@@ -17,8 +17,8 @@
 #include "tpxCore.h"
 
 // globally visible
-struct tpx_rdo tpx_rdo[6] ;
-struct tpx_rdo_dbg tpx_rdo_dbg[6] ;
+struct tpx_rdo tpx_rdo[24][6] ;
+struct tpx_rdo_dbg tpx_rdo_dbg[24][6] ;
 int tpx_fee_check ;
 
 // statics...
@@ -188,6 +188,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	struct ddl_header *hdr ;
 	struct ddl_trailer *trl ;
 
+
 	u_int *l ;	// temporary pointer...
 
 
@@ -213,6 +214,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	rdo->subtype = (hdr->type >> 4) & 0xF ;
 	rdo->sector = (hdr->type >> 12) & 0x7F ;	// last bit might indicate an error!
 	rdo->rdo = (hdr->type >> 8) & 0xF ;
+
 
 	rdo->data_end = 0 ;
 	rdo->data_start = (u_int *)(buff + sizeof(struct ddl_header)) ;	// skip the header...
@@ -319,13 +321,13 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 				rh_delta = rh - rh_prompt ; 
 			}
 			else {
-				rh_delta = (rh - tpx_rdo_dbg[rdo->rdo-1].old_rhic) ;
+				rh_delta = (rh - tpx_rdo_dbg[rdo->sector-1][rdo->rdo-1].old_rhic) ;
 			}
 			break ;	
 		case 0xEE000000 :	// emulated!
 		default :		// real TCD prompt trigger
 			rh_prompt = rdo->trg[i].rhic_counter ;
-			rh_delta = rh_prompt - tpx_rdo_dbg[rdo->rdo-1].old_rhic ;
+			rh_delta = rh_prompt - tpx_rdo_dbg[rdo->sector-1][rdo->rdo-1].old_rhic ;
 			rdo->token = rdo->trg[i].data & 0xFFF ;
 			break ;
 
@@ -347,11 +349,11 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 
 	if(do_log) {
 		if(rh_prompt) {
-			tpx_rdo_dbg[rdo->rdo-1].delta = rh_prompt - tpx_rdo_dbg[rdo->rdo-1].old_rhic ;
-			tpx_rdo_dbg[rdo->rdo-1].old_rhic = rh_prompt ;
+			tpx_rdo_dbg[rdo->sector-1][rdo->rdo-1].delta = rh_prompt - tpx_rdo_dbg[rdo->sector-1][rdo->rdo-1].old_rhic ;
+			tpx_rdo_dbg[rdo->sector-1][rdo->rdo-1].old_rhic = rh_prompt ;
 		}
 		else {
-			tpx_rdo_dbg[rdo->rdo-1].delta = 0 ;
+			tpx_rdo_dbg[rdo->sector-1][rdo->rdo-1].delta = 0 ;
 			// leave "old rhic" intact!
 
 		}
@@ -766,6 +768,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 		ret = -2 ;
 	}
 
+	
 	if(ret) {
 		if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?) data [1] %d",a->rdo+1,a->t,a->id,a->ch,ret) ;
 		return 0 ;
@@ -782,6 +785,11 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
 
 	tb_prev = tb_last - tb_cou ;
+
+	if(tb_prev < -1) {
+		if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?) tb_prev [2] %d",a->rdo+1,a->t,a->id,a->ch,tb_prev) ;
+		return 0 ;
+	}
 
 	if(a->what & TPX_ALTRO_DO_ADC) {
 		for(;tb_last > tb_prev; tb_last--) {
@@ -926,7 +934,7 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 	if((1<<rb) & rb_mask) ;
 	else continue ;
 
-	rdo = &(tpx_rdo[rb]) ;
+	rdo = &(tpx_rdo[sector-1][rb]) ;
 
 	if(rdo->sector != sector || (rb+1) != rdo->rdo) {
 		LOG(WARN,"msc: config for RDO %d: sector %d, rdo %d claims error",rb+1,rdo->sector & 0x7F,rdo->rdo) ;
@@ -1163,14 +1171,14 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 }
 
 
+// this is the real sector and real RDO (from 0)!
 int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
 {
 	struct tpx_rdo *rdo ;
 
 	rdo = (struct tpx_rdo *) buff ;
 
-
-	memcpy(&(tpx_rdo[rb]),buff,sizeof(struct tpx_rdo)) ;
+	memcpy(&(tpx_rdo[sector-1][rb]),buff,sizeof(struct tpx_rdo)) ;
 
 
 	LOG(NOTE,"RDO %d: msc event, should be %d bytes",rb+1,sizeof(struct tpx_rdo)) ;

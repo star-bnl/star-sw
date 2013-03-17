@@ -45,6 +45,7 @@ private:
 
 	// calculated from "adc_sim"
 	class daq_dta *cld_sim ;
+	class daq_dta *cld_2d_sim ;
 
 	// calculated via algorithm at end-run
 	class daq_dta *ped_c ;	// in ped runs 
@@ -85,7 +86,7 @@ public:
 
 
 	class tpxFCF *fcf_algo[25] ;
-	class tpxFCF_2D *fcf2d_algo[25] ;
+	class tpxFCF_2D *fcf_2d_algo[25] ;
 
 	int InitRun(int run_num) ;	// used in send_config
 	int FinishRun(int old_run) ;	// used in inject_token0

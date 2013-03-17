@@ -71,20 +71,51 @@
 #define TPX_PULSER_PED_START	166
 #define TPX_PULSER_PED_STOP	182
 
+
 class tpxGain
 {
 public:
 	tpxGain() ;
 	~tpxGain() ;
 
-	
+	// this is not just gains but any kind of per-pad information	
 	struct gains {
 		float g ;
 		float t0 ;
 	} ;
 
-	// used in running
+	// main storage area, malloc in "add_sector"
 	struct gains *gains[24] ;	// pointers to sector contribs, [46][183]
+
+	// MUST be called FIRST, unless the default of 45 is needed!!!!
+	void set_row_max(int max) {
+		row_max = max ;
+	}
+
+	// MUST be called SECOND -- before any other operation!!!
+	void add_sector(int sec1) {
+		int min_s, max_s ;
+
+		int bytes = sizeof(struct gains) * (TPX_MAX_PAD+1) * (row_max+1) ;
+	
+		if(sec1 <= 0) {
+			min_s = 0 ;
+			max_s = 23 ;
+		}
+		else {
+			min_s = sec1 - 1 ;
+			max_s = min_s ;
+		}
+
+		for(int s=min_s;s<=max_s;s++) {
+			if(gains[s]) {
+//				free(gains[s]) ;
+			}
+
+//			gains[s] = (struct gains *) malloc(bytes) ;							  
+
+		}
+	}
 
 	void set_gains(int s, int r, int p, float g, float t0) {
 		struct gains *gs = get_gains(s,r,p) ;
@@ -98,8 +129,11 @@ public:
 			return &dummy_gain ;
 		}
 
-		return (gains[s-1] + r*182 + (p-1)) ;
+		return (gains[s-1] + r*TPX_MAX_PAD + (p-1)) ;
 	}
+
+	int from_file(char *fname, int sector = 0) ;
+
 
 	// [sector 1-24][RDO 1-6][fee-index 0-35]
 	u_int bad_fee[25][7][37] ;	// [x][y][36] contains the count!
@@ -120,10 +154,11 @@ public:
 		short cou ;		// count of good events
 		short need ;		// count of expected events!
 		u_int adc_store[20] ;
-	} *aux	;	// [24][46][182]
+	} *aux	;	// [24][46][TPX_MAX_PAD]
+
 
 	struct aux *get_aux(int s, int r, int p) {
-		return (aux + (s-1)*46*182 + r*182 + (p-1)) ;
+		return (aux + (s-1)*46*TPX_MAX_PAD + r*TPX_MAX_PAD + (p-1)) ;
 	} ;
 
 	struct means {
@@ -148,7 +183,7 @@ public:
 		return (fee_found + (s-1)*7 + rdo) ;
 	}
 
-	int from_file(char *fname, int sector = 0) ;
+
 
 	// below used only during calculation
 	int to_file(char *fname) ;
@@ -194,6 +229,7 @@ private:
 //	struct tpx_odd_fee_t tpx_odd_fee[256] ;
 //	int tpx_odd_fee_count  ;
 
+	int row_max ;
 
 	//int charge_peak ;	// peak of the charge
 } ;

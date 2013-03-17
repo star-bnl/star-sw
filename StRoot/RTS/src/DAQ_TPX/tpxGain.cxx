@@ -83,6 +83,8 @@ tpxGain::tpxGain()
 	sector = 0 ;	// assume all...
 	c_run = c_date = c_time = 0 ;
 
+	row_max = 45 ;	// normal TPC, not iTPC!
+
 	// no raw dump
 	raw_gains_fname = 0 ;
 
@@ -187,7 +189,7 @@ void tpxGain::init(int sec)
 
 	events = 0 ;
 	load_time = 0 ;	// force reload next time if I reinit gains!
-	sector = sec ;
+	sector = sec ;	// this is the 36 
 
 	
 
@@ -219,17 +221,7 @@ void tpxGain::init(int sec)
 	}
 
 
-
 	memset(tpx_pulser_peak,0,sizeof(tpx_pulser_peak))  ;
-
-//	tb_start = 181 ;
-//	tb_stop = 190 ;
-
-#if 0
-	// used in run FY09
-	tb_start = 179 ;
-	tb_stop = 188 ;
-#endif
 
 	memset(bad_rdo_mask,0,sizeof(bad_rdo_mask)) ;
 
@@ -435,11 +427,14 @@ void tpxGain::calc()
 		s_start = 1 ;
 		s_stop = 24 ;
 	}
-	else {
+	else if(sector <= 24) {
 		s_start = sector ;
 		s_stop = sector ;
 	}
-
+	else {
+		s_start = (sector-24)*2-1 ;
+		s_stop = s_start + 1 ;
+	}
 
 	char fname[128];
 	FILE *ofile = 0 ;
@@ -757,7 +752,7 @@ void tpxGain::calc()
 	return ;
 }
 	
-void tpxGain::do_default(int sector)
+void tpxGain::do_default(int sec)
 {
 	int s, r, p ;
 
@@ -766,9 +761,9 @@ void tpxGain::do_default(int sector)
 	memset(bad_fee,0,sizeof(bad_fee)) ;
 	tpx_odd_fee_count = 0 ;
 
-	if(sector) {
-		if(gains[sector-1] == 0) {
-			gains[sector-1] = (struct gains *) malloc(sizeof(struct gains) * 46 * 182) ;
+	if(sec) {
+		if(gains[sec-1] == 0) {
+			gains[sec-1] = (struct gains *) malloc(sizeof(struct gains) * 46 * 182) ;
 		}
 	}
 	else {
@@ -1004,7 +999,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.29 2012/04/27 09:15:15 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.30 2013/03/17 21:40:24 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
@@ -1078,6 +1073,7 @@ void tpxGain::compare(char *fname, int mysec)
 		return ;
 	}
 
+	// read in the canonical gain file
 	while(!feof(f)) {
 		char str[1024] ;
 

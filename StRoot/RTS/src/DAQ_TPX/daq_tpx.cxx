@@ -109,7 +109,8 @@ daq_tpx::daq_tpx(daqReader *rts_caller)
 	ped = new daq_dta ;
 	
 	cld_sim = new daq_dta ;	// from "adc_sim", decompressed
-	
+	cld_2d_sim = new daq_dta ;
+
 	ped_c = new daq_dta ;
 	gain_c = new daq_dta ;
 
@@ -119,7 +120,7 @@ daq_tpx::daq_tpx(daqReader *rts_caller)
 	ped_algo = 0 ;
 	for(int i=0;i<=24;i++) {
 		fcf_algo[i] = 0 ;
-		fcf2d_algo[i] = 0 ;
+		fcf_2d_algo[i] = 0 ;
 	}
 	fcf_tmp_storage = 0 ;
 
@@ -155,6 +156,7 @@ daq_tpx::~daq_tpx()
 	delete ped ;
 
 	delete cld_sim ;
+	delete cld_2d_sim ;
 
 	LOG(DBG,"%s: DEstructor done",name) ;
 
@@ -179,7 +181,7 @@ daq_tpx::~daq_tpx()
 
 	for(int i=0;i<=24;i++) {
 		if(fcf_algo[i]) delete fcf_algo[i] ;
-		if(fcf2d_algo[i]) delete fcf2d_algo[i] ;
+		if(fcf_2d_algo[i]) delete fcf_2d_algo[i] ;
 	}
 	LOG(DBG,"%s: DEstructor done",name) ;
 	if(fcf_tmp_storage) free(fcf_tmp_storage) ;
@@ -439,9 +441,9 @@ int daq_tpx::FinishRun(int old)
 
 	// we free FCF 2D storage, if any!
 	for(int i=0;i<=24;i++) {
-		if(fcf2d_algo[i]) {
-			delete fcf2d_algo[i] ;
-			fcf2d_algo[i] = 0 ;
+		if(fcf_2d_algo[i]) {
+			delete fcf_2d_algo[i] ;
+			fcf_2d_algo[i] = 0 ;
 		}
 	}
 
@@ -527,10 +529,14 @@ daq_dta *daq_tpx::put(const char *in_bank, int sec, int row, int pad, void *p1, 
 	assert(in_bank) ;
 
 	if(strcasecmp(in_bank,"adc_sim")==0) {
-		if((row<=0)) sim_row_count = 45 ;
-		else sim_row_count = row ;
-
-		sim_tpx_rowlen = (u_char *)p1 ;
+		if((row<=0)) {	// current TPC
+			sim_row_count = 45 ;	// this needs to be correct
+			sim_tpx_rowlen = 0 ;
+		}	
+		else {	// iTPC!
+			sim_row_count = row ;
+			sim_tpx_rowlen = (u_char *)p1 ;
+		}
 
 		LOG(NOTE,"adc_sim: row count %d, rowlen %p",sim_row_count,sim_tpx_rowlen) ;
 
@@ -760,12 +766,18 @@ daq_dta *daq_tpx::handle_ped(int sec)
 
 	for(int s=min_sec;s<=max_sec;s++) {
 
-		sprintf(str,"%s/sec%02d/pedrms",sfs_name, s) ;
-	
+		for(int rdo=0;rdo<=6;rdo++) {
+
+		
+		if(rdo==0) sprintf(str,"%s/sec%02d/pedrms",sfs_name, s) ;
+		else sprintf(str,"%s/sec%02d/rb%02d/pedrms",sfs_name,s,rdo) ;
+
 		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
 		char *full_name = caller->get_sfs_name(str) ;
-		if(full_name == 0) continue ;	// not in this event...
+		if(full_name == 0) {
+			continue ;	// not in this event...
+		}
 
 		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
 
@@ -842,6 +854,7 @@ daq_dta *daq_tpx::handle_ped(int sec)
 
 		free(tmp_cache) ;	// release temporary storage...
 
+		}
 	}
 
 	
@@ -1135,14 +1148,14 @@ daq_dta *daq_tpx::handle_cld_raw(int sec, int rdo)
 
 		sprintf(str,"%s/sec%02d/cld%02d",sfs_name, s, r) ;
 	
-		LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
+		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
 		char *full_name = caller->get_sfs_name(str) ;
 		if(full_name == 0) continue ;
 
 		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-		LOG(DBG,"%s: sector %d, rdo %d : cld size %d",name,s,r,size) ;
+		LOG(NOTE,"%s: sector %d, rdo %d : cld size %d",name,s,r,size) ;
 
 
 		if(size <= 0) {
@@ -1362,7 +1375,167 @@ static int cmpr_sim_adc(const void *first, const void *second)
 */
 daq_dta *daq_tpx::handle_cld_2d_sim(int sec, int row)
 {
-	return 0 ;
+
+	int min_sec, max_sec ;
+	int min_row, max_row ;
+
+
+	// sanity
+	if(sec <= 0) {
+		min_sec = 1 ;
+		max_sec = MAX_SEC ;
+	}
+	else if((sec<1) || (sec>24)) return 0 ;
+	else {
+		min_sec = sec ;
+		max_sec = sec ;
+	}
+
+	if(row <= 0) {
+		min_row = 1 ;
+		max_row = sim_row_count ;
+	}
+	else if((row<0) || (row>250)) return 0 ;
+	else {
+		min_row = max_row = row ;
+	}
+
+	// get a size estimate
+	int rows = 0 ;
+	
+	for(int s=min_sec;s<=max_sec;s++) {
+		if(fcf_2d_algo[s]) {
+			LOG(DBG,"start_evt(): sec %d",s) ;
+			fcf_2d_algo[s]->start_evt_2d(s,0) ;
+		}
+
+		for(int r=min_row;r<=max_row;r++) {
+			rows++ ;
+		}
+	}
+
+	// guess the byte size: assume 30 hits per row
+	int guess_bytes = rows * (sizeof(daq_store) + 30*sizeof(daq_sim_cld)) ;
+
+	cld_2d_sim->create(guess_bytes,(char *)"cld_2d_sim",rts_id,DAQ_DTA_STRUCT(daq_sim_cld)) ;
+
+	// adc_sim data is flattened out so we will run if we find the sec/row
+	// requested
+	daq_dta *sim = get("adc_sim") ;
+
+	if(sim==0) {
+		LOG(ERR,"%s: sector %d, row %d: you need to add simulated data first!",name,sec,row) ;
+		return 0 ;
+		return cld_2d_sim ;
+	}
+
+
+	while(sim->iterate()) {
+		if((min_sec<=sim->sec) && (sim->sec<= max_sec) && (min_row<=sim->row) && (sim->row <= max_row)) ;
+		else continue ;
+
+		// this is how I allocate the algorithm
+		if(fcf_2d_algo[sim->sec]==0) {
+
+			LOG(NOTE,"No algo assigned for sector %d -- creating one!",sim->sec) ;
+			fcf_2d_algo[sim->sec] = new tpxFCF_2D ;
+			fcf_2d_algo[sim->sec]->set_id(sim->sec) ;
+			fcf_2d_algo[sim->sec]->fcf_style = 2 ;
+
+			fcf_2d_algo[sim->sec]->run_compatibility = fcf_run_compatibility ;
+			fcf_2d_algo[sim->sec]->do_cuts = fcf_do_cuts ;
+
+			for(int r=1;r<=6;r++) {
+				fcf_2d_algo[sim->sec]->config2(sim->sec,r,1,sim_row_count,sim_tpx_rowlen) ;
+			}
+
+
+			//LOG(TERR,"DOne with config2") ;
+
+			fcf_2d_algo[sim->sec]->apply_gains2(gain_algo) ;
+
+			//LOG(TERR,"Done with apply gains") ;
+
+			if(fcf_tmp_storage==0) {	// for the results!!!
+				fcf_tmp_storage = (u_int *)valloc(FCF_TMP_BYTES) ;
+			}
+
+			fcf_2d_algo[sim->sec]->start_evt_2d(sim->sec,0) ;
+		}
+
+		//u_short track_id[512] ;
+		tpx_altro_struct a ;
+
+		a.row = sim->row ;
+		a.pad = sim->pad ;
+		a.count = 0 ;
+
+		// NEED to sort in falling timebin!
+		qsort(sim->sim_adc, sim->ncontent, sizeof(sim->sim_adc[0]),cmpr_sim_adc) ;
+
+		
+	
+		for(u_int i=0;i<sim->ncontent;i++) {
+			a.adc[i] = sim->sim_adc[i].adc ;
+			a.tb[i] = sim->sim_adc[i].tb ;
+			//track_id[i] = sim->sim_adc[i].track_id ;
+			a.count++ ;
+		}
+
+
+		fcf_2d_algo[sim->sec]->do_pad_2d(&a, sim->sim_adc) ;
+		LOG(DBG,"do_pad(): sec %d, row %d, pad %d: %d",sim->sec,a.row,a.pad,a.count) ;
+	}
+
+
+
+	for(int s=min_sec;s<=max_sec;s++) {
+		if(fcf_2d_algo[s]) {
+			//LOG(WARN,"Trying sec %d",s) ;
+
+			int words = fcf_2d_algo[s]->stage_2d(fcf_tmp_storage,FCF_TMP_BYTES) ;
+			if(words<=0) continue ;
+
+			//LOG(TERR,"Sector %d: %d words",s,words) ;			
+
+			u_int *p_buff = fcf_tmp_storage ;
+			u_int *end_buff = p_buff + words ;
+
+			while(p_buff < end_buff) {
+				u_int row = *p_buff++ ;
+				u_int cou = *p_buff++ ;
+				int g_cou = 0 ;
+			
+
+				u_int version = (row >> 16) ;
+				row &= 0xFFFF ;
+
+			
+				//LOG(TERR,"row %d, version 0x%X, cou %d",row,version,cou) ;
+
+				daq_sim_cld *cld = (daq_sim_cld *) cld_2d_sim->request(cou) ;
+
+				while(cou) {
+					int skip = fcf_2d_algo[s]->fcf_decode(p_buff, cld + g_cou, version) ;
+					
+
+					g_cou++ ;
+
+					p_buff += skip ;
+					cou-- ;
+
+				}
+			
+				cld_2d_sim->finalize(g_cou,s,row) ;
+			}			
+		}
+	}
+
+	
+	cld_2d_sim->rewind() ;
+
+	return cld_2d_sim ;
+
 }
 
 /*

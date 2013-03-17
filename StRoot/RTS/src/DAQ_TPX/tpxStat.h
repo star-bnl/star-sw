@@ -22,9 +22,9 @@ public:
 		int aid ;
 	} fee_check_data[72][16];	// max 72 altros, 16 ch each...
 
-	int sector ;	// from 1
+	int sector ;	// from 1..36!!!
 
-	u_int stripes ;	// count of bad pads with all pizels lit...
+	u_int stripes ;	// count of bad pads with all pixels lit...
 
 	// runs globally
 	void run_start(u_int rb_mask, int run_type) ;
@@ -35,9 +35,6 @@ public:
 
 	// runs globally
 	int run_stop(FILE *f, u_int rb_mask, int run_type, char *fname) ;
-
-	// singleton.... [why????]
-//	static struct tpx_stat_struct {
 
 	struct tpx_stat_struct {
 		u_char should ;	// should the RDO be present
@@ -52,7 +49,7 @@ public:
 				u_int stripes ;
 			} c[16] ;	// ALTRO channel (aka pad)
 		} a[256] ;	// ALTRO
-	} r[6] ;	// RDO
+	} r[6] ;	// RDO; as logical!!!
 
 
 
