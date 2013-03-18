@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.92 2012/12/26 17:45:53 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.93 2013/03/18 17:18:38 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.93  2013/03/18 17:18:38  genevb
+ * Fix for ticket 2529, and some array copying optimzation via memcopy
+ *
  * Revision 1.92  2012/12/26 17:45:53  genevb
  * reinitialization fixed for PredictSpaceCharge functions
  *
@@ -989,11 +992,13 @@ void StMagUtilities::BrBz3DField( const Float_t r, const Float_t z, const Float_
 //________________________________________
 
 
+
 /// Main Entry Point for requests to UNDO the E and B field distortions
 void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
   // Control by flags JCD Oct 4, 2001
   Float_t Xprime1[3], Xprime2[3] ;
+  size_t threeFloats = 3 * sizeof(Float_t);
 
   SectorNumber( Sector, x ) ;
 
@@ -1001,9 +1006,8 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
     // iteration to determine UndoDistortion()
     iterateDistortion = kFALSE;
 
-    int asize = 3 * sizeof(Float_t);
-    memcpy(Xprime1,x,asize);
-    memcpy(Xprime,x,asize);
+    memcpy(Xprime1,x,threeFloats);
+    memcpy(Xprime,x,threeFloats);
     const Float_t MINDIST = 1e-4; // ~1 micron accuracy
     Float_t dist = 2000;
     int iter =0;
@@ -1023,7 +1027,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
         dist = 0;
         if (iterationFailCounter >=0) iterationFailCounter++;
       } else {
-        memcpy(Xprime,Xprime1,asize);
+        memcpy(Xprime,Xprime1,threeFloats);
       }
     }
 
@@ -1033,29 +1037,24 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 
 
   // Set it up
-  for (unsigned int i=0; i<3; ++i) {
-      Xprime1[i] = x[i];
-  }
+  memcpy(Xprime1,x,threeFloats);
+ 
 
   Float_t r2 = x[0]*x[0] + x[1]*x[1] ;   // Point must be inside TPC to be suffer distortions, check this.
   if ( r2 >= OFCRadius*OFCRadius || r2 <= IFCRadius*IFCRadius || x[2] >= TPC_Z0 || x[2] <= -1*TPC_Z0 )
     {
-      for (unsigned int i=0; i<3; ++i) { Xprime[i] = x[i] ; }
+      memcpy(Xprime,x,threeFloats);
       return ;
     }
       
   if (mDistortionMode & kBMap) {
       FastUndoBDistortion    ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
       
   if (mDistortionMode & kFast2DBMap) {
       FastUndo2DBDistortion    ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if ((mDistortionMode & kBMap) && (mDistortionMode & kFast2DBMap)) {
@@ -1067,63 +1066,42 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 
   if (mDistortionMode & kPadrow13) {
       UndoPad13Distortion    ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
   
   if (mDistortionMode & kTwist) {
-
       UndoTwistDistortion    ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if (mDistortionMode & kClock) {
-      
       UndoClockDistortion    ( Xprime1, Xprime2, Sector ) ; 
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if (mDistortionMode & kMembrane) {
-      
       UndoMembraneDistortion ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
-
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
-  if (mDistortionMode & kEndcap) 
-    { 
+  if (mDistortionMode & kEndcap) { 
       UndoEndcapDistortion ( Xprime1, Xprime2, Sector ) ; 
-      for (unsigned int i=0; i<3; ++i) {
-	Xprime1[i] = Xprime2[i];
-      }
-    }
-    
+      memcpy(Xprime1,Xprime2,threeFloats);
+  }
+
   if (mDistortionMode & kIFCShift) { 
       UndoIFCShiftDistortion ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if (mDistortionMode & kSpaceCharge) { 
       UndoSpaceChargeDistortion ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if (mDistortionMode & kSpaceChargeR2) { 
       UndoSpaceChargeR2Distortion ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if ((mDistortionMode & kSpaceCharge) && (mDistortionMode & kSpaceChargeR2)) {
@@ -1134,23 +1112,17 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 
   if (mDistortionMode & kShortedRing) { 
       UndoShortedRingDistortion ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if (mDistortionMode & kGridLeak) { 
       UndoGridLeakDistortion ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if (mDistortionMode & k3DGridLeak) { 
       Undo3DGridLeakDistortion ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-	  Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if ((mDistortionMode & kGridLeak) && (mDistortionMode & k3DGridLeak)) {
@@ -1161,28 +1133,21 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 
   if (mDistortionMode & kGGVoltError) {
       UndoGGVoltErrorDistortion ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-          Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   if (mDistortionMode & kSectorAlign) {
       UndoSectorAlignDistortion ( Xprime1, Xprime2, Sector ) ;
-      for (unsigned int i=0; i<3; ++i) {
-          Xprime1[i] = Xprime2[i];
-      }
+      memcpy(Xprime1,Xprime2,threeFloats);
   }
 
   // Return it
 
-  for (unsigned int i=0; i<3; ++i) {
-      Xprime[i] = Xprime1[i];
-  }
+  memcpy(Xprime,Xprime1,threeFloats);
 
   DoOnce = kFALSE;
   
 }
-
 
 //________________________________________
 
@@ -2779,10 +2744,17 @@ Float_t StMagUtilities::Interpolate( const Float_t Xarray[], const Float_t Yarra
   if ( ORDER == 2 )                // Quadratic Interpolation = 2 
 
     {
-      y  = (x-Xarray[1]) * (x-Xarray[2]) * Yarray[0] / ( (Xarray[0]-Xarray[1]) * (Xarray[0]-Xarray[2]) ) ; 
-      y += (x-Xarray[2]) * (x-Xarray[0]) * Yarray[1] / ( (Xarray[1]-Xarray[2]) * (Xarray[1]-Xarray[0]) ) ; 
-      y += (x-Xarray[0]) * (x-Xarray[1]) * Yarray[2] / ( (Xarray[2]-Xarray[0]) * (Xarray[2]-Xarray[1]) ) ; 
-      
+      /*
+      y  = (x-Xarray[1]) * (x-Xarray[2]) * Yarray[0] / ( (Xarray[0]-Xarray[1]) * (Xarray[0]-Xarray[2]) ) ;
+      y += (x-Xarray[2]) * (x-Xarray[0]) * Yarray[1] / ( (Xarray[1]-Xarray[2]) * (Xarray[1]-Xarray[0]) ) ;
+      y += (x-Xarray[0]) * (x-Xarray[1]) * Yarray[2] / ( (Xarray[2]-Xarray[0]) * (Xarray[2]-Xarray[1]) ) ;
+       */
+      // The version below is to resolve RT ticket 2529:
+      //  compiler does something odd with the above when optimizing
+      Float_t Xa012 = (x - Xarray[2]) / (Xarray[0] - Xarray[1]);
+      Float_t Xa120 = (x - Xarray[0]) / (Xarray[1] - Xarray[2]);
+      Float_t Xa201 = (x - Xarray[1]) / (Xarray[2] - Xarray[0]);
+      y  = - ( Xa201 * Xa012 * Yarray[0] ) - Xa120 * ( Xa012 * Yarray[1] + Xa201 * Yarray[2] ) ;
     }
 
   else                             // Linear Interpolation = 1
