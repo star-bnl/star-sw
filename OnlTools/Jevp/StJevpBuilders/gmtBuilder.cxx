@@ -191,6 +191,7 @@ void gmtBuilder::event(daqReader *rdr)
   //if(evtCount >= 0){
   
   //=======initialization ======================
+  /*
   for ( int i_arm = 0; i_arm < numARMs; i_arm++ ) {
     for ( int i_port = 0; i_port < numPORTs; i_port++ ) {
       for ( int i_apv = 0; i_apv < numAPVs; i_apv++ ) {
@@ -202,7 +203,7 @@ void gmtBuilder::event(daqReader *rdr)
       }
     }
   }
-  
+  */
   
   for( int ilayer = 0; ilayer<numLayers; ilayer++){
       	sumSignal_AllTimebins[ilayer] = 0.0;
