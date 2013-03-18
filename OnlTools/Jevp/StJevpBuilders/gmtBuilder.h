@@ -117,7 +117,7 @@ bool usedAPV(int i_rdo,int i_arm,int i_port,int i_apv){
     };
   } hSigtbContents;
 
-  static const int ADCcut = 800;  //Can be changed 
+  static const int ADCcut = 760;  //Can be changed 
   //========= Fixed Values ===================
   static const int numLayers = 8;
   static const int numRDOs = 1;
