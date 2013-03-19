@@ -13,13 +13,15 @@
 #include "TH1F.h"
 #include "TProfile.h"
 #endif //APPROX_DEBUG
+#include "StvSeedConst.h"
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvDraw.h"
+
 void myBreak(int);
-enum {kFstAng=88,kErrFakt=5,kLenFakt=5,kStpFakt=3};
+enum {kFstAng=74,kErrFakt=5,kLenFakt=5,kStpFakt=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinTan = 0.1;
-static const double kImpFakt = 0.95;
+static const double kImpFakt = 0.05;
 static const float  kDeltaR = 40;
 static const float  kDeltaZ = 40;
 static const float  kRangeZ = 1000; //range of zVertex
@@ -148,8 +150,9 @@ if (myDeb>0) {fDraw->Clear();mySeedObjs.clear();}
 //		Add info from selected hit
       fSeedHits.push_back(selHit); selHit->addTimesUsed();fNUsed[0]++;
 if (selJkk>=0) printf("***Selected*** selJkk = %d\n",selJkk);
-
-      mSel.AddHit(selHit->x());
+      const StHitPlane *hp = selHit->detector();
+      const float *hd = hp->GetDir(selHit->x())[0];
+      mSel.AddHit(selHit->x(),hd);
       mSel.Prepare();
       fMultiIter->Set(fMultiHits->GetTop(),mSel.mLim[0],mSel.mLim[1]);
       selHit=0; 
@@ -198,10 +201,11 @@ StvConeSelector::StvConeSelector()
   memset(mBeg,0,mBeg-mBeg+1);
 }
 //_____________________________________________________________________________
-void StvConeSelector::AddHit(const float *x)
+void StvConeSelector::AddHit(const float *x,const float *dir)
 {
   mX[++mJst]=x;
   mHit = x;
+  mHitDir = dir;
   assert(mJst<100);
 }
 //_____________________________________________________________________________
@@ -216,9 +220,14 @@ StvDebug::Break(nCall);
   switch(kase) {
   
     case 0: {
-      for (int i=0;i<3;i++) {mDir[i]=-mHit[i];}
+      
+
+      for (int i=0;i<3;i++) {mDir[i]=mHitDir[i];}
 //	if Z is inside of range direction to Z=0 is senseless 
-      if (fabs(mDir[2]) < kRangeZ) mDir[2] = 0;
+//      if (fabs(mDir[2]) < kRangeZ) mDir[2] = 0;
+      float sgn = Dot(mHit,mDir);
+      if (sgn>0) { mDir[0]=-mDir[0];mDir[1]=-mDir[1];mDir[2]=-mDir[2];}
+
       stp=0;
       for (int i=0;i<3;i++) {stp+=mDir[i]*mDir[i];}
       stp = sqrt(stp);
@@ -259,7 +268,8 @@ StvDebug::Break(nCall);
     default: assert(0 && "Wrong case");
   }
   mRxy2 = mHit[0]*mHit[0]+mHit[1]*mHit[1];
-   
+  mRxy = sqrt(mRxy2);
+  mDelta = SEED_ERR(mRxy);
   mLen=0;
   if (mXYStep>0) {
     float cosLa = sqrt((1.-mDir[2])*(1+mDir[2]));
@@ -309,8 +319,7 @@ void  StvConeSelector::UpdateLims()
 int  StvConeSelector::Reject(const float x[3])
 {
    float myRxy2 = x[0]*x[0]+x[1]*x[1];
-//VP   if (myRxy2>mRxy2 && fabs(x[2])>fabs(mHit[2])) 	return 1;
-   if (myRxy2>mRxy2 ) 					return 2;
+   if (myRxy2>mRxy2 -2*mRxy*mDelta) 	return 2;
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
    float z2 = xx[2]*xx[2];

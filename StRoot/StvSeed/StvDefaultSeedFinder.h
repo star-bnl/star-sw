@@ -22,7 +22,7 @@ public:
 void Reset() 			{mJst=-1;}
 void Prepare();
 void Update();
-void AddHit(const float *x);
+void AddHit(const float *x,const float *dir);
 void SetErr(float err) 		{mErr=err;}
 void SetXYStep(float stp) 	{mZStep=0;   mXYStep=stp;}
 void SetZStep (float stp) 	{mZStep=stp; mXYStep=0  ;}
@@ -42,8 +42,11 @@ float mErr;
 float mXYStep;
 float mZStep;
 float mRxy2;
+float mRxy;
+float mDelta;
 float mZ2;
 float mDir[3]; 		// track direction
+const float *mHitDir; 	// hit plane direction
 float mLen;		// cone length (height)
 //		Calculated data
 
