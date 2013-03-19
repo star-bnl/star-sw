@@ -240,7 +240,7 @@ void plot2d(int hid) {
     for(int i=0; i<24; i++){
       char ccc[10]; sprintf(ccc,"_%d_%d",disc,i);
       h1[i] = h->ProjectionX(ccc,i+1,i+1); 
-      if(h1[i]->GetMaximum() > max) {max=h1[i]->GetMaximum(); maxid=i; }
+      if(h1[i]->GetMaximum() > max && i!=0) {max=h1[i]->GetMaximum(); maxid=i; }
     }
     off=max/4.0;
     printf("max=%f off=%f\n",max,off);
@@ -534,8 +534,12 @@ void makeqaplot(int run=0, int plt=0, int save=0){
       if(f1[i]<f1l || f1[i]>f1h || f2[i]<f2l) {hr4->Fill(rms[i]);} 
       if(f1[i]<f1l || f1[i]>f1h || f2[i]<f2l || f2[i]>f2h) {hr5->Fill(rms[i]);} 
     }
-    char filename[100];
-    sprintf(filename,"%d/status/status.%d.txt",yearday,run);
+    char filename[150];
+    if(nevt>=1000){
+      sprintf(filename,"%d/status/status.%d.txt",yearday,run);
+    }else{
+      sprintf(filename,"%d/status/status.%d.lowstat.txt",yearday,run);
+    }
     FILE* pfile=fopen(filename,"w");
     if(!pfile){
       printf("Couldn't open file %s\n",filename);

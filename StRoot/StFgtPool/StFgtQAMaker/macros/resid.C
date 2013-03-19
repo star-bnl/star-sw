@@ -12,7 +12,7 @@ void resid(int run=0, int plt=1, int quad=-1, int png=0, int ba=1, int disc=0){
   gStyle->SetStatW(0.4);
   
   int yearday=run/1000;
-  char *fname[3]={"alignment.root","alignment_before.root","alignment_after.root"};
+  char fname[3][150]={"alignment.root","alignment_before.root","alignment_after.root"};
   if(run>0) {
     sprintf(fname[0],"%d/alignment_%d.root",yearday,run);
     sprintf(fname[1],"%d/alignment_before_%d.root",yearday,run);
@@ -51,7 +51,7 @@ void resid(int run=0, int plt=1, int quad=-1, int png=0, int ba=1, int disc=0){
   int quad1=quad, quad2=quad;
   if(quad==-1) {quad1=0; quad2=kFgtNumQuads-1;}
   
-  for(int q=quad1; q<=quad2; q++){
+  for(int q=quad1; q<=quad2; q++){    
     if(plt==1 || plt==0){    
       c1->Clear();
       c1->Divide(2,2);
@@ -77,16 +77,19 @@ void resid(int run=0, int plt=1, int quad=-1, int png=0, int ba=1, int disc=0){
 	  if(!h || (disc>0 && disc!=idisc+1)) continue;
 	  if(disc>0) h->SetStats(1111111);
 	  h->SetLineColor(color[idisc]); h->Draw("SAME");  
-	  h->Fit("gaus","0Q");
-	  TF1 *g = h->GetFunction("gaus");
-	  g->SetLineColor(color[idisc]); g->Draw("same");
-	  double s=g->GetParameter(2);
-	  char c[20]; 
+	  double s=0;
+	  if(h->GetEntries()>10){
+	    h->Fit("gaus","0Q");
+	    TF1 *g = h->GetFunction("gaus");
+	    g->SetLineColor(color[idisc]); g->Draw("same");
+	    s=g->GetParameter(2);
+	  }
+	  char c[40]; 
 	  if(axis==3) {sprintf(c,"%1d%s sig=%6.4f",idisc+1,cquad[q],s);}
 	  else        {sprintf(c,"%1d%s sig=%6.3f",idisc+1,cquad[q],s);}
 	  TText *t1;
 	  if(disc>0 || (disc==0 && idisc<3)) { t1 = new TText(xmin*0.9,ymax*(1.1-0.1*idisc),c); }
-	  else                               { t1 = new TText(xmax*0.3,ymax*(1.1-0.1*(idisc-3)),c); }
+	  else                               { t1 = new TText(xmax*0.2,ymax*(1.1-0.1*(idisc-3)),c); }
 	  t1->SetTextSize(0.05); t1->SetTextColor(color[idisc]); t1->Draw(); 
 	}
 	TText *t2 = new TText(xmax*0.9,-ymax*0.10,caxis[axis]);
@@ -99,7 +102,7 @@ void resid(int run=0, int plt=1, int quad=-1, int png=0, int ba=1, int disc=0){
 	c1->SaveAs(cpng);
       }else if(png==2) {c1->Print(cpdf,"pdf");}
     }
-
+    
     if(plt==2 || plt==0){
       int disc1=disc;
       int disc2=disc;
