@@ -102,6 +102,7 @@ class StMcEEmcTreeMaker_t : public StMaker {
    TClonesArray *mAncestorParticleArr;
    TClonesArray *mIncidentParticleArr;
    TClonesArray *mVertexArr;
+   Double_t mBjX1, mBjX2;
 
    // maps for indexing
    std::map< const StMcTrack*, Int_t  > mAncestorMap;
@@ -143,8 +144,11 @@ inline void StMcEEmcTreeMaker_t::removeTrigger( Int_t trig ){ mTriggerSet.erase(
 #endif
 
 /*
- * $Id: StMcEEmcTreeMaker.h,v 1.1 2012/11/26 19:06:11 sgliske Exp $
+ * $Id: StMcEEmcTreeMaker.h,v 1.2 2013/03/19 18:49:08 sgliske Exp $
  * $Log: StMcEEmcTreeMaker.h,v $
+ * Revision 1.2  2013/03/19 18:49:08  sgliske
+ * added Bjorken x1 and x2
+ *
  * Revision 1.1  2012/11/26 19:06:11  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcTreeMaker to StRoot/StEEmcPool/StEEmcTreeMaker
  *
