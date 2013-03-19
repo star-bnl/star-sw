@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.11 2013/03/15 20:07:41 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.12 2013/03/19 01:27:35 akio Exp $
  *
  */
 
@@ -283,6 +283,7 @@ void StFgtQAMaker::fillHist(){
   
   mNTimeBin=fgtCollectionPtr->getNumTimeBins();
   int datasize=0;
+  if(mNTimeBin==0) {hist0[2]->Fill(float(datasize)); return; }
   for (int disc=0; disc<kFgtNumDiscs; disc++){    
     //Strips
     int nhit[kFgtNumQuads]; memset(nhit,0,sizeof(nhit));
