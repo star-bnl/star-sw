@@ -189,7 +189,7 @@ Int_t StFgtRawDaqReader::Make() {
 	if(!dd) dd = mRdr->det("fgt")->get("adc");
       }
 
-      static int ntimebin=15;
+      int ntimebin=0;
       if(dd && dd->meta){
 	apv_meta_t *meta = (apv_meta_t *)dd->meta;
 	for(int r=1;r<=FGT_RDO_COU;r++) {
@@ -329,8 +329,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.17 2013/03/10 05:45:29 akio Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.18 2013/03/19 03:24:19 akio Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.18  2013/03/19 03:24:19  akio
+ * remove static from numtimebin
+ *
  * Revision 1.17  2013/03/10 05:45:29  akio
  * added option to limit timebins to feed rest of makers
  *
