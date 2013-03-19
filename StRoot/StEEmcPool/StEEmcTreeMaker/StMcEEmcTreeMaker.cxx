@@ -30,12 +30,18 @@
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcVertex.hh"
 
+#include "St_DataSet.h"
+#include "St_DataSetIter.h"
+#include "tables/St_g2t_event_Table.h"
+#include "tables/St_particle_Table.h"
+#include "tables/St_g2t_pythia_Table.h"
+
 #include "StRoot/StEEmcPool/./EEmcTreeContainers/EEmcEnergy.h"
 #include "StRoot/StEEmcPool/./EEmcTreeContainers/McParticle.h"
 #include "StRoot/StEEmcPool/StEEmcPointMap/StEEmcPointMap.h"
 
 StMcEEmcTreeMaker_t::StMcEEmcTreeMaker_t( const Char_t *myName ) : StMaker( myName ), mIOStat( UNSET ), mFile(0), mTree(0), mChain(0), 
-                                                                   mNumEvents(0), mMaxNumEvents(-1), mTowEnergyThres( 0.01 ) {
+                                                                   mNumEvents(0), mMaxNumEvents(-1), mTowEnergyThres( 0.01 ), mBjX1(0), mBjX2(0) {
    mEEmcEnergyArr       = new TClonesArray("EEmcEnergy_t", 5);
    mAncestorParticleArr = new TClonesArray("McParticle_t", 10);
    mIncidentParticleArr = new TClonesArray("McParticle_t", 5);
@@ -101,7 +107,10 @@ Int_t StMcEEmcTreeMaker_t::Init(){
             mTree->SetBranchAddress( "incidentParticleArr", &mIncidentParticleArr );
             mTree->SetBranchAddress( "ancestorParticleArr", &mAncestorParticleArr );
             mTree->SetBranchAddress( "vertexArr",           &mVertexArr );
+            mTree->SetBranchAddress( "xBj1",                &mBjX1 );
+            mTree->SetBranchAddress( "xBj2",                &mBjX2 );
          };
+
       } else if( mIOStat == WRITE ){
          mFile = new TFile( mFilename.data(), "RECREATE" );
          if( mFile->IsOpen() ){
@@ -117,6 +126,8 @@ Int_t StMcEEmcTreeMaker_t::Init(){
             mTree->Branch( "incidentParticleArr", &mIncidentParticleArr );
             mTree->Branch( "ancestorParticleArr", &mAncestorParticleArr );
             mTree->Branch( "vertexArr",           &mVertexArr );
+            mTree->Branch( "xBj1",                &mBjX1 );
+            mTree->Branch( "xBj2",                &mBjX2 );
          };
       };
    };
@@ -181,6 +192,24 @@ Int_t StMcEEmcTreeMaker_t::fill(){
    if( !mcEventPtr ){
       LOG_FATAL << "ERROR finding StMcEvent" << endm;
       ierr = kStFatal;
+   };
+
+   // for bjorken-x from Pythia
+   {
+      //GET GEANT EVENT
+      TDataSet *Event = GetDataSet("geant"); //Event->ls(3);
+
+      //GET PYTHIA RECORD from particleTable
+      TDataSetIter geantDstI(Event);
+
+      //CHECK IF EXISTS PARTICLE TABLE
+      if( geantDstI("particle") ){
+         St_g2t_pythia *Pg2t_pythia = (St_g2t_pythia*)geantDstI("g2t_pythia");
+         g2t_pythia_st *g2t_pythia1 = Pg2t_pythia->GetTable();
+
+         mBjX1 = g2t_pythia1->bjor_1;
+         mBjX2 = g2t_pythia1->bjor_2;
+      };
    };
 
    // index in mIncidentParticleArr
@@ -465,8 +494,11 @@ Int_t StMcEEmcTreeMaker_t::getAncestorIdx( const StMcTrack* track ){
 ClassImp( StMcEEmcTreeMaker_t );
 
 /*
- * $Id: StMcEEmcTreeMaker.cxx,v 1.1 2012/11/26 19:06:10 sgliske Exp $
+ * $Id: StMcEEmcTreeMaker.cxx,v 1.2 2013/03/19 18:49:08 sgliske Exp $
  * $Log: StMcEEmcTreeMaker.cxx,v $
+ * Revision 1.2  2013/03/19 18:49:08  sgliske
+ * added Bjorken x1 and x2
+ *
  * Revision 1.1  2012/11/26 19:06:10  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcTreeMaker to StRoot/StEEmcPool/StEEmcTreeMaker
  *
