@@ -80,7 +80,7 @@ if ( "$type" == "pedestal" ) then
   echo root -b -q makepedplot.C"($run)"
   root -b -q makepedplot.C"($run)"
   \mv $dir/*${run}*.png www/$dir/	
-  \rm $dir/*${run}*.tiny.png
+  \rm www/$dir/*${run}*.tiny.png
   ./maketiny.pl www/$dir
 else
   echo root -b -q makeqaplot.C"($run,0,1)"
@@ -88,15 +88,15 @@ else
   \mv $dir/*${run}*.pdf www/$dir/	
   \mv $dir/*${run}.evtdump.txt www/$dir/ 
   \mv $dir/*${run}*.png www/$dir/ 
-  \rm $dir/*${run}*.tiny.png
-    ./maketiny.pl www/$dir
+  \rm www/$dir/*${run}*.tiny.png
+  ./maketiny.pl www/$dir
 
   if ( -e $dir/status/status.$run.txt ) then
     \cp $dir/status/status.$run.txt status/status.phys.$run.txt
     echo root -b -q makepedplot.C"($run,1)"
     root -b -q makepedplot.C"($run,1)"
     \mv $dir/*${run}*.png www/$dir/ 
-    \rm $dir/*${run}*.tiny.png
+    \rm www/$dir/*${run}*.tiny.png
     ./maketiny.pl www/$dir
     set st=`ls -l status.txt | grep ped | wc -l`
     if ( $st == 1 ) then
