@@ -56,7 +56,7 @@ void StvDefaultSeedFinder::Reset()
     StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
     const float *x = stiHit->x();
 //    float r2 = x[0]*x[0] + x[1]*x[1]+ x[2]*x[2];
-    float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
+    float r2 = x[0]*x[0] + x[1]*x[1] + 1e-3*x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, stiHit));
     fMultiHits->Add(stiHit,x);
   } 
