@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.44 2013/03/12 03:06:02 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.45 2013/03/20 20:17:37 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.45  2013/03/20 20:17:37  genevb
+// Run 13 edits
+//
 // Revision 2.44  2013/03/12 03:06:02  genevb
 // Add FMS/FPD histograms for Run 13+
 //
@@ -205,7 +208,7 @@
   ":tpx;tpc:QaPtrkEtaTTS",
   ":tpx;tpc:QaPtrkMeanPtTTS",
   ":tpx;tpc:QaPtrkMeanEtaTTS",
-  ":tpx;tpc:QaPtrkGood",
+  ":tpx;tpc:QaPtrkGoodsm",
   ":tpx;tpc:QaPtrkGoodTTS",
   ":tpx;tpc:QaPtrkChisq0TTS",
   ":tpx;tpc:QaPtrkFlag",
