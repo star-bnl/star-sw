@@ -360,9 +360,10 @@ Int_t StEventQAMaker::Make() {
       }
       case (StQA_run8) :
       case (StQA_run12):
+      case (StQA_run13):
       case (StQA_AuAu) :
       case (StQA_dAu)  : break;
-      default: evClasses[0] = 1;
+      default: nEvClasses=1; evClasses[0] = 1;
     }
   }
 
@@ -2457,8 +2458,11 @@ void StEventQAMaker::MakeHistFMS() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.112 2013/03/12 03:06:02 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.113 2013/03/20 20:17:37 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.113  2013/03/20 20:17:37  genevb
+// Run 13 edits
+//
 // Revision 2.112  2013/03/12 03:06:02  genevb
 // Add FMS/FPD histograms for Run 13+
 //
