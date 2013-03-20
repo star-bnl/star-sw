@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.33 2011/04/26 20:27:45 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.34 2013/03/20 01:08:39 huck Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.34  2013/03/20 01:08:39  huck
+ * use mu- to compare to pi-
+ *
  * Revision 1.33  2011/04/26 20:27:45  hmasui
  * Add gamma geantid check
  *
@@ -678,6 +681,7 @@ Int_t StEmbeddingQADraw::getGeantIdReal(const Int_t daughter) const
   /// Get daughter particle id for the real data
   ///   if daughters are not e/pi/K/p, return pi+ (geantid=8)
 
+  if(mDaughterGeantId[daughter]==6) return 9; // if mu-, use pi-
   return ( StEmbeddingQAUtilities::instance()->isEPiKP(mDaughterGeantId[daughter]) ) ? mDaughterGeantId[daughter] : 8 ;
 }
 
