@@ -67,9 +67,9 @@ void HltphiBuilder::initialize(int argc, char *argv[]) {
     InvMassv2_Sin = new TH3D("InvMassv2_Sin","InvMassv2_Sin",60,0.,6.0,100,-1.0,1.0,100,2.0,4.0);
     DenInvMass = new TH3D("DenInvMass","DenInvMass",60,0.,6.0,100,-1.0,1.0,100,2.0,4.0);
   */
-  InvMassv2 = new TH3D("hltphi_InvMassv2","hltphi_InvMassv2",60,0.,6.0,200,-1.0,1.0,220,0.98,1.2);
-  InvMassv2_Sin = new TH3D("hltphi_InvMassv2_Sin","hltphi_InvMassv2_Sin",60,0.,6.0,200,-1.0,1.0,220,0.98,1.2);
-  DenInvMass = new TH3D("hltphi_DenInvMass","hltphi_DenInvMass",60,0.,6.0,10,0.,3.1415926,220,0.98,1.2);
+  InvMassv2 = new TH3D("hltphi_InvMassv2","hltphi_InvMassv2",50,0.,6.0,50,-1.0,1.0,50,0.98,1.2);
+  InvMassv2_Sin = new TH3D("hltphi_InvMassv2_Sin","hltphi_InvMassv2_Sin",50,0.,6.0,50,-1.0,1.0,50,0.98,1.2);
+  DenInvMass = new TH3D("hltphi_DenInvMass","hltphi_DenInvMass",50,0.,6.0,10,0.,3.1415926,50,0.98,1.2);
 
 
 
@@ -126,7 +126,7 @@ void HltphiBuilder::initialize(int argc, char *argv[]) {
   run[7]->addHisto(ph);
   addPlot(run[7]);
 
-  TH2F *Run_Glob_P_towerEnergy = new TH2F("hltphi_Run_Glob_P_towerEnergy","hltphi_Run_Glob_P_towerEnergy",150,0,15,200,0,20);
+  TH2F *Run_Glob_P_towerEnergy = new TH2F("hltphi_Run_Glob_P_towerEnergy","hltphi_Run_Glob_P_towerEnergy",100,0,15,100,0,20);
   ph = new PlotHisto();
   ph->histo = Run_Glob_P_towerEnergy;
   run[8]->addHisto(ph);
@@ -171,7 +171,7 @@ void HltphiBuilder::initialize(int argc, char *argv[]) {
   run[14]->addHisto(ph);
   addPlot(run[14]);
 
-  TH2F *Run_Prim_P_towerEnergy = new TH2F("hltphi_Run_Prim_P_towerEnergy","hltphi_Run_Prim_P_towerEnergy",150,0,15,200,0,20);
+  TH2F *Run_Prim_P_towerEnergy = new TH2F("hltphi_Run_Prim_P_towerEnergy","hltphi_Run_Prim_P_towerEnergy",100,0,15,100,0,20);
   ph = new PlotHisto();
   ph->histo = Run_Prim_P_towerEnergy;
   run[15]->addHisto(ph);
@@ -270,7 +270,7 @@ void HltphiBuilder::initialize(int argc, char *argv[]) {
   run[30]->addHisto(ph);
   addPlot(run[30]);
 
-  TH2F *Run_towerEtaPhi = new TH2F("hltphi_Run_towerEtaPhi","hltphi_Run_towerEtaPhi",200,-2.,2.,360,-3.,3.);
+  TH2F *Run_towerEtaPhi = new TH2F("hltphi_Run_towerEtaPhi","hltphi_Run_towerEtaPhi",100,-2.,2.,100,-3.,3.);
   ph = new PlotHisto();
   ph->histo = Run_towerEtaPhi;
   run[31]->addHisto(ph);
@@ -336,13 +336,13 @@ void HltphiBuilder::initialize(int argc, char *argv[]) {
   run[40]->addHisto(ph);
   addPlot(run[40]);
 
-  TH2F *Run_matchId_fiberId = new TH2F("hltphi_Run_matchChannelId_fiberChannelId","hltphi_Run_matchChannelId_fiberChannelId",200,0,200,200,0,200); //
+  TH2F *Run_matchId_fiberId = new TH2F("hltphi_Run_matchChannelId_fiberChannelId","hltphi_Run_matchChannelId_fiberChannelId",100,0,200,100,0,200); //
   ph = new PlotHisto();
   ph->histo = Run_matchId_fiberId;
   run[41]->addHisto(ph);
   addPlot(run[41]);
 
-  TH2F *Run_TrayID_TrgTime = new TH2F("hltphi_Run_TrayID_TrgTime","hltphi_Run_TrayID_TrgTime",122,0.,122,400,2700,3100);
+  TH2F *Run_TrayID_TrgTime = new TH2F("hltphi_Run_TrayID_TrgTime","hltphi_Run_TrayID_TrgTime",100,0.,122,100,2700,3100);
   ph = new PlotHisto();
   ph->histo = Run_TrayID_TrgTime;
   run[42]->addHisto(ph);
@@ -354,7 +354,7 @@ void HltphiBuilder::initialize(int argc, char *argv[]) {
   run[43]->addHisto(ph);
   addPlot(run[43]);
 
-  TH2F *Run_Vzvpd_Vz = new TH2F("hltphi_Run_Vzvpd_Vz","hltphi_Run_Vzvpd_Vz",400,-200,200,400,-200,200);
+  TH2F *Run_Vzvpd_Vz = new TH2F("hltphi_Run_Vzvpd_Vz","hltphi_Run_Vzvpd_Vz",100,-200,200,100,-200,200);
   ph = new PlotHisto();
   ph->histo = Run_Vzvpd_Vz;
   run[44]->addHisto(ph);
@@ -430,12 +430,12 @@ void HltphiBuilder::initialize(int argc, char *argv[]) {
   //--------Heavy Fragment-------//
   day[9]->optstat = 0; 
   day[9]->setDrawOpts("colz");
-  TH2F *Day_HFM_dEdx = new TH2F("hltphi_Day_HFM_dEdx","hltphi_Day_HFM_dEdx",500,-5,5,300,0,3.e-5);
+  TH2F *Day_HFM_dEdx = new TH2F("hltphi_Day_HFM_dEdx","hltphi_Day_HFM_dEdx",100,-5,5,100,0,3.e-5);
   ph = new PlotHisto(); //55
   ph->histo = Day_HFM_dEdx;
   day[9]->addHisto(ph);
 
-  TH2F *Day_Ref_dEdx = new TH2F("hltphi_Day_Ref_dEdx","hltphi_Day_Ref_dEdx",500,-5,5,300,0,3.e-5);
+  TH2F *Day_Ref_dEdx = new TH2F("hltphi_Day_Ref_dEdx","hltphi_Day_Ref_dEdx",100,-5,5,100,0,3.e-5);
   ph = new PlotHisto();
   ph->histo = Day_Ref_dEdx;
   day[9]->addHisto(ph);
@@ -757,12 +757,12 @@ void HltphiBuilder::initialize(int argc, char *argv[]) {
   //--------Heavy Fragment-------//
   all[30]->optstat = 0;
   all[30]->setDrawOpts("colz");
-  TH2F *Cumu_HFM_dEdx = new TH2F("hltphi_Cumu_HFM_dEdx","hltphi_Cumu_HFM_dEdx",500,-5,5,300,0,3.e-5);
+  TH2F *Cumu_HFM_dEdx = new TH2F("hltphi_Cumu_HFM_dEdx","hltphi_Cumu_HFM_dEdx",100,-5,5,100,0,3.e-5);
   ph = new PlotHisto(); //86
   ph->histo = Cumu_HFM_dEdx;
   all[30]->addHisto(ph);
 
-  TH2F *Cumu_Ref_dEdx = new TH2F("hltphi_Cumu_Ref_dEdx","hltphi_Cumu_Ref_dEdx",500,-5,5,300,0,3.e-5);
+  TH2F *Cumu_Ref_dEdx = new TH2F("hltphi_Cumu_Ref_dEdx","hltphi_Cumu_Ref_dEdx",100,-5,5,100,0,3.e-5);
   ph = new PlotHisto();
   ph->histo = Cumu_Ref_dEdx;
   all[30]->addHisto(ph);

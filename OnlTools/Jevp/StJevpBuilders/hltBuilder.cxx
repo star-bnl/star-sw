@@ -267,14 +267,14 @@ void hltBuilder::initialize(int argc, char *argv[]) {
   index++;
 
   HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1; 
-  Timevsmultiplicity = new TH2F("hlt_Timevsmultiplicity","Single Run processing time (to fill these HLT histos) vs multiplicity",1000,0.,1000.,200,0.,200.);
+  Timevsmultiplicity = new TH2F("hlt_Timevsmultiplicity","Single Run processing time (to fill these HLT histos) vs multiplicity",100,0.,1000.,100,0.,200.);
   Timevsmultiplicity->Sumw2();  ph = new PlotHisto();  ph->histo = Timevsmultiplicity;  HltPlots[index]->addHisto(ph);
   addPlot(HltPlots[index]);
 
   index++;
 
   HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  Ratevsmultiplicity = new TH2F("hlt_Ratevsmultiplicity","Single Run rate/event (to fill these HLT histos) vs multiplicity",1000,0.,1000.,1000,0.,1000.);
+  Ratevsmultiplicity = new TH2F("hlt_Ratevsmultiplicity","Single Run rate/event (to fill these HLT histos) vs multiplicity",100,0.,1000.,100,0.,1000.);
   Ratevsmultiplicity->Sumw2();  ph = new PlotHisto();  ph->histo = Ratevsmultiplicity;  HltPlots[index]->addHisto(ph);
   addPlot(HltPlots[index]);
 
@@ -321,7 +321,7 @@ void hltBuilder::initialize(int argc, char *argv[]) {
   //HltPlots[index]->logz=1;
   //HltPlots[index]->optstat = 0;
   HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  dedx = new TH2F("hlt_dEdxpt","dEdx vs pt",500,0.,5.,500,0.,5.e-5);
+  dedx = new TH2F("hlt_dEdxpt","dEdx vs pt",100,0.,5.,100,0.,5.e-5);
   dedx->Sumw2();  ph = new PlotHisto();  ph->histo = dedx;  HltPlots[index]->addHisto(ph);
   addPlot(HltPlots[index]);
 
@@ -375,43 +375,43 @@ void hltBuilder::initialize(int argc, char *argv[]) {
 
   //LETTER REFERS TO BEMC CUT, NUMBER REFERS TO VERTEX CUT    
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_1a = new TH2F("BEMC_1a","BEMC e vs w (No BEMC cuts, No Vertex cuts) 1a",200,0.,200.,200,0.,200.);
+  BEMC_1a = new TH2F("BEMC_1a","BEMC e vs w (No BEMC cuts, No Vertex cuts) 1a",100,0.,200.,100,0.,200.);
   BEMC_1a->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_1a;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);    jml--> did this twice!
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_2a = new TH2F("BEMC_2a","BEMC e vs w (No BEMC cuts, Vr < 2) 2a",200,0.,200.,200,0.,200.);
+  BEMC_2a = new TH2F("BEMC_2a","BEMC e vs w (No BEMC cuts, Vr < 2) 2a",100,0.,200.,100,0.,200.);
   BEMC_2a->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_2a;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_3a = new TH2F("BEMC_3a","BEMC e vs w (No BEMC cuts, Vr < 2, Vz < 70) 3a",200,0.,200.,200,0.,200.);
+  BEMC_3a = new TH2F("BEMC_3a","BEMC e vs w (No BEMC cuts, Vr < 2, Vz < 70) 3a",100,0.,200.,100,0.,200.);
   BEMC_3a->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_3a;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_4a = new TH2F("BEMC_4a","BEMC e vs w (No BEMC cuts, Vr > 2, Vz < 70) 4a",200,0.,200.,200,0.,200.);
+  BEMC_4a = new TH2F("BEMC_4a","BEMC e vs w (No BEMC cuts, Vr > 2, Vz < 70) 4a",100,0.,200.,100,0.,200.);
   BEMC_4a->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_4a;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_1b = new TH2F("BEMC_1b","BEMC e vs w (BEMC e & w > 20, No Vertex cuts) 1b",200,0.,200.,200,0.,200.);
+  BEMC_1b = new TH2F("BEMC_1b","BEMC e vs w (BEMC e & w > 20, No Vertex cuts) 1b",100,0.,200.,100,0.,200.);
   BEMC_1b->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_1b;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_2b = new TH2F("BEMC_2b","BEMC e vs w (BEMC e & w > 20, Vr < 2) 2b",200,0.,200.,200,0.,200.);
+  BEMC_2b = new TH2F("BEMC_2b","BEMC e vs w (BEMC e & w > 20, Vr < 2) 2b",100,0.,200.,100,0.,200.);
   BEMC_2b->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_2b;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_3b = new TH2F("BEMC_3b","BEMC e vs w (BEMC e & w > 20, Vr < 2, Vz < 70) 3b",200,0.,200.,200,0.,200.);
+  BEMC_3b = new TH2F("BEMC_3b","BEMC e vs w (BEMC e & w > 20, Vr < 2, Vz < 70) 3b",100,0.,200.,100,0.,200.);
   BEMC_3b->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_3b;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
@@ -423,19 +423,19 @@ void hltBuilder::initialize(int argc, char *argv[]) {
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_1c = new TH2F("BEMC_1c","BEMC e vs w (BEMC e & w > 20, BEMC |e-w| < 6, No Vertex cuts) 1c",200,0.,200.,200,0.,200.);
+  BEMC_1c = new TH2F("BEMC_1c","BEMC e vs w (BEMC e & w > 20, BEMC |e-w| < 6, No Vertex cuts) 1c",100,0.,200.,100,0.,200.);
   BEMC_1c->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_1c;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_2c = new TH2F("BEMC_2c","BEMC e vs w (BEMC e & w > 20, BEMC |e-w| < 6, Vr < 2) 2c",200,0.,200.,200,0.,200.);
+  BEMC_2c = new TH2F("BEMC_2c","BEMC e vs w (BEMC e & w > 20, BEMC |e-w| < 6, Vr < 2) 2c",100,0.,200.,100,0.,200.);
   BEMC_2c->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_2c;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_3c = new TH2F("BEMC_3c","BEMC e vs w (BEMC e & w > 20, BEMC |e-w| < 6, Vr < 2, Vz < 70) 3c",200,0.,200.,200,0.,200.);
+  BEMC_3c = new TH2F("BEMC_3c","BEMC e vs w (BEMC e & w > 20, BEMC |e-w| < 6, Vr < 2, Vz < 70) 3c",100,0.,200.,100,0.,200.);
   BEMC_3c->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_3c;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
@@ -447,13 +447,13 @@ void hltBuilder::initialize(int argc, char *argv[]) {
   addPlot(HltPlots[index]);
  
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_1d = new TH2F("BEMC_1d","BEMC e vs w (BEMC e & w > 1 GeV, No Vertex cuts) 1d",200,0.,200.,200,0.,200.);
+  BEMC_1d = new TH2F("BEMC_1d","BEMC e vs w (BEMC e & w > 1 GeV, No Vertex cuts) 1d",100,0.,200.,100,0.,200.);
   BEMC_1d->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_1d;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_2d = new TH2F("BEMC_2d","BEMC e vs w (BEMC e & w > 1 GeV, Vr < 2) 2d",200,0.,200.,200,0.,200.);
+  BEMC_2d = new TH2F("BEMC_2d","BEMC e vs w (BEMC e & w > 1 GeV, Vr < 2) 2d",100,0.,200.,100,0.,200.);
   BEMC_2d->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_2d;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
@@ -465,7 +465,7 @@ void hltBuilder::initialize(int argc, char *argv[]) {
   addPlot(HltPlots[index]);
 
   index++;             HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  BEMC_4d = new TH2F("BEMC_4d","BEMC e vs w (BEMC e & w > 1 GeV, Vr > 2, Vz < 70) 4d",200,0.,200.,200,0.,200.);
+  BEMC_4d = new TH2F("BEMC_4d","BEMC e vs w (BEMC e & w > 1 GeV, Vr > 2, Vz < 70) 4d",100,0.,200.,100,0.,200.);
   BEMC_4d->Sumw2(); ph = new PlotHisto(); ph->histo = BEMC_4d;  HltPlots[index]->addHisto(ph);    
   //addPlot(HltPlots[index]);
   addPlot(HltPlots[index]);
@@ -745,14 +745,14 @@ void hltBuilder::initialize(int argc, char *argv[]) {
   index++;
 
   HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  tot_Timevsmultiplicity = new TH2F("hlt_tot_Timevsmultiplicity","Accumulated processing time (to fill these HLT histos) vs multiplicity",1000,0.,1000.,200,0.,200.);
+  tot_Timevsmultiplicity = new TH2F("hlt_tot_Timevsmultiplicity","Accumulated processing time (to fill these HLT histos) vs multiplicity",100,0.,1000.,100,0.,200.);
   tot_Timevsmultiplicity->Sumw2();  ph = new PlotHisto();  ph->histo = tot_Timevsmultiplicity;  HltPlots[index]->addHisto(ph);
   addPlot(HltPlots[index]);
 
   index++;
 
   HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  tot_Ratevsmultiplicity = new TH2F("hlt_tot_Ratevsmultiplicity","Accumulated rate/event (to fill these HLT histos) vs multiplicity",1000,0.,1000.,1000,0.,1000.);
+  tot_Ratevsmultiplicity = new TH2F("hlt_tot_Ratevsmultiplicity","Accumulated rate/event (to fill these HLT histos) vs multiplicity",100,0.,1000.,100,0.,1000.);
   tot_Ratevsmultiplicity->Sumw2();  ph = new PlotHisto();  ph->histo = tot_Ratevsmultiplicity;  HltPlots[index]->addHisto(ph);
   addPlot(HltPlots[index]);
 
@@ -799,7 +799,7 @@ void hltBuilder::initialize(int argc, char *argv[]) {
   //HltPlots[index]->logz=1;
   //HltPlots[index]->optstat = 0;
   HltPlots[index]->setDrawOpts((char *)"colz");  HltPlots[index]->optlogz=1;
-  tot_dedx = new TH2F("hlt_tot_dEdxpt","Accumulated dEdx vs pt",500,0.,5.,500,0.,5.e-5);
+  tot_dedx = new TH2F("hlt_tot_dEdxpt","Accumulated dEdx vs pt",100,0.,5.,100,0.,5.e-5);
   tot_dedx->Sumw2();  ph = new PlotHisto();  ph->histo = tot_dedx;  HltPlots[index]->addHisto(ph);
   addPlot(HltPlots[index]);
 

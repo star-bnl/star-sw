@@ -35,9 +35,9 @@ class tpxBuilder : public JevpPlotSet {
   union {
     TH1 *array[];
     struct {
-      TH1 *tpc_occ_physics;
-      TH1 *h44_tpc_occ_laser;
-      TH1 *h43_tpc_occ_pulser;
+      //TH1 *tpc_occ_physics;
+      //TH1 *h44_tpc_occ_laser;
+      //TH1 *h43_tpc_occ_pulser;
       TH1 *tpc_pix_occ_physics;
       TH1 *tpc_pix_occ_laser;
       TH1 *tpc_pix_occ_pulser;

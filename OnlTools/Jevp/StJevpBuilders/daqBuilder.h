@@ -37,21 +37,21 @@ public:
     struct {
       TH1 *h2_tpc;
       TH1 *h0_evt_size;
-      TH1 *h10_bemc_evsize;
-      TH1 *h11_ftp_evsize;
-      TH1 *h12_l3_evsize;
-      TH1 *h13_svt_evsize;
-      TH1 *h14_tof_evsize;
+      //TH1 *h10_bemc_evsize;
+      //TH1 *h11_ftp_evsize;
+      //TH1 *h12_l3_evsize;
+      //TH1 *h13_svt_evsize;
+      //TH1 *h14_tof_evsize;
       TH1 *h103_tpc_frac;
       TH1 *h106_bemc_frac;
-      TH1 *h105_ftp_frac;
-      TH1 *h108_l3_frac;
-      TH1 *h104_svt_frac;
+      //TH1 *h105_ftp_frac;
+      //TH1 *h108_l3_frac;
+      //TH1 *h104_svt_frac;
       TH1 *h107_tof_frac;
       TH1 *h155_time_size_2min;
       TH1 *h156_time_size_10min;
       TH1 *h157_time_size_2hour;
-      TH1 *h337_ftp_time_size_2hour;
+      //TH1 *h337_ftp_time_size_2hour;
     };
   } contents;
 

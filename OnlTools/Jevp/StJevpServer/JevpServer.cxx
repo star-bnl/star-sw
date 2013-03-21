@@ -1120,6 +1120,9 @@ void JevpServer::handleSwapRefs(char *name)
 
 void JevpServer::writeRunPdf(int display, int run)
 {
+  RtsTimer_root pdfclock;
+  pdfclock.record_time();
+
   if(pdfdir == NULL) return;
 
   int ret = displays->setDisplay(display);
@@ -1127,12 +1130,16 @@ void JevpServer::writeRunPdf(int display, int run)
     LOG(ERR, "Can't set display to %d",display);
     return;
   }
-  LOG(DBG, "Set displays to %d",ret);
+  double t = pdfclock.record_time();
+  LOG("JEFF", "write PDF[%d:%s]:  setdisplays took %lf",display,displays->displayRoot->name,t);
   
   char filename[256];
   sprintf(filename, "%s/%s_%d.pdf",pdfdir, displays->displayRoot->name, run);
   CP;
   writePdf(filename, 1);
+
+  t = pdfclock.record_time();
+  LOG("JEFF", "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
   CP;
 
   // Save it in the database...
@@ -1150,8 +1157,11 @@ void JevpServer::writeRunPdf(int display, int run)
     args[4] = NULL;
 
     //int ret = char((execScript *)"WritePDFToDB",args);
-    int ret = execScript("WritePDFToDB", args);
+    int ret = execScript("WritePDFToDB", args, 0);
     LOG(WARN, "Wrote PDF file to DB: %s (ret=%d)", filename, ret);
+    
+    t = pdfclock.record_time();
+    LOG("JEFF", "write PDF[%d:%s]:  writepdfdb took %lf (no wait!)",display,displays->displayRoot->name,t);
   }
 }
 
@@ -1244,6 +1254,9 @@ int JevpServer::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *pr
 //
 int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
 {
+  RtsTimer_root clk;
+  clk.record_time();
+
   LOG(DBG, "Write histogram leaves: %s",node->name);
 
   CP;
@@ -1297,7 +1310,7 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     }
     CP;
     
-    printf("Got scaley...  Setting max value to ymax=%lf\n",ymax*1.1);
+    //printf("Got scaley...  Setting max value to ymax=%lf\n",ymax*1.1);
     cnode = node;
     while(cnode) {
       JevpPlot *plot = getPlot(cnode->name);
@@ -1350,9 +1363,14 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     // printf("Drawing jeff %d\n",pad);
     pad++;
   }
-  
+
+  double t1 = clk.record_time();
   CP;
   c1->Print(fname, "pdf,Portrait");
+
+  double t2 = clk.record_time();
+
+  LOG(DBG, "Write histogram leaves: %s (%lf/%lf)",node->name,t1,t2);
 
   delete c1;
   return 1;
