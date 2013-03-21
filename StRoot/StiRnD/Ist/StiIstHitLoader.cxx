@@ -22,7 +22,7 @@
 #include "StBFChain.h"
 #include "StChain.h"
 #include "StMaker.h"
-#include "StPixelFastSimMaker/StPixelFastSimMaker.h"
+//#include "StPixelFastSimMaker/StPixelFastSimMaker.h"
 
 StiIstHitLoader::StiIstHitLoader()
     : StiHitLoader<StEvent,StiDetectorBuilder>("IstHitLoader")
