@@ -61,9 +61,9 @@ tpxBuilder::~tpxBuilder() {
 
 void tpxBuilder::initialize(int argc, char *argv[]) {
 
-  contents.tpc_occ_physics = new TH1D("tpc_physics","TPC Channel Occupancy (in %) Physics",100,0,100);
-  contents.h44_tpc_occ_laser = new TH1D("h44_tpc_occ_laser","TPC Channel Occupancy (in %) Lasers",100,0,100);
-  contents.h43_tpc_occ_pulser = new TH1D("h43_tpc_occ_pulser","TPC Channel Occupancy (in %) Pulsers",100,0,100);
+  //contents.tpc_occ_physics = new TH1D("tpc_physics","TPC Channel Occupancy (in %) Physics",100,0,100);
+  //contents.h44_tpc_occ_laser = new TH1D("h44_tpc_occ_laser","TPC Channel Occupancy (in %) Lasers",100,0,100);
+  //contents.h43_tpc_occ_pulser = new TH1D("h43_tpc_occ_pulser","TPC Channel Occupancy (in %) Pulsers",100,0,100);
   contents.tpc_pix_occ_physics = new TH1D("tpc_pix_occ_physics","TPC Pixel Occupancy (in %) Physics",100,0,2.5);
   contents.tpc_pix_occ_laser = new TH1D("tpc_pix_occ_laser","TPC Pixel Occupancy (in %) Lasers",100,0,1);
   contents.tpc_pix_occ_pulser = new TH1D("tpc_pix_occ_pulser","TPC Pixel Occupancy (in %) Pulsers",100,0,10);
@@ -115,12 +115,12 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   contents.h141_chargeStep_s22 = new TH1D("h141_chargeStep_s22","TPC adc vs time sector#22",512,1,512);
   contents.h142_chargeStep_s23 = new TH1D("h142_chargeStep_s23","TPC adc vs time sector#23",512,1,512);
   contents.h143_chargeStep_s24 = new TH1D("h143_chargeStep_s24","TPC adc vs time sector#24",512,1,512);
-
+ 
   contents.h102_tpc_drift_vel = new TH1D("h102_tpc_drift_vel", "TPC Drift Velocity (cm/us)",400,5.4,5.8);
   // contents.h113_tpc_drift_vel_dist = new TH1D("113_tpc_drift_vel_dist", "TPC Drift Velocity Distribution(cm/us)",200,4,8);
   contents.h66_tpc_phi_charge = new TH1D("h66_tpc_phi_charge","Azimuthal Distribution of TPC Charge",360,-180,180);
   contents.h67_tpc_sector_charge = new TH1D("h67_tpc_sector_charge","TPC Charge per Sector",24,0.5,24.5);
-
+  
   // cluster based vesions...
   extras.tpc_clpix_occ_physics = new TH1D("tpc_clpix_occ_physics","TPC Pixel Occupancy (in %) Physics",100,0,2.5);
   extras.tpc_clpix_occ_laser = new TH1D("tpc_clpix_occ_laser","TPC Pixel Occupancy (in %) Lasers",100,0,1);
@@ -149,22 +149,21 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   extras.cl141_chargeStep_s22 = new TH1D("cl141_chargeStep_s22","TPC adc vs time sector#22",512,1,512);
   extras.cl142_chargeStep_s23 = new TH1D("cl142_chargeStep_s23","TPC adc vs time sector#23",512,1,512);
   extras.cl143_chargeStep_s24 = new TH1D("cl143_chargeStep_s24","TPC adc vs time sector#24",512,1,512);
-
+ 
   extras.cl66_tpc_phi_charge = new TH1D("cl66_tpc_phi_charge","Azimuthal Distribution of TPC Charge",360,-180,180);
   extras.cl67_tpc_sector_charge = new TH1D("cl67_tpc_sector_charge","TPC Charge per Sector",24,0.5,24.5);
-
+ 
   // Add root histograms to Plots
   int np = sizeof(contents) / sizeof(TH1 *);
   JevpPlot *plots[np];
 
   int n=0;
 
+  //plots[n] = new JevpPlot(contents.tpc_occ_physics);
+  // plots[++n] = new JevpPlot(contents.h44_tpc_occ_laser);
+  //plots[++n] = new JevpPlot(contents.h43_tpc_occ_pulser);
 
-  plots[n] = new JevpPlot(contents.tpc_occ_physics);
-  plots[++n] = new JevpPlot(contents.h44_tpc_occ_laser);
-  plots[++n] = new JevpPlot(contents.h43_tpc_occ_pulser);
-
-  plots[++n] = new JevpPlot(extras.tpc_clpix_occ_physics);
+  plots[n] = new JevpPlot(extras.tpc_clpix_occ_physics);
   plots[n]->addHisto(contents.tpc_pix_occ_physics);
   extras.tpc_clpix_occ_physics->SetLineColor(kRed);
   contents.tpc_pix_occ_physics->SetLineColor(kGreen);
@@ -195,6 +194,7 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   plots[n]->getHisto(0)->setLegArgs("l");
   
   plots[++n] = new JevpPlot(contents.h15_tpc_sec1);
+  
   plots[++n] = new JevpPlot(contents.h16_tpc_sec2);
   plots[++n] = new JevpPlot(contents.h17_tpc_sec3);
   plots[++n] = new JevpPlot(contents.h18_tpc_sec4);
@@ -219,6 +219,7 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.h37_tpc_sec23);
   plots[++n] = new JevpPlot(contents.h38_tpc_sec24);
   plots[++n] = new JevpPlot(contents.h120_chargeStep_s1);
+ 
   plots[n]->addHisto(extras.cl120_chargeStep_s1);
   plots[++n] = new JevpPlot(contents.h121_chargeStep_s2);
   plots[n]->addHisto(extras.cl121_chargeStep_s2);
@@ -266,7 +267,7 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   plots[n]->addHisto(extras.cl142_chargeStep_s23);
   plots[++n] = new JevpPlot(contents.h143_chargeStep_s24);
   plots[n]->addHisto(extras.cl143_chargeStep_s24);
-
+ 
   plots[++n] = new JevpPlot(contents.h102_tpc_drift_vel);
   //plots[++n] = new JevpPlot(contents.h113_tpc_drift_vel_dist);
 
@@ -295,7 +296,7 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
   long qs_idx = ((long)&contents.h120_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
   long cl_qs_idx = ((long)&extras.cl120_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
-  
+ 
   for(int i=0;i<24;i++) {
     plots[i+q_idx]->setDrawOpts((char *)"colz");
     plots[i+q_idx]->optstat = 0;
@@ -306,15 +307,16 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
     plots[i+qs_idx]->getHisto(1)->setLegText("clusters");
     plots[i+qs_idx]->getHisto(0)->setLegArgs("l");
     plots[i+qs_idx]->getHisto(1)->setLegArgs("l");
+
     contents.array[i+qs_idx]->SetLineColor(kGreen);
+
     extras.array[i+cl_qs_idx]->SetLineColor(kRed);
   }
-
 
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
     addPlot(plots[i]);
-  }
+  } 
 }
   
 void tpxBuilder::startrun(daqReader *rdr) {
@@ -506,7 +508,7 @@ void tpxBuilder::event(daqReader *rdr)
 
   switch(rdr->trgcmd) {
   case 4:
-    contents.tpc_occ_physics->Fill(100.0 * (double)channel_count / tpc_max_channels);
+    //contents.tpc_occ_physics->Fill(100.0 * (double)channel_count / tpc_max_channels);
     contents.tpc_pix_occ_physics->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
 
     extras.tpc_clpix_occ_physics->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
@@ -519,7 +521,7 @@ void tpxBuilder::event(daqReader *rdr)
       
       LOG("JEFF", "Got a laser...");
 
-      contents.h44_tpc_occ_laser->Fill(100.0 * (double)channel_count / tpc_max_channels);
+      //contents.h44_tpc_occ_laser->Fill(100.0 * (double)channel_count / tpc_max_channels);
       contents.tpc_pix_occ_laser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
       extras.tpc_clpix_occ_laser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
 
@@ -534,7 +536,7 @@ void tpxBuilder::event(daqReader *rdr)
     break;
 
   case 10:   // Pulsers..
-    contents.h43_tpc_occ_pulser->Fill(100.0 * (double)channel_count / tpc_max_channels);
+    //contents.h43_tpc_occ_pulser->Fill(100.0 * (double)channel_count / tpc_max_channels);
     contents.tpc_pix_occ_pulser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
     extras.tpc_clpix_occ_pulser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
 
