@@ -1,4 +1,22 @@
-
+//! Muon Telescope Detector (MTD) Match Maker
+/*!  \class StMtdMatchMaker
+ *   \brief Match Maker for the MTD detector
+ *   \author Bingchu Huang
+ *   \date January 2013
+ *
+ * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
+ * 
+ * $Id: StMtdMatchMaker.h,v 1.2 2013/03/21 11:21:45 jeromel Exp $
+ */
+/*****************************************************************
+ *
+ * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.2  2013/03/21 11:21:45  jeromel
+ * Reviewd version 2013/03
+ *
+ *
+ *
+ *******************************************************************/
 #ifndef STMTDMATCHMAKER_H
 #define STMTDMATCHMAKER_H
 
@@ -35,26 +53,28 @@ typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
 #endif
 
 const Int_t kMaxHits = 100000;
+const Int_t kMaxTriggerIds = 64;
 const Int_t mNBacklegs = 30;
 const Int_t mNStrips = 30;
 const Int_t mNAllTrays = 150; 
 
+/// MTD Event data structure
 struct MtdEvtData {
-	Int_t  run, evt;
-	Int_t  trgId;
+	Int_t  run, evt,nTrgIds;
+	Int_t  trgId[kMaxTriggerIds];
 	Float_t  bField;
 	Float_t vertexX, vertexY, vertexZ;
 
 	Double_t  triggerTime;
 
-	//raw hits
+	/// raw hits information
 	Int_t  nMtdRawHits;
 	Char_t    flag[kMaxHits];
 	UChar_t   backlegRaw[kMaxHits];
 	UChar_t   chn[kMaxHits]; //1-120
 	Double_t  tdc[kMaxHits]; // bin
 
-	//sorted hits
+	/// sorted hits information
 	Int_t  nMtdHits;
 	UChar_t  backleg[kMaxHits];
 	UChar_t  module[kMaxHits];
@@ -65,7 +85,7 @@ struct MtdEvtData {
 	Double_t totWest[kMaxHits];
 	Double_t totEast[kMaxHits];
 
-	//global tracks
+	/// global tracks information
 	Int_t ngTracks;
 	Float_t gpt[kMaxHits];
 	Float_t geta[kMaxHits];
@@ -99,7 +119,7 @@ struct MtdEvtData {
 	Float_t gbeta[kMaxHits];
 	Float_t gtdiff[kMaxHits];
 
-	//projection to TOF and MTD
+	/// projection information to TOF and MTD
 	UChar_t  gprojMtdBackLeg[kMaxHits];
 	UChar_t  gprojMtdModule[kMaxHits];
 	UChar_t  gprojMtdCell[kMaxHits];
@@ -125,35 +145,88 @@ struct MtdEvtData {
 	Float_t   gmLocalY[kMaxHits];
 };
 
+/// MTD track class
+class MtdTrack{
+	public:
+		MtdTrack(StTrack *stt);
+		MtdTrack(StMuTrack *mut);
+		~MtdTrack(){}
+
+		Double_t pt;
+		Double_t eta;
+		Int_t	 nFtPts;   
+		Int_t	 nDedxPts;   
+		Int_t	 flag;   
+		Int_t	 nHitsPoss;   
+
+};
+
 class StMtdMatchMaker: public StMaker{
 
 	public:
-		StMtdMatchMaker(StMuDstMaker *,  const Char_t *);
+                /// Default constructor
+		StMtdMatchMaker();
 		virtual ~StMtdMatchMaker();
 		virtual void  Clear(const char* opt="");
+		/// initialize drifting velocity and histograms.
 		virtual Int_t Init();
 		Int_t  InitRun(int runnumber);
+
+		/// associate tracks with mtd hits
 		virtual Int_t Make();
+		/// write QA histograms
 		virtual Int_t Finish();
 		Int_t  FinishRun(int runnumber);
-		void setMuDstIn(const Bool_t val);
-		void setCosmicEvent(const Bool_t val);
-		void setSaveTree(const Bool_t val);
-		void setHisto(const Bool_t val);
 
+		/// set event trigger comsmic ray event has a reversed direction from outer to inner for tracks in upper half TPC 
+		void setCosmicEvent(const Bool_t val);
+		/// save QA tree or not
+		void setSaveTree(const Bool_t val);
+		/// save QA histogram or not
+		void setHisto(const Bool_t val);
+		
+		/// set minimum nHitsFit 
+		void setMinFitPoints(Int_t val);
+		/// set minimum ndEdx fit points 
+		void setMindEdxFitPoints(Int_t val);
+		/// set pseudo rapidity range 
+		void setEtaRange(Float_t etaMin, Float_t etaMax);
+		/// set minimum nHitsFit 
+		void setMinPt(Float_t val);
+		
+		/// check track quality 
+		bool validTrack(StTrack *track);
+		bool validTrack(StMuTrack *track);
+
+
+	protected:
+		string		 mOutName;
 		StPhysicalHelixD* mBeamHelix;
 		Float_t mBeamX, mBeamY;
 		Bool_t  doPrintMemoryInfo;     
 		Bool_t  doPrintCpuInfo;
 		Bool_t  mCosmicFlag;
 
-		Int_t mMinFitPointsPerTrack;
-		Float_t mMinFitPointsOverMax;
-		//Float_t mZLocalCut;
-		Float_t mNSigReso;
+		Int_t   mMinFitPointsPerTrack;  //! minimum fit points per track
+		Int_t   mMindEdxFitPoints;  //! minimum dE/dx fit points per track
+		Float_t mMinFitPointsOverMax; //! minimum ratio
+		Float_t mNSigReso; //! n sigma of z and y resolution of MTD
+		Float_t mMinEta; //! minimum pseudorapidity 
+		Float_t mMaxEta; //! maximum pseudorapidity 
+		Float_t mMinPt;  //! minimum transverse momentum 
 
+
+	private:
+		Bool_t          mMuDstIn;          //! switch - default is to read in StEvent
+		Bool_t			mSaveTree;
+		Bool_t			mHisto;
+		
+		Double_t		mVDrift[mNAllTrays][mNStrips];  //! drifting velocity
+		Int_t 	mnNeighbors; //! match with +- mnNeighbors cell
 		Int_t ngTracks;
 
+
+		///QA histograms
 		TH1D* mEventCounterHisto;
 		TH1D* mCellsMultInEvent;
 		TH1D* mHitsMultInEvent;
@@ -166,9 +239,7 @@ class StMtdMatchMaker: public StMaker{
 
 		TH2D* mHitCorr[mNBacklegs];
 		TH2D* mHitCorrModule[mNBacklegs];
-
 		TH2D* mDeltaHitFinal[mNBacklegs];
-
 
 		TH2D* mTrackPtEta;
 		TH2D* mTrackPtPhi;
@@ -208,22 +279,6 @@ class StMtdMatchMaker: public StMaker{
 		TF1 *fZReso;
 		TF1 *fPhiReso;
 
-	protected:
-		StMuDstMaker *mMuDstMaker;
-		string		 mOutName;
-	private:
-		Bool_t          mMuDstIn;          //! switch - default is to read in StEvent
-		Bool_t			mSaveTree;
-		Bool_t			mHisto;
-		Double_t		mVDrift[mNAllTrays][mNStrips];
-		Int_t 	mnNeighbors; // match with +- mnNeighbors cell
-
-		///
-		void processStEvent();
-		///
-		void processMuDst();
-
-
 		StEvent *mEvent;
 		StMuDst *mMuDst;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -260,28 +315,50 @@ class StMtdMatchMaker: public StMaker{
 		typedef pair<Double_t,Double_t> pairD;
 
 
+		/// set QA histograms
 		void bookHistograms();
+		/// set QA tree 
+		void bookTree();
+		/// read mtd hits from StMuDst and StEvent
 		Bool_t readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& validModuleVec);
+		/// project a track to MTD geometry, return the hit position and strip index
 		void project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVector& allCellsHitVec,Int_t& nPrimaryHits);
+		/// compare track hit strip index with mtd hits, save the MTD fired hits in same strip as candidates
 		void matchMtdHits(mtdCellHitVector& dapCellsHitVec,mtdCellHitVector& allCellsHitVec,mtdCellHitVector& matchHitCellsVec);
+		/// save vectors of single and multi matched hits
 		void sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,mtdCellHitVector& singleHitCellsVec,mtdCellHitVector& multiHitsCellsVec);
+		/// select the closest hit from multi match hits
 		void finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mtdCellHitVector& FinalMatchedCellsVec);
+		/// fill the matched hit into PID traits
 		void fillPidTraits(mtdCellHitVector& FinalMatchedCellsVec,Int_t& nValidSingleHitCells,Int_t& nValidSinglePrimHitCells);
-		bool validTrack(StTrack *track);
-		bool validTrack(StMuTrack *track);
+		/// check track quality
+		bool validTrack(MtdTrack mtt);
+
+		/// used in project2Mtd(), StEvent mode
 		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StTrack *theTrack, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
+		/// used in project2Mtd(), StMuDst mode
 		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StMuTrack *theTrack, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
+		/// used in project2Mtd() 
 		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalHelixD helix, Int_t gq, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
+
+
+		/// convert module center to local coordinates
 		void modulePos(int backleg,int module,StThreeVector<double>& local);		
+		/// convert global position to local position 
 		void global2Local(StThreeVector<double> global,int backleg,int module,StThreeVector<double>& local);
-		int  decodeStripPhiZ(int backLeg, int trayId, int channel, double &phi, double &z);
-		int  decodeTofPhiZ(int channel, double &phi, double &z);
+		/// reset QA tree data
 		void initEventData();
+
+		virtual const char *GetCVS() const
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.2 2013/03/21 11:21:45 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,1)
 };
 
-inline void StMtdMatchMaker::setMuDstIn(const Bool_t val) { mMuDstIn = val; }
 inline void StMtdMatchMaker::setCosmicEvent(const Bool_t val) { mCosmicFlag= val; }
 inline void StMtdMatchMaker::setSaveTree(const Bool_t val) { mSaveTree= val; }
 inline void StMtdMatchMaker::setHisto(const Bool_t val) { mHisto = val; }
+inline void StMtdMatchMaker::setMinFitPoints(Int_t val) { mMinFitPointsPerTrack = val; }
+inline void StMtdMatchMaker::setMindEdxFitPoints(Int_t val) { mMindEdxFitPoints= val; }
+inline void StMtdMatchMaker::setEtaRange(Float_t etaMin,Float_t etaMax) {mMinEta=etaMin;mMaxEta=etaMax; }
+inline void StMtdMatchMaker::setMinPt(Float_t val) {mMinPt=val; }
 #endif
