@@ -127,8 +127,7 @@ static int myDeb = 0;
 std::vector<TObject*> mySeedObjs;
 
   StvHit *fstHit,*selHit=0; 
-  mSel.SetXYStep(kDeltaR);
-  mSel.SetZStep (kDeltaZ);
+  mSel.SetStep (kDeltaR,kDeltaZ);
 
   for (;(*f1stHitMapIter)!=f1stHitMap->end();++(*f1stHitMapIter)) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
@@ -144,20 +143,15 @@ if (myDeb>0) {fDraw->Clear();mySeedObjs.clear();}
     selHit = fstHit;
     mSel.SetErr(sqrt(fstHit->err2())*kErrFakt);
 
-    int selJkk = -11;
-
     while (1) { //Search next hit 
 //		Add info from selected hit
       fSeedHits.push_back(selHit); selHit->addTimesUsed();fNUsed[0]++;
-if (selJkk>=0) printf("***Selected*** selJkk = %d\n",selJkk);
       const StHitPlane *hp = selHit->detector();
       const float *hd = hp->GetDir(selHit->x())[0];
       mSel.AddHit(selHit->x(),hd);
       mSel.Prepare();
       fMultiIter->Set(fMultiHits->GetTop(),mSel.mLim[0],mSel.mLim[1]);
       selHit=0; 
-      selJkk = -11;
-      float minLen = 1e11;
       TObject *selObj=0;	//This guy for graphics only
       for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
       { 
@@ -165,11 +159,12 @@ if (selJkk>=0) printf("***Selected*** selJkk = %d\n",selJkk);
         if (nexHit->timesUsed()) continue;
 	int ans = mSel.Reject(nexHit->x());
 	if (ans>0) continue;
-        if (ans<0) fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
-	if (minLen>mSel.mHitLen) { //Selecting the best
-          delete selObj; minLen=mSel.mHitLen; selHit=nexHit;
-
-        } //endSelecting the best
+//			Selecting the best
+        selHit=nexHit;
+        if (!ans)  continue;
+//		Decrease size of searching box
+	mSel.Update();
+	fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
       } //endMultiIter loop
 
       if (!selHit) break; //No more hits 
@@ -203,6 +198,7 @@ StvConeSelector::StvConeSelector()
 //_____________________________________________________________________________
 void StvConeSelector::AddHit(const float *x,const float *dir)
 {
+  mMinPrj = 1.e11; mMinImp = 1.e11;
   mX[++mJst]=x;
   mHit = x;
   mHitDir = dir;
@@ -222,16 +218,11 @@ StvDebug::Break(nCall);
     case 0: {
       
 
-      for (int i=0;i<3;i++) {mDir[i]=mHitDir[i];}
+      for (int i=0;i<3;i++) {mDir[i]=-mHitDir[i];}
 //	if Z is inside of range direction to Z=0 is senseless 
 //      if (fabs(mDir[2]) < kRangeZ) mDir[2] = 0;
       float sgn = Dot(mHit,mDir);
-      if (sgn>0) { mDir[0]=-mDir[0];mDir[1]=-mDir[1];mDir[2]=-mDir[2];}
-
-      stp=0;
-      for (int i=0;i<3;i++) {stp+=mDir[i]*mDir[i];}
-      stp = sqrt(stp);
-      for (int i=0;i<3;i++) {mDir[i]/=stp;}
+      assert(sgn<0);
       mS[0]=0;
       mTan = kFstTan;
     }; break;
@@ -295,12 +286,15 @@ void  StvConeSelector::UpdateLims()
     float qwe = mLen*mDir[i];
     float asd = mLen*mTan*sqrt(fabs(1-mDir[i]*mDir[i]));
     float lim = qwe - asd - mErr;
-    mLim[0][i] = (qwe<-mErr) ? qwe:-mErr;
+    mLim[0][i] = (lim<0)? lim:-mErr;
     lim = qwe + asd + mErr;
-    mLim[1][i] = (qwe> mErr) ? qwe: mErr;
-    mLim[0][i]+=mHit[i]; mLim[1][i]+=mHit[i];
+    mLim[1][i] = (lim>0)? lim: mErr;
+//		Move to global system 
+    mLim[0][i]+= mHit[i];
+    mLim[1][i]+= mHit[i];
   }
 
+//		Temporary check
   for (int j=0;j<3;j++) {
     float xx = mHit[j]+mDir[j]*mLen*0.1;
     assert(xx>=mLim[0][j]);
@@ -309,10 +303,6 @@ void  StvConeSelector::UpdateLims()
     assert(xx>=mLim[0][j]);
     assert(xx<=mLim[1][j]);
   }
-
-//  for (int j=0;j<3;j++) {mLim[0][j]=-999; mLim[1][j]=999;}
-
-
 
 }
 //_____________________________________________________________________________
@@ -327,13 +317,17 @@ int  StvConeSelector::Reject(const float x[3])
    mHitLen = (r2xy+z2);
    if (mHitLen  < 1e-8) 		return 4;
    mHitPrj = Dot(xx,mDir);
-   if (mHitPrj<1e-4)			return 5;
+   if (mHitPrj<mDelta*0.1)		return 5;
    if (mHitPrj>mLen) 			return 6;
    float imp =mHitLen-mHitPrj*mHitPrj; if (imp<=0) imp = 0;
    float lim = (mErr) + mHitPrj*mTan;
    if (imp > lim*lim)          		return 7;
-   mHitLen = imp*kImpFakt+ mHitPrj*mHitPrj*(1-kImpFakt);
-   return -1;
+
+   if (mHitPrj>mMinPrj*1.1) 		return 8;
+   if (imp    >mMinImp    ) 		return 9;
+   int ans = (mHitPrj<mMinPrj*0.9)? -1:0;
+   mMinPrj= mHitPrj; mMinImp=imp;
+   return ans;
 }
 //_____________________________________________________________________________
 void StvConeSelector::Update()
