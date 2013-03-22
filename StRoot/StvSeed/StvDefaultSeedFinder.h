@@ -19,13 +19,12 @@ public:
   StvConeSelector();
  ~StvConeSelector(){;}
 
-void Reset() 			{mJst=-1;}
+void Reset() 				{mJst=-1;}
 void Prepare();
 void Update();
-void AddHit(const float *x);
-void SetErr(float err) 		{mErr=err;}
-void SetXYStep(float stp) 	{mZStep=0;   mXYStep=stp;}
-void SetZStep (float stp) 	{mZStep=stp; mXYStep=0  ;}
+void AddHit(const float *x,const float *dir);
+void SetErr(float err) 			{mErr=err;}
+void SetStep(float xStp,float zStp) 	{mXYStep=xStp;mZStep=zStp;}
 
 
 int  Reject(const float x[3]);	// 0  :x accepted
@@ -42,8 +41,11 @@ float mErr;
 float mXYStep;
 float mZStep;
 float mRxy2;
+float mRxy;
+float mDelta;
 float mZ2;
 float mDir[3]; 		// track direction
+const float *mHitDir; 	// hit plane direction
 float mLen;		// cone length (height)
 //		Calculated data
 
@@ -52,6 +54,9 @@ float mLim[2][3];
 //		Output data
 float mHitLen;
 float mHitPrj;
+float mMinPrj;
+float mMinImp;
+
 const float *mX[100];
 const float *mHit;
 float mS[100];

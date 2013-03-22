@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.24 2013/03/08 19:18:37 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.25 2013/03/20 20:52:07 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.25  2013/03/20 20:52:07  perev
+ * Remove StuTopTopologyMap...
+ *
  * Revision 1.24  2013/03/08 19:18:37  perev
  * not setting huge impact if no vertice
  *
@@ -539,7 +542,7 @@
 
 
 #include "StEventUtilities/StEventHelper.h"
-#include "StEventUtilities/StuFixTopoMap.cxx"
+///VP #include "StEventUtilities/StuFixTopoMap.cxx"
 //Stv
 #include "Stv/StvStl.h"
 #include "Stv/StvHit.h"
@@ -1219,7 +1222,7 @@ void StvStEventFiller::fillTrack(StTrack* gTrack, const StvTrack* track,StTrackD
   fillGeometry(gTrack, track, true ); // outer geometry
   fillFitTraits(gTrack, track);
   gTrack->setDetectorInfo(detInfo);
-  StuFixTopoMap(gTrack);
+///VP  StuFixTopoMap(gTrack);
   fillFlags(gTrack);
   if (!track->GetNode(StvTrack::kPrimPoint)) fillDca(gTrack,track);
   return;
