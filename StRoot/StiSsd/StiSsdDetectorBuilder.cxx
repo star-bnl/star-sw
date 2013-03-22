@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.35 2011/04/22 22:00:39 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.36 2013/03/22 23:58:51 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.36  2013/03/22 23:58:51  fisyak
+// Remove name[50]
+//
 // Revision 1.35  2011/04/22 22:00:39  fisyak
 // warn off
 //
@@ -93,7 +96,6 @@ StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
 
 void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 {
-    char name[50];  
     gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
     StSsdBarrel *mySsd = StSsdBarrel::Instance();
     if (! mySsd) {// no active SSD
@@ -125,7 +127,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
     StSsdWafer *Wafer2 = Ladder->getWafer(NW-1);
     assert(Wafer1 && Wafer2);
     Double_t width = TMath::Abs(Wafer1->x(2) - Wafer2->x(2))/2. + 2;
-    StiPlanarShape *ladderShape = new StiPlanarShape(name,
+    StiPlanarShape *ladderShape = new StiPlanarShape("SsdLadder",
 						     width,
 						     0.34, // increas by a factor ~10 2*dimensions->waferHalfThickness,
 						     dimensions->waferHalfLength );
@@ -163,9 +165,8 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       pPlacement->setRegion(StiPlacement::kMidRapidity);
       //		pPlacement->setNormalRep(phi, r, 0.);  //but we have to use this to fix ladders 20 and 12
       pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD)); 
-      sprintf(name, "Ssd/Layer_%d/Ladder_%d/Wafers", layer, ladder);
       StiDetector *pLadder = _detectorFactory->getInstance();
-      pLadder->setName(name);
+      pLadder->setName(Form("Ssd/Layer_%d/Ladder_%d/Wafers", layer, ladder));
       pLadder->setIsOn(true);
       pLadder->setIsActive(new StiIsActiveFunctor(_active));
       pLadder->setIsContinuousMedium(true);
