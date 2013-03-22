@@ -32,7 +32,7 @@ STD_DAQ_OBJS := rtsComLib.o rtsLogUnix.o ipcQLib.o rtsMother.o shmLib.o rtsCfgLi
 # these are obsolete now....
 #EVPREADER_OBJS := cfgutil.o emcReader.o evpReader.o evpSupport.o fpdReader.o ftpReader.o l3Reader.o msgNQLib.o pmdReader.o pp2ppReader.o ricReader.o sanityCheckers.o scReader.o ssdReader.o svtReader.o tofReader.o tpcFCFReader.o tpcReader.o trgReader10.o trgReader12.o trgReader20.o trgReader21.o trgReader22.o trgReader30.o trgReader32.o trgReader.o rts_reader.o daq_dta.o daq_det.o 
 
-#EVPREADER_OBJS += daq_tpx.o tpxCore.o tpxFCF.o tpxGain.o tpx_ped.o tpxPed.o tpxStat.o
+#EVPREADER_OBJS += daq_tpx.o tpxCore.o tpxFCF.o tpxGain.o tpx_ped.o tpxPed.o tpxStat.o tpxFCF_2D.o
 #EVPREADER_OBJS += daq_pp2pp.o
 #EVPREADER_OBJS += fcfAfterburner.o fcfClass.o
 #EVPREADER_OBJS += daq_tof.o 
@@ -41,7 +41,7 @@ STD_DAQ_OBJS := rtsComLib.o rtsLogUnix.o ipcQLib.o rtsMother.o shmLib.o rtsCfgLi
 
 #the preferred reader
 DAQREADER_OBJS := msgNQLib.o daqReader.o cfgutil.o daq_det.o daq_dta.o
-DAQREADER_OBJS += daq_tpx.o tpxCore.o tpxFCF.o tpxGain.o tpxPed.o tpxStat.o
+DAQREADER_OBJS += daq_tpx.o tpxCore.o tpxFCF.o tpxGain.o tpxPed.o tpxStat.o tpxFCF_2D.o
 DAQREADER_OBJS += daq_tpc.o tpc_FCFReader.o tpc_reader.o
 DAQREADER_OBJS += fcfAfterburner.o fcfClass.o
 DAQREADER_OBJS += daq_l3.o l3_reader.o 
