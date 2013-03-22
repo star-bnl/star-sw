@@ -863,14 +863,14 @@ ComponentCST::WeightingField(
   jac->InvertFast();
   // Field calculation
   TMatrixD E(3,1);
-  E = (nodes[elements[imap].emap[0]].v * (*jac) * (*dN.at(0)) +
-      nodes[elements[imap].emap[1]].v * (*jac) * (*dN.at(1)) +
-      nodes[elements[imap].emap[2]].v * (*jac) * (*dN.at(2)) +
-      nodes[elements[imap].emap[3]].v * (*jac) * (*dN.at(3)) +
-      nodes[elements[imap].emap[4]].v * (*jac) * (*dN.at(4)) +
-      nodes[elements[imap].emap[5]].v * (*jac) * (*dN.at(5)) +
-      nodes[elements[imap].emap[6]].v * (*jac) * (*dN.at(6)) +
-      nodes[elements[imap].emap[7]].v * (*jac) * (*dN.at(7)));
+  E = (nodes[elements[imap].emap[0]].w[iw] * (*jac) * (*dN.at(0)) +
+      nodes[elements[imap].emap[1]].w[iw] * (*jac) * (*dN.at(1)) +
+      nodes[elements[imap].emap[2]].w[iw] * (*jac) * (*dN.at(2)) +
+      nodes[elements[imap].emap[3]].w[iw] * (*jac) * (*dN.at(3)) +
+      nodes[elements[imap].emap[4]].w[iw] * (*jac) * (*dN.at(4)) +
+      nodes[elements[imap].emap[5]].w[iw] * (*jac) * (*dN.at(5)) +
+      nodes[elements[imap].emap[6]].w[iw] * (*jac) * (*dN.at(6)) +
+      nodes[elements[imap].emap[7]].w[iw] * (*jac) * (*dN.at(7)));
 
   wx = E(0,0);
   wy = E(1,0);
