@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.4 2013/01/18 15:03:37 fisyak Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.5 2013/03/22 23:29:15 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -24,7 +24,7 @@
 //________________________________________________________________________________
 ClassImp(StTrack2FastDetectorMatcher);
 //________________________________________________________________________________
-StTrack2FastDetectorMatcher::StTrack2FastDetectorMatcher() : mMinZBtof(-3.0), mMaxZBtof(3.0), mMinAdcBemc(5), mMinAdcEemc(5),  
+StTrack2FastDetectorMatcher::StTrack2FastDetectorMatcher() : mTotEve(0), mMinZBtof(-3.0), mMaxZBtof(3.0), mMinAdcBemc(5), mMinAdcEemc(5),  
 							     isMC(kFALSE),
 							     btofList(0), 
 							     ctbList(0), 
@@ -304,6 +304,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.5  2013/03/22 23:29:15  genevb
+ * Initialize mTotEve to zero
+ *
  * Revision 2.4  2013/01/18 15:03:37  fisyak
  * Fix TrackData data name clash with StiPPVertexFinder
  *
