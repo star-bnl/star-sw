@@ -1382,8 +1382,16 @@ Bfc_st BFC[] = {
    ,                                                                               "BTOF hit maker",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker"   ,"StVpdCalibMaker","VPD calibration",kFALSE},
   // MTD related chains
-  {"mtdDat"   ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
+  {"mtd"      ,"MtdChain","","mtdDat,mtdMatch","StMaker",                     "StChain","MTD Chain",kFALSE},
+  //{"mtdDat"   ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
+  // ,                                                                                "MTD hit maker",kFALSE},
+  {"mtdDat"   ,"mtd_raw","MtdChain","db","StMtdHitMaker","StEvent,StMtdHitMaker"
    ,                                                                                "MTD hit maker",kFALSE},
+  {"mtdMatch" ,"","","db,MtdUtil","StMtdMatchMaker","StMtdMatchMaker"     ,"TPC-MTD track matching",kFALSE},
+
+
+
+
   // Time Of Flight related options
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
   {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
