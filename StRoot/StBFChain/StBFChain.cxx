@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.598 2013/03/13 21:34:09 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.599 2013/03/24 19:55:03 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -165,12 +165,14 @@ Int_t StBFChain::Load()
 	    iok = gSystem->Load(libL);
 	    if (iok < 0)  {
 
-	      LOG_QA  << "problem with loading of " << libL.Data() << endm;
-	      LOG_QA  <<  fBFC[i].Key << " is switched off \t!!!!" << endm;
+	      LOG_FATAL  << "problem with loading of " << libL.Data() << endm;
+	      LOG_FATAL  <<  fBFC[i].Key << " is switched off \t!!!!" << endm;
 
-	      fBFC[i].Flag = kFALSE;
-	      status = kStErr;
-	      assert(iok >= 0);
+	      //fBFC[i].Flag = kFALSE;
+	      //status = kStErr;
+	      //assert(iok >= 0); ?? obviously it is so, but not very specific
+	      Int_t libraryload = kStErr;
+	      assert(libraryload!=kStErr); // this is obvious and will display an explicit
 	      break;
 	    } else {
 	      if (Debug() > 1) {  TString ts("load "); ts += libL; StMemStat::PrintMem(ts.Data());}
