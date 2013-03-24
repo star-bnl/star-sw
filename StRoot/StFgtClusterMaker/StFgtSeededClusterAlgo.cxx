@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.29 2013/03/15 15:53:49 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.30 2013/03/24 20:25:24 jeromel Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.30  2013/03/24 20:25:24  jeromel
+//  SeededClusterAlgo created a canvas on exit, removed
+//
 //  Revision 1.29  2013/03/15 15:53:49  avossen
 //  check seed before overwriting w/ next to cluster flag
 //
@@ -106,7 +109,7 @@
 #include "TStyle.h"
 #include "StFgtSeededClusterAlgo.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
-#include <TCanvas.h>
+//#include <TCanvas.h>
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtStripCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
@@ -678,7 +681,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
 
 Int_t StFgtSeededClusterAlgo::Finish()
 {
-  TCanvas c;
+  //TCanvas c;
   hGaussFitStatus->Write();
   hGaussFitChi2->Write();
   hTbFitStatus->Write();
