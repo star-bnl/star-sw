@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.25 2012/04/27 00:15:48 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.26 2013/03/25 23:09:50 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -705,8 +705,8 @@ static int 	nTest=0,nFail=0,detId=0;
   hp = hpMap;
   if (hpMap==0 || nTest < kMaxTest) { 
      nTest++;
-     int sure = 0;
-     hpGeo = FindHitPlane(xyz,sure);
+     fGoodHit = 0;
+     hpGeo = FindHitPlane(xyz,fGoodHit);
      if (!hpGeo) {
        double pnt[3]={xyz[0],xyz[1],xyz[2]};
        gGeoManager->SetCurrentPoint(pnt);
@@ -721,7 +721,7 @@ static int 	nTest=0,nFail=0,detId=0;
               ,pnt[0],pnt[1],pnt[2],hpMap->GetName(),hpGeo->GetName());
        assert(nFail<=kMaxFail);
      }
-     if (sure) (*fHitPlaneHardMap)[hardw]=hp;
+     if (fGoodHit) (*fHitPlaneHardMap)[hardw]=hp;
   }
   if (hp->GetDetId() != detId) { // New detector started
     nTest=0; nFail=0; detId = hp->GetDetId();
@@ -745,33 +745,59 @@ StHitPlane *StTGeoHelper::FindHitPlane(const float xyz[3],int &sure)
 {
 // cos(a+b) = cos(a)*cos(b) - sin(a)*sin(b)
 // sin(a+b) = cos(a)*sin(b) + sin(a)*cos(b)
-static const float dirs[26][3] = {
-{ 1.0000,        0.0000,         0.0000}, 
-{-1.0000,        0.0000,         0.0000}, 
-{-0.5774,       -0.5774,        -0.5774}, 
-{-0.7071,       -0.7071,         0.0000}, 
-{-0.5774,       -0.5774,         0.5774}, 
-{-0.7071,        0.0000,        -0.7071}, 
-{-0.7071,        0.0000,         0.7071}, 
-{-0.5774,        0.5774,        -0.5774}, 
-{-0.7071,        0.7071,         0.0000}, 
-{-0.5774,        0.5774,         0.5774}, 
-{ 0.0000,       -0.7071,        -0.7071}, 
-{ 0.0000,       -1.0000,         0.0000}, 
-{ 0.0000,       -0.7071,         0.7071}, 
-{ 0.0000,        0.0000,        -1.0000}, 
-{ 0.0000,        0.0000,         1.0000}, 
-{ 0.0000,        0.7071,        -0.7071}, 
-{ 0.0000,        1.0000,         0.0000}, 
-{ 0.0000,        0.7071,         0.7071}, 
-{ 0.5774,       -0.5774,        -0.5774}, 
-{ 0.7071,       -0.7071,         0.0000}, 
-{ 0.5774,       -0.5774,         0.5774}, 
-{ 0.7071,        0.0000,        -0.7071}, 
-{ 0.7071,        0.0000,         0.7071}, 
-{ 0.5774,        0.5774,        -0.5774}, 
-{ 0.7071,        0.7071,         0.0000}, 
-{ 0.5774,        0.5774,         0.5774}};
+static const float dirs[][3] =  {
+{ 0.0000,        0.0000,         1.0000 },      // 1
+{ 0.5000,        0.0000,         0.8660 },      // 2
+{ 0.2500,        0.4330,         0.8660 },      // 3
+{-0.2500,        0.4330,         0.8660 },      // 4
+{-0.5000,        0.0000,         0.8660 },      // 5
+{-0.2500,       -0.4330,         0.8660 },      // 6
+{ 0.2500,       -0.4330,         0.8660 },      // 7
+{ 0.8660,        0.0000,         0.5000 },      // 8
+{ 0.7344,        0.4589,         0.5000 },      // 9
+{ 0.3796,        0.7784,         0.5000 },      //10
+{-0.0905,        0.8613,         0.5000 },      //11
+{-0.5332,        0.6824,         0.5000 },      //12
+{-0.8138,        0.2962,         0.5000 },      //13
+{-0.8471,       -0.1801,         0.5000 },      //14
+{-0.6230,       -0.6016,         0.5000 },      //15
+{-0.2095,       -0.8403,         0.5000 },      //16
+{ 0.2676,       -0.8236,         0.5000 },      //17
+{ 0.6634,       -0.5567,         0.5000 },      //18
+{ 0.8576,       -0.1205,         0.5000 },      //19
+{ 1.0000,        0.0000,         0.0000 },      //20
+{ 0.8660,        0.5000,         0.0000 },      //21
+{ 0.5000,        0.8660,         0.0000 },      //22
+{ 0.0000,        1.0000,         0.0000 },      //23
+{-0.5000,        0.8660,         0.0000 },      //24
+{-0.8660,        0.5000,         0.0000 },      //25
+{-1.0000,        0.0000,         0.0000 },      //26
+{-0.8660,       -0.5000,         0.0000 },      //27
+{-0.5000,       -0.8660,         0.0000 },      //28
+{-0.0000,       -1.0000,         0.0000 },      //29
+{ 0.5000,       -0.8660,         0.0000 },      //30
+{ 0.8660,       -0.5000,         0.0000 },      //31
+{ 0.8660,        0.0000,        -0.5000 },      //32
+{ 0.7344,        0.4589,        -0.5000 },      //33
+{ 0.3796,        0.7784,        -0.5000 },      //34
+{-0.0905,        0.8613,        -0.5000 },      //35
+{-0.5332,        0.6824,        -0.5000 },      //36
+{-0.8138,        0.2962,        -0.5000 },      //37
+{-0.8471,       -0.1801,        -0.5000 },      //38
+{-0.6230,       -0.6016,        -0.5000 },      //39
+{-0.2095,       -0.8403,        -0.5000 },      //40
+{ 0.2676,       -0.8236,        -0.5000 },      //41
+{ 0.6634,       -0.5567,        -0.5000 },      //42
+{ 0.8576,       -0.1205,        -0.5000 },      //43
+{ 0.5000,        0.0000,        -0.8660 },      //44
+{ 0.2500,        0.4330,        -0.8660 },      //45
+{-0.2500,        0.4330,        -0.8660 },      //46
+{-0.5000,        0.0000,        -0.8660 },      //47
+{-0.2500,       -0.4330,        -0.8660 },      //48
+{ 0.2500,       -0.4330,        -0.8660 },      //49
+{ 0.0000,        0.0000,        -1.0000 }};     //50
+
+enum {kNDIRS = sizeof(dirs)/(3*sizeof(**dirs))}; 
 
 static int nCall=0; nCall++;
   double pnt[3]={xyz[0],xyz[1],xyz[2]};
@@ -785,9 +811,9 @@ static int nCall=0; nCall++;
   double Rxy = sqrt(pnt[0]*pnt[0]+pnt[1]*pnt[1]);
   double myCos= pnt[0]/Rxy,mySin=pnt[1]/Rxy;
   double myDir[3],myPnt[3];
-  double minDist=10;
+  double minDist=(fabs(xyz[0])+fabs(xyz[1]))/10+5;
   StHitPlane *minHitPlane=0;
-  for (int idir=0;idir<26; idir++) {
+  for (int idir=0;idir<kNDIRS; idir++) {
     gGeoManager->SetCurrentPoint(pnt);
     node = gGeoManager->FindNode();
     myDir[0] = dirs[idir][0]*myCos - dirs[idir][1]*mySin; 
@@ -1384,36 +1410,29 @@ int StActiveFunctor::GetIPath(int nLev,int *copyNums,const char **voluNams) cons
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 #if 0
-StTGeoPath::StTGeoPath(const int *path)
+// generate dirs for FindHitPlane
 {
-  mPath = new int[path[0]+2];
-  for (int j=0;j<path[0]+2;j++) {mPath[j]=path[j];}
-}
-
-//_____________________________________________________________________________
-StTGeoPath::StTGeoPath(const StTGeoPath &fr)
-{
-  mPath = new int[fr.mPath[0]+2];
-  for (int j=0;j<fr.mPath[0]+2;j++) {mPath[j]=fr.mPath[j];}
-}
-
-//_____________________________________________________________________________
-bool StTGeoPath::operator<(const StTGeoPath &other) const
-{
-   if (mPath[0]!=other.mPath[0])
-     return (mPath[0]<other.mPath[0])? true:false;
-   for (int j= mPath[0]+1;j>0;j--) {
-     if (mPath[j]==other.mPath[j]) continue;
-     return (mPath[j]<other.mPath[j])? true:false;
-   }
-   return false;
-}
-
-//_____________________________________________________________________________
-void StTGeoPath::Print() const
-{
-  for (int i=0;i<=mPath[0];i++) {printf("%d\t ",mPath[i]);}
-  printf("\n");
+  double PI = 3.14159265358;
+  double toRad = PI/180;
+  int lamStep = 30;
+  int num=0;  
+  for (int lam=0;lam<=180;lam+=lamStep) {
+    double cosL = cos(toRad*lam);
+    double sinL = sin(toRad*lam);
+    double rad=sinL;
+    int nPhi = (sinL*360+lamStep-1)/lamStep;
+    if (!nPhi) nPhi = 1;
+    int phiStep=360./nPhi;
+    
+    for (int phi=0;phi<360;phi+=phiStep) {
+      double cosP = cos(toRad*phi);
+      double sinP = sin(toRad*phi);
+      double dir[3]={sinL*cosP,sinL*sinP,cosL};
+      num++;
+      printf("{%7.4f,\t%7.4f,\t%7.4f\t},\t//%2d\n",dir[0],dir[1],dir[2],num);
+    }
+  
+  }
 }
 #endif
 
