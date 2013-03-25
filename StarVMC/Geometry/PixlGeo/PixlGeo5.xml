@@ -1297,7 +1297,7 @@
     <Attribute for="PXSI" seen="1" colo="594"/>
     <Shape type="BOX" dz="1.0125" dx="1.137" dy="0.0025"/>
     <Create block="PLAC"/>
-    <Placement block="PLAC" x="-0.1533" z="0.0" y="0" in="PXSI" konly="'MANY'"/>
+    <Placement block="PLAC" x="-0.1533" z="0.0" y="0" in="PXSI" />
     </Volume>
 
     <Volume name="PLAC" comment="active silicon top sector"  >
