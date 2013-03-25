@@ -153,7 +153,7 @@ public:
     Float_t  vz() const {return _vz;}
     Float_t  vy() const {return _vy;}
     friend ostream& operator<<(ostream& os, const StiHit& h);
-private:
+protected:
     char  mBeg[1];
     unsigned char mTimesUsed;
     Float_t mrefangle;
