@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.35 2012/04/19 16:22:51 perev Exp $
+ * $Id: StMcEvent.cc,v 2.36 2013/03/25 23:26:39 perev Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.36  2013/03/25 23:26:39  perev
+ * Mustafa.Pxl corrs+Cleanup
+ *
  * Revision 2.35  2012/04/19 16:22:51  perev
  * Cleanup
  *
@@ -148,7 +151,7 @@
 #include "StMcTofHitCollection.hh"
 #include "StMcBTofHitCollection.hh"
 #include "StMcMtdHitCollection.hh"
-#include "StMcPixelHitCollection.hh"
+#include "StMcPxlHitCollection.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcFgtHitCollection.hh"
 #include "StMcEtrHitCollection.hh"
@@ -164,7 +167,7 @@
 #include "StMcTofHit.hh"
 #include "StMcBTofHit.hh"
 #include "StMcMtdHit.hh"
-#include "StMcPixelHit.hh"
+#include "StMcPxlHit.hh"
 #include "StMcIstHit.hh"
 #include "StMcFgtHit.hh"
 #include "StMcEtrHit.hh"
@@ -172,8 +175,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.35 2012/04/19 16:22:51 perev Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.35 2012/04/19 16:22:51 perev Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.36 2013/03/25 23:26:39 perev Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.36 2013/03/25 23:26:39 perev Exp $";
 ClassImp(StMcEvent);
 //______________________________________________________________________________
 void StMcEvent::initToZero()
@@ -194,7 +197,7 @@ void StMcEvent::makeColls()
     mTofHits  = new StMcTofHitCollection();
     mBTofHits = new StMcBTofHitCollection();
     mMtdHits  = new StMcMtdHitCollection();
-    mPixelHits = new StMcPixelHitCollection();
+    mPxlHits  = new StMcPxlHitCollection();
     mIstHits  = new StMcIstHitCollection();
     mFgtHits  = new StMcFgtHitCollection();
     mEtrHits  = new StMcEtrHitCollection();
@@ -346,124 +349,66 @@ void StMcEvent::setPrimaryVertex(StMcVertex* val) {  mPrimaryVertex = val; }
 //______________________________________________________________________________
 void StMcEvent::setTpcHitCollection(StMcTpcHitCollection* val)
 {   
-    if (mTpcHits && mTpcHits!= val) delete mTpcHits;
+    if (mTpcHits!= val) delete mTpcHits;
     mTpcHits = val;
 }               
 
 //______________________________________________________________________________
 void StMcEvent::setSvtHitCollection(StMcSvtHitCollection* val)
 {
-    if (mSvtHits && mSvtHits!= val) delete mSvtHits;
+    if (mSvtHits!= val) delete mSvtHits;
     mSvtHits = val;
 }               
 
 //______________________________________________________________________________
 void StMcEvent::setSsdHitCollection(StMcSsdHitCollection* val)
 {
-    if (mSsdHits && mSsdHits!= val) delete mSsdHits;
+    if (mSsdHits!= val) delete mSsdHits;
     mSsdHits = val;
 }               
 
 //______________________________________________________________________________
 void StMcEvent::setFtpcHitCollection(StMcFtpcHitCollection* val)
 {
-    if (mFtpcHits && mFtpcHits!= val) delete mFtpcHits;
+    if (mFtpcHits!= val) delete mFtpcHits;
     mFtpcHits = val;
 }              
 
 //______________________________________________________________________________
 void StMcEvent::setRichHitCollection(StMcRichHitCollection* val)
 {
-    if (mRichHits && mRichHits!= val) delete mRichHits;
+    if (mRichHits!= val) delete mRichHits;
     mRichHits = val;
 }              
-#if 0
-//______________________________________________________________________________
-void StMcEvent::setBemcHitCollection(StMcEmcHitCollection* val)
-{
-    if (mBemcHits && mBemcHits!= val) delete mBemcHits;
-    mBemcHits = val;
-}              
-
-//______________________________________________________________________________
-void StMcEvent::setBprsHitCollection(StMcEmcHitCollection* val)
-{
-    if (mBprsHits && mBprsHits!= val) delete mBprsHits;
-    mBprsHits = val;
-}              
-
-//______________________________________________________________________________
-void StMcEvent::setBsmdeHitCollection(StMcEmcHitCollection* val)
-{
-    if (mBsmdeHits && mBsmdeHits!= val) delete mBsmdeHits;
-    mBsmdeHits = val;
-}              
-
-//______________________________________________________________________________
-void StMcEvent::setBsmdpHitCollection(StMcEmcHitCollection* val)
-{
-    if (mBsmdpHits && mBsmdpHits!= val) delete mBsmdpHits;
-    mBsmdpHits = val;
-}              
-#endif
 //______________________________________________________________________________
 void StMcEvent::setTofHitCollection(StMcTofHitCollection* val)
 {
-    if (mTofHits && mTofHits!= val) delete mTofHits;
+    if (mTofHits!= val) delete mTofHits;
     mTofHits = val;
 }
 //______________________________________________________________________________
 void StMcEvent::setBTofHitCollection(StMcBTofHitCollection* val)
 {
-    if (mBTofHits && mBTofHits!= val) delete mBTofHits;
+    if (mBTofHits!= val) delete mBTofHits;
     mBTofHits = val;
 }
 //______________________________________________________________________________
 void StMcEvent::setMtdHitCollection(StMcMtdHitCollection* val)
 {
-    if (mMtdHits && mMtdHits!= val) delete mMtdHits;
+    if (mMtdHits!= val) delete mMtdHits;
     mMtdHits = val;
 }
-#if 0
 //______________________________________________________________________________
-void StMcEvent::setEemcHitCollection(StMcEmcHitCollection* val)
+void StMcEvent::setPxlHitCollection(StMcPxlHitCollection* val)
 {
-    if (mEemcHits && mEemcHits!= val) delete mEemcHits;
-    mEemcHits = val;
-}
-
-//______________________________________________________________________________
-void StMcEvent::setEprsHitCollection(StMcEmcHitCollection* val)
-{
-    if (mEprsHits && mEprsHits!= val) delete mEprsHits;
-    mEprsHits = val;
-}
-
-//______________________________________________________________________________
-void StMcEvent::setEsmduHitCollection(StMcEmcHitCollection* val)
-{
-    if (mEsmduHits && mEsmduHits!= val) delete mEsmduHits;
-    mEsmduHits = val;
-}
-
-//______________________________________________________________________________
-void StMcEvent::setEsmdvHitCollection(StMcEmcHitCollection* val)
-{
-    if (mEsmdvHits && mEsmdvHits!= val) delete mEsmdvHits;
-    mEsmdvHits = val;
-}
-#endif
-//______________________________________________________________________________
-void StMcEvent::setPixelHitCollection(StMcPixelHitCollection* val)
-{
-    if (mPixelHits && mPixelHits!= val) delete mPixelHits;
-    mPixelHits = val;
+    if (mPxlHits!= val) delete mPxlHits;
+    mPxlHits = val;
 }   
 
 //______________________________________________________________________________
 void StMcEvent::setIstHitCollection(StMcIstHitCollection* val)
 {
-    if (mIstHits && mIstHits!= val) delete mIstHits;
+    if (mIstHits!= val) delete mIstHits;
     mIstHits = val;
 }
    
@@ -471,7 +416,7 @@ void StMcEvent::setIstHitCollection(StMcIstHitCollection* val)
 //______________________________________________________________________________
 void StMcEvent::setFgtHitCollection(StMcFgtHitCollection* val)
 {
-    if (mFgtHits && mFgtHits!= val) delete mFgtHits;
+    if (mFgtHits!= val) delete mFgtHits;
     mFgtHits = val;
 }
 //______________________________________________________________________________
@@ -693,7 +638,7 @@ void StMcEvent::Print(Option_t *option) const {
   PrintHitCollection(Tof,tof);
   PrintHitCollection(BTof,btof);
   PrintHitCollection(Mtd,mtd);
-  PrintHitCollectionL(Pixel,pixel,layer,Layers);
+  //PrintHitCollectionL(Pxl,pxl,sector,Sectors);
   PrintHitCollectionL(Ist,ist,layer,Layers);
   PrintHitCollectionL(Fgt,fgt,layer,Layers);
   PrintHitCollection(Etr,etr);
