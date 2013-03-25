@@ -942,18 +942,18 @@ ComponentCST::WeightingPotential(
                 << " " <<  nodes[elements[imap].emap[i]].x
                 << " " <<  nodes[elements[imap].emap[i]].y
                 << " " <<  nodes[elements[imap].emap[i]].z
-                << " " <<  nodes[elements[imap].emap[i]].v << "" << std::endl;
+                << " " <<  nodes[elements[imap].emap[i]].w[iw] << "" << std::endl;
     }
   }
 
-  return (nodes[elements[imap].emap[0]].v * (1 - t1) * (1 - t2) * (1 - t3) +
-      nodes[elements[imap].emap[1]].v * (1 + t1) * (1 - t2) * (1 - t3) +
-      nodes[elements[imap].emap[2]].v * (1 + t1) * (1 + t2) * (1 - t3) +
-      nodes[elements[imap].emap[3]].v * (1 - t1) * (1 + t2) * (1 - t3) +
-      nodes[elements[imap].emap[4]].v * (1 - t1) * (1 - t2) * (1 + t3) +
-      nodes[elements[imap].emap[5]].v * (1 + t1) * (1 - t2) * (1 + t3) +
-      nodes[elements[imap].emap[6]].v * (1 + t1) * (1 + t2) * (1 + t3) +
-      nodes[elements[imap].emap[7]].v * (1 - t1) * (1 + t2) * (1 + t3)) / 8.;
+  return (nodes[elements[imap].emap[0]].w[iw] * (1 - t1) * (1 - t2) * (1 - t3) +
+      nodes[elements[imap].emap[1]].w[iw] * (1 + t1) * (1 - t2) * (1 - t3) +
+      nodes[elements[imap].emap[2]].w[iw] * (1 + t1) * (1 + t2) * (1 - t3) +
+      nodes[elements[imap].emap[3]].w[iw] * (1 - t1) * (1 + t2) * (1 - t3) +
+      nodes[elements[imap].emap[4]].w[iw] * (1 - t1) * (1 - t2) * (1 + t3) +
+      nodes[elements[imap].emap[5]].w[iw] * (1 + t1) * (1 - t2) * (1 + t3) +
+      nodes[elements[imap].emap[6]].w[iw] * (1 + t1) * (1 + t2) * (1 + t3) +
+      nodes[elements[imap].emap[7]].w[iw] * (1 - t1) * (1 + t2) * (1 + t3)) / 8.;
 
 }
 
