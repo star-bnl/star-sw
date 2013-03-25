@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.15 2012/03/22 00:38:52 perev Exp $
+ * $Id: StMcEventTypes.hh,v 2.16 2013/03/25 23:28:11 perev Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.16  2013/03/25 23:28:11  perev
+ * Mustafa.Pxl corrs
+ *
  * Revision 2.15  2012/03/22 00:38:52  perev
  * Etr added
  *
@@ -99,9 +102,9 @@
 #include "StMcBTofHitCollection.hh"
 #include "StMcMtdHit.hh"
 #include "StMcMtdHitCollection.hh"
-#include "StMcPixelHit.hh"
-#include "StMcPixelHitCollection.hh"
-#include "StMcPixelLayerHitCollection.hh"
+#include "StMcPxlHit.hh"
+#include "StMcPxlHitCollection.hh"
+#include "StMcPxlSectorHitCollection.hh"
 #include "StMcIstHit.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcIstLayerHitCollection.hh"
