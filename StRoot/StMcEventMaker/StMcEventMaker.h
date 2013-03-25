@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.26 2012/03/22 01:10:13 perev Exp $
+ * $Id: StMcEventMaker.h,v 1.27 2013/03/25 23:51:22 perev Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.27  2013/03/25 23:51:22  perev
+ * Mustafa.Pxl corrs
+ *
  * Revision 1.26  2012/03/22 01:10:13  perev
  * Etr add
  *
@@ -118,7 +121,7 @@ public:
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.26 2012/03/22 01:10:13 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.27 2013/03/25 23:51:22 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -139,7 +142,7 @@ public:
     Bool_t  doUseEemc;             //!
     Bool_t  doUseFpd;		   //!
     Bool_t  doUseFsc;		   //!
-    Bool_t  doUsePixel;            //!
+    Bool_t  doUsePxl;            //!
     Bool_t  doUseIst;              //!
     Bool_t  doUseFgt;              //!
     Bool_t  doUseEtr;              //!
