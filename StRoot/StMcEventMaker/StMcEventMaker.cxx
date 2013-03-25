@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.77 2012/07/21 18:45:09 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.78 2013/03/25 23:51:19 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.78  2013/03/25 23:51:19  perev
+ * Mustafa.Pxl corrs
+ *
  * Revision 1.77  2012/07/21 18:45:09  perev
  * Cleanup
  *
@@ -327,7 +330,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.77 2012/07/21 18:45:09 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.78 2013/03/25 23:51:19 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -371,7 +374,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseEemc        (kTRUE),
     doUseFpd         (kTRUE),
     doUseFsc         (kTRUE),
-    doUsePixel       (kTRUE),
+    doUsePxl       (kTRUE),
     doUseIst         (kTRUE),
     doUseFgt         (kTRUE),
     doUseEtr         (kTRUE),
@@ -671,7 +674,7 @@ Int_t StMcEventMaker::Make()
 	  if (Debug()) cout << "Table g2t_fsc_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//	
-	// Pixel Hit Table
+	// Pxl Hit Table
 	//
 	g2t_pix_hit_st *pixHitTable=0;
 	if (g2t_pix_hitTablePointer)
@@ -1263,7 +1266,7 @@ Int_t StMcEventMaker::Make()
 	AddHits(tof,tof,Tof);
 	AddHits(tfr,tof,Tof);
 	AddHits(mtd,mtd,Mtd);
-	AddHits(pix,pixel,Pixel);
+	AddHits(pix,pxl,Pxl);
 	AddHits(ist,ist,Ist);
 	AddHits(fgt,fgt,Fgt);
 	AddHits(etr,etr,Etr);
