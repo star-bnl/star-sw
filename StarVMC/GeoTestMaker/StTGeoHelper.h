@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.21 2012/04/27 00:14:25 perev Exp $
+// $Id: StTGeoHelper.h,v 1.22 2013/03/25 23:08:42 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -241,6 +241,7 @@ const TGeoVolume *FindModule(const char *patt);
          StVoluInfo *IsModule  (const TGeoNode   *node)        const;
          StVoluInfo *IsMODULE  (const TGeoVolume *volu)        const;
          StVoluInfo *IsActive  (const TGeoVolume *volu=0)      const;                  
+         int  IsGoodHit ()  const 	{return fGoodHit;}
          int  IsActive  (StDetectorId did)              const;
          int  IsHitted  (const double X[3])             const;
 static   int  IsSensitive(const TGeoVolume *volu=0);
@@ -283,6 +284,7 @@ private:
 char fBeg[1];
 int fMode;      //0=fill infos + hitShape, 1= hit planes
 int fOpt;      //0=Optimisation Off, !=0= Optimization ON
+int fGoodHit;  //1=last loaded hit inside of sensitive volume
 Long64_t	fActiveModu;
 TObjArray      *fVoluInfoArr;           // array of all StVoluIinfo
 TObjArray      *fHitPlaneArr;           // array of StHitPlane's
