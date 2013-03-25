@@ -5,8 +5,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcHitIter.cxx,v 2.1 2012/03/22 01:08:05 perev Exp $
+ * $Id: StMcHitIter.cxx,v 2.2 2013/03/25 23:28:51 perev Exp $
  * $Log: StMcHitIter.cxx,v $
+ * Revision 2.2  2013/03/25 23:28:51  perev
+ * Mustafa.Pxl corrs
+ *
  * Revision 2.1  2012/03/22 01:08:05  perev
  * McHitIter added
  *
@@ -25,7 +28,7 @@
 #include "StMcTofHitCollection.hh"
 #include "StMcBTofHitCollection.hh"
 #include "StMcMtdHitCollection.hh"
-#include "StMcPixelHitCollection.hh"
+#include "StMcPxlHitCollection.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcFgtHitCollection.hh"
 #include "StMcEtrHitCollection.hh"
@@ -45,7 +48,7 @@ int Init(int *myOffset,int *myDetId) {
   myOffset[n]= (char*)&mTofHits  -(char*)this; myDetId[n] = 0;		n++;
   myOffset[n]= (char*)&mBTofHits -(char*)this; myDetId[n] = kTofId;	n++;
   myOffset[n]= (char*)&mMtdHits  -(char*)this; myDetId[n] = kMtdId;	n++;
-  myOffset[n]= (char*)&mPixelHits-(char*)this; myDetId[n] = kPxlId;	n++;
+  myOffset[n]= (char*)&mPxlHits  -(char*)this; myDetId[n] = kPxlId;	n++;
   myOffset[n]= (char*)&mIstHits  -(char*)this; myDetId[n] = kIstId;	n++;
   myOffset[n]= (char*)&mFgtHits  -(char*)this; myDetId[n] = kFgtId;	n++;
   myOffset[n]= (char*)&mEtrHits  -(char*)this; myDetId[n] = kEtrId;	n++;
