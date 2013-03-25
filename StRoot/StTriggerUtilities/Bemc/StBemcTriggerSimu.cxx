@@ -296,7 +296,12 @@ void StBemcTriggerSimu::InitRun(int runnumber){
     HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
   }
   else {
-    FEEini2009(runnumber);
+    if (mBemcStatus != "") {
+      FEEini2009();
+    }
+    else {
+      FEEini2009(runnumber);
+    }
     mAllTriggers.clear();
   }
 }
@@ -763,6 +768,63 @@ void StBemcTriggerSimu::GetTriggerPatchFromCrate(int crate, int seq, int& trigge
 {
   triggerPatch = (340-10*crate)%150+seq;
   if (crate <= 15) triggerPatch += 150;
+}
+
+void StBemcTriggerSimu::FEEini2009()
+{
+  const bool debug = false;
+
+  fill(numMaskTow,numMaskTow+kNPatches,0);
+
+  ifstream bemcStatus(mBemcStatus);
+
+  assert(bemcStatus);
+
+  LOG_INFO << mBemcStatus << endm;
+
+  TString line;
+
+  while (line.ReadLine(bemcStatus)) {
+    if (line.BeginsWith("#")) {
+      LOG_INFO << line << endm;
+      continue;
+    }
+    else if (line.BeginsWith("SoftId")) {
+      int towerId, crate, crateSeq, towerStatus, highTowerStatus, patchSumStatus, triggerPatch;
+      float pedestal;
+      sscanf(line,"SoftId %d %d %d %d %d %d %f %d",&towerId,&crate,&crateSeq,&towerStatus,&highTowerStatus,&patchSumStatus,&pedestal,&triggerPatch);
+      LOG_INFO << "SoftId " << towerId << '\t' << crate << '\t' << crateSeq << '\t' << towerStatus << '\t' << highTowerStatus << '\t' << patchSumStatus << '\t' << pedestal << '\t' << triggerPatch << endm;
+      TriggerPatchFromTowerId[towerId-1] = triggerPatch;
+      TowerStatus[towerId-1] = towerStatus;
+      ped12[towerId-1] = pedestal;
+      if (towerStatus == 0) ++numMaskTow[triggerPatch];
+    }
+    else if (line.BeginsWith("TriggerPedestalShift")) {
+      sscanf(line,"TriggerPedestalShift %lu",&pedTargetValue);
+      LOG_INFO << "TriggerPedestalShift " << pedTargetValue << endm;
+    }
+    else if (line.BeginsWith("triggerPatch")) {
+      int triggerPatch, crate, cratePatch, highTowerStatus, patchSumStatus, bitConvMode, LUTformula;
+      int p0, p1, p2, p3, p4, p5;
+      sscanf(line,"triggerPatch %d %d %d %d %d %d %d %d %d %d %d %d %d",&triggerPatch,&crate,&cratePatch,&highTowerStatus,&patchSumStatus,&bitConvMode,&LUTformula,&p0,&p1,&p2,&p3,&p4,&p5);
+      LOG_INFO << "triggerPatch " << triggerPatch << '\t' << crate << '\t' << cratePatch << '\t' << highTowerStatus << '\t' << patchSumStatus << '\t' << bitConvMode << '\t' << LUTformula << '\t' << p0 << '\t' << p1 << '\t' << p2 << '\t' << p3 << '\t' << p4 << '\t' << p5 << endm;
+      TriggerPatchFromCrate[crate-1][cratePatch] = triggerPatch;
+      DSM_HTStatus[triggerPatch] = highTowerStatus;
+      DSM_TPStatus[triggerPatch] = patchSumStatus;
+      bitConvValue[triggerPatch] = bitConvMode;
+      formula[crate-1][cratePatch] = LUTformula;
+      LUTscale[crate-1][cratePatch] = p0;
+      LUTped  [crate-1][cratePatch] = p1;
+      LUTsig  [crate-1][cratePatch] = p2;
+      LUTpow  [crate-1][cratePatch] = p3;
+    }
+  }
+
+  bemcStatus.close();
+
+  for (int towerId = 1; towerId <= kNTowers; ++towerId) {
+    FEEped[towerId-1] = getFEEpedestal(ped12[towerId-1],pedTargetValue,debug);
+  }
 }
 
 void StBemcTriggerSimu::FEEini2009(int runNumber)
