@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.54 2013/03/24 16:08:28 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.55 2013/03/25 01:27:30 pibero Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -474,9 +474,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
   mysql_init(&mysql);
 
-  // Try backup and current online db
-  if (!mysql_real_connect(&mysql,host,user,pass,database,port,unix_socket,client_flag) &&
-      !mysql_real_connect(&mysql,"onldb.starp.bnl.gov",user,pass,database,3501,unix_socket,client_flag)) {
+  if (!mysql_real_connect(&mysql,host,user,pass,database,port,unix_socket,client_flag)) {
     LOG_WARN << "Can't connect to database: " << mysql_error(&mysql) << endm;
     return false;
   }
@@ -740,6 +738,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.55  2013/03/25 01:27:30  pibero
+ * Remove use of current online db
+ *
  * Revision 1.54  2013/03/24 16:08:28  pibero
  * Also check current online db
  *
