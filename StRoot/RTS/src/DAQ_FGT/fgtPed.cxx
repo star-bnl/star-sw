@@ -37,6 +37,8 @@ fgtPed::fgtPed()
 
 	rts_id = 0 ;
 
+	tb_cou_xpect = 6 ;
+
 	return ;
 }
 
@@ -83,6 +85,15 @@ void fgtPed::init(int active_rbs, int rts)
 
 	rts_id = rts ;
 
+	switch(rts_id) {
+	case FGT_ID :
+		tb_cou_xpect = 8 ;
+		break ;
+	case GMT_ID :
+		tb_cou_xpect = 15 ;
+		break ;
+	}
+
 	memset(ped_store,0,sizeof_ped) ;
 	err_counter = 0 ;
 
@@ -128,7 +139,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 
 			int tb_cou = meta->arc[rdo1].arm[arm].apv[apv].ntim ;
 
-			if(tb_cou != 15) {
+			if(tb_cou != tb_cou_xpect) {
 				if(err_counter < 100) {
 					LOG(WARN,"tb %2d: ARC %d, ARM %d, APV %d",tb_cou,rdo1,arm,apv) ;
 				}
@@ -202,7 +213,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 		arm = dd->sec ;
 		apv = dd->pad ;
 
-//		printf("ARC %d, ARM %d, APV %d: entries %d\n",
+//		printf("**** ARC %d, ARM %d, APV %d: entries %d\n",
 //		      arc,arm,apv,dd->ncontent) ;
 
 		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
@@ -219,8 +230,6 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 		*d16++ = 0xAB00 | arc ;
 		*d16++ = (arm << 8) | apv ;
 
-//		printf("*** ARC %d %d %d\n",arc,arm,apv) ;
-//		printf("*** ARM %d, APV %d\n",arm,apv) ;
 
 		for(u_int i=0;i<dd->ncontent;i++) {
 			int tb = f[i].tb ;
@@ -228,14 +237,15 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 			
 			if(tb==0) {
 				if(dump) {
-//					printf("*** dump CH %d in %d tb\n",ch,cou_tb) ;
+//					printf("*** dump ARC %d, ARM %d, APV %d, CH %d in %d tb\n",arc,arm,apv,ch,cou_tb) ;
+
 					*d16++ = (cou_tb << 8) | ch ;
 					dumped_cou++ ;
 
 					for(int i=0;i<cou_tb;i++) {
 
 						if(do_ped_sub) {
-							*d16++ = (short)((float)f[i_save+i].adc - p_thr->ped[arm][apv][ch][i] + 0.2);
+							*d16++ = (short)((float)f[i_save+i].adc - p_thr->ped[arm][apv][ch][i] + 0.5);	// had bug, was "+ 0.2"!
 						}
 						else {
 							*d16++ = f[i_save+i].adc ;
@@ -278,13 +288,22 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 
 		// last guy
 		if(dump) {
-//			printf("*** LAST dump CH %d in %d tb\n",ch,cou_tb) ;
+//			printf("*** LAST dump ARC %d, ARM %d, APV %d, CH %d in %d tb\n",arc,arm,apv,ch,cou_tb) ;
+
 			*d16++ = (cou_tb <<8) | ch  ;
 			dumped_cou++ ;
 
 			for(int i=0;i<cou_tb;i++) {
 
-				*d16++ = f[i_save+i].adc ;
+
+				if(do_ped_sub) {
+					*d16++ = (short)((float)f[i_save+i].adc - p_thr->ped[arm][apv][ch][i] + 0.5);	// had bug, was "+ 0.2"!
+				}
+				else {
+					*d16++ = f[i_save+i].adc ;
+				}
+
+				//*d16++ = f[i_save+i].adc ;
 
 //				printf("   *** ch %d: %d %d\n",
 //				       f[i_save+i].ch,
@@ -357,8 +376,8 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
 			if(meta->arc[rdo1].arm[arm].apv[apv].present == 0) continue ;
 
-
-			if(meta->arc[rdo1].arm[arm].apv[apv].ntim != 15) {
+			
+			if(meta->arc[rdo1].arm[arm].apv[apv].ntim != tb_cou_xpect) {
 				if(err_counter < 100) {
 					LOG(WARN,"evt %d: RDO %d, ARM %d, APV %d: ntim %d??",evts[rdo],rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].ntim) ;
 				}
@@ -487,7 +506,7 @@ void fgtPed::do_thresh(double ns, int k)
 
 		off_id += aa*128+c ;
 
-		printf("TH %d: %f %f %d\n",off_id,ped,rms,cou) ;
+		//printf("TH %d: %f %f %d\n",off_id,ped,rms,cou) ;
 		}
 		}
 		}

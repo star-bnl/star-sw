@@ -36,6 +36,8 @@ public:
 
 	int err_counter ;
 
+	int tb_cou_xpect ;
+
 //private:
 	// allocated per RDO
 
