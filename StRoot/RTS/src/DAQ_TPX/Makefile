@@ -23,7 +23,7 @@ ifeq ($(HOST_NAME),ettie.star.bnl.gov)
 endif
 
 
-DEFINES += -DDO_DBG
+//DEFINES += -DDO_DBG -DDO_SIMULATION
 
 OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxFCF_2D.o tpxStat.o daq_tpx.o
 
