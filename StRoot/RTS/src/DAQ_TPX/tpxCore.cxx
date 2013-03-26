@@ -239,7 +239,16 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 			rdo->type = DDL_TYPE_LOG ;
 		}
 		else {
-			if(do_log) LOG(ERR,"RDO %d:%d: Header type 0x%08X and trailer type 0x%08X mismatch",rdo->sector,rdo->rdo,hdr->type,trl->type) ;
+			if(do_log) {
+				LOG(ERR,"RDO %d:%d: Header type 0x%08X and trailer type 0x%08X mismatch",rdo->sector,rdo->rdo,hdr->type,trl->type) ;
+
+				u_int *d32 = (u_int *)(buff + 4*words) ;
+				d32 -= 5 ;
+
+				for(int i=0;i<10;i++) {
+					LOG(WARN,"%d: 0x%08X",i,d32[i]) ;
+				}
+			}
 			rdo->token = -EBADF ;
 			return rdo->token ;
 		}
@@ -580,7 +589,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
   // we bomb out here if there was any error
   if(ret) {
-	if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  header [1] %d",a->rdo+1,a->t,a->id,a->ch,ret) ;
+	if(log) LOG(WARN,"RDO %d: T %d: A %d:%d(?) hdr[%d]",a->rdo+1,a->t,a->id,a->ch,ret) ;
 	return 0 ;	// already error...
   }
 
@@ -655,19 +664,19 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   case 1 :
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 1:1") ;
-      ret = -1 ;
+      ret = -5 ;
     }
     p10++ ;
 
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 1:2: 0x%X %d",get10(h,p10),wc) ;
-      ret = -2 ;
+      ret = -6 ;
     }
     p10++ ;
 
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 1:3") ;
-      ret = -3 ;
+      ret = -7 ;
     }
     p10++ ;
 
@@ -676,13 +685,13 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   case 2 :
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 2:1") ;
-      ret = -4 ;
+      ret = -8 ;
     }
     p10++ ;
 
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 2:2") ;
-      ret = -5 ;
+      ret = -9 ;
     }
     p10++ ;
 
@@ -691,7 +700,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   case 3 :
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 3:1") ;
-      ret = -6 ;
+      ret = -10 ;
     }
     p10++ ;
 
@@ -717,12 +726,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 #endif
 
   if(ret) {
-	if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  header [2] %d",a->rdo+1,a->t,a->id,a->ch,ret) ;
-//	if(log) {
-//		for(int kk=0;kk<wc;kk++) {
-//			LOG(TERR,"%2d: 0x%08X",kk,h_start[-kk]) ;
-//		}
-//	}
+	if(log) LOG(WARN,"RDO %d: T %d: A %d:%d(?) hdr[%d]",a->rdo+1,a->t,a->id,a->ch,ret) ;
 	return 0 ;	// already error...
   }
 
@@ -739,7 +743,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   while(p10 < l10) {
 	int tb_cou = get10(h,p10++) ;
 	int tb_last = get10(h,p10++) ;
-
+	int tb_prev_last = tb_prev ;
 
 	tb_cou -= 2 ;	// tb_cou & tb_last are included in the count, get rid of them...
 
@@ -768,28 +772,28 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 		ret = -2 ;
 	}
 
-	
-	if(ret) {
-		if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?) data [1] %d",a->rdo+1,a->t,a->id,a->ch,ret) ;
-		return 0 ;
-	}
-
-
-
 
 	tb_all += tb_cou ;
 	if(tb_all >= 512) {
-		if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?) tb_all [1] %d",a->rdo+1,a->t,a->id,a->ch,tb_all) ;
-		return 0 ;
+		ret = -3 ;
+		//if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?) tb_all [1] %d",a->rdo+1,a->t,a->id,a->ch,tb_all) ;
 	}
 
 
+	
 	tb_prev = tb_last - tb_cou ;
 
 	if(tb_prev < -1) {
-		if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?) tb_prev [2] %d",a->rdo+1,a->t,a->id,a->ch,tb_prev) ;
+		ret = -4 ;
+		//if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?) tb_prev [2] %d",a->rdo+1,a->t,a->id,a->ch,tb_prev) ;
+	}
+	
+	if(ret) {
+		if(log) LOG(WARN,"RDO %d: T %d: A %d:%d(?) dta[%d]: pprev %d, prev %d, last %d, cou %d",a->rdo+1,a->t,a->id,a->ch,ret,
+			    tb_prev_last,tb_prev,tb_last,tb_cou) ;
 		return 0 ;
 	}
+
 
 	if(a->what & TPX_ALTRO_DO_ADC) {
 		for(;tb_last > tb_prev; tb_last--) {
@@ -956,8 +960,7 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 	    ) ;
 
 	for(int i=0;i<5;i++) {
-//		if(expected_usercode[i] != rdo->fpga_usercode[i]) {
-		if(rdo->fpga_usercode[i] != (u_int)(i+1)) {
+		if((expected_usercode[i] != rdo->fpga_usercode[i]) && (rdo->fpga_usercode[i] != (u_int)(i+1))) {
 			LOG(WARN,"msc: RDO %d: FPGA %d usercode is 0x%08X, expect 0x%08X!?",rdo->rdo,i,rdo->fpga_usercode[i],expected_usercode[i]) ;
 		}
 	}
