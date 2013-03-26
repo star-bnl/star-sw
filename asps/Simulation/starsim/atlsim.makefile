@@ -421,7 +421,8 @@ $(LNK_SPEC):
 #------------------------------ library -------------------------------------
 $(LIB_DIR)/$(NAME).$(SL): $(LIST_o) $(LIST_co) $(LIST_go)
 	$(LDS) $(LIB_DIR)/$(NAME).$(SL) $(LIST_o) $(LIST_co) $(LIST_go) \
-               $(inputL) $(LLIBS) $(inputl) $(inputlib) -L$(STAR_LIB) -lStarMagFieldNoDict
+               $(inputL) $(LLIBS) $(inputl) $(inputlib) 
+#-L$(STAR_LIB) -lStarMagFieldNoDict
 	@rm -f $(LIB_DIR)/tagsl*; touch $(LIB_DIR)/tagsl$(subst /,-,$(SOURCE))
 #------------------------- idm  conversion rules ----------------------------
 $(LIST_cc):  $(WRK_DIR)/%_i.cc: %.idl
