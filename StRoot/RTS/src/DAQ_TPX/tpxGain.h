@@ -96,7 +96,7 @@ public:
 	void add_sector(int sec1) {
 		int min_s, max_s ;
 
-		int bytes = sizeof(struct gains) * (TPX_MAX_PAD+1) * (row_max+1) ;
+//		int bytes = sizeof(struct gains) * (TPX_MAX_PAD+1) * (row_max+1) ;
 	
 		if(sec1 <= 0) {
 			min_s = 0 ;
