@@ -955,7 +955,7 @@ void bemcBuilder::initialize(int argc, char *argv[]) {
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
     LOG(DBG, "Adding plot %d: %s",i,plots[i]->GetPlotName());
-    plots[i]->optstat = 0;
+    plots[i]->optstat = 10;
     addPlot(plots[i]);
   }
 }
