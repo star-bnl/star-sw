@@ -402,6 +402,11 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 			}
 		}
 
+		if(cou) {
+			zs->finalize(cou,arm,arc,apv) ;
+
+		}
+
 		if(got_chs != dumped_chs) {
 			LOG(ERR,"Mismatch: got %d, expect %d",got_chs,dumped_chs) ;
 		}
