@@ -520,7 +520,7 @@ void BEMCPlots::clear(const char *bemcStatus) {
 		      this->mTowerData[softId - 1][1] = int(ped * 100.0);
 		      //int triggerPatch;
 		      //if ((unmaskTower == 0) && BEMCDecoder && BEMCDecoder->GetTriggerPatchFromCrate(crate, crateSeq, triggerPatch)) {
-		      if ((triggerPatch >= 0) && (triggerPatch < 300)) {
+		      if ((triggerPatch >= 0) && (triggerPatch < 300) && (unmaskTower == 0)) {
 			this->mPatchData[triggerPatch][10] += 1;
 		      }
 		      //}
