@@ -1,7 +1,7 @@
 #ifndef _TPC_ROWLEN_
 #define _TPC_ROWLEN_
 
-static unsigned char tpc_rowlen[46] = {
+static unsigned char __attribute__ ((unused)) tpc_rowlen[46] = {
 100,	// Tonko,May07,added for row 0 the number of unphysical pads in the sector
 88,
 96,
