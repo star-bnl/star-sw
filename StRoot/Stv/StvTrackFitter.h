@@ -30,12 +30,14 @@ public:
         double GetDca3() const 			{return mDca3;}     
         double GetXi2()  const 			{return mXi2 ;}     
            int Failed()  const 			{return mFailed;}     
+           int& NHits()   			{return mNHits;}     
  
 static StvTrackFitter *Inst() {return fgInst;}
 
 protected:
 char mBeg[1];
 char mFailed;
+int    mNHits;
 int    mNDF;
 double mXi2;
 double mDca3;
