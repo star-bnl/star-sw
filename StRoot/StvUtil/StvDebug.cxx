@@ -89,10 +89,11 @@ int TH2Hack::Fill(double x,double y)
 //______________________________________________________________________________ 
 void TH2Hack::Save()
 {
-  if(GetEntries()) return;
+  if(TH2F::GetEntries()) return;
   GetXaxis()->Set(100,mXLow,mXUpp);
-  GetYaxis()->Set(100,mXLow,mXUpp);
+  GetYaxis()->Set(100,mYLow,mYUpp);
   for (int l=0;l<mEnt;l++) {TH2F::Fill(buf[l][0],buf[l][1]);}
+  mEnt=1002;
 }
 //______________________________________________________________________________ 
 double TH2Hack::GetEntries() const
