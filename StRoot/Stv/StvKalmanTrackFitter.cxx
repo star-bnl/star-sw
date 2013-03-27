@@ -33,7 +33,6 @@ void StvKalmanTrackFitter::Clear(const char*)
 {
  StvTrackFitter::Clear("");
 }
-
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
 {
@@ -83,7 +82,7 @@ static const StvConst  *kons = StvConst::Inst();
     else 	{ outNode = node; innNode = preNode;}
 enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
     node->GetFE(lane).mHH = -1;
-    node->GetFE(lane).mHH = -1;
+    node->GetFE(lane).mZZ = -1;
 
 //         if (node->GetType()==StvNode::kDcaNode) {
 //           printf("DCAInit lane=%d err=%g\n",jane,sqrt(node->mFE[jane].mPP));
@@ -158,31 +157,17 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 
 	myXi2 = fitt->Xi2(hit); iFailed = fitt->IsFailed();
 //      =================================================
-
-	if (iFailed || myXi2> kons->mXi2Hit) 	{ //Fit is bad yet
-	  nErr++;		
-          if (iFailed>0 || myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
-            node->SetHit(0);nFitLeft--;
+	node->SetXi2(myXi2,lane);
+	if (iFailed ) nErr+=1; 			//Fit is bad yet
+	if (myXi2> kons->mXi2Hit) nErr+=10; //Fit is bad yet
+        if ( myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
+            node->SetHit(0); hit = 0; nFitLeft--;
 //		No hit anymore. Fit = Prediction		
             node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
             break;
-	  }
-        }
-        nFitLeft++; kase|=kLeft;
-	int ipdate = fitt->Update();
-        myXi2 = fitt->GetXi2();
-        if (ipdate) nErr++;		//Update failed
-        if (ipdate>0) { // Fit failed. Hit not accepted
-          node->SetHit(0);nFitLeft--;
-//		No hit anymore. Fit = Prediction		
-          node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
-          break;
 	}
-
-	node->SetXi2(myXi2,lane);
-        if (nFitLeft<=kNodesEnough && jane!=lane) {
-	  node->mFP[lane] = node->mFP[jane];}
-
+	iFailed  = fitt->Update(); if (iFailed) nErr+=100;		
+        nFitLeft++; kase|=kLeft;
         node->mFP[2] = node->mFP[lane];
         node->mFE[2] = node->mFE[lane];
 
@@ -209,7 +194,7 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
        }
 
        case kLeft: 	// Left fits only, no  Hit
-//		No hit. No own ifo yet. Get everything from opposite fit		
+//		No hit. No own info yet. Get everything from opposite fit		
        {
         node->SetFit(node->mFP[lane],node->mFE[lane],2); 
         break;
@@ -217,25 +202,45 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 
        default:
       {
-	fitt->Set(node->mFP+lane         ,node->mFE+lane
+	fitt->Set(node->mPP+lane         ,node->mPE+lane
         	 ,node->mPP+jane         ,node->mPE+jane
         	 ,node->mFP+2            ,node->mFE+2   );
 	node->SetXi2(3e33,2);
 	myXi2 = fitt->Xi2(); iFailed = fitt->IsFailed();
 //      ==============================================
-        if(iFailed>0) 	return 1313;
-
-	if (iFailed<0 || myXi2 > kons->mXi2Joi) nErr+=100;
-	int ipdate = fitt->Update();
-        myXi2 = fitt->GetXi2();
-        if (ipdate>0) 	return 1413;
-  
-        if (ipdate) {//Update error 
-	  myXi2= 3e13;nErr+=1000;
+	node->SetXi2(myXi2/5*2,3);
+	if (iFailed 		 ) 	nErr+=1000;
+	if (myXi2 > kons->mXi2Joi) 	nErr+=10000;
+	iFailed = fitt->Update();
+	if (iFailed) 			nErr+=100000;
+        if (myXi2 > kons->mXi2Joi*kXtendFactor || iFailed>0) { //Joining is impossible. Stop joining
+          mode = 0;	//No more joinings
+          node->SetFit(node->mFP[lane],node->mFE[lane],2); 
+          break;
         }
+        myXi2 = fitt->GetXi2();
+        if (!hit)  break;
+
+
+//		Fit hit	 to join data	
+        StvNodePars myPars(node->mFP[2]);
+        StvFitErrs  myErrs(node->mFE[2]);
+	fitt->Set(&myPars,&myErrs,node->mFP+2,node->mFE+2);
+	fitt->Prep();
+
+	myXi2 = fitt->Xi2(hit); iFailed = fitt->IsFailed();
+//      =================================================
 	node->SetXi2(myXi2,2);
-        break;
-      }
+	if (iFailed		) nErr+=1000000; //Fit is bad yet
+	if (myXi2> kons->mXi2Hit) nErr+=10000000; //Fit is bad yet
+        if (myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
+          node->SetHit(0); hit = 0; nFitLeft--; mNHits--;
+//		No hit anymore. Fit = Prediction		
+            node->SetFit(myPars,myErrs,2); 
+	} 
+	iFailed = fitt->Update(); if (iFailed) nErr+=100000000;
+         break;
+       }
 
     }//End 3rd case
 //         if (node->GetType()==StvNode::kDcaNode) {
@@ -248,6 +253,7 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 
   return -nErr;
 }
+
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir,int lane)
 {
