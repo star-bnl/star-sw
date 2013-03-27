@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 #include "THelixTrack.h"
 
 class StvNodePars;
@@ -11,6 +12,9 @@ class StvFitPars;
 class StvFitErrs;
 class StvImpact;
 class StvELossData;
+
+enum ENode {kMaxPti=200,kMaxTanL=100};
+
 //------------------------------------------------------------------------------
 typedef double Mtx55D_t[5][5];
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B);
@@ -300,6 +304,9 @@ inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &pa)
   mHH+= el.mOrt2;
   mZZ+= el.mOrt2;
   mPP+= el.mdPPErr2*(pa._ptin*pa._ptin);
+  assert(el.mTheta2>0 && el.mOrt2>0 &&el.mdPPErr2>0);
+
+
 }
 
 #endif
