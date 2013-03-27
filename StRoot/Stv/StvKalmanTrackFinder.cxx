@@ -58,6 +58,7 @@ void StvKalmanTrackFinder::Reset()
 int StvKalmanTrackFinder::FindTracks()
 {
 static int nCall = 0; nCall++;
+static int nTally = 0;
 static StvToolkit *kit = StvToolkit::Inst();
 static const StvConst  *kons = StvConst::Inst();
   int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0,nSeedTot=0;
@@ -73,21 +74,18 @@ static const StvConst  *kons = StvConst::Inst();
       nTrk = 0;nSeed=0; sf->Again();
       while ((mSeedHelx = sf->NextSeed())) 
       {
-	nSeed++;
+	nSeed++; nTally++;
 						  if (sf->DoShow())  sf->Show();
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
 	mCurrTrak->CutTail();	//Clean track from previous failure
 	nAdded = FindTrack(0);
         sf->FeedBack(nAdded);
-
 	if (!nAdded) 				continue;
-{ double tlen = mCurrTrak->GetLength();
-  assert(tlen >0.0 && tlen<1000.);
-}
 	int ans = 0,fail=13;
-    //		Refit track   
+//		Refit track   
+        int nFitHits = mCurrTrak->GetNHits();
 	do {
-	  if (!mRefit) {fail=0; 		break;};
+	  if (!mRefit) 				continue;
 	  ans = Refit(1);
 	  if (ans) 				break;
           nHits = mCurrTrak->GetNHits();
@@ -96,24 +94,20 @@ static const StvConst  *kons = StvConst::Inst();
           nHits = mCurrTrak->GetNHits();
           if (nHits<=3) 			break;
           if (nAdded<=0)			continue;;
-{  double tlen = mCurrTrak->GetLength();
-  assert(tlen >0.0 && tlen<1000.);}
 // 			few hits added. Refit track to beam again 
 	  ans = Refit(0);
 	  if (ans) 				break;
 	} while((fail=0));		
 	nHits = mCurrTrak->GetNHits();
 	if (nHits < myMinHits)	fail+=100;		;
+        if (fail) nHits=0;
+StvDebug::Count("FitRefit",nFitHits,nHits);
 	if (fail) 	{//Track is failed, release hits & continue
 	  mCurrTrak->CutTail();			continue;
         }
-{  double tlen = mCurrTrak->GetLength();
-  assert(tlen >0.0 && tlen<1000.);}
+
 	StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
 	if (node) node->UpdateDca();
-        if (node && fabs(node->GetFP()._curv) <1./300) {
-	  StvTrackFitter::Inst()->Helix(mCurrTrak,16|1);
-        }
 
 	kit->GetTracks().push_back(mCurrTrak);
 	nTrk++;nTrkTot++;
@@ -165,12 +159,13 @@ hitCount->Clear();
     par[0] = curNode->GetFP(); err[0] = curNode->GetFE(); 	//Set outer node pars into par[0]
   }
 
-//  	Skip too big curvature
-  if (fabs(par[0]._curv)>myConst->mMaxCurv)	return nHits;	
+//  	Skip too big curvature or pti
+  if (fabs(par[0]._curv)>myConst->mMaxCurv)	return 0;	
+  if (fabs(par[0]._ptin)>myConst->mMaxPti)	return 0;	
 
 //  	skip P too small
   { double t = par[0]._tanl, pti = par[0]._ptin;	
-    if ((t*t+1.)< myConst->mMinP2*pti*pti)	return nHits;
+    if ((t*t+1.)< myConst->mMinP2*pti*pti)	return 0;
   }
   fitt->Set(par, err, par+1,err+1);
   mHitter->Reset();
@@ -197,6 +192,7 @@ StvFitDers derivFit;
 //+++++++++++++++++++++++++++++++++++++
 
     idive = mDive->Dive();
+
 //+++++++++++++++++++++++++++++++++++++
     if (mySkip && !idive) {
       Warning("FindTrack","Strange case mySkip!=0 and iDive==0");
@@ -209,6 +205,8 @@ StvFitDers derivFit;
 		// Stop tracking when too big Z or Rxy
     if (fabs(par[0]._z)  > myConst->mZMax  ) 	break;
     if (par[0].getRxy()  > myConst->mRxyMax) 	break;
+    if (fabs(par[0]._curv)>myConst->mMaxCurv)	break;	
+    if (fabs(par[0]._ptin)>myConst->mMaxPti)	break;	
 
     		
     const StvHits *localHits = 0; 
@@ -264,7 +262,7 @@ static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};
 
       myXi2 = fitt->Xi2(minHit);
       int iuerr = fitt->Update(); 
-      if (!iuerr || (nHits<=3)) {		//Hit accepted
+      if (iuerr<=0 || (nHits<=3)) {		//Hit accepted
         hitCount->AddHit();nHits++;
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
@@ -352,56 +350,50 @@ int StvKalmanTrackFinder::Refit(int idir)
 {
 static int nCall=0;nCall++;
 static StvTrackFitter *tkf = StvTrackFitter::Inst();
+static const StvConst  *kons = StvConst::Inst();
 static const double kEps = 1e-2;
 enum {kTryFitMax = 5,kBadHits=5};
 
-  StvNode *node = 0;
-  int ans=0,lane = 1;
+  int ans=0,anz=0,lane = 1;
+  int& nHits = tkf->NHits();
+  nHits = mCurrTrak->GetNHits();
+  int nRepair = 3;
+  if (nHits<= 5) {nRepair=0;} 
+  if (nHits<=10) {nRepair=1;}
+  int state = 0;
   StvNode *tstNode = (idir)? mCurrTrak->front(): mCurrTrak->back();
-
-  int tryFit = 0,nBadHits=0;
-  ans = tkf->Refit(mCurrTrak,idir,lane,1);
-//        ==================================
-
-       if (ans>0) { return 130113;}	//Very bad
-  else if (ans<0) { 			//Try to fix
-
-
-    for (int refIt=0; refIt<55; refIt++)  	//Start iterations
-    {
-      int nHits = mCurrTrak->GetNHits();
-      if (nHits<3) 	return 130313;
-
-      StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
-      int anz = tkf->Refit(mCurrTrak,1-idir,1-lane,1); 
-  //        ==========================================
-      if (anz>0)  	return 130413;
-
-
+  for (int repair=0;repair<=nRepair;repair++)  	{ 	//Repair loop
+    int converged = 0;
+    for (int refIt=0; refIt<55; refIt++)  	{	//Fit iters
       ans = tkf->Refit(mCurrTrak,idir,lane,1);
-  //        ==================================
-      if (ans>0)  	return 130513;
-      ans+=anz*10000;tryFit++;
+//    ==================================
+      if (nHits < kBadHits) break;
+      if (ans>0) break;			//Very bad
+      
+      StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
+      anz = tkf->Refit(mCurrTrak,1-idir,1-lane,1); 
+  //        ==========================================
+      if (nHits < kBadHits) break;
+      if (anz>0) break;	
+
       double dif = lstPars.diff(tstNode->GetFP());
+      if ( dif < kEps) { converged = 1; break; } 
+    }// End Fit iters
+    
+    state = (ans!=0) + 2*((anz!=0) + 2*(!converged) 
+          + 2*(mCurrTrak->GetXi2()>kons->mXi2Trk)+2*(nHits <= kBadHits));
+    if (!state) break;
+    if (nHits <= kBadHits) break;
+    StvNode *badNode=mCurrTrak->GetNode(StvTrack::kMaxXi2);
+    badNode->SetHit(0);
+    nHits--; if (nHits < kBadHits) break;
+  }//End Repair loop
 
-      if ( dif < kEps || tryFit > kTryFitMax) {//Tired to try, probably alien hit 
-	if (!ans) break;
-	nBadHits++;  tryFit=0;
-	if (nBadHits >kBadHits) return 130613;
-      }  
+  StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
+  if (node) node->UpdateDca();
+  if (ans<=0) state &= (-2);
+  if (anz<=0) state &= (-4);
+  return state;
 
-    }
-  }
-  if (ans) return  130613;
-  int nErr = tkf->Clean(mCurrTrak);
-  if (nErr && mCurrTrak->GetNHits() >3) { ans = Refit(idir);}		//Recursion
-  if (ans) return  130713;
-
-  node = mCurrTrak->GetNode(StvTrack::kDcaPoint);if (!node) return 0;
-  node->UpdateDca();
-  if (idir==1) {
-//??    assert(ptiErr< 4*tstNode->mFE[2].mPP);
-  }
-  return 0;
 }
 
