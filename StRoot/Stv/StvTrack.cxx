@@ -107,7 +107,6 @@ StvNode *StvTrack::GetNode(EPointType noTy)
         case kMaxXi2:
 	  if (node->GetType()!=StvNode::kRegNode) 	break;
 	  if (!node->GetHit()) 		 		break;
- 	  if ( node->GetXi2()>1000) 		 	break;
           if ( node->GetXi2()<maxXi2) 			break;
           foundNode = node; maxXi2=node->GetXi2();	break;
 
