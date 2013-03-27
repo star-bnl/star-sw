@@ -24,7 +24,7 @@ class StvHitLoader : public TNamed
     int   LoadHits(const StEvent *stev); 
     int   Finish();
  protected:
-    StvHit *MakeStvHit(const StHit *stHit,UInt_t upath); 
+    StvHit *MakeStvHit(const StHit *stHit,UInt_t upath,int &sure); 
     int     TpcHitTest(const StHit *stHit);    
  private:
  StEventHitIter *mHitIter;

@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.14 2013/02/20 23:20:23 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.15 2013/03/27 15:45:01 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -25,6 +25,7 @@ Main tasks:
 #include "StHit.h"
 #include "StEventUtilities/StEventHelper.h"
 #include "StEventUtilities/StEventHitIter.h"
+#include "StvUtil/StvDebug.h"
 #include "Stv/StvDraw.h"
 #include "Stv/StvStl.h"
 
@@ -84,7 +85,7 @@ if (myGraph) { //create canvas
   mHitIter->Reset(stev);
   const StHit *stHit=0;
   StDetectorId didOld = kUnknownId;
-  int nTotHits = 0,nTotHitz=0, nHits=0,nHitz=0;
+  int nTotHits = 0,nTotHitz=0,nTotGits=0, nHits=0,nHitz=0,nGits=0;
 
   for (; ; ++(*mHitIter)) {
     stHit=*(*mHitIter);
@@ -92,32 +93,39 @@ if (myGraph) { //create canvas
     
     if (did != didOld || !stHit) {
       if (didOld) {
-        Info("LoadHits","Loaded  %d good and failed %d %s hits"
-	    ,nHits,nHitz,StTGeoHelper::DetName(didOld));
+        Info("LoadHits","Loaded  %d good, recovered %d and failed %d %s hits"
+	    ,nHits,nHits-nGits,nHitz,StTGeoHelper::DetName(didOld));
       }
       if (!stHit) break;
       Info("LoadHits","Start %s hits",StTGeoHelper::DetName(did));
-      nHits=0; nHitz=0;
+      nHits=0; nHitz=0,nGits=0;
     }
     if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY) continue; // ignore hits marked by AfterBurner as chopped o
-    StvHit *stiHit = MakeStvHit(stHit,mHitIter->UPath());
+    int sure;
+    StvHit *stiHit = MakeStvHit(stHit,mHitIter->UPath(),sure);
+    if (!sure && stiHit) { //Non reliable hit
+      double rxy = sqrt(pow(stiHit->x()[0],2)+pow(stiHit->x()[1],2));
+      StvDebug::Count("OrphanHits",stiHit->x()[2],rxy);
+    }
 
 if (myHits) (*myHits)+= stiHit;   
 
-    if (stiHit) {nHits++;nTotHits++;}  
+    if (stiHit) {nHits++;nTotHits++;nGits+=sure;nTotGits+=sure;}  
     else 	{nHitz++;nTotHitz++;
       if (did == kTpcId) TpcHitTest(stHit);} 
     didOld = did; 
   }
   int nIniHits = StTGeoHelper::Inst()->InitHits();
   assert(nTotHits==nIniHits);
-  Info("LoadHits","Loaded %d good and failed %d of all hits",nTotHits,nTotHitz);
+  Info("LoadHits","Loaded %d good, recovered %d and failed %d of all hits"
+      ,nTotHits,nTotHits-nTotGits,nTotHitz);
 if (myDraw) {myDraw->Hits(*myHits,kUnusedHit); myDraw->Wait();}
   return nTotHits;
 }
 //_____________________________________________________________________________
-StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath)
+StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath, int &sure)
 {
+static StTGeoHelper *tgh = StTGeoHelper::Inst();
    StvHit *stiHit = StvToolkit::Inst()->GetHit();
    StDetectorId did = stHit->detector();
    UInt_t hard = stHit->hardwarePosition();
@@ -133,7 +141,8 @@ StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath)
    }
    hard *= (uint)kMaxDetectorId; hard+=(uint)did;
    
-   const StHitPlane *hp = StTGeoHelper::Inst()->AddHit(stiHit,xyz,hard,seed);
+   const StHitPlane *hp = tgh->AddHit(stiHit,xyz,hard,seed);
+   sure =  tgh->IsGoodHit();
    if (!hp) { StvToolkit::Inst()->FreeHit(stiHit);return 0;}
 
    if (did == kTpcId) {// TPC hit check for being in sector
