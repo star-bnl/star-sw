@@ -14,11 +14,10 @@
 static const double recvCORRMAX  = 0.99;
 static const double chekCORRMAX  = 0.9999;
 
-static double MAXTAN = 100;
 //                              x   y   z  psi   pti  tan      cur
-static double MAXNODPARS[]   ={555,555,555,6.66,100, MAXTAN+1, .1};
+static double MAXNODPARS[]   ={555,555,555,6.66,kMaxPti+10, kMaxTanL+10, .1};
 //                                   h    z   a     l   ptin
-static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,20  };
+static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,kMaxPti+10  };
 static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
 static const double kERRFACT     = 3*3;
 static const double kFitErrs[5]   ={0.5*kERRFACT,0.5*kERRFACT 
@@ -259,14 +258,16 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   _sinCA = cosCA*sA+_sinCA*cA;
 
   _ptin  += fp.mP;
+  if (_ptin >  kMaxPti) _ptin = kMaxPti;
+  if (_ptin < -kMaxPti) _ptin =-kMaxPti;
 
   double l = fp.mL,tL;
   if (fabs(l) < 0.1) {tL = l*(1+l*l/3);}
   else               {tL = tan(l)     ;}
   _tanl = (_tanl+tL)/(1.-_tanl*tL);
 
-  if (_tanl < -MAXTAN) _tanl = -MAXTAN;
-  if (_tanl >  MAXTAN) _tanl =  MAXTAN;
+  if (_tanl < -kMaxTanL) _tanl = -kMaxTanL;
+  if (_tanl >  kMaxTanL) _tanl =  kMaxTanL;
   _curv   = _hz *_ptin;
   if (fabs( _cosCA)>1 || fabs( _sinCA)>1) ready();
   assert(!check("StvNodePars::operator+=") || 1);
@@ -323,11 +324,13 @@ int StvNodePars::isReady( ) const
 //_____________________________________________________________________________
 StvFitPars StvNodePars::delta() const
 {
-   double space = 0.1+sqrt(_x*_x+_y*_y+_z*_z)/200;
+   double spaceR = 0.1+sqrt(_x*_x+_y*_y)/200;
+   double spaceZ = 0.1+fabs(_z)/200;
    StvFitPars fp;
-   fp.mH = space;    fp.mZ = space; 
-   fp.mA = 3.14/180*3; fp.mL = 3.14/180*3;	//ten degree
-   fp.mP = 1./500/fabs(_hz);
+   fp.mH = spaceR;    fp.mZ = spaceZ; 
+   fp.mA = fp.mL = 3.14/180*30;	//ten degree
+   fp.mP = fabs(_ptin)*0.2;
+   if (fp.mP<0.1) fp.mP = 0.1;
    return fp;
 }
 //_____________________________________________________________________________
