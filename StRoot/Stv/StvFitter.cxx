@@ -19,7 +19,7 @@ StvFitter *StvFitter::mgFitter=0;
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
 
-enum {kDeltaFactor = 3};
+enum {kDeltaFactor = 1};
 
 
 static const double kXtraBigXi2 = 9e9;
@@ -61,7 +61,8 @@ StvDebug::Break(nCall);
   TCL::trsinv(E2,E2i,nP2);		//E2i = 1/E2
   TCL::vadd (E1i,E2i,EJi ,nE2);		//EJi = E1i+E2i
   TCL::trsinv(EJi,EJm,nP2);		//EJ = 1/EJi
-  TCL::vsub (P1 ,P2 ,Pdif,nP1);		//Pdif = P1-P2
+  if (P2) TCL::vsub (P1 ,P2 ,Pdif,nP1);	//Pdif = P1-P2
+  else    TCL::ucopy(P1     ,Pdif,nP1);
   TCL::trqsq(E1i,EJm,ERi ,nP1);		//ERi = E1i*EJm*E1i
   TCL::vsub (E1i,ERi,ERi ,nE1);         //ERi = E1i- E1i*EJi*E1i == 1/(E1+E2)
   double chi2;
@@ -69,7 +70,7 @@ StvDebug::Break(nCall);
 
   double PJt[5],EJt[15];
   double chi2T =JoinTwoT(nP1,P1,E1,nP2,P2,E2,PJt,EJt);
-//  assert(fabs(chi2-chi2T) <1e-3*(chi2+chi2T+1));
+  assert(fabs(chi2-chi2T) <1e-3*(chi2+chi2T+1));
   if (!PJ)      return chi2;
   if (chi2>=kXtraBigXi2) return chi2;
   TCL::ucopy(EJm,EJ,nE2);		//EJ = 1/EJi
@@ -84,7 +85,7 @@ StvDebug::Break(nCall);
     dia[i]= sqrt(EJt[li+i]);
     assert(fabs(PJ[i]-PJt[i])<1e-4*dia[i]);
     for (int j=0;j<=i; j++) {
-      assert( fabs(EJ[li+j]-EJt[li+j])<(dia[i]*dia[j]));}}
+      assert( fabs(EJ[li+j]-EJt[li+j])<1e-4*(dia[i]*dia[j]));}}
 
   return chi2;
 }
@@ -202,17 +203,18 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                    ,const StvNodePars *jnPars, const StvFitErrs *jnErrs
                    ,      StvNodePars *otPars,       StvFitErrs *otErrs)
 {
+  mDelta *= kDeltaFactor;
   mKase = 1;		// join left & rite part of track
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
   mJnPars = jnPars; mJnErrs = jnErrs;
+  mDelta  = mInPars->delta();  mDelta *= kDeltaFactor;
+
 }
 //______________________________________________________________________________
 void StvFitter::Prep()
 {
-  mDelta  = mInPars->delta();
-  mDelta *= kDeltaFactor;
-  assert(mDelta.mA<1);
+  mDelta  = mInPars->delta();  mDelta *= kDeltaFactor;
   mHit   = 0; mHitPlane = 0;
   double myTan = mInPars->_tanl;
   mCos2L = 1./(1+myTan*myTan);
@@ -240,7 +242,6 @@ void StvFitter::Prep()
 double StvFitter::Xi2(const StvHit *hit)
 {
   if (mHit == hit) return mXi2;
-assert(mDelta.mA<1);
   mFailed = 0;
   mHit = hit;
   const float *errMtx=mHit->errMtx();
@@ -300,8 +301,6 @@ assert(mDelta.mA<1);
 
 //  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
   mXi2 = MyXi2(G,mDcaP,mDcaL);
-  if (mXi2 >= kXtraBigXi2) {mXi2 = kXtraBigXi2; mFailed = 99;}
-  if (!mHit) return mXi2;
   return mXi2 ; 
 }  
 //______________________________________________________________________________
@@ -314,43 +313,36 @@ double StvFitter::Xi2()
     const StvNodePars *swp = mInPars; mInPars=mJnPars; mJnPars=swp;
     const StvFitErrs  *swe = mInErrs; mInErrs=mJnErrs; mJnErrs=swe;
   }
-  mDelta  = mInPars->delta(); mDelta *= kDeltaFactor;
 
   StvFitPars F   = (*mInPars-*mJnPars);
-assert(mDelta.mA<1);
-  for (int i=0;i<5;i++) {
-    if (F[i]<-mDelta[i]) {mFailed = -1; F[i]= -mDelta[i];}
-    if (F[i]> mDelta[i]) {mFailed = -1; F[i]=  mDelta[i];}
-  }
   double     Zero[5]= {0};
   double myXi2 = JoinTwo(5,F.Arr()    ,mInErrs->Arr()
                         ,5,Zero       ,mJnErrs->Arr()
 		        ,mQQPars.Arr(),mQQErrs.Arr());
-  mQQErrs.mHz = mInPars->_hz;
-  for (int i=0;i<5;i++) {
-    if (mQQPars[i]<-mDelta[i]) {mFailed = -1; mQQPars[i]= -mDelta[i];}
-    if (mQQPars[i]> mDelta[i]) {mFailed = -1; mQQPars[i]=  mDelta[i];}
-  }
-  if ( myXi2>= kXtraBigXi2) mFailed = 99;
+  mXi2 = myXi2;
   return myXi2;
 }  
 //______________________________________________________________________________
 int StvFitter::Update()
 {
 static int nCall=0; nCall++;
-static const StvConst  *kons = StvConst::Inst();
 StvDebug::Break(nCall);
-  if (mFailed>0) return mFailed;
+  mFailed = 0;
   switch (mKase) {
     case 0: mFailed = Hpdate(); break;		//Hit+Track
     case 1: mFailed = Jpdate();	break; 		//Track join
     case 2: mFailed = Vpdate();	break;		//Vertex+track
   }
-  
-  if (mFailed>0) return mFailed;
-  if (mHit && mOtPars->diff(mHit->x())>kons->mMaxRes) 	mXi2=1001;
-  if (fabs(mOtPars->_ptin)           > kons->mMaxPti) 	mXi2=1002;
-  if (mOtPars->check()) 				mXi2=1013; 
+
+  double fak = 1.;
+  for (int i=0;i<5;i++) {
+    double f = fabs(mQQPars[i])/mDelta[i];
+    if (fak<f) fak=f;
+  }
+  if (fak>1.) { mFailed = -1; TCL::vscale(mQQPars,1./fak,mQQPars,5);}
+
+  *mOtPars+= mQQPars;
+   mOtErrs->SetHz(mOtPars->_hz);
   return mFailed;
 }
 //______________________________________________________________________________
@@ -365,20 +357,12 @@ int StvFitter::Hpdate()
   StvFitPars myHitPars(mDcaP, mDcaL );
   StvFitErrs myHitErrs(mHitErrs[0],mHitErrs[1],mHitErrs[2]);
   StvFitPars myTrkPars;
-  StvFitPars myJrkPars;
 
   double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
-		        ,  myJrkPars.Arr(),mOtErrs->Arr());
-  if (myXi2>kXtraBigXi2) { mFailed=99; return mFailed;}
+		        ,  mQQPars.Arr(),mOtErrs->Arr());
   assert(fabs(myXi2-mXi2)<1e-1*(myXi2+mXi2+1));
-  for (int i=0;i<5;i++) {
-    if (myJrkPars[i]<-mDelta[i]) {mFailed=-1; myJrkPars[i]= -mDelta[i];}
-    if (myJrkPars[i]> mDelta[i]) {mFailed=-1; myJrkPars[i]=  mDelta[i];}
-  }
   *mOtPars = mTkPars;
-  *mOtPars+= myJrkPars;
-   mOtErrs->SetHz(mOtPars->_hz);
 
   return mFailed;
 }  
@@ -392,22 +376,12 @@ static int nCall=0; nCall++;
 //		New Z ortogonal to X (track direction)
   StvFitPars myHitPars(mDcaP, mDcaL );
   StvFitPars myTrkPars;
-  StvFitPars myJrkPars;
 
   double myXi2 = JoinVtx(2,myHitPars.Arr(),mHitErrs
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
-		        ,  myJrkPars.Arr(),mOtErrs->Arr());
+		        ,  mQQPars.Arr(),mOtErrs->Arr());
   if (myXi2){}
-//assert(fabs(myXi2-mXi2)<1e-4*(myXi2+mXi2));
-  assert(fabs(myJrkPars[0]-myHitPars[0])<1e-6);
-  assert(fabs(myJrkPars[1]-myHitPars[1])<1e-6);
-  for (int i=0;i<5;i++) {
-    if (myJrkPars[i]<-mDelta[i]) {mFailed=-1; myJrkPars[i]= -mDelta[i];}
-    if (myJrkPars[i]> mDelta[i]) {mFailed=-1; myJrkPars[i]=  mDelta[i];}
-  }
   *mOtPars = mTkPars;
-  *mOtPars+= myJrkPars;
-  mOtErrs->SetHz(mOtPars->_hz);
   for (int i=0;i<3;i++) {mOtErrs->Arr()[i]+=mHitErrs[i];}
   return 0;
 }  
@@ -416,9 +390,7 @@ int StvFitter::Jpdate()
 {
 ///		this is Update for sub track+sub track fit (join)
   *mOtPars = *mJnPars; 
-  *mOtPars+=  mQQPars;
   *mOtErrs =  mQQErrs;   
-   mOtErrs->SetHz(mOtPars->_hz);
   return mFailed;
 }
 //______________________________________________________________________________
