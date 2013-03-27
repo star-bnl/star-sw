@@ -10,18 +10,18 @@ St_StvKonst *tableSet = new St_StvKonst("StvKonst",1);
 //
 memset(&row,0,tableSet->GetRowSize());
   double Nstd = 5.0;
-  row.mXi2Hit = 2*Nstd*Nstd;		//Xi2 to accept new hit
+  row.mXi2Hit = 5*Nstd*Nstd;		//Xi2 to accept new hit
   row.mXi2Trk = 1*Nstd*Nstd;		//Xi2 to accept new track
-  row.mXi2Vtx = 5*Nstd*Nstd;		//Xi2 to accept vertex
+  row.mXi2Vtx = 2*Nstd*Nstd;		//Xi2 to accept vertex
   row.mXi2Joi = 5*Nstd*Nstd;		//Xi2 in Refit join left & right subtrack
   row.mXi2Hlx = row.mXi2Hit*9;  //Xi2 in Helix, .
   row.mRxyMax = 300;		//Max radius for tracking
   row.mZMax   = 300;		//Max Z      for tracking
   row.mDca2dZeroXY = 6.;	//max 2d dca to X=Y=0  for primary track
   row.mDca3dVertex = 3.;	//max 3d dca to vertex for primary track
-  row.mMaxCurv     = 0.1;	//Maximal allowed curvature
+  row.mMaxCurv     = 0.2;	//Maximal allowed curvature
   row.mMinP2  = 0.003*0.003;	//Geant3 cut for too small momentum**2	
-  row.mMaxPti   = 100;		/*Maximal allowed 1/pt */
+  row.mMaxPti   = 200;		/*Maximal allowed 1/pt */
   row.mMaxRes	= 0.5;		/*Maximal allowed residual */
   row.mMaxWindow= 3.;		/*Maximal window to search hits*/
   row.mMinHits 	= 5;		/*Min number of hits allowed*/
