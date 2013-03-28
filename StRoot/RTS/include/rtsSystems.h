@@ -378,6 +378,7 @@ so we keep it here for source compatibility
 #define EVP_NODE	((DAQ_SYSTEM<<12) | EVP_INSTANCE) 
 #define BB2_NODE	((DAQ_SYSTEM<<12) | BB2_INSTANCE) 
 
+
 #endif
 
 /* aliases and shortcuts */
@@ -475,6 +476,7 @@ so we keep it here for source compatibility
 #define L4_EVP_INSTANCE  121
 #define L4_CAL_NODE     ((EXT2_SYSTEM<<12) | (L4_SYSTEM<<7) | L4_CAL_INSTANCE)
 #define L4_EVP          ((EXT2_SYSTEM<<12) | (L4_SYSTEM<<7) | L4_EVP_INSTANCE)
+#define L4_EVP_NODE     L4_EVP
 #define L4_EVB(x)       ((EXT2_SYSTEM<<12) | (L4_SYSTEM<<7) | (L4_EVP_INSTANCE + 1 + x))
 
 /* Trigger */
