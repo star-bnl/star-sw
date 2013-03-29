@@ -15,21 +15,30 @@
 //   3) Use the two distinct constraints on SC & GL from these two fits
 //        to arrive at initial values
 //   4) Fit SpaceCharge & GridLeak simultaneously
+//   5) Plot the fits
 //
 // Parameters:
-//   1) Input file with info on data to be calibrated
+//   1) Input specification with info on data to be calibrated
 //   2) Any additional cuts to help calibrate (i.e. "run!=6082047")
 //   3) A specific scaler identifier (if you know which scaler you want to use)
 //      Possible values:
 //      -1    : automatically determine which of the predefined scalers is best
-//      0..n  : force the calibration to use specific scaler with this id
-//              (see code below, or StDetectorDbMaker/St_spaceChargeCorC.cxx)
+//      0..n  : force the calibration to use specific scaler with this id (see
+//              'dets' in code below, or StDetectorDbMaker/St_spaceChargeCorC.cxx)
 //      -n    : perform principal components analysis with up to 'n' scalers
 //      "det" : force the calibration to use a specific scaler, e.g. "zdcx"
 //      "det1:det2:..." : perform principal components analysis using a specific
 //              set of scalers, e.g. "zdcx:zdcx*zdcx" allows a function of
 //              sc = A*(zdcx-offset)+B*(zdcx^2)
 //   4) Debug mode
+//      0 : default, limited output
+//      1 : outlier removal info and chisquare contours
+//      2 : detailed fit results
+//      3 : more detailed fit results
+//   5) If specified, the cuts for including data in the plots versus luminosity;
+//        same as parameter 2 if omitted. A looser cut here than in parameter 2
+//        allows to see the predictive power of whether the fits describe data
+//        outside what was used in the calibration
 //
 // Details:
 //
@@ -38,33 +47,66 @@
 // PCA does not determine errors on individual terms, so errors are reported
 //   on the overall scale, e.g. (1.0 +/- error)*(...)
 //
-// The input file should contain lines with the following info:
+// Plots show:
+//   - small brown points     : single file (ntuple) results from data
+//   - violet diamonds        : averages for each dataset
+//   - grey lines             : independent fits for SpaceCharge & GridLeak
+//   - black lines            : simultaneous SpaceCharge & GridLeak fits
+//                              (sometimes obscures the grey lines)
+//   - red crosses & ellipses : final values and 1-sigma ellipse
+//   - blue lines             : constraint on SCxGL and 1-sigma bands
+//   - pink lines             : outlier removal bands
+//
+// There are three input specification methods. 
+//   1) 1 An empty (or 0) input argument will use data files already opened
+//      in ROOT, and the used calibrations are read from each data file
+//      and used to determine the different input parameter sets:
+//        root hists*/*
+//        .x Calib_SC_GL.C+
+//   2) A '@' at the first character of the input argument will open all files
+//      matching a simple wildcard pattern (does not work well with multiple
+//      wildcards), and the used calibrations are read from each data file
+//      and used to determine the different input parameter sets:
+//        root Calib_SC_GL.C+("@hists/*")
+//   3) The input specification can be the name of an input file, which should
+//      contain lines with the path/name (simple wildcards allowed) of dataset
+//      files. Each line beginning with a '@' character will be assumed to be
+//      a distinct dataset with common used calibrations:
+//        @histsSetA/*
+//        @histsSetB/*
+//        @histsSetC/*
+//      A # at the beginning of a line will cause that dataset to be skipped:
+//        #@histsSetC/*
+//      If this file is named input.dat, it could be analyzed with:
+//        root Calib_SC_GL.C+("input.dat")
+//      If you know you want to use only bbce+bbcw:
+//        root Calib_SC_GL.C+("input.dat","",4)
+//
+// Note: Older input file formats are supported for backward compatibility
+// with hist files that do not have the used corrections stored in them.
+// For these, each line of the file must contain the following info:
 //   - dataset file specification
 //   - scaler detector used in that dataset (see dets strings below)
 //   - SpaceCharge rate used in that dataset
 //   - GridLeak multiplier used in that dataset
 //   - (optional) SpaceCharge offset used in that dataset (set "!" below)
-//
-// There should be at least 3 datasets with different GridLeaks!
 // Example 3 dataset file which used bbce+bbcw would look like this:
 //    histsSetA/* 4 1.7e-8 9.0
 //    histsSetB/* 4 1.7e-8 12.0
 //    histsSetC/* 4 1.7e-8 15.0
 // A ! at the beginning of a file spec will cause the optional SpaceCharge
 // offset to be read in on that line:
-//    !histsSetC/* 4 0 12.0 550
-// A # at the beginning of a file spec will cause that dataset to be skipped:
-//    #histsSetC/* 4 0 12.0
-// If this file is named input.dat, it could be analyzed with:
-//    root Calib_SC_GL.C+("input.dat")
-// If you knew you wanted to use only bbce+bbcw:
-//    root Calib_SC_GL.C+("input.dat","",4)
+//    !histsSetC/* 4 1.7e-8 15.0 550
+// A # can be used to skip these old format lines as well
 //
 /////////////////////////////////////////////////////////////////
 
 #ifndef __CINT__
+#include "TFile.h"
+#include "TKey.h"
 #include "TCanvas.h"
 #include "TChain.h"
+#include "TChainElement.h"
 #include "TGraphErrors.h"
 #include "TF3.h"
 #include "TH2.h"
@@ -78,7 +120,6 @@
 #include "TMinuit.h"
 #include "TMath.h"
 #include "TStyle.h"
-#include "TLine.h"
 #include "TString.h"
 #include "TPrincipal.h"
 #include "TROOT.h"
@@ -86,27 +127,33 @@
 #endif
 
 
+// Switches and constants for experts
 Bool_t USE_OLD_STDDEV = kTRUE; // method for determining STDDEV
-Bool_t FORCE_GLO_SO = kFALSE; // force GLO = SO
-Bool_t NO_PLOTS = kFALSE;
-double MAX_DEV = 3.0;
+Bool_t FORCE_GLO_SO   = kTRUE; // force GLO = SO
+Bool_t FORCE_g3_same  = kTRUE;
+Bool_t FORCE_g4_same  = kTRUE;
+Bool_t FORCE_g5_same  = kTRUE; // if g4_same, then g3_same and g5_same are equivalent
+Bool_t NO_PLOTS       = kFALSE;
+double MAX_DEV        = 4.0;
+double REF_CONST1     = 0.318;
 
 // Main routine:
-void Calib_SC_GL(const char* input, const char* cuts=0, int scaler=-1, int debug=0);
-void Calib_SC_GL(const char* input, const char* cuts, const char* scalerstr, int debug=0);
+void Calib_SC_GL(const char* input=0, const char* cuts=0, int scaler=-1, int debug=0, const char* gcuts=0);
+void Calib_SC_GL(const char* input, const char* cuts, const char* scalerstr, int debug=0, const char* gcuts=0);
 
 // Fitting functions:
 Double_t funcGapf(Double_t* x, Double_t* pars);
 Double_t funcSC(Double_t* x, Double_t* pars);
+Double_t funcSC2(Double_t* x, Double_t* pars);
 void fnchGapf(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
 void fnchSC(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
 void fnchSCGapf(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
 
 // Helper functions:
-void Init(const char* input);
+int  Init(const char* input);
 int  Waiting();
 void SetMinMax(int n, Double_t* ar, double& min, double& max, double inclusion, double margin=0.075);
-void SetMinuitPars(const int n, TString* names, Double_t* starts, Double_t* steps, int debug);
+int  SetMinuitPars(const int n, TString* names, Double_t* starts, Double_t* steps, int debug, Bool_t* fixing=0);
 void Log2Lin(int i);
 int  FitWithOutlierRemoval(int debug);
 void DrawErrorContours();
@@ -125,10 +172,9 @@ int nMeasuresI = 0;
 int nfi = 0;
 
 // Global inputs
-TCut cut;
+TCut cut,gcut;
 TChain* SCi[nfip];
 TChain* SCall = 0;
-int det[nfip];    // detector used (see dets above)
 Bool_t allZeros = kTRUE;
 TString scastr;
 
@@ -139,6 +185,17 @@ TCanvas* conGL = 0;
 TCanvas* conSCGL = 0;
 TCanvas* cSC = 0;
 TCanvas* cGL = 0;
+TH1* histo = 0;
+
+// Colors
+Int_t colorData = kOrange+2;
+Int_t colorMiFit = kGray;
+Int_t colorFit = kBlack;
+Int_t colorConstraint = kBlue;
+Int_t colorGrid = kSpring+8;
+Int_t colorAggregate = kViolet+1;
+Int_t colorOutlier = kMagenta-9;
+Int_t colorFinal = kRed;
 
 // Fitting
 TF1* scgl_fit = 0;
@@ -152,17 +209,20 @@ Double_t fitParsSC[3];
 Double_t fitParErrsSC[3];
 Double_t fitParsGL[3];
 Double_t fitParErrsGL[3];
-Double_t fitParsSCGL[6];
-Double_t fitParErrsSCGL[6];
+Double_t fitParsSCGL[8];
+Double_t fitParErrsSCGL[8];
 char* parNameSC[3];
 char* parNameGL[3];
-char* parNameSCGL[6];
+char* parNameSCGL[8];
 
 // Global fit data and parameters
 Double_t m_sc[nMeasuresMax];
+Double_t m_sc2[nMeasuresMax];
+Double_t m_usc[nMeasuresMax];
+Double_t m_ugl[nMeasuresMax];
 Double_t m_gapf[nMeasuresMax];
 Double_t m_L[nMeasuresMax];
-Double_t m_L2[nMeasuresMax];
+Double_t m_c1[nMeasuresMax];
 Int_t m_set[nMeasuresMax];
 Double_t devsSC[nMeasuresMax];
 Double_t devsGL[nMeasuresMax];
@@ -182,11 +242,8 @@ double STDDEV_SC = 0.001;
 double STDDEV_GL = 0.035;
 
 // Data for each chain
-double uso[nfip]; // SO used
-double usc[nfip]; // SC used
+int glmode[nfip]; // mode of obtaining used GL
 double ugl[nfip]; // GL used
-double usg[nfip]; // SC*GL used
-double ugo[nfip]; // SO*SC*GL used
 
 // Plot data:
 double xgl[nMeasuresMax];
@@ -202,7 +259,7 @@ TString pcadets[nsca];
 double pcacoef[nsca];
 double pcaoffset;
 int pcaN = -1;
-const int maxp = 512;
+const int maxp = 1024;
 TPrincipal* ppl[maxp];
 Bool_t ITER0 = kFALSE;
 
@@ -212,26 +269,42 @@ Bool_t ITER0 = kFALSE;
 // Main routine
 //////////////////////////////////////////
 
-void Calib_SC_GL(const char* input, const char* cuts, const char* scalerstr, int debug) {
+void Calib_SC_GL(const char* input, const char* cuts, const char* scalerstr, int debug, const char* gcuts) {
   scastr = scalerstr;
-  if (scastr.Contains(":")) Calib_SC_GL(input,cuts,  -999,debug);
-  else                      Calib_SC_GL(input,cuts,nsca-1,debug);
+  if (scastr.Contains(":")) Calib_SC_GL(input,cuts,  -999,debug,gcuts);
+  else                      Calib_SC_GL(input,cuts,nsca-1,debug,gcuts);
 }
 
-void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
+void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, const char* gcuts) {
 
   // Define useful luminosity scaler detectors
+  //   copied from StRoot/StDetectorDbMaker/St_spaceChargeCorC.cxx
   TString dets[nsca];
-  dets[0] = "bbce+bbcw-4*(bbcyb+bbcbb)"; // Just for fun.
+  dets[0] = "vpdx"     ;
   dets[1] = "bbcx"     ;
   dets[2] = "zdcx"     ;
   dets[3] = "zdce+zdcw";
   dets[4] = "bbce+bbcw";
-  //dets[11] = "zdcc"    ;
-  //dets[12] = "bbcc"    ;
+  dets[5] = "zdce"     ;
+  dets[6] = "zdcw"     ;
+  dets[7] = "bbce"     ;
+  dets[8] = "bbcw"     ;
+  dets[9] = "bbcyb"    ;
+  dets[10]= "bbcbb"    ;
+  dets[11]= "vpde"     ;
+  dets[12]= "vpdw"     ;
+  dets[13]= "zdcxnk"   ;
+  dets[14]= "zdcenk"   ;
+  dets[15]= "zdcwnk"   ;
+  //dets[21] = "zdcc"    ;
+  //dets[22] = "bbcc"    ;
+  //dets[23] = "bbce+bbcw-4*(bbcyb+bbcbb)"; // Just for fun.
   // reserve dets[nsca-1] for special uses (PCA, manually provided scalers)
 
-  Init(input);
+  if (Init(input)) return;
+  
+  cut = ((cuts) ? cuts : "");
+  gcut = ((gcuts) ? gcuts : cut.GetTitle());
 
   Bool_t DO_PCA = (scaler < -1);
 
@@ -242,8 +315,8 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
       ITER0 = kTRUE;
       printf("\n*** Running PCA iteration 0 ***\n\n");
       // First iteration uses a single input dataset to define PCA
-      Calib_SC_GL(input,cuts,scaler,debug);
-      // Second pass uses a all input datasets to define PCA
+      Calib_SC_GL(input,cuts,scaler,debug,gcuts);
+      // Second pass uses all input datasets to define PCA
       NO_PLOTS = no_plots;
       ITER0 = kFALSE;
       printf("\n*** Running PCA iteration 1 ***\n\n");
@@ -260,15 +333,15 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
     }
   }
 
-
-  cut = ((cuts) ? cuts : "");
   int i,j,k,status;
   double temp1,temp2,vsc_min = 1e10;
   int jmin=-1;
 
 
   // Data arrays
+  double asg[nfip];
   double glk[nfip];
+  double ago[nfip];
   double glo[nfip];
   double spc[nfip];
   double spo[nfip];
@@ -284,16 +357,13 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
 
   // Define useful graphics tools
   TMarker mark;
-  mark.SetMarkerColor(2);
+  mark.SetMarkerColor(colorFinal);
   mark.SetMarkerStyle(28);
   TPolyMarker mark2;
   TEllipse ellip;
-  ellip.SetLineColor(2);
+  ellip.SetLineColor(colorFinal);
   ellip.SetLineStyle(2);
   ellip.SetFillStyle(0);
-  TLine line;
-  line.SetLineStyle(2);
-  line.SetLineColor(4);
   double zero = 0;
 
 
@@ -305,7 +375,25 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   parName = parNameSC;
 
 
-
+  // Set some dimensional variables
+  nMeasures = 0;
+  for (i=0;i<nfi;i++) { // parameter sets
+    TString SCvarstr = "sc:gapf:usc:const1";
+    SCi[i]->Draw(SCvarstr.Data(),cut,"goff");
+    nMeasuresI = SCi[i]->GetSelectedRows();
+    memcpy(&(m_sc  [nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
+    memcpy(&(m_gapf[nMeasures]),SCi[i]->GetV2(),nMeasuresI*sizeof(Double_t));
+    memcpy(&(m_usc [nMeasures]),SCi[i]->GetV3(),nMeasuresI*sizeof(Double_t));
+    memcpy(&(m_c1  [nMeasures]),SCi[i]->GetV4(),nMeasuresI*sizeof(Double_t));
+    if (glmode[i] == 2) {
+      SCi[i]->Draw("ugl",cut,"goff");
+      memcpy(&(m_ugl[nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
+      ugl[i] = m_ugl[nMeasures];
+    } else for (k=0; k<nMeasuresI; k++) m_ugl[k+nMeasures] = ugl[i]; // if not in the ntuple
+    for (k=0; k<nMeasuresI; k++) m_set[k+nMeasures] = i;
+    nMeasures += nMeasuresI;
+  }
+  
   // Loop over available scaler detectors
   for (j=0;j<nsca;j++) {
     if (scaler>=0 && j!=scaler) continue;
@@ -319,11 +407,9 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
     // Set dimensional variables
     nMeasures = 0;
     for (i=0;i<nfi;i++) { // parameter sets
-      SCi[i]->Draw(Form("sc:%s",dt),cut,"goff");
+      SCi[i]->Draw(dt,cut,"goff");
       nMeasuresI = SCi[i]->GetSelectedRows();
-      memcpy(&(m_sc[nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
-      memcpy(&(m_L [nMeasures]),SCi[i]->GetV2(),nMeasuresI*sizeof(Double_t));
-      for (k=0; k<nMeasuresI; k++) m_set[k+nMeasures] = i;
+      memcpy(&(m_L[nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
       nMeasures += nMeasuresI;
     }
     STDDEV = STDDEV_SC;
@@ -334,23 +420,23 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
       if (!ITER0) sce_init = fitParsSCGL[1]+fitParsSCGL[4];
     } else {
       SCi[nfi-1]->Draw(Form("sc/(%s)",dt),cut,"goff");
-      TH1* htemp = SCi[nfi-1]->GetHistogram();
-      sce_init *= (htemp->GetMean());
+      histo = SCi[nfi-1]->GetHistogram();
+      sce_init *= (histo->GetMean());
     }
     if (debug) printf("\nUsing initial value for SCe of %g\n",sce_init);
 
     TString sname[3] = {"SO","log(SCe)","log(g5)"};
     Double_t sstart[3] = {100., TMath::Log(sce_init), TMath::Log(15.0)};
-    Double_t sstep[3] = {1000., 0.5, 0.1};
-    if (DO_PCA) sstart[0] = 0;
+    Double_t sstep[3] = {1000., TMath::Abs(0.01*TMath::Log(sce_init)), 0.01};
+    if (DO_PCA) { sstart[0] = 1e-3; sstep[0] = 1e-5; }
     SetMinuitPars(3,sname,sstart,sstep,debug);
-    minuit->SetFCN(fnchSC);
+    minuit->SetFCN(fnchSC); // Keep g3r=g4r=1 to stabilize initial fit
 
     // Perform the fit
-    printf("\nSpaceCharge fit results (scaler: %s):\n",dt);
+    printf("\nSpaceCharge fit results {scaler: %s}:\n",dt);
     status = FitWithOutlierRemoval(debug);
     if (status) {
-      printf("Fit failed for sc, scaler = %s, err = %d\nTrying next scaler (if any)...\n\n",dt,status);
+      printf("Fit failed for sc, err = %d\nTrying next scaler (if any)...\n\n",status);
       Waiting();
       continue;
     }
@@ -412,19 +498,16 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   // Set dimensional variables
   nMeasures = 0;
   for (i=0;i<nfi;i++) {
-    SCi[i]->Draw(Form("gapf:%s:%s",detbest,dets[det[i]].Data()),cut,"goff");
+    SCi[i]->Draw(detbest,cut,"goff");
     nMeasuresI = SCi[i]->GetSelectedRows();
-    memcpy(&(m_gapf[nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
-    memcpy(&(m_L   [nMeasures]),SCi[i]->GetV2(),nMeasuresI*sizeof(Double_t));
-    memcpy(&(m_L2  [nMeasures]),SCi[i]->GetV3(),nMeasuresI*sizeof(Double_t));
-    for (k=0; k<nMeasuresI; k++) m_set[k+nMeasures] = i;
+    memcpy(&(m_L[nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
     nMeasures += nMeasuresI;
   }
 
   // Set starting values and step sizes for parameters
-  TString gname[3] = {"g2","gGL/g2 = SCxGL","GLO"};
-  Double_t gstart[3] = {1.0, sce[jmin]*0.4, 0.}; // guess GL/(g5+gL) ~=(10/(15+10)) ~= 0.4
-  Double_t gstep[3]  = {0.1, sceE[jmin]*0.4, 100.0};
+  TString gname[3] = {"g2","g1/g2 = SCxGL","GLO"};
+  Double_t gstart[3] = {1.0, sce[jmin]*0.4, 0.}; // guess GL/(g5+GL) ~=(10/(15+10)) ~= 0.4
+  Double_t gstep[3]  = {0.01, sceE[jmin]*0.4, 100.0};
   if (DO_PCA) {
     gstart[1] = 10.0; // gues GL ~= 10.0
     gstep[1] = 1.0;
@@ -433,7 +516,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   minuit->SetFCN(fnchGapf);
 
   // Perform the fit
-  printf("\nGridLeak fit results (scaler: %s):\n",detbest);
+  printf("\nGridLeak fit results {scaler: %s}:\n",detbest);
   status = FitWithOutlierRemoval(debug);
   if (status) {
     printf("Fit failed for gapf, err = %d\n",status);
@@ -478,11 +561,11 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   if (debug>0) {
     printf("\n*** FIRST PASS CALIBRATION VALUES: ***\n");
     PrintResult(scp, escp, sop, esop, glp, eglp, (DO_PCA ? 0 : detbest));
-    printf("USING STDDEV SC = %f :: GL = %f\n",STDDEV_SC,STDDEV_GL);
+    printf("USING STDDEV sc => %f :: gapf => %f\n",STDDEV_SC,STDDEV_GL);
   }
   
   //////////////////////////////////////////
-  // Try again with one unified full fit
+  // Try again with one unified full 3D fit
   // No further outlier removal (use already-determined outliers)
 
   // Prepare for SC+GL fit
@@ -491,29 +574,32 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   parName = parNameSCGL;
 
   // Set starting values and step sizes for parameters
-  int npar = 6;
-  TString fname[6] = {"g2","log(g5)","log(SC)","SO","log(GL)","GLO"};
-  Double_t fstart[6] = {fitParsGL[0], TMath::Log(fitParsSC[2]), TMath::Log(scp),
-    sop, TMath::Log(9.0), GLO};
-  Double_t fstep[6]  = {fitParErrsGL[0], fitParErrsSC[2]/fitParsSC[2], escp/scp,
-    esop, 0.1, eGLO};
-  SetMinuitPars(6,fname,fstart,fstep,debug);
+  int npar = 8;
+  TString fname[8] = {"g2","log(g5)","log(SC)","SO","log(GL)","GLO","log(g5r)","log(g4r)"};
+  Double_t fstart[8] = {fitParsGL[0], TMath::Log(fitParsSC[2]), TMath::Log(scp),
+    sop, TMath::Log(9.0), GLO, 0, 0};
+  Double_t fstep[8]  = {fitParErrsGL[0], fitParErrsSC[2]/fitParsSC[2], escp/scp,
+    esop, 0.1, eGLO, 0.001, 0.001};
+  Bool_t ffix[8] = {kFALSE, kFALSE, kFALSE, kFALSE, kFALSE,
+    FORCE_GLO_SO, (FORCE_g3_same || FORCE_g5_same), FORCE_g4_same};
+  SetMinuitPars(8,fname,fstart,fstep,debug,ffix);
   minuit->SetFCN(fnchSCGapf);
-  if (FORCE_GLO_SO) {
-    minuit->SetParameter(5, "GLO    ", 0, 0, 0, 0);
-    minuit->FixParameter(5);
-    npar--;
-  }
-
+  
   // Perform the fit
-  printf("\nSpaceCharge & GridLeak fit results (scaler: %s):\n",detbest);
+  printf("\nSpaceCharge & GridLeak fit results {scaler: %s}:\n",detbest);
   status = minuit->ExecuteCommand("MIGRAD", arglist ,1);
   if (status) {
     printf("Fit failed for sc+gl, err = %d\n",status);
     return;
   }
+  // covarAdjust is a fudge factor for how the covariance (which is negative)
+  // between pars 2 and 4 modifies the variance on the product of their exponentials
+  Double_t covarAdjust = 1 + (minuit->GetCovarianceMatrixElement(2,4) / 
+                              (minuit->GetCovarianceMatrixElement(2,2) +
+                               minuit->GetCovarianceMatrixElement(4,4)));
   for (k=0;k<npar;k++) {
-    for (i=0;i<npar;i++) if (i!=k) minuit->FixParameter(i);
+    if (ffix[k]) continue;
+    for (i=0;i<npar;i++) if (i!=k && !ffix[i]) minuit->FixParameter(i);
     status = minuit->ExecuteCommand("MIGRAD", arglist ,1);
     if (status) {
       printf("Fit failed for sc+gl, err = %d\n",status);
@@ -521,7 +607,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
     }
     minuit->GetParameter(k,parName[k],fitPars[k],fitParErrs[k],temp1,temp2);
     printf("%s\t:\t%g\t+/- %g\n",parName[k],fitPars[k],fitParErrs[k]);
-    for (i=0;i<npar;i++) if (i!=k) minuit->ReleaseParameter(i);
+    for (i=0;i<npar;i++) if (i!=k && !ffix[i]) minuit->ReleaseParameter(i);
   }
   if (!NO_PLOTS && debug>0) {
     if (conSCGL ==0) {
@@ -533,6 +619,8 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   Log2Lin(1);
   Log2Lin(2);
   Log2Lin(4);
+  Log2Lin(6);
+  Log2Lin(7);
   scp = fitPars[2];
   sop = fitPars[3];
   glp = fitPars[4];
@@ -548,6 +636,21 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
     GLO = fitPars[5];
     eGLO = fitParErrs[5];
   }
+  if (FORCE_g4_same) {
+    fitPars[7] = 1.0;
+    fitParErrs[7] = 0.0;
+  }
+  if (FORCE_g5_same) {
+    fitPars[6] = 1.0;
+    fitParErrs[6] = 0.0;
+  } else if (FORCE_g3_same) {
+    fitPars[6] = 1.0/fitPars[7];
+    fitParErrs[6] = fitPars[6]*(fitParErrs[7]/fitPars[7]);
+  }
+  double scXgl_final = scp*glp;
+  double escXgl_final = scXgl_final*TMath::Sqrt(covarAdjust*
+                                                (TMath::Power(fitParErrs[4]/fitPars[4],2)+
+                                                 TMath::Power(fitParErrs[2]/fitPars[2],2)));
   printf("\n*** FINAL CALIBRATION VALUES: ***\n");
   PrintResult(scp, escp, sop, esop, glp, eglp, (DO_PCA ? 0 : detbest));
 
@@ -561,9 +664,20 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   //   because it would otherwise depend on both the
   //   used luminosity scaler and the estimated best one
 
-
+  if (fitParsSCGL[6] == 1.0 && fitParsSCGL[7] == 1.0) {
+    memcpy(m_sc2,m_sc,nMeasures*sizeof(Double_t));
+  } else {
+    // Need to shift data points for display purposes
+    //   (cannot shift the fit curves point-by-point)
+    for (i=0; i<nMeasures; i++) {
+      m_sc2[i] = m_sc[i] - m_usc[i] *
+                 (1.0 - (                (               fitParsSCGL[1] + m_ugl[i])/
+                         (fitParsSCGL[7]*(fitParsSCGL[6]*fitParsSCGL[1] + m_ugl[i]))));
+    }
+  }    
+  
   double sc_min,sc_max,gapf_min,gapf_max,Lmin,Lmax;
-  SetMinMax(nMeasures,m_sc,sc_min,sc_max,0);
+  SetMinMax(nMeasures,m_sc2,sc_min,sc_max,0);
   SetMinMax(nMeasures,m_gapf,gapf_min,gapf_max,0,0.25);
   SetMinMax(nMeasures,m_L,Lmin,Lmax,m_L[0]);
   gapf_max += fitParsSCGL[0]*scp*glp*(Lmax-sop);
@@ -578,46 +692,66 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   gapf_max += (nfi-1)*gapf_offset;
 
   // Same as funcGapf and funcSC except non-luminosity dimensions become
-  //   exra parameters, and we're pushing gapf back to uncorrected values
-  TF1* fnGapf = new TF1("fnGapf","[0] * ( ([2]*[4]) * (x - [5]) ) + [8]",0,Lmax);
-  TF1* fnSC = new TF1("fnSC","([2]*([1]+[4])) * (x - [3]) / ([6] + [1]) + [8]",0,Lmax);
+  //   extra parameters, and we're adjusting gapf back to uncorrected values
+  TF1* fnGapf = new TF1("fnGapf","[0] * ( ([2]*[4]) * (x - [5]) ) + [9]",0,Lmax);
+  TF1* fnSC = new TF1("fnSC","([2]*([1] + [4])) * (x - [3]) / ([7]*([6]*[1] + [8])) + [9]",0,Lmax);
   fnGapf->SetParameters(fitParsSCGL);
   fnSC->SetParameters(fitParsSCGL);
   fnGapf->SetLineWidth(1);
   fnSC->SetLineWidth(1);
+  TF1* fiGapf = new TF1("fiGapf","[0] * ( ([1]) * (x - [2]) ) + [9]",0,Lmax);
+  TF1* fiSC = new TF1("fiSC","[1] * (x - [0]) / ([2] + [8]) + [9]",0,Lmax);
+  fiGapf->SetParameters(fitParsGL);
+  fiSC->SetParameters(fitParsSC);
+  fiGapf->SetLineWidth(1);
+  fiSC->SetLineWidth(1);
+  fiGapf->SetLineColor(colorMiFit);
+  fiSC->SetLineColor(colorMiFit);
   if (!cGL) cGL = new TCanvas("cGL","GridLeak Fits",30,30,500,500);
-  TH2D* htGL = new TH2D("htGL",Form("gapf vs. %s for all sets offset by %4.2f",detbest,gapf_offset),
+  TH2D* htGL = new TH2D("htGL",Form("adjusted #font[32]{gapf} vs. %s for all sets, offset by %4.2f",detbest,gapf_offset),
                         1,Lmin,Lmax,1,gapf_min,gapf_max);
   htGL->Draw();
   if (!cSC) cSC = new TCanvas("cSC","SpaceCharge Fits",60,60,500,500);
-  TH2D* htSC = new TH2D("htSC",Form("sc vs. %s for all sets offset by %5.3f",detbest,sc_offset),
+  TH2D* htSC = new TH2D("htSC",Form("#font[32]{sc} vs. %s for all sets, offset by %5.3f",detbest,sc_offset),
                         1,Lmin,Lmax,1,sc_min,sc_max);
   htSC->Draw();
   for (i=0; i<nfi; i++) {
     cGL->cd();
-    SCi[i]->Draw(Form("gapf+(%g)*(%g)*((%s)-(%g))+%g:%s",fitParsSCGL[0],usg[i],dets[det[i]].Data(),uso[i],
-                      i*gapf_offset,detbest),cut,"same");
-    fnGapf->SetParameter(6,usg[i]);
-    fnGapf->SetParameter(7,uso[i]);
-    fnGapf->SetParameter(8,0+i*gapf_offset);
-    fnGapf->SetLineColor(1);
+    SCi[i]->Draw(Form("gapf+%s*(%g)*usc+%g:%s",
+                      (glmode[i] == 2 ? "ugl" : Form("(%g)",ugl[i])),
+                      fitParsSCGL[0],i*gapf_offset,detbest),gcut,"same");
+    // should use fitParsSCGL[0] to match fnGapf and outlier bands,
+    //   but fitParsGL[0] to match fiGapf
+    fiGapf->SetParameter(9,0+i*gapf_offset);
+    fiGapf->DrawCopy("same");
+    fnGapf->SetParameter(9,0+i*gapf_offset);
+    fnGapf->SetLineColor(colorFit);
     fnGapf->DrawCopy("same");
-    fnGapf->SetParameter(8,MAX_DEV*vgl+i*gapf_offset);
-    fnGapf->SetLineColor(6);
+    fnGapf->SetParameter(9,MAX_DEV*vgl+i*gapf_offset);
+    fnGapf->SetLineColor(colorOutlier);
     fnGapf->DrawCopy("same");
-    fnGapf->SetParameter(8,-MAX_DEV*vgl+i*gapf_offset);
+    fnGapf->SetParameter(9,-MAX_DEV*vgl+i*gapf_offset);
     fnGapf->DrawCopy("same");
 
     cSC->cd();
-    SCi[i]->Draw(Form("sc+%g:%s",i*sc_offset,detbest),cut,"same");
-    fnSC->SetParameter(6,ugl[i]);
-    fnSC->SetParameter(8,0+i*sc_offset);
-    fnSC->SetLineColor(1);
+    if (fitParsSCGL[6] == 1.0 && fitParsSCGL[7] == 1.0) {
+      SCi[i]->Draw(Form("sc+%g:%s",i*sc_offset,detbest),gcut,"same");
+    } else {
+      SCi[i]->Draw(Form("sc-usc*(1-(%g+ugl)/(%g*(%g+ugl)))+%g:%s",
+                        fitParsSCGL[1],fitParsSCGL[7],fitParsSCGL[6]*fitParsSCGL[1],
+                        i*sc_offset,detbest),gcut,"same");
+    }
+    fiSC->SetParameter(8,ugl[i]);
+    fiSC->SetParameter(9,0+i*sc_offset);
+    fiSC->DrawCopy("same");
+    fnSC->SetParameter(8,ugl[i]);
+    fnSC->SetParameter(9,0+i*sc_offset);
+    fnSC->SetLineColor(colorFit);
     fnSC->DrawCopy("same");
-    fnSC->SetParameter(8,MAX_DEV*vsc[jmin]+i*sc_offset);
-    fnSC->SetLineColor(6);
+    fnSC->SetParameter(9,MAX_DEV*vsc[jmin]+i*sc_offset);
+    fnSC->SetLineColor(colorOutlier);
     fnSC->DrawCopy("same");
-    fnSC->SetParameter(8,-MAX_DEV*vsc[jmin]+i*sc_offset);
+    fnSC->SetParameter(9,-MAX_DEV*vsc[jmin]+i*sc_offset);
     fnSC->DrawCopy("same");
   }
 
@@ -630,8 +764,8 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   if (allZeros) {
     printf("\n\n*** Try the following calibration values: ***\n");
     for (i=0; i<nfi; i++) {
-      printf("SC = %6.4g * ((%s) - (%6.4g))",sce[jmin],detbest,sof[jmin]);
-      printf(" with GL = %5.2f\n\n",ugl[i]);
+      printf("sc = %6.4g * ((%s) - (%6.4g))",sce[jmin],detbest,sof[jmin]);
+      printf(" with GL = %5.2f\n\n",ugl[i]); // glmode[i]==2 ?
     }
     return;
   }
@@ -640,116 +774,119 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   if (cSummary==0) cSummary = new TCanvas("cSummary","Calib SC and GL");
   cSummary->Divide(2,2,0.01,0.025);
 
-  Double_t min,max,ymin,ymax,ymin2,ymax2,dev,dev2;
-  Double_t xx[4];
+  Double_t min,max,ymin,ymax,ymin2,ymax2;
+  Double_t xx[2];
   
   //////////////////////////////////////////
-  // Plot for LeakS vs. SC*GL
+  // Plot for gapf/(L-GLO) vs. usc*GLu/(L-GLO) (~SC*GL) => g1/g2 @ zero crossing
 
-  TF1* myGL = new TF1("LeakS_of_SCGL","[0]*([1]-x)",0,5e-5);
-  myGL->SetParameters(fitParsGL);
+  TF1* miGL = new TF1("igapfL_of_SCGL","[0]*([1]-x)",0,5e-5);
+  miGL->SetParameters(fitParsGL);
+  miGL->SetLineWidth(1);
+  miGL->SetLineColor(colorMiFit);
+  TF1* myGL = new TF1("gapfL_of_SCGL","[0]*([2]*[4]-x)",0,5e-5);
+  myGL->SetParameters(fitParsSCGL);
   myGL->SetLineWidth(1);
-  Double_t asg[nfip]; // approximated usg converted from used lum scaler to best
+  myGL->SetLineColor(colorFit);
+  // average used SC*GL converted from used lum scaler to best
   memset(asg,0,nfip*sizeof(Double_t));
+  memset(glk,0,nfip*sizeof(Double_t));
   memset(nno,0,nfip*sizeof(Double_t));
-  memset(devs,0,nMeasures*sizeof(Double_t));
-  for (i=0;i<nMeasures;i++) { // parameter sets
-    if (!outliersGL[i]) {
-      int ifi = m_set[i];
-      asg[ifi] += m_L2[i]/m_L[i];
-      nno[ifi]++;
-    }
-  }
-  for (i=0;i<nfi;i++) {
-    asg[i] *= usg[i]/nno[i];
-    glk[i] = myGL->Eval(asg[i]);
-  }
   k = 0;
   for (i=0;i<nMeasures;i++) { // parameter sets
     if (outliersGL[i]) continue;
     int ifi = m_set[i];
-    xx[0] = m_L[i];
-    xx[1] = m_L2[i];
-    xx[2] = uso[ifi];
-    xx[3] = usg[ifi];
-    xgl[k] = usg[ifi]*m_L2[i]/m_L[i]; // more realistic than using asg[ifi]
-    // gapf = Leak_I + Leak_S * L
-    // Leak_S = (gapf - Leak_I) / L
-    // del(Leak_S) = del(gapf)/L
-    dev = (m_gapf[i] - funcGapf(xx,fitParsGL))/m_L[i];
-    ygl[k] = glk[ifi] + dev;
-    devs[ifi] += dev;
+    // gapf = g5*(L-GLO) - g2*usc*GLu = g2*(SC*GL*(L-GLO) - usc*GLu)
+    // SC*GL = usc*GLu/(L-GLO) @ gapf = 0
+    xgl[k] = m_usc[i]*m_ugl[i]/(m_L[i]-fitParsSCGL[5]);
+    ygl[k] = m_gapf[i]/(m_L[i]-fitParsSCGL[5]);
+    asg[ifi] += xgl[k];
+    glk[ifi] += ygl[k];
+    nno[ifi]++;
     k++;
   }
   for (i=0;i<nfi;i++) {
-    glk[i] += devs[i]/nno[i];
+    asg[i] /= nno[i];
+    glk[i] /= nno[i];
   }
-  SetMinMax(k,xgl,min,max,scXgl);
+  SetMinMax(k,xgl,min,max,scXgl_final);
   SetMinMax(k,ygl,ymin,ymax,zero);
+  miGL->SetRange(min,max);
   myGL->SetRange(min,max);
 
   cSummary->cd(1);
   myGL->Draw();
-  myGL->GetHistogram()->SetTitle("Leak_S vs. SC*GL");
-  myGL->GetHistogram()->SetMinimum(ymin);
-  myGL->GetHistogram()->SetMaximum(ymax);
-  mark2.SetMarkerColor(1);
+  histo = myGL->GetHistogram();
+  histo->SetTitle("#font[32]{gapf}/#font[32]{L} vs. SC#timesGL");
+  histo->SetYTitle("#font[32]{gapf} / (#font[32]{L}_{best} - GLO)");
+  histo->SetXTitle("#font[32]{sc}_{used} GL_{used} / (#font[32]{L}_{best} - GLO)");
+  histo->GetYaxis()->SetTitleOffset(1.25);
+  histo->SetMinimum(ymin);
+  histo->SetMaximum(ymax);
+  miGL->Draw("same");
+  myGL->Draw("same");
+  mark2.SetMarkerColor(colorData);
   mark2.SetMarkerStyle(1);
   mark2.DrawPolyMarker(k,xgl,ygl);
-  mark2.SetMarkerColor(4);
+  mark2.SetMarkerColor(colorAggregate);
   mark2.SetMarkerStyle(27);
   mark2.DrawPolyMarker(nfi,asg,glk);
 
-  ellip.DrawEllipse(scXgl,zero,escXgl,0.004*(ymax-ymin),0,360,0);
-  mark.DrawMarker(scXgl,zero);
+  ellip.DrawEllipse(scXgl_final,zero,escXgl_final,0.004*(ymax-ymin),0,360,0);
+  mark.DrawMarker(scXgl_final,zero);
 
 
   //////////////////////////////////////////
-  // Plot for LeakI vs. SO*SC*GL*g2/gGL => GLO @ zero crossing
+  // Plot for gapf vs. L - usc*GL*g2/g1 => GLO @ zero crossing
   
-  TF1* myGO = new TF1("LeakI_of_SOSCGL","[0]*[1]*(x-[2])",0,5e-6);
-  myGO->SetParameters(fitParsGL);
+  TF1* miGO = new TF1("igapf_of_GLO","[0]*[1]*(x-[2])",0,5e-6);
+  miGO->SetParameters(fitParsGL);
+  miGO->SetLineWidth(1);
+  miGO->SetLineColor(colorMiFit);
+  TF1* myGO = new TF1("gapf_of_GLO","[0]*[2]*[4]*(x-[5])",0,5e-6);
+  myGO->SetParameters(fitParsSCGL);
   myGO->SetLineWidth(1);
-  memset(devs,0,nMeasures*sizeof(Double_t));
-  for (i=0;i<nfi;i++) {
-    ugo[i] /= scXgl; // Use 
-    glo[i] = myGO->Eval(ugo[i]);
-  }
+  myGO->SetLineColor(colorFit);
+  // average used GLO converted from used lum scaler to best
+  memset(ago,0,nfip*sizeof(Double_t));
+  memset(glo,0,nfip*sizeof(Double_t));
   k = 0;
   for (i=0;i<nMeasures;i++) { // parameter sets
     if (outliersGL[i]) continue;
     int ifi = m_set[i];
-    xx[0] = m_L[i];
-    xx[1] = m_L2[i];
-    xx[2] = uso[ifi];
-    xx[3] = usg[ifi];
-    xgo[k] = ugo[ifi];
-    // gapf = Leak_I + Leak_S * L
-    // Leak_I = gapf - (Leak_S / L)
-    // del(Leak_I) = del(gapf), (Leak_S / L) cancels out
-    dev = m_gapf[i] - funcGapf(xx,fitParsGL);
-    ygo[k] = glo[ifi] + dev;
-    devs[ifi] += dev;
+    // GLO = L - (usc*GLu)/(SC*GL) @ gapf = 0
+    xgo[k] = m_L[i] - (m_usc[i]*m_ugl[i])/(fitParsSCGL[2]*fitParsSCGL[4]);
+    ygo[k] = m_gapf[i];
+    ago[ifi] += xgo[k];
+    glo[ifi] += ygo[k];
     k++;
   }
   for (i=0;i<nfi;i++) {
-    glo[i] += devs[i]/nno[i];
+    ago[i] /= nno[i];
+    glo[i] /= nno[i];
   }
-  SetMinMax(nfi,ugo,min,max,GLO);
+  SetMinMax(nfi,ago,min,max,GLO);
   SetMinMax(k,ygo,ymin,ymax,zero);
+  miGO->SetRange(min,max);
   myGO->SetRange(min,max);
 
   cSummary->cd(3);
   myGO->Draw();
-  myGO->GetHistogram()->SetTitle("Leak_I vs. GLO");
-  myGO->GetHistogram()->SetMinimum(ymin);
-  myGO->GetHistogram()->SetMaximum(ymax);
-  mark2.SetMarkerColor(1);
+  histo = myGO->GetHistogram();
+  histo->SetTitle(Form("#font[32]{gapf} vs. GLO%s",(FORCE_GLO_SO ? " #equiv SO" : "")));
+  histo->SetYTitle("#font[32]{gapf}");
+  histo->SetXTitle("#font[32]{L}_{best} - (#font[32]{sc}_{used} GL_{used} g_{2} / g_{GL})");
+  histo->GetYaxis()->SetTitleOffset(1.25);
+  histo->SetMinimum(ymin);
+  histo->SetMaximum(ymax);
+  miGO->Draw("same");
+  myGO->Draw("same");
+  mark2.SetMarkerColor(colorData);
   mark2.SetMarkerStyle(1);
   mark2.DrawPolyMarker(nMeasures,xgo,ygo);
-  mark2.SetMarkerColor(4);
+  mark2.SetMarkerColor(colorAggregate);
   mark2.SetMarkerStyle(27);
-  mark2.DrawPolyMarker(nfi,ugo,glo);
+  mark2.DrawPolyMarker(nfi,ago,glo);
 
   ellip.DrawEllipse(GLO,zero,eGLO,0.004*(ymax-ymin),0,360,0);
   mark.DrawMarker(GLO,zero);
@@ -758,44 +895,53 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   //////////////////////////////////////////
   // Plots for SC and SO vs. GL
 
-  TF1* mySO = new TF1("SO_of_GL","[0]",0,100);
-  TF1* mySC = new TF1("SC_of_GL","[1]/(x+[2])",0,100);
-  mySO->SetParameters(fitParsSC);
-  mySC->SetParameters(fitParsSC);
+  TF1* miSO = new TF1("iSO_of_GL","[0]",0,100);
+  TF1* miSC = new TF1("iSC_of_GL","[1]/([2]+[0])",0,100);
+  miSO->SetParameters(fitParsSC);
+  miSC->SetParameters(fitParsSC);
+  miSC->SetParameter(0,fitParsSCGL[4]);
+  miSO->SetLineWidth(1);
+  miSC->SetLineWidth(1);
+  miSO->SetLineColor(colorMiFit);
+  miSC->SetLineColor(colorMiFit);
+  TF1* mySO = new TF1("SO_of_GL","[3]",0,100);
+  TF1* mySC = new TF1("SC_of_GL","[2]",0,100);
+  mySO->SetParameters(fitParsSCGL);
+  mySC->SetParameters(fitParsSCGL);
   mySO->SetLineWidth(1);
   mySC->SetLineWidth(1);
+  mySO->SetLineColor(colorFit);
+  mySC->SetLineColor(colorFit);
   memset(nno,0,nfip*sizeof(Double_t));
-  memset(devs,0,nMeasures*sizeof(Double_t));
-  for (i=0;i<nfi;i++) {
-    spo[i] = mySO->Eval(ugl[i]);
-    spc[i] = mySC->Eval(ugl[i]);
-  }
+  memset(spo,0,nfip*sizeof(Double_t));
+  memset(spc,0,nfip*sizeof(Double_t));
   k = 0;
   for (i=0;i<nMeasures;i++) { // parameter sets
     if (outliersSC[i]) continue;
     int ifi = m_set[i];
     xx[0] = m_L[i];
-    xx[1] = ugl[ifi];
-    xsc[k] = ugl[ifi];
-    // sc = SC*(L-SO)
-    // SO = L-sc/SC, , del(SO) = del(sc)/SC    , L cancels
-    // SC = sc/(L-SO), del(SC) = del(sc)/(L-SO)
-    double dsc = m_sc[i] - funcSC(xx,fitParsSC);
-    dev = dsc/spc[ifi];
-    dev2 = dsc/(m_L[i]-spo[ifi]);
-    yso[k] = spo[ifi] + dev;
-    ysc[k] = spc[ifi] + dev2;
-    devs[ifi] += dev;
-    devs[ifi+nfi] += dev2;
+    xx[1] = m_ugl[i];
+    xsc[k] = m_ugl[i];
+    // Basically, sc = SC*(L-SO), so...
+    // SO = L-sc/SC 
+    // SC = sc/(L-SO)
+    // More explicitly,
+    // sc_real = [(sc_obs - sc_used) * g4r * (g5r * g5 + ugl) + sc_used * (g5 + ugl)] / (g5 + GL)
+    temp1 = ((m_sc[i] - m_usc[i]) * fitParsSCGL[7] * (fitParsSCGL[6] * fitParsSCGL[1] + m_ugl[i]) +
+                        m_usc[i]  *                  (                 fitParsSCGL[1] + m_ugl[i])) /
+                                                     (                 fitParsSCGL[1] + fitParsSCGL[4]);
+    yso[k] = m_L[i] - (temp1 / fitParsSCGL[2]);
+    ysc[k] = temp1 / (m_L[i] - fitParsSCGL[3]);
+    spo[ifi] += yso[k];
+    spc[ifi] += ysc[k];
     nno[ifi]++;
     k++;
   }
   j = 0;
   for (i=0;i<nfi;i++) {
-    spo[i] += devs[i]/nno[i];
-    dev2 = devs[i+nfi]/nno[i];
-    spc[i] += dev2;
-    if (dev2 > 0) j++;
+    spo[i] /= nno[i];
+    spc[i] /= nno[i];
+    if (spc[i] - miSC->Eval(ugl[i]) > 0) j++;
   }
   i = (nfi>5 ? 1 : 0);
   if (j<=i || j>=nfi-i) {
@@ -808,31 +954,39 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   SetMinMax(nfi,ugl,min,max,glp);
   SetMinMax(k,yso,ymin,ymax,sop);
   SetMinMax(k,ysc,ymin2,ymax2,scp);
+  miSO->SetRange(min,max);
+  miSC->SetRange(min,max);
   mySO->SetRange(min,max);
   mySC->SetRange(min,max);
 
   cSummary->cd(2);
   mySC->Draw();
-  mySC->GetHistogram()->SetTitle("SC vs. GL");
-  mySC->GetHistogram()->SetMinimum(ymin2);
-  mySC->GetHistogram()->SetMaximum(ymax2);
-  mark2.SetMarkerColor(1);
+  histo = mySC->GetHistogram();
+  histo->SetTitle("SC vs. GL");
+  histo->SetYTitle("[#font[32]{sc} / (#font[32]{L}_{best} - SO)] (g_{5} + GL_{used}) / (g_{5} + GL)");
+  histo->SetXTitle("GL_{used}");
+  histo->GetYaxis()->SetTitleOffset(1.25);
+  histo->SetMinimum(ymin2);
+  histo->SetMaximum(ymax2);
+  miSC->Draw("same");
+  mySC->Draw("same");
+  mark2.SetMarkerColor(colorData);
   mark2.SetMarkerStyle(1);
   mark2.DrawPolyMarker(k,xsc,ysc);
-  mark2.SetMarkerColor(4);
+  mark2.SetMarkerColor(colorAggregate);
   mark2.SetMarkerStyle(27);
   mark2.DrawPolyMarker(nfi,ugl,spc);
 
 
   if (!scgl_fit) scgl_fit = new TF1("scgl_fit","[0]/x",-5.,100.);
-  scgl_fit->SetParameter(0,scXgl);
-  scgl_fit->SetLineColor(4);
+  scgl_fit->SetParameter(0,scXgl_final);
+  scgl_fit->SetLineColor(colorConstraint);
   scgl_fit->SetLineWidth(1);
   scgl_fit->DrawCopy("same");
   scgl_fit->SetLineStyle(7);
-  scgl_fit->SetParameter(0,scXgl+escXgl);
+  scgl_fit->SetParameter(0,scXgl_final+escXgl_final);
   scgl_fit->DrawCopy("same");
-  scgl_fit->SetParameter(0,scXgl-escXgl);
+  scgl_fit->SetParameter(0,scXgl_final-escXgl_final);
   scgl_fit->DrawCopy("same");
 
   ellip.DrawEllipse(glp,scp,eglp,escp,0,360,0);
@@ -840,13 +994,19 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
   
   cSummary->cd(4);
   mySO->Draw();
-  mySO->GetHistogram()->SetTitle("SO vs. GL");
-  mySO->GetHistogram()->SetMinimum(ymin);
-  mySO->GetHistogram()->SetMaximum(ymax);
-  mark2.SetMarkerColor(1);
+  histo = mySO->GetHistogram();
+  histo->SetTitle("SO vs. GL");
+  histo->SetYTitle("#font[32]{L}_{best} - [#font[32]{sc} (g_{5} + GL_{used}) / (g_{5} + GL)]");
+  histo->SetXTitle("GL_{used}");
+  histo->GetYaxis()->SetTitleOffset(1.25);
+  histo->SetMinimum(ymin);
+  histo->SetMaximum(ymax);
+  miSO->Draw("same");
+  mySO->Draw("same");
+  mark2.SetMarkerColor(colorData);
   mark2.SetMarkerStyle(1);
   mark2.DrawPolyMarker(k,xsc,yso);
-  mark2.SetMarkerColor(4);
+  mark2.SetMarkerColor(colorAggregate);
   mark2.SetMarkerStyle(27);
   mark2.DrawPolyMarker(nfi,ugl,spo);
 
@@ -874,31 +1034,49 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug) {
 
 Double_t funcGapf(Double_t* x, Double_t* pars) {
   // x[0] = Luminosity to use
-  // x[1] = Luminosity used
-  // x[2] = uso
-  // x[3] = usg
-  return pars[0] * ( pars[1] * (x[0] - pars[2]) - x[3] * (x[1] - x[2]) );
+  // x[1] = usc*ugl
+  // x[2] = const1
+  // pars[0] = g2
+  // pars[1] = g1 / g2 = SC * GL
+  // pars[2] = GLO
+  return (x[2] / REF_CONST1) * pars[0] * ( pars[1] * (x[0] - pars[2]) - x[1] );
 }
 
 Double_t funcSC(Double_t* x, Double_t* pars) {
   // x[0] = Luminosity
   // x[1] = ugl
+  // pars[0] = SO
+  // pars[1] = SCe = SC * (g5 + GL)
+  // pars[2] = g5
   return pars[1] * (x[0] - pars[0]) / (x[1] + pars[2]);
+}
+
+Double_t funcSC2(Double_t* x, Double_t* pars) {
+  // x[0] = Luminosity
+  // x[1] = ugl
+  // x[2] = usc
+  // pars[0] = SO
+  // pars[1] = SCe = SC * (g5 + GL)
+  // pars[2] = g5
+  // pars[3] = g5r = g5' / g5
+  // pars[4] = g4r = g4' / g4
+  return x[2] +
+    (pars[1] * (x[0] - pars[0]) - (pars[2] + x[1]) * x[2]) /
+    (pars[4] * (pars[3] * pars[2] + x[1]));
 }
 
 void fnchGapf(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   //calculate chisquare
   gin = 0; iflag = 0;
   double chisq = 0;
-  Double_t x[4];
+  Double_t x[3];
   nMeasuresI = 0;
   for (int i=0;i<nMeasures;i++) {
     if (outliers[i]) continue;
-    int ifi = m_set[i];
+    if (m_gapf[i] == 0) { outliers[i]=kTRUE; devs[i] = 0; continue; }
     x[0] = m_L[i];
-    x[1] = m_L2[i];
-    x[2] = uso[ifi];
-    x[3] = usg[ifi];
+    x[1] = m_usc[i] * m_ugl[i];
+    x[2] = m_c1[i];
     devs[i] = m_gapf[i] - funcGapf(x,par);
     chisq += devs[i]*devs[i];
     nMeasuresI++;
@@ -919,9 +1097,9 @@ void fnchSC(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   nMeasuresI = 0;
   for (int i=0;i<nMeasures;i++) {
     if (outliers[i]) continue;
-    int ifi = m_set[i];
+    if (m_sc[i] == 0) { outliers[i]=kTRUE; devs[i] = 0; continue; }
     x[0] = m_L[i];
-    x[1] = ugl[ifi];
+    x[1] = m_ugl[i];
     devs[i] = m_sc[i] - funcSC(x,pars); // par
     chisq += devs[i]*devs[i];
     nMeasuresI++;
@@ -934,34 +1112,37 @@ void fnchSCGapf(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t if
   //calculate chisquare
   gin = 0; iflag = 0;
   double chisq = 0;
-  Double_t x[4];
+  Double_t x[3];
   nMeasuresI = 0;
   Double_t parGL[3];
-  Double_t parSC[3];
+  Double_t parSC[5];
   Double_t SC = TMath::Exp(par[2]);
   Double_t GL = TMath::Exp(par[4]);
   Double_t g5 = TMath::Exp(par[1]);
+  Double_t g5r= TMath::Exp(par[6]); // g5r = g5' / g5
+  Double_t g4r= TMath::Exp(par[7]); // g4r = g4' / g4
   parGL[0] = par[0]; // g2
-  parGL[1] = SC*GL; // gGL/g2 = SC * GL
+  parGL[1] = SC*GL; // g1 / g2 = SC * GL
   parGL[2] = (FORCE_GLO_SO ? par[3] : par[5]); // GLO
   parSC[0] = par[3]; // SO
   parSC[1] = SC*(g5 + GL); // SCe = SC * (g5 + GL)
   parSC[2] = g5; // g5
+  parSC[3] = (FORCE_g5_same ? 1. : (FORCE_g3_same ? 1./g4r : g5r));
+  parSC[4] = (FORCE_g4_same ? 1. : g4r);
   for (int i=0;i<nMeasures;i++) {
-    int ifi = m_set[i];
     x[0] = m_L[i];
-    x[1] = m_L2[i];
-    x[2] = uso[ifi];
-    x[3] = usg[ifi];
+    x[1] = m_usc[i] * m_ugl[i];
+    x[2] = m_c1[i];
     if (!outliersGL[i]) {
       devsGL[i] = m_gapf[i] - funcGapf(x,parGL);
       chisq += TMath::Power(devsGL[i]/STDDEV_GL,2);
       nMeasuresI++;
     }
-
-    x[1] = ugl[ifi];
+    
+    x[1] = m_ugl[i];
+    x[2] = m_usc[i];
     if (!outliersSC[i]) {
-      devsSC[i] = m_sc[i] - funcSC(x,parSC);
+      devsSC[i] = m_sc[i] - funcSC2(x,parSC);
       chisq += TMath::Power(devsSC[i]/STDDEV_SC,2);
       nMeasuresI++;
     }
@@ -975,65 +1156,155 @@ void fnchSCGapf(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t if
 //////////////////////////////////////////
 
 
-void Init(const char* input) {
-  if (SCall) return;
+int Init(const char* input) {
+  if (SCall) return 0;
 
-  gStyle->SetGridColor(kSpring+8);
+  gStyle->SetGridColor(colorGrid);
   gStyle->SetOptStat(0);
   gStyle->SetPalette(1);
 
   int i,k;
-  char fname[128];
+  char fname[256];
+  double temp;
   TString fis[nfip];// file names
+  SCall = new TChain("SC","ChainAll");
 
-  // Read input file
-  ifstream dats(input);
-  nfi = nfip;
-  for (i=0;i<nfi;i++) {
-    dats >> fname;
-    if (dats.eof()) { nfi=i; continue; }
-    fis[i] = fname;
-    dats >> det[i] >> usc[i] >> ugl[i];
-    if (usc[i]) allZeros = kFALSE;
-
-    if (fis[i].Contains("!")) { // Indicates that the used SO value is to be read in
-      dats >> uso[i];
-      fis[i].Remove(fis[i].First('!'),1);
-    } else {
-      uso[i] = 0;
+  if (!input || input[0] == 0 || input[0] == '@') {
+    
+    nfi = 0;
+    int nfii[nfip];
+    TSeqCollection* listOfFiles = 0;
+    TObjArray SCGLcombos;
+    TFile* fileI = 0;
+    if (!input) { // Use already opened files
+      listOfFiles = gROOT->GetListOfFiles();
+    } else { // Unified file specification
+      fis[0] = input;
+      fis[0].Remove(0,1);
+      SCall->Add(fis[0].Data());
+      listOfFiles = SCall->GetListOfFiles();
     }
+    Int_t nfiles = (listOfFiles ? listOfFiles->GetEntries() : 0);
+    if (nfiles == 0) {
+      printf("Error: no input specified!\n");
+      return 1;
+    }
+    for (i=nfiles-1;i>=0;i--) {
+      if (!input) {
+        fileI = (TFile*) (listOfFiles->At(i));
+        SCall->Add(fileI->GetName());
+      } else {
+        TChainElement* elem = (TChainElement*) (listOfFiles->At(i));
+        if (elem->GetEntries() == 0) continue;
+        fileI = new TFile(elem->GetTitle());
+      }
+      TKey* corrKey = fileI->GetKey("SCcorrection");
+      if (!corrKey) {
+        printf("File is missing its corrections (excluding from grouping): %s\n",fileI->GetName());
+        continue;
+      } else {
+        TString corrStr = corrKey->ReadObj()->GetTitle();
+        corrStr += ":";
+        corrKey = fileI->GetFile()->GetKey("GLcorrection");
+        corrStr += corrKey->ReadObj()->GetTitle();
+        TObject* existing = SCGLcombos.FindObject(corrStr.Data());
+        if (existing) {
+          k = SCGLcombos.IndexOf(existing);
+          SCi[k]->Add(fileI->GetName());
+          nfii[k]++;
+        } else {
+          SCGLcombos.AddLast(new TNamed(corrStr.Data(),corrStr.Data()));
+          SCi[nfi] = new TChain("SC",Form("Chain%d : %s",nfi,corrStr.Data()));
+          SCi[nfi]->Add(fileI->GetName());
+          nfi++;
+          nfii[nfi] = 1;
+          if (nfi>nfip) {
+            printf("Warning! Exceeding maximum number of sets! Excluding the rest from grouping.\n");
+            break;
+          }
+        }
+      }
+      fileI->Close();
+    }
+    for (i=0;i<nfi;i++) {
+      printf("%d files added with...\n",nfii[i]);
+      TString corrStr = SCGLcombos.At(i)->GetName();
+      corrStr.Remove(corrStr.First(':'));
+      if (corrStr.Length()) allZeros = kFALSE;
+      printf("  used sc = %s\n",corrStr.Data());
+      corrStr = SCGLcombos.At(i)->GetName();
+      corrStr.Remove(0,corrStr.First(':')+1);
+      ugl[i] = corrStr.Atof();
+      glmode[i] = 1;
+      printf("  used GL = %g\n",ugl[i]);
+    }
+  } else {
+    // Read input file
+    nfi = nfip;
+    ifstream dats(input);
+    if (!(dats.good())) {
+      printf("Error: problems opening input file specified!\n");
+      return 2;
+    }
+    for (i=0;i<nfi && dats.good();i++) {
+      dats >> fname;
+      if (dats.eof()) { nfi=i; continue; }
+      fis[i] = fname;
+      if (fis[i].Contains('@')) {
+        fis[i].Remove(fis[i].First('@'),1);
+      } else { // depracated; supported only to read in ugl
+        dats >> temp >> temp >> ugl[i];
+        if (ugl[i]) allZeros = kFALSE;
+        if (fis[i].Contains('!')) { // Defunct
+          dats >> temp;
+          fis[i].Remove(fis[i].First('!'),1);
+        }
+      }
 
-    usg[i] = usc[i] * ugl[i];
-    ugo[i] = usg[i] * uso[i];
+      // Skip lines beginning with #
+      if (fname[0]=='#') { i--; continue; }
 
-    if (fname[0]=='#') i--; // Skip lines beginning with #
+      // Build TChains from histogram files
+      SCi[i] = new TChain("SC",Form("Chain%d : %s",i,fis[i].Data()));
+      int added_files = 0;
+      if ((added_files = SCi[i]->Add(fis[i].Data())) < 1) {
+        printf("Warning: no files added from %s\n",fis[i].Data());
+      } else {
+        printf("%d files added from %s\n",added_files,fis[i].Data());
+        TKey* corrKey = SCi[i]->GetFile()->GetKey("SCcorrection");
+        if (corrKey) {
+          TString corrStr = corrKey->ReadObj()->GetTitle();
+          if (corrStr.Length()) allZeros = kFALSE;
+          printf("  used sc = %s\n",corrStr.Data());
+          corrKey = SCi[i]->GetFile()->GetKey("GLcorrection");
+          corrStr = corrKey->ReadObj()->GetTitle();
+          ugl[i] = corrStr.Atof();
+        }
+        printf("  used GL = %g\n",ugl[i]);
+        // glmode: from ntuple (2), from file (1), from input.dat (0)
+        glmode[i] = (SCi[i]->GetBranch("ugl") ? 2 :
+                     (corrKey ? 1 : 0));
+        SCall->Add(fis[i].Data());
+      }
+    }
   }
   printf("Found %d dataset specifications.\n",nfi);
-  
-  SCall = new TChain("SC","ChainAll");
-  for (i=0;i<nfi;i++) { // parameter sets
-    
-    // Build TChains from histogram files
-    SCi[i] = new TChain("SC",Form("Chain%d : %s",i,fis[i].Data()));
-    int added_files = 0;
-    if ((added_files = SCi[i]->Add(fis[i].Data())) < 1)
-      printf("Warning: no files added from %s\n",fis[i].Data());
-    else {
-      printf("%d files added from %s\n",added_files,fis[i].Data());
-      SCall->Add(fis[i].Data());
-    }
+
+  for (i=0;i<nfi;i++) {
     SCi[i]->SetMarkerStyle(7);
-    SCi[i]->SetMarkerColor(2);
+    SCi[i]->SetMarkerColor(colorData);
   }
+  SCall->SetMarkerStyle(7);
 
   memset(conSC,0,nsca*sizeof(TCanvas*));
 
   // Minimization items
   for (k=0;k<3;k++) parNameSC[k] = new char[16];
   for (k=0;k<3;k++) parNameGL[k] = new char[16];
-  for (k=0;k<6;k++) parNameSCGL[k] = new char[16];
+  for (k=0;k<8;k++) parNameSCGL[k] = new char[16];
   arglist[0] = 5000;
   
+  return 0;
 }
 
 int Waiting() {
@@ -1058,7 +1329,9 @@ void SetMinMax(int n, Double_t* ar, double& min, double& max,
   max += margins;
 }
 
-void SetMinuitPars(const int n, TString* names, Double_t* starts, Double_t* steps,int debug) {
+int SetMinuitPars(const int n, TString* names, Double_t* starts, Double_t* steps, int debug, Bool_t* fixing) {
+  TVirtualFitter::SetDefaultFitter("Minuit");
+  TVirtualFitter::SetMaxIterations(500000000);
   minuit = TVirtualFitter::Fitter(0,26);
   minuit2 = ((TFitter*) minuit)->GetMinuit();
   minuit2->SetPrintLevel(debug - 2);
@@ -1067,8 +1340,14 @@ void SetMinuitPars(const int n, TString* names, Double_t* starts, Double_t* step
   for (i=0; i<n; i++) if (names[i].Length() > maxlen) maxlen = names[i].Length();
   for (i=0; i<n; i++) {
     names[i].Append(' ',maxlen-names[i].Length());
-    minuit->SetParameter(i, names[i].Data(), starts[i], steps[i], 0, 0);
+    if (fixing && fixing[i]) {
+      minuit->SetParameter(i, names[i].Data(),         0,        0, 0, 0);
+      minuit->FixParameter(i);
+    } else {
+      minuit->SetParameter(i, names[i].Data(), starts[i], steps[i], 0, 0);
+    }
   }
+  return maxlen;
 }
 
 
@@ -1152,7 +1431,7 @@ int FitWithOutlierRemoval(int debug) {
     // Determine outliers from this pass and compare to previous passes
     nOutliers = 0;
     for (i=0; i<nMeasures; i++) {
-      if (TMath::Abs(devs[i]) > MAX_DEV*VAR) { outliers[i] = kTRUE; nOutliers++; }
+      if (devs[i] == 0 || TMath::Abs(devs[i]) > MAX_DEV*VAR) { outliers[i] = kTRUE; nOutliers++; }
       else outliers[i] = kFALSE;
     }
     if (iter>0 && memcmp(outliers,outliers1,nBytes) == 0) break;
@@ -1249,11 +1528,12 @@ TString PCA(int Nmax, int debug) {
   Double_t p[nsca];
   TString delim=":";
   TString scas = (scastr.Length() ? scastr :
-                  "zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcyb:bbcbb");
+                  "zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcyb:bbcbb:vpdx:vpde:vpdw");
   scas += ":sc";
   TObjArray* scaA = scas.Tokenize(delim);
   int i,n,N1 = scaA->GetEntries();
   TH1F rmsp("rmsp","rmsp",500,-0.01,0.01);
+  int iter0fi = nfi-1;
 
   if (pcaN >= 0) for (i=0;i<maxp;i++) if (ppl[i]) delete ppl[i];
   memset(ppl,0,maxp*sizeof(TPrincipal*));
@@ -1265,13 +1545,26 @@ TString PCA(int Nmax, int debug) {
   for (n=0; n<N1; n++) {
     xvals[n] = new Double_t[nMeasuresMax];
     if (ITER0) {
-      SCi[nfi-1]->Draw(scaA->At(n)->GetName(),cut,"goff");
-      nMeasures = SCi[nfi-1]->GetSelectedRows();
-      memcpy(xvals[n],SCi[nfi-1]->GetV1(),nMeasures*sizeof(Double_t));
+      SCi[iter0fi]->Draw(scaA->At(n)->GetName(),cut,"goff");
+      nMeasures = SCi[iter0fi]->GetSelectedRows();
+      memcpy(xvals[n],SCi[iter0fi]->GetV1(),nMeasures*sizeof(Double_t));
     } else {
       nMeasures = 0;
       for (i=0; i<nfi; i++) {
-        SCi[i]->Draw(Form("%s*%g",scaA->At(n)->GetName(),(fitPars[1]+ugl[i])/(fitPars[1]+fitPars[4])),cut,"goff");
+        SCi[i]->Draw(Form("%s*%g",scaA->At(n)->GetName(),
+                          (n < N1-1 ? 1.0 : (fitPars[1]+ugl[i])/(fitPars[1]+fitPars[4]))),
+                     cut,"goff");
+        /* Using fitPars[6] and fitPars[7] can be dangerous if first iteration fit wasn't very good
+        if (n < N1-1)
+          SCi[i]->Draw(Form("%s",scaA->At(n)->GetName()),cut,"goff");
+        else if (fitPars[6] == 1.0 && fitPars[7] == 1.0)
+          SCi[i]->Draw(Form("sc*%g",(fitPars[1]+ugl[i])/(fitPars[1]+fitPars[4])),cut,"goff");
+        else
+          SCi[i]->Draw(Form("(sc-usc)*(%g)+usc*(%g)",
+                            fitPars[7]*(fitPars[6]*fitPars[1]+ugl[i])/(fitPars[1]+fitPars[4]),
+                            (fitPars[1]+ugl[i])/(fitPars[1]+fitPars[4])),
+                       cut,"goff");
+        */ 
         nMeasuresI = SCi[i]->GetSelectedRows();
         memcpy(&(xvals[n][nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
         nMeasures += nMeasuresI;
@@ -1298,6 +1591,10 @@ TString PCA(int Nmax, int debug) {
     for (n=0;n<N1;n++) if ((n==N1-1) || ((m>>n) & one)) { map[N]=n; N++; }
     if (N>Nmax) continue;
     l++;
+    if (l == (unsigned int) maxp) {
+      printf("Error! Maximum number of combinations %d exceeded!\n",maxp);
+      break;
+    }
 
     pp = new TPrincipal(N,"D");
     pp->SetName(Form("principal%d",l));
@@ -1380,24 +1677,27 @@ TString PCA(int Nmax, int debug) {
 
 void PrintResult(double scp, double escp, double sop, double esop,
                  double glp, double eglp, const char* det) {
-  printf("SC = (");
+  printf("sc = (");
   if (det) {
     printf("%6.4g +/- %6.4g) * ((%s) - (%6.4g +/- %6.4g)",scp,escp,det,sop,esop);
   } else {
     double lsop = (sop + pcaoffset)/pcacoef[0];
     double lesop = esop/pcacoef[0];
-    printf("1.0 +/- %6.4g)*(%6.4g*(%s-(%6.4g +/- %6.4g))",escp/scp,pcacoef[0]/scp,
+    printf("1.0 +/- %6.4g)*(%6.4g*(%s-(%6.4g +/- %6.4g))",escp/scp,pcacoef[0]*scp,
            pcadets[0].Data(),lsop,lesop);
-    for (int n=1;n<pcaN;n++) printf("+(%6.4g*(%s))",pcacoef[n]/scp,pcadets[n].Data());
+    for (int n=1;n<pcaN;n++) printf("+(%6.4g*(%s))",pcacoef[n]*scp,pcadets[n].Data());
   }
   printf(")\n  with GL = %5.2f +/- %5.2f\n\n",glp,eglp);
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.0 2012/06/13 04:45:02 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.1 2013/03/29 23:54:22 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.1  2013/03/29 23:54:22  genevb
+// Modified fits with additional flexibility, use self-documented files for input,  more scalers, bug fixes
+//
 // Revision 2.0  2012/06/13 04:45:02  genevb
-// Switch to universal fits, add PCA and flexible mixtures of scalers, chisq contout plots
+// Switch to universal fits, add PCA and flexible mixtures of scalers, chisq contour plots
 //
 // Revision 1.5  2010/01/06 17:56:43  genevb
 // Improvements to the fitter
