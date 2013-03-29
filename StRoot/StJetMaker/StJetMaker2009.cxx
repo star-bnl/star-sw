@@ -104,14 +104,18 @@ int StJetMaker2009::Make()
 	// Found good vertex
 	++nvertices;
 
-	StjTrackList trackList = jetbranch->anapars->tpcCuts()(tpc.getTrackList());
+	StjTrackList trackList = tpc.getTrackList();
+	if (jetbranch->anapars->changeTracks) trackList = (*jetbranch->anapars->changeTracks)(trackList);
+	trackList = jetbranch->anapars->tpcCuts()(trackList);
 
 	// Get BEMC towers
 	StjTowerEnergyList bemcEnergyList;
 
 	if (jetbranch->anapars->useBemc) {
 	  StjBEMCMuDst bemc;
-	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemc.getEnergyList());
+	  bemcEnergyList = bemc.getEnergyList();
+	  if (jetbranch->anapars->changeTowers) (*jetbranch->anapars->changeTowers)(bemcEnergyList);
+	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemcEnergyList);
 	}
 
 	// Get EEMC towers
@@ -119,7 +123,9 @@ int StJetMaker2009::Make()
 
 	if (jetbranch->anapars->useEemc) {
 	  StjEEMCMuDst eemc;
-	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemc.getEnergyList());
+	  eemcEnergyList = eemc.getEnergyList();
+	  if (jetbranch->anapars->changeTowers) (*jetbranch->anapars->changeTowers)(eemcEnergyList);
+	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemcEnergyList);
 	}
 
 	// Merge BEMC and EEMC towers
@@ -170,7 +176,9 @@ int StJetMaker2009::Make()
 	if (jetbranch->anapars->useBemc) {
 	  StjBEMCMuDst bemc;
 	  bemc.setVertex(0,0,0);
-	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemc.getEnergyList());
+	  bemcEnergyList = bemc.getEnergyList();
+	  if (jetbranch->anapars->changeTowers) (*jetbranch->anapars->changeTowers)(bemcEnergyList);
+	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemcEnergyList);
 	}
 
 	// Get EEMC towers
@@ -178,7 +186,9 @@ int StJetMaker2009::Make()
 
 	if (jetbranch->anapars->useEemc) {
 	  StjEEMCMuDst eemc;
-	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemc.getEnergyList());
+	  eemcEnergyList = eemc.getEnergyList();
+	  if (jetbranch->anapars->changeTowers) (*jetbranch->anapars->changeTowers)(eemcEnergyList);
+	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemcEnergyList);
 	}
 
 	// Merge BEMC and EEMC towers
