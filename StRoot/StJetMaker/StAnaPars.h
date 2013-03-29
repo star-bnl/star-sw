@@ -14,6 +14,8 @@
 #include "StjTowerEnergyListCut.h"
 #include "StjMCParticleListCut.h"
 #include "StJetFinder/StProtoJetListCut.h"
+#include "StjAbstractTrack.h"
+#include "StjAbstractTower.h"
 
 class StAnaPars : public TObject {
 public:
@@ -26,6 +28,8 @@ public:
     , randomSelectorProb(1.0)
     , randomSelectorAt(false)
     , randomSelectorSeed(0)
+    , changeTracks(0)
+    , changeTowers(0)
   {
   }
 
@@ -65,6 +69,8 @@ public:
   double randomSelectorProb;
   double randomSelectorAt;
   unsigned int randomSelectorSeed;
+  StjAbstractTrack* changeTracks;
+  StjAbstractTower* changeTowers;
 
   ClassDef(StAnaPars,0);
 };
