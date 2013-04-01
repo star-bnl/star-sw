@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.41 2012/06/11 14:33:47 fisyak Exp $
+ * $Id: StDbManagerImpl.cc,v 1.42 2013/04/01 14:42:51 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.42  2013/04/01 14:42:51  dmitry
+ * added new domain - PXL
+ *
  * Revision 1.41  2012/06/11 14:33:47  fisyak
  * std namespace
  *
@@ -403,6 +406,7 @@ addDbDomain(dbZdc,"zdc");
 addDbDomain(dbFms,"fms"); 
 addDbDomain(dbpp2pp,"pp2pp"); 
 addDbDomain(dbFgt,"fgt"); 
+addDbDomain(dbPxl,"pxl"); 
 
 }
 
