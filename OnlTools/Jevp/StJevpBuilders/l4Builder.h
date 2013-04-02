@@ -21,8 +21,6 @@
 #include <math.h>
 #include <DAQ_HLT/daq_hlt.h>
 #include "RTS/include/HLT/HLTFormats.h"
-//#include <time.h>
-//#include <sys/time.h>
 
 enum {
   e,
@@ -38,7 +36,14 @@ enum {
 class l4Builder : public JevpPlotSet {
  public:
     
-  ///////////// struct ////////////
+/**
+ * Struct
+ * @param 
+ * @return 
+ * @exception 
+ * @see 
+ * @author 
+ */
   struct hbt_event_info {
     int mult;
     float zvertex;
@@ -97,16 +102,16 @@ class l4Builder : public JevpPlotSet {
     struct hlt_diElectronPair ePair[1000];
   };
 
-
-  //Timing variables to reset periodic plots
-  /*   int last_time; */
-  /*   float nHours; */
-  //timeval PeriodicStart; 
-  //timeval PeriodicResetTest; 
-  //timeval PeriodicResult;
-
-  ////////// plots /////////
-  JevpPlot *HltPlots[62];
+/**
+ * Plots, Functions, Histograms.
+ * @param 
+ * @return 
+ * @exception 
+ * @see 
+ * @author 
+ */  
+  JevpPlot *HltPlots[48];
+  JevpPlot *JPsiPlots[14];
   JevpPlot *HltPlots_UPC[36];
   PlotHisto *ph;
 
@@ -125,6 +130,7 @@ class l4Builder : public JevpPlotSet {
   char CurrentNtuple[256];
   char Currentdir[256];
   char Destindir[256];
+  char dEdxTheoDir[256];
   char dEdxMeanFiles[8][256];
 
   TStopwatch timer;
@@ -134,6 +140,7 @@ class l4Builder : public JevpPlotSet {
   void inputDedx();
   double getDedx(double p, const int name);
   void defineHltPlots();
+  void defineJPsiPlots();
   void defineHltPlots_UPC();
   void setAllPlots();
   void writeHistogram();
@@ -160,18 +167,19 @@ class l4Builder : public JevpPlotSet {
   int primaryTracks_UPC ;
   int runnumber;
   int iBin;
+  int switch_jpsi;
   int switch_upc;
   double innerGainPara;
   double outerGainPara;
   double BeamX;
   double BeamY;
-  double twopi;
   double pi;
+  double twopi;
   double A;
 
   TH1I *hEvtsAccpt;
-		
-  ///< track level QA
+
+  // track
   TH1I *hnhits;
   TH1I *hnDedx; 
   TH1D *hDcaXy;
@@ -199,7 +207,7 @@ class l4Builder : public JevpPlotSet {
   TH1D *hPrim_Eta_UPC;
   TH2F *hPrim_dEdx_UPC;
 
-  ///< event level QA
+  // event
   TH1D *hVertexX; 
   TH1D *hVertexY;
   TH1D *hVertexZ;
@@ -208,7 +216,7 @@ class l4Builder : public JevpPlotSet {
   TH1D *hLm_VertexZ;
   TH1I *hglobalMult;
   TH1I *hprimaryMult;
-/*   TH1I *hLmPrimaryMult; */
+  /*   TH1I *hLmPrimaryMult; */
 
   TH1D *hVertexX_UPC; 
   TH1D *hVertexY_UPC;
@@ -219,7 +227,7 @@ class l4Builder : public JevpPlotSet {
   TH1I *hglobalMult_UPC;
   TH1I *hprimaryMult_UPC;
 
-  ///< emc QA
+  // EMC
   TH1D *hMatchPhi_Diff;
   TH1D *hTowerEnergy ;
   TH1I *hTowerDaqId; 
@@ -234,7 +242,7 @@ class l4Builder : public JevpPlotSet {
   TH1D *hzEdge_UPC;
   TH2F *hTowerEtaPhi_UPC;
 
-  ///< di-electron QA
+  // di-e
   TH1D *hDiElectronInvMassTpxEmc;
   TH1D *hDiElectronInvMassTpxEmcBG;
   TH1D *hDiElectronInvMassFullRange;
@@ -257,41 +265,39 @@ class l4Builder : public JevpPlotSet {
   TH1D *hDaughter2P_TowerEnergy_UPC;
   TH1D *hDiLeptonRapidity_UPC;
 
-  ///<di_muon QA
+  // di-muon
   TH1D *hDiMuonInvMassFullRange;
   TH1D *hDiMuonInvMassFullRangeBG;
   TH1D *hDiMuonInvMassTpxCut;
   TH1D *hDiMuonInvMassTpxCutBG;
 
-  // di pion
+  // di-pion
   TH1D *hDiPionInvMassFullRange;
   TH1D *hDiPionInvMassFullRangeBG;
   TH1D *hDiPionDeltphi;
 
-  ///< tof qualities 
+  // ToF
   TH1D *hLocalZ;
   TH1D *hLocalY;
-/*   TH2F *hTofprimaryMult; */
+  /*   TH2F *hTofprimaryMult; */
   TH2F *hInverseBeta;
   TH2F *hMatchId_fiberId;
   TH2F *hTrayID_TrgTime;
   TH1D *hchannelID;
   TH2F *hVzvpd_Vz ;
   TH1D *hVzDiff;
-  //		TH3D *hMatchannel3D ;
+  /*   TH3D *hMatchannel3D ; */
 	
   TH2F *hVzvpd_Vz_UPC ;
   TH1D *hVzDiff_UPC;
 
-	
-  ///< heavy fragments
+  // heavy fragments
   TH2F *hdEdx;
   TH2F *hHFM_dEdx;
-	
   TH2F *hdEdx_UPC;
   TH2F *hHFM_dEdx_UPC;
 
-  ///< different event tpye
+  // different event tpye
   TH1I *hUpc ;
   TH1I *hMtd ;
   TH1I *hNpeHt_25_NoZdc;
@@ -301,7 +307,7 @@ class l4Builder : public JevpPlotSet {
   TH1I *hNpe;
   TH1I *hAtomcule ;
 		
-  ///< run by run display
+  // run-by-run display
   TH1D *hBeamX;
   TH1D *hBeamY; 
   TH1D *hInnerGain;
