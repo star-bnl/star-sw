@@ -4,11 +4,11 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.36 2013/04/02 00:09:39 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.37 2013/04/02 00:14:43 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
-// Revision 1.36  2013/04/02 00:09:39  zhux
-// added chain for run 12 U+U 193GeV
+// Revision 1.37  2013/04/02 00:14:43  zhux
+// added chain for run12 U+U 193GeV
 //
 // Revision 1.35  2012/09/28 16:02:42  zhux
 // Chain for Run 9 p+p 200 GeV (P11id) added; 'Embedding' option removed from Chain3 (see ticket #2419).
