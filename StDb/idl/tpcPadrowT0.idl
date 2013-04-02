@@ -8,6 +8,6 @@
 
 struct tpcPadrowT0 { 
 
-   float  T0[100];   /*  T0s per padrow */
+   float  T0[45];   /*  T0s per padrow */
 
  };  
