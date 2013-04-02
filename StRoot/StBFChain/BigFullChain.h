@@ -1431,7 +1431,7 @@ Bfc_st BFC[] = {
   {"VFMinuit2"      ,""  ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 2",kFALSE},
   {"VFMinuit3"      ,""  ,"","VFMinuit","","","... Generic VF will use Minuit method w/rank mode 3",kFALSE},
   {"VFFV"           ,""  ,"","genvtx"                            ,"","","... Fixed dummy VF method",kFALSE},
-  {"VFMCE"          ,""  ,"","VFMinuit"                      ,"","","... Fixed vertex from MCEvent",kFALSE},
+  {"VFMCE"          ,""  ,"","genvtx"                        ,"","","... Fixed vertex from MCEvent",kFALSE},
   {"VFppLMV"        ,""  ,"","genvtx"                 ,"","","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5"       ,""  ,"","VFppLMV"        ,"","","...VertexMaker will use ppLMV method (tuned)",kFALSE},
   // Sti options
