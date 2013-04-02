@@ -46,7 +46,8 @@
   <Fill name="PIPG" comment="Pipe geometry">
 
       <var name="version" value="3.0"     comment="Default position and geometry" />
-      <var name="vacdens" value="1.25E-8" comment="Vacuum density... needs to be verified" />
+      <!--      <var name="vacdens" value="1.25E-8" comment="Vacuum density... needs to be verified" />      -->
+      <var name="vacdens" value="1.0E-5" comment="Vaccuum density... needs to be verified" />
 
       <var name="xoffset" value="0.0"     comment="Default x position " />
       <var name="yoffset" value="0.0"     comment="Default y position " />
@@ -111,7 +112,11 @@
   <Volume name="PALH" comment="The hole inside the beam pipe" >
 
      <Material name="Air" />
-     <Material name="vacuum" dens="pipg_vacdens" />
+     <Material name="vacuum" 
+               dens="material::dens *pipg_vacdens" 
+	       radl="material::radl /pipg_vacdens"
+	       absl="material::absl /pipg_vacdens"
+               />
      <Attribute for  = "PALH" seen="0"    />
 
      <Shape     type = "Pcon"
