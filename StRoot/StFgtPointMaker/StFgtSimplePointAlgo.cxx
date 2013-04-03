@@ -36,7 +36,7 @@ Int_t StFgtSimplePointAlgo::makePoints( StFgtCollection& c)
 
   StFgtPointCollection* pPointCollection=c.getPointCollection();
   if( !pPointCollection ){
-    LOG_ERROR << "$Id: StFgtSimplePointAlgo.cxx,v 1.1 2013/03/13 20:36:29 jeromel Exp $ Error getting pointer to StFgtPointCollection from StFgtCollection" << endm;
+    LOG_ERROR << "$Id: StFgtSimplePointAlgo.cxx,v 1.2 2013/04/03 19:44:30 akio Exp $ Error getting pointer to StFgtPointCollection from StFgtCollection" << endm;
     return kStErr;
   }
   StFgtPointCollection& points=*pPointCollection;
@@ -52,7 +52,7 @@ Int_t StFgtSimplePointAlgo::makePoints( StFgtCollection& c)
     //prevent looping for too long
     if(numClusters > 40)
       {
-	LOG_WARN <<"$Id: StFgtSimplePointAlgo.cxx,v 1.1 2013/03/13 20:36:29 jeromel Exp $ :  number of cluster too large in disk " << discIdx<<"! " <<endl;
+	LOG_WARN <<"$Id: StFgtSimplePointAlgo.cxx,v 1.2 2013/04/03 19:44:30 akio Exp $ :  number of cluster too large in disk " << discIdx<<"! " <<endl;
 	continue;
       }
 
@@ -77,9 +77,10 @@ Int_t StFgtSimplePointAlgo::makePoints( StFgtCollection& c)
     for( iter1 = hitVec.begin(); iter1 != hitVec.end(); ++iter1 )
       {
 	Char_t iter1_layer = (*iter1)->getLayer();
+	Int_t iter1_quad=(*iter1)->getQuad();
 
 	for( iter2 = hitVec.begin(); iter2 != iter1; ++iter2 )
-	  if( (*iter2)->getLayer() != iter1_layer)
+	  if( (*iter2)->getLayer() != iter1_layer && (iter1_quad==(*iter2)->getQuad()))
 	    {
 	      Float_t chargeAsymmetry=fabs( ((*iter1)->charge()-(*iter2)->charge())/((*iter1)->charge()+(*iter2)->charge()));
 	      //	    cout <<"charge asymmetry: " <<chargeAsymmetry <<" max: " << m_maxChargeAsymmetry <<endl;
@@ -98,8 +99,7 @@ Int_t StFgtSimplePointAlgo::makePoints( StFgtCollection& c)
 	      };
 	    };
       }
-
-    //  cout <<" we have " << points.getEntries() <<" points " << endl;
+    cout <<"StFgtSimplePointAlgo: we have " << points.getNumPoints() <<" points after disc = " << discIdx << endl;
   }
   return iErr;
 };
@@ -107,8 +107,11 @@ Int_t StFgtSimplePointAlgo::makePoints( StFgtCollection& c)
 ClassImp(StFgtSimplePointAlgo);
 //
 //
-//  $Id: StFgtSimplePointAlgo.cxx,v 1.1 2013/03/13 20:36:29 jeromel Exp $
+//  $Id: StFgtSimplePointAlgo.cxx,v 1.2 2013/04/03 19:44:30 akio Exp $
 //  $Log: StFgtSimplePointAlgo.cxx,v $
+//  Revision 1.2  2013/04/03 19:44:30  akio
+//  added same quad check
+//
 //  Revision 1.1  2013/03/13 20:36:29  jeromel
 //  Initial revision, Anselm Vossen
 //
