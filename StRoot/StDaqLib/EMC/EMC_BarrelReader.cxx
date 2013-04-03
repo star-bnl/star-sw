@@ -7,7 +7,7 @@
 #include <Stiostream.h>
 #include <stdio.h>
 #include "StMessMgr.h"
-#include "StRTSClient/include/rts.h" // swap16(), swap32()
+#include "RTS/include/rts.h" // swap16(), swap32()
 //ofstream fout("decode.out");
 using namespace OLDEVP;
 
