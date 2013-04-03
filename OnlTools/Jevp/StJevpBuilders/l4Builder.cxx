@@ -4,15 +4,16 @@
  * EMC, ToF and HLT heavy-fragment. All of above are designed to show in
  * STAR run monitor. JPsi plots[#0-13] including J/Psi invariant mass,
  * two daughters(e) info, and corresponding plots for di-pion, di-muon, should be
- * (if needed) saved into root files which then can be added later for expert
- * run-by-run or day-by-day check in online machine through webpage.
- * Both JPsi plots and UPC plots[#0-35] can be chosen to turn on/off by
- * set switch in inputPara.dat.
+ * saved into root files which then can be added later for expert run-by-run or
+ * day-by-day check through webpage.
+ * UPC plots[#0-35], as well as JPsi plots can be chosen to turn on/off by
+ * setting switch in inputPara.dat.
  *
+ * Default mode contains Basic plots + JPsi plots.
+ * The directory of dE/dx theoretical curve should be pointed in inputPara.dat.
  * Essential Functions init/start/stop/event/main
  *
  * @todo Weird TheoDedx_K_neg value if set mininum P at 0.1(0.101 now)
- * @version 1.0
  * @author Q-Y. Shou
  */
 #include <stdio.h>
@@ -89,14 +90,16 @@ void l4Builder::initialize(int argc, char *argv[])
   innerGainPara = -999;
   outerGainPara = -999;
   eventCounter = 0;
-
+  switch_upc = 0;
+  switch_jpsi = 1;
+  
   ifstream inData;
   string paraName;
   char paraDir[256];
   sprintf(paraDir, "%s/inputPara.dat", Currentdir);
-  inData.open(paraDir);  
+  inData.open(paraDir);
   if (!inData)
-    cout<<"inputPara.dat not found, I'll run in basic mode."<<endl;
+    cout<<"inputPara.dat not found, I'll run in default mode."<<endl;
   else {
     while(!inData.eof()) {
       inData>>paraName;
@@ -176,7 +179,7 @@ void l4Builder::initialize(int argc, char *argv[])
     HltPlots_UPC[i]->setPalette(1);
   }
 
-  cout<<"HltPlots(default) OK."<<endl;
+  cout<<"HltPlots OK"<<endl;
   if (switch_jpsi == 1) cout<<"with J/Psi shown in monitor"<<endl;
   if (switch_upc == 1) cout<<"with UPC shown in monitor"<<endl;
 
