@@ -6,8 +6,8 @@ my $DirPath = DirPath '.'; #print "DirPath = $DirPath\n";
 (my $ObjDir = $DirPath) =~ s/\\/\//g; #print "ObjDir = $ObjDir\n";
 (my $Dir = $ObjDir) =~ s/$build\///g; #print "Dir = $Dir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-my @pkgs = qw(StDb      gen        svt
-	      emc       geometry  tpc       ctf       ftpc
+my @pkgs = qw(StDb      gen       svt
+	      emc       geometry  ctf       ftpc
 	      global    sim);#       trg      mwc        vpd
 my $LIBPATH = $env->{LIBPATH};# print "LIBPATH = $LIBPATH\n";
 my $LIBS  = $env->{LIBS};
