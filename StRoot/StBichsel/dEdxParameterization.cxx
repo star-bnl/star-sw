@@ -41,6 +41,7 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   if (! file) Fatal("dEdxParameterization::GetFile","File %s has not been found in path %s",rootf,path);
   else        Warning("dEdxParameterization::GetFile","File %s has been found as %s",rootf,file);
   TFile       *pFile = new TFile(file);
+  delete [] file;
   assert(pFile);
   fP   = (TProfile2D *) pFile->Get("bichP");   assert(fP);   fP->SetDirectory(0);
   fA   = (TProfile2D *) pFile->Get("bichA");   assert(fA);   fA->SetDirectory(0);
