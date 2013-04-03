@@ -1,5 +1,5 @@
 //
-// $Id: StEventCompendiumMaker.cxx,v 1.3 2012/05/07 14:43:47 fisyak Exp $
+// $Id: StEventCompendiumMaker.cxx,v 1.4 2013/04/03 21:58:39 fisyak Exp $
 //
 //#include <iostream>
 #include "Stiostream.h"
@@ -16,7 +16,7 @@
 #include "StTrackGeometry.h"
 #include "StPrimaryVertex.h" 
 
-static const char rcsid[] = "$Id: StEventCompendiumMaker.cxx,v 1.3 2012/05/07 14:43:47 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventCompendiumMaker.cxx,v 1.4 2013/04/03 21:58:39 fisyak Exp $";
 ClassImp(StEventCompendiumMaker)
 //________________________________________________________________________________
 Int_t StEventCompendiumMaker::Make(){
@@ -52,6 +52,7 @@ void StEventCompendiumMaker::fillEventSummary(StEvent* e) {
     const StSPtrVecTrackNode& nodes = e->trackNodes();
     for (size_t itrk=0; itrk < nodes.size(); itrk++) {/* begin global track loop */
 	StTrack* gtrk = nodes[itrk]->track(global);
+	if (! gtrk) continue;
 	// Calculate track multiplicities 
 	
 	//  good global tracks 
