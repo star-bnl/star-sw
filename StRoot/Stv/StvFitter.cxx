@@ -254,6 +254,7 @@ double StvFitter::Xi2(const StvHit *hit)
 
 //		Hit position
   const float *hP = mHit->x();
+  assert(fabs(hP[2])>1e-5);
 
 //		Track direction
   double *tD = mDcaFrame[0];
