@@ -228,7 +228,9 @@ static StvFitPars fp;
   double a = (_psi -sub._psi );
   if      (a < -M_PI) {a += M_PI*2;}
   else if (a >  M_PI) {a -= M_PI*2;}
-  fp.mA = a*cosL;
+  assert(fabs(a)<3.15);
+  a*=cosL;
+  fp.mA = (fabs(a) <0.1)? a*(1-a*a/3): atan(a);
   fp.mP = (_ptin-sub._ptin);
   double tL = (_tanl-sub._tanl)/(1+_tanl*sub._tanl);
   fp.mL = tL*(1+tL*tL*(-1./3+tL*tL/5)); 
@@ -237,6 +239,8 @@ static StvFitPars fp;
 //______________________________________________________________________________
 void StvNodePars::operator+=(const StvFitPars &fp)
 {
+static int nCall=0; nCall++;
+StvDebug::Break(nCall);
   assert(_hz);
   double cos2L = 1./(1+_tanl*_tanl); 
   double cosL  = sqrt(cos2L);
@@ -245,18 +249,23 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   _y +=  _cosCA*fp.mH - sinL*_sinCA*fp.mZ;
   _z +=                 cosL       *fp.mZ;
 
-  double a = 0,cA,sA;
-  if (fabs(cosL) > 1e-3)	{a  = fp.mA/cosL;               }
-  if (fabs(a) < 0.01)   	{sA = a*(1-a*a/6); cA = 1-a*a/2;}
-  else                		{sA = sin(a);      cA = cos(a) ;} 
+  double a = 0,cA=1,sA=0;
+  double tA = fp.mA*(1.+fp.mA*fp.mA/3)/cosL;
+  if (fabs(tA)<0.1) 	{
+    a = tA*(1-tA*tA/3); sA = a*(1-a*a/6); cA = 1-a*a/2;}
+  else 			{
+    tA = tan(fp.mA)/cosL; a = atan(tA); cA = cos(a); sA = tA*cA;}
+
+  assert(fabs(a)<3.);
  _psi   += a;
   if (_psi < -M_PI) _psi += 2*M_PI;
   if (_psi >  M_PI) _psi -= 2*M_PI;
+  assert(fabs(_psi)<3.15);
 
   double cosCA = _cosCA;
   _cosCA = cosCA*cA-_sinCA*sA;
   _sinCA = cosCA*sA+_sinCA*cA;
-
+  if (fabs(_cosCA*_cosCA+_sinCA*_sinCA-1)>1e-5) ready();
   _ptin  += fp.mP;
   if (_ptin >  kMaxPti) _ptin = kMaxPti;
   if (_ptin < -kMaxPti) _ptin =-kMaxPti;
