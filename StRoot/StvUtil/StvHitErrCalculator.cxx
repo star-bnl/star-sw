@@ -8,6 +8,8 @@
 #include <string>
 
 static std::map<std::string,StvHitErrCalculator *> calcMap;
+static const double kMinCos = 0.1;
+static const double kMaxSin  = (1-kMinCos)*(1+kMinCos);
 
 
 
@@ -54,148 +56,202 @@ void StvHitErrCalculator::SetTrack(const float tkDir[3])
 void StvHitErrCalculator::SetTrack(const double tkDir[3])
 {  
   double nor = sqrt(tkDir[0]*tkDir[0]+tkDir[1]*tkDir[1]+tkDir[2]*tkDir[2]);
-  double sinL = tkDir[2]/nor;
-  double cosL=((1-sinL)*(1+sinL)); 
-  if (cosL<1e-6) {cosL=0;sinL=1;} else {cosL = sqrt(cosL);}
-  double cosP=1,sinP=0;
-  if (cosL) { cosP = tkDir[0]/cosL/nor; sinP = tkDir[1]/cosL/nor;}
-
-  mNG[0][0]= cosL*cosP; mNG[0][1]= cosL*sinP; mNG[0][2]= sinL;
-  mNG[1][0]=-sinP;      mNG[1][1]= cosP;      mNG[1][2]= 0;
-  mNG[2][0]=-sinL*cosP; mNG[2][1]=-sinL*sinP; mNG[2][2]= cosL;
+  TCL::vscale(tkDir,1./nor,mTG,3);
 }
 //______________________________________________________________________________
 void StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
 {
 /// Calculate hit error matrix in local detector system. In this system
 /// detector plane is x = const 
-
-  float Nt[3];
-//		Nt == track direction in Hit frame
-  for (int j=0;j<3;j++) {
-    Nt[j] = hiDir[j][0]*mNG[0][0]+hiDir[j][1]*mNG[0][1]+hiDir[j][2]*mNG[0][2];
-  }
 //		Nt = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
-  mSl = Nt[2],mCl = sqrt((1-mSl)*(1+mSl));
-  mSp = Nt[1]/mCl; mCp = Nt[0]/mCl;
-  hRr[0] = (mPar[kThkDet]*mSp*mSp   + mPar[kWidTrk])
-           / (mCp*mCp) + mPar[kYErr];
-  hRr[2] = (mPar[kThkDet]*(mSl*mSl) + mPar[kWidTrk]*((mSp*mSl)*(mSp*mSl)+mCp*mCp))
-           / ((mCp*mCl)*(mCp*mCl))  + mPar[kZErr];
-  hRr[1] = (mPar[kThkDet]           + mPar[kWidTrk])*(mSp*mSl)/(mCp*mCp*mCl);
+  memset(mDD[0],0,mNPar*3*sizeof(mDD[0][0]));
+  mDD[0][0] = 1;
+  mDD[1][2] = 1;
+  hRr[0] =  mDD[kYErr][0]*mPar[kYErr];
+  hRr[2] =  mDD[kZErr][2]*mPar[kZErr];
+  hRr[1] = 0;
 
 }  
+//______________________________________________________________________________
+void StvHitErrCalculator::CalcLocals(const float hiDir[3][3])
+{
+/// Calculate hit error matrix in DCA  system. In this system
+/// track is along x axis, Y axis comes thru hit point 
+static const double s15 = sin(3.14/180*15);
+static const double c15 = cos(3.14/180*15);
+static const double s45 = sin(3.14/180*45);
+static const double c45 = cos(3.14/180*45);
+
+  mFailed = 0;
+  if (!hiDir) {
+    mSp  = s15    ; mCp  = c15    ; mSl  = s45    ; mCl  = c45    ;
+    mSp2 = s15*s15; mCp2 = c15*c15; mSl2 = s45*s45; mCl2 = c45*c45;
+    return;
+  }
+  for (int j=0;j<3;j++) {
+    mTL[j] = (hiDir[j][0]*mTG[0]+hiDir[j][1]*mTG[1]+hiDir[j][2]*mTG[2]);}
+
+//		mTL = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
+  mSl = mTL[2],mCl2 = ((1-mSl)*(1+mSl));
+  if (mCl2<kMinCos*kMinCos) 	{	//Lambda too big
+    mCl=kMinCos; mCl2=mCl*mCl; mSl = (mSl<0)? -kMaxSin:kMaxSin;
+    mSp = 0; mCp = 1; mFailed = 1;
+  } else           		{	//Normal case
+    mCl=sqrt(mCl2); mSp = mTL[1]/mCl; mCp = mTL[0]/mCl; 
+  }
+  if (fabs(mCp) < kMinCos) { 		//Phi (psi) too big
+    mCp = (mCp<0)? -kMinCos:kMinCos; 
+    mSp = (mSp<0)? -kMaxSin:kMaxSin; mFailed = 2;
+  }
+  mSp2 = mSp*mSp; mCp2 = mCp*mCp; mSl2=mSl*mSl;
+}
 //______________________________________________________________________________
 void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
 {
 /// Calculate hit error matrix in DCA  system. In this system
 /// track is along x axis, Y axis comes thru hit point 
+   double detHitErr[3];
+   CalcDetErrs(hiPos,hiDir,detHitErr);
+   CalcLocals(hiDir);
 
-  float *NtG = mNG[0];		   
-  float  NL[3][3], *Nt=NL[0],*Np=NL[1],*Nl=NL[2];
-  for (int j=0;j<3;j++) {
-    Nt[j] = (hiDir[j][0]*NtG[0]+hiDir[j][1]*NtG[1]+hiDir[j][2]*NtG[2]);}
-
-
-//		Nt = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
-  mSl = Nt[2],mCl = ((1-mSl)*(1+mSl));
-  if (mCl<1e-6) { mCl=0;         mSp = 0;         mCp = 1;        }
-  else          { mCl=sqrt(mCl); mSp = Nt[1]/mCl; mCp = Nt[0]/mCl;}
-  Np[0]=-mSp;     Np[1]=mCp;     Np[2]=0;
-  Nl[0]=-mSl*mCp; Nl[1]=-mSl*mSp;Nl[2]=mCl;
-
-  float g[3];
-  memset(mDD[0],0,sizeof(mDD));
-////  g[0] = mPar[kThkDet]*mSp*mSp 	   + mPar[kWidTrk] + mPar[kYErr]*mCp*mCp;
-////  g[2] = mPar[kThkDet]*mCp*mCp*mSl*mSl + mPar[kWidTrk] + mPar[kYErr]*(mSl*mSp)*(mSl*mSp)+ mPar[kZErr]*mCl*mCl;
-////  g[1] = mPar[kThkDet]*mCp*mSp*mSl;
-  double amp = fabs(mCp*mCl);
-  amp = 1; //??????????????????????????????????????????????????????
-  mDD[kThkDet][0] = mSp*mSp		*amp;	      
-  mDD[kWidTrk][0] = 1			*amp;
-  mDD[kYErr  ][0] = mCp*mCp		*amp;
-
-  mDD[kThkDet][1] = mCp*mSp*mSl		*amp;
-
-  mDD[kThkDet][2] = mCp*mCp*mSl*mSl	*amp;
-  mDD[kWidTrk][2] = 1			*amp;
-  mDD[kYErr  ][2] = (mSl*mSp)*(mSl*mSp)	    ;
-  mDD[kZErr  ][2] = mCl*mCl		    ;
-
-  g[0] = mDD[kThkDet][0]*mPar[kThkDet]+mDD[kWidTrk][0]*mPar[kWidTrk]+mDD[kYErr][0]*mPar[kYErr];
-  g[1] = mDD[kThkDet][1]*mPar[kThkDet];
-  g[2] = mDD[kThkDet][2]*mPar[kThkDet]+mDD[kWidTrk][2]*mPar[kWidTrk]+mDD[kYErr][2]*mPar[kYErr]+mDD[kZErr][2]*mPar[kZErr];
-
-  hRr[0]=g[0]; hRr[1]=g[1]; hRr[2]=g[2];
+   double tt[2][2]= {{mCp,0},{-mSl*mSp,mCl}};
+   memcpy(mTT[0],tt[0],sizeof(mTT));
+   TCL::trasat(mTT[0],detHitErr,hRr,2,2); 
 } 
 //______________________________________________________________________________
-double StvHitErrCalculator::Trace(const float*) {
-  return mPar[kWidTrk]+mPar[kYErr]+mPar[kWidTrk]+mPar[kZErr];
+double StvHitErrCalculator::Trace(const float*) 
+{
+  return mPar[kYErr]+mPar[kZErr];
 }
 //______________________________________________________________________________
 void StvHitErrCalculator::CalcDcaDers(double dRR[kMaxPars][3])
 {
 // Calculate deriavatives of err matrix.
 // must be called after CalcDcaErrs(...)
-  memset(dRR[0],0,sizeof(double)*3*kMaxPars);
-  TCL::ucopy(mDD[0],dRR[0],mNPar*3);
-}
-  
-//______________________________________________________________________________
-//______________________________________________________________________________
-void StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
-{
-static const double kMinErr2=0.1*0.1,kMaxErr2=1.0*1.0;
-
-    float zSpan = fabs(fabs(hiPos[2])-210)/100;
-    double save1 = mPar[kYErr],save2 = mPar[kZErr];
-    mPar[kYErr]+=mPar[kYDiff]*zSpan;
-    mPar[kZErr]+=mPar[kZDiff]*zSpan;
-    StvHitErrCalculator::CalcDetErrs(hiPos,hiDir,hRR);
-    mPar[kYErr]=save1;mPar[kZErr]=save2;
-    for (int i=0;i<3;i+=2) {
-      if (hRR[i]<kMinErr2) hRR[i]=kMinErr2;
-      if (hRR[i]>kMaxErr2) hRR[i]=kMaxErr2;
-    }
+  for (int iPar=0;iPar<mNPar;iPar++) {
+    TCL::trasat(mTT[0],mDD[iPar],dRR[iPar],2,2); 
+  }
 
 }
 //______________________________________________________________________________
-void StvTpcHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
-{
-    mZSpan = fabs(fabs(hiPos[2])-210)/100;
-    double save1 = mPar[kYErr],save2 = mPar[kZErr];
-    mPar[kYErr]+=mPar[kYDiff]*mZSpan;
-    mPar[kZErr]+=mPar[kZDiff]*mZSpan;
-    StvHitErrCalculator::CalcDcaErrs(hiPos,hiDir,hRR);
-    mPar[kYErr]=save1;mPar[kZErr]=save2;
-}
 //______________________________________________________________________________
-void StvTpcHitErrCalculator::CalcDcaDers(double dRR[kMaxPars][3])
+void StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
 {
-   StvHitErrCalculator::CalcDcaDers(dRR);
-   for (int j=0;j<3;j++) {
-     dRR[kYDiff][j]=dRR[kYErr][j]*mZSpan;
-     dRR[kZDiff][j]=dRR[kZErr][j]*mZSpan;
-   }
-}
+/// Calculate hit error matrix in local detector system. In this system
+/// detector plane is x = const 
+
+  CalcLocals(hiDir);
+  memset(mDD[0],0,mNPar*3*sizeof(mDD[0][0]));
+  mZSpan = fabs(fabs(hiPos[2])-210)/100;
+  double fak = fabs(mCl*mCp);
+  mDD[kYErr   ][0] = 1;
+  mDD[kYDiff  ][0] = mZSpan/mCp2	*fak;
+  mDD[kYThkDet][0] = mSp2/mCp2/12	*fak;
+
+  mDD[kZErr   ][2] = 1;
+  mDD[kZDiff  ][2] = mZSpan		*fak;
+  mDD[kYDiff  ][2] = mZSpan*mSl2/mCl2	*fak;
+  mDD[kZThkDet][2] = mSl2/mCl2/12	*fak;
+  mDD[kZAB2   ][2] = 1./180		*fak;
+
+  for (int ig=0;ig<3;ig++) {
+    hRr[ig]=0;
+    for (int ip=0;ip<mNPar;ip++) {
+      if(!mDD[ip][ig]) continue;
+      hRr[ig]+=mDD[ip][ig]*mPar[ip];
+  } }
+  if (hRr[0]>100) hRr[0]=100;
+  if (hRr[1]>100) hRr[1]=100;
+
+}  
 //______________________________________________________________________________
 double StvTpcHitErrCalculator::Trace(const float hiPos[3]) 
 {
-    mZSpan = fabs(fabs(hiPos[2])-210)/100;
-    double save1 = mPar[kYErr],save2 = mPar[kZErr];
-    mPar[kYErr]+=mPar[kYDiff]*mZSpan;
-    mPar[kZErr]+=mPar[kZDiff]*mZSpan;
-    double err2 = StvHitErrCalculator::Trace(hiPos);
-    mPar[kYErr]=save1;mPar[kZErr]=save2;
-    return err2;
+  double hiErr[3];
+  CalcDetErrs(hiPos,0,hiErr);
+  return hiErr[0]+hiErr[2];
 }
 
 
 
-
-#if 1
 #include "TRandom.h"
 #include "TVector3.h"
+//______________________________________________________________________________
+void StvTpcHitErrCalculator::Dest(double phiG,double lamG)
+{
+  double par[10]={0};
+  par[kYErr]=0.03*0.03;
+  par[kZErr]=0.07*0.07;
+  par[kYThkDet]=1.;
+  par[kZThkDet]=1.5;
+  par[kYDiff]=par[kYErr]*1;
+  par[kZDiff]=par[kZErr]*2;
+  par[kZAB2 ]=1;
+
+  double Lam = lamG/180*M_PI;
+  double Phi = phiG/180*M_PI;
+  double cL = cos(Lam);
+  double sL = sin(Lam);
+  double cP = cos(Phi);
+  double sP = sin(Phi);
+  double Nt[3]={cL*cP,cL*sP,sL};
+  float  hiPos[3]   = {100,0,155};
+  float  hiDir[3][3]={{1,0,0},{0,1,0},{0,0,1}};
+
+//		Randomize orientation
+  double LamH = (gRandom->Rndm()-0.5);
+  double PhiH = (gRandom->Rndm()-0.5);
+//		copy all info from arrays to TVector3
+  TVector3 myV[4];
+  for (int i=0;i<3;i++) { myV[i] = TVector3(hiDir[i]);}
+  myV[3] = TVector3(Nt);
+//		Rotate it
+  for (int i=0;i<4;i++) { myV[i].RotateZ(PhiH);myV[i].RotateX(LamH);}
+
+//		copy all info back into arrays
+  for (int i=0;i<3;i++) { Nt[i] = myV[3][i];
+  for (int j=0;j<3;j++) { hiDir[i][j] = myV[i][j]; }}
+
+  StvTpcHitErrCalculator calc("UUUUUUUUU");
+  int nPars = calc.GetNPars();
+  calc.SetPars(par);
+  calc.SetTrack(Nt);
+  double hRR[3],dRR[10][3];
+  calc.CalcDcaErrs(hiPos,hiDir,hRR);
+  calc.CalcDcaDers(dRR);
+  for (int j=0;j<3;j++) {
+    printf("hRR[%d]=%g  Der = %g %g %g %g\n",j,hRR[j]
+          ,dRR[0][j],dRR[1][j],dRR[2][j],dRR[3][j]);
+  }
+
+  StvTpcHitErrCalculator calk("");
+  for (int ider=0;ider<nPars;ider++) {
+    double myPar[10],delta;
+    memcpy(myPar,par,nPars*sizeof(par[0]));
+    delta = myPar[ider]*1e-1;
+    if (delta<1e-6) delta=1e-6;
+    myPar[ider]+=delta;
+    calk.SetPars(myPar);
+    calk.SetTrack(Nt);
+    double myRR[3];
+    calk.CalcDcaErrs(hiPos,hiDir,myRR);
+    for (int j=0;j<3;j++) {
+      double est = (myRR[j]-hRR[j])/delta;
+      double eps = (dRR[ider][j]-est)/(fabs(dRR[ider][j])+fabs(est)+1e-10);
+      printf("Der[%d][%d]=%g \tnum=%g \teps=%g\n",ider,j,dRR[ider][j],est,eps);
+    }
+  }
+}
+#if 0
+//______________________________________________________________________________
+void StvHitErrCalculator::Test(double phiG,double lamG)
+{
+  double par[6]={0};
+  par[kYErr]=0.1*0.1;
+  par[kZErr]=0.2*0.2;
+  par[kThkDet]=9*9/12;
+  par[kWidTrk]=0.1*0.1;
+
 //______________________________________________________________________________
 void StvHitErrCalculator::Test(double phiG,double lamG)
 {
@@ -346,70 +402,6 @@ void StvHitErrCalculator::Dest(double phiG,double lamG)
   StvHitErrCalculator calk("",4);
   for (int ider=0;ider<4;ider++) {
     double myPar[4],delta;
-    memcpy(myPar,par,sizeof(myPar));
-    delta = myPar[ider]*1e-1;
-    myPar[ider]+=delta;
-    calk.SetPars(myPar);
-    calk.SetTrack(Nt);
-    double myRR[3];
-    calk.CalcDcaErrs(hiPos,hiDir,myRR);
-    for (int j=0;j<3;j++) {
-      double est = (myRR[j]-hRR[j])/delta;
-      double eps = (dRR[ider][j]-est)/(fabs(dRR[ider][j])+fabs(est)+1e-10);
-      printf("Der[%d][%d]=%g \tnum=%g \teps=%g\n",ider,j,dRR[ider][j],est,eps);
-    }
-  }
-}
-//______________________________________________________________________________
-void StvTpcHitErrCalculator::Dest(double phiG,double lamG)
-{
-  double par[6]={0};
-  par[kYErr]=0.03*0.03;
-  par[kZErr]=0.07*0.07;
-  par[kThkDet]=3*3/12.;
-  par[kWidTrk]=0.1*0.1;
-  par[kWidTrk]=0.1*0.1;
-  par[kYDiff]=par[kYErr]*1;
-  par[kZDiff]=par[kZErr]*2;
-
-  double Lam = lamG/180*M_PI;
-  double Phi = phiG/180*M_PI;
-  double cL = cos(Lam);
-  double sL = sin(Lam);
-  double cP = cos(Phi);
-  double sP = sin(Phi);
-  double Nt[3]={cL*cP,cL*sP,sL};
-  float  hiPos[3]   = {100,0,155};
-  float  hiDir[3][3]={{1,0,0},{0,1,0},{0,0,1}};
-
-//		Randomize orientation
-  double LamH = (gRandom->Rndm()-0.5);
-  double PhiH = (gRandom->Rndm()-0.5);
-//		copy all info from arrays to TVector3
-  TVector3 myV[4];
-  for (int i=0;i<3;i++) { myV[i] = TVector3(hiDir[i]);}
-  myV[3] = TVector3(Nt);
-//		Rotate it
-  for (int i=0;i<4;i++) { myV[i].RotateZ(PhiH);myV[i].RotateX(LamH);}
-
-//		copy all info back into arrays
-  for (int i=0;i<3;i++) { Nt[i] = myV[3][i];
-  for (int j=0;j<3;j++) { hiDir[i][j] = myV[i][j]; }}
-
-  StvTpcHitErrCalculator calc("");
-  calc.SetPars(par);
-  calc.SetTrack(Nt);
-  double hRR[3],dRR[10][3];
-  calc.CalcDcaErrs(hiPos,hiDir,hRR);
-  calc.CalcDcaDers(dRR);
-  for (int j=0;j<3;j++) {
-    printf("hRR[%d]=%g  Der = %g %g %g %g\n",j,hRR[j]
-          ,dRR[0][j],dRR[1][j],dRR[2][j],dRR[3][j]);
-  }
-
-  StvTpcHitErrCalculator calk("");
-  for (int ider=0;ider<6;ider++) {
-    double myPar[6],delta;
     memcpy(myPar,par,sizeof(myPar));
     delta = myPar[ider]*1e-1;
     myPar[ider]+=delta;
