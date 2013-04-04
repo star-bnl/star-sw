@@ -308,11 +308,10 @@ double TPoliFitter::Fit()
 //_____________________________________________________________________________
 void   TPoliFitter::MakeErrs()
 {
-  delete fEmx;
+  delete [] fEmx;
   int n = (fNP+1)*(fNP+2)/2;
   fEmx = new double[n];
   TCL::trsmul(fP,fEmx,fNP+1);
-//TCL::trsmlu(fP,fEmx,fNP+1);
   TCL::vscale(fEmx,1./fWtot,fEmx,n);
 }
 //_____________________________________________________________________________
