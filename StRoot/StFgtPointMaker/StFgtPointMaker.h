@@ -19,6 +19,8 @@ Please see instructions in the macro.
 #include "StMaker.h"
 #include "StFgtIPointAlgo.h"
 
+class StFgtDb;
+
 class StFgtPointMaker : public StMaker
 {
  public:
@@ -28,11 +30,15 @@ class StFgtPointMaker : public StMaker
   virtual Int_t Make();
   virtual void Clear( Option_t *opts = "" );
   Int_t setPointAlgo(StFgtIPointAlgo*);
+  void setSkipEvent(int v){mSkipEvent=v;}
+
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtPointMaker.h,v 1.1 2013/03/13 20:36:28 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtPointMaker.h,v 1.2 2013/04/04 20:24:50 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StFgtIPointAlgo* mPointAlgoPtr;
+  StFgtDb* mDb;
+  int mSkipEvent;
 
  private:
   ClassDef(StFgtPointMaker,1);
@@ -40,8 +46,13 @@ class StFgtPointMaker : public StMaker
 #endif
 
 /*
- * $Id: StFgtPointMaker.h,v 1.1 2013/03/13 20:36:28 jeromel Exp $ 
+ * $Id: StFgtPointMaker.h,v 1.2 2013/04/04 20:24:50 akio Exp $ 
  * $Log: StFgtPointMaker.h,v $
+ * Revision 1.2  2013/04/04 20:24:50  akio
+ * - Filling StHit with xyz, error on xyz and detectorId
+ * - Add option to return kStSkip if max number of disc hit per quad is less than setSkipEvent (default 0)
+ *    This is for expert only, and not for production. Use it with SetAttr(".Privilege",1)
+ *
  * Revision 1.1  2013/03/13 20:36:28  jeromel
  * Initial revision, Anselm Vossen
  *
