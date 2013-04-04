@@ -22,9 +22,8 @@ public:
 void Reset() 				{mJst=-1;}
 void Prepare();
 void Update();
-void AddHit(const float *x,const float *dir);
+void AddHit(const float *x,const float *dir,float layer);
 void SetErr(float err) 			{mErr=err;}
-void SetStep(float xStp,float zStp) 	{mXYStep=xStp;mZStep=zStp;}
 
 
 int  Reject(const float x[3]);	// 0  :x accepted
@@ -38,13 +37,12 @@ public:
 char  mBeg[1];
 int   mJst;
 float mErr;
-float mXYStep;
-float mZStep;
 float mRxy2;
 float mRxy;
 float mDelta;
 float mZ2;
 float mDir[3]; 		// track direction
+float mLayer;
 const float *mHitDir; 	// hit plane direction
 float mLen;		// cone length (height)
 //		Calculated data
