@@ -26,7 +26,7 @@
 //==========================================================
 //==========================================================
 EemcHitList::EemcHitList(StEEmcDb* x, uint y, EEmcGeomSimple *z) :
-  ScintHitList(-C_PI/60.,C_PI/30,60, 999,999,8,"Eemc",4,0.75) {
+  ScintHitList(-C_PI/60.,C_PI/30,60, 999,999,8,(char *) "Eemc",4,0.75) {
   eeDb=x; 
   killStatEEmc=y ;
   geomE=z;

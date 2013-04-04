@@ -23,7 +23,7 @@ extern void cts_get_ctb_indexes(long, long &, long &);
 //==========================================================
 //==========================================================
 CtbHitList::CtbHitList() :
-  ScintHitList(-C_PI/60.,C_PI/30,60, -1.,0.5,4,"Ctb",2.,0.5){
+  ScintHitList(-C_PI/60.,C_PI/30,60, -1.,0.5,4,(char *) "Ctb",2.,0.5){
   // CTB clibration: 2 MeV==5 ADC
   mCtbThres_mev=1; //to reject slats with low dE for M-C data
   mCtbThres_ch=2 ;  //to reject slats with low ADC for real data

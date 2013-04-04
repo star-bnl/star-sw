@@ -245,7 +245,7 @@ ScintHitList::doHisto(){
 void
 ScintHitList:: initHisto (TObjArray*HList){
   const char *core=myName.Data();
-  char *type[3]={"Fired","Track","Matched tracks"};
+  char *type[3]={(char *) "Fired",(char *) "Track",(char *) "Matched tracks"};
   char tt1[100],tt2[500];
  
   int it;

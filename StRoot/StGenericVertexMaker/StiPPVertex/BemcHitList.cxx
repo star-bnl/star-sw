@@ -21,7 +21,7 @@
 //==========================================================
 //==========================================================
 BemcHitList::BemcHitList() :
-  ScintHitList(0.,C_PI/60,120, -1.,0.05,40,"Bemc",4,0.75) {
+  ScintHitList(0.,C_PI/60,120, -1.,0.05,40,(char *) "Bemc",4,0.75) {
   myTable = new StBemcTables();
   geomB = StEmcGeom::instance("bemc");
   kSigPed=5.0; 
