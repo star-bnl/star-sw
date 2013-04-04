@@ -5,20 +5,22 @@
 * There should be one such parameter set for each detector. Some detectors, such
 * as the TPC may have more.
 *
-  yErr =>      Intrinsic resolution, padrow or Y direction
-  zErr =>      Intrinsic resolution, z direction
-  widTrk   =>  Track_width sigma**2
-  thkDet   =>  (Thickness of detector plane)**2/12
-  yDiff    =>  Y Drift dependent diffusion resolution, z direction
-  zDiff    =>  Z Drift dependent diffusion resolution, z direction
+  yErr =>      	Intrinsic resolution, padrow or Y direction
+  zErr =>      	Intrinsic resolution, Z direction
+  yDiff=>	Diffusion in XY direction
+  zDiff=>	Diffusion in Z direction
+  yThkDet=>	Effective detector thickness**2 for Y err 
+  zThkDet=>	Effective detector thickness**2 for Z err
+  zAB2   =>	Constant member in Z direction (a*b)**2
 */ 
 
 struct StvHitErrs 
 { 
 double yErr  ; /* Intrinsic resolution, padrow or Y direction		*/
 double zErr  ; /* Intrinsic resolution, z direction			*/
-double widTrk; /* Track_width sigma**2					*/
-double thkDet; /* (Thickness of detector plane)**2/12			*/
-double yDiff ; /* Y Drift dependent diffusion resolution, z direction	*/
-double zDiff ; /* Z Drift dependent diffusion resolution, z direction	*/
+double yDiff ; /* Diffusion in XY direction				*/
+double zDiff ; /* Diffusion in Z direction				*/
+double yThkDet;	/* Effective detector thickness**2 for Y err 		*/
+double zThkDet;	/* Effective detector thickness**2 for Z err		*/
+double zAB2   ;	/* Constant member in Z direction (a*b)**2		*/
 };  
