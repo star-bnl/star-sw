@@ -39,7 +39,7 @@ class StvMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.1 2010/07/06 20:27:53 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.2 2013/04/04 21:37:19 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 
 
@@ -52,6 +52,8 @@ private:
     TFile               *mPullFile;
     StvPullEvent        *mPullEvent;
     TTree               *mPullTTree;
+    int                  mFETracks;	//max number of track requested if fit hit errs
+    int                  mToTracks;	//total tracks created, if > mFETracks, stop
   char mEnd[1];
     ClassDef(StvMaker,0)
 };
