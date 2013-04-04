@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.22 2013/03/25 23:08:42 perev Exp $
+// $Id: StTGeoHelper.h,v 1.23 2013/04/04 21:28:13 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -145,6 +145,8 @@ virtual       int   Kind() const 	{return 0;}
      StDetectorId   GetDetId() const 	{ return fDetId;}    
              void   SetDetId(StDetectorId id){ fDetId=id;}    
 int   GetNHits() const;
+float GetLayer() const 		{ return fNex;}
+void  SetLayer(); 	
 const StMultiKeyMap *GetHitMap() const {return fHitMap;}
 
 protected:
@@ -152,6 +154,7 @@ char  fBeg[1];
 StDetectorId fDetId;
 float fOrg[3];
 float fDir[3][3];
+float fNex;		//distance to next layer
 TNamed *fHitErrCalc;
 StMultiKeyMap *fHitMap;
 char  fEnd[1];
@@ -223,6 +226,7 @@ public:
         int InitHits();
        void ClearHits();
        void Clear(const char *opt="");
+static double Look(double maxDist,const double pnt[3],const double dir[3]);
 
         int SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc,const StTGeoSele *sel=0);
 static  StTGeoHelper *Instance();

@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.26 2013/03/25 23:09:50 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.27 2013/04/04 21:28:04 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -361,7 +361,8 @@ void StTGeoHelper::InitHitPlane()
     StHitPlaneInfo *hpi = IsHitPlane(vol);
     if (!hpi) 		continue;
     StHitPlane *hp = hpi->MakeHitPlane(it);
-    if(hp) hp->SetDetId(detId);
+    if(!hp) 		continue;
+    hp->SetDetId(detId);
     
   }
 
@@ -565,6 +566,16 @@ static const float myDir[3][3][3]={{{1,0,0},{ 0,1,0},{ 0,0,1}}
   return 0;
 }
 //_____________________________________________________________________________
+void StHitPlane::SetLayer()
+{
+ const float *pnt = GetPnt();
+ double myPnd[3]={pnt[0],pnt[1],pnt[2]};
+ const float *dir = GetDir(pnt)[0];
+ double myDir[3] = {dir[0],dir[1],dir[2]};
+ fNex = StTGeoHelper::Look(50,myPnd,myDir);
+ assert(fNex>1e-2);
+}
+//_____________________________________________________________________________
 int StTGeoHelper::IsSensitive(const TGeoVolume *volu)
 {
   if (!volu) volu = gGeoManager->GetCurrentVolume();
@@ -700,7 +711,7 @@ static int 	nTest=0,nFail=0,detId=0;
   StHitPlaneHardMapIter it(fHitPlaneHardMap->find(hardw));
   StHitPlane *hp=0,*hpMap=0,*hpGeo=0;
   if (fOpt && it !=  fHitPlaneHardMap->end()) { //HitPlane found
-     hpMap = (*it).second;
+     hpMap = (*it).second;fGoodHit=1;
   } 
   hp = hpMap;
   if (hpMap==0 || nTest < kMaxTest) { 
@@ -810,7 +821,7 @@ static int nCall=0; nCall++;
 
   double Rxy = sqrt(pnt[0]*pnt[0]+pnt[1]*pnt[1]);
   double myCos= pnt[0]/Rxy,mySin=pnt[1]/Rxy;
-  double myDir[3],myPnt[3];
+  double myDir[3];
   double minDist=(fabs(xyz[0])+fabs(xyz[1]))/10+5;
   StHitPlane *minHitPlane=0;
   for (int idir=0;idir<kNDIRS; idir++) {
@@ -819,35 +830,13 @@ static int nCall=0; nCall++;
     myDir[0] = dirs[idir][0]*myCos - dirs[idir][1]*mySin; 
     myDir[1] = dirs[idir][0]*mySin + dirs[idir][1]*myCos; 
     myDir[2] = dirs[idir][2];
-    gGeoManager->SetCurrentDirection(myDir);
-    TString prevPath(gGeoManager->GetPath());
-    double myStep = 0,epsStp = 1e-4,minStp = epsStp,stp=0;
-    for (int istep=0;istep<100 ;istep++) {
-      const TGeoNode *myNode = 
-        gGeoManager->FindNextBoundaryAndStep(1.001*(minDist-myStep));
-      if (!myNode) 				break;
-      TString currPath(gGeoManager->GetPath());
-      stp = gGeoManager->GetStep();
-      int same = (currPath == prevPath);
-      if (stp<1e-4 && same) {//Same volume
-        stp=minStp; minStp*=2;
-        const double *x = gGeoManager->GetCurrentPoint();
-        for (int j=0;j<3;j++) { myPnt[j]=x[j]+myDir[j]*stp;}
-        gGeoManager->SetCurrentPoint(myPnt);
-        gGeoManager->FindNode();
-      } 
-      myStep +=stp; if (myStep>=minDist) 	break; 
-      if (same) 				continue;
-
-      prevPath=currPath; minStp = epsStp; 
-      hp = GetCurrentHitPlane();     
-      if (!hp || !hp->GetHitErrCalc()) 		continue;
-      if (!IsHitted(gGeoManager->GetLastPoint()))	continue;
-      minDist = myStep; minHitPlane = hp; 	break;
-    }
-
+    double myStep = Look(minDist,pnt,myDir);
+    if (myStep > minDist) continue;
+    hp = GetCurrentHitPlane();     
+    if (!hp || !hp->GetHitErrCalc()) 		continue;
+    if (!IsHitted(gGeoManager->GetLastPoint()))	continue;
+    minDist = myStep; minHitPlane = hp; 	break;
   }
-
   return minHitPlane;  
 }       
        
@@ -992,6 +981,7 @@ static int nCall=0; nCall++;
     it.LocalToMaster(pnt, ht->fPnt);
     ht->fRmed = rMed;
   }
+  hp->SetLayer();
   return hp;
 }
 //_____________________________________________________________________________
@@ -1290,7 +1280,42 @@ const TGeoVolume *StTGeoHelper::FindModule(const char *patt)
   }
   return bestVolu;
 }
+//_____________________________________________________________________________
+double StTGeoHelper::Look(double maxDist,const double pnt[3],const double dir[3])
+{
+//  Search nearest sensitive volume in given direction.
+//  returns distance
+  double myPnt[3]={ pnt[0], pnt[1], pnt[2]};
+  double myDir[3]={ dir[0], dir[1], dir[2]};
 
+  gGeoManager->SetCurrentPoint(myPnt);
+  const TGeoNode *node = gGeoManager->FindNode();
+  if (!node) return 0;
+  gGeoManager->SetCurrentDirection(myDir);
+  TString prevPath(gGeoManager->GetPath());
+  double myStep = 0,epsStp = 1e-4+maxDist*1e-3,minStp = epsStp,stp=0;
+  for (int istep=0;istep<100 ;istep++) {
+    node = gGeoManager->FindNextBoundaryAndStep(1.001*(maxDist-myStep));
+    if (!node) 				break;
+    TString currPath(gGeoManager->GetPath());
+    stp = gGeoManager->GetStep();
+    int same = (currPath == prevPath);
+    if (stp<epsStp && same) {//Same volume
+      stp=minStp; minStp*=2;
+      const double *x = gGeoManager->GetCurrentPoint();
+      for (int j=0;j<3;j++) { myPnt[j]=x[j]+myDir[j]*stp;}
+      gGeoManager->SetCurrentPoint(myPnt);
+      node = gGeoManager->FindNode();
+      if (!node) 			break;
+    } 
+    myStep +=stp; if (myStep>=maxDist) 	break; 
+    if (same) 				continue;
+
+    prevPath=currPath; minStp = epsStp; 
+    if (IsSensitive()) break;
+  }
+  return myStep;
+}
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 StVoluInfo::StVoluInfo(int voluNumber)     
