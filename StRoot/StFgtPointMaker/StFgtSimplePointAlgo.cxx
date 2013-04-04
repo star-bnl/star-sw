@@ -1,4 +1,3 @@
-
 #include "StFgtSimplePointAlgo.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StEvent/StFgtHit.h"
@@ -7,8 +6,6 @@
 #include "StRoot/StEvent/StFgtPoint.h"
 #include "StRoot/StEvent/StFgtPointCollection.h"
 #include "StRoot/St_base/StMessMgr.h"
-
-
 
 StFgtSimplePointAlgo::StFgtSimplePointAlgo():StFgtIPointAlgo("simple point algo","simple point algo"),mIsInitialized(0),m_maxChargeAsymmetry(0.1)
 {
@@ -36,7 +33,7 @@ Int_t StFgtSimplePointAlgo::makePoints( StFgtCollection& c)
 
   StFgtPointCollection* pPointCollection=c.getPointCollection();
   if( !pPointCollection ){
-    LOG_ERROR << "$Id: StFgtSimplePointAlgo.cxx,v 1.2 2013/04/03 19:44:30 akio Exp $ Error getting pointer to StFgtPointCollection from StFgtCollection" << endm;
+    LOG_ERROR << "$Id: StFgtSimplePointAlgo.cxx,v 1.3 2013/04/04 20:24:50 akio Exp $ Error getting pointer to StFgtPointCollection from StFgtCollection" << endm;
     return kStErr;
   }
   StFgtPointCollection& points=*pPointCollection;
@@ -52,7 +49,7 @@ Int_t StFgtSimplePointAlgo::makePoints( StFgtCollection& c)
     //prevent looping for too long
     if(numClusters > 40)
       {
-	LOG_WARN <<"$Id: StFgtSimplePointAlgo.cxx,v 1.2 2013/04/03 19:44:30 akio Exp $ :  number of cluster too large in disk " << discIdx<<"! " <<endl;
+	LOG_WARN <<"$Id: StFgtSimplePointAlgo.cxx,v 1.3 2013/04/04 20:24:50 akio Exp $ :  number of cluster too large in disk " << discIdx<<"! " <<endl;
 	continue;
       }
 
@@ -96,8 +93,8 @@ Int_t StFgtSimplePointAlgo::makePoints( StFgtCollection& c)
 	      if( pointVec.back()->getKey() != clusterCounter ){ // error during construction
 		delete pointVec.back();
 		pointVec.pop_back();
-	      };
-	    };
+	      }
+	    }
       }
     cout <<"StFgtSimplePointAlgo: we have " << points.getNumPoints() <<" points after disc = " << discIdx << endl;
   }
@@ -107,8 +104,13 @@ Int_t StFgtSimplePointAlgo::makePoints( StFgtCollection& c)
 ClassImp(StFgtSimplePointAlgo);
 //
 //
-//  $Id: StFgtSimplePointAlgo.cxx,v 1.2 2013/04/03 19:44:30 akio Exp $
+//  $Id: StFgtSimplePointAlgo.cxx,v 1.3 2013/04/04 20:24:50 akio Exp $
 //  $Log: StFgtSimplePointAlgo.cxx,v $
+//  Revision 1.3  2013/04/04 20:24:50  akio
+//  - Filling StHit with xyz, error on xyz and detectorId
+//  - Add option to return kStSkip if max number of disc hit per quad is less than setSkipEvent (default 0)
+//     This is for expert only, and not for production. Use it with SetAttr(".Privilege",1)
+//
 //  Revision 1.2  2013/04/03 19:44:30  akio
 //  added same quad check
 //
