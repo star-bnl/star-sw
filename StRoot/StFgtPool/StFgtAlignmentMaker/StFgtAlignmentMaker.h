@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtAlignmentMaker.h,v 1.2 2013/02/07 00:39:33 akio Exp $
+ * $Id: StFgtAlignmentMaker.h,v 1.3 2013/04/04 17:08:30 akio Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtAlignmentMaker.h,v $
+ * Revision 1.3  2013/04/04 17:08:30  akio
+ * make steps settable from macro
+ *
  * Revision 1.2  2013/02/07 00:39:33  akio
  * Adding run# for naming output files
  *
@@ -17,6 +20,21 @@
  *
  * -------------------------------------------------------------------------
  */
+
+//setStep define alignment procedure by with different parameter space search in sequence
+//                                                                                                                                         
+//  setStep(discmask,quadmask,parmask,hitmask,trackType,minHit,minTpcHit)                                                 
+//    3 masks to specify which parameters are free(1) or fixed(0)
+//      discmask = 3f(all),3e(fix d1)    note: discmask=3f & hitmask=3f causes unstable result                                               
+//      quadmask = 1(A),2(B),4(C),8(D)                                                                                                       
+//      parmask  = 3f(all),38(xyz),19(xy,phi),39(xyz & phi)                                                                                  
+//    1 mask to specify wihch hits to be used bit0-5=fgt d1-6, bit6=vtx, bit7=tpc
+//      hitmask  = ff(FGT+VTX+TPC),c0(TPC+VTX, no FGT), 3f(FGT only), 7f(FGT+VTX)                                                            
+//    Specify track type to be used for refit
+//      trackType= 0(straight line), 1(Helix)                                                                                                
+//  
+//    1st step should have 3 masks all 0 for making "before" histos
+//    "after" histos will use last step's paramters except 3 masks are set to 0
 
 #ifndef StFgtAlignmentMaker_hh     
 #define StFgtAlignmentMaker_hh
@@ -43,14 +61,16 @@ public:
   inline void setDataSource(Int_t v) {mDataSource=v;} // 0=StEvent 1=Fake 2=AVTrack 3=TTree(alignment.root) [0]
   inline void setWriteTree(char* v="alignment.root") {mOutTreeFile=v;} 
   inline void setReadTree(char* v="alignment.root")  {mInTreeFile=v;}
-  inline void setTrackType(Int_t v) {mTrackType=v;}  // 0=straight line 1=helix [0]
   inline void setFgtErr(Float_t x, Float_t y, Float_t z) {mFgtXerr=x; mFgtZerr=y; mFgtZerr=z;} // [0.05,0.05,0.2]
   inline void setDcaCut(Float_t v) {mDcaCut=v;}
   inline void setChi2Cut(Float_t v) {mChi2Cut=v;}
   inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
+  void setStep(int discmask,int quadmask, int parmask, int hitmask_disc, 
+	       int trackType, int minHit, int minTpcHit);
+
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtAlignmentMaker.h,v 1.2 2013/02/07 00:39:33 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtAlignmentMaker.h,v 1.3 2013/04/04 17:08:30 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   };
   
@@ -86,11 +106,20 @@ private:
   Int_t   mDataSource;   //!  0=reading from StEvent 1=Fake data 2=Reading from TTree(alignment.root)
   Char_t* mOutTreeFile;  //!  output Tree file name
   Char_t* mInTreeFile;   //!  input Tree file name
-  Int_t   mTrackType;    //!  0= straight line 1=helix
   Float_t mDcaCut;       //!  Dca Cut
   Float_t mChi2Cut;      //!  Track chi2 cut
   Int_t   mRunNumber;    //!  Run# for output file name
 
+  static const int mMaxStep=100;
+  int mNStep;
+  int mDiscMask[mMaxStep];
+  int mQuadMask[mMaxStep];
+  int mParMask[mMaxStep];
+  int mHitMask[mMaxStep];
+  int mTrackType[mMaxStep];
+  int mMinHit[mMaxStep];
+  int mMinTpcHit[mMaxStep];
+  
   ClassDef(StFgtAlignmentMaker,0)
 };
 #endif
