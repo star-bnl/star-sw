@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.28 2013/03/08 19:16:32 perev Exp $
+// $Id: StvMaker.cxx,v 1.29 2013/04/04 21:37:03 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -156,14 +156,15 @@ Int_t StvMaker::InitDetectors()
   tgh->Init(1+2+4);
 //	Check is Stv is running in fit hit error utility
 
-  int isFitErr = IAttr("fiterr");
-
+  mFETracks = IAttr("fiterr");
+  if (mFETracks>0) SetAttr(".privilege",1,"");
+  
 //		TGeo herlper is ready, add error calculators
   if (IAttr("activeTpc")) {	//TPC error calculators
   
     const char*  innOutNames[2]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs"    };
     for (int io=0;io<2;io++) {
-      TString myName(innOutNames[io]); if (isFitErr) myName+="FE";
+      TString myName(innOutNames[io]); if (mFETracks) myName+="FE";
       StvHitErrCalculator *hec = new StvTpcHitErrCalculator(myName);
       TString ts("Calibrations/tracker/");
       ts+=myName;
@@ -178,7 +179,7 @@ Int_t StvMaker::InitDetectors()
   } }
 
   if (IAttr("activeEtr")) {	//Etr error calculators
-    TString myName("EtrHitErrs"); if (isFitErr) myName+="FE";
+    TString myName("EtrHitErrs"); if (mFETracks) myName+="FE";
     StvHitErrCalculator *hec = new StvHitErrCalculator(myName,2);
     double etrPars[StvHitErrCalculator::kMaxPars]={9e-4,9e-4};
     hec->SetPars(etrPars);
@@ -188,7 +189,7 @@ Int_t StvMaker::InitDetectors()
   }
 
   if (IAttr("activeFgt")) {    // FGT error calculator
-    TString myName("FgtHitErrs"); if (isFitErr) myName+="FE";
+    TString myName("FgtHitErrs"); if (mFETracks) myName+="FE";
     StvHitErrCalculator *hec = new StvHitErrCalculator(myName, 2);
     Double_t fgtPars[ StvHitErrCalculator::kMaxPars]={
       9e-4,9e-4,
@@ -276,8 +277,8 @@ Int_t StvMaker::Make()
   StvToolkit* kit = StvToolkit::Inst();
   kit->HitLoader()->LoadHits(event);
   kit->Reset();
-  kit->TrackFinder()->FindTracks();
-
+  int nTks = kit->TrackFinder()->FindTracks();
+  mToTracks += nTks;
 
   if (mEventFiller) {
     mEventFiller->Set(event,&kit->GetTracks());
@@ -313,6 +314,7 @@ Int_t StvMaker::Make()
   StTGeoHelper::Inst()->Clear();
   if (iAns) return iAns;
   if (iAnz) return iAnz;
+  if (mFETracks && mToTracks>mFETracks) return kStEOF;
   return kStOK;
 }
 //_____________________________________________________________________________
