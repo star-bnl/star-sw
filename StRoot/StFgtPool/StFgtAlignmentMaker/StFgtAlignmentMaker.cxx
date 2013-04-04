@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtAlignmentMaker.cxx,v 1.4 2013/03/07 22:59:16 akio Exp $
+ * $Id: StFgtAlignmentMaker.cxx,v 1.5 2013/04/04 17:08:30 akio Exp $
  *
  */
 
@@ -354,10 +354,10 @@ void funcLine(Int_t &npar, Double_t* gin, Double_t &f, Double_t *par, Int_t ifla
 
 ClassImp(StFgtAlignmentMaker);
 
-StFgtAlignmentMaker::StFgtAlignmentMaker(const Char_t *name) : StMaker(name),mEventCounter(0),mDataSource(0),mTrackType(0),
+StFgtAlignmentMaker::StFgtAlignmentMaker(const Char_t *name) : StMaker(name),mEventCounter(0),mDataSource(0),
 							       mOutTreeFile(0),mInTreeFile(0),
 							       mFgtXerr(0.05), mFgtYerr(0.05), mFgtZerr(0.2),
-							       mDcaCut(5.0),mChi2Cut(0.02),mRunNumber(0) {
+							       mDcaCut(5.0),mChi2Cut(0.02),mRunNumber(0),mNStep(0) {
 }
 
 Int_t StFgtAlignmentMaker::Init(){
@@ -384,6 +384,26 @@ Int_t StFgtAlignmentMaker::InitRun(Int_t runnum){
   return kStOK;
 }
 
+static const int mMaxStep=100;
+int mNStep;
+
+void StFgtAlignmentMaker::setStep(int discmask,int quadmask, int parmask, int hitmask_disc,
+				  int trackType, int minHit, int minTpcHit){
+  if(mNStep>=mMaxStep) {printf("Reached MaxStep\n"); return; }
+  if(mNStep==0) { printf("Step0 is making before histo, and masks are set to 0\n"); discmask=0; quadmask=0; parmask=0; }
+  mDiscMask[mNStep]=discmask;
+  mQuadMask[mNStep]=quadmask;
+  mParMask[mNStep]=parmask;
+  mHitMask[mNStep]=hitmask_disc;
+  mTrackType[mNStep]=trackType;
+  mMinHit[mNStep]=minHit;
+  mMinTpcHit[mNStep]=minTpcHit;
+  printf("Adding step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x trkType=%d minHit=%d minTpcHit=%d\n",
+	 mNStep,discmask,quadmask,parmask,hitmask_disc,trackType,minHit,minTpcHit);
+  mNStep++;
+}
+
+
 Int_t StFgtAlignmentMaker::Make() {
   if(mDataSource==0){
     readFromStEvent();  
@@ -407,43 +427,41 @@ Int_t StFgtAlignmentMaker::Finish() {
   fgtAlignment_st result;
   memcpy(&result,orig_algpar,sizeof(fgtAlignment_st));
 
-  cout << "Creating Hist before alignment with TrackType="<<mTrackType<< endl;  
+  cout << "Creating Histo before alignment"<<endl;  
   mFillHist=1;
-  for(int quad=0; quad<kFgtNumQuads; quad++){ mQuad=quad; doAlignment(&result,0,0,0,0x3f,mTrackType,3,0,&result);} 
+  for(int quad=0; quad<kFgtNumQuads; quad++){ 
+    mQuad=quad; 
+    doAlignment(&result,mDiscMask[0],mQuadMask[0],mParMask[0],mHitMask[0],mTrackType[0],mMinHit[0],mMinTpcHit[0],&result);
+  } 
   saveHist();
+  if(mNStep<=1) return kStOK; //exit if only step0 exist
 
-  cout << "Doing Alignment with TrackType="<<mTrackType<< endl;  
+  cout << "Doing Alignment with Number of steps = "<<mNStep<<endl;  
   mFillHist=0;  
   for(int quad=0; quad<kFgtNumQuads; quad++){
     mQuad=quad;
+    int quadmask= 1<<quad;
     cout << Form("Doing alignment for quad=%1d with Ntrk=%4d",quad,mNtrk[quad])<<endl;
     if(mNtrk[mQuad]>0){
-      int quadmask=1<<quad;
-
-      //This is alignment procedure by calling doAlignment with different par in sequence - still need to be developped
-      // 
-      //  doAlignment(input,discmask,quadmask,parmask,hitmask,trackType,minHit,minTpcHit,result)
-      //    discmask = 3f(all),3e(fix d1)    note: discmask=3f & hitmask=3f causes unstable result
-      //    quadmask = 1(A),2(B),4(C),8(D)
-      //    parmask  = 3f(all),38(xyz),19(xy,phi),39(xyz & phi)
-      //    hitmask  = ff(FGT+VTX+TPC),c0(TPC+VTX, no FGT), 3f(FGT only), 7f(FGT+VTX)
-      //    trackType= 0(straight line), 1(Helix)
-
-      //doAlignment(&result,0x3f,quadmask,0x38,0xc0,mTrackType,3,0,&result); //writePar(&result);
-      //doAlignment(&result,0x3f,quadmask,0x20,0xff,mTrackType,3,0,&result); //writePar(&result);
-      //doAlignment(&result,0x3e,quadmask,0x39,0x7f,mTrackType,3,0,&result);   //writePar(&result);
-      //doAlignment(&result,0x3f,quadmask,0x39,0x3f,mTrackType,3,0,&result); //writePar(&result);
-
+      for(int s=1; s<mNStep; s++){	
+	if( quadmask && mQuadMask[s] ){
+	  printf("Quad=%d Step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x trkType=%d minHit=%d minTpcHit=%d\n",
+		 quad,s,mDiscMask[s],quadmask,mParMask[s],mHitMask[s],mTrackType[s],mMinHit[s],mMinTpcHit[s]);
+	  doAlignment(&result,mDiscMask[s],quadmask,mParMask[s],mHitMask[s],mTrackType[s],mMinHit[s],mMinTpcHit[s],&result);
+	}
+      }
     }
   }
-  writePar(&result);  
-
-  //cout << "Creating Hist after alignment with trackType="<<mTrackType<<endl;
-  //mFillHist=2;
-  //resetHist();
-  //for(int quad=0; quad<kFgtNumQuads; quad++){ mQuad=quad; doAlignment(&result,0,0,0,0x3f,mTrackType,3,0,&result);}
-  //saveHist();
-
+  writePar(&result);        
+  cout << "Creating Histo after alignment using last step's parameters"<<endl;
+  mFillHist=2;
+  resetHist();
+  int s=mNStep-1;
+  for(int quad=0; quad<kFgtNumQuads; quad++){ 
+    mQuad=quad; 
+    doAlignment(&result,0,0,0,mHitMask[s],mTrackType[s],mMinHit[s],mMinTpcHit[s],&result);
+  }
+  saveHist();
   return kStOK;
 }
 
