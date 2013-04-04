@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtAlignmentMaker.cxx,v 1.5 2013/04/04 17:08:30 akio Exp $
+ * $Id: StFgtAlignmentMaker.cxx,v 1.6 2013/04/04 17:09:36 akio Exp $
  *
  */
 
@@ -369,7 +369,8 @@ Int_t StFgtAlignmentMaker::Init(){
 
 Int_t StFgtAlignmentMaker::InitRun(Int_t runnum){
   LOG_INFO << "StFgtAlignmentMaker::InitRun for "  << runnum << endm;
-  StFgtDbMaker *fgtDbMkr = static_cast<StFgtDbMaker * >( GetMaker("fgtDb"));
+  StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
+  //StFgtDbMaker *fgtDbMkr = static_cast<StFgtDbMaker * >( GetMaker("fgtDb"));
   if( !fgtDbMkr ){
     LOG_FATAL << "StFgtDb not provided and error finding StFgtDbMaker" << endm;
     return kStFatal;      
