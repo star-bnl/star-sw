@@ -1,6 +1,6 @@
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
-// StvTpcOuterHitErrs Allocated rows: 1  Used rows: 1  Row size: 48 bytes
+// StvTpcOuterHitErrs Allocated rows: 1  Used rows: 1  Row size: 56 bytes
 //  Table: StvHitErrs_st[0]--> StvHitErrs_st[0]
 // ====================================================================
 // ------  Test whether this table share library was loaded ------
@@ -9,12 +9,13 @@ StvHitErrs_st row;
 St_StvHitErrs *tableSet = new St_StvHitErrs("StvTpcOuterHitErrs",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.yErr	 = 0.000295596; // Intrinsic resolution, padrow or Y direction		;
-    row.zErr	 = 0.02294365; // Intrinsic resolution, z direction			;
-    row.widTrk	 = 2.385502e-05; // Track_width sigma**2					;
-    row.thkDet	 = 0.04000728; // (Thickness of detector plane)**2/12			;
-    row.yDiff	 = 0.001283351; // Y Drift dependent diffusion resolution, z direction	;
-    row.zDiff	 = 0.00023575; // Z Drift dependent diffusion resolution, z direction	;
+    row.yErr	 = 0.003046751; // Intrinsic resolution, padrow or Y direction		;
+    row.zErr	 = 0.006821852; // Intrinsic resolution, z direction			;
+    row.yDiff	 = 0.0002902693; // Diffusion in XY direction				;
+    row.zDiff	 =      1e-08; // Diffusion in Z direction				;
+    row.yThkDet	 =  0.8212956; // Effective detector thickness**2 for Y err 		;
+    row.zThkDet	 =  0.6535844; // Effective detector thickness**2 for Z err		;
+    row.zAB2	 = 5.106092e-06; // Constant member in Z direction (a*b)**2		;
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
