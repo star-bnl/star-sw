@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.16 2012/12/12 22:09:58 fisyak Exp $
+ * $Id: StPPVertexFinder.h,v 1.17 2013/04/05 21:00:02 jeromel Exp $
  *
  */
 #ifdef __APPLE__
@@ -21,12 +21,12 @@ class StiToolkit;
 class StEEmcDb;
 
 class EEmcGeomSimple;
-class StBTofGeometry; // dongx
+class StBTofGeometry; 
 
-class  BtofHitList;  // dongx
-class  CtbHitList;
-class  BemcHitList;
-class  EemcHitList;
+class BtofHitList;  
+class CtbHitList;
+class BemcHitList;
+class EemcHitList;
 class Vertex3D;
 
 class StPPVertexFinder: public StGenericVertexFinder {
@@ -65,12 +65,14 @@ class StPPVertexFinder: public StGenericVertexFinder {
   float  mMinAdcBemc;     // BEMC towers with MIP response
   float  mMinAdcEemc;     // EEMC towers with MIP response
   float  mMinFitPfrac;    // nFit/nPossible
+  bool   mBoostEffi;      // changes some cuts, higher VF efficiency, lower VF purity
   bool   isMC;            // flag minor differences between Data & M-C
   bool   mUseCtb;         // disable CTB from matching/vetoing of tracks
   bool   mDropPostCrossingTrack;  // enable/disable post crossing tarck rejection
   int    mStoreUnqualifiedVertex; // set the max # of vertices, sorted by rank
   float  mCut_oneTrackPT; // threshold for storing one track vertices
-  int    mBeamLineTracks; // activates writing them out + lot of QA histos, use  BFC option: VtxSeedCalG to enable it, expert only
+  int    mBeamLineTracks; // activates writing them out + lot of QA histos, 
+                          // use  BFC option: VtxSeedCalG to enable it, expert only
 
   // beam line
   double          mX0  ;     // starting point of beam parameterization
@@ -98,6 +100,7 @@ public:
   void useCTB(bool x=true){mUseCtb=x;}
   void UsePCT(bool x=true){setDropPostCrossingTrack(!x);}
   void setDropPostCrossingTrack(bool x=true){mDropPostCrossingTrack=x;}
+  void boostEfficiency();
   void Finish();
 
   TH1F *hA[mxH];
@@ -123,6 +126,14 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.17  2013/04/05 21:00:02  jeromel
+ * Implemented and merged back to source the boostEfficiency (i.e. change of
+ * nFit /nPossible points on the track fract to consider). No DB imp yet.
+ *
+ * Fixed boostEfficiency()
+ *
+ * Changed cout to LOG_INFO
+ *
  * Revision 1.16  2012/12/12 22:09:58  fisyak
  * add sys/types.h include for APPLE
  *
