@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.cxx,v 2.11 2013/01/15 23:21:05 fisyak Exp $
+ * $Id: StPrimaryTrack.cxx,v 2.12 2013/04/05 15:11:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.cxx,v $
+ * Revision 2.12  2013/04/05 15:11:33  ullrich
+ * Changes due to the addition of StTrackMassFit (Yuri)
+ *
  * Revision 2.11  2013/01/15 23:21:05  fisyak
  * improve printouts
  *
@@ -50,54 +53,50 @@
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"
 #include "StTrackGeometry.h"
+
 ClassImp(StPrimaryTrack)
 
-static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.11 2013/01/15 23:21:05 fisyak Exp $";
-StPrimaryTrack::StPrimaryTrack(): mVertex(0) {/* noop */} 
-const StVertex*  StPrimaryTrack::vertex() const{ return mVertex; }
-void StPrimaryTrack::setVertex(StVertex* val) {
-  StPrimaryVertex *p = dynamic_cast<StPrimaryVertex*>(val);
-  if (p) mVertex = p;
-}
+static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.12 2013/04/05 15:11:33 ullrich Exp $";
 
 void StPrimaryTrack::Streamer(TBuffer &R__b)
 {
     // Stream an object of class .
-
+    
     if (R__b.IsReading()) {
-       UInt_t R__s, R__c;
-       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-       if (R__v > 1) {
-          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
-          return;
-       }
-       //====process old versions before automatic schema evolution
-       StTrack::Streamer(R__b);
-      
-//     R__b >> mVertex;
-       R__b >> (StPrimaryVertex*&)mVertex;
-
-       R__b.CheckByteCount(R__s, R__c, Class());
-       //====end of old versions
-      
-    } else {
-       Class()->WriteBuffer(R__b,this);
+        UInt_t R__s, R__c;
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v > 1) {
+            Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+            return;
+        }
+        //====process old versions before automatic schema evolution
+        StTrack::Streamer(R__b);
+        
+        //     R__b >> mVertex;
+        R__b >> (StPrimaryVertex*&)mVertex;
+        
+        R__b.CheckByteCount(R__s, R__c, Class());
+        //====end of old versions
+        
+    } 
+    else {
+        Class()->WriteBuffer(R__b,this);
     }
 } 
-//________________________________________________________________________________
+
 ostream&  operator<<(ostream& os,  const StPrimaryTrack& track) {
     os << *((StTrack *) &track);
-  Double_t charge = track.geometry()->charge();
-  StThreeVectorD g3 = track.geometry()->momentum(); // p of global track
-  os << Form(" q/pT %8.3f eta %8.3f phi %8.3f",
-	     charge/g3.perp(),g3.pseudoRapidity(),g3.phi());
-  os << Form(" pxyz %8.3f%8.3f%8.3f",g3.x(),g3.y(),g3.z());
-  Double_t chi2_0 = track.fitTraits().chi2(0); if (chi2_0 > 9999.) chi2_0 = 9999.;
-  Double_t chi2_1 = track.fitTraits().chi2(1); if (chi2_1 > 9999.) chi2_1 = 9999.;
-  os << Form(" NF %2d chi2 %8.3f/%8.3f", track.fitTraits().numberOfFitPoints(),chi2_0,chi2_1);
+    Double_t charge = track.geometry()->charge();
+    StThreeVectorD g3 = track.geometry()->momentum(); // p of global track
+    os << Form(" q/pT %8.3f eta %8.3f phi %8.3f",
+               charge/g3.perp(),g3.pseudoRapidity(),g3.phi());
+    os << Form(" pxyz %8.3f%8.3f%8.3f",g3.x(),g3.y(),g3.z());
+    Double_t chi2_0 = track.fitTraits().chi2(0); if (chi2_0 > 9999.) chi2_0 = 9999.;
+    Double_t chi2_1 = track.fitTraits().chi2(1); if (chi2_1 > 9999.) chi2_1 = 9999.;
+    os << Form(" NF %2d chi2 %8.3f/%8.3f", track.fitTraits().numberOfFitPoints(),chi2_0,chi2_1);
 #if 0
-  if (track.idTruth())
-    os << Form(" IdT:%5i Q:%3i", track.idTruth(), track.qaTruth());
+    if (track.idTruth())
+        os << Form(" IdT:%5i Q:%3i", track.idTruth(), track.qaTruth());
 #endif
- return os;
+    return os;
 }

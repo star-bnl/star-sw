@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.39 2013/03/05 14:42:45 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.40 2013/04/05 15:11:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.40  2013/04/05 15:11:33  ullrich
+ * Changes due to the addition of StTrackMassFit (Yuri)
+ *
  * Revision 2.39  2013/03/05 14:42:45  ullrich
  * Added StPxl hits and Containers.
  *
@@ -163,6 +166,7 @@
 #include "StFtpcSectorHitCollection.h"
 #include "StFunctional.h"
 #include "StGlobalTrack.h"
+#include "StTrackMassFit.h"
 #include "StHelixModel.h"
 #include "StHit.h"
 #include "StHltBEmcTowerHit.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.23 2013/02/16 02:19:14 perev Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.24 2013/04/05 15:11:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.24  2013/04/05 15:11:33  ullrich
+ * Changes due to the addition of StTrackMassFit (Yuri)
+ *
  * Revision 2.23  2013/02/16 02:19:14  perev
  * Bug fix, double counting of fitpoints
  *
@@ -85,12 +88,14 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
+#include <assert.h>
 #include "TFile.h"
 #include <algorithm>
 #include "StTrackFitTraits.h"
 #include "StParticleTypes.hh"
 #include "StParticleTable.hh"
 #include "TClass.h"
+#include "TMath.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
@@ -98,7 +103,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.23 2013/02/16 02:19:14 perev Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.24 2013/04/05 15:11:33 ullrich Exp $";
 
 //_____________________________________________________________________________
 StTrackFitTraits::StTrackFitTraits()
@@ -118,8 +123,8 @@ StTrackFitTraits::StTrackFitTraits()
 
 
 //_____________________________________________________________________________
-StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
-                 float chi[2], float cov[15])
+StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
+                                   Float_t chi[2], Float_t cov[15])
 {
     mPidHypothesis = pid;
     mNumberOfFitPoints = 0x8000;
@@ -133,89 +138,108 @@ StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
     mNumberOfFitPointsPxl = 0;
     mNumberOfFitPointsIst = 0;
     mPrimaryVertexUsedInFit = false;
+    assert(check());
+}
+//_____________________________________________________________________________
+StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
+                                   Float_t chi[2], TArrayF &cov)
+{
+    mPidHypothesis = pid;
+    mNumberOfFitPoints = nfp|0x8000;
+    copy(chi, chi+2, mChi2);
+    mCovariantMatrix = cov;
+    mNumberOfFitPointsTpc = 0;
+    mNumberOfFitPointsFtpcWest = 0;
+    mNumberOfFitPointsFtpcEast = 0;
+    mNumberOfFitPointsSvt = 0;
+    mNumberOfFitPointsSsd = 0;
+    mNumberOfFitPointsPxl = 0;
+    mNumberOfFitPointsIst = 0;
+    mPrimaryVertexUsedInFit = false;
+    assert(check());
 }
 
 //_____________________________________________________________________________
 StTrackFitTraits::~StTrackFitTraits() {/* noop */}
 
 //_____________________________________________________________________________
-unsigned short StTrackFitTraits::numberOfFitPoints() const
+UShort_t StTrackFitTraits::numberOfFitPoints() const
 {
     int result;
- 
-// y2012 version
-   result = numberOfFitPoints(kTpcId) 		+
-	    numberOfFitPoints(kFtpcWestId) 	+
-	    numberOfFitPoints(kFtpcEastId) 	+
-	    numberOfFitPoints(kSvtId)      	+
-	    numberOfFitPoints(kSsdId) 		+	
-	    numberOfFitPoints(kPxlId) 		+
-	    numberOfFitPoints(kIstId);	
-   if (mNumberOfFitPoints&0x8000) result += (mNumberOfFitPoints&0x7FFF);
-   if (mPrimaryVertexUsedInFit) result++;
-   return (unsigned short)result;
+    
+    // y2012 version
+    result = numberOfFitPoints(kTpcId) 		+
+    numberOfFitPoints(kFtpcWestId) 	+
+    numberOfFitPoints(kFtpcEastId) 	+
+    numberOfFitPoints(kSvtId)      	+
+    numberOfFitPoints(kSsdId) 		+	
+    numberOfFitPoints(kPxlId) 		+
+    numberOfFitPoints(kIstId);	
+    if (mNumberOfFitPoints&0x8000) result += (mNumberOfFitPoints&0x7FFF);
+    if (mPrimaryVertexUsedInFit) result++;
+    return (UShort_t)result;
 }
 
 //_____________________________________________________________________________
-unsigned short StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
+UShort_t StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
 {
     //
     // Old and obsolete
     //
     if (mNumberOfFitPoints && (mNumberOfFitPoints<0x8000)) {    
-	// 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-	switch (det) {
-	case kFtpcWestId:
-	case kFtpcEastId:
-	case kTpcId:
-	    return mNumberOfFitPoints%1000;
-	    break;
-	case kSvtId:
-	    return (mNumberOfFitPoints%10000)/1000;
-	    break;
-	case kSsdId:
-	    return mNumberOfFitPoints/10000;
-	    break;
-	default:
-	    return 0;
-	}
+        // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
+        switch (det) {
+            case kFtpcWestId:
+            case kFtpcEastId:
+            case kTpcId:
+                return mNumberOfFitPoints%1000;
+                break;
+            case kSvtId:
+                return (mNumberOfFitPoints%10000)/1000;
+                break;
+            case kSsdId:
+                return mNumberOfFitPoints/10000;
+                break;
+            default:
+                return 0;
+        }
     }
     //
     // New version
     //
     else {
-	switch (det) {
-	case kFtpcWestId:
-	    return mNumberOfFitPointsFtpcWest;
-	    break;
-	case kFtpcEastId:
-	    return mNumberOfFitPointsFtpcEast;
-	    break;
-	case kTpcId:
-	    return mNumberOfFitPointsTpc;
-	    break;
-	case kSvtId:
-	    return mNumberOfFitPointsSvt;
-	    break;
-	case kSsdId:
-	    return mNumberOfFitPointsSsd;
-	    break;
-	case kPxlId:
-	    return mNumberOfFitPointsPxl;
-	    break;
-	case kIstId:
-	    return mNumberOfFitPointsIst;
-	    break;
-	default:	//sum of all
-            return mNumberOfFitPoints&0x7FFF
-	    + mNumberOfFitPointsFtpcWest
-	    + mNumberOfFitPointsFtpcEast
-	    + mNumberOfFitPointsTpc
-	    + mNumberOfFitPointsSvt
-	    + mNumberOfFitPointsSsd
-	    + mNumberOfFitPointsPxl
-	    + mNumberOfFitPointsIst;
-	}
+        switch (det) {
+            case kFtpcWestId:
+                return mNumberOfFitPointsFtpcWest;
+                break;
+            case kFtpcEastId:
+                return mNumberOfFitPointsFtpcEast;
+                break;
+            case kTpcId:
+                return mNumberOfFitPointsTpc;
+                break;
+            case kSvtId:
+                return mNumberOfFitPointsSvt;
+                break;
+            case kSsdId:
+                return mNumberOfFitPointsSsd;
+                break;
+            case kPxlId:
+                return mNumberOfFitPointsPxl;
+                break;
+            case kIstId:
+                return mNumberOfFitPointsIst;
+                break;
+            default:	//sum of all
+                return (mNumberOfFitPoints&0x7FFF)
+                + mNumberOfFitPointsFtpcWest
+                + mNumberOfFitPointsFtpcEast
+                + mNumberOfFitPointsTpc
+                + mNumberOfFitPointsSvt
+                + mNumberOfFitPointsSsd
+                + mNumberOfFitPointsPxl
+                + mNumberOfFitPointsIst;
+        }
     }
 }
 
@@ -226,7 +250,7 @@ StParticleDefinition* StTrackFitTraits::pidHypothesis() const
 }
 
 //_____________________________________________________________________________
-double StTrackFitTraits::chi2(unsigned int i) const
+Double_t StTrackFitTraits::chi2(UInt_t i) const
 {
     if (i < 2)
         return mChi2[i];
@@ -238,8 +262,39 @@ double StTrackFitTraits::chi2(unsigned int i) const
 StMatrixF StTrackFitTraits::covariantMatrix() const
 {
     StMatrixF m(5,5);
-    if (mCovariantMatrix.GetSize() == 15) {
 #define mCovariantMatrix ((TArrayF&)mCovariantMatrix)         //temporary HACK VP
+    if (mCovariantMatrix.GetSize() == 15) {
+        /** StiKalmanTrackNode::getGlobalTpt, contains only covariance matrix cc[15] in tpt convension 
+         returns the node information in TPT representation
+         double x[6],  : state, for a definition, in radial implementation
+         rad  - radius at start (cm). See also comments
+         phi  - azimuthal angle  (in rad)      
+         z    - z-coord. (cm)                 
+         psi  - azimuthal angle of pT vector (in rads)     
+         tanl - tan(dip) =pz/pt               
+         q/pt -  
+         double cc[15] : error matrix of the state "x" rad is fixed
+         code definition adopted here, where:
+         Units
+         ______|________________|____________
+         phi*R |  0  1  2  3  4 |  deg*cm
+         z0   |  1  5  6  7  8 |    cm
+         tanl  |  2  6  9 10 11 |    1         covar(i)
+         psi  |  3  7 10 12 13 |   deg
+         q/pt  |  4  8 11 13 14 | e*1/(GeV/c)
+         -----------------------------------
+         
+         and where phi  = atan2(y0,x0)*(180 deg/pi)
+         R    = sqrt(x0*x0 + y0*y0)
+         q/pt = icharge*invpt; (This is what the 
+         radius of curvature actually
+         determines)
+         PhiPhi PhiZ PhiTan PhiPsi PhiPt
+         ZZ   ZTan   ZPsi     ZPt
+         TanTan TanPsi TanPt
+         PsiPsi PsiPt
+         PtPt
+         */
         m(1,1) = mCovariantMatrix[0];			//yy
         m(1,2) = m(2,1) = mCovariantMatrix[1];		//
         m(1,3) = m(3,1) = mCovariantMatrix[2];
@@ -255,11 +310,38 @@ StMatrixF StTrackFitTraits::covariantMatrix() const
         m(4,4) = mCovariantMatrix[12];			//PsiPsi deg
         m(4,5) = m(5,4) = mCovariantMatrix[13];		
         m(5,5) = mCovariantMatrix[14];			//PtiPti
-#undef mCovariantMatrix                                 //temporary HACK VP
+    } 
+    else if (mCovariantMatrix.GetSize() == 9) {
+        /* contain variables x(tanL,Psi,Pti=-q/pT) and their cov. matrix
+         tanLtanL[3] 
+         tanLPsi[4]  PsiPsi[5]
+         tanLPti[6]  PsiPti[7]  PtiPti[8]
+         */
+        Double_t rd = TMath::RadToDeg();
+        m(3,3) = mCovariantMatrix[3];			//tanLtanL
+        m(3,4) = m(4,3) = mCovariantMatrix[4]*rd;         //tanLPsi deg
+        m(3,5) = m(5,3) = mCovariantMatrix[6];            //tanLPti
+        m(4,4) = mCovariantMatrix[5]*rd*rd;		//PsiPsi  deg
+        m(4,5) = m(5,4) = mCovariantMatrix[7];		//PsiPti  deg
+        m(5,5) = mCovariantMatrix[8];			//PtiPti
     }
+#undef mCovariantMatrix                                 //temporary HACK VP
     return m;
 }
-
+//_____________________________________________________________________________
+Bool_t StTrackFitTraits::check() const {
+    if (mCovariantMatrix.GetSize() == 15) 
+        return (mCovariantMatrix[0]  > 0 &&
+                mCovariantMatrix[5]  > 0 &&
+                mCovariantMatrix[9]  > 0 &&
+                mCovariantMatrix[12] > 0 &&
+                mCovariantMatrix[14] > 0);
+    if (mCovariantMatrix.GetSize() == 9) 
+        return (mCovariantMatrix[3] > 0 &&
+                mCovariantMatrix[5] > 0 &&
+                mCovariantMatrix[8] > 0);
+    return (mCovariantMatrix.GetSize() == 0);
+}
 //_____________________________________________________________________________
 bool StTrackFitTraits::primaryVertexUsedInFit() const
 { return mPrimaryVertexUsedInFit;}
@@ -272,32 +354,32 @@ void StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 {
     mNumberOfFitPoints|=  0x8000;  // make sure old method is NOT active
     switch (det) {
-    case kUnknownId:
-        break;
-    case kFtpcWestId:
-	mNumberOfFitPointsFtpcWest = val;
-	break;
-    case kFtpcEastId:
-	mNumberOfFitPointsFtpcEast = val;
-	break;
-    case kTpcId:
-	mNumberOfFitPointsTpc = val;
-	break;
-    case kSvtId:
-	mNumberOfFitPointsSvt = val;
-	break;
-    case kSsdId:
-	mNumberOfFitPointsSsd = val;
-	break;
-    case kPxlId:
-	mNumberOfFitPointsPxl = val;
-	break;
-    case kIstId:
-	mNumberOfFitPointsIst = val;
-	break;
-    default:
-        mNumberOfFitPoints += val; mNumberOfFitPoints|=0x8000;
-	break;
+        case kUnknownId:
+            break;
+        case kFtpcWestId:
+            mNumberOfFitPointsFtpcWest = val;
+            break;
+        case kFtpcEastId:
+            mNumberOfFitPointsFtpcEast = val;
+            break;
+        case kTpcId:
+            mNumberOfFitPointsTpc = val;
+            break;
+        case kSvtId:
+            mNumberOfFitPointsSvt = val;
+            break;
+        case kSsdId:
+            mNumberOfFitPointsSsd = val;
+            break;
+        case kPxlId:
+            mNumberOfFitPointsPxl = val;
+            break;
+        case kIstId:
+            mNumberOfFitPointsIst = val;
+            break;
+        default:
+            mNumberOfFitPoints += val; mNumberOfFitPoints|=0x8000;
+            break;
     }
 }
 
@@ -306,47 +388,98 @@ void StTrackFitTraits::setPrimaryVertexUsedInFit(bool val)
 {mPrimaryVertexUsedInFit = val;}
 
 //_____________________________________________________________________________
-void StTrackFitTraits::setPidHypothesis(unsigned short val)
+void StTrackFitTraits::setPidHypothesis(UShort_t val)
 {
     mPidHypothesis = val;
 }
 
 //_____________________________________________________________________________
-void StTrackFitTraits::setChi2(float val, unsigned int i)
+void StTrackFitTraits::setChi2(Float_t val, UInt_t i)
 {
     if (i<2) mChi2[i] = val;
 }
 
 //_____________________________________________________________________________
-void StTrackFitTraits::setCovariantMatrix(float val[15])
+void StTrackFitTraits::setCovariantMatrix(Float_t val[15])
 {
     mCovariantMatrix.Set(15, val);
+    assert(check());
+}
+//_____________________________________________________________________________
+void StTrackFitTraits::setCovariantMatrix(TArrayF &cov)
+{
+    mCovariantMatrix = cov;
+    assert(check());
 }
 
 //_____________________________________________________________________________
 void StTrackFitTraits::Streamer(TBuffer &R__b)
 {
-//        Stream an object of class StTrackFitTraits.
-
-  if (R__b.IsReading()) {
-    UInt_t R__s, R__c;
-    Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-    if (R__v > 4) {
-       Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
-       return;
+    //        Stream an object of class StTrackFitTraits.
+    
+    if (R__b.IsReading()) {
+        UInt_t R__s, R__c;
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v > 4) {
+            Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+            return;
+        }
+        StObject::Streamer(R__b);
+        
+        R__b >> (UShort_t&)mPidHypothesis;
+        R__b >> (UShort_t&)mNumberOfFitPoints;
+        
+        if (R__v==2 && gFile && gFile->GetVersion()%100000<30000)
+        { Int_t dumy; R__b >> dumy;}
+        
+        R__b.ReadFastArray(mChi2,2);
+        mCovariantMatrix.Streamer(R__b);
+        
+    } 
+    else {
+        Class()->WriteBuffer(R__b,this);
     }
-    StObject::Streamer(R__b);
-
-    R__b >> (unsigned short&)mPidHypothesis;
-    R__b >> (unsigned short&)mNumberOfFitPoints;
-
-    if (R__v==2 && gFile && gFile->GetVersion()%100000<30000)
-       { Int_t dumy; R__b >> dumy;}
-
-    R__b.ReadFastArray(mChi2,2);
-    mCovariantMatrix.Streamer(R__b);
-
-  } else {
-    Class()->WriteBuffer(R__b,this);
-  }
+}
+//________________________________________________________________________________
+StThreeVectorF StTrackFitTraits::momentum() {
+    StThreeVectorF mom;
+    if (mCovariantMatrix.GetSize() == 9) {
+        if (mCovariantMatrix[2]) {
+            Float_t pT = 1./TMath::Abs(mCovariantMatrix[2]);
+            Float_t tanL = mCovariantMatrix[0];
+            Float_t phi =  mCovariantMatrix[1];
+            mom = StThreeVectorF(pT*TMath::Cos(phi),pT*TMath::Sin(phi),pT*tanL);
+        }
+    }
+    return mom;
+}//________________________________________________________________________________
+StThreeVectorF StTrackFitTraits::momentumErrors() {
+    StMatrixF Cxyz = momentumCovariance();
+    return StThreeVectorF(Cxyz(0,0) > 0 ? TMath::Sqrt(Cxyz(0,0)) : 13,
+                          Cxyz(1,1) > 0 ? TMath::Sqrt(Cxyz(1,1)) : 13,
+                          Cxyz(2,2) > 0 ? TMath::Sqrt(Cxyz(2,2)) : 13);
+}//________________________________________________________________________________
+StMatrixF StTrackFitTraits::momentumCovariance() {
+    StMatrixF Cxyz(3,3);
+    if (mCovariantMatrix[2]) {
+        StMatrixF C(3,3);
+        C(0,0) =          mCovariantMatrix[3]; 
+        C(0,1) = C(1,0) = mCovariantMatrix[4]; 
+        C(1,1) =          mCovariantMatrix[5];
+        C(0,2) = C(2,0) = mCovariantMatrix[6]; 
+        C(1,2) = C(2,1) = mCovariantMatrix[7]; 
+        C(2,2) =          mCovariantMatrix[8]; 
+        StThreeVectorF P = momentum();
+        Float_t pT = 1./TMath::Abs(mCovariantMatrix[2]);
+        static Float_t One = 1.;
+        Float_t pTs = -pT*TMath::Sign(One,mCovariantMatrix[2]);
+        StMatrixF F(3,3);
+        //     tanL               Psi                 Pti
+        F(0,0) =  0;  F(0,1) =- P.y(); F(0,2) = pTs*P.x(); // p_x
+        F(1,0) =  0;  F(1,1) =  P.x(); F(1,2) = pTs*P.y();
+        F(2,0) = pT;  F(2,1) =      0; F(2,2) = pTs*P.z();
+        StMatrixF FT = F.T();
+        Cxyz = FT*C*F;
+    }
+    return Cxyz;
 }
