@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.599 2013/03/24 19:55:03 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.600 2013/04/05 23:43:43 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -204,7 +204,7 @@ Int_t StBFChain::Load()
   here which deserves attention
   - The maker's SetMode() mechanism is treated here.
   - Calibration options like NoMySQLDb, NoCintCalDb or NoCintDb and path are set
-  - SetFlavor() sim+ofl or sim is made
+  - SetFlavor() sim+ofl or sim, and filestreams is made
 
   If a maker is added along with some flag options, this is the place to
   implement the switches.
@@ -273,9 +273,26 @@ Int_t StBFChain::Instantiate()
 	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
 	  if (!dbMk) goto Error;
 	  strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
+
+	  // Determine flavors
+	  TString flavors = "ofl"; // default flavor for offline
+
+	  // simulation flavors
+	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) flavors.Prepend("sim+");
+
+	  // filestream flavors
+	  if (fSetFiles) {
+	    TString firstFileName = fSetFiles->GetFileName(0);
+	    firstFileName = firstFileName(firstFileName.Last('/')+1,firstFileName.Length());
+	    if (firstFileName.BeginsWith("st_")) {
+	      TString fileStream = firstFileName(3,firstFileName.Index('_',3)-3);
+	      if (fileStream.Length()>0) flavors.Prepend(fileStream += '+');
+	    }
+	  }
+ 
+	  LOG_INFO << "Using DB flavors: " << flavors << endm;
+	  dbMk->SetFlavor(flavors.Data());
 	  mk = dbMk;
-	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) dbMk->SetFlavor("sim+ofl");
-	  else                                              dbMk->SetFlavor("ofl");
 	}
 	if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
 	SetDbOptions(dbMk);
