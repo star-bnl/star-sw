@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.40 2013/01/15 23:21:06 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.41 2013/04/05 15:11:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.41  2013/04/05 15:11:33  ullrich
+ * Changes due to the addition of StTrackMassFit (Yuri)
+ *
  * Revision 2.40  2013/01/15 23:21:06  fisyak
  * improve printouts
  *
@@ -151,53 +154,65 @@
 #include "StG2TrackVertexMap.h"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.40 2013/01/15 23:21:06 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.41 2013/04/05 15:11:33 ullrich Exp $";
 
 StTrack::StTrack()
 {
-  memset(mBeg, 0, mEnd-mBeg+1);
+    memset(mBeg, 0, mEnd-mBeg+1);
 }
 
+//________________________________________________________________________________
+
+const StVertex*  StTrack::vertex() const{ return mVertex; }
+
+//________________________________________________________________________________
+
+void StTrack::setVertex(StVertex* val) {
+    StVertex *p = dynamic_cast<StVertex*>(val);
+    if (p) mVertex = p;
+}
+
+//________________________________________________________________________________
 
 StTrack::StTrack(const StTrack& track) {
-  for (Int_t bit = 14; bit < 23; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
-  memcpy (mBeg, track.mBeg, mEnd-mBeg+1);
-  mTopologyMap = track.mTopologyMap;
-  mFitTraits = track.mFitTraits;
-  if (track.mGeometry)
-    mGeometry = track.mGeometry->copy();
-  else
-    mGeometry = 0;
-  if (track.mOuterGeometry)
-    mOuterGeometry = track.mOuterGeometry->copy();
-  else
-    mOuterGeometry = 0;
-  mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
-  mPidTraitsVec = track.mPidTraitsVec;
-  mNode = 0;                                 // do not assume any context here
-}
-
-StTrack&
-StTrack::operator=(const StTrack& track) {
-  if (this != &track) {
     for (Int_t bit = 14; bit < 23; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
     memcpy (mBeg, track.mBeg, mEnd-mBeg+1);
     mTopologyMap = track.mTopologyMap;
     mFitTraits = track.mFitTraits;
-    if (mGeometry) delete mGeometry;
     if (track.mGeometry)
-      mGeometry = track.mGeometry->copy();
+        mGeometry = track.mGeometry->copy();
     else
-      mGeometry = 0;
-    if (mOuterGeometry) delete mOuterGeometry;
+        mGeometry = 0;
     if (track.mOuterGeometry)
-      mOuterGeometry = track.mOuterGeometry->copy();
+        mOuterGeometry = track.mOuterGeometry->copy();
     else
-      mOuterGeometry = 0;
+        mOuterGeometry = 0;
     mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
     mPidTraitsVec = track.mPidTraitsVec;
-  }
-  return *this;
+    mNode = 0;                                 // do not assume any context here
+}
+
+StTrack&
+StTrack::operator=(const StTrack& track) {
+    if (this != &track) {
+        for (Int_t bit = 14; bit < 23; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
+        memcpy (mBeg, track.mBeg, mEnd-mBeg+1);
+        mTopologyMap = track.mTopologyMap;
+        mFitTraits = track.mFitTraits;
+        if (mGeometry) delete mGeometry;
+        if (track.mGeometry)
+            mGeometry = track.mGeometry->copy();
+        else
+            mGeometry = 0;
+        if (mOuterGeometry) delete mOuterGeometry;
+        if (track.mOuterGeometry)
+            mOuterGeometry = track.mOuterGeometry->copy();
+        else
+            mOuterGeometry = 0;
+        mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
+        mPidTraitsVec = track.mPidTraitsVec;
+    }
+    return *this;
 }
 
 StTrack::~StTrack()
@@ -224,31 +239,31 @@ StTrack::fittingMethod() const
 {
     Int_t method = mEncodedMethod & 0xf;
     switch(method) {
-    case kHelix2StepId:
-        return kHelix2StepId;
-        break;
-    case kHelix3DId:
-        return kHelix3DId;
-        break;
-    case kKalmanFitId:
-        return kKalmanFitId;
-        break;
-    case kLine2StepId:
-        return kLine2StepId;
-        break;
-    case kLine3DId:
-        return kLine3DId;
-        break;
-    case kL3FitId:
-        return kL3FitId;
-        break;
-    case kITKalmanFitId:
-        return kITKalmanFitId;
-        break;
-    default:
-    case kUndefinedFitterId:
-        return kUndefinedFitterId;
-        break;
+        case kHelix2StepId:
+            return kHelix2StepId;
+            break;
+        case kHelix3DId:
+            return kHelix3DId;
+            break;
+        case kKalmanFitId:
+            return kKalmanFitId;
+            break;
+        case kLine2StepId:
+            return kLine2StepId;
+            break;
+        case kLine3DId:
+            return kLine3DId;
+            break;
+        case kL3FitId:
+            return kL3FitId;
+            break;
+        case kITKalmanFitId:
+            return kITKalmanFitId;
+            break;
+        default:
+        case kUndefinedFitterId:
+            return kUndefinedFitterId;
+            break;
     }
 }
 
@@ -263,12 +278,12 @@ StTrack::numberOfPossiblePoints() const
 {
     UShort_t result;
     result = numberOfPossiblePoints(kTpcId) +
-      numberOfPossiblePoints(kFtpcWestId) +
-      numberOfPossiblePoints(kFtpcEastId) +
-      numberOfPossiblePoints(kSvtId) +
-      numberOfPossiblePoints(kSsdId) +	
-      numberOfPossiblePoints(kPxlId) +
-      numberOfPossiblePoints(kIstId);	
+    numberOfPossiblePoints(kFtpcWestId) +
+    numberOfPossiblePoints(kFtpcEastId) +
+    numberOfPossiblePoints(kSvtId) +
+    numberOfPossiblePoints(kSsdId) +	
+    numberOfPossiblePoints(kPxlId) +
+    numberOfPossiblePoints(kIstId);	
     if (type() == primary || type() == estPrimary) result++;
     return result;
 }
@@ -277,29 +292,29 @@ UShort_t
 StTrack::numberOfPossiblePoints(StDetectorId det) const
 {
 	switch (det) {
-	case kFtpcWestId:
-	    return mNumberOfPossiblePointsFtpcWest;
-	    break;
-	case kFtpcEastId:
-	    return mNumberOfPossiblePointsFtpcEast;
-	    break;
-	case kTpcId:
-	    return mNumberOfPossiblePointsTpc;
-	    break;
-	case kSvtId:
-	    return mNumberOfPossiblePointsSvt;
-	    break;
-	case kSsdId:
-	    return mNumberOfPossiblePointsSsd;
-	    break;
-	case kPxlId:
-	    return mNumberOfPossiblePointsPxl;
-	    break;
-	case kIstId:
-	    return mNumberOfPossiblePointsIst;
-	    break;
-	default:
-	    return 0;
+        case kFtpcWestId:
+            return mNumberOfPossiblePointsFtpcWest;
+            break;
+        case kFtpcEastId:
+            return mNumberOfPossiblePointsFtpcEast;
+            break;
+        case kTpcId:
+            return mNumberOfPossiblePointsTpc;
+            break;
+        case kSvtId:
+            return mNumberOfPossiblePointsSvt;
+            break;
+        case kSsdId:
+            return mNumberOfPossiblePointsSsd;
+            break;
+        case kPxlId:
+            return mNumberOfPossiblePointsPxl;
+            break;
+        case kIstId:
+            return mNumberOfPossiblePointsIst;
+            break;
+        default:
+            return 0;
     }  
 }
 
@@ -402,29 +417,29 @@ void
 StTrack::setNumberOfPossiblePoints(unsigned char val, StDetectorId det)
 {
     switch (det) {
-    case kFtpcWestId:
-	mNumberOfPossiblePointsFtpcWest = val;
-	break;
-    case kFtpcEastId:
-	mNumberOfPossiblePointsFtpcEast = val;
-	break;
-    case kTpcId:
-	mNumberOfPossiblePointsTpc = val;
-	break;
-    case kSvtId:
-	mNumberOfPossiblePointsSvt = val;
-	break;
-    case kSsdId:
-	mNumberOfPossiblePointsSsd = val;
-	break;
-    case kPxlId:
-	mNumberOfPossiblePointsPxl = val;
-	break;
-    case kIstId:
-	mNumberOfPossiblePointsIst = val;
-	break;
-    default:
-	break;
+        case kFtpcWestId:
+            mNumberOfPossiblePointsFtpcWest = val;
+            break;
+        case kFtpcEastId:
+            mNumberOfPossiblePointsFtpcEast = val;
+            break;
+        case kTpcId:
+            mNumberOfPossiblePointsTpc = val;
+            break;
+        case kSvtId:
+            mNumberOfPossiblePointsSvt = val;
+            break;
+        case kSsdId:
+            mNumberOfPossiblePointsSsd = val;
+            break;
+        case kPxlId:
+            mNumberOfPossiblePointsPxl = val;
+            break;
+        case kIstId:
+            mNumberOfPossiblePointsIst = val;
+            break;
+        default:
+            break;
     }
 }
 
@@ -463,8 +478,8 @@ Int_t StTrack::bad() const
     while (len12<  0) len12+=per;
     while (len12>per) len12-=per;
     double tol = (len12)*0.2; if (tol<1) tol =1;
-//VP ignor for TPT    if (fabs(mLength-len12)>tol)                 return   43;
-     
+    //VP ignor for TPT    if (fabs(mLength-len12)>tol)                 return   43;
+    
     if (fabs(hlx1.z(mLength))>kStarMaxTrackRangeZ) return   53;
     double qwe = pow(hlx1.x(mLength),2)+pow(hlx1.y(mLength),2);
     if (sqrt(qwe)>kStarMaxTrackRangeR)		 return   63;
@@ -474,118 +489,122 @@ Int_t StTrack::bad() const
 void StTrack::Streamer(TBuffer &R__b)
 {
     // Stream an object of class .
-
+    
     if (R__b.IsReading()) {
-       UInt_t R__s, R__c;
-       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-       if (R__v > 1) {
-          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
-          return;
-       }
-       //====process old versions before automatic schema evolution
-       StObject::Streamer(R__b);
-       R__b >> mKey;
-       R__b >> mFlag;
-
-//     R__b >> mEncodedMethod;
-       UChar_t oldEncodedMethod;
-       R__b >> oldEncodedMethod;
-       mEncodedMethod=oldEncodedMethod;
-
-       R__b >> mImpactParameter;
-       R__b >> mLength;
-       R__b >> mSeedQuality;
-       mTopologyMap.Streamer(R__b);
-       mFitTraits.Streamer(R__b);
-       R__b >> mGeometry;
-
-//     R__b >> mDetectorInfo;
-       R__b >> (StTrackDetectorInfo*&)mDetectorInfo;
-
-//     R__b >> mNode;
-       R__b >> (StTrackNode*&)mNode;
-
-
-       mPidTraitsVec.Streamer(R__b);
-
-       R__b.CheckByteCount(R__s, R__c, Class());
-       //====end of old versions
-      
+        UInt_t R__s, R__c;
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v > 1) {
+            Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+            return;
+        }
+        //====process old versions before automatic schema evolution
+        StObject::Streamer(R__b);
+        R__b >> mKey;
+        R__b >> mFlag;
+        
+        //     R__b >> mEncodedMethod;
+        UChar_t oldEncodedMethod;
+        R__b >> oldEncodedMethod;
+        mEncodedMethod=oldEncodedMethod;
+        
+        R__b >> mImpactParameter;
+        R__b >> mLength;
+        R__b >> mSeedQuality;
+        mTopologyMap.Streamer(R__b);
+        mFitTraits.Streamer(R__b);
+        R__b >> mGeometry;
+        
+        //     R__b >> mDetectorInfo;
+        R__b >> (StTrackDetectorInfo*&)mDetectorInfo;
+        
+        //     R__b >> mNode;
+        R__b >> (StTrackNode*&)mNode;
+        
+        
+        mPidTraitsVec.Streamer(R__b);
+        
+        R__b.CheckByteCount(R__s, R__c, Class());
+        //====end of old versions
+        
     } else {
-       Class()->WriteBuffer(R__b,this);
+        Class()->WriteBuffer(R__b,this);
     }
 } 
+
 //________________________________________________________________________________
+
 void StTrack::setIdTruth() // match with IdTruth
 {
-
-  const StTrackDetectorInfo* di = detectorInfo();
-  if (!di) return;
-  const StPtrVecHit& vh = di->hits();
-
-  typedef std::map< int,float>  myMap_t;
-  typedef std::pair<int,float>  myPair_t;
-  typedef myMap_t::const_iterator myIter_t;
-  myMap_t  idTruths;
     
-  // 		Loop to store all the mc track keys and quality of every reco hit on the track.
-  Int_t nHits = vh.size(),id=0,qa=0;
-  for (Int_t hi=0;hi<nHits; hi++) {
-    const StHit* rHit = vh[hi]; 
-    id = rHit->idTruth(); if (!id) continue;
-    qa = rHit->qaTruth(); if (!qa) qa = 1;
-    idTruths[id]+=qa;
-  }
-  if (! idTruths.size()) return;		//no simu hits
-  Int_t tkBest=-1; Float_t qaBest=0,qaSum=0;
-  for (myIter_t it=idTruths.begin(); it!=idTruths.end();++it) {
-    qaSum+=(*it).second;
-    if ((*it).second<qaBest)	continue;
-    tkBest=(*it).first; qaBest=(*it).second;
-  }
-  if (tkBest < 0 || tkBest> 0xffff) return;
-  Int_t avgQua= 100*qaBest/(qaSum+1e-10)+0.5;
-  setIdTruth(tkBest,avgQua);
-  Int_t IdVx = StG2TrackVertexMap::instance()->IdVertex(tkBest);
-  setIdParentVx(IdVx);
-}
-//________________________________________________________________________________
-ostream&  operator<<(ostream& os,  const StTrack& track) {
-  os << Form("%4i ",track.key());
-  if (track.type() == global)                       os << "global";
-  else                                              os << "primary";
-  os << Form(" %4i",track.flag());
-  if (track.isPostXTrack())                         os << "C";
-  else if (track.isPromptTrack())                   os << "P";
-  else                                              os << " ";
-  if (track.isCtbMatched() || track.isToFMatched()) os << "T";
-  else                                              os << " ";
-  if (track.isBemcMatched() || track.isEemcMatched()) {
-    if (track.isBemcMatched())                      os << "b";
-    else                                            os << "e";
-    UInt_t fext = track.flagExtension() & 07;
-    switch (fext) {
-    case 0:    os << " "; break;
-    case 1:    os << "M"; break;
-    case 2:    os << "H"; break;
-    case 3:    os << "E"; break;
-    case 4:    os << "T"; break;
-    case 5:    os << "W"; break;
-    case 6:    os << "Z"; break;
-    default:   os << "?"; break;
+    const StTrackDetectorInfo* di = detectorInfo();
+    if (!di) return;
+    const StPtrVecHit& vh = di->hits();
+    
+    typedef std::map< int,float>  myMap_t;
+    typedef std::pair<int,float>  myPair_t;
+    typedef myMap_t::const_iterator myIter_t;
+    myMap_t  idTruths;
+    
+    // 		Loop to store all the mc track keys and quality of every reco hit on the track.
+    Int_t nHits = vh.size(),id=0,qa=0;
+    for (Int_t hi=0;hi<nHits; hi++) {
+        const StHit* rHit = vh[hi]; 
+        id = rHit->idTruth(); if (!id) continue;
+        qa = rHit->qaTruth(); if (!qa) qa = 1;
+        idTruths[id]+=qa;
     }
-  }  else                                           os << "  ";
-  if (track.isMembraneCrossingTrack())              os << "X";
-  else if (track.isWestTpcOnly())                   os << "W";
-  else if (track.isEastTpcOnly())                   os << "E";
-  else                                              os << " ";
-  if (track.isShortTrack2EMC())                     os << "S";
-  else                                              os << " ";
-  if (track.isRejected())                           os << "R";
-  else                                              os << " ";
-  Double_t length = track.length();
-  if (length > 9999.) length = 9999.;
-  os << Form(" NP %2d L %8.3f", track.numberOfPossiblePoints(),length);
-  os << Form(" IdT: %4i Q:%3i", track.idTruth(), track.qaTruth());
-  return os;
+    if (! idTruths.size()) return;		//no simu hits
+    Int_t tkBest=-1; Float_t qaBest=0,qaSum=0;
+    for (myIter_t it=idTruths.begin(); it!=idTruths.end();++it) {
+        qaSum+=(*it).second;
+        if ((*it).second<qaBest)	continue;
+        tkBest=(*it).first; qaBest=(*it).second;
+    }
+    if (tkBest < 0 || tkBest> 0xffff) return;
+    Int_t avgQua= 100*qaBest/(qaSum+1e-10)+0.5;
+    setIdTruth(tkBest,avgQua);
+    Int_t IdVx = StG2TrackVertexMap::instance()->IdVertex(tkBest);
+    setIdParentVx(IdVx);
+}
+
+//________________________________________________________________________________
+
+ostream&  operator<<(ostream& os,  const StTrack& track) {
+    os << Form("%4i ",track.key());
+    if (track.type() == global)                       os << "global";
+    else                                              os << "primary";
+    os << Form(" %4i",track.flag());
+    if (track.isPostXTrack())                         os << "C";
+    else if (track.isPromptTrack())                   os << "P";
+    else                                              os << " ";
+    if (track.isCtbMatched() || track.isToFMatched()) os << "T";
+    else                                              os << " ";
+    if (track.isBemcMatched() || track.isEemcMatched()) {
+        if (track.isBemcMatched())                      os << "b";
+        else                                            os << "e";
+        UInt_t fext = track.flagExtension() & 07;
+        switch (fext) {
+            case 0:    os << " "; break;
+            case 1:    os << "M"; break;
+            case 2:    os << "H"; break;
+            case 3:    os << "E"; break;
+            case 4:    os << "T"; break;
+            case 5:    os << "W"; break;
+            case 6:    os << "Z"; break;
+            default:   os << "?"; break;
+        }
+    }  else                                           os << "  ";
+    if (track.isMembraneCrossingTrack())              os << "X";
+    else if (track.isWestTpcOnly())                   os << "W";
+    else if (track.isEastTpcOnly())                   os << "E";
+    else                                              os << " ";
+    if (track.isShortTrack2EMC())                     os << "S";
+    else                                              os << " ";
+    if (track.isRejected())                           os << "R";
+    else                                              os << " ";
+    Double_t length = track.length();
+    if (length > 9999.) length = 9999.;
+    os << Form(" NP %2d L %8.3f", track.numberOfPossiblePoints(),length);
+    os << Form(" IdT: %4i Q:%3i", track.idTruth(), track.qaTruth());
+    return os;
 }
