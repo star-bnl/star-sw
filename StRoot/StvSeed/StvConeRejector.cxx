@@ -62,8 +62,7 @@ void StvConeRejector::Reset(const float pos[3],const float dir[3]
     Mul(mDir,-1./nor,mPos);
   }
   mThet = (theta) ? theta : kFstAng*M_PI/180;
-  mCosThet = cos(mThet);
-  mSinThet = sin(mThet);
+  mTan = tan(mThet);
   mErr = (err)? err : SEED_ERR(nor);
 }
 
@@ -74,34 +73,21 @@ void StvConeRejector::Prepare()
 ///	Parameters of brik are used for selection in multy key iterator
 ///	of hits
 
-  for (int ix=0;ix<3;ix++) { mLim[0][ix]=999; mLim[1][ix]= -999;} 
-
-  TVector3 myZ(mDir),myX(myZ.Orthogonal()),myY(myZ.Cross(myX));		
-  TVector3 pos[2];		
-  pos[0]= TVector3(mPos); 		
-  pos[1]= pos[0]+myZ*(mCosThet*mLen);		
-  double fak[2]={mErr,mLen*mSinThet};
-  for (int ix=0;ix<3;ix++) {			//loop over x,y,z
-    double delta = sqrt(myX[ix]*myX[ix]+myY[ix]*myY[ix]);
-    for (int iBegEnd=0;iBegEnd<2;iBegEnd++){	// loop over begin&end of cone
-      for (int jk=-1;jk<=1;jk+=2) {		// loop over -1,+1 sign
-        double dlt = delta*fak[iBegEnd]*jk;
-        double qwe = pos[iBegEnd][ix]+dlt;
-        if (mLim[0][ix]>qwe)  mLim[0][ix]=qwe;        
-        if (mLim[1][ix]<qwe)  mLim[1][ix]=qwe;        
-      }// end sign loop
-    }// end of begEnd
-  }// end of x,y,z
-
-  for (int ix=0;ix<3;ix++) {			//loop over x,y,z
-    for (int jk=-1;jk<=1;jk+=2) {		// loop over -1,+1 sign
-      if (myZ[ix]*jk<mCosThet) continue;
-      double qwe = mPos[ix]+mLen*jk;
-      if (mLim[0][ix]>qwe)  mLim[0][ix]=qwe;        
-      if (mLim[1][ix]<qwe)  mLim[1][ix]=qwe;        
-    }//end of sign loop
-  }//end of x,y,z loop
-
+  for (int i=0;i<3;i++) {
+    float qwe = mLen*mDir[i];
+    float asd = mLen*mTan*sqrt(fabs(1-mDir[i]*mDir[i]));
+    float lim = qwe - asd - mErr;
+    mLim[0][i] = (lim<0)? lim:-mErr;
+    lim = qwe + asd + mErr;
+    mLim[1][i] = (lim>0)? lim: mErr;
+//		Move to global system 
+    mLim[0][i]+= mPos[i];
+    mLim[1][i]+= mPos[i];
+  }
+  for (int i=0;i<2;i++) {
+    if (mLim[0][i]< -mRad) mLim[0][i]=-mRad;
+    if (mLim[1][i]>  mRad) mLim[1][i]= mRad;
+  }
 }   
 //_____________________________________________________________________________
 int StvConeRejector::Reject(const float x[3]) const
@@ -113,8 +99,11 @@ int StvConeRejector::Reject(const float x[3]) const
   if (r2>mLen2)	return 1;
   float myX = Dot(xx,mDir);
   if (myX <0) 	return 2;
+  if (myX >mLen)return 2;
+
+
   float myY = (r2-myX*myX);
   myY = (myY>0)? sqrt(myY):0;
-  if (myY*mCosThet-myX*mSinThet>mErr) return 3;
+  if (myY >myX*mTan+mErr) return 3;
   return 0;
 }
