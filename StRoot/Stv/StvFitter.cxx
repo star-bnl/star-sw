@@ -314,20 +314,22 @@ double StvFitter::Xi2()
     const StvNodePars *swp = mInPars; mInPars=mJnPars; mJnPars=swp;
     const StvFitErrs  *swe = mInErrs; mInErrs=mJnErrs; mJnErrs=swe;
   }
+  double qwe = (1 - mInPars->_tanl * mJnPars->_tanl);
+  if (fabs(qwe)<1e-2) {mFailed=1; mXi2 = 1e11;return mXi2;}
 
   StvFitPars F   = (*mInPars-*mJnPars);
   double     Zero[5]= {0};
-  double myXi2 = JoinTwo(5,F.Arr()    ,mInErrs->Arr()
-                        ,5,Zero       ,mJnErrs->Arr()
-		        ,mQQPars.Arr(),mQQErrs.Arr());
-  mXi2 = myXi2;
-  return myXi2;
+  mXi2 = JoinTwo(5,F.Arr()    ,mInErrs->Arr()
+                ,5,Zero       ,mJnErrs->Arr()
+		,mQQPars.Arr(),mQQErrs.Arr());
+  return mXi2;
 }  
 //______________________________________________________________________________
 int StvFitter::Update()
 {
 static int nCall=0; nCall++;
 StvDebug::Break(nCall);
+  if(mFailed>0) return mFailed;
   mFailed = 0;
   switch (mKase) {
     case 0: mFailed = Hpdate(); break;		//Hit+Track
