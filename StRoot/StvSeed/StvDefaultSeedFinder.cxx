@@ -275,14 +275,10 @@ void  StvConeSelector::UpdateLims()
     mLim[1][i]+= mHit[i];
   }
 
-//		Temporary check
-  for (int j=0;j<3;j++) {
-    float xx = mHit[j]+mDir[j]*mLen*0.1;
-    assert(xx>=mLim[0][j]);
-    assert(xx<=mLim[1][j]);
-          xx = mHit[j]+mDir[j]*mLen*0.9;
-    assert(xx>=mLim[0][j]);
-    assert(xx<=mLim[1][j]);
+//		Account that all the hits inside of cylinder with Rxy
+  for (int i=0;i<2;i++) {
+    if (mLim[0][i]<-mRxy) mLim[0][i]=-mRxy;
+    if (mLim[1][i]> mRxy) mLim[1][i]= mRxy;
   }
 
 }
