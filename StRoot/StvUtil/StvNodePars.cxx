@@ -233,7 +233,8 @@ static StvFitPars fp;
   fp.mA = (fabs(a) <0.1)? a*(1-a*a/3): atan(a);
   fp.mP = (_ptin-sub._ptin);
   double tL = (_tanl-sub._tanl)/(1+_tanl*sub._tanl);
-  fp.mL = tL*(1+tL*tL*(-1./3+tL*tL/5)); 
+  if (fabs(tL) <0.3)  	{fp.mL = tL*(1+tL*tL*(-1./3+tL*tL/5));} 
+  else 			{fp.mL = atan(tL)		     ;}
   return fp;
 }
 //______________________________________________________________________________
