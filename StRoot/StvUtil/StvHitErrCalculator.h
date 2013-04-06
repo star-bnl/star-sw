@@ -21,6 +21,7 @@ protected:
 void CalcLocals(const float hiDir[3][3]);
 protected:
 enum {kYErr=0,kZErr=1,kWidTrk=2};
+char mBeg[1];
 int mNPar;			//Size of mPar
 int mFailed;
 double mPar[kMaxPars];		// mPar
@@ -30,6 +31,7 @@ double mCp ,mSp ,mCl ,mSl;
 double mCp2,mSp2,mCl2,mSl2;
 double mTT[2][2]; 	//matrix converting from detector to track(dca) system
 double mDD[kMaxPars][3];
+char mEnd[1];
 ClassDef(StvHitErrCalculator,0)
 };
 
