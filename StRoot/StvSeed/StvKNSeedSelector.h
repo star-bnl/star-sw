@@ -45,7 +45,6 @@ private:
  int  mState;		//Status, &1 =narrow trace
 void *mStartHit;
 float mStartPos[3];
-float mStartDir[3];
 float mAveDir[3];
 float mSidDir[3];
 float mStartRad;

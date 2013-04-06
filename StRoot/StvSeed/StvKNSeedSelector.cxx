@@ -7,12 +7,9 @@
 #include "StvSeedConst.h"
 
 static const float kMaxAng =  9*3.14/180;	//???Maximal angle allowed for connected hits
-static const float kMinAng =  kMaxAng*pow(0.1,1./(2*kKNumber));	//KN angle allowed
-static const float kWidMax =  3*3.14/180;	//KN width angle allowed, narrow width of ellips
-static const float kWidMin =  .01*3.14/180;	//KN width angle allowed, narrow width of ellips
+static const float kMinAng =  1*3.14/180;;	//KN angle allowed
+static const float kMaxRatio=   3;		//ratio 
 static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
-static const float kMaxNearFak = 1.1;
-static const float kMaxAccuFak = 3.3;
 
 #define Sq(x) ((x)*(x))
 
@@ -145,19 +142,17 @@ static int nCall=0; nCall++;
       mKNNDist=qwe; mMinIdx = i;
     }
     if (mMinIdx<0) return 0;
-    mMaxSel = kMinAng ; 
-    if (mKNNDist > mMaxSel) return 0;	
+    if (mKNNDist > kMinAng*kMaxRatio) return 0;	
+    memcpy(mAveDir,mAux[mMinIdx].mDir,sizeof(mAveDir));
+
+
 
   ///		define the best direction
     std::map<float,int>::iterator myIt;
     mNHits=0; Zer(mAveDir);
-    mMaxNear = mKNNDist*kMaxNearFak;
-    mMaxAccu = mKNNDist*kMaxAccuFak;
-    Pass(mMinIdx,0.);
-    Nor(mAveDir);
+    Pass(mMinIdx,mKNNDist);
     double wid = Width();
-    if (wid>100 ||wid<kWidMin*kWidMin || wid>kWidMax*kWidMax)	{mAux[mMinIdx].mHit=0; continue; }
-
+    if (mKNNDist*wid > kMinAng) return 0;	
 
 double ei0 = sqrt(mEigen[0])*57;
 double ei1 = sqrt(mEigen[1])*57;
@@ -166,11 +161,6 @@ StvDebug::Count("MinEig",sqrt(mEigen[0])*57);
 StvDebug::Count("KNNDis:MinEig" ,ei0,mKNNDist*57);
 StvDebug::Count("MaxEig:MinEig",ei0,ei1);
 
-    mSel.push_back(mStartHit);
-    for (myIt = mMapLen.begin(); myIt !=mMapLen.end(); ++myIt) {
-       int i = (*myIt).second;
-       mSel.push_back(mAux[i].mHit);
-    }
     return mSel.size();
   }//end while
   return 0;
@@ -180,15 +170,12 @@ void StvKNSeedSelector::Pass(int iux, double accuAng)
 {
   StvKNAux &aux = mAux[iux];
   aux.mSel=1; mNHits++;
-  ::Add(mAveDir,aux.mDir,aux.mLen);
   mMapLen[aux.mLen]=iux;
   for (int ifan=0;ifan<kKNumber;ifan++) {
-    if (aux.mDist[ifan]>mMaxNear)	continue;
-    float myAccu = accuAng+aux.mDist[ifan];
-    if (myAccu>mMaxAccu)		continue;
+    if (aux.mDist[ifan]>accuAng)	continue;
     int idx = aux.mNbor[ifan];
     if (mAux[idx].mSel) 		continue; 
-    Pass(idx,myAccu);
+    Pass(idx,accuAng);
   }
 }
 //_____________________________________________________________________________
@@ -211,7 +198,7 @@ double StvKNSeedSelector::Width()
   if (mMapLen.size()<3) 	return 102;
 
   TVector3 myX(mAveDir),myZ(myX.Orthogonal()),myY(myZ.Cross(myX));		
-  double G[3]={0};
+  double G[3]={0},uv[2]={0};
   std::map<float,int>::iterator myIt;
 
   for( myIt=mMapLen.begin(); myIt!=mMapLen.end();++myIt)
@@ -220,28 +207,19 @@ double StvKNSeedSelector::Width()
     TVector3 dir(mAux[i].mDir);
     double u = myY.Dot(dir);
     double v = myZ.Dot(dir);
+    uv[0]+=u;uv[1]+=v;
     G[0]+=u*u;G[1]+=u*v;G[2]+=v*v;
   }
   double dN = mMapLen.size();
-  G[0]/=dN;G[1]/=dN;G[2]/=dN;
+  G[0]/=dN;G[1]/=dN;G[2]/=dN; uv[0]/=dN;uv[1]/=dN;
+  G[0]-=uv[0]*uv[0];G[1]-=uv[0]*uv[1];G[0]-=uv[1]*uv[1];
+
   double bb = 0.5*(G[0]+G[2]);
   double cc = G[0]*G[2]-G[1]*G[1];
   double dis = bb*bb - cc*cc; if (dis<0) dis = 0;
   mEigen[0] = cc/(bb+sqrt(dis));
   mEigen[1] = G[0]+G[2]-mEigen[0];
-  mState += (mEigen[1]>=mEigen[0]*3);
-  if (!(mState&1)) return mEigen[0];
-
-//		Now evaluate direction
-  G[0]-=mEigen[0]; 
-  G[2]-=mEigen[0];
-  double uv[2];
-  if (G[0]>G[2]) { uv[0] = -G[1]/G[0]; uv[1]=1;}
-  else           { uv[1] = -G[1]/G[2]; uv[0]=1;}
-  (myY*uv[0]+myZ*uv[1]).GetXYZ(mSidDir);
-  Nor(mSidDir);
-
-  return mEigen[0];
+  return sqrt(mEigen[0]/(mEigen[1]+1e-11));
 
 }
 #if 1
