@@ -27,8 +27,8 @@ ClassImp(StvTpcHitErrCalculator)
 //______________________________________________________________________________
 StvHitErrCalculator::StvHitErrCalculator(const char *name,int nPar):TNamed(name,"")
 {
+  memset(mBeg,0,mEnd-mBeg+1);
   mNPar = nPar;
-  memset(mPar,0,sizeof(mPar));
   if (!*GetName()) return;
   StvHitErrCalculator *&calc = calcMap[GetName()];
   assert(!calc && "Name clash");
