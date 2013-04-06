@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.600 2013/04/05 23:43:43 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.601 2013/04/06 03:21:19 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -802,6 +802,9 @@ Int_t StBFChain::Instantiate()
 }
 //_____________________________________________________________________
 Int_t StBFChain::Init() {
+
+  TDatime td;
+  Info("Init","Time=%s Cwd=%s",td.AsString(),gSystem->pwd());
 
   SetChainOpt(new StBFChainOpt(this));
   //  SetDbOptions(); moved to Instantiation
