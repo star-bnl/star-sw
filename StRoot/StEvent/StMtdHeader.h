@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMtdHeader.h,v 2.1 2011/04/25 21:24:02 ullrich Exp $
+ * $Id: StMtdHeader.h,v 2.2 2013/04/06 12:18:35 ullrich Exp $
  *
  * Author: Frank Geurts, April 25, 2011
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StMtdHeader.h,v $
+ * Revision 2.2  2013/04/06 12:18:35  ullrich
+ * Increase MAXFIBER from 1 to 2.
+ *
  * Revision 2.1  2011/04/25 21:24:02  ullrich
  * Initial Revision.
  *
@@ -27,7 +30,7 @@
 
 class StMtdHeader : public StObject {
 public:
-    enum {MAXFIBER=1};
+    enum {MAXFIBER=2};
     
     StMtdHeader();
     ~StMtdHeader();
