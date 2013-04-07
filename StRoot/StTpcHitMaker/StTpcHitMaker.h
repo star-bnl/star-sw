@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.15 2012/09/13 21:00:04 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.16 2013/04/07 21:58:36 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.16  2013/04/07 21:58:36  fisyak
+ * Move selection of sector range from InitRun to Init, add cluster averaging based on TH3
+ *
  * Revision 1.15  2012/09/13 21:00:04  fisyak
  * Corrections for iTpx, clean up
  *
@@ -67,7 +70,12 @@
 #include "StRTSBaseMaker.h"
 #include "TString.h"
 #include "StThreeVectorF.hh"
+//#define __USE__THnSparse__
+#ifdef __USE__THnSparse__
 #include "THnSparse.h"
+#else /* ! __USE__THnSparse__ */
+#include "TH3.h"
+#endif /* __USE__THnSparse__ */
 class StTpcDigitalSector;
 class StTpcHit;
 class tpc_cl;
@@ -101,7 +109,9 @@ class StTpcHitMaker : public StRTSBaseMaker {
   void    PrintSpecial(Int_t sector);
   Int_t   RawTpcData(Int_t sector);
   Int_t   RawTpxData(Int_t sector);
-  THnSparseF *CompressTHn(THnSparseF *hist, Double_t compress = 1e3);
+#ifdef __USE__THnSparse__
+  THnSparseF *CompressTHn(THnSparseF *hist, Double_t compress = 1e4);
+#endif /* __USE__THnSparse__ */
   StTpcDigitalSector *GetDigitalSector(Int_t sector);
   virtual Int_t        Finish();
  private:
@@ -116,7 +126,12 @@ class StTpcHitMaker : public StRTSBaseMaker {
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;
   Int_t    bin0Hits;
+#ifdef __USE__THnSparse__
   THnSparseF **fAvLaser;
+#else /* ! __USE__THnSparse__ */
+  TH3F       **fAvLaser;
+#endif /* __USE__THnSparse__ */
+
   Int_t    NoRows;
   Int_t    NoInnerPadRows;
  protected:
