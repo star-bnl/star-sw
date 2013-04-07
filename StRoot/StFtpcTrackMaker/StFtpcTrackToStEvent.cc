@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.18 2011/08/31 23:24:53 perev Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.19 2013/04/07 21:51:20 fisyak Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -36,7 +36,7 @@ using namespace std;
 #include "StFtpcTrack.hh"
 #include "StFtpcTrackingParams.hh"
 #include "TObjArray.h"
-
+#include "TArrayF.h"
 #include "StFtpcTrackToStEvent.hh"
 
 StFtpcTrackToStEvent::StFtpcTrackToStEvent() : mEvent(0), mTrackStore(0), mTrkNodeMap() {
@@ -375,10 +375,7 @@ void StFtpcTrackToStEvent::FillFitTraits(StTrack* gTrack, StFtpcTrack* track){
   chi2[0] = track->GetChiSq()[0]/(nFitPoints-3.);
   chi2[1] = track->GetChiSq()[1]/(nFitPoints-2.);
     
-  float covMFloat[15];
-  for (Int_t i = 0; i < 15; i++) {
-    covMFloat[i]  = 0.;
-  }
+  TArrayF covMFloat;
     
   // setFitTraits uses assignment operator of StTrackFitTraits, which is the default one,
   // which does a memberwise copy.  Therefore, constructing a local instance of 
