@@ -232,6 +232,13 @@ ViewMedium::PlotHoleAttachment() {
 }
 
 void
+ViewMedium::PlotElectronCrossSections() {
+
+  SetupCanvas();
+
+}
+
+void
 ViewMedium::SetupCanvas() {
 
   if (canvas == 0) {
@@ -291,6 +298,7 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
     functions.back().SetMaximum(ymax);
   }
   functions.back().GetXaxis()->SetTitle(xlabel.c_str());
+  functions.back().GetXaxis()->SetTitleOffset(1.2);
   functions.back().GetYaxis()->SetTitle(ylabel.c_str());
   functions.back().SetTitle(title.c_str());
   functions.back().SetParameter(0, type);

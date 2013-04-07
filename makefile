@@ -57,10 +57,10 @@ installdirs :
 	    echo "   >>>> Create $(GARFIELD_HOME)/Library/$(BFARCH)"; fi
 	@if [ ! -d $(OBJDIR) ]; then mkdir -p $(OBJDIR); \
 	    echo "   >>>> Create $(OBJDIR)"; \
-        else echo " $(OBJDIR) already existent"; fi
+        else echo " $(OBJDIR) already exists"; fi
 	@if [ ! -d $(OBJDIR)/Heed/ ]; then mkdir -p $(OBJDIR)/Heed; \
 	    echo "   >>>> Create $(OBJDIR)/Heed"; \
-        else echo " $(OBJDIR)/Heed already existent"; fi
+        else echo " $(OBJDIR)/Heed already exists"; fi
         
 heed:	
 	@echo Compiling Heed...

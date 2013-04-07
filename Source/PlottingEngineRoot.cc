@@ -39,9 +39,10 @@ PlottingEngineRoot::SetDefaultStyle() {
     garfieldStyle->cd();
     return;
   }
-  garfieldStyle = new TStyle("Garfield","Garfield Style");
-  SetDefaultStyle();
-  garfieldStyle->Reset();  
+  garfieldStyle = new TStyle("Garfield", "Garfield Style");
+  garfieldStyle->Reset(); 
+  garfieldStyle->SetFillColor(1);
+  garfieldStyle->SetFillStyle(1001);
   garfieldStyle->SetCanvasBorderMode(0);
   garfieldStyle->SetCanvasColor(0);
   garfieldStyle->SetCanvasPreferGL(kTRUE);
@@ -52,9 +53,13 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetPadLeftMargin(0.1);
   garfieldStyle->SetPadBottomMargin(0.1);
   garfieldStyle->SetPadRightMargin(0.1);
-  garfieldStyle->SetPadTopMargin(0.1);
+  garfieldStyle->SetPadTopMargin(0.05);
+  garfieldStyle->SetPadTickX(1);
+  garfieldStyle->SetPadTickY(1);
+  garfieldStyle->SetFrameFillColor(0);
   garfieldStyle->SetFrameBorderMode(0);
   garfieldStyle->SetDrawBorder(0);
+  garfieldStyle->SetLegendBorderSize(0);
 
   garfieldStyle->SetGridColor(kGray);
   garfieldStyle->SetGridStyle(3);
@@ -62,7 +67,7 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetPadGridX(kTRUE);
   garfieldStyle->SetPadGridY(kTRUE);
 
-  // const int font = 132;
+// const int font = 132;
   const int font = 42;
   garfieldStyle->SetTextFont(font);
   garfieldStyle->SetTitleStyle(0);
@@ -84,13 +89,13 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetStatX(0.88);
   garfieldStyle->SetStatY(0.88);
   garfieldStyle->SetStatW(0.25);
-  garfieldStyle->SetStatH(0.03);
+  garfieldStyle->SetStatH(0.1);
   garfieldStyle->SetOptStat(111110);
-
+  garfieldStyle->SetStatFormat("6.3g");
   garfieldStyle->SetLabelFont(font, "xyz");
   garfieldStyle->SetLabelSize(0.03, "xyz");
   garfieldStyle->SetLabelOffset(0.01, "xyz");
-
+  garfieldStyle->SetOptTitle(0);
   garfieldStyle->SetPaperSize(TStyle::kA4);
   garfieldStyle->SetFuncWidth(2);
   garfieldStyle->SetHistLineColor(kOrange - 3);
@@ -98,8 +103,14 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetAxisColor(kBlack, "X");
   garfieldStyle->SetAxisColor(kBlack, "Y");
   garfieldStyle->SetAxisColor(kBlack, "Z");
-  
-  garfieldStyle->cd();  
+  const double lw = 2; 
+  garfieldStyle->SetLineWidth(lw);
+  garfieldStyle->SetFrameLineWidth(lw);
+  garfieldStyle->SetHistLineWidth(lw);
+  garfieldStyle->SetFuncWidth(lw);
+  garfieldStyle->SetGridWidth(lw);
+
+garfieldStyle->cd();  
     
 }
 

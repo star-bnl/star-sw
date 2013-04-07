@@ -45,7 +45,9 @@ class ViewMedium {
 
     void PlotElectronAttachment();
     void PlotHoleAttachment();
-    
+   
+    void PlotElectronCrossSections();
+
     double EvaluateFunction(double* pos, double* par);
 
   private:

@@ -19,29 +19,50 @@ DriftLineRKF::DriftLineRKF() :
 
 }
 
-
 void 
 DriftLineRKF::SetSensor(Sensor* s) {
     
-  if (s == 0) {
+  if (!s) {
     std::cerr << className << "::SetSensor:\n";
     std::cerr << "    Sensor pointer is null.\n";
     return;
   }
-
   sensor = s;
+
+}
+
+void
+DriftLineRKF::SetIntegrationAccuracy(const double a) {
+
+  if (a > 0.) {
+    intAccuracy = a;
+  } else {
+    std::cerr << className << "::SetIntegrationAccuracy:\n";
+    std::cerr << "    Accuracy must be greater than zero.\n";
+  }
+
+}
+
+void 
+DriftLineRKF::SetMaximumStepSize(const double ms) {
+
+  if (ms > 0.) {
+    maxStepSize = ms;
+  } else {
+    std::cerr << className << "::SetMaximumStepSize:\n";
+    std::cerr << "    Step size must be greater than zero.\n";
+  }
 
 }
 
 void
 DriftLineRKF::EnablePlotting(ViewDrift* view) {
 
-  if (view == 0) {
+  if (!view) {
     std::cerr << className << "::EnablePlotting:\n";
     std::cerr << "    Viewer pointer is null.\n";
     return;
   }
-  
   usePlotting = true;
   viewer = view;
 
@@ -90,16 +111,15 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     viewer->NewElectronDriftLine(1, iLine, x0, y0, z0);
   }
 
-  // Check if the sensor is defined
-  if (sensor == 0) {
+  // Check if the sensor is defined.
+  if (!sensor) {
     std::cerr << className << "::DriftLine:\n";
     std::cerr << "    Sensor is not defined.\n";
     return;
   }
   
   // Check to make sure initial position is in a 
-  // valid location ie. non zero field, 
-  // in a drift medium.
+  // valid location ie. non zero field, in a drift medium.
   
   // Get field values
   double ex, ey, ez; 
