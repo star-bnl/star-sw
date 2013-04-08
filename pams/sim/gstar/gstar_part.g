@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.38 2013/03/14 18:27:29 jwebb Exp $
+* $Id: gstar_part.g,v 1.39 2013/04/08 19:57:20 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.39  2013/04/08 19:57:20  jwebb
+* Updated mass and lifetime of the phi to more recent PDG values.
+*
 * Revision 1.38  2013/03/14 18:27:29  jwebb
 * Added pi0    --> e+e- gamma 100% gid=10007
 * Added K0long --> nu e- pi+  100% gid=10010
@@ -258,7 +261,7 @@ MODULE gstar_part Is the STAR Particle Database
                               mode    = { 70809, 107,  809 }
 
 * group rho-pi and pi-pi-pi together (in practice indistinguishable)
-  Particle phi       code=151 TrkTyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
+  Particle phi       code=151 TrkTyp=3 mass=1.01946 charge=0  tlife=1.545e-22,
                      pdg=333  bratio = { .491, .343, .154, .0128, .00131 },
                               mode   = { 1112, 1016, 70809, 1701,   701  }
  
@@ -276,6 +279,9 @@ MODULE gstar_part Is the STAR Particle Database
 
   Particle anti_K0   code=156 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
                      pdg=-311  bratio= { .5, .5}    mode= { 16, 10 }
+
+
+
 ************************************************************************************ 
 * Heavy flavor studies -- July 2003 - May 2007, M.Potekhin
   Particle Jpsi       code=160 TrkTyp=4 mass=3.096  charge=0  tlife=7.48e-21,

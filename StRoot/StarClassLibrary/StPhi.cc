@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhi.cc,v 1.1 2000/04/06 22:23:16 ullrich Exp $
+ * $Id: StPhi.cc,v 1.2 2013/04/08 19:57:17 jwebb Exp $
  *
  * Author: Thomas Ullrich, Apr 2000 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPhi.cc,v $
+ * Revision 1.2  2013/04/08 19:57:17  jwebb
+ * Updated mass and lifetime of the phi to more recent PDG values.
+ *
  * Revision 1.1  2000/04/06 22:23:16  ullrich
  * Initial Revision
  *
@@ -54,9 +57,9 @@ StPhi::StPhi(const string  &  aName,
 //             stable         lifetime   
 //
 StPhi StPhi::mPhi(
-	        "phi",    1019.413*MeV,      4.43*MeV,          0., 
+	        "phi",    1019.446*MeV,      4.43*MeV,          0., 
 		    2,              -1,            -1,          
 		    0,               0,            -1,             
 	      "meson",               0,             0,         333,
-	      false,          0.0*nanosecond
+	      false,   1.545e-13 *nanosecond
 	      );
