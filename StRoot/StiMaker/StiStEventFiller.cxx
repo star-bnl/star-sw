@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.103 2013/01/28 21:51:17 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.104 2013/04/08 19:21:41 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.104  2013/04/08 19:21:41  fisyak
+ * Adjust for new KFParticle
+ *
  * Revision 2.103  2013/01/28 21:51:17  fisyak
  * Correct ranking
  *
@@ -517,10 +520,13 @@ using namespace std;
 #include "TMath.h"
 #include "StTrack2FastDetectorMatcher.h"
 #define NICE(angle) StiKalmanTrackNode::nice((angle))
+#include "TRSymMatrix.h"
+#include "TRVector.h"
 map<StiKalmanTrack*, StTrackNode*> StiStEventFiller::mTrkNodeMap;
 map<StTrackNode*, StiKalmanTrack*> StiStEventFiller::mNodeTrkMap;
 StiStEventFiller *StiStEventFiller::fgStiStEventFiller = 0;
-
+static Int_t _debug = 0;
+#define PrPP(A,B) if (_debug) {LOG_INFO << "StiStEventFiller::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 //_____________________________________________________________________________
 StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mFastDetectorMatcher(0)
 {
@@ -708,7 +714,6 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled as global(2):"<< fillTrackCount2<<endl;
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled GOOD globals:"<< fillTrackCountG<<endl;
   errh.Print();
-
   return;
 }
 //_____________________________________________________________________________
@@ -945,18 +950,49 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
 //_____________________________________________________________________________
 void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   // mass
-  // this makes no sense right now... double massHyp = track->getMass();  // change: perhaps this mass is not set right?
-  unsigned short geantIdPidHyp = 9999;
-  //if (.13< massHyp<.14) 
-  geantIdPidHyp = 9;
+  Int_t geantIdPidHyp = track->geantId();
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
   StiKalmanTrackNode* node = track->getInnerMostHitNode(3);
-  float x[6],covMFloat[15];
-  node->getGlobalTpt(x,covMFloat);
   float chi2[2];
-  //get chi2/dof
   chi2[0] = track->getChi2();  
+#if 0
+  float x[6];
+  TArrayF covMFloat(15);
+  node->getGlobalTpt(x,covMFloat.GetArray());
+#else
+  enum eStiVar {
+    lTan = 0, lPsi, lCur, 
+    lTanTan, 
+    lTanPsi, lPsiPsi, 
+    lTanCur, lPsiCur, lCurCur};
+  enum eFitTraits {	
+    kX = 0, kY, kZ, kE, kC, kT,
+    kXX = 0, 
+    kXY, kYY, 
+    kXZ, kYZ, kZZ, 
+    kXE, kYE, kZE, KEE,
+    kXC, kYC, kZC, kEC, KCC,
+    kXT, kYT, kZT, kET, KCT, kTT};
+  Double_t alpha, xRef, x[kNPars], cc[kNErrs], Chi2;
+  node->get(alpha, xRef, x, cc, Chi2);
+  TArrayF covMFloat(9);// (tanL, psi, -q/pT & their cov matrix)
+  covMFloat[lTan] = x[kT];
+  covMFloat[lPsi] = x[kE] + alpha;
+  covMFloat[lCur] = x[kC]; 
+  covMFloat[lTanTan] = cc[kTT];
+  covMFloat[lTanPsi] = cc[kET];
+  covMFloat[lPsiPsi] = cc[KEE];
+  covMFloat[lTanCur] = cc[KCT];
+  covMFloat[lPsiCur] = cc[kEC];
+  covMFloat[lCurCur] = cc[KCC];
+  if (_debug) {
+    TRSymMatrix C(6,cc); PrPP(fillFitTraits,C);
+    TRVector    P(3,covMFloat.GetArray()); PrPP(fillFitTraits,P);
+    TRSymMatrix CF(3,covMFloat.GetArray()+3); PrPP(fillFitTraits,CF);
+  }
+#endif
+  //get chi2/dof
   chi2[1] = -999; // change: here goes an actual probability, need to calculate?
   // December 04: The second element of the array will now hold the incremental chi2 of adding
   // the vertex for primary tracks
@@ -1321,8 +1357,8 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
     for (int j=1;j<=i;j++) {sete[jj++]=errs.A[li+j];}}
   StDcaGeometry *dca = new StDcaGeometry;
-  gTrack->setDcaGeometry(dca);
   dca->set(setp,sete);
+  gTrack->setDcaGeometry(dca);
 
 }
 //_____________________________________________________________________________
