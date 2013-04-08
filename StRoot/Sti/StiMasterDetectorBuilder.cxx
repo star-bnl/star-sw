@@ -65,7 +65,57 @@ void StiMasterDetectorBuilder::build(StMaker&source)
 	}
     }
   if (gGeoManagerSV) {
-//VP    SafeDelete(gGeoManager);
+#define __CHECK_SHARED_OBJECTS__
+#ifdef __CHECK_SHARED_OBJECTS__
+    // Clean up shared objects 
+    enum {NoLists = 12};
+    TSeqCollection *listSV[NoLists] = {
+      gGeoManagerSV->GetListOfMaterials(),      // TList                 
+      gGeoManagerSV->GetListOfMedia(),	        // TList                 
+      gGeoManagerSV->GetListOfNodes(),          // TObjArray             
+      gGeoManagerSV->GetListOfPhysicalNodes(),  // TObjArray             
+      gGeoManagerSV->GetListOfOverlaps(),	// TObjArray             
+      gGeoManagerSV->GetListOfMatrices(),       // TObjArray             
+      gGeoManagerSV->GetListOfVolumes(),        // TObjArray             
+      gGeoManagerSV->GetListOfGVolumes(),       // TObjArray             
+      gGeoManagerSV->GetListOfShapes(),	        // TObjArray             
+      gGeoManagerSV->GetListOfGShapes(),	// TObjArray             
+      gGeoManagerSV->GetListOfUVolumes(),       // TObjArray             
+      gGeoManagerSV->GetListOfTracks()};        // TObjArray             
+    TSeqCollection *list[NoLists] = {
+      gGeoManager->GetListOfMaterials(),      // TList                 
+      gGeoManager->GetListOfMedia(),	      // TList                 
+      gGeoManager->GetListOfNodes(),          // TObjArray             
+      gGeoManager->GetListOfPhysicalNodes(),  // TObjArray             
+      gGeoManager->GetListOfOverlaps(),       // TObjArray             
+      gGeoManager->GetListOfMatrices(),       // TObjArray             
+      gGeoManager->GetListOfVolumes(),        // TObjArray             
+      gGeoManager->GetListOfGVolumes(),       // TObjArray             
+      gGeoManager->GetListOfShapes(),	      // TObjArray             
+      gGeoManager->GetListOfGShapes(),	      // TObjArray             
+      gGeoManager->GetListOfUVolumes(),       // TObjArray             
+      gGeoManager->GetListOfTracks()};	      // TObjArray             
+    for (Int_t l = 0; l < NoLists; l++) {
+      if (listSV[l] && list[l]) {
+	TIter nextSV(listSV[l]);
+	TObject *oSV = 0;
+	while ((oSV = nextSV())) {
+	  TIter next(list[l]);
+	  TObject *o = 0;
+	  while ((o = next())) {
+	    if (o == oSV) {
+	      cout << "Duplicate object " << o->GetName() << "\t" << o->GetTitle() << endl;
+	      Int_t indx = list[l]->IndexOf(o);
+	      if (indx >= 0) {
+		list[l]->RemoveAt(indx);
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    //    delete gGeoManager;
+#endif /* __CHECK_SHARED_OBJECTS__ */
     gGeoManager = gGeoManagerSV;
   }
   cout << "StiMasterDetectorBuilder::build() -I- Done"<<endl;

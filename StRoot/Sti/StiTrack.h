@@ -115,7 +115,6 @@ public:
   virtual double  getTrackLength() const=0;
   virtual vector<const StMeasuredPoint*> stHits() const=0;
   /// Get mass of the particle that produced this track
-  virtual double  getMass() const=0;
   /// Get charge of the particle that produced this track
   virtual int     getCharge() const=0;
   /// Get chi2 of this track
@@ -132,6 +131,10 @@ public:
   virtual int  refit()=0;
   virtual int  refitL()=0;
   StiTrack &operator=(const StiTrack &tk);
+   static void setPDG(Int_t pdg=221) {_pdgId = pdg;}
+   static Double_t  getMass();                   // mass for pdg
+   static Int_t     pdgId()   {return _pdgId;}   // 
+   static Int_t     geantId();                   // geantId for pdg
  protected:
   static StiTrackFinder * trackFinder;
   static StiTrackFitter * trackFitter;
@@ -140,6 +143,7 @@ public:
 protected:
   int             mId;
   int             mIdDb;
+  static Int_t     _pdgId;   // its pgd and   
 };
 
 //Dummy get global dca method always returns zero
