@@ -38,14 +38,17 @@ class KFParticleBase : public TObject {
   virtual ~KFParticleBase() {}
   //  Initialisation from "cartesian" coordinates ( X Y Z Px Py Pz )
   //  Parameters, covariance matrix, charge, and mass hypothesis should be provided 
-  void Initialize( const Double_t Param[], const Double_t Cov[], Int_t Charge, Double_t Mass );
+  void Initialize( const Double_t Param[], const Double_t Cov[], Int_t Charge, Double_t Mass, Int_t PID = 0);
   //  Initialise covariance matrix and set current parameters to 0.0 
   void Initialize();
+  virtual void        Clear(Option_t * /*option*/ ="");
   //  Set decay vertex parameters for linearisation 
   void SetVtxGuess( Double_t x, Double_t y, Double_t z );
   void SetID(Int_t id=0) {fID = id;}
+  void SetParentID(Int_t id=0) {fParentID = id;}
   //   ACCESSORS
-  Int_t  GetID() const {return fID;}
+  Int_t    GetID() const {return fID;}
+  Int_t    GetParentID() const {return fParentID;}
   Double_t GetX    () const { return fP[0]; }
   Double_t GetY    () const { return fP[1]; }
   Double_t GetZ    () const { return fP[2]; }
@@ -54,11 +57,13 @@ class KFParticleBase : public TObject {
   Double_t GetPz   () const { return fP[5]; }
   Double_t GetE    () const { return fP[6]; }
   Double_t GetS    () const { return fP[7]; }
-  Int_t    GetQ    () const { return fQ;    }
+  Short_t  GetQ    () const { return fQ;    }
   Double_t GetChi2 () const { return fChi2; }
-  Int_t    GetNDF  () const { return fNDF;  }
+  Short_t  GetNDF  () const { return fNDF;  }
   
-  Double_t GetParameter ( Int_t i )        const { return fP[i];       }
+  const Double_t *GetParameter()           const { return fP;}
+  Double_t GetParameter ( Int_t i )        const { return fP[i];}
+  const Double_t *GetCovariance()          const { return fC;}
   Double_t GetCovariance( Int_t i )        const { return fC[i];       }
   Double_t GetCovariance( Int_t i, Int_t j ) const { return fC[IJ(i,j)]; }
   
@@ -87,9 +92,9 @@ class KFParticleBase : public TObject {
   Double_t & Pz   () { return fP[5]; }
   Double_t & E    () { return fP[6]; }
   Double_t & S    () { return fP[7]; }
-  Int_t    & Q    () { return fQ;    }
+  Short_t  & Q    () { return fQ;    }
   Double_t & Chi2 () { return fChi2; }
-  Int_t    & NDF  () { return fNDF;  }
+  Short_t  & NDF  () { return fNDF;  }
 
   Double_t & Parameter ( Int_t i )        { return fP[i];       }
   Double_t & Covariance( Int_t i )        { return fC[i];       }
@@ -192,10 +197,12 @@ class KFParticleBase : public TObject {
   virtual void Print(Option_t *opt="") const;
   Int_t           IdTruth() const { return fIdTruth;}
   Int_t           QaTruth() const { return fQuality; }
-  Int_t           IdParentVx() const {return fIdParentVx;}
+  Int_t           IdParentMcVx() const {return fIdParentMcVx;}
   
   void         SetIdTruth(Int_t idtru,Int_t qatru=0) {fIdTruth = (UShort_t) idtru; fQuality = (UShort_t) qatru;}
-  void         SetIdParentVx(Int_t id) {fIdParentVx = id;}
+  void         SetIdParentMcVx(Int_t id) {fIdParentMcVx = id;}
+  void  SetPDG ( Int_t pdg ) { fPDG = pdg; }
+  Int_t GetPDG () const { return fPDG; }
  protected:
 
   static Int_t IJ( Int_t i, Int_t j ){ 
@@ -216,29 +223,29 @@ class KFParticleBase : public TObject {
 
   static Double_t GetSCorrection( const Double_t Part[], const Double_t XYZ[] );
 
-  void GetMeasurement( const Double_t XYZ[], Double_t m[], Double_t V[] ) const ;
-
-  Int_t  fID;
-  Double_t fP[8];  //  Main particle parameters {X,Y,Z,Px,Py,Pz,E,S[=DecayLength/P]}
-  Double_t fC[36]; //  Low-triangle covariance matrix of fP
-  Int_t    fQ;     //  Particle charge 
-  Int_t    fNDF;   //  Number of degrees of freedom 
-  Double_t fChi2;  //  Chi^2
-
-  Double_t fSFromDecay; //  Distance from decay vertex to current position
+  void  GetMeasurement( const Double_t XYZ[], Double_t m[], Double_t V[] ) const ;
   
-  Bool_t fAtProductionVertex; //  Flag shows that the particle error along
-  //  its trajectory is taken from production vertex    
+  Char_t     fBeg[1];        //!
+  Short_t    fID;
+  Short_t    fParentID;
+  Double32_t fP[8];  //  Main particle parameters {X,Y,Z,Px,Py,Pz,E,S[=DecayLength/P]}
+  Double32_t fC[36]; //  Low-triangle covariance matrix of fP
+  Short_t    fQ;     //  Particle charge 
+  Short_t    fNDF;   //  Number of degrees of freedom 
+  Double32_t fChi2;  //  Chi^2
 
-  Double_t fVtxGuess[3];  //  Guess for the position of the decay vertex 
-                          //  ( used for linearisation of equations )
+  Double32_t fSFromDecay; //  Distance from decay vertex to current position
+  Bool_t     fAtProductionVertex; //!  Flag shows that the particle error along  its trajectory is taken from production vertex    
+
+  Double32_t fVtxGuess[3];  //!  Guess for the position of the decay vertex ( used for linearisation of equations )
   
-  Bool_t fIsLinearized;   //  Flag shows that the guess is present
-  UShort_t      fIdTruth; // MC track id 
-  UShort_t      fQuality; // quality of this information (percentage of hits coming from the above MC track)
-  Int_t         fIdParentVx;
-  
-  ClassDef(KFParticleBase,1)			    
+  Bool_t     fIsLinearized;   //!  Flag shows that the guess is present
+  Short_t    fIdTruth; // MC track id 
+  Short_t    fQuality; // quality of this information (percentage of hits coming from the above MC track)
+  Short_t    fIdParentMcVx; // for track and McTrack for vertex
+  Short_t    fPDG;     // pdg hypothesis
+  Char_t     fEnd[1];        //!
+  ClassDef(KFParticleBase,3)			    
 };
 std::ostream&  operator<<(std::ostream& os, KFParticleBase const & particle);
 #endif 
