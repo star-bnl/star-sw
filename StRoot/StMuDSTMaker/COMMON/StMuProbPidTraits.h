@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuProbPidTraits.h,v 1.7 2012/05/07 14:47:06 fisyak Exp $
+ * $Id: StMuProbPidTraits.h,v 1.8 2013/04/08 18:07:55 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -47,7 +47,7 @@ public:
   void   setdEdxTrackLength(double dedx );     ///< sets the track length in TPC used for dE/dx calculations
   void   setNdf(unsigned int);                 ///< set number of degrees of freedom
   void   setProbability(unsigned int, double); ///< set the probability for particle i
-  void   setLog2dX(Float_t log2dX = 1) {mLog2dX = log2dX;}
+  void   setLog2dX(Float_t Log2dX = 1) {mLog2dX = Log2dX;}
 protected:
   unsigned char mNDF; 
   float mdEdxFit;
@@ -75,7 +75,7 @@ inline void   StMuProbPidTraits::setdEdxFit(double dEdx ) { mdEdxFit = dEdx; }
 inline void   StMuProbPidTraits::setdEdxErrorFit(double dEdx ) { mdEdxErrorFit = dEdx; }
 inline void   StMuProbPidTraits::setdEdxTruncated(double dEdx) { mdEdxTruncated = dEdx; }
 inline void   StMuProbPidTraits::setdEdxErrorTruncated(double dEdx) { mdEdxErrorTruncated = dEdx; }
-inline void   StMuProbPidTraits::setdEdxTrackLength(double dEdxTrackLength) { mdEdxTrackLength = dEdxTrackLength; }
+inline void   StMuProbPidTraits::setdEdxTrackLength(double length) { mdEdxTrackLength = length; }
 inline void   StMuProbPidTraits::setProbability(unsigned int i, double prob) { if (i<__NPARTICLES__) mProbabilities[i]=prob;}
 inline void   StMuProbPidTraits::setNdf(unsigned int i) { mNDF = i; }
 
@@ -86,6 +86,9 @@ inline void   StMuProbPidTraits::setNdf(unsigned int i) { mNDF = i; }
 /***************************************************************************
  *
  * $Log: StMuProbPidTraits.h,v $
+ * Revision 1.8  2013/04/08 18:07:55  fisyak
+ * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
+ *
  * Revision 1.7  2012/05/07 14:47:06  fisyak
  * Add handles for track to fast detector matching
  *

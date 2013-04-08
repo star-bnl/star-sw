@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.55 2012/11/15 22:26:13 sangalin Exp $
+ * $Id: StMuDstMaker.h,v 1.56 2013/04/08 18:07:55 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -15,8 +15,9 @@ using namespace std;
 #include "StMaker.h"
 #include "StChain.h"
 #include "StIOInterFace.h"
-#include "St_DataSetIter.h"
-
+#include "TDataSetIter.h"
+#include "TObjectSet.h"
+#include "TObjArray.h"
 #include "StMuArrays.h"
 
 #include "StMuFilter.h"
@@ -177,7 +178,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.55 2012/11/15 22:26:13 sangalin Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.56 2013/04/08 18:07:55 fisyak Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -295,7 +296,8 @@ virtual   void closeRead();
   void fillBTof(StEvent* ev);
   void fillMtd(StEvent* ev);
   void fillFgt(StEvent* ev);
-
+  void fillKFTracks(TObjArray */* objA */);
+  void fillKFVertices(TObjArray */* objA */);
     void fillEzt(StEvent* ev);
 
   void fillHddr();
@@ -404,6 +406,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.56  2013/04/08 18:07:55  fisyak
+ * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
+ *
  * Revision 1.55  2012/11/15 22:26:13  sangalin
  * Added the FGT. Fixed bugs in array offsets for the MTD.
  *
