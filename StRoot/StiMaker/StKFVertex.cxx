@@ -1,4 +1,4 @@
-// $Id: StKFVertex.cxx,v 2.2 2012/06/11 15:33:41 fisyak Exp $
+// $Id: StKFVertex.cxx,v 2.3 2013/04/08 19:21:41 fisyak Exp $
 #include "StKFVertex.h"
 #include "StKFTrack.h"
 #include "TArrayC.h"
@@ -11,6 +11,7 @@
 #endif
 using namespace std;
 Int_t StKFVertex::_debug = 0;
+Int_t StKFVertex::fTotalNoVertices = 0;
 const Char_t *StKFVertex::GeNames[52] = {
   //   1       2       3      4         5           6       7        8         9          10
   "",
@@ -24,9 +25,7 @@ const Char_t *StKFVertex::GeNames[52] = {
 ClassImp(StKFVertex);
 //________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const StKFVertex& v) {
-  Int_t iWest = v.MultW();
-  Int_t iEast = v.MultE();
-  os << Form(" with %4i tracks Q:%3i W/E = %3i/%3i",v.NoTracks(),v.Charge(),iWest,iEast);
+  os << Form("%3i with %4i tracks Q:%3i", v.ID(),v.NoTracks(),v.Charge());
   for (Int_t i = 0; i < 3; i++) {
     os << Form("%9.3f +/- %5.3f",v.Vertex().GetParameter(i),TMath::Sqrt(v.Vertex().GetCovariance(i,i)));
   }
@@ -80,7 +79,7 @@ void StKFVertex::Fit() {
   for (Int_t i = 0; i < N; i++) {
     const StKFTrack *pTrack = Track(i);
     if (! pTrack) continue;
-    Int_t IdVx = pTrack->Particle().IdParentVx();
+    Int_t IdVx = pTrack->Particle().IdParentMcVx();
     if (IdVx <= 0) continue;
     Int_t J = -1;
     for (Int_t j = 0; j < NC; j++) if (candidates[j].Id == IdVx) {J = j; break;}
@@ -102,11 +101,11 @@ void StKFVertex::Fit() {
 }
 //________________________________________________________________________________
 void StKFVertex::AddTrack(const StKFTrack *track) {
-  Int_t k2 = track->K()%100000;
+  Int_t k2 = track->K();
   Int_t N1 = NoTracks();
   for (Int_t j = 0; j < N1; j++) {// protect from multiple copies of beam track
     StKFTrack*  t1 = Track(j);
-    Int_t k1 = t1->K()%100000;
+    Int_t k1 = t1->K();
     if (k1 == k2) {
       PrintW("AddTrack");
       assert(0);
@@ -150,29 +149,6 @@ StKFTrack*   StKFVertex::Remove(KFParticle *particle)    {
   return 0;
 }
 //________________________________________________________________________________
-Int_t        StKFVertex::MultWE(Int_t k) const {
-  Int_t N = NoTracks();
-  Int_t iWE = 0;
-  for (Int_t i = 0; i < N; i++) {
-    const StKFTrack*  t = Track(i);
-    if (t) {
-      Int_t id = (t->OrigParticle()->GetID()/100000)%10;
-      if (id == k) iWE++;
-    }
-  }
-  return iWE;
-}
-//________________________________________________________________________________
-Int_t StKFVertex::Q() const {
-  Int_t iQ = 0;
-  Int_t N = NoTracks();
-  for (Int_t i = 0; i < N; i++) {
-    const StKFTrack*  t = Track(i);
-    if (t) {iQ += t->OrigParticle()->GetQ();}
-  }
-  return iQ;
-}
-//________________________________________________________________________________
 void StKFVertex::operator +=(StKFVertex &vtx) {
   if (_debug) {
     PrintW("Before Merge 1");
@@ -181,11 +157,11 @@ void StKFVertex::operator +=(StKFVertex &vtx) {
   Int_t N2 = vtx.NoTracks();
   for (Int_t i = N2-1; i >= 0; i--) {
     StKFTrack*  t2  = (StKFTrack* ) vtx.Remove(i); 
-    Int_t k2 = t2->K()%100000;
+    Int_t k2 = t2->K();
     Int_t N1 = NoTracks();
     for (Int_t j = 0; j < N1; j++) {// protect from multiple copies of beam track
       StKFTrack*  t1 = Track(j);
-      Int_t k1 = t1->K()%100000;
+      Int_t k1 = t1->K();
       if (k1 == k2) {SafeDelete(t2); break;}
     }
     if (t2) fKFTracks.AddLast(t2);
@@ -199,7 +175,7 @@ void StKFVertex::operator +=(StKFVertex &vtx) {
 //________________________________________________________________________________
 void StKFVertex::PrintW(Option_t *option) const {
   Int_t N = NoTracks();
-  cout << Form("Vertex %5i with %5i tracks\t",fID,N);
+  cout << Form("Vertex %5i with %5i tracks\t",Vertex().GetID(),N);
   Print(option);
   cout   << Form("     i    k    Weight        W        Z       chi2") << endl;
   for (Int_t i = 0; i < N; i++) {
@@ -216,6 +192,9 @@ void StKFVertex::SetMc(Float_t time, Float_t x, Float_t y, Float_t z, Int_t NoDa
 }
 #undef PrPP
 // $Log: StKFVertex.cxx,v $
+// Revision 2.3  2013/04/08 19:21:41  fisyak
+// Adjust for new KFParticle
+//
 // Revision 2.2  2012/06/11 15:33:41  fisyak
 // std namespace
 //
