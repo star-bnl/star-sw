@@ -415,6 +415,23 @@ Int_t St_TpcAvgCurrentC::ChannelFromSocket(Int_t socket) {
   }
   return channel;
 }
+//________________________________________________________________________________
+Float_t St_TpcAvgCurrentC::AcChargeL(Int_t sector, Int_t channel) {
+  //  static const Double_t RA[2]        = { 154.484, 81.42}; // Outer/ Inner average Radii
+  //  static const Double_t WireLenth[2] = {   3.6e5, 1.6e5}; 
+  // L Inner = 190222, Outer = 347303
+  static Float_t Length[8] = {
+    1307.59, //   Channel 1 
+    1650.57, //   Channel 2 
+    1993.54, //   Channel 3 
+    2974.24, //   Channel 4 
+    3324.59, //   Channel 5 
+    3202.42, //   Channel 6 
+    3545.4 , //   Channel 7 
+    4398.53};//   Channel 8 
+
+  return AcCharge(sector,channel)/Length[channel-1];
+}
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
