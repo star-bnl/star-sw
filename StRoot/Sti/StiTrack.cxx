@@ -18,6 +18,13 @@ StiTrack::StiTrack()
 {
   mId = 0;		
 }
+#include "TDatabasePDG.h"
+#include "TParticlePDG.h"
+Int_t    StiTrack::_pdgId = 211;
+//________________________________________________________________________________
+Double_t StiTrack::getMass() {return TDatabasePDG::Instance()->GetParticle(_pdgId)->Mass();}
+//________________________________________________________________________________
+Int_t StiTrack::geantId() {return TDatabasePDG::Instance()->ConvertPdgToGeant3(_pdgId);}
 
 //______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiTrack& track)

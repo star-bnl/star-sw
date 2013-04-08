@@ -1,10 +1,12 @@
-//StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.134 2013/01/14 22:19:48 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.135 2013/04/08 19:22:25 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.135  2013/04/08 19:22:25  fisyak
+ * Add different mass hypothysis
+ *
  * Revision 2.134  2013/01/14 22:19:48  fisyak
  * Set Bz = 0 for laser tracks
  *
@@ -1191,7 +1193,7 @@ void StiKalmanTrackNode::propagateError()
           ,mFE._cYY,mFE._cZZ,mFE._cEE,mFE._cPP,mFE._cTT) << endm;
     assert(mFE._cYY>0 && mFE._cZZ>0 && mFE._cEE>0 && mFE._cPP>=0 && mFE._cTT>0);
   }
-  assert(fabs(mFE._cXX)<1.e-6);
+  //YF  assert(fabs(mFE._cXX)<1.e-6);
   assert(mFE._cYY*mFE._cZZ-mFE._cZY*mFE._cZY>0);
   mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
   mFE.recov();
@@ -1500,7 +1502,7 @@ static int nCall=0; nCall++;
 #ifdef STI_ERROR_TEST
   testError(mFE.A,0);
 #endif //STI_ERROR_TEST
-  assert(mFE._cXX<1e-8);
+  // yf   assert(mFE._cXX<1e-8);
   double r00,r01,r11;
   r00 = mHrr.hYY + mFE._cYY;
   r01 = mHrr.hZY + mFE._cZY;
@@ -2085,9 +2087,9 @@ void   StiKalmanTrackNode::PrintpT(const Char_t *opt) const {
   //       _ext->mPP 
   //       _ext->mPE
   //       _ext->mMtx
-  Double_t dpTOverpT = 100*TMath::Sqrt(mFE._cPP/(mFP.ptin()*mFP.ptin()));
+  Double_t dpTOverpT = 100*TMath::Sqrt(fitErrs()._cPP/(fitPars().ptin()*fitPars().ptin()));
   if (dpTOverpT > 9999.9) dpTOverpT = 9999.9;
-  comment += ::Form(" %s pT %8.3f+-%6.1f sy %6.4f",opt,getPt(),dpTOverpT,TMath::Sqrt(mFE._cYY));
+  comment += ::Form(" %s pT %8.3f+-%6.1f sy %6.4f",opt,getPt(),dpTOverpT,TMath::Sqrt(fitErrs()._cYY));
 }
 //________________________________________________________________________________
 void StiKalmanTrackNode::PrintStep() {
@@ -2143,6 +2145,8 @@ static const char *HHH = "xyzXYZ";
     printf("\th%c=%g",HHH[i],val);
     if (err) printf("(%6.1g)",err);
   }
+  if (isValid()) printf(" valid");
+  if (getDetector()) {printf(" %s",getDetector()->getName().c_str());}
   printf("\n");
   return 1;
 }    
@@ -2275,4 +2279,37 @@ static const double surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
   }
   return time;
 }
-
+//________________________________________________________________________________
+void StiKalmanTrackNode::getXYZ(Double_t xyzp[6], Double_t CovXyzp[21]) const {
+  //  static const Float_t one = 1;
+  const StiNodePars &pars = fitPars(); 
+  const StiNodeErrs &errs = fitErrs();
+  Float_t alpha = getAlpha();
+  Double_t ca = cos(_alpha);
+  Double_t sa = sin(_alpha);
+  xyzp[0] = ca*pars.x() - sa*pars.y(); 
+  xyzp[1] = sa*pars.x() + ca*pars.y(); 
+  xyzp[2] =  pars.z();
+  Double_t pT = 1./TMath::Abs(pars.ptin());
+  Double_t ce = TMath::Cos(pars.eta()+alpha);
+  Double_t se = TMath::Sin(pars.eta()+alpha);
+  Double_t px = pT*ce;
+  Double_t py = pT*se;
+  Double_t pz = pT*pars.tanl();
+  xyzp[3] = px;
+  xyzp[4] = py;
+  xyzp[5] = pz;
+  Double_t dpTdPti = -pT*pT*TMath::Sign(1.,pars.ptin());
+  Double_t f[36] = {
+    //          x,  y,     z,     eta,               ptin, tanl
+    /*  x */  ca, -sa,     0,       0,                  0,    0, 
+    /*  y */  sa,  ca,     0,       0,                  0,    0, 
+    /*  z */   0,   0,     1,       0,                  0,    0, 
+    /* px */   0,   0,     0,     -py,         dpTdPti*ce,    0, 
+    /* py */   0,   0,     0,      px,         dpTdPti*se,    0,
+    /* pz */   0,   0,     0,       0,dpTdPti*pars.tanl(),   pT};
+  TRMatrix F(6,6,f);
+  TRSymMatrix C(6,errs.A);
+  TRSymMatrix Cov(F,TRArray::kAxSxAT,C);
+  TCL::ucopy(Cov.GetArray(),CovXyzp,21);
+}

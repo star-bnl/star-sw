@@ -60,7 +60,7 @@ Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw
       targetHit = targetNode->getHit();
       Double_t oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
       static Int_t myKount=0;myKount++;
-      if (!pNode && !targetNode->isValid()) continue;
+      if (!pNode && targetDet && !targetNode->isValid()) continue;
       //begin refit at first hit
       status = 0;
       if (pNode) {
@@ -73,7 +73,10 @@ Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw
       }
       else  {
 	if (debug()) {
-	  targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
+	  if (targetDet) 
+	    targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
+	  else 
+	    targetNode->ResetComment(::Form("%30s start refit","Vertex"));
 	  targetNode->PrintpT("S");}
 //        pNode = targetNode;		continue;
         pNode = targetNode;		
