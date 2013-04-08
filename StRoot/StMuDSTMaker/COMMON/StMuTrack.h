@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.41 2012/05/07 14:47:06 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.42 2013/04/08 18:07:55 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -123,7 +123,7 @@ class StMuTrack : public TObject {
   Int_t            qaTruth() const { return mQuality; }
   Int_t           idParentVx() const {return mIdParentVx;}
   void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
-  void         setIdParentVx(Int_t id) {mIdParentVx = id;}
+  void         setIdParentVx(Int_t Id) {mIdParentVx = Id;}
 
 protected:
   Short_t mId;
@@ -236,6 +236,9 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.42  2013/04/08 18:07:55  fisyak
+ * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
+ *
  * Revision 1.41  2012/05/07 14:47:06  fisyak
  * Add handles for track to fast detector matching
  *

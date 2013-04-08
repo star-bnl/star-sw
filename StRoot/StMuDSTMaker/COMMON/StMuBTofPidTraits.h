@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMuBTofPidTraits.h,v 1.2 2009/12/08 23:24:46 fine Exp $
+ * $Id: StMuBTofPidTraits.h,v 1.3 2013/04/08 18:07:54 fisyak Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StMuBTofPidTraits.h,v $
+ * Revision 1.3  2013/04/08 18:07:54  fisyak
+ * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
+ *
  * Revision 1.2  2009/12/08 23:24:46  fine
  * Fix issue  #1748 http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1748
  *
@@ -128,7 +131,7 @@ inline void StMuBTofPidTraits::setZLocal(float z) { mZLocal=z; }
 inline void StMuBTofPidTraits::setThetaLocal(float theta) { mThetaLocal=theta; }
 inline void StMuBTofPidTraits::setTimeOfFlight(float t) { mTimeOfFlight=t; }
 inline void StMuBTofPidTraits::setPathLength(float s) { mPathLength=s; }
-inline void StMuBTofPidTraits::setBeta(float beta) { mBeta=beta; }
+inline void StMuBTofPidTraits::setBeta(float Beta) { mBeta=Beta; }
 inline void StMuBTofPidTraits::setSigmaElectron(float sigma) { mSigmaElectron=sigma; }
 inline void StMuBTofPidTraits::setSigmaPion(float sigma) { mSigmaPion=sigma; }
 inline void StMuBTofPidTraits::setSigmaKaon(float sigma) { mSigmaKaon=sigma; }

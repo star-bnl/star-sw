@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.27 2013/01/08 22:57:33 sangalin Exp $
+ * $Id: StMuArrays.h,v 1.28 2013/04/08 18:07:54 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -28,7 +28,7 @@ enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc,
 /// @enum MCTypes enumeration to to index the mcArrays
 enum MCTypes {MCVertex=0, MCTrack};
 /// @enum enumeration to to index the arrays
-enum muDstTypes {muEvent=0, muPrimaryVertex, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject, muCovGlobTrack, muCovPrimTrack, mupp2pp,muMtd}; 
+enum muDstTypes {muEvent=0, muPrimaryVertex, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject, muCovGlobTrack, muCovPrimTrack, mupp2pp,muMtd, muKFTracks, muKFVertices}; 
 
 /// @enum pmdTypes enumeration to to index the pmdArrays
 enum pmdTypes {muPmdHit=0, muCpvHit, muPmdCluster, muCpvCluster}; 
@@ -47,7 +47,7 @@ enum mtdTypes {muMTDHit=0, muMTDRawHit, muMTDHeader};
 enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd,muEztFpd};
 
 enum NARRAYS {
-__NARRAYS__        =14,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  (add two more for global and primary track covariance matrices)
+__NARRAYS__        =16,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  (add two more for global and primary track covariance matrices)
 #ifndef __NO_STRANGE_MUDST__
 __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClonesArrays  
 #endif
@@ -141,6 +141,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.28  2013/04/08 18:07:54  fisyak
+ * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
+ *
  * Revision 1.27  2013/01/08 22:57:33  sangalin
  * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
  *
