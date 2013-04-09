@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.43 2013/04/09 21:11:58 genevb Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.44 2013/04/09 22:37:56 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -105,7 +105,7 @@ StPPVertexFinder::Init() {
   LOG_INFO << Form("PPV-algo  switches=0x%0x,  following cuts have been activated:",mAlgoSwitches)<<endm;
   //.. set various params 
   mStoreUnqualifiedVertex=5; // extension requested by Akio, October 2008, set to 0 do disable it
-  mBoostEffi=false;          // default prior to 2012 
+  mFitPossWeighting=false;          // default prior to 2012 
 
   //get pointer to Sti toolkit
   mToolkit = StiToolkit::instance();
@@ -183,6 +183,7 @@ StPPVertexFinder::InitRun(int runnumber){
     mMinFitPfrac  = vtxCuts->MinFracOfPossFitPointsOnTrack();
     mMaxZradius   = vtxCuts->DcaZMax();  //+sigTrack, to match tracks to Zvertex
     mMinMatchTr   = vtxCuts->MinTrack();    // required to accept vertex
+    mFitPossWeighting = true;
   }
   mMaxZrange    = 200;  // to accept Z_DCA of a track           
   mDyBtof       = 1.5;  // |dy|<1.5 cm for local position - not used now
@@ -213,8 +214,6 @@ StPPVertexFinder::InitRun(int runnumber){
   bemcList->initRun();
   eemcList->initRun();
   
-  //boostEfficiency();   // for 2012+ testing, should be called by BFC option
-
   if(mBeamLineTracks){
     assert(vertex3D==0); // crash means initRun was called twice - not foreseen,Jan B.
     vertex3D=new Vertex3D;
@@ -240,7 +239,7 @@ StPPVertexFinder::InitRun(int runnumber){
     <<"\n bool    isMC = " << isMC
     <<"\n bool  useCtb = " << mUseCtb
     <<"\n bool useBtof = " << mUseBtof
-    <<"\n bool boostEfficiency = " << mBoostEffi
+    <<"\n bool nFit/nPoss weighting = " << mFitPossWeighting
     <<"\n bool DropPostCrossingTrack = " << mDropPostCrossingTrack
     <<"\n Store # of UnqualifiedVertex = " << mStoreUnqualifiedVertex
     <<"\n Store="<<(mAlgoSwitches & kSwitchOneHighPT) <<
@@ -249,17 +248,6 @@ StPPVertexFinder::InitRun(int runnumber){
     <<"\n"
     <<endm; 
 
-}
-
-//
-// Parameters set for 2012 W Jan/Zilong
-// JL: this can be set via atttributes perhaps?
-//
-void 
-StPPVertexFinder::boostEfficiency(){ 
-  mBoostEffi=true;  
-  mMinFitPfrac  = 0.51; 
-  mMaxTrkDcaRxy = 2.0; 
 }
 
 
@@ -1351,7 +1339,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 
   if(nFit<  mMinFitPfrac  * nPos) return false; // too short fragment of a track
 
-  if( mBoostEffi)
+  if( mFitPossWeighting)
     t.weight*=1.*nFit/nPos;// introduced in 2012 for pp510 to differentiate between global track quality, together with lowering the overall threshold from 0.7 to 0.51, Jan
   
   t.scanNodes(hitPatt,jz0); // if central membrane is crossed, scale weight inside
@@ -1398,6 +1386,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.44  2013/04/09 22:37:56  genevb
+ * Remove boostEfficiency codes: DB usage implemented
+ *
  * Revision 1.43  2013/04/09 21:11:58  genevb
  * Use database table for track selection cuts
  *
