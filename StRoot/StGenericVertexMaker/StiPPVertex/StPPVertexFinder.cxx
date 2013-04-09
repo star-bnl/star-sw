@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.42 2013/04/05 21:00:02 jeromel Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.43 2013/04/09 21:11:58 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -24,7 +24,8 @@
 #include "TrackData.h"
 #include "VertexData.h" 
 #include "Vertex3D.h"
-#include "StGenericVertexMaker/StGenericVertexMaker.h"
+#include "StGenericVertexMaker.h"
+#include "St_VertexCutsC.h"
 
 #include <Sti/StiToolkit.h>
 #include <Sti/StiKalmanTrack.h>
@@ -103,18 +104,6 @@ StPPVertexFinder::Init() {
   assert(mTotEve==0); // can't be called twice
   LOG_INFO << Form("PPV-algo  switches=0x%0x,  following cuts have been activated:",mAlgoSwitches)<<endm;
   //.. set various params 
-  mMaxTrkDcaRxy = 3.0;  // cm 
-  mMinTrkPt     = 0.20; // GeV/c  //was 0.2 in 2005 prod
-  mMinFitPfrac  = 0.70; // nFit /nPossible points on the track, 
-                        // changed for pp510 2012 by Jan in boostEfficiency
-  mMaxZradius   = 3.0;  //+sigTrack, to match tracks to Zvertex
-  mMaxZrange    = 200;  // to accept Z_DCA of a track           
-  mMinMatchTr   = 2;    // required to accept vertex
-  mDyBtof       = 1.5;  // |dy|<1.5 cm for local position - not used now
-  mMinZBtof     = -3.0; //
-  mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0 - dongx              
-  mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
-
   mStoreUnqualifiedVertex=5; // extension requested by Akio, October 2008, set to 0 do disable it
   mBoostEffi=false;          // default prior to 2012 
 
@@ -176,6 +165,31 @@ StPPVertexFinder::InitRun(int runnumber){
       btofGeom->Init(mydb, starHall);
     }
   }
+
+  //.. set various params 
+  if (!isMC && runnumber < 13000000) {
+    // old defaults, pre-Run12
+    // (important if we want to reprocess old data with different cuts!)
+    LOG_INFO << "PPV InitRun() using old, hardwired cuts" << endm;
+    mMaxTrkDcaRxy = 3.0;  // cm 
+    mMinTrkPt     = 0.20; // GeV/c  //was 0.2 in 2005 prod
+    mMinFitPfrac  = 0.7;  // nFit /nPossible points on the track
+    mMaxZradius   = 3.0;  //+sigTrack, to match tracks to Zvertex
+    mMinMatchTr   = 2;    // required to accept vertex
+  } else {
+    St_VertexCutsC* vtxCuts = St_VertexCutsC::instance();
+    mMaxTrkDcaRxy = vtxCuts->RImpactMax();
+    mMinTrkPt     = vtxCuts->MinTrackPt();
+    mMinFitPfrac  = vtxCuts->MinFracOfPossFitPointsOnTrack();
+    mMaxZradius   = vtxCuts->DcaZMax();  //+sigTrack, to match tracks to Zvertex
+    mMinMatchTr   = vtxCuts->MinTrack();    // required to accept vertex
+  }
+  mMaxZrange    = 200;  // to accept Z_DCA of a track           
+  mDyBtof       = 1.5;  // |dy|<1.5 cm for local position - not used now
+  mMinZBtof     = -3.0; //
+  mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0 - dongx              
+  mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
+
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
   if(isMC) {
     LOG_INFO << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
@@ -212,6 +226,7 @@ StPPVertexFinder::InitRun(int runnumber){
   //gMessMgr->Message("","I") 
   LOG_INFO 
     << "PPV::cuts "
+    <<"\n MinNumberOfFitPointsOnTrack = unused"
     <<"\n MinFitPfrac=nFit/nPos  = " << mMinFitPfrac 
     <<"\n MaxTrkDcaRxy/cm= " << mMaxTrkDcaRxy
     <<"\n MinTrkPt GeV/c = " << mMinTrkPt
@@ -1383,6 +1398,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.43  2013/04/09 21:11:58  genevb
+ * Use database table for track selection cuts
+ *
  * Revision 1.42  2013/04/05 21:00:02  jeromel
  * Implemented and merged back to source the boostEfficiency (i.e. change of
  * nFit /nPossible points on the track fract to consider). No DB imp yet.
