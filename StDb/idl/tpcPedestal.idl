@@ -1,6 +1,6 @@
 /*    tpcPedestal.idl
 *
-*  Table: tpcPedestal per sector
+*  Table: tpcPedestal
 *
 *       description:
 */ 
@@ -8,6 +8,6 @@
 
 struct tpcPedestal { 
 
-   float  Pedestal[45][182][512];   /*  Pedestals [row:1,100][pad:1,182][timebucket:0,511] */
-  /*   float  Rms[100][182][512];    */    /*  Rms       -"-  */
+   float  Pedestal[100][182];   /*  Pedestals per */
+   float  Rms[100][182];        /*  Rms per */
  };  
