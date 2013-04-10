@@ -9,10 +9,10 @@ class St_tpcPedestalC : public TChair {
   static St_tpcPedestalC* 	instance();
   tpcPedestal_st 	*Struct(Int_t i = 0) 	{return ((St_tpcPedestal*) Table())->GetTable()+i;}
   UInt_t     	getNumRows()                	{return GetNRows();}
-  Float_t 	Pedestal(Int_t sector = 1, Int_t row = 1, Int_t pad = 1, Int_t timebucket = 0) 
-    {return (row >= 1 && row <= 45) ? Struct(sector-1)->Pedestal[row-1][pad-1][timebucket] : 0 ;}
-  /*  Float_t& 	Rms(Int_t sector = 1, Int_t row = 1, Int_t pad = 1, Int_t timebucket = 0)  
-      {return Struct(sector-1)->Rms[row-1][pad-1][timebucket];} */
+  Float_t& 	Pedestal(Int_t sector = 1, Int_t row = 1, Int_t pad = 1) 
+  {return Struct(sector-1)->Pedestal[row-1][pad-1];}
+  Float_t& 	Rms(Int_t sector = 1, Int_t row = 1, Int_t pad = 1) 
+  {return Struct(sector-1)->Rms[row-1][pad-1];}
  protected:
   St_tpcPedestalC(St_tpcPedestal *table=0) : TChair(table) {}
   virtual ~St_tpcPedestalC() {fgInstance = 0;}
