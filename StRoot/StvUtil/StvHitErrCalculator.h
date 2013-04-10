@@ -25,7 +25,7 @@ char mBeg[1];
 int mNPar;			//Size of mPar
 int mFailed;
 double mPar[kMaxPars];		// mPar
-double mTG[3];		// track direction in global system
+double mTG[3][3];		// track direction in global system
 double mTL[3];		// track direction in local hit plane system
 double mCp ,mSp ,mCl ,mSl;
 double mCp2,mSp2,mCl2,mSl2;
