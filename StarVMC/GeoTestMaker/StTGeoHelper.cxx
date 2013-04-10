@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.27 2013/04/04 21:28:04 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.28 2013/04/10 03:49:30 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -27,8 +27,51 @@
 #include "TGeoTube.h"
 #include "TGeoMatrix.h"
 #include "TCernLib.h"
+#include "TVector3.h"
+
 #include "StTGeoHelper.h"
 #include "StMultiKeyMap.h"
+
+class myTVector3 : public TVector3 {
+
+public:
+
+
+   myTVector3(Double_t x = 0.0, Double_t y = 0.0, Double_t z = 0.0):TVector3(x,y,z){;}
+   // The constructor.
+
+   myTVector3(const Double_t *d):TVector3(d){;}
+   myTVector3(const Float_t *f):TVector3(f){;}
+   				// Constructors from an array
+
+   operator TVector3 &() {return *(TVector3*)this;}
+   operator const TVector3 &() const {return *(TVector3*)this;}
+   				// The copy constructor.
+   myTVector3(const TVector3 &v):TVector3(v){;}
+   				// Assignment
+   myTVector3 & operator = (const   TVector3 &v){ *((TVector3*)this)=v; return *this;}
+   myTVector3 & operator = (const myTVector3 &v){ *((TVector3*)this)=v; return *this;}
+
+   myTVector3 & operator = (const  double *d){ SetXYZ(d[0],d[1],d[2]); return *this;}
+   myTVector3 & operator = (const   float *f){ SetXYZ(f[0],f[1],f[2]); return *this;}
+
+   void Set(const Double_t *d){SetXYZ(d[0],d[1],d[2]);}
+   void Set(const Float_t  *f){SetXYZ(f[0],f[1],f[2]);}
+   void Get(      Double_t *d){d[0]=X();d[1]=Y();d[2]=Z();}
+   void Get(      Float_t  *f){f[0]=X();f[1]=Y();f[2]=Z();}
+
+
+
+const double* GetArrD() const { fD[0]=X();fD[0]=Y();fD[0]=Z(); return fD;}
+const  float* GetArrF() const { fF[0]=X();fF[0]=Y();fF[0]=Z(); return fF;}
+
+protected:
+mutable double fD[3];
+mutable float  fF[3];
+
+};
+
+#define DOT(a,b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 
 static StTGeoHelper *gStTGeoHelper=0;
 typedef std::map<const TGeoVolume*,int> myVoluMap ;
@@ -484,32 +527,34 @@ int StTGeoHelper::MayHitPlane(const TGeoVolume *volu)  const
   const TGeoShape* sh=volu->GetShape() ;
   if (!sh) 			return 0;
   if (!sh->IsValidBox()) 	return 0;     
-  
+  int myKode=0;
   int kase = sh->IsCylType() ;
   switch (kase) {
     case 0://Plane case
     {
-     const TGeoBBox *bb = (const TGeoBBox*)sh;
-     double dd[3]={bb->GetDX(),bb->GetDY(),bb->GetDZ()};
-     int jMin = 0;
-     for (int j=1;j<3;j++) { if (dd[j]<dd[jMin]) jMin=j;}
-     for (int j=0;j<3;j++) { if (j==jMin) continue;  if (dd[j]<kHow*dd[jMin]) return 0;} 
-     return jMin+1;
+      const TGeoBBox *bb = (const TGeoBBox*)sh;
+      double dd[3]={bb->GetDX(),bb->GetDY(),bb->GetDZ()};
+      int jMin =0,jMax=0,jMed=0;
+      for (int j=1;j<3;j++) { if (dd[j]<dd[jMin]) jMin=j;}
+      for (int j=1;j<3;j++) { if (dd[j]>dd[jMax]) jMax=j;} 
+      for (int j=1;j<3;j++) { if (j==jMin) continue;if (j==jMax) continue;jMed=j;}
+      myKode = (jMin+1)+ 10*(jMed+1) + 100*(jMax+1);
+      if (dd[jMin]*kHow>dd[jMax]) myKode = 0;
+      break;
     }
     case 1: //Tube case
-     {
-       double par[9];
-       sh->GetBoundingCylinder(par);
-       const TGeoBBox *bb = (const TGeoBBox*)sh;
-       par[4] = bb->GetDZ();
-       par[0] = sqrt(par[0]);
-       par[1] = sqrt(par[1]);
-       if ((par[1]-par[0])*kHow <      (2*par[4])) return 4;
-       if ((par[1]-par[0])      > kHow*(2*par[4])) return 3;
-       return 0;
+    {
+      double par[9];
+      sh->GetBoundingCylinder(par);
+      const TGeoBBox *bb = (const TGeoBBox*)sh;
+      par[4] = bb->GetDZ();
+      par[0] = sqrt(par[0]);
+      par[1] = sqrt(par[1]);
+      if ((par[1]-par[0])*kHow <      (2*par[4])) myKode = 123;			//thin walls
+      if ((par[1]-par[0])      > kHow*(2*par[4])) myKode = 4;		//disk
     }
   }
-  return 0;
+  return myKode;
 }
 //_____________________________________________________________________________
 StHitPlaneInfo *StTGeoHelper::MakeHitPlaneInfo(const StTGeoIter &it) 
@@ -534,25 +579,26 @@ static int nCall=0; nCall++;
      switch(kase) {
 
        case 0: //no extention
-       case 1: //basic extention
+       case 1: {//basic extention
 	 bhp = new StHitPlaneInfo(iv);
 	 if (ext) *bhp = *ext;
 	 bhp->SetHitPlane();
          bhp->SetAxis(ax);
-         if (ax<=3) {
-static const float myDir[3][3][3]={{{1,0,0},{ 0,1,0},{ 0,0,1}} 
-                                  ,{{0,1,0},{-1,0,0},{ 0,0,1}}
-                                  ,{{0,0,1},{ 0,1,0},{-1,0,0}}};
-           TCL::ucopy(myDir[ax-1][0],bhp->fDir[0],3*3);
+         int ax1 = (ax%10);
+         if ((ax1)<=3) {
+           myTVector3 myDir[3];
+           myDir[0][((ax    )%10)-1]=1;
+           myDir[2][((ax/100)%10)-1]=1;
+           myDir[1] = myDir[2].Cross(myDir[0]);
+           for (int i=0;i<3;i++) {myDir[i].Get(bhp->fDir[i]);}
 	   TCL::ucopy(bb->GetOrigin(),bhp->fOrg,3);
-           assert(bhp->fDir[0][0]+bhp->fDir[0][1]+bhp->fDir[0][2]>0.99);
-	 }else if(ax==4) {
+	 }else if(ax1==4) {
            for (int jk=0;jk<3;jk++){bhp->fDir[jk][jk]=1;}
 
          }else { assert(0 && "Wrong axis number"); }
 
 	 SetInfo(bhp);
-	 break;
+	 break;}
 
        case 2: //HitPlane  extention
 	 bhp = (StHitPlaneInfo*)ext; 
@@ -571,7 +617,9 @@ void StHitPlane::SetLayer()
  const float *pnt = GetPnt();
  double myPnd[3]={pnt[0],pnt[1],pnt[2]};
  const float *dir = GetDir(pnt)[0];
- double myDir[3] = {dir[0],dir[1],dir[2]};
+ double myDir[3] = {-dir[0],-dir[1],-dir[2]};
+ assert(DOT(myPnd,myDir)<0);
+
  fNex = StTGeoHelper::Look(50,myPnd,myDir);
  assert(fNex>1e-2);
 }
@@ -942,7 +990,6 @@ StHitPlaneInfo::StHitPlaneInfo(int volId) : StVoluInfo(volId)
 //_____________________________________________________________________________
 StHitPlane *StHitPlaneInfo::MakeHitPlane(const StTGeoIter &it)
 {
-static const double kCos45 = 1./sqrt(2.);
 static int nCall=0; nCall++;
   const TGeoVolume *volu = *it;
   const TGeoShape  *sh = volu->GetShape();
@@ -951,25 +998,38 @@ static int nCall=0; nCall++;
   TString path(it.GetPath());
   hp= (StHitPlane *)GetHitPlane(path);
   if (hp) return 0;
-  if (fAxi<=3) {
+  if ((fAxi%10)<=3) {
     hp = new StHitPlane(path,volu->GetNumber());
-  } else if (fAxi==4) {
+  } else if ((fAxi%10)==4) {
     StHitTube *ht = new StHitTube(path,volu->GetNumber()); hp = ht;
   }
   fHitPlanePathMap[path] = hp;
   it.LocalToMaster(fOrg, hp->fOrg);
-  for (int i=0;i<3;i++) {it.LocalToMasterVect(fDir[i], hp->fDir[i]);}
-  assert(fabs(hp->fDir[0][0])+fabs(hp->fDir[0][1])+fabs(hp->fDir[0][2])>0.5);
+  myTVector3 Vd[3],Vo(hp->fOrg);
+  int upd = 0;
+  for (int i=0;i<3;i++) {
+    it.LocalToMasterVect(fDir[i], hp->fDir[i]); Vd[i]=hp->fDir[i];}
+// Check signature and try to fix
+    for(int i=0;i<3;i++){Vd[i]= hp->fDir[i];}
+    for(int iTry=0;iTry<2;iTry++) {
+      int iTst=0;
+      for(int i=0;i<3;i++){
+	int j = (i+1)%3,k = (j+1)%3;
+	myTVector3 res = Vd[i].Cross(Vd[j]);
+	iTst+= ((Vd[k]-res).Mag()>1e-4);
+      }
+      if (!iTst) break;
+      assert(!iTry);
+      upd++; Vd[1]*=(-1.);
+    }
 
-  if (fabs(hp->fDir[2][2])<kCos45 && fabs(hp->fDir[1][2])>kCos45) {
-//		Rotate around X to keep local Zaxis close to global one 
-    double qq[3];
-    TCL::ucopy(hp->fDir[2],qq,3);
-    TCL::ucopy(hp->fDir[1],hp->fDir[2],3);
-    TCL::ucopy(qq,hp->fDir[1],3);
-    if (hp->fDir[2][2]<0) TCL::vcopyn(hp->fDir[2],hp->fDir[2],3);
-    else                  TCL::vcopyn(hp->fDir[1],hp->fDir[1],3);
-  }  
+  if (Vd[0].Dot(Vo)<0) 	{upd++; 	// Rotate around local Z
+    for(int i=0;i<2;i++){Vd[i].Rotate(M_PI,Vd[2]);}}
+
+  if (Vd[2][2]<0) 		{upd++; 	// Rotate around local X
+    for(int i=1;i<3;i++)	{Vd[i].Rotate(M_PI,Vd[0]);}}
+  if (upd) 			{  		// Update
+    for(int i=0;i<3;i++){Vd[i].Get(hp->fDir[i]);}}
   
   if (ht) {
     double par[9];float pnt[3]={0};
@@ -982,6 +1042,15 @@ static int nCall=0; nCall++;
     ht->fRmed = rMed;
   }
   hp->SetLayer();
+  
+// Check
+    for(int i=0;i<3;i++){for(int j=0;j<3;j++) {Vd[i][j]= hp->fDir[i][j];}}
+    for(int i=0;i<3;i++){
+      int j = (i+1)%3,k = (j+1)%3;
+      myTVector3 res = Vd[i].Cross(Vd[j]);
+      assert( (Vd[k]-res).Mag()<1e-4);
+    }
+
   return hp;
 }
 //_____________________________________________________________________________
