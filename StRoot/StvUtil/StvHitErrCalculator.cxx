@@ -4,11 +4,12 @@
 #include <assert.h>
 #include "TCernLib.h"
 #include "StvHitErrCalculator.h"
+#include "StvUtil/StvDebug.h"
 #include <map>
 #include <string>
 
 static std::map<std::string,StvHitErrCalculator *> calcMap;
-static const double kMinCos = 0.1;
+static const double kMinCos = 0.01;
 static const double kMaxSin  = (1-kMinCos)*(1+kMinCos);
 
 
@@ -55,8 +56,23 @@ void StvHitErrCalculator::SetTrack(const float tkDir[3])
 //______________________________________________________________________________
 void StvHitErrCalculator::SetTrack(const double tkDir[3])
 {  
-  double nor = sqrt(tkDir[0]*tkDir[0]+tkDir[1]*tkDir[1]+tkDir[2]*tkDir[2]);
-  TCL::vscale(tkDir,1./nor,mTG,3);
+  double nor = (tkDir[0]*tkDir[0]+tkDir[1]*tkDir[1]+tkDir[2]*tkDir[2]);
+  nor = (fabs(nor-1)< 1e-2)? (nor+1)*0.5 : sqrt(nor);
+  TCL::vscale(tkDir,1./nor,mTG[0],3);
+  
+  nor = (1.-mTG[0][2]*mTG[0][2]);
+  if (nor <1e-6) { 
+    mTG[1][0]=1; mTG[1][1]=0; mTG[1][2]=0;
+    mTG[2][0]=0; mTG[2][1]=1; mTG[2][2]=0;
+  } else {
+    nor = sqrt(nor);
+    mTG[1][0] = -mTG[0][1]/nor; mTG[1][1] = mTG[0][0]/nor;mTG[1][2] = 0;
+
+    mTG[2][0] = /*mTG[0][1]*mTG[1][2]*/-mTG[1][1]*mTG[0][2]  ;
+    mTG[2][1] =   mTG[0][2]*mTG[1][0]/*-mTG[1][2]*mTG[0][0]*/;
+    mTG[2][2] =   mTG[0][0]*mTG[1][1]  -mTG[1][0]*mTG[0][1]  ;
+  }
+
 }
 //______________________________________________________________________________
 void StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
@@ -89,7 +105,7 @@ static const double c45 = cos(3.14/180*45);
     return;
   }
   for (int j=0;j<3;j++) {
-    mTL[j] = (hiDir[j][0]*mTG[0]+hiDir[j][1]*mTG[1]+hiDir[j][2]*mTG[2]);}
+    mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);}
 
 //		mTL = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
   mSl = mTL[2],mCl2 = ((1-mSl)*(1+mSl));
@@ -104,6 +120,12 @@ static const double c45 = cos(3.14/180*45);
     mSp = (mSp<0)? -kMaxSin:kMaxSin; mFailed = 2;
   }
   mSp2 = mSp*mSp; mCp2 = mCp*mCp; mSl2=mSl*mSl;
+
+  for (int i=0;i<2;i++) {for (int j=0;j<2;j++) { double s = 0;
+    for (int k=0;k<3;k++) {s+=mTG[i+1][k]*hiDir[j+1][k];}
+    mTT[i][j] = s;}};
+  if (fabs(mCp)<0.1) StvDebug::Break(-1);
+
 }
 //______________________________________________________________________________
 void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
@@ -111,12 +133,66 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
 /// Calculate hit error matrix in DCA  system. In this system
 /// track is along x axis, Y axis comes thru hit point 
    double detHitErr[3];
+   mCp2 = -1; 			//To test of calling CalcLocals
    CalcDetErrs(hiPos,hiDir,detHitErr);
-   CalcLocals(hiDir);
+   if (mCp2> -1) ;CalcLocals(hiDir);
 
-   double tt[2][2]= {{mCp,0},{-mSl*mSp,mCl}};
-   memcpy(mTT[0],tt[0],sizeof(mTT));
+   double Phi = atan2(hiPos[1],hiPos[0]);
+   Phi =  (int(fmod((Phi/M_PI*180)+15,30)))*30./180.*M_PI;
+   
+
+   
+   double rxy  = cos(Phi)*hiPos[0]+sin(Phi)*hiPos[1];
+   double psid = atan2(mSp,mCp)/M_PI*180;
+   double lamd = atan2(mSl,mCl)/M_PI*180;
+   double cros = acos(mCp*mCl)/M_PI*180;
+   if (fabs(psid) <90 ) { //ignore seed hit errs calculation
+   if (rxy<123) {//inner
+     StvDebug::Count("InnYYdet",          sqrt(detHitErr[0]));
+     StvDebug::Count("InnYYdet:Psi",psid, sqrt(detHitErr[0]));
+
+     StvDebug::Count("InnZZdet",          sqrt(detHitErr[2]));
+     StvDebug::Count("InnZZdet:Lam",lamd, sqrt(detHitErr[2]));
+
+     StvDebug::Count("InnZZdet:Z"  ,hiPos[2], sqrt(detHitErr[2]));
+     StvDebug::Count("InnYYdet:Z"  ,hiPos[2], sqrt(detHitErr[0]));
+   } else {
+     StvDebug::Count("OutYYdet",          sqrt(detHitErr[0]));
+     StvDebug::Count("OutYYdet:Psi",psid, sqrt(detHitErr[0]));
+
+     StvDebug::Count("OutZZdet",          sqrt(detHitErr[2]));
+     StvDebug::Count("OutZZdet:Lam",lamd, sqrt(detHitErr[2]));
+
+     StvDebug::Count("OutZZdet:Z"  ,hiPos[2], sqrt(detHitErr[2]));
+     StvDebug::Count("OutYYdet:Z"  ,hiPos[2], sqrt(detHitErr[0]));
+   } }
    TCL::trasat(mTT[0],detHitErr,hRr,2,2); 
+   if (fabs(psid) <90 ) { //ignore seed hit errs calculation
+   if (rxy<123) {//inner
+     StvDebug::Count("InnYYdca",          sqrt(hRr[0]));
+     StvDebug::Count("InnYYdca:Psi",psid, sqrt(hRr[0]));
+
+     StvDebug::Count("InnZZdca",          sqrt(hRr[2]));
+     StvDebug::Count("InnZZdca:Lam",lamd, sqrt(hRr[2]));
+
+     StvDebug::Count("InnZZdca:Z",hiPos[2], sqrt(hRr[2]));
+     StvDebug::Count("InnYYdca:Z",hiPos[2], sqrt(hRr[0]));
+
+     StvDebug::Count("InnYZdca"           ,hRr[1]/sqrt(hRr[0]*hRr[2]));
+     StvDebug::Count("InnYZdca:Cross",cros,hRr[1]/sqrt(hRr[0]*hRr[2]));
+   } else {
+     StvDebug::Count("OutYYdca",          sqrt(hRr[0]));
+     StvDebug::Count("OutYYdca:Psi",psid, sqrt(hRr[0]));
+
+     StvDebug::Count("OutZZdca",          sqrt(hRr[2]));
+     StvDebug::Count("OutZZdca:Lam",lamd, sqrt(hRr[2]));
+
+     StvDebug::Count("OutZZdca:Z",hiPos[2], sqrt(hRr[2]));
+     StvDebug::Count("OutYYdca:Z",hiPos[2], sqrt(hRr[0]));
+
+     StvDebug::Count("OutYZdca"           ,hRr[1]/sqrt(hRr[0]*hRr[2]));
+     StvDebug::Count("OutYZdca:Cross",cros,hRr[1]/sqrt(hRr[0]*hRr[2]));
+   } }
 } 
 //______________________________________________________________________________
 double StvHitErrCalculator::Trace(const float*) 
@@ -160,8 +236,9 @@ void StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[
       if(!mDD[ip][ig]) continue;
       hRr[ig]+=mDD[ip][ig]*mPar[ip];
   } }
+
   if (hRr[0]>100) hRr[0]=100;
-  if (hRr[1]>100) hRr[1]=100;
+  if (hRr[2]>100) hRr[1]=100;
 
 }  
 //______________________________________________________________________________
