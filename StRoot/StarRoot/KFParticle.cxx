@@ -23,6 +23,7 @@
 #include "MVertex.h"
 ClassImp(KFParticle);
 
+
 Double_t KFParticle::fgBz = -5.;  //* Bz compoment of the magnetic field
 
 void KFParticle::Create( const Double_t Param[], const Double_t Cov[], Int_t Charge, Int_t PID )
@@ -44,7 +45,7 @@ void KFParticle::Create( const Double_t Param[], const Double_t Cov[], Int_t Cha
   TParticlePDG* particlePDG = TDatabasePDG::Instance()->GetParticle(PID);
   Double_t mass = (particlePDG) ? particlePDG->Mass() :0.13957;
   
-  KFParticleBase::Initialize( Param, C, Charge, mass, PID );
+  KFParticleBase::Initialize( Param, C, Charge, mass );
 }
 
 KFParticle::KFParticle( const MTrack &track, Int_t PID )
