@@ -56,7 +56,9 @@ double StvHit::err2() const
 {
   return ((StvHitErrCalculator*)(mDetector->GetHitErrCalc()))->Trace(mGlo);
 }
-
+//_____________________________________________________________________________
+int StvHit::detectorId() const 
+{ return (int)detector()->GetDetId(); }
 //_____________________________________________________________________________
 void StvVertex::set(const float *x,const float matrix[6])
 {
