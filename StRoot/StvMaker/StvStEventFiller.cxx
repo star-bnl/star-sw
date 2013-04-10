@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.25 2013/03/20 20:52:07 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.26 2013/04/10 03:37:25 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.26  2013/04/10 03:37:25  perev
+ * account non Tpc hits with waight =2
+ *
  * Revision 1.25  2013/03/20 20:52:07  perev
  * Remove StuTopTopologyMap...
  *
@@ -1232,12 +1235,15 @@ bool StvStEventFiller::accept(const StvTrack* track)
 {
 //  int nPossiblePoints = track->getMaxPointCount(0);
 //  int nMeasuredPoints = track->getPointCount   (0);
-    int nFittedPoints   = track->GetNHits();
-    if (nFittedPoints  <  5 )				return 0;
-    if(track->GetLength()<=0) 				return 0; 
-    // insert other filters for riff-raff we don't want in StEvent here.
-    
+  int n=0;
+  for (StvNodeConstIter it = track->begin(); it !=track->end();++it) {
+    const StvNode *node = *it; 
+    if (!node->IsFitted(2)) 	continue;    
+    if (node->GetDetId()==kTpcId) { n++;} else {n+=2;}
 
+  }
+    if (n  <  5 )		return 0;
+    if(track->GetLength()<=0) 	return 0; 
     return 1;
 }
 //_____________________________________________________________________________
