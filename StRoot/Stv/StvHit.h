@@ -68,6 +68,7 @@ public:
     ///Return a const pointer to the StHitPlane object from which the hit
     ///arose.
     const StHitPlane* detector() const {return mDetector;}
+                  int detectorId() const ;
     ///Return a const pointer to the StHit object corresponding to this StvHit
     ///instance
     //const StHit* stHit() const 
