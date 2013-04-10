@@ -162,7 +162,7 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 	if (iFailed ) nErr+=1; 			//Fit is bad yet
 	if (myXi2> kons->mXi2Hit) nErr+=10; //Fit is bad yet
         if ( myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
-            if (--nFitTotal <5) 			return 1;
+            if (--nFitTotal <3) 			return 1;
             node->SetHit(0); hit = 0; nFitLeft--;
 //		No hit anymore. Fit = Prediction		
             node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
