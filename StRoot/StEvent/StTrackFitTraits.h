@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.17 2013/04/05 15:11:33 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.18 2013/04/10 19:15:53 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -41,8 +41,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
- * Revision 2.17  2013/04/05 15:11:33  ullrich
- * Changes due to the addition of StTrackMassFit (Yuri)
+ * Revision 2.18  2013/04/10 19:15:53  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  *
  * Revision 2.16  2012/04/27 01:45:12  perev
  * Logic for total numbers of fit points changed
@@ -102,7 +102,6 @@
 #include "StObject.h"
 #include "StEnumerations.h"
 #include "StMatrixF.hh"
-#include "StThreeVectorF.hh"
 #include "TArrayF.h"
 
 class StParticleDefinition;
@@ -110,33 +109,26 @@ class StParticleDefinition;
 class StTrackFitTraits : public StObject {
 public:
     StTrackFitTraits();
-    StTrackFitTraits(UShort_t, UShort_t, Float_t[2], Float_t[15]);
-    StTrackFitTraits(UShort_t, UShort_t, Float_t[2], TArrayF&);
+    StTrackFitTraits(unsigned short, unsigned short, float[2], float[15]);
     // StTrackFitTraits(const StTrackFitTraits&);            use default
     // StTrackFitTraits& operator=(const StTrackFitTraits&); use default
     virtual ~StTrackFitTraits();
 
-    UShort_t               numberOfFitPoints() const;
-    UShort_t               numberOfFitPoints(StDetectorId) const;
+    unsigned short         numberOfFitPoints() const;
+    unsigned short         numberOfFitPoints(StDetectorId) const;
     StParticleDefinition*  pidHypothesis() const;
     StMatrixF              covariantMatrix() const;
     const Float_t*         covariance() const {return mCovariantMatrix.GetArray();}
-    const TArrayF&         covarianceMatrixF() const {return *&mCovariantMatrix;}
-    Double_t               chi2(UInt_t = 0) const;
+    double                 chi2(unsigned int = 0) const;
     bool                   primaryVertexUsedInFit() const;
-    UShort_t               geantId() const {return mPidHypothesis;}
+
     void                   clearCovariantMatrix();
     void                   setNumberOfFitPoints(unsigned char n, StDetectorId id=kUnknownId);
     void                   setPrimaryVertexUsedInFit(bool);
     
-    void                   setPidHypothesis(UShort_t);
-    void                   setChi2(Float_t, UInt_t = 0);
-    void                   setCovariantMatrix(Float_t[15]);
-    void                   setCovariantMatrix(TArrayF &cov);
-    Bool_t                 check() const;
-    StThreeVectorF         momentum();
-    StThreeVectorF         momentumErrors();
-    StMatrixF              momentumCovariance();
+    void                   setPidHypothesis(unsigned short);
+    void                   setChi2(float, unsigned int = 0);
+    void                   setCovariantMatrix(float[15]);
     
 protected:
     UShort_t mPidHypothesis;       // GeantId
@@ -152,6 +144,6 @@ protected:
     Float_t  mChi2[2];
     TArrayF  mCovariantMatrix;
     
-    ClassDef(StTrackFitTraits,8) 
+    ClassDef(StTrackFitTraits,7) 
 };
 #endif
