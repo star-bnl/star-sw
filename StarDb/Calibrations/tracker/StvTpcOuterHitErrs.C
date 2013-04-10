@@ -9,13 +9,13 @@ StvHitErrs_st row;
 St_StvHitErrs *tableSet = new St_StvHitErrs("StvTpcOuterHitErrs",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.yErr	 = 0.003051983; // Intrinsic resolution, padrow or Y direction		;
-    row.zErr	 = 0.006847441; // Intrinsic resolution, z direction			;
-    row.yDiff	 = 0.0002904323; // Diffusion in XY direction				;
+    row.yErr	 = 0.003025857; // Intrinsic resolution, padrow or Y direction		;
+    row.zErr	 = 0.006877033; // Intrinsic resolution, z direction			;
+    row.yDiff	 = 0.0003152263; // Diffusion in XY direction				;
     row.zDiff	 =      1e-08; // Diffusion in Z direction				;
-    row.yThkDet	 =  0.8227245; // Effective detector thickness**2 for Y err 		;
-    row.zThkDet	 =  0.6529184; // Effective detector thickness**2 for Z err		;
-    row.zAB2	 = 5.11027e-06; // Constant member in Z direction (a*b)**2		;
+    row.yThkDet	 =  0.8378609; // Effective detector thickness**2 for Y err 		;
+    row.zThkDet	 =  0.6543077; // Effective detector thickness**2 for Z err		;
+    row.zAB2	 = 5.127968e-06; // Constant member in Z direction (a*b)**2		;
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
