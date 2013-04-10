@@ -49,6 +49,7 @@ int StvDebug::Break(double x,double y,double z)
 class TH2Hack: public TH2F
 {
 public: 
+enum {kBUFF=10000};
 TH2Hack(const char *key);
 int Fill(double x,double y);
 double GetEntries() const;
@@ -59,7 +60,7 @@ double mXLow;
 double mXUpp;
 double mYLow;
 double mYUpp;
-double buf[1000][2];
+double buf[kBUFF][2];
 };
 
 //______________________________________________________________________________ 
@@ -76,29 +77,35 @@ mYUpp = -3e33;
 int TH2Hack::Fill(double x,double y)
 {
  mEnt++;
- if (mEnt<1001) 	{
+ if (mEnt<kBUFF+1) 	{
    if (mXLow>x) mXLow=x;
    if (mYLow>y) mYLow=y;
    if (mXUpp<x) mXUpp=x;
    if (mYUpp<y) mYUpp=y;
    buf[mEnt-1][0]=x; buf[mEnt-1][1]=y; 
    return 0;
- } else if (mEnt==1001) 	{Save();}
+ } else if (mEnt==kBUFF+1) 	{Save();}
  return TH2F::Fill(x,y);
 }
 //______________________________________________________________________________ 
 void TH2Hack::Save()
 {
+  enum {kMORE=2};
   if(TH2F::GetEntries()) return;
-  GetXaxis()->Set(100,mXLow,mXUpp);
-  GetYaxis()->Set(100,mYLow,mYUpp);
+  double xlow = 0.5*(mXLow+mXUpp) -  0.5*(mXUpp-mXLow)*kMORE;
+  double xupp = 0.5*(mXLow+mXUpp) +  0.5*(mXUpp-mXLow)*kMORE;
+  double ylow = 0.5*(mYLow+mYUpp) -  0.5*(mYUpp-mYLow)*kMORE;
+  double yupp = 0.5*(mYLow+mYUpp) +  0.5*(mYUpp-mYLow)*kMORE;
+
+  GetXaxis()->Set(100,xlow,xupp);
+  GetYaxis()->Set(100,ylow,yupp);
   for (int l=0;l<mEnt;l++) {TH2F::Fill(buf[l][0],buf[l][1]);}
-  mEnt=1002;
+  mEnt=kBUFF+2;
 }
 //______________________________________________________________________________ 
 double TH2Hack::GetEntries() const
 {
-  if (mEnt<=1000) ((TH2Hack*)this)->Save();
+  if (mEnt<=kBUFF) ((TH2Hack*)this)->Save();
   return TH2F::GetEntries();
 }
 //______________________________________________________________________________ 
