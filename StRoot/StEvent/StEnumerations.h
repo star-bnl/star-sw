@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.51 2013/04/05 15:11:33 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.52 2013/04/10 19:15:52 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,8 +16,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.51  2013/04/05 15:11:33  ullrich
- * Changes due to the addition of StTrackMassFit (Yuri)
+ * Revision 2.52  2013/04/10 19:15:52  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  *
  * Revision 2.50  2013/01/15 23:18:12  fisyak
  * Add more bits for track quality matching to EMC
@@ -244,7 +244,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
 /*!
  * \enum StTrackType
  */
-enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary, massFit, massFitAtVx};
+enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary};
 
 /*!
  * \enum StTrackModel

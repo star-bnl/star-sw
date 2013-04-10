@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.14 2013/04/05 15:11:33 ullrich Exp $
+ * $Id: StVertex.h,v 2.15 2013/04/10 19:15:53 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 2.14  2013/04/05 15:11:33  ullrich
- * Changes due to the addition of StTrackMassFit (Yuri)
+ * Revision 2.15  2013/04/10 19:15:53  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  *
  * Revision 2.13  2012/05/07 14:42:58  fisyak
  * Add handilings for Track to Fast Detectors Matching
@@ -69,11 +69,8 @@
 #include "StMatrixF.hh"
 #include "StContainers.h"
 #include "StEnumerations.h"
-#include "StTrackMassFit.h"
 class StTrack;
 class StTrackFilter;
-class StVertex;
-ostream&  operator<<(ostream& os,  const StVertex& v);
 
 class StVertex : public StMeasuredPoint {
 public:
@@ -84,7 +81,6 @@ public:
     Int_t operator!=(const StVertex&) const;
 
     virtual StVertexId     type() const {return mType; }
-    virtual Int_t          key()  const {return mKey;}
     Int_t                  flag() const {return mFlag; }
     Float_t                chiSquared() const { return mChiSquared; }
     Float_t                probChiSquared() const { return mProbChiSquared; }
@@ -94,23 +90,17 @@ public:
     const StTrack*         parent() const  { return mParent; }
     virtual UInt_t         numberOfDaughters()    const {NotImplemented("numberOfDaughters"); return 0;}
     virtual UInt_t         numberOfGoodTracks()   const {NotImplemented("numberOfGoodTracks"); return 0;}
-    virtual StTrack*       daughter(UInt_t)       {NotImplemented("daughter"); return 0;}
-    virtual const StTrack* daughter(UInt_t) const {NotImplemented("daughter"); return 0;}
-    virtual UInt_t         numberOfMassFits()    const {return mMassFits.size();}
-    virtual StTrackMassFit       *massFit(UInt_t);
-    virtual const StTrackMassFit *massFit(UInt_t) const;
-    virtual StPtrVecTrackMassFit  massFits(StTrackFilter&);
-    //?    virtual const StPtrVecTrackMassFit&  massFits() const  {return *&mMassFits;}
+    virtual StTrack*       daughter(unsigned int)       {NotImplemented("daughter"); return 0;}
+    virtual const StTrack* daughter(unsigned int) const {NotImplemented("daughter"); return 0;}
+    virtual StPtrVecTrack  daughters(StTrackFilter&)    {NotImplemented("daughters"); return 0;}
 
-    virtual void setKey(Int_t key) {mKey = key;}
     virtual void setFlag(Int_t val) { mFlag = val; }
     virtual void setCovariantMatrix(Float_t[6]);
     virtual void setChiSquared(Float_t val) { mChiSquared = val; }
     virtual void setProbChiSquared(Float_t val) { mProbChiSquared = val; }
     virtual void setParent(StTrack*);
-    virtual void addDaughter(StTrack*) {NotImplemented("addDaughter");}
-    virtual void addMassFit(StTrack*);
-    virtual void removeMassFit(StTrack*);
+    virtual void addDaughter(StTrack*) = 0;
+    virtual void removeDaughter(StTrack*) = 0;
     Int_t            idTruth() const { return mIdTruth;}
     Int_t            qaTruth() const { return mQuality; }
     Int_t            idParent() const { return mIdParent;}
@@ -124,7 +114,7 @@ public:
     virtual void setKinkVertex()      {SETBIT(mFlag,kKinkVtxId);}    
     virtual void setBeamConstrained() {SETBIT(mFlag,kBEAMConstrVtxId);}
     virtual void setRejected()        {SETBIT(mFlag,kRejectedVtxId);}
-    
+
     Bool_t        isPrimaryVtx()      const {return TESTBIT(mFlag,kPrimaryVtxId);} 
     Bool_t        isV0Vtx()           const {return TESTBIT(mFlag,kV0VtxId);}	   
     Bool_t        isXiVtx()           const {return TESTBIT(mFlag,kXiVtxId);}	   
@@ -134,12 +124,10 @@ public:
     void Print(Option_t *option="") const {cout << option << *this << endl; }
     static void   SetNoFitPointCutForGoodTrack(UInt_t val) {fgNoFitPointCutForGoodTrack = val;}
     static UInt_t NoFitPointCutForGoodTrack() {return fgNoFitPointCutForGoodTrack;}
-
 protected:
     void          NotImplemented(const Char_t *method) const;
     StVertexId    mType;
     Char_t        mBeg[1]; //!
-    Int_t         mKey;
     Int_t         mFlag;
     Float_t       mCovariantMatrix[6];
     Float_t       mChiSquared;
@@ -149,15 +137,13 @@ protected:
     Int_t         mIdParent;// Id of MC parent track
     Char_t        mEnd[1]; //!
     static        UInt_t fgNoFitPointCutForGoodTrack;
-    //  StTrack*  mParent;           	//$LINK
+//  StTrack*      mParent;           	//$LINK
 #ifdef __CINT__
     StObjLink     mParent;            
 #else
     StLink<StTrack> mParent;            
 #endif //__CINT__
-protected:
-    StSPtrVecTrackMassFit    mMassFits;
-    
-    ClassDef(StVertex,5)
+
+    ClassDef(StVertex,4)
 };
 #endif
