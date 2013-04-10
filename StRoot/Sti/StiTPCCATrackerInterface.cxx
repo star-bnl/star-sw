@@ -62,7 +62,6 @@ StiTPCCATrackerInterface::StiTPCCATrackerInterface()
 
 StiTPCCATrackerInterface::~StiTPCCATrackerInterface(  )
 { // never called for static object
-  SafeDelete(fSeedFinder);
 } // StiTPCCATrackerInterface::StiTPCCATrackerInterface()
 
 void StiTPCCATrackerInterface::SetNewEvent()

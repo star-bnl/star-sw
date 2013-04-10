@@ -4,7 +4,6 @@
 #include "StiTrackNodeHelper.h"
 #include "StiElossCalculator.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
-#include "StiTrack.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
 #if ROOT_VERSION_CODE < 331013
@@ -71,7 +70,6 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
     mParentNode->mFP.check("2StiTrackNodeHelper::set");
   }
   if (mTargetNode->isValid()) {
-    mTargetNode->mFP.eta() = StiKalmanTrackNode::nice(mTargetNode->mFP.eta());
     mTargetNode->mFP.check("1StiTrackNodeHelper::set");
     assert(fabs(mTargetHz-mTargetNode->mFP.hz()) < EC*0.1);
   }
@@ -715,7 +713,7 @@ int StiTrackNodeHelper::propagateMCS()
   double tanl   = mBestPars.tanl();
   double pti    = mBestPars.ptin(); 
   double p2     = (1.+tanl*tanl)*pt*pt;
-  double m      = StiTrack::getMass();
+  double m      = StiKalmanTrackFinderParameters::instance()->getMassHypothesis();
   double m2     = m*m;
   double e2     = p2+m2;
   double beta2  = p2/e2;

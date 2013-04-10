@@ -91,7 +91,8 @@ class StiKalmanTrack : public StiTrack
     firstNode(0),
     lastNode(0),
     mSeedHitCount(0),
-    mFlag(0)
+    mFlag(0),
+    m(-1.)
     {  /* nops */ }
   
   /*! 
@@ -264,6 +265,7 @@ class StiKalmanTrack : public StiTrack
    virtual vector<StiKalmanTrackNode*> getNodes(int detectorGroupId) const;
 	 
 
+  double  getMass() const;   // mass when pid known
   int     getCharge()const;   // charge of the particle
   double  getChi2() const;   // chi2/ndf of fit 
   double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
@@ -304,6 +306,7 @@ class StiKalmanTrack : public StiTrack
     kTooManyDroppedNodes
   } TRefitStatus;
 
+  
 protected:
   friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 protected:
@@ -317,6 +320,8 @@ protected:
   UShort_t  mSeedHitCount; //number of points used to seed the track (seed quality)
   int     mVertex;
   long    mFlag;         //A flag to pack w/ topo info
+  double  m;             // mass hypothesis
+
   double  _dca;
 
  public:
@@ -327,6 +332,10 @@ protected:
 
 /*! Return the mass hypothesis used in the resconstruction of this track.
 */
+inline double  StiKalmanTrack::getMass() const
+{ 
+  return m;  
+}
 
 inline void StiKalmanTrack::setFlag(long v) 
 {
