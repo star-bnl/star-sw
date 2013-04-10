@@ -15,26 +15,23 @@
 //  -= Copyright &copy ALICE HLT Group =-
 //_________________________________________________________________________________
 
-#include <string.h>
+
 #include "KFParticleBase.h"
 #include "TMath.h"
 #include "Riostream.h"
 #include "TString.h"
-#include "TRSymMatrix.h"
-#include "TRVector.h"
 ClassImp(KFParticleBase);
-static Int_t _debug = 0;
 
 
-KFParticleBase::KFParticleBase() :fID(0), fParentID(0), fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fAtProductionVertex(0), fIsLinearized(0), 
-				  fIdTruth(0), fQuality(0), fIdParentMcVx(0), fPDG(0)
+KFParticleBase::KFParticleBase() :fID(0), fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fAtProductionVertex(0), fIsLinearized(0), 
+				  fIdTruth(0), fQuality(0), fIdParentVx(0)
 { 
   //* Constructor 
-  Clear();
+
   Initialize();
 }
 
-void KFParticleBase::Initialize( const Double_t Param[], const Double_t Cov[], Int_t Charge, Double_t Mass, Int_t PID )
+void KFParticleBase::Initialize( const Double_t Param[], const Double_t Cov[], Int_t Charge, Double_t Mass )
 {
   // Constructor from "cartesian" track, particle mass hypothesis should be provided
   //
@@ -47,7 +44,8 @@ void KFParticleBase::Initialize( const Double_t Param[], const Double_t Cov[], I
   //                (  6  7  8  9  .  . )
   //                ( 10 11 12 13 14  . )
   //                ( 15 16 17 18 19 20 )
-  fPDG = PID;
+
+
   for( Int_t i=0; i<6 ; i++ ) fP[i] = Param[i];
   for( Int_t i=0; i<21; i++ ) fC[i] = Cov[i];
 
@@ -75,21 +73,27 @@ void KFParticleBase::Initialize( const Double_t Param[], const Double_t Cov[], I
   fC[26] = h0*fC[18] + h1*fC[19] + h2*fC[20];
   fC[27] = ( h0*h0*fC[ 9] + h1*h1*fC[14] + h2*h2*fC[20] 
 	     + 2*(h0*h1*fC[13] + h0*h2*fC[18] + h1*h2*fC[19] ) );
-  if (_debug) {
-    std::cout << "KFParticle::Create " << *this << std::endl;
-  }
+  for( Int_t i=28; i<36; i++ ) fC[i] = 0;
+  fC[35] = 1.;
 }
 
 void KFParticleBase::Initialize()
 {
   //* Initialise covariance matrix and set current parameters to 0.0 
-}
-void KFParticleBase::Clear(Option_t *option) {
-  memset(fBeg,0,fEnd-fBeg+1);
+
+  for( Int_t i=0; i<8; i++) fP[i] = 0;
+  for(Int_t i=0;i<36;++i) fC[i]=0.;
   fC[0] = fC[2] = fC[5] = 100.;
   fC[35] = 1.;
   fNDF  = -3;
+  fChi2 =  0.;
+  fQ = 0;
+  fSFromDecay = 0;
+  fAtProductionVertex = 0;
+  fVtxGuess[0]=fVtxGuess[1]=fVtxGuess[2]=0.;
+  fIsLinearized = 0;
 }
+
 void KFParticleBase::SetVtxGuess( Double_t x, Double_t y, Double_t z )
 {
   //* Set decay vertex parameters for linearisation 
@@ -366,10 +370,10 @@ void KFParticleBase::GetMeasurement( const Double_t XYZ[], Double_t m[], Double_
 void KFParticleBase::AddDaughter( const KFParticleBase &Daughter )
 {
   //* Add daughter 
+
   if( fNDF<-1 ){ // first daughter -> just copy
     fNDF   = -1;
     fQ     =  Daughter.GetQ();
-    
     if( Daughter.fC[35]>0 ){ //TODO Check this: only the first daughter is used here!
       Daughter.GetMeasurement( fVtxGuess, fP, fC );
     } else {
@@ -511,6 +515,7 @@ void KFParticleBase::AddDaughter( const KFParticleBase &Daughter )
     fChi2 += (mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
       +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
       +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2];   
+  
   }
 }
 
@@ -2227,35 +2232,19 @@ void KFParticleBase::MultQSQt( const Double_t Q[], const Double_t S[], Double_t 
 //________________________________________________________________________________
 void KFParticleBase::Print(Option_t *opt) const {
   std::cout << *this << std::endl;
-  if (opt && (opt[0] == 'a' || opt[0] == 'A')) {
-    TRVector P(8,fP); std::cout << "par. " << P << std::endl;
-    TRSymMatrix C(8,fC); std::cout << "cov. " << C << std::endl;
-    
-  }
 }
 //________________________________________________________________________________
 std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
-  static const Char_t *vn[14] = {"x","y","z","px","py","pz","E","S","M","t","p","Q","Chi2","NDF"};
-  os << Form("p(%4i,%4i,%4i)",particle.GetID(),particle.GetParentID(),particle.IdParentMcVx());
-  for (Int_t i = 0; i < 8; i++) {
-    if (i == 6) continue;                                    // E
-    if (i == 7 && particle.GetParameter(i) <= 0.0) continue; // S
-    if (particle.GetParameter(i) == 0. && particle.GetCovariance(i,i) == 0) continue;
-    if (particle.GetCovariance(i,i) > 0) 
-      os << Form(" %s:%8.3f+/-%6.3f", vn[i], particle.GetParameter(i), TMath::Sqrt(particle.GetCovariance(i,i)));
-    else 
-      os << Form(" %s:%8.3f", vn[i], particle.GetParameter(i));
-  }
-  Double_t Mtp[3], MtpErr[3];
-  particle.GetMass(Mtp[0], MtpErr[0]);     if (MtpErr[0] < 1e-7 || MtpErr[0] > 1e10) MtpErr[0] = -13;
-  particle.GetLifeTime(Mtp[1], MtpErr[1]); if (MtpErr[1] <=   0 || MtpErr[1] > 1e10) MtpErr[1] = -13;
-  particle.GetMomentum(Mtp[2], MtpErr[2]); if (MtpErr[2] <=   0 || MtpErr[2] > 1e10) MtpErr[2] = -13;
-  for (Int_t i = 8; i < 11; i++) {
-    if (i == 9 && Mtp[i-8] <= 0.0) continue; // t
-    if (MtpErr[i-8] > 0 && MtpErr[i-8] < 1e10) os << Form(" %s:%8.3f+/-%7.3f", vn[i],Mtp[i-8],MtpErr[i-8]);
-    else                                       os << Form(" %s:%8.3f", vn[i],Mtp[i-8]);
-  }
-  os << Form(" pdg:%5i Q:%2i  chi2/NDF :%8.2f/%2i",particle.GetPDG(),particle.GetQ(),particle.GetChi2(),particle.GetNDF());
-  if (particle.IdTruth()) os << Form(" IdT:%4i/%3i",particle.IdTruth(),particle.QaTruth());
+  static const Char_t *vn[11] = {"x","y","z","px","py","pz","E","S","Q","Chi2","NDF"};
+  os << "KFP:";
+  for (Int_t i = 0; i < 8; i++) 
+    os << Form(" %s:%8.3f+/-%7.3f", vn[i],
+	       particle.GetParameter(i), 
+	       (particle.GetCovariance(i,i) >= 0) ? TMath::Sqrt(particle.GetCovariance(i,i)) : -13);
+  os << " Q:" << particle.GetQ() << " chi2/NDF : " << particle.GetChi2() << "/" << particle.GetNDF();
   return os;
 }
+
+// 72-charachters line to define the printer border
+//3456789012345678901234567890123456789012345678901234567890123456789012
+

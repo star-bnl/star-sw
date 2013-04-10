@@ -83,7 +83,7 @@ class KFVertex : public KFParticle
 
  protected:
 
-  Bool_t fIsConstrained; //! Is the beam constraint set
+  Bool_t fIsConstrained; // Is the beam constraint set
 
   ClassDef( KFVertex, 1 );
 
