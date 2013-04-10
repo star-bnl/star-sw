@@ -1,4 +1,4 @@
-// $Id: StKFVerticesCollection.cxx,v 2.3 2013/04/08 19:21:41 fisyak Exp $
+// $Id: StKFVerticesCollection.cxx,v 2.4 2013/04/10 22:14:20 fisyak Exp $
 #include "StKFVerticesCollection.h"
 #include "TArrayI.h"
 #include "TArrayD.h"
@@ -6,7 +6,6 @@
 #include "TRVector.h"
 #include "TPolyMarker.h"
 #include "TList.h"
-#include "StG2TrackVertexMap.h"
 using namespace std;
 ClassImp(StKFVerticesCollection);
 Double_t StKFVerticesCollection::fgVxPenaltyFactor = 1000;
@@ -20,7 +19,7 @@ StKFVerticesCollection::StKFVerticesCollection(Int_t NoPeaks, Double_t *zOfPeaks
 }
 //________________________________________________________________________________
 void StKFVerticesCollection::AddVertex(Double_t x, Double_t y, Double_t z, Double_t sigmaXY, Double_t sigmaZ) {
-  StKFVertex *vtx = new StKFVertex();
+  StKFVertex *vtx = new StKFVertex(fVertices.GetEntriesFast() + 1);
   vtx->Vertex().SetBeamConstraint(x, y, z, sigmaXY, sigmaXY, sigmaZ);
   fVertices.AddLast(vtx);
 }
@@ -78,7 +77,7 @@ Double_t StKFVerticesCollection::DoTrack2VertexAssociation(const TObjArray &part
       Chi2s[k] = 1e10;
       particle = (KFParticle *) particles.UncheckedAt(k);
       if (! particle) continue;
-      if (particle->GetParentID()) continue;
+      if (particle->GetID() > 100000) continue;
       Double_t chi2il = particle->GetDeviationFromVertex(vtx->Vertex());
       chi2il *= 2*chi2il;
       Chi2s[k] = chi2il;
@@ -278,7 +277,7 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
 	  StKFVertex *vtxm = Vertex(m);
 	  if (! vtxm) continue;
 	  if (m != lMax) {
-	    if (particleMax->GetID()) { // beam track is not in the game
+	    if (particleMax->GetID()%100000) { // beam track is not in the game
 	      delete vtxm->Remove(particleMax);
 	      vtxm->Compress();
 	      if (vtxm->NoTracks() == 0) {delete vtxm; Vertex(m) = 0;}
@@ -299,34 +298,12 @@ void StKFVerticesCollection::UniqueTracks2VertexAssociation(){
   for (Int_t l = 0; l < NVtx; l++) {
     StKFVertex *vtxl = Vertex(l);
     if (! vtxl) continue;
-    // Set IdTruth
-    std::map< Int_t,Float_t> idTruths;
-    Int_t IdVx = 0;
-    Int_t qa = 0;
     Int_t N = vtxl->NoTracks();
     for (Int_t i = 0; i < N; i++) {
       KFParticle *particle = vtxl->Track(i)->OrigParticle();;
-      particle->SetParentID(vtxl->ID());
-      Int_t IdTk = particle->IdTruth();
-      if (!IdTk) continue;
-      IdVx = particle->IdParentMcVx();
-      if (IdVx <= 0) continue;
-      qa = particle->QaTruth(); if (!qa) qa = 1;
-      idTruths[IdVx] += qa;
+      Int_t ID = particle->GetID()%100000 + 100000*vtxl->ID();;
+      particle->SetID(ID);
     }
-    if (! idTruths.size()) continue;		//no simu info
-    Int_t vxBest = 0; 
-    Float_t qaBest = 0, qaSum = 0;
-    for (std::map< Int_t,Float_t>::const_iterator it=idTruths.begin(); it!=idTruths.end(); ++it) {
-      qaSum += (*it).second;
-      if ((*it).second < qaBest) continue;
-      vxBest = (*it).first; qaBest = (*it).second;
-    }
-    if (vxBest <= 0 || vxBest > 0xffff) return;
-    Int_t avgQua = 100*qaBest/(qaSum+1e-10)+0.5;
-    vtxl->SetIdTruth(vxBest,avgQua);
-    Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
-    vtxl->Vertex().SetIdParentMcVx(IdParentTk);
   }
 }
 //________________________________________________________________________________
@@ -392,8 +369,8 @@ Double_t StKFVerticesCollection::Fit(Int_t marker, TCanvas *c1, TH1 *Vtx) {
   return chi2Total;
 }
 // $Log: StKFVerticesCollection.cxx,v $
-// Revision 2.3  2013/04/08 19:21:41  fisyak
-// Adjust for new KFParticle
+// Revision 2.4  2013/04/10 22:14:20  fisyak
+// Roll back to version 04/04/2013
 //
 // Revision 2.2  2012/06/11 15:33:41  fisyak
 // std namespace

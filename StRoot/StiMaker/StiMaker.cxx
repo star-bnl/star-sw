@@ -1,10 +1,10 @@
-// $Id: StiMaker.cxx,v 1.205 2013/04/08 19:21:41 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.206 2013/04/10 22:14:20 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
-// Revision 1.205  2013/04/08 19:21:41  fisyak
-// Adjust for new KFParticle
+// Revision 1.206  2013/04/10 22:14:20  fisyak
+// Roll back to version 04/04/2013
 //
 // Revision 1.204  2012/06/13 20:21:09  fisyak
 // Check that vertex fitter exist before getting vertex postion
@@ -441,7 +441,9 @@ More detailed: 				<br>
 #include "Sti/StiTimer.h"
 #include "StiDetectorVolume.h"
 #include "StarMagField.h"
+#if 0
 #include "StG2TrackVertexMap.h"
+#endif
 #include "StTpcDb/StTpcDb.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
 #include "StSvtDbMaker/StSvtDbMaker.h"
@@ -680,9 +682,6 @@ Int_t StiMaker::Make()
   if (! _tracker) return kStWarn;
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
   if (!event) return kStWarn;
-  St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");  
-  St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex"); 
-  StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
   eventIsFinished = false;
   try {		// try new event
     
@@ -725,7 +724,6 @@ Int_t StiMaker::MakeGlobalTracks(StEvent   * event) {
   if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
   if (_eventFiller)
     _eventFiller->fillEvent(event, _trackContainer);
-  event->setIdTruth();
   if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
   return kStOK;
 }
@@ -762,7 +760,6 @@ Int_t StiMaker::MakePrimaryTracks(StEvent   * event) {
     if (_eventFiller) {_eventFiller->fillEventPrimaries(); /* fillVxFlags(); */}
     if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
   }
-  event->setIdTruth();
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -858,3 +855,49 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   }
   return fVolume;
 }
+#if 0
+//_____________________________________________________________________________
+void StiMaker::fillVxFlags() {// set vertices IdTruth if any
+  StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+  if (! event) return;
+  UInt_t NVx = event->numberOfPrimaryVertices();
+  if (! NVx) return;
+  struct vertexPing {
+    Int_t  Id;
+    Int_t nPings;
+  };
+  enum {NVxMax = 200};
+  for (UInt_t i = 0; i < NVx; i++) {
+    StPrimaryVertex  *vx = event->primaryVertex(i);
+    if (! vx) continue;
+    vertexPing candidates[NVxMax]; memset(candidates,0,sizeof(candidates));
+    UInt_t N = 0;
+    UInt_t Ntracks = vx->numberOfDaughters();
+    Int_t IdVx = 0;
+    for (UInt_t l = 0; l < Ntracks; l++) {
+      const StTrack *pTrack = vx->daughter(l);
+      if (! pTrack) continue;
+      Int_t IdTk = pTrack->idTruth();
+      if (IdTk <= 0) continue;
+      IdVx = pTrack->idParentVx();
+      if (IdVx <= 0) continue;
+      Int_t J = -1;
+      for (UInt_t j = 0; j < N; j++) if (candidates[j].Id == IdVx) {J = j; break;}
+      if (J < 0) {J = N; if (N < NVxMax-1) N++;}
+      candidates[J].Id = IdVx;
+      candidates[J].nPings++;
+    }
+    Int_t dominant = -1;
+    Int_t J = -1;
+    for (UInt_t j = 0; j < N; j++) if (candidates[j].nPings > dominant) 
+      {dominant = candidates[j].nPings; J = j;}
+    if (J > -1) {
+      Int_t IdTruth = candidates[J].Id;
+      Int_t QA      = (100*dominant)/Ntracks;
+      vx->setIdTruth(IdTruth,QA);
+      Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(IdTruth);
+      vx->setIdParent(IdParentTk);
+    }
+  }
+}
+#endif
