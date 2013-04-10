@@ -151,7 +151,8 @@ if (myDeb>0) {fDraw->Clear();mySeedObjs.clear();}
       for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
       { 
 	StvHit *nexHit = (StvHit*)node->GetObj();
-        if (nexHit->timesUsed()) continue;
+        if (nexHit->timesUsed()) 	continue;
+        if (nexHit->detector()==hp) 	continue;
 	int ans = mSel.Reject(nexHit->x());
 	if (ans>0) continue;
 //			Selecting the best
@@ -286,8 +287,6 @@ void  StvConeSelector::UpdateLims()
 int  StvConeSelector::Reject(const float x[3])
 {
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
-   float down = Dot(mHitDir,xx);
-   if ( down > -mLayer/2) 		return 2;
 
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
    float z2 = xx[2]*xx[2];

@@ -104,9 +104,9 @@ static int nCall=0; nCall++;
     { 
 //		Search next hit 
       StvHit *nexHit = (StvHit*)node->GetObj();
-      if (nexHit==fstHit)	continue;
-      if (nexHit->timesUsed()) 	continue;
-
+      if (nexHit==fstHit)		continue;
+      if (nexHit->timesUsed()) 		continue;
+      if (nexHit->detector()==hp)	continue;;
       nTotHits++;
       int ans = mRej.Reject(nexHit->x());
       if (ans) continue;
