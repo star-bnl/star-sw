@@ -117,9 +117,8 @@ public:
   /// in the local reference frame of this node.
   void getMomentum(double p[3], double e[6]=0) const;
   /// Calculates and returns the tangent of the track pitch angle at this node.
-  double getCurvature() const {return mFP.curv();}
-  void getXYZ(Double_t xyzp[6], Double_t CovXyzp[21]) const;
-  void setCurvature(double curvature) {mFP.curv()=curvature;}
+    double getCurvature() const {return mFP.curv();}
+    void setCurvature(double curvature) {mFP.curv()=curvature;}
   double getDipAngle() const {return atan(mFP.tanl());}
   double getTanL() const {return mFP.tanl();}
   /// Calculates and returns the transverse momentum of the track at this node.

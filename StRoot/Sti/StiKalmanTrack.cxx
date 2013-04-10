@@ -1,13 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.124 2013/04/08 19:22:24 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.124 2013/04/08 19:22:24 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.125 2013/04/10 22:09:01 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.125 2013/04/10 22:09:01 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.124  2013/04/08 19:22:24  fisyak
- * Add different mass hypothysis
+ * Revision 2.125  2013/04/10 22:09:01  fisyak
+ * Roll back to version 04/04/2013
  *
  * Revision 2.123  2012/03/12 23:17:12  fisyak
  * Correct detectorOld cast for StiCA
@@ -424,6 +424,7 @@
 #endif
 #include "StMessMgr.h"
 ostream& operator<<(ostream&, const StiHit&);
+
 Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
 int StiKalmanTrack::mgMaxRefiter = 100;
 int StiKalmanTrack::_debug = 0;
@@ -447,6 +448,7 @@ static double diff(const StiNodePars &p1,const StiNodeErrs &e1
    i.e. does not represent any track and is thus ready for a new
    search and reconstruction.  
  */
+//_____________________________________________________________________________
 void StiKalmanTrack::reset()
 {
 static int mIdCount = 0;
@@ -456,6 +458,7 @@ static int mIdCount = 0;
   lastNode  = 0;
   mSeedHitCount = 0;
   mVertex = 0;
+  m      = -1.;
   mFlag  = 0;
   _dca   = 0;
   _vChi2=-2;
@@ -1792,7 +1795,7 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
 
   mSeedHitCount=tk.mSeedHitCount; 	//number of points used to seed the track
   mFlag        =tk.mFlag;         	//A flag to pack w/ topo info
-  _pdgId       =tk._pdgId;             	// mass hypothesis
+  m            =tk.m;             	// mass hypothesis
   _dca	       =tk._dca;
   _vChi2       =tk._vChi2;		//
   mVertex      =tk.mVertex;
