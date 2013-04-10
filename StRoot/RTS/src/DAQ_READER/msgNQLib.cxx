@@ -57,7 +57,7 @@ int msgNQCreate(char *host, int port, int msglen)
 
 	hostent = gethostbyname(host) ;
 	if(hostent == NULL) {
-		LOG(CRIT,"Unknown host %s",host,0,0,0,0) ;
+	  LOG(CRIT,"Unknown host %s (%s)",host,strerror(errno),0,0,0) ;
 		return -1 ;
 	}
 
