@@ -590,8 +590,8 @@ int StvFitPars::TooBig(const StvNodePars &np) const
 {
   
   double space = BIGFITPART*(fabs(np._x)+fabs(np._y)+fabs(np._z));
-  for (int i=0;i<2;i++) {if (fabs(Arr()[i]) > BIGFITPARS[i]+space) return i+1;};
-  for (int i=2;i<4;i++) {if (fabs(Arr()[i]) > BIGFITPARS[i]      ) return i+1;};
+  for (int i=0;i<2;i++) {if (fabs(Arr()[i]) > MAXFITPARS[i]+space) return i+1;};
+  for (int i=2;i<4;i++) {if (fabs(Arr()[i]) > MAXFITPARS[i]      ) return i+1;};
 
   if (fabs(mP) > BIGFITPARS[4]+fabs(np._ptin)*BIGFITPART)     	   return 4+1;
   return 0;
