@@ -20,7 +20,7 @@ StvFitter *StvFitter::mgFitter=0;
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
 
 enum {kDeltaFactor = 1};
-
+static const double kMinCos = 0.1;	// minimal cos allowed
 
 static const double kXtraBigXi2 = 9e9;
 
@@ -273,7 +273,7 @@ double StvFitter::Xi2(const StvHit *hit)
       const StHitPlane *hp = hit->detector(); 
       const Mtx33F_t &hD = hp->GetDir(hit->x());
       mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
-
+      if (mHitErrCalc->CpCl() <kMinCos) {mXi2 = 1e11; return mXi2;}
     }; break;
 
     case 1: assert(0 && "Wrong case 1");
@@ -461,7 +461,7 @@ static int nCall =0; nCall++;
     if (!mode) {
      Xi2X = JoinTwoX(nP1,P1,E1,nP2,P2,E2,0,0);
      Xi2T = JoinTwoT(nP1,P1,E1,nP2,P2,E2,0,0);
-    assert(fabs(Xi2X-Xi2T) < (Xi2X+Xi2T+0.1)*1e-4);
+    assert(fabs(Xi2X-Xi2T) < (Xi2X+Xi2T+0.1)*1e-1);
     } else {
      Xi2T = JoinVtx(nP1,P1,E1,nP2,P2,E2,0,0);
     }
