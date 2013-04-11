@@ -16,6 +16,7 @@ virtual void CalcDcaDers(double dRR[kMaxPars][3]);
 virtual double Trace(const float hiPos[3]);
 virtual  int GetNPars() const 			{return mNPar;}
 const double *GetPars() const 			{return mPar  ;}
+      double CpCl() const			{return fabs(mCl*mCp);}
 static StvHitErrCalculator *Inst(const char *name);
 protected:
 void CalcLocals(const float hiDir[3][3]);
