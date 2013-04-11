@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.88 2013/02/18 16:31:13 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.89 2013/03/26 15:56:00 genevb Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.89  2013/03/26 15:56:00  genevb
+// Replace agufld(x,b) with direct call to StarMagField::Instance()->BField(x,b)
+//
 // Revision 1.88  2013/02/18 16:31:13  fisyak
 // gufld => agufld
 //
@@ -357,13 +360,9 @@ using std::max;
 #include "StTpcDbSlowControl.hh"
 #include "StTpcDbElectronics.hh"
 //#include "StDbMagneticField.hh" // To be done
+#include "StarMagField.h"
 
 #include "StSimpleMagneticField.hh"
-#ifdef __ROOT__
-#define agufld   agufld_
-//#define agufld   AGUFLD
-extern "C" {void agufld(Float_t *, Float_t *);}
-#endif
 #include "StTrsDeDx.hh"
 
 #include "electronicsDataSet.h"
@@ -406,7 +405,7 @@ extern "C" {void agufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.88 2013/02/18 16:31:13 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.89 2013/03/26 15:56:00 genevb Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -470,7 +469,7 @@ Int_t StTrsMaker::InitRun(int runnumber)
   
    float x[3] = {0,0,0};
    float B[3];
-   agufld(x,B);
+   StarMagField::Instance()->BField(x,B);
    StThreeVector<double> Bfield(B[0],B[1],B[2]);
    Bfield*=kilogauss;
    PR(Bfield/tesla);
