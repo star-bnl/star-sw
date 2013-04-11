@@ -117,7 +117,9 @@ const double BAD_RHO=0.1;
   Xi2 =fHelix.Fit();
   if (Xi2>BAD_XI2) return 0; 	//Xi2 too bad, no updates
   fHelix.MakeErrs();
-  l = fHelix.Path(dx); fHelix.Move(l*1.2);
+  l = fHelix.Path(dx); 
+  l*= (nNode+1.)/(nNode-1.);
+  fHelix.Move(l);
   return &fHelix;
 }    
 //_____________________________________________________________________________
