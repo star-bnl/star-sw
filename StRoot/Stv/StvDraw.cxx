@@ -71,20 +71,18 @@ return Trak(helx,vc,sty);
 TObject *StvDraw::Trak(const THelixTrack &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty)
 {
   int n = hits.size(); if (!n) return 0;
-  for (int i=0;i<n; i++) {
-    printf("%d %g\n",i,atan2(hits[i]->x()[1],hits[i]->x()[0]));}
-
   std::vector<float> myTrak;  
   THelixTrack th(helx);
+  const double *x = th.Pos();
+  for (int j=0;j<3;j++) {myTrak.push_back(x[j]);}
+
   const float *h = hits[0]->x();
   double l = th.Path(h[0],h[1]); th.Move(l);
   h = hits[n-1]->x();
   l = th.Path(h[0],h[1]);
   double dl = l/100;
   for (int i=0;i<=100;i++) {
-    const double *x = th.Pos();
-    for (int j=0;j<3;j++) {myTrak.push_back(x[j]);}
-    th.Move(dl);
+    x = th.Pos(); for (int j=0;j<3;j++) {myTrak.push_back(x[j]);} th.Move(dl);
   }
                 Hits(hits  ,kUsedHit);
   TObject *to = Line(myTrak,sty);
