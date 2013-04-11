@@ -141,6 +141,7 @@ if (myDeb>0) {fDraw->Clear();mySeedObjs.clear();}
     while (1) { //Search next hit 
 //		Add info from selected hit
       fSeedHits.push_back(selHit); selHit->addTimesUsed();fNUsed[0]++;
+      if (fSeedHits.size()>=kMaxHits) break;
       const StHitPlane *hp = selHit->detector();
       const float *hd = hp->GetDir(selHit->x())[0];
       mSel.AddHit(selHit->x(),hd,hp->GetLayer());
@@ -167,7 +168,6 @@ if (myDeb>0) {fDraw->Clear();mySeedObjs.clear();}
 
 if (myDeb>0) { mySeedObjs.push_back(selObj);}
 
-      if (fSeedHits.size()>=kMaxHits) break;
     }// endNext hit loop
 
 //		Mark hits as unused when seed is created. Only tracker
@@ -294,16 +294,18 @@ int  StvConeSelector::Reject(const float x[3])
    mHitLen = (r2xy+z2);
    if (mHitLen  < 1e-8) 		return 4;
    mHitPrj = Dot(xx,mDir);
-   if (mHitPrj>mLen) 			return 6;
+   if (mHitPrj>mLen) 			return 6;	//Outside of cone along
    float imp =mHitLen-mHitPrj*mHitPrj; if (imp<=0) imp = 0;
    float lim = (mErr) + mHitPrj*mTan;
-   if (imp > lim*lim)          		return 7;
+   if (imp > lim*lim)          		return 7;	//Outside of cone aside
 
-   if (mHitPrj>mMinPrj*1.1) 		return 8;
-   if (imp    >mMinImp    ) 		return 9;
-   int ans = (mHitPrj<mMinPrj*0.9)? -1:0;
+   if (mHitPrj>mMinPrj*1.1) 		return 8;	//more far than best,along
+   if (mHitPrj<mMinPrj*0.9) {
+     mMinPrj= mHitPrj; mMinImp=imp;	return -1;	//hit plane more close
+   }
+   if (imp    >mMinImp    ) 		return 9;	//same plane but impact bigger
    mMinPrj= mHitPrj; mMinImp=imp;
-   return ans;
+   return 0;						//impact best but cone the same
 }
 //_____________________________________________________________________________
 void StvConeSelector::Update()
