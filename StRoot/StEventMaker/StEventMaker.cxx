@@ -7,7 +7,7 @@
            Revised version for new StEvent by T. Ullrich, Yale
 
 */
- 
+
 #include <vector>
 #include <algorithm>
 #include <utility>
@@ -48,11 +48,11 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.93 2012/05/07 14:44:50 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.94 2013/04/11 18:57:36 jeromel Exp $";
 //______________________________________________________________________________
 ClassImp(StEventMaker)
     //______________________________________________________________________________
-    
+
     StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
 {
     if(title) SetTitle(title);
@@ -110,14 +110,14 @@ StEventMaker::Make()
     // Since this Maker should also work without any 'dst' dataset
     // we create *always* an instance of StEvent, even if it is empty.
     //
-    
+
     //
     //  Init timing and memory snapshots
     //
     StTimer timer;
     if (doPrintCpuInfo) timer.start();
     if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();
-    
+
     //
     //  The current event is deleted automatically before every
     //  new event. It is added by using AddData().
@@ -134,7 +134,7 @@ StEventMaker::Make()
     Int_t status = makeEvent();
     if (status != kStOK)
         gMessMgr->Warning() << "StEventMaker::Make(): error in makeEvent(), no StEvent object created." << endm;
-    
+
     mEventManager->closeEvent();
     //
     //  Print out some timing, memory usage and StEvent
@@ -150,7 +150,7 @@ StEventMaker::Make()
         LOG_DEBUG  << "CPU time for StEventMaker::Make(): "
              << timer.elapsedTime() << " sec\n" << endm;
     }
-    
+
     return status;
 }
 
@@ -187,7 +187,7 @@ StEventMaker::makeEvent()
     //  Create instance of StEvent, using whatever we got so far.
     //
     mCurrentEvent = getStEventInstance();
-    
+
     //
     //        Load trigger & trigger detector data
     //
@@ -210,7 +210,7 @@ StEventMaker::makeEvent()
     // Get trgStructure structures from StTriggerDataMaker
     // and store them in StEvent. Note that they are need
     // pior to creating the old StTriggerDetectorCollection
-    // since the latter uses StTriggerData at construction. 
+    // since the latter uses StTriggerData at construction.
     //
     if (!mCurrentEvent->triggerData()) {
         TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
@@ -224,14 +224,14 @@ StEventMaker::makeEvent()
 	  if (theInfo) {
 	    theInfo->setBunchCrossingNumber(pTrg->bunchCounterLow(),0);
 	    theInfo->setBunchCrossingNumber(pTrg->bunchCounterHigh(),1);
-	  } 
+	  }
 	  StEvtHddr* header = dynamic_cast<StEvtHddr*>(GetInputDS("EvtHddr"));
 	  if (header) {
 	    header->SetBunchCrossingNumber(pTrg->bunchCounterLow(),pTrg->bunchCounterHigh());
-	  } 
+	  }
         }
     }
-    
+
     //
     //  year 2001, 2002: use TrgDet tables
     //  year >= 2003: use info from StTriggerData
@@ -239,12 +239,12 @@ StEventMaker::makeEvent()
     //             and use StTriggerData
     //
     if (!mCurrentEvent->triggerDetectorCollection()) {
-        if (mCurrentEvent->triggerData() && mCurrentEvent->triggerData()->year() >= 2003) 
+        if (mCurrentEvent->triggerData() && mCurrentEvent->triggerData()->year() >= 2003)
 	  mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*(mCurrentEvent->triggerData())));
-        else if (dstTriggerDetectors) 
+        else if (dstTriggerDetectors)
 	  mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
     }
-    
+
     StL0Trigger *l0t = mCurrentEvent->l0Trigger();
     if (!l0t) mCurrentEvent->setL0Trigger((l0t = new StL0Trigger()));
     if (mCurrentEvent->triggerData() && mCurrentEvent->triggerData()->year() >= 2003){
@@ -254,7 +254,7 @@ StEventMaker::makeEvent()
         l0t->set(dstL0Trigger       );
         l0t->set(dstTriggerDetectors);
     }
-    
+
     if (dstL0Trigger && dstL1Trigger && !mCurrentEvent->l1Trigger())
         mCurrentEvent->setL1Trigger(new StL1Trigger(*dstL0Trigger, *dstL1Trigger));
     //
@@ -270,53 +270,53 @@ StEventMaker::makeEvent()
     triggerIdColl->setL1((trigId[0] = new StTriggerId()));
     triggerIdColl->setL2((trigId[1] = new StTriggerId()));
     triggerIdColl->setL3((trigId[2] = new StTriggerId()));
-    
+
     St_DataSet *daqReaderSet=GetDataSet("StDAQReader");
     if (daqReaderSet) {
-        
+
         StTrigSummary* trigSummary =
             ((StDAQReader*) (daqReaderSet->GetObject()))->getTrigSummary();
         if (!trigSummary) gMessMgr->Warning("StEventMaker: No StTrigSummary found");
-        
+
         StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
         if (!dbTriggerId) gMessMgr->Warning("StEventMaker: No StDetectorDbTriggerID found");
-        
+
         if (trigSummary && dbTriggerId) {
-	    
+
 	    // The nominal is a pointer to one of the above.
 	    // 64 bits for Run 11 and beyond
 	    if (mCurrentEvent->runId()> 12000000) {
-		
+
 		uint64_t mask = 0;
-		mask = trigSummary->L1summary[1];
+		mask  = (unsigned int) trigSummary->L1summary[1];
 		mask <<= 32;
-		mask += trigSummary->L1summary[0];
+		mask += (unsigned int) trigSummary->L1summary[0];
 		trigId[0]->setMask(mask);
 
-		mask = trigSummary->L2summary[1];
+		mask  = (unsigned int) trigSummary->L2summary[1];
 		mask <<= 32;
-		mask += trigSummary->L2summary[0];
+		mask += (unsigned int) trigSummary->L2summary[0];
 		trigId[1]->setMask(mask);
 
-		mask = trigSummary->L3summary[1];
+		mask  = (unsigned int) trigSummary->L3summary[1];
 		mask <<= 32;
-		mask += trigSummary->L3summary[0];
+		mask += (unsigned int) trigSummary->L3summary[0];
 		trigId[2]->setMask(mask);
-		
+
 
 	    }
 	    else {
-		
+
 		trigId[0]->setMask(trigSummary->L1summary[0]);
 		trigId[1]->setMask(trigSummary->L2summary[0]);
 		trigId[2]->setMask(trigSummary->L3summary[0]);
 	    }
-	    
-	    
+
+
 	    // Loop over trigger level
 	    for(unsigned int trglevel=0 ; trglevel < 3 ; trglevel++){
 		StTriggerId* whichTrig =  trigId[trglevel];
-		
+
 		// Loop over the triggers within this level
 		for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++){
 		    // Shift the mask by daqTrigId bits to examine that bit
@@ -331,10 +331,10 @@ StEventMaker::makeEvent()
                                     printf("StEventMaker: StTriggerData found partial corruption, thus adding 9000 to offline trigger id =%d\n",offlineId);
 			  }
                             }
-                            
+
                             whichTrig->addTrigger(
                                                   //dbTriggerId->getOfflineTrgId(iTrg),
-                                                  offlineId,		      
+                                                  offlineId,
                                                   dbTriggerId->getTrgVersion(iTrg),
                                                   dbTriggerId->getTrgNameVersion(iTrg),
                                                   dbTriggerId->getThreashVersion(iTrg),
@@ -342,7 +342,7 @@ StEventMaker::makeEvent()
                                                   );
 		    }
 		}
-		
+
 		// Add in additional trigger ids to all levels; hack to fix prescale problem in runs 3-6
 		for (unsigned int iTrg = 0; iTrg < dbTriggerId->getAdditionalTriggerIDNumRows() ; iTrg++){
 		    // Shift the mask by daqTrigId bits to examine that bit
@@ -363,20 +363,20 @@ StEventMaker::makeEvent()
 		    }
 		}
 	    }
-	    
+
 	    // This just puts the pointer, not a deep copy
 	    if ( (idx=dbTriggerId->getDefaultTriggerLevel() ) != kDbTriggerBadID ){
 		triggerIdColl->setNominal(trigId[idx-1]);
 	    }
 	    // Now hack up the offline trigger ids for year 2006
-	    
-	   
+
+
 	    if (mCurrentEvent->triggerData() && mCurrentEvent->runId()>7000000 && mCurrentEvent->runId()<8000000) {
 		gMessMgr->Info("StEventMaker::Run 6, expanding L3 trigger id");
-		
+
 		// Hack for mapping of StDetectorDb to StL2TriggerResultType
 		map<string,StL2TriggerResultType> mapDbToStL2TriggerResultType;
-		
+
 		mapDbToStL2TriggerResultType["l2Trg2006BEMCGammaPi"] = l2Trg2006BEMCGammaPi;
 		mapDbToStL2TriggerResultType["l2Trg2006BEMCGammaPiRandom"] = l2Trg2006BEMCGammaPiRandom;
 		mapDbToStL2TriggerResultType["l2Trg2006EEMCGammaPi"] = l2Trg2006EEMCGammaPi;
@@ -385,10 +385,10 @@ StEventMaker::makeEvent()
 		mapDbToStL2TriggerResultType["l2Trg2006DiJet"] = l2Trg2006DiJet;
 		mapDbToStL2TriggerResultType["l2Trg2006RandomJet"] = l2Trg2006RandomJet;
 
-	
+
 		// Do a deep copy of the l3 into l3Expanded
 		StTriggerId *whichTrig = new StTriggerId(*triggerIdColl->l3());
-		
+
 		triggerIdColl->setL3Expanded(whichTrig);
 		// Reset the nominal pointer
 		triggerIdColl->setNominal(whichTrig);
@@ -396,20 +396,20 @@ StEventMaker::makeEvent()
 		for (unsigned int irow=0; irow<dbTriggerId->getTrigL3ExpandedNumRows(); ++irow) {
 		    unsigned int oldtid = dbTriggerId->getTrigL3ExpandedL3TrgId(irow);
 		    unsigned int newtid = dbTriggerId->getTrigL3ExpandedL3ExpandedTrgId(irow);
-		   
-		    
+
+
 		    string testString = string(dbTriggerId->getTrigL3ExpandedL2TriggerResultType(irow));
 
-		    
+
 		    map<string,StL2TriggerResultType>::const_iterator p =
 			mapDbToStL2TriggerResultType.find(
 			    testString);
-		    
+
 		    if (p != mapDbToStL2TriggerResultType.end()) {
 			StL2TriggerResultType l2Test = (*p).second;
 			if (whichTrig->isTrigger(oldtid) &&
 			    mCurrentEvent->triggerData()->isL2Triggered(l2Test)) {
-			    
+
 			    whichTrig->addTrigger(newtid,
 						  whichTrig->version(oldtid),
 						  whichTrig->nameVersion(oldtid),
@@ -438,14 +438,14 @@ StEventMaker::makeEvent()
 	    }
 	}
     }
-    
-    
+
+
     else {
         gMessMgr->Warning("StEventMaker: No StDAQReader found");
     }
-    
-    
-    
+
+
+
     //
     //  Complete information in StEventInfo
     //
@@ -453,7 +453,7 @@ StEventMaker::makeEvent()
     if (theInfo && dstTriggerDetectors) {
         theInfo->setBunchCrossingNumber(dstTriggerDetectors->bunchXing_lo,0);
         theInfo->setBunchCrossingNumber(dstTriggerDetectors->bunchXing_hi,1);
-    } 
+    }
     //
     //  Add data from StEvtHddr we cannot get elsewhere
     //
@@ -463,27 +463,27 @@ StEventMaker::makeEvent()
         if (mCurrentEvent->info())
 	  mCurrentEvent->info()->setEventSize(header->GetEventSize());
     }
-    
+
     //
     //  Fill StRunInfo
     //
     StRunInfo* mCurrentRunInfo = new StRunInfo;
     StDetectorDbBeamInfo *dbBeamInfo = StDetectorDbBeamInfo::instance();
     StDetectorDbRichScalers* richScalers = StDetectorDbRichScalers::instance();
-    
+
     mCurrentRunInfo->setRunId(mCurrentEvent->runId());
-    mCurrentRunInfo->setProductionTime(time(0));                 
+    mCurrentRunInfo->setProductionTime(time(0));
     mCurrentRunInfo->setProductionVersion(getenv("STAR_VERSION"));
     if (mCurrentEvent->summary())
         mCurrentRunInfo->setMagneticField(mCurrentEvent->summary()->magneticField());
     if (gStTpcDb) {
-        mCurrentRunInfo->setTpcDriftVelocity(east, gStTpcDb->DriftVelocity());	
+        mCurrentRunInfo->setTpcDriftVelocity(east, gStTpcDb->DriftVelocity());
         mCurrentRunInfo->setTpcDriftVelocity(west, gStTpcDb->DriftVelocity());
     }
     if (dbBeamInfo) {
         mCurrentRunInfo->setCenterOfMassEnergy(dbBeamInfo->getBlueEnergy() + dbBeamInfo->getYellowEnergy());
-        mCurrentRunInfo->setBeamMassNumber(blue, dbBeamInfo->getBlueMassNumber());  
-        mCurrentRunInfo->setBeamMassNumber(yellow, dbBeamInfo->getYellowMassNumber());  
+        mCurrentRunInfo->setBeamMassNumber(blue, dbBeamInfo->getBlueMassNumber());
+        mCurrentRunInfo->setBeamMassNumber(yellow, dbBeamInfo->getYellowMassNumber());
         mCurrentRunInfo->setBeamEnergy(blue, dbBeamInfo->getBlueEnergy());
         mCurrentRunInfo->setBeamEnergy(yellow, dbBeamInfo->getYellowEnergy());
         mCurrentRunInfo->setInitialBeamIntensity(blue, dbBeamInfo->getBlueIntensity());
@@ -500,21 +500,21 @@ StEventMaker::makeEvent()
         mCurrentRunInfo->setBackgroundRate(richScalers->getMult());
         mCurrentRunInfo->setL0RateToRich(richScalers->getL0());
         mCurrentRunInfo->setBbcCoincidenceRate(richScalers->getBBCX());
-        mCurrentRunInfo->setBbcEastRate(richScalers->getBBCEast());		
-        mCurrentRunInfo->setBbcWestRate(richScalers->getBBCWest());		
-        mCurrentRunInfo->setBbcBlueBackgroundRate(richScalers->getBBCBlueBkg());	
+        mCurrentRunInfo->setBbcEastRate(richScalers->getBBCEast());
+        mCurrentRunInfo->setBbcWestRate(richScalers->getBBCWest());
+        mCurrentRunInfo->setBbcBlueBackgroundRate(richScalers->getBBCBlueBkg());
         mCurrentRunInfo->setBbcYellowBackgroundRate(richScalers->getBBCYellowBkg());
     }
-    
+
     if (mCurrentRunInfo)
         mCurrentEvent->setRunInfo(mCurrentRunInfo);
-    
+
     //
     //  Detector States
     //
     if (richScalers)
         mCurrentEvent->addDetectorState(new StDetectorState(kRichId, richScalers->getRichHVStatus()));
-    
+
     return kStOK;
 }
 
@@ -524,7 +524,7 @@ StEventMaker::printEventInfo()
     LOG_INFO << "*********************************************************" << endm;
     LOG_INFO << "*                  StEvent Information                  *" << endm;
     LOG_INFO << "*********************************************************" << endm;
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StEvent at " << (void*) mCurrentEvent                      << endm;
     LOG_INFO << "---------------------------------------------------------" << endm;
@@ -532,19 +532,19 @@ StEventMaker::printEventInfo()
 	 mCurrentEvent->Dump();
     else
         return;
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StRunInfo at " << (void*) mCurrentEvent->runInfo()         << endm;
     LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent->runInfo())
 	 mCurrentEvent->runInfo()->Dump();
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StEventInfo at " << (void*) mCurrentEvent->info()          << endm;
     LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent->info())
 	 mCurrentEvent->info()->Dump();
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StEventSummary at " << (void*) (mCurrentEvent->summary())  << endm;
     LOG_INFO << "---------------------------------------------------------" << endm;
@@ -589,7 +589,7 @@ StEventMaker::printEventInfo()
          << (void*) (mCurrentEvent->l0Trigger())                        << endm;
     LOG_INFO << "---------------------------------------------------------" << endm;
     if (mCurrentEvent->l0Trigger()) mCurrentEvent->l0Trigger()->Dump();
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StTriggerDetectorCollection at "
          << (void*) (mCurrentEvent->triggerDetectorCollection())        << endm;
@@ -602,30 +602,30 @@ StEventMaker::printEventInfo()
         LOG_INFO << "StCtbTriggerDetector"                                      << endm;
         LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->triggerDetectorCollection()->ctb().Dump();
-	
+
         LOG_INFO << "---------------------------------------------------------" << endm;
         LOG_INFO << "StMwcTriggerDetector"                                      << endm;
         LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->triggerDetectorCollection()->mwc().Dump();
-	
+
         LOG_INFO << "---------------------------------------------------------" << endm;
         LOG_INFO << "StVpdTriggerDetector"                                      << endm;
         LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->triggerDetectorCollection()->vpd().Dump();
-	
+
         LOG_INFO << "---------------------------------------------------------" << endm;
         LOG_INFO << "StZdcTriggerDetector"                                      << endm;
         LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->triggerDetectorCollection()->zdc().Dump();
     }
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StSPtrVecTrackDetectorInfo"                                << endm;
     LOG_INFO << "Dumping first element in collection only (if available). " << endm;
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "collection size = "
          << mCurrentEvent->trackDetectorInfo().size() << endm;
-    
+
     if (mCurrentEvent->trackDetectorInfo().size()) {
         LOG_INFO << "---------------------------------------------------------" << endm;
         LOG_INFO << "StTrackDetectorInfo at "
@@ -633,7 +633,7 @@ StEventMaker::printEventInfo()
         LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->trackDetectorInfo()[0]->Dump();
     }
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StSPtrVecTrackNode"                                        << endm;
     LOG_INFO << "Dumping first element in collection only (if available). " << endm;
@@ -642,7 +642,7 @@ StEventMaker::printEventInfo()
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "collection size = "
          << mCurrentEvent->trackNodes().size() << endm;
-    
+
     unsigned int i;
     if (mCurrentEvent->trackNodes().size()) {
         LOG_INFO << "# tracks in first element = "
@@ -655,7 +655,7 @@ StEventMaker::printEventInfo()
         for (i=0; i<mCurrentEvent->trackNodes()[0]->entries(); i++)
             printTrackInfo(mCurrentEvent->trackNodes()[0]->track(i));
     }
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StSPtrVecPrimaryVertex"                                    << endm;
     LOG_INFO << "Dumping first element in collection only (if available). " << endm;
@@ -664,7 +664,7 @@ StEventMaker::printEventInfo()
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "collection size = "
          << mCurrentEvent->numberOfPrimaryVertices() << endm;
-    
+
     if (mCurrentEvent->numberOfPrimaryVertices()) {
         LOG_INFO << "# primary tracks in first element = "
              << mCurrentEvent->primaryVertex()->numberOfDaughters() << endm;
@@ -676,14 +676,14 @@ StEventMaker::printEventInfo()
         if (mCurrentEvent->primaryVertex()->numberOfDaughters())
             printTrackInfo(mCurrentEvent->primaryVertex()->daughter(0));
     }
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StSPtrVecCalibrationVertex"                                << endm;
     LOG_INFO << "Dumping first element in collection only (if available). " << endm;
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "collection size = "
          << mCurrentEvent->numberOfCalibrationVertices() << endm;
-    
+
     if (mCurrentEvent->numberOfCalibrationVertices())
         mCurrentEvent->calibrationVertex(0)->Dump();
 
@@ -693,7 +693,7 @@ StEventMaker::printEventInfo()
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "collection size = "
          << mCurrentEvent->v0Vertices().size() << endm;
-    
+
     if (mCurrentEvent->v0Vertices().size()) {
         LOG_INFO << "---------------------------------------------------------" << endm;
         LOG_INFO << "StV0Vertex at "
@@ -708,7 +708,7 @@ StEventMaker::printEventInfo()
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "collection size = "
          << mCurrentEvent->xiVertices().size() << endm;
-    
+
     if (mCurrentEvent->xiVertices().size()) {
         LOG_INFO << "---------------------------------------------------------" << endm;
         LOG_INFO << "StXiVertex at "
@@ -716,14 +716,14 @@ StEventMaker::printEventInfo()
         LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->xiVertices()[0]->Dump();
     }
-    
+
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StSPtrVecKinkVertex"                                       << endm;
     LOG_INFO << "Dumping first element in collection only (if available). " << endm;
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "collection size = "
          << mCurrentEvent->kinkVertices().size() << endm;
-    
+
     if (mCurrentEvent->kinkVertices().size()) {
         LOG_INFO << "---------------------------------------------------------" << endm;
         LOG_INFO << "StKinkVertex at "
@@ -731,7 +731,7 @@ StEventMaker::printEventInfo()
         LOG_INFO << "---------------------------------------------------------" << endm;
         mCurrentEvent->kinkVertices()[0]->Dump();
     }
-    
+
     unsigned int       j=0, k=0, nhits=0;
     Bool_t             gotOneHit;
     StTpcHitCollection *tpcColl = mCurrentEvent->tpcHitCollection();
@@ -750,7 +750,7 @@ StEventMaker::printEventInfo()
                     gotOneHit = kTRUE;
                 }
     }
-    
+
     StFtpcHitCollection *ftpcColl = mCurrentEvent->ftpcHitCollection();
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StFtpcHitCollection at " << (void*) ftpcColl               << endm;
@@ -767,7 +767,7 @@ StEventMaker::printEventInfo()
                     gotOneHit = kTRUE;
                 }
     }
-    
+
     StSvtHitCollection *svtColl = mCurrentEvent->svtHitCollection();
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StSvtHitCollection at " << (void*) svtColl                 << endm;
@@ -785,7 +785,7 @@ StEventMaker::printEventInfo()
                         gotOneHit = kTRUE;
                     }
     }
-    
+
     StSsdHitCollection *ssdColl = mCurrentEvent->ssdHitCollection();
     LOG_INFO << "---------------------------------------------------------" << endm;
     LOG_INFO << "StSsdHitCollection at " << (void*) ssdColl                 << endm;
@@ -825,7 +825,7 @@ StEventMaker::printTrackInfo(StTrack* track)
     if (track) {
         track->Dump();
         LOG_INFO << "covariantMatrix():" << track->fitTraits().covariantMatrix() << endm;
-	
+
         LOG_INFO << "---> StTrack -> StGeometry ("<< track->geometry()->GetName()
              << ") at " << (void*) (track->geometry()) << endm;
         if (track->geometry()) track->geometry()->Dump();
@@ -833,15 +833,15 @@ StEventMaker::printTrackInfo(StTrack* track)
         LOG_INFO << "---> StTrack -> StGeometry (outer) ("<< track->outerGeometry()->GetName()
              << ") at " << (void*) (track->outerGeometry()) << endm;
         if (track->outerGeometry()) track->outerGeometry()->Dump();
-	
+
         LOG_INFO << "---> StTrack -> StDetectorInfo at "
              << (void*) (track->detectorInfo()) << endm;
         if (track->detectorInfo()) track->detectorInfo()->Dump();
-	
+
         LOG_INFO << "---> StTrack -> StTrackNode at "
              << (void*) (track->node()) << endm;
         if (track->node()) track->node()->Dump();
-	
+
         LOG_INFO << "---> StTrack -> StPidTraits ("
              << (track->pidTraits().size() ? 1 : 0 ) << " of "
              <<  track->pidTraits().size() << " entries shown)" << endm;
@@ -850,8 +850,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.93 2012/05/07 14:44:50 fisyak Exp $
+ * $Id: StEventMaker.cxx,v 2.94 2013/04/11 18:57:36 jeromel Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.94  2013/04/11 18:57:36  jeromel
+ * cast to unsigned as mask is 2x32 in a unint64
+ *
  * Revision 2.93  2012/05/07 14:44:50  fisyak
  * Give StTpcDb hit about TriggerId
  *
