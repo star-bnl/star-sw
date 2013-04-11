@@ -238,7 +238,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
         if (myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
           node->SetHit(0); hit = 0; nFitLeft--; mNHits--;
 //		No hit anymore. Fit = Prediction		
-            node->SetFit(myPars,myErrs,2); 
+          node->SetFit(myPars,myErrs,2); 
+          break;
 	} 
 	iFailed = fitt->Update(); if (iFailed) nErr+=100000000;
          break;
