@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.29 2013/04/04 21:37:03 perev Exp $
+// $Id: StvMaker.cxx,v 1.30 2013/04/12 23:58:53 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -88,6 +88,7 @@ More detailed: 				<br>
 #include "StvStarVertexFinder.h"
 #include "StvTpcActive.h"
 #include "StvStEventMaker.h"
+#include "StvStarEdit.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems
@@ -154,6 +155,17 @@ Int_t StvMaker::InitDetectors()
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
 //		Now Initialize TGeo helper
   tgh->Init(1+2+4);
+//	TPC has non standard TGeo. Edit it
+
+  int nEdit = tgh->Edit(kTpcId,new StvTpcEdit());	//Disable fake padrows
+  Info("InitDetectors","%d fake TPC padrows disabled",nEdit);
+
+  int nLaye = tgh->Edit(kTpcId,new StvTpcLayer());	//Recalculate layers
+  Info("InitDetectors","%d TPC padrows relayered",nLaye);
+
+
+
+
 //	Check is Stv is running in fit hit error utility
 
   mFETracks = IAttr("fiterr");
