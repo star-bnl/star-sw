@@ -103,14 +103,14 @@ CVS/  FgtdGeo3.xml
   -->
 
 <Structure name="FGGG">
-   <var name="FgstConfig"  type="float" />
+   <var name="FgstConfig" />
 </Structure>
 
 <Structure name="FGST"  >
-   <var name="config"    type="float" />
-   <var name="ndisk"      type="int" />
-   <var name="nQuad"      type="int"/>
-   <var name="zDiscA(6)"   type="float"   />   
+   <var name="config"     />
+   <var name="ndisk"     type="int" />
+   <var name="nQuad"     type="int"/>
+   <var name="zDiscA(6)"  />   
 </Structure>
 
 <!--                                                                 
@@ -130,9 +130,9 @@ CVS/  FgtdGeo3.xml
   -->
 <Fill name="FGST" comment="FGT Geometry  for year 2012"  >
    <var name="config" value="1.0" comment="versioning of the FGST geometry data" />
-   <var name="ndisk"   value="6"    comment="number of disks" />
-   <var name="nQuad"   value="4"    comment="number quadrants in a disks" />
-   <var name="zdiscA"  value="{67.3990,77.8765,87.0840,97.4821,108.9121,118.9927}" comment=" z-center of disk senstive volume from center in STAR , as measured in 2011-10  "  />
+   <var name="ndisk"  value="6"    comment="number of disks" />
+   <var name="nQuad"  value="4"    comment="number quadrants in a disks" />
+   <var name="zdiscA" value="{67.3990,77.8765,87.0840,97.4821,108.9121,118.9927}" comment=" z-center of disk senstive volume from center in STAR , as measured in 2011-10  "  />
 </Fill>
 
 
@@ -142,11 +142,11 @@ CVS/  FgtdGeo3.xml
  ============================================================
   -->
 
-<Fill name="FGST" comment="FGT Geometry with one quadrant in one disk"  >
+<Fill name="FGST" comment="FGT Geometry with six full disks y2013.  Using y2012 z-positions."  >
    <var name="config" value="2.0" comment="versioning of the FGST geometry data" />
-   <var name="ndisk"   value="6"    comment="number of disks" />
-   <var name="nQuad"   value="4"    comment="number quadrants in a disks" />
-   <var name="zdiscA"    value="{70.,80.,90.,100.,110.,120.}" comment=" z-center of disk senstive volume from center in STAR , ideal location "  />
+   <var name="ndisk"  value="6"    comment="number of disks" />
+   <var name="nQuad"  value="4"    comment="number quadrants in a disks" />
+   <var name="zdiscA" value="{67.3990,77.8765,87.0840,97.4821,108.9121,118.9927}" comment=" z-center of disk senstive volume from center in STAR , as measured in 2011-10  "  />
 </Fill>
 
 
