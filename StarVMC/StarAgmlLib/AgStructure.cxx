@@ -1259,6 +1259,11 @@ Bool_t AgStructure::AgDetpNew( const Char_t *module, const Char_t *title )
   // Make sure that the namespace is really really defined
   assert(MODULE!="NONE");
 
+  //
+  // So... this is a real hack.  May cause us problems, but we would need to
+  // revisit AgStructure design to factor this out.  We are really abusing
+  // ROOT, the CINT dictionary and CINT here.
+  //
   gROOT -> ProcessLine(Form("using namespace %s;",MODULE.Data()));
 
   /// Get the /DETP/.commands folder
@@ -1631,14 +1636,11 @@ Bool_t AgStructure::AgDetpSet()
       // Get the name of the member variable
       TString member = obj->GetName();
 
-      std::cout << Form(">>> Configure /DETP/%s/%s::/%-20s <<<",fname.Data(),destination->GetName(),member.Data()) << std::endl;
-      //      TString myname = fname;
-      //      myname.ToLower();
-      //      gROOT->ProcessLine( Form ("std::cout << %s.%s << std::endl",myname.Data(),member.Data()) );
+      std::cout << Form(">>> Configure /DETP/%s/%s::/%-20s <<<",fname.Data(),destination->GetName(),member.Data()) << " ";
 
       // Now copy the member variable to the destination in the folder
       // and into the current structure
-      destination -> CopyDataMembers( source, member  );
+      destination -> CopyDataMembers( source, member, true  );
       this        -> CopyDataMembers( source, member  );
 
     }
