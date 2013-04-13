@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.23 2013/04/04 21:28:13 perev Exp $
+// $Id: StTGeoHelper.h,v 1.24 2013/04/13 00:02:03 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -109,6 +109,7 @@ const Mtx33F_t &GetDir() const   	{return fDir;}
 const float   *GetOrg() const   	{return fOrg;}
       StHitPlane *MakeHitPlane(const StTGeoIter &it);
       StHitPlane *GetHitPlane (const TString &path) const;
+      StHitPlane *RemHitPlane (const TString &path);
       void SetAxis(int axi)     	{fAxi=axi;}
       void SetDetId(StDetectorId id)	{ fDetId=id;}    
       StDetectorId GetDetId() const 	{ return fDetId;}    
@@ -214,6 +215,7 @@ public:
        void SetOpt (int opt)	{fOpt = (opt!=0);}
        void Init(int mode=0);
        void Finish();
+        int Edit(StDetectorId did,StActiveFunctor *af);
 
  StVoluInfo *SetModule (const char *voluName,int akt=1);
        void InitInfo();
@@ -226,7 +228,7 @@ public:
         int InitHits();
        void ClearHits();
        void Clear(const char *opt="");
-static double Look(double maxDist,const double pnt[3],const double dir[3]);
+       double Look(double maxDist,const double pnt[3],const double dir[3]);
 
         int SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc,const StTGeoSele *sel=0);
 static  StTGeoHelper *Instance();
@@ -266,7 +268,7 @@ StHitPlaneHardMap *GetPlaneHardMap() const {return fHitPlaneHardMap;}
 
 StHitPlaneInfo* IsHitPlane(const TGeoVolume *volu) const;
 StHitPlaneInfo* IsHitPlane(const TGeoNode   *node) const;
-StHitPlane   *GetCurrentHitPlane ();
+StHitPlane    * GetCurrentHitPlane ();
 
              int  MayHitPlane     (const TGeoVolume *volu) const;
   StHitPlaneInfo *MakeHitPlaneInfo(const StTGeoIter &iter);

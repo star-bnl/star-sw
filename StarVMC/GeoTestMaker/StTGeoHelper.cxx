@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.28 2013/04/10 03:49:30 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.29 2013/04/13 00:02:03 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -318,6 +318,35 @@ StVoluInfo *StTGeoHelper::IsFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo f
   return inf;
 }
 //_____________________________________________________________________________
+int StTGeoHelper::Edit(StDetectorId did,StActiveFunctor *af)
+{
+  
+  StTGeoIter it;
+  StDetectorId detId=kUnknownId;
+  int nEdit=0;
+  const TGeoVolume *vol=0,*myModu=0;
+  for (;(vol=*it);++it) {
+
+    if ( it.IsLast() && (vol == myModu)) myModu=0;
+    if (!it.IsFirst()) {continue;}		//First visit only
+    StVoluInfo *inf = IsModule(vol);
+    if (inf) {
+//      if (!IsActive(vol)) {it.Skip();continue;}
+      detId = DetId(vol->GetName());
+      if (!detId) 	continue;
+      if (!did	) 	continue;
+      if (did != detId) {it.Skip();continue;}
+      myModu =vol;
+    }
+    if (!myModu) 	continue;
+    const char *path = it.GetPath();
+    gGeoManager->cd(path);
+    int ans = (*af)(0);
+    if (ans>0) nEdit++;
+  }
+  return nEdit;
+}
+//_____________________________________________________________________________
 void StTGeoHelper::InitHitShape()
 {
   
@@ -438,7 +467,7 @@ int StTGeoHelper::SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc
     StHitPlaneInfo* hpi = IsHitPlane(vol);
     if (!hpi) 			continue;
     StHitPlane* hp = hpi->GetHitPlane (it.GetPath()); 
-    assert(hp);
+    if (!hp) 			continue;
     if (hp->GetHitErrCalc()==hitErrCalc) 	continue;
     if (sel) {//check selector
       const TGeoNode *node = it.GetNode();
@@ -614,13 +643,14 @@ static int nCall=0; nCall++;
 //_____________________________________________________________________________
 void StHitPlane::SetLayer()
 {
+ static StTGeoHelper *tg = StTGeoHelper::Inst();
  const float *pnt = GetPnt();
  double myPnd[3]={pnt[0],pnt[1],pnt[2]};
  const float *dir = GetDir(pnt)[0];
  double myDir[3] = {-dir[0],-dir[1],-dir[2]};
  assert(DOT(myPnd,myDir)<0);
 
- fNex = StTGeoHelper::Look(50,myPnd,myDir);
+ fNex = tg->Look(100,myPnd,myDir);
  assert(fNex>1e-2);
 }
 //_____________________________________________________________________________
@@ -642,6 +672,11 @@ const TGeoVolume *StTGeoHelper::GetModu() const
      if (IsModule(v))  			return v;
    }
    return 0;
+}
+//_____________________________________________________________________________
+const TGeoVolume *StTGeoHelper::GetVolu() const
+{
+   return gGeoManager->GetCurrentVolume();
 }
 //_____________________________________________________________________________
 void StTGeoHelper::Print(const char *tit) const
@@ -1062,6 +1097,15 @@ static int nCall=0; nCall++;
    return (*it).second;
 }
 //_____________________________________________________________________________
+StHitPlane *StHitPlaneInfo::RemHitPlane (const TString &path) 	
+{
+   StHitPlanePathMap::iterator it = fHitPlanePathMap.find(path);
+   if (it ==  fHitPlanePathMap.end()) {return 0;}
+   StHitPlane *hp = (*it).second;
+   fHitPlanePathMap.erase(it);
+   return hp;
+}
+//_____________________________________________________________________________
 void StHitPlaneInfo::Print(const char* tit ) const
 {
   printf("\nStHitPlaneInfo(%s) %s\n",GetName(),tit);
@@ -1381,7 +1425,11 @@ double StTGeoHelper::Look(double maxDist,const double pnt[3],const double dir[3]
     if (same) 				continue;
 
     prevPath=currPath; minStp = epsStp; 
-    if (IsSensitive()) break;
+    if (!IsSensitive()) 		continue;
+    StHitPlaneInfo* inf = IsHitPlane(node) ;
+    if (!inf) 				continue;
+    StHitPlane *hp = inf->GetHitPlane(currPath);
+    if (hp) 				break;
   }
   return myStep;
 }
