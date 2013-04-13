@@ -18,7 +18,7 @@
 #include "Stv/StvDraw.h"
 
 void myBreak(int);
-enum {kFstAng=74,kErrFakt=5,kLenFakt=3};
+enum {kFstAng=74,kErrFakt=5,kLenFakt=5};
 static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinTan = 0.1;
 
