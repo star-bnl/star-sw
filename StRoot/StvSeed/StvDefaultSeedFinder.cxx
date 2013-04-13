@@ -153,8 +153,9 @@ if (myDeb>0) {fDraw->Clear();mySeedObjs.clear();}
       { 
 	StvHit *nexHit = (StvHit*)node->GetObj();
         if (nexHit->timesUsed()) 	continue;
-        if (nexHit->detector()==hp) 	continue;
-	int ans = mSel.Reject(nexHit->x());
+        const StHitPlane *hpNex = nexHit->detector();
+        if (hpNex==hp) 	continue;
+	int ans = mSel.Reject(nexHit->x(),hpNex);
 	if (ans>0) continue;
 //			Selecting the best
         selHit=nexHit;
@@ -194,7 +195,7 @@ StvConeSelector::StvConeSelector()
 //_____________________________________________________________________________
 void StvConeSelector::AddHit(const float *x,const float *dir,float layer)
 {
-  mMinPrj = 1.e11; mMinImp = 1.e11;
+  mMinPrj = 1.e11; mMinImp = 1.e11; mHp = 0;
   mX[++mJst]=x;
   mHit = x;
   mLayer = layer;
@@ -284,7 +285,7 @@ void  StvConeSelector::UpdateLims()
 
 }
 //_____________________________________________________________________________
-int  StvConeSelector::Reject(const float x[3])
+int  StvConeSelector::Reject(const float x[3],const void* hp)
 {
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
 
@@ -298,14 +299,16 @@ int  StvConeSelector::Reject(const float x[3])
    float imp =mHitLen-mHitPrj*mHitPrj; if (imp<=0) imp = 0;
    float lim = (mErr) + mHitPrj*mTan;
    if (imp > lim*lim)          		return 7;	//Outside of cone aside
-
-   if (mHitPrj>mMinPrj*1.1) 		return 8;	//more far than best,along
-   if (mHitPrj<mMinPrj*0.9) {
-     mMinPrj= mHitPrj; mMinImp=imp;	return -1;	//hit plane more close
+   int ans = 99;
+   if (mHp != hp) { 					//different layers, only prj is important
+     if (mHitPrj>mMinPrj) 		return 8;	//more far than best,along
+     ans = -1;
+   } else         {					//same layer, only impact is important
+     if (imp>mMinImp) 			return 9;	//same plane but impact bigger
+     ans = 0;
    }
-   if (imp    >mMinImp    ) 		return 9;	//same plane but impact bigger
-   mMinPrj= mHitPrj; mMinImp=imp;
-   return 0;						//impact best but cone the same
+   mMinPrj= mHitPrj; mMinImp=imp; mHp = hp;
+   return ans;						//impact best but cone the same
 }
 //_____________________________________________________________________________
 void StvConeSelector::Update()

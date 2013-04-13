@@ -26,9 +26,9 @@ void AddHit(const float *x,const float *dir,float layer);
 void SetErr(float err) 			{mErr=err;}
 
 
-int  Reject(const float x[3]);	// 0  :x accepted
-				// >0 :x rejected
-				//-1 =x     accepted and lims updated
+int  Reject(const float x[3],const void* hp);	// 0  :x accepted
+					// >0 :x rejected
+					//-1 =x     accepted and lims updated
 private:
 void UpdateLims();		//Update XYZ limits
 
@@ -36,6 +36,7 @@ public:
 //		Input data
 char  mBeg[1];
 int   mJst;
+const void* mHp;
 float mErr;
 float mRxy2;
 float mRxy;
