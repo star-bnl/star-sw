@@ -28,6 +28,8 @@
 #include "Stv/StvHitCounter.h"
 ClassImp(StvKalmanTrackFinder)
 
+int ThruFgt(const StvNodePars &par);	///???????????????????????????????
+
 typedef std::vector<StvNode*> 		StvNodeVec;
 typedef std::map<double,StvNode*> 	StvNodeMap;
 typedef StvNodeMap::iterator 		StvNodeMapIter ;
@@ -108,6 +110,13 @@ StvDebug::Count("FitRefit",nFitHits,nHits);
 
 	StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
 	if (node) node->UpdateDca();
+static int akio=0;
+if (akio && node) { 
+ int ak = ThruFgt(node->GetFP());
+ if (ak) {
+   StvDebug::Break(-3);
+ } }
+ 
 
 	kit->GetTracks().push_back(mCurrTrak);
 	nTrk++;nTrkTot++;
@@ -399,4 +408,31 @@ enum {kTryFitMax = 5,kBadHits=5};
   return state;
 
 }
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+// int checkfgt(double x0, double y0, double x1, double y1){
+//   static const double z=67.399; //disc1 z
+//   double x=x0+x1*z;
+//   double y=y0+y1*z;
+//   double r=sqrt(x*x+y*y);
+//   if(r>12.0 && r<38.0) return 1;
+//   return 0;
+// }
 
+int ThruFgt(const StvNodePars &par)
+{
+static const double kZ=67.399; //disc1 z
+static const double kRmin =12.0;
+static const double kRmax =38.0;
+  double t = (kZ-par._z)/par._tanl;
+  if (t<0) return 0;
+  double myX = par._x + par._cosCA*t;  
+  double myY = par._y + par._sinCA*t;
+  double rr = myX*myX+myY*myY;
+  if (rr<kRmin*kRmin) return 0;
+  if (rr>kRmax*kRmax) return 0;
+  return 1;
+}  
