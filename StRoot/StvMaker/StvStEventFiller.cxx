@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.26 2013/04/10 03:37:25 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.27 2013/04/15 00:41:42 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.27  2013/04/15 00:41:42  perev
+ * outdated assert removed
+ *
  * Revision 1.26  2013/04/10 03:37:25  perev
  * account non Tpc hits with waight =2
  *
@@ -1146,7 +1149,6 @@ void StvStEventFiller::fillFlags(StTrack* gTrack) {
   const StTrackFitTraits &fitTrait = gTrack->fitTraits();
   int totFitPoints = fitTrait.numberOfFitPoints();
   int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
-  assert(tpcFitPoints*2 > totFitPoints);
   const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
   if (dinfo) {
     Int_t NoTpcFitPoints = dinfo->numberOfPoints(kTpcId);
