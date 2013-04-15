@@ -56,9 +56,9 @@ static const StvConst  *kons = StvConst::Inst();
   int nFitRite=0;		// number of fits made during previous
   				// pass in different direction, including current node 
   int wasFitted=0;		// this node was fitted in previous pass
-  int nFitTotal = trak->GetNFits(jane);
+  mNHits = trak->GetNFits(jane);
   if (mode&1) {//Join of two lanes
-    nFitRite = nFitTotal;}
+    nFitRite = mNHits;}
   else        {//no join. lanes independent
     jane=lane;
   }
@@ -162,7 +162,7 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 	if (iFailed ) nErr+=1; 			//Fit is bad yet
 	if (myXi2> kons->mXi2Hit) nErr+=10; //Fit is bad yet
         if ( myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
-            if (--nFitTotal <3) 			return 1;
+            if (--mNHits <3) 			return 1;
             node->SetHit(0); hit = 0; nFitLeft--;
 //		No hit anymore. Fit = Prediction		
             node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
