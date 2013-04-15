@@ -367,12 +367,14 @@ enum {kTryFitMax = 5,kBadHits=5};
     for (int refIt=0; refIt<55; refIt++)  	{	//Fit iters
       ans = tkf->Refit(mCurrTrak,idir,lane,1);
 //    ==================================
+      nHits=tkf->NHits();
       if (nHits < kBadHits) break;
       if (ans>0) break;			//Very bad
       
       StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
       anz = tkf->Refit(mCurrTrak,1-idir,1-lane,1); 
   //        ==========================================
+      nHits=tkf->NHits();
       if (nHits < kBadHits) break;
       if (anz>0) break;	
 
@@ -382,9 +384,10 @@ enum {kTryFitMax = 5,kBadHits=5};
     
     state = (ans!=0) + 2*((anz!=0) + 2*(!converged) 
           + 2*(mCurrTrak->GetXi2()>kons->mXi2Trk)+2*(nHits <= kBadHits));
-    if (!state) break;
-    if (nHits <= kBadHits) break;
+    if (!state) 		break;
+    if (nHits <= kBadHits) 	break;
     StvNode *badNode=mCurrTrak->GetNode(StvTrack::kMaxXi2);
+    if (!badNode) 		break;
     badNode->SetHit(0);
     nHits--; if (nHits < kBadHits) break;
   }//End Repair loop
