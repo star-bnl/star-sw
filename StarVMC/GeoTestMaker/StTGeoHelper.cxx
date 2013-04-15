@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.29 2013/04/13 00:02:03 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.30 2013/04/15 00:40:45 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -579,8 +579,8 @@ int StTGeoHelper::MayHitPlane(const TGeoVolume *volu)  const
       par[4] = bb->GetDZ();
       par[0] = sqrt(par[0]);
       par[1] = sqrt(par[1]);
-      if ((par[1]-par[0])*kHow <      (2*par[4])) myKode = 123;			//thin walls
-      if ((par[1]-par[0])      > kHow*(2*par[4])) myKode = 4;		//disk
+      if ((par[1]-par[0])*kHow <      (2*par[4])) myKode =   4;		//thin walls
+      if ((par[1]-par[0])      > kHow*(2*par[4])) myKode = 123;		//disk
     }
   }
   return myKode;
