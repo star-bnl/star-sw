@@ -20,7 +20,7 @@ StvFitter *StvFitter::mgFitter=0;
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
 
 enum {kDeltaFactor = 1};
-static const double kMinCos = 0.1;	// minimal cos allowed
+static const double kMinCos = 0.5;	// minimal cos allowed
 
 static const double kXtraBigXi2 = 9e9;
 
@@ -68,9 +68,6 @@ StvDebug::Break(nCall);
   double chi2;
   TCL::trasat(Pdif,ERi,&chi2,1,nP1); 
 
-  double PJt[5],EJt[15];
-  double chi2T =JoinTwoT(nP1,P1,E1,nP2,P2,E2,PJt,EJt);
-  assert(fabs(chi2-chi2T) <1e-3*(chi2+chi2T+1));
   if (!PJ)      return chi2;
   if (chi2>=kXtraBigXi2) return chi2;
   TCL::ucopy(EJm,EJ,nE2);		//EJ = 1/EJi
@@ -80,12 +77,6 @@ StvDebug::Break(nCall);
   TCL::vadd(P2J,P1J,P2J,nP1);		//P2J = P1J+P2J
   TCL::trsa(EJ,P2J,PJ,nP2,1);		//PJ  = EJ*P3J
 
-  double dia[5];
-  for (int i=0,li=0;i< 5;li+=++i) {
-    dia[i]= sqrt(EJt[li+i]);
-    assert(fabs(PJ[i]-PJt[i])<1e-4*dia[i]);
-    for (int j=0;j<=i; j++) {
-      assert( fabs(EJ[li+j]-EJt[li+j])<1e-4*(dia[i]*dia[j]));}}
 
   return chi2;
 }
@@ -409,99 +400,6 @@ double StvFitter::TooBig(StvFitPars &fp, int *mask) const
   if (mask) *mask = msk;
   return fakt;
 }
-#if 0
-//______________________________________________________________________________
-double StvFitter::JoinTwo(int nP1,const double *P1,const double *E1
-                         ,int nP2,const double *P2,const double *E2
-	                 ,              double *PJ,      double *EJ
-			 ,int mode)
-{
-// 		mode=0 normal case
-//		mode=1 assign to vertex where 1st nP1 words of PJ must be == P1
-static int nCall =0; nCall++;
-
-  assert(nP1<=nP2);
-  int nE1 = nP1*(nP1+1)/2;
-  int nE2 = nP2*(nP2+1)/2;
-  TArrayD ard(nE2*6+2*nP2*nP2);
-  double *a = ard.GetArray();  
-  double *sumE 		= (a);
-  double *sumEI 	= (a+=nE2);
-  double *e2sumEIe2 	= (a+=nE2);
-  double *subP 		= (a+=nE2);
-  double *sumEIsubP	= (a+=nE2);
-  double *E2U           = (a+=nE2);
-  double *E2UsumEI      = (a+=nP2*nP2);
-  a+=nP2*nP2);
-  assert(a-ard.GetArray()<=ard.GetSize());
-
-  double chi2=3e33;
-
-
-  do {//empty loop
-//  	Join errors
-    if (!mode) {TCL::vadd (E2,E1,sumE,nE1);}
-    else       {TCL::ucopy(E2,   sumE,nE1);}
-    TCL::trsinv(sumE,sumEI,nP1);
-    TCL::vsub  (P1  ,P2   ,subP   ,nP1);
-    TCL::trasat(subP,sumEI,&chi2,1,nP1); 
-    if (!EJ) 	break;
-
-    TCL::trqsq (E2  ,sumEI,e2sumEIe2,nP2); 
-    TCL::vsub(E2,e2sumEIe2,EJ,nE2);
-    if (!mode)  break;
-    TCL::trupck(E2,E2U,nP2);
-    TCL::trats(E2U,sumEI,E2UsumEI,nP2,nP1);
-    TCL::trasat(E2UsumEI,E1,E2U,nP2,nP1);
-    TCL::vadd(E2U,EJ,EJ,nE2);
-      
-  } while(0);
-//  	Join params
-    double Xi2X,Xi2T;
-    if (!mode) {
-     Xi2X = JoinTwoX(nP1,P1,E1,nP2,P2,E2,0,0);
-     Xi2T = JoinTwoT(nP1,P1,E1,nP2,P2,E2,0,0);
-    assert(fabs(Xi2X-Xi2T) < (Xi2X+Xi2T+0.1)*1e-1);
-    } else {
-     Xi2T = JoinVtx(nP1,P1,E1,nP2,P2,E2,0,0);
-    }
-    assert(fabs(chi2-Xi2T) < (chi2+Xi2T+0.1)*1e-4);
-  if (!PJ) return chi2;
-  TCL::tras(subP     ,sumEI,sumEIsubP,1,nP1);
-  TCL::tras(sumEIsubP,E2   ,PJ       ,1,nP2);
-  TCL::vadd(PJ       ,P2   ,PJ         ,nP2);
-
-  double PJX[5],PJT[5],EJX[15],EJT[15];
-
-    if (!mode) {
-      Xi2X = JoinTwoX(nP1,P1,E1,nP2,P2,E2,PJX,EJX);
-      Xi2T = JoinTwoT(nP1,P1,E1,nP2,P2,E2,PJT,EJT);
-      TCL::ucopy(PJT,PJ,nP2);
-      TCL::ucopy(EJT,EJ,nE2);
-      for (int i=0;i<5;i++) {
-        assert (fabs(PJX[i]-PJT[i])<1e-5*(fabs(PJT[i]+0.1)));
-      }
-    } else {
-      Xi2T = JoinVtx(nP1,P1,E1,nP2,P2,E2,PJT,EJT);
-      TCL::ucopy(PJT,PJX,nP2);
-      TCL::ucopy(EJT,EJX,nE2);
-    }
-     
-    for (int i=0;i<5;i++) {
-      assert (fabs( PJ[i]-PJT[i])<1e-4*(fabs(PJT[i]+0.1)));
-    }
-    for (int i=0;i<15;i++) {
-      assert (fabs(EJX[i]-EJT[i])<1e-5*(fabs(EJT[i]+0.1)));
-    }
-
-    for (int i=0;i<15;i++) {
-      assert (fabs( EJ[i]-EJT[i])<1e-4*(fabs(EJT[i]+0.1)));
-    }
-   
-
-  return chi2;
-}
-#endif
 //______________________________________________________________________________
 void StvFitter::Test()
 {
