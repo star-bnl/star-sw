@@ -112,6 +112,7 @@ const double BAD_RHO=0.1;
     double hRR[3];
     myHitErrCalc->CalcDcaErrs(fx,hd,hRR);
     double cos2l = circ.GetCos(); cos2l*=cos2l;
+    if (hRR[0]<1e-4) hRR[0]=1.;
     fHelix.AddErr( hRR[0],hRR[2]/cos2l);
   }
   Xi2 =fHelix.Fit();
