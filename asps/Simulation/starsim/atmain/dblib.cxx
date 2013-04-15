@@ -1,8 +1,14 @@
 
 /*
-** $Id: dblib.cxx,v 1.7 2009/11/19 04:58:19 perev Exp $
+** $Id: dblib.cxx,v 1.9 2010/08/27 16:28:06 perev Exp $
 **
 ** $Log: dblib.cxx,v $
+** Revision 1.9  2010/08/27 16:28:06  perev
+** Simlification
+**
+** Revision 1.8  2010/08/27 14:20:11  fisyak
+** Add stdio.h for gcc  4??
+**
 ** Revision 1.7  2009/11/19 04:58:19  perev
 ** DUMMY mYSql
 **
@@ -168,6 +174,9 @@
 // Mar 27 2002 AV added dynamic array support
 // Feb 28 2002 AV removed mysql_close due to a conflict with mysql_ping
 /*******************************************************************************/
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 //gcc3.2
 #if defined(__GNUC__) &&  (__GNUC__ >= 3)
@@ -176,14 +185,8 @@
 #        include <string>
 #        include <sstream>
          using namespace std;
-#       if (__GNUC__ >= 4)
-#           include <string.h>
-#       endif
 int my_query(ostringstream *Query);
 #else //.h for gcc-2 and SunOS
-#        include <stdio.h>
-#        include <stdlib.h>
-#        include <string.h>
 #        include <strstream.h>
 // extern char *strdup (__const char *__s) __THROW __attribute_malloc__;
 int my_query(ostrstream *Query);

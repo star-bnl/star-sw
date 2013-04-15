@@ -106,7 +106,7 @@ Fill  EMCS                          ! EM Endcap Calorimeter geometry
       ZOrg     = 268.763            ! calorimeter origin in z
       ZEnd     = 310.007            ! Calorimeter end in z
       EtaMin   = 1.086              ! upper feducial eta cut 
-      EtaMax   = 2.0,               ! lower feducial eta cut
+      EtaMax   = 2.0                ! lower feducial eta cut
       PhiMin   = -90                ! Min phi 
       PhiMax   = 90                 ! Max phi
       Offset   = 0.0                ! offset in x
@@ -141,7 +141,7 @@ Fill  EMCS                          ! EM Endcap Calorimeter geometry
       ZOrg     = 268.763            ! calorimeter origin in z
       ZEnd     = 310.007            ! Calorimeter end in z
       EtaMin   = 1.086              ! upper feducial eta cut 
-      EtaMax   = 2.0,               ! lower feducial eta cut
+      EtaMax   = 2.0                ! lower feducial eta cut
       PhiMin   = -90                ! Min phi 
       PhiMax   = 90                 ! Max phi
       Offset   = 0.0                ! offset in x
@@ -1879,8 +1879,11 @@ c 		B) Introduced sector overlaps
 c 		C) All other changes are documentede here:
 c	 	   http://drupal.star.bnl.gov/STAR/subsys/eemc/endcap-geometry-update-2009
 c
-c $Id: ecalgeo6.g,v 1.3 2009/12/22 18:27:15 jwebb Exp $
+c $Id: ecalgeo6.g,v 1.4 2010/09/09 17:08:45 jwebb Exp $
 c $Log: ecalgeo6.g,v $
+c Revision 1.4  2010/09/09 17:08:45  jwebb
+c Removed stray comma (typo) from EMCS fill statement.
+c
 c Revision 1.3  2009/12/22 18:27:15  jwebb
 c Corrected error in definition of 10 keV cuts for bcutm.
 c

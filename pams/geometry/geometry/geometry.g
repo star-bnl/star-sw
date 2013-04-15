@@ -1,5 +1,170 @@
-* $Id: geometry.g,v 1.215 2010/05/25 21:21:50 jwebb Exp $
+* $Id: geometry.g,v 1.258 2013/02/26 15:25:32 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.258  2013/02/26 15:25:32  jwebb
+* Updates to the Y2013 first cut and asymptotic tags.  Pixel support tube
+* remains in place when pixel detector is removed.
+*
+* Revision 1.257  2013/02/21 22:51:24  jwebb
+* Defined pixel detector in and out geometries.
+*
+* Revision 1.256  2013/02/06 21:58:09  jwebb
+* Corrections to y2013 geometry tag.  Addition of y2012b geometry tag to
+* properly include the MTD.
+*
+* Revision 1.255  2013/02/05 21:26:31  jwebb
+* Corrected double placement of volume in PixlGeo5
+*
+* Revision 1.254  2013/02/05 16:58:36  jwebb
+* Definition of the y2013 and y2013x geometry tags.
+*
+* Revision 1.253  2013/01/22 18:27:10  jwebb
+* Defined Y2013x geometry.
+*
+* Revision 1.252  2013/01/17 21:04:52  jwebb
+* Support for improved magnet model, improved trim coil description, in y2013x
+* geometry tag.
+*
+* Revision 1.251  2012/12/19 14:48:39  jwebb
+* Updates to support y2013 version of MTD.
+*
+* Revision 1.250  2012/12/14 16:13:56  jwebb
+* Updates for y2013 geometry.
+*
+* Revision 1.249  2012/11/02 15:03:21  jwebb
+* Fix format statement for SL4.4.
+*
+* Revision 1.248  2012/11/01 20:49:16  jwebb
+* Add TOF_MAX configuration option.
+*
+* Revision 1.247  2012/08/27 17:50:28  jwebb
+* Added estar1 and tpciv1 geometry tags.
+*
+* Revision 1.246  2012/08/27 14:56:12  jwebb
+* Added vfgt to definition of the estar development geometry.
+*
+* Revision 1.245  2012/07/02 18:50:36  jwebb
+* Few more modifications for dev14 geometry.  Add VPD and PXST to dev14.
+*
+* Revision 1.244  2012/06/29 15:10:51  jwebb
+* Added DEV14 geometry tag.
+*
+* Revision 1.243  2012/05/31 20:57:28  jwebb
+* Added y2012a production tag
+*
+* Revision 1.242  2012/05/07 21:44:06  jwebb
+* Added "devT" geometry tag for TPC upgrade studies.
+*
+* Revision 1.241  2012/03/28 15:14:17  jwebb
+* Switched pipe12 (old beam pipe) to pipev1 (new narrow beam pipe) for dev13
+* geometry with the HFT.
+*
+* Revision 1.240  2011/11/22 15:09:19  jwebb
+* Added "devE" tag for eStar development.
+*
+* Revision 1.239  2011/10/13 18:23:58  jwebb
+* Added production geometry tag y2011a.  Tag y2011a is consistent with the y2011
+* geometry tag, as it exists in the SL11c and SL11d libraries.  y2011a should be
+* used for any reproduction of production series PL11ic and PL11id.
+*
+* Revision 1.238  2011/10/07 19:44:45  jwebb
+* Switched versions of the PIXL detector.
+*
+* Revision 1.237  2011/10/06 20:38:22  jwebb
+* Fixed FGT setup.
+*
+* Revision 1.236  2011/10/06 19:54:48  jwebb
+* Moved IDSM earlier in the call sequence.
+*
+* Revision 1.235  2011/10/06 15:52:05  jwebb
+* Added dev13 tag.
+*
+* Revision 1.234  2011/10/06 14:54:00  jwebb
+* Added DEV13 geometry.  Removed pmd from y2012.  Added pixl to complete.
+*
+* Revision 1.233  2011/10/03 22:03:06  jwebb
+* Redefined the "complete" geometry for use in anticipated simulations with
+* FGT.  Did not add the HFT as we do not yet have a geometry for that.
+*
+* Revision 1.232  2011/08/19 16:44:14  jwebb
+* Definition of Y2012 geometry tag (1st cut).
+*
+* Revision 1.231  2011/07/20 20:23:47  jwebb
+* Upgr23 tag defined with FSC geometry and FMS in open position.
+*
+* Revision 1.230  2011/07/18 15:53:12  jwebb
+* Reverted to single FGT "upgr2012" geometry.
+*
+* Revision 1.229  2011/07/06 17:39:01  jwebb
+* Defined upgr2012a: 2-disk FGT
+*
+* Revision 1.228  2011/05/12 19:42:42  jwebb
+* Definition of upgr2012 geometry now includes IdsmGeo1 and FgtdGeo3 by default.
+*
+* Revision 1.227  2011/05/02 20:22:16  jwebb
+* Added code to pass configuration of the MTD to the mutdgeo4 module.
+*
+* Revision 1.226  2011/04/25 18:27:00  jwebb
+* Added Y2008e tag, which implements the LOW_EM central calorimeter cuts in
+* the y2008 geometry.
+*
+* Revision 1.225  2011/04/11 17:37:56  jwebb
+* Introduce UPGR2012 geometry as y2011 with inner detectors (FGT, SSD) and
+* supports removed.
+*
+* Revision 1.224  2011/03/11 00:05:18  jwebb
+* Added Y2008d, Y2009d, Y2010c and updated Y2011 geometry tags.  These tags
+* now contain an improved model of the SVT support cone... specifically the
+* support rods.  Previous geometry assumed solid carbon.  Now we assume a
+* carbon-fiber nomex sandwich.
+*
+* Revision 1.223  2010/12/22 00:13:00  jwebb
+* Correction to the documentation bank in the fzd file for y2008c geometry.
+*
+* Revision 1.222  2010/12/21 17:21:31  jwebb
+* Added Y2008c tag.
+* Added Y2009c tag.
+* Added y2010b tag.
+*
+* These three tags represent the current best model of the STAR detector,
+* including TOF geometry, for Y2008 - Y2010.  Previous models used a TPC
+* envelope which was too large and overlapped with 'kOnly' volumes in the
+* TOF, causing 'odd' hit distributions.
+*
+* Revision 1.221  2010/12/17 20:01:24  jwebb
+*
+* Defined TPCE04r (reduced TPC envelope radius) and BTOF67 (btof sensitive
+* volume size fix) and incorporated them into Y2011 tag.
+*
+* Revision 1.220  2010/11/12 20:04:14  jwebb
+* Added y2008b geometry tag with most recent models of the TPC, endcap
+* and barrel.
+*
+* Revision 1.219  2010/10/31 16:27:32  jwebb
+* Switch PHMD on.  Modified configuration of MUTD at request of Bill Llope.
+*
+* Revision 1.218  2010/07/30 18:31:29  jwebb
+* Added development / baseline y2011 geometry tag and reduced the number
+* of write statements.
+*
+* Revision 1.217  2010/07/12 18:47:20  jwebb
+* Added y2005i tag to provide up-to-date version of ecal in y2005 geometry
+* and to provide 10 keV transport cuts in calorimeters.
+*
+* Revision 1.216  2010/06/01 18:57:41  jwebb
+* Modified geometry.g so that seperate particle transport cuts can be
+* used in the BEMC and EEMC.  This is needed for the spin/dijet simulation
+* request summarized here:
+*
+* http://drupal.star.bnl.gov/STAR/starsimrequests/2010/may/26/filtered-dijet-simulation
+*
+* The simulation request applies filters which select out barrel- and
+* adjacent-jetpatch triggers.  Thus, the endcap is only important for
+* trigger response.  Requestors have noted a x2 increase in speed when
+* EEMC is run with higher tracking cuts than in the BEMC.
+*
+* We define the Y2009b tag to apply the 10keV default tracking cuts in
+* the BEMC, and revert the EEMC to the 80kev/1MeV (photon/electron) cuts.
+*
 * Revision 1.215  2010/05/25 21:21:50  jwebb
 * y2010a geometry tag commit.  Tag is identical to y2010, except dependency
 * on y2009a is removed.
@@ -913,8 +1078,7 @@
 
 replace [exe BBCMon;] with [;BBCM=on;]
 
-*                                                                                   Barrel Calorimeter 
-
+replace [exe MAGPv1;] with [;MagpConfig = 2; """Improved magnet model"""; ]
 
 replace [exe CALBof;] with [;CALB=off;]
 replace [exe CALB00;] with [;"Full barrel in 2007"; CALB=on;
@@ -945,6 +1109,7 @@ replace [exe CALB02;] with [;CALB=on;
 
 replace [exe CAVE03;] with [ "We need an even bigger Cave";   CaveConfig = 3;]
 replace [exe CAVE04;] with [ "We need an even bigger Cave";   CaveConfig = 4;]
+replace [exe CAVE05;] with [ "How about we just get the dimensions right and be done with it"; CaveConfig=5;]
 
 *                                                                                   Endcap Calorimeter 
 replace [exe ECALof;] with [;ECAL=off;]
@@ -977,8 +1142,8 @@ replace [exe ECALv6;] with[;"ECAL version 6.1 (or higher)"
                            ;EcalGeometry=6; "Version 6.1 and higher";
                            ]
 
-replace [exe EMCUTS(#);] with [ "Set eemc / bemc cuts to #1";
-                                EmCutConfig=#1;
+replace [exe EMCUTS(#,#);] with [ "Set eemc / bemc cuts to #1";
+                                #1CutConfig=#2;
                               ]
 
 
@@ -1006,8 +1171,14 @@ replace [exe MFLD54;] with [ MFLD=on; magField = 5.0; MfldConfig=4;]
 
 *                                                                                       Muon Telescope 
 
-replace [exe MUTD01;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 1;]
-replace [exe MUTD03;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 3;]
+Replace [exe MUTD01;] with [ "Muon Trigger System";                   MUTD=on;   MutdConfig= 1;]
+Replace [exe MUTD03;] with [ "Muon Trigger System";                   MUTD=on;   MutdConfig= 3;]
+Replace [exe MUTD04;] with [ "MTD Run 11 - single backleg, 3 trays";  MUTD=on;   MutdConfig= 4;]
+Replace [exe MUTD05;] with [ "MTD Run 28 backlegs, 118 trays";        MUTD=on;   MutdConfig= 5;]
+Replace [exe MUTD12;] with [ "MTD Run 12 - 3  backlegs, 13 trays";    MUTD=on;   MutdConfig=12;]
+Replace [exe MUTD13;] with [ "MTD Run 13 - 15 backlegs, 75 trays";    MUTD=on;   MutdConfig=13;]
+
+
 
 *                                                                         Photon Multiplicity Detector   
 
@@ -1024,10 +1195,23 @@ replace [exe PIPE04;] with [ "The new pipe according to Kai"; PipeConfig = 4;
 replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
                              "pipe wrap only" ;               PipeFlag   = 1;]
 
+replace [exe PIPEv1;] with [ "The beam pipe for the HFT";     PipeConfig = 10;]
+replace [exe PIPEv2;] with [ "The beam pipe for the HFT";     PipeConfig = 20;]
+
+
 *                                                                                       Pixel Detector
 
 replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
 replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
+replace [exe PIXL02;] with [ "Add the pixle detector to the IDSM"; PIXL=on; PixlConfig=6; ]
+
+replace [exe PIXL05;] with [ "Add pixel detector to the IDSM"; PIXL=on;     PixlConfig=50; ]
+
+replace [exe DTUB01;] with [ "Add DTUB (no op)"; ]
+
+replace [exe ISTD01;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=1; ]
+replace [exe PXST01;] with [ "Add the PST to the IDSM"; PXST=on; PxstConfig=0; ]
+
 replace [exe RICHof;] with [;RICH=off;]
 replace [exe RICH02;] with [;RICH=on; richPos=2; richConfig=2;]
 
@@ -1035,6 +1219,7 @@ replace [exe SCON02;] with [;SCON = off; ConeConfig=2 " new cable weight estimat
 
 replace [exe SCON12;] with [;SCON = on ; ConeConfig=2 " new cable weight estimate ";]
 replace [exe SCON13;] with [;SCON = on ; ConeConfig=3 " new cable weight estimate ";]
+replace [exe SCON14;] with [;SCON = on ; ConeConfig=4 " new cable weight estimate better SROD";]
 
 
 *                                                                               Silicon Strip Detector
@@ -1049,6 +1234,7 @@ replace [exe SISD35;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=
 replace [exe SISD55;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=55;]
 replace [exe SISD65;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=65;]
 replace [exe SISD75;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=75;]
+replace [exe SISD85;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=85;]
 
 replace [exe SVTTof;] with ["SVTT version"; SVTT=off; SvttConfig = -1;]
 replace [exe SVTT00;] with ["SVTT version"; SVTT=on;
@@ -1112,11 +1298,36 @@ replace [exe BTOF16;] with [;" X.Dong";BTOF=on;
 replace [exe BTOF66;] with [;" X.Dong";BTOF=on;
                             BtofConfig=6; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=0;]
+
+replace [exe BTOF67;] with [;"F.Geurts fixes to sensitive volumes";
+                            BtofConfig=6; Itof=7 "call btofgeo7";
+                            tofX0=0.00; tofZ0=0.00;]
+
 replace [exe BTOFb6;] with [;" X.Dong";BTOF=on;
                             BtofConfig=11; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=-0.50;]
-replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo6 ";]
 
+replace [exe BTOFb7;] with [;" X.Dong";BTOF=on;
+                            BtofConfig=11; Itof=7 " call btofgeo7 ";
+                            tofX0= 0.00; tofZ0=-0.50;]
+
+replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo6 ";]
+replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=7 " call btofgeo7 ";]
+
+replace [exe BTOFv8;] with [;BTOF=on; BtofConfig=13; Itof=8 "call btofgeo8";]
+""" ----------------------------------------------------------------------- """
+""" TPC Configurations                                                      """
+"""     Naming convention is offset by 1 from the corresponding module.     """
+"""                                                                         """
+""" TPCE00  Module: tpcegeo                                                 """
+""" TPCE01  Module: tpcegeo                                                 """
+""" TPCE02  Module: tpcegeo1                                                """
+""" TPCE03  Module: tpcegeo2                                                """
+""" TPCE04  Module: tpcegeo3                                                """
+""" TPCE04r Module: tpcegeo3 with reduced rmax                              """
+"""                                                                         """
+""" TPCE31 revises this scheme.  It corresponds to the version number (3)   """
+"""        and subversion number (1). TPCE30 == TPCE04r.                    """
 
 
 replace [exe TPCE00;] with [;"New version of the TPC backplane "; TpceConfig = 1;]
@@ -1128,6 +1339,20 @@ replace [exe TPCE03;] with [;"New version of the TPC backplane "; TpceConfig = 3
                              "gas density correction";            DensConfig = 1;]
 replace [exe TPCE04;] with [;"New version of the TPC backplane "; TpceConfig = 4;
                              "gas density correction";            DensConfig = 1;]
+replace [exe TPCE04r;] with [;"New version of the TPC backplane "; TpceConfig = 4;
+                              "gas density correction";            DensConfig = 1;
+                              "radius correction";                 RmaxConfig = 1;]
+
+replace [exe TPCE30;] with [;"Equivalent to TPCE04r"; exe TPCE30; ]
+replace [exe TPCE31;] with [;"                     "; TpceConfig = 31; ]
+
+replace [exe tpcx10;] with [;"TPC test version";    TpcxConfig=1;
+                            ;"Disable old TPC";     TpceConfig=0;
+                            ;"Set 1st TPAD config"; TpadConfig=0;]
+replace [exe tpcx11;] with [;"TPC test version";    TpcxConfig=1;
+                            ;"Disable old TPC";     TpceConfig=0;
+                            ;"Set 1st TPAD config"; TpadConfig=1;]
+                            
 
 replace [exe ISTB00;] with [;ISTB=on;IstbConfig=-1;]
 
@@ -1139,11 +1364,20 @@ replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConf
 
 
 replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
+replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 5 half plus one full disk"]
+replace [exe FGTDv32;] with [;FGTD=on;FgtdConfig=32; "FGT v3 6 disks"]
+replace [exe FGTDv55;] with [;FGTD=on;FgtdConfig=55; "FGT very forward upgrade w/ 12 disks"]
+
+replace [exe IDSM01;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
+replace [exe IDSM02;] with [;IDSM=on;IdsmConfig=2; "Inner Detector Support"]
 
 replace [exe FSTDof;] with  [;FSTD=off;]
 replace [exe ITSPof;] with  [;ITSP=off;] "prototype of the Inner Tracker SuPport structure"
 
 replace [exe FHCM01;] with  [;FhcmConfig=1;] 
+
+
+replace [exe EIDDv01;] with [;EiddConfig=1; EIDD=on; ]
 
 
 ********* Geometry definitions *******************************************************
@@ -1257,22 +1491,22 @@ replace [exe y2003x;] with [ "same as y2003b but with full calorimeters and PHMD
 
 
 *********  (in)complete   ***
-replace [exe COMPLETE;] with ["New Complete+correction 3 in 2003 geometry:";
-                              "TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD";
-                              "(complete tag has been out of date since 2003)x";
-         exe SVT204;
-         exe BTOF52;
-         exe CALBc0;
-         exe ECAL33;
-         exe BBCMon;
-         exe FPDM00;
-         exe TPCE01;
-         exe FTPC00;
-         exe PHMD01;
-         exe SISDof;
-         exe PIPE04; 
-         exe PIXL01;
-         ]
+!$$$    [exe COMPLETE;] with ["New Complete+correction 3 in 2003 geometry:";
+!$$$                          "TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD";
+!$$$                          "(complete tag has been out of date since 2003)x";
+!$$$     exe SVT204;
+!$$$     exe BTOF52;
+!$$$     exe CALBc0;
+!$$$     exe ECAL33;
+!$$$     exe BBCMon;
+!$$$     exe FPDM00;
+!$$$     exe TPCE01;
+!$$$     exe FTPC00;
+!$$$     exe PHMD01;
+!$$$     exe SISDof;
+!$$$     exe PIPE04; 
+!$$$     exe PIXL01;
+!$$$     ]
 
 
 
@@ -1360,7 +1594,8 @@ replace [exe y2005e;] with [
 replace [exe y2005f;] with [ 
          exe y2005e; 
          exe CALB02;      
-         exe EMCUTS(0); "disable 10 keV cuts";
+         exe EMCUTS(bemc,0); "disable 10 keV cuts";
+         exe EMCUTS(eemc,0); "disable 10 keV cuts";
          exe SISD55;
          ]
 
@@ -1375,7 +1610,12 @@ replace [exe y2005h;] with [
         exe TPCE04;
         ]
 
-
+replace [exe y2005i;] with [
+        exe y2005h; 
+        exe ECALv6;         "Latest version of the EEMC geometry";
+        exe EMCUTS(bemc,1); "10 keV transport cuts in the BEMC";
+        exe EMCUTS(eemc,1); "10 keV transport cuts in the EEMC";
+        ]
 
 
 
@@ -1412,7 +1652,8 @@ replace [exe y2006a;] with ["Y2006 baseline which is Y2005D+fixed TPC backplane+
 replace [exe y2006b;] with ["Y2006A + improved SSD with dead area + improved CALB"
          exe y2006; 
          exe CALB02; 
-         exe EMCUTS(0);   "disable 10 keV calorimeter cuts";
+         exe EMCUTS(bemc,0); "disable 10 keV cuts";
+         exe EMCUTS(eemc,0); "disable 10 keV cuts";
          exe FPDM02;
          exe SISD55;
          ]
@@ -1442,7 +1683,8 @@ replace [exe y2006h;] with ["y2006g + new BEMC, new EEMC";
         exe TPCe04;    "Latest model of the TPC, with additional mass";  
         exe CALB02;    "Latest model of the BEMC, with additional volumes";
         exe ECALv6;    "Latest model of the EEMC, with additional volumes and bug fixes";
-        exe EMCUTS(1); "10 keV cuts in b/emc calorimeter volumes";
+        exe EMCUTS(eemc,1); "10 keV cuts in b/emc calorimeter volumes";
+        exe EMCUTS(bemc,1); "10 keV cuts in b/emc calorimeter volumes";
         ]
 
 !//______________________________________________________________________________
@@ -1453,7 +1695,8 @@ replace [exe y2007;] with ["y2006 baseline which is Y2006+FMS"
                 exe BTOFa5; 
                 exe CALB02; 
                 exe ECAL31;
-                exe EMCUTS(0);   "disable 10 keV calorimeter cuts";
+                exe EMCUTS(eemc,0);   "disable 10 keV calorimeter cuts";
+                exe EMCUTS(bemc,0);   "disable 10 keV calorimeter cuts";
                 exe BBCMon; 
                 exe FPDM03; 
                 exe VPDD07; 
@@ -1487,6 +1730,12 @@ replace [exe y2007h;] with ["y2007g + TPC y2009"
          exe TPCE04;
          ]
 
+""" ================================================================================= """
+""" NOTE: Y2007 and earlier need to have the SROD modification applied to the support """
+"""       rods in the SVT.  This involves correcting 10 different geometry files in   """
+"""       order to propagate this fix backwards.                                      """
+""" ================================================================================= """
+
 
 !//______________________________________________________________________________
 *********   y2008   ***
@@ -1497,7 +1746,8 @@ replace [exe y2008;] with [;
     exe BTOFb6;
     exe CALB02;
     exe ECAL31;
-    exe EMCUTS(0);   "disable 10 keV calorimeter cuts";
+    exe EMCUTS(eemc,0);   "disable 10 keV calorimeter cuts";
+    exe EMCUTS(bemc,0);   "disable 10 keV calorimeter cuts";
     exe BBCMon;
     exe FPDM03;
     exe VPDD07;
@@ -1514,6 +1764,33 @@ replace [exe y2008;] with [;
 *********   y2008a   ***
 replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 
+replace [exe y2008b;] with [;exe y2008a; 
+        exe TPCE04;
+        exe CALB02;
+        exe ECALv6;]
+
+
+replace [exe y2008c;] with ["Y2008 production tag C: Fixes TOF response " ; 
+        exe y2008b ; "Inherit everything from y2008b";
+        exe TPCE04r; "Reduce the TPC envelope raidus";
+        exe BTOFb7;           "Fixed TOF sensitve volumes";
+        ]
+
+replace [exe y2008d;] with [
+   "Y2008 production tag D: Improved SROD description in support cone";
+   exe y2008c;
+   exe scon14;
+]
+
+replace [exe y2008e;] with [
+   "Y2008 production tag E: Same as D but with lowered EM cuts in the EEMC and BEMC";
+   exe y2008d;
+   exe EMCUTS(eemc,1); "Enable 10 keV cuts in EEMC";
+   exe EMCUTS(bemc,1); "Enable 10 keV cuts in BEMC";
+   exe CALB02;
+   exe ECALv6;
+]
+ 
 
 !//______________________________________________________________________________
 *                                                                           Y2009
@@ -1524,7 +1801,8 @@ replace [exe y2009;] with [;
     exe BTOFc6;
     exe CALB02;
     exe ECAL31;   
-    exe EMCUTS(0); "disable 10 keV cuts";
+    exe EMCUTS(eemc,0); "disable 10 keV cuts";
+    exe EMCUTS(bemc,0); "disable 10 keV cuts";
     exe BBCMon;
     exe FPDM03;
     exe VPDD07;
@@ -1545,7 +1823,8 @@ replace [exe y2009a;] with [;
     exe BTOFc6;      "time of flight";
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
-    exe EMCUTS(1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe BBCMon;      "beam beam counters";
     exe FPDM03;      "";
     exe VPDD07;      "";
@@ -1560,6 +1839,28 @@ replace [exe y2009a;] with [;
 };]
 
 
+replace [exe y2009b;] with [;
+{   "y2009b production tag B: Y2009A tag with the old tracking cuts in the EEMC.";
+    "This tag is not appropriate for EEMC simulations.";
+    exe Y2009A;           "Y2009A configugration";
+    exe EMCUTS(eemc,0);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+};]
+
+replace [exe y2009c;] with [;
+   "y2009b production tag C: Y2009A tag with fixed TOF resonse";
+   exe Y2009A;           "Y2009A configugration";
+   exe TPCE04r;          "Reduced TPC envelope radius";
+   exe BTOFc7;           "Fixed TOF sensitve volumes";
+;]
+
+replace [exe y2009d;] with [;
+   "y2009d production tag D: Improved SROD description in support cone";
+   exe Y2009C;           "Y2009C configugration";
+   exe SCON14;           "Improved SROD";
+;]
+
+
 
 !//______________________________________________________________________________
 *********   y2010   ***
@@ -1572,25 +1873,310 @@ replace [exe y2010;] with [;
 };]
 
 replace [exe y2010a;] with [;
-{ "y2010a: production tag A"
-    exe SCON13;      "support cone without SVT and new cable weight estimates";
-    exe TPCE04;      "agstar version of yf model";
-    exe BTOF66;      "time of flight";
+ "y2010a: production tag A"
+  exe SCON13;      "support cone without SVT and new cable weight estimates";
+  exe TPCE04;      "agstar version of yf model";
+  exe BTOF66;      "time of flight";
+  exe CALB02;      "updated bemc model";
+  exe ECALv6;      "several bugfixes in eemc geometry";
+  exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+  exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+  exe BBCMon;      "beam beam counters";
+  exe FPDM03;      "";
+  exe VPDD07;      "";
+  exe FTPC01;      "";
+  exe SVTTof;      "";
+  exe PHMD02;      "Photon mult detector";
+  exe SISDof;
+  exe FTRO01;
+  exe MUTD03;
+  exe CAVE04;
+  exe PIPE12;
+;]
+
+replace [exe y2010b;] with ["Y2010 production tag B: Based on A, with TOF fixes";
+   exe y2010a;           "Inherit from y2010a";
+   exe TPCE04r;          "reduced TPC envelope raidus";
+   exe BTOF67;           "fixes to TOF sensitive volume dimensions";
+   ]
+replace [exe y2010c;] with ["Y2010 production tag C: Improved SROD description in support cone";
+   exe y2010b;           "Inherit from y2010a";
+   exe scon14;           "Support cone"
+   ] 
+
+c ======================================================================= y2011 =
+REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC envelope radius and TOF";
+    exe SCON14;      "support cone without SVT and new cable weight estimates and SROD fix";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
-    exe EMCUTS(1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe BBCMon;      "beam beam counters";
-    exe FPDM03;      "";
-    exe VPDD07;      "";
-    exe FTPC01;      "";
-    exe SVTTof;      "";
-    exe PHMD02;      "Photon mult detector";
-    exe SISDof;
-    exe FTRO01;
-    exe MUTD03;
-    exe CAVE04;
-    exe PIPE12;
-};]
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPC01;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMD02;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe FTRO01;      "FTPC readout";
+    exe MUTD04;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+]
+
+REPLACE [exe y2011a;] with ["y2011a: Pro.  consistent with production series P11ic and P11id";
+    exe SCON14;      "support cone without SVT and new cable weight estimates and SROD fix";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPC01;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMD02;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe FTRO01;      "FTPC readout";
+    exe MUTD04;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+]
+
+c ===============================================================================
+c ===============================================================================
+c ===============================================================================
+
+REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+   "exe MUTD12; executable code was not present when tag defined... no effect"
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+
+    exe IDSM01;      "Inner detector support";
+    exe FGTDv31;     "FGT v3 5 half + 1 full disks";
+]
+
+REPLACE [exe y2012a;] with ["y2012a production geometry tag";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+   "exe MUTD12; executable code not present when tag defined ... no effect"
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+    exe IDSM01;      "Inner detector support";
+    exe FGTDv31;     "FGT v3 5 half + 1 full disks";
+]
+
+REPLACE [exe y2012b;] with ["y2012b production geometry tag";
+    exe y2012a; "Y2012a baseline";
+    exe MUTD12; "Adds in code to activate MTD";
+]
+
+c ===============================================================================
+c ===============================================================================
+c ===============================================================================
+
+REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD13;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPEv1;      "The beam pipe";
+
+    exe IDSM02;      "Inner detector support";
+    exe FGTDv32;     "FGT v3 6 disks";
+
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL02;      "Development version of the pixl detector";
+]
+
+REPLACE [exe y2013;] with ["Y2013 first cut geometry";
+    exe CAVE04;      "Cave version 4";
+    exe MAGPv1;      "New magnet with H20";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOFv8;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD13;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPEv2;      "The beam pipe";
+
+    exe IDSM02;      "Inner detector support";
+    exe FGTDv32;     "FGT v3 6 disks";
+
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL05;      "Production version of the pixl detector";
+    exe DTUB01;      "DTUB";
+]
+
+""" Configuration 1 baseline, 2 without pixl """
+REPLACE [exe y2013_1;] with ["Y2013 first cut"          ; exe Y2013; ];
+REPLACE [exe y2013_2;] with ["Y2013 first cut sans PIXL"; exe Y2013;  PIXL=off; PXST=on; ];
+
+
+
+REPLACE [exe y2013x;] with [                                      "Y2013 asymptotic";
+    EXE y2013;    "first cut 2013";
+    EXE MAGPv1;   "version 1 of the magnet";
+    EXE TPCE31;   "version 3.1 of the TPC (increase deadzone and integration time)";
+]
+REPLACE [exe y2013_1x;] with [ "Y2013 asymptotic"; EXE Y2013x; ]
+REPLACE [exe y2013_2x;] with [ "Y2013 asymptotic sans PIXL"; EXE y2013x; PIXL=off; PXST=on; ]
+
+
+c ===============================================================================
+c ===============================================================================
+c ===============================================================================
+
+REPLACE [exe dev14;] with ["DEV14 upgrade geometry";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe IDSM02;      "Inner detector support";
+    exe SISD85;      "SSD version 7"
+    exe PIPEv1;      "The beam pipe";
+    exe FGTDv32;     "FGT v3 6 disks";
+    exe ISTD01;      "IST version 1";
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL02;      "Development version of the pixl detector";
+]
+
+
+
+REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently just complete FGT.  HFT when available."
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMD02;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPEv1;      "The beam pipe";
+
+    exe IDSM02;      "Inner detector support";
+    exe FGTDv32;     "FGT v3 6 disks";
+
+    exe PIXL02;      "Development version of the pixl detector";
+]
+
+
+
+REPLACE [exe devE;] with ["DEVE eSTAR upgrade geometry";
+    """Deprecated detectors"""
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+
+    exe IDSM02;      "Inner detector support";
+    exe FGTDv55;     "Very forward FGT, 12 disks";
+
+    exe PIXL02;      "Development version of the pixl detector";
+
+    """Move the FMS N and S modules to an open position"""
+       FpdmPosition=1;
+       
+    """Switch on and configure the FSC geometry"""
+       FSCE=on;
+       FsceConfig=1;
+
+    """Activate the EIDD geometry"""
+       EIDD=on; 
+       EiddConfig=1; ]
+
+
+Replace [exe devT;] with ["DEVT TPC Upgrade Geometry";
+       exe devE;    "eSTAR baseline";
+       exe Tpcx10;  "TPC upgrade geometry w/ default pads"; ]
+
+
+** Aliases to devE and devT geometries to work around the field bug **
+Replace [exe estar1;] with [exe devE;]
+Replace [exe TPCIv1;] with [exe devT;]
+
 
 
 !//______________________________________________________________________________
@@ -1705,13 +2291,13 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               RICH,ZCAL,MFLD,BBCM,FPDM,PHMD,
               PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
               SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
-              DUMM,SCON
+              DUMM,SCON,IDSM,FSCE,EIDD,ISTD,PXST
 
 * Qualifiers:  TPC        TOF         etc
    Logical    emsEdit,svtWater,
               on/.true./,off/.false./
 
-
+   Logical    verbose/.false./
 
 
 *  Codes:
@@ -1740,7 +2326,10 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
-              FhcmConfig
+              FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig,
+              IstdConfig, PxstConfig, MagpConfig
+
+   Integer    FpdmPosition / 0 /
 
 * The following flags select different base geometry files for the endcap
    Integer    EcalGeometry / 6 /            ! defaults to version 5
@@ -1753,13 +2342,15 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
 *   3 = 100 keV cuts
 *   4 =   1 MeV cuts
 
-   Integer    EmCutConfig / 1 /             ! defaults to 10 keV cuts
+   Integer    BEmcCutConfig / 1 /             ! defaults to 10 keV cuts
+   Integer    EEmcCutConfig / 1 /
 
 
 
    Integer    pipeFlag
 
 *             DensConfig, ! TPC gas density correction
+*             RmaxConfig, ! TPC envelope max radius in tpcgeo3
 *             SvttConfig, ! SVTT version
 *             BtofConfig, ! BTOF trays
 *             VpddConfig, ! VPDD
@@ -1770,6 +2361,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
 *             PixlConfig, ! Inner Pixel detector
 *             HpdtConfig, ! Heavy Flavor Tracker
 *             IstbConfig, ! Integrated Silicon Tracker
+*             PxstConfig, ! PST
+*             IstdConfig, ! Integrated Silicon Tracker
 *             GembConfig, ! Inner GEM barrel tracker
 *             IgtdConfig, ! GEM disks
 *             FstdConfig, ! Forward Silicon tracker Disks
@@ -1830,13 +2423,16 @@ replace[;Case#{#;] with [
    CaveConfig  = 1 ! custom for shielding studies=2, wider for muon detector=3, and longer=4
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
    DensConfig  = 0 ! gas density correction
-   FgtdConfig  = 1 ! version
+   RmaxConfig  = 0 ! tpcegeo3 rmax
+   FgtdConfig  = 306 ! version
+   IdsmConfig  = 1 ! version
    FpdmConfig  = 0 ! 0 means the original source code
    FstdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
    FtpcConfig  = 0 ! 0  version, 1=gas correction
    HpdtConfig  = 0 ! 0=no, >1=version
    IstbConfig  = 0 ! 0=no, >1=version
+   IstdConfig  = 0 ! 0=no, >1=version
    IgtdConfig  = 1 ! 1=old radii etc, 2=new ones
    GembConfig  = 0 ! 0=no, >1=version
    MutdConfig  = 0 ! same
@@ -1852,6 +2448,11 @@ replace[;Case#{#;] with [
    TpceConfig  = 1 ! 1 (def) old version, 2=more structures in the backplane
    VpddConfig  = 1 ! vpd...
    FhcmConfig  = 0 ! Forward Hadron Detector off by default
+   FsceConfig  = 0 ! Forward Sphagettoni Calorimeter off by default
+   EiddConfig  = 0 ! EAst side, Trd, Tof and Calo for eSTAR studies
+   TpcxConfig  = 0 ! Tpc Experimental 
+   TpadConfig  = 0 ! Tpad configuration
+   MagpConfig  = 1 ! Default magnet configuration
 
    pipeFlag = 3 ! pipe wrap + svt shield
 
@@ -1865,7 +2466,12 @@ replace[;Case#{#;] with [
 
    {CAVE,PIPE,SVTT,TPCE,FTPC,BTOF,VPDD,CALB,ECAL,MAGP,MFLD,UPST,ZCAL} = on;
 * whereas some newer stuff is considered optional:
-   {BBCM,FPDM,PHMD,PIXL,ISTB,GEMB,FSTD,SISD,FTRO,FGTD,SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,DUMM,SCON} = off;
+   {BBCM,FPDM,PHMD,PIXL,
+    ISTB,GEMB,FSTD,SISD,
+    FTRO,FGTD,SHLD,QUAD,
+    MUTD,IGTD,HPDT,ITSP,
+    DUMM,SCON,IDSM,FSCE,
+    EIDD,ISTD,PXST} = off;
 
    {emsEdit,RICH}=off        " TimeOfFlight, EM calorimeter Sector            "
    nSvtLayer=7; nSvtVafer=0;  svtWaferDim=0; " SVT+SSD, wafer number and width as in code     "
@@ -1940,6 +2546,7 @@ If LL>0
 *************************************************************************************************************
   Case COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                  exe complete;
+                 geom = 'complete';
                }
 ****************************************************************************************
 * corrected: MWC readout, RICH reconstructed position, no TOF
@@ -2162,6 +2769,11 @@ If LL>0
                   Geom = 'Y2005h  ';
                  exe y2005h;
                }
+
+  Case y2005i { Y2005h + updated endcap and lowered thresholds in E/BEMC
+                Geom = 'Y2005i  ';
+                exe y2005i;
+              }
 ****************************************************************************************
 ****************************************************************************************
   Case Y2006    { y2006 baseline which is Y2005D+fixed TPC backplane+New SSD
@@ -2228,14 +2840,44 @@ If LL>0
                 exe y2008a;
 	        }
 
+  Case Y2008b   { y2008 + SCONE + calorimeter fixes
+                  Geom = 'Y2008b  ';
+                exe y2008b;
+	        }
+
+  Case Y2008c   { "2008c production: y2008b geometry with fixes for TOF response.";
+                  Geom = 'Y2008c  ';
+                  exe y2008c;}
+
+  Case Y2008d   { "Y2008 production tag D: Improved SROD description in support cone";
+                  Geom = 'Y2008d  ';
+                  exe y2008d;}
+
+  Case Y2008e   {"Y2008 production tag E: Same as D but with lowered EM cuts in the EEMC and BEMC";
+                  Geom = 'Y2008e  ';
+                  exe y2008e;}
+
 ****************************************************************************************
   Case Y2009   { y2009 initial geometry: more detailed TPC
-                  Geom = 'Y2009   ';
-                exe y2009;}
+                 Geom = 'Y2009   ';
+                 exe y2009;}
 
   Case Y2009a   { y2009a baseline: more detailed TPC, version 6.1 of the endcap geometry
                   Geom = 'Y2009a  ';
-                exe y2009a;}
+                  exe y2009a;}
+
+  Case Y2009b   { "2009b production: y2009a geometry with 'old' tracking thresholds in the EEMC.  Not suitable for EEMC simulations.";
+                  Geom = 'Y2009b  ';
+                  exe y2009b;}
+
+  Case Y2009c   { "2009c production: y2009a geometry with fixes for TOF response.";
+                  Geom = 'Y2009c  ';
+                  exe y2009c;}
+
+  Case Y2009d    {   "y2009d production tag D: Improved SROD description in support cone";
+                   Geom = 'Y2009d';
+                   exe y2009d;
+                 }
 
 ****************************************************************************************
   Case Y2010   { y2010: baseline
@@ -2246,6 +2888,88 @@ If LL>0
                  Geom = 'Y2010A  ';
                  exe y2010a;       }
 
+  Case Y2010b  { "Y2010a: production tag B with fixes for TOF response";
+                 Geom = 'Y2010b  ';
+                 exe y2010b;       }
+
+  Case Y2010c  { "Y2010 production tag C: Improved SROD description in support cone";
+                 Geom = 'Y2010c  ';
+                 exe y2010c;       }
+
+****************************************************************************************
+
+  Case y2011   { Y2011: baseline y2011 geometry, placeholder added 07/30/2010
+                 Geom = 'Y2011   ';
+                 exe y2011; }
+
+  Case y2011a   { Y2011a: Production quality tag
+                 Geom = 'Y2011a  ';
+                 exe y2011a; }
+
+
+
+  Case upgr2012 { y2012 : Y2012 geometry first cut;
+                 Geom = 'y2012   ';
+                 exe y2012; }
+
+  Case y2012 { y2012 : Y2012 geometry first cut;
+                 Geom = 'y2012   ';
+                 exe y2012; }
+
+  Case y2012a { y2012a : Y2012a production geometry tag;
+                 Geom = 'y2012a  ';
+                 exe y2012a; }
+
+  Case y2012b { y2012b : Y2012b production geometry tag;
+                 Geom = 'y2012b  ';
+                 exe y2012b; }
+
+  Case dev13 { dev13 : y2013 studies;
+                 Geom = 'dev13   ';
+                 exe dev13; }
+
+  Case y2013 { y2013 : y2013 first cut geometry;
+                 Geom = 'y2013   ';
+                 exe y2013; }
+
+  Case y2013x { y2013x : y2013 asymptotic;
+                  Geom = 'y2013x  ';
+                  exe y2013x; }
+
+  Case Y2013_1 { Y2013_1 : Y2013 baseline; 
+                  Geom = 'y2013_1 ';
+                  exe y2013_1; }
+
+  Case Y2013_2 { Y2013_2 : Y2013 baseline sans PIXL; 
+                  Geom = 'y2013_2; ';
+                  exe y2013_2; }
+
+  Case Y2013_1x { Y2013_1x : Y2013 asymptotic; 
+                  Geom = 'y2013_1x';
+                  exe y2013_1x; }
+
+  Case Y2013_2x { Y2013_2x : Y2013 asymptotic sans PIXL; 
+                  Geom = 'y2013_2x; ';
+                  exe y2013_2x; }
+
+  Case dev14 { dev14 : y2014 studies;
+                 Geom = 'dev14   ';
+                 exe dev14; }
+
+  Case devE  { devE : eSTAR development geometry;
+                 Geom = 'devE    ';
+                 exe devE; }
+
+  Case DevT  { devT : TPC upgrade studies;
+               Geom = 'devT';
+               exe devT; }
+
+  Case estar1  { eStar1 : eStar development geometry;     Geom = 'estar1  ';  exe estar1; }
+  Case TPCIv1  { TPCIv1 : TPC inner pad upgrade geometry; Geom = 'TPCIv1  ';  exe TPCIv1; }
+
+
+****************************************************************************************
+****************************************************************************************
 ****************************************************************************************
   Case DUMM01   { R and D geometry: TPC+DUMM
 
@@ -2287,7 +3011,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR01   { "R and D geometry: TPC+SSD+HFT-SVT"
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2342,7 +3067,8 @@ If LL>0
   Case UPGR02    { R and D geometry: TPC+IST+HFT-SVT
                   "svt: 3 layers ";
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
@@ -2419,7 +3145,8 @@ If LL>0
 *************************************************************************************************************
   Case UPGR03   { New Tracking: IST+IGT+HFT-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2473,7 +3200,8 @@ If LL>0
 *************************************************************************************************************
   Case UPGR04   { New Tracking: HPD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2514,7 +3242,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR05   { New Tracking: HFT+HPD+IST+TPC-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2573,7 +3302,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR06   { New Tracking: HFT+HPD+SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2626,7 +3356,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR07   { New Tracking: HFT+IST+TPC+SSD-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2675,7 +3406,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR08   { New Tracking: HFT+HPD+IST+TPC-SVT-SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2734,7 +3466,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR09   { New Tracking: HFT+HPD+IST*outer+TPC-SVT-SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2793,7 +3526,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR10   { New Tracking: HFT+innerLayerIST+TPC-SVT+SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2853,7 +3587,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR11   { New Tracking: HFT+2LayerIST+TPC-SVT+SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2907,10 +3642,11 @@ If LL>0
 * prototype of the Inner Tracker SuPport structure
                    ITSP=on;
                 }
-****************************************************************************************
+*************    ***********************************************************************
   Case UPGR12   { New Tracking: HFT+HPD+IST+TPC+IGT*newRadii
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2970,7 +3706,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR13   { New Tracking: HFT+IST+TPC+SSD-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -3022,7 +3759,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR14   { TUP sans IST: HFT+TPC+SSD-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -3081,19 +3819,25 @@ If LL>0
 
   Case UPGR15   { New Tracking: HFT+IST+TPC+SSD-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
+
                 exe UPGR15; }
 ****************************************************************************************
   Case UPGR16   { New Tracking: HFT+IST+TPC+SSD-SVT
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
                   exe  UPGR16; }
 ****************************************************************************************
   Case UPGR16a   { upgr16 + tpc2009
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
                   exe  UPGR16a; }
 ****************************************************************************************
   Case UPGR17   { UPGR16 - FGTD + FTPC  request Wei-Ming-Zhang
-                  exe EMCUTS(0);
+
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                      SCON=on;
@@ -3292,7 +4036,9 @@ If LL>0
 ****************************************************************************************
   Case UPGR21    { Year UPGR20 + full tof;
 
-                  exe EMCUTS(0);
+
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
@@ -3361,7 +4107,9 @@ If LL>0
 ****************************************************************************************
   Case UPGR20    { y2007 + one TOF
 
-                  exe EMCUTS(0);
+
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                   "svt: 3 layers ";
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
@@ -3431,12 +4179,30 @@ If LL>0
 ****************************************************************************************
   Case UPGR22    { first FHMC version;
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                  exe UPGR22;
                }
 
 ****************************************************************************************
+****************************************************************************************
+****************************************************************************************
+  Case Upgr23 { The Forward Spaghettini Calorimeter
+
+       """Use y2010a as the baseline"""
+       EXE y2010a;
+
+       """Move the FMS N and S modules to an open position"""
+       FpdmPosition=1;
+       
+       """Switch on and configure the FSC geometry"""
+       FSCE=on;
+       FsceConfig=1;
+
+  }
+
+
   Case HADR_ON    { all Geant Physics On;                                       }
   Case HADR_OFF   { all Geant Physics on, except for hadronic interactions;
                                                                        IHADR=0}
@@ -3460,16 +4226,20 @@ If LL>0
                 }
 
   Case EMC_10keV    { 10 keV cuts on Electromagnetic processes in the barrel and endcap;
-                    EmCutConfig = 1;
+                    BEmcCutConfig = 1;
+                    EEmcCutConfig = 1;
                     }
   Case EMC_30keV    { 30 keV cuts on Electromagnetic processes in the barrel and endcap;
-                    EmCutConfig = 2;
+                    BEmcCutConfig = 2;
+                    EEmcCutConfig = 2;
                     }
   Case EMC_100keV   { 100 keV cuts on Electromagnetic processes in the barrel and endcap;
-                    EmCutConfig = 3;
+                    BEmcCutConfig = 3;
+                    EEmcCutConfig = 3;
                     }
   Case EMC_1MeV     { 1 MeV cuts on Electromagnetic processes in the barrel and endcap;
-                    EmCutConfig = 4;
+                    BEmcCutConfig = 4;
+                    EEmcCutConfig = 4;
                     }
 
   Case TPC_ONLY   { Minimal geometry - only TPC;
@@ -3504,6 +4274,8 @@ If LL>0
 
   Case PIXL_ON    { Optional PIXL added on top of the minimal geo;
                      PIXL=on; }
+  Case ISTD_ON    { Optional PIXL added on top of the minimal geo;
+                     ISTD=on; }
 
   Case FIELD_ONLY { No geometry - only magnetic field;
       NtrSubEv=0;
@@ -3525,6 +4297,11 @@ If LL>0
 		Idebug=max(Idebug,1); Itest=1; }
   Case DEBUG_OFF  { standard debug mode;
            	{Idebug,Itest}=0;              }
+
+  Case TOF_MAX { Configure maximum time of flight for particles in this run;
+                <W> TOFMAX, myArg; ('Change TOFMAX from ',E8.1,' to ', E8.1);
+                TOFMAX = myArg; }
+
   } !// end of main moop
 
 * sanity check - if something left in commands (unknown keyword), we stop!
@@ -3549,7 +4326,7 @@ If LL>0
 
    If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
-
+   if ( verbose ) {
    write(*,*) '****** ATTENTION ACHTUNG ATTENZIONE VNIMANIE UVAGA WEI ******'
    write(*,*) '******* THESE FLAGS ARE USED TO GENERATE THE GEOMETRY *******'
    write(*,*) '                 BtofConfig: ',BtofConfig
@@ -3576,45 +4353,63 @@ If LL>0
    write(*,*) '                 TpceConfig: ',TpceConfig
    write(*,*) '                 VpddConfig: ',VpddConfig
    write(*,*) '***** FOR EXPERTS ONLY: LOOK UP GEOMETRY.G FOR DETAIL *******'
+   }
 
 
    if (RICH) ItCKOV = 1
 
    if (CAVE) {
-      write(*,*) 'CAVE'
+c     write(*,*) 'CAVE'
       call AgDETP new ('CAVE')
       call AgDETP add ('CVCF.config=',CaveConfig,1)
       call cavegeo
+      if ( CaveConfig == 5 ) { Call wallgeo; "another brick..." }
    }
 
 * Pipe:
-   If (PIPE)   {
-     write(*,*) 'PIPE'
-     call AgDETP new ('PIPE')
-     call AgDETP add ('pipv.PipeConfig=',PipeConfig,1);
-     call AgDETP add ('pipv.PipeFlag=',PipeFlag,1);
-     if (PipeConfig == -1) {Call pipegeo00;}
-     else                  {Call pipegeo;  }
+
+   IF PIPE  {
+
+     Call AgDETP new ('PIPE')
+     IF   PipeConfig < 10 {
+          Call AgDETP add ('pipv.PipeConfig=', PipeConfig,1);
+          Call AgDETP add ('pipv.PipeFlag=',   PipeFlag,  1);
+     }
+
+     IF      PipeConfig == -1 { Call pipegeo00; "Simple beam pipe"   }
+     ELSE IF PipeConfig  < 10 { Call pipegeo;   "Standard beam pipe" }
+     ELSE IF PipeConfig == 10 { Call pipegeo1;  "HFT era beam pipe"  }
+     ELSE IF PipeConfig == 20 { Call pipegeo2;  "HFT era beam pipe as built" }
+
    }
 
 * Upstream (DX), shield, and D0+Q1+Q2+Q3
-   if (UPST)        {write(*,*) 'UPST'; Call upstgeo;}
-   if (SHLD)        {write(*,*) 'SHLD'; Call shldgeo;}
-   if (QUAD)        {write(*,*) 'QUAD'; Call quadgeo;}
+   if (UPST)        {
+c     write(*,*) 'UPST'; 
+      Call upstgeo;
+   }
+   if (SHLD)        {
+c     write(*,*) 'SHLD'; 
+      Call shldgeo;
+   }
+   if (QUAD)        {
+c     write(*,*) 'QUAD'; 
+      Call quadgeo;
+   }
 
 * ---
    Call AGSFLAG('SIMU',2)
 
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6
    if (SCON) {
-     write(*,*) 'SCON'
+c    write(*,*) 'SCON'
      call AgDETP new ('SCON')
      call AgDETP add ('svtg.ConeVer=',ConeConfig ,1) ! could have more copper on the cone
      call scongeo
    }
 
    If (SVTT) { 
-     write(*,*) 'SVT'
+c    write(*,*) 'SVT'
      call AgDETP new ('SVTT')
      if (nSvtLayer < 7)     call AgDETP add ('svtg.nlayer=',   nSvtLayer,1)
      if (nSvt1stLayer > 1)  call AgDETP add ('svtg.nmin=',     nSvt1stLayer,1)
@@ -3658,13 +4453,168 @@ If LL>0
 * See note on top about using MOD(10) to encode the geometry
 * cut, as opposed to configuration of the detector:
 
+* Back in July 2003 Yuri has discovered the discrepancy
+* in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
+
+
+
+   if (TPCE)  {
+c     write(*,*) 'TPC';
+* Back in July 2003 Yuri has discovered the discrepancy
+* in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
+
+     call AgDETP new('TPCE');  
+
+     if (DensConfig >0) {        Call AgDETP add ('tpcg.gasCorr=',2 ,1);     }
+     if (TpceConfig==1)          Call tpcegeo
+     if (TpceConfig==2)          Call tpcegeo1
+     if (TpceConfig==3)          Call tpcegeo2
+     if (TpceConfig==4) {
+     if ( RmaxConfig>0) {        Call AgDetp add ('tpcg.rmax=',207.77,1); }
+                                 Call tpcegeo3
+                        }
+     IF TpcxConfig==1   {                                                    Call TpcxGeo1;  }
+     IF TpceConfig==31 {         Call AgDETP add('tpcc.version=', 3.1, 1 );  Call TpceGeo3a; }
+
+   }
+   if (ftpc) then
+c       write(*,*) 'FTPC'
+        if(FtpcConfig==0) Call ftpcgeo
+        if(FtpcConfig==1) Call ftpcgeo1
+*       and look at the support pieces, was: if(CorrNum==0)
+        if(SupoConfig==0)  Call supogeo
+        if(SupoConfig==1)  Call supogeo1
+   endif
+
+* FTPC readout electronics barrel
+   if (FTRO) Call ftrogeo
+
+* - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
+   If (BTOF) { 
+c    write(*,*) 'BTOF'
+     call AgDETP new ('BTOF')
+     call AgDETP add ('btog.choice=',BtofConfig,1)
+* X.Dong
+     if(Itof>5) {
+         call AgDETP add ('btog.X0=',tofX0,1)
+         call AgDETP add ('btog.Z0=',tofZ0,1)
+     }
+* X.Dong.end
+      IF (Itof=1)  write(*,*) '*****  ATTENTION : OLD VERSION OF BTOF NOT IMPLEMENTED - NO TOF CREATED *****'
+      IF (Itof=2)  call btofgeo2
+      IF (Itof=4)  call btofgeo4
+      IF (Itof=5)  call btofgeo5
+      IF (Itof=6)  call btofgeo6       !X.Dong + F.Geurts
+      IF (Itof=7)  call btofgeo7       !F.Geurts fixes to sensitive volumes
+      IF (Itof=8)  call btofgeo8     
+   } 
+
+   Call AGSFLAG('SIMU',1)
+
+
+********************* Vertex Position Detector *******************
+   If (LL>0 & VPDD) then
+     call AgDETP new ('VPDD')
+     call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
+     if(VpddConfig <7) call vpddgeo
+     if(VpddConfig==7) call vpddgeo2
+   endif
+
+********************** BARREL CALORIMETER ************************
+*  - Set up the parameters for the barrel calorimeter
+   If (CALB) {
+c    write(*,*) 'CALB'
+     call AgDETP new ('CALB')
+     if (emsEdit)  call AgDETP add ('calg.nmodule=',Nmod, 2)
+     if (emsEdit)  call AgDETP add ('calg.shift=',  shift,2)
+
+       if(CalbConfig==0) then
+c          write(*,*) '************** Creating the 1996-2003 version of the Barrel Calorimeter'
+           Call calbgeo
+       endif
+
+       if(CalbConfig==1) then
+c          write(*,*) '************** Creating the 2004-2006 version of the Barrel Calorimeter'
+           Call calbgeo1
+       endif
+
+       if(CalbConfig==2) then
+c          write(*,*) '************** Creating the 2007-     version of the Barrel Calorimeter'
+           Call AgDetp add ('ccut.absorber=',  BEmcCutConfig, 1)
+           Call AgDetp add ('ccut.sensitive=', BEmcCutConfig, 1)
+           Call calbgeo2
+       endif
+
+   }
+******************************************************************
+*  - Set up the parameters for the RICH counter
+   if (LL>0 & RICH) then
+      call AgDETP new ('Rich')
+      if (richConfig>0) call AgDETP add ('Rich.Version=', richConfig,1)
+      if (richPos>0) call AgDETP add ('Rich.Position=',richPos,1)
+      if (richPos>0) call AgDETP add ('Rich.Cversion=',richPos,1)
+   endif
+   if (RICH) Call richgeo
+
+******************************************************************
+*  - Set up the parameters for the endcap calorimeter
+   If (ECAL) then
+c     write(*,*) 'ECAL'
+      call AgDETP new ('ECAL')
+      call AgDETP add ('emcg.OnOff='   ,EcalConfig,1)
+      call AgDETP add ('emcg.FillMode=',ecalFill,1)
+      IF ( EcalGeometry .lt. 6 ) Call ecalgeo            ! version 5
+      IF ( EcalGeometry .eq. 6 ) THEN 
+                                 Call AgDetp add ('ecut.absorber=',  EEmcCutConfig, 1)
+                                 Call AgDetp add ('ecut.sensitive=', EEmcCutConfig, 1)
+                                 Call ecalgeo6           ! version 6
+      ENDIF
+   endif
+
+******************************************************************
+* The rest of steering:
+
+   if (BBCM)                   { 
+c     write(*,*) 'CALB';
+      Call bbcmgeo
+   }
+
+   if (FPDM){
+
+     IF FpdmPosition > 0 {
+        """Move the FMS N/S modules to an outward position"""
+        Call AgDetp NEW ( 'FPDM' );
+        Call AgDetp ADD ( 'FPOS(imod=3).x=', -50.3, 1 );
+        Call AgDetp ADD ( 'FPOS(imod=4).x=', +50.3, 1 );
+     }
+
+     if (FpdmConfig==0) Call fpdmgeo
+     if (FpdmConfig==1) Call fpdmgeo1
+     if (FpdmConfig==2) Call fpdmgeo2     
+     if (FpdmConfig==3) Call fpdmgeo3
+
+   }
+   if (ZCAL)   { write(*,*) 'ZCAL';Call zcalgeo;}
+   if (MAGP)   {
+        call AgDetp NEW ('MAGP')
+        call AgDetp ADD ('magg.version=', magpConfig, 1 );
+        call MagpGeo
+   }
+
+   IF IDSM { "Inner detector support module" 
+      write(*,*) 'IDSM is built'
+      Call AgDETP new ('IDSM')
+      Call AgDETP add ('IDSC.version=',IdsmConfig,1)
+      Call IdsmGeo1
+   }
+
   if(SISD) {
-       write(*,*) 'SVT' 
+c      write(*,*) 'SVT' 
        sisd_level=0
        call AgDETP new ('SISD')
 
 * if SVT is present, position the SSD in it, otherwise need to position in CAVE (default)
-       if(SVTT) { call AgDETP add ('ssdp.Placement=',1 ,1) };
+       if(IDSM) { call AgDETP add ('ssdp.Placement=',1 ,1) };
 
 * In the following, level means the version of the ssd geo code to be loaded
 * It is the most important decimal place of the SisdConfig, and we just check
@@ -3683,6 +4633,8 @@ If LL>0
             call sisdgeo3
          elseif (sisd_level.eq.4) then
             call sisdgeo4
+         elseif (sisd_level.eq.8) then
+            call sisdgeo7
          else
             call sisdgeo6	!//only sisdgeo6 is used from now
          endif
@@ -3697,140 +4649,28 @@ If LL>0
 
   } !!end SISD
 
-
-
-* Back in July 2003 Yuri has discovered the discrepancy
-* in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
-
-
-
-   if (TPCE)  {
-      write(*,*) 'TPC';
-* Back in July 2003 Yuri has discovered the discrepancy
-* in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
-     if(DensConfig>0) { call AgDETP new('TPCE');  call AgDETP add ('tpcg.gasCorr=',2 ,1);}
-     if (TpceConfig==1) Call tpcegeo
-     if (TpceConfig==2) Call tpcegeo1
-     if (TpceConfig==3) Call tpcegeo2
-     if (TpceConfig==4) Call tpcegeo3
-   }
-   if (ftpc) then
-        write(*,*) 'FTPC'
-        if(FtpcConfig==0) Call ftpcgeo
-        if(FtpcConfig==1) Call ftpcgeo1
-*       and look at the support pieces, was: if(CorrNum==0)
-        if(SupoConfig==0)  Call supogeo
-        if(SupoConfig==1)  Call supogeo1
-   endif
-
-* FTPC readout electronics barrel
-   if (FTRO) Call ftrogeo
-
-* - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
-   If (BTOF) { 
-     write(*,*) 'BTOF'
-     call AgDETP new ('BTOF')
-     call AgDETP add ('btog.choice=',BtofConfig,1)
-* X.Dong
-     if(Itof>5) {
-         call AgDETP add ('btog.X0=',tofX0,1)
-         call AgDETP add ('btog.Z0=',tofZ0,1)
-     }
-* X.Dong.end
-
-      if(Itof.eq.1) write(*,*) '*****  ATTENTION : OLD VERSION OF BTOF NOT IMPLEMENTED - NO TOF CREATED *****'
-      if(Itof.eq.2) call btofgeo2
-      if(Itof.eq.4) call btofgeo4
-      if(Itof.eq.5) call btofgeo5
-      if(Itof.ge.6) call btofgeo6       !X.Dong + F.Geurts
-   }
-
-   Call AGSFLAG('SIMU',1)
-
-
-********************* Vertex Position Detector *******************
-   If (LL>0 & VPDD) then
-     call AgDETP new ('VPDD')
-     call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
-     if(VpddConfig <7) call vpddgeo
-     if(VpddConfig==7) call vpddgeo2
-   endif
-
-********************** BARREL CALORIMETER ************************
-*  - Set up the parameters for the barrel calorimeter
-   If (CALB) {
-     write(*,*) 'CALB'
-     call AgDETP new ('CALB')
-     if (emsEdit)  call AgDETP add ('calg.nmodule=',Nmod, 2)
-     if (emsEdit)  call AgDETP add ('calg.shift=',  shift,2)
-
-       if(CalbConfig==0) then
-           write(*,*) '************** Creating the 1996-2003 version of the Barrel Calorimeter'
-           Call calbgeo
-       endif
-
-       if(CalbConfig==1) then
-           write(*,*) '************** Creating the 2004-2006 version of the Barrel Calorimeter'
-           Call calbgeo1
-       endif
-
-       if(CalbConfig==2) then
-           write(*,*) '************** Creating the 2007-     version of the Barrel Calorimeter'
-           Call AgDetp add ('ccut.absorber=',  emcutconfig, 1)
-           Call AgDetp add ('ccut.sensitive=', emcutconfig, 1)
-           Call calbgeo2
-       endif
-
-   }
-******************************************************************
-*  - Set up the parameters for the RICH counter
-   if (LL>0 & RICH) then
-      call AgDETP new ('Rich')
-      if (richConfig>0) call AgDETP add ('Rich.Version=', richConfig,1)
-      if (richPos>0) call AgDETP add ('Rich.Position=',richPos,1)
-      if (richPos>0) call AgDETP add ('Rich.Cversion=',richPos,1)
-   endif
-   if (RICH) Call richgeo
-
-******************************************************************
-*  - Set up the parameters for the endcap calorimeter
-   If (ECAL) then
-      write(*,*) 'ECAL'
-      call AgDETP new ('ECAL')
-      call AgDETP add ('emcg.OnOff='   ,EcalConfig,1)
-      call AgDETP add ('emcg.FillMode=',ecalFill,1)
-      IF ( EcalGeometry .lt. 6 ) Call ecalgeo            ! version 5
-      IF ( EcalGeometry .eq. 6 ) THEN 
-                                 Call AgDetp add ('ecut.absorber=',  emcutconfig, 1)
-                                 Call AgDetp add ('ecut.sensitive=', emcutconfig, 1)
-                                 Call ecalgeo6           ! version 6
-      ENDIF
-   endif
-
-******************************************************************
-* The rest of steering:
-
-   if (BBCM)                   { write(*,*) 'CALB';Call bbcmgeo}
-
-   if (FPDM){
-     write(*,*) 'FPDM'
-     if (FpdmConfig==0) Call fpdmgeo
-     if (FpdmConfig==1) Call fpdmgeo1
-     if (FpdmConfig==2) Call fpdmgeo2
-     if (FpdmConfig==3) Call fpdmgeo3
-   }
-   if (ZCAL)   { write(*,*) 'ZCAL';Call zcalgeo;}
-   if (MAGP)   { write(*,*) 'MAGP';Call magpgeo;}
-
-
+   if (ISTD){
+    write(*,*) 'ISTD'
+     if (IstdConfig==1) Call istdgeo0
+}
+  if (PXST){
+   write(*,*) 'PXST'
+    if (PxstConfig==0) Call pxstgeo1
+}
    if (MUTD) {
-     write(*,*) 'MUTD'
-     if (MutdConfig==1) Call mutdgeo
-     if (MutdConfig==2) Call mutdgeo2
-     if (MutdConfig==3) Call mutdgeo3
+     Call AgDetp NEW ('MUTD')
+     if (MutdConfig==1) Call mutdgeo;
+     if (MutdConfig==2) Call mutdgeo2;
+     if (MutdConfig==3) Call mutdgeo3;
+     if (MutdConfig==4 | MutdConfig==5 | MutdConfig==12 | MutdConfig==13 )
+     { 
+         Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);   
+         Call mutdgeo4;
+     } 
+
    }
    if (PIXL){
-     write(*,*) 'CALB'
+c    write(*,*) 'CALB'
      if (PixlConfig==-1)Call pixlgeo00
      if (PixlConfig==1) Call pixlgeo
      if (PixlConfig==2) Call pixlgeo1
@@ -3841,10 +4681,24 @@ If LL>0
            call AgDETP add ('PXLV.LadVer=',2.0,1)
            call pixlgeo3
      }
-   }
+     IF PixlConfig==6 {
+           call AgDetp new ('PIXL')
+           call AgDetp add ('PXLV.LadVer=',2.0,1)
+           call AgDetp add ('PXLV.location=',2.0,1)
+           call pixlgeo4
+     }
 
+     IF PixlConfig==50 {               "Y2013 Pixel Configuration"
+           call AgDetp new ('PIXL')
+           call AgDetp add ('PXLV.location=',2.0,1);
+           call PixlGeo5   """ Pixl Detector """
+           call DtubGeo1   """ Electronics etc... """
+     }
+
+
+   }
    if (ISTB){
-     write(*,*) 'ISTB'
+c    write(*,*) 'ISTB'
      if (IstbConfig==-1) Call istbgeo00
      if (IstbConfig== 1) Call istbgeo
      if (IstbConfig== 2) Call istbgeo1
@@ -3855,26 +4709,50 @@ If LL>0
      if (IstbConfig== 7) Call istbgeo6
    }
 
-   if (GEMB.and.GembConfig>0)  {write(*,*) 'GEMB'; Call gembgeo;}
+   if (GEMB.and.GembConfig>0)  {
+c     write(*,*) 'GEMB'; 
+      Call gembgeo;
+   }
 
    if (FSTD.and.FstdConfig>0)  then
-      write(*,*) 'FSTD'
+c     write(*,*) 'FSTD'
       if(FstdConfig==2) then
          call AgDETP new ('FSTD')
          call AgDETP add ('fstg.Rmax=',22.3,1)
       endif
-        Call fstdgeo
+      Call fstdgeo
    endif
 
-   if (FGTD) then
-     write(*,*) 'FGTD'
+
+   IF (FGTD) THEN                                            
+
+     Call AgDETP new ('FGTD')                                     """Establish the interface to the geometry module"""
+
      if (FgtdConfig==1)    Call fgtdgeo  ! old, decomissioned
      if (FgtdConfig==2)    Call fgtdgeo1
      if (FgtdConfig==3)    Call fgtdgeo2
-   endif
+
+     IF FgtdConfig>30 {                                           """Apply FGT configuration and construct geometry"""
+        IF FgtdConfig==31 { Call AgDETP add ( 'FGGG.FgstConfig=', 1.0, 1 );         Call FgtdGeo3; }
+        IF FgtdConfig==32 { Call AgDetp add ( 'FGGG.FgstConfig=', 2.0, 1 );         Call FgtdGeo3; }
+        IF FgtdConfig==55 {                                               ;         Call FgtdGeoV; }
+ 
+
+     }
+
+
+   ENDIF
+
+
+   """The Foward Spaghetti Calorimeter"""    
+   IF FSCE {  call fscegeo;  }
+
+
+   """The EIDD Geometry (TOF, TRD, East calo)"""
+   IF EIDD {  call eiddgeo;  }
 
    if (IGTD) then
-     write(*,*) 'IGTD'
+c    write(*,*) 'IGTD'
      if(IgtdConfig==2) then
          call AgDETP new ('IGTD')
          call AgDETP add ('igtv.Config=',IgtdConfig ,1)
@@ -3883,15 +4761,15 @@ If LL>0
    endif
 
    if (HPDT.and.HpdtConfig>0) { write(*,*) 'HPDT';Call hpdtgeo;}
-
    if (ITSP)                  { write(*,*) 'ITSP';Call itspgeo;}
+
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
 * is defined, pass the version number to its constructor
 * and create it:
 
    if  (PHMD.and.PhmdConfig>0) then
-     write(*,*) 'PHMD'
+c     write(*,*) 'PHMD'
       call AgDETP new ('PHMD')
       call AgDETP add ('PMVR.Config=', PhmdConfig,1)
       call phmdgeo
@@ -3904,7 +4782,7 @@ If LL>0
    endif
 ********************************************************************
    If (FhcmConfig .ne.0) then
-     write(*,*) 'FHCM'
+c     write(*,*) 'FHCM'
       call AgDETP new ('FHCM')
       call AgDETP add ('fhcg.Version='   ,FhcmConfig,1)
       Call fhcmgeo
@@ -3920,7 +4798,6 @@ If LL>0
       Call mfldgeo(magField);
       call gufld(magX,magB);
       write(*,*) 'MFLD magField,Bz = ',magField,magB(3)
-
    }
 *
    if JVOLUM>0

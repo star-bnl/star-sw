@@ -26,8 +26,11 @@ MODULE  CALBGEO2 is the geometry of the Barrel EM Calorimeter
    Created   December 12, 2006
 * Based on CALBGEO1 -- tower map removed due to a full calorimeter
 *
-* $Id: calbgeo2.g,v 1.6 2009/12/22 13:40:34 jwebb Exp $
+* $Id: calbgeo2.g,v 1.7 2010/08/24 15:08:24 jwebb Exp $
 * $Log: calbgeo2.g,v $
+* Revision 1.7  2010/08/24 15:08:24  jwebb
+* Inserted an ENDFILl statement required by AgML.
+*
 * Revision 1.6  2009/12/22 13:40:34  jwebb
 * Added options to set tracking cuts for electrons, photons to 10, 30, 100
 * or 1000 keV.  Default behaviour is to take no action, i.e. it reverts to
@@ -270,6 +273,7 @@ Fill CSEN                  ! EM cuts in absorbing material
     DCutM   =   1 MeV      ! muon delta ray cut
     BCutE   =   1 MeV      ! electron brem cut
     BCutM   =   1 MeV      ! muon brem cut
+EndFILL
 
    USE    CALG
    USE    CCUT  Version=1
@@ -337,9 +341,8 @@ Fill CSEN                  ! EM cuts in absorbing material
 	  RSMD1= R1+R3+smd_width2 ! mean raduis of SMD
 	  RSMD2= R1+R3+smd_width3 ! mean raduis of SMD
 	  RMAX = cut_radius       ! outer raduis of sensitive area
-      Rmax3 = Rmax/cos(3.14159*DphiMod/360) 
-
       Endfill
+      Rmax3 = Rmax/cos(3.14159*DphiMod/360) 
       USE CALR
       cutAng = atan2(cut_radius-Calg_Rmin,Hleng2-cut_length2)
 *
@@ -408,6 +411,7 @@ Block CPHI corresponds to a single module
 *
       current_depth = calg_Rmin
       c_dep=current_depth
+
       Create   CBTW   dx=calg_FrontThk
       Position CBTW   x =calg_Rmin+calg_FrontThk,
                       z =current_depth/tan_theta/2 +zz0/2
@@ -564,6 +568,7 @@ Block CSUP  is a super layer with few layers inside
                       zi ={zz1, current_depth/tan_theta, future_depth/tan_theta},
                       rmn={ current_depth,    current_depth,    future_depth },
                       rmx={ future_depth,     future_depth,     future_depth };
+
       Call CALBPAR(ag_imed,'ABSORBER')
       Set EmCuts(CABS)
 
@@ -591,6 +596,7 @@ Block CSUP  is a super layer with few layers inside
          current_depth = current_depth + 2*smd_width  
 *
       enddo      
+
 EndBlock
 *-----------------------------------------------------------------------------
 Block CPBP
@@ -640,7 +646,6 @@ Block CBTW  is the  Module Front Back Plate
                       dz = current_depth/tan_theta/2 -zz0/2
       Call CALBPAR(ag_imed,'ABSORBER')
       Set EmCuts(CABS)
-
 EndBlock
 * ----------------------------------------------------------------------------
 Block CSMD is the shower maximum detector envelope

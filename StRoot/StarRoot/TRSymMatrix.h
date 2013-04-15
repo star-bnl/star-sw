@@ -25,7 +25,7 @@ class TRSymMatrix : public TRArray {
   Int_t GetNrows()  const       {return fNrows;} 
   Int_t GetNcols()  const       {return GetNrows();}
   virtual ETRMatrixType GetMatrixType() const {return kSemiPosDefinedSymMatrix;}
-  virtual Double_t Product(const TRVector& A,ETRMatrixCreatorsOp kop);
+  virtual Double_t Product(const TRVector& A,ETRMatrixCreatorsOp kop=kAxSxAT);
   virtual Int_t    SpmInv(const TRSymMatrix &S, TRVector *B = 0);
   static  Int_t    spminv(Double_t *v, Double_t *b, Int_t n, 
 			  Int_t &nrank, Double_t *diag, Bool_t *flag);
@@ -53,14 +53,14 @@ ostream& operator<<(ostream& s,const TRSymMatrix &target);
 inline Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
   //  assert(! (j < 0 || j >= fNrows));
   if (j < 0 || j >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: %p)", 
 	    j, fNrows, this); 
     j = 0;
     assert(0);
   }
   //  assert(! (i < 0 || i >= fNrows));
   if (i < 0 || i >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: %p)", 
 	    i, fNrows, this); 
     i = 0;
     assert(0);
@@ -73,14 +73,14 @@ inline Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
 inline Double_t TRSymMatrix::operator()(Int_t i,Int_t j) const {
   //  assert(! (j < 0 || j >= fNrows));
   if (j < 0 || j >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: %p)", 
 	    j, fNrows, this); 
     j = 0;
     assert(0);
   }
   //  assert(! (i < 0 || i >= fNrows));
   if (i < 0 || i >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: %p)", 
 	    i, fNrows, this); 
     i = 0;
     assert(0);

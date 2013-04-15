@@ -6,12 +6,12 @@ TDataSet *CreateTable() {
   row.numberOfTimeBins	 =        512; // ;
   row.nominalGain	 =     82.065; // mV/fC  ;
   row.samplingFrequency	 =    9.43437; // MHz  ;
-  row.tZero	 =   -1.05995; // us (microseconds)  ;
-  row.adcCharge	 =       0.12; // fC/adc count  ;
+  row.tZero	                =   0; // us (microseconds)  ;
+  row.adcCharge	         =       0.12; // fC/adc count  ;
   row.adcConversion	 =          2; // mV/adc count  ;
   row.averagePedestal	 =         50; // adc counts  ;
   row.shapingTime	 =        180; // ns  ;
-  row.tau	 =         55; // ns  ;
+  row.tau	         =         55; // ns  ;
   tableSet->AddAt(&row);
   return (TDataSet *)tableSet;
 }

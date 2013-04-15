@@ -11,15 +11,15 @@
 #include "TObjArray.h"
 ClassImp(TRArray);
 //________________________________________________________________________________
-TRArray::TRArray(Int_t N,const Float_t *Array):  TArrayD(N), fValid(kTRUE) {
+TRArray::TRArray(Int_t N,const Float_t *Array):  TArrayD(N), fValid(kTRUE), fIsNotOwn(kFALSE) {
   TCL::ucopy(Array,fArray,N);
 }
 //________________________________________________________________________________
-TRArray::TRArray(Int_t N,Double_t va_(a0), ...) : TArrayD(N), fValid(kTRUE) {
+TRArray::TRArray(Int_t N,Double_t va_(a0), ...) : TArrayD(N), fValid(kTRUE), fIsNotOwn(kFALSE) {
   __VA_LIST__(a0);
 }
 //________________________________________________________________________________
-TRArray::TRArray(Int_t N,const Char_t *s): TArrayD(N), fValid(kTRUE) {
+TRArray::TRArray(Int_t N,const Char_t *s): TArrayD(N), fValid(kTRUE), fIsNotOwn(kFALSE) {
   static TString separator = "([^\t ;,]+)";
   TString opt(s);
   TObjArray *array = opt.Tokenize(separator);

@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.43 2005/11/23 20:44:16 potekhin Exp $
+* $Id: gstar_input.g,v 1.44 2011/08/24 18:45:42 fisyak Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.44  2011/08/24 18:45:42  fisyak
+* Dstkine option to define kinematcs from MuDst
+*
 * Revision 1.43  2005/11/23 20:44:16  potekhin
 * Following the changed packaging of data on the Herwig side
 * (changes checked in today), we correspondingly modify the
@@ -158,6 +161,10 @@
     else if C=='M'                       "mickey-mouse"
     {  Iadr=CSADDR('GSTAR_MICKY');  If (Iadr!=0) Call CSJCAL(Iadr,0,0,0)
     } 
+    else if C=='D'                       "DST"
+    {  Iadr=CSADDR('GSTAR_DST');  
+       If (Iadr!=0) Call CSJCAL(Iadr,0,0,0)
+    } 
     CCOMMAND(N:N)=C
     return
 :e: print *,' gstar_AgUsOPEN error openning file ',file(1:L)
@@ -193,6 +200,7 @@
      elseif C=='N' { J=1;                    call gstar_ReadNT (Igate)     }
      elseif C=='C' { J=1;                    call gstar_ReadCNT(Igate)     }
      elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
+     elseif C=='D' { J=CsADDR ('DSTKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
      elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }
      elseif C=='V' { J=AMI_CALL ('venus'//o,        1,%L(Table)//o)-1; 
                      J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }

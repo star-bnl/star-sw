@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.100 2010/05/04 21:33:31 fine Exp $
+// $Id: StDraw3D.cxx,v 1.103 2011/10/03 23:55:34 perev Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -251,9 +251,13 @@ StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColo
    // The detectorName is a comma separated list of the OpenInventor files with no extension
    // For all names on the list one should provide the iv file with the "iv extension:
    //                         <name>.iv
-
-   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
-   static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
+   Init();
+}
+//__________________________________________________________________________________________
+void StDraw3D::Init()
+{
+   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.0;  static const Color_t UHitCol=kBlue;
+   static const Style_t NHitSty = 2; static const Size_t NHitSiz = 0.0;  static const Color_t NHitCol=kGreen;
    static const Style_t TrakSty = 1; static const Size_t TrakSiz = 2.00; static const Color_t TrakCol=kRed;
    static const Style_t VertSty = 5; static const Size_t VertSiz = 3.50; static const Color_t VertCol=kYellow;
    AddStyle(kVtx,         VertCol,VertSty,VertSiz);
@@ -264,8 +268,6 @@ StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColo
    AddStyle(kUsedHit,     UHitCol,UHitSty,UHitSiz);
    AddStyle(kUnusedHit,   NHitCol,NHitSty,NHitSiz);
 }
-
-
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Create a EventDisplay using the external TVirtualViewer3D \a viewer and TVirtualPad \a pad
@@ -273,17 +275,7 @@ StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColo
 StDraw3D::StDraw3D(TVirtualViewer3D *viewer,TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(viewer),fView(0)
       , fDetectorName(),fMaster(),fTopVolume(),fWantPad(0),fOwnViewer(kFALSE),fOwnPad(kFALSE)
 {
-   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
-   static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
-   static const Style_t TrakSty = 1; static const Size_t TrakSiz = 2.00; static const Color_t TrakCol=kRed;
-   static const Style_t VertSty = 5; static const Size_t VertSiz = 3.50; static const Color_t VertCol=kYellow;
-   AddStyle(kVtx,         VertCol,VertSty,VertSiz);
-   AddStyle(kPrimaryTrack,TrakCol,TrakSty,TrakSiz);
-   AddStyle(kGlobalTrack, TrakCol,TrakSty,TrakSiz);
-   AddStyle(kTrackBegin,  VertCol,VertSty,VertSiz);
-   AddStyle(kTrackEnd,    VertCol,VertSty,VertSiz);
-   AddStyle(kUsedHit,     UHitCol,UHitSty,UHitSiz);
-   AddStyle(kUnusedHit,   NHitCol,NHitSty,NHitSiz);
+   Init();
 }
 
 //__________________________________________________________________________________
@@ -407,7 +399,7 @@ void  StDraw3D::Clear(Option_t *opt)
    // Clear the view
    TVirtualPad *pad = Pad();
    if (pad) {
-      pad->Clear(opt);
+      pad->Clear();
       fTopVolume = 0;
       if ( !strcmp(opt,"update") ) Update();
    } else if ( TVirtualViewer3D *viewer = Viewer() ) {

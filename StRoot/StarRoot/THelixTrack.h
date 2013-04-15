@@ -14,6 +14,7 @@ void Clear()  			{ memset(this,0,sizeof(*this));}
      TCEmx_t()			{ Clear();}
 void Set(const double *err);  	
 void Move(double const F[3][3]);
+double Sign() const;
 void Backward();
 public:
 
@@ -36,6 +37,8 @@ void Set(const double *err);
 void Set(const double *errxy,const double *errz);
 void Move(double const F[5][5]);
 void Backward();
+void Print(const char *tit=0) const;
+double Sign() const;
 public:
 //  dA: delta azimuth angle; dH: error along ort to dir and Z axis
 //  dC: error of curvature;  dZ == dZ; dL = dLambda
@@ -51,10 +54,12 @@ mHL, mAL, mCL, mZL, mLL;
 class TCircle: public TObject
 {
 friend class THelixTrack;
+friend class TCircleFitter;
 public:
  TCircle();
  TCircle(const double *x,const double *dir,double rho);
  TCircle(const TCircle& fr);
+ TCircle(const TCircle* fr);	//special ctr without errors
 ~TCircle();
 TCircle &operator=(const TCircle& fr);
  void Set(const double *x=0,const double *dir=0,const double rho=0);
@@ -68,6 +73,7 @@ const double* Dir() const 	{return fD;  }
       void    SetEmx(const double *err=0);
 const TCEmx_t *Emx() const 	{return fEmx;} 
       TCEmx_t *Emx()     	{return fEmx;} 
+  void GetCenter(double center[2]) const;
 double Path(const double pnt[2]) const;
 double Path(const double pnt[2], const double exy[3]) const;
 double Path(const TCircle &tc,double *s2=0) const;
@@ -122,6 +128,7 @@ int    Used() const 			{return fNuse;}
 void   Add (double x,double y,const double *errs=0); 
 void   Add (double x,double y,double z); 
 void   AddErr(const double *errs,double errz=0); 
+void   AddErr(double errh,double errz=0); 
 void   AddZ(double z,double err2z=0);
 double Fit();   
 void   MakeErrs();
@@ -142,11 +149,18 @@ const double *GetX(int i=0) const;
       double *GetX(int i=0);
 TCircleFitterAux* GetAux(int i) const;
 
-static void Test(int iTest);
-static void Test();
+static void Test(int iTest=0);
 static void TestCorr(int kode=0);
 private:
-//double Weight(int idx);
+double f();
+double df(int i);
+double d2f(int i,int j);
+double Rho2();
+double dRho2(int i);
+double d2Rho2(int i,int j);
+double F();
+double dF(int i);
+double d2F(int i,int j);
 
 private:
 TArrayD fArr;
@@ -157,7 +171,7 @@ int    fCase;	//default case 0=automatic,1=small angle,2=Chernov/Ososkov
 int    fKase;	//used case
 int    fBack;
 TCircleFitterAux* fAux;
-double fCos,fSin;
+double fCos,fSin;	//Direction of local coordinate
 double fNor[2];
 double fPol[6];
 double fXgravity;
@@ -171,9 +185,12 @@ double fRrrr;
 double fRr;
 double fWtot;
 double fRadius2;
-double fXd, fYd, fG1;
-double fXCenter,fYCenter;
+double fXd, fYd, fG1;		//fXd,fYd coordianate of circle center in local sys 
+double fNx, fNy;		//Direction from circle center to point on circle in local sys 
+double fXCenter,fYCenter;	//coordianate of circle center in globa
 double fCov[6],fA,fB,fC,fH;
+double fR;			//radius of curvatur
+double fRd;			//distance to center in local system
 double fCorrR,fCorrB;
 double fChi2;
 int    fNdf;
@@ -191,13 +208,14 @@ public:
 	THelixTrack();
 	THelixTrack(const double *xyz,const double *dir,double rho,double drho=0);
 	THelixTrack(const THelixTrack &from);
+	THelixTrack(const THelixTrack *from);	//Special ctr without errs
 virtual ~THelixTrack();
 THelixTrack &operator=(const THelixTrack &from);
 	void Set   (const double *xyz,const double *dir,double rho,double drho=0);
 	void Set   (double rho,double drho=0);
 	void SetEmx(const double*  err2xy,const double*  err2z);
 	void SetEmx(const double*  err=0);
-    THEmx_t *Emx() const{return fEmx;}
+    THEmx_t *Emx() const			{return fEmx;}
 	void StiEmx(double emx[21]) const;
         void GetSpot(const double axis[3][3],double emx[3]) const;
 	void Fill  (TCircle &circ) const;
@@ -206,8 +224,6 @@ THelixTrack &operator=(const THelixTrack &from);
 ///		Move along helix
 	double Move(double step);
 	double Move(double step,double F[5][5]);
-///     	Make transformatiom matrix to transform errors
-	void MakeMtx(double step,double F[5][5]);
 ///		Evaluate params with given step along helix
 	double Eval(double step, double *xyz, double *dir,double &rho) const;
 	double Step(double step, double *xyz, double *dir,double &rho) const
@@ -268,6 +284,7 @@ THelixTrack &operator=(const THelixTrack &from);
         double GetDRho()	const {return fDRho ;}
         double GetCos() 	const {return fCosL;}
         double GetSin() 	const {return fP[2];}
+        double GetTan() 	const {return fP[2]/fCosL;}
         double GetPeriod() const ;
         void Rot(double angle);
         void Rot(double cosa,double sina);
@@ -275,12 +292,18 @@ THelixTrack &operator=(const THelixTrack &from);
         void Show(double len, const THelixTrack *other=0) const;
         void Print(Option_t *opt="") const;
 //	statics
+static  void InvertMtx(double derivs[5][5]);
 static  void Test1();
 static  void Test2();
 static  void Test3();
 static  void Test4();
 static  void Test5();
+static	void TestMtx();
+static	void TestDer();
 private:
+///     	Make transformatiom matrix to transform errors
+///		called only after Eval()
+	void MakeMtx(double step,double F[5][5]);
 protected:
         double Step(double stmin,double stmax, const double *surf, int nsurf
 	           ,double *x=0, double *dir=0,int nearest=0) const;
@@ -306,6 +329,7 @@ int    Size() const 			{return fCircleFitter.Size();}
 int    Used() const 			{return fCircleFitter.Used();}
 void   Add (double x,double y,double z); 
 void   AddErr(const double *err2xy,double err2z); 
+void   AddErr(double errhh,double errzz); 
 double Fit();   
 void   MakeErrs();
 double FixAt(const double vals[5],int flag=1); 

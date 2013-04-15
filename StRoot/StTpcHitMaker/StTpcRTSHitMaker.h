@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.6 2010/01/12 22:55:17 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.7 2010/08/30 18:02:02 genevb Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.7  2010/08/30 18:02:02  genevb
+ * Introduce hit maxima for tracking
+ *
  * Revision 1.6  2010/01/12 22:55:17  fisyak
  * Add minimum cluster charge in ADC for <= 20090101
  *
@@ -46,11 +49,12 @@ class StTpcRTSHitMaker : public StMaker {
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
-  Int_t               InitRun(Int_t runumber);
+  Int_t               InitRun(Int_t runnumber);
   Int_t               Make();
  private:
   daq_tpx *fTpx; //!
   Double_t fminCharge; // ! minimum cluster charge in ADC
+  Int_t    maxHits[24];
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;

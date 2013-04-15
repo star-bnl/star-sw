@@ -1,4 +1,4 @@
-#define AGROTF_TEST
+!//#define AGROTF_TEST
 #ifdef AGROTF_TEST
       program test
       real gang(6)
