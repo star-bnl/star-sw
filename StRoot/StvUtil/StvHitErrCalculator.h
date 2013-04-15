@@ -15,8 +15,8 @@ virtual void CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR
 virtual void CalcDcaDers(double dRR[kMaxPars][3]);
 virtual double Trace(const float hiPos[3]);
 virtual  int GetNPars() const 			{return mNPar;}
-const double *GetPars() const 			{return mPar  ;}
-      double CpCl() const			{return fabs(mCl*mCp);}
+const double *GetPars() const 			{return mPar ;}
+      double CpCl() const			{return mCpCl;}
 static StvHitErrCalculator *Inst(const char *name);
 protected:
 void CalcLocals(const float hiDir[3][3]);
@@ -29,7 +29,7 @@ double mPar[kMaxPars];		// mPar
 double mTG[3][3];		// track direction in global system
 double mTL[3];		// track direction in local hit plane system
 double mCp ,mSp ,mCl ,mSl;
-double mCp2,mSp2,mCl2,mSl2;
+double mCp2,mSp2,mCl2,mSl2,mCpCl;
 double mTT[2][2]; 	//matrix converting from detector to track(dca) system
 double mDD[kMaxPars][3];
 char mEnd[1];

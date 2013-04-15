@@ -9,7 +9,7 @@
 #include <string>
 
 static std::map<std::string,StvHitErrCalculator *> calcMap;
-static const double kMinCos = 0.01;
+static const double kMinCos = 0.01, kMinCpCl=0.1;
 static const double kMaxSin  = (1-kMinCos)*(1+kMinCos);
 
 
@@ -102,6 +102,7 @@ static const double c45 = cos(3.14/180*45);
   if (!hiDir) {
     mSp  = s15    ; mCp  = c15    ; mSl  = s45    ; mCl  = c45    ;
     mSp2 = s15*s15; mCp2 = c15*c15; mSl2 = s45*s45; mCl2 = c45*c45;
+    mCpCl = mCp*mCl;
     return;
   }
   for (int j=0;j<3;j++) {
@@ -120,7 +121,7 @@ static const double c45 = cos(3.14/180*45);
     mSp = (mSp<0)? -kMaxSin:kMaxSin; mFailed = 2;
   }
   mSp2 = mSp*mSp; mCp2 = mCp*mCp; mSl2=mSl*mSl;
-
+  mCpCl = fabs(mCp*mCl); if (mCpCl < kMinCpCl) mCpCl = kMinCpCl;
   for (int i=0;i<2;i++) {for (int j=0;j<2;j++) { double s = 0;
     for (int k=0;k<3;k++) {s+=mTG[i+1][k]*hiDir[j+1][k];}
     mTT[i][j] = s;}};
@@ -219,16 +220,15 @@ void StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[
   CalcLocals(hiDir);
   memset(mDD[0],0,mNPar*3*sizeof(mDD[0][0]));
   mZSpan = fabs(fabs(hiPos[2])-210)/100;
-  double fak = fabs(mCl*mCp);
   mDD[kYErr   ][0] = 1;
-  mDD[kYDiff  ][0] = mZSpan/mCp2	*fak;
-  mDD[kYThkDet][0] = mSp2/mCp2/12	*fak;
+  mDD[kYDiff  ][0] = mZSpan/mCp2	*mCpCl;
+  mDD[kYThkDet][0] = mSp2/mCp2/12	*mCpCl;
 
   mDD[kZErr   ][2] = 1;
-  mDD[kZDiff  ][2] = mZSpan		*fak;
-  mDD[kYDiff  ][2] = mZSpan*mSl2/mCl2	*fak;
-  mDD[kZThkDet][2] = mSl2/mCl2/12	*fak;
-  mDD[kZAB2   ][2] = 1./180		*fak;
+  mDD[kZDiff  ][2] = mZSpan		*mCpCl;
+  mDD[kYDiff  ][2] = mZSpan*mSl2/mCl2	*mCpCl;
+  mDD[kZThkDet][2] = mSl2/mCl2/12	*mCpCl;
+  mDD[kZAB2   ][2] = 1./180		*mCpCl;
 
   for (int ig=0;ig<3;ig++) {
     hRr[ig]=0;
