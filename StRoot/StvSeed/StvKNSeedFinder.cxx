@@ -5,6 +5,7 @@
 #include "TVector3.h"
 #include "StMultiKeyMap.h"
 #include "THelixTrack.h"
+#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 #include "StvSeed/StvSeedConst.h"
 
 #ifndef __NOSTV__
