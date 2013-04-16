@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.56 2013/04/12 19:03:16 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.55 2013/02/10 13:42:40 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -863,7 +863,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       return 0;
     }
 
-    LOG(ERR, "buff = %c%c%c  off=%lld",buff[0],buff[1],buff[2], orig_offset);
+    LOG(DBG, "buff = %c%c%c  off=%lld",buff[0],buff[1],buff[2], orig_offset);
 
     lseek64(desc, orig_offset, SEEK_SET);
 
