@@ -1889,12 +1889,23 @@ static int nCall=0; nCall++;
     fKase = fCase;
     if (fNuse < 3) return 3e33;
     TCircleFitterAux *aux = GetAux(0);
+    dx = aux[fN/2].x - aux[0].x;
+    dy = aux[fN/2].y - aux[0].y;
+    double catA = sqrt(dx*dx+dy*dy);
+    dx = aux[fN-1].x - aux[fN/2].x;
+    dy = aux[fN-1].y - aux[fN/2].y;
+    double catB = sqrt(dx*dx+dy*dy);
     dx = aux[fN-1].x - aux[0].x;
     dy = aux[fN-1].y - aux[0].y;
-    hord = sqrt(dx*dx+dy*dy);
-    fCos = dx/hord;
-    fSin = dy/hord;
-    fNor[0] = -fSin,fNor[1] = fCos;
+    double catC = sqrt(dx*dx+dy*dy);
+    double alfa2 = (catA+catB+catC)*(catA+catB-catC)/(catA*catB);
+    int fastTrak = (alfa2<0.15*0.15);
+    if (fastTrak) {
+      fCos = dx/catC;
+      fSin = dy/catC;
+      fNor[0] = -fSin,fNor[1] = fCos;
+    }
+
     const double *exy=0;
     for (int iter=0;iter<2;iter++) {// one or two iters
       fWtot = 0;
@@ -1903,7 +1914,8 @@ static int nCall=0; nCall++;
         if (aux[i].wt<0) continue;
         int kase = iter;
 	if (aux[i].wt    >0) 	kase+=2;	//weight defined
-        if (aux[i].exy[0]>0)	kase+=4;	//error matrix defined
+        if (fastTrak && aux[i].exy[0]>0)	kase+=4;	//error matrix defined
+        fastTrak =1;
         switch (kase) {
           case 0: wt = 1; break;
           case 2: ; case 3: wt = aux[i].wt; break;
@@ -3627,7 +3639,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.61 2013/02/20 02:01:44 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.62 2013/04/16 18:54:20 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3643,6 +3655,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.62  2013/04/16 18:54:20  perev
+ * More accurate fast track estimation
+ *
  * Revision 1.61  2013/02/20 02:01:44  perev
  * Cleanup
  *
