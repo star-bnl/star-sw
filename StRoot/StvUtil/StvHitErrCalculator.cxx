@@ -9,7 +9,7 @@
 #include <string>
 
 static std::map<std::string,StvHitErrCalculator *> calcMap;
-static const double kMinCos = 0.01, kMinCpCl=0.1;
+static const double kMinCos = 0.1, kMinCpCl=0.1;
 static const double kMaxSin  = (1-kMinCos)*(1+kMinCos);
 
 
@@ -107,7 +107,10 @@ static const double c45 = cos(3.14/180*45);
   }
   for (int j=0;j<3;j++) {
     mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);}
-
+  if (fabs(mTL[0]) < kMinCos) {
+     mTL[0] = kMinCos; double n = sqrt(TCL::vdot(mTL,mTL,3));
+     TCL::vscale(mTL,1./n,mTL,3);
+  }
 //		mTL = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
   mSl = mTL[2],mCl2 = ((1-mSl)*(1+mSl));
   if (mCl2<kMinCos*kMinCos) 	{	//Lambda too big
@@ -122,10 +125,10 @@ static const double c45 = cos(3.14/180*45);
   }
   mSp2 = mSp*mSp; mCp2 = mCp*mCp; mSl2=mSl*mSl;
   mCpCl = fabs(mCp*mCl); if (mCpCl < kMinCpCl) mCpCl = kMinCpCl;
+
   for (int i=0;i<2;i++) {for (int j=0;j<2;j++) { double s = 0;
     for (int k=0;k<3;k++) {s+=mTG[i+1][k]*hiDir[j+1][k];}
     mTT[i][j] = s;}};
-  if (fabs(mCp)<0.1) StvDebug::Break(-1);
 
 }
 //______________________________________________________________________________
