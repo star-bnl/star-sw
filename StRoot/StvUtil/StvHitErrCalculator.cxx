@@ -182,8 +182,8 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
      StvDebug::Count("InnZZdca:Z",hiPos[2], sqrt(hRr[2]));
      StvDebug::Count("InnYYdca:Z",hiPos[2], sqrt(hRr[0]));
 
-     StvDebug::Count("InnYZdca"           ,hRr[1]/sqrt(hRr[0]*hRr[2]));
-     StvDebug::Count("InnYZdca:Cross",cros,hRr[1]/sqrt(hRr[0]*hRr[2]));
+     StvDebug::Count("InnYZdca"           ,hRr[1]/sqrt(hRr[0]*hRr[2]+1e-10));
+     StvDebug::Count("InnYZdca:Cross",cros,hRr[1]/sqrt(hRr[0]*hRr[2]+1e-10));
    } else {
      StvDebug::Count("OutYYdca",          sqrt(hRr[0]));
      StvDebug::Count("OutYYdca:Psi",psid, sqrt(hRr[0]));
@@ -194,8 +194,8 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
      StvDebug::Count("OutZZdca:Z",hiPos[2], sqrt(hRr[2]));
      StvDebug::Count("OutYYdca:Z",hiPos[2], sqrt(hRr[0]));
 
-     StvDebug::Count("OutYZdca"           ,hRr[1]/sqrt(hRr[0]*hRr[2]));
-     StvDebug::Count("OutYZdca:Cross",cros,hRr[1]/sqrt(hRr[0]*hRr[2]));
+     StvDebug::Count("OutYZdca"           ,hRr[1]/sqrt(hRr[0]*hRr[2]+1e-10));
+     StvDebug::Count("OutYZdca:Cross",cros,hRr[1]/sqrt(hRr[0]*hRr[2]+1e-10));
    } }
 } 
 //______________________________________________________________________________
