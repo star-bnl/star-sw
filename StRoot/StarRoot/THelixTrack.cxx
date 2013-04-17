@@ -1827,7 +1827,7 @@ void  TCircleFitter::Add(double x,double y,const double *errs)
   if (fArr.GetSize()<n) {fArr.Set(n*2);fAux=0;}
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
-  aux->x = x; aux->y=y; aux->exy[0]=1; aux->exy[2]=1; aux->ezz=1;aux->wt=0;
+  aux->x = x; aux->y=y; aux->exy[0]=1; aux->exy[2]=1; aux->ezz=1;aux->wt=1;
   if (errs) AddErr(errs);
 }
 //______________________________________________________________________________
@@ -1839,7 +1839,7 @@ void  TCircleFitter::Add(double x,double y,double z)
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
   aux->x = x; aux->y=y; aux->z=z;
-  aux->exy[0]=1; aux->exy[1]=0; aux->exy[2]=1;aux->ezz=1;aux->wt=0;
+  aux->exy[0]=1; aux->exy[1]=0; aux->exy[2]=1;aux->ezz=1;aux->wt=1;
 }
 //______________________________________________________________________________
 void  TCircleFitter::AddErr(const double *errs,double ezz) 
@@ -1885,25 +1885,22 @@ static int nCall=0; nCall++;
     double xx, yy, xx2, yy2;
     double f, g, h, p, q, t, g0, g02, d=0;
     double xroot, ff, fp;
-    double dx, dy, xnom,wt,hord,tmp,radius2,radiuc2;
+    double dx, dy, xnom,wt,tmp,radius2,radiuc2,side[3];
     fKase = fCase;
     if (fNuse < 3) return 3e33;
     TCircleFitterAux *aux = GetAux(0);
-    dx = aux[fN/2].x - aux[0].x;
-    dy = aux[fN/2].y - aux[0].y;
-    double catA = sqrt(dx*dx+dy*dy);
-    dx = aux[fN-1].x - aux[fN/2].x;
-    dy = aux[fN-1].y - aux[fN/2].y;
-    double catB = sqrt(dx*dx+dy*dy);
-    dx = aux[fN-1].x - aux[0].x;
-    dy = aux[fN-1].y - aux[0].y;
-    double catC = sqrt(dx*dx+dy*dy);
-    double alfa2 = (catA+catB+catC)*(catA+catB-catC)/(catA*catB);
-    int fastTrak = (alfa2<0.15*0.15);
-    if (fastTrak) {
-      fCos = dx/catC;
-      fSin = dy/catC;
-      fNor[0] = -fSin,fNor[1] = fCos;
+    const int idx[][2]={{0,fN/2},{fN/2,fN-1},{0,fN-1}};
+    for (int jk=0; jk<3; jk++) {
+      dx = aux[idx[jk][0]].x - aux[idx[jk][1]].x;
+      dy = aux[idx[jk][0]].y - aux[idx[jk][1]].y;
+      side[jk]= sqrt(dx*dx+dy*dy);
+    }
+    double alfa2 = (side[0]+side[1]+side[2])*(side[0]+side[1]-side[2])/(side[0]*side[1]+1e-11);
+    int fastTrak = (alfa2>0 && alfa2<0.2*0.2);
+    fCos = 1; fSin= 0;
+    if (fastTrak) {//dx,dy calculated in last cycle of previous for
+      fCos    = dx/side[2];fSin    = dy/side[2];
+      fNor[0] = -fSin     ;fNor[1] = fCos;
     }
 
     const double *exy=0;
@@ -1913,9 +1910,8 @@ static int nCall=0; nCall++;
       for (int i=0; i<fN; i++) {//Loop over points
         if (aux[i].wt<0) continue;
         int kase = iter;
-	if (aux[i].wt    >0) 	kase+=2;	//weight defined
-        if (fastTrak && aux[i].exy[0]>0)	kase+=4;	//error matrix defined
-        fastTrak =1;
+	if (aux[i].wt    >0) 		kase+=2;	//weight defined
+        if (fastTrak && aux[i].exy[0]>0)kase+=4;	//error matrix defined
         switch (kase) {
           case 0: wt = 1; break;
           case 2: ; case 3: wt = aux[i].wt; break;
@@ -1930,8 +1926,9 @@ static int nCall=0; nCall++;
 		 +fNor[0]*fNor[1]*exy[1]*2
 		 +fNor[1]*fNor[1]*exy[2]);
             if (wt<1e-8) wt = 1e-8;
-            wt = 1/wt; break;}
-          default: assert(0);
+            wt = 1/wt; 
+	    break;}
+            default: assert(0);
 	}//end switch
         aux[i].wt = wt;
         fWtot += wt;
@@ -2027,7 +2024,9 @@ SWIT: switch(fKase) {
       } //end switch
       fXCenter = fXd*fCos-fYd*fSin + fXgravity;
       fYCenter = fXd*fSin+fYd*fCos + fYgravity;
-      if (!exy)	break;
+      
+      if (fastTrak || !exy) break;
+      fastTrak = 99;
     }// end iters
     
 //	Update TCircle
@@ -3639,7 +3638,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.62 2013/04/16 18:54:20 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.63 2013/04/17 02:12:20 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3655,6 +3654,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.63  2013/04/17 02:12:20  perev
+ * More accurate fast track estimation 2
+ *
  * Revision 1.62  2013/04/16 18:54:20  perev
  * More accurate fast track estimation
  *
