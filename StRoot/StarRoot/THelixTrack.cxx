@@ -2730,23 +2730,33 @@ double THelixFitter::Fit()
   if (Xi2xy>1e11) return Xi2xy;
   int ndfXY = fCircleFitter.Ndf();
   TCircle circ(fCircleFitter);
-  const double *xy=0;
-  xy = &(myAux[nDat-1].x);
-  double z1 = xy[2];
-  double s1 = circ.Path(xy);
+  const double *xy = &(myAux[nDat-1].x);
+  double z2 = xy[2];
+  double s2 = circ.Path(xy);
 
   xy = &(myAux[0].x);
   double z0 = xy[2];
-  double s  = circ.Path(xy);
-//	estimation of tan(dip) to correct z errs
-  double tanDip = (z1-z0)/(s1-s);
+  double s0  = circ.Path(xy);
 
-  circ.Move(s);
+
+  xy = &(myAux[nDat/2].x);
+  double z1 = xy[2];
+  double s1  = circ.Path(xy);
+  if (fabs(s1-s0) > fabs(s2-s0)) {s2=s1;z2=z1;}
+
+
+
+
+//	estimation of tan(dip) to correct z errs
+  double tanDip = (z2-z0)/(s2-s0);
+
+  circ.Move(s0);
 //  set lengths
+  double s = 0;
   for (int iDat=0;iDat<nDat;iDat++) {
     TCircleFitterAux* aux = myAux+iDat;
     xy = &(aux->x);
-    double ds = circ.Path(xy,aux->exy);
+    double ds = circ.Path(xy);
     circ.Move(ds); s+=ds;
 //		correct errors
     double corErr = 0;;
@@ -3638,7 +3648,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.63 2013/04/17 02:12:20 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.64 2013/04/17 03:01:32 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3654,6 +3664,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.64  2013/04/17 03:01:32  perev
+ * Special case xy1st ~= xyLst
+ *
  * Revision 1.63  2013/04/17 02:12:20  perev
  * More accurate fast track estimation 2
  *
