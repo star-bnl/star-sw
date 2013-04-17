@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.20 2013/01/11 21:43:57 geurts Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.21 2013/04/17 20:15:46 geurts Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -241,14 +241,15 @@ Int_t StBTofHitMaker::UnpackTofRawData()
       unsigned int timeinbin = ((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  /// time in tdc bin
       temphit.tdc     = timeinbin;
       /// global channel numbers defined here:
-      /// For Run13+ the GMT trays (8,23,93,108) the  TDIGs at tdigid==1 identifies itself as tdigid==0.
+      /// For Run13+ the lower half of GMT trays (8,23,93,108) the  TDIG at tdigid==1 identifies itself as tdigid==0.
 	bool isGMT = (trayid==8) || (trayid==23) || (trayid==93) || (trayid==108);
       /// The following code corrects for that offline. This is a permanent fixture for Run13+
-	  if ((mYear >= 13) && (isGMT) &&  (tdigid==0)){
+	if ((mYear >= 13) && (isGMT) &&  (halftrayid==0) && (tdigid==0)){
 	temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+ 1*24 +halftrayid*96); /// 0-191 for tray
       }
-	  else if ((mYear >= 13) && (isGMT) &&  ((tdigid==1) || (tdigid==7))){
-		LOG_ERROR<<"Unexpected TDIG-Id (" << tdigid << ") in TOF GMT tray (" << trayid << "). Should not happen" << endm;
+	/// The second check for the upper half-tray is a data sanity check. Has no direct impact on the data. The first check is important (hence the LOG_ERROR)
+	else if ((mYear >= 13) && (isGMT) &&  (((halftrayid==0)&&(tdigid==1)) || ((halftrayid==1)&&(tdigid==3)))){
+	  LOG_ERROR<<"Unexpected TDIG-Id (" << tdigid+(4*halftrayid) << ") in TOF GMT tray (" << trayid << "). Should not happen" << endm;
       }
       else{
 	temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+tdigid*24+halftrayid*96); /// 0-191 for tray
