@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.2 2013/03/21 11:21:43 jeromel Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.3 2013/04/18 21:01:10 geurts Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -8,7 +8,12 @@
  *
  *****************************************************************
  *
- * 
+ * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.3  2013/04/18 21:01:10  geurts
+ * Bugfix (RT#2575): protection against events that have tracks, but no vertex.
+ *  - Warning messages
+ *  - Consistently reset variables that depend on a vertex to -9999.
+ *
  *
  *
  *******************************************************************/
@@ -729,12 +734,19 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			mMtdEvtData.run = mEvent->runId();       // the run number
 			mMtdEvtData.evt = mEvent->id();       // the event number
 			mMtdEvtData.bField= mEvent->runInfo()->magneticField()/10.; 
+
+			StPrimaryVertex *pVtx = mEvent->primaryVertex();
 			float xvtx = -999.;
-			xvtx = mEvent->primaryVertex()->position().x();
 			float yvtx = -999.;
-			yvtx = mEvent->primaryVertex()->position().y();
 			float zvtx = -999.;
-			zvtx = mEvent->primaryVertex()->position().z();
+			if (pVtx){
+			  xvtx = mEvent->primaryVertex()->position().x();
+			  yvtx = mEvent->primaryVertex()->position().y();
+			  zvtx = mEvent->primaryVertex()->position().z();
+			}
+			else {
+			  LOG_WARN << "No (default) primary vertex information for this (st-) event"  << endm;
+			};
 
 			mMtdEvtData.vertexX = xvtx;        
 			mMtdEvtData.vertexY = yvtx;              
@@ -846,12 +858,19 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			mMtdEvtData.run = mEvent->runId();       // the run number
 			mMtdEvtData.evt = mEvent->id();       // the event number
 			mMtdEvtData.bField= mEvent->runInfo()->magneticField()/10.; 
+
+			StPrimaryVertex *pVtx = mEvent->primaryVertex();
 			float xvtx = -999.;
-			xvtx = mEvent->primaryVertex()->position().x();
 			float yvtx = -999.;
-			yvtx = mEvent->primaryVertex()->position().y();
 			float zvtx = -999.;
-			zvtx = mEvent->primaryVertex()->position().z();
+			if (pVtx){
+			  xvtx = mEvent->primaryVertex()->position().x();
+			  yvtx = mEvent->primaryVertex()->position().y();
+			  zvtx = mEvent->primaryVertex()->position().z();
+			}
+			else {
+			  LOG_WARN << "No (default) primary vertex information for this (st-) event"  << endm;
+			};
 
 			mMtdEvtData.vertexX = xvtx;        
 			mMtdEvtData.vertexY = yvtx;              
@@ -1150,11 +1169,19 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	StThreeVector<double> g1O(ghelixox,ghelixoy,ghelixoz);//origin
 	StPhysicalHelixD gHelixTpc(g1P,g1O,bField*tesla,gq); 
 
-
-	StThreeVectorF vertexPos = mEvent->summary()->primaryVertexPosition();
-	double length2Vtx 	  = TMath::Abs(gHelixTpc.pathLength(vertexPos));
 	LOG_DEBUG <<"StMtdMatchMaker::matchTrack2Mtd() "<<" bField"<<bField<<endm;
-	LOG_DEBUG<<" vertex x,y,z:"<<vertexPos.x()<<","<<vertexPos.y()<<","<<vertexPos.z()<<endm;
+
+	StEventSummary *vertexPosInfo = mEvent->summary();
+	double length2Vtx = -99999.;
+	if (vertexPosInfo) {
+	  StThreeVectorF vertexPos = vertexPosInfo->primaryVertexPosition();
+	  length2Vtx 	  = TMath::Abs(gHelixTpc.pathLength(vertexPos));
+	  LOG_DEBUG<<" vertex x,y,z:"<<vertexPos.x()<<","<<vertexPos.y()<<","<<vertexPos.z()<<endm;
+	}
+	else {
+	  LOG_WARN << "No (default) primary vertex information for this (st-) event"  << endm;
+	}
+
 	LOG_DEBUG<<" gq:"<<gq<<" ghelix ox,oy,oz:"<<ghelixox<<","<<ghelixoy<<","<<ghelixoz
 		<<" ghelix p,pt,eta,phi:"<<helixMomentum.mag()<<","<<helixMomentum.perp()<<","<<helixMomentum.pseudoRapidity()<<","<<helixMomentum.phi()
 		<<" length2vertex:"<<length2Vtx<<endm;
@@ -1171,7 +1198,8 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 
 	double betaGam = g1P.mag()/muonMass;
 	double vInner  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light;
-	double tof2Tof = (length2Vtx+rTof)/vInner;
+	double tof2Tof = -9999.;
+	if (vertexPosInfo) tof2Tof = (length2Vtx+rTof)/vInner;
 
 	LOG_DEBUG<<" to TOF: pos x,y,z:"<<tofPos.x()<<","<<tofPos.y()<<","<<tofPos.z()<<endm;
 	LOG_DEBUG<<" to TOF: mom p,pt,eta,phi:"<<tofMom.mag()<<","<<tofMom.perp()<<","<<tofMom.pseudoRapidity()<<","<<tofMom.phi()<<endm;
@@ -1194,7 +1222,8 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	StThreeVector<double> innerEMCMom = gHelixTpc.momentumAt(rInnerEMC,bField*tesla);
 	StPhysicalHelixD helixInEMC(innerEMCMom,innerEMCPos,bField*tesla,gq);
 
-	double tof2InnerEMC = (length2Vtx+rInnerEMC)/vInner;
+	double tof2InnerEMC = -9999.;
+	if (vertexPosInfo) tof2InnerEMC = (length2Vtx+rInnerEMC)/vInner;
 
 	LOG_DEBUG<<" to EMCinner: pos x,y,z:"<<innerEMCPos.x()<<","<<innerEMCPos.y()<<","<<innerEMCPos.z()<<endm;
 	LOG_DEBUG<<" to EMCinner: mom p,pt,eta,phi:"<<innerEMCMom.mag()<<","<<innerEMCMom.perp()<<","<<innerEMCMom.pseudoRapidity()<<","<<innerEMCMom.phi()<<endm;
@@ -1351,23 +1380,29 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	LOG_DEBUG<<" to MTD: mom p,pt,eta,phi:"<<mtdMom.mag()<<","<<mtdMom.perp()<<","<<mtdMom.pseudoRapidity()<<","<<mtdMom.phi()<<endm;
 	LOG_DEBUG<<" to MTD: tof:"<<tof2Outer<<endm;
 
-	double length2Tof     = length2Vtx+rTof;
+	double length2Tof = -9999.;
+	if (vertexPosInfo) length2Tof = length2Vtx+rTof;
+
 	double length2Mtd[2] = {0};
-	double length2SteelOuter = 0.;
-	length2SteelOuter += length2Vtx+rInnerEMC;
-	length2SteelOuter += rInnerBSMD+rOuterBSMD;
-	for(int i=0;i<nEMCStep;i++) length2SteelOuter += EMClengthLayer[i];
-	length2SteelOuter += rInnerSteel;
-	for(int i=0;i<nStep;i++) length2SteelOuter += lengthLayer[i];
+	double length2SteelOuter = -9999.;
+	if (vertexPosInfo){
+	  length2SteelOuter += length2Vtx+rInnerEMC;
+	  length2SteelOuter += rInnerBSMD+rOuterBSMD;
+	  for(int i=0;i<nEMCStep;i++) length2SteelOuter += EMClengthLayer[i];
+	  length2SteelOuter += rInnerSteel;
+	  for(int i=0;i<nStep;i++) length2SteelOuter += lengthLayer[i];
+	}
 	for(int i=0;i<2;i++) length2Mtd[i] = length2SteelOuter;
 
 	double tof2Mtd[2] = {0};
-	double tof2SteelOuter = 0.;
-	tof2SteelOuter += tof2InnerEMC; 
-	tof2SteelOuter += tof2InnerBSMD+tof2OuterBSMD; 
-	for(int i=0;i<nEMCStep;i++) tof2SteelOuter += EMCtofLayer[i];
-	tof2SteelOuter += tof2InnerSteel; 
-	for(int i=0;i<nStep;i++) tof2SteelOuter += tofLayer[i];
+	double tof2SteelOuter = -9999.;
+	if (vertexPosInfo){
+	  tof2SteelOuter += tof2InnerEMC; 
+	  tof2SteelOuter += tof2InnerBSMD+tof2OuterBSMD; 
+	  for(int i=0;i<nEMCStep;i++) tof2SteelOuter += EMCtofLayer[i];
+	  tof2SteelOuter += tof2InnerSteel; 
+	  for(int i=0;i<nStep;i++) tof2SteelOuter += tofLayer[i];
+	}
 	for(int i=0;i<2;i++) tof2Mtd[i] = tof2SteelOuter;
 
 	LOG_DEBUG<<" pathLength from vertex to MTD:"<<length2SteelOuter+rMtd<<endm;
