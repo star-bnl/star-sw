@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.19 2013/03/14 18:27:26 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.20 2013/04/18 20:05:29 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,12 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.20  2013/04/18 20:05:29  jwebb
+ * Ticket #2574 Wrong Omega/Anti-Omega Geant ID.
+ *
+ * PDG +3334 id was incorrectly assigned to the Omega+... should be -3334 for
+ * Omega+ and +3334 for Omega-.  IDs have been swapped.
+ *
  * Revision 1.19  2013/03/14 18:27:26  jwebb
  * Added pi0    --> e+e- gamma 100% gid=10007
  * Added K0long --> nu e- pi+  100% gid=10010
@@ -310,8 +316,8 @@ StParticleTable::StParticleTable()
     Geant2Pdg(15011, 321,  Kaon+ --> pi+ pi0 pi0 );    // K+
     Geant2Pdg(15012, -321, Kaon- --> pi- pi0 pi0 );   // K-
              
-       Geant2Pdg( 40001,  3334, Omega-); 
-       Geant2Pdg( 40002, -3334, Omega+); 
+       Geant2Pdg( 40001, -3334, Omega+); 
+       Geant2Pdg( 40002,  3334, Omega-); 
        Geant2Pdg( 40003, +3312, XiMinus );       
        Geant2Pdg( 40004, -3312, XiPlus  );      
        Geant2Pdg( 40005, +3322, XiZero );       
