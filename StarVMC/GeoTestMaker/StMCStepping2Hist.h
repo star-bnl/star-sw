@@ -1,4 +1,4 @@
-// $Id: StMCStepping2Hist.h,v 1.2 2009/08/29 21:22:25 perev Exp $
+// $Id: StMCStepping2Hist.h,v 1.3 2013/04/20 21:54:07 perev Exp $
 //
 //
 // Class StMCStepping2Hist
@@ -13,7 +13,7 @@
 #include "TLorentzVector.h"
 #include "StMCStepping.h"
 
-class StTGeoHelper;
+class StTGeoProxy;
 class StTGeoHitShape;
 class My2Hist;
 class StiELossTrk;

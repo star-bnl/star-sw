@@ -10,7 +10,7 @@
 #include "Stv/StvDraw.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvTrackFitter.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 int StvTrack::mgId=0;
 
 //______________________________________________________________________________

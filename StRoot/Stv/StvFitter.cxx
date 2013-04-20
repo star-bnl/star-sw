@@ -11,7 +11,7 @@
 #include "StvConst.h"
 #include "StvUtil/StvDebug.h"
 #include "StvUtil/StvHitErrCalculator.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
 StvFitter *StvFitter::mgFitter=0;
 #define VDOT(a,b)   ( a[0]*b[0]+a[1]*b[1]+a[2]*b[2])

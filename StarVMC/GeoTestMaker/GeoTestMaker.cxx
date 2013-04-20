@@ -1,7 +1,10 @@
 //*-- Author : Victor Perev
 // 
-// $Id: GeoTestMaker.cxx,v 1.4 2010/01/27 23:02:57 perev Exp $
+// $Id: GeoTestMaker.cxx,v 1.5 2013/04/20 21:53:41 perev Exp $
 // $Log: GeoTestMaker.cxx,v $
+// Revision 1.5  2013/04/20 21:53:41  perev
+// Rename StTGeoHelper ==> StTGeoProxy
+//
 // Revision 1.4  2010/01/27 23:02:57  perev
 // Development
 //
@@ -73,7 +76,7 @@ GeoTestMaker::Init()
 #include "StMCInitApp.h"
 //#include "StMCSteppingHist.h"
 #include "StMCStepping2Hist.h"
-#include "StTGeoHelper.h"
+#include "StTGeoProxy.h"
 
 ClassImp(GeoTestMaker);
 
@@ -103,7 +106,7 @@ int GeoTestMaker::Init()
   
   app->Init();
 
-  StTGeoHelper::Instance()->Init(1);
+  StTGeoProxy::Instance()->Init(1);
 
   return StMaker::Init();
 }

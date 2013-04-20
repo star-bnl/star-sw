@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.13 2012/10/10 19:33:11 perev Exp $
+ * $Id: StvNode.cxx,v 1.14 2013/04/20 22:07:02 perev Exp $
  *
  * /author Victor Perev
  */
@@ -13,7 +13,7 @@
 #include "Stv/StvNode.h"
 #include "Stv/StvHit.h"
 #include "StvUtil/StvDebug.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
 
 //______________________________________________________________________________

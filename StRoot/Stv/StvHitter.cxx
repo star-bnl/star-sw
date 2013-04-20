@@ -3,7 +3,7 @@
 #include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "StvHitter.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvUtil/StvNodePars.h"
 #include "StarRoot/StMultiKeyMap.h"
 //_____________________________________________________________________________
@@ -26,7 +26,7 @@ void StvHitter::Reset()
 const StvHits *StvHitter::GetHits(const StvNodePars *pars, const float gate[2])
 {
   mHits.clear();
-  const StHitPlane *myHitPlane = StTGeoHelper::Inst()->GetCurrentHitPlane();
+  const StHitPlane *myHitPlane = StTGeoProxy::Inst()->GetCurrentHitPlane();
   if (!myHitPlane) 		return 0;	//no sensitive volume there
 
 //   gGeoManager->FindNode(pars->_x,pars->_y,pars->_z);

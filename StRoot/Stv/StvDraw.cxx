@@ -10,7 +10,7 @@
 #include "StvUtil/StvNodePars.h"
 #include "Stv/StvStl.h"
 #include "THelixTrack.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
 #include "Stv/StvToolkit.h"
 static Color_t gMyColors[] = {kRed,kBlue,kMagenta,kCyan};
@@ -173,7 +173,7 @@ void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
   THelixTrack hlx(parF.P,dir,rho);
   double sag2 = fabs(dxy*dxy/4*rho)+wide; sag2*=sag2;
   
-  StVoidArr *vHits = StTGeoHelper::Inst()->GetAllHits();
+  StVoidArr *vHits = StTGeoProxy::Inst()->GetAllHits();
   int nHits = vHits->size();
   std::vector<const StvHit*> unHits;
   myDir=myDir.Unit();
@@ -260,7 +260,7 @@ void  StvDraw::All(const char *opt)
   }  }
 
   if (strstr(opt,"h")) {
-    StVoidArr *vHits = StTGeoHelper::Inst()->GetAllHits();  
+    StVoidArr *vHits = StTGeoProxy::Inst()->GetAllHits();  
     std::vector<const StvHit*> sHits;
     for (int ihit=0;ihit<(int)vHits->size();ihit++) {
       const StvHit *stvHit = (StvHit*)(*vHits)[ihit];

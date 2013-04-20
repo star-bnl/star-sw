@@ -4,7 +4,7 @@
 #include "StvHit.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "vector"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
 ClassImp(StvSeedFinder)
 //_____________________________________________________________________________
@@ -29,7 +29,7 @@ void StvSeedFinder::ShowRest(EDraw3DStyle style)
 {
    if (!fDraw) fDraw = NewDraw();
    std::vector<StvHit*> myHits;  
-   const StVoidArr *hitArr =  StTGeoHelper::Inst()->GetSeedHits();
+   const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetSeedHits();
    int nHits =  hitArr->size();
    for (int iHit=0;iHit<nHits;iHit++) {
      StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
@@ -59,18 +59,6 @@ void StvSeedFinder::DoShow(int lev)
 const THelixTrack *StvSeedFinder::Approx()
 {
 static int nCall=0; nCall++;
-
-#ifdef APPROX_DEBUG
-static TCanvas *myCanvas=0;
-static TH1  *H[2];
-if(!myCanvas) {
-   myCanvas=new TCanvas("Approx","",600,800);
-   H[0] = new TH1F("Xi2","Xi2", 100,0,5);
-   H[1] = new TProfile("nHits ","nHits",  30,0,30);
-   myCanvas->Divide(1,2);
-   for (int i=0;i<2;i++) {myCanvas->cd(i+1); H[i]->Draw();}
-}
-#endif // APPROX_DEBUG
 
 const double BAD_XI2=100;
 const double BAD_RHO=0.1;

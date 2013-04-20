@@ -9,7 +9,7 @@
 #include "Stiostream.h"
 #include "StvHit.h"
 #include "StvUtil/StvHitErrCalculator.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
 
 //_____________________________________________________________________________

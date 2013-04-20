@@ -7,7 +7,7 @@
 ClassImp(StvTpcActive)
 
 //______________________________________________________________________________
-StvTpcActive::StvTpcActive():StActiveFunctor("TPCActive")
+StvTpcActive::StvTpcActive():StActorFunctor("TPCActive")
 {
 }
 //______________________________________________________________________________

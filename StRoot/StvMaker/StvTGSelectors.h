@@ -1,6 +1,6 @@
 #ifndef __StvTGSelectors_h_
 #define __StvTGSelectors_h_
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
 class StvTpcSelector: public StTGeoSele

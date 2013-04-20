@@ -1,8 +1,8 @@
 
-// $Id: StTGeoHelper.cxx,v 1.30 2013/04/15 00:40:45 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.1 2013/04/20 21:58:41 perev Exp $
 //
 //
-// Class StTGeoHelper
+// Class StTGeoProxy
 // ------------------
 
 
@@ -29,7 +29,7 @@
 #include "TCernLib.h"
 #include "TVector3.h"
 
-#include "StTGeoHelper.h"
+#include "StTGeoProxy.h"
 #include "StMultiKeyMap.h"
 
 class myTVector3 : public TVector3 {
@@ -73,10 +73,10 @@ mutable float  fF[3];
 
 #define DOT(a,b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
 
-static StTGeoHelper *gStTGeoHelper=0;
+static StTGeoProxy *gStTGeoProxy=0;
 typedef std::map<const TGeoVolume*,int> myVoluMap ;
 
-ClassImp(StTGeoHelper)
+ClassImp(StTGeoProxy)
 ClassImp(StVoluInfo)
 ClassImp(StHitPlaneInfo)
 ClassImp(StHitPlane)
@@ -128,17 +128,17 @@ static int iCatch=-999;
   printf("myBreak:iCatch=%d\n",i);
 }
 //_____________________________________________________________________________
-StTGeoHelper::StTGeoHelper()
+StTGeoProxy::StTGeoProxy()
 {
-  assert(!gStTGeoHelper);
-  gStTGeoHelper=this;
+  assert(!gStTGeoProxy);
+  gStTGeoProxy=this;
   memset(fBeg,0,fEnd-fBeg);  
   fVoluInfoArr = new TObjArray();
   fHitPlaneArr = new TObjArray();
   fOpt = 1;
 }
 //_____________________________________________________________________________
-int StTGeoHelper::Load(const char *geo)
+int StTGeoProxy::Load(const char *geo)
 {
   if (gGeoManager) { // Geom already there
     Warning("Load","TGeoManager(%s,%s) is already there"
@@ -153,7 +153,7 @@ int StTGeoHelper::Load(const char *geo)
   return ierr;
 }
 //_____________________________________________________________________________
-void StTGeoHelper::Init(int mode)
+void StTGeoProxy::Init(int mode)
 {
   fMode = mode;
   InitInfo();
@@ -161,18 +161,24 @@ void StTGeoHelper::Init(int mode)
   if (fMode&1) InitHitShape();
 }
 //_____________________________________________________________________________
-void StTGeoHelper::Finish()
+void StTGeoProxy::InitLayers(StDetectorId did)
+{
+  StvSetLayer sl;
+  Edit(did,&sl);
+}
+//_____________________________________________________________________________
+void StTGeoProxy::Finish()
 {
 // Avoid deleting of TGeoManager
   gGeoManager = 0;
 }
 //_____________________________________________________________________________
-void StTGeoHelper::InitInfo()
+void StTGeoProxy::InitInfo()
 {
   gGeoManager->CdTop();
   std::map <int,int> moduMap;  
   StTGeoIter it;
-  it.Print("StTGeoHelper_Init");
+  it.Print("StTGeoProxy_Init");
   const TGeoVolume *vol= *it;
 
   StVoluInfo *myModu=0;
@@ -227,7 +233,7 @@ void StTGeoHelper::InitInfo()
 
 }
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::SetModule (const char *voluName, int akt)
+StVoluInfo *StTGeoProxy::SetModule (const char *voluName, int akt)
 {
   const char *volName = voluName;
   StDetectorId did = DetId(volName);
@@ -240,7 +246,7 @@ StVoluInfo *StTGeoHelper::SetModule (const char *voluName, int akt)
   return info;
 }
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::SetActive (const char *voluName, int akt,StActiveFunctor *af)
+StVoluInfo *StTGeoProxy::SetActive (const char *voluName, int akt,StActorFunctor *af)
 {
   StVoluInfo *inf = SetModule(voluName,1);
   if (!inf) return 0;
@@ -263,7 +269,7 @@ StVoluInfo *StTGeoHelper::SetActive (const char *voluName, int akt,StActiveFunct
   return inf;
 }
 //_____________________________________________________________________________
-StVoluInfo * StTGeoHelper::SetActive (StDetectorId did,int akt,StActiveFunctor *af)
+StVoluInfo * StTGeoProxy::SetActive (StDetectorId did,int akt,StActorFunctor *af)
 {
   const char *modu = ModName(did);
   if (!*modu)  { Warning("SetActive","DetId %d Unknown",did);return 0;}
@@ -275,12 +281,12 @@ StVoluInfo * StTGeoHelper::SetActive (StDetectorId did,int akt,StActiveFunctor *
   return vi;
 }
 //_____________________________________________________________________________
-int StTGeoHelper::IsActive (StDetectorId did) const
+int StTGeoProxy::IsActive (StDetectorId did) const
 {
   return ((fActiveModu & ((Long64_t)1)<<did)!=0);
 }
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::IsActive (const TGeoVolume *volu) const
+StVoluInfo *StTGeoProxy::IsActive (const TGeoVolume *volu) const
 {
  if (volu) {
    return (IsFlag(volu,StVoluInfo::kActive));
@@ -291,7 +297,7 @@ StVoluInfo *StTGeoHelper::IsActive (const TGeoVolume *volu) const
  }
 }
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::SetFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg,int act)
+StVoluInfo *StTGeoProxy::SetFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg,int act)
 {
   int volId = volu->GetNumber();
   StVoluInfo *inf = GetInfo(volId);
@@ -308,7 +314,7 @@ StVoluInfo *StTGeoHelper::SetFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo 
   return inf;
 }
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::IsFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const
+StVoluInfo *StTGeoProxy::IsFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const
 {
   int volId = volu->GetNumber();
   StVoluInfo *inf = GetInfo(volId);
@@ -318,7 +324,7 @@ StVoluInfo *StTGeoHelper::IsFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo f
   return inf;
 }
 //_____________________________________________________________________________
-int StTGeoHelper::Edit(StDetectorId did,StActiveFunctor *af)
+int StTGeoProxy::Edit(StDetectorId did,StActorFunctor *af)
 {
   
   StTGeoIter it;
@@ -331,11 +337,11 @@ int StTGeoHelper::Edit(StDetectorId did,StActiveFunctor *af)
     if (!it.IsFirst()) {continue;}		//First visit only
     StVoluInfo *inf = IsModule(vol);
     if (inf) {
-//      if (!IsActive(vol)) {it.Skip();continue;}
+      if (!IsActive(vol)) 	{myModu=0; it.Skip();	continue;}
       detId = DetId(vol->GetName());
-      if (!detId) 	continue;
-      if (!did	) 	continue;
-      if (did != detId) {it.Skip();continue;}
+      if (!detId) 		{			continue;}
+      if (!did	) 		{myModu =vol;		continue;}
+      if (did != detId) 	{myModu=0; it.Skip();	continue;}
       myModu =vol;
     }
     if (!myModu) 	continue;
@@ -347,11 +353,11 @@ int StTGeoHelper::Edit(StDetectorId did,StActiveFunctor *af)
   return nEdit;
 }
 //_____________________________________________________________________________
-void StTGeoHelper::InitHitShape()
+void StTGeoProxy::InitHitShape()
 {
   
   StTGeoIter it;
-  it.Print("StTGeoHelper_Init");
+  it.Print("StTGeoProxy_Init");
 //	Create HitShape
   const TGeoVolume *vol= *it;
   TGeoBBox *bb = (TGeoBBox*)vol->GetShape();
@@ -397,7 +403,7 @@ void StTGeoHelper::InitHitShape()
 
 }
 //_____________________________________________________________________________
-void StTGeoHelper::InitHitPlane()
+void StTGeoProxy::InitHitPlane()
 {
   fHitPlaneHardMap = new StHitPlaneHardMap;
   fSeedHits =        new StVoidArr();
@@ -440,7 +446,7 @@ void StTGeoHelper::InitHitPlane()
 
 }
 //_____________________________________________________________________________
-int StTGeoHelper::SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc
+int StTGeoProxy::SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc
                                ,const StTGeoSele *sel)
 
 {
@@ -479,23 +485,23 @@ int StTGeoHelper::SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc
   return kount;
 }
 //_____________________________________________________________________________
-StTGeoHelper::~StTGeoHelper()
+StTGeoProxy::~StTGeoProxy()
 {
   delete fVoluInfoArr;
 }
 //_____________________________________________________________________________
-StTGeoHelper *StTGeoHelper::Instance()
+StTGeoProxy *StTGeoProxy::Instance()
 {
-  if (!gStTGeoHelper) gStTGeoHelper = new StTGeoHelper;
-  return gStTGeoHelper;
+  if (!gStTGeoProxy) gStTGeoProxy = new StTGeoProxy;
+  return gStTGeoProxy;
 }
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::GetInfo(int idx) const
+StVoluInfo *StTGeoProxy::GetInfo(int idx) const
 {
   return (StVoluInfo*)((idx<fVoluInfoArr->GetSize())? (*fVoluInfoArr)[idx]:0);
 }    
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::GetINFO(int idx) 
+StVoluInfo *StTGeoProxy::GetINFO(int idx) 
 {
   StVoluInfo *inf = GetInfo(idx);
   if (inf) return inf;
@@ -504,7 +510,7 @@ StVoluInfo *StTGeoHelper::GetINFO(int idx)
   return inf;
 }    
 //_____________________________________________________________________________
-void StTGeoHelper::SetInfo(StVoluInfo* ext)
+void StTGeoProxy::SetInfo(StVoluInfo* ext)
 {
   int volId = ext->GetNumber();
   StVoluInfo* extOld = (StVoluInfo*)((fVoluInfoArr->GetSize()>volId)? (*fVoluInfoArr)[volId]:0);
@@ -513,12 +519,12 @@ void StTGeoHelper::SetInfo(StVoluInfo* ext)
   fVoluInfoArr->AddAtAndExpand(ext,volId);
 }    
 //_____________________________________________________________________________
-void StTGeoHelper::AddHitPlane(StHitPlane* pla)
+void StTGeoProxy::AddHitPlane(StHitPlane* pla)
 {
   fHitPlaneArr->Add(pla);
 }    
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::IsModule(const TGeoVolume *volu)  const
+StVoluInfo *StTGeoProxy::IsModule(const TGeoVolume *volu)  const
 {
   StVoluInfo *ext = GetInfo(volu->GetNumber());
   if (!ext) return 0;
@@ -526,7 +532,7 @@ StVoluInfo *StTGeoHelper::IsModule(const TGeoVolume *volu)  const
   return ext;
 }    
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::IsMODULE(const TGeoVolume *volu)  const
+StVoluInfo *StTGeoProxy::IsMODULE(const TGeoVolume *volu)  const
 {
   StVoluInfo *ext = GetInfo(volu->GetNumber());
   if (!ext) return 0;
@@ -534,10 +540,10 @@ StVoluInfo *StTGeoHelper::IsMODULE(const TGeoVolume *volu)  const
   return ext;
 }    
 //_____________________________________________________________________________
-StVoluInfo *StTGeoHelper::IsModule(const TGeoNode   *node)  const
+StVoluInfo *StTGeoProxy::IsModule(const TGeoNode   *node)  const
 { return IsModule(node->GetVolume()); }
 //_____________________________________________________________________________
-StHitPlaneInfo* StTGeoHelper::IsHitPlane(const TGeoVolume *volu) const
+StHitPlaneInfo* StTGeoProxy::IsHitPlane(const TGeoVolume *volu) const
 {
   StVoluInfo *ext = GetInfo(volu->GetNumber());
   if (!ext) 			return 0;
@@ -545,11 +551,11 @@ StHitPlaneInfo* StTGeoHelper::IsHitPlane(const TGeoVolume *volu) const
   return (StHitPlaneInfo*)ext;
 }    
 //_____________________________________________________________________________
-StHitPlaneInfo* StTGeoHelper::IsHitPlane(const TGeoNode   *node) const
+StHitPlaneInfo* StTGeoProxy::IsHitPlane(const TGeoNode   *node) const
 { return IsHitPlane(node->GetVolume()); }
 
 //_____________________________________________________________________________
-int StTGeoHelper::MayHitPlane(const TGeoVolume *volu)  const
+int StTGeoProxy::MayHitPlane(const TGeoVolume *volu)  const
 {
   enum {kHow=4};
 
@@ -586,7 +592,7 @@ int StTGeoHelper::MayHitPlane(const TGeoVolume *volu)  const
   return myKode;
 }
 //_____________________________________________________________________________
-StHitPlaneInfo *StTGeoHelper::MakeHitPlaneInfo(const StTGeoIter &it) 
+StHitPlaneInfo *StTGeoProxy::MakeHitPlaneInfo(const StTGeoIter &it) 
 {
 static int nCall=0; nCall++;   
 
@@ -643,7 +649,7 @@ static int nCall=0; nCall++;
 //_____________________________________________________________________________
 void StHitPlane::SetLayer()
 {
- static StTGeoHelper *tg = StTGeoHelper::Inst();
+ static StTGeoProxy *tg = StTGeoProxy::Inst();
  const float *pnt = GetPnt();
  double myPnd[3]={pnt[0],pnt[1],pnt[2]};
  const float *dir = GetDir(pnt)[0];
@@ -654,7 +660,7 @@ void StHitPlane::SetLayer()
  assert(fNex>1e-2);
 }
 //_____________________________________________________________________________
-int StTGeoHelper::IsSensitive(const TGeoVolume *volu)
+int StTGeoProxy::IsSensitive(const TGeoVolume *volu)
 {
   if (!volu) volu = gGeoManager->GetCurrentVolume();
   const TGeoMedium *tm = volu->GetMedium();
@@ -662,7 +668,7 @@ int StTGeoHelper::IsSensitive(const TGeoVolume *volu)
   return (tm->GetParam(kISVOL)>0.);
 }
 //_____________________________________________________________________________
-const TGeoVolume *StTGeoHelper::GetModu() const
+const TGeoVolume *StTGeoProxy::GetModu() const
 {
    for (int i=0;1;i++) {
      TGeoNode *n = gGeoManager->GetMother(i); 
@@ -674,15 +680,15 @@ const TGeoVolume *StTGeoHelper::GetModu() const
    return 0;
 }
 //_____________________________________________________________________________
-const TGeoVolume *StTGeoHelper::GetVolu() const
+const TGeoVolume *StTGeoProxy::GetVolu() const
 {
    return gGeoManager->GetCurrentVolume();
 }
 //_____________________________________________________________________________
-void StTGeoHelper::Print(const char *tit) const
+void StTGeoProxy::Print(const char *tit) const
 {
   TGeoVolume *v=0;
-  if (tit) printf("StTGeoHelpe::Print(%s)\n\n",tit);   
+  if (tit) printf("StTGeoProxy::Print(%s)\n\n",tit);   
    for (int i=gGeoManager->GetLevel();i>=0;i--) {
      TGeoNode *n = gGeoManager->GetMother(i); 
      if(!n) 				break;
@@ -698,7 +704,7 @@ void StTGeoHelper::Print(const char *tit) const
 
 }
 //_____________________________________________________________________________
-void StTGeoHelper::ls(const char *opt) const
+void StTGeoProxy::ls(const char *opt) const
 {
 static int nCall=0;nCall++;
 static const char *types[]={"Dead","MODU","Modu","HitP","Sens"};
@@ -747,15 +753,15 @@ static const char *types[]={"Dead","MODU","Modu","HitP","Sens"};
   }
 }
 //_____________________________________________________________________________
-const char *StTGeoHelper::GetPath() const     
+const char *StTGeoProxy::GetPath() const     
 {
   return gGeoManager->GetPath();
 }
 //_____________________________________________________________________________
-void StTGeoHelper::Test()
+void StTGeoProxy::Test()
 {
    gROOT->Macro("$STAR/StarDb/AgiGeometry/y2009.h");
-   StTGeoHelper &hlp = *StTGeoHelper::Instance();
+   StTGeoProxy &hlp = *StTGeoProxy::Instance();
    hlp.Init(1+2);
 //   hlp.ls("p");
   StTGeoIter it;
@@ -776,14 +782,14 @@ void StTGeoHelper::Test()
   hlp.ls("p");
 }
 //_____________________________________________________________________________
-void StTGeoHelper::Break(int kase) 
+void StTGeoProxy::Break(int kase) 
 {
 static int myKase = -2009;
 if (kase!=myKase) return;
 printf("Break(%d)\n",kase); 
 }
 //_____________________________________________________________________________
-const StHitPlane *StTGeoHelper::AddHit(void *hit,const float xyz[3],unsigned int hardw,int seed)
+const StHitPlane *StTGeoProxy::AddHit(void *hit,const float xyz[3],unsigned int hardw,int seed)
 {
 static int nCall = 0;  nCall++;  
 //		Test of hardware id assignment quality
@@ -835,7 +841,7 @@ static int 	nTest=0,nFail=0,detId=0;
   return hp;
 }
 //_____________________________________________________________________________
-StHitPlane *StTGeoHelper::FindHitPlane(const float xyz[3],int &sure)
+StHitPlane *StTGeoProxy::FindHitPlane(const float xyz[3],int &sure)
 {
 // cos(a+b) = cos(a)*cos(b) - sin(a)*sin(b)
 // sin(a+b) = cos(a)*sin(b) + sin(a)*cos(b)
@@ -924,7 +930,7 @@ static int nCall=0; nCall++;
 }       
        
 //_____________________________________________________________________________
-StHitPlane *StTGeoHelper::GetCurrentHitPlane ()
+StHitPlane *StTGeoProxy::GetCurrentHitPlane ()
 {
   const TGeoNode *node = 0;
   const StHitPlaneInfo *inf=0;
@@ -943,7 +949,7 @@ StHitPlane *StTGeoHelper::GetCurrentHitPlane ()
   return hp;
 }
 //_____________________________________________________________________________
-void StTGeoHelper::ClearHits()
+void StTGeoProxy::ClearHits()
 {
   fAllHits->clear();
   fSeedHits->clear();
@@ -955,12 +961,12 @@ void StTGeoHelper::ClearHits()
   fHitPlaneArr->Clear();
 }    
 //_____________________________________________________________________________
-void StTGeoHelper::Clear(const char *)
+void StTGeoProxy::Clear(const char *)
 {
   ClearHits();
 }
 //_____________________________________________________________________________
-int StTGeoHelper::InitHits()
+int StTGeoProxy::InitHits()
 {
 
   int n = fHitPlaneArr->GetLast()+1;
@@ -972,7 +978,7 @@ int StTGeoHelper::InitHits()
   return nHits;
 }    
 //_____________________________________________________________________________
-StDetectorId StTGeoHelper::DetId(const char *detName) 
+StDetectorId StTGeoProxy::DetId(const char *detName) 
 {
    StDetectorId id = detectorIdByName(detName); 
    if (id) return id;
@@ -983,13 +989,13 @@ StDetectorId StTGeoHelper::DetId(const char *detName)
    return (StDetectorId)0;
 }
 //_____________________________________________________________________________
-const char *StTGeoHelper::DetName(StDetectorId detId)
+const char *StTGeoProxy::DetName(StDetectorId detId)
 {
   const char *det =detectorNameById(detId);
   return det;
 }
 //_____________________________________________________________________________
-const char *StTGeoHelper::ModName(StDetectorId detId)
+const char *StTGeoProxy::ModName(StDetectorId detId)
 {
    for (int i = 0;gMyMod[i].name; i++) 
    { if (gMyMod[i].id==detId)  return gMyMod[i].name;}
@@ -997,13 +1003,13 @@ const char *StTGeoHelper::ModName(StDetectorId detId)
 }
 
 //_____________________________________________________________________________
-int StTGeoHelper::IsHitted(const double X[3]) const
+int StTGeoProxy::IsHitted(const double X[3]) const
 {
   if (!IsSensitive()) return 0;
   const TGeoVolume *mo = GetModu();
   if (!IsActive(mo)) return 0;
   StVoluInfo *vi = GetInfo(mo->GetNumber());
-  StActiveFunctor *af = vi->GetActiveFunctor();
+  StActorFunctor *af = vi->GetActiveFunctor();
   if (!af) return 1;
   return (*af)(X);
 }
@@ -1076,7 +1082,6 @@ static int nCall=0; nCall++;
     it.LocalToMaster(pnt, ht->fPnt);
     ht->fRmed = rMed;
   }
-  hp->SetLayer();
   
 // Check
     for(int i=0;i<3;i++){for(int j=0;j<3;j++) {Vd[i][j]= hp->fDir[i][j];}}
@@ -1374,7 +1379,7 @@ int StTGeoIter::IsOmule()  const //candidate to module
    return (jk==6);
 }
 //_____________________________________________________________________________
-const TGeoVolume *StTGeoHelper::FindModule(const char *patt) 
+const TGeoVolume *StTGeoProxy::FindModule(const char *patt) 
 {
    
   const TGeoVolume *vol=0,*bestVolu=0;
@@ -1394,7 +1399,7 @@ const TGeoVolume *StTGeoHelper::FindModule(const char *patt)
   return bestVolu;
 }
 //_____________________________________________________________________________
-double StTGeoHelper::Look(double maxDist,const double pnt[3],const double dir[3])
+double StTGeoProxy::Look(double maxDist,const double pnt[3],const double dir[3])
 {
 //  Search nearest sensitive volume in given direction.
 //  returns distance
@@ -1481,7 +1486,7 @@ int  StTGeoHitShape::Inside(double z,double rxy) const
    return 1;
 }
 //_____________________________________________________________________________
-void  StTGeoHelper::ShootZR(double z,double rxy) 
+void  StTGeoProxy::ShootZR(double z,double rxy) 
 {
     typedef std::set<std::string> MySet_t ;
     MySet_t  mySet;
@@ -1535,9 +1540,9 @@ void StTGeoHitShape::Get(double &zMin,double &zMax,double &rMax) const
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-ClassImp(StActiveFunctor)
+ClassImp(StActorFunctor)
 //_____________________________________________________________________________
-int StActiveFunctor::GetIPath(int nLev,int *copyNums,const char **voluNams) const
+int StActorFunctor::GetIPath(int nLev,int *copyNums,const char **voluNams) const
 {
   for (int iLev=0;iLev<nLev;iLev++) {
     TGeoNode *node = gGeoManager->GetMother(iLev);
@@ -1550,33 +1555,75 @@ int StActiveFunctor::GetIPath(int nLev,int *copyNums,const char **voluNams) cons
   return 0;
 }
 //_____________________________________________________________________________
-//_____________________________________________________________________________
-#if 0
-// generate dirs for FindHitPlane
+const char* StActorFunctor::GetPath()       const
 {
-  double PI = 3.14159265358;
-  double toRad = PI/180;
-  int lamStep = 30;
-  int num=0;  
-  for (int lam=0;lam<=180;lam+=lamStep) {
-    double cosL = cos(toRad*lam);
-    double sinL = sin(toRad*lam);
-    double rad=sinL;
-    int nPhi = (sinL*360+lamStep-1)/lamStep;
-    if (!nPhi) nPhi = 1;
-    int phiStep=360./nPhi;
-    
-    for (int phi=0;phi<360;phi+=phiStep) {
-      double cosP = cos(toRad*phi);
-      double sinP = sin(toRad*phi);
-      double dir[3]={sinL*cosP,sinL*sinP,cosL};
-      num++;
-      printf("{%7.4f,\t%7.4f,\t%7.4f\t},\t//%2d\n",dir[0],dir[1],dir[2],num);
-    }
-  
-  }
+  return gGeoManager->GetPath();
 }
-#endif
+//_____________________________________________________________________________
+const TGeoVolume *StActorFunctor::GetVolu() const
+{
+  return gGeoManager->GetCurrentVolume();
+}
+//_____________________________________________________________________________
+const TGeoNode *StActorFunctor::GetNode() const
+{
+  return gGeoManager->GetCurrentNode();
+}
+//_____________________________________________________________________________
+StVoluInfo *StActorFunctor::GetInfo() const
+{
+static StTGeoProxy *tgp = StTGeoProxy::Inst();
+const TGeoVolume *v = tgp->GetVolu();
+      int voluId = v->GetNumber();
+      return tgp->GetInfo(voluId);
+}
+//_____________________________________________________________________________
+StHitPlaneInfo *StActorFunctor::GetHitPlaneInfo() const
+{
+static StTGeoProxy *tgp = StTGeoProxy::Inst();
+  const TGeoVolume *v = tgp->GetVolu();
+  return tgp->IsHitPlane(v);
+}
+//_____________________________________________________________________________
+StHitPlane *StActorFunctor::GetHitPlane()     const
+{
+static StTGeoProxy *tgp = StTGeoProxy::Inst();
+  return tgp->GetCurrentHitPlane();
+}
+//______________________________________________________________________________
+StvSetLayer::StvSetLayer():StActorFunctor("SetLayer")
+{
+}
+//______________________________________________________________________________
+int StvSetLayer::operator()( const double *)
+{
+static StTGeoProxy *tg = StTGeoProxy::Inst();
+  if (!tg->IsSensitive()) 	return 0;
+  StHitPlane  *hp =tg->GetCurrentHitPlane();
+  if (!hp)			return 0;
+  hp->SetLayer();
+  return 1;
+}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//_____________________________________________________________________________
+//_____________________________________________________________________________
