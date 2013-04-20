@@ -28,6 +28,29 @@ static double EmxSign(int n,const double *e);
 // Complex numbers
 const TComplex Im(0,1);
 //_____________________________________________________________________________
+static void eigen2(double G[3], double lam[2], double eig[2])
+{
+  double spur = G[0]+G[2];
+  double det  = G[0]*G[2]-G[1]*G[1];
+  double dis  = spur*spur-4*det;
+  if (dis<0) dis = 0;
+  dis = sqrt(dis);
+  if (lam) {
+    lam[0] = 0.5*(spur+dis);
+    lam[1] = 0.5*(spur-dis);
+  }
+  if (eig) {
+    eig[0] = -2*G[1]; eig[1]=G[0]-G[2]-dis;
+    double nor = sqrt(eig[0]*eig[0]+eig[1]*eig[1]);
+    if(eig[0]<0) nor = -nor;
+    eig[0]/=nor;eig[1]/=nor;
+  }
+  if (lam) {
+    lam[0] = 0.5*(spur+dis);
+    lam[1] = 0.5*(spur-dis);
+  }
+}
+//_____________________________________________________________________________
 inline static double dot(const TComplex &a,const TComplex &b)
 {return a.Re()*b.Re()+a.Im()*b.Im();}
 //_____________________________________________________________________________
@@ -1827,7 +1850,7 @@ void  TCircleFitter::Add(double x,double y,const double *errs)
   if (fArr.GetSize()<n) {fArr.Set(n*2);fAux=0;}
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
-  aux->x = x; aux->y=y; aux->exy[0]=1; aux->exy[2]=1; aux->ezz=1;aux->wt=1;
+  aux->x = x; aux->y=y; aux->exy[0]=0; aux->exy[2]=0; aux->ezz=1;aux->wt=0;
   if (errs) AddErr(errs);
 }
 //______________________________________________________________________________
@@ -1839,7 +1862,7 @@ void  TCircleFitter::Add(double x,double y,double z)
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
   aux->x = x; aux->y=y; aux->z=z;
-  aux->exy[0]=1; aux->exy[1]=0; aux->exy[2]=1;aux->ezz=1;aux->wt=1;
+  aux->exy[0]=0; aux->exy[1]=0; aux->exy[2]=0;aux->ezz=1;aux->wt=0;
 }
 //______________________________________________________________________________
 void  TCircleFitter::AddErr(const double *errs,double ezz) 
@@ -1867,7 +1890,7 @@ void  TCircleFitter::AddErr(double errhh,double ezz)
   assert(ezz>=0);
   assert(errhh>0);
   aux->wt = 1./errhh;
-  aux->exy[0]= -1;
+  aux->exy[0]= 0;aux->exy[2]= 0;
   aux->ezz = ezz;
 }
 //______________________________________________________________________________
@@ -1885,49 +1908,70 @@ static int nCall=0; nCall++;
     double xx, yy, xx2, yy2;
     double f, g, h, p, q, t, g0, g02, d=0;
     double xroot, ff, fp;
-    double dx, dy, xnom,wt,tmp,radius2,radiuc2,side[3];
+    double dx, dy, xnom,wt,tmp,radius2,radiuc2;
     fKase = fCase;
     if (fNuse < 3) return 3e33;
     TCircleFitterAux *aux = GetAux(0);
-    const int idx[][2]={{0,fN/2},{fN/2,fN-1},{0,fN-1}};
-    for (int jk=0; jk<3; jk++) {
-      dx = aux[idx[jk][0]].x - aux[idx[jk][1]].x;
-      dy = aux[idx[jk][0]].y - aux[idx[jk][1]].y;
-      side[jk]= sqrt(dx*dx+dy*dy);
-    }
-    double alfa2 = (side[0]+side[1]+side[2])*(side[0]+side[1]-side[2])/(side[0]*side[1]+1e-11);
-    int fastTrak = (alfa2>0 && alfa2<0.2*0.2);
-    fCos = 1; fSin= 0;
-    if (fastTrak) {//dx,dy calculated in last cycle of previous for
-      fCos    = dx/side[2];fSin    = dy/side[2];
-      fNor[0] = -fSin     ;fNor[1] = fCos;
-    }
 
+//		Loop over points,fill orientation 
+    double *mm = &fXgravity; memset(mm,0,sizeof(*mm)*5);
+    for (int i=0; i<fN; i++) {
+      double x=aux[i].x, y=aux[i].y;
+      fXgravity+=x; fYgravity+=y;fXx+=x*x;fYy+=y*y;fXy+=x*y;}
+
+    for (int j=0;j<5;j++) {mm[j]/=fN;}
+    fXx-=fXgravity*fXgravity;fYy-=fYgravity*fYgravity;fXy-=fXgravity*fYgravity;
+
+    double eigVal[2];
+    eigen2(&fXx,eigVal,&fCos);    
+    int fastTrak = (eigVal[0]>10*eigVal[1]);
+    fNor[0] = -fSin; fNor[1] = fCos;
+
+
+    enum {kIter=1,kFast=2,kWeit=4,kErr=8};
     const double *exy=0;
+    int wasErrs = 0;
     for (int iter=0;iter<2;iter++) {// one or two iters
       fWtot = 0;
       memset(&fXgravity,0,sizeof(double)*(nAVERs+2));
-      for (int i=0; i<fN; i++) {//Loop over points
+      for (int i=0; i<fN; i++) {//Loop over points,fill wt and center of gravity
         if (aux[i].wt<0) continue;
         int kase = iter;
-	if (aux[i].wt    >0) 		kase+=2;	//weight defined
-        if (fastTrak && aux[i].exy[0]>0)kase+=4;	//error matrix defined
+        if (fastTrak)  kase|=2;
+	if (aux[i].wt >0) 		kase+=4;	//weight defined
+        if (aux[i].exy[0]>0) {wasErrs++;kase+=8;}	//error matrix defined
         switch (kase) {
-          case 0: wt = 1; break;
-          case 2: ; case 3: wt = aux[i].wt; break;
-          case 5: ; case 7: {
+          case 0:; 
+	  case kErr:;
+	  case kFast:;
+
+	    wt = 1; break;		//assign Weight =1
+
+          case kWeit:;
+	  case kWeit|kErr:;
+	  case kWeit|kFast:;
+	  case kWeit|kIter:;
+	   wt = aux[i].wt; break;
+
+          case kIter|kWeit|kErr:; 
+          case kIter|kFast|kWeit|kErr:; 
+	   {				// slow error, calculate normal
             fNor[0] = fXCenter - aux[i].x;
             fNor[1] = fYCenter - aux[i].y;
             tmp = sqrt(fNor[0]*fNor[0]+fNor[1]*fNor[1]);
-            fNor[0]/=tmp; fNor[1]/=tmp; }
-          case 4:; case 6: {
+            fNor[0]/=tmp; fNor[1]/=tmp;
+	   }
+          case kFast|kErr:;
+          case kFast|kErr|kWeit:;
+	   {				// fast errors
             exy = aux[i].exy;
             wt = (fNor[0]*fNor[0]*exy[0]
 		 +fNor[0]*fNor[1]*exy[1]*2
 		 +fNor[1]*fNor[1]*exy[2]);
             if (wt<1e-8) wt = 1e-8;
             wt = 1/wt; 
-	    break;}
+	    break;
+	   }
             default: assert(0);
 	}//end switch
         aux[i].wt = wt;
@@ -1935,10 +1979,11 @@ static int nCall=0; nCall++;
 	fXgravity += aux[i].x *wt;
 	fYgravity += aux[i].y *wt;
       }//End Loop over points
+
       fXgravity /= fWtot;
       fYgravity /= fWtot;
 
-      for (int i=0; i<fN; i++) {
+      for (int i=0; i<fN; i++) {		//Calc all averages
 	  dx  = aux[i].x-fXgravity;
 	  dy  = aux[i].y-fYgravity;
 	  xx  =  dx*fCos + dy*fSin;
@@ -1958,7 +2003,7 @@ static int nCall=0; nCall++;
       fRr = fXx+fYy;
 
       if (fNuse <= 3 && !fKase) fKase=1;
-      if (!fKase) fKase =(fYy < fXx *(0.5)*(0.5)/210)? 1:2;
+      if (!fKase) fKase =(fastTrak)? 1:2;
 SWIT: switch(fKase) {
         case 1:	{	//Try 1st method
 
@@ -2025,8 +2070,7 @@ SWIT: switch(fKase) {
       fXCenter = fXd*fCos-fYd*fSin + fXgravity;
       fYCenter = fXd*fSin+fYd*fCos + fYgravity;
       
-      if (fastTrak || !exy) break;
-      fastTrak = 99;
+      if (fastTrak || !wasErrs) break;	//if track fast,errs accounted or no errs, no more iters
     }// end iters
     
 //	Update TCircle
@@ -2728,38 +2772,34 @@ double THelixFitter::Fit()
   int nDat = Size();
   double Xi2xy = fCircleFitter.Fit();
   if (Xi2xy>1e11) return Xi2xy;
+  
   int ndfXY = fCircleFitter.Ndf();
-  TCircle circ(fCircleFitter);
-  const double *xy = &(myAux[nDat-1].x);
-  double z2 = xy[2];
-  double s2 = circ.Path(xy);
-
-  xy = &(myAux[0].x);
-  double z0 = xy[2];
-  double s0  = circ.Path(xy);
-
-
-  xy = &(myAux[nDat/2].x);
-  double z1 = xy[2];
-  double s1  = circ.Path(xy);
-  if (fabs(s1-s0) > fabs(s2-s0)) {s2=s1;z2=z1;}
-
-
-
+  double rho = fCircleFitter.Rho();
+  double mm[4]={0},s=0;		//mm[s,z,ss,sz]	
+  double z0 = myAux[0].z;
+  for (int ip=1;ip<nDat;ip++) {
+    double z = myAux[ip].z-z0;
+    double dx = myAux[ip].x - myAux[ip-1].x;
+    double dy = myAux[ip].y - myAux[ip-1].y;
+    double hord = sqrt(dx*dx+dy*dy);
+    double t = 0.5*hord*rho;
+    double ds = (fabs(t)<0.3)? hord*(1+t*t/6):2*asin(t)/rho;
+    s+=ds; mm[0]+=s; mm[1]+=z;mm[2]+=s*s;mm[3]+=s*z;
+  }
+  for (int j=0;j<4;j++) { mm[j]/=nDat;}
+  mm[2]-=mm[0]*mm[0]; mm[3]-= mm[0]*mm[1];
 
 //	estimation of tan(dip) to correct z errs
-  double tanDip = (z2-z0)/(s2-s0);
-
-  circ.Move(s0);
+  double tanDip = mm[3]/mm[2];
+  TCircle circ(fCircleFitter);
 //  set lengths
-  double s = 0;
+  s = 0;
   for (int iDat=0;iDat<nDat;iDat++) {
     TCircleFitterAux* aux = myAux+iDat;
-    xy = &(aux->x);
-    double ds = circ.Path(xy);
+    double ds = circ.Path(&(aux->x));
     circ.Move(ds); s+=ds;
 //		correct errors
-    double corErr = 0;;
+    double corErr = 0;
     if (aux->exy[0]>0) {
       const double *dc = circ.Dir();
       corErr = tanDip*tanDip*
@@ -2769,6 +2809,7 @@ double THelixFitter::Fit()
     }
     fPoli1Fitter.Add(s,aux->z,aux->ezz+corErr);
   }
+
   double Xi2z = fPoli1Fitter.Fit();
 //	Now set THelixTrack
   int ndfSz = fPoli1Fitter.Ndf();
@@ -3648,7 +3689,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.64 2013/04/17 03:01:32 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.65 2013/04/20 03:37:11 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3664,6 +3705,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.65  2013/04/20 03:37:11  perev
+ * Reorganization to account non standard cases
+ *
  * Revision 1.64  2013/04/17 03:01:32  perev
  * Special case xy1st ~= xyLst
  *
@@ -3800,4 +3844,4 @@ double EmxSign(int n,const double *e)
  * Initial Revision
  *
  **************************************************************************/
- 
+
