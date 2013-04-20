@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.30 2013/04/12 23:58:53 perev Exp $
+// $Id: StvMaker.cxx,v 1.31 2013/04/20 22:02:00 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -67,7 +67,7 @@ More detailed: 				<br>
 #include "StChainOpt.h"
 #include "StvMaker.h"
 #include "StarVMC/GeoTestMaker/StVMCApplication.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 //#include "StvMCInitApp.h"
 #include "Stv/StvConst.h"
 #include "Stv/StvHit.h"
@@ -128,7 +128,7 @@ void StvMaker::Clear(const char*)
 //_____________________________________________________________________________
 Int_t StvMaker::Finish()
 {
-  StTGeoHelper::Inst()->Finish();
+  StTGeoProxy::Inst()->Finish();
   return StMaker::Finish();
 }
 
@@ -146,7 +146,7 @@ Int_t StvMaker::InitDetectors()
 {
   
   StvToolkit   *kit = StvToolkit::Inst();
-  StTGeoHelper *tgh = StTGeoHelper::Inst();
+  StTGeoProxy *tgh = StTGeoProxy::Inst();
   if (*SAttr("HitLoadOpt")) tgh->SetOpt(IAttr("HitLoadOpt"));
 
 //		Activate detectors
@@ -157,11 +157,10 @@ Int_t StvMaker::InitDetectors()
   tgh->Init(1+2+4);
 //	TPC has non standard TGeo. Edit it
 
-  int nEdit = tgh->Edit(kTpcId,new StvTpcEdit());	//Disable fake padrows
+  StvTpcEdit tpce;
+  int nEdit = tgh->Edit(kTpcId,&tpce);	//Disable fake padrows
   Info("InitDetectors","%d fake TPC padrows disabled",nEdit);
-
-  int nLaye = tgh->Edit(kTpcId,new StvTpcLayer());	//Recalculate layers
-  Info("InitDetectors","%d TPC padrows relayered",nLaye);
+  tgh->InitLayers();
 
 
 
@@ -232,7 +231,7 @@ static int initialized = 0;
   } else {
     geom = GetChainOpt()->GetGeometry();
     assert(geom.Length());
-    StTGeoHelper::Inst()->Load(geom);
+    StTGeoProxy::Inst()->Load(geom);
   }
 
   StVMCApplication *app = new StVMCApplication(geom, "StVMC application");
@@ -323,7 +322,7 @@ Int_t StvMaker::Make()
   cout<< "StvMaker::Make() -I- Done"<<endl;
   iAnz = StMaker::Make();
   kit->Clear();
-  StTGeoHelper::Inst()->Clear();
+  StTGeoProxy::Inst()->Clear();
   if (iAns) return iAns;
   if (iAnz) return iAnz;
   if (mFETracks && mToTracks>mFETracks) return kStEOF;

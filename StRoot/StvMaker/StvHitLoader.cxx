@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.15 2013/03/27 15:45:01 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.16 2013/04/20 22:01:31 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -20,7 +20,7 @@ Main tasks:
 #include "StvHitLoader.h"
 #include "Stv/StvHit.h"
 #include "Stv/StvToolkit.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StEvent.h"
 #include "StHit.h"
 #include "StEventUtilities/StEventHelper.h"
@@ -46,7 +46,7 @@ StvHitLoader::~StvHitLoader()
 //_____________________________________________________________________________
 void StvHitLoader::Clear(const char*)
 {
-  StTGeoHelper::Inst()->ClearHits();
+  StTGeoProxy::Inst()->ClearHits();
 }
 
 //_____________________________________________________________________________
@@ -60,7 +60,7 @@ Int_t StvHitLoader::Init()
 {
    int nDet=0;
    for (int id=1; id<kMaxDetectorId; id++){
-     if (!StTGeoHelper::Inst()->IsActive((StDetectorId)id)) continue;
+     if (!StTGeoProxy::Inst()->IsActive((StDetectorId)id)) continue;
      mHitIter->AddDetector((StDetectorId)id);
      nDet++;
    }
@@ -94,10 +94,10 @@ if (myGraph) { //create canvas
     if (did != didOld || !stHit) {
       if (didOld) {
         Info("LoadHits","Loaded  %d good, recovered %d and failed %d %s hits"
-	    ,nHits,nHits-nGits,nHitz,StTGeoHelper::DetName(didOld));
+	    ,nHits,nHits-nGits,nHitz,StTGeoProxy::DetName(didOld));
       }
       if (!stHit) break;
-      Info("LoadHits","Start %s hits",StTGeoHelper::DetName(did));
+      Info("LoadHits","Start %s hits",StTGeoProxy::DetName(did));
       nHits=0; nHitz=0,nGits=0;
     }
     if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY) continue; // ignore hits marked by AfterBurner as chopped o
@@ -115,7 +115,7 @@ if (myHits) (*myHits)+= stiHit;
       if (did == kTpcId) TpcHitTest(stHit);} 
     didOld = did; 
   }
-  int nIniHits = StTGeoHelper::Inst()->InitHits();
+  int nIniHits = StTGeoProxy::Inst()->InitHits();
   assert(nTotHits==nIniHits);
   Info("LoadHits","Loaded %d good, recovered %d and failed %d of all hits"
       ,nTotHits,nTotHits-nTotGits,nTotHitz);
@@ -125,7 +125,7 @@ if (myDraw) {myDraw->Hits(*myHits,kUnusedHit); myDraw->Wait();}
 //_____________________________________________________________________________
 StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath, int &sure)
 {
-static StTGeoHelper *tgh = StTGeoHelper::Inst();
+static StTGeoProxy *tgh = StTGeoProxy::Inst();
    StvHit *stiHit = StvToolkit::Inst()->GetHit();
    StDetectorId did = stHit->detector();
    UInt_t hard = stHit->hardwarePosition();

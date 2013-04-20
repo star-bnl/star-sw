@@ -1,4 +1,4 @@
-// $Id: StMCStepping2Hist.cxx,v 1.5 2010/01/27 23:02:57 perev Exp $
+// $Id: StMCStepping2Hist.cxx,v 1.6 2013/04/20 21:53:53 perev Exp $
 //
 //
 // Class StMCStepping2Hist
@@ -13,7 +13,7 @@
 #include "TColor.h"
 #include "TVirtualMC.h"
 #include "StMCStepping2Hist.h"
-#include "StTGeoHelper.h"
+#include "StTGeoProxy.h"
 #include "TObjArray.h"
 #include "TNamed.h"
 #include "TH1F.h"
@@ -515,7 +515,7 @@ StMCStepping2Hist::~StMCStepping2Hist()
 //_____________________________________________________________________________
 void StMCStepping2Hist::Print(const Option_t*) const
 {
-   StTGeoHelper::Instance()->Print(KazeAsString(fKaze));
+   StTGeoProxy::Instance()->Print(KazeAsString(fKaze));
    printf("RadLen=%g fCurrentLength=%g Rxy=%g Z=%g\n\n"
          , fTotRadL,fCurrentLength,fCurrentPosition.Perp(),fCurrentPosition.Z());
 }		
@@ -525,7 +525,7 @@ int StMCStepping2Hist::Fun()
 static int nCall = 0;
 nCall++;
 
-if (!fHitShape)  fHitShape = StTGeoHelper::Instance()->GetHitShape();
+if (!fHitShape)  fHitShape = StTGeoProxy::Instance()->GetHitShape();
 
   const TGeoVolume *modu = 0;     TString ts,modName;
   Case();
@@ -538,7 +538,7 @@ if (!fHitShape)  fHitShape = StTGeoHelper::Instance()->GetHitShape();
   assert(fCurrentLength< 10000);
   assert(fEnterLength  < 10000);
   
-//   StTGeoHelper::Instance()->Print(KazeAsString(fKaze));
+//   StTGeoProxy::Instance()->Print(KazeAsString(fKaze));
 //   printf("fEnterLength=%g fCurrentLength=%g Rxy=%g Z=%g\n\n"
 //         , fEnterLength, fCurrentLength,fCurrentPosition.Perp(),fCurrentPosition.Z());
 SWITCH: int myKaze = fKaze;
@@ -571,13 +571,13 @@ if (strcmp(fVolume->GetName(),"TPAD")==0) Break(1);
 
     case kEXITtrack:
     {
-      fVolHits = (StTGeoHelper::Instance()->IsSensitive(fVolume))? 1:0;
+      fVolHits = (StTGeoProxy::Instance()->IsSensitive(fVolume))? 1:0;
       if (fX0<=0) break;
       double dL = fCurrentLength-fEnterLength;
       fVolRadL = fabs(dL)/fX0;
       fTotRadL    += fVolRadL;
 //??      assert(fTotRadL<100);
-      modu = StTGeoHelper::Instance()->GetModu();   
+      modu = StTGeoProxy::Instance()->GetModu();   
       fModName = (modu)? modu->GetName(): "CAVE";
       fModName = Alias(fModName);
       fELossTrk[0]->Add(dL,fX0);

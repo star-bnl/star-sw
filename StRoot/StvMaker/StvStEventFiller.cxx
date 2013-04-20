@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.27 2013/04/15 00:41:42 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.28 2013/04/20 22:02:42 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.28  2013/04/20 22:02:42  perev
+ * Rename StTGeoHelper ==> StTGeoProxy
+ *
  * Revision 1.27  2013/04/15 00:41:42  perev
  * outdated assert removed
  *
@@ -557,7 +560,7 @@
 #include "StvUtil/StvPullEvent.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StvUtil/StvDebug.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 //#include "StDetectorDbMaker/StvKalmanTrackFitterParameters.h"
 
 //StvMaker

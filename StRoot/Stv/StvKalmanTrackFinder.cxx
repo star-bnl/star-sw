@@ -10,7 +10,7 @@
 
 #include "StvToolkit.h"
 #include "StMultiKeyMap.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "Stv/StvHit.h"
 #include "StvUtil/StvNodePars.h"
 #include "StvUtil/StvDebug.h"
@@ -41,7 +41,7 @@ StvKalmanTrackFinder::StvKalmanTrackFinder(const char *name):StvTrackFinder(name
   mDive = new StvDiver("KalmanTrackFinder");
   mDive->Init();
   double rMax,zMin,zMax;
-  StTGeoHelper::Inst()->GetHitShape()->Get(zMin,zMax,rMax);
+  StTGeoProxy::Inst()->GetHitShape()->Get(zMin,zMax,rMax);
   if (zMax < -zMin) zMax = -zMin;
   mDive->SetRZmax(rMax,zMax);
   mHitter = new StvHitter();

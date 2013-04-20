@@ -5,7 +5,7 @@
 #include "TGeant3TGeo.h"
 #include "StarVMC/GeoTestMaker/StVMCApplication.h"
 #include "StarVMC/GeoTestMaker/StMCStack.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvUtil/StvNodePars.h"
 #include "StarMagField.h"
 #include "StvELossTrak.h"
@@ -257,7 +257,7 @@ int StvMCStepping::Fun()
 {
 static int nCall = 0;
 nCall++;
-static StTGeoHelper *tgh = StTGeoHelper::Instance();
+static StTGeoProxy *tgh = StTGeoProxy::Instance();
 int meAgain = 0;
 
 mybreak(nCall);
@@ -269,7 +269,7 @@ mybreak(nCall);
   assert(fCurrentLength< 10000);
   assert(fEnterLength  < 10000);
   
-//   StTGeoHelper::Instance()->Print(KazeAsString(fKaze));
+//   StTGeoProxy::Instance()->Print(KazeAsString(fKaze));
 //   printf("fEnterLength=%g fCurrentLength=%g Rxy=%g Z=%g\n\n"
 //         , fEnterLength, fCurrentLength,fCurrentPosition.Perp(),fCurrentPosition.Z());
 SWITCH: int myKaze = fKaze;
@@ -289,7 +289,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
          double *X = &fCurrentPosition[0];
          fHitted = (tgh->IsHitted(X) && (!meAgain));
          if (strcmp(fVolume->GetName(),"HALL")==0) fKaze=kENDEDtrack;
-         if (!StTGeoHelper::Inst()->GetHitShape()->Inside(fCurrentPosition.Z(),fCurrentPosition.Perp()))
+         if (!StTGeoProxy::Inst()->GetHitShape()->Inside(fCurrentPosition.Z(),fCurrentPosition.Perp()))
 	    fKaze=kENDEDtrack;
          if (fKaze==kENDEDtrack) break;
          if ((fExit = BegVolume())) fKaze=kENDEDtrack;}
