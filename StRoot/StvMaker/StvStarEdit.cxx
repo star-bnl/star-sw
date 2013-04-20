@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvStarEdit.h"
 
 ClassImp(StvTpcEdit)
 
 //______________________________________________________________________________
-StvTpcEdit::StvTpcEdit():StActiveFunctor("TpcEdit")
+StvTpcEdit::StvTpcEdit():StActorFunctor("TpcEdit")
 {
 }
 //______________________________________________________________________________
@@ -51,7 +51,7 @@ static const int isdets[nbpads]={
 //______________________________________________________________________________
 int StvTpcEdit::operator()( const double *)
 {
-static StTGeoHelper *tg = StTGeoHelper::Inst();
+static StTGeoProxy *tg = StTGeoProxy::Inst();
 
   const TGeoVolume *vol = tg->GetVolu();
   assert(vol);
@@ -65,19 +65,5 @@ static StTGeoHelper *tg = StTGeoHelper::Inst();
   if (!isd) 			return 0;	//Not fake volume
   hp=inf->RemHitPlane(path);
   delete hp;
-  return 1;
-}
-//______________________________________________________________________________
-StvTpcLayer::StvTpcLayer():StActiveFunctor("TpcLayer")
-{
-}
-//______________________________________________________________________________
-int StvTpcLayer::operator()( const double *)
-{
-static StTGeoHelper *tg = StTGeoHelper::Inst();
-  if (!tg->IsSensitive()) 	return 0;
-  StHitPlane  *hp =tg->GetCurrentHitPlane();
-  if (!hp)			return 0;
-  hp->SetLayer();
   return 1;
 }
