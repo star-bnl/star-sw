@@ -1,6 +1,6 @@
 #ifndef __BigFullChain_h__
 #define __BigFullChain_h__
-#define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
+//#define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
 //#define __NoStrangeMuDst__
 /*   -- from Jeff list 04/26/12 -- zdc always in
 year : active detector list                                                                | Data samples
