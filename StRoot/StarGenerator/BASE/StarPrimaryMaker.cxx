@@ -30,6 +30,8 @@ ClassImp(StarPrimaryMaker);
 
 #include "TMCProcess.h"
 
+#include "tables/St_vertexSeed_Table.h"
+
 using namespace std;
 
 StarPrimaryMaker *fgPrimary      = 0;
@@ -43,8 +45,9 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mFileName("none"),
   mStack(0),
   mPrimaryEvent(0),
-  mVx(0), mVy(0), mVz(0), mSx(0.1), mSy(0.1), mSz(30.0), mRho(0),
-  mPtMin(0), mPtMax(-1), mRapidityMin(0), mRapidityMax(-1), mPhiMin(0), mPhiMax(-1), mZMin(0), mZMax(-1)
+  mVx(0), mVy(0), mVz(0), mSx(0.1), mSy(0.1), mSz(30.0), mRho(0), mVdxdz(0), mVdydz(0),
+  mPtMin(0), mPtMax(-1), mRapidityMin(0), mRapidityMax(-1), mPhiMin(0), mPhiMax(-1), mZMin(0), mZMax(-1),
+  mRunNumber(-1)
 {
   assert(fgPrimary == 0); // cannot create more than one primary generator
   fgPrimary = this;
@@ -73,6 +76,12 @@ TParticlePDG *StarPrimaryMaker::pdg( Int_t id ){
 // --------------------------------------------------------------------------------------------------------------
 Int_t StarPrimaryMaker::Init()
 {
+
+  //
+  // Initialize runtime flags
+  //
+  mDoBeamline = IAttr("beamline");
+  
   
   //
   // Initialize all submakers first
@@ -92,8 +101,6 @@ Int_t StarPrimaryMaker::Init()
   if ( !mFile ) result = (result<kStWarn)? kStWarn : result;
 
   mTree = new TTree( "genevents", "TTree containing event generator information" );
-  
-
 
   mPrimaryEvent = new StarGenEvent("primaryEvent","Primary Event... particle-wise information from all event generators");
   mTree->Branch("primaryEvent","StarGenEvent",&mPrimaryEvent,64000,99);
@@ -180,9 +187,13 @@ Int_t StarPrimaryMaker::Make()
   return kStOK;
 }
 // --------------------------------------------------------------------------------------------------------------
+// Intialize for this run
 Int_t StarPrimaryMaker::InitRun( Int_t runnumber )
 {
+  // Set the run number
   mPrimaryEvent->SetRunNumber(runnumber);
+  mRunNumber = runnumber;
+
   return StMaker::InitRun( runnumber );
 }
 
@@ -213,6 +224,31 @@ void StarPrimaryMaker::AddGenerator( StarGenerator *gener )
 Int_t StarPrimaryMaker::PreGenerate()
 { 
   
+  // Check for beamline constraint and load values
+  if ( mDoBeamline ) 
+    {
+      TDataSet*      dbDataSet = GetChain()->GetDataBase("Calibrations/rhic/vertexSeed");
+      vertexSeed_st* vSeed = 0;
+      if ( dbDataSet ) 
+	{
+	  vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
+	}
+      if ( vSeed ) {
+
+	mVx    = vSeed->x0;
+	mVy    = vSeed->y0;
+	mVdxdz = vSeed->dxdz;
+	mVdydz = vSeed->dydz;
+      }
+      else {
+	LOG_WARN << "-- Beamline constraint requested but none seen in DB --" << endm;
+      }
+
+    }
+
+  LOG_INFO << Form("mDoBeamline=%i run=%i vx=%6.4f vy=%6.4f vz=%6.3f dxdz=%6.4f dydz=%6.4f",mDoBeamline,mRunNumber,mVx,mVy,mVz,mVdxdz,mVdydz) << endm;
+
+
   TIter Next( GetMakeList() );
   StarGenerator *generator = 0;
   while ( (generator=(StarGenerator *)Next()) )
@@ -382,12 +418,6 @@ Int_t StarPrimaryMaker::Finalize()
 	  Double_t vz   = particle->GetVz();
 	  Double_t vt   = particle->GetTof();
 
-	  /**
-	   *
-	   * NOTE: Insert rotation along the beamline constraint at this point
-	   *
-	   */
-
 	  Double_t polx=0, poly=0, polz=0;
 	  
 	  Int_t    parent  = particle->GetFirstMother();
@@ -404,16 +434,31 @@ Int_t StarPrimaryMaker::Finalize()
 	  //
 	  if ( i )
 	    {
+
+	      // Rotate the particle along the specified beamline
+	      RotateBeamline( px, py, pz, E, M, vx, vy, vz, vt );
+
+	      // Smear the vertex in X, Y, and Z. 
+	      // NOTE: This is wrong, in the sense that we *should* measure the vertex
+	      //       distributions along the beam line.  In practice, users give us
+	      //       the x,y and z distributions as measured in the STAR reference
+	      //       system.  So long as dxdz and dydz are small, this should all be
+	      //       a good approximation.
 	      vx += vertex.X();
 	      vy += vertex.Y();
 	      vz += vertex.Z();
 	      vt += vertex.T();
-	      
+
+
+	      // Handle bookkeepting between event generators
 	      parent += offset;
 	      parent2 += offset;
 	      kid1 += offset;
 	      kid2 += offset;
+
 	    }
+
+
 
 
 	  // Add the track to the particle stack and register the
@@ -455,8 +500,6 @@ Int_t StarPrimaryMaker::Finalize()
 
     }
   
-  //  St_particle *particle_st = (St_particle *)GetData("particle");
-  //  assert(particle_st); // Hey!  Did we create the particle DS?
 
   return kStOK;
 }
@@ -501,3 +544,31 @@ void StarPrimaryMaker::BuildTables()
    
 }
 // --------------------------------------------------------------------------------------------------------------
+void StarPrimaryMaker::RotateBeamline( Double_t &px, Double_t &py, Double_t &pz, Double_t &E, Double_t &M, Double_t &vx, Double_t &vy, Double_t &vz, Double_t &vt )
+{
+
+  // Unit vectors
+  static const TVector3 xhat(1,0,0), yhat(0,1,0), zhat(0,0,1);
+
+  if ( mVdxdz == 0.0 && mVdydz == 0.0 ) return; // Nothing to do
+
+  // Vertex position and momentum
+  TLorentzVector vertex(vx,vy,vz,vt);
+  TLorentzVector moment(px,py,pz,E);
+
+  Double_t thetaX = TMath::ATan( mVdxdz );
+  Double_t thetaY = TMath::ATan( mVdydz );
+
+  vertex.Rotate( -thetaY, xhat ); // - comes about because of the cross product, order of rotations, ...
+  vertex.Rotate( +thetaX, yhat );
+  moment.Rotate( -thetaY, xhat );
+  moment.Rotate( +thetaX, yhat );
+
+  vx = vertex[0];
+  vy = vertex[1];
+  vz = vertex[2];
+  px = moment[0];
+  py = moment[1];
+  pz = moment[2];
+
+}
