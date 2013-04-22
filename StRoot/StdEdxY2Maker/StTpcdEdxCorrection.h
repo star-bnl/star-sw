@@ -1,10 +1,11 @@
-// $Id: StTpcdEdxCorrection.h,v 1.5 2012/09/14 13:45:40 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.6 2013/04/22 19:05:12 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
 #include "TObject.h"
 #include "Stiostream.h"
 #include "StDetectorDbMaker/St_tpcCorrectionC.h"
+#include "StDetectorDbMaker/St_MDFCorrectionC.h"
 #include "tables/St_tpcGas_Table.h"
 #include "tables/St_TpcSecRowCor_Table.h"
 #include "tables/St_tpcGas_Table.h"
@@ -26,7 +27,7 @@ struct dEdxCorrection_t {
   {Name = name, Chair = chair; Title = title; nrows = n; dE = 0;} 
   const Char_t *Name;
   const Char_t *Title;
-  St_tpcCorrectionC *Chair;
+  TChair       *Chair;
   Int_t   nrows;
   Double_t dE;
 };
@@ -58,20 +59,24 @@ class StTpcdEdxCorrection : public TObject {
     kdXCorrection     , //X
     kTpcPadTBins      , //d
     kTpcZDC           ,
+    kTpcNoAnodeVGainC ,
     kTpcLast          ,
     kTpcLengthCorrection,
+    kTpcLengthCorrectionMDF,
     kTpcdEdxCor       ,
     kTpcAllCorrections
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
   Int_t dEdxCorrection(dEdxY2_t &dEdx, Bool_t doIT=kTRUE); 
+  Int_t dEdxTrackCorrection(Int_t type, dst_dedx_st &dedx);
   Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx);
   void SettpcGas               (St_tpcGas          *m = 0);
   //  void SettrigDetSums          (St_trigDetSums     *m = 0);
   void SetTpcSecRowB           (St_TpcSecRowCor    *m = 0);
   void SetTpcSecRowC           (St_TpcSecRowCor    *m = 0);
   void SetCorrection           (Int_t k = 0, St_tpcCorrection   *m = 0);
+  void SetCorrectionMDF        (Int_t k = 0, St_MDFCorrection   *m = 0);
   void Setdrift                (St_tpcCorrection   *m = 0) {SetCorrection (kDrift               , m);}
   void SetMultiplicity         (St_tpcCorrection   *m = 0) {SetCorrection (kMultiplicity        , m);}
   void SetAdcCorrection        (St_tpcCorrection   *m = 0) {SetCorrection (kAdcCorrection       , m);}
@@ -96,7 +101,7 @@ class StTpcdEdxCorrection : public TObject {
   St_TpcSecRowCor  *TpcSecRowC()           {return m_TpcSecRowC;}
 
   St_tpcCorrectionC *Correction(Int_t k = 0) {
-    return (k > kTpcSecRowC && k < kTpcAllCorrections && m_Corrections[k].Chair) ? m_Corrections[k].Chair : 0;
+    return (St_tpcCorrectionC *)((k > kTpcSecRowC && k < kTpcAllCorrections && m_Corrections[k].Chair) ? (m_Corrections[k].Chair) : 0);
   }
   St_tpcCorrectionC *drift()               {return Correction(kDrift);}
   St_tpcCorrectionC *Multiplicity()        {return Correction(kMultiplicity);}
