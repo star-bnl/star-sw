@@ -5,11 +5,11 @@
 #include "TVector3.h"
 #include "StMultiKeyMap.h"
 #include "THelixTrack.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvSeed/StvSeedConst.h"
 
 #ifndef __NOSTV__
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvKNSeedFinder.h"
 #include "Stv/StvHit.h"
 #include "StvUtil/StvDebug.h"
@@ -51,7 +51,7 @@ void StvKNSeedFinder::Reset()
 #ifndef __NOSTV__
   memset(mBeg,0,mMed-mBeg+1);
   std::map<double,StvHit*> myMap;
-  const StVoidArr *hitArr =  StTGeoHelper::Inst()->GetSeedHits();
+  const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetSeedHits();
   int nHits =  hitArr->size();
   for (int iHit=0;iHit<nHits;iHit++) {
     StvHit *hit = (StvHit*)(*hitArr)[iHit];

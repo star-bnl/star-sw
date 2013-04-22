@@ -6,7 +6,7 @@
 #include "TCernLib.h"
 #include "StvCASeedFinder.h"
 #include "StMultiKeyMap.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
 #include "StEvent/StEnumerations.h"
 #include "StEvent/StTpcHit.h"
@@ -219,7 +219,7 @@ void StvCASeedFinder::MakeHits()
 {
 const static double TAN15 = tan(M_PI*16/180); //16 != mistype
 
-  fStvHits = StTGeoHelper::Inst()->GetAllHits(); 
+  fStvHits = StTGeoProxy::Inst()->GetAllHits(); 
   if (!fStvHits) return;
   int nHits = fStvHits->size();
   if (!nHits) 	return;
