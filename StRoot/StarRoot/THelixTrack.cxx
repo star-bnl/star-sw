@@ -1980,19 +1980,20 @@ static int nCall=0; nCall++;
       fYgravity /= fWtot;
 
       for (int i=0; i<fN; i++) {		//Calc all averages
-	  dx  = aux[i].x-fXgravity;
-	  dy  = aux[i].y-fYgravity;
-	  xx  =  dx*fCos + dy*fSin;
-	  yy  = -dx*fSin + dy*fCos;
-	  xx2 = xx*xx;
-	  yy2 = yy*yy;
-          wt  = aux[i].wt;
-	  fXx    += xx2 		*wt;
-	  fYy    += yy2 		*wt;
-	  fXy    += xx*yy 		*wt;
-	  fXrr   += xx*(xx2+yy2) 	*wt;
-	  fYrr   += yy*(xx2+yy2) 	*wt;
-	  fRrrr += (xx2+yy2)*(xx2+yy2) 	*wt;
+        wt  = aux[i].wt;
+        if (wt<0) continue;
+	dx  = aux[i].x-fXgravity;
+	dy  = aux[i].y-fYgravity;
+	xx  =  dx*fCos + dy*fSin;
+	yy  = -dx*fSin + dy*fCos;
+	xx2 = xx*xx;
+	yy2 = yy*yy;
+	fXx    += xx2 		*wt;
+	fYy    += yy2 		*wt;
+	fXy    += xx*yy 	*wt;
+	fXrr   += xx*(xx2+yy2) 	*wt;
+	fYrr   += yy*(xx2+yy2) 	*wt;
+	fRrrr += (xx2+yy2)*(xx2+yy2) 	*wt;
       }
       double *dd = &fXx;
       for (int i=0;i<nAVERs;i++) {dd[i]/=fWtot;}
@@ -3691,7 +3692,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.66 2013/04/23 01:47:16 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.67 2013/04/23 19:04:41 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3707,6 +3708,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.67  2013/04/23 19:04:41  perev
+ * Add one more check for discarded point (wt=-1)
+ *
  * Revision 1.66  2013/04/23 01:47:16  perev
  * add Show() ++ defence against abnormal cases
  *
