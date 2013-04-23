@@ -353,6 +353,7 @@
         <Volume name="MIGG" comment="is a single gas gap"  >
             <Attribute for="MIGG" seen="1" colo="7"  />
             <Material name="RPCgas"  />
+            <Medium   name="RPCgas_sensitive" isvol="1" />
             <Shape type="BOX"  />
 
             <Instrument block="MIGG"  >
