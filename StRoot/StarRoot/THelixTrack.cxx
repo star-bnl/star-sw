@@ -22,6 +22,8 @@
 #include "TComplex.h"
 #include "TH1.h"
 #include <cassert>
+
+static const double kMinErr = 1e-4;
 static double *myQQQ = 0;
 static double EmxSign(int n,const double *e);
 
@@ -1868,18 +1870,11 @@ void  TCircleFitter::Add(double x,double y,double z)
 void  TCircleFitter::AddErr(const double *errs,double ezz) 
 {
   TCircleFitterAux *aux = fAux+fN-1;
-  assert(ezz>=0);
-  assert(errs[0]>=0);
-  assert(errs[2]>=0);
-  double spur = errs[0]+errs[2];
-  assert(spur>0);
   double *e = aux->exy;
   memcpy(e,errs,sizeof(aux->exy));
-
-  if (e[0]<0 && e[0]>-1e-5*spur) {e[0]=0;e[1]=0;}
-  if (e[2]<0 && e[2]>-1e-5*spur) {e[2]=0;e[1]=0;}
-  assert(e[1]*e[1]<=1.01*e[0]*e[2]);
-
+  assert(ezz>=0);
+  assert(e[0]>=0);
+  assert(e[2]>=0);
   aux->wt = 0;
   aux->ezz = ezz;
 }
@@ -1935,7 +1930,7 @@ static int nCall=0; nCall++;
       fWtot = 0;
       memset(&fXgravity,0,sizeof(double)*(nAVERs+2));
       for (int i=0; i<fN; i++) {//Loop over points,fill wt and center of gravity
-        if (aux[i].wt<0) continue;
+        if (aux[i].wt<0) { if(!i) fNuse--; continue;}
         int kase = iter;
         if (fastTrak)  kase|=2;
 	if (aux[i].wt >0) 		kase+=4;	//weight defined
@@ -1968,14 +1963,15 @@ static int nCall=0; nCall++;
             wt = (fNor[0]*fNor[0]*exy[0]
 		 +fNor[0]*fNor[1]*exy[1]*2
 		 +fNor[1]*fNor[1]*exy[2]);
-            if (wt<1e-8) wt = 1e-8;
+            if (wt<kMinErr*kMinErr) {fNuse--; wt = -1; break;}
             wt = 1/wt; 
 	    break;
 	   }
             default: assert(0);
 	}//end switch
         aux[i].wt = wt;
-        fWtot += wt;
+        if (wt<0) continue;
+	fWtot += wt;
 	fXgravity += aux[i].x *wt;
 	fYgravity += aux[i].y *wt;
       }//End Loop over points
@@ -2688,7 +2684,7 @@ if (!(helx.GetCase()&kase)) continue;
 
 }
 //______________________________________________________________________________
-void TCircle::Show(int nPts,const double *Pts,int pstep) 
+void TCircle::Show(int nPts,const double *Pts,int pstep) const
 {
 static TCanvas *myCanvas = 0;
 static TGraph  *ptGraph  = 0;
@@ -2774,7 +2770,7 @@ double THelixFitter::Fit()
   if (Xi2xy>1e11) return Xi2xy;
   
   int ndfXY = fCircleFitter.Ndf();
-  double rho = fCircleFitter.Rho();
+  double arho = fabs(fCircleFitter.Rho());
   double mm[4]={0},s=0;		//mm[s,z,ss,sz]	
   double z0 = myAux[0].z;
   for (int ip=1;ip<nDat;ip++) {
@@ -2782,8 +2778,9 @@ double THelixFitter::Fit()
     double dx = myAux[ip].x - myAux[ip-1].x;
     double dy = myAux[ip].y - myAux[ip-1].y;
     double hord = sqrt(dx*dx+dy*dy);
-    double t = 0.5*hord*rho;
-    double ds = (fabs(t)<0.3)? hord*(1+t*t/6):2*asin(t)/rho;
+    double t = 0.5*hord*arho;
+    if (t>0.9) t=0.9;
+    double ds = (fabs(t)<0.3)? hord*(1+t*t/6):2*asin(t)/arho;
     s+=ds; mm[0]+=s; mm[1]+=z;mm[2]+=s*s;mm[3]+=s*z;
   }
   for (int j=0;j<4;j++) { mm[j]/=nDat;}
@@ -2796,6 +2793,7 @@ double THelixFitter::Fit()
   s = 0;
   for (int iDat=0;iDat<nDat;iDat++) {
     TCircleFitterAux* aux = myAux+iDat;
+    if (aux->wt<0) continue;
     double ds = circ.Path(&(aux->x));
     circ.Move(ds); s+=ds;
 //		correct errors
@@ -3271,6 +3269,10 @@ return ans;
 }		    
 //______________________________________________________________________________
 //______________________________________________________________________________
+void TCircleFitter::Show() const
+{
+   Show(fN,&(fAux[0].x),sizeof(fAux[0])/sizeof(double));  
+}
 
 //______________________________________________________________________________
 class myTHFits {
@@ -3689,7 +3691,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.65 2013/04/20 03:37:11 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.66 2013/04/23 01:47:16 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3705,6 +3707,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.66  2013/04/23 01:47:16  perev
+ * add Show() ++ defence against abnormal cases
+ *
  * Revision 1.65  2013/04/20 03:37:11  perev
  * Reorganization to account non standard cases
  *
