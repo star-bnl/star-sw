@@ -92,7 +92,7 @@ void   Rot(double angle);
 void   Rot(double cosa,double sina);
 void   Backward();
 double Eval(double step,double *xy,double *dir=0) const;
-void   Show(int nPts,const double *Pts,int pstep=2);
+void   Show(int nPts,const double *Pts,int pstep=2) const;
 virtual void   Print(const char* chopt = "") const;
 void   SetStrait(int strait=1) 		{SetBit(1,strait) ;}
 int    IsStrait()  			{return TestBit(1);}
@@ -156,6 +156,9 @@ void   SetNdf(int ndf);
 double EvalChi2();
 void   Clear(const char *opt ="");
 void   Print(const char* chopt = "") const;
+void   Show(int nPts,const double *Pts,int pstep=2) const
+       			{TCircle::Show(nPts,Pts,pstep);}
+void   Show() const;
 const double *GetX(int i=0) const;
       double *GetX(int i=0);
 TCircleFitterAux* GetAux(int i) const;
