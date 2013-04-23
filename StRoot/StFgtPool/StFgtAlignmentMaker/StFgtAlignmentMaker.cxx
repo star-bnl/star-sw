@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtAlignmentMaker.cxx,v 1.6 2013/04/04 17:09:36 akio Exp $
+ * $Id: StFgtAlignmentMaker.cxx,v 1.7 2013/04/23 16:47:22 akio Exp $
  *
  */
 
@@ -33,11 +33,8 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
 
-#define __READ_AVTRACK__
-#ifdef __READ_AVTRACK__
 #include "StRoot/StFgtPool/StFgtClusterTools/StFgtGeneralBase.h"
 #include "StRoot/StFgtPool/StFgtClusterTools/StFgtStraightTrackMaker.h"
-#endif
 
 static const int mDebug=0;      // debug mesasge level
 static const int mEventDisp=0;  // event display
@@ -53,14 +50,14 @@ static TH2F *hist2[kFgtNumDiscs][kFgtNumQuads][NAXIS*2]; // 2d residual histos
 static const double PI = 4.0*atan(1);
 
 struct TRKHIT{  
-  int nhit, nhitUse, nhitTpc;
+  int nhit, nhitUse, nhitTpc, nhitPrompt;
   float dca, chi2;
   int det[MAXHIT];                          //0-23=FGT(disc*4+quad), 24=vertex, 25=TPC
   float x[MAXHIT],y[MAXHIT],z[MAXHIT];      //x=r and y=phi for FGT hit if mFgtInputRPhi=1
   float ex[MAXHIT],ey[MAXHIT],ez[MAXHIT];   //xyz error
   bool use[MAXHIT];                         //false=do not use in fit true=use in fit
 };
-const char* ntpdef="nhit/I:nhitUse:nhitTpc:dca/F:chi2:det[20]/I:x[20]/F:y[20]:z[20]:ex[20]:ey[20]:ez[20]:use[20]/O";
+const char* ntpdef="nhit/I:nhitUse:nhitTpc:nhitPrompt:dca/F:chi2:det[20]/I:x[20]/F:y[20]:z[20]:ex[20]:ey[20]:ez[20]:use[20]/O";
 
 static int mNtrk[kFgtNumQuads];            // number of tracks per quad
 static int mNtrkUse[kFgtNumQuads];         // number of usable tracks per quad after hitmask
@@ -72,6 +69,7 @@ static int mFgtInputRPhi;                  // 0=x/y/z or  1=r/phi/z for fgt hits
 static int mFillHist;                      // 0=not filling histo 1=filling histo before alignments 2=filling histo after alignment
 static int mReqHit=0;                      // required # of hits
 static int mReqTpcHit=0;                   // required # of TPC hits
+static int mReqPromptHit=0;                // required # of TPC prompt hits
 static float mReqDca=0;                    // max dca to accept track
 static float mReqChi2=0;                   // max chi2 to accept track
 
@@ -145,7 +143,7 @@ void eventDisplay(double *par){
     double y=h.y(s);
     double dx = x - mHitAlg.x[i];
     double dy = y - mHitAlg.y[i];
-    double dr = sqrt(x*x+y*y) - sqrt(mHitAlg.x[i]*mHitAlg.x[i]+mHitAlg.y[i]*mHitAlg.y[i]);
+    //double dr = sqrt(x*x+y*y) - sqrt(mHitAlg.x[i]*mHitAlg.x[i]+mHitAlg.y[i]*mHitAlg.y[i]);
     double dp = atan2(y,x) - atan2(mHitAlg.y[i],mHitAlg.x[i]);
     if(dp>PI)  dp-=2*PI;
     if(dp<-PI) dp+=2*PI;
@@ -153,7 +151,7 @@ void eventDisplay(double *par){
     double hy=mHitAlg.y[i];
     double hz=mHitAlg.z[i];
     double hr=sqrt(hx*hx+hy*hy);
-    double hp=atan2(hy,hx);
+    //double hp=atan2(hy,hx);
     hitxz->SetPoint(i,hz,dx);
     hityz->SetPoint(i,hz,dy);
     if(abs(dp)<0.1) hitpr->SetPoint(i,hr,dp);
@@ -244,6 +242,7 @@ void funcHelix(Int_t &npar, Double_t* gin, Double_t &f, Double_t *par, Int_t ifl
   for(int itrk=0; itrk<mNtrk[mQuad]; itrk++){
     if(mHit[mQuad][itrk].nhitUse<mReqHit ||
        mHit[mQuad][itrk].nhitTpc<mReqTpcHit ||
+       mHit[mQuad][itrk].nhitPrompt<mReqPromptHit ||
        mHit[mQuad][itrk].dca>mReqDca ||
        mHit[mQuad][itrk].chi2>mReqChi2 ) continue;
     //make "aligned" hits in mHitAlg
@@ -354,9 +353,10 @@ void funcLine(Int_t &npar, Double_t* gin, Double_t &f, Double_t *par, Int_t ifla
 
 ClassImp(StFgtAlignmentMaker);
 
-StFgtAlignmentMaker::StFgtAlignmentMaker(const Char_t *name) : StMaker(name),mEventCounter(0),mDataSource(0),
-							       mOutTreeFile(0),mInTreeFile(0),
+StFgtAlignmentMaker::StFgtAlignmentMaker(const Char_t *name) : StMaker(name),mEventCounter(0),
 							       mFgtXerr(0.05), mFgtYerr(0.05), mFgtZerr(0.2),
+							       mDataSource(0),
+							       mOutTreeFile(0),mInTreeFile(0),
 							       mDcaCut(5.0),mChi2Cut(0.02),mRunNumber(0),mNStep(0) {
 }
 
@@ -389,7 +389,7 @@ static const int mMaxStep=100;
 int mNStep;
 
 void StFgtAlignmentMaker::setStep(int discmask,int quadmask, int parmask, int hitmask_disc,
-				  int trackType, int minHit, int minTpcHit){
+				  int trackType, int minHit, int minTpcHit, int minPromptHit){
   if(mNStep>=mMaxStep) {printf("Reached MaxStep\n"); return; }
   if(mNStep==0) { printf("Step0 is making before histo, and masks are set to 0\n"); discmask=0; quadmask=0; parmask=0; }
   mDiscMask[mNStep]=discmask;
@@ -399,8 +399,9 @@ void StFgtAlignmentMaker::setStep(int discmask,int quadmask, int parmask, int hi
   mTrackType[mNStep]=trackType;
   mMinHit[mNStep]=minHit;
   mMinTpcHit[mNStep]=minTpcHit;
-  printf("Adding step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x trkType=%d minHit=%d minTpcHit=%d\n",
-	 mNStep,discmask,quadmask,parmask,hitmask_disc,trackType,minHit,minTpcHit);
+  mMinPromptHit[mNStep]=minPromptHit;
+  printf("Adding step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x trkType=%d minHit=%d minTpcHit=%d minPromptHit=%d\n",
+	 mNStep,discmask,quadmask,parmask,hitmask_disc,trackType,minHit,minTpcHit,minPromptHit);
   mNStep++;
 }
 
@@ -408,10 +409,10 @@ void StFgtAlignmentMaker::setStep(int discmask,int quadmask, int parmask, int hi
 Int_t StFgtAlignmentMaker::Make() {
   if(mDataSource==0){
     readFromStEvent();  
+  }else if(mDataSource==1){
+    readFromStEventGlobal();  
   }else if(mDataSource==2){
-#ifdef __READ_AVTRACK__    
     readFromStraightTrackMaker();  
-#endif
   }
   return kStOK;
 }
@@ -419,7 +420,7 @@ Int_t StFgtAlignmentMaker::Make() {
 Int_t StFgtAlignmentMaker::Finish() {
   gMessMgr->Info() << "StFgtAlignmentMaker::Finish()" << endm;
 
-  if(mDataSource==1)      {fakeData();}
+  if(mDataSource==4)      {fakeData();}
   else if(mDataSource==3) {readFromTree();}
   else if(mOutTreeFile)   {writeTree();}
 
@@ -432,7 +433,7 @@ Int_t StFgtAlignmentMaker::Finish() {
   mFillHist=1;
   for(int quad=0; quad<kFgtNumQuads; quad++){ 
     mQuad=quad; 
-    doAlignment(&result,mDiscMask[0],mQuadMask[0],mParMask[0],mHitMask[0],mTrackType[0],mMinHit[0],mMinTpcHit[0],&result);
+    doAlignment(&result,mDiscMask[0],mQuadMask[0],mParMask[0],mHitMask[0],mTrackType[0],mMinHit[0],mMinTpcHit[0],mMinPromptHit[0],&result);
   } 
   saveHist();
   if(mNStep<=1) return kStOK; //exit if only step0 exist
@@ -446,9 +447,9 @@ Int_t StFgtAlignmentMaker::Finish() {
     if(mNtrk[mQuad]>0){
       for(int s=1; s<mNStep; s++){	
 	if( quadmask && mQuadMask[s] ){
-	  printf("Quad=%d Step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x trkType=%d minHit=%d minTpcHit=%d\n",
-		 quad,s,mDiscMask[s],quadmask,mParMask[s],mHitMask[s],mTrackType[s],mMinHit[s],mMinTpcHit[s]);
-	  doAlignment(&result,mDiscMask[s],quadmask,mParMask[s],mHitMask[s],mTrackType[s],mMinHit[s],mMinTpcHit[s],&result);
+	  printf("Quad=%d Step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x trkType=%d minHit=%d minTpcHit=%d minPromptHit=%d\n",
+		 quad,s,mDiscMask[s],quadmask,mParMask[s],mHitMask[s],mTrackType[s],mMinHit[s],mMinTpcHit[s],mMinPromptHit[s]);
+	  doAlignment(&result,mDiscMask[s],quadmask,mParMask[s],mHitMask[s],mTrackType[s],mMinHit[s],mMinTpcHit[s],mMinPromptHit[s],&result);
 	}
       }
     }
@@ -460,7 +461,7 @@ Int_t StFgtAlignmentMaker::Finish() {
   int s=mNStep-1;
   for(int quad=0; quad<kFgtNumQuads; quad++){ 
     mQuad=quad; 
-    doAlignment(&result,0,0,0,mHitMask[s],mTrackType[s],mMinHit[s],mMinTpcHit[s],&result);
+    doAlignment(&result,0,0,0,mHitMask[s],mTrackType[s],mMinHit[s],mMinTpcHit[s],mMinPromptHit[s],&result);
   }
   saveHist();
   return kStOK;
@@ -605,18 +606,21 @@ void StFgtAlignmentMaker::readFromStEvent() {
       StPrimaryTrack* pTrack = (StPrimaryTrack*) vx->daughter(j);
       if (! pTrack) continue;
       //if (pTrack->geometry()->momentum().pseudoRapidity()<1.0) continue;
-      int nfgt=0, ntpc=0, quad=-1;
+      int nfgt=0, ntpc=0, nprompt=0, quad=-1;
       StPtrVecHit &hits=pTrack->detectorInfo()->hits();
       for (StPtrVecHitConstIterator iter=hits.begin(); iter != hits.end(); iter++){
 	StDetectorId det=(*iter)->detector();
-	if (det == kTpcId) ntpc++;
-	if (det == kFgtId) {	    
+	if (det == kTpcId) {
+	  ntpc++;
+	  StThreeVectorF xyz=(*iter)->position();
+	  if(xyz.z()>200.0) {nprompt++;}
+	}else if (det == kFgtId) {	    
 	  nfgt++;
 	  StFgtPoint* point=(StFgtPoint*)(*iter);
 	  quad=point->getQuad();
 	}
       }
-      cout << Form("Track: Tpc=%2d Fgt=%1d Quad=%1d",ntpc,nfgt,quad) << *pTrack << endl;
+      cout << Form("Track: Tpc=%2d Pmp=%1d Fgt=%1d Quad=%1d ",ntpc,nprompt,nfgt,quad) << *pTrack << endl;
       if(nfgt==0) continue; 
       int itrk=mNtrk[quad];
       int ihit=0;
@@ -639,6 +643,7 @@ void StFgtAlignmentMaker::readFromStEvent() {
 	  mHit[quad][itrk].x[ihit]=xyz.x();
 	  mHit[quad][itrk].y[ihit]=xyz.y();
 	  mHit[quad][itrk].z[ihit]=xyz.z(); 
+	  if(mHit[quad][itrk].z[ihit]>200.0){mHit[quad][itrk].det[ihit]=26;}
 	  StThreeVectorF exyz=(*iter)->positionError();
 	  mHit[quad][itrk].ex[ihit]=exyz.x();
 	  mHit[quad][itrk].ey[ihit]=exyz.y();
@@ -670,6 +675,89 @@ void StFgtAlignmentMaker::readFromStEvent() {
       mNtrk[quad]++;
     }//loop over tracks
   }//loop over vertex
+}
+
+void StFgtAlignmentMaker::readFromStEventGlobal() {
+  mFgtInputRPhi=1;
+  mEventCounter++;  // increase counter	
+  StEvent* event;
+  event = (StEvent *) GetInputDS("StEvent");
+  if (!event){
+    gMessMgr->Warning() << "StFgtAlignmentMaker::Make : No StEvent" << endm;
+    return;          // if no event, we're done
+  }
+  cout << "Event: Run "<< event->runId() << " Event No: " << event->id() << endl;
+  
+  if (event->fgtCollection()) {
+    cout << "# of FGT point:            " << event->fgtCollection()->getNumPoints() << endl;
+  }else{
+    cout << "No FGT collection" << endl;
+  }
+
+  StSPtrVecTrackNode& trackNode = event->trackNodes();
+  UInt_t nTracks = trackNode.size();
+  StTrackNode *node = 0;
+  cout << "# of tracks "<<nTracks<<endl;
+  for (UInt_t  i=0; i < nTracks; i++) {
+    node = trackNode[i]; if (!node) continue;
+    StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
+    int nfgt=0, ntpc=0, nprompt=0, quad=-1;
+    StPtrVecHit &hits=gTrack->detectorInfo()->hits();
+    for (StPtrVecHitConstIterator iter=hits.begin(); iter != hits.end(); iter++){
+      StDetectorId det=(*iter)->detector();
+      if (det == kTpcId) {
+	ntpc++;
+	StThreeVectorF xyz=(*iter)->position();
+	if(xyz.z()>200.0) {nprompt++;}
+      }else if (det == kFgtId) {	    
+	nfgt++;
+	StFgtPoint* point=(StFgtPoint*)(*iter);
+	quad=point->getQuad();
+      }
+    }
+    cout << Form("Track: Tpc=%2d Pmp=%1d Fgt=%1d Quad=%1d ",ntpc,nprompt,nfgt,quad) << *gTrack << endl;
+    if(nfgt==0) continue; 
+    int itrk=mNtrk[quad];
+    int ihit=0;
+    for (StPtrVecHitConstIterator iter=hits.begin(); iter != hits.end(); iter++){
+      StDetectorId det=(*iter)->detector();
+      if (det == kTpcId){
+	mHit[quad][itrk].det[ihit]=25;
+	StThreeVectorF xyz=(*iter)->position();
+	mHit[quad][itrk].x[ihit]=xyz.x();
+	mHit[quad][itrk].y[ihit]=xyz.y();
+	mHit[quad][itrk].z[ihit]=xyz.z(); 
+	if(mHit[quad][itrk].z[ihit]>200.0){mHit[quad][itrk].det[ihit]=26;}
+	StThreeVectorF exyz=(*iter)->positionError();
+	mHit[quad][itrk].ex[ihit]=exyz.x();
+	mHit[quad][itrk].ey[ihit]=exyz.y();
+	mHit[quad][itrk].ez[ihit]=exyz.z();	    
+      }else if (det == kFgtId){
+	StFgtPoint* point=(StFgtPoint*)(*iter);	    
+	int disc=point->getDisc();
+	int quad2=point->getQuad();
+	mHit[quad][itrk].det[ihit]=disc*4+quad2;
+	StThreeVectorF xyz=(*iter)->position();
+	mHit[quad][itrk].x[ihit]=point->getPositionR();
+	mHit[quad][itrk].y[ihit]=point->getPositionPhi();
+	mHit[quad][itrk].z[ihit]=StFgtGeom::getDiscZ(disc);
+	StThreeVectorF exyz=(*iter)->positionError();
+	if(mFgtXerr>0.0) {mHit[quad][itrk].ex[ihit]=mFgtXerr;} else {mHit[quad][itrk].ex[ihit]=exyz.x();}
+	if(mFgtYerr>0.0) {mHit[quad][itrk].ey[ihit]=mFgtYerr;} else {mHit[quad][itrk].ey[ihit]=exyz.y();}
+	if(mFgtZerr>0.0) {mHit[quad][itrk].ez[ihit]=mFgtZerr;} else {mHit[quad][itrk].ez[ihit]=exyz.z();}
+      }
+      ihit++;
+    }
+    mHit[quad][itrk].nhit=ihit;
+    for(int i=0; i<mHit[quad][itrk].nhit; i++){
+      cout<<Form("Trk=%3d Hit=%3d Quad=%1d Det=%2d XYZ=%8.4f %8.4f %8.4f err=%8.4f %8.4f %8.4f",
+		 itrk,i,quad,mHit[quad][itrk].det[i],
+		 mHit[quad][itrk].x[i],mHit[quad][itrk].y[i],mHit[quad][itrk].z[i],
+		 mHit[quad][itrk].ex[i],mHit[quad][itrk].ey[i],mHit[quad][itrk].ez[i])
+	  <<endl;
+    }
+    mNtrk[quad]++;
+  }//loop over tracks
 }
 
 void StFgtAlignmentMaker::writeTree(){
@@ -868,20 +956,27 @@ void StFgtAlignmentMaker::setHitMask(int hitmask_disc){
   for(int i=0; i<6; i++) {if(hitmask_disc & (1<<i) ) {cout << Form("FgtD%1d ",i+1);}}
   if(hitmask_disc & 0x40) cout << "Vertex ";
   if(hitmask_disc & 0x80) cout << "TPC ";
+  if(hitmask_disc & 0x100) cout << "Prompt ";
   cout << Form("(hitmask_disc = %02x)",hitmask_disc);
   mHitMaskDisc=hitmask_disc;
   mNtrkUse[mQuad]=0;
   for(int itrk=0; itrk<mNtrk[mQuad]; itrk++){
     mHit[mQuad][itrk].nhitUse=0;
     mHit[mQuad][itrk].nhitTpc=0;
+    mHit[mQuad][itrk].nhitPrompt=0;
     for(int ihit=0; ihit<mHit[mQuad][itrk].nhit; ihit++){
       mHit[mQuad][itrk].use[ihit]=false;
       int det=mHit[mQuad][itrk].det[ihit];      
       int disc=det/4;          //fgt disc0-5
       if     (det==24) disc=6; //vertex
-      else if(det==25) {       //tpc
+      else if(det==25) { //tpc
 	disc=7; 
 	mHit[mQuad][itrk].nhitTpc++;
+      }
+      else if(det==26) { //tpc prompt
+	disc=8; 
+	mHit[mQuad][itrk].nhitTpc++;
+	mHit[mQuad][itrk].nhitPrompt++;
       }
       if(hitmask_disc & (1<<disc)) {
 	mHit[mQuad][itrk].use[ihit]=true; 
@@ -890,6 +985,7 @@ void StFgtAlignmentMaker::setHitMask(int hitmask_disc){
     }
     if(mHit[mQuad][itrk].nhitUse>=mReqHit &&
        mHit[mQuad][itrk].nhitTpc>=mReqTpcHit &&
+       mHit[mQuad][itrk].nhitPrompt>=mReqPromptHit &&
        mHit[mQuad][itrk].dca<=mReqDca &&
        mHit[mQuad][itrk].chi2<=mReqChi2 ) mNtrkUse[mQuad]++;
   }
@@ -899,7 +995,7 @@ void StFgtAlignmentMaker::setHitMask(int hitmask_disc){
 
 void StFgtAlignmentMaker::doAlignment(fgtAlignment_st* input, 
 				      int discmask,int quadmask, int parmask, int hitmask_disc, 
-				      int trackType, int minHit, int minTpcHit,
+				      int trackType, int minHit, int minTpcHit, int minPromptHit,
 				      fgtAlignment_st* result){  
   double arg[10];
   int iflag, min=0;
@@ -913,6 +1009,7 @@ void StFgtAlignmentMaker::doAlignment(fgtAlignment_st* input,
   mReqHit=minHit;
   if(mReqHit<min) mReqHit=min;
   mReqTpcHit=minTpcHit;
+  mReqPromptHit=minPromptHit;
   mReqDca=mDcaCut;
   mReqChi2=mChi2Cut;
 
