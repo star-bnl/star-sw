@@ -116,7 +116,7 @@ class l4Builder : public JevpPlotSet {
   PlotHisto *ph;
 
   l4Builder(JevpServer *parent=NULL) : JevpPlotSet(parent) {
-    plotsetname = (char *)"test";
+    plotsetname = (char *)"l4";
   }
  
   void initialize(int argc, char *argv[]);   

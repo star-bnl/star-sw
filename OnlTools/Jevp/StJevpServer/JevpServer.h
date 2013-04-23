@@ -32,6 +32,8 @@ class JevpServer {
   
   int throttleAlgos;
 
+  int isL4;
+
   char *pdfdir;        // pdf dir
   char *rootfiledir;
   char *refplotdir;    // ref plot dir

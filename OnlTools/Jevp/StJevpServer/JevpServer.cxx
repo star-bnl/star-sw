@@ -46,6 +46,7 @@
 #include "Jevp/StJevpBuilders/vpdBuilder.h"
 #include "Jevp/StJevpBuilders/fmsBuilder.h"
 #include "Jevp/StJevpBuilders/gmtBuilder.h"
+#include "Jevp/StJevpBuilders/l4Builder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
 
@@ -152,7 +153,7 @@ void JevpServer::main(int argc, char *argv[])
   rtsLogAddDest(serv.log_dest, serv.log_port);
   rtsLogLevel(serv.log_level);
 
-  LOG("JEFF", "Starting JevpServer: port=%d pid=%d", serv.myport, (int)getpid());
+  LOG("JEFF", "Starting JevpServer: port=%d pid=%d isL4=%d", serv.myport, (int)getpid(),serv.isL4);
 
   // Each time we start, archive the existing display file...
   serv.init(serv.myport, argc, argv);
@@ -277,6 +278,7 @@ void JevpServer::readSocket()
 void JevpServer::parseArgs(int argc, char *argv[])
 {
   throttleAlgos = 1;
+  isL4 = 0;
 
   log_output = RTS_LOG_NET;
   log_dest = (char *)"172.16.0.1";
@@ -319,6 +321,27 @@ void JevpServer::parseArgs(int argc, char *argv[])
       nodb = 0;
       myport = JEVP_PORT;
     }
+    else if (strcmp(argv[i], "-l4production") == 0) {
+      LOG("JEFF", "Using L4");
+      isL4 = 1;
+      nodb = 0;
+      myport = JEVP_PORT;
+      basedir = (char *)"/RTScache/conf/l4jevp";
+      pdfdir = (char *)"/a/l4jevp/pdf";
+      refplotdir = (char *)"/a/l4jevp/refplots";
+      rootfiledir = (char *)"/a/l4jevp/rootfiles";
+    }
+    else if (strcmp(argv[i], "-l4test") == 0) {
+      LOG("JEFF", "Using L4 test");
+      isL4 = 1;
+      nodb = 1;
+      myport = JEVP_PORT+10;
+      basedir = (char *)"/RTScache/conf/l4jevp";
+      pdfdir = (char *)"/a/l4jevp/pdf";
+      refplotdir = (char *)"/a/l4jevp/refplots";
+      rootfiledir = (char *)"/a/l4jevp/rootfiles"; 
+      log_output = RTS_LOG_STDERR;
+    }
     else if (strcmp(argv[i], "-test")==0) {
       nodb = 1;
       log_output = RTS_LOG_STDERR;
@@ -358,6 +381,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 
   JEVPSERVERport = myport;
      
+  LOG(NOTE, "isL4=%d",isL4);
   if(!displays_fn) {
     displays_fn = (char *)"HistoDefs.txt";
   }    
@@ -396,24 +420,30 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 
 
   // Create builders...
-  builders.Add(new baseBuilder(this));
-  builders.Add(new bbcBuilder(this));
-  builders.Add(new daqBuilder(this));
-  builders.Add(new bemcBuilder(this));
-  builders.Add(new eemcBuilder(this));
-  builders.Add(new fpdBuilder(this));
-  builders.Add(new hltBuilder(this));
-  builders.Add(new l3Builder(this));
-  builders.Add(new tofBuilder(this));
-  builders.Add(new mtdBuilder(this));
-  builders.Add(new tpxBuilder(this));
-  builders.Add(new trgBuilder(this));
-  builders.Add(new upcBuilder(this));
-  builders.Add(new fgtBuilder(this));
-  builders.Add(new vpdBuilder(this));
-  builders.Add(new fmsBuilder(this));
-  builders.Add(new gmtBuilder(this));
-  
+  if(!isL4) {
+    builders.Add(new baseBuilder(this));
+    builders.Add(new bbcBuilder(this));
+    builders.Add(new daqBuilder(this));
+    builders.Add(new bemcBuilder(this));
+    builders.Add(new eemcBuilder(this));
+    builders.Add(new fpdBuilder(this));
+    builders.Add(new hltBuilder(this));
+    builders.Add(new l3Builder(this));
+    builders.Add(new tofBuilder(this));
+    builders.Add(new mtdBuilder(this));
+    builders.Add(new tpxBuilder(this));
+    builders.Add(new trgBuilder(this));
+    builders.Add(new upcBuilder(this));
+    builders.Add(new fgtBuilder(this));
+    builders.Add(new vpdBuilder(this));
+    builders.Add(new fmsBuilder(this));
+    builders.Add(new gmtBuilder(this));
+  }
+  else {
+    builders.Add(new trgBuilder(this));
+    builders.Add(new l4Builder(this));
+  }
+
 
   TListIter next(&builders);
   JevpPlotSet *curr;
@@ -510,7 +540,7 @@ void JevpServer::handleClient(int delay) {
   CP;
 
   // printf("Got a message\n");
-  //  LOG("JEFF", "calling sleep");
+  //  LOG(NOTE, "calling sleep");
   //   sleep(1);
   LOG(DBG, "calling select");
 
@@ -637,7 +667,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     //int display;
 
     //sscanf(msg->args, "%s %d %d", printer, &display, &tab);
-    //LOG("JEFF", "Request to printing tab %d to printer %s", tab, printer);
+    //LOG(NOTE, "Request to printing tab %d to printer %s", tab, printer);
 
     
     writePdf((char *)"/tmp/jevp.pdf", 1);
@@ -729,7 +759,7 @@ void JevpServer::writeRootFiles()
   char filename[256];
   sprintf(filename, "%s/run_%d.root",rootfiledir, runStatus.run);
   
-  LOG("JEFF", "Writing to rootfile: %s",filename);
+  LOG(NOTE, "Writing to rootfile: %s",filename);
   TFile *rootfile = new TFile(filename, "recreate");
   
   // Got through all histos...
@@ -782,7 +812,7 @@ void JevpServer::performStopRun()
   displays->ignoreServerTags = 0;
 
   for(int i=0;i<displays->nDisplays();i++) {
-    LOG("JEFF","Writing pdf for display %d, run %d",i,runStatus.run);
+    LOG(NOTE,"Writing pdf for display %d, run %d",i,runStatus.run);
     CP;
     writeRunPdf(i, runStatus.run);
     CP;
@@ -815,7 +845,7 @@ void JevpServer::performStopRun()
   }
   CP;
 
-  LOG(DBG, "Writing display file...%s",fn);
+  LOG(NOTE, "Writing display file...%s",fn);
   unlink(fn);
   if(displays->Write(fn) < 0) {
     LOG(ERR, "Error writing display file %s",fn);
@@ -845,7 +875,7 @@ void JevpServer::clearForNewRun()
 {
   // Delete all from histogram list
   // First free the actual histo, then remove the link...
-  LOG("JEFF", "Clear for new run  #%d",runStatus.run);
+  LOG(NOTE, "Clear for new run  #%d",runStatus.run);
 
   TListIter next(&builders);
 
@@ -1131,7 +1161,7 @@ void JevpServer::writeRunPdf(int display, int run)
     return;
   }
   double t = pdfclock.record_time();
-  LOG("JEFF", "write PDF[%d:%s]:  setdisplays took %lf",display,displays->displayRoot->name,t);
+  LOG(NOTE, "write PDF[%d:%s]:  setdisplays took %lf",display,displays->displayRoot->name,t);
   
   char filename[256];
   sprintf(filename, "%s/%s_%d.pdf",pdfdir, displays->displayRoot->name, run);
@@ -1139,7 +1169,7 @@ void JevpServer::writeRunPdf(int display, int run)
   writePdf(filename, 1);
 
   t = pdfclock.record_time();
-  LOG("JEFF", "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
+  LOG(NOTE, "write PDF[%d:%s]:  writepdf took %lf",display,displays->displayRoot->name,t);
   CP;
 
   // Save it in the database...
@@ -1161,7 +1191,7 @@ void JevpServer::writeRunPdf(int display, int run)
     LOG(WARN, "Wrote PDF file to DB: %s (ret=%d)", filename, ret);
     
     t = pdfclock.record_time();
-    LOG("JEFF", "write PDF[%d:%s]:  writepdfdb took %lf (no wait!)",display,displays->displayRoot->name,t);
+    LOG(NOTE, "write PDF[%d:%s]:  writepdfdb took %lf (no wait!)",display,displays->displayRoot->name,t);
   }
 }
 
@@ -1195,11 +1225,12 @@ void JevpServer::writePdf(char *filename, int combo_index)
   TCanvas summary("c2");
   summary.Print(endfilename, "pdf,Portrait");
 
+  
   CP;
   // Index the file...
   char indexedfilename[256];
   strcpy(indexedfilename, filename);
-  // strcat(indexedfilename, ".idx");
+  strcat(indexedfilename, ".idx");
   index.CreateIndexedFile(filename, indexedfilename);
 
   CP;
@@ -1207,12 +1238,12 @@ void JevpServer::writePdf(char *filename, int combo_index)
 
 int JevpServer::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs)
 {
-  LOG(DBG, "Checking node %s against server tags %s", node->name, serverTags);
+  LOG(NOTE, "Checking node %s against server tags %s", node->name, serverTags);
 
   int npages = 0;
 
   if(!node->matchTags(serverTags)) {
-    LOG(DBG, "node %s does not match tags %s", node->name, serverTags);
+    LOG(NOTE, "node %s does not match tags %s", node->name, serverTags);
 
     // But, handle siblings!   
     if(node->next && !nosibs) {
@@ -1222,11 +1253,14 @@ int JevpServer::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *pr
   }
 
   if(node->leaf) {   // We are writing histograms...
+      LOG(NOTE, "leaf");
     writeHistogramLeavesPdf(node, index, prevIndexEntry, filename, page);
     return 1;
   }
   else {   // We are just writing index entries
     // are we the child?
+      LOG(NOTE, "name");
+
     index_entry *currIndexEntry;
     if(node->prev == NULL) {
       currIndexEntry = index->add_child(prevIndexEntry, node->name, page, 0);
@@ -1719,7 +1753,7 @@ void readerThreadWait(TSocket *socket)
 
   if(serv.launchArgs) {
 
-    LOG("JEFF", "Got launchArgs!");
+    LOG(NOTE, "Got launchArgs!");
     // We need to change the rdr...
     delete serv.rdr;
     serv.rdr = new daqReader(serv.launchArgs);
