@@ -331,12 +331,17 @@ void trgBuilder::initialize(int argc, char *argv[]) {
 void trgBuilder::startrun(daqReader *rdr) {
   LOG(DBG, "TriggerPlotBuilder starting run #%d",rdr->run);
   resetAllPlots();
+  first_event = 0;
 }
 
 void trgBuilder::event(daqReader *rdr)
 {
 #include "zdc_smd.h"
 
+    if(first_event == 0) {
+	addServerTags("|trg|");
+	first_event = 1;
+    }
 
   StTriggerData *trgd = getStTriggerData(rdr);
   if(!trgd) return;

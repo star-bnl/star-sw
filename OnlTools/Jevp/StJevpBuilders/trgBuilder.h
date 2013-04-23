@@ -14,6 +14,7 @@ class trgBuilder : public JevpPlotSet {
 public:
   //RunStatus status;
   int run;
+  int first_event;
 
   trgBuilder(JevpServer *parent=NULL); 
   ~trgBuilder();

@@ -29,7 +29,7 @@ void initMysql()
 			 DB_PORT,
 			 NULL,
 			 0)) {
-    LOG(CRIT, "Can't connect to RunLog_daq");
+    LOG(CRIT, "Can't connect to RunLog");
     exit(0);
   }
 }
