@@ -9,6 +9,9 @@ OnlTools/Jevp/launch JevpServerMain -production
 // runs from new data, but jevp_test data dirs, no db.
 OnlTools/Jevp/launch JevpServerMain -test   
 
+// l4db
+OnlTools/Jevp/launch JevpServerMain -l4production
+
 // dies after run, runs from file 
 OnlTools/Jevp/launch JevpServerMain -test -die -file st_physics_adc_12098019_raw_0510001.daq
 

@@ -1331,6 +1331,9 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	    if(args[0].equals("-live")) {
 		s = "/RTScache/conf/jevp/HistoDefs.txt";
 	    }
+	    else if(args[0].equals("-l4")) {
+		s = "/RTScache/conf/l4jevp/HistoDefs.txt";
+	    }
 	    else {
 		s = args[0];
 	    }
