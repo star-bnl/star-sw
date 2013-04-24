@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd2005.C,v 1.3 2010/02/18 23:55:30 fisyak Exp $
+// $Id: bfcMixer_TpcSvtSsd2005.C,v 1.4 2013/04/24 15:27:28 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ void bfcMixer_TpcSvtSsd2005(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsd
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geomP07ib;
   TString chain3Opt = prodP07ib;
-  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker EmbeddingShortCut"; 
+  chain3Opt += " TpcMixer Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker EmbeddingShortCut"; 
   if (isSvtIn) chain3Opt += " SvtEmbed";
   if (isSsdIn) {
     chain1Opt += ",ssddat";
@@ -60,12 +60,14 @@ void bfcMixer_TpcSvtSsd2005(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsd
     }
     trsMk->setNormalFactor(2.67);
   }
+#if 0
   //________________________________________________________________________________
   gSystem->Load("StMixerMaker");
   StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
   //  StMixerMaker  *mixer = new StMixerMaker("Mixer","","trs");
   mixer->SetInput("Input1","StDAQReader");
   mixer->SetInput("Input2","Event");
+#endif
   //________________________________________________________________________________
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
@@ -79,6 +81,7 @@ void bfcMixer_TpcSvtSsd2005(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsd
   chain3 = chain;
   chain3->SetName("Three"); 
   Chain->cd();
+#if 0
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw"); 
   if(!tpcdaqMk )  {
     cout <<" Error: no tpc daq maker. End. "<<endl;
@@ -86,6 +89,7 @@ void bfcMixer_TpcSvtSsd2005(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsd
   }
   tpcdaqMk->SetMode(1);   // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
+#endif
   Chain->cd();
   //________________________________________________________________________________
   {

@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4_svt.C,v 1.2 2010/02/18 23:55:30 fisyak Exp $
+// $Id: bfcMixer_v4_svt.C,v 1.3 2013/04/24 15:27:28 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -114,14 +114,14 @@ void bfcMixer_v4(const Int_t Nevents=10,
   // end additional maker code
 
   saveMk->cd();
-
+#if 0
   // Mixer
   gSystem->Load("StMixerMaker");
   StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
   chain1->SetInput("Input1","StDAQReader");
   chain2->SetInput("Input2","Event");
   mixer->writeFile("mixer.trs",Nevents);
-
+#endif
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
 
@@ -137,7 +137,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
 
   //  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc svt_daq SvtD event Kalman Tree evout useCDV SCEbyE tofdat EST xiSvt pmdRaw Xi2 V02 Kink2 CMuDst");
 
-  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svtEmbed SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw EmbeddingShortCut"); 
+  chain3->SetFlags("TpcMixer Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svtEmbed SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw EmbeddingShortCut"); 
 
   //  StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
   //  fcfMk->SetMode("0x1");
@@ -152,10 +152,11 @@ void bfcMixer_v4(const Int_t Nevents=10,
   chain3->Instantiate();
   St_geant_Maker *geantMk = (St_geant_Maker *) chain->GetMaker("geant");
   geantMk->SetActive(kTRUE);
+#if 0
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
   tpcdaqMk->SetMode(1);   // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
-
+#endif
   //  StMaker *ftpccluMk = chain3->GetMaker("ftpc_hits");
   //  ftpccluMk->SetInput("ftpc_raw","FtpcMixer");
 

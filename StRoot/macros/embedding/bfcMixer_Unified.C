@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Unified.C,v 1.5 2010/02/18 23:55:30 fisyak Exp $
+// $Id: bfcMixer_Unified.C,v 1.6 2013/04/24 15:27:28 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +42,7 @@ void bfcMixer_Unified(const Int_t Nevents=1,
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geom;
   TString chain3Opt = prod;
-  chain3Opt += " Embedding onlraw GeantOut MiniMcMk -in NoInput,useInTracker EmbeddingShortCut"; 
+  chain3Opt += " TpcMixer Embedding onlraw GeantOut MiniMcMk -in NoInput,useInTracker EmbeddingShortCut"; 
   chain3Opt += " "; chain3Opt += geom;
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
@@ -67,12 +67,14 @@ void bfcMixer_Unified(const Int_t Nevents=1,
     }
     trsMk->setNormalFactor(2.67);
   }
+#if 0
   //________________________________________________________________________________
   gSystem->Load("StMixerMaker");
   StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
   //  StMixerMaker  *mixer = new StMixerMaker("Mixer","","trs");
   mixer->SetInput("Input1","StDAQReader");
   mixer->SetInput("Input2","Event");
+#endif
   //________________________________________________________________________________
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
@@ -85,6 +87,7 @@ void bfcMixer_Unified(const Int_t Nevents=1,
   chain3 = chain;
   chain3->SetName("Three"); 
   Chain->cd();
+#if 0
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw"); 
   if(!tpcdaqMk )  {
     cout <<" Error: no tpc daq maker. End. "<<endl;
@@ -92,6 +95,7 @@ void bfcMixer_Unified(const Int_t Nevents=1,
   }
   tpcdaqMk->SetMode(1);   // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
+#endif
   Chain->cd();
   //________________________________________________________________________________
   {
@@ -125,6 +129,9 @@ void bfcMixer_Unified(const Int_t Nevents=1,
 }
   
 // $Log: bfcMixer_Unified.C,v $
+// Revision 1.6  2013/04/24 15:27:28  fisyak
+// Retire tpcdaq, StMixer, bug #2580
+//
 // Revision 1.5  2010/02/18 23:55:30  fisyak
 // Add EmbeddingShortCut to chain3 for embedding with Trs
 //
