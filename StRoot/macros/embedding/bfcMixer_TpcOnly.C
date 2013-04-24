@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcOnly.C,v 1.4 2012/06/03 06:35:40 zhux Exp $
+// $Id: bfcMixer_TpcOnly.C,v 1.5 2013/04/24 15:27:28 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -57,7 +57,7 @@ void bfcMixer_TpcOnly(Int_t Nevents=100,
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",Embedding,onlraw,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,EmbeddingShortCut"; 
+  chain3Opt += ",TpcMixer,Embedding,onlraw,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,EmbeddingShortCut"; 
 
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
@@ -88,12 +88,14 @@ void bfcMixer_TpcOnly(Int_t Nevents=100,
 	  trsMk->setNormalFactor(2.67);
 	  trsMk->SetMode(0);
   }
+#if 0
   //________________________________________________________________________________
   gSystem->Load("StMixerMaker");
   StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
   //  StMixerMaker  *mixer = new StMixerMaker("Mixer","","trs");
   mixer->SetInput("Input1","StDAQReader");
   mixer->SetInput("Input2","Event");
+#endif
   //________________________________________________________________________________
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
@@ -107,6 +109,7 @@ void bfcMixer_TpcOnly(Int_t Nevents=100,
   chain3 = chain;
   chain3->SetName("Three"); 
   Chain->cd();
+#if 0
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
   if(!tpcdaqMk )  {
     cout <<" Error: no tpc daq maker. End. "<<endl;
@@ -114,6 +117,7 @@ void bfcMixer_TpcOnly(Int_t Nevents=100,
   }
   tpcdaqMk->SetMode(1);   // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
+#endif
   Chain->cd();
 
   //............. begin of EMC embedding makers................

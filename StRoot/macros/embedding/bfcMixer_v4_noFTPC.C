@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4_noFTPC.C,v 1.5 2010/02/18 23:55:30 fisyak Exp $
+// $Id: bfcMixer_v4_noFTPC.C,v 1.6 2013/04/24 15:27:28 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -118,14 +118,14 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   // end additional maker code
 
   saveMk->cd();
-
+#if 0
   // Mixer
   gSystem->Load("StMixerMaker");
   StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
   chain1->SetInput("Input1","StDAQReader");
   chain2->SetInput("Input2","Event");
   mixer->writeFile("mixer.trs",Nevents);
-
+#endif
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
 
@@ -138,7 +138,7 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
 
 // use Simu NoDefault NoInput onlraw -onlcl and standard chain options
 //  expand P2005, get rid of corrections and ftpc:
-chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw EmbeddingShortCut"); 
+chain3->SetFlags("TpcMixer Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw EmbeddingShortCut"); 
 //chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl B2005 l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT SCEbyE EmbeddingShortCut");
 
 //chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl ry2005b,tpc_daq,tpc_T, globT tls db tpcDB,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT MuDST -trg VFMinuit GeantOut EmbeddingShortCut");
@@ -161,6 +161,7 @@ chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_d
   chain3->Instantiate();
   St_geant_Maker *geantMk = (St_geant_Maker *) chain->GetMaker("geant");
   geantMk->SetActive(kTRUE);
+#if 0
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
   if(!tpcdaqMk )
     {
@@ -169,7 +170,7 @@ chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_d
     }
   tpcdaqMk->SetMode(1);   // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
-
+#endif
   //  StMaker *ftpccluMk = chain3->GetMaker("ftpc_hits");
   //  ftpccluMk->SetInput("ftpc_raw","FtpcMixer");
   cout <<"AAR - going to file"<<endl;
