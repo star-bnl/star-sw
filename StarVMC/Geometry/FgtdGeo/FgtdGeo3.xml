@@ -111,6 +111,7 @@ CVS/  FgtdGeo3.xml
    <var name="ndisk"     type="int" />
    <var name="nQuad"     type="int"/>
    <var name="zDiscA(6)"  />   
+   <var name="cool1stShift"     />
 </Structure>
 
 <!--                                                                 
@@ -133,6 +134,11 @@ CVS/  FgtdGeo3.xml
    <var name="ndisk"  value="6"    comment="number of disks" />
    <var name="nQuad"  value="4"    comment="number quadrants in a disks" />
    <var name="zdiscA" value="{67.3990,77.8765,87.0840,97.4821,108.9121,118.9927}" comment=" z-center of disk senstive volume from center in STAR , as measured in 2011-10  "  />
+   <var name="cool1stShift" value="0" comment="A global offset to account for ~1cm shift of cooling ring" />
+</Fill>
+<Fill name="FGST" comment="FGT Geometry for year 2012 with 1cm offset accounted">
+   <var name="config"  value="1.1" comment="Revised FGT geometry for y2012" />
+   <var name="cool1stShift" value="1.0" comment="A global offset to account for ~1cm shift of cooling ring" />
 </Fill>
 
 
@@ -147,6 +153,7 @@ CVS/  FgtdGeo3.xml
    <var name="ndisk"  value="6"    comment="number of disks" />
    <var name="nQuad"  value="4"    comment="number quadrants in a disks" />
    <var name="zdiscA" value="{67.3990,77.8765,87.0840,97.4821,108.9121,118.9927}" comment=" z-center of disk senstive volume from center in STAR , as measured in 2011-10  "  />
+   <var name="cool1stShift" value="1.0" comment="A global offset to account for 1cm shift of cooling ring" />
 </Fill>
 
 
@@ -288,7 +295,7 @@ diskLenZ=volNomexDZ+volSensDZ+volGemDZ+volReadDZ+volElecDZ
 
 fgtLenZ = coolTubeDZ
 <!-- center begin of FGT on the active volume of the 1st disk  -->
-centerZ = FGST_zdiscA(1) +fgtLenZ/2.0 -( volNomexDZ+volSensDZ/2.)
+centerZ = FGST_zdiscA(1) +fgtLenZ/2.0 -( volNomexDZ+volSensDZ/2.) - FGST_cool1stShift
 
 
 xx=acos(flatOutR/diskOutR) <!-- half opening angle of the flat (rad) -->
@@ -319,7 +326,7 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
     <!-- place disk(s) inside FGT mother volume , add 1cm for 1st cooling ring-->
 
     <Do var="disk" from="1" to="FGST_ndisk"  >
-       diskZ=-fgtLenZ/2.+1.0 +diskLenZ/2. + FGST_zdiscA(disk)- FGST_zdiscA(1)
+       diskZ=-fgtLenZ/2.+1.0 +diskLenZ/2. + FGST_zdiscA(disk)- FGST_zdiscA(1) + FGST_cool1stShift
  
       <If expr="(FGST_config.eq.2.0).or.(disk.le.1)"  >
          <Create    block="FGTD"  />
