@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtHit.h,v 2.3 2012/11/08 17:58:31 ullrich Exp $
+ * $Id: StFgtHit.h,v 2.4 2013/04/24 17:27:43 ullrich Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtHit.h,v $
+ * Revision 2.4  2013/04/24 17:27:43  ullrich
+ * New methods and members (Akio and Anselm)
+ *
  * Revision 2.3  2012/11/08 17:58:31  ullrich
  * major revision, various new methods and member added (Anselm/Akio)
  *
@@ -71,6 +74,10 @@ public:
     float getChargeUncert() const;
     short calcMaxAdc();       //get from stripWeightMap_t
     short getMaxAdc() const;  //get from data member
+    float getLandauNorm() const;
+    float getLandauMpv() const;
+    float getLandauSigma() const;
+    float getLandauChi2() const;
     int getNstrip() const;
     int getMaxTimeBin() const;    
     int getSeedType() const;    
@@ -91,6 +98,7 @@ public:
     void setMaxAdc(short v);
     void setNstrip(int v);
     void setMaxTimeBin(int v);
+    void setLandau(float norm, float mpv, float sigma, float chi2);
     void setSeedType(int v);
     void setEvenOddChargeAsy(float v);
 
@@ -105,6 +113,10 @@ protected:
     Int_t   mCentralStripGeoId;                   // obvious
     Float_t mChargeUncert;                        // uncertanity on the charge
     Short_t mMaxAdc;                              // max adc in all strips and timebin
+    Float_t mLandauNorm;
+    Float_t mLandauMpv;
+    Float_t mLandauSigma;
+    Float_t mLandauChi2;
     Int_t   mNstrip;                              // number of strips in the hit
     Int_t   mMaxTimeBin;                          // time bin for max adc
     Int_t   mSeedType;                            // seed type
@@ -113,7 +125,7 @@ protected:
     stripWeightMap_t mStripWeightMap;             //! 
     
 private:   
-    ClassDef(StFgtHit,2);
+    ClassDef(StFgtHit,3);
 }; 
 
 
@@ -256,5 +268,9 @@ inline int  StFgtHit::getSeedType() const {return mSeedType;};
 inline void StFgtHit::setSeedType(int v)  {mSeedType=v;};
 inline float StFgtHit::getEvenOddChargeAsy() const {return mEvenOddChargeAsy;};
 inline void  StFgtHit::setEvenOddChargeAsy(float v) {mEvenOddChargeAsy=v;};
-
+inline float StFgtHit::getLandauNorm() const {return mLandauNorm;};
+inline float StFgtHit::getLandauMpv() const {return mLandauMpv;};
+inline float StFgtHit::getLandauSigma() const {return mLandauSigma;};
+inline float StFgtHit::getLandauChi2() const {return mLandauChi2;};
+inline void StFgtHit::setLandau(float n, float m, float s, float c) {mLandauNorm=n; mLandauMpv=m; mLandauSigma=s; mLandauChi2=c;};
 #endif
