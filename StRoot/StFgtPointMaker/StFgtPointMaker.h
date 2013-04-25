@@ -30,15 +30,18 @@ class StFgtPointMaker : public StMaker
   virtual Int_t Make();
   virtual void Clear( Option_t *opts = "" );
   Int_t setPointAlgo(StFgtIPointAlgo*);
-  void setSkipEvent(int v){mSkipEvent=v;}
+  void setSkipEvent(int v){mSkipEvent=v;} //Return kStSkip if max number of disc hit per quad is less than setSkipEvent (default 0)
+                                          //For debugging prpose only. Use it with SetAttr(".Privilege",1)
+  void setFakeData(float v){mFakeData=v;} //Create fake hits for FGT and TPC at eta=v (default=0, no fake hit and real data)
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtPointMaker.h,v 1.2 2013/04/04 20:24:50 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtPointMaker.h,v 1.3 2013/04/25 11:52:31 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StFgtIPointAlgo* mPointAlgoPtr;
   StFgtDb* mDb;
   int mSkipEvent;
+  float mFakeData;
 
  private:
   ClassDef(StFgtPointMaker,1);
@@ -46,8 +49,11 @@ class StFgtPointMaker : public StMaker
 #endif
 
 /*
- * $Id: StFgtPointMaker.h,v 1.2 2013/04/04 20:24:50 akio Exp $ 
+ * $Id: StFgtPointMaker.h,v 1.3 2013/04/25 11:52:31 akio Exp $ 
  * $Log: StFgtPointMaker.h,v $
+ * Revision 1.3  2013/04/25 11:52:31  akio
+ * *** empty log message ***
+ *
  * Revision 1.2  2013/04/04 20:24:50  akio
  * - Filling StHit with xyz, error on xyz and detectorId
  * - Add option to return kStSkip if max number of disc hit per quad is less than setSkipEvent (default 0)
