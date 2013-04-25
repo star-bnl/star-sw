@@ -107,6 +107,8 @@ static const double c45 = cos(3.14/180*45);
   }
   for (int j=0;j<3;j++) {
     mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);}
+
+
   if (fabs(mTL[0]) < kMinCos) {
      mTL[0] = kMinCos; double n = sqrt(TCL::vdot(mTL,mTL,3));
      TCL::vscale(mTL,1./n,mTL,3);

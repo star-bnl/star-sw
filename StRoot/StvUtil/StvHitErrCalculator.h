@@ -13,6 +13,7 @@ StvHitErrCalculator(const char *name,int nPars=2);
 virtual void CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual void CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual void CalcDcaDers(double dRR[kMaxPars][3]);
+virtual double DetThick2() const {return 0.1*0.1;}
 virtual double Trace(const float hiPos[3]);
 virtual  int GetNPars() const 			{return mNPar;}
 const double *GetPars() const 			{return mPar ;}
