@@ -8,7 +8,7 @@
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvUtil/StvNodePars.h"
 #include "StarMagField.h"
-#include "StvELossTrak.h"
+#include "StvUtil/StvELossTrak.h"
 #include "THelixTrack.h"
 #include "TRandom.h"
 
