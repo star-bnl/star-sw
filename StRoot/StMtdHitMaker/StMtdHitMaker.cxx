@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.8 2013/02/25 18:31:00 geurts Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.9 2013/04/25 14:52:06 geurts Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -81,7 +81,7 @@ Int_t StMtdHitMaker::Init() {
 //_____________________________________________________________
 Int_t StMtdHitMaker::InitRun(Int_t runnumber) {
 	/// Find out what year we're in
-	mYear= (Int_t)runnumber/1e6 -1 ;
+        mYear= (Int_t)(runnumber/1000000 -1);
 
 	/// The Run-12 entries will all move to the database
 	if (mYear == 12){
@@ -506,7 +506,7 @@ void StMtdHitMaker::fillMtdSingleHits() {
 		unsigned int   tdc    = MtdLeadingHits[i].tdc;
 		int itray = (chn-1)/24+1;
 		int ichan = (chn-1)%24;
-		if (ibackleg<=0 || ibackleg>mNBACKLEG || itray<=0 || itray>mNTRAY || ichan<0 || ichan>=mNCHAN || ifiber<0 || ifiber>mNFIBER ) {
+		if (ibackleg>mNBACKLEG || itray<=0 || itray>mNTRAY || ichan<0 || ichan>=mNCHAN || ifiber>mNFIBER ) {
 			LOG_FATAL << " StMtdHitMaker::fillMtdSingleHits() "
 				<< ": ibackleg=" << ibackleg 
 				<< ": itray=" << itray 

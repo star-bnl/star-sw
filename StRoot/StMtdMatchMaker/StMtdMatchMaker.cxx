@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.3 2013/04/18 21:01:10 geurts Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.4 2013/04/25 14:52:13 geurts Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.4  2013/04/25 14:52:13  geurts
+ * Minor adjustments that address SL44 compiler warnings
+ *
  * Revision 1.3  2013/04/18 21:01:10  geurts
  * Bugfix (RT#2575): protection against events that have tracks, but no vertex.
  *  - Warning messages
@@ -723,7 +726,7 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 
 		if(mSaveTree){
 
-			int nTrgIds = 0.;
+		  int nTrgIds(0);
 			for(int i=0;i<kMaxTriggerIds;i++){
 				int trgId = mMuDst->event()->triggerIdCollection().nominal().triggerId(i);
 				if(trgId>0){ 
@@ -847,7 +850,7 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 		StSPtrVecMtdRawHit& mtdRawHits=theMtd->mtdRawHits();
 		if(mSaveTree){
 
-			int nTrgIds = 0.;
+		  int nTrgIds(0);
 			for(int i=0;i<kMaxTriggerIds;i++){
 				int trgId = mEvent->triggerIdCollection()->nominal()->triggerId(i);
 				if(trgId>0){ 
@@ -1422,12 +1425,12 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	double dphi = backLegPhiWidth+backLegPhiGap;
 
 	int projMtdBackLeg = -1;
-	projMtdBackLeg = projMtdPhi/dphi;
+	projMtdBackLeg = (int)(projMtdPhi/dphi);
 	projMtdBackLeg += 24;
 	if(projMtdBackLeg>30) projMtdBackLeg -= 30;
 
 	int projMtdModule = -1;
-	projMtdModule = (projMtdZ+2.5*stripLength)/stripLength+1;
+	projMtdModule = (int)((projMtdZ+2.5*stripLength)/stripLength+1);
 	double projMtdModuleZcen = (projMtdModule-3.)*stripLength;
 
 	StThreeVector<double> localnew[2]; //local vector of module
@@ -1462,7 +1465,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	int cellCan[2]={-1,-1};
 	for(int i=0;i<2;i++){
 		if(local[i].y()+(stripWidth+stripGap)*nStrips/2.>0){
-			cellCan[i]=(local[i].y()+(stripWidth+stripGap)*nStrips/2.)/(stripWidth+stripGap);
+		  cellCan[i]=(int)((local[i].y()+(stripWidth+stripGap)*nStrips/2.)/(stripWidth+stripGap));
 		}
 	}
 
@@ -1473,7 +1476,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	if(dCellPhi<0) 		dCellPhi += 2.*(TMath::Pi());
 	if(dCellPhi>2.*(TMath::Pi()))  dCellPhi -= 2.*(TMath::Pi());
 	int projMtdCell = -1;
-	projMtdCell	= dCellPhi/((stripWidth+stripGap)/mtdRadius);
+	projMtdCell	= (int)(dCellPhi/((stripWidth+stripGap)/mtdRadius));
 	for(int i=0;i<2;i++){
 		LOG_DEBUG<<"i "<<i<<" projMtdBackleg:"<<projMtdBackLeg<<" projMtdModule: "<<moduleCan[i]<<" projMtdCell: "<<cellCan[i]<<endm;
 	}
