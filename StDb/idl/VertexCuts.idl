@@ -12,4 +12,6 @@ struct VertexCuts {
     long    MinTrack;         // Min number of tracks
     float   DcaZMax;
     double  RImpactMax;       // Max distance between helix and nominal beamline (0,0,z)  
+    float   MinFracOfPossFitPointsOnTrack; // Min nFit/nPoss of tracks                                                                                                 
+    float   MinTrackPt;       // Min pt of tracks 
 };  
