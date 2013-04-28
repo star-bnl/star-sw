@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.15 2013/04/24 15:27:28 fisyak Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.16 2013/04/28 14:41:31 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -128,14 +128,6 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
     trsMk->setNormalFactor(1.05);
     trsMk->SetMode(0);
   }
-#if 0
-  //________________________________________________________________________________
-  gSystem->Load("StMixerMaker");
-  StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
-  //  StMixerMaker  *mixer = new StMixerMaker("Mixer","","trs");
-  mixer->SetInput("Input1","StDAQReader");
-  mixer->SetInput("Input2","Event");
-#endif
   //________________________________________________________________________________
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
@@ -149,15 +141,6 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
   chain3 = chain;
   chain3->SetName("Three"); 
   Chain->cd();
-#if 0
-  StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw"); 
-  if(!tpcdaqMk )  {
-    cout <<" Error: no tpc daq maker. End. "<<endl;
-    return;
-  }
-  tpcdaqMk->SetMode(1);   // Trs
-  tpcdaqMk->SetInput("Event","MixerEvent");
-#endif
   Chain->cd();
   //________________________________________________________________________________
   {
@@ -219,6 +202,9 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
 }
   
 // $Log: bfcMixer_TpcSvtSsd.C,v $
+// Revision 1.16  2013/04/28 14:41:31  fisyak
+// Clean up after retirement of St_tpcdaq_Maker, StRTSClient and StMixer
+//
 // Revision 1.15  2013/04/24 15:27:28  fisyak
 // Retire tpcdaq, StMixer, bug #2580
 //

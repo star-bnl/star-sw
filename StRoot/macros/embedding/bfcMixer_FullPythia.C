@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_FullPythia.C,v 1.2 2013/04/24 15:27:28 fisyak Exp $
+// $Id: bfcMixer_FullPythia.C,v 1.3 2013/04/28 14:41:31 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -20,7 +20,6 @@ StEvent *Event;
 class St_geant_Maker;
 class StIOMaker;
 class StEventDisplayMaker; StEventDisplayMaker *dsMk = 0;
-class StMixerMaker;
 //class StFtpcMixerMaker;
 class StEvtHddr;
 //_____________________________________________________________________
@@ -117,14 +116,6 @@ void bfcMixer_FullPythia(const Int_t Nevents=10,
   // end additional maker code
 #endif
   saveMk->cd();
-#if 0
-  // Mixer
-  gSystem->Load("StMixerMaker");
-  StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
-  chain1->SetInput("Input1","StDAQReader");
-  chain2->SetInput("Input2","Event");
-  // ??????  mixer->writeFile("mixer.trs",Nevents);
-#endif
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
 
@@ -157,11 +148,6 @@ void bfcMixer_FullPythia(const Int_t Nevents=10,
   chain3->Instantiate();
   St_geant_Maker *geantMk = (St_geant_Maker *) chain->GetMaker("geant");
   geantMk->SetActive(kTRUE);
-#if 0
-  StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
-  tpcdaqMk->SetMode(1);   // Trs
-  tpcdaqMk->SetInput("Event","MixerEvent");
-#endif
   //  StMaker *ftpccluMk = chain3->GetMaker("ftpc_hits");
   //  ftpccluMk->SetInput("ftpc_raw","FtpcMixer");
 

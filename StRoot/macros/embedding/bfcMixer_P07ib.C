@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_P07ib.C,v 1.8 2013/04/24 15:27:28 fisyak Exp $
+// $Id: bfcMixer_P07ib.C,v 1.9 2013/04/28 14:41:31 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -52,14 +52,6 @@ void bfcMixer_P07ib(const Int_t Nevents=1,
     }
     trsMk->setNormalFactor(2.67);
   }
-#if 0
-  //________________________________________________________________________________
-  gSystem->Load("StMixerMaker");
-  StMixerMaker  *mixer = new StMixerMaker("Mixer","daq","trs");
-  //  StMixerMaker  *mixer = new StMixerMaker("Mixer","","trs");
-  mixer->SetInput("Input1","StDAQReader");
-  mixer->SetInput("Input2","Event");
-#endif
   //________________________________________________________________________________
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
@@ -72,15 +64,6 @@ void bfcMixer_P07ib(const Int_t Nevents=1,
   chain3 = chain;
   chain3->SetName("Three"); 
   Chain->cd();
-#if 0
-  StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw"); 
-  if(!tpcdaqMk )  {
-    cout <<" Error: no tpc daq maker. End. "<<endl;
-    return;
-  }
-  tpcdaqMk->SetMode(1);   // Trs
-  tpcdaqMk->SetInput("Event","MixerEvent");
-#endif
   Chain->cd();
   //________________________________________________________________________________
   {
