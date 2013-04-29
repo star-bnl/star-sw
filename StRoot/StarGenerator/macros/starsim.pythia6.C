@@ -85,7 +85,7 @@ void starsim( Int_t nevents=1 )
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2012 geant gstar";
+    TString simple = "y2012 geant gstar usexgeom pythia6 ";
     bfc(0, simple );
   }
 

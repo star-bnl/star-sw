@@ -81,7 +81,7 @@ void starsim( Int_t nevents=10 )
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2012 geant gstar";
+    TString simple = "y2012 geant gstar usexgeom agml ";
     bfc(0, simple );
   }
 
