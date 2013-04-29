@@ -58,7 +58,7 @@ void starsim( Int_t nevents=50 )
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2012 geant gstar";
+    TString simple = "y2012 geant gstar usexgeom agml ";
     //TString full   = "tpcrs TpxRaw y2010a MakeEvent ITTF NoSvtIt NoSsdIt Idst IAna l0 ftpc Sti Tree logger genvtx tpcDB TpcHitMover TpxClu pmd bbcSim tofsim tags emcY2 EEfs evout IdTruth geantout -dstout big fzin MiniMcMk clearmem";
     //  TString full = "y2012 geant gstar tpcrs genvtx tpcDb tpxclu dedx event sdt20120224 ";
     bfc(0, simple );
