@@ -333,8 +333,8 @@ int StvMCStepping::BegVolume()
 static int nCall=0; nCall++;
 
   fPrevMat = fMaterial;
-  fELossTrak->Set(fMaterial->GetA(),fMaterial->GetZ(),fMaterial->GetDensity(), fX0);
-  fELossTrak->Set(fEnterMomentum.Vect().Mag());
+  fELossTrak->Set(fMaterial->GetA(),fMaterial->GetZ(),fMaterial->GetDensity(), fX0
+                 ,fEnterMomentum.Vect().Mag());
   return (IsDca00(0));
 }
 //_____________________________________________________________________________

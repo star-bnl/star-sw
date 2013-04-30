@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.1 2013/04/25 23:50:52 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.2 2013/04/30 15:27:40 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -25,18 +25,15 @@ void StvELossTrak::Clear(const char*)
   memset(fMed,0,fEnd-fMed+1);
 }
 //_____________________________________________________________________________
-void StvELossTrak::Set(double A, double Z, double dens, double x0
-                     ,double mass, double charge)
+void StvELossTrak::Set(double A, double Z,    double dens, double x0
+                      ,double p, double mass, double charge)
 {
   fdEdX=0;
   fA=A; fZ=Z; fDens=dens,fX0=x0; 
   if (fA<=0) fX0 = 1e+11;
   assert(fX0>0);
   fM=mass; fCharge2=charge*charge;
-}
-//_____________________________________________________________________________
-void StvELossTrak::Set(double p)
-{
+
   fP = p; if (fP>1e6) fP=1e6;
   fdEdX=0;fdEdXErr2=0;
   double p2 = fP*fP,m2 = fM*fM;
