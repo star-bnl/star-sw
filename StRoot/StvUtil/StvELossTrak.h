@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.1 2013/04/25 23:50:52 perev Exp $
+// $Id: StvELossTrak.h,v 1.2 2013/04/30 15:27:43 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -17,17 +17,15 @@ public:
         ~StvELossTrak(){;}
     void Reset();
     void Clear(const char *opt);
-//  void Set(const TGeoMaterial *mate,double mass=PiMASS,double charge=1);
     void Set(double A, double Z, double Dens, double x0 
-            ,double mass = PiMASS, double charge=1);
-    void Set(double p); 
+            ,double p,double mass = PiMASS, double charge=1);
     void Add(double len);
   double GetTheta2() const;
   double GetOrt2()   const;
 
   double ELoss    (double len) 	const;
+  double ELoss    () const 		{return ELoss(fTotLen);}
   double ELossErr2(double len) 	const;
-  double ELoss    () 		const	{return fTotELoss;}
   double ELossErr2() 		const	{return fTotELossErr2;}
   double dPP     () 		const;	
   double dPPErr2() 		const;	
