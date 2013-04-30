@@ -111,7 +111,7 @@
   TanTheta = (exp(+mend_etacut)-exp(-mend_etacut))/2 
 
   <Create    block="MAGP"  />
-  <Placement block="MAGP" in="Cave"  />
+  <Placement block="MAGP" in="Cave" konly="MANY" />
         
 
   <Volume name="MAGP" comment="is the magnet mother"  >
@@ -271,6 +271,9 @@
 </Module>
 <!--
   $Log: MagpGeo.xml,v $
+  Revision 1.5  2013/04/30 18:06:17  jwebb
+  MAGP now flagged as many due to overlap with MTD.
+
   Revision 1.4  2013/01/17 21:04:34  jwebb
   Support for improved magnet model, improved trim coil description.
 
