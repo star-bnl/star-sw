@@ -263,8 +263,8 @@ double StvFitter::Xi2(const StvHit *hit)
       mHitErrCalc->SetTrack(tD);
       const StHitPlane *hp = hit->detector(); 
       const Mtx33F_t &hD = hp->GetDir(hit->x());
-      mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
-      if (mHitErrCalc->CpCl() <kMinCos) {mXi2 = 1e11; return mXi2;}
+      int ans = mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
+      if (ans) {mXi2 = 1e11; return mXi2;}
     }; break;
 
     case 1: assert(0 && "Wrong case 1");

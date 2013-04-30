@@ -98,10 +98,14 @@ const double BAD_RHO=0.1;
     StvHitErrCalculator* myHitErrCalc = (StvHitErrCalculator*)hp->GetHitErrCalc();
     myHitErrCalc->SetTrack(circ.Dir());
     double hRR[3];
-    myHitErrCalc->CalcDcaErrs(fx,hd,hRR);
-    double cos2l = circ.GetCos(); cos2l*=cos2l;
-    if (hRR[0]<1e-4) hRR[0]=1.;
-    fHelix.AddErr( hRR[0],hRR[2]/cos2l);
+    int ans = myHitErrCalc->CalcDcaErrs(fx,hd,hRR);
+    if (ans) {// touching case
+       fHelix.AddErr( 1.,1.);
+    } else {
+      double cos2l = circ.GetCos(); cos2l*=cos2l;
+      if (hRR[0]<1e-4) hRR[0]=1.;
+      fHelix.AddErr( hRR[0],hRR[2]/cos2l);
+    }
   }
   Xi2 =fHelix.Fit();
   if (Xi2>BAD_XI2) return 0; 	//Xi2 too bad, no updates
