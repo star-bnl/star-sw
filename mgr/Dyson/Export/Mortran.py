@@ -1372,6 +1372,10 @@ class Placement(Handler):
         self.copy  = attr.get('ncopy',None)
         self.cond  = attr.get('if',   None)
 
+        if self.only:
+            self.only  = self.only.strip("'")
+            self.only  = "'%s'"%self.only
+
         self.attr  = attr
 
     def endElement(self,tag):
