@@ -9,9 +9,10 @@
 #include <string>
 
 static std::map<std::string,StvHitErrCalculator *> calcMap;
-static const double kMinCos = 0.1, kMinCpCl=0.1;
-static const double kMaxSin  = (1-kMinCos)*(1+kMinCos);
-
+enum {kMaxLam = 80,kMaxPsi=80};
+static const double kMinCosLam = cos(M_PI/180*kMaxLam),k2MinCosLam=kMinCosLam*kMinCosLam;
+static const double kMinCosPsi = cos(M_PI/180*kMaxPsi),k2MinCosPsi=kMinCosPsi*kMinCosPsi;
+static const double kMinCpCl = 0.1;
 
 
 // //______________________________________________________________________________
@@ -75,7 +76,7 @@ void StvHitErrCalculator::SetTrack(const double tkDir[3])
 
 }
 //______________________________________________________________________________
-void StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
+int StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
 {
 /// Calculate hit error matrix in local detector system. In this system
 /// detector plane is x = const 
@@ -83,13 +84,18 @@ void StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][
   memset(mDD[0],0,mNPar*3*sizeof(mDD[0][0]));
   mDD[0][0] = 1;
   mDD[1][2] = 1;
-  hRr[0] =  mDD[kYErr][0]*mPar[kYErr];
-  hRr[2] =  mDD[kZErr][2]*mPar[kZErr];
-  hRr[1] = 0;
-
+  mDRr[kXX] =  0.1;
+  mDRr[kYY] =  mDD[kYErr][0]*mPar[kYErr];
+  mDRr[kZZ] =  mDD[kZErr][2]*mPar[kZErr];
+  mDRr[kZY] = 0;
+  if (!hRr) return 0;
+  hRr[kXX] = mDRr[kYY];
+  hRr[kYX] = mDRr[kZY];
+  hRr[kYY] = mDRr[kZZ];
+  return 0;
 }  
 //______________________________________________________________________________
-void StvHitErrCalculator::CalcLocals(const float hiDir[3][3])
+int StvHitErrCalculator::CalcLocals(const float hiDir[3][3])
 {
 /// Calculate hit error matrix in DCA  system. In this system
 /// track is along x axis, Y axis comes thru hit point 
@@ -98,161 +104,222 @@ static const double c15 = cos(3.14/180*15);
 static const double s45 = sin(3.14/180*45);
 static const double c45 = cos(3.14/180*45);
 
-  mFailed = 0;
   if (!hiDir) {
     mSp  = s15    ; mCp  = c15    ; mSl  = s45    ; mCl  = c45    ;
     mSp2 = s15*s15; mCp2 = c15*c15; mSl2 = s45*s45; mCl2 = c45*c45;
     mCpCl = mCp*mCl;
-    return;
+    return 0;
   }
   for (int j=0;j<3;j++) {
     mTL[j] = (hiDir[j][0]*mTG[0][0]+hiDir[j][1]*mTG[0][1]+hiDir[j][2]*mTG[0][2]);}
 
 
-  if (fabs(mTL[0]) < kMinCos) {
-     mTL[0] = kMinCos; double n = sqrt(TCL::vdot(mTL,mTL,3));
-     TCL::vscale(mTL,1./n,mTL,3);
-  }
 //		mTL = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
   mSl = mTL[2],mCl2 = ((1-mSl)*(1+mSl));
-  if (mCl2<kMinCos*kMinCos) 	{	//Lambda too big
-    mCl=kMinCos; mCl2=mCl*mCl; mSl = (mSl<0)? -kMaxSin:kMaxSin;
-    mSp = 0; mCp = 1; mFailed = 1;
-  } else           		{	//Normal case
-    mCl=sqrt(mCl2); mSp = mTL[1]/mCl; mCp = mTL[0]/mCl; 
-  }
-  if (fabs(mCp) < kMinCos) { 		//Phi (psi) too big
-    mCp = (mCp<0)? -kMinCos:kMinCos; 
-    mSp = (mSp<0)? -kMaxSin:kMaxSin; mFailed = 2;
-  }
+  if (mCl2<k2MinCosLam) 				return 1; //Lambda too big
+  mCl=sqrt(mCl2); mSp = mTL[1]/mCl; mCp = mTL[0]/mCl; 
+
+  if (fabs(mCp) < kMinCosPsi) 				return 2; //Phi (psi) too big
   mSp2 = mSp*mSp; mCp2 = mCp*mCp; mSl2=mSl*mSl;
   mCpCl = fabs(mCp*mCl); if (mCpCl < kMinCpCl) mCpCl = kMinCpCl;
 
-  for (int i=0;i<2;i++) {for (int j=0;j<2;j++) { double s = 0;
-    for (int k=0;k<3;k++) {s+=mTG[i+1][k]*hiDir[j+1][k];}
+  for (int i=0;i<3;i++) { 
+  for (int j=0;j<3;j++) {
+    double s = 0;
+    for (int k=0;k<3;k++) {s+=mTG[i][k]*hiDir[j][k];}
     mTT[i][j] = s;}};
-
+  return 0;
 }
 //______________________________________________________________________________
-void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
+int StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
 {
+static int nCall = 0; nCall++;
 /// Calculate hit error matrix in DCA  system. In this system
 /// track is along x axis, Y axis comes thru hit point 
-   double detHitErr[3];
    mCp2 = -1; 			//To test of calling CalcLocals
-   CalcDetErrs(hiPos,hiDir,detHitErr);
-   if (mCp2> -1) ;CalcLocals(hiDir);
-
-   double Phi = atan2(hiPos[1],hiPos[0]);
-   Phi =  (int(fmod((Phi/M_PI*180)+15,30)))*30./180.*M_PI;
-   
-
-   
-   double rxy  = cos(Phi)*hiPos[0]+sin(Phi)*hiPos[1];
-   double psid = atan2(mSp,mCp)/M_PI*180;
-   double lamd = atan2(mSl,mCl)/M_PI*180;
-   double cros = acos(mCp*mCl)/M_PI*180;
-   if (fabs(psid) <90 ) { //ignore seed hit errs calculation
-   if (rxy<123) {//inner
-     StvDebug::Count("InnYYdet",          sqrt(detHitErr[0]));
-     StvDebug::Count("InnYYdet:Psi",psid, sqrt(detHitErr[0]));
-
-     StvDebug::Count("InnZZdet",          sqrt(detHitErr[2]));
-     StvDebug::Count("InnZZdet:Lam",lamd, sqrt(detHitErr[2]));
-
-     StvDebug::Count("InnZZdet:Z"  ,hiPos[2], sqrt(detHitErr[2]));
-     StvDebug::Count("InnYYdet:Z"  ,hiPos[2], sqrt(detHitErr[0]));
-   } else {
-     StvDebug::Count("OutYYdet",          sqrt(detHitErr[0]));
-     StvDebug::Count("OutYYdet:Psi",psid, sqrt(detHitErr[0]));
-
-     StvDebug::Count("OutZZdet",          sqrt(detHitErr[2]));
-     StvDebug::Count("OutZZdet:Lam",lamd, sqrt(detHitErr[2]));
-
-     StvDebug::Count("OutZZdet:Z"  ,hiPos[2], sqrt(detHitErr[2]));
-     StvDebug::Count("OutYYdet:Z"  ,hiPos[2], sqrt(detHitErr[0]));
-   } }
-   TCL::trasat(mTT[0],detHitErr,hRr,2,2); 
-   if (fabs(psid) <90 ) { //ignore seed hit errs calculation
-   if (rxy<123) {//inner
-     StvDebug::Count("InnYYdca",          sqrt(hRr[0]));
-     StvDebug::Count("InnYYdca:Psi",psid, sqrt(hRr[0]));
-
-     StvDebug::Count("InnZZdca",          sqrt(hRr[2]));
-     StvDebug::Count("InnZZdca:Lam",lamd, sqrt(hRr[2]));
-
-     StvDebug::Count("InnZZdca:Z",hiPos[2], sqrt(hRr[2]));
-     StvDebug::Count("InnYYdca:Z",hiPos[2], sqrt(hRr[0]));
-
-     StvDebug::Count("InnYZdca"           ,hRr[1]/sqrt(hRr[0]*hRr[2]+1e-10));
-     StvDebug::Count("InnYZdca:Cross",cros,hRr[1]/sqrt(hRr[0]*hRr[2]+1e-10));
-   } else {
-     StvDebug::Count("OutYYdca",          sqrt(hRr[0]));
-     StvDebug::Count("OutYYdca:Psi",psid, sqrt(hRr[0]));
-
-     StvDebug::Count("OutZZdca",          sqrt(hRr[2]));
-     StvDebug::Count("OutZZdca:Lam",lamd, sqrt(hRr[2]));
-
-     StvDebug::Count("OutZZdca:Z",hiPos[2], sqrt(hRr[2]));
-     StvDebug::Count("OutYYdca:Z",hiPos[2], sqrt(hRr[0]));
-
-     StvDebug::Count("OutYZdca"           ,hRr[1]/sqrt(hRr[0]*hRr[2]+1e-10));
-     StvDebug::Count("OutYZdca:Cross",cros,hRr[1]/sqrt(hRr[0]*hRr[2]+1e-10));
-   } }
+   int ans = CalcDetErrs(hiPos,hiDir,0);
+   if (mCp2 <= -1) {ans = CalcLocals(hiDir);}
+   if (ans) return ans;
+   TCL::trasat(mTT[0],mDRr,mTRr,3,3); 
+//   TCL::tratsa(mTT[0],mDRr,mTRr,3,3); 
+   if (!hRr) return 0;
+   hRr[kXX] = mTRr[kYY]*mCpCl;
+   hRr[kYX] = mTRr[kZY]*mCpCl;
+   hRr[kYY] = mTRr[kZZ]*mCpCl;
+   assert(hRr[kXX]>0);
+   assert(hRr[kYY]>0);
+   assert(hRr[kYY]*hRr[kXX]>hRr[kYX]*hRr[kYX]);
+   return 0;
 } 
 //______________________________________________________________________________
-double StvHitErrCalculator::Trace(const float*) 
-{
-  return mPar[kYErr]+mPar[kZErr];
-}
-//______________________________________________________________________________
-void StvHitErrCalculator::CalcDcaDers(double dRR[kMaxPars][3])
+void StvHitErrCalculator::CalcDcaDers(double dRr[kMaxPars][3])
 {
 // Calculate deriavatives of err matrix.
 // must be called after CalcDcaErrs(...)
+  double myDRr[6];
   for (int iPar=0;iPar<mNPar;iPar++) {
-    TCL::trasat(mTT[0],mDD[iPar],dRR[iPar],2,2); 
+    TCL::trasat(mTT[0],mDD[iPar],myDRr,3,3); 
+    dRr[iPar][kXX] = myDRr[kYY]*mCpCl;
+    dRr[iPar][kYX] = myDRr[kZY]*mCpCl;
+    dRr[iPar][kYY] = myDRr[kZZ]*mCpCl;
   }
-
 }
 //______________________________________________________________________________
-//______________________________________________________________________________
-void StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
-{
-/// Calculate hit error matrix in local detector system. In this system
-/// detector plane is x = const 
-
-  CalcLocals(hiDir);
-  memset(mDD[0],0,mNPar*3*sizeof(mDD[0][0]));
-  mZSpan = fabs(fabs(hiPos[2])-210)/100;
-  mDD[kYErr   ][0] = 1;
-  mDD[kYDiff  ][0] = mZSpan/mCp2	*mCpCl;
-  mDD[kYThkDet][0] = mSp2/mCp2/12	*mCpCl;
-
-  mDD[kZErr   ][2] = 1;
-  mDD[kZDiff  ][2] = mZSpan		*mCpCl;
-  mDD[kYDiff  ][2] = mZSpan*mSl2/mCl2	*mCpCl;
-  mDD[kZThkDet][2] = mSl2/mCl2/12	*mCpCl;
-  mDD[kZAB2   ][2] = 1./180		*mCpCl;
-
-  for (int ig=0;ig<3;ig++) {
-    hRr[ig]=0;
-    for (int ip=0;ip<mNPar;ip++) {
-      if(!mDD[ip][ig]) continue;
-      hRr[ig]+=mDD[ip][ig]*mPar[ip];
-  } }
-
-  if (hRr[0]>100) hRr[0]=100;
-  if (hRr[2]>100) hRr[1]=100;
-
-}  
-//______________________________________________________________________________
-double StvTpcHitErrCalculator::Trace(const float hiPos[3]) 
+double StvHitErrCalculator::Trace(const float hiPos[3]) 
 {
   double hiErr[3];
   CalcDetErrs(hiPos,0,hiErr);
   return hiErr[0]+hiErr[2];
 }
+//______________________________________________________________________________
+//______________________________________________________________________________
+int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
+{
+/// Calculate hit error matrix in local detector system. In this system
+/// detector plane is x = const 
+// <dX*dX>  = DD/12
+// 
+// <dY*dX>	 = tP*DD/12
+// <dY*dY>  = tP2*(DD/12) +WWy/cP2
+// 
+// <dZ*dX>  = tL/cP*(DD/12) 
+// <dZ*dY> =  (tP*tL)/cP*((DD/12 + WWy))
+// <dZ*dZ> =  tL2/cP2*(DD/12 + WWy) +WWz
+  int ans = CalcLocals(hiDir);
+  if (ans) return ans;
+  
+  double DDy = mPar[kYThkDet];
+  double DDz = mPar[kZThkDet];
+  double Dy = sqrt(DDy);
+  double Dz = sqrt(DDz);
+//  double Dx = sqrt(Dy*Dz);
+  double Dx = 0.5*(Dy+Dz);
+  double DyDDy = 0.5/DDy;
+  double DzDDz = 0.5/DDz;
+  double DxDDy = 0.25/DDy;
+  double DxDDz = 0.25/DDz;
+
+
+  memset(mDD[0],0,mNPar*sizeof(mDD[0]));
+  double myTp = mSp/mCp, myTp2 = myTp*myTp;
+  double myTl = mSl/mCl, myTl2 = myTl*myTl;
+  mZSpan = fabs(fabs(hiPos[2])-210)/100;
+  double WWy = mPar[kYDiff]*mZSpan;
+  double WWz = mPar[kZDiff]*mZSpan;
+
+// <dX*dX>  = DD/12
+// 
+// <dY*dX>	 = tP*DD/12
+// <dY*dY>  = tP2*(DD/12) +WWy/cP2
+// 
+// <dZ*dX>  = tL/cP*(DD/12) 
+// <dZ*dY> =  (tP*tL)/cP*((DD/12 + WWy))
+// <dZ*dZ> =  tL2/cP2*(DD/12 + WWy) +WWz +AB/cP2
+
+  mDRr[kXX] = Dx*Dx/12;
+  mDRr[kYX] = myTp*Dy*Dx/12;
+  mDRr[kZX] = myTl/mCp*(Dz*Dx/12);
+  mDRr[kYY] = myTp2*DDy/12 +WWy/mCp2;
+  mDRr[kZY] = (myTp*myTl)/mCp*(Dz*Dy/12 + WWy);
+  mDRr[kZZ] = myTl2/mCp2*(DDz/12+WWy)+WWz + mPar[kZAB2]/180/mCp2;
+
+  mDD[kYThkDet][kXX] = 2*Dx*DxDDy/12;
+  mDD[kZThkDet][kXX] = 2*Dx*DxDDz/12;
+
+  mDD[kYThkDet][kYX] = myTp*(DyDDy*Dx + Dy*DxDDy)/12;;
+  mDD[kZThkDet][kYX] = myTp*(           Dy*DxDDz)/12;;
+
+  mDD[kYThkDet][kZX] = myTl/mCp*(         Dz*DxDDy)/12;
+  mDD[kZThkDet][kZX] = myTl/mCp*(DzDDz*Dx+Dz*DxDDz)/12;
+
+  mDD[kYErr   ][kYY] = 1;;
+  mDD[kYThkDet][kYY] = myTp2/12;
+  mDD[kYDiff  ][kYY] = mZSpan/mCp2;
+
+//mDRr[kZY] = (myTp*myTl)/mCp*(Dz*Dy/12 + WWy);
+  mDD[kYThkDet][kZY] = (myTp*myTl)/mCp*((Dz*DyDDy)/12);
+  mDD[kZThkDet][kZY] = (myTp*myTl)/mCp*((DzDDz*Dy)/12);
+  mDD[kYDiff  ][kZY] = (myTp*myTl)/mCp*mZSpan;
+
+//mDRr[kZZ] = myTl2/mCp2*(DDz/12+WWy)+WWz + mPar[kZAB2]/180/mCp2;
+  mDD[kZErr   ][kZZ] = 1;;
+  mDD[kZThkDet][kZZ] = myTl2/mCp2/12;
+  mDD[kYDiff  ][kZZ] = myTl2/mCp2/12*mZSpan;
+  mDD[kZDiff  ][kZZ] = mZSpan;
+  mDD[kZAB2   ][kZZ] = 1./180/mCp2;
+
+
+
+
+
+
+  assert(mDRr[kYY]>0);
+  assert(mDRr[kZZ]>0);
+  assert(mDRr[kYY]*mDRr[kZZ]>mDRr[kZY]*mDRr[kZY]);
+
+
+  if (!hRr) return 0;
+  hRr[kXX] = mDRr[kYY]*mCpCl;
+  hRr[kYY] = mDRr[kZZ]*mCpCl;
+  hRr[kYX] = mDRr[kZY]*mCpCl;
+
+  return 0;
+
+}  
+//______________________________________________________________________________
+//______________________________________________________________________________
+//______________________________________________________________________________
+int StvTpcGeoErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
+{
+// <dX*dX>  = DD/12
+// 
+// <dY*dX>  = tP*DD/12
+// <dY*dY>  = tP2*(DD/12) +WWy/cP2
+// 
+// <dZ*dX>  = tL/cP*(DD/12) 
+// <dZ*dY> =  (tP*tL)/cP*((DD/12 + WWy))
+// <dZ*dZ> =  tL2/cP2*(DD/12 + WWy) +WWz
+
+/// Calculate hit error matrix in local detector system. In this system
+/// detector plane is x = const 
+
+  int ans =CalcLocals(hiDir);
+  if (ans) return ans;
+
+  memset(mDD[0],0,mNPar*sizeof(mDD[0]));
+  double myTp = mSp/mCp, myTp2 = myTp*myTp;
+  double myTl = mSl/mCl, myTl2 = myTl*myTl;
+
+  mZSpan = fabs(fabs(hiPos[2])-210)/100;
+  mDD[kYThkDet][kXX] = 0.5/12;
+  mDD[kZThkDet][kXX] = 0.5/12;
+
+  mDD[kYThkDet][kYX] = myTp /12;
+
+  mDD[kYThkDet][kYY] = myTp2/12;
+  mDD[kYDiff  ][kYY] = mZSpan/mCp2;
+
+  mDD[kZThkDet][kZX] = myTl/mCp/12;
+
+  mDD[kYThkDet][kZY] = myTl*myTp/mCp/12 *0.5;
+  mDD[kZThkDet][kZY] = myTl*myTp/mCp/12 *0.5;
+  mDD[kYDiff  ][kZY] = mZSpan*myTl*myTp/mCp;
+
+  mDD[kZThkDet][kZZ] = myTl2/mCp2/12;
+  mDD[kYDiff  ][kZZ] = mZSpan*myTl2/mCp2;
+  mDD[kZDiff  ][kZZ] = mZSpan;
+
+  for (int ig=0;ig<6;ig++) {
+    double s = 0;
+    for (int ip=0;ip<mNPar;ip++) {s+=mDD[ip][ig]*mPar[ip];}
+    mDRr[ig]=s;
+  } 
+  if (!hRr) return 0;
+  hRr[kXX] = mDRr[kYY]*mCpCl;
+  hRr[kYY] = mDRr[kZZ]*mCpCl;
+  hRr[kYX] = mDRr[kZY]*mCpCl;
+  return 0;
+}  
 
 
 
