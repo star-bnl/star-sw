@@ -26,7 +26,8 @@
 //#define APPROX
 static const double kWeight = 0.99;	//pars = oldPars*(1-kWeight) + newPars*kWeight
 static int testOnly=0;
-static const double kMaxDY=0.5,kMaxDZ=0.5,kErrFak=2.,kMaxCur=1./100;
+enum {kMinNodes = 10,kMinHits=25};
+static const double kMaxDY=0.5,kMaxDZ=0.5,kErrFak=1.,kMaxCur=1./200,kPMin=0.5;
 
 
 //______________________________________________________________________________
@@ -343,8 +344,8 @@ void CalcInit()
 {
    const char*  innOutNames[2]  ={"StvTpcInnerHitErrsFE"    ,"StvTpcOuterHitErrsFE"    };
 
-   const double innOutPars[2][6]={{0.047,0.107,5e-5,1./12,0.0011, 0.0012}
-                                 ,{0.035,0.077,5e-5,1./12,0.0011, 0.0012}};
+//    const double innOutPars[2][6]={{0.047,0.107,5e-5,1./12,0.0011, 0.0012}
+//                                  ,{0.035,0.077,5e-5,1./12,0.0011, 0.0012}};
    double TpcMiMax[2][2][2]={{{0.05,0.2},{0.05,0.2}},{{0.05,0.2},{0.05,0.2}}};
 
 
@@ -357,7 +358,7 @@ void CalcInit()
 
   for (int io=0;io<2;io++) {
     StvHitErrCalculator *hec = new StvTpcHitErrCalculator(innOutNames[io]);
-    hec->SetPars(innOutPars[io]);
+//    hec->SetPars(innOutPars[io]);
     FECalcHolder *hold= new FETpcCalcHolder(hec,TpcMiMax[io]);
     myFcn.Add(hold);
   }
@@ -423,7 +424,7 @@ double Poli2::Fit()
     fLiH -= log(w);
     if (!fReg) continue;
     fKor += Kor(i);
-    fdKor+= dKordW(i);
+    fdKor+= dKordW(i)*fW[i];
   }
   for (int j=0;j<=fPw;j++){ fB[j] = B[j];
   for (int k=0;k<=j  ;k++){ fA(j,k) = A[j][k]; fA(k,j)=A[j][k];}}
@@ -438,17 +439,18 @@ double Poli2::Fit()
 double Poli2::Kor(int ipt) const
 {
   if (!fReg) return 0;
-  double t = fReg*sqrt(fW[ipt]);
-  double kor = 2*log(F(t));
+  double t = fReg*sqrt(fW[ipt]/2);
+  double kor = 2*TMath::Erfc(t);
   return kor;
 }
 //______________________________________________________________________________
 double Poli2::dKordW(int ipt) const
 {
   if (!fReg) return 0;
+// kor =  2*TMath::Erfc(t);
 //d/dW = X2 - 1/W + 1/W * 1/F(A*sqrt(W)) * A*sqrt(W) *exp(-A*A*W/2)
-  double t = fReg*sqrt(fW[ipt]);
-  double dkor = t*exp(-t*2/2)/F(t)/fW[ipt];
+  double t = fReg*sqrt(fW[ipt]/2);
+  double dkor =  M_2_SQRTPIl*exp(-t*t)*fReg/(sqrt(2*fW[ipt]));
   return dkor;
 }   
 
@@ -456,6 +458,8 @@ double Poli2::dKordW(int ipt) const
 //______________________________________________________________________________
 double Poli2::Fun( double x ) const
 {
+// Polinom of x == a0+a1*x+a2*x*x
+
   x -= fX0;
   double xx[3]={1,x,x*x};
   TVectorD XX(fPw+1,xx);
@@ -883,21 +887,26 @@ void FECalcHolder::DbSave()
     TString ts(dbFile);
     ts +=".BAK"; gSystem->Rename(dbFile,ts);
   }
-  std::ofstream ofs(dbFile);
+  {	//save FE file
+    std::ofstream ofs(dbFile);
 
 //		Save increased errors
-  Scale(kErrFak);
-  mTab->SavePrimitive(ofs);
-  Scale(1./kErrFak);
-
+    Scale(kErrFak);
+    mTab->SavePrimitive(ofs);
+    Scale(1./kErrFak);
+  }
 //		Save production errors
-  TString ts(mTab->GetName());
-  assert(ts.EndsWith("FE"));
-  ts.Chop();ts.Chop();
-  mTab->SetName(ts);
-  mTab->SavePrimitive(ofs);
-  ts+="FE";
-  mTab->SetName(ts);
+  {
+    dbFile.ReplaceAll("FE.C",".C");
+    std::ofstream ofs(dbFile);
+    TString ts(mTab->GetName());
+    assert(ts.EndsWith("FE"));
+    ts.Chop();ts.Chop();
+    mTab->SetName(ts);
+    mTab->SavePrimitive(ofs);
+    ts+="FE";
+    mTab->SetName(ts);
+  }
 }
 //______________________________________________________________________________
 void FECalcHolder::Scale(double fak)
@@ -1021,18 +1030,7 @@ void FEFcn::InitFitter()
   myFitter.SetPrintLevel(1);
   Synchro('C');
   TCL::ucopy(mPars,mFist,mNPars);
-  int nCas = mCas.size();
 
-//		First two are TPC
-  if (nCas>=2 
-  && strstr(mCas[0]->GetName(),"TpcInner")
-  && strstr(mCas[1]->GetName(),"TpcOuter")) {
-    printf("mCas[0]->GetName()=%s\n",mCas[0]->GetName());
-    printf("mCas[1]->GetName()=%s\n",mCas[1]->GetName());
-    assert(myFitter.GetNumPars()>=12);
-    FixPar(StvHitErrCalculator::kWidTrk+0,2);
-    FixPar(StvHitErrCalculator::kWidTrk+6,2);
-  }
   myFitter.SetFCN(&Fcn);
 }
 //______________________________________________________________________________
@@ -1096,15 +1094,15 @@ FECalcHolder *FEFcn::GetCalc(int id,const float hiPos[3])
 //______________________________________________________________________________
 int FEFcn::Add(FEEvent* ev)
 { 
-enum {kMinNodes = 10,kMinHits=15};
   mNEvs++;
   int jl,jr;
   FENode node;
   while ((jl=ev->NextTrack(jr))>-1) 
   {
-    if (fabs(ev->mCurv[jl])>kMaxCur) 	continue;
-    if (ev->nAllHits[jl]   <kMinHits) 	continue;
-    assert(jr-jl+1>=15);
+    if (fabs(ev->mCurv[jl])>kMaxCur) 			continue;
+    if (ev->nAllHits[jl]   <kMinHits) 			continue;
+    if (fabs(ev->mPt[jl]/cos(ev->gDip[jl]))<kPMin) 	continue;
+
     int nNodes=0;
     double y00=0,z00=0;
     FETrak myTrak;
@@ -1393,8 +1391,8 @@ void FEFcn::Approx(int nonBias)
   printf("Approx::Aver: Xi2=%g(y) %g(z) %g Pull=%g\n"
         ,mXi2[0],mXi2[1],mXi2[2],double(myPull));
 
-  double korFak = 1./(1.-mydKor);
-  if (!nonBias)  {TCL::vscale(mPars,mXi2[2]*korFak       ,mPars,mNPars);}
+  double korFak = (1.+mydKor/mXi2[2]);
+  if (!nonBias)  {TCL::vscale(mPars,      mXi2[2]*korFak ,mPars,mNPars);}
   else           {TCL::vscale(mPars,double(myPull*korFak),mPars,mNPars);}
 
 
@@ -1832,43 +1830,5 @@ int FEApprox::Approx()
   return iter;
 }		
 #endif // APPROX
-
-
-
-
 #endif
-#if 0
-
-exp(-X2/(2*S))/Int(0,A,-X2/(2*S)dX)
-
-F(T) = Int(0,T,exp(-t**2/2)dt)
-
-
-Take -log()
-X2/(2*S)+log(Int(0,A,-X2/(2*S)dX))
-
-
-Int(0,A,-X2/(2*S)dX == sqrt(S)*Int(0,A/sqrt(S),-T2/2)dT
-
-X2/(2*S)+1/2*log(S) + log(F(A/sqrt(S)))
-
-1/S = W
-
-X2*W-log(W) + 2*log(F(A*sqrt(W)))
-
-d/dW = X2 - 1/W + 1/W * 1/F(A*sqrt(W)) * A*sqrt(W) *exp(-A*A*W/2)
-
-X2*W - 1/t + 1/t*tau*exp(-tau*tau/2)/F(tau)
-X2*W - 1/t * (1- tau*exp(-tau*tau/2)/F(tau))
-
-1/t = X2*W/(1- tau*exp(-tau*tau/2)/F(tau))
-
-
-
-
-
-
-#endif
-
-
 
