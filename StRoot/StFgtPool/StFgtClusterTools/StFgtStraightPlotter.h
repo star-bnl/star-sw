@@ -19,7 +19,8 @@ class StFgtCollection;
 
 class StFgtStraightPlotter : public StMaker {
  public:
-  StFgtStraightPlotter(const Char_t* name="FgtStraightPlotter");
+  template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int numBin, int first, int last);
+  StFgtStraightPlotter(const Char_t* name="FgtStraightPlotter", const Char_t* trackerName="fgtStraightTracker");
   pair<Double_t,Double_t> findCluChargeSize(Int_t iD,Char_t layer, Double_t ordinate);
   virtual ~StFgtStraightPlotter();
    void setMaxDistChi(Float_t maxDChi);
@@ -31,11 +32,12 @@ class StFgtStraightPlotter : public StMaker {
    void setDcaCut(Int_t dca_in_cm);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.7 2013/03/08 02:11:53 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.8 2013/05/01 16:49:33 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   void SetEffDisk(Int_t disk)
   {
     m_effDisk=disk;
   }
+   void SetFileBase(const Char_t* filebase, const Char_t* filename="");
  protected:
   Int_t intNumTracks;
   Bool_t isCosmic;
@@ -47,7 +49,11 @@ class StFgtStraightPlotter : public StMaker {
    Float_t maxDistStrip_Phi;
    Float_t maxDist2Eff;
    Bool_t doPrint;
-  Char_t fileBase[300];
+
+  Char_t mFileBase[300];
+  Char_t mFileName[200];
+  Char_t mTrackerName[200];
+
    StFgtDb* mDb;
   Int_t m_effDisk;
    Float_t maxDistChi;
@@ -94,6 +100,21 @@ class StFgtStraightPlotter : public StMaker {
    TCanvas* mCanvas;
    TH2D** radioPlotsEff;
    TH2D** radioPlotsNonEff;
+
+   TH2D** radioPlotsTrackHits;
+   TH2D** radioPlotsClusChargeR;
+   TH2D** radioPlotsClusSizeR;
+   TH2D** radioPlotsClusChargeP;
+   TH2D** radioPlotsClusSizeP;
+
+   TH2D** chargeCorrTracks;
+   TH2D** chargeCorrTracksRCut;
+
+
+   TH1D** clusChargeR;
+   TH1D** clusSizeR;
+
+   
 
    TH2D** radioPlotsEffR;
    TH2D** radioPlotsNonEffR;
@@ -148,6 +169,24 @@ class StFgtStraightPlotter : public StMaker {
 
    TH1F** chargeTrackClusterR;
    TH1F** chargeTrackClusterP;
+   TH1F** chargeTrackClusterRvsP;
+   TH1F** chargeTrackClusterPvsR;
+   TH1F** numTrackClusterR;
+   TH1F** numTrackClusterP;
+   TH1F** numTrackSymCutClusterR;
+   TH1F** numTrackSymCutClusterP;
+
+
+   //   TH2D* chargeCorrCluster;
+
+
+
+
+
+
+
+   TH1F** chargeTrackSymCutClusterR;
+   TH1F** chargeTrackSymCutClusterP;
 
    TH1F** maxSigTrackClusterP;
    TH1F** maxSigCloseClusterP;
@@ -223,6 +262,9 @@ class StFgtStraightPlotter : public StMaker {
    TH2D* tpcFgtZVertexCorr2;
    TH2D* tpcFgtZVertexCorr3;
 
+   TH1D* tpcFgtZVtxDiff;
+   TH1D* tpcFgtZVtxDiff2;
+
    TH2D** chargeCorr;
    TH1D** clusterSizeR;
    TH1D** clusterSizeP;
@@ -257,7 +299,7 @@ class StFgtStraightPlotter : public StMaker {
    int hitCounter;
    int hitCounterR;
    //THD2** 
-   void SetFileBase(const Char_t* filebase);
+
 
  private:   
       ClassDef(StFgtStraightPlotter,1);

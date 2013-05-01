@@ -16,8 +16,12 @@ StMuDstMaker       *muDstMaker    = 0;
 StFgtGenPlotter    *fgtGenPlotter     = 0;
 StFgtGenAVEMaker    *fgtAVEffMkr     = 0;
 StFgtGeneralBase * fgtGenBase =0;
-StFgtStraightTrackMaker* fgtStraightTrackMaker;
-StFgtStraightPlotter* fgtStraightPlotter;
+StFgtStraightTrackMaker* fgtStraightTrackMaker2;
+StFgtStraightPlotter* fgtStraightPlotter2;
+StFgtStraightTrackMaker* fgtStraightTrackMaker3;
+StFgtStraightPlotter* fgtStraightPlotter3;
+StFgtStraightTrackMaker* fgtStraightTrackMaker4;
+StFgtStraightPlotter* fgtStraightPlotter4;
 StFgtDbMaker *fgtDbMkr=0;
 
 void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
@@ -81,12 +85,25 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    //fgtGenPlotter = new StFgtGenPlotter( "fgtGenPlotter" );
    //   fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
    fgtGenBase=new StFgtGeneralBase("fgtGenBase");
-   fgtStraightTrackMaker =new StFgtStraightTrackMaker("fgtStraightTracker");
-   fgtStraightTrackMaker->SetEffDisk(2);
-   fgtStraightTrackMaker->setMinNumFitPoints(4);
-   fgtStraightTrackMaker->setMaxClusters(20);
-   fgtStraightPlotter=new StFgtStraightPlotter("fgtStraightPlotter");
-
+   //   fgtGenBase->setVertexNumber(1); //<--- this selects second best vertex
+   fgtStraightTrackMaker2 =new StFgtStraightTrackMaker("fgtStraightTracker2");
+      fgtStraightTrackMaker3 =new StFgtStraightTrackMaker("fgtStraightTracker3");
+      fgtStraightTrackMaker4 =new StFgtStraightTrackMaker("fgtStraightTracker4");
+   fgtStraightTrackMaker2->SetEffDisk(20);
+      fgtStraightTrackMaker3->SetEffDisk(20);
+      fgtStraightTrackMaker4->SetEffDisk(20);
+   fgtStraightTrackMaker2->setMinNumFitPoints(2);
+      fgtStraightTrackMaker3->setMinNumFitPoints(3);
+      fgtStraightTrackMaker4->setMinNumFitPoints(4);
+   fgtStraightTrackMaker2->setMaxClusters(30);
+      fgtStraightTrackMaker3->setMaxClusters(30);
+      fgtStraightTrackMaker4->setMaxClusters(30);
+   fgtStraightPlotter2=new StFgtStraightPlotter("fgtStraightPlotterNew2","fgtStraightTracker2");
+      fgtStraightPlotter3=new StFgtStraightPlotter("fgtStraightPlotter3","fgtStraightTracker3");
+      fgtStraightPlotter4=new StFgtStraightPlotter("fgtStraightPlotter4","fgtStraightTracker4");
+   fgtStraightPlotter2->SetFileBase(".","2PointTrack");
+         fgtStraightPlotter3->SetFileBase(".","3PointTrack");
+         fgtStraightPlotter4->SetFileBase(".","4PointTrack");
 
    //   fgtAVEffMkr->SetFileBase(baseFilename);
 
@@ -112,6 +129,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    Int_t ierr  = kStOK;  // err flag
    Int_t nevents = 0;    // cumulative number of events in
    for( ; nevents < neventsIn && !ierr; ++nevents ){
+     if(nevents%100)
        cout <<"event: "<< nevents <<endl;
       analysisChain->Clear();
       //          cout <<"making ... " << endl;
@@ -157,8 +175,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.12 2013/03/02 03:11:24 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.13 2013/05/01 16:49:33 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.13  2013/05/01 16:49:33  avossen
+updated code and macros so that several trackers and plotters can run at the same time with different settings such as min points. Added option to use other primary vertices
+
 Revision 1.12  2013/03/02 03:11:24  avossen
 *** empty log message ***
 

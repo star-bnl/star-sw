@@ -8,13 +8,14 @@
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StEventInfo.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
+#include "TMath.h"
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
-
+#include <cstdlib>
 
 #include <TH2D.h>
 #include <TROOT.h>
@@ -118,13 +119,17 @@ Bool_t StFgtStraightPlotter::fitTheStrip(generalStrip* pStrip, generalStrip* pSt
   char buffer[100];
   sprintf(buffer,"d%d_quad%d",iD,iq);
   pulsePictureFile->cd();
+  //  cout <<"trying to cd to " << buffer <<endl;
   pulsePictureFile->cd(buffer);
+  //  cout <<"done " <<endl;
   if(layer=='R')
     sprintf(buffer,"apv%d_R",apvBin);
   else
     sprintf(buffer,"apv%d_P",apvBin);
   //  cout <<"changing to " << buffer <<endl;
+  //  cout <<" and now to " << buffer <<endl;
   gDirectory->cd(buffer);
+  //  cout  << "done cd 2 " << endl;
   Int_t minAdcCount=100000;
   Int_t maxAdcCount=0;
   for(Int_t tb=0;tb<7;tb++)
@@ -147,13 +152,17 @@ Bool_t StFgtStraightPlotter::fitTheStrip(generalStrip* pStrip, generalStrip* pSt
   //  cout <<"histo name: "<< buffer <<endl;
   TH1F* tmpPulseHisto=(TH1F*)mHistPtr->Clone(buffer);
   tmpPulseHisto->Write();
+
   if(pStripOtherLayer!=0)
     {
       mCanvas->cd();
+
       sprintf(buffer,"tmpCnvsD%d_Q%d_APV%d_ev%d",iD,iq,apvBin,evtNr);
       TCanvas* tmpCnv=(TCanvas*)mCanvas->Clone(buffer);
+
       tmpCnv->SetTitle(buffer);
       tmpCnv->SetName(buffer);
+
       tmpCnv->cd();
 
       for(Int_t tb=0;tb<7;tb++)
@@ -167,28 +176,35 @@ Bool_t StFgtStraightPlotter::fitTheStrip(generalStrip* pStrip, generalStrip* pSt
 	  if(pStripOtherLayer->adc[tb]>maxAdcCount)
 	    maxAdcCount=pStripOtherLayer->adc[tb]+pStripOtherLayer->pedErr;
 	}
+
       tmpPulseHisto->GetYaxis()->SetRangeUser(minAdcCount-10,maxAdcCount+10);
       mHistPtr2->GetYaxis()->SetRangeUser(minAdcCount-10,maxAdcCount+10);
       tmpPulseHisto->Draw();
       mHistPtr2->Draw("SAME");
       tmpCnv->Write();
     }
+
   pulsePictureFile->cd();
+
   myRootFile->cd();
+
   return true;
 }
 
 
-template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int numBin, int first, int last)
+template<class T> void StFgtStraightPlotter::createPlots(T*** pH, int numH, const char* nameBase, int numBin, int first, int last)
 {
+
   char buffer[200];
+  char bufferNB[200];
+  sprintf(bufferNB,"%s_%s",nameBase,mFileName);
   (*pH)=new T*[numH];
   
   if (numH==22)
     {
       for(int iD=0;iD<numH;iD++)
         {  
-	  sprintf(buffer, "%s_APV%d", nameBase, iD);
+	  sprintf(buffer, "%s_APV%d", bufferNB, iD);
 	  (*pH)[iD]=new T(buffer,buffer,numBin, first, last);
 	}
     }
@@ -200,7 +216,7 @@ template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int 
         {
           for(int iQ=0;iQ<4;iQ++)
             {
-              sprintf(buffer,"%s_disc%d_quad%d",nameBase,iD+1,iQ);
+              sprintf(buffer,"%s_disc%d_quad%d",bufferNB,iD+1,iQ);
               (*pH)[iD*4+iQ]=new T(buffer,buffer,numBin,first,last);
             }
         }
@@ -212,7 +228,7 @@ template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int 
 
 	  if (numH==kFgtNumDiscs)
 	    {
-	      sprintf(buffer, "%s_disc%d", nameBase, iD+1);
+	      sprintf(buffer, "%s_disc%d", bufferNB, iD+1);
 	      (*pH)[iD]=new T(buffer, buffer,numBin, first, last);
 	    }
 	  else
@@ -224,7 +240,7 @@ template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int 
 		  if((binAPVi>=10) && (binAPVi<=19)) iQ=1;
 		  if((binAPVi>=20) && (binAPVi<=29)) iQ=2;
 		  if((binAPVi>=30) && (binAPVi<=39)) iQ=3;
-		  sprintf(buffer,"%s_disc%d_quad%d_apvBIN%d",nameBase,iD+1,iQ,binAPVi);
+		  sprintf(buffer,"%s_disc%d_quad%d_apvBIN%d",bufferNB,iD+1,iQ,binAPVi);
 		  (*pH)[iD*40+binAPVi]=new T(buffer,buffer,numBin,first,last);
 		}
 	    }
@@ -233,8 +249,9 @@ template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int 
 }
 
 
-template void createPlots(TH1I*** pH, int numH,const char* nameBase, int numBin, int first, int last);
-template void createPlots(TH1F*** pH, int numH, const char* nameBase, int numBin, int first, int last);
+template void StFgtStraightPlotter::createPlots(TH1I*** pH, int numH,const char* nameBase, int numBin, int first, int last);
+template void StFgtStraightPlotter::createPlots(TH1F*** pH, int numH, const char* nameBase, int numBin, int first, int last);
+template void StFgtStraightPlotter::createPlots(TH1D*** pH, int numH, const char* nameBase, int numBin, int first, int last);
 
 void StFgtStraightPlotter::doNormalize(TH2D** hEff, TH2D** hNonEff)
 {
@@ -259,7 +276,6 @@ void StFgtStraightPlotter::doNormalize(TH2D** hEff, TH2D** hNonEff)
 	}
       delete tmpAllCounts;
     }
-
 }
 
 
@@ -267,7 +283,9 @@ void StFgtStraightPlotter::doNormalize(TH2D** hEff, TH2D** hNonEff)
 void StFgtStraightPlotter::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi, Int_t maxR, Int_t maxPhi, Int_t discId, Int_t quad)
 {
   Char_t buffer[200];
-  sprintf(buffer,"Sig_Disc%d_quad%d_Phi_Evt_%d_R_%f_Phi_%f",discId,quad,evtNr,r,phi);
+  int uniqueId=rand() % 1000;
+  sprintf(buffer,"Sig_Disc%d_quad%d_Phi_Evt_%d_R_%f_Phi_%f_%d_%s",discId,quad,evtNr,r,phi,uniqueId,mFileName);
+
   TH2D* histoP=new TH2D(buffer,buffer,7,0,6,maxPhi,0,maxPhi-1);
   for(int i=0;i<maxPhi;i++)
     {
@@ -278,7 +296,8 @@ void StFgtStraightPlotter::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, 
 	}
     }
   v_hClusP.push_back(histoP);
-  sprintf(buffer,"Sig_Disc%d_quad%d_R_Evt_%d_R_%f_Phi_%f",discId,quad,evtNr,r,phi);
+  sprintf(buffer,"Sig_Disc%d_quad%d_R_Evt_%d_R_%f_Phi_%f_%d_%s",discId,quad,evtNr,r,phi,uniqueId,mFileName);
+  //  cout <<"creating histoR: "<< buffer<<endl;
   TH2D* histoR=new TH2D(buffer,buffer,7,0,6,maxR,0,maxR-1);
   for(int i=0;i<maxR;i++)
     {
@@ -1294,7 +1313,7 @@ Int_t StFgtStraightPlotter::Make()
   Int_t ierr = kStOk;
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
 
-  StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
+  StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker(mTrackerName));
 
   vector<AVTrack>& tracks=fgtSTracker->getTracks();
   //    cout <<"plotter: we have " << tracks.size() << "tracks " <<endl;
@@ -1317,8 +1336,39 @@ Int_t StFgtStraightPlotter::Make()
 	  if(iD<6 && iD>=0 && iq<4 && iq>=0)
 	    {
 	      //	      cout <<"disk :  " << iD << " iq: " << iq <<endl;
+	      Float_t rCharge=(*(it->points))[i].rCharge;
+	      Float_t phiCharge=(*(it->points))[i].phiCharge;
+	      Float_t rPos=(*(it->points))[i].r;
+	      Float_t phiPos=(*(it->points))[i].phi;
+	      //r clusters are at constant r, so we plot against phi and vice versa
+	      if(phiPos<0)
+		phiPos+=2*TMath::Pi();
+	      chargeTrackClusterRvsP[iD*4+iq]->Fill(phiPos,(*(it->points))[i].rCharge);
+	      chargeTrackClusterPvsR[iD*4+iq]->Fill(rPos,(*(it->points))[i].phiCharge);
 	      chargeTrackClusterR[iD*4+iq]->Fill((*(it->points))[i].rCharge);
 	      chargeTrackClusterP[iD*4+iq]->Fill((*(it->points))[i].phiCharge);
+	      numTrackClusterR[iD*4+iq]->Fill(rPos);
+	      numTrackClusterP[iD*4+iq]->Fill(phiPos);
+	      if(fabs((rCharge-phiCharge)/(rCharge+phiCharge))<0.1)
+		{
+		  //num track is not needed beause we don't do it position depedent
+		  numTrackSymCutClusterR[iD*4+iq]->Fill(rPos);
+		  numTrackSymCutClusterP[iD*4+iq]->Fill(phiPos);
+		  //---
+		  chargeTrackSymCutClusterR[iD*4+iq]->Fill((*(it->points))[i].rCharge);
+		  chargeTrackSymCutClusterP[iD*4+iq]->Fill((*(it->points))[i].phiCharge);
+		}
+	      radioPlotsTrackHits[iD]->Fill((*(it->points))[i].x,(*(it->points))[i].y);
+	      radioPlotsClusChargeR[iD]->Fill((*(it->points))[i].x,(*(it->points))[i].y,(*(it->points))[i].rCharge);
+	      radioPlotsClusChargeP[iD]->Fill((*(it->points))[i].x,(*(it->points))[i].y,(*(it->points))[i].phiCharge);
+	      radioPlotsClusSizeR[iD]->Fill((*(it->points))[i].x,(*(it->points))[i].y,(*(it->points))[i].rSize);
+	      radioPlotsClusSizeP[iD]->Fill((*(it->points))[i].x,(*(it->points))[i].y,(*(it->points))[i].phiSize);
+	      chargeCorrTracks[iD*4+iq]->Fill((*(it->points))[i].rCharge,(*(it->points))[i].phiCharge);
+	      if((*(it->points))[i].r>19)
+		{
+		  chargeCorrTracksRCut[iD*4+iq]->Fill((*(it->points))[i].rCharge,(*(it->points))[i].phiCharge);
+		}
+
 	      //	      cout <<" r charge: " << (*(it->points))[i].rCharge <<  " phi : " << (*(it->points))[i].phiCharge <<endl;
 	      //	      cout << "point on track: R hit: " << (*(it->points))[i].fgtHitR->getPositionR()<< " geoId: " <<  (*(it->points))[i].fgtHitR->getCentralStripGeoId() <<" size: " <<(*(it->points))[i].fgtHitR->getNstrip()<< endl;
 	      //	      cout << "point on track: Phi hit: " << (*(it->points))[i].fgtHitPhi->getPositionPhi()<< " geoId: " <<  (*(it->points))[i].fgtHitPhi->getCentralStripGeoId()<<" size: " << (*(it->points))[i].fgtHitPhi->getNstrip() <<endl;
@@ -1459,7 +1509,6 @@ Int_t StFgtStraightPlotter::Make()
 	    }
 	}
     }
-
   int counter=0;
   for(vector<AVTrack>::iterator it=tracks.begin();it!=tracks.end();it++)
     {
@@ -1485,6 +1534,10 @@ Int_t StFgtStraightPlotter::Make()
 	    {
 	      tpcFgtZVertexCorr->Fill(dca.first,it->ipZEv);
 	      tpcFgtZVertexCorr2->Fill(vertZ,it->ipZEv);
+	      tpcFgtZVtxDiff->Fill(dca.first-it->ipZEv);
+	      tpcFgtZVtxDiff->Fill(vertZ-it->ipZEv);
+
+
 	    }
 	  tpcFgtZVertexCorr3->Fill(vertZ,dca.first);
 
@@ -1496,8 +1549,11 @@ Int_t StFgtStraightPlotter::Make()
 
 };
  
-StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name ),intNumTracks(0),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
+StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name, const Char_t* trackerName): StMaker( name ),intNumTracks(0),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
 {
+
+  sprintf(mTrackerName,"%s",trackerName);
+
   StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
   if( !fgtDbMkr ){
     LOG_FATAL << "StFgtDb not provided and error finding StFgtDbMaker" << endm;
@@ -1509,7 +1565,7 @@ StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name )
   }
   //count from 0--> third disk
   m_effDisk=2;
-  sprintf(fileBase,"%s",".");
+  sprintf(mFileBase,"%s",".");
   pulseCondition=true;
   lenCondition=false;
   maxDistStrip_R=0.7;
@@ -1524,26 +1580,15 @@ StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name )
   else
     vertexCut=100000000;
 
-  //   dcaCut=2;
+     dcaCut=3;
   //no cut 
-   dcaCut=100;
+  //   dcaCut=100;
 
   maxDistChi=1.0;
   //  cout <<"AVE constructor!!" <<endl;
-  int numTb=7;
-  mPulseShapePtr=new TF1("pulseShape","[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]",0,numTb);
-  mPulseShapePtr->SetParName( 0, "C" );
-  mPulseShapePtr->SetParName( 1, "a" );
-  mPulseShapePtr->SetParName( 2, "b" );
-  mPulseShapePtr->SetParName( 3, "ped" );
-  mPulseShapePtr->SetParName( 4, "t0" );
 
-  mHistPtr=new TH1F("tempFitHist","tempFitHist",numTb,0,numTb);
-  mHistPtr2=new TH1F("tempFitHist2","tempFitHist2",numTb,0,numTb);
-  mHistPtr2->SetLineColor(kBlue);
-  mHistPtr2->SetFillColor(kBlue);
-  mHistPtr2->SetMarkerColor(kBlue);
-  mCanvas=new TCanvas("tmpCnvs","tmpCnvs");
+
+
 };
 
 StFgtStraightPlotter::~StFgtStraightPlotter()
@@ -1551,13 +1596,16 @@ StFgtStraightPlotter::~StFgtStraightPlotter()
 
   //delete histogram arrays
 };
-void StFgtStraightPlotter::SetFileBase(const Char_t* m_filebase)
+void StFgtStraightPlotter::SetFileBase(const Char_t* filebase, const Char_t* filename )
 {
-  cout <<"setting file base to " << m_filebase <<endl;
-  sprintf(fileBase,"%s",m_filebase);
+  cout <<"setting file base to " << filebase <<endl;
+  sprintf(mFileBase,"%s",filebase);
+  sprintf(mFileName,"%s",filename);
 }
 
 Int_t StFgtStraightPlotter::Finish(){
+
+
   outTxtFile->close();
   gStyle->SetPalette(1);
   Int_t ierr = kStOk;
@@ -1567,14 +1615,20 @@ Int_t StFgtStraightPlotter::Finish(){
   vector<AVTrack>& tracks=fgtSTracker->getTracks();
 
   ///  cout <<"canvases etc.. " << endl;
-  //////////////////////////////////////////////////
-  TCanvas* cRadio=new TCanvas("radioPlots","radioPlot",1000,1500);
-  TCanvas* cRadioLoose=new TCanvas("radioPlotsLoose","radioPlotLoose",1000,1500);
-  TCanvas* cRadioR=new TCanvas("radioPlotsR","radioPlotR",1000,1500);
-  TCanvas* cRadioPhi=new TCanvas("radioPlotsPhi","radioPlotPhi",1000,1500);
-
-  TCanvas* cRadioHits=new TCanvas("radioPlotsHits","radioPlotHits",1000,1500);
-  TCanvas* cRadioNonHits=new TCanvas("radioPlotsNonHits","radioPlotNonHits",1000,1500);
+  //////////////////// //////////////////////////////
+  char buffer[300];
+  sprintf(buffer,"radioPlots_%s",mFileName);
+  TCanvas* cRadio=new TCanvas(buffer,buffer,1000,1500);
+  sprintf(buffer,"radioPlotsLoose_%s",mFileName);
+  TCanvas* cRadioLoose=new TCanvas(buffer,buffer,1000,1500);
+  sprintf(buffer,"radioPlotsR_%s",mFileName);
+  TCanvas* cRadioR=new TCanvas(buffer,buffer,1000,1500);
+  sprintf(buffer,"radioPlotsPhi_%s",mFileName);
+  TCanvas* cRadioPhi=new TCanvas(buffer,buffer,1000,1500);
+  sprintf(buffer,"radioPlotsHits_%s",mFileName);
+  TCanvas* cRadioHits=new TCanvas(buffer,buffer,1000,1500);
+  sprintf(buffer,"radioPlotsNonHits_%s",mFileName);
+  TCanvas* cRadioNonHits=new TCanvas(buffer,buffer,1000,1500);
   //  cout <<"divide "<<endl;
   cRadio->Divide(2,3); //6 discs
   cRadioR->Divide(2,3); //6 discs
@@ -1582,10 +1636,11 @@ Int_t StFgtStraightPlotter::Finish(){
   cRadioLoose->Divide(2,3); //6 discs
   cRadioHits->Divide(2,3); //6 discs
   cRadioNonHits->Divide(2,3); //6 discs
-  TCanvas* cRPRatio=new TCanvas("rPhiRatio","rPhiRatios",1000,1500);
+  sprintf(buffer,"rPhiRatios_%s",mFileName);
+  TCanvas* cRPRatio=new TCanvas(buffer,buffer,1000,1500);
   cRPRatio->Divide(2,3); //6 discs
-
-  TCanvas* cREff=new TCanvas("crEff","crEff",1000,1500);
+  sprintf(buffer,"crEff_%s",mFileName);
+  TCanvas* cREff=new TCanvas(buffer,buffer,1000,1500);
 
   cREff->Divide(2,3); //6 discs
   //  cout <<"drawing hits " <<endl;
@@ -1597,26 +1652,29 @@ Int_t StFgtStraightPlotter::Finish(){
       cRadioNonHits->cd(iD+1);
       radioPlotsNonEff[iD]->Draw("colz");
     }
-  char buffer[100];
 
-
-  sprintf(buffer,"%s/clusterPics.root",fileBase);
+  sprintf(buffer,"%s/clusterPics%s.root",mFileBase,mFileName);
    cout <<"setting cluster pic file to : " << buffer <<endl;
   TFile *fClu = new TFile(buffer,"recreate");
+  cout <<" 1 " << endl;
   fClu->cd();
-
+  cout <<" 2 " << endl;
   for(unsigned int i=0;i<v_hClusP.size();i++)
     {
-      (v_hClusP[i])->Write();
+      //      (v_hClusP[i])->Write();
     }
+  cout <<" 3 " << endl;
   for(unsigned int i=0;i<v_hClusR.size();i++)
     {
-      (v_hClusR[i])->Write();
+      //      (v_hClusR[i])->Write();
     }
+  cout <<" 4 " << endl;
   fClu->Write();
+  cout <<" 5 " << endl;
   fClu->Close();
-  sprintf(buffer,"%s/signalShapes.root",fileBase);
-  //  cout <<"setting signal shapes file to : " << buffer <<endl;
+  cout <<"about to open signal shapes file... "<<endl;
+  sprintf(buffer,"%s/signalShapes%s.root",mFileBase,mFileName);
+  cout <<"setting signal shapes file to : " << buffer <<endl;
   TFile *f1 = new TFile(buffer,"recreate");
   f1->cd();
   cout <<"writing hip..."<<endl;
@@ -1624,8 +1682,17 @@ Int_t StFgtStraightPlotter::Finish(){
   hIp->Draw();
   hIp->Write();
   f1->Write();
-  ctmp.SaveAs("tmp.png");
-  cout <<"done " <<endl;
+  for(int iD=0;iD<6;iD++)
+    {
+      radioPlotsTrackHits[iD]->Write();
+      radioPlotsClusSizeR[iD]->Write();
+      radioPlotsClusSizeP[iD]->Write();
+      radioPlotsClusChargeR[iD]->Write();
+      radioPlotsClusChargeP[iD]->Write();
+    }
+
+  //  ctmp.SaveAs("tmp.png");
+
   //normalize
   for(int iB=1;iB<8;iB++)
     {
@@ -1642,7 +1709,6 @@ Int_t StFgtStraightPlotter::Finish(){
       exPulseSigTrackR->SetBinContent(iB,exPulseSigTrackR->GetBinContent(iB)/(float)pulseCounterTR);
     }
 
-
   chargeCorrSum3->Write();
   chargeCorrMaxStrip->Write();
   chargeCorrMaxAdc->Write();
@@ -1655,7 +1721,6 @@ Int_t StFgtStraightPlotter::Finish(){
   
   exPulseMaxAdcNormTrackP->Write();
   exPulseSigTrackP->Write();
-  
   exPulseMaxAdcNormTrackR->Write();
   exPulseSigTrackR->Write();
   numTracks->Write();
@@ -1666,7 +1731,6 @@ Int_t StFgtStraightPlotter::Finish(){
     disk1QuadA[xx]->Write();
   }
 
-  
   
   for(int iD=0;iD<kFgtNumDiscs;iD++)
     {
@@ -1704,9 +1768,18 @@ Int_t StFgtStraightPlotter::Finish(){
 	  firstTbSigCloseClusterR[iD*4+iq]->Write();
 	  firstTbSigCloseClusterP[iD*4+iq]->Write();
 
-
 	  chargeTrackClusterR[iD*4+iq]->Write();
 	  chargeTrackClusterP[iD*4+iq]->Write();
+	  chargeTrackClusterRvsP[iD*4+iq]->Write();
+	  chargeTrackClusterPvsR[iD*4+iq]->Write();
+	  numTrackClusterR[iD*4+iq]->Write();
+	  numTrackClusterP[iD*4+iq]->Write();
+	  numTrackSymCutClusterR[iD*4+iq]->Write();
+	  numTrackSymCutClusterP[iD*4+iq]->Write();
+	  chargeCorrTracks[iD*4+iq]->Write();
+	  chargeCorrTracksRCut[iD*4+iq]->Write();
+	  chargeTrackSymCutClusterR[iD*4+iq]->Write();
+	  chargeTrackSymCutClusterP[iD*4+iq]->Write();
 	  maxTbTrackClusterP[iD*4+iq]->Write();
 	  maxTbTrackClusterR[iD*4+iq]->Write();
 	  maxAdcTrackClusterP[iD*4+iq]->Write();
@@ -1764,16 +1837,22 @@ Int_t StFgtStraightPlotter::Finish(){
   ///---->   cRadioHits->SaveAs("radioPlotsHits.png");
   ///---->  cRadioNonHits->SaveAs("radioPlotsNonHits.png");
   
-  TCanvas* cClusterSizeR=new TCanvas("clusterSizeR","clusterSizeR",1000,1500);
-  cClusterSizeR->Divide(2,3);
-  TCanvas* cClusterSizePhi=new TCanvas("clusterSizePhi","clusterSizePhi",1000,1500);
-  cClusterSizePhi->Divide(2,3);
-  TCanvas* cChargeCorr=new TCanvas("chargeCorr","chargeCorr",1000,1500);
-  cChargeCorr->Divide(3,4);
 
-  TCanvas* cClusterChargePhi=new TCanvas("clusterChargePhi","clusterChargePhi",1000,1500);
+  sprintf(buffer,"clusterSizeR_%s",mFileName);
+  TCanvas* cClusterSizeR=new TCanvas(buffer,buffer,1000,1500);
+
+  cClusterSizeR->Divide(2,3);
+  sprintf(buffer,"clusterSizePhi_%s",mFileName);
+  TCanvas* cClusterSizePhi=new TCanvas(buffer,buffer,1000,1500);
+  cClusterSizePhi->Divide(2,3);
+  sprintf(buffer,"chargeCorr_%s",mFileName);
+  TCanvas* cChargeCorr=new TCanvas(buffer,buffer,1000,1500);
+  cChargeCorr->Divide(3,4);
+  sprintf(buffer,"clusterChargePhi_%s",mFileName);
+  TCanvas* cClusterChargePhi=new TCanvas(buffer,buffer,1000,1500);
   cClusterChargePhi->Divide(2,3);
-  TCanvas* cClusterChargeR=new TCanvas("clusterChargeR","clusterChargeR",1000,1500);
+  sprintf(buffer,"clusterChargeR_%s",mFileName);
+  TCanvas* cClusterChargeR=new TCanvas(buffer,buffer,1000,1500);
   cClusterChargeR->Divide(2,3);
 
   //  TCanvas cIPProj;
@@ -1830,6 +1909,9 @@ Int_t StFgtStraightPlotter::Finish(){
 
   tpcFgtZVertexCorr2->Draw("colz");
   tpcFgtZVertexCorr2->Write();
+
+  tpcFgtZVtxDiff->Write();
+  tpcFgtZVtxDiff2->Write();
   ///---->  cIPProj.SaveAs("tpcFgtCorr2.png");
   tpcFgtZVertexCorr3->Draw("colz");
   tpcFgtZVertexCorr3->Write();
@@ -1996,15 +2078,23 @@ Int_t StFgtStraightPlotter::Finish(){
 
 
 Int_t StFgtStraightPlotter::Init(){
+  cout <<"init file name is " << mFileName<<endl;
   outTxtFile=new ofstream;
   outTxtFile->open("clusExpectations.txt");
   cluNotFoundTxt=new ofstream;
   cluNotFoundTxt->open("clusNotFound.txt");
 
-  myRootFile=new TFile("clusterEff.root","RECREATE");
-  pulsePictureFile=new TFile("pulsePics.root","RECREATE");
+  Char_t buffer[500];
+  sprintf(buffer,"tmpCnvs%s",mFileName);
+  mCanvas=new TCanvas(buffer,buffer);
+  cout <<"made canvas with name " << buffer <<" pointer: " << mCanvas <<endl;
+  sprintf(buffer,"%s/clusterEff%s.root",mFileBase,mFileName);
 
-  char buffer[100];
+  myRootFile=new TFile(buffer,"RECREATE");
+  sprintf(buffer,"%s/pulsePic%s.root",mFileBase,mFileName);
+
+  pulsePictureFile=new TFile(buffer,"RECREATE");
+  cout <<"making dirs.." <<endl;
   for(int i=0;i<6;i++){
     for(int iq=0;iq<4;iq++){
       sprintf(buffer,"d%d_quad%d",i,iq);
@@ -2020,26 +2110,61 @@ Int_t StFgtStraightPlotter::Init(){
       pulsePictureFile->cd();
 
     }}
+  cout <<"done " << endl;
   myRootFile->cd();
   //  outTxtFile=new ofstream;
   //  outTxtFile->open("clusters.txt");
+  sprintf(buffer,"pulseShape_%s",mFileName);
+  int numTb=7;
+  mPulseShapePtr=new TF1(buffer,"[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]",0,numTb);
+  mPulseShapePtr->SetParName( 0, "C" );
+  mPulseShapePtr->SetParName( 1, "a" );
+  mPulseShapePtr->SetParName( 2, "b" );
+  mPulseShapePtr->SetParName( 3, "ped" );
+  mPulseShapePtr->SetParName( 4, "t0" );
+
+  sprintf(buffer,"tempFitHist_%s",mFileName);
+  mHistPtr=new TH1F(buffer,buffer,numTb,0,numTb);
+  sprintf(buffer,"tempFitHist2_%s",mFileName);
+  mHistPtr2=new TH1F(buffer,buffer,numTb,0,numTb);
+  mHistPtr2->SetLineColor(kBlue);
+  mHistPtr2->SetFillColor(kBlue);
+  mHistPtr2->SetMarkerColor(kBlue);
+  cout <<"producing my canvas... "<<endl;
+
+
+
+
 
 
   Int_t ierr = kStOk;
-
-  chargeRatioInEffDisk=new TH2D("chargeRatioInEffDisk","chargeRatioInEffDisk",NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+  sprintf(buffer,"chargeRatioInEffDisk_%s",mFileName);
+  chargeRatioInEffDisk=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
   chargeRatioInEffDisk->SetMaximum(2.0);
-  chargeAsymInEffDisk=new TH2D("chargeAsymInEffDisk","chargeAsymInEffDisk",NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+  sprintf(buffer,"chargeAsymInEffDisk_%s",mFileName);
+  chargeAsymInEffDisk=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
   chargeAsymInEffDisk->SetMaximum(1.0);
-  chargeCorrInEffDisk=new TH2D("chargeCorrInEffDisk","chargeCorrInEffDisk",500,0,50000,500,0,50000);
-  hChargeAsym=new TH1D("chargeAsym","chargeAsym",100,0,50);
-  hChargeRatio=new TH1D("chargeRatio","chargeRatio",100,0,50);
+  sprintf(buffer,"chargeCorrInEffDisk_%s",mFileName);
+  chargeCorrInEffDisk=new TH2D(buffer,buffer,500,0,50000,500,0,50000);
+  sprintf(buffer,"chargeAsym_%s",mFileName);
+  hChargeAsym=new TH1D(buffer,buffer,100,0,50);
+  sprintf(buffer,"chargeRatio_%s",mFileName);
+  hChargeRatio=new TH1D(buffer,buffer,100,0,50);
 
+  sprintf(buffer,"chargeCorrSum3_%s",mFileName);
+  chargeCorrSum3=new TH2D(buffer,buffer,500,0,50000,500,0,50000);
+  sprintf(buffer,"chargeCorrMaxStrip_%s",mFileName);
+  chargeCorrMaxStrip=new TH2D(buffer,buffer,500,0,20000,500,0,20000);
+  sprintf(buffer,"chargeCorrMaxAdc_%s",mFileName);
+  chargeCorrMaxAdc=new TH2D(buffer,buffer,500,0,5000,500,0,5000);
+  chargeCorrTracks=new TH2D*[kFgtNumDiscs*4];
+  chargeCorrTracksRCut=new TH2D*[kFgtNumDiscs*4];
 
-  chargeCorrSum3=new TH2D("chargeCorrSum3","chargeCorrSum3",500,0,50000,500,0,50000);
-  chargeCorrMaxStrip=new TH2D("chargeCorrMaxStrip","chargeCorrMaxStrip",500,0,20000,500,0,20000);
-  chargeCorrMaxAdc=new TH2D("chargeCorrMaxAdc","chargeCorrMaxAdc",500,0,5000,500,0,5000);
-
+  radioPlotsTrackHits=new TH2D*[kFgtNumDiscs];
+  radioPlotsClusChargeR=new TH2D*[kFgtNumDiscs];
+  radioPlotsClusSizeR=new TH2D*[kFgtNumDiscs];
+  radioPlotsClusChargeP=new TH2D*[kFgtNumDiscs];
+  radioPlotsClusSizeP=new TH2D*[kFgtNumDiscs];
 
   radioPlotsEff=new TH2D*[kFgtNumDiscs];
   radioPlotsNonEff=new TH2D*[kFgtNumDiscs];
@@ -2051,18 +2176,24 @@ Int_t StFgtStraightPlotter::Init(){
   radioPlotsNonEffLoose=new TH2D*[kFgtNumDiscs];
   rPhiRatioPlots=new TH1D*[kFgtNumDiscs];
 
+  sprintf(buffer,"pulseMaxAdcNormP_%s",mFileName);
+  exPulseMaxAdcNormP=new TH1F(buffer,buffer,7,0,6);
+  sprintf(buffer,"pulseSigNormP_%s",mFileName);
+  exPulseSigP=new TH1F(buffer,buffer,7,0,6);
+  sprintf(buffer,"pulseMaxAdcNormR_%s",mFileName);
+  exPulseMaxAdcNormR=new TH1F(buffer,buffer,7,0,6);
+  sprintf(buffer,"pulseSigNormR_%s",mFileName);
+  exPulseSigR=new TH1F(buffer,buffer,7,0,6);
 
-  exPulseMaxAdcNormP=new TH1F("pulseMaxAdcNormP","pulseMaxAdcNormP",7,0,6);
-  exPulseSigP=new TH1F("pulseSigNormP","pulseSigNormP",7,0,6);
+  sprintf(buffer,"pulseMaxAdcNormTrackP_%s",mFileName);
+  exPulseMaxAdcNormTrackP=new TH1F(buffer,buffer,7,0,6);
+  sprintf(buffer,"pulseSigNormTrackP_%s",mFileName);
+  exPulseSigTrackP=new TH1F(buffer,buffer,7,0,6);
 
-  exPulseMaxAdcNormR=new TH1F("pulseMaxAdcNormR","pulseMaxAdcNormR",7,0,6);
-  exPulseSigR=new TH1F("pulseSigNormR","pulseSigNormR",7,0,6);
-
-  exPulseMaxAdcNormTrackP=new TH1F("pulseMaxAdcNormTrackP","pulseMaxAdcNormTrackP",7,0,6);
-  exPulseSigTrackP=new TH1F("pulseSigNormTrackP","pulseSigNormTrackP",7,0,6);
-
-  exPulseMaxAdcNormTrackR=new TH1F("pulseMaxAdcNormTrackR","pulseMaxAdcNormTrackR",7,0,6);
-  exPulseSigTrackR=new TH1F("pulseSigNormTrackR","pulseSigNormTrackR",7,0,6);
+  sprintf(buffer,"pulseMaxAdcNormTrackR_%s",mFileName);
+  exPulseMaxAdcNormTrackR=new TH1F(buffer,buffer,7,0,6);
+  sprintf(buffer,"pulseSigNormTrackR_%s",mFileName);
+  exPulseSigTrackR=new TH1F(buffer,buffer,7,0,6);
 
 
   pulseCounterP=0;
@@ -2071,20 +2202,37 @@ Int_t StFgtStraightPlotter::Init(){
   pulseCounterTP=0;
   pulseCounterTR=0;
 
+
+
+
   createPlots(&numClustersR,kFgtNumDiscs*4,"numClustersR",101,0,100);
   createPlots(&numClustersPhi,kFgtNumDiscs*4,"numClustersPhi",101,0,100);
   createPlots(&numTrackHits,kFgtNumDiscs*4,"numTrackHits",101,0,100);
-  numTracks=new TH1I("numTracksPerEvent","numTracksPerEvent",10,0,9);
-  numPointsPerTrack=new TH1I("numPointsPerTrack","numPointsPerTrack",7,0,6);
+  sprintf(buffer,"numTracksPerEvent_%s",mFileName);
+  numTracks=new TH1I(buffer,buffer,10,0,9);
+  sprintf(buffer,"numPointsPerTrack_%s",mFileName);
+  numPointsPerTrack=new TH1I(buffer,buffer,7,0,6);
 
   createPlots(&firstTbSigCloseClusterR,kFgtNumDiscs*4,"firstTbSigCloseClusterR",100,0,20);
   createPlots(&firstTbSigCloseClusterP,kFgtNumDiscs*4,"firstTbSigCloseClusterP",100,0,20);
   createPlots(&firstTbSigTrackClusterR,kFgtNumDiscs*4,"firstTbSigTrackClusterR",100,0,20);
   createPlots(&firstTbSigTrackClusterP,kFgtNumDiscs*4,"firstTbSigTrackClusterP",100,0,20);
 
+  createPlots(&chargeTrackSymCutClusterR,kFgtNumDiscs*4,"chargeTrackSymCutClusterR",100,0,10000);
+  createPlots(&chargeTrackSymCutClusterP,kFgtNumDiscs*4,"chargeTrackSymCutClusterP",100,0,10000);
+
+  createPlots(&numTrackSymCutClusterR,kFgtNumDiscs*4,"numTrackSymCutClusterR",100,0,10000);
+  createPlots(&numTrackSymCutClusterP,kFgtNumDiscs*4,"numTrackSymCutClusterP",100,0,10000);
+
+  createPlots(&numTrackClusterR,kFgtNumDiscs*4,"numTrackClusterR",100,10,40);
+  createPlots(&numTrackClusterP,kFgtNumDiscs*4,"numTrackClusterP",100,0,7);
 
   createPlots(&chargeTrackClusterR,kFgtNumDiscs*4,"chargeTrackClusterR",100,0,10000);
   createPlots(&chargeTrackClusterP,kFgtNumDiscs*4,"chargeTrackClusterP",100,0,10000);
+
+  createPlots(&chargeTrackClusterRvsP,kFgtNumDiscs*4,"chargeTrackClusterRvsP",100,0,7);
+  createPlots(&chargeTrackClusterPvsR,kFgtNumDiscs*4,"chargeTrackClusterPvsR",100,10,40);
+
   createPlots(&maxAdcTrackClusterR,kFgtNumDiscs*4,"maxAdcTrackClusterR",100,0,5000);
   createPlots(&maxAdcCloseClusterR,kFgtNumDiscs*4,"maxAdcCloseClusterR",100,0,5000);
   createPlots(&maxSigTrackClusterR,kFgtNumDiscs*4,"maxSigTrackClusterR",100,1,200);
@@ -2151,7 +2299,7 @@ Int_t StFgtStraightPlotter::Init(){
   for (Int_t iii=0;iii< 22;iii++)
     { 
       char buffer[100];
-      sprintf(buffer, "%s_APV%d", "disk1QuadA",iii);
+      sprintf(buffer, "%s_APV%d", "disk1QuadA_%s",iii,mFileName);
       disk1QuadA[iii]=new TH1I(buffer,buffer,128,0,128);
     }
 
@@ -2162,64 +2310,108 @@ Int_t StFgtStraightPlotter::Init(){
   clusterSizeP=new TH1D*[kFgtNumDiscs*4];
   clusterSizeR=new TH1D*[kFgtNumDiscs*4];
   chargeCorr=new TH2D*[kFgtNumDiscs*4];
+
   h_clusterSizeR=new TH1D*[kFgtNumDiscs];
   h_clusterSizePhi=new TH1D*[kFgtNumDiscs];
 
   h_clusterChargeR=new TH1D*[kFgtNumDiscs];
   h_clusterChargePhi=new TH1D*[kFgtNumDiscs];
 
+  sprintf(buffer,"ProjToIP_%s",mFileName);
+  hIp=new TH2D(buffer,buffer,50,-100,100,50,0,10);
+  sprintf(buffer,"hBx_%s",mFileName);
+  hBx=new TH1D(buffer,buffer,50,-100,100);
+  sprintf(buffer,"hBy_%s",mFileName);
+  hBy=new TH1D(buffer,buffer,50,-100,100);
+  sprintf(buffer,"hMx_%s",mFileName);
+  hMx=new TH1D(buffer,buffer,50,-100,100);
+  sprintf(buffer,"hMy_%s",mFileName);
+  hMy=new TH1D(buffer,buffer,50,-0.1,0.1);
+  sprintf(buffer,"IP_Z_%s",mFileName);
+  hIpZ=new TH1D(buffer,buffer,50,-100,100);
 
-  hIp=new TH2D("ProjToIP","Proj_to_Ip",50,-100,100,50,0,10);
-  hBx=new TH1D("hBx","hBx",50,-100,100);
-  hBy=new TH1D("hBy","hBy",50,-100,100);
-  hMx=new TH1D("hMx","hMx",50,-100,100);
-  hMy=new TH1D("hMy","My",50,-0.1,0.1);
-  hIpZ=new TH1D("IPZ","IP_Z",50,-100,100);
+  sprintf(buffer,"ipDCA_%s",mFileName);
+  hIpDca=new TH1D(buffer,buffer,50,-100,100);
+  sprintf(buffer,"z_Vtx_From_trk_fit_%s",mFileName);
+  hTrkZ=new TH1D(buffer,buffer,50,-100,100);
+  sprintf(buffer,"residua_%s",mFileName);
+  hResidua=new TH1D(buffer,buffer,100,0,2);
+  sprintf(buffer,"residuaX_%s",mFileName);
+  hResiduaX=new TH2D(buffer,buffer,100,-10,10,200,0,1.0);
+  sprintf(buffer,"residuaY_%s",mFileName);
+  hResiduaY=new TH2D(buffer,buffer,100,-40,-20,200,0,1.0);
+  sprintf(buffer,"residuaR_%s",mFileName);
+  hResiduaR=new TH2D(buffer,buffer,100,12,32,200,0,1.0);
+  sprintf(buffer,"residuaP_%s",mFileName);
+  hResiduaP=new TH2D(buffer,buffer,100,0,0.8,200,0,1.0);
 
-  hIpDca=new TH1D("ipDCA","ipDCA",50,-100,100);
-  hTrkZ=new TH1D("z_Vtx_From_trk_fit","z_Vtx_From_trk_fit",50,-100,100);
-  hResidua=new TH1D("residua","residua",100,0,2);
-  hResiduaX=new TH2D("residuaX","residuaX",100,-10,10,200,0,1.0);
-  hResiduaY=new TH2D("residuaY","residuaY",100,-40,-20,200,0,1.0);
-  hResiduaR=new TH2D("residuaR","residuaR",100,12,32,200,0,1.0);
-  hResiduaP=new TH2D("residuaP","residuaP",100,0,0.8,200,0,1.0);
+  sprintf(buffer,"chi2_%s",mFileName);
+  hChi2=new TH1D(buffer,buffer,50,0,2);
+  sprintf(buffer,"tpc_fgt_corr_%s",mFileName);
+  tpcFgtZVertexCorr=new TH2D(buffer,buffer,100,-120,120,100,-120,120);
+  sprintf(buffer,"tpc_fgt_corr2_%s",mFileName);
+  tpcFgtZVertexCorr2=new TH2D(buffer,buffer,100,-120,120,100,-120,120);
+  sprintf(buffer,"tpc_fgt_corr3_%s",mFileName);
+  tpcFgtZVertexCorr3=new TH2D(buffer,buffer,50,-50,50,50,-50,50);
 
-
-  hChi2=new TH1D("chi2","chi2",50,0,2);
-  tpcFgtZVertexCorr=new TH2D("tpc_fgt_corr","tpc_fgt_corr",100,-120,120,100,-120,120);
-  tpcFgtZVertexCorr2=new TH2D("tpc_fgt_corr2","tpc_fgt_corr2",100,-120,120,100,-120,120);
-  tpcFgtZVertexCorr3=new TH2D("fgt_fgt_corr","fgt_fgt_corr",50,-50,50,50,-50,50);
+  sprintf(buffer,"tpc_fgt_diff%s",mFileName);
+  tpcFgtZVtxDiff=new TH1D(buffer,buffer,1000,-50,50);
+  sprintf(buffer,"tpc_fgt_diff2%s",mFileName);
+  tpcFgtZVtxDiff2=new TH1D(buffer, buffer,1000,-50,50);
 
   for(int iD=0;iD<kFgtNumDiscs;iD++)
     {
 
-      sprintf(buffer,"radioDiskEff_%d",iD);
+      for(int iq=0;iq<4;iq++)
+	{
+	  sprintf(buffer,"chargeCorrTracks_disk_%d_quad_%d_%s",iD,iq,mFileName);
+	  chargeCorrTracks[iD*4+iq]=new TH2D(buffer,buffer,200,0,10000,200,0,10000);
+	  sprintf(buffer,"chargeCorrTracksRCut_disk_%d_quad_%d_%s",iD,iq,mFileName);
+	  chargeCorrTracksRCut[iD*4+iq]=new TH2D(buffer,buffer,200,0,10000,200,0,10000);
+	}
+
+      sprintf(buffer,"radioTrackHits_%d_%s",iD,mFileName);
+      radioPlotsTrackHits[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+
+      sprintf(buffer,"radioClusterChargeR_%d_%s",iD,mFileName);
+      radioPlotsClusChargeR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+
+      sprintf(buffer,"radioClusterSizeR_%d_%s",iD,mFileName);
+      radioPlotsClusSizeR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+
+      sprintf(buffer,"radioClusterChargeP_%d_%s",iD,mFileName);
+      radioPlotsClusChargeP[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+
+      sprintf(buffer,"radioClusterSizeP_%d_%s",iD,mFileName);
+      radioPlotsClusSizeP[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+
+      sprintf(buffer,"radioDiskEff_%d_%s",iD,mFileName);
       radioPlotsEff[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
 
-      sprintf(buffer,"radioDiskEffR_%d",iD);
+      sprintf(buffer,"radioDiskEffR_%d_%s",iD,mFileName);
       radioPlotsEffR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
 
-      sprintf(buffer,"radioDiskEffPhi_%d",iD);
+      sprintf(buffer,"radioDiskEffPhi_%d_%s",iD,mFileName);
       radioPlotsEffPhi[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
 
-      sprintf(buffer,"radioDiskEffLoose_%d",iD);
+      sprintf(buffer,"radioDiskEffLoose_%d_%s",iD,mFileName);
       radioPlotsEffLoose[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
       //      cout <<"1" <<endl;
-      sprintf(buffer,"rEff_%d",iD);
+      sprintf(buffer,"rEff_%d_%s",iD,mFileName);
       rEff[iD]=new TH1D(buffer,buffer,100,0,DISK_DIM);
-      sprintf(buffer,"rNonEff_%d",iD);
+      sprintf(buffer,"rNonEff_%d_%s",iD,mFileName);
       rNonEff[iD]=new TH1D(buffer,buffer,100,0,DISK_DIM);
-      sprintf(buffer,"clusterSizeR_Disk_%d",iD);
+      sprintf(buffer,"clusterSizeR_Disk_%d_%s",iD,mFileName);
       h_clusterSizeR[iD]=new TH1D(buffer,buffer,20,0,20);
       h_clusterSizeR[iD]->SetFillColor(kYellow);
-      sprintf(buffer,"clusterSizePhi_Disk_%d",iD);
+      sprintf(buffer,"clusterSizePhi_Disk_%d_%s",iD,mFileName);
       h_clusterSizePhi[iD]=new TH1D(buffer,buffer,20,0,20);
       h_clusterSizePhi[iD]->SetFillColor(kYellow);
-      sprintf(buffer,"clusterChargeR_Disk_%d",iD);
+      sprintf(buffer,"clusterChargeR_Disk_%d_%s",iD,mFileName);
       h_clusterChargeR[iD]=new TH1D(buffer,buffer,100,0,5000);
       h_clusterChargeR[iD]->SetFillColor(kYellow);
 
-      sprintf(buffer,"clusterChargePhi_Disk_%d",iD);
+      sprintf(buffer,"clusterChargePhi_Disk_%d_%s",iD,mFileName);
       h_clusterChargePhi[iD]=new TH1D(buffer,buffer,100,0,5000);
       h_clusterChargePhi[iD]->SetFillColor(kYellow);
       //      cout <<"2" <<endl;
@@ -2233,27 +2425,27 @@ Int_t StFgtStraightPlotter::Init(){
       //      cout <<"3" <<endl;
       for(int iq=0;iq<4;iq++)
 	{
-	  sprintf(buffer,"r_phi_ChargeCorrelationInDisk_%d_quad_%d",iD+1,iq);
+	  sprintf(buffer,"r_phi_ChargeCorrelationInDisk_%d_quad_%d_%s",iD+1,iq,mFileName);
 	  chargeCorr[iD*4+iq]=new TH2D(buffer,buffer,200,0,70000,200,0,70000);
-	  sprintf(buffer,"clusterSizeRInDisk_%d_quad_%d",iD+1,iq);
+	  sprintf(buffer,"clusterSizeRInDisk_%d_quad_%d_%s",iD+1,iq,mFileName);
 	  clusterSizeR[iD*4+iq]=new TH1D(buffer,buffer,100,0,100);
-	  sprintf(buffer,"clusterSizePInDisk_%d_quad_%d",iD+1,iq);
+	  sprintf(buffer,"clusterSizePInDisk_%d_quad_%d_%d",iD+1,iq,mFileName);
 	  clusterSizeP[iD*4+iq]=new TH1D(buffer,buffer,100,0,100);
 	}
-      sprintf(buffer,"radioDiskNonEff_%d",iD);
+      sprintf(buffer,"radioDiskNonEff_%d_%s",iD,mFileName);
       radioPlotsNonEff[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
       //      cout <<" created non eff histo " << endl;
-      sprintf(buffer,"radioDiskNonEffR_%d",iD);
+      sprintf(buffer,"radioDiskNonEffR_%d_%s",iD,mFileName);
       radioPlotsNonEffR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
-      sprintf(buffer,"radioDiskNonEffPhi_%d",iD);
+      sprintf(buffer,"radioDiskNonEffPhi_%d_%s",iD,mFileName);
       radioPlotsNonEffPhi[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
-      sprintf(buffer,"radioDiskNonEffLoose_%d",iD);
+      sprintf(buffer,"radioDiskNonEffLoose_%d_%s",iD,mFileName);
       radioPlotsNonEffLoose[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
       for(int nx=0;nx<rEff[iD]->GetNbinsX();nx++)
 	{
 	  //	   rEff[iD]->SetBinContent(nx,0.1);
 	}
-      sprintf(buffer,"rPhiRatio_%d",iD);
+      sprintf(buffer,"rPhiRatio_%d_%s",iD,mFileName);
       rPhiRatioPlots[iD]=new TH1D(buffer,buffer,100,-2,10);
     }
 
