@@ -315,8 +315,10 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 
   if(doFitWithVertex)
     {
+
       if(isMuDst && vtxRank>0&&ipZ>-100 && ipZ<100)
         {
+      cout <<"fit with vertex!!" <<endl;
           A+=ipZ*ipZ;
           B+=ipZ;
           D++;
@@ -391,6 +393,7 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	{
           if(isMuDst && vtxRank>0&&ipZ>-100 && ipZ<100)
             {
+	      cout <<"refit with vertex! " <<endl;
               A+=ipZ*ipZ;
               B+=ipZ;
               D++;

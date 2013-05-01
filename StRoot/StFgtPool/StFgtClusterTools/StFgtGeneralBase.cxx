@@ -26,7 +26,7 @@
 #endif
 
 
-StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ),m_fillFromEvent(false),evtNr(0),m_effDisk(2), fgtCollection(0)
+StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ),m_fillFromEvent(false),evtNr(0),m_effDisk(2), fgtCollection(0), mVertexNumber(0)
 {
   sprintf(fileBase,"%s",".");
   m_isCosmic=false;
@@ -473,8 +473,8 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 	const StThreeVectorF& v = event->primaryVertexPosition();
 	StEventInfo &info=event->eventInfo();
 	int nPrimV=muDst->numberOfPrimaryVertices();
-	if(1 && nPrimV>0) { // copy vertex info
-	  StMuPrimaryVertex* V= muDst->primaryVertex(0);// select highest rank vertex
+	if(1 && nPrimV>mVertexNumber) { // copy vertex info
+	  StMuPrimaryVertex* V= muDst->primaryVertex(mVertexNumber);// select highest rank vertex
 	  assert(V);
 	  const StThreeVectorF &r=V->position();
 	  vtxZ=r.z();

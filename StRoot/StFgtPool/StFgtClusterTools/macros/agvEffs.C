@@ -34,7 +34,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
 	     Int_t nevents = 100, Int_t effDisk=20,
 	     Bool_t cutShortEvents = 1 ){
    LoadLibs();   
-
+   cout << "number of events: " << nevents <<endl;
    Int_t ierr = 0;
 
    cout << "Constructing the chain" << endl;
@@ -70,7 +70,8 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
 
    ///     dbMkr->SetDateTime(20120307,000717); ///
    //      dbMkr->SetDateTime(20120128,204320);      // run ???
-   /////// begin of run 13   dbMkr->SetDateTime(20130301,043459); ///
+   //// begin of run 13   
+   //   dbMkr->SetDateTime(20130301,043459); ///
    
    cout << "Constructing StFgtDbMaker" << endl;
    fgtDbMkr = new StFgtDbMaker( "fgtDb" );
@@ -83,7 +84,8 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
    cout << "Constructing the daq reader" << endl;
    daqRdr = new StFgtRawDaqReader( "daqReader", filenameIn, fgtDbMkrName.data() );
    daqRdr->setIsCosmic( false );
-   daqRdr->setZSdataOnly();
+   //   daqRdr->setZSdataOnly();
+   daqRdr->setNoneZSdataOnly();
    daqRdr->cutShortEvents( cutShortEvents );
    gSystem->Load("libStFgtA2CMaker");
    StFgtA2CMaker* a2cMkr  = new StFgtA2CMaker(  "FgtA2CMaker" );
@@ -125,7 +127,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
   fgtGenBase->fillFromEvent();
 
   fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
-  fgtStraightTracker->setMinNumFitPoints(4);
+  fgtStraightTracker->setMinNumFitPoints(3);
   fgtStraightTracker->SetEffDisk(effDisk);
   fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
   //dca in cm for track associated clusters...
@@ -154,11 +156,11 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
    for( int i=0; i<nevents && !ierr; ++i ){
      if( i+1 % 100 == 1 )
          cout << "\ton event number **************" << i << endl;
-	 cout << "clear (agv)" << endl;
+     //	 cout << "clear (agv)" << endl;
 	 analysisChain->Clear();
-      cout << "make" << endl;
+	 //      cout << "make" << endl;
 	 ierr = analysisChain->Make();
-	 cout <<" done " <<endl;
+	 //	 cout <<" done " <<endl;
    };
 
    //   fgtDbMkr->printFgtDumpCSV("fgtMapDump.csv");

@@ -91,12 +91,14 @@ struct generalCluster
   Double_t maxAdc;
   Double_t maxAdcInt;
   Bool_t hasMatch;
+
 };
 
 class StFgtGeneralBase : public StMaker {
  public:
   Double_t vtxZ;
   Int_t vtxRank;
+  Int_t mVertexNumber;
   StFgtGeneralBase(const Char_t* name="FgtGeneralBase");
 
   void fillFromEvent(Bool_t fillFromEv=true); //default, no, use mDsts
@@ -110,6 +112,7 @@ class StFgtGeneralBase : public StMaker {
   }
 
 
+  void setVertexNumber(Int_t r=0);
   void doLooseClustering();
   //check if cluster has energy match in other layer
   void checkMatches();
@@ -216,4 +219,9 @@ enum evStatCodes
 };
 inline void StFgtGeneralBase::setChargeMatchCut(Float_t cut)
 {chargeMatchCut=cut;};
+inline void StFgtGeneralBase::setVertexNumber(Int_t r)
+{
+  mVertexNumber=r;
+}
+
 #endif
