@@ -75,6 +75,14 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
   MyHostList(vector<ChapiDbHost>()),
   MyStatus(st_db_service_broker::NO_ERROR)
 {
+  last_succeeded_connect_time = time(NULL);
+  seconds_to_reach_for_connect = 1800;
+  char* secs = 0;
+  secs = getenv("STAR_DEBUG_DB_RETRIES_SECONDS");
+  if (secs) {
+	seconds_to_reach_for_connect = atoi(secs);
+  }
+
   char* whoami = getenv("USER");
   if (!whoami) whoami = getenv("LOGNAME");
   if (!whoami) 
@@ -169,6 +177,15 @@ StDbServiceBroker::StDbServiceBroker
   MyHostList(vector<ChapiDbHost>()),
   MyStatus(st_db_service_broker::NO_ERROR)
 {
+  last_succeeded_connect_time = time(NULL);
+  seconds_to_reach_for_connect = 1800;
+  char* secs = 0;
+  secs = getenv("STAR_DEBUG_DB_RETRIES_SECONDS");
+  if (secs) {
+	seconds_to_reach_for_connect = atoi(secs);
+  }
+
+
   StlXmlTree* f = new StlXmlTree(xmlfilter);
   f->ShowTree();
   ParsedXml = StlXmlTree(xmlbase,f);
@@ -201,6 +218,7 @@ void StDbServiceBroker::DoLoadBalancing()
 #endif
   bool host_found = false;
   const int MAX_COUNT = 500;
+  last_succeeded_connect_time = time(NULL);
   for (int i = 0; i < MAX_COUNT; i++) {
 	if (!RecommendHost()) {
 		host_found = true;
@@ -303,6 +321,18 @@ void StDbServiceBroker::PrintHostList()
       LOG_DEBUG << (*i).HostName << endm;
     }
 }
+
+void StDbServiceBroker::CallExternalScript() {
+	char* script = 0;
+	script = getenv("STAR_DEBUG_DB_RETRIES_SCRIPT"); // full path to some notification script
+	if (script) {
+    	std::ifstream infile(script);
+		if (infile.good()) { // check that string points to real file
+			system(script);
+		}
+	}
+}
+
 //////////////////////////////////////////////////////
 int StDbServiceBroker::RecommendHost()
 {
@@ -334,12 +364,18 @@ int StDbServiceBroker::RecommendHost()
 
       if (mysql_real_connect
 	  (conn,((*I).HostName).c_str(), "loadbalancer","lbdb","test",(*I).Port,Socket,0)==NULL)
-        {
+        {	
           LOG_WARN << "StDbServiceBroker::RecommendHost() mysql_real_connect "<< 
 	    conn << " "<<((*I).HostName).c_str()<<" "<<(*I).Port <<" did not succeed"<<endm;
           mysql_close(conn);
+		  if ( (time(NULL) - last_succeeded_connect_time) > seconds_to_reach_for_connect) { // default: 1800 
+			last_succeeded_connect_time = time(NULL);
+			CallExternalScript();
+		  }
           continue;
-        }
+        } else {
+			last_succeeded_connect_time = time(NULL);
+		}
 
       if (mysql_query(conn, "show status like \"%Threads_running\"") != 0 )
         {
