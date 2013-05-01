@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.602 2013/04/30 18:33:16 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.603 2013/05/01 19:46:58 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -75,6 +75,7 @@ void StBFChain::Setup(Int_t mode) {
   cmd += file;
   gInterpreter->ProcessLine(cmd);
   assert(fchainOpt);
+  delete [] file;
   fNoChainOptions = fchainOpt->GetNRows();
   fBFC = fchainOpt->GetTable();
   // add predifined time stamps and geometry versions
@@ -453,6 +454,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("Alignment")) mk->SetAttr("Alignment"  ,kTRUE);
       mk->PrintAttr();
     }
+    if (maker=="StKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
       // VertexFinder methods
@@ -570,68 +572,6 @@ Int_t StBFChain::Instantiate()
       if (GetOption("TrsToF"))    mode += 2; // account for particle time of flight
       if (mode) mk->SetMode(mode);
     }
-
-    if (maker == "St_tpcdaq_Maker") {
-      Int_t DMode=0;
-      TString cmd(Form("St_tpcdaq_Maker *tcpdaqMk = (St_tpcdaq_Maker *) %p;",mk));
-
-      // Beware of those ...
-      Int_t                                                  mode = 0; // daq
-      if      (GetOption("Trs") || GetOption("Embedding") || GetOption("TpcRS"))
-                                                             mode = 1; // trs
-      else if (GetOption("Simu"))                            mode = 2; // daq, no gain
-      if (mode) mk->SetMode(mode);
-      // DAQ100 or Raw switch options -- Please, adjust StRTSClientFCFMaker block as well
-      if ( GetOption("onlcl") )   DMode = DMode | 0x2;  // use the online TPC clusters (DAQ100) info if any
-      if ( GetOption("onlraw") )  DMode = DMode | 0x1;  // use the TPC raw hit information
-
-      if (DMode != 0) // set flag, leave default = 1
-	cmd += Form("tcpdaqMk->SetDAQFlag(%i);",DMode);
-      // Correction depending on DAQ100 or not
-      // bit 0  =   do GAIN_CORRECTION
-      // bit 1  =   do NOISE_ELIM
-      // bit 2  =   do ASIC_THRESHOLDS
-      // WARNING Option FCF is checked in StDAQMaker
-      Int_t Correction = 0;
-      Int_t SequenceMerging = 0;
-      if ( GetOption("fcf")   ){
-	if ( GetOption("Trs")   )  Correction = 0x5; // ASIC + GAIN
-	else                       Correction = 0x0; // fcf && ! trs => no corrections
-      } else {
-	SequenceMerging = 1;
-	Correction = 0x7;
-      }
-      cmd += Form("tcpdaqMk->SetCorrection(%d);",Correction); // default Correction = 0x7
-      cmd += Form("tcpdaqMk->SetSequenceMerging(%d);",SequenceMerging);
-      LOG_QA << "StBFChain::Instantiate  maker==" << maker.Data()
-	     << Form(" SetDAQFlag(%d) SetMode(%d) SetCorrection(%d) SetSequenceMerging(%d)",
-		     DMode,mk->GetMode(),Correction,SequenceMerging) << endm;
-      ProcessLine(cmd);
-    }
-
-#if 0 /* probably bug 2106 : mismatch N_fit_points */
-    if (maker == "StTpcRTSHitMaker") {
-      if (GetOption("Trs") || GetOption("Embedding"))  mk->SetMode(2); // daq, no gain
-    }
-#endif
-
-    if (maker == "StRTSClientFCFMaker"){
-      Int_t DMode=0;
-      // use the online TPC clusters (DAQ100) info if any
-      if ( GetOption("onlcl") && ! GetOption("onlraw") )  DMode = DMode | 0x2;
-      // use the TPC raw hit information
-      if ( GetOption("onlraw")&& ! GetOption("onlcl")  )  DMode = DMode | 0x1;
-      if ( GetOption("Simu") ||  GetOption("Embedding"))  DMode = DMode | 0x4;
-      if (DMode) mk->SetMode(DMode);                 // set flag (matches tcpdaqMk->SetDAQFlag())
-    }
-    if (maker == "StTpcT0Maker"){
-      Int_t mask = 0;
-      if ( GetOption("fcf") ) mask = mask | 0x1;
-      LOG_QA << "StBFChain::Instantiate For " << maker.Data();
-      LOG_QA << " => mask = " << mask << endm;
-      mk->SetMode(mask);
-    }
-
     // Place-holder. Would possibly be a bitmask
     if (maker == "StTofrMatchMaker"){
       mk->SetMode(0);
@@ -860,6 +800,7 @@ Int_t StBFChain::Init() {
 	    gInterpreter->Calc("CreateTable()");
 	    command.ReplaceAll(".L ",".U ");
 	    gInterpreter->ProcessLine(command);
+	    delete [] file;
 	  } else {
 	    LOG_INFO << "StBFChain::Init file for geometry tag  " << geom << " has not been found in path" << path << endm;
 	  }
@@ -1151,6 +1092,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	      fchainOpt->AddAt(&row);
 	      fNoChainOptions = fchainOpt->GetNRows();
 	      fBFC = fchainOpt->GetTable();
+	      delete [] file;
 	    }
 	    kgo = kOpt(Tag.Data(),kFALSE);
 	    if (kgo != 0) {
@@ -1416,6 +1358,7 @@ void StBFChain::SetInputFile (const Char_t *infile){
   if (fInFile != "") {
     fInFile.ReplaceAll("\n",";");
     fInFile.ReplaceAll("#",";");
+    fInFile.ReplaceAll(":",";");
     gMessMgr->QAInfo() << "Input file name = " << fInFile.Data() << endm;
   } else {
     if (fkChain >= 0) {
