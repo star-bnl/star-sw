@@ -13,7 +13,6 @@ StvHitErrCalculator(const char *name,int nPars=2);
 virtual  int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual  int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual void CalcDcaDers(double dRR[kMaxPars][3]);
-virtual double DetThick2() const {return 0.1*0.1;}
 virtual double Trace(const float hiPos[3]);
 virtual  int GetNPars() const 			{return mNPar;}
 const double *GetPars() const 			{return mPar ;}
@@ -49,8 +48,8 @@ static void Dest(double phiG=33,double lamG=33);
 
 protected:
 enum {kYDiff  =2	//Diffusion in XY direction
-     ,kYThkDet=4	//Effective detectot thickness for Y err 
      ,kZDiff  =3	//Diffusion in Z direction
+     ,kYThkDet=4	//Effective detectot thickness for Y err 
      ,kZThkDet=5	//Effective detectot thickness for Z err
      ,kZAB2   =6	//Constant member in Z direction (a*b)**2
      };
@@ -58,10 +57,11 @@ double mZSpan;
 ClassDef(StvTpcHitErrCalculator,0)
 };
 
+
 class StvTpcGeoErrCalculator : public StvHitErrCalculator {
 
 public:	
-  StvTpcGeoErrCalculator(const char *name="TpcHitErr"):StvHitErrCalculator(name,7){};
+  StvTpcGeoErrCalculator(const char *name="TpcHitGeo"):StvHitErrCalculator(name,7){};
 virtual int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 
 protected:
@@ -75,5 +75,21 @@ double mZSpan;
 ClassDef(StvTpcGeoErrCalculator,0)
 };
 
+class StvTpcStiErrCalculator : public StvHitErrCalculator {
+
+public:	
+  StvTpcStiErrCalculator(const char *name="TpcHitErr"):StvHitErrCalculator(name,7){};
+virtual int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
+
+protected:
+enum {kYErr   =0	//Diffusion in XY direction
+     ,kYThkDet=1	//Effective detectot thickness**2/12 for Y err 
+     ,kYDiff  =2	//Diffusion in Z direction
+     ,kZErr   =3	//electronics Z err
+     ,kZDiff  =4	//Diffusion in Z direction
+     ,kZThkDet=5};	//Effective detectot thickness**2/12 for Z err 
+double mZSpan;
+/*ClassDef(StvTpcStiErrCalculator,0)*/
+};
 
 #endif
