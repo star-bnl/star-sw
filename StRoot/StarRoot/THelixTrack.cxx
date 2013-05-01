@@ -3272,7 +3272,7 @@ return ans;
 //______________________________________________________________________________
 void TCircleFitter::Show() const
 {
-   Show(fN,&(fAux[0].x),sizeof(fAux[0])/sizeof(double));  
+   TCircle::Show(fN,&(fAux[0].x),sizeof(fAux[0])/sizeof(double));  
 }
 
 //______________________________________________________________________________
@@ -3692,7 +3692,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.69 2013/05/01 15:58:52 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.70 2013/05/01 17:33:34 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3708,6 +3708,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.70  2013/05/01 17:33:34  perev
+ * method TCirleFitter::Show added
+ *
  * Revision 1.69  2013/05/01 15:58:52  perev
  * Some pre fit analisys improved to avoid crashes for Stv
  *
