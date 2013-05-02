@@ -42,14 +42,18 @@ static void eigen2(double G[3], double lam[2], double eig[2])
     lam[1] = 0.5*(spur-dis);
   }
   if (eig) {
-    eig[0] = -2*G[1]; eig[1]=G[0]-G[2]-dis;
+    eig[1]=G[0]-G[2]-dis;
+    eig[0]=G[2]-G[0]-dis;
+    if (eig[1]>eig[0]) {eig[0]=  -2*G[1];}
+    else               {eig[1]=  -2*G[1];}
     double nor = sqrt(eig[0]*eig[0]+eig[1]*eig[1]);
-    if(eig[0]<0) nor = -nor;
-    eig[0]/=nor;eig[1]/=nor;
-  }
-  if (lam) {
-    lam[0] = 0.5*(spur+dis);
-    lam[1] = 0.5*(spur-dis);
+    if (nor>1e-11) {
+      if(eig[0]<0) nor = -nor;
+      eig[0]/=nor;eig[1]/=nor;}
+      else {
+      eig[0]=1;eig[1]=0;
+    }
+
   }
 }
 //_____________________________________________________________________________
@@ -3692,7 +3696,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.70 2013/05/01 17:33:34 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.71 2013/05/02 02:00:12 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3708,6 +3712,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.71  2013/05/02 02:00:12  perev
+ * Defence aginst strait track along X
+ *
  * Revision 1.70  2013/05/01 17:33:34  perev
  * method TCirleFitter::Show added
  *
