@@ -1552,6 +1552,7 @@ Bfc_st BFC[] = {
 #else /* ! __NoStrangeMuDst__ */
   {"CMuDST"    ,"","MuDSTChain","MuDst,Tree",               "StMuDstMaker","","Writes Common MuDST",kFALSE},
 #endif /* __NoStrangeMuDst__ */
+  {"RMuDST"    ,"","","CMuDST"   ,"","","reads Common MuDST, do not disactivate if no output files",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
 #ifndef __NoDisplay__
   {"Display"     ,"","","TbUtil,St_geom"
