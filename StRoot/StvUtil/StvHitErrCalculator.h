@@ -78,7 +78,7 @@ ClassDef(StvTpcGeoErrCalculator,0)
 class StvTpcStiErrCalculator : public StvHitErrCalculator {
 
 public:	
-  StvTpcStiErrCalculator(const char *name="TpcHitErr"):StvHitErrCalculator(name,7){};
+  StvTpcStiErrCalculator(const char *name="StiHitErr"):StvHitErrCalculator(name,6){};
 virtual int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 
 protected:
