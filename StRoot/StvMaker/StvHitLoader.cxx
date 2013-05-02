@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.16 2013/04/20 22:01:31 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.17 2013/05/02 01:57:11 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -155,7 +155,7 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
      double dang = (atan2(ort[1],ort[0])-atan2(xyz[1],xyz[0]))*57.3;
      if (dang> 180) dang-=360;
      if (dang<-180) dang+=360;
-     if (fabs(dang)>16) printf("dang = %g\n",dang);
+     if (fabs(dang)>17) printf("dang = %g\n",dang);
      assert(fabs(dang)<31);
    }
    stiHit->set(hp,stHit,xyz);
