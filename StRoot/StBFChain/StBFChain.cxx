@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.603 2013/05/01 19:46:58 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.604 2013/05/02 19:40:31 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -762,7 +762,8 @@ Int_t StBFChain::Init() {
   }
   if (fNoChainOptions) {
     if (GetOption("NoOutput") || GetOption("EvOutOnly")) {
-      SetAttr(".call","SetActive(0)","MuDst");		//NO MuDst
+      if (! GetOption("RMuDst"))
+	SetAttr(".call","SetActive(0)","MuDst");		//NO MuDst
       if (! GetOption("EvOutOnly")) {
 	SetAttr(".call","SetActive(0)","outputStream");	//NO Out
       }
