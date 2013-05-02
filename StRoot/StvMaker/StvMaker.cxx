@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.31 2013/04/20 22:02:00 perev Exp $
+// $Id: StvMaker.cxx,v 1.32 2013/05/02 01:57:58 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -30,7 +30,6 @@ More detailed: 				<br>
      SetAttr("makePulls"           ,kFALSE);		// default Off
 
      SetAttr("noTreeSearch",kFALSE);	// treeSearch default ON
-     SetAttr("svtSelf",,kFALSE);	// Svt self align default OFF
 </ul>
  
 <li>On InitRun:				
@@ -104,7 +103,7 @@ StvMaker::StvMaker(const char *name) : StMaker(name)
   memset(mBeg,0,mEnd-mBeg+1);
   cout <<"StvMaker::StvMaker() -I- Starting"<<endl;
 
-  SetAttr("activeTpc"		,kTRUE);
+  SetAttr("activeTpc"		,1);
   SetAttr("useEventFiller"      ,kTRUE);
   SetAttr("useTracker"          ,kTRUE);
   SetAttr("useVertexFinder"     ,kTRUE);
@@ -171,10 +170,13 @@ Int_t StvMaker::InitDetectors()
   if (mFETracks>0) SetAttr(".privilege",1,"");
   
 //		TGeo herlper is ready, add error calculators
-  if (IAttr("activeTpc")) {	//TPC error calculators
+  int actTpc = IAttr("activeTpc");
+  if (actTpc) {	//TPC error calculators
   
-    const char*  innOutNames[2]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs"    };
-    for (int io=0;io<2;io++) {
+    const char*  innOutNames[]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs", 0
+                                  ,"tpcInnerHitError"      ,"tpcOuterHitError"  , 0};
+    int ioBeg = (actTpc-1)*3;
+    for (int io=ioBeg;innOutNames[io];io++) {
       TString myName(innOutNames[io]); if (mFETracks) myName+="FE";
       StvHitErrCalculator *hec = new StvTpcHitErrCalculator(myName);
       TString ts("Calibrations/tracker/");
