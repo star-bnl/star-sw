@@ -10,8 +10,9 @@ ClassImp(StvTpcSelector)
 StvTpcSelector::StvTpcSelector(const char *name):StTGeoSele(name)
 {
   mInOut=-99;
-  if (strstr(name,"TpcInner")) mInOut=0;
-  if (strstr(name,"TpcOuter")) mInOut=1;
+  TString ts(name);
+  if (ts.Index("TpcInner",0,TString::kIgnoreCase)>-1) mInOut=0;
+  if (ts.Index("TpcOuter",0,TString::kIgnoreCase)>-1) mInOut=1;
   assert(mInOut>=0);
 }
 //______________________________________________________________________________
