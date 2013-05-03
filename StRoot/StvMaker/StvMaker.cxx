@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.32 2013/05/02 01:57:58 perev Exp $
+// $Id: StvMaker.cxx,v 1.33 2013/05/03 03:10:25 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -178,7 +178,12 @@ Int_t StvMaker::InitDetectors()
     int ioBeg = (actTpc-1)*3;
     for (int io=ioBeg;innOutNames[io];io++) {
       TString myName(innOutNames[io]); if (mFETracks) myName+="FE";
-      StvHitErrCalculator *hec = new StvTpcHitErrCalculator(myName);
+      StvHitErrCalculator *hec = 0;
+      switch (actTpc) {
+        case 1: hec = new StvTpcHitErrCalculator(myName); break;
+        case 2: hec = new StvTpcStiErrCalculator(myName); break;
+        default: assert(0 && "Wrong tpcActive value");
+      }
       TString ts("Calibrations/tracker/");
       ts+=myName;
       TTable *tt = (TTable*)GetDataBase(ts);
