@@ -330,6 +330,7 @@ int StvTpcStiErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
 // 
   int ans = CalcLocals(hiDir);
   if (ans) return ans;
+  mZSpan = fabs(fabs(hiPos[2])-210)/100;
   mCpCl = 1;
   double myTp = mSp/mCp, myTp2 = myTp*myTp;
   double myTl = mSl/mCl, myTl2 = myTl*myTl;
@@ -338,7 +339,6 @@ int StvTpcStiErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
   double DDz = mPar[kZThkDet];
   double WWy = mPar[kYDiff]*mZSpan;
   double WWz = mPar[kZDiff]*mZSpan;
-  mZSpan = fabs(fabs(hiPos[2])-210)/100;
 
   memset(mDD[0],0,mNPar*sizeof(mDD[0]));
 //	Sti code
