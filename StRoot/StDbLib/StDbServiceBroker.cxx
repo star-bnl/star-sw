@@ -339,14 +339,16 @@ void StDbServiceBroker::CallExternalScript() {
 
   std::string admin_emails = "arkhipkin@bnl.gov";
   char* admins = getenv("STAR_DEBUG_DB_RETRIES_ADMINS");
-  if (admins) {
-	admin_emails = admins;
-  }
+  if (!admins) { return; }
+  char* hostname = getenv("HOSTNAME");
+  std::string host = "unknown host";
+  if (hostname) { host = hostname; }
+  admin_emails = admins;
 
   std::string curtime = currentDateTime();
   std::stringstream exec_command;
-  exec_command << "echo \"We waited for " << seconds_to_reach_for_connect << " seconds, and did not get a db connection at " << getenv("HOSTNAME") 
-	<< " at " << curtime << "\" | /bin/mail -s \"DB RETRIES - Problem detected on "<< getenv("HOSTNAME") << " at " << curtime << "\" " << admin_emails;
+  exec_command << "echo \"We waited for " << seconds_to_reach_for_connect << " seconds, and did not get a db connection at " << host 
+	<< " at " << curtime << "\" | /bin/mail -s \"DB RETRIES - Problem detected on "<< host << " at " << curtime << "\" " << admin_emails;
   system(exec_command.str().c_str());
 
 }
