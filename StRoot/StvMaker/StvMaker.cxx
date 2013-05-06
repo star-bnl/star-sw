@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.33 2013/05/03 03:10:25 perev Exp $
+// $Id: StvMaker.cxx,v 1.34 2013/05/06 16:08:51 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -152,7 +152,7 @@ Int_t StvMaker::InitDetectors()
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
-//		Now Initialize TGeo helper
+//		Now Initialize TGeo proxy
   tgh->Init(1+2+4);
 //	TPC has non standard TGeo. Edit it
 
@@ -173,11 +173,11 @@ Int_t StvMaker::InitDetectors()
   int actTpc = IAttr("activeTpc");
   if (actTpc) {	//TPC error calculators
   
-    const char*  innOutNames[]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs", 0
-                                  ,"tpcInnerHitError"      ,"tpcOuterHitError"  , 0};
-    int ioBeg = (actTpc-1)*3;
-    for (int io=ioBeg;innOutNames[io];io++) {
-      TString myName(innOutNames[io]); if (mFETracks) myName+="FE";
+    const char*  innOutNames[2][3]  ={{"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs", 0}
+                                     ,{"tpcInnerHitError"      ,"tpcOuterHitError"  , 0}};
+    const char* innOut = 0;
+    for (int io=0;(innOut =innOutNames[actTpc-1][io]);io++) {
+      TString myName(innOut); if (mFETracks) myName+="FE";
       StvHitErrCalculator *hec = 0;
       switch (actTpc) {
         case 1: hec = new StvTpcHitErrCalculator(myName); break;
@@ -190,9 +190,9 @@ Int_t StvMaker::InitDetectors()
       if (!tt) Error("Make","Table %s NOT FOUND",ts.Data());
       assert(tt);
       hec->SetPars((double*)tt->GetArray());
-      StvTpcSelector*sel = new StvTpcSelector(innOutNames[io]);
+      StvTpcSelector*sel = new StvTpcSelector(innOut);
       int nHP = tgh->SetHitErrCalc(kTpcId,hec,sel);
-      Info("Init","%s: %d HitPlanes",innOutNames[io],nHP);
+      Info("Init","%s: %d HitPlanes",innOut,nHP);
       assert(nHP);
   } }
 
@@ -277,10 +277,12 @@ static int initialized = 0;
   new StvConst();
   new StvFitter();
   new StvKalmanTrackFitter();
-  mEventFiller= new StvStEventFiller;
+  if (IAttr("useEventFiller"))
+    mEventFiller= new StvStEventFiller;
   InitPulls();
-  mVertexFinder = new StvStarVertexFinder("GenericVertex");
-  
+  if (IAttr("useVertexFinder")) 
+    mVertexFinder = new StvStarVertexFinder("GenericVertex");
+       
   return StMaker::InitRun(run);
 }
 
@@ -309,7 +311,8 @@ Int_t StvMaker::Make()
     if (!nVtx) 		break;
     Info("Make","VertexFinder found %d vertices",nVtx);
     const StvHits &vertexes = mVertexFinder->Result();
-             //Set minimal errors
+    if (!vertexes.size()) break;       
+//Set minimal errors
     for (size_t i=0;i<vertexes.size();i++) {
       StvHit *vtx=vertexes[i];
       float *vtxErr = vtx->errMtx();
