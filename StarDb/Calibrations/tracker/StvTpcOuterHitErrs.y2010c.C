@@ -1,21 +1,23 @@
 TDataSet *CreateTable() { 
 // -----------------------------------------------------------------
-// StvTpcOuterHitErrs Allocated rows: 1  Used rows: 1  Row size: 56 bytes
-//  Table: StvHitErrs_st[0]--> StvHitErrs_st[0]
+// StvTpcOuterHitErrs Allocated rows: 1  Used rows: 1  Row size: 72 bytes
+//  Table: StvTpcHitErrs_st[0]--> StvTpcHitErrs_st[0]
 // ====================================================================
 // ------  Test whether this table share library was loaded ------
-  if (!TClass::GetClass("St_StvHitErrs")) return 0;
-StvHitErrs_st row;
-St_StvHitErrs *tableSet = new St_StvHitErrs("StvTpcOuterHitErrs",1);
+  if (!TClass::GetClass("St_StvTpcHitErrs")) return 0;
+StvTpcHitErrs_st row;
+St_StvTpcHitErrs *tableSet = new St_StvTpcHitErrs("StvTpcOuterHitErrs",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.yErr	 = 0.005330997; // Intrinsic resolution, padrow or Y direction		;
-    row.zErr	 = 0.01498843; // Intrinsic resolution, z direction			;
-    row.yDiff	 = 0.001338237; // Diffusion in XY direction				;
-    row.zDiff	 =      1e-08; // Diffusion in Z direction				;
-    row.yThkDet	 =   1.092825; // Effective detector thickness**2 for Y err 		;
-    row.zThkDet	 =      1e-08; // Effective detector thickness**2 for Z err		;
-    row.zAB2	 = 2.936864e-08; // Constant member in Z direction (a*b)**2		;
+    row.yErr	 = 0.002016838; // Intrinsic resolution, padrow or Y direction		;
+    row.zErr	 = 0.008511401; // Intrinsic resolution, z direction			;
+    row.thkDet	 =     3.8025; // detector thickness**2 , not fitted			;
+    row.yyDiff	 = 0.002159075; // Diffusion in XY direction *yFactor			;
+    row.zzDiff	 = 1.206901e-08; // Diffusion in Z direction  *ZFactor			;
+    row.yzDiff	 = 2.078102e-05; // Diffusion in Z direction  *ZFactor			;
+    row.yFact	 =  0.7016589; // Error factor in Y-direction 			;
+    row.zFact	 =  0.7915512; // Error factor in Z-direction 			;
+    row.zAB2	 = 5.0293e-06; // Constant member in Z direction (a*b)**2		;
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
