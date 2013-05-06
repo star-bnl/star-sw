@@ -337,7 +337,7 @@ const std::string currentDateTime() {
 
 void StDbServiceBroker::CallExternalScript() {
 
-  std::string admin_emails = "arkhipkin@bnl.gov";
+  std::string admin_emails;
   char* admins = getenv("STAR_DEBUG_DB_RETRIES_ADMINS");
   if (!admins) { return; }
   char* hostname = getenv("HOSTNAME");
