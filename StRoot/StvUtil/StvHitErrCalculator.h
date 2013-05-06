@@ -12,6 +12,7 @@ StvHitErrCalculator(const char *name,int nPars=2);
         void SetTrack(const float  tkDir[3]);
 virtual  int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual  int CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
+virtual void CalcDetDers(double dRR[kMaxPars][3]);
 virtual void CalcDcaDers(double dRR[kMaxPars][3]);
 virtual double Trace(const float hiPos[3]);
 virtual  int GetNPars() const 			{return mNPar;}
@@ -42,17 +43,21 @@ ClassDef(StvHitErrCalculator,0)
 class StvTpcHitErrCalculator : public StvHitErrCalculator {
 
 public:	
-  StvTpcHitErrCalculator(const char *name="TpcHitErr"):StvHitErrCalculator(name,7){};
+  StvTpcHitErrCalculator(const char *name="TpcHitErr"):StvHitErrCalculator(name,9){};
 virtual int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 static void Dest(double phiG=33,double lamG=33);
 
 protected:
-enum {kYDiff  =2	//Diffusion in XY direction
-     ,kZDiff  =3	//Diffusion in Z direction
-     ,kYThkDet=4	//Effective detectot thickness for Y err 
-     ,kZThkDet=5	//Effective detectot thickness for Z err
-     ,kZAB2   =6	//Constant member in Z direction (a*b)**2
-     };
+enum {
+kYErr  	=0, 	/* Intrinsic resolution, padrow or Y direction		*/
+kZErr  	=1, 	/* Intrinsic resolution, z direction			*/
+kThkDet	=2,	/* detector thickness**2 , not fitted			*/
+kYYDiff	=3,  	/* Diffusion in XY direction *yFactor			*/
+kZZDiff	=4,  	/* Diffusion in Z direction  *ZFactor			*/
+kYZDiff	=5,  	/* Diffusion in Y direction  *ZFactor			*/
+kYFact 	=6, 	/*	Error factor in Y-direction 			*/
+kZFact 	=7, 	/*	Error factor in Z-direction 			*/
+kZAB2  	=8};	/* Constant member in Z direction (a*b)**2		*/
 double mZSpan;
 ClassDef(StvTpcHitErrCalculator,0)
 };

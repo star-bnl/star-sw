@@ -143,9 +143,9 @@ static int nCall = 0; nCall++;
    TCL::trasat(mTT[0],mDRr,mTRr,3,3); 
 //   TCL::tratsa(mTT[0],mDRr,mTRr,3,3); 
    if (!hRr) return 0;
-   hRr[kXX] = mTRr[kYY]*mCpCl;
-   hRr[kYX] = mTRr[kZY]*mCpCl;
-   hRr[kYY] = mTRr[kZZ]*mCpCl;
+   hRr[kXX] = mTRr[kYY];
+   hRr[kYX] = mTRr[kZY];
+   hRr[kYY] = mTRr[kZZ];
    assert(hRr[kXX]>0);
    assert(hRr[kYY]>0);
    assert(hRr[kYY]*hRr[kXX]>hRr[kYX]*hRr[kYX]);
@@ -159,9 +159,20 @@ void StvHitErrCalculator::CalcDcaDers(double dRr[kMaxPars][3])
   double myDRr[6];
   for (int iPar=0;iPar<mNPar;iPar++) {
     TCL::trasat(mTT[0],mDD[iPar],myDRr,3,3); 
-    dRr[iPar][kXX] = myDRr[kYY]*mCpCl;
-    dRr[iPar][kYX] = myDRr[kZY]*mCpCl;
-    dRr[iPar][kYY] = myDRr[kZZ]*mCpCl;
+    dRr[iPar][kXX] = myDRr[kYY];
+    dRr[iPar][kYX] = myDRr[kZY];
+    dRr[iPar][kYY] = myDRr[kZZ];
+  }
+}
+//______________________________________________________________________________
+void StvHitErrCalculator::CalcDetDers(double dRr[kMaxPars][3])
+{
+// Calculate deriavatives of err matrix.
+// must be called after CalcDetErrs(...)
+  for (int iPar=0;iPar<mNPar;iPar++) {
+    dRr[iPar][kXX] = mDD[iPar][kYY];
+    dRr[iPar][kYX] = mDD[iPar][kZY];
+    dRr[iPar][kYY] = mDD[iPar][kZZ];
   }
 }
 //______________________________________________________________________________
@@ -172,84 +183,172 @@ double StvHitErrCalculator::Trace(const float hiPos[3])
   return hiErr[0]+hiErr[2];
 }
 //______________________________________________________________________________
-//______________________________________________________________________________
 int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
 {
 /// Calculate hit error matrix in local detector system. In this system
 /// detector plane is x = const 
 // <dX*dX>  = DD/12
 // 
-// <dY*dX>	 = tP*DD/12
-// <dY*dY>  = tP2*(DD/12) +WWy/cP2
+// <dY*dX>	 = tP* DD/12
+// <dY*dY>  = tP2*DD/12 +WWy/cP2
 // 
 // <dZ*dX>  = tL/cP*(DD/12) 
 // <dZ*dY> =  (tP*tL)/cP*((DD/12 + WWy))
 // <dZ*dZ> =  tL2/cP2*(DD/12 + WWy) +WWz
+
+
   int ans = CalcLocals(hiDir);
   if (ans) return ans;
   
-  double DDy = mPar[kYThkDet];
-  double DDz = mPar[kZThkDet];
-  double Dy = sqrt(DDy);
-  double Dz = sqrt(DDz);
-//  double Dx = sqrt(Dy*Dz);
-  double Dx = 0.5*(Dy+Dz);
-  double DyDDy = 0.5 /Dy;
-  double DzDDz = 0.5 /Dz;
-  double DxDDy = 0.25/Dy;
-  double DxDDz = 0.25/Dz;
-
 
   memset(mDD[0],0,mNPar*sizeof(mDD[0]));
   double myTp = mSp/mCp, myTp2 = myTp*myTp;
   double myTl = mSl/mCl, myTl2 = myTl*myTl;
   mZSpan = fabs(fabs(hiPos[2])-210)/100;
-  double WWy = mPar[kYDiff]*mZSpan;
-  double WWz = mPar[kZDiff]*mZSpan;
+  double WWyy = mPar[kYYDiff]*mZSpan;
+  double WWzz = mPar[kZZDiff]*mZSpan;
+  double DD   = mPar[kThkDet]/12;
+
+  double qCpCl = sqrt(mCpCl);
+  double yF   = mPar[kYFact ]*qCpCl; 
+  double zF   = mPar[kZFact ]*qCpCl; 
 
 // <dX*dX>  = DD/12
 // 
-// <dY*dX>	 = tP*DD/12
+// <dY*dX>  = tP   * DD/12 *sqrt(yFact)
 // <dY*dY>  = tP2*(DD/12) +WWy/cP2
 // 
 // <dZ*dX>  = tL/cP*(DD/12) 
 // <dZ*dY> =  (tP*tL)/cP*((DD/12 + WWy))
 // <dZ*dZ> =  tL2/cP2*(DD/12 + WWy) +WWz +AB/cP2
 
-  mDRr[kXX] = Dx*Dx/12;
-  mDRr[kYX] = myTp*Dy*Dx/12;
-  mDRr[kZX] = myTl/mCp*(Dz*Dx/12);
-  mDRr[kYY] = myTp2*DDy/12 +WWy/mCp2+mPar[kYErr];
-  mDRr[kZY] = (myTp*myTl)/mCp*(Dz*Dy/12 + WWy);
-  mDRr[kZZ] = myTl2/mCp2*(DDz/12+WWy)+WWz + mPar[kZAB2]/180/mCp2+mPar[kZErr];
+  mDRr[kXX] = DD;
 
-// <dX*dX>  = Dx*Dx/12
-   mDD[kYThkDet][kXX] = 2*Dx*DxDDy/12;
-   mDD[kZThkDet][kXX] = 2*Dx*DxDDz/12;
+  mDRr[kYX] = myTp*DD*yF;
+  mDRr[kZX] = myTl/mCp*DD*zF;
 
-// <dY*dX>	 = tP*Dx*Dy/12
-  mDD[kYThkDet][kYX] = myTp*(DyDDy*Dx + Dy*DxDDy)/12;;
-  mDD[kZThkDet][kYX] = myTp*(           Dy*DxDDz)/12;;
+  mDRr[kYY] =(myTp2*DD + WWyy/mCp2)*yF*yF + mPar[kYErr];
+  mDRr[kZY] = myTp*myTl/mCp*(DD + WWyy)*yF*zF;
+  mDRr[kZZ] = (myTl2/mCp2*(DD +WWyy) + WWzz + mPar[kZAB2]/180/mCp2)*zF*zF + mPar[kZErr];
 
-// <dZ*dX>  = tL/cP*(Dz*Dx/12) 
-  mDD[kYThkDet][kZX] = myTl/mCp*(         Dz*DxDDy)/12;
-  mDD[kZThkDet][kZX] = myTl/mCp*(DzDDz*Dx+Dz*DxDDz)/12;
+//		NOW DERIVATIVEs
 
-// <dY*dY>  = tP2*(DDy/12) +WWy/cP2
+// 			<dX*dX>  = DD/12
+// 
+
+//  			mDRr[kYX] = myTp*DD*yF;
+  mDD[kYFact ][kYX] = myTp*DD*qCpCl;
+
+
+//  			mDRr[kZX] = myTl/mCp*DD*zF;
+  mDD[kZFact ][kZX] = myTl/mCp*DD*qCpCl;
+
+//  			mDRr[kYY] =(myTp2*DD + WWyy/mCp2)*yF*yF + mPar[kYErr];
+  mDD[kYErr  ][kYY] = 1;;
+  mDD[kYFact ][kYY] = (myTp2*DD + WWyy/mCp2)*yF*2*qCpCl;
+  mDD[kYYDiff][kYY] = mZSpan/mCp2*yF*yF;
+
+//		  	mDRr[kZY] = myTp*myTl/mCp*(DD + WWyy)*yF*zF;
+  mDD[kYFact ][kZY] =  myTp*myTl/mCp*(DD + WWyy)*zF*qCpCl;
+  mDD[kZFact ][kZY] =  myTp*myTl/mCp*(DD + WWyy)*yF*qCpCl;
+  mDD[kYYDiff][kZY] =  mZSpan*myTp*myTl/mCp*yF*zF;
+
+//  		mDRr[kZZ] = (myTl2/mCp2*(DD +WWyy) + WWzz + mPar[kZAB2]/180/mCp2)*zF*zF + mPar[kZErr];
+  mDD[kZErr  ][kZZ] = 1;;
+  mDD[kZFact ][kZZ] = (myTl2/mCp2*(DD +WWyy) + WWzz + mPar[kZAB2]/180/mCp2)*zF*2*qCpCl;
+  mDD[kYYDiff][kZZ] = mZSpan*myTl2/mCp2*zF*zF;
+  mDD[kZZDiff][kZZ] = mZSpan*zF*zF;
+  mDD[kZAB2  ][kZZ] = 1./180/mCp2*zF*zF;
+
+
+  assert(mDRr[kYY]>0);
+  assert(mDRr[kZZ]>0);
+  assert(mDRr[kYY]*mDRr[kZZ]>mDRr[kZY]*mDRr[kZY]);
+
+  if (!hRr) return 0;
+  hRr[kXX] = mDRr[kYY];
+  hRr[kYY] = mDRr[kZZ];
+  hRr[kYX] = mDRr[kZY];
+
+  return 0;
+
+}  
+#if 0
+//______________________________________________________________________________
+int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
+{
+/// Calculate hit error matrix in local detector system. In this system
+/// detector plane is x = const 
+
+// <dX*dX>  = thkDet/12
+// <dY*dY>  = tP2*thkDet/12*yFact +yyDiff/cP2
+// <dZ*dZ> =  tL2/cP2*(thkDet/12*zFact + yzDiff) +zAB2/180/cP2+ zzDiff
+// 
+// <dY*dX>	 = tP   * thkDet/12 *sqrt(yFact)
+// <dZ*dX>  = tL/cP*(thkDet/12)*sqrt(zFact)
+// <dZ*dY> =  (tP*tL)/cP*((thkDet/12 + yyDiff/yFact))*sqrt(yFact*zFact)
+// 
+
+  int ans = CalcLocals(hiDir);
+  if (ans) return ans;
+  
+
+  memset(mDD[0],0,mNPar*sizeof(mDD[0]));
+  double myTp = mSp/mCp, myTp2 = myTp*myTp;
+  double myTl = mSl/mCl, myTl2 = myTl*myTl;
+  mZSpan = fabs(fabs(hiPos[2])-210)/100;
+  double WWyy = mPar[kYYDiff]*mZSpan;
+  double WWzz = mPar[kZZDiff]*mZSpan;
+  double WWyz = mPar[kYZDiff]*mZSpan;
+  double DD   = mPar[kThkDet];
+  double yF   = mPar[kYFact ],yFq = sqrt(yF); 
+  double zF   = mPar[kZFact ],zFq = sqrt(zF); 
+
+// <dX*dX>  = DD/12
+// 
+// <dY*dX>  = tP   * DD/12 *sqrt(yFact)
+// <dY*dY>  = tP2*(DD/12) +WWy/cP2
+// 
+// <dZ*dX>  = tL/cP*(DD/12) 
+// <dZ*dY> =  (tP*tL)/cP*((DD/12 + WWy))
+// <dZ*dZ> =  tL2/cP2*(DD/12 + WWy) +WWz +AB/cP2
+
+  mDRr[kXX] = DD/12;
+
+  mDRr[kYX] = myTp*DD/12*yFq;
+  mDRr[kZX] = myTl/mCp*(DD/12)*zFq;
+
+  mDRr[kYY] = myTp2*DD/12*yF + WWyy/mCp2 + mPar[kYErr];
+  mDRr[kZY] = myTp*myTl/mCp*(DD/12*yFq*zFq + WWyy/yFq*zFq);
+  mDRr[kZZ] = myTl2/mCp2*(DD/12*zF+WWyz) + WWzz + mPar[kZAB2]/180/mCp2 + mPar[kZErr];
+
+//		NOW DERIVATIVEs
+
+// <dX*dX>  = DD/12
+  mDD[kThkDet][kXX] = 1./12;
+
+//		  	mDRr[kYX] = myTp*DD/12*yFq;
+  mDD[kYFact  ][kYX] = myTp*DD/12 *0.5/yFq;
+
+
+//  			mDRr[kZX] = myTl/mCp*(DD/12)*zFq;
+  mDD[kZFact  ][kZX] = myTl/mCp*DD/12* 0.5/zFq;
+
+//  		mDRr[kYY] = myTp2*DD/12*yF + WWyy/mCp2 + mPar[kYErr];
   mDD[kYErr   ][kYY] = 1;;
-  mDD[kYThkDet][kYY] = myTp2/12;
-  mDD[kYDiff  ][kYY] = mZSpan/mCp2;
+  mDD[kYFact  ][kYY] = myTp2*DD/12;
+  mDD[kYYDiff ][kYY] = mZSpan/mCp2;
 
-//mDRr[kZY] = (myTp*myTl)/mCp*(Dz*Dy/12 + WWy);
-  mDD[kYThkDet][kZY] = (myTp*myTl)/mCp*((Dz*DyDDy)/12);
-  mDD[kZThkDet][kZY] = (myTp*myTl)/mCp*((DzDDz*Dy)/12);
-  mDD[kYDiff  ][kZY] = (myTp*myTl)/mCp*mZSpan;
+//  		mDRr[kZY] = (myTp*myTl/mCp)*(DD/12*yFq*zFq + WWyy/yFq*zFq);
+  mDD[kYFact ][kZY] = (myTp*myTl)/mCp*(DD/12*0.5/yFq*zFq + WWyy* (-0.5/yF /yFq*zFq));
+  mDD[kZFact ][kZY] = (myTp*myTl)/mCp*(DD/12*0.5/zFq*yFq + WWyy* ( 0.5/yFq/zFq    ));
+  mDD[kYYDiff][kZY] = (myTp*myTl)/mCp*(                  mZSpan* ( 1.0/yFq*zFq    ));
 
-//mDRr[kZZ] = myTl2/mCp2*(DDz/12+WWy)+WWz + mPar[kZAB2]/180/mCp2;
+//  		mDRr[kZZ] = myTl2/mCp2*(DD/12*zF+WWyz) + WWzz + mPar[kZAB2]/180/mCp2 + mPar[kZErr];
   mDD[kZErr   ][kZZ] = 1;;
-  mDD[kZThkDet][kZZ] = myTl2/mCp2/12;
-  mDD[kYDiff  ][kZZ] = myTl2/mCp2*mZSpan;
-  mDD[kZDiff  ][kZZ] = mZSpan;
+  mDD[kZFact  ][kZZ] = myTl2/mCp2*DD/12;
+  mDD[kYZDiff ][kZZ] = myTl2/mCp2*mZSpan;
+  mDD[kZZDiff ][kZZ] = mZSpan;
   mDD[kZAB2   ][kZZ] = 1./180/mCp2;
 
 
@@ -257,15 +356,15 @@ int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
   assert(mDRr[kZZ]>0);
   assert(mDRr[kYY]*mDRr[kZZ]>mDRr[kZY]*mDRr[kZY]);
 
-
   if (!hRr) return 0;
-  hRr[kXX] = mDRr[kYY]*mCpCl;
-  hRr[kYY] = mDRr[kZZ]*mCpCl;
-  hRr[kYX] = mDRr[kZY]*mCpCl;
+  hRr[kXX] = mDRr[kYY];
+  hRr[kYY] = mDRr[kZZ];
+  hRr[kYX] = mDRr[kZY];
 
   return 0;
 
 }  
+#endif //0
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -308,6 +407,7 @@ int StvTpcGeoErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
   mDD[kZThkDet][kZZ] = myTl2/mCp2/12;
   mDD[kYDiff  ][kZZ] = mZSpan*myTl2/mCp2;
   mDD[kZDiff  ][kZZ] = mZSpan;
+  TCL::vscale(mDD[0],mCpCl,mDD[0],6*mNPar);
 
   for (int ig=0;ig<6;ig++) {
     double s = 0;
@@ -315,9 +415,9 @@ int StvTpcGeoErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
     mDRr[ig]=s;
   } 
   if (!hRr) return 0;
-  hRr[kXX] = mDRr[kYY]*mCpCl;
-  hRr[kYY] = mDRr[kZZ]*mCpCl;
-  hRr[kYX] = mDRr[kZY]*mCpCl;
+  hRr[kXX] = mDRr[kYY];
+  hRr[kYY] = mDRr[kZZ];
+  hRr[kYX] = mDRr[kZY];
   return 0;
 }  
 
@@ -366,22 +466,31 @@ int StvTpcStiErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
 void StvTpcHitErrCalculator::Dest(double phiG,double lamG)
 {
   double par[10]={0};
+static const char *titPa[9]={"YErr  ","ZErr ","ThkDet","YYDiff","ZZDiff"
+                            ,"YZDiff","YFact","ZFact ","ZAB2  "};
+
+static const char *titYZ [3] = {"YY","ZY","ZZ"};
+static const char *titXYZ[6] = {"XX","YX","YY","ZX","ZY","XX"};
+
+// kYErr  	=0, 	/* Intrinsic resolution, padrow or Y direction		*/
+// kZErr  	=1, 	/* Intrinsic resolution, z direction			*/
+// kThkDet	=2,	/* detector thickness**2 , not fitted			*/
+// kYYDiff	=3,  	/* Diffusion in XY direction *yFactor			*/
+// kZZDiff	=4,  	/* Diffusion in Z direction  *ZFactor			*/
+// kYZDiff	=5,  	/* Diffusion in Y direction  *ZFactor			*/
+// kYFact 	=6, 	/*	Error factor in Y-direction 			*/
+// kZFact 	=7, 	/*	Error factor in Z-direction 			*/
+// kZAB2  	=8};	/* Constant member in Z direction (a*b)**2		*/
+
   par[kYErr]=0.03*0.03;
   par[kZErr]=0.07*0.07;
-  par[kYThkDet]=1.;
-  par[kZThkDet]=1.5;
-  par[kYDiff]=par[kYErr]*1;
-  par[kZDiff]=par[kZErr]*2;
-  par[kZAB2 ]=1;
-static const char* titYZ[3] = {"YY","ZY","ZZ"};
-       const char* titPa[9];
-  titPa[kYErr   ]="YErr";
-  titPa[kZErr   ]="ZErr";
-  titPa[kYThkDet]="YThk";
-  titPa[kZThkDet]="ZThk";
-  titPa[kYDiff  ]="YDif";
-  titPa[kZDiff  ]="ZDif";
-  titPa[kZAB2   ]="ZAB2";
+  par[kThkDet]=1.;
+  par[kYYDiff]=0.11;
+  par[kZZDiff]=0.12;
+  par[kYZDiff]=0.13;
+  par[kYFact ]=0.9;
+  par[kZFact ]=0.8;
+  par[kZAB2  ]=1;
 
   double Lam = lamG/180*M_PI;
   double Phi = phiG/180*M_PI;
@@ -411,33 +520,59 @@ static const char* titYZ[3] = {"YY","ZY","ZZ"};
   int nPars = calc.GetNPars();
   calc.SetPars(par);
   calc.SetTrack(Nt);
-  double hRR[3],dRR[10][3];
-  calc.CalcDcaErrs(hiPos,hiDir,hRR);
-  calc.CalcDcaDers(dRR);
-  for (int j=0;j<3;j++) {
-    printf("hRR[%d]=%g  Der = %g %g %g %g\n",j,hRR[j]
-          ,dRR[0][j],dRR[1][j],dRR[2][j],dRR[3][j]);
-  }
+  double hRR[6],dRR[10][3],dRRx[10][6];
 
-  StvTpcHitErrCalculator calk("");
-  for (int ider=0;ider<nPars;ider++) {
-    double myPar[10],delta;
-    memcpy(myPar,par,nPars*sizeof(par[0]));
-    delta = myPar[ider]*1e-2;
-    if (delta<1e-6) delta=1e-6;
-    myPar[ider]+=delta;
-    calk.SetPars(myPar);
-    calk.SetTrack(Nt);
-    double myRR[3];
-    calk.CalcDcaErrs(hiPos,hiDir,myRR);
+  for (int detDca = 0; detDca<3; detDca++) {
+static const char *tit[3] = {"Test CalcDetDers()","Test CalcDcaDers()","Test internals" };   
+    printf("\n\n\n StvTpcHitErrCalculator::Dest(%s)\n\n",tit[detDca]);
+    switch(detDca) {
+      case 0:  {calc.CalcDetErrs(hiPos,hiDir,hRR); calc.CalcDetDers(dRR); break;}
+      case 1:  {calc.CalcDcaErrs(hiPos,hiDir,hRR); calc.CalcDcaDers(dRR); break;}
+      case 2:  {calc.CalcDetErrs(hiPos,hiDir,hRR); calc.CalcDetDers(dRR);
+                memcpy(hRR    ,calc.mDRr  ,sizeof(hRR ));
+		memcpy(dRRx[0],calc.mDD[0],sizeof(dRRx));                 break;}
+    };
     for (int j=0;j<3;j++) {
-      double est = (myRR[j]-hRR[j])/delta;
-      double eps = (dRR[ider][j]-est)/(fabs(dRR[ider][j])+fabs(est)+1e-10);
+      printf("hRR[%d]=%g  Der = %g %g %g %g\n",j,hRR[j]
+            ,dRR[0][j],dRR[1][j],dRR[2][j],dRR[3][j]);
+    }
 
-      printf("Der[%s][%s]=%g \tnum=%g \teps=%g\n",titPa[ider],titYZ[j],dRR[ider][j],est,eps);
+    StvTpcHitErrCalculator calk("");
+    for (int ider=0;ider<nPars;ider++) {
+      if (ider ==kThkDet) 	continue;
+      double myPar[10],delta;
+      memcpy(myPar,par,nPars*sizeof(par[0]));
+      delta = myPar[ider]*1e-2;
+      if (delta<1e-6) delta=1e-6;
+      myPar[ider]+=delta;
+      calk.SetPars(myPar);
+      calk.SetTrack(Nt);
+      double myRR[6];
+      switch(detDca) {
+        case 0: calk.CalcDetErrs(hiPos,hiDir,myRR);break;
+        case 1: calk.CalcDcaErrs(hiPos,hiDir,myRR);break;
+        case 2: calk.CalcDetErrs(hiPos,hiDir,myRR);
+                memcpy(myRR,calk.mDRr,sizeof(myRR));
+      };
+      
+      switch(detDca) {
+      case 0:; case 1:;
+      for (int j=0;j<3;j++) {
+	double est = (myRR[j]-hRR[j])/delta;
+	double eps = (dRR[ider][j]-est)/(fabs(dRR[ider][j])+fabs(est)+1e-10);
+	printf("Der[%s][%s]=%g \tnum=%g \teps=%g\n",titPa[ider],titYZ[j],dRR[ider][j],est,eps);
+      }
+      break;
+      case 2:
+      for (int j=0;j<6;j++) {
+	double est = (myRR[j]-hRR[j])/delta;
+	double eps = (dRRx[ider][j]-est)/(fabs(dRRx[ider][j])+fabs(est)+1e-10);
+	printf("Der[%s][%s]=%g \tnum=%g \teps=%g\n",titPa[ider],titXYZ[j],dRRx[ider][j],est,eps);
+      } };//end switch
     }
   }
 }
+
 #if 0
 //______________________________________________________________________________
 void StvHitErrCalculator::Test(double phiG,double lamG)
