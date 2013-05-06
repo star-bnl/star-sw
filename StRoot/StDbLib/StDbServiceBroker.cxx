@@ -322,15 +322,33 @@ void StDbServiceBroker::PrintHostList()
     }
 }
 
+namespace {
+
+const std::string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+    return buf;
+}
+
+}
+
 void StDbServiceBroker::CallExternalScript() {
-	char* script = 0;
-	script = getenv("STAR_DEBUG_DB_RETRIES_SCRIPT"); // full path to some notification script
-	if (script) {
-    	std::ifstream infile(script);
-		if (infile.good()) { // check that string points to real file
-			system(script);
-		}
-	}
+
+  std::string admin_emails = "arkhipkin@bnl.gov";
+  char* admins = getenv("STAR_DEBUG_DB_RETRIES_ADMINS");
+  if (admins) {
+	admin_emails = admins;
+  }
+
+  std::string curtime = currentDateTime();
+  std::stringstream exec_command;
+  exec_command << "echo \"We waited for " << seconds_to_reach_for_connect << " seconds, and did not get a db connection at " << getenv("HOSTNAME") 
+	<< " at " << curtime << "\" | /bin/mail -s \"DB RETRIES - Problem detected on "<< getenv("HOSTNAME") << " at " << curtime << "\" " << admin_emails;
+  system(exec_command.str().c_str());
+
 }
 
 //////////////////////////////////////////////////////
