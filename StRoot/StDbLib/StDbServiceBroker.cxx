@@ -335,7 +335,7 @@ const std::string currentDateTime() {
 
 }
 
-void StDbServiceBroker::CallExternalScript() {
+void StDbServiceBroker::SendEmail() {
 
   std::string admin_emails;
   char* admins = getenv("STAR_DEBUG_DB_RETRIES_ADMINS");
@@ -390,7 +390,7 @@ int StDbServiceBroker::RecommendHost()
           mysql_close(conn);
 		  if ( (time(NULL) - last_succeeded_connect_time) > seconds_to_reach_for_connect) { // default: 1800 
 			last_succeeded_connect_time = time(NULL);
-			CallExternalScript();
+			SendEmail();
 		  }
           continue;
         } else {
