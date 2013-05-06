@@ -8,6 +8,27 @@
 <!-- once the sector is assembled, it is placed in a TUBS with opening angles slightly larger (by 2 deg.) than the real geometry -->
 <!-- then we duplicate x10 this volume-->
 
+
+<!--
+    Update April 12, 2012 : (FV)
+    Make the material kind of the cable defined in structure
+    Update April 18, 2013 : (FV)
+    make the offsets on inside ladder defined by variables so thicknesses can be modified as
+    needed
+    Update April 20, 2013 (FV)
+     Store the cable thickness in the structure.
+     We still need to get the proper values from the production. The original
+     values were estimated from a four layer Al cable.
+     presently the Al and Cu cable thickness are set to match the nominal values
+     of 0.37% and 0.65%  radlength per layer
+     Update April 30, 2013 (FV)
+     Changed PXLA to have all the component of the PXSE ie those wo ladders.
+     Changed the phis angles of PXLA and PXSE to ensure there are no extrusions.
+     The Cable thickness is taken from the spreadsheet using the design parameters,
+     and calculated thickness, and effective densities, and radlenghts.
+
+-->
+
     <CDE>agecom,gcunit,gconst.</CDE>
 
     <Content>PXMO, <!-- is the mother volume -->
@@ -23,7 +44,7 @@
             PTRA, PTRB, PTRC, PTRD, PTRE, PTRF,
             PTMA, PTMB, PTMC, PTME, PTMF,
             PTLA, PTLB, PTLC, PTLD, PTLE, PTLF, PTLG, PTLH, PTLI, PTLJ
-    <!-- names/nomenclatures start from a point located a the bottom right of a sector -->
+    <!-- names/nomenclatures start froma point located a the bottom right of a sector -->
     </Content>
 
     <varlist type="float" comment=" Half length of Carbon Fibre sector" > sectorLength/17.55/</varlist> 
@@ -33,7 +54,7 @@
     <varlist type="float" comment=" Z offset for Sector" > sectorZOffset/-3.8105/</varlist> 
     <varlist type="float" comment="  Half Length of Ladder CF backing" > backingLength/14.95/</varlist> 
     <varlist type="float" comment="  Half Width of Ladder CF backing" > backingWidth/1.245/</varlist> 
-    <varlist type="float" comment="  Half Thickness of Ladder CF backing" > backingThickness/0.00875/</varlist> 
+    <varlist type="float" comment="  Thickness of Ladder CF backing" > backingThickness/0.0175/</varlist> 
     <varlist type="float" comment=" Z Offset of CF backing" > backingZOffset/0.65/</varlist> 
     <varlist type="float" comment=" length of short Extrusion" > DoveTailExtrusionLength/0.05/</varlist> 
     <varlist type="float" comment=" Thickness of lip" > DoveTailExtrusionThickness/0.124/</varlist> 
@@ -47,7 +68,6 @@
     <varlist type="float" comment=" Half Thickness of Dovetail" > DoveTailHalfThickness/0.05/</varlist> 
     <varlist type="float" comment=" Dove tail is just inside end of sector beam" > DoveTailZOffset/-20.8605/</varlist> 
     <varlist type="float" comment=" Cable Half Length" > cableLength/15.325/</varlist> 
-    <varlist type="float" comment=" Cable Half Length" > cableThickness/0.011/</varlist> 
     <varlist type="float" comment=" Al cable Offset" > cableZOffset/0/</varlist>
 
     <varlist type="float" comment=" Ladder half Z length"> HalfLadZLen/21/</varlist>
@@ -57,17 +77,26 @@
     <varlist type="float" comment=" Z of the TUBS defining a sector volume"> maxZsec/21/</varlist>
     <varlist type="float" comment=" min radius of the TUBS defining the main volume"> minRvol/2.1/</varlist>
     <varlist type="float" comment=" max radius of the TUBS defining the main volume"> maxRvol/11/</varlist>
-    <!-- test JB : 02/10-->
+
+
     <varlist type="float" comment=" Z of the TUBS defining the main volume"> maxZvol/21.2/</varlist>
    <!-- 06/27 : volume increased to take into account that the pixel is not centered at 0-->
     <varlist type="float" comment=" halfZ of the TUBS defining a sector volume"> halfMaxZ/20.0/</varlist>
-    <varlist type="float" comment=" phi1 of the TUBS defining a sector volume"> minphisec/88.0/</varlist>
-    <varlist type="float" comment=" phi2 of the TUBS defining a sector volume"> maxphisec/128.0/</varlist> 
+    <varlist type="float" comment=" phi1 of the TUBS defining a sector volume"> minphisec/72.0/</varlist>
+    <varlist type="float" comment=" phi2 of the TUBS defining a sector volume"> maxphisec/132.0/</varlist> 
+    <varlist type="float" comment=" phi1 of the TUBS defining a bare sector volume"> minphisecbare/90.0/</varlist>
+    <varlist type="float" comment=" phi2 of the TUBS defining a bare sector volume"> maxphisecbare/126.0/</varlist> 
 
-    <varlist type="float" comment="internal computations">  xpos,ypos,zpos,angle,anglepos, zsensor</varlist> 
+    <varlist type="float" comment="internal computations">  xpos,ypos,zpos,angle,anglepos, zsensor, alphaz, alphax, alphay</varlist> 
     <varlist type="int"   comment="internal computations"> sector </varlist>
     <varlist type="float" comment="internal computations">  ladBoxX, ladBoxY, ladBoxZ </varlist> 
     <varlist type="int"   comment="used for debug">  debug, sens, jj, ii</varlist> 
+
+<!--- Misc ladder thicknesses -->
+    <varlist type="float" comment="GluA thickness"> gluathickness /0.0050/ </varlist>
+    <varlist type="float" comment="GluB thickness"> glubthickness /0.0050/ </varlist>
+    <varlist type="float" comment="GluC thickness"> glucthickness /0.0100/ </varlist>
+     <varlist type="float" comment="LADR half thickness"> ladderhalfthickness/0.05225/ </varlist>
 
     <Structure name="PDEF" >
      <var name="version"     type="float"/>
@@ -107,6 +136,12 @@
      <var name="sec(10)" type="int"/>
     </Structure>
 
+    <Structure name="LADR" comment="LADR parameter settings ">
+     <var name="version" type="int"/>
+     <var name="type" type="int" comment="2: Al cable  1:Cu cable"/>
+     <var name="cablethickness" type="float" comment="Cable thickness" />
+    </Structure>
+
     <Fill name="PDEF" comment=" Pixel default paramters" >
     <var name="version" value="1.0" />
     <var name="sector"  value="10" comment=" number of sectors" />
@@ -120,6 +155,10 @@
     <var name="zpos"  value="{-4.2315, -2.2055, -0.1795 ,1.8465, 3.8725, 5.8985, 7.9245, 9.9505, 11.9765, 14.0025}" comment="z positions [cm] of the 10 sensors inside a ladder"/>
     </Fill>
 
+
+<!--  Most the the version below have been for testing different configurations.
+      The once relavant for Y2013 actual geometry is version 7.
+ -->
     <Fill name="PIXL" comment=" General Pixel detector paramters" >
     <var name="version" value="1.0" />
     <var name="sector"  value="10" comment=" number of sectors" />
@@ -162,6 +201,16 @@
     <var name="isOn"    value="{1,0,0,0,1,0,0,0,0,1}" comment="1 means present, 0 means no ladder"/>
     </Fill>
 
+   <Fill name="PIXL" comment=" mercedes prototype 2-7-9: run13" >
+    <var name="version" value="7.0" />
+    <var name="sector"  value="10" comment=" number of sectors" />
+ 
+    <var name="phiNum"  value="{0,324,288,252,216,180,144,108,72,36}" comment="phi values for each sector, starting from 1, 2 .. 10"/>   
+    <var name="isOn"    value="{0,1,0, 1, 0,0,1,0,0,0}" comment="1 means present, 0 means no ladder"/>
+    </Fill>
+
+
+
     <Fill name="PARO" comment="default">
     <var name="version" value="0"/>
     <var name="DX" value="0"   comment=" no shift "/>
@@ -198,6 +247,21 @@
     <var name="sec"  value="{1,0,0,0,0,0,0,0,0,0}" comment="1..10"/>
     </Fill>
 
+    <Fill name="LADR" >
+     <var name="version" value="1" />
+     <var name="type"    value="1" comment="Cu cable"/>
+     <var name="cablethickness" value="0.014" />     
+    </Fill>
+
+    <Fill name="LADR" >
+     <var name="version" value="2" />
+     <var name="type"    value="0" comment="Al cable"/>
+     <var name="cablethickness" value="0.022" />     
+    </Fill>
+     
+  
+    
+
     <!-- DEFINITION of MATERIALS/MIXTURES -->
    
     <Mixture name="matAdhesive" dens="1.2" >
@@ -206,27 +270,64 @@
     <Component name="H" a="1"  z="1" w="0.073"  />
     </Mixture>
 
-    <Mixture name="medFR4" dens="1.80">
+    <Mixture name="medFR4" dens="1.80" >
     <Component name="Si" a="28.08" z="14" w="0.281"/>
     <Component name="O" a="16" z="8" w="0.467"/>
     <Component name="C" a="12" z="6" w="0.220"/>
     <Component name="H" a="1" z="1" w="0.032"/>
     </Mixture>
 
-    <Material a="12" z="6" name="CFRPMix" dens="1.3" radl="23.9"/>
-    <Material a="12" z="6" name="CBMix" dens="1.3" radl="68"/>
-    <Material a="26.98" z="13" name="medAlCable" dens="2.7" radl="23.7"/>
 
-    <!-- first we create the main volume -->
+
+    <Material a="12" z="6" name="CFRPMix" dens="1.3" radl="23.9"/>
+    <Material a="12" z="6" name="CBMix"   dens="1.3" radl="68"/>
+
+<!--- The radl length is set correctly for the cable mixtures, the dens and a/z should be setup
+      using a proper mixture. The filling factors of Al, Cu lis assumed 0.7 for these calc. It is probably a bit smaller
+-->
+    <Mixture name="kapton" dens="1.41" >
+    <Component name="O" a="16" z="8" w="0.209235"/>
+    <Component name="N" a="15" z="7" w="0.073270"/>
+    <Component name="C" a="12" z="6" w="0.691133"/>
+    <Component name="H" a="1"  z="1" w="0.026362"/>
+    </Mixture>
+    
+
+    <Mixture name="matCuCable" dens="4.37" >
+    <Component name="Cu" a="63.54" z="29" w="0.802"/>
+    <Component name="kapton" a="12.767" z="6.36" w="0.198"/>
+    </Mixture>
+
+    <Mixture name="matAlCable" dens="1.936" >
+    <Component name="Al" a="27" z="13" w="0.626"/>
+    <Component name="kapton" a="12.767" z="6.36" w="0.374"/>
+    </Mixture>
+
+    <!-- first we create the main volume 
+         Setup version to use.
+-->
     <Use struct="PDEF" select="version" value="1.0"/>
     <Use struct="SENP" select="version" value="1.0"/>
-    <Use struct="PIXL" select="version" value="6.0"/>
+    <Use struct="PIXL" select="version" value="7.0"/>
     <Use struct="PARO" select="version" value="0" />
     <Use struct="PARA" select="version" value="0" />
+    <!--    <Use struct="LADR" select="version" value="1" />-->
+    <!-- first test : 05-01-2013 was done with LADR =1 , means Cu cable-->
+<!-- new test is LADR=2 , means Al-->
+    <Use struct="LADR" select="version" value="2" />
     debug = 0
+
+
+    <Print level="0" fmt="' PXL : PXL_version = ',F5.3 " >
+      PIXL_version
+    </Print>
+    <Print level="0" fmt="' PXL : LADR_version = ',I3,' LADR_type= ',I3 " >
+      LADR_version,LADR_type
+    </Print>
+
     <Create    block="PXMO" />
-<!--    <Placement block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" />-->
-    <Placement block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" konly="'MANY'"/>
+
+    <Placement block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" konly="'ONLY'"/>
 
     <Volume name="PXMO" comment="Main volume in the AGML tutorial geometry">
 
@@ -234,6 +335,8 @@
     <Attribute for="PXMO" seen="0" colo="6" /> 
 
     <Shape type="TUBE" rmin="minRvol" rmax="maxRvol" dz="maxZvol" />
+    
+
     <Do var="jj" from="1" to="10">
 
      angle = PDEF_phiNum(jj)
@@ -244,25 +347,32 @@
      ypos=.00001*cos(anglepos) + (PARO_DY*PARO_mult)*PARO_sec(jj) 
      zpos = (PARO_DZ*PARO_mult)*PARO_sec(jj)
    
-     <If expr="debug==1"  >
-       <Info format="angle(deg)={6.3f}"> angle </Info>
+     alphaz = -1*angle -1*(PARA_DG*PARA_mult)*PARA_sec(jj)
+     alphax = -1*(PARA_DA*PARA_mult)*PARA_sec(jj)
+     alphay = -1*(PARA_DB*PARA_mult)*PARA_sec(jj)
+     <!-- PXSE is the single naked sector volume-->
+
+    
+     <If expr="PIXL_isOn(jj)!=1">
+
+      <If expr="debug==1"  >
+       <Info format="Blank Sector angle(deg)={7.3f}"> angle </Info>
        <Info format="sector={2i}"> jj </Info>
        <Info format="xpos={6.2f}"> xpos*1000000 </Info>
        <Info format="ypos={6.2f}"> ypos*1000000 </Info>
        <Info format="zpos={6.2f}"> zpos </Info>
-       <Info format="alphaZ={6.2f}"> -1*(PARA_DG*PARA_mult)*PARA_sec(jj)</Info>
-       <Info format="alphaX={6.2f}"> -1*(PARA_DA*PARA_mult)*PARA_sec(jj) </Info>
-       <Info format="alphaY={6.2f}"> -1*(PARA_DB*PARA_mult)*PARA_sec(jj) </Info>
+       <Info format="alphaZ={7.2f}"> alphaZ</Info>
+       <Info format="alphaX={6.2f}"> alphax </Info>
+       <Info format="alphaY={6.2f}"> alphay </Info>
      </If>
-
-     <!-- PXSE is the single naked sector volume-->
-     <!-- it is always present -->
+ 
      <Create block="PXSE"/>
      <Placement block="PXSE" x="xpos" y="ypos" z="zpos" konly="'MANY'" ncopy="jj">
-       <Rotation alphaz="-1*angle-(PARA_DG*PARA_mult*PARA_sec(jj))"/>
-       <Rotation alphax="-1*(PARA_DA*PARA_mult)*PARA_sec(jj)"/>
-       <Rotation alphay="-1*(PARA_DB*PARA_mult)*PARA_sec(jj)"/>
+       <Rotation alphaz="alphaz"/>
+       <Rotation alphax="alphax"/>
+       <Rotation alphay="alphay"/>
      </Placement>
+    </If>
     </Do>
 
     <!-- placement of silicon volume -->
@@ -276,14 +386,32 @@
      xpos=.00001*sin(anglepos) + (PARO_DX*PARO_mult)*PARO_sec(ii) 
      ypos=.00001*cos(anglepos) + (PARO_DY*PARO_mult)*PARO_sec(ii) 
      zpos = (PARO_DZ*PARO_mult)*PARO_sec(ii)
+  
+     alphaz = -1*angle -1*(PARA_DG*PARA_mult)*PARA_sec(jj)
+     alphax = -1*(PARA_DA*PARA_mult)*PARA_sec(jj)
+     alphay = -1*(PARA_DB*PARA_mult)*PARA_sec(jj)
 
-     <If expr="PIXL_isOn(ii)==1"> 
+   
+
+     <If expr="PIXL_isOn(ii)==1">
+
+    <If expr="debug==1"  >
+       <Info format="Instrumented sector={2i}"> ii </Info>    
+       <Info format="angle(deg)={7.3f}"> angle </Info>
+       <Info format="xpos={6.2f}"> xpos*1000000 </Info>
+       <Info format="ypos={6.2f}"> ypos*1000000 </Info>
+       <Info format="zpos={6.2f}"> zpos </Info>
+       <Info format="alphaZ={7.2f}"> alphaz</Info>
+       <Info format="alphaX={6.2f}"> alphax </Info>
+       <Info format="alphaY={6.2f}"> alphay </Info>
+      </If>
+
      <!-- PXLA is the single sector volume equipped with LADDR-->
      <Create block="PXLA"/>
-     <Placement block="PXLA" x="xpos" y="ypos" z="zpos" konly="'MANY'" ncopy="ii">
-     <Rotation alphaz="-1*angle-(PARA_DG*PARA_mult*PARA_sec(ii))"/>
-     <Rotation alphax="-1*(PARA_DA*PARA_mult)*PARA_sec(ii)"/>
-     <Rotation alphay="-1*(PARA_DB*PARA_mult)*PARA_sec(ii)"/>
+     <Placement block="PXLA" in="PXMO" x="xpos" y="ypos" z="zpos" konly="'MANY'" ncopy="ii">
+     <Rotation alphaz="alphaz"/>
+     <Rotation alphax="alphax"/>
+     <Rotation alphay="alphay"/>
      </Placement>
      </If>
      </Do>
@@ -295,8 +423,10 @@
     <Volume name="PXSE" comment="pixel sector"  >
     <Material name="Air" />
     <Attribute for="PXSE" seen="0" colo="1" />
-    <Shape type="TUBS" dz="HalfLadZLen" rmin="minradsec" rmax="maxradsec" phi1="minphisec" phi2="maxphisec" />
+    <Shape type="TUBS" dz="HalfLadZLen" rmin="minradsec" rmax="maxradsec" phi1="minphisecbare" phi2="maxphisecbare" />
 
+    <!-- The following section is identical to that of the the PXSE section
+         Can this be done by an include ?  -->
     <!--  Placement of arcs in sector beam --> 
     <!-- Arc bottom right --> 
 
@@ -683,7 +813,422 @@
     </Volume>
     <!--  Close PXSE volume  --> 
 
-    <!-- here we define all the shapes -->
+   <Volume name="PXLA" comment="pixel sector with ladders">
+   <Material name="Air"/>
+   <Attribute for="PXLA" seen="0" colo="1"/>
+   <Shape type="TUBS" dz="halfMaxZ" rmin="minradsec" rmax="maxradsec" phi1="minphisec" phi2="maxphisec"/>
+        
+    <!--  Placement of arcs in sector beam --> 
+    <!-- Arc bottom right --> 
+
+    <Create block="PXCA" />
+    <Placement block="PXCA" x="-0.25" y="2.7522" z="sectorZOffset">
+    </Placement>
+    <!-- Arc topright --> 
+
+    <Create block="PXCC" />
+    <Placement block="PXCC" x="-0.25" y="7.76948" z="sectorZOffset">
+    </Placement>
+    <!-- Arc top 23 --> 
+
+    <Create block="PXCD" />
+    <Placement block="PXCD" x="-1.47764" y="7.98676" z="sectorZOffset">
+    </Placement>
+    <!-- Arc bottom 23 --> 
+
+    <Create block="PXCE" />
+    <Placement block="PXCE" x="-1.7562" y="7.85145" z="sectorZOffset">
+    </Placement>
+    <!-- Arc top 12 --> 
+
+    <Create block="PXCF" />
+    <Placement block="PXCF"  x="-3.10589" y="7.50501" z="sectorZOffset">
+    </Placement>
+    <!-- Arc bottom 12 --> 
+
+    <Create block="PXCG" />
+    <Placement block="PXCG"  x="-3.35023" y="7.31474" z="sectorZOffset">
+    </Placement>
+    <!-- arc top left --> 
+
+    <Create block="PXCH" />
+    <Placement block="PXCH"  x="-4.56196" y="6.70432" z="sectorZOffset">
+    </Placement>
+    <!-- arc bottom left --> 
+
+    <Create block="PXCB" />
+    <Placement block="PXCB"  x="-1.71349" y="2.86881" z="sectorZOffset">
+    </Placement>
+
+    <!--  Placement of Planes  --> 
+
+    <!-- Sector Right side --> 
+
+    <Create block="PXRB" />
+    <Placement block="PXRB"  x="-0.112" y="5.26084" z="sectorZOffset">
+    <Rotation alphaz="90" />
+    </Placement>
+
+    <Create block="PXTR" />
+    <Placement block="PXTR"  x="-0.839768" y="8.01401" z="sectorZOffset">
+    <Rotation alphaz="169.963" />
+    </Placement>
+
+    <Create block="PXTM" />
+    <Placement block="PXTM"  x="-2.43063" y="7.66624" z="sectorZOffset">
+    <Rotation alphaz="181.963" />
+    </Placement>
+
+    <Create block="PXTL" />
+    <Placement block="PXTL"  x="-3.9532" y="6.99789" z="sectorZOffset">
+    <Rotation alphaz="193.963" />
+    </Placement>
+
+    <Create block="PXTJ" />
+    <Placement block="PXTJ"  x="-3.21706" y="7.41467" z="sectorZOffset">
+    <Rotation alphaz="293.54" />
+    </Placement>
+
+    <Create block="PXTI" />
+    <Placement block="PXTI"  x="-1.60516" y="7.92151" z="sectorZOffset">
+    <Rotation alphaz="281.54" />
+    </Placement>
+
+    <!-- Sector Left side --> 
+
+    <Create block="PXLB" />
+    <Placement block="PXLB"  x="-3.2696" y="4.69076" z="sectorZOffset">
+    <Rotation alphaz="306" />
+    </Placement>
+
+    <!-- Sector Inner side --> 
+
+    <Create block="PXIB" />
+    <Placement block="PXIB"  x="-0.989152" y="2.64767" z="sectorZOffset">
+    <Rotation alphaz="357.396" />
+    </Placement>
+
+    <!-- dovetail code .. ugh --> 
+
+    <!--  Placement of Dovetail inside sector  --> 
+
+    <Create block="DTCA" />
+    <Placement block="DTCA" x="-0.25" y="2.7522" z="DoveTailZOffset">
+    </Placement>
+
+    <Create block="DTCB" />
+    <Placement block="DTCB" x="-0.25" y="7.76948" z="DoveTailZOffset">
+    </Placement>
+
+    <Create block="DTCC" />
+    <Placement block="DTCC" x="-1.47764" y="7.98676" z="DoveTailZOffset">
+    </Placement>
+
+    <Create block="DTCD" />
+    <Placement block="DTCD" x="-1.7562" y="7.85145" z="DoveTailZOffset">
+    </Placement>
+
+    <Create block="DTCE" />
+    <Placement block="DTCE" x="-3.10589" y="7.50501" z="DoveTailZOffset">
+    </Placement>
+
+    <Create block="DTCF" />
+    <Placement block="DTCF" x="-3.35023" y="7.31474" z="DoveTailZOffset">
+    </Placement>
+
+    <Create block="DTCG" />
+    <Placement block="DTCG" x="-4.56196" y="6.70432" z="DoveTailZOffset">
+    </Placement>
+
+    <Create block="DTCH" />
+    <Placement block="DTCH" x="-1.71349" y="2.86881" z="DoveTailZOffset">
+    </Placement>
+
+    <!-- DoveTail Sector Right side --> 
+
+    <Create block="DTSA" />
+    <Placement block="DTSA" x="-0.174" y="5.26084" z="DoveTailZOffset">
+    <Rotation alphaz="90" />
+    </Placement>
+
+    <!-- DoveTail  Sector Right upper side --> 
+
+    <Create block="DTSB" />
+    <Placement block="DTSB" x="-0.850573" y="7.95296" z="DoveTailZOffset">
+    <Rotation alphaz="169.963" />
+    </Placement>
+
+    <!-- DoveTail Sector Right upper side --> 
+
+    <Create block="DTSC" />
+    <Placement block="DTSC" x="-1.54441" y="7.93391" z="DoveTailZOffset">
+    <Rotation alphaz="281.54" />
+    </Placement>
+
+    <!-- DoveTail  Sector Right upper side --> 
+
+    <Create block="DTSD" />
+    <Placement block="DTSD" x="-2.42851" y="7.60428" z="DoveTailZOffset">
+    <Rotation alphaz="181.963" />
+    </Placement>
+
+    <!-- DoveTail  Sector Right upper side --> 
+
+    <Create block="DTSE" />
+    <Placement block="DTSE" x="-3.16022" y="7.43943" z="DoveTailZOffset">
+    <Rotation alphaz="293.54" />
+    </Placement>
+
+    <!-- DoveTail  Sector Right upper side --> 
+
+    <Create block="DTSF" />
+    <Placement block="DTSF" x="-3.93824" y="6.93772" z="DoveTailZOffset">
+    <Rotation alphaz="193.963" />
+    </Placement>
+
+    <!-- DoveTail  Sector Right upper side --> 
+
+    <Create block="DTSG" />
+    <Placement block="DTSG" x="-3.21944" y="4.7272" z="DoveTailZOffset">
+    <Rotation alphaz="306" />
+    </Placement>
+
+    <!-- DoveTail  Sector Right upper side --> 
+
+    <Create block="DTSH" />
+    <Placement block="DTSH" x="-0.98906" y="2.68568" z="DoveTailZOffset">
+    <Rotation alphaz="359.27" />
+    </Placement>
+
+    <!--  Placement of Dovetail Extrusion --> 
+
+    <Create block="DTEA" />
+    <Placement block="DTEA" x="-0.25" y="2.7522" z="DoveTailExtrusionZOffset">
+    </Placement>
+
+    <Create block="DTEB" />
+    <Placement block="DTEB" x="-0.25" y="7.76948" z="DoveTailExtrusionZOffset">
+    </Placement>
+
+    <Create block="DTEC" />
+    <Placement block="DTEC" x="-1.47764" y="7.98676" z="DoveTailExtrusionZOffset">
+    </Placement>
+
+    <Create block="DTED" />
+    <Placement block="DTED" x="-1.7562" y="7.85145" z="DoveTailExtrusionZOffset">
+    </Placement>
+
+    <Create block="DTEE" />
+    <Placement block="DTEE" x="-3.10589" y="7.50501" z="DoveTailExtrusionZOffset">
+    </Placement>
+
+    <Create block="DTEF" />
+    <Placement block="DTEF" x="-3.35023" y="7.31474" z="DoveTailExtrusionZOffset">
+    </Placement>
+
+    <Create block="DTEG" />
+    <Placement block="DTEG" x="-4.56196" y="6.70432" z="DoveTailExtrusionZOffset">
+    </Placement>
+
+    <Create block="DTEH" />
+    <Placement block="DTEH" x="-1.71349" y="2.86881" z="DoveTailExtrusionZOffset">
+    </Placement>
+
+    <!-- DoveTail Extrusion Sector Right side --> 
+
+    <Create block="DESA" />
+    <Placement block="DESA" x="-0.162" y="5.26084" z="DoveTailExtrusionZOffset">
+    <Rotation alphaz="90" />
+    </Placement>
+
+    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+    <Create block="DESB" />
+    <Placement block="DESB" x="-0.883339" y="7.76783" z="DoveTailExtrusionZOffset">
+    <Rotation alphaz="169.963" />
+    </Placement>
+
+    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+    <Create block="DESC" />
+    <Placement block="DESC" x="-1.36021" y="7.97152" z="DoveTailExtrusionZOffset">
+    <Rotation alphaz="281.54" />
+    </Placement>
+
+    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+    <Create block="DESD" />
+    <Placement block="DESD" x="-2.42207" y="7.41639" z="DoveTailExtrusionZOffset">
+    <Rotation alphaz="181.963" />
+    </Placement>
+
+    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+    <Create block="DESE" />
+    <Placement block="DESE" x="-2.98786" y="7.51452" z="DoveTailExtrusionZOffset">
+    <Rotation alphaz="293.54" />
+    </Placement>
+
+    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+    <Create block="DESF" />
+    <Placement block="DESF" x="-3.89287" y="6.75527" z="DoveTailExtrusionZOffset">
+    <Rotation alphaz="193.963" />
+    </Placement>
+
+    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+    <Create block="DESG" />
+    <Placement block="DESG" x="-3.06734" y="4.8377" z="DoveTailExtrusionZOffset">
+    <Rotation alphaz="306" />
+    </Placement>
+
+    <!-- DoveTail Extrusion Sector Right upper side --> 
+
+    <Create block="DESH" />
+    <Placement block="DESH" x="-0.977794" y="2.89742" z="DoveTailExtrusionZOffset">
+    <Rotation alphaz="357.396" />
+    </Placement>
+
+    <!-- DoveTail Extrusion Sector Right upper side --> 
+
+<!--    <Create block="DESH" />
+    <Placement block="DESH" x="-0.977794" y="2.89742" z="DoveTailExtrusionZOffset">
+    <Rotation alphaz="357.396" />
+    </Placement> -->
+
+    <Create block="PTRA" />
+    <Placement block="PTRA" x="-0.844273" y="7.31126" z="0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-174" />
+    </Placement>
+
+    <Create block="PTRB" />
+    <Placement block="PTRB" x="-2.2742" y="6.99926" z="0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-162" />
+    </Placement>
+
+    <Create block="PTRC" />
+    <Placement block="PTRC" x="-3.61442" y="6.41119" z="0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-150" />
+    </Placement>
+
+    <Create block="PTRD" />
+    <Placement block="PTRD" x="-0.45" y="4.93658" z="0.85+DoveTailShapeOffset">
+    <Rotation alphaz="90" />
+    </Placement>
+
+    <Create block="PTRE" />
+    <Placement block="PTRE" x="-2.64683" y="4.40863" z="0.85+DoveTailShapeOffset">
+    <Rotation alphaz="126" />
+    </Placement>
+
+    <Create block="PTRF" />
+    <Placement block="PTRF" x="-1.06041" y="3.14864" z="0.25+DoveTailShapeOffset">
+    <Rotation alphaz="177.396" />
+    </Placement>
+
+    <Create block="PTMA" />
+    <Placement block="PTMA" x="-1.09427" y="7.28499" z="0.2+DoveTailShapeOffset">
+    <Rotation alphaz="-174" />
+    </Placement>
+
+    <Create block="PTMB" />
+    <Placement block="PTMB" x="-2.2742" y="6.99926" z="0.2+DoveTailShapeOffset">
+    <Rotation alphaz="-162" />
+    </Placement>
+
+    <Create block="PTMC" />
+    <Placement block="PTMC" x="-3.39672" y="6.53688" z="0.2+DoveTailShapeOffset">
+    <Rotation alphaz="-150" />
+    </Placement>
+
+    <Create block="PTME" />
+    <Placement block="PTME" x="-0.7" y="4.92913" z="0.2+DoveTailShapeOffset">
+    <Rotation alphaz="90" />
+    </Placement>
+
+    <Create block="PTMF" />
+    <Placement block="PTMF" x="-2.37819" y="4.46421" z="0.2+DoveTailShapeOffset">
+    <Rotation alphaz="126" />
+    </Placement>
+
+    <Create block="PTLA" />
+    <Placement block="PTLA" x="-0.769273" y="7.31915" z="-0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-174" />
+    </Placement>
+
+    <Create block="PTLB" />
+    <Placement block="PTLB" x="-2.2742" y="6.99926" z="-0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-162" />
+    </Placement>
+
+    <Create block="PTLC" />
+    <Placement block="PTLC" x="-3.67973" y="6.37348" z="-0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-150" />
+    </Placement>
+
+    <Create block="PTLD" />
+    <Placement block="PTLD" x="-0.322263" y="3.06613" z="-0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-174" />
+    </Placement>
+
+    <Create block="PTLE" />
+    <Placement block="PTLE" x="-0.952705" y="2.93212" z="-0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-162" />
+    </Placement>
+
+    <Create block="PTLF" />
+    <Placement block="PTLF" x="-1.54151" y="2.66997" z="-0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-150" />
+    </Placement>
+
+    <Create block="PTLG" />
+    <Placement block="PTLG" x="-0.375" y="5.31059" z="-0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-174" />
+    </Placement>
+
+    <Create block="PTLH" />
+    <Placement block="PTLH" x="-2.8181" y="4.51677" z="-0.85+DoveTailShapeOffset">
+    <Rotation alphaz="-150" />
+    </Placement>
+
+    <Create block="PTLI" />
+    <Placement block="PTLI" x="-0.375" y="5.11059" z="-0.6+DoveTailShapeOffset">
+    <Rotation alphaz="-174" />
+    </Placement>
+
+    <Create block="PTLJ" />
+    <Placement block="PTLJ" x="-2.70055" y="4.35497" z="-0.6+DoveTailShapeOffset">
+    <Rotation alphaz="-150" />
+    </Placement>
+ 
+
+        <Create block="LADR" />
+        <Placement block="LADR"  x="-1.38525" y="8.1758" z="-4.8855">
+        <Rotation alphaz="169.963" />
+        </Placement>
+
+        <Create block="LADR" />
+        <Placement block="LADR"  x="-3.05482" y="7.70913" z="-4.8855">
+        <Rotation alphaz="181.963" />
+        </Placement>
+
+        <Create block="LADR" />
+        <Placement block="LADR" x="-4.59088" y="6.90554" z="-4.8855">
+        <Rotation alphaz="193.963" />
+        </Placement>
+
+        <Create block="LADR" />
+        <Placement block="LADR" x="-0.5323251963" y="2.56258" z="-4.8855">
+        <Rotation alphaz="357.396" />
+        </Placement>
+
+    </Volume>
+
+
+
+
+    <!-- here we define all the shapes for the sectors-->
     <!-- BOX for planes -->
 
     <Volume name="PXCA" comment="Arc bottom right"  >
@@ -781,6 +1326,10 @@
     <Material name="CFRPMix" />
     <Shape type="BOX" dx="0.73364" dy="sectorHalfThickness" dz="sectorLength" />
     </Volume>
+
+
+
+<!-- shapes for Dovetails .. -->
 
     <Volume name="DTCA" comment=""  >
     <Attribute for="DTCA" seen="1" colo="920" />
@@ -1114,7 +1663,7 @@
       alp1="0" alp2="0" />
    </Volume>
 
-   <Volume name="PTLD" comment="Dovetail support palte part outer"  >
+   <Volume name="PTLD" comment="Dovetail support plate part outer"  >
    <Attribute for="PTLD" seen="1" colo="920" />
    <Material name="Aluminium" />
    <Shape type="TRAP" dz="0.05" thet="0" phi="0"
@@ -1124,7 +1673,7 @@
       alp1="-5.08889e-14" alp2="-5.08889e-14" />
    </Volume>
 
-   <Volume name="PTLE" comment="Dovetail support palte part outer"  >
+   <Volume name="PTLE" comment="Dovetail support plate part outer"  >
    <Attribute for="PTLE" seen="1" colo="920" />
    <Material name="Aluminium" />
    <Shape type="TRAP" dz="0.05" thet="0" phi="0"
@@ -1134,7 +1683,7 @@
       alp1="5.08889e-14" alp2="5.08889e-14" /> 
    </Volume>
 
-   <Volume name="PTLF" comment="Dovetail support palte part outer"  >
+   <Volume name="PTLF" comment="Dovetail support plate part outer"  >
    <Attribute for="PTLF" seen="1" colo="920" />
    <Material name="Aluminium" />
    <Shape type="TRAP" dz="0.05" thet="0" phi="0"
@@ -1184,69 +1733,52 @@
       alp1="-6" alp2="-6" />
    </Volume>
 
-   <Volume name="PXLA" comment="pixel sector">
-   <Material name="Air"/>
-   <Attribute for="PXLA" seen="0" colo="1"/>
-   <Shape type="TUBS" dz="halfMaxZ" rmin="minradsec" rmax="maxradsec" phi1="minphisec" phi2="maxphisec"/>
-        
-        <Create block="LADR" />
-        <Placement block="LADR"  x="-1.38525" y="8.1758" z="-4.8855">
-        <Rotation alphaz="169.963" />
-        </Placement>
-
-        <Create block="LADR" />
-        <Placement block="LADR"  x="-3.05482" y="7.70913" z="-4.8855">
-        <Rotation alphaz="181.963" />
-        </Placement>
-
-        <Create block="LADR" />
-        <Placement block="LADR" x="-4.59088" y="6.90554" z="-4.8855">
-        <Rotation alphaz="193.963" />
-        </Placement>
-
-        <Create block="LADR" />
-        <Placement block="LADR" x="-0.582273" y="2.56485" z="-4.8855">
-        <Rotation alphaz="357.396" />
-        </Placement>
-
-    </Volume>
 
     <!--  BOX for silicon active ladders  -->
     <Volume name="LADR" comment="first ladder prototype">
     <Material name="Air"/>
+    <Medium name ="MedAir" epsil="0.001"/>
     <Attribute for="LADR" seen="1" colo="920"/>
     <Shape type="BOX" dx="1.245" dy="0.05225" dz="15.325" />
+
+
+   ypos = ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness - gluathickness - 0.0025
+
+
     <Do var="sens" from="1" to="SENP_sensor">
       zsensor = SENP_zpos(sens)
       <Create block="PXSI"/>
-      <Placement in="LADR" x="-0.0848" y="-0.009975" z="zsensor" block="PXSI">
+      <Placement in="LADR" x="-0.0848" y="ypos" z="zsensor" block="PXSI">
       </Placement>
     </Do>
 
     <!-- Glue for CMOS sensors --> 
-
+   ypos = ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness - gluathickness/2.0
     <Create block="GLUA" />
-    <Placement block="GLUA" in="LADR" x="-0.1044" y="-0.00475" z="4.8855">
+    <Placement block="GLUA" in="LADR" x="-0.1044" y="ypos" z="4.8855">
     </Placement>
+     ypos = ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness/2.0
 
     <Create block="ALCA" />
-    <Placement block="ALCA" x="-0.01475" y="0.00875" z="cableZOffset">
+    <Placement block="ALCA" x="-0.01475" y="ypos" z="cableZOffset">
     </Placement>
 
     <!-- Glue for Al/Cu Cable --> 
-
+   ypos = ladderhalfthickness -glucthickness - backingThickness - glubthickness/2
     <Create block="GLUB" />
-    <Placement block="GLUB" x="1.53076e-19" y="0.02225" z="0.065">
+    <Placement block="GLUB" x="1.53076e-19" y="ypos" z="0.065">
     </Placement>
 
     <!-- Carbon Fiber backing on ladder --> 
 
+    ypos = ladderhalfthickness -glucthickness - backingThickness/2.0
     <Create block="CFBK" />
-    <Placement block="CFBK" x="5.35765e-19" y="0.0335" z="backingZOffset">
+    <Placement block="CFBK" x="5.35765e-19" y="ypos" z="backingZOffset">
     </Placement>
 
+    ypos = ladderhalfthickness -glucthickness/2.0
     <Create block="GLUC" />
-    <Placement block="GLUC" x="-0.525" y="0.04725" z="0">
+    <Placement block="GLUC" x="-0.525" y="ypos" z="0">
     </Placement>
 
     <Create block="DRIV" />
@@ -1259,31 +1791,38 @@
     <Volume name="GLUA" comment="Glue for CMOS sensors"  >
     <Attribute for="GLUA" seen="1" colo="800" />
     <Material name="matAdhesive" />
-    <Shape type="BOX" dx="1.1406" dy="0.0025" dz="10.1295" />
+    <Shape type="BOX" dx="1.1406" dy="gluathickness/2.0" dz="10.1295" />
     </Volume>
 
     <Volume name="ALCA" comment=""  >
     <Attribute for="ALCA" seen="1" colo="616" />
-    <Material name="medAlCable" />
-    <Shape type="BOX" dx="1.23025" dy="cableThickness" dz="cableLength" />
+    <If expr="LADR_type==0">
+     <Then>
+      <Material name="matAlCable" />
+     </Then>
+     <Else>
+      <Material name="matCuCable" />
+     </Else>
+    </If>
+    <Shape type="BOX" dx="1.23025" dy="LADR_cablethickness/2.0" dz="cableLength" />
     </Volume>
 
     <Volume name="GLUB" comment="Glue for Al/Cu Cable"  >
     <Attribute for="GLUB" seen="1" colo="629" />
     <Material name="matAdhesive" />
-    <Shape type="BOX" dx="1.245" dy="0.0025" dz="14.95" />
+    <Shape type="BOX" dx="1.245" dy="glubthickness/2.0" dz="14.95" />
     </Volume>
 
     <Volume name="CFBK" comment="Carbon Fiber backing on ladder"  >
     <Attribute for="CFBK" seen="1" colo="1" />
     <Material name="CBMix" />
-    <Shape type="BOX" dx="1.245" dy="backingThickness" dz="backingLength" />
+    <Shape type="BOX" dx="1.245" dy="backingThickness/2.0" dz="backingLength" />
     </Volume>
 
     <Volume name="GLUC" comment=""  >
     <Attribute for="GLUC" seen="1" colo="629" />
     <Material name="matAdhesive" />
-    <Shape type="BOX" dx="0.72" dy="0.005" dz="14.95" />
+    <Shape type="BOX" dx="0.72" dy="glucthickness/2.0" dz="14.95" />
     </Volume>
 
     <Volume name="DRIV" comment=""  >
@@ -1296,26 +1835,28 @@
     <Material name="Silicon"/>
     <Attribute for="PXSI" seen="1" colo="594"/>
     <Shape type="BOX" dz="1.0125" dx="1.137" dy="0.0025"/>
+    
     <Create block="PLAC"/>
-    <Placement block="PLAC" x="-0.1533" z="0.0" y="0" in="PXSI" />
+    <Placement block="PLAC" x="-0.1533" z="0.0" y="-0.0013" in="PXSI" />
     </Volume>
 
     <Volume name="PLAC" comment="active silicon top sector"  >
-    <Attribute for="PLAC" seen="1" colo="600"  />
-    <Material name="Silicon"  />
+    <Attribute for="PLAC" seen="1" colo="4"  />
+    <Material name="Silicon" />
     <Material name="SSensitive" isvol="1"/>
-    <Shape type="BOX" dz="0.9936" dx="0.9605" dy="0.0025" />
+    <Medium name ="MedSiSensitive" epsil="0.001"/>
+    <Shape type="BOX" dz="0.9936" dx="0.9605" dy="0.0008" />
        <Instrument block="PLAC"  >
              <Hit meas="z" opts="S" bins=".00001"  />
-             <Hit meas="y" bins=".00001"  />
-             <Hit meas="x" bins=".00001"  />
+             <Hit meas="y" opts="S" bins=".00001"  />
+             <Hit meas="x" opts="S" bins=".00001"  />
              <Hit meas="ptot" nbits="16" min="0" max="100"  />
              <Hit meas="cx" nbits="10"  />
              <Hit meas="cy" nbits="10"  />
              <Hit meas="cz" nbits="10"  />
              <Hit meas="sleng" nbits="16" min="0" max="500"  />
              <Hit meas="tof" nbits="16"  />
-             <Hit meas="step" bins=".01"  />
+             <Hit meas="step" bins=".0001"  />
              <Hit meas="eloss" nbits="16"  />
        </Instrument>
     </Volume>
