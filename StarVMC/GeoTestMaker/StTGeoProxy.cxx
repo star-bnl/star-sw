@@ -1,5 +1,5 @@
 
-// $Id: StTGeoProxy.cxx,v 1.1 2013/04/20 21:58:41 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.2 2013/05/06 16:13:34 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -799,7 +799,7 @@ static int 	nTest=0,nFail=0,detId=0;
 //   Break(nCall);
   StHitPlaneHardMapIter it(fHitPlaneHardMap->find(hardw));
   StHitPlane *hp=0,*hpMap=0,*hpGeo=0;
-  if (fOpt && it !=  fHitPlaneHardMap->end()) { //HitPlane found
+  if ((fOpt&1) && it !=  fHitPlaneHardMap->end()) { //HitPlane found
      hpMap = (*it).second;fGoodHit=1;
   } 
   hp = hpMap;

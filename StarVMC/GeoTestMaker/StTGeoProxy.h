@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.1 2013/04/20 21:58:41 perev Exp $
+// $Id: StTGeoProxy.h,v 1.2 2013/05/06 16:13:29 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -230,7 +230,7 @@ virtual ~StTGeoProxy();
 
 public:
        int  Load(const char *geo);
-       void SetOpt (int opt)	{fOpt = (opt!=0);}
+       void SetOpt (int opt)	{fOpt = opt;}
        void Init(int mode=0);
        void InitLayers(StDetectorId did=kUnknownId);
        void Finish();
