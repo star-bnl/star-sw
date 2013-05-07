@@ -1,4 +1,4 @@
-// $Id: StHitFilterMaker.h,v 1.4 2004/04/08 19:28:55 caines Exp $
+// $Id: StHitFilterMaker.h,v 1.5 2013/05/07 18:37:43 jeromel Exp $
 
 #ifndef STAR_StHitFilterMaker
 #define STAR_StHitFilterMaker
@@ -40,12 +40,14 @@ class StHitFilterMaker : public StMaker {
   Double_t mPtUpperCut;
   Double_t mAbsEtaCut;
   Double_t mAbsZVertCut;
-    
+  Double_t mKeepWestHighEtaHits;
+
  protected:
   // Protected method if any
+  Int_t checkHitTowardFgt(StHit* hit);
 
  public: 
-  StHitFilterMaker(const char *name="StHitFilterMaker",Double_t ptLowerCut=1.5,Double_t ptUpperCut=-1, Double_t absEtaCut=1., Double_t absZVertCut=999.);
+  StHitFilterMaker(const char *name="StHitFilterMaker",Double_t ptLowerCut=1.5,Double_t ptUpperCut=-1, Double_t absEtaCut=1., Double_t absZVertCut=999., Double_t WestEtaCut=1.4);
   virtual       ~StHitFilterMaker();
   virtual Int_t Init();
   virtual Int_t  Make();
@@ -64,13 +66,15 @@ class StHitFilterMaker : public StMaker {
   Double_t ptUpperCut() { return mPtUpperCut;}
   Double_t absEtaCut() { return mAbsEtaCut;}
   Double_t absZVertCut() { return mAbsZVertCut;}
-    
+
+  void setKeepWestHighEtaHitsForFgt(Double_t v) {mKeepWestHighEtaHits=v;}
+
   // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StHitFilterMaker.h,v 1.4 2004/04/08 19:28:55 caines Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StHitFilterMaker.h,v 1.5 2013/05/07 18:37:43 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
     
@@ -82,6 +86,9 @@ class StHitFilterMaker : public StMaker {
 
 
 // $Log: StHitFilterMaker.h,v $
+// Revision 1.5  2013/05/07 18:37:43  jeromel
+// Modified HitFilter takes a WestEta cut to keep hits in the FGT direction - requested Akio on behalf of the FGT effort
+//
 // Revision 1.4  2004/04/08 19:28:55  caines
 // Make Hitfilter take out those SVT hits not on tracks defined in the constructor - same as TPC filtering
 //

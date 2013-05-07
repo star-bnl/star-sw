@@ -1,7 +1,10 @@
 //*-- Author : James Dunlop
 // 
-// $Id: StHitFilterMaker.cxx,v 1.6 2007/04/28 17:56:18 perev Exp $
+// $Id: StHitFilterMaker.cxx,v 1.7 2013/05/07 18:37:43 jeromel Exp $
 // $Log: StHitFilterMaker.cxx,v $
+// Revision 1.7  2013/05/07 18:37:43  jeromel
+// Modified HitFilter takes a WestEta cut to keep hits in the FGT direction - requested Akio on behalf of the FGT effort
+//
 // Revision 1.6  2007/04/28 17:56:18  perev
 // Redundant StChain.h removed
 //
@@ -42,7 +45,7 @@ ClassImp(StHitFilterMaker)
 
 //_____________________________________________________________________________
 /// StHitFilterMaker constructor
-StHitFilterMaker::StHitFilterMaker(const char *name, Double_t ptl, Double_t pth, Double_t eta, Double_t zvert):StMaker(name),mPtLowerCut(ptl),mPtUpperCut(pth),mAbsEtaCut(eta), mAbsZVertCut(zvert){
+  StHitFilterMaker::StHitFilterMaker(const char *name, Double_t ptl, Double_t pth, Double_t eta, Double_t zvert, Double_t WestEta): StMaker(name),mPtLowerCut(ptl),mPtUpperCut(pth), mAbsEtaCut(eta), mAbsZVertCut(zvert), mKeepWestHighEtaHits(WestEta){
   //  This has defaults for the cuts in the include file
 }
 
@@ -119,7 +122,7 @@ Int_t StHitFilterMaker::Make(){
     }
     
     gMessMgr->Info() << "StHitFilterMaker::Make(): keeping TPC hits on " <<
-      keptTrackNodes.size() << "track nodes " << endm;
+      keptTrackNodes.size() << " track nodes " << endm;
     if (! TESTBIT(m_Mode, kTpcId)) 
     this->removeTpcHitsNotOnTracks(event,keptTrackNodes);
     if (! TESTBIT(m_Mode, kSvtId)) {
@@ -175,7 +178,9 @@ bool StHitFilterMaker::accept(StHit *hit) {
 bool StHitFilterMaker::removeTpcHitsNotOnTracks(StEvent *event, 
 						vector<StTrackNode*>& keptTrackNodes) 
 {
-  Int_t removedHits = 0;
+  Int_t totalHits = 0;
+  Int_t removedHits1 = 0, removedHits2 = 0;
+  Int_t keep4fgt1=0, keep4fgt2=0;
     
   if (event && event->tpcHitCollection()) {
     // first remove all hits not associated with a track at all
@@ -184,20 +189,26 @@ bool StHitFilterMaker::removeTpcHitsNotOnTracks(StEvent *event,
       for (unsigned int m=0; m<theHits->sector(n)->numberOfPadrows(); m++) {
 	
 	for (unsigned int h=0; h<theHits->sector(n)->padrow(m)->hits().size(); h++) {
-		    
+	  totalHits++;
 	  if (theHits->sector(n)->padrow(m)->hits()[h]->trackReferenceCount() == 0) {
 	    if (! (theHits->sector(n)->padrow(m)->hits()[h]->isZombie())) {
-	      theHits->sector(n)->padrow(m)->hits()[h]->makeZombie();
-	      ++removedHits;
+	      if(mKeepWestHighEtaHits<=0.0 || 
+		 checkHitTowardFgt(theHits->sector(n)->padrow(m)->hits()[h])==0 ){
+		theHits->sector(n)->padrow(m)->hits()[h]->makeZombie();
+		++removedHits1;
+	      }else{
+		keep4fgt1++;
+	      }
 	    }
 	  }
 	}
       }
     }
-    gMessMgr->Info() << "StHitFilterMaker::removeTpcHitsNotOnTracks.  Removed " <<
-      removedHits << " TPC hits not on any tracks" << endm;
-    removedHits = 0;
-	
+    gMessMgr->Info() << "StHitFilterMaker::removeTpcHitsNotOnTracks.  Total "<<totalHits<<
+      ", Removed " << removedHits1 << " TPC hits not on any tracks" << endm;
+
+    if(mKeepWestHighEtaHits>0.0) gMessMgr->Info() << " But keeping "<<keep4fgt1<<" hits for fgt"<<endm;
+
     // now all hits not associated 
     StSPtrVecTrackNode& nodes = event->trackNodes();
     for (unsigned int i = 0; i < nodes.size(); i++) {   // loop nodes
@@ -220,8 +231,12 @@ bool StHitFilterMaker::removeTpcHitsNotOnTracks(StEvent *event,
 	      for (unsigned int k = 0; k < hitList.size(); k++)   // loop hits
 		if (hitList[k]->detector() == kTpcId && 
 		    !(hitList[k]->isZombie()) ) {
-		  hitList[k]->makeZombie();
-		  ++removedHits;
+		  if(mKeepWestHighEtaHits<=0.0 || checkHitTowardFgt(hitList[k])==0 ){
+		    hitList[k]->makeZombie();
+		    ++removedHits2;
+		  }else{
+		     keep4fgt2++;
+		  }
 		}
 	      
 	    }
@@ -229,7 +244,10 @@ bool StHitFilterMaker::removeTpcHitsNotOnTracks(StEvent *event,
 	}
     }
     gMessMgr->Info() << "StHitFilterMaker::removeTpcHitsNotOnTracks.  Removed " <<
-      removedHits << " TPC hits not on passed tracks" << endm;
+      removedHits2 << " TPC hits not on passed tracks" << endm;
+    if(mKeepWestHighEtaHits>0.0) gMessMgr->Info() << " But keeping "<<keep4fgt2<<" hits for fgt"<<endm;
+    gMessMgr->Info() << "StHitFilterMaker::removeTpcHitsNotOnTracks.  Saving " <<
+      (totalHits - removedHits1 - removedHits2) << " after filter" << endm;
     
     return true;
   }
@@ -346,5 +364,9 @@ bool StHitFilterMaker::removeBadSvtHits(StEvent *event)
 }
 
 
-
+Int_t StHitFilterMaker::checkHitTowardFgt(StHit* hit){
+  if(hit->position().z() < 0) return 0;
+  if(hit->position().pseudoRapidity()>mKeepWestHighEtaHits) return 1;
+  return 0;
+}
 
