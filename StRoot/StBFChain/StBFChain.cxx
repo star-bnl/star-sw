@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.604 2013/05/02 19:40:31 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.605 2013/05/07 19:30:00 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -687,10 +687,16 @@ Int_t StBFChain::Instantiate()
       } else {
 	LOG_QA << "Default hit filtering is ON" << endm;
       }
-      Int_t mode = 0;
+      Int_t    mode = 0;
       if (GetOption("KeepTpcHit")) mode |= (1 << kTpcId);
       if (GetOption("KeepSvtHit")) mode |= (1 << kSvtId);
       mk->SetMode(mode);
+      // the m_Mode (Int_t is signed integer 4 bytes) mask is too short for the FGT
+      if (GetOption("KeepFgtHit")){
+	TString cmd(Form("StHitFilterMaker *Filtmk=(StHitFilterMaker*) %p;",mk));
+	cmd += "Filtmk->setKeepWestHighEtaHitsForFgt(1.0);";
+	ProcessLine(cmd);
+      }
     }
     if (maker == "StMiniMcMaker" && fFileOut != "") {
       ProcessLine(Form("((StMiniMcMaker *) %p)->setFileName(\"%s\");", mk, fFileOut.Data()));
