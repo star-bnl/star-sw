@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.52 2013/04/10 19:15:52 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.53 2013/05/07 19:30:21 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.53  2013/05/07 19:30:21  jeromel
+ * No change but add markers
+ *
  * Revision 2.52  2013/04/10 19:15:52  jeromel
  * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  *
@@ -217,7 +220,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kBarrelSmdEtaStripId  = kBarrelSmdEtaStripIdentifier,
                    kBarrelSmdPhiStripId  = kBarrelSmdPhiStripIdentifier,
                    kEndcapEmcTowerId     = kEndcapEmcTowerIdentifier,
-                   kEndcapEmcPreShowerId = kEndcapEmcPreShowerIdentifier,
+                   kEndcapEmcPreShowerId = kEndcapEmcPreShowerIdentifier, // 16
                    kEndcapSmdUStripId    = kEndcapSmdUStripIdentifier,
                    kEndcapSmdVStripId    = kEndcapSmdVStripIdentifier,
                    kZdcWestId   = kZdcWestIdentifier,
@@ -233,7 +236,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kPxlId       = kPxlIdentifier,
                    kIstId       = kIstIdentifier,
                    kFgtId       = kFgtIdentifier,
-                   kEtrId       = kEtrIdentifier,
+                   kEtrId       = kEtrIdentifier,                         // 32
                    kFpdWestId   = kFpdWestIdentifier,
                    kFpdEastId   = kFpdEastIdentifier, 
                    kFmsId       = kFmsIdentifier,  
