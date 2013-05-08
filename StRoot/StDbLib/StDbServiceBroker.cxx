@@ -341,6 +341,7 @@ void StDbServiceBroker::SendEmail() {
   char* admins = getenv("STAR_DEBUG_DB_RETRIES_ADMINS");
   if (!admins) { return; }
   char* hostname = getenv("HOSTNAME");
+  pid_t mypid = getpid();
   std::string host = "unknown host";
   if (hostname) { host = hostname; }
   admin_emails = admins;
@@ -348,7 +349,7 @@ void StDbServiceBroker::SendEmail() {
   std::string curtime = currentDateTime();
   std::stringstream exec_command;
   exec_command << "echo \"We waited for " << seconds_to_reach_for_connect << " seconds, and did not get a db connection at " << host 
-	<< " at " << curtime << "\" | /bin/mail -s \"DB RETRIES - Problem detected on "<< host << " at " << curtime << "\" " << admin_emails;
+	<< " at " << curtime << ", process id = " << mypid << "\" | /bin/mail -s \"DB RETRIES - Problem detected on "<< host << " at " << curtime << "\" " << admin_emails;
   system(exec_command.str().c_str());
 
 }
