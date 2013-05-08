@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.34 2013/05/06 16:08:51 perev Exp $
+// $Id: StvMaker.cxx,v 1.35 2013/05/08 00:09:27 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -17,12 +17,6 @@ More detailed: 				<br>
 <li>On Init:				
 <ul>
 <li> Detectors initialization. 
-     SetAttr("useTpc"  ,1) && SetAttr("activeTpc"  ,1) 	// default
-     SetAttr("useSvt",  1) && SetAttr("activeSvt"  ,0) 	// default
-     SetAttr("useSsd"  ,0) && SetAttr("activeSsd"  ,0)	// default Off
-     SetAttr("usePixel",0) && SetAttr("activePixel",0)	// default Off
-     SetAttr("useIst"  ,0) && SetAttr("activeIst"  ,0)	// default Off
-     SetAttr("useHpd"  ,0) && SetAttr("activeHpd"  ,0)	// default Off
 
      SetAttr("useEventFiller"      ,kTRUE);		// default On
      SetAttr("useTracker"          ,kTRUE);		// default On
