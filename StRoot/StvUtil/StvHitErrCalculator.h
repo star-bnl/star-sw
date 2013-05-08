@@ -43,7 +43,7 @@ ClassDef(StvHitErrCalculator,0)
 class StvTpcHitErrCalculator : public StvHitErrCalculator {
 
 public:	
-  StvTpcHitErrCalculator(const char *name="TpcHitErr"):StvHitErrCalculator(name,9){};
+  StvTpcHitErrCalculator(const char *name="TpcHitErr"):StvHitErrCalculator(name,8){};
 virtual int CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 static void Dest(double phiG=33,double lamG=33);
 
@@ -54,10 +54,9 @@ kZErr  	=1, 	/* Intrinsic resolution, z direction			*/
 kThkDet	=2,	/* detector thickness**2 , not fitted			*/
 kYYDiff	=3,  	/* Diffusion in XY direction *yFactor			*/
 kZZDiff	=4,  	/* Diffusion in Z direction  *ZFactor			*/
-kYZDiff	=5,  	/* Diffusion in Y direction  *ZFactor			*/
-kYFact 	=6, 	/*	Error factor in Y-direction 			*/
-kZFact 	=7, 	/*	Error factor in Z-direction 			*/
-kZAB2  	=8};	/* Constant member in Z direction (a*b)**2		*/
+kYFact 	=5, 	/*	Error factor in Y-direction 			*/
+kZFact 	=6, 	/*	Error factor in Z-direction 			*/
+kZAB2  	=7};	/* Constant member in Z direction (a*b)**2		*/
 double mZSpan;
 ClassDef(StvTpcHitErrCalculator,0)
 };

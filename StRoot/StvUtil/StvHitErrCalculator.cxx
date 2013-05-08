@@ -273,98 +273,6 @@ int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
   return 0;
 
 }  
-#if 0
-//______________________________________________________________________________
-int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRr[3])
-{
-/// Calculate hit error matrix in local detector system. In this system
-/// detector plane is x = const 
-
-// <dX*dX>  = thkDet/12
-// <dY*dY>  = tP2*thkDet/12*yFact +yyDiff/cP2
-// <dZ*dZ> =  tL2/cP2*(thkDet/12*zFact + yzDiff) +zAB2/180/cP2+ zzDiff
-// 
-// <dY*dX>	 = tP   * thkDet/12 *sqrt(yFact)
-// <dZ*dX>  = tL/cP*(thkDet/12)*sqrt(zFact)
-// <dZ*dY> =  (tP*tL)/cP*((thkDet/12 + yyDiff/yFact))*sqrt(yFact*zFact)
-// 
-
-  int ans = CalcLocals(hiDir);
-  if (ans) return ans;
-  
-
-  memset(mDD[0],0,mNPar*sizeof(mDD[0]));
-  double myTp = mSp/mCp, myTp2 = myTp*myTp;
-  double myTl = mSl/mCl, myTl2 = myTl*myTl;
-  mZSpan = fabs(fabs(hiPos[2])-210)/100;
-  double WWyy = mPar[kYYDiff]*mZSpan;
-  double WWzz = mPar[kZZDiff]*mZSpan;
-  double WWyz = mPar[kYZDiff]*mZSpan;
-  double DD   = mPar[kThkDet];
-  double yF   = mPar[kYFact ],yFq = sqrt(yF); 
-  double zF   = mPar[kZFact ],zFq = sqrt(zF); 
-
-// <dX*dX>  = DD/12
-// 
-// <dY*dX>  = tP   * DD/12 *sqrt(yFact)
-// <dY*dY>  = tP2*(DD/12) +WWy/cP2
-// 
-// <dZ*dX>  = tL/cP*(DD/12) 
-// <dZ*dY> =  (tP*tL)/cP*((DD/12 + WWy))
-// <dZ*dZ> =  tL2/cP2*(DD/12 + WWy) +WWz +AB/cP2
-
-  mDRr[kXX] = DD/12;
-
-  mDRr[kYX] = myTp*DD/12*yFq;
-  mDRr[kZX] = myTl/mCp*(DD/12)*zFq;
-
-  mDRr[kYY] = myTp2*DD/12*yF + WWyy/mCp2 + mPar[kYErr];
-  mDRr[kZY] = myTp*myTl/mCp*(DD/12*yFq*zFq + WWyy/yFq*zFq);
-  mDRr[kZZ] = myTl2/mCp2*(DD/12*zF+WWyz) + WWzz + mPar[kZAB2]/180/mCp2 + mPar[kZErr];
-
-//		NOW DERIVATIVEs
-
-// <dX*dX>  = DD/12
-  mDD[kThkDet][kXX] = 1./12;
-
-//		  	mDRr[kYX] = myTp*DD/12*yFq;
-  mDD[kYFact  ][kYX] = myTp*DD/12 *0.5/yFq;
-
-
-//  			mDRr[kZX] = myTl/mCp*(DD/12)*zFq;
-  mDD[kZFact  ][kZX] = myTl/mCp*DD/12* 0.5/zFq;
-
-//  		mDRr[kYY] = myTp2*DD/12*yF + WWyy/mCp2 + mPar[kYErr];
-  mDD[kYErr   ][kYY] = 1;;
-  mDD[kYFact  ][kYY] = myTp2*DD/12;
-  mDD[kYYDiff ][kYY] = mZSpan/mCp2;
-
-//  		mDRr[kZY] = (myTp*myTl/mCp)*(DD/12*yFq*zFq + WWyy/yFq*zFq);
-  mDD[kYFact ][kZY] = (myTp*myTl)/mCp*(DD/12*0.5/yFq*zFq + WWyy* (-0.5/yF /yFq*zFq));
-  mDD[kZFact ][kZY] = (myTp*myTl)/mCp*(DD/12*0.5/zFq*yFq + WWyy* ( 0.5/yFq/zFq    ));
-  mDD[kYYDiff][kZY] = (myTp*myTl)/mCp*(                  mZSpan* ( 1.0/yFq*zFq    ));
-
-//  		mDRr[kZZ] = myTl2/mCp2*(DD/12*zF+WWyz) + WWzz + mPar[kZAB2]/180/mCp2 + mPar[kZErr];
-  mDD[kZErr   ][kZZ] = 1;;
-  mDD[kZFact  ][kZZ] = myTl2/mCp2*DD/12;
-  mDD[kYZDiff ][kZZ] = myTl2/mCp2*mZSpan;
-  mDD[kZZDiff ][kZZ] = mZSpan;
-  mDD[kZAB2   ][kZZ] = 1./180/mCp2;
-
-
-  assert(mDRr[kYY]>0);
-  assert(mDRr[kZZ]>0);
-  assert(mDRr[kYY]*mDRr[kZZ]>mDRr[kZY]*mDRr[kZY]);
-
-  if (!hRr) return 0;
-  hRr[kXX] = mDRr[kYY];
-  hRr[kYY] = mDRr[kZZ];
-  hRr[kYX] = mDRr[kZY];
-
-  return 0;
-
-}  
-#endif //0
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -446,7 +354,7 @@ int StvTpcStiErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
 //  edip  =Coeff[3]+Coeff[4]*dz*cosDipInv2    +Coeff[5]*tanDip*tanDip;
 
 
-  mDRr[kXX] = sqrt(DDy*DDz);
+  mDRr[kXX] = 1e-6;
   mDRr[kYY] = myTp2*DDy +WWy/mCp2+mPar[kYErr];
   mDRr[kZZ] = myTl2*DDz +WWz/mCl2+mPar[kZErr];
 
@@ -477,17 +385,15 @@ static const char *titXYZ[6] = {"XX","YX","YY","ZX","ZY","XX"};
 // kThkDet	=2,	/* detector thickness**2 , not fitted			*/
 // kYYDiff	=3,  	/* Diffusion in XY direction *yFactor			*/
 // kZZDiff	=4,  	/* Diffusion in Z direction  *ZFactor			*/
-// kYZDiff	=5,  	/* Diffusion in Y direction  *ZFactor			*/
-// kYFact 	=6, 	/*	Error factor in Y-direction 			*/
-// kZFact 	=7, 	/*	Error factor in Z-direction 			*/
-// kZAB2  	=8};	/* Constant member in Z direction (a*b)**2		*/
+// kYFact 	=5, 	/*	Error factor in Y-direction 			*/
+// kZFact 	=6, 	/*	Error factor in Z-direction 			*/
+// kZAB2  	=7};	/* Constant member in Z direction (a*b)**2		*/
 
   par[kYErr]=0.03*0.03;
   par[kZErr]=0.07*0.07;
   par[kThkDet]=1.;
   par[kYYDiff]=0.11;
   par[kZZDiff]=0.12;
-  par[kYZDiff]=0.13;
   par[kYFact ]=0.9;
   par[kZFact ]=0.8;
   par[kZAB2  ]=1;
