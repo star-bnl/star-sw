@@ -335,7 +335,7 @@ const std::string currentDateTime() {
 
 }
 
-void StDbServiceBroker::SendEmail() {
+void StDbServiceBroker::SendEmail(time_t timediff) {
 
   std::string admin_emails;
   char* admins = getenv("STAR_DEBUG_DB_RETRIES_ADMINS");
@@ -348,7 +348,7 @@ void StDbServiceBroker::SendEmail() {
 
   std::string curtime = currentDateTime();
   std::stringstream exec_command;
-  exec_command << "echo \"We waited for " << seconds_to_reach_for_connect << " seconds, and did not get a db connection at " << host 
+  exec_command << "echo \"We waited for " << timediff << " seconds (threshold: "<< seconds_to_reach_for_connect <<"), and did not get a db connection at " << host 
 	<< " at " << curtime << ", process id = " << mypid << "\" | /bin/mail -s \"DB RETRIES - Problem detected on "<< host << " at " << curtime << "\" " << admin_emails;
   system(exec_command.str().c_str());
 
@@ -389,9 +389,10 @@ int StDbServiceBroker::RecommendHost()
           LOG_WARN << "StDbServiceBroker::RecommendHost() mysql_real_connect "<< 
 	    conn << " "<<((*I).HostName).c_str()<<" "<<(*I).Port <<" did not succeed"<<endm;
           mysql_close(conn);
-		  if ( (time(NULL) - last_succeeded_connect_time) > seconds_to_reach_for_connect) { // default: 1800 
+		  time_t timediff = time(NULL) - last_succeeded_connect_time;
+		  if ( timediff > seconds_to_reach_for_connect) { // default: 1800 
 			last_succeeded_connect_time = time(NULL);
-			SendEmail();
+			SendEmail(timediff);
 		  }
           continue;
         } else {
