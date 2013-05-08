@@ -14,7 +14,6 @@ memset(&row,0,tableSet->GetRowSize());
     row.thkDet	 =     3.8025; // detector thickness**2 , not fitted			;
     row.yyDiff	 = 0.002159075; // Diffusion in XY direction *yFactor			;
     row.zzDiff	 = 1.206901e-08; // Diffusion in Z direction  *ZFactor			;
-    row.yzDiff	 = 2.078102e-05; // Diffusion in Z direction  *ZFactor			;
     row.yFact	 =  0.7016589; // Error factor in Y-direction 			;
     row.zFact	 =  0.7915512; // Error factor in Z-direction 			;
     row.zAB2	 = 5.0293e-06; // Constant member in Z direction (a*b)**2		;
