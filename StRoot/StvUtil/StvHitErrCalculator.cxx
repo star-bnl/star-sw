@@ -222,11 +222,11 @@ int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
 // <dZ*dY> =  (tP*tL)/cP*((DD/12 + WWy))
 // <dZ*dZ> =  tL2/cP2*(DD/12 + WWy) +WWz +AB/cP2
 
-  mDRr[kXX] = DD;
-
-  mDRr[kYX] = myTp*DD*yF;
-  mDRr[kZX] = myTl/mCp*DD*zF;
-
+//   mDRr[kXX] = DD;
+// 
+//   mDRr[kYX] = myTp*DD*yF;
+//   mDRr[kZX] = myTl/mCp*DD*zF;
+// 
   mDRr[kYY] =(myTp2*DD + WWyy/mCp2)*yF*yF + mPar[kYErr];
   mDRr[kZY] = myTp*myTl/mCp*(DD + WWyy)*yF*zF;
   mDRr[kZZ] = (myTl2/mCp2*(DD +WWyy) + WWzz + mPar[kZAB2]/180/mCp2)*zF*zF + mPar[kZErr];
@@ -237,11 +237,11 @@ int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
 // 
 
 //  			mDRr[kYX] = myTp*DD*yF;
-  mDD[kYFact ][kYX] = myTp*DD*qCpCl;
+//  mDD[kYFact ][kYX] = myTp*DD*qCpCl;
 
 
 //  			mDRr[kZX] = myTl/mCp*DD*zF;
-  mDD[kZFact ][kZX] = myTl/mCp*DD*qCpCl;
+//  mDD[kZFact ][kZX] = myTl/mCp*DD*qCpCl;
 
 //  			mDRr[kYY] =(myTp2*DD + WWyy/mCp2)*yF*yF + mPar[kYErr];
   mDD[kYErr  ][kYY] = 1;;
