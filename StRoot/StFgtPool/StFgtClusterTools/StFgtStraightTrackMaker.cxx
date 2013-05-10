@@ -548,7 +548,8 @@ Int_t StFgtStraightTrackMaker::Make()
   Double_t D1Pos=StFgtGeneralBase::getLocDiscZ(0);
   Double_t D6Pos=StFgtGeneralBase::getLocDiscZ(5);
   Double_t zArm=D6Pos-D1Pos;
-  vector<generalCluster>::iterator hitIterD1,hitIterD6, hitIterD1R, hitIterD6R, hitIter, hitIter2;
+  vector<generalCluster>::reverse_iterator hitIterD1,hitIterD6;
+  vector<generalCluster>::iterator  hitIterD1R, hitIterD6R, hitIter, hitIter2;
   StFgtHit* fgtHitD1Phi;
   StFgtHit* fgtHitD1R;
   StFgtHit* fgtHitD6Phi;
@@ -577,7 +578,8 @@ Int_t StFgtStraightTrackMaker::Make()
 	  D6Pos=StFgtGeneralBase::getLocDiscZ(iSeed2);
 	  zArm=D6Pos-D1Pos;
 
-	  for(hitIterD1=hitVecSeed1.begin();hitIterD1 != hitVecSeed1.end();hitIterD1++)
+	  //	  for(hitIterD1=hitVecSeed1.begin();hitIterD1 != hitVecSeed1.end();hitIterD1++)
+	  for(hitIterD1=hitVecSeed1.rbegin();hitIterD1 != hitVecSeed1.rend();hitIterD1++)
 	    {
 	      //this is from the loose clustering and the cluster doesn't have energy match
 	      if(useChargeMatch && !hitIterD1->hasMatch)
@@ -599,7 +601,7 @@ Int_t StFgtStraightTrackMaker::Make()
 	      //    cout <<"ave make1 " <<endl;
 	      Float_t phiD1=hitIterD1->posPhi;
 	      fgtHitD1Phi=hitIterD1->fgtHit;
-	      for(hitIterD6=hitVecSeed2.begin();hitIterD6 != hitVecSeed2.end();hitIterD6++)
+	      for(hitIterD6=hitVecSeed2.rbegin();hitIterD6 != hitVecSeed2.rend();hitIterD6++)
 		{
 		  if(useChargeMatch &&  !hitIterD6->hasMatch)
 		    continue;
@@ -880,6 +882,7 @@ Int_t StFgtStraightTrackMaker::Make()
 			    {
 			      //			           cout <<"found " <<endl;
 			      Bool_t validTrack=false;
+			      Bool_t passQCuts=true;
 			      //			      if(v_x.size()>iFound)
 			      {
 				Double_t ipZ;
@@ -888,7 +891,14 @@ Int_t StFgtStraightTrackMaker::Make()
 				//this also manipulates the points vector to only put points in there that fit
 				//get Track gets the ipZ, so it is ok to put in a random value here, but it is not a reference! So you don't get ipZ back
 				validTrack=getTrack(*v_points, ipZ);
-				if(validTrack)
+
+
+			      if(m_tracks.size()>0)
+				{
+				  passQCuts=trackQCuts(m_tracks.back());
+				}
+
+			      if(validTrack && passQCuts)
 				  {
 				    ///do something...
 				    (m_tracks.back()).points=v_points;
@@ -896,18 +906,20 @@ Int_t StFgtStraightTrackMaker::Make()
 				else
 				  {
 				    v_points->clear();
+				    m_tracks.pop_back();
 				    delete v_points;
 				  }
 			      }
 
-			      if(validTrack)
+
+			      if(validTrack && passQCuts)
 				{
 				  //at least don't duplicate seeds..., the other ones might belong to multiple tracks
 				  usedPoints.insert(geoIdSeed1);
 				  usedPoints.insert(geoIdSeed1R);
 				  usedPoints.insert(geoIdSeed2);
 				  usedPoints.insert(geoIdSeed2R);
-
+				  
 				}
 			      hitCounter++;
 			    }
@@ -933,15 +945,25 @@ Int_t StFgtStraightTrackMaker::Make()
 
   return ierr;
 
+    };
+
+bool StFgtStraightTrackMaker::trackQCuts(AVTrack& trk)
+{
+
+      if(trk.chi2>maxChi2 || trk.trkZ> vertexCutPos || trk.trkZ< vertexCutNeg|| trk.dca> dcaCut )
+	{
+	  return false;
+	}
+      return true;
 };
 
-StFgtStraightTrackMaker::StFgtStraightTrackMaker( const Char_t* name): StMaker( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0)
+StFgtStraightTrackMaker::StFgtStraightTrackMaker( const Char_t* name): StMaker( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),maxChi2(2),dcaCut(1),vertexCutPos(70),vertexCutNeg(-120)
 {
   //  cout <<"AVE constructor!!" <<endl;
   int numTb=7;
   m_effDisk=10;//
   isMuDst=true; //might want to change this...
-  maxPhiDiff=0.5;
+  maxPhiDiff=0.1;
   maxClusters=10;
 
   doFitWithVertex=false;

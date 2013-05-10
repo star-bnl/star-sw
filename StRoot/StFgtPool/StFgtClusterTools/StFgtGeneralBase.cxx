@@ -26,7 +26,7 @@
 #endif
 
 
-StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ),m_fillFromEvent(false),evtNr(0),m_effDisk(2), fgtCollection(0), mVertexNumber(0)
+StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ),m_fillFromEvent(false),evtNr(0),m_effDisk(2), fgtCollection(0), mVertexNumber(0),mUseEHTTrigs(false)
 {
   sprintf(fileBase,"%s",".");
   m_isCosmic=false;
@@ -466,18 +466,37 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
     }
   // get pointer to input
   const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
+  //temp trigger ids for ehts like stuff
+
+
+
   if( muDst )
     {
       StMuEvent *event = static_cast<StMuEvent*>(muDst->event());
       if( event ){
+	StMuTriggerIdCollection trig=event->triggerIdCollection();
+	StTriggerId l1trig=trig.nominal();
+	Bool_t haveEHTTrig=false;
+	for(int iTrig=0;iTrig<3;iTrig++)
+	  {
+
+	    if(l1trig.isTrigger(trigID[iTrig]))
+	      {
+		cout <<"found " <<endl;
+		haveEHTTrig=true;
+	      }
+	  }
 	const StThreeVectorF& v = event->primaryVertexPosition();
 	StEventInfo &info=event->eventInfo();
 	int nPrimV=muDst->numberOfPrimaryVertices();
-	if(1 && nPrimV>mVertexNumber) { // copy vertex info
+	//	cout <<"nPrimV: " << nPrimV <<" vertex num: " << mVertexNumber << " useEHT: " << mUseEHTTrigs << " have EHT? " << haveEHTTrig <<endl;
+
+	if(1 && (nPrimV>mVertexNumber) && (!mUseEHTTrigs || haveEHTTrig )) { // copy vertex info
 	  StMuPrimaryVertex* V= muDst->primaryVertex(mVertexNumber);// select highest rank vertex
 	  assert(V);
 	  const StThreeVectorF &r=V->position();
 	  vtxZ=r.z();
+	  //	  cout <<"vtxZ: " << vtxZ <<endl;
 	  const StThreeVectorF &er=V->posError();
 	  float rank=V->ranking();
 
@@ -496,6 +515,10 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 	      return false; //primary vertex is not good...
 #endif
 	    }
+	 
+	}
+	else{
+	  	vtxRank=-999;
 	}
 	//	if(fabs(ipZ)>20)
 	// return false;
@@ -862,5 +885,7 @@ void StFgtGeneralBase::doLooseClustering()
     }
 
 }
+ const Int_t StFgtGeneralBase::trigID[3]={430315,430313,430312};
+
 Float_t StFgtGeneralBase::chargeMatchCut=1.5;
 ClassImp(StFgtGeneralBase);

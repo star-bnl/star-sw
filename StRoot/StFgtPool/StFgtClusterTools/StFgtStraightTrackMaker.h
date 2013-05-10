@@ -41,10 +41,15 @@ class StFgtStraightTrackMaker : public StMaker {
    void setMaxPhiDiff(Float_t pd);
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.4 2013/01/20 02:47:33 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.5 2013/05/10 18:20:09 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    Bool_t isCosmic;
 
+
+   Float_t maxChi2;
+   Float_t dcaCut;
+   Float_t vertexCutPos;
+   Float_t vertexCutNeg;
 
    Float_t maxPhiDiff;//for points belonging to same track
    Int_t maxClusters; //per disk
@@ -64,6 +69,9 @@ class StFgtStraightTrackMaker : public StMaker {
    vector<TH2D*> v_hClusR;
    Bool_t useChargeMatch;
    Short_t getQuadFromCoo(Double_t x, Double_t y);
+
+   bool trackQCuts(AVTrack& trk);
+
    pair<Double_t,Double_t> getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq);
 
 

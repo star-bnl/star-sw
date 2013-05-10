@@ -110,7 +110,7 @@ class StFgtGeneralBase : public StMaker {
   {
     m_isCosmic=iC;
   }
-
+  void useEHTTrig(Bool_t useEHTTrig);
 
   void setVertexNumber(Int_t r=0);
   void doLooseClustering();
@@ -178,7 +178,11 @@ enum evStatCodes
  StFgtCollection* fgtCollection;
  Bool_t m_fillFromEvent;
  Bool_t m_isCosmic;
-
+ Bool_t mUseEHTTrigs;
+  //EHT1*L2EW == 430315
+  //EHT1 == 430313
+  //EHT0 == 430312
+ static const Int_t trigID[3];
 
   TH1D* clusWChargeMatch;
   TH1D* clusWOChargeMatch;
@@ -223,5 +227,8 @@ inline void StFgtGeneralBase::setVertexNumber(Int_t r)
 {
   mVertexNumber=r;
 }
-
+inline void StFgtGeneralBase::useEHTTrig(Bool_t useEHTTrig)
+{
+  mUseEHTTrigs=useEHTTrig;
+}
 #endif
