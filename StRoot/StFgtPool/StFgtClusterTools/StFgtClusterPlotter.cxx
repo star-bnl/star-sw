@@ -502,9 +502,20 @@ Int_t StFgtClusterPlotter::Init(){
    radioPlots=new TH2D*[kFgtNumDiscs];
    corrPlots=new TH2D*[kFgtNumDiscs*kFgtNumQuads];
 
+   trkRadioPlots=new TH2D*[kFgtNumDiscs];
+   trkPhiProj=new TH1D*[kFgtNumDiscs];
+
+
 
    for(int iD=0;iD<kFgtNumDiscs;iD++)
      {
+       sprintf(buffer,"radioDisk%d_",iD);
+       radioPlots[iD]=new TH2D(buffer,buffer,100,-50,50,100,-50,50);
+       sprintf(buffer,"trkRadioDisk%d_",iD);
+       trkRadioPlots[iD]=new TH2D(buffer,buffer,100,-50,50,100,-50,50);
+       sprintf(buffer,"trkPhiDisk%d_",iD);
+       trkPhiProj[iD]=new TH1D(buffer,buffer,100,-3.5,3.5);
+
        for(int iQ=0;iQ<kFgtNumQuads;iQ++)
 	 {
 	   sprintf(buffer,"clusterChargeDisk%d_Quad%d_phi",iD,iQ);
@@ -520,7 +531,7 @@ Int_t StFgtClusterPlotter::Init(){
 	   sprintf(buffer,"clusterChargeDisk%d_Quad%d_ElecSpace",iD,iQ);
 	   hCChargeElecSpace[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,1000, 100, 0, 2000);
 	   sprintf(buffer,"radioDisk%d_Quad_%d",iD,iQ);
-	   radioPlots[iD]=new TH2D(buffer,buffer,100,-50,50,100,-50,50);
+
 	   sprintf(buffer,"r_phi_ChargeCorr%d_Quad_%d",iD,iQ);
 	   corrPlots[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,2000,100,0,2000);
 	 }

@@ -1364,6 +1364,10 @@ Int_t StFgtStraightPlotter::Make()
 	      radioPlotsClusSizeR[iD]->Fill((*(it->points))[i].x,(*(it->points))[i].y,(*(it->points))[i].rSize);
 	      radioPlotsClusSizeP[iD]->Fill((*(it->points))[i].x,(*(it->points))[i].y,(*(it->points))[i].phiSize);
 	      chargeCorrTracks[iD*4+iq]->Fill((*(it->points))[i].rCharge,(*(it->points))[i].phiCharge);
+
+
+	      trkPhiProj[iD]->Fill((*(it->points))[i].phi);
+
 	      if((*(it->points))[i].r>19)
 		{
 		  chargeCorrTracksRCut[iD*4+iq]->Fill((*(it->points))[i].rCharge,(*(it->points))[i].phiCharge);
@@ -1689,6 +1693,7 @@ Int_t StFgtStraightPlotter::Finish(){
       radioPlotsClusSizeP[iD]->Write();
       radioPlotsClusChargeR[iD]->Write();
       radioPlotsClusChargeP[iD]->Write();
+      trkPhiProj[iD]->Write();
     }
 
   //  ctmp.SaveAs("tmp.png");
@@ -2160,6 +2165,8 @@ Int_t StFgtStraightPlotter::Init(){
   chargeCorrTracks=new TH2D*[kFgtNumDiscs*4];
   chargeCorrTracksRCut=new TH2D*[kFgtNumDiscs*4];
 
+  trkPhiProj=new TH1D*[kFgtNumDiscs];
+
   radioPlotsTrackHits=new TH2D*[kFgtNumDiscs];
   radioPlotsClusChargeR=new TH2D*[kFgtNumDiscs];
   radioPlotsClusSizeR=new TH2D*[kFgtNumDiscs];
@@ -2372,6 +2379,9 @@ Int_t StFgtStraightPlotter::Init(){
 
       sprintf(buffer,"radioTrackHits_%d_%s",iD,mFileName);
       radioPlotsTrackHits[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+
+      sprintf(buffer,"trkPhiProj_%d_%s",iD,mFileName);
+      trkPhiProj[iD]=new TH1D(buffer,buffer,100,-3.5,3.5);
 
       sprintf(buffer,"radioClusterChargeR_%d_%s",iD,mFileName);
       radioPlotsClusChargeR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);

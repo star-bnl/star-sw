@@ -23,7 +23,7 @@ class StFgtClusterPlotter : public StMaker {
    Int_t Finish();
    //   Bool_t checkPulse(StFgtHit* pClus);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterPlotter.h,v 1.1 2012/04/16 19:37:36 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterPlotter.h,v 1.2 2013/05/10 18:20:09 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    // for accessing the data
    StFgtCollection *mFgtCollectionPtr;
@@ -43,6 +43,9 @@ class StFgtClusterPlotter : public StMaker {
    TH2D** radioPlots;
    TH2D** corrPlots;
    int runningEvtNr;
+   TH1D** trkPhiProj;
+   TH2D** trkRadioPlots;
+
 
 
    //THD2** 
