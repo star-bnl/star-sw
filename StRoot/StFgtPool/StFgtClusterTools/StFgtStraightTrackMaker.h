@@ -30,7 +30,8 @@ class StFgtStraightTrackMaker : public StMaker {
    void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    vector<AVTrack>& getTracks();
-
+   void setTrackDcaCut(Float_t dca);
+   void setTrackZVtxCuts(Float_t minZVtx, Float_t maxZVtx);
    void setMinNumFitPoints(Int_t numFP);
    void addMultiplePoints(Bool_t addMult);
    void setMaxClusters(Int_t maxC);
@@ -41,7 +42,7 @@ class StFgtStraightTrackMaker : public StMaker {
    void setMaxPhiDiff(Float_t pd);
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.5 2013/05/10 18:20:09 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.6 2013/05/10 18:24:50 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    Bool_t isCosmic;
 
@@ -104,6 +105,16 @@ class StFgtStraightTrackMaker : public StMaker {
  private:   
       ClassDef(StFgtStraightTrackMaker,1);
 
+};
+
+inline void StFgtStraightTrackMaker::setTrackDcaCut(Float_t dca)
+{
+  dcaCut=dca;
+};
+inline void StFgtStraightTrackMaker::setTrackZVtxCuts(Float_t minZVtx, Float_t maxZVtx)
+{
+  vertexCutPos=maxZVtx;
+  vertexCutNeg=minZVtx;
 };
 
 inline void StFgtStraightTrackMaker::setMaxPhiDiff(Float_t pd)
