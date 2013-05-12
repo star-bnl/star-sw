@@ -1318,8 +1318,8 @@ Bfc_st BFC[] = {
   {"dEdx"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"svtdEdx"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"Event"       ,  "","","MakeEvent",                          "","","Request to initialize event",kFALSE},
-  {"pixFastSim","","","StMcEvent,StEvent"
-   ,                               "StPixelFastSimMaker","StPixelFastSimMaker","FastPixelSimulator",kFALSE},
+  {"pxlFastSim","","","StMcEvent,StEvent"
+   ,                               "StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
