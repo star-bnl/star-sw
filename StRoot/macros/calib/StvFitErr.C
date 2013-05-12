@@ -28,10 +28,12 @@ static const double kWeight = 0.99;	//pars = oldPars*(1-kWeight) + newPars*kWeig
 static int testOnly=0;
 enum {kMinNodes = 10,kMinHits=25};
 static const double kMaxDY=0.5,kMaxDZ=0.5,kErrFak=1.,kMaxCur=1./200,kPMin=0.5;
-
+static const int gScale = 0;
+static const double kUppPar=22,kLowPar=1e-8;
 
 //______________________________________________________________________________
 class FEEvent;
+class FEFcn;
 class StvHitErrCalculator;
 class StvTpcHitErrCalculator;
 int StvFitErr(const char *file="pulls.root");
@@ -148,6 +150,7 @@ public:
   FECalcHolder(int id,StvHitErrCalculator* calc,const double miMax[2][2]);	
         StvHitErrCalculator *GetCalc() const 		{return mCalc;} 
 virtual StvHitErrCalculator *GetCalc(const float x[3])  {if(x){};return mCalc;} 
+virtual int FixPars(FEFcn * /*fcn*/) 			{return 0;}
   int GetId() {return mId;}
  void SetOffset(int off) 	{mOffset=off;}
   int GetOffset() const  	{return mOffset;}
@@ -160,7 +163,7 @@ const char   *GetName() const   {return mCalc->GetName() ;}
  void Scale(double fak);
 
  void AvInit();
- void AvAdd(const double hRR[3]);
+ void AvAdd(const double hRR[3],double yXi2,double zXi2);
  void AvEnd();
 
 private:
@@ -169,7 +172,7 @@ TTable *mTab;
 int mId;
 int mOffset;
 public:
-double mAve[5];
+double mAve[10];
 double mAveDer[kMaxPars][3];
 double mMiMax[2][2];
 StvHitErrCalculator* mCalc;
@@ -183,8 +186,8 @@ public:
   FETpcCalcHolder(StvHitErrCalculator* calc,const double miMax[2][2])
                  :FECalcHolder(1,calc,miMax){;}
 virtual StvHitErrCalculator *GetCalc(const float x[3]);
+virtual int FixPars(FEFcn *fcn);
 };
-
 //______________________________________________________________________________
 class FETstCalcHolder: public FECalcHolder
 {
@@ -239,6 +242,7 @@ double*  GetPars()       		{return mPars ;}
 FECalcHolder *GetCalc(int id,const float hiPos[3]);
    void  Eval(int  npar, double* grad, double& fval, double* par, int flag);
    void  FixPar(int iPar,int fix=1);
+    int  FixPars();
     int  IsFixed(int iPar) const 	{return mFix[iPar];}
     int  Fit();
    void  AvErr(const char *tit);
@@ -922,7 +926,7 @@ void FECalcHolder::AvInit()
    memset(mAveDer[0],0,sizeof(mAveDer));
 }
 //______________________________________________________________________________
-void FECalcHolder::AvAdd(const double hRR[3])
+void FECalcHolder::AvAdd(const double hRR[3],double yXi2,double zXi2)
 {
   double der[kMaxPars][3];
   mAve[0]++;
@@ -930,32 +934,26 @@ void FECalcHolder::AvAdd(const double hRR[3])
   mAve[2]+=hRR[0]*hRR[0];
   mAve[3]+=hRR[2];
   mAve[4]+=hRR[2]*hRR[2];
+  mAve[5]+=yXi2;
+  mAve[6]+=zXi2;
+
   mCalc->CalcDcaDers(der);
   TCL::vadd(mAveDer[0],der[0],mAveDer[0],kMaxPars*3);
 }
 //______________________________________________________________________________
 void FECalcHolder::AvEnd()
 {
-    for (int i=1;i<5;i++) {mAve[i]/=mAve[0];}
+    for (int i=1;i<7;i++) {mAve[i]/=mAve[0];}
     for (int i=2;i<5;i+=2){mAve[i] -= pow(mAve[i-1],2);}
 
-    printf(" yRes=%g  zRes=%g \n\n",sqrt(myFcn.mRes[1]),sqrt(myFcn.mRes[3]));
-    printf(" %s\t yErr = %5.2g(+-%5.2g) \tzErr = %5.2g(+-%5.2g)  Hits=%g\n"
+    printf(" %s\t yRes=%g  zRes=%g \n\n",GetName(),sqrt(myFcn.mRes[1]),sqrt(myFcn.mRes[3]));
+    printf(" %s\t yErr= %5.2g(+-%5.2g) \tzErr = %5.2g(+-%5.2g)  Hits=%g\n"
           ,GetName()
           ,sqrt(mAve[1]), mAve[2]/(2*sqrt(mAve[1]))   
           ,sqrt(mAve[3]), mAve[4]/(2*sqrt(mAve[3])), mAve[0]);  
+    printf(" %s\t yXi2=%g  zXi2=%g \n\n",GetName(),mAve[5],mAve[6]);
 
     
-    TCL::vscale(mAveDer[0],1./mAve[0],mAveDer[0],kMaxPars*3);
-    int nPars = mCalc->GetNPars();
-    double yy=0,zz=0;
-    const double *par = mCalc->GetPars();
-    for (int i=0;i<nPars;i++) {
-      yy += par[i]*mAveDer[i][0];
-      zz += par[i]*mAveDer[i][2];
-    }
-    printf("Again: YY = %g ZZ=%g\n",sqrt(yy),sqrt(zz));
-
 }
 //______________________________________________________________________________
 StvHitErrCalculator *FETpcCalcHolder::GetCalc(const float x[3])
@@ -976,6 +974,22 @@ static const double Dinner =120.8/cos(15./180*M_PI);
    gphi = fmod(gphi+15,30.)-15;
    jk = (sqrt(rxy)*cos(gphi/180*M_PI) <Rinner)? 0:1;
    return (inOut==jk)? mCalc:0;
+}
+//______________________________________________________________________________
+int FETpcCalcHolder::FixPars(FEFcn *fcn)
+{
+enum {
+kYErr  	=0, 	/* Intrinsic resolution, padrow or Y direction		*/
+kZErr  	=1, 	/* Intrinsic resolution, z direction			*/
+kThkDet	=2,	/* detector thickness**2 , not fitted			*/
+kYYDiff	=3,  	/* Diffusion in XY direction *yFactor			*/
+kZZDiff	=4,  	/* Diffusion in Z direction  *ZFactor			*/
+kYFact 	=5, 	/*	Error factor in Y-direction 			*/
+kZFact 	=6, 	/*	Error factor in Z-direction 			*/
+kZAB2  	=7};	/* Constant member in Z direction (a*b)**2		*/
+    fcn->FixPar(kZAB2+mOffset);
+    fcn->FixPar(kThkDet+mOffset);
+    return 2;
 }
 //______________________________________________________________________________
 FETstCalcHolder::FETstCalcHolder()
@@ -1024,6 +1038,17 @@ void FEFcn::Add(FECalcHolder* holder)
   mCas.push_back(holder);
 }
 //______________________________________________________________________________
+int FEFcn::FixPars()
+{ 
+  int n = mCas.size();
+  int nn = 0;
+  for (int i=0;i<n;i++) {
+    nn+= mCas[i]->FixPars(this);
+  }
+ return nn;
+
+}
+//______________________________________________________________________________
 void FEFcn::InitFitter()
 {
   myFitter.SetMaxIterations(2000);
@@ -1032,6 +1057,9 @@ void FEFcn::InitFitter()
   TCL::ucopy(mPars,mFist,mNPars);
 
   myFitter.SetFCN(&Fcn);
+  int n = FixPars();
+  printf("FEFcn::InitFitter() %d fixed params\n",n);
+
 }
 //______________________________________________________________________________
 void FEFcn::DbLoad()
@@ -1233,7 +1261,7 @@ enum {kMinNodes = 10,kMinHits=15,kMaxXi2=30,kNTracks=10000};
 //______________________________________________________________________________
 void FEFcn::Eval(int npar, double* gradp, double& fvalp, double* par, int flag)
 {
-static const double oleg = 1e-6;
+static const double oleg = 1e-10;
 static const double igor = 0;
    assert(npar<=mNPars);
    mNCall++;
@@ -1261,6 +1289,7 @@ static const double igor = 0;
        calc->CalcDcaErrs(n.hiPos,n.hiDir,hRR);
        assert(hRR[0]>0);
        assert(hRR[2]>0);
+       assert(hRR[0]*hRR[2]>hRR[1]*hRR[1]);
        poliSY.Add(n.s,n.yz[0],1./hRR[0]); 
        poliSZ.Add(n.s,n.yz[1],1./hRR[2]); 
      } // end 1st Loop over nodes
@@ -1391,10 +1420,11 @@ void FEFcn::Approx(int nonBias)
   printf("Approx::Aver: Xi2=%g(y) %g(z) %g Pull=%g\n"
         ,mXi2[0],mXi2[1],mXi2[2],double(myPull));
 
-  double korFak = (1.+mydKor/mXi2[2]);
-  if (!nonBias)  {TCL::vscale(mPars,      mXi2[2]*korFak ,mPars,mNPars);}
-  else           {TCL::vscale(mPars,double(myPull*korFak),mPars,mNPars);}
-
+  if (gScale) {
+    double korFak = (1.+mydKor/mXi2[2]);
+    if (!nonBias)  {TCL::vscale(mPars,      mXi2[2]*korFak ,mPars,mNPars);}
+    else           {TCL::vscale(mPars,double(myPull*korFak),mPars,mNPars);}
+  }
 
   Synchro('P');
 }
@@ -1414,7 +1444,7 @@ void FEFcn::Synchro(char from,const double* Arr )
         TString ts(calc->GetName());ts+="_";ts+=ip;
         double qwe = p[ip]; if (qwe<1e-8) qwe=1e-8;
         double stp = qwe*0.1; if (stp<1e-8) stp = 0.8e-6;
-        myFitter.DefineParameter(nump,ts.Data(), qwe, stp, 0, 0.9);
+        myFitter.DefineParameter(nump,ts.Data(), qwe, stp, kLowPar, kUppPar);
         mNams[nump] = ts;
         mPars[nump] = qwe;
         nump++;
@@ -1466,21 +1496,34 @@ void FEFcn::AvErr(const char *tit)
   {
     FECalcHolder *hold = mCas[ih]; hold->AvInit();
   }
-  for (int itk=0;itk<(int)mTks.size();itk++) {   
+  Poli2 poliSY(2,kMaxDY),poliSZ(2,kMaxDZ);
+  for (int itk=0;itk<(int)mTks.size();itk++) {//Loop over tracks 
     const FENodes &nodes = mTks[itk].Nodes();
     int nNodes = nodes.size();
+    poliSY.Clear(); poliSZ.Clear();
+    FECalcHolder *hold[100];
+    double errs[100][3];
     double hRR[3];
     for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
       const FENode &n = nodes[iNode];
-      int detId = n.detId;
-      FECalcHolder *hold = GetCalc(detId,n.hiPos);
-      StvHitErrCalculator *calc = hold->GetCalc();
+      hold[iNode] = GetCalc((int)n.detId,n.hiPos);
+      StvHitErrCalculator *calc = hold[iNode]->GetCalc();
       calc->SetTrack(n.tkDir);
       calc->CalcDcaErrs(n.hiPos,n.hiDir,hRR);
-      hold->AvAdd(hRR);
-    } // end Loop over nodes
-  }//End tracks
+      memcpy(errs[iNode],hRR,sizeof(hRR));
+      poliSY.Add(n.s,n.yz[0],1./hRR[0]); 
+      poliSZ.Add(n.s,n.yz[1],1./hRR[2]); 
+    } // end 1st Loop over nodes
 
+     poliSY.Fit(); 
+     poliSZ.Fit(); 
+
+    for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
+      double yXi2 = poliSY.Xi2(iNode);
+      double zXi2 = poliSZ.Xi2(iNode);
+      hold[iNode]->AvAdd(errs[iNode],yXi2,zXi2);
+    } // end 2nd Loop over nodes
+  }//End tracks
 
   printf("\n ====== AvErr(%s) Events=%d  Tracks=%d Hits=%d\n"
         ,tit,mNEvs,mNTks,mNHits);
