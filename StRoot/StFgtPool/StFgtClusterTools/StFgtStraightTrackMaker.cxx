@@ -555,6 +555,9 @@ Int_t StFgtStraightTrackMaker::Make()
   StFgtHit* fgtHitD6Phi;
   StFgtHit* fgtHitD6R;
 
+
+  for(int locMinNumFitPoints=6;locMinNumFitPoints>=minNumFitPoints;locMinNumFitPoints--)
+    {
   //  cout <<"eff disk : " << m_effDisk <<endl;
   for(int iSeed1=0;iSeed1<5;iSeed1++)
     {
@@ -844,8 +847,8 @@ Int_t StFgtStraightTrackMaker::Make()
 				  Int_t clusterSizePhi=iterClosestPhi->clusterSize;
 				  //				  cout <<"charge R of middle disk: "<<  iD<<": "<< rCharge <<" phicharge: " << phiCharge<<endl;
 
-
-				  if(!doAddMultiplePoints)// already added before if this flag is set
+// already added before if this flag is set
+				  if(!doAddMultiplePoints)
 				    {
 				      AVPoint avp(x,y,diskZ,r,phi,iD,closestQuad, rCharge,phiCharge, clusterSizeR,clusterSizePhi);
 				      //				  cout<<" adding point with r: "<< r <<" phi: " << phi <<" x: " << x <<" y: " << y <<endl;
@@ -878,7 +881,7 @@ Int_t StFgtStraightTrackMaker::Make()
 			  //		  if(iFound>=2 && fabs(xIpExp)<20 && fabs(yIpExp)<20 && fabs(zIpExpX0)<40 && fabs(zIpExpY0)<40) //at least one hit plus seed and pointing roughly to the interaction region
 			  //with hard cuts on the track we can get the whole vertex distribution
 			  //			  cout << " we found " << iFound <<" points " << endl;
-			  if(iFound>=(minNumFitPoints-2)) //at least one hit plus seed and pointing roughly to the interaction region
+			  if(iFound>=(locMinNumFitPoints-2)) //at least one hit plus seed and pointing roughly to the interaction region
 			    {
 			      //			           cout <<"found " <<endl;
 			      Bool_t validTrack=false;
@@ -902,6 +905,19 @@ Int_t StFgtStraightTrackMaker::Make()
 				  {
 				    ///do something...
 				    (m_tracks.back()).points=v_points;
+				  //at least don't duplicate seeds..., the other ones might belong to multiple tracks
+				    usedPoints.insert(geoIdSeed1);
+				    usedPoints.insert(geoIdSeed1R);
+				    usedPoints.insert(geoIdSeed2);
+				    usedPoints.insert(geoIdSeed2R);
+				    //put the rest of it in as well, doesn't matter that we duplicate the seeds, this is a set<int>
+				    for(vector<AVPoint>::iterator it=v_points->begin();it!=v_points->end();it++)
+				      {
+					usedPoints.insert(it->geoIdR);
+					usedPoints.insert(it->geoIdPhi);
+				      }
+
+
 				  }
 				else
 				  {
@@ -912,15 +928,6 @@ Int_t StFgtStraightTrackMaker::Make()
 			      }
 
 
-			      if(validTrack && passQCuts)
-				{
-				  //at least don't duplicate seeds..., the other ones might belong to multiple tracks
-				  usedPoints.insert(geoIdSeed1);
-				  usedPoints.insert(geoIdSeed1R);
-				  usedPoints.insert(geoIdSeed2);
-				  usedPoints.insert(geoIdSeed2R);
-				  
-				}
 			      hitCounter++;
 			    }
 			  //start over
@@ -938,7 +945,7 @@ Int_t StFgtStraightTrackMaker::Make()
 	}
 
     }
-
+    }
   //  cout <<"we have " << m_tracks.size()-oldNumTracks<< " tracks in this event " <<endl;
   //  cout <<"oldNumtracsk: " << oldNumTracks << " new size: " << m_tracks.size() <<endl;
   //  numTracks->Fill(m_tracks.size()-oldNumTracks);

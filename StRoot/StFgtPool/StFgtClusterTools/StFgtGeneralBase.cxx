@@ -2,6 +2,7 @@
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
+
 #include "StRoot/StEvent/StFgtHitCollection.h"
 #include "StRoot/StEvent/StFgtHit.h"
 #include "StRoot/StEvent/StFgtStrip.h"
