@@ -7,7 +7,7 @@
 struct SegDef
 {
   int segment;
-  int size;
+  unsigned int size;
 };
 
 struct ProcessDef {

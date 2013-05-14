@@ -17,13 +17,13 @@ struct ShmAttributes
 {
   int key;
   int segment;
-  int size;
+  unsigned int size;
   int shmid;
   char *ptr;
 };
 
-int createShmSegment(int seg, int size);
-char *getShmPtr(int seg, int offset);
+int createShmSegment(int seg, unsigned int size);
+char *getShmPtr(int seg, unsigned int offset);
 ShmAttributes *getShmAttributes(int seg);
 
 #endif
