@@ -68,6 +68,8 @@ void Pythia8( TString config="pp:W" )
       pythia8->SetFrame("CMS", 510.0);
       pythia8->SetBlue("proton");
       pythia8->SetYell("proton");            
+
+      pythia8->Set("SoftQCD:minBias = on");
     }
 
   primary -> AddGenerator( pythia8 );
