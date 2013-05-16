@@ -1,5 +1,8 @@
-// $Id: LoopOverLaserTrees.C,v 1.9 2010/01/02 23:41:19 genevb Exp $
+// $Id: LoopOverLaserTrees.C,v 1.10 2013/05/16 15:25:39 fisyak Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.10  2013/05/16 15:25:39  fisyak
+// Relax cut on drift velocity precision : 5e-4 => 1e-3
+//
 // Revision 1.9  2010/01/02 23:41:19  genevb
 // Fix issues with dates starting with 2010
 //
@@ -75,7 +78,7 @@ Double_t ScaleE2W(Double_t day) {// scale East to West drift velocity
 //________________________________________________________________________________
 void MakeTable() {
 #ifndef SeparateWestandEast
-  if (! (DVAll[0][0] > 5.3 && DVAll[0][0] < 5.9 && dDVAll[0][0] > 0 && dDVAll[0][0]< 5e-4)) {
+  if (! (DVAll[0][0] > 5.3 && DVAll[0][0] < 5.9 && dDVAll[0][0] > 0 && dDVAll[0][0]< 1e-3)) {
     cout << "Run " << run << " fails =============================" << endl;
     return;
   }
