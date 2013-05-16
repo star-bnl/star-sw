@@ -1904,10 +1904,10 @@ double TCircleFitter::Fit()
 {
 static const int nAVERs = &fRr-&fXx;
 static int nCall=0; nCall++;
-    double xx, yy, xx2, yy2;
-    double f, g, h, p, q, t, g0, g02, d=0;
-    double xroot, ff, fp;
-    double dx, dy, xnom,wt,tmp,radius2,radiuc2;
+    double xx=0, yy=0, xx2=0, yy2=0;
+    double f=0, g=0, h=0, p=0, q=0, t=0, g0=0, g02=0, d=0;
+    double xroot=0, ff=0, fp=0;
+    double dx=0, dy=0, xnom=0,wt=0,tmp=0,radius2=0,radiuc2=0;
     fKase = fCase;
     if (fNuse < 3) return 3e33;
     TCircleFitterAux *aux = GetAux(0);
@@ -1921,7 +1921,7 @@ static int nCall=0; nCall++;
     for (int j=0;j<5;j++) {mm[j]/=fN;}
     fXx-=fXgravity*fXgravity;fYy-=fYgravity*fYgravity;fXy-=fXgravity*fYgravity;
 
-    double eigVal[2];
+    double eigVal[2]={0};
     eigen2(&fXx,eigVal,&fCos);    
     int fastTrak = (eigVal[0]>10*eigVal[1]);
     fNor[0] = -fSin; fNor[1] = fCos;
@@ -2014,7 +2014,7 @@ SWIT: switch(fKase) {
 //  		Nor1 = fPol[1]+ v1*fPol[2]
 //  		Nor2 = fPol[3]+ v1*fPol[4]+ v2*fPol[5] 
     
-	  double myCof[3];    
+	  double myCof[3]={0};    
 	  fPol[0] = 1;
 	  fPol[1] = 0;    fPol[2] = 1./(2*sqrt(fXx));
 	  fPol[3] = fRr;  fPol[4] = fXrr/(2*fXx);   fPol[5] = 1.;
@@ -2169,7 +2169,6 @@ void TCircleFitter::MakeErrs()
          for (int j=0   ;j<=i;j++    ) {
            fCov[li+j] = d2F(i,j)*0.5;  }}
        TCL::trsinv(fCov,fCov ,3);
-#if 1
 
        double dRho = -fH/(fRd*fR);
        dRho = 1/fRd-1/fR;
@@ -2182,34 +2181,6 @@ void TCircleFitter::MakeErrs()
        F[2][0] = -fXd*aRho3;		// dRho/dXd 
        F[2][1] = -fYd*aRho3;		// dRho/dYd 
        F[2][2] = -0.5*aRho3;		// dRho/dG1 
-#endif
-#if 0
-       fXCenter = fXd*fCos-fYd*fSin + fXgravity;
-       fYCenter = fXd*fSin+fYd*fCos + fYgravity;
-       fNx = fXd*fCos-fYd*fSin; 
-       fNy = fXd*fSin+fYd*fCos; 
-       double nor = sqrt(fNx*fNx+fNy*fNy);
-       fNx/=nor; fNy/=nor;
-//     |fXCenter -fNx*fR|
-//     |fYCenter -fNy*fR|
-//     H = fXCenter*fNx+fYCenter*fNy - fR
-       fX[0] = fXCenter -fNx*fR;
-       fX[1] = fYCenter -fNy*fR;
-       fD[0] = fNy;
-       fD[1] =-fNx;
-
-
-       F[0][0] = ( fNx*fCos+fNy*fSin) -fXd*aRho;	// dH /dXd
-       F[0][1] = (-fNx*fSin+fNy*fCos) -fYd*aRho;	// dH /dYd
-       F[0][2] =                      -0.5*aRho;	// dH /dG1
-       F[1][0] = (-fNy*fCos + fNx*fSin)*aRho;		// dFi/dXd
-       F[1][1] = ( fNy*fSin + fNx*fCos)*aRho;		// dFi/dYd
-       F[1][2] = 0;					// dFi/dG1
-       F[2][0] = -fXd*aRho3;				// dRho/dXd 
-       F[2][1] = -fYd*aRho3;				// dRho/dYd 
-       F[2][2] = -0.5*aRho3;				// dRho/dG1 
-
-#endif
 
        break;
      }
@@ -3442,18 +3413,17 @@ double THelixKFitter::Fit()
 {
 
 static const int konv[15] ={0,6,9,3,8,5,1,7,4,2,10,13,12,11,14};
-//static const double bigErr[5] = {3,1,1,3,1};
-  double cmx[15]={0},tmp[15];
+  double cmx[15]={0},tmp[15]={0};
   
   if (fFitingShow) fFitingShow->clear();
   myTHPars P;
   THelixTrack th;
-  double dir[3],myXi2;
+  double dir[3]={0},myXi2=0;
   TCL::vsub(fAux[1].x,fAux[0].x,dir,3);
   th.Set(fAux[0].x,dir,0.);
   fChi2=0;
 
-  double F[5][5];
+  double F[5][5]={{0}};
   for (int ip=0;ip<(int)fAux.size();ip++) {
     double s = th.Path(fAux[ip].x[0],fAux[ip].x[1]);
     th.Move(s,F);
@@ -3696,7 +3666,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.71 2013/05/02 02:00:12 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.72 2013/05/16 20:04:09 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3712,6 +3682,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.72  2013/05/16 20:04:09  perev
+ * Init all variables to 0
+ *
  * Revision 1.71  2013/05/02 02:00:12  perev
  * Defence aginst strait track along X
  *
