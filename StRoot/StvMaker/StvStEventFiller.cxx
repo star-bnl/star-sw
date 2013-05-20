@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.28 2013/04/20 22:02:42 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.29 2013/05/20 18:38:52 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.29  2013/05/20 18:38:52  perev
+ * Cleanup
+ *
  * Revision 1.28  2013/04/20 22:02:42  perev
  * Rename StTGeoHelper ==> StTGeoProxy
  *
@@ -1151,7 +1154,7 @@ void StvStEventFiller::fillFlags(StTrack* gTrack) {
   }
   const StTrackFitTraits &fitTrait = gTrack->fitTraits();
   int totFitPoints = fitTrait.numberOfFitPoints();
-  int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
+//int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
   const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
   if (dinfo) {
     Int_t NoTpcFitPoints = dinfo->numberOfPoints(kTpcId);
