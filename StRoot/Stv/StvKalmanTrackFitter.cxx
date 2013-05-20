@@ -19,10 +19,9 @@
 ClassImp(StvKalmanTrackFitter)
 #define DIST2(a,b) ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 
-static const double kMaxCorr = 1.1;
-static const int    kNodesEnough = -1;	//min number of nodes to define helix
 static const int    kXtendFactor  = 100;//Xi2 factor that fit sure failed
-
+static const double kPiMass=0.13956995;
+static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 //_____________________________________________________________________________
 StvKalmanTrackFitter::StvKalmanTrackFitter():StvTrackFitter("StvKalmanTrackFitter")
 {
@@ -287,22 +286,31 @@ static int nCall=0; nCall++;
 
   THelixTrack myHlx;
   preNode->mFP[lane].get(&myHlx);
-  preNode->mFE[lane].Get(&myHlx);
-  const double *P = node->mFP[0].P;
-  double dS = myHlx.Path(P);
+  const StvNodePars &prePars =  preNode->mFP[lane];
+  const StvFitErrs  &preErrs =  preNode->mFE[lane];
+  prePars.get(&myHlx);
+  preErrs.Get(&myHlx);
+  const double *Xnode = node->mFP[0].P;
+  double dS = myHlx.Path(Xnode);
   StvHlxDers derHlx;
   StvFitDers derFit;
-  double rho = myHlx.GetRho();
+//		reset ELossData for may be new momentum
+  innNode->ResetELoss(fabs(dS),preNode->mFP[lane]);
   const StvELossData &el = innNode->GetELoss();
-  double dRho = rho*(el.mdPP/el.mTotLen)*dS;
-//assert(dRho/rho*(2*dir-1)>=0);
+  double dE = el.mELoss; if (dS>0) dE = -dE;
+  double P = sqrt(prePars.getP2()); if (P<kMinP) P=kMinP;
+  double E = sqrt(P*P+ kPiMass*kPiMass);
+  if (E+dE < kMinE) dE = kMinE - E;
+  double dP = 2*E*dE/(sqrt(P*P+2*E*dE)+P);
+  double rho = prePars._curv;
+  double dRho = -rho*(dP/P);
   myHlx.Set(rho+dRho/3);
-  dS = myHlx.Path(P);
+  dS = myHlx.Path(Xnode);
   myHlx.Move(dS,derHlx);
   myHlx.Set(rho+dRho);
   node->mPP[lane].set(&myHlx,node->GetHz());
   node->mPE[lane].Set(&myHlx,node->GetHz());
-  node->mPE[lane].Add(innNode->mELossData,node->mPP[lane]);
+  node->mPE[lane].Add(el,node->mPP[lane]);
   node->mPP[lane].convert(derFit,derHlx);
   innNode->SetDer(derFit,lane);
 
