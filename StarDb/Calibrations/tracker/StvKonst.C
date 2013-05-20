@@ -34,7 +34,8 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMinContHits=3;       	/*Min length of good hit sequence*/
 //row.mMaxContNits=13;      	/*Max length of acceptable non hit sequence*/
 //row.mMaxContNits=8;      	/*Max length of acceptable non hit sequence*/
-  row.mMaxContNits=10;      	/*Max length of acceptable non hit sequence*/
+//row.mMaxContNits=10;      	/*Max length of acceptable non hit sequence*/
+  row.mMaxContNits=7;      	/*Max length of acceptable non hit sequence*/
 //row.mMaxTotNits =30;      	/*Max number of acceptable non hits*/
   row.mMaxTotNits =40;      	/*Max number of acceptable non hits*/
 
