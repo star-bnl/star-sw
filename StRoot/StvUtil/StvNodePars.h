@@ -234,15 +234,20 @@ public:
 };
 
 //------------------------------------------------------------------------------
+class TGeoMaterial; 
 class StvELossData 
 {
 public:
   double mTheta2;	//multiple scattering angle error
   double mOrt2;		//multiple scattering position error
-  double mELoss;	//Energy loss
   double mdPP;		//dP/P
+  double mELoss;	//Energy loss
   double mdPPErr2;	//Square error of mdPP
   double mTotLen;	//Total length where errors accumulated
+  double mP;		//Total momentum
+  double mM;		//Mass
+     int mTally;	//Counter for debug only, remove later
+const TGeoMaterial *mMate;	//
 public:
 
 };
