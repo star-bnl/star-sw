@@ -17,19 +17,22 @@ class TGeoMaterial;
 class THelixTrack;
 class StvFitErrs;
 class StvNodePars;
-enum StvDiverFlags {kDiveOk=0,kDiveHits,kDiveDca,kDiveBreak,kDiveMany};
 /// \class StvDiver
 class StvDiver : public TNamed
 {
+public:
+enum StvDiverFlags {kDiveOk=0,kDiveHits,kDiveDca,kDiveBreak,kDiveMany};
+enum StvDiverOpt   {kTargHit=1,kTarg2D=2,kTarg3D=4,kDoErrs=8};
 public:
   StvDiver(const char *name="");
   virtual ~StvDiver(){;}
 int  Init();
 void Reset();
 int  Dive();
-void Set(StvNodePars *inpar,const StvFitErrs *inerr,int idir);
-void Set(StvNodePars *otpar,      StvFitErrs *oterr,StvFitDers *deriv);
-void SetSkip(int skip=1);
+void Set(const StvNodePars *inpar,const StvFitErrs *inerr,int idir);
+void Set(      StvNodePars *otpar,      StvFitErrs *oterr,StvFitDers *deriv);
+void SetTarget(const double *target,int nTarget=3);
+void SetOpt(int opt);
 double GetLength() const;
 const StvELossData GetELossData() const;
 void SetRZmax(double rMax,double zMax); 
@@ -37,17 +40,17 @@ void SetRZmax(double rMax,double zMax);
 protected:
 char mBeg[1];
 int mDir;
-      StvNodePars    *mInpPars;
-const StvFitErrs     *mInpErrs;
-StvNodePars    *mOutPars;
-StvFitErrs     *mOutErrs;
-StvFitDers       *mOutDeri; //Out derivatives in StvFitPars notation
-THelixTrack    *mHelix;
-StvELossTrak   *mELoss;
-StvHlxDers        mHlxDeri; //Internal derivatives in StHeliTrack notation
-StvMCStepping  *mSteps;
-StvMCField     *mFld;
-StvMCPrimaryGenerator *mGen;
+const   StvNodePars    *mInpPars;
+const 	StvFitErrs     *mInpErrs;
+	StvNodePars    *mOutPars;
+	StvFitErrs     *mOutErrs;
+	StvFitDers     *mOutDeri; 	//Out derivatives in StvFitPars notation
+	THelixTrack    *mHelix;
+	StvELossTrak   *mELoss;
+	StvHlxDers      mHlxDeri; 	//Internal derivatives in StHelixTrack notation
+	StvMCStepping  *mSteps;
+	StvMCField     *mFld;
+StvMCPrimaryGenerator  *mGen;
 
 char mEnd[1];
 ClassDef(StvDiver,0);
@@ -79,17 +82,19 @@ virtual ~StvMCStepping();
 
 virtual int  Fun();
 void Reset ();
-int  GetExit() const 		{return fExit;}
+int  GetExit() const 		{return       fExit;}
 void Set(StvELossTrak *eLoss)	{fELossTrak = eLoss;}
-void Set(THelixTrack *helx )	{fHelix    = helx ;}
-void Set(StvHlxDers  *deriv)	{fDeriv    = deriv;}
-void Set(StvMCField  *field)	{fField    = field;}
-void SetSkip(int skip=1)	{fSkip     = skip ;}
+void Set(THelixTrack *helx )	{fHelix    = helx  ;}
+void Set(StvHlxDers  *deriv)	{fDeriv    = deriv ;}
+void Set(StvMCField  *field)	{fField    = field ;}
+void SetOpt(int opt);
+void SetTarget(const double *target,int nTarget=3);
 
 
  int BegVolume();
  int EndVolume();
  int IsDca00(int begEnd);
+ int TooMany();
 
 void FillHelix();
 void Print (const Option_t* opt=0) const;
@@ -98,17 +103,20 @@ void Finish(const Option_t* opt=0);
 
 protected:
 char fFist[1];
-int    fKount;
-int    fExit;
-int    fSkip;
-int    fLastKaze;
-int    fLastNumb;
-int    fHitted;
-float  fStartSign;
-float  fCurrentSign;
+int     fOpt;
+int    	fKount;
+int    	fExit;
+int    	fLastKaze;
+int    	fLastNumb;
+int    	fHitted;
+int    	fNTarget;
+float  	fStartSign;
+float  	fCurrentSign;
+float   fLastLength;
+double  fTarget[3];
 char fMidl[1];
 THelixTrack  *fHelix;
-StvHlxDers     *fDeriv;		//Derivative matrix in THelixTrack notation
+StvHlxDers   *fDeriv;		//Derivative matrix in THelixTrack notation
 StvELossTrak *fELossTrak;	//Energy loss calculator
 StvMCField   *fField;		//Mag field calculator
 const TGeoMaterial *fPrevMat;
