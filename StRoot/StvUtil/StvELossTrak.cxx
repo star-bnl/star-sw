@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.2 2013/04/30 15:27:40 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.3 2013/05/20 18:44:02 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include "TGeoMaterial.h"
 #include "StvELossTrak.h"
 static double gsigma2(double ZoverA,double DENS,double CHARGE2
                      ,double AMASS ,double BET2,double STEP  );
@@ -28,11 +29,15 @@ void StvELossTrak::Clear(const char*)
 void StvELossTrak::Set(double A, double Z,    double dens, double x0
                       ,double p, double mass, double charge)
 {
-  fdEdX=0;
-  fA=A; fZ=Z; fDens=dens,fX0=x0; 
-  if (fA<=0) fX0 = 1e+11;
-  assert(fX0>0);
-  fM=mass; fCharge2=charge*charge;
+  if (A>0) {
+    fdEdX=0;
+    fA=A; fZ=Z; fDens=dens,fX0=x0; 
+    if (fA<=0) fX0 = 1e+11;
+    assert(fX0>0);
+    fM=mass; fCharge2=charge*charge;
+  }
+
+  if (p<=0 || fabs(fP-p)<1e-6) return;
 
   fP = p; if (fP>1e6) fP=1e6;
   fdEdX=0;fdEdXErr2=0;
@@ -41,20 +46,40 @@ void StvELossTrak::Set(double A, double Z,    double dens, double x0
   fFak = (14.1*14.1*(p2+m2))/(p2*p2*1e6);
   double T = fE-fM;
   if (fA>0) {
-    fdEdX = gdrelx(fA,fZ,fDens,T,fM)*fDens*fCharge2;
+    fdEdX = gdrelx(fA,fZ,fDens,T,fM) * fDens*fCharge2;
     double beta2 = p2/(p2+m2);
     fdEdXErr2 = gsigma2(fZ/(fA+1e-6),fDens,fCharge2,fM ,beta2,1.);
   }
 }
-//______________________________________________________________________________
-double StvELossTrak::ELoss(double l) const
+//_____________________________________________________________________________
+int StvELossTrak::Same(const TGeoMaterial *mate) const
 {
-  return fdEdX*l;
+  if (fMate == mate) 					return 1;
+  if (!fMate       )	 				return 0;
+  if (fabs(fA-mate->GetA())> 1e-3*fA) 			return 0;
+  if (fabs(fZ-mate->GetZ())> 1e-3*fZ) 			return 0;
+  if (fabs(fDens-mate->GetDensity())< 1e-6) 		return 1;
+  if (fabs(fDens-mate->GetDensity())> 1e-3*fDens) 	return 0;
+  							return 1;
 }
-//______________________________________________________________________________
-double StvELossTrak::ELossErr2(double l) const
+//_____________________________________________________________________________
+void StvELossTrak::Set(const TGeoMaterial *mate
+                      ,double p, double mass, double charge)
 {
-  return fdEdXErr2*l;
+
+  if (!Same(mate)) {
+    fNMats ++; fMate = mate;
+    fA = fMate->GetA();
+    fZ = fMate->GetZ();
+    fDens= fMate->GetDensity();
+    fX0  = fMate->GetRadLen();
+    fM=mass; fCharge2=charge*charge;
+
+    Set(fMate->GetA(),fMate->GetZ(),fMate->GetDensity()
+       ,fMate->GetRadLen(),p,mass,charge);
+    return;
+  }
+  Set(0,0,0,0,p,mass,charge);
 }
 //______________________________________________________________________________
 //_____________________________________________________________________________
