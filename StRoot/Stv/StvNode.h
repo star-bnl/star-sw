@@ -10,7 +10,6 @@
 
 class StvHit;
 class StHitPlane;
-
   
   
 /*! \class StvNode
@@ -74,10 +73,9 @@ const StvELossData &GetELoss() const		{ return mELossData;}
    void SetPre(StvNodePars &par,StvFitErrs &err,int dir); 	
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 
    void SetDer(const StvFitDers &der, int dir);
-
+    int ResetELoss(double s,const StvNodePars &pars);
  StvNode::ENodeType GetType() const 			{return (StvNode::ENodeType)mType;}
                void SetType(StvNode::ENodeType ty) 	{mType =(char)ty;}
-
 StDetectorId GetDetId() const;  
 void UpdateDca();
  int Check(const char *tit="",int dirs=3) const; 

@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.14 2013/04/20 22:07:02 perev Exp $
+ * $Id: StvNode.cxx,v 1.15 2013/05/20 18:56:57 perev Exp $
  *
  * /author Victor Perev
  */
@@ -13,6 +13,7 @@
 #include "Stv/StvNode.h"
 #include "Stv/StvHit.h"
 #include "StvUtil/StvDebug.h"
+#include "StvUtil/StvELossTrak.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
 
@@ -168,4 +169,24 @@ int StvNode::Check(const char *tit, int dirs) const
   }
   return nerr;
 }
+//________________________________________________________________________________
+int StvNode::ResetELoss(double s,const StvNodePars &pars)
+{
+static StvELossTrak *el = new StvELossTrak();
 
+  double p2 = pars.getP2();  
+  if (fabs(mELossData.mP*mELossData.mP-p2) <0.01*p2) return 0;
+  if (!mELossData.mMate) return 1;
+  el->Reset();
+  double p = sqrt(p2);
+  el->Set(mELossData.mMate,p); el->Add(fabs(s));
+  mELossData.mTheta2 = el->GetTheta2();
+  mELossData.mOrt2   = el->GetOrt2();
+  mELossData.mdPP    = el->dPP();
+  mELossData.mELoss  = el->ELoss();
+  mELossData.mdPPErr2= el->dPPErr2();
+  mELossData.mTotLen = el->TotLen();
+  mELossData.mP      = el->P();
+  return 0;
+}
+ 
