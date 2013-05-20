@@ -14,6 +14,7 @@
 #include "Stv/StvHit.h"
 #include "StvUtil/StvNodePars.h"
 #include "StvUtil/StvDebug.h"
+#include "StvTester.h"
 #include "Stv/StvEnum.h"
 #include "Stv/StvConst.h"
 #include "Stv/StvDiver.h"
@@ -84,6 +85,8 @@ static const StvConst  *kons = StvConst::Inst();
         sf->FeedBack(nAdded);
 	if (!nAdded) 				continue;
 	int ans = 0,fail=13;
+// int jerr = StvTester::Inst()->TestIt("BefoRefit",mCurrTrak);
+// if (jerr){};
 //		Refit track   
         int nFitHits = mCurrTrak->GetNHits();
 	do {
@@ -107,9 +110,15 @@ StvDebug::Count("FitRefit",nFitHits,nHits);
 	if (fail) 	{//Track is failed, release hits & continue
 	  mCurrTrak->CutTail();			continue;
         }
+        
+	StvNode *node = MakeDcaNode(mCurrTrak);
 
-	StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
-	if (node) node->UpdateDca();
+// //	TestQuality of track
+// int ierr = StvTester::Inst()->TestIt("AfteRefit",mCurrTrak);
+// if (ierr){};
+// //	EndTestQuality of track
+
+
 static int akio=0;
 if (akio && node) { 
  int ak = ThruFgt(node->GetFP());
@@ -142,6 +151,7 @@ int StvKalmanTrackFinder::FindTrack(int idir)
 {
 
 static int nCall=0; nCall++;
+static int nTally=0; 
 static const StvConst *myConst = StvConst::Inst();
 static       StvToolkit *kit      = StvToolkit::Inst();
 static       StvFitter  *fitt     = StvFitter::Inst();
@@ -180,34 +190,28 @@ hitCount->Clear();
   mHitter->Reset();
 StvFitDers derivFit;
   mDive->Reset();
+  mDive->SetOpt(StvDiver::kTargHit | StvDiver::kDoErrs | StvDiver::kTarg2D);
   mDive->Set(par+0,err+0,idir);
   mDive->Set(par+1,err+1,&derivFit);	//Output of diving in par[1]
 
 
-  while(idive==kDiveHits || idive==0) {
+  while(idive==StvDiver::kDiveHits || idive==0) {
 
     do {//Stop tracking?
       idive = 99;
       if (!nNode)		continue;	//No nodes yet, OK
       mySkip = hitCount->Skip();
-      if (!mySkip) 		continue;	//No Skip, OK
-      if (idir)   		break;
-      mySkip = hitCount->Reject();
-      if (mySkip) 		break;
-      mDive->SetSkip();
+      if (mySkip) 		break;		//Skip stop tracking,
     } while ((idive=0));
     if (idive) 			break;
 
 //+++++++++++++++++++++++++++++++++++++
-
+    nTally++;
     idive = mDive->Dive();
 
 //+++++++++++++++++++++++++++++++++++++
-    if (mySkip && !idive) {
-      Warning("FindTrack","Strange case mySkip!=0 and iDive==0");
-      break;
-    }
-    if (idive >= kDiveBreak) 			break;
+    if (idive >= StvDiver::kDiveBreak) 			break;
+    if (idive == StvDiver::kDiveDca) 			break;
 
     totLen+=mDive->GetLength();
     par[0]=par[1]; err[0]=err[1];			//pars again in par[0]
@@ -219,7 +223,7 @@ StvFitDers derivFit;
 
     		
     const StvHits *localHits = 0; 
-    if (idive== kDiveHits) {
+    if (idive== StvDiver::kDiveHits) {
 static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};   
       localHits = mHitter->GetHits(par,gate); 
     }
@@ -239,17 +243,11 @@ static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};
     curNode->mLen = (!idir)? totLen:-totLen;
 		// Set prediction
     StvELossData eld = mDive->GetELossData();
+    eld.mTally = nTally;
     innNode->SetELoss(eld,idir);
     err[0].Add(innNode->mELossData,par[0]);
     curNode->SetPre(par[0],err[0],0);
     innNode->SetDer(derivFit,idir);
-
-    if (idive==kDiveDca) {
-      curNode->SetType(StvNode::kDcaNode);
-      double testDca = TCL::vdot(&par[0]._cosCA,par[0].P,2);
-      assert(fabs(testDca)<1e-4);
-      continue;
-    }
 
     if (!localHits)	 continue;	//Never hits in curNode 
     curNode->SetHitPlane(mHitter->GetHitPlane());
@@ -275,7 +273,7 @@ static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};
         hitCount->AddHit();nHits++;
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
-        if (nHits>3) par[0]=par[1];
+        par[0]=par[1];
         err[0]=err[1]; 
       } else { minHit=0;}
     } 
@@ -306,6 +304,62 @@ static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};
 
   return nHits;
 
+}
+//_____________________________________________________________________________
+int StvKalmanTrackFinder::Swim(int idir, int opt, const double target[3]
+                               ,const StvNodePars *inpPar,const StvFitErrs *inpErr
+                               ,      StvNodePars *outPar,      StvFitErrs *outErr
+			       ,       StvFitDers *derivFit)
+{
+
+static int nCall=0; nCall++;
+
+  mDive->Reset();
+  mDive->Set(inpPar,inpErr,idir);
+  mDive->Set(outPar,outErr,derivFit);	//Output of diving in par[1]
+  mDive->SetOpt(opt);
+  int nTg = (opt & StvDiver::kTarg3D)? 3:2; 
+  if (target) mDive->SetTarget(target,nTg);
+
+
+//+++++++++++++++++++++++++++++++++++++
+
+  int idive = mDive->Dive();
+
+//+++++++++++++++++++++++++++++++++++++
+  return idive;
+
+}
+//_____________________________________________________________________________
+StvNode *StvKalmanTrackFinder::MakeDcaNode(StvTrack *tk)
+{
+static StvToolkit *kit = StvToolkit::Inst();
+
+  StvNode *start = tk->front();
+  int opt = StvDiver::kTarg2D | StvDiver::kDoErrs;
+  StvNodePars dcaPars;
+  StvFitErrs  dcaErrs;
+  StvFitDers  dcaDers;
+  int iSwim = Swim(0,opt,0
+                  ,&(start->GetFP()),&(start->GetFE())
+		  ,&dcaPars,&dcaErrs,&dcaDers);
+  if (iSwim != StvDiver::kDiveDca) return 0;		   
+
+  StvNode *dcaNode = kit->GetNode();      
+  tk->push_front(dcaNode);
+  dcaNode->mLen =  start->mLen + mDive->GetLength();
+	       // Set prediction
+  StvELossData eld = mDive->GetELossData();
+  dcaNode->SetELoss(eld,0);
+  dcaErrs.Add(dcaNode->mELossData,dcaPars);
+  dcaNode->SetPre(dcaPars,dcaErrs,0);
+  dcaNode->SetDer(dcaDers,0);
+  dcaNode->SetXi2(1e11,0);
+  dcaNode->SetType(StvNode::kDcaNode);
+  double testDca = TCL::vdot(&dcaPars._cosCA,dcaPars.P,2);
+  assert(fabs(testDca)<1e-4);
+
+  return dcaNode;
 }
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::FindPrimaries(const StvHits &vtxs)	
