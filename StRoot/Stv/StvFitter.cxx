@@ -19,7 +19,7 @@ StvFitter *StvFitter::mgFitter=0;
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
 
-enum {kDeltaFactor = 1};
+enum {kDeltaFactor = 9};
 static const double kMinCos = 0.5;	// minimal cos allowed
 
 static const double kXtraBigXi2 = 9e9;
