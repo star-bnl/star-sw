@@ -1,5 +1,8 @@
-// $Id: LoopOverLaserTrees.C,v 1.10 2013/05/16 15:25:39 fisyak Exp $
+// $Id: LoopOverLaserTrees.C,v 1.11 2013/05/20 12:35:12 fisyak Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.11  2013/05/20 12:35:12  fisyak
+// Set time stamp at the begin of the laser run
+//
 // Revision 1.10  2013/05/16 15:25:39  fisyak
 // Relax cut on drift velocity precision : 5e-4 => 1e-3
 //
@@ -26,7 +29,7 @@
 //
 //#define ADJUSTABLE_BINNING
 //#define __REFIT__
-#define INTEGRATE_OVER_HOURS
+//#define INTEGRATE_OVER_HOURS
 //#define SeparateWestandEast
 #if !defined(__CINT__) || defined(__MAKECINT__)
 //#include <ostream>
@@ -273,7 +276,7 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
       }
 #endif
     }
-    Double_t dt =  fEvtHdr_fDate%100000 + ((Double_t) fEvtHdr_fTime)*1e-6;
+    Double_t dt =  fEvtHdr_fDate%1000000 + ((Double_t) fEvtHdr_fTime)*1e-6;
     Double_t DT =  Run.date + Run.time*1e-6;
     if (dt < DT) {
       Run.date = fEvtHdr_fDate%1000000;
