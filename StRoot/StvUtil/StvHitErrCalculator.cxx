@@ -196,6 +196,8 @@ int StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3
 // <dZ*dY> =  (tP*tL)/cP*((DD/12 + WWy))
 // <dZ*dZ> =  tL2/cP2*(DD/12 + WWy) +WWz
 
+  double Rxy = sqrt(hiPos[0]*hiPos[0]+hiPos[1]*hiPos[1]);
+  if ( Rxy < 110 ) {assert( strstr(GetName(),"Inner"));}
 
   int ans = CalcLocals(hiDir);
   if (ans) return ans;
