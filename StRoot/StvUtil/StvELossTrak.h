@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.2 2013/04/30 15:27:43 perev Exp $
+// $Id: StvELossTrak.h,v 1.3 2013/05/20 18:43:58 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -17,20 +17,25 @@ public:
         ~StvELossTrak(){;}
     void Reset();
     void Clear(const char *opt);
+     int Same(const TGeoMaterial *mate) const;
     void Set(double A, double Z, double Dens, double x0 
+            ,double p,double mass = PiMASS, double charge=1);
+    void Set(const TGeoMaterial *mate
             ,double p,double mass = PiMASS, double charge=1);
     void Add(double len);
   double GetTheta2() const;
   double GetOrt2()   const;
 
-  double ELoss    (double len) 	const;
-  double ELoss    () const 		{return ELoss(fTotLen);}
-  double ELossErr2(double len) 	const;
+  double dEdX () const			{return fdEdX    ;}
+  double ELoss() const 			{return fTotELoss;}
   double ELossErr2() 		const	{return fTotELossErr2;}
   double dPP     () 		const;	
   double dPPErr2() 		const;	
   double TotLen() 		const	{return fTotLen;}	
-
+  double P() 		        const	{return fP;}	
+  double M() 		        const	{return fM;}	
+     int GetNMats() 		const	{return fNMats;}	
+const TGeoMaterial *GetMate()   const	{return fMate ;}
 private:
 char   fBeg[1];
 double fdEdX,fdEdXErr2;
@@ -40,6 +45,8 @@ double fE;		//energy
 double fCharge2;	//particle charge **2
 double fFak;
 double fA,fZ,fDens,fX0;
+int    fNMats;		///Number of different material used
+const TGeoMaterial *fMate;
 //
 char   fMed[1];
 double fTotELoss; 	///accumulated energy loss
