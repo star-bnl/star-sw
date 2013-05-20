@@ -183,7 +183,7 @@ void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
     TVector3 hl = hi-myFst;
 //    double dot = hl.Dot(myDir);
 //    if (dot<0 || dot >dis) 		continue;
-    if ((hl.Cross(myDir)).Mag2()>sag2)	continue;
+//    if ((hl.Cross(myDir)).Mag2()>sag2)	continue;
     double *d = &(hi[0]);
     double dca = hlx.Dca(d);
     if (dca>wide) 			continue;
