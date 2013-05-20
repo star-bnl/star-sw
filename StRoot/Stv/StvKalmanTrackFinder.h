@@ -4,11 +4,15 @@
 #define StvKalmanTrackFinder_HH
 #include "StvTrackFinder.h"
 
+class StvDiver;
 class StvPars;
 class StvTrack;
 class StvDiver;
 class StvHitter;
 class StvHitVector;
+class StvNodePars;
+class StvFitErrs;
+class StvFitDers;
 /// \class StvKalmanTrackFinder
 
 class StvKalmanTrackFinder : public StvTrackFinder
@@ -19,7 +23,12 @@ public:
    int	FindTracks();
    int	Refit(int idir);
    int  FindTrack(int idir);
+StvNode *MakeDcaNode(StvTrack *tk);
    int	FindPrimaries(const StvHits &vtxs);
+   int  Swim(int idir,int opt, const double target[3]
+            ,const StvNodePars *inpPar,const StvFitErrs *inpErr
+            ,      StvNodePars *outPar,      StvFitErrs *outErr
+            ,      StvFitDers  *derivFit);
    void	Reset();
    void	Clear(const char *opt="");
    void SetRefit(int r=1)  			{mRefit = r;} 
