@@ -22,6 +22,7 @@ ClassImp(StvKalmanTrackFitter)
 static const int    kXtendFactor  = 100;//Xi2 factor that fit sure failed
 static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
+static const double kMaxCorr = 0.1;
 //_____________________________________________________________________________
 StvKalmanTrackFitter::StvKalmanTrackFitter():StvTrackFitter("StvKalmanTrackFitter")
 {
@@ -298,12 +299,14 @@ static int nCall=0; nCall++;
   innNode->ResetELoss(fabs(dS),preNode->mFP[lane]);
   const StvELossData &el = innNode->GetELoss();
   double dE = el.mELoss; if (dS>0) dE = -dE;
-  double P = sqrt(prePars.getP2()); if (P<kMinP) P=kMinP;
+  double P = sqrt(prePars.getP2()); 
   double E = sqrt(P*P+ kPiMass*kPiMass);
   if (E+dE < kMinE) dE = kMinE - E;
-  double dP = 2*E*dE/(sqrt(P*P+2*E*dE)+P);
+  double dP = dE/P*(2*E+dE)/(sqrt(P*P+dE*(2*E+dE))+P);
+  if (dP > kMaxCorr) dP = kMaxCorr;
+  if (dP <-kMaxCorr) dP =-kMaxCorr;
   double rho = prePars._curv;
-  double dRho = -rho*(dP/P);
+  double dRho = -rho*(dP);
   myHlx.Set(rho+dRho/3);
   dS = myHlx.Path(Xnode);
   myHlx.Move(dS,derHlx);
