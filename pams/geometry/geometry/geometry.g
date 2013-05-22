@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.258 2013/02/26 15:25:32 jwebb Exp $
+* $Id: geometry.g,v 1.259 2013/05/22 14:39:15 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.259  2013/05/22 14:39:15  jwebb
+* Added new version of the CAVE as CAVE05.  Better dimensions, walls, platform,
+* crates.  The y2013x (asymptotic) STAR uses CAVE05.  First cut geometry remains
+* at CAVE04.
+*
 * Revision 1.258  2013/02/26 15:25:32  jwebb
 * Updates to the Y2013 first cut and asymptotic tags.  Pixel support tube
 * remains in place when pixel detector is removed.
@@ -2047,7 +2052,6 @@ REPLACE [exe y2013;] with ["Y2013 first cut geometry";
     exe PHMDof;      "Photon mult detector on";
     exe SISDof;      "No sisd";
     exe MUTD13;      "Muon telescope detector";
-    exe CAVE04;      "Cave and tunnel";
     exe PIPEv2;      "The beam pipe";
 
     exe IDSM02;      "Inner detector support";
@@ -2066,11 +2070,17 @@ REPLACE [exe y2013_2;] with ["Y2013 first cut sans PIXL"; exe Y2013;  PIXL=off; 
 
 REPLACE [exe y2013x;] with [                                      "Y2013 asymptotic";
     EXE y2013;    "first cut 2013";
+    EXE CAVE05;   "New version of the CAVE";
     EXE MAGPv1;   "version 1 of the magnet";
     EXE TPCE31;   "version 3.1 of the TPC (increase deadzone and integration time)";
 ]
-REPLACE [exe y2013_1x;] with [ "Y2013 asymptotic"; EXE Y2013x; ]
-REPLACE [exe y2013_2x;] with [ "Y2013 asymptotic sans PIXL"; EXE y2013x; PIXL=off; PXST=on; ]
+REPLACE [exe y2013_1x;] with [ "Y2013 asymptotic"; 
+    EXE Y2013x; 
+]
+REPLACE [exe y2013_2x;] with [ "Y2013 asymptotic sans PIXL"; 
+    EXE y2013x; PIXL=off; 
+    PXST=on; 
+]
 
 
 c ===============================================================================
@@ -4358,12 +4368,16 @@ If LL>0
 
    if (RICH) ItCKOV = 1
 
-   if (CAVE) {
-c     write(*,*) 'CAVE'
+   IF CAVE {
+
+      WRITE (*,*) 'CAVE: caveconfig = ', caveconfig
+ 
       call AgDETP new ('CAVE')
       call AgDETP add ('CVCF.config=',CaveConfig,1)
-      call cavegeo
-      if ( CaveConfig == 5 ) { Call wallgeo; "another brick..." }
+
+      IF      caveconfig < 5 {       call cavegeo;  }
+      ELSE IF caveconfig ==5 {       call cavegeo2; }
+ 
    }
 
 * Pipe:
