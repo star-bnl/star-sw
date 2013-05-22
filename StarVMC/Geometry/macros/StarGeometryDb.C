@@ -1112,6 +1112,37 @@ void estar()
   };
 
 
+  geom.select="eStar2"; {
+    // ================================================ The 4th version of the CAVE
+    geom.caveFlag = "CAVE04";  geom.caveStat = 1;
+    // ================================================ Disable old STAR inner detectors
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
+    // ================================================ Tracking, calorimetry, etc..
+    geom.tpcxFlag = "TPCX16";  geom.tpceStat = 0; geom.tpcxStat = 1;
+    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD13";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPE12";  geom.pipeStat = 1;
+
+    // ================================================ The new Inner Detectors
+    geom.idsmFlag = "IDSM01";  geom.idsmStat = 1;
+    geom.fgtdFlag = "FGTD31";  geom.fgtdStat = 1;
+    // ================================================ 
+    geom.fpdmFlag = "FPDM13";  geom.fpdmStat = 1;        // open FPDM
+    geom.fsceFlag = "FSCEv0";  geom.fsceStat = 1;
+    geom.eiddFlag = "EIDDv0";  geom.eiddStat = 1;
+
+    setTitle("eSTAR upgrades development geometry");
+    geom.fill();
+
+  };
 
 
 }
@@ -1266,13 +1297,17 @@ void y2013()
   /// Y2013 Asymptotic Configuration /////////////////////////////
   geom.select = "y2013_1x"; {
     // Inherits y2013 and
+    geom.caveFlag = "CAVE05";
     geom.tpceFlag = "TPCE31"; geom.tpceStat = 1;
     geom.tpcRefSys = true; // Create TPC reference system
     setTitle("Asymptotic y2013");
     geom.fill();
   }
+  geom.select="y2013x"; geom.fill();
+
   geom.select = "y2013_2x"; {
     setTitle("Asymptotic y2013 sans PIXL");
+    geom.caveFlag = "CAVE05";
     geom.tpcRefSys = true; // Create TPC reference system
     // geom.pxstStat = 1; // support tube always on
     geom.pixlStat = 0;

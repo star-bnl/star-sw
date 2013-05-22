@@ -1097,16 +1097,16 @@ Bool_t Geometry::CalbInit()
 Bool_t Geometry::CaveInit()
 {
   caveGeom.select="CAVEon"; {
-    caveGeom.config = 1;
+    caveGeom.config = 1;caveGeom.module="CaveGeo";
     caveGeom.SetTitle("STAR Wide Angle Hall Mater Configuration: Default Cave");
     caveGeom.fill();
   }
   //replace [exe CAVE03;] with [ "We need an even bigger Cave";   CaveConfig = 3;]
-  caveGeom.select="CAVE03"; caveGeom.config=3; caveGeom.fill();
+  caveGeom.select="CAVE03"; caveGeom.config=3; caveGeom.module="CaveGeo"; caveGeom.fill();
   //replace [exe CAVE04;] with [ "We need an even bigger Cave";   CaveConfig = 4;]
-  caveGeom.select="CAVE04"; caveGeom.config=4; caveGeom.fill();
+  caveGeom.select="CAVE04"; caveGeom.config=4; caveGeom.module="CaveGeo"; caveGeom.fill();
   //replace [exe CAVE05;] with [ "How about we just get the dimensions right and be done with it"; CaveConfig=5;]
-  caveGeom.select="CAVE05"; caveGeom.config=5; caveGeom.fill();
+  caveGeom.select="CAVE05"; caveGeom.config=5; caveGeom.module="CaveGeo2";  caveGeom.fill();
   return true;
 }
 // ----------------------------------------------------------------------
@@ -1818,6 +1818,15 @@ Bool_t Geometry::TpcxInit()
     tpcxGeom.module = "TpcxGeo1";
     tpcxGeom.fill();
   };
+
+  tpcxGeom.select="TPCX16"; {
+    tpcxGeom.config = 1;
+    tpcxGeom.padconfig=6;
+    tpcxGeom.module="TpcxGeo1";
+    tpcxGeom.fill();
+  };
+
+
   return true;
 }
 // ----------------------------------------------------------------------------
