@@ -1,4 +1,4 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/mutdgeo/mutdgeo4.g'}" file="pams/geometry/mutdgeo/mutdgeo4.g"  >
+<Document file="StarVMC/Geometry/MutdGeo/MutdGeo4.xml"  >
 
 
     <Module name="MUTDGEO4" comment=" is the geometry of the STAR MTD, WMRPC Version "  >
