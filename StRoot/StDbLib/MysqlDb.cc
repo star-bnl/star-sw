@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.62 2012/12/12 21:58:37 fisyak Exp $
+ * $Id: MysqlDb.cc,v 1.63 2013/05/23 19:27:08 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.63  2013/05/23 19:27:08  dmitry
+ * simple hook to use database with login/pass when really needed
+ *
  * Revision 1.62  2012/12/12 21:58:37  fisyak
  * Add check for HAVE_CLOCK_GETTIME flag and for APPLE
  *
@@ -319,6 +322,11 @@ static const char* binaryMessage = {"Cannot Print Query with Binary data"};
 
 MysqlDb::MysqlDb(): mdbhost(0), mdbName(NULL), mdbuser(0), mdbpw(0), mdbPort(0),mdbServerVersion(0),mlogTime(false) {
 
+	if (mdbuser == NULL && getenv("USE_LB_LOGIN") != NULL) {
+		mdbuser = "loadbalancer";
+		mdbpw = "lbdb";
+	}
+
 mhasConnected=false;
 mhasBinaryQuery=false;
 mtimeout=1;
@@ -380,6 +388,7 @@ bool MysqlDb::reConnect(){
     mysql_ssl_set(&mData, NULL, NULL, NULL, NULL, "AES128-SHA");
 #endif
 	unsigned long client_flag = CLIENT_COMPRESS;
+
 
     if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,client_flag)) {
     	connected=true;
