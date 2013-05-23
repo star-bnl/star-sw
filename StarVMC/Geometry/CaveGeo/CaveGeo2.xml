@@ -202,6 +202,10 @@
     <Create    block="WALL"  />
     <Placement block="WALL" y="wall_yy" />
 
+    wall_dy = (D1-CDIM_Dfloor)/2
+    <Create    block="WALL"  />
+    <Placement block="WALL" y="-cave_Rmax(1)+wall_dy" />
+
 
     D3 = CDIM_Dceiling - CDIM_ThickCeil 
     wall_dx = 68 *2.54 / 2
