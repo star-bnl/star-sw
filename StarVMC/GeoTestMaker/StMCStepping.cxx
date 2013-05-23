@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.6 2011/05/04 17:43:27 perev Exp $
+// $Id: StMCStepping.cxx,v 1.7 2013/05/23 03:04:10 perev Exp $
 //
 //
 // Class StMCStepping
@@ -144,6 +144,12 @@ static int nCall = 0; nCall++;
 //vp  fCasName = CaseAsString(fCase);
 //vp  fKazName = KazeAsString(fKaze);
 
+  myMC->TrackPosition(fCurrentPosition);
+  myMC->TrackMomentum(fCurrentMomentum);
+  fCurrentLength = myMC->TrackLength();
+  fCharge = myMC->TrackCharge();
+  fMass   = myMC->TrackMass();
+  fEtot   = myMC->Etot();
  
   switch (fKaze) {
 
@@ -153,17 +159,12 @@ static int nCall = 0; nCall++;
     case kENTERtrack:;
       {
       fSteps=0;
-      myMC->TrackPosition(fEnterPosition);
-      fCurrentPosition = fEnterPosition;
+      fEnterPosition = fCurrentPosition;
       myMC->TrackMomentum(fEnterMomentum);
-      fCurrentMomentum = fEnterMomentum;
+      fEnterMomentum = fCurrentMomentum;
       assert(fCurrentMomentum[3]>1e-6);
-      fEnterLength     = myMC->TrackLength();
-      fCurrentLength   = fEnterLength;
-      fCharge = myMC->TrackCharge();
-      fMass   = myMC->TrackMass();
+      fEnterLength = fCurrentLength;
       fEdep   = 0;
-      fEtot   = myMC->Etot();
       fLastVect[6] = fCurrentMomentum.P();
       for (int i=0;i<3;i++) {
         fLastVect[i+0] = fCurrentPosition[i];
@@ -177,11 +178,9 @@ static int nCall = 0; nCall++;
     case kOUTtrack:
       fEdep   = myMC->Edep();
       fEtot   = myMC->Etot();
+      RecovEloss();
       myMC->TrackPosition(fCurrentPosition);
       myMC->TrackMomentum(fCurrentMomentum);
-      assert(fCurrentMomentum[3]>1e-6);
-      fCurrentLength     = myMC->TrackLength();
-      RecovEloss();
     break;
 
     case kIgnore:;
@@ -239,31 +238,34 @@ void StMCStepping::RecovEloss()
 {
 // 	Update directly Geant3 common when we moving bacward the track
 //	and energy loss is negative
-
+  enum {kX=0,kY,kZ,kDx,kDy,kDz,kP};
   float *vout = gGctrak->vout;
   do {
     if (fEdep<=0) 	break;
     double dL = fCurrentLength-fLastLength;
     if (dL<1e-5) 	break;
-    double nor = sqrt(vout[3]*vout[3]+vout[4]*vout[4]);
-    double ang=(fabs(vout[3])>fabs(vout[4]))?  (vout[4]-fLastVect[4])/vout[3]
-                                             :-(vout[3]-fLastVect[3])/vout[4];
-    double Rho = ang/dL;
+    double cL0 = sqrt((1.-fLastVect[kDz])*(1+fLastVect[kDz]));
+    double cL1 = sqrt((1.-     vout[kDz])*(1+     vout[kDz]));
+    double ang = ((vout[kDy]-fLastVect[kDy])*fLastVect[kDx]
+               -  (vout[kDx]-fLastVect[kDx])*fLastVect[kDy])/(cL0*cL1);
+    ang = (fabs(ang)<0.1)? ang*(1.-ang*ang/6)  :  asin(ang);
+    double dLxy = dL*cL1;
+    double Rho = ang/dLxy;
     double dE = (fDir)? -fEdep:fEdep*2;
-    double dP = dE/vout[6]*fEtot;
-    double dRho = -Rho*dP/vout[6];
-    double dPhi = dRho*dL/2;
-    double dOrt = dPhi*dL/3;
-    vout[0] += -vout[4]/nor*dOrt;
-    vout[1] +=  vout[3]/nor*dOrt;
-    float v3 = vout[3];
-    vout[3] += -vout[4]*dPhi;
-    vout[4] +=      v3 *dPhi;
+    double dP = dE*fEtot/vout[kP];
+    double dRho = -Rho*dP/vout[kP];
+    double dPhi = dRho*dLxy/2;
+    double dOrt = dPhi*dLxy/3;
+    vout[kX] += -vout[kDy]/cL1*dOrt;
+    vout[kY] +=  vout[kDx]/cL1*dOrt;
+    float vDx = vout[kDx];
+    vout[kDx] += -vout[kDy]*dPhi;
+    vout[kDy] +=       vDx *dPhi;
     if (fDir) 		break;
     fEtot += dE;
     gGctrak->getot  = fEtot;
     gGctrak->gekin += dE;
-    vout[6] = sqrt(gGctrak->gekin*(fEtot+fMass));
+    vout[kP] = sqrt(gGctrak->gekin*(fEtot+fMass));
     ((TGeant3*)gMC)->Gekbin();
   } while(0);
   fLastLength = fCurrentLength;
