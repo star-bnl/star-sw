@@ -112,7 +112,7 @@ int    	fHitted;
 int    	fNTarget;
 float  	fStartSign;
 float  	fCurrentSign;
-float   fLastLength;
+float   fTooManyLength;
 double  fTarget[3];
 char fMidl[1];
 THelixTrack  *fHelix;

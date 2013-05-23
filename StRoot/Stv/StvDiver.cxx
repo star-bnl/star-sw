@@ -354,7 +354,7 @@ static int nCall=0; nCall++;
 
   fPrevMat = fMaterial;
   fELossTrak->Set(fMaterial,fEnterMomentum.Vect().Mag());
-  fLastLength = fCurrentLength;
+  fTooManyLength = fCurrentLength;
   return (IsDca00(0));
 }
 //_____________________________________________________________________________
@@ -365,15 +365,15 @@ static int nCall=0; nCall++;
 
   int isDca = (IsDca00(1));
   if (isDca>=StvDiver::kDiveBreak) 	return isDca;
-  fLastLength = fCurrentLength;
+  fTooManyLength = fCurrentLength;
   double dL = fCurrentLength-fEnterLength;
   if (dL<1e-6) 				return isDca;
   fCurrentPosition.GetXYZT(pos);
   fCurrentMomentum.GetXYZT(mom);
   double pt = fCurrentMomentum.Pt();
   double nowRho = -fField->GetHz()/pt*fCharge;
-  double wasRho = fHelix->GetRho();
-
+  double wasRho =  fHelix->GetRho();
+  assert(nowRho*wasRho> -1./(200*200));
   fELossTrak->Add(dL);
 
   if ((fOpt&StvDiver::kDoErrs)) { 	//Errors and derivatives requested
@@ -426,7 +426,7 @@ static int nCall=0; nCall++;
       double dcaL = (ans==StvDiver::kDiveDca)? th.Path(0.,0.) : dL/2;
       if (dcaL< 0) 	return StvDiver::kDiveBreak;		//Crazy case		
       double nowRho = -fField->GetHz()/fCurrentMomentum.Pt()*fCharge;
-      double wasRho = fHelix->GetRho();
+      double wasRho =  fHelix->GetRho();
       double delta = nowRho-wasRho;
       if (fabs(delta) > 1e-6*fabs(nowRho)) { // significant change of curvature
          th.Set((2*wasRho+nowRho)/3);
@@ -453,9 +453,9 @@ static int nCall=0; nCall++;
 //_____________________________________________________________________________
 int StvMCStepping::TooMany()
 {
-  double dL = fCurrentLength-fLastLength;
+  double dL = fCurrentLength-fTooManyLength;
   if (dL<1e-6) return 0;
-  fEnterLength = fLastLength;
+  fEnterLength = fTooManyLength;
   EndVolume();
   return 0;
 }
