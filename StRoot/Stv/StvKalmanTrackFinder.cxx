@@ -414,7 +414,7 @@ int StvKalmanTrackFinder::Refit(int idir)
 static int nCall=0;nCall++;
 static StvTrackFitter *tkf = StvTrackFitter::Inst();
 static const StvConst  *kons = StvConst::Inst();
-static const double kEps = 1e-2;
+static const double kEps = 0.3e-2;
 enum {kTryFitMax = 5,kBadHits=5};
 
   int ans=0,anz=0,lane = 1;
@@ -455,8 +455,6 @@ enum {kTryFitMax = 5,kBadHits=5};
     nHits--; if (nHits < kBadHits) break;
   }//End Repair loop
 
-  StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
-  if (node) node->UpdateDca();
   if (ans<=0) state &= (-2);
   if (anz<=0) state &= (-4);
   return state;
