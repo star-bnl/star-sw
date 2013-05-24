@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.29 2013/05/20 18:38:52 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.30 2013/05/24 16:34:38 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.30  2013/05/24 16:34:38  perev
+ * Introduction hit filter in case HitFitErr
+ *
  * Revision 1.29  2013/05/20 18:38:52  perev
  * Cleanup
  *
@@ -813,6 +816,7 @@ void StvStEventFiller::fillEvent()
 {
   //cout << "StvStEventFiller::fillEvent() -I- Started"<<endl;
 
+  StEventHelper::Remove(mEvent,"Track");
 
   mGloPri=0;
   gTrkNodeMap.clear();  // need to reset for this event

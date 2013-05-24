@@ -1,5 +1,5 @@
 
-// $Id: StvStEventMaker.cxx,v 1.1 2013/03/08 19:18:57 perev Exp $
+// $Id: StvStEventMaker.cxx,v 1.2 2013/05/24 16:35:00 perev Exp $
 /*!
 \author V Perev 2030
 
@@ -27,7 +27,8 @@ Int_t StvStEventMaker::Make()
   for (int i=0; i<n; i++) {
     StObject *to = V[i];
     if (!to) continue;
-    if (strstr(to->ClassName(),"TpcHit")) continue;
+    if (strstr(to->ClassName(),"Hit"  )) 	continue;
+    if (strstr(to->ClassName(),"Track"))	continue;
     V[i] = 0; delete to;
   }
   return kStOK;

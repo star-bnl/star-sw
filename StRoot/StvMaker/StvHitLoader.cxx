@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.17 2013/05/02 01:57:11 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.18 2013/05/24 16:33:19 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -18,6 +18,7 @@ Main tasks:
 #include <string>
 #include "TGeoManager.h"
 #include "StvHitLoader.h"
+#include "StvStEventHitSelector.h"
 #include "Stv/StvHit.h"
 #include "Stv/StvToolkit.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
@@ -28,13 +29,14 @@ Main tasks:
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvDraw.h"
 #include "Stv/StvStl.h"
-
+#include "StvStEventHitSelector.h"
 ClassImp(StvHitLoader)
 //_____________________________________________________________________________
 StvHitLoader::StvHitLoader(const char *name) : TNamed(name,"")
 
 {
   mHitIter = new StEventHitIter();
+  mHitSelector = 0;
 }
 
 //_____________________________________________________________________________
@@ -66,6 +68,11 @@ Int_t StvHitLoader::Init()
    }
    return nDet;
 }
+//_____________________________________________________________________________
+void StvHitLoader::SetHitSelector()
+{
+   mHitSelector = new StvStEventHitSelector;
+}
 
 //_____________________________________________________________________________
 int StvHitLoader::LoadHits(const StEvent *stev)
@@ -81,14 +88,16 @@ if (myGraph) { //create canvas
   myDraw = new StvDraw();
   myHits = new StvHits;
 }
-
   mHitIter->Reset(stev);
+  int nSel = (mHitSelector)? mHitSelector->Edit(stev):-1;
+  if (!nSel) return 0;
   const StHit *stHit=0;
   StDetectorId didOld = kUnknownId;
   int nTotHits = 0,nTotHitz=0,nTotGits=0, nHits=0,nHitz=0,nGits=0;
 
   for (; ; ++(*mHitIter)) {
     stHit=*(*mHitIter);
+//		If hit selector is ON and hit is not marked, ignore it
     StDetectorId did = mHitIter->DetectorId();
     
     if (did != didOld || !stHit) {
@@ -100,7 +109,8 @@ if (myGraph) { //create canvas
       Info("LoadHits","Start %s hits",StTGeoProxy::DetName(did));
       nHits=0; nHitz=0,nGits=0;
     }
-    if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY) continue; // ignore hits marked by AfterBurner as chopped o
+    if (nSel> 0 && (!stHit->TestBit(StvStEventHitSelector::kMarked))) 	continue; // ignore not selected hit
+    if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY)	continue; // ignore hits marked by AfterBurner as chopped o
     int sure;
     StvHit *stiHit = MakeStvHit(stHit,mHitIter->UPath(),sure);
     if (!sure && stiHit) { //Non reliable hit
