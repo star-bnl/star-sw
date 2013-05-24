@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlHitMaker.cxx,v 1.1 2013/05/23 20:57:24 qiuh Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.2 2013/05/24 20:26:00 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013 
  ***************************************************************************
@@ -15,7 +15,7 @@
  ***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
- * Revision 1.1  2013/05/23 20:57:24  qiuh
+ * Revision 1.2  2013/05/24 20:26:00  qiuh
  * *** empty log message ***
  * 
  **************************************************************************/ 
@@ -112,8 +112,8 @@ Int_t StPxlHitMaker::Make() {
         return kStWarn;
     }
 
-    double firstPixelX = -nPxlColumnsOnSensor*pxlPixelSize/2 + pxlCenterOfDiodeX;
-    double firstPixelY = -nPxlRowsOnSensor*pxlPixelSize/2 + pxlCenterOfDiodeY;
+    double firstPixelZ = -(nPxlColumnsOnSensor-1)*pxlPixelSize/2;
+    double firstPixelX = (nPxlRowsOnSensor-1)*pxlPixelSize/2;
 
     for (int i=0; i<nPxlSectors; i++)
         for(int j=0; j<nPxlLaddersPerSector; j++)
@@ -139,8 +139,8 @@ Int_t StPxlHitMaker::Make() {
                             double local[3];
                             double global[3];
                         
-                            local[2] = firstPixelX + pxlPixelSize*cluster->columnCenter;
-                            local[0] = firstPixelY + pxlPixelSize*cluster->rowCenter;
+                            local[2] = firstPixelZ + pxlPixelSize*cluster->columnCenter;
+                            local[0] = firstPixelX - pxlPixelSize*cluster->rowCenter;
                             
                             if(EmbeddingShortCut && pxlHit->idTruth())
                                 local[1] = 0;
