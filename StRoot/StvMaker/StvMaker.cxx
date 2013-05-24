@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.35 2013/05/08 00:09:27 perev Exp $
+// $Id: StvMaker.cxx,v 1.36 2013/05/24 16:34:01 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -214,7 +214,8 @@ Int_t StvMaker::InitDetectors()
 
   kit->SetHitLoader(new StvHitLoader);
   assert(kit->HitLoader()->Init());
-
+//		In case of fithiterr utility working, selects special hits to speedup
+  if (mFETracks) kit->HitLoader()->SetHitSelector();
 
   return kStOk;
 } 

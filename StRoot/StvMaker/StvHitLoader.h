@@ -13,6 +13,7 @@ class StEvent;
 class StHit;
 class StvHit;
 class StEventHitIter;
+class StvStEventHitSelector;
 class StvHitLoader : public TNamed 
 {
  public:
@@ -21,6 +22,7 @@ class StvHitLoader : public TNamed
     virtual ~StvHitLoader();
     void  Clear(const char* opt="");
     int   Init();
+    void  SetHitSelector();
     int   LoadHits(const StEvent *stev); 
     int   Finish();
  protected:
@@ -28,6 +30,7 @@ class StvHitLoader : public TNamed
     int     TpcHitTest(const StHit *stHit);    
  private:
  StEventHitIter *mHitIter;
+ StvStEventHitSelector *mHitSelector;
  ClassDef(StvHitLoader,0)
 };
 
