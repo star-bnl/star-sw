@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.34 2013/02/19 20:57:01 akio Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.35 2013/05/25 17:18:51 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.35  2013/05/25 17:18:51  avossen
+//  checked for maximum allowed timebin
+//
 //  Revision 1.34  2013/02/19 20:57:01  akio
 //  Added getting timebin from meta data, and also support for zero suppresed data
 //
@@ -118,7 +121,8 @@
 #include "StFgtDbMaker/StFgtDbMaker.h"
 #include "St_base/StMessMgr.h"
 #include "St_base/Stypes.h"
-
+#include <string>
+#include <sstream>
 #include "StFgtRawMaker.h"
 
 
@@ -181,7 +185,14 @@ Int_t StFgtRawMaker::Make()
   else
     {
       mEvent++;
-      return fillHits();
+      try{
+	return fillHits();
+      }
+      catch(string s)
+	{
+	  LOG_ERROR << s << endm;
+	  return kStFatal;
+	}
     }
 }
 
@@ -236,6 +247,12 @@ Int_t StFgtRawMaker::fillHits()
 	      //printf("RDO=%1d ARM=%1d APV=%02d Number of time bin =%d\n",r,arm,apv,nt);
 	      if(ntimebin!=0 && nt!=0 && ntimebin!=nt) {
 		LOG_ERROR << "Different number of timebins in different APV!!! Taking larger one!!!" << endm;
+		if(ntimebin>kFgtNumTimeBins)
+		  {
+		    stringstream ss;
+		    ss<<"timebin nr read from APV ("<<ntimebin<<") larger than allocated space ("<<kFgtNumTimeBins<<")";
+		    throw ss.str();
+		  }
 	      }
 	      if(ntimebin<nt) ntimebin=nt;
 	    }
