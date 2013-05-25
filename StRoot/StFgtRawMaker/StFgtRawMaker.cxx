@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.35 2013/05/25 17:18:51 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.36 2013/05/25 17:34:52 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.36  2013/05/25 17:34:52  avossen
+//  checked for maximum allowed timebin
+//
 //  Revision 1.35  2013/05/25 17:18:51  avossen
 //  checked for maximum allowed timebin
 //
@@ -247,14 +250,14 @@ Int_t StFgtRawMaker::fillHits()
 	      //printf("RDO=%1d ARM=%1d APV=%02d Number of time bin =%d\n",r,arm,apv,nt);
 	      if(ntimebin!=0 && nt!=0 && ntimebin!=nt) {
 		LOG_ERROR << "Different number of timebins in different APV!!! Taking larger one!!!" << endm;
-		if(ntimebin>kFgtNumTimeBins)
-		  {
-		    stringstream ss;
-		    ss<<"timebin nr read from APV ("<<ntimebin<<") larger than allocated space ("<<kFgtNumTimeBins<<")";
-		    throw ss.str();
-		  }
 	      }
 	      if(ntimebin<nt) ntimebin=nt;
+	      if(ntimebin>kFgtNumTimeBins)
+		{
+		  stringstream ss;
+		  ss<<"timebin nr read from APV ("<<ntimebin<<") larger than allocated space ("<<kFgtNumTimeBins<<")";
+		  throw ss.str();
+		}
 	    }
 	  }
 	}
@@ -276,7 +279,7 @@ Int_t StFgtRawMaker::fillHits()
 
 	  if(apv>=22 || apv <  0 || apv ==10|| apv==11)	 continue;
 	  if(arm<0 || arm>5)		    continue;
-	  if(timebin<0 || timebin>ntimebin) continue;
+	  if(timebin<0 || timebin>ntimebin || timebin>kFgtNumTimeBins) continue;
 	  if(channel<0 || channel>=128)	    continue;
 	  if(rdo<1 || rdo>2)		    continue;
 
