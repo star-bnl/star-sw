@@ -1,5 +1,8 @@
-// $Id: LoopOverLaserTrees.C,v 1.12 2013/05/28 06:59:56 fisyak Exp $
+// $Id: LoopOverLaserTrees.C,v 1.13 2013/05/28 20:08:49 fisyak Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.13  2013/05/28 20:08:49  fisyak
+// Increase cut on membrane drift distance precision 1e-3 => 2e-3
+//
 // Revision 1.12  2013/05/28 06:59:56  fisyak
 // Add drift velocity estimation from membrane cluster positions if standard procedure fails
 //
@@ -113,7 +116,7 @@ void MakeTable() {
   }
   if (Run.ok == 2 && (Run.date < 130101 ||  Run.date >  140000)) return;
   if (Run.ok == 2) { // try to drift length for Run XIII
-    if (Run.dzWO > 1e-3 || Run.dzEO > 1e-3 ||
+    if (Run.dzWO > 2e-3 || Run.dzEO > 2e-3 ||
 	Run.zWO + Run.zEO < 409.9 ||
 	Run.zWO + Run.zEO > 410.5) {Run.ok = 3; return;}
     /*
