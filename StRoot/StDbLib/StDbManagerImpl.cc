@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.42 2013/04/01 14:42:51 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.43 2013/05/28 18:07:43 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.43  2013/05/28 18:07:43  dmitry
+ * new db domain: MTD
+ *
  * Revision 1.42  2013/04/01 14:42:51  dmitry
  * added new domain - PXL
  *
@@ -407,6 +410,7 @@ addDbDomain(dbFms,"fms");
 addDbDomain(dbpp2pp,"pp2pp"); 
 addDbDomain(dbFgt,"fgt"); 
 addDbDomain(dbPxl,"pxl"); 
+addDbDomain(dbMtd,"mtd"); 
 
 }
 
