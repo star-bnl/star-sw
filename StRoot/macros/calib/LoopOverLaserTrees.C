@@ -1,5 +1,8 @@
-// $Id: LoopOverLaserTrees.C,v 1.11 2013/05/20 12:35:12 fisyak Exp $
+// $Id: LoopOverLaserTrees.C,v 1.12 2013/05/28 06:59:56 fisyak Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.12  2013/05/28 06:59:56  fisyak
+// Add drift velocity estimation from membrane cluster positions if standard procedure fails
+//
 // Revision 1.11  2013/05/20 12:35:12  fisyak
 // Set time stamp at the begin of the laser run
 //
@@ -30,7 +33,7 @@
 //#define ADJUSTABLE_BINNING
 //#define __REFIT__
 //#define INTEGRATE_OVER_HOURS
-//#define SeparateWestandEast
+#define SeparateWestandEast
 #if !defined(__CINT__) || defined(__MAKECINT__)
 //#include <ostream>
 #include "Riostream.h"
@@ -66,11 +69,14 @@ static Double_t dDVAll[2][3];
 static Int_t  _debug = 0; 
 TH2D *dv = 0;
 TH2D *slope = 0;
+//             io
+TH2D *zMembrane[2];
 TNtuple *runNT = 0;
 struct Run_t {
   Float_t run, date, time, events, day, dvAll, ddvAll, dvWest, ddvWest, dvEast, ddvEast, slAll, dslAll, slWest, dslWest, slEast, dslEast;
+  Float_t vWest, vEast, zWI, dzWI, zEI, dzEI, zWO, dzWO, zEO, dzEO, utime, ok, dvSet;
 };
-const Char_t *vRun = "run:date:time:events:day:dvAll:ddvAll:dvWest:ddvWest:dvEast:ddvEast:slAll:dslAll:slWest:dslWest:slEast:dslEast";
+const Char_t *vRun = "run:date:time:events:day:dvAll:ddvAll:dvWest:ddvWest:dvEast:ddvEast:slAll:dslAll:slWest:dslWest:slEast:dslEast:vWest:vEast:zWI:dzWI:zEI:dzEI:zWO:dzWO:zEO:dzEO:utime:ok:dvSet";
 Run_t Run;
 //________________________________________________________________________________
 Double_t ScaleE2W(Double_t day) {// scale East to West drift velocity
@@ -80,18 +86,48 @@ Double_t ScaleE2W(Double_t day) {// scale East to West drift velocity
 }
 //________________________________________________________________________________
 void MakeTable() {
+  Double_t dv      =  DVAll[0][0];
+  Double_t ddv     = dDVAll[0][0];
+  Double_t dvWest  =  DVAll[0][1];
+  Double_t ddvWest = dDVAll[0][1];
+  Double_t dvEast  =  DVAll[0][2]; 
+  Double_t ddvEast = dDVAll[0][2]; 
+  Run.ok = 0; // ok == 0 => use both: west and east; ok == 1 => use averaged drift velocities; ok > 1 ==> no. acceptable drift velocities
+  if (dvWest < 5.3 || dvWest > 5.9 || ddvWest <= 0 || ddvWest> 1e-3 ||
+      dvEast < 5.3 || dvEast > 5.9 || ddvEast <= 0 || ddvEast> 1e-3) {
+    //  if (! (dvWest < 5.3 && dvWest > 5.9 && ddvWest < 0 && ddvWest> 1e-3) ||
+    //      ! (dvEast < 5.3 && dvEast > 5.9 && ddvEast < 0 && ddvEast> 1e-3)) {
+    cout << "Run " << run << " fails ============================= to make separated East and West drift velocities" << endl;
+    cout << "vWest = " << dvWest << " +/- " << ddvWest 
+	 << "\tvEast = " << dvEast << " +/- " << ddvEast << endl;
+    Run.ok = 1;
+  }
 #ifndef SeparateWestandEast
-  if (! (DVAll[0][0] > 5.3 && DVAll[0][0] < 5.9 && dDVAll[0][0] > 0 && dDVAll[0][0]< 1e-3)) {
-    cout << "Run " << run << " fails =============================" << endl;
-    return;
-  }
-#else
-  if (! (DVAll[0][1] > 5.3 && DVAll[0][1] < 5.9 && dDVAll[0][1] > 0 && dDVAll[0][1]< 4e-5 ||
-	 DVAll[0][2] > 5.3 && DVAll[0][2] < 5.9 && dDVAll[0][2] > 0 && dDVAll[0][2]< 4e-5)) {
-    cout << "Run " << run << " fails =============================" << endl;
-    return;
-  }
+  Run.ok = 1;
 #endif
+  //  if (ok == 1 && ! (dv > 5.3 && dv < 5.9 && ddv > 0 && ddv< 1e-3)) {
+  if (Run.ok == 1 && (dv < 5.3 || dv > 5.9 || ddv <= 0 || ddv > 1e-3)) {
+    cout << "Run " << run << " fails ============================= to make averaged drift velocities" << endl;
+    cout << "v = " << dv << " +/- " << ddv << endl;
+    Run.ok = 2;
+  }
+  if (Run.ok == 2 && (Run.date < 130101 ||  Run.date >  140000)) return;
+  if (Run.ok == 2) { // try to drift length for Run XIII
+    if (Run.dzWO > 1e-3 || Run.dzEO > 1e-3 ||
+	Run.zWO + Run.zEO < 409.9 ||
+	Run.zWO + Run.zEO > 410.5) {Run.ok = 3; return;}
+    /*
+      RunNT->Draw("1e6*dvAll/vWest-1:zEO+zWO>>D(10,409.9,410.5)","dzWO<1e-3&&dzEO<1e-3&&ddvAll<1e-3&&ok<2","prof")
+      D->Fit("pol1","e")
+      FCN=4.90371 FROM MINOS     STATUS=FAILURE       156 CALLS         389 TOTAL
+      EDM=5.83814e-09    STRATEGY= 1      ERR MATRIX NOT POS-DEF
+      EXT PARAMETER                APPROXIMATE        STEP         FIRST   
+      NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+      1  p0           5.85670e-01   2.04554e-04   2.04554e-04   2.08675e-04
+      2  p1          -1.42815e-03   4.98660e-07   4.98660e-07   3.42967e+03
+     */
+    dv = 1e-6*Run.vWest*(1. + (5.85670e-01 -1.42815e-03*(Run.zWO + Run.zEO)));
+  }
   TString fOut =  Form("tpcDriftVelocity.%8i.%06i.C",date,Time);
   ofstream out;
   cout << "Create " << fOut << endl;
@@ -100,39 +136,42 @@ void MakeTable() {
   out << "  if (!gROOT->GetClass(\"St_tpcDriftVelocity\")) return 0;" << endl;
   out << "  St_tpcDriftVelocity *tableSet = new St_tpcDriftVelocity(\"tpcDriftVelocity\",1);" << endl;
   out << "  tpcDriftVelocity_st row;// Laser Run " << run << endl;
-  Double_t dvEast  =  DVAll[0][2]; 
-  Double_t ddvEast = dDVAll[0][2]; 
-  Double_t dvWest  =  DVAll[0][1];
-  Double_t ddvWest = dDVAll[0][1];
-#ifdef SeparateWestandEast
-  if (! (dvWest > 5.5 && dvWest < 5.9 && ddvWest > 0 && ddvWest< 4e-5) ) {// West From East
-    ddvWest = -1;
-    dvWest = dvEast/(1 + 1e-3*ScaleE2W(Run.day));
-  } 
-  if (! (dvEast > 5.5 && dvEast < 5.9 && ddvEast > 0 && ddvEast< 4e-5) ) {// East from West
-    ddvEast = -1;
-    dvEast = dvWest*(1 + 1e-3*ScaleE2W(Run.day));
-  } 
+  if (! Run.ok) {// ok == 0 => use both: west and east
+    Run.dvSet = dvWest;
+#if 0
+    if (! (dvWest > 5.5 && dvWest < 5.9 && ddvWest > 0 && ddvWest< 1e-3) ) {// West From East
+      ddvWest = -1;
+      dvWest = dvEast/(1 + 1e-3*ScaleE2W(Run.day));
+    } 
+    if (! (dvEast > 5.5 && dvEast < 5.9 && ddvEast > 0 && ddvEast< 1e-3) ) {// East from West
+      ddvEast = -1;
+      dvEast = dvWest*(1 + 1e-3*ScaleE2W(Run.day));
+    }
+#endif 
   out << "  row.laserDriftVelocityEast	 =   " << dvEast << "; // +/- " << ddvEast 
-      << " cm/us East: Slope = " << DVAll[1][2] << " +/- " << dDVAll[1][2] << " DV = " << DVAll[0][2] << " +/- " << dDVAll[0][2]<< endl;
+      << " cm/us East: Slope = " << DVAll[1][2] << " +/- " << dDVAll[1][2] << " DV = " << dvEast << " +/- " << ddvEast
+      << endl;
   out << "  row.laserDriftVelocityWest	 =   " << dvWest << "; // +/- " << ddvWest 
-      << " cm/us West: Slope = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << " DV = " << DVAll[0][1] << " +/- " << dDVAll[0][1]<< endl;
+      << " cm/us West: Slope = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << " DV = " << dvWest << " +/- " << ddvWest<< endl;
   out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
   out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
   out << "  tableSet->AddAt(&row); " << endl;
-  out << "  return (TDataSet *)tableSet;" << endl;
-#else
-  out << "  row.laserDriftVelocityEast	 =   " << DVAll[0][0] << "; // +/- " << dDVAll[0][0] 
-      << " cm/us All: East = " << DVAll[1][2] << " +/- " << dDVAll[1][2] << endl;
-  out << "  row.laserDriftVelocityWest	 =   " << DVAll[0][0] << "; // +/- " << dDVAll[0][0] 
-      << " cm/us All: West = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << endl;
-  out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
-  out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
-  out << "  tableSet->AddAt(&row);// 1e3*Delta: All = " << DVAll[0][0] << " +/- " << dDVAll[0][0] << endl;
-  out << "  return (TDataSet *)tableSet;//" 
-      << " West = " << DVAll[0][1] << " +/- " << dDVAll[0][1]
-      << " East = " << DVAll[0][2] << " +/- " << dDVAll[0][2] << endl;
-#endif
+  out << "  return (TDataSet *)tableSet; // 1e3*Delta: All = " << dv << " +/- " << ddv << endl;
+  } else { // averaged drif tvelocity
+    Run.dvSet = dv;
+    out << "  row.laserDriftVelocityEast	 =   " << dv << "; // +/- " << ddv 
+	<< " cm/us All: East = " << DVAll[1][2] << " +/- " << dDVAll[1][2];
+    if (Run.ok == 2) out << " From Membrane";
+    out << endl;
+    out << "  row.laserDriftVelocityWest	 =   " << dv << "; // +/- " << ddv 
+	<< " cm/us All: West = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << endl;
+    out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
+    out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
+    out << "  tableSet->AddAt(&row);// 1e3*Delta: All = " << dv << " +/- " << ddv << endl;
+    out << "  return (TDataSet *)tableSet;//" 
+	<< " West = " << dvWest << " +/- " << ddvWest
+	<< " East = " << dvEast << " +/- " << ddvEast << endl;
+  }
   out << "};" << endl;
 }
 //________________________________________________________________________________
@@ -142,8 +181,8 @@ void Fit() {
   date = 20000000 + (Int_t) Run.date;
   Time = (Int_t) Run.time;
   TDatime t(date, Time);
-  UInt_t u = t.Convert();
-  Run.day = 1. + (u - u0)/(24.*60.*60.);
+  Run.utime = t.Convert();
+  Run.day = 1. + (Run.utime - u0)/(24.*60.*60.);
   run  = (Int_t) (1000000*((Int_t) (Run.date/1000000)) + Run.run);
   memset(&DVAll[0][0], 0, 6*sizeof(Double_t));
   memset(&dDVAll[0][0], 0, 6*sizeof(Double_t));
@@ -185,8 +224,26 @@ void Fit() {
     }
     fit->Write();
   }
-  runNT->Fill(&Run.run);
+  // Memberane
+  for (Int_t io = 0; io < 2; io++) {
+    zMembrane[io]->FitSlicesY(0,1,0,10,"QNRI");
+    TString fitN(zMembrane[io]->GetName());
+    fitN += "_1";
+    TH1D *fit = (TH1D *) gDirectory->Get(fitN);
+    if (! fit) continue;
+    fit->SetMarkerStyle(20);
+    Float_t *par = &Run.zWI;
+    for (Int_t we = 0; we < 2; we++) {
+      TF1 *pol0 = (TF1*) gROOT->GetFunction("pol0");
+      if (we == 0) fit->Fit(pol0,"er","",0.5,12.5);
+      else         fit->Fit(pol0,"er+","",12.5,24.5);
+      par[4*io+2*we  ] = pol0->GetParameter(0);
+      par[4*io+2*we+1] = pol0->GetParError(0);
+    }
+    fit->Write();
+  }
   MakeTable();
+  runNT->Fill(&Run.run);
 }
 //________________________________________________________________________________
 void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
@@ -199,28 +256,32 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
   const Int_t&       fEvtHdr_fTime                            = iter("fEvtHdr.fTime");
   //  const Float_t&     fEvtHdr_ftZero                           = iter("fEvtHdr.ftZero");
   const Float_t&     fEvtHdr_fDriVel                          = iter("fEvtHdr.fDriVel");
+  const Float_t&     fEvtHdr_fDriVelWest                      = iter("fEvtHdr.fDriVelWest");
+  const Float_t&     fEvtHdr_fDriVelEast                      = iter("fEvtHdr.fDriVelEast");
   const Float_t&     fEvtHdr_fClock                           = iter("fEvtHdr.fClock");
   //  const Float_t&     fEvtHdr_fTrigger                         = iter("fEvtHdr.fTrigger");
   //  const Float_t&     fEvtHdr_fDriftDistance                   = iter("fEvtHdr.fDriftDistance");
   //  const Float_t&     fEvtHdr_fInnerSectorzOffset              = iter("fEvtHdr.fInnerSectorzOffset");
   //  const Float_t&     fEvtHdr_fOuterSectorzOffset              = iter("fEvtHdr.fOuterSectorzOffset");
   //  const Float_t&     fEvtHdr_ftriggerTimeOffset               = iter("fEvtHdr.ftriggerTimeOffset");
+  const Int_t&       fNhit                                    = iter("fNhit");
+  const UShort_t*&   fHits_sector                             = iter("fHits.sector");
+  const UShort_t*&   fHits_row                                = iter("fHits.row");
+  const Float_t*&    fHits_xyzL_mX3                            = iter("fHits.xyzL.mX3");
   const Float_t&     fEvtHdr_fOnlClock                        = iter("fEvtHdr.fOnlClock");
-  const Int_t*&      fFit_N                                   = iter("fFit.N");
   const Int_t*&      fFit_Sector                              = iter("fFit.Sector");
 #ifdef __REFIT__
+  const Int_t*&     fFit_N                                   = iter("fFit.N");
   const Int_t*&     fFit_Bundle                              = (Int_t **) iter("fFit.Bundle[42]");
   const Int_t*&     fFit_Mirror                              = (Int_t **) iter("fFit.Mirror[42]");
-#endif
   const Double32_t*& fFit_offset                              = iter("fFit.offset");
-  const Double32_t*& fFit_slope                               = iter("fFit.slope");
   const Double32_t*& fFit_doffset                             = iter("fFit.doffset");
   const Double32_t*& fFit_dslope                              = iter("fFit.dslope");
   const Double32_t*& fFit_chisq                               = iter("fFit.chisq");
-#ifdef __REFIT__
   const Double32_t**&  fFit_X                                   = (Double_t **) iter("fFit.X[42]");
   const Double32_t**&  fFit_Y                                   = (Double_t **) iter("fFit.Y[42]");
 #endif
+  const Double32_t*& fFit_slope                               = iter("fFit.slope");
   const Double32_t*& fFit_Prob                                = iter("fFit.Prob");
   const Int_t*&      fFit_ndf                                 = iter("fFit.ndf");
   //  const Int_t*&      fFit_Flag                                = (Int_t **) iter("fFit.Flag[42]");
@@ -253,6 +314,8 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
 	Run.run  = fEvtHdr_fRun%1000000;
 	Run.date = fEvtHdr_fDate%1000000;
 	Run.time = fEvtHdr_fTime;
+	Run.vWest = fEvtHdr_fDriVelWest;
+	Run.vEast = fEvtHdr_fDriVelEast;
 	Run.events = 0;
 #ifdef ADJUSTABLE_BINNING
 	dv = new TH2D(Form("DV%i",fEvtHdr_fRun%1000000),Form("Drift Velocity for run %i",fEvtHdr_fRun%1000000),12,1,25,400,1,-1);
@@ -270,11 +333,25 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
 #endif
 	slope->SetXTitle("Sector");
 	slope->SetYTitle("Difference wrt reference Drift Velocity in pemill");
+	for (Int_t io = 0; io < 2; io++) {// 0 => Inner, 1 => Outer
+	  TString name("Z");
+	  TString title("Z[cm] of Membrane");
+	  if (io == 0)  {name += "I"; title += " Inner";}
+	  else          {name += "O"; title += " Outer";}
+	  name += Form("%i",fEvtHdr_fRun%1000000);
+	  title += Form(" for run %i",fEvtHdr_fRun%1000000); 
+	  //	  zMembrane[io] = new TH2D(name,title,24,0.5,24.5,2000,-10.,10.);
+	  zMembrane[io] = new TH2D(name,title,24,0.5,24.5,2000,200,210);
+	}
 	oldRun = (Int_t) fEvtHdr_fRun;
 	oldDate = Date;
 #ifdef INTEGRATE_OVER_HOURS
       }
 #endif
+    }
+    for (Int_t i = 0; i <  fNhit; i++) {
+      Int_t io = 0; if (fHits_row[i]    > 13) io = 1;
+      zMembrane[io]->Fill(fHits_sector[i],fHits_xyzL_mX3[i]);
     }
     Double_t dt =  fEvtHdr_fDate%1000000 + ((Double_t) fEvtHdr_fTime)*1e-6;
     Double_t DT =  Run.date + Run.time*1e-6;
@@ -379,7 +456,7 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
   
 */  
 //________________________________________________________________________________
-Double_t OffSets(Double_t *x, Double_t *par = 0) {
+Double_t OffSets(Double_t *x/*, Double_t *par = 0 */) {
   // TF1 *f = new TF1("Off",OffSets,0,24,0)
   //                                  2      4      6      8    10      12
   static Double_t Toffsets[12] = {10.33,  3.34,  6.14, 13.11,   -1., 17.31, // ns
@@ -390,3 +467,32 @@ Double_t OffSets(Double_t *x, Double_t *par = 0) {
   if (sector2 < 0 || sector2 > 12) return off;
   return DV*Toffsets[sector2];
 }
+/*
+  RunNT->Draw("1e6*dvAll/vWest-1:zWO-zEO>>zO(10,7,7.5)","ok<2&&zEO<0","prof")
+
+
+c1 = new TCanvas()
+TH1* frame = c1->DrawFrame(575e6,5.4,581.e6,5.6)
+frame->SetTitle("Drift velocitry")
+frame->GetXaxis()->SetTimeDisplay(1)
+c1->Update()
+TLegend *l = new TLegend(0.2,0.2,0.4,0.4)
+RunNT->Draw("dvWest:utime-788936400>>west","ok==0","same")
+l->AddEntry(west,"West")
+l->Draw()
+RunNT->SetMarkerColor(2)
+RunNT->Draw("dvEast:utime-788936400>>east","ok==0","same")
+l->AddEntry(east,"East")
+RunNT->SetMarkerColor(3)
+RunNT->Draw("dvAll:utime-788936400>>all","ok==1","same")
+l->AddEntry(all,"All")
+RunNT->SetMarkerColor(4)
+RunNT->Draw("dvSet:utime-788936400>>memb","ok==2","same")
+l->AddEntry(memb,"Membrane")
+
+
+
+
+
+
+ */
