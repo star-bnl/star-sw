@@ -132,7 +132,14 @@ int pxlBuilder::pxl_decoder(const u_int *d, const int wordLength,bitset<NCOL> bs
     row[i] = -1;
     prev_row[i] = 0;
     prev_col[i] = 0;
+
+    for(j=0; j<4; j++){
+      runlength[i][j] = 0;
+    }
   }
+  
+  
+
 
   // dump header
   //DEBUGP("\t%4d: 0x%08X\n",0,d[0]);
@@ -275,27 +282,85 @@ bool pxlBuilder::UpdateTH1(TH1 *hist,int bin,double value,bool scale,int mod_val
   }
 }
 
+int pxlBuilder::IncrementArray(const char* name,int x_bin,int y_bin){
+  int count;
+
+  if(name == "hits_inner"){
+    count_hits_inner[x_bin][y_bin]++;
+    count = count_hits_inner[x_bin][y_bin];
+  }
+
+  else if(name == "hits_outer"){
+    count_hits_outer[x_bin][y_bin]++;
+    count = count_hits_outer[x_bin][y_bin];
+  }
+
+  else if(name == "length_inner"){
+    count_length_inner[x_bin][y_bin]++;
+    count = count_length_inner[x_bin][y_bin];
+  }
+
+  else if(name == "length_outer"){
+    count_length_outer[x_bin][y_bin]++;
+    count = count_length_outer[x_bin][y_bin];
+  }
+
+  else{
+    cout<<"Error: IncrementArray"<<endl;
+    return 1.0;
+  }
+
+  return count;
+}
+
 bool pxlBuilder::UpdateTH1(TH1 *hist,int bin,double value){
   double bin_content = 0;
   bin_content += hist->GetBinContent(bin);
+  ((!bin_content) || (bin_content < 0)) && (bin_content = 0);
   double new_content = bin_content+value;
 
-  if(new_content == 0.0) return true;
+  if(new_content <= 0.0) return true;
   else{
     hist->SetBinContent(bin,new_content);
     return (hist->GetBinContent(bin) == new_content) ? true : false;
   }
 }
 
-bool pxlBuilder::UpdateTH2(TH1 *hist,int x_bin,int y_bin,double value){
-  double bin_content = 0;
-  bin_content += hist->GetBinContent(x_bin,y_bin);
-  double new_content = bin_content+value;
-
-  if(new_content == 0.0) return true;
+bool pxlBuilder::UpdateTH2(const char* name,TH1 *hist,int x_bin,int y_bin,double value){
+  if(value <= 0.0) return true;
   else{
+    //if(value > 4) cout<<"Run length is "<<value<<endl;
+
+    double bin_content = 0;
+    bin_content += hist->GetBinContent(x_bin,y_bin);
+    ((!bin_content) || (bin_content < 0)) && (bin_content = 0);
+    
+    double new_content;
+    int count = IncrementArray(name,x_bin,y_bin);
+    if(count == 1) new_content = value;
+    else{
+      new_content = ((bin_content*(count-1))+value)/(double)(count);
+    }
+    if(new_content < 0) cout<<"Less than 0!"<<endl;
+    
     hist->SetBinContent(x_bin,y_bin,new_content);
     return (hist->GetBinContent(x_bin,y_bin) == new_content) ? true : false;
+  }
+}
+
+bool pxlBuilder::UpdateTH2(TH1 *hist,int x_bin,int y_bin,double value){
+  if(value <= 0.0) return true;
+  else{
+    double bin_content = 0;
+    bin_content += hist->GetBinContent(x_bin,y_bin);
+    ((!bin_content) || (bin_content < 0)) && (bin_content = 0);
+    double new_content = bin_content+value;
+    
+    if(new_content <= 0.0) return true;
+    else{
+      hist->SetBinContent(x_bin,y_bin,new_content);
+      return (hist->GetBinContent(x_bin,y_bin) == new_content) ? true : false;
+    }
   }
 }
 
@@ -326,21 +391,40 @@ pxlBuilder::pxlBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   number_of_events = 0;
 
   max_count = 0;
+  max_count_sector1 = 0;
   max_count_sector2 = 0;
+  max_count_sector3 = 0;
   max_count_sector4 = 0;
+  max_count_sector5 = 0;
+  max_count_sector6 = 0;
   max_count_sector7 = 0;
+  max_count_sector8 = 0;
+  max_count_sector9 = 0;
+  max_count_sector10 = 0;
+
   max_count_inner = 0;
   max_count_outer = 0;
 
   min_count = 1000000;
+  min_count_sector1 = 1000000;
   min_count_sector2 = 1000000;
+  min_count_sector3 = 1000000;
   min_count_sector4 = 1000000;
+  min_count_sector5 = 1000000;
+  min_count_sector6 = 1000000;
   min_count_sector7 = 1000000;
+  min_count_sector8 = 1000000;
+  min_count_sector9 = 1000000;
+  min_count_sector10 = 1000000;
+
   min_count_inner = 1000000;
   min_count_outer = 1000000;
 
-  LadderMap = new map<int,int>();
-  SetLadderMap();
+  memset(count_hits_inner, 0, sizeof(count_hits_inner[0][0]) * 10 * 10);
+  memset(count_hits_outer, 0, sizeof(count_hits_outer[0][0]) * 30 * 10);
+  memset(count_length_inner, 0, sizeof(count_length_inner[0][0]) * 10 * 10);
+  memset(count_length_outer, 0, sizeof(count_length_outer[0][0]) * 30 * 10);
+
 }
 
 pxlBuilder::~pxlBuilder() {
@@ -363,19 +447,18 @@ void pxlBuilder::initialize(int argc, char *argv[]) {
   contents.GlobalHitMultiplicity = new TH1I("GlobalHitMultiplicity","",2500,1,75001);
   
 
-  //contents.GlobalHitMultiplicitySector1 = new TH1I("GlobalHitMultiplicitySector1","",500,1,15001);
+  contents.GlobalHitMultiplicitySector1 = new TH1I("GlobalHitMultiplicitySector1","",2500,1,50001);
   contents.GlobalHitMultiplicitySector2 = new TH1I("GlobalHitMultiplicitySector2","",2500,1,50001);
-  //contents.GlobalHitMultiplicitySector3 = new TH1I("GlobalHitMultiplicitySector3","",500,1,15001);
-  contents.GlobalHitMultiplicitySector4 = new TH1I("GlobalHitMultiplicitySector4","",500,1,10001);
-  //contents.GlobalHitMultiplicitySector5 = new TH1I("GlobalHitMultiplicitySector5","",500,1,15001);
-  //contents.GlobalHitMultiplicitySector6 = new TH1I("GlobalHitMultiplicitySector6","",500,1,15001);
-  contents.GlobalHitMultiplicitySector7 = new TH1I("GlobalHitMultiplicitySector7","",750,1,20001);
-  //contents.GlobalHitMultiplicitySector8 = new TH1I("GlobalHitMultiplicitySector8","",500,1,15001);
-  //contents.GlobalHitMultiplicitySector9 = new TH1I("GlobalHitMultiplicitySector9","",500,1,15001);
-  //contents.GlobalHitMultiplicitySector10 = new TH1I("GlobalHitMultiplicitySector10","",500,1,15001);
+  contents.GlobalHitMultiplicitySector3 = new TH1I("GlobalHitMultiplicitySector3","",2500,1,50001);
+  contents.GlobalHitMultiplicitySector4 = new TH1I("GlobalHitMultiplicitySector4","",2500,1,50001);
+  contents.GlobalHitMultiplicitySector5 = new TH1I("GlobalHitMultiplicitySector5","",2500,1,50001);
+  contents.GlobalHitMultiplicitySector6 = new TH1I("GlobalHitMultiplicitySector6","",2500,1,50001);
+  contents.GlobalHitMultiplicitySector7 = new TH1I("GlobalHitMultiplicitySector7","",2500,1,50001);
+  contents.GlobalHitMultiplicitySector8 = new TH1I("GlobalHitMultiplicitySector8","",2500,1,50001);
+  contents.GlobalHitMultiplicitySector9 = new TH1I("GlobalHitMultiplicitySector9","",2500,1,50001);
+  contents.GlobalHitMultiplicitySector10 = new TH1I("GlobalHitMultiplicitySector10","",2500,1,50001);
 
   contents.HitMultiplicityPerEvent = new TH1I("HitMultiplicityPerEvent","",500,1,5001);
-  //contents.HitMultiplicityPerEvent = new TH1I("HitMultiplicityPerEvent","",5000,1,5001);
   
   contents.HitsPerLadder = new TH1I("HitsPerLadder","",40,1,41);
   
@@ -384,13 +467,11 @@ void pxlBuilder::initialize(int argc, char *argv[]) {
   
   //Tab 2: PXL Hit Maps
   contents.SensorHitsInnerLayer = new TH2I("SensorHitsInnerLayer","",10,1,11,10,1,11);
-  contents.SensorHitsInnerLayerPerEvent = new TH2I("SensorHitsInnerLayerPerEvent","",10,1,11,10,1,11);
   
-  contents.SensorHitsOuterLayer = new TH2I("SensorHitsOuterLayer","",30,11,41,10,1,11);
-  contents.SensorHitsOuterLayerPerEvent = new TH2I("SensorHitsOuterLayerPerEvent","",30,11,41,10,1,11);
+  contents.SensorHitsOuterLayer = new TH2I("SensorHitsOuterLayer","",30,1,31,10,1,11);
   
   contents.AverageRunLengthInnerLayer = new TH2D("AverageRunLengthInnerLayer","",10,1,11,10,1,11);
-  contents.AverageRunLengthOuterLayer = new TH2D("AverageRunLengthOuterLayer","",30,11,41,10,1,11);
+  contents.AverageRunLengthOuterLayer = new TH2D("AverageRunLengthOuterLayer","",30,1,31,10,1,11);
   
 
   //%%%%%%%%%%%%%%Histogram Attributes%%%%%%%%%%%%%%
@@ -398,38 +479,62 @@ void pxlBuilder::initialize(int argc, char *argv[]) {
   contents.GlobalHitMultiplicity->SetTitle("Distribution of the Total Number of Hits per Event;Global Hit Multiplicity per Event;Counts");
   contents.GlobalHitMultiplicity->SetFillColor(kMagenta+3);
 
+  contents.GlobalHitMultiplicitySector1->SetTitle("Distribution of the Total Number of Hits per Event (Sector 1);Global Hit Multiplicity per Event;Counts");
+  contents.GlobalHitMultiplicitySector1->SetFillColor(kMagenta+3);
+  contents.GlobalHitMultiplicitySector1->SetFillStyle(3001);
+
   contents.GlobalHitMultiplicitySector2->SetTitle("Distribution of the Total Number of Hits per Event (Sector 2);Global Hit Multiplicity per Event;Counts");
   contents.GlobalHitMultiplicitySector2->SetFillColor(kMagenta+3);
   contents.GlobalHitMultiplicitySector2->SetFillStyle(3001);
+
+  contents.GlobalHitMultiplicitySector3->SetTitle("Distribution of the Total Number of Hits per Event (Sector 3);Global Hit Multiplicity per Event;Counts");
+  contents.GlobalHitMultiplicitySector3->SetFillColor(kMagenta+3);
+  contents.GlobalHitMultiplicitySector3->SetFillStyle(3001);
 
   contents.GlobalHitMultiplicitySector4->SetTitle("Distribution of the Total Number of Hits per Event (Sector 4);Global Hit Multiplicity per Event;Counts");
   contents.GlobalHitMultiplicitySector4->SetFillColor(kMagenta+3);
   contents.GlobalHitMultiplicitySector4->SetFillStyle(3001);
 
+  contents.GlobalHitMultiplicitySector5->SetTitle("Distribution of the Total Number of Hits per Event (Sector 5);Global Hit Multiplicity per Event;Counts");
+  contents.GlobalHitMultiplicitySector5->SetFillColor(kMagenta+3);
+  contents.GlobalHitMultiplicitySector5->SetFillStyle(3001);
+
+  contents.GlobalHitMultiplicitySector6->SetTitle("Distribution of the Total Number of Hits per Event (Sector 6);Global Hit Multiplicity per Event;Counts");
+  contents.GlobalHitMultiplicitySector6->SetFillColor(kMagenta+3);
+  contents.GlobalHitMultiplicitySector6->SetFillStyle(3001);
+
   contents.GlobalHitMultiplicitySector7->SetTitle("Distribution of the Total Number of Hits per Event (Sector 7);Global Hit Multiplicity per Event;Counts");
   contents.GlobalHitMultiplicitySector7->SetFillColor(kMagenta+3);
   contents.GlobalHitMultiplicitySector7->SetFillStyle(3001);
+
+  contents.GlobalHitMultiplicitySector8->SetTitle("Distribution of the Total Number of Hits per Event (Sector 8);Global Hit Multiplicity per Event;Counts");
+  contents.GlobalHitMultiplicitySector8->SetFillColor(kMagenta+3);
+  contents.GlobalHitMultiplicitySector8->SetFillStyle(3001);
+
+  contents.GlobalHitMultiplicitySector9->SetTitle("Distribution of the Total Number of Hits per Event (Sector 9);Global Hit Multiplicity per Event;Counts");
+  contents.GlobalHitMultiplicitySector9->SetFillColor(kMagenta+3);
+  contents.GlobalHitMultiplicitySector9->SetFillStyle(3001);
+
+  contents.GlobalHitMultiplicitySector10->SetTitle("Distribution of the Total Number of Hits per Event (Sector 10);Global Hit Multiplicity per Event;Counts");
+  contents.GlobalHitMultiplicitySector10->SetFillColor(kMagenta+3);
+  contents.GlobalHitMultiplicitySector10->SetFillStyle(3001);
 
 
   contents.HitMultiplicityPerEvent->SetTitle("Global Hit Multiplicity per Event;Event Counter;Global Hit Multiplicity");
   contents.HitMultiplicityPerEvent->SetFillColor(kRed+2);
   
-  contents.HitsPerLadder->SetTitle("Number of Hits per Ladder;Ladder Number;Hit Multiplicity");
+  contents.HitsPerLadder->SetTitle("Number of Hits per Ladder;Ladder ID;Hit Multiplicity");
   contents.HitsPerLadder->SetFillColor(kGreen+2);
   
   contents.HitCorrelation->SetTitle("Distribution Hit Correlation Inner-Outer Layer;Outer Layer Hit Multiplicity per Event;Inner Layer Hit Multiplicity per Event");
   
-  contents.SensorHitsInnerLayer->SetTitle("Number of Hits per Sensor (Inner Layer);Ladder Number;Sensor Number");
-
-  contents.SensorHitsInnerLayerPerEvent->SetTitle("Number of Hits per Sensor (Inner Layer) per Event;Ladder Number;Sensor Number");
+  contents.SensorHitsInnerLayer->SetTitle("Number of Hits per Sensor (Inner Layer);Ladder Counter;Sensor ID");
   
-  contents.SensorHitsOuterLayer->SetTitle("Number of Hits per Sensor (Outer Layer);Ladder Number;Sensor Number");
-
-  contents.SensorHitsOuterLayerPerEvent->SetTitle("Number of Hits per Sensor (Outer Layer) per Event;Ladder Number;Sensor Number");
+  contents.SensorHitsOuterLayer->SetTitle("Number of Hits per Sensor (Outer Layer);Ladder Counter;Sensor NumberID");
   
-  contents.AverageRunLengthInnerLayer->SetTitle("Intensity Plot of Average Run Length (Inner Layer);Ladder Number;Sensor Number");
+  contents.AverageRunLengthInnerLayer->SetTitle("Intensity Plot of Average Run Length (Inner Layer);Ladder Counter;Sensor ID");
 
-  contents.AverageRunLengthOuterLayer->SetTitle("Intensity Plot of Average Run Length (Outer Layer);Ladder Number;Sensor Number");
+  contents.AverageRunLengthOuterLayer->SetTitle("Intensity Plot of Average Run Length (Outer Layer);Ladder Counter;Sensor ID");
 
 
 
@@ -446,35 +551,35 @@ void pxlBuilder::initialize(int argc, char *argv[]) {
   plots[n] = new JevpPlot(contents.GlobalHitMultiplicity);
   plots[n]->optstat = 0;
 
-  //plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector1);
-  //plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector1);
+  plots[n]->optstat = 0;
 
   plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector2);
   plots[n]->optstat = 0;
 
-  //plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector3);
-  //plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector3);
+  plots[n]->optstat = 0;
 
   plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector4);
   plots[n]->optstat = 0;
 
-  //plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector5);
-  //plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector5);
+  plots[n]->optstat = 0;
 
-  //plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector6);
-  //plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector6);
+  plots[n]->optstat = 0;
 
   plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector7);
   plots[n]->optstat = 0;
 
-  //plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector8);
-  //plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector8);
+  plots[n]->optstat = 0;
 
-  //plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector9);
-  //plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector9);
+  plots[n]->optstat = 0;
 
-  //plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector10);
-  //plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.GlobalHitMultiplicitySector10);
+  plots[n]->optstat = 0;
 
   plots[++n] = new JevpPlot(contents.HitMultiplicityPerEvent);
   plots[n]->optstat = 0;
@@ -490,15 +595,7 @@ void pxlBuilder::initialize(int argc, char *argv[]) {
   plots[n]->optstat = 0;
   plots[n]->setDrawOpts("colz");
 
-  plots[++n] = new JevpPlot(contents.SensorHitsInnerLayerPerEvent);
-  plots[n]->optstat = 0;
-  plots[n]->setDrawOpts("colz");
-
   plots[++n] = new JevpPlot(contents.SensorHitsOuterLayer);
-  plots[n]->optstat = 0;
-  plots[n]->setDrawOpts("colz");
-
-  plots[++n] = new JevpPlot(contents.SensorHitsOuterLayerPerEvent);
   plots[n]->optstat = 0;
   plots[n]->setDrawOpts("colz");
 
@@ -526,6 +623,50 @@ void pxlBuilder::initialize(int argc, char *argv[]) {
 void pxlBuilder::startrun(daqReader *rdr) {
   LOG(NOTE, "pxlBuilder starting run #%d",rdr->run);
   resetAllPlots();
+
+  event_multiplicity = 0;
+  multiplicity_inner = 0;
+  multiplicity_outer = 0;
+  sensor_count = 0;
+  number_of_events = 0;
+
+  max_count = 0;
+  max_count_sector1 = 0;
+  max_count_sector2 = 0;
+  max_count_sector3 = 0;
+  max_count_sector4 = 0;
+  max_count_sector5 = 0;
+  max_count_sector6 = 0;
+  max_count_sector7 = 0;
+  max_count_sector8 = 0;
+  max_count_sector9 = 0;
+  max_count_sector10 = 0;
+
+  max_count_inner = 0;
+  max_count_outer = 0;
+
+  min_count = 1000000;
+  min_count_sector1 = 1000000;
+  min_count_sector2 = 1000000;
+  min_count_sector3 = 1000000;
+  min_count_sector4 = 1000000;
+  min_count_sector5 = 1000000;
+  min_count_sector6 = 1000000;
+  min_count_sector7 = 1000000;
+  min_count_sector8 = 1000000;
+  min_count_sector9 = 1000000;
+  min_count_sector10 = 1000000;
+
+  min_count_inner = 1000000;
+  min_count_outer = 1000000;
+
+  memset(count_hits_inner, 0, sizeof(count_hits_inner[0][0]) * 10 * 10);
+  memset(count_hits_outer, 0, sizeof(count_hits_outer[0][0]) * 30 * 10);
+  memset(count_length_inner, 0, sizeof(count_length_inner[0][0]) * 10 * 10);
+  memset(count_length_outer, 0, sizeof(count_length_outer[0][0]) * 30 * 10);
+
+  LadderMap = new map<int,int>();
+  SetLadderMap();
 }
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
@@ -543,11 +684,6 @@ void pxlBuilder::event(daqReader *rdr){
   
   AverageRunLength = new map<int,double>();
   LadderCount = new map<int,int>();
-  
-  //Reset Per-Event Histograms
-  //contents.HitMultiplicityPerEvent->Reset();
-  contents.SensorHitsInnerLayerPerEvent->Reset();
-  contents.SensorHitsOuterLayerPerEvent->Reset();
 
   //+++++++++++++++++++++++Per Event Decoding+++++++++++++++++++++++
   //+++++++++++++++++++++++Per Event Decoding+++++++++++++++++++++++
@@ -616,66 +752,111 @@ void pxlBuilder::event(daqReader *rdr){
 
 	if(sensor_id < 11){
 	  if(!UpdateTH2(contents.SensorHitsInnerLayer,ladder_bin,sensor_id,(double)sector_count)) cout<<"Something is very wrong with SensorHitsInnerLayer!"<<endl;
-	  if(!UpdateTH2(contents.SensorHitsInnerLayerPerEvent,ladder_bin,sensor_id,(double)sector_count)) cout<<"Something is very wrong with SensorHitsInnerLayer!"<<endl;
 
-	  if(!UpdateTH2(contents.AverageRunLengthInnerLayer,ladder_bin,sensor_id,(double)ave_runlength[i])) cout<<"Something is very wrong with AverageRunLengthInnerLayer!"<<endl;
+	  if(!UpdateTH2("length_inner",contents.AverageRunLengthInnerLayer,ladder_bin,sensor_id,(double)ave_runlength[i])) cout<<"Something is very wrong with AverageRunLengthInnerLayer!"<<endl;
+	  //contents.AverageRunLengthInnerLayer->Fill(ladder_bin,sensor_id,ave_runlength[i]);
+
 	}
 	else{
 	  if(sensor_id < 21){
 	    if(!UpdateTH2(contents.SensorHitsOuterLayer,ladder_bin,sensor_id-10,(double)sector_count)) cout<<"Something is very wrong with SensorHitsOuterLayer!"<<endl;
-	    if(!UpdateTH2(contents.SensorHitsOuterLayerPerEvent,ladder_bin,sensor_id-10,(double)sector_count)) cout<<"Something is very wrong with SensorHitsOuterLayer!"<<endl;
 
-	    if(!UpdateTH2(contents.AverageRunLengthOuterLayer,ladder_bin,sensor_id-10,(double)ave_runlength[i])) cout<<"Something is very wrong with AverageRunLengthOuterLayer!"<<endl;
+	    if(!UpdateTH2("length_outer",contents.AverageRunLengthOuterLayer,ladder_bin,sensor_id-10,(double)ave_runlength[i])) cout<<"Something is very wrong with AverageRunLengthOuterLayer!"<<endl;
+	    //contents.AverageRunLengthOuterLayer->Fill(ladder_bin,sensor_id-10,ave_runlength[i]);
+
 	  }
 	  else if(sensor_id < 31){
 	    if(!UpdateTH2(contents.SensorHitsOuterLayer,ladder_bin+10,sensor_id-20,(double)sector_count)) cout<<"Something is very wrong with SensorHitsOuterLayer!"<<endl;
-	    if(!UpdateTH2(contents.SensorHitsOuterLayerPerEvent,ladder_bin+10,sensor_id-20,(double)sector_count)) cout<<"Something is very wrong with SensorHitsOuterLayer!"<<endl;
 
-	    if(!UpdateTH2(contents.AverageRunLengthOuterLayer,ladder_bin+10,sensor_id-20,(double)ave_runlength[i])) cout<<"Something is very wrong with AverageRunLengthOuterLayer!"<<endl;
+	    if(!UpdateTH2("length_outer",contents.AverageRunLengthOuterLayer,ladder_bin+10,sensor_id-20,(double)ave_runlength[i])) cout<<"Something is very wrong with AverageRunLengthOuterLayer!"<<endl;
+	    //contents.AverageRunLengthOuterLayer->Fill(ladder_bin+10,sensor_id-20,ave_runlength[i]);
+
 	  }
 	  else if(sensor_id < 41){
 	    if(!UpdateTH2(contents.SensorHitsOuterLayer,ladder_bin+20,sensor_id-30,(double)sector_count)) cout<<"Something is very wrong with SensorHitsOuterLayer!"<<endl;
-	    if(!UpdateTH2(contents.SensorHitsOuterLayerPerEvent,ladder_bin+20,sensor_id-30,(double)sector_count)) cout<<"Something is very wrong with SensorHitsOuterLayer!"<<endl;
 
-	    if(!UpdateTH2(contents.AverageRunLengthOuterLayer,ladder_bin+20,sensor_id-30,(double)ave_runlength[i])) cout<<"Something is very wrong with AverageRunLengthOuterLayer!"<<endl;
+	    if(!UpdateTH2("length_outer",contents.AverageRunLengthOuterLayer,ladder_bin+20,sensor_id-30,(double)ave_runlength[i])) cout<<"Something is very wrong with AverageRunLengthOuterLayer!"<<endl;
+	    //contents.AverageRunLengthOuterLayer->Fill(ladder_bin+20,sensor_id-30,ave_runlength[i]);
+
 	  }
 	  else cout<<"Something is extremely wrong!"<<endl;
 	}
 
       }
       
-      //Finding the max_count/min_count for the different histograms
+  
 
-      if(pxl_sector == 2) {
+      if(pxl_sector == 1){
+	((sector_count > max_count_sector1) && (max_count_sector1 = sector_count));
+	((sector_count < min_count_sector1) && (min_count_sector1 = sector_count));
+
+	contents.GlobalHitMultiplicitySector1->Fill(sector_count);
+	contents.GlobalHitMultiplicitySector1->SetAxisRange(min_count_sector1-10,max_count_sector1+10);
+      }
+      else if(pxl_sector == 2){
 	((sector_count > max_count_sector2) && (max_count_sector2 = sector_count));
 	((sector_count < min_count_sector2) && (min_count_sector2 = sector_count));
-      }
-      if(pxl_sector == 4){
-	((sector_count > max_count_sector4) && (max_count_sector4 = sector_count));
-	((sector_count < min_count_sector4) && (min_count_sector4 = sector_count));
-      }
-      if(pxl_sector == 7){
-	((sector_count > max_count_sector7) && (max_count_sector7 = sector_count));
-	((sector_count < min_count_sector7) && (min_count_sector7 = sector_count));
-      }
-      
-      //Finding the min_count for the different histograms
-     
 
-      //cout<<"number_of_events = "<<number_of_events;
-
-      if(pxl_sector == 2){
 	contents.GlobalHitMultiplicitySector2->Fill(sector_count);
 	contents.GlobalHitMultiplicitySector2->SetAxisRange(min_count_sector2-10,max_count_sector2+10);
       }
-      if(pxl_sector == 4){
+      else if(pxl_sector == 3){
+	((sector_count > max_count_sector3) && (max_count_sector3 = sector_count));
+	((sector_count < min_count_sector3) && (min_count_sector3 = sector_count));
+
+	contents.GlobalHitMultiplicitySector3->Fill(sector_count);
+	contents.GlobalHitMultiplicitySector3->SetAxisRange(min_count_sector3-10,max_count_sector3+10);
+      }
+      else if(pxl_sector == 4){
+	((sector_count > max_count_sector4) && (max_count_sector4 = sector_count));
+	((sector_count < min_count_sector4) && (min_count_sector4 = sector_count));
+
 	contents.GlobalHitMultiplicitySector4->Fill(sector_count);
 	contents.GlobalHitMultiplicitySector4->SetAxisRange(min_count_sector4-10,max_count_sector4+10);
       }
-      if(pxl_sector == 7){
+      else if(pxl_sector == 5){
+	((sector_count > max_count_sector5) && (max_count_sector5 = sector_count));
+	((sector_count < min_count_sector5) && (min_count_sector5 = sector_count));
+
+	contents.GlobalHitMultiplicitySector5->Fill(sector_count);
+	contents.GlobalHitMultiplicitySector5->SetAxisRange(min_count_sector5-10,max_count_sector5+10);
+      }
+      else if(pxl_sector == 6){
+	((sector_count > max_count_sector6) && (max_count_sector6 = sector_count));
+	((sector_count < min_count_sector6) && (min_count_sector6 = sector_count));
+
+	contents.GlobalHitMultiplicitySector6->Fill(sector_count);
+	contents.GlobalHitMultiplicitySector6->SetAxisRange(min_count_sector6-10,max_count_sector6+10);
+      }
+      else if(pxl_sector == 7){
+	((sector_count > max_count_sector7) && (max_count_sector7 = sector_count));
+	((sector_count < min_count_sector7) && (min_count_sector7 = sector_count));
+
 	contents.GlobalHitMultiplicitySector7->Fill(sector_count);
 	contents.GlobalHitMultiplicitySector7->SetAxisRange(min_count_sector7-10,max_count_sector7+10);
       }
+      else if(pxl_sector == 8){
+	((sector_count > max_count_sector8) && (max_count_sector8 = sector_count));
+	((sector_count < min_count_sector8) && (min_count_sector8 = sector_count));
+
+	contents.GlobalHitMultiplicitySector8->Fill(sector_count);
+	contents.GlobalHitMultiplicitySector8->SetAxisRange(min_count_sector8-10,max_count_sector8+10);
+      }
+      else if(pxl_sector == 9){
+	((sector_count > max_count_sector9) && (max_count_sector9 = sector_count));
+	((sector_count < min_count_sector9) && (min_count_sector9 = sector_count));
+
+	contents.GlobalHitMultiplicitySector9->Fill(sector_count);
+	contents.GlobalHitMultiplicitySector9->SetAxisRange(min_count_sector9-10,max_count_sector9+10);
+      }
+      else if(pxl_sector == 10){
+	((sector_count > max_count_sector10) && (max_count_sector10 = sector_count));
+	((sector_count < min_count_sector10) && (min_count_sector10 = sector_count));
+
+	contents.GlobalHitMultiplicitySector10->Fill(sector_count);
+	contents.GlobalHitMultiplicitySector10->SetAxisRange(min_count_sector10-10,max_count_sector10+10);
+      }
+      else cout<<"pxl_sector error"<<endl;
 
      
       
@@ -708,13 +889,15 @@ void pxlBuilder::event(daqReader *rdr){
       cout<<"FYI: Number of events in evp > 5000"<<endl;
     }
 
+    
     double scale_factor = (double)((double)number_of_events/(double)(number_of_events+1));
     (scale_factor == 0.0) && (scale_factor = 1.0);
 
     contents.SensorHitsInnerLayer->Scale(scale_factor);
     contents.SensorHitsOuterLayer->Scale(scale_factor);
-    contents.AverageRunLengthInnerLayer->Scale(scale_factor);
-    contents.AverageRunLengthOuterLayer->Scale(scale_factor);
+    //contents.AverageRunLengthInnerLayer->Scale(scale_factor);
+    //contents.AverageRunLengthOuterLayer->Scale(scale_factor);
+    
     
   }
   
