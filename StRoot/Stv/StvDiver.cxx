@@ -22,6 +22,7 @@ static MyRandom* gMyRandom=0;
 static const double gMyPiMass=0.1396;
 static const    int gMyPiPdg =9999;
 
+enum {kNMany = 10};
 
 
 
@@ -103,6 +104,9 @@ void StvDiver::SetTarget(const double target[3],int nTarget)
 //_____________________________________________________________________________
 int  StvDiver::Dive()
 {
+  mGen->Set(mInpPars,mDir);
+
+
 // ****************** Replacing ROOT random by empty one. Dangerous
 // ****************** At the end of method it is returned back
   assert(gRandom != gMyRandom);
@@ -117,8 +121,8 @@ int  StvDiver::Dive()
   mInpErrs->Get(mHelix);
   mHlxDeri[0][0]=0;		//Mark this matrix is not filled
   if (!mDir) mHelix->Backward();
-
-  while(1) {
+  StvNodePars tmpPars;
+  for (int iMany=0; iMany <kNMany;iMany++) {
     TVirtualMC::GetMC()->ProcessEvent();
     myExit = mSteps->GetExit();
     if (myExit==StvDiver::kDiveBreak) break;
@@ -144,6 +148,8 @@ int  StvDiver::Dive()
     }
     if (myExit !=StvDiver::kDiveMany) break;
     mHelix->Move(1.0);
+    tmpPars.set(mHelix,mOutPars->_hz);
+    mGen->Set(&tmpPars,mDir);
   }
   assert (myExit >1 || mInpPars->_ptin * mOutPars->_ptin >=0);
   gRandom = myRandom;
@@ -344,7 +350,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
   fLastNumb++; if (fLastNumb<100)	return 0;
   fExit=StvDiver::kDiveMany; fLastNumb=0;
   TooMany();
-//VP  TVirtualMC::GetMC()->StopTrack();
+  TVirtualMC::GetMC()->StopTrack();
   return 0;
 }		
 //_____________________________________________________________________________
