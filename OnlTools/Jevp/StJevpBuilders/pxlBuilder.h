@@ -7,6 +7,8 @@
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TH2D.h>
+#include <TH3D.h>
 
 #include <math.h>
 
@@ -53,18 +55,39 @@ public:
   int number_of_events;
 
   int max_count;
+  int max_count_sector1;
   int max_count_sector2;
+  int max_count_sector3;
   int max_count_sector4;
+  int max_count_sector5;
+  int max_count_sector6;
   int max_count_sector7;
+  int max_count_sector8;
+  int max_count_sector9;
+  int max_count_sector10;
+
   int max_count_inner;
   int max_count_outer;
 
   int min_count;
+  int min_count_sector1;
   int min_count_sector2;
+  int min_count_sector3;
   int min_count_sector4;
+  int min_count_sector5;
+  int min_count_sector6;
   int min_count_sector7;
+  int min_count_sector8;
+  int min_count_sector9;
+  int min_count_sector10;
+
   int min_count_inner;
   int min_count_outer;
+
+  int count_hits_inner[10][10];
+  int count_hits_outer[30][10];
+  int count_length_inner[10][10];
+  int count_length_outer[30][10];
 
   map<int,double> *AverageRunLength;
   map<int,int> *LadderCount;
@@ -87,9 +110,12 @@ public:
   void SetRunLength(int sensor_number,double average_run_length);
   bool UpdateTH1(TH1 *hist,int bin,double value);
   bool UpdateTH2(TH1 *hist,int x_bin,int y_bin,double value);
+  bool UpdateTH2(const char* name,TH1 *hist,int x_bin,int y_bin,double value);
   bool UpdateTH1(TH1 *hist,int bin,double value,bool scale,int mod_val);
   bool ScaleTH1Bin(TH1 *hist,int bin,int scale_factor);
   void SetLadderMap();
+  int IncrementArray(const char* name,int x_bin,int y_bin);
+
   //*** Histogram Declarations...
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
@@ -101,16 +127,16 @@ public:
       //Tab 1: Global Multiplicity
       TH1 *GlobalHitMultiplicity;
 
-      //TH1 *GlobalHitMultiplicitySector1;
+      TH1 *GlobalHitMultiplicitySector1;
       TH1 *GlobalHitMultiplicitySector2;
-      //TH1 *GlobalHitMultiplicitySector3;
+      TH1 *GlobalHitMultiplicitySector3;
       TH1 *GlobalHitMultiplicitySector4;
-      //TH1 *GlobalHitMultiplicitySector5;
-      //TH1 *GlobalHitMultiplicitySector6;
+      TH1 *GlobalHitMultiplicitySector5;
+      TH1 *GlobalHitMultiplicitySector6;
       TH1 *GlobalHitMultiplicitySector7;
-      //TH1 *GlobalHitMultiplicitySector8;
-      //TH1 *GlobalHitMultiplicitySector9;
-      //TH1 *GlobalHitMultiplicitySector10;
+      TH1 *GlobalHitMultiplicitySector8;
+      TH1 *GlobalHitMultiplicitySector9;
+      TH1 *GlobalHitMultiplicitySector10;
       
 
       //Tab 2: Hit Multiplicity
@@ -123,10 +149,7 @@ public:
 
       //Tab 2: Hit Maps
       TH1 *SensorHitsInnerLayer;
-      TH1 *SensorHitsInnerLayerPerEvent;
-
       TH1 *SensorHitsOuterLayer;
-      TH1 *SensorHitsOuterLayerPerEvent;
 
       TH1 *AverageRunLengthInnerLayer;
       TH1 *AverageRunLengthOuterLayer;
