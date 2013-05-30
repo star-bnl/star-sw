@@ -284,23 +284,53 @@ bool pxlBuilder::UpdateTH1(TH1 *hist,int bin,double value,bool scale,int mod_val
 
 int pxlBuilder::IncrementArray(const char* name,int x_bin,int y_bin){
   int count;
+  x_bin--;
+  y_bin--;
 
   if(name == "hits_inner"){
+    /*
+    if(x_bin > 9 || y_bin > 9){
+      cout<<"hits_inner bin error"<<endl;
+      cout<<"(x_bin,y_bin) = ("<<x_bin<<","<<y_bin<<")"<<endl;
+      return 0;
+    }
+    */
     count_hits_inner[x_bin][y_bin]++;
     count = count_hits_inner[x_bin][y_bin];
   }
 
   else if(name == "hits_outer"){
+    /*
+    if(x_bin > 29 || y_bin > 9){
+      cout<<"hits_outer bin error"<<endl;
+      cout<<"(x_bin,y_bin) = ("<<x_bin<<","<<y_bin<<")"<<endl;
+      return 0;
+    }
+    */
     count_hits_outer[x_bin][y_bin]++;
     count = count_hits_outer[x_bin][y_bin];
   }
 
   else if(name == "length_inner"){
+    /*
+    if(x_bin > 9 || y_bin > 9){
+      cout<<"length_inner bin error"<<endl;
+      cout<<"(x_bin,y_bin) = ("<<x_bin<<","<<y_bin<<")"<<endl;
+      return 0;
+    }
+    */
     count_length_inner[x_bin][y_bin]++;
     count = count_length_inner[x_bin][y_bin];
   }
 
   else if(name == "length_outer"){
+    /*
+    if(x_bin > 29 || y_bin > 9){
+      cout<<"length_outer bin error"<<endl;
+      cout<<"(x_bin,y_bin) = ("<<x_bin<<","<<y_bin<<")"<<endl;
+      return 0;
+    }
+    */
     count_length_outer[x_bin][y_bin]++;
     count = count_length_outer[x_bin][y_bin];
   }
@@ -321,6 +351,15 @@ bool pxlBuilder::UpdateTH1(TH1 *hist,int bin,double value){
 
   if(new_content <= 0.0) return true;
   else{
+    /*
+    int bin_limit = hist->GetNbinsX();
+
+    if(bin > bin_limit){
+      cout<<"bin ("<<bin<<") > bin_limit ("<<bin_limit<<")"<<endl;
+      return true;
+    }
+    */
+
     hist->SetBinContent(bin,new_content);
     return (hist->GetBinContent(bin) == new_content) ? true : false;
   }
@@ -330,6 +369,20 @@ bool pxlBuilder::UpdateTH2(const char* name,TH1 *hist,int x_bin,int y_bin,double
   if(value <= 0.0) return true;
   else{
     //if(value > 4) cout<<"Run length is "<<value<<endl;
+    /*
+    int x_bin_limit = hist->GetNbinsX();
+    int y_bin_limit = hist->GetNbinsY();
+
+    if(x_bin > x_bin_limit){
+      cout<<"x_bin ("<<x_bin<<") > x_bin_limit ("<<x_bin_limit<<")"<<endl;
+      return true;
+    }
+
+    if(y_bin > y_bin_limit){
+      cout<<"y_bin ("<<y_bin<<") > y_bin_limit ("<<y_bin_limit<<")"<<endl;
+      return true;
+    }
+    */
 
     double bin_content = 0;
     bin_content += hist->GetBinContent(x_bin,y_bin);
@@ -351,6 +404,21 @@ bool pxlBuilder::UpdateTH2(const char* name,TH1 *hist,int x_bin,int y_bin,double
 bool pxlBuilder::UpdateTH2(TH1 *hist,int x_bin,int y_bin,double value){
   if(value <= 0.0) return true;
   else{
+    /*
+    int x_bin_limit = hist->GetNbinsX();
+    int y_bin_limit = hist->GetNbinsY();
+
+    if(x_bin > x_bin_limit){
+      cout<<"x_bin ("<<x_bin<<") > x_bin_limit ("<<x_bin_limit<<")"<<endl;
+      return true;
+    }
+
+    if(y_bin > y_bin_limit){
+      cout<<"y_bin ("<<y_bin<<") > y_bin_limit ("<<y_bin_limit<<")"<<endl;
+      return true;
+    }
+    */
+
     double bin_content = 0;
     bin_content += hist->GetBinContent(x_bin,y_bin);
     ((!bin_content) || (bin_content < 0)) && (bin_content = 0);
@@ -368,6 +436,7 @@ void pxlBuilder::SetLadderMap(){
   for(int i=1; i<41; i++){
     int value = ((i-1)/4)+1;
     LadderMap->insert(make_pair(i,value));
+    //cout<<"(i,value) = ("<<i<<","<<value<<")"<<endl;
   }
 }
 //+++++++++++++++++++++++END Helper Functions+++++++++++++++++++++++
@@ -791,70 +860,70 @@ void pxlBuilder::event(daqReader *rdr){
 	((sector_count < min_count_sector1) && (min_count_sector1 = sector_count));
 
 	contents.GlobalHitMultiplicitySector1->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector1->SetAxisRange(min_count_sector1-10,max_count_sector1+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector1->SetAxisRange(min_count_sector1-10,max_count_sector1+10);
       }
       else if(pxl_sector == 2){
 	((sector_count > max_count_sector2) && (max_count_sector2 = sector_count));
 	((sector_count < min_count_sector2) && (min_count_sector2 = sector_count));
 
 	contents.GlobalHitMultiplicitySector2->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector2->SetAxisRange(min_count_sector2-10,max_count_sector2+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector2->SetAxisRange(min_count_sector2-10,max_count_sector2+10);
       }
       else if(pxl_sector == 3){
 	((sector_count > max_count_sector3) && (max_count_sector3 = sector_count));
 	((sector_count < min_count_sector3) && (min_count_sector3 = sector_count));
 
 	contents.GlobalHitMultiplicitySector3->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector3->SetAxisRange(min_count_sector3-10,max_count_sector3+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector3->SetAxisRange(min_count_sector3-10,max_count_sector3+10);
       }
       else if(pxl_sector == 4){
 	((sector_count > max_count_sector4) && (max_count_sector4 = sector_count));
 	((sector_count < min_count_sector4) && (min_count_sector4 = sector_count));
 
 	contents.GlobalHitMultiplicitySector4->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector4->SetAxisRange(min_count_sector4-10,max_count_sector4+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector4->SetAxisRange(min_count_sector4-10,max_count_sector4+10);
       }
       else if(pxl_sector == 5){
 	((sector_count > max_count_sector5) && (max_count_sector5 = sector_count));
 	((sector_count < min_count_sector5) && (min_count_sector5 = sector_count));
 
 	contents.GlobalHitMultiplicitySector5->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector5->SetAxisRange(min_count_sector5-10,max_count_sector5+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector5->SetAxisRange(min_count_sector5-10,max_count_sector5+10);
       }
       else if(pxl_sector == 6){
 	((sector_count > max_count_sector6) && (max_count_sector6 = sector_count));
 	((sector_count < min_count_sector6) && (min_count_sector6 = sector_count));
 
 	contents.GlobalHitMultiplicitySector6->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector6->SetAxisRange(min_count_sector6-10,max_count_sector6+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector6->SetAxisRange(min_count_sector6-10,max_count_sector6+10);
       }
       else if(pxl_sector == 7){
 	((sector_count > max_count_sector7) && (max_count_sector7 = sector_count));
 	((sector_count < min_count_sector7) && (min_count_sector7 = sector_count));
 
 	contents.GlobalHitMultiplicitySector7->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector7->SetAxisRange(min_count_sector7-10,max_count_sector7+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector7->SetAxisRange(min_count_sector7-10,max_count_sector7+10);
       }
       else if(pxl_sector == 8){
 	((sector_count > max_count_sector8) && (max_count_sector8 = sector_count));
 	((sector_count < min_count_sector8) && (min_count_sector8 = sector_count));
 
 	contents.GlobalHitMultiplicitySector8->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector8->SetAxisRange(min_count_sector8-10,max_count_sector8+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector8->SetAxisRange(min_count_sector8-10,max_count_sector8+10);
       }
       else if(pxl_sector == 9){
 	((sector_count > max_count_sector9) && (max_count_sector9 = sector_count));
 	((sector_count < min_count_sector9) && (min_count_sector9 = sector_count));
 
 	contents.GlobalHitMultiplicitySector9->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector9->SetAxisRange(min_count_sector9-10,max_count_sector9+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector9->SetAxisRange(min_count_sector9-10,max_count_sector9+10);
       }
       else if(pxl_sector == 10){
 	((sector_count > max_count_sector10) && (max_count_sector10 = sector_count));
 	((sector_count < min_count_sector10) && (min_count_sector10 = sector_count));
 
 	contents.GlobalHitMultiplicitySector10->Fill(sector_count);
-	contents.GlobalHitMultiplicitySector10->SetAxisRange(min_count_sector10-10,max_count_sector10+10);
+	if(!(number_of_events % 30)) contents.GlobalHitMultiplicitySector10->SetAxisRange(min_count_sector10-10,max_count_sector10+10);
       }
       else cout<<"pxl_sector error"<<endl;
 
@@ -866,7 +935,7 @@ void pxlBuilder::event(daqReader *rdr){
     (event_count > max_count) && (max_count = event_count);
     (event_count < min_count) && (min_count = event_count);
     contents.GlobalHitMultiplicity->Fill(event_count);
-    contents.GlobalHitMultiplicity->SetAxisRange(min_count+10,max_count+10);
+    if(!(number_of_events % 30)) contents.GlobalHitMultiplicity->SetAxisRange(min_count+10,max_count+10);
 
     //^^^HIST^^^::HitCorrelation
     (multiplicity_inner > max_count_inner) && (max_count_inner = multiplicity_inner);
@@ -876,13 +945,15 @@ void pxlBuilder::event(daqReader *rdr){
     (multiplicity_outer < min_count_outer) && (min_count_outer = multiplicity_outer);
 
     contents.HitCorrelation->Fill(multiplicity_outer,multiplicity_inner);
-    contents.HitCorrelation->SetAxisRange(min_count_outer+10,max_count_outer+10);
-    contents.HitCorrelation->SetAxisRange(min_count_inner+10,max_count_inner+10,"Y");
+    if(!(number_of_events % 30)){
+      contents.HitCorrelation->SetAxisRange(min_count_outer+10,max_count_outer+10);
+      contents.HitCorrelation->SetAxisRange(min_count_inner+10,max_count_inner+10,"Y");
+    }
 
     //^^^HIST^^^::HitMultiplicityPerEvent
     if(number_of_events < 5000){
       int event_bin = (number_of_events/10)+1;
-      contents.HitMultiplicityPerEvent->SetAxisRange(0,number_of_events+10);
+      if(!(number_of_events % 30)) contents.HitMultiplicityPerEvent->SetAxisRange(0,number_of_events+30);
       if(!UpdateTH1(contents.HitMultiplicityPerEvent,event_bin,(double)event_count)) cout<<"Something is very wrong with HitMultiplicityPerEvent!"<<endl;
     }
     else{
@@ -904,10 +975,6 @@ void pxlBuilder::event(daqReader *rdr){
   else {
     //printf("no PXL found\n");
   }
-  
-  //$$$$$$$$$$$$$$$$$$$ Do I need to delete this?
-  //delete rdr ;	// cleanup i.e. if running through a set of files.
-  
   
   // End Fill Histograms...
   number_of_events++;
