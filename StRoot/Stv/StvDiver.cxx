@@ -147,8 +147,14 @@ int  StvDiver::Dive()
       assert(mOutErrs->mPP>0);
     }
     if (myExit !=StvDiver::kDiveMany) break;
-    mHelix->Move(1.0);
+//	Too many attempts. Move blindly forward and continue.
+    double bigStep = mOutPars->getRxy();
+    bigStep = 0.1 + bigStep/200;				//Estimate bigstep
+    double dcaStep = mHelix->Path(0.,0.);
+    if (dcaStep>0 && dcaStep<bigStep) bigStep = 0.9*dcaStep;	//bigStep must be less dca
+    mHelix->Move(bigStep);
     tmpPars.set(mHelix,mOutPars->_hz);
+    if (!mDir) tmpPars.reverse();				//account direction
     mGen->Set(&tmpPars,mDir);
   }
   assert (myExit >1 || mInpPars->_ptin * mOutPars->_ptin >=0);
