@@ -8,7 +8,9 @@
 #include "TLorentzVector.h"
 
 #include "StarGenerator/EVENT/StarGenEvent.h"
+#include "StarGenerator/EVENT/StarGenStats.h"
 #include "StarGenerator/UTIL/StarParticleData.h"
+
 
 /**
    \class StarGenerator
@@ -152,9 +154,12 @@ class StarGenerator : public StMaker
   /// Retrieves the event record
   StarGenEvent *Event(){ return mEvent; }
 
+  /// Create and retrieve end-of-run statistics
+  virtual StarGenStats Stats() { return StarGenStats(); }
+
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.2 2012/12/05 22:59:15 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.3 2013/05/30 17:36:10 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  private:
