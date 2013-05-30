@@ -133,8 +133,6 @@ class StarGenEvent : public TObject
   /// Get the sqrt(s) of the collision
   Double_t GetRootS(){ return mCmsEnergy; }
     
-
-
   /// Add a particle to the list of particles.  StarGenEvent is responsible for
   /// cleaning up the memory.
   StarGenParticle *AddParticle();
@@ -168,7 +166,7 @@ class StarGenEvent : public TObject
 
   /// Print the event.
   /// @param opts Default prints everything.  If "simu" option is provided, then only the particles which were stacked for simulation are printed.
-  void Print( const Option_t *opts="" ) const;
+  void Print( const Option_t *opts="head" ) const;
 
   /// Obtain an iterator over all generated particles.
   /// @param dir kIterForward or kIterBackward
@@ -188,6 +186,24 @@ class StarGenEvent : public TObject
   /// Obtain the number of particles in the event record
   Int_t GetNumberOfParticles(){ return mNumParticles; }
 
+  /// Filter result enumeration.  
+  enum FilterResult 
+    {
+      kUnknown  = 0,      // Result not specified.
+      kAccept   = 0x0001, // The event is accepted
+      kReject   = 0x0002, // The event is rejected
+      kFlag     = 0x0004  // The event will be simulated regardless of accept/reject decision
+    };
+
+  /// Sets the filter result
+  void SetFilterResult( UInt_t result ){ mFilterResult =result; }
+
+  /// Performs a bitwise-or between the current filter result and
+  /// the passed parameter
+  void AddFilterResult( UInt_t result ){ mFilterResult|=result; }
+
+  /// Returns the filter result
+  UInt_t GetFilterResult(){ return mFilterResult; }
 
  private:
   /// Copy ctor is private.  
@@ -217,7 +233,7 @@ class StarGenEvent : public TObject
   Double_t mCmsEnergy;             ///< aka sqrt(s) 
 
   Int_t    mNumRejected[3];        ///< 0=total, 1=EG, 2=filter
-  Int_t    mFilterResult;          ///< Result of filter
+  UInt_t   mFilterResult;          ///< Result of filter
 
   std::vector<Double_t> mWeights;  ///< User weights
 
