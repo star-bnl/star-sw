@@ -28,6 +28,8 @@ ClassImp(StarPrimaryMaker);
 #include "AgStarReader.h"
 #include "StarGenerator/UTIL/StarRandom.h"
 
+#include "StarGenerator/FILT/StarFilterMaker.h"
+
 #include "TMCProcess.h"
 
 #include "tables/St_vertexSeed_Table.h"
@@ -45,18 +47,22 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mFileName("none"),
   mStack(0),
   mPrimaryEvent(0),
-  mVx(0), mVy(0), mVz(0), mSx(0.1), mSy(0.1), mSz(30.0), mRho(0), mVdxdz(0), mVdydz(0),
+  mVx(0), mVy(0), mVz(0), mSx(0.1), mSy(0.1), mSz(30.0), mRho(0),
   mPtMin(0), mPtMax(-1), mRapidityMin(0), mRapidityMax(-1), mPhiMin(0), mPhiMax(-1), mZMin(0), mZMax(-1),
-  mRunNumber(-1)
+  mPrimaryVertex(0,0,0,0),
+  mFilter(0),mAccepted(0)
 {
   assert(fgPrimary == 0); // cannot create more than one primary generator
   fgPrimary = this;
+
   mStack = new StarParticleStack();
   AgStarReader::Instance().SetStack(mStack);
 
   // Register the particle database with this maker
   StarParticleData &pdb = StarParticleData::instance();
   Shunt( &pdb );
+
+  SetAttr("FilterKeepHeader", int(1) );
 
 }
 // --------------------------------------------------------------------------------------------------------------
@@ -89,6 +95,15 @@ Int_t StarPrimaryMaker::Init()
   Int_t result =  StMaker::Init();
 
   //
+  // The filter is properly a maker, so initialize it.  Also create accepted event list.
+  // and add it as an object set.
+  //
+  if (mFilter) { 
+    mFilter->Init();
+    mAccepted=new TEventList(mFilter->GetName(),"Accepted events");
+  }
+
+  //
   // Intialize the TTree with one event branch for each sub generator
   // and one branch for the primary event
   //
@@ -96,7 +111,7 @@ Int_t StarPrimaryMaker::Init()
     mFileName =   ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
     mFileName.ReplaceAll(".root",".gener.root");
   }
-  
+
   mFile = TFile::Open( mFileName, "recreate" );
   if ( !mFile ) result = (result<kStWarn)? kStWarn : result;
 
@@ -104,6 +119,8 @@ Int_t StarPrimaryMaker::Init()
 
   mPrimaryEvent = new StarGenEvent("primaryEvent","Primary Event... particle-wise information from all event generators");
   mTree->Branch("primaryEvent","StarGenEvent",&mPrimaryEvent,64000,99);
+
+  if (mFilter) mFilter->SetEvent(mPrimaryEvent);
 
   TIter Next( GetMakeList() );
   StarGenerator *generator = 0; 
@@ -143,6 +160,20 @@ Int_t StarPrimaryMaker::Init()
 // --------------------------------------------------------------------------------------------------------------
 Int_t StarPrimaryMaker::Finish()
 {
+
+  // Calls finish on all sub makers to collect statisitcs
+  StMaker::Finish();
+
+  // Now call finish on the filter
+  if ( mFilter ) {
+
+    // Call finish on the generator
+    mFilter->Finish();
+    
+    mAccepted->Print("all");
+    mTree->SetEventList( mAccepted );
+  }
+
   if (mFile) 
     { 
 
@@ -154,6 +185,28 @@ Int_t StarPrimaryMaker::Finish()
 
       ///\todo add random number state to user info
 
+      TIter Next( GetMakeList() );
+      StarGenerator *generator = 0; 
+      StMaker *_maker = 0;
+      
+      Int_t id = 0;
+      
+      while ( (_maker=(StMaker *)Next()) )
+	{
+	  generator = dynamic_cast<StarGenerator *>(_maker);
+	  if ( !generator ) 
+	    {
+	      continue;
+	    }
+	  StarGenStats stats = generator->Stats();
+	  stats.Dump();
+	  if ( mFilter ) stats.nFilterSeen   = mFilter->numberOfEvents();
+	  if ( mFilter ) stats.nFilterAccept = mFilter->acceptedEvents();
+	  stats.Write(); // write to fiel
+	}
+
+
+
       mFile -> Write();
       mFile -> Close();
     }
@@ -161,30 +214,69 @@ Int_t StarPrimaryMaker::Finish()
     {
       Warning(GetName(),"Could not write to unopened file");
     }
-  return StMaker::Finish();
+
+
+  return kStOK;
 }
 // --------------------------------------------------------------------------------------------------------------
 Int_t StarPrimaryMaker::Make()
 {
 
+  Bool_t go = true;
 
-  /// Iterate over all generators and execute  PreGenerate()
-  PreGenerate();
-  /// Iterate over all generators and execute     Generate()
-  Generate();
-  /// Iterate over all generators and execute PostGenerate()
-  PostGenerate();
+  while (go) {
 
-  /// Register g2t tables
-  BuildTables();
+    /// Iterate over all generators and execute  PreGenerate()
+    PreGenerate();
 
-  /// Finalize the event
-  Finalize();
+    /// Iterate over all generators and execute     Generate()
+    Generate();
 
-  /// Fill the tree
-  mTree -> Fill();
+    /// Iterate over all generators and execute PostGenerate()
+    PostGenerate();
 
-  return kStOK;
+    /// Register g2t tables
+    BuildTables();
+
+    /// Finalize the event
+    Finalize();
+
+    /// Apply the event filter (if available)
+    if (mFilter)
+      {
+	mFilter->Make(); // properly this is a maker but we fake it here...
+      }
+
+    /// Print the event for debugging purposes
+    //    event()->Print("head");
+
+    ///
+    /// If the filter resulted in an accept decision, fill the tree and return kStOK
+    ///
+    if ( event()->GetFilterResult() & ( StarGenEvent::kAccept | StarGenEvent::kFlag ) )
+      {
+
+	mTree->Fill();
+	if ( mAccepted ) mAccepted->Enter( mTree->GetEntries() );
+	Info(GetName(),"Filter Accept");
+	return kStOK;
+	
+      }
+
+    ///
+    /// If the filter resulted in a reject decision, fill the tree and try try again
+    ///
+    Info(GetName(),"Filter Reject");	
+    if ( IAttr( "FilterKeepAll" ) == 0 ) mPrimaryEvent->Clear("part");
+    if ( IAttr( "FilterKeepAll" ) || IAttr( "FilterKeepHeader" ) )    mTree->Fill();
+    Clear();
+
+
+  }// infinite loop
+
+
+
+  return kStWarn;
 }
 // --------------------------------------------------------------------------------------------------------------
 // Intialize for this run
@@ -220,6 +312,12 @@ void StarPrimaryMaker::AddGenerator( StarGenerator *gener )
   AddMaker(gener);
 }
 
+void StarPrimaryMaker::AddFilter( StarFilterMaker *filter )
+{
+  mFilter = filter;
+  AddData( 0, ".filter" );
+  mFilter -> Shunt( GetDataSet( ".filter" ) );
+}
 // --------------------------------------------------------------------------------------------------------------
 Int_t StarPrimaryMaker::PreGenerate()
 { 
@@ -499,7 +597,6 @@ Int_t StarPrimaryMaker::Finalize()
       event->Clear("part");
 
     }
-  
 
   return kStOK;
 }

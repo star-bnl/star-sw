@@ -10,8 +10,11 @@
 
 #include "StarGenerator/UTIL/StarParticleData.h"
 
+#include "TEventList.h"
+
 class StarGenerator;
 class StarGenEvent;
+class StarFilterMaker;
 
 class TTree;
 class TFile;
@@ -114,6 +117,10 @@ class StarPrimaryMaker : public StMaker
   /// @param gener Is a pointer to the user's event generator
   void AddGenerator( StarGenerator *gener );
 
+  /// Attach a filter to the primary generator
+  /// @param filt Is a pointer to the filter maker
+  void AddFilter( StarFilterMaker *filt );
+
   /// Set the x, y and z vertex position
   void SetVertex( Double_t x, Double_t y, Double_t z ){ mVx=x; mVy=y; mVz=z; }
 
@@ -145,11 +152,10 @@ class StarPrimaryMaker : public StMaker
   void SetZvertexRange( Double_t zmin, Double_t zmax ){ mZMin = zmin; mZMax = zmax; }
 
   /// Return a pointer to the event
-  const StarGenEvent *event() const { return mPrimaryEvent; }
-
+  StarGenEvent *event() { return mPrimaryEvent; }
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.3 2013/04/22 15:33:01 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.4 2013/05/30 17:36:10 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
  protected:
@@ -204,7 +210,8 @@ class StarPrimaryMaker : public StMaker
 
   TLorentzVector mPrimaryVertex;
 
-
+  StarFilterMaker *mFilter;
+  TEventList      *mAccepted; //*< event list containing accepted events
 
   ClassDef(StarPrimaryMaker,1);
 
