@@ -6,6 +6,7 @@ ClassImp(StarGenEvent);
 #include "TParticlePDG.h"
 #include <assert.h>
 #include "TMath.h"
+#include <iostream>
 
 using namespace std;
 
@@ -24,7 +25,7 @@ StarGenEvent::StarGenEvent(const Char_t *name, const Char_t *title ) : TObject()
   mBlueId(0),
   mYellId(0),
   mCmsEnergy(0),
-  mFilterResult(0),
+  mFilterResult(StarGenEvent::kAccept),// default accept
   mNumParticles(0)
 {
   for ( Int_t i=0;i<3;i++ ) mNumRejected[i]=0; 
@@ -46,7 +47,7 @@ void StarGenEvent::Clear( Option_t *opts )
   if ( Opts.Contains("data") ) {
     mWeights.clear();
     mProcessId    = 0;
-    mFilterResult = 0;
+    mFilterResult = 0x0000;
     mCmsEnergy    = 0;
     for ( Int_t i=0;i<3;i++ ) mNumRejected[i]=0; 
   }
@@ -97,6 +98,19 @@ StarGenParticle *StarGenEvent::AddParticle( StarGenParticle *p )
 void StarGenEvent::Print( const Option_t *opts )const
 {
   TString Opts = opts;
+
+  if ( Opts.Contains("head") )
+    {
+      cout << "----------------------------------------------------------------------------- " 
+	   << mName.Data() << endl;
+      cout << "Run number:   " << mRunNumber << endl;
+      cout << "Event number: " << mEventNumber << endl;
+      cout << "Generator:    " << mGeneratorId << endl;
+      cout << "Offset:       " << mOffset << endl;
+      cout << Form("Filter:       0x%04x",int(mFilterResult)) << mOffset << endl;
+      cout << "----------------------------------------------------------------------------- " 
+	   << endl;
+    }
 
   for ( Int_t i=0;i<mParticles->GetEntriesFast();i++ )
     {
