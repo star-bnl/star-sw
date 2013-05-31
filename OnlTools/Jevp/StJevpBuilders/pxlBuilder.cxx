@@ -287,7 +287,7 @@ int pxlBuilder::IncrementArray(const char* name,int x_bin,int y_bin){
   x_bin--;
   y_bin--;
 
-  if(name == "hits_inner"){
+  if(strcmp(name,"hits_inner") == 0){
     /*
     if(x_bin > 9 || y_bin > 9){
       cout<<"hits_inner bin error"<<endl;
@@ -299,7 +299,7 @@ int pxlBuilder::IncrementArray(const char* name,int x_bin,int y_bin){
     count = count_hits_inner[x_bin][y_bin];
   }
 
-  else if(name == "hits_outer"){
+  else if(strcmp(name,"hits_outer") == 0){
     /*
     if(x_bin > 29 || y_bin > 9){
       cout<<"hits_outer bin error"<<endl;
@@ -311,7 +311,7 @@ int pxlBuilder::IncrementArray(const char* name,int x_bin,int y_bin){
     count = count_hits_outer[x_bin][y_bin];
   }
 
-  else if(name == "length_inner"){
+  else if(strcmp(name,"length_inner") == 0){
     /*
     if(x_bin > 9 || y_bin > 9){
       cout<<"length_inner bin error"<<endl;
@@ -323,7 +323,7 @@ int pxlBuilder::IncrementArray(const char* name,int x_bin,int y_bin){
     count = count_length_inner[x_bin][y_bin];
   }
 
-  else if(name == "length_outer"){
+  else if(strcmp(name,"length_outer") == 0){
     /*
     if(x_bin > 29 || y_bin > 9){
       cout<<"length_outer bin error"<<endl;
