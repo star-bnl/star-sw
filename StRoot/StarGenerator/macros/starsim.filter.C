@@ -12,13 +12,15 @@ StarGenEvent   *event       = 0;
 class StarPrimaryMaker;
 StarPrimaryMaker *primary = 0;
 
+class StarFilterMaker;
+StarFilterMaker *filter = 0;
+
 // ----------------------------------------------------------------------------
 void geometry( TString tag, Bool_t agml=true )
 {
   TString cmd = "DETP GEOM "; cmd += tag;
   if ( !geant_maker ) geant_maker = (St_geant_Maker *)chain->GetMaker("geant");
   geant_maker -> LoadGeometry(cmd);
-  //  if ( agml ) command("gexec $STAR_LIB/libxgeometry.so");
 }
 // ----------------------------------------------------------------------------
 void command( TString cmd )
@@ -28,23 +30,19 @@ void command( TString cmd )
 }
 // ----------------------------------------------------------------------------
 // trig()  -- generates one event
-// trig(n) -- generates n+1 events.
-//
-// NOTE:  last event generated will be corrupt in the FZD file
-//
+// trig(n) -- generates n events.
 void trig( Int_t n=1 )
 {
   chain->EventLoop(n);
-  //  command("gprint kine");
-  //  command("gprint hits");
-  primary->event()->Print();
   
 }
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void Pythia8( TString config="pp:W" )
+void Pythia8( TString config="pp:W", Double_t ckin3=0.0, Double_t ckin4=-1.0 )
 {
+
+  gSystem->Load( "Pythia8_1_62.so"  );
 
   //
   // Create the pythia 8 event generator and add it to 
@@ -65,12 +63,17 @@ void Pythia8( TString config="pp:W" )
     }
   if ( config=="pp:minbias" )
     {
-      pythia8->SetFrame("CMS", 510.0);
+      pythia8->SetFrame("CMS", 500.0);
       pythia8->SetBlue("proton");
-      pythia8->SetYell("proton");            
+      pythia8->SetYell("proton");    
 
-      pythia8->Set("SoftQCD:minBias = on");
+      pythia8->Set("HardQCD:all = on");
+
     }
+
+  // Setup phase space cuts
+  pythia8 -> Set(Form("PhaseSpace:ptHatMin=%f", ckin3 ));
+  pythia8 -> Set(Form("PhaseSpace:ptHatMax=%f", ckin4 ));
 
   primary -> AddGenerator( pythia8 );
   
@@ -78,7 +81,56 @@ void Pythia8( TString config="pp:W" )
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=10 )
+void Pythia6( TString mode="pp:minbias", Double_t ckin3=0.0, Double_t ckin4=-1.0, Int_t tune=320 )
+{
+  
+  //  gSystem->Load( "libStarGeneratorPoolPythia6_4_23.so" );
+  gSystem->Load( "libPythia6_4_23.so");
+  //  gSystem->Load( "StarPythia6.so"   );
+
+  StarPythia6 *pythia6 = new StarPythia6("pythia6");
+
+  //
+  // Common blocks for configuration
+  //
+  PySubs_t &pysubs = pythia6->pysubs();
+
+  if ( mode=="pp:W" )
+  {
+    pythia6->SetFrame("CMS", 510.0 );
+    pythia6->SetBlue("proton");
+    pythia6->SetYell("proton");
+    if ( tune ) pythia6->PyTune( tune );
+
+    // Setup pythia process
+
+    pysubs.msel = 12;
+
+  }
+  if ( mode == "pp:minbias" )
+  {
+    pythia6->SetFrame("CMS", 510.0 );
+    pythia6->SetBlue("proton");
+    pythia6->SetYell("proton");
+    pythia6->PyTune( tune );
+    
+    // Setup pythia process
+
+    pysubs.msel = 1;
+
+  }
+
+  pysubs.ckin(3)=ckin3;
+  pysubs.ckin(4)=ckin4;
+
+  primary->AddGenerator(pythia6);
+
+}
+
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+void starsim( Int_t nevents=100, Double_t ckin3=3.0, Double_t ckin4=4.0  )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
@@ -92,24 +144,15 @@ void starsim( Int_t nevents=10 )
   gSystem->Load( "StarGeneratorUtil.so");
   gSystem->Load( "StarGeneratorEvent.so");
   gSystem->Load( "StarGeneratorBase.so" );
-
-  gSystem->Load( "Pythia8_1_62.so");
-
   gSystem->Load( "libMathMore.so"   );  
 
-  // Force loading of xgeometry
-  gSystem->Load( "xgeometry.so"     );
 
-//   // And unloading of geometry
-//   TString geo = gSystem->DynamicPathName("geometry.so");
-//   if ( !geo.Contains("Error" ) ) {
-//     std::cout << "Unloading geometry.so" << endl;
-//     gSystem->Unload( gSystem->DynamicPathName("geometry.so") );
-//   }
 
-  gSystem->Load( "Pythia8_1_62.so"  );
+  //  gSystem->Load("StarFilterMaker.so") ;
+  gSystem->Load( "StarGeneratorFilt.so" );
  
-  
+  gMessMgr->SetLevel(999);
+
   //
   // Create the primary event generator and insert it
   // before the geant maker
@@ -117,14 +160,24 @@ void starsim( Int_t nevents=10 )
   //  StarPrimaryMaker *
   primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( "pythia8.starsim.root");
+    primary -> SetFileName( Form("filter_%f_%f.gener.root",ckin3,ckin4) );
     chain -> AddBefore( "geant", primary );
   }
 
   //
   // Setup an event generator
   //
-  Pythia8("pp:W");
+  Pythia8("pp:minbias", ckin3, ckin4 );
+  //  Pythia6("pp:minbias", ckin3, ckin4 );
+
+  //
+  // Setup the generator filter
+  //
+  filter = new StDijetFilter();
+  primary -> AddFilter( filter );
+
+  // Enable to keep tracks on events which were rejected
+  //  primary->SetAttr("FilterKeepAll", int(1));
 
   //
   // Initialize primary event generator and all sub makers
@@ -134,10 +187,10 @@ void starsim( Int_t nevents=10 )
   //
   // Setup geometry and set starsim to use agusread for input
   //
-  //geometry("y2012");
+
   command("gkine -4 0");
-  command("gfile o pythia8.starsim.fzd");
-  
+  command( Form("gfile o filter_%f_%f.starsim.fzd",ckin3,ckin4) );
+
 
   //
   // Trigger on nevents
