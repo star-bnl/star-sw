@@ -199,13 +199,11 @@ Int_t StarPrimaryMaker::Finish()
 	      continue;
 	    }
 	  StarGenStats stats = generator->Stats();
-	  stats.Dump();
 	  if ( mFilter ) stats.nFilterSeen   = mFilter->numberOfEvents();
 	  if ( mFilter ) stats.nFilterAccept = mFilter->acceptedEvents();
+	  stats.Dump();
 	  stats.Write(); // write to fiel
 	}
-
-
 
       mFile -> Write();
       mFile -> Close();
@@ -256,17 +254,30 @@ Int_t StarPrimaryMaker::Make()
     if ( event()->GetFilterResult() & ( StarGenEvent::kAccept | StarGenEvent::kFlag ) )
       {
 
+	//
+	// Increment the event number in the master event record
+	//
+	(*event())++;
+
+	//
+	// Fill the TTree
+	//
 	mTree->Fill();
+
+	//
+	// Add the event to the accepted event list
+	//
 	if ( mAccepted ) mAccepted->Enter( mTree->GetEntries() );
-	Info(GetName(),"Filter Accept");
+
+
 	return kStOK;
 	
       }
 
     ///
-    /// If the filter resulted in a reject decision, fill the tree and try try again
+    /// If the filter resulted in a reject decision, fill the tree and try try again.
+    /// Clear the particle information if the KeepAll flag has not been set.
     ///
-    Info(GetName(),"Filter Reject");	
     if ( IAttr( "FilterKeepAll" ) == 0 ) mPrimaryEvent->Clear("part");
     if ( IAttr( "FilterKeepAll" ) || IAttr( "FilterKeepHeader" ) )    mTree->Fill();
     Clear();
