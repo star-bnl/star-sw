@@ -47,7 +47,8 @@ StarPrimaryMaker::StarPrimaryMaker()  :
   mFileName("none"),
   mStack(0),
   mPrimaryEvent(0),
-  mVx(0), mVy(0), mVz(0), mSx(0.1), mSy(0.1), mSz(30.0), mRho(0),
+  mVx(0), mVy(0), mVz(0), mSx(0.1), mSy(0.1), mSz(30.0), mRho(0), mVdxdz(0), mVdydz(0),
+  mDoBeamline(0),
   mPtMin(0), mPtMax(-1), mRapidityMin(0), mRapidityMax(-1), mPhiMin(0), mPhiMax(-1), mZMin(0), mZMax(-1),
   mPrimaryVertex(0,0,0,0),
   mFilter(0),mAccepted(0)
@@ -246,7 +247,7 @@ Int_t StarPrimaryMaker::Make()
       }
 
     /// Print the event for debugging purposes
-    //    event()->Print("head");
+    if ( IAttr("Debug")==1 ) event()->Print("head");
 
     ///
     /// If the filter resulted in an accept decision, fill the tree and return kStOK
