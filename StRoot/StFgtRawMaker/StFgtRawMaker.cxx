@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.36 2013/05/25 17:34:52 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.37 2013/06/03 15:47:52 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.37  2013/06/03 15:47:52  avossen
+//  changed return code from fatal to warn if #tb is to high in meta data
+//
 //  Revision 1.36  2013/05/25 17:34:52  avossen
 //  checked for maximum allowed timebin
 //
@@ -194,7 +197,7 @@ Int_t StFgtRawMaker::Make()
       catch(string s)
 	{
 	  LOG_ERROR << s << endm;
-	  return kStFatal;
+	  return kStWarn;
 	}
     }
 }
