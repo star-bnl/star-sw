@@ -3,13 +3,23 @@
 
 
 #include <stdlib.h>
-//#include <string.h>
 
 #include <DAQ_TPX/tpxFCF.h>
 
 
+// remove DO_SIMULATION if running in DAQ PC (aka real-time)
+#ifdef TPX_REALTIME
+	#ifdef DO_DBG
+		#undef DO_DBG
+	#endif
 
+	#ifdef DO_SIMULATION
+		#undef DO_SIMULATION
+	#endif
 
+#else
+	#define DO_SIMULATION
+#endif
 
 
 class tpxFCF_2D : public tpxFCF
@@ -42,22 +52,29 @@ public:
 		sector = sec1 ;
 		rdo = rdo1 ;
 
-		data_raw_cou = 0 ;
 		data_raw_p = data_raw ;
+		
+		event++ ;		// for debugging
+		cluster_id = 1 ;	// start of cluster ids : for track id Offline stuff
 
 		memset(p_row_pad,0,sizeof(p_row_pad)) ;
 	}
+
+	int row ;	// for debugging mostly
+	int event ;	// for debugging too
+	int cluster_id ;	// for track id Offline stuff
 
 	int do_dump(int ix, u_int *obuff) ;
 
 	int do_print(int row) ;
 
 
-	u_int data_raw_cou ;		// zapped to 0 on event start...
+	int data_raw_shorts ;
+
 	short *data_raw ;	// row, pad, tb_cou, tb_start, adc, adc, adc...
 	short *data_raw_p ;	
 
-	short *p_row_pad[46][183] ;
+	short *p_row_pad[100][183] ;
 	
 	struct blob_seq_t {
 		short *s ;
@@ -74,6 +91,14 @@ public:
 
 	} blobs[MAX_BLOB_COUNT] ;
 
+	struct blob_common_t {
+		short p1, p2 ;
+		short t1, t2 ;
+		short dp, dt ;
+		short dt_2 ;
+		short flags ;
+	} blob_c ;
+
 	struct {
 		double f_charge ;
 		double f_p_ave ;
@@ -84,17 +109,29 @@ public:
 
 		short i, j ;
 		short flags ;
+
+
 		short pix_cou ;
 
 		short aux_flags ;
+#ifdef DO_SIMULATION
+		u_short cluster_id ;
+		short quality ;
+		u_short track_id ;
+#endif
 		
 	} peaks[MAX_PEAKS_PER_BLOB] ;
 
-	int do_peaks(int row, int peaks_cou) ;
+	int do_peaks(int peaks_cou) ;
+	void do_track_id(int peaks_cou) ;
 
 	short dta[64*1024] ;
 	short *dta_s ;	// for the filtered data...
 
+#ifdef DO_SIMULATION
+	u_short dta_t[32*1024] ;	// for the track ids
+	u_short dta_id[32*1024] ;	// for the cluster ids
+#endif
 } ;
 
 extern u_int *tpxFCF_2D_scan_to_next(tpxFCF_2D *fcf, u_int *end, u_int *start,tpx_altro_struct *a) ;

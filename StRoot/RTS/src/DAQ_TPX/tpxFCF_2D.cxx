@@ -13,6 +13,8 @@
 
 #include "tpxFCF_2D.h"
 
+#include <DAQ_READER/daq_dta_structs.h>
+
 #define CHECK_SANITY
 
 //#include <GL3/profiler.hh>
@@ -24,8 +26,9 @@
 
 
 #define DTA(i,j) (dta + (dt_2)*(i) + (j))
+#define DTA_T(i,j) (dta_t + (dt_2)*(i) + (j))
 #define DTA_S(i,j) (dta_s + (dt_2)*(i) + (j))
-
+#define DTA_ID(i,j) (dta_id + (dt_2)*(i) + (j))
 
 static inline u_int get10(u_int *l, u_int p)
 {
@@ -245,7 +248,7 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 	int gprof0 = PROFILER(0) ;
 
-	for(int row=1;row<=45;row++) {	// need row count here!!!
+	for(row=1;row<=45;row++) {	// need row count here!!!
 
 	int do_debug = 0 ;
 
@@ -359,7 +362,9 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 
 			b1 += b1_cou  ;	// advance to next...
-		
+#ifdef DO_SIMULATION
+			b1 += b1_cou ;	// to skip the track_ids as well
+#endif
 
 			short *b2 = p_row_pad[row][p+1] ;
 
@@ -395,7 +400,9 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 				b2 += b2_cou ;
 				
-
+#ifdef DO_SIMULATION
+				b2 += b2_cou ;	// to skip the track ids
+#endif
 				int merge ;
 
 				if(t1_lo > t2_hi) merge = 0 ;
@@ -517,6 +524,9 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 			b1 += b1_cou + 1 ;
 
+#ifdef DO_SIMULATION
+			b1 += b1_cou ;
+#endif
 			}
 		}
 
@@ -657,7 +667,9 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 			b += cou + 3 ;		// advance pointer to next sequence
 		
-
+#ifdef DO_SIMULATION
+			b += cou ;
+#endif
 			// check for late merge via chains
 			for(int l=0;l<chain_cou;l++) {
 				for(int k=0;k<chain[l].cou;k++) {
@@ -814,6 +826,10 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 		dta_s = dta + (dp+2)*dt_2 ;	// for the filtered data
 
+#ifdef DO_SIMULATION
+		memset(dta_t,0,(dp+2)*dt_2*sizeof(short)) ;
+		memset(dta_id,0,(dp+2)*dt_2*sizeof(short)) ;
+#endif
 
 		int prof3 = PROFILER(prof2) ;	// now 0.15us (was 0.47 us)
 
@@ -837,8 +853,17 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 			short *udd = DTA(p0,0) ;
 
+// this is the critical timing part and should not be present in real-time code!
+#ifdef DO_SIMULATION	
+			u_short *tdd = DTA_T(p0,0) ;
+#endif
 			for(;tb_hi>=tb_lo;tb_hi--) {
 				short adc = *s++ ;
+#ifdef DO_SIMULATION
+				u_short track_id = *s++ ;
+
+				*(tdd + tb) = track_id ;
+#endif
 
 				*(udd + tb) = adc ;
 				tb-- ;
@@ -859,6 +884,7 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 			int iy = j - 1 ;
 
+#if 1
 			for(int ii=-1;ii<=1;ii++) {
 				register short *udd = DTA(i+ii,iy) ;
 
@@ -866,6 +892,14 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 					sum += *udd++ ;
 				}	
 			}
+#else
+			register short *udd = DTA(i,iy) ;
+
+			for(int jj=0;jj<3;jj++) {
+				sum += *udd++ ;
+			}	
+
+#endif
 
 			*DTA_S(i,j) = sum ;
 		}
@@ -948,9 +982,46 @@ int tpxFCF_2D::stage_2d(u_int *buff, int max_bytes)
 
 
 
-		#ifdef DO_DBG
+#ifdef DO_DBG
 
-if((peaks_cou==0) || (t2==512)) {		
+if(peaks_cou <= 1) {
+	static u_int ccc ;
+
+	int max_adc = 0 ;
+
+	for(int i=1;i<=(dp);i++) {
+	for(int j=1;j<=(dt);j++) {
+		short adc ;
+
+
+		adc = *DTA(i,j) ;
+
+		if(adc > max_adc) max_adc = adc ;
+	}
+	}
+
+	if(max_adc >= 10) {
+		ccc++ ;
+		for(int j=1;j<=(dt);j++) {
+			int sum = 0 ;
+			for(int i=1;i<=(dp);i++) {
+				short adc ;
+
+
+				adc = *DTA(i,j) ;
+				sum += adc ;
+			
+			}
+
+			printf("FFF %d %d %d %d %d %d %d\n",event,sector,row,p1,ccc,t1+j-1,sum) ;
+		}
+	}
+
+}
+
+
+if(1) {
+//if((peaks_cou<=1) || (t2==512)) {		
 		printf("+++++ sec %2d, row %2d: p [%d,%d], t [%d,%d]; peaks %d\n",sector,row,p1,p2,t1,t2,peaks_cou) ;
 		printf("peaks: ") ;
 		for(int i=0;i<peaks_cou;i++) {
@@ -995,10 +1066,20 @@ if((peaks_cou==0) || (t2==512)) {
 		printf("\n") ;
 
 }
-		#endif
+#endif
 
 
 		int prof7 = 0 ;
+
+
+		blob_c.p1 = p1 ;
+		blob_c.p2 = p2 ;
+		blob_c.t1 = t1 ;
+		blob_c.t2 = t2 ;
+		blob_c.dp = dp ;
+		blob_c.dt = dt ;
+		blob_c.flags = flags ;
+		blob_c.dt_2 = dt_2 ;
 
 		peaks[0].p1 = p1 ;
 		peaks[0].p2 = p2 ;
@@ -1006,6 +1087,8 @@ if((peaks_cou==0) || (t2==512)) {
 		peaks[0].t2 = t2 ;
 		peaks[0].flags = flags ;
 
+		static u_int peak_counter ;
+	
 		if(peaks_cou <= 1 ) {	// single peak, full mean!
 
 			double f_charge = 0.0 ;
@@ -1013,6 +1096,8 @@ if((peaks_cou==0) || (t2==512)) {
 			double f_p_ave = 0.0 ;
 
 			int pix_cou = 0 ;
+			
+			peak_counter++ ;
 
 			for(int i=1;i<=(dp);i++) {	// data starts on 2
 
@@ -1026,11 +1111,15 @@ if((peaks_cou==0) || (t2==512)) {
 
 				for(int j=1;j<=(dt);j++) {	// data starts on 2
 					
-					//register int adc = (int) dta[i][j] ;
 
 					register int adc = *adc_p++ ;
 
-					//if(adc) pix_cou++ ;
+					if(adc) pix_cou++ ;
+
+#ifdef DO_SIMULATION	
+					if(adc) *DTA_ID(i,j) = cluster_id ;
+#endif
+					//if(adc && (row<=13)) printf("BLOB1 %d %d %d %d\n",peak_counter,i,j,adc) ;
 
 					//if(adc==0) {
 					//	tb++ ;
@@ -1075,8 +1164,13 @@ if((peaks_cou==0) || (t2==512)) {
 			peaks[0].pix_cou = pix_cou ;
 
 
+
 			peaks_cou = 1 ;	// force it!
 
+#ifdef DO_SIMULATION	
+			peaks[0].cluster_id = cluster_id++ ;
+			do_track_id(peaks_cou) ;
+#endif
 			outbuff += do_dump(0,outbuff) ;
 
 			prof7 = PROFILER(prof6) ;	// 0.19 us
@@ -1084,7 +1178,11 @@ if((peaks_cou==0) || (t2==512)) {
 		}
 		else {
 
-			do_peaks(row,peaks_cou) ;
+			do_peaks(peaks_cou) ;
+#ifdef DO_SIMULATION
+			do_track_id(peaks_cou) ;
+#endif
+
 			for(int p=0;p<peaks_cou;p++) {
 				outbuff += do_dump(p,outbuff) ;
 			}
@@ -1136,7 +1234,10 @@ if((peaks_cou==0) || (t2==512)) {
 }
 
 
-
+/*
+	Used only in re-doing clusters later in offline or for simulated
+	data.
+*/
 int tpxFCF_2D::do_pad_2d(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 {
 	int row = a->row ;
@@ -1149,6 +1250,14 @@ int tpxFCF_2D::do_pad_2d(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 	}
 
 	if(a->count == 0) return 0 ;
+
+
+	// check size
+	int shorts_so_far = data_raw_p - data_raw ;
+	if(shorts_so_far >((data_raw_shorts*9)/10)) {
+		LOG(ERR,"Too much data %d/%d",shorts_so_far,data_raw_shorts) ;
+		return 0 ;
+	}
 
 
 	// NEED to sort in falling timebin!
@@ -1168,6 +1277,13 @@ int tpxFCF_2D::do_pad_2d(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 		int tb = a->tb[i] ;
 		int aa = a->adc[i];
 
+#ifdef DO_SIMULATION
+		// every pixel has an associated track_id
+		int track_id ;
+		if(sim_adc && modes) track_id = sim_adc[i].track_id ;
+		else track_id = 0xFFFF ;
+#endif
+
 		if(tb >= tb_last) {
 			LOG(ERR,"%d: %d %d",i,tb,aa) ;
 		}
@@ -1183,11 +1299,17 @@ int tpxFCF_2D::do_pad_2d(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 			tb_cou = 1 ;
 			
 			*data_raw_p++ = aa ;
+#ifdef DO_SIMULATION	
+			*data_raw_p++ = track_id ;
+#endif
 		}
 		else {
 
 			tb_cou++ ;
 			*data_raw_p++ = aa ;
+#ifdef DO_SIMULATION
+			*data_raw_p++ = track_id ;
+#endif
 		}
 		
 		tb_last = tb ;
@@ -1203,400 +1325,26 @@ int tpxFCF_2D::do_pad_2d(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 
 	int s_cou = data_raw_p - start ;
 
-/*
-	for(int i=0;i<s_cou;i++) {
-		LOG(TERR,"%d: %d:%d:   0x%04X (%d dec)",i,row,pad,start[i],start[i]) ;
-
-	}
-*/
-
 	return s_cou ;
 
-#if 0
-	short adc[512] ;
-	memset(adc,0,sizeof(adc)) ;
-	
-//	LOG(TERR,"do_pad_2d: row %d, pad %d, cou %d",row,pad,a->count) ;
-
-	for(int i=0;i<a->count;i++) {
-		int tb = a->tb[i] ;
-		int aa = a->adc[i] ;
-
-		adc[tb] = aa ;
-	}
-
-	short *start = data_raw_p ;
-
-	*data_raw_p++ = row ;
-	*data_raw_p++ = pad ;
-
-	p_row_pad[row][pad] = data_raw_p ;	// remember pointer
-
-	int t_hi = -1 ;
-	int tb_cou = 0 ;
-	short *tb_cou_p = data_raw_p ;
-
-	for(int i=511;i>=0;i--) {
-
-		
-		if(adc[i]) {
-			if(t_hi < 0) {	// start new
-
-				t_hi = i ;
-
-				tb_cou_p = data_raw_p++ ;
-				*data_raw_p++ = -1 ;
-				*data_raw_p++ = t_hi ;
-
-
-				tb_cou = 1 ;
-
-				*data_raw_p++ = adc[i] ;
-			}
-			else {
-				tb_cou++ ;
-				*data_raw_p++ = adc[i] ;
-			}
-		}
-		else {
-			if(t_hi < 0) ;
-			else {
-				*tb_cou_p = tb_cou ;
-
-				t_hi = -1 ;
-			}
-		}
-	}
-			
-
-	if(t_hi < 0) ;
-	else {
-		*tb_cou_p = tb_cou ;
-	}
-
-	*data_raw_p++ = 0 ;
-	*data_raw_p = 0 ;
-
-	int s_cou = data_raw_p - start ;
-
-/*
-	for(int i=0;i<s_cou;i++) {
-		LOG(TERR,"%d: %d:%d:   0x%04X (%d dec)",i,row,pad,start[i],start[i]) ;
-
-	}
-*/
-
-	return s_cou ;
-#endif
-
-#if 0
-	short tmp_store[512+512], a_tmp[512] ;
-	
-	short *tmp_buff = tmp_store ;
-	
-	short *start_raw_p = data_raw_p ;
-
-
-	int any = 0 ;
-
-	short t_hi, t_lo, t_prev ;
-
-	t_prev = 0 ;
-	t_hi = -1 ;
-
-	for(int i=511;i>=0;i--) {
-		if(adc[i]) {
-			if(t_hi == -1) t_hi = i ;
-
-			t_prev = i ;
-		}
-		else {
-			if(t_hi > 0) {	// dump seq
-				t_lo = t_prev ;
-
-				*tmp_buff++ = (t_hi - t_lo + 1) ;
-				*tmp_buff++ = t_hi ;
-
-				for(int k=t_hi;k>=t_lo;k--) {
-					*tmp_buff++ = adc[k] ;
-				}
-
-				any = 1 ;
-				t_hi = -1 ;
-			}
-		}
-	}
-
-
-	#ifdef DO_DBG1
-	int tmp_count = tmp_buff - tmp_store ;
-	for(int i=0;i<tmp_count;i++) {
-		printf("Row %d, pad %d: %d: %d\n",row,pad,i,tmp_store[i]) ;
-	}
-	#endif
-
-	*data_raw_p++ = row ;
-	*data_raw_p++ = pad ;
-
-	p_row_pad[row][pad] = data_raw_p ;	// remember pointer
-
-
-	if(any == 0) {
-		*data_raw_p++ = 0 ;
-		*data_raw_p = 0 ;
-		return 3 ;	// 3 items...
-	}
-
-	short *a_buff = tmp_store ;
-
-	short tb_prev = 512 ;
-	t_hi = -1 ;
-
-	while(a_buff < tmp_buff) {
-		short tb_cou = *a_buff++ ;
-		short tb_last = *a_buff++ ;
-
-		tb_prev = tb_last - tb_cou ;
-
-		for(;tb_last > tb_prev; tb_last--) {
-			short adc = *a_buff++ ;
-
-			a_tmp[tb_last] = adc ;
-
-
-			if(adc > 0) {
-				if(t_hi == -1) t_hi = tb_last ;
-
-				t_prev = tb_last ;
-			}
-			else {
-				if(t_hi >= 0) {
-					t_lo = t_prev ;
-
-					*data_raw_p++ = (t_hi - t_lo + 1) ;
-					*data_raw_p++ = -1 ;
-					*data_raw_p++ = t_hi ;
-
-					for(int k=t_hi; k>=t_lo; k--) {
-						*data_raw_p++ = a_tmp[k] ;
-					}
-
-					any = 1 ;
-					t_hi = -1 ;
-				}
-			}
-
-		}
-
-		if(t_hi >= 0) {	// unfinished
-			t_lo = t_prev ;
-
-			*data_raw_p++ = (t_hi - t_lo + 1) ;
-			*data_raw_p++ = -1 ;
-			*data_raw_p++ = t_hi ;
-
-			for(int k=t_hi; k>=t_lo;k--) {
-				*data_raw_p++ = a_tmp[k] ;
-			}
-
-			t_hi = -1 ;
-
-		}
-	}
-
-	*data_raw_p++ = 0 ;	// final tb_cou
-	*data_raw_p = 0 ;	// next row sentinel
-
-
-	int cou = data_raw_p - start_raw_p ;
-
-
-	#ifdef DO_DBG1
-	for(int i=0;i<cou;i++) {
-		printf("row %d, pad %d: %d: %d\n",row,pad,i,start_raw_p[i]) ;
-	}
-	#endif
-
-	return cou ;
-#endif
-
 }
 
-#if 0
-int tpxFCF_2D::fill(short row, short pad, short adc[512])
-{
-	short tmp_store[512+512], a_tmp[512] ;
-	
-	short *tmp_buff = tmp_store ;
-	
-	short *start_raw_p = data_raw_p ;
-
-
-	int any = 0 ;
-
-	short t_hi, t_lo, t_prev ;
-
-	t_prev = 0 ;
-	t_hi = -1 ;
-
-	for(int i=511;i>=0;i--) {
-		if(adc[i]) {
-			if(t_hi == -1) t_hi = i ;
-
-			t_prev = i ;
-		}
-		else {
-			if(t_hi > 0) {	// dump seq
-				t_lo = t_prev ;
-
-				*tmp_buff++ = (t_hi - t_lo + 1) ;
-				*tmp_buff++ = t_hi ;
-
-				for(int k=t_hi;k>=t_lo;k--) {
-					*tmp_buff++ = adc[k] ;
-				}
-
-				any = 1 ;
-				t_hi = -1 ;
-			}
-		}
-	}
-
-	#ifdef DO_DBG1
-	int tmp_count = tmp_buff - tmp_store ;
-	for(int i=0;i<tmp_count;i++) {
-		printf("Row %d, pad %d: %d: %d\n",row,pad,i,tmp_store[i]) ;
-	}
-	#endif
-
-	*data_raw_p++ = row ;
-	*data_raw_p++ = pad ;
-
-
-	p_row_pad[row][pad] = data_raw_p ;	// remember pointer
-
-
-
-	if(any == 0) {
-		*data_raw_p++ = 0 ;
-		*data_raw_p = 0 ;
-		return 3 ;	// 3 items...
-	}
-
-	short *a_buff = tmp_store ;
-
-	short tb_prev = 512 ;
-	t_hi = -1 ;
-
-	while(a_buff < tmp_buff) {
-		short tb_cou = *a_buff++ ;
-		short tb_last = *a_buff++ ;
-
-		tb_prev = tb_last - tb_cou ;
-
-		for(;tb_last > tb_prev; tb_last--) {
-			short adc = *a_buff++ ;
-
-			a_tmp[tb_last] = adc ;
-
-
-			if(adc > 2) {
-				if(t_hi == -1) t_hi = tb_last ;
-
-				t_prev = tb_last ;
-			}
-			else {
-				if(t_hi >= 0) {
-					t_lo = t_prev ;
-
-					*data_raw_p++ = (t_hi - t_lo + 1) ;
-					*data_raw_p++ = -1 ;
-					*data_raw_p++ = t_hi ;
-
-					for(int k=t_hi; k>=t_lo; k--) {
-						*data_raw_p++ = a_tmp[k] ;
-					}
-
-					any = 1 ;
-					t_hi = -1 ;
-				}
-			}
-
-		}
-
-		if(t_hi >= 0) {	// unfinished
-			t_lo = t_prev ;
-
-			*data_raw_p++ = (t_hi - t_lo + 1) ;
-			*data_raw_p++ = -1 ;
-			*data_raw_p++ = t_hi ;
-
-			for(int k=t_hi; k>=t_lo;k--) {
-				*data_raw_p++ = a_tmp[k] ;
-			}
-
-			t_hi = -1 ;
-
-		}
-	}
-
-	*data_raw_p++ = 0 ;	// final tb_cou
-	*data_raw_p = 0 ;	// next row sentinel
-
-
-	int cou = data_raw_p - start_raw_p ;
-
-
-	#ifdef DO_DBG1
-	for(int i=0;i<cou;i++) {
-		printf("row %d, pad %d: %d: %d\n",row,pad,i,start_raw_p[i]) ;
-	}
-	#endif
-
-	return cou ;
-}
-
-#endif
-
-#if 0
-void tpxFCF_2D::output(void *buff, int count)
-{
-	int cou = 0 ;
-	int row = 0 ;
-	fcf2d_res_t *res = (fcf2d_res_t *) buff ;
-
-	for(int i=0;i<count;i++) {
-		if(res[i].pad < 0) {
-			row = (int) - res[i].pad ;
-			//printf("===> Row %2d, clusters: %d\n",row,res[i].ix) ;
-			continue ;
-		}
-
-
-
-		if(row==1) {
-		if((res[i].flags & FCF_DEAD_EDGE) || (res[i].flags & FCF_ROW_EDGE)) continue ;
-
-//		if(res[i].flags != 1) {
-		cou++ ;
-		printf("FCF2D: row %2d: %3d: pad %f[%d], tb %f[%d], cha %d, fla %d, pixs %d, ix %d\n",
-		       row,
-		       cou,
-		       res[i].pad, res[i].dp,
-		       res[i].tb, res[i].dt, 
-		       res[i].charge, res[i].flags,res[i].pix_cou,
-		       res[i].ix) ;
-		}
-	} ;
-
-}
-#endif
 
 tpxFCF_2D::tpxFCF_2D()
 {
+#ifndef TPX_ONLINE
+	LOG(WARN,"TPX_ONLINE undefined -- running in Offline mode.") ;
+#endif
+#ifdef DO_SIMULATION
+	LOG(WARN,"DO_SIMULATION defined.") ;
+#endif
+#ifdef CHECK_SANITY
+	LOG(WARN,"CHECK_SANITY defined.") ;
+#endif
 
-
-	data_raw = (short *) valloc(2*MAX_PADS_PER_RDO*512) ;	// pad_num X 512tb X 2bytes (short)
+	event = 0 ;
+	data_raw_shorts = 2*MAX_PADS_PER_RDO*512 ;		// we need this sizable because of simulated data with track_id!
+	data_raw = (short *) valloc(2*data_raw_shorts) ;	// pad_num X 512tb X 2bytes (short)
 }
 
 int tpxFCF_2D::do_dump(int ix, u_int *obuff)
@@ -1637,7 +1385,28 @@ int tpxFCF_2D::do_dump(int ix, u_int *obuff)
 	u_int cha = (u_int) (peaks[ix].f_charge + 0.5) ;
 
 
+	if(flags & FCF_BROKEN_EDGE) goto keep ;
+	if(do_cuts == 0) goto keep ;
 
+	if(do_cuts != 2) {
+		if(flags & (FCF_DEAD_EDGE | FCF_ROW_EDGE)) return 0 ;
+	}
+
+	if((t2-t1)<=2) return 0 ;
+	if(cha < 10.0) return 0 ;
+
+	keep:;
+
+#if 0
+if(flags & 2) ;
+else {
+	if((f_t_ave > 26.0) && (f_t_ave < 415.0)) ;
+	else {
+		if(cha < 12) ;
+		else printf("PROMPT %d %d %d %f %f %d\n",event,sector,row,f_p_ave,f_t_ave,cha) ;
+		}
+}
+#endif
 	u_int tmp_fl ;
 
 	// get extents
@@ -1683,24 +1452,32 @@ int tpxFCF_2D::do_dump(int ix, u_int *obuff)
 	*obuff++ = (cha << 16) | tmp_fl ;
 
 	ret = 2 ;
-//	LOG(TERR,"Modes %d",modes) ;
+
+#ifdef DO_SIMULATION
 	if(modes) {
-		int quality = 1 ;
-		int track_id = 2 ;
+		int quality = peaks[ix].quality ;
+		int track_id = peaks[ix].track_id ;
 
 		*obuff++ = (quality << 16) | track_id ;
 		ret++ ;
 	}
+#else
+	if(modes) {
+		*obuff++ = 0 ;
+		ret++ ;
+	}
+#endif
 
 	return ret ;
 }
 
-int tpxFCF_2D::do_peaks(int row, int peaks_cou)
+int tpxFCF_2D::do_peaks(int peaks_cou)
 {
-	short p1 = peaks[0].p1 ;
-	short p2 = peaks[0].p2 ;
-	short t1 = peaks[0].t1 ;
-	short t2 = peaks[0].t2 ;
+	// ix==0 contains the extents of the blob...
+	short p1 = blob_c.p1 ;
+	short p2 = blob_c.p2 ;
+	short t1 = blob_c.t1 ;
+	short t2 = blob_c.t2 ;
 
 	short dt, dt_2 ;
 	short dp ;
@@ -1712,10 +1489,15 @@ int tpxFCF_2D::do_peaks(int row, int peaks_cou)
 	}
 #endif
 
-	dp = p2 - p1 + 1 ;
-	dt = t2 - t1 + 1 ;
-	dt_2 = dt + 2 ;	// MUST be called dt_2 due to the DTA() define!!!
+	dp = blob_c.dp ;
+	dt = blob_c.dt ;
+	dt_2 = blob_c.dt_2 ;	// MUST be called dt_2 due to the DTA() define!!!
 
+	int flags = 0 ;
+	if(peaks_cou==0) peaks_cou = 1 ;	// sanitize...
+	if(peaks_cou > 1) flags = FCF_MERGED ;
+
+	
 
 	for(int p=0;p<peaks_cou;p++) {
 		peaks[p].f_charge = 0.0 ;
@@ -1726,9 +1508,10 @@ int tpxFCF_2D::do_peaks(int row, int peaks_cou)
 		peaks[p].p1 = 10000 ;
 		peaks[p].t2 = 0 ;
 		peaks[p].p2 = 0 ;
-		peaks[p].flags = 0 ;
-
-		
+		peaks[p].flags = flags ;	
+#ifdef DO_SIMULATION
+		peaks[p].cluster_id++ ;
+#endif
 	}
 
 	for(int i=1;i<=(dp);i++) {
@@ -1738,14 +1521,13 @@ int tpxFCF_2D::do_peaks(int row, int peaks_cou)
 		double t0 = get_static(row,pad)->t0 ;
 	
 		short flags = get_static(row,pad)->f & 0xFFF ;
-		if(rdo==0) flags &= ~FCF_BROKEN_EDGE ;
+		if(rdo==0) flags &= ~FCF_BROKEN_EDGE ;	// clear broken_edge if not running rdo-per-rdo
 
 #ifdef CHECK_SANITY
 		if(gain < 0.8) {
 			LOG(ERR,"What: lo gain %f %f, flags 0x%X: sec %d: rp %d:%d; i %d, dp %d",gain,t0,flags,sector,row,pad,i,dp) ;
 		}
 #endif
-		if(peaks_cou > 1) flags |= FCF_MERGED ;
 
 		for(int j=1;j<=(dt);j++) {
 		
@@ -1753,28 +1535,33 @@ int tpxFCF_2D::do_peaks(int row, int peaks_cou)
 
 			if(adc==0) continue ;
 
-			int min_diff = 10000000 ;
+			int min_dist = 10000000 ;
 			int min_p = -1 ;
 
+			// find the closest peak...
 			for(int p=0;p<peaks_cou;p++) {
 			
 				int dx = i - peaks[p].i ;
 				int dy = j - peaks[p].j ;
 
-				int diff = dx*dx + dy*dy ;
+				int dist = dx*dx + dy*dy ;
 
-				if(diff < min_diff) {
-					min_diff = diff ;
+				if(dist < min_dist) {
+					min_dist = dist ;
 					min_p = p ;
 				}
 			}
 
-			double corr_charge = adc * gain ;
 
 			if(min_p<0) {
 				LOG(ERR,"What: %d: rp %d:%d",min_p,row,pad) ;
 				continue ;
 			}
+
+#ifdef DO_SIMULATION
+			*DTA_ID(i,j) = peaks[min_p].cluster_id ;
+#endif
+			double corr_charge = adc * gain ;
 
 			peaks[min_p].f_charge += corr_charge ;
 			peaks[min_p].f_t_ave += corr_charge*(t0+(double)(j+t1-1)) ;
@@ -1800,9 +1587,110 @@ int tpxFCF_2D::do_peaks(int row, int peaks_cou)
 
 		if((peaks[p].p2 - peaks[p].p1)==0) peaks[p].flags |= FCF_ONEPAD ;
 		else peaks[p].flags &= ~FCF_ONEPAD ;
-
-		PROFILER(0) ;
 	}
 
 	return 0 ;
+}
+
+
+void tpxFCF_2D::do_track_id(int peaks_cou)
+{
+	short dt, dt_2 ;
+	short dp ;
+
+	dp = blob_c.dp ;
+	dt = blob_c.dt ;
+	dt_2 = blob_c.dt_2 ;	// MUST be called dt_2 due to the DTA() define!!!
+
+
+	for(int c=0;c<peaks_cou;c++) {
+		// now to the track_id and Q
+		const int MAX_TRACK_IDS = 10 ;
+
+		struct {
+			int cou ;
+			u_int track_id ;
+		} t_id[MAX_TRACK_IDS] ;
+
+		memset(t_id,0,sizeof(t_id)) ;
+
+
+		u_short track_id = 123;
+		u_int blob_adc = 0 ;
+
+		for(int i=1;i<=dp;i++) {
+		for(int j=1;j<=dt;j++) {
+			if(*DTA_ID(i,j) == peaks[c].cluster_id) {
+				track_id = *DTA_T(i,j) ;
+
+				//if(track_id != 0xFFFF) {
+				//	LOG(ERR,"Eh %d %d",track_id,*DTA(i,j)) ;
+				//}
+
+				blob_adc += *DTA(i,j) ;
+
+				// did I see it before?
+				int found = 0 ;
+				int t_use = -1 ;
+
+				for(int t=0;t<MAX_TRACK_IDS;t++) {
+					if(t_id[t].track_id == track_id) {
+						t_id[t].cou++ ;
+						found = 1 ;
+						break ;
+					}
+					else if(t_id[t].cou == 0) {
+						t_use = t ;
+					}
+				}
+
+				if(found) continue ;
+				if(t_use < 0) continue ;
+
+				// new track id...
+				t_id[t_use].track_id = track_id ;
+				t_id[t_use].cou++ ;
+					
+			}
+		}}
+
+		// get the track id with maximum counts
+		int max_cou = 0 ;
+		for(int t=0;t<MAX_TRACK_IDS;t++) {
+			if(t_id[t].cou >= max_cou) {
+				max_cou = t_id[t].cou ;
+				track_id = t_id[t].track_id ;
+			}
+		}
+
+		if(max_cou == 0) {
+			LOG(ERR,"Wha?") ;
+		}
+
+		int track_adc = 0 ;
+		for(int i=1;i<=dp;i++) {
+		for(int j=1;j<=dt;j++) {
+			if(*DTA_ID(i,j) == peaks[c].cluster_id) {
+				if(*DTA_T(i,j) == track_id) {
+					track_adc += *DTA(i,j) ;
+				}
+			}
+		}
+		}
+
+
+		peaks[c].track_id = track_id ;
+
+		if(blob_adc) {
+			peaks[c].quality = (int)((double)track_adc/(double)blob_adc * 100.0 + 0.5) ;
+		}
+		else peaks[c].quality = 0 ;
+			
+
+		if(peaks[c].quality == 0) {
+			LOG(ERR,"What??? %d %d %d",max_cou,track_adc,blob_adc) ;
+		}
+
+	}
+
 }
