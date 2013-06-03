@@ -25,7 +25,7 @@ StarGenEvent::StarGenEvent(const Char_t *name, const Char_t *title ) : TObject()
   mBlueId(0),
   mYellId(0),
   mCmsEnergy(0),
-  mFilterResult(StarGenEvent::kAccept),// default accept
+  mFilterResult( StarGenEvent::kAccept ),// default accept
   mNumParticles(0)
 {
   for ( Int_t i=0;i<3;i++ ) mNumRejected[i]=0; 
@@ -47,7 +47,7 @@ void StarGenEvent::Clear( Option_t *opts )
   if ( Opts.Contains("data") ) {
     mWeights.clear();
     mProcessId    = 0;
-    mFilterResult = 0x0000;
+    mFilterResult = StarGenEvent::kAccept; // Default is always accept
     mCmsEnergy    = 0;
     for ( Int_t i=0;i<3;i++ ) mNumRejected[i]=0; 
   }
