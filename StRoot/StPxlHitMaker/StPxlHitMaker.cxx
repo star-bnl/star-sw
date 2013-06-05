@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlHitMaker.cxx,v 1.2 2013/05/24 20:26:00 qiuh Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.3 2013/06/05 01:01:46 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013 
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.3  2013/06/05 01:01:46  qiuh
+ * *** empty log message ***
+ *
  * Revision 1.2  2013/05/24 20:26:00  qiuh
  * *** empty log message ***
  * 
@@ -98,19 +101,19 @@ Int_t StPxlHitMaker::Make() {
         return kStWarn;
     }
 
-    StPxlHitCollection* pxlHitCollection = new StPxlHitCollection();
-    
     TObjectSet* pxlClusterDataSet = (TObjectSet*)GetDataSet("pxlCluster");
-    if (! pxlClusterDataSet) {
-        LOG_WARN << "StPxlHitMaker::Make() there is no pxlClusterDataSet " << endm;
+    StPxlClusterCollection* pxlClusterCollection = 0;
+    if(pxlClusterDataSet)
+        pxlClusterCollection = (StPxlClusterCollection*)pxlClusterDataSet->GetObject();
+
+    StPxlHitCollection* pxlHitCollection = pEvent->pxlHitCollection();
+
+    if (!pxlClusterCollection && !pxlHitCollection) {
+        LOG_WARN << "StPxlHitMaker::Make()  no pxlClusterCollection or pxlHitCollection to work on" << endm;
         return kStWarn;
     }
 
-    StPxlClusterCollection* pxlClusterCollection = (StPxlClusterCollection*)pxlClusterDataSet->GetObject();
-    if(!pxlClusterCollection) {
-        LOG_WARN << "StPxlHitMaker::Make() no pxlClusterCollection."<<endm;
-        return kStWarn;
-    }
+    if(!pxlHitCollection) pxlHitCollection = new StPxlHitCollection();
 
     double firstPixelZ = -(nPxlColumnsOnSensor-1)*pxlPixelSize/2;
     double firstPixelX = (nPxlRowsOnSensor-1)*pxlPixelSize/2;
@@ -120,27 +123,39 @@ Int_t StPxlHitMaker::Make() {
             for(int k=0; k<nPxlSensorsPerLadder; k++)
                 {
                     int sensorId = i*40+j*10+k+1;
-                    TGeoHMatrix *geoMSensorOnGlobal=(TGeoHMatrix*)listGeoMSensorOnGlobal->FindObject(Form("R%03i",sensorId));
 
-                    int vecSize = pxlClusterCollection->clusterVec[i][j][k].size();
-                    for(int l=0; l<vecSize; l++)
+                    //add in new hit from cluster
+                    if(pxlClusterCollection)
                         {
-                            StPxlCluster* cluster = pxlClusterCollection->clusterVec[i][j][k][l];
-                            StPxlHit* pxlHit = new StPxlHit();
-                            pxlHit->setSector(i+1);
-                            pxlHit->setLadder(j+1);
-                            pxlHit->setSensor(k+1);
-                            pxlHit->setDetectorId(kPxlId);
-                            pxlHit->setMeanRow(cluster->rowCenter);
-                            pxlHit->setMeanColumn(cluster->columnCenter);
-                            pxlHit->setNRawHits(cluster->nRawHits());
-                            pxlHit->setIdTruth(cluster->idTruth);
+                            int vecSize = pxlClusterCollection->clusterVec[i][j][k].size();
+                            for(int l=0; l<vecSize; l++)
+                                {
+                                    StPxlCluster* cluster = pxlClusterCollection->clusterVec[i][j][k][l];
+                                    StPxlHit* pxlHit = new StPxlHit();
+                                    pxlHit->setSector(i+1);
+                                    pxlHit->setLadder(j+1);
+                                    pxlHit->setSensor(k+1);
+                                    pxlHit->setDetectorId(kPxlId);
+                                    pxlHit->setMeanRow(cluster->rowCenter);
+                                    pxlHit->setMeanColumn(cluster->columnCenter);
+                                    pxlHit->setNRawHits(cluster->nRawHits());
+                                    pxlHit->setIdTruth(cluster->idTruth);
+                                    
+                                    pxlHitCollection->addHit(pxlHit);
+                                }
+                        }
 
+                    //get hit positions
+                    TGeoHMatrix *geoMSensorOnGlobal=(TGeoHMatrix*)listGeoMSensorOnGlobal->FindObject(Form("R%03i",sensorId));
+                    int nHitsInSensor = pxlHitCollection->sector(i)->ladder(j)->sensor(k)->hits().size();
+                    for(int l=0; l<nHitsInSensor; l++)
+                        {
+                            StPxlHit* pxlHit = pxlHitCollection->sector(i)->ladder(j)->sensor(k)->hits()[l];
                             double local[3];
                             double global[3];
                         
-                            local[2] = firstPixelZ + pxlPixelSize*cluster->columnCenter;
-                            local[0] = firstPixelX - pxlPixelSize*cluster->rowCenter;
+                            local[2] = firstPixelZ + pxlPixelSize*pxlHit->meanColumn();
+                            local[0] = firstPixelX - pxlPixelSize*pxlHit->meanRow();
                             
                             if(EmbeddingShortCut && pxlHit->idTruth())
                                 local[1] = 0;
@@ -151,12 +166,11 @@ Int_t StPxlHitMaker::Make() {
                             pxlHit->setLocalPosition(local[0], local[1], local[2]);
                             StThreeVectorF vecGlobal(global);
                             pxlHit->setPosition(vecGlobal);
-                            
-                            pxlHitCollection->addHit(pxlHit);
                         }
                 }
 
-    pEvent->setPxlHitCollection(pxlHitCollection);
+    if(!pEvent->pxlHitCollection())
+        pEvent->setPxlHitCollection(pxlHitCollection);
     return kStOK;
 }
 
