@@ -16,7 +16,7 @@ if [[ "${EMCONLINE_TRG_EPICS_CHANNEL}" != "" ]]
 then
     if [[ -f ${EPICS_CAPUT_CMD} ]]
     then
-	${EPICS_CAPUT_CMD} ${EMCONLINE_TRG_EPICS_CHANNEL} `date +%s`
+	#${EPICS_CAPUT_CMD} ${EMCONLINE_TRG_EPICS_CHANNEL} `date +%s`
     else
 	echo "Cannot find EPICS command \"caput\"!"
     fi
