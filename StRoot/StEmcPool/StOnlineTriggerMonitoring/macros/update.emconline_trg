@@ -129,7 +129,7 @@ cat ${EMCONLINE_TRG_LASTRUN_FILE}
 if [[ "${MODE}" != "RUN" ]]
 then
     echo "Monitoring is disabled, exit now"
-    ${EMCONLINE_TRG_EPICS_STOPPED}
+    #${EMCONLINE_TRG_EPICS_STOPPED}
     exit
 fi
 
@@ -163,7 +163,7 @@ for file in ${CRATE_CONFIG_FILES}
 do
     export FILE1=${EMCONLINE_TRG_CURRCONF_DIR}/${file}
     export FILE2=${EMCONLINE_TRG_LASTCONF_DIR}/${file}
-    if [[ -f ${FILE1} ]]
+    if [[ -f ${FILE1} && -s ${FILE1} ]]
     then
 	export DIFF=`diff ${DIFF_OPTIONS} ${FILE1} ${FILE2}`
 	echo "${file} ${DIFF}"
@@ -181,7 +181,7 @@ for file in ${CRATE_PEDESTAL_FILES}
 do
     export FILE1=${EMCONLINE_TRG_CURRCONF_DIR}/${file}
     export FILE2=${EMCONLINE_TRG_LASTCONF_DIR}/${file}
-    if [[ -f ${FILE1} ]]
+    if [[ -f ${FILE1} && -s ${FILE1} ]]
     then
 	export DIFF=`diff ${DIFF_OPTIONS} ${FILE1} ${FILE2}`
 	echo "${file} ${DIFF}"
@@ -198,7 +198,7 @@ for file in ${CRATES_CONFIG_FILE}
 do
     export FILE1=${EMCONLINE_TRG_CURRCONF_DIR}/${file}
     export FILE2=${EMCONLINE_TRG_LASTCONF_DIR}/${file}
-    if [[ -f ${FILE1} ]]
+    if [[ -f ${FILE1} && -s ${FILE1} ]]
     then
 	export TMP1=${EMCONLINE_TRG_DIR}/${file}.curr.tmp
 	export TMP2=${EMCONLINE_TRG_DIR}/${file}.last.tmp
@@ -223,7 +223,7 @@ for file in ${DSM_MASK_FILES}
 do
     export FILE1=${EMCONLINE_TRG_CURRCONF_DIR}/${file}
     export FILE2=${EMCONLINE_TRG_LASTCONF_DIR}/${file}
-    if [[ -f ${FILE1} ]]
+    if [[ -f ${FILE1} && -s ${FILE1} ]]
     then
 	export DIFF=`diff ${DIFF_OPTIONS} ${FILE1} ${FILE2}`
 	echo "${file} ${DIFF}"
@@ -290,7 +290,7 @@ then
     if [[ -f ${EMCONLINE_TRG_BEMCSTATUS_FILE} ]]
     then
 	echo "Delivering bemcStatus.txt" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
-	update_desktop_icon_trg
+	#update_desktop_icon_trg
 	echo "Copying bemcStatus.txt to consumers"
 	for consumer in ${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}
 	do
@@ -312,7 +312,7 @@ then
     rm -f ${EMCONLINE_TRG_WEBPAGE}.tmp
     echo "Finished updating webpage ${EMCONLINE_TRG_WEBDIR}"
 
-    ${EMCONLINE_TRG_EPICS_HEARTBEAT}
+    #${EMCONLINE_TRG_EPICS_HEARTBEAT}
 else
     echo "Nothing to do" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
     update_desktop_icon_trg
@@ -322,7 +322,7 @@ else
 
     echo "Nothing happened. Exiting..."
 
-    ${EMCONLINE_TRG_EPICS_HEARTBEAT}
+    #${EMCONLINE_TRG_EPICS_HEARTBEAT}
 fi
 
 echo "" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}

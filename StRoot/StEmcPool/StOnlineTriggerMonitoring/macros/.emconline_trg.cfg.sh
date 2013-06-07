@@ -1,10 +1,8 @@
-export EMCONLINE_TRG_DIR=/ldaphome/onlmon/bemctrgdb2010
 # main directory
-export EMCONLINE_TRG_DIR=/ldaphome/onlmon/bemctrgdb2010
+export EMCONLINE_TRG_DIR=/ldaphome/onlmon/bemctrgdb2013
 
 # web output directory
-export EMCONLINE_TRG_WEBDIR=/onlineweb/www/test2009/ogrebeny
-#export EMCONLINE_TRG_WEBDIR=/afs/rhic.bnl.gov/star/doc_protected/www/spin/ogrebeny/bemctrgdb2010
+export EMCONLINE_TRG_WEBDIR=/onlineweb/www/test2012/stevens4/bemctrgdb2013
 
 # ROOT script
 export EMCONLINE_TRG_SCRIPT=${EMCONLINE_TRG_DIR}/saveTriggerLoad.C
@@ -116,15 +114,16 @@ if [[ "${EMCONLINE_SLOWCTRL_PED_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_
 if [[ "${EMCONLINE_SLOWCTRL_CFG_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_CFG_DIR='sysuser@sc5.starp.bnl.gov:/home/sysuser/GUI/emc/unix' ; fi
 
 # Directory that contains DSM mask files
-if [[ "${EMCONLINE_SLOWCTRL_DSMMASK_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_DSMMASK_DIR='operator@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT' ; fi
+if [[ "${EMCONLINE_SLOWCTRL_DSMMASK_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_DSMMASK_DIR='staruser@startrg.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT' ; fi
 
 # Directory that contains pedestal monitoring installation
 #if [[ "${EMCONLINE_PED_DIR}" == "" ]] ; then export EMCONLINE_PED_DIR='/home/emc/online/emc/pedestal' ; fi
 
 if [[ "${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}" == "" ]] ; then export EMCONLINE_TRG_BEMCSTATUS_CONSUMERS="\
-operator@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT \
-operator@evp.starp.bnl.gov:/a/pplot/files/bemc \
+staruser@startrg.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT \
+evpops@evp.starp.bnl.gov:/RTScache/conf/jevp/bemc \
 " ; fi
+#evpops@evp.starp.bnl.gov:/a/pplot/files/bemc \ #old location for pplots
 
 if [[ "${SCP}" == "" ]] ; then export SCP="${EMCONLINE_TRG_DIR}/scp" ; fi
 

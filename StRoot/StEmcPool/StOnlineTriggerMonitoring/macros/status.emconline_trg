@@ -21,10 +21,10 @@ then
     if [[ ( "${RUNMODE}" == "RUN" ) || ( "${RUNMODE}" == "STOP" ) ]]
     then
 	echo ${RUNMODE} >| ${EMCONLINE_TRG_RUNMODE_FILE}
-	if [[ "${RUNMODE}" == "STOP" ]]
-	then
-	    ${EMCONLINE_TRG_EPICS_STOPPED}
-	fi
+	#if [[ "${RUNMODE}" == "STOP" ]]
+	#then
+	#    ${EMCONLINE_TRG_EPICS_STOPPED}
+	#fi
 	update_desktop_icon_trg
     else
 	echo "Cannot recognize run mode: ${RUNMODE}, should be either RUN or STOP"
