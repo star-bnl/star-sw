@@ -21,8 +21,8 @@ class StvNodePars;
 class StvDiver : public TNamed
 {
 public:
-enum StvDiverFlags {kDiveOk=0,kDiveHits,kDiveDca,kDiveBreak,kDiveMany};
-enum StvDiverOpt   {kTargHit=1,kTarg2D=2,kTarg3D=4,kDoErrs=8};
+enum StvDiverFlags {kDiveOk =0,kDiveHits=1,kDiveDca=2,kDiveBreak=4,kDiveMany=8};
+enum StvDiverOpt   {kTargHit=1,kTarg2D  =2,kTarg3D =4,kDoErrs   =8};
 public:
   StvDiver(const char *name="");
   virtual ~StvDiver(){;}
@@ -94,6 +94,7 @@ void SetTarget(const double *target,int nTarget=3);
  int BegVolume();
  int EndVolume();
  int IsDca00(int begEnd);
+ int IsOverstep() const;
  int TooMany();
 
 void FillHelix();
