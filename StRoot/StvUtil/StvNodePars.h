@@ -100,6 +100,7 @@ double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
   void convert( StvFitDers &fitDer , const StvHlxDers &hlxDer) const;
 //		move point along helix  
   void move(double dLxy); 
+double move(const double v[3]); 
 //		move point along helix  up to given radius in xy
   void moveToR(double Rxy); 
 StvNodePars &merge(double wt,StvNodePars &other);

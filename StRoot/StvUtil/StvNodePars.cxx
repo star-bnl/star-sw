@@ -145,6 +145,8 @@ StvNodePars &StvNodePars::merge(double wt,StvNodePars &other)
 void StvNodePars::set(const THelixTrack *th, double Hz)
 {
   memcpy(&_x,th->Pos(),3*sizeof(_x));
+  assert(fabs(_x)<220);
+  assert(fabs(_y)<220);
   _psi = atan2(th->Dir()[1],th->Dir()[0]);
   double sinL = th->Dir()[2];
   double cosL = sqrt((1-sinL)*(1+sinL));
@@ -186,6 +188,16 @@ void StvNodePars::move(double dLxy)
   dcCA = _cosCA*dC - _sinCA*dS;
   dsCA = _sinCA*dC + _cosCA*dS;
   _cosCA+=dcCA; _sinCA+=dsCA; _x+=dX; _y+=dY; _z+=dZ; _psi+=dPhi;
+}
+//______________________________________________________________________________
+double StvNodePars::move(const double v[3])
+{
+   double mom[3]={_cosCA,_sinCA,_tanl};
+   double tau = (_x-v[0])*mom[0]+(_y-v[1])*mom[1]+(_z-v[2])*mom[2];
+   double den = (1+_tanl*_tanl);
+   tau /= den;
+   move(tau);
+   return tau;
 }
 //______________________________________________________________________________
 void StvNodePars::moveToR(double R)
@@ -249,7 +261,8 @@ StvDebug::Break(nCall);
   _x += -_sinCA*fp.mH - sinL*_cosCA*fp.mZ;
   _y +=  _cosCA*fp.mH - sinL*_sinCA*fp.mZ;
   _z +=                 cosL       *fp.mZ;
-
+  assert(fabs(_x)<220);
+  assert(fabs(_y)<220);
   double a = 0,cA=1,sA=0;
   double tA = fp.mA*(1.+fp.mA*fp.mA/3)/cosL;
   if (fabs(tA)<0.1) 	{
