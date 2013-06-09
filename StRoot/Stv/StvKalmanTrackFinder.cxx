@@ -72,11 +72,11 @@ static const StvConst  *kons = StvConst::Inst();
   for (int isf=0;isf<(int)sfs->size();isf++) { //Loop over seed finders
     StvSeedFinder* sf = (*sfs)[isf];
     int myMinHits = kons->mMinHits;
-//??    if(sf->Again()) myMinHits = kons->mGoodHits;
     for (int repeat =0;repeat<5;repeat++) {//Repeat search the same seed finder 
       nTrk = 0;nSeed=0; sf->Again();
       while ((mSeedHelx = sf->NextSeed())) 
       {
+
 	nSeed++; nTally++;
 						  if (sf->DoShow())  sf->Show();
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
@@ -195,7 +195,7 @@ StvFitDers derivFit;
   mDive->Set(par+1,err+1,&derivFit);	//Output of diving in par[1]
 
 
-  while(idive==StvDiver::kDiveHits || idive==0) {
+  while((idive & StvDiver::kDiveHits) || idive==0) {
 
     do {//Stop tracking?
       idive = 99;
@@ -208,10 +208,9 @@ StvFitDers derivFit;
 //+++++++++++++++++++++++++++++++++++++
     nTally++;
     idive = mDive->Dive();
-
 //+++++++++++++++++++++++++++++++++++++
-    if (idive >= StvDiver::kDiveBreak) 			break;
-    if (idive == StvDiver::kDiveDca) 			break;
+    if (idive & StvDiver::kDiveBreak) 		break;
+    if (idive & StvDiver::kDiveDca  ) 		break;
 
     totLen+=mDive->GetLength();
     par[0]=par[1]; err[0]=err[1];			//pars again in par[0]
@@ -223,9 +222,10 @@ StvFitDers derivFit;
 
     		
     const StvHits *localHits = 0; 
-    if (idive== StvDiver::kDiveHits) {
-static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};   
-      localHits = mHitter->GetHits(par,gate); 
+    if (idive & StvDiver::kDiveHits) {
+static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
+                     ,myConst->mMaxWindow,myConst->mMaxWindow};   
+      localHits = mHitter->GetHits(par,err,gate); 
     }
 
 
@@ -293,8 +293,7 @@ static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};
     int myReject = hitCount->Reject();
     if (myReject) {
       StvDebug::Count("hitCountRej2",myReject);
-      mCurrTrak->ReleaseHits(); mCurrTrak->unset();
-      kit->FreeTrack(mCurrTrak);mCurrTrak=0; return 0; }
+      mCurrTrak->CutTail(); return 0; }
   }
   if (nHits>3) {
     double tlen = mCurrTrak->GetLength();
@@ -343,7 +342,7 @@ static StvToolkit *kit = StvToolkit::Inst();
   int iSwim = Swim(0,opt,0
                   ,&(start->GetFP()),&(start->GetFE())
 		  ,&dcaPars,&dcaErrs,&dcaDers);
-  if (iSwim != StvDiver::kDiveDca) return 0;		   
+  if (!(iSwim & StvDiver::kDiveDca)) return 0;		   
 
   StvNode *dcaNode = kit->GetNode();      
   tk->push_front(dcaNode);
