@@ -9,7 +9,7 @@
 #include <string>
 
 static std::map<std::string,StvHitErrCalculator *> calcMap;
-enum {kMaxLam = 80,kMaxPsi=80};
+enum {kMaxLam = 85,kMaxPsi=85};
 static const double kMinCosLam = cos(M_PI/180*kMaxLam),k2MinCosLam=kMinCosLam*kMinCosLam;
 static const double kMinCosPsi = cos(M_PI/180*kMaxPsi),k2MinCosPsi=kMinCosPsi*kMinCosPsi;
 static const double kMinCpCl = 0.1;
