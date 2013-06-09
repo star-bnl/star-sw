@@ -5,7 +5,9 @@
 #include "StvHitter.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "StvUtil/StvNodePars.h"
+#include "StvUtil/StvHitErrCalculator.h"
 #include "StarRoot/StMultiKeyMap.h"
+
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 StvHitter::StvHitter()
@@ -23,23 +25,25 @@ void StvHitter::Reset()
   mHitPlane=0;
 }
 //_____________________________________________________________________________
-const StvHits *StvHitter::GetHits(const StvNodePars *pars, const float gate[2])
+const StvHits *StvHitter::GetHits(const StvNodePars *pars
+                                 ,const StvFitErrs  *errs, const float gate[2])
 {
+static int nCall=0; nCall++;
+static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
   mHits.clear();
-  const StHitPlane *myHitPlane = StTGeoProxy::Inst()->GetCurrentHitPlane();
+  const StHitPlane *myHitPlane = myProxy->GetCurrentHitPlane();
   if (!myHitPlane) 		return 0;	//no sensitive volume there
-
-//   gGeoManager->FindNode(pars->_x,pars->_y,pars->_z);
-//   assert(strcmp(gGeoManager->GetPath(),myHitPlane->GetName())==0);
-
 
   if (mHitPlane == myHitPlane)  return 0;	//hit plane was already used
   if (!myHitPlane->GetNHits())	return &mHits;	//it is sensitive but no hits
   mHitPlane = myHitPlane;
+
   mHitMap  = mHitPlane->GetHitMap();
   float xNode[3]={pars->_x,pars->_y,pars->_z};
   mOrg =  mHitPlane->GetOrg(xNode);
   mDir = &mHitPlane->GetDir(xNode);
+
+
   float tau =0,den=0;
   float const *ort =(*mDir)[0];
   float mom[3]={pars->_cosCA,pars->_sinCA,pars->_tanl};
@@ -49,11 +53,26 @@ const StvHits *StvHitter::GetHits(const StvNodePars *pars, const float gate[2])
   if (fabs(den)<1e-2) 		return 0; // track is parallel to hit plane
   tau/=den;
   for (int j=0;j<3;j++) {xNode[j]+=mom[j]*tau;}
-  float lNode[3],lim[2][2];
 
+//		Obtain hit errs
+  StvHitErrCalculator *calc = (StvHitErrCalculator*)mHitPlane->GetHitErrCalc();
+  calc->SetTrack(mom);
+  double hRR[3],myGate[2];
+  int ans = calc->CalcDetErrs(xNode,*mDir,hRR);
+  if (ans) return 0;
+//		Obtain track errs
+  double cos2 = den*den/(1.+mom[2]*mom[2]);
+
+  double totRr = (errs->mHH+errs->mZZ)/cos2 + hRR[0]+hRR[2];
+  totRr = sqrt(totRr);
+  for (int j=0;j<2;j++) {
+    myGate[j] = gate[j]*totRr;
+    if (myGate[j]>gate[j+2]) myGate[j]=gate[j+2];}
+
+  float lNode[3],lim[2][2];
   mHitPlane->ToLocal(xNode,lNode);
-  for (int j=0;j<2;j++) {lim[0][j]=lNode[1+j]-gate[j];
-                         lim[1][j]=lNode[1+j]+gate[j];}
+  for (int j=0;j<2;j++) {lim[0][j]=lNode[1+j]-myGate[j];
+                         lim[1][j]=lNode[1+j]+myGate[j];}
   
   fMultiIter->Set(mHitMap->GetTop(),lim[0],lim[1]);
   for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 

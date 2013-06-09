@@ -7,11 +7,14 @@
 #include "StvStl.h"
 
 
+class StvSeedFinder;
 class StvHit;
 class StHitPlane;
 class StvNodePars;
 class StMultiKeyMap;
 class StMultiKeyMapIter;
+class StvNodePars;
+class StvFitErrs;
 typedef float Mtx33F_t[3][3];
 
 /// \class StvHitter, local hit provider
@@ -21,7 +24,7 @@ public:
   StvHitter();
  ~StvHitter();
 void Reset();
-const StvHits *GetHits(const StvNodePars *np, const float gate[2]);
+const StvHits *GetHits(const StvNodePars *np, const StvFitErrs *ne,const float gate[2]);
 const StHitPlane* GetHitPlane() const;
      StDetectorId GetDetId()    const;
 private:
@@ -33,6 +36,8 @@ const      Mtx33F_t    	*mDir;	//orts of hit plane, local x,y,x orts
 StMultiKeyMapIter	*fMultiIter;
 
 StvHits mHits;
+public:
+StvSeedFinder *mSF;
 };
 
 #endif
