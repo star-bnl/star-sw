@@ -134,7 +134,6 @@ std::vector<TObject*> mySeedObjs;
 
     fSeedHits.clear();
     mSel.Reset();
-if (myDeb>0) {fDraw->Clear();mySeedObjs.clear();}
     selHit = fstHit;
     mSel.SetErr(sqrt(fstHit->err2())*kErrFakt);
 
@@ -174,6 +173,11 @@ if (myDeb>0) { mySeedObjs.push_back(selObj);}
 //		Mark hits as unused when seed is created. Only tracker
 //		has right to deside to use or not to use
     fSeedHits.unused();
+    for (int j=0;j<fSeedHits.size();j++) {
+      assert(!fSeedHits[j]->timesUsed());
+    }
+
+
     const THelixTrack *hel = 0;
     if (fSeedHits.size() >= kMinHits) hel = Approx();
     if (hel) { fNSeeds[0]++; ++(*f1stHitMapIter); return hel;}		//Good boy
@@ -287,6 +291,8 @@ void  StvConeSelector::UpdateLims()
 //_____________________________________________________________________________
 int  StvConeSelector::Reject(const float x[3],const void* hp)
 {
+   if (x[0]*x[0]+x[1]*x[1]>mRxy2) return 1;
+
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
 
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
