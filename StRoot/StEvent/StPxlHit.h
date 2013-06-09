@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlHit.h,v 2.1 2013/03/05 14:40:40 ullrich Exp $
+ * $Id: StPxlHit.h,v 2.2 2013/06/09 22:04:42 ullrich Exp $
  *
  * Author: S. Margetis, J. Bouchet, Jan 2013
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPxlHit.h,v $
+ * Revision 2.2  2013/06/09 22:04:42  ullrich
+ * Modified layer() method.
+ *
  * Revision 2.1  2013/03/05 14:40:40  ullrich
  * Initial Revision.
  * 
@@ -91,7 +94,7 @@ inline unsigned char StPxlHit::sensor() const {return mSensor;}
 inline float StPxlHit::meanRow() const {return mMeanRow;}
 inline float StPxlHit::meanColumn()  const {return mMeanColumn;}
 inline unsigned char StPxlHit::nRawHits() const {return mNRawHits;}
-inline unsigned char StPxlHit::layer() const {return (mLadder==4)? 1 : 2;}
+inline unsigned char StPxlHit::layer() const {return (mLadder==1)? 1 : 2;}
 
 inline void StPxlHit::setSector(unsigned char v) {mSector = v;}
 inline void StPxlHit::setLadder(unsigned char v) {mLadder = v;}
