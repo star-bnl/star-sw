@@ -5,10 +5,12 @@
 
 class StvHit;
 class StvHits;
+class StvConstHits;
 class StvNode;
 class StvTrack;
 class THelixTrack;
 class StvPoints;
+class TVector3;
 class StvDraw : public StDraw3D
 {
 public: 
@@ -24,6 +26,7 @@ TObject *Hits(const std::vector<const float*> &hits,  EDraw3DStyle sty);
 
 TObject *Trak(const THelixTrack &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
 TObject *Trak(const THelixTrack &helx,const std::vector<      StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
+   void  Road(const THelixTrack &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack,double wide=10);
 TObject *Trak(const std::vector<float> &pnts, EDraw3DStyle sty=kGlobalTrack,Color_t col=kRed);
    void  Trak(const StvTrack *tk, int dir = 2, EDraw3DStyle sty=kGlobalTrack);
 
@@ -31,6 +34,9 @@ TObject *Trak(const std::vector<float> &pnts, EDraw3DStyle sty=kGlobalTrack,Colo
    void  All(const char *opt);
 
    void  DoIt();
+   void  Near(const TVector3 &A,const TVector3 &B,StvConstHits &hits, double wide=10);
+
+
 static int ProcessEvents();
 static StvDraw *Inst() {if (!fgStvDraw) fgStvDraw=new StvDraw(); return fgStvDraw;}
 static StvDraw *Jnst() {return fgStvDraw;}

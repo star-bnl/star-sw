@@ -68,21 +68,43 @@ const std::vector<const StvHit*>&vc = (std::vector<const StvHit*>&)hits;
 return Trak(helx,vc,sty);
 }
 //_____________________________________________________________________________
-TObject *StvDraw::Trak(const THelixTrack &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty)
+void StvDraw::Road(const THelixTrack &helx,const std::vector<const StvHit*> &hits
+                  , EDraw3DStyle sty, double wide)
 {
-  int n = hits.size(); if (!n) return 0;
+  int n = hits.size();
+  if (!n) return;
+
+  TVector3 A(hits.front()->x());
+  TVector3 B(hits.back ()->x());
+  StvConstHits unHits;
+  Near(A,B,unHits,wide);
+  Hits(unHits,kUnusedHit);
+  Trak(helx,hits,sty);
+}
+//_____________________________________________________________________________
+TObject *StvDraw::Trak(const THelixTrack &helx
+                      ,const std::vector<const StvHit*>  &hits
+		      ,EDraw3DStyle sty)
+{
+  int n = hits.size(); if (n<=1) return 0;
+  Hits(hits  ,kUsedHit);
+  if (helx.GetCos()<=0) {DoIt(); return 0;}
+
+  const float *f = 0;
+  f = hits.front()->x();
+  double fst[3]={f[0],f[1],f[2]};
+  f = hits.back()->x();
+  double lst[3]={f[0],f[1],f[2]};
+
   std::vector<float> myTrak;  
   THelixTrack th(helx);
-  const double *x = th.Pos();
-  for (int j=0;j<3;j++) {myTrak.push_back(x[j]);}
 
-  const float *h = hits[0]->x();
-  double l = th.Path(h[0],h[1]); th.Move(l);
-  h = hits[n-1]->x();
-  l = th.Path(h[0],h[1]);
+  double l = th.Path(fst); th.Move(l);
+  l = th.Path(lst);
   double dl = l/100;
   for (int i=0;i<=100;i++) {
-    x = th.Pos(); for (int j=0;j<3;j++) {myTrak.push_back(x[j]);} th.Move(dl);
+    const double *x = th.Pos(); 
+    for (int j=0;j<3;j++) {myTrak.push_back(x[j]);} th.Move(dl);
   }
                 Hits(hits  ,kUsedHit);
   TObject *to = Line(myTrak,sty);
@@ -155,44 +177,34 @@ void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
 {
   Trak(tk, sty);
   const StvNode *fist = tk->front();
-  assert(fist);  
   const StvNode *last = tk->back();
-  assert(last);  
   const StvNodePars &parF = fist->GetFP();
   const StvNodePars &parL = last->GetFP();
   TVector3 myFst(parF.P);
-  TVector3 myDir(parL._x-parF._x,parL._y-parF._y,parL._z-parF._z);
-  double dxy = myDir.Perp();;
-//double dis = myDir.Mag();;
-  double fi0 = myDir.Phi();
-  double rho = parF._curv;
-  double dfi = asin(dxy*rho/2);
-  double len = (fabs(dfi)<1e-3)? dxy:2*fabs(dfi/rho);
-
-  double dir[3]={cos(fi0-dfi),sin(fi0-dfi),myDir[2]/len};
-  THelixTrack hlx(parF.P,dir,rho);
-  double sag2 = fabs(dxy*dxy/4*rho)+wide; sag2*=sag2;
-  
-  StVoidArr *vHits = StTGeoProxy::Inst()->GetAllHits();
-  int nHits = vHits->size();
-  std::vector<const StvHit*> unHits;
-  myDir=myDir.Unit();
-  for (int ih=0;ih<nHits;ih++) {//loop hit
-    const StvHit *hit = (const StvHit*)(*vHits)[ih];
-    TVector3 hi(hit->x()); 
-    TVector3 hl = hi-myFst;
-//    double dot = hl.Dot(myDir);
-//    if (dot<0 || dot >dis) 		continue;
-//    if ((hl.Cross(myDir)).Mag2()>sag2)	continue;
-    double *d = &(hi[0]);
-    double dca = hlx.Dca(d);
-    if (dca>wide) 			continue;
-    unHits.push_back(hit);
-  } //End hit loop
+  TVector3 myLst(parL.P);
+  StvConstHits unHits;
+  Near(myFst,myLst,unHits,wide);
   if (!unHits.size()) 			return;
   Hits(unHits,kUnusedHit);
 }
-
+//_____________________________________________________________________________
+void StvDraw::Near(const TVector3 &A,const TVector3 &B,StvConstHits &hits,double wide)
+{
+ TVector3 D = B-A; 
+ double len = D.Mag();D*=1./len;
+ StVoidArr *vHits = StTGeoProxy::Inst()->GetAllHits();
+  int nHits = vHits->size();
+  hits.resize(0);
+  for (int ih=0;ih<nHits;ih++) {//loop hit
+    const StvHit *hit = (const StvHit*)(*vHits)[ih];
+    TVector3 hi(hit->x()); 
+    TVector3 hl = hi-A;
+    double dot = hl.Dot(D);
+    if (dot<-3*wide || dot >len+3*wide) continue;
+    if ((hl.Cross(D)).Mag()>wide)	continue;
+    hits.push_back(hit);
+  } //End hit loop
+}
 
 //_____________________________________________________________________________
 void StvDraw::Join(const StvNode *left,const StvNode *rite,StvPoints &poits,int dir)
