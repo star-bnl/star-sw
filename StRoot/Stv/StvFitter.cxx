@@ -244,7 +244,6 @@ double StvFitter::Xi2(const StvHit *hit)
 
 //		Hit position
   const float *hP = mHit->x();
-  assert(fabs(hP[2])>1e-5);
 
 //		Track direction
   double *tD = mDcaFrame[0];
@@ -335,7 +334,7 @@ StvDebug::Break(nCall);
   if (fak>1.) { mFailed = -1; TCL::vscale(mQQPars,1./fak,mQQPars,5);}
 
   *mOtPars+= mQQPars;
-   mOtErrs->SetHz(mOtPars->_hz);
+  mOtErrs->SetHz(mOtPars->_hz);
   return mFailed;
 }
 //______________________________________________________________________________
