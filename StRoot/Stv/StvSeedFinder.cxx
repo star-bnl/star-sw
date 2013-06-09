@@ -21,7 +21,8 @@ void StvSeedFinder::Clear(const char*)
 void StvSeedFinder::Show()
 {
   if (!fDraw) fDraw = NewDraw();
-  fDraw->Trak(fHelix,fSeedHits,kGlobalTrack);
+  StvConstHits &ch = (StvConstHits &)fSeedHits;
+  fDraw->Road(fHelix,ch,kGlobalTrack,10.);
   fDraw->UpdateModified();
 }
 //_____________________________________________________________________________
@@ -65,8 +66,15 @@ const double BAD_RHO=0.1;
 
 //		Loop over nodes and collect global xyz
 
+  fHelix.Clear();
   THelixFitter circ;
   int nNode=fSeedHits.size();
+  const float *fBeg = fSeedHits.front()->x();
+  const float *fEnd = fSeedHits.back ()->x();
+  double r2Beg = fBeg[0]*fBeg[0]+fBeg[1]*fBeg[1];
+  double r2End = fEnd[0]*fEnd[0]+fEnd[1]*fEnd[1];
+  assert(r2Beg > r2End);
+
   for (int iNode = 0; iNode<nNode;++iNode) {
     const StvHit * hit = fSeedHits[iNode];
     circ.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
@@ -74,18 +82,12 @@ const double BAD_RHO=0.1;
   double Xi2 =circ.Fit();
   if (Xi2>BAD_XI2*100) 			return 0; //Xi2 too bad, no updates
   if (fabs(circ.GetRho()) >BAD_RHO) 	return 0; //Too big curvature
-  int startSeed = 0;
-  if (circ.Pos()[0]*circ.Dir()[0]+circ.Pos()[1]*circ.Dir()[1]>0) {
-    circ.Backward(); startSeed = nNode-1;
-  }
-  const float *fx = fSeedHits[startSeed]->x();
-  const double dx[3]={fx[0],fx[1],fx[2]};
-  double l = circ.Path(dx); circ.Move(l*1.2);
+
+  const double dBeg[3]={fBeg[0],fBeg[1],fBeg[2]};
+  double l = circ.Path(dBeg); circ.Move(l);
 
 //		Now refit with errors
-  int step = (startSeed)? -1:1;
-  fHelix.Clear();
-  for (int iNode = startSeed; (iNode<nNode && iNode>=0) ;iNode+=step) {
+  for (int iNode = 0; iNode<nNode ;iNode++) {
     const StvHit * hit = fSeedHits[iNode];
     const float *fx = hit->x();
     const double dx[3]={fx[0],fx[1],fx[2]};
@@ -110,7 +112,7 @@ const double BAD_RHO=0.1;
   Xi2 =fHelix.Fit();
   if (Xi2>BAD_XI2) return 0; 	//Xi2 too bad, no updates
   fHelix.MakeErrs();
-  l = fHelix.Path(dx); 
+  l = fHelix.Path(dBeg); 
   l*= (nNode+1.)/(nNode-1.);
   fHelix.Move(l);
   return &fHelix;

@@ -34,13 +34,7 @@ void StvTrack::reset()
 //______________________________________________________________________________
 void StvTrack::unset()
 {
-  mId = -1;
-  static StvToolkit *kit = StvToolkit::Inst();
-  for (StvNodeIter it = begin();it != end();++it) 
-  {
-    StvNode *node = *it;kit->FreeNode(node);
-  }
-  clear();
+  CutTail(0);  
 }
 //______________________________________________________________________________
 int StvTrack::GetNPoss(StDetectorId detectorId) const
@@ -193,27 +187,12 @@ double StvTrack::GetXi2P() const
 }
   
 //_____________________________________________________________________________
-int StvTrack::ReleaseHits()
-{
-  int nd=0;
-  for (StvNodeIter it = begin();it != end();++it) 
-  {
-    StvNode *node = *it;
-    StvHit *hit = node->GetHit();
-    if (!hit) 			continue;
-    if (!node->GetDetId())	continue;
-    node->SetHit(0);
-    nd++;
-  }
-  return nd;
-}
-//_____________________________________________________________________________
 void StvTrack::CutTail(const StvNode *start)
 {
 static StvToolkit *kit = StvToolkit::Inst();
   if (empty()) return;
   if (!start) start = front();
-  StvNodeIter tail;
+  StvNodeIter tail = begin();
   int kase=0;
   for (StvNodeIter it = begin();it != end();++it) 
   {
