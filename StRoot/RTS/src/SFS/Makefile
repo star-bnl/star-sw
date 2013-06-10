@@ -44,9 +44,11 @@ $(LIBDIR)/libsfs.a: libsfs.a
 
 install:
 	$(INSTALL) fs $(BINDIR)
-	$(INSTALL) libsfs.a $(LIBDIR)
 	cp fs daq_fs
 	$(INSTALL) daq_fs $(BINDIR)
+	$(INSTALL) sfs_header $(BINDIR)
+
+#	$(INSTALL) libsfs.a $(LIBDIR)
 
 clean:
 	@$(CLEAN) $(BINS) $(LIBS)

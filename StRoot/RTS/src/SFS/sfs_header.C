@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
   ittr.get(&file);
 
-  while(ittr.next() >=0) {
+  while((ittr.next() >=0)  && (ittr.filepos >= 0)) {
     printittr(&ittr,ctr);
     ctr++;
   }
