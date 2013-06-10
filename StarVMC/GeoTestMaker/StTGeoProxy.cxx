@@ -1,5 +1,5 @@
 
-// $Id: StTGeoProxy.cxx,v 1.2 2013/05/06 16:13:34 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.3 2013/06/10 22:17:41 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -733,7 +733,8 @@ static const char *types[]={"Dead","MODU","Modu","HitP","Sens"};
 //Break(num);
     TString path(it.GetPath());
     const TGeoShape    *sh = vol->GetShape();
-    const TGeoMaterial *ma = vol->GetMaterial();
+    const TGeoMedium *me = vol->GetMedium();
+    const TGeoMaterial *ma = (me)? me->GetMaterial():0;
     const char *maName = (ma)? ma->GetName(): "";
     printf("%3d - %s(%s",num,vol->GetName(),types[jk]);
     if (ghp) {
@@ -1316,10 +1317,10 @@ void StTGeoIter::Print(const char *tit) const
     int iocc = (l) ? fStk[l-1]:0;
     printf("/%s#%d",v->GetName(),iocc);
   }
-  const TGeoMaterial *mat = v->GetMaterial();
+  const TGeoMedium *tm = v->GetMedium();
+  const TGeoMaterial *mat = (tm)? tm->GetMaterial():0;
   const char* maName = (mat)? mat->GetName():"";
   printf("(%s)",maName);
-  const TGeoMedium *tm = v->GetMedium();
   if (tm && tm->GetParam(kISVOL)>0.)printf("*");  
     
   v = GetVolu(0);
