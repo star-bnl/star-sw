@@ -145,8 +145,8 @@ StvNodePars &StvNodePars::merge(double wt,StvNodePars &other)
 void StvNodePars::set(const THelixTrack *th, double Hz)
 {
   memcpy(&_x,th->Pos(),3*sizeof(_x));
-  assert(fabs(_x)<220);
-  assert(fabs(_y)<220);
+  assert(fabs(_x)<300);
+  assert(fabs(_y)<300);
   _psi = atan2(th->Dir()[1],th->Dir()[0]);
   double sinL = th->Dir()[2];
   double cosL = sqrt((1-sinL)*(1+sinL));
@@ -261,8 +261,8 @@ StvDebug::Break(nCall);
   _x += -_sinCA*fp.mH - sinL*_cosCA*fp.mZ;
   _y +=  _cosCA*fp.mH - sinL*_sinCA*fp.mZ;
   _z +=                 cosL       *fp.mZ;
-  assert(fabs(_x)<220);
-  assert(fabs(_y)<220);
+  assert(fabs(_x)<300);
+  assert(fabs(_y)<300);
   double a = 0,cA=1,sA=0;
   double tA = fp.mA*(1.+fp.mA*fp.mA/3)/cosL;
   if (fabs(tA)<0.1) 	{
