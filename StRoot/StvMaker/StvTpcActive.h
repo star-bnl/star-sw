@@ -11,6 +11,9 @@ public:
 int operator()(const double xyz[3]=0);
 int VoluId();
 private:
+int mSector;
+int mIsDet;
+int mTPad;
 
 ClassDef(StvTpcActive,0)
 };
