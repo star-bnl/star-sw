@@ -66,10 +66,12 @@ sfs_index.o: sfs_index.h
 sfs_index.o: fs_index.h
 sfs_index.o: sfs_base.h
 sfs_index.o: ../../include/rtsLog.h
+sfs_index.o: ../../include/rts.h
 sfs_index_daq.o: sfs_index.h
 sfs_index_daq.o: fs_index.h
 sfs_index_daq.o: sfs_base.h
 sfs_index_daq.o: ../../include/rtsLog.h
+sfs_index_daq.o: ../../include/rts.h
 sfs_index_daq.o: ../../include/daqFormats.h
 sfs_index_daq.o: ../../include/SECTOR/sector.h
 sfs_index_daq.o: ../../trg/include/trgDataDefs.h

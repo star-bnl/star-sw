@@ -842,7 +842,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	if(d32[5] != 0xFEEDBEEF) {	// deadface
-		LOG(ERR,"RDO %d: bad deadface 0x%08X",rdo,d32[9]) ;
+		LOG(ERR,"RDO %d: bad FEEDBEEF 0x%08X",rdo,d32[5]) ;
 		bad |= 1 ;
 	}
 
@@ -1064,14 +1064,6 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 				    rdo,rdo_id[rdo],rdo_in_dta) ;
 			}			
 		}
-
-
-		rdo_warns[rdo]++ ;
-		if(rdo_warns[rdo]<2) {
-			LOG(NOTE,"RDO %d: rdo check: expect 0x%02X, found 0x%02X",
-			    rdo,rdo_id[rdo],rdo_in_dta) ;
-		}
-
 
 		return t_cou ;
 	}

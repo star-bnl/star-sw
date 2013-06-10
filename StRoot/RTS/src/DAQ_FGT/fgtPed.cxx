@@ -426,6 +426,7 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 	}
 
 
+	// the following is just an error dump...
 	for(int arm=0;arm<FGT_ARM_COU;arm++) {
 	for(int apv=0;apv<FGT_APV_COU;apv++) {
 		if(need[arm][apv] == 0) continue ;
@@ -765,6 +766,7 @@ int fgtPed::to_cache(char *fname, u_int run)
 
 
 	if(!valid) {
+		LOG(CAUTION,"Pedestals are not valid -- not caching!") ;
 		LOG(ERR,"ped::to_cache peds are bad: valid %d -- not caching",valid) ;
 		return -1 ;
 	}

@@ -1050,6 +1050,19 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print)
 	if(strcasestr(do_print,"pp2pp")) ;	// leave as is...
 	else do_print = 0 ;
 
+	dd = rdr->det("pp2pp")->get("raw") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+
+			if(do_print) {
+				printf("PP2PP: RAW: sector %d, RDO %d, bytes %d\n",dd->sec,dd->rdo,dd->ncontent) ;
+			}
+
+		}
+	}
+
 
 	dd = rdr->det("pp2pp")->get("adc") ;
 	if(dd) {
@@ -1538,7 +1551,11 @@ static int pxl_doer(daqReader *rdr, const char *do_print)
 			if(do_print) {
 				printf("PXL RAW: Sector %d, RDO %d: %d bytes (%d words)\n",dd->sec,dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few
-				for(int i=0;i<10;i++) {
+				int cou = dd->ncontent/4 ;
+
+				if(cou > 30) cou = 30 ;
+
+				for(int i=0;i<cou;i++) {
 					printf(" %2d: 0x%08X\n",i,d[i]) ;
 				}
 			}
