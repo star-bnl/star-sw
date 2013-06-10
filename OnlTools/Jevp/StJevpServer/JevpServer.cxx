@@ -335,7 +335,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-l4test") == 0) {
       LOG("JEFF", "Using L4 test");
       isL4 = 1;
-      nodb = 1;
+      nodb = 0;
       myport = JEVP_PORT+10;
       basedir = (char *)"/RTScache/conf/l4jevp";
       pdfdir = (char *)"/a/l4jevp/pdf";
