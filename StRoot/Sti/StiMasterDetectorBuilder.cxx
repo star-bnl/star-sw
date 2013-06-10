@@ -23,11 +23,15 @@ void StiMasterDetectorBuilder::reset()
 void StiMasterDetectorBuilder::build(StMaker&source)
 {
   TGeoManager *gGeoManagerSV = gGeoManager; gGeoManager = 0;
+#if 1
+  gGeoManagerSV->Clone("CloneGeom");
+#else
   if (StMaker::GetChain()) {
     cout << "StiMasterDetectorBuilder::build() -I- Create clone of VmcGeometry by reinitialization for recontruction" <<endl;
     TDataSet *set = StMaker::GetChain()->GetDataBase("VmcGeometry/Geometry", &StMaker::GetChain()->StMaker::GetDBTime());
     delete set;
   }
+#endif
   cout << "StiMasterDetectorBuilder::build() -I- Started"<<endl;
   vector<StiDetectorBuilder*>::iterator iter;
   unsigned int nRows=0;
