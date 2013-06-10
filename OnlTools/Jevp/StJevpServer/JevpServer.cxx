@@ -450,7 +450,9 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   TListIter next(&builders);
   JevpPlotSet *curr;
   while((curr = (JevpPlotSet *)next())) {
+    LOG(NOTE, "init");
     curr->_initialize(argc, argv);
+    LOG(NOTE, "init done");
   }
   CP;
 
@@ -472,7 +474,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     }
   }
   else if(strcmp(m->cmd, "readerr") == 0) {
-    LOG("JEFF", "A read err...");
+    LOG(ERR, "A read err...");
   }
   else if(strcmp(m->cmd,"newevent") == 0) {
     LOG(DBG, "SERVThread: Got newevent");
@@ -630,7 +632,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
   }
   else if(strcmp(msg->getCmd(), "display_desc") == 0) {  // Display Descriptor
 
-    LOG(DBG, "Got request for display %s", msg->args);
+    LOG(NOTE, "Got request for display %s", msg->args);
     int ret = displays->setDisplay(msg->args);
     LOG(DBG, "setdisplay returend %d", ret);
 
@@ -648,11 +650,14 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     TMessage mess(kMESS_OBJECT);
     mess.WriteObject(&m);
     s->Send(mess);
+    LOG(NOTE, "replied to display %s", msg->args);
   }
   else if(strcmp(msg->getCmd(), "GetStatus") == 0) {
+    LOG(NOTE, "GetStatus");
     TMessage mess(kMESS_OBJECT);
     mess.WriteObject(&runStatus);
     s->Send(mess);
+    LOG(NOTE, "Replied to GetStatus");
   }
   else if(strcmp(msg->getCmd(), "ping") == 0) {    
     EvpMessage m;
@@ -678,14 +683,16 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     
   }
   else if(strcmp(msg->getCmd(), "getplot") == 0) {
+    LOG(NOTE, "GetPlot");
     CP;
     RtsTimer_root clock;
     clock.record_time();
     handleGetPlot(s,msg->args);
     double t1 = clock.record_time();
     if(t1 > .05) {
-      LOG("JEFF", "Timing: handleGetPlot(%s) time=%lf",msg->args,t1);
+      LOG(WARN, "Timing: handleGetPlot(%s) time=%lf",msg->args,t1);
     }
+    LOG(NOTE, "Done with GetPlot");
   }
   else if(strcmp(msg->getCmd(), "swaprefs") == 0) {
     CP;
@@ -730,7 +737,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     s->Send(mess);
   }
   else if (strcmp(msg->getCmd(), "launch") == 0) {
-    LOG("JEFF", "Got launch:  (%s) (%s)", msg->getArgs(), msg->getSource());	
+    LOG(DBG, "Got launch:  (%s) (%s)", msg->getArgs(), msg->getSource());	
 
 
     char *x = (char *)malloc(strlen(msg->getArgs()) + 1);
@@ -799,7 +806,7 @@ void JevpServer::performStopRun()
   TListIter next(&builders);
   
   while((curr = (JevpPlotSet *)next())) {
-    LOG("JEFF", "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
+    LOG(NOTE, "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
 	curr->getPlotSetName(), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
     
     continue;
