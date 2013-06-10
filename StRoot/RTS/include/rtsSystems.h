@@ -603,6 +603,66 @@ extern inline const char *rts2name(int rts_id)
 	}
 } ;
 
+extern inline const char *rts2sfs_name(int rts_id)
+{
+	switch(rts_id) {
+	case TPC_SYSTEM :
+		return "tpc" ;
+	case SVT_SYSTEM :
+		return "SVT" ;
+	case TOF_SYSTEM :
+		return "tof" ;
+	case BTOW_SYSTEM :
+		return "btow" ;
+	case FPD_SYSTEM :
+		return "FPD" ;
+	case FTP_SYSTEM :
+		return "FTP" ;
+	case PMD_SYSTEM :
+		return "PMD" ;
+	case SSD_SYSTEM :
+		return "SSD" ;
+	case ETOW_SYSTEM :
+		return "etow" ;
+	case FGT_SYSTEM :	
+		return "fgt" ;
+	case BSMD_SYSTEM :
+		return "bsmd" ;
+	case ESMD_SYSTEM :
+		return "esmd" ;
+	case DAQ_SYSTEM :
+		return "DAQ" ;
+	case TRG_SYSTEM :
+		return "trg" ;
+	case L3_SYSTEM :
+		return "l3" ;
+	case SC_SYSTEM :
+		return "sc" ;
+	case TPX_SYSTEM :
+	        return "tpx" ;
+	case PXL_SYSTEM :
+	        return "pxl" ;
+	case PP_SYSTEM :
+	        return "pp2" ;
+	case RIC_SYSTEM :
+		return "RICH" ;
+	case MTD_SYSTEM :
+		return "mtd" ;
+	case IST_SYSTEM :
+		return "ist" ;
+	case SST_SYSTEM :
+		return "sst" ;
+	case RPII_SYSTEM :
+		return "rpii" ;
+	case GMT_SYSTEM :
+		return "gmt" ;
+	case L4_SYSTEM :
+		return "l4" ;
+	default :
+	  return (const char *)NULL ;	// unknown!
+	}
+} ;
+
 #ifndef __vxworks
 extern inline int name2rts(const char *name)
 {

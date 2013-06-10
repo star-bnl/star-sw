@@ -364,6 +364,20 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 			caller->sfs->read(str, (char *)(pedrms[s]), l_bytes) ;
 
 		}
+#if 0
+		// try to fix FY13 bug!
+		if(bytes==0) {	// not found
+			char str[256] ;
+			char *full_name ;
+
+
+			sprintf(str,"%s/pedrms",sfs_name) ;
+
+			full_name = caller->get_sfs_name(str) ;
+
+			LOG(TERR,"FY13 bug -- Got %s for RDO%d, ped %d?!",str,rdo,is_ped) ;
+		}
+#endif
 	}
 
 	LOG(DBG,"rdo %d: bytes %d",rdo,bytes) ;

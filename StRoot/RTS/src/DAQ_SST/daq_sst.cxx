@@ -110,7 +110,7 @@ daq_dta *daq_sst::handle_raw(int sec, int rdo)
 
 	if(rdo<=0) {
 		r_start = 1 ;
-		r_stop = 4 ;	
+		r_stop = 3 ;		// 1 sector has 3, 2nd has 2
 	}
 	else {
 		r_start = r_stop = rdo ;
@@ -140,7 +140,7 @@ daq_dta *daq_sst::handle_raw(int sec, int rdo)
 	
 		raw->finalize(bytes,s,r,0) ;	;
 
-	}	// end of loop over RDOs [1..4]
+	}	// end of loop over RDOs [1..3]
 
 	}	// end of loop over Sectors [1..2]
 
@@ -153,5 +153,7 @@ daq_dta *daq_sst::handle_raw(int sec, int rdo)
 	
 int daq_sst::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int rdo)
 {
+	// will look the same as PXL!
+
 	return -1 ;
 }
