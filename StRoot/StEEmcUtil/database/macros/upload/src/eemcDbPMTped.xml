@@ -1,8 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbPMTped  <comment>  *    PMT+MAPMT ADC pedestals for one sector </comment>
-  <dbString> name <length> 16000 </length> <comment>   sector/subsector/tower of strip/pre/post/tower  </comment> </dbString> 
-  <dbFloat> ped <length> 1000 </length> <comment>  pedestal in ADC chan  </comment> </dbFloat> 
-  <dbFloat> sig <length> 1000 </length> <comment>  width of pedestal in ADC chan  </comment> </dbFloat> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>

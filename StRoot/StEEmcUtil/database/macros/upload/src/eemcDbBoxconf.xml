@@ -1,8 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbBoxconf  <comment>  *    EEMC Tower Box configuration for one sector </comment>
-  <dbString> name <length> 80 </length> <comment>     PMT ID  sector/box/tower  </comment> </dbString> 
-  <dbInt> barcode <length> 5 </length> <comment>     box barcode   </comment> </dbInt> 
-  <dbInt> hvBranch <length> 5 </length> <comment>     branch+ID  of HVsys controller  </comment> </dbInt> 
-  <dbString> comment <length> 160 </length> <comment>     PMT ID  sector/box/tower  </comment> </dbString> 
-</StDbTable> 
-</StarDataBase>
