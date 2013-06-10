@@ -3,7 +3,7 @@
 #include <math.h>
 #include <assert.h>
 #include "StvTpcActive.h"
-
+#include "StDetectorDbMaker/St_tpcRDOMasksC.h"
 ClassImp(StvTpcActive)
 
 //______________________________________________________________________________
@@ -34,24 +34,28 @@ static const int isdets[nbpads]={
 			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			     0, 0, 2};
 
+
   int numbv[3];
   GetIPath(3,numbv);
   int tpgv  = numbv[2];
   int tpss  = numbv[1];
-  int sector= tpss+12*(tpgv-1); 
-  int tpad  = numbv[0];
+  mSector= tpss+12*(tpgv-1); 
+  mTPad  = numbv[0];
 
 //		tpad >nbpads (73) prompt hits
-  if (tpad > nbpads) tpad -= nbpads;
-  int isdet = isdets[tpad-1];
-  tpad = tpads [tpad-1];
-  return 100000*isdet+100*sector+tpad;
+  if (mTPad  > nbpads) mTPad -= nbpads;
+  mIsDet = isdets[mTPad-1];
+  mTPad  = tpads [mTPad-1];
+  return 100000*mIsDet+100*mSector+mTPad;
 }  
 //______________________________________________________________________________
 int StvTpcActive::operator()( const double xyz[3])
 {
-  int isd = VoluId()/100000;  
-  if (isd) return 0;
+static St_tpcRDOMasksC *pRdoMasks = St_tpcRDOMasksC::instance();
+  VoluId();
+  if (mIsDet) return 0;
+  int iRdo  = pRdoMasks->rdoForPadrow(mTPad);
+  int iact  = pRdoMasks->isOn(mSector, iRdo);
   if (xyz) {};
-  return 1;
+  return iact;
 }
