@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.43 2013/05/28 18:07:43 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.44 2013/06/10 17:45:15 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.44  2013/06/10 17:45:15  dmitry
+ * unknown db fix - to be backported into old libraries
+ *
  * Revision 1.43  2013/05/28 18:07:43  dmitry
  * new db domain: MTD
  *
@@ -1148,7 +1151,10 @@ char*  StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
-  return getenv(printDbName(type,domain));
+  if (!type || !domain) return 0;
+  char* dbname = printDbName(type,domain);
+  if (!dbname) return 0;
+  return getenv(dbname);
 }
   
 ////////////////////////////////////////////////////////////////
@@ -1655,7 +1661,7 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
-
+  if (!typeName || !domainName) return 0;
   std::string tpName(typeName);
   std::string dmName(domainName);
   std::string mergedName = tpName + "_" + dmName;
