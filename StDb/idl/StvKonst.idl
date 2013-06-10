@@ -14,6 +14,7 @@ struct StvKonst {
       float     mMinP2;		        /*Minimal allowed momentum**2 for Geant3*/
       float     mMaxPti;		/*Maximal allowed 1/pt */
       float     mMaxRes;		/*Maximal allowed residual */
+      float     mCoeWindow;		/*Error coeficient for searching window*/
       float     mMaxWindow;		/*Maximal window to search hits*/
       long      mMinHits;		/*Min number of hits allowed*/
       long      mGoodHits;		/*Min umber of Good hits in track*/
