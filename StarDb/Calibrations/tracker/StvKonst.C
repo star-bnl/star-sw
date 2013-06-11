@@ -25,21 +25,17 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMinP2  = 0.003*0.003;	//Geant3 cut for too small momentum**2	
   row.mMaxPti   = 200;		/*Maximal allowed 1/pt */
   row.mMaxRes	= 0.5;		/*Maximal allowed residual */
-  row.mMaxWindow= 3.;		/*Maximal window to search hits*/
+  row.mCoeWindow= 5.;		/*Maximal window to search hits*/
+  row.mMaxWindow= 10.;		/*Maximal window to search hits*/
   row.mMinHits 	= 5;		/*Min number of hits allowed*/
   row.mGoodHits =15;		/*Good number of hits allowed*/
 
 //	hitCount hitCount hitCount hitCount hitCount 
-  row.mMinTotHits =5;       	/*Min number hits for track*/
+  row.mMinTotHits =3;       	/*Min number hits for track*/
   row.mMinGoodHits=3;       	/*Min number good hits for track*/
-//row.mMinContHits=2;       	/*Min length of good hit sequence*/
   row.mMinContHits=3;       	/*Min length of good hit sequence*/
-//row.mMaxContNits=13;      	/*Max length of acceptable non hit sequence*/
-//row.mMaxContNits=8;      	/*Max length of acceptable non hit sequence*/
-//row.mMaxContNits=10;      	/*Max length of acceptable non hit sequence*/
-  row.mMaxContNits=7;      	/*Max length of acceptable non hit sequence*/
-//row.mMaxTotNits =30;      	/*Max number of acceptable non hits*/
-  row.mMaxTotNits =40;      	/*Max number of acceptable non hits*/
+  row.mMaxContNits=5;      	/*Max length of acceptable non hit sequence*/
+  row.mMaxTotNits =10;      	/*Max number of acceptable non hits*/
 
 
 tableSet->AddAt(&row);
