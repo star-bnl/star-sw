@@ -1,6 +1,6 @@
 /******************************************************
  *
- * $Id: StPmdHit.cxx,v 1.2 2002/09/09 11:28:12 subhasis Exp $
+ * $Id: StPmdHit.cxx,v 1.3 2010/05/28 17:23:33 rashmi Exp $
  * Author: Subhasis Chattopadhyay, Dec 2001
  *
  ******************************************************
@@ -9,6 +9,9 @@
  *
  ******************************************************
  * $Log: StPmdHit.cxx,v $
+ * Revision 1.3  2010/05/28 17:23:33  rashmi
+ * Added sorting routine
+ *
  * Revision 1.2  2002/09/09 11:28:12  subhasis
  * ADC added
  *
@@ -46,8 +49,15 @@ ostream &operator<<(ostream &os, StPmdHit &cl)
   cl.print(&os); return os;
 }
 
-void 
-StPmdHit::Browse(TBrowser *b)
+Int_t StPmdHit::Compare(const TObject *hit) const
+{
+  StPmdHit*  mhit = (StPmdHit*)hit;
+  if (mAdc < mhit->mAdc) return -1;
+  else if (mAdc > mhit->mAdc) return 1;
+  else return 0;
+}
+
+void StPmdHit::Browse(TBrowser *b)
 {
   cout << (*this) << endl;
   StObject::Browse(b);
