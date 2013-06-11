@@ -1,9 +1,18 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.16 2009/09/03 15:16:17 jeromel Exp $
+# $Id: Conscript,v 1.19 2009/11/13 17:31:45 fisyak Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.19  2009/11/13 17:31:45  fisyak
+# remove second FLIBS
+#
+# Revision 1.18  2009/11/13 17:08:15  fisyak
+# Add extra -m32 for LD
+#
+# Revision 1.17  2009/11/13 16:52:51  fisyak
+# swit LDto g++ with gfortran
+#
 # Revision 1.16  2009/09/03 15:16:17  jeromel
 # Changed rh8/rh9 to rh and added gfortran support
 #
@@ -87,6 +96,7 @@ my $PGI = $env->{ENV}->{PGI};
 if (($FC =~ /g77/ || $FC =~ /gfortran/) && ! $PGI) {
     $CPPFLAGS .= " -DWithoutPGI";
 }
+if ($FC =~ /gfortran/) {$FPPFLAGS .= " -DGFORTRAN";}
 # print "DEBUG --> $FC $CPPFLAGS\n";
 $env2 = $env->clone('FC'           => $FC,
 		    'FPPFLAGS'     => $FPPFLAGS,
@@ -112,8 +122,9 @@ foreach my $s (@src) {
     next if ($ss =~ /deccc\/traceqc\.c/);
     next if ($ss =~ /deccc\/mykuip\.c/);
     next if ($ss =~ /atmain\/traceq\.age/);
-    next if ($ss =~ /atmain\/etime\.F/   && $FC !~ /g77/ && $FC !~ /gfortran/);
+#    next if ($ss =~ /atmain\/etime\.F/   && $FC !~ /g77/ && $FC !~ /gfortran/);
     next if ($ss =~ /deccc\/idisp\.c/    && $FC !~ /g77/ && $FC !~ /gfortran/);
+#    next if ($ss =~ /atmain\/dblib\.cxx/    && ($FC eq /g77/ or $FC eq /gfortran/));
     next if ($ss =~ /atmain\/agxinit\.cdf/);
     next if ($ss =~ /atmain\/guinti\.cdf/);
     next if ($ss =~ /atmain\/sterror\.age/);
@@ -144,9 +155,10 @@ my @starsim = qw(acmain.cxx deccc/traceqc.c atmain/traceq.age atmain/sterror.age
 my $pgm = "starsim";
 script::Keep $pgm;
 my $LD = $env->{LD};
-if ($LD eq 'g++') {$LD = $env->{CC};}
+if ($LD eq 'g++' and $FC ne 'gfortran') {$LD = $env->{CC};}
 my $LDFLAGS = $env->{LDFLAGS};
 $LDFLAGS .= $env->{LDEXPORT};
+if ($STAR_SYS =~ /sl53_gcc4/) {$LDFLAGS .= " -m32";}
 my $LIBPATH    = $env->{LIBPATH};
 if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
 
