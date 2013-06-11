@@ -1,0 +1,15 @@
+/*	eemcGammaFilterMakerParams.idl
+ *
+ *	Table: eemcGammaFilterMakerParams
+ *
+ *	description: *	//:	parameters for the EEMC-based gamma filter maker
+ */
+
+struct eemcGammaFilterMakerParams {
+	float eemcSamplingFraction; /* EEMc sampling fraction to be used in the calculations */
+	float seedEnergyThreshold; /* seed tower energy threshold for foming 3x3 clusters */
+	float clusterEtThreshold; /* total cluster E_T threshold */
+	float maxVertexZ; /* vertex |z| limit */
+	long filterMode; /* filter enabled or disabled */
+};
+

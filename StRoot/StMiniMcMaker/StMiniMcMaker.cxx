@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.31 2010/04/15 19:17:27 fisyak Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.32 2010/08/05 15:31:11 jwebb Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,10 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.32  2010/08/05 15:31:11  jwebb
+ * Changed the check on valid towers during clustering to suppress the non-
+ * error issued by StEmcGeom.
+ *
  * Revision 1.31  2010/04/15 19:17:27  fisyak
  * Add corrections for AppendMCDaughterTrack from Masayuki Wada
  *
@@ -146,6 +150,10 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.32  2010/08/05 15:31:11  jwebb
+ * Changed the check on valid towers during clustering to suppress the non-
+ * error issued by StEmcGeom.
+ *
  * Revision 1.31  2010/04/15 19:17:27  fisyak
  * Add corrections for AppendMCDaughterTrack from Masayuki Wada
  *
@@ -280,7 +288,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.31 2010/04/15 19:17:27 fisyak Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.32 2010/08/05 15:31:11 jwebb Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -1753,6 +1761,10 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     for(int idEta=-1; idEta<2; ++idEta) {
       for (int idPhi=-1; idPhi<2; ++idPhi) {
 	int towerId = emcPos.getNextTowerId(softIdProj,idEta,idPhi);
+	if ( towerId == 0 )
+	  {
+	    continue; // off the end of the barrel
+	  }
 	if (!emcGeom->checkId(towerId)) {
 	  // Valid tower SoftId.  (Again, note that checkId returns "false" when the
 	  // softId is valid!)
@@ -2543,6 +2555,10 @@ void StMiniMcMaker::AppendMCDaughterTrack() {
 
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.32  2010/08/05 15:31:11  jwebb
+// Changed the check on valid towers during clustering to suppress the non-
+// error issued by StEmcGeom.
+//
 // Revision 1.31  2010/04/15 19:17:27  fisyak
 // Add corrections for AppendMCDaughterTrack from Masayuki Wada
 //
