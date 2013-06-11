@@ -22,6 +22,7 @@ void StiMasterDetectorBuilder::reset()
  */
 void StiMasterDetectorBuilder::build(StMaker&source)
 {
+  if (! gGeoManager) StiVMCToolKit::GetVMC();
   TGeoManager *gGeoManagerSV = gGeoManager; gGeoManager = 0;
 #if 1
   LOG_INFO << "Create a clone of VmcGeometry for reconstruction" << endm;
