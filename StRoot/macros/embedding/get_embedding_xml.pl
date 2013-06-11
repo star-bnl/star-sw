@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.13 2010/10/11 19:04:00 hmasui Exp $
+# $Id: get_embedding_xml.pl,v 1.14 2010/11/07 23:31:48 hmasui Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.14  2010/11/07 23:31:48  hmasui
+# Added transverse vertex cut. Use eliza disk instead of HPSS. Determine local library path based on 32sl44
+#
 # Revision 1.13  2010/10/11 19:04:00  hmasui
 # Added sync command before hsi
 #
@@ -28,6 +31,7 @@ chomp($date);
 my $staroflDir    = "/home/starofl"; # starofl home
 
 # Common log/generator area under /project directory at PDSF
+#   The directories only used for the temporary storage for log files
 $EMLOGS = "/project/projectdirs/star/embedding";
 
 my $force         = 0;                                              # Default is false (do not overwrite existing xml file)
@@ -40,6 +44,7 @@ my $tagsDirectory = "$staroflDir/embedding/$production";            # Default ta
 my $trgsetupName  = "2007ProductionMinBias";                        # Default trigger setup name
 my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_TpcSvtSsd.C"; # Default bfcMixer
 my $zvertexCut    = 200 ;                                           # Default z-vertex cut
+my $vrCut         = 100 ;                                           # Default vr cut
 my $ptmin         = 0.0 ;                                           # Default pt lower cut off
 my $ptmax         = 10.0 ;                                          # Default pt higher cut off
 my $ymin          = -1.5 ;                                          # Default rapidity lower cut off
@@ -48,6 +53,10 @@ my $pid           = 8 ;                                             # Default ge
 my $multiplicity  = 1 ;                                             # Default multiplicity (is 1)
 my $particleName  = "PiPlus" ;                                      # Default particle name (is pi+)
 my $prodName      = $production ;                                   # Default prodName (second last argument in the bfcMixer)
+
+# Output path will be the following structure
+# $elizaDisk/star/starprod/embedding/${TRGSETUPNAME}/${PARTICLENAME}_${FSET}_${REQUESTNUMBER}/${PRODUCTION}.${LIBRARY}/${YEAR}/${DAY}
+my $elizaDisk     = "/eliza14" ;                                    # Default eliza disk (is /eliza14)
 $verbose          = 0 ;                                             # verbose flag (defalt is false)
 
 my $maxFilesPerProcess = 1 ;       # 1 file per job
@@ -58,7 +67,7 @@ my $ptOption           = "FlatPt"; # Default pt option
 #my $logDirectory       = getLogDirectory($production);
 my $generatorDir       = "" ;  # will be determined later by (production, particle name, request number)
 my $logDirectory       = "" ;  # will be determined later by (production, particle name, request number)
-my $libraryPath        = ".sl44_gcc346";      # Default library path
+my $libraryPath        = getLocalLibraryPath(); # Local library path depends on $CHOS
 
 # Scripts
 my $getYearDayFromFile = "StRoot/macros/embedding/getYearDayFromFile.pl";
@@ -72,6 +81,7 @@ GetOptions (
     'daq=s' => \$daqsDirectory,            # Daq file directory
     'force' => \$force,                    # Flag for overwrite
     'geantid=i' => \$pid,                  # Geantid
+    'eliza=s' => \$elizaDisk,              # Target eliza disk
     'help' => \$help,
     'library=s' => \$library,              # Library
     'local' => \$local,                    # Make local test script
@@ -86,7 +96,8 @@ GetOptions (
     'requestnumber=i' => \$requestNumber,  # Request number
     'tag=s' => \$tagsDirectory,            # Set tags file directory
     'trg=s' => \$trgsetupName,             # Set trigger setup name
-    'triggerid=i' => \@triggerId,       # Set trigger id cut
+    'triggerid=i' => \@triggerId,          # Set trigger id cut
+    'vrcut=f' => \$vrCut,                  # Set vr cut
     'ymin=f' => \$ymin,                    # Minimum rapidity cut
     'ymax=f' => \$ymax,                    # Maximum rapidity cut
     'zvertex=f' => \$zvertexCut,           # Set z-vertex cut
@@ -104,6 +115,7 @@ my $usage = q(
 
   -daq [daq file directory]    Set daq file directory (default is /home/starofl/embedding/$production)
 
+  -e (or --eliza) [eliza disk] Set target eliza disk (e.g. /eliza14) for the outputs
   -f                           Overwrite the existing xml file (default is false)
   -g (or --geantid) [GEANT id] GEANT3 id for input MC particle
   -h or --help                 Show this messages and exit
@@ -137,12 +149,14 @@ my $usage = q(
   -trig (or --triggerid) [trigger id's] Set trigger id cut (accept multiple trigger id's, see below)
       > get_embedding_xml.pl -trig 280001 -trig 290001
 
+  -vrcut [vr cut value]                 Set vr (=sqrt{vx^2 + vy^2}) cut (default is 100cm)
+
   -ymin [Minimum rapidity cut]          Set minimum rapidity cut off (default is -1.5)
   -ymax [Maximum rapidity cut]          Set maximum rapidity cut off (default is 1.5)
 
   -z (or --zvertex) [max. z-vertex cut] Set z-vertex cut. The cut will be |vz| < cut
 
-  -v or --verbose              Verbose flag to show debug messages
+  -verbose                              Verbose flag to show debug messages
 
 );
 
@@ -191,6 +205,7 @@ $outputXml = getXmlFileName($production);
   print "  Request number:     $requestNumber\n";
   print "  Use library:        $library \n";
   print "  Trigger setup name: $trgsetupName\n";
+  print "  Local library path: $libraryPath\n";
   print "\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -241,27 +256,36 @@ print OUT "<!-- Set tags file directory -->\n";
 print OUT "setenv EMBEDTAGDIR $tagsDirectory\n";
 print OUT "\n";
 
+# Added 'perl' command in front of scripts in order to be able to run in sl53
 printDebug("Set year and day ...");
 print OUT "<!-- Set year and day from filename -->\n";
-print OUT "setenv EMYEAR `$getYearDayFromFile -y $fileBaseNameXml`\n";
-print OUT "setenv EMDAY `$getYearDayFromFile -d $fileBaseNameXml`\n";
+print OUT "setenv EMYEAR `perl $getYearDayFromFile -y $fileBaseNameXml`\n";
+print OUT "setenv EMDAY `perl $getYearDayFromFile -d $fileBaseNameXml`\n";
 print OUT "\n";
 
 printDebug("Set log files area ...");
 print OUT "<!-- Set log files area -->\n";
 print OUT "setenv EMLOGS $EMLOGS\n";
+print OUT "\n";
 
-printDebug("Set HPSS outputs/LOG path ...");
-my $hpssLogDir = "/nersc/projects/starofl/embedding/$trgsetupName/$particleName\_&FSET;_$requestNumber/$production.$library/\${EMYEAR}/\${EMDAY}";
-print OUT "<!-- Set HPSS outputs/LOG path -->\n";
-print OUT "setenv EMHPSS $hpssLogDir\n";
+#printDebug("Set HPSS outputs/LOG path ...");
+#my $hpssLogDir = "/nersc/projects/starofl/embedding/$trgsetupName/$particleName\_&FSET;_$requestNumber/$production.$library/\${EMYEAR}/\${EMDAY}";
+#print OUT "<!-- Set HPSS outputs/LOG path -->\n";
+#print OUT "setenv EMHPSS $hpssLogDir\n";
+
+printDebug("Set output path ...");
+my $outputDirectory = getOutputDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
+print OUT "<!-- Set output directory path -->\n";
+print OUT "setenv EMOUTPUT $outputDirectory\n";
+print OUT "\n";
 
 print OUT "\n";
 print OUT "<!-- Print out EMYEAR and EMDAY and EMLOGS -->\n";
-print OUT "echo EMYEAR : \$EMYEAR\n";
-print OUT "echo EMDAY  : \$EMDAY\n";
-print OUT "echo EMLOGS : \$EMLOGS\n";
-print OUT "echo EMHPSS : \$EMHPSS\n";
+print OUT "echo EMYEAR   : \$EMYEAR\n";
+print OUT "echo EMDAY    : \$EMDAY\n";
+print OUT "echo EMLOGS   : \$EMLOGS\n";
+print OUT "echo EMOUTPUT : \$EMOUTPUT\n";
+#print OUT "echo EMHPSS : \$EMHPSS\n";
 print OUT "\n";
 print OUT "<!-- Start job -->\n";
 
@@ -283,7 +307,7 @@ if ( @triggerId ){
 }
 
 # Get bfcMixer
-$execute_bfcMixer = get_bfcMixer($bfcMixer, $nevents, "\$INPUTFILE0", $tagFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, 
+$execute_bfcMixer = get_bfcMixer($bfcMixer, $nevents, "\$INPUTFILE0", $tagFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
     $pid, $multiplicity, $triggerString, $prodName, $ptOption) ;
 
 print OUT "echo 'Executing $execute_bfcMixer ...'\n";
@@ -298,9 +322,18 @@ print OUT "  $execute_bfcMixer\n";
 print OUT "  .q\n";
 print OUT "EOF\n";
 print OUT "ls -la .\n";
+print OUT "\n\n";
 
 #----------------------------------------------------------------------------------------------------
-# Copy log/error files in the working directory
+# Make output directory
+#----------------------------------------------------------------------------------------------------
+print OUT "<!-- Make output directory -->\n";
+print OUT "mkdir -pv \$EMOUTPUT\n";
+print OUT "chmod -R ug+rw \$EMOUTPUT\n";
+print OUT "\n\n";
+
+#----------------------------------------------------------------------------------------------------
+# Move LOG files and copy output ROOT files to eliza disk
 #----------------------------------------------------------------------------------------------------
 my $logFileName = "$fileBaseNameXml.$jobIdXml.log";
 printDebug("Set logfilename: $logFileName ...");
@@ -308,33 +341,41 @@ printDebug("Set logfilename: $logFileName ...");
 my $errFileName = "$fileBaseNameXml.$jobIdXml.elog";
 printDebug("Set errfilename: $errFileName ...");
 
-print OUT "cp " . getTempLogDirectory($production, 0) . "/$jobIdXml.log $logFileName\n";
-print OUT "cp " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog $errFileName\n";
+#print OUT "cp " . getTempLogDirectory($production, 0) . "/$jobIdXml.log $logFileName\n";
+#print OUT "cp " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog $errFileName\n";
+print OUT "<!-- Copy LOG files to eliza disk -->\n";
+print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.log \$EMOUTPUT/$logFileName\n";
+print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog \$EMOUTPUT/$errFileName\n";
 print OUT "\n";
-print OUT "<!-- New command to organize log files -->\n";
-print OUT "mkdir -p $logDirectory\n";
-print OUT "mv " . getTempLogDirectory($production, 0) . "/$jobIdXml.* $logDirectory/\n";
-print OUT "\n";
+print OUT "<!-- Copy ROOT files to eliza disk -->\n";
+print OUT "cp -v *.root \$EMOUTPUT/\n";
+
+#print OUT "<!-- New command to organize log files -->\n";
+#print OUT "mkdir -p $logDirectory\n";
+#print OUT "mv " . getTempLogDirectory($production, 0) . "/$jobIdXml.* $logDirectory/\n";
+#print OUT "\n";
 
 #----------------------------------------------------------------------------------------------------
 # put log file in HPSS
+#   - No longer put the outputs into HPSS
 #----------------------------------------------------------------------------------------------------
-printDebug("Set archive log/root files in HPSS: $hpssLogDir ...");
-print OUT "<!-- Write buffers into disk -->\n";
-print OUT "sync\n"
-print OUT ""
-print OUT "<!-- Archive in HPSS -->\n";
-print OUT "set i = 0\n";
-print OUT "set ret = 1\n";
-print OUT "while (\$i &lt; 5 || \$ret != 0)\n";
-print OUT "  @ i++\n";
-print OUT "  hsi \"mkdir -p \$EMHPSS; prompt; cd \$EMHPSS; mput *.root; mput $logFileName; mput $errFileName; chmod ug+rw -R \$EMHPSS \"\n";
-print OUT "  set ret = \$status\n";
-print OUT "  if (\$ret == 0) then\n";
-print OUT "    break\n";
-print OUT "  endif\n";
-print OUT "  sleep 300\n";
-print OUT "end\n";
+#printDebug("Set archive log/root files in HPSS: $hpssLogDir ...");
+#print OUT "<!-- Write buffers into disk -->\n";
+#print OUT "sync\n";
+#print OUT "\n";
+#print OUT "<!-- Archive in HPSS -->\n";
+#print OUT "set i = 0\n";
+#print OUT "set ret = 1\n";
+#print OUT "while (\$i &lt; 5 || \$ret != 0)\n";
+#print OUT "  @ i++\n";
+#print OUT "  hsi \"mkdir -p \$EMHPSS; prompt; cd \$EMHPSS; mput *.root; mput $logFileName; mput $errFileName; chmod ug+rw -R \$EMHPSS \"\n";
+#print OUT "  set ret = \$status\n";
+#print OUT "  if (\$ret == 0) then\n";
+#print OUT "    break\n";
+#print OUT "  endif\n";
+#print OUT "  sleep 300\n";
+#print OUT "end\n";
+
 print OUT "\n";
 print OUT "</command>\n";
 print OUT "\n";
@@ -422,7 +463,7 @@ if($local){
   print LOCAL "\n";
 
   # Get bfcMixer
-  $execute_bfcMixer = get_bfcMixer($bfcMixer, 10, $daqOneFile, $tagsOneFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, 
+  $execute_bfcMixer = get_bfcMixer($bfcMixer, 10, $daqOneFile, $tagsOneFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
       $pid, $multiplicity, $triggerString, $prodName, $ptOption) ;
 
   print LOCAL "echo 'Executing $execute_bfcMixer ...'\n";
@@ -460,6 +501,7 @@ sub get_bfcMixer {
   my $ymin         = shift @_ ;
   my $ymax         = shift @_ ;
   my $zvertexcut   = shift @_ ;
+  my $vrcut        = shift @_ ;
   my $pid          = shift @_ ;
   my $multiplicity = shift @_ ;
   my $trigger      = shift @_ ;
@@ -485,7 +527,7 @@ sub get_bfcMixer {
     # Other bfcMixers (TpcOnly or Tpx)
     printDebug("Starndard (without SVT/SSD) bfcMixer");
 
-    $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\");";
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $vrcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\");";
   }
   printDebug("Executing bfcMixer looks: $execute_bfcMixer");
 
@@ -637,6 +679,40 @@ sub getLogDirectory {
   my $dir           = getEmbeddingProjectDirectory($production, $particleName, $requestNumber, 0);
   return "$dir/LOG/&FSET;";
 };
+
+#----------------------------------------------------------------------------------------------------
+# Get output directory
+#----------------------------------------------------------------------------------------------------
+sub getOutputDirectory {
+  my $elizadisk     = shift @_ ;
+  my $trgsetupname  = shift @_ ;
+  my $particleName  = shift @_ ;
+  my $requestNumber = shift @_ ;
+  my $production    = shift @_ ;
+  my $library       = shift @_ ;
+  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY";
+}
+
+#----------------------------------------------------------------------------------------------------
+# Get local library path
+#----------------------------------------------------------------------------------------------------
+sub getLocalLibraryPath {
+  #  $CHOS       path
+  # 32sl44 -->  .sl44_gcc346
+  # sl53   -->  .sl53_gcc432
+  my $chos = `echo \$CHOS`;
+  if ( $chos =~ "32sl44" ){
+    return ".sl44_gcc346";
+  }
+  elsif ( $chos =~ "sl53" ){
+    return ".sl53_gcc432";
+  }
+  else{
+    print "Unknown OS : $chos. Set the sl44 path\n";
+    return ".sl44_gcc346";
+  }
+}
+
 
 #----------------------------------------------------------------------------------------------------
 # Check file exists

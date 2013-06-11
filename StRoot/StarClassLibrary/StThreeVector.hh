@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.23 2010/10/18 21:55:11 fisyak Exp $
+ * $Id: StThreeVector.hh,v 1.22 2009/09/22 16:43:29 fine Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,9 +15,6 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
- * Revision 1.23  2010/10/18 21:55:11  fisyak
- * Warn off for gcc4.5.1 64bits
- *
  * Revision 1.22  2009/09/22 16:43:29  fine
  * Introdcue the dedicated default ctor for StThreeVector #1612
  *
@@ -142,7 +139,7 @@ public:
     void setX(T);
     void setY(T);
     void setZ(T);
-    void set(T X,T Y, T Z) {mX1=X;mX2=Y;mX3=Z;}
+    void set(T x,T y, T z) {mX1=x;mX2=y;mX3=z;}
 
     void setPhi(T);
     void setTheta(T);
@@ -233,39 +230,39 @@ inline StThreeVector<T>::StThreeVector()
     : mX1(0), mX2(0), mX3(0) {/* nop */}
 
 template<class T>
-inline StThreeVector<T>::StThreeVector(T X, T Y, T Z)
-    : mX1(X), mX2(Y), mX3(Z) {/* nop */}
+inline StThreeVector<T>::StThreeVector(T x, T y, T z)
+    : mX1(x), mX2(y), mX3(z) {/* nop */}
 template<class T>
 inline StThreeVector<T>::~StThreeVector() {/* nop */}
 
 template<class T>
-inline void StThreeVector<T>::setX(T X) {mX1 = X;}
+inline void StThreeVector<T>::setX(T x) {mX1 = x;}
 
 template<class T>
-inline void StThreeVector<T>::setY(T Y) {mX2 = Y;}
+inline void StThreeVector<T>::setY(T y) {mX2 = y;}
 
 template<class T>
-inline void StThreeVector<T>::setZ(T Z) {mX3 = Z;}
+inline void StThreeVector<T>::setZ(T z) {mX3 = z;}
 
 template<class T>
-void StThreeVector<T>::setPhi(T Angle)
+void StThreeVector<T>::setPhi(T angle)
 {
     double  r = magnitude();
     double th = theta();
     
-    mX1 = r*sin(th)*cos(Angle);
-    mX2 = r*sin(th)*sin(Angle);
+    mX1 = r*sin(th)*cos(angle);
+    mX2 = r*sin(th)*sin(angle);
 }
 
 template <class T>
-void StThreeVector<T>::setTheta(T Angle)
+void StThreeVector<T>::setTheta(T angle)
 {
     double r  = magnitude();
     double ph = phi();
 
-    mX1 = r*sin(Angle)*cos(ph);
-    mX2 = r*sin(Angle)*sin(ph);
-    mX3 = r*cos(Angle);
+    mX1 = r*sin(angle)*cos(ph);
+    mX2 = r*sin(angle)*sin(ph);
+    mX3 = r*cos(angle);
 }
 
 template <class T>
@@ -280,9 +277,9 @@ void StThreeVector<T>::setMagnitude(T r)
 }
 
 template <class T>
-void StThreeVector<T>::setMag(T Mag)
+void StThreeVector<T>::setMag(T mag)
 {
-    setMagnitude(Mag);
+    setMagnitude(mag);
 }
 
 template<class T>
@@ -347,44 +344,44 @@ StThreeVector<T> StThreeVector<T>::orthogonal() const
 {
     // Direct copy from CLHEP--it is probably better to
     // use your own dot/cross product code...
-    double X = (mX1 < 0.0) ? -mX1 : mX1;
-    double Y = (mX2 < 0.0) ? -mX2 : mX2;
-    double Z = (mX3 < 0.0) ? -mX3 : mX3;
+    double x = (mX1 < 0.0) ? -mX1 : mX1;
+    double y = (mX2 < 0.0) ? -mX2 : mX2;
+    double z = (mX3 < 0.0) ? -mX3 : mX3;
     
-    if(X<Y)
-	return X < Z ? StThreeVector<T>(0,mX3,-mX2) :  StThreeVector<T>(mX2,-mX1,0);
+    if(x<y)
+	return x < z ? StThreeVector<T>(0,mX3,-mX2) :  StThreeVector<T>(mX2,-mX1,0);
     else
 	return  mX2 < mX3 ? StThreeVector<T>(-mX3,0,mX1) :  StThreeVector<T>(mX2,-mX1,0);
 }
 
 template <class T>
-void StThreeVector<T>::rotateX(T Angle)
+void StThreeVector<T>::rotateX(T angle)
 {
     // may in the future make use of the StRotation class!
-    double yPrime = cos(Angle)*mX2 - sin(Angle)*mX3;
-    double zPrime = sin(Angle)*mX2 + cos(Angle)*mX3;
+    double yPrime = cos(angle)*mX2 - sin(angle)*mX3;
+    double zPrime = sin(angle)*mX2 + cos(angle)*mX3;
 
     mX2 = yPrime;
     mX3 = zPrime;
 }
 
 template <class T>
-void StThreeVector<T>::rotateY(T Angle)
+void StThreeVector<T>::rotateY(T angle)
 {
     // may in the future make use of the StRotation class!
-    double zPrime = cos(Angle)*mX3 - sin(Angle)*mX1;
-    double xPrime = sin(Angle)*mX3 + cos(Angle)*mX1;
+    double zPrime = cos(angle)*mX3 - sin(angle)*mX1;
+    double xPrime = sin(angle)*mX3 + cos(angle)*mX1;
 
     mX1 = xPrime;
     mX3 = zPrime;
 }
 
 template <class T>
-void StThreeVector<T>::rotateZ(T Angle)
+void StThreeVector<T>::rotateZ(T angle)
 {
     // may in the future make use of the StRotation class!
-    double xPrime = cos(Angle)*mX1 - sin(Angle)*mX2;
-    double yPrime = sin(Angle)*mX1 + cos(Angle)*mX2;
+    double xPrime = cos(angle)*mX1 - sin(angle)*mX2;
+    double yPrime = sin(angle)*mX1 + cos(angle)*mX2;
 
     mX1 = xPrime;
     mX2 = yPrime;
@@ -423,7 +420,7 @@ inline T StThreeVector<T>::mag2() const
 template<class T>
 inline T StThreeVector<T>::operator() (size_t i) const
 {
-    if (i <= 2)  return (&mX1)[i];
+    if (0 <=i && i <= 2)  return (&mX1)[i];
 #ifndef ST_NO_EXCEPTIONS
     throw out_of_range("StThreeVector<T>::operator(): bad index");
 #else
@@ -435,7 +432,7 @@ inline T StThreeVector<T>::operator() (size_t i) const
 template<class T>
 inline T& StThreeVector<T>::operator() (size_t i) 
 {
-    if (i <= 2)  return (&mX1)[i];
+    if (0 <=i && i <= 2)  return (&mX1)[i];
 #ifndef ST_NO_EXCEPTIONS
     throw out_of_range("StThreeVector<T>::operator(): bad index");
 #else
@@ -447,7 +444,7 @@ inline T& StThreeVector<T>::operator() (size_t i)
 template<class T>
 inline T StThreeVector<T>::operator[] (size_t i) const
 {
-    if (i <= 2)  return (&mX1)[i];
+    if (0 <=i && i <= 2)  return (&mX1)[i];
 #ifndef ST_NO_EXCEPTIONS
       throw out_of_range("StThreeVector<T>::operator[]: bad index"); 
 #else
@@ -487,9 +484,9 @@ inline StThreeVector<T>& StThreeVector<T>::operator/= (double c)
 
 template<class T>
 inline StThreeVector<T>
-StThreeVector<T>::pseudoProduct(double X,double Y,double Z) const
+StThreeVector<T>::pseudoProduct(double x,double y,double z) const
 {
-    return StThreeVector<T>(mX1*X,mX2*Y,mX3*Z);
+    return StThreeVector<T>(mX1*x,mX2*y,mX3*z);
 }
 
 template<class T>

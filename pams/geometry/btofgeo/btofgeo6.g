@@ -1,7 +1,11 @@
-* $Id: btofgeo6.g,v 1.8 2010/06/23 19:09:49 jwebb Exp $
+* $Id: btofgeo6.g,v 1.10 2010/12/17 20:00:21 jwebb Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo6.g,v $
+* Revision 1.10  2010/12/17 20:00:21  jwebb
+* Reverted to previous version of btofgeo6 code.  Fixes will be applied now
+* in btofgeo7.
+*
 * Revision 1.8  2010/06/23 19:09:49  jwebb
 * Resolved minor bug in the cooling tubes for the tof.  The inner radii of
 * the cooling tubes are passed to the block creating the water volume, but

@@ -6,6 +6,7 @@
 // Algorithms and implementations by Michael Betancourt (MIT)
 //
 
+#include "tables/St_g2t_event_Table.h"
 #include "tables/St_particle_Table.h"
 #include "StMcEvent/StMcEventTypes.hh"
 #include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
@@ -80,16 +81,21 @@ int StGammaPythiaEventMaker::Make()
     }
     
     //////////////////////////////////////////////////
-    //  Store prompt photons, distinguising between //
-    //          converted and nonconverted          //
+    //     Store prompt photons, distinguishing     //
+    //      between converted and nonconverted      //
     ////////////////////////////////////////////////// 
 
-    long pid = mcEvent->subProcessId();
+    // Check for prompt photon subprocess ID
+    St_g2t_event* Pg2t_event = (St_g2t_event*)geantDstI("g2t_event");
+    g2t_event_st* g2t_event = Pg2t_event->GetTable();
+    long pid = g2t_event->subprocess_id;
 
-    // Collect photons from primary vertex
+    bool photonEvent = (pid==14) || (pid==18) || (pid==29) || (pid==114) || (pid==115);
+    if(!photonEvent) return kStOk;
+
+    // Collect photons from primary vertex, looping over daughters
     StMcVertex *primary=mcEvent->primaryVertex();
         
-    // Loop over daughters of primary vertex
     for(UInt_t id = 0; id < primary->numberOfDaughters(); ++id)
     {
         
@@ -97,35 +103,31 @@ int StGammaPythiaEventMaker::Make()
         if ( !track ) continue;
         const StLorentzVectorF& trackV=track->fourMomentum();
             
-        // Check if subprocess can produce a prompt photon
-        if( (pid==14)||(pid==18)||(pid==29)||(pid==114)||(pid==115) )
+        // Require that track is a photon
+        bool promptFlag = (track->geantId() == 1);
+    
+        // Require that track is not a daughter of the initial partons
+        promptFlag &= track->parent()->eventGenLabel() >= 5;
+        
+        // Require that track is a daughter of a photon (how PYTHIA handles the evoluton of the
+        // final state prompt photon to a stable photon)
+        promptFlag &= track->parent()->pdgId() == 22;
+            
+        // Check for conversion and store photons
+        if(promptFlag)
         {
-                
-            // Require that track is a photon
-            bool promptFlag = (track->geantId() == 1);
-            // Require that track is not a daughter of the initial partons
-            promptFlag &= track->parent()->eventGenLabel() >= 5;
-            // Require that track is a daughter of a photon (how PYTHIA handles the evoluton of the
-            // final state prompt photon to a stable photon)
-            promptFlag &= track->parent()->pdgId() == 22;
             
-            // Check for conversion and store photons
-            if(promptFlag)
+            if(track->stopVertex())
             {
-            
-                if(track->stopVertex())
-                {
-                    mPythia->conversion().push_back(TLorentzVector(trackV.px(),trackV.py(),trackV.pz(),trackV.e()));
-                }
-                else
-                {
-                    mPythia->prompt().push_back(TLorentzVector(trackV.px(),trackV.py(),trackV.pz(),trackV.e()));
-                }
-            
+                mPythia->conversion().push_back(TLorentzVector(trackV.px(),trackV.py(),trackV.pz(),trackV.e()));
+            }
+            else
+            {
+                mPythia->prompt().push_back(TLorentzVector(trackV.px(),trackV.py(),trackV.pz(),trackV.e()));
             }
             
         }
-        
+
     }
         
     return kStOk;
