@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.257 2013/03/13 22:12:29 jeromel Exp $
+// $Id: StMaker.cxx,v 1.258 2013/06/11 10:08:40 jeromel Exp $
 //
 //
 /*!
@@ -275,7 +275,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2012b",      20111215,     2, "y2012b",   "y2012 geometry (now with MTD)"},
 
   {"y2013",       20121215,     0, "y2013",    "y2013 first cut geometry"},
-  {"y2013_1",     20121215,     1, "y2013_1",  "y2013 first cut geometry"},
+  {"y2013_1",     20121215,     1, "y2013_1",  "y2013 first cut geometry with pixel"},
   {"y2013_2",     20121215,  1001, "y2013_2",  "y2013 first cut geometry sans pixel"},
 
   // development tags
@@ -1966,6 +1966,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.258  2013/06/11 10:08:40  jeromel
+// Slight blabla change
+//
 // Revision 1.257  2013/03/13 22:12:29  jeromel
 // Some spacing + DbAlias geo name should be _1 and _2
 //
@@ -2105,7 +2108,7 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 // y2009
 //
 // Revision 1.211  2008/12/21 18:59:33  perev
-// GetDBTim() added
+// GetDBTime() added
 //
 // Revision 1.210  2008/07/26 01:54:37  perev
 // add y2007a
