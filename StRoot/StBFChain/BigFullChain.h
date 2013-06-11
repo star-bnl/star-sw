@@ -962,17 +962,31 @@ Bfc_st BFC[] = {
 
   // Year 13 chains 
   {"B2013"   ,"","","B2013_c2","","",                             "Alias for B2013 Configuration 2",kFALSE},
-  {"B2013_c2","","","ry2013_2,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2013_c2","","","ry2013_2,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2013 ITTF (tpc)",kFALSE},
-  {"B2013_c1","","","ry2013_1,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2013_c1","","","ry2013_1,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2013 ITTF (tpc)",kFALSE},
+
   {"pp2013a","" ,"",
-   "B2013_c2,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+   "B2013_c2,ITTF,UseXgeom,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
    "","",                "Production chain for 2013 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
   {"pp2013b","" ,"",
-   "B2013_c1,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+   "B2013_c1,ITTF,UseXgeom,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
    "","",                "Production chain for 2013 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
 
+  // option is bare, no tracker and no Geom
+  {"pp2013","" ,"",
+   "BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+   "","",                "Production chain for 2013 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
+
+
+
+  // TEST
+  //{"B2013_X","","","ry2012,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  // ,                                                               "Base chain for 2013 ITTF (tpc)",kFALSE},
+  //{"pp2013X","" ,"",
+  // "B2013_X,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+  // "","",                "Production chain for 2013 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
 
 
 
