@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.35 2009/12/04 16:06:52 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.35.2.1 2013/06/11 16:12:55 didenko Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.35.2.1  2013/06/11 16:12:55  didenko
+ * branch revision for db update
+ *
  * Revision 1.35  2009/12/04 16:06:52  dmitry
  * StDbLib in standalone mode cannot use SafeDelete - proper wrapper added
  *
@@ -1106,7 +1109,10 @@ char*  StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
-  return getenv(printDbName(type,domain));
+  if (!type || !domain) return 0;
+  char* dbname = printDbName(type,domain);
+  if (!dbname) return 0;
+  return getenv(dbname);
 }
   
 ////////////////////////////////////////////////////////////////
@@ -1613,7 +1619,7 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
- 
+  if (!typeName || !domainName) return 0;
   StString dbname;
   dbname<<typeName;
   if(strcmp(domainName,"Star")!=0)dbname<<"_"<<domainName;
