@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.27 2009/12/07 15:13:42 tonko Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.26 2009/11/11 14:51:07 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1341,7 +1341,6 @@ daq_det *daqReader::det(const char *which)
 
 	// not found in DAQ dets, try pseudo dets...
 	if(strcasecmp(which,"emc_pseudo")==0) id = -BTOW_ID ;	// by definition...
-	if(strcasecmp(which,"hlt")==0) id = -L3_ID ;	// by definition...
 
 	if(id < -32) {	// not found even in pseudo
 		LOG(CRIT,"Requested det \"%s\" not created -- check spelling!",which) ;

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.552 2009/11/23 15:55:13 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.554 2010/01/02 18:23:29 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -438,7 +438,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("IdTruth")) cmd += Form("((StAssociationMaker *) %p)->useIdAssoc();",mk);
       ProcessLine(cmd);
     }
-    if (maker == "StMiniMcMaker" && GetOption("IdTruth")) {
+    if (maker == "StMiniMcMaker" && GetOption("IdTruth") && ! GetOption("OldMiniMc")) {
       mk->SetMode(1);
       gMessMgr->QAInfo() << "StBFChain::Instantiate create simplified MiniMcTree in " << maker  << endm;
     }
@@ -1355,16 +1355,21 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   if (fFileOut != "")  gMessMgr->QAInfo() << "Output root file name " <<  fFileOut.Data() << endm;  
   else                 SetOption("NoOutput","No Output File"); 
   if (!GetTFile()) {
-    if (GetOption("tags")  &&  ( (fFileOut != "") ||
-	GetOption("lana") ||  GetOption("Laser") || GetOption("lanaDV") ) ) {
-      TString TagsName = fFileOut;
-      if(GetOption("LaserCal")){
-	TagsName.ReplaceAll(".root",".laser.root");
-      } else {
-	TagsName.ReplaceAll(".root",".tags.root");
-      }
-      SetTFile(new TFile(TagsName.Data(),"RECREATE"));
-    }
+//   if (GetOption("tags")  &&  ( 
+//				 (fFileOut != "")    || 
+//				 GetOption("lana")   ||  GetOption("Laser") ||
+//				 GetOption("lanaDV") ||  GetOption("lanaDVtpx")  )
+//	) {
+     
+     if ( ( GetOption("tags")  || GetOption("lana") ) &&  (fFileOut != "") ){
+	TString TagsName = fFileOut;
+	if( GetOption("lana") ){
+	   TagsName.ReplaceAll(".root",".laser.root");
+	} else {
+	   TagsName.ReplaceAll(".root",".tags.root");
+	}
+	SetTFile(new TFile(TagsName.Data(),"RECREATE"));
+     }
   }
   //    gSystem->Exit(1);
 }

@@ -16,7 +16,7 @@
 
 #include "fs_index.h"
 
-//extern int debug;
+extern int debug;
 
 int wrapfile::openmem(char *buff, int size) {
   wbuff = buff;

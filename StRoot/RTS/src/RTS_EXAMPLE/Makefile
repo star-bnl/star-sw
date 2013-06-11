@@ -8,10 +8,10 @@ DEFINES += -DRTS_LOG_COLORED
 
 
 VOBJS += libbsmd.a libbtow.a libemc.a libesmd.a libfpd.a libftp.a libl3.a libpmd.a libpp2pp.a \
-	libric.a libsc.a libssd.a libsvt.a libtof.a libtpc.a libtpcfcf.a libtpx.a libtrg.a libhlt.a libetow.a \
+	libric.a libsc.a libssd.a libsvt.a libtof.a libtpc.a libtpcfcf.a libtpx.a libtrg.a libetow.a \
 	libdaqReader.a libsfs.a librtslog.a
 VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ../DAQ_L3 ../DAQ_PMD \
-	../DAQ_PP2PP ../DAQ_RIC ../DAQ_SC ../DAQ_SSD ../DAQ_SVT ../DAQ_TOF ../DAQ_TPC ../FCF ../DAQ_HLT ../DAQ_ETOW \
+	../DAQ_PP2PP ../DAQ_RIC ../DAQ_SC ../DAQ_SSD ../DAQ_SVT ../DAQ_TOF ../DAQ_TPC ../FCF ../DAQ_ETOW \
 	../DAQ_TPX ../DAQ_TRG \
 	../DAQ_READER  ../SFS ../LOG 
 
@@ -40,15 +40,7 @@ daqFileChopper: daqFileChopper.o $(VOBJS)
 
 # DO NOT DELETE
 
-daqFileChopper.o: ../../../../StRoot/RTS/include/rtsLog.h
-daqFileChopper.o: ../../../../StRoot/RTS/include/rtsSystems.h
-daqFileChopper.o: ../DAQ_READER/daqReader.h
-daqFileChopper.o: ../DAQ_READER/daqConfig.h
-daqFileChopper.o: ../DAQ_READER/daq_dta.h
-daqFileChopper.o: ../../../../StRoot/RTS/include/rts.h
-daqFileChopper.o: ../DAQ_READER/daq_dta_structs.h
 rts_example.o: ../../../../StRoot/RTS/include/rtsLog.h
-rts_example.o: ../../../../StRoot/RTS/include/rtsSystems.h
 rts_example.o: ../DAQ_READER/daqReader.h
 rts_example.o: ../DAQ_READER/daqConfig.h
 rts_example.o: ../DAQ_READER/daq_dta.h
@@ -77,7 +69,6 @@ rts_example.o: ../DAQ_TOF/daq_tof.h
 rts_example.o: ../DAQ_TPC/daq_tpc.h
 rts_example.o: ../DAQ_TPX/daq_tpx.h
 rts_example.o: ../DAQ_TRG/daq_trg.h
-rts_example.o: ../DAQ_HLT/daq_hlt.h
 sfs_stuff.o: ../../../../StRoot/RTS/include/rtsLog.h
 sfs_stuff.o: ../DAQ_READER/daqReader.h
 sfs_stuff.o: ../DAQ_READER/daqConfig.h
@@ -89,6 +80,14 @@ tpc_rerun.o: ../../../../StRoot/RTS/include/rts.h
 tpc_rerun.o: ../DAQ_READER/daq_dta_structs.h
 tpc_rerun.o: ../DAQ_TPX/daq_tpx.h
 tpc_rerun.o: ../DAQ_READER/daq_det.h
-tpx_read_gains.o: ../DAQ_TPX/tpxGain.h
-tpx_read_gains.o: ../DAQ_TPX/tpxCore.h
-tpx_read_gains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpx_gains.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpx_gains.o: ../DAQ_READER/daqReader.h
+tpx_gains.o: ../DAQ_READER/daqConfig.h
+tpx_gains.o: ../DAQ_READER/daq_dta.h
+tpx_gains.o: ../../../../StRoot/RTS/include/rts.h
+tpx_gains.o: ../DAQ_READER/daq_dta_structs.h
+tpx_gains.o: ../DAQ_TPX/daq_tpx.h
+tpx_gains.o: ../DAQ_READER/daq_det.h
+tpx_gains.o: ../DAQ_TPX/tpxGain.h
+tpx_gains.o: ../DAQ_TPX/tpxCore.h
+tpx_gains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h

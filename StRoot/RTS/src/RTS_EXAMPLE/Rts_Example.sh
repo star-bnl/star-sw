@@ -1,6 +1,6 @@
 #!/bin/bash
 #######################################################
-# $Id: Rts_Example.sh,v 1.7 2009/12/08 17:27:33 fine Exp $
+# $Id: Rts_Example.sh,v 1.6 2009/07/09 16:17:26 fine Exp $
 # Author: v.Fine [ fine@bnl.gov ]
 #######################################################
 # The simple script to compile and build the main RTS application
@@ -24,7 +24,7 @@ base_name=$(basename $source_application)
 executable_name=${base_name%%.*}
 echo This script will build \"$executable_name\" from \"$(basename $source_application)\" against 
 echo \"libRTS.so\" from the STAR offline release.
- g++ -m32 -g -o $executable_name         \
+ g++ -g -o $executable_name         \
      -IStRoot/RTS/trg/include       \
      -IStRoot/RTS/include           \
      -IStRoot/RTS/src               \

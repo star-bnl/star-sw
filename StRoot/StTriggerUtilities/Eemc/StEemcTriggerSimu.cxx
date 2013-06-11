@@ -64,7 +64,6 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   mBemcEsum5bit=0;
   mExternDsmSetup=0;
   mSetupPath="wrong1";
-  mSource = "MuDst";
 
   feeTPTreeADC=new EEfeeTPTree("ADC",mxChan);
   dsm0TreeADC =new EEdsm0Tree("ADC");
@@ -179,17 +178,18 @@ StEemcTriggerSimu::InitRun(int runnumber){
   memset(feeMask,0xff,sizeof(feeMask)); // mask everything as bad
   getEemcFeeMask();
 
-  const TDatime& dbtime = StMaker::GetChain()->GetDBTime();
-  mYear = dbtime.GetYear();
-  int yyyymmdd = dbtime.GetDate(); //form of 19971224 (i.e. 24/12/1997)
-  int hhmmss   = dbtime.GetTime(); //form of 123623 (i.e. 12:36:23)
+  St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("StarDb");
+  assert(mydb);
+  mYear=mydb->GetDateTime().GetYear();
+  int yyyymmdd=mydb->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
+  int hhmmss=mydb->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23)
 
   LOG_INFO<<Form("Eemc::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
 
   //char text[1000];
   //sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
   //EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
-  EemcTrigUtil::getFeePed4(dbtime,mxChan,feePed);
+  EemcTrigUtil::getFeePed4(mydb->GetDateTime(),mxChan,feePed);
 
   if( mYear == 2006 ){ // #### modified line by Liaoyuan 
     DsmThreshold thresholds;
@@ -402,59 +402,37 @@ StEemcTriggerSimu::getHttpInfo(int tpId, EemcHttpInfo &httpInfo){
 
 void 
 StEemcTriggerSimu::getEemcAdc(){
+
   // printf("This StEemcTriggerSimu::getting Endcap ADC values\n");
-  if (mSource == "MuDst") {
-    if (StMuEmcCollection* emc = StMuDst::muEmcCollection()) {
-      // printf("see %d endcap towers\n",emc->getNEndcapTowerADC());
-  
-      //.........................  T O W E R S .....................
-      int i;
-      for (i=0; i< emc->getNEndcapTowerADC(); i++) {
-	int sec,eta,sub,AdcRead; //muDst  ranges:sec:1-12, sub:1-5, eta:1-12
-	emc->getEndcapTowerADC(i,AdcRead,sec,sub,eta);
-
-	//Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
-	const EEmcDbItem *x=mDbE->getTile(sec,'A'+sub-1,eta,'T');
-	assert(x); // it should never happened for muDst
-	// do NOT drop not working channels
-    
-	assert(x->crate >= 1 && x->crate <=  6);
-	assert(x->chan  >= 0 && x->chan  < 120);
-	int rdo = (x->crate-1)*mxChan+x->chan;
-	rawAdc[rdo] = AdcRead;
-
-	//LOG_DEBUG << Form("crate=%d chan=%d rdo=%d adc=%d",x->crate,x->chan,rdo,AdcRead) << endm;
-
-	//if(strstr(x->name,"12TD03")) printf("i=%d, name=%s, sec=%d, crate=%d, chan=%d, ped=%.1f, rawADC=%d\n",i, x->name, sec, x->crate, x->chan, x->ped, AdcRead);
-	//  if(x->crate==2) printf(" name=%s crate=%d, chan=%d  ped=%.1f rawADC=%d  stat=%d fail=%d\n", x->name, x->crate, x->chan, x->ped, AdcRead, x->stat, x->fail);
-      }	// end of loop over towers
-    }
-  } else if (mSource == "StEvent") { // Useful for running in BFC
-    if (StEvent* event = (StEvent*)StMaker::GetChain()->GetDataSet("StEvent")) {
-      if (StEmcCollection* emc = event->emcCollection()) {
-	if (StEmcDetector* det = emc->detector(kEndcapEmcTowerId)) {
-	  for (unsigned int sec = 1; sec <= det->numberOfModules(); ++sec) { // 1-12
-	    StSPtrVecEmcRawHit& hits = det->module(sec)->hits();
-	    //LOG_DEBUG << Form("sector=%d: nhits=%d",sec,hits.size()) << endm;
-	    for (size_t i = 0; i < hits.size(); ++i) {
-	      StEmcRawHit* hit = hits[i];
-	      char sub = hit->sub()-1+'A'; // 'A'-'E'
-	      int  eta = hit->eta(); // 1-12
-	      int  adc = hit->adc(); // raw ADC
-	      // Db ranges: sector=1-12,sub=A-E,eta=1-12,type=T,P-R; slow method
-	      const EEmcDbItem* x = mDbE->getTile(sec,sub,eta,'T');
-	      if (!x) continue;
-	      int rdo = (x->crate-1)*mxChan+x->chan;
-	      rawAdc[rdo] = adc;
-	      //LOG_DEBUG << Form("crate=%d chan=%d rdo=%d adc=%d",x->crate,x->chan,rdo,adc) << endm;
-	    } // End loop over hits
-	  } // End loop over sectors
-	} // if (det)
-      } // if (emc)
-    } // if (event)
-  } else {
-    LOG_WARN << "No EEMC data for this event" << endm;
+  StMuEmcCollection* emc = StMuDst::muEmcCollection();
+  if (!emc) {
+     LOG_WARN  <<"No EMC data1 for this event"<<endm;    
+     return;
   }
+  // printf("see %d endcap towers\n",emc->getNEndcapTowerADC());
+  
+  //.........................  T O W E R S .....................
+  int i;
+  for (i=0; i< emc->getNEndcapTowerADC(); i++) {
+    int sec,eta,sub,AdcRead; //muDst  ranges:sec:1-12, sub:1-5, eta:1-12
+    emc->getEndcapTowerADC(i,AdcRead,sec,sub,eta);
+
+    //Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
+    const EEmcDbItem *x=mDbE->getTile(sec,'A'+sub-1,eta,'T');
+    assert(x); // it should never happened for muDst
+    // do NOT drop not working channels
+    
+    assert(x->crate >= 1 && x->crate <=  6);
+    assert(x->chan  >= 0 && x->chan  < 120);
+    int rdo = (x->crate-1)*mxChan+x->chan;
+    rawAdc[rdo] = AdcRead;
+
+    //LOG_DEBUG << Form("crate=%d chan=%d rdo=%d adc=%d",x->crate,x->chan,rdo,AdcRead) << endm;
+
+    //if(strstr(x->name,"12TD03")) printf("i=%d, name=%s, sec=%d, crate=%d, chan=%d, ped=%.1f, rawADC=%d\n",i, x->name, sec, x->crate, x->chan, x->ped, AdcRead);
+    //  if(x->crate==2) printf(" name=%s crate=%d, chan=%d  ped=%.1f rawADC=%d  stat=%d fail=%d\n", x->name, x->crate, x->chan, x->ped, AdcRead, x->stat, x->fail);
+  }// end of loop over towers
+  
 }
 
 //==================================================
@@ -715,15 +693,6 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
-// Revision 1.24  2009/12/08 02:12:42  pibero
-// Removed extraneous "return;"
-//
-// Revision 1.23  2009/12/08 02:06:59  pibero
-// Add support for StEvent when running in BFC.
-//
-// Revision 1.22  2009/12/06 21:57:49  pibero
-// Removed dependency on hard-coded maker's name.
-//
 // Revision 1.21  2009/11/19 07:29:28  pibero
 // Mask out faulty EEMC towers. Add more LOG_DEBUG messages.
 //

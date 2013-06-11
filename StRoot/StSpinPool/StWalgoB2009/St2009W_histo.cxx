@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.2 2009/12/08 04:48:35 balewski Exp $
+// $Id: St2009W_histo.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -121,9 +121,7 @@ St2009WMaker::initHistos(){
 
   hA[34]=h=new TH2F("muBclAdcPt"," matched  TPC PT vs. 2x2 cluster ADC sum ; cluster (ADC sum);TPC  PT (GeV)",50,0,5000,75,0,150);
 
-  hA[35]=new TH1F("muTrch2","track glob chi2/dof X-Y",100,0,5);
-  hA[36]=new TH2F("muTrch2b","track glob chi2/dof; chi2/dof  X-Y; last hit eta",30,0,5.,30,-1,1);
-
+  // free 35, 36
   
   //.... 4x4 cluster
   hA[37]=h=new TH1F("muBclET24","matched BTOW 4x4 cluster ET ;cluster 4x4  ET (GeV)",100,0,100);
@@ -240,9 +238,6 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
-// Revision 1.2  2009/12/08 04:48:35  balewski
-// *** empty log message ***
-//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //
