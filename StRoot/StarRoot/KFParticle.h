@@ -94,9 +94,9 @@ class KFParticle :public KFParticleBase
   Double_t GetChi2 () const ; //* chi^2
   Int_t    GetNDF  () const ; //* Number of Degrees of Freedom
   
-  Double_t GetParameter ( int i ) const ;
-  Double_t GetCovariance( int i ) const ;
-  Double_t GetCovariance( int i, int j ) const ;
+  Double_t GetParameter ( Int_t i ) const ;
+  Double_t GetCovariance( Int_t i ) const ;
+  Double_t GetCovariance( Int_t i, Int_t j ) const ;
 
   //* Accessors with calculations, value returned w/o error flag
   
@@ -135,16 +135,16 @@ class KFParticle :public KFParticleBase
   //* Accessors with calculations( &value, &estimated sigma )
   //* error flag returned (0 means no error during calculations) 
 
-  int GetP           ( Double_t &P, Double_t &SigmaP ) const ;   //* momentum
-  int GetPt          ( Double_t &Pt, Double_t &SigmaPt ) const ; //* transverse momentum
-  int GetEta         ( Double_t &Eta, Double_t &SigmaEta ) const ; //* pseudorapidity
-  int GetPhi         ( Double_t &Phi, Double_t &SigmaPhi ) const ; //* phi
-  int GetMomentum    ( Double_t &P, Double_t &SigmaP ) const ;   //* momentum
-  int GetMass        ( Double_t &M, Double_t &SigmaM ) const ;   //* mass
-  int GetDecayLength ( Double_t &L, Double_t &SigmaL ) const ;   //* decay length
-  int GetDecayLengthXY ( Double_t &L, Double_t &SigmaL ) const ;   //* decay length in XY
-  int GetLifeTime    ( Double_t &T, Double_t &SigmaT ) const ;   //* life time
-  int GetR           ( Double_t &R, Double_t &SigmaR ) const ; //* R
+  Int_t GetP           ( Double_t &P, Double_t &SigmaP ) const ;   //* momentum
+  Int_t GetPt          ( Double_t &Pt, Double_t &SigmaPt ) const ; //* transverse momentum
+  Int_t GetEta         ( Double_t &Eta, Double_t &SigmaEta ) const ; //* pseudorapidity
+  Int_t GetPhi         ( Double_t &Phi, Double_t &SigmaPhi ) const ; //* phi
+  Int_t GetMomentum    ( Double_t &P, Double_t &SigmaP ) const ;   //* momentum
+  Int_t GetMass        ( Double_t &M, Double_t &SigmaM ) const ;   //* mass
+  Int_t GetDecayLength ( Double_t &L, Double_t &SigmaL ) const ;   //* decay length
+  Int_t GetDecayLengthXY ( Double_t &L, Double_t &SigmaL ) const ;   //* decay length in XY
+  Int_t GetLifeTime    ( Double_t &T, Double_t &SigmaT ) const ;   //* life time
+  Int_t GetR           ( Double_t &R, Double_t &SigmaR ) const ; //* R
 
 
   //*
@@ -163,9 +163,9 @@ class KFParticle :public KFParticleBase
   Double_t & Chi2 () ;
   Int_t    & NDF  () ;
 
-  Double_t & Parameter ( int i ) ;
-  Double_t & Covariance( int i ) ;
-  Double_t & Covariance( int i, int j ) ;
+  Double_t & Parameter ( Int_t i ) ;
+  Double_t & Covariance( Int_t i ) ;
+  Double_t & Covariance( Int_t i, Int_t j ) ;
   Double_t * Parameters () ;
   Double_t * CovarianceMatrix() ;
 
@@ -197,7 +197,7 @@ class KFParticle :public KFParticleBase
 
   //* Everything in one go  
 
-  void Construct( const KFParticle *vDaughters[], int NDaughters, 
+  void Construct( const KFParticle *vDaughters[], Int_t NDaughters, 
 		  const KFParticle *ProdVtx=0,   Double_t Mass=-1, Bool_t IsConstrained=0  );
 
   //*
@@ -442,17 +442,17 @@ inline Int_t    KFParticle::GetNDF  () const
   return KFParticleBase::GetNDF();  
 }
 
-inline Double_t KFParticle::GetParameter ( int i ) const 
+inline Double_t KFParticle::GetParameter ( Int_t i ) const 
 { 
   return KFParticleBase::GetParameter(i);  
 }
 
-inline Double_t KFParticle::GetCovariance( int i ) const 
+inline Double_t KFParticle::GetCovariance( Int_t i ) const 
 { 
   return KFParticleBase::GetCovariance(i); 
 }
 
-inline Double_t KFParticle::GetCovariance( int i, int j ) const 
+inline Double_t KFParticle::GetCovariance( Int_t i, Int_t j ) const 
 { 
   return KFParticleBase::GetCovariance(i,j);
 }
@@ -639,52 +639,52 @@ inline Double_t KFParticle::GetErrR    () const
 }
 
 
-inline int KFParticle::GetP( Double_t &P, Double_t &SigmaP ) const 
+inline Int_t KFParticle::GetP( Double_t &P, Double_t &SigmaP ) const 
 {
   return KFParticleBase::GetMomentum( P, SigmaP );
 }
 
-inline int KFParticle::GetPt( Double_t &Pt, Double_t &SigmaPt ) const 
+inline Int_t KFParticle::GetPt( Double_t &Pt, Double_t &SigmaPt ) const 
 {
   return KFParticleBase::GetPt( Pt, SigmaPt );
 }
 
-inline int KFParticle::GetEta( Double_t &Eta, Double_t &SigmaEta ) const 
+inline Int_t KFParticle::GetEta( Double_t &Eta, Double_t &SigmaEta ) const 
 {
   return KFParticleBase::GetEta( Eta, SigmaEta );
 }
 
-inline int KFParticle::GetPhi( Double_t &Phi, Double_t &SigmaPhi ) const 
+inline Int_t KFParticle::GetPhi( Double_t &Phi, Double_t &SigmaPhi ) const 
 {
   return KFParticleBase::GetPhi( Phi, SigmaPhi );
 }
 
-inline int KFParticle::GetMomentum( Double_t &P, Double_t &SigmaP ) const 
+inline Int_t KFParticle::GetMomentum( Double_t &P, Double_t &SigmaP ) const 
 {
   return KFParticleBase::GetMomentum( P, SigmaP );
 }
 
-inline int KFParticle::GetMass( Double_t &M, Double_t &SigmaM ) const 
+inline Int_t KFParticle::GetMass( Double_t &M, Double_t &SigmaM ) const 
 {
   return KFParticleBase::GetMass( M, SigmaM );
 }
 
-inline int KFParticle::GetDecayLength( Double_t &L, Double_t &SigmaL ) const 
+inline Int_t KFParticle::GetDecayLength( Double_t &L, Double_t &SigmaL ) const 
 {
   return KFParticleBase::GetDecayLength( L, SigmaL );
 }
 
-inline int KFParticle::GetDecayLengthXY( Double_t &L, Double_t &SigmaL ) const 
+inline Int_t KFParticle::GetDecayLengthXY( Double_t &L, Double_t &SigmaL ) const 
 {
   return KFParticleBase::GetDecayLengthXY( L, SigmaL );
 }
 
-inline int KFParticle::GetLifeTime( Double_t &T, Double_t &SigmaT ) const 
+inline Int_t KFParticle::GetLifeTime( Double_t &T, Double_t &SigmaT ) const 
 {
   return KFParticleBase::GetLifeTime( T, SigmaT );
 }
 
-inline int KFParticle::GetR( Double_t &R, Double_t &SigmaR ) const 
+inline Int_t KFParticle::GetR( Double_t &R, Double_t &SigmaR ) const 
 {
   return KFParticleBase::GetR( R, SigmaR );
 }
@@ -744,17 +744,17 @@ inline Int_t    & KFParticle::NDF()
   return KFParticleBase::NDF();  
 }
 
-inline Double_t & KFParticle::Parameter ( int i )        
+inline Double_t & KFParticle::Parameter ( Int_t i )        
 { 
   return KFParticleBase::Parameter(i);
 }
 
-inline Double_t & KFParticle::Covariance( int i )        
+inline Double_t & KFParticle::Covariance( Int_t i )        
 { 
   return KFParticleBase::Covariance(i);
 }
 
-inline Double_t & KFParticle::Covariance( int i, int j ) 
+inline Double_t & KFParticle::Covariance( Int_t i, Int_t j ) 
 { 
   return KFParticleBase::Covariance(i,j); 
 }
@@ -796,7 +796,7 @@ inline void KFParticle::SetNoDecayLength()
   KFParticleBase::SetNoDecayLength();
 }
 
-inline void KFParticle::Construct( const KFParticle *vDaughters[], int NDaughters, 
+inline void KFParticle::Construct( const KFParticle *vDaughters[], Int_t NDaughters, 
 			       const KFParticle *ProdVtx,   Double_t Mass, Bool_t IsConstrained  )
 {    
   KFParticleBase::Construct( ( const KFParticleBase**)vDaughters, NDaughters, 

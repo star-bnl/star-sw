@@ -6,7 +6,7 @@
 
 #include <algorithm>
 #include <numeric>
-static int gMyId=0;
+static int gMyId=0,gMyInst=0;
 
 #include "StMultiKeyMap.h"
 #ifndef MAX
@@ -55,11 +55,11 @@ double StMultiKeyMap::StMultiKeyMap::Quality()
   return mTop->Quality();
 }
 //______________________________________________________________________________
-void StMultiKeyMap::MakeTree()
+int StMultiKeyMap::MakeTree()
 {
    assert(!mTop);
    int nNodes = mArr.size();
-   if (!nNodes) return;
+   if (!nNodes) return 0;
 //   std::random_shuffle( mArr.begin(),mArr.end() ); // shuffle elements 
    random_shuffle(mArr); 
    mTop =  mArr[0];
@@ -68,7 +68,7 @@ void StMultiKeyMap::MakeTree()
 std::vector<StMultiKeyNode*> tmp(0);
    assert(nNodes == mTop->Size());
    mArr.swap(tmp);	//destroy internal array completely;
-   return;
+   return nNodes;
 }
 //______________________________________________________________________________
 int StMultiKeyMap::ls(const char *file) const
@@ -179,7 +179,7 @@ StMultiKeyNode::StMultiKeyNode(const StMultiKeyNode &fr)
 void StMultiKeyNode::Init()
 {
   memset(&mNKey,0,(char*)&mKeys-&mNKey+sizeof(mKeys));
-  mId = ++gMyId;
+  mId = ++gMyId; gMyInst++;
 }
 //______________________________________________________________________________
 void StMultiKeyNode::Clear()
@@ -192,7 +192,11 @@ StMultiKeyNode::~StMultiKeyNode()
   if (mObj) delete [] mKeys;
   delete mLink[0];
   delete mLink[1];
+  gMyInst--;
 } 
+//______________________________________________________________________________
+int StMultiKeyNode::GetNInst() 
+{ return gMyInst;}
 //______________________________________________________________________________
 void StMultiKeyNode::Set(const void *obj,const float *keys)
 {

@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.33 2010/08/31 20:16:15 fisyak Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.35 2011/02/22 20:42:52 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,12 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.35  2011/02/22 20:42:52  perev
+ * now int parentParentGeantId
+ *
+ * Revision 1.34  2011/02/16 00:50:30  perev
+ * mPdgId added
+ *
  * Revision 1.33  2010/08/31 20:16:15  fisyak
  * Add track seedQuality
  *
@@ -153,6 +159,12 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.35  2011/02/22 20:42:52  perev
+ * now int parentParentGeantId
+ *
+ * Revision 1.34  2011/02/16 00:50:30  perev
+ * mPdgId added
+ *
  * Revision 1.33  2010/08/31 20:16:15  fisyak
  * Add track seedQuality
  *
@@ -294,7 +306,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.33 2010/08/31 20:16:15 fisyak Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.35 2011/02/22 20:42:52 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -1538,7 +1550,7 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
       contamPair->setStartY(mcTrack->startVertex()->position().y());
       contamPair->setStartZ(mcTrack->startVertex()->position().z());  
       
-      Short_t parentParentGeantId=0;
+      Int_t parentParentGeantId=0;
       Float_t parentParentPt=0;
       // check for parent of parent
       if(mcTrack->parent()->parent() && 
@@ -1853,6 +1865,7 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
     tinyMcTrack->setNSsdHitMc(mcTrack->ssdHits().size());
     tinyMcTrack->setNFtpcHitMc(mcTrack->ftpcHits().size());
     tinyMcTrack->setGeantId(mcTrack->geantId());
+    tinyMcTrack->setPdgId(mcTrack->pdgId());
     short chargeMc = -9999;
     if (mcTrack->particleDefinition()) chargeMc = static_cast<short>(mcTrack->particleDefinition()->charge());
     tinyMcTrack->setChargeMc(chargeMc);
@@ -2561,6 +2574,12 @@ void StMiniMcMaker::AppendMCDaughterTrack() {
 
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.35  2011/02/22 20:42:52  perev
+// now int parentParentGeantId
+//
+// Revision 1.34  2011/02/16 00:50:30  perev
+// mPdgId added
+//
 // Revision 1.33  2010/08/31 20:16:15  fisyak
 // Add track seedQuality
 //

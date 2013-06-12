@@ -130,6 +130,7 @@ void simM2Maker (
 	StBTofSimMaker *simMaker = new StBTofSimMaker;
 	simMaker->setBookHist(kTRUE);
 	simMaker->setHistFileName(filename);
+	simMaker->writeStEvent(kTRUE);
 
 	StBTofMatchMaker *matchMaker = new StBTofMatchMaker;
         matchMaker->setIdealGeometry();
