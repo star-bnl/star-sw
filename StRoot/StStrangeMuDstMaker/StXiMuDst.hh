@@ -35,7 +35,7 @@ public:
   Float_t momBachelorX() const;        // Momentum components of bachelor
   Float_t momBachelorY() const;
   Float_t momBachelorZ() const;
-  UShort_t keyBachelor() const;
+  Int_t   keyBachelor() const;
   StTrackTopologyMap& topologyMapBachelor();
 
   TVector3 momXi();                    //  Momentum components of Xi/Omega at decay vertex
@@ -75,7 +75,7 @@ protected:
   Float_t mMomBachelorY;
   Float_t mMomBachelorZ;
 
-  UShort_t mKeyBachelor;
+  Int_t mKeyBachelor;
 
   StTrackTopologyMap mTopologyMapBachelor;
 
@@ -91,7 +91,7 @@ protected:
   Float_t mErrDedxBachelor;
   UShort_t mNumDedxBachelor;
 
-  ClassDef(StXiMuDst,7)
+  ClassDef(StXiMuDst,8)
 };
 
 inline StXiMuDst::StXiMuDst(StXiVertex* x1,StV0Vertex* v1,StStrangeEvMuDst* e1):
@@ -121,7 +121,7 @@ inline Float_t StXiMuDst::momXiZ() { return mMomBachelorZ + momV0Z(); }
 inline Float_t StXiMuDst::momXiAtPrimVertexX() { return momXiAtPrimVertex().X(); }
 inline Float_t StXiMuDst::momXiAtPrimVertexY() { return momXiAtPrimVertex().Y(); }
 inline Float_t StXiMuDst::momXiAtPrimVertexZ() { return momXiAtPrimVertex().Z(); }
-inline UShort_t StXiMuDst::keyBachelor() const { return mKeyBachelor; }
+inline Int_t StXiMuDst::keyBachelor() const { return mKeyBachelor; }
 inline StTrackTopologyMap& StXiMuDst::topologyMapBachelor()
              { return mTopologyMapBachelor; }
 inline Float_t StXiMuDst::chi2Xi() const { return mChi2Xi; }
@@ -140,8 +140,11 @@ inline Float_t StXiMuDst::lenDedxBachelor() const
 
 
 /***********************************************************************
- * $Id: StXiMuDst.hh,v 3.12 2008/07/11 16:23:10 genevb Exp $
+ * $Id: StXiMuDst.hh,v 3.13 2011/05/27 18:25:32 genevb Exp $
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.13  2011/05/27 18:25:32  genevb
+ * Propagate StTrack::key => Int_t to other codes
+ *
  * Revision 3.12  2008/07/11 16:23:10  genevb
  * bad() won't work unless chi2 allows to return negative values
  *

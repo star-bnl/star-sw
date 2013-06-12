@@ -88,9 +88,9 @@ public:
   /// Length of dE/dX track of daughter
   virtual Float_t  lenDedxDaughter()    const {return 0;}
   /// Track id of parent
-  virtual UShort_t keyParent()     const {return 0;}
+  virtual Int_t keyParent()     const {return 0;}
   /// Track id of daughter
-  virtual UShort_t keyDaughter()   const {return 0;}
+  virtual Int_t keyDaughter()   const {return 0;}
   //@}
 
   /// @name DCAs
@@ -131,8 +131,11 @@ inline Float_t StKinkI::parentPrimPsi() const
 
 
 /***********************************************************************
- * $Id: StKinkI.hh,v 3.6 2008/07/10 16:16:54 genevb Exp $
+ * $Id: StKinkI.hh,v 3.7 2011/05/27 18:25:32 genevb Exp $
  * $Log: StKinkI.hh,v $
+ * Revision 3.7  2011/05/27 18:25:32  genevb
+ * Propagate StTrack::key => Int_t to other codes
+ *
  * Revision 3.6  2008/07/10 16:16:54  genevb
  * Allow for marking of bad tracks -> bad secondary vertices
  *

@@ -40,8 +40,8 @@ public:
   Float_t  transverseMassPion() const;
   Float_t  rapidityKaon() const;
   Float_t  rapidityPion() const;
-  UShort_t keyParent() const;          // Track id of parent
-  UShort_t keyDaughter() const;        // Track id of daughter
+  Int_t    keyParent() const;          // Track id of parent
+  Int_t    keyDaughter() const;        // Track id of daughter
 
   Float_t  chi2Kink()     const;       // Chi square of Kink
   Float_t  clKink()       const;       // Confidence level of Kink
@@ -90,8 +90,8 @@ public:
   Float_t  mErrDedxDaughter;
   UShort_t mNumDedxParent;
   UShort_t mNumDedxDaughter;
-  UShort_t mKeyParent;
-  UShort_t mKeyDaughter;
+  Int_t    mKeyParent;
+  Int_t    mKeyDaughter;
 
 private:
   void     findMinDeltaEnergy(StKinkVertex*);
@@ -101,7 +101,7 @@ private:
   void     findTransverseMassPion();
   void     findRapidityKaon();
   void     findRapidityPion();
-  ClassDef(StKinkMuDst,8)
+  ClassDef(StKinkMuDst,9)
 };
 
 inline Float_t StKinkMuDst::dcaParentDaughter() const
@@ -155,14 +155,17 @@ inline Float_t StKinkMuDst::lenDedxParent()   const
                { return (mNumDedxParent/100); }
 inline Float_t StKinkMuDst::lenDedxDaughter() const
                { return (mNumDedxDaughter/100); }
-inline UShort_t StKinkMuDst::keyParent() const { return mKeyParent; }
-inline UShort_t StKinkMuDst::keyDaughter() const { return mKeyDaughter; }
+inline Int_t StKinkMuDst::keyParent() const { return mKeyParent; }
+inline Int_t StKinkMuDst::keyDaughter() const { return mKeyDaughter; }
 #endif
 
 
 /***********************************************************************
- * $Id: StKinkMuDst.hh,v 3.12 2008/07/11 16:23:08 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.13 2011/05/27 18:25:32 genevb Exp $
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.13  2011/05/27 18:25:32  genevb
+ * Propagate StTrack::key => Int_t to other codes
+ *
  * Revision 3.12  2008/07/11 16:23:08  genevb
  * bad() won't work unless chi2 allows to return negative values
  *

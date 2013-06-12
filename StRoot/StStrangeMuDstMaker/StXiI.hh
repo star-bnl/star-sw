@@ -178,7 +178,7 @@ public:
 
   //@{
   /// Bachelor track key
-  virtual UShort_t keyBachelor() const {return 0;}
+  virtual Int_t keyBachelor() const {return 0;}
   /// Bachelor track topology map
   virtual StTrackTopologyMap& topologyMapBachelor() {return (*gFakeTopoPtr);}
   /// dE/dX of bachelor
@@ -466,8 +466,11 @@ inline TVector3 StXiI::momXiFrame(Float_t m1, Float_t m2, StXiDaughter type) {
 
 
 /***********************************************************************
- * $Id: StXiI.hh,v 3.13 2008/07/10 16:16:55 genevb Exp $
+ * $Id: StXiI.hh,v 3.14 2011/05/27 18:25:32 genevb Exp $
  * $Log: StXiI.hh,v $
+ * Revision 3.14  2011/05/27 18:25:32  genevb
+ * Propagate StTrack::key => Int_t to other codes
+ *
  * Revision 3.13  2008/07/10 16:16:55  genevb
  * Allow for marking of bad tracks -> bad secondary vertices
  *

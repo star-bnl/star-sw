@@ -11,7 +11,8 @@ StMuMtdHeader::StMuMtdHeader(const StMtdHeader *header){
 	mFiberTriggerWord2 = 0;
 	mTriggerTime1 = 0;
 	mTriggerTime2 = 0;
-	for(int i=0; i<header->MAXFIBER; i++){
+	if (header){
+	  for(int i=0; i<header->MAXFIBER; i++){
 		if(i==0) {
 			mFiberHeader1 = header->fiberHeader(i);
 			mFiberTriggerWord1 = header->fiberTriggerWord(i);
@@ -22,8 +23,8 @@ StMuMtdHeader::StMuMtdHeader(const StMtdHeader *header){
 			mFiberTriggerWord2 = header->fiberTriggerWord(i);
 			mTriggerTime2 = header->triggerTime(i); 		
 		}
-	}
-	
+	  }
+	}	
 }
 short StMuMtdHeader::fiberHeader(int fiberId) const {
     if (fiberId==1) return mFiberHeader1;
