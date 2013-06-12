@@ -4,7 +4,8 @@ extern TSystem* gSystem;
 
 
 void loadSharedLibraries() {
-  // Dynamically link needed shared libs
+  // Dynamically link needed shared lib
+  gSystem->Load("libStTableUtilities");
   gSystem->Load("libTable");
   gSystem->Load("libPhysics");
   gSystem->Load("St_base");
