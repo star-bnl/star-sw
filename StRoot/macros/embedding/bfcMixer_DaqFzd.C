@@ -1,8 +1,11 @@
 //////////////////////////////////////////////////////////////////////////
 //
-// $Id: bfcMixer_DaqFzd.C,v 1.1 2011/10/14 20:05:23 jeromel Exp $
+// $Id: bfcMixer_DaqFzd.C,v 1.2 2012/02/17 20:47:36 fisyak Exp $
 //
 // $Log: bfcMixer_DaqFzd.C,v $
+// Revision 1.2  2012/02/17 20:47:36  fisyak
+// Remove nodefault option from chain3
+//
 // Revision 1.1  2011/10/14 20:05:23  jeromel
 // Saved version ... floating aorund and being used or tested
 //
@@ -74,7 +77,7 @@ void bfcMixer_Jet2(const Int_t Nevents = 1000,
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible." << endl;
     return;
   }
-  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
+  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker"; 
   chain3Opt += ",";
 
   if (prodName == "P08icpp")           { chain3Opt += geomP08ic; }
