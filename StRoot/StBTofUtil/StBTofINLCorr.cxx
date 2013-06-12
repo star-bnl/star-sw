@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.6 2009/08/25 01:02:44 dongx Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.7 2009/12/14 19:38:30 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,10 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.7  2009/12/14 19:38:30  dongx
+ * - mNValidBoards set by the read-in database entrie instead of a hard-coded number
+ * - clean up mNValidTrays and related functions (not needed since previous versions)
+ *
  * Revision 1.6  2009/08/25 01:02:44  dongx
  * Correct the total # of rows read-in for the TDIGOnTray table
  *
@@ -52,6 +56,7 @@ void StBTofINLCorr::init() {
 }
 
 void StBTofINLCorr::init(StMaker *maker) {
+  Reset();
   initFromDbase(maker);
 }
 
@@ -60,7 +65,6 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
   LOG_INFO << "StBTofINLCorr -- rertieving the INL correction table" << endm;
   ///////////////////////////////////////////////////////
   // Load configuration parameters from dbase
-  //    need "[shell] setenv Calibrations_tof reconV0"
   ///////////////////////////////////////////////////////
 
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
@@ -118,8 +122,9 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
   }
   Int_t NTdig = 0;
   Int_t tdigId_old = 0;
-  for (Int_t i=0;i<mNValidBoards*mNChanOnTDIG;i++) {
-    if(NTdig>mNTDIGMAX) {
+//  for (Int_t i=0;i<mNValidBoards*mNChanOnTDIG;i++) {
+  for (Int_t i=0;i<numRows;i++) {
+    if(NTdig>=mNTDIGMAX) {
       { LOG_INFO << " !!! # of boards read-in exceeds the array limit in this function !!! Trancated !!! " << endm; }
       NTdig = mNTDIGMAX;
       break;
@@ -147,6 +152,7 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
   }
 
   LOG_INFO << " Total # of boards read in : " << NTdig << endm;
+  mNValidBoards = NTdig;
 
   // re-organize
   for(Int_t i=0;i<NTdig;i++) {
@@ -185,7 +191,7 @@ void StBTofINLCorr::Reset() {
     mBoardId2Index[i] = -1;
   }
 
-  mNValidTrays = 0;
+  mNValidBoards = 0;
 }
 
 float StBTofINLCorr::getTrayINLCorr(int trayId, int globalTdcChan, int bin) {

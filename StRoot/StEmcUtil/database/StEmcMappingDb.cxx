@@ -1,10 +1,11 @@
-// $Id: StEmcMappingDb.cxx,v 1.7 2009/11/17 14:19:28 mattheww Exp $
+// $Id: StEmcMappingDb.cxx,v 1.8 2010/01/27 21:40:30 perev Exp $
 
 #include "StEmcMappingDb.h"
 
 #include "TUnixTime.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
+#include "St_db_Maker/St_db_Maker.h"
 
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
@@ -437,7 +438,7 @@ bool StEmcMappingDb::maybe_reset_cache(StDetectorId det) const {
     Int_t version;
     switch(det) {
         case kBarrelEmcTowerId:
-        if((version = mChain->GetValidity(mBemcTTable,NULL)) != mBemcValidity) {
+        if((version = St_db_Maker::GetValidity(mBemcTTable,NULL)) != mBemcValidity) {
             mBemcValidity = version;
             reset_bemc_cache();
             return true;
@@ -445,7 +446,7 @@ bool StEmcMappingDb::maybe_reset_cache(StDetectorId det) const {
         break;
         
         case kBarrelEmcPreShowerId:
-        if((version = mChain->GetValidity(mBprsTTable,NULL)) != mBprsValidity) {
+        if((version = St_db_Maker::GetValidity(mBprsTTable,NULL)) != mBprsValidity) {
             mBprsValidity = version;
             reset_bprs_cache();
             return true;
@@ -453,7 +454,7 @@ bool StEmcMappingDb::maybe_reset_cache(StDetectorId det) const {
         break;
         
         case kBarrelSmdEtaStripId:
-        if((version = mChain->GetValidity(mSmdeTTable,NULL)) != mSmdeValidity) {
+        if((version = St_db_Maker::GetValidity(mSmdeTTable,NULL)) != mSmdeValidity) {
             mSmdeValidity = version;
             reset_smde_cache();
             return true;
@@ -461,7 +462,7 @@ bool StEmcMappingDb::maybe_reset_cache(StDetectorId det) const {
         break;
         
         case kBarrelSmdPhiStripId:
-        if((version = mChain->GetValidity(mSmdpTTable,NULL)) != mSmdpValidity) {
+        if((version = St_db_Maker::GetValidity(mSmdpTTable,NULL)) != mSmdpValidity) {
             mSmdpValidity = version;
             reset_smdp_cache();
             return true;
@@ -491,6 +492,9 @@ void StEmcMappingDb::reset_smdp_cache() const {
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.cxx,v $
+ * Revision 1.8  2010/01/27 21:40:30  perev
+ * GetValidity now is static
+ *
  * Revision 1.7  2009/11/17 14:19:28  mattheww
  * fixed bug in some if statements
  *

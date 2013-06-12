@@ -1,6 +1,9 @@
-// $Id: gasTemp.C,v 1.2 2009/11/22 20:48:30 jcs Exp $
+// $Id: gasTemp.C,v 1.3 2009/12/09 14:41:49 jcs Exp $
 //
 // $Log: gasTemp.C,v $
+// Revision 1.3  2009/12/09 14:41:49  jcs
+// delta_t0 and delta_gas can now both = 0
+//
 // Revision 1.2  2009/11/22 20:48:30  jcs
 // set 2D histogram limits depending on deltaT
 //
@@ -38,11 +41,6 @@ void gasTemp(TString filename,int ftpc, int lsec, int straight, int gfit,char* t
   cout<<"                            maxz     = "<<maxz<<endl;
   cout<<"                            minrad   = "<<minrad<<endl;
   cout<<"                            maxrad   = "<<maxrad<<endl;
-// if both t0 and gas = "0", set t0=".000001" otherwise program will seg fault
-  if (atof(t0)==0 && atof(gas)==0) {
-     t0 = ".000001";
-     cout<<"     changed t0=0 to        t0       = "<<t0<<" to avoid seg fault"<<endl;
-  } else
   cout<<"                            t0       = "<<t0<<endl;
   cout<<"                            gas      = "<<gas<<endl;
   cout<<"                            gastemp  = "<<gastemp<<endl;
@@ -128,7 +126,7 @@ void gasTemp(TString filename,int ftpc, int lsec, int straight, int gfit,char* t
 	}
     }
 
-  laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,"0.000001","0",0,mbfield);
+  laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,"0","0",0,mbfield);
 
   delete laser;
 }

@@ -3,6 +3,9 @@
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+
+#include <algorithm>
+#include <numeric>
 static int gMyId=0;
 
 #include "StMultiKeyMap.h"
@@ -10,6 +13,7 @@ static int gMyId=0;
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
+static void random_shuffle(std::vector<StMultiKeyNode*> &arr); // shuffle elements 
 //______________________________________________________________________________
 StMultiKeyMap::StMultiKeyMap(int nkeys) 
 {
@@ -55,17 +59,14 @@ void StMultiKeyMap::MakeTree()
 {
    assert(!mTop);
    int nNodes = mArr.size();
-   for (int n=nNodes-1;n>-1;n--) 
-   {
-     int i = rand()%(n+1);
-     StMultiKeyNode *node=mArr[i];
-     node->Clear();
-     mArr[i]=mArr[n];
-     if (!mTop) { mTop = node          ;}
-     else       { mTop->Add(node,&mTop);}
-   }   
-   std::vector<StMultiKeyNode*> tmp(0);
-   assert(nNodes == mTop->GetNumb(0)+mTop->GetNumb(1));
+   if (!nNodes) return;
+//   std::random_shuffle( mArr.begin(),mArr.end() ); // shuffle elements 
+   random_shuffle(mArr); 
+   mTop =  mArr[0];
+   for (int i=1;i<nNodes;i++) {mTop->Add(mArr[i]);}
+
+std::vector<StMultiKeyNode*> tmp(0);
+   assert(nNodes == mTop->Size());
    mArr.swap(tmp);	//destroy internal array completely;
    return;
 }
@@ -209,47 +210,23 @@ void StMultiKeyNode::Set(const void *obj,const double *keys)
    Set(obj,buf);
 }
 //______________________________________________________________________________
-void StMultiKeyNode::Add(const void *obj,const float *keys, StMultiKeyNode **keep)
+void StMultiKeyNode::Add(const void *obj,const float *keys)
 {
   StMultiKeyNode *node = new StMultiKeyNode(mNKey);
   node->Set(obj,keys);
-  Add(node,keep);
+  Add(node);
 }
 //______________________________________________________________________________
-void StMultiKeyNode::Add(StMultiKeyNode *node, StMultiKeyNode **keep)
+void StMultiKeyNode::Add(StMultiKeyNode *node)
 {
 static int nCall=0; nCall++;
   assert(this != node);
-  assert(!node->mLink[0]);
-  assert(!node->mLink[1]);
-  assert(*keep == this);
   node->mIKey = (mIKey+1000003)%mNKey;
   int way = (node->mKeys[int(mIKey)] <= GetKey())? 0:1;
+  if (mLink[way])            { mLink[way]->Add(node);}
+  else                       { mLink[way] = node    ;}
   mNumb[way]++;
-  if (mLink[way])            { mLink[way]->Add(node,mLink+way); return;}
-  if (!mObj || mLink[1-way]) { mLink[way] = node;		return;}
-  assert(!mLink[0]);
-  assert(!mLink[1]);
-
-  int ik = mIKey;
-  const float *nKeys = node->mKeys;
-  if (!way || fabs(mKeys[ik]-nKeys[ik])<1e-6) {
-    ik = -1;  float fk = 0;
-    for (int i=0;i<mNKey;i++) {
-      float dif = fabs(mKeys[i]-nKeys[i])/(fabs(mKeys[i])+fabs(nKeys[i])+1e-10);
-      if (dif>fk) {fk = dif; ik = i;}
-    } 
-    if (ik==-1)   { mLink[way] = node; return;}
-  } 
-
-  Clear();
-  StMultiKeyNode *repl = new StMultiKeyNode(mNKey);
-  *keep = repl;
-  repl->mIKey = ik;
-  repl->mDiv = (mKeys[ik]+node->mKeys[ik])/2;
-  repl->Add(this,keep);
-  repl->Add(node,keep);
-  return ;
+  return;
 }  
 //______________________________________________________________________________
 double StMultiKeyNode::Quality() 
@@ -306,6 +283,7 @@ int StMultiKeyNode::ls(const char *file) const
 StMultiKeyMapIter::StMultiKeyMapIter(const StMultiKeyNode *node,const float *kMin,const float *kMax)
   :mMinMax(0),mStk(32)
 {
+  if (!node) return;
   Set(node,kMin,kMax);
 }
 //______________________________________________________________________________
@@ -327,6 +305,13 @@ void StMultiKeyMapIter::Set(const StMultiKeyNode *node,const float *kMin,const f
   mLev = 0; mStk[0]=0;
   Down(node);
   SelfCheck();
+}
+//______________________________________________________________________________
+void StMultiKeyMapIter::Update(const float *kMin,const float *kMax)
+{
+  int sk = mNK*sizeof(mKMin[0]);
+  if (kMin) memcpy(mKMin,kMin,sk);
+  if (kMax) memcpy(mKMax,kMax,sk);
 }
 //______________________________________________________________________________
 StMultiKeyMapIter::~StMultiKeyMapIter()
@@ -437,6 +422,16 @@ int StMultiKeyMapIter::FilterRite(const StMultiKeyNode *node) const
   }//end bounds switch
   return 0;
 }
-
+//______________________________________________________________________________
+void random_shuffle(std::vector<StMultiKeyNode*> &arr)
+{
+  int n = arr.size(); if (n<=3) return;
+  unsigned int u=n/2,us=1000000007;
+  int jr=n-1;
+  while (0<jr) {
+    int jj = (u+=us)%jr;
+    StMultiKeyNode *v = arr[jj]; arr[jj]=arr[jr]; arr[jr]=v; jr--;
+  }
+}
 //______________________________________________________________________________
 //______________________________________________________________________________

@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.20 2007/04/28 17:56:01 perev Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.21 2009/12/09 20:38:00 ogrebeny Exp $
 
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
@@ -36,6 +36,10 @@ StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   /// Class Constructor.  
   SetEmcCollectionLocal(false);
   mLocalStEmcCollection=0;
+  mUseFullTower = false;
+  mUseFullPreShower = false;
+  mUseFullSmdu = false;
+  mUseFullSmdv = false;
   mevIN= new EEmcMCData;
   meeve= new EEeventDst;
 
@@ -104,7 +108,7 @@ StEEmcFastMaker::Make(){
     mLocalStEmcCollection=new StEmcCollection();
     emcColl=mLocalStEmcCollection;
   } else { // standard action
-    StEvent *stevent =   (StEvent *) (StEvent *) GetInputDS("StEvent");
+    StEvent *stevent =   (StEvent *) GetInputDS("StEvent");
     assert(stevent); // do sth to provide StEvent first       
     emcColl=stevent->emcCollection();
     if(emcColl==0) {
@@ -142,99 +146,144 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
     for(int isec=0; isec<mxSector; isec++){ // over used sectors
       int secID=isec+1;
       EEsectorDst* EEsec = (EEsectorDst*)eevt->getSec(secID);
-      if(EEsec==0) continue;
+      //if(EEsec==0) continue;
       LOG_DEBUG<<  Form("EE2ST() isec=%d sec_add=%p  secID=%d det=%d\n",isec,(void*)EEsec,secID,det)<<endm;
 
       switch (det){
-      case kEndcapEmcTowerId: //..............................     
-	tca = EEsec->getTwHits();      
-	for(int j=0; j<=tca->GetLast(); j++){
-	  EEtwHitDst* t = (EEtwHitDst *) tca->At(j);
-	  int eta=t->eta();
-	  int sub=t->sub()-'A'+1;
+      case kEndcapEmcTowerId: {//..............................     
+	bool hasHit[kEEmcNumSubSectors][kEEmcNumEtas];
+	memset(hasHit,0,sizeof(hasHit));
+	if (EEsec) {
+	  tca = EEsec->getTwHits();      
+	  for(int j=0; j<=tca->GetLast(); j++){
+	    EEtwHitDst* t = (EEtwHitDst *) tca->At(j);
+	    int eta=t->eta();
+	    int sub=t->sub()-'A'+1;
 
-	  // FAST SIMU:
-	  int adc=(int) (t->energy() * mfixTgain[eta-1]);
-	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+	    // FAST SIMU:
+	    int adc=(int) (t->energy() * mfixTgain[eta-1]);
+	    if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
 
-	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
-	  d->addHit(h);
-	  //	  printf("yyy secID=%d, id2=%d\n",isec,h->module());
-	  LOG_DEBUG<<  Form("Tw   %c  %d  %f  %d \n",t->sub(),t->eta(),t->energy(),adc)<<endm;
-	} break;
-	
+	    StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
+	    d->addHit(h);
+	    hasHit[sub-1][eta-1] = true;
+	    //	  printf("yyy secID=%d, id2=%d\n",isec,h->module());
+	    LOG_DEBUG<<  Form("Tw   %c  %d  %f  %d \n",t->sub(),t->eta(),t->energy(),adc)<<endm;
+	  }
+	}
+	if (mUseFullTower) {
+	  // Fill rest of detector with empty hits (ADC=0, E=0)
+	  for (int sub = 1; sub <= kEEmcNumSubSectors; ++sub)
+	    for (int eta = 1; eta <= kEEmcNumEtas; ++eta)
+	      if (!hasHit[sub-1][eta-1]) d->addHit(new StEmcRawHit(id,secID,eta,sub,0,0));
+	}
+      } break;
+
       case kEndcapEmcPreShowerId: {//............................
-	tca = EEsec->getPre1Hits();      
-	for(int j=0; j<=tca->GetLast(); j++){
-	  EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
-	  int eta=t->eta();
-	  int sub=t->sub()-'A'+1;
-	  int adc= (int) (t->energy()* getPreshowerGain());
-	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+	bool hasHit[3*kEEmcNumSubSectors][kEEmcNumEtas];
+	memset(hasHit,0,sizeof(hasHit));
+	if (EEsec) {
+	  tca = EEsec->getPre1Hits();      
+	  for(int j=0; j<=tca->GetLast(); j++){
+	    EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
+	    int eta=t->eta();
+	    int sub=t->sub()-'A'+1;
+	    int adc= (int) (t->energy()* getPreshowerGain());
+	    if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
 
-	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
-	  d->addHit(h);
-	  LOG_DEBUG<<  Form("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy())<<endm;
+	    StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
+	    d->addHit(h);
+	    hasHit[sub-1][eta-1] = true;
+	    LOG_DEBUG<<  Form("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy())<<endm;
+	  }
+
+	  tca = EEsec->getPre2Hits();      
+	  for(int j=0; j<=tca->GetLast(); j++){
+	    EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
+	    int eta=t->eta();
+	    int sub=t->sub()-'A'+5+1;
+	    int adc= (int) (t->energy()* getPreshowerGain());
+	    if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+
+	    StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
+	    d->addHit(h);
+	    hasHit[sub-1][eta-1] = true;
+	    LOG_DEBUG<<  Form("Pr2   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy())<<endm;
+	  }
+
+	  tca = EEsec->getPostHits();      
+	  for(int j=0; j<=tca->GetLast(); j++){
+	    EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
+	    int eta=t->eta();
+	    int sub=t->sub()-'A'+10+1;
+	    int adc= (int) (t->energy()* getPreshowerGain());
+	    if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+
+	    StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
+	    d->addHit(h);
+	    hasHit[sub-1][eta-1] = true;
+	    LOG_DEBUG<<  Form ("Post   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy())<<endm;
+	  }
 	}
-
-	tca = EEsec->getPre2Hits();      
-	for(int j=0; j<=tca->GetLast(); j++){
-	  EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
-	  int eta=t->eta();
-	  int sub=t->sub()-'A'+5+1;
-	  int adc= (int) (t->energy()* getPreshowerGain());
-	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
-
-	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
-	  d->addHit(h);
-	  LOG_DEBUG<<  Form("Pr2   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy())<<endm;
-	}
-
-	tca = EEsec->getPostHits();      
-	for(int j=0; j<=tca->GetLast(); j++){
-	  EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
-	  int eta=t->eta();
-	  int sub=t->sub()-'A'+10+1;
-	  int adc= (int) (t->energy()* getPreshowerGain());
-	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
-
-	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
-	  d->addHit(h);
-	  LOG_DEBUG<<  Form ("Post   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy())<<endm;
+	if (mUseFullPreShower) {
+	  // Fill rest of detector with empty hits (ADC=0, E=0)
+	  for (int sub = 1; sub <= 15; ++sub)
+	    for (int eta = 1; eta <= kEEmcNumEtas; ++eta)
+	      if (!hasHit[sub-1][eta-1]) d->addHit(new StEmcRawHit(id,secID,eta,sub,0,0));
 	}
       } break;
 
       case kEndcapSmdUStripId: { //............................
-	tca = EEsec->getSmdUHits(); 
+	bool hasHit[kEEmcNumStrips];
+	memset(hasHit,0,sizeof(hasHit));
+	if (EEsec) {
+	  tca = EEsec->getSmdUHits(); 
 	
-	for(int j=0; j<=tca->GetLast(); j++){
-	  EEsmdHitDst* t = (EEsmdHitDst *)(* tca)[j];
-	  int eta=t->strip();
-	  int sub=1;
-	  int adc= (int) (t->energy()* getSmdGain());
-	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+	  for(int j=0; j<=tca->GetLast(); j++){
+	    EEsmdHitDst* t = (EEsmdHitDst *)(* tca)[j];
+	    int eta=t->strip();
+	    int sub=1;
+	    int adc= (int) (t->energy()* getSmdGain());
+	    if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
 
-	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
-	  d->addHit(h);
-	  LOG_DEBUG<<  Form("SMDU     %d  %d %f\n",t->strip(),adc,t->energy())<<endm;
+	    StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
+	    d->addHit(h);
+	    hasHit[eta-1] = true;
+	    LOG_DEBUG<<  Form("SMDU     %d  %d %f\n",t->strip(),adc,t->energy())<<endm;
+	  }
+	}
+	if (mUseFullSmdu) {
+	  // Fill rest of detector with empty hits (ADC=0, E=0)
+	  for (int eta = 1; eta <= kEEmcNumStrips; ++eta)
+	    if (!hasHit[eta-1]) d->addHit(new StEmcRawHit(id,secID,eta,1,0,0));
 	}
       } break;
 
       case kEndcapSmdVStripId:  {//............................
+	bool hasHit[kEEmcNumStrips];
+	memset(hasHit,0,sizeof(hasHit));
+	if (EEsec) {
+	  tca = EEsec->getSmdVHits();
+	  for(int j=0; j<=tca->GetLast(); j++){
+	    EEsmdHitDst* t = (EEsmdHitDst *)(* tca)[j];
+	    int eta=t->strip();
+	    //int sub=1;
+	    int sub=2;
+	    int adc= (int) (t->energy()*getSmdGain());
+	    if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
 
-	tca = EEsec->getSmdVHits();
-	for(int j=0; j<=tca->GetLast(); j++){
-	  EEsmdHitDst* t = (EEsmdHitDst *)(* tca)[j];
-	  int eta=t->strip();
-	  int sub=1;
-	  int adc= (int) (t->energy()*getSmdGain());
-	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
-
-	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
-	  LOG_DEBUG<<  Form("SMDV    %d  %d  %f\n",t->strip(),adc,t->energy())<<endm;
-	  d->addHit(h);
-	} 
-      }break;
+	    StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
+	    LOG_DEBUG<<  Form("SMDV    %d  %d  %f\n",t->strip(),adc,t->energy())<<endm;
+	    d->addHit(h);
+	    hasHit[eta-1] = true;
+	  } 
+	}
+	if (mUseFullSmdv) {
+	  // Fill rest of detector with empty hits (ADC=0, E=0)
+	  for (int eta = 1; eta <= kEEmcNumStrips; ++eta)
+	    if (!hasHit[eta-1]) d->addHit(new StEmcRawHit(id,secID,eta,2,0,0));
+	}
+      } break;
       default:
 	assert(1==2); // the det is out of range, this code gaves up
       }   
@@ -291,6 +340,9 @@ Float_t StEEmcFastMaker::getPreshowerGain()
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.21  2009/12/09 20:38:00  ogrebeny
+// User-switchable function added to always create all hits, even if ADC=0. Requested by Pibero for the trigger simulator.
+//
 // Revision 1.20  2007/04/28 17:56:01  perev
 // Redundant StChain.h removed
 //

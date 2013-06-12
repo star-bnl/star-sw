@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.14 2009/11/10 21:18:53 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.17 2010/08/10 19:46:18 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,15 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.17  2010/08/10 19:46:18  fisyak
+ * Lock mag.field if it was initialized from GEANT
+ *
+ * Revision 1.16  2010/05/27 14:52:02  fisyak
+ * Clean up, set assert when mag. field is not initialized
+ *
+ * Revision 1.15  2009/12/07 23:38:15  fisyak
+ * Move size definition from #define  to enumerations
+ *
  * Revision 1.14  2009/11/10 21:18:53  fisyak
  * use local fMap variable
  *
@@ -130,32 +139,22 @@ R__EXTERN  "C" {
 
   Float_t type_of_call agufld(Float_t *x, Float_t *bf) {
     bf[0] = bf[1] = bf[2] = 0;
-#if 1
-    if (! StarMagField::Instance()) new StarMagField();
-    StarMagField::Instance()->BField(x,bf);
-#else
     if (StarMagField::Instance()) 
       StarMagField::Instance()->BField(x,bf);
     else {
       printf("agufld:: request for non initialized mag.field, return 0\n");
       assert(StarMagField::Instance());
     }
-#endif
     return 0;
   }
 //________________________________________________________________________________
   void type_of_call mfldgeo(float &factor) {
-#if 0
-    printf("Ignore request for StarMagField from mfldgeo\n");
-#else
     if (StarMagField::Instance()) {
       printf("StarMagField  mfldgeo: The field has been already instantiated.\n");
-      StarMagField::Instance()->SetFactor(factor/5.);
     } else {
       printf("StarMagField  instantiate starsim field=%g\n",factor);
-      new StarMagField(StarMagField::kMapped,factor/5.);
+      (new StarMagField(StarMagField::kMapped,factor/5.))->SetLock();
     }
-#endif
     float x[3]={0},b[3];
     gufld(x,b);
     printf("StarMagField:mfldgeo(%g) Bz=%g\n",factor,b[2]);
@@ -1059,7 +1058,7 @@ Float_t StarMagField::Interpolate( const Float_t Xarray[], const Float_t Yarray[
 
 /// Search an ordered table by starting at the most recently used point
 
-void StarMagField::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
+void StarMagField::Search( Int_t N, const Float_t Xarray[], Float_t x, Int_t &low )
 
 {
   assert(! TMath::IsNaN(x));

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.16 2001/01/22 18:37:52 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.17 2011/11/28 17:03:08 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.17  2011/11/28 17:03:08  dmitry
+ * dbv override support in StDbLib,StDbBroker,St_db_Maker
+ *
  * Revision 1.16  2001/01/22 18:37:52  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -168,8 +171,10 @@ public:
   // set the table flavors in full sub-tree or local list
    virtual void           setTablesFlavor(const char* flavor)               =0;
    virtual void           setTablesProdTime(unsigned int ptime)             =0;
+   virtual void           setTablesProdTimeOverride(unsigned int ptime, char* dbType = 0, char* dbDomain = 0)             =0;
    void  setFlavor(const char* flavor);
    void  setProdTime(unsigned int ptime);
+   void  setProdTimeOverride(unsigned int ptime, char* dbType = 0, char* dbDomain = 0);
 
   // More node operations
    StDbConfigNode* findConfigNode(StDbType t, StDbDomain d, const char* sPath);

@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.8 2009/11/20 19:54:17 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.10 2009/12/09 13:28:40 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -22,39 +22,42 @@ class TGenericTable;
 class StEvent;
 class StRpsCollection;
 
-class pp2ppOffset_st;
 class pp2pp_t;
+class pp2ppOffset_st;
+class pp2ppZ_st;
 
 class St_pp2pp_Maker : public StRTSBaseMaker {
 
  public:
   enum {ErrorCode = -9999,
-	MAXSEC = 2 ,   /// 2 sides
-	MAXCHAIN = 4 , /// 4 chains/planes
-	MAXSVX = 6 ,   
-	MAXSEQ = 8 ,   /// 8 sequencers/roman pots
-	MAXSTRIP = 128 } ;
+	kMAXSEC = 2 ,   /// 2 sides
+	kMAXCHAIN = 4 , /// 4 chains/planes
+	kMAXSVX = 6 ,   
+	kMAXSEQ = 8 ,   /// 8 sequencers/roman pots
+	kMAXSTRIP = 128 } ;
 
  private:
-  StEvent *mEvent ; /// for fetching StEvent
+  StEvent *mEvent ; /// pointer *mEvent for fetching StEvent
 
-  typedef pair<Int_t, Double_t> HitChannel ; /// first -> Position ; second -> Energy
+  typedef pair<Int_t, Double_t> HitChannel ; /// HitChannel : a pair in which first -> Position ; second -> Energy
 
-  vector<HitChannel>  mvalidhits[MAXSEQ][MAXCHAIN] ;
+  vector<HitChannel>  mValidHits[kMAXSEQ][kMAXCHAIN] ; /// mValidHits[][] array to store hits which are above thresholds
   static Bool_t hitcompare (HitChannel A,HitChannel B) { return (A.first<B.first); }
 
 
-  Double_t  mpedave[MAXSEQ][MAXCHAIN][MAXSVX][MAXSTRIP] ;
-  Double_t  mpedrms[MAXSEQ][MAXCHAIN][MAXSVX][MAXSTRIP] ;
+  Double_t  mPedave[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
+  Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
 
-  Int_t mLast_svx;
-  Int_t mLast_chain;
-  Int_t mLast_seq;
+  Int_t mLastSvx;
+  Int_t mLastChain;
+  Int_t mLastSeq;
 
-  string mpedestal_perchannel_filename ; /// filename to read in pedestal_per_channel
-  Int_t read_pedestal_perchannel() ;
-  Int_t read_offset_perplane() ;
-  pp2ppOffset_st *moffset_table ;
+  string mPedestalPerchannelFilename ; /// filename to read in pedestal_per_channel
+  Int_t readPedestalPerchannel() ;
+  Int_t readOffsetPerplane() ;
+  Int_t readZPerplane() ;
+  pp2ppOffset_st *mOffsetTable ;
+  pp2ppZ_st *mZTable ;
 
   //  Int_t nevt_count ;
 
@@ -67,7 +70,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   virtual       ~St_pp2pp_Maker();
   virtual void  Clear(Option_t *option="");
   virtual Int_t Init();
-  virtual Int_t  Make();
+  virtual Int_t Make();
   virtual Int_t Finish();
 
   
@@ -75,7 +78,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
     Set the filename for the pedestal file if you don't want to use the default filename.
     Default : "pedestal.in.perchannel"
    */
-  void SetPedestalFileName(const char* filename) { mpedestal_perchannel_filename = filename ; }
+  void SetPedestalFileName(const char* filename) { mPedestalPerchannelFilename = filename ; }
 
   /*!
     Set the flag not to do clustering 
@@ -85,7 +88,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /*!
     DoerPp2pp(const pp2pp_t &d,  TGenericTable &hitsTable) read all channels from each SVX and make valid hits
-    and put into the vector of "mvalidhits".
+    and put into the vector of "mValidHits".
 
   */
   Int_t  DoerPp2pp(const pp2pp_t &d,  TGenericTable &hitsTable);
@@ -100,7 +103,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.8 2009/11/20 19:54:17 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.10 2009/12/09 13:28:40 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 

@@ -1,0 +1,65 @@
+MACRO pythia outfile rndm1 rndm2 trig ptmin ptmax
+
+gfile o [outfile]
+
+** Create the geometry
+detp geom y2008 field=-5.0
+gexec $STAR_LIB/geometry.so
+gclose all
+
+** Load the PYTHIA generator
+gexec  $STAR_LIB/libpythia_6410t.so
+gexec  $STAR_LIB/bpythia.so
+
+* sample II
+ENER 200.0        ! Collision energy
+MSEL 1            ! Total cross section, i.e. elastic+inelastic D=1
+* caution -- Pt bin
+CKIN 3=[ptmin] 
+CKIN 4=[ptmax]
+*
+MSTP (51)=7       ! - 
+MSTP (81)=1       ! - 
+MSTP (82)=4       ! - 
+PARP (82)=2.0     !-
+PARP (83)=0.5     !-
+PARP (84)=0.4     !-
+PARP (85)=0.9     !-
+PARP (86)=0.95    !-
+PARP (89)=1800    !-
+PARP (90)=0.25    !-
+PARP (91)=1.0     !-
+PARP (67)=4.0     !-
+
+*
+* Make the following stable:
+*
+MDCY (102,1)=0  ! PI0 111
+MDCY (106,1)=0  ! PI+ 211
+*
+MDCY (109,1)=0  ! ETA 221
+*
+MDCY (116,1)=0  ! K+ 321
+*
+MDCY (112,1)=0  ! K_SHORT 310
+MDCY (105,1)=0  ! K_LONG 130
+*
+*
+MDCY (164,1)=0  ! LAMBDA0 3122
+*
+MDCY (167,1)=0  ! SIGMA0 3212
+MDCY (162,1)=0  ! SIGMA- 3112
+MDCY (169,1)=0  ! SIGMA+ 3222
+MDCY (172,1)=0  ! Xi- 3312
+MDCY (174,1)=0  ! Xi0 3322
+MDCY (176,1)=0  ! OMEGA- 3334
+*set the vertex
+vsig  0.03  20.0
+gkine -4 0 0 100 -6.3 +6.3 0 6.3 -30.0 +30.0
+* seed the random generator
+rndm [rndm1] [rndm2]
+* trigger
+trig [trig]
+*
+CALL PYSTAT(1)
+quit
