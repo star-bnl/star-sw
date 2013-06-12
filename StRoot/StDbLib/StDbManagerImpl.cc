@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.40 2012/04/09 14:32:26 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.40.2.1 2013/06/12 21:10:08 didenko Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.40.2.1  2013/06/12 21:10:08  didenko
+ * branch revision for db fixes
+ *
  * Revision 1.40  2012/04/09 14:32:26  dmitry
  * AFS-related patch commented out
  *
@@ -1136,7 +1139,10 @@ char*  StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
-  return getenv(printDbName(type,domain));
+  if (!type || !domain) return 0;
+  char* dbname = printDbName(type,domain);
+  if (!dbname) return 0;
+  return getenv(dbname);
 }
   
 ////////////////////////////////////////////////////////////////
@@ -1643,7 +1649,7 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
-
+  if (!typeName || !domainName) return 0;
   std::string tpName(typeName);
   std::string dmName(domainName);
   std::string mergedName = tpName + "_" + dmName;
