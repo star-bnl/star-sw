@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.37 2011/04/04 15:44:24 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.37.2.1 2013/06/12 15:38:51 didenko Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.37.2.1  2013/06/12 15:38:51  didenko
+ * branch revision for db update
+ *
  * Revision 1.37  2011/04/04 15:44:24  dmitry
  * fix to blacklist Calibrations_bla only
  *
@@ -1121,7 +1124,10 @@ char*  StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
-  return getenv(printDbName(type,domain));
+  if (!type || !domain) return 0;
+  char* dbname = printDbName(type,domain);
+  if (!dbname) return 0;
+  return getenv(dbname);
 }
   
 ////////////////////////////////////////////////////////////////
@@ -1628,7 +1634,7 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
-
+  if (!typeName || !domainName) return 0;
   std::string tpName(typeName);
   std::string dmName(domainName);
   std::string mergedName = tpName + "_" + dmName;
