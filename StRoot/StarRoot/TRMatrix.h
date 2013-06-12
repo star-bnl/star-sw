@@ -58,12 +58,12 @@ class TRMatrix : public TRArray {
 ostream& operator<<(ostream& s,const TRMatrix &target);
 inline Double_t &TRMatrix::operator()(Int_t i,Int_t j){
   if (j < 0 || j >= fNcols) {
-    ::Error("TRMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRMatrix::operator()", "index j %d out of bounds (size: %d, this: %p)", 
 	    j, fNcols, this); 
     j = 0;
   }
   if (i < 0 || i >= fNrows) {
-    ::Error("TRMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRMatrix::operator()", "index i %d out of bounds (size: %d, this: %p)", 
 	    i, fNrows, this); 
     i = 0;
   }

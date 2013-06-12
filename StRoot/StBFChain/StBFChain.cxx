@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.564 2010/05/11 17:11:08 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.570 2010/11/27 18:21:31 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -213,7 +213,7 @@ Int_t StBFChain::Instantiate()
 	maker == "StEEmcDbMaker"  ||
 	maker == "St_geant_Maker" ||
 	maker == "StVMCMaker") {
-      mk = GetChain()->GetMakerInheritsFrom(maker);
+      mk = GetTopChain()->GetMakerInheritsFrom(maker);
       if (mk) {
 	if (maker == "St_geant_Maker" || maker == "StVMCMaker") {
 	  LOG_INFO << "StBFChain::Instantiate ignore request for instantiation of " << maker
@@ -231,33 +231,34 @@ Int_t StBFChain::Instantiate()
     if (strlen(fBFC[i].Chain) > 0) myChain = GetMaker(fBFC[i].Chain);
     if (maker == "St_db_Maker"){
       if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
-	TString MySQLDb("MySQL:StarDb");
-	TString MainCintDb("$STAR/StarDb");
-	TString MyCintDb("$PWD/StarDb");
-	if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
-	// Removed twice already and put back (start to be a bit boring)
-	// DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
-	if (GetOption("NoLocalCintDb")) {MyCintDb = "";}
-	if (GetOption("NoStarCintDb") ) {MainCintDb = "";}
-	if (GetOption("NoCintDb")     ) {MainCintDb = ""; MyCintDb = "";}
-
-	TString Dirs[3];
-	Int_t j;
-	for (j = 0; j < 3; j++) Dirs[j] = "";
-	j = 0;
-	if (MySQLDb    != "") {Dirs[j] = MySQLDb;    j++;}
-	if (MainCintDb != "") {Dirs[j] = MainCintDb; j++;}
-	if (MyCintDb   != "") {Dirs[j] = MyCintDb;   j++;}
-	if (! mk) {
-	  St_db_Maker* dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
+	St_db_Maker* dbMk = (St_db_Maker *) mk;
+	if (! dbMk) {
+	  TString MySQLDb("MySQL:StarDb");
+	  TString MainCintDb("$STAR/StarDb");
+	  TString MyCintDb("$PWD/StarDb");
+	  if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
+	  // Removed twice already and put back (start to be a bit boring)
+	  // DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
+	  if (GetOption("NoLocalCintDb")) {MyCintDb = "";}
+	  if (GetOption("NoStarCintDb") ) {MainCintDb = "";}
+	  if (GetOption("NoCintDb")     ) {MainCintDb = ""; MyCintDb = "";}
+	  
+	  TString Dirs[3];
+	  Int_t j;
+	  for (j = 0; j < 3; j++) Dirs[j] = "";
+	  j = 0;
+	  if (MySQLDb    != "") {Dirs[j] = MySQLDb;    j++;}
+	  if (MainCintDb != "") {Dirs[j] = MainCintDb; j++;}
+	  if (MyCintDb   != "") {Dirs[j] = MyCintDb;   j++;}
+	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
 	  if (!dbMk) goto Error;
 	  strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
 	  mk = dbMk;
 	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) dbMk->SetFlavor("sim+ofl");
 	  else                                              dbMk->SetFlavor("ofl");
-	  if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
-	  SetDbOptions(mk);
 	}
+	if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
+	SetDbOptions(dbMk);
       }
       goto Add2Chain;
     }
@@ -410,6 +411,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("min2trkVtx" ) ) mk->SetAttr("minTracks" 	, 2);
       if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", kTRUE);
       if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , kTRUE);
+      if (GetOption("useBTOF4Vtx") ) mk->SetAttr("BTOF"         , kTRUE);
       mk->PrintAttr();
     }
     if (maker=="StAssociationMaker") {
@@ -628,6 +630,7 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , kTRUE);
 	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);
 	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", kTRUE);
+	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
       }
       mk->PrintAttr();
     }
@@ -944,14 +947,14 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"dbv%8d",&FDate);
 	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"dbv%8d.%6d",&FDate,&FTime);
 	  if (Tag.Length() == 11 || Tag.Length() == 18) {
-	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (MaxEntryTime) "
+	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Max DB EntryTime) "
 			       << FDate  << "." << FTime << endm;
 	  }
 	} else if (Tag.BeginsWith("sdt")) {
 	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"sdt%8d",&FDateS);
 	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"sdt%8d.%6d",&FDateS,&FTimeS);
 	  if (Tag.Length() == 11 || Tag.Length() == 18) {
-	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (MaxEntryTime) "
+	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Event Time) "
 			       << FDateS  << "." << FTimeS << endm;
 	  }
 	} else if ( Tag.BeginsWith("gopt") && Tag.Length() == 13){
@@ -1409,12 +1412,12 @@ void StBFChain::SetDbOptions(StMaker *mk){
       gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
       m_EvtHddr->SetDateTime(db->GetDateTime());
     }
-    // MaxEntry over-write
-    if (Idate) {
-      db->SetMaxEntryTime(Idate,Itime);
-      gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
-		       << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
-    }
+  }
+  // MaxEntry over-write
+  if (Idate) {
+    db->SetMaxEntryTime(Idate,Itime);
+    gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
+		     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
   } // check if maker is St_db_Maker
   if (!GetOption("fzin")) {
     struct Field_t {

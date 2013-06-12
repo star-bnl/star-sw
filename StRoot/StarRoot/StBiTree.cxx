@@ -76,7 +76,7 @@ void testclass() {
    a2.Print();
    a2.PrintData();
 #else
-   for (int i=0; i<500; ++i) {
+   for (int i=0; i<25; ++i) {
       b[0] =r.Rndm(); b[1]=r.Rndm();
       Node3d *p = a2.push_back(b)->Parent();
       dsp->Point(b[0],b[1],0,kYellow,3,1);
@@ -87,7 +87,7 @@ void testclass() {
          cerr << " x0=" << x-0.3 << " y0=" << line(x-0.3,pl) 
             << " x1=" << x+0.3 << " y1=" << line(x+0.3,pl) 
             << endl;
-         TObject *view1 = dsp->Line(x+0.3,line(x+0.3,pl),0.0,x-0.3,line(x-0.3,pl),0.0,kRed);
+         TObject *view1 = dsp->Line(x+1,line(x+1,pl),0.0,x-1,line(x-1,pl),0.0,kRed);
  
          vector<float> connection =  p->Left()->Data();
          connection.push_back(0);
@@ -95,8 +95,9 @@ void testclass() {
          connection.push_back( p->Right()->Data()[1]);
          connection.push_back(0);
          TObject *view2 = dsp->Line(connection,kBlue);
-         dsp->Animate();
-         delete view1; delete view2;
+         dsp->Update(true);
+         //dsp->Animate();
+         //delete view1; delete view2;
       }
    }   
 #endif

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.232 2010/05/24 14:25:54 fisyak Exp $
+// $Id: StMaker.cxx,v 1.244 2011/07/19 20:49:16 perev Exp $
 //
 //
 /*!
@@ -230,6 +230,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2005f",      20041201,     3, "y2005f",   "y2005e + SSD5/CALB2"},//       {"y2005e",      20041201,     0}
   {"y2005g",      20041201,     4, "y2005g",   "y2005f + SVT dead material"},//{"y2005e",      20041201,     0}
   {"y2005h",      20041201,     5, "y2005h",   "y2005g + TPC2009 "},
+  {"y2005i",      20041201,     6, "y2005i",   "y2005h + ECALv6  "},
 
   // Dead area in SSD, in version y2006b
   {"y2006",       20051201,     0, "y2006",    "base for y2006: y2005e+fixed TPC plane"},
@@ -248,10 +249,23 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   // SVT/SSD is out
   {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone is lost"},
   {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
+  {"y2008b",      20071101,     2, "y2008b",   "base for y2008: SVT/SSD out, latest TPC ECAL CALB"},
+  {"y2008c",      20071101,     3, "y2008c",   "TOF fix & TPCE redused"},
+  {"y2008d",      20071101,     4, "y2008d",   "Honey sandwich fix"},
+  {"y2008e",      20071101,     5, "y2008e",   "LOW_EM central calorimter cuts"},
   // 
+
   {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF"},
+
   {"y2009a",      20081215,     1, "y2009a",   "y2009+ecalgeo6(JW)"},
+  {"y2009b",      20081215,     2, "y2009b",   "y2009+ecalgeo6(JW) w/ old tracking cuts in eemc."},
+  {"y2009c",      20081215,     3, "y2009c",   "TOF fix & TPCE redused"},
+  {"y2009d",      20081215,     4, "y2009d",   "Honey sandwich fix"},
   {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF"},
+  {"y2010a",      20091215,     1, "y2010a",   "y2010 production tag"},
+  {"y2010b",      20091215,     2, "y2010b",   "TOF fix & TPCE redused"},
+  {"y2010c",      20091215,     3, "y2010c",   "Honey sandwich fix"},
+  {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -615,92 +629,92 @@ TDataSet *StMaker::FindDataSet(const Char_t *logInput,
 
 TDataSetIter nextMk(0);
 TString actInput,findString,tmp;
-TDataSet *dataset,*dir;
+TDataSet *dataset=0,*dir;
 StMaker    *parent,*mk;
 Int_t icol,islas;
   
-  actInput = GetInput(logInput);
-  if (actInput.IsNull()) actInput = logInput;
-  
+  for (int itry=0;itry<2;itry++) {
+    actInput = (!itry)? GetInput(logInput).Data():logInput;
+    dataset = 0;
+    if (actInput.IsNull()) continue;
+  //		Direct try
+    if (actInput.Contains("."))  dataset = Find(actInput);
+    if (dataset) goto FOUND;
 
-//		Direct try
-  dataset = 0;
-  if (actInput.Contains("."))  dataset = Find(actInput);
-  if (dataset) goto FOUND;
-  
-  if (actInput==GetName()) dataset = m_DataSet;
-  if (dataset) goto FOUND;
+    if (actInput==GetName()) dataset = m_DataSet;
+    if (dataset) goto FOUND;
 
-//		Not so evident, do some editing
-  
-  
-  icol = actInput.Index(":");
-  if (icol>=0) {//there is maker name is hidden
-    tmp = actInput; 
-    tmp.Replace(0,0,".make/"); icol +=6;
-    tmp.Replace(icol,1,"/.data/");
-    dataset = Find((const char*)tmp);  		// .make/MAKER/.data/...
-    if (dataset) goto FOUND;
-    dataset = Find((const char*)tmp+6);		//       MAKER/.data/...
-    if (dataset) goto FOUND;
-    tmp.Replace(icol,7,"/.const/");
-    dataset = Find((const char*)tmp);		// .make/MAKER/.const/...
-    if (dataset) goto FOUND;
-    dataset = Find((const char*)tmp+6);		//       MAKER/.const/...
-    if (dataset) goto FOUND;
-    goto DOWN;
-  }
+  //		Not so evident, do some editing
 
-  if (m_DataSet) {
-  islas = actInput.Index("/");
-  if (islas>0) {
-    tmp.Replace(0,999,actInput,islas);
-    if (tmp == GetName()) { // 
-      tmp = actInput;
-      tmp.Replace(0,islas+1,"");
-      dataset = m_DataSet->Find(tmp);
+
+    icol = actInput.Index(":");
+    if (icol>=0) {//there is maker name is hidden
+      tmp = actInput; 
+      tmp.Replace(0,0,".make/"); icol +=6;
+      tmp.Replace(icol,1,"/.data/");
+      dataset = Find((const char*)tmp);  		// .make/MAKER/.data/...
       if (dataset) goto FOUND;
-      dataset = m_ConstSet->Find(tmp);
+      dataset = Find((const char*)tmp+6);		//       MAKER/.data/...
       if (dataset) goto FOUND;
+      tmp.Replace(icol,7,"/.const/");
+      dataset = Find((const char*)tmp);		// .make/MAKER/.const/...
+      if (dataset) goto FOUND;
+      dataset = Find((const char*)tmp+6);		//       MAKER/.const/...
+      if (dataset) goto FOUND;
+      goto DOWN;
     }
-  }
 
-  dataset = m_DataSet->Find(actInput);
-  if (dataset) goto FOUND;
-  dataset = m_ConstSet->Find(actInput);
-  if (dataset) goto FOUND;
-  }
+    if (m_DataSet) {
+    islas = actInput.Index("/");
+    if (islas>0) {
+      tmp.Replace(0,999,actInput,islas);
+      if (tmp == GetName()) { // 
+	tmp = actInput;
+	tmp.Replace(0,islas+1,"");
+	dataset = m_DataSet->Find(tmp);
+	if (dataset) goto FOUND;
+	dataset = m_ConstSet->Find(tmp);
+	if (dataset) goto FOUND;
+      }
+    }
 
-//	Try to search DOWN
-DOWN: if (!(dir = Find(".make"))) goto UP;
-
-  nextMk.Reset(dir);
-  while ((mk = (StMaker* )nextMk()))
-  {
-    if (mk==dowMk) continue;
-    dataset = mk->FindDataSet(actInput,this,0);
+    dataset = m_DataSet->Find(actInput);
     if (dataset) goto FOUND;
+    dataset = m_ConstSet->Find(actInput);
+    if (dataset) goto FOUND;
+    }
+
+    //	Try to search DOWN
+    DOWN: if (!(dir = Find(".make"))) goto UP;
+
+      nextMk.Reset(dir);
+      while ((mk = (StMaker* )nextMk()))
+      {
+	if (mk==dowMk) continue;
+	dataset = mk->FindDataSet(actInput,this,0);
+	if (dataset) goto FOUND;
+      }
+
+    //     Try to search UP
+    UP: if (uppMk) return 0;
+
+      parent = GetMaker(this); if (!parent) goto NOTFOUND;
+      dataset = parent->FindDataSet(actInput,0,this);
+      if (dataset) goto FOUND;
+
+    //		Not FOUND
+    NOTFOUND:
+      if (!dowMk && GetDebug()>1) //PrintWarning message
+	if ((MaxWarnings--) > 0) Warning("GetDataSet"," \"%s\" Not Found ***\n",(const char*)actInput);
+      dataset = 0; continue;
+
+    //		DataSet FOUND
+    FOUND: if (uppMk || dowMk) 	return dataset;
+	   if (GetDebug()<2) 	return dataset;
+      printf("Remark: <%s::%s> DataSet %s FOUND in %s\n"
+      ,ClassName(),"GetDataSet",logInput,(const char*)dataset->Path());
+    break;
   }
-
-//     Try to search UP
-UP: if (uppMk) return 0;
-
-  parent = GetMaker(this); if (!parent) goto NOTFOUND;
-  dataset = parent->FindDataSet(actInput,0,this);
-  if (dataset) goto FOUND;
-
-//		Not FOUND
-NOTFOUND:
-  if (!dowMk && GetDebug()>1) //PrintWarning message
-    if ((MaxWarnings--) > 0) Warning("GetDataSet"," \"%s\" Not Found ***\n",(const char*)actInput);
-  return 0;
-
-//		DataSet FOUND
-FOUND: if (uppMk || dowMk) 	return dataset;
-       if (GetDebug()<2) 	return dataset;
-  printf("Remark: <%s::%s> DataSet %s FOUND in %s\n"
-  ,ClassName(),"GetDataSet",logInput,(const char*)dataset->Path());
-
   return dataset;
 
 }
@@ -1064,7 +1078,7 @@ Int_t StMaker::Make()
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
      maker->EndMaker(ret);
      
-     if (Debug() || ret) 
+     if (Debug() || ret) {
 #ifdef STAR_LOGGER     
         LOG_INFO << "*** " << maker->ClassName() << "::Make() == " 
                   << RetCodeAsString(ret) << "(" << ret << ") ***" 
@@ -1073,6 +1087,7 @@ Int_t StMaker::Make()
         printf("*** %s::Make() == %s(%d) ***\n"
                         ,maker->ClassName(),RetCodeAsString(ret),ret);
 #endif     
+     }
      maker->ResetBIT(kMakeBeg);
      StMkDeb::SetCurrent(curr);
      if ((ret%10)>kStWarn) { //something unusual
@@ -1125,7 +1140,7 @@ EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
      //if (setSize && (setSize - table->GetTableSize() > 100)) {
       if (setSize && table->GetTableSize() == 0){
         table->Warning("ReAllocate"," Table %s has purged from %d to %d "
-               ,table->GetName(),setSize,table->GetTableSize());
+		       ,table->GetName(),setSize,(Int_t) table->GetTableSize());
 	       }
      table->NaN();
   }
@@ -1648,7 +1663,7 @@ Int_t StMaker::SetAttr(const Char_t *key, const Char_t *val, const Char_t *to)
        if (!m_Attr) m_Attr = new TAttr(GetName());
        m_Attr->SetAttr(tk.Data(), tv.Data());
        if (Debug() > 1) {
-	 LOG_DEBUG << Form("SetAttr","(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data()) << endm;
+	 LOG_DEBUG << Form("SetAttr(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data()) << endm;
        }
      }
    }
@@ -1955,6 +1970,42 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.244  2011/07/19 20:49:16  perev
+// Cleanup
+//
+// Revision 1.243  2011/06/20 15:13:50  fisyak
+// Force to call Finish with SIGTERM signal obtained from condor_vacate_job after time limit reached
+//
+// Revision 1.242  2011/04/25 22:12:58  perev
+// y2008e
+//
+// Revision 1.241  2011/03/28 21:11:32  fisyak
+// Move back y2011 time stamp from 20101212 to 20101215
+//
+// Revision 1.240  2011/03/28 20:51:03  fisyak
+// Move y2011 time stamp from 20101215 to 20101212
+//
+// Revision 1.239  2011/03/14 17:38:01  perev
+// copy/paste fix
+//
+// Revision 1.238  2011/03/11 16:43:21  perev
+// support cone honey sandwich fix geometries
+//
+// Revision 1.237  2011/02/02 20:13:09  perev
+// y2005i added
+//
+// Revision 1.236  2010/12/22 17:46:30  perev
+// y2008c y2009b y2010b added
+//
+// Revision 1.235  2010/11/19 20:00:55  fisyak
+// Add y2008b (requested by Jason)
+//
+// Revision 1.234  2010/07/21 21:39:29  fisyak
+// Add alias for y2011
+//
+// Revision 1.233  2010/06/01 20:18:30  perev
+// Added y2009b and y2010a geometry tags to support simulation requests
+//
 // Revision 1.232  2010/05/24 14:25:54  fisyak
 // move alias time stamp for y2010 from 20091214 to 20091215 (back, as it was before 2010/04/06)
 //

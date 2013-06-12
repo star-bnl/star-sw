@@ -42,8 +42,23 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.11 2010/04/07 19:45:11 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.16 2011/04/12 03:01:07 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.16  2011/04/12 03:01:07  hmasui
+ * Fix isMatchedPairOk() to properly process particles with decay daughters
+ *
+ * Revision 1.15  2011/02/11 03:44:57  hmasui
+ * Draw error messages in pdf if histogram is missing. Add error check for Ncommon histogram
+ *
+ * Revision 1.14  2011/01/31 21:33:51  hmasui
+ * Add setParentGeantId() function to allow the multiple decays
+ *
+ * Revision 1.13  2010/06/22 16:31:17  hmasui
+ * Separate 2D and 1D QA for MC tracks. Add pol0 fit for MC eta, y and phi distributions.
+ *
+ * Revision 1.12  2010/06/10 14:51:01  hmasui
+ * Added particle name functions
+ *
  * Revision 1.11  2010/04/07 19:45:11  hmasui
  * Use box option for dE/dx vs p to reduce the pdf file size
  *
@@ -93,6 +108,12 @@ class StEmbeddingQADraw {
         const Int_t year, const TString production, const Int_t geantid, const Bool_t isEmbeddingOnly = kFALSE);
     virtual ~StEmbeddingQADraw();
 
+    /// Initialization
+    void init() ;
+
+    /// Set parent geant id (default is 0)
+    void setParentGeantId(const Int_t parentgeantid) ;
+
     /// Default is current directory
     void setOutputDirectory(const TString name = "./") ;
 
@@ -137,9 +158,6 @@ class StEmbeddingQADraw {
     //  return true only if both embedding and real data files are opened properly
     Bool_t open(const TString embeddingFile, const TString realDataFile) ;
 
-    /// Initialization
-    void init() ;
-
     /// Print figures (png only by default)
     void print(const TCanvas& canvas, const TString name) const;
 
@@ -181,6 +199,11 @@ class StEmbeddingQADraw {
     TObject* getHistogram(const TString name, const UInt_t daughter, const Bool_t isEmbedding,
         const UInt_t parentparentid = 0) const ;
 
+    /// Get histogram name (part of codes moved from getHistogram function)
+    const Char_t* getHistogramName(const TString name, const UInt_t daughter, const Bool_t isEmbedding,
+        const UInt_t parentparentid = 0) const ;
+
+
     /// (1/Ntrk) * (1/bin)
     Double_t getNormalization(const TH1& h) const ;
 
@@ -195,6 +218,13 @@ class StEmbeddingQADraw {
     TPaveText* drawHeader(const TString description,
         const Double_t x1=0.0, const Double_t y1=0.9, const Double_t x2=1.0, const Double_t y2=0.95, 
         const Double_t textSize = 0.032) const;
+
+    /// Draw legend
+    void drawLegend(const UInt_t id, TH1* hembed, TH1* hreal, const Option_t* option="L",
+        const Bool_t doSplit=kFALSE) const ;
+
+    /// Draw error messages if histogram doesn't exist
+    void drawErrorMessages(const TString histogramName) const ;
 
     /// Event-wise informations
     Bool_t drawVertices() const;          /// Draw vertices
@@ -217,6 +247,15 @@ class StEmbeddingQADraw {
     /// Get accepted minimum/maximum vz from histogram
     Double_t getVzAcceptedMinimum() const ; /// Minimum vz
     Double_t getVzAcceptedMaximum() const ; /// Maximum vz
+
+    /// Get input MC particle name
+    const Char_t* getMcParticleName() const ; 
+
+    /// Get reconstructed embedding particle name
+    const Char_t* getEmbeddingParticleName(const UInt_t id, const Bool_t doSplit=kFALSE) const ; 
+
+    /// Get real data particle name
+    const Char_t* getRealParticleName(const UInt_t id, const Bool_t doSplit=kFALSE) const ; 
 
     // Data members
     static UInt_t mCanvasId ; /// Canvas id
@@ -246,7 +285,10 @@ class StEmbeddingQADraw {
     TString mOutputFigureDirectory ; /// Figure directory (default is current directory)
 
     std::vector<Int_t> mDaughterGeantId ; /// Daughter geant id
+    std::vector<Int_t> mParentGeantId ;   /// Parent geant id (only relevant for unstable particles)
+    std::vector<Int_t> mParentParentGeantId ; /// Parent-parent geant id (only relevant for unstable particles)
     std::vector<Int_t> mMcGeantId ;       /// MC geant id
+    Int_t mInputParentGeantId ; /// Input parent geant id
 
     ClassDef(StEmbeddingQADraw, 1)
 };

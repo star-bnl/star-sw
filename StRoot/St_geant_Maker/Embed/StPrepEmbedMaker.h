@@ -4,11 +4,30 @@
  * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
  * \date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.2 2010/05/26 03:22:52 hmasui Exp $
+ * $Id: StPrepEmbedMaker.h,v 1.8 2012/06/03 06:34:39 zhux Exp $
  *
  *
  * -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.h,v $
+ * Revision 1.8  2012/06/03 06:34:39  zhux
+ * Added a switch to cut on the ranking of primary vertex
+ *
+ * Revision 1.7  2012/05/13 06:36:59  zhux
+ * Added switch to choose between the two kinematic variables: rapidty or pseudo-rapdity
+ *
+ * Revision 1.6  2012/04/23 23:52:54  zhux
+ * Added a switch to cut on |VpdVz-Vz|
+ *
+ * Revision 1.5  2011/12/05 15:49:05  zhux
+ * Add switch to prime the first event with deuterons (for dbar, tbar and hypertritons embedding).
+ * see tickets 2097 for details.
+ *
+ * Revision 1.4  2010/11/30 23:32:18  hmasui
+ * Add fz file and a switch to enable writing fz file
+ *
+ * Revision 1.3  2010/11/07 23:28:33  hmasui
+ * Added transverse vertex cut
+ *
  * Revision 1.2  2010/05/26 03:22:52  hmasui
  * Set rapidity +/-10 in gkine/phasespace for spectrum option in order to avoid acceptance cuts
  *
@@ -67,7 +86,7 @@ class StPrepEmbedMaker : public StMaker {
   Int_t  InitRun(const int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.2 2010/05/26 03:22:52 hmasui Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.8 2012/06/03 06:34:39 zhux Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -89,6 +108,15 @@ class StPrepEmbedMaker : public StMaker {
   void SetSpreadMode(const Bool_t flag=kFALSE) ;
   void SetTrgOpt(const Int_t TrgId); // Set trigger id cut
   void SetZVertexCut(const Double_t vzlow, const Double_t vzhigh); // Set z-vertex cut
+  void SetVrCut(const Double_t vr) ; // Set vr = sqrt{vx^2 + vy^2} cut
+  void SetVpdVzCut(const Double_t vpdvz) ; // Set |vpdvz-vz| cut
+  void SetPVRankCut(const Double_t pvrank) ; // Set cut on P.V. rank > pvrank
+  void OpenFzFile() ; /// Switch to enable writing .fz file
+  void SetPrimeMode(const Bool_t flag=kFALSE) ; //Switch to prime mode for nucleus (with geantID > 10000) embedding
+  void SetVpdVzCutMode(const Bool_t flag=kFALSE) ; //Switch to turn on cut for |VpdVz-Vz|
+  void SetPVRankCutMode(const Bool_t flag=kFALSE) ; //Switch to turn on cut for P.V. rank
+
+  void SetRapidityMode(const Bool_t flag=kTRUE) ; //Switch to assigin input kinematic range to rapidity (true) or pseudorapidity(false)
 
   /// Do phasespace command from input pt, y
   ///   Force to make rapidity distribute within +/- mRapidityMaximumCut for 'spectrum' option
@@ -109,6 +137,7 @@ class StPrepEmbedMaker : public StMaker {
   TGiant3 *mGeant3;
   TString mTagFile; /// Tags file name
   TString mMoreTagsFile; /// More tags file name for vertex error (will be removed in future)
+  TString mFzFile ; /// .fz file name
   Int_t mEventCounter; /// Number of events
   TFile *mFile; /// 
   TFile *mMoreFile;
@@ -116,6 +145,16 @@ class StPrepEmbedMaker : public StMaker {
   TTree *mMoreTree;
   Bool_t mSkipMode;
   Bool_t mSpreadMode;
+  Bool_t mOpenFzFile; /// Flag to enable/disable writing .fz file (default is false)
+
+  Bool_t mRapidityMode; /// flag to switch between flat in rapdity (true) and flat in pseudo-rapidity (false, default is true).
+
+  Bool_t mPrimeMode;  /// Flag to enable/disable prime mode
+  Int_t  mSavePid;
+  Bool_t mPrimed;  // 
+
+  Bool_t mVpdVzCutMode;  /// Flag to enable/disable VpdVz cut mode
+  Bool_t mPVRankCutMode;  /// Flag to enable/disable PVRank cut mode
 
   ClassDef(StPrepEmbedMaker,0)    
 };
