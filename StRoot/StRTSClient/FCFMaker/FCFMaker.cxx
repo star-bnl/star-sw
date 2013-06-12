@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.40 2009/09/24 16:39:35 fine Exp $
+ * $Id: FCFMaker.cxx,v 1.41 2010/05/28 15:05:39 fisyak Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.41  2010/05/28 15:05:39  fisyak
+ * new interface for pad t0
+ *
  * Revision 1.40  2009/09/24 16:39:35  fine
  * fix the pointer arithmetics
  *
@@ -1053,7 +1056,7 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
     // NOTE: it seems that getT0 wants row,pad to start from 1 whereas the previous Gain
     // 		started from 0 - need to crosscheck!
     if(doT0Corrections) {
-      t0 = gStTpcDb->T0(sector)->getT0(row+1,pad+1);
+      t0 = gStTpcDb->tpcT0()->T0(sector,row+1,pad+1);
     }
     else t0 = 0.0 ;
 

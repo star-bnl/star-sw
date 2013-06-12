@@ -8,25 +8,7 @@ ClassImp(StMuRpsCollection)
 
 StMuRpsCollection::StMuRpsCollection(const StRpsCollection & rps){
 
-
-/*	memset( mNumberPlanes, 0 ,  sizeof(mNumberPlanes));
-	memset( mNumberPlanesWithClusters , 0,  sizeof(mNumberPlanesWithClusters));
-	memset( mStatusRomanPot , 0,  sizeof(mStatusRomanPot));
-	memset( mADC , 0,  sizeof(mADC));
-	memset( mTAC, 0	,  sizeof(mTAC));
-
-	memset( mOffsetPlane, 0 , sizeof(mOffsetPlane));
-	memset( mzPlane, 0 , sizeof(mzPlane));
-	memset( mAnglePlane, 0, sizeof(mAnglePlane));
-	memset( mOrientationPlane, 0,  sizeof(mOrientationPlane));
-	memset( mStatusPlane, 0, sizeof(mStatusPlane));
-	memset( mNumberOfClusters, 0, sizeof(mNumberOfClusters));
-
-	memset( mPositionCluster, 0, sizeof(mPositionCluster));
-	memset( mLengthCluster, 0, sizeof(mLengthCluster));
-	memset( mEnergyCluster, 0, sizeof(mEnergyCluster));
-	memset( mXYCluster, 0, sizeof(mXYCluster));
-	memset(mQualityCluster,0 , sizeof(mQualityCluster));*/
+    mSiliconBunch = rps.siliconBunch();
 
 	for(int i=0;i<mNumberOfRomanPot;i++){
 
@@ -53,14 +35,6 @@ StMuRpsCollection::StMuRpsCollection(const StRpsCollection & rps){
 				mEnergyCluster[i][j].push_back(rps.romanPot(i)->plane(j)->cluster(k)->energy());				
 				mXYCluster[i][j].push_back(rps.romanPot(i)->plane(j)->cluster(k)->xy());				
 				mQualityCluster[i][j].push_back(rps.romanPot(i)->plane(j)->cluster(k)->quality());		
-
-	/*			mPositionCluster[i][j][k] = rps.romanPot(i)->plane(j)->cluster(k)->position();
-				mLengthCluster[i][j][k] = rps.romanPot(i)->plane(j)->cluster(k)->length();
-				mEnergyCluster[i][j][k] = rps.romanPot(i)->plane(j)->cluster(k)->energy();				
-				mXYCluster[i][j][k] =  rps.romanPot(i)->plane(j)->cluster(k)->xy();				
-				mQualityCluster[i][j][k] = rps.romanPot(i)->plane(j)->cluster(k)->quality();*/		
-				
-//				cout<<"Cluster position "<<rps.romanPot(i)->plane(j)->cluster(k)->position()<<endl;
 				
 			}
 		}

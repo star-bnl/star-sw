@@ -58,23 +58,27 @@ class StMiniMcEvent : public TObject {
   Float_t       vertexY() 			const { return mVertexY; }
   Float_t       vertexZ() 			const { return mVertexZ; }
   const Float_t*vertexCovMatrix()               const { return &mVertexCovMatrix[0];}
-  Float_t       mcVertexX() 			const { return mMcVertexX; }
-  Float_t       mcVertexY() 			const { return mMcVertexY; }
-  Float_t       mcVertexZ() 			const { return mMcVertexZ; }
+  Float_t       mcVertexX() 			const { return mMcVertexX	; }
+  Float_t       mcVertexY() 			const { return mMcVertexY	; }
+  Float_t       mcVertexZ() 			const { return mMcVertexZ	; }
   Float_t	centerOfMassEnergy() 		const { return mCenterOfMassEnergy; }
-  Float_t	magneticField() 		const { return mMagField; }
-  Float_t	backgroundRate() 		const { return mBackgroundRate; }
+  Float_t	magneticField() 		const { return mMagField	; }
+  Float_t	backgroundRate() 		const { return mBackgroundRate	; }
   Short_t	beamMassNumberEast() 		const { return mBeamMassNumberEast; }
   Short_t	beamMassNumberWest() 		const { return mBeamMassNumberWest; }
-  Float_t       ctb() 				const { return mCtb; }
-  Float_t       zdcE()				const { return mZdcE; }
-  Float_t       zdcW() 				const { return mZdcW; }
-  Int_t		nMcTrack() 			const { return mNMcTrack; }     
-  Int_t		nMatchedPair() 			const { return mNMatchedPair; }
-  Int_t		nMergedPair()			const { return mNMergedPair; }
-  Int_t		nSplitPair() 			const { return mNSplitPair; }
-  Int_t 	nGhostPair() 			const { return mNGhostPair; }
-  Int_t 	nContamPair() 			const { return mNContamPair; }
+  Float_t       ctb() 				const { return mCtb		; }
+  Float_t       zdcE()				const { return mZdcE		; }
+  Float_t       zdcW() 				const { return mZdcW		; }
+  Int_t		nMcTrack() 			const { return mNMcTrack	; }     
+  Int_t		nMatchedPair() 			const { return mNMatchedPair	; }
+  Int_t		nMergedPair()			const { return mNMergedPair	; }
+  Int_t		nSplitPair() 			const { return mNSplitPair	; }
+  Int_t 	nGhostPair() 			const { return mNGhostPair	; }
+  Int_t 	nContamPair() 			const { return mNContamPair	; }
+
+  float impact()				const { return mImpact		; }
+  float impactPhi()				const { return mImpactPhi	; }
+  float timeOffset()				const { return mTimeOffset	; }
 
   void setEventId(Int_t val)				{ mEventId=val; }
   void setRunId(Int_t val)				{ mRunId=val; }
@@ -109,12 +113,18 @@ class StMiniMcEvent : public TObject {
   void setCtb(Float_t val)				{ mCtb=val; }
   void setZdcE(Float_t val)				{ mZdcE=val; }
   void setZdcW(Float_t val)				{ mZdcW=val; }
-  void setNMcTrack(Int_t val)				{ mNMcTrack=val; }
-  void setNMatchedPair(Int_t val)			{ mNMatchedPair=val; }
-  void setNMergedPair(Int_t val)			{ mNMergedPair=val; }
-  void setNSplitPair(Int_t val)				{ mNSplitPair=val; }
-  void setNGhostPair(Int_t val)				{ mNGhostPair=val; }
-  void setNContamPair(Int_t val)			{ mNContamPair=val; }
+  void setNMcTrack(Int_t val)				{ mNMcTrack	=val; }
+  void setNMatchedPair(Int_t val)			{ mNMatchedPair	=val; }
+  void setNMergedPair(Int_t val)			{ mNMergedPair	=val; }
+  void setNSplitPair(Int_t val)				{ mNSplitPair	=val; }
+  void setNGhostPair(Int_t val)				{ mNGhostPair	=val; }
+  void setNContamPair(Int_t val)			{ mNContamPair	=val; }
+
+  void setImpact(float imp)				{ mImpact	=imp  ;}
+  void setImpactPhi(float imphi)			{ mImpactPhi	=imphi;}
+  void setTimeOffset(float time)			{ mTimeOffset	=time ;}
+
+
   virtual void Print(Option_t *option="") const;
 private:
   //
@@ -140,6 +150,10 @@ private:
   Int_t		mNMcGoodGlobal20;	// mc, primary, |eta|<4, MC TPC hits >=20
   Int_t         mNRcGlobal;     	// reco, primaries flag > 0
   Int_t         mNRcGoodGlobal20; 	// reco, primaries flag > 0, 20 fit hits
+
+  Float_t       mImpact;  	// Impact parameter
+  Float_t       mImpactPhi;  	// Phi Impact parameter, azimuth of reaction plane 
+  Float_t       mTimeOffset;	// time offset in seconds wrt trigger event
 
   Float_t       mVertexX;  
   Float_t       mVertexY;     // 
@@ -181,7 +195,7 @@ private:
   TClonesArray* mMatGlobPairs;
   static Int_t mSFirst; //!
 
-  ClassDef(StMiniMcEvent,4)
+  ClassDef(StMiniMcEvent,5)
 };
 
 #endif
@@ -189,6 +203,9 @@ private:
   
 //
 // $Log: StMiniMcEvent.h,v $
+// Revision 1.8  2011/03/22 00:31:48  perev
+// Added impact,phi impact & trigger time
+//
 // Revision 1.7  2007/05/21 16:17:16  fisyak
 // Increament ClassDef, thanks to Adam Kocoloski
 //

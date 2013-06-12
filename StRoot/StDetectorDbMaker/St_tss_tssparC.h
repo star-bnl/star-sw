@@ -32,10 +32,10 @@ class St_tss_tssparC : public TChair {
   Float_t 	c_test(Int_t i = 0) 	{return Struct(i)->c_test;}
   Float_t 	diff_long(Int_t i = 0) 	{return Struct(i)->diff_long;}
   Float_t 	diff_trans(Int_t i = 0) {return Struct(i)->diff_trans;}
-  Float_t 	gain_in(Int_t i = 0);
-  Float_t 	gain_in(Int_t sec, Int_t row);
-  Float_t 	gain_out(Int_t i = 0);
-  Float_t 	gain_out(Int_t sec, Int_t row);
+  Float_t 	gain_in(Int_t i = 0)    {return Struct(i)->gain_in;}
+  Float_t 	gain_in(Int_t sec, Int_t row) {return gain(sec,row);}
+  Float_t 	gain_out(Int_t i = 0)   {return Struct(i)->gain_out;}
+  Float_t 	gain_out(Int_t sec, Int_t row)  {return gain(sec,row);}
   Float_t 	gain(Int_t sec, Int_t row);
   Float_t 	prf_in(Int_t i = 0) 	{return Struct(i)->prf_in;}
   Float_t 	prf_out(Int_t i = 0) 	{return Struct(i)->prf_out;}

@@ -1,5 +1,23 @@
-!// $Id: tpcegeo3.g,v 1.24 2010/01/13 22:36:24 perev Exp $
+!// $Id: tpcegeo3.g,v 1.28 2011/02/24 15:48:20 jwebb Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.28  2011/02/24 15:48:20  jwebb
+!// Volumes TBRW (Aluminum) and TWAS (Air) overlap.  Changed positioning of
+!// TBRW so that it is positioned as an ONLY volume, to remove ambiguity in
+!// geant tracking.  The change has no effect on an AgSTAR geometry, see
+!//
+!// http://drupal.star.bnl.gov/STAR/node/20519
+!//
+!// Revision 1.27  2010/12/17 20:02:11  jwebb
+!//
+!// Reverted max radius to previous value.  Reduced radius will be set by
+!// TPCE04r flag in geometry.g.
+!//
+!// Revision 1.26  2010/09/19 19:39:01  jwebb
+!// Reduced size of TPC envelope to acommodate TOF.
+!//
+!// Revision 1.25  2010/08/20 20:32:15  jwebb
+!// Increased size of array to prevent an out-of-bounds condition.
+!//
 !// Revision 1.24  2010/01/13 22:36:24  perev
 !// Typo is fixed. TPCG was twice as bigger
 !//
@@ -239,7 +257,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
   Real myCos,myRmin,myRmax,myG1,myG2;
 
 !// RDO & cool
-  Real dRDOCooling(0:6) /16.0, 16.0, 16.0, 16.7, 15.0, 3.5, 14.5/;
+  Real dRDOCooling(0:7) /16.0, 16.0, 16.0, 16.7, 15.0, 3.5, 14.5,0.0/;
   Real RCoolingTube/123456789/;
   character *4 mySha;
   integer iCoo,iCab,jCoo,iRib,iTALS,jTALS;
@@ -285,7 +303,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
   Fill  TPCG !//   TPC basic dimensions
         version =       3               !// version    => current version
         Rmin =          46.107          !// Rmin          => TPC envelope inner radius
-        Rmax =          206.75/cos15    !// Rmax          => TPC envelope outer radius
+        Rmax =          206.75/cos15    ! TPC outer envelope 
         RminIFC =       46.6            !// RminIFC    => inner radius TPC IFC  : A.Lebedev measurement 10/16/08
         LengthT =       2*271.0         !// LengthT    => TPC full length up to front of EEMC
         Length  =       2*259.685       !// Length        => TPC full length including RDOs
@@ -341,6 +359,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
         zGroundGrid = TPCG_zGatingGrid+TPCG_dGateGround       		!//
         DeadZone      = 12. !// Dead zone before GatingGrid. No hits there
         endFill
+
         USE TPCG
 
    Fill TPRS                    ! sector of padrows
@@ -522,8 +541,10 @@ USE TECW
 
   !//  make primitive control and basic printout
   del = TPCG_Rmax-tofcOR;
-  write(*,*) ' TPCEgeo : tpcConfig = ',TPCG_version;
-  write(*,*) ' TPCEgeo: maximum  TPC  Radius is ',tofcOR,' clearance is ',del;
+  write(*,*) ' TPCEgeo : tpcConfig = ',TPCG_version
+  write(*,*) ' TPCEgeo : tpcg_rmax = ',TPCG_rmax
+  write(*,*) ' TPCEgeo : maximum  TPC  Radius is ',tofcOR,' clearance is ',del;
+
   if (del<0) write(*,*)' *** TPCEgeo ERROR : outer clearance negative '  ,del;
 !//   write(*,*) ' TPCEgeo: senset. gas inner radius ',tpgvIR;
 !//   write(*,*) ' TPCEgeo: sensitive gas length is ', tpgvLeng;
@@ -1006,7 +1027,7 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
 !//  TGeoVolume *WheelRibBox = gGeoManager->MakeBox("WheelRibBox",GetMed("TPCE_ALUMINIUM"), TPCG_WheelBoxDy/2, TPCG_WheelBoxDx/2, TPCG_WheelTHK/2);
 !//  TpcSectorAndWheel->AddNodeOverlap(WheelRibBox, 1, new TGeoTranslation(TPCG_WheelR1, 0., zWheel1+TPCG_WheelTHK/2));
 
-        Create And Position TBRW        kOnly='MANY'  X=TPCG_WheelR1, Z=zWheel1+TPCG_WheelTHK/2 "//TpcWheelRibBox"
+        Create And Position TBRW          X=TPCG_WheelR1, Z=zWheel1+TPCG_WheelTHK/2 "//TpcWheelRibBox"
     x1 = TPCG_WheelR0*cos15;
     x2 = TPCG_WheelR2;
     dz = TPCG_WheelRibHeight/2;
@@ -1045,7 +1066,7 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
       x = r ;
       y = r *tand(alpha);
 !//      TpcSectorAndWheel->AddNodeOverlap(WheelRibBox, 3+4*inOut+j, new TGeoCombiTrans(x, y, zWheel1+TPCG_WheelTHK/2, GetRot(rotm)));
-     Position TBRW x=x y=y z=zWheel1+TPCG_WheelTHK/2 alphaz=alpha kOnly='Many'
+     Position TBRW x=x y=y z=zWheel1+TPCG_WheelTHK/2 alphaz=alpha 
     }
     qwe(1) = -qwe(1);
     qwe(2) = -qwe(2);

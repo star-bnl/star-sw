@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.8 2007/12/22 20:37:53 calderon Exp $
+ * $Id: StTinyMcTrack.h,v 1.13 2011/04/01 20:00:17 perev Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -37,16 +37,17 @@ class StTinyMcTrack : public TObject {
   void setNEprsHitMc(Short_t val) { mNEprsHitMc=val; }
   void setNEsmduHitMc(Short_t val) { mNEsmduHitMc=val; }
   void setNEsmdvHitMc(Short_t val) { mNEsmdvHitMc=val; }
-  void setGeantId(Short_t val) { mGeantId=val; }
-  void setChargeMc(Short_t val) { mChargeMc=val; }
-  void setNAssocGl(Short_t val) { mNAssocGl=val; }
-  void setNAssocPr(Short_t val) { mNAssocPr=val; }
+  void setGeantId(int val);
+  void setPdgId(int val)	{ mPdgId   = val; }
+  void setChargeMc(Short_t val) { mChargeMc= val; }
+  void setNAssocGl(Short_t val) { mNAssocGl= val; }
+  void setNAssocPr(Short_t val) { mNAssocPr= val; }
   void setStopR(Float_t val) { mStopR=val; }
   void setKey(Short_t val) { mKey=val; }
   void setPrimary(Bool_t val) { mIsPrimary = val;}
   void setValid() {mIsValid = 1;}
   void setParentKey(Short_t val) { mParentKey=val; }
-  void setParentGeantId(Short_t val) { mParentGeantId=val; }
+  void setParentGeantId(int val);
   void setEmcEnergyMcHit(Float_t val,size_t index) {if (index<3) mEmcEnergyMcHit[index]=val;}
   void setEmcEnergyMcSum(Float_t val) {mEmcEnergyMcSum=val;}  
   void setEmcSoftIdHiTowerMc(Short_t val,size_t index) {if (index<3) mEmcSoftIdHiTowerMc[index]=val;}
@@ -70,7 +71,7 @@ class StTinyMcTrack : public TObject {
   short nEprsHitMc() const { return mNEprsHitMc; }
   short nEsmduHitMc() const { return mNEsmduHitMc; }
   short nEsmdvHitMc() const { return mNEsmdvHitMc; }
-  short geantId() const { return mGeantId; }
+    int geantId() const { return mGeantId; }
   short chargeMc() const { return mChargeMc; }
   short nAssocGl() const { return mNAssocGl; }
   short nAssocPr() const { return mNAssocPr; }
@@ -80,7 +81,7 @@ class StTinyMcTrack : public TObject {
   Bool_t isValid() {return  mIsValid;}
   virtual void Print(Option_t *option="") const;
   short parentKey() const { return mParentKey; }
-  short parentGeantId() const { return mParentGeantId; }
+    int parentGeantId() const { return mParentGeantId; }
   float emcEnergyMcHit(size_t index) const { if (index<3) return mEmcEnergyMcHit[index]; else return -999;}
   float emcEnergyMcSum() const { return mEmcEnergyMcSum; }
   short emcSoftIdHiTowerMc(size_t index) const { if (index<3) return mEmcSoftIdHiTowerMc[index]; else return -999; }
@@ -104,27 +105,43 @@ private:
   Short_t    mNEprsHitMc;
   Short_t    mNEsmduHitMc;
   Short_t    mNEsmdvHitMc;
-  Short_t    mGeantId;
+  UShort_t   mGeantId;		//Geant particle id
+  Int_t      mPdgId;		//PDG particle id
   Short_t    mChargeMc;
   Float_t    mStopR;
-  Short_t    mKey;
-  Short_t    mParentKey;
-  Short_t    mParentGeantId;
+  Short_t    mKey;		//Geant track id
+  Short_t    mParentKey;	//Geant vertex id
+  UShort_t   mParentGeantId;	//Geant Parent particle id
   Float_t    mEmcEnergyMcHit[3];
   Float_t    mEmcEnergyMcSum;
   Short_t    mEmcSoftIdHiTowerMc[3];
   
   // assoc stuff
-  Short_t      mNAssocGl;
-  Short_t      mNAssocPr;
+  Short_t    mNAssocGl;		//Number of rc globals   assigned to this mc track
+  Short_t    mNAssocPr;		//Number of rc primaries assigned to this mc track
   Bool_t     mIsPrimary;
 
-  ClassDef(StTinyMcTrack,5)
+  ClassDef(StTinyMcTrack,6)
 };
 
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.13  2011/04/01 20:00:17  perev
+// Comments++
+//
+// Revision 1.12  2011/02/24 17:58:03  perev
+// change IO version
+//
+// Revision 1.11  2011/02/16 16:46:30  perev
+// setPdgId imp added
+//
+// Revision 1.10  2011/02/16 00:49:48  perev
+// mPdgId added
+//
+// Revision 1.9  2011/02/11 03:32:14  perev
+// geantid now is ushort
+//
 // Revision 1.8  2007/12/22 20:37:53  calderon
 // Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
 // obtained from track extrapolation to BEMC of rec track.
