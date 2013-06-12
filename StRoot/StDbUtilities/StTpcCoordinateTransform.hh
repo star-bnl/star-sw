@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.18 2011/01/18 14:34:28 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.21 2012/10/23 20:13:17 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,15 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.21  2012/10/23 20:13:17  fisyak
+ * Move xFromPad from h- to cxx-file
+ *
+ * Revision 1.20  2012/09/13 20:57:28  fisyak
+ * Corrections for iTpx
+ *
+ * Revision 1.19  2012/05/07 14:38:41  fisyak
+ * Remvoe hardcoded separation between Inner and Outer Sectors
+ *
  * Revision 1.18  2011/01/18 14:34:28  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -205,7 +214,8 @@ public:
   Double_t  zFromTB(Double_t tb, Int_t sector, Int_t row) const;
   // Transformation Routines!!
   // Raw Data (pad row timebin or drift L From tpc local sector Coordinates
-  Int_t       rowFromLocal(const StThreeVector<Double_t>& a)         const;
+  static Int_t       rowFromLocalY(Double_t y);
+  static Int_t       rowFromLocal(const StThreeVector<Double_t>& a)            {return rowFromLocalY(a.y());}
   Double_t    padFromLocal(const StThreeVector<Double_t>& a, Int_t row)  const {return padFromX(a.x(), row);}
   Double_t    padFromX(Double_t x, Int_t row)                        const; 
   Int_t       rowFromLocal(const StTpcLocalSectorCoordinate& a)      const {return rowFromLocal(a.position());}
@@ -213,10 +223,7 @@ public:
   // tpc local sector Coordinates from Raw Data
   StThreeVector<Double_t> xyFromRow(const StTpcPadCoordinate& a) {return StThreeVector<Double_t> (xFromPad(a.row(),a.pad()),yFromRow(a.row()),0);}
   Double_t                yFromRow(Int_t row)                        const {return (gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(row));}
-  Double_t                xFromPad(Int_t row, Double_t pad)          const {    // x coordinate in sector 12
-    Double_t pitch = (row<14) ?	gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch() : gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
-    return -pitch*(pad - (gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2.);
-  }
+  Double_t                xFromPad(Int_t row, Double_t pad)          const;
 // sector from Tpc local coordinates
   Int_t sectorFromCoordinate(const StThreeVector<double>& a) const{
     Double_t angle = TMath::RadToDeg()*TMath::ATan2(a.y(),a.x());
@@ -231,6 +238,9 @@ private:
   Double_t    mTimeBinWidth;
   Double_t    mInnerSectorzOffset; 
   Double_t    mOuterSectorzOffset; 
+  Int_t       mNoOfInnerRows;
+  Int_t       mNoOfRows;
+  
   //  ClassDef(StTpcCoordinateTransform,0) //
 };
 

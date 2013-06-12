@@ -6,8 +6,8 @@
 
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
- \date   1999/07/29 , 2001-2008
- @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.48 2011/04/19 16:20:34 fisyak Exp $
+ \date   1999/07/29 , 2001-2011
+ @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.50 2011/11/28 22:47:04 jeromel Exp $
 
  Class to control "BFC" chain
 
@@ -23,24 +23,7 @@
 #include "TFile.h"
 #include "TTable.h"
 #include "Ttypes.h"
-#ifndef __Bfc_st__
-#define __Bfc_st__
-struct Bfc_st {
-  Char_t       Key[63];      /* nick name */
-  Char_t       Name[63];     /* maker name */
-  Char_t       Chain[63];    /* its chain */
-  Char_t       Opts[257];    /* required options */
-  Char_t       Maker[63];    /* required Makers */
-  Char_t       Libs[127];    /* libraries to be loaded */
-  Char_t       Comment[257];  
-  Char_t       Flag;         /* F/T to use it in chain */
-};
-class St_Bfc : public TTable {
- public:
-  ClassDefTable(St_Bfc,Bfc_st)
-  ClassDef(St_Bfc,1) //C++ container for chain/makers status 
-};
-#endif /* __Bfc_st__ */
+#include "Bfc.h"
 //_____________________________________________________________________
 
 class StFileI;
@@ -61,6 +44,7 @@ class StBFChain : public StChain {
   TString             Gproperty;  // a global property name
   TString             Gpattern;   // a global pattern
   TString             Gvalue;     // a global value
+  StVecBFCTS          GTSOptions; // global set of detector specific timestamps
 
   St_Bfc             *fchainOpt;
   Int_t               fkChain;    // Master chain option
@@ -120,7 +104,7 @@ class StBFChain : public StChain {
                TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.48 2011/04/19 16:20:34 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.50 2011/11/28 22:47:04 jeromel Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class

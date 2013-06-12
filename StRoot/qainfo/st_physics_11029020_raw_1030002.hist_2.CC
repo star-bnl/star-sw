@@ -1,6 +1,6 @@
 {
 //=========Macro generated from canvas: CanvasName/ STAR Maker Histogram Canvas
-//=========  (Fri Apr 15 09:52:15 2011) by ROOT version5.22/00
+//=========  (Mon Aug  1 11:02:37 2011) by ROOT version5.22/00
    TCanvas *CanvasName = new TCanvas("CanvasName", " STAR Maker Histogram Canvas",1,1,600,756);
    gStyle->SetOptFit(1);
    CanvasName->Range(0,0,1,1);
@@ -25,7 +25,7 @@
    text = pt->AddText("Hists");
    pt->Draw();
    
-   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Fri Apr 15 09:52:14 2011","br");
+   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Mon Aug  1 11:02:37 2011","br");
    pl->SetTextSize(0.6);
    pl->Draw();
    
@@ -65,12 +65,12 @@
    StEQaVtxPrZ->SetBinContent(8,4);
    StEQaVtxPrZ->SetBinContent(9,7);
    StEQaVtxPrZ->SetBinContent(10,2);
-   StEQaVtxPrZ->SetBinContent(11,6);
+   StEQaVtxPrZ->SetBinContent(11,5);
    StEQaVtxPrZ->SetBinContent(12,6);
    StEQaVtxPrZ->SetBinContent(13,6);
    StEQaVtxPrZ->SetBinContent(14,5);
    StEQaVtxPrZ->SetBinContent(15,6);
-   StEQaVtxPrZ->SetBinContent(16,3);
+   StEQaVtxPrZ->SetBinContent(16,4);
    StEQaVtxPrZ->SetBinContent(17,3);
    StEQaVtxPrZ->SetBinContent(18,4);
    StEQaVtxPrZ->SetBinContent(19,6);
@@ -111,8 +111,8 @@
    text = ptstats->AddText("StEQaVtxPrZ");
    text->SetTextSize(0.04906667);
    text = ptstats->AddText("Entries = 186    ");
-   text = ptstats->AddText("Mean  =  -3.56");
-   text = ptstats->AddText("RMS   =  18.79");
+   text = ptstats->AddText("Mean  = -3.498");
+   text = ptstats->AddText("RMS   =  18.72");
    text = ptstats->AddText("Underflow =      0");
    text = ptstats->AddText("Overflow  =      1");
    ptstats->SetOptStat(111111);
@@ -183,7 +183,7 @@
    PadName_3 = new TPad("PadName_3", "PadName_3",0.01,0.3433333,0.49,0.6566667);
    PadName_3->Draw();
    PadName_3->cd();
-   PadName_3->Range(-45,-446.9063,405,4022.156);
+   PadName_3->Range(-45,-447.3,405,4025.7);
    PadName_3->SetFillColor(10);
    PadName_3->SetBorderMode(0);
    PadName_3->SetBorderSize(2);
@@ -196,7 +196,7 @@
    PadName_4 = new TPad("PadName_4", "PadName_4",0.51,0.3433333,0.99,0.6566667);
    PadName_4->Draw();
    PadName_4->cd();
-   PadName_4->Range(-2.5,1.011216,2.5,4.878454);
+   PadName_4->Range(-2.5,0.9911191,2.5,4.882041);
    PadName_4->SetFillColor(10);
    PadName_4->SetBorderMode(0);
    PadName_4->SetBorderSize(2);
@@ -210,7 +210,7 @@
    PadName_5 = new TPad("PadName_5", "PadName_5",0.01,0.01,0.49,0.3233333);
    PadName_5->Draw();
    PadName_5->cd();
-   PadName_5->Range(-3.75,-0.8689025,3.75,4.809822);
+   PadName_5->Range(-3.75,-0.8684588,3.75,4.805829);
    PadName_5->SetFillColor(10);
    PadName_5->SetBorderMode(0);
    PadName_5->SetBorderSize(2);

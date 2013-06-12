@@ -3,9 +3,18 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.8 2011/03/08 18:20:44 genevb Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.11 2012/09/13 21:00:04 fisyak Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.11  2012/09/13 21:00:04  fisyak
+ * Corrections for iTpx, clean up
+ *
+ * Revision 1.10  2012/05/07 23:01:37  fisyak
+ * Add Tonko's interface for variable no. of pad rows
+ *
+ * Revision 1.9  2012/05/07 15:51:01  fisyak
+ * Remove hard coded TPC numbers
+ *
  * Revision 1.8  2011/03/08 18:20:44  genevb
  * Limit on number of hits starting at time bin 0
  *
@@ -48,7 +57,7 @@ class StTpcDigitalSector;
 class daq_tpx;
 class StTpcRTSHitMaker : public StMaker {
  public:
-  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0) {}
+  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0),NoRows(-1), mTpx_RowLen(0) {}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
@@ -60,6 +69,9 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;
   Int_t    bin0Hits;
+  Int_t    NoRows;
+  Int_t    NoInnerPadRows;
+  UChar_t *mTpx_RowLen;
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
