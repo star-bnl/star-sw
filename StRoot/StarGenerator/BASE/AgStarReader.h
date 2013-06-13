@@ -3,6 +3,7 @@
 
 #include "TObject.h"
 #include "StarParticleStack.h"
+class StarParticleData;
 
 /**
    \class AgStarReader
@@ -37,8 +38,10 @@ class AgStarReader : public TObject
   StarParticleStack *mStack;
 
   static AgStarReader *mInstance;
+  StarParticleData    *mParticleData;
 
   AgStarReader();
+
 
   ClassDef(AgStarReader,1);
 

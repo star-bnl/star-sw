@@ -13,6 +13,8 @@ using namespace std;
 
 #include "TGiant3.h"
 
+#include "StarGenerator/UTIL/StarParticleData.h"
+
 AgStarReader *AgStarReader::mInstance = 0;
 
 // TODO: Refactor TDatabasePDG to StarParticleData 
@@ -35,7 +37,7 @@ extern "C" {
 // ----------------------------------------------------------------------------------------------------
 AgStarReader::AgStarReader()
 { 
-  
+  mParticleData = &StarParticleData::instance();
 }
 // ----------------------------------------------------------------------------------------------------
 //
@@ -96,7 +98,13 @@ void AgStarReader::ReadEvent()
       // Now connect the particle to the vertex
       Float_t plab[3] = { part->Px(), part->Py(), part->Pz() };
       Int_t   ipdg    = part->GetPdgCode();
-      Int_t   g3id    = TDatabasePDG::Instance()->ConvertPdgToGeant3(ipdg);
+      Int_t   g3id    = 0; 
+      {
+	TParticlePDG *pdg = mParticleData -> GetParticle( ipdg );     assert(pdg);
+	g3id = pdg->TrackingCode();                                   assert(g3id);
+	part->Print();
+      }
+
 
       geant3->Gskine( plab, g3id, myvtx );
 

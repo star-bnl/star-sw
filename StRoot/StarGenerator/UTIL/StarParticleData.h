@@ -32,9 +32,38 @@ class StarParticleData : public TObjectSet
   TParticlePDG *GetParticle( const Int_t   id   );
 
   /// Add a particle to the database
-  void          AddParticle( const Char_t *name,  TParticlePDG *particle );
+  void          AddParticle( const Char_t *name,  TParticlePDG *particle ); 
   /// Add an alias to a particle in the database
   void          AddAlias   ( const Char_t *alias, const Char_t *realname );
+
+  /*!
+    Particle definition normal constructor. If the particle is set to be
+    stable, the decay width parameter does have no meaning and can be set to
+    any value. The parameters granularity, LowerCutOff and HighCutOff are
+    used for the construction of the mean free path look up tables. The
+    granularity will be the number of logwise energy points for which the
+    mean free path will be calculated.
+
+    @param name Name of the particle
+    @param title Title 
+    @param mass  Mass of the particle [GeV]
+    @param stable True if the particle is stable
+    @param width Total width of the particle (meaningless if stable) [GeV]
+    @param charge3 Charge of the particle in units of |e|/3... i.e. proton would be charge3 = 3, down quark charge3 = -1.
+    @param particleClass is the class of the particle, e.g. lepton, hadron, ...
+    @param pdgCode is the Particle Data Group code
+    @param geantCode is the geant code of the particle
+
+  */
+  TParticlePDG *AddParticle( const Char_t *name, const Char_t *title, Double_t mass, Bool_t Stable, Double_t Width, Double_t Charge3, const char* ParticleClass, Int_t PdgCode, Int_t Anti, Int_t geantCode );
+
+  /*!
+    Add a decay channel to the named particle
+    @param name Name of the particle
+ 
+    AddDecay( const Char_t *name, Int_t num, Int_t matrixCode, Double_t branchingRatio, TArrayI kids );
+   
+  */
 
   /// Returns a reference to the single instance of this class
   static StarParticleData &instance(){ return sInstance; }
@@ -44,12 +73,12 @@ class StarParticleData : public TObjectSet
 
   /// Returns a reference to the list of particles.
   const TObjArray &GetParticles() const { return mParticleList; }
-  
+
  private:
  protected:
 
   // Singleton instance of this class
-  static StarParticleData sInstance;
+  static StarParticleData sInstance; 
 
   TObjArray                           mParticleList;    // my particles
   std::map< TString, TParticlePDG* >  mParticleNameMap; // particle aliases
