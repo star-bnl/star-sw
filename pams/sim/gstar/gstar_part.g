@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.39 2013/04/08 19:57:20 jwebb Exp $
+* $Id: gstar_part.g,v 1.40 2013/06/13 18:44:03 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.40  2013/06/13 18:44:03  jwebb
+* Added Lambda Xi dibaryon.
+*
 * Revision 1.39  2013/04/08 19:57:20  jwebb
 * Updated mass and lifetime of the phi to more recent PDG values.
 *
@@ -662,7 +665,7 @@ Particle anti_hyperTriton_db_pb_pi code      = 62054  ,
                                   mode      = {081553,}
 
 
-   """Define all dibaryons / dimesons with offset=70000 """
+   """Define all dibaryons / dimesons with offset=60000 """
 
 Particle H_dibaryon               code      = 60001,
                                   mass      = 2.232,
@@ -672,6 +675,26 @@ Particle H_dibaryon               code      = 60001,
                                   trktyp    = kGtHADR,
                                   bratio    = {1,},
                                   mode      = { 98 14 09, }
+
+
+
+  PARTICLE LamXi2430 "Lambda0 Xi0 bound state " _
+                      code = 60002       pdg=0             ,
+                      trktyp = kGtNeut   mass=2.430543     ,
+                      charge = 0         tlife = 0.26320E-9/2, 
+                      bratio = {0.5,  0.5 }                ,   
+                      mode   = {1523, 1818}                    
+
+  PARTICLE AntiLamXi2430 "Lambda0 Xi0 bound state " _
+                      code = 60003       pdg=0             ,
+                      trktyp = kGtNeut   mass=2.430543     ,
+                      charge = 0         tlife = 0.26320E-9/2, 
+                      bratio = {0.5,  0.5 }                ,
+                      mode   = {1431, 2626}
+                      
+ 
+
+
 
                         
 
