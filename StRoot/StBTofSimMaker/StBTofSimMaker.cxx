@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.6 2012/05/07 14:16:40 fisyak Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.7 2013/06/13 14:00:51 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.7  2013/06/13 14:00:51  geurts
+ * improve log message for inefficiency cuts
+ *
  * Revision 1.6  2012/05/07 14:16:40  fisyak
  * Write hit to StEvent, set kBTofId for hit
  *
@@ -628,7 +631,7 @@ Int_t StBTofSimMaker::fillEvent()
 	    Float_t eff = 1.;
 	    if(trayid>0&&trayid<=120) eff = mSimDb->eff_tof(trayid, moduleid, cellid);
 	    else if(trayid==121||trayid==122) eff = mSimDb->eff_vpd(trayid, cellid);
-	    if (gRandom->Uniform(1.0) > eff){cout<<"REMOVED"<<endl; continue; } //! inefficiency
+	    if (gRandom->Uniform(1.0) > eff){LOG_DEBUG<<"Hit removed by inefficiency cut (at " << eff*100 << "%)"<<endm; continue; } //! inefficiency
 
 
 	    //Fill the StBTofHit
