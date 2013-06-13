@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.43 2012/09/13 21:00:04 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.45 2012/11/20 22:55:56 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,12 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.45  2012/11/20 22:55:56  fisyak
+ * Set the same cuts for online cluster maker as for offline one
+ *
+ * Revision 1.44  2012/10/24 13:36:06  fisyak
+ * Increase no. of pad rows
+ *
  * Revision 1.43  2012/09/13 21:00:04  fisyak
  * Corrections for iTpx, clean up
  *
@@ -458,6 +464,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	Int_t ncounts = tpc->cl_counts[padrow];
 	for(Int_t j=0;j<ncounts;j++,c++) {
 	  if (! c || ! c->charge) continue;
+	  if (c->flags & (FCF_DEAD_EDGE | FCF_BROKEN_EDGE | FCF_ROW_EDGE)) continue;
 	  Int_t iok = hitCollection->addHit(CreateTpcHit(*c,sector,padrow+1));
 	  assert(iok);
 	}
@@ -484,6 +491,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       }
       if (! cld->pad || ! cld->charge) continue;
       if (cld->tb >= __MaxNumberOfTimeBins__) continue;
+      if (cld->flags & (FCF_DEAD_EDGE | FCF_BROKEN_EDGE | FCF_ROW_EDGE)) continue;
       Int_t iok = hitCollection->addHit(CreateTpcHit(*cld,sector,row));
       assert(iok);
     }
@@ -511,13 +519,13 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   UInt_t hw = 1;   // detid_tpc
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
-  
+#if 0  
   Int_t npads = TMath::Abs(cluster.p2 - cluster.p1) + 1;
   hw += (npads   << 15);  // npads
   
   Int_t ntmbk = TMath::Abs(cluster.t2 - cluster.t1) + 1;
   hw += (ntmbk << 22);  // ntmbks...
-
+#endif
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
 
   Double_t gain = (row<=NoInnerPadRows) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
@@ -569,13 +577,13 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   UInt_t hw = 1;   // detid_tpc
   hw += sector << 4;     // (row/100 << 4);   // sector
   hw += row    << 9;     // (row%100 << 9);   // row
-  
+#if 0  
   Int_t npads = TMath::Abs(cluster.p2 - cluster.p1) + 1;
   hw += (npads   << 15);  // npads
   
   Int_t ntmbk = TMath::Abs(cluster.t2 - cluster.t1) + 1;
   hw += (ntmbk << 22);  // ntmbks...
-
+#endif
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
 
   StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q

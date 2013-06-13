@@ -9,7 +9,6 @@
 #ifndef ST_JET_TRACK_H
 #define ST_JET_TRACK_H
 
-#include "TMath.h"
 #include "StJetElement.h"
 
 class StJetTrack : public StJetElement {
@@ -61,7 +60,6 @@ public:
   float nSigmaKaon()           const { return mNSigmaKaon; }
   float nSigmaProton()         const { return mNSigmaProton; }
   float nSigmaElectron()       const { return mNSigmaElectron; }
-  float m()                    const { return (beta() > 0 && beta() < 1) ? momentum().Mag()*TMath::Sqrt(1/(beta()*beta())-1) : -999; }
 
 private:
   short    mFlag;

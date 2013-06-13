@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.17 2012/06/25 16:02:05 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.19 2013/03/14 18:27:26 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,16 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.19  2013/03/14 18:27:26  jwebb
+ * Added pi0    --> e+e- gamma 100% gid=10007
+ * Added K0long --> nu e- pi+  100% gid=10010
+ * Added K0long --> nu e+ pi-  100% gid=10110
+ *
+ * http://www.star.bnl.gov/rt2/Ticket/Display.html?id=2549
+ *
+ * Revision 1.18  2013/01/31 18:21:46  jwebb
+ * Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
+ *
  * Revision 1.17  2012/06/25 16:02:05  jwebb
  * Added Xi0(1530).
  *
@@ -91,7 +101,7 @@
 
 #include "StarPDGEncoding.hh"
 #define kUndefined _undefined_particle_id++
-long _undefined_particle_id = 2000000000;
+long _undefined_particle_id = 2000000000; /* Unique PDG ID for each undefined particle */
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
 #include <ospace/stl/src/treeaux.cpp> // CC4.2 with ObjectSpace only
@@ -103,6 +113,7 @@ long _undefined_particle_id = 2000000000;
 #include "StAntiHelium3.hh"
 #include "StAntiHyperTriton.hh"
 #include "StHyperTriton.hh"
+#include "StHDibaryon.hh"
 
 
 StParticleTable* StParticleTable::mParticleTable = 0;
@@ -267,6 +278,11 @@ StParticleTable::StParticleTable()
     /// Embedding particle definitions
     ///@{
 
+    Geant2Pdg( 10007, 130, pi0 --> e+ e- gamma );
+
+    Geant2Pdg( 10010, 130, K0 Long --> nu e- pi+ );
+    Geant2Pdg( 10110, 130, K0 Long --> nu e+ pi- );
+
        Geant2Pdg(10017,  221, eta --> e+ e- gamma);
        Geant2Pdg(10018, 3122, lambda --> p + pi- );
        Geant2Pdg(10026,-3122, lambdaBar --> pbar + pi+ );
@@ -322,6 +338,12 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 61054, kAntiHyperTriton, AntiH3(Lambda) --> AntiHe3 piplus );
        Geant2Pdg( 62053, kHyperTriton,         H3(Lambda) --> d p piminus );
        Geant2Pdg( 62054, kAntiHyperTriton, AntiH3(Lambda) --> dbar pbar piplus );	
+    ///@}
+
+    ///@addtogroup EXOTICS
+    ///Definitions of exotics, e.g. H-dibaryon
+    ///@{
+       Geant2Pdg( 60001, kUndefined,         H-Dibaryon --> Lambda + piminus + proton );
     ///@}
 
 
@@ -427,9 +449,13 @@ StParticleDefinition* StParticleTable::findParticleByGeantId(int geantId) const
     case 60054:
     case 61054:
     case 62054:
-      p = StAntiHyperTriton::instance();
+      p = StAntiHyperTriton::instance();      
       break;
       
+      
+    case 60001:
+      p = StHDibaryon::instance();
+      break;
 
 
 
