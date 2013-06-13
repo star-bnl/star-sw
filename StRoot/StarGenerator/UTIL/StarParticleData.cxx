@@ -130,6 +130,19 @@ void StarParticleData::AddParticle( const Char_t *name, TParticlePDG *particle )
 // ---------------------------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------------------------
+TParticlePDG *StarParticleData::AddParticle( const Char_t *name, const Char_t *title, Double_t mass, 
+Bool_t stable, Double_t width, Double_t charge3, const char* particleClass, Int_t PdgCode, Int_t Anti, Int_t geantCode )
+{
+  // Create the particle
+  TParticlePDG *part = new TParticlePDG(name,title,mass,stable,width,charge3,particleClass,PdgCode,Anti,geantCode); 
+  // Register the particle
+  AddParticle( name, part );
+  // And return a pointer to it
+  return part;
+}
+// ---------------------------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------------------------
 void StarParticleData::AddAlias( const Char_t *alias, const Char_t *name )
 {
   TParticlePDG *particle = GetParticle(name);
