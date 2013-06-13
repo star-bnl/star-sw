@@ -1933,15 +1933,22 @@ x0 = mod4_X0Offset
   <Create    block="GVBC"  />
   <Placement block="GVBC" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_HVThk/2" y="gmtr_GINW-gmtr_GtoHVW+gmtr_HVW/2" z="gmtr_GINL/2-gmtr_GtoHVL-gmtr_HVL-gmtr_GVL/2" />
 	
-  <Create    block="GFBO"  /> <!-- Place twice at different z-positions -->
+  <Create    block="GFBO"  /> 
   <Placement block="GFBO" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGFL+gmtr_GBL/2" /> 	
+  <!-- JCW double placement
   <Placement block="GFBO" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGBL+gmtr_GBL/2" /> 
+  -->
 	
-  <Create    block="GFBC"  /> <!-- Place twice at different z-positions -->
+  <Create    block="GFBC"  /> 
   <Placement block="GFBC" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGFL-gmtr_GCL/2" />
+  <!-- JCW double placement
   <Placement block="GFBC" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGBL-gmtr_GCL/2" />
+  -->
   
   <Create    block="GSBE"  />  <Placement block="GSBE" x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"    />	
+  <!-- JCW double create double place
+  <Create    block="GSBE"  />  <Placement block="GSBE" x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"    />
+  -->
 
 </Block>
     
