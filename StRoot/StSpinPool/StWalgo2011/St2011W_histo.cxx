@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.15 2012/10/05 17:53:53 balewski Exp $
+// $Id: St2011W_histo.cxx,v 1.16 2013/06/14 21:08:51 jlzhang Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -55,7 +55,7 @@ St2011WMaker::initHistos(){
 
 
   //.... vertex histograms .....
-  hA[10]=h=new TH1F("muVRf","L2WB: PPV Vertex rank, funny X-axis; X=Log10(rank)+offset", 150, -9,25);
+  hA[10]=h=new TH1F("muVRf","L2WB: PPV Vertex rank, funny X-axis; X=Log(rank)+offset", 150, -9,25);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,0,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
@@ -227,7 +227,7 @@ St2011WMaker::initHistos(){
   hA[96]=h=new TH1F("muWcar1",txt,10,-0.5,9.5);
   h->SetLineColor(kBlue);h->SetLineWidth(3);
 
-  sprintf(txt,"Barrel W: Vertex 'funny' rank, final W selection, 2x2 ET>%.0f GeV;  X=Log10(rank)+offset",par_highET);
+  sprintf(txt,"Barrel W: Vertex 'funny' rank, final W selection, 2x2 ET>%.0f GeV;  X=Log(rank)+offset",par_highET);
   hA[97]=new TH1F("muWcar2",txt, 150, -9,25);
   
   sprintf(txt,"Barrel W: Vertex Z, final selection, 2x2 ET>%.0f GeV; Z(cm)",par_highET);
@@ -395,6 +395,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.16  2013/06/14 21:08:51  jlzhang
+// add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
+//
 // Revision 1.15  2012/10/05 17:53:53  balewski
 // added correlation plots for reco Q in Z, W algos
 //
