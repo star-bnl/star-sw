@@ -7,7 +7,7 @@ root [7] muWET->Draw()
 */
 
 //=================================================
-plWana(  int page=0,int pl=2, char *core0="run12long", char *iPath="8.29.12/", char *oPath="out/bemc/", int isMC=0, char *etaBin="Eta5"){ //1=gif, 2=ps, 3=both
+plWana(  int page=-1,int pl=2, char *core0="sumR12P13ib", char *iPath="/star/u/jlzhang/run12-dev/", char *oPath="/star/u/jlzhang/run12-dev/movies/", int isMC=0, char *etaBin="Eta7"){ //1=gif, 2=ps, 3=both
 
   //cout<<iPath<<core0<<endl;
   //cout<<etaBin<<endl;
@@ -31,8 +31,8 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameH[]={"muBclET24","muBclE242D","muBclET24R"};//pg 8
   
   char *nameJ[]={"muBdist1","muBdist2","muBdist3","muBdist4"};//pg 9
-  char *nameK[]={"muBjetETR","muTjetBjet2D","muTBjetET"};//pg 11
-  char *nameL[]={"muBjetET","muBclEjetE2D","muTjetET"};//pg 10
+  char *nameK[]={"muBjetETR","muTjetBjet2D","muTBjetET"};//pg 10
+  char *nameL[]={"muBjetET","muBclEjetE2D","muTjetET"};//pg 11
   char *nameM[]={"muTwayET","muBwayET","muBclETPt","muEwayET"};//pg 12
   
   char *nameW[]={"muTotwayET2D","musPtBalance_clust","muWET","muW2D1"};//pg 13
@@ -43,20 +43,17 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   
   char *nameP[]={"muETlive0","muETlive1", "muETlive2","muETlive3","muWcar1","muWcar2","muWcar3"}; // pg 18
   
-  char *nameQ[]={"pubJoe1","pubJoe2","pubJoe3","pubJoe4","pubJoe5","pubJoe6","pubJoe7","pubJoe8"};// pg 19
-
-  char *nameR1[]={"pubStatEve","pubCrR","pubWET","pubchEtaCP","pubchEtaCN"};// pg 20
-  char *nameR2[]={"pubchRecPNg","pubchRecPNp"};// pg 21
-  char *nameR3[]={"pubchWETPg"  ,"pubchWETPp","pubchCFP0" ,"pubchWETNg" ,"pubchWETNp","pubchCFN0"};// pg 22
+  //add histograms for q/pt and q*ET/pT
+  char *nameR1[]={"muChRecPNg","muChRecPNp"}; //pg 19
+  char *nameR2[]={"muChRecHypCorrPNg","muChRecHypCorrPNp"};//pg 20
 
   TString spinPre='A';
   char *nameS1[]={"spinStatEve","spins4mon","spinbX48","spinbX7","spinbX48c","spinbX7c"};// pg 23
   char *nameS5[]={"spinET_P","spinET_N","spinQpT","spinQpT2"};// pg 24
-  char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N"};// pg 25
-  char *nameS3[]={,"spinY3_P","spinY3_N","spinY4_P","spinY4_N"};// pg 26
-  char *nameS4[]={"spinY5_P","spinY5_N","spinLepEta_P","spinLepEta_N"};// pg 27
-  char *nameLum[]={"AEta8spinY1", "lumStatEve","lumEleTrET", "lumY0", "lumY2", "lumY3", "lumY1"}; // pg28
-
+  char *nameS6[]={"spinQpT_hits","spinQpT_hitF","spinHitsFit_Frac"};// pg 25
+  char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N"};// pg 26
+  char *nameS3[]={,"spinY3_P","spinY3_N","spinY4_P","spinY4_N"};// pg 27
+  char *nameS4[]={"spinY5_P","spinY5_N","spinLepEta_P","spinLepEta_N"};// pg 28
 
   //use  Page 30 -42 TPC sectors per cut, 2 pages per cut
 
@@ -73,7 +70,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
 
   //switch to TDirectory for eta binning
   if(fd->Get("muStatEve")==0) {
-    cout<<"Switching to etaBin"<<etaBin<<" now have to use gDirectory"<<endl;
+    cout<<"Switching to etaBin "<<etaBin<<" now have to use gDirectory"<<endl;
     spinPre+=etaBin;
     if(!fd->cd(etaBin)) {
       cout<<"Missing TDirectory of interest, no plots!"<<endl;
@@ -97,8 +94,9 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     nameR2[0]="muChRecPNg";
     nameR2[1]="muChRecPNp";
   }
-  if( ((page>=2 && page<=6) || (page>=30 && page<=42) || page==15) && !fd->cd("tpc")) return; //skip tpc/vertex plots
-  fd->cd(etaBin);
+  if( ((page>=2 && page<=6) || (page>=31 && page<=43) || page==15) && !fd->cd("tpc")) return; //skip tpc/vertex plots
+  //fd->cd(etaBin);
+  fd->cd();
   //*****
 
  gStyle->SetPalette(1,0);
@@ -437,46 +435,12 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
 
  } break;//--------------------------------------
 
-case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(3,3);gStyle->SetOptStat(10);
-    char **nameX=nameQ;
-    for(int i=0;i<8;i++) {
-      printf("->%s<\n",nameX[i]);
-      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
-      c->cd(i+1);  h->Draw();
-      h->SetFillColor(30+i*5);
-      if(i==7) h->Draw("colz");
-    }
-    c->GetPad(1)->SetLogy();
- } break;//--------------------------------------
-
-
- case 20:{    sprintf(padTit,"pub-maker misc, %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(2,2);gStyle->SetOptStat(10);
-    char **nameX=nameR1;
-    for(int i=0;i<3;i++) {
-        printf("->%s<\n",nameX[i]);
-      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
-      if(i==4) {
-	h->Draw("same e");
-	break;
-      }
-      c->cd(i+1); h->Draw();
-      if(i==1)  h->Draw("colz");
-      if(i==0) h->Draw("h text");
-    }
-    c->GetPad(2)->SetLogz();          
-    c->GetPad(1)->SetLogy();
- } break;//--------------------------------------
-
  
- case 21:{    sprintf(padTit,"charge separation, %s",core0);
+ case 19:{    sprintf(padTit,"charge separation, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,1);gStyle->SetOptStat(110110);
-    ln=new TLine(0,0,80,0); ln->SetLineColor(kMagenta);
-    char **nameX=nameR2;
+    ln=new TLine(0,0,70,0); ln->SetLineColor(kMagenta);
+    char **nameX=nameR1;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
@@ -486,21 +450,18 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
  } break;//--------------------------------------
 
  
- case 22:{    sprintf(padTit,"charge separation, %s",core0);
+ case 20:{    sprintf(padTit,"Charge Separation Hyperbola Corrected, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(3,2);gStyle->SetOptStat(10);
-    char **nameX=nameR3;
-    for(int i=0;i<6;i++) {
+    c->Divide(2,1);gStyle->SetOptStat(110110);
+    ln=new TLine(0,0,70,0); ln->SetLineColor(kMagenta);
+    char **nameX=nameR2;
+    for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
-      c->cd(i+1);  h->Draw();
-      h->SetFillColor(4);
-      if(i==0 ||i==3) h->SetFillColor(3);
-      h->Rebin();
-      h->SetAxisRange(0,80);
+      c->cd(i+1);  h->Draw("colz"); h->SetAxisRange(0,70);
+      ln->Draw();
     }
  } break;//--------------------------------------
-
 
 
  case 23:{    sprintf(padTit,"bXing & spin QA, %s",core0);
@@ -536,11 +497,21 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
      gPad->SetGrid(0,0);
    }
  } break;//--------------------------------------
-   
-
  
- case 25:
+ case 25:{  sprintf(padTit,"Charge separation vs. track quality, %s", core0);
+   can=new TCanvas("aa","aa",800,600); TPad *c=makeTitle(can,spinPre+padTit,page);
+   c->Divide(2,2);gStyle->SetOptStat(10);
+   char **nameX=nameS6;
+   for(int i=0;i<3;i++) {
+	 printf("->%s<\n",nameX[i]);
+     h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);  
+	 c->cd(i+1);  h->Draw("colz"); ((TH2F*)h)->Rebin2D(1,2);
+	 gPad->SetGrid(0,0);
+	  }   
+  }break;//-----------------------------------
+ 
  case 26:
+ case 27:
    {    sprintf(padTit,"spin sorting: lumi & Ws, %s",core0);
      char **nameX=nameS2;
      if(page==26) { nameX=nameS3;sprintf(padTit,"spin sorting: QCD background, %s",core0);}
@@ -554,7 +525,7 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     }
  } break;//--------------------------------------
  
-  case 27:{    sprintf(padTit,"charge & ET vs. spin state, %s",core0);
+  case 28:{    sprintf(padTit,"charge & ET vs. spin state, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameS4;
@@ -562,50 +533,28 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
-      if(i>1) { h->Draw(); h->Rebin(4);}
-    }
- } break;//--------------------------------------
-
- case 28:{    sprintf(padTit,"  alternative rel spin monitors, %s",core0);
-     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
-     c->Divide(3,2);gStyle->SetOptStat(10);
-     char **nameX=nameLum;
-     TH1F *hRef=0;
-     for(int i=0;i<6;i++) {
-       printf("->%s<\n",nameX[i]);
-       h=(TH1F*)gDirectory->Get(nameX[i]);  assert(h);
-       if(hRef==0) hRef=h;
-       c->cd(i+1);  h->Draw();
-       if(i>=3) {
-	 h->SetMarkerStyle(20);
-	 h->Sumw2();
-	 h->Divide(hRef);
-	 if(h->GetEntries()>0)h->Fit("pol0");
-	 h->SetMinimum( h->GetMinimum());
-      }
+      if(i>1) h->Draw();
     }
  } break;//--------------------------------------
 
 
 
-
-
- case 30: // TPC stats 
- case 31: 
- case 32: // TPC nFitPts 
- case 33: 
- case 34: // TPC nFit/nPossibe
- case 35: 
- case 36: // TPC 1st hit R
- case 37: 
- case 38: // TPC last hit R
- case 39: 
- case 40: // TPC dE/dX
- case 41: 
+ case 31: // TPC stats 
+ case 32: 
+ case 33: // TPC nFitPts 
+ case 34: 
+ case 35: // TPC nFit/nPossibe
+ case 36: 
+ case 37: // TPC 1st hit R
+ case 38: 
+ case 39: // TPC last hit R
+ case 40: 
+ case 41: // TPC dE/dX
+ case 42: 
    {    
    fd->cd("tpc");
-   int iew=(page-30)%2; // East-West
-   int iCut=(page-30)/2;
+   int iew=(page-31)%2; // East-West
+   int iCut=(page-31)/2;
    int sec1=1, sec2=12; if(iew) sec1=13, sec2=24;
    char *titA[]={"stats","nFitPoints", " nFit/nPossible","1st hit Rxy","last hit Rxy","dE/dX"};
    char *titB[]={"Stat","TrNfit","TrFitFrac","TrRxyIn","TrRxyOut","TrdEdX"};
@@ -629,7 +578,7 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
    }
  } break;//--------------------------------------
 
- case 42:{    
+ case 43:{    
     fd->cd();
     sprintf(padTit,"TPC accepted tracks, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
@@ -751,21 +700,14 @@ void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* eta
     plWana(i,2,core0,iPath,oPath,isMC,etaBin);
   }
   // TPC by sector:
-  for(int i=30;i<=42;i++)  plWana(i,2,core0,iPath,oPath,isMC,etaBin);
+  for(int i=31;i<=43;i++)  plWana(i,2,core0,iPath,oPath,isMC,etaBin);
 
 }
 
 
 // $Log: plWana.C,v $
-// Revision 1.18  2012/09/14 21:02:31  balewski
-// *lumi-maker re-written to accumulate alternative rel lumi monitors,
-// * added spin sorting to Zs
-//
-// Revision 1.17  2012/08/31 20:56:06  balewski
-// Toy pol eve generator and reco
-//
-// Revision 1.16  2012/08/28 14:28:49  stevens4
-// updates to movie makers
+// Revision 1.19  2013/06/14 21:09:10  jlzhang
+// add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
 //
 // Revision 1.15  2012/08/07 21:06:56  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin

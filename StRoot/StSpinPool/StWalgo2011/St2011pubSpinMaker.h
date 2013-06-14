@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.h,v 1.6 2012/09/17 03:29:30 stevens4 Exp $
+// $Id: St2011pubSpinMaker.h,v 1.7 2013/06/14 21:08:51 jlzhang Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -41,8 +41,8 @@ class St2011pubSpinMaker : public StMaker {
 
   // histograms
   TObjArray *HList;
-  enum {mxHA=32}; TH1 * hA[mxHA];
-  enum {mxHE=32}; TH1 * hE[mxHE];
+  enum {mxHA=35}; TH1 * hA[mxHA];
+  enum {mxHE=35}; TH1 * hE[mxHE];
   
   void initHistos();
   void bXingSort();
@@ -65,7 +65,7 @@ class St2011pubSpinMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.6 2012/09/17 03:29:30 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.7 2013/06/14 21:08:51 jlzhang Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -76,6 +76,9 @@ class St2011pubSpinMaker : public StMaker {
 
 
 // $Log: St2011pubSpinMaker.h,v $
+// Revision 1.7  2013/06/14 21:08:51  jlzhang
+// add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
+//
 // Revision 1.6  2012/09/17 03:29:30  stevens4
 // Updates to Endcap algo and Q*ET/PT charge separation
 //

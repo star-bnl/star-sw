@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.12 2012/09/26 14:20:59 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.13 2013/06/14 21:08:51 jlzhang Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -186,7 +186,12 @@ St2011pubSpinMaker::bXingSort(){
 
       if(ET>par_myET) hA[0]->Fill("W25",1.);
       float q2pt=T.prMuTrack->charge()/T.prMuTrack->pt();
-      if(ET>par_myET) hA[8]->Fill(q2pt);
+      if(ET>par_myET) {
+		hA[8]->Fill(q2pt);
+		hA[32]->Fill(q2pt,T.prMuTrack->nHitsFit());
+	    hA[33]->Fill(q2pt,1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
+		hA[34]->Fill(T.prMuTrack->nHitsFit(),1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
+	  }
       hA[9]->Fill(ET,q2pt);
       
       // new charge rejection Q*ET/PT
@@ -317,7 +322,12 @@ St2011pubSpinMaker::bXingSortEndcap(){
 
       if(ET>par_myET) hE[0]->Fill("W25",1.);
       float q2pt=T.prMuTrack->charge()/T.prMuTrack->pt();
-      if(ET>par_myET) hE[8]->Fill(q2pt);
+      if(ET>par_myET){ 
+		hE[8]->Fill(q2pt);
+		hE[32]->Fill(q2pt,T.prMuTrack->nHitsFit());
+	    hE[33]->Fill(q2pt,1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
+		hE[34]->Fill(T.prMuTrack->nHitsFit(),1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
+	  }
       hE[9]->Fill(ET,q2pt);
 
       // new charge rejection Q*ET/PT
@@ -352,6 +362,9 @@ St2011pubSpinMaker::bXingSortEndcap(){
 }
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.13  2013/06/14 21:08:51  jlzhang
+// add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
+//
 // Revision 1.12  2012/09/26 14:20:59  stevens4
 // use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
 //

@@ -1,4 +1,4 @@
-// $Id: St2011pubSpin_histo.cxx,v 1.6 2012/09/26 14:21:00 stevens4 Exp $
+// $Id: St2011pubSpin_histo.cxx,v 1.7 2013/06/14 21:08:51 jlzhang Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -47,7 +47,8 @@ St2011pubSpinMaker::initHistos(){
   hA[6]=new TH1F(core+"Y0","Barrel BG1: L2W-BHT3-rnd & vertex OK & low ET; spin4 ",16,-0.5,15.5);
   hA[7]=new TH1F(core+"Y1",Form("Barrel BG2: vertex & ET<20 &  ET 2x2 << 4x4 : %s; spin4 ",coreTitle.Data()),16,-0.5,15.5);
 
-  hA[8]=h=new TH1F(core+"QpT","Barrel reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
+  //hA[8]=h=new TH1F(core+"QpT","Barrel reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
+  hA[8]=h=new TH1F(core+"QpT","Barrel W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
   float highCut=par_QPThighA - (par_QPThighET1-par_QPThighET0)*par_QPThighB; 
     
   if(par_QPTlow>0) { // abaility to skip all Q/PT cuts
@@ -124,6 +125,9 @@ St2011pubSpinMaker::initHistos(){
   // free 24-29
 
   hA[31]=h=new TH1F(core+"LumET","Lumi monitor; 2x2 ET (GeV)",100,0.,100.);
+  hA[32]=h=new TH2F(core+"QpT_hits","nHitsFit vs Q/PT,Barrel W ET>25 GeV; reco Q/PT  (1/GeV); nFitPoints",100,-0.099,0.099,50,0,50);
+  hA[33]=h=new TH2F(core+"QpT_hitF","nHitsFrac vs Q/PT,Barrel W ET>25 GeV; reco Q/PT  (1/GeV); nHitsFrac",100,-0.099,0.099,50,0,1.1);
+  hA[34]=h=new TH2F(core+"HitsFit_Frac","Barrel nHitsFit vs nHitsFrac; nHitsFit; nHitsFrac",50,0,50,50,0,1.1);
 
 
 
@@ -214,6 +218,9 @@ St2011pubSpinMaker::initHistos(){
   // free 20-29
 
   hE[31]=h=new TH1F(core+"ELumET","Lumi monitor; 2x2 ET (GeV)",100,0.,100.);
+  hE[32]=h=new TH2F(core+"EQpT_hits","nHitsFit vs Q/PT,Endcap W ET>25 GeV; reco Q/PT  (1/GeV); nFitPoints",100,-0.099,0.099,50,0,50);
+  hE[33]=h=new TH2F(core+"EQpT_hitF","nHitsFrac vs Q/PT,Endcap W ET>25 GeV; reco Q/PT  (1/GeV); nHitsFrac",100,-0.099,0.099,50,0,1.1);
+  hE[34]=h=new TH2F(core+"EHitsFit_Frac","Endcap nHitsFit vs nHitsFrac; nHitsFit; nHitsFrac",50,0,50,50,0,1.1);
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
@@ -231,6 +238,11 @@ St2011pubSpinMaker::initHistos(){
 
 
 // $Log: St2011pubSpin_histo.cxx,v $
+// Revision 1.7  2013/06/14 21:08:51  jlzhang
+// add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
+//
+// Revision 1.7 2013/05/04/           zhang
+// Add nHitsFit vs Q/pT and nHitsFit/nHitsPoss vs Q/pT , recover Q/pT 
 // Revision 1.6  2012/09/26 14:21:00  stevens4
 // use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
 //

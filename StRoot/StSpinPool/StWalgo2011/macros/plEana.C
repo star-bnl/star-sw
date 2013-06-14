@@ -9,7 +9,7 @@ root [7] muWET->Draw()
 // Endcap reco algo
 
 //=================================================
-void plEana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="out/eemc/", int isMC=0, char *etaBin="Eta8"){ //1=gif, 2=ps, 3=both
+void plEana(  int page=-1,int pl=2, char *core0="sumR12P13ib", char *iPath="/star/u/jlzhang/run12-dev/", char *oPath="/star/u/jlzhang/run12-dev/movies/", int isMC=0, char *etaBin="Eta7"){ //1=gif, 2=ps, 3=both
     
   cout<<iPath<<core0<<endl;
 
@@ -39,27 +39,27 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   
   char *nameW[]={"muETotwayET2D","muEsPtBalance_clust","muE_WET","muE_W2D1"};//pg 13
   char *namePB[]={"muEsPtBalance_clust", "muEsPtBalance_awayTot","muE_Weta","muE_WXY"};// pg 14 -Pt-Balance plots
-  //pg 15 blank -> add ESMD plots
-  char *nameN[]={"muETrdEdX","muE_Wdedx"}; //pg 16
+  char *nameN[]={"muETrdEdX","muE_Wdedx"}; //pg 16 -> pg 15 pg21 -> pg16
   char *nameO[]={"muE_WglDcaSP","muE_WglDcaSN"}; // pg 17
   
   char *nameP[]={"muE_ETlive0","muE_ETlive1","muE_ETlive2","muE_ETlive3","muE_Wcar1","muE_Wcar2","muE_Wcar3"}; // pg 18
   
   //add histograms for q/pt plots etc.
   char *nameR2[]={"muEchRecPNg","muEchRecPNp"};// pg 19
-  char *nameR3[]={"muE_WETPg"  ,"muE_WETPp","muE_CFP0" ,"muE_WETNg" ,"muE_WETNp","muE_CFN0"};// pg 20
+  char *nameR3[]={"muEchRecHypCorrPNg" ,"muEchRecHypCorrPNp"};// pg 20
 
-  char *nameSMD[]={"muE_UoffStr","muE_VoffStr"}; // pg21
+  char *nameSMD[]={"muE_UoffStr","muE_VoffStr"}; // pg21 -> pg 16
 
   TString spinPre='A';
   char *nameS1[]={"spinEStatEve","spinEs4mon","spinEbX48","spinEbX7","spinEbX48c","spinEbX7c"};// pg 23
   char *nameS5[]={"spinE_ET_P","spinE_ET_N","spinEQpT","spinEQpT2"};// pg 24
-  char *nameS2[]={"spinEY0","spinEY1","spinEY2_P","spinEY2_N"};// pg 25
-  char *nameS3[]={,"spinEY3_P","spinEY3_N","spinEY4_P","spinEY4_N"};// pg 26
-  char *nameS4[]={"spinEY5_P","spinEY5_N","spinELepEta_P","spinELepEta_N"};// pg 27
+  char *nameS6[]={"spinEQpT_hits","spinEQpT_hitF","spinEHitsFit_Frac"};// pg 25
+  char *nameS2[]={"spinEY0","spinEY1","spinEY2_P","spinEY2_N"};// pg 26
+  char *nameS3[]={,"spinEY3_P","spinEY3_N","spinEY4_P","spinEY4_N"};// pg 27
+  char *nameS4[]={"spinEY5_P","spinEY5_N","spinELepEta_P","spinELepEta_N"};// pg 28
 
-  char *nameEsmd1[]={"muEsmdNhit","muEsmdEne","muEsmdRatioUV","muEclustET_esmdNhit","muEclustET_esmdEne","muEclustET_esmdRatio"};//pg 28
-  char *nameEsmd2[]={"muEclustET_esmdEneSum7","muEsPtBalance_clustPassSMD","muEsPtBalance_clustFailSMD","muEsPtBalance_esmdRatio_highET","muEsPtBalance2_clustPassSMD","muEsPtBalance2_clustFailSMD"};//pg 29
+  char *nameEsmd1[]={"muEsmdNhit","muEsmdEne","muEsmdRatioUV","muEclustET_esmdNhit","muEclustET_esmdEne","muEclustET_esmdRatio"};//pg 29
+  char *nameEsmd2[]={"muEclustET_esmdEneSum7","muEsPtBalance_clustPassSMD","muEsPtBalance_clustFailSMD","muEsPtBalance_esmdRatio_ET25","muEsPtBalance2_clustPassSMD","muEsPtBalance2_clustFailSMD"};//pg 30
 
   //use  Page 30-42 TPC sectors per cut, 2 pages per cut
 
@@ -91,11 +91,11 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
    for(int k=1;k<=16;k++) printf("%.0f, ",h0->GetBinContent(k));
    printf("\n");
  }
-  if(page>=23 && page<=25 && gDirectory->Get("AspinStatEve")==0) return; // skip spin plots if maker was not used
+ // if(page>=23 && page<=25 && gDirectory->Get("AspinStatEve")==0) return; // skip spin plots if maker was not used
 
   //skip tpc plots if using tree reader code
-  if( ((page>=2 && page<=6) || (page>=30 && page<=42)) && !fd->cd("tpc")) return;
-  fd->cd(etaBin); 
+  if( ((page>=2 && page<=6) || (page>=31 && page<=43)) && !fd->cd("tpc")) return;
+  fd->cd(); 
   gStyle->SetPalette(1,0);
   gStyle->SetOptStat(0);
   char padTit[1000];
@@ -334,7 +334,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
       if(i==3) { // draw on previous
 	float sum=h->GetEntries();
 	sprintf(txt,"%.0f eve >thres",sum);
-	tx=new TText(30,55,txt); tx->Draw();
+	tx=new TText(30,52,txt); tx->Draw();
       }
 
       c->cd(i+1); h->Draw();
@@ -367,22 +367,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
    
  } break;//--------------------------------------
 
-
- case 15:{    sprintf(padTit,"BSMD raw spectra, %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(1,2);gStyle->SetOptStat(10);
-    char **nameX=nameB1;
-    for(int i=0;i<2;i++) {
-      printf("->%s<\n",nameX[i]);
-      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
-      c->cd(i+1); h->Draw();
-    }
-   c->GetPad(1)->SetLogy();       
-   c->GetPad(2)->SetLogy();       
-   
- } break;//--------------------------------------
-
-case 16:{    sprintf(padTit,"TPC dEdx for all & W tracks, %s",core0);
+case 15:{    sprintf(padTit,"TPC dEdx for all & W tracks, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,1);gStyle->SetOptStat(10);
     char **nameX=nameN;
@@ -392,6 +377,25 @@ case 16:{    sprintf(padTit,"TPC dEdx for all & W tracks, %s",core0);
       c->cd(i+1); h->Draw("colz");
     }
     c->GetPad(1)->SetLogz();   
+ } break;//--------------------------------------
+
+ case 16:{    sprintf(padTit,"TRack-SMD peak offset , %s",core0);
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    c->Divide(1,2);gStyle->SetOptStat(10);
+    char **nameX=nameSMD;
+    for(int i=0;i<2;i++) {
+      printf("->%s<\n",nameX[i]);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
+      c->cd(i+1);  h->Draw("colz");
+      for(int sec=1;sec<=12;sec++) {
+	float phiC= (3-sec)*30;
+	if(phiC<-179) phiC+=360;
+	float phiL= (phiC-15.)/180*3.1416;
+	//printf("sec=%d phiC/deg=%.0d  phiL/rad=%.2f\n",sec,phiC, phiL);
+	ln=new TLine(phiL,-7,phiL,7); ln->Draw(); ln->SetLineColor(8);
+	tx=new TText(phiL+0.05,5,Form("sec %d",sec)); tx->Draw();
+      }
+    }
  } break;//--------------------------------------
 
 case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
@@ -447,38 +451,17 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
       h->SetAxisRange(0,70); ln->Draw();
     }
  } break;//--------------------------------------
-
-  case 20:{    sprintf(padTit,"charge separation, %s",core0);
+    
+ case 20:{    sprintf(padTit,"Charge Separation Hyperbola Corrected, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(3,2);gStyle->SetOptStat(10);
+    c->Divide(2,1);gStyle->SetOptStat(110110);
+    ln=new TLine(0,0,70,0); ln->SetLineColor(kMagenta);
     char **nameX=nameR3;
-    for(int i=0;i<6;i++) {
-      printf("->%s<\n",nameX[i]);
-      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
-      c->cd(i+1);  h->Draw();
-      h->SetFillColor(4);
-      if(i==0 ||i==3) h->SetFillColor(3);
-      h->Rebin();
-      h->SetAxisRange(0,80);
-    }
- } break;//--------------------------------------
-
-  case 21:{    sprintf(padTit,"TRack-SMD peak offset , %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(1,2);gStyle->SetOptStat(10);
-    char **nameX=nameSMD;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
-      c->cd(i+1);  h->Draw("box");
-      for(int sec=1;sec<=12;sec++) {
-	float phiC= (3-sec)*30;
-	if(phiC<-179) phiC+=360;
-	float phiL= (phiC-15.)/180*3.1416;
-	//printf("sec=%d phiC/deg=%.0d  phiL/rad=%.2f\n",sec,phiC, phiL);
-	ln=new TLine(phiL,-7,phiL,7); ln->Draw(); ln->SetLineColor(8);
-	tx=new TText(phiL+0.05,5,Form("sec %d",sec)); tx->Draw();
-      }
+      h=(TH2*)gDirectory->Get(nameX[i]);  assert(h); h->Rebin2D(3,3);
+      c->cd(i+1);  h->Draw("colz");
+      h->SetAxisRange(0,70); ln->Draw();
     }
  } break;//--------------------------------------
 
@@ -515,10 +498,20 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
      gPad->SetGrid(0,0);
    }
  } break;//--------------------------------------
-   
+ case 25:{  sprintf(padTit,"Charge separation vs. track quality, %s", core0);
+   can=new TCanvas("aa","aa",800,600); TPad *c=makeTitle(can,spinPre+padTit,page);
+   c->Divide(2,2);gStyle->SetOptStat(10);
+   char **nameX=nameS6;
+   for(int i=0;i<3;i++) {
+	 printf("->%s<\n",nameX[i]);
+     h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);  
+	 c->cd(i+1);  h->Draw("colz"); ((TH2F*)h)->Rebin2D(2,2);
+	 gPad->SetGrid(0,0);
+   }
+		 }break;//-----------------------------------
 
- case 25:
  case 26:
+ case 27:
    {    sprintf(padTit,"spin sorting: lumi & Ws, %s",core0);
      char **nameX=nameS2;
      if(page==26) { nameX=nameS3;sprintf(padTit,"spin sorting: QCD background, %s",core0);}
@@ -533,7 +526,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     }
  } break;//--------------------------------------
  
-  case 27:{    sprintf(padTit,"charge & ET vs. spin state, %s",core0);
+  case 28:{    sprintf(padTit,"charge & ET vs. spin state, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameS4;
@@ -545,7 +538,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     }
  } break;//--------------------------------------
 
- case 28:{    sprintf(padTit,"ESMD 1, %s",core0);
+ case 29:{    sprintf(padTit,"ESMD 1, %s",core0);
      can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
      c->Divide(3,2);gStyle->SetOptStat(10);
      char **nameX=nameEsmd1;
@@ -562,7 +555,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
      }
  } break;//--------------------------------------
 
- case 29:{    sprintf(padTit,"ESMD 2, %s",core0);
+ case 30:{    sprintf(padTit,"ESMD 2, %s",core0);
      can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
      c->Divide(3,2);gStyle->SetOptStat(10);
      char **nameX=nameEsmd2;
@@ -581,23 +574,23 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
      }
  } break;//--------------------------------------   
 
-
- case 30: // TPC stats 
- case 31: 
- case 32: // TPC nFitPts 
- case 33: 
- case 34: // TPC nFit/nPossibe
- case 35: 
- case 36: // TPC 1st hit R
- case 37: 
- case 38: // TPC last hit R
- case 39: 
- case 40: // TPC dE/dX
- case 41: 
+ 
+ case 31: // TPC stats
+ case 32: 
+ case 33: // TPC nFitPts
+ case 34:
+ case 35: // TPC nFit/nPossibe
+ case 36:
+ case 37: // TPC 1st hit R
+ case 38:
+ case 39: // TPC last hit R
+ case 40: 
+ case 41: // TPC dE/dX
+ case 42:
    {    
    fd->cd("tpc");
-   int iew=(page-30)%2; // East-West
-   int iCut=(page-30)/2;
+   int iew=(page-31)%2; // East-West
+   int iCut=(page-31)/2;
    int sec1=1, sec2=12; if(iew) {sec1=13, sec2=24; return;}
    char *titA[]={"stats","nFitPoints", " nFit/nPossible","1st hit Rxy","last hit Rxy","dE/dX"};
    char *titB[]={"Stat","TrNfit","TrFitFrac","TrRxyIn","TrRxyOut","TrdEdX"};
@@ -621,7 +614,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
    }
  } break;//--------------------------------------
 
- case 42:{    sprintf(padTit,"TPC accepted tracks, %s",core0);
+ case 43:{    sprintf(padTit,"TPC accepted tracks, %s",core0);
     fd->cd();
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,1);gStyle->SetOptStat(10);
@@ -723,8 +716,8 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* etaBin=""){
-  for(int i=1;i<=27;i++)  { 
-    if(i==15 || i==20) continue; //remove 20 for sign flip!
+  for(int i=1;i<=28;i++)  { 
+//    if( i==20) continue; //remove 20 for sign flip!
     if( isMC && i==3) continue;
     if( isMC &&i==4) continue;
     if( isMC && i>=20) continue;
@@ -733,10 +726,11 @@ void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* eta
   }
 
   // ESMD QA
-  for(int i = 28; i<=29; i++) plEana(i,2,core0,iPath,oPath,isMC,etaBin);
+  //plEana(21,2,core0,iPath,oPath,isMC,etaBin);
+  for(int i = 29; i<=30; i++) plEana(i,2,core0,iPath,oPath,isMC,etaBin);
   
   // TPC by sector:
-  for(int i=30;i<=42;i++)  plEana(i,2,core0,iPath,oPath,isMC,etaBin);
+  for(int i=31;i<=43;i++)  plEana(i,2,core0,iPath,oPath,isMC,etaBin);
 
 }
 
@@ -752,11 +746,14 @@ void doAllMC(char *core0="", char *iPath=""){
   }
   
   // TPC by sector:
-  for(int i=30;i<=42;i++)  plEana(i,2,core0,iPath);
+  for(int i=31;i<=43;i++)  plEana(i,2,core0,iPath);
 }
 
 
 // $Log: plEana.C,v $
+// Revision 1.16  2013/06/14 21:09:09  jlzhang
+// add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
+//
 // Revision 1.15  2012/09/21 21:14:08  balewski
 // plane/sectord dependent Z-location for ESMD implemented in matching of TPC track to ESMD shower.
 // I'm done

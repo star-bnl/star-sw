@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.13 2012/09/21 21:14:04 balewski Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.14 2013/06/14 21:08:50 jlzhang Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -20,7 +20,7 @@ St2011WMaker::initEHistos(){
   TList *Lx;  TLine *ln;TH1 *h;
   char txt[1000], txt0[100];
   int nCase=20;
-  hE[0]=h=new TH1F("muEStatEve","Endcap W-algo: event count",nCase,0,nCase);
+  hE[0]=h=new TH1F("muEStatEve","Endcap W-algo: event count, Jinlong-version",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
   h->SetMarkerSize(2);//<-- large text
@@ -55,7 +55,7 @@ St2011WMaker::initEHistos(){
 
 
   //.... vertex histograms .....
-  hE[10]=h=new TH1F("muEVRf","L2WE: PPV Vertex rank, funny X-axis; X=Log10(rank)+offset", 150, -9,25);
+  hE[10]=h=new TH1F("muEVRf","L2WE: PPV Vertex rank, funny X-axis; X=Log(rank)+offset", 150, -9,25);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,0,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
@@ -218,7 +218,7 @@ St2011WMaker::initEHistos(){
   hE[96]=h=new TH1F("muE_Wcar1",txt,10,-0.5,9.5);
   h->SetLineColor(kBlue);h->SetLineWidth(3);
 
-  sprintf(txt,"Endcap W: Vertex 'funny' rank, final selection, 2x2 ET>%.0f GeV;  X=Log10(rank)+offset",parE_highET);
+  sprintf(txt,"Endcap W: Vertex 'funny' rank, final selection, 2x2 ET>%.0f GeV;  X=Log(rank)+offset",parE_highET);
   hE[97]=new TH1F("muE_Wcar2",txt, 150, -9,25);
 
   sprintf(txt,"Vertex Z ,Endcap W: Vertex Z, final selection 2x2 ET>%.0f GeV; Z(cm)",parE_highET);
