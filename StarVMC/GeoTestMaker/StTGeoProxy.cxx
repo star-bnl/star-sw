@@ -1,5 +1,5 @@
 
-// $Id: StTGeoProxy.cxx,v 1.3 2013/06/10 22:17:41 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.4 2013/06/16 00:33:56 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -136,6 +136,9 @@ StTGeoProxy::StTGeoProxy()
   fVoluInfoArr = new TObjArray();
   fHitPlaneArr = new TObjArray();
   fOpt = 1;
+  fHitPlaneHardMap = new StHitPlaneHardMap;
+  fSeedHits =        new StVoidArr();
+  fAllHits  =        new StVoidArr();
 }
 //_____________________________________________________________________________
 int StTGeoProxy::Load(const char *geo)
@@ -180,7 +183,6 @@ void StTGeoProxy::InitInfo()
   StTGeoIter it;
   it.Print("StTGeoProxy_Init");
   const TGeoVolume *vol= *it;
-
   StVoluInfo *myModu=0;
   for (;(vol=*it);++it) {
     vol->GetShape()->ComputeBBox();
@@ -224,12 +226,16 @@ void StTGeoProxy::InitInfo()
         } else 		{// Module with hits. It is MODULE
 	  SetFlag(vol,StVoluInfo::kHitted);
           TString ts = (IsActive(vol))? "*":" ";
- 	  printf("MODULE%s= %s(%d) hits=%d",ts.Data(),vol->GetName(),volId,myModu->GetSens());
+ 	  printf("MODULE%s= %s(%d) Sens=%d",ts.Data(),vol->GetName(),volId,myModu->GetSens());
 	  it.Print(0);
         }  
       
     }
   }
+  
+
+
+
 
 }
 //_____________________________________________________________________________
@@ -273,6 +279,7 @@ StVoluInfo * StTGeoProxy::SetActive (StDetectorId did,int akt,StActorFunctor *af
 {
   const char *modu = ModName(did);
   if (!*modu)  { Warning("SetActive","DetId %d Unknown",did);return 0;}
+  if (af) af->SetDetId(did);
   StVoluInfo *vi = SetActive(modu,akt,af); 
   if (!vi) return 0;
   Long64_t mask = 1; mask = mask<<(int)did;
@@ -347,7 +354,8 @@ int StTGeoProxy::Edit(StDetectorId did,StActorFunctor *af)
     if (!myModu) 	continue;
     const char *path = it.GetPath();
     gGeoManager->cd(path);
-    int ans = (*af)(0);
+    af->SetDetId(detId);
+    int ans = (*af)();
     if (ans>0) nEdit++;
   }
   return nEdit;
@@ -403,11 +411,9 @@ void StTGeoProxy::InitHitShape()
 
 }
 //_____________________________________________________________________________
-void StTGeoProxy::InitHitPlane()
+void StTGeoProxy::InitHitPlane(StActorFunctor *act)
 {
-  fHitPlaneHardMap = new StHitPlaneHardMap;
-  fSeedHits =        new StVoidArr();
-  fAllHits  =        new StVoidArr();
+  mInitHitPlaneAct = act;
   
   StTGeoIter it;
   StDetectorId detId=kUnknownId;
@@ -447,7 +453,7 @@ void StTGeoProxy::InitHitPlane()
 }
 //_____________________________________________________________________________
 int StTGeoProxy::SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc
-                               ,const StTGeoSele *sel)
+                               ,StActorFunctor *sel)
 
 {
   assert(IsActive(modId));
@@ -475,9 +481,11 @@ int StTGeoProxy::SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc
     StHitPlane* hp = hpi->GetHitPlane (it.GetPath()); 
     if (!hp) 			continue;
     if (hp->GetHitErrCalc()==hitErrCalc) 	continue;
+
     if (sel) {//check selector
-      const TGeoNode *node = it.GetNode();
-      if (!sel->Select(it.GetPath(),node->GetNumber(),hp->GetPnt()))	continue;
+      gGeoManager->cd(it.GetPath());
+      sel->SetDetId(modId);
+      if (!sel->Operator(hp->GetPnt()))	continue;
     }
     hp->SetHitErrCalc(hitErrCalc);
     kount++;
@@ -1030,7 +1038,7 @@ StHitPlaneInfo::StHitPlaneInfo(int volId) : StVoluInfo(volId)
    memset(fOrg,0,sizeof(fOrg)+sizeof(fDir));
 }
 //_____________________________________________________________________________
-StHitPlane *StHitPlaneInfo::MakeHitPlane(const StTGeoIter &it)
+StHitPlane *StHitPlaneInfo::MakeHitPlane(const StTGeoIter &it,StActorFunctor *act)
 {
 static int nCall=0; nCall++;
   const TGeoVolume *volu = *it;
@@ -1040,13 +1048,26 @@ static int nCall=0; nCall++;
   TString path(it.GetPath());
   hp= (StHitPlane *)GetHitPlane(path);
   if (hp) return 0;
-  if ((fAxi%10)<=3) {
+
+  float  myPos[3];
+  it.LocalToMaster(fOrg, myPos);
+
+  int myAxi = fAxi;
+  if (act) { 	//Try to use functor
+    gGeoManager->cd(path);
+    act->SetDetId(GetDetId());
+    int ax = act->Operator(myPos);
+    if (ax>0) myAxi = ax;
+  }
+  if (!myAxi) return 0;
+
+  if ((myAxi%10)<=3) {
     hp = new StHitPlane(path,volu->GetNumber());
-  } else if ((fAxi%10)==4) {
+  } else if ((myAxi%10)==4) {
     StHitTube *ht = new StHitTube(path,volu->GetNumber()); hp = ht;
   }
   fHitPlanePathMap[path] = hp;
-  it.LocalToMaster(fOrg, hp->fOrg);
+  memcpy(hp->fOrg,myPos,sizeof(myPos));
   myTVector3 Vd[3],Vo(hp->fOrg);
   int upd = 0;
   for (int i=0;i<3;i++) {
