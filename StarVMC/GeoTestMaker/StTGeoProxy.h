@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.2 2013/05/06 16:13:29 perev Exp $
+// $Id: StTGeoProxy.h,v 1.3 2013/06/16 00:33:52 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -107,7 +107,7 @@ void  operator=(const StVoluInfo& ext){*((StVoluInfo*)this)=ext;}
       int Axis() const          	{return fAxi;}
 const Mtx33F_t &GetDir() const   	{return fDir;}
 const float   *GetOrg() const   	{return fOrg;}
-      StHitPlane *MakeHitPlane(const StTGeoIter &it);
+      StHitPlane *MakeHitPlane(const StTGeoIter &it,StActorFunctor *act=0);
       StHitPlane *GetHitPlane (const TString &path) const;
       StHitPlane *RemHitPlane (const TString &path);
       void SetAxis(int axi)     	{fAxi=axi;}
@@ -184,23 +184,18 @@ char  fEnd[1];
 ClassDef(StHitTube,0) //
 };
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
-class StTGeoSele : public TNamed
-{
-public:
-    StTGeoSele(const char *name=""):TNamed(name,""){}
-virtual ~StTGeoSele(){}
-virtual int Select(const char *path,int copyNumber, const float xyz[3]) const =0;
-ClassDef(StTGeoSele,0)
-};
-
-// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
 class StActorFunctor : public TNamed
 {
 public:
     StActorFunctor(const char *name=""):TNamed(name,""){}
 virtual ~StActorFunctor(){}
+
 virtual int operator()(const double xyz[3]=0)=0;
+        int Operator  (const float  xyz[3]);
+
        int  GetIPath(int nLev,int *copyNums,const char **voluNams=0) const;
+       int  GetDetId() const 	{return mDetId;}
+      void  SetDetId(int det) 	{mDetId = det ;}
 const char* GetPath()       const;
 const TGeoVolume *GetVolu() const;
 const TGeoNode   *GetNode() const;
@@ -208,8 +203,17 @@ const TGeoNode   *GetNode() const;
       StHitPlaneInfo *GetHitPlaneInfo() const;
       StHitPlane     *GetHitPlane()     const;
 
+protected:
+int mDetId;
+
 ClassDef(StActorFunctor,0)
 };
+inline int StActorFunctor::Operator(const float xyz[3]) 
+{
+  if (!xyz) return (*this)();
+  double d[3]={xyz[0],xyz[1],xyz[2]};
+  return (*this)(d);
+}
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
 class StvSetLayer: public StActorFunctor
 {
@@ -243,13 +247,13 @@ public:
        void InitHitShape();
 
        void SetHitPlane(const char *moduName,const char *voluName,int axis=1);
-       void InitHitPlane();
+       void InitHitPlane(StActorFunctor *act=0);
         int InitHits();
        void ClearHits();
        void Clear(const char *opt="");
        double Look(double maxDist,const double pnt[3],const double dir[3]);
 
-        int SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc,const StTGeoSele *sel=0);
+        int SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc,StActorFunctor *sel=0);
 static  StTGeoProxy *Instance();
 static  StTGeoProxy *Inst(){return Instance();};
 
@@ -317,6 +321,8 @@ StHitPlaneHardMap *fHitPlaneHardMap;    // StHitPlane[hardwarePosition]
 StVoidArr      *fSeedHits;              // Vector for hits used in seed finder
 StVoidArr      *fAllHits;               // Vector of all hits, mainly for debug
 StTGeoHitShape *fHitShape;
+StActorFunctor *mInitHitPlaneAct;
+
 char fEnd[1];
 ClassDef(StTGeoProxy,0) //
 };
