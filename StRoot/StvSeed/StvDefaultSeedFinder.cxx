@@ -173,7 +173,7 @@ if (myDeb>0) { mySeedObjs.push_back(selObj);}
 //		Mark hits as unused when seed is created. Only tracker
 //		has right to deside to use or not to use
     fSeedHits.unused();
-    for (int j=0;j<fSeedHits.size();j++) {
+    for (int j=0;j<(int)fSeedHits.size();j++) {
       assert(!fSeedHits[j]->timesUsed());
     }
 
