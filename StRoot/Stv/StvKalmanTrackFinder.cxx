@@ -91,7 +91,10 @@ static const StvConst  *kons = StvConst::Inst();
         int nFitHits = mCurrTrak->GetNHits();
 	do {
 	  if (!mRefit) 				continue;
+          if(nFitHits<=1)			break;
 	  ans = Refit(1);
+StvDebug::Count("RefitCalls",0);
+if (ans) StvDebug::Count("RefitCalls",1);
 	  if (ans) 				break;
           nHits = mCurrTrak->GetNHits();
           if (nHits<=1) 			break;
@@ -101,13 +104,15 @@ static const StvConst  *kons = StvConst::Inst();
           if (nAdded<=0)			continue;;
 // 			few hits added. Refit track to beam again 
 	  ans = Refit(0);
+StvDebug::Count("RefitCalls",2);
+if (ans) StvDebug::Count("RefitCalls",3);
 	  if (ans) 				break;
 	} while((fail=0));		
 	nHits = mCurrTrak->GetNHits();
 	if (nHits < myMinHits)	fail+=100;		;
         if (fail) nHits=0;
-StvDebug::Count("FitRefit",nFitHits,nHits);
 	if (fail) 	{//Track is failed, release hits & continue
+StvDebug::Count("RefitCalls",4);
 	  mCurrTrak->CutTail();			continue;
         }
         
@@ -291,8 +296,8 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
   if (!idir) {
     double eff = hitCount->Eff(); if (eff){}
     int myReject = hitCount->Reject();
-    if (myReject) {
-      StvDebug::Count("hitCountRej2",myReject);
+StvDebug::Count("hitCountReject",myReject);
+   if (myReject) {
       mCurrTrak->CutTail(); return 0; }
   }
   if (nHits>3) {
@@ -376,8 +381,6 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
     StvTrack *track = *it;  nTracks++;
     double dca00 = track->ToBeam();
     if (dca00 > myConst->mDca2dZeroXY) {
-      if (dca00 >1e11) StvDebug::Count("PrimNoDcaRej",    0);
-      else             StvDebug::Count("PrimDca00Rej",dca00);
       continue;
     }
     int bestVertex=-1; double bestXi2 = myConst->mXi2Vtx;
@@ -391,7 +394,6 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
     }//End vertex loop
     
     if(bestVertex<0) 				continue;
-    StvDebug::Count("PrimXi2Acc",bestXi2);
     StvNode *node = kit->GetNode();
     StvHit *hit = vtxs[bestVertex];
     hit->addCount();
@@ -413,20 +415,21 @@ int StvKalmanTrackFinder::Refit(int idir)
 static int nCall=0;nCall++;
 static StvTrackFitter *tkf = StvTrackFitter::Inst();
 static const StvConst  *kons = StvConst::Inst();
-static const double kEps = 0.3e-2;
-enum {kTryFitMax = 5,kBadHits=5};
+static const double kEps = 1.e-2;
+enum {kBadHits=5};
 
   int ans=0,anz=0,lane = 1;
   int& nHits = tkf->NHits();
   nHits = mCurrTrak->GetNHits();
-  int nRepair = 3;
-  if (nHits<= 5) {nRepair=0;} 
-  if (nHits<=10) {nRepair=1;}
+  int nBegHits = nHits;
+  int nRepair =(nHits-5)*0.1;
   int state = 0;
   StvNode *tstNode = (idir)? mCurrTrak->front(): mCurrTrak->back();
+  int nIters = 0,nDrops=0;
   for (int repair=0;repair<=nRepair;repair++)  	{ 	//Repair loop
     int converged = 0;
     for (int refIt=0; refIt<55; refIt++)  	{	//Fit iters
+      nIters++;
       ans = tkf->Refit(mCurrTrak,idir,lane,1);
 //    ==================================
       nHits=tkf->NHits();
@@ -440,8 +443,10 @@ enum {kTryFitMax = 5,kBadHits=5};
       if (nHits < kBadHits) break;
       if (anz>0) break;	
 
-      double dif = lstPars.diff(tstNode->GetFP());
-      if ( dif < kEps) { converged = 1; break; } 
+      double dif = lstPars.diff(tstNode->GetFP(),tstNode->GetFE());
+      if ( dif < kEps) { //Fit converged
+      converged = 1; break; } 
+
     }// End Fit iters
     
     state = (ans!=0) + 2*((anz!=0) + 2*(!converged) 
@@ -450,12 +455,19 @@ enum {kTryFitMax = 5,kBadHits=5};
     if (nHits <= kBadHits) 	break;
     StvNode *badNode=mCurrTrak->GetNode(StvTrack::kMaxXi2);
     if (!badNode) 		break;
-    badNode->SetHit(0);
+    badNode->SetHit(0); nDrops++;
     nHits--; if (nHits < kBadHits) break;
   }//End Repair loop
 
+
   if (ans<=0) state &= (-2);
   if (anz<=0) state &= (-4);
+  nDrops = nBegHits-nHits;
+  if (!state) {
+    if (nDrops==0) StvDebug::Count("RefitGoodIters",nIters);      
+    else           StvDebug::Count("RefitBaddIters",nIters); 
+    StvDebug::Count("RefitDrops",100.*nDrops/nBegHits); 
+  } else           StvDebug::Count("RefitFailed"   ,nIters);    
   return state;
 
 }
