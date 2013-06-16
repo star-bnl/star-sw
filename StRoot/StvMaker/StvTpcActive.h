@@ -6,16 +6,45 @@
 class StvTpcActive: public StActorFunctor
 {
 public:
-    StvTpcActive();
-   ~StvTpcActive(){}
-int operator()(const double xyz[3]=0);
+    StvTpcActive(const char *name="");
+virtual  ~StvTpcActive(){}
+virtual int operator()(const double xyz[3]=0);
 int VoluId();
-private:
+protected:
+char mBeg[1];
 int mSector;
 int mIsDet;
-int mTPad;
+int mGPad;		//Padrow number including all non physical
+int mTPad;		//Padrow number including only physical
+int mPrompt;		//It is a prompt hit , 
+char mEnd[1];
 
 ClassDef(StvTpcActive,0)
 };
 
+// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
+class StvTpcSelector: public StvTpcActive
+{
+public:
+    StvTpcSelector(const char *name);
+virtual ~StvTpcSelector(){}
+virtual int operator()(const double xyz[3]);
+protected:
+int mInOut;
+
+ClassDef(StvTpcSelector,0)
+};
+
+
+// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
+class StvTpcEdit: public StvTpcActive
+{
+public:
+    StvTpcEdit();
+   ~StvTpcEdit(){}
+int operator()(const double xyz[3]=0);
+protected:
+
+ClassDef(StvTpcEdit,0)
+};
 #endif
