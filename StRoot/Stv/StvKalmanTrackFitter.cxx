@@ -324,8 +324,8 @@ static int nCall=0; nCall++;
 int StvKalmanTrackFitter::Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)
 {
 static       StvToolkit *kit     = StvToolkit::Inst();
-static const StvConst *myConst =   StvConst::Inst();
-static const double dca3dVertex = myConst->mDca3dVertex;
+//static const StvConst *myConst =   StvConst::Inst();
+//static const double dca3dVertex = myConst->mDca3dVertex;
 static StvFitter *fitt = StvFitter::Inst();
 
   const StvNode *lastNode = trak->GetNode(StvTrack::kDcaPoint);
@@ -339,10 +339,6 @@ static StvFitter *fitt = StvFitter::Inst();
   double x[3];
   th.Eval(len,x);
   mDca3 = DIST2(d,x);
-  if (mDca3 > dca3dVertex*dca3dVertex) {
-    StvDebug::Count("PrimDca3Rej",sqrt(mDca3));
-    return 2;
-  }
   StvFitDers derivFit;
   StvHlxDers derivHlx;
   if (node) {th.Move(len,derivHlx);} else {th.Move(len);}
@@ -352,10 +348,6 @@ static StvFitter *fitt = StvFitter::Inst();
   fitt->Set(par+0,err+0,par+1,err+1);
   fitt->Prep();
   mXi2 = fitt->Xi2(vtx);
-  if (mXi2>myConst->mXi2Vtx) {
-    StvDebug::Count("PrimXi2Rej",mXi2);
-    return 3;
-  }
   if (!node) return 0;
   
   fitt->Update();
@@ -414,7 +406,7 @@ static int nCall=0;nCall++;
 //		Loop for Print,compare & update
   double totLen=0;
   THelixTrack myHlx(hlx);
-  int iNode = -1,nHist=0;
+  int iNode = -1;
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
     iNode++;preNode=node; node = *it;
     StvNodePars sFP = node->GetFP(0);
@@ -457,19 +449,6 @@ static int nCall=0;nCall++;
       printf("StvixPars(%g) Xi2i=%g ",totLen,node->GetXi2()); sFP.print();
       sFE.Print("StvixErrs");
     }
-    if (mode&16 &&  hit && !nHist){ 	//Histogram
-static const char *fiNam[]={"H","Z","A","L","P"};
-      nHist++;
-      for (int i=0,li=0;i< 5;li+=++i) {
-        TString ts("FiterrByHelix"); ts +=fiNam[i];
-	StvDebug::Count(ts,sFE.Arr()[li+i]/hFE.Arr()[li+i]);
-    } }
-    if (mode&16 && node->GetType()==StvNode::kDcaNode){ 	//Dca Histogram
-static const char *fiNam[]={"H","Z","A","L","P"};
-      for (int i=0,li=0;i< 5;li+=++i) {
-        TString ts("FitDcaByHelix"); ts +=fiNam[i];
-	StvDebug::Count(ts,sFE.Arr()[li+i]/hFE.Arr()[li+i]);
-    } }
     
   }//end of hit loop
 

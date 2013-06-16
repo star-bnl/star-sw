@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.36 2013/05/24 16:34:01 perev Exp $
+// $Id: StvMaker.cxx,v 1.37 2013/06/16 00:41:54 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -73,7 +73,6 @@ More detailed: 				<br>
 #include "StvSeed/StvKNSeedFinder.h"
 #include "StvSeed/StvCASeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
-#include "StvTGSelectors.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvKalmanTrackFitter.h"
@@ -81,7 +80,6 @@ More detailed: 				<br>
 #include "StvStarVertexFinder.h"
 #include "StvTpcActive.h"
 #include "StvStEventMaker.h"
-#include "StvStarEdit.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems

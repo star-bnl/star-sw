@@ -44,7 +44,7 @@ static int nCall = 0; nCall++;
   
   for (StvNodeConstIter it=tk->begin();it!=tk->end();++it) {
     curNode = (*it); n++;
-    const StvHit *hit = curNode->GetHit();
+//  const StvHit *hit = curNode->GetHit();
     const StvNodePars &par = curNode->GetFP(); 
     const StvFitErrs  &err = curNode->GetFE(); 
     pCur = sqrt(par.getP2());
