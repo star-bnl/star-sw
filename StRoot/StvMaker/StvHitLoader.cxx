@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.18 2013/05/24 16:33:19 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.19 2013/06/16 00:40:57 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -113,10 +113,10 @@ if (myGraph) { //create canvas
     if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY)	continue; // ignore hits marked by AfterBurner as chopped o
     int sure;
     StvHit *stiHit = MakeStvHit(stHit,mHitIter->UPath(),sure);
-    if (!sure && stiHit) { //Non reliable hit
-      double rxy = sqrt(pow(stiHit->x()[0],2)+pow(stiHit->x()[1],2));
-      StvDebug::Count("OrphanHits",stiHit->x()[2],rxy);
-    }
+//     if (!sure && stiHit) { //Non reliable hit
+//       double rxy = sqrt(pow(stiHit->x()[0],2)+pow(stiHit->x()[1],2));
+//       StvDebug::Count("OrphanHits",stiHit->x()[2],rxy);
+//     }
 
 if (myHits) (*myHits)+= stiHit;   
 

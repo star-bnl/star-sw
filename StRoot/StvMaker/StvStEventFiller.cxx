@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.30 2013/05/24 16:34:38 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.31 2013/06/16 00:44:58 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.31  2013/06/16 00:44:58  perev
+ * Cleanup
+ *
  * Revision 1.30  2013/05/24 16:34:38  perev
  * Introduction hit filter in case HitFitErr
  *
@@ -1293,7 +1296,6 @@ static int nCall = 0; nCall++;
   StDcaGeometry *dca = new StDcaGeometry;
   gTrack->setDcaGeometry(dca);
   dca->set(&myImp.mImp,&myImp.mImpImp);
-  StvDebug::Count("DcaGeo",dca->params()[0]);
   assert(fabs(pars.getRxy()-fabs(dca->params()[0]))<1e-2*(1+pars.getRxy()));
   stTrack->setImpactParameter(myImp.mImp);
 
@@ -1375,8 +1377,6 @@ static int nCall=0; nCall++;
     double dL = th.Path(0.,0.);
     th.Eval(dL,ar,ar+3);
     double dca00 = (-ar[0]*ar[4]+ar[1]*ar[3])/cos(aux.mDip);
-    StvDebug::Count("RxyPull",dca00);
-    StvDebug::Count("LLLPull",dL);
   }
 
   double len=0,preRho,preXy[2]; int myNode=0;
