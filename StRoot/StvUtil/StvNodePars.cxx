@@ -378,6 +378,19 @@ double StvNodePars::diff(const StvNodePars &other) const
   return myMax;
 }
 //_____________________________________________________________________________
+double StvNodePars::diff(const StvNodePars &other,const StvFitErrs &otherr) const 
+{ 
+  StvFitPars fp = *this-other;
+
+  double myMax=0;
+  const double *ee = otherr;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    double d = fp[i]*fp[i]/(ee[li+i]+1e-11);
+    if (myMax<d) myMax=d;
+  }
+  return myMax;
+}
+//_____________________________________________________________________________
 double StvNodePars::diff(const float hit[3]) const 
 { 
   StvNodePars other(*this);
