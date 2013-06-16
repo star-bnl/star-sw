@@ -19,7 +19,7 @@
 ClassImp(StvKalmanTrackFitter)
 #define DIST2(a,b) ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 
-static const int    kXtendFactor  = 100;//Xi2 factor that fit sure failed
+static const int    kXtendFactor  = 10;//Xi2 factor that fit sure failed
 static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxCorr = 0.1;
