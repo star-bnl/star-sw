@@ -108,6 +108,7 @@ StvNodePars &merge(double wt,StvNodePars &other);
 StvFitPars delta() const;
 StvFitErrs deltaErrs() const;
 double diff(const StvNodePars &other) const;
+double diff(const StvNodePars &other, const StvFitErrs &otherr) const;
 double diff(const float hit[3]) const;
 
 operator const double  *() const {return P;}
