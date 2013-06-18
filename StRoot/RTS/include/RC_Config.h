@@ -657,6 +657,7 @@ void swapPP_CFG(PP_CFG *);
 #define swapPP_CFG(yada)
 #endif
 
+class SimpleXmlDoc;
 
 // Configuration file functions...The functions get properly swapped
 // versions of the configuration file.
@@ -761,6 +762,16 @@ class EvbChooser
   int evb4token[4096];         
 };
 
+class TokenManagerChooser {
+ public:
+    void configure(STAR_CFG *cfg);
+    void configure(SimpleXmlDoc *cfg);
+    int getEventNumber(int token);
+    
+ private:
+    EvbChooser chooser;
+    int sockets[10];    
+};
 
 #define RHIC_TRG "RHICTRG\0"
 #define TRG_UDP_PORT 8060
