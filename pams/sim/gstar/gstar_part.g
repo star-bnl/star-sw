@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.41 2013/06/19 22:15:27 jwebb Exp $
+* $Id: gstar_part.g,v 1.42 2013/06/19 22:17:48 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.42  2013/06/19 22:17:48  jwebb
+* Improved properties of lambda xi hyperon.
+*
 * Revision 1.41  2013/06/19 22:15:27  jwebb
 * Fixed decay modes.
 *
@@ -683,15 +686,15 @@ Particle H_dibaryon               code      = 60001,
 
   PARTICLE LamXi2430 "Lambda0 Xi0 bound state " _
                       code = 60002       pdg=0             ,
-                      trktyp = kGtNeut   mass=2.430543     ,
-                      charge = 0         tlife = 0.26320E-9/2, 
+                      trktyp = kGtNeut   mass=2.430543-0.002,
+                      charge = 0         tlife = 6.578E-15,
                       bratio = {0.5,  0.5 }                ,   
                       mode   = {1423, 1818}                    
 
   PARTICLE AntiLamXi2430 "Lambda0 Xi0 bound state " _
                       code = 60003       pdg=0             ,
-                      trktyp = kGtNeut   mass=2.430543     ,
-                      charge = 0         tlife = 0.26320E-9/2, 
+                      trktyp = kGtNeut   mass=2.430543-0.002,
+                      charge = 0         tlife = 6.578E-15,    
                       bratio = {0.5,  0.5 }                ,
                       mode   = {1531, 2626}
                       
