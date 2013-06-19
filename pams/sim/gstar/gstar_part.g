@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.40 2013/06/13 18:44:03 jwebb Exp $
+* $Id: gstar_part.g,v 1.41 2013/06/19 22:15:27 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.41  2013/06/19 22:15:27  jwebb
+* Fixed decay modes.
+*
 * Revision 1.40  2013/06/13 18:44:03  jwebb
 * Added Lambda Xi dibaryon.
 *
@@ -683,14 +686,14 @@ Particle H_dibaryon               code      = 60001,
                       trktyp = kGtNeut   mass=2.430543     ,
                       charge = 0         tlife = 0.26320E-9/2, 
                       bratio = {0.5,  0.5 }                ,   
-                      mode   = {1523, 1818}                    
+                      mode   = {1423, 1818}                    
 
   PARTICLE AntiLamXi2430 "Lambda0 Xi0 bound state " _
                       code = 60003       pdg=0             ,
                       trktyp = kGtNeut   mass=2.430543     ,
                       charge = 0         tlife = 0.26320E-9/2, 
                       bratio = {0.5,  0.5 }                ,
-                      mode   = {1431, 2626}
+                      mode   = {1531, 2626}
                       
  
 
