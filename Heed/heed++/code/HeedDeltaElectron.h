@@ -16,8 +16,8 @@ extern long last_particle_number;  // for debug print
 // It is assigned by current last_particle_number which is then incremented
 // This extern is also repeated in HeedParticle.h and HeedParticle_BGM.h.
 
-class HeedDeltaElectron: public eparticle
-{public:
+class HeedDeltaElectron: public eparticle {
+public:
   static int s_low_mult_scattering;
   static int s_high_mult_scattering;
 
@@ -52,21 +52,22 @@ class HeedDeltaElectron: public eparticle
 
   long parent_particle_number;
   //PassivePtr< gparticle > parent_part;
-  HeedDeltaElectron(void): eparticle(), s_print_listing(0) 
-    {;}
+
+  // Constructors
+  HeedDeltaElectron(): eparticle(), s_print_listing(0) {}
   HeedDeltaElectron(manip_absvol* primvol, const point& pt, 
-		    const vec& vel, vfloat time,
-		    long fparent_particle_number,
-		    //PassivePtr< gparticle > fparent_part
-		    int fs_print_listing = 0
-		    );
-  //EnTransfCS* encs);
+                    const vec& vel, vfloat time,
+                    long fparent_particle_number,
+                    //PassivePtr< gparticle > fparent_part
+                    int fs_print_listing = 0
+                    );
+  // Destructor
+  virtual ~HeedDeltaElectron() {}
+
   virtual void physics_mrange(double& fmrange);
-  virtual void physics_after_new_speed(void);
+  virtual void physics_after_new_speed();
   virtual void print(std::ostream& file, int l) const;
   macro_copy_total(HeedDeltaElectron);
-  virtual ~HeedDeltaElectron() {;}
-  //virtual ~HeedDeltaElectron(void);
   
 };
 

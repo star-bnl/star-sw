@@ -4,7 +4,6 @@
 #include "wcpplib/safetl/AbsArr.h"
 #include "wcpplib/math/tline.h"
 
-
 /*
 class PoisState
 {public:
@@ -33,7 +32,5 @@ long pois (double AMU,int &IERROR);
 //C    ON RETURN IERROR.EQ.0 NORMALLY
 //C              IERROR.EQ.1 IF AMU.LE.0.
 //C
-
-
 
 #endif

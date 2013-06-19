@@ -3,10 +3,9 @@
 2003, I. Smirnov
 */
 
-void HeedCondElectron::print(std::ostream& file, int l) const
-{
+void HeedCondElectron::print(std::ostream& file, int l) const {
   if (l <= 0) return;
-  Ifile<<"HeedCondElectron (l=" << l << ")\n";
+  Ifile << "HeedCondElectron (l=" << l << ")\n";
   //Ifile << "pt=" << pt << "ptloc=" << ptloc << '\n';
   Ifile << "ptloc=" << ptloc << '\n';
   /*

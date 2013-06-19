@@ -42,5 +42,4 @@ double chispre(DynLinArr< double >& f, int s_allow_zero_f = 0);
 
 double chisran(double flat_random_number, DynLinArr < double >  f);
 
-
 #endif
