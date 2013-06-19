@@ -2,15 +2,11 @@
 #define PHOTOABSCSLIB_H
 
 #include "heed++/code/PhotoAbsCS.h"
-
-#ifdef NOT_INCLUDE_GASLIB_IN_PACSLIB
-#else
 #include "wcpplib/matter/GasLib.h"
-#endif
 
 /*
-The library of photoabsorption cross sections for some frequently used atoms
-and moleculas
+Library of photoabsorption cross sections for some frequently used atoms
+and molecules
 
 2004, I. Smirnov
 */
@@ -50,10 +46,14 @@ extern ExAtomPhotoAbsCS Phosphorus_PACS;
 extern ExAtomPhotoAbsCS Sulfur_PACS;
 extern ExAtomPhotoAbsCS Chlorine_PACS;
 extern ExAtomPhotoAbsCS Argon_PACS;
+extern ExAtomPhotoAbsCS Gallium_PACS;
 extern ExAtomPhotoAbsCS Germanium_PACS;
 extern ExAtomPhotoAbsCS Germanium_crystal_PACS;
+extern ExAtomPhotoAbsCS Arsenic_PACS;
 extern ExAtomPhotoAbsCS Bromine_PACS;
 extern ExAtomPhotoAbsCS Krypton_PACS;
+extern ExAtomPhotoAbsCS Cadmium_PACS;
+extern ExAtomPhotoAbsCS Tellurium_PACS;
 extern ExAtomPhotoAbsCS Xenon_PACS;
 extern ExAtomPhotoAbsCS Caesium_PACS;
 extern ExAtomPhotoAbsCS Mercury_PACS;

@@ -27,15 +27,7 @@ class MatterDef: public AtomMixDef
   // Here is a simplest and probably not good.
   void calc_I_eff(void);
 public:
-  inline const String& name(void) const  {return nameh;}
-  inline const String& notation(void) const  {return notationh;}
-  inline double density(void) const {return densityh; }
-  inline double temperature(void) const {return temperatureh;}
-  inline double I_eff(void) const {return I_effh;}
-
   MatterDef(void);
-  //MatterDef(const MatterDef& f);            // call is forbidden, terminates
-  //MatterDef& operator=(const MatterDef& f); // call is forbidden, terminates 
   MatterDef(const String& fname, const String& fnotation,
             long fqatom, const DynLinArr< String >& fatom_not,
             const DynLinArr< double >& fweight_quan, 
@@ -52,9 +44,13 @@ public:
             const String& fatom_not3, double fweight_quan3, 
             double fdensity, double ftemperature);
   ~MatterDef();
-
   virtual void print(std::ostream& file, int l) const;
   static void printall(std::ostream& file);
+  const String& name(void) const  {return nameh;}
+  const String& notation(void) const  {return notationh;}
+  double density(void) const {return densityh; }
+  double temperature(void) const {return temperatureh;}
+  double I_eff(void) const {return I_effh;}
   // Check that there is no matter with the same name in the container
   void verify(void); 
   static void verify(const String& fname, const String& fnotation); 
@@ -70,8 +66,7 @@ public:
 };
 std::ostream& operator << (std::ostream& file, const MatterDef& f);
 
-class MatterType
-{
+class MatterType {
 public:
   PassivePtr<MatterDef> matdef;
   MatterType(void): matdef() {;}

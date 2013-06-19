@@ -64,22 +64,19 @@ class AtomDef: public RegPassivePtr
   // Atomic mass in internal units. Transfer to gram/mole if need.
   double Ah;  
 public:
-  inline const String& name(void) const {return nameh;}
-  inline const String& notation(void) const {return notationh;}
-  inline int Z(void) const {return Zh;}
-  inline double A(void) const {return Ah;}
   AtomDef(void);
-  //AtomDef(const AtomDef& f);            // call is forbidden, terminates
-  //AtomDef& operator=(const AtomDef& f); // call is forbidden, terminates
   AtomDef(const String& fnameh, const String& fnotationh,
           int fZh, double fAh);
   ~AtomDef();
   void print(std::ostream& file, int l = 0) const;
+  const String& name(void) const {return nameh;}
+  const String& notation(void) const {return notationh;}
+  int Z(void) const {return Zh;}
+  double A(void) const {return Ah;}
   // Print all registered atoms
   static void printall(std::ostream& file); 
   // Check that there is no atom with the same name in the container
   void verify(void); 
-public:  
   // Initialize the logbook at the first request
   // and keep it as internal static variable.
   static AbsList<AtomDef* >& get_logbook(void);
@@ -109,37 +106,17 @@ class AtomMixDef: public RegPassivePtr
   DynLinArr< double > weight_quanh;  // sum is 1
   DynLinArr< double > weight_massh;  // sum is 1
 
-  // Mean per one atom (ordinary means with taking into account 
-  // quantitative weights)
+  // Weighted means
   double Z_meanh;
-  double A_meanh;      // in internal units. Transfer to gram/mole if need.
+  double A_meanh;      // in internal units. Transfer to gram/mole if needed.
   double inv_A_meanh;  // in internal units. Transfer to (1.0/(gram/mole)),
-                       // if need
+                       // if needed
   // Z_meanh / A_meanh;  
   double mean_ratio_Z_to_Ah;  
   double NumberOfElectronsInGramh;
 
 public:
-
-  inline long qatom(void) const {return qatomh;}
-  inline const DynLinArr< PassivePtr<AtomDef> >& atom(void) const 
-    {return atomh;}
-  inline PassivePtr<AtomDef> atom(long n) const {return atomh[n];}
-  inline const DynLinArr< double >& weight_quan(void) const 
-    {return weight_quanh; }
-  inline const DynLinArr< double >& weight_mass(void) const 
-    {return weight_massh; }
-  inline double  weight_quan(long n) const 
-    {return weight_quanh[n]; }
-  inline double weight_mass(long n) const 
-    {return weight_massh[n]; }
-  inline double Z_mean(void) const {return Z_meanh;}
-  inline double A_mean(void) const {return A_meanh;}
-  inline double inv_A_mean(void) const {return inv_A_meanh;}
-  inline double mean_ratio_Z_to_A(void) const {return mean_ratio_Z_to_Ah;}
-  inline double NumberOfElectronsInGram(void) const 
-    {return NumberOfElectronsInGramh;}
-  AtomMixDef(void):qatomh(0), Z_meanh(0.0), A_meanh(0.0), 
+  AtomMixDef(void) : qatomh(0), Z_meanh(0.0), A_meanh(0.0), 
       inv_A_meanh(0.0), mean_ratio_Z_to_Ah(0.0), NumberOfElectronsInGramh(0.0)
     {;}
   AtomMixDef(long fqatom, const DynLinArr< String >& fatom_not,
@@ -156,9 +133,21 @@ public:
              const String& fatom_not2, double  fweight_quan2,
              const String& fatom_not3, double  fweight_quan3,
              const String& fatom_not4, double  fweight_quan4);
-
   void print(std::ostream& file, int l) const;
-};
+  long qatom(void) const {return qatomh;}
+  const DynLinArr< PassivePtr<AtomDef> >& atom(void) const {return atomh;}
+  PassivePtr<AtomDef> atom(long n) const {return atomh[n];}
+  const DynLinArr< double >& weight_quan(void) const {return weight_quanh;}
+  const DynLinArr< double >& weight_mass(void) const {return weight_massh;}
+  double weight_quan(long n) const {return weight_quanh[n];}
+  double weight_mass(long n) const {return weight_massh[n];}
+  double Z_mean(void) const {return Z_meanh;}
+  double A_mean(void) const {return A_meanh;}
+  double inv_A_mean(void) const {return inv_A_meanh;}
+  double mean_ratio_Z_to_A(void) const {return mean_ratio_Z_to_Ah;}
+  double NumberOfElectronsInGram(void) const {return NumberOfElectronsInGramh;}
+}
+;
 std::ostream & operator << (std::ostream& file, const AtomMixDef& f);
 
 #endif

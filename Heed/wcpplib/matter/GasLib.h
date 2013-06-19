@@ -43,7 +43,6 @@ The last half of Mendeleev's (Mendel's) table is not totally included yet.
 #include "wcpplib/matter/MoleculeDef.h"
 #include "wcpplib/matter/GasDef.h"
 
-
 extern AtomDef Hydrogen; 
 extern AtomDef Helium;
 extern AtomDef Lithium;
@@ -58,7 +57,7 @@ extern AtomDef Sodium;
 extern AtomDef Magnesium;
 extern AtomDef Aluminium;
 extern AtomDef Silicon;
-extern AtomDef Phosphor;
+extern AtomDef Phosphorus;
 extern AtomDef Sulfur;
 extern AtomDef Chlorine;
 extern AtomDef Argon;
@@ -70,27 +69,33 @@ extern AtomDef Titanium;
 extern AtomDef Vanadium;
 extern AtomDef Chromium;
 extern AtomDef Manganese;
-extern AtomDef Ferum;
+extern AtomDef Iron;
 extern AtomDef Cobalt;
 extern AtomDef Nickel;
-extern AtomDef Cuprum;
+extern AtomDef Copper;
 extern AtomDef Zinc;
 extern AtomDef Gallium;
 extern AtomDef Germanium;
 extern AtomDef Arsenic;
 extern AtomDef Selenium;
-extern AtomDef Barium;
+extern AtomDef Bromine;
 extern AtomDef Krypton;
 extern AtomDef Rubidium;
 extern AtomDef Strontium;
 extern AtomDef Yttrium;
 extern AtomDef Zirconium;
 extern AtomDef Niobium;
-extern AtomDef Molibdenum;
+extern AtomDef Technetium;
+extern AtomDef Molybdenum;
 extern AtomDef Ruthenium;
 extern AtomDef Rhodium;
 extern AtomDef Palladium;
 extern AtomDef Silver;
+extern AtomDef Cadmium;
+extern AtomDef Indium;
+extern AtomDef Tin;
+extern AtomDef Antimony;
+extern AtomDef Tellurium;
 extern AtomDef Iodine;
 extern AtomDef Xenon;
 extern AtomDef Caesium;
@@ -164,31 +169,5 @@ extern MoleculeDef Hg_molec;
 extern MoleculeDef H2S_molec;
 extern MoleculeDef GeH4_molec;
 extern MoleculeDef SiH4_molec; 
-
-extern double todays_temperature;  // in internal units
-extern double todays_pressure;  // in internal units
-
-// extern GasDef GasHelium;
-// extern GasDef GasNeon;
-// extern GasDef GasArgon;
-// extern GasDef GasKrypton;
-// extern GasDef GasXenon;
-// extern GasDef GasN2;
-// extern GasDef GasO2;
-// extern GasDef GasNH3;
-// extern GasDef GasN2O;
-// extern GasDef GasCO2;
-// extern GasDef GasCF4;
-// extern GasDef GasCH4;
-// extern GasDef GasC2H2;
-// extern GasDef GasC2H4;
-// extern GasDef GasC2H6;
-// extern GasDef GasC3H8;
-// extern GasDef GasC4H10;
-// extern GasDef Air;
-// extern GasDef GasHydrogen2;
-// extern GasDef LiquidHydrogen;
-
-// extern MatterDef CoverMatterForSpes4pi;
 
 #endif

@@ -6,42 +6,21 @@
 1998-2004 I. Smirnov
 */ 
 
-void MatterDef::calc_I_eff(void) 
-{
-  I_effh=Z_mean() * 12.0 * eV;
+void MatterDef::calc_I_eff(void) {
+  I_effh = Z_mean() * 12.0 * eV;
 }
     
-MatterDef::MatterDef(void):nameh("none"), notationh("none") 
-{
+MatterDef::MatterDef(void):nameh("none"), notationh("none") {
   MatterDef::get_logbook().append(this);
 }
-/*
-MatterDef::MatterDef(const MatterDef& f)
-{
-  mfunnamep("MatterDef::MatterDef(const MatterDef& f)");
-  funnw.ehdr(cerr);
-  mcerr<<"The copy constructor is not allowed, "
-       <<"since it would create second matter with the same name and notation\n";
-  spexit(mcerr);
-}
 
-MatterDef& MatterDef::operator=(const MatterDef& f)
-{
-  mfunnamep("MatterDef& MatterDef::operator=(const MatterDef& f)");
-  funnw.ehdr(cerr);
-  mcerr<<"The assignment operator is not allowed, "
-       <<"since it would create second matter with the same name and notation\n";
-  spexit(mcerr);
-}
-*/
 MatterDef::MatterDef(const String& fname, const String& fnotation,
                      long fqatom, const DynLinArr< String >& fatom_not,
                      const DynLinArr< double >& fweight_quan, 
                      double fdensity, double ftemperature):
   AtomMixDef(fqatom, fatom_not, fweight_quan),
   nameh(fname), notationh(fnotation), 
-  temperatureh(ftemperature), densityh(fdensity) 
-{
+  temperatureh(ftemperature), densityh(fdensity) {
   mfunname("MatterDef::MatterDef(...many atoms...)");
   calc_I_eff();
   verify();
@@ -53,8 +32,7 @@ MatterDef::MatterDef(const String& fname, const String& fnotation,
                      double fdensity, double ftemperature):
   AtomMixDef(fatom_not),
   nameh(fname), notationh(fnotation), 
-  temperatureh(ftemperature), densityh(fdensity) 
-{
+  temperatureh(ftemperature), densityh(fdensity) {
   mfunname("MatterDef::MatterDef(...1 atom...)");
   calc_I_eff();
   verify();
@@ -83,16 +61,14 @@ MatterDef::MatterDef(const String& fname, const String& fnotation,
              fatom_not2, fweight_quan2,
              fatom_not3, fweight_quan3),
   nameh(fname), notationh(fnotation), 
-  temperatureh(ftemperature), densityh(fdensity) 
-{
+  temperatureh(ftemperature), densityh(fdensity) {
   mfunname("MatterDef::MatterDef(...2 atoms...)");
   calc_I_eff();
   verify();
   MatterDef::get_logbook().append(this);
 }
 
-void MatterDef::verify(void) 
-{
+void MatterDef::verify(void) {
   mfunnamep("void MatterDef::verify(void)");
   if (nameh == "none" && notationh == "none") return;
   AbsList< MatterDef* >& logbook = MatterDef::get_logbook();
@@ -108,8 +84,7 @@ void MatterDef::verify(void)
   }
 }
 
-void MatterDef::verify(const String& fname, const String& fnotation) 
-{
+void MatterDef::verify(const String& fname, const String& fnotation) {
   mfunnamep("void MatterDef::verify(const String& fname, const String& fnotation)");
   AbsList< MatterDef* >& logbook = MatterDef::get_logbook();
   AbsListNode<MatterDef*>* an = NULL;
@@ -124,13 +99,11 @@ void MatterDef::verify(const String& fname, const String& fnotation)
   }
 }
 
-void MatterDef::print(std::ostream& file, int l) const 
-{
-  if (l > 0) file<<(*this);
+void MatterDef::print(std::ostream& file, int l) const {
+  if (l > 0) file << (*this);
 }
 
-void MatterDef::printall(std::ostream& file) 
-{
+void MatterDef::printall(std::ostream& file) {
   Ifile << "MatterDef::printall:\n";
   AbsList< MatterDef* >& logbook = MatterDef::get_logbook();
   AbsListNode<MatterDef*>* an = NULL;
@@ -139,19 +112,16 @@ void MatterDef::printall(std::ostream& file)
   }
 }
 
-AbsList< MatterDef* >& MatterDef::get_logbook(void) 
-{
+AbsList< MatterDef* >& MatterDef::get_logbook(void) {
   static AbsList< MatterDef* > logbook;
   return logbook;
 }
 
-const AbsList< MatterDef* >& MatterDef::get_const_logbook(void) 
-{
+const AbsList< MatterDef* >& MatterDef::get_const_logbook(void) {
   return MatterDef::get_logbook();
 }
 
-MatterDef* MatterDef::get_MatterDef(const String& fnotation) 
-{
+MatterDef* MatterDef::get_MatterDef(const String& fnotation) {
   AbsList< MatterDef* >& logbook = MatterDef::get_logbook();
   AbsListNode<MatterDef*>* an = NULL;
   while ((an = logbook.get_next_node(an)) != NULL) { 
@@ -160,8 +130,7 @@ MatterDef* MatterDef::get_MatterDef(const String& fnotation)
   return NULL;
 }
 
-std::ostream& operator << (std::ostream& file, const MatterDef& f) 
-{
+std::ostream& operator << (std::ostream& file, const MatterDef& f) {
   mfunname("std::ostream& operator << (std::ostream& file, const MatterDef& f)");
   Ifile << "MatterDef: name=" << std::setw(10) << f.name()
         << " notation=" << std::setw(3) << f.notation() << '\n';
@@ -174,8 +143,7 @@ std::ostream& operator << (std::ostream& file, const MatterDef& f)
   return file;
 }
 
-std::ostream& operator << (std::ostream& file, const MatterType& f) 
-{
+std::ostream& operator << (std::ostream& file, const MatterType& f) {
   mfunname("std::ostream& operator << (std::ostream& file, const MatterType& f)");
   if (f.matdef.get() == NULL) {
     Ifile << "MatterType: type is not initialized\n";
@@ -185,8 +153,7 @@ std::ostream& operator << (std::ostream& file, const MatterType& f)
   return file;
 }
 
-MatterDef::~MatterDef() 
-{ 
+MatterDef::~MatterDef() { 
   MatterDef::get_logbook().remove(this); 
 }
   

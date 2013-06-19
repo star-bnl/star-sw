@@ -1250,7 +1250,11 @@ TrackHeed::SetupMaterial(Medium* medium) {
     if (materialName == "C")       atPacs[i] = &Carbon_PACS;
     else if (materialName == "Si") atPacs[i] = &Silicon_crystal_PACS;
     // else if (materialName == "Si") atPacs[i] = &Silicon_G4_PACS;
+    else if (materialName == "Ga") atPacs[i] = &Gallium_PACS;
     else if (materialName == "Ge") atPacs[i] = &Germanium_PACS;
+    else if (materialName == "As") atPacs[i] = &Arsenic_PACS;
+    else if (materialName == "Cd") atPacs[i] = &Cadmium_PACS;
+    else if (materialName == "Te") atPacs[i] = &Tellurium_PACS;
     else {
       std::cerr << className << "::SetupMaterial:\n";
       std::cerr << "    Photoabsorption cross-section data for " 

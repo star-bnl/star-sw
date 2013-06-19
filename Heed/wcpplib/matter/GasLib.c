@@ -1,12 +1,12 @@
-#include "wcpplib/matter/GasLib.h"
+//#include "wcpplib/matter/GasLib.h"
+#include "wcpplib/matter/AtomDef.h"
+#include "wcpplib/matter/MatterDef.h"
+#include "wcpplib/matter/MoleculeDef.h"
+#include "wcpplib/matter/GasDef.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 /*
 1998-2003,  I. Smirnov
 */
-
-// AbsList< AtomDef* > AtomDef::logbook;
-// This call should be before all atom_def
-// otherwise they are all lost.
 
 AtomDef Hydrogen(  "Hydrogen",   "H",   1, 1.0        * gram/mole);
 //AtomDef Hydrogen(  "Hydrogen",   "H",   1, 1.00794 * gram/mole);
@@ -58,11 +58,11 @@ AtomDef Ruthenium( "Ruthenium",  "Ru", 44, 101.07     * gram/mole);
 AtomDef Rhodium(   "Rhodium",    "Rh", 45, 102.9055   * gram/mole);    
 AtomDef Palladium( "Palladium",  "Pd", 46, 106.4      * gram/mole);    
 AtomDef Silver(    "Silver",     "Ag", 47, 107.868    * gram/mole);    
-AtomDef Cadium(    "Cadmium",    "Cd", 48, 112.411    * gram/mole);
+AtomDef Cadmium(   "Cadmium",    "Cd", 48, 112.411    * gram/mole);
 AtomDef Indium(    "Indium",     "In", 49, 114.818    * gram/mole);
 AtomDef Tin(       "Tin",        "Sn", 50, 118.710    * gram/mole);
 AtomDef Antimony(  "Antimony",   "Sb", 51, 121.760    * gram/mole);
-AtomDef Tellurium( "Te",         "Te", 52, 127.60     * gram/mole); 
+AtomDef Tellurium( "Tellurium",  "Te", 52, 127.60     * gram/mole); 
 AtomDef Iodine(    "Iodine",     "I",  53, 126.9045   * gram/mole);    
 AtomDef Xenon(     "Xenon",      "Xe", 54, 131.293    * gram/mole);
 AtomDef Caesium(   "Caesium",    "Cs", 55, 132.9054519 * gram/mole);
@@ -70,11 +70,8 @@ AtomDef Tungsten(  "Tungsten",   "W",  74, 183.85     * gram/mole);
 AtomDef Mercury(   "Mercury",    "Hg", 80, 200.59     * gram/mole);
 AtomDef Bismuth(   "Bismuth",    "Bi", 83, 208.9804   * gram/mole);    
 AtomDef Uranium(   "Uranium",    "U",  92, 238.0289   * gram/mole);
-AtomDef Plutonium(  "Plutonium", "Pu", 94, 244.0      * gram/mole);
+AtomDef Plutonium( "Plutonium",  "Pu", 94, 244.0      * gram/mole);
 
-// AbsList< MoleculeDef* > MoleculeDef::logbook;
-// This call should be before all MoleculeDef
-// otherwise they are all lost.
 VanDerVaals Argon_VanDerVaals(   48.6 * bar, 150.7 * kelvin);
 VanDerVaals Krypton_VanDerVaals( 55.0 * bar, 209.4 * kelvin);
 VanDerVaals Xenon_VanDerVaals(   55.0 * bar, 209.4 * kelvin);
@@ -150,39 +147,3 @@ MoleculeDef H2S_molec("H2S", "H2S", "H", 2, "S", 1);
 MoleculeDef GeH4_molec("GeH4", "GeH4", "Ge", 1, "H", 4);
 MoleculeDef SiH4_molec("SiH4", "SiH4", "Si", 1, "H", 4); 
 
-// AbsList< MatterDef* > MatterDef::logbook;
-// This call should be before all MatterDef otherwise they are all lost.
-
-double todays_temperature = 293.0 * kelvin; // room temperature, 20 deg Celsius
-double todays_pressure = 1.0 * atmosphere;  // sea level
-
-//GasDef Air("Air", "Air", "N2", 0.7, "O2", 0.3, 
-//	   todays_pressure, todays_temperature);
-//DynLinArr< String > fmolec_not = {
-// according to "short reference book of chemist", B.I.Perelman, Moskow, 1963.
-
-// String  smolec_not[6] = {String("N2"), String("O2"), String("Ar"), 
-// 			  String("CO2"), String("Ne"), String("He")}; 
-// double sweight_quan_molec[6] = 
-// {0.7809, 0.2095, 0.009325, 0.0003, 0.000018, 0.000005};
-// DynLinArr< String > fmolec_not(6, smolec_not, ArgInterp_Arr()); 
-// DynLinArr< double > fweight_quan_molec(6, sweight_quan_molec, 
-// 				       ArgInterp_Arr()); 
-
-// GasDef Air("Air", "Air", 6, fmolec_not, fweight_quan_molec,
-// 	   todays_pressure, todays_temperature);
-
-// GasDef GasHydrogen2("GasHydrogen2", "H2", "H2",  
-// 		todays_pressure, todays_temperature);
-
-/*
-GasDef LiquidHydrogen("LiquidHydrogen", "LiqH2", "H2",  
-		      todays_pressure, todays_temperature, 0.0708*gram/cm3);
-
-MatterDef CoverMatterForSpes4pi("CoverMatterForSpes4pi",
-				"CoverMatterForSpes4pi",
-				"C", 2,
-				"H", 3,
-				"Cl", 1,
-				0.0759*gram/cm3, todays_temperature);
-*/

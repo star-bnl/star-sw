@@ -1,15 +1,11 @@
-#include "heed++/code/PhotoAbsCSLib.h"
+#include "heed++/code/PhotoAbsCS.h"
 #include "heed++/code/PhysicalConstants.h"
+#include "wcpplib/matter/GasLib.c"
+
 /*
 2004, I. Smirnov
 */
 
-#ifdef NOT_INCLUDE_GASLIB_IN_PACSLIB
-#else
-#include "wcpplib/matter/GasLib.c"  
-#endif
-// to guarantee earlier initialization 
-// include the source to provide preliminary initialization.
 /*
 Remark  14.10.2005:
 
@@ -22,14 +18,6 @@ he will need to include both PhotoAbsCSLib.c and GasLib.c
 in certain his source file.
 If GasLib.c is already included here, there is no need to include 
 it again there and there will be only one line of initializations.
-But some people complains that such inclusion is inconvenient
-and unnecessary if they don't have global objects dependent
-on gas features. To allow them to switch this inclusion off,
-the macro NOT_INCLUDE_GASLIB_IN_PACSLIB is introduced.
-If it is defined, GasLib.c is NOT included.
-Similar behaviour applies to GasLib.h and PhotoAbsCSLib.h,
-because in many current test programs header GasLib.h is not included,
-but it should be included at least indirectly.
 */ 
 
 char* a_internal_HDB;
@@ -54,7 +42,6 @@ PhenoPhotoAbsCS Hydrogen_for_NH4_shell_PACS("Hydrogen_for_NH4",
 // SimpleTablePhotoAbsCS Hydrogen_for_CH4_shell_PACS("Hydrogen_for_CH4", 
 //                                       1, 12.65e-6, 
 //                                       shelllist_dir_name + "H_for_CH4.dat");
-
 SimpleAtomPhotoAbsCS Hydrogen_for_H2_PACS(1, Hydrogen_for_H2_shell_PACS);
 SimpleAtomPhotoAbsCS Hydrogen_for_CH4_PACS(1, Hydrogen_for_CH4_shell_PACS);
 SimpleAtomPhotoAbsCS Hydrogen_for_NH4_PACS(1, Hydrogen_for_NH4_shell_PACS);
@@ -257,6 +244,9 @@ ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void) {
 
 ExAtomPhotoAbsCS Argon_PACS = generate_Argon_PACS_mod_esc();
 
+ExAtomPhotoAbsCS Gallium_PACS(31, 
+                              shelllist_dir_name + "shelllist.dat",
+                              pacs_table_dir_name + "Ga.dat");
 ExAtomPhotoAbsCS Germanium_PACS(32, 
                                 shelllist_dir_name + "shelllist.dat",
                                 pacs_table_dir_name + "Ge.dat");
@@ -265,13 +255,21 @@ ExAtomPhotoAbsCS Germanium_crystal_PACS(32,
                                         pacs_table_dir_name + "Ge.dat",
                                         "Ge_crystal",
                                         0.67e-06);
-
+ExAtomPhotoAbsCS Arsenic_PACS(33, 
+                              shelllist_dir_name + "shelllist.dat",
+                              pacs_table_dir_name + "As.dat");
 ExAtomPhotoAbsCS Bromine_PACS(35, 
                               shelllist_dir_name + "shelllist.dat",
                               pacs_table_dir_name + "Br.dat");
 ExAtomPhotoAbsCS Krypton_PACS(36, 
                               shelllist_dir_name + "shelllist.dat", 
                               pacs_table_dir_name + "Kr.dat"); 
+ExAtomPhotoAbsCS Cadmium_PACS(48, 
+                              shelllist_dir_name + "shelllist.dat",
+                              pacs_table_dir_name + "Cd.dat");
+ExAtomPhotoAbsCS Tellurium_PACS(49, 
+                              shelllist_dir_name + "shelllist.dat",
+                              pacs_table_dir_name + "Te.dat");
 ExAtomPhotoAbsCS Xenon_PACS(54, 
                             shelllist_dir_name + "shelllist.dat", 
                             pacs_table_dir_name + "Xe.dat");

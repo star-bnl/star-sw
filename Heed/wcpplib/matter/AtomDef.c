@@ -7,56 +7,33 @@
 1998-2004, I. Smirnov.
 */
 
-void AtomDef::print(std::ostream & file, int l) const
-{
-  if (l > 0) file<<(*this);
+void AtomDef::print(std::ostream & file, int l) const {
+  if (l > 0) file << (*this);
 }
-void AtomDef::printall(std::ostream & file)
-{
+
+void AtomDef::printall(std::ostream & file) {
   Ifile << "AtomDef::printall:\n";
   AbsList< AtomDef* >& logbook = AtomDef::get_logbook();
   AbsListNode<AtomDef*>* an = NULL;
   while ((an = logbook.get_next_node(an)) != NULL) { 
-    file<<(*(an->el));
+    file << (*(an->el));
   }
 }
 
-AtomDef::AtomDef(void):nameh("none"), notationh("none") 
-{
+AtomDef::AtomDef(void):nameh("none"), notationh("none") {
   AtomDef::get_logbook().append(this);
 }
-/*
-AtomDef::AtomDef(const AtomDef& f)
-{
-  mfunnamep("AtomDef::AtomDef(const AtomDef& f)");
-  funnw.ehdr(cerr);
-  mcerr<<"The copy constructor is not allowed, "
-       <<"since it would create second atom with the same name and notation\n";
-  spexit(mcerr);
-}
-
-AtomDef& AtomDef::operator=(const AtomDef& f)
-{
-  mfunnamep("AtomDef& AtomDef::operator=(const AtomDef& f)");
-  funnw.ehdr(cerr);
-  mcerr<<"The assignment operator is not allowed, "
-       <<"since it would create second atom with the same name and notation\n";
-  spexit(mcerr);
-}
-*/
 
 AtomDef::AtomDef(const String& fnameh, const String& fnotationh,
-                 int fZh, double fAh):
-  nameh(fnameh), notationh(fnotationh), Zh(fZh), Ah(fAh)
-{ 
+                 int fZh, double fAh) :
+  nameh(fnameh), notationh(fnotationh), Zh(fZh), Ah(fAh) { 
   mfunname("AtomDef::AtomDef(...)");
   check_econd21(fZh , < 1 || , > max_poss_atom_z , mcerr); 
   verify();
   AtomDef::get_logbook().append(this);
 }
 
-double AtomDef::get_A(int fZ)
-{
+double AtomDef::get_A(int fZ) {
   mfunnamep("double AtomDef::get_A(int fZ)");
   AbsList< AtomDef* >& logbook = AtomDef::get_logbook();
   AbsListNode<AtomDef*>* an = NULL;
@@ -69,8 +46,7 @@ double AtomDef::get_A(int fZ)
   return 0.0; // to quiet compiler
 }
 
-AtomDef* AtomDef::get_AtomDef(int fZ)
-{
+AtomDef* AtomDef::get_AtomDef(int fZ) {
   mfunnamep("AtomDef* AtomDef::get_AtomDef(int fZ)");
   AbsList< AtomDef* >& logbook = AtomDef::get_logbook();
   AbsListNode<AtomDef*>* an = NULL;
@@ -83,8 +59,7 @@ AtomDef* AtomDef::get_AtomDef(int fZ)
   return NULL; // to quiet compiler
 }
 
-void AtomDef::verify(void)
-{
+void AtomDef::verify(void) {
   mfunnamep("void AtomDef::verify(void)");
   if (nameh == "none" && notationh == "none") return;
   AbsList< AtomDef* >& logbook = AtomDef::get_logbook();
@@ -99,8 +74,7 @@ void AtomDef::verify(void)
   }
 }
 
-std::ostream & operator << (std::ostream& file, const AtomDef& f)
-{
+std::ostream & operator << (std::ostream& file, const AtomDef& f) {
   Ifile << "AtomDef: name=" << std::setw(10) << f.name()
         << " notation=" << std::setw(3) << f.notation();
   Ifile << " Z()=" << std::setw(3) << f.Z() 
@@ -108,20 +82,16 @@ std::ostream & operator << (std::ostream& file, const AtomDef& f)
   return file;
 }
 
-AbsList< AtomDef* >& AtomDef::get_logbook(void)
-{
+AbsList< AtomDef* >& AtomDef::get_logbook(void) {
   static AbsList< AtomDef* > logbook;
   return logbook;
 }
 
-const AbsList< AtomDef* >& AtomDef::get_const_logbook(void)
-{
+const AbsList< AtomDef* >& AtomDef::get_const_logbook(void) {
   return AtomDef::get_logbook();
 }
 
-
-AtomDef* AtomDef::get_AtomDef(const String& fnotation)
-{
+AtomDef* AtomDef::get_AtomDef(const String& fnotation) {
   AbsList< AtomDef* >& logbook = AtomDef::get_logbook();
   AbsListNode<AtomDef*>* an = NULL;
   while ((an = logbook.get_next_node(an)) != NULL) { 
@@ -130,8 +100,7 @@ AtomDef* AtomDef::get_AtomDef(const String& fnotation)
   return NULL;
 }
 
-AtomDef::~AtomDef() 
-{ 
+AtomDef::~AtomDef() { 
   AtomDef::get_logbook().remove(this); 
 }
 
@@ -141,23 +110,22 @@ AtomMixDef::AtomMixDef(long fqatom, const DynLinArr< String >& fatom_not,
   weight_quanh(fqatom, 0.0),
   weight_massh(fqatom, 0.0),
   Z_meanh(0.0), A_meanh(0.0), inv_A_meanh(0.0),
-  mean_ratio_Z_to_Ah(0.0)
-{ 
+  mean_ratio_Z_to_Ah(0.0) { 
   mfunnamep("AtomMixDef::AtomMixDef(...)");
   check_econd11( fqatom , <=0  , mcerr );
   check_econd12( fqatom , > , fatom_not.get_qel() , mcerr );
   check_econd12( fqatom , > , fweight_quan.get_qel() , mcerr );
 
-  long k, n;
-  for (k = 0; k < qatomh; k++) {
-    AtomDef* ad = AtomDef::get_AtomDef(fatom_not[k]);
+  long n;
+  for (n = 0; n < qatomh; ++n) {
+    AtomDef* ad = AtomDef::get_AtomDef(fatom_not[n]);
     if (ad == NULL) {
       funnw.ehdr(mcerr);
-      mcerr << "cannot find atom with notation " << fatom_not[k]
+      mcerr << "cannot find atom with notation " << fatom_not[n]
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
-    atomh[k].put(ad);
+    atomh[n].put(ad);
   }
   double s = 0.0;
   for (n = 0; n < qatomh; n++) {
@@ -200,23 +168,22 @@ AtomMixDef::AtomMixDef(long fqatom, const DynLinArr< String >& fatom_not,
   weight_quanh(fqatom, 0.0),
   weight_massh(fqatom, 0.0),
   Z_meanh(0.0), A_meanh(0.0), inv_A_meanh(0.0),
-  mean_ratio_Z_to_Ah(0.0)
-{ 
+  mean_ratio_Z_to_Ah(0.0) { 
   mfunnamep("AtomMixDef::AtomMixDef(...)");
   check_econd11( fqatom , <=0  , mcerr );
   check_econd12( fqatom , > , fatom_not.get_qel() , mcerr );
   check_econd12( fqatom , > , fweight_quan.get_qel() , mcerr );
 
-  long k, n;
-  for (k = 0; k < qatomh; k++) {
-    AtomDef* ad = AtomDef::get_AtomDef(fatom_not[k]);
+  long n;
+  for (n = 0; n < qatomh; ++n) {
+    AtomDef* ad = AtomDef::get_AtomDef(fatom_not[n]);
     if (ad == NULL) {
       funnw.ehdr(mcerr);
-      mcerr << "cannot find atom with notation "<< fatom_not[k]
+      mcerr << "cannot find atom with notation "<< fatom_not[n]
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
-    atomh[k].put(ad);
+    atomh[n].put(ad);
   }
 
   double s = 0.0;
@@ -297,16 +264,16 @@ AtomMixDef::AtomMixDef(const String& fatom_not1, double  fweight_quan1,
   fatom_not[0] = fatom_not1;
   fatom_not[1] = fatom_not2;
 
-  long k, n;
-  for (k = 0; k < qatomh; k++) {
-    AtomDef* ad = AtomDef::get_AtomDef(fatom_not[k]);
+  long n;
+  for (n = 0; n < qatomh; ++n) {
+    AtomDef* ad = AtomDef::get_AtomDef(fatom_not[n]);
     if (ad == NULL) {
       funnw.ehdr(mcerr);
-      mcerr << "cannot find atom with notation " << fatom_not[k]
+      mcerr << "cannot find atom with notation " << fatom_not[n]
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
-    atomh[k].put(ad);
+    atomh[n].put(ad);
   }
   weight_quanh[0] = fweight_quan1;
   weight_quanh[1] = fweight_quan2;
@@ -352,24 +319,24 @@ AtomMixDef::AtomMixDef(const String& fatom_not1, double  fweight_quan1,
   weight_quanh(3),
   weight_massh(3), 
   Z_meanh(0.0), A_meanh(0.0), inv_A_meanh(0.0),
-  mean_ratio_Z_to_Ah(0.0)
-{ 
+  mean_ratio_Z_to_Ah(0.0) {
+
   mfunnamep("AtomMixDef::AtomMixDef(...)");
   DynLinArr< String > fatom_not(3);
   fatom_not[0] = fatom_not1;
   fatom_not[1] = fatom_not2;
   fatom_not[2] = fatom_not3;
 
-  long k, n;
-  for (k = 0; k < qatomh; k++) {
-    AtomDef* ad = AtomDef::get_AtomDef(fatom_not[k]);
+  long n;
+  for (n = 0; n < qatomh; ++n) {
+    AtomDef* ad = AtomDef::get_AtomDef(fatom_not[n]);
     if (ad == NULL) {
       funnw.ehdr(mcerr);
-      mcerr << "cannot find atom with notation " << fatom_not[k]
+      mcerr << "cannot find atom with notation " << fatom_not[n]
             << "\nIn particular, check the sequence of initialization\n";
       spexit(mcerr);
     }
-    atomh[k].put(ad);
+    atomh[n].put(ad);
   }
   weight_quanh[0] = fweight_quan1;
   weight_quanh[1] = fweight_quan2;
@@ -474,13 +441,11 @@ AtomMixDef::AtomMixDef(const String& fatom_not1, double  fweight_quan1,
   NumberOfElectronsInGramh = mean_ratio_Z_to_Ah * (gram/mole) * Avogadro;
 }
 
-void AtomMixDef::print(std::ostream & file, int l) const
-{
+void AtomMixDef::print(std::ostream & file, int l) const {
   if (l > 0) file << (*this);
 }
 
-std::ostream& operator << (std::ostream& file, const AtomMixDef& f)
-{
+std::ostream& operator << (std::ostream& file, const AtomMixDef& f) {
   mfunname("std::ostream& operator << (std::ostream& file, const AtomMixDef& f)");
   Ifile << "AtomMixDef\n";
   indn.n += 2;
