@@ -1,6 +1,6 @@
-// $Id: StPxlDbMaker.cxx,v 1.2 2013/06/20 19:19:01 bouchet Exp $
-// $Log: StPxlDbMaker.cxx,v $
-// Revision 1.2  2013/06/20 19:19:01  bouchet
+// $Id: StPxlDbMaker.cxx~,v 1.1 2013/06/20 19:19:01 bouchet Exp $
+// $Log: StPxlDbMaker.cxx~,v $
+// Revision 1.1  2013/06/20 19:19:01  bouchet
 // update for pxlSensorRowColumnMask tables
 //
 // Revision 1.1  2013/05/24 15:59:52  bouchet
@@ -45,7 +45,7 @@
 #include "StTpcDb/StTpcDb.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_pxlSensorStatus_Table.h" 
-#include "tables/St_pxlSensorRowColumnMask_Table.h" 
+
 StPxlDbMaker* gStPxlDbMaker=NULL; 
 THashList *StPxlDbMaker::fRotList = 0;
 
@@ -66,7 +66,6 @@ Int_t StPxlDbMaker::Init()
 Int_t StPxlDbMaker::InitRun(Int_t runNumber) {
   CalculateSensorsPosition();  
   GetPxlSensorStatusTable();
-  //GetPxlSensorRowColumnMaskTable();
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -164,7 +163,6 @@ Int_t StPxlDbMaker::CalculateSensorsPosition(){
 
   Int_t ladder = 0;
   Int_t sector = 0;
-  Int_t sensor = 0;
   Int_t SECTOR = 0;
   Int_t LADDER = 0;
   Int_t HALF   = 0;
@@ -174,12 +172,10 @@ Int_t StPxlDbMaker::CalculateSensorsPosition(){
     TGeoHMatrix *comb = (TGeoHMatrix *) fRotList->FindObject(Form("R%03i",Id));
     if (comb) continue;
     //LOG_DEBUG <<" I'm starting with Id : " << Id << endm;
-    comb = new TGeoHMatrix(Form("R%03i",Id));
-    // numbering of sensors in the RotMatrices() list is :
-    // id = [1-10]*40 + [1-4]*10 + sensor
-    sector = (Id-1)/40 + 1;
-    ladder = (Id-1)%40/10 + 1;
-    sensor = (Id-1)%10 + 1;
+    comb = new TGeoHMatrix(Form("R%03i",Id)); 
+    sector  = Id/40 + 1;                   // 1 <= sector <= 10
+    ladder = (Id - (sector-1)*40)/10 + 1;  // 1 <= ladder <= 4
+    if(Id%10 ==0)--ladder;
     //LOG_DEBUG <<" Id : " << Id <<" sector : " << sector << " ladder : " << ladder << " sensor :  " << sensor<<endm;
     TGeoHMatrix WLL;
     WLL.SetRotation(&SensorsOnLadders->r00);
@@ -276,18 +272,3 @@ void StPxlDbMaker::GetPxlSensorStatusTable(){
     pxlSensorStatus_st *g = mSensorStatus->GetTable() ;
   }
 }
-//_______________________________________________
-void StPxlDbMaker::GetPxlSensorRowColumnMaskTable(int sector,int ladder){
-  mSensorRowColumnMask = (St_pxlSensorRowColumnMask*)GetDataBase(Form("Calibrations/pxl/Sector_%d/Ladder_%d/pxlSensorRowColumnMask",sector,ladder));
-  if(mSensorRowColumnMask){ 
-    pxlSensorRowColumnMask_st *gg = mSensorRowColumnMask->GetTable() ;
-    for(int ii = 1 ; ii <= mSensorRowColumnMask->GetNRows(); ++ii){
-      LOG_DEBUG <<" Sensor : " << ii << endm;
-      for(int jj = 1 ; jj <= 200 ;++jj) { 
-	LOG_DEBUG <<" pxlDbMaker : sensor/row    : " << ii <<" " << gg[ii-1].rowNum[jj-1] << endm;
-	LOG_DEBUG <<" pxlDbMaker : sensor/column : " << ii <<" " << gg[ii-1].columnNum[jj-1] << endm;
-      }
-    }
-  }
-}
-//_______________________________________________
