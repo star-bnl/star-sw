@@ -267,17 +267,19 @@ ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
   
   // In case of periodicity, move the point into the basic cell.
   double x0 = xin, y0 = yin;
+  int nX = 0, nY = 0, nPhi = 0;
   if (perx) {
-    x0 -= sx * int(round(xin / sx));
+    nX = int(round(xin / sx));
+    x0 -= sx * nX;
   }
-  double arot = 0.;
   if (pery && tube) {
     Cartesian2Polar(xin, yin, x0, y0);
-    arot = 180. * sy * int(round((Pi * y0) / (sy * 180.))) / Pi;
-    y0 -= arot;
+    nPhi = int(round((Pi * y0) / (sy * 180.)));
+    y0 -= 180. * sy * nPhi / Pi;
     Polar2Cartesian(x0, y0, x0, y0);
   } else if (pery) {
-    y0 -= sy * int(round(yin / sy));
+    nY = int(round(yin / sy));
+    y0 -= sy * nY;
   }
   
   // Move the point to the correct side of the plane.
@@ -293,9 +295,23 @@ ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
     const double rTrap = 0.5 * w[i].d * w[i].nTrap;
     if (debug) std::cout << "rTrap = " << rTrap << "\nr = " << r <<"\n"; 
     if (r < rTrap) {
+      std::cout << "rTrap = " << rTrap << ", r = " << r << ", nTrap = " << w[i].nTrap << "\n"; 
       xw = w[i].x;
       yw = w[i].y;
       rw = w[i].d * 0.5;
+      if (perx && ynplan[0] && x0 <= coplan[0]) x0 -= sx;
+      if (perx && ynplan[1] && x0 >= coplan[1]) x0 += sx;
+      if (pery && ynplan[2] && y0 <= coplan[2]) y0 -= sy;
+      if (pery && ynplan[3] && y0 >= coplan[3]) y0 += sy;
+      if (pery && tube) {
+        double rhow, phiw;
+        Cartesian2Polar(xw, yw, rhow, phiw);
+        phiw += 180. * sy * nPhi / Pi;
+        Polar2Cartesian(rhow, phiw, xw, yw);
+      } else if (pery) {
+        y0 += sy * nY;
+      }
+      if (perx) xw += sx * nX;
       if (debug) {
         std::cout << className << "::IsInTrapRadius:\n";
         std::cout << "    (" << xin << ", " << yin << ", " << zin << ")"
@@ -345,7 +361,6 @@ ComponentAnalyticField::AddWire(const double x, const double y,
     std::cerr << "    Number of trap radii must be > 0.\n";
     return;
   }
-
   // Create a new wire
   wire newWire;
   newWire.x = x;
@@ -363,8 +378,8 @@ ComponentAnalyticField::AddWire(const double x, const double y,
   
   // Force recalculation of the capacitance and signal matrices.
   cellset = false;
-  sigset = false; 
-  
+  sigset = false;
+
 }
 
 void 
@@ -1561,6 +1576,10 @@ ComponentAnalyticField::CellCheck() {
       w[nWires].d = w[i].d;
       w[nWires].v = w[i].v;
       w[nWires].type = w[i].type;
+      w[nWires].u = w[i].u;
+      w[nWires].e = w[i].e;
+      w[nWires].ind = w[i].ind;
+      w[nWires].nTrap = w[i].nTrap;
       ++nWires;
     }
   }

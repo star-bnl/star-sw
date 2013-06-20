@@ -482,11 +482,9 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0,
 
   if (debug) {
     std::cout << className << "::DriftToWire:\n";
-    std::cout << "    Particle trapped by wire at: "
-              << x0 << ", " << y0 << ", " << z0
-              << " (r = " << sqrt(x0 * x0 + y0 * y0 + z0 * z0) << ")\n";
-    std::cout << "    by wire located at (" << xWire << ", " 
-              << yWire << ") with physical radius " 
+    std::cout << "    Particle at (" << x0 << ", " << y0 << ")\n";
+    std::cout << "    trapped by wire located at (" 
+              << xWire << ", " << yWire << ") with physical radius " 
               << rWire << " cm.\n";
   }
  
@@ -545,8 +543,9 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0,
     return;
   }
 
-  while (!lastStep) {
-   
+  unsigned int nSteps = 0;
+  while (!lastStep && nSteps < 100) {
+    ++nSteps;
     // Estimate where the drift-line will end up
     double x1 = x0 + tCrude * vx0;
     double y1 = y0 + tCrude * vy0;
@@ -975,7 +974,7 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
     //getchar()
   }
   const double totalStep = sqrt(pow(x - xe, 2) + pow(y - ye, 2) + pow(z - ze, 2));
-  std::cout << "DLrms = " << dLrms << " Acquired over " << totalStep << " [cm] in  " << stepCounter << " steps.\n";
+  // std::cout << "DLrms = " << dLrms << " Acquired over " << totalStep << " [cm] in  " << stepCounter << " steps.\n";
   return dLrms;
 
 }  
