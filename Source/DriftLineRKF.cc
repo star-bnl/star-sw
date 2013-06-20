@@ -973,8 +973,6 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
     }
     //getchar()
   }
-  const double totalStep = sqrt(pow(x - xe, 2) + pow(y - ye, 2) + pow(z - ze, 2));
-  // std::cout << "DLrms = " << dLrms << " Acquired over " << totalStep << " [cm] in  " << stepCounter << " steps.\n";
   return dLrms;
 
 }  
