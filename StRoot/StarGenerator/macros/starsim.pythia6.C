@@ -85,7 +85,7 @@ void starsim( Int_t nevents=1 )
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2012 geant gstar usexgeom pythia6 ";
+    TString simple = "y2012 geant gstar agml usexgeom ";
     bfc(0, simple );
   }
 
@@ -113,6 +113,27 @@ void starsim( Int_t nevents=1 )
   // Setup an event generator
   //
   Pythia6( "pp:W" );
+
+  //
+  // Setup cuts on which particles get passed to geant for
+  //   simulation.  (To run generator in standalone mode,
+  //   set ptmin=1.0E9.)
+  //                    ptmin  ptmax
+  primary->SetPtRange  (1.0E9,  -1.0);         // GeV
+  //                    etamin etamax
+  primary->SetEtaRange ( -3.0, +3.0 );
+  //                    phimin phimax
+  primary->SetPhiRange ( 0., TMath::TwoPi() );
+  
+  
+  // 
+  // Setup a realistic z-vertex distribution:
+  //   x = 0 gauss width = 1mm
+  //   y = 0 gauss width = 1mm
+  //   z = 0 gauss width = 30cm
+  // 
+  primary->SetVertex( 0., 0., 0. );
+  primary->SetSigma( 0.1, 0.1, 30.0 );
 
   //
   // Initialize primary event generator and all sub makers
