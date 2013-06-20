@@ -73,12 +73,12 @@ class StarGenParticle : public TObject
   ~StarGenParticle(){ };
 
 
-  enum State { kNull,          /** Null entry */
-	       kFinal,         /** Final state particle which will not be decayed further by the event generator */
-	       kDecayed,       /** Standard model hadron, muon or tau which has decayed.  Code does not include intermediate-state hadrons. */
-	       kDocumentation, /** Documentation line in the record */ 
-	       kIncident,      /** Incident beam particle */
-	       kUnknown        /** Negative numbers will signify STAR event header information */
+  enum State { kNull,          /**< Null entry */
+	       kFinal,         /**< Final state particle which will not be decayed further by the event generator */
+	       kDecayed,       /**< Standard model hadron, muon or tau which has decayed.  Code does not include intermediate-state hadrons. */
+	       kDocumentation, /**< Documentation line in the record */ 
+	       kIncident,      /**< Incident beam particle */
+	       kUnknown        /**< Negative numbers will signify STAR event header information */
   };
 
 	          
