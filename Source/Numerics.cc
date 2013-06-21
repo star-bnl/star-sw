@@ -835,15 +835,16 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
     iX0 = iNode;
     iX1 = iNode;
     // Establish the shape functions.
-    fX[0] = 1.;
+    fX[0] = 0.;
     fX[1] = 0.;
-    fX[2] = 0.;	
+    fX[2] = 0.;
+    fX[3] = 0.;	
   } else if (iOrder == 1 || nx == 2) {
     // First order interpolation in x.
     // Find the grid segment containing this point.
     int iGrid = 0;
     for (int i = 1; i < nx; i++) {
-      if ((xAxis[i - 1] - x) * (x - xAxis[i]) >= 0.){
+      if ((xAxis[i - 1] - x) * (x - xAxis[i]) >= 0.) {
         iGrid = i;
       }
     }
@@ -864,11 +865,12 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
     fX[0] = 1. - xLocal;
     fX[1] = xLocal;
     fX[2] = 0.;
+    fX[3] = 0.;
   } else if (iOrder == 2) {
     // Second order interpolation in x.
     // Find the grid segment containing this point.
     int iGrid = 0;
-    for (int i = 0; i < nx; i++) {
+    for (int i = 1; i < nx; i++) {
       if ((xAxis[i - 1] - x) * (x - xAxis[i]) >= 0.) {
         iGrid = i;
       }
@@ -877,21 +879,6 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
     const double xLocal = (x - xAxis[iGrid - 1]) / 
                           (xAxis[iGrid] - xAxis[iGrid - 1]);
     // Set the summing range and shape functions.
-    // These assignments are shared by all of the following conditions,
-    // so it's easier to take them out.
-    fX[0] = (x           - xAxis[iX0 + 1]) *
-            (x           - xAxis[iX0 + 2]) /
-            ((xAxis[iX0] - xAxis[iX0 + 1]) *
-             (xAxis[iX0] - xAxis[iX0 + 2]));
-    fX[1] = (x               - xAxis[iX0]) *
-            (x               - xAxis[iX0 + 2]) /
-            ((xAxis[iX0 + 1] - xAxis[iX0]) *
-             (xAxis[iX0 + 1] - xAxis[iX0 + 2]));
-    fX[2] = (x               - xAxis[iX0])*
-            (x               - xAxis[iX0 + 1]) /
-            ((xAxis[iX0 + 2] - xAxis[iX0]) *
-             (xAxis[iX0 + 2] - xAxis[iX0 + 1]));
-    
     if (iGrid == 1) {
       iX0 = iGrid - 1;
       iX1 = iGrid + 1;
@@ -904,6 +891,18 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
         f = 0.;
         return false;
       } 
+      fX[0] = (x           - xAxis[iX0 + 1]) *
+              (x           - xAxis[iX0 + 2]) /
+              ((xAxis[iX0] - xAxis[iX0 + 1]) *
+               (xAxis[iX0] - xAxis[iX0 + 2]));
+      fX[1] = (x               - xAxis[iX0]) *
+              (x               - xAxis[iX0 + 2]) /
+              ((xAxis[iX0 + 1] - xAxis[iX0]) *
+               (xAxis[iX0 + 1] - xAxis[iX0 + 2]));
+      fX[2] = (x               - xAxis[iX0])*
+              (x               - xAxis[iX0 + 1]) /
+              ((xAxis[iX0 + 2] - xAxis[iX0]) *
+               (xAxis[iX0 + 2] - xAxis[iX0 + 1]));
     } else if (iGrid == nx - 1) {
       iX0 = iGrid - 2;
       iX1 = iGrid;
@@ -916,6 +915,18 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
         f = 0.;
         return false;
       } 
+      fX[0] = (x           - xAxis[iX0 + 1]) *
+              (x           - xAxis[iX0 + 2]) /
+              ((xAxis[iX0] - xAxis[iX0 + 1]) *
+               (xAxis[iX0] - xAxis[iX0 + 2]));
+      fX[1] = (x               - xAxis[iX0]) *
+              (x               - xAxis[iX0 + 2]) /
+              ((xAxis[iX0 + 1] - xAxis[iX0]) *
+               (xAxis[iX0 + 1] - xAxis[iX0 + 2]));
+      fX[2] = (x               - xAxis[iX0])*
+              (x               - xAxis[iX0 + 1]) /
+              ((xAxis[iX0 + 2] - xAxis[iX0]) *
+               (xAxis[iX0 + 2] - xAxis[iX0 + 1]));
     } else {
       iX0 = iGrid - 2;
       iX1 = iGrid + 1;
@@ -931,7 +942,18 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
         f = 0.;
         return false;
       }
-
+      fX[0] = (x           - xAxis[iX0 + 1]) *
+              (x           - xAxis[iX0 + 2]) /
+              ((xAxis[iX0] - xAxis[iX0 + 1]) *
+               (xAxis[iX0] - xAxis[iX0 + 2]));
+      fX[1] = (x               - xAxis[iX0]) *
+              (x               - xAxis[iX0 + 2]) /
+              ((xAxis[iX0 + 1] - xAxis[iX0]) *
+               (xAxis[iX0 + 1] - xAxis[iX0 + 2]));
+      fX[2] = (x               - xAxis[iX0])*
+              (x               - xAxis[iX0 + 1]) /
+              ((xAxis[iX0 + 2] - xAxis[iX0]) *
+               (xAxis[iX0 + 2] - xAxis[iX0 + 1]));
       fX[0] *= (1. - xLocal);
       fX[1] = fX[1] * (1. - xLocal) + 
               xLocal * (x - xAxis[iX0 + 2]) * 
@@ -998,7 +1020,7 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
     // Second order interpolation in y.
     // Find the grid segment containing this point.
     int iGrid = 0;
-    for (int i = 0; i < ny; i++) {
+    for (int i = 1; i < ny; i++) {
       if ((yAxis[i - 1] - y) * (y - yAxis[i]) >= 0.) {
         iGrid = i;
       }
@@ -1034,6 +1056,18 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
         f = 0.;
         return false;
       } 
+      fY[0] = (y           - yAxis[iY0 + 1]) *
+              (y           - yAxis[iY0 + 2]) /
+              ((yAxis[iY0] - yAxis[iY0 + 1]) *
+               (yAxis[iY0] - yAxis[iY0 + 2]));
+      fY[1] = (y               - yAxis[iY0]) *
+              (y               - yAxis[iY0 + 2]) /
+              ((yAxis[iY0 + 1] - yAxis[iY0]) *
+               (yAxis[iY0 + 1] - yAxis[iY0 + 2]));
+      fY[2] = (y               - yAxis[iY0])*
+              (y               - yAxis[iY0 + 1]) /
+              ((yAxis[iY0 + 2] - yAxis[iY0]) *
+              (yAxis[iY0 + 2] - yAxis[iY0 + 1]));
     } else if (iGrid == ny - 1) {
       iY0 = iGrid - 2;
       iY1 = iGrid;
@@ -1046,6 +1080,18 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
         f = 0.;
         return false;
       } 
+      fY[0] = (y           - yAxis[iY0 + 1]) *
+              (y           - yAxis[iY0 + 2]) /
+              ((yAxis[iY0] - yAxis[iY0 + 1]) *
+               (yAxis[iY0] - yAxis[iY0 + 2]));
+      fY[1] = (y               - yAxis[iY0]) *
+              (y               - yAxis[iY0 + 2]) /
+              ((yAxis[iY0 + 1] - yAxis[iY0]) *
+               (yAxis[iY0 + 1] - yAxis[iY0 + 2]));
+      fY[2] = (y               - yAxis[iY0])*
+              (y               - yAxis[iY0 + 1]) /
+              ((yAxis[iY0 + 2] - yAxis[iY0]) *
+              (yAxis[iY0 + 2] - yAxis[iY0 + 1]));
     } else {
       iY0 = iGrid - 2;
       iY1 = iGrid + 1;
@@ -1061,6 +1107,18 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
         f = 0.;
         return false;
       } 
+      fY[0] = (y           - yAxis[iY0 + 1]) *
+              (y           - yAxis[iY0 + 2]) /
+              ((yAxis[iY0] - yAxis[iY0 + 1]) *
+               (yAxis[iY0] - yAxis[iY0 + 2]));
+      fY[1] = (y               - yAxis[iY0]) *
+              (y               - yAxis[iY0 + 2]) /
+              ((yAxis[iY0 + 1] - yAxis[iY0]) *
+               (yAxis[iY0 + 1] - yAxis[iY0 + 2]));
+      fY[2] = (y               - yAxis[iY0])*
+              (y               - yAxis[iY0 + 1]) /
+              ((yAxis[iY0 + 2] - yAxis[iY0]) *
+               (yAxis[iY0 + 2] - yAxis[iY0 + 1]));
 
       fY[0] *= (1. - yLocal);
       fY[1] = fY[1] * (1. - yLocal) + 
@@ -1128,7 +1186,7 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
     // Second order interpolation in z.
     // Find the grid segment containing this point.
     int iGrid = 0;
-    for (int i = 0; i < nz; i++) {
+    for (int i = 1; i < nz; i++) {
       if ((zAxis[i - 1] - z) * (z - zAxis[i]) >= 0.) {
         iGrid = i;
       }
@@ -1164,6 +1222,18 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
         f = 0.;
         return false;
       } 
+      fZ[0] = (z           - zAxis[iZ0 + 1]) *
+              (z           - zAxis[iZ0 + 2]) /
+              ((zAxis[iZ0] - zAxis[iZ0 + 1]) *
+               (zAxis[iZ0] - zAxis[iZ0 + 2]));
+      fZ[1] = (z               - zAxis[iZ0]) *
+              (z               - zAxis[iZ0 + 2]) /
+              ((zAxis[iZ0 + 1] - zAxis[iZ0]) *
+               (zAxis[iZ0 + 1] - zAxis[iZ0 + 2]));
+      fZ[2] = (z               - zAxis[iZ0])*
+              (z               - zAxis[iZ0 + 1]) /
+              ((zAxis[iZ0 + 2] - zAxis[iZ0]) *
+               (zAxis[iZ0 + 2] - zAxis[iZ0 + 1]));
     } else if (iGrid == nz - 1) {
       iZ0 = iGrid - 2;
       iZ1 = iGrid;
@@ -1176,6 +1246,18 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
         f = 0.;
         return false;
       } 
+      fZ[0] = (z           - zAxis[iZ0 + 1]) *
+              (z           - zAxis[iZ0 + 2]) /
+              ((zAxis[iZ0] - zAxis[iZ0 + 1]) *
+               (zAxis[iZ0] - zAxis[iZ0 + 2]));
+      fZ[1] = (z               - zAxis[iZ0]) *
+              (z               - zAxis[iZ0 + 2]) /
+              ((zAxis[iZ0 + 1] - zAxis[iZ0]) *
+               (zAxis[iZ0 + 1] - zAxis[iZ0 + 2]));
+      fZ[2] = (z               - zAxis[iZ0])*
+              (z               - zAxis[iZ0 + 1]) /
+              ((zAxis[iZ0 + 2] - zAxis[iZ0]) *
+               (zAxis[iZ0 + 2] - zAxis[iZ0 + 1]));
     } else {
       iZ0 = iGrid - 2;
       iZ1 = iGrid + 1;
@@ -1193,6 +1275,19 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
         return false;
       } 
       
+      fZ[0] = (z           - zAxis[iZ0 + 1]) *
+              (z           - zAxis[iZ0 + 2]) /
+              ((zAxis[iZ0] - zAxis[iZ0 + 1]) *
+               (zAxis[iZ0] - zAxis[iZ0 + 2]));
+      fZ[1] = (z               - zAxis[iZ0]) *
+              (z               - zAxis[iZ0 + 2]) /
+              ((zAxis[iZ0 + 1] - zAxis[iZ0]) *
+               (zAxis[iZ0 + 1] - zAxis[iZ0 + 2]));
+      fZ[2] = (z               - zAxis[iZ0])*
+              (z               - zAxis[iZ0 + 1]) /
+              ((zAxis[iZ0 + 2] - zAxis[iZ0]) *
+               (zAxis[iZ0 + 2] - zAxis[iZ0 + 1]));
+
       fZ[0] *= (1. - zLocal);
       fZ[1] = fZ[1] * (1. - zLocal) + 
               zLocal * (z - zAxis[iZ0 + 2]) * 
