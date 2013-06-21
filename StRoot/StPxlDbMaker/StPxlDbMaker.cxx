@@ -1,5 +1,8 @@
-// $Id: StPxlDbMaker.cxx,v 1.2 2013/06/20 19:19:01 bouchet Exp $
+// $Id: StPxlDbMaker.cxx,v 1.3 2013/06/21 21:12:26 qiuh Exp $
 // $Log: StPxlDbMaker.cxx,v $
+// Revision 1.3  2013/06/21 21:12:26  qiuh
+// *** empty log message ***
+//
 // Revision 1.2  2013/06/20 19:19:01  bouchet
 // update for pxlSensorRowColumnMask tables
 //
@@ -198,8 +201,8 @@ Int_t StPxlDbMaker::CalculateSensorsPosition(){
     }
     LaddersOnSectors = pxlLadderOnSector->GetTable();
     for (Int_t l = 0; l < NoLadders; l++, LaddersOnSectors++) {
-      SECTOR  =  (LaddersOnSectors->Id)/40 + 1;
-      LADDER  =  (LaddersOnSectors->Id - (SECTOR-1)*40)/10 + 1;
+        SECTOR  =  (LaddersOnSectors->Id-1)/4 + 1;
+        LADDER  =  (LaddersOnSectors->Id-1)%4 + 1;
       LOG_DEBUG <<" from Comb-->sector : " << sector <<"  from tables-->sector : " << SECTOR << endm;
       LOG_DEBUG <<" from Comb-->ladder : " << ladder <<"  from tables-->ladder : " << LADDER << endm;
       if ((ladder == LADDER) && (sector == SECTOR)){
