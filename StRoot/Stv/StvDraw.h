@@ -34,7 +34,8 @@ TObject *Trak(const std::vector<float> &pnts, EDraw3DStyle sty=kGlobalTrack,Colo
    void  All(const char *opt);
 
    void  DoIt();
-   void  Near(const TVector3 &A,const TVector3 &B,StvConstHits &hits, double wide=10);
+   void  Near(const StvConstHits &inhits,StvConstHits &unhits, double wide=10);
+   void  Near(const StvTrack *tk,StvConstHits &unhits, double wide=10);
 
 
 static int ProcessEvents();

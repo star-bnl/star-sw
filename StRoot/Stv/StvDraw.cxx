@@ -77,7 +77,7 @@ void StvDraw::Road(const THelixTrack &helx,const std::vector<const StvHit*> &hit
   TVector3 A(hits.front()->x());
   TVector3 B(hits.back ()->x());
   StvConstHits unHits;
-  Near(A,B,unHits,wide);
+  Near((StvConstHits&)hits,unHits,wide);
   Hits(unHits,kUnusedHit);
   Trak(helx,hits,sty);
 }
@@ -176,34 +176,46 @@ void StvDraw::Zhow(const StvTrack *tk){Inst()->Road(tk,10);}
 void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
 {
   Trak(tk, sty);
-  const StvNode *fist = tk->front();
-  const StvNode *last = tk->back();
-  const StvNodePars &parF = fist->GetFP();
-  const StvNodePars &parL = last->GetFP();
-  TVector3 myFst(parF.P);
-  TVector3 myLst(parL.P);
   StvConstHits unHits;
-  Near(myFst,myLst,unHits,wide);
+  Near(tk,unHits,wide);
   if (!unHits.size()) 			return;
   Hits(unHits,kUnusedHit);
 }
 //_____________________________________________________________________________
-void StvDraw::Near(const TVector3 &A,const TVector3 &B,StvConstHits &hits,double wide)
+void StvDraw::Near(const StvConstHits &inHits,StvConstHits &unHits,double wide)
 {
- TVector3 D = B-A; 
- double len = D.Mag();D*=1./len;
- StVoidArr *vHits = StTGeoProxy::Inst()->GetAllHits();
+  THelixFitter hf;
+  int nh = inHits.size();
+  for (int ih = 0;ih<nh;ih++) {
+    const float *f = inHits[ih]->x(); hf.Add(f[0],f[1],f[2]);
+  }
+  hf.Fit();
+  THelixTrack th(hf);
+
+  StVoidArr *vHits = StTGeoProxy::Inst()->GetAllHits();
   int nHits = vHits->size();
-  hits.resize(0);
+  unHits.resize(0);
   for (int ih=0;ih<nHits;ih++) {//loop hit
     const StvHit *hit = (const StvHit*)(*vHits)[ih];
-    TVector3 hi(hit->x()); 
-    TVector3 hl = hi-A;
-    double dot = hl.Dot(D);
-    if (dot<-3*wide || dot >len+3*wide) continue;
-    if ((hl.Cross(D)).Mag()>wide)	continue;
-    hits.push_back(hit);
+    TVector3 Hit(hit->x());; 
+    double d[3] = {Hit[0],Hit[1],Hit[2]};
+    double s = th.Path(d); th.Move(s);
+    double dis2 = (Hit - TVector3(th.Pos())).Mag2();
+    if (dis2 > wide*wide) continue;
+    unHits.push_back(hit);
   } //End hit loop
+}
+//_____________________________________________________________________________
+void StvDraw::Near(const StvTrack *tk,StvConstHits &unHits,double wide)
+{
+  StvConstHits inHits;
+  for (StvNodeConstIter it=tk->begin(); it!=tk->end(); ++it) {
+    const StvNode *node = *it;
+    const StvHit  *hit  = node->GetHit();
+    if (!hit) continue;
+    inHits.push_back(hit);
+  }
+  Near(inHits,unHits,wide);  
 }
 
 //_____________________________________________________________________________
