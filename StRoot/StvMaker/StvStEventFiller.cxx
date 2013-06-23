@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.31 2013/06/16 00:44:58 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.32 2013/06/23 23:31:58 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.32  2013/06/23 23:31:58  perev
+ * Assert++
+ *
  * Revision 1.31  2013/06/16 00:44:58  perev
  * Cleanup
  *
@@ -994,8 +997,11 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
   getAllPointCount(track,dets);
   const StvNode *node = 0;
   for (int i=0;i<kMaxDetectorId;i++) {
-    if (!dets[i][1]) continue;
-    detInfo->setNumberOfPoints(dets[i][1],static_cast<StDetectorId>(i));
+    int np = dets[i][1];
+    if (!np) continue;
+    assert(np<100);
+    detInfo->setNumberOfPoints(np,(StDetectorId)(i));
+    assert((int)detInfo->numberOfPoints((StDetectorId)(i)) == np);
   }
   for (StvNodeConstIter it = track->begin();it!=track->end();++it) 
   {
@@ -1109,8 +1115,11 @@ static int nCall=0; nCall++;
   int dets[kMaxDetectorId][3]; 
   getAllPointCount(track,dets);
   for (int i=1;i<kMaxDetectorId;i++) {
-    if (!dets[i][2]) continue;
-    fitTraits.setNumberOfFitPoints((unsigned char)dets[i][2],(StDetectorId)i);
+    int nf = dets[i][2];
+    if (!nf) continue;
+    assert(nf<100);
+    fitTraits.setNumberOfFitPoints(nf,(StDetectorId)i);
+    assert((int)fitTraits.numberOfFitPoints((StDetectorId)i)==nf);
   }
   
   if (gTrack->type()==primary) {
@@ -1232,8 +1241,11 @@ void StvStEventFiller::fillTrack(StTrack* gTrack, const StvTrack* track,StTrackD
   int dets[kMaxDetectorId][3];
   getAllPointCount(track,dets);
   for (int i=1;i<kMaxDetectorId;i++) {
-    if(!dets[i][0]) continue;
-    gTrack->setNumberOfPossiblePoints((unsigned char)dets[i][0],(StDetectorId)i);
+    int np = dets[i][0];
+    if(!np) continue;
+    assert(np<100);
+    gTrack->setNumberOfPossiblePoints(np,(StDetectorId)i);
+    assert((int)gTrack->numberOfPossiblePoints((StDetectorId)i)==np);
   }
 
   fillGeometry(gTrack, track, false); // inner geometry
@@ -1520,6 +1532,7 @@ enum {kPP=0,kMP=1,kFP=2};
     const StvNode *node = (*it);
     int detId= node->GetDetId();
     if (!detId)			continue;
+    if (!node->GetHitPlane()) 	continue;
 //fill possible points
     count[0][kPP]++; count[detId][kPP]++;
     const StvHit* h = GetHit(node);
