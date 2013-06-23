@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.37 2013/06/16 00:41:54 perev Exp $
+// $Id: StvMaker.cxx,v 1.38 2013/06/23 23:30:39 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -146,6 +146,10 @@ Int_t StvMaker::InitDetectors()
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
 //		Now Initialize TGeo proxy
   tgh->Init(1+2+4);
+  StvTpcPrompt promp;
+  tgh->InitHitPlane(&promp);
+
+
 //	TPC has non standard TGeo. Edit it
 
   StvTpcEdit tpce;
@@ -153,6 +157,7 @@ Int_t StvMaker::InitDetectors()
   Info("InitDetectors","%d fake TPC padrows disabled",nEdit);
   tgh->InitLayers();
 
+  tgh->Summary();
 
 
 
@@ -165,15 +170,15 @@ Int_t StvMaker::InitDetectors()
   int actTpc = IAttr("activeTpc");
   if (actTpc) {	//TPC error calculators
   
-    const char*  innOutNames[2][3]  ={{"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs", 0}
-                                     ,{"tpcInnerHitError"      ,"tpcOuterHitError"  , 0}};
+    const char*  innOutNames[]  = {"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs" 
+                                  ,"StvTpcInnerPromptErrs" ,"StvTpcOuterPromptErrs",0};
     const char* innOut = 0;
-    for (int io=0;(innOut =innOutNames[actTpc-1][io]);io++) {
+    for (int io=0;(innOut=innOutNames[io]);io++) {
       TString myName(innOut); if (mFETracks) myName+="FE";
       StvHitErrCalculator *hec = 0;
-      switch (actTpc) {
-        case 1: hec = new StvTpcHitErrCalculator(myName); break;
-        case 2: hec = new StvTpcStiErrCalculator(myName); break;
+      switch (io) {
+        case 0:; case 1: hec = new StvTpcHitErrCalculator(myName); break;
+        case 2:; case 3: hec = new StvHitErrCalculator   (myName); break;
         default: assert(0 && "Wrong tpcActive value");
       }
       TString ts("Calibrations/tracker/");
@@ -212,6 +217,7 @@ Int_t StvMaker::InitDetectors()
 
   kit->SetHitLoader(new StvHitLoader);
   assert(kit->HitLoader()->Init());
+  kit->HitLoader()->SetHitActor(new StvTpcHitActor);
 //		In case of fithiterr utility working, selects special hits to speedup
   if (mFETracks) kit->HitLoader()->SetHitSelector();
 
