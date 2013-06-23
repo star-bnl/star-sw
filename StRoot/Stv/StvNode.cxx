@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.16 2013/06/09 21:37:33 perev Exp $
+ * $Id: StvNode.cxx,v 1.17 2013/06/23 23:28:29 perev Exp $
  *
  * /author Victor Perev
  */
@@ -54,7 +54,7 @@ double StvNode::GetTime() const
 //________________________________________________________________________________
 void StvNode::Print(const char *opt) const
 {
-static const char *txt = "X Y Z A P T C H R E L K U Xi P[ E[ ";
+static const char *txt = "X Y Z A P T C H R E L K U Xi P[ E[ Pa ";
 static const char *hhh = "x y z r e ";
   if (!opt || !opt[0]) opt = "_";
   TString myOpt(opt);myOpt+=" ";
@@ -74,26 +74,27 @@ static const char *hhh = "x y z r e ";
   const char *myopt = myOpt.Data(); char*e;
   for (int i=0;txt[i];i++) {
     if (txt[i]==' ') continue;
+    TString ts(txt+i,2);
     err[0]=-999;val=-999;
-    if ((iopt=myOpt.Index(TString(txt+i,2)))<0) continue;
-    if (txt[i+1]==' ') {//Single letter request 
-           if (txt[i]=='R') 	{val = fp.getRxy();}
-      else if (txt[i]=='P')	{val = fp.getPt() ;}
-      else if (txt[i]=='E')	{err[0] = sqrt(fe.mHH); err[1] = sqrt(fe.mZZ);}
-      else if (txt[i]=='L')	{val = GetLen();}
-      else if (txt[i]=='K')	{val = fe.MaxCorr();}
-      else if (txt[i]=='U')	{val = fe.mPP;}
-      else if (txt[i]=='H')	{val = fp._hz;}
-      else                      {val = fp[i];}
-      if (abs(val+999)>1e-6) 	{ printf("\t%c=%g",txt[i],val);}
-      if (err[0]>-999)  	{ printf("\tHH=%7.2g ZZ=%7.2g",err[0],err[1]);}
-      } else if (txt[i+1]=='[') {// now print by index
-      int idx = strtol(myopt+iopt+2,&e,10);
-      TString tnam(myopt+iopt,e-(myopt+iopt)+1);
-      if      (txt[i]=='P') 	{val = fp[idx];}
-      else if (txt[i]=='E') 	{val = fe[idx];}
-      else 			continue;
-      printf("\t%s=%g",tnam.Data(),val);
+    const char *cal = 0;
+    if ((iopt=myOpt.Index(ts))<0) continue;
+    int idx =(txt[i+1]=='[') ? strtol(myopt+iopt+2,&e,10):0;
+    
+    {//Single letter request 
+           if (ts=="R ") 	{val = fp.getRxy();}
+      else if (ts=="P ")	{val = fp.getPt() ;}
+      else if (ts=="E ")	{err[0] = sqrt(fe.mHH); err[1] = sqrt(fe.mZZ);}
+      else if (ts=="L ")	{val = GetLen();}
+      else if (ts=="K ")	{val = fe.MaxCorr();}
+      else if (ts=="U ")	{val = fe.mPP;}
+      else if (ts=="H ")	{val = fp._hz;}
+      else if (ts=="P[")	{val = fp[idx];}
+      else if (ts=="E[")	{val = fe[idx];}
+      else if (ts=="Pa")	{cal = (mHitPlane)? mHitPlane->GetPath():"";}
+      printf("\t%s=",ts.Data());
+      if (cal) 			{ printf("%s ",cal);}
+      if (abs(val+999)>1e-6) 	{ printf("%g",val);}
+      if (err[0]>-999)  	{ printf("HH(%7.2g) ZZ(%7.2g)",err[0],err[1]);}
     } 
   }//end for i
 
