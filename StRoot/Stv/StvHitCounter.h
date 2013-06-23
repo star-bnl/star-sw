@@ -19,6 +19,8 @@ void AddNit();
 int  Reject() const;
 int  Skip()   const;
 double Eff()  const;
+int  MaxNitSeq() const;	//Length of longesr Nits sequence
+int  MaxHitSeq() const;	//Length of longesr Hits sequence
 private:
 static StvHitCounter *mgStvHitCounter;
 public:
@@ -33,6 +35,8 @@ int nSeqNits ;	// Number of Non Hit(Nit) sequences
 int nSeqLong ;	// Number of too long Non Hit(Nit) sequences
 int nContHits;	// Number of hits in current Hit sequence
 int nContNits;	// Number of nits in current nonHit sequence
+int mContHits;	// Number of hits in maximal Hit sequence
+int mContNits;	// Number of nits in maximal nonHit sequence
 char mMed[1] ;
 int mMinTotHits;	//Min number hits for track
 int mMinGoodHits;	//Min number good hits for track

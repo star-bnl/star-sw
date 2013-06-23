@@ -28,8 +28,18 @@ StvHitCounter *StvHitCounter::Inst()
   if (!mgStvHitCounter) mgStvHitCounter = new StvHitCounter;
   return mgStvHitCounter;
 }
-
-
+//_____________________________________________________________________________
+int StvHitCounter::MaxNitSeq() const
+{
+  if (nContNits>mContNits) return nContNits;
+  else                     return mContNits;
+}
+//_____________________________________________________________________________
+int StvHitCounter::MaxHitSeq() const
+{
+  if (nContHits>mContHits) return nContHits;
+  else                     return mContHits;
+}
 //_____________________________________________________________________________
 void StvHitCounter::AddHit()
 {
@@ -37,6 +47,7 @@ void StvHitCounter::AddHit()
   if (!nContNits)		return;
   if (nContHits<mMinContHits) 	return;
   if (nContNits>mMaxContNits) 	nSeqLong++;
+  if (mContNits<nContNits   )   mContNits=nContNits;
   nContNits=0;nSeqNits++;
 }
 //_____________________________________________________________________________
@@ -45,13 +56,15 @@ void StvHitCounter::AddNit()
   nPossHits++;nContNits++;nTotNits++;
   if (!nContHits) 	return;
   if (nContHits<mMinContHits) {nSeqShort++;} else { nGoodHits+=nContHits;}
+  if (mContHits<nContHits   )   mContHits=nContHits;
   nContHits=0;nSeqHits++;
 }
 //_____________________________________________________________________________
 int StvHitCounter::Reject() const
 {
   int rej = 0;
-  if (nGoodHits+nContHits<mMinGoodHits) rej+=1;
+  int nG = (nContHits>=mMinContHits)? nGoodHits+nContHits : nGoodHits;
+  if (nG       <mMinGoodHits) rej+=1;
   if (nTotHits <mMinTotHits ) rej+=2;
 //if (nTotNits+nContNits> mMaxTotNits) rej+=4;
 
@@ -68,7 +81,7 @@ int StvHitCounter::Skip() const
 //_____________________________________________________________________________
 double StvHitCounter::Eff() const
 {
-  double p = nTotHits/(nPossHits-nContNits+1e-6);
+  double p = nTotHits/(nPossHits+1e-6);
   double q = 1-p;
-  return p +3*sqrt(p*q/(nPossHits+1e-6));
+  return p +1*sqrt(p*q/(nPossHits+1e-6));
 }
