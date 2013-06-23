@@ -47,4 +47,28 @@ protected:
 
 ClassDef(StvTpcEdit,0)
 };
+// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
+
+class StvTpcPrompt: public StvTpcActive
+{
+public:
+    StvTpcPrompt(){;}
+   ~StvTpcPrompt(){;}
+int operator()(const double xyz[3]=0);
+protected:
+
+ClassDef(StvTpcPrompt,0)
+};
+// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
+
+class StvTpcHitActor: public StvTpcActive
+{
+public:
+    StvTpcHitActor(){;}
+   ~StvTpcHitActor(){;}
+int operator()(const double xyz[3]=0);
+protected:
+
+ClassDef(StvTpcHitActor,0)
+};
 #endif
