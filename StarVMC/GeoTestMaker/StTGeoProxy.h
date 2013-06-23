@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.3 2013/06/16 00:33:52 perev Exp $
+// $Id: StTGeoProxy.h,v 1.4 2013/06/23 22:29:19 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -46,6 +46,11 @@ typedef std::map< unsigned int, StHitPlane*>    StHitPlaneHardMap;
 typedef std::pair<unsigned int, StHitPlane*>    StHitPlaneHardPair;
 typedef StHitPlaneHardMap::const_iterator       StHitPlaneHardMapIter;
 
+class StVoluInfo;
+typedef std::map< unsigned int, StVoluInfo*>    StVoluInfoMap;
+typedef StVoluInfoMap::const_iterator           StVoluInfoMapIter;
+
+
 class StVoidArr:public std::vector<void*>{};
 
 
@@ -68,7 +73,7 @@ public:
 enum E_Kind { kVoluInfo=1,kHitPlaneInfo=2};
 
          StVoluInfo(int voluNumber);
-virtual ~StVoluInfo(){;}
+virtual ~StVoluInfo();
         int IsModule  ()        const   {return TestBit(kModule);}
         int IsMODULE()          const   {return TestBit(kMODULE);}
         int IsHitPlane()        const   {return TestBit(kHitPlane);}
@@ -79,7 +84,7 @@ virtual ~StVoluInfo(){;}
        void SetActive  (int s=1)        {SetBit(kActive,s)      ;}
        void SetActiveFunctor(StActorFunctor *af)	
        					{fActiveFunctor=af      ;}
-        int GetNumber()         const   {return GetUniqueID()   ;}
+        int GetVoluId()         const   {return GetUniqueID()   ;}
 const  TGeoVolume* GetVolu()    const;
 const char *GetName() const;
 StActorFunctor *GetActiveFunctor() 	{return fActiveFunctor  ;}
@@ -101,7 +106,7 @@ class StHitPlaneInfo : public StVoluInfo
 friend class StTGeoProxy;
 public:
       StHitPlaneInfo(int volId);
-virtual ~StHitPlaneInfo(){;}
+virtual ~StHitPlaneInfo();
 void  operator=(const StVoluInfo& ext){*((StVoluInfo*)this)=ext;}
       int Kind() const          	{return kHitPlaneInfo;}
       int Axis() const          	{return fAxi;}
@@ -141,7 +146,7 @@ virtual const float    *GetOrg(const float *) const {return fOrg;}
 virtual const float    *GetPnt()        const {return fOrg;}
 virtual       void  AddHit(void *hit,const float xyz[3]);
 virtual       int   Kind() const 	{return 0;}
-              int   GetNumber()  	{return GetUniqueID(); }
+              int   GetVoluId()  	{return GetUniqueID(); }
              void   ToLocal(const float xyz[3],float uv[3]) const;
      StDetectorId   GetDetId() const 	{ return fDetId;}    
              void   SetDetId(StDetectorId id){ fDetId=id;}    
@@ -149,7 +154,8 @@ int   GetNHits() const;
 float GetLayer() const 		{ return fNex;}
 void  SetLayer(); 	
 const StMultiKeyMap *GetHitMap() const {return fHitMap;}
-
+void        SetPath(const char *path) { fPath=path;  }
+const char *GetPath() const           { return fPath;}
 protected:
 char  fBeg[1];
 StDetectorId fDetId;
@@ -158,6 +164,7 @@ float fDir[3][3];
 float fNex;		//distance to next layer
 TNamed *fHitErrCalc;
 StMultiKeyMap *fHitMap;
+const char *fPath;
 char  fEnd[1];
 
 ClassDef(StHitPlane,0) //
@@ -196,6 +203,7 @@ virtual int operator()(const double xyz[3]=0)=0;
        int  GetIPath(int nLev,int *copyNums,const char **voluNams=0) const;
        int  GetDetId() const 	{return mDetId;}
       void  SetDetId(int det) 	{mDetId = det ;}
+      void  SetHit(void *hit) 	{mHit   = hit ;}
 const char* GetPath()       const;
 const TGeoVolume *GetVolu() const;
 const TGeoNode   *GetNode() const;
@@ -205,7 +213,7 @@ const TGeoNode   *GetNode() const;
 
 protected:
 int mDetId;
-
+void *mHit;
 ClassDef(StActorFunctor,0)
 };
 inline int StActorFunctor::Operator(const float xyz[3]) 
@@ -277,11 +285,13 @@ static   int  IsSensitive(const TGeoVolume *volu=0);
 static   StDetectorId  DetId(const char *detName);
 static  const char *DetName(StDetectorId detId);
 static  const char *ModName(StDetectorId detId);
+static         int  MakeDir(int kode,float dir[3][3]);
+static        void  Summary();
 
 
 
-   StVoluInfo *GetInfo  (int idx)       const;
-   StVoluInfo *GetINFO  (int idx);
+   StVoluInfo  *GetInfo  (int idx)       const;
+   StVoluInfo *&GetINFO  (int idx);
 const   char  *GetPath() const;
 const TGeoVolume *GetModu() const;
 const TGeoVolume *GetVolu() const;
@@ -303,6 +313,8 @@ const StHitPlane *AddHit(void *hit,const float xyz[3],unsigned int hardw,int see
         void  ShootZR(double z,double rxy);
 
 const StTGeoHitShape* GetHitShape() const {return fHitShape;}
+        void SetHitLoadActor(StActorFunctor *fun) {fHitLoadActor = fun;}
+
 
 static void Test();
 static void Break(int kase);
@@ -311,19 +323,24 @@ private:
 
 private:
 char fBeg[1];
-int fMode;      //0=fill infos + hitShape, 1= hit planes
+int fMode;     //0=fill infos + hitShape, 1= hit planes
 int fOpt;      //0=Optimisation Off, !=0= Optimization ON
 int fGoodHit;  //1=last loaded hit inside of sensitive volume
 Long64_t	fActiveModu;
-TObjArray      *fVoluInfoArr;           // array of all StVoluIinfo
+StVoluInfoMap  *fVoluInfoArr;           // array of all StVoluIinfo
 TObjArray      *fHitPlaneArr;           // array of StHitPlane's
 StHitPlaneHardMap *fHitPlaneHardMap;    // StHitPlane[hardwarePosition]
 StVoidArr      *fSeedHits;              // Vector for hits used in seed finder
 StVoidArr      *fAllHits;               // Vector of all hits, mainly for debug
 StTGeoHitShape *fHitShape;
-StActorFunctor *mInitHitPlaneAct;
+
+//	Actor functorss
+StActorFunctor *fHitLoadActor;		// functor used in AddHit
 
 char fEnd[1];
+public:
+static int fgKount[3];
+
 ClassDef(StTGeoProxy,0) //
 };
 
