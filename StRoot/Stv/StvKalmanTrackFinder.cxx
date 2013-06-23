@@ -81,7 +81,20 @@ static const StvConst  *kons = StvConst::Inst();
 						  if (sf->DoShow())  sf->Show();
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
 	mCurrTrak->CutTail();	//Clean track from previous failure
+
+//=============================
 	nAdded = FindTrack(0);
+//=============================
+static StvHitCounter *hitK = StvHitCounter::Inst();
+if (nAdded) {
+  StvDebug::Count("AccTrakN",hitK->nTotHits,hitK->MaxNitSeq());
+  StvDebug::Count("AccTrakH",hitK->nTotHits,hitK->MaxHitSeq());
+} else {
+  StvDebug::Count("RejTrakN",hitK->nTotHits,hitK->MaxNitSeq());
+  StvDebug::Count("RejTrakH",hitK->nTotHits,hitK->MaxHitSeq());
+}
+
+
         sf->FeedBack(nAdded);
 	if (!nAdded) 				continue;
 	int ans = 0,fail=13;
@@ -95,6 +108,17 @@ static const StvConst  *kons = StvConst::Inst();
 	  ans = Refit(1);
 StvDebug::Count("RefitCalls",0);
 if (ans) StvDebug::Count("RefitCalls",1);
+if (!ans) {
+  StvDebug::Count("AccRefiN",hitK->nTotHits,hitK->MaxNitSeq());
+  StvDebug::Count("AccRefiH",hitK->nTotHits,hitK->MaxHitSeq());
+} else {
+  StvDebug::Count("RejRefiN",hitK->nTotHits,hitK->MaxNitSeq());
+  StvDebug::Count("RejRefiH",hitK->nTotHits,hitK->MaxHitSeq());
+}
+
+
+
+
 	  if (ans) 				break;
           nHits = mCurrTrak->GetNHits();
           if (nHits<=1) 			break;
@@ -275,7 +299,8 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
       myXi2 = fitt->Xi2(minHit);
       int iuerr = fitt->Update(); 
       if (iuerr<=0 || (nHits<=3)) {		//Hit accepted
-        hitCount->AddHit();nHits++;
+        hitCount->AddHit();
+	nHits++;assert(nHits<=100);
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
         par[0]=par[1];
