@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.19 2013/06/16 00:40:57 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.20 2013/06/23 23:29:26 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -81,6 +81,8 @@ enum {kFCF_CHOPPED=256		// 0x100 cluster is chopped from its neighbour: OFFLINE 
      ,kFCF_SANITY =512};	// 0x200 cluster extents not sane
 static int nCall=0; nCall++;
 static int myGraph=0;
+static StTGeoProxy* tgp = StTGeoProxy::Inst();
+       tgp->SetHitLoadActor(mHitLoadActor);
 
 StvDraw *myDraw=0;
 StvHits *myHits=0;
@@ -105,45 +107,50 @@ if (myGraph) { //create canvas
         Info("LoadHits","Loaded  %d good, recovered %d and failed %d %s hits"
 	    ,nHits,nHits-nGits,nHitz,StTGeoProxy::DetName(didOld));
       }
+      
       if (!stHit) break;
       Info("LoadHits","Start %s hits",StTGeoProxy::DetName(did));
+      if (mHitLoadActor) mHitLoadActor->SetDetId(did);
       nHits=0; nHitz=0,nGits=0;
     }
     if (nSel> 0 && (!stHit->TestBit(StvStEventHitSelector::kMarked))) 	continue; // ignore not selected hit
     if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY)	continue; // ignore hits marked by AfterBurner as chopped o
     int sure;
-    StvHit *stiHit = MakeStvHit(stHit,mHitIter->UPath(),sure);
-//     if (!sure && stiHit) { //Non reliable hit
-//       double rxy = sqrt(pow(stiHit->x()[0],2)+pow(stiHit->x()[1],2));
-//       StvDebug::Count("OrphanHits",stiHit->x()[2],rxy);
+    StvHit *stvHit = MakeStvHit(stHit,mHitIter->UPath(),sure);
+//     if (!sure && stvHit) { //Non reliable hit
+//       double rxy = sqrt(pow(stvHit->x()[0],2)+pow(stvHit->x()[1],2));
+//       StvDebug::Count("OrphanHits",stvHit->x()[2],rxy);
 //     }
 
-if (myHits) (*myHits)+= stiHit;   
+if (myHits) (*myHits)+= stvHit;   
 
-    if (stiHit) {nHits++;nTotHits++;nGits+=sure;nTotGits+=sure;}  
+    if (stvHit) {nHits++;nTotHits++;nGits+=sure;nTotGits+=sure;}  
     else 	{nHitz++;nTotHitz++;
       if (did == kTpcId) TpcHitTest(stHit);} 
     didOld = did; 
   }
-  int nIniHits = StTGeoProxy::Inst()->InitHits();
+  int nIniHits = tgp->InitHits();
   assert(nTotHits==nIniHits);
   Info("LoadHits","Loaded %d good, recovered %d and failed %d of all hits"
       ,nTotHits,nTotHits-nTotGits,nTotHitz);
 if (myDraw) {myDraw->Hits(*myHits,kUnusedHit); myDraw->Wait();}
   return nTotHits;
 }
+
 //_____________________________________________________________________________
 StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath, int &sure)
 {
 static StTGeoProxy *tgh = StTGeoProxy::Inst();
-   StvHit *stiHit = StvToolkit::Inst()->GetHit();
+   assert(stHit);
+   StvHit *stvHit = StvToolkit::Inst()->GetHit();
    StDetectorId did = stHit->detector();
    UInt_t hard = stHit->hardwarePosition();
    if (!hard) hard = upath;
    StThreeVectorF v3f = stHit->position();
    const float *xyz = v3f.xyz();
+   stvHit->set(stHit,xyz);
    int seed = 1;
-   if (did == kTpcId) {
+   if (did == kTpcId) {	// Special case for TPCHit. Prompt info added
 //   enum {zPrompt = 205,rMiddle=124};
      enum {zPrompt = 205,rMiddle=0};
      hard <<=1; hard |= (fabs(xyz[2]) > zPrompt);
@@ -151,13 +158,13 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
    }
    hard *= (uint)kMaxDetectorId; hard+=(uint)did;
    
-   const StHitPlane *hp = tgh->AddHit(stiHit,xyz,hard,seed);
+   const StHitPlane *hp = tgh->AddHit(stvHit,xyz,hard,seed);
    sure =  tgh->IsGoodHit();
-   if (!hp) { StvToolkit::Inst()->FreeHit(stiHit);return 0;}
+   if (!hp) { StvToolkit::Inst()->FreeHit(stvHit);return 0;}
 
    if (did == kTpcId) {// TPC hit check for being in sector
-     const float* ort = hp->GetDir(xyz)[0];
      const float* org = hp->GetOrg(xyz);
+     const float* ort = (fabs(org[2])<209)? hp->GetDir(xyz)[0]:hp->GetDir(xyz)[2];
      double art = atan2(ort[1],ort[0])*180/M_PI;
      double arg = atan2(org[1],org[0])*180/M_PI;
      assert(fabs(art-arg)<1.e-3);
@@ -168,9 +175,10 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
      if (fabs(dang)>17) printf("dang = %g\n",dang);
      assert(fabs(dang)<31);
    }
-   stiHit->set(hp,stHit,xyz);
-   return stiHit;
+   stvHit->set(hp);
+   return stvHit;
 }
+
 //_____________________________________________________________________________
 int StvHitLoader::TpcHitTest(const StHit *stHit)
 {
