@@ -4,10 +4,49 @@
 #include <assert.h>
 #include "StvTpcActive.h"
 #include "StEvent/StEnumerations.h"
+#include "TGeoManager.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "TGeoVolume.h"
 
 #include "StDetectorDbMaker/St_tpcRDOMasksC.h"
+enum {kNGPads=73,kNTPads=45};
+static const double kZPrompt = 205;
+
+static const int TPADS[kNGPads]={
+1, 1, 1, 2, 2, 2, 3, 3, 3, 4,
+4, 4, 5, 5, 5, 6, 6, 6, 7, 7,
+7, 8, 8, 8, 9, 9, 9,10,10,10,
+11,11,11,12,12,12,13,13,13,14,
+14,15,16,17,18,19,20,21,22,23,
+24,25,26,27,28,29,30,31,32,33,
+34,35,36,37,38,39,40,41,42,43,
+44,45,45};
+
+static const int RPADS[kNGPads]={
+  0, 1, 0, 0, 2, 0, 0, 3, 0, 0
+, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7
+, 0, 0, 8, 0, 0, 9, 0, 0,10, 0
+, 0,11, 0, 0,12, 0, 0,13, 0, 0
+,14,15,16,17,18,19,20,21,22,23
+,24,25,26,27,28,29,30,31,32,33
+,34,35,36,37,38,39,40,41,42,43
+,44,45, 0};
+static const int GPADS[kNTPads]={
+  2, 5, 8,11,14,17,20,23,26,29
+,32,35,38,41,42,43,44,45,46,47
+,48,49,50,51,52,53,54,55,56,57
+,58,59,60,61,62,63,64,65,66,67
+,68,69,70,71,72};
+
+static const int ISDETS[kNGPads]={
+1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
+2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
+1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 2};
 
 ClassImp(StvTpcActive)
 
@@ -19,35 +58,6 @@ StvTpcActive::StvTpcActive(const char *name):StActorFunctor(name)
 //______________________________________________________________________________
 int StvTpcActive::VoluId()
 {
-enum {kNbPads=73};
-// static const int tpads[kNbPads]={
-//                              1, 1, 1, 2, 2, 2, 3, 3, 3, 4,
-// 			     4, 4, 5, 5, 5, 6, 6, 6, 7, 7,
-// 			     7, 8, 8, 8, 9, 9, 9,10,10,10,
-// 			    11,11,11,12,12,12,13,13,13,14,
-// 			    14,15,16,17,18,19,20,21,22,23,
-// 			    24,25,26,27,28,29,30,31,32,33,
-// 			    34,35,36,37,38,39,40,41,42,43,
-// 			    44,45,45};
-
-static const int tpads[kNbPads]={
-                             0, 1, 0, 0, 2, 0, 0, 3, 0, 0,
-			     4, 0, 0, 5, 0, 0, 6, 0, 0, 7,
-			     0, 0, 8, 0, 0, 9, 0, 0,10, 0,
-			     0,11, 0,12, 0, 0, 0,13, 0, 0,
-			    14,15,16,17,18,19,20,21,22,23,
-			    24,25,26,27,28,29,30,31,32,33,
-			    34,35,36,37,38,39,40,41,42,43,
-			    44,45, 0};
-static const int isdets[kNbPads]={
-                             1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
-			     0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
-			     2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
-			     1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
-			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			     0, 0, 2};
 
   if (GetDetId() != kTpcId) return 0;
   if (strncmp(GetVolu()->GetName(),"TPA",3)) return 0;
@@ -60,9 +70,9 @@ static const int isdets[kNbPads]={
 
 //		tpad >nbpads (73) prompt hits
   mPrompt = 0;
-  if (mGPad  > kNbPads) { mGPad -= kNbPads; mPrompt = 1; }
-  mIsDet = isdets[mGPad-1];
-  mTPad  = tpads [mGPad-1];
+  if (mGPad  > kNGPads) { mGPad -= kNGPads; mPrompt = 1; }
+  mIsDet = ISDETS[mGPad-1];
+  mTPad  = RPADS [mGPad-1];
   return 100000*mIsDet+100*mSector+mTPad;
 }  
 //______________________________________________________________________________
@@ -124,3 +134,40 @@ static StTGeoProxy *tg = StTGeoProxy::Inst();
   delete hp;
   return 1;
 }
+//______________________________________________________________________________
+int StvTpcPrompt::operator()(const double xyz[3]) 
+{
+
+  if (!VoluId()) 	return 0;
+  if (!mTPad) 		return 0;
+  if (!mPrompt)		return 0;
+  return 123;
+}  
+//______________________________________________________________________________
+#include "StEvent/StTpcHit.h"
+#include "Stv/StvHit.h"
+//______________________________________________________________________________
+int StvTpcHitActor::operator()(const double xyz[3]) 
+{
+ assert(mHit);
+ TString path(GetPath());
+ if (mDetId != kTpcId) return 0;
+ int jTPCE = path.Index("TPCE");
+ if (jTPCE<0) return 0;
+ StvHit *hit = (StvHit *)mHit;
+ StTpcHit *tpcHit = (StTpcHit*)hit->stHit();
+
+ int sector = tpcHit->sector();
+ int tpadrow = tpcHit->padrow();
+ int gpadrow = GPADS[tpadrow-1];
+ if (fabs(xyz[2]) > kZPrompt) gpadrow+=kNGPads;
+ int tpgv = 1; if (sector>12) {tpgv = 2; sector-=12;}
+ path.Remove(jTPCE+6,99);
+ path+="/TPGV_"; path+=tpgv;
+ path+="/TPSS_"; path+=sector;
+ if (tpadrow<=13) { path+="/TPAD_";} else { path+="/TPA1_"; }
+ path+=gpadrow;
+ int ok = gGeoManager->cd(path);
+ assert(ok);
+ return 1;
+}  
