@@ -42,11 +42,8 @@ static unsigned int myCount=0;
   mCount = ++myCount;
 }
 //_____________________________________________________________________________
-void StvHit::set(const StHitPlane *detector,
-		       const void *stHit,
-		       const float *gx)
+void StvHit::set(const void *stHit,const float *gx)
 {
-  mDetector = detector;
   memcpy(mGlo,gx,sizeof(mGlo));
   msthit = stHit;
   return;

@@ -75,9 +75,8 @@ public:
     const void *stHit() const {return msthit;}
 
     ///Set the global position one function call 
-    void set(const StHitPlane* detector
-                  ,const void *stHit
-		  ,const float *x);
+    void set(const StHitPlane* detector) {mDetector = detector;}
+    void set(const void *stHit,const float x[3]);
     ///Set the global position and error 
     virtual void set(const float *x,const float *err){assert(0);}
     virtual void addCount()		{assert(0);}
