@@ -146,9 +146,14 @@ int StvTpcPrompt::operator()(const double xyz[3])
 //______________________________________________________________________________
 #include "StEvent/StTpcHit.h"
 #include "Stv/StvHit.h"
+//		Workaround of bug in StTpcHit::padrow()
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+//		End of workaround
+
 //______________________________________________________________________________
 int StvTpcHitActor::operator()(const double xyz[3]) 
 {
+static const int kMaxRows = St_tpcPadPlanesC::instance()->numberOfRows();
  assert(mHit);
  TString path(GetPath());
  if (mDetId != kTpcId) return 0;
@@ -159,6 +164,11 @@ int StvTpcHitActor::operator()(const double xyz[3])
 
  int sector = tpcHit->sector();
  int tpadrow = tpcHit->padrow();
+
+//		Workaround of bug int StTpcHit::padrow()
+ if (tpadrow>kMaxRows) tpadrow &= 0x3F;
+//		End of workaround
+
  int gpadrow = GPADS[tpadrow-1];
  if (fabs(xyz[2]) > kZPrompt) gpadrow+=kNGPads;
  int tpgv = 1; if (sector>12) {tpgv = 2; sector-=12;}
