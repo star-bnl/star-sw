@@ -63,7 +63,7 @@ ComponentTcad2d::ElectricField(
     x = xNew;
   } 
   bool yMirrored = false;
-  const double cellsy = xMaxBoundingBox - xMinBoundingBox;
+  const double cellsy = yMaxBoundingBox - yMinBoundingBox;
   if (yPeriodic) {
     y = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
     if (y < yMinBoundingBox) y += cellsy;
