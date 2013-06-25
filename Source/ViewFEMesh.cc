@@ -500,7 +500,7 @@ ViewFEMesh::DrawElements() {
 
               // Create the TPolyLine.
               int polyPts = 0;
-              TPolyLine * poly = new TPolyLine();
+              TPolyLine* poly = new TPolyLine();
               poly->SetLineColor(colorID);
               poly->SetFillColor(colorID_fill);
               poly->SetLineWidth(3);
@@ -523,31 +523,26 @@ ViewFEMesh::DrawElements() {
   } // end loop over elements
 
   // If we have an associated ViewDrift, plot projections of the drift lines.
-  if(viewDrift != 0) {
+  if (viewDrift != 0) {
 
-    for(int dline = 0; dline < (int)viewDrift->driftLines.size(); dline++) {
+    for (int dline = 0; dline < (int)viewDrift->driftLines.size(); dline++) {
 
-      // Get the number of points and their coordinates.
-      float npts = viewDrift->driftLines[dline].GetN();
-      float * pts = viewDrift->driftLines[dline].GetP();
-
+      // Get the number of points.
+      const unsigned int npts = viewDrift->driftLines[dline].vect.size();
       // Create a TPolyLine that is a 2D projection of the original.
       TPolyLine* poly = new TPolyLine();
-      poly->SetLineColor(viewDrift->driftLines[dline].GetLineColor());
+      poly->SetLineColor(viewDrift->driftLines[dline].col);
       int polyPts = 0;
-      for(int pt = 0; pt < npts; pt++) {
-
-        // Get the coordinates of this point in the TPolyLine3D.
-        double ptx = pts[3*pt];
-        double pty = pts[3*pt+1];
-        double ptz = pts[3*pt+2];
-
+      for (unsigned int pt = 0; pt < npts; pt++) {
+        // Get the coordinates of this point.
+        double ptx = viewDrift->driftLines[dline].vect[pt].x;
+        double pty = viewDrift->driftLines[dline].vect[pt].y;
+        double ptz = viewDrift->driftLines[dline].vect[pt].z;
         // Project this point onto the plane.
         PlaneCoords(ptx, pty, ptz, projMat, xMat);
-
         // Add this point if it is within the view.
-        if(xMat(0,0) >= xMin && xMat(0,0) <= xMax
-            && xMat(1,0) >= yMin && xMat(1,0) <= yMax) {
+        if (xMat(0,0) >= xMin && xMat(0,0) <= xMax &&
+            xMat(1,0) >= yMin && xMat(1,0) <= yMax) {
           poly->SetPoint(polyPts, xMat(0,0), xMat(1,0));
           polyPts++;
         }
@@ -833,35 +828,28 @@ ViewFEMesh::DrawCST(ComponentCST* componentCST) {
 
     for(int dline = 0; dline < (int)viewDrift->driftLines.size(); dline++) {
 
-      // Get the number of points and their coordinates
-      float npts = viewDrift->driftLines[dline].GetN();
-      float * pts = viewDrift->driftLines[dline].GetP();
-
+      // Get the number of points.
+      const unsigned int npts = viewDrift->driftLines[dline].vect.size();
       // Create a TPolyLine that is a 2D projection of the original
       TPolyLine* poly = new TPolyLine();
-      poly->SetLineColor(viewDrift->driftLines[dline].GetLineColor());
+      poly->SetLineColor(viewDrift->driftLines[dline].col);
       int polyPts = 0;
-      for(int pt = 0; pt < npts; pt++) {
-
+      for (unsigned int pt = 0; pt < npts; pt++) {
         // Get the coordinates of this point in the TPolyLine3D
-        double ptx = pts[3*pt];
-        double pty = pts[3*pt+1];
-        double ptz = pts[3*pt+2];
-
+        double ptx = viewDrift->driftLines[dline].vect[pt].x;
+        double pty = viewDrift->driftLines[dline].vect[pt].y;
+        double ptz = viewDrift->driftLines[dline].vect[pt].z;
         // Project this point onto the plane
         PlaneCoords(ptx, pty, ptz, projMat, xMat);
-
         // Add this point if it is within the view
-        if(xMat(0,0) >= xMin && xMat(0,0) <= xMax
-            && xMat(1,0) >= yMin && xMat(1,0) <= yMax) {
+        if (xMat(0,0) >= xMin && xMat(0,0) <= xMax &&
+            xMat(1,0) >= yMin && xMat(1,0) <= yMax) {
           poly->SetPoint(polyPts, xMat(0,0), xMat(1,0));
           polyPts++;
         }
       } // end loop over points
-
       // Add the drift line to the list
       driftLines.push_back(poly);
-
     } // end loop over drift lines
   } // end if(viewDrift != 0)
 

@@ -2,7 +2,7 @@
 #define G_VIEW_DRIFT
 
 #include <string>
-
+#include <TGraph.h>
 #include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TPolyLine3D.h>
@@ -27,8 +27,10 @@ class ViewDrift {
     void SetArea(double xmin, double ymin, double zmin, 
                  double xmax, double ymax, double zmax);
     void Clear();
-    void Plot();
-
+    void Plot(const bool twod = false, const bool axis = true);
+    void Plot2d(const bool axis);
+    void Plot3d(const bool axis);
+    
     void SetClusterMarkerSize(const double size);
     void SetCollisionMarkerSize(const double size);
 
@@ -71,6 +73,12 @@ class ViewDrift {
     bool debug;
 
     std::string label;
+   
+    struct marker {
+      double x;
+      double y;
+      double z;
+    };
 
     // Canvas
     TCanvas* canvas;
@@ -82,16 +90,14 @@ class ViewDrift {
     TView* view;
 
     int nDriftLines;
-    std::vector<TPolyLine3D> driftLines;
-    
+    struct driftLine {
+      std::vector<marker> vect;
+      int col; 
+    };
+    std::vector<driftLine> driftLines;
+
     int nTracks;
     std::vector<TPointSet3D> tracks;
-
-    struct marker {
-      double x;
-      double y;
-      double z;
-    };
     int nExcMarkers;
     std::vector<marker> excMarkers;
     TPointSet3D* excPlot;
