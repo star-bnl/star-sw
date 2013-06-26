@@ -9,7 +9,7 @@
       G2T_MTD=STAFCV_OK
       if (g2t_mtd_hit_h.maxlen.le.0) return
 *
-      call G2R_GET_SYS ('MUTD','MGAP',Iprin,Idigi)
+      call G2R_GET_SYS ('MUTD','MIGG',Iprin,Idigi)
       if (Iprin.lt.0) return
       Local  = Idigi.ge.2
 *
