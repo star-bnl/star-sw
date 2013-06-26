@@ -742,6 +742,8 @@ class EvbChooser
 {
  public:
   EvbChooser() {};
+  void configure(SimpleXmlDoc *xml);
+
   void configure(STAR_CFG *cfg, int legacy);
 
   // These return error if no evbs in run, but otherwise
