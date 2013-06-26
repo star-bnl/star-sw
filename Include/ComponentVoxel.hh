@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "ComponentBase.hh"
 
@@ -29,6 +30,9 @@ class ComponentVoxel : public ComponentBase {
                    Medium*& medium);
 
     bool GetVoltageRange(double& vmin, double& vmax);
+    bool GetElectricFieldRange(double& exmin, double& exmax,
+                               double& eymin, double& eymax,
+                               double& ezmin, double& ezmax);
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                         double& xmax, double& ymax, double& zmax); 
     // Setup the grid.
@@ -53,30 +57,23 @@ class ComponentVoxel : public ComponentBase {
     // "ijk": elements are specified by its index 
     bool LoadData(const std::string filename, std::string format,
                   const bool withPotential, const bool withRegion,
-		  const double scaleX = 1., const double scaleE = 1.,
-		  const double scaleP = 1.);
+                  const double scaleX = 1., const double scaleE = 1.,
+                  const double scaleP = 1.);
 
     bool GetElement(const double xi, const double yi, const double zi,
                     unsigned int& i, unsigned int& j, unsigned int& k,
                     bool& xMirrored, bool& yMirrored, bool& zMirrored);
     bool GetElement(const unsigned int i, const unsigned int j, 
                     const unsigned int k,
-		    double& v, double& ex, double& ey, double& ez);
+                    double& v, double& ex, double& ey, double& ez);
 
-    bool GetMedium(const unsigned int i, Medium*& m) const;
-    void SetMedium(const unsigned int i, Medium* medium);
+    void SetMedium(const int i, Medium* m);
+    bool GetMedium(const int i, Medium*& m);
     void PrintRegions();
 
   private:
 
-    struct region {
-      // Name of region
-      std::string name;
-      // Pointer to associated medium
-      Medium* medium;
-    };
-    std::vector<region> regions;
-    unsigned int nRegions;
+    std::map<int, Medium*> media;
 
     struct element {
       // Electric field

@@ -11,7 +11,6 @@ namespace Garfield {
 
 ComponentVoxel::ComponentVoxel() : 
   ComponentBase(), 
-  nRegions(0), 
   nX(0), nY(0), nZ(0),
   xMin(0.), yMin(0.), zMin(0.),
   xMax(0.), yMax(0.), zMax(0.),
@@ -55,12 +54,12 @@ ComponentVoxel::ElectricField(
   if (zMirrored) ez = -ez;
   // Get the medium.
   int region = mesh[i][j][k].region;
-  if (region < 0) {
+  if (media.count(region) < 1) {
     m = 0;
     status = -5;
     return;
   }
-  m = regions[region].medium;
+  m = media[region];
   if (m == 0) status = -5;
 
 }
@@ -94,7 +93,11 @@ ComponentVoxel::GetMedium(
                   xMirrored, yMirrored, zMirrored)) {
     return false;
   }
-  m = regions[mesh[i][j][k].region].medium;
+  if (media.count(mesh[i][j][k].region) < 1) {
+    m = 0;
+  } else {
+    m = media[mesh[i][j][k].region];
+  }
   if (m == 0) return false;
   return true;
 
@@ -153,8 +156,8 @@ ComponentVoxel::SetMesh(const unsigned int nx,
 bool 
 ComponentVoxel::LoadData(const std::string filename, std::string format,
                          const bool withPotential, const bool withRegion,
-			 const double scaleX, const double scaleE, 
-			 const double scaleP) {
+                         const double scaleX, const double scaleE, 
+                         const double scaleP) {
  
   if (!hasMesh) {
     std::cerr << className << "::LoadData:\n";
@@ -163,7 +166,21 @@ ComponentVoxel::LoadData(const std::string filename, std::string format,
   }
   ready = false;
   hasPotential = hasField = false;
-  
+  pMin = pMax = 0.;
+  if (withPotential) {
+    pMin =  1.;
+    pMax = -1.;
+  }
+
+  unsigned int nValues = 0;
+  std::vector<std::vector<std::vector<bool> > > isSet;
+  isSet.resize(nX);
+  for (unsigned int i = 0; i < nX; ++i) {
+    isSet[i].resize(nY);
+    for (unsigned int j = 0; j < nY; ++j) {
+      isSet[i][j].resize(nZ, false);
+    }
+  }
   std::ifstream infile;
   infile.open(filename.c_str(), std::ios::in);
   if (!infile) {
@@ -243,6 +260,13 @@ ComponentVoxel::LoadData(const std::string filename, std::string format,
                 << ") out of range.\n";
       continue;
     }
+    if (isSet[i][j][k]) {
+      std::cerr << className << "::LoadData:\n";
+      std::cerr << "    Error reading line " << nLines << ".\n";
+      std::cerr << "    Mesh element (" << i << ", " << j << ", " << k
+                << ") has already been set.\n";
+      continue;
+    }
     // Get the electric field values;
     data >> ex >> ey >> ez;
     if (data.fail()) {
@@ -265,6 +289,14 @@ ComponentVoxel::LoadData(const std::string filename, std::string format,
         break;
       }
       v *= scaleP;
+      if (pMin > pMax) {
+        // First value.
+        pMin = v;
+        pMax = v;
+      } else {
+        if (v < pMin) pMin = v;
+        if (v > pMax) pMax = v;
+      }
     }
     if (withRegion) {
       data >> region;
@@ -281,9 +313,18 @@ ComponentVoxel::LoadData(const std::string filename, std::string format,
     mesh[i][j][k].ez = ez;
     mesh[i][j][k].v = v;
     mesh[i][j][k].region = region;
+    isSet[i][j][k] = true;
+    ++nValues;
   }
   if (bad) return false;
-
+  std::cout << className << "::LoadData:\n";
+  std::cout << "    Read " << nValues << " values from file " 
+            << filename << ".\n";
+  const unsigned int nExpected = nX * nY * nZ;
+  if (nExpected != nValues) {
+    std::cerr << className << "::LoadData:\n";
+    std::cerr << "   Expected " << nExpected << " values.\n"; 
+  }
   ready = true;
   return true;
 
@@ -330,6 +371,43 @@ ComponentVoxel::GetVoltageRange(double& vmin, double& vmax) {
   
 }
 
+bool
+ComponentVoxel::GetElectricFieldRange(double& exmin, double& exmax,
+                                      double& eymin, double& eymax,
+                                      double& ezmin, double& ezmax) {
+
+  if (!ready) {
+    std::cerr << className << "::GetElectricFieldRange:\n";
+    std::cerr << "    Field map not available.\n";
+    return false;
+  }
+  bool gotValue = false;
+  for (unsigned int i = 0; i < nX; ++i) {
+    for (unsigned int j = 0; j < nY; ++j) {
+      for (unsigned int k = 0; k < nZ; ++k) {
+        if (!gotValue) {
+          exmin = mesh[i][j][k].ex;
+          exmax = mesh[i][j][k].ex;
+          eymin = mesh[i][j][k].ey;
+          eymax = mesh[i][j][k].ey;
+          ezmin = mesh[i][j][k].ez;
+          ezmax = mesh[i][j][k].ez;
+	  gotValue = true;
+	  continue;
+        } 
+        if (mesh[i][j][k].ex < exmin) exmin = mesh[i][j][k].ex;
+        if (mesh[i][j][k].ex > exmax) exmax = mesh[i][j][k].ex;
+        if (mesh[i][j][k].ey < eymin) eymin = mesh[i][j][k].ey;
+        if (mesh[i][j][k].ey > eymax) eymax = mesh[i][j][k].ey;
+        if (mesh[i][j][k].ez < ezmin) ezmin = mesh[i][j][k].ez;
+        if (mesh[i][j][k].ez > ezmax) ezmax = mesh[i][j][k].ez;
+      }
+    }
+  }
+  return true;
+
+}
+
 void
 ComponentVoxel::PrintRegions() {
 
@@ -340,56 +418,54 @@ ComponentVoxel::PrintRegions() {
     return;
   }
 
-  if (nRegions < 1) {
+  if (media.size() < 1) {
     std::cerr << className << "::PrintRegions:\n";
     std::cerr << "    No regions are currently defined.\n";
     return;
   }
 
   std::cout << className << "::PrintRegions:\n";
-  std::cout << "    Currently " << nRegions 
-            << " regions are defined.\n";
-  std::cout << "      Index  Name       Medium\n";
-  for (unsigned int i = 0; i < nRegions; ++i) {
-    std::cout << "      " << i << "  " << regions[i].name;
-    if (regions[i].medium == 0) {
-      std::cout << "      none  ";
+  if (media.size() == 1) {
+    std::cout << "    1 region is defined.\n";
+  } else {
+    std::cout << "    " << media.size() << " regions are defined.\n";
+  }
+  std::cout << "      Index     Medium\n";
+  std::map<int, Medium*>::iterator it;
+  for (it = media.begin(); it != media.end(); ++it) {
+    const int i = (*it).first;
+    Medium* m = (*it).second;
+    std::cout << "      " << i << "      ";
+    if (m == 0) {
+      std::cout << "      none\n";
     } else {
-      std::cout << "      " << regions[i].medium->GetName();
+      std::cout << "      " << m->GetName() << "\n";
     }
   }
 
 }
  
 void 
-ComponentVoxel::SetMedium(const unsigned int i, Medium* medium) {
+ComponentVoxel::SetMedium(const int i, Medium* m) {
 
-  if (i >= nRegions) {
+  if (m == 0) {
     std::cerr << className << "::SetMedium:\n";
-    std::cerr << "    Region " << i << " does not exist.\n";
-    return;
+    std::cerr << "    Warning: medium pointer is null.\n";
   }
-  
-  if (medium == 0) {
-    std::cerr << className << "::SetMedium:\n";
-    std::cerr << "    Medium pointer is null.\n";
-    return;
-  }
-  
-  regions[i].medium = medium;
+  media[i] = m;
   
 }
 
 bool
-ComponentVoxel::GetMedium(const unsigned int i, Medium*& m) const {
+ComponentVoxel::GetMedium(const int i, Medium*& m) {
 
-  if (i >= nRegions) {
+  if (media.count(i) < 1) {
     std::cerr << className << "::GetMedium:\n";
-    std::cerr << "    Region " << i << " does not exist.\n";
+    std::cerr << "    Medium " << i << " does not exist.\n";
     return false;
   }
   
-  m = regions[i].medium;
+  m = media[i];
   if (m == 0) return false;
   return true;
 
@@ -511,9 +587,8 @@ ComponentVoxel::Reset() {
   nX = nY = nZ = 0;
   xMin = yMin = zMin = 0.;
   xMax = yMax = zMax = 0.;
-
-  regions.clear();
-  nRegions = 0;
+  pMin = pMax = 0.;
+  media.clear();
 
   hasMesh = false;
   hasPotential = false;
