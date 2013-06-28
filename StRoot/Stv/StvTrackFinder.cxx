@@ -44,8 +44,8 @@ void StvTrackFinder::DoShow(int lev)
 //_____________________________________________________________________________
 void StvTrackFinder::Clear(const char*)
 {
-if (fDraw)  fDraw->Clear();
-fShowTrak.clear();
-fShowTrakHits.clear();
-fShowFreeHits.clear();
+// if (fDraw)  fDraw->Clear();
+// fShowTrak.clear();
+// fShowTrakHits.clear();
+// fShowFreeHits.clear();
 }
