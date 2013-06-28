@@ -106,7 +106,7 @@ void StvToolkit::Show() const
 //_____________________________________________________________________________
 void StvToolkit::Clear(const char*)
 {
-  if (StvDraw::Jnst())  StvDraw::Jnst()->Clear();
+//if (StvDraw::Jnst())  StvDraw::Jnst()->Clear();
   if (mTraks)		mTraks->clear();
   if (mHitLoader)   	mHitLoader->Clear();
   if (mSeedFinders)  	mSeedFinders->Clear();
