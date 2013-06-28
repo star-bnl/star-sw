@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.17 2013/06/23 23:28:29 perev Exp $
+ * $Id: StvNode.cxx,v 1.18 2013/06/28 02:12:48 perev Exp $
  *
  * /author Victor Perev
  */
@@ -54,7 +54,7 @@ double StvNode::GetTime() const
 //________________________________________________________________________________
 void StvNode::Print(const char *opt) const
 {
-static const char *txt = "X Y Z A P T C H R E L K U Xi P[ E[ Pa ";
+static const char *txt = "X Y Z Pt H R E Ep L Ps Tl P[ E[ Pa ";
 static const char *hhh = "x y z r e ";
   if (!opt || !opt[0]) opt = "_";
   TString myOpt(opt);myOpt+=" ";
@@ -64,6 +64,9 @@ static const char *hhh = "x y z r e ";
   double val,err[2];
   const StvNodePars &fp= mFP[dir];
   const StvFitErrs  &fe= mFE[dir];
+  int dkr = (dir<2)? dir:0;
+  const StvFitErrs  &pe= mPE[dkr];
+  const StvNodePars &pp= mPP[dkr];
   StvHit *hit = GetHit();
   TString ts; if (hit) {ts = (mXi2[0]>1e3 && mXi2[1]>1e3)? "h":"H";}
   if (GetType()==kDcaNode ) ts='D';
@@ -72,21 +75,28 @@ static const char *hhh = "x y z r e ";
   printf("\t%s=%g","Xi2",GetXi2(djr));
   int iopt=0;
   const char *myopt = myOpt.Data(); char*e;
+  int seekSpace = 0;
   for (int i=0;txt[i];i++) {
-    if (txt[i]==' ') continue;
-    TString ts(txt+i,2);
+    if (txt[i]==' ') {seekSpace=0; continue;}
+    seekSpace = 1;
+    int nc = 2; if (txt[i+1]=='[') nc = 4;
+    TString ts(txt+i,nc);
     err[0]=-999;val=-999;
     const char *cal = 0;
     if ((iopt=myOpt.Index(ts))<0) continue;
     int idx =(txt[i+1]=='[') ? strtol(myopt+iopt+2,&e,10):0;
     
     {//Single letter request 
-           if (ts=="R ") 	{val = fp.getRxy();}
-      else if (ts=="P ")	{val = fp.getPt() ;}
+           if (ts=="X ") 	{val = fp._x;}
+      else if (ts=="Y ") 	{val = fp._y;}
+      else if (ts=="Z ") 	{val = fp._z;}
+      else if (ts=="R ") 	{val = fp.getRxy();}
+      else if (ts=="Ps")	{val = fp._psi ;}
+      else if (ts=="Tl")	{val = fp._tanl ;}
+      else if (ts=="Pt")	{val = fp.getPt() ;}
       else if (ts=="E ")	{err[0] = sqrt(fe.mHH); err[1] = sqrt(fe.mZZ);}
+      else if (ts=="Ep")	{err[0] = sqrt(pe.mHH); err[1] = sqrt(pe.mZZ);}
       else if (ts=="L ")	{val = GetLen();}
-      else if (ts=="K ")	{val = fe.MaxCorr();}
-      else if (ts=="U ")	{val = fe.mPP;}
       else if (ts=="H ")	{val = fp._hz;}
       else if (ts=="P[")	{val = fp[idx];}
       else if (ts=="E[")	{val = fe[idx];}
