@@ -266,22 +266,6 @@ static int nCall=0; nCall++;
   else      {outNode = node; innNode=preNode;}
 //????  assert(innNode->GetFP().getRxy()<outNode->GetFP().getRxy());
 
-#if 0 //???????????????????????????????????????????????
-  do { //Attempt to propagate with linear approximation;
-    node->mPP[lane] = node->mFP[1-lane];
-    StvFitPars delPre = preNode->mFP[lane]-preNode->mPP[1-lane];
-    if (delPre.TooBig(preNode->mFP[lane])) 	break;
-    StvFitPars del    = delPre*innNode->mDer[lane];
-    if (del.TooBig(node->mPP[lane]))    		break; 
-    node->mPP[lane]+= del;node->mFP[lane]=node->mPP[lane];
-//        node->mPP[lane]+= ((preNode->mFP[lane]-preNode->mPP[1-lane])*node->mDer[lane]);
-    node->mPE[lane] = preNode->mFE[lane]*node->mDer[lane];
-    node->mPE[lane].SetHz(node->mPP[lane]._hz);
-    node->mPE[lane].Add(innNode->mELossData,node->mPP[lane]);
-    if(node->mPE[lane].Check()) break; 
-//    return 0;
-  } while(0);
-#endif
 
 //		Propagate with THelixTrack
 
@@ -313,6 +297,7 @@ static int nCall=0; nCall++;
   myHlx.Set(rho+dRho);
   node->mPP[lane].set(&myHlx,node->GetHz());
   node->mPE[lane].Set(&myHlx,node->GetHz());
+  node->mPE[lane].Recov();
   node->mPE[lane].Add(el,node->mPP[lane]);
   node->mPP[lane].convert(derFit,derHlx);
   innNode->SetDer(derFit,lane);
