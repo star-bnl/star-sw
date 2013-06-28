@@ -32,8 +32,9 @@ virtual const StvHits *GetHits() const 	{return &fSeedHits;}
 
   virtual void Show();
   virtual void ShowRest(EDraw3DStyle style = kUnusedHit);
-  virtual  int DoShow() const 		{return fDoShow;}
-  virtual void DoShow(int lev);
+        double GetXi2(int i=1) const	{return fXi2[i];}
+
+
 static    StvDraw *NewDraw();
 protected:
   const THelixTrack* Approx();
@@ -42,8 +43,8 @@ int fMinHits;		//Min number of hits accepted
 int fGoodHits;		//Good number of hits. Used in first pass
 StvHits  fSeedHits;
 THelixFitter fHelix;
-int fDoShow;
 StvDraw *fDraw;
+double   fXi2[2];	//Xi2[0] without hit errs,[1] with hit errs
 ClassDef(StvSeedFinder,0);
 };
 

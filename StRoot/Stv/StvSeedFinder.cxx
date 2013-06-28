@@ -6,10 +6,15 @@
 #include "vector"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 
+//Constants for THelixFitter (Approx)
+static const double kBAD_XI2cm2 = 0.3*0.3	// max Xi2 in cm**2 without errs
+                  , kBAD_XI2    = 4.0*4.0;	// max Xi2 (with errs)
+const double BAD_RHO=0.1;
+
 ClassImp(StvSeedFinder)
 //_____________________________________________________________________________
 StvSeedFinder::StvSeedFinder(const char *name):TNamed(name,"")
-{ fDraw=0;fDoShow=0;
+{ fDraw=0;
 }
 //_____________________________________________________________________________
 void StvSeedFinder::Clear(const char*)
@@ -24,6 +29,7 @@ void StvSeedFinder::Show()
   StvConstHits &ch = (StvConstHits &)fSeedHits;
   fDraw->Road(fHelix,ch,kGlobalTrack,10.);
   fDraw->UpdateModified();
+  fDraw->Wait();
 }
 //_____________________________________________________________________________
 void StvSeedFinder::ShowRest(EDraw3DStyle style)
@@ -39,6 +45,7 @@ void StvSeedFinder::ShowRest(EDraw3DStyle style)
    }
    fDraw->Hits(myHits,style);
    fDraw->UpdateModified();
+   fDraw->Wait();
 }
 //_____________________________________________________________________________
 StvDraw *StvSeedFinder::NewDraw()
@@ -47,23 +54,11 @@ StvDraw *StvSeedFinder::NewDraw()
    dr->SetBkColor(kWhite);
    return dr;
 }
-//_____________________________________________________________________________
-void StvSeedFinder::DoShow(int lev)
-{
-  fDoShow = lev;
-  if (fDoShow) {if (!fDraw) fDraw=NewDraw();}
-  else         { delete fDraw;fDraw=0      ;}
-
-}
 
 //_____________________________________________________________________________
 const THelixTrack *StvSeedFinder::Approx()
 {
 static int nCall=0; nCall++;
-
-const double BAD_XI2=100;
-const double BAD_RHO=0.1;
-
 //		Loop over nodes and collect global xyz
 
   fHelix.Clear();
@@ -79,8 +74,8 @@ const double BAD_RHO=0.1;
     const StvHit * hit = fSeedHits[iNode];
     circ.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
   }  
-  double Xi2 =circ.Fit();
-  if (Xi2>BAD_XI2*100) 			return 0; //Xi2 too bad, no updates
+  fXi2[0] =circ.Fit();
+  if (fXi2[0]>kBAD_XI2cm2) 		return 0; //Xi2 too bad, no updates
   if (fabs(circ.GetRho()) >BAD_RHO) 	return 0; //Too big curvature
 
   const double dBeg[3]={fBeg[0],fBeg[1],fBeg[2]};
@@ -109,8 +104,8 @@ const double BAD_RHO=0.1;
       fHelix.AddErr( hRR[0],hRR[2]/cos2l);
     }
   }
-  Xi2 =fHelix.Fit();
-  if (Xi2>BAD_XI2) return 0; 	//Xi2 too bad, no updates
+  fXi2[1] =fHelix.Fit();
+  if (fXi2[1]>kBAD_XI2) return 0; 	//Xi2 too bad, no updates
   fHelix.MakeErrs();
   l = fHelix.Path(dBeg); 
   l*= (nNode+1.)/(nNode-1.);
