@@ -20,8 +20,10 @@ static double MAXNODPARS[]   ={555,555,555,6.66,kMaxPti+10, kMaxTanL+10, .1};
 static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,kMaxPti+10  };
 static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
 static const double kERRFACT     = 3*3;
-static const double kFitErrs[5]   ={0.5*kERRFACT,0.5*kERRFACT 
-                                   ,0.3*kERRFACT,0.3*kERRFACT ,10*kERRFACT};
+static const double kFitErrs[5]   ={1.,1. 
+                                   ,10./180*M_PI
+				   ,10./180*M_PI
+				   ,kMaxPti};
 //______________________________________________________________________________ 
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
 {
@@ -569,7 +571,6 @@ int StvFitErrs::Recov()
   double dia[5],fak[5];double *e=&mHH;
 
   int nerr=0;
-  if (!StvDebug::mgRecov) return 0;
 //		Check diag errs
   for (int i=0,li=0;i< 5;li+=++i) {
     fak[i]=1;

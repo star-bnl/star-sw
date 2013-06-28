@@ -13,7 +13,9 @@ class StvFitErrs;
 class StvImpact;
 class StvELossData;
 
-enum ENode {kMaxPti=200,kMaxTanL=100};
+enum ENode {kMaxPti=20,kMaxEta = 5};
+static const double kMaxLamda = 3.14159265358/2-atan(exp(-kMaxEta))*2;
+static const double kMaxTanL  = tan(kMaxLamda);
 
 //------------------------------------------------------------------------------
 typedef double Mtx55D_t[5][5];
