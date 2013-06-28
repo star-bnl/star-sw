@@ -70,82 +70,66 @@ static const StvConst  *kons = StvConst::Inst();
   mCurrTrak = 0;
 
   for (int isf=0;isf<(int)sfs->size();isf++) { //Loop over seed finders
-    StvSeedFinder* sf = (*sfs)[isf];
+    mSeedFinder = (*sfs)[isf];
     int myMinHits = kons->mMinHits;
     for (int repeat =0;repeat<5;repeat++) {//Repeat search the same seed finder 
-      nTrk = 0;nSeed=0; sf->Again();
-      while ((mSeedHelx = sf->NextSeed())) 
+      nTrk = 0;nSeed=0; mSeedFinder->Again();
+      while ((mSeedHelx = mSeedFinder->NextSeed())) 
       {
+double seedAng = atan2(mSeedHelx->GetSin(),mSeedHelx->GetCos())/3.1415*180;
+StvDebug::Count("SeedAll",seedAng);
 
 	nSeed++; nTally++;
-						  if (sf->DoShow())  sf->Show();
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
 	mCurrTrak->CutTail();	//Clean track from previous failure
 
 //=============================
 	nAdded = FindTrack(0);
 //=============================
-static StvHitCounter *hitK = StvHitCounter::Inst();
-if (nAdded) {
-  StvDebug::Count("AccTrakN",hitK->nTotHits,hitK->MaxNitSeq());
-  StvDebug::Count("AccTrakH",hitK->nTotHits,hitK->MaxHitSeq());
-} else {
-  StvDebug::Count("RejTrakN",hitK->nTotHits,hitK->MaxNitSeq());
-  StvDebug::Count("RejTrakH",hitK->nTotHits,hitK->MaxHitSeq());
-}
+StvDebug::Count("NumCalls",0);
+if (nAdded) StvDebug::Count("NumCalls",1);
 
 
-        sf->FeedBack(nAdded);
+        mSeedFinder->FeedBack(nAdded);
 	if (!nAdded) 				continue;
+
+StvDebug::Count("SeedDive",seedAng);
+
 	int ans = 0,fail=13;
-// int jerr = StvTester::Inst()->TestIt("BefoRefit",mCurrTrak);
-// if (jerr){};
 //		Refit track   
         int nFitHits = mCurrTrak->GetNHits();
 	do {
 	  if (!mRefit) 				continue;
           if(nFitHits<=1)			break;
 	  ans = Refit(1);
-StvDebug::Count("RefitCalls",0);
-if (ans) StvDebug::Count("RefitCalls",1);
-if (!ans) {
-  StvDebug::Count("AccRefiN",hitK->nTotHits,hitK->MaxNitSeq());
-  StvDebug::Count("AccRefiH",hitK->nTotHits,hitK->MaxHitSeq());
-} else {
-  StvDebug::Count("RejRefiN",hitK->nTotHits,hitK->MaxNitSeq());
-  StvDebug::Count("RejRefiH",hitK->nTotHits,hitK->MaxHitSeq());
-}
 
-
+if (!ans) StvDebug::Count("NumCalls",2);
 
 
 	  if (ans) 				break;
           nHits = mCurrTrak->GetNHits();
           if (nHits<=1) 			break;
 	  nAdded = FindTrack(1);
+if (nAdded) StvDebug::Count("NumCalls",3);
           nHits = mCurrTrak->GetNHits();
           if (nHits<=3) 			break;
           if (nAdded<=0)			continue;;
 // 			few hits added. Refit track to beam again 
 	  ans = Refit(0);
-StvDebug::Count("RefitCalls",2);
-if (ans) StvDebug::Count("RefitCalls",3);
+if (!ans) StvDebug::Count("NumCalls",4);
 	  if (ans) 				break;
 	} while((fail=0));		
 	nHits = mCurrTrak->GetNHits();
 	if (nHits < myMinHits)	fail+=100;		;
+if (!fail) StvDebug::Count("NumCalls",5);
         if (fail) nHits=0;
 	if (fail) 	{//Track is failed, release hits & continue
-StvDebug::Count("RefitCalls",4);
 	  mCurrTrak->CutTail();			continue;
         }
+
+StvDebug::Count("SeedRefit",seedAng);
         
 	StvNode *node = MakeDcaNode(mCurrTrak);
-
-// //	TestQuality of track
-// int ierr = StvTester::Inst()->TestIt("AfteRefit",mCurrTrak);
-// if (ierr){};
-// //	EndTestQuality of track
 
 
 static int akio=0;
@@ -164,7 +148,7 @@ if (akio && node) {
       }
       nSeedTot+=nSeed;
       Info("FindTracks:","SeedFinder(%s) Seeds=%d Tracks=%d ratio=%d\%\n"
-          ,sf->GetName(),nSeed,nTrk,(100*nTrk)/(nSeed+1));
+          ,mSeedFinder->GetName(),nSeed,nTrk,(100*nTrk)/(nSeed+1));
       
       if (!nTrk && myMinHits == kons->mMinHits) break;
       myMinHits = kons->mMinHits;
@@ -323,8 +307,13 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     int myReject = hitCount->Reject();
 StvDebug::Count("hitCountReject",myReject);
    if (myReject) {
-      mCurrTrak->CutTail(); return 0; }
+// StvDebug::Count("RejectXi2cm2",mSeedFinder->GetXi2(0));
+// StvDebug::Count("RejectXi2   ",mSeedFinder->GetXi2(1));
+
+     mCurrTrak->CutTail(); return 0; }
   }
+// StvDebug::Count("AcceptXi2cm2",mSeedFinder->GetXi2(0));
+// StvDebug::Count("AcceptXi2   ",mSeedFinder->GetXi2(1));
   if (nHits>3) {
     double tlen = mCurrTrak->GetLength();
     assert(tlen >0.0 && tlen<1000.);
@@ -474,16 +463,23 @@ enum {kBadHits=5};
 
     }// End Fit iters
     
-    state = (ans!=0) + 2*((anz!=0) + 2*(!converged) 
-          + 2*(mCurrTrak->GetXi2()>kons->mXi2Trk)+2*(nHits <= kBadHits));
+    state = (ans!=0) + 10*((anz!=0) + 10*(!converged) 
+          + 10*(mCurrTrak->GetXi2()>kons->mXi2Trk)+10*(nHits <= kBadHits));
     if (!state) 		break;
     if (nHits <= kBadHits) 	break;
     StvNode *badNode=mCurrTrak->GetNode(StvTrack::kMaxXi2);
     if (!badNode) 		break;
     badNode->SetHit(0); nDrops++;
-    nHits--; if (nHits < kBadHits) break;
+    nHits--; if (nHits < kBadHits) { state = 1000000; break;}
   }//End Repair loop
 
+if (state) {
+StvDebug::Count("RejectXi2cm2",mSeedFinder->GetXi2(0));
+StvDebug::Count("RejectXi2   ",mSeedFinder->GetXi2(1));
+} else {
+StvDebug::Count("AcceptXi2cm2",mSeedFinder->GetXi2(0));
+StvDebug::Count("AcceptXi2   ",mSeedFinder->GetXi2(1));
+}
 
   if (ans<=0) state &= (-2);
   if (anz<=0) state &= (-4);

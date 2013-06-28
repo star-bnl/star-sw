@@ -4,6 +4,7 @@
 #define StvKalmanTrackFinder_HH
 #include "StvTrackFinder.h"
 
+class StvSeedFinder;
 class StvDiver;
 class StvPars;
 class StvTrack;
@@ -37,6 +38,7 @@ StvNode *MakeDcaNode(StvTrack *tk);
 protected:
 char mBeg[1];
 int  mRefit; 	//refit flag
+    StvSeedFinder *mSeedFinder;
 const THelixTrack *mSeedHelx;
       StvTrack    *mCurrTrak;
 StvDiver *mDive;
