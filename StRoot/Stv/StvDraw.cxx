@@ -171,7 +171,7 @@ void  StvDraw::Trak(const StvTrack *tk, int dir, EDraw3DStyle sty)
 
 }
 //_____________________________________________________________________________
-void StvDraw::Zhow(const StvTrack *tk){Inst()->Road(tk,10);}
+void StvDraw::Zhow(const StvTrack *tk){Inst()->Road(tk,10); Wait();}
 //_____________________________________________________________________________
 void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
 {
@@ -237,7 +237,7 @@ static const double maxStep=0.1;
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-void StvDraw::Show(const StvTrack *tk,int dir){Inst()->Trak(tk,dir);}
+void StvDraw::Show(const StvTrack *tk,int dir){Inst()->Trak(tk,dir); Wait();}
 //_____________________________________________________________________________
 void StvDraw::Klear(){Inst()->Clear();}
 //_____________________________________________________________________________
