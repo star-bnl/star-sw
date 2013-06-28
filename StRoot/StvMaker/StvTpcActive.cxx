@@ -153,6 +153,7 @@ int StvTpcPrompt::operator()(const double xyz[3])
 //______________________________________________________________________________
 int StvTpcHitActor::operator()(const double xyz[3]) 
 {
+static int nCall = 0; nCall++;
 static const int kMaxRows = St_tpcPadPlanesC::instance()->numberOfRows();
  assert(mHit);
  TString path(GetPath());

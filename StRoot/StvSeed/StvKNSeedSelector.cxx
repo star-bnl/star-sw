@@ -194,6 +194,7 @@ void StvKNSeedSelector::Update(int ia,int ib)
 //_____________________________________________________________________________
 double StvKNSeedSelector::Width() 
 {
+static int nCall = 0; nCall++;
   if (fabs(mAveDir[2])>=0.99)	return 101;
   if (mMapLen.size()<3) 	return 102;
 
