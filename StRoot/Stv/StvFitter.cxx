@@ -303,8 +303,6 @@ double StvFitter::Xi2()
     const StvNodePars *swp = mInPars; mInPars=mJnPars; mJnPars=swp;
     const StvFitErrs  *swe = mInErrs; mInErrs=mJnErrs; mJnErrs=swe;
   }
-  double qwe = (1 - mInPars->_tanl * mJnPars->_tanl);
-  if (fabs(qwe)<1e-2) {mFailed=1; mXi2 = 1e11;return mXi2;}
 
   StvFitPars F   = (*mInPars-*mJnPars);
   double     Zero[5]= {0};
