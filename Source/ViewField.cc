@@ -224,23 +224,35 @@ ViewField::PlotContour(const std::string option) {
       option == "pot" || option == "potential") {
     fPot->SetParameter(0, -1.);
     fPot->SetRange(pxmin, pymin, pxmax, pymax);
+    fPot->SetMinimum(fmin);
+    fPot->SetMaximum(fmax);
   } else if (option == "e" || option == "field") {
     fPot->SetParameter(0,  1.);
     plotType = 1;
+    fPot->SetMinimum(emin);
+    fPot->SetMaximum(emax);
   } else if (option == "ex") {
     fPot->SetParameter(0, 11.);
     plotType = 2;
+    fPot->SetMinimum(emin);
+    fPot->SetMaximum(emax);
   } else if (option == "ey") {
     fPot->SetParameter(0, 21.);
     plotType = 3;
+    fPot->SetMinimum(emin);
+    fPot->SetMaximum(emax);
   } else if (option == "ez") {
     fPot->SetParameter(0, 31.);
     plotType = 4;
+    fPot->SetMinimum(emin);
+    fPot->SetMaximum(emax);
   } else {
     std::cerr << className << "::PlotContour:\n";
     std::cerr << "    Unknown option (" << option << ")\n";
     std::cerr << "    Plotting the potential.\n";
     fPot->SetParameter(0, -1.);
+    fPot->SetMinimum(fmin);
+    fPot->SetMaximum(fmax);
   }
 
   double level[nMaxContours];
@@ -307,23 +319,35 @@ ViewField::PlotSurface(const std::string option) {
       option == "volt" || option == "voltage" || 
       option == "pot" || option == "potential") {
     fPot->SetParameter(0, -1.);
+    fPot->SetMinimum(fmin);
+    fPot->SetMinimum(fmax);
   } else if (option == "e" || option == "field") {
     fPot->SetParameter(0,  1.);
     plotType = 1;
+    fPot->SetMinimum(emin);
+    fPot->SetMinimum(emax);
   } else if (option == "ex") {
     fPot->SetParameter(0, 11.);
     plotType = 2;
+    fPot->SetMinimum(emin);
+    fPot->SetMinimum(emax);
   } else if (option == "ey") {
     fPot->SetParameter(0, 21.);
     plotType = 3;
+    fPot->SetMinimum(emin);
+    fPot->SetMinimum(emax);
   } else if (option == "ez") {
     fPot->SetParameter(0, 31.);
     plotType = 4;
+    fPot->SetMinimum(emin);
+    fPot->SetMinimum(emax);
   } else {
     std::cerr << className << "::PlotSurface:\n";
     std::cerr << "    Unknown option (" << option << ")\n";
     std::cerr << "    Plotting the potential.\n";
     fPot->SetParameter(0, -1.);
+    fPot->SetMinimum(fmin);
+    fPot->SetMinimum(fmax);
   }
   fPot->SetNpx(nSamples2dX); 
   fPot->SetNpy(nSamples2dY);
@@ -379,23 +403,35 @@ ViewField::PlotProfile(const double x0, const double y0, const double z0,
       option == "volt" || option == "voltage" || 
       option == "pot" || option == "potential") {
     fPotProfile->SetParameter(6, -1.);
+    fPotProfile->SetMinimum(fmin);
+    fPotProfile->SetMaximum(fmax);
   } else if (option == "e" || option == "field") {
     fPotProfile->SetParameter(6,  1.);
     plotType = 1;
+    fPotProfile->SetMinimum(emin);
+    fPotProfile->SetMaximum(emax);
   } else if (option == "ex") {
     fPotProfile->SetParameter(6, 11.);
     plotType = 2;
+    fPotProfile->SetMinimum(emin);
+    fPotProfile->SetMaximum(emax);
   } else if (option == "ey") {
     fPotProfile->SetParameter(6, 21.);
     plotType = 3;
+    fPotProfile->SetMinimum(emin);
+    fPotProfile->SetMaximum(emax);
   } else if (option == "ez") {
     fPotProfile->SetParameter(6, 31.);
     plotType = 4;
+    fPotProfile->SetMinimum(emin);
+    fPotProfile->SetMaximum(emax);
   } else {
     std::cerr << className << "::PlotProfile:\n";
     std::cerr << "    Unknown option (" << option << ")\n";
     std::cerr << "    Plotting the potential.\n";
     fPotProfile->SetParameter(6, -1.);
+    fPotProfile->SetMinimum(fmin);
+    fPotProfile->SetMaximum(fmax);
   }
   if (debug) {
     std::cout << className << "::PlotProfile:\n";
