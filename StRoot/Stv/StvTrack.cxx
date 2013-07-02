@@ -301,3 +301,19 @@ int StvTrack::GetCharge() const
 //_____________________________________________________________________________
 void StvTrack::Reverse() 
 { reverse(); }
+//_____________________________________________________________________________
+StvTrack &StvTrack::operator=(const StvTrack &from)
+{
+static StvToolkit *kit = StvToolkit::Inst();
+  memcpy(mBeg,from.mBeg,mEnd-mBeg+1);
+  for (StvNodeConstIter it=from.begin();it!=from.end();++it) {
+    const StvNode *node = (*it);
+    StvNode *myNode = kit->GetNode();
+    *myNode = *node;
+    push_back(myNode);
+  }
+  return *this;
+}
+
+
+
