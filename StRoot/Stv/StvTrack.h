@@ -16,6 +16,7 @@ class StvTrack: public StvNodes
  enum EPointType {kDcaPoint,kFirstPoint,kLastPoint,kPrimPoint,kMaxXi2}; 
  public:
   StvTrack(); 
+  StvTrack &operator=(const StvTrack &from);
   
 ///    	Destructor
   virtual ~StvTrack();
@@ -72,12 +73,13 @@ double GetRes() const;		// Average residual
   void Show() const;  
 
 protected:
- int mFlag;  
-public:
-unsigned int  mId; 
+unsigned char mBeg[1];
 unsigned char mPrimary;
 unsigned char mTypeEnd;	// Type of end tracking. 0=Dca,
-                        // 1 = too many continues nits,2 = too many total nits
+          int mFlag;  
+unsigned char mEnd[1];
+unsigned int  mId; 
+public:
 static int mDebug; 	// Debug level
 static int mgId; 	// static track counter
 
