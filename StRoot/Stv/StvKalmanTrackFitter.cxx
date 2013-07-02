@@ -112,12 +112,23 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 
       case kRite|kHit: 	// No left, now Hit, rite fits 
       case kNull|kHit: 	// No left, now Hit, No rite  
+      {	// Empty leading node
+//		It was not fits before(left) but shoulf be now. 
+//		get params from previous dir and set huge errors
+        node->mPP[lane] = node->mFP[2];		//prediction from opposite fit
+        node->mPE[lane] = node->mFE[2];	
+	node->mPE[lane]*=kKalmanErrFact;	//Big errors
+        node->mPE[lane].Recov();		//But not too big
+        break;
+      }  
+
       case kRite: 	// No left, no  Hit, rite fits 
-      case kNull: {	// Empty leading node
+      case kNull: 
+      {	// Empty leading node
 //		It was not fits before(left) get params from previous dir
 //		and set huge errors
-        node->mPP[lane] = node->mFP[2];					//prediction from opposite fit
-        node->mPE[lane] = node->mFE[2];	node->mPE[lane]*=kKalmanErrFact;	//Big errors
+        node->mPP[lane] = node->mFP[2];				//prediction from opposite fit
+        node->mPE[lane] = node->mFE[2];				//Big errors
         break;
       }  
       case kLeft: 		// Left fits only, no  Hit
