@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.20 2013/06/23 23:29:26 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.21 2013/07/02 04:06:52 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -122,18 +122,14 @@ if (myGraph) { //create canvas
 //       StvDebug::Count("OrphanHits",stvHit->x()[2],rxy);
 //     }
 
-if (myHits) (*myHits)+= stvHit;   
-
     if (stvHit) {nHits++;nTotHits++;nGits+=sure;nTotGits+=sure;}  
-    else 	{nHitz++;nTotHitz++;
-      if (did == kTpcId) TpcHitTest(stHit);} 
+    else 	{nHitz++;nTotHitz++;}
     didOld = did; 
   }
   int nIniHits = tgp->InitHits();
   assert(nTotHits==nIniHits);
   Info("LoadHits","Loaded %d good, recovered %d and failed %d of all hits"
       ,nTotHits,nTotHits-nTotGits,nTotHitz);
-if (myDraw) {myDraw->Hits(*myHits,kUnusedHit); myDraw->Wait();}
   return nTotHits;
 }
 
