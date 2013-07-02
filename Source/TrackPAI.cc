@@ -202,7 +202,11 @@ TrackPAI::GetCluster(double& xcls, double& ycls, double& zcls,
   
   // Number of electron/hole (or electron/ion pairs) produced.
   ncls = 1;
-  
+ 
+  if (debug) {
+    std::cout << className << "::GetCluster:\n";
+    std::cout << "   Fraction of Rutherford scattering: " << f << "\n";
+  }
   return true;
                        
 }
