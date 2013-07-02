@@ -33,6 +33,7 @@ public:
   StvNode(){;}
   StvNode(const StvNode &node);
   virtual ~StvNode(){mId=-1;};
+  StvNode &operator=(const StvNode &from);
   /// Resets the node to a "null" un-used state
   void reset();
   void unset(){;}
@@ -62,6 +63,7 @@ public:
 
         StvHit *GetHit() 	const 		{ return mHit;}
   void  SetHit(StvHit *hit); 			
+  void  SetMem(StvHit *hit[2],double xi2[2]); 			
   const StHitPlane *GetHitPlane() const 	{ return mHitPlane  ;}
   void  SetHitPlane(const StHitPlane *hitPlane) { mHitPlane=hitPlane;}
   void  SetELoss(const StvELossData &el,int   ) { mELossData=el;}  
@@ -88,6 +90,8 @@ void Print(const char *opt) const;
  char mType; 			//0=regular,1=dca,2=primary
 const StHitPlane *mHitPlane;
 StvHit *mHit;
+StvHit *memHit[2];
+double  memXi2[2];
 
 ///  Z mag field in units PGev = Hz*Rcm
   mutable double mHz;

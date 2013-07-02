@@ -66,7 +66,7 @@ static StvToolkit *kit = StvToolkit::Inst();
 static const StvConst  *kons = StvConst::Inst();
   int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0,nSeedTot=0;
   StvSeedFinders *sfs = kit->SeedFinders();
-  double aveRes=0,aveXi2=0;
+  double aveRes=0,aveXi2=0,aveHits=0;
   mCurrTrak = 0;
 
   for (int isf=0;isf<(int)sfs->size();isf++) { //Loop over seed finders
@@ -86,8 +86,12 @@ StvDebug::Count("SeedAll",seedAng);
 //=============================
 	nAdded = FindTrack(0);
 //=============================
+
+//		DebugDebugDebugDebugDebugDebugDebugDebug
 StvDebug::Count("NumCalls",0);
 if (nAdded) StvDebug::Count("NumCalls",1);
+//StvTrack debugTrak = *mCurrTrak;
+//		DebugDebugDebugDebugDebugDebugDebugDebug
 
 
         mSeedFinder->FeedBack(nAdded);
@@ -142,6 +146,7 @@ if (akio && node) {
 
 	kit->GetTracks().push_back(mCurrTrak);
 	nTrk++;nTrkTot++;
+        aveHits+= nHits;
 	aveRes += mCurrTrak->GetRes();
 	aveXi2 += mCurrTrak->GetXi2();
 	mCurrTrak=0;
@@ -155,8 +160,8 @@ if (akio && node) {
     }//End of repeat
   }//End of seed finders
 
-  if (nTrkTot) {aveRes/=nTrkTot; aveXi2/=nTrkTot;}
-  Info("FindTracks","tracks=%d aveRes = %g aveXi2=%g",nTrkTot,aveRes,aveXi2);
+  if (nTrkTot) {aveHits/=nTrkTot;aveRes/=nTrkTot; aveXi2/=nTrkTot;}
+  Info("FindTracks","tracks=%d aveHits = %g aveRes = %g aveXi2=%g",nTrkTot,aveHits,aveRes,aveXi2);
   return nTrkTot;
 }
 //_____________________________________________________________________________
@@ -269,18 +274,21 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
       hitCount->AddNit(); continue;
     } 
     fitt->Prep();
-    double minXi2 = myConst->mXi2Hit,myXi2=3e33; 
-    StvHit *minHit=0; int minIdx = -1;
+    double  minXi2[2]={1e11,1e11},myXi2;
+    StvHit *minHit[2]={0};
+    minXi2[0] = myConst->mXi2Hit,myXi2=3e33; 
+    int minIdx = -1;
     for (int ihit=0;ihit<(int)localHits->size();ihit++) {
       StvHit *hit = (*localHits)[ihit];
       myXi2 = fitt->Xi2(hit);
-      if (myXi2 > minXi2) continue;
-      minXi2 = myXi2; minHit = hit; minIdx = ihit;
+      if (myXi2 > minXi2[0]) continue;
+      minXi2[1]=minXi2[0]; minXi2[0] = myXi2;
+      minHit[1]=minHit[0]; minHit[0] = hit; minIdx = ihit;
     }
-   
-    if (minHit) {	// Fit succesful
-
-      myXi2 = fitt->Xi2(minHit);
+    curNode->SetMem(minHit ,minXi2);
+    if (minHit[0]) {	// Fit succesful
+      
+      myXi2 = fitt->Xi2(minHit[0]);
       int iuerr = fitt->Update(); 
       if (iuerr<=0 || (nHits<=3)) {		//Hit accepted
         hitCount->AddHit();
@@ -289,14 +297,12 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
         curNode->SetFit(par[1],err[1],0);
         par[0]=par[1];
         err[0]=err[1]; 
-      } else { minHit=0;}
-    } 
-
-    if (!minHit) {//No Hit or ignored
+      } else { minHit[0]=0;}
+    } else 		{//No Hit or ignored
       myXi2 = 1e11;
       hitCount->AddNit(); 
     }
-    curNode->SetHit(minHit); 
+    curNode->SetHit(minHit[0]); 
     curNode->SetXi2(myXi2,0);
     
   } // End Dive&Fitter loop 

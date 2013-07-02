@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.18 2013/06/28 02:12:48 perev Exp $
+ * $Id: StvNode.cxx,v 1.19 2013/07/02 04:04:03 perev Exp $
  *
  * /author Victor Perev
  */
@@ -26,6 +26,12 @@ static int myCount=0;
   StvDebug::Break(mId);
   mXi2[0] = 3e33;mXi2[1] = 3e33;mXi2[2] = 3e33;
 }
+//______________________________________________________________________________
+StvNode &StvNode::operator=(const StvNode &from)
+{ 
+  memcpy(mBeg,from.mBeg,mEnd-mBeg+1); return *this;
+}
+
 //______________________________________________________________________________
 void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir) 	
 {
@@ -66,11 +72,14 @@ static const char *hhh = "x y z r e ";
   const StvFitErrs  &fe= mFE[dir];
   int dkr = (dir<2)? dir:0;
   const StvFitErrs  &pe= mPE[dkr];
-  const StvNodePars &pp= mPP[dkr];
+//const StvNodePars &pp= mPP[dkr];
   StvHit *hit = GetHit();
-  TString ts; if (hit) {ts = (mXi2[0]>1e3 && mXi2[1]>1e3)? "h":"H";}
+  TString ts; 
+  if (mHitPlane) ts = "h"; 
+  if (hit)       ts = "H"; 
   if (GetType()==kDcaNode ) ts='D';
   if (GetType()==kPrimNode) ts='P';
+
   printf("%p(%s)",(void*)this,ts.Data());
   printf("\t%s=%g","Xi2",GetXi2(djr));
   int iopt=0;
@@ -101,6 +110,7 @@ static const char *hhh = "x y z r e ";
       else if (ts=="P[")	{val = fp[idx];}
       else if (ts=="E[")	{val = fe[idx];}
       else if (ts=="Pa")	{cal = (mHitPlane)? mHitPlane->GetPath():"";}
+      if (!cal && val==-999 && err[0]==-999) continue;
       printf("\t%s=",ts.Data());
       if (cal) 			{ printf("%s ",cal);}
       if (abs(val+999)>1e-6) 	{ printf("%g",val);}
@@ -149,6 +159,12 @@ void StvNode::SetHit(StvHit *hit)
    assert(!mHit->timesUsed());
    mHit->setTimesUsed(1);
 } 
+//________________________________________________________________________________
+void StvNode::SetMem(StvHit *hit[2],double xi2[2])
+{
+  memcpy(memHit,hit,sizeof(memHit));
+  memcpy(memXi2,xi2,sizeof(memXi2));
+}
 //________________________________________________________________________________
 void StvNode::UpdateDca()
 { 
