@@ -20,12 +20,10 @@ template<class Object>
 class StvHolder  {
 public:
 	StvHolder();
-union {
+public:
   StvHolder *fNext;
   long       fLong;
-  char       fChar[1];
-};
- Object fObj;
+  Object fObj;
 };
 
 //______________________________________________________________________________
@@ -90,7 +88,8 @@ void StvBlock<Object>::reset(StvBlock **bTop,StvHolder<Object> **hTop)
 template <class Object>
 StvHolder<Object>::StvHolder()
 {
-  memset(fChar,0,((char*)&fObj)-fChar);
+  char *b = (char*)&fNext;
+  memset(b,0,((char*)&fObj)-b);
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -146,7 +145,9 @@ void StvFactory<Concrete,Abstract>::free(Abstract *obj)
   obj->unset();
   StvHolder<Concrete>* h = (StvHolder<Concrete>*)((char*)obj-shift);
   assert((h->fLong-1)== (long)this);
-  h->fNext = fHTop; fHTop=h; this->fUseCount--; this->fFreeCount++;
+  h->fNext = fHTop;
+   fHTop=h; 
+   this->fUseCount--; this->fFreeCount++;
 }
 
 //______________________________________________________________________________

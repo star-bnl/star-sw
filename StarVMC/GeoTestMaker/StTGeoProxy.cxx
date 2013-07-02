@@ -1,5 +1,4 @@
-
-// $Id: StTGeoProxy.cxx,v 1.5 2013/06/23 22:29:25 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.6 2013/07/02 04:00:06 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -451,6 +450,7 @@ void StTGeoProxy::InitHitPlane(StActorFunctor *act)
       detId = DetId(vol->GetName());
       if(!detId) 	continue;
     }
+    if(!IsSensitive(vol)) continue;
     StHitPlaneInfo *hpi = IsHitPlane(vol);
     if (!hpi) 		continue;
     StHitPlane *hp = hpi->MakeHitPlane(it,act);
@@ -848,6 +848,7 @@ static int 	nTest=0,nFail=0,detId=0;
      if (fHitLoadActor) fHitLoadActor->SetHit(hit);
      hpGeo = FindHitPlane(xyz,fGoodHit);
      if (!hpGeo) {
+       if (fGoodHit) return 0; 	//Hit rejected
        double pnt[3]={xyz[0],xyz[1],xyz[2]};
        gGeoManager->SetCurrentPoint(pnt);
        Warning("AddHit","Hit(%g,%g,%g) in %s Not Found",pnt[0],pnt[1],pnt[2],GetPath());
@@ -950,10 +951,10 @@ static int nCall=0; nCall++;
   StHitPlane *hp = GetCurrentHitPlane();     
   sure = 1;
   if (hp  && hp->GetHitErrCalc() && IsHitted(pnt)) 	return hp;
-  sure = 0;
 
-//	volume is sensitive but not active
+//	volume is sensitive but not active but still sure
   if (hp) 						return 0;
+  sure = 0;
   double Rxy = sqrt(pnt[0]*pnt[0]+pnt[1]*pnt[1]);
   double myCos= pnt[0]/Rxy,mySin=pnt[1]/Rxy;
   double myDir[3];
