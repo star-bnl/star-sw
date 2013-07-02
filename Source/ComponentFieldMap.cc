@@ -1867,7 +1867,7 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
 int 
 ComponentFieldMap::Coordinates12(double x, double y, double z,
                         double& t1, double& t2, double& t3, double& t4,
-                        double jac[4][4], double& det, int imap) {
+                        int imap) {
 
   if (debug) {
     std::cout << className << "::Coordinates12:\n";
@@ -1973,7 +1973,7 @@ ComponentFieldMap::Coordinates12(double x, double y, double z,
 int 
 ComponentFieldMap::Coordinates13(double x, double y, double z,
                         double& t1, double& t2, double& t3, double& t4,
-                        double jac[4][4], double& det, int imap) {
+                        double jac[4][4], double& det,int imap) {
 
   if (debug) {
     std::cout << className << "::Coordinates13:\n";
@@ -1991,7 +1991,7 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
   double f = 0.5;
 
   // Make a first order approximation.
-  int rc = Coordinates12(x, y, z, t1, t2, t3, t4, jac, det, imap);
+  int rc = Coordinates12(x, y, z, t1, t2, t3, t4, imap);
   if (rc > 0) {
     if (debug) {
       std::cout << className << "::Coordinates13:\n";

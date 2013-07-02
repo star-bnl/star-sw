@@ -179,7 +179,7 @@ class ComponentFieldMap : public ComponentBase {
     // Calculate coordinates in linear tetrahedra            
     int Coordinates12(double x, double y, double z,
             double& t1, double& t2, double& t3, double& t4,
-            double jac[4][4], double& det, int imap);
+            int imap);
     // Calculate coordinates for curved quadratic tetrahedra            
     int Coordinates13(double x, double y, double z,
             double& t1, double& t2, double& t3, double& t4,
