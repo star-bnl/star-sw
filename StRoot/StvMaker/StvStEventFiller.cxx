@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.32 2013/06/23 23:31:58 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.33 2013/07/02 04:07:48 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.33  2013/07/02 04:07:48  perev
+ * add dca00 to pull tree
+ *
  * Revision 1.32  2013/06/23 23:31:58  perev
  * Assert++
  *
@@ -1388,7 +1391,7 @@ static int nCall=0; nCall++;
     THelixTrack th(ar,ar+3,ar[6]);
     double dL = th.Path(0.,0.);
     th.Eval(dL,ar,ar+3);
-    double dca00 = (-ar[0]*ar[4]+ar[1]*ar[3])/cos(aux.mDip);
+    aux.mDca00 = (-ar[0]*ar[4]+ar[1]*ar[3])/cos(aux.mDip);
   }
 
   double len=0,preRho,preXy[2]; int myNode=0;

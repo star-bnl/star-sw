@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.7 2013/03/08 03:42:55 perev Exp $
+ * $Id: StvPullEvent.h,v 1.8 2013/07/02 04:08:09 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.8  2013/07/02 04:08:09  perev
+ * add dca00 to pull tree
+ *
  * Revision 1.7  2013/03/08 03:42:55  perev
  * Define empty Finish()
  *
@@ -105,6 +108,7 @@ float mDip;			//track Dip in global  Stv frame
 float mRxy;			//Rxy of track begining 
 float mPhi;			//Phi angle of track begining
 float mZ;
+float mDca00;
 //				Errors
 float mPtErr;        		//pt error
 float mPsiErr;			//track Psi error
