@@ -22,7 +22,7 @@ int rdMuWana2012(
   
   if(isMC==0) jetDir="./"; 
 
-  //if(isMC &&  useJetFinder==2) geant=true;
+  if(isMC &&  useJetFinder==2) geant=true;
   
   if(isMC) spinSort=false;
   TString outF=file;
@@ -115,6 +115,7 @@ int rdMuWana2012(
   TObjArray* HList=new TObjArray;
   TObjArray* HListTpc=new TObjArray;
 
+#if 0
   if(geant){                          
     // get geant file                    
     StIOMaker* ioMaker = new StIOMaker();
@@ -126,9 +127,34 @@ int rdMuWana2012(
     ioMaker->SetBranch("geantBranch",0,"r");//activate geant Branch
     ioMaker->SetBranch("minimcBranch",0,"r");//activate geant Branch 
   }
-  
-  // Now we add Makers to the chain...  
+#endif  
+
   int nFiles=1000;
+  if(geant){ 
+    //split MuDst file list to geant files
+    ifstream infile(file); string line; 
+    StFile *setFiles= new StFile(); int j=0;
+    while(infile.good()){
+      getline (infile,line);
+      TString name = line;
+      name.ReplaceAll(".MuDst.root",".geant.root");
+      name.ReplaceAll("muDst/","geant/");
+      if(line=="") break;
+      setFiles->AddFile(name.Data());
+      j++;
+      if(j%10==0) cout<<"Added "<<j<<" files:"<<name.Data()<<endl;
+      if(j==nFiles) break;
+    }
+
+    // get list of geant files                    
+    StIOMaker* ioMaker = new StIOMaker("IO","r",setFiles,"bfcTree");
+    //ioMaker->SetDebug();
+    ioMaker->SetIOMode("r");
+    ioMaker->SetBranch("*",0,"0");   //deactivate all branches 
+    ioMaker->SetBranch("geantBranch",0,"r");//activate geant Branch
+  }
+
+  // Now we add Makers to the chain...  
   muMk = new StMuDstMaker(0,0,muDir,file,"MuDst.root",nFiles);
   muMk->SetStatus("*",0);
   muMk->SetStatus("MuEvent",1);
@@ -391,7 +417,7 @@ int rdMuWana2012(
   }
   
   if(geant){
-    pubMcMk=new St2009pubMcMaker("pubMc");
+    pubMcMk=new St2011pubMcMaker("pubMc");
     pubMcMk->attachWalgoMaker(WmuMk);
     pubMcMk->setHList(HList);
   }
@@ -470,6 +496,9 @@ void chainFiles(const Char_t *fileList)
 
 
 // $Log: rdMuWana2012.C,v $
+// Revision 1.11  2013/07/03 16:53:15  stevens4
+// Update for efficiency studies with embedding
+//
 // Revision 1.10  2012/09/18 22:33:07  stevens4
 // remove hardcoded jet tree path
 //

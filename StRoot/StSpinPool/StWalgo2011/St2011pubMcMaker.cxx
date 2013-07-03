@@ -1,4 +1,4 @@
-// $Id: St2011pubMcMaker.cxx,v 1.1 2011/02/10 20:33:25 balewski Exp $
+// $Id: St2011pubMcMaker.cxx,v 1.2 2013/07/03 16:53:07 stevens4 Exp $
 //
 //*-- Author : Justin Stevens, IUCF
 // 
@@ -47,7 +47,7 @@ Int_t
 St2011pubMcMaker::Make(){
   //printf("-----------in %s\n", GetName());
   //only get geant particle info for W MC
-  if(wMK->isMC==8 || wMK->isMC==30 || wMK->isMC==20){
+  if(wMK->isMC==350){
     if(doMCanalysis()){
       doWanalysis();
       doWefficiency();
@@ -332,6 +332,9 @@ St2011pubMcMaker::doMCanalysis(){
 }
 
 // $Log: St2011pubMcMaker.cxx,v $
+// Revision 1.2  2013/07/03 16:53:07  stevens4
+// Update for efficiency studies with embedding
+//
 // Revision 1.1  2011/02/10 20:33:25  balewski
 // start
 //
