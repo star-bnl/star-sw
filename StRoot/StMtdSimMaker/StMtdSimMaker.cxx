@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.2 2012/03/02 02:18:34 perev Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.3 2013/07/05 21:57:34 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -34,7 +34,6 @@
 #include "StMcTrack.hh"
 
 #include "StEventTypes.h"
-//fg #include "StEvent/StMtdCollection.h"
 
 
 static RanluxEngine engine;
@@ -66,12 +65,19 @@ Int_t StMtdSimMaker::Init() {
 void StMtdSimMaker::Reset() {
   mGeantData = 0;
   mEvent  = 0;
-  //mBTofCollection = 0;
   if (mWriteStEvent) delete mMtdCollection;
 }
 //_____________________________________________________________________________
 Int_t StMtdSimMaker::InitRun(Int_t runnumber) {
-  // do nothing
+
+  // Channel group mapping for each module. Basic initialization below. Will move to database eventually.
+  int channel(0);
+  for (int module=0; module<5; module++){
+    for (int cell=0; cell<24; cell ++){
+      mModuleChannel[module][cell] = ++channel;
+    }
+  }
+
   return kStOK;
 }
 
@@ -137,8 +143,8 @@ int StMtdSimMaker::CalcCellId(Int_t volume_id, Float_t ylocal,
 
 // 		Decode GEANT volume_id
   Int_t ires    = volume_id/100;
-  imodule = ires%100; 
-  ibackleg =(ires/100)%100;
+  imodule = ires%10; 
+  ibackleg =ires/10;
 
   // Construct cell ID from local Y coordinate
   icell = Int_t((ylocal + kMtdPadWidth * kNCell/2) / kMtdPadWidth) + 1;
@@ -167,22 +173,44 @@ Int_t StMtdSimMaker::FastCellResponse()
       mTofGeant->Fill(ghit.tof / nanosecond);
     }
 
+
+    // int channel1 = 0;    //AJ First end of read out strip
+    //int channel2 = 0;    //AJ Second end of read out strip
+
+    
+
     Int_t icell, imodule, ibackleg;
     int cellId = CalcCellId(ghit.volume_id, ghit.x[1],ibackleg,imodule,icell);
+
+    LOG_DEBUG << "Volume ID: "<< ghit.volume_id << "  Cell ID: " << cellId;
+    LOG_DEBUG << " icell: " << icell << " imodule: " << imodule << " ibackleg: " << ibackleg << " ghit.tof: " << ghit.tof << endm;
+
     if (cellId<0) continue;
     StMtdHit *&sthit = myMap[cellId];
     if (!sthit) { sthit = new StMtdHit;}
     else        { if (sthit->tof()>ghit.tof) continue; }
     Float_t wt = 1.0;
 
-//fg		Double_t tof= mtdHitsFromGeant->tof*1000./nanosecond + ranGauss.shoot()*mSimDb->timeres_tof()*1000./nanosecond;    //! 85ps per channel
-//fg 		temporarily fix MTD resolution at 99ps
-    Double_t tof= ghit.tof*1000./nanosecond + ranGauss.shoot()*99*1000./nanosecond;
-    Double_t t0 = ghit.tof*1000./nanosecond;
+    //fg temporarily fix MTD resolution at 99ps
+    Double_t tof= ghit.tof/nanosecond + ranGauss.shoot()*(99.e-12)/nanosecond;
+    //Double_t t0 = ghit.tof/nanosecond;
     Double_t de = ghit.de * wt;
-    Double_t pathL = ghit.s_track;
-    Double_t q = 0.;
+    //Double_t pathL = ghit.s_track;
+    //Double_t q = 0.;
     
+   int channel1 = mModuleChannel[imodule - 1][icell - 1];   //AJ uses the module and the cell id to find the first channel on RDO
+   int channel2 = channel1 + 12;
+
+   LOG_DEBUG << "First hit for this cell, assigning channel 1: " << channel1 << " channel 2: " << channel2 << endm;
+
+   //Fill Histograms here AJ////
+   QABacklegChannel->Fill(ibackleg, channel1);
+   QABacklegChannel->Fill(ibackleg, channel2);
+  
+    mDeSeen->Fill(de);
+    mTofSeen->Fill(tof);
+    //////////////
+
     sthit->setBackleg(ibackleg);
     sthit->setModule( imodule );
     sthit->setCell(   icell   );
@@ -190,6 +218,8 @@ Int_t StMtdSimMaker::FastCellResponse()
     sthit->setTrailingEdgeTime(pair<double,double>(tof, tof));
     sthit->setAssociatedTrack(NULL);		//done in StMtdMatchMaker
     sthit->setIdTruth(ghit.track_p, 100);
+
+    LOG_INFO << "sthit " << sthit->tof() << " tof:" << tof << endm;
   }
 
   mMtdCollection= new StMtdCollection();
@@ -233,6 +263,7 @@ Int_t StMtdSimMaker::bookHistograms()
   mTACorr     = new TH2F("TACorr","TACorr",512,0.,4096.,512,0.,4096.);
 
   mModHist     = new TH1F("ModuleHist","ModuleHist",201,-100,100);
+  QABacklegChannel = new TH2I("QABacklegChannel", "QABacklegChannel", 30, 1., 30., 120, 1., 120.); 
   return kStOk;
 
 }
@@ -268,5 +299,6 @@ Int_t StMtdSimMaker::writeHistograms()
   mTACorr->Write();
 
   mModHist->Write();
+  QABacklegChannel->Write();
   return kStOk;
 }

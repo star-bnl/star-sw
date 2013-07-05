@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.h,v 1.2 2012/03/02 02:18:34 perev Exp $
+ * $Id: StMtdSimMaker.h,v 1.3 2013/07/05 21:57:34 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMtdSimMaker.h,v $
+ * Revision 1.3  2013/07/05 21:57:34  geurts
+ * Bug fix and improved mapping [Alex Jentsch]
+ *
  * Revision 1.2  2012/03/02 02:18:34  perev
  * New provisional version rewritten by VP
  *
@@ -23,6 +26,7 @@ class StEvent;
 struct g2t_mtd_hit_st;
 class StMtdCollection;
 class TH2F;
+class TH2I;
 
 // g2t tables
 #include "tables/St_g2t_mtd_hit_Table.h"
@@ -33,6 +37,9 @@ class TH2F;
 
 class StMtdSimMaker : public StMaker
 {
+ private:
+  Int_t mModuleChannel[5][24];
+
  protected:
   St_DataSet        *mGeantData;        //! geant table
   StEvent           *mEvent;            //!
@@ -96,6 +103,7 @@ class StMtdSimMaker : public StMaker
   TH1F* mVpdResReco;   //! vpd time resolution after recon
   TH2F* mTACorr;       //! T-A Slewing Correlation
   TH1F* mModHist;       //! T-A Slewing Correlation
+  TH2I* QABacklegChannel; //!MTD hit distribution
 
   /// TOFp histograms
     TH1F* mdE;           //!
@@ -135,7 +143,7 @@ class StMtdSimMaker : public StMaker
 //fg    void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.2 2012/03/02 02:18:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.3 2013/07/05 21:57:34 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StMtdSimMaker,1)
 };
