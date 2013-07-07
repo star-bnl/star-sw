@@ -76,8 +76,9 @@ static const StvConst  *kons = StvConst::Inst();
       nTrk = 0;nSeed=0; mSeedFinder->Again();
       while ((mSeedHelx = mSeedFinder->NextSeed())) 
       {
-double seedAng = atan2(mSeedHelx->GetSin(),mSeedHelx->GetCos())/3.1415*180;
-StvDebug::Count("SeedAll",seedAng);
+TVector3 dbSeed(mSeedHelx->Dir());
+double seedEta = dbSeed.Eta(); 
+StvDebug::Count("SeedEta",seedEta);
 
 	nSeed++; nTally++;
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
@@ -90,14 +91,14 @@ StvDebug::Count("SeedAll",seedAng);
 //		DebugDebugDebugDebugDebugDebugDebugDebug
 StvDebug::Count("NumCalls",0);
 if (nAdded) StvDebug::Count("NumCalls",1);
-//StvTrack debugTrak = *mCurrTrak;
+//??StvTrack geanTrak(*mCurrTrak);
 //		DebugDebugDebugDebugDebugDebugDebugDebug
 
 
         mSeedFinder->FeedBack(nAdded);
 	if (!nAdded) 				continue;
 
-StvDebug::Count("SeedDive",seedAng);
+StvDebug::Count("SeedDive",seedEta);
 
 	int ans = 0,fail=13;
 //		Refit track   
@@ -108,13 +109,14 @@ StvDebug::Count("SeedDive",seedAng);
 	  ans = Refit(1);
 
 if (!ans) StvDebug::Count("NumCalls",2);
+//??StvTrack refiTrak(*mCurrTrak);
 
 
 	  if (ans) 				break;
           nHits = mCurrTrak->GetNHits();
           if (nHits<=1) 			break;
 	  nAdded = FindTrack(1);
-if (nAdded) StvDebug::Count("NumCalls",3);
+//??StvTrack bakwTrak(*mCurrTrak);
           nHits = mCurrTrak->GetNHits();
           if (nHits<=3) 			break;
           if (nAdded<=0)			continue;;
@@ -131,7 +133,7 @@ if (!fail) StvDebug::Count("NumCalls",5);
 	  mCurrTrak->CutTail();			continue;
         }
 
-StvDebug::Count("SeedRefit",seedAng);
+StvDebug::Count("SeedRefit",seedEta);
         
 	StvNode *node = MakeDcaNode(mCurrTrak);
 
@@ -177,7 +179,7 @@ static       StvFitter  *fitt     = StvFitter::Inst();
 StvDebug::Break(nCall);
 StvNodePars par[2];
 StvFitErrs  err[2];
-int mySkip=0,idive = 0,nNode=0,nHits=0;
+int mySkip=0,idive = 0,nNode=0,nHits=0,nTotHits=0;
 double totLen=0;
 StvNode *curNode=0,*preNode=0,*innNode=0,*outNode=0;
 StvHitCounter *hitCount = StvHitCounter::Inst();
@@ -194,6 +196,7 @@ hitCount->Clear();
  
     curNode =(idir)? mCurrTrak->back(): mCurrTrak->front();
     par[0] = curNode->GetFP(); err[0] = curNode->GetFE(); 	//Set outer node pars into par[0]
+    nTotHits = mCurrTrak->GetNFits(idir);
   }
 
 //  	Skip too big curvature or pti
@@ -231,6 +234,7 @@ StvFitDers derivFit;
     if (idive & StvDiver::kDiveDca  ) 		break;
 
     totLen+=mDive->GetLength();
+    err[1].Recov();
     par[0]=par[1]; err[0]=err[1];			//pars again in par[0]
 		// Stop tracking when too big Z or Rxy
     if (fabs(par[0]._z)  > myConst->mZMax  ) 	break;
@@ -250,6 +254,10 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
 //	Create and add node to myTrak
     preNode = curNode;
     curNode = kit->GetNode();      
+    assert(preNode != curNode);
+    assert(curNode != mCurrTrak->front());
+    assert(curNode != mCurrTrak->back ());
+
     if (!idir)  {mCurrTrak->push_front(curNode);innNode=curNode;outNode=preNode;}
     else        {mCurrTrak->push_back (curNode);innNode=preNode;outNode=curNode;}
     nNode++;		// assert(nNode<200);
@@ -281,10 +289,14 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     for (int ihit=0;ihit<(int)localHits->size();ihit++) {
       StvHit *hit = (*localHits)[ihit];
       myXi2 = fitt->Xi2(hit);
+      if (nTotHits > 10 && fitt->IsFailed() == -99) { // Too big track errs
+         mySkip = 4; break;	//Track Errors too big
+      }
       if (myXi2 > minXi2[0]) continue;
       minXi2[1]=minXi2[0]; minXi2[0] = myXi2;
       minHit[1]=minHit[0]; minHit[0] = hit; minIdx = ihit;
     }
+    if (mySkip) break; 		//Track Errors too big
     curNode->SetMem(minHit ,minXi2);
     if (minHit[0]) {	// Fit succesful
       
@@ -292,7 +304,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
       int iuerr = fitt->Update(); 
       if (iuerr<=0 || (nHits<=3)) {		//Hit accepted
         hitCount->AddHit();
-	nHits++;assert(nHits<=100);
+	nHits++;nTotHits++;assert(nHits<=100);
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
         par[0]=par[1];
