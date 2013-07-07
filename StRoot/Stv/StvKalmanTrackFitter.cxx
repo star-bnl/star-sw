@@ -117,6 +117,9 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 //		get params from previous dir and set huge errors
         node->mPP[lane] = node->mFP[2];		//prediction from opposite fit
         node->mPE[lane] = node->mFE[2];	
+        assert(node->mPE[lane].mHH>0);
+        assert(node->mPE[lane].mZZ>0);
+
 	node->mPE[lane]*=kKalmanErrFact;	//Big errors
         node->mPE[lane].Recov();		//But not too big
         break;
@@ -129,6 +132,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 //		and set huge errors
         node->mPP[lane] = node->mFP[2];				//prediction from opposite fit
         node->mPE[lane] = node->mFE[2];				//Big errors
+        assert(node->mPE[lane].mHH>0);
+        assert(node->mPE[lane].mZZ>0);
         break;
       }  
       case kLeft: 		// Left fits only, no  Hit
@@ -154,6 +159,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kLeft|kRite: // Left fits, no Hit, Rite fits
       {
 //		No hit. Fit = Prediction		
+        assert(node->mPE[lane].mHH>0);
+        assert(node->mPE[lane].mZZ>0);
         node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
         break;
       }
@@ -164,6 +171,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kLeft|kRite|kHit: // Left fits,now Hit, Rite fits
       {
 //		Fit it		
+        assert(node->mPE[lane].mHH>0);
+        assert(node->mPE[lane].mZZ>0);
 	fitt->Set(node->mPP+lane,node->mPE+lane,node->mFP+lane,node->mFE+lane);
 	fitt->Prep();
 
@@ -176,6 +185,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
             if (--mNHits <3) 			return 1;
             node->SetHit(0); hit = 0; nFitLeft--;
 //		No hit anymore. Fit = Prediction		
+        assert(node->mPE[lane].mHH>0);
+        assert(node->mPE[lane].mZZ>0);
             node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
             break;
 	}
@@ -202,6 +213,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
        case kRite: 	// Rite fits only, no  Hit
 //		No hit. No own ifo yet. Get everything from opposite fit		
        {
+        assert(node->mFE[jane].mHH>0);
+        assert(node->mFE[jane].mZZ>0);
         node->SetFit(node->mFP[jane],node->mFE[jane],2); 
         break;
        }
@@ -215,6 +228,10 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 
        default:
       {
+        assert(node->mPE[lane].mHH>0);
+        assert(node->mPE[lane].mZZ>0);
+        assert(node->mPE[jane].mHH>0);
+        assert(node->mPE[jane].mZZ>0);
 	fitt->Set(node->mPP+lane         ,node->mPE+lane
         	 ,node->mPP+jane         ,node->mPE+jane
         	 ,node->mFP+2            ,node->mFE+2   );
@@ -238,6 +255,9 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 //		Fit hit	 to join data	
         StvNodePars myPars(node->mFP[2]);
         StvFitErrs  myErrs(node->mFE[2]);
+        assert(node->mFE[2].mHH>0);
+        assert(node->mFE[2].mZZ>0);
+
 	fitt->Set(&myPars,&myErrs,node->mFP+2,node->mFE+2);
 	fitt->Prep();
 
@@ -262,6 +282,9 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 //         }
 
     nFitRite-= wasFitted;
+    assert(node->mFE[lane].mHH>0);
+    assert(node->mFE[lane].mZZ>0);
+
 
   }//endMainLoop
 
@@ -283,6 +306,7 @@ static int nCall=0; nCall++;
   THelixTrack myHlx;
   preNode->mFP[lane].get(&myHlx);
   const StvNodePars &prePars =  preNode->mFP[lane];
+  assert(preNode->mFE[lane].mHH>0);
   const StvFitErrs  &preErrs =  preNode->mFE[lane];
   prePars.get(&myHlx);
   preErrs.Get(&myHlx);

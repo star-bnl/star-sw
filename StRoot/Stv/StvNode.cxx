@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.19 2013/07/02 04:04:03 perev Exp $
+ * $Id: StvNode.cxx,v 1.20 2013/07/07 22:25:37 perev Exp $
  *
  * /author Victor Perev
  */
@@ -35,6 +35,7 @@ StvNode &StvNode::operator=(const StvNode &from)
 //______________________________________________________________________________
 void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir) 	
 {
+  assert(err.mHH>0);
   mPP[dir]=par;mPE[dir]=err;
   mFP[dir]=par;mFE[dir]=err;
   mFP[  2]=par;mFE[  2]=err;
@@ -42,6 +43,7 @@ void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir)
 //______________________________________________________________________________
 void StvNode::SetFit(StvNodePars &par,StvFitErrs &err,int dir) 	
 {
+  assert(err.mHH>0);
   mFP[dir]=par;mFE[dir]=err;
   if (dir==2) return;
   mFP[2]=par;mFE[2]=err;
