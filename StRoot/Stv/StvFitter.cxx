@@ -19,7 +19,7 @@ StvFitter *StvFitter::mgFitter=0;
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
 
-enum {kDeltaFactor = 21};
+enum {kDeltaFactor = 21,kTooBigErrFactor = 5*5};
 
 static const double kXtraBigXi2 = 9e9;
 
@@ -287,7 +287,11 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaP-= 0.5*mTkPars._curv*dS*dS;
 
   double G[3] = {mInErrs->mHH,mInErrs->mHZ,mInErrs->mZZ};
-  if (mKase==0) {for (int j=0;j<3;j++) {G[j]+=mHitErrs[j];}}
+  if (mKase==0) {// Include Hit Errs
+    if (G[0]>mHitErrs[0]*kTooBigErrFactor) mFailed = -99;
+    if (G[2]>mHitErrs[2]*kTooBigErrFactor) mFailed = -99;
+    for (int j=0;j<3;j++) {G[j]+=mHitErrs[j];}
+  }// end Include Hit Errs
 
 //  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
   mXi2 = MyXi2(G,mDcaP,mDcaL);
