@@ -17,6 +17,7 @@ class StvTrack: public StvNodes
  public:
   StvTrack(); 
   StvTrack &operator=(const StvTrack &from);
+  StvTrack(const StvTrack &from)	{*this=from;} 
   
 ///    	Destructor
   virtual ~StvTrack();
