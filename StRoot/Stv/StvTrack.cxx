@@ -34,7 +34,7 @@ void StvTrack::reset()
 //______________________________________________________________________________
 void StvTrack::unset()
 {
-  CutTail(0);  
+  CutTail(0); clear();
 }
 //______________________________________________________________________________
 int StvTrack::GetNPoss(StDetectorId detectorId) const
