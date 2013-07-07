@@ -22,7 +22,7 @@ public:
 	StvHolder();
 public:
   StvHolder *fNext;
-  long       fLong;
+  FactoryB  *fFact;
   Object fObj;
 };
 
@@ -134,7 +134,8 @@ Abstract *StvFactory<Concrete,Abstract>::getInstance()
   h->fNext=0;
   h->fObj.reset();
   this->fUseCount++;
-  h->fLong= ((long)this)+1;		//set factory addres+1
+  assert(!h->fFact || (unsigned long)h->fFact == 0xFF);
+  h->fFact = this;		//set factory addres
   return &h->fObj;  
 }  
 //______________________________________________________________________________
@@ -144,10 +145,10 @@ void StvFactory<Concrete,Abstract>::free(Abstract *obj)
   static const int shift = (char*)(&(((StvHolder<Concrete>*)1)->fObj))-(char*)1;
   obj->unset();
   StvHolder<Concrete>* h = (StvHolder<Concrete>*)((char*)obj-shift);
-  assert((h->fLong-1)== (long)this);
-  h->fNext = fHTop;
-   fHTop=h; 
-   this->fUseCount--; this->fFreeCount++;
+  assert(h->fFact == this); 
+  h->fNext = fHTop; h->fFact = (FactoryB*)0xFF;
+  fHTop=h; 
+  this->fUseCount--; this->fFreeCount++;
 }
 
 //______________________________________________________________________________

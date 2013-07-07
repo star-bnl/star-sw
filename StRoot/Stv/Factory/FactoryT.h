@@ -72,10 +72,10 @@ public:
 
 inline void FactoryB::Free(void *obj)
 {
-   long *v = ((long*)obj) - 1;
+   void **v = ((void**)obj) - 1;
    if (!*v) v--;
-   assert((*v)&1L);
-   FactoryB *f = (FactoryB*)((*v)-1);
+   assert((*v)!=(void*)0xFF);
+   FactoryB *f = (FactoryB*)((*v));
    f->free(obj);
 }
 
