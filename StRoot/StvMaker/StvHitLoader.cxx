@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.21 2013/07/02 04:06:52 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.22 2013/07/07 22:29:23 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -36,7 +36,7 @@ StvHitLoader::StvHitLoader(const char *name) : TNamed(name,"")
 
 {
   mHitIter = new StEventHitIter();
-  mHitSelector = 0;
+  mHitSelector = 0; mHitLoadActor = 0;
 }
 
 //_____________________________________________________________________________
@@ -158,7 +158,7 @@ static StTGeoProxy *tgh = StTGeoProxy::Inst();
    sure =  tgh->IsGoodHit();
    if (!hp) { StvToolkit::Inst()->FreeHit(stvHit);return 0;}
 
-   if (did == kTpcId) {// TPC hit check for being in sector
+   if (did == kTpcId && fabs(xyz[2])<200) {// TPC hit check for being in sector
      const float* org = hp->GetOrg(xyz);
      const float* ort = (fabs(org[2])<209)? hp->GetDir(xyz)[0]:hp->GetDir(xyz)[2];
      double art = atan2(ort[1],ort[0])*180/M_PI;
