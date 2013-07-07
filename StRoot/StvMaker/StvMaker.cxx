@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.38 2013/06/23 23:30:39 perev Exp $
+// $Id: StvMaker.cxx,v 1.39 2013/07/07 22:30:34 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -140,21 +140,29 @@ Int_t StvMaker::InitDetectors()
   StTGeoProxy *tgh = StTGeoProxy::Inst();
   if (*SAttr("HitLoadOpt")) tgh->SetOpt(IAttr("HitLoadOpt"));
 
+//	What is the geo version
+  TString geoName(gGeoManager->GetName()); geoName.ToLower();
+  int yGeo = 0;
+  if (geoName(0,2)=="y2") yGeo = TString(geoName(1,99)).Atoi();
+
+
 //		Activate detectors
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
 //		Now Initialize TGeo proxy
   tgh->Init(1+2+4);
-  StvTpcPrompt promp;
-  tgh->InitHitPlane(&promp);
-
+  if (yGeo>=2009) { 	//no prompt hits for geo <y2009
+    StvTpcPrompt promp;
+    tgh->InitHitPlane(&promp);
+  }
 
 //	TPC has non standard TGeo. Edit it
-
-  StvTpcEdit tpce;
-  int nEdit = tgh->Edit(kTpcId,&tpce);	//Disable fake padrows
-  Info("InitDetectors","%d fake TPC padrows disabled",nEdit);
+//  if (yGeo>=2009) { 
+    StvTpcEdit tpce;
+    int nEdit = tgh->Edit(kTpcId,&tpce);	//Disable fake padrows
+    Info("InitDetectors","%d fake TPC padrows disabled",nEdit);
+//  }
   tgh->InitLayers();
 
   tgh->Summary();
@@ -174,6 +182,8 @@ Int_t StvMaker::InitDetectors()
                                   ,"StvTpcInnerPromptErrs" ,"StvTpcOuterPromptErrs",0};
     const char* innOut = 0;
     for (int io=0;(innOut=innOutNames[io]);io++) {
+      if (yGeo<2009 && strstr(innOut,"Prompt")) 	break;
+
       TString myName(innOut); if (mFETracks) myName+="FE";
       StvHitErrCalculator *hec = 0;
       switch (io) {
@@ -217,7 +227,10 @@ Int_t StvMaker::InitDetectors()
 
   kit->SetHitLoader(new StvHitLoader);
   assert(kit->HitLoader()->Init());
-  kit->HitLoader()->SetHitActor(new StvTpcHitActor);
+
+//	After 2009 tpcegeo3 is used
+  if (yGeo>=2009) kit->HitLoader()->SetHitActor(new StvTpcHitActor);
+
 //		In case of fithiterr utility working, selects special hits to speedup
   if (mFETracks) kit->HitLoader()->SetHitSelector();
 
