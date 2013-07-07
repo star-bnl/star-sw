@@ -161,6 +161,7 @@ class StvFitErrs
 public:	
   enum eFitErrs {kNErrs=15};
   StvFitErrs(double hh=0,double hz=0,double zz=0);
+  StvFitErrs(const StvFitErrs &fr) {*this = fr;}
 //??  void Reset(double hz = 0);
   void Set(const THelixTrack *he,double hz);
   void Get(      THelixTrack *he)     const;

@@ -438,6 +438,9 @@ static StvFitErrs myFitErrs;
 //______________________________________________________________________________
 StvFitErrs &StvFitErrs::operator=(const StvFitErrs &fr) 
 {
+  assert(fr.mHH>0);
+  assert(fr.mZZ>0);
+
   if (&fr==this)	return *this;
   memcpy(this,&fr,sizeof(*this));
 assert(mHz);
