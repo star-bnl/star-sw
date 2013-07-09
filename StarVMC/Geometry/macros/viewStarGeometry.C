@@ -90,12 +90,14 @@ void addDetectorTab( const Char_t *name,
   TGeoVolume *top = gGeoManager->FindVolumeFast(_top);
   if (!top)
     {
+      cout << Form("Top volume %s not found",_top) << endl;
       return;
     }
 
   TGeoNode       *node = top -> FindNode(name);
   if ( !node )
     {
+      cout << Form("Node %s not found",name) << endl;
       return;
     }
 

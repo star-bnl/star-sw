@@ -1,5 +1,5 @@
-<Document file="StarVMC/Geometry/Compat/xgeometry.xml">  
-
+<Document file="StarVMC/Geometry/Compat/xgeometry.xml">   
+ 
 <Export language="Mortran">
 <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
@@ -11,12 +11,15 @@ call geometry
 </Export>
 </Module>
 
-   
+      
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.17 2013/05/22 14:38:50 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.18 2013/07/09 18:36:16 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.18  2013/07/09 18:36:16  jwebb
+  Additions to support eStar2 model.
+
   Revision 1.17  2013/05/22 14:38:50  jwebb
   Force recompilation.
 
