@@ -234,7 +234,6 @@ StvFitDers derivFit;
     if (idive & StvDiver::kDiveDca  ) 		break;
 
     totLen+=mDive->GetLength();
-    err[1].Recov();
     par[0]=par[1]; err[0]=err[1];			//pars again in par[0]
 		// Stop tracking when too big Z or Rxy
     if (fabs(par[0]._z)  > myConst->mZMax  ) 	break;
@@ -272,6 +271,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     eld.mTally = nTally;
     innNode->SetELoss(eld,idir);
     err[0].Add(innNode->mELossData,par[0]);
+    err[0].Recov();
     curNode->SetPre(par[0],err[0],0);
     innNode->SetDer(derivFit,idir);
 
@@ -289,8 +289,8 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     for (int ihit=0;ihit<(int)localHits->size();ihit++) {
       StvHit *hit = (*localHits)[ihit];
       myXi2 = fitt->Xi2(hit);
-      if (nTotHits > 10 && fitt->IsFailed() == -99) { // Too big track errs
-         mySkip = 4; break;	//Track Errors too big
+      if (nTotHits > 5 && fitt->IsFailed() == -99) { // Too big track errs
+         mySkip = 4; break;	//Track Errors too big, stop tracking
       }
       if (myXi2 > minXi2[0]) continue;
       minXi2[1]=minXi2[0]; minXi2[0] = myXi2;
