@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.259 2013/05/22 14:39:15 jwebb Exp $
+* $Id: geometry.g,v 1.260 2013/07/09 18:37:00 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.260  2013/07/09 18:37:00  jwebb
+* Additions to support eStar2 model.
+*
 * Revision 1.259  2013/05/22 14:39:15  jwebb
 * Added new version of the CAVE as CAVE05.  Better dimensions, walls, platform,
 * crates.  The y2013x (asymptotic) STAR uses CAVE05.  First cut geometry remains
@@ -1357,6 +1360,8 @@ replace [exe tpcx10;] with [;"TPC test version";    TpcxConfig=1;
 replace [exe tpcx11;] with [;"TPC test version";    TpcxConfig=1;
                             ;"Disable old TPC";     TpceConfig=0;
                             ;"Set 1st TPAD config"; TpadConfig=1;]
+replace [exe tpcx16;] with ["TPC test version";     TpceConfig=0;
+                            ;"Set 6th TPAD config"; TpadConfig=6;]
                             
 
 replace [exe ISTB00;] with [;ISTB=on;IstbConfig=-1;]
@@ -2188,6 +2193,43 @@ Replace [exe estar1;] with [exe devE;]
 Replace [exe TPCIv1;] with [exe devT;]
 
 
+""" Setup eStar2 geometry """
+Replace [exe eStar2;] with [
+    """Deprecated detectors"""
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+
+    exe TPCX16; 
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+
+    exe MUTD13;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+
+    exe IDSM02;      "Inner detector support";
+    exe FGTDv55;     "Very forward FGT, 12 disks";
+
+    """Move the FMS N and S modules to an open position"""
+       FpdmPosition=1;
+       
+    """Switch on and configure the FSC geometry"""
+       FSCE=on;
+       FsceConfig=1;
+
+    """Activate the EIDD geometry"""
+       EIDD=on; 
+       EiddConfig=1; ]
+
+
 
 !//______________________________________________________________________________
 replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
@@ -2976,6 +3018,7 @@ If LL>0
 
   Case estar1  { eStar1 : eStar development geometry;     Geom = 'estar1  ';  exe estar1; }
   Case TPCIv1  { TPCIv1 : TPC inner pad upgrade geometry; Geom = 'TPCIv1  ';  exe TPCIv1; }
+  Case eStar2  { eStar2 : eStar development geometry;     Geom = 'eStar2  ';  exe eStar2; }
 
 
 ****************************************************************************************

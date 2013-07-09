@@ -212,14 +212,14 @@ void Geometry::StarsimGeometry( const Char_t *tag )
 AgModule *Geometry::CreateModule( const Char_t *module, const Char_t *top )
 {
 
-  /*
+#if 0
   if (top) {
     std::cout << ">>> Setting top volume = " << top << " <<<" << std::endl;
   }
   else {
     std::cout << ">>> Creating module    = " << module << " <<<" << std::endl;
   }
-  */
+#endif 
   Info( GetName(), Form("AgML/Geometry creating module %s",module) );
   if ( top )
     Info( GetName(), Form("AgML/Geometry setting top module %s / volume %s", module, top) );
@@ -1822,7 +1822,7 @@ Bool_t Geometry::TpcxInit()
   tpcxGeom.select="TPCX16"; {
     tpcxGeom.config = 1;
     tpcxGeom.padconfig=6;
-    tpcxGeom.module="TpcxGeo1";
+    tpcxGeom.module="TpcxGeo2";
     tpcxGeom.fill();
   };
 
@@ -2008,7 +2008,8 @@ Bool_t Geometry::FgtdInit()
 
 
   // vf -- very forward FGT
-  fgtdGeom.select="FGTDvf";   fgtdGeom.module="FgtdGeoV"; fgtdGeom.config=55;   fgtdGeom.fill();
+  fgtdGeom.select="FGTDvf";    fgtdGeom.module="FgtdGeoV"; fgtdGeom.config=55;   fgtdGeom.fill();
+  fgtdGeom.select="FGTDv55";   fgtdGeom.module="FgtdGeoV"; fgtdGeom.config=55;   fgtdGeom.fill();
 
 
   /*

@@ -1132,12 +1132,13 @@ void estar()
     geom.pipeFlag = "PIPE12";  geom.pipeStat = 1;
 
     // ================================================ The new Inner Detectors
-    geom.idsmFlag = "IDSM01";  geom.idsmStat = 1;
-    geom.fgtdFlag = "FGTD31";  geom.fgtdStat = 1;
+    geom.idsmFlag = "IDSM01";   geom.idsmStat = 1;
+    geom.fgtdFlag = "FGTDv55";  geom.fgtdStat = 1;
     // ================================================ 
     geom.fpdmFlag = "FPDM13";  geom.fpdmStat = 1;        // open FPDM
     geom.fsceFlag = "FSCEv0";  geom.fsceStat = 1;
     geom.eiddFlag = "EIDDv0";  geom.eiddStat = 1;
+    // ================================================ 
 
     setTitle("eSTAR upgrades development geometry");
     geom.fill();
