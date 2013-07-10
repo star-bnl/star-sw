@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.258 2013/06/11 10:08:40 jeromel Exp $
+// $Id: StMaker.cxx,v 1.259 2013/07/10 19:30:41 jwebb Exp $
 //
 //
 /*!
@@ -315,7 +315,9 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr21",      20200102,    18, "upgr21",   "y2007 + full TOF"}, // advertized simu 20061101
   {"dev13",       20200102,    19, "dev13",    "dev geo for 2013"}, // 
   {"devE",        20200102,    20, "devE",     "dev geo for Erick"}, // 
-  {"dev14",       20200102,    21, "dev14",    "dev geo for 2014"},
+  {"dev14",       20200102,    21, "dev14",    "dev geo for 2014"},  
+  {"eStar2",      20200102,    22, "eStar2",   "dev geometry for eStar"},
+
   {0,                    0,     0,        0,    0}
 };
 
@@ -1966,6 +1968,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.259  2013/07/10 19:30:41  jwebb
+// Added eStar2 definition.
+//
 // Revision 1.258  2013/06/11 10:08:40  jeromel
 // Slight blabla change
 //
