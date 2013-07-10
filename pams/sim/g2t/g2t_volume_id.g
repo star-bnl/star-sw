@@ -1,5 +1,10 @@
-* $Id: g2t_volume_id.g,v 1.71 2013/01/16 16:51:31 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.72 2013/07/10 20:34:20 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.72  2013/07/10 20:34:20  jwebb
+* Detects tpadconfig from TPCG structure instead of relying on versioning of
+* the TPC... of course, the best way would be to just use teh appropriate
+* TPAD structure and detect number of padrows, but this should work.
+*
 * Revision 1.71  2013/01/16 16:51:31  jwebb
 * Update BTOF volume id's to support GMT in y2013.
 *
@@ -206,7 +211,7 @@
 
 
       Structure  SVTG  {version}
-      Structure  TPCG  {version}
+      Structure  TPCG  {version, tpadconfig }
       Structure  VPDG  {version}
       Structure  BTOG  {version, int choice, posit1(2), posit2, posit3}
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
@@ -259,10 +264,12 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
           """ Intialize TPADs based on TPC version """
-          IF TPCG_version == 10 {
+          IF TPCG_tpadconfig==1 .or. _
+             TPCG_tpadconfig==4 .or. _
+             TPCG_tpadconfig==6 "Inner TPC upgrade 32 pads" {
 
-             nbpads = 68
-
+             nbpads = 32 "inner" + 32 "outer" + 4 "edge/fake"
+ 
              tpads = { 1, 1, 2, 3, 4, 5, 6, 7, 8, 9,
                       10,11,12,13,14,15,16,17,18,19,
                       20,21,22,23,24,25,26,27,28,29,
@@ -270,6 +277,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                       38,39,40,41,42,43,44,45,46,47,
                       48,49,50,51,52,53,54,55,56,57,
                       58,59,60,61,62,63,64,64 };
+
               isdets = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -277,10 +285,8 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                          0, 0, 0, 0, 0, 0, 0, 2 };
-                            
 
-
-          } else {
+          } else {           
 
              nbpads = 73
              tpads = { 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
