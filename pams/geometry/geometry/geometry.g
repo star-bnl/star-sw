@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.260 2013/07/09 18:37:00 jwebb Exp $
+* $Id: geometry.g,v 1.261 2013/07/10 21:19:08 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.261  2013/07/10 21:19:08  jwebb
+* Correction to eStar2 definition.
+*
 * Revision 1.260  2013/07/09 18:37:00  jwebb
 * Additions to support eStar2 model.
 *
@@ -1360,7 +1363,8 @@ replace [exe tpcx10;] with [;"TPC test version";    TpcxConfig=1;
 replace [exe tpcx11;] with [;"TPC test version";    TpcxConfig=1;
                             ;"Disable old TPC";     TpceConfig=0;
                             ;"Set 1st TPAD config"; TpadConfig=1;]
-replace [exe tpcx16;] with ["TPC test version";     TpceConfig=0;
+replace [exe tpcx16;] with ["TPC test version";     TpcxConfig=2;
+                            "Disable old TPC";      TpceConfig=0;
                             ;"Set 6th TPAD config"; TpadConfig=6;]
                             
 
@@ -4530,7 +4534,10 @@ c     write(*,*) 'TPC';
      if ( RmaxConfig>0) {        Call AgDetp add ('tpcg.rmax=',207.77,1); }
                                  Call tpcegeo3
                         }
+
+
      IF TpcxConfig==1   {                                                    Call TpcxGeo1;  }
+     IF TpcxConfig==2   {                                                    Call TpcxGeo2;  }
      IF TpceConfig==31 {         Call AgDETP add('tpcc.version=', 3.1, 1 );  Call TpceGeo3a; }
 
    }
