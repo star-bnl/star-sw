@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.29 2013/01/24 15:43:08 ramdebbe Exp $
+// $Id: StPeCMaker.cxx,v 1.30 2013/07/10 19:28:06 ramdebbe Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.30  2013/07/10 19:28:06  ramdebbe
+// added returnValue in StEvent input mode
+//
 // Revision 1.29  2013/01/24 15:43:08  ramdebbe
 // added more flags to choose input or output tracks tof etc.
 //
@@ -126,7 +129,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.29 2013/01/24 15:43:08 ramdebbe Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.30 2013/07/10 19:28:06 ramdebbe Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -172,6 +175,7 @@ Int_t StPeCMaker::Init() {
 
    //Add branches
    uDstTree->Branch("Event", "StPeCEvent", &pevent, 94000, 99);
+    LOG_INFO << "StPeCMaker Init: after Event branch add ---------- " << endm;
    uDstTree->Branch("Trigger", "StPeCTrigger", &trigger, 64000, 99);
    uDstTree->Branch("Geant", "StPeCGeant", &geant, 64000, 99);
     LOG_INFO << "StPeCMaker Init: after branch add ---------- " << endm;
@@ -181,7 +185,7 @@ Int_t StPeCMaker::Init() {
    TDirectory * snapShots = gDirectory->mkdir("snapShots");
    snapShots->cd();
    fSnapShots = new TList();
-//    Int_t snapLimit = 100;
+   Int_t snapLimit = 100;
    for (Int_t i=0;i<snapLimit;i++){
 
      fSnapShots->Add(new TH2F(Form("snapShot%d",i), Form("y z view of event %d", i) , 100, -250., 250., 100, -200., 200.));
@@ -264,7 +268,7 @@ Int_t StPeCMaker::Make()
 	 return kStOK; 
        }
      //Process StEvent trigger simulations
-     trigger->process(event);
+     returnValue = trigger->process(event);
 
      StSPtrVecTrackNode& tempn = event->trackNodes();
      NTracks = tempn.size();
@@ -286,7 +290,7 @@ Int_t StPeCMaker::Make()
       StL0Trigger &trig = muDst->event()->l0Trigger();
       tw = trig.triggerWord();
 
-      trigger->process(muDst);
+      returnValue = trigger->process(muDst);
       ok = pevent->fill(event, muDst);
    }   
    
@@ -308,7 +312,8 @@ Int_t StPeCMaker::Make()
 //    else       ok = pevent->fill(muDst);
 //    if (event) ok = pevent->fill(event, muDst);  //RD 
    //   ok = pevent->fill(muDst); // 11-DEC-2011 for embedding work
-   if ( !ok && returnValue>0) {    // || geantBranch  ) {  RD 15-SEP
+//    if ( !ok && returnValue>0) {    // || geantBranch  ) {  RD 15-SEP
+//    if ( returnValue>0) {    // || geantBranch  ) {  RD 15-SEP  //25MAR2013 to read pp fast offline  //turn off trigger check
      //LOG_INFO << "Fill Event to Tree!**********************" << endm;
      uDstTree->Fill();
 
@@ -322,9 +327,9 @@ Int_t StPeCMaker::Make()
      //        else if (filter == 2)
      // 	 flag = Cuts4Prong(event, pevent);
      //        }
-   } else {
+//    } else {                                                                   //turn off trigger
 //      LOG_INFO << "Do Not fill Event to Tree!**********************" << endm;
-   }
+//    }           //turn off trigger 
    
    //Cleanup
    //LOG_INFO << "Before clean up!**********************" << endm;
@@ -408,7 +413,7 @@ Int_t StPeCMaker::Finish()
 {
 // 	cout << "Entering StPeCMaker::Finish()" << endl;
 	TDirectory * saveDir = gDirectory;
-	m_outfile->cd("snapshots");
+	m_outfile->cd("snapShots");
 	fSnapShots->Write();
 	gDirectory = saveDir;
 	m_outfile->ls();
