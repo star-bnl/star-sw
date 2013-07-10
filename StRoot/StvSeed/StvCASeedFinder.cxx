@@ -217,7 +217,7 @@ void StvCASeedFinder::MakeSettings()
 //_____________________________________________________________________________
 void StvCASeedFinder::MakeHits()
 {
-const static double TAN15 = tan(M_PI*16/180); //16 != mistype
+const static double TAN15 = tan(M_PI*20/180); //18 != mistype
 
   fStvHits = StTGeoProxy::Inst()->GetAllHits(); 
   if (!fStvHits) return;
