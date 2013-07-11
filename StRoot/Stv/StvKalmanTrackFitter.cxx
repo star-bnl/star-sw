@@ -179,6 +179,7 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 	myXi2 = fitt->Xi2(hit); iFailed = fitt->IsFailed();
 //      =================================================
 	node->SetXi2(myXi2,lane);
+        if (iFailed == StvFitter::kBigErrs) iFailed = 0;
 	if (iFailed ) nErr+=1; 			//Fit is bad yet
 	if (myXi2> kons->mXi2Hit) nErr+=10; //Fit is bad yet
         if ( myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
@@ -263,6 +264,7 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 
 	myXi2 = fitt->Xi2(hit); iFailed = fitt->IsFailed();
 //      =================================================
+        if (iFailed== StvFitter::kBigErrs) iFailed=0;
 	node->SetXi2(myXi2,2);
 	if (iFailed		) nErr+=1000000; //Fit is bad yet
 	if (myXi2> kons->mXi2Hit) nErr+=10000000; //Fit is bad yet
