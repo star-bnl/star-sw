@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.3 2013/05/20 18:44:02 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.4 2013/07/11 01:16:16 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -43,7 +43,7 @@ void StvELossTrak::Set(double A, double Z,    double dens, double x0
   fdEdX=0;fdEdXErr2=0;
   double p2 = fP*fP,m2 = fM*fM;
   fE = sqrt(p2+m2);
-  fFak = (14.1*14.1*(p2+m2))/(p2*p2*1e6);
+  fFak = (14.1*14.1)*(p2+m2)/(p2*p2*1e6);
   double T = fE-fM;
   if (fA>0) {
     fdEdX = gdrelx(fA,fZ,fDens,T,fM) * fDens*fCharge2;
@@ -87,23 +87,24 @@ void StvELossTrak::Add(double len)
 {
   double l1 = fTotLen,l2 = l1+len;
   assert(fX0>0);
-  fMCS[0] += len/fX0				*fFak;
-  fMCS[1] -= (l2*l2-l1*l1)/fX0			*fFak;
-  fMCS[2] += (l2*l2*l2-l1*l1*l1)/(3*fX0)	*fFak;
+  double addTheta2 = len/fX0*fFak;
+  fOrth2 += (fTheta2 + addTheta2/3)*len*len;
+  fTheta2 += addTheta2;
+
   fTotELoss += fdEdX *len;
   fTotELossErr2 += fdEdXErr2*len;
 
-  fTotLen = l2;
+  fTotLen+=len;
 }
 //_____________________________________________________________________________
 double StvELossTrak::GetTheta2() const 
 {
-  return fMCS[0];
+  return fTheta2;
 }
 //_____________________________________________________________________________
 double StvELossTrak::GetOrt2() const 
 {
-  return (fMCS[2]+fTotLen*(fMCS[1]+fTotLen*fMCS[0]));
+  return fOrth2;
 }
 //_____________________________________________________________________________
 double StvELossTrak::dPP() const	

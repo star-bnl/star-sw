@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.3 2013/05/20 18:43:58 perev Exp $
+// $Id: StvELossTrak.h,v 1.4 2013/07/11 01:16:19 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -52,7 +52,8 @@ char   fMed[1];
 double fTotELoss; 	///accumulated energy loss
 double fTotELossErr2;	///accumulated error of energy loss
 double fTotLen;		///accumulated track length
-double fMCS[3];
+double fTheta2;
+double fOrth2;
 char   fEnd[1];
 ClassDef(StvELossTrak,0) 
 };
