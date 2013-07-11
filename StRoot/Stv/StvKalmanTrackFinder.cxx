@@ -88,15 +88,12 @@ StvDebug::Count("SeedEta",seedEta);
 	nAdded = FindTrack(0);
 //=============================
 
-//		DebugDebugDebugDebugDebugDebugDebugDebug
-StvDebug::Count("NumCalls",0);
-if (nAdded) StvDebug::Count("NumCalls",1);
-//??StvTrack geanTrak(*mCurrTrak);
-//		DebugDebugDebugDebugDebugDebugDebugDebug
-
-
         mSeedFinder->FeedBack(nAdded);
 	if (!nAdded) 				continue;
+//		DebugDebugDebugDebugDebugDebugDebugDebug
+StvDebug::Count("Xi2.geant",mCurrTrak->GetXi2());
+StvTrack geanTrak(*mCurrTrak);
+//		DebugDebugDebugDebugDebugDebugDebugDebug
 
 StvDebug::Count("SeedDive",seedEta);
 
@@ -105,25 +102,23 @@ StvDebug::Count("SeedDive",seedEta);
         int nFitHits = mCurrTrak->GetNHits();
 	do {
 	  if (!mRefit) 				continue;
-          if(nFitHits<=1)			break;
+          if(nFitHits<3)			break;
 	  ans = Refit(1);
-
-if (!ans) StvDebug::Count("NumCalls",2);
-//??StvTrack refiTrak(*mCurrTrak);
-
-
 	  if (ans) 				break;
+StvDebug::Count("Xi2.refi2",mCurrTrak->GetXi2());
+StvTrack refiTrak(*mCurrTrak);
           nHits = mCurrTrak->GetNHits();
           if (nHits<=1) 			break;
 	  nAdded = FindTrack(1);
-//??StvTrack bakwTrak(*mCurrTrak);
+          if (nAdded<=0)			continue;;
           nHits = mCurrTrak->GetNHits();
           if (nHits<=3) 			break;
-          if (nAdded<=0)			continue;;
+StvDebug::Count("Xi2.backw",mCurrTrak->GetXi2());
+StvTrack bakwTrak(*mCurrTrak);
 // 			few hits added. Refit track to beam again 
 	  ans = Refit(0);
-if (!ans) StvDebug::Count("NumCalls",4);
 	  if (ans) 				break;
+StvDebug::Count("Xi2.REFIT",mCurrTrak->GetXi2());
 	} while((fail=0));		
 	nHits = mCurrTrak->GetNHits();
 	if (nHits < myMinHits)	fail+=100;		;
@@ -132,18 +127,7 @@ if (!fail) StvDebug::Count("NumCalls",5);
 	if (fail) 	{//Track is failed, release hits & continue
 	  mCurrTrak->CutTail();			continue;
         }
-
-StvDebug::Count("SeedRefit",seedEta);
-        
 	StvNode *node = MakeDcaNode(mCurrTrak);
-
-
-static int akio=0;
-if (akio && node) { 
- int ak = ThruFgt(node->GetFP());
- if (ak) {
-   StvDebug::Break(-3);
- } }
  
 
 	kit->GetTracks().push_back(mCurrTrak);
@@ -481,8 +465,8 @@ enum {kBadHits=5};
 
     }// End Fit iters
     
-    state = (ans!=0) + 10*((anz!=0) + 10*(!converged) 
-          + 10*(mCurrTrak->GetXi2()>kons->mXi2Trk)+10*(nHits <= kBadHits));
+    state = (ans!=0) + 10*((anz!=0) + 10*((!converged) 
+          + 10*((mCurrTrak->GetXi2()>kons->mXi2Trk)+10*(nHits <= kBadHits))));
     if (!state) 		break;
     if (nHits <= kBadHits) 	break;
     StvNode *badNode=mCurrTrak->GetNode(StvTrack::kMaxXi2);
