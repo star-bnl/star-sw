@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.20 2013/07/07 22:25:37 perev Exp $
+ * $Id: StvNode.cxx,v 1.21 2013/07/11 01:12:06 perev Exp $
  *
  * /author Victor Perev
  */
@@ -165,7 +165,7 @@ void StvNode::SetHit(StvHit *hit)
 void StvNode::SetMem(StvHit *hit[2],double xi2[2])
 {
   memcpy(memHit,hit,sizeof(memHit));
-  memcpy(memXi2,xi2,sizeof(memXi2));
+  memXi2[0]=xi2[0];memXi2[1]=xi2[1];
 }
 //________________________________________________________________________________
 void StvNode::UpdateDca()

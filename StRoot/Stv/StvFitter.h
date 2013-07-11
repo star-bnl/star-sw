@@ -16,7 +16,9 @@ class StvHitErrCalculator;
 
 class StvFitter : public TNamed {
 public:	
+enum E_Failed {kBigVari=-1,kBigErrs=-99};
 
+public:	
 StvFitter(const char *name="DefaultFitter");
       void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                  ,      StvNodePars *otPars=0,     StvFitErrs *otErrs=0);

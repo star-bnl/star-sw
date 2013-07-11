@@ -91,7 +91,7 @@ void Print(const char *opt) const;
 const StHitPlane *mHitPlane;
 StvHit *mHit;
 StvHit *memHit[2];
-double  memXi2[2];
+ float  memXi2[2];
 
 ///  Z mag field in units PGev = Hz*Rcm
   mutable double mHz;
