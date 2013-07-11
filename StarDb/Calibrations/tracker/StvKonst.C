@@ -11,11 +11,11 @@ St_StvKonst *tableSet = new St_StvKonst("StvKonst",1);
 memset(&row,0,tableSet->GetRowSize());
   
 
-  double myProb = 1e-4;
+  double myProb = 1e-4,myFaktor = 3;
   row.mXi2Hit = ROOT::Math::chisquared_quantile_c(myProb,2);		//Xi2 to accept new hit
-  row.mXi2Trk = ROOT::Math::chisquared_quantile_c(myProb,15)/15;	//Xi2 to accept new track
+  row.mXi2Trk = ROOT::Math::chisquared_quantile_c(myProb,30)/30*myFaktor;//Xi2 to accept new track
   row.mXi2Vtx = ROOT::Math::chisquared_quantile_c(myProb,2);		//Xi2 to accept vertex
-  row.mXi2Joi = ROOT::Math::chisquared_quantile_c(myProb,5);		//Xi2 in Refit join left & right subtrack
+  row.mXi2Joi = ROOT::Math::chisquared_quantile_c(myProb,5)*myFaktor;	//Xi2 in Refit join left & right subtrack
   row.mXi2Hlx = row.mXi2Hit*9;  //Xi2 in Helix, .
   row.mRxyMax = 300;		//Max radius for tracking
   row.mZMax   = 300;		//Max Z      for tracking
