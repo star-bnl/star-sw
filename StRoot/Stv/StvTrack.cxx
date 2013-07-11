@@ -22,7 +22,13 @@ StvTrack::StvTrack()
 //______________________________________________________________________________
 StvTrack::~StvTrack()
 {
-  unset(); 		
+static StvToolkit *kit = StvToolkit::Inst();
+  for (StvNodeIter it = begin();it != end();++it) 
+  {
+    StvNode *node = *it;
+    kit->FreeNode(node);		
+  }
+  clear(); 		
 }
 //______________________________________________________________________________
 void StvTrack::reset()
