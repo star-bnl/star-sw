@@ -256,6 +256,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     innNode->SetELoss(eld,idir);
     err[0].Add(innNode->mELossData,par[0]);
     err[0].Recov();
+    curNode->SetXDive(par[0]);
     curNode->SetPre(par[0],err[0],0);
     innNode->SetDer(derivFit,idir);
 
