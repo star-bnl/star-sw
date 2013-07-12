@@ -147,8 +147,8 @@ StvNodePars &StvNodePars::merge(double wt,StvNodePars &other)
 void StvNodePars::set(const THelixTrack *th, double Hz)
 {
   memcpy(&_x,th->Pos(),3*sizeof(_x));
-  assert(fabs(_x)<300);
-  assert(fabs(_y)<300);
+  assert(fabs(_x)<500);
+  assert(fabs(_y)<500);
   _psi = atan2(th->Dir()[1],th->Dir()[0]);
   double sinL = th->Dir()[2];
   double cosL = sqrt((1-sinL)*(1+sinL));
