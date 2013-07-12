@@ -75,6 +75,7 @@ const StvELossData &GetELoss() const		{ return mELossData;}
    void SetPre(StvNodePars &par,StvFitErrs &err,int dir); 	
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 
    void SetDer(const StvFitDers &der, int dir);
+   void SetXDive(const double xdive[3])		{memcpy(mXDive,xdive,sizeof(mXDive));}
     int ResetELoss(double s,const StvNodePars &pars);
  StvNode::ENodeType GetType() const 			{return (StvNode::ENodeType)mType;}
                void SetType(StvNode::ENodeType ty) 	{mType =(char)ty;}
@@ -88,6 +89,7 @@ void Print(const char *opt) const;
 
  char mBeg[1];  
  char mType; 			//0=regular,1=dca,2=primary
+ double mXDive[3];		// xyz from Diver
 const StHitPlane *mHitPlane;
 StvHit *mHit;
 StvHit *memHit[2];
