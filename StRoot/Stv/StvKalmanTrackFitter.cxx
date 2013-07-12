@@ -300,7 +300,6 @@ static int nCall=0; nCall++;
   StvNode *innNode=0,*outNode=0;
   if (!dir) {innNode = node; outNode=preNode;}
   else      {outNode = node; innNode=preNode;}
-//????  assert(innNode->GetFP().getRxy()<outNode->GetFP().getRxy());
 
 
 //		Propagate with THelixTrack
@@ -312,7 +311,10 @@ static int nCall=0; nCall++;
   const StvFitErrs  &preErrs =  preNode->mFE[lane];
   prePars.get(&myHlx);
   preErrs.Get(&myHlx);
-  const double *Xnode = node->mFP[0].P;
+  double Xnode[3];
+  if (node->mHit) 	{ TCL::ucopy(node->mHit->x(),Xnode,3);}
+  else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
+
   double dS = myHlx.Path(Xnode);
   StvHlxDers derHlx;
   StvFitDers derFit;
