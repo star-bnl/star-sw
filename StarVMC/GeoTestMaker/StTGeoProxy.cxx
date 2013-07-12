@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.6 2013/07/02 04:00:06 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.7 2013/07/12 02:37:48 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -1559,8 +1559,9 @@ void StTGeoHitShape::Update(double z1, double z2, double rxy)
 //_____________________________________________________________________________
 int  StTGeoHitShape::Inside(double z,double rxy) const
 {
-   if (z<=fZMin) return 0;
-   if (z>=fZMax) return 0;
+   if (z<=fZMin) 	return 0;
+   if (z>=fZMax) 	return 0;
+   if (rxy>=fRMax) 	return 0;
    int jj = (int)((z-fZMin)/(fZMax-fZMin)*kNZ);
    if (rxy >=fRxy[jj]) return 0;
    return 1;
