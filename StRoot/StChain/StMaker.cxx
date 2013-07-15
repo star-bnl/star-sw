@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.259 2013/07/10 19:30:41 jwebb Exp $
+// $Id: StMaker.cxx,v 1.260 2013/07/15 17:15:19 jwebb Exp $
 //
 //
 /*!
@@ -316,8 +316,9 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"dev13",       20200102,    19, "dev13",    "dev geo for 2013"}, // 
   {"devE",        20200102,    20, "devE",     "dev geo for Erick"}, // 
   {"dev14",       20200102,    21, "dev14",    "dev geo for 2014"},  
-  {"eStar2",      20200102,    22, "eStar2",   "dev geometry for eStar"},
-
+  // eStar simulations starting w/ timestamp 12/10/2020
+  {"eStar2",      20201210,     0, "eStar2",   "dev geometry for eStar"},
+  // 
   {0,                    0,     0,        0,    0}
 };
 
@@ -1968,6 +1969,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.260  2013/07/15 17:15:19  jwebb
+// Updated timestamp for eStar simu.
+//
 // Revision 1.259  2013/07/10 19:30:41  jwebb
 // Added eStar2 definition.
 //
