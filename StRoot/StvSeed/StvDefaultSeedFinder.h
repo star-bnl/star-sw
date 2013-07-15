@@ -64,6 +64,7 @@ char  mEnd[1];
 
 class StvDefaultSeedFinder : public StvSeedFinder
 {
+enum { kNDejavu=4 };
 public:
   StvDefaultSeedFinder(const char *name="Default");
    ~StvDefaultSeedFinder(){;}
@@ -79,6 +80,9 @@ private:
 char mBeg[1];
 int fIPass,fNSeeds[2],fNUsed[2];
 char mMed[1];
+int mNDejavu;
+const StvHit *mDejavu[kNDejavu];
+
 StMultiKeyMap 		*fMultiHits;
 StMultiKeyMapIter 	*fMultiIter;
 Stv1stHitMap  		*f1stHitMap;
