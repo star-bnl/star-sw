@@ -1,52 +1,45 @@
 class StMaker;
 void rmMaker(const StMaker *top,const char *key);
-int runStv(const char *daqFile,const char *flg,int nEvents)
+int runStv(const char *daqFile,const char *flg,int nEvents,int myFlag)
 {
+int stv = (myFlag     )%10;
+int trs = (myFlag/10  )%10;
+int mcm = (myFlag/100 )%10;
+int knn = (myFlag/1000)%10;
+
+printf("\n***  runStv(\"%s\",\"%s\",%d,%d)\n\n",daqFile,flg,nEvents,myFlag);
 gROOT->LoadMacro("bfc.C");
-gROOT->LoadMacro("$STAR/StarVMC/GeoTestMaker/GeoTestLoad.C");
-GeoTestLoad();
-gSystem->Load("/usr/lib/mysql/libmysqlclient_r.so");
 TString opt(flg),fil(daqFile);
 int fr=1,to=nEvents;
 int ierr = 0;
 
-opt += " StiPulls";
+opt += " StvPulls";
 
 
-bfc(-1,opt,fil);
-// StMaker::lsMakers(chain);
-// chain->SetAttr(".call","SetDebug(1)","St_db_Maker::");
-// chain->SetAttr(".call","SetActive(0)","St_geant_Maker::");
-// chain->SetAttr(".call","SetActive(0)","StTofHitMaker::");
-// chain->SetAttr(".call","SetActive(0)","StTofrMatchMaker::");
-// chain->SetAttr(".call","SetActive(0)","StTofCalibMaker::");
+bfc(-1,opt,fil);//StMaker::lsMakers(chain);
+chain->SetAttr("blackList","Svt","St_db_Maker::");
 
-chain->SetAttr(".call","SetActive(0)",".*Tof.*Maker::");
-chain->SetAttr(".call","SetActive(0)",".*Emc.*Maker");
-chain->SetAttr(".call","SetActive(0)","dEdxY2");
+StIOInterFace *iomk = (StIOInterFace *)chain->GetMaker("inputStream");
+if (iomk && !fil.Contains(".geant.")) {
+ TString dir("/star/simu/simu/perev/StiVMC/offline/users/perev/fitErrSim/");
+ iomk->SetBranch("geantBranch",dir,"r");
+}
+
 
 StMaker *mk=0;
-gSystem->Load("StvUtil.so");
-gSystem->Load("Stv.so");
-gSystem->Load("StvMaker.so");
-mk = new StvMaker();
-chain->AddAfter("Sti",mk);
 
-rmMaker(chain,"::geant");
-rmMaker(chain,"MuDst.*");
-rmMaker(chain,"StFtpc.*::");
-rmMaker(chain,"StEmc.*::");
-rmMaker(chain,"StEEmc.*::");
-rmMaker(chain,"Sti");
+StMaker::lsMakers(chain);
+
+if (nEvents>=0) chain->Init();
+
+//==========================================
 rmMaker(chain,"StKinkMaker");
-rmMaker(chain,"StXiFinderMaker");
-
-
-//StMaker::lsMakers(chain);
-
-chain->Init();
-
-chain->EventLoop(nEvents);
+//==========================================
+if (knn){
+ chain->SetAttr("seedFinders","KN","Stv");
+ chain->SetAttr("seedFinders","KN","Sti");
+}
+if (nEvents>=0) chain->EventLoop(nEvents);
 return 99;
 }
 
