@@ -63,6 +63,7 @@ void StvDefaultSeedFinder::Reset()
 int StvDefaultSeedFinder::Again()
 {
   *f1stHitMapIter = f1stHitMap->begin();
+   mNDejavu = 0;
    return 1;
 }
 //_____________________________________________________________________________
@@ -119,19 +120,15 @@ inline static float Impact2(const float dir[3],const float pnt[3])
 //_____________________________________________________________________________
 const THelixTrack* StvDefaultSeedFinder::NextSeed()
 {
-static int myDeb = 0;
 std::vector<TObject*> mySeedObjs;
 
   StvHit *fstHit,*selHit=0; 
-
-  for (;(*f1stHitMapIter)!=f1stHitMap->end();++(*f1stHitMapIter)) {//1st hit loop
+ 
+  while ((*f1stHitMapIter)!=f1stHitMap->end()) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
-    assert(fstHit);
-    const float *fstX = fstHit->x();
-    int myBreak = StvDebug::Break(fstX[0],fstX[1],fstX[2]); if(myBreak){}
-
-    if (fstHit->timesUsed()) continue;
-
+    if (fstHit->timesUsed() || mNDejavu>=kNDejavu) {		//1st hit is used
+      ++(*f1stHitMapIter); mNDejavu = 0; continue;
+    }
     fSeedHits.clear();
     mSel.Reset();
     selHit = fstHit;
@@ -147,15 +144,21 @@ std::vector<TObject*> mySeedObjs;
       mSel.Prepare();
       fMultiIter->Set(fMultiHits->GetTop(),mSel.mLim[0],mSel.mLim[1]);
       selHit=0; 
-      TObject *selObj=0;	//This guy for graphics only
       for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
       { 
 	StvHit *nexHit = (StvHit*)node->GetObj();
         if (nexHit->timesUsed()) 	continue;
         const StHitPlane *hpNex = nexHit->detector();
-        if (hpNex==hp) 	continue;
+        if (hpNex==hp) 			continue;
+        int dejavu = 0;
+        for (int j=0;j<mNDejavu;j++) {
+          if (mDejavu[j]!=nexHit) continue;
+          dejavu = 2013; break;
+        }
+        if (dejavu) 			continue;
 	int ans = mSel.Reject(nexHit->x(),hpNex);
-	if (ans>0) continue;
+	if (ans>0) 			continue;
+
 //			Selecting the best
         selHit=nexHit;
         if (!ans)  continue;
@@ -166,26 +169,23 @@ std::vector<TObject*> mySeedObjs;
 
       if (!selHit) break; //No more hits 
 
-if (myDeb>0) { mySeedObjs.push_back(selObj);}
-
-    }// endNext hit loop
-
+    }// end NextHit loop
 //		Mark hits as unused when seed is created. Only tracker
 //		has right to deside to use or not to use
     fSeedHits.unused();
-    for (int j=0;j<(int)fSeedHits.size();j++) {
-      assert(!fSeedHits[j]->timesUsed());
-    }
+//		If no hits found, go to next 1st hit
+    if ((int)fSeedHits.size()<=1) {mNDejavu = 99; 	continue;}
+
+//		Store second hit to skip it next time
+    mDejavu[mNDejavu++]=fSeedHits[1];
+//	If too short seed go to next 1st hit
+    if (fSeedHits.size() < kMinHits) 			continue;
 
 
-    const THelixTrack *hel = 0;
-    if (fSeedHits.size() >= kMinHits) hel = Approx();
-    if (hel) { fNSeeds[0]++; ++(*f1stHitMapIter); return hel;}		//Good boy
+    const THelixTrack *hel = Approx();
+    if (hel) { fNSeeds[0]++;;return hel;}		//Good boy
  //		Bad seed
     fNUsed[0] -= fSeedHits.size();
-
-if (myDeb>0){for (int i=0;i<(int)mySeedObjs.size();i++) {delete mySeedObjs[i];}}
-
   }// end 1st hit loop
   fNSeeds[1]+=fNSeeds[0]; fNUsed[1]+= fNUsed[0];
   return 0;
