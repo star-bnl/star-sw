@@ -389,14 +389,12 @@ THelixTrack* StvKalmanTrackFitter::GetHelix() const {return mHelx;}
 int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
 {
 static int nCall=0;nCall++;
+enum {kUseErrs=1, kUpdate=2, kPrint=4};
 // mode &1 use err
 // mode &2 = update track
 // mode &4 = print
-// mode &8 = print+compare
-// mode &16 = histogramm
 
-  if (!mode  ) mode = 4;
-  if ( mode&8) mode|= 4;
+  if (!mode         ) mode = kPrint;
   mXi2 = 0;
   if (!mHelx) mHelx = new THelixFitter;
   mHelx->Clear();
@@ -409,21 +407,19 @@ static int nCall=0;nCall++;
     const StvHit *hit= node->GetHit();
     if (!hit) continue;
     hlx.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
-    if(mode&1) {	//Account errors
+    if(mode&kUseErrs) 		{	//Account errors
       double cos2li = node->GetFP()._tanl; cos2li = (1+cos2li*cos2li);
       const double *rr = node->GetHE();    
-      assert(rr[0]>0);
-      assert(rr[2]>0);
-      assert(rr[0]*rr[2]>rr[1]*rr[1]);
+      assert(rr[0]>0);assert(rr[2]>0);assert(rr[0]*rr[2]>rr[1]*rr[1]);
       hlx.AddErr( rr[0],rr[2]*cos2li);
     }
   }  
-  mXi2 = 3e33; if (hlx.Used()<=3) return 1;
+  mXi2 = 3e33; if (hlx.Used()<3) return 1;
   mXi2 =hlx.Fit();
-  if(mode&1) { hlx.MakeErrs();}
+  if(mode&kUseErrs) { hlx.MakeErrs();}
   double dL = hlx.Path(trak->front()->GetFP().P);
   hlx.Move(dL);
-
+  if ((mode&(kUpdate|kPrint))==0) return 0;
   node=0;
   double dHit[3],tstXi2=0,myXi2=0;
 
@@ -435,8 +431,10 @@ static int nCall=0;nCall++;
     iNode++;preNode=node; node = *it;
     StvNodePars sFP = node->GetFP(0);
     const StvHit *hit = node->GetHit();
-    const double *X = sFP.P;
-    if (hit) {for (int i=0;i<3;i++) {dHit[i]=hit->x()[i];};X = dHit;}
+    const float *hix = (hit)? hit->x():0;
+
+    const double *X = node->mXDive;
+    if (hit) {for (int i=0;i<3;i++) {dHit[i]=hix[i];};X = dHit;}
     double dS = myHlx.Path(X); myHlx.Move(dS,Fhlx);
     totLen+=dS;
     StvNodePars hFP; hFP.set(&myHlx,sFP._hz);
@@ -446,8 +444,7 @@ static int nCall=0;nCall++;
 
 
     myXi2 = 6e6;
-    if (hit) {//Hit is there. Calculate Xi2i etc...
-      const float  *hix = hit->x();
+    if (hix) {//Hit is there. Calculate Xi2i etc...
       StvNodePars iFP(hFP); iFP._x=hix[0];iFP._y=hix[1];iFP._z=hix[2];
       StvFitPars  fp = hFP-iFP;
 
@@ -458,27 +455,22 @@ static int nCall=0;nCall++;
        tstXi2 +=  myXi2;
     }
 
-    if (mode&2)	{ 		//Update
+    if (mode&kUpdate)	{ 		//Update
       node->mLen = totLen;
-      node->SetFit(hFP,hFE,3);
-      node->SetXi2(myXi2,3);
+      node->SetPre(hFP,hFE,0);
+      node->SetFit(hFP,hFE,0);
+      node->SetXi2(myXi2,0);
     }
 
-    if (mode&4)	{ 		//Print Helix
+    if (mode&kPrint)	{ 		//Print Helix
       printf("HelixPars(%g) Xi2i=%g ",totLen,myXi2); hFP.print();
       if (mode&1) hFE.Print("HelixErrs");
     }  
-
-    if (mode&8)	{ 		//Print StvFit
-      printf("StvixPars(%g) Xi2i=%g ",totLen,node->GetXi2()); sFP.print();
-      sFE.Print("StvixErrs");
-    }
     
   }//end of hit loop
 
   tstXi2/=hlx.Ndf();if (tstXi2){};
   double qwe = mXi2; if (qwe){};//only to see it in gdb
-//??  assert(fabs(tstXi2-mXi2)< 0.1*(tstXi2+mXi2));
 
 
   return 0;

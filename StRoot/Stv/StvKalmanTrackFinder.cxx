@@ -92,6 +92,7 @@ StvDebug::Count("SeedEta",seedEta);
 	if (!nAdded) 				continue;
 //		DebugDebugDebugDebugDebugDebugDebugDebug
 StvDebug::Count("Xi2.geant",mCurrTrak->GetXi2());
+StvDebug::Count("CALLS",1);
 StvTrack geanTrak(*mCurrTrak);
 //		DebugDebugDebugDebugDebugDebugDebugDebug
 
@@ -103,21 +104,31 @@ StvDebug::Count("SeedDive",seedEta);
 	do {
 	  if (!mRefit) 				continue;
           if(nFitHits<3)			break;
+//=============================
 	  ans = Refit(1);
+//=============================
 	  if (ans) 				break;
+StvDebug::Count("CALLS",2);
 StvDebug::Count("Xi2.refi2",mCurrTrak->GetXi2());
 StvTrack refiTrak(*mCurrTrak);
           nHits = mCurrTrak->GetNHits();
-          if (nHits<=1) 			break;
+          if (nHits<=3) 			break;
+//=============================
 	  nAdded = FindTrack(1);
+//=============================
           if (nAdded<=0)			continue;;
+StvDebug::Count("CALLS",3);
           nHits = mCurrTrak->GetNHits();
           if (nHits<=3) 			break;
 StvDebug::Count("Xi2.backw",mCurrTrak->GetXi2());
 StvTrack bakwTrak(*mCurrTrak);
 // 			few hits added. Refit track to beam again 
+//=============================
 	  ans = Refit(0);
+//=============================
 	  if (ans) 				break;
+StvDebug::Count("CALLS",4);
+
 StvDebug::Count("Xi2.REFIT",mCurrTrak->GetXi2());
 	} while((fail=0));		
 	nHits = mCurrTrak->GetNHits();
@@ -127,7 +138,8 @@ if (!fail) StvDebug::Count("NumCalls",5);
 	if (fail) 	{//Track is failed, release hits & continue
 	  mCurrTrak->CutTail();			continue;
         }
-	StvNode *node = MakeDcaNode(mCurrTrak);
+StvDebug::Count("CALLS",5);
+	StvNode *node = MakeDcaNode(mCurrTrak); if(node){};
  
 
 	kit->GetTracks().push_back(mCurrTrak);
@@ -448,6 +460,7 @@ enum {kBadHits=5};
     for (int refIt=0; refIt<55; refIt++)  	{	//Fit iters
       nIters++;
       ans = tkf->Refit(mCurrTrak,idir,lane,1);
+StvDebug::Count("CALLS",10);
 //    ==================================
       nHits=tkf->NHits();
       if (nHits < kBadHits) break;
@@ -455,6 +468,7 @@ enum {kBadHits=5};
       
       StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
       anz = tkf->Refit(mCurrTrak,1-idir,1-lane,1); 
+StvDebug::Count("CALLS",10);
   //        ==========================================
       nHits=tkf->NHits();
       if (nHits < kBadHits) break;
