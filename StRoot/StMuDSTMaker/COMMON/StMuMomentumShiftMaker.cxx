@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuMomentumShiftMaker.cxx,v 1.9 2013/04/10 19:28:35 jeromel Exp $
+ * $Id: StMuMomentumShiftMaker.cxx,v 1.10 2013/07/16 14:30:30 fisyak Exp $
  * Author: Marco van Leeuwen, LBNL
  *
  * This class is used to correct the momenta of tracks on MicroDst after 
@@ -120,11 +120,13 @@ int StMuMomentumShiftMaker::Make() {
     StMuTrack *track= mudst->globalTracks(i_glob);
     ScaleMomentum(track);
   }
+#if 0
   Int_t n_other=mudst->numberOfOtherTracks();
   for (Int_t i_other=0; i_other < n_other; i_other++) {
     StMuTrack *track= mudst->otherTracks(i_other);
     ScaleMomentum(track);
   }
+#endif
   /* Skip L3 tracks for now, they were reconstructed seperately
   Int_t n_l3=mudst->numberOfL3Tracks();
   for (Int_t i_l3=0; i_l3 < n_l3; i_l3++) {

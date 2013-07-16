@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.15 2013/04/10 19:15:53 jeromel Exp $
+ * $Id: StVertex.cxx,v 2.16 2013/07/16 14:29:04 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
- * Revision 2.15  2013/04/10 19:15:53  jeromel
- * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
+ * Revision 2.16  2013/07/16 14:29:04  fisyak
+ * Restore mass fit tracks
+ *
+ * Revision 2.14  2013/04/05 15:11:33  ullrich
+ * Changes due to the addition of StTrackMassFit (Yuri)
  *
  * Revision 2.13  2012/05/07 14:42:58  fisyak
  * Add handilings for Track to Fast Detectors Matching
@@ -71,8 +74,10 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.15 2013/04/10 19:15:53 jeromel Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.16 2013/07/16 14:29:04 fisyak Exp $";
+
 UInt_t StVertex::fgNoFitPointCutForGoodTrack = 15;
+
 StVertex::StVertex()
 {
     mType = kUndefinedVtxId;
@@ -83,9 +88,9 @@ Int_t
 StVertex::operator==(const StVertex& v) const
 {
     return mType == v.mType &&
-        mFlag == v.mFlag &&
-        mPosition == v.mPosition &&
-        mChiSquared == v.mChiSquared;
+    mFlag == v.mFlag &&
+    mPosition == v.mPosition &&
+    mChiSquared == v.mChiSquared;
 }
 
 Int_t
@@ -106,7 +111,7 @@ StVertex::covariantMatrix() const
     m(3,3) = mCovariantMatrix[5];
     return m;
 }
-    
+
 StThreeVectorF
 StVertex::positionError() const
 {
@@ -119,70 +124,123 @@ void StVertex::setCovariantMatrix(float val[6]) { copy(val, val+6, mCovariantMat
 void StVertex::Streamer(TBuffer &R__b)
 {
     // Stream an object of class .
-
+    
     if (R__b.IsReading()) {
-       UInt_t R__s, R__c;
-       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-       if (R__v > 1) {
-          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
-          return;
-       }
-       //====process old versions before automatic schema evolution
-       StMeasuredPoint::Streamer(R__b);
-       R__b >> (Int_t&)mType;
-       R__b >> mFlag;
-       Int_t dumy;
-       if (gFile && gFile->GetVersion() < 30000) {R__b >> dumy;}
-       R__b.ReadFastArray(mCovariantMatrix,6);
-       R__b >> mChiSquared;
-       R__b >> mProbChiSquared;
-//     R__b >> mParent;
-       R__b >> (StTrack*&)mParent;
-
-       R__b.CheckByteCount(R__s, R__c, Class());
-       //====end of old versions
-      
-    } else {
-       Class()->WriteBuffer(R__b,this);
+        UInt_t R__s, R__c;
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v > 1) {
+            Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+            return;
+        }
+        //====process old versions before automatic schema evolution
+        StMeasuredPoint::Streamer(R__b);
+        R__b >> (Int_t&)mType;
+        R__b >> mFlag;
+        Int_t dumy;
+        if (gFile && gFile->GetVersion() < 30000) {R__b >> dumy;}
+        R__b.ReadFastArray(mCovariantMatrix,6);
+        R__b >> mChiSquared;
+        R__b >> mProbChiSquared;
+        //     R__b >> mParent;
+        R__b >> (StTrack*&)mParent;
+        
+        R__b.CheckByteCount(R__s, R__c, Class());
+        //====end of old versions
+        
+    } 
+    else {
+        Class()->WriteBuffer(R__b,this);
     }
 } 
 //________________________________________________________________________________
 void StVertex::setIdTruth() { // match with IdTruth
-  typedef std::map< Int_t,Float_t>  myMap_t;
-  typedef std::pair<Int_t,Float_t>  myPair_t;
-  typedef myMap_t::const_iterator myIter_t;
-  myMap_t  idTruths;
-  // Loop to store all the mc vertex keys and quality of every reco track on the vertex.
-  UInt_t Ntracks = numberOfDaughters();
-  Int_t IdVx = 0;
-  Int_t qa = 0;
-  for (UInt_t l = 0; l < Ntracks; l++) {
-    const StTrack *pTrack = daughter(l);
-    if (! pTrack) continue;
-    Int_t IdTk = pTrack->idTruth();
-    if (IdTk <= 0) continue;
-    IdVx = pTrack->idParentVx();
-    if (IdVx <= 0) continue;
-    qa = pTrack->qaTruth(); if (!qa) qa = 1;
-    idTruths[IdVx] += qa;
-  }
-  if (! idTruths.size()) return;		//no simu info
-  Int_t vxBest = 0; 
-  Float_t qaBest = 0, qaSum = 0;
-  for (myIter_t it=idTruths.begin(); it!=idTruths.end(); ++it) {
-    qaSum += (*it).second;
-    if ((*it).second < qaBest) continue;
-    vxBest = (*it).first; qaBest = (*it).second;
-  }
-  if (vxBest <= 0 || vxBest > 0xffff) return;
-  Int_t avgQua = 100*qaBest/(qaSum+1e-10)+0.5;
-  setIdTruth(vxBest,avgQua);
-  Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
-  setIdParent(IdParentTk);
+    typedef std::map< Int_t,Float_t>  myMap_t;
+    typedef std::pair<Int_t,Float_t>  myPair_t;
+    typedef myMap_t::const_iterator myIter_t;
+    myMap_t  idTruths;
+    // Loop to store all the mc vertex keys and quality of every reco track on the vertex.
+    UInt_t Ntracks = numberOfDaughters();
+    Int_t IdVx = 0;
+    Int_t qa = 0;
+    for (UInt_t l = 0; l < Ntracks; l++) {
+        const StTrack *pTrack = daughter(l);
+        if (! pTrack) continue;
+        Int_t IdTk = pTrack->idTruth();
+        if (IdTk <= 0) continue;
+        IdVx = pTrack->idParentVx();
+        if (IdVx <= 0) continue;
+        qa = pTrack->qaTruth(); if (!qa) qa = 1;
+        idTruths[IdVx] += qa;
+    }
+    if (! idTruths.size()) return;		//no simu info
+    Int_t vxBest = 0; 
+    Float_t qaBest = 0, qaSum = 0;
+    for (myIter_t it=idTruths.begin(); it!=idTruths.end(); ++it) {
+        qaSum += (*it).second;
+        if ((*it).second < qaBest) continue;
+        vxBest = (*it).first; qaBest = (*it).second;
+    }
+    if (vxBest <= 0 || vxBest > 0xffff) return;
+    Int_t avgQua = 100*qaBest/(qaSum+1e-10)+0.5;
+    setIdTruth(vxBest,avgQua);
+    Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
+    setIdParent(IdParentTk);
 }
 //______________________________________________________________________________
 void StVertex::NotImplemented(const Char_t *method) const {
-  cout << "StVertex::" << method << " is no implemented" <<  endl;
+    cout << "StVertex::" << method << " is no implemented" <<  endl;
 }
-
+//______________________________________________________________________________
+StTrackMassFit* StVertex::massFit(UInt_t i){
+    return i < mMassFits.size() ? mMassFits[i] : 0;
+}
+//______________________________________________________________________________
+const StTrackMassFit* StVertex::massFit(UInt_t i) const {
+    return i < mMassFits.size() ? mMassFits[i] : 0;
+}
+//______________________________________________________________________________
+StPtrVecTrackMassFit StVertex::massFits(StTrackFilter& filter) {
+    StPtrVecTrackMassFit vec;
+    for (UInt_t i=0; i<mMassFits.size(); i++)
+        if (filter(mMassFits[i])) vec.push_back(mMassFits[i]);
+    return vec;
+}
+//______________________________________________________________________________
+void StVertex::addMassFit(StTrack* t) {
+    StTrackMassFit* p = dynamic_cast<StTrackMassFit*>(t);
+    if (p) {
+        if (p->type() == massFitAtVx) {
+            mMassFits.push_back(p);
+            p->setVertex(this);
+        }
+    }
+}
+//______________________________________________________________________________
+void StVertex::removeMassFit(StTrack* t) {
+    StTrackMassFit* p = dynamic_cast<StTrackMassFit*>(t);
+    if (!p) return;
+    StSPtrVecTrackMassFitIterator iter;
+    if (p->type() == massFitAtVx) {
+        for (iter=mMassFits.begin(); iter != mMassFits.end(); iter++)
+            if (*iter == t) {
+                mMassFits.erase(iter);
+                p->setVertex(0);
+            }
+    }
+}
+//________________________________________________________________________________
+ostream&  operator<<(ostream& os,  const StVertex& v) {
+    const StTrackMassFit *massFit = dynamic_cast<const StTrackMassFit *>(v.parent());
+    if (massFit && massFit->kfParticle()) {
+        os << *massFit->kfParticle();
+    } 
+    else {
+        const Float_t *xyz = v.position().xyz();
+        const Float_t *dxyz = v.positionError().xyz();
+        for (Int_t i = 0; i < 3; i++)     os << Form("%8.3f+/-%5.3f,",xyz[i],dxyz[i]);
+        os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared());
+    }
+    if (v.idTruth())  os << Form(" IdT: %5i Q: %4i", v.idTruth(), v.qaTruth());
+    return os;
+}
 

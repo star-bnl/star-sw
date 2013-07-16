@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDcaGeometry.cxx,v 2.8 2013/01/15 23:21:05 fisyak Exp $
+ * $Id: StDcaGeometry.cxx,v 2.9 2013/07/16 14:29:03 fisyak Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.cxx,v $
+ * Revision 2.9  2013/07/16 14:29:03  fisyak
+ * Restore mass fit tracks
+ *
  * Revision 2.8  2013/01/15 23:21:05  fisyak
  * improve printouts
  *
@@ -46,7 +49,7 @@
 #include "TMath.h"
 ClassImp(StDcaGeometry)
     
-static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.8 2013/01/15 23:21:05 fisyak Exp $";
+static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.9 2013/07/16 14:29:03 fisyak Exp $";
 
 StDcaGeometry::StDcaGeometry()
 {
@@ -128,7 +131,7 @@ THelixTrack StDcaGeometry::thelix() const
 //________________________________________________________________________________
 ostream&  operator<<(ostream& os, const StDcaGeometry& dca) {
   const Float_t *errMx =  dca.errMatrix();
-  return os << Form("Dca: imp %7.2f +/-%7.2f,Z %7.2f +/-%7.2f,psi %7.2f +/-%7.2f, q*pT %7.2f +/-%6.1f\%,TanL %8.3f +/-%8.3f",
+  return os << Form("Dca: imp %7.2f +/-%7.2f,Z:%7.2f +/-%7.2f,psi:%7.2f +/-%7.2f,pT/q:%7.2f +/-%6.1f%%,TanL:%8.3f +/-%8.3f",
 		    dca.impact(),    (errMx[0] >= 0)  ? TMath::Sqrt(errMx[0]) : -13,
 		    dca.z(),         (errMx[2] >= 0)  ? TMath::Sqrt(errMx[2]) : -13,
 		    dca.psi(),       (errMx[5] >= 0)  ? TMath::Sqrt(errMx[5]) : -13,
