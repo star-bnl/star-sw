@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 2.11 2013/04/10 19:15:52 jeromel Exp $
+ * $Id: StGlobalTrack.cxx,v 2.12 2013/07/16 14:29:03 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
- * Revision 2.11  2013/04/10 19:15:52  jeromel
- * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
+ * Revision 2.12  2013/07/16 14:29:03  fisyak
+ * Restore mass fit tracks
+ *
+ * Revision 2.10  2013/04/05 15:11:33  ullrich
+ * Changes due to the addition of StTrackMassFit (Yuri)
  *
  * Revision 2.9  2013/01/15 23:21:05  fisyak
  * improve printouts
@@ -47,10 +50,12 @@
 #include "StGlobalTrack.h"
 #include "StVertex.h"
 #include "StDcaGeometry.h"
+#include "StParticleDefinition.hh"
 
 ClassImp(StGlobalTrack)
 
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.11 2013/04/10 19:15:52 jeromel Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.12 2013/07/16 14:29:03 fisyak Exp $";
+
 StGlobalTrack::StGlobalTrack(const StGlobalTrack& track) : StTrack(track)
 {
     mDcaGeometry=0;
@@ -68,14 +73,14 @@ StGlobalTrack& StGlobalTrack::operator=(const StGlobalTrack& track)
 }
 //________________________________________________________________________________
 ostream&  operator<<(ostream& os,  const StGlobalTrack& track) {
-  os << *((StTrack *) &track);
-  const StDcaGeometry* dca    = track.dcaGeometry();
-  if (dca) os << " " << *dca;
-  os << Form(" NF %2d chi2 %8.3g", track.fitTraits().numberOfFitPoints(),track.fitTraits().chi2(0));
+    os << *((StTrack *) &track);
+    const StDcaGeometry* dca    = track.dcaGeometry();
+    if (dca) os << " " << *dca;
+    os << Form(" NF %2d chi2 %8.3g gId %2d", track.fitTraits().numberOfFitPoints(),track.fitTraits().chi2(0),track.fitTraits().geantId());
 #if 0
-  if (track.idTruth())
-    os << Form(" IdT: %4i Q: %4i", track.idTruth(), track.qaTruth());
+    if (track.idTruth())
+        os << Form(" IdT: %4i Q: %4i", track.idTruth(), track.qaTruth());
 #endif
- return os;
+    return os;
 }
 //________________________________________________________________________________

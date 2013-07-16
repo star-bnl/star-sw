@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.115 2013/04/10 19:28:35 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.116 2013/07/16 14:30:30 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -74,6 +74,8 @@
 #include "StMuTofHit.h"
 #include "StMuTofHitCollection.h"
 #include "StMuTofUtil.h"
+#include "KFParticle.h"
+#include "KFVertex.h"
 /// dongx
 #include "StEvent/StBTofCollection.h"
 #include "StEvent/StBTofRawHit.h"
@@ -103,7 +105,7 @@
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
 #include "StG2TrackVertexMap.h"
-
+#include "TArrayF.h"
 ClassImp(StMuDstMaker)
 
 #if !(ST_NO_NAMESPACES)
@@ -444,11 +446,13 @@ void  StMuDstMaker::streamerOff() {
   StMuPrimaryVertex::Class()->IgnoreTObjectStreamer();
   //  StDcaGeometry::Class()->IgnoreTObjectStreamer();
   StMuPrimaryTrackCovariance::Class()->IgnoreTObjectStreamer();
+  KFParticle::Class()->IgnoreTObjectStreamer();
+  KFVertex::Class()->IgnoreTObjectStreamer();
   StMuHelix::Class()->IgnoreTObjectStreamer();
   StMuEmcHit::Class()->IgnoreTObjectStreamer();
   StMuEmcTowerData::Class()->IgnoreTObjectStreamer();
   StMuFmsHit::Class()->IgnoreTObjectStreamer();
-   StMuPmdHit::Class()->IgnoreTObjectStreamer();
+  StMuPmdHit::Class()->IgnoreTObjectStreamer();
   StMuPmdCluster::Class()->IgnoreTObjectStreamer();
   EztEventHeader::Class()->IgnoreTObjectStreamer();
   EztTrigBlob::Class()->IgnoreTObjectStreamer();
@@ -997,18 +1001,26 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     }
   }
 #endif
-
-  //catch(StMuException e) {
-  //  e.print();
-  //  throw e;
-  //}
-
+  TObjectSet *obj = (TObjectSet *) GetDataSet("KFTracks");
+  if (obj) {
+    TObjArray *oA = (TObjArray *) obj->GetObject();
+    if (oA) {
+      fillKFTracks(oA);
+    }
+  }
+  obj = (TObjectSet *) GetDataSet("KFVertices");
+  if (obj) {
+    TObjArray *oA = (TObjArray *) obj->GetObject();
+    if (oA) {
+      fillKFVertices(oA);
+    }
+  }
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
   mStMuDst->fixTrackIndicesG(mStMuDst->numberOfPrimaryVertices());
 }
-
-
+  
+  
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1439,6 +1451,34 @@ void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+void StMuDstMaker::fillKFTracks(TObjArray *obj) {
+  if (!obj) return;
+  TClonesArray &KFTracks = *mStMuDst->KFTracks();
+  Int_t N = obj->GetLast();
+  Int_t j = 0;
+  for (Int_t i = 0; i <= N; i++) {
+    KFParticle *particle = (KFParticle *) (*obj)[i];
+    if (! particle) continue;
+    new (KFTracks[j++]) KFParticle(*particle);
+  }
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillKFVertices(TObjArray *obj) {
+  if (!obj) return;
+  TClonesArray &KFVertices = *mStMuDst->KFVertices();
+  Int_t N = obj->GetLast();
+  Int_t j = 0;
+  for (Int_t i = 0; i <= N; i++) {
+    KFVertex *particle = (KFVertex *) (*obj)[i];
+    if (! particle) continue;
+    new (KFVertices[j++]) KFVertex(*particle);
+  }
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 void StMuDstMaker::fillL3Tracks(StEvent* ev, StMuCut* cut) {
   DEBUGMESSAGE2("");
   if (!ev->l3Trigger()) return;
@@ -1529,16 +1569,12 @@ int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack
     StMuTrack *muTrack = new((*tca)[counter]) StMuTrack(event, track, vtx, index2Global, index2RichSpectra, l3, &mVtxList);
     if (track->type() == primary) {
       if (covpTCA) {
-	Int_t countCOVPTCA = covpTCA->GetEntries();
-#if 0
-	const StMatrixF covMatrix = track->fitTraits().covariantMatrix();
-	new((*covpTCA)[countCOVPTCA]) StMuPrimaryTrackCovariance(covMatrix);
-#else
-	//	cout << track->fitTraits().covariantMatrix() << endl;
-	const Float_t*    cov      = track->fitTraits().covariance();
-	new((*covpTCA)[countCOVPTCA]) StMuPrimaryTrackCovariance(cov);
-#endif
-	muTrack->setIndex2Cov(countCOVPTCA);
+	if (track->fitTraits().covarianceMatrixF().GetSize() >= 9) {// valid cov. matrix
+	  Int_t countCOVPTCA = covpTCA->GetEntries();
+	  //	cout << track->fitTraits().covariantMatrix() << endl;
+	  new((*covpTCA)[countCOVPTCA]) StMuPrimaryTrackCovariance(track->fitTraits().covarianceMatrixF());
+	  muTrack->setIndex2Cov(countCOVPTCA);
+	}
       }
     }
     else {
@@ -1816,8 +1852,11 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
- * Revision 1.115  2013/04/10 19:28:35  jeromel
- * Step back to 04/04 version (van aware) - previous changes may be recoverred
+ * Revision 1.116  2013/07/16 14:30:30  fisyak
+ * Restore mass fit tracks
+ *
+ * Revision 1.114  2013/04/08 18:07:55  fisyak
+ * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
  *
  * Revision 1.113  2013/01/08 22:57:33  sangalin
  * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
