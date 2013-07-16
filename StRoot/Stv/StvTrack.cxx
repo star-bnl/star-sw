@@ -83,6 +83,18 @@ int StvTrack::GetNFits(int dir) const
   return n;
 }   
 //______________________________________________________________________________
+int StvTrack::SetUsed(int use) 
+{  
+  int n = 0;
+  for (StvNodeConstIter it = begin(); it !=end();++it) {
+    const StvNode *node = *it; 
+    StvHit *hit = node->GetHit();
+    if (!hit) continue;
+    hit->setTimesUsed(use); n++;
+  }
+  return n;
+}   
+//______________________________________________________________________________
 StvNode *StvTrack::GetNode(EPointType noTy)
 {
   StvNode *node=0,*foundNode=0;int n=0;

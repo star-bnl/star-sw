@@ -109,7 +109,7 @@ StvDebug::Count("SeedDive",seedEta);
 //=============================
 	  if (ans) 				break;
 StvDebug::Count("CALLS",2);
-StvDebug::Count("Xi2.refi2",mCurrTrak->GetXi2());
+StvDebug::Count("Xi2.refit",mCurrTrak->GetXi2());
 StvTrack refiTrak(*mCurrTrak);
           nHits = mCurrTrak->GetNHits();
           if (nHits<=3) 			break;
@@ -126,8 +126,11 @@ StvTrack bakwTrak(*mCurrTrak);
 //=============================
 	  ans = Refit(0);
 //=============================
-	  if (ans) 				break;
-StvDebug::Count("CALLS",4);
+	  if (ans) {
+	    *mCurrTrak = refiTrak; 
+	    nHits = mCurrTrak->SetUsed();
+	  }
+else {StvDebug::Count("CALLS",4);}
 
 StvDebug::Count("Xi2.REFIT",mCurrTrak->GetXi2());
 	} while((fail=0));		
