@@ -108,6 +108,11 @@ inline static float Dot(const float dir[3],const float pnt[3])
    return dir[0]*pnt[0]+dir[1]*pnt[1]+dir[2]*pnt[2];
 }
 //_____________________________________________________________________________
+inline static void Mul(const float a[3],float scale,float b[3])
+{
+  b[0]=a[0]*scale;b[1]=a[1]*scale;b[2]=a[2]*scale;
+}
+//_____________________________________________________________________________
 inline static float Impact2(const float dir[3],const float pnt[3])
 {
    float imp[3];
@@ -219,8 +224,11 @@ StvDebug::Break(nCall);
   
     case 0: {
       
-
-      for (int i=0;i<3;i++) {mDir[i]=-mHitDir[i];}
+static int myDir = 1;
+if      ( myDir == 0) { Mul(mX[0]  ,-1./sqrt(Dot(mX[0],mX[0])),mDir);}   
+else if ( myDir == 1) { Mul(mHitDir,-1.                       ,mDir);}
+else                  { mDir[0]= mX[0][0]; mDir[1]= mX[0][1];mDir[2]= mX[0][2]/2;
+                        Mul(mDir   ,-1./sqrt(Dot(mDir ,mDir )),mDir);}
       float sgn = Dot(mHit,mDir);
       assert(sgn<0);
       mS[0]=0;
