@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.79 2013/04/22 19:05:12 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.80 2013/07/17 21:09:42 perev Exp $
 #define CompareWithToF 
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -642,7 +642,7 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 	}
 	I70 /= N70; D70 /= N70;
-	D70  = TMath::Sqrt(D70 - I70*I70);
+	D70  = TMath::Sqrt(fabs(D70 - I70*I70));
 	D70 /= I70;
 	if (SumdEdX > 0) dXavLog2 = SumdX/SumdEdX;
 	dst_dedx_st dedx;
