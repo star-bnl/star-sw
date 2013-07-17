@@ -40,7 +40,7 @@ AUX_SOURCE_DIRECTORY( Source garfield_sources )
 LIST( APPEND ROOT_DICT_INCLUDE_DIRS Include )
 
 ## add magboltz ########################################
-SET( magboltz_sources Source/magboltz-8.97.f )
+SET( magboltz_sources Source/magboltz-9.01.f )
 SET_SOURCE_FILES_PROPERTIES( ${magboltz_sources}  PROPERTIES LANGUAGE Fortran )
 
 ## add Heed ############################################
