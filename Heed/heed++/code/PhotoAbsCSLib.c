@@ -1,6 +1,9 @@
 #include "heed++/code/PhotoAbsCS.h"
 #include "heed++/code/PhysicalConstants.h"
-#include "wcpplib/matter/GasLib.c"
+#ifdef NOT_INCLUDE_GASLIB_IN_PACSLIB
+#else
+#include "wcpplib/matter/GasLib.c"  
+#endif
 
 /*
 2004, I. Smirnov
