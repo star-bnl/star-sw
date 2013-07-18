@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.606 2013/07/18 14:30:17 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.607 2013/07/18 14:39:18 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -827,7 +827,7 @@ Int_t StBFChain::Init() {
 Int_t StBFChain::Finish()
 {
   if (!fBFC) return kStOK;
-  Int_t ians = StMaker::Finish();
+  Int_t ians = StChain::Finish();
   SafeDelete(fchainOpt);
   fBFC = 0;
   TFile *tf = GetTFile();
