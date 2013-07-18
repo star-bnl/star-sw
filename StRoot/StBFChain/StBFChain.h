@@ -7,7 +7,7 @@
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
  \date   1999/07/29 , 2001-2011
- @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.51 2012/11/14 00:01:26 fisyak Exp $
+ @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.52 2013/07/18 14:30:17 fisyak Exp $
 
  Class to control "BFC" chain
 
@@ -76,11 +76,6 @@ class StBFChain : public StChain {
    void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
    void                SetInputFile(const Char_t *infile=0);                          // *MENU
-   void                SetGC(const Char_t *queue=
-			     "-s;dst runc;"                     // list of components needed
-			     "-q;numberOfPrimaryTracks>1500;"   // example of user query
-			     );                                                       // *MENU
-
    void                SetOutputFile(const Char_t *outfile=0);                        // *MENU
    void                SetTFile(TFile *tf)			{fTFile=tf;}
    TFile              *GetTFile() const			        {return fTFile;}
@@ -106,7 +101,7 @@ class StBFChain : public StChain {
                TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.51 2012/11/14 00:01:26 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.52 2013/07/18 14:30:17 fisyak Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
