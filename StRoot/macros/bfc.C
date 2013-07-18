@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.184 2012/03/22 14:14:30 fisyak Exp $
+// $Id: bfc.C,v 1.185 2013/07/18 13:57:11 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -114,11 +114,10 @@ void Load(const Char_t *options){
       gROOT->ProcessLine("StLoggerManager::StarLoggerInit();"); 
     }
   }
-  gSystem->Load("libHtml");
+  //  gSystem->Load("libHtml");
   gSystem->Load("libStChain");                                        //  StMemStat::PrintMem("load StChain");
   gSystem->Load("libStUtilities");                                    //  StMemStat::PrintMem("load StUtilities");
   gSystem->Load("libStBFChain");                                      //  StMemStat::PrintMem("load StBFChain");
-  gSystem->Load("libStChallenger");                                   //  StMemStat::PrintMem("load StChallenger");
   cout << endl;
 }
 //_____________________________________________________________________
