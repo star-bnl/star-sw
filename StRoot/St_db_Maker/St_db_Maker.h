@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.42 2012/03/16 19:36:18 dmitry Exp $
+// $Id: St_db_Maker.h,v 1.43 2013/07/18 14:00:32 fisyak Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.43  2013/07/18 14:00:32  fisyak
+// expand no. of possible databases from 4 to 10
+//
 // Revision 1.42  2012/03/16 19:36:18  dmitry
 // converted dangled char pointers to std::string objects + fixed typo
 //
@@ -141,7 +144,7 @@ private:
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.42 2012/03/16 19:36:18 dmitry Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.43 2013/07/18 14:00:32 fisyak Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -149,6 +152,12 @@ private:
                               ,const char *dir1 = ""
                               ,const char *dir2 = ""
                               ,const char *dir3 = ""
+                              ,const char *dir4 = ""
+                              ,const char *dir5 = ""
+                              ,const char *dir6 = ""
+                              ,const char *dir7 = ""
+                              ,const char *dir8 = ""
+                              ,const char *dir9 = ""
                    );
    virtual        ~St_db_Maker();
    virtual TDataSet *GetDataBase(const char* logInput, const TDatime *td=0);
@@ -189,7 +198,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.42 2012/03/16 19:36:18 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.43 2013/07/18 14:00:32 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };

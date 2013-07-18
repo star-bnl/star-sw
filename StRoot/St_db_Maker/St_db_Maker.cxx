@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.131 2012/05/04 19:42:34 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.132 2013/07/18 14:00:32 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.132  2013/07/18 14:00:32  fisyak
+// expand no. of possible databases from 4 to 10
+//
 // Revision 1.131  2012/05/04 19:42:34  perev
 // Ignore wrong timing for RunLog tables
 //
@@ -320,10 +323,16 @@ TableClassImpl(St_dbConfig,dbConfig_st)
 ClassImp(St_db_Maker)
 //_____________________________________________________________________________
 St_db_Maker::St_db_Maker(const char *name
-, const char *dir0
-, const char *dir1
-, const char *dir2
-, const char *dir3
+			 , const char *dir0
+			 , const char *dir1
+			 , const char *dir2
+			 , const char *dir3
+			 , const char *dir4
+			 , const char *dir5
+			 , const char *dir6
+			 , const char *dir7
+			 , const char *dir8
+			 , const char *dir9
 )
 :StMaker(name)
 {
@@ -336,7 +345,12 @@ St_db_Maker::St_db_Maker(const char *name
    fDirs[1] = dir1;
    fDirs[2] = dir2;
    fDirs[3] = dir3;
-   fDirs[4] = "";
+   fDirs[4] = dir4;
+   fDirs[5] = dir5;
+   fDirs[6] = dir6;
+   fDirs[7] = dir7;
+   fDirs[8] = dir8;
+   fDirs[9] = dir9;
 
    fDBBroker = 0;
 
@@ -374,7 +388,7 @@ Int_t St_db_Maker::Init()
    fDataBase=0;
    Snapshot(0);
    int snap = fDataBase!=0;
-   for (int idir=0; !fDirs[idir].IsNull() && !snap; idir++) {//loop over dirs
+   for (int idir=0; !fDirs[idir].IsNull() && !snap && idir < 10; idir++) {//loop over dirs
 
      dir = fDirs[idir];
      gSystem->ExpandPathName(dir);
