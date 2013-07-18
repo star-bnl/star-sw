@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.605 2013/05/07 19:30:00 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.606 2013/07/18 14:30:17 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -14,7 +14,6 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
-#include "StChallenger/StChallenger.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h"
 #include "StEnumerations.h"
@@ -255,7 +254,9 @@ Int_t StBFChain::Instantiate()
 	if (! dbMk) {
 	  TString MySQLDb("MySQL:StarDb");
 	  TString MainCintDb("$STAR/StarDb");
+	  TString MainCintDbObj("$STAR/.$STAR_HOST_SYS/obj/StarDb");
 	  TString MyCintDb("$PWD/StarDb");
+	  TString MyCintDbObj("$PWD/.$STAR_HOST_SYS/obj/StarDb");
 	  if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
 	  // Removed twice already and put back (start to be a bit boring)
 	  // DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
@@ -263,14 +264,16 @@ Int_t StBFChain::Instantiate()
 	  if (GetOption("NoStarCintDb") ) {MainCintDb = "";}
 	  if (GetOption("NoCintDb")     ) {MainCintDb = ""; MyCintDb = "";}
 	  
-	  TString Dirs[3];
+	  TString Dirs[10];
 	  Int_t j;
-	  for (j = 0; j < 3; j++) Dirs[j] = "";
+	  for (j = 0; j < 10; j++) Dirs[j] = "";
 	  j = 0;
 	  if (MySQLDb    != "") {Dirs[j] = MySQLDb;    j++;}
 	  if (MainCintDb != "") {Dirs[j] = MainCintDb; j++;}
+	  if (MainCintDbObj != "") {Dirs[j] = MainCintDbObj; j++;}
 	  if (MyCintDb   != "") {Dirs[j] = MyCintDb;   j++;}
-	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
+	  if (MyCintDbObj   != "") {Dirs[j] = MyCintDbObj;   j++;}
+	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2],Dirs[3],Dirs[4]);
 	  if (!dbMk) goto Error;
 	  strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
 
@@ -1310,53 +1313,9 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       gc = TString(infile,3);
       gc.ToLower();
     }
-    if (gc == "gc:") {SetGC(infile+3); goto SetOut;}
   }
   SetInputFile(infile);
- SetOut:
   if (! GetOption("NoOutput")) SetOutputFile(outfile);
-}
-//_____________________________________________________________________
-void StBFChain::SetGC (const Char_t *queue){
-  TString Queue(queue);
-  gMessMgr->QAInfo() << "Requested GC queue is :\t" << Queue.Data() << endm;
-  TObjArray Opts;
-  ParseString(Queue,Opts);
-  TIter next(&Opts);
-  TObjString *Opt;
-  static TString ARGV[40];
-  Int_t Argc = -1;
-  while ((Opt = (TObjString *) next())) {
-    TString string = Opt->GetString();
-    const Char_t *argv = string.Data();
-    if (argv[0] == '-') {
-      switch (argv[1]) {
-      case 'o':
-      case 'i':
-      case 'c':
-      case 'q':
-      case 's':
-      case 'n':
-      case 'm':
-      case 't':
-      case '-': // now do --options, they get added to Config
-        ARGV[++Argc] = string.Data();
-        Argc++;
-	break;
-      default :
-	gMessMgr->QAInfo() << "Unrecognized option :\t" << string << endm;
-	break;
-      }
-    }
-    else if (Argc > 0) {ARGV[Argc] += " "; ARGV[Argc] += string;}
-  }
-  Opts.Delete();
-  fSetFiles = (StFileI *)StChallenger::Challenge();
-  fSetFiles->SetDebug();
-  Argc++;
-  Char_t **Argv = new Char_t* [Argc];
-  for (Int_t i=0;i<Argc;i++)  {Argv[i] = (Char_t *) ARGV[i].Data();}
-  fSetFiles->Init(Argc,(const Char_t **) Argv);
 }
 //_____________________________________________________________________
 void StBFChain::SetInputFile (const Char_t *infile){
