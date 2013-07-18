@@ -87,6 +87,7 @@ Int_t StChain::Finish(){
            ,GetName(),ClassName());
    return 1;
  }
+ TCollection::StartGarbageCollection();
  Int_t res = StMaker::Finish();
  // TCollection::EmptyGarbageCollection();
  SetBIT  (kFiniEnd);
@@ -282,8 +283,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.80 2011/10/13 20:06:53 perev Exp $
+// $Id: StChain.cxx,v 1.81 2013/07/18 14:05:25 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.81  2013/07/18 14:05:25  fisyak
+// Open garbage can at Finish
+//
 // Revision 1.80  2011/10/13 20:06:53  perev
 // Put removed UCM messages back(req JL)
 //
