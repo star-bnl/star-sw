@@ -1,6 +1,10 @@
-* $Id: gstar_part.g,v 1.42 2013/06/19 22:17:48 jwebb Exp $
+* $Id: gstar_part.g,v 1.43 2013/07/22 20:45:56 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.43  2013/07/22 20:45:56  jwebb
+* Changed lifetime... previous values were the width of the particle in GeV
+* not the time in seconds.
+*
 * Revision 1.42  2013/06/19 22:17:48  jwebb
 * Improved properties of lambda xi hyperon.
 *
@@ -193,6 +197,9 @@ MODULE gstar_part Is the STAR Particle Database
    Integer kGtNINO / 6 /! A geantino
    Integer kGtHION / 8 /! A heavy ion
    Integer kGtCKOV / 7 /! A cherenkov photon (note mistake in geant manual)
+
+* For meaning of paramters see G3 manual
+* http://wwwasdoc.web.cern.ch/wwwasdoc/geant_html3/node72.html#SECTION024000000000000000000000
 
 * --------------------------------------------------------------------------
 *
@@ -687,14 +694,14 @@ Particle H_dibaryon               code      = 60001,
   PARTICLE LamXi2430 "Lambda0 Xi0 bound state " _
                       code = 60002       pdg=0             ,
                       trktyp = kGtNeut   mass=2.430543-0.002,
-                      charge = 0         tlife = 6.578E-15,
+                      charge = 0         tlife    = 1.0e-10,
                       bratio = {0.5,  0.5 }                ,   
                       mode   = {1423, 1818}                    
 
   PARTICLE AntiLamXi2430 "Lambda0 Xi0 bound state " _
                       code = 60003       pdg=0             ,
                       trktyp = kGtNeut   mass=2.430543-0.002,
-                      charge = 0         tlife = 6.578E-15,    
+                      charge = 0         tlife = 1.0e-10,    
                       bratio = {0.5,  0.5 }                ,
                       mode   = {1531, 2626}
                       
