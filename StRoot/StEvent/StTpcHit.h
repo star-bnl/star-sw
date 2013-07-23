@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.23 2013/07/16 14:29:04 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.24 2013/07/23 11:21:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 2.23  2013/07/16 14:29:04  fisyak
- * Restore mass fit tracks
+ * Revision 2.24  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
  * Revision 2.22  2012/10/23 20:17:16  fisyak
  * Allow more then 64 pad rows
@@ -149,7 +149,7 @@ protected:
     Short_t     mMcl_t;      /* average timebucket*64 */
     UShort_t    mAdc;        /* cluster ADC sum */
     Float_t     mChargeModified; //!
-    ClassDef(StTpcHit,6)
+    ClassDef(StTpcHit,5)
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 #endif

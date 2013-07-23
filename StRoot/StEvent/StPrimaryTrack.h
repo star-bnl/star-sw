@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.h,v 2.12 2013/07/16 14:29:04 fisyak Exp $
+ * $Id: StPrimaryTrack.h,v 2.13 2013/07/23 11:21:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,11 +14,11 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.h,v $
- * Revision 2.12  2013/07/16 14:29:04  fisyak
- * Restore mass fit tracks
+ * Revision 2.13  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
- * Revision 2.10  2013/04/05 15:11:33  ullrich
- * Changes due to the addition of StTrackMassFit (Yuri)
+ * Revision 2.11  2013/04/10 19:15:53  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  *
  * Revision 2.9  2012/05/07 14:42:57  fisyak
  * Add handilings for Track to Fast Detectors Matching
@@ -53,20 +53,27 @@
 #define StPrimaryTrack_hh
 
 #include "StTrack.h"
-
 class StPrimaryVertex;
 class StPrimaryTrack;
-
 ostream&  operator<<(ostream& os,  const StPrimaryTrack& t);
 
 class StPrimaryTrack : public StTrack {
-public:
-    StPrimaryTrack()  {/* noop */}
-    ~StPrimaryTrack() {/* noop */}
-    
-    StTrackType type() const {return primary; }
-    void Print(Option_t *option="") const {cout << option << *this << endl; }
-    
-    ClassDef(StPrimaryTrack,3)
+ public:
+  StPrimaryTrack();
+  ~StPrimaryTrack()  {/* noop */}
+
+  StTrackType      type() const  { return primary; }
+  const StVertex*  vertex() const;
+  
+  void setVertex(StVertex*);
+  void Print(Option_t *option="") const {cout << option << *this << endl; }
+ private:
+  //  StPrimaryVertex*         	mVertex; 	//$LINK
+#ifdef __CINT__
+  StObjLink  		mVertex; 	
+#else
+  StLink<StPrimaryVertex>  	mVertex; 	
+#endif //__CINT__
+  ClassDef(StPrimaryTrack,2)
 };
 #endif

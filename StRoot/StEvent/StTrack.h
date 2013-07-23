@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.33 2013/07/16 14:29:04 fisyak Exp $
+ * $Id: StTrack.h,v 2.34 2013/07/23 11:21:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,11 +58,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 2.33  2013/07/16 14:29:04  fisyak
- * Restore mass fit tracks
+ * Revision 2.34  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
- * Revision 2.31  2013/04/05 15:11:33  ullrich
- * Changes due to the addition of StTrackMassFit (Yuri)
+ * Revision 2.32  2013/04/10 19:15:53  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  *
  * Revision 2.30  2013/01/15 23:21:06  fisyak
  * improve printouts
@@ -186,6 +186,7 @@ public:
     virtual ~StTrack();
 
     virtual StTrackType            type() const = 0;
+    virtual const StVertex*        vertex() const = 0;
     virtual Int_t                  key() const { return mKey; }
     Short_t                        flag() const;
     UInt_t                         flagExtension() const { return mFlagExtension; }
@@ -211,8 +212,6 @@ public:
     const StParticleDefinition*    pidTraits(StPidAlgorithm&) const;
     StTrackNode*                   node();
     const StTrackNode*             node() const;
-    const StVertex*                vertex() const;
-    virtual const StVertex*        endVertex() const {return mEndVertex;}
     UShort_t                       seedQuality() const {return mSeedQuality;}
     Bool_t       isCtbMatched()            const {return testBit(kCtbMatched);}   
     Bool_t       isToFMatched()  	   const {return testBit(kToFMatched);}   
@@ -267,7 +266,6 @@ public:
     void         addPidTraits(StTrackPidTraits*);
     void         setDetectorInfo(StTrackDetectorInfo*);
     void         setNode(StTrackNode*);
-    void         setEndVertex(StVertex *v = 0) {mEndVertex = v;}
     Int_t        bad() const;
     void         setNumberOfPossiblePoints(unsigned char, StDetectorId);
     void         setSeedQuality(UShort_t qa) 		{mSeedQuality = qa;}
@@ -277,7 +275,6 @@ public:
     void         setIdTruth(Int_t idtru,Int_t qatru=0) 	{mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
     void         setIdTruth(); 				//setting on hits info
     void         setIdParentVx(Int_t id) {mIdParentVx = id;}
-    void         setVertex(StVertex* /* val */);
    //----- bit manipulation
     void         setBit(UInt_t f, Bool_t set) {(set) ? setBit(f) : reSetBit(f);}
     void         setBit(UInt_t f) { mFlagExtension |= f; }
@@ -309,26 +306,22 @@ protected:
     UShort_t                mIdTruth; // MC track id 
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
-    StVertex               *mEndVertex;
     Char_t                  mEnd[1]; //!
     StTrackTopologyMap      mTopologyMap;
     StTrackFitTraits        mFitTraits;
     
 //  StTrackDetectorInfo         *mDetectorInfo;         //$LINK
 //  StTrackNode                 *mNode;                 //$LINK
-//  StTrackVertex               *mVertex;                 //$LINK
 #ifdef __CINT__
-    StObjLink                    mDetectorInfo;         
+    StObjLink                mDetectorInfo;         
     StObjLink      	         mNode;                 	
-    StObjLink      	         mVertex;                 	
 #else
     StLink<StTrackDetectorInfo>  mDetectorInfo;         
     StLink<StTrackNode>          mNode;                 	
-    StLink<StVertex>             mVertex;                 	
 #endif //__CINT__
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
-    
-    ClassDef(StTrack,10)
+
+    ClassDef(StTrack,9)
 };
 #endif
