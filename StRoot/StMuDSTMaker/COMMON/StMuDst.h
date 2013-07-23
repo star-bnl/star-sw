@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.48 2013/07/16 14:30:30 fisyak Exp $
+ * $Id: StMuDst.h,v 1.49 2013/07/23 11:02:59 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -64,8 +64,7 @@ class StMuMtdCollection;
 class StMuMtdHit;
 class StMuMtdRawHit;
 class StMuMtdHeader;
-class KFParticle;
-class KFVertex;
+
 #include "StPhysicalHelixD.hh"
 
 #include "TObject.h"
@@ -236,8 +235,6 @@ public:
   static TClonesArray* l3AlgoReject() { return arrays[muReject]; }
   static TClonesArray* covGlobTrack() {return arrays[muCovGlobTrack];}
   static TClonesArray* covPrimTrack() {return arrays[muCovPrimTrack];}
-  static TClonesArray* KFTracks() {return arrays[muKFTracks];}
-  static TClonesArray* KFVertices() {return arrays[muKFVertices];}
 
   /// returns pointer to current StMuEvent (class holding the event wise information, e.g. event number, run number)
   static StMuEvent* event() { return (StMuEvent*)arrays[muEvent]->UncheckedAt(0); }
@@ -267,8 +264,6 @@ public:
 
 	static StDcaGeometry* covGlobTracks(int i) { return (StDcaGeometry*)arrays[muCovGlobTrack]->UncheckedAt(i); }
   static StMuPrimaryTrackCovariance* covPrimTracks(int i) { return (StMuPrimaryTrackCovariance*)arrays[muCovPrimTrack]->UncheckedAt(i); }
-  static KFParticle* KFtrack(int i) { return (KFParticle*)arrays[muKFTracks]->UncheckedAt(i); }
-  static KFVertex* KFvertex(int i) { return (KFVertex*)arrays[muKFVertices]->UncheckedAt(i); }
  
 #ifndef __NO_STRANGE_MUDST__
   /// returns pointer to current StStrangeEvMuDst (class holding the event wise information, e.g. event number, run number)
@@ -372,8 +367,6 @@ public:
   static unsigned int numberOfL3AlgoRejects()  { return arrays[muReject]->GetEntriesFast(); }
   static unsigned int numberOfCovGlobTracks()  { return arrays[muCovGlobTrack]->GetEntriesFast(); }
   static unsigned int numberOfCovPrimTracks()  { return arrays[muCovPrimTrack]->GetEntriesFast(); }
-  static unsigned int numberOfKFTracks()       { return arrays[muKFTracks]->GetEntriesFast(); }
-  static unsigned int numberOfKFVertices()     { return arrays[muKFVertices]->GetEntriesFast(); }
 #ifndef __NO_STRANGE_MUDST__
   static unsigned int numberOfV0s()            { return strangeArrays[smuV0]->GetEntriesFast(); }
   static unsigned int numberOfV0sMc()          { return strangeArrays[smuV0Mc]->GetEntriesFast(); }
@@ -447,11 +440,11 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
- * Revision 1.48  2013/07/16 14:30:30  fisyak
- * Restore mass fit tracks
+ * Revision 1.49  2013/07/23 11:02:59  jeromel
+ * Undo changes (KF and other)
  *
- * Revision 1.46  2013/04/08 18:07:55  fisyak
- * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
+ * Revision 1.47  2013/04/10 19:28:35  jeromel
+ * Step back to 04/04 version (van aware) - previous changes may be recoverred
  *
  * Revision 1.45  2012/11/26 23:14:32  fisyak
  * Replace GetEntries() by GetEntriesFast(), fix print outs
