@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.30 2013/07/16 14:30:29 fisyak Exp $
+ * $Id: StMuArrays.cxx,v 1.31 2013/07/23 11:02:59 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -14,7 +14,6 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVer
 					                   "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
 					                   "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject",
 							   "CovGlobTrack","CovPrimTrack","pp2pp","mtd",
-							   "KFTracks","KFVertices",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayNames[__NSTRANGEARRAYS__]*/                  "Event","McEvent",
 							   "V0","McV0","V0Assoc",
@@ -60,7 +59,6 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrim
 					                   "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
 					                   "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo",
 							   "StDcaGeometry","StMuPrimaryTrackCovariance","StMuRpsCollection","StMuMtdCollection",
-							   "KFParticle","KFVertex",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayTypes[__NSTRANGEARRAYS__]*/                  "StStrangeEvMuDst","StStrangeEvMuDst",
 							   "StV0MuDst","StV0Mc","StStrangeAssoc",
@@ -184,11 +182,11 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
- * Revision 1.30  2013/07/16 14:30:29  fisyak
- * Restore mass fit tracks
+ * Revision 1.31  2013/07/23 11:02:59  jeromel
+ * Undo changes (KF and other)
  *
- * Revision 1.28  2013/04/08 18:07:54  fisyak
- * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
+ * Revision 1.29  2013/04/10 19:28:35  jeromel
+ * Step back to 04/04 version (van aware) - previous changes may be recoverred
  *
  * Revision 1.27  2013/01/08 22:57:33  sangalin
  * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
