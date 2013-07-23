@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.29 2013/07/16 14:29:03 fisyak Exp $
+ * $Id: StContainers.cxx,v 2.30 2013/07/23 11:21:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,11 +10,11 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
- * Revision 2.29  2013/07/16 14:29:03  fisyak
- * Restore mass fit tracks
+ * Revision 2.30  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
- * Revision 2.27  2013/04/05 15:11:25  ullrich
- * Changes due to the addition of StTrackMassFit (Yuri)
+ * Revision 2.28  2013/04/10 19:15:52  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  *
  * Revision 2.26  2013/03/05 14:42:45  ullrich
  * Added StPxl hits and Containers.
@@ -122,11 +122,9 @@
 #include "StTofData.h"
 #include "StTofRawData.h"
 #include "StPrimaryTrack.h"
-#include "StTrackMassFit.h"
 #include "StPrimaryVertex.h"
 #include "StPsd.h"
 #include "StTrackNode.h"
-#include "StTrackFitTraits.h"
 #include "StTrackPidTraits.h"
 #include "StTrackDetectorInfo.h"
 #include "StV0Vertex.h"
@@ -157,7 +155,6 @@ StCollectionImp(CalibrationVertex)
 StCollectionImp(DetectorState)
 StCollectionImp(Hit)
 StCollectionImp(PrimaryTrack)
-StCollectionImp(TrackMassFit)
 StCollectionImp(PrimaryVertex)
 StCollectionImp(Psd)
 StCollectionImp(SvtHit)
@@ -187,7 +184,6 @@ StCollectionImp(MtdHit)
 StCollectionImp(MtdRawHit)
 StCollectionImp(Track)
 StCollectionImp(TrackNode)
-StCollectionImp(TrackFitTraits)
 StCollectionImp(TrackPidTraits)
 StCollectionImp(TrackDetectorInfo)
 StCollectionImp(V0Vertex)
@@ -210,3 +206,4 @@ StCollectionImp(FgtHit)
 StCollectionImp(FgtStrip)
 StCollectionImp(FgtPoint)
 StCollectionImp(PxlHit)
+

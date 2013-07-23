@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.54 2013/07/16 14:29:03 fisyak Exp $
+ * $Id: StEnumerations.h,v 2.55 2013/07/23 11:21:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,8 +16,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.54  2013/07/16 14:29:03  fisyak
- * Restore mass fit tracks
+ * Revision 2.55  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
  * Revision 2.53  2013/05/07 19:30:21  jeromel
  * No change but add markers
@@ -250,7 +250,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
 /*!
  * \enum StTrackType
  */
-enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary, massFit, massFitAtVx};
+enum StTrackType {global, primary, tpt, secondary, estGlobal, estPrimary};
 
 /*!
  * \enum StTrackModel

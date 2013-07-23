@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.42 2013/07/16 14:29:03 fisyak Exp $
+ * $Id: StEventTypes.h,v 2.43 2013/07/23 11:21:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,11 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 2.42  2013/07/16 14:29:03  fisyak
- * Restore mass fit tracks
+ * Revision 2.43  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
- * Revision 2.40  2013/04/05 15:11:33  ullrich
- * Changes due to the addition of StTrackMassFit (Yuri)
+ * Revision 2.41  2013/04/10 19:15:52  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  *
  * Revision 2.39  2013/03/05 14:42:45  ullrich
  * Added StPxl hits and Containers.
@@ -169,7 +169,6 @@
 #include "StFtpcSectorHitCollection.h"
 #include "StFunctional.h"
 #include "StGlobalTrack.h"
-#include "StTrackMassFit.h"
 #include "StHelixModel.h"
 #include "StHit.h"
 #include "StHltBEmcTowerHit.h"

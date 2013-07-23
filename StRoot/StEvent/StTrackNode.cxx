@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.cxx,v 2.16 2013/07/16 14:29:04 fisyak Exp $
+ * $Id: StTrackNode.cxx,v 2.17 2013/07/23 11:21:49 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,11 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.cxx,v $
- * Revision 2.16  2013/07/16 14:29:04  fisyak
- * Restore mass fit tracks
+ * Revision 2.17  2013/07/23 11:21:49  jeromel
+ * Undo past week changes
  *
- * Revision 2.14  2013/04/05 15:11:33  ullrich
- * Changes due to the addition of StTrackMassFit (Yuri)
+ * Revision 2.15  2013/04/10 19:15:53  jeromel
+ * Step back from StEvent changes - previous change recoverable [Thomas OK-ed]
  *
  * Revision 2.13  2003/11/25 04:10:47  perev
  * bug in erase fixed
@@ -64,7 +64,7 @@
 
 ClassImp(StTrackNode)
 
-static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.16 2013/07/16 14:29:04 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.17 2013/07/23 11:21:49 jeromel Exp $";
 
 StTrackNode::StTrackNode() { /* noop */ }
 
@@ -75,22 +75,22 @@ StTrackNode::addTrack(StTrack* track)
 {
     if (track) {
         switch (track->type()) {
-            case primary:
-            case estPrimary:
-            case secondary:               
-            case massFitAtVx:
-                mReferencedTracks.push_back(track);
-                break;
-            case global:
-            case tpt:
-            case estGlobal:
-            case massFit:               
-                mOwnedTracks.push_back(track);
-                break;
-            default:
-                cerr << "StTrackNode::addTrack(): cannot add, unknown track type." << endl;
-                return;
-                break;
+        case primary:
+        case estPrimary:
+            mReferencedTracks.push_back(track);
+            break;
+        case secondary:                // not implemented yet
+            cerr << "StTrackNode::addTrack(): track type 'secondary' not implemented yet." << endl;
+            break;
+        case global:
+        case tpt:
+        case estGlobal:
+            mOwnedTracks.push_back(track);
+            break;
+        default:
+            cerr << "StTrackNode::addTrack(): cannot add, unknown track type." << endl;
+            return;
+            break;
         }
         track->setNode(this);
     }
@@ -103,23 +103,23 @@ StTrackNode::removeTrack(StTrack* track)
     StSPtrVecTrackIterator iterS;
     if (track) {
         switch (track->type()) {
-            case primary:
-            case estPrimary:
-            case secondary:
-            case massFitAtVx:
-                for (iter = mReferencedTracks.begin(); iter < mReferencedTracks.end(); iter++)
-                    if (*iter == track) mReferencedTracks.erase(iter);
-                break;
-            case tpt:
-            case global:
-            case estGlobal:
-            case massFit:
-                for (iterS = mOwnedTracks.begin(); iterS < mOwnedTracks.end(); iterS++)
-                    if (*iterS == track) mOwnedTracks.erase(iterS);
-                break;
-            default:
-                cerr << "StTrackNode::removeTrack(): cannot remove, unknown track type." << endl;
-                break;
+        case primary:
+        case estPrimary:
+            for (iter = mReferencedTracks.begin(); iter < mReferencedTracks.end(); iter++)
+                if (*iter == track) mReferencedTracks.erase(iter);
+            break;
+        case secondary:                // not implemented yet
+            cerr << "StTrackNode::removeTrack(): track type 'secondary' not implemented yet." << endl;
+            break;
+        case tpt:
+        case global:
+        case estGlobal:
+            for (iterS = mOwnedTracks.begin(); iterS < mOwnedTracks.end(); iterS++)
+                if (*iterS == track) mOwnedTracks.erase(iterS);
+            break;
+        default:
+            cerr << "StTrackNode::removeTrack(): cannot remove, unknown track type." << endl;
+            break;
         }
         track->setNode(0);
     }
@@ -166,28 +166,29 @@ StTrackNode::entries(StTrackType type) const
     //VPunused StSPtrVecTrackConstIterator iterS;
     //VPunused StPtrVecTrackConstIterator  iter;
     unsigned int                counter;
-    
+
     switch (type) {
-        case primary:
-        case estPrimary:
-        case secondary:
-        case massFitAtVx:
-            for (counter=0, i=0; i < mReferencedTracks.size(); i++)
-                if (mReferencedTracks[i]->type() == type) counter++;
-            return counter;
-            break;
-        case tpt:
-        case global:
-        case estGlobal:
-        case massFit:
-            for (counter=0, i=0; i < mOwnedTracks.size(); i++)
-                if (mOwnedTracks[i]->type() == type) counter++;
-            return counter;
-            break;
-        default:
-            cerr << "StTrackNode::entries(): unknown track type." << endl;
-            return 0;
-            break;
+    case primary:
+    case estPrimary:
+        for (counter=0, i=0; i < mReferencedTracks.size(); i++)
+            if (mReferencedTracks[i]->type() == type) counter++;
+        return counter;
+        break;
+    case secondary:                // not implemented yet
+        cerr << "StTrackNode::entries(): track type 'secondary' not implemented yet." << endl;
+        return 0;
+        break;
+    case tpt:
+    case global:
+    case estGlobal:
+        for (counter=0, i=0; i < mOwnedTracks.size(); i++)
+            if (mOwnedTracks[i]->type() == type) counter++;
+        return counter;
+        break;
+    default:
+        cerr << "StTrackNode::entries(): unknown track type." << endl;
+        return 0;
+        break;
     }
 }
 
@@ -196,66 +197,68 @@ StTrackNode::track(StTrackType type, unsigned int i) const
 {
     int          j;
     unsigned int k;
-    
+
     switch (type) {
-        case primary:
-        case estPrimary:
-        case secondary:
-        case massFitAtVx:
-            for (j=-1, k=0; k < mReferencedTracks.size(); k++) {
-                if (mReferencedTracks[k]->type() == type) j++;
-                if (j == static_cast<int>(i)) return mReferencedTracks[k];
-            }
-            return 0;
-            break;
-        case tpt:
-        case global:
-        case estGlobal:
-        case massFit:
-            for (j=-1, k=0; k < mOwnedTracks.size(); k++) {
-                if (mOwnedTracks[k]->type() == type) j++;
-                if (j == static_cast<int>(i)) return mOwnedTracks[k];
-            }
-            return 0;
-            break;
-        default:
-            cerr << "StTrackNode::track(): unknown track type." << endl;
-            return 0;
-            break;
+    case primary:
+    case estPrimary:
+        for (j=-1, k=0; k < mReferencedTracks.size(); k++) {
+            if (mReferencedTracks[k]->type() == type) j++;
+            if (j == static_cast<int>(i)) return mReferencedTracks[k];
+        }
+        return 0;
+        break;
+    case secondary:                // not implemented yet
+        cerr << "StTrackNode::track(): track type 'secondary' not implemented yet." << endl;
+        return 0;
+        break;
+    case tpt:
+    case global:
+    case estGlobal:
+        for (j=-1, k=0; k < mOwnedTracks.size(); k++) {
+            if (mOwnedTracks[k]->type() == type) j++;
+            if (j == static_cast<int>(i)) return mOwnedTracks[k];
+        }
+        return 0;
+        break;
+    default:
+        cerr << "StTrackNode::track(): unknown track type." << endl;
+        return 0;
+        break;
     }
 }
-
+ 
 StTrack*
 StTrackNode::track(StTrackType type, unsigned int i)
 {
     int          j;
     unsigned int k;
-    
+
     switch (type) {
-        case primary:
-        case estPrimary:
-        case secondary:
-        case massFitAtVx:
-            for (j=-1, k=0; k < mReferencedTracks.size(); k++) {
-                if (mReferencedTracks[k]->type() == type) j++;
-                if (j == static_cast<int>(i)) return mReferencedTracks[k];
-            }
-            return 0;
-            break;
-        case tpt:
-        case global:
-        case estGlobal:
-        case massFit:
-            for (j=-1, k=0; k < mOwnedTracks.size(); k++) {
-                if (mOwnedTracks[k]->type() == type) j++;
-                if (j == static_cast<int>(i)) return mOwnedTracks[k];
-            }
-            return 0;
-            break;
-        default:
-            cerr << "StTrackNode::track(): unknown track type." << endl;
-            return 0;
-            break;
+    case primary:
+    case estPrimary:
+        for (j=-1, k=0; k < mReferencedTracks.size(); k++) {
+            if (mReferencedTracks[k]->type() == type) j++;
+            if (j == static_cast<int>(i)) return mReferencedTracks[k];
+        }
+	return 0;
+        break;
+    case secondary:                // not implemented yet
+        cerr << "StTrackNode::track(): track type 'secondary' not implemented yet." << endl;
+        return 0;
+        break;
+    case tpt:
+    case global:
+    case estGlobal:
+        for (j=-1, k=0; k < mOwnedTracks.size(); k++) {
+            if (mOwnedTracks[k]->type() == type) j++;
+            if (j == static_cast<int>(i)) return mOwnedTracks[k];
+        }
+        return 0;
+        break;
+    default:
+        cerr << "StTrackNode::track(): unknown track type." << endl;
+        return 0;
+        break;
     }
 }
 
