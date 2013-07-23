@@ -379,6 +379,10 @@ ostrstream& StLoggerManager::Message(const char* mess, const char* type,
   else fSourceFileNames[LevelIndex(fCurType)].clear();
   fLineNumbers[LevelIndex(fCurType)]     = lineNumber;
 
+  if (mess && std::char_traits<char>::length(mess) > 0) {
+    BuildMessage(mess, typeChar, opt, sourceFileName, lineNumber);
+  }
+
 //  if (messSize > 0) *this << mess << endm; // print out the previous this message if present
 //   return *((StMessMgr*) this);
   return Stream();
@@ -545,7 +549,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.49 2012/12/04 15:31:03 jeromel Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.50 2013/07/23 20:03:05 dmitry Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -978,8 +982,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.49 2012/12/04 15:31:03 jeromel Exp $
+// $Id: StLoggerManager.cxx,v 1.50 2013/07/23 20:03:05 dmitry Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.50  2013/07/23 20:03:05  dmitry
+// missing backwards compatibility feature restored
+//
 // Revision 1.49  2012/12/04 15:31:03  jeromel
 // Replaced GNUC by STAR_LOG4CXX_VERSION for consistency, comment if 1
 //
