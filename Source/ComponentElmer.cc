@@ -137,8 +137,6 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
       return false;
     }
     
-    // if(il < 60) std::cout << "Got node " << il << " with x=" << xnode << ", y=" << ynode << ", z=" << znode << " and funit=" << funit << "\n";
-
     // Set up and create a new node.
     newNode.x = xnode * funit;
     newNode.y = ynode * funit;
@@ -296,7 +294,6 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   // Read the elements and their material indices.
   elements.clear();  
   int highestnode = 0;
-  int nbackground = 0;
   element newElement;
   for (il = 0; il < nElements; il++)	{
 
@@ -389,12 +386,6 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     if (in8 > highestnode) highestnode = in8;
     if (in9 > highestnode) highestnode = in9;
 
-    // Skip quadrilaterals which are background.
-    if (deleteBackground && materials[imat - 1].ohm == 0) {
-      nbackground++;
-      continue;
-    }    
-    
     // These elements must not be degenerate.
     if (in0 == in1 || in0 == in2 || in0 == in3 || in0 == in4 || in0 == in5 || 
         in0 == in6 || in0 == in7 || in0 == in8 || in0 == in9 || 
