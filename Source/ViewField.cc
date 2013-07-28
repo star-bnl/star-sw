@@ -816,7 +816,7 @@ ViewField::EvaluateWeightingField(double* pos, double* par) {
     if (par[0] > 0.) {
       sensor->WeightingField(xpos, ypos, zpos, ex, ey, ez, electrode);
     } else {
-      v = component->WeightingPotential(xpos, ypos, zpos, electrode);
+      v = sensor->WeightingPotential(xpos, ypos, zpos, electrode);
     }
   }
   if (debug) {
