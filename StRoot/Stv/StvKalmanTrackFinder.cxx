@@ -447,7 +447,7 @@ int StvKalmanTrackFinder::Refit(int idir)
 static int nCall=0;nCall++;
 static StvTrackFitter *tkf = StvTrackFitter::Inst();
 static const StvConst  *kons = StvConst::Inst();
-static const double kEps = 1.e-2;
+static const double kEps = 1.e-2,kEPS=1e-1;
 enum {kBadHits=5};
 
   int ans=0,anz=0,lane = 1;
@@ -478,7 +478,8 @@ StvDebug::Count("CALLS",10);
       if (anz>0) break;	
 
       double dif = lstPars.diff(tstNode->GetFP(),tstNode->GetFE());
-      if ( dif < kEps) { //Fit converged
+      double eps = (ans || anz)? kEPS:kEps;
+      if ( dif < eps) { //Fit converged
       converged = 1; break; } 
 
     }// End Fit iters
