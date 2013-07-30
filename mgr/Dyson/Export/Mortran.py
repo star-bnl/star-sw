@@ -1474,6 +1474,7 @@ class Rotation(Handler):
             if ( val != None ):
                 self.key   = key
                 self.value = val
+                if key=='ort': self.value = val.replace("+","")                     
                 self.parent.add(self)
                 return
 
