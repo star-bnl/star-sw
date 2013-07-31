@@ -33,7 +33,9 @@ ADD_DEFINITIONS( "-Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloade
 ## Allow to use debug symbols ##########################
 IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
  CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
- ADD_DEFINITIONS( "-DDEBUG -g" )
+ ADD_DEFINITIONS( "-g -O0" )
+ELSE()
+ ADD_DEFINITIONS( "-O2" )
 ENDIF()
 ## add garfield  #######################################
 AUX_SOURCE_DIRECTORY( Source garfield_sources )
@@ -66,7 +68,7 @@ LIST( REMOVE_ITEM heed_sources Heed/heed++/code/HeedParticle_BGM.c )
 
 SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES LANGUAGE CXX)
 ## Add compiler flags needed to build heed ##############
-ADD_DEFINITIONS( "-O2 -pg -DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX -DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN" )
+ADD_DEFINITIONS( "-pg -DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX -DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN" )
 
 # Not sure about this, but without this flag the same symbols appear in GasLib.c.o and PhotoAbsCSLib.c.o and I can't compile
 ADD_DEFINITIONS( "-DNOT_INCLUDE_GASLIB_IN_PACSLIB" )
