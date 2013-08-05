@@ -13,22 +13,22 @@ TString opt(flg),fil(daqFile);
 int fr=1,to=nEvents;
 int ierr = 0;
 
-opt += " StvPulls";
+opt += ",StvPulls";
 
 
-bfc(-1,opt,fil);//StMaker::lsMakers(chain);
+bfc(-1,opt,fil);
 chain->SetAttr("blackList","Svt","St_db_Maker::");
 
-StIOInterFace *iomk = (StIOInterFace *)chain->GetMaker("inputStream");
-if (iomk && !fil.Contains(".geant.")) {
- TString dir("/star/simu/simu/perev/StiVMC/offline/users/perev/fitErrSim/");
- iomk->SetBranch("geantBranch",dir,"r");
-}
+// StIOInterFace *iomk = (StIOInterFace *)chain->GetMaker("inputStream");
+// if (iomk && !fil.Contains(".geant.")) {
+//  TString dir("/star/simu/simu/perev/StiVMC/offline/users/perev/fitErrSim/");
+//  iomk->SetBranch("geantBranch",dir,"r");
+// }
 
 
 StMaker *mk=0;
 
-StMaker::lsMakers(chain);
+//StMaker::lsMakers(chain);
 
 if (nEvents>=0) chain->Init();
 

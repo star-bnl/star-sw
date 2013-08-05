@@ -257,11 +257,11 @@ int  mNFixd;
 int  mNEvs;
 int  mNTks;
 int  mNHits;
-int  mN00;
 int  mNCall;
 double mPars[100];
 double mFist[100];
 double mVal00;
+double mVal99;
 double mXi2[3];
 double mRes[4];
 
@@ -346,11 +346,11 @@ int StvFitErr(const char *file)
 //______________________________________________________________________________
 void CalcInit()
 {
-   const char*  innOutNames[2]  ={"StvTpcInnerHitErrsFE"    ,"StvTpcOuterHitErrsFE"    };
-
+   const char*  innOutNames[4]  ={"StvTpcInnerHitErrsFE"    ,"StvTpcOuterHitErrsFE"    
+				 ,"StvTpcInnerPromptErrsFE" ,"StvTpcOuterPromptErrsFE" };
 //    const double innOutPars[2][6]={{0.047,0.107,5e-5,1./12,0.0011, 0.0012}
 //                                  ,{0.035,0.077,5e-5,1./12,0.0011, 0.0012}};
-   double TpcMiMax[2][2][2]={{{0.05,0.2},{0.05,0.2}},{{0.05,0.2},{0.05,0.2}}};
+   double TpcMiMax[2][2]={{0.05,0.2},{0.05,0.2}};
 
 
   myFcn.Clear();
@@ -360,10 +360,10 @@ void CalcInit()
     return;
   }
 
-  for (int io=0;io<2;io++) {
-    StvHitErrCalculator *hec = new StvTpcHitErrCalculator(innOutNames[io]);
-//    hec->SetPars(innOutPars[io]);
-    FECalcHolder *hold= new FETpcCalcHolder(hec,TpcMiMax[io]);
+  for (int io=0;io<4;io++) {
+    StvHitErrCalculator *hec = (io<2) ? new StvTpcHitErrCalculator(innOutNames[io])
+                                      : new StvHitErrCalculator   (innOutNames[io]);
+    FECalcHolder *hold= new FETpcCalcHolder(hec,TpcMiMax);
     myFcn.Add(hold);
   }
 }
@@ -833,6 +833,8 @@ FECalcHolder::FECalcHolder(int id,StvHitErrCalculator* calc
   memset(mBeg,0,mEnd-mBeg+1);
   mId=id; mCalc=calc; 
   memcpy(mMiMax[0],miMax[0],sizeof(mMiMax));
+  double *par = calc->GetPars();
+  for (int j=0;j<2;j++) {par[j] = 0.5*(miMax[j][0]+miMax[j][1]);}
 }
 //______________________________________________________________________________
 FECalcHolder::FECalcHolder()	
@@ -867,9 +869,8 @@ void FECalcHolder::DbLoad()
     command.ReplaceAll(".L ",".U "); 
     gInterpreter->ProcessLine(command);
     mCalc->SetPars((double*)mTab->GetArray());
-    Scale(1./kErrFak);}
-
-  else {				//file does not exist
+//??    Scale(1./kErrFak);
+  } else {				//file does not exist
     printf("FECalcHolder::DbLoad: %s NOT FOUND. Default is used)\n",dbFile.Data());
 //     mTab = (TTable *)gInterpreter->Calc("new St_StvHitErrs(\"someHitError\",1)"); 
 //     mTab->SetName(dbName);
@@ -895,9 +896,9 @@ void FECalcHolder::DbSave()
     std::ofstream ofs(dbFile);
 
 //		Save increased errors
-    Scale(kErrFak);
+//??    Scale(kErrFak);
     mTab->SavePrimitive(ofs);
-    Scale(1./kErrFak);
+//??    Scale(1./kErrFak);
   }
 //		Save production errors
   {
@@ -928,7 +929,7 @@ void FECalcHolder::AvInit()
 //______________________________________________________________________________
 void FECalcHolder::AvAdd(const double hRR[3],double yXi2,double zXi2)
 {
-  double der[kMaxPars][3];
+//  double der[kMaxPars][3];
   mAve[0]++;
   mAve[1]+=hRR[0];
   mAve[2]+=hRR[0]*hRR[0];
@@ -937,8 +938,8 @@ void FECalcHolder::AvAdd(const double hRR[3],double yXi2,double zXi2)
   mAve[5]+=yXi2;
   mAve[6]+=zXi2;
 
-  mCalc->CalcDcaDers(der);
-  TCL::vadd(mAveDer[0],der[0],mAveDer[0],kMaxPars*3);
+//  mCalc->CalcDcaDers(der);
+//  TCL::vadd(mAveDer[0],der[0],mAveDer[0],kMaxPars*3);
 }
 //______________________________________________________________________________
 void FECalcHolder::AvEnd()
@@ -960,19 +961,24 @@ StvHitErrCalculator *FETpcCalcHolder::GetCalc(const float x[3])
 {
 static const double Rinner =120.8;
 static const double Dinner =120.8/cos(15./180*M_PI);
+static const double kZPrompt = 205;
    int inOut = -1;
-   if (strstr(mCalc->GetName(),"TpcInner")) inOut=0;;  
-   if (strstr(mCalc->GetName(),"TpcOuter")) inOut=1;;  
+   if (strstr(mCalc->GetName(),"TpcInnerHit"   )) inOut=0;;  
+   if (strstr(mCalc->GetName(),"TpcOuterHit"   )) inOut=1;;  
+   if (strstr(mCalc->GetName(),"TpcInnerPrompt")) inOut=2;;  
+   if (strstr(mCalc->GetName(),"TpcOuterPrompt")) inOut=3;;  
    assert(inOut>=0);
    float rxy = x[0]*x[0]+x[1]*x[1];
    int jk=-1;
    if (rxy<Rinner*Rinner) jk=0;
    if (rxy>Dinner*Dinner) jk=1;
-   if (jk!=-1) {return (inOut==jk)? mCalc:0;}
-   float gphi = atan2(x[1],x[0])/M_PI*180;
-   gphi = fmod(gphi+15,30.)-15;
-   gphi = fmod(gphi+15,30.)-15;
-   jk = (sqrt(rxy)*cos(gphi/180*M_PI) <Rinner)? 0:1;
+   if (jk==-1) {
+     float gphi = atan2(x[1],x[0])/M_PI*180;
+     gphi = fmod(gphi+15,30.)-15;
+     gphi = fmod(gphi+15,30.)-15;
+     jk = (sqrt(rxy)*cos(gphi/180*M_PI) <Rinner)? 0:1;
+   }
+   if (fabs(x[2])>kZPrompt) jk+=2; 
    return (inOut==jk)? mCalc:0;
 }
 //______________________________________________________________________________
@@ -987,6 +993,8 @@ kZZDiff	=4,  	/* Diffusion in Z direction  *ZFactor			*/
 kYFact 	=5, 	/*	Error factor in Y-direction 			*/
 kZFact 	=6, 	/*	Error factor in Z-direction 			*/
 kZAB2  	=7};	/* Constant member in Z direction (a*b)**2		*/
+
+    if (strstr(GetName(),"Prompt")) return 0;
     fcn->FixPar(kZAB2+mOffset);
     fcn->FixPar(kThkDet+mOffset);
     return 2;
@@ -1091,17 +1099,18 @@ int FEFcn::Fit()
 //stat=myFitter.Command("SET ERRORDEF 0.0001");
   stat=myFitter.Command("SHOW EPS");
   stat=myFitter.Command("SHOW ERR");
-  int nOK=0;
-  for (int it=0;it<10 && nOK<3;it++) {  
+  mVal99 = 0;
+  for (int it=0;it<10;it++) {  
+    mVal00 = mVal99;
     Approx(0);
     stat = myFitter.Migrad();
-    printf("%d Migrad() == %d\n",it,stat);
-    if (!stat) {nOK++; continue;}
-    nOK = 0;
+    printf("%d Command Migrad == %d\n",it,stat);
+    if (!stat) {break;}
     stat = myFitter.Command("SCAN");
-    printf("Scan() == %d\n",stat);
+    printf("%d Command Scan== %d\n",it,stat);
+    if (stat) break;
   }
-  myFitter.Command("IMPROVE");
+//  myFitter.Command("IMPROVE");
   Approx(1);
   printf("FEFcn::Fit() Average Xi2/Ndf = %g(y) %g(z) %g\n",mXi2[0],mXi2[1],mXi2[2]);
   return 0;
@@ -1190,8 +1199,6 @@ int FEFcn::Add(FEEvent* ev)
     assert(nNodes==mTks.back().NNodes());
   }        
   assert(mTks.size());
-  mN00 = (int)(log(double(mNHits))/log(2.)+1); 
-  mN00 = 1<<mN00; 
   return 0;
 }
 
@@ -1253,16 +1260,12 @@ enum {kMinNodes = 10,kMinHits=15,kMaxXi2=30,kNTracks=10000};
     assert(nNodes==mTks.back().NNodes());
   }        
   assert(mTks.size());
-  mN00 = (int)(log(double(mNHits))/log(2.)+1); 
-  mN00 = 1<<mN00; 
   return;
 }
 
 //______________________________________________________________________________
 void FEFcn::Eval(int npar, double* gradp, double& fvalp, double* par, int flag)
 {
-static const double oleg = 1e-10;
-static const double igor = 0;
    assert(npar<=mNPars);
    mNCall++;
    long double grad[100]={0},fval=0,myXi2[3]={0};
@@ -1274,7 +1277,7 @@ static const double igor = 0;
 //	Update calc's params by current ones
    Synchro('A',par);
 //??   Poli2 poliSY(2),poliSZ(1);
-   Poli2 poliSY(2,kMaxDY),poliSZ(2,kMaxDZ);
+   Poli2 poliSY(2,kMaxDY),poliSZ(1,kMaxDZ);
    for (int itk=0;itk<(int)mTks.size();itk++) {//Loop over tracks
      const FENodes &nodes = mTks[itk].Nodes();
      int nNodes = nodes.size();;
@@ -1296,7 +1299,7 @@ static const double igor = 0;
 
      poliSY.Fit(); 
      poliSZ.Fit(); 
-     fval += ((poliSY.LiH()+poliSZ.LiH()));
+     fval += ((poliSY.LiH()+poliSZ.LiH()))-mVal00/mTks.size();
      myXi2[0] += poliSY.Xi2()-(nNodes);
      myXi2[1] += poliSZ.Xi2()-(nNodes);
 
@@ -1344,18 +1347,14 @@ static const double igor = 0;
   mXi2[1] = 1+myXi2[1]/myNz;
   mXi2[2] = 1+myXi2[2]/myN;
 
-mN00 = 1;
-  fval2 /= mN00; fval  /= mN00;
-  fval = fval + igor*0.5*(fval2*fval2);
-  for (int ip=0;ip<npar;ip++) { fval += oleg*0.5*par[ip]*par[ip];}
-  if (!mVal00) mVal00 = fval;
-  fvalp = fval-mVal00;
+  fvalp = fval; if (!mVal99 || mVal99 > fval+mVal00) mVal99 = fval+mVal00;
+  if (!mVal00) { mVal00 = mVal99; fvalp = 0;}
   TCL::vscale(mRes,(1./myNHits),mRes,4);
 
 
   if (flag==2)   {
     for (int i=0;i<mNPars;i++){
-      gradp[i]=(grad[i]+igor*(fval2)*gra2[i])/mN00  +oleg*par[i];}}
+      gradp[i]=grad[i]; }}
 }
 //______________________________________________________________________________
 void FEFcn::Approx(int nonBias)

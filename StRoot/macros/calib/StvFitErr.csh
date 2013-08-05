@@ -30,26 +30,30 @@ if ( ! ${%1} ) then
 endif
 
 set daqFile = ${1}
-if (!( -e ${daqFile} )) then
+
+set myFile = {$daqFile:s/@//}
+setenv STV_FILE_LIST $myFile
+
+if (!( -e ${myFile} )) then
   echo "fiterr:  ***Daq file Not FOUND // ${daqFile} ***"
   exit 13
 endif
 echo "fiterr: Input daq file=${daqFile}"
+set nam = ${daqFile:t}
+set nam = ${nam:r}
+set nam = ${nam:s/@//}
+
 
 set Opt = ${2}
+setenv STV_OPTS $Opt
 set myOpt = ${3}
-set noPrepass = 0
-set x = (`echo $myOpt | grep -i noPrepass`) 
-if ($#x) set noPrepass = 1
-
-
-
-
+set nFETracks = ${4};
+if ( ! $nFETracks ) set nFETracks = 1000000;
+echo "fiterr: *** $nFETracks tracks requested"
 #		FloatPointException OFF
 setenv STARFPE NO
 
 #		Fit Stv errors
-touch stv.log
 
 
 #		Create DB directories
@@ -60,77 +64,57 @@ mkdir -p StarDb/Calibrations/rich/
 #if ( ! ( -e fiterr.C  ) ) ln -sf $STAR/StRoot/macros/calib/fiterr.C .
 
 @ iter = 0
-#		Run prepass
-if (${daqFile:e} == "fz") touch fiterrPrepass.DONE
-if (${noPrepass}        ) touch fiterrPrepass.DONE
-
-if (!(-e fiterrPrepass.DONE)) then
-  rm fit.log stv.log
-  touch stv.log
-  touch fit.log
-
-  echo '*** Prepass Started *** '
-  echo '*** Prepass Started *** '>> stv.log
-
-  root4star -b  <<EOF  >>& stv.log
-.L calib/prepass.C
-#include <stdlib.h>
-int ans =13;
-ans =prepass("$daqFile","$Opt");
-printf("ptrepass ans=%d\n",ans);
-if (ans != 99) exit(13);
-printf("exit(0)\n");
-exit(0);
-EOF
-  set myerr = $status
-  echo '*** Prepass Ended *** Status=' $myerr
-  echo '*** Prepass Ended *** Status=' $myerr>> stv.log
-  if ($myerr) goto STVERR
-  touch fiterrPrepass.DONE
-
-else
-
-echo '*** Prepass allready DONE (fiterrPrepass.DONE exists)*** '
-echo '*** Prepass allready DONE (fiterrPrepass.DONE exists)*** '>> stv.log
-
-endif 
-
 
 AGAIN:
 @ iter = $iter + 1
 
 set myroot_time = 0
-if ( -e pulls.root) set myroot_time = `stat -L -c %X pulls.root`
 set fitlog_time = 0
 if ( -e fit.log) set fitlog_time = `stat -c %X fit.log`
-
+if ( -e stv.log) set myroot_time = `stat -c %X stv.log`
+touch fit.log
+touch stv.log
 if ($myroot_time > $fitlog_time) goto FIT
 
-if (-e pulls.root) cp pulls.root pulls.root.BAK
 echo '*** STV Started *** Iter=' $iter
 echo '*** STV Started *** Iter=' $iter >> stv.log
 
-STV:
-root.exe -b  <<EOF  >>& stv.log
-.L runStv.C
-#include <stdlib.h>
-const char *star = gSystem->Getenv("STAR");
-const char *path = gSystem->Getenv("LD_LIBRARY_PATH");
-printf("***  STAR = %s  ***\n",star);
-printf("***  PATH = %s  ***\n",path);
-int ans =13;
-ans =runStv("$daqFile","${Opt}",200);
-if (ans != 99) exit(13);
-ans =chain->Finish(); 
-if (ans) exit(14);
-exit(0);
-EOF
-
+## STV:
+## gdb root.exe   <<EOF  >>& stv.log
+## run -b 
+## .L runStv.C
+## #include <stdlib.h>
+## const char *star = gSystem->Getenv("STAR");
+## const char *path = gSystem->Getenv("LD_LIBRARY_PATH");
+## printf("***  STAR = %s  ***\n",star);
+## printf("***  PATH = %s  ***\n",path);
+## int ans =13;
+## ans =runStv("$daqFile","${Opt}",0,11);
+## printf("*** runStv=%d\n ***",ans);
+## ans =13;
+## chain->SetAttr("fiterr",$nFETracks,"Stv");
+## chain->SetAttr("HitLoadOpt"     ,0,"Stv");
+## chain->SetAttr("useTracker"     ,1,"Stv");             
+## chain->SetAttr("useVertexFinder",0,"Stv");             
+## chain->SetAttr("useEventFiller" ,1,"Stv");            
+## chain->SetAttr("makePulls"      ,1,"Stv");
+## ans = chain->EventLoop(4000);
+## bt
+## printf("*** EventLoop=%d ***\n",ans);
+## if (ans > 2) exit(13);
+## ans =chain->Finish(); 
+## if (ans) exit(14);
+## exit(0);
+## EOF
+##########################
+runCondor.csh
+##########################
 set myerr = $status
+if ($myerr) goto STVERR
 echo '*** STV Ended *** Status=' $myerr
 echo '*** STV Ended *** Iter=' $iter >> stv.log
+touch stv.log
 if ($myerr) goto STVERR
-if (! -e pulls.root) ln -s *.tags.root pulls.root
 
 FIT:
 echo '*** FitErr Started *** Iter=' $iter
@@ -147,14 +131,14 @@ gSystem->Load("StvUtil");
 
 .L StvFitErr.C+
 int ans = 13;
-ans = StvFitErr();
+ans = StvFitErr("condor/*.tags.root");
 exit(ans);
 .q
 EOF
 set myerr = $status
 echo '*** FitErr Ended *** Status=' $myerr
 if ($myerr) goto FITERR
-
+if ( $iter > 9 ) goto MANY
 goto AGAIN
 
 #
@@ -166,3 +150,6 @@ FITERR: if (myerr==99) goto DONE
         echo "FITERR =" $myerr "Iter=" $iter
 exit
 DONE:   echo "DONE Iter=" $iter
+exit
+MANY:   echo "TOO MANY Iters=" $iter
+exit
