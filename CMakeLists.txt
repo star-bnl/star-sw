@@ -27,16 +27,6 @@ INCLUDE_DIRECTORIES ( ${ROOT_INCLUDE_DIRS} )
 LINK_LIBRARIES( ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 MESSAGE( STATUS "The ROOT Version is found to be ${ROOT_VERSION_MAJOR}.${ROOT_VERSION_MINOR}.${ROOT_VERSION_PATCH}" )
 
-## Flags to pass to the compiler #######################
-ADD_DEFINITIONS( "-Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual -fpic -fno-common -Os -c" )
-
-## Allow to use debug symbols ##########################
-IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
- CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
- ADD_DEFINITIONS( "-g -O0" )
-ELSE()
- ADD_DEFINITIONS( "-O2" )
-ENDIF()
 ## add garfield  #######################################
 AUX_SOURCE_DIRECTORY( Source garfield_sources )
 LIST( APPEND ROOT_DICT_INCLUDE_DIRS Include )
@@ -62,16 +52,27 @@ SET( heed_dirs
 FOREACH( heed_dir ${heed_dirs} )
     AUX_SOURCE_DIRECTORY( ${heed_dir} heed_sources )
 ENDFOREACH()
-
 # Don't build HeedParticle_BGM.c.o because it will not compile
 LIST( REMOVE_ITEM heed_sources Heed/heed++/code/HeedParticle_BGM.c )
-
 SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES LANGUAGE CXX)
-## Add compiler flags needed to build heed ##############
-ADD_DEFINITIONS( "-pg -DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX -DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN" )
 
-# Not sure about this, but without this flag the same symbols appear in GasLib.c.o and PhotoAbsCSLib.c.o and I can't compile
-ADD_DEFINITIONS( "-DNOT_INCLUDE_GASLIB_IN_PACSLIB" )
+## Flags to pass to the compiler #######################
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual -fno-common -pg " )
+
+# Add common flags (gfortran and g++)
+ADD_DEFINITIONS( "-c" )
+# Allow to use debug symbols
+IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+ CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
+ ADD_DEFINITIONS( "-g -O0" )
+ELSE()
+ ADD_DEFINITIONS( "-O2" )
+ENDIF()
+
+
+# Add switches used in HEED
+# -DNOT_INCLUDE_GASLIB_IN_PACSLIB is used in Heed/heed++/code/PhotoAbsCS.c
+SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES COMPILE_FLAGS "-DNOT_INCLUDE_GASLIB_IN_PACSLIB -DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX -DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN")
 
 ## create dictionary  ##################################
 SET( ROOT_DICT_CINT_DEFINITIONS "-DHANDLE_DICT_EXCEPTIONS=IGNORED_FOR_CINT" )
@@ -101,41 +102,32 @@ ADD_LIBRARY( ${PROJECT_NAME} SHARED
     ${magboltz_sources}
     ${heed_sources} )
 
-
 SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
     VERSION ${${PROJECT_NAME}_VERSION}
     SOVERSION ${${PROJECT_NAME}_SOVERSION} )
 
-# set library install dir    
-INSTALL( TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/Library/  COMPONENT library )
-# put cmake config files in the CMake folder
-INSTALL( FILES ${PROJECT_BINARY_DIR}/GarfieldConfig.cmake
-        ${PROJECT_BINARY_DIR}/GarfieldConfigVersion.cmake
-        ${PROJECT_BINARY_DIR}/GarfieldBuildTreeSettings.cmake
-        ${PROJECT_BINARY_DIR}/GarfieldLibraryDepends.cmake
-        DESTINATION ${PROJECT_SOURCE_DIR}/Library/cmake/
-        COMPONENT cmakefiles )
-
 ## EXPORT PACKAGE INFORMATION ##########################
-# Add all targets to the build-tree export set
-export(TARGETS ${PROJECT_NAME}
-  FILE "${PROJECT_BINARY_DIR}/GarfieldLibraryDepends.cmake")
- 
-# Export the package for use from the build-tree
-# (this registers the build-tree with a global CMake-registry)
 export(PACKAGE ${PROJECT_NAME})
- 
-# Create a GarfieldBuildTreeSettings.cmake file for the use from the build tree
-configure_file(CMake/GarfieldBuildTreeSettings.cmake.in
-  "${PROJECT_BINARY_DIR}/GarfieldBuildTreeSettings.cmake" @ONLY)
- 
-# Create the GarfieldConfig.cmake and GarfieldConfigVersion files
-SET( INSTALL_CMAKE_DIR ${PROJECT_BINARY_DIR} CACHE PATH
-  "Installation directory for CMake files" )
-SET( INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/inlcude CACHE PATH 
-  "Installation directory for Include files" )
 
+# Configure the config files 
 configure_file(CMake/GarfieldConfig.cmake.in
   "${PROJECT_BINARY_DIR}/GarfieldConfig.cmake" @ONLY)
 configure_file(CMake/GarfieldConfigVersion.cmake.in
   "${PROJECT_BINARY_DIR}/GarfieldConfigVersion.cmake" @ONLY)
+
+# set the install path
+SET( INSTALL_CMAKE_DIR ${PROJECT_SOURCE_DIR}/Library/ CACHE PATH
+  "Installation directory for CMake files" )
+
+# decide were the library will end up and to write info in  GarfieldLibraryDepends.cmake
+INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_CMAKE_DIR} EXPORT GarfieldLibraryDepends)
+
+# decide were to install GarfieldLibraryDepends.camke
+INSTALL(EXPORT GarfieldLibraryDepends DESTINATION ${INSTALL_CMAKE_DIR}/cmake  COMPONENT cmakefiles)
+
+# now install cofigured config files 
+INSTALL( FILES ${PROJECT_BINARY_DIR}/GarfieldConfig.cmake
+        ${PROJECT_BINARY_DIR}/GarfieldConfigVersion.cmake
+        DESTINATION ${INSTALL_CMAKE_DIR}/cmake
+        COMPONENT cmakefiles )
+  

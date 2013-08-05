@@ -2,13 +2,11 @@
 # It defines the following variables
 #  GARFIELD_INCLUDE_DIRS - include directories for Garfield
  
-get_filename_component(GARFIELD_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-if(EXISTS "${GARFIELD_CMAKE_DIR}/GarfieldBuildTreeSettings.cmake")
-   # In build tree
-   include("${GARFIELD_CMAKE_DIR}/GarfieldBuildTreeSettings.cmake")
-else()
-   set(GARFIELD_INCLUDE_DIRS "${GARFIELD_CMAKE_DIR}/@CONF_REL_INCLUDE_DIR@")
-endif()
+SET(GARFIELD_INCLUDE_DIRS
+  "@PROJECT_SOURCE_DIR@/Include"
+  "@PROJECT_SOURCE_DIR@/Heed/heed++/code")
+  
+SET( GARFIELD_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
+SET( GARFIELD_BINARY_DIR "@PROJECT_BINARY_DIR@")
  
-# Our library dependencies (contains definitions for IMPORTED targets)
-include("${GARFIELD_CMAKE_DIR}/GarfieldLibraryDepends.cmake")
+include("@PROJECT_SOURCE_DIR@/Library/cmake/GarfieldLibraryDepends.cmake")
