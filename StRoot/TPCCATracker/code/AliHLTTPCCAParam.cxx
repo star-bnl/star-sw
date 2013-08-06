@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.7 2012/08/14 16:30:42 fisyak Exp $
+// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.8 2013/08/06 18:59:19 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -157,6 +157,7 @@ void AliHLTTPCCAParam::Initialize( int iSlice,
   fErrZ = zSigma;
   fBz = bz;
   fNRows = nRows;
+  fRowX.resize(fNRows);
   for ( int irow = 0; irow < nRows; irow++ ) {
     fRowX[irow] = rowX[irow];
   }
@@ -334,6 +335,7 @@ std::istream &operator>>( std::istream &in, AliHLTTPCCAParam &p )
   in >> tmpf;
   in >> tmpf;
   in >> tmpf;
+  p.fRowX.resize(p.fNRows);
   for ( int iRow = 0; iRow < p.fNRows; iRow++ ) {
     in >> p.fRowX[iRow];
   }
