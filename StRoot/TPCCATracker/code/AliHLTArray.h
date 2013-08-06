@@ -26,6 +26,7 @@
 
 #ifndef ALIHLTARRAY_H
 #define ALIHLTARRAY_H
+#include <cstring>
 
 #ifndef assert
 #include <assert.h>

@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParamVector.h,v 1.4 2012/08/14 16:30:42 fisyak Exp $
+// $Id: AliHLTTPCCATrackParamVector.h,v 1.5 2013/08/06 18:59:38 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -14,6 +14,7 @@
 #include "AliHLTTPCCADef.h"
 #include "AliHLTVector.h"
 #include "AliHLTTPCCAMath.h"
+#include <cstring>
 
 class AliHLTTPCCATrackLinearisationVector;
 
