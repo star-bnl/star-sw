@@ -32,11 +32,15 @@ bool StJetCandidate::getBarrelDetectorEta(const TVector3& vertex, float& detEta)
   // Front plate of BEMC or BPRS layer
   // See StEmcGeom/geometry/StEmcGeom.cxx
   static const double BEMC_RADIUS = 225.405; // cm
+  // EEMC preshower1 layer
+  // See StEEmcUtil/EEmcGeom/EEmcGeomDefs.h
+  static const double EEMC_Z = 270.190; // cm
   TVector3 pos = momentum();
   pos.SetMag(BEMC_RADIUS/pos.Unit().Perp());
   pos += vertex;
   detEta = pos.Eta();
-  return fabs(detEta) < 1;
+  //  return fabs(detEta) < 1;
+  return fabs(pos.Z()) < EEMC_Z;
 }
 
 bool StJetCandidate::getEndcapDetectorEta(const TVector3& vertex, float& detEta) const
@@ -59,7 +63,8 @@ bool StJetCandidate::getEndcapDetectorEta(const TVector3& vertex, float& detEta)
     pos2 += vertex2;
     detEta = -pos2.Eta();
   }
-  return fabs(detEta) > 1 && fabs(detEta) < 2;
+  //  return fabs(detEta) > 1 && fabs(detEta) < 2;
+  return fabs(detEta) < 2.5;
 }
 
 StJetTrack* StJetCandidate::leadingChargedParticle() const
