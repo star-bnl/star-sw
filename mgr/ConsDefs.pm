@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.132 2012/12/02 17:26:31 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.133 2013/08/07 18:47:09 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -829,19 +829,19 @@
 
     # search for the config    
     my ($MYSQLCONFIG,$mysqlconf);
-    if ( defined($ENV{USE_LOCAL_MYSQL}) ){
+    # if ( defined($ENV{USE_LOCAL_MYSQL}) ){
 	($MYSQLCONFIG,$mysqlconf) =
 	    script::find_lib($XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ".
 			     $MYSQL . " ".
-			     "/usr/bin /usr/bin/mysql /sw/bin ",
+			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ",
 			     "mysql_config");
-    } else {
-	($MYSQLCONFIG,$mysqlconf) =
-	    script::find_lib($MYSQL . " ".
-			     "/usr/bin /usr/bin/mysql ".
-			     $XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ",
-			     "mysql_config");
-    }
+    # } else {
+    #	($MYSQLCONFIG,$mysqlconf) =
+    #	    script::find_lib($MYSQL . " ".
+    #			     "/usr/$LLIB/mysql /usr/bin/mysql /usr/bin ".
+    #			     $XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ",
+    #			     "mysql_config");
+    # } 
 
 
     # Associate the proper lib with where the inc was found
@@ -852,33 +852,56 @@
     # Note - there is a trick here - the first element uses mysqllibdir
     #        which is dreived from where the INC is found hence subject to 
     #        USE_LOCAL_MYSQL switch. This may not have been obvious.
-    my ($MYSQLLIBDIR,$MYSQLLIB) =
-	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
-			 $XOPTSTAR . "/lib " .  $XOPTSTAR . "/lib/mysql ",
-			 "libmysqlclient");
-			 #"libmysqlclient_r libmysqlclient");
-    #print "*** $MYSQLLIBDIR,$MYSQLLIB\n";
+    # my ($MYSQLLIBDIR,$MYSQLLIB) =
+    #	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
+    #			 $XOPTSTAR . "/lib " .  $XOPTSTAR . "/lib/mysql ",
+    #			 "libmysqlclient");
+    #			 # "libmysqlclient_r libmysqlclient");
+    # # die "*** $MYSQLLIBDIR,$MYSQLLIB\n";
 
-    if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
-        # if ( $mysqlconf ){
-	if ( 1==0 ){
-	    # Do not guess, just take it - this leads to a cons error though TBC
-	    chomp($MYSQLLIB = `$mysqlconf  --libs`);
-	    # mysqlconf returns (on SL5, 64 bits)
-	    #  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
-	} else {
-	    $MYSQLLIB .= " -L/usr/$LLIB";
-	    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
-	    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
-	    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
-	    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
-	    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
-	    $MYSQLLIB .= " -lz";
-	    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
+    # if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
+    if ( $mysqlconf ){
+	$mysqlconf = "$MYSQLCONFIG/$mysqlconf";
+	# if ( 1==1 ){
+	# Do not guess, just take it - this leads to a cons error though TBC
+	chomp($MYSQLLIB = `$mysqlconf  --libs`);
+	# but remove -L which are treated separately by cons
+	my(@libs) = split(" ", $MYSQLLIB);
+	my($test) = shift(@libs);
+	if ( $test =~ /-L/){
+	    $MYSQLLIBDIR = $test; $MYSQLLIBDIR =~ s/-L//;
+	    $MYSQLLIB = "";
+	    foreach my $el (@libs){
+		$MYSQLLIB  .= " ".$el if ($el !~ m/-L/);
+	    }
 	}
+	
+	# here is a check for libmysqlclient
+	
+	
+	# die "DEBUG got $MYSQLLIBDIR $MYSQLLIB\n";
+	
+	# mysqlconf returns (on SL5, 64 bits)
+	#  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
+	# } else {
+	#    $MYSQLLIB .= " -L/usr/$LLIB";
+	#    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
+	#    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
+	#    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
+	#    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
+	#    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
+	#    $MYSQLLIB .= " -lz";
+	#    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
+	# }
+    } else {
+	die "No mysql_config found\n";
     }
-    print "Use MYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
-	if $MYSQLLIBDIR && ! $param::quiet;
+    print "Using $mysqlconf\n\tMYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
+          if ! $param::quiet;
+
+    # die "\n";
+
+
 
     # QT
     if ( defined($QTDIR) && -d $QTDIR) {
@@ -929,14 +952,14 @@
 	}
 
 	# Coin3D - WHAT??! JL 2009
-	#if ( !defined($IVROOT)) {
+	# if ( !defined($IVROOT)) {
 	#    if ($QT_VERSION==4) {
 	#	$IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package
 	#    } else {
 	#	$IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package
 	#    }
 	#    print "*** ATTENTION *** IVROOT $IVROOT\n";
-	#}
+	# }
 	if ( ! defined($IVROOT) ){  $IVROOT = $XOPTSTAR;}
 	if ( defined($IVROOT) &&  -d $IVROOT) {
 	    # This is an initial logic relying on IVROOT to be defined
@@ -995,7 +1018,7 @@
 	$XMLINCDIR = `$xml --cflags`;
 	chomp($XMLINCDIR);
 	$XMLINCDIR =~ s/-I//;
-	my $XML  = `$xml --libs`;# print "$XML\n";
+	my $XML  = `$xml --libs`; # die "$XML\n";
 	my(@libs)= split(" ", $XML);
 
 	$XMLLIBDIR = shift(@libs);
@@ -1009,13 +1032,14 @@
 	    $XMLLIBDIR = "/usr/$LLIB";
 	}
 
-	#($XMLLIBDIR,$XMLLIBS) = split(' ', $XML);
-	#if ($XMLLIBDIR =~ /-L/){
+
+	# ($XMLLIBDIR,$XMLLIBS) = split(' ', $XML);
+	# if ($XMLLIBDIR =~ /-L/){
 	#    $XMLLIBDIR =~ s/-L//;
-	#} else {
+	# } else {
 	#    # may not have any -L
 	#    if ($XMLLIBS
-	#}
+	# }
 
 	my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
 	my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
