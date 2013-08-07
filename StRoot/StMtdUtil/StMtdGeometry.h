@@ -1,3 +1,14 @@
+/********************************************************************
+ * $Id: StMtdGeometry.h,v 1.3 2013/08/07 18:27:01 geurts Exp $
+ ********************************************************************
+ *
+ * $Log: StMtdGeometry.h,v $
+ * Revision 1.3  2013/08/07 18:27:01  geurts
+ * - updated strip gap dimension from old to current MRPC design [Bingchu]
+ * - include CVS Id and Log tags
+ *
+ *
+ *******************************************************************/
 #ifndef StMtdGeometry_HH
 #define StMtdGeometry_HH
 
@@ -23,7 +34,7 @@ const double innerBSMDRadius=230.705;
 const double outerBSMDRadius=232.742;
 const double stripLength = 87.0; //cm
 const double stripWidth  = 3.8 ; //cm
-const double stripGap    = 0.4 ; //cm
+const double stripGap    = 0.6 ; //cm
 const double bFieldInSteelFF = -1.26;
 const double bFieldFF = 0.5;
 const double eLossInSteel = 0.074;
@@ -64,7 +75,7 @@ class StMtdGeometry : public TNamed{
 		const char* title="Simplified Mtd Geometry");
   ~StMtdGeometry();
   const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.2 2013/03/24 19:56:41 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.3 2013/08/07 18:27:01 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 };
 
 R__EXTERN  StMtdGeometry* gMtdGeometry;
