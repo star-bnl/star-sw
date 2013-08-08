@@ -130,7 +130,7 @@ void Pythia6( TString mode="pp:minbias", Double_t ckin3=0.0, Double_t ckin4=-1.0
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=100, Double_t ckin3=3.0, Double_t ckin4=4.0  )
+void starsim( Int_t nevents=1, Double_t ckin3=7.0, Double_t ckin4=-1.0  )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
@@ -157,10 +157,11 @@ void starsim( Int_t nevents=100, Double_t ckin3=3.0, Double_t ckin4=4.0  )
   // Create the primary event generator and insert it
   // before the geant maker
   //
-  //  StarPrimaryMaker *
   primary = new StarPrimaryMaker();
   {
     primary -> SetFileName( Form("filter_%f_%f.gener.root",ckin3,ckin4) );
+    primary -> SetVertex( 0.1, -0.2, 0.0 );
+    primary -> SetSigma ( 0.1,  0.1, 30.0 );
     chain -> AddBefore( "geant", primary );
   }
 
@@ -177,7 +178,7 @@ void starsim( Int_t nevents=100, Double_t ckin3=3.0, Double_t ckin4=4.0  )
   primary -> AddFilter( filter );
 
   // Enable to keep tracks on events which were rejected
-  //  primary->SetAttr("FilterKeepAll", int(1));
+  primary->SetAttr("FilterKeepAll", int(1));
 
   //
   // Initialize primary event generator and all sub makers
