@@ -17,11 +17,14 @@ virtual void CalcDcaDers(double dRR[kMaxPars][3]);
 virtual double Trace(const float hiPos[3]);
 virtual  int GetNPars() const 			{return mNPar;}
 const double *GetPars() const 			{return mPar ;}
+      double *GetPars()  			{return mPar ;}
 static StvHitErrCalculator *Inst(const char *name);
+static void Test(double phiG=33,double lamG=66);
+static void Dest(double phiG=33,double lamG=66);
 protected:
 int CalcLocals(const float hiDir[3][3]);
 protected:
-enum {kYErr=0,kZErr=1,kWidTrk=2};
+enum {kYErr=0,kZErr=1};
 enum {kXX=0,kYX=1,kYY=2,kZX=3,kZY=4,kZZ=5};
 
 char mBeg[1];
