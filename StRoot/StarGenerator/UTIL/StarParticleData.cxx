@@ -21,7 +21,20 @@ Int_t hid( Int_t z, Int_t a, Int_t l=0 )
          +           10*a );
 }
 
-StarParticleData StarParticleData::sInstance;
+
+// Functor class which converts PDG code to STAR definition.
+class StarTrackingCode { 
+public: 
+  virtual Int_t operator()(Int_t pdgcode)=0; 
+};
+class G3TrackingCode : public StarTrackingCode { 
+public:
+  virtual Int_t operator()( Int_t ipdg ){ return TDatabasePDG::Instance()->ConvertPdgToGeant3(ipdg); }
+};
+
+
+
+  StarParticleData StarParticleData::sInstance;
 // ---------------------------------------------------------------------------------------------
 StarParticleData::~StarParticleData()
 {
@@ -44,20 +57,46 @@ StarParticleData::StarParticleData( const Char_t *name, TDataSet *parent ) :
   TDatabasePDG *pdg = TDatabasePDG::Instance();
   pdg -> ReadPDGTable(); // because it's too much to expect from a singleton
 
+
+  //
+  // Iterate over all particles in the PDG database, and add them to the local list.
+  // Set the tracking code according to the G3 standard.  TODO:  Allow user to select
+  // differnt tracking code standard.
+  //
   TIter Next( pdg->ParticleList() );
+
+  G3TrackingCode G3ID;
 
   TParticlePDG *particle = 0;
   while(  (particle=(TParticlePDG *)Next())  )
     {
 
-      TString name = particle->GetName();
+      //
+      // Clone the particle and add in the tracking code, which maps the PDG ID to the ID 
+      // used in the simulation package.
+      //
+      TString   name   = particle->GetName();
+      TString   title  = particle->GetTitle();
+      Double_t  mass   = particle->Mass();
+      Bool_t    stable = particle->Stable();
+      Double_t  width  = particle->Width();
+      Double_t  charge = particle->Charge();
+      TString   class_ = particle->ParticleClass();
+
       Int_t   code = particle->PdgCode();
+      Int_t   anti = 0; if ( particle->AntiParticle() == particle ) anti = -code;
 
-      mParticleList. Add( (TParticlePDG *)particle->Clone(name) );   
-      mParticleNameMap[ name ] = particle;
-      mParticleIdMap[ code ]   = particle; 
+      Int_t g3id = G3ID( code );
+      
+      TParticlePDG *myparticle = new TParticlePDG( name, title, mass, stable, width, charge, class_, code, anti, g3id );
+      
+      mParticleList. Add( myparticle );   
+      mParticleNameMap[ name ] = myparticle;
+      mParticleIdMap[ code ]   = myparticle; 
 
-    }
+     }
+	
+
  
   //
   // Register the object array with the dataset
