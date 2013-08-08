@@ -368,6 +368,12 @@ StarTGeoStacker::StarTGeoStacker( const Char_t *name, const Char_t *title )
   : StarAgmlStacker(name,title)
 {
 
+  // Ensure that we have a geometry manager
+  if ( !gGeoManager ) {
+    TGeoManager *manager = new TGeoManager("dyson","The STAR Geometry Manager");
+  }
+
+
   // Export basic materials to ROOT
   const Char_t *ag[]={"Hydrogen","Deuterium","Helium","Lithium","Berillium","Carbon","Nitrogen","Neon","Aluminium","Iron","Copper","Tungsten","Lead","Uranium","Air","Vacuum","Silicon"};
   for ( UInt_t i=0;i<sizeof(ag)/sizeof(Char_t *);i++ )
