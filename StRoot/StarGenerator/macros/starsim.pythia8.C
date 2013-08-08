@@ -116,6 +116,8 @@ void starsim( Int_t nevents=10 )
   primary = new StarPrimaryMaker();
   {
     primary -> SetFileName( "pythia8.starsim.root");
+    primary -> SetVertex( 0.1, -0.1, 0.0 );
+    primary -> SetSigma ( 0.1,  0.1, 30.0 );
     chain -> AddBefore( "geant", primary );
   }
 
@@ -155,6 +157,8 @@ void starsim( Int_t nevents=10 )
   // Setup geometry and set starsim to use agusread for input
   //
   //geometry("y2012");
+  //* AGUSER/GKINE NTRACK ID [ PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH option ]
+
   command("gkine -4 0");
   command("gfile o pythia8.starsim.fzd");
   
