@@ -98,11 +98,14 @@ void AgStarReader::ReadEvent()
       // Now connect the particle to the vertex
       Float_t plab[3] = { part->Px(), part->Py(), part->Pz() };
       Int_t   ipdg    = part->GetPdgCode();
-      Int_t   g3id    = 0; 
+      Int_t   g3id    = 0;
       {
 	TParticlePDG *pdg = mParticleData -> GetParticle( ipdg );     assert(pdg);
-	g3id = pdg->TrackingCode();                                   assert(g3id);
-	part->Print();
+	g3id = pdg->TrackingCode();
+	if ( g3id < 1 )
+	  {
+	    Warning(GetName(),Form("Particle %s with PDG id=%i has no G3 code.  Skipped.",pdg->GetName(),ipdg));
+	  }
       }
 
 

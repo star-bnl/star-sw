@@ -61,7 +61,8 @@ StarPrimaryMaker::StarPrimaryMaker()  :
 
   // Register the particle database with this maker
   StarParticleData &pdb = StarParticleData::instance();
-  Shunt( &pdb );
+  //  Shunt( &pdb );
+  AddData( &pdb, ".data" );
 
   SetAttr("FilterKeepHeader", int(1) );
 
