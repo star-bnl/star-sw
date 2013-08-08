@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.11 2012/06/11 16:38:35 fisyak Exp $
+ * $Id: RecHeaderFormats.hh,v 1.12 2013/08/08 12:19:19 jeromel Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.12  2013/08/08 12:19:19  jeromel
+ * Missing header
+ *
  * Revision 1.11  2012/06/11 16:38:35  fisyak
  * std namespace, remove clash with rtsSystems.h
  *
@@ -43,6 +46,8 @@
  *
  **************************************************************************/
 #include <ctype.h>
+#include <cstring>
+
 
 #ifndef RECHEADERFORMATS_HH
 #define RECHEADERFORMATS_HH
