@@ -198,6 +198,7 @@ class KFParticleBase : public TObject {
   Int_t           IdTruth() const { return fIdTruth;}
   Int_t           QaTruth() const { return fQuality; }
   Int_t           IdParentMcVx() const {return fIdParentMcVx;}
+  Int_t           IdParentVx()   const {return IdParentMcVx();}
   
   void         SetIdTruth(Int_t idtru,Int_t qatru=0) {fIdTruth = (UShort_t) idtru; fQuality = (UShort_t) qatru;}
   void         SetIdParentMcVx(Int_t id) {fIdParentMcVx = id;}
