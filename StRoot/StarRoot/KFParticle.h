@@ -63,15 +63,15 @@ class KFParticle :public KFParticleBase
  //* Initialisation from ALICE track, PID hypothesis shoould be provided 
 
   KFParticle( const MTrack &track, Int_t PID );
+  virtual void        Clear(Option_t *option ="") {KFParticleBase::Clear(option);}
 
   //* Initialisation from VVertex 
-
   KFParticle( const MVertex &vertex );
-
   //* Initialise covariance matrix and set current parameters to 0.0 
-
+#if 0
   void Initialize();
-
+#endif
+  
   //* Set decay vertex parameters for linearisation 
 
   void SetVtxGuess( Double_t x, Double_t y, Double_t z );
@@ -90,14 +90,12 @@ class KFParticle :public KFParticleBase
   Double_t GetPz   () const ; //* z-compoment of 3-momentum
   Double_t GetE    () const ; //* energy
   Double_t GetS    () const ; //* decay length / momentum
-  Int_t    GetQ    () const ; //* charge
+  Short_t  GetQ    () const ; //* charge
   Double_t GetChi2 () const ; //* chi^2
-  Int_t    GetNDF  () const ; //* Number of Degrees of Freedom
-  
+  Short_t  GetNDF  () const ; //* Number of Degrees of Freedom
   Double_t GetParameter ( Int_t i ) const ;
   Double_t GetCovariance( Int_t i ) const ;
   Double_t GetCovariance( Int_t i, Int_t j ) const ;
-
   //* Accessors with calculations, value returned w/o error flag
   
   Double_t GetP           () const; //* momentum
@@ -159,9 +157,9 @@ class KFParticle :public KFParticleBase
   Double_t & Pz   () ;
   Double_t & E    () ;
   Double_t & S    () ;
-  Int_t    & Q    () ;
+  Short_t  & Q    () ;
   Double_t & Chi2 () ;
-  Int_t    & NDF  () ;
+  Short_t  & NDF  () ;
 
   Double_t & Parameter ( Int_t i ) ;
   Double_t & Covariance( Int_t i ) ;
@@ -173,7 +171,6 @@ class KFParticle :public KFParticleBase
   //* CONSTRUCTION OF THE PARTICLE BY ITS DAUGHTERS AND MOTHER
   //* USING THE KALMAN FILTER METHOD
   //*
-
 
   //* Add daughter to the particle 
 
@@ -256,7 +253,6 @@ class KFParticle :public KFParticleBase
   Double_t GetDistanceFromVertex( const KFParticle &Vtx ) const ;
   Double_t GetDistanceFromVertex( const MVertex &Vtx ) const ;
   Double_t GetDistanceFromParticle( const KFParticle &p ) const ;
-
   //* Calculate sqrt(Chi2/ndf) deviation from another object
   //* ( v = [xyz]-vertex, Cv=[Cxx,Cxy,Cyy,Cxz,Cyz,Czz]-covariance matrix )
 
@@ -299,7 +295,6 @@ class KFParticle :public KFParticleBase
 
   void ConstructGamma( const KFParticle &daughter1,
 		       const KFParticle &daughter2  );
-
  protected: 
   
   //*
@@ -322,12 +317,12 @@ class KFParticle :public KFParticleBase
 
  private:
 
-  static Double_t fgBz;  //* Bz compoment of the magnetic field
+  static Double32_t fgBz;  //! * Bz compoment of the magnetic field
 
 
   ClassDef(KFParticle,1)
 };
-
+#ifndef __CINT__
 
 
 //---------------------------------------------------------------------
@@ -339,7 +334,7 @@ class KFParticle :public KFParticleBase
 
 inline void KFParticle::SetField( Double_t Bz )
 { 
-  fgBz = -Bz;//!!!
+  fgBz = Bz;//!!!
 }
 
 
@@ -375,13 +370,12 @@ inline KFParticle::KFParticle( const KFParticle &d1,
   mother+= d4;
   *this = mother;
 }
-
-
+#if 0
 inline void KFParticle::Initialize()
 { 
   KFParticleBase::Initialize(); 
 }
-
+#endif
 inline void KFParticle::SetVtxGuess( Double_t x, Double_t y, Double_t z )
 {
   KFParticleBase::SetVtxGuess(x,y,z);
@@ -427,7 +421,7 @@ inline Double_t KFParticle::GetS    () const
   return KFParticleBase::GetS();    
 }
 
-inline Int_t    KFParticle::GetQ    () const 
+inline Short_t    KFParticle::GetQ    () const 
 { 
   return KFParticleBase::GetQ();    
 }
@@ -437,11 +431,10 @@ inline Double_t KFParticle::GetChi2 () const
   return KFParticleBase::GetChi2(); 
 }
 
-inline Int_t    KFParticle::GetNDF  () const 
+inline Short_t    KFParticle::GetNDF  () const 
 { 
   return KFParticleBase::GetNDF();  
 }
-
 inline Double_t KFParticle::GetParameter ( Int_t i ) const 
 { 
   return KFParticleBase::GetParameter(i);  
@@ -456,7 +449,6 @@ inline Double_t KFParticle::GetCovariance( Int_t i, Int_t j ) const
 { 
   return KFParticleBase::GetCovariance(i,j);
 }
-
 
 inline Double_t KFParticle::GetP    () const
 {
@@ -638,12 +630,10 @@ inline Double_t KFParticle::GetErrR    () const
   else return err;
 }
 
-
 inline Int_t KFParticle::GetP( Double_t &P, Double_t &SigmaP ) const 
 {
   return KFParticleBase::GetMomentum( P, SigmaP );
 }
-
 inline Int_t KFParticle::GetPt( Double_t &Pt, Double_t &SigmaPt ) const 
 {
   return KFParticleBase::GetPt( Pt, SigmaPt );
@@ -688,7 +678,6 @@ inline Int_t KFParticle::GetR( Double_t &R, Double_t &SigmaR ) const
 {
   return KFParticleBase::GetR( R, SigmaR );
 }
-
 inline Double_t & KFParticle::X() 
 { 
   return KFParticleBase::X();    
@@ -729,7 +718,7 @@ inline Double_t & KFParticle::S()
   return KFParticleBase::S();    
 }
 
-inline Int_t    & KFParticle::Q() 
+inline Short_t    & KFParticle::Q() 
 { 
   return KFParticleBase::Q();    
 }
@@ -739,7 +728,7 @@ inline Double_t & KFParticle::Chi2()
   return KFParticleBase::Chi2(); 
 }
 
-inline Int_t    & KFParticle::NDF() 
+inline Short_t    & KFParticle::NDF() 
 { 
   return KFParticleBase::NDF();  
 }
@@ -758,7 +747,6 @@ inline Double_t & KFParticle::Covariance( Int_t i, Int_t j )
 { 
   return KFParticleBase::Covariance(i,j); 
 }
-
 inline Double_t * KFParticle::Parameters ()
 {
   return fP;
@@ -768,7 +756,6 @@ inline Double_t * KFParticle::CovarianceMatrix()
 {
   return fC;
 }
-
 
 inline void KFParticle::operator +=( const KFParticle &Daughter )
 {
@@ -812,7 +799,6 @@ inline void KFParticle::TransportToProductionVertex()
 {
   KFParticleBase::TransportToProductionVertex();
 }
-
 inline void KFParticle::TransportToPoint( const Double_t xyz[] )
 { 
   TransportToDS( GetDStoPoint(xyz) );
@@ -878,12 +864,10 @@ inline Double_t KFParticle::GetDeviationFromVertex( const MVertex &Vtx ) const
 {
   return GetDeviationFromVertex( KFParticle(Vtx) );
 }
-  
 inline Double_t KFParticle::GetDistanceFromParticle( const KFParticle &p ) const 
 {
   return KFParticleBase::GetDistanceFromParticle( p );
 }
-
 inline Double_t KFParticle::GetDeviationFromParticle( const KFParticle &p ) const 
 {
   return KFParticleBase::GetDeviationFromParticle( p );
@@ -928,5 +912,5 @@ inline void KFParticle::ConstructGamma( const KFParticle &daughter1,
 {
   KFParticleBase::ConstructGammaBz( daughter1, daughter2, GetFieldAlice() );
 }
-
+#endif /* ! __CINT__ */
 #endif 
