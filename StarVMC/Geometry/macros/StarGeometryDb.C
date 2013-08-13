@@ -31,21 +31,24 @@ void StarGeometryDb()
   //
   // Setup STAR Geometries y2000 to present
   //
-  std::cout << ">>> Setup";
-  y2000(); geom.Last(); setTitle("Year 2000 Production Geometry");  geom.select="y2000pro"; geom.fill();
-  y2001(); geom.Last(); setTitle("Year 2001 Production Geometry");  geom.select="y2001pro"; geom.fill();
-  y2002(); geom.Last(); setTitle("Year 2002 Production Geometry");  geom.select="y2002pro"; geom.fill();
-  y2003(); geom.Last(); setTitle("Year 2003 Production Geometry");  geom.select="y2003pro"; geom.fill();
-  y2004(); geom.Last(); setTitle("Year 2004 Production Geometry");  geom.select="y2004pro"; geom.fill();
-  y2005(); geom.Last(); setTitle("Year 2005 Production Geometry");  geom.select="y2005pro"; geom.fill();
-  y2006(); geom.Last(); setTitle("Year 2006 Production Geometry");  geom.select="y2006pro"; geom.fill();
-  y2007(); geom.Last(); setTitle("Year 2007 Production Geometry");  geom.select="y2007pro"; geom.fill();
-  y2008(); geom.Last(); setTitle("Year 2008 Production Geometry");  geom.select="y2008pro"; geom.fill();
-  y2009(); geom.Last(); setTitle("Year 2009 Production Geometry");  geom.select="y2009pro"; geom.fill();
-  y2010(); geom.Last(); setTitle("Year 2010 Production Geometry");  geom.select="y2010pro"; geom.fill();
-  y2011(); geom.Last(); setTitle("Year 2011 Production Geometry");  geom.select="y2011pro"; geom.fill();
-  y2012(); geom.Last(); setTitle("Year 2012 Production Geometry");  geom.select="y2012pro"; geom.fill();
-  y2013(); geom.Last(); setTitle("Year 2013 First Cut Geometry");   geom.select="y2013fist"; geom.fill();
+  //std::cout << ">>> Setup";
+  y2000();   geom.Last(); setTitle("Year 2000 Production Geometry");  geom.select="y2000pro"; geom.fill();
+  y2001();   geom.Last(); setTitle("Year 2001 Production Geometry");  geom.select="y2001pro"; geom.fill();
+  y2002();   geom.Last(); setTitle("Year 2002 Production Geometry");  geom.select="y2002pro"; geom.fill();
+  y2003();   geom.Last(); setTitle("Year 2003 Production Geometry");  geom.select="y2003pro"; geom.fill();
+  y2004();   geom.Last(); setTitle("Year 2004 Production Geometry");  geom.select="y2004pro"; geom.fill();
+  y2005();   geom.Last(); setTitle("Year 2005 Production Geometry");  geom.select="y2005pro"; geom.fill();
+  y2006();   geom.Last(); setTitle("Year 2006 Production Geometry");  geom.select="y2006pro"; geom.fill();
+  y2007();   geom.Last(); setTitle("Year 2007 Production Geometry");  geom.select="y2007pro"; geom.fill();
+  y2008();   geom.Last(); setTitle("Year 2008 Production Geometry");  geom.select="y2008pro"; geom.fill();
+  y2009();   geom.Last(); setTitle("Year 2009 Production Geometry");  geom.select="y2009pro"; geom.fill();
+  y2010();   geom.Last(); setTitle("Year 2010 Production Geometry");  geom.select="y2010pro"; geom.fill();
+  y2011();   geom.Last(); setTitle("Year 2011 Production Geometry");  geom.select="y2011pro"; geom.fill();
+  y2012();   geom.Last(); setTitle("Year 2012 Production Geometry");  geom.select="y2012pro"; geom.fill();
+  y2013();   geom.Last(); setTitle("Year 2013 First Cut Geometry");   geom.select="y2013fist"; geom.fill();
+
+  // Setup upgrade geometries
+  upgrade();
 
   test();
 
@@ -65,7 +68,7 @@ void StarGeometryDb()
   estar(); geom.Last(); setTitle("eSTAR simulation geometries."); 
 
 
-  std::cout << "<<<" << std::endl;
+  //std::cout << "<<<" << std::endl;
 
 }
 
@@ -76,7 +79,7 @@ void y2000()
   //replace [exe y2000;] with [;"corrected: MWC readout, RICH reconstructed position, no TOF ";
   //                            "actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder"
   //                             exe TPCE00; exe VPDDof; exe ECALof; exe FTPCof;  exe SVTT00; exe CALB00; exe MFLD23;  ]
-  std::cout << " y2000 " << std::flush;
+  //std::cout << " y2000 " << std::flush;
   geom.select   = "y2000";
   geom.tpceFlag = "TPCE00"; geom.tpceStat = 1;
   geom.svttFlag = "SVTT00"; geom.ftpcStat = 1;
@@ -102,7 +105,7 @@ void y2001()
   //" by 250 um insterad of 150 um."
   //" -- Obsoleted CorrNum = 1;"
   // exe TPCE00;        exe SVT101;        exe FTPC00;        exe BTOF42;         exe RICH02;        exe ECAL31;         exe CALBa0;         exe MFLD53;
-  std::cout << " y2001 "<< std::flush;;  
+  //std::cout << " y2001 "<< std::flush;;  
   geom.select   = "y2001";
   geom.svttFlag = "SVT101"; geom.svttStat = 1;
   geom.btofFlag = "BTOF42"; geom.btofStat = 1;
@@ -121,7 +124,7 @@ void y2002()
   //replace [exe y2002;] with ["january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD";                           
   //        exe TPCE00;         exe SVT100;         exe RICH02;         exe BTOF42;         exe CALBa0; 
   //        exe ECALof;        exe BBCMon;         exe FPDM00;         exe VPDD02;         exe MFLD54;
-  std::cout << " y2002 "<< std::flush;;
+  //std::cout << " y2002 "<< std::flush;;
   geom.select   = "y2002";
   geom.svttFlag = "SVT100"; geom.svttStat = 1;
   geom.ecalFlag = "ECALof"; geom.ecalStat = 0;
@@ -137,7 +140,7 @@ void y2002()
 }
         
 void y2003()
-{   std::cout << " y2003 "<< std::flush;;
+{   //std::cout << " y2003 "<< std::flush;;
 
   //
   // Defaults for y2003
@@ -216,7 +219,6 @@ void y2003()
 
   //replace [exe y2003x;] with [ "same as y2003b but with full calorimeters and PHMD";
   //        exe y2003b;         exe CALBc0;         exe ECAL33;          exe PHMD01;
-  /**
   geom.select = "y2003x"; {
     geom.calbFlag = "CALBc0"; geom.calbStat = 1;
     geom.ecalFlag = "ECAL33"; geom.ecalStat = 1;
@@ -224,14 +226,14 @@ void y2003()
     setTitle("Development");
     geom.fill();
   }
-  **/
+
 
 
 }
 
 
 void y2004()
-{ std::cout << " y2004 "<< std::flush;;
+{ //std::cout << " y2004 "<< std::flush;;
 
   //
   // Defaults for y2004
@@ -315,18 +317,35 @@ void y2004()
   //                exe SVT203; exe BTOF72; exe CALBe0; exe ECAL31; exe BBCMon; exe FPDM01;
   //                exe VPDD04; exe MFLD54; exe FTPC01; exe PHMD02; exe SISD02; exe TPCE01;
   //]
+
+  geom.select = "y2004x"; {
+    geom.svttFlag = "SVT203";
+    geom.calbFlag = "CALBe0";
+    geom.sisdFlag = "SISD02";
+    geom.tpceFlag = "TPCE01";
+    geom.fill();
+  };
+
   //*********   y2004y   ***
   //replace [exe y2004y;] with [
   //                exe SVT204; exe SCON02; exe BTOF72; exe CALBe0; exe ECAL31; exe BBCMon; exe FPDM01;
   //                exe VPDD04; exe MFLD54; exe FTPC01; exe FTRO01; exe PHMD02; exe SISD22; exe TPCE02;
   //]
+  geom.select = "y2004y"; {
+    geom.svttFlag = "SVT204";
+    geom.ftpcFlag = "FTPC01";
+    geom.ftroFlag = "FTRO01";
+    geom.sisdFlag = "SISD22";
+    geom.tpceFlag = "TPCE02";
+    geom.fill();
+  };
 
 }
 
 void y2005()
 { 
 
-  std::cout << " y2005 "<< std::flush;;
+  //std::cout << " y2005 "<< std::flush;;
   // Switch on some detectors by default
   geom.bbcmFlag = "BBCMon"; geom.bbcmStat = 1;
 
@@ -348,7 +367,7 @@ void y2005()
     geom.bbcmFlag = "BBCMon"; geom.bbcmStat = 1;
     geom.fpdmFlag = "FPDM01"; geom.fpdmStat = 1;
     geom.vpddFlag = "VPDD04"; geom.vpddStat = 1;
-    geom.mfldFlag = "MFLD54"; geom.mfldStat = 1;
+    geom.mfldFlag = "MFLD54"; geom.mfldStat = 0;
     geom.ftpcFlag = "FTPC01"; geom.ftpcStat = 1;
     geom.phmdFlag = "PHMD02"; geom.phmdStat = 1;
     geom.ftroFlag = "FTRO01"; geom.ftroStat = 1;
@@ -395,7 +414,7 @@ void y2005()
   geom.bbcmFlag = "BBCMon"; geom.bbcmStat = 1;
   geom.fpdmFlag = "FPDM01"; geom.fpdmStat = 1;
   geom.vpddFlag = "VPDD04"; geom.vpddStat = 1;
-  geom.mfldFlag = "MFLD54"; geom.mfldStat = 1;
+  geom.mfldFlag = "MFLD54"; geom.mfldStat = 0;
   geom.ftpcFlag = "FTPC01"; geom.ftpcStat = 1;
   geom.phmdFlag = "PHMD02"; geom.phmdStat = 1;
   geom.ftroFlag = "FTRO01"; geom.ftroStat = 1;
@@ -444,7 +463,7 @@ void y2005()
 
 void y2006()
 {
-  std::cout << " y2006 "<< std::flush;;
+  //std::cout << " y2006 "<< std::flush;;
   //replace [exe y2006;] with [ "y2006 baseline which is Y2005D+fixed TPC backplane+New SSD"
   //                exe SVT306; exe SCON02; exe BTOF84; exe CALB01; exe ECAL31;	exe BBCMon; exe FPDM01; exe VPDD04; 
   //                exe MFLD54; exe FTPC01; exe PHMD02; exe FTRO01; exe SISD35; exe TPCE03; exe mutd01; exe cave03;
@@ -457,7 +476,7 @@ void y2006()
   geom.bbcmFlag = "BBCMon"; geom.bbcmStat = 1;
   geom.fpdmFlag = "FPDM01"; geom.fpdmStat = 1;
   geom.vpddFlag = "VPDD04"; geom.vpddStat = 1;
-  geom.mfldFlag = "MFLD54"; geom.mfldStat = 1;
+  geom.mfldFlag = "MFLD54"; geom.mfldStat = 0;
   geom.ftpcFlag = "FTPC01"; geom.ftpcStat = 1;
   geom.phmdFlag = "PHMD02"; geom.phmdStat = 1;
   geom.ftroFlag = "FTRP01"; geom.ftroStat = 1;
@@ -520,7 +539,7 @@ void y2006()
 
 void y2007()
 {
-  std::cout << " y2007 "<< std::flush;;
+  //std::cout << " y2007 "<< std::flush;;
   //  replace [exe y2007;] with ["y2006 baseline which is Y2006+FMS"
   //           exe SVT306x; exe SCON02; exe BTOFa5; exe CALB02; exe ECAL31;
   //           exe EMCUTS(eemc,0);   "disable 10 keV calorimeter cuts";
@@ -534,7 +553,7 @@ void y2007()
     geom.ecalFlag = "ECAL31";  geom.ecalStat = 1;  geom.ecalCuts = 0;
     geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
     geom.vpddFlag = "VPPD07";  geom.vpddStat = 1;
-    geom.mfldFlag = "MFLD54";  geom.mfldStat = 1;
+    geom.mfldFlag = "MFLD54";  geom.mfldStat = 0;
     geom.ftpcFlag = "FTPC01";  geom.ftpcStat = 1;
     geom.phmdFlag = "PHMD02";  geom.phmdStat = 1;
     geom.ftroFlag = "FTRO01";  geom.ftroStat = 1;
@@ -583,7 +602,10 @@ void y2007()
 
 void y2008() 
 {
-  std::cout << " y2008 "<< std::flush;;
+
+  geom.mfldFlag = "MFLDof";
+
+  //std::cout << " y2008 "<< std::flush;;
   //replace [exe y2008;] with [;
   //{ "y2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now"
   //    exe SCON02;    exe TPCE03;    exe BTOFb6;    exe CALB02;    exe ECAL31;
@@ -660,7 +682,7 @@ void y2008()
 
 void y2009()
 {
-  std::cout << " y2009 "<< std::flush;;
+  //std::cout << " y2009 "<< std::flush;;
   geom.upstFlag = "UPSTon"; geom.upstStat=1;
 
 
@@ -757,7 +779,7 @@ void y2009()
 
 void y2010()
 {
-  std::cout << " y2010 "<< std::flush;;
+  //std::cout << " y2010 "<< std::flush;;
   //replace [exe y2010;] with [;
   //{ "y2010 baseline: y2009a+full tof+phmd, blessed 04/13 jcw"
   //  exe y2009a; 
@@ -828,7 +850,7 @@ void y2010()
 
 void y2011()
 {
-  std::cout << " y2011 "<< std::flush;;
+  //std::cout << " y2011 "<< std::flush;;
   /*
 REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC envelope radius and TOF";
     exe SCON13;      "support cone without SVT and new cable weight estimates";
@@ -897,7 +919,7 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
 
 void y2012()
 {
-  std::cout << " y2012 "<< std::flush;;
+  //std::cout << " y2012 "<< std::flush;;
   geom.Use("select","y2011");
 
   geom.select = "y2012"; {
@@ -968,7 +990,7 @@ void y2012()
 
 void dev14()
 {
-  std::cout << " dev14 "<< std::flush;;
+  //std::cout << " dev14 "<< std::flush;;
   geom.select = "dev14"; {
     // ================================================
     geom.caveFlag = "CAVE04";  geom.caveStat = 1;
@@ -1009,7 +1031,7 @@ void dev14()
 
 void complete()
 {
-  std::cout << " y2012 "<< std::flush;;
+  //std::cout << " y2012 "<< std::flush;;
   geom.Use("select","y2011");
 
   geom.select = "complete"; {
@@ -1046,7 +1068,7 @@ void complete()
 
 void estar()
 {
-  std::cout << " estar "<< std::flush;;
+  //std::cout << " estar "<< std::flush;;
 
   geom.select = "devE"; {
     // ================================================ The 4th version of the CAVE
@@ -1206,7 +1228,7 @@ void test()
 void y2013()
 {
 
-  std::cout << " y2013 "<< std::flush;;
+  //std::cout << " y2013 "<< std::flush;;
 
   geom.select = "dev13"; {
     // ================================================ 
@@ -1320,3 +1342,32 @@ void y2013()
 }
 
 
+// -----------------------------------------------------------------------------------------------------------------
+void upgrade()
+{
+  // We won't actually support these with AgML, but we will define them so that cons will be able to export
+  const Char_t *upgrs[]={
+    "upgr01", "upgr02", "upgr03", "upgr04", "upgr05", "upgr06", "upgr07", "upgr08", "upgr09", "upgr10",
+    "upgr11", "upgr12", "upgr13", "upgr14", "upgr15", "upgr16", "upgr16a", "upgr17", "upgr21", "upgr22", 
+    "upgr23" };
+
+  for ( UInt_t ii=0;ii<sizeof(upgrs)/sizeof(Char_t *);ii++ )
+    {
+      geom.select = upgrs[ii];
+      geom.pixlStat = 0;
+      geom.dtubStat = 0;
+      geom.magpStat = 0;
+      geom.tpceStat = 0;
+      geom.tpcxStat = 0;
+      geom.ecalStat = 0;
+      geom.pipeStat = 0;
+      geom.calbStat = 0;
+      geom.btofStat = 0;
+      geom.vpddStat = 0;
+      geom.bbcmStat = 0;
+      geom.idsmStat = 0;
+      geom.fgtdStat = 0;
+      geom.fill();
+    }
+  
+}
