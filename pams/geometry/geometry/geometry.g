@@ -1,5 +1,14 @@
-* $Id: geometry.g,v 1.261 2013/07/10 21:19:08 jwebb Exp $
+* $Id: geometry.g,v 1.262 2013/08/13 18:55:54 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.262  2013/08/13 18:55:54  jwebb
+* Defined a CONSTRUCT keyword in geometry.g.  CONSTRUCT calls a geometry
+* module using comis.  If the subroutine is not linked with the program,
+* it will not be called and a warning will be issued.  This warning can
+* be caught and parsed for dependency analysis.
+*
+* For the case where one or more moduels are missing, a fortran STOP will
+* be issued to prevent invalid geometries from being used.
+*
 * Revision 1.261  2013/07/10 21:19:08  jwebb
 * Correction to eStar2 definition.
 *
@@ -1083,6 +1092,32 @@
 * Revision 1.36  2000/11/22 17:51:41  nevski
 * tof geometry versions 1/2 preserved in btofgeo1, version 3 goes in btofgeo2
 ***************************************************************************
+
+"""                                                                               """
+""" Define a CONSTRUCT command to check for the presence of modules using CsADDR. """
+""" If they are not found, they are not loaded and an error message will be made  """
+""" at the end.  This breaks the dependency on the geometry modules, and allows   """
+""" us to run geometry.g standalone to, e.g., print a list of the dependencies.   """
+"""                                                                               """
+REPLACE [CONSTRUCT #;] with [
+   address = CsADDR('#1'); 
+   IF address>0 { Write (*,*) '---> Construct: ',  '#1';          nloaded+=1;  
+                  CALL CsJCAL (address,0, 0,0,0,0,0, 0,0,0,0,0);               }
+   ELSE {         Write (*,*) '---> Unresolved: ', '#1';          nfailed+=1;  }
+];
+REPLACE [CONSTRUCT # !#;] with [!#2
+   address = CsADDR('#1'); 
+   IF address>0 { Write (*,*) '---> Construct: ',  '#1';          nloaded+=1;  
+                  CALL CsJCAL (address,0, 0,0,0,0,0, 0,0,0,0,0);               }
+   ELSE {         Write (*,*) '---> Unresolved: ', '#1';          nfailed+=1;  }
+];
+REPLACE [CONSTRUCT #(#);] with [
+   address = CsADDR('#1');
+   IF address>0 { Write (*,*) '---> Construct: ',  '#1';              nloaded+=1; 
+                  CALL CsJCAL (address,1, #2,0,0,0,0, 0,0,0,0,0);               }
+   ELSE {         Write (*,*) '---> Unresolved: ', '#1';              nfailed+=1; }
+];
+
 
 
 ********* Detector definitions*********************************************
@@ -2255,7 +2290,7 @@ replace [exe UPGR16;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
 
 * X.Dong
                  "ctb: central trigger barrer             ";
-                     Itof=6 " call btofgeo6 ";
+                     Itof=6 " CONSTRUCT btofgeo6 ";
 * NEW CONFIG!
                      tofX0= 0.00;
                      tofZ0=-0.50;
@@ -2339,7 +2374,11 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
 *  09/30/03, MP: converted the sub into a MODULE to allow for ZEBRA access*
 ***************************************************************************
 
+   Integer stop_on_fail / 1 / ! Full stop if missing modules
+
    Structure  GDAT {real mfscale, char gtag(2)}
+
+   Integer CsADDR, address/0/, nloaded/0/, nfailed/0/
 
 * list of system on/off switches:
    Logical    CAVE,PIPE,SVTT,SISD,TPCE,FTPC,
@@ -2737,7 +2776,7 @@ If LL>0
                      ConeConfig=2 " new cable weight estimate ";
 
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
 * note the upgrade with respect to previous years:
                      BtofConfig=7;
 
@@ -3033,7 +3072,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3074,7 +3113,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3134,7 +3173,7 @@ If LL>0
                      ConeConfig=2 " new cable weight estimate ";
 
                   "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
+                     Itof=4 " CONSTRUCT btofgeo4 ";
 * NEW CONFIG!
                      BtofConfig=8;
 
@@ -3208,7 +3247,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3264,7 +3303,7 @@ If LL>0
                      ftpc=off; "no FTPC at all in this configuration"
 
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3305,7 +3344,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3365,7 +3404,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3419,7 +3458,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3469,7 +3508,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3529,7 +3568,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3589,7 +3628,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3650,7 +3689,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3708,7 +3747,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3769,7 +3808,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3822,7 +3861,7 @@ If LL>0
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=5;
                   "CALB"
                      emsEdit=on
@@ -3901,7 +3940,7 @@ If LL>0
                      ConeConfig=2 " new cable weight estimate ";
 
                   "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
+                     Itof=2 " CONSTRUCT btofgeo2 ";
                      BtofConfig=6;
                   "CALB"
                      emsEdit=on
@@ -3966,7 +4005,7 @@ If LL>0
                      ConeConfig=2 " new cable weight estimate ";
 
                   "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
+                     Itof=4 " CONSTRUCT btofgeo4 ";
 * NEW CONFIG!
                      BtofConfig=8;
 
@@ -4031,7 +4070,7 @@ If LL>0
                      ConeConfig=2 " new cable weight estimate ";
 
                   "ctb: central trigger barrer             ";
-                     Itof=5 " call btofgeo5 ";
+                     Itof=5 " CONSTRUCT btofgeo5 ";
 * NEW CONFIG!
                      BtofConfig=10;
 
@@ -4104,7 +4143,7 @@ If LL>0
                      ConeConfig=2 " new cable weight estimate ";
 
                   "ctb: central trigger barrer             ";
-                     Itof=5 " call btofgeo5 ";
+                     Itof=5 " CONSTRUCT btofgeo5 ";
 * NEW CONFIG!
                      BtofConfig=6;
 
@@ -4176,7 +4215,7 @@ If LL>0
                      ConeConfig=2 " new cable weight estimate ";
 
                   "ctb: central trigger barrer             ";
-                     Itof=5 " call btofgeo5 ";
+                     Itof=5 " CONSTRUCT btofgeo5 ";
 * NEW CONFIG!
                      BtofConfig=10;
 
@@ -4344,6 +4383,8 @@ If LL>0
   Case FIELD      { defined mag field;
                   magField=myArg; }
 
+  Case STOP       { Stop processor on failure to load; stop_on_fail = myArg; }
+
   Case 4TH_OFF    { SVT fourth layer off;
 		nSvtLayer=min(nSvtLayer,6);           }
   Case SPLIT_OFF  { events will not be split into subevents;
@@ -4422,8 +4463,8 @@ If LL>0
       call AgDETP new ('CAVE')
       call AgDETP add ('CVCF.config=',CaveConfig,1)
 
-      IF      caveconfig < 5 {       call cavegeo;  }
-      ELSE IF caveconfig ==5 {       call cavegeo2; }
+      IF      caveconfig < 5 {       CONSTRUCT cavegeo;  }
+      ELSE IF caveconfig ==5 {       CONSTRUCT cavegeo2; }
  
    }
 
@@ -4437,25 +4478,22 @@ If LL>0
           Call AgDETP add ('pipv.PipeFlag=',   PipeFlag,  1);
      }
 
-     IF      PipeConfig == -1 { Call pipegeo00; "Simple beam pipe"   }
-     ELSE IF PipeConfig  < 10 { Call pipegeo;   "Standard beam pipe" }
-     ELSE IF PipeConfig == 10 { Call pipegeo1;  "HFT era beam pipe"  }
-     ELSE IF PipeConfig == 20 { Call pipegeo2;  "HFT era beam pipe as built" }
+     IF      PipeConfig == -1 { CONSTRUCT pipegeo00; "Simple beam pipe"   }
+     ELSE IF PipeConfig  < 10 { CONSTRUCT pipegeo;   "Standard beam pipe" }
+     ELSE IF PipeConfig == 10 { CONSTRUCT pipegeo1;  "HFT era beam pipe"  }
+     ELSE IF PipeConfig == 20 { CONSTRUCT pipegeo2;  "HFT era beam pipe as built" }
 
    }
 
 * Upstream (DX), shield, and D0+Q1+Q2+Q3
    if (UPST)        {
-c     write(*,*) 'UPST'; 
-      Call upstgeo;
+      CONSTRUCT upstgeo;
    }
    if (SHLD)        {
-c     write(*,*) 'SHLD'; 
-      Call shldgeo;
+      CONSTRUCT shldgeo;
    }
    if (QUAD)        {
-c     write(*,*) 'QUAD'; 
-      Call quadgeo;
+      CONSTRUCT quadgeo;
    }
 
 * ---
@@ -4463,14 +4501,12 @@ c     write(*,*) 'QUAD';
 
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6
    if (SCON) {
-c    write(*,*) 'SCON'
      call AgDETP new ('SCON')
      call AgDETP add ('svtg.ConeVer=',ConeConfig ,1) ! could have more copper on the cone
-     call scongeo
+     CONSTRUCT scongeo
    }
 
    If (SVTT) { 
-c    write(*,*) 'SVT'
      call AgDETP new ('SVTT')
      if (nSvtLayer < 7)     call AgDETP add ('svtg.nlayer=',   nSvtLayer,1)
      if (nSvt1stLayer > 1)  call AgDETP add ('svtg.nmin=',     nSvt1stLayer,1)
@@ -4496,17 +4532,17 @@ c    write(*,*) 'SVT'
 
 * Ugly, but I Do not want to hash function pointers in Fortran:
 
-    if(SvttConfig==0)  call svttgeo
-    if(SvttConfig==1)  call svttgeo1
-    if(SvttConfig==2)  call svttgeo2
-    if(SvttConfig==3)  call svttgeo3
-    if(SvttConfig==4)  call svttgeo4
-    if(SvttConfig==5)  call svttgeo5
-    if(SvttConfig==6)  call svttgeo6
-    if(SvttConfig==7)  call svttgeo7
-    if(SvttConfig==9)  call svttgeo9
-    if(SvttConfig==10) call svttgeo10
-    if(SvttConfig>=11) call svttgeo11
+    IF SvttConfig== 0 {  CONSTRUCT svttgeo;   }
+    IF SvttConfig== 1 {  CONSTRUCT svttgeo1;  }
+    IF SvttConfig== 2 {  CONSTRUCT svttgeo2;  }
+    IF SvttConfig== 3 {  CONSTRUCT svttgeo3;  }
+    IF SvttConfig== 4 {  CONSTRUCT svttgeo4;  }
+    IF SvttConfig== 5 {  CONSTRUCT svttgeo5;  }
+    IF SvttConfig== 6 {  CONSTRUCT svttgeo6;  }
+    IF SvttConfig== 7 {  CONSTRUCT svttgeo7;  }
+    IF SvttConfig== 9 {  CONSTRUCT svttgeo9;  }
+    IF SvttConfig==10 {  CONSTRUCT svttgeo10; }
+    IF SvttConfig>=11 {  CONSTRUCT svttgeo11; } 
 
   }!!end SVTT
 
@@ -4520,38 +4556,38 @@ c    write(*,*) 'SVT'
 
 
    if (TPCE)  {
-c     write(*,*) 'TPC';
 * Back in July 2003 Yuri has discovered the discrepancy
 * in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
 
      call AgDETP new('TPCE');  
 
      if (DensConfig >0) {        Call AgDETP add ('tpcg.gasCorr=',2 ,1);     }
-     if (TpceConfig==1)          Call tpcegeo
-     if (TpceConfig==2)          Call tpcegeo1
-     if (TpceConfig==3)          Call tpcegeo2
+
+     if (TpceConfig==1) {        CONSTRUCT tpcegeo;}
+
+     if (TpceConfig==2) {        CONSTRUCT tpcegeo1; }
+     if (TpceConfig==3) {        CONSTRUCT tpcegeo2; }
      if (TpceConfig==4) {
      if ( RmaxConfig>0) {        Call AgDetp add ('tpcg.rmax=',207.77,1); }
-                                 Call tpcegeo3
+                                 CONSTRUCT tpcegeo3
                         }
 
 
-     IF TpcxConfig==1   {                                                    Call TpcxGeo1;  }
-     IF TpcxConfig==2   {                                                    Call TpcxGeo2;  }
-     IF TpceConfig==31 {         Call AgDETP add('tpcc.version=', 3.1, 1 );  Call TpceGeo3a; }
+     IF TpcxConfig==1   {                                                    CONSTRUCT TpcxGeo1;  }
+     IF TpcxConfig==2   {                                                    CONSTRUCT TpcxGeo2;  }
+     IF TpceConfig==31 {         Call AgDETP add('tpcc.version=', 3.1, 1 );  CONSTRUCT TpceGeo3a; }
 
    }
    if (ftpc) then
-c       write(*,*) 'FTPC'
-        if(FtpcConfig==0) Call ftpcgeo
-        if(FtpcConfig==1) Call ftpcgeo1
+        if(FtpcConfig==0) {CONSTRUCT ftpcgeo;}
+        if(FtpcConfig==1) {CONSTRUCT ftpcgeo1;}
 *       and look at the support pieces, was: if(CorrNum==0)
-        if(SupoConfig==0)  Call supogeo
-        if(SupoConfig==1)  Call supogeo1
+        if(SupoConfig==0)  {CONSTRUCT supogeo;}
+        if(SupoConfig==1)  {CONSTRUCT supogeo1;}
    endif
 
 * FTPC readout electronics barrel
-   if (FTRO) Call ftrogeo
+   if (FTRO) {CONSTRUCT ftrogeo;}
 
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (BTOF) { 
@@ -4565,12 +4601,12 @@ c    write(*,*) 'BTOF'
      }
 * X.Dong.end
       IF (Itof=1)  write(*,*) '*****  ATTENTION : OLD VERSION OF BTOF NOT IMPLEMENTED - NO TOF CREATED *****'
-      IF (Itof=2)  call btofgeo2
-      IF (Itof=4)  call btofgeo4
-      IF (Itof=5)  call btofgeo5
-      IF (Itof=6)  call btofgeo6       !X.Dong + F.Geurts
-      IF (Itof=7)  call btofgeo7       !F.Geurts fixes to sensitive volumes
-      IF (Itof=8)  call btofgeo8     
+      IF Itof=2 {  CONSTRUCT btofgeo2; }
+      IF Itof=4 {  CONSTRUCT btofgeo4; }
+      IF Itof=5 {  CONSTRUCT btofgeo5; }
+      IF Itof=6 {  CONSTRUCT btofgeo6; }     !X.Dong + F.Geurts
+      IF Itof=7 {  CONSTRUCT btofgeo7; }     !F.Geurts fixes to sensitive volumes
+      IF Itof=8 {  CONSTRUCT btofgeo8; }    
    } 
 
    Call AGSFLAG('SIMU',1)
@@ -4580,33 +4616,32 @@ c    write(*,*) 'BTOF'
    If (LL>0 & VPDD) then
      call AgDETP new ('VPDD')
      call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
-     if(VpddConfig <7) call vpddgeo
-     if(VpddConfig==7) call vpddgeo2
+     if(VpddConfig <7) { CONSTRUCT vpddgeo; }
+     if(VpddConfig==7) { CONSTRUCT vpddgeo2;}
    endif
 
 ********************** BARREL CALORIMETER ************************
 *  - Set up the parameters for the barrel calorimeter
    If (CALB) {
-c    write(*,*) 'CALB'
      call AgDETP new ('CALB')
      if (emsEdit)  call AgDETP add ('calg.nmodule=',Nmod, 2)
      if (emsEdit)  call AgDETP add ('calg.shift=',  shift,2)
 
        if(CalbConfig==0) then
 c          write(*,*) '************** Creating the 1996-2003 version of the Barrel Calorimeter'
-           Call calbgeo
+           CONSTRUCT calbgeo
        endif
 
        if(CalbConfig==1) then
 c          write(*,*) '************** Creating the 2004-2006 version of the Barrel Calorimeter'
-           Call calbgeo1
+           CONSTRUCT calbgeo1
        endif
 
        if(CalbConfig==2) then
 c          write(*,*) '************** Creating the 2007-     version of the Barrel Calorimeter'
            Call AgDetp add ('ccut.absorber=',  BEmcCutConfig, 1)
            Call AgDetp add ('ccut.sensitive=', BEmcCutConfig, 1)
-           Call calbgeo2
+           CONSTRUCT calbgeo2
        endif
 
    }
@@ -4618,20 +4653,19 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
       if (richPos>0) call AgDETP add ('Rich.Position=',richPos,1)
       if (richPos>0) call AgDETP add ('Rich.Cversion=',richPos,1)
    endif
-   if (RICH) Call richgeo
+   if (RICH) {CONSTRUCT richgeo;}
 
 ******************************************************************
 *  - Set up the parameters for the endcap calorimeter
    If (ECAL) then
-c     write(*,*) 'ECAL'
       call AgDETP new ('ECAL')
       call AgDETP add ('emcg.OnOff='   ,EcalConfig,1)
       call AgDETP add ('emcg.FillMode=',ecalFill,1)
-      IF ( EcalGeometry .lt. 6 ) Call ecalgeo            ! version 5
+      IF ( EcalGeometry .lt. 6 ) { CONSTRUCT ecalgeo; }           ! version 5
       IF ( EcalGeometry .eq. 6 ) THEN 
                                  Call AgDetp add ('ecut.absorber=',  EEmcCutConfig, 1)
                                  Call AgDetp add ('ecut.sensitive=', EEmcCutConfig, 1)
-                                 Call ecalgeo6           ! version 6
+                                 CONSTRUCT ecalgeo6;           ! version 6
       ENDIF
    endif
 
@@ -4639,8 +4673,7 @@ c     write(*,*) 'ECAL'
 * The rest of steering:
 
    if (BBCM)                   { 
-c     write(*,*) 'CALB';
-      Call bbcmgeo
+      CONSTRUCT bbcmgeo
    }
 
    if (FPDM){
@@ -4652,28 +4685,26 @@ c     write(*,*) 'CALB';
         Call AgDetp ADD ( 'FPOS(imod=4).x=', +50.3, 1 );
      }
 
-     if (FpdmConfig==0) Call fpdmgeo
-     if (FpdmConfig==1) Call fpdmgeo1
-     if (FpdmConfig==2) Call fpdmgeo2     
-     if (FpdmConfig==3) Call fpdmgeo3
+     if (FpdmConfig==0) {CONSTRUCT fpdmgeo; }
+     if (FpdmConfig==1) {CONSTRUCT fpdmgeo1;}
+     if (FpdmConfig==2) {CONSTRUCT fpdmgeo2;}    
+     if (FpdmConfig==3) {CONSTRUCT fpdmgeo3;}
 
    }
-   if (ZCAL)   { write(*,*) 'ZCAL';Call zcalgeo;}
+   if (ZCAL)   { CONSTRUCT zcalgeo;}
    if (MAGP)   {
         call AgDetp NEW ('MAGP')
         call AgDetp ADD ('magg.version=', magpConfig, 1 );
-        call MagpGeo
+        CONSTRUCT MagpGeo
    }
 
    IF IDSM { "Inner detector support module" 
-      write(*,*) 'IDSM is built'
       Call AgDETP new ('IDSM')
       Call AgDETP add ('IDSC.version=',IdsmConfig,1)
-      Call IdsmGeo1
+      CONSTRUCT IdsmGeo1
    }
 
   if(SISD) {
-c      write(*,*) 'SVT' 
        sisd_level=0
        call AgDETP new ('SISD')
 
@@ -4690,23 +4721,23 @@ c      write(*,*) 'SVT'
 
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
          if     (sisd_level.eq.1) then
-            call sisdgeo1
+            CONSTRUCT sisdgeo1
          elseif (sisd_level.eq.2) then
-            call sisdgeo2
+            CONSTRUCT sisdgeo2
          elseif (sisd_level.eq.3) then
-            call sisdgeo3
+            CONSTRUCT sisdgeo3
          elseif (sisd_level.eq.4) then
-            call sisdgeo4
+            CONSTRUCT sisdgeo4
          elseif (sisd_level.eq.8) then
-            call sisdgeo7
+            CONSTRUCT sisdgeo7
          else
-            call sisdgeo6	!//only sisdgeo6 is used from now
+            CONSTRUCT sisdgeo6	!//only sisdgeo6 is used from now
          endif
 
        else
 *        The original version (pretty much obsolete)
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
-         call sisdgeo
+         CONSTRUCT sisdgeo
        endif
 
 *       write(*,*) '*** Silicon Strip Detector Config and Code Level: ',SisdConfig, ' ',sisd_level
@@ -4714,68 +4745,67 @@ c      write(*,*) 'SVT'
   } !!end SISD
 
    if (ISTD){
-    write(*,*) 'ISTD'
-     if (IstdConfig==1) Call istdgeo0
-}
-  if (PXST){
-   write(*,*) 'PXST'
-    if (PxstConfig==0) Call pxstgeo1
-}
+     if (IstdConfig==1) { CONSTRUCT istdgeo0; }
+   }
+
+   if (PXST){
+     if (PxstConfig==0) { CONSTRUCT pxstgeo1; }
+   }
+
    if (MUTD) {
      Call AgDetp NEW ('MUTD')
-     if (MutdConfig==1) Call mutdgeo;
-     if (MutdConfig==2) Call mutdgeo2;
-     if (MutdConfig==3) Call mutdgeo3;
-     if (MutdConfig==4 | MutdConfig==5 | MutdConfig==12 | MutdConfig==13 )
+     IF MutdConfig=1 { CONSTRUCT mutdgeo; }
+     IF MutdConfig=2 { CONSTRUCT mutdgeo2;}
+     IF MutdConfig=3 { CONSTRUCT mutdgeo3;}
+     IF MutdConfig=4 | MutdConfig=5 | MutdConfig=12 | MutdConfig=13 
      { 
          Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);   
-         Call mutdgeo4;
+         CONSTRUCT mutdgeo4;
      } 
 
    }
    if (PIXL){
-c    write(*,*) 'CALB'
-     if (PixlConfig==-1)Call pixlgeo00
-     if (PixlConfig==1) Call pixlgeo
-     if (PixlConfig==2) Call pixlgeo1
-     if (PixlConfig==3) Call pixlgeo2
-     if (PixlConfig==4) Call pixlgeo3
-     if (PixlConfig==5) {
+     IF PixlConfig==-1 { CONSTRUCT pixlgeo00; }
+     IF PixlConfig==1  { CONSTRUCT pixlgeo;   }
+     IF PixlConfig==2  { CONSTRUCT pixlgeo1;  }
+     IF PixlConfig==3  { CONSTRUCT pixlgeo2;  }
+     IF PixlConfig==4  { CONSTRUCT pixlgeo3;  }
+     IF PixlConfig==5  {
            call AgDETP new ('PIXL')
            call AgDETP add ('PXLV.LadVer=',2.0,1)
-           call pixlgeo3
+           CONSTRUCT pixlgeo3;
      }
      IF PixlConfig==6 {
            call AgDetp new ('PIXL')
            call AgDetp add ('PXLV.LadVer=',2.0,1)
            call AgDetp add ('PXLV.location=',2.0,1)
-           call pixlgeo4
+           CONSTRUCT pixlgeo4;
      }
 
      IF PixlConfig==50 {               "Y2013 Pixel Configuration"
            call AgDetp new ('PIXL')
            call AgDetp add ('PXLV.location=',2.0,1);
-           call PixlGeo5   """ Pixl Detector """
-           call DtubGeo1   """ Electronics etc... """
+           CONSTRUCT PixlGeo5   """ Pixl Detector """
+           CONSTRUCT DtubGeo1   """ Electronics etc... """
      }
 
 
    }
    if (ISTB){
-c    write(*,*) 'ISTB'
-     if (IstbConfig==-1) Call istbgeo00
-     if (IstbConfig== 1) Call istbgeo
-     if (IstbConfig== 2) Call istbgeo1
-     if (IstbConfig== 3) Call istbgeo2
-     if (IstbConfig== 4) Call istbgeo3
-     if (IstbConfig== 5) Call istbgeo4
-     if (IstbConfig== 6) Call istbgeo5
-     if (IstbConfig== 7) Call istbgeo6
+
+     IF IstbConfig==-1 {CONSTRUCT istbgeo00;}
+     IF IstbConfig== 1 {CONSTRUCT istbgeo;}
+     IF IstbConfig== 2 {CONSTRUCT istbgeo1;}
+     IF IstbConfig== 3 {CONSTRUCT istbgeo2;}
+     IF IstbConfig== 4 {CONSTRUCT istbgeo3;}
+     IF IstbConfig== 5 {CONSTRUCT istbgeo4;}
+     IF IstbConfig== 6 {CONSTRUCT istbgeo5;}
+     IF IstbConfig== 7 {CONSTRUCT istbgeo6;}
    }
 
    if (GEMB.and.GembConfig>0)  {
-c     write(*,*) 'GEMB'; 
-      Call gembgeo;
+
+      CONSTRUCT gembgeo;
    }
 
    if (FSTD.and.FstdConfig>0)  then
@@ -4784,7 +4814,7 @@ c     write(*,*) 'FSTD'
          call AgDETP new ('FSTD')
          call AgDETP add ('fstg.Rmax=',22.3,1)
       endif
-      Call fstdgeo
+      CONSTRUCT fstdgeo
    endif
 
 
@@ -4792,16 +4822,14 @@ c     write(*,*) 'FSTD'
 
      Call AgDETP new ('FGTD')                                     """Establish the interface to the geometry module"""
 
-     if (FgtdConfig==1)    Call fgtdgeo  ! old, decomissioned
-     if (FgtdConfig==2)    Call fgtdgeo1
-     if (FgtdConfig==3)    Call fgtdgeo2
+     if (FgtdConfig==1) {  CONSTRUCT fgtdgeo;  }! old, decomissioned
+     if (FgtdConfig==2) {  CONSTRUCT fgtdgeo1; }
+     if (FgtdConfig==3) {  CONSTRUCT fgtdgeo2; }
 
      IF FgtdConfig>30 {                                           """Apply FGT configuration and construct geometry"""
-        IF FgtdConfig==31 { Call AgDETP add ( 'FGGG.FgstConfig=', 1.0, 1 );         Call FgtdGeo3; }
-        IF FgtdConfig==32 { Call AgDetp add ( 'FGGG.FgstConfig=', 2.0, 1 );         Call FgtdGeo3; }
-        IF FgtdConfig==55 {                                               ;         Call FgtdGeoV; }
- 
-
+        IF FgtdConfig==31 { Call AgDETP add ( 'FGGG.FgstConfig=', 1.0, 1 );         CONSTRUCT FgtdGeo3; }
+        IF FgtdConfig==32 { Call AgDetp add ( 'FGGG.FgstConfig=', 2.0, 1 );         CONSTRUCT FgtdGeo3; }
+        IF FgtdConfig==55 {                                               ;         CONSTRUCT FgtdGeoV; }
      }
 
 
@@ -4809,23 +4837,23 @@ c     write(*,*) 'FSTD'
 
 
    """The Foward Spaghetti Calorimeter"""    
-   IF FSCE {  call fscegeo;  }
+   IF FSCE {  CONSTRUCT fscegeo;  }
 
 
    """The EIDD Geometry (TOF, TRD, East calo)"""
-   IF EIDD {  call eiddgeo;  }
+   IF EIDD {  CONSTRUCT eiddgeo;  }
 
    if (IGTD) then
-c    write(*,*) 'IGTD'
+
      if(IgtdConfig==2) then
          call AgDETP new ('IGTD')
          call AgDETP add ('igtv.Config=',IgtdConfig ,1)
      endif
-     Call igtdgeo
+     CONSTRUCT igtdgeo
    endif
 
-   if (HPDT.and.HpdtConfig>0) { write(*,*) 'HPDT';Call hpdtgeo;}
-   if (ITSP)                  { write(*,*) 'ITSP';Call itspgeo;}
+   if (HPDT.and.HpdtConfig>0) { write(*,*) 'HPDT';CONSTRUCT hpdtgeo;}
+   if (ITSP)                  { write(*,*) 'ITSP';CONSTRUCT itspgeo;}
 
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
@@ -4836,20 +4864,20 @@ c    write(*,*) 'IGTD'
 c     write(*,*) 'PHMD'
       call AgDETP new ('PHMD')
       call AgDETP add ('PMVR.Config=', PhmdConfig,1)
-      call phmdgeo
+      CONSTRUCT phmdgeo
    endif
 
 
 ********************************************************************
    if(DUMM) then
-      call dummgeo
+      CONSTRUCT dummgeo
    endif
 ********************************************************************
    If (FhcmConfig .ne.0) then
 c     write(*,*) 'FHCM'
       call AgDETP new ('FHCM')
       call AgDETP add ('fhcg.Version='   ,FhcmConfig,1)
-      Call fhcmgeo
+      CONSTRUCT fhcmgeo
    endif
 ****************  Magnetic Field  ********************************
 *
@@ -4859,7 +4887,7 @@ c     write(*,*) 'FHCM'
 !//       if (MFLD & magField!=5)   call AgDETP add ('MFLG(1).Bfield=' ,magField  ,1)
 !//       if (MFLD & MfldConfig!=0) call AgDETP add ('MFLG(1).version=',MfldConfig,1)
 !//       Call mfldgeo;
-      Call mfldgeo(magField);
+      CONSTRUCT mfldgeo(magField);
       call gufld(magX,magB);
       write(*,*) 'MFLD magField,Bz = ',magField,magB(3)
    }
@@ -4890,4 +4918,12 @@ c  =============================================================================
       gtag={geom(1:4),geom(5:8)} ! geometry tag 
    EndFill
 
-   end
+   IF nfailed>0 {
+      WRITE (*,*);      WRITE (*,*);       WRITE (*,*)
+      WRITE (*,*) 'WARNING: (x)geometry.so was not built properly or not loaded.'
+      WRITE (*,*) '         ', nloaded, ' modules loaded'
+      WRITE (*,*) '         ', nfailed, ' modules failed to load'
+      IF stop_on_fail > 0 { STOP; }
+   }
+
+   END
