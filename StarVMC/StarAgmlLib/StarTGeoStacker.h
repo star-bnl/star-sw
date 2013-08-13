@@ -22,14 +22,14 @@ class StarTGeoStacker : public StarAgmlStacker
   StarTGeoStacker(const Char_t *name="dyson", const Char_t *title="Construction of STAR geometry");
   ~StarTGeoStacker(){ /* nada */ };
   
-  Bool_t Build( AgBlock *block );
-  Bool_t Position ( AgBlock *block, AgPlacement position );
+  virtual  Bool_t Build( AgBlock *block );
+  virtual  Bool_t Position ( AgBlock *block, AgPlacement position );
 
-  Bool_t SearchVolume( const AgShape &shape, const AgAttribute &attr );
+  virtual  Bool_t SearchVolume( const AgShape &shape, const AgAttribute &attr );
 
   static std::map< Int_t, TString > mClassMap; // maps shape names to TGeo classes
 
-  void AddGroup( const Char_t *group );
+  virtual void AddGroup( const Char_t *group );
 
  private:
  protected:
