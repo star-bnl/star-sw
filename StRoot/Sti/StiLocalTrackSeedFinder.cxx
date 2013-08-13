@@ -14,25 +14,35 @@
 #include "StiLocalTrackSeedFinder.h"
 #include "StiSortedHitIterator.h"
 #include "StiMasterDetectorBuilder.h"
+#include "StiToolkit.h"
 
 ostream& operator<<(ostream&, const StiDetector&);
 
 //______________________________________________________________________________
-StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
-						 const string& description, 
-						 Factory<StiKalmanTrack> * trackFactory,
-						 StiHitContainer         * hitContainer,
-						 StiDetectorContainer    * detectorContainer)
-  : StiTrackFinder(),
-    _reset(true),
-    _trackFactory(trackFactory),
-    _hitContainer(hitContainer),
-    _detectorContainer(detectorContainer)
+StiLocalTrackSeedFinder::StiLocalTrackSeedFinder()
+  : StiTrackFinder(),_reset(true)
 {
+  StiToolkit *kit = StiToolkit::instance();
+  _trackFactory = kit->getTrackFactory();
+  _hitContainer = kit->getHitContainer();
+  _detectorContainer = kit->getDetectorContainer();  
   fRxyMin=0;
   cout <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
 }
-
+//______________________________________________________________________________
+  StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
+			  const string& description, 
+			  Factory<StiKalmanTrack> * trackFactory,
+			  StiHitContainer         * hitContainer,
+			  StiDetectorContainer * detectorContainer)
+  : StiTrackFinder(),_reset(true)
+{
+  _trackFactory =trackFactory;
+  _hitContainer = hitContainer;
+  _detectorContainer =  detectorContainer;  
+  fRxyMin=0;
+  cout <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
+}
 //______________________________________________________________________________
 StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 {
