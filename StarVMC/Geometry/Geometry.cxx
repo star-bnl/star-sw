@@ -2043,6 +2043,7 @@ Bool_t Geometry::FtroInit()
 // ----------------------------------------------------------------------
 Bool_t Geometry::GeomInit()
 {
+  assert(0); // deprecated.  will remove when nobody complains about this...
 
   // Common to most geometry definitions
   geom.magpFlag = "MAGPon"; geom.magpStat=1;
