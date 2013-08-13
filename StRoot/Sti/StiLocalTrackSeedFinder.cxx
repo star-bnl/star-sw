@@ -14,35 +14,25 @@
 #include "StiLocalTrackSeedFinder.h"
 #include "StiSortedHitIterator.h"
 #include "StiMasterDetectorBuilder.h"
-#include "StiToolkit.h"
 
 ostream& operator<<(ostream&, const StiDetector&);
 
 //______________________________________________________________________________
-StiLocalTrackSeedFinder::StiLocalTrackSeedFinder()
-  : StiTrackFinder(),_reset(true)
+StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
+						 const string& description, 
+						 Factory<StiKalmanTrack> * trackFactory,
+						 StiHitContainer         * hitContainer,
+						 StiDetectorContainer    * detectorContainer)
+  : StiTrackFinder(),
+    _reset(true),
+    _trackFactory(trackFactory),
+    _hitContainer(hitContainer),
+    _detectorContainer(detectorContainer)
 {
-  StiToolkit *kit = StiToolkit::instance();
-  _trackFactory = kit->getTrackFactory();
-  _hitContainer = kit->getHitContainer();
-  _detectorContainer = kit->getDetectorContainer();  
   fRxyMin=0;
   cout <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
 }
-//______________________________________________________________________________
-  StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
-			  const string& description, 
-			  Factory<StiKalmanTrack> * trackFactory,
-			  StiHitContainer         * hitContainer,
-			  StiDetectorContainer * detectorContainer)
-  : StiTrackFinder(),_reset(true)
-{
-  _trackFactory =trackFactory;
-  _hitContainer = hitContainer;
-  _detectorContainer =  detectorContainer;  
-  fRxyMin=0;
-  cout <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
-}
+
 //______________________________________________________________________________
 StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 {
@@ -204,7 +194,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double dr = r2-r1;
   double dy = y2-y1;
   double dz = z2-z1;
-  if (fabs(dr) <1.e-3) return false;
+  assert (fabs(dr) >1.e-3); //// || dy==0. || dz==0.);
 //    throw logic_error("StiLocalTrackSeedFinder::extrapolate() -E- Seed aborted because dr==0 ");
   //Now look for a hit in the next layer in:
   _detectorContainer->setToDetector( hit2->detector());
