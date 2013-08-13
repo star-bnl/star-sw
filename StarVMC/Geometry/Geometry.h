@@ -8,7 +8,7 @@
 #include "TROOT.h"
 
 #define AddDetector(x) TString x##Flag; Int_t x##Stat; Int_t nvolumes_##x; Int_t nnodes_##x; Int_t success_##x;
-#define SetDetector(x) x##Flag="-none-"; x##Stat=0; nvolumes_##x=0; nnodes_##x=0; success_##x=0;
+#define SetDetector(x) x##Flag="-none-"; x##Stat=0; nvolumes_##x=0; nnodes_##x=0; success_##x=0; detectors.push_back( #x  );
 // ----------------------------------------------------------------------
 class Geom_t : public AgStructure
 {
@@ -79,6 +79,9 @@ class Geom_t : public AgStructure
   void Print ( const Option_t *opts="" ) const; // *MENU*
 
   typedef Int_t Meh_t;
+
+  // Accumulate list of all detectors
+  std::vector<TString> detectors;
 
 };
 #undef SetDetector
