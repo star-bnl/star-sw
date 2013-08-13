@@ -35,7 +35,7 @@ public:
   /// Copy Constructor
   StiSortedHitIterator(const StiSortedHitIterator&iter);
   /// Asignment operator
-  const StiSortedHitIterator& operator=(const StiSortedHitIterator&iter);
+  const StiSortedHitIterator& operator=(const StiSortedHitIterator &iter);
   /// Destructor
   ~StiSortedHitIterator() {};
   

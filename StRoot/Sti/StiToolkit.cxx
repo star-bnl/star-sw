@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "StiToolkit.h"
 
@@ -8,12 +9,9 @@ StiToolkit::StiToolkit()
 {
   assert(!_instance);
   _instance = this;
+  memset(mBeg,0,mEnd-mBeg+1);
 }
 
-void StiToolkit::setToolkit(StiToolkit * toolkit)
-{
-  _instance = toolkit;
-}
 
 StiToolkit * StiToolkit::instance()
 {

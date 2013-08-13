@@ -29,6 +29,7 @@ class StiDetector;
 class StiLocalTrackSeedFinder : public StiTrackFinder
 {
 public:
+  StiLocalTrackSeedFinder();
   StiLocalTrackSeedFinder(const string& name,
 			  const string& description, 
 			  Factory<StiKalmanTrack> * trackFactory,
@@ -77,7 +78,6 @@ protected:
  private:
   //The following are not implemented, as they are non-trivial
   //and the default compiler generated versions will be wrong.
-  StiLocalTrackSeedFinder();
   StiLocalTrackSeedFinder(const StiLocalTrackSeedFinder&);
   StiLocalTrackSeedFinder operator=(const StiLocalTrackSeedFinder&);
   //Count how many hits we've skipped in extrapolation
