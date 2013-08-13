@@ -1,5 +1,6 @@
 #ifndef __StarNoStacker_h__
 
+
 #include "StarAgmlStacker.h"
 
 /**
