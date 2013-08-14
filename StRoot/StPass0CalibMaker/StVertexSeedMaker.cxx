@@ -114,6 +114,8 @@ StVertexSeedMaker::StVertexSeedMaker(const char *name,
   resNtuple = 0;
   parsNtuple = 0;
   nsize = 0;
+  foffset = 0;
+  noclobber = kTRUE;
   setArraySize(512);
   UseEventDateTime(); // By default, use the data & time from the first event
   useAllTriggers = kFALSE;
@@ -146,7 +148,7 @@ void StVertexSeedMaker::Reset() {
   mTempOut = new TFile(Form("%s/vertexseedhist.%d.root",
     gSystem->TempDirectory(),
     gSystem->GetPid()),"RECREATE");
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey:index");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey:index:bmatch:ematch:tmatch:cmatch:hmatch");
   LOG_INFO << "Opening new temp file at " << mTempOut->GetName() << endm;
 
   date = 0;
@@ -159,6 +161,11 @@ void StVertexSeedMaker::Reset() {
   itpc = 0;
   otpc = 0;
   detmap = 0;
+  bmatch = 0;
+  ematch = 0;
+  tmatch = 0;
+  cmatch = 0;
+  hmatch = 0;
   a[0]   = -888.0;
   //a[0]   = 0.0;
   a[1] = 0.0;
@@ -228,7 +235,7 @@ Int_t StVertexSeedMaker::Make(){
     ydist->Fill(yvertex);
     yerr ->Fill(yvertex-yguess);
 
-    float XX[16];
+    float XX[21];
     XX[0]  = (float) GetEventNumber();
     XX[1]  = xvertex;
     XX[2]  = yvertex;
@@ -245,6 +252,11 @@ Int_t StVertexSeedMaker::Make(){
     XX[13] = exvertex;
     XX[14] = eyvertex;
     XX[15] = (float) pvn;
+    XX[16] = (float) bmatch;
+    XX[17] = (float) ematch;
+    XX[18] = (float) tmatch;
+    XX[19] = (float) cmatch;
+    XX[20] = (float) hmatch;
     resNtuple->Fill(XX);
     addVert(xvertex,yvertex,zvertex,mult,exvertex,eyvertex);
     sumzdc += zdc;
@@ -313,28 +325,15 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.54 2012/10/11 16:33:12 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.55 2013/08/14 21:42:48 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::WriteTableToFile(){
-  char filename[80]; 
-  if (defDir.Length()>0 && !defDir.EndsWith("/")) defDir.Append("/");
-  sprintf(filename,"%svertexSeed.%08d.%06d.C",defDir.Data(),date,time);
-  LOG_INFO << "Writing new table to:\n  "
-    << filename << endm;
-  TString dirname = gSystem->DirName(filename);
-  if (gSystem->OpenDirectory(dirname.Data())==0) { 
-    if (gSystem->mkdir(dirname.Data())) {
-      LOG_WARN << "Directory creation failed for:\n  " << dirname
-      << "\n  Putting table file in current directory" << endm;
-      for (int i=0;i<80;i++){filename[i]=0;}
-      sprintf(filename,"vertexSeed.%08d.%06d.C",date,time);
-    }
-  }
-  ofstream *out = new ofstream(filename);
+  TString fileName = NameFile("table","vertexSeed","C");
+  ofstream *out = new ofstream(fileName.Data());
   VertexSeedTable()->SavePrimitive(*out,"");
   if (parsNtuple) AddResults(parsNtuple);
   return;
@@ -378,20 +377,7 @@ void StVertexSeedMaker::WriteHistFile(Bool_t writeFit){
     return;
   }
   // .ROOT is NOT a typo !!!
-  if (defDir.Length()>0 && !defDir.EndsWith("/")) defDir.Append("/");
-  TString fileNameBase = Form("vertexseedhist.%08d.%06d.ROOT",date,time);
-  TString fileName = defDir;
-  fileName += fileNameBase;
-  LOG_INFO << "Writing new histograms to:\n  "
-    << fileName << endm;
-  TString dirname = gSystem->DirName(fileName.Data());
-  if (gSystem->OpenDirectory(dirname.Data())==0) { 
-    if (gSystem->mkdir(dirname.Data())) {
-      LOG_WARN << "Directory creation failed for:\n  " << dirname
-      << "\n  Putting histogram file in current directory" << endm;
-      fileName = fileNameBase;
-    }
-  }
+  TString fileName = NameFile("histograms","vertexseedhist","ROOT");
   if (mTempOut) {
     mTempOut->Write();
     mTempOut->Close();
@@ -404,12 +390,49 @@ void StVertexSeedMaker::WriteHistFile(Bool_t writeFit){
   TFile out(fileName.Data(),"UPDATE");
   GetHistList()->Write();
   if (writeFit) {
-    TNtupleD* pars1Ntuple = new TNtupleD("BLpars","BeamLine parameters",
-    "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc");
-    AddResults(pars1Ntuple);
+    AddResults(newBLpars());
     out.Write();
   }
   out.Close();
+}
+//_____________________________________________________________________________
+TString StVertexSeedMaker::NameFile(const char* type, const char* prefix, const char* suffix) {
+  int fdate = date;
+  int ftime = time;
+  if (foffset) { // apply any time offsets
+    TDatime fdatime(date,time);
+    fdatime.Set(fdatime.Convert()+foffset);
+    fdate = fdatime.GetDate();
+    ftime = fdatime.GetTime();
+  }
+  TString fileNameBase = Form("%s.%08d.%06d.%s",prefix,fdate,ftime,suffix);
+
+  if (defDir.Length()>0 && !defDir.EndsWith("/")) defDir.Append("/");
+  TString fileName = defDir;
+  fileName += fileNameBase;
+  LOG_INFO << "Writing new " << type << " to:\n  "
+    << fileName << endm;
+  TString dirname = gSystem->DirName(fileName.Data());
+  if (gSystem->OpenDirectory(dirname.Data())==0) { 
+    if (gSystem->mkdir(dirname.Data())) {
+      LOG_WARN << "Directory creation failed for:\n  " << dirname
+      << "\n  Putting " << type << " file in current directory" << endm;
+      fileName = fileNameBase;
+    }
+  }
+  TString searchFile = fileName;
+  if (gSystem->FindFile(".",searchFile)) {
+    if (noclobber) {
+      foffset++;
+      LOG_WARN << "Existing file: trying 1 second later (offset="
+               << foffset << ")..." << endm;
+      fileName = NameFile(type,prefix,suffix);
+      foffset--;
+    } else {
+      LOG_WARN << "Existing file: overwriting!" << endm;
+    }
+  }
+  return fileName;
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::FillAssumed(){
@@ -575,14 +598,21 @@ void StVertexSeedMaker::FitData() {
      minuit->GetParameter(i, pname, p[i], ep[i], plow[i], phigh[i]);
 }
 //_____________________________________________________________________________
-Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
+TNtupleD* StVertexSeedMaker::newBLpars() {
+  return new TNtupleD("BLpars","BeamLine parameters",
+    "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc");
+}
+//_____________________________________________________________________________
+Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts, const Int_t offset) {
   // Format of filenames for parsing must be:
   // vertexseedhist.DDDDDDDD.TTTTTT.root
   // where D and T are 8 and 6 digit representations of date and time
 
+  // offset will be applied as a time offset in the date.time use in writing new files
+  SetOffset(offset);
+
   TFile* parsOut = new TFile("BLpars.root","RECREATE");
-  parsNtuple = new TNtupleD("BLpars","BeamLine parameters",
-    "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc");
+  parsNtuple = newBLpars();
 
   const char* defaultDir = "./";
   TString dirStr = dir;
@@ -646,13 +676,32 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
     curNtuple->Draw(">>elistVtxSeed",cuts);
     TEventList* elist = (TEventList*) gDirectory->Get("elistVtxSeed");
     Int_t nentries = (elist ? (Int_t) elist->GetN() : 0);
+    Int_t nvar = curNtuple->GetNvar();
     for (Int_t entryn = 0; entryn < nentries; entryn++) {
       curNtuple->GetEntry(elist->GetEntry(entryn));
       vals = curNtuple->GetArgs();
       unsigned int tid = (unsigned int) vals[5];
       if (ValidTrigger(tid)) {
-        resNtuple->Fill(vals);
-        if (curNtuple->GetNvar()>13) 
+        if (nvar < 20) {
+          // detmap should be converted...
+          float vals2[32];
+          memset(vals2,0,32*sizeof(float));
+          memcpy(vals2,vals,nvar*sizeof(float));
+          detmap = (int) (vals[12]);
+          bmatch = (detmap)&7;
+          ematch = (detmap>>3)&7;
+          tmatch = (detmap>>6)&7;
+          cmatch = (detmap>>9)&3;
+          hmatch = (detmap>>11)&7;
+          vals2[16] = (float) bmatch;
+          vals2[17] = (float) ematch;
+          vals2[18] = (float) tmatch;
+          vals2[19] = (float) cmatch;
+          vals2[20] = (float) hmatch;
+          resNtuple->Fill(vals2);
+        } else
+          resNtuple->Fill(vals);
+        if (nvar > 13) // errors are available
           addVert(vals[1],vals[2],vals[3],vals[4],vals[13],vals[14]);
         else
           addVert(vals[1],vals[2],vals[3],vals[4],0.,0.);
@@ -677,8 +726,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.54 2012/10/11 16:33:12 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.55 2013/08/14 21:42:48 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.55  2013/08/14 21:42:48  genevb
+// Introduce time offsets, noclobber toggle, more matched-tracks controls
+//
 // Revision 1.54  2012/10/11 16:33:12  genevb
 // Protect against zero entries, and a more unique entry list name
 //

@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.19 2012/08/22 04:52:35 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.20 2013/08/14 21:42:48 genevb Exp $
  * \brief BeamLine Constraint calibration base class
  *
  * StVertexSeedMaker calculates mean primary vertex positions from
@@ -41,14 +41,20 @@
  * - mult   : number of daughter tracks for the vertex
  * - i/otpc : bitmaps of inner/outer TPC sectors where daughter tracks have hits
  *   (bits 0-23 represent sectors 1-24)
+ * - bmatch : number of daughter tracks matched to BEMC
+ * - ematch : number of daughter tracks matched to EEMC
+ * - tmatch : number of daughter tracks matched to BTOF
+ * - cmatch : number of daughter tracks matched across the TPC CM
+ * - hmatch : number of daughter tracks matched to HFT (not yet implemented)
  * - detmap : packed information on daughter tracks matched in detectors
  *   (the number of matched tracks is always a subset of mult)...
  *   <table>
- *   <tr><th> bits  </th><th> store the number of </th><th> capped at </th></tr>
- *   <tr><td> 0,1,2 </td><td> BEMC matches        </td><td>     7     </td></tr>
- *   <tr><td> 3,4,5 </td><td> EEMC matches        </td><td>     7     </td></tr>
- *   <tr><td> 6,7,8 </td><td> BTOF matches        </td><td>     7     </td></tr>
- *   <tr><td>  9,10 </td><td> TPC CM crossers     </td><td>     3     </td></tr>
+ *   <tr><th>    bits  </th><th> store the number of </th><th> capped at </th></tr>
+ *   <tr><td>    0,1,2 </td><td> BEMC matches        </td><td>     7     </td></tr>
+ *   <tr><td>    3,4,5 </td><td> EEMC matches        </td><td>     7     </td></tr>
+ *   <tr><td>    6,7,8 </td><td> BTOF matches        </td><td>     7     </td></tr>
+ *   <tr><td>     9,10 </td><td> TPC CM crossers     </td><td>     3     </td></tr>
+ *   <tr><td> 11,12,13 </td><td> HFT  matches        </td><td>     7     </td></tr>
  *   </table>
  *   ...where a cap at N means values larger than N are recorded as N.<br><br>
  *   Using TTree::Draw() methods allows the bit-shifting operator in selection cuts:<br>
@@ -83,7 +89,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void PrintInfo();
    virtual void Clear(Option_t *option);
    virtual Int_t Finish();
-   virtual Int_t Aggregate(Char_t* dir=0, const Char_t* cuts="");
+   virtual Int_t Aggregate(Char_t* dir=0, const Char_t* cuts="", const Int_t offset=0);
 
    virtual void FitData();
    virtual void FindResult(Bool_t checkDb=kTRUE);
@@ -93,7 +99,9 @@ class StVertexSeedMaker : public StMaker {
    virtual void UseFillDateTime();
    virtual void UseAllTriggers();
    virtual St_vertexSeed* VertexSeedTable();
-   virtual void WriteTableToFile();     //Write drift velocity table (assumes correct trigger offset)
+   virtual void WriteTableToFile();     // Write vertex seed table
+   virtual void SetOffset(Int_t offset=0) {foffset = offset;} // time offset in writing table name
+   virtual void SetNoClobber(Bool_t noclob=kTRUE) {noclobber = noclob;} // clobber existing files?
    virtual void SetMinEntries(int entries);  //minimum number of valid events for seed
    virtual void SetMaxX0Err(float err);  //maximum allowed error for x0 
    virtual void SetMaxY0Err(float err);  //maximum allowed error for y0 
@@ -104,7 +112,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.19 2012/08/22 04:52:35 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.20 2013/08/14 21:42:48 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -120,6 +128,8 @@ class StVertexSeedMaker : public StMaker {
    virtual Bool_t ValidTrigger(unsigned int);
    virtual Int_t GetEventData() { return kStErr; }
    virtual void AddResults(TNtupleD* ntup);
+   virtual TString NameFile(const char* type, const char* prefix, const char* suffix);
+   virtual TNtupleD* newBLpars();
 
   TH1F* xdist;
   TH1F* ydist;
@@ -144,6 +154,8 @@ class StVertexSeedMaker : public StMaker {
   int    fill;
   int    date;
   int    time;
+  int    foffset;
+  Bool_t noclobber;
   int    run;
   float  zdc; // ZDC coincidence rate
   float  sumzdc; // running sum of zdc
@@ -152,6 +164,11 @@ class StVertexSeedMaker : public StMaker {
   int    itpc; // inner tpc track map
   int    otpc; // inner tpc track map
   int    detmap; // map any other detectors
+  int    bmatch; // matches with BEMC
+  int    ematch; // matches with EEMC
+  int    tmatch; // matches with BTOF
+  int    cmatch; // matches across TPC Central Membrane
+  int    hmatch; // matches with HFT
   float  rank;
   unsigned int pvn; // primery vertex index number
   int    minEntries;
@@ -188,8 +205,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.19 2012/08/22 04:52:35 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.20 2013/08/14 21:42:48 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.20  2013/08/14 21:42:48  genevb
+// Introduce time offsets, noclobber toggle, more matched-tracks controls
+//
 // Revision 1.19  2012/08/22 04:52:35  genevb
 // Add BeamLine parameter ntuples to output
 //

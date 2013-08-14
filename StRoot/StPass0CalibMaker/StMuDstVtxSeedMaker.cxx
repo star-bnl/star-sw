@@ -95,40 +95,47 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
   //detmap will store number of matches in other detectors
 
   unsigned short nBEMC = primVtx->nBEMCMatch();
+  bmatch = nBEMC;
   if (nBEMC>7) nBEMC=7; // 7 should be enough to convince
   // pack into bits 0,1,2
   detmap += nBEMC;
 
   unsigned short nEEMC = primVtx->nEEMCMatch();
+  ematch = nEEMC;
   if (nEEMC>7) nEEMC=7; // 7 should be enough to convince
   // pack into bits 3,4,5
   detmap += 8*nEEMC;
 
   unsigned short nBTOF = primVtx->nBTOFMatch();
+  tmatch = nBTOF;
   if (nBTOF>7) nBTOF=7; // 7 should be enough to convince
   // pack into bits 6,7,8
   detmap += 64*nBTOF;
 
   unsigned short nCRCM = primVtx->nCrossCentralMembrane();
+  cmatch = nCRCM;
   if (nCRCM>3) nCRCM=3; // 3 should be enough to convince
   // pack into bits 9,10
   detmap += 512*nCRCM;
 
- 
+  hmatch = 0; // reserved for HFT matches
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.10 2012/08/15 00:08:09 genevb Exp $"
+           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.11 2013/08/14 21:42:48 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.10 2012/08/15 00:08:09 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.11 2013/08/14 21:42:48 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.11  2013/08/14 21:42:48  genevb
+// Introduce time offsets, noclobber toggle, more matched-tracks controls
+//
 // Revision 1.10  2012/08/15 00:08:09  genevb
 // ZDC sum rate -> ZDC coincidence rate
 //
