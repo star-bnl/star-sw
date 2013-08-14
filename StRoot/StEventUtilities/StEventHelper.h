@@ -19,7 +19,6 @@
 #include "StHelixD.hh"
 #include "StPhysicalHelixD.hh"
 #include "StPhysicalHelixD.hh"
-#include "StHelixD.hh"
 #include "StHelixHelper.h"
 #include "StEnumerations.h"
 #include <cassert>
