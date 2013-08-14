@@ -15,9 +15,9 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-Int_t AggregateVtxSeed(char* dir=0, const char* cuts="");
+Int_t AggregateVtxSeed(char* dir=0, const char* cuts="", const Int_t offset=0);
 
-Int_t AggregateVtxSeed(char* dir, const char* cuts) {
+Int_t AggregateVtxSeed(char* dir, const char* cuts, const Int_t offset) {
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
@@ -31,12 +31,16 @@ Int_t AggregateVtxSeed(char* dir, const char* cuts) {
 
   StVertexSeedMaker vtxSeedMk;
   //vtxSeedMk.UseFillDateTimeFromFile();
-  Int_t nfiles = vtxSeedMk.Aggregate(dir,cuts);
+  //vtxSeedMk.SetNoClobber(kFALSE);
+  Int_t nfiles = vtxSeedMk.Aggregate(dir,cuts,offset);
   return nfiles;
 }
 
-// $Id: AggregateVtxSeed.C,v 1.3 2013/03/15 01:52:28 genevb Exp $
+// $Id: AggregateVtxSeed.C,v 1.4 2013/08/14 21:41:15 genevb Exp $
 // $Log: AggregateVtxSeed.C,v $
+// Revision 1.4  2013/08/14 21:41:15  genevb
+// Introduce time offsets, noclobber toggle
+//
 // Revision 1.3  2013/03/15 01:52:28  genevb
 // library dependence
 //
