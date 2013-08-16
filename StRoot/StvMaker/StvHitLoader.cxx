@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.22 2013/07/07 22:29:23 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.23 2013/08/16 22:24:37 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -107,6 +107,7 @@ if (myGraph) { //create canvas
         Info("LoadHits","Loaded  %d good, recovered %d and failed %d %s hits"
 	    ,nHits,nHits-nGits,nHitz,StTGeoProxy::DetName(didOld));
       }
+      didOld = did; 
       
       if (!stHit) break;
       Info("LoadHits","Start %s hits",StTGeoProxy::DetName(did));
@@ -124,7 +125,6 @@ if (myGraph) { //create canvas
 
     if (stvHit) {nHits++;nTotHits++;nGits+=sure;nTotGits+=sure;}  
     else 	{nHitz++;nTotHitz++;}
-    didOld = did; 
   }
   int nIniHits = tgp->InitHits();
   assert(nTotHits==nIniHits);
