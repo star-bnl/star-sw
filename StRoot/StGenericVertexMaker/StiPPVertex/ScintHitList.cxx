@@ -12,7 +12,7 @@
 //==========================================================
 ScintHitList::ScintHitList(float Xphi0,float XdPhi,int mxPhi,
 			   float Xeta0, float XdEta,int mxEta,
-			   char * name, float wm, float wv) {
+			   const char* name, float wm, float wv) {
   phi0=Xphi0;
   dPhi=XdPhi;
   nPhi=mxPhi;

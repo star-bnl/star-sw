@@ -29,6 +29,7 @@
 // Vertex finder implemtations
 #include "Minuit/StMinuitVertexFinder.h"
 #include "StiPPVertex/StPPVertexFinder.h"
+#include "StvPPVertex/StPPVertexFinder.h"
 
 
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
@@ -116,9 +117,16 @@ Int_t StGenericVertexMaker::Init()
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
 
   } else if ( IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")){ // 2 version of PPV w/ & w/o CTB
-    LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
-    theFinder= new StPPVertexFinder();
-    if ( IAttr("VFPPVnoCTB")) ((StPPVertexFinder*) theFinder)->useCTB(kFALSE);	
+    int stev = IAttr("STEVPPV");
+    if (!stev) {
+      LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
+      theFinder= new StPPVertexFinder();
+    } else {
+      LOG_INFO << "StGenericVertexMaker::Init: uses StvPPVertex finder"<<  endm;
+      theFinder= new StEvPPV::StPPVertexFinder();
+    }
+
+    if ( IAttr("VFPPVnoCTB")) theFinder->UseCTB(kFALSE);	
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
       ((StPPVertexFinder*) theFinder)->setMC(kTRUE);
     }

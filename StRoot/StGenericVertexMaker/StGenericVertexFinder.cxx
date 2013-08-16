@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.15 2010/09/10 21:06:45 rjreed Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.16 2013/08/16 20:49:38 perev Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -13,8 +13,12 @@
 
 //______________________________________________________________________________
 StGenericVertexFinder::StGenericVertexFinder() : 
-  mVertexConstrain(false), mMode(0), mDebugLevel(0), mUseBtof(false)
+  mVertexConstrain(false), mMode(0), mDebugLevel(0)
 {
+  
+  mIsMC	  =0;            	// flag minor differences between Data & M-C
+  mUseBtof=0;           	// default use btof = false
+  mUseCtb =0;            	// default use ctb = false
   mVertexOrderMethod = orderByNumberOfDaughters;
 }
 //______________________________________________________________________________
@@ -86,6 +90,9 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.16  2013/08/16 20:49:38  perev
+// PPV with only StEvent dependency
+//
 // Revision 1.15  2010/09/10 21:06:45  rjreed
 // Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
 //
