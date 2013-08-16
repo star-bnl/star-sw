@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.39 2013/07/07 22:30:34 perev Exp $
+// $Id: StvMaker.cxx,v 1.40 2013/08/16 22:26:53 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -183,18 +183,21 @@ Int_t StvMaker::InitDetectors()
     const char* innOut = 0;
     for (int io=0;(innOut=innOutNames[io]);io++) {
       if (yGeo<2009 && strstr(innOut,"Prompt")) 	break;
-
-      TString myName(innOut); if (mFETracks) myName+="FE";
+      TTable *tt = 0;
       StvHitErrCalculator *hec = 0;
-      switch (io) {
-        case 0:; case 1: hec = new StvTpcHitErrCalculator(myName); break;
-        case 2:; case 3: hec = new StvHitErrCalculator   (myName); break;
-        default: assert(0 && "Wrong tpcActive value");
+      int nDo = !!mFETracks;
+      for (int iDo=0; iDo<=nDo; iDo++) {
+	TString myName(innOut); if (mFETracks && !iDo) myName+="FE";
+	switch (io) {
+          case 0:; case 1: hec = new StvTpcHitErrCalculator(myName); break;
+          case 2:; case 3: hec = new StvHitErrCalculator   (myName); break;
+          default: assert(0 && "Wrong tpcActive value");
+	}
+	TString ts("Calibrations/tracker/");
+	ts+=myName;
+	tt = (TTable*)GetDataBase(ts);
+	if (!tt) Error("Make","Table %s NOT FOUND",ts.Data());
       }
-      TString ts("Calibrations/tracker/");
-      ts+=myName;
-      TTable *tt = (TTable*)GetDataBase(ts);
-      if (!tt) Error("Make","Table %s NOT FOUND",ts.Data());
       assert(tt);
       hec->SetPars((double*)tt->GetArray());
       StvTpcSelector*sel = new StvTpcSelector(innOut);
