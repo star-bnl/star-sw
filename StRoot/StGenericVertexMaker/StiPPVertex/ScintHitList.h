@@ -22,7 +22,7 @@ class ScintHitList {
 
  public:
   ScintHitList(float Xphi0,float XdPhi,int mxPhi,float Xeta0, float XdEta,int mxEta,
-	       char *name, float wm, float wv);
+	       const char *name, float wm, float wv);
   virtual  ~ScintHitList();
   void clear();
   void initRun();

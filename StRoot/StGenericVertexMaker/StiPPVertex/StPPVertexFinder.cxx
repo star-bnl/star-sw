@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.44 2013/04/09 22:37:56 genevb Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.45 2013/08/16 20:49:38 perev Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -75,7 +75,7 @@ StPPVertexFinder::StPPVertexFinder() {
   memset(hA,0,sizeof(hA));
 
   setMC(false);                      // default = real Data
-  useCTB(true);                      // default CTB is in the data stream
+  UseCTB(true);                      // default CTB is in the data stream
   setDropPostCrossingTrack(true);    // default PCT rejection on
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
 
@@ -145,7 +145,7 @@ StPPVertexFinder::InitRun(int runnumber){
   St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("db");
   int dateY=mydb->GetDateTime().GetYear();
   
-  if(isMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
+  if(mIsMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
  // Initialize BTOF geometry - dongx
   if (mUseBtof){ // only add btof if it is required
     btofGeom = 0;
@@ -167,7 +167,7 @@ StPPVertexFinder::InitRun(int runnumber){
   }
 
   //.. set various params 
-  if (!isMC && runnumber < 13000000) {
+  if (!mIsMC && runnumber < 13000000) {
     // old defaults, pre-Run12
     // (important if we want to reprocess old data with different cuts!)
     LOG_INFO << "PPV InitRun() using old, hardwired cuts" << endm;
@@ -192,7 +192,7 @@ StPPVertexFinder::InitRun(int runnumber){
   mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
 
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
-  if(isMC) {
+  if(mIsMC) {
     LOG_INFO << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
     // simu prior to 2008 
     mMinAdcBemc =7; //ideal BTOW gain 60 GeV ET @ 3500 ADC 
@@ -236,7 +236,7 @@ StPPVertexFinder::InitRun(int runnumber){
     <<"\n Min/Max Z position for BTOF hit = " << mMinZBtof<<" "<<mMaxZBtof   
     <<"\n MinAdcBemc for MIP = " << mMinAdcBemc
     <<"\n MinAdcEemc for MIP = " << mMinAdcEemc
-    <<"\n bool    isMC = " << isMC
+    <<"\n bool    mIsMC = " << mIsMC
     <<"\n bool  useCtb = " << mUseCtb
     <<"\n bool useBtof = " << mUseBtof
     <<"\n bool nFit/nPoss weighting = " << mFitPossWeighting
@@ -361,7 +361,7 @@ StPPVertexFinder::printInfo(ostream& os) const
   }
   float zGeant=999;
   
-  if(isMC) {
+  if(mIsMC) {
     // get geant vertex
     St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
     assert(gds);
@@ -374,7 +374,7 @@ StPPVertexFinder::printInfo(ostream& os) const
     }
   }
   
-  if(isMC) {
+  if(mIsMC) {
     for(i=0;i<mTrackData.size();i++) {
       const TrackData *t=&mTrackData[i];
       if(t->vertexID<=0) continue; // skip not used or pileup vertex 
@@ -474,7 +474,7 @@ StPPVertexFinder::fit(StEvent* event) {
 
   // get CTB info, does not  work for embeding 
   if(mUseCtb) {// CTB could be off since 2006 
-    if(isMC){
+    if(mIsMC){
       St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
       ctbList->buildFromMC(gds);  // use M-C
     }  else {
@@ -1386,6 +1386,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.45  2013/08/16 20:49:38  perev
+ * PPV with only StEvent dependency
+ *
  * Revision 1.44  2013/04/09 22:37:56  genevb
  * Remove boostEfficiency codes: DB usage implemented
  *
