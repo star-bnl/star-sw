@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.607 2013/07/18 14:39:18 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.608 2013/08/17 21:47:17 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -468,6 +468,14 @@ Int_t StBFChain::Instantiate()
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
       if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, kTRUE);
       if (GetOption("VFPPV"      ) ) mk->SetAttr("VFPPV"      	, kTRUE);
+      if (GetOption("VFPPVEv"  ) ) {
+        gSystem->Load("StBTofUtil.so");
+        mk->SetAttr("VFPPVEv"      , kTRUE);
+      }
+      if (GetOption("VFPPVEvNoBtof")){
+        gSystem->Load("StBTofUtil.so"); //Not used but loaded to avoid fail
+        mk->SetAttr("VFPPVEvNoBtof", kTRUE);
+      }
       if (GetOption("VFPPVnoCTB" ) ) mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
       if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, kTRUE);
       if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, kTRUE);
