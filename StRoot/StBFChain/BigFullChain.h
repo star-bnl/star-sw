@@ -1439,9 +1439,12 @@ Bfc_st BFC[] = {
   {"StiSsd"   ,"","",""                           ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSvt",kFALSE},
   {"StiLibs"  ,"","","StiTpc,StiSvt,StiSsd,BTofUtil"   ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
   // depends on Sti symbols
-  {"VFPPV"    ,""  ,"","ctf_T,eemcDb,StiLib","StGenericVertexMaker"
-   ,         "ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
-  {"VFPPVnoCTB"     ,""  ,"","VFPPV",""                ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
+  {"VFPPV"    	,""  	,""	,"ctf_T,eemcDb,StiLib"	,"StGenericVertexMaker"
+                ,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker"	,"... Pile-up proof vertex finder",kFALSE},
+  {"VFPPVnoCTB"		,""  ,""	,"VFPPV" 	,""             ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
+  {"VFPPVEv"    ,""     ,""	,"ctf_T,eemcDb,StiLib"	,"StGenericVertexMaker"	
+             	,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker"	,"... StEvent based VFPPV, noCTB",kFALSE},
+  {"VFPPVEvNoBtof"     	,""  ,""	,"VFPPVEv"	,""		,"","...VFPPVEv with no Btof ",kFALSE},
   // Sti/Stv chains
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                                         "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
