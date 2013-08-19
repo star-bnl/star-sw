@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.1 2013/08/16 22:19:56 perev Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.2 2013/08/19 21:27:32 perev Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -515,6 +515,7 @@ assert(event);
   {
     k++;
     const StGlobalTrack* track = (const StGlobalTrack*)(*tracks)[it]->track(global);
+    if (!track->dcaGeometry()) continue;
     TrackData t;
 
     ntrk[0]++;
@@ -1152,6 +1153,7 @@ void StPPVertexFinder::matchTrack2EEMC(const StGlobalTrack* track,TrackData &t,f
 //==========================================================
 bool StPPVertexFinder::matchTrack2Membrane(const StGlobalTrack* track,TrackData &t)
 {
+static int nCall = 0; nCall++;
   //generate bitt pattern for TPC nodes with hits 
   int nPos=0,nFit=0,jz0=0;
   const StDcaGeometry* dcaGeo = track->dcaGeometry();
@@ -1187,6 +1189,7 @@ const StPtrVecHit& hits = track->detectorInfo()->hits();
       if (zignNow!=zignOld) jz0 = row;
     }
   }//end loop over hits
+  if (rowMax<0) 	return 0;
   
   for (int jl=0,jr=rowMin-1;jr<rowMax;jl++,jr++) { //remove leading & trailing zeros
     hitPatt[jl]=hitPatt[jr];
@@ -1234,6 +1237,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StGlobalTrack* track)
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.2  2013/08/19 21:27:32  perev
+ * Check for Dca geo added
+ *
  * Revision 1.1  2013/08/16 22:19:56  perev
  * PPV with only StEvent dependency
  *
