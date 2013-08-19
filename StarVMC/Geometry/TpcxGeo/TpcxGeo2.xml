@@ -444,7 +444,7 @@
         
         <Fill name="TPCG" comment="// TPC basic dimensions"  >
             <var name="version" value="3.0" comment="// version    =&gt; current version "  />
-            <var name="tpadconfig" value="0.0" comment="Default to starndard TPC TPAD configuration" />
+            <var name="tpadconfig" value="6.0" comment="Default to starndard TPC TPAD configuration" />
             <var name="Rmin" value="46.107" comment="// Rmin          =&gt; TPC envelope inner radius "  />
             <var name="Rmax" value="206.75/cos15" comment="// Rmax          =&gt; TPC envelope outer radius "  />
             <var name="RminIFC" value="46.6" comment="// RminIFC    =&gt; inner radius TPC IFC  : A.Lebedev measurement 10/16/08 "  />
