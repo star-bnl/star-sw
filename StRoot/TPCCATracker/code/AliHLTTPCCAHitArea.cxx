@@ -24,9 +24,9 @@
 #include "AliHLTTPCCAGrid.h"
 #include "AliHLTTPCCARow.h"
 #include "debug.h"
-
+#ifndef NVALGRIND 
 #include <valgrind/memcheck.h>
-
+#endif
 AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTTPCCASliceData &slice,
     const sfloat_v &y, const sfloat_v &z, float dy, float dz, short_m mask )
   : fRow( row ), fSlice( slice ),
@@ -86,16 +86,19 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
 bool AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
 {
   // get next hit index
-  
+#ifndef NVALGRIND 
   VALGRIND_CHECK_VALUE_IS_DEFINED( fIh );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fHitYlst );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fIz );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fBZmax );
+#endif
   ushort_m yIndexOutOfRange = fIh >= fHitYlst;
   ushort_m zIndexOutOfRange = fIz >= fBZmax;
   ushort_m isUsed = static_cast<ushort_m>( short_v(fSlice.HitDataIsUsed( fRow ), fIh) != short_v( Vc::Zero ) ); // TODO change rot.fDataIsUsed type on ushort
+#ifndef NVALGRIND 
   VALGRIND_CHECK_VALUE_IS_DEFINED( yIndexOutOfRange );
   VALGRIND_CHECK_VALUE_IS_DEFINED( zIndexOutOfRange );
+#endif
   if ( yIndexOutOfRange && zIndexOutOfRange ) { // all iterators are over the end
     return false;
   }

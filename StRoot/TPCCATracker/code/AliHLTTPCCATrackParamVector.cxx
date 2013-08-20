@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCATrackParamVector.cxx,v 1.3 2012/08/14 16:30:42 fisyak Exp $
+// $Id: AliHLTTPCCATrackParamVector.cxx,v 1.4 2013/08/20 16:05:09 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -26,7 +26,9 @@
 #include "AliHLTTPCCATrackLinearisationVector.h"
 #include <iostream>
 #include <iomanip>
+#ifndef NVALGRIND 
 #include <valgrind/memcheck.h>
+#endif
 #include <assert.h>
 #include "debug.h"
 

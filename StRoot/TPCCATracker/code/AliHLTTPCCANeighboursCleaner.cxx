@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.12 2012/08/13 19:35:05 fisyak Exp $
+// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.13 2013/08/20 16:05:09 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -24,9 +24,9 @@
 #include "AliHLTTPCCANeighboursCleaner.h"
 #include "AliHLTTPCCAMath.h"
 #include "AliHLTTPCCATracker.h"
-
+#ifndef NVALGRIND 
 #include <valgrind/memcheck.h>
-
+#endif
 // *
 // * kill link to the neighbour if the neighbour is not pointed to the hit
 // *
@@ -60,7 +60,9 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         // up part
       assert( ( validHitsMask && ((hitIndexes   >= 0 ) && (hitIndexes   < row.NHits()   )) ) == validHitsMask );
       short_v up = short_v(data.HitLinkUpData( row ), hitIndexes, validHitsMask );
+#ifndef NVALGRIND 
       VALGRIND_CHECK_VALUE_IS_DEFINED( up );
+#endif
       ushort_v upIndexes = up.staticCast<ushort_v>();
       assert ( (validHitsMask && (up >= short_v( -1 )) ) == validHitsMask );
       short_m upMask = validHitsMask && up >= short_v( Vc::Zero );
@@ -69,7 +71,9 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         // down part
       short_v dn = short_v(data.HitLinkDownData( row ), hitIndexes, validHitsMask );
       assert ( ( validHitsMask && (dn >= short_v(-1)) ) == validHitsMask );
+#ifndef NVALGRIND 
       VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
+#endif
       ushort_v downIndexes = dn.staticCast<ushort_v>();
       short_m dnMask = validHitsMask && dn >= short_v( Vc::Zero );
       assert( ( dnMask && ((downIndexes   >= 0 ) && (downIndexes   < rowDown.NHits()   )) ) == dnMask );
@@ -191,12 +195,16 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         // delete one-way links (all other one-way links)
       const short_v minusOne = -1;
       short_m badUpMask = validHitsMask && (downFromUp != static_cast<short_v>(hitIndexes));
+#ifndef NVALGRIND 
       VALGRIND_CHECK_VALUE_IS_DEFINED( up );
+#endif
       assert( ( badUpMask && ((hitIndexes   >= 0 ) && (hitIndexes   < row.NHits()   )) )  == badUpMask );
       data.SetHitLinkUpData( row, hitIndexes, minusOne, badUpMask );
 
       short_m badDnMask = validHitsMask && (upFromDown != static_cast<short_v>(hitIndexes));
+#ifndef NVALGRIND 
       VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
+#endif
       assert( ( badDnMask && ((hitIndexes   >= 0 ) && (hitIndexes   < row.NHits()   )) )  == badDnMask );
       data.SetHitLinkDownData( row, hitIndexes, minusOne, badDnMask );
     } // for iHit

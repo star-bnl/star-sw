@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.8 2012/08/14 16:30:42 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.9 2013/08/20 16:05:09 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -47,9 +47,9 @@
 
 #include <limits>
 #include <Vc/limits>
-
+#ifndef NVALGRIND 
 #include <valgrind/memcheck.h>
-
+#endif
 
  //#define LOSE_DEBUG
 
@@ -163,19 +163,24 @@ inline void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, int row
   const sfloat_v x = fData.RowX( rowIndex ); // convert to sfloat_v once now
   const sfloat_v y( fData.HitDataY( row ), oldHitIndex, active );
   const sfloat_v z( fData.HitDataZ( row ), oldHitIndex, active );
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( x );
   VALGRIND_CHECK_VALUE_IS_DEFINED( y );
   VALGRIND_CHECK_VALUE_IS_DEFINED( z );
-
+#endif
   debugF() << "x, y, z: " << x << y << z << endl;
 
     // correct SinPhi if it is necessary
     // calculate displacement to previous hit
   const sfloat_v dx = x - r.fParam.X();
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( dx );
   VALGRIND_CHECK_VALUE_IS_DEFINED( r.fLastY );
+#endif
   const sfloat_v dy = y - r.fLastY;
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( dy );
+#endif
   const sfloat_v dz = z - r.fLastZ;
   debugF() << "dx, dy, dz: " << dx << dy << dz << endl;
   r.fLastY( activeF ) = y;
@@ -183,40 +188,51 @@ inline void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, int row
 
   sfloat_v err2Y, err2Z;
   sfloat_v sinPhi = r.fParam.GetSinPhi();
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
-
+#endif
   const sfloat_v ri = sfloat_v( Vc::One ) / CAMath::Sqrt( dx * dx + dy * dy ); // RSqrt
   const sfloat_m fragile =
       static_cast<sfloat_m>( r.fNHits < AliHLTTPCCAParameters::MinimumHitsForFragileTracklet ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f;
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( fragile );
+#endif
   sinPhi( fragile ) = dy * ri;
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
-
+#endif
   assert( ( x == 0 && activeF ).isEmpty() );
   const sfloat_m transported =
     r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), -1.f, activeF );
 #ifdef LOSE_DEBUG
   if (!(activeF && (!transported)).isEmpty()) std::cout << "FitTracklet-TransportToX(...) lose track: " << (activeF && (!transported)) << std::endl;
 #endif
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
+#endif
 ///mvz start 20.01.2010
 //  fTracker.GetErrors2( rowIndex, r.fParam.GetZ(), sinPhi, r.fParam.GetDzDs(), &err2Y, &err2Z );
   fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
 ///mvz end 20.01.2010
 //   std::cout << err2Y << " " << err2Z << std::endl;
 //   err2Y = 0.12*0.12; err2Z = 0.16*0.16;
-  
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( active );
+#endif
   {
     const short_m hitAdded = active &&
       static_cast<short_m>( r.fParam.Filter( transported, y, z, err2Y, err2Z, .99f ) );
+#ifndef NVALGRIND
     VALGRIND_CHECK_VALUE_IS_DEFINED( hitAdded );
+#endif
     trackletVector.SetRowHits( rowIndex, trackIndex, oldHitIndex, hitAdded );
     ++r.fNHits( hitAdded );
     r.fEndRow( hitAdded ) = rowIndex;
   }
 
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( r.fCurrentHitIndex );
+#endif
   const short_m fittingDone = r.fCurrentHitIndex < 0 && active;
   debugF() << "fittingDone = " << fittingDone << endl;
   if ( ISUNLIKELY( !fittingDone.isEmpty() ) ) {
@@ -251,10 +267,14 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, int
 //     // correct SinPhi if it is necessary
 //     // calculate displacement to previous hit
 //   const sfloat_v dx = x - r.fParam.X();
+#ifndef NVALGRIND
 //   VALGRIND_CHECK_VALUE_IS_DEFINED( dx );
 //   VALGRIND_CHECK_VALUE_IS_DEFINED( r.fLastY );
+#endif
 //   const sfloat_v dy = y - r.fLastY;
+#ifndef NVALGRIND
 //   VALGRIND_CHECK_VALUE_IS_DEFINED( dy );
+#endif
 //   const sfloat_v dz = z - r.fLastZ;
 //   debugF() << "dx, dy, dz: " << dx << dy << dz << endl;
 //   r.fLastY( activeF ) = y;
@@ -262,14 +282,20 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, int
 // 
 //   sfloat_v err2Y, err2Z;
 //  sfloat_v sinPhi = r.fParam.GetSinPhi();
+#ifndef NVALGRIND
 //   VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
+#endif
 // 
 //   const sfloat_v ri = sfloat_v( Vc::One ) / CAMath::Sqrt( dx * dx + dy * dy ); // RSqrt
 //  const sfloat_m fragile =
 //      static_cast<sfloat_m>( r.fNHits < AliHLTTPCCAParameters::MinimumHitsForFragileTracklet ) || CAMath::Abs( r.fParam.SinPhi() ) >= .99f;
+#ifndef NVALGRIND
 //   VALGRIND_CHECK_VALUE_IS_DEFINED( fragile );
+#endif
 //   sinPhi( fragile ) = dy * ri;
+#ifndef NVALGRIND
 //   VALGRIND_CHECK_VALUE_IS_DEFINED( sinPhi );
+#endif
 #ifdef LOSE_DEBUG
 //   if (!(active && (fragile)).isEmpty()) std::cout << "ExtrapolateTracklet-SinPhi is bad: " << (active && (fragile)) << " SinPhi = " << sinPhi << " NTrackletHits = " << r.fNHits << std::endl;
 #endif
@@ -840,7 +866,9 @@ void InitTracklets::operator()( int rowIndex )
   const sfloat_m maskF( mask );
   {
     const AliHLTTPCCARow &row = fData.Row( rowIndex );
+#ifndef NVALGRIND
     VALGRIND_CHECK_MEM_IS_ADDRESSABLE( &row, sizeof( AliHLTTPCCARow ) );
+#endif
     const sfloat_v x = fData.RowX( rowIndex );
     const ushort_v &hitIndex = static_cast<ushort_v>( r.fCurrentHitIndex );
     const sfloat_v y( fData.HitDataY( row ), hitIndex, mask );

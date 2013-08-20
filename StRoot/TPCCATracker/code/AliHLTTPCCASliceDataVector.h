@@ -23,8 +23,9 @@
 #include "AliHLTArray.h"
 #include "AliHLTVector.h"
 #include <cstdio>
-
+#ifndef NVALGRIND
 #include <valgrind/memcheck.h>
+#endif
 #include "debug.h"
 
 class AliHLTTPCCAClusterData;
@@ -372,8 +373,8 @@ inline void AliHLTTPCCASliceData::MaximizeHitWeight( const AliHLTTPCCARow &row,
     const ushort_v &hitIndex, const ushort_v &weight )
 {
   const short_m mask = validHitIndexes( hitIndex );
-  VALGRIND_CHECK_VALUE_IS_DEFINED( weight );
 #ifndef NVALGRIND
+  VALGRIND_CHECK_VALUE_IS_DEFINED( weight );
   for ( int i = 0; i < hitIndex.Size; ++i ) {
     if ( mask[i] ) {
       VALGRIND_CHECK_VALUE_IS_DEFINED( row.fHitWeights[hitIndex[i]] );
