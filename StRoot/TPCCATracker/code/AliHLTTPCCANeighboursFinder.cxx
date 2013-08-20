@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.13 2012/08/13 19:35:05 fisyak Exp $
+// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.14 2013/08/20 16:05:09 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -41,8 +41,9 @@
 // #endif
 
 #include "debug.h"
+#ifndef NVALGRIND 
 #include <valgrind/memcheck.h>
-
+#endif
 using namespace Vc;
 
 bool DRAW_EVERY_LINK = false;
@@ -161,21 +162,22 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
     while ( areaUp.GetNext( &neighUp[upperNeighbourIndex] ) ) {
       assert( neighUp[upperNeighbourIndex].fLinks < rowUp.NHits() || !neighUp[upperNeighbourIndex].fValid );
       debugS() << neighUp[upperNeighbourIndex];
-
+#ifndef NVALGRIND
       VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fLinks );
       VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fValid );
       VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fY );
       VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fZ );
+#endif
 #ifdef DRAW_NEIGHBOURSFINDING
       neighUpY[upperNeighbourIndex] = neighUp[upperNeighbourIndex].fY;
       neighUpZ[upperNeighbourIndex] = neighUp[upperNeighbourIndex].fZ;
 #endif      
       neighUp[upperNeighbourIndex].fY = DnDx * ( neighUp[upperNeighbourIndex].fY - y );
       neighUp[upperNeighbourIndex].fZ = DnDx * ( neighUp[upperNeighbourIndex].fZ - z );
-
+#ifndef NVALGRIND
       VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fY );
       VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fZ );
-
+#endif
       ++upperNeighbourIndex;
       //assert( (upperNeighbourIndex < kMaxN) || ("" == " too small array ") );
       if ( upperNeighbourIndex >= kMaxN ){
@@ -195,10 +197,12 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
       HitArea areaDn( rowDn, fData, yDnTx, zDnTx, -DnDx*kAreaSizeY, -DnDx*kAreaSizeZ, validHitsMask );
       while ( areaDn.GetNext( &neighDn ) ) {
         assert( neighDn.fLinks < rowDn.NHits() || !neighDn.fValid );
+#ifndef NVALGRIND
         VALGRIND_CHECK_VALUE_IS_DEFINED( neighDn.fLinks );
         VALGRIND_CHECK_VALUE_IS_DEFINED( neighDn.fValid );
         VALGRIND_CHECK_VALUE_IS_DEFINED( neighDn.fY );
         VALGRIND_CHECK_VALUE_IS_DEFINED( neighDn.fZ );
+#endif
         debugS() << neighDn;
 
         nNeighDn++;

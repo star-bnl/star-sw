@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.6 2012/08/14 16:30:42 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.7 2013/08/20 16:05:09 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -33,9 +33,9 @@
 #ifdef USE_TBB
 #include <tbb/atomic.h>
 #endif //USE_TBB
-
+#ifndef NVALGRIND 
 #include <valgrind/memcheck.h>
-
+#endif
 #include "debug.h"
 
 #ifdef DRAW3
@@ -111,18 +111,22 @@ void AliHLTTPCCATrackletSelector::run()
       const ushort_v &hitIndexes = tracklet.HitIndexAtRow( rowIndex ); // hit index for the current row
       debugTS() << hitIndexes << invalidMarker << validHitIndexes( hitIndexes ) << endl;
       const ushort_m &validHits = valid && validHitIndexes( hitIndexes );
+#ifndef NVALGRIND 
       VALGRIND_CHECK_VALUE_IS_DEFINED( weight );
       VALGRIND_CHECK_VALUE_IS_DEFINED( nShared );
       VALGRIND_CHECK_VALUE_IS_DEFINED( tNHitsNew );
       VALGRIND_CHECK_VALUE_IS_DEFINED( kMaximumSharedPerHits );
+#endif
       //cerr << rowIndex << hitIndexes << weight << fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) << endl;
       const ushort_m own = fData.TakeOwnHits( fData.Row( rowIndex ), hitIndexes, validHits, weight );
       //cerr << own << fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) << endl;
       //const ushort_m &own = fData.HitWeight( fData.Row( rowIndex ), hitIndexes, validHits ) == weight;
       const ushort_m &sharedOK = nShared < static_cast<ushort_v>( static_cast<sfloat_v>( tNHitsNew ) * kMaximumSharedPerHits );
       const ushort_m &outHit = validHits && ( own || sharedOK );
+#ifndef NVALGRIND 
       VALGRIND_CHECK_VALUE_IS_DEFINED( own );
       VALGRIND_CHECK_VALUE_IS_DEFINED( sharedOK );
+#endif
 #ifndef NODEBUG
       const ushort_m &invalidTrack = !( own || sharedOK );
 //      std::cout << invalidTrack << "       "<< outHit <<"            "<<firstRow.min()<<"  "<<lastRow.max()<<"         "<< firstRow<<"  "<<lastRow<<std::endl;

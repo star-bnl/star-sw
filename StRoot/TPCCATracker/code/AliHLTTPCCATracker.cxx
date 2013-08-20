@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.6 2012/08/13 19:35:06 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.7 2013/08/20 16:05:09 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -39,7 +39,9 @@
 #include "AliHLTTPCCATrackParam.h"
 
 #include <iostream>
+#ifndef NVALGRIND 
 #include <valgrind/memcheck.h>
+#endif
 
 #ifdef HLTCA_INTERNAL_PERFORMANCE
 #include "AliHLTTPCCAPerformance.h"
@@ -275,12 +277,13 @@ void AliHLTTPCCATracker::WriteOutput()
       const int inpIdOffset = fClusterData->RowOffset( rowIndex );
       const int inpIdtot = fData.ClusterDataIndex( row, hitIndex );
       const int inpId = inpIdtot - inpIdOffset;
+#ifndef NVALGRIND
       VALGRIND_CHECK_VALUE_IS_DEFINED( rowIndex );
       VALGRIND_CHECK_VALUE_IS_DEFINED( hitIndex );
       VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdOffset );
       VALGRIND_CHECK_VALUE_IS_DEFINED( inpIdtot );
       VALGRIND_CHECK_VALUE_IS_DEFINED( inpId );
-
+#endif
       const float origX = fClusterData->X( inpIdtot );
       const float origY = fClusterData->Y( inpIdtot );
       const float origZ = fClusterData->Z( inpIdtot );

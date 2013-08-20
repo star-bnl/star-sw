@@ -26,7 +26,9 @@
 #include "AliHLTTPCCAParam.h"
 #include "MemoryAssignmentHelpers.h"
 #include <iostream>
+#ifndef NVALGRIND 
 #include <valgrind/memcheck.h>
+#endif
 
 // calculates an approximation for 1/sqrt(x)
 // Google for 0x5f3759df :)
@@ -271,16 +273,22 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
 
     for ( int hitIndex = 0; hitIndex < row.fNHits; ++hitIndex ) {
       const unsigned short bin = bins[hitIndex];
+#ifndef NVALGRIND
       VALGRIND_CHECK_VALUE_IS_DEFINED( bin );
+#endif
       assert( bin < numberOfBins + 3 );
       --filled[bin];
       const unsigned short ind = c[bin] + filled[bin]; // generate an index for this hit that is >= c[bin] and < c[bin + 1]
       assert( ind < row.fNHits );
+#ifndef NVALGRIND
       VALGRIND_CHECK_VALUE_IS_DEFINED( ind );
+#endif
       const int globalHitIndex = clusterDataOffset + hitIndex;
 
       // allows to find the global hit index / coordinates from a global bin sorted hit index
+#ifndef NVALGRIND
       VALGRIND_CHECK_VALUE_IS_DEFINED( globalHitIndex );
+#endif
       row.fClusterDataIndex[ind] = globalHitIndex;
       row.fHitDataY[ind] = data.Y( globalHitIndex );
       row.fHitDataZ[ind] = data.Z( globalHitIndex );

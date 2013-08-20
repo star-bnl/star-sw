@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParamVector.h,v 1.5 2013/08/06 18:59:38 fisyak Exp $
+// $Id: AliHLTTPCCATrackParamVector.h,v 1.6 2013/08/20 16:05:09 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -275,7 +275,9 @@ inline sfloat_m AliHLTTPCCATrackParamVector::TransportToX( const sfloat_v &x, co
   return mask;
 }
 
+#ifndef NVALGRIND 
 #include <valgrind/memcheck.h>
+#endif
 #include <assert.h>
 
 #ifdef NVALGRIND
@@ -301,16 +303,19 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
 
   assert( err2Y > 0.f || !mask );
   assert( err2Z > 0.f || !mask );
+
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( dy, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( dz, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( err2Y, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( err2Z, mask );
-#ifndef NVALGRIND
+#endif
   err2Y.setZero( !mask );
   err2Z.setZero( !mask );
-#endif
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( maxSinPhi );
+#endif
 
   //* Add the y,z measurement with the Kalman filter
 
@@ -320,12 +325,13 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
   const sfloat_v c31 = fC[ 7];
   const sfloat_v c40 = fC[10];
 
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( c00 );
   VALGRIND_CHECK_VALUE_IS_DEFINED( c11 );
   VALGRIND_CHECK_VALUE_IS_DEFINED( c20 );
   VALGRIND_CHECK_VALUE_IS_DEFINED( c40 );
   VALGRIND_CHECK_VALUE_IS_DEFINED( c31 );
-
+#endif
   err2Y += c00;
   err2Z += c11;
 #ifndef NODEBUG
@@ -335,11 +341,12 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
 #endif
   assert( err2Y > 0.f || !mask );
   assert( err2Z > 0.f || !mask );
+#ifndef NVALGRIND
 
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[0] );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[1] );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[2] );
-
+#endif
   const sfloat_v &z0 = dy;
   const sfloat_v &z1 = dz;
 
@@ -372,10 +379,13 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
   debugKF() << "delta(sinPhi): " << ( z0 * c20 / err2Y + fP[2] - sinPhi ) << std::endl;
 
   assert( maxSinPhi > 0.f );
+#ifndef NVALGRIND
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( sinPhi, mask );
+#endif
   const sfloat_m &success = mask && err2Y >= 1.e-8f && err2Z >= 1.e-8f && CAMath::Abs( sinPhi ) < maxSinPhi;
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( success );
-
+#endif
   fNDF  ( static_cast<short_m>( success ) ) += 2;
   fChi2 ( success ) += mS0 * z0 * z0 + mS2 * z1 * z1 ;
 
@@ -419,17 +429,18 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
 
   assert( err2Y > 0.f || !mask );
   assert( err2Z > 0.f || !mask );
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( y, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( z, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( err2Y, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( err2Z, mask );
-#ifndef NVALGRIND
+#endif
   err2Y.setZero( !mask );
   err2Z.setZero( !mask );
-#endif
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( maxSinPhi );
-
+#endif
   //* Add the y,z measurement with the Kalman filter
 
   const sfloat_v c00 = fC[ 0];
@@ -437,13 +448,13 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
   const sfloat_v c20 = fC[ 3];
   const sfloat_v c31 = fC[ 7];
   const sfloat_v c40 = fC[10];
-
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( c00 );
   VALGRIND_CHECK_VALUE_IS_DEFINED( c11 );
   VALGRIND_CHECK_VALUE_IS_DEFINED( c20 );
   VALGRIND_CHECK_VALUE_IS_DEFINED( c40 );
   VALGRIND_CHECK_VALUE_IS_DEFINED( c31 );
-
+#endif
   err2Y += c00;
   err2Z += c11;
 #ifndef NODEBUG
@@ -453,11 +464,11 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
 #endif
   assert( err2Y > 0.f || !mask );
   assert( err2Z > 0.f || !mask );
-
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[0] );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[1] );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fP[2] );
-
+#endif
   const sfloat_v &z0 = y - fP[0];
   const sfloat_v &z1 = z - fP[1];
 
@@ -490,10 +501,13 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
   debugKF() << "delta(sinPhi): " << ( z0 * c20 / err2Y + fP[2] - sinPhi ) << std::endl;
 
   assert( maxSinPhi > 0.f );
+#ifndef NVALGRIND
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( sinPhi, mask );
+#endif
   const sfloat_m &success = mask && err2Y >= 1.e-8f && err2Z >= 1.e-8f && CAMath::Abs( sinPhi ) < maxSinPhi;
+#ifndef NVALGRIND
   VALGRIND_CHECK_VALUE_IS_DEFINED( success );
-
+#endif
   fNDF  ( static_cast<short_m>( success ) ) += 2;
   fChi2 ( success ) += mS0 * z0 * z0 + mS2 * z1 * z1 ;
 
