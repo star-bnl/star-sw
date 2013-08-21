@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.40 2013/08/16 22:26:53 perev Exp $
+// $Id: StvMaker.cxx,v 1.41 2013/08/21 18:56:51 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -99,7 +99,7 @@ StvMaker::StvMaker(const char *name) : StMaker(name)
   SetAttr("useEventFiller"      ,kTRUE);
   SetAttr("useTracker"          ,kTRUE);
   SetAttr("useVertexFinder"     ,kTRUE);
-  SetAttr("makePulls"           ,kTRUE);
+//SetAttr("makePulls"           ,kTRUE);
   SetAttr("refit"           	,kTRUE);
 }
 
