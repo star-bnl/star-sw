@@ -863,12 +863,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 		LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
 		hlt_debug_setup(sub_type) ;
 		return 1 ; 
-	case RUN_TYPE_LASER :
-		if(sub_type == 100) {
-			LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
-			break ;
-		}
-		return 1 ;
+		
 	default :
 		return 1 ;
 	}
@@ -933,10 +928,6 @@ int tpxPed::special_setup(int run_type, int sub_type)
 			for(t=1;t<512;t++) ped->ped[t] = ped->ped[0] ;
 
 			break ;
-		case RUN_TYPE_LASER :
-			for(t=368;t<=383;t++) ped->ped[t] = 0.0 ;
-			break ;
-
 		default :	// some pattern
 			for(t=0;t<512;t++) ped->ped[t] = 1023.0 ;	// kill all
 			for(t=p;t<(p+10);t++) ped->ped[t] = 0 ;		// some pattern depending on row

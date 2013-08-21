@@ -657,7 +657,6 @@ void swapPP_CFG(PP_CFG *);
 #define swapPP_CFG(yada)
 #endif
 
-class SimpleXmlDoc;
 
 // Configuration file functions...The functions get properly swapped
 // versions of the configuration file.
@@ -742,8 +741,6 @@ class EvbChooser
 {
  public:
   EvbChooser() {};
-  void configure(SimpleXmlDoc *xml);
-
   void configure(STAR_CFG *cfg, int legacy);
 
   // These return error if no evbs in run, but otherwise
@@ -764,16 +761,6 @@ class EvbChooser
   int evb4token[4096];         
 };
 
-class TokenManagerChooser {
- public:
-    void configure(STAR_CFG *cfg);
-    void configure(SimpleXmlDoc *cfg);
-    int getEventNumber(int cmd, int token, int sz);
-    
- private:
-    EvbChooser chooser;
-    int sockets[10];    
-};
 
 #define RHIC_TRG "RHICTRG\0"
 #define TRG_UDP_PORT 8060

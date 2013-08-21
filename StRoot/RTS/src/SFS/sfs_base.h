@@ -29,16 +29,6 @@ struct SFS_File {
   char name[4];     // get rid of padding confusions... by alligning
 };
 
-/* Tonko: I need this convenience function */
-inline int sfs_calcfileheader(char *fn)
-{
-	int n = sizeof(SFS_File) - 4 ;
-	n += strlen(fn) + 1 ;
-	n = (n+3)&0xfffffffc;
-
-	return n ;
-}
-
 inline int sfs_putfileheader(char *ptr, char *fn, int filesz, int flags)
 {
   SFS_File *file = (SFS_File *)ptr;

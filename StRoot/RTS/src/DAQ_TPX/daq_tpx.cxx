@@ -1482,21 +1482,21 @@ daq_dta *daq_tpx::handle_cld_2d_sim(int sec, int row)
 			a.count++ ;
 		}
 
-		//LOG(TERR,"before") ;
+
 		fcf_2d_algo[sim->sec]->do_pad_2d(&a, sim->sim_adc) ;
-		//LOG(TERR,"do_pad(): sec %d, row %d, pad %d: %d",sim->sec,a.row,a.pad,a.count) ;
+		LOG(DBG,"do_pad(): sec %d, row %d, pad %d: %d",sim->sec,a.row,a.pad,a.count) ;
 	}
 
 
 
 	for(int s=min_sec;s<=max_sec;s++) {
 		if(fcf_2d_algo[s]) {
-			LOG(NOTE,"Trying sec %d",s) ;
+			//LOG(WARN,"Trying sec %d",s) ;
 
 			int words = fcf_2d_algo[s]->stage_2d(fcf_tmp_storage,FCF_TMP_BYTES) ;
 			if(words<=0) continue ;
 
-			LOG(NOTE,"Sector %d: %d words",s,words) ;			
+			//LOG(TERR,"Sector %d: %d words",s,words) ;			
 
 			u_int *p_buff = fcf_tmp_storage ;
 			u_int *end_buff = p_buff + words ;
@@ -1518,7 +1518,7 @@ daq_dta *daq_tpx::handle_cld_2d_sim(int sec, int row)
 				while(cou) {
 					int skip = fcf_2d_algo[s]->fcf_decode(p_buff, cld + g_cou, version) ;
 					
-					//LOG(TERR,"skip %d",skip) ;
+
 					g_cou++ ;
 
 					p_buff += skip ;
@@ -1531,8 +1531,7 @@ daq_dta *daq_tpx::handle_cld_2d_sim(int sec, int row)
 		}
 	}
 
-	LOG(NOTE,"Sec done") ;
-
+	
 	cld_2d_sim->rewind() ;
 
 	return cld_2d_sim ;
@@ -1732,19 +1731,6 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 		u_int dta = rdo.trg[i].data ;
 		u_int marker = rdo.trg[i].csr >> 24 ;
 		u_int rhic = rdo.trg[i].rhic_counter ;
-
-
-//#define WANT_LOGGING
-#ifdef WANT_LOGGING
-		if(rdo.rdo==1 && rdo.sector==1) {
-			int delta = rhic - rdo.trg[0].rhic_counter ;
-			LOG(TERR,"RDO %d: trg %d/%d: dta 0x%08X, CSR 0x%08X, RHIC %u, delta %u",rdo.rdo,
-			    i,rdo.trg_cou,
-			    dta,rdo.trg[i].csr,rhic,
-			    delta) ;
-
-		}
-#endif
 
 		if((marker==0) || (marker==0xEE)) {	// marks the prompt configuration
 

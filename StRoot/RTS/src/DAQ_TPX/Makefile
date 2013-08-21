@@ -23,9 +23,7 @@ ifeq ($(HOST_NAME),ettie.star.bnl.gov)
 endif
 
 
-#DEFINES += -DDO_DBG
-
-
+//DEFINES += -DDO_DBG -DDO_SIMULATION
 
 OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxFCF_2D.o tpxStat.o daq_tpx.o
 
@@ -84,7 +82,6 @@ tpxFCF_2D.o: ../DAQ_TPX/tpxGain.h
 tpxFCF_2D.o: tpxCore.h
 tpxFCF_2D.o: tpxFCF_2D.h
 tpxFCF_2D.o: ../DAQ_TPX/tpxFCF.h
-tpxFCF_2D.o: ../DAQ_READER/daq_dta_structs.h
 tpxFCF.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxFCF.o: ../../../../StRoot/RTS/include/I386/i386Lib.h
 tpxFCF.o: ../../../../StRoot/RTS/include/TPC/rowlen.h

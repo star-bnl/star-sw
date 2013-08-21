@@ -180,10 +180,4 @@
 
 #define L4_TASK 80        // use L3 task
 #define L4_EVB_TASK 82
-
-#define TOKEN_MANAGER_TASK 19
-#define TOKEN_MANAGER_TKN_TASK 20
-#define TOKEN_MANAGER_EXT_TRG_TASK 21
-#define TOKEN_MANAGER_TKN_RETURN_TASK 22
-
 #endif 

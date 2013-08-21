@@ -74,7 +74,7 @@
 #define TCD_BBC         7	//0x11, trigger-only
 #define TCD_ETOW        8	//0x12,
 #define TCD_MTD_QT      9	//0x13, trigger-only
-#define TCD_IST         10	//0x14, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
+#define TCD_FGT         10	//0x14, Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //0x15,
 #define TCD_PP          12      //0x16
 #define TCD_MTD         13      //0x17
@@ -102,8 +102,8 @@
 
 #define PXL_GRP		8	// same as old PMD
 
-#define IST_GRP         9	// Jun 2013: was FGT
-#define xxx_GRP		10	// unused...
+#define FGT_GRP         9
+#define IST_GRP		10
 #define RPII_GRP	11
 #define GMT_GRP		14
 #define MTD_GRP		15
@@ -290,27 +290,24 @@ so we keep it here for source compatibility
 */
 
 #ifndef RTS_PROJECT_PP
-#define DAQMAN_INSTANCE		1
+#define DAQMAN_INSTANCE 1
 #endif
 
-#define BB_INSTANCE		2
+#define BB_INSTANCE     2
 
 #ifndef RTS_PROJECT_PP
-#define EVP_INSTANCE		3
+#define EVP_INSTANCE    3
 #endif
 
-//#define GB_INSTANCE		4
-#define BDB_INSTANCE		4	// we'll keep the BDB controller's node_id the same...
-
-#define TOKEN_MANAGER_INSTANCE	5
+//#define GB_INSTANCE     4
+#define BDB_INSTANCE	4	// we'll keep the BDB controller's node_id the same...
 
 //#define BB2_INSTANCE    5
 //#define TM_INSTANCE     GB_INSTANCE
 //#define EVB_INSTANCE    BB_INSTANCE
 //#define EVB02_INSTANCE	BB2_INSTANCE
-
-#define RC_CLIENT_INSTANCE	14
-#define CLIENT_INSTANCE		15
+#define RC_CLIENT_INSTANCE 14
+#define CLIENT_INSTANCE 15
 
 
 #ifdef RTS_PROJECT_PP
@@ -402,12 +399,6 @@ so we keep it here for source compatibility
 
 
 #define BDB_NODE	((DAQ_SYSTEM<<12) | BDB_INSTANCE) // old GB...
-
-#define TOKEN_MANAGER_NODE	((DAQ_SYSTEM<<12) | TOKEN_MANAGER_INSTANCE) 
-
-
-
-
 
 /* singular detectors */
 #define RIC01_NODE	((RIC_SYSTEM<<12) | 1)
@@ -612,66 +603,6 @@ extern inline const char *rts2name(int rts_id)
 	}
 } ;
 
-extern inline const char *rts2sfs_name(int rts_id)
-{
-	switch(rts_id) {
-	case TPC_SYSTEM :
-		return "tpc" ;
-	case SVT_SYSTEM :
-		return "SVT" ;
-	case TOF_SYSTEM :
-		return "tof" ;
-	case BTOW_SYSTEM :
-		return "btow" ;
-	case FPD_SYSTEM :
-		return "FPD" ;
-	case FTP_SYSTEM :
-		return "FTP" ;
-	case PMD_SYSTEM :
-		return "PMD" ;
-	case SSD_SYSTEM :
-		return "SSD" ;
-	case ETOW_SYSTEM :
-		return "etow" ;
-	case FGT_SYSTEM :	
-		return "fgt" ;
-	case BSMD_SYSTEM :
-		return "bsmd" ;
-	case ESMD_SYSTEM :
-		return "esmd" ;
-	case DAQ_SYSTEM :
-		return "DAQ" ;
-	case TRG_SYSTEM :
-		return "trg" ;
-	case L3_SYSTEM :
-		return "l3" ;
-	case SC_SYSTEM :
-		return "sc" ;
-	case TPX_SYSTEM :
-	        return "tpx" ;
-	case PXL_SYSTEM :
-	        return "pxl" ;
-	case PP_SYSTEM :
-	        return "pp2" ;
-	case RIC_SYSTEM :
-		return "RICH" ;
-	case MTD_SYSTEM :
-		return "mtd" ;
-	case IST_SYSTEM :
-		return "ist" ;
-	case SST_SYSTEM :
-		return "sst" ;
-	case RPII_SYSTEM :
-		return "rpii" ;
-	case GMT_SYSTEM :
-		return "gmt" ;
-	case L4_SYSTEM :
-		return "l4" ;
-	default :
-	  return (const char *)NULL ;	// unknown!
-	}
-} ;
-
 #ifndef __vxworks
 extern inline int name2rts(const char *name)
 {
@@ -737,7 +668,7 @@ extern inline int rts2tcd(int rts)
 		-1,		//13: SSD gone...
 		TCD_ETOW,	//14
 		-1,		//15: generic DAQ
-		TCD_IST,	//16
+		TCD_FGT,	//16
 		TCD_PP,		//17
 		TCD_BSMD,	//18
 		TCD_ESMD,	//19
@@ -775,7 +706,7 @@ extern inline int tcd2rts(int tcd)
         -1,		//7 BBC
         ETOW_SYSTEM,	//8
         -1,		//9 ; used for MTD_QT, was SSD?
-        IST_SYSTEM,	//10 ; moved from FGT; moved from FPD
+        FGT_SYSTEM,	//10 ; moved from FPD
         TOF_SYSTEM,	//11
         PP_SYSTEM,	//12 ; moved from SVT_SYSTem to PP!
         MTD_SYSTEM,	//13 was EMPTY in FY10, MTD in FY11
@@ -843,8 +774,8 @@ extern inline u_int grp2rts_mask(int grp)
 	if(grp & (1 << PXL_GRP)) {
 	  ret |= (1 << PXL_SYSTEM);
 	}
-	if(grp & (1 << IST_GRP)) {
-	  ret |= (1 << IST_SYSTEM);
+	if(grp & (1 << FGT_GRP)) {
+	  ret |= (1 << FGT_SYSTEM);
 	}
 	if(grp & (1 << MTD_GRP)) {
 	  ret |= (1 << MTD_SYSTEM);
@@ -877,7 +808,7 @@ extern inline int rts2grp(int rts)
 	case TPX_ID:
 		return TPX_GRP;
 	case FGT_ID:
-		return IST_GRP;
+		return FGT_GRP;
 	case MTD_ID:
 		return MTD_GRP;
 	case GMT_ID :

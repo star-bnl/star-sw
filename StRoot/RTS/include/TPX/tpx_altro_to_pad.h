@@ -40,7 +40,6 @@ const struct tpx_fee_override_struct {
 	{ 7, 1, 204,  76 },	// FEE reads 230, should 166 
 	{16, 5, 250,  80 },
 	{23, 5, 194, 130 },	// FEE reads 97, should be 65 
-//	{ 6, 5,  94,  78 },	// FY13 with magent -- problems!
 #endif
 } ;
    
