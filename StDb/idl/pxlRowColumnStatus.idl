@@ -7,6 +7,6 @@
 */
 
 struct pxlRowColumnStatus {
-	octet rows[400000]; /* pxl row/column status: 0: not in place, 1: in place and good, 2-255: reserved */
+	octet rows[400000]; /* row/column status: 0: not in place, 1: in place and good, 2-255: reserved */
 	octet cols[400000];
 };
