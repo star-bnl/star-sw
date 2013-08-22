@@ -30,13 +30,13 @@ friend class StvTrack;
 enum ENodeType {kRegNode=0,kDcaNode=1,kPrimNode=2};
 
 public:
-  StvNode(){;}
+  StvNode(){mBeg[0] = 0; unset();}
   StvNode(const StvNode &node);
   virtual ~StvNode(){mId=-1;};
   StvNode &operator=(const StvNode &from);
   /// Resets the node to a "null" un-used state
   void reset();
-  void unset(){;}
+  void unset();
   const StvNodePars &GetFP() const {return mFP[2];}
   const StvFitErrs  &GetFE() const {return mFE[2];}
 

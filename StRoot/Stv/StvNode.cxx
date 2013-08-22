@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.21 2013/07/11 01:12:06 perev Exp $
+ * $Id: StvNode.cxx,v 1.22 2013/08/22 18:27:03 perev Exp $
  *
  * /author Victor Perev
  */
@@ -21,10 +21,17 @@
 void StvNode::reset()
 { 
 static int myCount=0;
+  assert(mBeg[0]=='@');
   memset(mBeg,0,mEnd-mBeg+1);
   mId = ++myCount; 
   StvDebug::Break(mId);
   mXi2[0] = 3e33;mXi2[1] = 3e33;mXi2[2] = 3e33;
+}
+//______________________________________________________________________________
+void StvNode::unset()
+{ 
+  assert(mBeg[0]!='@');
+  memset(mBeg,'@',mEnd-mBeg+1);
 }
 //______________________________________________________________________________
 StvNode &StvNode::operator=(const StvNode &from)
