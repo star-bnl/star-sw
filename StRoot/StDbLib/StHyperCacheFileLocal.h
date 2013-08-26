@@ -50,11 +50,14 @@ protected:
 
 	int m_MaxCacheSizeMb;
 	int m_MaxItemSizeKb;
+    float m_DiskFreeUpper;
+	float m_DiskFreeLower;
 	std::string m_IgnoreKeywords;
 
 	std::string m_StartEmpty;
 
 	void doCacheCleanup();
+	void getDiskUsage(size_t& bytes_free, size_t& bytes_total);
 
 };
 
