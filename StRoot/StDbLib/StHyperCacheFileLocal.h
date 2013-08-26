@@ -48,6 +48,8 @@ protected:
 	std::string m_AltBasePath;
 	std::string m_Path;
 
+	std::string m_Policy;
+
 	int m_MaxCacheSizeMb;
 	int m_MaxItemSizeKb;
     float m_DiskFreeUpper;
