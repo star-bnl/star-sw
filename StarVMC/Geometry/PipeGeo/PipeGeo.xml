@@ -1,149 +1,203 @@
 <Document file="StarVMC/Geometry/PipeGeo/PipeGeo.xml">
 
-    <Module name="PIPEGEO" comment=" is the geometry  of the STAR beam pipe. "  >
-        <Created date="  30-03-99 "  />
-        <Author name="W.B.Christie"  />
+<Module name="PIPEGEO" comment=" is the geometry  of the STAR beam pipe. "  >
 
-        <CDE  >
-            AGECOM
-            GCUNIT
-        </CDE>
+  <Created date="  30-03-99 "  />
+  <Author name="W.B.Christie"  />    <CDE>AGECOM,GCUNIT </CDE>
+  
+  <Content  >
+    PIPE,PIPC,PIPO,PIPS,PIPB,PIPT,PFLO,PFLT,PVAC,PVAO,PVAS,PVAB,PRIS,PRID,PRIB,PIPI,PVAI,PVAT,PWRP,PSLD
+  </Content>
         
-        <Content  >
-            PIPE,PIPC,PIPO,PIPS,PIPB,PIPT,PFLO,PFLT,PVAC,PVAO,PVAS,PVAB,PRIS,PRID,PRIB,PIPI,PVAI,PVAT,PWRP,PSLD
-        </Content>
+  <Structure name="PIPV"  >
+    <var name="version"    type="float"  />
+    <var name="pipeconfig" type="float"  />
+    <var name="pipeflag"   type="int"  />
+  </Structure>
         
-
-        <Structure name="PIPV"  >
-            <var name="version"    type="float"  />
-            <var name="pipeconfig" type="float"  />
-            <var name="pipeflag"   type="int"  />
-        </Structure>
+  <Structure name="PIPG"  >
+    <var name="config" type="float"  />
+    <var name="BeInnR" type="float"  />
+    <var name="BeOutR" type="float"  />
+    <var name="BeLeng" type="float"  />
+    <var name="material" type="char"  />
+    <var name="S1InnR" type="float"  />
+    <var name="S1OutR" type="float"  />
+    <var name="S1Leng" type="float"  />
+    <var name="S2InnR" type="float"  />
+    <var name="S2OutR" type="float"  />
+    <var name="S2Leng" type="float"  />
+    <var name="S3InnR" type="float"  />
+    <var name="S3OutR" type="float"  />
+    <var name="S3Leng" type="float"  />
+    <var name="S4InnR" type="float"  />
+    <var name="S4OutR" type="float"  />
+    <var name="S4Leng" type="float"  />
+    <var name="Flange1T" type="float"  />
+    <var name="Flange1R" type="float"  />
+    <var name="ConeLen" type="float"  />
+    <var name="RibNum" type="float"  />
+    <var name="RibSpa" type="float"  />
+    <var name="RibThk" type="float"  />
+    <var name="RibOutR" type="float"  />
+    <var name="RibCent" type="float"  />
+    <var name="WrpInnR" type="float"  />
+    <var name="WrpOutR" type="float"  />
+    <var name="WrpLeng" type="float"  />
+    <var name="SldInnR" type="float"  />
+    <var name="SldOutR" type="float"  />
+    <var name="SldLeng" type="float"  />
+  </Structure>
         
-        <Structure name="PIPG"  >
-            <var name="config" type="float"  />
-            <var name="BeInnR" type="float"  />
-            <var name="BeOutR" type="float"  />
-            <var name="BeLeng" type="float"  />
-            <var name="material" type="char"  />
-            <var name="S1InnR" type="float"  />
-            <var name="S1OutR" type="float"  />
-            <var name="S1Leng" type="float"  />
-            <var name="S2InnR" type="float"  />
-            <var name="S2OutR" type="float"  />
-            <var name="S2Leng" type="float"  />
-            <var name="S3InnR" type="float"  />
-            <var name="S3OutR" type="float"  />
-            <var name="S3Leng" type="float"  />
-            <var name="S4InnR" type="float"  />
-            <var name="S4OutR" type="float"  />
-            <var name="S4Leng" type="float"  />
-            <var name="Flange1T" type="float"  />
-            <var name="Flange1R" type="float"  />
-            <var name="ConeLen" type="float"  />
-            <var name="RibNum" type="float"  />
-            <var name="RibSpa" type="float"  />
-            <var name="RibThk" type="float"  />
-            <var name="RibOutR" type="float"  />
-            <var name="RibCent" type="float"  />
-            <var name="WrpInnR" type="float"  />
-            <var name="WrpOutR" type="float"  />
-            <var name="WrpLeng" type="float"  />
-            <var name="SldInnR" type="float"  />
-            <var name="SldOutR" type="float"  />
-            <var name="SldLeng" type="float"  />
-        </Structure>
+  <varlist type="REAL">Z1,Z2,Z3,Z4,R1,R2,vacuum/1.e-5/ </varlist>
+  <varlist type="REAL">WrpThk,SldThk</varlist>
         
+  WrpThk = (3.+1.5)*2*MIL_p 
+  SldThk = (3.+0.1)  *MIL_p 
 
-        <varlist type="REAL"  >
-            Z1,Z2,Z3,Z4,R1,R2,vacuum/1.e-5/
-        </varlist>
+  <Fill name="PIPV" comment="Beam pipe version"  >
+    <var name="version"    value="1" comment=" geometry version "  />
+    <var name="pipeConfig" value="2" comment=" pipe version (2 is the default, unfortunately) "  />
+    <var name="pipeFlag"   value="0" comment=" 1=PWRP !2=PSLD "  />
+  </Fill>
+  
+  <Fill name="PIPG"      comment="Beam Pipe data"  >
+    <var name="config"   value="2"      comment=" both material and geo params "  />
+    <var name="BeInnR"   value="3.9"    comment=" Berillium section inner radius "  />
+    <var name="BeOutR"   value="4.0"    comment=" Berillium section outer radius "  />
+    <var name="BeLeng"   value="76.2"   comment=" Berillium section half length "  />
+    <var name="material" value="'ALUM'" comment=" pipe main section material  "  />
+    <var name="S1InnR"   value="3.875"  comment=" first Aluminum section inner radius "  />
+    <var name="S1OutR"   value="4.0"    comment=" first Aluminum section outer radius "  />
+    <var name="S1Leng"   value="153.4"  comment=" first Aluminum section half length "  />
+    <var name="S2InnR"   value="3.875"  comment=" second Aluminum section inner radius "  />
+    <var name="S2OutR"   value="4.00"   comment=" second Aluminum section outer radius "  />
+    <var name="S2Leng"   value="18.0"   comment=" second Aluminum section half length "  />
+    <var name="S3InnR"   value="3.875"  comment=" Transition Stub Aluminum section inner radius "  />
+    <var name="S3OutR"   value="4.0"    comment=" Transition Stub Aluminum section outer radius "  />
+    <var name="S3Leng"   value="1.0"    comment=" Transition Stub Aluminum section half length "  />
+    <var name="S4InnR"   value="6.20"   comment=" Large OD Aluminum section inner radius "  />
+    <var name="S4OutR"   value="6.35"   comment=" Large OD Aluminum section outer radius "  />
+    <var name="S4Leng"   value="150.0"  comment=" Large OD Aluminum section half length "  />
+    <var name="ConeLen"  value="12.5"   comment=" half length of the Bell Reducer Cone "  />
+    <var name="Flange1T" value="2.0"    comment=" flange SET half thickness "  />
+    <var name="Flange1R" value="5.85"   comment=" flange outer radius "  />
+    <var name="RibNum"   value="8"      comment=" number of Ribs "  />
+    <var name="RibSpa"   value="1.75"   comment=" spacing between Ribs "  />
+    <var name="RibThk"   value="0.05"   comment=" Rib half thickness "  />
+    <var name="RibOutR"  value="4.8"    comment=" Rib Outer Radius "  />
+    <var name="RibCent"  value="454.5"  comment=" Rib Set center  "  />
+    <var name="WrpInnR"  value="4.0"    comment=" inner radius of beampipe multi layer insulation "  />
+    <var name="WrpOutR"  value="4.0+WrpThk" comment=" outer radius of beampipe multi layer insulation "  />
+    <var name="WrpLeng"  value="300"    comment=" length of beampipe multi layer insulation "  />
+    <var name="SldInnR"  value="4.0+WrpThk" comment=" inner radius of SVT beam pipe shield "  />
+    <var name="SldOutR"  value="4.0+WrpThk+SldThk" comment=" outer radius of SVT beam pipe shield "  />
+    <var name="SldLeng"  value="56"     comment=" length of SVT beam pipe shield "  />
+  </Fill>
         
-        <varlist type="REAL"  >
-            WrpThk,SldThk
-        </varlist>
+  <Fill name="PIPG" comment="Beam Pipe data">
+    <var name="config" value="1" comment=" both material and geo params "  />
+    <var name="material" value="'IRON'" comment=" material is steel "  />
+  </Fill>
         
-        WrpThk = (3.+1.5)*2*MIL_p 
-        SldThk = (3.+0.1)  *MIL_p 
-
-        <Fill name="PIPV" comment="Beam pipe version"  >
-            <var name="version"    value="1" comment=" geometry version "  />
-            <var name="pipeConfig" value="2" comment=" pipe version (2 is the default, unfortunately) "  />
-            <var name="pipeFlag"   value="0" comment=" 1=PWRP !2=PSLD "  />
-        </Fill>
+  <Fill name="PIPG" comment="Beam Pipe data"  >
+    <var name="config" value="4" comment=" both material and geo params "  />
+    <var name="BeInnR" value="1.374" comment=" Berillium section inner radius "  />
+    <var name="BeOutR" value="1.450" comment=" Berillium section outer radius "  />
+    <var name="material" value="'ALUM'" comment=" pipe main section material  "  />    
+  </Fill>
         
+  <Fill name="PIPG" comment="Beam Pipe data"  >
+    <var name="config" value="5" comment=" both material and geo params "  />
+    <var name="BeInnR" value="1.374" comment=" Berillium section inner radius "  />
+    <var name="BeOutR" value="1.424" comment=" Berillium section outer radius "  />
+  </Fill>
+  
+  <Fill name="PIPG" comment="Beam Pipe data"  >
+    <var name="config" value="6" comment=" both material and geo params "  />
+    <var name="BeInnR" value="2.0" comment=" Berillium section inner radius (Jan upgr16) "  />
+    <var name="BeOutR" value="2.076" comment=" Berillium section outer radius "  />
+  </Fill>
 
+  <!--
+      May 2013 (Fleming Videbaek) ___________________________________________________________________
 
-        <Fill name="PIPG" comment="Beam Pipe data"  >
-            <var name="config" value="2" comment=" both material and geo params "  />
-            <var name="BeInnR" value="3.9" comment=" Berillium section inner radius "  />
-            <var name="BeOutR" value="4.0" comment=" Berillium section outer radius "  />
-            <var name="BeLeng" value="76.2" comment=" Berillium section half length "  />
-            <var name="material" value="'ALUM'" comment=" pipe main section material  "  />
-            <var name="S1InnR" value="3.875" comment=" first Aluminum section inner radius "  />
-            <var name="S1OutR" value="4.0" comment=" first Aluminum section outer radius "  />
-            <var name="S1Leng" value="153.4" comment=" first Aluminum section half length "  />
-            <var name="S2InnR" value="3.875" comment=" second Aluminum section inner radius "  />
-            <var name="S2OutR" value="4.00" comment=" second Aluminum section outer radius "  />
-            <var name="S2Leng" value="18.0" comment=" second Aluminum section half length "  />
-            <var name="S3InnR" value="3.875" comment=" Transition Stub Aluminum section inner radius "  />
-            <var name="S3OutR" value="4.0" comment=" Transition Stub Aluminum section outer radius "  />
-            <var name="S3Leng" value="1.0" comment=" Transition Stub Aluminum section half length "  />
-            <var name="S4InnR" value="6.20" comment=" Large OD Aluminum section inner radius "  />
-            <var name="S4OutR" value="6.35" comment=" Large OD Aluminum section outer radius "  />
-            <var name="S4Leng" value="150.0" comment=" Large OD Aluminum section half length "  />
-            <var name="ConeLen" value="12.5" comment=" half length of the Bell Reducer Cone "  />
-            <var name="Flange1T" value="2.0" comment=" flange SET half thickness "  />
-            <var name="Flange1R" value="5.85" comment=" flange outer radius "  />
-            <var name="RibNum" value="8" comment=" number of Ribs "  />
-            <var name="RibSpa" value="1.75" comment=" spacing between Ribs "  />
-            <var name="RibThk" value="0.05" comment=" Rib half thickness "  />
-            <var name="RibOutR" value="4.8" comment=" Rib Outer Radius "  />
-            <var name="RibCent" value="454.5" comment=" Rib Set center  "  />
-            <var name="WrpInnR" value="4.0" comment=" inner radius of beampipe multi layer insulation "  />
-            <var name="WrpOutR" value="4.0+WrpThk" comment=" outer radius of beampipe multi layer insulation "  />
-            <var name="WrpLeng" value="300" comment=" length of beampipe multi layer insulation "  />
-            <var name="SldInnR" value="4.0+WrpThk" comment=" inner radius of SVT beam pipe shield "  />
-            <var name="SldOutR" value="4.0+WrpThk+SldThk" comment=" outer radius of SVT beam pipe shield "  />
-            <var name="SldLeng" value="56" comment=" length of SVT beam pipe shield "  />
+      The current geometry does not hav the transition flange at 159 inch from the center as its has 
+      been as built.  In addition the diameters are very slightly off. I implemented an approximate fix, 
+      which moves the whole assembly to 159 inch relative to Star 0 , but keeps all other dimensions.
+      It seems ok.  Clear also the support structures that are defined in the Vpdd code is now alignement
+      properly when looking say at y2012 geometry.  This should be checked against actual beamline drawings.
 
+      Integration notes 8/2013 (Jason Webb) _________________________________________________________
 
-        </Fill>
+      To maintain backwards compatability, we add these changes with config=2.1.  Future production 
+      geometries should use the appropriate subversion of the beam pipe (e.g. 2.1, 4.1, etc...)
+
+  --> 
+  
+  <Fill name="PIPG" comment="Beam Pipe data"  >
+    <var name="config"   value="2.1"    comment=" both material and geo params "  />
+    <var name="BeInnR"   value="3.81"   comment=" Berillium section inner radius "  />
+    <var name="BeOutR"   value="3.91"   comment=" Berillium section outer radius "  />
+    <var name="BeLeng"   value="76.2"   comment=" Berillium section half length "  />
+    <var name="material" value="'ALUM'" comment=" pipe main section material  "  />
+    <var name="S1InnR"   value="3.81"   comment=" first Aluminum section inner radius "  />
+    <var name="S1OutR"   value="3.937"  comment=" first Aluminum section outer radius "  />
+    <var name="S1Leng"   value="163.83" comment=" first Aluminum section half length "  />
+    <var name="S2InnR"   value="3.81"   comment=" second Aluminum section inner radius "  />
+    <var name="S2OutR"   value="3.937"  comment=" second Aluminum section outer radius "  />
+    <var name="S2Leng"   value="18.0"   comment=" second Aluminum section half length "  />
+    <var name="S3InnR"   value="3.81"   comment=" Transition Stub Aluminum section inner radius "  />
+    <var name="S3OutR"   value="3.937"  comment=" Transition Stub Aluminum section outer radius "  />
+    <var name="S3Leng"   value="1.0"    comment=" Transition Stub Aluminum section half length "  />
+    <var name="S4InnR"   value="6.20"   comment=" Large OD Aluminum section inner radius "  />
+    <var name="S4OutR"   value="6.35"   comment=" Large OD Aluminum section outer radius "  />
+    <var name="S4Leng"   value="139.57" comment=" Large OD Aluminum section half length "  />
+    <var name="ConeLen"  value="12.5"   comment=" half length of the Bell Reducer Cone "  />
+    <var name="Flange1T" value="2.0"    comment=" flange SET half thickness "  />
+    <var name="Flange1R" value="5.85"   comment=" flange outer radius "  />
+    <var name="RibNum"   value="8"      comment=" number of Ribs "  />
+    <var name="RibSpa"   value="1.75"   comment=" spacing between Ribs "  />
+    <var name="RibThk"   value="0.05"   comment=" Rib half thickness "  />
+    <var name="RibOutR"  value="4.8"    comment=" Rib Outer Radius "  />
+    <var name="RibCent"  value="454.5"  comment=" Rib Set center  "  />
+    <var name="WrpInnR"  value="4.0"    comment=" inner radius of beampipe multi layer insulation "  />
+    <var name="WrpOutR"  value="4.0+WrpThk" comment=" outer radius of beampipe multi layer insulation "  />
+    <var name="WrpLeng"  value="300"    comment=" length of beampipe multi layer insulation "  />
+    <var name="SldInnR"  value="4.0+WrpThk" comment=" inner radius of SVT beam pipe shield "  />
+    <var name="SldOutR"  value="4.0+WrpThk+SldThk" comment=" outer radius of SVT beam pipe shield "  />
+    <var name="SldLeng"  value="56"     comment=" length of SVT beam pipe shield "  />
+  </Fill>
+ 
+  <Fill name="PIPG" comment="Beam Pipe data">
+    <var name="config" value="1.1" comment=" both material and geo params "  />
+    <var name="material" value="'IRON'" comment=" material is steel "  />
+  </Fill>
         
-        <Fill name="PIPG" comment="Beam Pipe data"  >
-            <var name="config" value="1" comment=" both material and geo params "  />
-            <var name="material" value="'IRON'" comment=" material is steel "  />
-
-        </Fill>
+  <Fill name="PIPG" comment="Beam Pipe data"  >
+    <var name="config" value="4.1" comment=" both material and geo params "  />
+    <var name="BeInnR" value="1.374" comment=" Berillium section inner radius "  />
+    <var name="BeOutR" value="1.450" comment=" Berillium section outer radius "  />
+    <var name="material" value="'ALUM'" comment=" pipe main section material  "  />    
+  </Fill>
         
+  <Fill name="PIPG" comment="Beam Pipe data"  >
+    <var name="config" value="5.1" comment=" both material and geo params "  />
+    <var name="BeInnR" value="1.374" comment=" Berillium section inner radius "  />
+    <var name="BeOutR" value="1.424" comment=" Berillium section outer radius "  />
+  </Fill>
+  
+  <Fill name="PIPG" comment="Beam Pipe data"  >
+    <var name="config" value="6.1" comment=" both material and geo params "  />
+    <var name="BeInnR" value="2.0" comment=" Berillium section inner radius (Jan upgr16) "  />
+    <var name="BeOutR" value="2.076" comment=" Berillium section outer radius "  />
+  </Fill>
 
-
-        <Fill name="PIPG" comment="Beam Pipe data"  >
-            <var name="config" value="4" comment=" both material and geo params "  />
-            <var name="BeInnR" value="1.374" comment=" Berillium section inner radius "  />
-            <var name="BeOutR" value="1.450" comment=" Berillium section outer radius "  />
-            <var name="material" value="'ALUM'" comment=" pipe main section material  "  />
-
-        </Fill>
         
-        <Fill name="PIPG" comment="Beam Pipe data"  >
-            <var name="config" value="5" comment=" both material and geo params "  />
-            <var name="BeInnR" value="1.374" comment=" Berillium section inner radius "  />
-            <var name="BeOutR" value="1.424" comment=" Berillium section outer radius "  />
-        </Fill>
-        
-        <Fill name="PIPG" comment="Beam Pipe data"  >
-            <var name="config" value="6" comment=" both material and geo params "  />
-            <var name="BeInnR" value="2.0" comment=" Berillium section inner radius (Jan upgr16) "  />
-            <var name="BeOutR" value="2.076" comment=" Berillium section outer radius "  />
-        </Fill>
-        
-        <Use struct="PIPV"  />
-        <Use struct="PIPG" select="config" value="PIPV_pipeConfig"  />
+  <Use struct="PIPV"  />
+  <Use struct="PIPG" select="config" value="PIPV_pipeConfig"  />
 
-        <Print level="1" fmt="' beam pipe material - ',a4"  >
-            pipg_material
-        </Print>
+  <Print level="1" fmt="' beam pipe material - ',a4"> pipg_material </Print>
         
 
         Z1 = pipg_BeLeng + 2*pipg_S1Leng + pipg_flange1t 
