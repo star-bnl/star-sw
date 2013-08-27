@@ -8,6 +8,8 @@
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvToolkit.h"
 
+enum {kHf,kZf,kAf,kLf,kPf};
+enum {kHh,kAh,kCh,kZh,kLh};
   static const int idx66[6][6] =
   {{ 0, 1, 3, 6,10,15},{ 1, 2, 4, 7,11,16},{ 3, 4, 5, 8,12,17}
   ,{ 6, 7, 8, 9,13,18},{10,11,12,13,14,19},{15,16,17,18,19,20}};
@@ -17,7 +19,7 @@ static const double chekCORRMAX  = 0.9999;
 //                              x   y   z  psi   pti  tan      cur
 static double MAXNODPARS[]   ={555,555,555,6.66,kMaxPti+10, kMaxTanL+10, .1};
 //                                   h    z   a     l   ptin
-static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,kMaxPti+10  };
+static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,kMaxPti  };
 static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
 static const double kERRFACT     = 3*3;
 static const double kFitErrs[5]   ={1.,1. 
@@ -307,8 +309,6 @@ static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv"
 //______________________________________________________________________________
 void StvNodePars::convert( StvFitDers &fitDer, const StvHlxDers &hlxDer) const
 {
-enum {kHf,kZf,kAf,kLf,kPf};
-enum {kHh,kAh,kCh,kZh,kLh};
 
   double cosL = 1/sqrt(1+_tanl*_tanl);
   double sinL = _tanl*cosL;
@@ -403,12 +403,113 @@ double StvNodePars::diff(const float hit[3]) const
   if (myMax < fabs(fp.mZ)) myMax = fabs(fp.mZ);
   return myMax;
 }
+//______________________________________________________________________________
+void StvNodePars::Deriv(double len,StvFitDers &der) const
+{
+   double Rho   = _curv;
+   double cos2L = 1./(1.+_tanl*_tanl);
+   double cosL  = sqrt(cos2L);
+   double cos3L = cos2L*cosL;
+   double sinL  = _tanl*cosL;
+   double sin2L = sinL*sinL;
+   double lxy = len*cosL;
+   double dFi = lxy*Rho;
+   
+   double mySin,rSin,dSin,rCos,dCos,rrCos;   
 
+
+
+   if (fabs(dFi)<0.1) { //Small Phi approach
+     mySin = -1./6*dFi*dFi;
+     dSin = (1+mySin); 	rSin = lxy*dSin;   dSin*=dFi;
+     dCos = (1./2-dFi*dFi/24); 	rCos=lxy*dFi*dCos; rrCos=lxy*lxy*dCos; dCos*=dFi*dFi;
+   } else {
+     dSin =   sin(dFi); rSin = dSin/Rho;  mySin = dSin/dFi-1;
+     dCos = 1-cos(dFi); rCos = dCos/Rho; rrCos = rCos/Rho;
+   }
+
+// dH1dH0  = cos(t/R)
+// dZ1dH0 =-sinL*sin(t/R)
+// dA1/dH0 =  -Rho*sin(t/R)*cos3L
+// dLamdH0 = 0;
+// dRho/dH0 = 0
+// Now d/dZ
+// ========
+// dH1dZ0 = sinL*sin(t/R) 
+// dZ1dZ0 = sin2L*(cos(t/R)-1)+1
+// dAdZ0 = sinL*(cos(t/R)-1)*cos3L*Rho
+// dLadZ0 = 0;
+// dRhodZ0 = 0;
+// 
+// Now d/dA
+// ========
+// dH1dA = R*sin(t/R)/cosL
+// dZ1dA = R*tanL*(cos(t/R)-1);
+// dA1dA0 = sin2L +cos(t/R)*cos2L
+// dLamdA = 0;
+// dRhodA = 0;
+// 
+// Now d/dLam
+// ========
+// dH1/dLam = 0
+// dZ1/dLam = t/cosL
+// dA1/dLam =  -2*Rho*t*sinL
+// dLam/dLam = 1
+// dRho/dLam = 0;
+// 
+// Now d/dRho
+// ==========
+// dH1/dRho = R**2*(1 -cos(t*Rho))
+// dZdRho   = R*sinL*(-R*sin(t*Rho)  + t)
+
+
+
+// dA/dRho = cosL*(t + cos2L*(R*sin(t*Rho)-t))
+// dLam/dRho = 0;
+// dRho/dRho = 1;
+
+   der[kHf][kHf] = 1-dCos;		// cos(t/R)
+   der[kZf][kHf] =-sinL*dSin;		// -sinL*sin(t/R)
+   der[kAf][kHf] =-Rho*dSin*cos3L;	// -Rho*sin(t/R)*cos3L
+   der[kLf][kHf] = 0;			// dLamdH0 = 0
+   der[kPf][kHf] = 0;			// dRho/dH0=0
+
+   der[kHf][kZf] = sinL*dSin;		// sinL*sin(t/R)
+   der[kZf][kZf] = 1-sin2L*dCos;	// sin2L*(cos(t/R)-1)+1
+   der[kAf][kZf] =-sinL*dCos*cos3L*Rho;	// sinL*(cos(t/R)-1)*cos3L*Rho
+   der[kLf][kZf] = 0;			// dLadZ0 = 0
+   der[kPf][kZf] = 0;			// dRhodZ0 = 0
+
+   der[kHf][kAf] = rSin/cosL;		// R*sin(t/R)/cosL
+   der[kZf][kAf] =-rCos*sinL/cosL;	// R*tanL*(cos(t/R)-1)
+   der[kAf][kAf] = 1-dCos*cos2L;	// sin2L +cos(t/R)*cos2L
+
+
+   der[kLf][kAf] = 0;			// dLamdA = 0;
+   der[kPf][kAf] = 0;			// dRhodA = 0;
+
+   der[kHf][kLf] = 0;			// dH1/dLam = 0
+   der[kZf][kLf] = lxy/cosL;		// t/cosL
+   der[kAf][kLf] =-dFi*sinL;		// -Rho*t*sinL
+   der[kLf][kLf] = 1;			// dLam/dLam = 1
+   der[kPf][kLf] = 0;			// dRho/dLam = 0;
+
+
+   der[kHf][kPf] = rrCos;		//  R**2*(1 -cos(t*Rho))
+   der[kZf][kPf] = sinL*mySin/Rho*lxy;	// R*sinL*(R*sin(t*Rho)  - t)
+   der[kAf][kPf] = cosL*lxy*(1+cos2L*mySin);	// cosL*(t + cos2L*(R*sin(t*Rho)-t))
+   der[kLf][kPf] = 0;			// 0
+   der[kPf][kPf] = 1;			// dRho/dRho = 1;
+
+//		_curv ==> _ptin
+   der[kHf][kPf]*=_hz;
+   der[kZf][kPf]*=_hz;
+   der[kAf][kPf]*=_hz;
+}
 //______________________________________________________________________________
 //______________________________________________________________________________
 void StvHitErrs::rotate(double angle)
-{
-  double t[2][2];
+{  double t[2][2];
   t[0][0] = cos(angle); t[0][1] = -sin(angle);
   t[1][0] = -t[0][1]  ; t[1][1] = t[0][0];
   double r[3];
@@ -1245,7 +1346,7 @@ static int iHELIX=0;
 void StvNodeParsTest::TestMtx() 
 {
   int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
-  double maxEps = 0;  
+  double maxEps = 0,maxEpz = 0;  
   double hz = 0.0014880496061989194;
   int nErr=0;
   int iR   =100 + gRandom->Rndm()*100;
@@ -1268,14 +1369,14 @@ iLam=80;
   basePar.ready();
   
   THelixTrack baseHlx,modiHlx,baseEndHlx,modiEndHlx;
-  StvFitDers mtxStv,mtxNum;
+  StvFitDers mtxStv,mtxZtv,mtxNum;
   StvHlxDers mtxHlx;
   basePar.get(&baseHlx);
-  double len = 33;
+  double len = iR*1.5;
   baseEndHlx = baseHlx; baseEndHlx.Move(len,mtxHlx);
   baseEndPar.set(&baseEndHlx,hz);
   baseEndPar.convert(mtxStv , mtxHlx);
-
+  baseEndPar.Deriv(len,mtxZtv);
   double stpArr[]={0.1, 0.1, 3.14/180, 3.14/180, 0.1*basePar._ptin+1e-2};
   double fak=0.01;
   memset(mtxNum[0],0,sizeof(mtxNum));
@@ -1301,13 +1402,18 @@ static const char T[]="HZALP";
     for (int jp=0;jp<5;jp++) {
       double est = mtxNum[jp][ip];
       double ana = mtxStv[jp][ip];
+      double unu = mtxZtv[jp][ip];
       double eps = 2*fabs(est-ana)/(stpArr[jp]/stpArr[ip]);
+      double epz = 2*fabs(est-unu)/(stpArr[jp]/stpArr[ip]);
       if (eps>maxEps) maxEps=eps;
-      if (eps < 1e-3) continue;
+      if (epz>maxEpz) maxEpz=epz;
+
+      if (eps < 1e-3 && epz < 1e-3) continue;
       nErr++;
       printf(" m%c%c \t%g \t%g \t%g\n",T[jp],T[ip],ana,est,eps);
+      printf(" m%c%c \t%g \t%g \t%g\n",T[jp],T[ip],unu,est,epz);
   } }  
-  printf("TestMtx: %d errors maxEps=%g\n",nErr,maxEps);
+  printf("TestMtx: %d errors maxEps=%g maxEpz=%g\n",nErr,maxEps,maxEpz);
   StvDebug::mgRecov=saveRecov;
 
 }
