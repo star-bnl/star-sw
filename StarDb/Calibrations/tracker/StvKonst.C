@@ -20,7 +20,7 @@ memset(&row,0,tableSet->GetRowSize());
   row.mZMax   = 300;		//Max Z      for tracking
   row.mDca2dZeroXY = 6.;	//max 2d dca to X=Y=0  for primary track
   row.mDca3dVertex = 3.;	//max 3d dca to vertex for primary track
-  row.mMaxCurv     = 0.2;	//Maximal allowed curvature
+  row.mMaxCurv     = 0.2;	//Maximal allowed curvature(5cm radius)
   row.mMinP2  = 0.003*0.003;	//Geant3 cut for too small momentum**2	
   row.mMaxPti   = 200;		/*Maximal allowed 1/pt */
   row.mMaxRes	= 0.5;		/*Maximal allowed residual */
@@ -33,8 +33,9 @@ memset(&row,0,tableSet->GetRowSize());
   row.mMinTotHits =3;       	/*Min number hits for track*/
   row.mMinGoodHits=3;       	/*Min number good hits for track*/
   row.mMinContHits=3;       	/*Min length of good hit sequence*/
-  row.mMaxContNits=5;      	/*Max length of acceptable non hit sequence*/
-  row.mMaxTotNits =10;      	/*Max number of acceptable non hits*/
+//row.mMaxContNits=5;      	/*Max length of acceptable non hit sequence*/
+  row.mMaxContNits=11;      	/*Max length of acceptable non hit sequence*/
+  row.mMaxTotNits =20;      	/*Max number of acceptable non hits*/
 
 
 tableSet->AddAt(&row);
