@@ -4,9 +4,10 @@
    <Author  name="JB,FV" />
    <Created date="2/1 2013" />
 
-<!-- global idea of implementation : all the elements of a single sector are defined according a translation SolidWorks to TGeo (F. Videbaek)-->
-<!-- once the sector is assembled, it is placed in a TUBS with opening angles slightly larger (by 2 deg.) than the real geometry -->
-<!-- then we duplicate x10 this volume-->
+<!-- global idea of implementation : all the elements of a single sector are defined according a translation SolidWorks to TGeo (F. Videbaek) 
+ once the sector is assembled, it is placed in a TUBS with opening 
+ angles slightly larger (by 2 deg.) than the real geometry  then we duplicate x10 this volume
+-->
 
 
 <!--
@@ -26,6 +27,19 @@
      Changed the phis angles of PXLA and PXSE to ensure there are no extrusions.
      The Cable thickness is taken from the spreadsheet using the design parameters,
      and calculated thickness, and effective densities, and radlenghts.
+    Update May 10. An mistake was identified lats week - this did not effect the material budget. 
+     The issue was the local coordinate system of the LADR.
+     The y-axis was poiting towards the sector support, whereas it should have pointed away from thea surface.
+     The LADR volume was rotated 180 deg, and the inside of ladr volume build oppositely too.
+    Update May 15,2013 (FV)
+     Reviewed and compare sector ladr geometry with SW modles. 
+     Found a number of difference (~30-40 micron level).
+     Changed the temp variable ypos in placing the LADR components to yp . This solved the
+     peculiar PXLA positioning problem.
+    Update July end
+     PXLW data structure added so it can be set from the steering geometry,g and Geometry.cxx
+
+
 
 -->
 
@@ -41,7 +55,7 @@
             DTSA, DTSB, DTSC, DTSD, DTSE, DTSF, DTSG, DTSH,
             DTEA, DTEB, DTEC, DTED, DTEE, DTEF, DTEG, DTEH,
             DESA, DESB, DESC, DESD, DESE, DESF, DESG, DESH,
-            PTRA, PTRB, PTRC, PTRD, PTRE, PTRF,
+            PTRA, PTRB, PTRC, PTRE, PTRF, PTRG,
             PTMA, PTMB, PTMC, PTME, PTMF,
             PTLA, PTLB, PTLC, PTLD, PTLE, PTLF, PTLG, PTLH, PTLI, PTLJ
     <!-- names/nomenclatures start froma point located a the bottom right of a sector -->
@@ -87,7 +101,7 @@
     <varlist type="float" comment=" phi1 of the TUBS defining a bare sector volume"> minphisecbare/90.0/</varlist>
     <varlist type="float" comment=" phi2 of the TUBS defining a bare sector volume"> maxphisecbare/126.0/</varlist> 
 
-    <varlist type="float" comment="internal computations">  xpos,ypos,zpos,angle,anglepos, zsensor, alphaz, alphax, alphay</varlist> 
+    <varlist type="float" comment="internal computations"> xp, yp,  xpos,ypos,zpos,angle,anglepos, zsensor, alphaz, alphax, alphay</varlist> 
     <varlist type="int"   comment="internal computations"> sector </varlist>
     <varlist type="float" comment="internal computations">  ladBoxX, ladBoxY, ladBoxZ </varlist> 
     <varlist type="int"   comment="used for debug">  debug, sens, jj, ii</varlist> 
@@ -110,6 +124,13 @@
      <var name="sensor"      type="int"/>
      <var name="zpos(10)"    type="float"/>
     </Structure>
+ 
+    <Structure name="PXLW"  >
+      <var name="version"       type="int"  />
+      <var name="LadrConfig"    type="float"  />
+      <var name="SecVersion"    type="float" />
+    </Structure>
+
 
     <Structure name="PIXL" >
      <var name="version"     type="float"/>
@@ -117,6 +138,8 @@
      <var name="phiNum(10)"  type="float"/>
      <var name="isOn(10)"    type="int"/>
     </Structure>
+
+
 
     <Structure name="PARO" comment="set of 3 paramters (offset) to misalign a ladder ">
      <var name="version" type="int" />
@@ -141,6 +164,12 @@
      <var name="type" type="int" comment="2: Al cable  1:Cu cable"/>
      <var name="cablethickness" type="float" comment="Cable thickness" />
     </Structure>
+
+    <Fill name="PXLW" comment="Pixel ladder data"  >
+     <var name="Version" value="1" comment=" config version "  />
+     <var name="LadrConfig" value="1.0" comment=" Ladder Version "  />
+     <var name="SecVersion" value="0.0" comment="Different configs of PIXL" />
+    </Fill>
 
     <Fill name="PDEF" comment=" Pixel default paramters" >
     <var name="version" value="1.0" />
@@ -226,7 +255,7 @@
     <var name="DY" value="0"   comment=" no shift "/>
     <var name="DZ" value="1"   comment=" no shift "/>
     <var name="mult" value="5" comment=" max is 5 cm"/>
-    <var name="sec"  value="{1,0,0,0,0,0,0,0,0,0}" comment="1..10"/>
+    <var name="sec"  value="{0,0,0,0,0,0,0,0,0,0}" comment="1..10"/>
     </Fill>
 
     <Fill name="PARA" comment="default">
@@ -244,19 +273,19 @@
     <var name="DB" value="0"   comment=" no rot. "/>
     <var name="DG" value="5"   comment=" rot. "/>
     <var name="mult" value="1" comment=" max is 5 deg "/>
-    <var name="sec"  value="{1,0,0,0,0,0,0,0,0,0}" comment="1..10"/>
+    <var name="sec"  value="{0,0,0,0,0,0,0,0,0,0}" comment="1..10"/>
     </Fill>
 
     <Fill name="LADR" >
      <var name="version" value="1" />
      <var name="type"    value="1" comment="Cu cable"/>
-     <var name="cablethickness" value="0.014" />     
+     <var name="cablethickness" value="0.009" />     
     </Fill>
 
     <Fill name="LADR" >
      <var name="version" value="2" />
      <var name="type"    value="0" comment="Al cable"/>
-     <var name="cablethickness" value="0.022" />     
+     <var name="cablethickness" value="0.011" />     
     </Fill>
      
   
@@ -306,20 +335,23 @@
     <!-- first we create the main volume 
          Setup version to use.
 -->
+    <Use struct="PXLW"  />
     <Use struct="PDEF" select="version" value="1.0"/>
     <Use struct="SENP" select="version" value="1.0"/>
-    <Use struct="PIXL" select="version" value="7.0"/>
+    <Use struct="LADR" select="version" value="PXLW_LadrConfig" /> 
+    <Use struct="PIXL" select="version" value="PXLW_SecVersion"/>
     <Use struct="PARO" select="version" value="0" />
     <Use struct="PARA" select="version" value="0" />
-    <!--    <Use struct="LADR" select="version" value="1" />-->
-    <!-- first test : 05-01-2013 was done with LADR =1 , means Cu cable-->
-<!-- new test is LADR=2 , means Al-->
-    <Use struct="LADR" select="version" value="2" />
+ 
     debug = 0
 
+    <Info format="PXL PXLW_version = {5.2f}">PXLW_SecVersion</Info>
 
     <Print level="0" fmt="' PXL : PXL_version = ',F5.3 " >
       PIXL_version
+    </Print>
+    <Print level="0" fmt="' PXL : PXLW_SecVersion = ',F5.3 " >
+      PXLW_SecVersion
     </Print>
     <Print level="0" fmt="' PXL : LADR_version = ',I3,' LADR_type= ',I3 " >
       LADR_version,LADR_type
@@ -329,7 +361,7 @@
 
     <Placement block="PXMO" in="IDSM" x="0.0" y="0.0" z="0.0" konly="'ONLY'"/>
 
-    <Volume name="PXMO" comment="Main volume in the AGML tutorial geometry">
+    <Volume name="PXMO" comment="Main volume for Active ">
 
     <Material  name="Air"      /> 
     <Attribute for="PXMO" seen="0" colo="6" /> 
@@ -350,6 +382,7 @@
      alphaz = -1*angle -1*(PARA_DG*PARA_mult)*PARA_sec(jj)
      alphax = -1*(PARA_DA*PARA_mult)*PARA_sec(jj)
      alphay = -1*(PARA_DB*PARA_mult)*PARA_sec(jj)
+   
      <!-- PXSE is the single naked sector volume-->
 
     
@@ -358,8 +391,8 @@
       <If expr="debug==1"  >
        <Info format="Blank Sector angle(deg)={7.3f}"> angle </Info>
        <Info format="sector={2i}"> jj </Info>
-       <Info format="xpos={6.2f}"> xpos*1000000 </Info>
-       <Info format="ypos={6.2f}"> ypos*1000000 </Info>
+       <Info format="xpos={10.5f}"> xpos </Info>
+       <Info format="ypos={10.5f}"> ypos </Info>
        <Info format="zpos={6.2f}"> zpos </Info>
        <Info format="alphaZ={7.2f}"> alphaZ</Info>
        <Info format="alphaX={6.2f}"> alphax </Info>
@@ -377,6 +410,7 @@
 
     <!-- placement of silicon volume -->
 
+
     <Do var="ii" from="1" to="PIXL_sector">
 
      angle = PIXL_phiNum(ii)
@@ -387,9 +421,9 @@
      ypos=.00001*cos(anglepos) + (PARO_DY*PARO_mult)*PARO_sec(ii) 
      zpos = (PARO_DZ*PARO_mult)*PARO_sec(ii)
   
-     alphaz = -1*angle -1*(PARA_DG*PARA_mult)*PARA_sec(jj)
-     alphax = -1*(PARA_DA*PARA_mult)*PARA_sec(jj)
-     alphay = -1*(PARA_DB*PARA_mult)*PARA_sec(jj)
+     alphaz = -1*angle -1*(PARA_DG*PARA_mult)*PARA_sec(ii)
+     alphax = -1*(PARA_DA*PARA_mult)*PARA_sec(ii)
+     alphay = -1*(PARA_DB*PARA_mult)*PARA_sec(ii)
 
    
 
@@ -398,9 +432,9 @@
     <If expr="debug==1"  >
        <Info format="Instrumented sector={2i}"> ii </Info>    
        <Info format="angle(deg)={7.3f}"> angle </Info>
-       <Info format="xpos={6.2f}"> xpos*1000000 </Info>
-       <Info format="ypos={6.2f}"> ypos*1000000 </Info>
-       <Info format="zpos={6.2f}"> zpos </Info>
+       <Info format="xpos={10.5f}"> xpos </Info>
+       <Info format="ypos={10.5f}"> ypos </Info>
+       <Info format="zpos={10.5f}"> zpos </Info>
        <Info format="alphaZ={7.2f}"> alphaz</Info>
        <Info format="alphaX={6.2f}"> alphax </Info>
        <Info format="alphaY={6.2f}"> alphay </Info>
@@ -425,806 +459,840 @@
     <Attribute for="PXSE" seen="0" colo="1" />
     <Shape type="TUBS" dz="HalfLadZLen" rmin="minradsec" rmax="maxradsec" phi1="minphisecbare" phi2="maxphisecbare" />
 
-    <!-- The following section is identical to that of the the PXSE section
-         Can this be done by an include ?  -->
-    <!--  Placement of arcs in sector beam --> 
-    <!-- Arc bottom right --> 
-
-    <Create block="PXCA" />
-    <Placement block="PXCA" x="-0.25" y="2.7522" z="sectorZOffset">
-    </Placement>
-    <!-- Arc topright --> 
-
-    <Create block="PXCC" />
-    <Placement block="PXCC" x="-0.25" y="7.76948" z="sectorZOffset">
-    </Placement>
-    <!-- Arc top 23 --> 
-
-    <Create block="PXCD" />
-    <Placement block="PXCD" x="-1.47764" y="7.98676" z="sectorZOffset">
-    </Placement>
-    <!-- Arc bottom 23 --> 
-
-    <Create block="PXCE" />
-    <Placement block="PXCE" x="-1.7562" y="7.85145" z="sectorZOffset">
-    </Placement>
-    <!-- Arc top 12 --> 
-
-    <Create block="PXCF" />
-    <Placement block="PXCF"  x="-3.10589" y="7.50501" z="sectorZOffset">
-    </Placement>
-    <!-- Arc bottom 12 --> 
-
-    <Create block="PXCG" />
-    <Placement block="PXCG"  x="-3.35023" y="7.31474" z="sectorZOffset">
-    </Placement>
-    <!-- arc top left --> 
-
-    <Create block="PXCH" />
-    <Placement block="PXCH"  x="-4.56196" y="6.70432" z="sectorZOffset">
-    </Placement>
-    <!-- arc bottom left --> 
-
-    <Create block="PXCB" />
-    <Placement block="PXCB"  x="-1.71349" y="2.86881" z="sectorZOffset">
-    </Placement>
-
-    <!--  Placement of Planes  --> 
-
-    <!-- Sector Right side --> 
-
-    <Create block="PXRB" />
-    <Placement block="PXRB"  x="-0.112" y="5.26084" z="sectorZOffset">
-    <Rotation alphaz="90" />
-    </Placement>
 
-    <Create block="PXTR" />
-    <Placement block="PXTR"  x="-0.839768" y="8.01401" z="sectorZOffset">
-    <Rotation alphaz="169.963" />
-    </Placement>
-
-    <Create block="PXTM" />
-    <Placement block="PXTM"  x="-2.43063" y="7.66624" z="sectorZOffset">
-    <Rotation alphaz="181.963" />
-    </Placement>
-
-    <Create block="PXTL" />
-    <Placement block="PXTL"  x="-3.9532" y="6.99789" z="sectorZOffset">
-    <Rotation alphaz="193.963" />
-    </Placement>
+<!--  Placement of arcs in sector beam --> 
+<!-- Arc bottom right --> 
 
-    <Create block="PXTJ" />
-    <Placement block="PXTJ"  x="-3.21706" y="7.41467" z="sectorZOffset">
-    <Rotation alphaz="293.54" />
-    </Placement>
+<!-- placement of silicon volume -->
 
-    <Create block="PXTI" />
-    <Placement block="PXTI"  x="-1.60516" y="7.92151" z="sectorZOffset">
-    <Rotation alphaz="281.54" />
-    </Placement>
 
-    <!-- Sector Left side --> 
 
-    <Create block="PXLB" />
-    <Placement block="PXLB"  x="-3.2696" y="4.69076" z="sectorZOffset">
-    <Rotation alphaz="306" />
-    </Placement>
 
-    <!-- Sector Inner side --> 
 
-    <Create block="PXIB" />
-    <Placement block="PXIB"  x="-0.989152" y="2.64767" z="sectorZOffset">
-    <Rotation alphaz="357.396" />
-    </Placement>
 
-    <!-- dovetail code .. ugh --> 
 
-    <!--  Placement of Dovetail inside sector  --> 
+<!--  Placement of arcs in sector beam --> 
+<!-- Arc bottom right --> 
 
-    <Create block="DTCA" />
-    <Placement block="DTCA" x="-0.25" y="2.7522" z="DoveTailZOffset">
-    </Placement>
+<Create block="PXCA" />
+ <Placement block="PXCA" x="-0.25" y="2.73819" z="sectorZOffset">
+ </Placement>
+<!-- Arc topright --> 
 
-    <Create block="DTCB" />
-    <Placement block="DTCB" x="-0.25" y="7.76948" z="DoveTailZOffset">
-    </Placement>
+<Create block="PXCC" />
+ <Placement block="PXCC" x="-0.25" y="7.78014" z="sectorZOffset">
+ </Placement>
+<!-- Arc top 23 --> 
 
-    <Create block="DTCC" />
-    <Placement block="DTCC" x="-1.47764" y="7.98676" z="DoveTailZOffset">
-    </Placement>
+<Create block="PXCD" />
+ <Placement block="PXCD" x="-1.482" y="7.9982" z="sectorZOffset">
+ </Placement>
+<!-- Arc bottom 23 --> 
 
-    <Create block="DTCD" />
-    <Placement block="DTCD" x="-1.7562" y="7.85145" z="DoveTailZOffset">
-    </Placement>
+<Create block="PXCE" />
+ <Placement block="PXCE" x="-1.76032" y="7.86181" z="sectorZOffset">
+ </Placement>
+<!-- Arc top 12 --> 
 
-    <Create block="DTCE" />
-    <Placement block="DTCE" x="-3.10589" y="7.50501" z="DoveTailZOffset">
-    </Placement>
+<Create block="PXCF" />
+ <Placement block="PXCF" x="-3.11253" y="7.51529" z="sectorZOffset">
+ </Placement>
+<!-- Arc bottom 12 --> 
 
-    <Create block="DTCF" />
-    <Placement block="DTCF" x="-3.35023" y="7.31474" z="DoveTailZOffset">
-    </Placement>
+<Create block="PXCG" />
+ <Placement block="PXCG" x="-3.35642" y="7.32402" z="sectorZOffset">
+ </Placement>
+<!-- arc top left --> 
 
-    <Create block="DTCG" />
-    <Placement block="DTCG" x="-4.56196" y="6.70432" z="DoveTailZOffset">
-    </Placement>
+<Create block="PXCH" />
+ <Placement block="PXCH" x="-4.56862" y="6.71349" z="sectorZOffset">
+ </Placement>
+<!-- arc bottom left --> 
 
-    <Create block="DTCH" />
-    <Placement block="DTCH" x="-1.71349" y="2.86881" z="DoveTailZOffset">
-    </Placement>
+<Create block="PXCB" />
+ <Placement block="PXCB" x="-1.68615" y="2.88554" z="sectorZOffset">
+ </Placement>
+<!--  Placement of Planes  --> 
 
-    <!-- DoveTail Sector Right side --> 
+<!-- Sector Right side --> 
 
-    <Create block="DTSA" />
-    <Placement block="DTSA" x="-0.174" y="5.26084" z="DoveTailZOffset">
-    <Rotation alphaz="90" />
-    </Placement>
+<Create block="PXRB" />
+  <Placement block="PXRB" x="-0.112" y="5.25916" z="sectorZOffset">
+  <Rotation alphaz="90" />
+ </Placement>
 
-    <!-- DoveTail  Sector Right upper side --> 
+<Create block="PXTR" />
+  <Placement block="PXTR" x="-0.841949" y="8.02506" z="sectorZOffset">
+  <Rotation alphaz="169.963" />
+ </Placement>
 
-    <Create block="DTSB" />
-    <Placement block="DTSB" x="-0.850573" y="7.95296" z="DoveTailZOffset">
-    <Rotation alphaz="169.963" />
-    </Placement>
+<Create block="PXTM" />
+  <Placement block="PXTM" x="-2.43602" y="7.67656" z="sectorZOffset">
+  <Rotation alphaz="181.963" />
+ </Placement>
 
-    <!-- DoveTail Sector Right upper side --> 
+<Create block="PXTL" />
+  <Placement block="PXTL" x="-3.95962" y="7.00711" z="sectorZOffset">
+  <Rotation alphaz="193.963" />
+ </Placement>
 
-    <Create block="DTSC" />
-    <Placement block="DTSC" x="-1.54441" y="7.93391" z="DoveTailZOffset">
-    <Rotation alphaz="281.54" />
-    </Placement>
+<Create block="PXTJ" />
+  <Placement block="PXTJ" x="-3.22348" y="7.42445" z="sectorZOffset">
+  <Rotation alphaz="293.554" />
+ </Placement>
 
-    <!-- DoveTail  Sector Right upper side --> 
+<Create block="PXTI" />
+  <Placement block="PXTI" x="-1.60941" y="7.93241" z="sectorZOffset">
+  <Rotation alphaz="281.554" />
+ </Placement>
 
-    <Create block="DTSD" />
-    <Placement block="DTSD" x="-2.42851" y="7.60428" z="DoveTailZOffset">
-    <Rotation alphaz="181.963" />
-    </Placement>
+<!-- Sector Left side --> 
 
-    <!-- DoveTail  Sector Right upper side --> 
+<Create block="PXLB" />
+  <Placement block="PXLB" x="-3.27218" y="4.69431" z="sectorZOffset">
+  <Rotation alphaz="306" />
+ </Placement>
 
-    <Create block="DTSE" />
-    <Placement block="DTSE" x="-3.16022" y="7.43943" z="DoveTailZOffset">
-    <Rotation alphaz="293.54" />
-    </Placement>
+<!-- Sector Inner side --> 
 
-    <!-- DoveTail  Sector Right upper side --> 
+<Create block="PXIB" />
+  <Placement block="PXIB" x="-0.976207" y="2.63307" z="sectorZOffset">
+  <Rotation alphaz="357.396" />
+ </Placement>
+<!--  Placement of Dovetail inside sector  --> 
+<!--  --> 
+
+<Create block="DTCA" />
+ <Placement block="DTCA" x="-0.25" y="2.73819" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCB" />
+ <Placement block="DTCB" x="-0.25" y="7.78014" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCC" />
+ <Placement block="DTCC" x="-1.482" y="7.9982" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCD" />
+ <Placement block="DTCD" x="-1.76032" y="7.86181" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCE" />
+ <Placement block="DTCE" x="-3.11253" y="7.51529" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCF" />
+ <Placement block="DTCF" x="-3.35642" y="7.32402" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCG" />
+ <Placement block="DTCG" x="-4.56862" y="6.71349" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCH" />
+ <Placement block="DTCH" x="-1.68615" y="2.88554" z="DoveTailZOffset">
+ </Placement>
+
+<!-- DoveTail Sector Right side --> 
+
+<Create block="DTSA" />
+  <Placement block="DTSA" x="-0.174" y="5.25916" z="DoveTailZOffset">
+  <Rotation alphaz="90" />
+ </Placement>
+
+<!-- DoveTail  Sector Right upper side --> 
+
+<Create block="DTSB" />
+  <Placement block="DTSB" x="-0.852755" y="7.96401" z="DoveTailZOffset">
+  <Rotation alphaz="169.963" />
+ </Placement>
+
+<!-- DoveTail Sector Right upper side --> 
+
+<Create block="DTSC" />
+  <Placement block="DTSC" x="-1.54866" y="7.94483" z="DoveTailZOffset">
+  <Rotation alphaz="281.554" />
+ </Placement>
+
+<!-- DoveTail  Sector Right upper side --> 
+
+<Create block="DTSD" />
+  <Placement block="DTSD" x="-2.43389" y="7.6146" z="DoveTailZOffset">
+  <Rotation alphaz="181.963" />
+ </Placement>
+
+<!-- DoveTail  Sector Right upper side --> 
+
+<Create block="DTSE" />
+  <Placement block="DTSE" x="-3.16664" y="7.44923" z="DoveTailZOffset">
+  <Rotation alphaz="293.554" />
+ </Placement>
 
-    <Create block="DTSF" />
-    <Placement block="DTSF" x="-3.93824" y="6.93772" z="DoveTailZOffset">
-    <Rotation alphaz="193.963" />
-    </Placement>
+<!-- DoveTail  Sector Right upper side --> 
+
+<Create block="DTSF" />
+  <Placement block="DTSF" x="-3.94466" y="6.94694" z="DoveTailZOffset">
+  <Rotation alphaz="193.963" />
+ </Placement>
 
-    <!-- DoveTail  Sector Right upper side --> 
+<!-- DoveTail  Sector Right upper side --> 
+
+<Create block="DTSG" />
+  <Placement block="DTSG" x="-3.22202" y="4.73075" z="DoveTailZOffset">
+  <Rotation alphaz="306" />
+ </Placement>
 
-    <Create block="DTSG" />
-    <Placement block="DTSG" x="-3.21944" y="4.7272" z="DoveTailZOffset">
-    <Rotation alphaz="306" />
-    </Placement>
+<!-- DoveTail  Sector Right upper side --> 
 
-    <!-- DoveTail  Sector Right upper side --> 
-
-    <Create block="DTSH" />
-    <Placement block="DTSH" x="-0.98906" y="2.68568" z="DoveTailZOffset">
-    <Rotation alphaz="359.27" />
-    </Placement>
-
-    <!--  Placement of Dovetail Extrusion --> 
-
-    <Create block="DTEA" />
-    <Placement block="DTEA" x="-0.25" y="2.7522" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEB" />
-    <Placement block="DTEB" x="-0.25" y="7.76948" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEC" />
-    <Placement block="DTEC" x="-1.47764" y="7.98676" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTED" />
-    <Placement block="DTED" x="-1.7562" y="7.85145" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEE" />
-    <Placement block="DTEE" x="-3.10589" y="7.50501" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEF" />
-    <Placement block="DTEF" x="-3.35023" y="7.31474" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEG" />
-    <Placement block="DTEG" x="-4.56196" y="6.70432" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEH" />
-    <Placement block="DTEH" x="-1.71349" y="2.86881" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <!-- DoveTail Extrusion Sector Right side --> 
-
-    <Create block="DESA" />
-    <Placement block="DESA" x="-0.162" y="5.26084" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="90" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESB" />
-    <Placement block="DESB" x="-0.883339" y="7.76783" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="169.963" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESC" />
-    <Placement block="DESC" x="-1.36021" y="7.97152" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="281.54" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESD" />
-    <Placement block="DESD" x="-2.42207" y="7.41639" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="181.963" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESE" />
-    <Placement block="DESE" x="-2.98786" y="7.51452" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="293.54" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESF" />
-    <Placement block="DESF" x="-3.89287" y="6.75527" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="193.963" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESG" />
-    <Placement block="DESG" x="-3.06734" y="4.8377" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="306" />
-    </Placement>
-
-    <!-- DoveTail Extrusion Sector Right upper side --> 
-
-    <Create block="DESH" />
-    <Placement block="DESH" x="-0.977794" y="2.89742" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="357.396" />
-    </Placement>
-
-    <!-- DoveTail Extrusion Sector Right upper side --> 
-
-<!--    <Create block="DESH" />
-    <Placement block="DESH" x="-0.977794" y="2.89742" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="357.396" />
-    </Placement> -->
-
-    <Create block="PTRA" />
-    <Placement block="PTRA" x="-0.844273" y="7.31126" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTRB" />
-    <Placement block="PTRB" x="-2.2742" y="6.99926" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-162" />
-    </Placement>
-
-    <Create block="PTRC" />
-    <Placement block="PTRC" x="-3.61442" y="6.41119" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTRD" />
-    <Placement block="PTRD" x="-0.45" y="4.93658" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="90" />
-    </Placement>
-
-    <Create block="PTRE" />
-    <Placement block="PTRE" x="-2.64683" y="4.40863" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="126" />
-    </Placement>
-
-    <Create block="PTRF" />
-    <Placement block="PTRF" x="-1.06041" y="3.14864" z="0.25+DoveTailShapeOffset">
-    <Rotation alphaz="177.396" />
-    </Placement>
-
-    <Create block="PTMA" />
-    <Placement block="PTMA" x="-1.09427" y="7.28499" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTMB" />
-    <Placement block="PTMB" x="-2.2742" y="6.99926" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="-162" />
-    </Placement>
-
-    <Create block="PTMC" />
-    <Placement block="PTMC" x="-3.39672" y="6.53688" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTME" />
-    <Placement block="PTME" x="-0.7" y="4.92913" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="90" />
-    </Placement>
-
-    <Create block="PTMF" />
-    <Placement block="PTMF" x="-2.37819" y="4.46421" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="126" />
-    </Placement>
-
-    <Create block="PTLA" />
-    <Placement block="PTLA" x="-0.769273" y="7.31915" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTLB" />
-    <Placement block="PTLB" x="-2.2742" y="6.99926" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-162" />
-    </Placement>
-
-    <Create block="PTLC" />
-    <Placement block="PTLC" x="-3.67973" y="6.37348" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTLD" />
-    <Placement block="PTLD" x="-0.322263" y="3.06613" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTLE" />
-    <Placement block="PTLE" x="-0.952705" y="2.93212" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-162" />
-    </Placement>
-
-    <Create block="PTLF" />
-    <Placement block="PTLF" x="-1.54151" y="2.66997" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTLG" />
-    <Placement block="PTLG" x="-0.375" y="5.31059" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTLH" />
-    <Placement block="PTLH" x="-2.8181" y="4.51677" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTLI" />
-    <Placement block="PTLI" x="-0.375" y="5.11059" z="-0.6+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTLJ" />
-    <Placement block="PTLJ" x="-2.70055" y="4.35497" z="-0.6+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-    </Volume>
-    <!--  Close PXSE volume  --> 
+<Create block="DTSH" />
+  <Placement block="DTSH" x="-0.976145" y="2.67108" z="DoveTailZOffset">
+  <Rotation alphaz="359.303" />
+ </Placement>
+<!--  Placement of Dovetail Extrusion --> 
+<!--  --> 
+
+<Create block="DTEA" />
+ <Placement block="DTEA" x="-0.25" y="2.73819" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEB" />
+ <Placement block="DTEB" x="-0.25" y="7.78014" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEC" />
+ <Placement block="DTEC" x="-1.482" y="7.9982" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTED" />
+ <Placement block="DTED" x="-1.76032" y="7.86181" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEE" />
+ <Placement block="DTEE" x="-3.11253" y="7.51529" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEF" />
+ <Placement block="DTEF" x="-3.35642" y="7.32402" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEG" />
+ <Placement block="DTEG" x="-4.56862" y="6.71349" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEH" />
+ <Placement block="DTEH" x="-1.68615" y="2.88554" z="DoveTailExtrusionZOffset">
+ </Placement>
+
+<!-- DoveTail Extrusion Sector Right side --> 
+
+<Create block="DESA" />
+  <Placement block="DESA" x="-0.162" y="5.25916" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="90" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESB" />
+  <Placement block="DESB" x="-0.88552" y="7.77888" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="169.963" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESC" />
+  <Placement block="DESC" x="-1.36447" y="7.98248" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="281.554" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESD" />
+  <Placement block="DESD" x="-2.42745" y="7.42671" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="181.963" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESE" />
+  <Placement block="DESE" x="-2.99431" y="7.52436" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="293.554" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESF" />
+  <Placement block="DESF" x="-3.8993" y="6.7645" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="193.963" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESG" />
+  <Placement block="DESG" x="-3.06992" y="4.84126" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="306" />
+ </Placement>
+
+<!-- DoveTail Extrusion Sector Right upper side --> 
+
+<Create block="DESH" />
+  <Placement block="DESH" x="-0.964849" y="2.88281" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="357.396" />
+ </Placement>
+
+<Create block="PTRA" />
+  <Placement block="PTRA" x="-0.844273" y="7.31126" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTRB" />
+  <Placement block="PTRB" x="-2.2742" y="6.99926" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-162" />
+ </Placement>
+
+<Create block="PTRC" />
+  <Placement block="PTRC" x="-3.61442" y="6.41119" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTRE" />
+  <Placement block="PTRE" x="-0.45" y="4.93658" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="90" />
+ </Placement>
+
+<Create block="PTRF" />
+  <Placement block="PTRF" x="-2.64683" y="4.40863" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="126" />
+ </Placement>
+
+<Create block="PTRG" />
+  <Placement block="PTRG" x="-1.06041" y="3.14864" z="0.25+DoveTailShapeOffset">
+  <Rotation alphaz="177.396" />
+ </Placement>
+
+<Create block="PTMA" />
+  <Placement block="PTMA" x="-1.09427" y="7.28499" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTMB" />
+  <Placement block="PTMB" x="-2.2742" y="6.99926" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="-162" />
+ </Placement>
+
+<Create block="PTMC" />
+  <Placement block="PTMC" x="-3.39672" y="6.53688" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTME" />
+  <Placement block="PTME" x="-0.7" y="4.92913" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="90" />
+ </Placement>
+
+<Create block="PTMF" />
+  <Placement block="PTMF" x="-2.37819" y="4.46421" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="126" />
+ </Placement>
+
+<Create block="PTLA" />
+  <Placement block="PTLA" x="-0.769273" y="7.31915" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTLB" />
+  <Placement block="PTLB" x="-2.2742" y="6.99926" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-162" />
+ </Placement>
+
+<Create block="PTLC" />
+  <Placement block="PTLC" x="-3.67973" y="6.37348" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTLD" />
+  <Placement block="PTLD" x="-0.322263" y="3.06613" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTLE" />
+  <Placement block="PTLE" x="-0.952705" y="2.93212" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-162" />
+ </Placement>
+
+<Create block="PTLF" />
+  <Placement block="PTLF" x="-1.54151" y="2.66997" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTLG" />
+  <Placement block="PTLG" x="-0.375" y="5.31059" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTLH" />
+  <Placement block="PTLH" x="-2.8181" y="4.51677" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTLI" />
+  <Placement block="PTLI" x="-0.375" y="5.11059" z="-0.6+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTLJ" />
+  <Placement block="PTLJ" x="-2.70055" y="4.35497" z="-0.6+DoveTailShapeOffset">">
+  <Rotation alphaz="-150" />
+ </Placement>
+<!-- placement of silicon volume -->
+
+</Volume>
+
+    <!--  Close PXSE volume :  end of sector.xml  --> 
 
    <Volume name="PXLA" comment="pixel sector with ladders">
    <Material name="Air"/>
    <Attribute for="PXLA" seen="0" colo="1"/>
    <Shape type="TUBS" dz="halfMaxZ" rmin="minradsec" rmax="maxradsec" phi1="minphisec" phi2="maxphisec"/>
         
-    <!--  Placement of arcs in sector beam --> 
-    <!-- Arc bottom right --> 
-
-    <Create block="PXCA" />
-    <Placement block="PXCA" x="-0.25" y="2.7522" z="sectorZOffset">
-    </Placement>
-    <!-- Arc topright --> 
-
-    <Create block="PXCC" />
-    <Placement block="PXCC" x="-0.25" y="7.76948" z="sectorZOffset">
-    </Placement>
-    <!-- Arc top 23 --> 
-
-    <Create block="PXCD" />
-    <Placement block="PXCD" x="-1.47764" y="7.98676" z="sectorZOffset">
-    </Placement>
-    <!-- Arc bottom 23 --> 
-
-    <Create block="PXCE" />
-    <Placement block="PXCE" x="-1.7562" y="7.85145" z="sectorZOffset">
-    </Placement>
-    <!-- Arc top 12 --> 
-
-    <Create block="PXCF" />
-    <Placement block="PXCF"  x="-3.10589" y="7.50501" z="sectorZOffset">
-    </Placement>
-    <!-- Arc bottom 12 --> 
-
-    <Create block="PXCG" />
-    <Placement block="PXCG"  x="-3.35023" y="7.31474" z="sectorZOffset">
-    </Placement>
-    <!-- arc top left --> 
-
-    <Create block="PXCH" />
-    <Placement block="PXCH"  x="-4.56196" y="6.70432" z="sectorZOffset">
-    </Placement>
-    <!-- arc bottom left --> 
-
-    <Create block="PXCB" />
-    <Placement block="PXCB"  x="-1.71349" y="2.86881" z="sectorZOffset">
-    </Placement>
-
-    <!--  Placement of Planes  --> 
 
-    <!-- Sector Right side --> 
-
-    <Create block="PXRB" />
-    <Placement block="PXRB"  x="-0.112" y="5.26084" z="sectorZOffset">
-    <Rotation alphaz="90" />
-    </Placement>
+<!--  Placement of arcs in sector beam --> 
+
+<!-- Arc bottom right --> 
+
+<Create block="PXCA" />
+ <Placement block="PXCA" x="-0.25" y="2.73819" z="sectorZOffset">
+ </Placement>
+<!-- Arc topright --> 
+
+<Create block="PXCC" />
+ <Placement block="PXCC" x="-0.25" y="7.78014" z="sectorZOffset">
+ </Placement>
+<!-- Arc top 23 --> 
+
+<Create block="PXCD" />
+ <Placement block="PXCD" x="-1.482" y="7.9982" z="sectorZOffset">
+ </Placement>
+<!-- Arc bottom 23 --> 
+
+<Create block="PXCE" />
+ <Placement block="PXCE" x="-1.76032" y="7.86181" z="sectorZOffset">
+ </Placement>
+<!-- Arc top 12 --> 
+
+<Create block="PXCF" />
+ <Placement block="PXCF" x="-3.11253" y="7.51529" z="sectorZOffset">
+ </Placement>
+<!-- Arc bottom 12 --> 
+
+<Create block="PXCG" />
+ <Placement block="PXCG" x="-3.35642" y="7.32402" z="sectorZOffset">
+ </Placement>
+<!-- arc top left --> 
+
+<Create block="PXCH" />
+ <Placement block="PXCH" x="-4.56862" y="6.71349" z="sectorZOffset">
+ </Placement>
+<!-- arc bottom left --> 
+
+<Create block="PXCB" />
+ <Placement block="PXCB" x="-1.68615" y="2.88554" z="sectorZOffset">
+ </Placement>
+<!--  Placement of Planes  --> 
+
+<!-- Sector Right side --> 
+
+<Create block="PXRB" />
+  <Placement block="PXRB" x="-0.112" y="5.25916" z="sectorZOffset">
+  <Rotation alphaz="90" />
+ </Placement>
+
+<Create block="PXTR" />
+  <Placement block="PXTR" x="-0.841949" y="8.02506" z="sectorZOffset">
+  <Rotation alphaz="169.963" />
+ </Placement>
+
+<Create block="PXTM" />
+  <Placement block="PXTM" x="-2.43602" y="7.67656" z="sectorZOffset">
+  <Rotation alphaz="181.963" />
+ </Placement>
+
+<Create block="PXTL" />
+  <Placement block="PXTL" x="-3.95962" y="7.00711" z="sectorZOffset">
+  <Rotation alphaz="193.963" />
+ </Placement>
+
+<Create block="PXTJ" />
+  <Placement block="PXTJ" x="-3.22348" y="7.42445" z="sectorZOffset">
+  <Rotation alphaz="293.554" />
+ </Placement>
+
+<Create block="PXTI" />
+  <Placement block="PXTI" x="-1.60941" y="7.93241" z="sectorZOffset">
+  <Rotation alphaz="281.554" />
+ </Placement>
+
+<!-- Sector Left side --> 
+
+<Create block="PXLB" />
+  <Placement block="PXLB" x="-3.27218" y="4.69431" z="sectorZOffset">
+  <Rotation alphaz="306" />
+ </Placement>
+
+<!-- Sector Inner side --> 
+
+<Create block="PXIB" />
+  <Placement block="PXIB" x="-0.976207" y="2.63307" z="sectorZOffset">
+  <Rotation alphaz="357.396" />
+ </Placement>
+<!--  Placement of Dovetail inside sector  --> 
+<!--  --> 
+
+<Create block="DTCA" />
+ <Placement block="DTCA" x="-0.25" y="2.73819" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCB" />
+ <Placement block="DTCB" x="-0.25" y="7.78014" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCC" />
+ <Placement block="DTCC" x="-1.482" y="7.9982" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCD" />
+ <Placement block="DTCD" x="-1.76032" y="7.86181" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCE" />
+ <Placement block="DTCE" x="-3.11253" y="7.51529" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCF" />
+ <Placement block="DTCF" x="-3.35642" y="7.32402" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCG" />
+ <Placement block="DTCG" x="-4.56862" y="6.71349" z="DoveTailZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTCH" />
+ <Placement block="DTCH" x="-1.68615" y="2.88554" z="DoveTailZOffset">
+ </Placement>
+
+<!-- DoveTail Sector Right side --> 
+
+<Create block="DTSA" />
+  <Placement block="DTSA" x="-0.174" y="5.25916" z="DoveTailZOffset">
+  <Rotation alphaz="90" />
+ </Placement>
+
+<!-- DoveTail  Sector Right upper side --> 
+
+<Create block="DTSB" />
+  <Placement block="DTSB" x="-0.852755" y="7.96401" z="DoveTailZOffset">
+  <Rotation alphaz="169.963" />
+ </Placement>
+
+<!-- DoveTail Sector Right upper side --> 
+
+<Create block="DTSC" />
+  <Placement block="DTSC" x="-1.54866" y="7.94483" z="DoveTailZOffset">
+  <Rotation alphaz="281.554" />
+ </Placement>
 
-    <Create block="PXTR" />
-    <Placement block="PXTR"  x="-0.839768" y="8.01401" z="sectorZOffset">
-    <Rotation alphaz="169.963" />
-    </Placement>
+<!-- DoveTail  Sector Right upper side --> 
+
+<Create block="DTSD" />
+  <Placement block="DTSD" x="-2.43389" y="7.6146" z="DoveTailZOffset">
+  <Rotation alphaz="181.963" />
+ </Placement>
 
-    <Create block="PXTM" />
-    <Placement block="PXTM"  x="-2.43063" y="7.66624" z="sectorZOffset">
-    <Rotation alphaz="181.963" />
-    </Placement>
+<!-- DoveTail  Sector Right upper side --> 
+
+<Create block="DTSE" />
+  <Placement block="DTSE" x="-3.16664" y="7.44923" z="DoveTailZOffset">
+  <Rotation alphaz="293.554" />
+ </Placement>
 
-    <Create block="PXTL" />
-    <Placement block="PXTL"  x="-3.9532" y="6.99789" z="sectorZOffset">
-    <Rotation alphaz="193.963" />
-    </Placement>
+<!-- DoveTail  Sector Right upper side --> 
 
-    <Create block="PXTJ" />
-    <Placement block="PXTJ"  x="-3.21706" y="7.41467" z="sectorZOffset">
-    <Rotation alphaz="293.54" />
-    </Placement>
+<Create block="DTSF" />
+  <Placement block="DTSF" x="-3.94466" y="6.94694" z="DoveTailZOffset">
+  <Rotation alphaz="193.963" />
+ </Placement>
 
-    <Create block="PXTI" />
-    <Placement block="PXTI"  x="-1.60516" y="7.92151" z="sectorZOffset">
-    <Rotation alphaz="281.54" />
-    </Placement>
+<!-- DoveTail  Sector Right upper side --> 
 
-    <!-- Sector Left side --> 
+<Create block="DTSG" />
+  <Placement block="DTSG" x="-3.22202" y="4.73075" z="DoveTailZOffset">
+  <Rotation alphaz="306" />
+ </Placement>
 
-    <Create block="PXLB" />
-    <Placement block="PXLB"  x="-3.2696" y="4.69076" z="sectorZOffset">
-    <Rotation alphaz="306" />
-    </Placement>
+<!-- DoveTail  Sector Right upper side --> 
 
-    <!-- Sector Inner side --> 
-
-    <Create block="PXIB" />
-    <Placement block="PXIB"  x="-0.989152" y="2.64767" z="sectorZOffset">
-    <Rotation alphaz="357.396" />
-    </Placement>
-
-    <!-- dovetail code .. ugh --> 
-
-    <!--  Placement of Dovetail inside sector  --> 
-
-    <Create block="DTCA" />
-    <Placement block="DTCA" x="-0.25" y="2.7522" z="DoveTailZOffset">
-    </Placement>
-
-    <Create block="DTCB" />
-    <Placement block="DTCB" x="-0.25" y="7.76948" z="DoveTailZOffset">
-    </Placement>
-
-    <Create block="DTCC" />
-    <Placement block="DTCC" x="-1.47764" y="7.98676" z="DoveTailZOffset">
-    </Placement>
-
-    <Create block="DTCD" />
-    <Placement block="DTCD" x="-1.7562" y="7.85145" z="DoveTailZOffset">
-    </Placement>
-
-    <Create block="DTCE" />
-    <Placement block="DTCE" x="-3.10589" y="7.50501" z="DoveTailZOffset">
-    </Placement>
-
-    <Create block="DTCF" />
-    <Placement block="DTCF" x="-3.35023" y="7.31474" z="DoveTailZOffset">
-    </Placement>
-
-    <Create block="DTCG" />
-    <Placement block="DTCG" x="-4.56196" y="6.70432" z="DoveTailZOffset">
-    </Placement>
-
-    <Create block="DTCH" />
-    <Placement block="DTCH" x="-1.71349" y="2.86881" z="DoveTailZOffset">
-    </Placement>
-
-    <!-- DoveTail Sector Right side --> 
-
-    <Create block="DTSA" />
-    <Placement block="DTSA" x="-0.174" y="5.26084" z="DoveTailZOffset">
-    <Rotation alphaz="90" />
-    </Placement>
-
-    <!-- DoveTail  Sector Right upper side --> 
-
-    <Create block="DTSB" />
-    <Placement block="DTSB" x="-0.850573" y="7.95296" z="DoveTailZOffset">
-    <Rotation alphaz="169.963" />
-    </Placement>
-
-    <!-- DoveTail Sector Right upper side --> 
-
-    <Create block="DTSC" />
-    <Placement block="DTSC" x="-1.54441" y="7.93391" z="DoveTailZOffset">
-    <Rotation alphaz="281.54" />
-    </Placement>
-
-    <!-- DoveTail  Sector Right upper side --> 
-
-    <Create block="DTSD" />
-    <Placement block="DTSD" x="-2.42851" y="7.60428" z="DoveTailZOffset">
-    <Rotation alphaz="181.963" />
-    </Placement>
-
-    <!-- DoveTail  Sector Right upper side --> 
-
-    <Create block="DTSE" />
-    <Placement block="DTSE" x="-3.16022" y="7.43943" z="DoveTailZOffset">
-    <Rotation alphaz="293.54" />
-    </Placement>
-
-    <!-- DoveTail  Sector Right upper side --> 
-
-    <Create block="DTSF" />
-    <Placement block="DTSF" x="-3.93824" y="6.93772" z="DoveTailZOffset">
-    <Rotation alphaz="193.963" />
-    </Placement>
-
-    <!-- DoveTail  Sector Right upper side --> 
-
-    <Create block="DTSG" />
-    <Placement block="DTSG" x="-3.21944" y="4.7272" z="DoveTailZOffset">
-    <Rotation alphaz="306" />
-    </Placement>
-
-    <!-- DoveTail  Sector Right upper side --> 
-
-    <Create block="DTSH" />
-    <Placement block="DTSH" x="-0.98906" y="2.68568" z="DoveTailZOffset">
-    <Rotation alphaz="359.27" />
-    </Placement>
-
-    <!--  Placement of Dovetail Extrusion --> 
-
-    <Create block="DTEA" />
-    <Placement block="DTEA" x="-0.25" y="2.7522" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEB" />
-    <Placement block="DTEB" x="-0.25" y="7.76948" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEC" />
-    <Placement block="DTEC" x="-1.47764" y="7.98676" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTED" />
-    <Placement block="DTED" x="-1.7562" y="7.85145" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEE" />
-    <Placement block="DTEE" x="-3.10589" y="7.50501" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEF" />
-    <Placement block="DTEF" x="-3.35023" y="7.31474" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEG" />
-    <Placement block="DTEG" x="-4.56196" y="6.70432" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <Create block="DTEH" />
-    <Placement block="DTEH" x="-1.71349" y="2.86881" z="DoveTailExtrusionZOffset">
-    </Placement>
-
-    <!-- DoveTail Extrusion Sector Right side --> 
-
-    <Create block="DESA" />
-    <Placement block="DESA" x="-0.162" y="5.26084" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="90" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESB" />
-    <Placement block="DESB" x="-0.883339" y="7.76783" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="169.963" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESC" />
-    <Placement block="DESC" x="-1.36021" y="7.97152" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="281.54" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESD" />
-    <Placement block="DESD" x="-2.42207" y="7.41639" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="181.963" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESE" />
-    <Placement block="DESE" x="-2.98786" y="7.51452" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="293.54" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESF" />
-    <Placement block="DESF" x="-3.89287" y="6.75527" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="193.963" />
-    </Placement>
-
-    <!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
-
-    <Create block="DESG" />
-    <Placement block="DESG" x="-3.06734" y="4.8377" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="306" />
-    </Placement>
-
-    <!-- DoveTail Extrusion Sector Right upper side --> 
-
-    <Create block="DESH" />
-    <Placement block="DESH" x="-0.977794" y="2.89742" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="357.396" />
-    </Placement>
-
-    <!-- DoveTail Extrusion Sector Right upper side --> 
-
-<!--    <Create block="DESH" />
-    <Placement block="DESH" x="-0.977794" y="2.89742" z="DoveTailExtrusionZOffset">
-    <Rotation alphaz="357.396" />
-    </Placement> -->
-
-    <Create block="PTRA" />
-    <Placement block="PTRA" x="-0.844273" y="7.31126" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTRB" />
-    <Placement block="PTRB" x="-2.2742" y="6.99926" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-162" />
-    </Placement>
-
-    <Create block="PTRC" />
-    <Placement block="PTRC" x="-3.61442" y="6.41119" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTRD" />
-    <Placement block="PTRD" x="-0.45" y="4.93658" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="90" />
-    </Placement>
-
-    <Create block="PTRE" />
-    <Placement block="PTRE" x="-2.64683" y="4.40863" z="0.85+DoveTailShapeOffset">
-    <Rotation alphaz="126" />
-    </Placement>
-
-    <Create block="PTRF" />
-    <Placement block="PTRF" x="-1.06041" y="3.14864" z="0.25+DoveTailShapeOffset">
-    <Rotation alphaz="177.396" />
-    </Placement>
-
-    <Create block="PTMA" />
-    <Placement block="PTMA" x="-1.09427" y="7.28499" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTMB" />
-    <Placement block="PTMB" x="-2.2742" y="6.99926" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="-162" />
-    </Placement>
-
-    <Create block="PTMC" />
-    <Placement block="PTMC" x="-3.39672" y="6.53688" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTME" />
-    <Placement block="PTME" x="-0.7" y="4.92913" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="90" />
-    </Placement>
-
-    <Create block="PTMF" />
-    <Placement block="PTMF" x="-2.37819" y="4.46421" z="0.2+DoveTailShapeOffset">
-    <Rotation alphaz="126" />
-    </Placement>
-
-    <Create block="PTLA" />
-    <Placement block="PTLA" x="-0.769273" y="7.31915" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTLB" />
-    <Placement block="PTLB" x="-2.2742" y="6.99926" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-162" />
-    </Placement>
-
-    <Create block="PTLC" />
-    <Placement block="PTLC" x="-3.67973" y="6.37348" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTLD" />
-    <Placement block="PTLD" x="-0.322263" y="3.06613" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTLE" />
-    <Placement block="PTLE" x="-0.952705" y="2.93212" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-162" />
-    </Placement>
-
-    <Create block="PTLF" />
-    <Placement block="PTLF" x="-1.54151" y="2.66997" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTLG" />
-    <Placement block="PTLG" x="-0.375" y="5.31059" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTLH" />
-    <Placement block="PTLH" x="-2.8181" y="4.51677" z="-0.85+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
-
-    <Create block="PTLI" />
-    <Placement block="PTLI" x="-0.375" y="5.11059" z="-0.6+DoveTailShapeOffset">
-    <Rotation alphaz="-174" />
-    </Placement>
-
-    <Create block="PTLJ" />
-    <Placement block="PTLJ" x="-2.70055" y="4.35497" z="-0.6+DoveTailShapeOffset">
-    <Rotation alphaz="-150" />
-    </Placement>
- 
-
-        <Create block="LADR" />
-        <Placement block="LADR"  x="-1.38525" y="8.1758" z="-4.8855">
-        <Rotation alphaz="169.963" />
-        </Placement>
-
-        <Create block="LADR" />
-        <Placement block="LADR"  x="-3.05482" y="7.70913" z="-4.8855">
-        <Rotation alphaz="181.963" />
-        </Placement>
-
-        <Create block="LADR" />
-        <Placement block="LADR" x="-4.59088" y="6.90554" z="-4.8855">
-        <Rotation alphaz="193.963" />
-        </Placement>
-
-        <Create block="LADR" />
-        <Placement block="LADR" x="-0.5323251963" y="2.56258" z="-4.8855">
-        <Rotation alphaz="357.396" />
-        </Placement>
-
-    </Volume>
-
+<Create block="DTSH" />
+  <Placement block="DTSH" x="-0.976145" y="2.67108" z="DoveTailZOffset">
+  <Rotation alphaz="359.303" />
+ </Placement>
+<!--  Placement of Dovetail Extrusion --> 
+<!--  --> 
+
+<Create block="DTEA" />
+ <Placement block="DTEA" x="-0.25" y="2.73819" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEB" />
+ <Placement block="DTEB" x="-0.25" y="7.78014" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEC" />
+ <Placement block="DTEC" x="-1.482" y="7.9982" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTED" />
+ <Placement block="DTED" x="-1.76032" y="7.86181" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEE" />
+ <Placement block="DTEE" x="-3.11253" y="7.51529" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEF" />
+ <Placement block="DTEF" x="-3.35642" y="7.32402" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEG" />
+ <Placement block="DTEG" x="-4.56862" y="6.71349" z="DoveTailExtrusionZOffset">
+ </Placement>
+<!--  --> 
+
+<Create block="DTEH" />
+ <Placement block="DTEH" x="-1.68615" y="2.88554" z="DoveTailExtrusionZOffset">
+ </Placement>
+
+<!-- DoveTail Extrusion Sector Right side --> 
+
+<Create block="DESA" />
+  <Placement block="DESA" x="-0.162" y="5.25916" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="90" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESB" />
+  <Placement block="DESB" x="-0.88552" y="7.77888" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="169.963" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESC" />
+  <Placement block="DESC" x="-1.36447" y="7.98248" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="281.554" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESD" />
+  <Placement block="DESD" x="-2.42745" y="7.42671" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="181.963" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESE" />
+  <Placement block="DESE" x="-2.99431" y="7.52436" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="293.554" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESF" />
+  <Placement block="DESF" x="-3.8993" y="6.7645" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="193.963" />
+ </Placement>
+
+<!-- DoveTailExtrusion Extrusion Sector Right upper side --> 
+
+<Create block="DESG" />
+  <Placement block="DESG" x="-3.06992" y="4.84126" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="306" />
+ </Placement>
+
+<!-- DoveTail Extrusion Sector Right upper side --> 
+
+<Create block="DESH" />
+  <Placement block="DESH" x="-0.964849" y="2.88281" z="DoveTailExtrusionZOffset">
+  <Rotation alphaz="357.396" />
+ </Placement>
+
+<Create block="PTRA" />
+  <Placement block="PTRA" x="-0.844273" y="7.31126" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTRB" />
+  <Placement block="PTRB" x="-2.2742" y="6.99926" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-162" />
+ </Placement>
+
+<Create block="PTRC" />
+  <Placement block="PTRC" x="-3.61442" y="6.41119" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTRE" />
+  <Placement block="PTRE" x="-0.45" y="4.93658" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="90" />
+ </Placement>
+
+<Create block="PTRF" />
+  <Placement block="PTRF" x="-2.64683" y="4.40863" z="0.85+DoveTailShapeOffset">
+  <Rotation alphaz="126" />
+ </Placement>
+
+<Create block="PTRG" />
+  <Placement block="PTRG" x="-1.06041" y="3.14864" z="0.25+DoveTailShapeOffset">
+  <Rotation alphaz="177.396" />
+ </Placement>
+
+<Create block="PTMA" />
+  <Placement block="PTMA" x="-1.09427" y="7.28499" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTMB" />
+  <Placement block="PTMB" x="-2.2742" y="6.99926" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="-162" />
+ </Placement>
+
+<Create block="PTMC" />
+  <Placement block="PTMC" x="-3.39672" y="6.53688" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTME" />
+  <Placement block="PTME" x="-0.7" y="4.92913" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="90" />
+ </Placement>
+
+<Create block="PTMF" />
+  <Placement block="PTMF" x="-2.37819" y="4.46421" z="0.2+DoveTailShapeOffset">
+  <Rotation alphaz="126" />
+ </Placement>
+
+<Create block="PTLA" />
+  <Placement block="PTLA" x="-0.769273" y="7.31915" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTLB" />
+  <Placement block="PTLB" x="-2.2742" y="6.99926" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-162" />
+ </Placement>
+
+<Create block="PTLC" />
+  <Placement block="PTLC" x="-3.67973" y="6.37348" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTLD" />
+  <Placement block="PTLD" x="-0.322263" y="3.06613" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTLE" />
+  <Placement block="PTLE" x="-0.952705" y="2.93212" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-162" />
+ </Placement>
+
+<Create block="PTLF" />
+  <Placement block="PTLF" x="-1.54151" y="2.66997" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTLG" />
+  <Placement block="PTLG" x="-0.375" y="5.31059" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTLH" />
+  <Placement block="PTLH" x="-2.8181" y="4.51677" z="-0.85+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+
+<Create block="PTLI" />
+  <Placement block="PTLI" x="-0.375" y="5.11059" z="-0.6+DoveTailShapeOffset">
+  <Rotation alphaz="-174" />
+ </Placement>
+
+<Create block="PTLJ" />
+  <Placement block="PTLJ" x="-2.70055" y="4.35497" z="-0.6+DoveTailShapeOffset">
+  <Rotation alphaz="-150" />
+ </Placement>
+<!-- placement of silicon volume -->
+
+
+
+<Create block="LADR" />
+  <Placement block="LADR" x="-0.527366" y="2.54834" z="-4.8855">
+  <Rotation alphaz="177.396" />
+ </Placement>
+
+<Create block="LADR" />
+  <Placement block="LADR" x="-1.30523" y="8.1723" z="-4.8855">
+  <Rotation alphaz="349.963" />
+ </Placement>
+
+<Create block="LADR" />
+  <Placement block="LADR" x="-2.97583" y="7.72235" z="-4.8855">
+  <Rotation alphaz="1.963" />
+ </Placement>
+
+<Create block="LADR" />
+  <Placement block="LADR" x="-4.51636" y="6.93489" z="-4.8855">
+  <Rotation alphaz="13.963" />
+ </Placement>
+
+
+
+
+
+<!--  Close PXLA volume  --> 
+</Volume>
+
+
+   
+  
+   
 
 
 
@@ -1243,495 +1311,494 @@
     <Shape type="TUBS" dz="sectorLength" rmin="0.126" rmax="0.15" phi1="0" phi2="79.963" />
     </Volume>
 
-    <Volume name="PXCD" comment="Arc top 23"  >
-    <Attribute for="PXCD" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="TUBS" dz="sectorLength" rmin="0.126" rmax="0.15" phi1="79.963" phi2="191.54" />
-    </Volume>
-
-    <Volume name="PXCE" comment="Arc bottom 23"  >
-    <Attribute for="PXCE" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="TUBS" dz="sectorLength" rmin="0.15" rmax="0.174" phi1="271.963" phi2="371.54" />
-    </Volume>
-
-    <Volume name="PXCF" comment="Arc top 12"  >
-    <Attribute for="PXCF" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="TUBS" dz="sectorLength" rmin="0.126" rmax="0.15" phi1="91.963" phi2="203.54" />
-    </Volume>
-
-    <Volume name="PXCG" comment="Arc bottom 12"  >
-    <Attribute for="PXCG" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="TUBS" dz="sectorLength" rmin="0.15" rmax="0.174" phi1="283.963" phi2="383.54" />
-    </Volume>
-
-    <Volume name="PXCH" comment="arc top left"  >
-    <Attribute for="PXCH" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="TUBS" dz="sectorLength" rmin="0.126" rmax="0.15" phi1="103.963" phi2="216" />
-    </Volume>
-
-    <Volume name="PXCB" comment="arc bottom left"  >
-    <Attribute for="PXCB" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="TUBS" dz="sectorLength" rmin="0.176" rmax="0.2" phi1="216" phi2="267.396" />
-    </Volume>
-
-    <Volume name="PXRB" comment="Sector Right side"  >
-    <Attribute for="PXRB" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="BOX" dx="2.50864" dy="sectorHalfThickness" dz="sectorLength" />
-    </Volume>
-
-    <Volume name="PXTR" comment=""  >
-    <Attribute for="PXTR" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="BOX" dx="0.623359" dy="sectorHalfThickness" dz="sectorLength" />
-    </Volume>
-
-    <Volume name="PXTM" comment=""  >
-    <Attribute for="PXTM" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="BOX" dx="0.680382" dy="sectorHalfThickness" dz="sectorLength" />
-    </Volume>
-
-    <Volume name="PXTL" comment=""  >
-    <Attribute for="PXTL" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="BOX" dx="0.661607" dy="sectorHalfThickness" dz="sectorLength" />
-    </Volume>
-
-    <Volume name="PXTJ" comment=""  >
-    <Attribute for="PXTJ" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="BOX" dx="0.0384251" dy="sectorHalfThickness" dz="sectorLength" />
-    </Volume>
-
-    <Volume name="PXTI" comment=""  >
-    <Attribute for="PXTI" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="BOX" dx="0.0384251" dy="sectorHalfThickness" dz="sectorLength" />
-    </Volume>
-
-    <Volume name="PXLB" comment="Sector Left side"  >
-    <Attribute for="PXLB" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="BOX" dx="2.38864" dy="sectorHalfThickness" dz="sectorLength" />
-    </Volume>
-
-    <Volume name="PXIB" comment="Sector Inner side"  >
-    <Attribute for="PXIB" seen="1" colo="410" />
-    <Material name="CFRPMix" />
-    <Shape type="BOX" dx="0.73364" dy="sectorHalfThickness" dz="sectorLength" />
-    </Volume>
-
-
-
-<!-- shapes for Dovetails .. -->
-
-    <Volume name="DTCA" comment=""  >
-    <Attribute for="DTCA" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="267.396" phi2="360" />
-    </Volume>
-
-    <Volume name="DTCB" comment=""  >
-    <Attribute for="DTCB" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="0" phi2="79.963" />
-    </Volume>
-
-    <Volume name="DTCC" comment=""  >
-    <Attribute for="DTCC" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="79.963" phi2="191.54" />
-    </Volume>
-
-    <Volume name="DTCD" comment=""  >
-    <Attribute for="DTCD" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailLength" rmin="0.174" rmax="0.274" phi1="271.963" phi2="371.54" />
-    </Volume>
-
-    <Volume name="DTCE" comment=""  >
-    <Attribute for="DTCE" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="91.963" phi2="203.54" />
-    </Volume>
-
-    <Volume name="DTCF" comment=""  >
-    <Attribute for="DTCF" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailLength" rmin="0.174" rmax="0.274" phi1="283.963" phi2="383.54" />
-    </Volume>
-
-    <Volume name="DTCG" comment=""  >
-    <Attribute for="DTCG" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="103.963" phi2="216" />
-    </Volume>
-
-    <Volume name="DTCH" comment=""  >
-    <Attribute for="DTCH" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailLength" rmin="0.076" rmax="0.176" phi1="216" phi2="267.396" />
-    </Volume>
-
-    <Volume name="DTSA" comment="DoveTail Sector Right side"  >
-    <Attribute for="DTSA" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="2.50864" dy="DoveTailHalfThickness" dz="DoveTailLength" />
-    </Volume>
-
-    <Volume name="DTSB" comment="DoveTail  Sector Right upper side"  >
-    <Attribute for="DTSB" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.623359" dy="DoveTailHalfThickness" dz="DoveTailLength" />
-    </Volume>
-
-    <Volume name="DTSC" comment="DoveTail Sector Right upper side"  >
-    <Attribute for="DTSC" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.0384251" dy="DoveTailHalfThickness" dz="DoveTailLength" />
-    </Volume>
-
-    <Volume name="DTSD" comment="DoveTail  Sector Right upper side"  >
-    <Attribute for="DTSD" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.680382" dy="DoveTailHalfThickness" dz="DoveTailLength" />
-    </Volume>
-
-    <Volume name="DTSE" comment="DoveTail  Sector Right upper side"  >
-    <Attribute for="DTSE" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.0384251" dy="DoveTailHalfThickness" dz="DoveTailLength" />
-    </Volume>
-
-    <Volume name="DTSF" comment="DoveTail  Sector Right upper side"  >
-    <Attribute for="DTSF" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.661607" dy="DoveTailHalfThickness" dz="DoveTailLength" />
-    </Volume>
-
-    <Volume name="DTSG" comment="DoveTail  Sector Right upper side"  >
-    <Attribute for="DTSG" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="2.38864" dy="DoveTailHalfThickness" dz="DoveTailLength" />
-    </Volume>
-
-    <Volume name="DTSH" comment="DoveTail  Sector Right upper side"  >
-    <Attribute for="DTSH" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.734032" dy="DoveTailHalfThickness" dz="DoveTailLength" />
-    </Volume>
-
-    <Volume name="DTEA" comment=""  >
-    <Attribute for="DTEA" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="267.396" phi2="360" />
-    </Volume>
-
-    <Volume name="DTEB" comment=""  >
-    <Attribute for="DTEB" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="0" phi2="79.963" />
-    </Volume>
-
-    <Volume name="DTEC" comment=""  >
-    <Attribute for="DTEC" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="79.963" phi2="191.54" />
-    </Volume>
-
-    <Volume name="DTED" comment=""  >
-    <Attribute for="DTED" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.05" rmax="0.174" phi1="271.963" phi2="371.54" />
-    </Volume>
-
-    <Volume name="DTEE" comment=""  >
-    <Attribute for="DTEE" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="91.963" phi2="203.54" />
-    </Volume>
-
-    <Volume name="DTEF" comment=""  >
-    <Attribute for="DTEF" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.05" rmax="0.174" phi1="283.963" phi2="383.54" />
-    </Volume>
-
-    <Volume name="DTEG" comment=""  >
-    <Attribute for="DTEG" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="103.963" phi2="216" />
-    </Volume>
-
-    <Volume name="DTEH" comment=""  >
-    <Attribute for="DTEH" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.076" rmax="0.2" phi1="216" phi2="267.396" />
-    </Volume>
-
-    <Volume name="DESA" comment="DoveTail Extrusion Sector Right side"  >
-    <Attribute for="DESA" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="2.50864" dy="DoveTailExtrusionHalfThickness" dz="DoveTailExtrusionLength" />
-    </Volume>
-
-    <Volume name="DESB" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
-    <Attribute for="DESB" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.623359" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
-    </Volume>
-
-    <Volume name="DESC" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
-    <Attribute for="DESC" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.0384251" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
-    </Volume>
-
-    <Volume name="DESD" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
-    <Attribute for="DESD" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.680382" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
-    </Volume>
-
-    <Volume name="DESE" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
-    <Attribute for="DESE" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.0384251" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
-    </Volume>
-
-    <Volume name="DESF" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
-    <Attribute for="DESF" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.661607" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
-    </Volume>
-
-    <Volume name="DESG" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
-    <Attribute for="DESG" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="2.38864" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" /> 
-    </Volume>
-
-    <Volume name="DESH" comment="DoveTail Extrusion Sector Right upper side"  >
-    <Attribute for="DESH" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="BOX" dx="0.73364" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
-    </Volume>
-
-    <Volume name="PTRA" comment="Approximate arc of first piece of dovetail"  >
-    <Attribute for="PTRA" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.198904" h2="0.198904"
-      bl1="0.719003" bl2="0.719003"
-      tl1="0.677192" tl2="0.677192"
-      alp1="-5.08889e-14" alp2="-5.08889e-14" />
-    </Volume>
-
-    <Volume name="PTRB" comment="Approximate arc of first piece of dovetail"  >
-    <Attribute for="PTRB" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.198904" h2="0.198904"
-      bl1="0.794416" bl2="0.794416"
-      tl1="0.752605" tl2="0.752605"
-      alp1="-5.08889e-14" alp2="-5.08889e-14" />
-    </Volume>
-
-    <Volume name="PTRC" comment="Approximate arc of first piece of dovetail"  >
-    <Attribute for="PTRC" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.198904" h2="0.198904"
-      bl1="0.719003" bl2="0.719003"
-      tl1="0.677192" tl2="0.677192"
-      alp1="0" alp2="0" />
-    </Volume>
-
-    <Volume name="PTRD" comment="Right hand side dovetail ext"  >
-    <Attribute for="PTRD" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.3" h2="0.3"
-      bl1="2.23871" bl2="2.23871"
-      tl1="2.19353" tl2="2.19353"
-      alp1="-1.70761" alp2="-1.70761" />
-    </Volume>
-
-    <Volume name="PTRE" comment="Left hand (near piece)"  >
-    <Attribute for="PTRE" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.3" h2="0.3"
-      bl1="2.13427" bl2="2.13427"
-      tl1="1.92628" tl2="1.92628"
-      alp1="24.3113" alp2="24.3113" />
-    </Volume>
-
-    <Volume name="PTRF" comment="Piece near BP"  >
-    <Attribute for="PTRF" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TRAP" dz="0.65" thet="0" phi="0"
-      h1="0.4" h2="0.4"
-      bl1="0.461319" bl2="0.461319"
-      tl1="0.16015" tl2="0.16015"
-      alp1="-22.8769" alp2="-22.8769" />
-    </Volume>
-
-    <Volume name="PTMA" comment="Approximate arc of first piece of dovetail"  >
-    <Attribute for="PTMA" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TRAP" dz="0.6" thet="0" phi="0"
-      h1="0.198904" h2="0.198904"
-      bl1="0.467626" bl2="0.467626"
-      tl1="0.425815" tl2="0.425815"
-      alp1="-1.01778e-13" alp2="-1.01778e-13" />
-    </Volume>
-
-    <Volume name="PTMB" comment="Approximate arc of first piece of dovetail"  >
-    <Attribute for="PTMB" seen="1" colo="920" />
-    <Material name="Aluminium" />
-    <Shape type="TRAP" dz="0.6" thet="0" phi="0"
-      h1="0.198904" h2="0.198904"
-      bl1="0.794416" bl2="0.794416"
-      tl1="0.752605" tl2="0.752605"
-      alp1="-5.08889e-14" alp2="-5.08889e-14" />
-    </Volume>
-
-   <Volume name="PTMC" comment="Approximate arc of first piece of dovetail"  >
-   <Attribute for="PTMC" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.6" thet="0" phi="0"
-      h1="0.198904" h2="0.198904"
-      bl1="0.467626" bl2="0.467626"
-      tl1="0.425815" tl2="0.425815"
-      alp1="-1.52667e-13" alp2="-1.52667e-13" />
-   </Volume>
-
-   <Volume name="PTME" comment=" of first piece of dovetail"  >
-   <Attribute for="PTME" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.6" thet="0" phi="0"
-      h1="0.05" h2="0.05"
-      bl1="2.20106" bl2="2.20106"
-      tl1="2.19353" tl2="2.19353"
-      alp1="-1.70761" alp2="-1.70761" />
-   </Volume>
-      
-   <Volume name="PTMF" comment="Left middle part "  >
-   <Attribute for="PTMF" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.6" thet="0" phi="0"
-      h1="0.05" h2="0.05"
-      bl1="2.13427" bl2="2.13427"
-      tl1="2.09961" tl2="2.09961"
-      alp1="24.3113" alp2="24.3113" />
-   </Volume>
-
-   <Volume name="PTLA" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLA" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.198904" h2="0.198904"
-      bl1="0.794416" bl2="0.794416"
-      tl1="0.752605" tl2="0.752605"
-      alp1="0" alp2="0" />
-   </Volume>
-
-   <Volume name="PTLB" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLB" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.198904" h2="0.198904"
-      bl1="0.794416" bl2="0.794416"
-      tl1="0.752605" tl2="0.752605"
-      alp1="-5.08889e-14" alp2="-5.08889e-14" />
-   </Volume>
-
-   <Volume name="PTLC" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLC" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.198904" h2="0.198904"
-      bl1="0.794416" bl2="0.794416"
-      tl1="0.752605" tl2="0.752605"
-      alp1="0" alp2="0" />
-   </Volume>
-
-   <Volume name="PTLD" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLD" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.397809" h2="0.397809"
-      bl1="0.36585" bl2="0.36585"
-      tl1="0.282227" tl2="0.282227"
-      alp1="-5.08889e-14" alp2="-5.08889e-14" />
-   </Volume>
-
-   <Volume name="PTLE" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLE" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.397809" h2="0.397809"
-      bl1="0.36585" bl2="0.36585"
-      tl1="0.282227" tl2="0.282227"
-      alp1="5.08889e-14" alp2="5.08889e-14" /> 
-   </Volume>
-
-   <Volume name="PTLF" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLF" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="0.397809" h2="0.397809"
-      bl1="0.36585" bl2="0.36585"
-      tl1="0.282227" tl2="0.282227"
-      alp1="-1.01778e-13" alp2="-1.01778e-13" />
-   </Volume>
-
-   <Volume name="PTLG" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLG" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="1.83987" h2="1.83987"
-      bl1="0.377066" bl2="0.377066"
-      tl1="0.377066" tl2="0.377066"
-      alp1="6" alp2="6" />
-   </Volume>
-
-   <Volume name="PTLH" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLH" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.05" thet="0" phi="0"
-      h1="1.83987" h2="1.83987"
-      bl1="0.377066" bl2="0.377066"
-      tl1="0.377066" tl2="0.377066"
-      alp1="-6" alp2="-6" />
-   </Volume>
-
-   <Volume name="PTLI" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLI" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.2" thet="0" phi="0"
-      h1="2.43658" h2="2.43658"
-      bl1="0.377066" bl2="0.377066"
-      tl1="0.377066" tl2="0.377066"
-      alp1="6" alp2="6" />
-   </Volume>
-
-   <Volume name="PTLJ" comment="Dovetail support plate part outer"  >
-   <Attribute for="PTLJ" seen="1" colo="920" />
-   <Material name="Aluminium" />
-   <Shape type="TRAP" dz="0.2" thet="0" phi="0"
-      h1="2.43658" h2="2.43658"
-      bl1="0.377066" bl2="0.377066"
-      tl1="0.377066" tl2="0.377066"
-      alp1="-6" alp2="-6" />
-   </Volume>
+
+<Volume name="PXCD" comment="Arc top 23"  >
+<Attribute for="PXCD" seen="1" colo="410" />
+<Material name="CFRPMix" />
+<Shape type="TUBS" dz="sectorLength" rmin="0.126" rmax="0.15" phi1="79.963" phi2="191.554" />
+</Volume>
+
+<Volume name="PXCE" comment="Arc bottom 23"  >
+<Attribute for="PXCE" seen="1" colo="410" />
+<Material name="CFRPMix" />
+<Shape type="TUBS" dz="sectorLength" rmin="0.15" rmax="0.174" phi1="271.963" phi2="371.554" />
+</Volume>
+
+<Volume name="PXCF" comment="Arc top 12"  >
+<Attribute for="PXCF" seen="1" colo="410" />
+<Material name="CFRPMix" />
+<Shape type="TUBS" dz="sectorLength" rmin="0.126" rmax="0.15" phi1="91.963" phi2="203.554" />
+</Volume>
+
+<Volume name="PXCG" comment="Arc bottom 12"  >
+<Attribute for="PXCG" seen="1" colo="410" />
+<Material name="CFRPMix" />
+<Shape type="TUBS" dz="sectorLength" rmin="0.15" rmax="0.174" phi1="283.963" phi2="383.554" />
+</Volume>
+
+<Volume name="PXCH" comment="arc top left"  >
+<Attribute for="PXCH" seen="1" colo="410" />
+<Material name="CFRPMix" />
+<Shape type="TUBS" dz="sectorLength" rmin="0.126" rmax="0.15" phi1="103.963" phi2="216" />
+</Volume>
+
+<Volume name="PXCB" comment="arc bottom left"  >
+<Attribute for="PXCB" seen="1" colo="410" />
+<Material name="CFRPMix" />
+<Shape type="TUBS" dz="sectorLength" rmin="0.20795" rmax="0.23195" phi1="216" phi2="267.396" />
+</Volume>
+
+<Volume name="PXRB" comment="Sector Right side"  >
+  <Attribute for="PXRB" seen="1" colo="410" />
+  <Material name="CFRPMix" />
+  <Shape type="BOX" dx="2.52098" dy="sectorHalfThickness" dz="sectorLength" />
+</Volume>
+
+<Volume name="PXTR" comment=""  >
+  <Attribute for="PXTR" seen="1" colo="410" />
+  <Material name="CFRPMix" />
+  <Shape type="BOX" dx="0.625575" dy="sectorHalfThickness" dz="sectorLength" />
+</Volume>
+
+<Volume name="PXTM" comment=""  >
+  <Attribute for="PXTM" seen="1" colo="410" />
+  <Material name="CFRPMix" />
+  <Shape type="BOX" dx="0.681643" dy="sectorHalfThickness" dz="sectorLength" />
+</Volume>
+
+<Volume name="PXTL" comment=""  >
+  <Attribute for="PXTL" seen="1" colo="410" />
+  <Material name="CFRPMix" />
+  <Shape type="BOX" dx="0.661849" dy="sectorHalfThickness" dz="sectorLength" />
+</Volume>
+
+<Volume name="PXTJ" comment=""  >
+  <Attribute for="PXTJ" seen="1" colo="410" />
+  <Material name="CFRPMix" />
+  <Shape type="BOX" dx="0.0389368" dy="sectorHalfThickness" dz="sectorLength" />
+</Volume>
+
+<Volume name="PXTI" comment=""  >
+  <Attribute for="PXTI" seen="1" colo="410" />
+  <Material name="CFRPMix" />
+  <Shape type="BOX" dx="0.0389368" dy="sectorHalfThickness" dz="sectorLength" />
+</Volume>
+
+<Volume name="PXLB" comment="Sector Left side"  >
+  <Attribute for="PXLB" seen="1" colo="410" />
+  <Material name="CFRPMix" />
+  <Shape type="BOX" dx="2.39557" dy="sectorHalfThickness" dz="sectorLength" />
+</Volume>
+
+<Volume name="PXIB" comment="Sector Inner side"  >
+  <Attribute for="PXIB" seen="1" colo="410" />
+  <Material name="CFRPMix" />
+  <Shape type="BOX" dx="0.720682" dy="sectorHalfThickness" dz="sectorLength" />
+</Volume>
+
+<Volume name="DTCA" comment=""  >
+<Attribute for="DTCA" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="267.396" phi2="360" />
+</Volume>
+
+<Volume name="DTCB" comment=""  >
+<Attribute for="DTCB" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="0" phi2="79.963" />
+</Volume>
+
+<Volume name="DTCC" comment=""  >
+<Attribute for="DTCC" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="79.963" phi2="191.554" />
+</Volume>
+
+<Volume name="DTCD" comment=""  >
+<Attribute for="DTCD" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailLength" rmin="0.174" rmax="0.274" phi1="271.963" phi2="371.554" />
+</Volume>
+
+<Volume name="DTCE" comment=""  >
+<Attribute for="DTCE" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="91.963" phi2="203.554" />
+</Volume>
+
+<Volume name="DTCF" comment=""  >
+<Attribute for="DTCF" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailLength" rmin="0.174" rmax="0.274" phi1="283.963" phi2="383.554" />
+</Volume>
+
+<Volume name="DTCG" comment=""  >
+<Attribute for="DTCG" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailLength" rmin="0.026" rmax="0.126" phi1="103.963" phi2="216" />
+</Volume>
+
+<Volume name="DTCH" comment=""  >
+<Attribute for="DTCH" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailLength" rmin="0.10795" rmax="0.20795" phi1="216" phi2="267.396" />
+</Volume>
+
+<Volume name="DTSA" comment="DoveTail Sector Right side"  >
+  <Attribute for="DTSA" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="2.52098" dy="DoveTailHalfThickness" dz="DoveTailLength" />
+</Volume>
+
+<Volume name="DTSB" comment="DoveTail  Sector Right upper side"  >
+  <Attribute for="DTSB" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.625575" dy="DoveTailHalfThickness" dz="DoveTailLength" />
+</Volume>
+
+<Volume name="DTSC" comment="DoveTail Sector Right upper side"  >
+  <Attribute for="DTSC" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.0389368" dy="DoveTailHalfThickness" dz="DoveTailLength" />
+</Volume>
+
+<Volume name="DTSD" comment="DoveTail  Sector Right upper side"  >
+  <Attribute for="DTSD" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.681643" dy="DoveTailHalfThickness" dz="DoveTailLength" />
+</Volume>
+
+<Volume name="DTSE" comment="DoveTail  Sector Right upper side"  >
+  <Attribute for="DTSE" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.0389368" dy="DoveTailHalfThickness" dz="DoveTailLength" />
+</Volume>
+
+<Volume name="DTSF" comment="DoveTail  Sector Right upper side"  >
+  <Attribute for="DTSF" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.661849" dy="DoveTailHalfThickness" dz="DoveTailLength" />
+</Volume>
+
+<Volume name="DTSG" comment="DoveTail  Sector Right upper side"  >
+  <Attribute for="DTSG" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="2.39557" dy="DoveTailHalfThickness" dz="DoveTailLength" />
+</Volume>
+
+<Volume name="DTSH" comment="DoveTail  Sector Right upper side"  >
+  <Attribute for="DTSH" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.721081" dy="DoveTailHalfThickness" dz="DoveTailLength" />
+</Volume>
+
+<Volume name="DTEA" comment=""  >
+<Attribute for="DTEA" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="267.396" phi2="360" />
+</Volume>
+
+<Volume name="DTEB" comment=""  >
+<Attribute for="DTEB" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="0" phi2="79.963" />
+</Volume>
+
+<Volume name="DTEC" comment=""  >
+<Attribute for="DTEC" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="79.963" phi2="191.554" />
+</Volume>
+
+<Volume name="DTED" comment=""  >
+<Attribute for="DTED" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.05" rmax="0.174" phi1="271.963" phi2="371.554" />
+</Volume>
+
+<Volume name="DTEE" comment=""  >
+<Attribute for="DTEE" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="91.963" phi2="203.554" />
+</Volume>
+
+<Volume name="DTEF" comment=""  >
+<Attribute for="DTEF" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.05" rmax="0.174" phi1="283.963" phi2="383.554" />
+</Volume>
+
+<Volume name="DTEG" comment=""  >
+<Attribute for="DTEG" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.026" rmax="0.15" phi1="103.963" phi2="216" />
+</Volume>
+
+<Volume name="DTEH" comment=""  >
+<Attribute for="DTEH" seen="1" colo="920" />
+<Material name="Aluminium" />
+<Shape type="TUBS" dz="DoveTailExtrusionLength" rmin="0.10795" rmax="0.23195" phi1="216" phi2="267.396" />
+</Volume>
+
+<Volume name="DESA" comment="DoveTail Extrusion Sector Right side"  >
+  <Attribute for="DESA" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="2.52098" dy="DoveTailExtrusionHalfThickness" dz="DoveTailExtrusionLength" />
+</Volume>
+
+<Volume name="DESB" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
+  <Attribute for="DESB" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.625575" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
+</Volume>
+
+<Volume name="DESC" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
+  <Attribute for="DESC" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.0389368" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
+</Volume>
+
+<Volume name="DESD" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
+  <Attribute for="DESD" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.681643" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
+</Volume>
+
+<Volume name="DESE" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
+  <Attribute for="DESE" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.0389368" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
+</Volume>
+
+<Volume name="DESF" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
+  <Attribute for="DESF" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.661849" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
+</Volume>
+
+<Volume name="DESG" comment="DoveTailExtrusion Extrusion Sector Right upper side"  >
+  <Attribute for="DESG" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="2.39557" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
+</Volume>
+
+<Volume name="DESH" comment="DoveTail Extrusion Sector Right upper side"  >
+  <Attribute for="DESH" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="BOX" dx="0.720682" dy="DoveTailExtrusionThicknessBox" dz="DoveTailExtrusionLength" />
+</Volume>
+
+<Volume name="PTRA" comment="PTR0 Approximate arc of first piece of dovetail"  >
+  <Attribute for="PTRA" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.198904" h2="0.198904"
+     bl1="0.719003" bl2="0.719003"
+     tl1="0.677192" tl2="0.677192"
+     alp1="-5.08889e-14" alp2="-5.08889e-14" />
+</Volume>
+
+<Volume name="PTRB" comment="PTR1 Approximate arc of first piece of dovetail"  >
+  <Attribute for="PTRB" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.198904" h2="0.198904"
+     bl1="0.794416" bl2="0.794416"
+     tl1="0.752605" tl2="0.752605"
+     alp1="-5.08889e-14" alp2="-5.08889e-14" />
+</Volume>
+
+<Volume name="PTRC" comment="PTR2 Approximate arc of first piece of dovetail"  >
+  <Attribute for="PTRC" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.198904" h2="0.198904"
+     bl1="0.719003" bl2="0.719003"
+     tl1="0.677192" tl2="0.677192"
+     alp1="0" alp2="0" />
+</Volume>
+
+<Volume name="PTRE" comment="PTR4 Right hand side dovetail ext"  >
+  <Attribute for="PTRE" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.3" h2="0.3"
+     bl1="2.23871" bl2="2.23871"
+     tl1="2.19353" tl2="2.19353"
+     alp1="-1.70761" alp2="-1.70761" />
+</Volume>
+
+<Volume name="PTRF" comment="PTR5 Left hand (near piece)"  >
+  <Attribute for="PTRF" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.3" h2="0.3"
+     bl1="2.13427" bl2="2.13427"
+     tl1="1.92628" tl2="1.92628"
+     alp1="24.3113" alp2="24.3113" />
+</Volume>
+
+<Volume name="PTRG" comment="PTR6 Piece near BP"  >
+  <Attribute for="PTRG" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.65" thet="0" phi="0"
+     h1="0.4" h2="0.4"
+     bl1="0.461319" bl2="0.461319"
+     tl1="0.16015" tl2="0.16015"
+     alp1="-22.8769" alp2="-22.8769" />
+</Volume>
+
+<Volume name="PTMA" comment="PTM0 Approximate arc of first piece of dovetail"  >
+  <Attribute for="PTMA" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.6" thet="0" phi="0"
+     h1="0.198904" h2="0.198904"
+     bl1="0.467626" bl2="0.467626"
+     tl1="0.425815" tl2="0.425815"
+     alp1="-1.01778e-13" alp2="-1.01778e-13" />
+</Volume>
+
+<Volume name="PTMB" comment="PTM1 Approximate arc of first piece of dovetail"  >
+  <Attribute for="PTMB" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.6" thet="0" phi="0"
+     h1="0.198904" h2="0.198904"
+     bl1="0.794416" bl2="0.794416"
+     tl1="0.752605" tl2="0.752605"
+     alp1="-5.08889e-14" alp2="-5.08889e-14" />
+</Volume>
+
+<Volume name="PTMC" comment="PTM2 Approximate arc of first piece of dovetail"  >
+  <Attribute for="PTMC" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.6" thet="0" phi="0"
+     h1="0.198904" h2="0.198904"
+     bl1="0.467626" bl2="0.467626"
+     tl1="0.425815" tl2="0.425815"
+     alp1="-1.52667e-13" alp2="-1.52667e-13" />
+</Volume>
+
+<Volume name="PTME" comment="PTM4  of first piece of dovetail"  >
+  <Attribute for="PTME" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.6" thet="0" phi="0"
+     h1="0.05" h2="0.05"
+     bl1="2.20106" bl2="2.20106"
+     tl1="2.19353" tl2="2.19353"
+     alp1="-1.70761" alp2="-1.70761" />
+</Volume>
+
+<Volume name="PTMF" comment="PTM5 Left middle part "  >
+  <Attribute for="PTMF" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.6" thet="0" phi="0"
+     h1="0.05" h2="0.05"
+     bl1="2.13427" bl2="2.13427"
+     tl1="2.09961" tl2="2.09961"
+     alp1="24.3113" alp2="24.3113" />
+</Volume>
+
+<Volume name="PTLA" comment="PTL0 Dovetail support plate part outer"  >
+  <Attribute for="PTLA" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.198904" h2="0.198904"
+     bl1="0.794416" bl2="0.794416"
+     tl1="0.752605" tl2="0.752605"
+     alp1="0" alp2="0" />
+</Volume>
+
+<Volume name="PTLB" comment="PTL1 Dovetail support plate part outer"  >
+  <Attribute for="PTLB" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.198904" h2="0.198904"
+     bl1="0.794416" bl2="0.794416"
+     tl1="0.752605" tl2="0.752605"
+     alp1="-5.08889e-14" alp2="-5.08889e-14" />
+</Volume>
+
+<Volume name="PTLC" comment="PTL2 Dovetail support plate part outer"  >
+  <Attribute for="PTLC" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.198904" h2="0.198904"
+     bl1="0.794416" bl2="0.794416"
+     tl1="0.752605" tl2="0.752605"
+     alp1="0" alp2="0" />
+</Volume>
+
+<Volume name="PTLD" comment="PTL3 Dovetail support palte part outer"  >
+  <Attribute for="PTLD" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.397809" h2="0.397809"
+     bl1="0.36585" bl2="0.36585"
+     tl1="0.282227" tl2="0.282227"
+     alp1="-5.08889e-14" alp2="-5.08889e-14" />
+</Volume>
+
+<Volume name="PTLE" comment="PTL4 Dovetail support palte part outer"  >
+  <Attribute for="PTLE" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.397809" h2="0.397809"
+     bl1="0.36585" bl2="0.36585"
+     tl1="0.282227" tl2="0.282227"
+     alp1="5.08889e-14" alp2="5.08889e-14" />
+</Volume>
+
+<Volume name="PTLF" comment="PTL5 Dovetail support palte part outer"  >
+  <Attribute for="PTLF" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="0.397809" h2="0.397809"
+     bl1="0.36585" bl2="0.36585"
+     tl1="0.282227" tl2="0.282227"
+     alp1="-1.01778e-13" alp2="-1.01778e-13" />
+</Volume>
+
+<Volume name="PTLG" comment="PTL6 Dovetail support plate part outer"  >
+  <Attribute for="PTLG" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="1.83987" h2="1.83987"
+     bl1="0.377066" bl2="0.377066"
+     tl1="0.377066" tl2="0.377066"
+     alp1="6" alp2="6" />
+</Volume>
+
+<Volume name="PTLH" comment="PTL7 Dovetail support plate part outer"  >
+  <Attribute for="PTLH" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.05" thet="0" phi="0"
+     h1="1.83987" h2="1.83987"
+     bl1="0.377066" bl2="0.377066"
+     tl1="0.377066" tl2="0.377066"
+     alp1="-6" alp2="-6" />
+</Volume>
+
+<Volume name="PTLI" comment="PTL8 Dovetail support plate part outer"  >
+  <Attribute for="PTLI" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.2" thet="0" phi="0"
+     h1="2.43658" h2="2.43658"
+     bl1="0.377066" bl2="0.377066"
+     tl1="0.377066" tl2="0.377066"
+     alp1="6" alp2="6" />
+</Volume>
+
+<Volume name="PTLJ" comment="PTL9 Dovetail support plate part outer"  >
+  <Attribute for="PTLJ" seen="1" colo="920" />
+  <Material name="Aluminium" />
+  <Shape type="TRAP" dz="0.2" thet="0" phi="0"
+     h1="2.43658" h2="2.43658"
+     bl1="0.377066" bl2="0.377066"
+     tl1="0.377066" tl2="0.377066"
+     alp1="-6" alp2="-6" />
+</Volume>
+
+
 
 
     <!--  BOX for silicon active ladders  -->
@@ -1739,50 +1806,49 @@
     <Material name="Air"/>
     <Medium name ="MedAir" epsil="0.001"/>
     <Attribute for="LADR" seen="1" colo="920"/>
-    <Shape type="BOX" dx="1.245" dy="0.05225" dz="15.325" />
+    <Shape type="BOX" dx="1.245" dy="ladderhalfthickness" dz="15.325" />
+       yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness - gluathickness - 0.0025)
 
-
-   ypos = ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness - gluathickness - 0.0025
 
 
     <Do var="sens" from="1" to="SENP_sensor">
       zsensor = SENP_zpos(sens)
       <Create block="PXSI"/>
-      <Placement in="LADR" x="-0.0848" y="ypos" z="zsensor" block="PXSI">
+      <Placement in="LADR" x="0.0848" y="yp" z="zsensor" block="PXSI">
       </Placement>
     </Do>
+    yp = yp - 0.005 
 
     <!-- Glue for CMOS sensors --> 
-   ypos = ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness - gluathickness/2.0
     <Create block="GLUA" />
-    <Placement block="GLUA" in="LADR" x="-0.1044" y="ypos" z="4.8855">
+    <Placement block="GLUA" in="LADR" x="0.0485" y="yp" z="4.8855">
     </Placement>
-     ypos = ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness/2.0
+     yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness - LADR_cablethickness/2.0)
 
     <Create block="ALCA" />
-    <Placement block="ALCA" x="-0.01475" y="ypos" z="cableZOffset">
+    <Placement block="ALCA" x="0.01475" y="yp" z="cableZOffset">
     </Placement>
 
     <!-- Glue for Al/Cu Cable --> 
-   ypos = ladderhalfthickness -glucthickness - backingThickness - glubthickness/2
+   yp = -(ladderhalfthickness -glucthickness - backingThickness - glubthickness/2)
     <Create block="GLUB" />
-    <Placement block="GLUB" x="1.53076e-19" y="ypos" z="0.065">
+    <Placement block="GLUB" x="0.0" y="yp" z="0.065">
     </Placement>
 
     <!-- Carbon Fiber backing on ladder --> 
 
-    ypos = ladderhalfthickness -glucthickness - backingThickness/2.0
+    yp = -(ladderhalfthickness -glucthickness - backingThickness/2.0)
     <Create block="CFBK" />
-    <Placement block="CFBK" x="5.35765e-19" y="ypos" z="backingZOffset">
+    <Placement block="CFBK" x="0.0" y="yp" z="backingZOffset">
     </Placement>
 
-    ypos = ladderhalfthickness -glucthickness/2.0
+    yp = -(ladderhalfthickness -glucthickness/2.0)
     <Create block="GLUC" />
-    <Placement block="GLUC" x="-0.525" y="ypos" z="0">
+    <Placement block="GLUC" x="0.4995" y="yp" z="0.065">
     </Placement>
 
     <Create block="DRIV" />
-    <Placement block="DRIV" x="-0.01475" y="-0.02725" z="-10.589">
+    <Placement block="DRIV" x="0.01475" y="0.02725" z="-10.589">
     </Placement>
 
     </Volume>
@@ -1791,7 +1857,7 @@
     <Volume name="GLUA" comment="Glue for CMOS sensors"  >
     <Attribute for="GLUA" seen="1" colo="800" />
     <Material name="matAdhesive" />
-    <Shape type="BOX" dx="1.1406" dy="gluathickness/2.0" dz="10.1295" />
+    <Shape type="BOX" dx="1.1715" dy="gluathickness/2.0" dz="10.1295" />
     </Volume>
 
     <Volume name="ALCA" comment=""  >
@@ -1822,7 +1888,7 @@
     <Volume name="GLUC" comment=""  >
     <Attribute for="GLUC" seen="1" colo="629" />
     <Material name="matAdhesive" />
-    <Shape type="BOX" dx="0.72" dy="glucthickness/2.0" dz="14.95" />
+    <Shape type="BOX" dx="0.7205" dy="glucthickness/2.0" dz="14.95" />
     </Volume>
 
     <Volume name="DRIV" comment=""  >
@@ -1837,7 +1903,8 @@
     <Shape type="BOX" dz="1.0125" dx="1.137" dy="0.0025"/>
     
     <Create block="PLAC"/>
-    <Placement block="PLAC" x="-0.1533" z="0.0" y="-0.0013" in="PXSI" />
+    <Placement block="PLAC" x="0.1533" z="0.0" y="0.0013" in="PXSI" >
+    </Placement>
     </Volume>
 
     <Volume name="PLAC" comment="active silicon top sector"  >
