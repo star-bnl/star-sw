@@ -13,7 +13,7 @@ class StvFitErrs;
 class StvImpact;
 class StvELossData;
 
-enum ENode {kMaxPti=20,kMaxEta = 5};
+enum ENode {kMaxPti=200,kMaxEta = 6};
 static const double kMaxLamda = 3.14159265358/2-atan(exp(-kMaxEta))*2;
 static const double kMaxTanL  = tan(kMaxLamda);
 
@@ -97,6 +97,7 @@ double getP2() const;
 double getRxy() const;
 double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
   void reverse(); 
+  void Deriv(double len,StvFitDers &der) const;
    int isValid() const 	{return  (_hz && _cosCA);};
 ///		convert THelixTrack derivativ matrix into StvFitPar one
   void convert( StvFitDers &fitDer , const StvHlxDers &hlxDer) const;
@@ -267,10 +268,6 @@ static void TestMtx      ();
 static void TestImpact   (int nEv=10000) ;
 ClassDef(StvNodeParsTest,0)
 };
-
-
-
-
 
 //------------------------------------------------------------------------------
 // 		StvNodePars::inlines
