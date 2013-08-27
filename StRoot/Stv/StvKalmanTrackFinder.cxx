@@ -448,7 +448,6 @@ static int nCall=0;nCall++;
 static StvTrackFitter *tkf = StvTrackFitter::Inst();
 static const StvConst  *kons = StvConst::Inst();
 static const double kEps = 1.e-2,kEPS=1e-1;
-enum {kBadHits=5};
 
   int ans=0,anz=0,lane = 1;
   int& nHits = tkf->NHits();
@@ -466,7 +465,7 @@ enum {kBadHits=5};
 StvDebug::Count("CALLS",10);
 //    ==================================
       nHits=tkf->NHits();
-      if (nHits < kBadHits) break;
+      if (nHits < kons->mMinHits) break;
       if (ans>0) break;			//Very bad
       
       StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
@@ -474,7 +473,7 @@ StvDebug::Count("CALLS",10);
 StvDebug::Count("CALLS",10);
   //        ==========================================
       nHits=tkf->NHits();
-      if (nHits < kBadHits) break;
+      if (nHits < kons->mMinHits) break;
       if (anz>0) break;	
 
       double dif = lstPars.diff(tstNode->GetFP(),tstNode->GetFE());
@@ -485,13 +484,13 @@ StvDebug::Count("CALLS",10);
     }// End Fit iters
     
     state = (ans!=0) + 10*((anz!=0) + 10*((!converged) 
-          + 10*((mCurrTrak->GetXi2()>kons->mXi2Trk)+10*(nHits <= kBadHits))));
+          + 10*((mCurrTrak->GetXi2()>kons->mXi2Trk)+10*(nHits < kons->mMinHits))));
     if (!state) 		break;
-    if (nHits <= kBadHits) 	break;
+    if (nHits < kons->mMinHits) 	break;
     StvNode *badNode=mCurrTrak->GetNode(StvTrack::kMaxXi2);
     if (!badNode) 		break;
     badNode->SetHit(0); nDrops++;
-    nHits--; if (nHits < kBadHits) { state = 1000000; break;}
+    nHits--; if (nHits < kons->mMinHits) { state = 1000000; break;}
   }//End Repair loop
 
 if (state) {
