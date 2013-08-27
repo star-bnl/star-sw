@@ -215,7 +215,7 @@
 
   <If expr="bbcg_OnOff(1)==1|bbcg_OnOff(1)==3">   
 
-    <Placement block="BBCM" in="CAVE" 
+    <Placement block="BBCM" in="CAVE" konly="MANY"
                x="0" 
                y="0" 
                z="bbcg_zdis(1)"/>
