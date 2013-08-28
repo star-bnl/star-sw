@@ -71,21 +71,21 @@
 	TCD_ID 21 -> VME 0x1F000000
 */
 #define TCD_ESMD        6	//0x10,
-#define TCD_BBC         7	//0x11, trigger-only
+#define TCD_BBC         7	//0x11, trigger-only; unused
 #define TCD_ETOW        8	//0x12,
-#define TCD_MTD_QT      9	//0x13, trigger-only
+#define TCD_MTD_QT      9	//0x13, trigger-only; unused
 #define TCD_IST         10	//0x14, Jun 2013: was FGT before; Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //0x15,
 #define TCD_PP          12      //0x16
 #define TCD_MTD         13      //0x17
 #define TCD_TPX		14	//0x18
 #define TCD_BSMD        15      //0x19
-#define TCD_CTB         16	//0x1A, trigger-only
+#define TCD_CTB         16	//0x1A, trigger-only; unused
 #define TCD_BTOW        17      //0x1B
 #define TCD_SST         18      //0x1C; was FTPC; gone in Sep '11
 #define TCD_PXL         19      //0x1D; was PMD; gone in Sep '11
 #define TCD_GMT         20      //0x1E; WAS: empty, Nov, 2008
-#define TCD_VPD		21      //0x1F trigger-only
+#define TCD_VPD		21      //0x1F trigger-only; unused
 
 
 
