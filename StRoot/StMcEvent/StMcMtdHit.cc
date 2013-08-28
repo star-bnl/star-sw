@@ -83,10 +83,10 @@ const static   int kNCell       = 12,     	//! 12 cells per box
 
    mPathLength = pt->s_track;
    int volume_id = pt->volume_id;
-   mModule = (volume_id/100  )%100;
-   mBackleg =(volume_id/10000)%100;
+   Int_t ires = volume_id/100;
+   mModule = ires%10;
+   mBackleg =ires/10;
    mCell = Int_t((pt->x[1] + kMtdPadWidth * kNCell/2) / kMtdPadWidth) + 1;
-
 
 }        
     
