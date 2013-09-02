@@ -30,6 +30,7 @@
 #pragma link C++ class Garfield::ComponentAnsys121;
 #pragma link C++ class Garfield::ComponentConstant;
 #pragma link C++ class Garfield::ComponentUser;
+#pragma link C++ class Garfield::ComponentCST;
 
 #pragma link C++ class Garfield::Sensor;
 
