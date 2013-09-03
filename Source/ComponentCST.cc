@@ -24,6 +24,10 @@ ComponentCST::ComponentCST() : ComponentFieldMap() {
   m_xlines.clear();
   m_ylines.clear();
   m_zlines.clear();
+  deleteBackground = false;
+  disableFieldComponent[0] = false;
+  disableFieldComponent[1] = false;
+  disableFieldComponent[2] = false;
 
 }
 
@@ -757,9 +761,12 @@ ComponentCST::ElectricField(
     E.Print();
   }
   // here two times -1 because t1 is in opposite direction of x
-  ex = -1 * E(1,0);
-  ey = E(0,0);
-  ez = E(2,0);
+  if(!disableFieldComponent[0])
+    ex = -1 * E(1,0);
+  if(!disableFieldComponent[1])
+    ey = E(0,0);
+  if(!disableFieldComponent[2])
+    ez = E(2,0);
 
   // Transform field to global coordinates
   UnmapFields(ex, ey, ez, x, y, z,
@@ -872,9 +879,12 @@ ComponentCST::WeightingField(
       nodes[elements[imap].emap[6]].w[iw] * (*jac) * (*dN.at(6)) +
       nodes[elements[imap].emap[7]].w[iw] * (*jac) * (*dN.at(7)));
 
-  wx = E(0,0);
-  wy = E(1,0);
-  wz = E(2,0);
+  if(!disableFieldComponent[0])
+    wx = E(0,0);
+  if(!disableFieldComponent[0])
+    wy = E(1,0);
+  if(!disableFieldComponent[0])
+    wz = E(2,0);
   // Transform field to global coordinates
   UnmapFields(wx, wy, wz, x, y, z,
               xmirrored, ymirrored, zmirrored,

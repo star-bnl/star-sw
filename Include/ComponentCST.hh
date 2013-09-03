@@ -40,7 +40,7 @@ class ComponentCST: public ComponentFieldMap {
                               const std::string label);
 
     bool Initialise(std::string elist = "ELIST.lis",
-                    std::string nlist = "NLIST.lis",
+                    std::string nlist = "NODELINES.lis",
                     std::string mplist = "MPLIST.lis",
                     std::string prnsol = "PRNSOL.lis",
                     std::string unit = "cm");
@@ -54,7 +54,16 @@ class ComponentCST: public ComponentFieldMap {
     }
 
     void SetRangeZ(const double zmin, const double zmax);
-
+    /**
+     * Use these functions to disable a certain field component.
+     * Is a field component is disabled ElectricField and WeightingField will return 0 for this component.
+     * This is useful if you want to have calculated global field distortions and you want to
+     * add the field of a GEM. If you would simply add both components the field component
+     * in drift direction would be added twice!
+     */
+    void DisableXField(){disableFieldComponent[0] = true;};
+    void DisableYField(){disableFieldComponent[1] = true;};
+    void DisableZField(){disableFieldComponent[2] = true;};
   protected:
 
     // Verify periodicities
@@ -70,6 +79,8 @@ class ComponentCST: public ComponentFieldMap {
 
   private:
     void ClearVec(std::vector<TMatrixD*> &vec);
+    // If true x,y,z fields of this component are disabled (e=0 V/cm).
+    bool disableFieldComponent[3];
 };
 
 struct PolygonInfo {
