@@ -343,6 +343,7 @@ tpxFCF::~tpxFCF()
 	for(int r=0;r<6;r++) {
 		if(gain_storage[s][r].storage) {
 			free(gain_storage[s][r].storage) ;
+			gain_storage[s][r].storage = 0;
 		}
 	}
 	}
