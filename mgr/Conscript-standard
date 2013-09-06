@@ -1494,6 +1494,7 @@ sub script::MakeMoc {
     my $G__name = "moc_" . $header;
     $G__name =~ s/\.h$/\.cxx/;
     my $moc = $envQt->{Packages}->{QT}->{BINDIR} . "/moc";
+    # print "moc is $moc\n";  
     Command $envQt ($G__name), ($header), qq($moc -o %>  %<);
     push @src, $G__name;
     print "+==========add moc file: $G__name\n" if $param::debug;
