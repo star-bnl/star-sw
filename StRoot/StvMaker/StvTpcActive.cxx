@@ -187,6 +187,8 @@ int StvTpcHitActor::operator()(const double xyz[3])
 {
 static int nCall = 0; nCall++;
 static const int kMaxRows = St_tpcPadPlanesC::instance()->numberOfRows();
+static const int iSect[24] = {23,22,21,20,19,18,17,16,15,14,13,24
+                             ,11,10, 9, 8, 7, 6, 5, 4, 3, 2, 1,12};
  assert(mHit);
  TString path(GetPath());
  if (mDetId != kTpcId) return 0;
@@ -196,6 +198,8 @@ static const int kMaxRows = St_tpcPadPlanesC::instance()->numberOfRows();
  StTpcHit *tpcHit = (StTpcHit*)hit->stHit();
 
  int sector = tpcHit->sector();
+ if ((sector<=12) != (xyz[2]>0)) sector = iSect[sector-1];// pileup tracks with wrong Z
+
  int tpadrow = tpcHit->padrow();
 
 //		Workaround of bug int StTpcHit::padrow()
