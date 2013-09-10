@@ -114,9 +114,6 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   // The magnet
   geom.success_magp = ConstructMagp( geom.magpFlag, geom.magpStat );
 
-  // Beam pipe is always there, but configuration may change
-  geom.success_pipe = ConstructPipe( geom.pipeFlag, geom.pipeStat );
-
   // Minbias trigger and vertex positioning detectors
   geom.success_bbcm = ConstructBbcm("BBCMon",       geom.bbcmStat );
   geom.success_vpdd = ConstructVpdd( geom.vpddFlag, geom.vpddStat );
@@ -137,6 +134,10 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   // Add in the support cone
   geom.success_scon = ConstructScon( geom.sconFlag, geom.sconStat ); // support cone before SVT 
   geom.success_idsm = ConstructIdsm( geom.idsmFlag, geom.idsmStat );
+
+  // Beam pipe is always there, but configuration may change.  And
+  // it should follow the support cone.
+  geom.success_pipe = ConstructPipe( geom.pipeFlag, geom.pipeStat );
 
   // SISD must come after the IDSM, as we may place it inside 
   geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat ); // 
@@ -952,10 +953,10 @@ Bool_t Geometry::ConstructPixl( const Char_t *flag, Bool_t go )
     }
 
   AgStructure::AgDetpNew(pixlGeom.module, Form("PIXL Configuration %s",flag));
-  /* Not required for PixlGeo4 --> pixlgeo00
-     AgStructure::AgDetpAdd("Pxlv_t","ladver",   2.0f );
-     AgStructure::AgDetpAdd("Pxlv_t","location", pixlGeom.location );
-  */
+  if(pixlGeom.config>=50 ){
+    AgStructure::AgDetpAdd("Pxlw_t","secversion", (Float_t) pixlGeom.secversion);
+    AgStructure::AgDetpAdd("Pxlw_t","ladrconfig", pixlGeom.ladrconfig );
+  }
 
   if (go) if ( !CreateModule(pixlGeom.module) ) {
     Warning(GetName(),Form("Could not create module %s",pixlGeom.module.Data()));
@@ -1361,6 +1362,14 @@ Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
     pipeGeom.fill();
   }
 
+  pipeGeom.select="PIPEv3"; {
+    pipeGeom.config=30;
+    pipeGeom.flag  =1;
+    pipeGeom.module="PipeGeo3";
+    pipeGeom.fill();
+  }
+    
+    
 
   return true;
 }
@@ -1377,8 +1386,10 @@ Bool_t Geometry::PixlInit() // Probably breaks config=-1 scheme
   pixlGeom.select="PIXL02"; pixlGeom.config=1; pixlGeom.location=2.0; pixlGeom.fill();
 
   pixlGeom.module="PixlGeo5";
-  dtubGeom.module="DtubGeo1";  
-  pixlGeom.select="PIXL05"; pixlGeom.config=1; pixlGeom.location=2.0; pixlGeom.fill();
+  pixlGeom.select="PIXL05"; pixlGeom.config=50; pixlGeom.ladrconfig=1; pixlGeom.secversion=7; pixlGeom.fill();  
+  pixlGeom.select="PIXL06"; pixlGeom.config=60; pixlGeom.ladrconfig=1; pixlGeom.secversion=1; pixlGeom.fill();
+
+  dtubGeom.module="DtubGeo1";    
   dtubGeom.select="DTUB01"; dtubGeom.config=1; dtubGeom.location=2.0; dtubGeom.fill();
   
   
@@ -1389,6 +1400,7 @@ Bool_t Geometry::IstdInit() // Probably breaks config=-1 scheme
 {
   istdGeom.select="ISTDof";  istdGeom.config=0;  istdGeom.module="NONE"    ;  istdGeom.fill(); 
   istdGeom.select="ISTD01";  istdGeom.config=1;  istdGeom.module="IstdGeo0";  istdGeom.fill(); 
+  istdGeom.select="ISTD02";  istdGeom.config=2;  istdGeom.module="IstdGeo1";  istdGeom.fill(); 
   return true;
 }
 // ----------------------------------------------------------------------------

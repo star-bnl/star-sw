@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.262 2013/08/13 18:55:54 jwebb Exp $
+* $Id: geometry.g,v 1.263 2013/09/10 18:59:04 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.263  2013/09/10 18:59:04  jwebb
+* Definitions for y2013a, new beam pipe module and new ist module.
+*
 * Revision 1.262  2013/08/13 18:55:54  jwebb
 * Defined a CONSTRUCT keyword in geometry.g.  CONSTRUCT calls a geometry
 * module using comis.  If the subroutine is not linked with the program,
@@ -1243,6 +1246,7 @@ replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
 
 replace [exe PIPEv1;] with [ "The beam pipe for the HFT";     PipeConfig = 10;]
 replace [exe PIPEv2;] with [ "The beam pipe for the HFT";     PipeConfig = 20;]
+replace [exe PIPEv3;] with [ "The beam pipe for the HFT";     PipeConfig = 30;]
 
 
 *                                                                                       Pixel Detector
@@ -1250,12 +1254,14 @@ replace [exe PIPEv2;] with [ "The beam pipe for the HFT";     PipeConfig = 20;]
 replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
 replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
 replace [exe PIXL02;] with [ "Add the pixle detector to the IDSM"; PIXL=on; PixlConfig=6; ]
-
 replace [exe PIXL05;] with [ "Add pixel detector to the IDSM"; PIXL=on;     PixlConfig=50; ]
+replace [exe PIXL06;] with [ "Add pixel detector to the IDSM"; PIXL=on;     PixlConfig=60; ]
 
 replace [exe DTUB01;] with [ "Add DTUB (no op)"; ]
 
 replace [exe ISTD01;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=1; ]
+replace [exe ISTD02;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=2; ]
+
 replace [exe PXST01;] with [ "Add the PST to the IDSM"; PXST=on; PxstConfig=0; ]
 
 replace [exe RICHof;] with [;RICH=off;]
@@ -2111,11 +2117,40 @@ REPLACE [exe y2013_1;] with ["Y2013 first cut"          ; exe Y2013; ];
 REPLACE [exe y2013_2;] with ["Y2013 first cut sans PIXL"; exe Y2013;  PIXL=off; PXST=on; ];
 
 
+REPLACE [exe y2013a;] with ["Y2013a first production geometry";
+    exe CAVE05;       "Improved cave geometry";
+    exe MAGPv1;       "New magnet geometry";
+    exe TPCE04r;      "agstar version of yf model with reduced Rmax";
+    exe BTOFv8;       "time of flight";
+    exe CALB02;       "updated bemc model";
+    exe ECALv6;       "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD13;      "Muon telescope detector";
+    exe PIPEv3;      "Improved beam pipe";
+
+    exe IDSM02;      "Inner detector support";
+    exe FGTDv32;     "FGT v3 6 disks";
+
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL05;      "Production version of the pixl detector";
+    exe DTUB01;      "DTUB";
+]
+
+""" Configuration 1 baseline, 2 without pixl """
+REPLACE [exe y2013_1a;] with ["Y2013 first cut"          ; exe Y2013; ];
+REPLACE [exe y2013_2a;] with ["Y2013 first cut sans PIXL"; exe Y2013;  PIXL=off; PXST=on; ];
 
 REPLACE [exe y2013x;] with [                                      "Y2013 asymptotic";
-    EXE y2013;    "first cut 2013";
-    EXE CAVE05;   "New version of the CAVE";
-    EXE MAGPv1;   "version 1 of the magnet";
+    EXE y2013a;   "First production geometry";
     EXE TPCE31;   "version 3.1 of the TPC (increase deadzone and integration time)";
 ]
 REPLACE [exe y2013_1x;] with [ "Y2013 asymptotic"; 
@@ -2141,24 +2176,23 @@ REPLACE [exe dev14;] with ["DEV14 upgrade geometry";
     exe BBCMon;      "beam beam counters";
     exe FPDM03;      "Latest version of FPD";
     exe VPDD07;      "Latest version of VPD";
-    exe FTPCof;      "FTPC";
+    exe FTPCof;      "no FTPC";
     exe SVTTof;      "No SVT";
-    exe PHMDof;      "Photon mult detector on";
-    exe SISDof;      "No sisd";
-    exe MUTD05;      "Muon telescope detector";
-    exe CAVE04;      "Cave and tunnel";
+    exe PHMDof;      "Photon mult detector off";
+    exe MUTD13;      "Muon telescope detector";
+    exe CAVE05;      "Cave and tunnel";
     exe IDSM02;      "Inner detector support";
     exe SISD85;      "SSD version 7"
-    exe PIPEv1;      "The beam pipe";
-    exe FGTDv32;     "FGT v3 6 disks";
-    exe ISTD01;      "IST version 1";
+    exe PIPEv3;      "The small diameter beam pipe";
+    exe ISTD02;      "IST version 2";
     exe PXST01;      "PIXEL detector support version 1";
-    exe PIXL02;      "Development version of the pixl detector";
+    exe PIXL06;      "Full config of the pixl detector";
+    exe DTUB01;      "DTUB";
 ]
 
 
 
-REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently just complete FGT.  HFT when available."
+REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2014."
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
     exe BTOF67;      "time of flight";
     exe CALB02;      "updated bemc model";
@@ -2168,18 +2202,18 @@ REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently j
     exe BBCMon;      "beam beam counters";
     exe FPDM03;      "Latest version of FPD";
     exe VPDD07;      "Latest version of VPD";
-    exe FTPCof;      "FTPC";
+    exe FTPCof;      "no FTPC";
     exe SVTTof;      "No SVT";
-    exe PHMD02;      "Photon mult detector on";
-    exe SISDof;      "No sisd";
-    exe MUTD05;      "Muon telescope detector";
-    exe CAVE04;      "Cave and tunnel";
-    exe PIPEv1;      "The beam pipe";
-
+    exe PHMDof;      "Photon mult detector off";
+    exe MUTD13;      "Muon telescope detector";
+    exe CAVE05;      "Cave and tunnel";
     exe IDSM02;      "Inner detector support";
-    exe FGTDv32;     "FGT v3 6 disks";
-
-    exe PIXL02;      "Development version of the pixl detector";
+    exe SISD85;      "SSD version 7"
+    exe PIPEv3;      "The small diameter beam pipe";
+    exe ISTD02;      "IST version 2";
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL06;      "Full config of the pixl detector";
+    exe DTUB01;      "DTUB";
 ]
 
 
@@ -4478,10 +4512,16 @@ If LL>0
           Call AgDETP add ('pipv.PipeFlag=',   PipeFlag,  1);
      }
 
+     IF   PipeConfig == 30 {
+          Call AgDETP add ('pipv.PipeConfig=', PipeConfig,1);
+          Call AgDETP add ('pipv.PipeFlag=',   PipeFlag,  1);
+     }
+
      IF      PipeConfig == -1 { CONSTRUCT pipegeo00; "Simple beam pipe"   }
      ELSE IF PipeConfig  < 10 { CONSTRUCT pipegeo;   "Standard beam pipe" }
      ELSE IF PipeConfig == 10 { CONSTRUCT pipegeo1;  "HFT era beam pipe"  }
      ELSE IF PipeConfig == 20 { CONSTRUCT pipegeo2;  "HFT era beam pipe as built" }
+     ELSE IF PipeConfig == 30 { CONSTRUCT pipegeo3;  "HFT era beam pipe as built improved" }
 
    }
 
@@ -4744,15 +4784,16 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
 
   } !!end SISD
 
-   if (ISTD){
-     if (IstdConfig==1) { CONSTRUCT istdgeo0; }
+   IF ISTD {
+     IF IstdConfig==1 { CONSTRUCT istdgeo0; }
+     IF IstdConfig==2 { CONSTRUCT istdgeo1; }
    }
 
-   if (PXST){
-     if (PxstConfig==0) { CONSTRUCT pxstgeo1; }
+   IF  PXST {
+     IF PxstConfig==0 { CONSTRUCT pxstgeo1; }
    }
 
-   if (MUTD) {
+   IF MUTD {
      Call AgDetp NEW ('MUTD')
      IF MutdConfig=1 { CONSTRUCT mutdgeo; }
      IF MutdConfig=2 { CONSTRUCT mutdgeo2;}
@@ -4764,7 +4805,8 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
      } 
 
    }
-   if (PIXL){
+
+   IF PIXL {
      IF PixlConfig==-1 { CONSTRUCT pixlgeo00; }
      IF PixlConfig==1  { CONSTRUCT pixlgeo;   }
      IF PixlConfig==2  { CONSTRUCT pixlgeo1;  }
@@ -4784,14 +4826,22 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
 
      IF PixlConfig==50 {               "Y2013 Pixel Configuration"
            call AgDetp new ('PIXL')
-           call AgDetp add ('PXLV.location=',2.0,1);
+           call AgDetp add ('PXLW.LadrConfig=',   1.0, 1);
+           call AgDetp add ('PXLW.SecVersion=',   7.0, 1); 
+           CONSTRUCT PixlGeo5   """ Pixl Detector """
+           CONSTRUCT DtubGeo1   """ Electronics etc... """  
+     }
+     IF PixlConfig==60 {               "Dev14 Pixel Configuration"
+           call AgDetp new ('PIXL')
+           call AgDetp add ('PXLW.SecVersion=',   1.0, 1); 
+           call AgDetp add ('PXLW.LadrConfig=',   2.0, 1);
            CONSTRUCT PixlGeo5   """ Pixl Detector """
            CONSTRUCT DtubGeo1   """ Electronics etc... """
      }
 
-
    }
-   if (ISTB){
+
+   IF ISTB {
 
      IF IstbConfig==-1 {CONSTRUCT istbgeo00;}
      IF IstbConfig== 1 {CONSTRUCT istbgeo;}
@@ -4803,13 +4853,11 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
      IF IstbConfig== 7 {CONSTRUCT istbgeo6;}
    }
 
-   if (GEMB.and.GembConfig>0)  {
-
+   IF (GEMB.and.GembConfig>0)  {
       CONSTRUCT gembgeo;
    }
 
    if (FSTD.and.FstdConfig>0)  then
-c     write(*,*) 'FSTD'
       if(FstdConfig==2) then
          call AgDETP new ('FSTD')
          call AgDETP add ('fstg.Rmax=',22.3,1)
