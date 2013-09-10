@@ -1,0 +1,1207 @@
+<Document file="StarVMC/Geometry/IstdGeo/IstdGeo1.xml">
+<Module name="IstdGeo1" comment=" is the the STAR IST geometry modeling in AgML"  >
+  <Created date="13 October 2012 "  />
+  <Author name="Yaping Wang (University of Illinois at Chicago)"  />
+  <CDE  >
+    AGECOM
+    GCUNIT
+  </CDE>
+ 
+<!--
+ January 9, Yaping
+ update stave geometry due to hybrid thickness changes at different position
+ Hybrid volumes and carbon fiber skin volumes are updated.
+
+ January 8, Yaping
+ update material definitions
+ 
+ December 9, Yaping
+ update Endcap modules (right and left side) and a ittle update for the thread hole spacers
+ 
+ November 7, Yaping
+ Screws, thread holes for screw and thermal sensor to be added.
+
+ October 20, Yaping Wang
+ ladder alignment readjusted, the shift in phi distribution is corrected.
+
+ October 5, Yaping Wang
+ update silicon sensor geometry (final sensor dimensions)
+
+ October 4, Yaping Wang
+ Support ring structure included
+
+ October 3, Yaping Wang
+ Transit board and its slots added
+
+ October 1, Yaping Wang
+ Ladder materials updated and also endcaps added
+ 
+ September 30, Yaping
+ ladder support materials were implemented into the code
+ 
+ September 27, Yaping
+ New geometry layout was updated
+ 
+ September 19, 2012, Yaping
+ This version implements real sensor layou but still without support material
+ 
+ September 18, 2012 : the rotation and shift parameters keep no change referred from Bouchet code
+ This version has paramters : 3 rotations + 3 shifts to allow misalignment of a group of ladder
+ These parameters add a small rotations(or shifts) to the placement of ladders . By default, these parameters are 0 ==> no misaligment
+
+June 14, 2013  Flemming
+ Changed name to istdgeo1 for dev14. Change IBMO mother volume to be many
+-->
+    <!-- Local variables -->
+    <varlist type="float"  >
+        aangle, bangle, raddeg, IniX, IniY, Module_Thk, Ladder_Thk, Ladder_Width, Ladder_Length, xpos, ypos, zpos, ModuleRadius, Half
+    </varlist>
+    
+    <varlist type="int"  >
+        nl, ly, nu, ne, nes, ns, nsc, num, cable, debug
+    </varlist>
+    
+  <!-- Global stuffs--> 
+  <Content> IBMO, <!-- IST mother volume-->
+            IBAM, <!-- IST ladder mother volume-->
+            ILCC, <!-- IST ladder carbon honeycomb mother volume-->
+            ICCU, <!-- IST carbon honeycomb BOX volume on east side (connecter side)-->
+            ICCD, <!-- IST carbon honeycomb BOX volume on west side-->
+            IBCF, <!-- IST carbon foam mother volume -->
+            ICFC, <!-- IST carbon foam BOX volume on east side (connecter side)-->
+            ICFD, <!-- IST carbon foam BOX volume on west side-->
+            ICFB, <!-- air groove box volume in IST carbon foam for cooling tube placement-->
+            ICFA, <!-- air groove arc volume in IST carbon foam for cooling tube placement-->
+            IBAT, <!-- IST Alunimum cooling tube-->
+            IBCW, <!-- IST cooling liquid in the alunimum tube -->      
+            ILST, <!-- IST CF skin TOP layer mother volume-->
+            ISTC, <!-- CF skin BOX volume on connecter side in TOP CF skin mother volume (due to hybrid thickness changes at different Z position)-->
+            ISTH, <!-- CF skin BOX volume on west side in TOP CF skin mother volume (due to hybrid thickness changes at different Z position)-->      
+            ILSB, <!-- IST CF skin BOTTOM layer mother volume-->
+            ISBC, <!-- CF skin BOX volume on connecter side in BOTTOM CF skin mother volume (due to hybrid thickness changes at different Z position)-->
+            ISBH, <!-- CF skin BOX volume on west side in BOTTOM CF skin mother volume (due to hybrid thickness changes at different Z position)-->
+            IBHT, <!-- IST hybrid top layer mother volume-->
+            IHTC, <!-- IST hybrid on connecter side in TOP hybrid mother volume (due to hybrid thickness changes at different Z position)-->
+            IHTH, <!-- IST hybrid on west side in TOP hybrid mother volume (due to hybrid thickness changes at different Z position)-->
+            IBHB, <!-- IST hybrid bottom layer mother volume-->
+            IHBC, <!-- IST hybrid on connecter side in BOTTOM hybrid mother volume (due to hybrid thickness changes at different Z position)-->
+            IHBH, <!-- IST hybrid on west side in BOTTOM hybrid mother volume (due to hybrid thickness changes at different Z position)-->      
+            IBHC, <!-- IST hybrid north arc layer mother volume-->
+            IHCA, <!-- Inner air layer in north ARC hybrid mother volume (due to hybrid thickness changes at different Z position)-->      
+            IBLM, <!-- IST sensor and APV mother volume-->
+            IBSS, <!-- IST active silicon volume-->
+            IBTE, <!-- IST dead area top edge-->
+            IBBE, <!-- IST dead area bottom edge-->
+            IBLE, <!-- IST dead area left edge-->
+            IBRE, <!-- IST dead area right edge-->
+            IBAP, <!-- APV readout chips -->
+            IECW, <!-- IST stave westside CF endcap mother volume-->
+            ICWT, <!-- IST stave westside CF endcap overlap body top BOX volume -->
+            ICWB, <!-- IST stave westside CF endcap overlap body bottom BOX volume -->
+            IABW, <!-- IST stave westside CF endcap air groove box area for cooling tube placement-->
+            IAAW, <!-- IST stave westside CF endcap air groove top arc area for cooling tube placement-->
+            ITNW, <!-- thread air hole (northwest side) for transpotation protection-->
+            ITSW, <!-- thread air hole (southwest side) for transpotation protection-->
+            IESB, <!-- thread air hole (middle) box area for support block fixing-->
+            IESA, <!-- thread air hole (middle) arc area for support block fixing-->
+            IESC, <!-- thread air hole (middle) arc area for support block fixing-->
+            IECE, <!-- IST stave eastside aluminum endcap mother volume-->
+            ICET, <!-- IST stave eastside aluminum endcap overlap body top BOX volume -->
+            ICEB, <!-- IST stave eastside aluminum endcap overlap body bottom BOX volume -->
+            IABE, <!-- IST stave eastside aluminum endcap air groove box area for cooling tube placement-->
+            IAAE, <!-- IST stave eastside aluminum endcap air groove top arc area for cooling tube placement-->
+            ITNE, <!-- thread air hole (northeast side) for transpotation protection-->
+            ITSE, <!-- thread air hole (southeast side) for transpotation protection-->
+            IESE, <!-- thread air hole (middle) in eastside endcap for support block fixing-->
+            ITSM, <!-- screw support thread spacer mother volume -->
+            ISTS, <!-- screw support thread spacer TUBS volume in the endcap-->
+            ISTF, <!-- screw support thread spacer TUBE volume to fix the support block-->      
+            IBRB, <!-- IST Transit board-->
+            IRSA, <!-- IST Transit board slot A-->
+            IRSB, <!-- IST Transit board slot B-->
+            IRSC, <!-- IST Transit board slot C-->      
+            IBSR, <!-- IST Support ring structure mother volume-->
+            ISRH, <!-- IST thread hole in supprt block to locate the spacer pin-->
+            ISRE, <!-- IST support structure box area east-->
+            ISRW, <!-- IST support structure box are west-->
+            ISRR, <!-- IST support structure air groove right side-->
+            ISRB, <!-- IST support structure air groove bottom side-->
+            ISRL, <!-- IST support structure air groove left side-->
+            ISRA, <!-- IST support structure top arc surface area-->
+            ISRI, <!-- IST support structure top narrow arc surface inside direction -->
+            ISRO, <!-- IST support structure top narrow arc surface outside direction -->
+            ISRC, <!-- IST support structure left connection part-->
+            ISRS, <!-- IST support structure small trapzoid shape at left side-->
+            ISCM, <!-- IST screw mother volume-->
+            ISWS, <!-- IST screw washer-->
+            ISCH, <!-- IST screw hat-->
+            ISCR, <!-- IST screw stud-->
+            IBTS  <!-- IST thermal sensor-->
+  </Content>
+    
+    <varlist type="float" comment=" Half Width of IST ladder mother volume" >  HalfLadWdt/3.8922/</varlist>
+    <varlist type="float" comment=" Half Thcikness of IST ladder mother volume" >   HalfLadThk/1.92955/</varlist>
+    <varlist type="float" comment=" Half Length of IST ladder mother volume" >    HalfLadLen/35.56/</varlist>
+    
+    <varlist type="float" comment=" Half Width of Choneycomb in Stave" > HalfCombWdt/1.800/</varlist>
+    <varlist type="float" comment=" Half Thickness of Choneycomb in Stave" > HalfCombThk/0.2900/</varlist>
+    <varlist type="float" comment=" Half Length of Choneycomb in Stave" > HalfCombLen/27.94/</varlist>
+    <varlist type="float" comment=" Half Thickness of Choneycomb on connecter side" > HalfCombThkConnect/0.28315/</varlist>
+    <varlist type="float" comment=" Half Length of connecter side Choneycomb volume" > HalfCombLenConnect/4.4125/</varlist>
+    
+    <varlist type="float" comment=" Half Width of Carbon Foam in Stave" > HalfFoamWdt/1.250/</varlist>
+    <varlist type="float" comment=" Half Thickness of Carbon Foam in Stave" > HalfFoamThk/0.2900/</varlist>
+    <varlist type="float" comment=" Half Length of Carbon Foam in Stave" > HalfFoamLen/27.94/</varlist>
+    <varlist type="float" comment=" Half Thickness of Carbon Foam con connecter side" > HalfFoamThkConnect/0.28315/</varlist>
+    <varlist type="float" comment=" Half Length of connecter side CARBON foam volume" > HalfFoamLenConnect/4.4125/</varlist>
+    <varlist type="float" comment=" Distance of Carbon Foam north edge to ladder mother volume edge" > DistFoamToLadder/1.0621/</varlist>
+    
+    <varlist type="float" comment=" Inner radius of Alunimum Tube in Carbon Foam" > TubeRmin/0.2025/</varlist>
+    <varlist type="float" comment=" Outer radius of Alunimum Tube in Carbon Foam" > TubeRmax/0.2381/</varlist>
+    <varlist type="float" comment=" Half Length of Alunimum Tube in Carbon Foam" >  HalfTubeLen/35.56/</varlist>
+    <varlist type="float" comment=" Distance from Alunimum Tube center to top skin inner surface" >  DistTubeTopSkin/0.2922/</varlist>
+    
+    <varlist type="float" comment=" radius of cooling liquid in Alunimum Tube" > LiquidInTubeR/0.2025/</varlist>
+    <varlist type="float" comment=" Half Length of cooling liquid in Alunimum Tube" > LiquidInTubeLen/35.56/</varlist>
+    
+    <varlist type="float" comment=" Half Width of carbon fiber skin" > HalfSkinWdt/3.05/</varlist>
+    <varlist type="float" comment=" Half Thickness of carbon fiber skin" > HalfSkinThk/0.0075/</varlist>
+    <varlist type="float" comment=" Half Length of carbon fiber skin" > HalfSkinLen/28.440/</varlist>
+    <varlist type="float" comment=" Half Thickness of carbon fiber skin mother volume" > HalfThkSkinMom/0.010925/</varlist>
+    <varlist type="float" comment=" Half Length of connecter side carbon fiber skin volume" > HalfLenSkinConnect/4.5725/</varlist>
+        
+    <varlist type="float" comment=" Half Width of top and bottom Hybrid" > HalfHbdWdtTB/3.05/</varlist>
+    <varlist type="float" comment=" Half Thickness of top and bottom Hybrid" > HalfHbdThkTB/0.008125/</varlist>
+    <varlist type="float" comment=" Half Length of top and bottom Hybrid" > HalfHbdLenTB/28.440/</varlist>
+    <varlist type="float" comment=" Half Thickness of top and bottom Hybrid on connecter side" > HalfHbdThkTBConnect/0.01155/</varlist>
+    <varlist type="float" comment=" Half Length of top and bottom Hybrid on connecter side" > HalfHbdLenTBConnect/4.565/</varlist>
+    <varlist type="float" comment=" Half Thickness of air layer in hybrid volume" > HalfThkAirInHbd/0.003425/</varlist>
+    <varlist type="float" comment=" Half Length of air layer in hybrid volume" > HalfLenAirInHbd/23.875/</varlist>
+    
+    <varlist type="float" comment=" Inner radius of north half circle Hybrid" > HbdArcRmin/0.29815/</varlist>
+    <varlist type="float" comment=" Outer radius of north half circle hybrid" > HbdArcRmax/0.32125/</varlist>
+    <varlist type="float" comment=" Half Length of north half circle Hybrid" > HalfHbdArcLen/28.44/</varlist>
+    <varlist type="float" comment=" Outer radius of air layer in north half circle hybrid" > AirInHbdArcRmax/0.305/</varlist>
+    <varlist type="float" comment=" Half Length of air layer in north half circle hybrid" > AirInHbdHalfLen/23.875/</varlist>
+    
+    <varlist type="float" comment=" Half Width of APV chip" > HalfAPVWdt/0.41/</varlist>
+    <varlist type="float" comment=" Half Thickness of APV chip" > HalfAPVThk/0.015/</varlist>
+    <varlist type="float" comment=" Half Length of APV chip" > HalfAPVLen/0.35875/</varlist>
+    <varlist type="float" comment=" Gap between two APV chips" > APVGapSize/0.5375/</varlist>
+    <varlist type="float" comment=" Gap between APV chip and silicon sensor" > APVSensorGapSize/0.1019/</varlist>
+    
+    <varlist type="float" comment=" Half Width of Sensor active area" > HalfSensorWdt/1.9008/</varlist>
+    <varlist type="float" comment=" Half Thickness of Sensor active area" > HalfSensorThk/0.015/</varlist>
+    <varlist type="float" comment=" Half Length of Sensor active area" > HalfSensorLen/3.765/</varlist>
+    <varlist type="float" comment=" Half Width of Sensor east and west edge structure" > HalfSensorEdgeLR/0.04/</varlist>
+    <varlist type="float" comment=" Half Width of Sensor south Edge Structure" > HalfSensorEdgeT/0.0364/</varlist>
+    <varlist type="float" comment=" Half Width of Sensor north Edge Structure" > HalfSensorEdgeB/0.0628/</varlist>
+    <varlist type="float" comment=" Gap between two Silicon Sensor Pad" > SensorGapSize/0.04/</varlist>
+    
+    <!-- HalfSenMomWdt euqals to HalfSensorWdt plus HalfSensorEdgeS plus HalfSensorEdgeN plus half of APVSensorGapSize plus HalfAPVWdt --> 
+    <varlist type="float" comment=" Half Width of mother volume of Sensor and APVs" > HalfSenMomWdt/2.46095/</varlist>
+    <varlist type="float" comment=" Half Thickness of mother volume of sensor and APVs" > HalfSenMomThk/0.015/</varlist>
+    <varlist type="float" comment=" Half Length of mother volume of sensor and APVs" > HalfSenMomLen/3.865/</varlist>
+    <!--the variable HalfSenMomLen equals to HalfSensorLen plus two times of HalfSensorEdgeEW plus Half of SensorGapSize  -->
+    <varlist type="float" comment=" Distance from ladder mother volume east edge to first IBLM east edge" > DistLadderToIBLM/19.25/</varlist>
+    <varlist type="float" comment=" Distance from sensor south edge to ladder south edge" > DistSensorToLadder/0.1/</varlist>
+ 
+    <varlist type="float" comment=" Half Width of mother volume of endcap" > HalfEndcapMomWdt/3.05/</varlist>
+    <varlist type="float" comment=" Half Thickness of mother volume of endcap" > HalfEndcapMomThk/0.305/</varlist>
+    <varlist type="float" comment=" Half Length of mother volume of endcap" > HalfEndcapMomLen/1.125/</varlist>
+    <varlist type="float" comment=" Half Thickness of overlap area between endcap and skin or hybrid" > HalfOverlapEndcapSkinThk/0.2775/</varlist>
+    <varlist type="float" comment=" Length of connection area between endcap and skin or hybrid" > ConnectEndcapSkinLen/0.6/</varlist>
+    <varlist type="float" comment=" Length of overlap area between endcap and skin or hybrid" > OverlapEndcapSkinLen/0.5/</varlist>
+    
+    <varlist type="float" comment=" Length of outside cooling tube in west direction" > OutsideTubeWestLen/3.24/</varlist>
+    <varlist type="float" comment=" Length of outside cooling tube in east direction" > OutsideTubeEastLen/7.50/</varlist>
+    <varlist type="float" comment=" Length of transit board part of outside endcap" > OutsideTBoardLen/0.8731/</varlist>
+    
+    <varlist type="float" comment=" Half Width of transit board" > HalfTBoardWdt/1.935/</varlist>
+    <varlist type="float" comment=" Half Thickness of transit board" > HalfTBoardThk/0.0823/</varlist>
+    <varlist type="float" comment=" Half Length of transit board" > HalfTBoardLen/5.830/</varlist>
+    
+    <varlist type="float" comment=" Half Width of Transit board slot" > HalfTBslotWdt/0.25/</varlist>
+    <varlist type="float" comment=" Half Thickness of Transit board slot" > HalfTBslotThk/0.2881/</varlist>
+    <varlist type="float" comment=" Half Length of Transit board slot" > HalfTBslotLen/1.650/</varlist>
+    <varlist type="float" comment=" Gap size in x direction between each TB slot" > TBSlotGapSize/0.150/</varlist>
+    <varlist type="float" comment=" Distance from slot C to foam north edge" > DistSlotCtoFoam/0.1582/</varlist>
+    <varlist type="float" comment=" Length of overlap between two slots" > OverlapSlotsLen/0.4655/</varlist>
+    
+    <varlist type="float" comment=" Half Width of support ring structure mother volume" > HalfSRMomWdt/2.32085/</varlist>
+    <varlist type="float" comment=" Half Thickness of support ring structure mother volume" > HalfSRMomThk/1.24945/</varlist>
+    <varlist type="float" comment=" Half Length of support ring structure momther volume" > HalfSRMomLen/0.47625/</varlist>
+    <varlist type="float" comment=" Distance from support ring structure momther volume to endcap edge" > DistSRMomToECedge/0.2737/</varlist>
+    <varlist type="float" comment=" Distance from support ring structure momther volume to hybrid edge" > DistSRMomToHBDedge/0.5238/</varlist>
+    
+    <varlist type="float" comment=" Half Width of two box parts of support structure in south" > HalfSRSouthWdt/0.31115/</varlist>
+    <varlist type="float" comment=" Half Thickness of two box parts of support structure in south" > HalfSRSouthThk/0.82385/</varlist>
+    <varlist type="float" comment=" Half Length of two box parts of support structure in south" > HalfSRSouthLen/0.0775/</varlist>
+    
+    <varlist type="float" comment=" Height of support ring structure in south" > SRSouthHgt/1.796/</varlist>
+    <varlist type="float" comment=" Height of support ring structure in north" > SRNorthHgt/2.4989/</varlist>
+    <varlist type="float" comment=" Thickness of top arc surface of support ring structure" > SRArcSurfThk/0.1483/</varlist>
+    
+    <varlist type="float" comment=" Inner radius of IST module" > ModuleInnerRadius/11.846885/</varlist>
+    
+    <!-- IST detector parameters -->
+    <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.5/</varlist>
+    <varlist type="float" comment=" Outer radius of mother volume whole detector" > IBMOOuterRadius/17.5/</varlist>
+    <varlist type="int"   comment=" Number of ladders" > nLadder/24/</varlist>
+    <varlist type="int"   comment=" Number of silicon sensor per ladder" > nUnit/6/</varlist>
+    <varlist type="int"   comment=" Number of APV chips per sensor" > nAPVUnit/6/</varlist>
+    <varlist type="float" comment=" Tilt angle of the ladders" > Tilt/17.91189/</varlist>
+    <varlist type="float" comment=" Shift angle in phi of the ladders" > phiCorrAngle/4.85/</varlist>  
+  
+  <!-- define rotation and shift parameters for misalignment test -->
+  <Structure name="PARO" comment="set of 3 paramters (offset) to misalign a ladder ">
+    <var name="version" type="int" />
+    <var name="DX"   type="float" comment="is the MAX shift in local X allowed, the real shift will be a fraction"/>
+    <var name="DY"   type="float" comment="is the MAX shift in local Y allowed, the real shift will be a fraction"/>
+    <var name="DZ"   type="float" comment="is the MAX shift in local Z allowed, the real shift will be a fraction"/>
+    <var name="mult" type="float" comment="is the multiplicator factor, [0,1]*Shift"/>
+    <var name="lad(24)"  type="int"/>
+  </Structure>
+
+  <Structure name="PARA" comment="set of 3 paramters (angles) to misalign a ladder ">
+    <var name="version" type="int" />
+    <var name="DA"   type="float" comment="is the MAX rotation dAlpha around X allowed, the real rot. will be a fraction"/>
+    <var name="DB"   type="float" comment="is the MAX rotation dBeta around Y allowed, the real rot. will be a fraction"/>
+    <var name="DG"   type="float" comment="is the MAX rotation dGamma around Z allowed, the real rot. will be a fraction"/>
+    <var name="mult" type="float" comment="is the multiplicator factor, [0,1]*rot"/>
+    <var name="lad(24)"  type="int"/>
+  </Structure>
+  
+  <Fill name="PARO" comment="default">
+   <var name="version" value="0"/>
+   <var name="DX" value="0"   comment=" default : no shift "/>
+   <var name="DY" value="0"   comment=" default : no shift "/>
+   <var name="DZ" value="0"   comment=" default : no shift "/>
+   <var name="mult" value="0" comment=" default : no shift "/>
+   <var name="lad"  value="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}" comment="1..24"/>
+  </Fill>
+
+  <Fill name="PARO" comment="shift">
+   <var name="version" value="1"/>
+   <var name="DX" value="0"   comment=" shift for all ladders"/>
+   <var name="DY" value="0"   comment=" default = no shift "/>
+   <var name="DZ" value="1"   comment=" default = no shift "/>
+   <var name="mult" value="5" comment=" max is 1 cm"/>
+   <var name="lad"  value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment="1..24"/>
+  </Fill>
+
+  <Fill name="PARA" comment="default">
+   <var name="version" value="0"/>
+   <var name="DA" value="0"   comment=" default = no rot "/>
+   <var name="DB" value="0"   comment=" default = no rot. "/>
+   <var name="DG" value="0"   comment=" default = no rot. "/>
+   <var name="mult" value="0" comment=" default = no rot. "/>
+   <var name="lad"  value="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}" comment="1..24"/>
+  </Fill>
+
+  <Fill name="PARA" comment="rotation gamma">
+   <var name="version" value="1"/>
+   <var name="DA" value="0"    comment=" no rot."/>
+   <var name="DB" value="0"    comment=" no rot. "/>
+   <var name="DG" value="1"    comment=" rot. for all ladders "/>
+   <var name="mult" value="1" comment=" max is 1 degrees "/>
+   <var name="lad"  value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment="1..24"/>
+  </Fill>
+    
+  <!-- the next 2 structures are used for misalignment : offset + rotation -->
+  <Use struct="PARO" select="version" value="0" />
+  <Use struct="PARA" select="version" value="0" />
+
+  
+  <!-- define materials/mixtures -->
+  <Material a="12" z="6" name="CARBONFOAM" dens="0.09" radl="42.7"/>  <!-- graphite for carbon foam -->
+    
+  <Mixture name="CFRPMix" dens="0.03" radl="23.9" >   <!-- CFRP (58% graphite and 42% plastic C26H25ClO5) for carbon honeycomb -->
+    <Component name="O"  a="16"   z="8"  w="0.074"  />
+    <Component name="C"  a="12"   z="6"  w="0.870"  />
+    <Component name="H"  a="1"    z="1"  w="0.023"  />
+    <Component name="Cl" a="35.5" z="17" w="0.033"  />
+  </Mixture>
+    
+    <Mixture name="CFRPMix2" dens="1.60" radl="23.9" > <!-- CFRP (58% graphite and 42% plastic C26H25ClO5) for CF skin -->
+        <Component name="O"  a="16"   z="8"  w="0.074"  />
+        <Component name="C"  a="12"   z="6"  w="0.870"  />
+        <Component name="H"  a="1"    z="1"  w="0.023"  />
+        <Component name="Cl" a="35.5" z="17" w="0.033"  />
+    </Mixture>
+
+    <Mixture name="PEEKCF30" dens="1.41" radl="25.0" >  <!-- PEEK CF 30 (30% graphite and 70% PEEK C19H12O3) for west end-cap and support block -->
+        <Component name="O"  a="16"   z="8"  w="0.117"  />
+        <Component name="C"  a="12"   z="6"  w="0.854"  />
+        <Component name="H"  a="1"    z="1"  w="0.029"  />
+    </Mixture>
+         
+    <Mixture name="KAPTON" dens="1.42" radl="28.6" > <!-- Kapton for hybrid -->
+        <Component name="O"  a="16"   z="8"  w="0.210"  />
+        <Component name="C"  a="12"   z="6"  w="0.691"  />
+        <Component name="H"  a="1"    z="1"  w="0.026"  />
+        <Component name="N"  a="14"   z="7"  w="0.073"  />
+    </Mixture>
+
+    <Mixture name="NOVEC7200" dens="1.44">  <!-- 3M Novec 7200 (C4F9OC2H5) for cooling liquid -->
+        <Component name="O" a="16" z="8"  w="0.061" />
+        <Component name="H" a="1"  z="1"  w="0.019" />
+        <Component name="C" a="12" z="6"  w="0.272"  />
+        <Component name="F" a="9"  z="19" w="0.648"  />
+    </Mixture>
+    
+    <Mixture name="PEEKGF30" dens="1.49" radl="25.0" >  <!-- PEEK GF 30 (30% SiO2 and 70% PEEK C19H12O3) for screws and washers -->
+        <Component name="O"  a="16"    z="8"  w="0.3*2*16/60.+0.7*3*16/288."  />
+        <Component name="C"  a="12"    z="6"  w="0.7*19*12/288."  />
+        <Component name="Si" a="28.08" z="14" w="0.3*1*28/60." />
+        <Component name="H"  a="1"     z="1"  w="0.7*12*1/288."  />
+    </Mixture>
+    
+  <Mixture name="G10" dens="1.7"  >  <!-- G10 (60% SiO2 and 40% C8H14O4) for transition board -->
+    <Component name="Si" a="28.08" z="14" w="0.6*1*28./60." />
+    <Component name="O" a="16" z="8" w="0.6*2*16./60.+0.4*4*16./174." />
+    <Component name="C" a="12" z="6" w="0.4*8*12./174." />
+    <Component name="H" a="1"  z="1" w="0.4*14*1./174." />
+  </Mixture>
+
+  <Mixture name="DELRIN" dens="1.2"  >  <!-- Delrin (C5H8O2) for readout connectors and spacers -->
+    <Component name="O" a="16" z="8" w="2*16./100." />
+    <Component name="C" a="12" z="6" w="5*12./100." />
+    <Component name="H" a="1"  z="1" w="8*1./100." />
+  </Mixture>
+    
+    <Mixture name="APVMix" dens="2.535"  > <!-- referred from FgtdGeo.xml for APV chips -->
+        <Component name="Si" a="28.1" z="14" w="0.191"  />
+        <Component name="O"  a="16"   z="8"  w="0.339"  />
+        <Component name="C"  a="12"   z="6"  w="0.213"  />
+        <Component name="H"  a="1"    z="1"  w="0.028"  />
+        <Component name="Cl" a="35.5" z="17" w="0.009"  />
+        <Component name="Cu" a="63.5" z="29" w="0.122" />
+        <Component name="Pb" a="207"  z="82" w="0.039"  />
+        <Component name="Sn" a="118.7" z="50" w="0.059"  />
+    </Mixture>
+    
+  raddeg = 3.14159265/180.0
+  <!-- Calculate thickness of modules and ladders to properly set the size of the mother volumes-->
+  Module_Thk = HalfLadThk*2
+  <!-- Ladder thickness -->
+  Ladder_Thk = HalfLadThk*2
+  Ladder_Width = HalfLadWdt*2
+  Ladder_Length = HalfLadLen*2
+    
+  debug = 0
+    
+  <Create block="IBMO"/>
+  <Placement block="IBMO" in="IDSM" kOnly="'MANY'" />
+  <Volume name="IBMO" comment="Main volume of IST detector in AgML modeling geometry">
+  <Material name="Air"/>
+  <Attribute for="IBMO" seen="0" colo="1"/>  
+  <Shape type="TUBE" rmin="IBMOInnerRadius" rmax="IBMOOuterRadius" dz="Ladder_Length/2.0" />
+
+  <!-- ModuleRadius = 13.633433 -->
+  ModuleRadius = 13.68767
+
+   <Do var="nl" from="1" to="nLadder">
+     <!-- Rotate ladders so that they nicely cover the layer-->
+     <!-- quick way to rotate ladder-->
+     <!-- The below 4.85 degree means the phi rotated IST so that it aligns with the TPC sectors-->
+     aangle=(360.0/nLadder)*nl - Tilt + phiCorrAngle
+
+     <!--And tilt a bit so that they can be tiled-->
+     bangle=(aangle+Tilt)*raddeg
+     <!--Vector from center of silicon sensor to center ladder volume-->
+     IniX=0.0
+     IniY=0.0
+     <If expr="debug==1"  >
+     <Info format="shift in X ={6.4f}"> PARO_DX*PARO_mult </Info>
+     <Info format="shift in Y ={6.4f}"> PARO_DY*PARO_mult </Info>
+     <Info format="shift in Z ={6.4f}"> PARO_DZ*PARO_mult </Info>
+     </If>
+     xpos=ModuleRadius*sin(aangle*raddeg) + (PARO_DX*PARO_mult)*PARO_lad(nl) 
+     ypos=ModuleRadius*cos(aangle*raddeg) + (PARO_DY*PARO_mult)*PARO_lad(nl)
+     zpos=0.0                                    + (PARO_DZ*PARO_mult)*PARO_lad(nl)
+
+     <If expr="debug==1"  >
+     <Info format="aangle={8.5f}"> aangle </Info>
+     <Info format="bangle={8.5f}"> bangle </Info>
+     <Info format="x={8.5f}"> xpos </Info>
+     <Info format="y={8.5f}"> ypos </Info>
+     </If>
+       <Create block="IBAM"/>
+       <!-- Note the ladder center is not in accordance with the IBMO center in z direction, so need to shift to superposition -->
+       <!-- the shift distance equals to OutsideTubeWestLen+2*HalfEndcapMomLen+2*HalfSenMomLen*3-HalfLadLen -->
+       <Placement in="IBMO" x="xpos" y="ypos" z="zpos-6.88" block="IBAM" konly="'MANY'">
+        <!-- tilt was originally -90, meaning no tilt-->
+        <!-- in this version, tilt=-75 meaning ladders are tilted wrt normal radius by angle = 15 degress-->
+        <If expr="debug==1"  >
+        <Info format="rot along X ={6.4f}"> PARA_DA*PARA_mult </Info>
+        <Info format="rot along Y ={6.4f}"> PARA_DB*PARA_mult </Info>
+        <Info format="rot along Z ={6.4f}"> PARA_DG*PARA_mult </Info>
+        </If>
+        <Rotation alphaz="-1*aangle-(Tilt + PARA_DG*PARA_mult*PARA_lad(nl))"/>
+        <Rotation alphax="-1*(PARA_DA*PARA_mult)*PARA_lad(nl)"/>
+        <Rotation alphay="-1*(PARA_DB*PARA_mult)*PARA_lad(nl)"/>
+       </Placement>
+  </Do>
+<!-- end Loop over ladders-->
+<!--  </Volume> -->
+</Volume> 
+
+ <!-- volume to contain a single ladder = 6 active silicon sensors + support materials -->
+ <Volume name="IBAM" comment="IST ladder">
+ <Material name="Air" />
+ <Attribute for="IBAM" seen="0" colo="6"/>
+ <Shape type="BOX" dx="Ladder_Width/2.0" dy="Ladder_Thk/2.0" dz="Ladder_Length/2.0"/>
+ <!-- virtual volume is created here -->
+ 
+    <!-- placement of boxes -->
+     <Create    block="ILCC"  />
+     <Placement in="IBAM" x="HalfLadWdt-HalfCombWdt-2*HalfSRSouthWdt" y="-HalfLadThk+HalfCombThk+2*HalfSRMomThk+2*HalfSkinThk" z="HalfLadLen-HalfCombLen-2*HalfEndcapMomLen-OutsideTubeWestLen" block="ILCC">
+     </Placement>
+     
+     <Create    block="IBCF"  />
+     <Placement in="IBAM" x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt" y="HalfFoamThk+2*HalfSRMomThk-HalfLadThk+2*HalfSkinThk" z="HalfLadLen-HalfFoamLen-2*HalfEndcapMomLen-OutsideTubeWestLen" block="IBCF">
+     </Placement>
+
+     <Create    block="ILST"  />
+     <Placement in="IBAM" x="HalfLadWdt-HalfSkinWdt-2*HalfSRSouthWdt" y="-HalfLadThk+2*HalfCombThk+2*HalfSRMomThk+2*HalfSkinThk+HalfSkinThk-HalfThkAirInHbd" z="HalfLadLen-HalfSkinLen-2*HalfEndcapMomLen+OverlapEndcapSkinLen-OutsideTubeWestLen" block="ILST">
+     </Placement>
+     
+     <Create    block="ILSB"  />
+     <Placement in="IBAM" x="HalfLadWdt-HalfSkinWdt-2*HalfSRSouthWdt" y="-HalfLadThk+2*HalfSRMomThk+HalfSkinThk+HalfThkAirInHbd" z="HalfLadLen-HalfSkinLen-2*HalfEndcapMomLen+OverlapEndcapSkinLen-OutsideTubeWestLen" block="ILSB">
+     </Placement>
+     
+     <Create    block="IBHT"  />
+     <Placement in="IBAM" x="HalfLadWdt-HalfHbdWdtTB-2*HalfSRSouthWdt" y="-HalfLadThk+4*HalfSkinThk+2*HalfCombThk+2*HalfSRMomThk+HalfHbdThkTB-HalfThkAirInHbd" z="HalfLadLen-HalfHbdLenTB-2*HalfEndcapMomLen+OverlapEndcapSkinLen-OutsideTubeWestLen" block="IBHT">
+     </Placement>
+     
+     <Create    block="IBHB"  />
+     <Placement in="IBAM" x="HalfLadWdt-HalfHbdWdtTB-2*HalfSRSouthWdt" y="-HalfLadThk+2*HalfSRMomThk-HalfHbdThkTB+HalfThkAirInHbd" z="HalfLadLen-HalfHbdLenTB-2*HalfEndcapMomLen+OverlapEndcapSkinLen-OutsideTubeWestLen" block="IBHB">
+     </Placement>
+     
+     <Create    block="IBHC"  />
+     <Placement in="IBAM" x="-HalfLadWdt+DistFoamToLadder" y="-HalfLadThk+HalfFoamThk+2*HalfSRMomThk+2*HalfSkinThk" z="HalfLadLen-HalfHbdArcLen-2*HalfEndcapMomLen+OverlapEndcapSkinLen-OutsideTubeWestLen" block="IBHC">
+     </Placement>
+
+     <!-- placement of tube -->
+     <Create    block="IBAT"  />
+     <Placement block="IBAT"  x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax" y="HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin" z="HalfTubeLen-HalfLadLen" >
+     </Placement>
+ 
+     <Create    block="IBCW"  />
+     <Placement block="IBCW"  x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax" y="HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin" z="LiquidInTubeLen-HalfLadLen" >
+     </Placement>
+         
+     <!-- placement of transit board-->
+     <Create    block="IBRB"  />
+     <Placement block="IBRB"  x="-HalfLadWdt+HalfTBoardWdt" y="HalfLadThk-HalfTBoardThk" z="-HalfLadLen+OutsideTubeEastLen-OutsideTBoardLen+HalfTBoardLen" >
+     </Placement>
+     
+     <Create    block="IRSA"  />
+     <Placement block="IRSA"  x="-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+5*HalfTBslotWdt+2*TBSlotGapSize" y="HalfLadThk-2*HalfTBoardThk-HalfTBslotThk" z="-HalfLadLen+OutsideTubeEastLen+2*HalfEndcapMomLen-OverlapEndcapSkinLen+HalfTBslotLen" >
+     </Placement>
+     
+     <Create    block="IRSB"  />
+     <Placement block="IRSB"  x="-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+3*HalfTBslotWdt+TBSlotGapSize" y="HalfLadThk-2*HalfTBoardThk-HalfTBslotThk" z="-HalfLadLen+OutsideTubeEastLen+2*HalfEndcapMomLen-OverlapEndcapSkinLen+3*HalfTBslotLen-OverlapSlotsLen" >
+     </Placement>
+     
+     <Create    block="IRSC"  />
+     <Placement block="IRSC"  x="-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+HalfTBslotWdt" y="HalfLadThk-2*HalfTBoardThk-HalfTBslotThk" z="-HalfLadLen+OutsideTubeEastLen+2*HalfEndcapMomLen-OverlapEndcapSkinLen+5*HalfTBslotLen-2*OverlapSlotsLen" >
+     </Placement>
+     
+     <Create    block="IBTS"  />
+     <Placement in="IBAM" x="-HalfLadWdt+DistFoamToLadder+0.265+0.1625/2.0" y="2*HalfSRMomThk-2*HalfHbdThkTB-HalfLadThk-0.06/2.0" z="-HalfLadLen+OutsideTubeEastLen+21.0236+0.1625/2.0" block="IBTS">
+     </Placement>
+     
+     <Create    block="IECW"  />
+     <Placement in="IBAM" x="HalfLadWdt-HalfEndcapMomWdt-2*HalfSRSouthWdt" y="HalfEndcapMomThk+2*HalfSRMomThk-HalfLadThk" z="-HalfLadLen+OutsideTubeEastLen+HalfEndcapMomLen*3+HalfCombLen*2" block="IECW">
+     </Placement>
+     
+     <Create    block="IECE"  />
+     <Placement in="IBAM" x="HalfLadWdt-HalfEndcapMomWdt-2*HalfSRSouthWdt" y="HalfEndcapMomThk+2*HalfSRMomThk-HalfLadThk" z="-HalfLadLen+OutsideTubeEastLen+HalfEndcapMomLen" block="IECE">
+     </Placement>
+  
+  <!--  <Create block="IBLM"/>  09 19 2012  Yaping Wang 
+   taking care of the silicon sensor numbering in a ladder
+   -->
+  <Do var="nu" from="1" to="nUnit">
+       <Create block="IBLM"/>
+       <Placement in="IBAM" x="HalfLadWdt-HalfSenMomWdt-DistSensorToLadder-2*HalfSRSouthWdt" y="2*HalfSRMomThk-2*HalfHbdThkTB-HalfSenMomThk-HalfLadThk" z="-1.0*HalfLadLen+DistLadderToIBLM+HalfSenMomLen*(2*nu-1)" block="IBLM">
+       <If expr="debug==1"  >
+       <Info format="zpos={6.3f}"> -16.31+3.865*(2*nu-1) </Info>
+       </If>
+       </Placement>
+  </Do>
+  <!-- end loop over sensors-->
+
+  <!-- Create screw thread spacer mother volume ITSM       December 10 2012 Yaping -->
+    <Do var="nes" from="1" to="2">
+         <Create block="ITSM"/>
+         <Placement in="IBAM" x="HalfLadWdt-HalfEndcapMomWdt-2*HalfSRSouthWdt" y="-HalfLadThk+2*HalfSRMomThk+2*HalfEndcapMomThk-0.605" z="-HalfLadLen+OutsideTubeEastLen+0.75+(1.5+HalfCombLen)*(2*nes-2)" block="ITSM">
+             <If expr="debug==1"  >
+                 <Info format="zpos={6.3f}"> -27.31+29.44*(2*nes-2) </Info>
+             </If>
+         </Placement>
+     </Do>
+     
+  <!-- Create screw mother volume ISCM       November 8 2012 Yaping -->
+     <Do var="nsc" from="1" to="2">
+         <Create block="ISCM"/>
+         <Placement in="IBAM" x="HalfLadWdt-HalfEndcapMomWdt-2*HalfSRSouthWdt" y="-HalfLadThk+2*HalfSRMomThk+2*HalfEndcapMomThk-0.02" z="-HalfLadLen+OutsideTubeEastLen+0.75+(1.5+HalfCombLen)*(2*nsc-2)" block="ISCM">
+             <If expr="debug==1"  >
+                 <Info format="zpos={6.3f}"> -27.31+29.44*(2*nsc-2) </Info>
+             </If>
+         </Placement>
+     </Do>
+
+  <!-- Create support ring mother volume       October 1 2012 Yaping -->
+     <Do var="ns" from="1" to="2">
+        <Create block="IBSR"/>
+         <!-- z="-1.0*HalfLadLen+OutsideTubeEastLen+DistSRMomToECedge+HalfSRMomLen*(2*ns-1)+(DistSRMomToHBDedge+HalfHbdLenTB)*(2*ns-2)" -->
+         <Placement in="IBAM" x="HalfLadWdt-1.0*HalfSRMomWdt" y="HalfSRMomThk-1.0*HalfLadThk" z="-56.7501+29.4403*(2*ns-1)" block="IBSR">
+             <If expr="debug==1"  >
+             <Info format="zpos={6.3f}"> -56.7501+29.4403*(2*ns-1) </Info>
+             </If>
+         </Placement>
+     </Do>
+ </Volume>
+
+    <!-- here we define shapes -->
+    <!-- volumes for Choneycomb-->
+    <Volume name="ILCC" comment="Choneycomb mother volume" >
+        <Attribute for="ILCC" seen="0" colo="1"/>
+        <Material name="Air"/>
+        <Shape type="BOX" dx="HalfCombWdt" dy="HalfCombThk" dz="HalfCombLen"/>
+        <Create block="ICCU"/>
+        <Placement block="ICCU" x="0.0" y="0.0" z="-HalfCombLen+HalfCombLenConnect"/>
+        <Create block="ICCD"/>
+        <Placement block="ICCD" x="0.0" y="0.0" z="HalfCombLenConnect"/>
+    </Volume>
+    
+    <Volume name="ICCU" comment="is the IST carbon honeycomb BOX volume on east side">
+        <Material name="CFRPMix" />
+        <Attribute for="ICCU" seen="1" colo="1"/>
+        <Shape type="BOX" dx="HalfCombWdt" dy="HalfCombThkConnect" dz="HalfCombLenConnect"/>
+    </Volume>
+    
+    <Volume name="ICCD" comment="is the IST carbon honeycomb BOX volume on west side">
+        <Material name="CFRPMix" />
+        <Attribute for="ICCD" seen="1" colo="1"/>
+        <Shape type="BOX" dx="HalfCombWdt" dy="HalfCombThk" dz="HalfCombLen-HalfCombLenConnect"/>
+    </Volume>
+    
+    <!-- volumes for CFoam -->
+    <Volume name="IBCF" comment="mother of the CFoam assembly"  >
+        <Material name="Air"  />
+        <Attribute for="IBCF" seen="0" colo="1"  />
+        <Shape type="BOX" dx="HalfFoamWdt" dy="HalfFoamThk" dz="HalfFoamLen"/>
+        <Create block="ICFC"/>
+        <Placement block="ICFC" x="0.0" y="0.0" z="-HalfFoamLen+HalfFoamLenConnect"/>
+        <Create block="ICFD"/>
+        <Placement block="ICFD" x="0.0" y="0.0" z="HalfFoamLenConnect"/>
+        <Create block="ICFB"/>
+        <Placement block="ICFB" x="TubeRmax-0.0" y="HalfFoamThk-DistTubeTopSkin/2.0" z="0.0"/>
+        <Create block="ICFA"/>
+        <Placement block="ICFA" x="TubeRmax-0.0" y="HalfFoamThk-DistTubeTopSkin" z="0.0"/>
+    </Volume>
+    
+    <Volume name="ICFC" comment="is the IST carbon foam BOX volume on east side">
+        <Material name="CARBONFOAM" />
+        <Attribute for="ICFC" seen="1" colo="1"/>
+        <Shape type="BOX" dx="HalfFoamWdt" dy="HalfFoamThkConnect" dz="HalfFoamLenConnect"/>
+    </Volume>
+    
+    <Volume name="ICFD" comment="is the IST carbon foam BOX volume on west side">
+        <Material name="CARBONFOAM" />
+        <Attribute for="ICFD" seen="1" colo="1"/>
+        <Shape type="BOX" dx="HalfFoamWdt" dy="HalfFoamThk" dz="HalfFoamLen-HalfFoamLenConnect"/>
+    </Volume>
+    
+    <Volume name="ICFB" comment="is the CFoam air groove box Area">
+        <Material name="Air" />
+        <Attribute for="ICFB" seen="1" colo="1"/>
+        <Shape type="BOX" dx="TubeRmax" dy="DistTubeTopSkin/2.0" dz="HalfFoamLen"/>
+    </Volume>
+    
+    <Volume name="ICFA" comment="is the CFoam air groove arc Area">
+        <Material name="Air" />
+        <Attribute for="ICFA" seen="1" colo="1"/>
+        <Shape type="TUBS" rmin="0" rmax="TubeRmax" dz="HalfFoamLen" phi1="180.0" phi2="360.0" />
+    </Volume>
+    
+    <!-- volume for cooling tube-->
+    <Volume name="IBAT" comment="Aluminium cooling tube">
+        <Attribute for="IBAT" seen="1" colo="4"/>
+        <Material name="Aluminium"/>
+        <Shape type="TUBE" rmin="TubeRmin" rmax="TubeRmax" dz="HalfTubeLen" />
+    </Volume>
+    
+    <!-- volume for cooling liquid-->
+    <Volume name="IBCW" comment="cooling liquid in Alumnium tube">
+        <Attribute for="IBCW" seen="1" colo="30"/>
+        <Material name="NOVEC7200"/>
+        <Shape type="TUBE" rmin="0.0" rmax="TubeRmin" dz="HalfTubeLen" />
+    </Volume>
+    
+    <!--update ILST geometry for top CF skin due to hybrid thickness  January 9 2013 -->
+    <Volume name="ILST" comment="CF Skin top layer mother volume" >
+        <Attribute for="ILST" seen="0" colo="1"/>
+        <Material name="Air"/>
+        <Shape type="BOX" dx="HalfSkinWdt" dy="HalfThkSkinMom" dz="HalfSkinLen"/>
+        <Create block="ISTC"/>
+        <Placement block="ISTC" x="0.0" y="-HalfThkSkinMom+HalfSkinThk" z="HalfLenSkinConnect-HalfSkinLen"/>
+        <Create block="ISTH"/>
+        <Placement block="ISTH" x="0.0" y="-HalfSkinThk+HalfThkSkinMom" z="HalfLenSkinConnect"/>
+    </Volume>
+    
+    <Volume name="ISTC" comment="is the CF skin BOX volume on connecter side in TOP CF skin mother volume">
+        <Material name="CFRPMix2" />
+        <Attribute for="ISTC" seen="1" colo="3"/>
+        <Shape type="BOX" dx="HalfSkinWdt" dy="HalfSkinThk" dz="HalfLenSkinConnect"/>
+    </Volume>
+    
+    <Volume name="ISTH" comment="is the CF skin BOX volume on west side in TOP CF skin mother volume">
+        <Material name="CFRPMix2" />
+        <Attribute for="ISTH" seen="1" colo="3"/>
+        <Shape type="BOX" dx="HalfSkinWdt" dy="HalfSkinThk" dz="HalfSkinLen-HalfLenSkinConnect"/>
+    </Volume>
+    
+    
+    <!--update ILSB geometry for bottom CF skin due to hybrid thickness  January 9 2013 -->
+    <Volume name="ILSB" comment="CF Skin bottom layer mother volume" >
+        <Attribute for="ILSB" seen="0" colo="1"/>
+        <Material name="Air"/>
+        <Shape type="BOX" dx="HalfSkinWdt" dy="HalfThkSkinMom" dz="HalfSkinLen"/>
+        <Create block="ISBC"/>
+        <Placement block="ISBC" x="0.0" y="HalfThkSkinMom-HalfSkinThk" z="HalfLenSkinConnect-HalfSkinLen"/>
+        <Create block="ISBH"/>
+        <Placement block="ISBH" x="0.0" y="-HalfThkSkinMom+HalfSkinThk" z="HalfLenSkinConnect"/>
+    </Volume>
+    
+    <Volume name="ISBC" comment="is the CF skin BOX volume on connecter side in BOTTOM CF skin mother volume">
+        <Material name="CFRPMix2" />
+        <Attribute for="ISBC" seen="1" colo="3"/>
+        <Shape type="BOX" dx="HalfSkinWdt" dy="HalfSkinThk" dz="HalfLenSkinConnect"/>
+    </Volume>
+    
+    <Volume name="ISBH" comment="is the CF skin BOX volume on west side in BOTTOM CF skin mother volume">
+        <Material name="CFRPMix2" />
+        <Attribute for="ISBH" seen="1" colo="3"/>
+        <Shape type="BOX" dx="HalfSkinWdt" dy="HalfSkinThk" dz="HalfSkinLen-HalfLenSkinConnect"/>
+    </Volume>
+    
+    
+    <!--update IBHT geometry due to hybrid thickness  January 9 2013 -->
+    <Volume name="IBHT" comment="Kapton hybrid TOP layer mother volume" >
+        <Attribute for="IBHT" seen="0" colo="1"/>
+        <Material name="Air"/>
+        <Shape type="BOX" dx="HalfHbdWdtTB" dy="HalfHbdThkTBConnect" dz="HalfHbdLenTB"/>
+        <Create block="IHTC"/>
+        <Placement block="IHTC" x="0.0" y="0.0" z="-HalfHbdLenTB+HalfHbdLenTBConnect"/>
+        <Create block="IHTH"/>
+        <Placement block="IHTH" x="0.0" y="-HalfHbdThkTB+HalfHbdThkTBConnect" z="HalfHbdLenTBConnect"/>
+    </Volume>
+    
+    <Volume name="IHTC" comment="is the hybrid on connecter side in TOP hybrid mother volume">
+        <Material name="KAPTON" />
+        <Attribute for="IHTC" seen="1" colo="2"/>
+        <Shape type="BOX" dx="HalfHbdWdtTB" dy="HalfHbdThkTBConnect" dz="HalfHbdLenTBConnect"/>
+    </Volume>
+    
+    <Volume name="IHTH" comment="is the hybird on west side in TOP hybrid mother volume">
+        <Material name="KAPTON" />
+        <Attribute for="IHTH" seen="1" colo="2"/>
+        <Shape type="BOX" dx="HalfHbdWdtTB" dy="HalfHbdThkTB" dz="HalfHbdLenTB-HalfHbdLenTBConnect"/>
+    </Volume>
+    
+    
+    <!--update IBHB geometry due to hybrid thickness  January 9 2013 -->
+    <Volume name="IBHB" comment="Kapton hybrid BOTTOM layer mother volume" >
+        <Attribute for="IBHB" seen="0" colo="1"/>
+        <Material name="Air"/>
+        <Shape type="BOX" dx="HalfHbdWdtTB" dy="HalfHbdThkTBConnect" dz="HalfHbdLenTB"/>
+        <Create block="IHBC"/>
+        <Placement block="IHBC" x="0.0" y="0.0" z="-HalfHbdLenTB+HalfHbdLenTBConnect"/>
+        <Create block="IHBH"/>
+        <Placement block="IHBH" x="0.0" y="HalfHbdThkTB-HalfHbdThkTBConnect" z="HalfHbdLenTBConnect"/>
+    </Volume>
+    
+    <Volume name="IHBC" comment="is the hybrid on connecter side in BOTTOM hybrid mother volume">
+        <Material name="KAPTON" />
+        <Attribute for="IHBC" seen="1" colo="2"/>
+        <Shape type="BOX" dx="HalfHbdWdtTB" dy="HalfHbdThkTBConnect" dz="HalfHbdLenTBConnect"/>
+    </Volume>
+    
+    <Volume name="IHBH" comment="is the hybrid on west side in BOTTOM hybrid mother volume">
+        <Material name="KAPTON" />
+        <Attribute for="IHBH" seen="1" colo="2"/>
+        <Shape type="BOX" dx="HalfHbdWdtTB" dy="HalfHbdThkTB" dz="HalfHbdLenTB-HalfHbdLenTBConnect"/>
+    </Volume>
+    
+    <!--update IBHC geometry due to hybrid thickness  January 9 2013 -->
+    <Volume name="IBHC" comment="Kapton Hybrid north Arc layer mother volume" >
+        <Attribute for="IBHC" seen="1" colo="2"/>
+        <Material name="KAPTON"/>
+        <Shape type="TUBS" rmin="HbdArcRmin" rmax="HbdArcRmax" dz="HalfHbdArcLen" phi1="90.0" phi2="270.0"/>
+        <Create block="IHCA"/>
+        <Placement block="IHCA" x="0.0" y="0.0" z="-AirInHbdHalfLen+HalfHbdArcLen"/>
+    </Volume>
+    
+    <Volume name="IHCA" comment="is the Inner air layer in north ARC hybrid mother volume">
+        <Material name="Air" />
+        <Attribute for="IHCA" seen="1" colo="1"/>
+        <Shape type="TUBS" rmin="HbdArcRmin" rmax="AirInHbdArcRmax" dz="AirInHbdHalfLen" phi1="90.0" phi2="270.0" />
+    </Volume>
+    
+    
+    <Volume name="IBRB" comment="Transit board" >
+        <Attribute for="IBRB" seen="1" colo="3"/>
+        <Material name="G10"/>
+        <Shape type="BOX" dx="HalfTBoardWdt" dy="HalfTBoardThk" dz="HalfTBoardLen"/>
+    </Volume>
+    
+    <Volume name="IRSA" comment="Transit board slot A" >
+        <Attribute for="IRSA" seen="1" colo="1"/>
+        <Material name="DELRIN"/>
+        <Shape type="BOX" dx="HalfTBslotWdt" dy="HalfTBslotThk" dz="HalfTBslotLen"/>
+    </Volume>
+    
+    <Volume name="IRSB" comment="Transit board slot B" >
+        <Attribute for="IRSB" seen="1" colo="1"/>
+        <Material name="DELRIN"/>
+        <Shape type="BOX" dx="HalfTBslotWdt" dy="HalfTBslotThk" dz="HalfTBslotLen"/>
+    </Volume>
+    
+    <Volume name="IRSC" comment="Transit board slot C" >
+        <Attribute for="IRSC" seen="1" colo="1"/>
+        <Material name="DELRIN"/>
+        <Shape type="BOX" dx="HalfTBslotWdt" dy="HalfTBslotThk" dz="HalfTBslotLen"/>
+    </Volume>
+    
+    <Volume name="IBTS" comment="is the thermal Sensor">
+        <Material name="Silicon" />
+        <Material name="PassiveSilicon" isvol="0"/>
+        <Attribute for="IBTS" seen="1" colo="2"/>
+        <Shape type="BOX" dx="0.1625/2.0" dy="0.06/2.0" dz="0.1625/2.0"/>
+    </Volume>
+
+    <!-- volumes to west-side endcap -->
+    <Volume name="IECW" comment="mother of the west-side endcap assembly"  >
+        <Material name="PEEKCF30"  />
+        <Attribute for="IECW" seen="1" colo="3"  />
+        <Shape type="BOX" dx="HalfEndcapMomWdt" dy="HalfEndcapMomThk" dz="HalfEndcapMomLen"/>
+        <Create block="ICWT"/>
+        <Placement block="ICWT" x="0.0" y="HalfEndcapMomThk-0.0275/2.0" z="-HalfEndcapMomLen+ConnectEndcapSkinLen/2.0"/>
+        <Create block="ICWB"/>
+        <Placement block="ICWB" x="0.0" y="-HalfEndcapMomThk+0.0275/2.0" z="-HalfEndcapMomLen+ConnectEndcapSkinLen/2.0"/>
+        <Create block="IABW"/>
+        <Placement block="IABW" x="-HalfEndcapMomWdt+1.2348+0.5065/2.0" y="HalfEndcapMomThk-0.31/2.0" z="0.0"/>
+        <Create block="IAAW"/>
+        <Placement block="IAAW" x="-HalfEndcapMomWdt+1.2348+0.5065/2.0" y="HalfEndcapMomThk-0.31" z="0.0"/>
+        <Create block="IESB"/>
+        <Placement block="IESB" x="0.0" y="0.0" z="HalfEndcapMomLen-0.3168-0.5664/2.0-0.3/2.0"/>
+        <Create block="IESA"/>
+        <Placement block="IESA" x="0.0" y="0.0" z="HalfEndcapMomLen-0.3168-0.5664/2.0-0.3">
+            <Rotation alphax="90.0"/>
+        </Placement>
+        <Create block="IESC"/>
+        <Placement block="IESC" x="0.0" y="0.0" z="HalfEndcapMomLen-0.3168-0.5664/2.0">
+            <Rotation alphax="90.0"/>
+        </Placement>
+        <Create    block="ITNW"  />
+        <Placement block="ITNW"  x="-HalfEndcapMomWdt+0.4+0.3/2.0" y="0.0" z="HalfEndcapMomLen-0.5" >
+            <Rotation alphax="90.0"/>
+        </Placement>        
+        <Create    block="ITSW"  />
+        <Placement block="ITSW"  x="HalfEndcapMomWdt-0.4-0.3/2.0" y="0.0" z="HalfEndcapMomLen-0.5" >
+            <Rotation alphax="90.0"/>
+        </Placement>
+    </Volume>
+    
+    <Volume name="ICWT" comment="is the cfoam endcap overlap body top BOX volume">
+        <Material name="Air" />
+        <Attribute for="ICWT" seen="1" colo="1"/>
+        <Shape type="BOX" dx="HalfEndcapMomWdt" dy="(HalfEndcapMomThk-HalfOverlapEndcapSkinThk)/2.0" dz="ConnectEndcapSkinLen/2.0"/>
+    </Volume>
+    
+    <Volume name="ICWB" comment="is the cfoam endcap overlap body bottom BOX volume">
+        <Material name="Air" />
+        <Attribute for="ICWB" seen="1" colo="1"/>
+        <Shape type="BOX" dx="HalfEndcapMomWdt" dy="(HalfEndcapMomThk-HalfOverlapEndcapSkinThk)/2.0" dz="ConnectEndcapSkinLen/2.0"/>
+    </Volume>
+    
+    <Volume name="IABW" comment="is the endcap air groove box Area for tube placement">
+        <Material name="Air" />
+        <Attribute for="IABW" seen="1" colo="1"/>
+        <Shape type="BOX" dx="0.5065/2.0" dy="0.31/2.0" dz="HalfEndcapMomLen"/>
+    </Volume>
+    
+    <Volume name="IAAW" comment="is the endcap air groove arc Area for tube placement">
+        <Material name="Air" />
+        <Attribute for="IAAW" seen="1" colo="1"/>
+        <Shape type="TUBS" rmin="0" rmax="0.5065/2.0" dz="HalfEndcapMomLen" phi1="180.0" phi2="360.0" />
+    </Volume>
+    
+    <Volume name="IESB" comment="is the endcap air groove box Area for screw thread hole">
+        <Material name="Air" />
+        <Attribute for="IESB" seen="1" colo="1"/>
+        <Shape type="BOX" dx="0.5664/2.0" dy="HalfEndcapMomThk" dz="0.3/2.0"/>
+    </Volume>
+    
+    <Volume name="IESA" comment="is the endcap air groove arc Area for screw thread hole">
+        <Material name="Air" />
+        <Attribute for="IESA" seen="1" colo="1"/>
+        <Shape type="TUBS" rmin="0.0" rmax="0.5664/2.0" dz="HalfEndcapMomThk" phi1="180.0" phi2="360.0" />
+    </Volume>
+    
+    <Volume name="IESC" comment="is the endcap air groove arc Area for screw thread hole">
+        <Material name="Air" />
+        <Attribute for="IESC" seen="1" colo="1"/>
+        <Shape type="TUBS" rmin="0.0" rmax="0.5664/2.0" dz="HalfEndcapMomThk" phi1=".0" phi2="180.0" />
+    </Volume>
+    
+    <Volume name="ITNW" comment="is the endcap air groove for transport protection screw thread (northwest)">
+        <Material name="Air" />
+        <Attribute for="ITNW" seen="1" colo="1"/>
+        <Shape type="TUBE" rmin="0.0" rmax="0.3/2.0" dz="HalfEndcapMomThk" />
+    </Volume>
+    
+    <Volume name="ITSW" comment="is the endcap air groove for transport protection screw thread (southwest)">
+        <Material name="Air" />
+        <Attribute for="ITSW" seen="1" colo="1"/>
+        <Shape type="TUBE" rmin="0.0" rmax="0.3/2.0" dz="HalfEndcapMomThk" />
+    </Volume>
+    
+    <!-- volumes to east-side endcap -->
+    <Volume name="IECE" comment="mother of the east-side endcap assembly"  >
+        <Material name="Aluminium"  />
+        <Attribute for="IECE" seen="1" colo="4"  />
+        <Shape type="BOX" dx="HalfEndcapMomWdt" dy="HalfEndcapMomThk" dz="HalfEndcapMomLen"/>
+        <Create block="ICET"/>
+        <Placement block="ICET" x="0.0" y="HalfEndcapMomThk-0.0275/2.0" z="HalfEndcapMomLen-ConnectEndcapSkinLen/2.0"/>
+        <Create block="ICEB"/>
+        <Placement block="ICEB" x="0.0" y="-HalfEndcapMomThk+0.0275/2.0" z="HalfEndcapMomLen-ConnectEndcapSkinLen/2.0"/>
+        <Create block="IABE"/>
+        <Placement block="IABE" x="-HalfEndcapMomWdt+1.2348+0.5065/2.0" y="HalfEndcapMomThk-0.31/2.0" z="0.0"/>
+        <Create block="IAAE"/>
+        <Placement block="IAAE" x="-HalfEndcapMomWdt+1.2348+0.5065/2.0" y="HalfEndcapMomThk-0.31" z="0.0"/>
+        <Create    block="IESE"  />
+        <Placement block="IESE"  x="0.0" y="0.0" z="-HalfEndcapMomLen+0.4668+0.5664/2.0" >
+            <Rotation alphax="90.0"/>
+        </Placement>
+        <Create    block="ITNE"  />
+        <Placement block="ITNE"  x="-HalfEndcapMomWdt+0.4+0.3/2.0" y="0.0" z="-HalfEndcapMomLen+0.5" >
+            <Rotation alphax="90.0"/>
+        </Placement>
+        <Create    block="ITSE"  />
+        <Placement block="ITSE"  x="HalfEndcapMomWdt-0.4-0.3/2.0" y="0.0" z="-HalfEndcapMomLen+0.5" >
+            <Rotation alphax="90.0"/>
+        </Placement>
+    </Volume>
+    
+    <Volume name="ICET" comment="is the Aluminium endcap overlap body top BOX volume">
+        <Material name="Air" />
+        <Attribute for="ICET" seen="1" colo="1"/>
+        <Shape type="BOX" dx="HalfEndcapMomWdt" dy="(HalfEndcapMomThk-HalfOverlapEndcapSkinThk)/2.0" dz="ConnectEndcapSkinLen/2.0"/>
+    </Volume>
+    
+    <Volume name="ICEB" comment="is the Aluminium endcap overlap body bottom BOX volume">
+        <Material name="Air" />
+        <Attribute for="ICEB" seen="1" colo="1"/>
+        <Shape type="BOX" dx="HalfEndcapMomWdt" dy="(HalfEndcapMomThk-HalfOverlapEndcapSkinThk)/2.0" dz="ConnectEndcapSkinLen/2.0"/>
+    </Volume>
+    
+    <Volume name="IABE" comment="is the endcap air groove box Area for tube placement">
+        <Material name="Air" />
+        <Attribute for="IABE" seen="1" colo="1"/>
+        <Shape type="BOX" dx="0.5065/2.0" dy="0.31/2.0" dz="HalfEndcapMomLen"/>
+    </Volume>
+    
+    <Volume name="IAAE" comment="is the endcap air groove arc Area for tube placement">
+        <Material name="Air" />
+        <Attribute for="IAAE" seen="1" colo="1"/>
+        <Shape type="TUBS" rmin="0" rmax="0.5065/2.0" dz="HalfEndcapMomLen" phi1="180.0" phi2="360.0" />
+    </Volume>
+    
+    <Volume name="IESE" comment="is the screw thread air hole TUBE volume in east-side endcap">
+        <Material name="Air" />
+        <Attribute for="IESE" seen="1" colo="1"/>
+        <Shape type="TUBE" rmin="0.0" rmax="0.5664/2.0" dz="HalfEndcapMomThk" />
+    </Volume>
+    
+    <Volume name="ITNE" comment="is the endcap air groove for transport protection screw thread (northeast)">
+        <Material name="Air" />
+        <Attribute for="ITNE" seen="1" colo="1"/>
+        <Shape type="TUBE" rmin="0.0" rmax="0.3/2.0" dz="HalfEndcapMomThk" />
+    </Volume>
+    
+    <Volume name="ITSE" comment="is the endcap air groove for transport protection screw thread (southeast)">
+        <Material name="Air" />
+        <Attribute for="ITSE" seen="1" colo="1"/>
+        <Shape type="TUBE" rmin="0.0" rmax="0.3/2.0" dz="HalfEndcapMomThk" />
+    </Volume>
+   
+    <!-- volumes to thread spacers -->
+    <Volume name="ITSM" comment="mother of the thread screw spacer assembly"  >
+        <Material name="Air"  />
+        <Attribute for="ITSM" seen="0" colo="1"  />
+        <Shape type="BOX" dx="0.5543/2.0" dy="1.22/2.0" dz="0.5543/2.0"/>
+        <Create block="ISTS"/>
+        <Placement block="ISTS" x="0.0" y="0.3" z="0.0">
+            <Rotation alphax="90.0"/>
+        </Placement>
+        <Create block="ISTF"/>
+        <Placement block="ISTF" x="0.0" y="-0.305" z="0.0">
+            <Rotation alphax="90.0"/>
+        </Placement>
+    </Volume>
+    
+    <Volume name="ISTS" comment="is the screw support thread spacer">
+        <Material name="PEEKGF30" />
+        <Attribute for="ISTS" seen="1" colo="6"/>
+        <Shape type="TUBE" rmin="0.3287/2.0" rmax="0.5543/2.0" dz="HalfEndcapMomThk" />
+    </Volume>
+    
+    <Volume name="ISTF" comment="is support thread spacer TUBE volume to fix the support block">
+        <Material name="PEEKGF30" />
+        <Attribute for="ISTF" seen="1" colo="6"/>
+        <Shape type="TUBE" rmin="0.0" rmax="0.3193/2.0" dz="0.3" />
+    </Volume>
+    
+    <!-- volumes to screws and washers -->
+    <Volume name="ISCM" comment="mother of the screw assembly"  >
+        <Material name="Air"  />
+        <Attribute for="ISCM" seen="0" colo="1"  />
+        <Shape type="BOX" dx="0.8993/2.0" dy="1.0/2.0" dz="0.8993/2.0"/>
+        <Create block="ISCH"/>
+        <Placement block="ISCH" x="0.0" y="0.3" z="0.0">
+            <Rotation alphax="90.0"/>
+        </Placement>
+        <Create block="ISCR"/>
+        <Placement block="ISCR" x="0.0" y="-0.2" z="0.0">
+            <Rotation alphax="90.0"/>
+        </Placement>
+        <Create block="ISWS"/>
+        <Placement block="ISWS" x="0.0" y="0.06" z="0.0">
+            <Rotation alphax="90.0"/>
+        </Placement>
+    </Volume>
+    
+    <Volume name="ISCH" comment="is the screw hat">
+        <Material name="PEEKGF30" />
+        <Attribute for="ISCH" seen="1" colo="6"/>
+        <Shape type="TUBE" rmin="0.0" rmax="0.7047/2.0" dz="0.4/2.0" />
+    </Volume>
+    
+    <Volume name="ISCR" comment="is the screw stud">
+        <Material name="PEEKGF30" />
+        <Attribute for="ISCR" seen="1" colo="6"/>
+        <Shape type="TUBE" rmin="0.0" rmax="0.3287/2.0" dz="0.6/2.0" />
+    </Volume>
+    
+    <Volume name="ISWS" comment="is the screw washer">
+        <Material name="PEEKGF30" />
+        <Attribute for="ISWS" seen="1" colo="6"/>
+        <Shape type="TUBE" rmin="0.4282/2.0" rmax="0.8993/2.0" dz="0.08/2.0" />
+    </Volume>
+    
+    <!-- volumes to support ring structure -->
+    <Volume name="IBSR" comment="is the support structure mother volume">
+        <Material name="Air" />
+        <Attribute for="IBSR" seen="0" colo="1"/>
+        <Shape type="BOX" dx="HalfSRMomWdt" dy="HalfSRMomThk" dz="HalfSRMomLen" />
+        <Create block="ISRE"/>
+        <Placement block="ISRE" x="HalfSRMomWdt-HalfSRSouthWdt" y="HalfSRMomThk-0.5*(SRSouthHgt-SRArcSurfThk)" z="-HalfSRMomLen+HalfSRSouthLen"/>
+        <Create block="ISRW"/>
+        <Placement block="ISRW" x="HalfSRMomWdt-HalfSRSouthWdt" y="HalfSRMomThk-0.5*(SRSouthHgt-SRArcSurfThk)" z="HalfSRMomLen-HalfSRSouthLen"/>
+        <Create block="ISRR"/>
+        <Placement block="ISRR" x="HalfSRMomWdt-2*HalfSRSouthWdt-0.1397/2" y="HalfSRMomThk-0.5*(1.8343-SRArcSurfThk)" z="0.0"/>
+        <Create block="ISRB"/>
+        <Placement block="ISRB" x="HalfSRMomWdt-2*HalfSRSouthWdt-0.1397-2.544482/2" y="HalfSRMomThk-0.5*0.1524" z="0.0"/>
+        <Create block="ISRL"/>
+        <Placement block="ISRL" x="-HalfSRMomWdt+0.341848+0.644252+0.5*0.3287+0.270863" y="HalfSRMomThk-1.010874" z="0.0">
+        <Rotation alphaz="-75.0"/>
+        </Placement> 
+        <Create block="ISRC"/>
+        <Placement block="ISRC" x="-HalfSRMomWdt+0.341848+0.5*0.644252+0.287079" y="HalfSRMomThk-1.071392" z="0.0">
+        <Rotation alphaz="-75.0"/>
+        </Placement>
+        <Create block="ISRA"/>
+        <Placement block="ISRA" x="HalfSRMomWdt" y="-ModuleInnerRadius-SRSouthHgt+HalfSRMomThk" z="0.0"/>
+        <Create block="ISRI"/>
+        <Placement block="ISRI" x="HalfSRMomWdt" y="-ModuleInnerRadius-SRSouthHgt+HalfSRMomThk" z="HalfSRMomLen-HalfSRSouthLen"/>
+        <Create block="ISRO"/>
+        <Placement block="ISRO" x="HalfSRMomWdt" y="-ModuleInnerRadius-SRSouthHgt+HalfSRMomThk" z="-HalfSRMomLen+HalfSRSouthLen"/>
+        <Create block="ISRS"/>
+        <Placement block="ISRS" x="-HalfSRMomWdt+0.5*0.341848+0.0233665" y="HalfSRMomThk-0.0872045" z="0.0">
+        <Rotation alphaz="-75.0"/>
+        </Placement>
+        <Create block="ISRH"/>
+        <Placement block="ISRH" x="HalfSRMomWdt-HalfEndcapMomWdt-2*HalfSRSouthWdt" y="HalfSRMomThk-0.6/2.0" z="0.0">
+        <Rotation alphax="90.0"/>
+        </Placement>
+    </Volume>
+    
+    <Volume name="ISRE" comment="is the support ring structure east Area">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRE" seen="1" colo="3"/>
+        <Shape type="BOX" dx="HalfSRSouthWdt" dy="HalfSRSouthThk" dz="HalfSRSouthLen"/>
+    </Volume>
+    
+    <Volume name="ISRW" comment="is the support ring structure west Area">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRW" seen="1" colo="3"/>
+        <Shape type="BOX" dx="HalfSRSouthWdt" dy="HalfSRSouthThk" dz="HalfSRSouthLen"/>
+    </Volume>
+    
+    <Volume name="ISRR" comment="is the support ring structure air groove right Area">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRR" seen="1" colo="3"/>
+        <Shape type="BOX" dx="0.1397/2" dy="0.5*(1.8343-0.1483)" dz="HalfSRMomLen"/>
+    </Volume>
+    
+    <Volume name="ISRB" comment="is the support ring structure air groove bottom Area">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRB" seen="1" colo="3"/>
+        <Shape type="TRAP" dz="HalfSRMomLen"   thet="0" phi="0"
+                h1="0.1524/2"       h2="0.1524/2"
+                bl1="2.524064/2"    bl2="2.524064/2"
+                tl1="2.5649/2"      tl2="2.5649/2"
+                alp1="180-7.63075"  alp2="180-7.63075" />
+    </Volume>
+    
+    <Volume name="ISRL" comment="is the support ring structure air groove left Area">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRL" seen="1" colo="3"/>
+        <Shape type="TRAP" dz="HalfSRMomLen"   thet="0" phi="0"
+                h1="0.3175/2"        h2="0.3175/2"
+                bl1="2.135604/2"     bl2="2.135604/2"
+                tl1="2.050530/2"     tl2="2.050530/2"
+                alp1="7.63075"       alp2="7.63075" />
+    </Volume>
+    
+    <Volume name="ISRC" comment="is the support ring structure connect Area">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRC" seen="1" colo="3"/>
+        <Shape type="TRAP" dz="0.635/2.0"   thet="0" phi="0"
+                h1="0.6223/2"       h2="0.6223/2"
+                bl1="2.301745/2"    bl2="2.301745/2"
+                tl1="2.135/2"       tl2="2.135/2"
+                alp1="7.63075"      alp2="7.63075" />
+    </Volume>
+   
+    <Volume name="ISRA" comment="is the support ring structure air groove arc Area">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRA" seen="1" colo="3"/>
+        <Shape type="TUBS" rmin="ModuleInnerRadius" rmax="ModuleInnerRadius+0.1483" dz="0.32125" phi1="93.0" phi2="108.0"/>
+    </Volume>
+ 
+    <Volume name="ISRI" comment="is the support ring structure air groove arc Area inside direction">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRI" seen="1" colo="3"/>
+        <Shape type="TUBS" rmin="ModuleInnerRadius" rmax="ModuleInnerRadius+0.1483" dz="HalfSRSouthLen" phi1="90.0" phi2="105.0"/>
+    </Volume>
+
+    <Volume name="ISRO" comment="is the support ring structure air groove arc Area outside direction">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRO" seen="1" colo="3"/>
+        <Shape type="TUBS" rmin="ModuleInnerRadius" rmax="ModuleInnerRadius+0.1483" dz="HalfSRSouthLen" phi1="90.0" phi2="105.0"/>
+    </Volume>
+    
+    <Volume name="ISRS" comment="is the support small Trapzoid part">
+        <Material name="PEEKCF30" />
+        <Attribute for="ISRS" seen="1" colo="3"/>
+        <Shape type="TRAP"      dz="0.635/2.0"   thet="0" phi="0"
+                h1="0.3302/2"       h2="0.3302/2"
+                bl1="0.2248/2"      bl2="0.2248/2"
+                tl1="0.136323/2"    tl2="0.136323/2"
+                alp1="7.63075"      alp2="7.63075" />
+    </Volume>
+
+    <Volume name="ISRH" comment="is the air hole to lacate the screw thread spacer in the support block">
+        <Material name="Air" />
+        <Attribute for="ISRH" seen="1" colo="1"/>
+        <Shape type="TUBE" rmin="0.0" rmax="0.3193/2.0" dz="0.3" />
+    </Volume>
+ 
+    <!-- volumes to silicon sensors and APV chips -->
+    <Volume name="IBLM" comment="mother of the sensor assembly"  >
+       <Material name="Air"  />
+       <Attribute for="IBLM" seen="0" colo="1"  />
+       <Shape type="BOX" dx="HalfSenMomWdt" dy="HalfSenMomThk" dz="HalfSenMomLen"/>
+       <Create block="IBSS"/>
+       <Placement block="IBSS" x="HalfSenMomWdt-HalfSensorWdt-2*HalfSensorEdgeT" y="0.0" z="0.0"/>
+       <Create block="IBTE"/>
+       <Placement block="IBTE" x="HalfSenMomWdt-HalfSensorEdgeT" y="0.0" z="0.0"/>
+       <Create block="IBBE"/>
+       <Placement block="IBBE" x="2*HalfAPVWdt+APVSensorGapSize+HalfSensorEdgeB-HalfSenMomWdt" y="0.0" z="0.0"/>
+       <Create block="IBLE"/>
+       <!-- the number 2.0 means width of silicon sensor (sensitive + passive) -->
+       <Placement block="IBLE" x="HalfSenMomWdt-2.0" y="0.0" z="HalfSenMomLen-HalfSensorEdgeLR-0.5*SensorGapSize"/>
+       <Create block="IBRE"/>
+       <Placement block="IBRE" x="HalfSenMomWdt-2.0" y="0.0" z="HalfSensorEdgeLR+0.5*SensorGapSize-HalfSenMomLen"/>
+       <!-- placement for APVs   -->
+       <Do var="num" from="1" to="nAPVUnit">
+           <Create block="IBAP"/>
+           <Placement in="IBLM" x="-HalfSenMomWdt+HalfAPVWdt" y="0.0" z="-HalfSenMomLen+HalfAPVLen*(2*num-1)+APVGapSize*(num-1)+0.36875" block="IBAP">
+           </Placement>
+       </Do>     
+    </Volume>
+    
+ <Volume name="IBTE" comment="is the Silicon Sensor top dead Area">
+     <Material name="Silicon" /> 
+     <Material name="PassiveSilicon" isvol="0"/>
+     <Attribute for="IBTE" seen="1" colo="2"/>
+     <Shape type="BOX" dx="HalfSensorEdgeT" dy="HalfSensorThk" dz="HalfSensorLen"/>
+ </Volume>
+    
+ <Volume name="IBBE" comment="is the Silicon Sensor bottom dead Area">
+    <Material name="Silicon" />
+    <Material name="PassiveSilicon" isvol="0"/>
+    <Attribute for="IBBE" seen="1" colo="2"/>
+    <Shape type="BOX" dx="HalfSensorEdgeB" dy="HalfSensorThk" dz="HalfSensorLen"/>
+ </Volume>
+    
+    <Volume name="IBLE" comment="is the Silicon Sensor left dead Area">
+        <Material name="Silicon" />
+        <Material name="PassiveSilicon" isvol="0"/>
+        <Attribute for="IBLE" seen="1" colo="2"/>
+        <Shape type="BOX" dx="2.0" dy="HalfSensorThk" dz="HalfSensorEdgeLR"/>
+    </Volume>
+
+    <Volume name="IBRE" comment="is the Silicon Sensor right dead Area">
+        <Material name="Silicon" />
+        <Material name="PassiveSilicon" isvol="0"/>
+        <Attribute for="IBRE" seen="1" colo="2"/>
+        <Shape type="BOX" dx="2.0" dy="HalfSensorThk" dz="HalfSensorEdgeLR"/>
+    </Volume>
+    
+    <Volume name="IBAP" comment="is the APV chip">
+        <Material name="APVMix" />
+        <!-- <Material name="PassiveSilicon" isvol="0"/> -->
+        <Attribute for="IBAP" seen="1" colo="2"/>
+        <Shape type="BOX" dx="HalfAPVWdt" dy="HalfAPVThk" dz="HalfAPVLen"/>
+    </Volume>
+
+ <Volume name="IBSS" comment="is the Silicon Sensor Active Area">
+       <Material name="Silicon"  />
+       <Material name="ISTSSensitive" isvol="1"/>
+       <Attribute for="IBSS" seen="1" colo="2"/>
+       <Shape type="BOX" dx="HalfSensorWdt" dy="HalfSensorThk" dz="HalfSensorLen"/>
+       <Instrument block="IBSS"  >
+                <Hit meas="z" opts="S" bins=".001"  />
+                <Hit meas="y" bins=".001"  />
+                <Hit meas="x" bins=".001"  />
+                <Hit meas="ptot" nbits="16" min="0" max="100"  />
+                <Hit meas="cx" nbits="10"  />
+                <Hit meas="cy" nbits="10"  />
+                <Hit meas="cz" nbits="10"  />
+                <Hit meas="sleng" nbits="16" min="0" max="500"  />
+                <Hit meas="tof" nbits="16"  />
+                <Hit meas="step" bins=".01"  />
+                <Hit meas="eloss" nbits="16"  />
+        </Instrument>
+ </Volume>
+</Module>
+</Document>
+
