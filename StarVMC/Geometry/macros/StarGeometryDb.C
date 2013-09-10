@@ -1315,7 +1315,32 @@ void y2013()
   }
   geom.Use("select","y2013"); // Back to baseline
 
+
+  // Setup y2013a
+  geom.select = "y2013a"; {
+    setTitle("Y2013a first production geometry PIXL in");
+    geom.tpcRefSys = true; // set reference system for TPC
+    geom.caveFlag = "CAVE05";
+    geom.pipeFlag = "PIPEv3";
+    geom.fill();
+  };
+  geom.select = "y2013_1a"; {
+    setTitle("Y2013a first production geometry PIXL in");
+    geom.tpcRefSys = true; // set reference system for TPC
+    geom.fill();
+  };
+  geom.select = "y2013_2a"; {
+    setTitle("Y2013a first production geometry PIXL out");
+    geom.tpcRefSys = true; // set reference system for TPC
+    geom.pixlStat = 0;
+    geom.dtubStat = 0;
+    geom.fill();
+  };
   
+    
+    
+
+
 
   /// Y2013 Asymptotic Configuration /////////////////////////////
   geom.select = "y2013_1x"; {
@@ -1338,6 +1363,7 @@ void y2013()
     geom.fill();
   }
   geom.Use("select","y2013_1x");  // Restore asymptotic values  
+
 
 }
 

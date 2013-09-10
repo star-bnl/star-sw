@@ -292,13 +292,16 @@ class PixlGeom_t : public AgStructure
   ClassDef(PixlGeom_t,1);
   PixlGeom_t(): AgStructure("PixlGeom_t","STAR Pixel Detector Master Geometry Table")
     {
-      select="default"; module="PixlGeo3"; config=-1; location=1.0;
+      select="default"; module="PixlGeo3"; config=-1; location=1.0; ladrconfig=-1.0; secversion=-1.0;
     }
   ~PixlGeom_t(){ };
   TString select;
   TString module;  // Geometry module
   Int_t   config;  // Geometry module configuration
-  Float_t location;
+  Float_t location; // used in earlier geometries
+  Float_t ladrconfig;  // Cable type
+  Float_t secversion;  // sectors populated
+
 };
 // ----------------------------------------------------------------------
 class DtubGeom_t : public AgStructure 
