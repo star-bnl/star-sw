@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.263 2013/09/10 18:59:04 jwebb Exp $
+* $Id: geometry.g,v 1.264 2013/09/11 14:27:21 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.264  2013/09/11 14:27:21  jwebb
+* Added case statements to enable y2013a geometries.
+*
 * Revision 1.263  2013/09/10 18:59:04  jwebb
 * Definitions for y2013a, new beam pipe module and new ist module.
 *
@@ -3077,9 +3080,11 @@ If LL>0
                   Geom = 'y2013_1x';
                   exe y2013_1x; }
 
-  Case Y2013_2x { Y2013_2x : Y2013 asymptotic sans PIXL; 
-                  Geom = 'y2013_2x; ';
-                  exe y2013_2x; }
+  Case Y2013_2x { Y2013_2x : Y2013 asymptotic sans PIXL; Geom = 'y2013_2x  '; exe y2013_2x; }
+
+  Case Y2013a   { Y2013a   : Y2013 1st prod geometry w/  PIXL; Geom = 'y2013a    '; exe y2013a;   }
+  Case Y2013_1a { Y2013_1a : Y2013 1st prod geometry w/  PIXL; Geom = 'y2013a    '; exe y2013a;   }
+  Case Y2013_2a { Y2013_2a : Y2013 1st prod geometry w/o PIXL; Geom = 'y2013a    '; exe y2013a;   }
 
   Case dev14 { dev14 : y2014 studies;
                  Geom = 'dev14   ';
