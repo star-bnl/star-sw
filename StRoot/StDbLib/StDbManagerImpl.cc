@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.44 2013/06/10 17:45:15 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.45 2013/09/11 17:40:06 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.45  2013/09/11 17:40:06  dmitry
+ * new database support: IST
+ *
  * Revision 1.44  2013/06/10 17:45:15  dmitry
  * unknown db fix - to be backported into old libraries
  *
@@ -414,6 +417,7 @@ addDbDomain(dbpp2pp,"pp2pp");
 addDbDomain(dbFgt,"fgt"); 
 addDbDomain(dbPxl,"pxl"); 
 addDbDomain(dbMtd,"mtd"); 
+addDbDomain(dbIst,"ist"); 
 
 }
 

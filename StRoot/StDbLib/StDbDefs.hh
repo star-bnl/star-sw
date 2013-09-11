@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.26 2013/05/28 18:07:43 dmitry Exp $
+ * $Id: StDbDefs.hh,v 1.27 2013/09/11 17:40:06 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.27  2013/09/11 17:40:06  dmitry
+ * new database support: IST
+ *
  * Revision 1.26  2013/05/28 18:07:43  dmitry
  * new db domain: MTD
  *
@@ -129,7 +132,7 @@
 enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, dbCalibrations, dbGeometry, dbRunCatalog, dbRunParams, dbScalers, dbTestScheme, dbTUser1, dbTUser2, dbTUser3, dbTEnd};
 
 // enumerated standard set of database domains
-enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd, dbRts, dbTof, dbFpd, dbEemc, dbPmd, dbBbc, dbTracker, dbZdc, dbFms, dbpp2pp, dbFgt, dbPxl, dbMtd, dbDUser1, dbDUser2, dbDUser3, dbDEnd };
+enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd, dbRts, dbTof, dbFpd, dbEemc, dbPmd, dbBbc, dbTracker, dbZdc, dbFms, dbpp2pp, dbFgt, dbPxl, dbMtd, dbIst, dbDUser1, dbDUser2, dbDUser3, dbDEnd };
 
 // enumerated sets of storage models (different sql content)
 enum StDbStoreType { dbV00=0 };
