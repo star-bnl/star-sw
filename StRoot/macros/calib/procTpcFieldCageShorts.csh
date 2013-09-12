@@ -7,6 +7,7 @@
 #  Created: April, 2007
 #  Modified: Dec. 9, 2007
 #  Modified: Feb. 20, 2009
+#  Modified: Sep. 10, 2013
 #
 #  Calculates TPC FC missing resistance and loads values into DB
 #  Requires use of matchTpcFieldCageShorts.C
@@ -19,8 +20,10 @@ source ${GROUP_DIR}/.stardev
 set ID=`/usr/bin/whoami`
 echo "procTpcFieldCageShorts: running at `/bin/date`"
 
-set tpc_db = "-h onldb2.starp.bnl.gov --port=3502"
-set daq_db = "-h onldb2.starp.bnl.gov --port=3501"
+# archival databases can be found here:
+# https://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map
+set tpc_db = "-h onld15.starp.bnl.gov --port=3502"
+set daq_db = "-h onld15.starp.bnl.gov --port=3501"
 set fcs_db = "-h dbx.star.bnl.gov --port=3316"
 
 set qq = "/tmp/FCS_short1_$ID.txt"
@@ -33,9 +36,9 @@ set logdir = `/bin/date --utc '+%Y%m%d.%H%M%S'`
 @ mingap = 240
 
 if ( -x /usr/bin/mysql ) then
-set MYSQL=/usr/bin/mysql
+set MYSQL="/usr/bin/mysql -N"
 else
-set MYSQL=mysql
+set MYSQL="mysql -N"
 endif
 
 set cdir = $cwd
@@ -43,42 +46,32 @@ set cdir = $cwd
 cd $logdir
 /bin/touch log
 
-# floats can handle 6 months worth of seconds, but not a year or more!
-# 16777216 seconds = ~194 days
-# last entry in Calibrations_tpc/TpcSpaceCharge used to define yearstart
-/bin/cat >! $qq <<EOF
-select unix_timestamp(beginTime) from TpcSpaceCharge order by beginTime desc limit 1;
-EOF
-@ yearstart = `/bin/cat $qq | $MYSQL $fcs_db -C Calibrations_tpc | /bin/grep -v begin`
-
 # get info on last time this script was run (recreate that info from DB)
 /bin/cat >! $qq <<EOF
 select resistor,MissingResistance,unix_timestamp(beginTime)
 from tpcFieldCageShort where side=1 and cage=1 order by beginTime desc limit 1;
 EOF
 /bin/cat $qq >> log; echo "" >> log
-/bin/cat $qq | $MYSQL $fcs_db -C Geometry_tpc | /bin/grep -v resist >! $q2
+/bin/cat $qq | $MYSQL $fcs_db -C Geometry_tpc >! $q2
 set last_resA = `/bin/awk '{print $1","$2}' $q2`
 @ lasttime = `/usr/bin/cut -f 3 $q2`
-if ($lasttime < $yearstart) @ lasttime = $yearstart
 set query = "select dataID from tpcFieldCageShort order by dataID desc limit 1;"
-set last_resB = `echo $query | $MYSQL $fcs_db -C Geometry_tpc | /bin/grep -v dataID`
+set last_resB = `echo $query | $MYSQL $fcs_db -C Geometry_tpc`
 set last_res = "$last_resA,$last_resB"
 
 @ thistime = `/bin/date '+%s'`
-@ thistime2 = $thistime - $yearstart
 set tlimited = "between from_unixtime($lasttime) and from_unixtime($thistime)"
 set daqtables = "daqSummary as ds left join detectorSet as de on ds.runNumber=de.runNumber"
 set daqtables = "$daqtables left join runStatus as rs on ds.runNumber=rs.runNumber"
 
 # determine TPC detectorID
 set query = "select detectorID from detectorTypes where name in ('tpc','tpx');"
-set tpcxid = `echo $query | $MYSQL $daq_db -C RunLog | /bin/grep -v det`
+set tpcxid = `echo $query | $MYSQL $daq_db -C RunLog`
 
 # query for runs
 /bin/cat >! $qq <<EOF
 select ds.runNumber,from_unixtime(ds.firstEventTime),
-ds.firstEventTime-$yearstart,ds.lastEventTime-$yearstart
+ds.firstEventTime,ds.lastEventTime
 from $daqtables
 where ds.beginTime $tlimited
 and de.detectorID in ($tpcxid[1],$tpcxid[2])
@@ -88,7 +81,7 @@ and ds.runTypeID in (3,4)
 order by ds.firstEventTime asc;
 EOF
 /bin/cat $qq >> log; echo "" >> log
-/bin/cat $qq | $MYSQL $daq_db -C RunLog | /bin/grep -v runNumber >! $rr
+/bin/cat $qq | $MYSQL $daq_db -C RunLog >! $rr
 set runs   = `/usr/bin/cut -f 1 $rr`
 if ($#runs == 0) then
   cd $cdir; /bin/rm -rf $logdir $qq
@@ -113,7 +106,7 @@ echo "procTpcFieldCageShorts: $latestrun , running_now = $running_now"
 @ gap_time = 0
 if ($running_now == 0) then
   @ buffer_time = $ends[$#ends] + $mingap
-  if ($buffer_time < $thistime2) @ gap_time = $buffer_time
+  if ($buffer_time < $thistime) @ gap_time = $buffer_time
 endif
 @ index = $#ends
 while ($gap_time == 0 && $index > 1)
@@ -131,7 +124,7 @@ endif
 echo "gap_time = $gap_time" >> log
 
 # new time limits
-@ thistime = $gap_time + $yearstart - 60
+@ thistime = $gap_time - 60
 echo "thistime = $thistime" >> log
 set tlimited = "between from_unixtime($lasttime) and from_unixtime($thistime)"
 
@@ -139,13 +132,13 @@ set tlimited = "between from_unixtime($lasttime) and from_unixtime($thistime)"
 # inner/outer appear switched, handled in matchTpcFieldCageShorts.C
 # place an extra 0 to represent external resistor (for OFCW usage)
 /bin/cat >! $qq <<EOF
-select unix_timestamp(beginTime)-$yearstart,currentInnerFieldCageEast_1,
+select unix_timestamp(beginTime),currentInnerFieldCageEast_1,
 currentOuterFieldCageEast_1,currentInnerFieldCageWest_1,currentOuterFieldCageWest_1,0
 from tpcFieldCage where beginTime $tlimited order by beginTime;
 EOF
 
 /bin/cat $qq >> log; echo "" >> log
-/bin/cat $qq | $MYSQL $tpc_db -C Conditions_tpc | /bin/grep -v begin >! $dd
+/bin/cat $qq | $MYSQL $tpc_db -C Conditions_tpc >! $dd
 
 # Reformat dates
 /bin/sed -i 's/[-:]/ /g' $rr
@@ -169,8 +162,11 @@ cd $cdir
 /bin/rm -rf $logdir
 
 #####################################
-# $Id: procTpcFieldCageShorts.csh,v 1.3 2010/01/08 19:48:01 genevb Exp $
+# $Id: procTpcFieldCageShorts.csh,v 1.4 2013/09/12 17:09:02 genevb Exp $
 # $Log: procTpcFieldCageShorts.csh,v $
+# Revision 1.4  2013/09/12 17:09:02  genevb
+# Update DBs, use full unixtime, small improvements
+#
 # Revision 1.3  2010/01/08 19:48:01  genevb
 # More selective runs, use backup DB
 #

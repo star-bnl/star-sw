@@ -12,7 +12,7 @@
 #ifndef __CINT__
 #include "TROOT.h"
 #include "TFile.h"
-#include "TNtuple.h"
+#include "TNtupleD.h"
 #include <iostream>
 #include <fstream>
 #include "TTimeStamp.h"
@@ -35,14 +35,14 @@
 ///////////////////////////////////////////
 
   // data arrays
-  Float_t ff1[15];
-  Float_t ff2[9];
+  Double_t ff1[15];
+  Double_t ff2[9];
   // for averaging:
-  Float_t ff3[5];
-  Float_t ff4[5];
+  Double_t ff3[5];
+  Double_t ff4[5];
 
   TFile scf("cur.root","RECREATE");
-  TNtuple sc("cur","current","t:Ioe:Iie:Iow:Iiw:res:run:Y:M:D:h:m:s:begin:end");
+  TNtupleD sc("cur","current","t:Ioe:Iie:Iow:Iiw:res:run:Y:M:D:h:m:s:begin:end");
   
   int li1=0;
   int li2=0;
@@ -54,13 +54,13 @@
   int dataid;
   char* eT;
 
-  float mincur,maxcur,dcur,maxdcur=0;
-  float pflag = 0;
-  float last_missing_resistance=0;
-  float last_resistor=0;
-  float maxsec = 16777215; // 2^24-1
-  float nexttime = 0;
-  float resistor = 0;
+  double mincur,maxcur,dcur,maxdcur=0;
+  double pflag = 0;
+  double last_missing_resistance=0;
+  double last_resistor=0;
+  double maxsec = 2147483647.0; // 2^31-1
+  double nexttime = 0;
+  double resistor = 0;
   UInt_t tOffset = 0;
 
 void Finish() {
@@ -86,7 +86,7 @@ void ReadLine2() {
   for (int i=0; i<size2; i++) in2 >> ff2[i];
   if (in2.eof()) {
     for (int i=0; i<size2; i++) ff2[i]=0;
-    ff2[7] = maxsec-1; // ~193 days; make sure we don't exceed this timespan!
+    ff2[7] = maxsec-1;
     ff2[8] = maxsec;
     return;
   }
@@ -124,10 +124,10 @@ void WriteTable() {
   // Modify from current->resistance
 
   // Only do Iow (which is index i=3, though it _should_ be index i=4 from db labels)
-  Float_t ring = 80.5;
-  //Float_t reference = TMath::Max(ff3[1],ff3[4]); // Use max(Ioe,Iiw) as reference
-  Float_t reference = TMath::Max(ff3[1],ff3[2]); // Use max(Iow,Iie) as reference
-  Float_t missing_resistance = 364.44*(1.0 - reference/ff3[3]); // delR = R*(1-(I1/I2))
+  Double_t ring = 80.5;
+  //Double_t reference = TMath::Max(ff3[1],ff3[4]); // Use max(Ioe,Iiw) as reference
+  Double_t reference = TMath::Max(ff3[1],ff3[2]); // Use max(Iow,Iie) as reference
+  Double_t missing_resistance = 364.44*(1.0 - reference/ff3[3]); // delR = R*(1-(I1/I2))
 //printf("GGGG ref = %g  , cur = %g\n",reference,ff3[3]);
   //missing_resistance += resistor;
   
@@ -150,7 +150,7 @@ void WriteTable() {
   ofstream* out1=0;
   if (writing) out1 = new ofstream(outname.Data());
 
-  float missing_res2 = missing_resistance;
+  double missing_res2 = missing_resistance;
   missing_res2 = (missing_resistance > 0.2 ? 0.345 : 0.0);
 
   TString buffer = Form("\"%d\",\"%s\",\"33\",\"1\",",dataid,eT);
@@ -205,14 +205,14 @@ void IncludeThisMeasure() {
 // Big change test
   if (tcnt) {
   //if (tcnt>2) { // don't decide based on one or two points?
-    float avg = ff3[3];
+    double avg = ff3[3];
     if (tcnt>1) avg /= ff3[0];
     if (TMath::Abs(avg-ff1[3]) > 0.045) ResetMeasure(); // 45nA change from the average
   }
 
 
   if (tcnt==1) for (int i=0; i<size3; i++) ff3[i]=0;
-  Float_t tdiff = 2;
+  Double_t tdiff = 2;
   if (tcnt>0) tdiff = ff1[0]-ff4[0];
   if (tdiff == 0) tdiff = 0.001;
   ff3[0] += tdiff;
@@ -246,7 +246,7 @@ void run() {
 
   while (1) {
     ReadLine1();
-    Float_t time = ff1[0];
+    Double_t time = ff1[0];
 
     while (time > ff2[8]) FindNextRun();
 
@@ -257,7 +257,7 @@ void run() {
 
 }
 
-void matchTpcFieldCageShorts(char* T, float lr, float lm, int i) {
+void matchTpcFieldCageShorts(char* T, double lr, double lm, int i) {
   dataid = i;
   eT = T;
   last_resistor = lr;
@@ -266,8 +266,11 @@ void matchTpcFieldCageShorts(char* T, float lr, float lm, int i) {
 }
 
 //////////////////////////////////////////
-// $Id: matchTpcFieldCageShorts.C,v 1.3 2010/01/08 19:48:36 genevb Exp $
+// $Id: matchTpcFieldCageShorts.C,v 1.4 2013/09/12 17:09:02 genevb Exp $
 // $Log: matchTpcFieldCageShorts.C,v $
+// Revision 1.4  2013/09/12 17:09:02  genevb
+// Update DBs, use full unixtime, small improvements
+//
 // Revision 1.3  2010/01/08 19:48:36  genevb
 // Update for permanent short at OFCW ring 181.4
 //
