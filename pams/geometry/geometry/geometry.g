@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.264 2013/09/11 14:27:21 jwebb Exp $
+* $Id: geometry.g,v 1.265 2013/09/12 18:09:21 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.265  2013/09/12 18:09:21  jwebb
+* Moved IDS construction before beam pipe.
+*
 * Revision 1.264  2013/09/11 14:27:21  jwebb
 * Added case statements to enable y2013a geometries.
 *
@@ -4507,6 +4510,14 @@ If LL>0
  
    }
 
+
+   """ Support cone needs to be constructed before the v3 beam pipe """
+   IF IDSM { "Inner detector support module" 
+      Call AgDETP new ('IDSM')
+      Call AgDETP add ('IDSC.version=',IdsmConfig,1)
+      CONSTRUCT IdsmGeo1
+   }
+
 * Pipe:
 
    IF PIPE  {
@@ -4741,12 +4752,6 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
         call AgDetp NEW ('MAGP')
         call AgDetp ADD ('magg.version=', magpConfig, 1 );
         CONSTRUCT MagpGeo
-   }
-
-   IF IDSM { "Inner detector support module" 
-      Call AgDETP new ('IDSM')
-      Call AgDETP add ('IDSC.version=',IdsmConfig,1)
-      CONSTRUCT IdsmGeo1
    }
 
   if(SISD) {
