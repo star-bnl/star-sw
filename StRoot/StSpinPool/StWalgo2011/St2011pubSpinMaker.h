@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.h,v 1.7 2013/06/14 21:08:51 jlzhang Exp $
+// $Id: St2011pubSpinMaker.h,v 1.8 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -28,11 +28,11 @@ class St2011WMaker;
 class St2011pubSpinMaker : public StMaker {
  private:
 
-  float par_QPTlow,par_QPThighET0,par_QPThighET1, par_QPThighA ,par_QPThighB; // cuts to drop questionable reco charge charges
+  int par_QET2PTcut;
+
   float par_leptonEta1, par_leptonEta2; // narrow the range
   int par_useNoEEMC;
 
-  float parE_QPTlow,parE_QPThighET0,parE_QPThighET1, parE_QPThighA ,parE_QPThighB; // cuts to drop questionable reco charge charges
   float parE_leptonEta1, parE_leptonEta2; // narrow the range
 
   St2011WMaker *wMK; // W-algo maker with all data
@@ -56,7 +56,7 @@ class St2011pubSpinMaker : public StMaker {
   void setHList(TObjArray * x){HList=x;}
   void setEta(float x, float y) { par_leptonEta1=x; par_leptonEta2=y;};
   void setEtaE(float x, float y) { parE_leptonEta1=x; parE_leptonEta2=y;};
-  void setQPT(float x, float xE){ par_QPTlow=x; parE_QPTlow=xE;};
+  void setQPT(int x){ par_QET2PTcut=x;};
   void setNoEEMC() {par_useNoEEMC=1;}
 
   void attachWalgoMaker(St2011WMaker *mk) { wMK=mk;}
@@ -65,7 +65,7 @@ class St2011pubSpinMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.7 2013/06/14 21:08:51 jlzhang Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.8 2013/09/13 19:33:13 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -76,6 +76,9 @@ class St2011pubSpinMaker : public StMaker {
 
 
 // $Log: St2011pubSpinMaker.h,v $
+// Revision 1.8  2013/09/13 19:33:13  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.7  2013/06/14 21:08:51  jlzhang
 // add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
 //

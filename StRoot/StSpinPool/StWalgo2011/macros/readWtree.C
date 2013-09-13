@@ -1,5 +1,4 @@
 // example uses bin 8 : root4star -b -q 'readWtree.C("./R13109027.lis",8,1e8)'
-// W+ M-C:  root4star -b -q 'readWtree.C("./jbc310.lis",8,1e2,false)'
 
 class StChain;
 class St2011WMaker;
@@ -34,12 +33,11 @@ void readWtree(	const Char_t *fileList="./R13104003.lis", int etaBin=8, int maxE
   TObjArray* HListEta=new TObjArray;;
   
   //define eta ranges (skip bin 5+6 and 9 is same as 8 except spin sorting)
-  float etaLow[9] =  {-1.0,-0.5, 0.0, 0.5, 0.0, 0.0, 0.7,-1.5,-1.5};
-  float etaHigh[9] = {-0.5, 0.0, 0.5, 1.0, 0.0, 0.0, 2.5, 2.0, 2.0};
+  float etaLow[9] =  {-1.1,-0.5, 0.0, 0.5, 1.0, -2.0, 0.7,-1.5,-1.5};
+  float etaHigh[9] = {-0.5, 0.0, 0.5, 1.1, 2.0, -1.0, 2.5, 2.0, 2.0};
 
   //initiate W maker
   wTreeMk = new St2011WMaker(Form("Eta%d",etaBin));
-  //wTreeMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
   wTreeMk->setJetTreeBranch("AntiKtR060NHits12","AntiKtR060NHits12_noEEMC");
 
   //set cuts for barrle and endcap algos
@@ -68,7 +66,7 @@ void readWtree(	const Char_t *fileList="./R13104003.lis", int etaBin=8, int maxE
       //assign eta bin same as W maker
       spinMkA[kk]->setEta(etaLow[etaBin-1],etaHigh[etaBin-1]); 
       spinMkA[kk]->setEtaE(etaLow[etaBin-1],etaHigh[etaBin-1]); 
-      if(kk==1) spinMkA[kk]->setQPT(-1,-1); //disable Q/pT cut
+      if(kk==1) spinMkA[kk]->setQPT(false); //disable Q/pT cut
 
       //special cases
       if(etaBin==7) {
@@ -78,12 +76,6 @@ void readWtree(	const Char_t *fileList="./R13104003.lis", int etaBin=8, int maxE
 	spinMkA[kk]->setEta(-1.,1.); //diff eta range for spin sorting
 	spinMkA[kk]->setEtaE(999.,999.); //mask endcap for for etaBin 8
       }
-
-      //possibly add other copies for systematic checks later
-      //if(kk==1) spinMkA[kk]->setEta(-1.,0.);
-      //if(kk==2) spinMkA[kk]->setEta(0,1.);
-      //if(kk==3) spinMkA[kk]->setQPT(-1);// disable Q/PT cut
-      //if(kk==4) spinMkA[kk]->setNoEEMC(); 
     }  
   }
 

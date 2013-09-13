@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.20 2012/10/05 17:53:53 balewski Exp $
+// $Id: St2011W_algo.cxx,v 1.21 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -52,7 +52,7 @@ St2011WMaker::find_W_boson(){
       float hypCorr_p = q2pt_p*(T.cluster.ET);
 
       //remove ambiguous charges from BG treatment histos
-      if( fabs(hypCorr_p) > 0.4 && fabs(hypCorr_p) < 1.8) {
+      if( fabs(hypCorr_p) > par_QET2PTlow && fabs(hypCorr_p) < par_QET2PThigh) {
 	//signal plots w/o EEMC in awayside veto
 	if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
 	  if(T.sPtBalance_noEEMC2>par_ptBalance ) {//only signed ptBalance cut 
@@ -105,11 +105,10 @@ St2011WMaker::find_W_boson(){
       if(T.cluster.ET > par_highET) hA[253]->Fill(T.awayTotET,T.sPtBalance);
 
       //remove ambiguous charges from BG treatment histos
-      if( fabs(hypCorr_p) > 0.4 && fabs(hypCorr_p) < 1.8) { 
-	for (int i=0; i<=20; i++) {
-	  //  float awayTot_cut = 10.+2.*((float) i);
-	  for (int j=0; j<=20; j++) {
-	    float pTBal_cut = 5.+((float) j);
+      if( fabs(hypCorr_p) > par_QET2PTlow && fabs(hypCorr_p) < par_QET2PThigh) { 
+	for (int i=0; i<=20; i++) { // i index not currently used
+	  for (int j=0; j<=80; j++) {
+	    float pTBal_cut = 5.+0.25*((float) j);
 	    if (T.sPtBalance2<pTBal_cut) { 
 	      if (T.prMuTrack->charge() < 0) {
 		hA[142+i]->Fill(T.cluster.ET,j);
@@ -143,7 +142,7 @@ St2011WMaker::find_W_boson(){
       }	
 
 
-      if(T.sPtBalance2>par_ptBalance){/***************************/
+      if(T.sPtBalance2>par_ptBalance && T.cluster.ET>par_highET){/***************************/
 	printf("\n WWWWWWWWWWWWWWWWWWWWW  Barrel \n");
 	wDisaply->exportEvent( "WB", V, T, iv);
 	wEve->print();
@@ -195,6 +194,7 @@ St2011WMaker::find_W_boson(){
       hA[98]->Fill(V.z);
       hA[99]->Fill(T.prMuTrack->eta());
       hA[190+k]->Fill(T.prMuTrack->eta(),T.cluster.ET);
+      hA[106]->Fill(wEve->zdcRate);
       
       hA[20]->Fill("goldW",1.);
       nGoldW++;
@@ -254,15 +254,15 @@ St2011WMaker::tag_Z_boson(){
 	  StJetTower *tower = jet->tower(itow);
 	  if(tower->detectorId()==13)//drop endcap towers
 	    continue;
-          
+
 	  int softId=tower->id();
-          //find highest 2x2 BTOW cluster in jet
-          TVector3 pos=positionBtow[softId-1]; int iEta,iPhi;
-          if( L2algoEtaPhi2IJ(pos.Eta(),pos.Phi(),iEta,iPhi)) 
+	  //find highest 2x2 tower cluster in jet
+	  TVector3 pos=positionBtow[softId-1]; int iEta,iPhi;
+	  if( L2algoEtaPhi2IJ(pos.Eta(),pos.Phi(),iEta,iPhi)) 
 	    continue;
 	  float cluster=maxBtow2x2(iEta,iPhi,V.z).ET;
-          if(cluster>maxCluster) maxCluster=cluster;
-        }
+	  if(cluster>maxCluster) maxCluster=cluster;
+	}
 
 	TVector3 jetVec3(jetVec.X(),jetVec.Y(),jetVec.Z());
 	if(jetVec3.DeltaR(T1.primP)<par_nearDeltaR)
@@ -275,8 +275,10 @@ St2011WMaker::tag_Z_boson(){
         TLorentzVector sum=ele1+jetVec;
         float invM=sqrt(sum*sum);
 	if(maxCluster/jetVec3.Pt() < 0.5) continue;
-	if(invM > lowMass && invM < highMass)
+	if(invM > lowMass && invM < highMass){
           wEve->zTag=true;
+	  //cout<<"tagged as Z mass = "<<invM<<endl;
+	}
       }
     }
   }
@@ -484,8 +486,7 @@ St2011WMaker::sumTpcConeFromTree(int vertID, TVector3 refAxis, int flag,int poin
     StMuTrack *prTr=V.prTrList[it];
     if(prTr->flag()<=0) continue;
     if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
-    if(prTr->flag()!=301 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate 
-    //JS remove short tracks from iso cone && prTr->flag()!=311
+    if(prTr->flag()!=301 && pointTowId<0) continue;// TPC-only regular tracks for endcap candidate 
     float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
     if(hitFrac<par_nHitFrac) continue;
     StThreeVectorF prPvect=prTr->p();
@@ -717,6 +718,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.21  2013/09/13 19:33:13  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.20  2012/10/05 17:53:53  balewski
 // added correlation plots for reco Q in Z, W algos
 //

@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.22 2012/10/01 19:48:20 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.23 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -26,7 +26,6 @@ St2011WMaker::findEndcap_W_boson(){
   //remove events tagged as Zs
   if(wEve->zTag) return;
 
- 
   // search for  Ws ............ 
   for(uint iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
@@ -54,9 +53,10 @@ St2011WMaker::findEndcap_W_boson(){
       StThreeVectorF ro=T.glMuTrack->lastPoint();
       int sec = WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
       if((sec < 5 || sec > 7) && sec!=21) { //skip sectors with dead padrows for this
-	hE[63]->Fill(T.prMuTrack->nHitsFit());
-	hE[64]->Fill(1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
+	hE[63]->Fill(T.glMuTrack->nHitsFit());
+	hE[64]->Fill(1.*T.glMuTrack->nHitsFit()/T.glMuTrack->nHitsPoss());
 	hE[65]->Fill(ri.perp());
+	hE[65]->Fill(ro.perp());
       }
 
       if(T.cluster.ET /T.nearTotET< parE_nearTotEtFrac) continue; // too large nearET
@@ -113,7 +113,6 @@ St2011WMaker::findEndcap_W_boson(){
           hE[211]->Fill(T.esmdNhit[0],T.esmdNhit[1]);
           hE[212]->Fill(T.esmdE[0],T.esmdE[1]);
           hE[213]->Fill(T.esmdNhit[0]+T.esmdNhit[1],T.esmdE[0]+T.esmdE[1]);
-	  // hE[216]->Fill(
           hE[217]->Fill(T.pointTower.R.X()-T.esmdXPcentroid.X(),T.pointTower.R.Y()-T.esmdXPcentroid.Y());
           hE[218]->Fill(T.pointTower.R.Eta()-T.esmdXPcentroid.Eta(),T.pointTower.R.Phi()-T.esmdXPcentroid.Phi());
           hE[219]->Fill(T.esmdPeakSumE[0]/T.esmdE[0],T.esmdPeakSumE[1]/T.esmdE[1]);
@@ -138,8 +137,8 @@ St2011WMaker::findEndcap_W_boson(){
       float hypCorr_p = q2pt_p*(T.cluster.ET);
 
       //correlate ratio with sPtBal for goldWs (used for background)
-      if( fabs(hypCorr_p) > 0.4 && fabs(hypCorr_p) < 1.8) { //remove ambiguous charges BG treatment
-	if(T.cluster.ET > parE_highET){
+      if( fabs(hypCorr_p) > parE_QET2PTlow && fabs(hypCorr_p) < parE_QET2PThigh) { //remove ambiguous charges BG treatment
+	if(T.cluster.ET > parE_highET && T.cluster.ET < 50.){
 	  hE[237]->Fill(T.sPtBalance,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	  hE[238]->Fill(T.sPtBalance2,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	  if(T.prMuTrack->charge()>0) 
@@ -148,7 +147,7 @@ St2011WMaker::findEndcap_W_boson(){
 	    hE[251]->Fill(T.sPtBalance2,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	}
 	// try lower threshold to find background
-	if(T.cluster.ET > 20.){
+	if(T.cluster.ET > 20.&& T.cluster.ET < 50.){
 	  hE[252]->Fill(T.sPtBalance,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	  hE[253]->Fill(T.sPtBalance2,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	  if(T.prMuTrack->charge()>0) 
@@ -232,17 +231,72 @@ St2011WMaker::findEndcap_W_boson(){
       hE[103]->Fill(T.cluster.ET/T.nearEmcET,T.sPtBalance);
       hE[104]->Fill(T.cluster.ET/T.nearEtowET,T.sPtBalance);
       hE[105]->Fill(T.glMuTrack->dEdx()*1e6,T.sPtBalance);
-      float dEdxFit = T.glMuTrack->probPidTraits().dEdxFit()*1e6;
-      //float dEdxTruncated = T.glMuTrack->probPidTraits().dEdxTruncated()*1e6;
-      hE[106]->Fill(T.glMuTrack->dEdx()*1e6,dEdxFit);
-      //hE[107]->Fill(dEdxTruncated,dEdxFit);
       
-      hE[107]->Fill(sec,hypCorr_p);
-      hE[108]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
-      hE[109]->Fill(T.glMuTrack->dEdx()*1e6,hypCorr_p);
+      // plots to study charge separation
+      hE[106]->Fill(T.prMuTrack->chi2(),hypCorr_p);
+      hE[107]->Fill(T.glMuTrack->chi2(),hypCorr_p);
+      hE[108]->Fill(1.*T.glMuTrack->nHitsFit()/T.glMuTrack->nHitsPoss(),hypCorr_p);
+      hE[109]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
+      
+      hE[120]->Fill(T.prMuTrack->chi2()-T.glMuTrack->chi2(),hypCorr_p);
+      hE[121]->Fill(T.glMuTrack->dcaD(),hypCorr_p);
+      hE[122]->Fill(T.esmdPeakOffset[0],hypCorr_p);
+      hE[123]->Fill(T.esmdPeakOffset[1],hypCorr_p);
+      hE[124]->Fill(T.esmdPeakOffset[1],T.esmdPeakOffset[0]);
+      hE[125]->Fill(ri.perp(),hypCorr_p);
+      hE[126]->Fill(ro.perp(),hypCorr_p);
+      hE[127]->Fill(T.glMuTrack->dEdx()*1e6,hypCorr_p);
+      hE[128]->Fill(T.glMuTrack->lengthMeasured(),hypCorr_p);
+      hE[129]->Fill(ro.perp()-ri.perp(),hypCorr_p);
+      float phiScale = 180./TMath::Pi();
+      float deltaPhiESMD = (T.pointTower.R.Phi()-T.esmdXPcentroid.Phi())*phiScale;
+      float deltaPhiTrack = (T.pointTower.R.Phi()-T.pointTower.Rglob.Phi())*phiScale;
+      float deltaR = ro.perp()-ri.perp();
+      float chi2 = T.prMuTrack->chi2();
+      hE[130]->Fill(deltaPhiESMD,hypCorr_p);
+      hE[131]->Fill(deltaPhiTrack,hypCorr_p);
+      
+      if(hypCorr_p > parE_QET2PTlow && hypCorr_p < parE_QET2PThigh) {
+	hE[150]->Fill(T.glMuTrack->dcaD(),ro.perp());
+	hE[152]->Fill(deltaPhiESMD,ro.perp());
+	hE[154]->Fill(deltaPhiESMD,ro.perp()-ri.perp());
+	hE[156]->Fill(deltaPhiTrack,ro.perp()-ri.perp());
+	hE[158]->Fill(deltaPhiTrack,T.prMuTrack->chi2());
+	hE[160]->Fill(deltaPhiESMD,T.prMuTrack->chi2());
+	hE[162]->Fill(ro.perp()-ri.perp(),T.prMuTrack->chi2());
+      }
+      else if(hypCorr_p < -1.*parE_QET2PTlow && hypCorr_p > -1.*parE_QET2PThigh) {
+	hE[151]->Fill(T.glMuTrack->dcaD(),ro.perp());
+	hE[153]->Fill(deltaPhiESMD,ro.perp());
+	hE[155]->Fill(deltaPhiESMD,ro.perp()-ri.perp());
+	hE[157]->Fill(deltaPhiTrack,ro.perp()-ri.perp());
+	hE[159]->Fill(deltaPhiTrack,T.prMuTrack->chi2());
+	hE[161]->Fill(deltaPhiESMD,T.prMuTrack->chi2());
+	hE[163]->Fill(ro.perp()-ri.perp(),T.prMuTrack->chi2());
+      }
 
-      //cout<<" dEdxFit="<<dEdxFit<<endl;
-
+      // harder "or" cuts
+      float delRcut = 45.; //50
+      float RoutCut = 110.; //115
+      float delPhiCut = 0.25; //0.2
+      float chi2cut = 3.0; //2.5
+      if( (chi2 < chi2cut && fabs(deltaPhiTrack) < delPhiCut) || (chi2 < chi2cut && deltaR > delRcut) || (fabs(deltaPhiTrack) < delPhiCut && deltaR > delRcut) )
+	hE[170]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
+      if( (chi2 < chi2cut && fabs(deltaPhiTrack) < delPhiCut) || (chi2 < chi2cut && ro.perp() > RoutCut) || (fabs(deltaPhiTrack) < delPhiCut && ro.perp() > RoutCut) )
+	hE[171]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
+      
+      // softer "and" cuts
+      if(chi2 < 4.0 && fabs(deltaPhiTrack) < 0.4 && ro.perp() > 90.) //3.5 0.35 90 (old cuts)
+	hE[172]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
+      if(chi2 < 3.5 && fabs(deltaPhiTrack) < 0.4 && ro.perp() > 90.) 
+	hE[173]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
+      if(chi2 < 4.0 && fabs(deltaPhiTrack) < 0.4)
+	hE[174]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
+      if(chi2 < 4.0 && fabs(deltaPhiTrack) < 0.35)
+	hE[175]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
+      if(chi2 < 3.5 && fabs(deltaPhiTrack) < 0.4)
+	hE[176]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
+       
       hE[20]->Fill("goldW",1.);
       nGoldW++;
       if(T.prMuTrack->charge()>0) nGoldWp++;
@@ -286,7 +340,6 @@ St2011WMaker::analyzeESMD(){
 	const StPhysicalHelixD trkHlx=T.prMuTrack->outerHelix();    
 	// to account for the z-depth of each plane, sector dependent, (cm), Z=smd depth
 	StThreeVectorD diskPosition=StThreeVectorD(0,0,geomE->getZSMD() + (layer[iuv]-2)* 1.25);
-	//diskPosition.setZ(geomE->getZSMD());// restore fixed, average  Z-DSM - discard after testing
 	StThreeVectorD diskNormal=StThreeVectorD(0,0,1);
 	printf(" ESMD sec=%d iuv=%d  layer=%d, smdZ=%.1f\n", isec+1, iuv,layer[iuv],diskPosition.z() );
 	//path length at intersection with plane
@@ -511,7 +564,6 @@ St2011WMaker::matchTrack2EtowCluster(){
       if(T.pointTower.id>=0) continue; //skip barrel towers
             
       float trackPT=T.prMuTrack->momentum().perp();
-      //need to decide on 2x2 or 2x1 for cluster size
       T.cluster=maxEtow2x2(T.pointTower.iEta,T.pointTower.iPhi,zVert);
       hE[110]->Fill( T.cluster.ET);
       hE[33]->Fill(T.cluster.ET);
@@ -666,6 +718,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.23  2013/09/13 19:33:13  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.22  2012/10/01 19:48:20  stevens4
 // add plots for Z result and move esmd cross point calculation outside plane loop
 //

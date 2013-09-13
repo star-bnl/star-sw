@@ -1,4 +1,5 @@
-// $Id: St2011W_Ehisto.cxx,v 1.14 2013/06/14 21:08:50 jlzhang Exp $
+
+// $Id: St2011W_Ehisto.cxx,v 1.15 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -66,9 +67,6 @@ St2011WMaker::initEHistos(){
   ln=new TLine(-par_vertexZ,0,-par_vertexZ,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   hE[12]=new TH1F("muENV","L2WE: # vertices per event, (rank>0 or matched track to ETOW) && Z in range; # of vertices",10,0,10);
-
-   // intended for QCD MC 
-  hE[13]=h=new TH2F("muEtowMaxTow_Zv","L2WE: ETOW max tower ET vs Z of any vertex w/ rank>0;Z-vertex (cm); max ETOW tower ET",100,-100,100,100,0,100);
 
   //..... Tracks....
   hE[20]=h=new TH1F("muEStatTrk","Endcap W-algo: track  count; cases",nCase,0,nCase);
@@ -192,6 +190,10 @@ St2011WMaker::initEHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(parE_trackRin,0,parE_trackRin,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
+  hE[66]=h=new TH1F("muETrRxyOutTr2Cl","Endcap: primary track last hit  in-muTr2Cl; Rxy (cm)",80,60,220.);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(parE_trackRout,0,parE_trackRout,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
   // misc...
   hE[69]=h=new TH2F("muEeXY","Endcap W: Projected track XY at SMD depth;  X (cm); Y (cm)",100,-280,280,100,-280,280);
   hE[70]=h=new TH1F("muETEMCjetETR_EMC","Endcap: ratio (2x2/nearEmcCone) ET ; cluster ET/ nearEmcCone ET",100,0,1.2);
@@ -232,12 +234,52 @@ St2011WMaker::initEHistos(){
   hE[104]=h=new TH2F("muE_W_sPtBalnearIsoEtow","Endcap W: sPt-Bal vs 2x2/nearEtowCone ratio, final selection ; 2x2/nearEtowCone ratio; signed Pt-Balance",100,0,1.2,100,-100,100);
 
   hE[105]=h=new TH2F("muE_W_sPtBaldedx","Endcap W: sPt-Bal vs dE/dx, final selection ; dE/dx (keV); signed Pt-Balance",100,0,20,100,-100,100);
-  hE[106]=h=new TH2F("muE_W_dEdxFit","Endcap W: dEdxFit vs dE/dx (nominal), final selection ; nominal dE/dx (keV); dEdxFit",100,0,20,100,0,20);
-  //hE[107]=h=new TH2F("muE_W_dEdxFitTrunc","Endcap W: dEdxFit vs dEdxTruncated, final selection ; dEdxTruncated; dEdxFit",100,0,20,100,0,20);
 
-  hE[107]=h=new TH2F("muE_W_sector_hypCorrP","Endcap W: Q*ET/PT vs TPC sector, final selection ; TPC sector ID; Q*ET/PT",20,0.,20.,100,-4,4);
-  hE[108]=h=new TH2F("muE_W_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, final selection ; nHit; Q*ET/PT",50,0,50,100,-4,4);
-  hE[109]=h=new TH2F("muE_W_dEdx_hypCorrP","Endcap W: Q*ET/PT vs dEdx, final selection ; dEdx; Q*ET/PT",100,0.,20.,100,-4,4);
+  // plots to study charge separation
+  hE[106]=h=new TH2F("muE_W_primChi2_hypCorrP","Endcap W: Q*ET/PT vs primary #Chi^{2}, final selection ; primary #Chi^{2}; Q*ET/PT",100,0,5,160,-4,4);
+  hE[107]=h=new TH2F("muE_W_globChi2_hypCorrP","Endcap W: Q*ET/PT vs global #Chi^{2}, final selection ; global #Chi^{2}; Q*ET/PT",100,0,5,160,-4,4);
+  hE[108]=h=new TH2F("muE_W_FitFrac_hypCorrP","Endcap W: Q*ET/PT vs FitFrac, final selection ; nFit/nPoss; Q*ET/PT",100,0,1.1,160,-4,4);
+  hE[109]=h=new TH2F("muE_W_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, final selection ; nHit; Q*ET/PT",50,0,50,160,-4,4);
+  
+  hE[120]=h=new TH2F("muE_W_diffChi2_hypCorrP","Endcap W: Q*ET/PT vs primary - global #Chi^{2}, final selection ; primary - global #Chi^{2}; Q*ET/PT",100,-5,5,160,-4,4);
+  hE[121]=h=new TH2F("muE_W_DCA_hypCorrP","Endcap W: Q*ET/PT vs sDCA, final selection ; sDCA; Q*ET/PT",100,-5,5,160,-4,4);
+  hE[122]=h=new TH2F("muE_W_ESMDdeltaU_hypCorrP","Endcap W: Q*ET/PT vs ESMDU #Delta strip, final selection; ESMDU #Delta strip; Q*ET/PT",11,-5.5,5.5,160,-4,4);
+  hE[123]=h=new TH2F("muE_W_ESMDdeltaV_hypCorrP","Endcap W: Q*ET/PT vs ESMDV #Delta strip, final selection; ESMDV #Delta strip; Q*ET/PT",11,-5.5,5.5,160,-4,4);
+  hE[124]=h=new TH2F("muE_W_ESMDdeltaV_deltaU","Endcap W: ESMD #Delta strip U vs V, final selection; ESMDV #Delta strip; ESMDU #Delta strip",11,-5.5,5.5,11,-5.5,5.5);
+  hE[125]=h=new TH2F("muE_W_Rin_hypCorrP","Endcap W: Q*ET/PT vs Rin, final selection ; Rin; Q*ET/PT",60,50,170.,160,-4,4);
+  hE[126]=h=new TH2F("muE_W_Rout_hypCorrP","Endcap W: Q*ET/PT vs Rout, final selection ; Rout; Q*ET/PT",80,60,220.,160,-4,4);
+  hE[127]=h=new TH2F("muE_W_dEdx_hypCorrP","Endcap W: Q*ET/PT vs dEdx, final selection ; dEdx; Q*ET/PT",100,0.,20.,160,-4,4);
+  hE[128]=h=new TH2F("muE_W_gLength_hypCorrP","Endcap W: Global track length vs zdcx rate; Global track length; Q*ET/PT",100,0.,200.,160,-4,4);
+  hE[129]=h=new TH2F("muE_W_deltaR_hypCorrP","Endcap W: Global track radial length vs zdcx rate; Global track radial length; Q*ET/PT",100,0.,100.,160,-4,4);
+  hE[130]=h=new TH2F("muE_W_ESMDdeltaPhi_hypCorrP","Endcap W: Q*ET/PT vs ESMD #Delta#phi (centroid - track), final selection; ESMD #Delta#phi; Q*ET/PT",100,-0.5,0.5,160,-4,4);
+  hE[131]=h=new TH2F("muE_W_trackDeltaPhi_hypCorrP","Endcap W: Q*ET/PT vs Track #Delta#phi (primary - global), final selection; Track #Delta#phi; Q*ET/PT",100,-0.5,0.5,160,-4,4);
+
+  // extra correlations for "or" type cuts
+  hE[150]=h=new TH2F("muE_WP_Rout_sDCA","Endcap Reco W+: Rout vs sDCA ; sDCA; Rout (cm)",160,-4,4,100,0.,200.);
+  hE[151]=h=new TH2F("muE_WN_Rout_sDCA","Endcap Reco W-: Rout vs sDCA ; sDCA; Rout (cm)",160,-4,4,100,0.,200.);
+  
+  hE[152]=h=new TH2F("muE_WP_Rout_ESMDdeltaPhi","Endcap Reco W+: Rout vs ESMD #Delta#phi (centroid - track); ESMD #Delta#phi; Rout (cm)",100,-0.5,0.5,100,0,200);
+  hE[153]=h=new TH2F("muE_WN_Rout_ESMDdeltaPhi","Endcap Reco W-: Rout vs ESMD #Delta#phi (centroid - track); ESMD #Delta#phi; Rout (cm)",100,-0.5,0.5,100,0,200);
+  hE[154]=h=new TH2F("muE_WP_deltaR_ESMDdeltaPhi","Endcap Reco W+: global track radial length vs ESMD #Delta#phi (centroid - track); ESMD #Delta#phi ; global track radial length (cm)",100,-0.5,0.5,100,0.,100.);
+  hE[155]=h=new TH2F("muE_WN_deltaR_ESMDdeltaPhi","Endcap Reco W-: global track radial length vs ESMD #Delta#phi (centroid - track); ESMD #Delta#phi ; global track radial length (cm)",100,-0.5,0.5,100,0.,100.);
+  hE[156]=h=new TH2F("muE_WP_deltaR_trackDeltaPhi","Endcap Reco W+: global track radial length vs Track #Delta#phi (primary - global); Track #Delta#phi ; global track radial length (cm)",100,-0.5,0.5,100,0.,100.);
+  hE[157]=h=new TH2F("muE_WN_deltaR_trackDeltaPhi","Endcap Reco W-: global track radial length vs Track #Delta#phi (primary - global); Track #Delta#phi ; global track radial length (cm)",100,-0.5,0.5,100,0.,100.);
+  hE[158]=h=new TH2F("muE_WP_primChi2_trackDeltaPhi","Endcap Reco W+: primary #Chi^{2} vs Track #Delta#phi (primary - global); Track #Delta#phi ; primary #Chi^{2}",100,-0.5,0.5,100,0.,5.);
+  hE[159]=h=new TH2F("muE_WN_primChi2_trackDeltaPhi","Endcap Reco W-: primary #Chi^{2} vs Track #Delta#phi (primary - global); Track #Delta#phi ; primary #Chi^{2}",100,-0.5,0.5,100,0.,5.);
+  hE[160]=h=new TH2F("muE_WP_primChi2_ESMDdeltaPhi","Endcap Reco W+: primary #Chi^{2} vs ESMD #Delta#phi (centroid - track); ESMD #Delta#phi ; primary #Chi^{2}",100,-0.5,0.5,100,0.,5.);
+  hE[161]=h=new TH2F("muE_WN_primChi2_ESMDdeltaPhi","Endcap Reco W-: primary #Chi^{2} vs ESMD #Delta#phi (centroid - track); ESMD #Delta#phi ; primary #Chi^{2}",100,-0.5,0.5,100,0.,5.);
+  hE[162]=h=new TH2F("muE_WP_primChi2_trackDeltaR","Endcap Reco W+: primary #Chi^{2} vs global track radial length; global track radial length; primary #Chi^{2}",100,0.,100.,100,0.,5.);
+  hE[163]=h=new TH2F("muE_WN_primChi2_trackDeltaR","Endcap Reco W-: primary #Chi^{2} vs global track radial length; global track radial length; primary #Chi^{2}",100,0.,100.,100,0.,5.);
+  
+  //158-169
+
+  hE[170]=h=new TH2F("muE_W_cutA_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, cut A selection; nHit; Q*ET/PT",35,0,35,160,-4,4);
+  hE[171]=h=new TH2F("muE_W_cutB_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, cut B selection; nHit; Q*ET/PT",35,0,35,160,-4,4);
+  hE[172]=h=new TH2F("muE_W_cutC_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, cut C selection; nHit; Q*ET/PT",35,0,35,160,-4,4);
+  hE[173]=h=new TH2F("muE_W_cutD_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, cut D selection; nHit; Q*ET/PT",35,0,35,160,-4,4);
+  hE[174]=h=new TH2F("muE_W_cutE_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, cut E selection; nHit; Q*ET/PT",35,0,35,160,-4,4);
+  hE[175]=h=new TH2F("muE_W_cutF_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, cut F selection; nHit; Q*ET/PT",35,0,35,160,-4,4);
+  hE[176]=h=new TH2F("muE_W_cutG_nHit_hypCorrP","Endcap W: Q*ET/PT vs nHit, cut G selection; nHit; Q*ET/PT",35,0,35,160,-4,4);
 
   // free 101-109
   //..... series of electron ET plots after succesive cuts
@@ -288,12 +330,12 @@ St2011WMaker::initEHistos(){
 
   // "straightened" charge separation plots
   sprintf(txt,"Endcap: TPC GLOB Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT");
-  hE[202]=h=new TH2F("muEchRecHypCorrPNg", txt,100,0.,100.,100,-4,4);
+  hE[202]=h=new TH2F("muEchRecHypCorrPNg", txt,100,0.,100.,160,-4,4);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
   sprintf(txt,"Endcap: TPC PRIM Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT");
-  hE[203]=h=new TH2F("muEchRecHypCorrPNp", txt,100,0.,100.,100,-4,4);
+  hE[203]=h=new TH2F("muEchRecHypCorrPNp", txt,100,0.,100.,160,-4,4);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
@@ -304,7 +346,7 @@ St2011WMaker::initEHistos(){
   hE[215]=h=new TH2F("muEclustET_esmdNhit","Tower cluster E_{T} vs. Number of hit strips; Tower cluster E_{T}; Nhit (U+V)",100,0.,100.,100,0.,100.);
   hE[216]=0;
   hE[217]=h=new TH2F("muEsmdCrossXY","Difference in SMD XP (track - SMD); X position; Y postion",50,-2.5,2.5,50,-2.5,2.5);
-  hE[218]=h=new TH2F("muEsmdCrossEtaPhi","Difference in SMD XP (track - SMD); Eta position; Phi postion",50,-.05,.05,50,-.05,.05);
+  hE[218]=h=new TH2F("muEsmdCrossEtaPhi","Difference in SMD XP (track - SMD); Eta position; Phi postion",50,-.02,.02,50,-.02,.02);
   hE[219]=h=new TH2F("muEsmdRatioUV","Ratio of 7 strip sum to 41 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
   hE[220]=h=new TH2F("muEclustET_esmdRatio","Tower cluster E_{T} vs. Ratio of 7 strip sum to 41 strip sum (U+V); Tower cluster E_{T} ; U+V ratio",100,0.,100.,50,0.,1.);
 

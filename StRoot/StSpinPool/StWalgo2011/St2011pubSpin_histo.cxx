@@ -1,4 +1,4 @@
-// $Id: St2011pubSpin_histo.cxx,v 1.7 2013/06/14 21:08:51 jlzhang Exp $
+// $Id: St2011pubSpin_histo.cxx,v 1.8 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -47,30 +47,8 @@ St2011pubSpinMaker::initHistos(){
   hA[6]=new TH1F(core+"Y0","Barrel BG1: L2W-BHT3-rnd & vertex OK & low ET; spin4 ",16,-0.5,15.5);
   hA[7]=new TH1F(core+"Y1",Form("Barrel BG2: vertex & ET<20 &  ET 2x2 << 4x4 : %s; spin4 ",coreTitle.Data()),16,-0.5,15.5);
 
-  //hA[8]=h=new TH1F(core+"QpT","Barrel reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
   hA[8]=h=new TH1F(core+"QpT","Barrel W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
-  float highCut=par_QPThighA - (par_QPThighET1-par_QPThighET0)*par_QPThighB; 
-    
-  if(par_QPTlow>0) { // abaility to skip all Q/PT cuts
-    Lx=h->GetListOfFunctions();
-    ln=new TLine(par_QPTlow,0,par_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    ln=new TLine(-par_QPTlow,0,-par_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    float avrC=(par_QPThighA+highCut)/2.; 
-    ln=new TLine(-avrC,0,-avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    ln=new TLine(avrC,0,avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  }
-
   hA[9]=h=new TH2F(core+"QpT2","Barrel TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT  (1/GeV)",100,0.,100.,100,-0.1,0.1);
-    Lx=h->GetListOfFunctions();
-    ln=new TLine(0,0,100,0);  ln->SetLineColor(kBlue);  Lx->Add(ln);
-
-    if(par_QPTlow>0) { // abaility to skip all Q/PT cuts
-    ln=new TLine(0,par_QPTlow,100,par_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
-    ln=new TLine(0,-par_QPTlow,100,-par_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
-    ln=new TLine(25,-0.1, 25,0.1);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    ln=new TLine(par_QPThighET0,par_QPThighA,par_QPThighET1,highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    ln=new TLine(par_QPThighET0,-par_QPThighA,par_QPThighET1,-highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  }
 
   //use 10-19
   char cPM[2]={'P','N'}; // Positive, Negative
@@ -154,29 +132,8 @@ St2011pubSpinMaker::initHistos(){
   hE[7]=new TH1F(core+"EY1",Form("Endcap BG2: vertex & ET<20 &  ET 2x2 << 4x4 : %s; spin4 ",coreTitle.Data()),16,-0.5,15.5);
 
   hE[8]=h=new TH1F(core+"EQpT","Endcap reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
-  float highCutE=parE_QPThighA - (parE_QPThighET1-parE_QPThighET0)*parE_QPThighB; 
-    
-  if(parE_QPTlow>0) { // abaility to skip all Q/PT cuts
-    Lx=h->GetListOfFunctions();
-    ln=new TLine(parE_QPTlow,0,parE_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    ln=new TLine(-parE_QPTlow,0,-parE_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    float avrC=(parE_QPThighA+highCutE)/2.; 
-    ln=new TLine(-avrC,0,-avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    ln=new TLine(avrC,0,avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  }
-
   hE[9]=h=new TH2F(core+"EQpT2","Endcap TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT  (1/GeV)",100,0.,100.,100,-0.1,0.1);
-    Lx=h->GetListOfFunctions();
-    ln=new TLine(0,0,100,0);  ln->SetLineColor(kBlue);  Lx->Add(ln);
-
-    if(parE_QPTlow>0) { // abaility to skip all Q/PT cuts
-    ln=new TLine(0,parE_QPTlow,100,parE_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
-    ln=new TLine(0,-parE_QPTlow,100,-parE_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
-    ln=new TLine(25,-0.1, 25,0.1);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    ln=new TLine(parE_QPThighET0,parE_QPThighA,parE_QPThighET1,highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
-    ln=new TLine(parE_QPThighET0,-parE_QPThighA,parE_QPThighET1,-highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  }
-
+  
   //use 10-19
   for(int ipn=0;ipn<2;ipn++){ 
     TH1 *h;
@@ -238,6 +195,9 @@ St2011pubSpinMaker::initHistos(){
 
 
 // $Log: St2011pubSpin_histo.cxx,v $
+// Revision 1.8  2013/09/13 19:33:13  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.7  2013/06/14 21:08:51  jlzhang
 // add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
 //

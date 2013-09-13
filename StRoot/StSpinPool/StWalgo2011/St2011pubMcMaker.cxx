@@ -1,4 +1,4 @@
-// $Id: St2011pubMcMaker.cxx,v 1.2 2013/07/03 16:53:07 stevens4 Exp $
+// $Id: St2011pubMcMaker.cxx,v 1.3 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Justin Stevens, IUCF
 // 
@@ -301,7 +301,7 @@ St2011pubMcMaker::doMCanalysis(){
     }
     i++;
   }
- 
+
   if(found!=2) return false;
  
   mWP=TVector3(pW.x(),pW.y(),pW.z());
@@ -332,6 +332,9 @@ St2011pubMcMaker::doMCanalysis(){
 }
 
 // $Log: St2011pubMcMaker.cxx,v $
+// Revision 1.3  2013/09/13 19:33:13  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.2  2013/07/03 16:53:07  stevens4
 // Update for efficiency studies with embedding
 //

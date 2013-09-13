@@ -1,4 +1,4 @@
-// $Id: St2011W_EacessMuDst.cxx,v 1.6 2012/07/12 20:49:21 balewski Exp $
+// $Id: St2011W_EacessMuDst.cxx,v 1.7 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -68,7 +68,6 @@ St2011WMaker::accessEndcapTrig(){ // return non-zero on abort
   printf("L2WE_Result 4-bytes: trg bitET=%d,  bitRnd=%d, highets:  ET/GeV=%.2f,  RDO=%d  hex=0x%08x\n",wEve->l2EbitET,wEve->l2EbitRnd,l2algo->highestEt/256.*60,l2algo->highestRDO,l2res[EEMCW_off]);
 #endif
   
-
   //  hack to make the code work also for run 9 and early run 12
   if (mRunNo<11000111 || mRunNo>13000000) {  
     wEve->l2EbitET=1;
@@ -256,6 +255,9 @@ St2011WMaker::accessESMD(){
 
 
 //$Log: St2011W_EacessMuDst.cxx,v $
+//Revision 1.7  2013/09/13 19:33:13  stevens4
+//Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 //Revision 1.6  2012/07/12 20:49:21  balewski
 //added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
 //removed dependence of spinSortingMaker from muDst

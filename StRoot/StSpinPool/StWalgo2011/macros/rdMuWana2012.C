@@ -22,7 +22,7 @@ int rdMuWana2012(
   
   if(isMC==0) jetDir="./"; 
 
-  if(isMC &&  useJetFinder==2) geant=true;
+  //if(isMC &&  useJetFinder==2) geant=true;
   
   if(isMC) spinSort=false;
   TString outF=file;
@@ -40,7 +40,7 @@ int rdMuWana2012(
     if(isMC==100) file1=strstr(file,"j");   
     //embedding run with geant files
     if(isMC==350) file1=strstr(file,"W");
-    if(isMC==351) file1=strstr(file,"Wtau");
+    if(isMC==351) file1=strstr(file,"Wminus_tau");
     if(isMC==352) file1=strstr(file,"Z");
     assert(file1);  printf("file1=%s=\n",file1);
     outF=file1; 
@@ -115,20 +115,6 @@ int rdMuWana2012(
   TObjArray* HList=new TObjArray;
   TObjArray* HListTpc=new TObjArray;
 
-#if 0
-  if(geant){                          
-    // get geant file                    
-    StIOMaker* ioMaker = new StIOMaker();
-    printf("\n %s \n\n",fileG.Data());   
-    ioMaker->SetFile(fileG.Data());      
-    
-    ioMaker->SetIOMode("r");             
-    ioMaker->SetBranch("*",0,"1");   //deactivate all branches 
-    ioMaker->SetBranch("geantBranch",0,"r");//activate geant Branch
-    ioMaker->SetBranch("minimcBranch",0,"r");//activate geant Branch 
-  }
-#endif  
-
   int nFiles=1000;
   if(geant){ 
     //split MuDst file list to geant files
@@ -156,6 +142,7 @@ int rdMuWana2012(
 
   // Now we add Makers to the chain...  
   muMk = new StMuDstMaker(0,0,muDir,file,"MuDst.root",nFiles);
+#if 0
   muMk->SetStatus("*",0);
   muMk->SetStatus("MuEvent",1);
   muMk->SetStatus("EmcTow",1);
@@ -167,6 +154,7 @@ int rdMuWana2012(
   muMk->SetStatus("PrimaryVertices",1);
   muMk->SetStatus("GlobalTracks",1);
   muMk->SetStatus("PrimaryTracks",1);
+#endif
   TChain* tree=muMk->chain(); assert(tree);
   int nEntries=(int) tree->GetEntries();
   printf("total eve in muDst chain =%d\n",nEntries);  // return ;
@@ -180,13 +168,9 @@ int rdMuWana2012(
     //data
     dbMk->SetFlavor("Wbose2","bsmdeCalib");// Willie's abs gains E-plane, run 9
     dbMk->SetFlavor("Wbose2","bsmdpCalib"); // P-plane
-    //dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains 
-    //dbMk->SetFlavor("sim","eemcPMTcal"); // use ideal gains 
   }     
   else if (isMC<400) {
-    if(isMC>=350) dbMk->SetMaxEntryTime(20101215,0); // run 9 embedding
-    dbMk->SetFlavor("Wbose2","bsmdeCalib");// Willie's abs gains E-plane, run 9
-    dbMk->SetFlavor("Wbose2","bsmdpCalib"); // P-plane
+    if(isMC>=350) dbMk->SetMaxEntryTime(20130520,0); // run 12 embedding
   }
   else {
     printf("???? unforeseen MC flag, ABORT\n"); assert(1==2);
@@ -369,10 +353,7 @@ int rdMuWana2012(
   St2011WMaker *WmuMk=new St2011WMaker();
   if(isMC) { // MC specific
     WmuMk->setMC(isMC); //pass "version" of MC to maker
-    //WmuMk->setJetNeutScaleMC(1.0); 
-    //WmuMk->setJetChrgScaleMC(1.0); 
   }else {// real data
-    //WmuMk->setBtowScale(0.976); //determined from Run 9 data 
     WmuMk->setTrigID(idL2BWtrg,idL2EWtrg);
   }
   
@@ -382,7 +363,7 @@ int rdMuWana2012(
   if (useJetFinder == 2) {
     cout << "Configure to read jet trees " << endl;
     WmuMk->chainJetFile(jetFile);
-    WmuMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
+    WmuMk->setJetTreeBranch("AntiKtR060NHits12","AntiKtR060NHits12_noEEMC"); //select jet tree braches used
   }
 
   WmuMk->setMaxDisplayEve(100); // only first N events will get displayed 
@@ -411,17 +392,17 @@ int rdMuWana2012(
       spinMkA[kk]->setHList(HList); 
       if(kk==1) spinMkA[kk]->setEta(-1.,0.);
       if(kk==2) spinMkA[kk]->setEta(0,1.);
-      if(kk==3) spinMkA[kk]->setQPT(-1,-1);// disable Q/PT cut
+      if(kk==3) spinMkA[kk]->setQPT(false);// disable Q/PT cut
       if(kk==4) spinMkA[kk]->setNoEEMC(); 
     }  
   }
-  
+ 
   if(geant){
     pubMcMk=new St2011pubMcMaker("pubMc");
     pubMcMk->attachWalgoMaker(WmuMk);
     pubMcMk->setHList(HList);
   }
-  
+ 
   if (findZ){
     ZMk=new St2011ZMaker("Z"); 
     ZMk->attachWalgoMaker(WmuMk);
@@ -485,17 +466,10 @@ int rdMuWana2012(
 }
 
 
-// ----------------------------------------------------------------------------
-void chainFiles(const Char_t *fileList)
-{
-
-  cout << "chaining files from list: " << fileList << endl;
-    wTreeMk->chainJetFile(jetName);
-
-}
-
-
 // $Log: rdMuWana2012.C,v $
+// Revision 1.12  2013/09/13 19:37:36  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.11  2013/07/03 16:53:15  stevens4
 // Update for efficiency studies with embedding
 //
