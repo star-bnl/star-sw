@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.16 2013/06/14 21:08:51 jlzhang Exp $
+// $Id: St2011W_histo.cxx,v 1.17 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -66,9 +66,7 @@ St2011WMaker::initHistos(){
   ln=new TLine(-par_vertexZ,0,-par_vertexZ,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   hA[12]=new TH1F("muNV","L2WB: # vertices per event, rank>0 & Z in range; # of vertices",10,0,10);
-
-  // intended for QCD MC normalization
-  hA[13]=h=new TH2F("muBtowMaxCl_Zv","L2WB: BTOW max 2x2 cluster ET vs Z of any vertex w/ rank>0;Z-vertex (cm); max BTOW 2x2 Cluster ET",100,-100,100,100,0,100);
+  hA[13]=h=new TH1F("muZdcx","zdcx rate; zdcx rate (kHz)",400,0.,4e5);
 
   //..... Tracks....
   hA[20]=h=new TH1F("muStatTrk","Barrel W-algo: track  count; cases",nCase,0,nCase);
@@ -256,10 +254,11 @@ St2011WMaker::initHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   
-  // free 102-109
   hA[104]=h=new TH1F("muWtime",Form("Barrel Golden W: unix time final selection %s 3/17/12 - 4/20/12; unixtime (bin = 10 min)",coreTitle.Data()),4896,1331942400,1334880000);
 
   hA[105]=h=new TH2F("muWfreeQ","reco charge vs. TPC dedx, golden W+; Q *ET/PT;  dEdx (keV)",200,-5,5,100,0,20);
+
+  hA[106]=h=new TH1F("muWzdcx","Barrel Golden W: zdcx rate, final selection ; zdcx rate (kHz)",400,0.,4e5);
 
   //..... series of electron ET plots after succesive cuts
   char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
@@ -285,29 +284,29 @@ St2011WMaker::initHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,par_ptBalance,100,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-
-  hA[136]=h=new TH1F("muclustPtBal",Form("Barrel: PT Balance > %.1f ; 2x2 Cluster ET",par_ptBalance),100,0,100);
-  hA[137]=h=new TH1F("muclustPtBal_bckgrd",Form("Barrel: PT Balance < %.1f ; 2x2 Cluster ET",par_ptBalance),100,0,100);
-  hA[140]=h=new TH1F("muclustPtBalnoE",Form("Barrel: sPT Balance > %.1f (EEMC not included); 2x2 Cluster ET",par_ptBalance),100,0,100);
+  int nETbins = 200;
+  hA[136]=h=new TH1F("muclustPtBal",Form("Barrel: PT Balance > %.1f ; 2x2 Cluster ET",par_ptBalance),nETbins,0,100);
+  hA[137]=h=new TH1F("muclustPtBal_bckgrd",Form("Barrel: PT Balance < %.1f ; 2x2 Cluster ET",par_ptBalance),nETbins,0,100);
+  hA[140]=h=new TH1F("muclustPtBalnoE",Form("Barrel: sPT Balance > %.1f (EEMC not included); 2x2 Cluster ET",par_ptBalance),nETbins,0,100);
   
   // Histograms added for background subtraction and systematic
   char str[200];
   for (int i=0; i<=20; i++) {
     sprintf(str,"neg_failAwaySide_Awayside_pt_bin_%d",i);
-    hA[142+i] = new TH2F(str,str,100,0,100,21,0,21);
+    hA[142+i] = new TH2F(str,str,nETbins,0,100,81,0,81);
   }
 
   for (int i=0; i<=20; i++) {
     sprintf(str,"pos_failAwaySide_Awayside_pt_bin_%d",i);
-    hA[163+i] = new TH2F(str,str,100,0,100,21,0,21);
+    hA[163+i] = new TH2F(str,str,nETbins,0,100,81,0,81);
   }
 
-  hA[184+2] = new TH1F("pos_muclustpTbal_wE","Barrel: pos_muclustpTbal_wE",100,0,100);
-  hA[184+1] = new TH1F("neg_muclustpTbal_wE","Barrel: neg_muclustpTbal_wE",100,0,100);
-  hA[184+4] = new TH1F("pos_muclustpTbal_noE","Barrel: pos_muclustpTbal_noE",100,0,100);
-  hA[184+3] = new TH1F("neg_muclustpTbal_noE","Barrel: neg_muclustpTbal_noE",100,0,100);
-  hA[184+6] = new TH1F("pos_muclustpTbal_back","Barrel: pos_muclustpTbal_back",100,0,100);
-  hA[184+5] = new TH1F("neg_muclustpTbal_back","Barrel: neg_muclustpTbal_back",100,0,100);
+  hA[184+2] = new TH1F("pos_muclustpTbal_wE","Barrel: pos_muclustpTbal_wE",nETbins,0,100);
+  hA[184+1] = new TH1F("neg_muclustpTbal_wE","Barrel: neg_muclustpTbal_wE",nETbins,0,100);
+  hA[184+4] = new TH1F("pos_muclustpTbal_noE","Barrel: pos_muclustpTbal_noE",nETbins,0,100);
+  hA[184+3] = new TH1F("neg_muclustpTbal_noE","Barrel: neg_muclustpTbal_noE",nETbins,0,100);
+  hA[184+6] = new TH1F("pos_muclustpTbal_back","Barrel: pos_muclustpTbal_back",nETbins,0,100);
+  hA[184+5] = new TH1F("neg_muclustpTbal_back","Barrel: neg_muclustpTbal_back",nETbins,0,100);
 
   
   hA[190]=h=new TH2F("muclustEt_etaWp","Barrel W+: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
@@ -334,17 +333,6 @@ St2011WMaker::initHistos(){
   hA[210]=h=new TH2F("muETOWnearET_eta_tr2cl","ETOW near cone ET vs. cluster eta; cluster detector eta; ETOW near ET",100,-1.,1.,20,0,20);
   hA[211]=h=new TH2F("muETOWnearET_phi_etaGT0_tr2cl","ETOW near cone ET vs. cluster phi (cluster eta > 0); cluster detector phi; ETOW near ET",240,-PI,PI,20,0,20);
   hA[212]=h=new TH2F("muETOWnearET_phi_etaLT0_tr2cl","ETOW near cone ET vs. cluster phi (cluster eta < 0); cluster detector phi; ETOW near ET",240,-PI,PI,20,0,20);
-
-  //hit towers for beam background tests
-  string bx7name[4]={"[0,30]","[30,40]","[40,110]","[110,120]"};
-  for(int i=0; i<4; i++){
-    hA[215+i]=h=new TH2F(Form("muBTOW_adcGT10goodVer_7bx%d",i),Form("BTOW tower ADC > 10 (after good vertex found) bx7=%s; detector eta; detector phi",bx7name[i].data()),40,-1,1,120,-PI,PI);
-    hA[219+i]=h=new TH2F(Form("muBTOW_etGT2goodVer_7bx%d",i),Form("BTOW tower ET > 2.0 GeV (after good vertex found) bx7=%s; detector eta; detector phi",bx7name[i].data()),40,-1,1,120,-PI,PI);
-    hA[223+i]=h=new TH2F(Form("muBTOW_adcGT10noVer_7bx%d",i),Form("BTOW tower ADC > 10 (no rank>0 vertex found) bx7=%s; detector eta; detector phi",bx7name[i].data()),40,-1,1,120,-PI,PI);
-    hA[227+i]=h=new TH2F(Form("muETOW_adcGT10goodVer_7bx%d",i),Form("ETOW tower ADC > 10 (after good vertex found) bx7=%s; detector eta bin; detector phi bin",bx7name[i].data()),12,0,12,60,0,60);
-    hA[231+i]=h=new TH2F(Form("muETOW_etGT2goodVer_7bx%d",i),Form("ETOW tower ET > 2.0 GeV (after good vertex found) bx7=%s; detector eta bin; detector phi bin",bx7name[i].data()),12,0,12,60,0,60);
-    hA[235+i]=h=new TH2F(Form("muETOW_adcGT10noVer_7bx%d",i),Form("ETOW tower ADC > 10 (no rank>0 vertex found) bx7=%s; detector eta bin; detector phi bin",bx7name[i].data()),12,0,12,60,0,60);
-  }
 
   hA[240]=h=new TH2F("muclustEt_etaFinal_noE","Barrel: 2x2 Cluster ET vs. lepton eta, final selection (no EEMC in veto); lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
   hA[241]=h=new TH2F("muclustEt_etaFinal","Barrel: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
@@ -395,6 +383,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.17  2013/09/13 19:33:13  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.16  2013/06/14 21:08:51  jlzhang
 // add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
 //

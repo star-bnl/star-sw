@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.15 2012/09/18 21:10:06 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.16 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -117,14 +117,6 @@ St2011WMaker::accessBarrelTrig(){ // return non-zero on abort
   unsigned int *l2res=(unsigned int *)l2Array.GetArray();
   const int BEMCW_off=20; // valid only for 2009 & 2011 run
   L2wResult2009 *l2algo= ( L2wResult2009 *) &l2res[BEMCW_off];
-
-#if 0
-  if(l2algo->trigger==0) return -3;
-  printf(" L2-jet online results below:\n");
-  for (int k=0;k<64;k++) 
-    if(l2res[k]) printf("k=%2d  val=0x%04x\n",k,l2res[k]);
-  L2wResult2009_print(l2algo);
-#endif
 
   wEve->l2bitET=(l2algo->trigger&2)>0;  // bit1=ET>thr
   wEve->l2bitRnd=(l2algo->trigger&1)>0; // bit0=rnd,
@@ -293,7 +285,7 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
 	//TPC sector dependent filter 
 	int secID=WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
 	if (mTpcFilter[secID-1].accept(prTr)==false) continue;
-	if (secID==20) continue; //poorly calibrated sector for Run 9+11+12?
+	if (secID==20) continue; //poorly calibrated sector for Run 9+11+12
 
 	hA[25]->Fill(glTr->p().perp());
 	if(glTr->charge()<0) hA[27]->Fill(glTr->p().perp());
@@ -455,9 +447,6 @@ St2011WMaker::accessBTOW(){
     int capID=0;// just one value for btow
     mBarrelTables->getPedestal(jBP,softID,capID,ped,sigPed); 
     mBarrelTables->getCalib(jBP, softID, 1, gain);
-    if (use_gains_file == 1) {
-      gain = gains_BTOW[softID];
-    }
     //printf("id=%d gain=%f\n",softID,gain);
 
     //method for shifting energy scale 
@@ -498,78 +487,6 @@ St2011WMaker::accessBTOW(){
   return 0;
 }
 
-
-//________________________________________________
-//________________________________________________
-void
-St2011WMaker::fillTowHit(bool vert){
-  if(!wEve->l2EbitET) return; //only barrel triggers
-
-  //find highest rank vertex
-  float maxRank=0; uint maxRankId=0;
-  for(uint iv=0;iv<wEve->vertex.size(); iv++) {
-    float rank=wEve->vertex[iv].rank;
-    if(rank<0) continue;
-    if(rank > maxRank){
-      maxRank=rank;
-      maxRankId=iv;
-    }
-  }
-
-  int bx7=wEve->bx7; int bxBin=-1;
-  if(bx7>=0 && bx7<30)
-    bxBin=0;
-  else if(bx7<40)
-    bxBin=1;
-  else if(bx7<110)
-    bxBin=2;
-  else if(bx7<120)
-    bxBin=3;
-  
-  float Rcylinder= mBtowGeom->Radius(), Rcylinder2=Rcylinder*Rcylinder;
-  //loop barrel towers and fill histo
-  for(int i=0; i<mxBtow; i++){
-    float adc=wEve->bemc.adcTile[kBTow][i];
-    bool fillAdc=false;
-    if(adc > 10) fillAdc=true; //~150 MeV threshold for tower firing
-    if(vert){
-      if(fillAdc) hA[215+bxBin]->Fill(positionBtow[i].Eta(),positionBtow[i].Phi()); 
-      float ene=wEve->bemc.eneTile[kBTow][i];
-      float delZ=positionBtow[i].z()-wEve->vertex[maxRankId].z;
-      float e2et=Rcylinder/sqrt(Rcylinder2+delZ*delZ);
-      float ET=ene*e2et;
-      if(ET > 2.0) hA[219+bxBin]->Fill(positionBtow[i].Eta(),positionBtow[i].Phi());
-    }
-    else if(fillAdc) hA[223+bxBin]->Fill(positionBtow[i].Eta(),positionBtow[i].Phi());
-  }
-
-  //some lower threshold plots  
-  for(int isec=0;isec<mxEtowSec;isec++){
-    for(int isub=0;isub<mxEtowSub;isub++){
-      for(int ieta=0;ieta<mxEtowEta;ieta++){
-	int iPhi=isec*mxEtowSub+isub;
-	float adc=wEve->etow.adc[iPhi][ieta];
-	bool fillAdc=false;
-	if(adc > 10) fillAdc=true; //~150 MeV threshold for tower firing
-	
-	if(vert){
-	  if(fillAdc) hA[227+bxBin]->Fill(ieta,iPhi); 
-	  float ene=wEve->etow.ene[iPhi][ieta];
-	  float delZ=positionEtow[iPhi][ieta].z()-wEve->vertex[maxRankId].z;
-	  float Rxy=positionEtow[iPhi][ieta].Perp();
-	  float e2et=Rxy/sqrt(Rxy*Rxy+delZ*delZ);
-	  float ET=ene*e2et;
-	  if(ET > 2.0) hA[231+bxBin]->Fill(ieta,iPhi);
-	}
-	else if(fillAdc) hA[235+bxBin]->Fill(ieta,iPhi);
-      }
-    }
-  }
-  
-  return;
-}
-
-
 //________________________________________________
 //________________________________________________
 float
@@ -593,8 +510,7 @@ St2011WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag, int pointTowId)
     StMuTrack *prTr=mMuDstMaker->muDst()->primaryTracks(itr);
     if(prTr->flag()<=0) continue;
     if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
-    if(prTr->flag()!=301 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate
-    //JS remove short tracks from iso cone && prTr->flag()!=311
+    if(prTr->flag()!=301 && pointTowId<0) continue;// TPC-only regular tracks for endcap candidate
     float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
     if(hitFrac<par_nHitFrac) continue;
     StThreeVectorF prPvect=prTr->p();
@@ -624,7 +540,7 @@ St2011WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag, int pointTowId)
 //________________________________________________
 void
 St2011WMaker::accessBSMD(){
-  const char cPlane[ mxBSmd]={'E','P'};
+  //const char cPlane[ mxBSmd]={'E','P'};
   // Access to muDst .......................
   StMuEmcCollection* emc = mMuDstMaker->muDst()->muEmcCollection();
   if (!emc) {
@@ -680,15 +596,15 @@ St2011WMaker::accessBSMD(){
       
       //if(nInpEve<3 || i <20 )printf("  i=%d, smd%c id=%d, m=%d adc=%.3f pedRes=%.1f, sigP=%.1f stat: O=%d P=%d G=%d  gain=%.2f\n",i,cPlane[iep],softID,1+id0/150,adc,pedRes,sigPed, statOfl,statPed,statGain, gain);
     }// end of hit list
-    if(nTrigEve%5000==1) { 
-      LOG_INFO << Form("unpackMuBSMD-%c() nBbad: ped=%d stat=%d gain=%d ; nAdc: %d>0, %d>thres", cPlane[iep],n1,n2,n3,n4,n5)<<endm;
-    }
   }// end of E-, P-plane loop
 
 }
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.16  2013/09/13 19:33:13  stevens4
+//Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 //Revision 1.15  2012/09/18 21:10:06  stevens4
 //Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
 //

@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.14 2012/09/21 16:59:10 balewski Exp $
+// $Id: St2011WMaker.h,v 1.15 2013/09/13 19:33:13 stevens4 Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -90,13 +90,12 @@ class St2011WMaker : public StMaker {
   float parE_trackEtaMin;
   int   parE_nSmdStrip, parE_esmdGL, parE_esmdWL;
   float parE_smdRatio;
+
+  float par_QET2PTlow, par_QET2PThigh;
+  float parE_QET2PTlow, parE_QET2PThigh;
         
   float par_etowScale;
   float par_btowScale;
-
-  char* gains_file;
-  int   use_gains_file;
-  float gains_BTOW[4801];
   
   TString coreTitle;
 
@@ -120,7 +119,6 @@ class St2011WMaker : public StMaker {
   void setL2SeedThresh(float x){ par_l2emulSeedThresh=x; }
   void setJetTreeBranch(TString jetTreeBranch, TString jetTreeBranch_noEEMC){ mJetTreeBranch = jetTreeBranch; mJetTreeBranch_noEEMC = jetTreeBranch_noEEMC; }
   
-  void setGainsFile(char* x) {gains_file=x; use_gains_file=1;}
   void setTreeName(TString x) { mTreeName=x; }
  private:   
 
@@ -143,8 +141,6 @@ class St2011WMaker : public StMaker {
   int   accessBarrelTrig();
   int   accessEndcapTrig();
   int   accessVertex();
-  void  fillTowHit(bool vert);
-  void  fillNorm();
   int   accessTracks();
   int   accessBTOW();
   void  accessBSMD();
@@ -228,7 +224,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.14 2012/09/21 16:59:10 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.15 2013/09/13 19:33:13 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -239,6 +235,9 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.15  2013/09/13 19:33:13  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.14  2012/09/21 16:59:10  balewski
 // added ESMD peak adjustement - partialy finished
 //

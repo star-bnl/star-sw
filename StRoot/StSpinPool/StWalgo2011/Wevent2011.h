@@ -1,4 +1,4 @@
-// $Id: Wevent2011.h,v 1.7 2013/01/15 23:26:35 fisyak Exp $
+// $Id: Wevent2011.h,v 1.8 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -193,7 +193,8 @@ class WeveBEMC { // info about BEMC
       int id=i+1;
       printf("id=%d adc=%.1f ene=%.1f;  ",id,adcTile[kBTow][i],eneTile[kBTow][i]);
     }    printf("\n");
-    
+   
+#if 0 
     printf(" BSMDE tower ADC>200 list: ");
     for(int i=0;i< mxBStrips;i++) {
       if(adcBsmd[ kBSE][i]<200) continue;
@@ -201,6 +202,7 @@ class WeveBEMC { // info about BEMC
       int module= 1+i/150;
       printf("id=%d mod=%d adc=%.1f ;  ",id,module,adcBsmd[ kBSE][i]);
     }    printf("\n");
+#endif
 
     printf(" BTOW maxAdc=%.1f  maxHtDsm=%d\n",maxAdc, maxHtDsm);
    
@@ -367,6 +369,9 @@ class Wevent2011 : public TObject {
 
 
 // $Log: Wevent2011.h,v $
+// Revision 1.8  2013/09/13 19:33:13  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.7  2013/01/15 23:26:35  fisyak
 // add sys/types.h for APPLE
 //

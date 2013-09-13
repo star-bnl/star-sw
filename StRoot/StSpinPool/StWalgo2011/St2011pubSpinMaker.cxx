@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.13 2013/06/14 21:08:51 jlzhang Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.14 2013/09/13 19:33:13 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -16,19 +16,11 @@ ClassImp(St2011pubSpinMaker)
   core=name;
   coreTitle=etaName;
 
-  par_QPTlow=0.4;
-  par_QPThighET0=25; 
-  par_QPThighET1=50; 
-  par_QPThighA=1.8; 
-  par_QPThighB=0.0013; 
+  par_QET2PTcut = true;
+
   par_leptonEta1=-1.; par_leptonEta2=1.;
   par_useNoEEMC=0;
   
-  parE_QPTlow=0.4;
-  parE_QPThighET0=25; 
-  parE_QPThighET1=50; 
-  parE_QPThighA=1.8; 
-  parE_QPThighB=0.0013;
   parE_leptonEta1=0.7; parE_leptonEta2=2.5;
 
  }
@@ -57,14 +49,8 @@ St2011pubSpinMaker::FinishRun  (int runNo){
 Int_t 
 St2011pubSpinMaker::InitRun  (int runNo){
 
-  //j1  sprintf(txt,"bXing= bx48+off=%d",spinDb->BX48offset());
-  //j1 hA[3]->GetXaxis()->SetTitle(txt);
-
-  //j1 sprintf(txt,"bXing= bx7+off=%d",spinDb->BX7offset());
-  //j1 hA[4]->GetXaxis()->SetTitle(txt);
-
-  LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude |Q/PT| < %.2f OR |Q/PT| above line %.3f*(ET-%.1f)-%6e if ET<%.1f, for AL use leptonEta in[%.1f,%.1f] useNoEEMC=%d", runNo,
-		 par_QPTlow,par_QPThighET0, par_QPThighA ,par_QPThighB,par_QPThighET1,par_leptonEta1, par_leptonEta2,par_useNoEEMC
+  LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude |Q*ET/PT| < %.2f OR |Q*ET/PT| > %.2f, for AL use leptonEta in[%.1f,%.1f] useNoEEMC=%d", runNo,
+		 wMK->par_QET2PTlow,wMK->par_QET2PThigh,par_leptonEta1, par_leptonEta2,par_useNoEEMC
 		 )<<endm;	 
   return kStOK;
 }
@@ -187,19 +173,19 @@ St2011pubSpinMaker::bXingSort(){
       if(ET>par_myET) hA[0]->Fill("W25",1.);
       float q2pt=T.prMuTrack->charge()/T.prMuTrack->pt();
       if(ET>par_myET) {
-		hA[8]->Fill(q2pt);
-		hA[32]->Fill(q2pt,T.prMuTrack->nHitsFit());
-	    hA[33]->Fill(q2pt,1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
-		hA[34]->Fill(T.prMuTrack->nHitsFit(),1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
-	  }
+	hA[8]->Fill(q2pt);
+	hA[32]->Fill(q2pt,T.prMuTrack->nHitsFit());
+	hA[33]->Fill(q2pt,1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
+	hA[34]->Fill(T.prMuTrack->nHitsFit(),1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
+      }
       hA[9]->Fill(ET,q2pt);
       
       // new charge rejection Q*ET/PT
       float hypCorr = q2pt*(T.cluster.ET);
-      if(par_QPTlow>0) { // ability to skip all Q/PT cuts
-	if( fabs(hypCorr) < par_QPTlow) continue;
+      if(par_QET2PTcut) { // ability to skip all Q/PT cuts
+	if( fabs(hypCorr) < wMK->par_QET2PTlow) continue;
 	if(ET>par_myET) hA[0]->Fill("Qlow",1.);
-	if( fabs(hypCorr) > par_QPThighA) continue;
+	if( fabs(hypCorr) > wMK->par_QET2PThigh) continue;
       }
 
       if(ET>par_myET) {
@@ -210,7 +196,7 @@ St2011pubSpinMaker::bXingSort(){
 
      
       hA[10+iQ]->Fill(ET);
-      if(ET>25 &&ET<50 ) {
+      if(ET>25 && ET<50 ) {
 	hA[12+iQ]->Fill(spin4);
 	hA[29+iQ]->Fill(T.prMuTrack->eta()); 
 	nIsW++;
@@ -273,8 +259,6 @@ St2011pubSpinMaker::bXingSortEndcap(){
   }
   
   if( wMK->wEve->l2EbitET==0) return; 
-  //..... it is guaranteed ..... L2EW-ET>11? did fired  ......
-  
   
   // search for  Ws ............
   for(uint iv=0;iv<wMK->wEve->vertex.size();iv++) {
@@ -285,7 +269,7 @@ St2011pubSpinMaker::bXingSortEndcap(){
 
       /* Collect QCD background for lumi monitors */
       float frac24=T.cluster.ET/(T.cl4x4.ET);
-      if(iv==0 && it==0 && frac24<wMK->par_clustFrac24) {
+      if(iv==0 && it==0 && frac24<wMK->parE_clustFrac24) {
 	hE[31]->Fill(T.cluster.ET);
 	if( T.cluster.ET <20. ) { hE[7]->Fill(spin4);  hE[0]->Fill("BG2",1.);}
       }
@@ -332,10 +316,10 @@ St2011pubSpinMaker::bXingSortEndcap(){
 
       // new charge rejection Q*ET/PT
       float hypCorr = q2pt*(T.cluster.ET);
-      if(parE_QPTlow>0) { // ability to skip all Q/PT cuts
-	if( fabs(hypCorr) < parE_QPTlow) continue;
+      if(par_QET2PTcut) { // ability to skip all Q/PT cuts
+	if( fabs(hypCorr) < wMK->parE_QET2PTlow) continue;
 	if(ET>par_myET) hE[0]->Fill("Qlow",1.);
-	if( fabs(hypCorr) > parE_QPThighA) continue;
+	if( fabs(hypCorr) > wMK->parE_QET2PThigh) continue;
       }
 
       if(ET>par_myET) {
@@ -345,7 +329,7 @@ St2011pubSpinMaker::bXingSortEndcap(){
       }
      
       hE[10+iQ]->Fill(ET);
-      if(ET>25 &&ET<50 ) {
+      if(ET>25 && ET<50 ) {
 	hE[12+iQ]->Fill(spin4);
 	hE[29+iQ]->Fill(T.prMuTrack->eta()); 
 	nIsW++;
@@ -362,6 +346,9 @@ St2011pubSpinMaker::bXingSortEndcap(){
 }
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.14  2013/09/13 19:33:13  stevens4
+// Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
+//
 // Revision 1.13  2013/06/14 21:08:51  jlzhang
 // add histo Q/pT vs. nHitsFit and Q/pT vs. nHitsPos
 //
