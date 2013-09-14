@@ -1,7 +1,7 @@
-// $Id: StPxlDbMaker.cxx,v 1.4 2013/09/14 17:46:58 bouchet Exp $
+// $Id: StPxlDbMaker.cxx,v 1.5 2013/09/14 17:53:01 bouchet Exp $
 // $Log: StPxlDbMaker.cxx,v $
-// Revision 1.4  2013/09/14 17:46:58  bouchet
-// *** empty log message ***
+// Revision 1.5  2013/09/14 17:53:01  bouchet
+// methods to retrieve PXL masks tables
 //
 // Revision 1.3  2013/06/21 21:12:26  qiuh
 // *** empty log message ***
@@ -286,8 +286,6 @@ void StPxlDbMaker::GetPxlSensorStatus(){
 }
 //_______________________________________________
 void StPxlDbMaker::GetPxlRowColumnStatus(){
-  int numCol=0;
-  int numRow=0;
   mRowColumnStatus = (St_pxlRowColumnStatus*)GetDataBase("Calibrations/pxl/pxlRowColumnStatus");
   if(mRowColumnStatus){ 
     pxlRowColumnStatus_st *gg = mRowColumnStatus->GetTable() ;
