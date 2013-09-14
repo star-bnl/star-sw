@@ -1,5 +1,8 @@
-// $Id: StPxlDbMaker.cxx,v 1.3 2013/06/21 21:12:26 qiuh Exp $
+// $Id: StPxlDbMaker.cxx,v 1.4 2013/09/14 17:46:58 bouchet Exp $
 // $Log: StPxlDbMaker.cxx,v $
+// Revision 1.4  2013/09/14 17:46:58  bouchet
+// *** empty log message ***
+//
 // Revision 1.3  2013/06/21 21:12:26  qiuh
 // *** empty log message ***
 //
@@ -48,7 +51,7 @@
 #include "StTpcDb/StTpcDb.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_pxlSensorStatus_Table.h" 
-#include "tables/St_pxlSensorRowColumnMask_Table.h" 
+#include "tables/St_pxlRowColumnStatus_Table.h" 
 StPxlDbMaker* gStPxlDbMaker=NULL; 
 THashList *StPxlDbMaker::fRotList = 0;
 
@@ -67,9 +70,11 @@ Int_t StPxlDbMaker::Init()
 }
 //_____________________________________________________________________________
 Int_t StPxlDbMaker::InitRun(Int_t runNumber) {
-  CalculateSensorsPosition();  
-  GetPxlSensorStatusTable();
-  //GetPxlSensorRowColumnMaskTable();
+  CalculateSensorsPosition(); 
+  LOG_DEBUG <<" StPxlDbMaker::InitRun() --> GetPxlSensorStatus" << endm;
+  GetPxlSensorStatus();
+  LOG_DEBUG <<" StPxlDbMaker::InitRun() --> GetPxlRowColumnStatus" << endm;
+  GetPxlRowColumnStatus(); 
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -273,24 +278,18 @@ Int_t StPxlDbMaker::CalculateSensorsPosition(){
   return kStOk;
 }
 //_______________________________________________
-void StPxlDbMaker::GetPxlSensorStatusTable(){
+void StPxlDbMaker::GetPxlSensorStatus(){
   mSensorStatus = (St_pxlSensorStatus*)GetDataBase("Calibrations/pxl/pxlSensorStatus"); 
   if(mSensorStatus){ 
     pxlSensorStatus_st *g = mSensorStatus->GetTable() ;
   }
 }
 //_______________________________________________
-void StPxlDbMaker::GetPxlSensorRowColumnMaskTable(int sector,int ladder){
-  mSensorRowColumnMask = (St_pxlSensorRowColumnMask*)GetDataBase(Form("Calibrations/pxl/Sector_%d/Ladder_%d/pxlSensorRowColumnMask",sector,ladder));
-  if(mSensorRowColumnMask){ 
-    pxlSensorRowColumnMask_st *gg = mSensorRowColumnMask->GetTable() ;
-    for(int ii = 1 ; ii <= mSensorRowColumnMask->GetNRows(); ++ii){
-      LOG_DEBUG <<" Sensor : " << ii << endm;
-      for(int jj = 1 ; jj <= 200 ;++jj) { 
-	LOG_DEBUG <<" pxlDbMaker : sensor/row    : " << ii <<" " << gg[ii-1].rowNum[jj-1] << endm;
-	LOG_DEBUG <<" pxlDbMaker : sensor/column : " << ii <<" " << gg[ii-1].columnNum[jj-1] << endm;
-      }
-    }
+void StPxlDbMaker::GetPxlRowColumnStatus(){
+  int numCol=0;
+  int numRow=0;
+  mRowColumnStatus = (St_pxlRowColumnStatus*)GetDataBase("Calibrations/pxl/pxlRowColumnStatus");
+  if(mRowColumnStatus){ 
+    pxlRowColumnStatus_st *gg = mRowColumnStatus->GetTable() ;
   }
 }
-//_______________________________________________
