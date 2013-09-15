@@ -198,8 +198,9 @@ static const int iSect[24] = {23,22,21,20,19,18,17,16,15,14,13,24
  StTpcHit *tpcHit = (StTpcHit*)hit->stHit();
 
  int sector = tpcHit->sector();
- if ((sector<=12) != (xyz[2]>0)) sector = iSect[sector-1];// pileup tracks with wrong Z
-
+ if ((sector<=12) != (xyz[2]>0)) {
+   sector = iSect[sector-1];// pileup tracks with wrong Z
+ }
  int tpadrow = tpcHit->padrow();
 
 //		Workaround of bug int StTpcHit::padrow()
