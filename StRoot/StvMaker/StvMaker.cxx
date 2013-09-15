@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.41 2013/08/21 18:56:51 perev Exp $
+// $Id: StvMaker.cxx,v 1.42 2013/09/15 01:46:18 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -101,6 +101,8 @@ StvMaker::StvMaker(const char *name) : StMaker(name)
   SetAttr("useVertexFinder"     ,kTRUE);
 //SetAttr("makePulls"           ,kTRUE);
   SetAttr("refit"           	,kTRUE);
+  SetAttr("HitLoadOpt"          ,0);
+
 }
 
 //_____________________________________________________________________________
@@ -255,6 +257,7 @@ static int initialized = 0;
     assert(geom.Length());
     StTGeoProxy::Inst()->Load(geom);
   }
+  assert(!GeoTest());
 
   StVMCApplication *app = new StVMCApplication(geom, "StVMC application");
   StvMCInitApp *ini = new StvMCInitApp();
@@ -409,3 +412,36 @@ Int_t StvMaker::FillPulls()
   mPullEvent->Clear();
   return kStOK;  
 }  
+//_____________________________________________________________________________
+int StvMaker::GeoTest()
+{
+ int ierr=0;
+ if (!gGeoManager) return 1;
+ for (int phi = 60,sect=1;phi>=-360+90;phi -=30,sect++)
+ {
+   double x = 100*cos(phi*3.1415/180);
+   double y = 100*sin(phi*3.1415/180);
+   double z = 100.;
+   TGeoNode *node = gGeoManager->FindNode(x,y,z);
+   TGeoNode *parn = gGeoManager->GetMother(1);
+   if (sect != parn->GetNumber()) ierr++;
+
+   const char *path = gGeoManager->GetPath();
+   printf("Sector=%d path=%s\n",sect,path);
+
+
+ }
+ for (int phi = 120,sect=13;sect<=24;phi +=30,sect++)
+ {
+   double x = 100*cos(phi*3.1415/180);
+   double y = 100*sin(phi*3.1415/180);
+   double z = -100.;
+   TGeoNode *node = gGeoManager->FindNode(x,y,z);
+   TGeoNode *parn = gGeoManager->GetMother(1);
+   if (sect-12 != parn->GetNumber()) ierr++;
+   const char *path = gGeoManager->GetPath();
+   printf("Sector=%d path=%s\n",sect,path);
+ }
+return ierr;
+}
+
