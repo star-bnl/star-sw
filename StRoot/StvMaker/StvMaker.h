@@ -39,12 +39,12 @@ class StvMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.2 2013/04/04 21:37:19 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StvMaker.h,v 1.3 2013/09/15 01:45:31 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 
 
  protected:
-    
+    int GeoTest();
 private:
   char mBeg[1];
     StvEventFiller      *mEventFiller;
