@@ -19,10 +19,10 @@ class Sensor {
 
     // Add a component
     void AddComponent(ComponentBase* comp);   
-    int GetNumberOfComponents() {return nComponents;}
+    int GetNumberOfComponents() {return m_nComponents;}
     // Add an electrode
     void AddElectrode(ComponentBase* comp, std::string label);
-    int GetNumberOfElectrodes() {return nElectrodes;}
+    int GetNumberOfElectrodes() {return m_nElectrodes;}
     // Remove all components, electrodes and reset the sensor
     void Clear();
     
@@ -71,7 +71,7 @@ class Sensor {
     bool GetVoltageRange(double& vmin, double& vmax);
 
     // Signal calculation
-    void NewSignal() {++nEvents;}
+    void NewSignal() {++m_nEvents;}
     // Reset signals and induced charges of all electrodes
     void ClearSignal();
     void AddSignal(const double q, const double t, const double dt,
@@ -84,41 +84,43 @@ class Sensor {
     void SetTimeWindow(const double tstart, const double tstep, 
                        const int nsteps);
     void GetTimeWindow(double& tstart, double& tstep, int& nsteps) {
-      tstart = tStart; tstep = tStep; nsteps = nTimeBins;
+      tstart = m_tStart; tstep = m_tStep; nsteps = m_nTimeBins;
     }
     double GetSignal(const std::string label, const int bin);
     double GetElectronSignal(const std::string label, const int bin);
     double GetIonSignal(const std::string label, const int bin);
     double GetInducedCharge(const std::string label);
     void SetTransferFunction(double (*f)(double t));
+    void SetTransferFunction(std::vector<double> times, 
+                             std::vector<double> values);
     bool ConvoluteSignal();
     bool IntegrateSignal();
     void SetNoiseFunction(double (*f)(double t));
     void AddNoise();
     bool ComputeThresholdCrossings(const double thr, 
                                    const std::string label, int& n);
-    int  GetNumberOfThresholdCrossings() {return nThresholdCrossings;}
+    int  GetNumberOfThresholdCrossings() {return m_nThresholdCrossings;}
     bool GetThresholdCrossing(const int i, 
                               double& time, double& level, bool& rise); 
 
     // Switch on/off debugging messages
-    void EnableDebugging()  {debug = true;}
-    void DisableDebugging() {debug = false;}    
+    void EnableDebugging()  {m_debug = true;}
+    void DisableDebugging() {m_debug = false;}    
 
   private:
 
-    std::string className;
+    std::string m_className;
 
     // Components
-    int nComponents;
+    int m_nComponents;
     struct component {
       ComponentBase* comp;
     };
-    std::vector<component> components;
-    int lastComponent;
+    std::vector<component> m_components;
+    int m_lastComponent;
     
     // Electrodes
-    int nElectrodes;
+    int m_nElectrodes;
     struct electrode {
       ComponentBase* comp;
       std::string label;
@@ -127,44 +129,49 @@ class Sensor {
       std::vector<double> ionsignal;
       double charge;
     };
-    std::vector<electrode> electrodes;
+    std::vector<electrode> m_electrodes;
 
     // Time window for signals
-    int nTimeBins;
-    double tStart, tStep;
-    int nEvents;
-    static double signalConversion;
+    int m_nTimeBins;
+    double m_tStart, m_tStep;
+    int m_nEvents;
+    static double m_signalConversion;
    
     // Transfer function
-    bool hasTransferFunction;
-    double (*fTransfer) (double t);
+    bool m_hasTransferFunction;
+    bool m_hasTransferFunctionTable; 
+    double (*m_fTransfer) (double t);
+    std::vector<double> m_transferFunctionTimes;
+    std::vector<double> m_transferFunctionValues;
 
     // Noise
-    bool hasNoiseFunction;
-    double (*fNoise) (double t);
+    bool m_hasNoiseFunction;
+    double (*m_fNoise) (double t);
 
-    int nThresholdCrossings;
+    int m_nThresholdCrossings;
     struct thresholdCrossing {
       double time;
       bool rise;
     };
-    std::vector<thresholdCrossing> thresholdCrossings;
-    double thresholdLevel;
+    std::vector<thresholdCrossing> m_thresholdCrossings;
+    double m_thresholdLevel;
 
     // Bounding box
-    double xMin, yMin, zMin;
-    double xMax, yMax, zMax;
+    double m_xMin, m_yMin, m_zMin;
+    double m_xMax, m_yMax, m_zMax;
     // User bounds
-    bool hasUserArea;
-    double xMinUser, yMinUser, zMinUser;
-    double xMaxUser, yMaxUser, zMaxUser;
+    bool m_hasUserArea;
+    double m_xMinUser, m_yMinUser, m_zMinUser;
+    double m_xMaxUser, m_yMaxUser, m_zMaxUser;
 
     // Switch on/off debugging messages
-    bool debug;
+    bool m_debug;
 
     // Return the current sensor size
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                         double& xmax, double& ymax, double& zmax);
+
+    double InterpolateTransferFunctionTable(double t);
 
 };
 
