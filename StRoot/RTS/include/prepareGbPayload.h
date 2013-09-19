@@ -59,14 +59,14 @@ class Lxgbx {
       
 	    evpCfg.rate[i] = xml->getParamI("trg_setup.evpGroup[%d].rate", i);
 
-	    LOG("JEFF", "Groups[%d].rate = %f",i,evpCfg.rate[i],0,0,0);
+	    LOG(NOTE , "Groups[%d].rate = %f",i,evpCfg.rate[i],0,0,0);
 
 	    if((evpCfg.rate[i] > 0.0) && (divisor > 1)) {
 		evpCfg.rate[i] /= (float)divisor;
 	    }
       
 	    if((int)(evpCfg.rate[i]*1000) > 0) {
-		LOG("JEFF", "configEvp: rate[%d]*1000 = %d (0x%x-0x%x): divisor=%d",i,(int)(evpCfg.rate[i]*1000),evpCfg.groupdef[i][0],evpCfg.groupdef[i][1],divisor);
+		LOG(NOTE, "configEvp: rate[%d]*1000 = %d (0x%x-0x%x): divisor=%d",i,(int)(evpCfg.rate[i]*1000),evpCfg.groupdef[i][0],evpCfg.groupdef[i][1],divisor);
 	    }
 	} 
 
@@ -96,7 +96,7 @@ class Lxgbx {
 	    }
       
 	    if((int)(evpCfg.rate[i]*1000) > 0) {
-		LOG("JEFF", "configEvp: rate[%d]*1000 = %d (0x%x-0x%x): divisor=%d",i,(int)(evpCfg.rate[i]*1000),evpCfg.groupdef[i][0],evpCfg.groupdef[i][1],divisor);
+		LOG(NOTE, "configEvp: rate[%d]*1000 = %d (0x%x-0x%x): divisor=%d",i,(int)(evpCfg.rate[i]*1000),evpCfg.groupdef[i][0],evpCfg.groupdef[i][1],divisor);
 	    }
 	} 
 
@@ -118,8 +118,12 @@ class Lxgbx {
 	    int inrun = xml->getParamI("subsys_tasks.nodes[%d].inrun",i);
 
 	    if(!inrun) continue;
+	    
+	    UINT32 node = xml->getParamI("subsys_tasks.nodes[%d].node",i);
 
-	    int sys = GET_SYSTEM(xml->getParamI("subsys_tasks.nodes[%d].node",i));
+	    LOG(DBG, "node = 0x%x", node);
+
+	    int sys = GET_SYSTEM(node);
 				 
 	    if(sys == DAQ_SYSTEM) continue;
 	    if(sys == TRG_SYSTEM) continue;
@@ -138,6 +142,7 @@ class Lxgbx {
 	    }
 	}
 	
+	LOG(NOTE, "dets_in_run_mask = 0x%x",dets_in_run_mask);
 	return ret;
     }
 
@@ -332,7 +337,7 @@ class Lxgbx {
 
 	detmask = grp2rts_mask(detmask);
 
-	LOG(NOTE, "potential det_mask = 0x%x",detmask,0,0,0,0);
+	LOG(NOTE, "potential det_mask = 0x%x dets_in_run_mask 0x%x",detmask,dets_in_run_mask,0,0,0);
 
 	detmask &= dets_in_run_mask;
 	detmask |= (1<<TRG_SYSTEM);

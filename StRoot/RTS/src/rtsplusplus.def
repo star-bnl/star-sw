@@ -26,7 +26,7 @@
 #       bintargets as a appropriate
 #
 
-STD_DAQ_OBJS := rtsComLib.o rtsLogUnix.o ipcQLib.o rtsMother.o shmLib.o rtsCfgLib.o fs_index.o sfs_index.o sfs_index_daq.o EthernetServer.o ThreadedEthernetServer.o MultiServer.o SimpleXmlDoc.o MemStack.o runControlClass.o
+STD_DAQ_OBJS := rtsComLib.o rtsLogUnix.o ipcQLib.o rtsMother.o shmLib.o rtsCfgLib.o fs_index.o sfs_index.o sfs_index_daq.o EthernetServer.o ThreadedEthernetServer.o MultiServer.o ThreadedMultiServer.o ThreadsMem.o SimpleXmlDoc.o MemStack.o runControlClass.o HashTable.o
 
 
 # these are obsolete now....

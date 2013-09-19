@@ -768,7 +768,7 @@ class TokenManagerChooser {
  public:
     void configure(STAR_CFG *cfg);
     void configure(SimpleXmlDoc *cfg);
-    int getEventNumber(int cmd, int token, int sz);
+    int getEventNumber(int token, int sz);
     
  private:
     EvbChooser chooser;

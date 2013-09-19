@@ -615,15 +615,16 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
     len += iovec[i].iov_len;
   }
 
+  //LOG("JEFF", "writev: %d",fd);
   int ret = ::writev(fd, iovec, vec);
-
+  //LOG("JEFF", "ret=%d",ret);
   if(ret != len) {
    for(int i=0;i<vec;i++) {
-      LOG(DBG, "socket error iovec[%d].base=%d,  len=%d",
+      LOG("JEFF", "socket error iovec[%d].base=%d,  len=%d",
 	  i,iovec[i].iov_base,iovec[i].iov_len);
     }
 
-   LOG(NOTE, "writev failed: ret=%d of %d, err=%s.  will retry",ret, len, strerror(errno));
+   LOG("JEFF", "writev failed: ret=%d of %d, err=%s.  will retry",ret, len, strerror(errno));
   }
 
   // keep retrying!
