@@ -4,7 +4,6 @@
 #include <sys/types.h>
 #include <rtsSystems.h>
 #include <netinet/in.h>
-#include <SUNRT/MultiServer.h>
 
 /***********************************************************************************
  * Configuration files for online
@@ -763,36 +762,6 @@ class EvbChooser
   int nevbserv[10];             // nservers by evb
   int nevbs;
   int evb4token[4096];         
-};
-
-// Protocol payload
-struct TokenManagerTknMsgData {
-    int token;
-    int sz;
-    int sourceId;
-    int rtsmask;
-};
-
-// Results From getEventNumber()
-struct TokenManagerResults {
-    int TknMgrEventNumber;
-    int evbNodeIdx;
-};
-
-class TokenManagerChooser {
- public:
-    TokenManagerChooser();
-    void configure(SimpleXmlDoc *cfg, int mynode);
-    int getEventNumber(TokenManagerResults *results, int token, int sz=0, int rtsmask=0);
-    
- private:
-    int manage_tokens;
-    int tmNode;          // 0 if not in run...
-    int mynode;
-    EthServer tmServer;
-    MultiSender tmSender;
-
-    EvbChooser chooser;
 };
 
 #define RHIC_TRG "RHICTRG\0"
