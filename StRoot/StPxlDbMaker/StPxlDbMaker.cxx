@@ -1,5 +1,8 @@
-// $Id: StPxlDbMaker.cxx,v 1.6 2013/09/16 16:45:06 bouchet Exp $
+// $Id: StPxlDbMaker.cxx,v 1.7 2013/09/22 15:02:43 bouchet Exp $
 // $Log: StPxlDbMaker.cxx,v $
+// Revision 1.7  2013/09/22 15:02:43  bouchet
+// sector 10 was missing
+//
 // Revision 1.6  2013/09/16 16:45:06  bouchet
 // clean up
 //
@@ -203,7 +206,7 @@ Int_t StPxlDbMaker::CalculateSensorsPosition(){
 	break;
       }
     }
-    if (sector <=0  || sector >=NoSectors) {cout << "Sector has not been defined" << endl; continue;}
+    if (sector <=0  || sector >NoSectors) {cout << "Sector has not been defined" << endl; continue;}
     SectorsOnHalf = pxlSectorOnHalf->GetTable();
     for (Int_t s = 0; s <NoSectors; s++, SectorsOnHalf++) {
       if (SectorsOnHalf->Id != (sector)) continue; //1<=SectorsOnHalf<=10
