@@ -19,7 +19,7 @@ StvFitter *StvFitter::mgFitter=0;
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
 
-enum {kDeltaFactor = 21,kTooBigErrFactor = 9*9};
+enum {kDeltaFactor = 21,kTooBigErrFactor = 20*20};
 
 static const double kXtraBigXi2 = 9e9;
 
