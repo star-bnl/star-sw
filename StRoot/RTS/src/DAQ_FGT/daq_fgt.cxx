@@ -215,7 +215,7 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 		}
 
 	
-		raw->finalize(bytes,0,r,0) ;	// sector 0;
+		raw->finalize(bytes,s,r,0) ;	// sector 0;
 	}
 
 	raw->rewind() ;
