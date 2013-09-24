@@ -64,12 +64,15 @@ public:
 	int configd ;
 	int emulation ;
 
+	int emu_fifo_length[128] ;
+	volatile rbFifo_t *sfifo, *rfifo ;	// same for fifos
+
 protected:
 
 	int board ;
 	int ch ;	// also port!
 
-	int emu_fifo_length[128] ;
+
 
 	char *buff ;	// buffer addresses
 	int fifo_cou ;		// set at code startup
@@ -77,7 +80,7 @@ protected:
 
 
 	char *rbuff, *sbuff ;	// address of receive/send buffers
-	volatile rbFifo_t *sfifo, *rfifo ;	// same for fifos
+
 
 
 } ;
