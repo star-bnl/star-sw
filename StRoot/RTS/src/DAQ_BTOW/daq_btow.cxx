@@ -277,6 +277,11 @@ int daq_btow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 
+	if(us[0] != 4) {	// was fixed only in FY13...
+		//LOG(WARN,"trg cmd not 4 == 0x%04X",us[0]) ;
+		us[0] = 4 ;
+	}
+
 	// L0 part
 	trg[tcou].t = t_hi*256 + t_lo ;
 	trg[tcou].daq = us[1] ;
@@ -285,9 +290,6 @@ int daq_btow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	tcou++ ;
 
 
-	if(us[0] != 4) {	// in data!!!
-		LOG(WARN,"trg cmd not 4 == 0x%04X",us[0]) ;
-	}
 
 	if(trg[0].t == 0) {
 		err |= 1 ;

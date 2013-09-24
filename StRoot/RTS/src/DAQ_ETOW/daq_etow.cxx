@@ -262,6 +262,11 @@ int daq_etow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo1)
 
 	}
 
+	if(us[0] != 4) {
+		//LOG(WARN,"trg cmd not 4 == 0x%04X",us[0]) ;
+		us[0] = 4 ;
+	}
+
 
 	// L0 part
 	trg[0].t = t_hi*256 + t_lo ;
@@ -270,9 +275,6 @@ int daq_etow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo1)
 	trg[0].rhic = l2h16(us[4]) ;
 
 
-	if(us[0] != 4) {
-		LOG(WARN,"trg cmd not 4 == 0x%04X",us[0]) ;
-	}
 
 	if(trg[0].t == 0) {
 		err |= 1 ;

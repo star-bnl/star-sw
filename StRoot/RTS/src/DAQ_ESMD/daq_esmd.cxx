@@ -251,7 +251,8 @@ int daq_esmd::get_l2(char *buff, int buff_words, struct daq_trg_word *trg, int r
 
 
 	if(us[0] != 4) {	// Gerard fixed the trigger command
-		LOG(WARN,"trg_cmd %d?",us[0]) ;
+		//LOG(WARN,"trg_cmd %d?",us[0]) ;
+		us[0] = 4 ;
 	}
 
 	// L0 part
