@@ -151,9 +151,110 @@ daq_dta *daq_sst::handle_raw(int sec, int rdo)
 }
 
 	
-int daq_sst::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int rdo)
+int daq_sst::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	// will look the same as PXL!
+	int t_cou = 0 ;
+	u_int *d32 = (u_int *)buff ;
+	u_int err = 0 ;
+	int last_ix = words - 1 ;
+	int token, daq_cmd, trg_cmd ;
 
-	return -1 ;
+	// quick sanity checks...
+	if(d32[0] != 0xAAAAAAAA) err |= 1 ;	// header error
+	if(d32[last_ix] != 0xBBBBBBBB) err |= 2	;	// trailer error
+	if((d32[1] & 0xFFF00000) != 0xCCC00000) err |= 8 ;	// junk in trigger/daq/token
+	
+	// special TCD-only event check
+	if(d32[1] == 0xCCC0FFFF) {
+		LOG(NOTE,"RDO %d: trigger-only event...",rdo) ;
+		token = 4097 ;
+		daq_cmd = 0 ;
+		trg_cmd = 4 ;
+	}
+	else {
+	
+		token = d32[1] & 0xFFF ;
+		daq_cmd = (d32[1] & 0xF000) >> 12 ;
+		trg_cmd = (d32[1] & 0xF0000) >> 16 ;
+	}
+
+	// more sanity
+	if(token == 0) {
+		token = 4097 ;	// override with dummy token!
+		err |= 8 ;
+	}
+
+	if(trg_cmd != 4) err |= 8 ;
+
+	trg[t_cou].t = token ;
+	trg[t_cou].daq = daq_cmd ;
+	trg[t_cou].trg = trg_cmd ;
+	trg[t_cou].rhic = d32[7] ;
+	trg[t_cou].rhic_delta = 0 ;
+	t_cou++ ;
+
+	
+	// get other trigger commands...
+	int last_p = last_ix - 1 ;	// at CRC
+
+	//u_int crc = d32[last_p] ;
+
+
+	last_p-- ;	// at end of TCD info
+	int first_trg = -1 ;		
+
+	for(int i=last_p;i>=0;i--) {
+		if(d32[i] == 0xCCCCCCCC) {	// trigger commands header...
+			first_trg = i + 1 ;
+			break ;
+		}
+	}
+
+	if(first_trg > 0) {	// found other trigger commands...
+		for(int i=first_trg;i<=last_p;i++) {
+			trg[t_cou].t = d32[i] & 0xFFF ;
+			trg[t_cou].daq = (d32[i] & 0xF000) >> 12 ;
+			trg[t_cou].trg = (d32[i] & 0xF0000) >> 16 ;
+			trg[t_cou].rhic = trg[0].rhic + 1 ;	// mock it up...
+			trg[t_cou].rhic_delta = 0 ;
+
+			switch(trg[t_cou].trg) {
+			case 0xF :
+			case 0xE :
+			case 0xD :
+				break ;
+			default :
+				continue ;
+			}
+
+			t_cou++ ;
+
+			if(t_cou >= 120) {	// put a sanity limiter...
+				err |= 4 ;
+				break ;
+			}
+		}
+	}
+
+	//err = t_cou ;
+	if(err) {
+		LOG(ERR,"RDO %d: error 0x%X, t_cou %d",rdo,err,t_cou) ;
+
+		for(int i=0;i<16;i++) {
+			LOG(ERR,"  RDO %d: %2d/%2d: 0x%08X",rdo,i,words,d32[i]) ;
+		}
+
+		int s = last_ix - 10 ;
+		if(s < 0) s = 0 ;
+
+		for(int i=s;i<=last_ix;i++) {
+			LOG(ERR,"  RDO %d: %2d/%2d: 0x%08X",rdo,i,words,d32[i]) ;
+		}
+	}
+
+
+	return t_cou ;
+	
+
 }
