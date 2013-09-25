@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.93 2013/03/18 17:18:38 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.94 2013/09/25 20:38:56 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.94  2013/09/25 20:38:56  genevb
+ * Meaningful return codes for Predict...()
+ *
  * Revision 1.93  2013/03/18 17:18:38  genevb
  * Fix for ticket 2529, and some array copying optimzation via memcopy
  *
@@ -3778,13 +3781,13 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 
    pSpace  = 0 ;
 
-   if ( (Pt < 0.3) || (Pt > 2.0) )                           return(0) ; // Fail
-   if ( (VertexZ < -50) || (VertexZ > 50) )                  return(0) ; // Fail
-   if ( (PseudoRapidity < -1.0) || (PseudoRapidity > 1.0) )  return(0) ; // Fail
-   if ( (Charge != 1) && (Charge != -1) )                    return(0) ; // Fail
-   if ( (DCA < -4.0) || (DCA > 4.0) )                        return(0) ; // Fail
-   if ( InnerTPCHits < MinInnerTPCHits )                     return(0) ; // No action if too few hits in the TPC   
-   if ( OuterTPCHits < MinOuterTPCHits )                     return(0) ; // No action if too few hits in the TPC   
+   if ( (Pt < 0.3) || (Pt > 2.0) )                           return(1) ; // Fail
+   if ( (VertexZ < -50) || (VertexZ > 50) )                  return(2) ; // Fail
+   if ( (PseudoRapidity < -1.0) || (PseudoRapidity > 1.0) )  return(3) ; // Fail
+   if ( (Charge != 1) && (Charge != -1) )                    return(4) ; // Fail
+   if ( (DCA < -4.0) || (DCA > 4.0) )                        return(5) ; // Fail
+   if ( InnerTPCHits < MinInnerTPCHits )                     return(6) ; // No action if too few hits in the TPC   
+   if ( OuterTPCHits < MinOuterTPCHits )                     return(7) ; // No action if too few hits in the TPC   
 
    Int_t    ChargeB ;
    Float_t  B[3], Direction, xx[3], xxprime[3] ;
@@ -3932,7 +3935,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    fSpaceChargeR2 = tempfSpaceChargeR2 ;
    SpaceChargeR2 = tempSpaceChargeR2 ;
    
-   return(1) ; // Success 
+   return(0) ; // Success 
 
 }
 
@@ -3959,10 +3962,10 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
   
   pSpace contains the estimate of the space charge in the TPC that caused the distortion on the original track.
 
-  The function returns one if it succeeds and pSpace will be finite.
-  The function returns zero if it fails and pSpace will be zero.  
-  The function returns zero if there are too few hits in the TPC inner and outer sectors.  
-  There are also cuts on Pt and rapdity, etc, that can cause the funtion to return zero.
+  The function returns zero if it succeeds and pSpace will be finite.
+  The function returns non-zero if it fails and pSpace will be zero.  
+  The function returns non-zero if there are too few hits in the TPC inner and outer sectors.  
+  There are also cuts on Pt and rapdity, etc, that can cause the funtion to return non-zero.
 
 */
 Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Float_t VertexZ, Float_t PseudoRapidity, Float_t Phi,
@@ -3997,13 +4000,13 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 
    pSpace  = 0 ;
 
-   if ( (Pt < 0.3) || (Pt > 2.0) )                           return(0) ; // Fail
-   if ( (VertexZ < -50) || (VertexZ > 50) )                  return(0) ; // Fail
-   if ( (PseudoRapidity < -1.0) || (PseudoRapidity > 1.0) )  return(0) ; // Fail
-   if ( (Charge != 1) && (Charge != -1) )                    return(0) ; // Fail
-   if ( (DCA < -4.0) || (DCA > 4.0) )                        return(0) ; // Fail
-   if ( InnerTPCHits < MinInnerTPCHits )                     return(0) ; // No action if too few hits in the TPC   
-   if ( OuterTPCHits < MinOuterTPCHits )                     return(0) ; // No action if too few hits in the TPC   
+   if ( (Pt < 0.3) || (Pt > 2.0) )                           return(1) ; // Fail
+   if ( (VertexZ < -50) || (VertexZ > 50) )                  return(2) ; // Fail
+   if ( (PseudoRapidity < -1.0) || (PseudoRapidity > 1.0) )  return(3) ; // Fail
+   if ( (Charge != 1) && (Charge != -1) )                    return(4) ; // Fail
+   if ( (DCA < -4.0) || (DCA > 4.0) )                        return(5) ; // Fail
+   if ( InnerTPCHits < MinInnerTPCHits )                     return(6) ; // No action if too few hits in the TPC   
+   if ( OuterTPCHits < MinOuterTPCHits )                     return(7) ; // No action if too few hits in the TPC   
 
    Int_t    ChargeB, HitSector ;
    Float_t  B[3], xx[3], xxprime[3] ;
@@ -4124,7 +4127,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
            fSpaceChargeR2  =  tempfSpaceChargeR2 ;
            SpaceChargeR2   =  tempSpaceChargeR2  ;
            mDistortionMode =  tempDistortionMode ;
-           return(0); // Fail on unknown GridLeak weights
+           return(8); // Fail on unknown GridLeak weights
          }
        }
 
@@ -4182,7 +4185,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    SpaceChargeR2   =  tempSpaceChargeR2  ;
    mDistortionMode =  tempDistortionMode ;
    
-   return(1) ; // Success 
+   return(0) ; // Success 
 
 }
 
