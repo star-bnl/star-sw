@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlClusterMaker.cxx,v 1.1 2013/05/23 20:57:17 qiuh Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.2 2013/09/25 11:53:59 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun 
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
+ * Revision 1.2  2013/09/25 11:53:59  qiuh
+ * *** empty log message ***
+ *
  * Revision 1.1  2013/05/23 20:57:17  qiuh
  * *** empty log message ***
  * 
@@ -92,7 +95,7 @@ Int_t StPxlClusterMaker::Make() {
                             FindCluster(cluster, rawHit->column(), rawHit->row());
                             if(cluster->nRawHits() > 0)
                                 {
-                                    cluster->Centering();
+                                    cluster->Summarize();
                                     m_pxlClusterCollection->clusterVec[i][j][k].push_back(cluster);
                                 }
                             else delete cluster;

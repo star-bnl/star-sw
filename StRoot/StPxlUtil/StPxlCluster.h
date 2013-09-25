@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlCluster.h,v 1.6 2013/05/23 21:40:38 qiuh Exp $
+ * $Id: StPxlCluster.h,v 1.7 2013/09/25 11:54:09 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun 
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.h,v $
+ * Revision 1.7  2013/09/25 11:54:09  qiuh
+ * *** empty log message ***
+ *
  * Revision 1.6  2013/05/23 21:40:38  qiuh
  * *** empty log message ***
  * 
@@ -31,9 +34,10 @@ public:
     ~StPxlCluster();
     int nRawHits();
     void AddRawHit(int column, int row, int idTruthAdd);
-    void Centering();
+    void Summarize();
     std::vector<int> columnVec; 
     std::vector<int> rowVec; 
+    std::vector<int> idVec;
     float columnCenter;
     float rowCenter;
     int idTruth;
