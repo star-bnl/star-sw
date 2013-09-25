@@ -67,6 +67,8 @@ static TF1 ga1("ga1","[0]*exp(-0.5*(x-[1])*(x-[1])/([2]*[2]))");
 static TF1 ln1("ln1","[0]+((208.707-abs(x))*[1]/100.0)",-150.,150.);
 //static TF1 ln1("ln1","[0]+((350.0-abs(x))*[1]/100.0)",-150.,150.);
 
+const unsigned int MAXVTXCANDIDATES = 256;
+
 ClassImp(StSpaceChargeEbyEMaker)
   
 //_____________________________________________________________________________
@@ -75,8 +77,8 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     Calibmode(kFALSE), PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE),
     doNtuple(kFALSE), doReset(kTRUE), doGaps(kFALSE),
     inGapRow(0),
-    vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5),
-    minTpcHits(25), reqEmcMatch(kTRUE), reqTofMatch(kTRUE),
+    vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5), minTpcHits(25),
+    reqEmcMatch(kFALSE), reqTofMatch(kFALSE), reqEmcOrTofMatch(kTRUE),
     m_ExB(0), SCcorrection(0), GLcorrection(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
@@ -199,28 +201,44 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   }
   if (QAmode) cutshist->Fill(2);
 
-  // Select the highest ranked vertex + some quality cuts
-  StPrimaryVertex* pvtx = event->primaryVertex();
-  if (!pvtx ||
-      (pvtx->numberOfDaughters()  < vtxMinTrks)   ||
-      (pvtx->numMatchesWithBEMC() < vtxEmcMatch)  ||
-      (pvtx->numMatchesWithBTOF() < vtxTofMatch)) return kStOk;
-  if (QAmode) cutshist->Fill(3);
-  StVertexFinderId vid = pvtx->vertexFinderId();
-  float min_rank = -1e6;
-  switch (vid) {
-    case minuitVertexFinder   : min_rank = -5; break;
-    case ppvVertexFinder      :
-    case ppvNoCtbVertexFinder : min_rank = 0; break;
-    default                   : break;
+  // Select highest ranked vertex(vertices) + some quality cuts
+  StPrimaryVertex* pvtx = 0;
+  unsigned int vtxCandidates[MAXVTXCANDIDATES];
+  unsigned int numVtxCandidates = 0;
+  unsigned int totVertices = event->numberOfPrimaryVertices();
+  for (unsigned int vtxIdx = 0; vtxIdx < totVertices; vtxIdx++) {
+    pvtx = event->primaryVertex(vtxIdx);
+    if (QAmode) cutshist->Fill(3);
+    StVertexFinderId vtxFindID = pvtx->vertexFinderId();
+    float min_rank = -1e6;
+    switch (vtxFindID) {
+      case minuitVertexFinder   : min_rank = -5; break;
+      case ppvVertexFinder      :
+      case ppvNoCtbVertexFinder : min_rank = 0; break;
+      default                   : break;
+    }
+    // only one chance for MinuitVF
+    if (vtxFindID == minuitVertexFinder) totVertices = 1;
+    // vertices are rank ordered, so once it fails, we're done
+    if (pvtx->ranking() < min_rank) break;
+    if (QAmode) cutshist->Fill(4);
+    if (pvtx->numberOfDaughters()  < vtxMinTrks) continue;
+    if (QAmode) cutshist->Fill(5);
+    if (pvtx->numMatchesWithBEMC() < vtxEmcMatch) continue;
+    if (QAmode) cutshist->Fill(6);
+    if (pvtx->numMatchesWithBTOF() < vtxTofMatch) continue;
+    if (QAmode) cutshist->Fill(7);
+    vtxCandidates[numVtxCandidates] = vtxIdx;
+    numVtxCandidates++;
+    if (numVtxCandidates == MAXVTXCANDIDATES) break;
   }
-  if (pvtx->ranking() < min_rank) return kStOk;
-  if (QAmode) cutshist->Fill(4);
+  if (!numVtxCandidates) return kStOk;
+  if (QAmode) cutshist->Fill(8);
   
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   unsigned int nnodes = theNodes.size();
   if (!nnodes) return kStOk;
-  if (QAmode) cutshist->Fill(5);
+  if (QAmode) cutshist->Fill(9);
 
   // Store and setup event-wise info
   evt++;
@@ -285,22 +303,25 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   }
  
   // Track loop
-  unsigned int i,j,k;
-  StThreeVectorD ooo = pvtx->position();
+  unsigned int i,j,k,v;
 
   // Prepare for EMC match
   StEmcDetector* bemcDet = 0;
   Double_t emcRadius = 0;
   static StEmcPosition* emcPosition = 0;
   static StEmcGeom* emcGeom = 0;
-  if (reqEmcMatch) {
+  if (reqEmcMatch || reqEmcOrTofMatch) {
     bemcDet = event->emcCollection()->detector(kBarrelEmcTowerId);
     if (!emcPosition) emcPosition = new StEmcPosition();
     if (!emcGeom) emcGeom = StEmcGeom::instance("bemc");
     emcRadius = emcGeom->Radius() + 30; // use exit radius, 30cm beyond face
   }
 
-  for (i=0; i<nnodes; i++) {
+  for (v=0; v<numVtxCandidates; v++) {
+    pvtx = event->primaryVertex(vtxCandidates[v]);
+    StThreeVectorD vtxPos = pvtx->position();
+
+    for (i=0; i<nnodes; i++) {
       for (j=0; j<theNodes[i]->entries(global); j++) {
         if (QAmode) cutshist->Fill(16);
         StTrack* tri = theNodes[i]->track(global,j);
@@ -318,66 +339,69 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           if (map.numberOfHits(kTpcId) < minTpcHits) continue;
           if (QAmode) cutshist->Fill(20);
 
-          if (reqTofMatch) {
-
+          // *** TOF MATCHING ***
+          Bool_t tofMatch = kFALSE;
+          if (reqTofMatch || reqEmcOrTofMatch) {
             const StPtrVecTrackPidTraits& theTofPidTraits = tri->pidTraits(kTofId);
-            if (!theTofPidTraits.size()) continue;
-            if (QAmode) cutshist->Fill(21);
-
-            StTrackPidTraits* theSelectedTrait = theTofPidTraits[theTofPidTraits.size()-1];
-            if (!theSelectedTrait) continue;
-            if (QAmode) cutshist->Fill(22);
-            StBTofPidTraits *pidTof = dynamic_cast<StBTofPidTraits *>(theSelectedTrait);
-            if (!pidTof) continue;
-            if (QAmode) cutshist->Fill(23);
-
-            int Mflag=pidTof->matchFlag();
-            //  0: no matching
-            //  1: 1-1 matching
-            //  2: 1-2 matching, pick up the one with higher ToT vaule (<25ns) 
-            //  3: 1-2 matching, pick up the one with closest projection position along local y
-            if (Mflag <= 0) continue;
-
+            if (theTofPidTraits.size()) {
+              if (QAmode) cutshist->Fill(21);
+              StTrackPidTraits* theSelectedTrait = theTofPidTraits[theTofPidTraits.size()-1];
+              if (theSelectedTrait) {
+                if (QAmode) cutshist->Fill(22);
+                StBTofPidTraits *pidTof = dynamic_cast<StBTofPidTraits *>(theSelectedTrait);
+                if (pidTof) {
+                  if (QAmode) cutshist->Fill(23);
+                  int Mflag=pidTof->matchFlag();
+                  //  0: no matching
+                  //  1: 1-1 matching
+                  //  2: 1-2 matching, pick up the one with higher ToT vaule (<25ns) 
+                  tofMatch = (Mflag > 0);
+                }
+              }
+            }
+            // Don't require match if reqEmcOrTofMatch
+            if (reqTofMatch && !tofMatch) continue;
           }
           if (QAmode) cutshist->Fill(24);
 
-          if (reqEmcMatch) {
-
+          // *** EMC MATCHING ***
+          Bool_t emcMatch = kFALSE;
+          if (reqEmcMatch || (reqEmcOrTofMatch&&(!tofMatch))) {
             Double_t mEmcThresh = 0.15;
             Double_t energyBEMC = -100.0;
             UInt_t tower_eta,tower_mod = 0;
             Int_t tower_sub = 0;
             StThreeVectorD emcTrkMomentum,emcTrkPosition;
-            if (!(emcPosition->trackOnEmc(&emcTrkPosition,&emcTrkMomentum,
-                                 tri,runinfo->magneticField()/10.,emcRadius))) continue;
-            if (QAmode) cutshist->Fill(25);
-         
-            Float_t emcEta = emcTrkPosition.pseudoRapidity();
-            Float_t emcPhi = emcTrkPosition.phi();
-            Int_t m,e,s,id = 0;
-            emcGeom->getBin(emcPhi,emcEta,m,e,s);
-            if (emcGeom->getId(m,e,s,id) == 0) {
-              tower_mod = m;
-              tower_eta = e;
-              tower_sub = s;
-            }
-            if (tower_mod < 1 || tower_mod > 120) continue;
-            if (QAmode) cutshist->Fill(26);
- 
-            if (event->emcCollection()) {
-              StEmcModule* emcMod = bemcDet->module(tower_mod);
-              StSPtrVecEmcRawHit& emcHits = emcMod->hits();
-              for (UInt_t emcHit=0; emcHit<emcHits.size(); emcHit++) {
-                if ((emcHits[emcHit]) && (emcHits[emcHit]->eta() == tower_eta)
-                                      && (emcHits[emcHit]->sub() == tower_sub)) {
-                    energyBEMC = emcHits[emcHit]->energy();
-                    break; // only one hit
+            if ((emcPosition->trackOnEmc(&emcTrkPosition,&emcTrkMomentum,
+                                 tri,runinfo->magneticField()/10.,emcRadius))) {
+              if (QAmode) cutshist->Fill(25);
+              Float_t emcEta = emcTrkPosition.pseudoRapidity();
+              Float_t emcPhi = emcTrkPosition.phi();
+              Int_t m,e,s,id = 0;
+              emcGeom->getBin(emcPhi,emcEta,m,e,s);
+              if (emcGeom->getId(m,e,s,id) == 0) {
+                tower_mod = m;
+                tower_eta = e;
+                tower_sub = s;
+              }
+              if (tower_mod >= 1 && tower_mod <= 120) {
+                if (QAmode) cutshist->Fill(26);
+                if (event->emcCollection()) {
+                  StEmcModule* emcMod = bemcDet->module(tower_mod);
+                  StSPtrVecEmcRawHit& emcHits = emcMod->hits();
+                  for (UInt_t emcHit=0; emcHit<emcHits.size(); emcHit++) {
+                    if ((emcHits[emcHit]) && (emcHits[emcHit]->eta() == tower_eta)
+                                          && (emcHits[emcHit]->sub() == tower_sub)) {
+                        energyBEMC = emcHits[emcHit]->energy();
+                        break; // only one hit
+                    }
+                  }
+                  emcMatch = (energyBEMC >= mEmcThresh);
                 }
               }
             }
-         
-            if (energyBEMC < mEmcThresh) continue; 
-
+            // Require match for both reqEmcMatch or reqEmcOrTofMatch if here
+            if (!emcMatch) continue; 
           }
           if (QAmode) cutshist->Fill(27);
 
@@ -409,16 +433,16 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           StDcaGeometry* triDcaGeom = ((StGlobalTrack*) tri)->dcaGeometry();
           if (triDcaGeom) {
             StPhysicalHelixD dcahh = triDcaGeom->helix();
-            DCA3 = dcahh.distance(ooo,kFALSE);
-            DCA2 = dcahh.geometricSignedDistance(ooo.x(),ooo.y());
+            DCA3 = dcahh.distance(vtxPos,kFALSE);
+            DCA2 = dcahh.geometricSignedDistance(vtxPos.x(),vtxPos.y());
             // helix() gets the sign of DCA2, thelix() gets the error
             THelixTrack thelix = triDcaGeom->thelix();
-            thelix.Dca(ooo.x(),ooo.y(),&DCAerr);
+            thelix.Dca(vtxPos.x(),vtxPos.y(),&DCAerr);
             phi = TMath::ATan2(dcahh.cy(pathlen),dcahh.cx(pathlen));
           } else {
-            DCA3 = hh.distance(ooo,kFALSE);
-            DCA2 = hh.geometricSignedDistance(ooo.x(),ooo.y());
-            pathlen = hh.pathLength(ooo.x(),ooo.y());
+            DCA3 = hh.distance(vtxPos,kFALSE);
+            DCA2 = hh.geometricSignedDistance(vtxPos.x(),vtxPos.y());
+            pathlen = hh.pathLength(vtxPos.x(),vtxPos.y());
             phi = TMath::ATan2(hh.cy(pathlen),hh.cx(pathlen));
           }
           if (DCA3 > 4) continue; // cut out pileup tracks!
@@ -457,8 +481,12 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           if (QAmode) cutshist->Fill(32);
           
           Float_t space = 10000.;
-          if (!(m_ExB->PredictSpaceChargeDistortion(ch,oldPt,ooo.z(),
-	     eta,phi,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space))) continue;
+          Int_t predictFailed = m_ExB->PredictSpaceChargeDistortion(ch,oldPt,vtxPos.z(),
+	    eta,phi,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space);
+          if (predictFailed) {
+            if (QAmode) cutshist->Fill(40+predictFailed);
+            continue;
+          }
           if (QAmode) cutshist->Fill(33);
 
           Double_t spaceErr = TMath::Abs(space*DCAerr/DCA2);
@@ -486,8 +514,9 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             FillGapHists(tri,hh,e_or_w,ch);
 
       } // loop over j tracks
-  } // loop over i Nodes
-  if (QAmode) cutshist->Fill(6);
+    } // loop over i Nodes
+  } // loop over v vertices
+  if (QAmode) cutshist->Fill(9);
 
 
   ntrks[curhist] = schists[curhist]->Integral();
@@ -1234,8 +1263,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.51 2013/04/26 20:00:54 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.52 2013/09/25 20:55:51 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.52  2013/09/25 20:55:51  genevb
+// Allow use of multiple PPVF vertices, introduce EmcOrTofMatch, keep track of Predict...() cuts
+//
 // Revision 1.51  2013/04/26 20:00:54  genevb
 // Protection against 0 entry histos for EvalCalib()
 //
