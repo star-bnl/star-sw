@@ -48,11 +48,15 @@ public:
           void   setVtxMinTrks(UInt_t x) { vtxMinTrks = x; }
 
           void   setMinTpcHits(UInt_t x) { minTpcHits = x; }
-          void   setReqEmcMatch(Bool_t match = kTRUE) { reqEmcMatch = match; }
-          void   setReqTofMatch(Bool_t match = kTRUE) { reqTofMatch = match; }
+          void   setReqEmcMatch(Bool_t match = kTRUE)
+            { reqEmcMatch = match; reqEmcOrTofMatch = kFALSE; }
+          void   setReqTofMatch(Bool_t match = kTRUE)
+            { reqTofMatch = match; reqEmcOrTofMatch = kFALSE; }
+          void   setReqEmcOrTofMatch(Bool_t match = kTRUE)
+            { reqEmcOrTofMatch = match; reqEmcMatch = kFALSE; reqTofMatch = kFALSE; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.14 2012/12/15 03:13:50 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.15 2013/09/25 20:55:51 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -82,6 +86,7 @@ protected:
   UInt_t minTpcHits;
   Bool_t reqEmcMatch;
   Bool_t reqTofMatch;
+  Bool_t reqEmcOrTofMatch;
 
   int HN;
   float MINTRACKS;
@@ -173,8 +178,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.14 2012/12/15 03:13:50 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.15 2013/09/25 20:55:51 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.15  2013/09/25 20:55:51  genevb
+// Allow use of multiple PPVF vertices, introduce EmcOrTofMatch, keep track of Predict...() cuts
+//
 // Revision 1.14  2012/12/15 03:13:50  genevb
 // Store used calibrations in histogram files
 //
