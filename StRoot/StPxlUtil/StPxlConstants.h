@@ -9,5 +9,8 @@ const int nPxlRowsOnSensor = 928;
 const float pxlPixelSize = 20.7e-4;
 const float pxlCenterOfDiodeZ = 5.5e-4;
 const float pxlCenterOfDiodeX = 15.1e-4;
+const int pxlSensorGoodStatusMin = 0;
+const int pxlSensorGoodStatusMax = 10;
+const int pxlRowColumnGoodStatus =1;
 
 #endif
