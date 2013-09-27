@@ -131,6 +131,10 @@
 #define SPOOL_WRITE_EVENT              0x67   // Spool to SpoolWriter
 #define SPOOL_EVENT_WRITTEN            0x68   // SpoolWriter to Spool
 
+// Token Manager
+#define TM_RESULTS             0x70
+#define TM_ANNOUNCE            0x71
+
 // GL3
 #define GL3_SEND_RESULTS               0x70
 #define GL3_ANNOUNCE_DATA              0x72
