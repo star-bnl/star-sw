@@ -757,6 +757,7 @@ class EvbChooser
   EthServer servers[50];        // linearized servers
   int nservers;
 
+  int getIdxByNode(int evbnode);
  private:
   int evbNodes[10][5];          // idx to server by evb/server
   int nevbserv[10];             // nservers by evb
