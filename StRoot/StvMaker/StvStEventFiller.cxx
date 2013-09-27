@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.33 2013/07/02 04:07:48 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.34 2013/09/27 20:35:46 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.34  2013/09/27 20:35:46  perev
+ * Return fix topology map
+ *
  * Revision 1.33  2013/07/02 04:07:48  perev
  * add dca00 to pull tree
  *
@@ -587,6 +590,7 @@
 std::map<const StvTrack*, StTrackNode*> gTrkNodeMap;
 typedef std::map<const StvTrack*, StTrackNode*>::iterator TkMapIter;
 
+#include "StEventUtilities/StuFixTopoMap.cxx"
 //_____________________________________________________________________________
 inline StThreeVectorF position(const StvNode *node)
 {
@@ -875,7 +879,7 @@ void StvStEventFiller::fillEvent()
           }
 	  fillTrackCount2++;
           fillPulls(kTrack,gTrack,0);
-          if (gTrack->numberOfPossiblePoints()<10) continue;
+          if (gTrack->numberOfPossiblePoints()<10) 	continue;
           if (gTrack->geometry()->momentum().mag()<0.1) continue;
 	  fillTrackCountG++;
           
@@ -1255,7 +1259,7 @@ void StvStEventFiller::fillTrack(StTrack* gTrack, const StvTrack* track,StTrackD
   fillGeometry(gTrack, track, true ); // outer geometry
   fillFitTraits(gTrack, track);
   gTrack->setDetectorInfo(detInfo);
-///VP  StuFixTopoMap(gTrack);
+  StuFixTopoMap(gTrack);
   fillFlags(gTrack);
   if (!track->GetNode(StvTrack::kPrimPoint)) fillDca(gTrack,track);
   return;
