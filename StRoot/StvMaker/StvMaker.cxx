@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.42 2013/09/15 01:46:18 perev Exp $
+// $Id: StvMaker.cxx,v 1.43 2013/09/27 20:35:00 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -422,7 +422,7 @@ int StvMaker::GeoTest()
    double x = 100*cos(phi*3.1415/180);
    double y = 100*sin(phi*3.1415/180);
    double z = 100.;
-   TGeoNode *node = gGeoManager->FindNode(x,y,z);
+   TGeoNode *node = gGeoManager->FindNode(x,y,z);if(node){};
    TGeoNode *parn = gGeoManager->GetMother(1);
    if (sect != parn->GetNumber()) ierr++;
 
@@ -436,7 +436,7 @@ int StvMaker::GeoTest()
    double x = 100*cos(phi*3.1415/180);
    double y = 100*sin(phi*3.1415/180);
    double z = -100.;
-   TGeoNode *node = gGeoManager->FindNode(x,y,z);
+   TGeoNode *node = gGeoManager->FindNode(x,y,z);if(node){};
    TGeoNode *parn = gGeoManager->GetMother(1);
    if (sect-12 != parn->GetNumber()) ierr++;
    const char *path = gGeoManager->GetPath();
