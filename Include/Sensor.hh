@@ -93,6 +93,7 @@ class Sensor {
     void SetTransferFunction(double (*f)(double t));
     void SetTransferFunction(std::vector<double> times, 
                              std::vector<double> values);
+    double GetTransferFunction(const double t);
     bool ConvoluteSignal();
     bool IntegrateSignal();
     void SetNoiseFunction(double (*f)(double t));
