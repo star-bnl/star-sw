@@ -672,7 +672,7 @@ Sensor::SetTransferFunction(std::vector<double> times,
     std::cerr << m_className << "::SetTransferFunction:\n";
     std::cerr << "    Time and value vectors must not be empty.\n";
     return;
-  } else if (times.size() != values.empty()) {
+  } else if (times.size() != values.size()) {
     std::cerr << m_className << "::SetTransferFunction:\n";
     std::cerr << "    Time and value vectors must have same size.\n";
     return;
@@ -711,6 +711,15 @@ Sensor::InterpolateTransferFunctionTable(double t) {
   return m_transferFunctionValues[iLow] + (t - m_transferFunctionTimes[iLow]) *
    (m_transferFunctionValues[iUp] - m_transferFunctionValues[iLow]) / 
    (m_transferFunctionTimes[iUp] - m_transferFunctionTimes[iLow]);
+
+}
+
+double 
+Sensor::GetTransferFunction(const double t) {
+
+  if (!m_hasTransferFunction) return 0.;
+  if (m_fTransfer) return m_fTransfer(t);
+  return InterpolateTransferFunctionTable(t);
 
 }
 
