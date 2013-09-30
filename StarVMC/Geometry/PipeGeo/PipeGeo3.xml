@@ -414,7 +414,7 @@
      <Material name="Air" />
      <Material name="vacuum" dens="pipg_vacdens" />
      <Attribute for  = "PIHI" seen="0"    />
-     <Shape     type = "TUBE" rmin="0.0" rmax="0.7875*inch" dz="55.71*inch/2" />
+     <Shape     type = "TUBE" rmin="0.0" rmax="0.7875*inch" dz="55.71*inch" />
 	        
   </Volume> 
 
