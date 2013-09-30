@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.265 2013/09/12 18:09:21 jwebb Exp $
+* $Id: geometry.g,v 1.266 2013/09/30 16:12:09 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.266  2013/09/30 16:12:09  jwebb
+* Fixes for IDSM / PIPE.
+*
 * Revision 1.265  2013/09/12 18:09:21  jwebb
 * Moved IDS construction before beam pipe.
 *
@@ -4515,7 +4518,8 @@ If LL>0
    IF IDSM { "Inner detector support module" 
       Call AgDETP new ('IDSM')
       Call AgDETP add ('IDSC.version=',IdsmConfig,1)
-      CONSTRUCT IdsmGeo1
+      IF IdsmConfig==1 { CONSTRUCT IdsmGeo1; }
+      IF IdsmConfig==2 { CONSTRUCT IdsmGeo2; }
    }
 
 * Pipe:
