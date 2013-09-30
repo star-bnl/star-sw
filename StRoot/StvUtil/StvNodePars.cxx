@@ -843,8 +843,8 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
     /// signed impact parameter; Signed in such a way that:
     ///     x =  -impact*sin(Psi)
     ///     y =   impact*cos(Psi)
-  imp->mImp = -(_x*(-_sinCA) + _y*(_cosCA));
-  double tst = _x*(_cosCA) + _y*(_sinCA);
+  imp->mImp  = _x*(-_sinCA) + _y*(_cosCA);
+  double tst = _x*( _cosCA) + _y*(_sinCA);
   assert(fabs(tst)<1e-5 || fabs(imp->mImp) > 1000*fabs(tst));
   imp->mZ   = _z;
   imp->mPsi = _psi;
@@ -873,7 +873,7 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
  double T[5][5] = {
 /*        H,   Zeta,         	  A,       L,P */
 /*----------------------------------------------*/
-/*Imp*/  {-1,     0,         	   0,	    0,0},
+/*Imp*/  { 1,     0,         	   0,	    0,0},
 /*Z  */  { 0,1/cosL,               0, 	    0,0},
 /*Psi*/  { 0,_curv*sinL,          1/cosL,   0,0},
 /*Pti*/  { 0,     0,         	   0, 	    0,1},
