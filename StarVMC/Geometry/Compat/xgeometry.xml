@@ -1,6 +1,5 @@
 <Document file="StarVMC/Geometry/Compat/xgeometry.xml">   
  
-
 <Export language="Mortran"> 
     <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
@@ -15,9 +14,12 @@ call geometry
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.23 2013/09/16 19:47:01 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.24 2013/09/30 16:12:15 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.24  2013/09/30 16:12:15  jwebb
+  Fixes for IDSM / PIPE.
+
   Revision 1.23  2013/09/16 19:47:01  jwebb
   Switch to latest version of IDSM.
 
