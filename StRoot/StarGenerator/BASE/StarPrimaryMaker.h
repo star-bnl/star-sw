@@ -125,16 +125,23 @@ class StarPrimaryMaker : public StMaker
   void SetVertex( Double_t x, Double_t y, Double_t z ){ mVx=x; mVy=y; mVz=z; }
 
   /// Set the smearing in the x, y and z vertex positions.
-  /// @sx is the smearing in x
-  /// @sy is the smearing in y
-  /// @sz is the smearing in z
-  /// @rho is the correlation between x and y
+  /// @param sx is the smearing in x
+  /// @param sy is the smearing in y
+  /// @param sz is the smearing in z
+  /// @param rho is the correlation between x and y
   void SetSigma( Double_t sx, Double_t sy, Double_t sz, Double_t rho=0 ){ mSx=sx; mSy=sy; mSz=sz; mRho=rho; }
 
   /// Set the slope of the vertex
-  /// @dxdz is the increase in x with increasing z
-  /// @dydz is the increase in y with increasing z
+  /// @param dxdz is the increase in x with increasing z
+  /// @param dydz is the increase in y with increasing z
   void SetSlope( Double_t dxdz, Double_t dydz ){ mVdxdz=dxdz; mVdydz=dydz; }
+
+  /// Use the beamline constraint as recorded in the database for the current timestamp.
+  /// Values set by the SetVertex and SetSlope will be overwritten by the database.
+  /// User must still provide a width using SetSigma.
+  /// This should only be used when a valid SDT timestamp has been set in the BFC options.
+  /// @param beamline >0 to use the beamline constraint.  =0 to switch it off.
+  void SetBeamline( Int_t beamline=1 ){ assert(beamline>=0); SetAttr("beamline",beamline); }
 
   /// Set particle cuts
   void SetCuts( Double_t ptmin,    Double_t ptmax=-1, 
@@ -155,7 +162,7 @@ class StarPrimaryMaker : public StMaker
   StarGenEvent *event() { return mPrimaryEvent; }
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.4 2013/05/30 17:36:10 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.5 2013/10/01 14:05:17 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
  protected:
