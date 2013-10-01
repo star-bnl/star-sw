@@ -836,6 +836,47 @@ double dRad[5][6] =
   TCL::trasat(T2.GetMatrixArray(),fitErr->Arr(),radErr,5,5); 
 
 }
+//_____________________________________________________________________________
+void StvNodePars::GetPrimial(double radPar[6],double radErr[15],const StvFitErrs *fitErr) const
+{
+/// This is GetRadial for primary track. Radial representation of errors
+/// is senseless for primary. But our oldfashiond TPT format demanding it. 
+/// All space errors supposed to be zeros.
+
+//Remind StvFitPars:
+//double mH;	// direction perpendicular movement and Z
+//double mZ;	// Pseudo Z, direction perpendicular movement & H
+//double mA;	// Angle in XY. cos(A),sin(A),T moving direction
+//double mL;	// Angle lambda in Rxy/Z
+//double mP;	// 1/pt with curvature sign
+
+  enum {jRad =0,jPhi   ,jZ  ,jTan,jPsi,jPti};
+
+  double r2xy = _x*_x+_y*_y, rxy=sqrt(r2xy);
+  double cos2L = 1./(1+_tanl*_tanl);
+  double cosL = sqrt(cos2L);
+
+  radPar[jRad] = rxy;
+  radPar[jPhi] = atan2(_y,_x);
+  radPar[jZ  ] = _z;
+  radPar[jTan] = _tanl;
+  radPar[jPsi] = _psi;
+  radPar[jPti] = _ptin;
+  if (!radErr) return;
+
+double T[5][5] = 
+/*                     H,     Z,     A,      L,      P*/
+/*----------------------------------------------------*/
+/*jRPhi*/	{{     0,     0,     0,      0,      0}
+/*jZ  */	,{     0,     0,     0,      0,      0}
+/*jTan*/	,{     0,     0,     0,      1/cos2L,0}
+/*jPsi*/	,{     0,     0,1/cosL,      0,      0}
+/*jPti*/	,{     0,     0,     0,      0,      1}};
+/*----------------------------------------------------*/
+
+  TCL::trasat(T[0],fitErr->Arr(),radErr,5,5); 
+
+}
 //______________________________________________________________________________
 const StvFitPars &StvFitPars::operator*(const StvFitDers &t) const  
 {
