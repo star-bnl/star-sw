@@ -5,7 +5,13 @@
 #include "TString.h"
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "StEmcPreCluster.h"
+//#define TTABLESORTER
+#ifdef TTABLESORTER
 #include <TTableSorter.h>
+#else
+#include "TArrayI.h"
+#include "TMath.h"
+#endif
 #include "Stiostream.h"
 #include "StMessMgr.h"
 
@@ -124,18 +130,25 @@ Bool_t StEmcOldFinder::findClustersInModule(Int_t det, StEmcModule* module)
         }
         return kTRUE;
     }
-
+#ifdef TTABLESORTER
     TTableSorter index(mEnergy.GetArray(), mNH); // The mLast element is biggest
+#else
+    TArrayI index(mNH);
+    TMath::Sort(mNH,mEnergy.GetArray(),index.GetArray(),0);
+#endif
     mHitsId.Set(10);
     mHitsId.Reset();
-
     Int_t i, ii,l;
     Int_t loop = (det==BTOW)?2:1;
     Float_t eClW=0;
 
     for(i=mNH-1; i>=0; i--) //loop from the more energetic hit to the less one
     {
+#ifdef TTABLESORTER
         Int_t j = index.GetIndex(i); //get index of the hit
+#else
+	Int_t j = index[i];
+#endif
         if(mEnergy[j] < mEnergySeed[det-1])
             break; //if the hit is below threshold for cluster find -> break
 
@@ -154,7 +167,11 @@ Bool_t StEmcOldFinder::findClustersInModule(Int_t det, StEmcModule* module)
             {
                 for(ii=i-1; ii>=0; ii--)
                 {
+#ifdef TTABLESORTER
                     int jj = index.GetIndex(ii);
+#else
+                    int jj = index[ii];
+#endif
                     if(mEnergy[jj] < mEnergyAdd[det-1])
                         break; // 19-apr
                     if(mUsed[jj] == 0)
