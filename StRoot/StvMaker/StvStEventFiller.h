@@ -1,13 +1,16 @@
 //StvStEventFiller.h
 /***************************************************************************
  *
- * $Id: StvStEventFiller.h,v 1.5 2012/10/21 22:57:22 perev Exp $
+ * $Id: StvStEventFiller.h,v 1.6 2013/10/02 20:23:00 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  * Author: Victor Perev, Jun 2010
  ***************************************************************************
  *
  * $Log: StvStEventFiller.h,v $
+ * Revision 1.6  2013/10/02 20:23:00  perev
+ * kMinFitPoints 10 ==> 11 to be like Sti
+ *
  * Revision 1.5  2012/10/21 22:57:22  perev
  * Add IdTruth into pulls
  *
@@ -38,7 +41,7 @@
 #define StvStEventFiller_HH
 #include "StDetectorId.h"
 
-enum ECuts { kMinFitPoints=10 };
+enum ECuts { kMinFitPoints=11 };
 
 
 class StEvent;
