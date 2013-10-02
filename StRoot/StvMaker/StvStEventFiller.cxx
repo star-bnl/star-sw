@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.34 2013/09/27 20:35:46 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.35 2013/10/02 19:12:31 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.35  2013/10/02 19:12:31  perev
+ * MaxTrackLen = 1500 now
+ *
  * Revision 1.34  2013/09/27 20:35:46  perev
  * Return fix topology map
  *
@@ -1239,7 +1242,7 @@ void StvStEventFiller::fillTrack(StTrack* gTrack, const StvTrack* track,StTrackD
 
   gTrack->setEncodedMethod(mStvEncoded);
   double tlen = track->GetLength();
-  assert(tlen >0.0 && tlen<1000.);
+  assert(tlen >0.0 && tlen<1500.);
   gTrack->setLength(tlen);// someone removed this, grrrr!!!!
  
   // Follow the StDetectorId.h enumerations...

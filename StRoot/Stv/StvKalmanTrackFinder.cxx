@@ -334,7 +334,7 @@ StvDebug::Count("hitCountReject",myReject);
 // StvDebug::Count("AcceptXi2   ",mSeedFinder->GetXi2(1));
   if (nHits>3) {
     double tlen = mCurrTrak->GetLength();
-    assert(tlen >0.0 && tlen<1000.);
+    assert(tlen >0.0 && tlen<1500);
   }
 
 
