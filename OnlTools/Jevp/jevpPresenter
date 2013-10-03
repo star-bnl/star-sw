@@ -1,6 +1,0 @@
-#!/bin/bash
-
-args="$*"
-cmdstr="OnlTools/Jevp/StJevpPresenter/evpPresenterBaseScript.C(\"$args\")"
-
-root4star  "$cmdstr"

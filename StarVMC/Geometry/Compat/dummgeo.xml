@@ -1,6 +1,0 @@
-<Document file="StarVMC/Compat/dummgeo.xml">
-<Module name="dummgeo" comment="Dummy dummy geometry">
-<CDE>AGECOM,GCUNIT</CDE>
-</Module>
-</Document>
-

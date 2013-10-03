@@ -1,9 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbPMTcal  <comment>  *    EEMC Tower Box  calibration for one sector, ver 2 </comment>
-  <dbString> name <length> 960 </length> <comment>     PMT ID  sector/box/tower  </comment> </dbString> 
-  <dbFloat> gain <length> 60 </length> <comment>  pmt effective gain of the tower  </comment> </dbFloat> 
-  <dbFloat> egain <length> 60 </length> <comment>  error of the gain   </comment> </dbFloat> 
-  <dbFloat> hv <length> 60 </length> <comment>  pmt actual HV (V), dac=HV/HVmax*1023  </comment> </dbFloat> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>
