@@ -1200,7 +1200,7 @@ Bfc_st BFC[] = {
   {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
    ,                                        "","gstar for 80 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
   {"pythia"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
-   ,                                "Pythia6_4_23,bpythia","Load Pythia in starsim, set pp 510 GeV",kFALSE},
+   ,                                "Pythia6_4_26,bpythia","Load Pythia in starsim, set pp 510 GeV",kFALSE},
   {"Wenu"        ,"" ,"","pythia","", ""                 ,"set pp 510 GeV -> W+/- -> e+/- nu/nubar",kFALSE},
   {"tdaq"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"miniDAQ"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
