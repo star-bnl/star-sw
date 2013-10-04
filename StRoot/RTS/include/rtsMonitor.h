@@ -446,5 +446,11 @@ struct rts2013_L4RcfMon {
     u_int files_waiting;  // waiting to be sent
 };
 
+struct rts2013_TmMon {
+    rtsMonHeader head; // all values according to token...
+    
+    u_int evtsManaged;   // eventsIn by tmtoken rather than token
+    u_int evtsEvb[10];   // eventsIn by tmtoken by evb
+};
 
 #endif
