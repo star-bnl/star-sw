@@ -17,7 +17,8 @@ using namespace std;
 
 class TCU {
 public:
-  void defineTrigger(const TriggerDefinition& triggerDef);
+  //  void defineTrigger(const TriggerDefinition& triggerDef);
+  void defineTrigger(TriggerDefinition& triggerDef);
   bool isOnBits(int onbits) const;
   bool isTrigger(int triggerId) const;
   set<int> triggerIds() const;
