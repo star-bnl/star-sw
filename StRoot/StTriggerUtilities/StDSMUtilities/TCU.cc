@@ -7,14 +7,17 @@
 #include "TriggerDefinition.hh"
 #include "TCU.hh"
 
-void TCU::defineTrigger(const TriggerDefinition& triggerDef)
+void TCU::defineTrigger(TriggerDefinition& triggerDef)
 {
   mTriggers.insert(make_pair(triggerDef.triggerId, triggerDef));
 }
 
 bool TCU::isOnBits(int onbits) const
 {
-  return (mInput & onbits) == onbits;
+  if(onbits != 0){	
+    return (mInput & onbits) == onbits;
+  }
+    return 0;
 }
 
 bool TCU::isTrigger(int triggerId) const
@@ -22,7 +25,13 @@ bool TCU::isTrigger(int triggerId) const
   typedef multimap<int, TriggerDefinition>::const_iterator MI;
   pair<MI, MI> p = mTriggers.equal_range(triggerId);
   for (MI i = p.first; i != p.second; ++i)
-    if (isOnBits(i->second.onbits)) return true;
+    //onbits comparision for run11 and run12 -- zchang
+    {
+
+      if (i->second.onbits&&isOnBits(i->second.onbits)) {
+	return true;
+      }
+    }
   return false;
 }
 
