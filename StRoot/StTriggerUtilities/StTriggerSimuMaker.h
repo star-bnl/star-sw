@@ -123,15 +123,27 @@ public:
   /// Choose DB to access trigger definitions and thresholds
   void useOnlineDB() { mUseOnlineDB = 1; }
   void useOfflineDB() { mUseOfflineDB = 1; }
+  //add askTrigger for trigger defintion
+
+  //Define requested trigger
+  vector<string> mTrigName;
+  void askTrigger(const char * ptrgname)
+  {
+    string strgname(ptrgname);
+    mTrigName.push_back(strgname);
+  }
 
   ClassDef(StTriggerSimuMaker,0)
 };
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.31 2012/07/13 16:47:26 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.32 2013/10/08 23:13:13 zchang Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.32  2013/10/08 23:13:13  zchang
+// Add member mTrigName and function askTrigger() to request trigger definition
+//
 // Revision 1.31  2012/07/13 16:47:26  pibero
 // Users must now specify database to use for trigger definitions and thresholds
 //
