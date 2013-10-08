@@ -1,5 +1,5 @@
-//////////////////////////////////////////////////////////////////////////
 //
+//////////////////////////////////////////////////////////////////////////
 //
 // StTriggerSimuMaker R.Fatemi, Adam Kocoloski , Jan Balewski  (Fall, 2007)
 //
@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.55 2013/03/25 01:27:30 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.56 2013/10/08 23:36:09 zchang Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -502,7 +502,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   sprintf(query,"select object,idx,reg,label,value,defaultvalue from dict where hash=(select dicthash from run where idx_rn = %d)",runNumber);
   LOG_INFO << query << endm;
   mysql_query(&mysql,query);
-
+  
   if (MYSQL_RES* result = mysql_store_result(&mysql)) {
     LOG_INFO << setw(10) << "object"
 	     << setw(10) << "idx"
@@ -575,71 +575,170 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
     mysql_free_result(result);
   }
 
-  LOG_INFO << "The following registers have new values:" << endm;
+  //  LOG_INFO << "The following registers have new values:" << endm;
 
   // Trigger definitions
   const int MAX_TRIGGERS = 64;
   TriggerDefinition triggers[MAX_TRIGGERS];
+  
+  //Trigger name selection -- zchang
+  if(mTrigName.size() == 0)
+    {
+      sprintf(query,"select idx_trigger,name,offlineBit from triggers where idx_rn = %d",runNumber);
+      LOG_INFO << query << endm;
+      mysql_query(&mysql,query);
+      
+      if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+	while (MYSQL_ROW row = mysql_fetch_row(result)) {
+	  int idx_trigger = atoi(row[0]);
+	  assert(idx_trigger >= 0 && idx_trigger < MAX_TRIGGERS);
+	  triggers[idx_trigger].triggerIndex = idx_trigger;
+	  strcpy(triggers[idx_trigger].name,row[1]);
+	  triggers[idx_trigger].triggerId = atoi(row[2]);
+	}
+	mysql_free_result(result);
+      }
+      
+      sprintf(query,"select idx_idx,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from pwc where idx_rn = %d",runNumber);
+      LOG_INFO << query << endm;
+      mysql_query(&mysql,query);
 
-  sprintf(query,"select idx_trigger,name,offlineBit from triggers where idx_rn = %d",runNumber);
-  LOG_INFO << query << endm;
-  mysql_query(&mysql,query);
+      if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+	LOG_INFO << setw(20) << "idx_trigger"
+		 << setw(20) << "name"
+		 << setw(20) << "offlineBit"
+		 << setw(20) << "onbits"
+		 << setw(20) << "offbits"
+		 << setw(20) << "onbits0"
+		 << setw(20) << "onbits1"
+		 << setw(20) << "onbits2"
+		 << setw(20) << "onbits3"
+		 << setw(20) << "offbits0"
+		 << setw(20) << "offbits1"
+		 << setw(20) << "offbits2"
+		 << setw(20) << "offbits3"
+		 << endm;
+	
+	int idx_trigger;
 
-  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
-    while (MYSQL_ROW row = mysql_fetch_row(result)) {
-      int idx_trigger = atoi(row[0]);
-      assert(idx_trigger >= 0 && idx_trigger < MAX_TRIGGERS);
-      triggers[idx_trigger].triggerIndex = idx_trigger;
-      strcpy(triggers[idx_trigger].name,row[1]);
-      triggers[idx_trigger].triggerId = atoi(row[2]);
+	while (MYSQL_ROW row = mysql_fetch_row(result)) {
+	  //      int idx_trigger = atoi(row[0]);
+	  sscanf(row[0],"%d",&idx_trigger);
+	  assert(idx_trigger >= 0 && idx_trigger < MAX_TRIGGERS);
+	  //use sscanf(...) converting char* to unsigned integer instead of using atoi(...) --zchang 
+	  //      triggers[idx_trigger].onbits = atoi(row[1]);
+	  sscanf(row[1],"%ud",&triggers[idx_trigger].onbits);
+	  sscanf(row[2],"%ud",&triggers[idx_trigger].offbits);
+	  sscanf(row[1],"%ud",&triggers[idx_trigger].onbits0);
+	  sscanf(row[2],"%ud",&triggers[idx_trigger].offbits0);
+	  sscanf(row[3],"%ud",&triggers[idx_trigger].onbits1);
+	  sscanf(row[4],"%ud",&triggers[idx_trigger].onbits2);
+	  sscanf(row[5],"%ud",&triggers[idx_trigger].onbits3);
+	  sscanf(row[6],"%ud",&triggers[idx_trigger].offbits1);
+	  sscanf(row[7],"%ud",&triggers[idx_trigger].offbits2);
+	  sscanf(row[8],"%ud",&triggers[idx_trigger].offbits3);
+	  
+	  emc->defineTrigger(triggers[idx_trigger],mYear);
+	  
+	  LOG_INFO << setw(20) << idx_trigger
+		   << setw(20) << triggers[idx_trigger].name
+		   << setw(20) << triggers[idx_trigger].triggerId
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits)
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits)
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits0)		  
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits1)
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits2)
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits3)
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits0)
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits1)
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits2)
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits3)
+		   << endm;
+	}
+	mysql_free_result(result);
+      }
+    }else
+    {
+      //Query with trigger name -- zchang
+      int cntr = 0;
+      for(vector<string> :: iterator p = mTrigName.begin(); p < mTrigName.end(); ++p)
+	{
+          sprintf(query,"select idx_idx,name,offlineBit,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from triggers, pwc where pwc.idx_idx = triggers.idx_trigger and pwc.idx_rn=triggers.idx_rn and triggers.idx_rn = %d and name = \"%s\";", runNumber, p->c_str());  
+	  LOG_INFO << query << endm;
+	  //	  mysql_query(&mysql,query);
+
+	  if(mysql_query(&mysql,query))
+	    {
+	      LOG_INFO <<mysql_error(&mysql) << "\n";
+	    }
+	  
+	  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+	    LOG_INFO << setw(20) << "idx_trigger"
+		     << setw(20) << "name"
+		     << setw(20) << "offlineBit"
+		     << setw(20) << "onbits"
+		     << setw(20) << "offbits"
+		     << setw(20) << "onbits0"
+		     << setw(20) << "onbits1"
+		     << setw(20) << "onbits2"
+		     << setw(20) << "onbits3"
+		     << setw(20) << "offbits0"
+		     << setw(20) << "offbits1"
+		     << setw(20) << "offbits2"
+		     << setw(20) << "offbits3"
+		     << endm;
+	    
+	    int idx_trigger;
+	    
+	    while (MYSQL_ROW row = mysql_fetch_row(result)) {
+	      sscanf(row[0],"%d",&idx_trigger);
+	      assert(cntr >= 0 && cntr < MAX_TRIGGERS);
+	      triggers[cntr].triggerIndex = idx_trigger;
+              strcpy(triggers[cntr].name,row[1]);
+              triggers[cntr].triggerId = atoi(row[2]);
+              //use sscanf(...) converting char* to unsigned integer instead of using atoi(...) -- zchang
+	      //      triggers[idx_trigger].onbits = atoi(row[1]);
+	      sscanf(row[3],"%ud",&triggers[cntr].onbits);
+	      sscanf(row[4],"%ud",&triggers[cntr].offbits);
+	      sscanf(row[3],"%ud",&triggers[cntr].onbits0);
+	      sscanf(row[4],"%ud",&triggers[cntr].offbits0);
+	      sscanf(row[5],"%ud",&triggers[cntr].onbits1);
+	      sscanf(row[6],"%ud",&triggers[cntr].onbits2);
+	      sscanf(row[7],"%ud",&triggers[cntr].onbits3);
+	      sscanf(row[8],"%ud",&triggers[cntr].offbits1);
+	      sscanf(row[9],"%ud",&triggers[cntr].offbits2);
+	      sscanf(row[10],"%ud",&triggers[cntr].offbits3);
+
+	      emc->defineTrigger(triggers[cntr],mYear);
+	      
+	      LOG_INFO << setw(20) << idx_trigger
+		       << setw(20) << triggers[cntr].name
+		       << setw(20) << triggers[cntr].triggerId
+		       << setw(20) << Form("0x%08x",triggers[cntr].onbits)
+		       << setw(20) << Form("0x%08x",triggers[cntr].offbits)
+		       << setw(20) << Form("0x%08x",triggers[cntr].onbits0)
+		       << setw(20) << Form("0x%08x",triggers[cntr].onbits1)
+		       << setw(20) << Form("0x%08x",triggers[cntr].onbits2)
+		       << setw(20) << Form("0x%08x",triggers[cntr].onbits3)
+		       << setw(20) << Form("0x%08x",triggers[cntr].offbits0)
+		       << setw(20) << Form("0x%08x",triggers[cntr].offbits1)
+		       << setw(20) << Form("0x%08x",triggers[cntr].offbits2)
+		       << setw(20) << Form("0x%08x",triggers[cntr].offbits3)
+		       << endm;
+	    }
+	    mysql_free_result(result);
+
+	  }
+	  cntr ++;
+	}
     }
-    mysql_free_result(result);
-  }
-
-  sprintf(query,"select idx_idx,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from pwc where idx_rn = %d",runNumber);
-  LOG_INFO << query << endm;
-  mysql_query(&mysql,query);
-
-  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
-    LOG_INFO << setw(20) << "idx_trigger"
-             << setw(20) << "name"
-             << setw(20) << "offlineBit"
-             << setw(20) << "onbits"
-             << setw(20) << "offbits"
-             << setw(20) << "onbits1"
-             << setw(20) << "onbits2"
-             << setw(20) << "onbits3"
-             << setw(20) << "offbits1"
-             << setw(20) << "offbits2"
-             << setw(20) << "offbits3"
-             << endm;
-
-    while (MYSQL_ROW row = mysql_fetch_row(result)) {
-      int idx_trigger = atoi(row[0]);
-      assert(idx_trigger >= 0 && idx_trigger < MAX_TRIGGERS);
-      triggers[idx_trigger].onbits = atoi(row[1]);
-      emc->defineTrigger(triggers[idx_trigger]);
-      LOG_INFO << setw(20) << idx_trigger
-               << setw(20) << triggers[idx_trigger].name
-               << setw(20) << triggers[idx_trigger].triggerId
-               << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits)
-               << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits)
-               << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits1)
-               << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits2)
-               << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits3)
-               << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits1)
-               << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits2)
-               << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits3)
-               << endm;
-    }
-    mysql_free_result(result);
-  }
-
+  
+  
   mysql_close(&mysql);
-
+  
   return true;
 }
-
+  
 void StTriggerSimuMaker::overwrite2009DsmRegisters()
 {
   for (int reg = 0; reg < 3; ++reg) {
@@ -738,11 +837,8 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
- * Revision 1.55  2013/03/25 01:27:30  pibero
- * Remove use of current online db
- *
- * Revision 1.54  2013/03/24 16:08:28  pibero
- * Also check current online db
+ * Revision 1.56  2013/10/08 23:36:09  zchang
+ * Add functionality to get2009DsmRegistersFromOnlineDatabase(int) to get trigger definition for run11 and run12 from database based on requested triggers
  *
  * Revision 1.53  2012/07/13 16:47:26  pibero
  * Users must now specify database to use for trigger definitions and thresholds
