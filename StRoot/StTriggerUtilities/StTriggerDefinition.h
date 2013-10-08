@@ -8,17 +8,19 @@
 #include "TString.h"
 
 struct StTriggerDefinition : public TObject {
-  Int_t   triggerIndex;		// trigger index
+  int triggerIndex;		// trigger index
   TString name;			// trigger name
-  Int_t   triggerId;		// trigger ID
-  Int_t   onbits;	        // bits required to be ON at input of TCU
-  Int_t   offbits;	        // bits required to be OFF at input of TCU
-  Int_t   onbits1;
-  Int_t   onbits2;
-  Int_t   onbits3;
-  Int_t   offbits1;
-  Int_t   offbits2;
-  Int_t   offbits3;
+  int triggerId;		// trigger ID
+  unsigned int onbits;	        // bits required to be ON at input of TCU
+  unsigned int offbits;	        // bits required to be OFF at input of TCU
+  unsigned int onbits0;
+  unsigned int onbits1;
+  unsigned int onbits2;
+  unsigned int onbits3;
+  unsigned int offbits0;
+  unsigned int offbits1;
+  unsigned int offbits2;
+  unsigned int offbits3;
 
   void print();
 
