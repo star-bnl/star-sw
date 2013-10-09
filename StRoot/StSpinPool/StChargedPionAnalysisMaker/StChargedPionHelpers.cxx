@@ -1,4 +1,4 @@
-// $Id: StChargedPionHelpers.cxx,v 1.7 2010/07/16 20:24:08 rfatemi Exp $
+// $Id: StChargedPionHelpers.cxx,v 1.8 2013/10/09 14:43:39 stevens4 Exp $
 
 #include "TLorentzVector.h"
 
@@ -29,7 +29,7 @@ translateEvent(StJetSkimEvent *skimEvent, StChargedPionBaseEv *ev) {
     ev->setRunId(skimEvent->runId());
     ev->setEventId(skimEvent->eventId());
     ev->setBbcTimeBin(skimEvent->bbcTimeBin());
-    char *baseName = strrchr(skimEvent->mudstFileName().GetString().Data(), '/');
+    const char *baseName = strrchr(skimEvent->mudstFileName().GetString().Data(), '/');
     baseName = baseName + 1;
     ev->setMuDstName( baseName );
     
@@ -379,6 +379,9 @@ translateTrack(const StMuTrack *mu, StChargedPionTrack *cp) {
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.cxx,v $
+ * Revision 1.8  2013/10/09 14:43:39  stevens4
+ * Add const to char* in 2 lines to compile on 5.34.09 and SL6.4 on rplay18
+ *
  * Revision 1.7  2010/07/16 20:24:08  rfatemi
  * Changes in code to preserve backward compatibility with changes in jet code.  Affects info about particles in jets.
  *
