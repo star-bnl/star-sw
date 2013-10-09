@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.261 2013/07/18 14:09:58 fisyak Exp $
+// $Id: StMaker.cxx,v 1.262 2013/10/09 21:58:52 fisyak Exp $
 //
 //
 /*!
@@ -1108,7 +1108,7 @@ void StMaker::lsMakers(const StMaker *top)
   TDataSetIter   iter((TDataSet*)top,20);
   Int_t N=0;
   for(const TDataSet *mk=top;mk;mk = iter.Next()) {
-    if(strncmp(".maker",mk->GetTitle(),6)!=0) continue;
+    if (! mk->InheritsFrom("StMaker")) continue;
     Int_t l=iter.GetDepth();
     N++;
     Char_t space[20]; memset(space,' ',sizeof(space));space[l]=0;
@@ -1827,6 +1827,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.262  2013/10/09 21:58:52  fisyak
+// Print hidden maker
+//
 // Revision 1.261  2013/07/18 14:09:58  fisyak
 // Move GeometryDbAliases into separate h-file, (disable for the moment simpletpc, upgr20, upgr21, dev13, and devE)
 //

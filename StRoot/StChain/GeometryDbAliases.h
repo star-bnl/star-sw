@@ -94,9 +94,9 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry (MTD missing),AgML"},
   {"y2012b",      20111215,     2, "y2012b",   "y2012 geometry (now with MTD),AgML"},
 
-  {"y2013",       20121215,     0, "y2013",    "y2013 first cut geometry,AgML,xgeometry"},
-  {"y2013_1",     20121215,     1, "y2013_1",  "y2013 first cut geometry with pixel,AgML,xgeometry"},
-  {"y2013_2",     20121215,  1001, "y2013_2",  "y2013 first cut geometry sans pixel,AgML,xgeometry"},
+  {"y2013",       20121215,     0, "y2013_1x", "y2013 first cut geometry,AgML,xgeometry"},
+  {"y2013_1",     20121215,     1, "y2013_1x", "y2013 first cut geometry with pixel,AgML,xgeometry"},
+  {"y2013_2",     20121215,  1001, "y2013_2x", "y2013 first cut geometry sans pixel,AgML,xgeometry"},
   {"y2013_1x",    20121215,  2001, "y2013_1x", "y2013 first cut geometry, new walls,AgML,xgeometry"},
   {"y2013_2x",    20121215,  3001, "y2013_2x", "y2013 first cut geometry sans pixel, new walls,AgML,xgeometry"},
   {"20130509.000000", 20130509, 0, "y2013_1x", "y2013 with pixel, real data,AgML,xgeometry"},
