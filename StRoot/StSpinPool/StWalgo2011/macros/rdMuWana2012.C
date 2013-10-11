@@ -61,7 +61,7 @@ int rdMuWana2012(
   
   assert( !gSystem->Load("StDaqLib"));
 
-  // libraries below are needed for DB interface
+  // libraries below are needed for DB interface and trigger
   assert( !gSystem->Load("StDetectorDbMaker")); // for St_tpcGasC
   assert( !gSystem->Load("StTpcDb"));
   assert( !gSystem->Load("StDbUtilities")); //for trigger simu
@@ -69,18 +69,16 @@ int rdMuWana2012(
   assert( !gSystem->Load("St_db_Maker"));
   assert( !gSystem->Load("StEEmcUtil"));
   assert( !gSystem->Load("StEEmcDbMaker"));
+  assert( !gSystem->Load("StSpinDbMaker"));  
   assert( !gSystem->Load("StTriggerFilterMaker"));
-  assert( !gSystem->Load("StWalgo2011"));
   assert( !gSystem->Load("StTriggerUtilities"));
-  assert( !gSystem->Load("StSpinDbMaker"));
-  
+
+  // load jet libraries
   if (useJetFinder ==1 || useJetFinder == 2){ // jetfinder/jetreader libraries
     cout << "BEGIN: loading jetfinder libs" << endl;
     gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
-    gSystem->Load("StSpinDbMaker");
     gSystem->Load("StEmcTriggerMaker");
-    gSystem->Load("StTriggerUtilities");
     gSystem->Load("StMCAsymMaker");
     gSystem->Load("StRandomSelector");
     gSystem->Load("libfastjet.so");
@@ -94,15 +92,16 @@ int rdMuWana2012(
     gSystem->Load("StJets");
     gSystem->Load("StJetEvent");
     gSystem->Load("StJetMaker");
-    gSystem->Load("StTriggerFilterMaker");
     cout << "END: loading jetfinder libs" << endl;
   }
   else  {
     cout << "\nWARN: Jet are NOT read in, W-algo will not wrk properly\n " << endl;
   }
-  
-  if(geant){                                  
-    // libraries for access to MC record  
+
+  // load W algo libraries
+  assert( !gSystem->Load("StWalgo2011"));
+
+  if(geant){ // libraries for access to MC record                                  
     assert( !gSystem->Load("StMcEvent"));      
     assert( !gSystem->Load("StMcEventMaker")); 
   }
@@ -467,6 +466,9 @@ int rdMuWana2012(
 
 
 // $Log: rdMuWana2012.C,v $
+// Revision 1.13  2013/10/11 14:22:34  stevens4
+// changed order of library loading to be compatible with ROOT/SL upgradex
+//
 // Revision 1.12  2013/09/13 19:37:36  stevens4
 // Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
 //
