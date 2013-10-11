@@ -72,24 +72,24 @@ void Pythia6( TString mode="pp:W", Int_t tune=320 )
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void standalone( Int_t nevents=100 )
+void standalone( Int_t nevents=100, UInt_t rngSeed = 12345 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
   {
-    TString simple = "y2012a sdt20111215 agml usexgeom geantL nodefault";
-    //    TString simple = "y2012a agml gen_T sim_T nodefault";
+    TString simple = "tables nodefault";
     bfc(0, simple );
   }
 
   gSystem->Load( "libVMC.so");
-
+  gSystem->Load( "St_g2t.so" );
+  gSystem->Load( "St_geant_Maker.so" );
+ 
   gSystem->Load( "StarGeneratorUtil.so" );
   gSystem->Load( "StarGeneratorEvent.so" );
   gSystem->Load( "StarGeneratorBase.so" );
 
   gSystem->Load( "libMathMore.so"   );  
-  gSystem->Load( "xgeometry.so"     );
   
   //
   // Create the primary event generator and insert it
@@ -106,6 +106,14 @@ void standalone( Int_t nevents=100 )
   // Setup an event generator
   //
   Pythia6( "pp:W" );
+
+  //
+  // Initialize random number generator
+  //
+  StarRandom &random = StarRandom::Instance();
+  random.capture(); // maps all ROOT TRandoms to StarRandom
+  random.seed( rngSeed );
+
 
   //
   // Setup cuts on which particles get passed to geant for
