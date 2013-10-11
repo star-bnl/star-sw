@@ -4,7 +4,7 @@
 #include "g2t_pix.inc"
 #include "genhit.h"
       INTEGER   G2T_PIX,G2R_GET_HIT,Iprin/0/,Idigi,i,isys
-      logical   Local/.false./
+      logical   Local/.true./ ! local coords requested by pixel group 10/11/13 jcw
 *
       G2T_PIX=STAFCV_OK
       if (g2t_pix_hit_h.maxlen.le.0) return
@@ -15,7 +15,8 @@
 
       call G2R_GET_SYS ('PIXL','PLAC',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
-       Local  = Idigi.ge.2
+!      Local  = Idigi.ge.2
+!      -- commented out 10/11/13 jcw
 
        Do While (G2R_GET_HIT('pix') .eq. 0)
 *          print *,i,id,trac,next,volume,
@@ -59,3 +60,14 @@
       END
 
 
+! $Log: g2t_pix.F,v $
+! Revision 1.5  2013/10/11 17:22:40  jwebb
+! Request from the pixel group to store local rather than global quantities
+! w/in the g2t tables.
+!
+! NOTE:  Has side effect if "MODE DIGI pixl" is set in starsim.  Some
+! archeology will be required to be sure, but this mode setting appears
+! to control whether starsim performs digitization for that detector,
+! or saves all hits with full precision.  The latter option appears to
+! be the default.
+!
