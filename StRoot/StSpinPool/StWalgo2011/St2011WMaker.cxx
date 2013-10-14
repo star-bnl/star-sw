@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.20 2013/09/13 19:33:13 stevens4 Exp $
+// $Id: St2011WMaker.cxx,v 1.21 2013/10/14 13:07:31 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -152,6 +152,21 @@ St2011WMaker::Init(){
   initHistos();
   initEHistos();
 
+  // init TPC histos
+  if(mMuDstMaker) {
+    for(int isec=0;isec<mxTpcSec;isec++) {
+      int sec=isec+1;
+      float Rin=par_trackRin,Rout=par_trackRout;
+      float RinE=parE_trackRin,RoutE=parE_trackRout;
+      
+      mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,Rin,Rout);
+      mTpcFilterE[isec].setCuts(parE_nFitPts,parE_nHitFrac,RinE,RoutE);
+      
+      mTpcFilter[isec].init("sec",sec,HListTpc,true);
+      mTpcFilterE[isec].init("secEemcTr",sec,HListTpc,false);
+    }
+  }
+
   mJetTreeChain->SetBranchAddress(mJetTreeBranch,&mJetEvent);
   mJetTreeChain->SetBranchAddress(mJetTreeBranch_noEEMC,&mJetEvent_noEEMC);
 
@@ -226,9 +241,6 @@ St2011WMaker::InitRun(int runNo){
   cout<<Form("\n EtowScaleFact=%.2f  BtowScaleFacor=%.2f" ,par_etowScale, par_btowScale)<<endl;
 
   if(mMuDstMaker) {
-    // check if TPC histograms already initialized for this job
-    bool initTpcHistos = HListTpc->IsEmpty();
-    
     // initialization of TPC cuts is run dependent (only MuDst analysis)
     for(int isec=0;isec<mxTpcSec;isec++) {
       int sec=isec+1;
@@ -260,12 +272,6 @@ St2011WMaker::InitRun(int runNo){
       // initialize cuts for each run individually
       mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,Rin,Rout);
       mTpcFilterE[isec].setCuts(parE_nFitPts,parE_nHitFrac,RinE,RoutE);
-      
-      // only initialize histograms once per job (needed for embedding with many runs per job)
-      if(initTpcHistos){ 
-	mTpcFilter[isec].init("sec",sec,HListTpc,true);
-	mTpcFilterE[isec].init("secEemcTr",sec,HListTpc,false);
-      }
     }
   }
 
@@ -604,6 +610,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.21  2013/10/14 13:07:31  stevens4
+// Move initialization of TPC QA histos from Init() to InitRun()
+//
 // Revision 1.20  2013/09/13 19:33:13  stevens4
 // Updates to code for combined 2011+2012 result presented to spin PWG 9.12.13
 //
