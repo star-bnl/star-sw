@@ -102,13 +102,13 @@ void starsim( Int_t nevents=50 )
   command("gkine -4 0");
   command("gfile o hijing.starsim.fzd");
   
-
   //
   // Trigger on nevents
   //
   trig( nevents );
+  command("gprint kine");
 
-  command("call agexit");  // Make sure that STARSIM exits properly
+  //  command("call agexit");  // Make sure that STARSIM exits properly
 
 }
 // ----------------------------------------------------------------------------
