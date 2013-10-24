@@ -177,8 +177,22 @@ void starsim( Int_t nevents=1, Double_t ckin3=7.0, Double_t ckin4=-1.0  )
   filter = new StDijetFilter();
   primary -> AddFilter( filter );
 
-  // Enable to keep tracks on events which were rejected
-  primary->SetAttr("FilterKeepAll", int(1));
+  // If set to 1, tracks will be saved in the tree on events which were
+  // rejected.  If the tree size is too big (because the filter is too
+  // powerful) you may want to set this equal to zero.  In which case
+  // only header information is saved for the event.
+  primary->SetAttr("FilterKeepAll",     int(1));
+
+  // By default, the primary maker enters an infinite loop and executes
+  // the event generator until it yields an event which passes the filter.
+  // The big full chain treats this as a single event.
+  //
+  // If you want the BFC to see an empty event, set the FilterSkipRejects
+  // attribute on the primary maker and give it the priveledge it needs
+  // to kill the event. 
+  //---  primary->SetAttr("FilterSkipRejects", int(1) ); // enables event skipping 
+  //---  chain->SetAttr(".Privilege",1,"StarPrimaryMaker::*" );
+
 
   //
   // Initialize primary event generator and all sub makers
