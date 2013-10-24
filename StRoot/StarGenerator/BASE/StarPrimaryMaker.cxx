@@ -284,6 +284,11 @@ Int_t StarPrimaryMaker::Make()
     if ( IAttr( "FilterKeepAll" ) || IAttr( "FilterKeepHeader" ) )    mTree->Fill();
     Clear();
 
+    //
+    // If enabled, skip rejected events
+    //
+    if ( IAttr("FilterSkipRejects") ) return kStSKIP; 
+
 
   }// infinite loop
 
