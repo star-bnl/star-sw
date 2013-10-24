@@ -670,6 +670,9 @@ int physmemOpen (int *fd,
                  volatile unsigned long **user_addr,
                  unsigned long *phys_addr,
                  unsigned long *size_physmem);
+int physmemCheck (char *devnam,
+                  unsigned long *phys_addr,
+                 unsigned long *size_physmem);
 int physmemClose (int physmem_fd,
                   unsigned long *addr_user_physmem,
                   unsigned long phys_size_physmem);
