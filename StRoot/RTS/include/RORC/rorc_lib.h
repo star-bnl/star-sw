@@ -89,6 +89,15 @@
 #define C_RXDA    30     /* channel Receive  DMA address register */
 #define C_TXDA    31     /* channel Transmit DMA address register */
 
+/* high addresses for 64 bit */
+#define C_RAFX    32     /* Receive Address FIFO Extension register   */
+#define C_RRBX    33     /* Rx Report Base Address Extension register */
+#define C_TAFX    34     /* Transmit Address FIFO Extension register  */
+#define C_TRBX    35     /* Tx Report Base Address Extension register */
+#define C_RDAH    36     /* channel Receive  DMA address register High*/
+#define C_TDAH    37     /* channel Transmit DMA address register High*/
+
+
 /*
  * I2C bits (D-RORC HID register)
  */
