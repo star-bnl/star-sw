@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.12 2013/01/24 15:44:59 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.13 2013/10/28 14:18:16 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.13  2013/10/28 14:18:16  ramdebbe
+// added arrays to handle bbc and zdc information
+//
 // Revision 1.12  2013/01/24 15:44:59  ramdebbe
 // added ZDC shower max information to output tree and bbc small tubes individual ADC. Returns UPC_Main trigger
 //
@@ -101,13 +104,11 @@ Int_t StPeCTrigger::process(StEvent *event)
   if(!trigData) {
     LOG_ERROR << "StTriggerData not available "<< endm;
   }
-//   if(trigData) {
-//     printf("lastDSM(0) %b\n", trigData->lastDSM(0));
-//     cout<<"ZDC_monitot 0 "<< setbase(16)<<trigData->lastDSM(0)<<" --- 1----  "<<trigData->lastDSM(1)<<setbase(10)<<endl;
-//     cout<<"ZDC_monitot 2 "<< setbase(16)<<trigData->lastDSM(2)<<" --- 3----  "<<trigData->lastDSM(3)<<setbase(10)<<endl;
-//     cout<<"ZDC_monitot 4 "<< setbase(16)<<trigData->lastDSM(4)<<" --- 5----  "<<trigData->lastDSM(5)<<setbase(10)<<endl;
-//     cout<<"ZDC_monitot 6 "<< setbase(16)<<trigData->lastDSM(6)<<" --- 7----  "<<trigData->lastDSM(7)<<setbase(10)<<endl;
-//   }
+  nBtofTriggerHits = trigData->tofMultiplicity();
+  nBTOFhits =  event->btofCollection()->tofHits().size();
+  bunchId = trigData->bunchId7Bit();
+  lastDSM0 = trigData->lastDSM(0);
+  lastDSM1 = trigData->lastDSM(1);
   StTriggerIdCollection* triggerIdColl = event->triggerIdCollection();
   if(triggerIdColl) {
     ttid= triggerIdColl->nominal();
@@ -130,6 +131,17 @@ Int_t StPeCTrigger::process(StEvent *event)
     if(runN>12130030 && runN<= 12179050) trg_3001     =ttid->isTrigger(11);      //run11 UPC Topo was never official
     if(runN>12146002 && runN<= 12152016) trg_3000     =ttid->isTrigger(350007);  //run11 UPC Main official
     if(runN>12152016 && runN<= 12179050) trg_3000     =ttid->isTrigger(350017);  //run11 UPC Main official
+
+    if(runN>13116029 && runN<= 13116046) trg_3000     =ttid->isTrigger(1);       //run12 UU UPC Main unofficial
+    if(runN>13110010 && runN<= 13116042) trg_3001     =ttid->isTrigger(2);       //run12 UU UPC Topo
+    if(runN>13121046 && runN<= 13125024) trg_3001     =ttid->isTrigger(1);       //run12 UU UPC Topo
+    if(runN>13125024 && runN<= 13130033) trg_3001     =ttid->isTrigger(400604);  //run12 UU UPC Topo
+    if(runN>13131006 && runN<= 13136015) trg_3001     =ttid->isTrigger(400614);      //run12 UU UPC Topo
+    if(runN>13116047 && runN<= 13117027) trg_3000     =ttid->isTrigger(400601);  //run12 UU UPC Main official
+    if(runN>13117027 && runN<= 13117036) trg_3000     =ttid->isTrigger(400611);  //run12 UU UPC Main official
+    if(runN>13117036 && runN<= 13118017) trg_3000     =ttid->isTrigger(400621);  //run12 UU UPC Main official
+    if(runN>13118017 && runN<= 13130033) trg_3000     =ttid->isTrigger(400631);  //run12 UU UPC Main official
+    if(runN>13131006 && runN<= 13136015) trg_3000     =ttid->isTrigger(400641);  //run12 UU UPC Main official
 
 //     trg_3000     =ttid->isTrigger(1);  
 //     trg_3001     =0;   //ttid->isTrigger(11); //run11 from 011035 to 039028  no topo trigger  //use in firstList.list
@@ -169,6 +181,16 @@ Int_t StPeCTrigger::process(StEvent *event)
     zdcWestUA = zdc.adc(0) ;
     zdcEastUA = zdc.adc(4) ;
     zdcSumUA  = zdcEastUA+zdcWestUA ;
+    int hori = 1;
+    int vert = 0;
+    //SMD information
+    for(int i=0;i<8;i++){
+      zdcSMDEastH[i] = trigData->zdcSMD(east, hori, i+1);
+      zdcSMDEastV[i] = trigData->zdcSMD(east, vert, i+1);
+      zdcSMDWestH[i] = trigData->zdcSMD(west, hori, i+1);
+      zdcSMDWestV[i] = trigData->zdcSMD(west, vert, i+1);
+    }
+
   }
   else {
     zdcWestUA = 0 ;
@@ -178,8 +200,15 @@ Int_t StPeCTrigger::process(StEvent *event)
     zdcWest = 0 ;
     zdcEast = 0 ;
     zdcSum  = 0 ;
+
+    for(int i=0;i<8;i++){
+      zdcSMDEastH[i] = 0;
+      zdcSMDEastV[i] = 0;
+      zdcSMDWestH[i] = 0;
+      zdcSMDWestV[i] = 0;
+    }
   }
-//   if(ttid->isTrigger(260002))LOG_INFO << "StPeCTrigger::ZDC West East ---------- " <<zdcWestUA <<" ---- "<<zdcEastUA<< endm;
+
 //
 //   MWC
 //
@@ -287,8 +316,15 @@ Int_t StPeCTrigger::process(StEvent *event)
 //     bbcTacWest=bbc.tdcEarliestWest();
 //     cout<<"just before using triData "<<endl;
     if(trigData){
-      bbcTacEast = trigData->bbcEarliestTDC(east);  
-      bbcTacWest = trigData->bbcEarliestTDC(west);  
+      bbcTacEast = trigData->bbcEarliestTDC(east);
+      bbcTacWest = trigData->bbcEarliestTDC(west); 
+      bbcTimeDiff = trigData->bbcTimeDifference();
+      for(int i=0;i<36;i++){
+	bbcTDCEast[i] = trigData->bbcTDC(east, i+1);
+	bbcTDCWest[i] = trigData->bbcTDC(west, i+1);
+	bbcADCEast[i] = trigData->bbcADC(east, i+1);
+	bbcADCWest[i] = trigData->bbcADC(west, i+1);
+      } 
     }
 //     cout<<"after use trigData"<<endl;
 
@@ -304,7 +340,12 @@ Int_t StPeCTrigger::process(StEvent *event)
     bbcNHitWestLg=0;
 
     bbcTacEast=0;
-    bbcTacWest=0;  
+    bbcTacWest=0;
+
+    for(int i=0;i<36;i++){
+      bbcTDCEast[i] = 0;
+      bbcTDCWest[i] = 0;
+    }  
   }
 //   if(ttid->isTrigger(260002)){
 //     LOG_INFO << "StPeCTrigger::BBC West East ---------- " <<bbcAdcSumWestSm<<" -- "<<bbcAdcSumWestLg<<" --- "<< bbcAdcSumEastSm<<" -- "<<bbcAdcSumEastLg<< endm; 
@@ -368,13 +409,16 @@ Int_t StPeCTrigger::process(StEvent *event)
 
   }
 
-  return 0 ;
+  return trg_3000 ;
 }
 
 
 Int_t StPeCTrigger::process(StMuDst* mudst)
 {
   unsigned int i,j;
+  //make sure trg_2001 is reset before possible use
+  trg_2001 = 0;
+  trg_3001 = 0;
 
   // get trigger word 
   tw = mudst->event()->l0Trigger().triggerWord();
@@ -385,15 +429,21 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
   const StTriggerData * trigData;
   trigData =  const_cast< StTriggerData *> (mudst->event()->triggerData());
 
-    unsigned short lastDSM1 = trigData->lastDSM(1);
-
   if(!trigData) {
     LOG_ERROR << "StTriggerData not available in StMuDst "<< endm;
   }
+    lastDSM0 = trigData->lastDSM(0);
+    lastDSM1 = trigData->lastDSM(1);
+  // get run number
+  //
+
+   runN = mudst->event()->eventInfo().runId(); 
+   LOG_INFO << "StPeCTrigger Run ID: " << runN << endm;
 
   // get triggger ids
   vector<unsigned int> triggerIds;
   StMuTriggerIdCollection  tt=mudst->event()->triggerIdCollection();
+
   StTriggerId ttid;
   if(&tt) {
     ttid= tt.nominal();
@@ -404,12 +454,53 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
 //     for(iiter=triggerIds.begin(); iiter!=triggerIds.end(); iiter++) {
 //     }
   
-    trg_3000     =ttid.isTrigger(260022);  //ZDC_monitor
-    trg_3001     =ttid.isTrigger(260750);  //UPC_Main
-//     LOG_INFO << "StPeCTrigger::value of trg_3000 ---------- " <<trg_3000<< endm;
-    trg_2001 = trigData->lastDSM(0);
-    trg_2004 = trigData->lastDSM(1);
+//     trg_3000     =ttid.isTrigger(260022);  //ZDC_monitor  run10  this two lines are used for trigger efficiency study Comment the 8 lines that follow
+//     trg_3001     =ttid.isTrigger(260750);  //UPC_Main     run10
+
+    if(runN>11011035 && runN<= 11039028) trg_3000     =ttid.isTrigger(1);       //run10 UPC Main unofficial
+    if(runN>11011035 && runN<= 11039028) trg_3001     =ttid.isTrigger(11);      //run10 UPC Topo not present
+    if(runN>11039028 && runN<= 11077018) trg_3000     =ttid.isTrigger(260750);  //run10 UPC Main official 260750
+    if(runN>11050046 && runN<= 11077018) trg_3001     =ttid.isTrigger(1);      //run10 UPC Topo was never official
+
+    if(runN>12130030 && runN<= 12146002) trg_3000     =ttid.isTrigger(4);       //run11 UPC Main unofficial
+    if(runN>12130030 && runN<= 12179050) trg_3001     =ttid.isTrigger(11);      //run11 UPC Topo was never official
+    if(runN>12146002 && runN<= 12152016) trg_3000     =ttid.isTrigger(350007);  //run11 UPC Main official
+    if(runN>12152016 && runN<= 12179050) trg_3000     =ttid.isTrigger(350017);  //run11 UPC Main official
+
+    if(runN>13116029 && runN<= 13116046) trg_3000     =ttid.isTrigger(1);       //run12 UU UPC Main unofficial
+    if(runN>13110010 && runN<= 13116042) trg_3001     =ttid.isTrigger(2);       //run12 UU UPC Topo
+    if(runN>13121046 && runN<= 13125024) trg_3001     =ttid.isTrigger(1);       //run12 UU UPC Topo
+    if(runN>13125024 && runN<= 13130033) trg_3001     =ttid.isTrigger(400604);  //run12 UU UPC Topo
+    if(runN>13131006 && runN<= 13136015) trg_3001     =ttid.isTrigger(400614);      //run12 UU UPC Topo
+    if(runN>13116047 && runN<= 13117027) trg_3000     =ttid.isTrigger(400601);  //run12 UU UPC Main official
+    if(runN>13117027 && runN<= 13117036) trg_3000     =ttid.isTrigger(400611);  //run12 UU UPC Main official
+    if(runN>13117036 && runN<= 13118017) trg_3000     =ttid.isTrigger(400621);  //run12 UU UPC Main official
+    if(runN>13118017 && runN<= 13130033) trg_3000     =ttid.isTrigger(400631);  //run12 UU UPC Main official
+    if(runN>13131006 && runN<= 13136015) trg_3000     =ttid.isTrigger(400641);  //run12 UU UPC Main official
+
+
+
+//     LOG_INFO << "StPeCTrigger::value of trg_3000 ZDC_monitor ---------- " <<trg_3000<< endm;
+//     LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Main ---------- " <<trg_3001<< endm;
+    LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_Main ---------- " <<trg_3000<< endm;
+    LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Topo ---------- " <<trg_3001<< endm;
     
+
+    lastDSM0 = trigData->lastDSM(0);
+    lastDSM1 = trigData->lastDSM(1);
+
+//     cout<<" lastDSM 0 "<<lastDSM0<<" lastDSM1 "<<lastDSM1<<endl;
+
+    if(runN==14116064){
+      trg_3000 =  ttid.isTrigger(1);
+      trg_3001 =  ttid.isTrigger(2);
+      trg_3001 =  ttid.isTrigger(4);
+    }
+    if(runN>14137093){
+      trg_3000 =  ttid.isTrigger(3);
+      trg_3001 =  ttid.isTrigger(430104);
+      trg_3001 =  ttid.isTrigger(430605);
+    }
 
     }
   }
@@ -425,7 +516,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
     int bit96 = trigData->lastDSM(96/16) & (1<<(96 %16)) ? 1 : 0;
 
   if(!bit5 && bit6 && !bit17 && !bit18 && bit22 && bit23 && bit24 && bit25 && !bit96) {
-    // trg_2001 = 1;
+    trg_2001 = 1;
 //     cout<<"UPC_Main set "<<endl;
 //     cout<<"UPC_Main bits --- "<<bit5<<"        "<<bit6<<"       "<<bit17<<"       "<<bit18<<"   "<<bit22<<"        "<<bit23<<"       "<<bit24<<"       "<<bit25<<"    "<<bit96<<endl;
   }
@@ -461,41 +552,13 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
     int hori = 1;
     int vert = 0;
     //SMD information
-    zdcSMDEastH0 = trigData->zdcSMD(east, hori, 1);
-    zdcSMDEastH1 = trigData->zdcSMD(east, hori, 2);
-    zdcSMDEastH2 = trigData->zdcSMD(east, hori, 3);
-    zdcSMDEastH3 = trigData->zdcSMD(east, hori, 4);
-    zdcSMDEastH4 = trigData->zdcSMD(east, hori, 5);
-    zdcSMDEastH5 = trigData->zdcSMD(east, hori, 6);
-    zdcSMDEastH6 = trigData->zdcSMD(east, hori, 7);
-    zdcSMDEastH7 = trigData->zdcSMD(east, hori, 8);
 
-    zdcSMDEastV0 = trigData->zdcSMD(east, vert, 1);
-    zdcSMDEastV1 = trigData->zdcSMD(east, vert, 2);
-    zdcSMDEastV2 = trigData->zdcSMD(east, vert, 3);
-    zdcSMDEastV3 = trigData->zdcSMD(east, vert, 4);
-    zdcSMDEastV4 = trigData->zdcSMD(east, vert, 5);
-    zdcSMDEastV5 = trigData->zdcSMD(east, vert, 6);
-    zdcSMDEastV6 = trigData->zdcSMD(east, vert, 7);
-    zdcSMDEastV7 = trigData->zdcSMD(east, vert, 8);
-
-    zdcSMDWestH0 = trigData->zdcSMD(west, hori, 1);
-    zdcSMDWestH1 = trigData->zdcSMD(west, hori, 2);
-    zdcSMDWestH2 = trigData->zdcSMD(west, hori, 3);
-    zdcSMDWestH3 = trigData->zdcSMD(west, hori, 4);
-    zdcSMDWestH4 = trigData->zdcSMD(west, hori, 5);
-    zdcSMDWestH5 = trigData->zdcSMD(west, hori, 6);
-    zdcSMDWestH6 = trigData->zdcSMD(west, hori, 7);
-    zdcSMDWestH7 = trigData->zdcSMD(west, hori, 8);
-
-    zdcSMDWestV0 = trigData->zdcSMD(west, vert, 1);
-    zdcSMDWestV1 = trigData->zdcSMD(west, vert, 2);
-    zdcSMDWestV2 = trigData->zdcSMD(west, vert, 3);
-    zdcSMDWestV3 = trigData->zdcSMD(west, vert, 4);
-    zdcSMDWestV4 = trigData->zdcSMD(west, vert, 5);
-    zdcSMDWestV5 = trigData->zdcSMD(west, vert, 6);
-    zdcSMDWestV6 = trigData->zdcSMD(west, vert, 7);
-    zdcSMDWestV7 = trigData->zdcSMD(west, vert, 8);
+    for(int i=0;i<8;i++){
+      zdcSMDEastH[i] = trigData->zdcSMD(east, hori, i+1);
+      zdcSMDEastV[i] = trigData->zdcSMD(east, vert, i+1);
+      zdcSMDWestH[i] = trigData->zdcSMD(west, hori, i+1);
+      zdcSMDWestV[i] = trigData->zdcSMD(west, vert, i+1);
+    }
 
     zdcSMDHighestStripEastH = trigData->zdcSMDHighestStrip(east, hori);
     zdcSMDHighestStripEastV = trigData->zdcSMDHighestStrip(east, vert);
@@ -515,41 +578,13 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
     zdcEastTDC = 0;
     zdcTimeDifference  = 0;
 
-    zdcSMDEastH0 = 0;
-    zdcSMDEastH1 = 0;
-    zdcSMDEastH2 = 0;
-    zdcSMDEastH3 = 0;
-    zdcSMDEastH4 = 0;
-    zdcSMDEastH5 = 0;
-    zdcSMDEastH6 = 0;
-    zdcSMDEastH7 = 0;
+    for(int i=0;i<8;i++){
+      zdcSMDEastH[i] = 0;
+      zdcSMDEastV[i] = 0;
+      zdcSMDWestH[i] = 0;
+      zdcSMDWestV[i] = 0;
+    }
 
-    zdcSMDEastV0 = 0;
-    zdcSMDEastV1 = 0;
-    zdcSMDEastV2 = 0;
-    zdcSMDEastV3 = 0;
-    zdcSMDEastV4 = 0;
-    zdcSMDEastV5 = 0;
-    zdcSMDEastV6 = 0;
-    zdcSMDEastV7 = 0;
-
-    zdcSMDWestH0 = 0;
-    zdcSMDWestH1 = 0;
-    zdcSMDWestH2 = 0;
-    zdcSMDWestH3 = 0;
-    zdcSMDWestH4 = 0;
-    zdcSMDWestH5 = 0;
-    zdcSMDWestH6 = 0;
-    zdcSMDWestH7 = 0;
-
-    zdcSMDWestV0 = 0;
-    zdcSMDWestV1 = 0;
-    zdcSMDWestV2 = 0;
-    zdcSMDWestV3 = 0;
-    zdcSMDWestV4 = 0;
-    zdcSMDWestV5 = 0;
-    zdcSMDWestV6 = 0;
-    zdcSMDWestV7 = 0;
 
     zdcSMDHighestStripEastH = 0;
     zdcSMDHighestStripEastV = 0;
@@ -634,48 +669,17 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
 //     bbcNHitEastLg=bbc.nHitEastLarge();;
 //     bbcNHitWestLg=bbc.nHitWestLarge();;
  
-//     bbcTacEast=bbc.tdcEarliestEast();
-//     bbcTacWest=bbc.tdcEarliestWest();  
-//
-// mix StTriggerData information here, will fix some day
-//
-    bbcADCEastSmall_1  = trigData->bbcADC(east, 1);
-    bbcADCEastSmall_2  = trigData->bbcADC(east, 2);
-    bbcADCEastSmall_3  = trigData->bbcADC(east, 3);
-    bbcADCEastSmall_4  = trigData->bbcADC(east, 4);
-    bbcADCEastSmall_5  = trigData->bbcADC(east, 5);
-    bbcADCEastSmall_6  = trigData->bbcADC(east, 6);
-    bbcADCEastSmall_7  = trigData->bbcADC(east, 7);
-    bbcADCEastSmall_8  = trigData->bbcADC(east, 8);
-    bbcADCEastSmall_9  = trigData->bbcADC(east, 9);
-    bbcADCEastSmall_10 = trigData->bbcADC(east, 10);
-    bbcADCEastSmall_11 = trigData->bbcADC(east, 11);
-    bbcADCEastSmall_12 = trigData->bbcADC(east, 12);
-    bbcADCEastSmall_13 = trigData->bbcADC(east, 13);
-    bbcADCEastSmall_14 = trigData->bbcADC(east, 14);
-    bbcADCEastSmall_15 = trigData->bbcADC(east, 15);
-    bbcADCEastSmall_16 = trigData->bbcADC(east, 16);
-    bbcADCEastSmall_17 = trigData->bbcADC(east, 17);
-    bbcADCEastSmall_18 = trigData->bbcADC(east, 18);
+    bbcTacEast = trigData->bbcEarliestTDC(east);
+    bbcTacWest = trigData->bbcEarliestTDC(west); 
+    bbcTimeDiff = trigData->bbcTimeDifference();
+    for(int i=0;i<36;i++){
+      bbcTDCEast[i] = trigData->bbcTDC(east, i+1);
+      bbcTDCWest[i] = trigData->bbcTDC(west, i+1);
+      bbcADCEast[i] = trigData->bbcADC(east, i+1);
+      bbcADCWest[i] = trigData->bbcADC(west, i+1);
+    }
 
-    bbcADCWestSmall_1  = trigData->bbcADC(west, 1);
-    bbcADCWestSmall_2  = trigData->bbcADC(west, 2);
-    bbcADCWestSmall_3  = trigData->bbcADC(west, 3);
-    bbcADCWestSmall_4  = trigData->bbcADC(west, 4);
-    bbcADCWestSmall_5  = trigData->bbcADC(west, 5);
-    bbcADCWestSmall_6  = trigData->bbcADC(west, 6);
-    bbcADCWestSmall_7  = trigData->bbcADC(west, 7);
-    bbcADCWestSmall_8  = trigData->bbcADC(west, 8);
-    bbcADCWestSmall_9  = trigData->bbcADC(west, 9);
-    bbcADCWestSmall_10 = trigData->bbcADC(west, 10);
-    bbcADCWestSmall_11 = trigData->bbcADC(west, 11);
-    bbcADCWestSmall_12 = trigData->bbcADC(west, 12);
-    bbcADCWestSmall_13 = trigData->bbcADC(west, 13);
-    bbcADCWestSmall_14 = trigData->bbcADC(west, 14);
-    bbcADCWestSmall_15 = trigData->bbcADC(west, 15);
-    bbcADCWestSmall_16 = trigData->bbcADC(west, 16);
-    bbcADCWestSmall_17 = trigData->bbcADC(west, 17);
-    bbcADCWestSmall_18 = trigData->bbcADC(west, 18);
+
 
   } else {
     bbcAdcSumEastSm=0;
@@ -690,44 +694,14 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
     
     bbcTacEast=0;
     bbcTacWest=0;
+    bbcTimeDiff = 0;
 
-    bbcADCEastSmall_1 =0;
-    bbcADCEastSmall_2 =0;
-    bbcADCEastSmall_3 =0;
-    bbcADCEastSmall_4 =0;
-    bbcADCEastSmall_5 =0;
-    bbcADCEastSmall_6 =0;
-    bbcADCEastSmall_7 =0;
-    bbcADCEastSmall_8 =0;
-    bbcADCEastSmall_9 =0;
-    bbcADCEastSmall_10 =0;
-    bbcADCEastSmall_11 =0;
-    bbcADCEastSmall_12 =0;
-    bbcADCEastSmall_13 =0;
-    bbcADCEastSmall_14 =0;
-    bbcADCEastSmall_15 =0;
-    bbcADCEastSmall_16 =0;
-    bbcADCEastSmall_17 =0;
-    bbcADCEastSmall_18 =0;
+    for(int i=0;i<36;i++){
+      bbcTDCEast[i] = 0;
+      bbcTDCWest[i] = 0;
+    }
 
-    bbcADCWestSmall_1 =0;
-    bbcADCWestSmall_2 =0;
-    bbcADCWestSmall_3 =0;
-    bbcADCWestSmall_4 =0;
-    bbcADCWestSmall_5 =0;
-    bbcADCWestSmall_6 =0;
-    bbcADCWestSmall_7 =0;
-    bbcADCWestSmall_8 =0;
-    bbcADCWestSmall_9 =0;
-    bbcADCWestSmall_10 =0;
-    bbcADCWestSmall_11 =0;
-    bbcADCWestSmall_12 =0;
-    bbcADCWestSmall_13 =0;
-    bbcADCWestSmall_14 =0;
-    bbcADCWestSmall_15 =0;
-    bbcADCWestSmall_16 =0;
-    bbcADCWestSmall_17 =0;
-    bbcADCWestSmall_18 =0;
+
   
   }
   //
@@ -735,15 +709,18 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
   //
   unsigned short tofMult;
   tofMult = trigData->tofMultiplicity();
-  //  if(ttid.isTrigger(260022)){
-//     LOG_INFO << "StPeCTrigger::muDst ---TOF mult------- " <<tofMult<< endm;
-    nCtbHits =  mudst->numberOfBTofHit();;
-    //  }
+  nBtofTriggerHits = tofMult;
+  nBTOFhits =  mudst->numberOfBTofHit();;
+  
   double leadingT ;
   for(int itof=0;itof<tofMult;itof++) {
    StMuBTofHit * leading = mudst->btofHit(itof);    //->leadingEdgeTime(); 
    //leadingT = leading->leadingEdgeTime();
   }
+  //
+  // 1-MAY-2013  pass bunchId 
+  //
+  bunchId = trigData->bunchId7Bit();
 //
 //   Simulate l0
 //
@@ -765,5 +742,5 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
      printf ( "\n" ) ;
   }
 //   return 0 ; //standard return (unused)
-  return trg_3001 ; //to pass ZDC_monitor trigger selection 
+  return trg_3000 ; //to pass UPC_Main trigger selection 
 }
