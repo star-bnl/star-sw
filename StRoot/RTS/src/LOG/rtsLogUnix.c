@@ -105,6 +105,15 @@ int rtsLogAddFile(char *fname)
 }
 
 
+    char _g_fname[256];
+    char *jml_fname = NULL;
+    void rtsLogAddJmlFile (char *fname)
+    {
+	strcpy(_g_fname, fname);
+	jml_fname = _g_fname;
+    }
+
+
 int rtsLogUnix_v(const char *str, ...) 
 {
 	/* common to all threads */
@@ -292,6 +301,16 @@ int rtsLogUnix_v(const char *str, ...)
 		struct tm *tm = localtime(&t) ;
 
 		if(fdesc) fprintf(fdesc,"%02d:%02d:%02d: %s",tm->tm_hour,tm->tm_min,tm->tm_sec,(char*)buffer+4) ;
+	}
+
+	if(jml_fname) {
+		time_t t = time(0) ;
+		struct tm *tm = localtime(&t) ;
+
+		FILE *f = fopen(jml_fname, "a");
+		if(f) fprintf(f,"%02d:%02d:%02d: %s",tm->tm_hour,tm->tm_min,tm->tm_sec,(char*)buffer+4) ;
+		fclose(f);
+
 	}
 
 	return 0 ;

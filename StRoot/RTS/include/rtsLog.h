@@ -61,6 +61,9 @@ extern "C" {
 #define RTS_LOG_NET	1
 #define RTS_LOG_STDERR	2
 #define RTS_LOG_FILE	4
+#define RTS_LOG_JML     8
+
+void rtsLogAddJmlFile (char *fname);
 
 /* strings used */
 #define CRIT	"CRITICAL"	/* unmasked (5) */
