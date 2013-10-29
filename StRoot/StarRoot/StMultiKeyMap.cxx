@@ -55,7 +55,7 @@ double StMultiKeyMap::StMultiKeyMap::Quality()
   return mTop->Quality();
 }
 //______________________________________________________________________________
-int StMultiKeyMap::MakeTree()
+int StMultiKeyMap::MakeTree(int keepArray)
 {
    assert(!mTop);
    int nNodes = mArr.size();
@@ -65,6 +65,7 @@ int StMultiKeyMap::MakeTree()
    mTop =  mArr[0];
    for (int i=1;i<nNodes;i++) {mTop->Add(mArr[i]);}
 
+   if (keepArray) return nNodes;
 std::vector<StMultiKeyNode*> tmp(0);
    assert(nNodes == mTop->Size());
    mArr.swap(tmp);	//destroy internal array completely;
@@ -81,86 +82,6 @@ int StMultiKeyMap::Size() const
   if (mTop) return mTop->Size();
   else      return mArr.size();
 }
-//______________________________________________________________________________
-void StMultiKeyMap::Test()
-{
-printf("StMultiKeyMap::Test() started\n");
-   float rnd; 
-   int nEVTS=1000;
-   StMultiKeyMap map(1);
-   for (int i=0;i<nEVTS;i++) {
-     rnd = (i+1.)/nEVTS; 
-     map.Add(0,&rnd);
-   }
-   map.MakeTree();
-   double qa = map.Quality();
-   printf(" Quality of tree = %g\n\n",qa);
-   map.ls();
-
-   StMultiKeyMapIter iter(map.GetTop());
-   int n = 0;
-   float pre=0;
-
-printf("\n%d evts No bounds\n",nEVTS);
-   for (StMultiKeyNode *node=0;(node = *iter);++iter)
-   {
-     n++; rnd = node->GetKeys()[0];
-////     printf("%4d - %g \n",n,rnd);
-     assert(pre<=rnd);
-     pre = rnd;
-   }
-assert(n==nEVTS);
-printf("\nNo bounds OK, touched %d %d\n",iter.Touched()[0],iter.Touched()[1]);
-
-
-   float kMin=0.5,kMax=0.6;
-   iter.Set(map.GetTop(),&kMin,&kMax);
-   pre=0;n=0;
-   int nEst = int((nEVTS)*(kMax-kMin)+0.5);
-printf("\n%d ~evts bounds=%g %g\n",nEst,kMin,kMax);
-   for (StMultiKeyNode *node=0;(node = *iter);++iter)
-   {
-     n++; rnd = node->GetKeys()[0];
-////     printf("%4d - %g \n",n,rnd);
-     assert(pre<=rnd);
-     assert((kMin<=rnd) && (rnd < kMax));
-     pre = rnd;
-   }
-printf("\nGot %d. Bounds OK, Touched %d %d\n",n,iter.Touched()[0],iter.Touched()[1]);
-
-}
-//______________________________________________________________________________
-void StMultiKeyMap::Test2()
-{
-printf("StMultiKeyMap::Test2() started\n");
-   StMultiKeyMap map(4);
-   float key[4];
-   for (int ix=0;ix<100;ix+=10) {
-     key[0]=ix;key[1]=ix+10;
-     for (int iy=0;iy<200;iy+=10) {
-     key[2]=iy;key[3]=iy+10;
-     map.Add(0,key);
-   } }
-   map.MakeTree();
-   double qa = map.Quality();
-   printf(" Quality of tree = %g\n\n",qa);
-   map.ls();
-
-
-   float sel[4]={15,25,105,115};
-   StMultiKeyMapIter iter(map.GetTop(),sel,0);
-printf("\n4 ~evts \n");
-   int n = 0;
-   for (StMultiKeyNode *node=0;(node = *iter);++iter)
-   {
-     n++; 
-     const float *key = node->GetKeys();
-     printf("%4d - %g %g %g %g \n",n,key[0],key[1],key[2],key[3]);
-   }
-printf("\nGot %d. Bounds OK , Touched %d %d\n",n,iter.Touched()[0],iter.Touched()[1]);
-
-}
-
 //______________________________________________________________________________
 //______________________________________________________________________________
 StMultiKeyNode::StMultiKeyNode(int nKeys)
@@ -295,16 +216,15 @@ void StMultiKeyMapIter::Set(const StMultiKeyNode *node,const float *kMin,const f
 {
   mTouched[0]=0;mTouched[1]=0;
   mStk.resize(32);
-  mBoundsOn=(kMin && !kMax);	//MapTree is a tree of boundaries. 
   mNK = node->GetNKey();
   mKMin=0;mKMax=0;
   if (kMin) {
     mMinMax.resize(2*mNK);
     mKMin = &mMinMax[0];
-    mKMax  = (mBoundsOn) ? 0: mKMin+mNK;
+    mKMax  = mKMin+mNK;
     int sk = mNK*sizeof(mKMin[0]);
     memcpy(mKMin,kMin,sk);
-    if (mKMax) memcpy(mKMax,kMax,sk);
+    memcpy(mKMax,kMax,sk);
   }
   mLev = 0; mStk[0]=0;
   Down(node);
@@ -353,28 +273,14 @@ void StMultiKeyMapIter::SelfCheck()
 {
   const StMultiKeyNode *node = mStk[mLev];
   if (!node ) return;
-  if (!node->GetObj()) {++(*this); return;}
+//  if (!node->GetObj()) {++(*this); return;}
   if (!mKMin) return;
   const float *fk = node->GetKeys();
-  switch (mBoundsOn) {
-    case 0:
-      mTouched[1]++;
-      for (int k=0;k<mNK;k++) {  
-	if (mKMin[k]<=fk[k] && fk[k] < mKMax[k]) continue;
-	 ++(*this); return;
-      }
-    return;
-
-    case 1:
-      mTouched[1]++;
-      for (int k=0;k<mNK;k++) {  
-        float *lim = mKMin+(k&(-2));
-        switch (k&1) {
-          case 0: if (fk[k]>lim[1]) {++(*this); return;} break;
-          case 1: if (fk[k]<lim[0]) {++(*this); return;} break;
-        }//end switch
-      }//end for k
-    }//end boundOn switch 
+  mTouched[1]++;
+  for (int k=0;k<mNK;k++) {  
+    if (mKMin[k]<=fk[k] && fk[k] < mKMax[k]) continue;
+    ++(*this); return;
+  }
   return;
 }  
 //______________________________________________________________________________
@@ -382,48 +288,16 @@ int StMultiKeyMapIter::FilterLeft(const StMultiKeyNode *node) const
 {
   int   ik = node->GetIKey();
   float fk = node->GetKey();
-  assert(ik>=0);
-
-  switch (mBoundsOn) {
-  
-  case 0: //Normal case
-    if ( mKMin[ik]>fk) return 1; return 0;
-
-  case 1:
-    float *lim = mKMin+(ik&(-2));
-    switch(ik&1) {
-    
-      case 0: //key is a lower boundary
-        return 0; 
-	
-      case 1://key is a upper boundary
-        mTouched[0]++;
-        if (lim[0]>fk) return 1; return 0;
-    }//end ik switch
-  }//end bounds switch
+  if ( mKMin[ik]>fk) return 1;
   return 0;
 }
 //______________________________________________________________________________
 int StMultiKeyMapIter::FilterRite(const StMultiKeyNode *node) const
 {
   int ik = node->GetIKey();
-  assert(ik>=0);
   float fk = node->GetKey();
-  switch (mBoundsOn) {
-
-   case 0:   mTouched[0]++;
-             if (mKMax[ik]<fk) return 1; return 0;
-
-   case 1: float *lim = mKMin+(ik&(-2));
-    switch(ik&1) {
-    
-      case 0: //key is a lower boundary
-         mTouched[0]++; if (lim[1]<fk) return 1; return 0;
-	
-      case 1://key is a upper boundary
-        return 0;
-    }//end ik switch
-  }//end bounds switch
+  mTouched[0]++;
+  if (mKMax[ik]<fk) return 1;
   return 0;
 }
 //______________________________________________________________________________
@@ -439,3 +313,107 @@ void random_shuffle(std::vector<StMultiKeyNode*> &arr)
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
+//______________________________________________________________________________
+#include "TRandom.h"
+void StMultiKeyMap::Test()
+{
+printf("StMultiKeyMap::Test() started\n");
+   float rnd; 
+   int nEVTS=1000;
+   StMultiKeyMap map(1);
+   for (int i=0;i<nEVTS;i++) {
+     rnd = 1 - (i+1.)/nEVTS; 
+     map.Add(0,&rnd);
+   }
+   map.MakeTree();
+   map.ls();
+   double qa = map.Quality();
+   printf(" Quality of tree = %g\n\n",qa);
+
+   StMultiKeyMapIter iter(map.GetTop());
+   int n = 0;
+   float pre=0;
+
+printf("\n%d evts No bounds\n",nEVTS);
+   for (StMultiKeyNode *node=0;(node = *iter);++iter)
+   {
+     n++; rnd = node->GetKeys()[0];
+////     printf("%4d - %g \n",n,rnd);
+     assert(pre<=rnd);
+     pre = rnd;
+   }
+assert(n==nEVTS);
+printf("\nNo bounds OK, touched %d %d\n",iter.Touched()[0],iter.Touched()[1]);
+
+
+   float kMin=0.5,kMax=0.6;
+   iter.Set(map.GetTop(),&kMin,&kMax);
+   pre=0;n=0;
+   int nEst = int((nEVTS)*(kMax-kMin)+0.5);
+printf("\n%d ~evts bounds=%g %g\n",nEst,kMin,kMax);
+   for (StMultiKeyNode *node=0;(node = *iter);++iter)
+   {
+     n++; rnd = node->GetKeys()[0];
+////     printf("%4d - %g \n",n,rnd);
+     assert(pre<=rnd);
+     assert((kMin<=rnd) && (rnd < kMax));
+     pre = rnd;
+   }
+printf("\nGot %d. Bounds OK, Touched %d %d\n",n,iter.Touched()[0],iter.Touched()[1]);
+
+}
+//______________________________________________________________________________
+void StMultiKeyMap::Test2()
+{
+printf("StMultiKeyMap::Test2() started\n");
+   StMultiKeyMap map(4);
+   float key[4];
+   int nEvts = 10000;
+   for (int iEv=0;iEv<nEvts ;iEv++) {
+     for (int ik=0;ik<4;ik++) { key[ik]= gRandom->Rndm();}
+     map.Add((void*)1,key);
+   }  
+
+   map.MakeTree(1946);
+//   map.ls();
+   double qa = map.Quality();
+   printf(" Quality of tree = %g\n\n",qa);
+
+
+   float dow[4]={0,  0.1,0.2,0.3};
+   float upp[4]={0.2,0.3,0.4,0.5};
+   StMultiKeyMapIter iter(map.GetTop(),dow,upp);
+   double ev = nEvts;for (int i=0;i<4;i++){ev*=(upp[i]-dow[i]);};
+printf("\n%d ~evts \n",int(ev+0.5));
+ 
+   int nSel = 0;
+   for (StMultiKeyNode *node=0;(node = *iter);++iter)
+   {
+     nSel++; 
+//     const float *key = node->GetKeys();
+//     printf("%4d - %g %g %g %g \n",nSel,key[0],key[1],key[2],key[3]);
+   }
+   int nb = map.Size();
+   int nk = map.GetNKey();
+   StMultiKeyNode **nodes = map.GetArr();
+   int nMust=0;
+   for (int i=0;i<nb;i++) 
+   {
+     StMultiKeyNode *node = nodes[i];
+     const float *key = node->GetKeys();
+     int good = 0;
+     for (int j=0;j<nk;j++) {
+       good = 0;
+       if (key[j]< dow[j]) break;
+       if (key[j]>=upp[j]) break;
+       good = 1;
+     }
+     if (!good) continue;
+     nMust++;
+   }
+   map.Clear();
+printf("\nSelected  %d and must be %d\n",nSel,nMust);
+printf("\nGot %d. Bounds OK , Touched %d %d\n",nSel,iter.Touched()[0],iter.Touched()[1]);
+
+}
+
