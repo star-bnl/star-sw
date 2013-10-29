@@ -388,7 +388,8 @@ class Lxgbx {
 	pay->usec = tm.tv_usec;
 #endif
 
-	int detmask = grp2rts_mask(dets_in_run_mask);
+	//	int detmask = grp2rts_mask(dets_in_run_mask);
+	int detmask = dets_in_run_mask | (1<<TRG_ID);
 	pay->rtsDetMask = l2h32(detmask);    
 
 	return 0;

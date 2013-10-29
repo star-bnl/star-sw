@@ -681,85 +681,88 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
 
 int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, int *sticky)
 {
-  iovec iovec[MAX_SEND_IOVECS];
-  char _buff[(sizeof(SFS_File) + 40)*50];
-  char *b = _buff;
+    iovec iovec[MAX_SEND_IOVECS];
+    char _buff[(sizeof(SFS_File) + 40)*50];
+    char *b = _buff;
 
-  int i;
-  int vec=0;
+    int i;
+    int vec=0;
 
-  if(n > MAX_SEND_IOVECS) {
-    LOG(CRIT, "sending %d iovecs > than max=%d",n,MAX_SEND_IOVECS);
-  }
-
-//   if(!writevbuff) {
-//     writevbuff = (char *)malloc(64*100);
-//   }
-
-//   char *b = writevbuff;
-
-  for(i=0;i<n;i++) {   // each file...
-
-    LOG(DBG, "i=%d\n",i);
-
-    if(fsiovec[i].filename) {
-      SFS_File *file = (SFS_File *)b;
-      
-      memcpy(file->type, "FILE", 4);
-      file->byte_order = 0x04030201;
-      file->sz = fsiovec[i].len;
-      file->head_sz = seeksize(strlen(fsiovec[i].filename)+1) + sizeof(SFS_File) - 4;
-      file->attr = SFS_ATTR_NOCD;
-      if(sticky) {
-	if(sticky[i]) {
-	  file->attr |= SFS_ATTR_POPSTICKY;
-	}
-	if(sticky[i] < 0) {
-	  LOG(DBG, "%d %d",sticky[i], file->sz);
-	  file->sz = -(sticky[i]);
-	  LOG(DBG, "Set file->sz=%d",file->sz);
-	}
-      }
-      strcpy(file->name, fsiovec[i].filename);
-      
-
-      iovec[vec].iov_base = b;
-      iovec[vec].iov_len = file->head_sz;
-      LOG(DBG, "fn:   iovec[%d] name=%s: base=0x%x(0x%x) len=%d",
-	vec,fsiovec[i].filename,
-	iovec[vec].iov_base,
-	  
-	iovec[vec].iov_len);
-
-
-      vec++;
-   
-      b += file->head_sz;
+    if(n > MAX_SEND_IOVECS) {
+	LOG(CRIT, "sending %d iovecs > than max=%d",n,MAX_SEND_IOVECS);
     }
+
+    //   if(!writevbuff) {
+    //     writevbuff = (char *)malloc(64*100);
+    //   }
+
+    //   char *b = writevbuff;
+
+    for(i=0;i<n;i++) {   // each file...
+
+	LOG(DBG, "i=%d\n",i);
+
+	if(fsiovec[i].filename) {
+	    SFS_File *file = (SFS_File *)b;
+      
+	    memcpy(file->type, "FILE", 4);
+	    file->byte_order = 0x04030201;
+	    file->sz = fsiovec[i].len;
+	    file->head_sz = seeksize(strlen(fsiovec[i].filename)+1) + sizeof(SFS_File) - 4;
+	    file->attr = SFS_ATTR_NOCD;
+	    if(sticky) {
+		if(sticky[i]) {
+		    file->attr |= SFS_ATTR_POPSTICKY;
+		}
+		if(sticky[i] < 0) {
+		    LOG(DBG, "%d %d",sticky[i], file->sz);
+		    file->sz = -(sticky[i]);
+		    LOG(DBG, "Set file->sz=%d",file->sz);
+		}
+	    }
+	    strcpy(file->name, fsiovec[i].filename);
+      
+
+	    iovec[vec].iov_base = b;
+	    iovec[vec].iov_len = file->head_sz;
+	    LOG(DBG, "fn:   iovec[%d] name=%s 0x%x: base=0x%x len=%d",
+		vec,
+		fsiovec[i].filename,
+		fsiovec[i].filename,
+		iovec[vec].iov_base,
+	  	iovec[vec].iov_len);
+
+
+	    vec++;
+   
+	    b += file->head_sz;
+	}
      
-    iovec[vec].iov_base = fsiovec[i].buff;
-    iovec[vec].iov_len = seeksize(fsiovec[i].len);
+	iovec[vec].iov_base = fsiovec[i].buff;
+	iovec[vec].iov_len = seeksize(fsiovec[i].len);
 
-    LOG(DBG, "iovec[%d] name=%s: base=0x%x len=%d",
-	vec,fsiovec[vec].filename,
-	iovec[vec].iov_base,
-	iovec[vec].iov_len);
+	LOG(DBG, "iovec[%d] name=%s 0x%x: base=0x%x len=%d",
+	    vec,
+	    fsiovec[vec].filename,
+	    fsiovec[vec].filename,
+	    iovec[vec].iov_base,
+	    iovec[vec].iov_len);
 
-    vec++;
+	vec++;
 
  
-  }
+    }
 
-  // we need this check when writing over ethernet!
-  int all_size = 0 ;
-  for(int i=0;i<vec;i++) {
+    // we need this check when writing over ethernet!
+    int all_size = 0 ;
+    for(int i=0;i<vec;i++) {
 	all_size += iovec[i].iov_len ;
-  }
+    }
 
-  // This can not be interrupted, except by hard error!
-  int ret = writev_call_retry(wfile.fd, iovec, vec);
+    // This can not be interrupted, except by hard error!
+    int ret = writev_call_retry(wfile.fd, iovec, vec);
 
-  return ret;
+    return ret;
 }
 
 sfs_index::sfs_index() : fs_index() 
