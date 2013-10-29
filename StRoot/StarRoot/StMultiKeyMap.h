@@ -13,12 +13,14 @@ StMultiKeyMap(int nKeys);
 void Clear(const char *opt="");
 void Add(const void *obj,const float  *keys);
 void Add(const void *obj,const double *keys);
-const StMultiKeyNode *GetTop() const {return mTop;}
-      StMultiKeyNode *GetTop()       {return mTop;}
+const StMultiKeyNode *GetTop() const 	{return mTop;}
+      StMultiKeyNode *GetTop()       	{return mTop;}
 double Quality();
-   int MakeTree();
+   int MakeTree(int keepArray=0);
    int ls(const char *file="") const;
    int Size() const;
+   int GetNKey() const { return mNKey;} 
+StMultiKeyNode** GetArr() 		{return &mArr[0];}
 // statics
 static void Test();
 static void Test2();
@@ -53,7 +55,7 @@ virtual       int    ls(const char *file="") const;
         int    GetNumb(int way) const { return mNumb[way];}
         int    Size() const    { return mNumb[0]+mNumb[1]+1;}
         void  *GetObj () const { return (void*)mObj ;}
-void Clear();
+        void Clear();
 static int GetNInst();
 //	Non user functions
 protected:
@@ -98,7 +100,6 @@ void SelfCheck();
 int FilterLeft(const StMultiKeyNode *node) const;
 int FilterRite(const StMultiKeyNode *node) const;
 protected:
-int mBoundsOn;
 mutable int mTouched[2];
 std::vector<float> mMinMax;
 float *mKMin;
