@@ -38,6 +38,7 @@
 #include <DAQ_FGT/daq_fgt.h>	//includes GMT & IST
 #include <DAQ_MTD/daq_mtd.h>
 #include <DAQ_PXL/daq_pxl.h>
+#include <DAQ_SST/daq_sst.h>
 
 // I wrapped more complicated detectors inside their own functions
 // for this example
@@ -63,6 +64,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which) ;
 static int mtd_doer(daqReader *rdr, const char *do_print) ;
 static int tinfo_doer(daqReader *rdr, const char *do_print);
 static int pxl_doer(daqReader *rdr, const char *do_print) ;
+static int sst_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
 
@@ -302,6 +304,9 @@ int main(int argc, char *argv[])
 		/*************************** PXL **************************/
 		if(pxl_doer(evp,print_det)) LOG(INFO,"PXL found") ;
 		
+		/*************************** SST **************************/
+		if(sst_doer(evp,print_det)) LOG(INFO,"SST found") ;
+		
 
 
 
@@ -517,9 +522,6 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 		dd = rdr->det("tpx")->get("adc",s) ;
 		if(dd) 	{
-
-			s_mask[dd->sec-1]=1 ;
-
 			while(dd->iterate()) {
 				found = 1 ;	// any sector...
 				sec_found = 1 ;
@@ -541,13 +543,20 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			}
 		
 
-			if(sec_found && do_print) {
-				for(int row=0;row<=45;row++) {
-					printf("+sector %2d, row %2d: pixels %d\n",s,row,pixel_count[row]) ;
+			if(sec_found) {
+
+				s_mask[dd->sec-1]=1 ;
+
+				if(do_print) {
+
+					for(int row=0;row<=45;row++) {
+						printf("+sector %2d, row %2d: pixels %d\n",s,row,pixel_count[row]) ;
+					}
 				}
 			}
 		}
 
+		LOG(DBG,"Doing TPX get CLD, s %d",s) ;
 
 		dd = rdr->det("tpx")->get("cld",s) ;
 		while(dd && dd->iterate()) {
@@ -1550,6 +1559,45 @@ static int pxl_doer(daqReader *rdr, const char *do_print)
 
 			if(do_print) {
 				printf("PXL RAW: Sector %d, RDO %d: %d bytes (%d words)\n",dd->sec,dd->rdo,dd->ncontent,dd->ncontent/4) ;
+				// dump a few
+				int cou = dd->ncontent/4 ;
+
+				if(cou > 30) cou = 30 ;
+
+				for(int i=0;i<cou;i++) {
+					printf(" %2d: 0x%08X\n",i,d[i]) ;
+				}
+			}
+
+		}
+	}
+
+
+
+	return found ;
+}
+
+static int sst_doer(daqReader *rdr, const char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"sst")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	// right now only the "raw" pointer is available/known
+	dd = rdr->det("sst")->get("raw") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			// point to the start of the DDL raw data
+			u_int *d = (u_int *) dd->Void ;	
+
+
+			if(do_print) {
+				printf("SST RAW: Sector %d, RDO %d: %d bytes (%d words)\n",dd->sec,dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few
 				int cou = dd->ncontent/4 ;
 
