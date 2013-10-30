@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- * $Id: StVpdTriggerDetector.cxx,v 2.6 2007/04/10 20:13:41 ullrich Exp $
+ * $Id: StVpdTriggerDetector.cxx,v 2.7 2013/10/30 15:47:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
- *
+ * 
  ***************************************************************************
  *
  * $Log: StVpdTriggerDetector.cxx,v $
+ * Revision 2.7  2013/10/30 15:47:16  ullrich
+ * Added ADCmxq(), TDCmxq() and referring data member (WJL).
+ *
  * Revision 2.6  2007/04/10 20:13:41  ullrich
  * Fixed bug in array subscript (Akio).
  *
@@ -38,20 +41,23 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.6 2007/04/10 20:13:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StVpdTriggerDetector.cxx,v 2.7 2013/10/30 15:47:16 ullrich Exp $";
 
 ClassImp(StVpdTriggerDetector)
 
 StVpdTriggerDetector::StVpdTriggerDetector()
 {
-    memset(*mADC,0,mMaxVpdCounter*sizeof(short));
-    memset(*mTDC,0,mMaxVpdCounter*sizeof(short));
+    memset(*mADC,0,mMaxVpdCounter*sizeof(unsigned short));
+    memset(*mTDC,0,mMaxVpdCounter*sizeof(unsigned short));
+    memset(*mADCmxq,0,mMaxVpdCounter*sizeof(unsigned short));		//WJL
+    memset(*mTDCmxq,0,mMaxVpdCounter*sizeof(unsigned short));		//WJL
     //fill_n(mADC, static_cast<short>(mMaxVpdCounter), 0);
     //fill_n(mTDC, static_cast<short>(mMaxVpdCounter), 0);
     //fill_n(mEarliestTDC, 2, 0);
     mEarliestTDC[0]=0;
     mEarliestTDC[1]=0;
     mTimeDifference = 0;
+    mYear = 0;
 }
 
 StVpdTriggerDetector::StVpdTriggerDetector(const dst_TrgDet_st&)
@@ -65,12 +71,23 @@ StVpdTriggerDetector::StVpdTriggerDetector(const StTriggerData& t)
     int i;
     mYear = t.year();
     if (mYear<2007) return;
-    
     for (i=0; i<mMaxVpdCounter; i++){
-	mADC[east][i] = t.vpdADC(east, i+1);
-	mTDC[east][i] = t.vpdTDC(east, i+1);
-	mADC[west][i] = t.vpdADC(west, i+1);
-	mTDC[west][i] = t.vpdTDC(west, i+1);
+		mADC[east][i] = t.vpdADC(east, i+1);
+		mTDC[east][i] = t.vpdTDC(east, i+1);
+		mADC[west][i] = t.vpdADC(west, i+1);
+		mTDC[west][i] = t.vpdTDC(west, i+1);
+		mADCmxq[east][i] = t.vpdADCHighThr(east, i+1);		//WJL
+		mTDCmxq[east][i] = t.vpdTDCHighThr(east, i+1);		//WJL
+		mADCmxq[west][i] = t.vpdADCHighThr(west, i+1);		//WJL
+		mTDCmxq[west][i] = t.vpdTDCHighThr(west, i+1);		//WJL
+		//
+		//LOG_INFO<<"WJL... "<<i
+		//	<<" ADCe "<<mADC[east][i]<<" "<<mADCmxq[east][i]
+		//	<<" TDCe "<<mTDC[east][i]<<" "<<mTDCmxq[east][i]
+		//	<<" ADCw "<<mADC[west][i]<<" "<<mADCmxq[west][i]
+		//	<<" TDCw "<<mTDC[west][i]<<" "<<mTDCmxq[west][i]
+		//	<<endm;
+		//
     }
     mEarliestTDC[east] = t.vpdEarliestTDC(east);
     mEarliestTDC[west] = t.vpdEarliestTDC(west);
@@ -119,5 +136,31 @@ StVpdTriggerDetector::setTDC(StBeamDirection eastwest, unsigned int i, unsigned 
 {
     if (i <= mMaxVpdCounter && i!=0)
         mTDC[eastwest][i-1] = v;
+}
+
+unsigned short StVpdTriggerDetector::ADCmxq(StBeamDirection eastwest, unsigned int i) const 	//WJL
+{
+    if (i <= mMaxVpdCounter && i!=0)
+        return mADCmxq[eastwest][i-1];
+    else
+        return 0;
+}
+unsigned short StVpdTriggerDetector::TDCmxq(StBeamDirection eastwest, unsigned int i) const 	//WJL
+{
+    if (i <= mMaxVpdCounter && i!=0)
+        return mTDCmxq[eastwest][i-1];
+    else
+        return 0;
+}
+void StVpdTriggerDetector::setADCmxq(StBeamDirection eastwest, unsigned int i, unsigned short v) 	//WJL
+{
+    if (i <= mMaxVpdCounter && i!=0)
+        mADCmxq[eastwest][i-1] = v;
+}
+
+void StVpdTriggerDetector::setTDCmxq(StBeamDirection eastwest, unsigned int i, unsigned short v) 	//WJL
+{
+    if (i <= mMaxVpdCounter && i!=0)
+        mTDCmxq[eastwest][i-1] = v;
 }
 
