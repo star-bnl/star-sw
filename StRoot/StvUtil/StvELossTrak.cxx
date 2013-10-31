@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.4 2013/07/11 01:16:16 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.5 2013/10/31 22:11:10 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -13,6 +13,9 @@ static double gsigma2(double ZoverA,double DENS,double CHARGE2
                      ,double AMASS ,double BET2,double STEP  );
 static double gdrelx (double A     ,double Z   ,double DENS ,double T,double HMASS);
 
+static const double kPiMass=0.13956995;
+static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
+static const double kMaxP = 1000,kMaxE = sqrt(kMaxP*kMaxP+kPiMass*kPiMass);
 ClassImp(StvELossTrak)
 
 //_____________________________________________________________________________
@@ -39,7 +42,9 @@ void StvELossTrak::Set(double A, double Z,    double dens, double x0
 
   if (p<=0 || fabs(fP-p)<1e-6) return;
 
-  fP = p; if (fP>1e6) fP=1e6;
+  fP = p; 
+  if (fP>kMaxP) fP=kMaxP;
+  if (fP<kMinP) fP=kMinP;
   fdEdX=0;fdEdXErr2=0;
   double p2 = fP*fP,m2 = fM*fM;
   fE = sqrt(p2+m2);
@@ -109,7 +114,7 @@ double StvELossTrak::GetOrt2() const
 //_____________________________________________________________________________
 double StvELossTrak::dPP() const	
 {
- return fTotELoss*fE/(fP*fP);
+ return fTotELoss*fE/(fP*fP)/fTotLen;
 }
 //_____________________________________________________________________________
 double StvELossTrak::dPPErr2() const	
