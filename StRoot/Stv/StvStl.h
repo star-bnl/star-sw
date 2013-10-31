@@ -16,6 +16,7 @@ StvHits &operator+=(      StvHit  *add)		{push_back(add);return *this;}
 StvHits &operator+=(const StvHits &add);
 StvHits &operator+=(const std::vector<void*> &add);
 void unused();
+void Print(const char *txt="");
 };
 class StvConstHits : public std::vector<const StvHit*>
 {
