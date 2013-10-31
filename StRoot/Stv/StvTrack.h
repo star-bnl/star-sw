@@ -63,6 +63,7 @@ double GetRes() const;		// Average residual
   void SetFlag(int flag) 	{mFlag = flag;}
    int GetFlag() const   	{return mFlag;}
    int GetId()   const   	{return mId  ;}
+  void AddId(int info)      	{mId+=1000000*info;}
 
   void SetPrimary(int iprim) 	{mPrimary = iprim;}
    int IsPrimary() const 	{return mPrimary ;}
