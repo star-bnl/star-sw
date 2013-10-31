@@ -1,5 +1,8 @@
 #include "StvSeedFinder.h"
 #include "TSystem.h"
+#include "TVector3.h"
+#include "TSystem.h"
+#include "StvUtil/StvDebug.h"
 #include "StvDraw.h"
 #include "StvHit.h"
 #include "StvUtil/StvHitErrCalculator.h"
@@ -8,7 +11,7 @@
 
 //Constants for THelixFitter (Approx)
 static const double kBAD_XI2cm2 = 0.3*0.3	// max Xi2 in cm**2 without errs
-                  , kBAD_XI2    = 4.0*4.0;	// max Xi2 (with errs)
+                  , kBAD_XI2    = 8;		// max Xi2 (with errs)
 const double BAD_RHO=0.1;
 
 ClassImp(StvSeedFinder)
@@ -123,4 +126,57 @@ void StvSeedFinders::Reset()
 {
   for (int i=0;i<(int)size();i++) {(*this)[i]->Reset();}
 }
+//_____________________________________________________________________________
+void StvSeedFinder::FeedBack(int success)
+{
+TVector3 dbSeed(fHelix.Dir());
+double seedEta = dbSeed.Eta(); 
+double mi,ma;
+   KNNMiMax(mi,ma);
+   if (success==0) {
+     StvDebug::Count("BaddSeedXi2",fXi2[1]);
+     StvDebug::Count("BaddSeedEta",seedEta);
+     StvDebug::Count("BaddMinKnn",mi);
+     StvDebug::Count("BaddMaxKnn",ma);
+     StvDebug::Count("BaddMa:MiKnn",mi,ma);
+   }
+   else if(success==-1) {
+     StvDebug::Count("FailSeedXi2",fXi2[1]);
+     StvDebug::Count("FailSeedEta",seedEta);
+     StvDebug::Count("FailMinKnn",mi);
+     StvDebug::Count("FailMaxKnn",ma);
+     StvDebug::Count("FailMa:MiKnn",mi,ma);
+   }
+   else {
+     StvDebug::Count("GoodSeedXi2",fXi2[1]);
+     StvDebug::Count("GoodSeedEta",seedEta);
+     StvDebug::Count("GoodMinKnn",mi);
+     StvDebug::Count("GoodMaxKnn",ma);
+     StvDebug::Count("GoodMa:MiKnn",mi,ma);
+   }
+}
+//_____________________________________________________________________________
+void StvSeedFinder::KNNMiMax(double &mi,double &ma)
+{
+  enum {kNN = 2};
+  mi = 1e11,ma=0;
+  int sz = fSeedHits.size();
+  for (int jk=0;jk<sz-kNN;jk++)
+  {
+    const float *xl = fSeedHits[jk    ]->x();
+    const float *xr = fSeedHits[jk+kNN]->x();
+    double d = 0;
+    for (int j=0;j<3;j++) d+= pow(xl[j]-xr[j],2);
+    if (mi>d) mi = d;
+    if (ma<d) ma = d;
+  }
+  double cosL = fHelix.GetCos();
+  mi = sqrt(mi)*cosL/kNN;
+  ma = sqrt(ma)*cosL/kNN;
+
+
+}
+ 
+ 
+ 
 

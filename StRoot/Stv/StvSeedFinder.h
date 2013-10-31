@@ -26,13 +26,14 @@ public:
   virtual void      Reset()		=0;
   virtual void      Clear(const char* opt="");
   virtual int       Again(){return 0;}
-  virtual void      FeedBack(int success){if(success){};}
+  virtual void      FeedBack(int success);
 
 virtual const StvHits *GetHits() const 	{return &fSeedHits;}
 
   virtual void Show();
   virtual void ShowRest(EDraw3DStyle style = kUnusedHit);
         double GetXi2(int i=1) const	{return fXi2[i];}
+          void KNNMiMax(double &mi,double &ma);
 
 
 static    StvDraw *NewDraw();
