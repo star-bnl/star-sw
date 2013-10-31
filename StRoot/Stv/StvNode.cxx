@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.22 2013/08/22 18:27:03 perev Exp $
+ * $Id: StvNode.cxx,v 1.23 2013/10/31 16:57:48 perev Exp $
  *
  * /author Victor Perev
  */
@@ -206,7 +206,7 @@ int StvNode::Check(const char *tit, int dirs) const
   return nerr;
 }
 //________________________________________________________________________________
-int StvNode::ResetELoss(double s,const StvNodePars &pars)
+int StvNode::ResetELoss(const StvNodePars &pars)
 {
 static StvELossTrak *el = new StvELossTrak();
 
@@ -215,13 +215,12 @@ static StvELossTrak *el = new StvELossTrak();
   if (!mELossData.mMate) return 1;
   el->Reset();
   double p = sqrt(p2);
-  el->Set(mELossData.mMate,p); el->Add(fabs(s));
+  el->Set(mELossData.mMate,p); el->Add(mELossData.mTotLen);
   mELossData.mTheta2 = el->GetTheta2();
   mELossData.mOrt2   = el->GetOrt2();
   mELossData.mdPP    = el->dPP();
   mELossData.mELoss  = el->ELoss();
   mELossData.mdPPErr2= el->dPPErr2();
-  mELossData.mTotLen = el->TotLen();
   mELossData.mP      = el->P();
   return 0;
 }
