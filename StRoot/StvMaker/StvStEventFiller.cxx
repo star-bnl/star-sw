@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.35 2013/10/02 19:12:31 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.36 2013/10/31 16:11:19 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.36  2013/10/31 16:11:19  perev
+ * test for minDca ==> fabs(minDca)
+ *
  * Revision 1.35  2013/10/02 19:12:31  perev
  * MaxTrackLen = 1500 now
  *
@@ -982,7 +985,7 @@ void StvStEventFiller::fillEventPrimaries()
       fillTrackCountG++;
       break;
     } //end of verteces
-      if (minDca<1000) {
+      if (fabs(minDca)<1000) {
         gTrack->setImpactParameter(minDca);
         if (pTrack) pTrack->setImpactParameter(minDca);
       }
