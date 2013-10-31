@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.5 2013/10/31 22:11:10 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.6 2013/10/31 22:25:28 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -90,7 +90,6 @@ void StvELossTrak::Set(const TGeoMaterial *mate
 //_____________________________________________________________________________
 void StvELossTrak::Add(double len)
 {
-  double l1 = fTotLen,l2 = l1+len;
   assert(fX0>0);
   double addTheta2 = len/fX0*fFak;
   fOrth2 += (fTheta2 + addTheta2/3)*len*len;
