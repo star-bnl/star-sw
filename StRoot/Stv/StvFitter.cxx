@@ -20,6 +20,7 @@ StvFitter *StvFitter::mgFitter=0;
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
 
 enum {kDeltaFactor = 21,kTooBigErrFactor = 20*20};
+//??enum {kDeltaFactor = 21,kTooBigErrFactor = 5*5};
 
 static const double kXtraBigXi2 = 9e9;
 
