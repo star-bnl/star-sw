@@ -5,6 +5,7 @@
 #include "TMath.h"
 
 #include "TCernLib.h"
+#include "TSystem.h"
 #include "StvKalmanTrackFitter.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvHit.h"
@@ -297,13 +298,17 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir,int lane)
 {
 static int nCall=0; nCall++;
+static const char* PropagateHelix = gSystem->Getenv("PropagateHelix");
+StvDebug::Break(nCall);
+  StvFitDers derFit;
+
   StvNode *innNode=0,*outNode=0;
   if (!dir) {innNode = node; outNode=preNode;}
   else      {outNode = node; innNode=preNode;}
 
-
-//		Propagate with THelixTrack
-
+double dSh,dS=0;
+if (PropagateHelix) 	//Propagate with THelixTrack
+{
   THelixTrack myHlx;
   preNode->mFP[lane].get(&myHlx);
   const StvNodePars &prePars =  preNode->mFP[lane];
@@ -316,16 +321,18 @@ static int nCall=0; nCall++;
   else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
 
   double dS = myHlx.Path(Xnode);
+dSh = dS;
   StvHlxDers derHlx;
-  StvFitDers derFit;
 //		reset ELossData for may be new momentum
-  innNode->ResetELoss(fabs(dS),preNode->mFP[lane]);
+  innNode->ResetELoss(preNode->mFP[lane]);
   const StvELossData &el = innNode->GetELoss();
   double dE = el.mELoss; if (dS>0) dE = -dE;
   double P = sqrt(prePars.getP2()); 
   double E = sqrt(P*P+ kPiMass*kPiMass);
   if (E+dE < kMinE) dE = kMinE - E;
   double dP = dE/P*(2*E+dE)/(sqrt(P*P+dE*(2*E+dE))+P);
+         dP = dE/P*(E)/(P);
+  
   if (dP > kMaxCorr) dP = kMaxCorr;
   if (dP <-kMaxCorr) dP =-kMaxCorr;
   double rho = prePars._curv;
@@ -337,23 +344,48 @@ static int nCall=0; nCall++;
   node->mPP[lane].set(&myHlx,node->GetHz());
   node->mPE[lane].Set(&myHlx,node->GetHz());
   node->mPE[lane].Recov();
-  node->mPE[lane].Add(el,node->mPP[lane]);
+  node->mPE[lane].Add(el,node->mPP[lane],dS);
   node->mPP[lane].convert(derFit,derHlx);
   innNode->SetDer(derFit,lane);
-
+  
+  } 
+else
+  {
+  innNode->ResetELoss(preNode->mFP[lane]);
+  const StvELossData &el = innNode->GetELoss();
+  double dPP = el.mdPP;
+  assert(dPP>=0);
+  double Xnode[3];
+  if (node->mHit) 	{ TCL::ucopy(node->mHit->x(),Xnode,3);}
+  else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
+  StvNodePars pars = preNode->mFP[lane];
+assert(fabs(pars._cosCA)<=1);
+  dS = pars.move(Xnode,dPP,dir);
+  node->mPP[lane] = pars;
+assert(fabs(pars._cosCA)<=1);
+  pars.Deriv(dS,derFit);
+  StvFitErrs  &nowErrs = node->mPE[lane];
+  const StvFitErrs  &preErrs =  preNode->mFE[lane];
+  nowErrs = preErrs*derFit;
+  nowErrs.Add(el,pars,dS);
+  innNode->SetDer(derFit,lane);
+  } 
   return 0;
   
 }
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)
 {
+static int nCall = 0; nCall++;
 static       StvToolkit *kit     = StvToolkit::Inst();
-//static const StvConst *myConst =   StvConst::Inst();
-//static const double dca3dVertex = myConst->mDca3dVertex;
+// static const StvConst *myConst =   StvConst::Inst();
+// static const double dca3dVertex = myConst->mDca3dVertex;
 static StvFitter *fitt = StvFitter::Inst();
+enum {kDeltaZ = 100};//??????
 
   const StvNode *lastNode = trak->GetNode(StvTrack::kDcaPoint);
   if (!lastNode) return 1;
+  if (fabs(vtx->x()[2]-lastNode->GetFP()._z) > kDeltaZ) return 2;
   THelixTrack th;
   lastNode->GetFP().get(&th);
   lastNode->GetFE().Get(&th);
@@ -546,5 +578,4 @@ static const StvConst  *kons = StvConst::Inst();
   }
   return nErr;
 }
-
 
