@@ -21,7 +21,6 @@
 #include "Stv/StvHitter.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvTrackFitter.h"
-#include "THelixTrack.h"
 #include "Stv/StvDraw.h"
 #include "Stv/StvStl.h"
 #include "Stv/StvNode.h"
@@ -64,22 +63,20 @@ static int nCall = 0; nCall++;
 static int nTally = 0;
 static StvToolkit *kit = StvToolkit::Inst();
 static const StvConst  *kons = StvConst::Inst();
+enum {kRepeatSeedFinder = 2};
+
   int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0,nSeedTot=0;
-  StvSeedFinders *sfs = kit->SeedFinders();
+  StvSeedFinders *seedFinders = kit->SeedFinders();
   double aveRes=0,aveXi2=0,aveHits=0;
   mCurrTrak = 0;
 
-  for (int isf=0;isf<(int)sfs->size();isf++) { //Loop over seed finders
-    mSeedFinder = (*sfs)[isf];
+  for (int seedFinder=0;seedFinder<(int)seedFinders->size();seedFinder++) { //Loop over seed finders
+    mSeedFinder = (*seedFinders)[seedFinder];
     int myMinHits = kons->mMinHits;
-    for (int repeat =0;repeat<5;repeat++) {//Repeat search the same seed finder 
+    for (int repeat =0;repeat<kRepeatSeedFinder;repeat++) {//Repeat search the same seed finder 
       nTrk = 0;nSeed=0; mSeedFinder->Again();
       while ((mSeedHelx = mSeedFinder->NextSeed())) 
       {
-TVector3 dbSeed(mSeedHelx->Dir());
-double seedEta = dbSeed.Eta(); 
-StvDebug::Count("SeedEta",seedEta);
-
 	nSeed++; nTally++;
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
 	mCurrTrak->CutTail();	//Clean track from previous failure
@@ -88,15 +85,7 @@ StvDebug::Count("SeedEta",seedEta);
 	nAdded = FindTrack(0);
 //=============================
 
-        mSeedFinder->FeedBack(nAdded);
-	if (!nAdded) 				continue;
-//		DebugDebugDebugDebugDebugDebugDebugDebug
-StvDebug::Count("Xi2.geant",mCurrTrak->GetXi2());
-StvDebug::Count("CALLS",1);
-StvTrack geanTrak(*mCurrTrak);
-//		DebugDebugDebugDebugDebugDebugDebugDebug
-
-StvDebug::Count("SeedDive",seedEta);
+        if (!nAdded) {mSeedFinder->FeedBack(0); continue;}
 
 	int ans = 0,fail=13;
 //		Refit track   
@@ -108,19 +97,15 @@ StvDebug::Count("SeedDive",seedEta);
 	  ans = Refit(1);
 //=============================
 	  if (ans) 				break;
-StvDebug::Count("CALLS",2);
-StvDebug::Count("Xi2.refit",mCurrTrak->GetXi2());
-StvTrack refiTrak(*mCurrTrak);
+          StvTrack refiTrak(*mCurrTrak);
           nHits = mCurrTrak->GetNHits();
           if (nHits<=3) 			break;
 //=============================
 	  nAdded = FindTrack(1);
 //=============================
           if (nAdded<=0)			continue;;
-StvDebug::Count("CALLS",3);
           nHits = mCurrTrak->GetNHits();
           if (nHits<=3) 			break;
-StvDebug::Count("Xi2.backw",mCurrTrak->GetXi2());
 StvTrack bakwTrak(*mCurrTrak);
 // 			few hits added. Refit track to beam again 
 //=============================
@@ -129,21 +114,19 @@ StvTrack bakwTrak(*mCurrTrak);
 	  if (ans) {
 	    *mCurrTrak = refiTrak; 
 	    nHits = mCurrTrak->SetUsed();
-	  }
-else {StvDebug::Count("CALLS",4);}
+	  } 
 
-StvDebug::Count("Xi2.REFIT",mCurrTrak->GetXi2());
 	} while((fail=0));		
 	nHits = mCurrTrak->GetNHits();
 	if (nHits < myMinHits)	fail+=100;		;
-if (!fail) StvDebug::Count("NumCalls",5);
         if (fail) nHits=0;
 	if (fail) 	{//Track is failed, release hits & continue
+          mSeedFinder->FeedBack(-1);
 	  mCurrTrak->CutTail();			continue;
         }
-StvDebug::Count("CALLS",5);
 	StvNode *node = MakeDcaNode(mCurrTrak); if(node){};
- 
+
+        mSeedFinder->FeedBack(nHits);
 
 	kit->GetTracks().push_back(mCurrTrak);
 	nTrk++;nTrkTot++;
@@ -153,7 +136,7 @@ StvDebug::Count("CALLS",5);
 	mCurrTrak=0;
       }
       nSeedTot+=nSeed;
-      Info("FindTracks:","SeedFinder(%s) Seeds=%d Tracks=%d ratio=%d\%\n"
+      Info("FindTracks:","SeedFinder(%s) Seeds=%d Tracks=%d ratio=%d\n"
           ,mSeedFinder->GetName(),nSeed,nTrk,(100*nTrk)/(nSeed+1));
       
       if (!nTrk && myMinHits == kons->mMinHits) break;
@@ -269,7 +252,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     StvELossData eld = mDive->GetELossData();
     eld.mTally = nTally;
     innNode->SetELoss(eld,idir);
-    err[0].Add(innNode->mELossData,par[0]);
+    err[0].Add(innNode->mELossData,par[0],0);
     err[0].Recov();
     curNode->SetXDive(par[0]);
     curNode->SetPre(par[0],err[0],0);
@@ -298,7 +281,7 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     }
     if (mySkip) break; 		//Track Errors too big
     curNode->SetMem(minHit ,minXi2);
-    if (minHit[0]) {	// Fit succesful
+    if (minHit[0] && minXi2[1]> minXi2[0]*1.2) {	// Fit succesful
       
       myXi2 = fitt->Xi2(minHit[0]);
       int iuerr = fitt->Update(); 
@@ -323,15 +306,10 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
   if (!idir) {
     double eff = hitCount->Eff(); if (eff){}
     int myReject = hitCount->Reject();
-StvDebug::Count("hitCountReject",myReject);
    if (myReject) {
-// StvDebug::Count("RejectXi2cm2",mSeedFinder->GetXi2(0));
-// StvDebug::Count("RejectXi2   ",mSeedFinder->GetXi2(1));
 
      mCurrTrak->CutTail(); return 0; }
   }
-// StvDebug::Count("AcceptXi2cm2",mSeedFinder->GetXi2(0));
-// StvDebug::Count("AcceptXi2   ",mSeedFinder->GetXi2(1));
   if (nHits>3) {
     double tlen = mCurrTrak->GetLength();
     assert(tlen >0.0 && tlen<1500);
@@ -370,8 +348,10 @@ static int nCall=0; nCall++;
 StvNode *StvKalmanTrackFinder::MakeDcaNode(StvTrack *tk)
 {
 static StvToolkit *kit = StvToolkit::Inst();
+static const StvConst  *kons = StvConst::Inst();
 
   StvNode *start = tk->front();
+  if (start->GetFP().getRxy()>kons->mDca2dZeroXY*10) return 0;
   int opt = StvDiver::kTarg2D | StvDiver::kDoErrs;
   StvNodePars dcaPars;
   StvFitErrs  dcaErrs;
@@ -387,7 +367,7 @@ static StvToolkit *kit = StvToolkit::Inst();
 	       // Set prediction
   StvELossData eld = mDive->GetELossData();
   dcaNode->SetELoss(eld,0);
-  dcaErrs.Add(dcaNode->mELossData,dcaPars);
+  dcaErrs.Add(dcaNode->mELossData,dcaPars,0);
   dcaNode->SetPre(dcaPars,dcaErrs,0);
   dcaNode->SetDer(dcaDers,0);
   dcaNode->SetXi2(1e11,0);
@@ -459,10 +439,9 @@ static const double kEps = 1.e-2,kEPS=1e-1;
   int nIters = 0,nDrops=0;
   for (int repair=0;repair<=nRepair;repair++)  	{ 	//Repair loop
     int converged = 0;
-    for (int refIt=0; refIt<55; refIt++)  	{	//Fit iters
+    for (int refIt=0; refIt<10; refIt++)  	{	//Fit iters
       nIters++;
       ans = tkf->Refit(mCurrTrak,idir,lane,1);
-StvDebug::Count("CALLS",10);
 //    ==================================
       nHits=tkf->NHits();
       if (nHits < kons->mMinHits) break;
@@ -470,8 +449,7 @@ StvDebug::Count("CALLS",10);
       
       StvNodePars lstPars(tstNode->GetFP());	//Remeber params to compare after refit	
       anz = tkf->Refit(mCurrTrak,1-idir,1-lane,1); 
-StvDebug::Count("CALLS",10);
-  //        ==========================================
+//        ==========================================
       nHits=tkf->NHits();
       if (nHits < kons->mMinHits) break;
       if (anz>0) break;	
@@ -493,22 +471,19 @@ StvDebug::Count("CALLS",10);
     nHits--; if (nHits < kons->mMinHits) { state = 1000000; break;}
   }//End Repair loop
 
-if (state) {
-StvDebug::Count("RejectXi2cm2",mSeedFinder->GetXi2(0));
-StvDebug::Count("RejectXi2   ",mSeedFinder->GetXi2(1));
-} else {
-StvDebug::Count("AcceptXi2cm2",mSeedFinder->GetXi2(0));
-StvDebug::Count("AcceptXi2   ",mSeedFinder->GetXi2(1));
-}
 
   if (ans<=0) state &= (-2);
   if (anz<=0) state &= (-4);
+  
+  nHits = mCurrTrak->GetNHits();
   nDrops = nBegHits-nHits;
-  if (!state) {
-    if (nDrops==0) StvDebug::Count("RefitGoodIters",nIters);      
-    else           StvDebug::Count("RefitBaddIters",nIters); 
-    StvDebug::Count("RefitDrops",100.*nDrops/nBegHits); 
-  } else           StvDebug::Count("RefitFailed"   ,nIters);    
+if(ans) {
+  StvDebug::Count("FailRefit.nDrop:nIter",nIters,nDrops);
+  StvDebug::Count("FailRefit.nHits:nIter",nIters,nHits );
+} else  {
+  StvDebug::Count("GoodRefit.nDrop:nIter",nIters,nDrops);
+  StvDebug::Count("GoodRefit.nHits:nIter",nIters,nHits );
+}
   return state;
 
 }
