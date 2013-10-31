@@ -50,12 +50,13 @@ fgtPed::~fgtPed()
 		ped_store = 0 ;
 	}
 
-	if(fgt_rdr[0]) {
-		delete fgt_rdr[0] ;
-		delete fgt_rdr[1] ;
-		fgt_rdr[0] = 0 ;
-		fgt_rdr[1] = 0 ;
+	for(int i=0;i<FGT_RDO_COU;i++) {
+		if(fgt_rdr[i]) {
+			delete fgt_rdr[i] ;
+			fgt_rdr[i] = 0 ;	
+		}
 	}
+
 
 	return ;
 }
@@ -75,11 +76,10 @@ void fgtPed::init(int active_rbs, int rts)
 		ped_store = (struct peds *) malloc(sizeof_ped) ;
 	}
 
-	if(fgt_rdr[0] == 0) {
-		fgt_rdr[0] = new daq_fgt(0) ;
-		fgt_rdr[1] = new daq_fgt(0) ;
-
-		
+	for(int i=0;i<FGT_RDO_COU;i++) {
+		if((rb_mask & (1<<i)) && (fgt_rdr[i]==0)) {
+			fgt_rdr[i] = new daq_fgt(0) ;
+		}
 	}
 
 
@@ -92,12 +92,15 @@ void fgtPed::init(int active_rbs, int rts)
 	case GMT_ID :
 		tb_cou_xpect = 15 ;
 		break ;
+	case IST_ID :
+		tb_cou_xpect = 7 ;
+		break ;
 	}
 
 	memset(ped_store,0,sizeof_ped) ;
-	err_counter = 0 ;
+	memset(err_counter,0,sizeof(err_counter)) ;
 
-	LOG(TERR,"Pedestals zapped: rb_mask 0x%02X",rb_mask) ;
+	LOG(TERR,"Pedestals zapped: rb_mask 0x%02X, expected tb count %d",rb_mask,tb_cou_xpect) ;
 }
 
 
@@ -140,10 +143,10 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 			int tb_cou = meta->arc[rdo1].arm[arm].apv[apv].ntim ;
 
 			if(tb_cou != tb_cou_xpect) {
-				if(err_counter < 100) {
-					LOG(WARN,"tb %2d: ARC %d, ARM %d, APV %d",tb_cou,rdo1,arm,apv) ;
+				if(err_counter[rdo1-1] < 100) {
+					LOG(WARN,"wrong tb_cou %d(expect %d): ARC %d, ARM %d, APV %d",tb_cou,tb_cou_xpect,rdo1,arm,apv) ;
 				}
-				err_counter++ ;
+				err_counter[rdo1-1]++ ;
 			}
 
 			if(tb_cou == 0) {
@@ -194,6 +197,9 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	case FGT_ID :
 		*d32++ = META_ZS_VERSION ;		// version
 		break ;
+	case IST_ID :
+		*d32++ = META_ZS_VERSION ;		// version
+		break ;		
 	case GMT_ID :
 		do_ped_sub = 1 ;	// subtract peds
 		*d32++ = META_PED_ZS_VERSION ;	// zs _AND_ ped subtracted
@@ -378,10 +384,10 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 			
 			if(meta->arc[rdo1].arm[arm].apv[apv].ntim != tb_cou_xpect) {
-				if(err_counter < 100) {
+				if(err_counter[rdo1-1] < 100) {
 					LOG(WARN,"evt %d: RDO %d, ARM %d, APV %d: ntim %d??",evts[rdo],rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].ntim) ;
 				}
-				err_counter++ ;
+				err_counter[rdo1-1]++ ;
 			}
 
 			need[arm][apv] |= 1 ;

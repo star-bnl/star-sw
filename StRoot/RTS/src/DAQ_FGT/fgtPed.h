@@ -34,7 +34,7 @@ public:
 
 	int rts_id ;
 
-	int err_counter ;
+	int err_counter[FGT_RDO_COU] ;
 
 	int tb_cou_xpect ;
 
