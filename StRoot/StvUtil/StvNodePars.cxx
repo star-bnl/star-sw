@@ -22,10 +22,14 @@ static double MAXNODPARS[]   ={555,555,555,6.66,kMaxPti+10, kMaxTanL+10, .1};
 static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,kMaxPti  };
 static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
 static const double kERRFACT     = 3*3;
-static const double kFitErrs[5]   ={1.,1. 
+//??static const double kFitErrs[5]   ={1.,1. 
+static const double kFitErrs[5]   ={.2,.2 
                                    ,10./180*M_PI
 				   ,10./180*M_PI
 				   ,kMaxPti};
+static const double kPiMass=0.13956995;
+static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass),kMaxCurv=1./5;
+static const double kMaxCorr = 0.1;
 //______________________________________________________________________________ 
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
 {
@@ -173,15 +177,18 @@ void StvNodePars::get(THelixTrack *th) const
   th->Set(&_x,dir,_curv);
 }
 //______________________________________________________________________________
-void StvNodePars::move(double dLxy)
+void StvNodePars::move(double dLen)
 {
   double dcCA,dsCA,dC,dS,dCR,dSR,dX,dY,dZ;
+  double dLxy = dLen*getCosL();
   double dPhi = _curv*dLxy;
+assert(fabs(_cosCA)<1.001);
+assert(fabs(_sinCA)<1.001);
 
   assert(_hz);
   if (fabs(dPhi) < 0.1) {
-    dCR = -dLxy*dPhi/2; dSR = dLxy*(1-dPhi*dPhi/6);
-    dC  = dCR*_curv;    dS  = dSR*_curv;
+    dCR = dLxy*dPhi*(-1./2 + dPhi*dPhi/24); 	dSR = dLxy*(1-dPhi*dPhi/6);
+    dC  = dCR*_curv;    			dS  = dSR*_curv;
   } else {
     dC = cos(dPhi)-1; dS = sin(dPhi);
     dCR = dC/_curv;   dSR = dS/_curv;
@@ -192,16 +199,98 @@ void StvNodePars::move(double dLxy)
   dcCA = _cosCA*dC - _sinCA*dS;
   dsCA = _sinCA*dC + _cosCA*dS;
   _cosCA+=dcCA; _sinCA+=dsCA; _x+=dX; _y+=dY; _z+=dZ; _psi+=dPhi;
+assert(fabs(_cosCA)<1.01);
+  if (fabs(_cosCA)>1 || fabs(_sinCA)>1 ) ready(); 
+  while(_psi> M_PI) { _psi-=2*M_PI;}
+  while(_psi<-M_PI) { _psi+=2*M_PI;}
+  assert(fabs(_psi)<=M_PI);
 }
 //______________________________________________________________________________
-double StvNodePars::move(const double v[3])
+double StvNodePars::move(const double v[3],double dPP, int dir)
 {
-   double mom[3]={_cosCA,_sinCA,_tanl};
-   double tau = (_x-v[0])*mom[0]+(_y-v[1])*mom[1]+(_z-v[2])*mom[2];
-   double den = (1+_tanl*_tanl);
-   tau /= den;
-   move(tau);
-   return tau;
+// move to dca point and return dca length
+// dPP account energy loss dPP = deltaP/P/Len
+
+static int  nCall=0; nCall++;
+static const double kMomAccu = 1e-3;	//momentum relative accuracy
+static const double kAngAcc[2]={0.1,0.01};
+static const double kAngMax=0.5;
+StvDebug::Break(nCall);
+
+ double MOM[3]={_cosCA,_sinCA,_tanl};
+ double cos2Li = (1+_tanl*_tanl),cosL = sqrt(1./cos2Li);
+
+ double myLen = 0;
+ for (int jk=0;jk<2;jk++) {//jk=0=move without energy loss,=1 with
+   int converge = 0;
+   for (int it=0;it<5;it++) {
+     double mom[3]={_cosCA,_sinCA,_tanl};
+     double vtx[3]={v[0]-_x,v[1]-_y,v[2]-_z};
+     double tau = vtx[0]*mom[0]+vtx[1]*mom[1]+vtx[2]*mom[2];
+     if (fabs(tau*_curv)>kAngMax)	break;
+     double den = cos2Li + (vtx[0]*mom[1]-vtx[1]*mom[0])*_curv;
+     if (den<0.1 || den>3) 		break;
+     tau /= den;
+     if (fabs(tau*_curv)>kAngMax)	break;
+     move(tau/cosL);
+     myLen+=tau;
+     if (fabs(tau*_curv) < kAngAcc[!!jk]) 	{converge = 1; break;}
+   }// end iters
+   if (!converge) { //failed, try THelix
+     if (myLen) move(-myLen/cosL);
+     double mom[3]={_cosCA,_sinCA,_tanl};
+     THelixTrack hlx(&_x,mom,_curv);
+     myLen = hlx.Path(v);
+     move(myLen); 
+   } else {
+     myLen /= cosL;
+   }
+assert(fabs(_z)<999);
+   if (jk)			return myLen;
+   double dRho = dPP*myLen,fak = 1+dRho;
+   if (fabs(dRho)<kMomAccu)	return myLen;
+   if (_curv*fak < -kMaxCurv) dRho = (-kMaxCurv-_curv)/_curv;
+   if (_curv*fak >  kMaxCurv) dRho = ( kMaxCurv-_curv)/_curv;
+   if (dRho< -kMaxCorr) dRho = -kMaxCorr;
+   if (dRho>  kMaxCorr) dRho =  kMaxCorr;
+   double lxy=myLen*cosL;
+
+   double ang = _curv*lxy,ang2=ang*ang;
+   double dH,dT,dA;
+   if (fabs(ang)<0.1) {
+     dH = 1./3 ; dT = 1./4  ;}
+   else               {
+     double qqCos = ((cos(ang)-1)/ang2+1./2)/ang2; 	//~ 1/24
+     double qqSin = (sin(ang)/(ang)-1)/ang2;  		//~-1/6
+     dT = ((qqCos+qqSin)*2-qqCos*ang2+1./2);		//~1/4
+     dH = ((2*qqCos+qqSin)*ang2 -2*qqSin );             //~1/3
+   }
+
+   dH*= dRho*ang *lxy/2;
+   dT*=-dRho*ang2*lxy/2;
+   dA  = dRho*ang/2;
+   _x += MOM[0]*dT-MOM[1]*dH;
+   _y += MOM[1]*dT+MOM[0]*dH;
+   _psi  += dA;
+   if (_psi<-M_PI) {_psi+=2*M_PI;} else if (_psi> M_PI) {_psi-=2*M_PI;}
+assert(fabs(_psi)<M_PI);
+   _curv += _curv*dRho;
+   _ptin  =_curv/_hz;
+   if (fabs(dA)<1e-2) 	{
+      double cosCA = _cosCA;
+     _cosCA -= _sinCA*dA;
+     _sinCA +=  cosCA*dA;}
+   else 		{
+     _cosCA = cos(_psi);
+     _sinCA = sin(_psi);
+   }
+
+
+  }//end jk loop
+assert((myLen>0) == (dir==1));
+assert(fabs(_z)<999);
+  return myLen;
+
 }
 //______________________________________________________________________________
 void StvNodePars::moveToR(double R)
@@ -244,7 +333,7 @@ static StvFitPars fp;
   double a = (_psi -sub._psi );
   if      (a < -M_PI) {a += M_PI*2;}
   else if (a >  M_PI) {a -= M_PI*2;}
-  assert(fabs(a)<3.15);
+assert(fabs(_psi)<M_PI);
   a*=cosL;
   fp.mA = (fabs(a) <0.1)? a*(1-a*a/3): atan(a);
   fp.mP = (_ptin-sub._ptin);
@@ -265,8 +354,8 @@ StvDebug::Break(nCall);
   _x += -_sinCA*fp.mH - sinL*_cosCA*fp.mZ;
   _y +=  _cosCA*fp.mH - sinL*_sinCA*fp.mZ;
   _z +=                 cosL       *fp.mZ;
-  assert(fabs(_x)<300);
-  assert(fabs(_y)<300);
+  assert(fabs(_x)<999);
+  assert(fabs(_y)<999);
   double a = 0,cA=1,sA=0;
   double tA = fp.mA*(1.+fp.mA*fp.mA/3)/cosL;
   if (fabs(tA)<0.1) 	{
@@ -278,7 +367,7 @@ StvDebug::Break(nCall);
  _psi   += a;
   if (_psi < -M_PI) _psi += 2*M_PI;
   if (_psi >  M_PI) _psi -= 2*M_PI;
-  assert(fabs(_psi)<3.15);
+  assert(fabs(_psi)<M_PI);
 
   double cosCA = _cosCA;
   _cosCA = cosCA*cA-_sinCA*sA;
@@ -668,6 +757,23 @@ void StvFitErrs::SetMaxCorr(double maxCorr)
   for (int i=0,li=0;i< 5;li+=++i) {
     for (int j=0;j<i;j++) { e[li+j]*=fak;} }
 }
+//_____________________________________________________________________________
+double StvFitErrs::Diff(const StvFitErrs &err,int *idx) const
+{
+  double diaA[5],diaB[5];
+  const double *a=&mHH,*b=&err.mHH;
+  double maxDif=0; int maxIdx=-1;  
+  for (int i=0,li=0;i< 5;li+=++i) {
+    diaA[i]=a[li+i];diaB[i]=b[li+i];
+    double dif = 2*fabs(diaA[i]-diaB[i])/(diaA[i]+diaB[i]+1e-11);
+    if (maxDif<dif) {maxDif=dif; maxIdx=li+i;}
+    for (int j=0;j<i;j++) {
+      dif = 2*fabs(a[li+j]-b[li+j])/sqrt((diaA[i]+diaB[i]+1e-11)*(diaA[j]+diaB[j]+1e-11));
+      if (maxDif<dif) {maxDif=dif; maxIdx=li+j;}
+  } }
+  if (idx) *idx = maxIdx;
+  return maxDif;
+}     
 //_____________________________________________________________________________
 int StvFitErrs::Recov()
 {
@@ -1303,7 +1409,6 @@ void StvNodeParsTest::TestMtx()
   int iR   =100 + gRandom->Rndm()*100;
   int iAlf = 10 + gRandom->Rndm()*100;
   int iLam = 10 + gRandom->Rndm()*100;
-iLam=80;
 
   double alf = iAlf/180.*M_PI;
   double lam = iLam/180.*M_PI;
