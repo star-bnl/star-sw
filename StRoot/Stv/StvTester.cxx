@@ -71,7 +71,7 @@ static int nCall = 0; nCall++;
       {			//Now TEST2
         
 	const StvELossData &dat = preNode->GetELoss();
-	double pLos2 = (dat.mdPP/dat.mTotLen) *len*pPre;
+	double pLos2 = (dat.mdPP) *len*pPre;
         if (1 || fabs(pLos2-pLos) > pErr) {
           pct = fabs(pLos2-pLos)/(pLos2+pLos)*200;
 	  printf("===== Rxy=%g Z=%g StvPLoss = %g InDive = %g dif=%1.1f%%\n"
