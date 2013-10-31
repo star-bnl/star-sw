@@ -76,7 +76,7 @@ const StvELossData &GetELoss() const		{ return mELossData;}
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 
    void SetDer(const StvFitDers &der, int dir);
    void SetXDive(const double xdive[3])		{memcpy(mXDive,xdive,sizeof(mXDive));}
-    int ResetELoss(double s,const StvNodePars &pars);
+    int ResetELoss(const StvNodePars &pars);
  StvNode::ENodeType GetType() const 			{return (StvNode::ENodeType)mType;}
                void SetType(StvNode::ENodeType ty) 	{mType =(char)ty;}
 StDetectorId GetDetId() const;  
