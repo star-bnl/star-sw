@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.23 2013/10/31 16:57:48 perev Exp $
+ * $Id: StvNode.cxx,v 1.24 2013/10/31 20:29:06 perev Exp $
  *
  * /author Victor Perev
  */
@@ -211,6 +211,7 @@ int StvNode::ResetELoss(const StvNodePars &pars)
 static StvELossTrak *el = new StvELossTrak();
 
   double p2 = pars.getP2();  
+  if (p2>1 && mELossData.mP>1) return 0;
   if (fabs(mELossData.mP*mELossData.mP-p2) <0.01*p2) return 0;
   if (!mELossData.mMate) return 1;
   el->Reset();
