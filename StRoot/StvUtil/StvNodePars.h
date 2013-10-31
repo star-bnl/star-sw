@@ -93,17 +93,18 @@ public:
 double getPt() const			{ return 1./(fabs(_ptin)+1e-6); }
   void getMom(double p[3]) const; 
   void getDir(double d[3]) const; 
-double getP2() const;
+double getP2()  const;
 double getRxy() const;
 double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
+double getCosL() const;
   void reverse(); 
   void Deriv(double len,StvFitDers &der) const;
    int isValid() const 	{return  (_hz && _cosCA);};
 ///		convert THelixTrack derivativ matrix into StvFitPar one
   void convert( StvFitDers &fitDer , const StvHlxDers &hlxDer) const;
 //		move point along helix  
-  void move(double dLxy); 
-double move(const double v[3]); 
+  void move(double dLen); 
+double move(const double v[3],double dPP,int dir); 
 //		move point along helix  up to given radius in xy
   void moveToR(double Rxy); 
 StvNodePars &merge(double wt,StvNodePars &other);
@@ -163,7 +164,6 @@ public:
   enum eFitErrs {kNErrs=15};
   StvFitErrs(double hh=0,double hz=0,double zz=0);
   StvFitErrs(const StvFitErrs &fr) {*this = fr;}
-//??  void Reset(double hz = 0);
   void Set(const THelixTrack *he,double hz);
   void Get(      THelixTrack *he)     const;
   void Get(const StvNodePars *np,  StvNodeErrs *ne)     const;
@@ -174,13 +174,15 @@ double GetHz() const   ;//?? 	{ return mHz ;}
 operator const double *() const { return &mHH;}
 operator       double *()       { return &mHH;}
 StvFitErrs &operator=(const StvFitErrs &fr) ;
-  void operator*=(double f) {for (int i=0;i<kNErrs;i++){Arr()[i]*=f;};}
-  void Add(const StvELossData &el,const StvNodePars &pa);
+StvFitErrs &operator*=(double f) {for (int i=0;i<kNErrs;i++){(*this)[i]*=f;};return *this;}
+  void Add(const StvELossData &el,const StvNodePars &pa,double len);
   void Backward();
 const StvFitErrs &operator*(const StvFitDers &mtx) const; 
 double Sign() const;
    int Check(const char *tit=0) const;
    int Recov();
+double Diff(const StvFitErrs &errs,int *idx=0) const;// difference 
+
 double MaxCorr() const   ;//  maximal correlation
   void SetMaxCorr(double maxCorr)  ;//  set maximal correlation
   void Print(const char *tit=0) const;
@@ -244,6 +246,8 @@ class TGeoMaterial;
 class StvELossData 
 {
 public:
+
+public:
   double mTheta2;	//multiple scattering angle error
   double mOrt2;		//multiple scattering position error
   double mdPP;		//dP/P
@@ -304,16 +308,23 @@ inline void StvNodePars::reverse()
  _tanl  = -_tanl ; _curv = -_curv ; _ptin = -_ptin;
 }
 //------------------------------------------------------------------------------
-inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &pa)
+inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &pa, double len)
 {    
-  mAA+= el.mTheta2;
-  mLL+= el.mTheta2;
-  mHH+= el.mOrt2;
-  mZZ+= el.mOrt2;
-  mPP+= el.mdPPErr2*(pa._ptin*pa._ptin);
+  double fak = (len)? fabs(len/el.mTotLen):1.;
+  mAA+= el.mTheta2 			*fak;
+  mLL+= el.mTheta2 			*fak;
+  mHH+= el.mOrt2 			*fak;
+  mZZ+= el.mOrt2 			*fak;
+  mPP+= el.mdPPErr2*(pa._ptin*pa._ptin) *fak;
   assert(el.mTheta2>0 && el.mOrt2>0 &&el.mdPPErr2>0);
 
 
+}
+//------------------------------------------------------------------------------
+inline double StvNodePars::getCosL() const
+{    
+   double tt = _tanl*_tanl;
+   return (tt<0.1)? 1./(1. +tt*(0.5 - tt*0.25)) :1./sqrt(1+tt);
 }
 
 #endif
