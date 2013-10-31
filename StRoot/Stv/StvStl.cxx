@@ -1,8 +1,9 @@
-// $Id: StvStl.cxx,v 1.3 2012/12/07 17:49:57 perev Exp $
+// $Id: StvStl.cxx,v 1.4 2013/10/31 16:54:47 perev Exp $
 //
 //
 // Class StvStl some stl containers for Stv objects
 // ------------------
+#include <stdio.h>
 #include "StvStl.h"
 #include "StvHit.h"
 //_____________________________________________________________________________
@@ -26,3 +27,14 @@ StvPoints &StvPoints::operator+=(const float  add[3])
 //_____________________________________________________________________________
 StvPoints &StvPoints::operator+=(const double  add[3])
 { push_back(add[0]); push_back(add[1]); push_back(add[2]);return *this;}
+
+//_____________________________________________________________________________
+void StvHits::Print(const char *txt)
+{
+  if (txt && txt[0]) printf("StvHits(%s)\n",txt);
+  for (int i=0;i<(int)size();i++) {
+    const float *x = (*this)[i]->x();
+    double r = sqrt(x[0]*x[0]+x[1]*x[1]);
+    printf("%3d - Rxy=%g x=%g y=%g z=%g\n",i,r,x[0],x[1],x[2]);
+  }
+}
