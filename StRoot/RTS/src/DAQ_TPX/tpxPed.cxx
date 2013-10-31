@@ -325,7 +325,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 	tpx36_to_real(sector,rb+1,s_real,r_real) ;
 
-	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
+//	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
 
 	for(a=0;a<256;a++) {
 	for(ch=0;ch<16;ch++) {
@@ -870,6 +870,11 @@ int tpxPed::special_setup(int run_type, int sub_type)
 		}
 		return 1 ;
 	default :
+		if(sub_type == 100) {
+			LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
+			break ;
+
+		}
 		return 1 ;
 	}
 
@@ -880,6 +885,9 @@ int tpxPed::special_setup(int run_type, int sub_type)
 		if(ped==0) continue ;
 		
 		switch(run_type) {
+		case RUN_TYPE_PHYS :
+			for(t=100;t<104;t++) ped->ped[t] -= 10 ;
+			break ;
 		case RUN_TYPE_PULSER_A :
 			// make it about 5% occupancy
 			for(t=100;t<110;t++) ped->ped[t] = 0.0 ;
