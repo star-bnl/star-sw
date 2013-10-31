@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.4 2013/06/23 22:29:19 perev Exp $
+// $Id: StTGeoProxy.h,v 1.5 2013/10/31 15:43:04 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -297,7 +297,6 @@ const TGeoVolume *GetModu() const;
 const TGeoVolume *GetVolu() const;
 StVoidArr     *GetSeedHits()         const {return fSeedHits       ;}
 StVoidArr     *GetAllHits()          const {return fAllHits        ;}
-StHitPlaneHardMap *GetPlaneHardMap() const {return fHitPlaneHardMap;}
 
 StHitPlaneInfo* IsHitPlane(const TGeoVolume *volu) const;
 StHitPlaneInfo* IsHitPlane(const TGeoNode   *node) const;
@@ -329,7 +328,6 @@ int fGoodHit;  //1=last loaded hit inside of sensitive volume
 Long64_t	fActiveModu;
 StVoluInfoMap  *fVoluInfoArr;           // array of all StVoluIinfo
 TObjArray      *fHitPlaneArr;           // array of StHitPlane's
-StHitPlaneHardMap *fHitPlaneHardMap;    // StHitPlane[hardwarePosition]
 StVoidArr      *fSeedHits;              // Vector for hits used in seed finder
 StVoidArr      *fAllHits;               // Vector of all hits, mainly for debug
 StTGeoHitShape *fHitShape;

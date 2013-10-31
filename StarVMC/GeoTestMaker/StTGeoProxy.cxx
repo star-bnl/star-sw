@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.7 2013/07/12 02:37:48 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.8 2013/10/31 15:43:00 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -146,7 +146,6 @@ StTGeoProxy::StTGeoProxy()
   fVoluInfoArr = new StVoluInfoMap;
   fHitPlaneArr = new TObjArray();
   fOpt = 1;
-  fHitPlaneHardMap = new StHitPlaneHardMap;
   fSeedHits =        new StVoidArr();
   fAllHits  =        new StVoidArr();
 }
@@ -833,39 +832,23 @@ const StHitPlane *StTGeoProxy::AddHit(void *hit,const float xyz[3],unsigned int 
 static int nCall = 0;  nCall++;  
 //		Test of hardware id assignment quality
 enum 		{kMaxTest=1000,kMaxFail=100};
-static int 	nTest=0,nFail=0,detId=0;
+static int 	nFail=0,detId=0;
 //
 //   Break(nCall);
-  StHitPlaneHardMapIter it(fHitPlaneHardMap->find(hardw));
-  StHitPlane *hp=0,*hpMap=0,*hpGeo=0;
-  if ((fOpt&1) && it !=  fHitPlaneHardMap->end()) { //HitPlane found
-     hpMap = (*it).second;fGoodHit=1;
-  } 
-  hp = hpMap;
-  if (hpMap==0 || nTest < kMaxTest) { 
-     nTest++;
-     fGoodHit = 0;
-     if (fHitLoadActor) fHitLoadActor->SetHit(hit);
-     hpGeo = FindHitPlane(xyz,fGoodHit);
-     if (!hpGeo) {
-       if (fGoodHit) return 0; 	//Hit rejected
-       double pnt[3]={xyz[0],xyz[1],xyz[2]};
-       gGeoManager->SetCurrentPoint(pnt);
-       Warning("AddHit","Hit(%g,%g,%g) in %s Not Found",pnt[0],pnt[1],pnt[2],GetPath());
-       return 0;
-     }
-     hp = hpGeo;
-     if (hpMap && hpMap != hpGeo) { //Different Hit planes found by map and geo
-       double pnt[3]={xyz[0],xyz[1],xyz[2]};
-       nFail++; 
-       Warning("AddHit","Hit(%g,%g,%g) Different Hit Planes found %s %s"
-              ,pnt[0],pnt[1],pnt[2],hpMap->GetName(),hpGeo->GetName());
-       assert(nFail<=kMaxFail);
-     }
-     if (fGoodHit) (*fHitPlaneHardMap)[hardw]=hp;
+  StHitPlane *hp=0,*hpGeo=0;
+  fGoodHit = 0;
+  if (fHitLoadActor) fHitLoadActor->SetHit(hit);
+  hpGeo = FindHitPlane(xyz,fGoodHit);
+  if (!hpGeo) {
+    if (fGoodHit) return 0; 	//Hit rejected
+    double pnt[3]={xyz[0],xyz[1],xyz[2]};
+    gGeoManager->SetCurrentPoint(pnt);
+    Warning("AddHit","Hit(%g,%g,%g) in %s Not Found",pnt[0],pnt[1],pnt[2],GetPath());
+    return 0;
   }
+  hp = hpGeo;
   if (hp->GetDetId() != detId) { // New detector started
-    nTest=0; nFail=0; detId = hp->GetDetId();
+    nFail=0; detId = hp->GetDetId();
   }
   assert(hp);
 
