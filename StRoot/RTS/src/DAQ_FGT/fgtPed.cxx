@@ -37,7 +37,7 @@ fgtPed::fgtPed()
 
 	rts_id = 0 ;
 
-	tb_cou_xpect = 6 ;
+	tb_cou_xpect = 0 ;
 
 	return ;
 }
@@ -85,6 +85,9 @@ void fgtPed::init(int active_rbs, int rts)
 
 	rts_id = rts ;
 
+	if(tb_cou_xpect) {
+	}
+	else {
 	switch(rts_id) {
 	case FGT_ID :
 		tb_cou_xpect = 8 ;
@@ -95,6 +98,7 @@ void fgtPed::init(int active_rbs, int rts)
 	case IST_ID :
 		tb_cou_xpect = 7 ;
 		break ;
+	}
 	}
 
 	memset(ped_store,0,sizeof_ped) ;
