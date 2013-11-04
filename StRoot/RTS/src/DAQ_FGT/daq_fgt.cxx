@@ -491,7 +491,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 			if(arm_mask & (1<<arm)) ;
 			else continue ;
 
-			LOG(NOTE,"[evt %d]: RDO %d: Handling ARM %d",get_global_event_num(),r) ;
+			LOG(NOTE,"[evt %d]: RDO %d: Handling ARM %d",get_global_event_num(),r,arm) ;
 
 			// digest the ARM header, word 0
 			int arm_id = *dta & 0x7 ;
