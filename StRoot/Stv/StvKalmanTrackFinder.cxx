@@ -74,7 +74,7 @@ enum {kRepeatSeedFinder = 2};
     mSeedFinder = (*seedFinders)[seedFinder];
     int myMinHits = kons->mMinHits;
     for (int repeat =0;repeat<kRepeatSeedFinder;repeat++) {//Repeat search the same seed finder 
-      nTrk = 0;nSeed=0; mSeedFinder->Again();
+      nTrk = 0;nSeed=0; mSeedFinder->Again(repeat);
       while ((mSeedHelx = mSeedFinder->NextSeed())) 
       {
 	nSeed++; nTally++;
@@ -128,6 +128,7 @@ StvTrack bakwTrak(*mCurrTrak);
 
         mSeedFinder->FeedBack(nHits);
 
+        mCurrTrak->AddId(10*seedFinder+repeat);
 	kit->GetTracks().push_back(mCurrTrak);
 	nTrk++;nTrkTot++;
         aveHits+= nHits;
