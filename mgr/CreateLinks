@@ -1,10 +1,11 @@
 #!/bin/csh 
 
-# This file will be kept up to date
-# per library so we can create the links
-# appropriate for the supported platform and
-# the backward compatible ones. 
+# This file will be kept up to date per library so we can create the links
+# appropriate for the supported platform and the backward compatible ones. 
 # Added comments a MUST (thanks)
+#
+set arg=$#argv
+#echo "Argument is [$arg]";
 
 
 # Solaris
@@ -87,30 +88,76 @@ endif
 
 
 #
-# Scientific Linux
+# Scientific Linux, SL53, SL6
 #
 foreach arch ( _ _x8664_ )
+    #+
+    # SL53
+    #-
     set refos="sl53"$arch"gcc432"
     echo "Checking possible backward compatibility through refos $refos"
+
     if ( -e .$refos || -e $refos ) then
-	foreach ospf ( sl rh )
-	    foreach vers ( 55 56 57 58 59 )
-		set dir=$ospf$vers$arch"gcc432"
-		if ( ! -e .$dir && -e .$refos ) then
-		    echo "  Backward compatibility assumed between $dir -> $refos "
-		    /bin/ln -s .$refos .$dir
-		else
-		    if ( -e .$refos && -e .$dir ) echo " .$dir exists"
-		endif
-		if ( ! -e $dir && -e $refos ) then
-		    echo "  Backward compatibility assumed between $dir -> $refos "
-		    /bin/ln -s $refos $dir
-		else
-		    if ( -e $refos && -e $dir )   echo " $dir exists"
-		endif
+	if ( "$arg" == "1") then
+            # for transition to SL6
+            set Urefos="sl64"$arch"gcc447"
+	    echo "Checking backward links for $refos under newer OS $Urefos"
+	    if ( -e .$refos && ! -e .$Urefos ) then
+	       echo "  Backward compatibility $Urefos -> $refos"
+	       /bin/ln -s .$refos .$Urefos
+	    endif 
+	    if ( -e $refos && ! -e $Urefos ) then
+	       echo "  Backward compatibility $Urefos -> $refos"
+	       /bin/ln -s $refos $Urefos
+	    endif
+        else 
+	    # expected SL5
+	    foreach ospf ( sl rh )
+	        foreach vers ( 55 56 57 58 59 )
+		    set dir=$ospf$vers$arch"gcc432"
+		    if ( ! -e .$dir && -e .$refos ) then
+		        echo "  Backward compatibility assumed between $dir -> $refos "
+			/bin/ln -s .$refos .$dir
+		    else
+		        if ( -e .$refos && -e .$dir ) echo " .$dir exists"
+		    endif
+		    if ( ! -e $dir && -e $refos ) then
+		        echo "  Backward compatibility assumed between $dir -> $refos "
+			/bin/ln -s $refos $dir
+		    else
+		        if ( -e $refos && -e $dir )   echo " $dir exists"
+		    endif
+		end
 	    end
-	end
+        endif
     endif
+    
+    #+
+    # SL64
+    #-
+    set refos="sl64"$arch"gcc447"
+    echo "Checking possible backward compatibility through refos $refos"
+    if ( -e .$refos || -e $refos ) then
+        # *** PLACEHOLDER ***
+	#foreach ospf ( sl rh )
+	#    foreach vers ( 55 56 57 58 59 )
+	#	set dir=$ospf$vers$arch"gcc432"
+	#	if ( ! -e .$dir && -e .$refos ) then
+	#	    echo "  Backward compatibility assumed between $dir -> $refos "
+	#	    /bin/ln -s .$refos .$dir
+	#	else
+	#	    if ( -e .$refos && -e .$dir ) echo " .$dir exists"
+	#	endif
+	#	if ( ! -e $dir && -e $refos ) then
+	#	    echo "  Backward compatibility assumed between $dir -> $refos "
+	#	    /bin/ln -s $refos $dir
+	#	else
+	#	    if ( -e $refos && -e $dir )   echo " $dir exists"
+	#	endif
+	#    end
+	#end
+    endif    
+    
 end
 
 
