@@ -8,6 +8,12 @@
 #include "TNamed.h"
 #include "StvStl.h"
 #include "StDraw3D.h"
+
+#ifndef MAX
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 /// \class StvSeedFinder
 class StvDraw;
 class StvHit;
@@ -25,7 +31,7 @@ public:
   virtual const THelixTrack *NextSeed()	=0;
   virtual void      Reset()		=0;
   virtual void      Clear(const char* opt="");
-  virtual int       Again(){return 0;}
+  virtual int       Again(int){return 0;}
   virtual void      FeedBack(int success);
 
 virtual const StvHits *GetHits() const 	{return &fSeedHits;}
