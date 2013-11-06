@@ -6,6 +6,14 @@
 #include <map>
 #include <vector>
 /// \class StvDefaultSeedFinder
+//#define MultiPhiZMap 1
+
+#ifdef MultiPhiZMap
+enum {kNKeys = 4};
+#else
+enum {kNKeys = 3};
+#endif
+
 
 class StvHit;
 class StMultiKeyMap;
@@ -30,7 +38,7 @@ int  Reject(const float x[3],const void* hp);	// 0  :x accepted
 					// >0 :x rejected
 					//-1 =x     accepted and lims updated
 private:
-void UpdateLims();		//Update XYZ limits
+void UpdateLims();		//Update  limits
 
 public:
 //		Input data
@@ -49,7 +57,7 @@ float mLen;		// cone length (height)
 //		Calculated data
 
 float mTan; 		// (tan(cone angle/2)
-float mLim[2][3];
+float mLim[4][kNKeys];
 //		Output data
 float mHitLen;
 float mHitPrj;
@@ -70,7 +78,7 @@ public:
    ~StvDefaultSeedFinder(){;}
   const THelixTrack* NextSeed();
   void      Clear(const char *opt="");
-  int       Again();
+  int       Again(int repeat);
   void      Reset();
   void      Print(const char *opt="") const {;}
 

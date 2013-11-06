@@ -26,7 +26,7 @@ public:
    ~StvKNSeedFinder(){;}
   const THelixTrack* NextSeed();
   void      Clear(const char *opt="");
-  int       Again();
+  int       Again(int repeat);
   void      Reset();
   void      FeedBack(int success);
   void      Print(const char *opt="") const {;}

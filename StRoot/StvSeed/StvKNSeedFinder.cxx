@@ -74,7 +74,7 @@ void StvKNSeedFinder::Reset()
 #endif
 }    
 //_____________________________________________________________________________
-int StvKNSeedFinder::Again()
+int StvKNSeedFinder::Again(int)
 {
   *f1stHitMapIter = f1stHitMap->begin();
    return 1;
