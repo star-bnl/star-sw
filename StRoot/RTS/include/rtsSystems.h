@@ -89,9 +89,8 @@
 
 
 
-// 2012 Group definitions...
-#define SST_GRP		0	// same as old FTPC
-
+// FY14 Group definitions; Tonko Nov 2013.
+#define SST_GRP		0
 #define PP_GRP	        1
 #define ETOW_GRP	2   
 #define BTOW_GRP	3
@@ -99,12 +98,12 @@
 #define TOF_GRP	        5
 #define ESMD_GRP	6
 #define TPX_GRP		7
-
-#define PXL_GRP		8	// same as old PMD
-
-#define IST_GRP         9	// Jun 2013: was FGT
-#define xxx_GRP		10	// unused...
-#define RPII_GRP	11
+#define PXL_GRP		8
+#define IST_GRP         9
+//#define xxx_GRP		10	// unused
+//#define RPII_GRP		11	// but still unused
+//#define xxx_GRP		12	// unused
+//#define xxx_GRP		13	// unused
 #define GMT_GRP		14
 #define MTD_GRP		15
 
