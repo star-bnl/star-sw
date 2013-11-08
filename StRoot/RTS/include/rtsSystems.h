@@ -101,7 +101,7 @@
 #define PXL_GRP		8
 #define IST_GRP         9
 //#define xxx_GRP		10	// unused
-//#define RPII_GRP		11	// but still unused
+#define RPII_GRP		11	// but still unused
 //#define xxx_GRP		12	// unused
 //#define xxx_GRP		13	// unused
 #define GMT_GRP		14
