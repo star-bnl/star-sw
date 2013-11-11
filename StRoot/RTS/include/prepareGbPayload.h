@@ -121,7 +121,7 @@ class Lxgbx {
 	    
 	    UINT32 node = xml->getParamI("subsys_tasks.nodes[%d].node",i);
 
-	    LOG(DBG, "node = 0x%x", node);
+	    LOG(DBG, "node = 0x%x", node,0,0,0,0);
 
 	    int sys = GET_SYSTEM(node);
 				 
@@ -142,7 +142,7 @@ class Lxgbx {
 	    }
 	}
 	
-	LOG(NOTE, "dets_in_run_mask = 0x%x",dets_in_run_mask);
+	LOG(NOTE, "dets_in_run_mask = 0x%x",dets_in_run_mask,0,0,0,0);
 	return ret;
     }
 
