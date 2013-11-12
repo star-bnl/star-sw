@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.104 2012/11/22 01:11:16 perev Exp $
+// $Id: StDraw3D.cxx,v 1.105 2013/11/12 17:50:22 perev Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -1473,7 +1473,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    
    // const char *towerName= gGeometry ? Form("CALO%d", gGeometry->GetListOfShapes()->GetSize()): "CALO";
      
-   TTRAP *trap = new TTRAP( "CALO", Form("Angle%d",lambda)
+   TTRAP *trap = new TTRAP( "CALO", Form("Angle%d",int(lambda/M_PI*180))
          , "Barrel"                // Material
          , siz/2                   // dz
          , lambda*TMath::RadToDeg()// Float_t theta (ROOT needs degree)
