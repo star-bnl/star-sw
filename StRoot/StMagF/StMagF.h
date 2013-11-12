@@ -5,10 +5,6 @@
 #include "StarMagField/StarMagField.h"
 #ifndef __CINT__
 #include "StarCallf77.h" 
-#define gufld  F77_NAME(gufld,GUFLD)
-R__EXTERN  "C" {
-  void type_of_call gufld(Float_t *x, Float_t *bf);
-}
 #endif
 class StMagF : public TNamed {
 public:
