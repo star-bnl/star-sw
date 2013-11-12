@@ -736,14 +736,14 @@ extern inline int rts2tcd(int rts)
 		-1,		//13: SSD gone...
 		TCD_ETOW,	//14
 		-1,		//15: generic DAQ
-		TCD_IST,	//16
+		-1,		//16: was FGT...
 		TCD_PP,		//17
 		TCD_BSMD,	//18
 		TCD_ESMD,	//19
 		TCD_TPX,	//20
 		TCD_PXL,	//21 PXL
 		TCD_MTD,	//22 MTD
-		-1,		//23 IST
+		TCD_IST,	//23 IST
 		TCD_SST,	//24 SST
 		-1,		//25 RPII
 		TCD_GMT,	//26 GMT
