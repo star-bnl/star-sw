@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.43 2013/09/27 20:35:00 perev Exp $
+// $Id: StvMaker.cxx,v 1.44 2013/11/13 20:32:24 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -50,6 +50,7 @@ More detailed: 				<br>
 #include <math.h>
 #include <string>
 #include "TSystem.h"
+#include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TTable.h"
@@ -69,9 +70,6 @@ More detailed: 				<br>
 #include "StvHitLoader.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvSeedFinder.h"
-#include "StvSeed/StvDefaultSeedFinder.h"
-#include "StvSeed/StvKNSeedFinder.h"
-#include "StvSeed/StvCASeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "Stv/StvFitter.h"
@@ -274,16 +272,22 @@ static int initialized = 0;
   TString seeds = SAttr("seedFinders");
   if (!seeds.Length()) seeds = "Default";
   TObjArray *tokens = seeds.Tokenize(" .,");
+  StvSeedFinder *seedFinder=0; int seedErr=0; 
+  const char *seedNick[]={"CA"                 ,"Default"                 ,"KN"                 ,0};
+  const char *seedNews[]={"new StvCASeedFinder","new StvDefaultSeedFinder","new StvKNSeedFinder",0};
+
   for (int idx=0;idx<=tokens->GetLast();idx++) {
   TString &chunk = ((TObjString*)tokens->At(idx))->String();
-    if (chunk.CompareTo("CA"      ,TString::kIgnoreCase)==0) {
-      assert(gSystem->Load("Vc.so")		>=0);
-      assert(gSystem->Load("TPCCATracker.so")	>=0);
-      kit->SetSeedFinder (new StvCASeedFinder);		continue;}
-    if (chunk.CompareTo("Default",TString::kIgnoreCase)==0 ) {
-      kit->SetSeedFinder (new StvDefaultSeedFinder);	continue;}
-    if (chunk.CompareTo("KN",TString::kIgnoreCase)==0 ) {
-      kit->SetSeedFinder (new StvKNSeedFinder);	continue;}
+    for (int nick=0;seedNick[nick];nick++) {
+      if (chunk.CompareTo(seedNick[nick],TString::kIgnoreCase)!=0) continue;
+      if (nick==0) {
+        assert(gSystem->Load("Vc.so")		>=0);
+        assert(gSystem->Load("TPCCATracker.so")	>=0);}
+      seedFinder = (StvSeedFinder*)gROOT->ProcessLineFast(seedNews[nick],&seedErr);
+      assert(seedFinder && !seedErr);
+      kit->SetSeedFinder (seedFinder); break;
+      Info("InitRun","Added %s seed finder",seedFinder->GetName());
+    }
   };
   delete tokens;
 
