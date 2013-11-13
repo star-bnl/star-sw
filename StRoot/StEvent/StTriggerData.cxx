@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.21 2013/02/12 19:40:32 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.22 2013/11/13 19:17:01 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.22  2013/11/13 19:17:01  ullrich
+ * Added mtd4AtAddress() and dsmTF201Ch(). (Akio)
+ *
  * Revision 2.21  2013/02/12 19:40:32  ullrich
  * Add two new methods: mxqAtSlotAddress and mtd3AtAddress (Llope).
  *
@@ -76,7 +79,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.21 2013/02/12 19:40:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.22 2013/11/13 19:17:01 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -253,9 +256,11 @@ unsigned short StTriggerData::mtdTdc(StBeamDirection eastwest, int pmt, int prep
 unsigned char  StTriggerData::mtdDsmAtCh(int ch, int prepost) const {return 0;}
 bool           StTriggerData::mtdDsmHit(int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdVpdTacDiff() const {return 0;}
+unsigned short StTriggerData::mtd4AtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::tofAtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::tofTrayMultiplicity(int tray, int prepost) const {return 0;}
 unsigned short StTriggerData::tofMultiplicity(int prepost) const {return 0;}
+unsigned short StTriggerData::dsmTF201Ch(int ch) const {return 0;}
 unsigned short StTriggerData::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
 unsigned long  StTriggerData::pp2ppDSM(int prepost) const {return 0;}
