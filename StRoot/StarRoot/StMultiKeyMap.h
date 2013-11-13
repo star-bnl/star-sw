@@ -15,6 +15,7 @@ void Add(const void *obj,const float  *keys);
 void Add(const void *obj,const double *keys);
 const StMultiKeyNode *GetTop() const 	{return mTop;}
       StMultiKeyNode *GetTop()       	{return mTop;}
+                void  SetTop(StMultiKeyNode *top) {mTop = top;}
 double Quality();
    int MakeTree(int keepArray=0);
    int ls(const char *file="") const;
@@ -51,6 +52,7 @@ virtual       int    ls(const char *file="") const;
   const float *GetKeys() const { return mKeys;}
         float  GetKey()  const { return mKeys[int(mIKey)];}
         int    GetIKey() const { return mIKey;} 
+        void   SetIKey(int ik) { mIKey=ik;    } 
         int    GetNKey() const { return mNKey;} 
         int    GetNumb(int way) const { return mNumb[way];}
         int    Size() const    { return mNumb[0]+mNumb[1]+1;}
@@ -90,17 +92,16 @@ void       Update(const float *kMin=0,const float *kMax=0);
 StMultiKeyNode *operator*() const { return (StMultiKeyNode*)mStk[mLev];}
 StMultiKeyMapIter &operator++();
 int Level() const {return mLev;}
-float *getKMin() const {return mKMin;}
-float *getKMax() const {return mKMax;}
+float *GetKMin() const {return mKMin;}
+float *GetKMax() const {return mKMax;}
 const int *Touched() const {return mTouched;}
-
 private:
-void Down(const StMultiKeyNode *node);
-void SelfCheck();
+void Left(const StMultiKeyNode *node);
+int FullCheck();
 int FilterLeft(const StMultiKeyNode *node) const;
 int FilterRite(const StMultiKeyNode *node) const;
 protected:
-mutable int mTouched[2];
+mutable int mTouched[3];
 std::vector<float> mMinMax;
 float *mKMin;
 float *mKMax;

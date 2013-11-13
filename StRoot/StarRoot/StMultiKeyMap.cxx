@@ -34,7 +34,6 @@ void StMultiKeyMap::Clear(const char *)
 //______________________________________________________________________________
 void StMultiKeyMap::Add(const void *obj,const double *keys)
 {
-   if (!obj) obj = (void*)(-1);
    float buf[200];
    for (int i=0;i<mNKey;i++) {buf[i]=(float)keys[i];}
    Add(obj,buf);
@@ -42,7 +41,7 @@ void StMultiKeyMap::Add(const void *obj,const double *keys)
 //______________________________________________________________________________
 void StMultiKeyMap::Add(const void *obj,const float *keys)
 {
-  if (!obj) obj = (void*)(-1);
+assert(obj);
   assert(!mTop);
   StMultiKeyNode *node = new StMultiKeyNode(mNKey);
   node->Set(obj,keys);
@@ -57,17 +56,21 @@ double StMultiKeyMap::StMultiKeyMap::Quality()
 //______________________________________________________________________________
 int StMultiKeyMap::MakeTree(int keepArray)
 {
-   assert(!mTop);
    int nNodes = mArr.size();
    if (!nNodes) return 0;
 //   std::random_shuffle( mArr.begin(),mArr.end() ); // shuffle elements 
    random_shuffle(mArr); 
-   mTop =  mArr[0];
-   for (int i=1;i<nNodes;i++) {mTop->Add(mArr[i]);}
+   int jl = 0;
+   if (!mTop )  {mTop =  mArr[0];jl=1;mTop->SetIKey(0);}
+   unsigned int myRnd = 1946;
+   for (int i=jl;i<nNodes;i++) {
+     myRnd+=1000000007; mArr[i]->SetIKey(myRnd%mNKey);
+     mTop->Add(mArr[i]);
+   }
 
    if (keepArray) return nNodes;
 std::vector<StMultiKeyNode*> tmp(0);
-   assert(nNodes == mTop->Size());
+//    assert(nNodes == mTop->Size());
    mArr.swap(tmp);	//destroy internal array completely;
    return nNodes;
 }
@@ -100,17 +103,17 @@ StMultiKeyNode::StMultiKeyNode(const StMultiKeyNode &fr)
 void StMultiKeyNode::Init()
 {
   memset(&mNKey,0,(char*)&mKeys-&mNKey+sizeof(mKeys));
-  mId = ++gMyId; gMyInst++;
+  mId = ++gMyId; gMyInst++; mIKey = -1;
 }
 //______________________________________________________________________________
 void StMultiKeyNode::Clear()
 {
-  memset(&mIKey,0,(char*)&mObj - &mIKey);
+  memset(&mIKey,0,(char*)&mObj - &mIKey); mIKey = -1;
 }
 //______________________________________________________________________________
 StMultiKeyNode::~StMultiKeyNode()
 {
-  if (mObj) delete [] mKeys;
+  delete [] mKeys;
   delete mLink[0];
   delete mLink[1];
   gMyInst--;
@@ -122,8 +125,7 @@ int StMultiKeyNode::GetNInst()
 void StMultiKeyNode::Set(const void *obj,const float *keys)
 {
    Clear();
-   if (!obj) obj = (void*)(-1);
-   mObj = obj; mIKey=0;
+   mObj = obj; mIKey=-1;
    if (!mKeys) mKeys = new float[mNKey]; 
    memcpy(mKeys,keys,sizeof(mKeys[0])*mNKey);
 }
@@ -146,8 +148,7 @@ void StMultiKeyNode::Add(StMultiKeyNode *node)
 {
 static int nCall=0; nCall++;
   assert(this != node);
-  node->mIKey = (mIKey+1000003)%mNKey;
-  int way = (node->mKeys[int(mIKey)] <= GetKey())? 0:1;
+  int way = (node->mKeys[int(mIKey)] > GetKey());
   if (mLink[way])            { mLink[way]->Add(node);}
   else                       { mLink[way] = node    ;}
   mNumb[way]++;
@@ -176,8 +177,7 @@ int StMultiKeyNode::ls(const char *file) const
 {
    FILE *out=stdout;
    if (!file) file="";
-   if (file[0]=='-') out=0;
-   else if (file[0]) out=fopen(file,"r");
+   if (file && file[0]) out=fopen(file,"w");
 
    StMultiKeyMapIter iter((StMultiKeyNode*)this);
    
@@ -214,7 +214,7 @@ StMultiKeyMapIter::StMultiKeyMapIter(const StMultiKeyNode *node,const float *kMi
 //______________________________________________________________________________
 void StMultiKeyMapIter::Set(const StMultiKeyNode *node,const float *kMin,const float *kMax)
 {
-  mTouched[0]=0;mTouched[1]=0;
+  memset(mTouched,0,sizeof(mTouched));
   mStk.resize(32);
   mNK = node->GetNKey();
   mKMin=0;mKMax=0;
@@ -227,8 +227,9 @@ void StMultiKeyMapIter::Set(const StMultiKeyNode *node,const float *kMin,const f
     memcpy(mKMax,kMax,sk);
   }
   mLev = 0; mStk[0]=0;
-  Down(node);
-  SelfCheck();
+  
+  Left(node);
+  if (FullCheck()) ++(*this);
 }
 //______________________________________________________________________________
 void StMultiKeyMapIter::Update(const float *kMin,const float *kMax)
@@ -244,20 +245,17 @@ StMultiKeyMapIter::~StMultiKeyMapIter()
 //______________________________________________________________________________
 StMultiKeyMapIter &StMultiKeyMapIter::operator++()
 {
-  if (!mLev)	return *this;
-  const StMultiKeyNode* node = mStk[mLev];
-  const StMultiKeyNode* rLink  = node->RLink();
-  mLev--;
-  if (!rLink)			goto RETN;
-  if (mKMin && FilterRite(node))goto RETN;
-  Down(rLink);
-  return *this;
-RETN:
-  SelfCheck();
+  while (mLev) {
+    const StMultiKeyNode* node  = mStk[mLev];
+    const StMultiKeyNode* rLink = node->RLink();
+    mLev--;  
+    if (rLink && (!mKMin || !FilterRite(node))) Left(rLink);
+    if (!FullCheck()) break;
+  }
   return *this;
 }  
 //______________________________________________________________________________
-void StMultiKeyMapIter::Down(const StMultiKeyNode *node) 
+void StMultiKeyMapIter::Left(const StMultiKeyNode *node) 
 {
   while(node) {
     if ((int)mStk.size() <=mLev) mStk.resize(mLev*2);
@@ -266,45 +264,45 @@ void StMultiKeyMapIter::Down(const StMultiKeyNode *node)
     if (mKMin && FilterLeft(node)) break;
     node = node->LLink();
   }
-  SelfCheck();
+  return;
 }
 //______________________________________________________________________________
-void StMultiKeyMapIter::SelfCheck() 
+int StMultiKeyMapIter::FullCheck() 
 {
   const StMultiKeyNode *node = mStk[mLev];
-  if (!node ) return;
-//  if (!node->GetObj()) {++(*this); return;}
-  if (!mKMin) return;
+
+  if (!node ) return 0;
+  if (!mKMin) return 0;
+//  if (!node->GetObj()) { ++(*this); return;} 
   const float *fk = node->GetKeys();
-  mTouched[1]++;
+  mTouched[2]++;
   for (int k=0;k<mNK;k++) {  
-    if (mKMin[k]<=fk[k] && fk[k] < mKMax[k]) continue;
-    ++(*this); return;
+    if (mKMin[k]>fk[k] || fk[k] >= mKMax[k]) return 1;
   }
-  return;
+  return 0;
 }  
 //______________________________________________________________________________
 int StMultiKeyMapIter::FilterLeft(const StMultiKeyNode *node) const
 {
   int   ik = node->GetIKey();
   float fk = node->GetKey();
-  if ( mKMin[ik]>fk) return 1;
-  return 0;
+  mTouched[0]++;
+  return ( mKMin[ik]>fk);
 }
 //______________________________________________________________________________
 int StMultiKeyMapIter::FilterRite(const StMultiKeyNode *node) const
 {
   int ik = node->GetIKey();
   float fk = node->GetKey();
-  mTouched[0]++;
-  if (mKMax[ik]<fk) return 1;
-  return 0;
+  mTouched[1]++;
+  return (mKMax[ik]<=fk);
 }
 //______________________________________________________________________________
 void random_shuffle(std::vector<StMultiKeyNode*> &arr)
 {
+static const unsigned int us=1000000007;
   int n = arr.size(); if (n<=3) return;
-  unsigned int u=n/2,us=1000000007;
+  unsigned int u=n/2;
   int jr=n-1;
   while (0<jr) {
     int jj = (u+=us)%jr;
@@ -323,7 +321,7 @@ printf("StMultiKeyMap::Test() started\n");
    StMultiKeyMap map(1);
    for (int i=0;i<nEVTS;i++) {
      rnd = 1 - (i+1.)/nEVTS; 
-     map.Add(0,&rnd);
+     map.Add((void*)(-1),&rnd);
    }
    map.MakeTree();
    map.ls();
@@ -338,12 +336,13 @@ printf("\n%d evts No bounds\n",nEVTS);
    for (StMultiKeyNode *node=0;(node = *iter);++iter)
    {
      n++; rnd = node->GetKeys()[0];
-////     printf("%4d - %g \n",n,rnd);
+//     printf("%4d - %g %p\n",n,rnd,node);
      assert(pre<=rnd);
      pre = rnd;
    }
 assert(n==nEVTS);
-printf("\nNo bounds OK, touched %d %d\n",iter.Touched()[0],iter.Touched()[1]);
+printf("\nNo bounds OK, touched %d %d %d\n"
+      ,iter.Touched()[0],iter.Touched()[1],iter.Touched()[2]);
 
 
    float kMin=0.5,kMax=0.6;
@@ -359,7 +358,8 @@ printf("\n%d ~evts bounds=%g %g\n",nEst,kMin,kMax);
      assert((kMin<=rnd) && (rnd < kMax));
      pre = rnd;
    }
-printf("\nGot %d. Bounds OK, Touched %d %d\n",n,iter.Touched()[0],iter.Touched()[1]);
+printf("\nGot %d. Bounds OK, Touched %d %d %d\n",n
+      ,iter.Touched()[0],iter.Touched()[1],iter.Touched()[2]);
 
 }
 //______________________________________________________________________________
@@ -382,38 +382,39 @@ printf("StMultiKeyMap::Test2() started\n");
 
    float dow[4]={0,  0.1,0.2,0.3};
    float upp[4]={0.2,0.3,0.4,0.5};
+
    StMultiKeyMapIter iter(map.GetTop(),dow,upp);
    double ev = nEvts;for (int i=0;i<4;i++){ev*=(upp[i]-dow[i]);};
 printf("\n%d ~evts \n",int(ev+0.5));
- 
-   int nSel = 0;
+   int nk = map.GetNKey();
+   int nSel = 0,nBad=0;
    for (StMultiKeyNode *node=0;(node = *iter);++iter)
    {
-     nSel++; 
-//     const float *key = node->GetKeys();
+     nSel++; int good = 0;
+     const float *key = node->GetKeys();
+     for (int j=0;j<nk;j++) {if (key[j]>=dow[j] && key[j]<upp[j]) good++;}
+     nBad += (good!=nk); 
 //     printf("%4d - %g %g %g %g \n",nSel,key[0],key[1],key[2],key[3]);
    }
    int nb = map.Size();
-   int nk = map.GetNKey();
    StMultiKeyNode **nodes = map.GetArr();
    int nMust=0;
    for (int i=0;i<nb;i++) 
    {
      StMultiKeyNode *node = nodes[i];
      const float *key = node->GetKeys();
-     int good = 0;
-     for (int j=0;j<nk;j++) {
-       good = 0;
-       if (key[j]< dow[j]) break;
-       if (key[j]>=upp[j]) break;
-       good = 1;
+     int good = 1;
+     for (int k=0;k<nk;k++) {  
+       if (dow[k]<=key[k] && key[k] < upp[k]) continue;
+       good=0;break;
      }
      if (!good) continue;
      nMust++;
    }
    map.Clear();
-printf("\nSelected  %d and must be %d\n",nSel,nMust);
-printf("\nGot %d. Bounds OK , Touched %d %d\n",nSel,iter.Touched()[0],iter.Touched()[1]);
+printf("\nSelected  %d bad %d and must be %d\n",nSel,nBad,nMust);
+printf("Touched %d %d %d\n"
+      ,iter.Touched()[0],iter.Touched()[1],iter.Touched()[2]);
 
 }
 
