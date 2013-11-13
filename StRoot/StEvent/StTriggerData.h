@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.43 2013/02/12 19:40:32 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.44 2013/11/13 19:17:01 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.44  2013/11/13 19:17:01  ullrich
+ * Added mtd4AtAddress() and dsmTF201Ch(). (Akio)
+ *
  * Revision 2.43  2013/02/12 19:40:32  ullrich
  * Add two new methods: mxqAtSlotAddress and mtd3AtAddress (Llope).
  *
@@ -307,11 +310,13 @@ public:
     virtual unsigned char  mtdDsmAtCh(int ch, int prepost=0) const;
     virtual bool           mtdDsmHit(int pmt, int prepost=0) const;
     virtual unsigned short mtdVpdTacDiff() const;
+    virtual unsigned short mtd4AtAddress(int address, int prepost=0) const;
 
     //TOF
     virtual unsigned short tofAtAddress(int address, int prepost=0) const;
     virtual unsigned short tofTrayMultiplicity(int tray, int prepost=0) const;
     virtual unsigned short tofMultiplicity(int prepost=0) const;
+    virtual unsigned short dsmTF201Ch(int ch) const;
 
     //PP2PP
     virtual unsigned short pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
