@@ -21,7 +21,7 @@
 
 
 void myBreak(int);
-enum {kFstAng=74,kErrFakt=5,kLenFakt=5};
+enum {kFstAng=65,kErrFakt=4,kLenFakt=4};
 enum {kPhi=0,kRxy=1,kTanL=2,kZ=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinTan = 0.1;
@@ -71,7 +71,7 @@ void StvDefaultSeedFinder::Reset()
     fMultiHits->Add(stiHit,x);
 #endif
   } 
-  fMultiHits->MakeTree();
+   fMultiHits->MakeTree();
   *f1stHitMapIter = f1stHitMap->begin();
 }    
 //_____________________________________________________________________________
