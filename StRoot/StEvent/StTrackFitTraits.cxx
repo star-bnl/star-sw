@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.27 2013/07/23 11:21:49 jeromel Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.28 2013/11/13 19:19:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.28  2013/11/13 19:19:40  ullrich
+ * Removed cause of warnings.
+ *
  * Revision 2.27  2013/07/23 11:21:49  jeromel
  * Undo past week changes
  *
@@ -104,7 +107,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.27 2013/07/23 11:21:49 jeromel Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.28 2013/11/13 19:19:40 ullrich Exp $";
 
 //_____________________________________________________________________________
 StTrackFitTraits::StTrackFitTraits()
@@ -169,59 +172,59 @@ unsigned short StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
     // Old and obsolete
     //
     if (mNumberOfFitPoints && (mNumberOfFitPoints<0x8000)) {    
-	// 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-	switch (det) {
-	case kFtpcWestId:
-	case kFtpcEastId:
-	case kTpcId:
-	    return mNumberOfFitPoints%1000;
-	    break;
-	case kSvtId:
-	    return (mNumberOfFitPoints%10000)/1000;
-	    break;
-	case kSsdId:
-	    return mNumberOfFitPoints/10000;
-	    break;
-	default:
-	    return 0;
-	}
+        // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
+        switch (det) {
+            case kFtpcWestId:
+            case kFtpcEastId:
+            case kTpcId:
+                return mNumberOfFitPoints%1000;
+                break;
+            case kSvtId:
+                return (mNumberOfFitPoints%10000)/1000;
+                break;
+            case kSsdId:
+                return mNumberOfFitPoints/10000;
+                break;
+            default:
+                return 0;
+        }
     }
     //
     // New version
     //
     else {
-	switch (det) {
-	case kFtpcWestId:
-	    return mNumberOfFitPointsFtpcWest;
-	    break;
-	case kFtpcEastId:
-	    return mNumberOfFitPointsFtpcEast;
-	    break;
-	case kTpcId:
-	    return mNumberOfFitPointsTpc;
-	    break;
-	case kSvtId:
-	    return mNumberOfFitPointsSvt;
-	    break;
-	case kSsdId:
-	    return mNumberOfFitPointsSsd;
-	    break;
-	case kPxlId:
-	    return mNumberOfFitPointsPxl;
-	    break;
-	case kIstId:
-	    return mNumberOfFitPointsIst;
-	    break;
-	default:	//sum of all
-            return mNumberOfFitPoints&0x7FFF
-	    + mNumberOfFitPointsFtpcWest
-	    + mNumberOfFitPointsFtpcEast
-	    + mNumberOfFitPointsTpc
-	    + mNumberOfFitPointsSvt
-	    + mNumberOfFitPointsSsd
-	    + mNumberOfFitPointsPxl
-	    + mNumberOfFitPointsIst;
-	}
+        switch (det) {
+            case kFtpcWestId:
+                return mNumberOfFitPointsFtpcWest;
+                break;
+            case kFtpcEastId:
+                return mNumberOfFitPointsFtpcEast;
+                break;
+            case kTpcId:
+                return mNumberOfFitPointsTpc;
+                break;
+            case kSvtId:
+                return mNumberOfFitPointsSvt;
+                break;
+            case kSsdId:
+                return mNumberOfFitPointsSsd;
+                break;
+            case kPxlId:
+                return mNumberOfFitPointsPxl;
+                break;
+            case kIstId:
+                return mNumberOfFitPointsIst;
+                break;
+            default:	//sum of all
+                return (mNumberOfFitPoints&0x7FFF)
+                + mNumberOfFitPointsFtpcWest
+                + mNumberOfFitPointsFtpcEast
+                + mNumberOfFitPointsTpc
+                + mNumberOfFitPointsSvt
+                + mNumberOfFitPointsSsd
+                + mNumberOfFitPointsPxl
+                + mNumberOfFitPointsIst;
+        }
     }
 }
 

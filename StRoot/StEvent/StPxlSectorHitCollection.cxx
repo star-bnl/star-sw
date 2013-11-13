@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPxlSectorHitCollection.cxx,v 2.1 2013/03/05 14:40:41 ullrich Exp $
+ * $Id: StPxlSectorHitCollection.cxx,v 2.2 2013/11/13 19:19:40 ullrich Exp $
  *
  * Author: X. Dong, Jan 2013
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPxlSectorHitCollection.cxx,v $
+ * Revision 2.2  2013/11/13 19:19:40  ullrich
+ * Removed cause of warnings.
+ *
  * Revision 2.1  2013/03/05 14:40:41  ullrich
  * Initial Revision.
  *
@@ -38,8 +41,8 @@ StPxlSectorHitCollection::ladder(unsigned int i) const
 unsigned int StPxlSectorHitCollection::numberOfHits() const
 {
     unsigned int sum = 0;
-    for ( int i=0; i < mNumberOfLadders; i++) {
-        for ( int j=0; j < mLadders[i].numberOfSensors(); j++) {
+    for ( unsigned int i=0; i < mNumberOfLadders; i++) {
+        for ( unsigned int j=0; j < mLadders[i].numberOfSensors(); j++) {
             sum += mLadders[i].sensor(j)->hits().size();
         }
     }
