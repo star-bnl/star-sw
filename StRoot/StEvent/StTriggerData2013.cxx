@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2013.cxx,v 2.3 2013/02/12 19:40:33 ullrich Exp $
+ * $Id: StTriggerData2013.cxx,v 2.4 2013/11/13 19:16:43 ullrich Exp $
  *
  * Author: Akio Ogawa,Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2013.cxx,v $
+ * Revision 2.4  2013/11/13 19:16:43  ullrich
+ * Added mtd4AtAddress() and dsmTF201Ch(). Corrections for BBC and VPD.
+ *
  * Revision 2.3  2013/02/12 19:40:33  ullrich
  * Add two new methods: mxqAtSlotAddress and mtd3AtAddress (Llope).
  *
@@ -371,7 +374,13 @@ unsigned short StTriggerData2013::bbcADCSum(StBeamDirection eastwest, int prepos
 {
     unsigned short sum=0;
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0) for(int i=1; i<=16; i++) {sum+=bbcADC(eastwest,i,prepost);}
+    //if (buffer >= 0) for(int i=1; i<=16; i++) {sum+=bbcADC(eastwest,i,prepost);}
+    if(buffer>=0){ 
+      if (mBBC[buffer]){
+	if(eastwest==east) { sum = mBBC[buffer]->BBClayer1[3]; }
+	else               { sum = mBBC[buffer]->BBClayer1[1]; }
+      }
+    }
     return sum;
 }
 
@@ -1054,19 +1063,38 @@ unsigned short StTriggerData2013::vpdEarliestTDCHighThr(StBeamDirection eastwest
                 if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
                 else                {return mBBC[buffer]->VPD[4]%4096;}
             }
-        }else {
+        }else if(mRun<=14001001){
             if(mMIX[buffer]){
                 if (eastwest==east) {return mMIX[buffer]->MTD_P2PLayer1[13] + ((mMIX[buffer]->MTD_P2PLayer1[12]&0x0f)<<8);}
                 else                {return mMIX[buffer]->MTD_P2PLayer1[9]  + ((mMIX[buffer]->MTD_P2PLayer1[8]&0x0f)<<8);}
+            }
+        }else {
+            if(mMIX[buffer]){
+                if (eastwest==east) {return mMIX[buffer]->MTD_P2PLayer1[11] + ((mMIX[buffer]->MTD_P2PLayer1[10]&0xf)<<8);}
+                else                {return (mMIX[buffer]->MTD_P2PLayer1[10]>>4) + ((mMIX[buffer]->MTD_P2PLayer1[9]&0xff)<<4);}	    
             }
         }
     }
     return 0;
 }
 
-unsigned short StTriggerData2013::vpdTimeDifference() const
+unsigned short StTriggerData2013::vpdTimeDifference() const 
 {
     return L1_DSM->VTX[7]%8192;
+}
+
+unsigned short StTriggerData2013::dsmTF201Ch(int ch) const   // read TF201 data            
+{                                                                 
+    int map[8]={3, 2, 1, 0, 7, 6, 5, 4};
+    return L1_DSM->TOF[map[ch]];  //ch4-7 currently unused
+}
+
+unsigned short StTriggerData2013::mtd4AtAddress(int address, int prepost) const  // read QT4 data
+{
+    if (mRun<=15001001) return 0;           // Run-14 onwards...
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && address>=0 && address<32) return mxq[buffer][14][address]; 
+    return 0;
 }
 
 unsigned short StTriggerData2013::nQTdata(int prepost) const
