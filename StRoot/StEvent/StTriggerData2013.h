@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2013.h,v 2.3 2013/02/12 19:40:33 ullrich Exp $
+ * $Id: StTriggerData2013.h,v 2.4 2013/11/13 19:16:43 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2013.h,v $
+ * Revision 2.4  2013/11/13 19:16:43  ullrich
+ * Added mtd4AtAddress() and dsmTF201Ch(). Corrections for BBC and VPD.
+ *
  * Revision 2.3  2013/02/12 19:40:33  ullrich
  * Add two new methods: mxqAtSlotAddress and mtd3AtAddress (Llope).
  *
@@ -158,7 +161,7 @@ public:
     unsigned short vpdEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     unsigned short vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost=0) const;
     unsigned short vpdTimeDifference() const;
-    
+
     //MXQ crate
     unsigned short mxqAtSlotAddress(int address, int prepost=0, int slot=0) const;
 
@@ -171,11 +174,13 @@ public:
     unsigned char  mtdDsmAtCh(int ch, int prepost=0) const;
     bool           mtdDsmHit(int pmt, int prepost=0) const;
     unsigned short mtdVpdTacDiff() const;
+    unsigned short mtd4AtAddress(int address, int prepost=0) const;
     
     //TOF
     unsigned short tofAtAddress(int address, int prepost=0) const;
     unsigned short tofTrayMultiplicity(int tray, int prepost=0) const;
     unsigned short tofMultiplicity(int prepost=0) const;
+    unsigned short dsmTF201Ch(int ch) const;
     
     //PP2PP
     unsigned short pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
