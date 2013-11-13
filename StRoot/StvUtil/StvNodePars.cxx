@@ -273,7 +273,7 @@ assert(fabs(_z)<999);
    _y += MOM[1]*dT+MOM[0]*dH;
    _psi  += dA;
    if (_psi<-M_PI) {_psi+=2*M_PI;} else if (_psi> M_PI) {_psi-=2*M_PI;}
-assert(fabs(_psi)<M_PI);
+assert(fabs(_psi)<=M_PI);
    _curv += _curv*dRho;
    _ptin  =_curv/_hz;
    if (fabs(dA)<1e-2) 	{
