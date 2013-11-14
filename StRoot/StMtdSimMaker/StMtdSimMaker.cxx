@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.3 2013/07/05 21:57:34 geurts Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.4 2013/11/14 16:17:08 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -39,6 +39,8 @@
 static RanluxEngine engine;
 static RandGauss ranGauss(engine);
 
+Int_t geant2backlegID[30] = {1,2,3,4,5,6,7,10,22,25,26,27,28,29,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};  ///Corrections to backleg numbers from GEANT
+
 ClassImp(StMtdSimMaker)
 
 	//_____________________________________________________________________________
@@ -70,7 +72,7 @@ void StMtdSimMaker::Reset() {
 //_____________________________________________________________________________
 Int_t StMtdSimMaker::InitRun(Int_t runnumber) {
 
-  // Channel group mapping for each module. Basic initialization below. Will move to database eventually.
+  /// Channel group mapping for each module. Basic initialization below. Will move to database eventually.
   int channel(0);
   for (int module=0; module<5; module++){
     for (int cell=0; cell<24; cell ++){
@@ -104,7 +106,7 @@ Int_t StMtdSimMaker::Finish() {
 //_____________________________________________________________________________
 Int_t StMtdSimMaker::Make() {
 
-  // Check to see that there are GEANT hits
+  /// Check to see that there are GEANT hits
   mGeantData = GetInputDS("geant"); // in bfc chain
   if(!mGeantData) { // when reading the geant.root file
     mGeantData = GetInputDS("geantBranch");
@@ -115,7 +117,7 @@ Int_t StMtdSimMaker::Make() {
   }
   LOG_INFO << " Found GEANT data -- loading MTD hits... " << endm;
 
-  // Look for MTD hits
+  /// Look for MTD hits
   St_g2t_mtd_hit* g2t_mtd_hits = dynamic_cast<St_g2t_mtd_hit*>(mGeantData->Find("g2t_mtd_hit"));
   if(!g2t_mtd_hits){
     LOG_WARN << " No MTD hits in GEANT" << endm; 
@@ -136,20 +138,21 @@ Int_t StMtdSimMaker::Make() {
   return kStOK;
 }
 
-//_____________________________________________________________________________
-int StMtdSimMaker::CalcCellId(Int_t volume_id, Float_t ylocal,
-                              int &ibackleg,int &imodule,int &icell) 
+///This will calculate the cell ID as well as decode the module # and backleg # to store in an MTD Collection. Done from volume_id produced by GEANT.
+int StMtdSimMaker::CalcCellId(Int_t volume_id, Float_t ylocal, int &ibackleg,int &imodule,int &icell) 
 {
 
-// 		Decode GEANT volume_id
+        ///Decode GEANT volume_id
+  Int_t backlegTemp;
   Int_t ires    = volume_id/100;
-  imodule = ires%10; 
-  ibackleg =ires/10;
+  imodule = ires%10;        ///module number, i.e. where the module falls in a 5 tray backleg
+  backlegTemp = ires/10;    /// This is the backleg number produced by GEANT, does not match value from geometry
+  ibackleg = geant2backlegID[backlegTemp - 1];  /// This is the corrected backleg number, will be stored in sthit       
 
-  // Construct cell ID from local Y coordinate
+  /// Construct cell ID from local Y coordinate
   icell = Int_t((ylocal + kMtdPadWidth * kNCell/2) / kMtdPadWidth) + 1;
 
-  // Verify ranges
+  /// Verify ranges
   if(ibackleg<0 || ibackleg>kNBackleg) return -3;
   if(imodule <0 || imodule >kNModule ) return -2;  
   if(icell  <=0 || icell   >kNCell   ) return -1;
@@ -158,7 +161,7 @@ int StMtdSimMaker::CalcCellId(Int_t volume_id, Float_t ylocal,
 }
 
 
-//_____________________________________________________________________________
+///This will define the maps to store the StMtdHits and will call the necessary functions to obtain the cell, module and backleg #s to
 Int_t StMtdSimMaker::FastCellResponse() 
 {
   std::map<int,StMtdHit*> myMap;
@@ -174,16 +177,13 @@ Int_t StMtdSimMaker::FastCellResponse()
     }
 
 
-    // int channel1 = 0;    //AJ First end of read out strip
-    //int channel2 = 0;    //AJ Second end of read out strip
-
     
-
     Int_t icell, imodule, ibackleg;
     int cellId = CalcCellId(ghit.volume_id, ghit.x[1],ibackleg,imodule,icell);
 
-    LOG_DEBUG << "Volume ID: "<< ghit.volume_id << "  Cell ID: " << cellId;
+    LOG_DEBUG << "Volume ID: "<< ghit.volume_id << "  Cell ID: " << cellId << endm;
     LOG_DEBUG << " icell: " << icell << " imodule: " << imodule << " ibackleg: " << ibackleg << " ghit.tof: " << ghit.tof << endm;
+    LOG_DEBUG << " track: " << ghit.track_p << endm;
 
     if (cellId<0) continue;
     StMtdHit *&sthit = myMap[cellId];
@@ -198,16 +198,21 @@ Int_t StMtdSimMaker::FastCellResponse()
     //Double_t pathL = ghit.s_track;
     //Double_t q = 0.;
     
-   int channel1 = mModuleChannel[imodule - 1][icell - 1];   //AJ uses the module and the cell id to find the first channel on RDO
-   int channel2 = channel1 + 12;
+    int channel1 = mModuleChannel[imodule - 1][icell - 1];   /// uses the module and the cell id to find the first channel on RDO
+    int channel2 = channel1 + 12;                            /// uses the module and the cell id to find the second channel on RDO
 
-   LOG_DEBUG << "First hit for this cell, assigning channel 1: " << channel1 << " channel 2: " << channel2 << endm;
+    LOG_INFO << "First hit for this cell, assigning channel 1: " << channel1 << " channel 2: " << channel2 << endm;
 
-   //Fill Histograms here AJ////
-   QABacklegChannel->Fill(ibackleg, channel1);
-   QABacklegChannel->Fill(ibackleg, channel2);
-  
-    mDeSeen->Fill(de);
+    //Fill Histograms here AJ////
+    QABacklegChannel->Fill(ibackleg, channel1);
+    QABacklegChannel->Fill(ibackleg, channel2);
+    
+    //mCellGeant->Fill(icell);
+    mDeGeant->Fill(ghit.de);
+    mTofGeant->Fill(ghit.tof);	
+    
+    //mCellSeen->Fill(cellId);
+	mDeSeen->Fill(de);
     mTofSeen->Fill(tof);
     //////////////
 
