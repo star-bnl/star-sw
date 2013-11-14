@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.63 2013/05/23 19:27:08 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.64 2013/11/14 21:25:47 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.64  2013/11/14 21:25:47  dmitry
+ * override for the mysql user autodetect functionality
+ *
  * Revision 1.63  2013/05/23 19:27:08  dmitry
  * simple hook to use database with login/pass when really needed
  *
@@ -340,6 +343,10 @@ mRes= new MysqlResult;
   pwd = getpwuid(geteuid());
   if (pwd) {
     mSysusername = pwd->pw_name;
+	mdbuser = (char*)mSysusername.c_str();
+	std::cout << "DB OVERRIDE default user with: " << mdbuser << std::endl;
+  } else {
+	std::cout << "DB OVERRIDE failure, user ID cannot be retrieved" << std::endl;
   }
 }
 //////////////////////////////////////////////////////////////////////
