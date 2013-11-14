@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.2  2013/11/14 19:10:27  mstftsm
+ * StMcPxlHit has been changed to be on local coordinates. We no longer transfor from global to local before smearing
+ *
  * Revision 1.1  2013/05/12 21:43:32  jeromel
  * Initial revision, code peer review closed 2013/05/06
  *
@@ -115,7 +118,7 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
 
                TString Path("");
                LOG_DEBUG << endm;
-               Path = Form("/HALL_1/CAVE_1/IDSM_1/PXMO_1/PXLA_%i/LADR_%i/PXSI_%i/PLAC_1", sector, ladder, sensor);
+	       Path = Form("/HALL_1/CAVE_1/IDSM_1/PXMO_1/PXLA_%i/LADR_%i/PXSI_%i/PLAC_1", sector, ladder, sensor);
                LOG_DEBUG << "PATH: " << Path << endm;
                LOG_DEBUG << "pxl hit volId/sector/ladder/sensor is " << volId << "/" << sector << "/" << ladder << "/" << sensor << endm;
 
@@ -123,11 +126,11 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
                gGeoManager->CdTop();
                gGeoManager->cd(Path);
 
-               Double_t globalPixHitPos[3] = {mcPix->position().x(), mcPix->position().y(), mcPix->position().z()};
-               Double_t localPixHitPos[3]  = {0, 0, 0};
-               gGeoManager->GetCurrentMatrix()->MasterToLocal(globalPixHitPos, localPixHitPos);
+               Double_t localPixHitPos[3] = {mcPix->position().x(), mcPix->position().y(), mcPix->position().z()};
+	       // StMcPxlHit has local coordinates now, do not transform. 
+               //Double_t localPixHitPos[3]  = {0, 0, 0};
+               //gGeoManager->GetCurrentMatrix()->MasterToLocal(globalPixHitPos, localPixHitPos);
 
-               LOG_DEBUG << "globalPixHitPos = " << globalPixHitPos[0] << " " << globalPixHitPos[1] << " " << globalPixHitPos[2] << endm;
                LOG_DEBUG << "localPixHitPos = " << localPixHitPos[0] << " " << localPixHitPos[1] << " " << localPixHitPos[2] << endm;
                // please note that what is called local Y in the PXL sensor design
                // is actually called Z in STAR coordinates convention and vice-versa
@@ -189,6 +192,9 @@ Double_t StPxlFastSim::distortHit(Double_t x, Double_t res, Double_t constraint)
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.2  2013/11/14 19:10:27  mstftsm
+ * StMcPxlHit has been changed to be on local coordinates. We no longer transfor from global to local before smearing
+ *
  * Revision 1.1  2013/05/12 21:43:32  jeromel
  * Initial revision, code peer review closed 2013/05/06
  *
