@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.h,v 1.3 2013/07/05 21:57:34 geurts Exp $
+ * $Id: StMtdSimMaker.h,v 1.4 2013/11/14 16:17:08 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMtdSimMaker.h,v $
+ * Revision 1.4  2013/11/14 16:17:08  geurts
+ * Correct mapping based on GEANT volume_id [Alex Jentsch]
+ *
  * Revision 1.3  2013/07/05 21:57:34  geurts
  * Bug fix and improved mapping [Alex Jentsch]
  *
@@ -39,6 +42,7 @@ class StMtdSimMaker : public StMaker
 {
  private:
   Int_t mModuleChannel[5][24];
+  
 
  protected:
   St_DataSet        *mGeantData;        //! geant table
@@ -60,6 +64,7 @@ class StMtdSimMaker : public StMaker
 //const static float kVHRBIN2PS = 24.4;  	//! Very High resolution mode, ps/bin
 //const static float kHRBIN2PS = 97.7;     	//! High resolution mode, ps/bin
   const static float kMtdPadWidth = 3.8 + 0.6; 	//! Pad Width: 38mm padwidth + 6mm innerspacing
+  //const static Int_t geant2backlegID[30] = {1,2,3,4,5,6,7,10,22,25,26,27,28,29,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 //  Bool_t mCellXtalk;     //! switch for cell xtalk
@@ -69,7 +74,7 @@ class StMtdSimMaker : public StMaker
 
 
 
-  string mHistFile;//for QA histograms
+  string mHistFile;    //for QA histograms
   TH1F* mBetaHist;    //! speed of particles hitting tof
   TH1F* mPathLHist;    //! speed of particles hitting tof
   TH1F* mTofHist;    //! total time of flight of partilce
@@ -87,7 +92,7 @@ class StMtdSimMaker : public StMaker
   TH2F* mNCellSeen;    //! # of cells after DetectorResponse
   TH2F* mNVpdSeen;     //! # of vpd tubes after DetectorResponse
   TH1F* mDeSeen;       //! deposited-energy after DetectorResponse
-  TH1F* mT0Seen;      //! 
+  TH1F* mT0Seen;       //! 
   TH1F* mTofSeen;      //! smeared-tof after DetectorResponse
   TH1F* mTofResSeen;   //! time resolution after Detector Response
   TH1F* mVpdResSeen;   //! vpd time resolution after DetectorResponse
@@ -98,7 +103,7 @@ class StMtdSimMaker : public StMaker
   TH2F* mNVpdReco;     //! # of vpd tubes after recon
   TH1F* mTDCReco;      //! TDC recon
   TH1F* mADCReco;      //! ADC recon -- empty
-  TH1F* mT0Reco;   //! 
+  TH1F* mT0Reco;       //! 
   TH1F* mTofResReco;   //! time resolution after recon
   TH1F* mVpdResReco;   //! vpd time resolution after recon
   TH2F* mTACorr;       //! T-A Slewing Correlation
@@ -143,7 +148,7 @@ class StMtdSimMaker : public StMaker
 //fg    void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.3 2013/07/05 21:57:34 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.4 2013/11/14 16:17:08 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StMtdSimMaker,1)
 };
