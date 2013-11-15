@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.36 2010/01/25 03:57:39 tone421 Exp $
+ * $Id: StMuDst.h,v 1.38 2010/02/01 23:15:27 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -88,17 +88,17 @@ public:
   /// constructor
   StMuDst(); 
   /// set the pointers to the TClonesArrays
-  void set(StMuDstMaker* maker);
+  static void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
   /// dongx
-  void set(TClonesArray**, TClonesArray**, TClonesArray** emc_ptca=0, TClonesArray** fms_ptca=0, TClonesArray** pmd_ptca=0, TClonesArray** tof_ptca=0, TClonesArray** btof_ptca=0, TClonesArray *emc_tca=0, StMuEmcCollection *emc_col=0, StMuFmsCollection *fms_col=0, TClonesArray *pmd_tca=0, StMuPmdCollection *pmd_col=0, TClonesArray** ezt_ptca=0);
+  static void set(TClonesArray**, TClonesArray**, TClonesArray** emc_ptca=0, TClonesArray** fms_ptca=0, TClonesArray** pmd_ptca=0, TClonesArray** tof_ptca=0, TClonesArray** btof_ptca=0, TClonesArray *emc_tca=0, StMuEmcCollection *emc_col=0, StMuFmsCollection *fms_col=0, TClonesArray *pmd_tca=0, StMuPmdCollection *pmd_col=0, TClonesArray** ezt_ptca=0);
   /// set pointer to current StEmcCollection
   static void setEmcCollection(StEmcCollection *emc_coll) { mEmcCollection=emc_coll; }
   
   static void setFmsCollection(StFmsCollection *fms_coll) { mFmsCollection=fms_coll; }
 
   /// resets the pointers to the TClonesArrays to 0
-  void unset();
+  static void unset();
   /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
   static void fixTrackIndices(TClonesArray* primary, TClonesArray* global);
   /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
@@ -366,9 +366,9 @@ public:
   static unsigned int GetNBTofRawHit()      { return numberOfBTofRawHit(); }
 
   virtual void Print(Option_t *option = "") const; ///< Print basic event info
-  void printPrimaryTracks() const;
-  void printGlobalTracks() const;
-  void printVertices() const;
+  static void printPrimaryTracks();
+  static void printGlobalTracks() ;
+  static void printVertices() ;
 
   friend class StMuDstMaker;
   friend class StMuIOMaker;
@@ -380,6 +380,12 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.38  2010/02/01 23:15:27  fine
+ * replace non-static method
+ *
+ * Revision 1.37  2010/02/01 22:54:34  fine
+ * replace non-static method
+ *
  * Revision 1.36  2010/01/25 03:57:39  tone421
  * Added FMS and Roman pot arrays
  *

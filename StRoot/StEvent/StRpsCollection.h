@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRpsCollection.h,v 2.1 2009/11/23 22:18:25 ullrich Exp $
+ * $Id: StRpsCollection.h,v 2.2 2010/02/04 18:16:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Nov 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRpsCollection.h,v $
+ * Revision 2.2  2010/02/04 18:16:09  ullrich
+ * Added new member mSiliconBunch and referring access methods.
+ *
  * Revision 2.1  2009/11/23 22:18:25  ullrich
  * Initial Revision
  *
@@ -32,12 +35,16 @@ public:
     StRpsRomanPot* romanPot(unsigned int);
  
     StPtrVecRpsCluster clusters() const;
+    unsigned char siliconBunch() const;
+
+    void setSiliconBunch(unsigned char);
 
 private:
     enum {mNumberOfRomanPots = 8};
     StRpsRomanPot mRomanPots[mNumberOfRomanPots];
+    UChar_t mSiliconBunch;
   
-    ClassDef(StRpsCollection, 1)
+    ClassDef(StRpsCollection, 2)
 };
 
 #endif
