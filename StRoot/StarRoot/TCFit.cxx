@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.4 2008/10/29 19:19:41 perev Exp $
+// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.6 2010/01/28 18:19:05 perev Exp $
 // Author: Victor Perev   05/08/03
 
 
@@ -416,7 +416,7 @@ TCFitData::~TCFitData()
 int TCFitData::AddPar(int tyPar, int idPar,double *par,int nPars,const char *name,double tiny)
 {
   assert(0<=tyPar && tyPar<=2);
-  assert(0<=idPar && tyPar<kMaxId);
+  assert(0<=idPar && idPar+nPars<kMaxId);
   if (fFail  ) return fFail;
   if (!name) name="";
   if (tiny<=0) tiny = 1e-3;
@@ -834,7 +834,7 @@ static int nCall=0; nCall++;
     if (sgn&1) th[0].Backward();
     if (sgn&2) th[1].Backward();
     s[0] = th[0].Path(th[1],&s[1]);
-    if (s[0]<100 & s[1]<100) {
+    if (s[0]<100 && s[1]<100) {
       for (int itk=0;itk<2;itk++) {
         th[itk].Eval(s[itk],pos); Vx[itk].SetXYZ(pos[0],pos[1],pos[2]);}
       double dis = (Vx[1]-Vx[0]).Mag();

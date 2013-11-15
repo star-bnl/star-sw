@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TCFit.h,v 1.3 2008/10/29 19:19:36 perev Exp $
+// @(#)root/base:$Name:  $:$Id: TCFit.h,v 1.4 2010/01/27 21:36:37 perev Exp $
 // Author: Victor Perev   05/07/2007
 // Class for Fit with constrains. 
 // TCFit   - fitter
@@ -99,29 +99,35 @@ public:
 
 /// Add measured parameter   
 /// tyPar: 0=meas, 1=slack,2=constr
+/// idPar: integer id given bu user. must be >0 and < kMaxId=100
 int AddPar(int tyPar,int idPar,double *par,int nPars=1,const char *name="",double tiny=0.);
 
 int GetId(const char *name)    const;	//get par id by name
+
+/// Internally all parameters are consequently numbered (jd)
+
 int GetId(int jd)    const;		//get par id by jd
 int GetJd(int id)    const;		//get par jd by id
 const char *GetNam(int idx)    const; 	//get par name by id	
 int GetType(int id)    const;		//get type(Meas,Slac,Constr) by dd
 
-void FixPar (int ipar,int yes=1);       //(dis/en)able parameter/constrain
-int  IsFixed(int ipar) const ;        		//
+void FixPar (int id,int yes=1);       //(dis/en)able parameter/constrain
+int  IsFixed(int id) const ;        		//
 
     
   virtual int      Ready();  			//Ready() could be overloaded 
   virtual int      Approx()=0;  		//Approx() must be overloaded 
-  virtual double   Fcn()=0;  			//Fcn,              could be overloaded 
+  virtual double   Fcn()=0;  			//Fcn,     must be overloaded 
   virtual double  DFcn(int ipar);  		//dFcn/dPar         could be overloaded
   virtual double DDFcn(int ipar,int jpar);    	//d2Fcn/dPar1/dPar2 could be overloaded
 
   virtual double   Con(int icon);          	//constrain, must be overloaded
   virtual double  DCon(int icon,int ipar); 	//dCon/dPar         could be overloaded 
   						//d2Con/dPar1/dPar2 could be overloaded 
-  virtual void   Update()=0; 			//Called when status changed,
-                				//must be overloaded 
+  virtual void   Update()=0; 			//Called when status changed, 
+                                                //like parameters were changed after fit
+                				//must be overloaded even if user does not need it.
+						//In last case it could be dummy routine
   virtual void Print(const char *name) const;
 
 
@@ -165,12 +171,12 @@ const TCFit *fFitter;
   int    fNPars[3];	//!number of "measured" ,slack, constrains
   int    fNFixs[3];		//!number of "slack"    parameters
 
-  double *fPars[kMaxId];
-  double  fTiny[kMaxId];	//!Tiny values still modifying fcn 
-  short   fTyps[kMaxId];
-  short   fFixs[kMaxId];
-  char    fIndx[kMaxId];
-  char    fJndx[kMaxId];
+  double *fPars[kMaxId+1];
+  double  fTiny[kMaxId+1];	//!Tiny values still modifying fcn 
+  short   fTyps[kMaxId+1];
+  short   fFixs[kMaxId+1];
+  char    fIndx[kMaxId+1];
+  char    fJndx[kMaxId+1];
   double  fFcn[3];		//!Current value of fcn [1]
   char    fEnd[1];
   TString fNams[kMaxId];	//!names of params

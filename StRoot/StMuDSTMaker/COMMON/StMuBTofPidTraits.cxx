@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuBTofPidTraits.cxx,v 1.1 2009/02/20 17:05:59 tone421 Exp $
+ * $Id: StMuBTofPidTraits.cxx,v 1.2 2009/12/08 23:24:46 fine Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuBTofPidTraits.cxx,v $
+ * Revision 1.2  2009/12/08 23:24:46  fine
+ * Fix issue  #1748 http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1748
+ *
  * Revision 1.1  2009/02/20 17:05:59  tone421
  * *** empty log message ***
  *
@@ -18,7 +21,7 @@
 #include "StBTofPidTraits.h"
 #include "StMuBTofPidTraits.h"
 
-static const char rcsid[] = "$Id: StMuBTofPidTraits.cxx,v 1.1 2009/02/20 17:05:59 tone421 Exp $";
+static const char rcsid[] = "$Id: StMuBTofPidTraits.cxx,v 1.2 2009/12/08 23:24:46 fine Exp $";
 
 ClassImp(StMuBTofPidTraits)
 
@@ -66,7 +69,7 @@ void StMuBTofPidTraits::setBTofPidTraits(const StBTofPidTraits* pid)
       mProbProton    = pid->probProton();  
 }
 
-StBTofPidTraits* StMuBTofPidTraits::createBTofPidTraits()
+StBTofPidTraits* StMuBTofPidTraits::createBTofPidTraits() const
 {
    StBTofPidTraits* traits = new StBTofPidTraits();
    traits->setMatchFlag(mMatchFlag);
@@ -97,4 +100,4 @@ const StThreeVectorF&
 StMuBTofPidTraits::position() const { return mPosition; }
 
 void
-StMuBTofPidTraits::setPosition(StThreeVectorF& pos) { mPosition = pos; }
+StMuBTofPidTraits::setPosition(const StThreeVectorF& pos) { mPosition = pos; }

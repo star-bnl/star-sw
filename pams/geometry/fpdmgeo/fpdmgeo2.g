@@ -1,7 +1,10 @@
 ******************************************************************************
-* $Id: fpdmgeo2.g,v 1.3 2009/08/14 22:40:26 perev Exp $
+* $Id: fpdmgeo2.g,v 1.4 2011/02/28 16:20:01 jwebb Exp $
 * $Name:  $
 * $Log: fpdmgeo2.g,v $
+* Revision 1.4  2011/02/28 16:20:01  jwebb
+* Switched from fortran-style to mortran-style continuation lines.
+*
 * Revision 1.3  2009/08/14 22:40:26  perev
 * Fix BIRK3 constant
 *
@@ -15,8 +18,8 @@
 *
 ******************************************************************************
 Module FPDMGEO2 is the Forward Pion Detector Modules GEOmetry
-Created   12 Jun 2006
-Author    Akio Ogawa
+      Created   12 Jun 2006
+      Author    Akio Ogawa
 +CDE,AGECOM,GCONST,GCUNIT.
 *
       Content    FBOX,FLGT,FLGF,FWAL,FLGR,FPRB,FPCT,FUMT,PBPT,FSHM,FHMS,FXGT
@@ -351,8 +354,8 @@ Block FBOX is one Pb-Glass fpd detector
          do i=1,14
             x1=x0            
             do j=1,14
-               if(i.gt.5 .and. i.lt.10 .and.
-     +            j.gt.5 .and. j.lt.10) then
+               if(i.gt.5 .and. i.lt.10 .and. _
+                  j.gt.5 .and. j.lt.10) then
                   x1=x1-wid
                else
                   Create and Position FLGF x=x1 y=y1 z=z1
