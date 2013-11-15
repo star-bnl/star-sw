@@ -3,9 +3,15 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.13 2011/06/09 20:52:08 genevb Exp $
+ * $Id: StTpcHitMaker.h,v 1.15 2012/09/13 21:00:04 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.15  2012/09/13 21:00:04  fisyak
+ * Corrections for iTpx, clean up
+ *
+ * Revision 1.14  2012/05/07 15:51:01  fisyak
+ * Remove hard coded TPC numbers
+ *
  * Revision 1.13  2011/06/09 20:52:08  genevb
  * Set sanity flag
  *
@@ -61,6 +67,7 @@
 #include "StRTSBaseMaker.h"
 #include "TString.h"
 #include "StThreeVectorF.hh"
+#include "THnSparse.h"
 class StTpcDigitalSector;
 class StTpcHit;
 class tpc_cl;
@@ -74,25 +81,29 @@ class StTpcHitMaker : public StRTSBaseMaker {
   enum EMode {kUndefined, 
 	      kTpc, kTpx, 
 	      kTpcPulser, kTpxPulser, 
-	      kTpcPadMonitor, kTpxPadMonitor, 
 	      kTpcDumpPxls2Nt, kTpxDumpPxls2Nt, 
 	      kTpcRaw, kTpxRaw, 
+	      kTpcAvLaser, kTpxAvLaser,      // averaging on pixel level
 	      kAll};
     StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker("tpc",name), kMode(kUndefined),
-      kReaderType(kUnknown), mQuery(""), fTpc(0) {}
+      kReaderType(kUnknown), mQuery(""), fTpc(0), fAvLaser(0) {}
   virtual ~StTpcHitMaker() {}
 
   Int_t   Init();
   Int_t   InitRun(Int_t runnumber);
   Int_t   Make();
   void    DoPulser(Int_t sector);
+  void    TpxAvLaser(Int_t sector);
+  void    TpcAvLaser(Int_t sector);
   void    PadMonitor(Int_t sector);
   Int_t   UpdateHitCollection(Int_t sector);
   void    DumpPixels2Ntuple(Int_t sector);
   void    PrintSpecial(Int_t sector);
   Int_t   RawTpcData(Int_t sector);
   Int_t   RawTpxData(Int_t sector);
+  THnSparseF *CompressTHn(THnSparseF *hist, Double_t compress = 1e3);
   StTpcDigitalSector *GetDigitalSector(Int_t sector);
+  virtual Int_t        Finish();
  private:
 
   EMode   kMode;
@@ -105,6 +116,9 @@ class StTpcHitMaker : public StRTSBaseMaker {
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;
   Int_t    bin0Hits;
+  THnSparseF **fAvLaser;
+  Int_t    NoRows;
+  Int_t    NoInnerPadRows;
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
@@ -122,8 +136,6 @@ class StTpcHitMaker : public StRTSBaseMaker {
   static Float_t fgDp;             // hardcoded errors
   static Float_t fgDt;
   static Float_t fgDperp;
-
- public:
 
   // cvs
   virtual const char *GetCVS() const    {
