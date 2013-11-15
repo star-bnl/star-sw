@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.11 2010/01/26 20:21:44 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.12 2010/02/05 14:35:49 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -61,6 +61,8 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   pp2ppOffset_st *mOffsetTable ;
   pp2ppZ_st *mZTable ;
 
+  UChar_t mSiliconBunch ;
+
   //  Int_t nevt_count ;
 
   Bool_t mLDoCluster; // to do clustering or not
@@ -105,7 +107,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.11 2010/01/26 20:21:44 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.12 2010/02/05 14:35:49 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 

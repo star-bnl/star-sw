@@ -109,7 +109,6 @@ the MC track. The association information is a bit map in which:<br><br>
 
 #ifndef StMaker_H
 #include "StMaker.h"
-#include "StMcEvent/StMcCalorimeterHit.hh"
 #include "TMatrix.h"
 #endif
 
@@ -124,6 +123,7 @@ class StEmcRawHit;
 class StEmcCluster;
 class StEmcPoint;
 class StMcTrack;
+class StMcCalorimeterHit;
 
 class StEmcAssociation
 {

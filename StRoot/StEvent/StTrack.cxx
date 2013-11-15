@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.33 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.34 2010/08/31 20:00:09 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.34  2010/08/31 20:00:09  fisyak
+ * Clean up, add mSeedQuality
+ *
  * Revision 2.33  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -127,7 +130,7 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.33 2009/11/23 16:34:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.34 2010/08/31 20:00:09 fisyak Exp $";
 
 StTrack::StTrack()
 {
@@ -136,7 +139,7 @@ StTrack::StTrack()
     mEncodedMethod = 0;
     mImpactParameter = 0;
     mLength = 0;
-    mNumberOfPossiblePoints = 0;
+    mSeedQuality = 0;
     mNumberOfPossiblePointsTpc = 0;
     mNumberOfPossiblePointsFtpcWest = 0;
     mNumberOfPossiblePointsFtpcEast = 0;
@@ -158,7 +161,7 @@ StTrack::StTrack(const StTrack& track)
     mEncodedMethod = track.mEncodedMethod;
     mImpactParameter = track.mImpactParameter;
     mLength = track.mLength;
-    mNumberOfPossiblePoints = track.mNumberOfPossiblePoints;
+    mSeedQuality = track.mSeedQuality;
     mNumberOfPossiblePointsTpc = track.mNumberOfPossiblePointsTpc;
     mNumberOfPossiblePointsFtpcWest = track.mNumberOfPossiblePointsFtpcWest;
     mNumberOfPossiblePointsFtpcEast = track.mNumberOfPossiblePointsFtpcEast;
@@ -190,7 +193,7 @@ StTrack::operator=(const StTrack& track)
         mEncodedMethod = track.mEncodedMethod;
         mImpactParameter = track.mImpactParameter;
         mLength = track.mLength;
-        mNumberOfPossiblePoints = track.mNumberOfPossiblePoints;
+        mSeedQuality = track.mSeedQuality;
         mNumberOfPossiblePointsTpc = track.mNumberOfPossiblePointsTpc;
         mNumberOfPossiblePointsFtpcWest = track.mNumberOfPossiblePointsFtpcWest;
         mNumberOfPossiblePointsFtpcEast = track.mNumberOfPossiblePointsFtpcEast;
@@ -281,26 +284,13 @@ unsigned short
 StTrack::numberOfPossiblePoints() const
 {
     unsigned short result;
-    //
-    //  Old (obsolete)
-    //
-    if (mNumberOfPossiblePoints) {
-        result = numberOfPossiblePoints(kTpcId) +
-	       numberOfPossiblePoints(kSvtId) +
-	       numberOfPossiblePoints(kSsdId);
-    }
-    //
-    //  New, indicated by mNumberOfPossiblePoints=0
-    //
-    else {
-        result = numberOfPossiblePoints(kTpcId) +
-	       numberOfPossiblePoints(kFtpcWestId) +
-	       numberOfPossiblePoints(kFtpcEastId) +
-	       numberOfPossiblePoints(kSvtId) +
-	       numberOfPossiblePoints(kSsdId) +	
-	       numberOfPossiblePoints(kPxlId) +
-	       numberOfPossiblePoints(kIstId);	
-    }
+    result = numberOfPossiblePoints(kTpcId) +
+      numberOfPossiblePoints(kFtpcWestId) +
+      numberOfPossiblePoints(kFtpcEastId) +
+      numberOfPossiblePoints(kSvtId) +
+      numberOfPossiblePoints(kSsdId) +	
+      numberOfPossiblePoints(kPxlId) +
+      numberOfPossiblePoints(kIstId);	
     if (type() == primary || type() == estPrimary) result++;
     return result;
 }
@@ -308,31 +298,6 @@ StTrack::numberOfPossiblePoints() const
 unsigned short
 StTrack::numberOfPossiblePoints(StDetectorId det) const
 {
-    //
-    //  Old (obsolete)
-    //
-    if (mNumberOfPossiblePoints) {    
-	// 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-	switch (det) {
-	case kFtpcWestId:
-	case kFtpcEastId:
-	case kTpcId:
-	    return mNumberOfPossiblePoints%1000;
-	    break;
-	case kSvtId:
-	    return (mNumberOfPossiblePoints%10000)/1000;
-	    break;
-	case kSsdId:
-	    return mNumberOfPossiblePoints/10000;
-	    break;
-	default:
-	    return 0;
-	}
-    }
-    //
-    //  New, indicated by mNumberOfPossiblePoints=0
-    //
-    else {
 	switch (det) {
 	case kFtpcWestId:
 	    return mNumberOfPossiblePointsFtpcWest;
@@ -357,7 +322,6 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
 	    break;
 	default:
 	    return 0;
-	}
     }  
 }
 
@@ -457,21 +421,10 @@ StTrack::addPidTraits(StTrackPidTraits* val) { mPidTraitsVec.push_back(val); }
 void
 StTrack::setDetectorInfo(StTrackDetectorInfo* val) { mDetectorInfo = val; }
 
-void         
-StTrack::setNumberOfPossiblePoints(unsigned short val)
-{
-    //
-    // This should not be used anymore. This number is not encoded
-    // in a single word given the large number of detectors we have now.
-    // Use the version below.
-    //
-    mNumberOfPossiblePoints = val;
-}
 
 void
 StTrack::setNumberOfPossiblePoints(unsigned char val, StDetectorId det)
 {
-    mNumberOfPossiblePoints = 0;  // make sure old method is NOT active
     switch (det) {
     case kFtpcWestId:
 	mNumberOfPossiblePointsFtpcWest = val;
@@ -565,7 +518,7 @@ void StTrack::Streamer(TBuffer &R__b)
 
        R__b >> mImpactParameter;
        R__b >> mLength;
-       R__b >> mNumberOfPossiblePoints;
+       R__b >> mSeedQuality;
        mTopologyMap.Streamer(R__b);
        mFitTraits.Streamer(R__b);
        R__b >> mGeometry;
