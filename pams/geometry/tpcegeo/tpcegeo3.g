@@ -1,5 +1,26 @@
-!// $Id: tpcegeo3.g,v 1.17 2009/11/10 23:04:42 perev Exp $
+!// $Id: tpcegeo3.g,v 1.24 2010/01/13 22:36:24 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.24  2010/01/13 22:36:24  perev
+!// Typo is fixed. TPCG was twice as bigger
+!//
+!// Revision 1.23  2009/12/30 19:10:28  perev
+!// Wrong rotation(15) of TPSS fixed
+!//
+!// Revision 1.22  2009/12/24 17:36:46  perev
+!// Gas volume 210
+!//
+!// Revision 1.21  2009/12/23 21:35:35  perev
+!//  TSAS zmax increased by 0.1
+!//
+!// Revision 1.20  2009/12/17 23:07:11  perev
+!// More exact envelopes for TPCE,TSAW,TSWH
+!//
+!// Revision 1.19  2009/12/15 02:44:07  perev
+!// TPCE increased in R & Z to avoid extruding
+!//
+!// Revision 1.18  2009/12/12 03:38:37  perev
+!// extrudedFix
+!//
 !// Revision 1.17  2009/11/10 23:04:42  perev
 !// remove debug prints
 !//
@@ -111,15 +132,16 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
           TSAS,TWAS,TALS,TSGT,TWBT,TWRC,TWRG,TWRI,TWTR,TWMR,
           TRDO,TBRW,TWRB,TCOO,TCAB,TRIB,TWIR
 *
-        Real INCH ,CM;
+        Real INCH ,CM,sind,cosd,tand,cos15,sin15,tan15;
         Parameter (INCH=2.54,CM=1.);
         integer kBlack,kRed,kGreen,kBlue,kYellow,kViolet,kLightBlue;
         parameter (kBlack=1,kRed=2,kGreen=3,kBlue=4);
         parameter (kYellow=5,kViolet=6,kLightBlue=7);
 
 !//  Real lb   = 0.45359; !// kG
-        Real cos15 /.965925826289068312/ !// Cos(15./180*Pi);
-        Real tan15 /.267949192431122696/ !// Tan(Pi*15./180);
+        parameter (cos15 =.965925826289068312) !// Cos(15./180*Pi);
+        parameter (sin15 =.258819045102520739) !// Sin(15./180*Pi);
+        parameter (tan15 =.267949192431122696) !// Tan(Pi*15./180);
 !//   int's
    Integer i,j,iSecAng,nCount/0/,jTRIB,kase;
 !//   real's
@@ -152,7 +174,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
         Real del;
 
    Real zWheel1,zTOFCend ,zTIFCend,zTIFCFlangeBegin;
-
+   Real qwe(10);
 
 
 !//
@@ -198,14 +220,14 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
   Integer inOut;
 
 !//     Tpc(Inner/Outer)SectorAssembly
-  Real zzzSA(2)         /207.4,218/
-  Real rmnSA(0:1)       /52   ,122/
-  Real rmxSA(0:1)       /122  ,194/
+  Real zzzSA(2)         /207.4   ,219.1 /
+  Real rmnSA(0:1)       /51      ,121.07/
+  Real rmxSA(0:1)       /121.07  ,194   /
 
 !//     Tpc(Inner/Outer)WheelAssembly
   Real zzzWA(2)         /211.4,229.2/
-  Real rmnWA(0:1)       /54   ,126  /
-  Real rmxWA(0:1)       /116  ,188  /
+  Real rmnWA(0:1)       /54   ,121  /
+  Real rmxWA(0:1)       /121  ,189  /
 
 !//             TpcRDOAssembly
   Real zzzRDO(2)/232. ,252./;
@@ -229,7 +251,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 
 !//             TPC Parameters
     structure TPCG {    version,Rmin,Rmax,RminIFC,
-                        LengthT,Length,LengthW,LengthV,WheelIR,
+                        LengthT,Length,LengthW,LengthV,dZEnvelop,WheelIR,
                         WheelR0,WheelR1,WheelR2,WheelTotalRibWidth,WheelRibWidth,
                         WheelRibHeight,WheelBoxDx,WheelBoxDy,WheelOR1,WheelOR,
                         WheelTHK1,WheelTHK,SenGasOR,MembTHK,tocsDR,
@@ -260,16 +282,16 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
                 AssemblyThickness,RibDX ,RibDY  ,RibDZ, Ass(3) }
 
 
-
   Fill  TPCG !//   TPC basic dimensions
         version =       3               !// version    => current version
         Rmin =          46.107          !// Rmin          => TPC envelope inner radius
-        Rmax =          207.750         !// Rmax          => TPC envelope outer radius
+        Rmax =          206.75/cos15    !// Rmax          => TPC envelope outer radius
         RminIFC =       46.6            !// RminIFC    => inner radius TPC IFC  : A.Lebedev measurement 10/16/08
         LengthT =       2*271.0         !// LengthT    => TPC full length up to front of EEMC
         Length  =       2*259.685       !// Length        => TPC full length including RDOs
         LengthW =       2*229.71        !// LengthW    => TPC length including Wheel
         LengthV =       2*210.00        !// LengthV    => TPC gas volume length
+        DzEnvelop =     268.            !// TPCE envelop dz
         WheelIR =       38.620*INCH/2   !// 49.60 WheelIR    => support wheel inner radius
         WheelR0 =       21.500*INCH     !// WheelR0 => Distance from IP of end of inner cylindrical part
         WheelR1 =       47.867*INCH     !// WheelR1 => Distance from IP of middle Rib
@@ -303,7 +325,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
         dzYF3  =        208.02          !// dz of YF3
         PadPlaneThickness = 0.182       !// 1.82 mm  Drawing 24A0314 & 24A0304
         dGateGround = 0.6            !//
-        WireMountWidth  = 5*0.130*INCH  !//
+        WireMountWidth  = 5*((0.130+0.1376)/2)*INCH  !//
         WireMountHeight = 1.340*inch    !// Drawing 24A0434
         dxRDO   = 1.75/2                !// A.Lebedev 1 RDO = 5 lb
         dyRDO   = 45./2                 !//
@@ -449,7 +471,8 @@ USE TECW
 !//   */
 
  tofcLENG = tpcg_Length-2*tpcg_WheelTHK-2*TPCR_RdoVthk  !// gas plus endcaps
- tpgvLeng = (tofcLeng-tpcg_MembTHK)/2   !// active gas
+ tpgvLeng = (tofcLeng-tpcg_MembTHK)/2   	!// active gas
+ tpgvLeng = (TPCG_LengthV-tpcg_MembTHK)/2 	!// active gas
 
 
 !// calculate radii of outer finest structureures
@@ -619,7 +642,8 @@ Block TPCE is the TPC envelope
       material  Air
       Medium    Standard
       Attribute TPCE  seen=0 colo=kRed
-      shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_length/2
+!//   shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_lengthT/2
+      shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_DzEnvelop
 
       tpgvz  = (tpcg_MembTHK + tpgvLeng)/2               " z center of gas volume   "
       zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK;        !// write(*,*) 'zWheel1 ', zWheel1;
@@ -706,7 +730,7 @@ endBlock        "end TIAD"
 *******************************************************************************
 *
 Block TOFC  defines outer field cage - fill it with insulating gas already
-      material  Nitrogen_gas
+      material  ALUMINIUM
       Attribute TOFC   seen=1 colo=kGreen
       SHAPE     PCON   Phi1=0  Dphi=360  Nz=6,
       zi =  {-zTOFCend, -zWheel1,-zWheel1,zWheel1,zWheel1,zTOFCend},
@@ -846,7 +870,7 @@ Block TSWH  TpcSectorWhole is Sector as Whole
       Attribute TSWH      seen=1  colo=kViolet
       SHAPE     PCON    Phi1=-15  Dphi=30  Nz=8,
       zi ={TPCG_MembTHK/2,zWheel1                 ,zWheel1                 ,zTOFCend,
-           zTOFCend      ,zTIFCFlangeBegin        ,zTIFCFlangeBegin        ,TPCG_LengthT/2},
+           zTOFCend      ,zTIFCFlangeBegin        ,zTIFCFlangeBegin        ,TPCG_DzEnvelop},
       Rmn={tifcOR        ,tifcOR                  ,tifcOR                  ,tifcOR,
            tifcOR        ,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT},
       Rmx={tofcIR        ,tofcIR                  ,TPCG_WheelOR1           ,TPCG_WheelOR1,
@@ -863,7 +887,8 @@ Block TSAW  TpcSectorAndWheel
       medium  STANDARD
       Attribute TSAW      seen=1  colo=kYellow
       SHAPE     PCON    Phi1=-15  Dphi=30  Nz=2,
-      zi = {204,274}, Rmn={48,48}, Rmx={208,208}
+      zi = {204,TPCG_DzEnvelop-TPCG_MembTHK/2}, Rmn={48,48}, Rmx={208,208}
+!//   zi = {204,274}, Rmn={48,48}, Rmx={208,208}
 
 
 
@@ -1006,24 +1031,25 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
     Create  And Position TWRB x=x, y=y, z=z ORT=YX-Z
 
 
+  }
 !//    TString rotm("R345");
 !//    if (inOut == 1) rotm = "R015";
-    r = 0;
-    alpha = 345
-    if (inOut == 1) alpha = 15;
+  do alpha = -15,15,30
+  {
     do j = 0,3
     {
       if (j == 0) r = TPCG_WheelR2 - 1.5/8.5*(TPCG_WheelR2 - TPCG_WheelR1);
       if (j == 1) r = TPCG_WheelR2 - 6.5/8.5*(TPCG_WheelR2 - TPCG_WheelR1);
       if (j == 2) r = TPCG_WheelR1 - 2.0/8.5*(TPCG_WheelR1 - TPCG_WheelR0);
       if (j == 3) r = TPCG_WheelR1 - 7.0/8.5*(TPCG_WheelR1 - TPCG_WheelR0);
-      x = r;
-      y = x *tan15*(2*inOut-1);
+      x = r ;
+      y = r *tand(alpha);
 !//      TpcSectorAndWheel->AddNodeOverlap(WheelRibBox, 3+4*inOut+j, new TGeoCombiTrans(x, y, zWheel1+TPCG_WheelTHK/2, GetRot(rotm)));
      Position TBRW x=x y=y z=zWheel1+TPCG_WheelTHK/2 alphaz=alpha kOnly='Many'
     }
+    qwe(1) = -qwe(1);
+    qwe(2) = -qwe(2);
   }
-
 
   Create And Position TWBT                      "//WheelBottom"
   Create And Position TWRI      kOnly='MANY'    "//WheelOuterRing"
@@ -1082,13 +1108,12 @@ Block TSAS  TpcInnerSectorAssembly &  TpcOuterSectorAssembly TSAS and TSA1
     dx = TECW_widthRib/2;
     dz = (TECW_Thick - TPCG_PadPlaneThickness - TECW_ThickAl)/2;
     z  = z2 - dz;
-    dxW = TPCG_WireMountWidth/2;
+    dxW = TPCG_WireMountWidth/cos15/2;
     dzW = TPCG_WireMountHeight/2;
     xW = 0;
     do iRib = 0,1
     {
 !//      TGeoVolume *trib = gGeoManager->MakePara("TRIB", GetMed("TPCE_ALUMINIUM"), dx, dy, dz,-(1-2*iRib)*alpha, 0, 0);
-      mySha = 'PARA';
       mySha = 'PARA';
       myPar = {dx, dy, dz, -(1-2*iRib)*alpha};
       Create TRIB;
@@ -1096,7 +1121,8 @@ Block TSAS  TpcInnerSectorAssembly &  TpcOuterSectorAssembly TSAS and TSA1
       x  = ((y1 + y2)/2 - dx)*(1-2*iRib);
       Position TRIB x=y y=-x z=z ORT=YX-Z
 
-      xW = ((y1 + y2)/2 +  dxW)*(1-2*iRib);
+!//VP      xW = ((y1 + y2)/2 +  dxW)*(1-2*iRib);
+      xW = ((y1 + y2)/2 -  dxW)*(1-2*iRib);
 !//      TGeoVolume *wireMount = gGeoManager->MakePara("WireMount", GetMed("TPCE_G10"), dxW, dy, dzW,-(1-2*iRib)*alpha, 0, 0);
       myPar = {dxW, dy, dzW, -(1-2*iRib)*alpha, 0, 0};
       Create TWIR;
@@ -1335,8 +1361,8 @@ block TWRI      WheelOuterRing
 Attribute TWRI seen=0  colo=kGreen
       SHAPE     PCON    Phi1=-15  Dphi=30  Nz=4,
                 zi ={zWheel1      ,zTOFCend     ,zTOFCend    ,TPCG_LengthW/2},
-                Rmn={TPCG_WheelR2 ,TPCG_WheelR2 ,TPCG_WheelR2,TPCG_WheelR2  },
-                Rmx={TPCG_WheelOR1,TPCG_WheelOR1,TPCG_WheelOR,TPCG_WheelOR  }
+                Rmn={TPCG_WheelR2*cos15 ,TPCG_WheelR2*cos15 ,TPCG_WheelR2*cos15,TPCG_WheelR2*cos15  },
+                Rmx={TPCG_WheelOR1      ,TPCG_WheelOR1      ,TPCG_WheelOR      ,TPCG_WheelOR        }
 
            Create And Position TWRC
 
@@ -1359,7 +1385,7 @@ endBlock        "end TWRI"
 *------------------------------------------------------------------------------
 *
 block TWRG WheelOuterRing PGON part
-Attribute TWRC seen=1  colo=kGreen
+Attribute TWRG seen=1  colo=kGreen
 Material ALUMINIUM
       SHAPE     PGON    Phi1=-alpha  Dphi=alpha*2  Nz=2 Npdv=1,
        zi ={zWheel1,TPCG_LengthW/2},
@@ -1441,6 +1467,7 @@ Attribute TRDO seen=1  colo=kYellow
   y = x*tan15 - TPCG_RDOCoolingdY ;
   z = TPCG_zRDO - 2*dy;
   Create And Position TCOO x=x y=y z=z ORT=YX-Z
+*===================================================
 
 !//  coolingTube = gGeoManager->MakePara("CoolingTube", GetMed("TPCE_Water_Pipe"), TPCG_RDOCoolingdY, TPCG_RDOCoolingdX,TPCG_RDOCoolingdZ, -15, 0, 0);
 !//  TpcRDO->AddNode(coolingTube,2,new TGeoCombiTrans(x,-y, TPCG_zRDO - 2*dy,GetRot("YZXZ")));
@@ -1448,9 +1475,9 @@ Attribute TRDO seen=1  colo=kYellow
   myPar = {TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, -15};
   x = TPCG_WheelR2 - TPCG_RDOCoolingdX;
   y = x*tan15 - TPCG_RDOCoolingdY ;
-  z =  - 2*dy;
+  z = TPCG_zRDO - 2*dy;
   Create And Position TCOO x=x y=-y z=z ORT=YX-Z
-
+*===================================================
 
 
   RCoolingTube = TPCG_WheelR2 - TPCG_heigTube - 2*TPCG_dxRDO;
@@ -1499,7 +1526,7 @@ endBlock        "end TBRW"
 *
 !//    wheelRib = gGeoManager->MakePara("TpcWheelRib", GetMed("TPCE_ALUMINIUM"), dy, dx, dz,-(1-2*inOut)*15, 0, 0);
 block TWRB TpcWheelRib
-Attribute TBRW seen=1  colo=kYellow
+Attribute TWRB seen=1  colo=kYellow
 Material ALUMINIUM
 SHAPE PARA dX=myDx dY=myDy dz=myDz Alph=myAlph
 endBlock        "end TWRB"
@@ -1608,12 +1635,17 @@ Block TPGV is the Gas Volume placed in TPC
       Attribute TPGV      seen=1  colo=kRed
       Material P10
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
-      Create    TPSS
+!//VP      Create    TPSS
+     do iSecAng = 15,360-15,30
+       Create and Position TPSS            alphaz=iSecAng kOnly='MANY'
+     endDo
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block  TPSS is a division of gas volume corresponding to a supersectors
       attribute TPSS  seen=1  colo=kBlue
-      shape Division  NDIV=12  IAXIS=2
+!//      shape Division  NDIV=12  IAXIS=2
+      SHAPE TUBS Phi1=-15 Phi2=15
+
 *
       ag_ncopy = 1;
       do kase=1,2

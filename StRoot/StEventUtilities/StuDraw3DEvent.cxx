@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.29 2009/12/04 19:51:30 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.28 2009/10/27 23:22:02 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -70,40 +70,7 @@ StuDraw3DEvent::~StuDraw3DEvent()
 {
    if (gEventDisplay == this) gEventDisplay = 0;
 }
-//____________________________________________________________________________________
-//! Add EMC hit defined \a emcHitsSoftId to the display list with the \a col color \a sty and \a size if provided
-/*! 
-   \param   emcHitsSoftId - StEmcRawHit soft ID that one wants to be present as the ROOT TTRAP 
-                    object with ROOT visual attributes \a col \a sty \a siz
-   \param   col - Tower color ( see: http://root.cern.ch/root/html/TAttFill.html ) 
-   \param   sty - Tower style ( see: http://root.cern.ch/root/html/TAttFill.html ) 
-   \param   siz - Tower size (cm) ( \sa StDraw3D::Tower( float radius, const StarRoot::StEta &eta,float phi,float dphi, Color_t col,Style_t sty, Size_t siz) )
-   \return - a pointer to the ROOT "view" TObject of \a emcHit model
-*/
-//____________________________________________________________________________________
-TObject *StuDraw3DEvent::EmcHit(Int_t emcHitsSoftId, Color_t col,Style_t sty,Size_t siz, const char *detId)
-{  
-   TObject *model = 0;
-   StEmcGeom *emcGeom =StEmcGeom::getEmcGeom(detId);
-   if (emcGeom) {
-      Int_t softId=emcHitsSoftId;
-      Float_t eta;
-      Float_t phi;
-      emcGeom->getEtaPhi(softId,eta,phi);
-      Float_t etaStep = 1.0/emcGeom->NEta();
-      Float_t phiStep = TMath::Pi()/60; 
-      static int entries = 0;
-        //if (entries) return 0;
-        // printf(" m=%d, e=%d, s=%d; eta=%e deta=%e phi=%e dphi=%e id %d\n",m, e, s,eta,etaStep ,phi, phiStep, softId);
-      entries++;
-      model  = Tower(emcGeom->Radius(), StarRoot::StEta(eta,etaStep)
-                         , phi, phiStep
-                         , col,sty+(strcmp(detId,"bemc")?0:kBarrelStyle),siz);
-   } else {
-      LOG_ERROR <<  __FILE__ << ":  there is no geometry information for \"" << detId << "\"" << endm;
-   }
-   return model;
-}
+
 //____________________________________________________________________________________
 //! Add \a emcHit to the display list with the \a col color \a sty and \a size if provided
 /*! 
@@ -119,13 +86,24 @@ TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t s
 {  
    TObject *model = 0;
    if (!detId || !detId[0]) detId = "bemc";
+   int m, e, s;
+   Int_t softId;
+   Float_t eta;
+   Float_t phi;
+   emcHit.modEtaSub(m,e,s);
    StEmcGeom *emcGeom =StEmcGeom::getEmcGeom(detId);
    if (emcGeom) {
-      int m, e, s;
-      Int_t softId;
-      emcHit.modEtaSub(m,e,s);
       emcGeom->getId(m,e,s,softId);
-      EmcHit(softId, col,sty,siz,detId);
+      emcGeom->getEtaPhi(softId,eta,phi);
+      Float_t etaStep = 1.0/emcGeom->NEta();
+      Float_t phiStep = TMath::Pi()/60; 
+      static int entries = 0;
+        //if (entries) return 0;
+        // printf(" m=%d, e=%d, s=%d; eta=%e deta=%e phi=%e dphi=%e id %d\n",m, e, s,eta,etaStep ,phi, phiStep, softId);
+      entries++;
+      model  = Tower(emcGeom->Radius(), StarRoot::StEta(eta,etaStep)
+                         , phi, phiStep
+                         , col,sty+(strcmp(detId,"bemc")?0:kBarrelStyle),siz);
       SetModel((TObject*)&emcHit);
    } else {
       LOG_ERROR <<  __FILE__ << ":  there is no geometry information for \"" << detId << "\"" << endm;

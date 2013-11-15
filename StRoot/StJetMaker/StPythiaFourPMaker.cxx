@@ -1,4 +1,4 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.14 2009/12/09 05:12:02 pibero Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.13 2009/09/04 17:29:54 pibero Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "StMuTrackFourVec.h"
@@ -29,35 +29,30 @@ Int_t StPythiaFourPMaker::Init()
 void StPythiaFourPMaker::Clear(Option_t* opt)
 {
   for (FourList::iterator it = tracks.begin(); it != tracks.end(); ++it) {
-    delete *it;
-    *it = 0;
+    delete (*it);
   }
 
   tracks.clear();
+
+  return;
 }
 
 Int_t StPythiaFourPMaker::Make()
 {
-  vertex = _mc->getMCVertex();
   StjMCParticleList theList = _mc->getMCParticleList();
+
   theList = (*_cut)(theList);
 
-  for (StjMCParticleList::const_iterator it = theList.begin(); it != theList.end(); ++it) {
-    TLorentzVector p;
-    p.SetPtEtaPhiM(it->pt,it->eta,it->phi,it->m);
-    StMcTrackEmu* mctrack = new StMcTrackEmu;
-    mctrack->_pt     = it->pt;
-    mctrack->_eta    = it->eta;
-    mctrack->_phi    = it->phi;
-    mctrack->_m      = it->m;
-    mctrack->_e      = it->e;
-    mctrack->_id     = it->mcparticleId;
-    mctrack->_pdg    = it->pdg;
-    mctrack->_status = it->status;
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(0,0,mctrack,p,0,it->mcparticleId-1,kUnknownId);
+  for(StjMCParticleList::const_iterator it = theList.begin(); it != theList.end(); ++it) {
+
+    TLorentzVector p4_;
+    p4_.SetPtEtaPhiM((*it).pt, (*it).eta, (*it).phi, (*it).m);
+
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, 0, p4_, 0, (*it).mcparticleId - 1, kUnknownId);
+				
     tracks.push_back(pmu);
   }
-
+	
   return kStOK;
 }
 
