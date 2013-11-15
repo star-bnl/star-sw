@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.18 2012/03/01 05:46:38 cpowell Exp $
+# $Id: get_embedding_xml.pl,v 1.19 2012/05/15 16:41:27 cpowell Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.19  2012/05/15 16:41:27  cpowell
+# Added line to gzip log files
+#
 # Revision 1.18  2012/03/01 05:46:38  cpowell
 # Corrected parameters for bfcMixer_TpcSvtSsd.C
 #
@@ -430,6 +433,8 @@ printDebug("Set errfilename: $errFileName ...");
 print OUT "<!-- Move LOG files and csh to eliza disk, remove list files -->\n";
 print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.log \$EMOUTPUT/$logFileName\n";
 print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog \$EMOUTPUT/$errFileName\n";
+print OUT "gzip " . "\$EMOUTPUT/$logFileName\n";
+print OUT "gzip " . "\$EMOUTPUT/$errFileName\n";
 print OUT "mv -v $generatorDir/sched\$JOBID.csh \$EMLIST/\n";
 print OUT "rm -v $generatorDir/sched\$JOBID.list\n";
 print OUT "\n";

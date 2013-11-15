@@ -1,8 +1,9 @@
 #include "TF1F.h"
+#include "TMath.h"
 ClassImp(TF1F);
 //________________________________________________________________________________
 void TF1F::Save(Double_t xmin, Double_t xmax, Double_t ymin, Double_t ymax, Double_t zmin, Double_t zmax) {
-  fXmin = xmin; fXmax = xmax; fdX = 0.05; fStep = 1./fdX; fNpx = ((fXmax - fXmin)/fdX + 0.5);
+  fXmin = xmin; fXmax = xmax; fStep = 20, fdX = 1./fStep; fNpx = TMath::Nint((fXmax - fXmin)/fdX);
   TF1::Save(xmin,xmax,ymin,ymax,zmin,zmax);
 }
 //________________________________________________________________________________

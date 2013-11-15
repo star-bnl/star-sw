@@ -4,7 +4,9 @@
 #include "StDbUtilities/StMagUtilities.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StEventTypes.h"
+#ifdef __CORRECT_CHARGE__
 #include "StDetectorDbMaker/St_tss_tssparC.h"
+#endif /* __CORRECT_CHARGE__ */
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
 #include "TMath.h"
 ClassImp(StTpcHitMover)
@@ -53,11 +55,13 @@ Int_t StTpcHitMover::Make() {
   if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
   StTpcCoordinateTransform &transform = *mTpcTransForm;
   StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
+#ifdef __CORRECT_CHARGE__
   St_tss_tssparC *tsspar = St_tss_tssparC::instance();
   Double_t gains[2] = {
     tsspar->gain_in() / tsspar->wire_coupling_in() *tsspar->ave_ion_pot() *tsspar->scale(),
     tsspar->gain_out()/ tsspar->wire_coupling_out()*tsspar->ave_ion_pot() *tsspar->scale()
   };
+#endif /* __CORRECT_CHARGE__ */
   if (TpcHitCollection) {
     UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
     for (UInt_t i = 0; i< numberOfSectors; i++) {
@@ -76,14 +80,18 @@ Int_t StTpcHitMover::Make() {
 	    if (NoHits) {
 	      for (UInt_t k = 0; k < NoHits; k++) {
 		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
+#ifdef __CORRECT_CHARGE__
 		Double_t q = tpcHit->charge();
 		PrPP(Make,*tpcHit);
 		if (tpcHit->adc()) { // correct charge
 		  q = gains[io] * ((Double_t) tpcHit->adc());
 		}
+#endif /* __CORRECT_CHARGE__ */
+		if (EmbeddingShortCut && tpcHit->idTruth() && tpcHit->idTruth() < 10000 && 
+		    tpcHit->qaTruth() > 95) {
+		  continue; // don't move embedded hits
+		}
 		if (! tpcHit->pad() && ! tpcHit->timeBucket()) {// old style, no pad and timeBucket set
-		  if (EmbeddingShortCut && tpcHit->idTruth() && tpcHit->idTruth() < 10000 && 
-		      tpcHit->qaTruth() > 95) continue; // don't move embedded hits
 		  StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
 		  moveTpcHit(coorL,coorG);
 		} else { //  transoform from original pad and time bucket measurements
