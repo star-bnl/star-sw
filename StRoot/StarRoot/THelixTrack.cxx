@@ -1092,16 +1092,6 @@ void THelixTrack::Test5()
 
   }  
 }
-//_____________________________________________________________________________
-void THelixTrack::InvertMtx(double F[5][5])
-{
-static const int minus[][2] = {{0,1},{1,0},{1,2},{3,0},{3,2},{3,4},{-1,0}};
-  for (int i=0;minus[i][0]>=0;i++) {
-    F[minus[i][0]][minus[i][1]] = -F[minus[i][0]][minus[i][1]];
-  }
-}
-
-
 // //_____________________________________________________________________________
 // void THelixTrack::TestErr()
 // {
@@ -2846,7 +2836,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.49 2010/10/14 17:45:49 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.48 2010/07/16 20:31:38 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2862,9 +2852,6 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
- * Revision 1.49  2010/10/14 17:45:49  perev
- * Inversion of derivative matrix added
- *
  * Revision 1.48  2010/07/16 20:31:38  perev
  * Put back some ctr(this) to ctr(*this)
  *
