@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.62 2012/12/12 21:58:37 fisyak Exp $
+ * $Id: MysqlDb.cc,v 1.62.2.1 2013/11/15 19:05:24 didenko Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.62.2.1  2013/11/15 19:05:24  didenko
+ * patch due to user id problem on SL6
+ *
  * Revision 1.62  2012/12/12 21:58:37  fisyak
  * Add check for HAVE_CLOCK_GETTIME flag and for APPLE
  *
@@ -332,6 +335,10 @@ mRes= new MysqlResult;
   pwd = getpwuid(geteuid());
   if (pwd) {
     mSysusername = pwd->pw_name;
+ 	mdbuser = (char*)mSysusername.c_str();
+	std::cout << "DB OVERRIDE default user with: " << mdbuser << std::endl;
+  } else {
+	std::cout << "DB OVERRIDE failure, user ID cannot be retrieved" << std::endl;
   }
 }
 //////////////////////////////////////////////////////////////////////
@@ -342,11 +349,11 @@ if(mQueryLast) delete [] mQueryLast;
 Release();
 if(mRes) delete mRes;
 if(mhasConnected)mysql_close(&mData);
-if(mdbhost) delete [] mdbhost;
-if(mdbuser) delete [] mdbuser;
-if(mdbpw)   delete [] mdbpw;
-if(mdbName)  delete [] mdbName;
- if(mdbServerVersion) delete [] mdbServerVersion;
+//if(mdbhost) delete [] mdbhost;
+//if(mdbuser) delete [] mdbuser;
+//if(mdbpw)   delete [] mdbpw;
+//if(mdbName)  delete [] mdbName;
+// if(mdbServerVersion) delete [] mdbServerVersion;
 
 #ifdef MYSQL_VERSION_ID
 # if MYSQL_VERSION_ID > 50044

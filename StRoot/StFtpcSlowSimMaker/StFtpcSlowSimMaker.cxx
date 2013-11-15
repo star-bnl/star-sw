@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.37 2013/02/18 16:30:42 fisyak Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.38 2013/03/26 15:56:00 genevb Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.38  2013/03/26 15:56:00  genevb
+// Replace agufld(x,b) with direct call to StarMagField::Instance()->BField(x,b)
+//
 // Revision 1.37  2013/02/18 16:30:42  fisyak
 // gufld => agufld
 //
@@ -156,11 +159,6 @@
 #include "TH1.h"
 #include "TH2.h"
 
-#ifndef agufld
-#define agufld agufld_
-extern "C" void agufld(float *, float *);
-#endif
-
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_ftp_hit_Table.h"
 #include "tables/St_fcl_ftpcndx_Table.h" 
@@ -201,7 +199,7 @@ StFtpcSlowSimMaker::~StFtpcSlowSimMaker(){
 Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   Float_t x[3] = {0,0,0};
   Float_t b[3];
-  agufld(x,b);
+  StarMagField::Instance()->BField(x,b);
   Double_t gFactor = b[2]/4.980;
 
    mDbMaker     = (St_db_Maker*)GetMaker("db");
