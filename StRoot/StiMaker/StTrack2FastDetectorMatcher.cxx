@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.2 2012/11/06 20:54:09 fisyak Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -72,7 +72,8 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
       eemcList =new StEemcHitList(eeDb, killStatEEmc,geomE); eemcList->initRun();
     }
     if (dateY > 2008) {
-      btofGeom = (StBTofGeometry *) mydb->GetDataSet("btofGeometry");
+      TObjectSet *set = (TObjectSet *) mydb->GetDataSet("btofGeometry");
+      if (set) btofGeom = (StBTofGeometry *) set->GetObject(); 
       if (! btofGeom) {
 	TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
 	if (starHall) {
@@ -302,6 +303,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.2  2012/11/06 20:54:09  fisyak
+ * Fix a bug with misplacement of TObjectSet
+ *
  * Revision 2.1  2012/05/07 14:56:14  fisyak
  * Add StKFVertexMaker
  *

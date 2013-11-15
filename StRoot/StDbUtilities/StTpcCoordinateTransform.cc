@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.38 2012/09/13 20:57:28 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.39 2012/10/23 20:13:17 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.39  2012/10/23 20:13:17  fisyak
+ * Move xFromPad from h- to cxx-file
+ *
  * Revision 1.38  2012/09/13 20:57:28  fisyak
  * Corrections for iTpx
  *
@@ -298,20 +301,25 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
   b = StTpcLocalSectorCoordinate(tmp,a.sector(),a.row());
 }
 //________________________________________________________________________________
-Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t row) const
-{
+Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t row) const {
   Double_t pitch = (row <= mNoOfInnerRows) ?
     gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch() :
     gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
   // x coordinate in sector 12
   Double_t probablePad = (gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2. - x/pitch;
   // CAUTION: pad cannot be <1
-    if(probablePad<0.500001) {
-      probablePad=0.500001;
-    }
-    return (probablePad);
+  if(probablePad<0.500001) {
+    probablePad=0.500001;
+  }
+  return (probablePad);
 }
-//
+//________________________________________________________________________________
+Double_t StTpcCoordinateTransform::xFromPad(Int_t row, Double_t pad)          const {    // x coordinate in sector 12
+  Double_t pitch = (row <= mNoOfInnerRows) ?	
+    gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch() : 
+    gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
+  return -pitch*(pad - (gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2.);
+}
 // Coordinate from Row
 //
 //Local Transformation...

@@ -109,8 +109,6 @@ St2011ZMaker::initHistos(){
   hA[36]=h=new TH1F(core+"etaZ","Z boson #eta; #eta_{Z}",100,-5.,5.);
   hA[37]=h=new TH1F(core+"ptZ","Z boson p_{T}; p_{T}^{Z}",100,0.,20.);
 
-  hA[38]=new TH1F(core+"Y2","golden Z spin sorted; spin4 ",16,-0.5,15.5);
-
   //************* endcap histos ***************
 
   // barrel track matched with endcap cluster (no track requirement

@@ -20,8 +20,27 @@ void loadStarGeometry( const Char_t *mytag="y2009a" )
   // This is the name of the file in which we cache the AgML
   // geometry
   //
+#if 0  
   TString filename = ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
-  filename.ReplaceAll(".root",".geom.root");
+#else /* NOTE: this assumes that "chain" is in scope in CINT */
+  TString filename = "";  
+  if ( chain ) {
+      filename = chain -> GetFileOut();
+      filename.ReplaceAll(".root","");
+  }
+#endif
+  if ( filename == "" ) 
+    {
+      filename = chain -> GetFileIn();
+      filename.ReplaceAll("@","");      // special case for filelist
+      filename.ReplaceAll(".list","");
+    }
+  if ( filename == "" )
+    {
+      filename = mytag;
+    }
+
+  filename += ".geom.root";
 
   ///////////////////////////////////////////////////////////
   //
@@ -29,7 +48,8 @@ void loadStarGeometry( const Char_t *mytag="y2009a" )
   //
   if ( AgModule::Find("HALL") )
     {
-      std::cout << Form(">>> AgML geometry detected.  Loading from %s <<<",filename.Data()) << std::endl;
+      std::cout << Form(">>> AgML geometry detected.  Loading from %s <<<",filename.Data()) << std::endl;      
+      gGeoManager = 0;// Prevent ROOT deleting existing geometry
       TGeoManager::Import( filename );
       assert(gGeoManager);
       return;
