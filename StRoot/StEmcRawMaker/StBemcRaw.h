@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.16 2009/02/26 12:00:40 mattheww Exp $
+// $Id: StBemcRaw.h,v 1.17 2010/12/22 22:58:57 stevens4 Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.17  2010/12/22 22:58:57  stevens4
+// Patch for BSMDE mapping problem in P10ih and P10ij productions (RT #2043)
+//
 // Revision 1.16  2009/02/26 12:00:40  mattheww
 // added token check to BTOW header check
 //
@@ -102,6 +105,8 @@ protected:
     Bool_t                   mPsdMapBug;
     Bool_t                   mPsdMapBug2;
     Bool_t                   mTowerMapBug;
+    Bool_t                   mSmdMapBug;
+    string                   mProdVer;
 
     Int_t                    mDate;
     Int_t                    mTime;
@@ -165,6 +170,10 @@ public:
     {
         mTime = t;
     } ///<Set event time.
+    void                      setProdVer(string prodVer)
+    {
+        mProdVer = prodVer;
+    } ///<Set event date.
     void                      saveAllStEvent(Bool_t a)
     {
         mSaveAllStEvent = a;
@@ -185,6 +194,10 @@ public:
         delete mTables;
         mTables = new StBemcTables(mTowerMapBug, mPsdMapBug2);
     } ///< Set to ktrue to correct for the tower map bug (only runs before 2006)
+    void                      smdMapBug(Bool_t a)
+    { 
+        mSmdMapBug = a;
+    } ///< Set to ktrue to correct SMD swaps
 
     StBemcTables*             getTables()
     {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.20 2010/09/08 15:44:41 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.22.2.1 2013/01/02 17:54:25 didenko Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -98,8 +98,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
         totalPads += numPadsAtRow;
         if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
             StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
-            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
-            St_tpcPadGainT0C::instance()->livePadrow(sector,row))
+            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
           livePads += numPadsAtRow;
       }
     }
@@ -158,6 +157,7 @@ Int_t StTpcRTSHitMaker::Make() {
     Int_t nup = 0;
     Int_t NoAdcs = 0;
     for (Int_t row = minRow; row <= maxRow; row++) {
+      if (! St_tpcPadGainT0C::instance()->livePadrow(sec,row)) continue;
       Int_t Npads = digitalSector->numberOfPadsInRow(row);
       if (! Npads) continue;
       for(Int_t pad = 1; pad <= Npads; pad++) {
@@ -233,6 +233,23 @@ Int_t StTpcRTSHitMaker::Make() {
 	    iBreak++;
 	  }
 	}
+#if 1
+	if (dta->sim_cld[i].cld.p1 > dta->sim_cld[i].cld.p2) continue;
+	if (dta->sim_cld[i].cld.t1 > dta->sim_cld[i].cld.t2) continue;
+	if (dta->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
+	if (dta->sim_cld[i].cld.charge < fminCharge) continue;
+	/*tpxFCF.h */
+	  #define FCF_ONEPAD              1
+	  #define FCF_DOUBLE_PAD          2       // offline: merged
+	  #define FCF_MERGED              2
+	  #define FCF_BIG_CHARGE          8
+	  #define FCF_ROW_EDGE           16      // 0x10 touched end of row
+	  #define FCF_BROKEN_EDGE        32      // 0x20 touches one of the mezzanine edges
+	  #define FCF_DEAD_EDGE          64      // 0x40 touches a dead pad 
+	/* */
+	if ( dta->sim_cld[i].cld.flags &&
+	    (dta->sim_cld[i].cld.flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE))) continue;
+#endif
 	if (maxHits[sec-1] && ++hitsAdded > maxHits[sec-1]) {
 	  LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
 	            << sec << "). Skipping event." << endm;
