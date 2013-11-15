@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.41 2011/11/28 17:03:09 dmitry Exp $
+// $Id: St_db_Maker.h,v 1.42 2012/03/16 19:36:18 dmitry Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.42  2012/03/16 19:36:18  dmitry
+// converted dangled char pointers to std::string objects + fixed typo
+//
 // Revision 1.41  2011/11/28 17:03:09  dmitry
 // dbv override support in StDbLib,StDbBroker,St_db_Maker
 //
@@ -133,12 +136,12 @@ private:
   TDatime     fDBTime;          //! Own DB time stamp
   Int_t       fUpdateMode;      //!
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
-  std::map<std::pair<char*,char*>,UInt_t> fMaxEntryTimeOverride; // DBV override for specific subsystems
+  std::map<std::pair<std::string,std::string>,UInt_t> fMaxEntryTimeOverride; // DBV override for specific subsystems
   TStopwatch  fTimer[6];        //!Timer object
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.41 2011/11/28 17:03:09 dmitry Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.42 2012/03/16 19:36:18 dmitry Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -186,7 +189,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.41 2011/11/28 17:03:09 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.42 2012/03/16 19:36:18 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };

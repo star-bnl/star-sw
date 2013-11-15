@@ -1,5 +1,0 @@
-      MODULE TPCEGEO3   Dummy module calling TPCEGEO3a
-      +CDE,agecom,gcunit.
-      Call TpceGeo3a
-      <W> '===>> 	[End AgML Module TPCEGEO3]	 <<==='; (A32,/,/);
-      END! Module TPCEGEO3
