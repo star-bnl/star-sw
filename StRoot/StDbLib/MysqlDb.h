@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.27 2007/10/29 22:50:56 deph Exp $
+ * $Id: MysqlDb.h,v 1.27.4.1 2013/11/15 20:49:57 didenko Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.27.4.1  2013/11/15 20:49:57  didenko
+ * patch due to user id problem on SL6
+ *
  * Revision 1.27  2007/10/29 22:50:56  deph
  * Abstracted load balancer call from connect to own function called from reconnect
  * removed extraneuos methods from header
@@ -212,6 +215,7 @@ private:
   int mdbPort;  
   char* mdbServerVersion;
 
+  std::string mSysusername;
   unsigned int mtimeout; // wait time between connection tries
 
 

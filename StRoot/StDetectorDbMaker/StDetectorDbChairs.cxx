@@ -375,6 +375,9 @@ Float_t St_tss_tssparC::gain_out(Int_t sec, Int_t row) {
 Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
   return row <= 13 ? gain_in(sec,row) : gain_out(sec,row);
 }
+//__________________Calibrations/tracker______________________________________________________________
+#include "St_tpcMaxHitsC.h"
+MakeChairInstance(tpcMaxHits,Calibrations/tracker/tpcMaxHits);
 //__________________Calibrations/rich______________________________________________________________
 #include "StDetectorDbRichScalers.h"
 StDetectorDbRichScalers *StDetectorDbRichScalers::fgInstance = 0;
