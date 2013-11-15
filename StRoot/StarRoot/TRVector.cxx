@@ -15,9 +15,9 @@ TRVector::TRVector(const TRMatrix& A, ETRMatrixCreatorsOp kop,const TRVector& B)
     TRMatrix(A, kop, B) {assert (kop = kAxB);}
 //________________________________________________________________________________
 TRVector::TRVector(const TRMatrix& S, Int_t I) {// get I'th row
-  if (I == 0) {::Error("TRVector::TRVector(const TRMatrix&)", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+  if (I == 0) {::Error("TRVector::TRVector(const TRMatrix&)", "index i %d out of bounds (size: %d, this: %p)", 
 		       I, S.NI(), this); I = 1;}
-  if (I > S.NI()) {::Error("TRVector::TRVector(const TRMatrix&)", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+  if (I > S.NI()) {::Error("TRVector::TRVector(const TRMatrix&)", "index i %d out of bounds (size: %d, this: %p)", 
 			   I, S.NI(), this); I = 1;}
   fNrows = S.NJ();
   fNcols = 1;
@@ -58,10 +58,21 @@ TRVector::TRVector(const TVector3& A) :TRMatrix(3,1) {
   Set(3,xyz);
 }
 //________________________________________________________________________________
+TRVector::TRVector(const StThreeVectorD& A) :TRMatrix(3,1) {
+  Set(3,A.xyz());
+}
+//________________________________________________________________________________
 TRVector &TRVector::operator=(const TVector3& A) {
   Double_t xyz[3];
   A.GetXYZ(xyz);
   Set(3,xyz);
+  fNrows = 3;
+  fNcols = 1;
+  return *this;
+}
+//________________________________________________________________________________
+TRVector &TRVector::operator=(const StThreeVectorD& A) {
+  Set(3,A.xyz());
   fNrows = 3;
   fNcols = 1;
   return *this;

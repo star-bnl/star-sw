@@ -10,13 +10,13 @@ TRMatrix::TRMatrix(const TRMatrix &S, Int_t NI, Int_t NJ, Int_t I, Int_t J){
   if (NJ == 0) NJ = S.NJ();
   if (NI > S.NI()) NI = S.NI();
   if (NJ > S.NJ()) NJ = S.NJ();
-  if (I == 0) {::Error("TRMatrix::TRMatrix(const TRMatrix &)", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+  if (I == 0) {::Error("TRMatrix::TRMatrix(const TRMatrix &)", "index i %d out of bounds (size: %d, this: %p)", 
 		       I, S.NI(), this); I = 1;}
-  if (J == 0) {::Error("TRMatrix::TRMatrix(const TRMatrix &)", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+  if (J == 0) {::Error("TRMatrix::TRMatrix(const TRMatrix &)", "index j %d out of bounds (size: %d, this: %p)", 
 		       J, S.NJ(), this); J = 1;}
-  if (I+NI-1 > S.NI()) {::Error("TRMatrix::TRMatrix(const TRMatrix &)", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+  if (I+NI-1 > S.NI()) {::Error("TRMatrix::TRMatrix(const TRMatrix &)", "index i %d out of bounds (size: %d, this: %p)", 
 		       I+NI-1, S.NI(), this); I = 1;}
-  if (J+NJ-1 > S.NJ()) {::Error("TRMatrix::TRMatrix(const TRMatrix &)", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+  if (J+NJ-1 > S.NJ()) {::Error("TRMatrix::TRMatrix(const TRMatrix &)", "index j %d out of bounds (size: %d, this: %p)", 
 		       J+NJ-1, S.NJ(), this); J = 1;}
   fNrows = NI; 
   fNcols = NJ;

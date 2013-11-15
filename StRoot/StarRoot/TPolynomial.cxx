@@ -64,6 +64,7 @@ Double_t TPolynomial::CalcPoly(Double_t *x, Double_t *par) {
 }
 //________________________________________________________________________________
 TF1 *TPolynomial::MakePoly(TString Name, Int_t Npar, Int_t R, Double_t xmin, Double_t xmax) {
+  // param[0] = RRTTnn
   // R = 0: X => x
   // R = 1: X => 2*x
   // R = 2: X => log(x)

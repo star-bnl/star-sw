@@ -38,8 +38,58 @@ class St_tpcPadPlanesC : public TChair {
   Double_t 	outerSectorPadPlaneZ(Int_t i = 0){return Struct(i)->outerSectorPadPlaneZ;}
   Int_t* 	innerPadsPerRow(Int_t i = 0) 	 {return Struct(i)->innerPadsPerRow;}
   Int_t* 	outerPadsPerRow(Int_t i = 0) 	 {return Struct(i)->outerPadsPerRow;}
+  Int_t         padsPerRow(Int_t row = 1)        {return (row <= innerPadRows()) ? 
+      innerPadsPerRow()[row-1] : 
+      outerPadsPerRow()[row-1-innerPadRows()];}
   Double_t* 	innerRowRadii(Int_t i = 0) 	 {return Struct(i)->innerRowRadii;}
   Double_t* 	outerRowRadii(Int_t i = 0) 	 {return Struct(i)->outerRowRadii;}
+  // taken from StRTpcPadPlane
+  Int_t         numberOfRows()                   {return padRows();}
+  Int_t         numberOfInnerRows()              {return innerPadRows();}
+  Int_t         numberOfInnerRows48()            {return innerPadRows48();}
+  Int_t         numberOfInnerRows52()            {return innerPadRows52();}
+  Int_t         numberOfOuterRows()              {return outerPadRows();}
+  Bool_t        isRowInRange(Int_t row)          {return (row >= 1 && row<=numberOfRows()) ? kTRUE: kFALSE;}
+  Double_t      radialDistanceAtRow(Int_t row)       {
+    if (! isRowInRange(row)) return 0;
+    if ( row<=numberOfInnerRows() ) return innerRowRadii()[row-1];
+    else                            return outerRowRadii()[row-1-numberOfInnerRows()];
+  }
+  Int_t   numberOfPadsAtRow(Int_t row)       {
+    if (! isRowInRange(row)) return 0;
+    if ( row<=numberOfInnerRows() ) return innerPadsPerRow()[row-1];
+    return outerPadsPerRow()[row-1-numberOfInnerRows()];
+  }
+  Double_t PadWidthAtRow(Int_t row)       {
+    if (! isRowInRange(row)) return 0;
+    if ( row<=numberOfInnerRows()) return innerSectorPadWidth();
+    return outerSectorPadWidth();
+  }
+  Double_t PadLengthAtRow(Int_t row)       {
+    if (! isRowInRange(row)) return 0;
+    if ( row<=numberOfInnerRows()) return innerSectorPadLength();
+    return outerSectorPadLength();
+  }
+  Double_t PadPitchAtRow(Int_t row)       {
+    if (! isRowInRange(row)) return 0;
+    if ( row<=numberOfInnerRows()) return innerSectorPadPitch();
+    return outerSectorPadPitch();
+  }
+  Double_t RowPitchAtRow(Int_t row)       {
+    if (! isRowInRange(row)) return 0;
+    if ( row<=numberOfInnerRows48() ) return innerSectorRowPitch1();
+    else if (row>numberOfInnerRows48()&&row<=numberOfInnerRows()) return innerSectorRowPitch2();
+    return outerSectorRowPitch();
+  }
+  Int_t indexForRowPad(Int_t row, Int_t pad)       {
+    if (pad >numberOfPadsAtRow(row)) return -1;
+    Int_t index = 0;
+    if (row>0 && row<=numberOfInnerRows() )             for (Int_t i=1;i<row;i++) index += numberOfPadsAtRow(i);    
+    else 
+      if (row>numberOfInnerRows()&&row<=numberOfRows()) for (Int_t i=numberOfInnerRows()+1;i<row;i++)  index += numberOfPadsAtRow(i);
+    index+=pad-1;
+    return index;
+  }
  protected:
   St_tpcPadPlanesC(St_tpcPadPlanes *table=0) : TChair(table) {}
   virtual ~St_tpcPadPlanesC() {fgInstance = 0;}

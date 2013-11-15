@@ -1,6 +1,6 @@
 #ifndef STAR_STCLOSEFILEONTERMINATE
 #define STAR_STCLOSEFILEONTERMINATE
-// $Id: StCloseFileOnTerminate.h,v 1.5 2010/03/02 23:09:24 fine Exp $
+// $Id: StCloseFileOnTerminate.h,v 1.7 2011/06/20 22:36:48 fisyak Exp $
 
 #include "TSysEvtHandler.h"
 
@@ -9,8 +9,8 @@
 class StNotifyOnTerminate;
 /*! \brief  Class StTerminateNotified is a abstract visitor to propagate the termination signal
     It is to provide the custom responce to the SIGTERM system signal.
-    One supposed to sublclass it adn reimplement the SetNotifiedCallBack() method.
-    Theis SetNotifiedCallBack() is to be called by system upon signal SIGTERM emition 
+    One is supposed to sublclass it and reimplement the SetNotifiedCallBack() method.
+    The SetNotifiedCallBack() is to be called by system upon signal SIGTERM emition 
     (for exampe with the kill <PID> shell command or 
     by the batch system manager (like Condor) upon the job eviction
  */
@@ -24,11 +24,11 @@ class StTerminateNotified {
 };
 
 /*! \brief  Class StCloseFileOnTerminate - it is a singleton to catch the SIGTERM signal (sent by Condor for example) to close all open ROOT files.
-    To activate insert into your code:
+    To activate, insert into your code:
     StCloseFileOnTerminate::Instantiate();
     On kill <PID> the Notify method is to close all existing ROOT files and terminated the applcation.
     It is simple. However it is error-prone. The signal SIGTERM can be emitted at the time of I/O operation.
-    As resul this I/O opeation can npt be completed and  no way the file can be close properly.
+    As result this I/O operation can not be completed and no way the file can be close properly.
  */
 class StCloseFileOnTerminate : public TSignalHandler {
  private:
@@ -37,7 +37,9 @@ class StCloseFileOnTerminate : public TSignalHandler {
        // ! singleton ctor 
        StCloseFileOnTerminate();
        //! Create an instance of the signal handler (Should be called at once  by code)
+ public:
        static StCloseFileOnTerminate &Instantiate();
+ protected:
        static bool Exists() {return fgCloseFileOnTerminate;}
        //! Close the open ROOT files upon SIGTERM sent by system to terminate the job
        virtual Bool_t Notify();

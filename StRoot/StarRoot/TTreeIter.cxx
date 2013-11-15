@@ -111,10 +111,14 @@ fV=v;fT=t;fN=name;
 //______________________________________________________________________________
 void *TTreeIterCast::Addr(Int_t outType)
 {
-  void *v = fV;
-  if (fT != outType) {
-     printf("*** Wrong cast:variable %s %s to %s IGNORED ***\n",
-          TTreeIter::TypeName(fT),fN,TTreeIter::TypeName(outType));
+  void *v = (outType>20) ? fV: *((void**)fV);
+  if (fT+20 == outType) {
+     Warning("Addr","*** Possible wrong cast:variable %s %s to %s ACCEPTED ***",
+             TTreeIter::TypeName(fT),fN,TTreeIter::TypeName(outType));
+  }
+  else if (fT != outType) {
+     Error("Addr","*** Wrong cast:variable %s %s to %s IGNORED ***",
+           TTreeIter::TypeName(fT),fN,TTreeIter::TypeName(outType));
      v = 0;
   }
   if (!v) fE[0]++;
@@ -403,9 +407,11 @@ void **TTreeIter::Void(const char *varname)
    } else {
      pddr = mem->GetMem();
    }
-   addr = *pddr;
-   if (fUnits) { if(tyCode) tyCode+=20; addr = (void*)pddr;}
-   fCast.Set(addr,tyCode,varname);
+//    addr = *pddr;
+//    if (fUnits) { if(tyCode) tyCode+=20; addr = (void*)pddr;}
+//    fCast.Set(addr,tyCode,varname);
+   if (fUnits) { if(tyCode) tyCode+=20;}
+   fCast.Set(pddr,tyCode,varname);
 
    return pddr;
 }     
@@ -632,7 +638,7 @@ Int_t TTreeIter::AddFile(const Char_t *file)
      fNFiles++; num++;
      printf("%04d -  TTreeIter::AddFile %s\n",fNFiles,fullname);
      if (fTree == 0) WhichTree(fullname);
-     fTree->Add(fullname);
+     if (fTree) fTree->Add(fullname);
    }
    
   Init();
@@ -648,7 +654,7 @@ void TTreeIter::WhichTree(const char *fileName)
    
 
    TFile *tfile = TFile::Open(fileNameS.Data());
-   if (tfile->IsZombie()) {
+   if (! tfile || tfile->IsZombie()) {
      printf("*** Can NOT open %s ***\n",fileNameS.Data());
      return;}
    

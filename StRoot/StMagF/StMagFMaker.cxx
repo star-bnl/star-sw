@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.15 2009/11/10 20:50:46 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.16 2010/09/01 20:21:21 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.16  2010/09/01 20:21:21  fisyak
+// remove dependence on St_geant_Maker
+//
 // Revision 1.15  2009/11/10 20:50:46  fisyak
 // Switch to TChair
 //
@@ -59,7 +62,6 @@
 #include <assert.h>
 #include <Stiostream.h>
 #include "StMagFMaker.h"
-#include "St_geant_Maker/St_geant_Maker.h"
 #include "StDetectorDbMaker/St_MagFactorC.h"
 #include "StMessMgr.h" 
 #include "StMagF.h"

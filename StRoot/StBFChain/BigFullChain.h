@@ -344,6 +344,7 @@ Bfc_st BFC[] = { // standard chains
   {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
   {"OGridLeak"   ,""  ,"","",""                                          ,"","Grid Leak correction",kFALSE},
   {"OGridLeak3D" ,""  ,"","",""                                       ,"","3D Grid Leak correction",kFALSE},
+  {"OGGVoltErr"  ,""  ,"","",""                                   ,"","GG voltage error correction",kFALSE},
   {"AlignSectors",""  ,"","",""                            ,"","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"DbRichSca"   ,""  ,"","detdb","","",                    "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
@@ -362,6 +363,7 @@ Bfc_st BFC[] = { // standard chains
   // WARNING: introduction of usePct4Vtx with default:false breaks backward compatibility.
   // See related code in StBFChain.cxx for details
   {"usePct4Vtx"     ,""  ,"","",""                ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
+  {"useBTOF4Vtx"    ,""  ,"","",""                 ,"","Use BTOF track matching for vertex ranking",kFALSE},
   {"svt1hit",""  ,"","",""                                     ,"","Use 1 SVT hit only combination",kFALSE},
   {"CtbMatchVtx"    ,""  ,"","VFMinuit",""              ,"","... CTB Matching ON in Vertex Finding",kFALSE},
 #ifdef WithStiVMC /* switched off for StiVMC */
@@ -632,6 +634,8 @@ Bfc_st BFC[] = { // standard chains
                                                                            "New simulator for BEMC",kFALSE},
   {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
                                      "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+  {"EEss" ,"eess","","EEfs",
+                                     "StEEmcSlowMaker","StEEmcSimulatorMaker","EEMC slow simulator",kFALSE},
 
   // BTOF related chains
   //  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
@@ -664,7 +668,9 @@ Bfc_st BFC[] = { // standard chains
 
   // Filtering - all filters will have the pattern "FiltXXX"
   {"FiltGamma" ,"","","StEvent,StMcEvent,EmcUtil",
-                                           "StGammaFilterMaker","StFilterMaker",  "Gamma filtering",kFALSE},
+                                      "StGammaFilterMaker","StFilterMaker",  "BEmc Gamma filtering",kFALSE},
+  {"FiltEemcGamma" ,"","","StEvent,StMcEvent,EmcUtil",
+                                  "StEemcGammaFilterMaker","StFilterMaker",  "EEmc Gamma filtering",kFALSE},
 
 
   // fms
@@ -733,7 +739,7 @@ Bfc_st BFC[] = { // standard chains
   {"flaser"   ,"","","fcl,fpt"   ,"","","StFtpcClusterMaker and StFtpcTrackMaker for LASERTRACKING",kFALSE},
 
   {"pmdReco"   ,"pmdReco","","PmdUtil,pmdRead,pmdClust"       ,"StMaker","StChain","PMD Reco chain",kFALSE},
-  {"pmdRaw"    ,"pmdRaw","","pmdReco"                        "","","PMD Reco chain giving raw data",kFALSE},
+  {"pmdRaw"    ,"pmdRaw","","pmdReco"                       ,"","","PMD Reco chain giving raw data",kFALSE},
   {"pmd"       ,"pmd","","pmdSim,pmdClust,pmdDis","StMaker"      ,"StChain", "PMD Simulation chain",kFALSE},
   {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
   {"pmdSim"    ,"","","PmdUtil","StPmdSimulatorMaker","StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
@@ -808,9 +814,9 @@ Bfc_st BFC[] = { // standard chains
 #endif
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
-  {"McAnaTpc"    ,"","","McAna"                                         "","","Mc Analysis for Tpc",kFALSE},
-  {"McAnaSvt"    ,"","","McAna"                                         "","","Mc Analysis for Svt",kFALSE},
-  {"McAnaSsd"    ,"","","McAna"                                         "","","Mc Analysis for Ssd",kFALSE},
+  {"McAnaTpc"    ,"","","McAna"                                        ,"","","Mc Analysis for Tpc",kFALSE},
+  {"McAnaSvt"    ,"","","McAna"                                        ,"","","Mc Analysis for Svt",kFALSE},
+  {"McAnaSsd"    ,"","","McAna"                                        ,"","","Mc Analysis for Ssd",kFALSE},
   {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"McQa"        ,"","McChain","McEvent",  "StMcQaMaker","StMcQaMaker","QA histogramms for McEvent",kFALSE},
   {"McTpcAna"    ,"","McAnaChain","McEvent,McAss"

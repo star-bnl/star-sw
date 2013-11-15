@@ -44,6 +44,7 @@ Altro::Altro(int timebins, short* Channel){
 	fConfiguredTCF = 0;
 	fConfiguredBSL2 = 0;
 	fConfiguredZSU = 0;
+	ADCkeep = 0;
 }
 
 /**	@brief Destructor of Altro Class
@@ -52,7 +53,8 @@ Altro::Altro(int timebins, short* Channel){
 	*/
 Altro::~Altro(){
 	if(fConfiguredZSU == 1)
-		delete ADCkeep;
+//VP		delete ADCkeep;
+        free(ADCkeep);
 }
 
 /**  @brief Configures which modules of the Altro should be on.
@@ -167,9 +169,9 @@ void Altro::ConfigZerosuppression(int Threshold, int MinSamplesaboveThreshold, i
 	fZSUPostsamples              = inRange(Postsamples,0,7,"Altro::BaselineCorrection_1","Postsamples");
 	ADCkeep = (short *)calloc(sizeof(short),ftimebins);
 
-	for(int i = 0; i < ftimebins; i++){
-		ADCkeep[i] = 0;
-	}
+// 	for(int i = 0; i < ftimebins; i++){
+// 		ADCkeep[i] = 0;
+// 	}
 	fConfiguredZSU = 1;
 }
 
@@ -626,7 +628,7 @@ void Altro::Zerosuppression(int Threshold, int MinSamplesaboveThreshold, int Pre
 			}
 		}
 	}
-	for(int i = ftimebins; i >= 0; i--){
+	for(int i = ftimebins-1; i >= 0; i--){
 		if( (ADCkeep[i] == 1) && (getElement(ADCkeep,i+1) == 0) ){
 			for(int j = i ; j <= i+Postsamples; j++){
 				setElement(ADCkeep,j,1);

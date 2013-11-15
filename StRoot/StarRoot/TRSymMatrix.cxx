@@ -151,25 +151,15 @@ TRSymMatrix::TRSymMatrix(const TRMatrix& A,ETRMatrixCreatorsOp kop) {
   }
 }
 //________________________________________________________________________________
-Double_t TRSymMatrix::Product(const TRVector& A,ETRMatrixCreatorsOp kop) {
+Double_t TRSymMatrix::Product(const TRVector& A,ETRMatrixCreatorsOp /* kop */) {
   Int_t M, N; // N == 1
   Double_t Value;
-  switch (kop) { // 
-  case kAxSxAT: //A[M,N]*S[N,N]*AT[M,N] => R[M,M]; 
-    M = A.GetNrows();
-    N = GetNrows();
-    assert(N == A.GetNcols());
-    TCL::trasat(A.GetArray(),GetArray(),&Value,M,N);
-    break;
-  case kATxSxA: //BT[N,M]*S[N,N]*B[N,M] => R[M,M]; 
-    M = A.GetNcols();
-    N = GetNrows();
-    assert(N == A.GetNrows());
-    TCL::tratsa(A.GetArray(),GetArray(),&Value,M,N);
-    break;
-  default:
-    Error("TRSymMatrix(ETRMatrixCreatorsOp)", "operation %d not yet implemented", kop);
-  }
+  //  case kAxSxAT: //A[M,N]*S[N,N]*AT[M,N] => R[M,M]; 
+  //  case kATxSxA: //BT[N,M]*S[N,N]*B[N,M] => R[M,M]; 
+  M = A.GetNcols();
+  N = GetNrows();
+  assert(N == A.GetNrows());
+  TCL::tratsa(A.GetArray(),GetArray(),&Value,M,N);
   return Value;
 }
 //________________________________________________________________________________
@@ -391,13 +381,13 @@ Int_t TRSymMatrix::TrsmUL(const Double_t *g, Double_t *gi, Int_t n) {TCL::trsmul
 Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
   //  assert(! (j < 0 || j >= fNrows));
   if (j < 0 || j >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: %p)", 
 	    j, fNrows, this); 
     j = 0;
   }
   //  assert(! (i < 0 || i >= fNrows));
   if (i < 0 || i >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: %p)", 
 	    i, fNrows, this); 
     i = 0;
   }

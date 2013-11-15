@@ -20,41 +20,31 @@ void GeomDrawUsage() {
           printf("One always can select the geometry from the \"file menu\" of the GUI interface later on too\n");          
           printf("\n");                
           printf("---------------\n"); 
-          printf("\n$Id: GeomBrowse.C,v 1.13 2009/09/17 19:15:32 fine Exp $\n");
+          printf("\n$Id: GeomBrowse.C,v 1.14 2010/05/26 22:00:40 jeromel Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
 StGeomBrowser *GeomBrowse(const char *fzFile="y2009")
 {
    GeomDrawUsage();
    // gSystem->Load("libGeomBrowser");  
+
    gSystem->Load("St_base");
-   // check Coin env and load if present
-   TString ivrootDir = "$ROOT/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d/lib/";
-   gSystem->ExpandPathName(ivrootDir);
-   bool CheckCoin = true;
-   if (!gSystem->AccessPathName(ivrootDir.Data())) {
-      printf(" Loading ... libCoin.so %d     \n",gSystem->Load(ivrootDir+"libCoin"));
-      printf(" Loading ... libSoQt.so %d     \n",gSystem->Load(ivrootDir+"libSoQt"));
-      // printf(" Loading ... libSmallChange %d \n",gSystem->Load(ivrootDir+"libSmallChange"));
-      CheckCoin = false;
-   }   
-   if (!StCheckQtEnv::SetQtEnv(CheckCoin)) {}
-   {
-      gSystem->Load("StChain");
-      gSystem->Load("St_Tables");
-      gSystem->Load("St_g2t.so");
-      gSystem->Load("StarMagField");
-      gSystem->Load("St_geant_Maker");
-      gSystem->Load("StUtilities");
-      gSystem->Load("StarClassLibrary");  
-      gSystem->Load("StEvent");  
-      gSystem->Load("StEventUtilities");  
-      gSystem->Load("St_geom_Maker");  
-      StGeomBrowser *a = new StGeomBrowser;
-      a->SetFile(fzFile); 
-      a->SetSize(360,600); 
-      a->Show();
-      geoBrowser = a;
-   }
+   gSystem->Load("StChain");
+   gSystem->Load("St_Tables");
+   gSystem->Load("St_g2t.so");
+   gSystem->Load("StarMagField");
+   gSystem->Load("St_geant_Maker");
+   gSystem->Load("StUtilities");
+   gSystem->Load("StarClassLibrary");  
+   gSystem->Load("StEvent");  
+   gSystem->Load("StEventUtilities"); 
+   gSystem->Load("libQt3Support");
+   gSystem->Load("St_geom_Maker");  
+   StGeomBrowser *a = new StGeomBrowser;
+   a->SetFile(fzFile); 
+   a->SetSize(360,600); 
+   a->Show();
+   geoBrowser = a;
+
    return geoBrowser;
 }

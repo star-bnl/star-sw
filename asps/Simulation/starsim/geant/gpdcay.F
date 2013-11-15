@@ -1,8 +1,12 @@
 *
-* $Id: gpdcay.F,v 1.1.1.1 2004/01/12 23:49:40 potekhin Exp $
+* $Id: gpdcay.F,v 1.2 2010/06/24 17:41:26 jwebb Exp $
 *
 * $Log: gpdcay.F,v $
+* Revision 1.2  2010/06/24 17:41:26  jwebb
+* Added the ids of the decay daughters to the output
+*
 * Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
+*
 *
 * Revision 1.2  2001/06/15 23:00:20  nevski
 * if-endif corrected
@@ -29,7 +33,8 @@
 #include "geant321/gcunit.inc"
       REAL      BRATIO
       INTEGER   LENOCC,IPART,IP1,IP2,IP,JPA,
-     >          MODE,JDK1,JDK2,L1,L,LL,I,JP,M1
+     >          MODE,JDK1,JDK2,L1,L,LL,I,JP,M1,
+     >          ID1, ID2, ID3
       CHARACTER CNAME*20,CMODE*200
 *-
 *-    ------------------------------------------------------------------
@@ -60,11 +65,17 @@
 *    COPY branching ratios & decay modes.
 *
          DO I  = 1,6
+
             CMODE = CMODE(1:L1)//' => '
             LL     = L1+4
             BRATIO = Q(JDK1+I)
             IF (BRATIO.LE.0) GO TO 60
             MODE   = IQ(JDK2+I)
+
+            ID1 = MOD(MODE/    1 ,  100)
+            ID2 = MOD(MODE/  100 ,  100)
+            ID3 = MOD(MODE/10000 ,  100)
+
             DO WHILE (MODE.GT.0)
                M1  = MOD(MODE,100)
                IF (M1.LE.0) GOTO 50
@@ -76,8 +87,20 @@
                LL  = LL+L+3
   50           MODE=MODE/100
             ENDDO
-            WRITE(LOUT,1001) BRATIO,CMODE(1:LL-3)
- 1001       FORMAT(6x,'Branching(%)=',F8.3,' Channel: ',A)
+
+            IF ( ID3 > 0 ) THEN
+               WRITE(LOUT,1001) BRATIO, CMODE(1:LL-3), ID1, ID2, ID3            
+ 1001          FORMAT(6x,'Branching(%)=',F8.3,' Channel: ',A,' Mode: ',
+     >              I3, I3, I3)
+
+            ELSE
+               WRITE(LOUT,1002) BRATIO, CMODE(1:LL-3), ID1, ID2
+ 1002          FORMAT(6x,'Branching(%)=',F8.3,' Channel: ',A,' Mode: ',
+     >              I3, I3)
+
+            ENDIF
+
+
   60     ENDDO
 C
   90     CONTINUE

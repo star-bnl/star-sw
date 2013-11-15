@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.23 2010/03/25 15:05:54 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.39 2011/04/07 23:29:52 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,21 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.39  2011/04/07 23:29:52  genevb
+ * Version intended for SL10h embedding (patched for improper max hit calc when gains are falsely zeroed)
+ *
+ * Revision 1.27  2010/08/31 15:19:36  genevb
+ * Lower bound on reduced hit maxima
+ *
+ * Revision 1.26  2010/08/31 14:16:30  genevb
+ * Correct mistake from prev commit of location of TPC cluster check
+ *
+ * Revision 1.25  2010/08/30 18:02:01  genevb
+ * Introduce hit maxima for tracking
+ *
+ * Revision 1.24  2010/08/02 23:06:15  fisyak
+ * Fix format
+ *
  * Revision 1.23  2010/03/25 15:05:54  fisyak
  * Add AfterBurner
  *
@@ -144,6 +159,10 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
+#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_tpcMaxHitsC.h"
+#include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "TFile.h"
 #include "TNtuple.h"
 #include "TH2.h"
@@ -182,7 +201,31 @@ Int_t StTpcHitMaker::Init() {
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
   SetAttr("maxRow",45);
+  memset(maxHits,0,sizeof(maxHits));
   return kStOK ;
+}
+//_____________________________________________________________
+Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
+  Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
+  if (maxHitsPerSector>0) SetAttr(".Privilege",1);
+  for(Int_t sector=1;sector<=24;sector++) {
+    Int_t livePads = 0;
+    Int_t totalPads = 0;
+    for(Int_t row=1;row<=45;row++) {
+      Int_t numPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
+      totalPads += numPadsAtRow;
+      if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
+          StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+          St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
+        livePads += numPadsAtRow;
+    }
+    Float_t liveFrac = TMath::Max((Float_t) 0.1,
+                       ((Float_t) livePads) / ((Float_t) totalPads));
+    maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
+    if (Debug()) {LOG_INFO << "maxHits in sector " << sector
+                           << " = " << maxHits[sector-1] << endm;}
+  }
+  return kStOK;
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::Make() {
@@ -213,6 +256,7 @@ Int_t StTpcHitMaker::Make() {
 	}
       }
     }
+    Int_t hitsAdded = 0;
     while (daqTpcTable) {
       assert(Sector() == sector);
       Int_t row = 45;
@@ -222,7 +266,7 @@ Int_t StTpcHitMaker::Make() {
       if (row >= minRow && row <= maxRow) {
 	switch (kMode) {
 	case kTpc: 
-	case kTpx:             UpdateHitCollection(sector); break;
+	case kTpx: hitsAdded += UpdateHitCollection(sector); break;
 	case kTpcPulser:       
 	case kTpxPulser:       
 	  if (! fTpc)                  break;
@@ -248,6 +292,11 @@ Int_t StTpcHitMaker::Make() {
       }
       daqTpcTable = GetNextDaqElement(mQuery);
     }
+    if (hitsAdded > maxHits[sector-1]) {
+      LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
+                << sector << "). Skipping event." << endm;
+      return kStSkip;
+    }
   }
   StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
   if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
@@ -257,11 +306,11 @@ Int_t StTpcHitMaker::Make() {
   return kStOK;
 }
 //_____________________________________________________________
-void StTpcHitMaker::UpdateHitCollection(Int_t sector) {
+Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
   // Populate StEvent with StTpcHit collection
   StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
   if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
-  if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return;}
+  if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return 0;}
   StTpcHitCollection *hitCollection = pEvent->tpcHitCollection();
   if ( !hitCollection )  {
     // Save the hit collection to StEvent...if needed
@@ -269,20 +318,20 @@ void StTpcHitMaker::UpdateHitCollection(Int_t sector) {
     pEvent->setTpcHitCollection(hitCollection);
   }
   Int_t NRows = DaqDta()->GetNRows();
-  if (NRows <= 0) return;
-  Int_t nhitsB = hitCollection->numberOfHits();
+  if (NRows <= 0) return 0;
+  Int_t nhitsBefore = hitCollection->numberOfHits();
   Int_t sec = DaqDta()->Sector();
   Int_t row = DaqDta()->Row();
   if (kReaderType == kLegacyTpc || kReaderType == kLegacyTpx) {
     tpc_t *tpc = (tpc_t *) DaqDta()->GetTable();
     for (Int_t l = 0; l < NRows; tpc++) {
-      if ( !tpc->has_clusters )  return;
-      for(Int_t row=0;row<45;row++) {
-	tpc_cl *c = &tpc->cl[row][0];
-	Int_t ncounts = tpc->cl_counts[row];
+      if ( !tpc->has_clusters )  return 0;
+      for(Int_t padrow=0;padrow<45;padrow++) {
+	tpc_cl *c = &tpc->cl[padrow][0];
+	Int_t ncounts = tpc->cl_counts[padrow];
 	for(Int_t j=0;j<ncounts;j++,c++) {
 	  if (! c || ! c->charge) continue;
-	  Int_t iok = hitCollection->addHit(CreateTpcHit(*c,sector,row+1));
+	  Int_t iok = hitCollection->addHit(CreateTpcHit(*c,sector,padrow+1));
 	  assert(iok);
 	}
       }
@@ -294,7 +343,7 @@ void StTpcHitMaker::UpdateHitCollection(Int_t sector) {
     }
     for (Int_t l = 0; l < NRows; l++, cld++) {
       if (Debug() > 1) {
-	LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
+	LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X",//, Id %d, Q %d ",
 			 cld->pad,
 			 cld->p1,
 			 cld->p2,
@@ -311,10 +360,11 @@ void StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       assert(iok);
     }
   }
-  Int_t nhits = hitCollection->numberOfHits();
+  Int_t nhits = hitCollection->numberOfHits() - nhitsBefore;
   if (Debug()) {
-    LOG_INFO << " Total hits in Sector : row " << sector << " : " << row << " = " << nhits - nhitsB << endm;
+    LOG_INFO << " Total hits in Sector : row " << sector << " : " << row << " = " << nhits << endm;
   }
+  return nhits;
 }
 //_____________________________________________________________
 StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row) {

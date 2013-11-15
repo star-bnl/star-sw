@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.22 2009/11/10 20:19:36 fisyak Exp $
+ * $Id: StAssociationMaker.h,v 1.24 2010/06/22 22:06:33 fine Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.24  2010/06/22 22:06:33  fine
+ * roll back the previous version to restore the nightly builds
+ *
  * Revision 1.22  2009/11/10 20:19:36  fisyak
  * Change default to ITTF
  *
@@ -534,7 +537,7 @@ private:
     bool              mEstTracksOn; //!
     bool              mDistanceAssoc; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.22 2009/11/10 20:19:36 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.24 2010/06/22 22:06:33 fine Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker,0)
 

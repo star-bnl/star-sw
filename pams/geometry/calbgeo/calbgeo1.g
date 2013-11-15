@@ -4,8 +4,11 @@ MODULE  CALBGEO1 is the geometry of the Barrel EM Calorimeter
    Created   January 20, 2004
 * Based on the original CALBGEO
 *
-* $Id: calbgeo1.g,v 1.5 2009/11/10 02:14:30 perev Exp $
+* $Id: calbgeo1.g,v 1.6 2011/02/28 15:40:03 jwebb Exp $
 * $Log: calbgeo1.g,v $
+* Revision 1.6  2011/02/28 15:40:03  jwebb
+* Added parentheses around expression in IF statements.
+*
 * Revision 1.5  2009/11/10 02:14:30  perev
 * Where GSTPAR, set local material avoid bug in gphysi
 *
@@ -165,8 +168,12 @@ block CALB is  EMC Barrel envelope
                       rmn = { cut_radius,  Calg_rmin,  Calg_Rmin,  cut_radius},
                       rmx = { Rmax,        Rmax,       Rmax,       Rmax };
 
-      if calg_Nmodule(1)>0 { ii=1; create and Position CHLV;            }      
-      if calg_Nmodule(2)>0 { ii=2; create and Position CHLV thetaZ=180; }
+      if (calg_Nmodule(1)>0) { 
+          ii=1; create and Position CHLV;            
+      }      
+      if (calg_Nmodule(2)>0) { 
+          ii=2; create and Position CHLV thetaZ=180; 
+      }
 *
 EndBlock
 * -----------------------------------------------------------------------------

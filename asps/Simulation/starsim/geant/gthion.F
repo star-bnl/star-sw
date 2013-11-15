@@ -1,6 +1,16 @@
-* $Id: gthion.F,v 1.1.1.1 2004/01/12 23:49:40 potekhin Exp $
+* $Id: gthion.F,v 1.2 2011/03/30 19:34:08 jwebb Exp $
 * $Log: gthion.F,v $
+* Revision 1.2  2011/03/30 19:34:08  jwebb
+* gthion.F -- modified such that the effective charge used in dE/dx generation
+*             depends on |Q| rather than Q to prevent Q**(2/3) generating a
+*             NaN condition.
+*
+*             Also added code to permit unstable (hyper) nuclei to decay.
+*
+* gltrac.F -- modified to initialize decay of unstable (hyper) nuclei.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
+*
 *
 * Revision 1.1  2001/02/27 10:15:43  nevski
 *  first working release
@@ -23,6 +33,12 @@ C.    *                                                                *
 C.    *   ==>Called by : GTRACK                                        *
 C.    *       Authors    R.Brun, F.Bruyant, M.Maire, L.Urban ***       *
 C.    * cernlib correction 95-99 added                                 *
+C.    *                                                                *
+C.    *                                                     01/22/2011 *
+C.    * CHARGE --> abs(CHARGE) to allow anti-nuclei to be propagated   *
+C.    * by this routine.  CHARGE is used in calculating dE/dx below,   *
+C.    * and this should only depend on the magnitude of the charge.    *
+C.    *                                                                *
 C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
@@ -79,7 +95,7 @@ C.    ------------------------------------------------------------------
          GKR   = (CUTPRO - ELOW(IKCUT))/(ELOW(IKCUT+1) - ELOW(IKCUT))
          STOPC = (1.-GKR)*Q(JRANG+IKCUT) + GKR*Q(JRANG+IKCUT+1)
          FACFLU = DME*(Z*DENS/A)
-         CHAR23 = ONE/CHARGE**TWOTHR
+         CHAR23 = ONE/abs(CHARGE)**TWOTHR
          IF(IMCKOV.EQ.1) THEN
             JTCKOV = LQ(JTM-3)
             JABSCO = LQ(JTCKOV-1)
@@ -95,10 +111,10 @@ C.    ------------------------------------------------------------------
       GAMASS=GETOT+AMASS
       BET2=GEKIN*GAMASS/(GETOT*GETOT)
       BET=SQRT(BET2)
-      W1=1.034-0.1777*EXP(-0.08114*CHARGE)
+      W1=1.034-0.1777*EXP(-0.08114*abs(CHARGE))
       W2=BET*CHAR23
       W3=121.4139*W2+0.0378*SIN(190.7165*W2)
-      CHARG1=CHARGE*(1.-W1*EXP(-W3))
+      CHARG1=abs(CHARGE)*(1.-W1*EXP(-W3))
 *
 *              the effective charge  CHARG1
 *            can be negative only for very low energy and
@@ -137,6 +153,19 @@ C.    ------------------------------------------------------------------
             IPROC = 12
          ENDIF
       ENDIF
+
+      !!
+      !! Step limitation due to decay of hypernucleus?
+      !!
+      If ( idcay .gt. 0 ) Then
+         sdcay = sumlif * vect(7)/amass
+         If ( sdcay .lt. step ) Then
+            step  = sdcay
+            iproc = 5
+         EndIf
+      EndIf
+                                                              
+
 *
 *  ** Step limitation due to delta-ray production ?
 *       (Cannot be tabulated easily because dependent on AMASS)
@@ -381,7 +410,7 @@ C.    ------------------------------------------------------------------
 *     Charge exchange fluctuations + Gaussian 'Landau' fluctuations
 *           (it is the same for ILOSS=1,2,3 !)
 *
-            SIGMA2=CNORM*CHARG1*(1.-CHARG1/CHARGE)
+            SIGMA2=CNORM*CHARG1*(1.-CHARG1/abs(CHARGE))
             SIGMA2=MAX(SIGMA2,0.)
             TA = RMASS*GEKIN
             TAM=TA/AMU
@@ -461,7 +490,29 @@ C.    ------------------------------------------------------------------
       ISTOP  = 2
       NMEC = NMEC + 1
       LMEC(NMEC) = 30
-      IF (IHADR.EQ.0) GO TO 999
+      !!    IF (IHADR.EQ.0) GO TO 999
+      !! ==========================================================
+      !!    Decay code imported from GtHADR
+      IF (IHADR.EQ.0) THEN
+         IF (IDCAY.NE.0) THEN
+            TOFG = TOFG +0.5*(1+GAMMA)*SUMLIF/CLIGHT
+            SUMLIF = 0.
+            IF (TOFG.GE.TOFMAX) THEN
+               ISTOP = 4
+               NMEC = NMEC + 1
+               LMEC(NMEC) = 22
+               NGKINE = 0
+            ELSE
+               NMEC = NMEC + 1
+               LMEC(NMEC) = 5
+               ISTOP =1
+               CALL GDECAY
+            ENDIF
+         ENDIF
+         GO TO 999
+      ENDIF
+      !!    End decay code
+      !! ==========================================================
       IPROC = 12
 *
 * *** apply slected process if any
@@ -489,6 +540,12 @@ C.    ------------------------------------------------------------------
                LMEC(NMEC) = 22
             ENDIF
          ENDIF
+         
+     !! Import decay code from gthadr
+      ELSE IF (IPROC.EQ.5) THEN
+         ISTOP = 1
+         CALL GDECAY
+
 *
 *  **   Delta-ray ?
 *

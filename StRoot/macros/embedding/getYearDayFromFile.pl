@@ -4,11 +4,13 @@ use Getopt::Long ;
 
 my $day = 0;
 my $help = 0;
+my $runnum = 0;
 my $year = 0;
 
 GetOptions (
     'day' => \$day,     # Return day
     'help' => \$help ,  # Show help messages
+    'run' => \$runnum,  # Return runnumber
     'year' => \$year    # Return year (default)
 );
 
@@ -17,6 +19,7 @@ my $usage = q(
 
     -d or --day     Return day extracted from filename
     -h or --help    Show this messages and exit
+    -r or --run     Return the runnumber from filename
     -y or --year    Return year extracted from filename (default)
 
 
@@ -81,6 +84,10 @@ if( $year ){
   $output += 1999 ; # -1 + 2000
 }
 
+if( $runnum ) {
+print "$run"
+}
+else {
 print "$output";
-
+}
 
