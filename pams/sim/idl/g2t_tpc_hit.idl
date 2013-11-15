@@ -10,4 +10,7 @@
        float     x[3];       /* coordinate (Cartesian) */
        float     lgam;       /* ALOG10(GEKin/AMass) */
        float     length;     /* track length up to this hit */
+       float     adc;        /* signal in ADC  after digitization */
+       float     pad;        /* hit pad position used in digitization */
+       float     timebucket; /* hit time position -"- */
 };

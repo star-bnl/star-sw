@@ -1,6 +1,18 @@
-* $Id: cavegeo.g,v 1.7 2007/02/07 20:45:33 potekhin Exp $
+* $Id: cavegeo.g,v 1.8 2010/02/04 20:50:50 jwebb Exp $
 *
 * $Log: cavegeo.g,v $
+* Revision 1.8  2010/02/04 20:50:50  jwebb
+* Update of the CAVE geometry:
+*
+* + New version 5 of the cave is implmented.
+* + Shape is a 4-sided PGON.  Size of the PGON corresponds to the distance
+*   from the beam pipe to the most distant wall in the cave or tunnel.
+* + This version is intended to be created along with the wallgeo geometry,
+*   which adds floors, ceiling, walls and shielding blocks such that the
+*   dimensions of the cave and tunnel better reflect the wide angle hall.
+*
+* Existing geometry tags are unaffected by this code.
+*
 * Revision 1.7  2007/02/07 20:45:33  potekhin
 * As advertised before, I'm changing the cave size as per
 * Akio and Ermes' request to make it larger, once more.
@@ -72,28 +84,83 @@ real      D1,D2,Z1
          Dz      = {950,2000}         ! half length
          Dconc   = 50                 ! concrete thickness
       EndFill 
+*------------------------------------------------------------------------------
+*                                                              == Version 5 ==
+* Author Jason C. Webb (jwebb@bnl.gov)
+*
+* Based on drawing: "STAR TUNNEL SHIELDING" Feb 23 2009 Rev. D
+*
+      Fill CAVE                       ! Star CAVE Geometry
+         version = 5                  ! version
+         Rmin    = 0                  ! Inner radius of cave had better be zero
+         Rmax    = {1575.02, 329.95 } ! furthest distance to a concrete wall
+         Dz      = {807.72, 4000.0 }  ! Dz(1) is distance to east/west wall from center of STAR, Dz(2) depth into tunnels
+         Dconc   = 50.0               ! concrete thickness
+      EndFILL                                      
 
 *------------------------------------------------------------------------------
       USE    CVCF
       USE    CAVE   version=CVCF_config
-      create HALL   "  no need to position it "
+*
+      Create HALL   "  no need to position it "
+*
+*     When using the latest version of the cave, communicate the
+*     cave dimensions to wallgeo.g to ensure proper dimensioing
+*     of walls, floors, etc...      
+      IF ( CAVE_version == 5 ) THEN
+         Call AgDETPnew( 'WALL' )
+         Call AgDETPadd( 'cdim(1).rmax=', cave_rmax(1), 1 )
+         Call AgDETPadd( 'tdim(1).rmax=', cave_rmax(2), 1 )
+         Call AgDETPadd( 'cdim(1).dz=', cave_dz(1), 1 )
+         Call AgDETPadd( 'tdim(1).dz=', cave_dz(2)-cave_dz(1), 1 )
+      ENDIF
+
+
+
 *------------------------------------------------------------------------------
 block HALL is  GSTAR building
+
       component Si  Z=14 A=28.08  W=1
       component O2  Z=8  A=16     W=2
-      mixture   Concrete  dens=2.5    " PDG: absl=67.4/2.5 radl=10.7
+      mixture   Concrete  dens=2.5    " PDG: absl=67.4/2.5 radl=10.7" 
       Medium    Standard
       Attribute HALL seen=1 colo=2
+
       D1=cave_Rmax(1)+cave_dconc
       D2=cave_Rmax(2)+cave_dconc
       Z1=cave_dz(1)+cave_dconc
-      SHAPE     PCON Phi1=0  Dphi=360  Nz=6,
-      zi  ={-cave_dz(2),-Z1,-Z1, Z1, Z1, cave_dz(2)},
-      rmn ={cave_rmin,cave_rmin,cave_rmin,cave_rmin,cave_rmin,cave_rmin },
-      rmx ={D2,D2,D1,D1,D2,D2}
 
-      write(*,*) 'CAVE config:', CVCF_config
-      create and position CAVE
+  IF ( CVCF_config .ge. 5 ) THEN
+
+      SHAPE PgON Phi1=45  Dphi=360  Nz=6 NPDIV=4,
+            zi  ={-cave_dz(2), -Z1,-Z1, Z1, Z1, cave_dz(2)},
+            rmn ={cave_rmin,
+		  cave_rmin,
+		  cave_rmin,
+		  cave_rmin,
+		  cave_rmin,
+		  cave_rmin },
+            rmx ={D2,D2,D1,D1,D2,D2}
+
+  ELSE
+
+      SHAPE PcON Phi1=0  Dphi=360  Nz=6,
+            zi  ={-cave_dz(2), -Z1,-Z1, Z1, Z1, cave_dz(2)},
+            rmn ={cave_rmin,
+		  cave_rmin,
+		  cave_rmin,
+		  cave_rmin,
+		  cave_rmin,
+		  cave_rmin },
+            rmx ={D2,D2,D1,D1,D2,D2}
+
+
+  ENDIF
+
+      Write(*,*) 'CAVE config:', CVCF_config
+
+      Create and Position CAVE
+
 endblock
 *------------------------------------------------------------------------------
 block CAVE is  GSTAR cave with subsystem envelopes
@@ -102,12 +169,40 @@ block CAVE is  GSTAR cave with subsystem envelopes
       Medium    something   stemax=100
       Attribute CAVE seen=1 colo=2
 
-      SHAPE     PCON _
-      zi  ={-cave_dz(2),-cave_dz(1),-cave_dz(1), 
-             cave_dz(1), cave_dz(1), cave_dz(2)},
-      rmx ={cave_Rmax(2),cave_Rmax(2),cave_Rmax(1),
-            cave_Rmax(1),cave_Rmax(2),cave_Rmax(2)}
-*     SHAPE     TUBE  rmin=cave_rmin  rmax=cave_rmax  dz=cave_dz
+  IF ( CVCF_config .ge. 5 ) THEN
+
+      SHAPE     PGON Phi1=45 Dphi=360 NpDiv=4 DPhi=360, 
+                zi ={ -cave_dz(2),
+                      -cave_dz(1),
+                      -cave_dz(1), 
+                      +cave_dz(1), 
+                      +cave_dz(1), 
+                      +cave_dz(2)  },
+                rmx={ +cave_Rmax(2),
+                      +cave_Rmax(2),
+                      +cave_Rmax(1),
+                      +cave_Rmax(1),
+                      +cave_Rmax(2),
+                      +cave_Rmax(2) }
+
+  ELSE
+
+      SHAPE     PCON Phi1=0 Dphi=360,
+                zi ={ -cave_dz(2),
+                      -cave_dz(1),
+                      -cave_dz(1), 
+                      +cave_dz(1), 
+                      +cave_dz(1), 
+                      +cave_dz(2)  },
+                rmx={ +cave_Rmax(2),
+                      +cave_Rmax(2),
+                      +cave_Rmax(1),
+                      +cave_Rmax(1),
+                      +cave_Rmax(2),
+                      +cave_Rmax(2) }
+
+  ENDIF
+
 endblock
 *------------------------------------------------------------------------------
 end

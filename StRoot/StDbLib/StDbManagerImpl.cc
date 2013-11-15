@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.34 2009/11/10 20:24:45 fisyak Exp $
+ * $Id: StDbManagerImpl.cc,v 1.38.4.1 2013/06/12 15:49:34 didenko Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,21 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.38.4.1  2013/06/12 15:49:34  didenko
+ * fixed branch revision
+ *
+ * Revision 1.38  2011/06/16 14:44:00  dmitry
+ * added new domain - FGT
+ *
+ * Revision 1.37  2011/04/04 15:44:24  dmitry
+ * fix to blacklist Calibrations_bla only
+ *
+ * Revision 1.36  2011/02/10 17:30:42  dmitry
+ * added an option to blacklist domains
+ *
+ * Revision 1.35  2009/12/04 16:06:52  dmitry
+ * StDbLib in standalone mode cannot use SafeDelete - proper wrapper added
+ *
  * Revision 1.34  2009/11/10 20:24:45  fisyak
  * Use SafeDelete
  *
@@ -267,6 +282,7 @@
 #endif
 
 #include <string.h>
+#include <algorithm>
 
 #ifdef HPUX
 #define freeze(i) str()
@@ -294,11 +310,32 @@ StDbManagerImpl::~StDbManagerImpl(){
   deleteServers();
   deleteDomains();
   deleteTypes();
+#ifndef __STDB_STANDALONE__
   SafeDelete(mfactory);
   SafeDelete(Messenger);
+#else
+  if (mfactory) { 
+	delete mfactory; 
+    mfactory = 0; 
+  };
+  if (Messenger) { 
+	delete Messenger; 
+	Messenger = 0; 
+  };
+
+#endif
   mInstance=0;
 #ifndef NoXmlTreeReader
+
+#ifndef __STDB_STANDALONE__
   SafeDelete(myServiceBroker);
+#else
+  if (myServiceBroker) {
+	delete myServiceBroker;
+    myServiceBroker = 0;
+  }
+#endif
+
 #endif
 }
 
@@ -358,6 +395,7 @@ addDbDomain(dbTracker,"tracker");
 addDbDomain(dbZdc,"zdc"); 
 addDbDomain(dbFms,"fms"); 
 addDbDomain(dbpp2pp,"pp2pp"); 
+addDbDomain(dbFgt,"fgt"); 
 
 }
 
@@ -978,8 +1016,8 @@ StDbType StDbManagerImpl::getDbType(const char* typeName){
 
 StDbDomain StDbManagerImpl::getDbDomain(const char* domainName){
 #define __METHOD__ "getDbDomain(domainName)"
-
   StDbDomain retType=dbDomainUnknown;
+
   bool found=false;
   for(dbDomains::iterator itr=mDomains.begin();
       itr != mDomains.end(); ++itr){
@@ -995,6 +1033,14 @@ StDbDomain StDbManagerImpl::getDbDomain(const char* domainName){
 return newDbDomain(domainName);
 #undef __METHOD__
 }     
+
+void StDbManagerImpl::blacklistDbDomain(const char* domainName) {
+	std::string domain(domainName);
+	std::transform(domain.begin(), domain.end(), domain.begin(), ::tolower);
+	if (mBlacklist.find(domain) == mBlacklist.end()) {
+		mBlacklist.insert(domain);
+	}
+}
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::printDbName(StDbType type, StDbDomain domain){
@@ -1082,7 +1128,10 @@ char*  StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
-  return getenv(printDbName(type,domain));
+  if (!type || !domain) return 0;
+  char* dbname = printDbName(type,domain);
+  if (!dbname) return 0;
+  return getenv(dbname);
 }
   
 ////////////////////////////////////////////////////////////////
@@ -1589,6 +1638,21 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
+  if (!typeName || !domainName) return 0;
+  std::string tpName(typeName);
+  std::string dmName(domainName);
+  std::string mergedName = tpName + "_" + dmName;
+  std::string completeName;
+  std::string blacklisted_domain;
+
+  for (std::set<std::string>::iterator it = mBlacklist.begin(); it != mBlacklist.end(); ++it) {
+    blacklisted_domain = *it;
+    completeName = "Calibrations_" + blacklisted_domain;
+    if (mergedName == completeName) {
+        mergedName = "blacklist_" + mergedName;
+        return mstringDup(mergedName.c_str());
+    }
+  }
  
   StString dbname;
   dbname<<typeName;

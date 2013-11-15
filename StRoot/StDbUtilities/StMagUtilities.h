@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.42 2009/11/06 13:38:05 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.44 2009/12/11 04:53:58 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,12 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.44  2009/12/11 04:53:58  genevb
+ * Give the enum constants unique names
+ *
+ * Revision 1.43  2009/12/11 03:55:21  genevb
+ * Singleton implementation + no defines in header
+ *
  * Revision 1.42  2009/11/06 13:38:05  fisyak
  * Revert the change done 11/03/09
  *
@@ -129,13 +135,6 @@
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 #include "TMatrix.h"      // TMatrix keeps changing ... keep it here until proven otherwise.
 
-#define  nZ               57            // Number of Z points in table. Measured STAR B field Maps from Steve T. 
-#define  nR               28            // Number of R points in table.
-#define  nPhi             37            // Number of Phi points in table.
-#define  neZ             224            // Number of Z points in table. Standard STAR distortion tables for interpolating. 
-#define  neR              82            // Number of R points in table
-#define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
-
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
 enum   Prime    { IsPrimary = 0 , IsGlobal = 1 } ;
 
@@ -156,6 +155,15 @@ enum   DistortSelect
   kFast2DBMap        = 0x2000,   // Bit 14
   kGridLeak          = 0x4000,   // Bit 15
   k3DGridLeak        = 0x8000    // Bit 16
+} ;
+enum   EBMapSizes
+{
+  BMap_nZ    =          57,           // Number of Z points in table. Measured STAR B field Maps from Steve T. 
+  BMap_nR    =          28,           // Number of R points in table.
+  BMap_nPhi  =          37,           // Number of Phi points in table.
+  EMap_nZ    =         224,           // Number of Z points in table. Standard STAR distortion tables for interpolating. 
+  EMap_nR    =          82,           // Number of R points in table
+  EMap_nPhi  =          13            // Number of Phi points in table ( add one for 360 == 0 )
 } ;
 
 // DO NOT change the numbering of these constants. StBFChain depends
@@ -178,7 +186,8 @@ class StMagUtilities {
 
 
  private:
-  
+  static StMagUtilities *fgInstance;
+ 
   StTpcDb*  thedb ;  
   TDataSet* thedb2 ;
   StDetectorDbSpaceCharge*   fSpaceCharge   ;
@@ -214,9 +223,9 @@ class StMagUtilities {
   virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi, 
 					Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
   virtual void    Interpolate2DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t z, 
-					     const Float_t Er[neZ][neR], Float_t &Er_value ) ;
+					     const Float_t Er[EMap_nZ][EMap_nR], Float_t &Er_value ) ;
   virtual void    Interpolate3DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t phi, const Float_t z, 
-					     const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
+					     const Float_t Er[EMap_nZ][EMap_nPhi][EMap_nR], const Float_t Ephi[EMap_nZ][EMap_nPhi][EMap_nR], 
 					     Float_t &Er_value, Float_t &Ephi_value ) ;
   virtual void    PoissonRelaxation  ( TMatrix &ArrayV, const TMatrix &Charge, TMatrix &EroverEz, 
                                        const Int_t ROWS, const Int_t COLUMNS, const Int_t ITERATIONS ) ;
@@ -263,27 +272,28 @@ class StMagUtilities {
   Float_t  MissingResistance[10]      ; // Amount of Missing Resistance due to this short (MOhm)
   Float_t  Resistor[10]               ; // Amount of compensating resistance added for this short
 
-  Float_t  Bz[nZ][nR], Br[nZ][nR] ;         
-  Float_t  Radius[nR], ZList[nZ] ;         
-  Float_t  Bz3D[nPhi][nZ][nR], Br3D[nPhi][nZ][nR], Bphi3D[nPhi][nZ][nR] ;         
-  Float_t  R3D[nR], Z3D[nZ], Phi3D[nPhi] ;         
-//Float_t  cmEr[neZ][nePhi][neR],    cmEphi[neZ][nePhi][neR]  ;
-//Float_t  endEr[neZ][nePhi][neR],   endEphi[neZ][nePhi][neR] ;
-  Float_t  shiftEr[neZ][neR] ;
-  Float_t  spaceEr[neZ][neR] ;
-  Float_t  spaceR2Er[neZ][neR] ;
-  Float_t  shortEr[neZ][neR] ;
+  Float_t  Bz[BMap_nZ][BMap_nR], Br[BMap_nZ][BMap_nR] ;         
+  Float_t  Radius[BMap_nR], ZList[BMap_nZ] ;         
+  Float_t  Bz3D[BMap_nPhi][BMap_nZ][BMap_nR], Br3D[BMap_nPhi][BMap_nZ][BMap_nR], Bphi3D[BMap_nPhi][BMap_nZ][BMap_nR] ;         
+  Float_t  R3D[BMap_nR], Z3D[BMap_nZ], Phi3D[BMap_nPhi] ;         
+//Float_t  cmEr[EMap_nZ][EMap_nPhi][EMap_nR],    cmEphi[EMap_nZ][EMap_nPhi][EMap_nR]  ;
+//Float_t  endEr[EMap_nZ][EMap_nPhi][EMap_nR],   endEphi[EMap_nZ][EMap_nPhi][EMap_nR] ;
+  Float_t  shiftEr[EMap_nZ][EMap_nR] ;
+  Float_t  spaceEr[EMap_nZ][EMap_nR] ;
+  Float_t  spaceR2Er[EMap_nZ][EMap_nR] ;
+  Float_t  shortEr[EMap_nZ][EMap_nR] ;
 
-  static   Float_t ePhiList[nePhi] ;   // Note: These are initialized near CommonStart() in the .cxx file
-  static   Float_t eRList[neR]     ;
-  static   Float_t eZList[neZ]     ;
+  static   Float_t ePhiList[EMap_nPhi] ;   // Note: These are initialized near CommonStart() in the .cxx file
+  static   Float_t eRList[EMap_nR]     ;
+  static   Float_t eZList[EMap_nZ]     ;
 
  public:
 
   StMagUtilities () ;
   StMagUtilities ( StTpcDb* dbin,  TDataSet* dbin2, Int_t mode = 0 ) ;
   StMagUtilities ( const EBField map, const Float_t factor, Int_t mode = 0 ) ;
-  virtual ~StMagUtilities () {}
+  virtual ~StMagUtilities () { fgInstance = 0; }
+  static StMagUtilities* Instance() { return fgInstance; }
 
   virtual void    BField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
