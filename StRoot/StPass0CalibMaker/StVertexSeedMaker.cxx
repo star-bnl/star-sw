@@ -291,7 +291,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.45 2010/07/19 20:48:32 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.46 2012/02/28 21:54:37 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -342,8 +342,9 @@ void StVertexSeedMaker::WriteHistFile(){
   }
   // .ROOT is NOT a typo !!!
   if (defDir.Length()>0 && !defDir.EndsWith("/")) defDir.Append("/");
-  TString fileName = Form("%svertexseedhist.%08d.%06d.root",
-                          defDir.Data(),date,time);
+  TString fileNameBase = Form("vertexseedhist.%08d.%06d.ROOT",date,time);
+  TString fileName = defDir;
+  fileName += fileNameBase;
   LOG_INFO << "Writing new histograms to:\n  "
     << fileName << endm;
   TString dirname = gSystem->DirName(fileName.Data());
@@ -351,7 +352,7 @@ void StVertexSeedMaker::WriteHistFile(){
     if (gSystem->mkdir(dirname.Data())) {
       LOG_WARN << "Directory creation failed for:\n  " << dirname
       << "\n  Putting histogram file in current directory" << endm;
-      fileName = Form("vertexseedhist.%08d.%06d.root",date,time);
+      fileName = fileNameBase;
     }
   }
   if (mTempOut) {
@@ -622,8 +623,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.45 2010/07/19 20:48:32 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.46 2012/02/28 21:54:37 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.46  2012/02/28 21:54:37  genevb
+// Restore .root to .ROOT to avoid St_db_Maker read-in
+//
 // Revision 1.45  2010/07/19 20:48:32  genevb
 // Forgot to shift ex,ey after detmap addition to ntuple
 //
