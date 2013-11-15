@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.241 2011/03/28 21:11:32 fisyak Exp $
+// $Id: StMaker.cxx,v 1.242 2011/04/25 22:12:58 perev Exp $
 //
 //
 /*!
@@ -251,8 +251,10 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
   {"y2008b",      20071101,     2, "y2008b",   "base for y2008: SVT/SSD out, latest TPC ECAL CALB"},
   {"y2008c",      20071101,     3, "y2008c",   "TOF fix & TPCE redused"},
-  {"y2008d",      20071101,     4, "y2008c",   "Honey sandwich fix"},
+  {"y2008d",      20071101,     4, "y2008d",   "Honey sandwich fix"},
+  {"y2008e",      20071101,     5, "y2008e",   "LOW_EM central calorimter cuts"},
   // 
+
   {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF"},
 
   {"y2009a",      20081215,     1, "y2009a",   "y2009+ecalgeo6(JW)"},
@@ -1967,6 +1969,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.242  2011/04/25 22:12:58  perev
+// y2008e
+//
 // Revision 1.241  2011/03/28 21:11:32  fisyak
 // Move back y2011 time stamp from 20101212 to 20101215
 //
