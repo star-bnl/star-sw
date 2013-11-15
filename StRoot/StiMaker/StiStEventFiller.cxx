@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.94 2011/04/01 15:52:21 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.95 2011/05/27 18:25:33 genevb Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.95  2011/05/27 18:25:33  genevb
+ * Propagate StTrack::key => Int_t to other codes
+ *
  * Revision 2.94  2011/04/01 15:52:21  fisyak
  * Enlarge array for possible candidates, add requirement that dominant track should have  > 2 good hits
  *
@@ -647,7 +650,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  // filling successful, set up relationships between objects
 	  detInfoVec.push_back(detInfo);
 	  //cout <<"Setting key: "<<(unsigned short)(trNodeVec.size())<<endl;
-	  gTrack->setKey((unsigned short)kTrack->getId());
+	  gTrack->setKey(kTrack->getId());
 	  trackNode->addTrack(gTrack);
 	  trNodeVec.push_back(trackNode);
 	  // reuse the utility to fill the topology map

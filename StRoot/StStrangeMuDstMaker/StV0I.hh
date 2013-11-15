@@ -212,9 +212,9 @@ public:
 
   //@{
   /// Pos. daughter track key
-  virtual UShort_t keyPos() const {return 0;}
+  virtual Int_t keyPos() const {return 0;}
   /// Neg. daughter track key
-  virtual UShort_t keyNeg() const {return 0;}
+  virtual Int_t keyNeg() const {return 0;}
   /// Pos. daughter track topology map
   virtual StTrackTopologyMap& topologyMapPos() {return (*gFakeTopoPtr);}
   /// Neg. daughter track topology map
@@ -600,8 +600,11 @@ inline void StV0I::Clear() {
 
 
 /***********************************************************************
- * $Id: StV0I.hh,v 3.12 2008/07/10 16:16:55 genevb Exp $
+ * $Id: StV0I.hh,v 3.13 2011/05/27 18:25:32 genevb Exp $
  * $Log: StV0I.hh,v $
+ * Revision 3.13  2011/05/27 18:25:32  genevb
+ * Propagate StTrack::key => Int_t to other codes
+ *
  * Revision 3.12  2008/07/10 16:16:55  genevb
  * Allow for marking of bad tracks -> bad secondary vertices
  *

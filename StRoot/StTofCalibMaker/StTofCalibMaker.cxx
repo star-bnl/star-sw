@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.20 2008/09/03 22:30:43 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.21 2011/05/27 18:25:32 genevb Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.21  2011/05/27 18:25:32  genevb
+ * Propagate StTrack::key => Int_t to other codes
+ *
  * Revision 1.20  2008/09/03 22:30:43  dongx
  * mTStart added, applicable for Run8
  *
@@ -1176,7 +1179,7 @@ Int_t StTofCalibMaker::processEventYear2to4(){
   for (unsigned int iNode=0; iNode<nodes.size(); iNode++){
     StTrack *theTrack = nodes[iNode]->track(primary);
     if(!theTrack) continue;
-    unsigned short trkId = theTrack->key();
+    Int_t trkId = theTrack->key();
     for (size_t j=0;j<tofHitVec.size();j++){
       StTrack *aTrack = tofHitVec[j]->associatedTrack();
       if(!aTrack) continue;
@@ -1390,7 +1393,7 @@ Int_t StTofCalibMaker::processEventYear5(){
   for (unsigned int iNode=0; iNode<nodes.size(); iNode++){
     StTrack *theTrack = nodes[iNode]->track(primary);
     if(!theTrack) continue;
-    unsigned short trkId = theTrack->key();
+    Int_t trkId = theTrack->key();
     for (size_t j=0;j<tofHitVec.size();j++){
       StTrack *aTrack = tofHitVec[j]->associatedTrack();
       if(!aTrack) continue;
@@ -1608,7 +1611,7 @@ Int_t StTofCalibMaker::processEventYear8(){
   for (unsigned int iNode=0; iNode<nodes.size(); iNode++){
     StTrack *theTrack = nodes[iNode]->track(primary);
     if(!theTrack) continue;
-    unsigned short trkId = theTrack->key();
+    Int_t trkId = theTrack->key();
     for (size_t j=0;j<tofHitVec.size();j++){
       StTrack *aTrack = tofHitVec[j]->associatedTrack();
       if(!aTrack) continue;
