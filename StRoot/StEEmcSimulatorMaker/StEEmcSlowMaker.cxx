@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.8 2010/05/03 20:47:22 ogrebeny Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.10 2010/08/03 02:20:40 stevens4 Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -18,76 +18,76 @@
 
 ClassImp(StEEmcSlowMaker)
 
-
 //________________________________________________
-//________________________________________________
-StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* )
-    : StMaker(self)
-{
-   mip2ene = 0.001998*0.7;  // This is the SMD thickness of 0.7 mm                                                                                           
-                            // times the minimum ionizing energy loss of                                                                                     
-                            // 1.998 MeV/cm from the PDG book                                                                                                
-   sig1pe = 0.85;           // from info from S. Vigdor on MAPMT test results                                                                                
-   Pmip2ene = 0.001998*0.5; // The pre- and post-shower tiles are                                                                                            
-                            // only 5 mm thick.                                                                                                              
-   Pmip2pe = 2.6*1.5;       // 2.6 mip/tower scint * 1.5 light yield                                                                                         
-                            // in pre- and post-shower elements                                                                                              
-                                                                                                                                                             
-   // loop to init  mip2pe[] - this will eventually need to be                                                                                               
-   // replaced by a table of measured values                                                                                                                 
-   for (int i=0; i<MaxSmdStrips; i++) {                                                                                                                          
-     // This is currently a trapezoidal-parameterization of                                                                                                  
-     // the light curve measurements                                                                                                                         
-     mip2pe[i] = avgNumPePerMip(i);                                                                                                                          
-   }                                                                                                                                                         
+StEEmcSlowMaker::StEEmcSlowMaker(const Char_t *name, const Char_t*)
+: StMaker(name) {
+   mMip2ene = 0.001998*0.7; // This is the SMD thickness of 7 mm
+                            // times the minimum ionizing energy loss of
+                            // 1.998 MeV/cm from the PDG book
+   mSig1pe = 0.85;          // from info from S. Vigdor on MAPMT test results
+   //set different thicknesses for pre and post layers (found in geometry debug by Jason et. al.)
+   mPmip2ene[0] = 0.001998*0.475; // The pre-shower tiles are only 4.75 mm thick.
+   mPmip2ene[1] = 0.001998*0.475; // The pre-shower tiles are only 4.75 mm thick.
+   mPmip2ene[2] = 0.001998*0.5;   // The post-shower tiles are only 5 mm thick.
+   mPmip2pe = 2.6*1.5;      // 2.6 mip/tower scint * 1.5 light yield
+                            // in pre- and post-shower elements
+   // loop to init  mMip2pe[] - this will eventually need to be
+   // replaced by a table of measured values
+   for (Int_t i = 0;i < MaxSmdStrips;i++) {
+     // This is currently a trapezoidal-parameterization of
+     // the light curve measurements
+     mMip2pe[i] = avgNumPePerMip(i);
+   }
 
-  eeDb=0;
-  mHList=0;
-  nInpEve=0; 
-  memset(hA,0,sizeof(hA));
+  mEeDb=0;
+  mNInpEve=0; 
+  memset(mHist,0,sizeof(mHist));
 
   /// By default, enable all three simulator subsystems
   mEnableTower=true;
   mEnableSMD=true;
   mEnablePrePost=true;
 
-  /// By default, we do not add a pedestal offset
-  mAddPed   = false;
-  /// By default, we do not smear the pedestal
-  mSmearPed = false;
+  /// By default, we add a pedestal offset           
+  mAddPed   = true;                                  
+  /// By default, we smear the pedestal              
+  mSmearPed = true;                                  
   /// By default, all channels are kept
   mDropBad  = false;
   /// By default, overwrite ADC in muDst
   mOverwrite = true;
 
-  mIsEmbeddingMode=false;
+  mIsEmbeddingMode = false;
   /// By default, source is MuDst
   mSource = kMuDst;
 
+  /// By default, truncate ped smearing at 3 sigma   
+  mTruncatePedSmear = 3;
+  
   /// By default, make tower energy sum corrections due to the
   /// relative light yields of the pre1, pre2 and post layers
   setDoLightYield(true);
 
   /// Set benchmark values for the relative light yields from
-  /// measurements.  We multiply these measurements by a factor of 
-  /// 4.0/5.0 (the thickness of a normal layer divided by the 
-  /// thickness of the special layers), since the GEANT model
-  /// already knows about the thickness of the layers.
-  setRelativeLightYield( (4.0/5.0) * 1.68, (4.0/5.0) * 1.68, (4.0/5.0)* 0.94);
+  /// measurements.  We multiply these measurements by a factor of
+  /// 4.0/4.75 and 4.0/5.0 (the thickness of a normal layer
+  /// divided by the thickness of the preshower and postshower
+  /// layers, respectively), since the GEANT model already knows about the
+  /// thickness of the layers.
+  setRelativeLightYield( (4.0/4.75) * 1.68, (4.0/4.75) * 1.68, (4.0/5.0)* 0.94);
 
   /// Copy and verify configuration of the fast simulator
   mSamplingFraction = StEEmcFastMaker::getSamplingFraction();
   mSamplingFractionUser = mSamplingFraction;
 
   /// Copy fast simulator gains
-  for ( Int_t ii=0;ii<kEEmcNumEtas;ii++ )
-    {
-      mTowerGains[ii] = StEEmcFastMaker::getTowerGains()[ii] * mSamplingFraction;
-    }
+  for (Int_t i = 0;i < kEEmcNumEtas;i++) {
+      mTowerGains[i] = StEEmcFastMaker::getTowerGains()[i] * mSamplingFraction;
+  }
   mPrepostGains = StEEmcFastMaker::getPreshowerGain();
   mSmdGains     = StEEmcFastMaker::getSmdGain();
   mMaxAdc       = StEEmcFastMaker::getMaxAdc();
-
+  
   if ( (mPrepostGains-23000.0)>1. ||
        (mSmdGains-23000.0)>1.     ||
        (mTowerGains[0]-18.9654)>0.01 )
@@ -101,40 +101,42 @@ StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* )
       LOG_WARN << "mPrepostGains="<<mPrepostGains<<endm;
       for ( Int_t ii=0;ii<12;ii++ )
 	LOG_WARN << "mTowerGains[etabin="<<ii<<"]="<<mTowerGains[ii]<<endm;
-      assert(2+2==5);
+      //assert(2+2==5);
     }
 
   // initialize tower gain factors to 1
-  for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ )
-    for ( Int_t sub=0;sub<kEEmcNumSubSectors;sub++ )
-      for ( Int_t eta=0;eta<kEEmcNumEtas;eta++ )
-	{
-	  mTowerGainFact[sec][sub][eta]=1.0;
-	}
+  for (Int_t sec = 0;sec < kEEmcNumSectors;sec++) {
+    for (Int_t sub = 0;sub < kEEmcNumSubSectors;sub++) {
+      for (Int_t eta = 0;eta < kEEmcNumEtas;eta++) {
+	  mTowerGainFact[sec][sub][eta] = 1.0;
+      }
+    }
+  }
 
   // initialize SMD gain factors to 1
-  for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ )
-    for ( Int_t uv=0;uv<kEEmcNumSmdUVs;uv++ )
-      for ( Int_t strip=0;strip<kEEmcNumStrips;strip++ )
-	{
-	  mSmdGainFact[sec][uv][strip]=1.0;
-	}
+  for (Int_t sec = 0;sec < kEEmcNumSectors;sec++) {
+    for (Int_t uv = 0;uv < kEEmcNumSmdUVs;uv++) {
+      for (Int_t strip = 0;strip < kEEmcNumStrips;strip++) {
+	  mSmdGainFact[sec][uv][strip] = 1.0;
+      }
+    }
+  }
 
-}
-
-
-//___________________ _____________________________
-StEEmcSlowMaker::~StEEmcSlowMaker(){
+  // flag set if used in BFC to change defaults in Init()
+  mIsBFC = GetParentChain()->InheritsFrom("StBFChain");         
 }
 
 //________________________________________________
-Float_t StEEmcSlowMaker::avgNumPePerMip(int stripID) {                                                                                                           
+StEEmcSlowMaker::~StEEmcSlowMaker() {
+}
+
+//________________________________________________
+Float_t StEEmcSlowMaker::avgNumPePerMip(Int_t stripID) {                                                                                                           
 //                                                                                                                                                          
 // A parameterization of the average number of photoelectrons                                                                                               
 // per mip for a given SMD strip.  See elog 457.                                                                                                            
 //                                                                                                                                                          
-  float y=0;                                                                                                                                                 
-  float ya=0,yb=0,xa=1,xb=2;                                                                                                                                 
+  Float_t ya=0,yb=0,xa=1,xb=2;                                                                                                                                 
   if ( stripID<1) {                                                                                                                                          
     ;                                                                                                                                                        
   } else if (stripID<20) {                                                                                                                                   
@@ -147,123 +149,125 @@ Float_t StEEmcSlowMaker::avgNumPePerMip(int stripID) {
     xa=250; ya=6.;                                                                                                                                           
     xb=290; yb=9.;                                                                                                                                           
   }                                                                                                                                                          
-  y=ya+(yb-ya)/(xb-xa) *(stripID -xa);                                                                                                                       
-  return y;                                                                                                                                                  
+  const Float_t y = ya + (yb - ya) / (xb - xa) * (stripID - xa);
+  return y;
 }                                                                                                                                                            
  
 //________________________________________________
-//________________________________________________
-Int_t StEEmcSlowMaker::Init(){
- LOG_INFO<<Form("%s::Init(), mIsEmbeddingMode=%d",GetName(),mIsEmbeddingMode)<<endm;
+Int_t StEEmcSlowMaker::Init() {
+  LOG_INFO << "mIsEmbeddingMode=" << mIsEmbeddingMode << ", mIsBFC=" << mIsBFC << endm;          
 
-  if(mIsEmbeddingMode) {
+  if (mIsEmbeddingMode) {
     setDropBad(1);   // force bad channels to be dropped in db
     setAddPed(0);    // disable pedestal addition
-    setSmearPed(0);  // diabale pedestal smearing
+    setSmearPed(0);  // disable pedestal smearing
     setOverwrite(1); // overwrites StEvent values
     setSource("StEvent");    
+  } else if (mIsBFC) { //set defaults for BFC with no embedding 
+    setAddPed(1);    // add pedestals                 
+    setSmearPed(1);  // smear pedestals                 
+    setDropBad(1);   // force bad channels to be dropped in db
+    setOverwrite(1); // overwrite ADC values
+    setSource("StEvent");             
+  } else { //set defaults for running in analysis chain 
+    if (mSource == kMuDst) disableTower(); //don't change tower in analysis chain since only ADC is stored in MuDst  
+  }                                   
+    
+  //print out full configuration in log file  
+  LOG_INFO << "mAddPed=" << mAddPed << ", mSmearPed=" << mSmearPed << ", mDropBad=" << mDropBad << ", mOverwrite=" << mOverwrite 
+    << ", mEnableTower=" << mEnableTower << ", mEnableSMD=" << mEnableSMD << ", mEnablePrePost=" << mEnablePrePost << endm;
+
+  mEeDb = (StEEmcDb*)GetDataSet("StEEmcDb");
+  if (!mEeDb) {
+    LOG_ERROR << "Cannot find EEMC database StEEmcDb" << endm;
   }
-
-
-  eeDb=(StEEmcDb*)GetDataSet("StEEmcDb");
-  assert( eeDb);
-  if ( mHList ) InitHisto();
+  InitHisto();
   if ( mSmearPed && !mAddPed) {
-       LOG_ERROR<<"::Init() detected mSmearPed=true && mAddPed=false \n will not work due to ETOW hits storage container in muDst not accepting negative ADC values, ABORT" << endm; 
-       assert(0);
+    LOG_WARN << "detected mSmearPed=true && mAddPed=false\nwill not work due to ETOW hits storage container in muDst not accepting negative ADC values." << endm; 
+    //assert(0);
   }
   if ( mSmearPed ) {
-    LOG_INFO<<"::Init() detected mSmearPed,  (be sure peds>>N*sig are loaded in DB!), muDst can't store negative ADC for towers, the NUadc will be forced to be non-negative" << endm; 
+    LOG_INFO << "detected mSmearPed,  (be sure peds>N*sig are loaded in DB!), muDst can't store negative ADC for towers, the NUadc will be forced to be non-negative" << endm; 
   }
-  
   return StMaker::Init();
 }
 
 //________________________________________________
-//________________________________________________
-void StEEmcSlowMaker::InitHisto(){
-
-  char tt1[100], tt2[500];
-  int sectID=5;
+void StEEmcSlowMaker::InitHisto() {
+  Char_t tt1[100], tt2[500];
 
   sprintf(tt1,"mm");
   sprintf(tt2,"freq vs. sector ID; sector ID");
-  hA[12]=new TH1F(tt1,tt2,20,-0.5,19.5);
+  mHist[12]=new TH1F(tt1,tt2,20,-0.5,19.5);
   
   sprintf(tt1,"PreADC");
   sprintf(tt2,"Revised ADC for Pre/Post Scint.");
-  hA[0]=new TH1F(tt1,tt2,100,0,200.);
+  mHist[0]=new TH1F(tt1,tt2,100,0,200.);
   
   sprintf(tt1,"Pre2ADC");
   sprintf(tt2,"Initial ADC for Pre/Post Scint.");
-  hA[1]=new TH1F(tt1,tt2,100,0,200.);
+  mHist[1]=new TH1F(tt1,tt2,100,0,200.);
   
   sprintf(tt1,"SMDADC");
   sprintf(tt2,"Revised ADC for SMD Strips");
-  hA[2]=new TH1F(tt1,tt2,100,0,200.);
+  mHist[2]=new TH1F(tt1,tt2,100,0,200.);
 
   sprintf(tt1,"SMD2ADC");
   sprintf(tt2,"Initial ADC for SMD Strips");
-  hA[3]=new TH1F(tt1,tt2,100,0,200.);
+  mHist[3]=new TH1F(tt1,tt2,100,0,200.);
 
-  hA[4]=new TH1F("hADCtow","Initial ADC for towers",512+32,-32.,512.);
-  hA[5]=new TH1F("hADCtow2","Finial ADC fot towers",512+32,-32.,512.);
+  mHist[4]=new TH1F("hADCtow","Initial ADC for towers",512+32,-32.,512.);
+  mHist[5]=new TH1F("hADCtow2","Finial ADC fot towers",512+32,-32.,512.);
 
   //..................
-  sprintf(tt1,"adc%02d",sectID);
-  sprintf(tt2," Adc vs, strip ID, sector=%02d; strip ID; ADC ",sectID);
-  hA[20]=new TH2F(tt1,tt2,30,0,300,100,0,200.);
+  sprintf(tt1,"adc");
+  sprintf(tt2," Adc vs strip ID; strip ID; ADC ");
+  mHist[20]=new TH2F(tt1,tt2,30,0,300,100,0,200.);
 
   sprintf(tt1,"ADCvsstr");
   sprintf(tt2," Adc vs, strip ID; strip ID; ADC ");
-  hA[19]=new TH2F(tt1,tt2,60,0,300,100,0,200.);
+  mHist[19]=new TH2F(tt1,tt2,60,0,300,100,0,200.);
 
   // add histos to the list (if provided)
-  if (mHList) {
-    for (int i = 0; i < mxH; ++i) {
-      if (hA[i] == 0) continue;
-      mHList->Add(hA[i]);
-    }
+  for (Int_t i = 0; i < maxHist; ++i) {
+      if (mHist[i]) this->AddHist(mHist[i]);
   }
 }
 
 //________________________________________________
-//________________________________________________
-Int_t StEEmcSlowMaker::Make(){
-  StMaker::Make();
-  nInpEve++;
-  LOG_DEBUG << GetName() << "::Make() is called , iEve " << nInpEve << " mSource="<<mSource<<endm;
+Int_t StEEmcSlowMaker::Make() {
+  Int_t result = StMaker::Make();
+  mNInpEve++;
+  LOG_DEBUG << "iEve " << mNInpEve << ", mSource = " << mSource << endm;
   
-  mKSigma = eeDb->getKsigOverPed();
-
   switch (mSource) {
   case kMuDst:
     /// Access to muDst .......................
     {
       if (!GetInputDS("MuDst")) {
 	LOG_DEBUG<<"::Make() MuDst missing"<<endm;
-	return kStOk;
+	return kStWarn;
       }
 
       StMuEmcCollection* emc = StMuDst::muEmcCollection();
       if (!emc) {
 	LOG_DEBUG<<"::Make() StMuEmcCollection missing"<<endm;
-	return kStOk;
+	return kStWarn;
       }
 
       /// Run slow simulator on towers
-      if ( mEnableTower) MakeTower(emc);
+      if (mEnableTower && (result == kStOk)) result = MakeTower(emc);
 
       /// Run slow simulator on pre/postshower
-      if ( mEnablePrePost ) MakePrePost(emc);
+      if (mEnablePrePost && (result == kStOk)) result = MakePrePost(emc);
 
       /// Run slow simulator on smd
-      if ( mEnableSMD ) MakeSMD(emc);
+      if (mEnableSMD && (result == kStOk)) result = MakeSMD(emc);
     }
     break;
 
   case kStEvent:
-    /// Acces to StEvent, automatic detection if in Embedding mode .....................
+    /// Acces to StEvent, automatic detection if in Embedding or BFC mode .....................
     {
 
       StEmcCollection *emc =0; 
@@ -271,7 +275,7 @@ Int_t StEEmcSlowMaker::Make(){
 	StEEmcFastMaker *fast = (StEEmcFastMaker*)GetMakerInheritsFrom("StEEmcFastMaker");
 	if(fast==0) {
 	  LOG_WARN << GetName() << "::Make()  no EEmcFastSim in the chain, ignore Endcap"<< endm;
-	  return kStOk;
+	  return kStWarn;
 	}
 	emc = fast->GetLocalEmcCollection();
       } else { // it is not Embedding mode
@@ -279,7 +283,7 @@ Int_t StEEmcSlowMaker::Make(){
 	StEvent* event = (StEvent*)GetInputDS("StEvent");
 	if (!event) {
 	  LOG_WARN << GetName() << "::Make()  no StEvent"<< endm;
-	  return kStOk;
+	  return kStWarn;
 	}
 	emc = event->emcCollection();
       }
@@ -287,17 +291,17 @@ Int_t StEEmcSlowMaker::Make(){
       
       if (!emc) {
 	LOG_WARN << GetName() << "::Make()  no emcCollection()" << endm;
-	return kStOk;
+	return kStWarn;
       }
 
       /// Run slow simulator on towers
-      if ( mEnableTower ) MakeTower(emc);
+      if (mEnableTower && (result == kStOk)) result = MakeTower(emc);
 
       /// Run slow simulator on pre/postshower
-      if ( mEnablePrePost ) MakePrePost(emc);
+      if (mEnablePrePost && (result == kStOk)) result = MakePrePost(emc);
 
       /// Run slow simulator on smd
-      if ( mEnableSMD) MakeSMD(emc);
+      if (mEnableSMD && (result == kStOk)) result = MakeSMD(emc);
     }
     break;
 
@@ -305,12 +309,10 @@ Int_t StEEmcSlowMaker::Make(){
     LOG_ERROR<< "Unknown source type " << mSource << " for this event" << endm;
     break;
   }
-
-  return  kStOK;
-
+  return result;
 }
-// ----------------------------------------------------------------------------
 
+//________________________________________________
 //
 // Some notes on differences between using StEvent and StMuDst
 //
@@ -324,8 +326,7 @@ Int_t StEEmcSlowMaker::Make(){
 //    of ADC+0.5 for the MuDst.
 //
 
-void StEEmcSlowMaker::MakeTower( StMuEmcCollection *emc )
-{
+Int_t StEEmcSlowMaker::MakeTower(StMuEmcCollection *emc) {
 
   /**************************************************************
    *
@@ -344,22 +345,19 @@ void StEEmcSlowMaker::MakeTower( StMuEmcCollection *emc )
   /// loop over pre and post shower hits to calculate the
   /// adc corrrections to the tower due to the relative
   /// light yields in the pre/postshower
-  if ( mDoLightYield )
-  for ( Int_t i = 0; i < emc->getNEndcapPrsHits(); i++ ) 
-    {
-
+  if (mDoLightYield) for (Int_t i = 0;i < emc->getNEndcapPrsHits();i++) {
       /// muDst ranges: sec:1-12, sub:1-5, eta:1-12 ,pre:1-3==>pre1/pre2/post
       Int_t sec,sub,eta,pre;
       StMuEmcHit *hit=emc->getEndcapPrsHit(i,sec,sub,eta,pre);
       // range check on returned values
-      assert( sec >= 1 && sec <= 12 ); // Indexing errors detected
-      assert( sub >= 1 && sub <= 5  ); // Indexing errors detected
-      assert( eta >= 1 && eta <= 12 ); // Indexing errors detected
-      assert( pre >= 1 && pre <= 3  ); // Indexing errors detected
-
+      if (!( sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
+	LOG_ERROR << "Indexing errors detected: EPRS hit " << i << ", sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
+	setZeroAdc(emc);
+	return kStErr;
+      }
       /// for pre/postshower, geant energy deposit gets propagated
       /// from StEvent into the MuDst as StMuEmcHit::energy().
-      Float_t edeposit = hit->getEnergy();
+      const Float_t edeposit = hit ? hit->getEnergy() : 0;
 
       // divide by sampling fraction, multiply by _tower_ gain
       // and brightness factor, and add to the adc sum for 
@@ -367,75 +365,75 @@ void StEEmcSlowMaker::MakeTower( StMuEmcCollection *emc )
       // difference in thickness between pre/post and normal
       // layers, the factor of 0.8 is introduced to prevent us
       // from double correcting.
-
-      const EEmcDbItem *tower=eeDb-> getTile(sec,sub-1+'A', eta, 'T');
+      const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : 0;
+      if (!tower) {
+	LOG_ERROR << "Cannot find DB entry for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
+	continue;
+      }
       Float_t myadc = edeposit / mSamplingFractionUser * tower->gain;
       myadc *= ( mRelativeLightYield[pre-1] - 1.0 );
 
       prepost_adc[sec-1][sub-1][eta-1] += myadc;
-
-    }
+  }
 
   /// now loop over the tower hits to apply the correction.  note
   /// that we are using standard "STAR" indexing scheme which 
   /// counts from 1
-  for (Int_t i=0; i < emc->getNEndcapTowerADC(); i++)
-    {
-
-      Int_t sec,sub,eta,adc,old;
-
+  for (Int_t i = 0;i < emc->getNEndcapTowerADC();i++) {
+      Int_t sec,sub,eta,adc;
       /// Get the ADC value stored for this tower
       emc->getEndcapTowerADC(i,adc,sec,sub,eta);
-      assert( sec >= 1 && sec <= 12 ); // Indexing errors detected
-      assert( sub >= 1 && sub <= 5  ); // Indexing errors detected
-      assert( eta >= 1 && eta <= 12 ); // Indexing errors detected
-      old=adc;
-      if ( mHList ) hA[4]->Fill( old );
+      // range check on returned values
+      if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12)) {
+	LOG_ERROR << "Indexing errors detected: ETOW hit " << i << ", sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
+	setZeroAdc(emc);
+	return kStErr;
+      }
+      
+      const Int_t old = adc;
+      if (mHist[4]) mHist[4]->Fill( old );
 
       /// Get the database gains
-      const EEmcDbItem *tower=eeDb-> getTile(sec,sub-1+'A', eta, 'T');
+      const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : 0;
+      if (!tower) {
+	LOG_ERROR << "Cannot find DB entry for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
+	continue;
+      }
 
-      /// Offset ADC to middle of the bin to minimize roundoff errrors
-      Float_t myadc=(Float_t)adc + 0.5;
-      /// adc value originally computed using fast simulator gains.  we
-      /// change to gains specified by the database.
-      myadc *= tower->gain / mTowerGains[eta-1] * mSamplingFraction / mSamplingFractionUser;
-
-      /// Add in the pre/post brightness correction
-      myadc += prepost_adc[sec-1][sub-1][eta-1];
-
-      /// Adjust for spread in tower gains (represents an uncertainty in measured gains)
-      myadc *= ( mTowerGainFact[sec-1][sub-1][eta-1] );
-
-      /// Add pedestal offset
-      if ( mAddPed )
-        {
-          Float_t ped = tower->ped;
-          if ( mSmearPed )
-            {
-              ped += gRandom -> Gaus( 0, tower->sigPed );
-            }
-          myadc += ped;
+      if (mDropBad && (tower->fail || !checkDBped(tower))) {
+	//zero out values if tower has fail bit set or ped is bad        
+	adc = 0;
+      } else {
+        /// Offset ADC to middle of the bin to minimize roundoff errrors
+        Float_t myadc=(Float_t)adc + 0.5;
+        /// adc value originally computed using fast simulator gains.  we
+        /// change to gains specified by the database.
+        myadc *= tower->gain / mTowerGains[eta-1] * mSamplingFraction / mSamplingFractionUser;
+        /// Add in the pre/post brightness correction
+        myadc += prepost_adc[sec-1][sub-1][eta-1];
+    	/// Adjust for spread in tower gains (represents an uncertainty in measured gains)
+        myadc *= ( mTowerGainFact[sec-1][sub-1][eta-1] );
+        Float_t ped = tower->ped;
+        /// Add pedestal offset
+        if (mAddPed) {
+	    if ( mSmearPed ) ped += getPedSmear( tower->sigPed );   
+	    myadc += ped;
         }
-
-      /// overwrite adc with new value (integerized) 
-      adc = (Int_t)myadc;
-      if ( mHList ) hA[5]->Fill(adc);
-
-      /// Check for zero values and saturation
-      if ( adc < 0 )
-        adc = 0;
-      if ( adc > mMaxAdc )
-        adc = mMaxAdc;
-
-      // Zero out values if tower is marked as bad
-      if ( mDropBad && tower->fail )
-        {
-          adc = 0;
+        /// overwrite adc with new value (integerized) 
+        adc = (Int_t)myadc;
+        if (mHist[5]) mHist[5]->Fill(adc);
+        if (mDropBad && (tower->gain <= 0) && mAddPed) {
+	    //still add ped to tower if gain is bad since trigger emulator expects peds
+	    adc = ped;
         }
-
+        /// Check for zero values and saturation
+        if (adc < 0) adc = 0;
+        if (adc > mMaxAdc) adc = mMaxAdc;
+      }
       if (mOverwrite) {
-        if(old)LOG_DEBUG <<"overwriting tower=" << tower->name << " old adc=" << old << " new adc=" << adc << endm;
+        if (old) {
+	    LOG_DEBUG << "overwriting tower=" << tower->name << " old adc=" << old << " new adc=" << adc << endm;
+	}
         /// Yes, the following is correct.  We setTowerAdc(i+1,...), and it 
         /// really does correspond to getEndcapTowerAdc(i+0,...).  It 
 	/// would be nice if someone would add one line of documentation
@@ -443,298 +441,290 @@ void StEEmcSlowMaker::MakeTower( StMuEmcCollection *emc )
 	/// down in the code...
 	emc->setTowerADC( i+1, adc, eemc );
       }
-
-    }
-
-
+  }
+  return kStOk;
 }
 
-// ----------------------------------------------------------------------------
-void StEEmcSlowMaker::MakePrePost( StMuEmcCollection *emc ){
-
-  for ( Int_t i = 0; i < emc->getNEndcapPrsHits(); i++ ) {
-
+//________________________________________________
+Int_t StEEmcSlowMaker::MakePrePost(StMuEmcCollection *emc) {
+  for (Int_t i = 0;i < emc->getNEndcapPrsHits();i++) {
     Int_t pre,sec,eta,sub;
-
     /// muDst ranges: sec:1-12, sub:1-5, eta:1-12 ,pre:1-3==>pre1/pre2/post
-    StMuEmcHit *hit=emc->getEndcapPrsHit(i,sec,sub,eta,pre);
+    StMuEmcHit *hit = emc->getEndcapPrsHit(i,sec,sub,eta,pre);
+    if (!hit) continue;
     
+    // range check on returned values
+    if (!( sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
+      LOG_ERROR << "Indexing errors detected: EPRS hit " << i << ", sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
+      setZeroAdc(emc);
+      return kStErr;
+    }
+
     /// tmp, for fasted analysis use only hits from sectors init in DB
-    if (sec<eeDb->getFirstSector() || sec>eeDb->getLastSector()) continue;
+    if (mEeDb && (sec < mEeDb->getFirstSector() || sec > mEeDb->getLastSector())) continue;
      
     /// Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
-    const EEmcDbItem *x=eeDb-> getTile(sec,sub-1+'A', eta, pre-1+'P'); 
-    if(x==0) continue;
-  
-    /// Drop broken channels
-    if(mDropBad) if(x->fail ) continue; 
-      
-    Float_t adc   = hit -> getAdc();
-    Float_t energy = hit->getEnergy();
+    const EEmcDbItem *x = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, pre-1+'P') : 0; 
+    if (!x) {
+	LOG_ERROR << "Cannot find DB entry for EPRS: sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
+	continue;
+    }
 
-    Float_t newadc = energy * x->gain;
-    if(adc>0) {
-      if ( mHList )  hA[1]->Fill(adc);
-      
-      /// Addition of Poisson fluctuations and Gaussian 
-      /// 1 p.e. resolution
-      Float_t mipval = energy / Pmip2ene;
-      Float_t avgpe  = mipval * Pmip2pe;
-      Float_t Npe    = gRandom->Poisson(avgpe);
-      
-      if (Npe>0) {
-        /// Determine number of photoelectrons
-        Float_t sigmape   = sqrt(Npe) * sig1pe;
-        Float_t smearedpe = gRandom -> Gaus(Npe,sigmape);
-        /// Determine new ADC value
-        newadc= smearedpe * mip2ene*(x->gain)/Pmip2pe;
-      }
-    }// non-zero ADC on input
+    Int_t NUadc;
+    // Zero out values if tower is marked as bad
+    if (mDropBad && (x->fail || !checkDBped(x) || (x->gain <= 0))) {
+	NUadc=0;
+    } else {
+	const Float_t adc = hit->getAdc();
+        const Float_t energy = hit->getEnergy();
 
-    /// Lookup pedestal in database (possibly zero)
-    Float_t ped    = (mAddPed)?x -> ped:0;
-    /// Smear the pedestal
-    if ( mSmearPed ) ped = gRandom -> Gaus(ped,x->sigPed);
+	Float_t newadc = energy * x->gain;
+	if (adc > 0) {
+    	    if (mHist[1]) mHist[1]->Fill(adc);
+      
+    	    /// Addition of Poisson fluctuations and Gaussian 
+    	    /// 1 p.e. resolution
+    	    const Float_t mipval = energy / mPmip2ene[pre-1];
+    	    const Float_t avgpe  = mipval * mPmip2pe;
+    	    const Float_t Npe    = gRandom->Poisson(avgpe);
+      
+    	    if (Npe > 0) {
+    		/// Determine number of photoelectrons
+    		const Float_t sigmape   = sqrt(Npe) * mSig1pe;
+    		Float_t smearedpe = gRandom->Gaus(Npe,sigmape);
+		if (smearedpe < 0) smearedpe = 0;
+    		/// Determine new ADC value
+    		newadc = smearedpe * mMip2ene*(x->gain) / mPmip2pe;
+    	    }
+	} // non-zero ADC on input
+
+	/// Lookup pedestal in database (possibly zero)
+	Float_t ped = (mAddPed) ? x->ped : 0;
+	/// Smear the pedestal
+	if ( mSmearPed ) ped += getPedSmear( x->sigPed ); 
+       
+	/// add signal & pedestal back
+	NUadc = (Int_t)(newadc + 0.5 + ped );
     
-    /// add signal & pedestal back
-    Int_t   NUadc     = (Int_t)(newadc + 0.5 + ped );
-    
-    if (adc>0 &&  mHList )   hA[0]->Fill(NUadc); //??
+	/// Check for zero values and saturation
+	if (NUadc < 0) NUadc = 0;
+	if (NUadc > mMaxAdc) NUadc = mMaxAdc;
+	if (adc > 0 && mHist[0]) mHist[0]->Fill(NUadc); //??
+    }
 
     ///
     /// If we've made it here, overwrite the muDst
     ///
-    if ( mOverwrite ) hit -> setAdc( NUadc );
-    
+    if (mOverwrite) hit->setAdc(NUadc);
   }
-
+  return kStOk;
 }
 
-// ----------------------------------------------------------------------------
-void StEEmcSlowMaker::MakeSMD( StMuEmcCollection *emc ) {
-  
+//________________________________________________
+Int_t StEEmcSlowMaker::MakeSMD(StMuEmcCollection *emc) {
   Int_t iuv = 0;
-  Char_t uv='U';
-  for ( uv='U'; uv <= 'V'; uv++ ) {
+  for (Char_t uv = 'U';uv <= 'V';uv++) {
     iuv++;
-    
     Int_t sec,strip;
-    for (Int_t i = 0; i < emc->getNEndcapSmdHits(uv); i++ ) {
-      
+    for (Int_t i = 0;i < emc->getNEndcapSmdHits(uv);i++) {
       StMuEmcHit *hit=emc->getEndcapSmdHit(uv,i,sec,strip);
-      assert(sec>0 && sec<=MaxSectors);// total corruption of muDst
-      
-      // tmp, for fasted analysis use only hits from sectors init in DB
-      if(sec<eeDb->getFirstSector() || sec>eeDb->getLastSector()) continue;
-      
-      const EEmcDbItem *x=eeDb->getByStrip(sec,uv,strip);
-      assert(x); // it should never happened for muDst
-
-      /// Drop broken channels
-      if(mDropBad)  if(x->fail ) continue;
-      
-      Float_t adc    = hit->getAdc();
-      Float_t energy = hit->getEnergy();
-      Float_t newadc = energy * x->gain;
-      
-      if(adc>0) {
-
-        if ( mHList ) { 
-          hA[12]->Fill(x->sec);
-          if(x->sec==5) hA[20]->Fill(x->strip,adc); 
-          hA[3]->Fill(adc);
-        }
-
-        // Addition of Poisson fluctuations and 
-        // Gaussian 1 p.e. resolution
-        Float_t mipval = energy / mip2ene;
-        Float_t avgpe  = mipval * mip2pe[strip];
-        Float_t Npe    = gRandom->Poisson(avgpe);
-
-        if (Npe>0) {
-          
-          /// Determine number of photoelectrons
-          Float_t sigmape   = sqrt(Npe) * sig1pe;
-          Float_t smearedpe = gRandom -> Gaus(Npe,sigmape);
-          
-          /// Determine new ADC value
-          newadc    = smearedpe * mip2ene * (x->gain) / mip2pe[strip];
-        }
+      // range check on returned values
+      if (!(strip-1 >= 0) || !(strip <= 288) || !(iuv-1 >= 0 && iuv-1 < 2) || !(sec > 0 && sec <= MaxSectors)) {
+	LOG_ERROR << "Bad index for ESMD: sec = " << sec << ", iuv = " << iuv << ", strip = " << strip << endm;
+	setZeroAdc(emc); 
+	return kStErr;
       }
       
+      // tmp, for fasted analysis use only hits from sectors init in DB
+      if (mEeDb && (sec < mEeDb->getFirstSector() || sec > mEeDb->getLastSector())) continue;
+      const EEmcDbItem *x = mEeDb ? mEeDb->getByStrip(sec,uv,strip) : 0;
+      if (!x) {
+	LOG_ERROR << "Cannot find DB entry for ESMD: sec = " << sec << ", uv = " << uv << ", strip = " << strip << endm;
+	continue;
+      }
 
-      /// Add in factor from gain smearing
-      assert(strip-1>=0); // or die strips are counted from zero already
-      assert(sec-1>=0); // or die sectors are counted from zero already
-      assert(iuv-1>=0&&iuv-1<2); 
-      newadc *= mSmdGainFact[sec-1][iuv-1][strip-1];
-
-
-      /// Lookup pedestal in database (possibly zero)
-      Float_t ped    = (mAddPed)?x -> ped:0;
-      /// Smear the pedestal
-      if ( mSmearPed ) ped = gRandom -> Gaus(ped,x->sigPed);
+      Int_t NUadc;
+      // Zero out values if tower is marked as bad
+      if (mDropBad && (x->fail || !checkDBped(x) || (x->gain <= 0))) {
+	  NUadc=0;
+      } else {
+        const Float_t adc = hit->getAdc();
+        const Float_t energy = hit->getEnergy();
+        Float_t newadc = energy * x->gain;
       
-      /// add signal & pedestal back
-      Int_t   NUadc     = (Int_t)(newadc + 0.5 + ped );
+        if (adc > 0) {
+    	    if (mHist[12]) mHist[12]->Fill(x->sec);
+    	    if (mHist[20]) mHist[20]->Fill(x->strip,adc); 
+    	    if (mHist[3]) mHist[3]->Fill(adc);
+
+    	    // Addition of Poisson fluctuations and 
+    	    // Gaussian 1 p.e. resolution
+    	    const Float_t mipval = energy / mMip2ene;
+    	    const Float_t avgpe  = mipval * mMip2pe[strip];
+    	    const Float_t Npe    = gRandom->Poisson(avgpe);
+    	    if (Npe > 0) {
+        	/// Determine number of photoelectrons
+        	const Float_t sigmape   = sqrt(Npe) * mSig1pe;
+        	Float_t smearedpe = gRandom->Gaus(Npe, sigmape);
+		if (smearedpe < 0) smearedpe = 0;
+        	/// Determine new ADC value
+        	newadc = smearedpe * mMip2ene * (x->gain) / mMip2pe[strip];
+    	    }
+        }
       
-      if (adc>0 && mHList ) {
-        hA[19]->Fill(x->strip,NUadc);
-        hA[2]->Fill(NUadc);
+        // Add in factor from gain smearing
+        newadc *= mSmdGainFact[sec-1][iuv-1][strip-1];
+
+        // Lookup pedestal in database (possibly zero)
+        Float_t ped = (mAddPed) ? x->ped : 0;
+        /// Smear the pedestal
+        if ( mSmearPed ) ped += getPedSmear( x->sigPed );
+            
+        /// add signal & pedestal back
+        NUadc = (Int_t)(newadc + 0.5 + ped );
+      
+        /// Check for zero values and saturation
+        if (NUadc < 0) NUadc = 0;
+        if (NUadc > mMaxAdc) NUadc = mMaxAdc;
+        if (adc > 0 && mHist[19]) mHist[19]->Fill(x->strip,NUadc);
+        if (adc > 0 && mHist[2]) mHist[2]->Fill(NUadc);
       }
       
       ///
       /// If we've made it here, overwrite the muDst
       ///
-      if ( mOverwrite ) hit -> setAdc( NUadc );
-      
+      if (mOverwrite) hit->setAdc(NUadc);
     }// loop over 1 plane
   } // loop over U,V
- 
+  return kStOk;
 }
 
-void StEEmcSlowMaker::setSource(const Char_t* name)
-{
-  if (strcmp(name, "MuDst") == 0)
+//________________________________________________
+void StEEmcSlowMaker::setSource(const Char_t* name) {
+  if (strcmp(name, "MuDst") == 0) {
     mSource = kMuDst;
-  else if (strcmp(name, "StEvent") == 0)
+  } else if (strcmp(name, "StEvent") == 0) {
     mSource = kStEvent;
-  else {
+  } else {
     LOG_WARN<<"::setSource()"<<"Source must be \"MuDst\" or \"StEvent\""<<endm;
   }
 }
 
-// ----------------------------------------------------------------------------
-void StEEmcSlowMaker::MakeTower(StEmcCollection* emc)
-{
-
+//________________________________________________
+Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
   StEmcDetector *det = emc->detector(kEndcapEmcTowerId);
   if (!det) {
     LOG_DEBUG<<"No kEndcapEmcTowerId"<<endm;
-    return;
+    return kStOk;
   } 
-
   StEmcDetector *prepost = emc->detector(kEndcapEmcPreShowerId);
   if (!prepost) {
     LOG_WARN<<"No kEndcapEmcPreShowerId, towers are fast simu only."<<endm;
-    return; 
+    return kStOk; 
   } 
 
   /// Arrays to store ADC corrections for  each tower
   Float_t prepost_adc[kEEmcNumSectors][kEEmcNumSubSectors][kEEmcNumEtas];
   memset( prepost_adc, 0, sizeof(prepost_adc) );
 
-
-  for ( UInt_t sec = 1; sec <= det->numberOfModules(); sec++ )
-    {
-
+  for (UInt_t sec = 1;sec <= det->numberOfModules();sec++) {
       StSPtrVecEmcRawHit &prepost_hits = prepost->module(sec)->hits();
-
-      if ( mDoLightYield )
-      for ( UInt_t ihit=0;ihit<prepost_hits.size();ihit++ )
-        {
+      if (mDoLightYield) for (UInt_t ihit = 0;ihit < prepost_hits.size();ihit++) {
           StEmcRawHit *hit = prepost_hits[ihit];
-          UInt_t sub = (hit->sub()-1)%5+1;
-          UInt_t eta = hit->eta();
-          UInt_t pre = (hit->sub()-1)/5+1;
-          
-          assert( sec >= 1 && sec <= 12 ); // Indexing errors detected
-          assert( sub >= 1 && sub <= 5  ); // Indexing errors detected
-          assert( eta >= 1 && eta <= 12 ); // Indexing errors detected
-          assert( pre >= 1 && pre <= 3  ); // Indexing errors detected
-
-          // energy deposit in GeV
-          Float_t edeposit = hit->energy();
-
+          const UInt_t sub = (hit->sub()-1)%5+1;
+          const UInt_t eta = hit->eta();
+          const UInt_t pre = (hit->sub()-1)/5+1;
+          // range check on returned values
+	  if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
+	    LOG_ERROR << "Indexing errors detected for EPRS: sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
+    	    setZeroAdc(emc); 
+	    return kStErr;
+	  }
+	  	  
+	  // energy deposit in GeV
+          const Float_t edeposit = hit->energy();
           // divide by sampling fraction, multiply by _tower_ gain
           // and brightness factor, and add to the adc sum for 
           // this tower.  Since GEANT already accounts for the 
 	  // difference in thickness between pre/post and normal
 	  // layers, the factor of 0.8 is introduced to prevent us
 	  // from double correcting.
-
-          const EEmcDbItem *tower=eeDb-> getTile(sec,sub-1+'A', eta, 'T');
+          const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : 0;
+          if (!tower) {
+	    LOG_ERROR << "Cannot find DB entry for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
+	    continue;
+          }
           Float_t myadc = edeposit / mSamplingFraction * tower->gain;
           myadc *= ( mRelativeLightYield[pre-1] - 1.0 );
-
           prepost_adc[sec-1][sub-1][eta-1] += myadc;
-
-        }
-
-      int nTchange=0; // counts # of towers with ADC (int) values changed
+      }
+      Int_t nTchange = 0; // counts # of towers with ADC (int) values changed
       StSPtrVecEmcRawHit &tower_hits = det->module(sec)->hits();
-      for ( UInt_t ihit=0;ihit<tower_hits.size();ihit++ )
-        {
-
+      for (UInt_t ihit = 0;ihit < tower_hits.size();ihit++) {
           StEmcRawHit *hit = tower_hits[ihit];
-          UInt_t sub = hit->sub();
-          UInt_t eta = hit->eta();
-
-          assert( sec >= 1 && sec <= 12 ); // Indexing errors detected
-          assert( sub >= 1 && sub <= 5  ); // Indexing errors detected
-          assert( eta >= 1 && eta <= 12 ); // Indexing errors detected
+          const UInt_t sub = hit->sub();
+          const UInt_t eta = hit->eta();
+          // range check on returned values
+	  if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12)) {
+	    LOG_ERROR << "Indexing errors detected for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
+    	    setZeroAdc(emc); 
+	    return kStErr;
+	  }
 
           // get DB entry for this tower
-          const EEmcDbItem *tower=eeDb-> getTile(sec,sub-1+'A', eta, 'T');
-          assert(tower);
-          if ( mHList ) hA[4]->Fill( hit->adc() );
-
-          // energy deposit in GeV
-          Float_t edeposit = hit->energy();
-	  // compute adc using gains stored in the databse
-          Float_t myadc = edeposit / mSamplingFraction * tower->gain;
-
-          // add in brightness correction for the pre and postshower layers
-          myadc += prepost_adc[sec-1][sub-1][eta-1];
-
-          /// Add pedestal offset
-          if ( mAddPed )
-            {
-              Float_t ped = tower->ped;
-              if ( mSmearPed )
-                {
-                  ped += gRandom -> Gaus( 0, tower->sigPed );
-                }
-              myadc += ped;
-            }
-
-          Int_t adc = (Int_t)myadc;
-
-          /// Check for zero values and saturation
-          if ( adc < 0 )
-            adc = 0;
-          if ( adc > mMaxAdc )
-            adc = mMaxAdc;
-
-          // Zero out values if tower is marked as bad
-          if ( mDropBad && tower->fail )
-            {
-              adc = 0;
-            }
-
-          if ( mHList ) hA[5]->Fill(adc);
-
-          if (mOverwrite) {
-	    if( (int)hit->adc() !=adc) nTchange++;
-
-            LOG_DEBUG <<"overwriting tower=" << tower->name << " old adc=" << hit->adc() << " new adc=" << adc << endm;
-            hit->setAdc( adc );
+          const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : 0;
+          if (!tower) {
+	    LOG_ERROR << "Cannot find DB entry for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
+	    continue;
           }
-
-        }
-
-      LOG_INFO <<Form(" Etow changed %d ADC values for sector=%d",nTchange, sec )<<endm;
-    }// loop over sectors
-
+	  Int_t adc;
+          if (mDropBad && (tower->fail || !checkDBped(tower))) {
+	    //zero out values if tower has fail bit set or ped is bad
+	    adc = 0;
+	  } else {
+            if (mHist[4]) mHist[4]->Fill( hit->adc() );
+            // energy deposit in GeV
+            const Float_t edeposit = hit->energy();
+	    // compute adc using gains stored in the databse
+            Float_t myadc = edeposit / mSamplingFraction * tower->gain;
+            // add in brightness correction for the pre and postshower layers
+            myadc += prepost_adc[sec-1][sub-1][eta-1];
+	    /// Adjust for spread in tower gains (represents an uncertainty in measured gains)
+	    myadc *= ( mTowerGainFact[sec-1][sub-1][eta-1] );
+	    /// Add pedestal offset
+            Float_t ped = tower->ped;
+            if (mAddPed) {
+		if ( mSmearPed ) ped += getPedSmear( tower->sigPed );
+		myadc += ped;
+            }
+            adc = (Int_t)myadc;
+            // Zero out values if tower is marked as bad
+            if (mDropBad && (tower->gain <= 0) && mAddPed) {
+		//still add ped to tower if gain is bad since trigger emulator expects peds
+		adc = ped;
+	    }
+            /// Check for zero values and saturation
+            if (adc < 0) adc = 0;
+            if (adc > mMaxAdc) adc = mMaxAdc;
+	  }
+          if (mHist[5]) mHist[5]->Fill(adc);
+	  if (mOverwrite) {
+	    if ((Int_t)hit->adc() != adc) nTchange++;
+            LOG_DEBUG <<"overwriting tower=" << tower->name << " old adc=" << hit->adc() << " new adc=" << adc << endm;
+	    hit->setAdc( adc );
+	  }
+      }
+      LOG_DEBUG << " Etow changed " << nTchange << " ADC values for sector=" << sec << endm;
+  }// loop over sectors
+  return kStOk;
 }
 
-// ----------------------------------------------------------------------------
-void StEEmcSlowMaker::MakePrePost(StEmcCollection* emc)
-{
+//________________________________________________
+Int_t StEEmcSlowMaker::MakePrePost(StEmcCollection* emc) {
   StEmcDetector* det = emc->detector(kEndcapEmcPreShowerId);
   if (!det) {
-    LOG_WARN<<Form("No kEndcapEmcPreShowerId");
-    return;
+    LOG_WARN << "No kEndcapEmcPreShowerId" << endm;
+    return kStOk;
   }
 
   for (UInt_t sector =1; sector <= det->numberOfModules(); ++sector) {
@@ -742,48 +732,69 @@ void StEEmcSlowMaker::MakePrePost(StEmcCollection* emc)
     for(UInt_t i = 0; i < hits.size(); ++i) {
       StEmcRawHit* hit = hits[i];
       Char_t sub = 'A'+(hit->sub()-1)%5;
-
+      
       // Layer: 'P'=preshower1, 'Q'=preshower2, 'R'=postshower
       Char_t layer = 'P'+(hit->sub()-1)/5;
+      Int_t layerP = (hit->sub()-1)/5;
 
+      const UInt_t isub = (hit->sub()-1)%5+1;
+      const UInt_t ieta = hit->eta();
+      const UInt_t ipre = (hit->sub()-1)/5+1;
+      // range check on returned values
+      if (!(sector >= 1 && sector <= 12) || !(isub >= 1 && isub <= 5) || !(ieta >= 1 && ieta <= 12) || !(ipre >= 1 && ipre <= 3)) {
+	LOG_ERROR << "Indexing errors detected for EPRS: sec = " << sector << ", sub = " << isub << ", eta = " << ieta << ", pre = " << ipre << endm;
+	setZeroAdc(emc); 
+	return kStErr;
+      }
+      
       // Database ranges: sector=1-12, sub=A-E, eta=1-12, type=T,P-R; Slow method
-      const EEmcDbItem* x = eeDb->getTile(sector, sub, hit->eta(), layer);
-      if (!x) continue;
+      const EEmcDbItem* x = mEeDb ? mEeDb->getTile(sector, sub, hit->eta(), layer) : 0;
+      if (!x) {
+        LOG_ERROR << "Cannot find DB entry for EPRS: sec = " << sector << ", sub = " << sub << ", eta = " << hit->eta() << ", pre = " << layer << endm;
+	continue;
+      }
 
-      // Drop broken channels
-      if (mDropBad && x->fail) continue;
-      Float_t adc = hit->adc();
-      Float_t energy = hit->energy();
-      Float_t newadc = energy * x->gain;
-      if(adc > 0) {
-	if (mHList) hA[1]->Fill(adc);
+      Int_t NUadc;
+      // Zero out values if tower is marked as bad
+      if (mDropBad && (x->fail || !checkDBped(x) || (x->gain <= 0))) {
+	  NUadc=0;
+      } else {
+        Float_t adc = hit->adc();
+        Float_t energy = hit->energy();
+        Float_t newadc = energy * x->gain;
+        if(adc > 0) {
+	    if (mHist[1]) mHist[1]->Fill(adc);
 
-	/// Addition of Poisson fluctuations and Gaussian 
-	/// 1 p.e. resolution
-	Float_t mipval = energy / Pmip2ene;
-	Float_t avgpe  = mipval * Pmip2pe;
-	Float_t Npe    = gRandom->Poisson(avgpe);
+	    /// Addition of Poisson fluctuations and Gaussian 
+	    /// 1 p.e. resolution
+	    const Float_t mipval = energy / mPmip2ene[layerP];
+	    const Float_t avgpe  = mipval * mPmip2pe;
+	    const Float_t Npe    = gRandom->Poisson(avgpe);
 
-	if (Npe > 0) {
-	  /// Determine number of photoelectrons
-	  Float_t sigmape   = sqrt(Npe) * sig1pe;
-	  Float_t smearedpe = gRandom->Gaus(Npe, sigmape);
+	    if (Npe > 0) {
+		/// Determine number of photoelectrons
+		const Float_t sigmape   = sqrt(Npe) * mSig1pe;
+		Float_t smearedpe = gRandom->Gaus(Npe, sigmape);
+		if (smearedpe < 0) smearedpe = 0;
+		/// Determine new ADC value
+		newadc = smearedpe * mMip2ene * x->gain / mPmip2pe;
+	    }
+        } // non-zero ADC on input
 
-	  /// Determine new ADC value
-	  newadc = smearedpe * mip2ene * x->gain / Pmip2pe;
-	}
-      } // non-zero ADC on input
+        /// Lookup pedestal in database (possibly zero)
+        Float_t ped = mAddPed ? x->ped : 0;
 
-      /// Lookup pedestal in database (possibly zero)
-      Float_t ped = mAddPed ? x->ped : 0;
+        /// Smear the pedestal
+        if ( mSmearPed ) ped += getPedSmear( x->sigPed );
+      
+        /// add signal & pedestal back
+        NUadc = Int_t(newadc + 0.5 + ped);
 
-      /// Smear the pedestal
-      if (mSmearPed) ped = gRandom->Gaus(ped, x->sigPed);
-
-      /// add signal & pedestal back
-      Int_t NUadc = Int_t(newadc + 0.5 + ped);
-
-      if (adc > 0 && mHList) hA[0]->Fill(NUadc); //??
+        /// Check for zero values and saturation
+        if ( NUadc < 0 ) NUadc = 0;
+        if ( NUadc > mMaxAdc ) NUadc = mMaxAdc;
+        if (adc > 0 && mHist[0]) mHist[0]->Fill(NUadc); //??
+      }
 
       ///
       /// If we've made it here, overwrite the muDst
@@ -791,165 +802,208 @@ void StEEmcSlowMaker::MakePrePost(StEmcCollection* emc)
       if (mOverwrite) hit->setAdc(NUadc);
     }
   }
+  return kStOk;
 }
 
-// ----------------------------------------------------------------------------
-void StEEmcSlowMaker::MakeSMD(StEmcCollection* emc)
-{
+//________________________________________________
+Int_t StEEmcSlowMaker::MakeSMD(StEmcCollection* emc) {
+  Int_t iuv = 0;
   for (Char_t plane = 'U'; plane <= 'V'; ++plane) {
+    iuv++;
     StEmcDetector* det = 0;
     switch (plane) {
     case 'U':
       det = emc->detector(kEndcapSmdUStripId);
       if (!det) {
-	gMessMgr->Debug("No kEndcapSmdUStripId");
+	LOG_DEBUG << "No kEndcapSmdUStripId" << endm;
 	continue;
       }
       break;
     case 'V':
       det = emc->detector(kEndcapSmdVStripId);
       if (!det) {
-	gMessMgr->Debug("No kEndcapSmdVStripId");
+	LOG_DEBUG << "No kEndcapSmdVStripId" << endm;
 	continue;
       }
       break;
     }
 
-    assert(det);
+    if (!det) continue;
 
     for (UInt_t sector = 1; sector <= det->numberOfModules();++sector) {
       StSPtrVecEmcRawHit& hits = det->module(sector)->hits();
       for (UInt_t i = 0; i < hits.size(); ++i) {
 	StEmcRawHit* hit = hits[i];
 	Int_t strip = hit->eta();
-	// Database ranges: sector=1-12, plane=U-V, strip=1-288
-	const EEmcDbItem* x = eeDb->getByStrip(sector, plane, strip);
-	if (!x) continue;
-
-	/// Drop broken channels
-	if (mDropBad && x->fail) continue;
-
-	Float_t adc    = hit->adc();
-	Float_t energy = hit->energy();
-	Float_t newadc = energy * x->gain;
-
-	if(adc > 0) {
-
-	  if (mHList) { 
-	    hA[12]->Fill(x->sec);
-	    if (x->sec == 5) hA[20]->Fill(x->strip, adc); 
-	    hA[3]->Fill(adc);
-	  }
-
-	  // Addition of Poisson fluctuations and 
-	  // Gaussian 1 p.e. resolution
-	  Float_t mipval = energy / mip2ene;
-	  Float_t avgpe  = mipval * mip2pe[strip];
-	  Float_t Npe    = gRandom->Poisson(avgpe);
-
-	  if (Npe > 0) {
-
-	    /// Determine number of photoelectrons
-	    Float_t sigmape   = sqrt(Npe) * sig1pe;
-	    Float_t smearedpe = gRandom->Gaus(Npe, sigmape);
-
-	    /// Determine new ADC value
-	    newadc = smearedpe * mip2ene * x->gain / mip2pe[strip];
-	  }
+	
+	// range check on returned values
+	if (!(strip-1 >= 0) || !(strip <= 288) || !(iuv-1 >= 0 && iuv-1 < 2) || !(sector > 0 && sector <= MaxSectors)) {
+	  LOG_ERROR << "Bad index for ESMD: sec = " << sector << ", iuv = " << iuv << ", strip = " << strip << endm;
+	  setZeroAdc(emc); 
+	  return kStErr;
 	}
 
-	/// Lookup pedestal in database (possibly zero)
-	Float_t ped = mAddPed ? x->ped : 0;
+	// Database ranges: sector=1-12, plane=U-V, strip=1-288
+	const EEmcDbItem* x = mEeDb ? mEeDb->getByStrip(sector, plane, strip) : 0;
+	if (!x) {
+	  LOG_ERROR << "Cannot find DB entry for ESMD: sec = " << sector << ", uv = " << iuv-1+'U' << ", strip = " << strip << endm;
+	  continue;
+	}
 
-	/// Smear the pedestal
-	if (mSmearPed) ped = gRandom->Gaus(ped, x->sigPed);
-
-	/// Add signal & pedestal back
-	Int_t NUadc = Int_t(newadc + 0.5 + ped);
-
-	if (adc > 0 && mHList) {
-	  hA[19]->Fill(x->strip, NUadc);
-	  hA[2]->Fill(NUadc);
+	Int_t NUadc;
+	// Zero out values if tower is marked as bad
+	if (mDropBad && (x->fail || !checkDBped(x) || (x->gain <= 0))) {
+	    NUadc = 0;
+	} else {
+	    const Float_t adc    = hit->adc();
+	    const Float_t energy = hit->energy();
+	    Float_t newadc = energy * x->gain;
+	    if (adc > 0) {
+		if (mHist[12]) mHist[12]->Fill(x->sec);
+		if (mHist[2]) mHist[20]->Fill(x->strip, adc); 
+		if (mHist[3]) mHist[3]->Fill(adc);
+		// Addition of Poisson fluctuations and 
+		// Gaussian 1 p.e. resolution
+		const Float_t mipval = energy / mMip2ene;
+		const Float_t avgpe  = mipval * mMip2pe[strip];
+		const Float_t Npe    = gRandom->Poisson(avgpe);
+		if (Npe > 0) {
+		    /// Determine number of photoelectrons
+		    const Float_t sigmape   = sqrt(Npe) * mSig1pe;
+		    Float_t smearedpe = gRandom->Gaus(Npe, sigmape);
+		    if (smearedpe < 0) smearedpe = 0;
+		    /// Determine new ADC value
+		    newadc = smearedpe * mMip2ene * x->gain / mMip2pe[strip];
+		}
+	    }
+	    // Add in factor from gain smearing
+	    newadc *= mSmdGainFact[sector-1][iuv-1][strip-1];
+	    /// Lookup pedestal in database (possibly zero)
+	    Float_t ped = mAddPed ? x->ped : 0;
+	    /// Smear the pedestal
+	    if ( mSmearPed ) ped += getPedSmear( x->sigPed );
+	    /// Add signal & pedestal back
+	    NUadc = Int_t(newadc + 0.5 + ped);
+	    /// Check for zero values and saturation
+	    if ( NUadc < 0 ) NUadc = 0;
+	    if ( NUadc > mMaxAdc ) NUadc = mMaxAdc;
+	    if (adc > 0 && mHist[19]) mHist[19]->Fill(x->strip, NUadc);
+	    if (adc > 0 && mHist[2]) mHist[2]->Fill(NUadc);
 	}
 
 	///
 	/// If we've made it here, overwrite the muDst
 	///
 	if (mOverwrite) hit->setAdc(NUadc);
-
       } // Loop over 1 plane
+    }
+  }
+  return kStOk;
+}
+
+//________________________________________________
+void StEEmcSlowMaker::setTowerGainSpread(Float_t s, Float_t mean) {
+  LOG_INFO << "setTowerGainSpread(): gain spread: " << s << "; gain mean value: " << mean << endm;
+  // initialize tower gain factors to mean +/- spread
+  for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ ) {
+    for ( Int_t sub=0;sub<kEEmcNumSubSectors;sub++ ) {
+      for ( Int_t eta=0;eta<kEEmcNumEtas;eta++ ) {
+	  Float_t f = -1.0E9;
+	  while (f <= -mean || f >= 1.0) f = gRandom->Gaus(0, s);
+	  mTowerGainFact[sec][sub][eta] = mean + f;
+      }
     }
   }
 }
 
-
-
-// ----------------------------------------------------------------------------
-void StEEmcSlowMaker::setSmearPed( Bool_t s ){ mSmearPed = s; }
-void StEEmcSlowMaker::setAddPed( Bool_t a ) { mAddPed = a; }
-void StEEmcSlowMaker::setDropBad( Bool_t d ) { mDropBad = d; }
-void StEEmcSlowMaker::setOverwrite( Bool_t o ) { mOverwrite = o; }
-
-void StEEmcSlowMaker::setMipElossSmd(Float_t e){ mip2ene=e; }
-void StEEmcSlowMaker::setMipElossPre(Float_t e){ Pmip2ene=e; }
-void StEEmcSlowMaker::setSinglePeResolution(Float_t s){ sig1pe=s; }
-void StEEmcSlowMaker::setNpePerMipSmd( Int_t strip, Float_t npe ) { mip2pe[strip] = npe; }
-void StEEmcSlowMaker::setNpePerMipSmd( Float_t npe ) { for ( Int_t i = 0; i < 288; i++ ) mip2pe[i] = npe; }
-void StEEmcSlowMaker::setNpePerMipPre( Float_t npe ) { Pmip2pe = npe; }
-
-void StEEmcSlowMaker::setRelativeLightYield( Float_t pre1, Float_t pre2, Float_t post ){ mRelativeLightYield[kPre1]=pre1; mRelativeLightYield[kPre2]=pre2; mRelativeLightYield[kPost]=post; }
-
-void StEEmcSlowMaker::setEmbeddingMode(Bool_t x){ mIsEmbeddingMode=x;} 
-
-// ----------------------------------------------------------------------------
-void StEEmcSlowMaker::setTowerGainSpread(Float_t s, Float_t mean)
-{
-    LOG_INFO << "setTowerGainSpread(): gain spread: " << s << "; gain mean value: " << mean << endm;
-
-  // initialize tower gain factors to mean +/- spread
-  for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ )
-    for ( Int_t sub=0;sub<kEEmcNumSubSectors;sub++ )
-      for ( Int_t eta=0;eta<kEEmcNumEtas;eta++ )
-	{
-	  Float_t f = -1.0E9;
-	  while ( f <= -1. || f >= 1.0 )
-	    f = gRandom->Gaus(0., s);
-
-	  mTowerGainFact[sec][sub][eta] = mean + f;
-
-	}
-
+//________________________________________________
+void StEEmcSlowMaker::setSmdGainSpread(Float_t s) {
+  for (Int_t strip = 0;strip < kEEmcNumStrips;strip++) {
+      setSmdGainSpread(s, strip);
+  }
 }
 
-// ----------------------------------------------------------------------------
-void StEEmcSlowMaker::setSmdGainSpread( Float_t s )
-{
-  for ( Int_t strip=0;strip<kEEmcNumStrips;strip++ )
-    {
-      setSmdGainSpread(s,strip);
+//________________________________________________
+void StEEmcSlowMaker::setSmdGainSpread(Float_t s, Int_t strip) {
+  for (Int_t sec = 0;sec < kEEmcNumSectors;sec++) {
+    for (Int_t uv = 0;uv < kEEmcNumSmdUVs;uv++) {
+      setSmdGainSpread(s, sec, uv, strip);
     }
+  }
 }
 
-void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t strip )
-{
-  for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ )
-    for ( Int_t uv=0;uv<kEEmcNumSmdUVs;uv++ )
-      setSmdGainSpread(s, sec,uv, strip );
-}
-
-void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t sec, Int_t uv, Int_t strip )
-{
-
+//________________________________________________
+void StEEmcSlowMaker::setSmdGainSpread(Float_t s, Int_t sec, Int_t uv, Int_t strip) {
+  const Float_t mean = 1.0;
   Float_t f = -1.0E9;
-  while ( f <= -1. || f >= 1.0 )
-    f = gRandom->Gaus(0., s);
-
-  mSmdGainFact[sec][uv][strip]= 1.0 + f;
-  
+  while (f <= -mean || f >= 1.0) f = gRandom->Gaus(0, s);
+  mSmdGainFact[sec][uv][strip] = mean + f;
 }
 
+//________________________________________________
+Bool_t StEEmcSlowMaker::checkDBped(const EEmcDbItem *x) {
+  //check that channels ped and pedSigma are all >= 0
+  return (x && (x->ped >= 0) && (x->sigPed >= 0));
+}
+
+//________________________________________________
+Float_t StEEmcSlowMaker::getPedSmear(Float_t sigPed) {
+  //get pedestal smearing from gaussian distribution truncated at N*sigma
+  Float_t smear = 0;
+  if (mTruncatePedSmear > 0) {
+    do {
+	smear = gRandom->Gaus(0, 1.0);
+    } while (fabs(smear) > mTruncatePedSmear);
+  }
+  return smear * sigPed;
+}
+
+//________________________________________________
+void StEEmcSlowMaker::setZeroAdc(StEmcCollection* emc) {
+  StDetectorId detId[4]={kEndcapEmcTowerId,kEndcapEmcPreShowerId,kEndcapSmdUStripId,kEndcapSmdVStripId};
+  StEmcDetector *det=0;
+
+  for(int i=0; i<4; i++) {
+    det = emc->detector(detId[i]);
+    if (!det) continue;
+    for (UInt_t sec = 1;sec <= det->numberOfModules();sec++) {
+      StSPtrVecEmcRawHit &det_hits = det->module(sec)->hits();
+      for (UInt_t ihit = 0;ihit < det_hits.size();ihit++) {
+	StEmcRawHit *hit = det_hits[ihit];
+	hit->setAdc(0);
+      }
+    }
+  }
+}
+
+//________________________________________________
+void StEEmcSlowMaker::setZeroAdc(StMuEmcCollection *emc) {
+  
+  for (Int_t i = 0;i < emc->getNEndcapTowerADC();i++) 
+    emc->setTowerADC( i+1, 0, eemc );
+
+  for (Int_t i = 0;i < emc->getNEndcapPrsHits();i++) {
+    Int_t pre,sec,eta,sub;
+    StMuEmcHit *hit = emc->getEndcapPrsHit(i,sec,sub,eta,pre);
+    if (hit) hit->setAdc(0);
+  }
+
+  for (Char_t uv = 'U';uv <= 'V';uv++) {
+    Int_t sec,strip;
+    for (Int_t i = 0;i < emc->getNEndcapSmdHits(uv);i++) {
+      StMuEmcHit *hit=emc->getEndcapSmdHit(uv,i,sec,strip);
+      if (hit) hit->setAdc(0);
+    }
+  }
+}
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.10  2010/08/03 02:20:40  stevens4
+// final update from peer review
+//
+// Revision 2.9  2010/07/29 16:12:03  ogrebeny
+// Update after the peer review
+//
 // Revision 2.8  2010/05/03 20:47:22  ogrebeny
 // Some code cleanup
 //

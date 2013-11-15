@@ -291,7 +291,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.45 2010/07/19 20:48:32 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.44 2010/07/02 22:36:10 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -603,8 +603,8 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
       unsigned int tid = (unsigned int) vals[5];
       if (ValidTrigger(tid)) {
         resNtuple->Fill(vals);
-        if (curNtuple->GetNvar()>13) 
-          addVert(vals[1],vals[2],vals[3],vals[4],vals[13],vals[14]);
+        if (curNtuple->GetNvar()>12) 
+          addVert(vals[1],vals[2],vals[3],vals[4],vals[12],vals[13]);
         else
           addVert(vals[1],vals[2],vals[3],vals[4],0.,0.);
       } else {
@@ -622,11 +622,8 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.45 2010/07/19 20:48:32 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.44 2010/07/02 22:36:10 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
-// Revision 1.45  2010/07/19 20:48:32  genevb
-// Forgot to shift ex,ey after detmap addition to ntuple
-//
 // Revision 1.44  2010/07/02 22:36:10  genevb
 // Option for using all triggers
 //

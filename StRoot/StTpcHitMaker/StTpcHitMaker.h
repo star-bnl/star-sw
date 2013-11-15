@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.10 2010/03/25 15:05:54 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.11 2010/08/30 18:02:02 genevb Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.11  2010/08/30 18:02:02  genevb
+ * Introduce hit maxima for tracking
+ *
  * Revision 1.10  2010/03/25 15:05:54  fisyak
  * Add AfterBurner
  *
@@ -73,10 +76,11 @@ class StTpcHitMaker : public StRTSBaseMaker {
   virtual ~StTpcHitMaker() {}
 
   Int_t   Init();
+  Int_t   InitRun(Int_t runnumber);
   Int_t   Make();
   void    DoPulser(Int_t sector);
   void    PadMonitor(Int_t sector);
-  void    UpdateHitCollection(Int_t sector);
+  Int_t   UpdateHitCollection(Int_t sector);
   void    DumpPixels2Ntuple(Int_t sector);
   void    PrintSpecial(Int_t sector);
   Int_t   RawTpcData(Int_t sector);
@@ -91,6 +95,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   Short_t  ADCs[512];
   UShort_t IDTs[512];
   UShort_t fId; // current cluster Id
+  Int_t    maxHits[24];
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
