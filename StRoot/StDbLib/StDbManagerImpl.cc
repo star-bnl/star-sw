@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.33 2009/10/12 15:06:11 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.33.2.1 2013/06/11 15:33:31 didenko Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.33.2.1  2013/06/11 15:33:31  didenko
+ * db update
+ *
  * Revision 1.33  2009/10/12 15:06:11  dmitry
  * added new domain: pp2pp
  *
@@ -1082,7 +1085,10 @@ char*  StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
-  return getenv(printDbName(type,domain));
+  if (!type || !domain) return 0;
+  char* dbname = printDbName(type,domain);
+  if (!dbname) return 0;
+  return getenv(dbname);
 }
   
 ////////////////////////////////////////////////////////////////
@@ -1589,7 +1595,7 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
- 
+  if (!typeName || !domainName) return 0;
   StString dbname;
   dbname<<typeName;
   if(strcmp(domainName,"Star")!=0)dbname<<"_"<<domainName;

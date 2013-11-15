@@ -82,7 +82,7 @@ endif
 
 if ( -e .sl44_gcc346 && ! -e .sl53_gcc432 ) then
     # as above, request confirmation
-    /bin/ln -s .sl44_gcc346 .sl53_gcc432 && echo "SL53 compatibility link created"
+    /bin/ln -s .sl44_gcc346 .sl53_gcc432 && echo "SL44 compatibility link created"
 endif
 
 
