@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.64 2013/11/14 21:25:47 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.65 2013/11/15 17:46:38 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.65  2013/11/15 17:46:38  dmitry
+ * do not try to free memory which we don\'t own..
+ *
  * Revision 1.64  2013/11/14 21:25:47  dmitry
  * override for the mysql user autodetect functionality
  *
@@ -357,11 +360,12 @@ if(mQueryLast) delete [] mQueryLast;
 Release();
 if(mRes) delete mRes;
 if(mhasConnected)mysql_close(&mData);
-if(mdbhost) delete [] mdbhost;
-if(mdbuser) delete [] mdbuser;
-if(mdbpw)   delete [] mdbpw;
-if(mdbName)  delete [] mdbName;
- if(mdbServerVersion) delete [] mdbServerVersion;
+
+//if(mdbhost) delete [] mdbhost; // no guarantee that we own this data, really
+//if(mdbuser) delete [] mdbuser; // thus do not destroy..
+//if(mdbpw)   delete [] mdbpw;
+//if(mdbName)  delete [] mdbName;
+// if(mdbServerVersion) delete [] mdbServerVersion;
 
 #ifdef MYSQL_VERSION_ID
 # if MYSQL_VERSION_ID > 50044
