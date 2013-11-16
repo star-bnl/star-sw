@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.45 2013/07/23 11:02:59 jeromel Exp $
+ * $Id: StMuTrack.h,v 1.46 2013/11/16 00:19:49 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -126,7 +126,8 @@ class StMuTrack : public TObject {
   void         setIdParentVx(Int_t id) {mIdParentVx = id;}
 
 protected:
-  Short_t mId;
+  
+  Int_t   mId;
   Short_t mType;
   Short_t mFlag;
   UInt_t  mFlagExtension; // bit wise fast detector matching status
@@ -236,6 +237,9 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.46  2013/11/16 00:19:49  jdb
+ * StMuTrack.h, changed mId from Short_t to Int_t
+ *
  * Revision 1.45  2013/07/23 11:02:59  jeromel
  * Undo changes (KF and other)
  *
