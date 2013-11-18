@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.19 2009/11/13 17:31:45 fisyak Exp $
+# $Id: Conscript,v 1.20 2013/11/18 20:30:09 jeromel Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.20  2013/11/18 20:30:09  jeromel
+# hardwired -m32 for sl53 should not be needed since LDFLAGS gets that from a central place
+#
 # Revision 1.19  2009/11/13 17:31:45  fisyak
 # remove second FLIBS
 #
@@ -156,9 +159,10 @@ my $pgm = "starsim";
 script::Keep $pgm;
 my $LD = $env->{LD};
 if ($LD eq 'g++' and $FC ne 'gfortran') {$LD = $env->{CC};}
+
 my $LDFLAGS = $env->{LDFLAGS};
 $LDFLAGS .= $env->{LDEXPORT};
-if ($STAR_SYS =~ /sl53_gcc4/) {$LDFLAGS .= " -m32";}
+# if ($STAR_SYS =~ /sl53_gcc4/) {$LDFLAGS .= " -m32";}
 my $LIBPATH    = $env->{LIBPATH};
 if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
 
