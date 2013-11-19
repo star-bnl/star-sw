@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.21 2009/01/26 15:00:34 fisyak Exp $
+ * $Id: St_sls_Maker.cxx,v 1.22 2013/11/19 14:48:55 jeromel Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.22  2013/11/19 14:48:55  jeromel
+ * Corrections for %d format use for long int
+ *
  * Revision 1.21  2009/01/26 15:00:34  fisyak
  * Take care about sector number packed in volume Id
  *
@@ -520,12 +523,12 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
 	      t = new StMcTrack(&(g2tTrack[trackId-1]));
 	      //mHit = new StMcSsdHit(g2t[j].x,g2t[j].p,g2t[j].de,0,0,0,finalVolumeId,t);
 	      mHit = new StMcSsdHit(&g2t[j]);
-	      LOG_DEBUG<<Form("from mHit:ladder=%d wafer=%d energy =%f x=%f y=%f z=%f",mHit->ladder(),mHit->wafer(),mHit->dE(),mHit->position().x(),mHit->position().y(),mHit->position().z())<<endm;
+	      LOG_DEBUG<<Form("from mHit:ladder=%ld wafer=%ld energy =%f x=%f y=%f z=%f",mHit->ladder(),mHit->wafer(),mHit->dE(),mHit->position().x(),mHit->position().y(),mHit->position().z())<<endm;
 	      mHit->setParentTrack(t);
 	      //mHit->setVolumeId(finalVolumeId);
 	      t->addSsdHit(mHit);
 	      mcEvent->ssdHitCollection()->addHit(mHit);
-	      LOG_DEBUG<<Form("check :finalVolumeid =%d fromhit ladder=%d wafer=%d ParentTrack=%ld",finalVolumeId,mHit->ladder(),mHit->wafer(),mHit->parentTrack()->key())<<endm;
+	      LOG_DEBUG<<Form("check :finalVolumeid =%d fromhit ladder=%ld wafer=%ld ParentTrack=%ld",finalVolumeId,mHit->ladder(),mHit->wafer(),mHit->parentTrack()->key())<<endm;
 	      if (iok != kStOK) continue;
 	      foundGoodHits++;
 	      //dump the 3-vector to Double_t[3] for MasterToLocal
