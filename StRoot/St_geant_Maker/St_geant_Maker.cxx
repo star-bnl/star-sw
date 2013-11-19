@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.146 2013/02/06 22:04:45 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.147 2013/06/26 18:55:05 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.147  2013/06/26 18:55:05  jwebb
+// Updated MTD sensitive volume.
+//
 // Revision 1.146  2013/02/06 22:04:45  fisyak
 // Add attribute hadr_off
 //
@@ -1422,7 +1425,7 @@ Int_t St_geant_Maker::Make() {
   }
 
   nhits = 0;
-  geant3->Gfnhit("MUTH","MGAP", nhits);
+  geant3->Gfnhit("MUTH","MIGG", nhits);
   if (nhits>0) {
     St_g2t_mtd_hit *g2t_mtd_hit = new St_g2t_mtd_hit("g2t_mtd_hit",nhits);
     m_DataSet->Add(g2t_mtd_hit);

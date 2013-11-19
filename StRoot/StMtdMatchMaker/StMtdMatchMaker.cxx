@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.4 2013/04/25 14:52:13 geurts Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.6 2013/11/19 22:30:30 jeromel Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,12 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.6  2013/11/19 22:30:30  jeromel
+ * Added name
+ *
+ * Revision 1.5  2013/11/19 00:17:16  geurts
+ * include protection against zero triggerIdCollection() pointers. This is relevant when using simulated data as input.
+ *
  * Revision 1.4  2013/04/25 14:52:13  geurts
  * Minor adjustments that address SL44 compiler warnings
  *
@@ -109,29 +115,30 @@ using namespace std;
 
 
 /// Default constructor: set default values
-StMtdMatchMaker::StMtdMatchMaker(){
-	doPrintMemoryInfo = kFALSE;
-	doPrintCpuInfo    = kFALSE;
-	mMinFitPointsPerTrack=15;
-	mMindEdxFitPoints=10;
-	mMinEta=-1.5;
-	mMaxEta=1.5;
-	mMinPt = 1.0;
-	mMinFitPointsOverMax=0.52;
-	mCosmicFlag=kFALSE;
+StMtdMatchMaker::StMtdMatchMaker(const Char_t *name): StMaker(name)
+{
+   doPrintMemoryInfo = kFALSE;
+   doPrintCpuInfo    = kFALSE;
+   mMinFitPointsPerTrack=15;
+   mMindEdxFitPoints=10;
+   mMinEta=-1.5;
+   mMaxEta=1.5;
+   mMinPt = 1.0;
+   mMinFitPointsOverMax=0.52;
+   mCosmicFlag=kFALSE;
+   
+   mnNeighbors = 2;
+   //mZLocalCut = 43.5;
+   mNSigReso = 3.; // n sigma of z and y resolution.
+   mSaveTree = kTRUE;
+   mHisto = kTRUE;
 
-	mnNeighbors = 2;
-	//mZLocalCut = 43.5;
-	mNSigReso = 3.; // n sigma of z and y resolution.
-	mSaveTree = kTRUE;
-	mHisto = kTRUE;
-
-	fZReso = new TF1("fZReso","sqrt([0]/x/x+[1])",0,100);
-	fZReso->SetParameters(148.7,1.654); //cm
-	fPhiReso = new TF1("fPhiReso","sqrt([0]/x/x+[1])",0,100);
-	fPhiReso->SetParameters(9.514e-4,7.458e-6); //rad
-
-	return;
+   fZReso = new TF1("fZReso","sqrt([0]/x/x+[1])",0,100);
+   fZReso->SetParameters(148.7,1.654); //cm
+   fPhiReso = new TF1("fPhiReso","sqrt([0]/x/x+[1])",0,100);
+   fPhiReso->SetParameters(9.514e-4,7.458e-6); //rad
+   
+   return;
 }
 
 StMtdMatchMaker::~StMtdMatchMaker(){
@@ -727,13 +734,17 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 		if(mSaveTree){
 
 		  int nTrgIds(0);
-			for(int i=0;i<kMaxTriggerIds;i++){
-				int trgId = mMuDst->event()->triggerIdCollection().nominal().triggerId(i);
-				if(trgId>0){ 
-					mMtdEvtData.trgId[nTrgIds] = trgId;
-					nTrgIds++;
-				}
-			}
+		  //fg mMtdEvtData.trgId[nTrgIds] = 0; // make sure to zero the first entry
+		  // protect against zero pointers (in simulated data, should not be necessary for MuDST)
+		  //fg      if (mEvent->triggerIdCollection() && mEvent->triggerIdCollection()->nominal()) {
+			  for(int i=0;i<kMaxTriggerIds;i++){
+			    int trgId = mMuDst->event()->triggerIdCollection().nominal().triggerId(i);
+			    if(trgId>0){
+			      mMtdEvtData.trgId[nTrgIds] = trgId;
+			      nTrgIds++;
+			    }
+			  }
+		   //fg	}
 			mMtdEvtData.run = mEvent->runId();       // the run number
 			mMtdEvtData.evt = mEvent->id();       // the event number
 			mMtdEvtData.bField= mEvent->runInfo()->magneticField()/10.; 
@@ -851,12 +862,16 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 		if(mSaveTree){
 
 		  int nTrgIds(0);
-			for(int i=0;i<kMaxTriggerIds;i++){
-				int trgId = mEvent->triggerIdCollection()->nominal()->triggerId(i);
-				if(trgId>0){ 
-					mMtdEvtData.trgId[nTrgIds] = trgId;
-					nTrgIds++;
-				}
+		  mMtdEvtData.trgId[nTrgIds] = 0; // make sure to zero the first entry
+		  // protect against zero pointers (in simulated data)
+		        if (mEvent->triggerIdCollection() && mEvent->triggerIdCollection()->nominal()) {
+			  for(int i=0;i<kMaxTriggerIds;i++){
+			    int trgId = mEvent->triggerIdCollection()->nominal()->triggerId(i);
+			    if(trgId>0){ 
+			      mMtdEvtData.trgId[nTrgIds] = trgId;
+			      nTrgIds++;
+			    }
+			  }
 			}
 			mMtdEvtData.run = mEvent->runId();       // the run number
 			mMtdEvtData.evt = mEvent->id();       // the event number
