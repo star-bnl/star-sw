@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.4 2013/04/25 14:52:13 geurts Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.5 2013/11/19 00:17:16 geurts Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.5  2013/11/19 00:17:16  geurts
+ * include protection against zero triggerIdCollection() pointers. This is relevant when using simulated data as input.
+ *
  * Revision 1.4  2013/04/25 14:52:13  geurts
  * Minor adjustments that address SL44 compiler warnings
  *
@@ -727,13 +730,17 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 		if(mSaveTree){
 
 		  int nTrgIds(0);
-			for(int i=0;i<kMaxTriggerIds;i++){
-				int trgId = mMuDst->event()->triggerIdCollection().nominal().triggerId(i);
-				if(trgId>0){ 
-					mMtdEvtData.trgId[nTrgIds] = trgId;
-					nTrgIds++;
-				}
-			}
+		  //fg mMtdEvtData.trgId[nTrgIds] = 0; // make sure to zero the first entry
+		  // protect against zero pointers (in simulated data, should not be necessary for MuDST)
+		  //fg      if (mEvent->triggerIdCollection() && mEvent->triggerIdCollection()->nominal()) {
+			  for(int i=0;i<kMaxTriggerIds;i++){
+			    int trgId = mMuDst->event()->triggerIdCollection().nominal().triggerId(i);
+			    if(trgId>0){
+			      mMtdEvtData.trgId[nTrgIds] = trgId;
+			      nTrgIds++;
+			    }
+			  }
+		   //fg	}
 			mMtdEvtData.run = mEvent->runId();       // the run number
 			mMtdEvtData.evt = mEvent->id();       // the event number
 			mMtdEvtData.bField= mEvent->runInfo()->magneticField()/10.; 
@@ -851,12 +858,16 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 		if(mSaveTree){
 
 		  int nTrgIds(0);
-			for(int i=0;i<kMaxTriggerIds;i++){
-				int trgId = mEvent->triggerIdCollection()->nominal()->triggerId(i);
-				if(trgId>0){ 
-					mMtdEvtData.trgId[nTrgIds] = trgId;
-					nTrgIds++;
-				}
+		  mMtdEvtData.trgId[nTrgIds] = 0; // make sure to zero the first entry
+		  // protect against zero pointers (in simulated data)
+		        if (mEvent->triggerIdCollection() && mEvent->triggerIdCollection()->nominal()) {
+			  for(int i=0;i<kMaxTriggerIds;i++){
+			    int trgId = mEvent->triggerIdCollection()->nominal()->triggerId(i);
+			    if(trgId>0){ 
+			      mMtdEvtData.trgId[nTrgIds] = trgId;
+			      nTrgIds++;
+			    }
+			  }
 			}
 			mMtdEvtData.run = mEvent->runId();       // the run number
 			mMtdEvtData.evt = mEvent->id();       // the event number
