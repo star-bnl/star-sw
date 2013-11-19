@@ -177,7 +177,8 @@ struct rtsMonGB {
 
 
 struct rtsMonTCD {
-	u_int deadtime[32] ;
+	int deadtime[32] ;
+	int clock[32] ;	// the clock of the TCD; or TCU for "Trigger"
 } ;
 
 
