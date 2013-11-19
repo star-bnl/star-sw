@@ -6,11 +6,14 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.2 2013/03/21 11:21:45 jeromel Exp $
+ * $Id: StMtdMatchMaker.h,v 1.3 2013/11/19 22:30:34 jeromel Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.3  2013/11/19 22:30:34  jeromel
+ * Added name
+ *
  * Revision 1.2  2013/03/21 11:21:45  jeromel
  * Reviewd version 2013/03
  *
@@ -161,12 +164,14 @@ class MtdTrack{
 
 };
 
-class StMtdMatchMaker: public StMaker{
+class StMtdMatchMaker: public StMaker 
+{
 
 	public:
                 /// Default constructor
-		StMtdMatchMaker();
+		StMtdMatchMaker(const char* name = "MtdMatch");
 		virtual ~StMtdMatchMaker();
+   
 		virtual void  Clear(const char* opt="");
 		/// initialize drifting velocity and histograms.
 		virtual Int_t Init();
@@ -350,7 +355,7 @@ class StMtdMatchMaker: public StMaker{
 		void initEventData();
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.2 2013/03/21 11:21:45 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.3 2013/11/19 22:30:34 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,1)
 };
 
