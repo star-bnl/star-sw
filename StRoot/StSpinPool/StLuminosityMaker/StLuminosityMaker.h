@@ -28,7 +28,7 @@ class StLuminosityMaker : public StMaker {
   StTriggerSimuMaker* mTriggerSimuMaker;
   TClonesArray*  mLumHolder;
 
-  char* runMode;
+  const char* runMode;
   float mXsec;
   int runNumber;
   float mVertexCut;
@@ -50,7 +50,7 @@ class StLuminosityMaker : public StMaker {
   
   void setFilterMode(unsigned int flag=1) {mFilterMode = flag;}
   void addTrigger(unsigned int trigId);
-  void setMode(char* newMode);
+  void setMode(const char* newMode);
   void setCrossSectionNB(float newXsec, int overRideMode = 1);
   void setVertexCutcm(float newcut){mVertexCut = newcut;}
   const float getCrossSectionNB() const {return mXsec;}
@@ -68,7 +68,7 @@ class StLuminosityMaker : public StMaker {
   const vector<unsigned int> getNSoftTrig() const {return mNSoftTrig;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLuminosityMaker.h,v 1.2 2008/08/20 16:11:50 mattheww Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLuminosityMaker.h,v 1.3 2013/11/20 18:48:32 zchang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StLuminosityMaker,0)   //StAF chain virtual base class for Makers
 };
