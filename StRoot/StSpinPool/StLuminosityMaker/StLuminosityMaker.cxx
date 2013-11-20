@@ -116,7 +116,7 @@ void StLuminosityMaker::addTrigger(unsigned int trigId)
   mLumSoftTrig.push_back(0.0);
 }
 //_____________________________________________________________________________
-void StLuminosityMaker::setMode(char* newMode)
+void StLuminosityMaker::setMode(const char* newMode)
 {
   float oldxsec = mXsec;
 
