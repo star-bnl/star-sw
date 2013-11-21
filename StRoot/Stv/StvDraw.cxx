@@ -62,6 +62,16 @@ TObject *StvDraw::Hits(const std::vector<const float*> &hits, EDraw3DStyle sty)
   return Points(vec,sty);
 }
 //_____________________________________________________________________________
+TObject *StvDraw::Hits(int nHits,const TVector3* hits, EDraw3DStyle sty)
+{
+  std::vector<double> vec(nHits*3);
+  int n =0;
+  for (int i=0;i<nHits; i++) {
+    for (int j=0;j<3;j++) {vec[n++]=hits[i][j];}
+  }
+  return Points(vec,sty);
+}
+//_____________________________________________________________________________
 TObject *StvDraw::Trak(const THelixTrack &helx,const std::vector<StvHit*>  &hits, EDraw3DStyle sty)
 {
 const std::vector<const StvHit*>&vc = (std::vector<const StvHit*>&)hits;

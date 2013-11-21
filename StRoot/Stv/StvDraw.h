@@ -19,10 +19,11 @@ public:
     StvDraw(const char *opt="TIFC,TPCFEE,TPCM");
     ~StvDraw(){;}
    void  Clear(const char *opt="");
-TObject *Hits(const std::vector<      StvHit*> &hits, EDraw3DStyle sty);
-TObject *Hits(const std::vector<const StvHit*> &hits, EDraw3DStyle sty);
-TObject *Hits(const StvHits                    &hits, EDraw3DStyle sty);
-TObject *Hits(const std::vector<const float*> &hits,  EDraw3DStyle sty);
+TObject *Hits(const std::vector<      StvHit*> &hits, EDraw3DStyle sty=kUsedHit);
+TObject *Hits(const std::vector<const StvHit*> &hits, EDraw3DStyle sty=kUsedHit);
+TObject *Hits(const StvHits                    &hits, EDraw3DStyle sty=kUsedHit);
+TObject *Hits(const std::vector<const float*>  &hits, EDraw3DStyle sty=kUsedHit);
+TObject *Hits(int nHits, const TVector3        *hits, EDraw3DStyle sty=kUsedHit);
 
 TObject *Trak(const THelixTrack &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
 TObject *Trak(const THelixTrack &helx,const std::vector<      StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
