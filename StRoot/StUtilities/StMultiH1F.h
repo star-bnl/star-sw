@@ -11,6 +11,8 @@
 
 #include "TH2.h"
 class TString;
+#define StMultiH1FMaxBins 10
+// change in MaxBins requires change in ClassDef version
 
 class StMultiH1F : public TH2F {
  public:
@@ -22,11 +24,11 @@ class StMultiH1F : public TH2F {
   virtual ~StMultiH1F() {}
   virtual        void Draw(Option_t *option="");
   virtual        void SetNames(Int_t   ybin, const char* name)
-                              { names[ybin] = name; }
+                              { if (ybin<StMultiH1FMaxBins) names[ybin] = name; }
   virtual        void SetNames(Float_t ybin, const char* name)
                               { SetNames((Int_t) ybin, name); }
   virtual const char* GetNames(Int_t   ybin) const
-                              { return names[ybin].Data(); }
+                              { return (ybin<StMultiH1FMaxBins ? names[ybin].Data() : 0); }
   virtual const char* GetNames(Float_t ybin) const
                               { return GetNames((Int_t) ybin); }
   // Overload the Rebin() function to allow naming of y bins with TH2F pointer
@@ -40,7 +42,7 @@ class StMultiH1F : public TH2F {
   virtual    Double_t GetNonZeroMaximum() const;
   virtual        void SavePrimitive(std::ostream& out, Option_t* option = "");
  protected:
-  TString names[10];
+  TString names[StMultiH1FMaxBins];
   Float_t fMOffset;
   virtual       TH1F* XProjection(const char* name, Int_t ybin=-1);
   ClassDef(StMultiH1F,1)
@@ -48,8 +50,11 @@ class StMultiH1F : public TH2F {
 
 #endif
 
-// $Id: StMultiH1F.h,v 1.8 2012/06/11 15:05:34 fisyak Exp $
+// $Id: StMultiH1F.h,v 1.9 2013/11/21 22:22:48 genevb Exp $
 // $Log: StMultiH1F.h,v $
+// Revision 1.9  2013/11/21 22:22:48  genevb
+// Protect against array out-of-bounds, use inherited axis handles
+//
 // Revision 1.8  2012/06/11 15:05:34  fisyak
 // std namespace
 //
