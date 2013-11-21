@@ -28,26 +28,24 @@ StMultiH2F::StMultiH2F(const char *name,const char *title,Int_t nbinsx,
 void StMultiH2F::Draw(Option_t *option) {
   // Probably only the "box" and "cont" options are reasonable here
 
-  TAxis* axisX = GetXaxis();
-  TAxis* axisY = GetYaxis();
-  Int_t x0 = axisX->GetFirst();
-  Int_t x1 = axisX->GetLast();
-  Int_t y0 = axisY->GetFirst();
-  Int_t y1 = axisY->GetLast();
-  axisX->SetRange();
-  axisY->SetRange();
-  Int_t zbins = GetNbinsZ();
+  Int_t x0 = fXaxis.GetFirst();
+  Int_t x1 = fXaxis.GetLast();
+  Int_t y0 = fYaxis.GetFirst();
+  Int_t y1 = fYaxis.GetLast();
+  fXaxis.SetRange();
+  fYaxis.SetRange();
+  Int_t zbins = TMath::Min(GetNbinsZ(),StMultiH2FMaxBins);
   if (zbins == 1) {
     TH2D* temp0 = XYProjection(GetName());
     temp0->SetStats((!TestBit(kNoStats)));
     TAxis* taxisX = temp0->GetXaxis();
     TAxis* taxisY = temp0->GetYaxis();
-    axisX->Copy(*taxisX);
-    axisY->Copy(*taxisY);
+    fXaxis.Copy(*taxisX);
+    fYaxis.Copy(*taxisY);
     taxisX->SetRange(x0,x1);
     taxisY->SetRange(y0,y1);
-    axisX->SetRange(x0,x1);
-    axisY->SetRange(y0,y1);
+    fXaxis.SetRange(x0,x1);
+    fYaxis.SetRange(y0,y1);
     temp0->Draw(option);
     return;
   }
@@ -78,8 +76,8 @@ void StMultiH2F::Draw(Option_t *option) {
     temp[zbin]->SetStats(kFALSE);
     TAxis* taxisX = temp[zbin]->GetXaxis();
     TAxis* taxisY = temp[zbin]->GetYaxis();
-    axisX->Copy(*taxisX);
-    axisY->Copy(*taxisY);
+    fXaxis.Copy(*taxisX);
+    fYaxis.Copy(*taxisY);
     taxisX->SetRange(x0,x1);
     taxisY->SetRange(y0,y1);
   
@@ -111,8 +109,8 @@ void StMultiH2F::Draw(Option_t *option) {
 
   legend->Draw();
 
-  axisX->SetRange(x0,x1);
-  axisY->SetRange(y0,y1);
+  fXaxis.SetRange(x0,x1);
+  fYaxis.SetRange(y0,y1);
 }
 
 TH2D* StMultiH2F::XYProjection(const char* name, Int_t zbin) {
@@ -124,15 +122,15 @@ TH2D* StMultiH2F::XYProjection(const char* name, Int_t zbin) {
   TH2D* temp = (TH2D*) tgList->FindObject(buf);
   if (temp) tgList->Remove(temp);
 
-  if (zbin<0) GetZaxis()->SetRange();
-  else GetZaxis()->SetRange(zbin,zbin);
+  if (zbin<0) fZaxis.SetRange();
+  else fZaxis.SetRange(zbin,zbin);
   temp = (TH2D*) Project3D("yx");
   temp->SetName(buf);
   TAttLine::Copy(*temp);
   TAttFill::Copy(*temp);
   TAttMarker::Copy(*temp);
-  temp->GetXaxis()->SetRange(GetXaxis()->GetFirst(),GetXaxis()->GetLast());
-  temp->GetYaxis()->SetRange(GetYaxis()->GetFirst(),GetYaxis()->GetLast());
+  temp->GetXaxis()->SetRange(fXaxis.GetFirst(),fXaxis.GetLast());
+  temp->GetYaxis()->SetRange(fYaxis.GetFirst(),fYaxis.GetLast());
   return temp;
 }
 
@@ -214,8 +212,11 @@ void StMultiH2F::SavePrimitive(ostream& out, Option_t* option) {
   TH1::SavePrimitiveHelp(out, option);
 }
 
-// $Id: StMultiH2F.cxx,v 1.5 2008/07/10 21:26:59 genevb Exp $
+// $Id: StMultiH2F.cxx,v 1.6 2013/11/21 22:22:48 genevb Exp $
 // $Log: StMultiH2F.cxx,v $
+// Revision 1.6  2013/11/21 22:22:48  genevb
+// Protect against array out-of-bounds, use inherited axis handles
+//
 // Revision 1.5  2008/07/10 21:26:59  genevb
 // Allow SavePrimitive of fully drawn TPad to work properly
 //

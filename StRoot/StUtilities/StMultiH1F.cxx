@@ -30,18 +30,17 @@ StMultiH1F::StMultiH1F(const char *name,const char *title,Int_t nbinsx,
 
 void StMultiH1F::Draw(Option_t *option) {
 
-  TAxis* axis = GetXaxis();
-  Int_t x0 = axis->GetFirst();
-  Int_t x1 = axis->GetLast();
-  axis->SetRange();
-  Int_t ybins = GetNbinsY();
+  Int_t x0 = fXaxis.GetFirst();
+  Int_t x1 = fXaxis.GetLast();
+  fXaxis.SetRange();
+  Int_t ybins = TMath::Min(GetNbinsY(),StMultiH1FMaxBins);
   if (ybins == 1) {
     TH1F* temp0 = XProjection(GetName());
     temp0->SetStats((!TestBit(kNoStats)));
     TAxis* taxis = temp0->GetXaxis();
-    axis->Copy(*taxis);
+    fXaxis.Copy(*taxis);
     taxis->SetRange(x0,x1);
-    axis->SetRange(x0,x1);
+    fXaxis.SetRange(x0,x1);
     temp0->Draw();
     return;
   }
@@ -80,7 +79,7 @@ void StMultiH1F::Draw(Option_t *option) {
     temp[ybin]->SetLineStyle(slice);
     temp[ybin]->SetStats(kFALSE);
     TAxis* taxis = temp[ybin]->GetXaxis();
-    axis->Copy(*taxis);
+    fXaxis.Copy(*taxis);
     taxis->SetRange(x0,x1);
 
     if (fMOffset && ybin) {
@@ -129,7 +128,7 @@ void StMultiH1F::Draw(Option_t *option) {
 
   legend->Draw();
 
-  axis->SetRange(x0,x1);
+  fXaxis.SetRange(x0,x1);
 }
 
 TH1F* StMultiH1F::XProjection(const char* name, Int_t ybin) {
@@ -166,7 +165,7 @@ Double_t StMultiH1F::GetNonZeroMinimum() const {
   Int_t xfirst  = fXaxis.GetFirst();
   Int_t xlast   = fXaxis.GetLast();
   Int_t yfirst  = fYaxis.GetFirst();
-  Int_t ylast   = fYaxis.GetLast();
+  Int_t ylast   = TMath::Min(fYaxis.GetLast(),StMultiH1FMaxBins);
   Int_t zfirst  = fZaxis.GetFirst();
   Int_t zlast   = fZaxis.GetLast();
   for (binz=zfirst;binz<=zlast;binz++) {
@@ -190,7 +189,7 @@ Double_t StMultiH1F::GetNonZeroMaximum() const {
   Int_t xfirst  = fXaxis.GetFirst();
   Int_t xlast   = fXaxis.GetLast();
   Int_t yfirst  = fYaxis.GetFirst();
-  Int_t ylast   = fYaxis.GetLast();
+  Int_t ylast   = TMath::Min(fYaxis.GetLast(),StMultiH1FMaxBins);
   Int_t zfirst  = fZaxis.GetFirst();
   Int_t zlast   = fZaxis.GetLast();
   for (binz=zfirst;binz<=zlast;binz++) {
@@ -267,8 +266,11 @@ void StMultiH1F::SavePrimitive(ostream& out, Option_t* option) {
   TH1::SavePrimitiveHelp(out, option);
 }
 
-// $Id: StMultiH1F.cxx,v 1.14 2008/07/10 21:26:59 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.15 2013/11/21 22:22:47 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.15  2013/11/21 22:22:47  genevb
+// Protect against array out-of-bounds, use inherited axis handles
+//
 // Revision 1.14  2008/07/10 21:26:59  genevb
 // Allow SavePrimitive of fully drawn TPad to work properly
 //
