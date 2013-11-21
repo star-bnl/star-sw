@@ -51,6 +51,22 @@ void StvSeedFinder::ShowRest(EDraw3DStyle style)
    fDraw->Wait();
 }
 //_____________________________________________________________________________
+void StvSeedFinder::ShowIn()
+{
+   if (!fDraw) fDraw = NewDraw();
+   std::vector<StvHit*> myHits;  
+   const StVoidArr *hitArr =  StTGeoProxy::Inst()->GetSeedHits();
+   int nHits =  hitArr->size();
+   for (int iHit=0;iHit<nHits;iHit++) {
+     StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
+     if (Reject(stiHit->x())) continue; 
+     myHits.push_back(stiHit);
+   }
+   fDraw->Hits(myHits,kUnusedHit);
+   fDraw->UpdateModified();
+   fDraw->Wait();
+}
+//_____________________________________________________________________________
 StvDraw *StvSeedFinder::NewDraw()
 {
    StvDraw *dr = new StvDraw();
