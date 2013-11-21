@@ -1,3 +1,4 @@
+#if 0
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -318,3 +319,4 @@ int StvCASeedFinder::padp(int pad, int row) {
     p = (int)p/2;
   return p;
 }
+#endif
