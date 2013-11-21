@@ -38,6 +38,9 @@ virtual const StvHits *GetHits() const 	{return &fSeedHits;}
 
   virtual void Show();
   virtual void ShowRest(EDraw3DStyle style = kUnusedHit);
+  virtual void ShowIn();
+  virtual  int Reject(const float *x) 	{return 0;}
+
         double GetXi2(int i=1) const	{return fXi2[i];}
           void KNNMiMax(double &mi,double &ma);
 
