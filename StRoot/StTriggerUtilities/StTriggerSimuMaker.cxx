@@ -11,12 +11,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.56 2013/10/08 23:36:09 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.57 2013/11/21 20:52:53 zchang Exp $
 
 // MySQL C API
 //#include "mysql.h"
 #include <mysql/mysql.h>
-
+//search user id for database
+#include <sys/types.h>
+#include <pwd.h>
+ 
 // DSM crates
 #include "RTS/trg/include/trgConfNum.h"
 #include "StDSMUtilities/StDSM2009Utilities.hh"
@@ -470,6 +473,10 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   unsigned long client_flag = 0;
   char query[1024];
 
+  struct passwd *login;
+  login = getpwuid(geteuid());
+  user =  login->pw_name;
+
   LOG_INFO << Form("host=%s user=\"%s\" pass=\"%s\" port=%d database=%s",host,user,pass,port,database) << endm;
 
   mysql_init(&mysql);
@@ -581,7 +588,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   const int MAX_TRIGGERS = 64;
   TriggerDefinition triggers[MAX_TRIGGERS];
   
-  //Trigger name selection -- zchang
+  //New Trigger name selection
   if(mTrigName.size() == 0)
     {
       sprintf(query,"select idx_trigger,name,offlineBit from triggers where idx_rn = %d",runNumber);
@@ -625,7 +632,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 	  //      int idx_trigger = atoi(row[0]);
 	  sscanf(row[0],"%d",&idx_trigger);
 	  assert(idx_trigger >= 0 && idx_trigger < MAX_TRIGGERS);
-	  //use sscanf(...) converting char* to unsigned integer instead of using atoi(...) --zchang 
+	  //use sscanf(...) converting char* to unsigned integer instead of using atoi(...) Z.Chang
 	  //      triggers[idx_trigger].onbits = atoi(row[1]);
 	  sscanf(row[1],"%ud",&triggers[idx_trigger].onbits);
 	  sscanf(row[2],"%ud",&triggers[idx_trigger].offbits);
@@ -645,7 +652,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 		   << setw(20) << triggers[idx_trigger].triggerId
 		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits)
 		   << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits)
-		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits0)		  
+		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits0)
 		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits1)
 		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits2)
 		   << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits3)
@@ -659,11 +666,39 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
       }
     }else
     {
-      //Query with trigger name -- zchang
+      //Query with trigger name
       int cntr = 0;
       for(vector<string> :: iterator p = mTrigName.begin(); p < mTrigName.end(); ++p)
 	{
-          sprintf(query,"select idx_idx,name,offlineBit,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from triggers, pwc where pwc.idx_idx = triggers.idx_trigger and pwc.idx_rn=triggers.idx_rn and triggers.idx_rn = %d and name = \"%s\";", runNumber, p->c_str());  
+	  
+	  // Trigger definitions
+	  //	  const int MAX_TRIGGERS = 64;
+	  //	  TriggerDefinition triggers[MAX_TRIGGERS];
+	  /*
+	  	  sprintf(query,"select idx_trigger,name,offlineBit from triggers where idx_rn = %d and name=\"%s\"",runNumber,p->c_str());
+	  LOG_INFO << query << endm;
+	  //	  mysql_query(&mysql,query);
+	  if(mysql_query(&mysql,query))
+	    {
+	      LOG_INFO <<mysql_error(&mysql) << "\n";
+	    }
+
+	  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+	    while (MYSQL_ROW row = mysql_fetch_row(result)) {
+	      int idx_trigger = atoi(row[0]);
+	      assert(idx_trigger >= 0 && idx_trigger < MAX_TRIGGERS);
+	      assert(cntr >= 0 && cntr < MAX_TRIGGERS);
+	      triggers[cntr].triggerIndex = idx_trigger;
+	      strcpy(triggers[cntr].name,row[1]);
+	      triggers[cntr].triggerId = atoi(row[2]);
+	    }
+	    mysql_free_result(result);
+	  }
+	  */
+	  //  sprintf(query,"select idx_idx,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from pwc where idx_rn = %d",runNumber);
+	  //	  sprintf(query,"select idx_idx,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from triggers, pwc where pwc.idx_idx = triggers.idx_trigger and pwc.idx_rn=triggers.idx_rn and triggers.idx_rn = %d and name = \"%s\";", runNumber, p->c_str());
+	  sprintf(query,"select idx_idx,name,offlineBit,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from triggers, pwc where pwc.idx_idx = triggers.idx_trigger and pwc.idx_rn=triggers.idx_rn and triggers.idx_rn = %d and name = \"%s\";", runNumber, p->c_str());
+  
 	  LOG_INFO << query << endm;
 	  //	  mysql_query(&mysql,query);
 
@@ -691,12 +726,14 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 	    int idx_trigger;
 	    
 	    while (MYSQL_ROW row = mysql_fetch_row(result)) {
+
 	      sscanf(row[0],"%d",&idx_trigger);
+	      //	      assert(idx_trigger >= 0 && idx_trigger < MAX_TRIGGERS);
 	      assert(cntr >= 0 && cntr < MAX_TRIGGERS);
 	      triggers[cntr].triggerIndex = idx_trigger;
-              strcpy(triggers[cntr].name,row[1]);
-              triggers[cntr].triggerId = atoi(row[2]);
-              //use sscanf(...) converting char* to unsigned integer instead of using atoi(...) -- zchang
+	      strcpy(triggers[cntr].name,row[1]);
+	      triggers[cntr].triggerId = atoi(row[2]);
+	      //use sscanf(...) converting char* to unsigned integer instead of using atoi(...) Z.Chang
 	      //      triggers[idx_trigger].onbits = atoi(row[1]);
 	      sscanf(row[3],"%ud",&triggers[cntr].onbits);
 	      sscanf(row[4],"%ud",&triggers[cntr].offbits);
@@ -837,8 +874,8 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
- * Revision 1.56  2013/10/08 23:36:09  zchang
- * Add functionality to get2009DsmRegistersFromOnlineDatabase(int) to get trigger definition for run11 and run12 from database based on requested triggers
+ * Revision 1.57  2013/11/21 20:52:53  zchang
+ * add getpwuid to get user name to access database
  *
  * Revision 1.53  2012/07/13 16:47:26  pibero
  * Users must now specify database to use for trigger definitions and thresholds
