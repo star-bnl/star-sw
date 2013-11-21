@@ -48,7 +48,7 @@ IdTruthVector          *fIdTruth; 	// id of the Track, which has created CaHit
 
 
 char mEnd[1];
-ClassDef(StvCASeedFinder,0);
+KlassDef(StvCASeedFinder,0);
 };
 
 
