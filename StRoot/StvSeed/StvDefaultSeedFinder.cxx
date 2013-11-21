@@ -63,7 +63,7 @@ void StvDefaultSeedFinder::Reset()
 #ifdef MultiPhiZMap
     float keys[kNKeys];
     keys[kPhi ] = atan2(x[1],x[0]);
-    keys[kRxy ] = sqrt(x[0]*x[0] + x[1]*x[1]+ x[2]*x[2]);
+    keys[kRxy ] = sqrt(x[0]*x[0] + x[1]*x[1]);
     keys[kTanL] = x[2]/keys[kRxy];
     keys[kZ   ] = x[2];
     fMultiHits->Add(stiHit,keys);
@@ -83,6 +83,13 @@ int StvDefaultSeedFinder::Again(int repeat)
    Clear();
    Reset();
    return 1;
+}
+//_____________________________________________________________________________
+void StvDefaultSeedFinder::ShowIn()
+{
+   fDraw = StvDraw::Inst();
+   if (mSel.mPnt) fDraw->Hits(mSel.mNPnt,mSel.mPnt);
+   StvSeedFinder::ShowIn();
 }
 //_____________________________________________________________________________
 //	Start of Local auxiliary routines
@@ -126,6 +133,11 @@ inline static float Dot(const float dir[3],const float pnt[3])
    return dir[0]*pnt[0]+dir[1]*pnt[1]+dir[2]*pnt[2];
 }
 //_____________________________________________________________________________
+inline static float Prj(const float dir[3],const float pnt[3],const float beg[3])
+{
+   return dir[0]*(pnt[0]-beg[0])+dir[1]*(pnt[1]-beg[1])+dir[2]*(pnt[2]-beg[2]);
+}
+//_____________________________________________________________________________
 inline static void Mul(const float a[3],float scale,float b[3])
 {
   b[0]=a[0]*scale;b[1]=a[1]*scale;b[2]=a[2]*scale;
@@ -156,6 +168,7 @@ std::vector<TObject*> mySeedObjs;
     fSeedHits.clear();
     mSel.Reset();
     selHit = fstHit;
+    m1stHit = fstHit->x();
     mSel.SetErr(sqrt(fstHit->err2())*kErrFakt);
 
     while (1) { //Search next hit 
@@ -167,14 +180,24 @@ std::vector<TObject*> mySeedObjs;
       const float *hd = hp->GetDir(selHit->x())[0];
       mSel.AddHit(selHit->x(),hd,hp->GetLayer());
       mSel.Prepare();
-      for (int iLim=0;iLim<2; iLim++) {
-        if (iLim) memcpy(mSel.mLim[0],mSel.mLim[2],2*kNKeys*sizeof(mSel.mLim[0][0]));
-        if (mSel.mLim[0][0]>1000) continue;
+      int myState = mSel.mJst; if (myState>2)  myState=2;
+
+      if (myState==1) {		//save 1st direction 
+        memcpy(m1stDir,mSel.mDir,sizeof(m1stDir));}
+
+      int nLim = (myState<2 ||mSel.mLim[2][0]>1000)?1:2;
+      for (int iLim=0;iLim<nLim; iLim++) {
+
         fMultiIter->Set(fMultiHits->GetTop(),mSel.mLim[0],mSel.mLim[1]);
-	selHit=0; 
-	for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
-	{ 
-	  StvHit *nexHit = (StvHit*)node->GetObj();
+	
+ 	selHit=0; 
+//	for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
+        StMultiKeyNode *node=0;
+	StvHit *nexHit = 0;
+        while(1) {
+	  node = *(*fMultiIter)		        ; if (!node) break; 
+	  nexHit = (StvHit*)node->GetObj()	;++(*fMultiIter); 
+
 	  if (nexHit->timesUsed()) 	continue;
 	  const StHitPlane *hpNex = nexHit->detector();
 	  if (hpNex==hp) 		continue;
@@ -185,7 +208,7 @@ std::vector<TObject*> mySeedObjs;
 	  }
 	  if (dejavu) 			continue;
 	  int ans = mSel.Reject(nexHit->x(),hpNex);
-	  if (ans>0) 			continue;
+	  if (ans>0) 			continue;	//hit outside the cone
 
    //			Selecting the best
 	  selHit=nexHit;
@@ -195,6 +218,7 @@ std::vector<TObject*> mySeedObjs;
 	  fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
 	} //endMultiIter loop
 
+        if (nLim>1) memcpy(mSel.mLim[0],mSel.mLim[2],2*sizeof(mSel.mLim[0]));
 	if (!selHit) 			continue; //No more hits 
       }//end iLim loop
       if (!selHit) 			break; //No more hits 
@@ -223,7 +247,7 @@ std::vector<TObject*> mySeedObjs;
 //_____________________________________________________________________________
 StvConeSelector::StvConeSelector()
 {
-  memset(mBeg,0,mBeg-mBeg+1);
+  memset(mBeg,0,mEnd-mBeg+1);
 }
 //_____________________________________________________________________________
 void StvConeSelector::AddHit(const float *x,const float *dir,float layer)
@@ -333,34 +357,32 @@ StvDebug::Break(nCall);
 struct myLim_t {double Phi,Rxy,tanL,Z;};
 //static const StvConst  *kons = StvConst::Inst();
 static const double kMyMax = 220;
-
    TVector3 vHit(mHit);
    TVector3 nT(mDir);
    TVector3 nP(nT.Orthogonal());
    TVector3 nL(nT.Cross(nP));
-   TVector3 Pnt[100];
-   enum {kPNT = sizeof(Pnt)/sizeof(Pnt[0])};
+   enum {kPNT = sizeof(mPnt)/sizeof(mPnt[0])};
 
    for (int ix=0;ix<3;ix++) {
      if (vHit[ix]+nT[ix]*mLen > kMyMax) {mLen = ( kMyMax-1-vHit[ix])/nT[ix];}
      if (vHit[ix]+nT[ix]*mLen <-kMyMax) {mLen = (-kMyMax+1-vHit[ix])/nT[ix];}
    }
    TVector3 vBas(vHit+nT*mLen);
-   int nPnt=0;
-   Pnt[nPnt++]=vHit;
-   double myRad = mLen*mTan*sqrt(2.);
+   mNPnt=0;
+   mPnt[mNPnt++]=vHit;
+   double myRad = mLen*mTan*sqrt(2.)+mErr;
    for (int i=-1;i<2;i+=2) {
-     Pnt[nPnt++]=vBas+nP*(i*myRad);
-     Pnt[nPnt++]=vBas+nL*(i*myRad);
-     assert(nPnt<=kPNT);
+     mPnt[mNPnt++]=vBas+nP*(i*myRad);
+     mPnt[mNPnt++]=vBas+nL*(i*myRad);
+     assert(mNPnt<=kPNT);
    }  
 
 //	account points out of volume.
-   TVector3* vHB[2]={&vHit,&vBas}; 
-   int nPnt1st = nPnt;
+   int nPnt1st = mNPnt;
+   int ySign = (vHit[1]<0)? -1:1;
    for (int ip=1;ip<nPnt1st;ip++) {//points loop
-     TVector3 &P = Pnt[ip];
-     double alfa,ALFA[2]={1,1};
+     TVector3 &P = mPnt[ip];
+     double alfa=1;
      for (int ix=0;ix<3;ix++) { //account too big X,Y,Z
        double lim = 0;
             if (P[ix] >  kMyMax) {lim =  kMyMax-1;}
@@ -372,40 +394,36 @@ static const double kMyMax = 220;
          assert(alfa>=0 && alfa<1); 
          if (ALFA[jHB]>alfa) ALFA[jHB]=alfa;
      } } //End ix loop
+       if (fabs(P[ix]) <  kMyMax) continue;
+       double lim = (P[ix]<0)? -kMyMax: kMyMax;
+       double al  = (lim-vHit[ix])/(P[ix]-vHit[ix]);
+       if (al<0.01) al=0.01;
+       assert(al>=0 && al<1); 
+       if (alfa>al) alfa=al;
+     } //End ix loop
 
-     if (ALFA[0]<1) {Pnt[nPnt++] = P*ALFA[1] + *vHB[1]*(1-ALFA[1]);
-                     P           = P*ALFA[0] + *vHB[0]*(1-ALFA[0]);}
+     if (alfa<1) {P = P*alfa + vHit*(1-alfa);}
 //		Now upp and down in Y (to avoid problems with Phi = +-Pi)
-     TVector3 *pHB[2]={Pnt+ip,Pnt+ip}; 
-     if (ALFA[0]<1) pHB[1] = Pnt+nPnt-1;
-     for (int jHB=0;jHB<2;jHB++) {
-       if ((vHB[jHB]->y()<0)==(pHB[jHB]->y()<0)) continue;
-       alfa = -vHB[jHB]->y()/(pHB[jHB]->y()-vHB[jHB]->y());
-       for (;1;alfa*=0.99) {
-         Pnt[nPnt] = (*pHB[jHB])*alfa + (*vHB[jHB])*(1-alfa);
-         if ((vHB[jHB]->y()<0)==(Pnt[nPnt].y()<0)) break;
-       } //end alfa loop
-       nPnt++;  assert(nPnt<kPNT); 
-     }//end jHB loop
-
+     if (P[1]*ySign >0) continue;
+     alfa = -vHit.y()/(P.y()-vHit.y());
+     mPnt[mNPnt++] = P*alfa*0.99 + vHit*(1-alfa*0.99);
+     mPnt[mNPnt++] = P*alfa*1.01 + vHit*(1-alfa*1.01);
    }// end of point loop
-
-
 
    myLim_t Dow[2]={{ 1e11, 1e11, 1e11, 1e11},{ 1e11, 1e11, 1e11, 1e11}};
    myLim_t Upp[2]={{-1e11,-1e11,-1e11,-1e11},{-1e11,-1e11,-1e11,-1e11}};
-   for (int ix=0;ix<nPnt;ix++) {
-     TVector3 &pnt= Pnt[ix];
-     double phi = pnt.Phi();
+   for (int ip=0;ip<mNPnt;ip++) {
+     TVector3 &P= mPnt[ip];
+     double phi = P.Phi();
      int jk = (phi <0)? 0:1;
      myLim_t &dow = Dow[jk];
      myLim_t &upp = Upp[jk];
      if (dow.Phi>phi) 		dow.Phi=phi;
      if (upp.Phi<phi) 		upp.Phi=phi;
-     double rxy = pnt.Perp();
+     double rxy = P.Perp();
      if (dow.Rxy>rxy) 		dow.Rxy=rxy;
      if (upp.Rxy<rxy) 		upp.Rxy=rxy;
-     double z = pnt.Z();
+     double z = P.Z();
      if (dow.Z>z) 		dow.Z=z;
      if (upp.Z<z) 		upp.Z=z;
      double tanL = z/rxy;
@@ -420,30 +438,7 @@ static const double kMyMax = 220;
    if (Upp[1].Phi >  M_PI/2) kase |=8;
 
    mLim[2][0] = 1e11;
-   switch (kase) {
-     case 1:; case 2:;case 1|2:;
-     mLim[0][kPhi ] = Dow[0].Phi ;
-     mLim[0][kRxy ] = Dow[0].Rxy ;
-     mLim[0][kTanL] = Dow[0].tanL;
-     mLim[0][kZ   ] = Dow[0].Z   ;
-     mLim[1][kPhi ] = Upp[0].Phi ;
-     mLim[1][kRxy ] = Upp[0].Rxy ;
-     mLim[1][kTanL] = Upp[0].tanL;
-     mLim[1][kZ   ] = Upp[0].Z   ;
-     break;
-     case 4:; case 8:; case 4|8:;    
-     
-     mLim[0][kPhi ] = Dow[1].Phi ;
-     mLim[0][kRxy ] = Dow[1].Rxy ;
-     mLim[0][kTanL] = Dow[1].tanL;
-     mLim[0][kZ   ] = Dow[1].Z   ;
-     mLim[1][kPhi ] = Upp[1].Phi ;
-     mLim[1][kRxy ] = Upp[1].Rxy ;
-     mLim[1][kTanL] = Upp[1].tanL;
-     mLim[1][kZ   ] = Upp[1].Z   ;
-     break;
-     
-     case 1|4:;case 2|4:; case 1|2|4:; case 2|4|8:;case 2|8:
+   if ((kase&(1|8))!=(1|8)) { // Np ambiguity 
      mLim[0][kPhi ] = MIN(Dow[0].Phi ,Dow[1].Phi );
      mLim[0][kRxy ] = MIN(Dow[0].Rxy ,Dow[1].Rxy );
      mLim[0][kTanL] = MIN(Dow[0].tanL,Dow[1].tanL);
@@ -452,33 +447,21 @@ static const double kMyMax = 220;
      mLim[1][kRxy ] = MAX(Upp[0].Rxy ,Upp[1].Rxy );
      mLim[1][kTanL] = MAX(Upp[0].tanL,Upp[1].tanL);
      mLim[1][kZ   ] = MAX(Upp[0].Z   ,Upp[1].Z   );
-     break;
-    
-     default: 
-     assert((kase&1) && (kase&8));
-     mLim[0][kPhi ] = Dow[0].Phi ;
-     mLim[0][kRxy ] = Dow[0].Rxy ;
-     mLim[0][kTanL] = Dow[0].tanL;
-     mLim[0][kZ   ] = Dow[0].Z   ;
-     mLim[1][kPhi ] = Upp[0].Phi ;
-     mLim[1][kRxy ] = Upp[0].Rxy ;
-     mLim[1][kTanL] = Upp[0].tanL;
-     mLim[1][kZ   ] = Upp[0].Z   ;
-     mLim[2][kPhi ] = Dow[1].Phi ;
-     mLim[2][kRxy ] = Dow[1].Rxy ;
-     mLim[2][kTanL] = Dow[1].tanL;
-     mLim[2][kZ   ] = Dow[1].Z   ;
-     mLim[3][kPhi ] = Upp[1].Phi ;
-     mLim[3][kTanL] = Upp[1].tanL;
-     mLim[3][kZ   ] = Upp[1].Z   ;
+   } else {   
+     for (int li=0,du=0;li<=2;li+=2,du++) {
+       mLim[li+0][kPhi ] = Dow[du].Phi ;
+       mLim[li+0][kRxy ] = Dow[du].Rxy-mErr ;
+       mLim[li+0][kTanL] = Dow[du].tanL;
+       mLim[li+0][kZ   ] = Dow[du].Z -mErr  ;
 
-     break;
-     
+       mLim[li+1][kPhi ] = Upp[du].Phi ;
+       mLim[li+1][kRxy ] = Upp[du].Rxy +mErr;
+       mLim[li+1][kTanL] = Upp[du].tanL;
+       mLim[li+1][kZ   ] = Upp[du].Z   +mErr;
+    }
   }
-
-
 }
-#endif
+#endif //MultiPhiZMap
 //_____________________________________________________________________________
 int  StvConeSelector::Reject(const float x[3],const void* hp)
 {
@@ -504,7 +487,7 @@ int  StvConeSelector::Reject(const float x[3],const void* hp)
      if (imp>mMinImp) 			return 9;	//same plane but impact bigger
      ans = 0;
    }
-   mMinPrj= mHitPrj; mMinImp=imp; mHp = hp;
+   if (hp) {mMinPrj= mHitPrj; mMinImp=imp; mHp = hp;}
    return ans;						//impact best but cone the same
 }
 //_____________________________________________________________________________
