@@ -1,18 +1,14 @@
 /// \File StvDefaultSeedFinder.h
-/// \author Victorb Perev 01/2010
+/// \author Victor Perev 01/2010
 #ifndef StvDefaultSeedFinder_HH
 #define StvDefaultSeedFinder_HH
+#include "TVector3.h"
 #include "Stv/StvSeedFinder.h"
 #include <map>
 #include <vector>
 /// \class StvDefaultSeedFinder
 //#define MultiPhiZMap 1
-
-#ifdef MultiPhiZMap
-enum {kNKeys = 4};
-#else
 enum {kNKeys = 3};
-#endif
 
 
 class StvHit;
@@ -67,7 +63,9 @@ float mMinImp;
 const float *mX[100];
 const float *mHit;
 float mS[100];
+int   mNPnt;
 char  mEnd[1];
+TVector3 mPnt[100];
 };
 
 class StvDefaultSeedFinder : public StvSeedFinder
@@ -80,7 +78,9 @@ public:
   void      Clear(const char *opt="");
   int       Again(int repeat);
   void      Reset();
-  void      Print(const char *opt="") const {;}
+  void      Print(const char *opt="") const 	{;}
+  void      ShowIn();
+   int      Reject(const float x[3])		{return mSel.Reject(x,0)>0;}	
 
 protected:
 
@@ -95,6 +95,8 @@ StMultiKeyMap 		*fMultiHits;
 StMultiKeyMapIter 	*fMultiIter;
 Stv1stHitMap  		*f1stHitMap;
 Stv1stHitMapIter  	*f1stHitMapIter;
+float const          	*m1stHit;
+float  			 m1stDir[3]; 	// first track direction
 char mEnd[1];
 StvConeSelector       mSel;
 ClassDef(StvDefaultSeedFinder,0);
