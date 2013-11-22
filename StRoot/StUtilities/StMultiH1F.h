@@ -23,6 +23,7 @@ class StMultiH1F : public TH2F {
 	     Int_t nbinsy);
   virtual ~StMultiH1F() {}
   virtual        void Draw(Option_t *option="");
+  virtual        void Draw2F(Option_t *option="") { TH2F::Draw(option); } // access inherited
   virtual        void SetNames(Int_t   ybin, const char* name)
                               { if (ybin<StMultiH1FMaxBins) names[ybin] = name; }
   virtual        void SetNames(Float_t ybin, const char* name)
@@ -50,8 +51,11 @@ class StMultiH1F : public TH2F {
 
 #endif
 
-// $Id: StMultiH1F.h,v 1.9 2013/11/21 22:22:48 genevb Exp $
+// $Id: StMultiH1F.h,v 1.10 2013/11/22 16:48:39 genevb Exp $
 // $Log: StMultiH1F.h,v $
+// Revision 1.10  2013/11/22 16:48:39  genevb
+// Access to inherited Draw() functions
+//
 // Revision 1.9  2013/11/21 22:22:48  genevb
 // Protect against array out-of-bounds, use inherited axis handles
 //
