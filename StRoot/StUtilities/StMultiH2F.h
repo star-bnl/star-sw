@@ -23,6 +23,7 @@ class StMultiH2F : public TH3F {
   virtual ~StMultiH2F() {}
   virtual        void Draw(Option_t *option="");
   // Probably only the "box" and "cont" options are reasonable here
+  virtual        void Draw3F(Option_t *option="") { TH3F::Draw(option); } // access inherited
 
   virtual        void SetNames(Int_t   zbin, const char* name)
                               { if (zbin<StMultiH2FMaxBins) names[zbin] = name; }
@@ -46,8 +47,11 @@ class StMultiH2F : public TH3F {
 
 #endif
 
-// $Id: StMultiH2F.h,v 1.4 2013/11/21 22:22:48 genevb Exp $
+// $Id: StMultiH2F.h,v 1.5 2013/11/22 16:48:39 genevb Exp $
 // $Log: StMultiH2F.h,v $
+// Revision 1.5  2013/11/22 16:48:39  genevb
+// Access to inherited Draw() functions
+//
 // Revision 1.4  2013/11/21 22:22:48  genevb
 // Protect against array out-of-bounds, use inherited axis handles
 //
