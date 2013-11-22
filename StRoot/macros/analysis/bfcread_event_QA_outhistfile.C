@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.17 2013/03/14 17:28:31 genevb Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.18 2013/11/22 16:31:20 genevb Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.18  2013/11/22 16:31:20  genevb
+// Restore parallelism with bfcread_event_QAhist.C
+//
 // Revision 1.17  2013/03/14 17:28:31  genevb
 // StTpcDb.so now depends on StEvent.so
 //
@@ -112,6 +115,10 @@ void bfcread_event_QA_outhistfile(
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
+  gSystem->Load("libglobal_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("libgeometry_Tables");
 
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
@@ -128,6 +135,9 @@ void bfcread_event_QA_outhistfile(
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
+  gSystem->Load("StarMagField");
+  gSystem->Load("StMagF");
+  gSystem->Load("StPmdUtil");
   gSystem->Load("St_QA_Maker"); 
   gSystem->Load("StTreeMaker");
 
@@ -146,9 +156,9 @@ void bfcread_event_QA_outhistfile(
   const char* calibDB = "MySQL:StarDb";
   const char* calibDB2 = "$STAR/StarDb";
   St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,calibDB2);
-  calibMk->SetDateTime("year_2b");
-  calibMk->SetDebug();  
   StMagFMaker* magfMk = new StMagFMaker; // now required for StTpcDbMaker
+  //calibMk->SetDateTime("year_2b");
+  calibMk->SetDebug();  
   StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
 
 // constructor for other maker (not used in chain)
