@@ -117,13 +117,13 @@ void AgPlacement::Print(Option_t *opts)const
 	}
 
 }
-
+#define __DEBUG_MATRIX__
 TGeoCombiTrans *AgPlacement::matrix()
 {
-#ifdef __DEBUG_MATRIX__
-	std::cout << "=============================================================================" << std::endl;
-	std::cout << Form("Place %s in %s",block(),mother()) << std::endl;
-#endif
+
+  //	std::cout << "=============================================================================" << std::endl;
+  //	std::cout << Form("Place %s in %s",block(),mother()) << std::endl;
+
 
 	// Execute rotations
 	//$$$	TGeoTranslation position(mTranslation.x,mTranslation.y,mTranslation.z);
@@ -131,23 +131,26 @@ TGeoCombiTrans *AgPlacement::matrix()
 	Double_t y = mTranslation.y;
 	Double_t z = mTranslation.z;
 	TGeoRotation rotation;
+
+
+
 	for ( UInt_t i=0;i<mRotation.size();i++ )
 	{
 		Rotation R=mRotation[i];
 		if ( mType[i]==kRot3 )
 		{
-#ifdef __DEBUG_MATRIX__
-			std::cout << "Rotation about axis="<<R.rot3.axis<<" by alpha="<<R.rot3.alpha << std::endl;
-#endif
+
+		  //			std::cout << "Rotation about axis="<<R.rot3.axis<<" by alpha="<<R.rot3.alpha << std::endl;
+
 			if ( R.rot3.axis == 0 ) rotation.RotateX( R.rot3.alpha );
 			if ( R.rot3.axis == 1 ) rotation.RotateY( R.rot3.alpha );
 			if ( R.rot3.axis == 2 ) rotation.RotateZ( R.rot3.alpha );
 		}
 		else if ( mType[i]==kRot6 )
 		{
-#ifdef __DEBUG_MATRIX__
-			std::cout << Form("G3 Rotation...") << std::endl;
-#endif
+
+		  //			std::cout << Form("G3 Rotation...") << std::endl;
+
 			Double_t thetax = R.rot6.thetax;
 			Double_t phix   = R.rot6.phix;
 			Double_t thetay = R.rot6.thetay;
@@ -160,28 +163,41 @@ TGeoCombiTrans *AgPlacement::matrix()
 		}
 		else if ( mType[i]==kRotO )
 		{
-#ifdef __DEBUG_MATRIX__
-			std::cout << Form("ORT Rotation") << std::endl;
-#endif
+
+		  //			std::cout << Form("ORT Rotation") << std::endl;
+
 			//                          -Z   -Y   -X        +X   +Y   +Z
 			const Double_t thetas[7]={ 180,  90,  90, 000,  90,  90,   0 };
 			const Double_t phis[7]  ={   0, 270, 180, 000,   0,  90,   0 };
 			Int_t ix=R.ort[0], iy=R.ort[1], iz=R.ort[2];
-#ifdef __DEBUG_MATRIX__
-			std::cout << Form("    ix=%3i iy=%3i iz=%3i",ix,iy,iz)<<std::endl;
-#endif
+
+			//			std::cout << Form("    ix=%3i iy=%3i iz=%3i",ix,iy,iz)<<std::endl;
+
 			TGeoRotation temp;
 			temp.SetAngles( thetas[ix+3], phis[ix+3], thetas[iy+3], phis[iy+3], thetas[iz+3], phis[iz+3] );
 			rotation = rotation*temp;
 		}
 		else
 		{
-			std::cout << "I dunno" << std::endl;
+		  //			std::cout << "I dunno" << std::endl;
 		}
 	}
 
-	TGeoCombiTrans *translation = new TGeoCombiTrans( x, y, z, (TGeoRotation*)rotation.Clone(Form("rot_%s_in_%s",mBlock.Data(),mMother.Data())));
+
+	TGeoRotation *RotInHell = new TGeoRotation(rotation);
+	RotInHell->SetName(Form("rot_%s_in_%s",mBlock.Data(),mMother.Data()));
+
+	//TGeoRotation *RotInHell = (TGeoRotation*)rotation.Clone(Form("rot_%s_in_%s",mBlock.Data(),mMother.Data()));
+	//TGeoCombiTrans *translation = new TGeoCombiTrans( x, y, z, 
+	//	 (TGeoRotation*)rotation.Clone(Form("rot_%s_in_%s",mBlock.Data(),mMother.Data())));
+
+	TGeoCombiTrans *translation = new TGeoCombiTrans( x, y, z, RotInHell );
+	translation->SetName(Form("mat_%s_in_%s",mBlock.Data(),mMother.Data()));
+
+	//	return (TGeoCombiTrans*)gGeoIdentity;
+
 	return translation;
+
 }
 
 Double_t &AgPlacement::par( const Char_t *name )
