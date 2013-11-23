@@ -105,13 +105,13 @@ int rtsLogAddFile(char *fname)
 }
 
 
-    char _g_fname[256];
-    char *jml_fname = NULL;
-    void rtsLogAddJmlFile (char *fname)
-    {
+static char _g_fname[256];
+static char *jml_fname = NULL;
+void rtsLogAddJmlFile (char *fname)
+{
 	strcpy(_g_fname, fname);
 	jml_fname = _g_fname;
-    }
+}
 
 
 int rtsLogUnix_v(const char *str, ...) 
