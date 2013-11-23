@@ -7,8 +7,12 @@ LDLIBS =
 
 
 LIBS = librtslog.a
-BINS =  rtsLogServer critServer logTest operDisplay rtsLog
 
+BINS =  logTest rtsLog
+
+# NOTE: rtsLogServer is disabled!!! Moved to  online/RTS/src/LOG_SERVER
+# I also disabled other servers
+# critServer operDisplay
 
 all: $(LIBS) $(BINS)
 
