@@ -57,7 +57,7 @@ void AgCreate::Print( const Option_t *otps ) const
   std::cout << "=============================================================" << std::endl;
   std::map< TString, Double_t > params = mParameters;
   std::map< TString, Double_t >::iterator iter = params.begin();
-  while ( iter != mParameters.end() )
+  while ( iter != params.end() )
     {     
       TString  key = (*iter).first;
       Double_t val = (*iter).second;
