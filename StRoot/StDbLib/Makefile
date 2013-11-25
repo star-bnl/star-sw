@@ -39,7 +39,7 @@ LINK_OBJS += $(LINK_OBJS3)
 
 $(STDBLIBSO): $(LINK_OBJS) 
 	rm -f $@
-	$(CXX) $(SOFLAGS) -o $@ $(LINK_OBJS) $(CLIBS)  $(SHARED_LIBS) 
+	$(CXX) $(SOFLAGS) -o $@ $(LINK_OBJS) $(CLIBS) $(CXXFLAGS)  $(SHARED_LIBS) 
 
 $(STDBLIBA): $(LINK_OBJS) 
 	rm -f $@
