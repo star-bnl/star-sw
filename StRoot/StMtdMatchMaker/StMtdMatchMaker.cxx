@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.6 2013/11/19 22:30:30 jeromel Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.7 2013/11/25 16:10:43 geurts Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.7  2013/11/25 16:10:43  geurts
+ * Remove AddHist for uninitialized histogram [Jason Webb]
+ *
  * Revision 1.6  2013/11/19 22:30:30  jeromel
  * Added name
  *
@@ -169,19 +172,27 @@ Int_t StMtdMatchMaker::Init(){
 void StMtdMatchMaker::bookHistograms(){
 
 	mEventCounterHisto = new TH1D("eventCounter","eventCounter",20,0,20);
-	mCellsMultInEvent = new TH1D("cellsPerEvent","cellsPerEvent",1000,0,1000);
-	mHitsMultInEvent  = new TH1D("hitsPerEvent","hitsPerEvent",1000,0,1000);
-	mHitsPrimaryInEvent  = new TH1D("hitsPrimaryPerEvent","hitsPrimaryPerEvent",1000,0,1000);
-	mHitsMultPerTrack = new TH1D("hitsPerTrack","hitsPerTrack",10,0,10);
-	mHitsPosition     = new TH2D("hitsPosition","hitsPositions",1000,-500.,500.,1000,-500.,500);
-
 	AddHist(mEventCounterHisto);
+
+	mCellsMultInEvent = new TH1D("cellsPerEvent","cellsPerEvent",1000,0,1000);
 	AddHist(mCellsMultInEvent);
+
+	mHitsMultInEvent  = new TH1D("hitsPerEvent","hitsPerEvent",1000,0,1000);
 	AddHist(mHitsMultInEvent);
+
+	mHitsPrimaryInEvent  = new TH1D("hitsPrimaryPerEvent","hitsPrimaryPerEvent",1000,0,1000);
 	AddHist(mHitsPrimaryInEvent);   
-	AddHist(mHitsGlobalInEvent);    
+
+	mHitsMultPerTrack = new TH1D("hitsPerTrack","hitsPerTrack",10,0,10);
 	AddHist(mHitsMultPerTrack);
+
+	mHitsPosition     = new TH2D("hitsPosition","hitsPositions",1000,-500.,500.,1000,-500.,500);
 	AddHist(mHitsPosition);
+
+	// histogram not created, memory location invalid
+	//	AddHist(mHitsGlobalInEvent);    
+
+
 
 	// occupancy
 	for(int i=0;i<mNBacklegs;i++) {
