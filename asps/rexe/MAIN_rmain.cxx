@@ -14,19 +14,22 @@ extern "C" {
   }
 }
 //______________________________________________________________________________
-int main(int argc, char **argv)
+int main(int argcp, char **argv)
 {
+  static int argc = argcp;
 #ifndef WIN32
    char appname[] = "Rint";
 #else
    char appname[] = "Root_Rint";
 #endif 
+
+   TRint *theApp = new TRint(appname, &argc, argv, 0, 0);
+
  __argc_save=argc; __argv_save= argv; 
        xargc=argc;      xargv = argv;
    f77argc = argc;    f77argv = argv;
    Margc   = argc;     Margv  = argv;
 
-   TRint *theApp = new TRint(appname, &argc, argv, 0, 0);
  
    // Init Intrinsics, build all windows, and enter event loop
    theApp->Run();
