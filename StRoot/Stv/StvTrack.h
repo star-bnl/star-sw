@@ -30,7 +30,8 @@ class StvTrack: public StvNodes
   /// returns node related ipt 0=DCA node, 1=1st point. 2=last point, 3=Primary vertex 
       StvNode *GetNode(EPointType poTy);
 const StvNode *GetNode(EPointType poTy) const;
-
+	 /// Returns  node with biggest KNN distance
+      StvNode *GetMaxKnnNode() ;
 	 /// Returns the number of hits associated and used in the fit of this track.
    int GetNHits(StDetectorId detectorId=kUnknownId) const;  
 	 /// Return the number of possible hits with this track.

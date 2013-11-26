@@ -10,6 +10,7 @@
 #include "Stv/StvDraw.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvTrackFitter.h"
+#include "StvUtil/StvKNNUtil.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 int StvTrack::mgId=0;
 
@@ -335,6 +336,29 @@ static StvToolkit *kit = StvToolkit::Inst();
     *myNode = *node; push_back(myNode);
   }
   return *this;
+}
+//______________________________________________________________________________
+StvNode *StvTrack::GetMaxKnnNode() 
+{
+  StvNode *node=0;int n=0;
+  float var[2];
+  const StvHit *hit=0;
+  StvKNNUtil knn(2,5);
+  for (StvNodeIter it = begin();it != end();++it) 
+  {
+    node = *it; n++; 
+    if (node->GetType()!=StvNode::kRegNode) 	continue;
+    if (!(hit=node->GetHit())) 		 	continue;
+    if ( node->GetXi2()>1000) 			continue;
+    const StvNodePars &par = node->GetFP();
+    const double cosL = par.getCosL();
+    const float *fx = hit->x();
+    var[1] = (fx[2]-par._z)*cosL;
+    var[0] = ((fx[0]-par._x)*(-par._sinCA)+(fx[1]-par._y)*(par._cosCA));
+    knn.Add((ULong_t)node,var);
+  }
+  knn.GetWost((ULong_t*)&node);
+  return node;
 }
 
 
