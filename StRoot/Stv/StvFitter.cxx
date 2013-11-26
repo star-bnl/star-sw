@@ -32,6 +32,411 @@ static inline double MyXi2(const double G[3],double dA,double dB)
   if (Xi2 > kXtraBigXi2) Xi2 = kXtraBigXi2;
   return Xi2;
 }
+
+class TCLx 
+{
+public:
+static void trsinv2x2(const double *pM,double *pMi);
+static void trsinv3x3(const double *pM,double *pMi);
+static void trsinv4x4(const double *pM,double *pMi);
+static void trsinv5x5(const double *pM,double *pMi);
+static void Test();
+};
+
+#include <assert.h>
+#include <math.h>
+
+//______________________________________________________________________________
+void TCLx::trsinv2x2(const double *pM,double *pMi)
+{
+   const double det = pM[0] * pM[2] - pM[1] * pM[1];
+
+   assert(det>3e-33);
+   const double s = 1./det;
+
+   const double tmp = s*pM[2];
+   pMi[1] = -pM[1]*s;
+   pMi[2] = s*pM[0];
+   pMi[0] = tmp;
+
+}
+//______________________________________________________________________________
+void TCLx::trsinv3x3(const double *pM,double *pMi)
+{
+//  0
+//  1  2 
+//  3  4  5
+// 
+//  0  1  2  
+//  3  4  5
+//  6  7  8
+// 
+// 2=>3
+// 3=>1
+// 4=>2
+// 5=>4
+// 6=>3
+// 7=>4
+// 8=>5
+
+   const double c00 = pM[2] * pM[5] - pM[4] * pM[4];
+   const double c10 = pM[4] * pM[3] - pM[1] * pM[5];
+   const double c20 = pM[1] * pM[4] - pM[2] * pM[3];
+   const double c11 = pM[5] * pM[0] - pM[3] * pM[3];
+   const double c21 = pM[3] * pM[1] - pM[4] * pM[0];
+   const double c22 = pM[0] * pM[2] - pM[1] * pM[1];
+
+   const double t0 = fabs(pM[0]);
+   const double t1 = fabs(pM[1]);
+   const double t2 = fabs(pM[3]);
+   double det;
+   double tmp;
+   if (t0 >= t1) {
+      if (t2 >= t0) {
+      tmp = pM[3];
+      det = c21*c10-c11*c20;
+      } else {
+         tmp = pM[0];
+         det = c11*c22-c21*c21;
+      }
+   } else if (t2 >= t1) {
+      tmp = pM[3];
+      det = c21*c10-c11*c20;
+   } else {
+      tmp = pM[1];
+      det = c20*c21-c10*c22;
+   }
+
+   assert ( det >3e-33 && tmp >3e-33); 
+
+   const double s = tmp/det;
+
+   pMi[0] = s*c00;
+   pMi[1] = s*c10;
+   pMi[2] = s*c11;
+   pMi[3] = s*c20;
+   pMi[4] = s*c21;
+   pMi[5] = s*c22;
+  
+}
+//______________________________________________________________________________
+// GFij are indices for a 4x4 matrix.
+
+//  0
+//  1  2 
+//  3  4  5
+//  6  7  8  9
+#define GF00 0
+
+#define GF10 1
+#define GF11 2
+
+#define GF20 3
+#define GF21 4
+#define GF22 5
+
+#define GF30 6
+#define GF31 7
+#define GF32 8
+#define GF33 9
+
+//______________________________________________________________________________
+void TCLx::trsinv4x4(const double *pM,double *pMi)
+{
+
+  // Find all NECESSARY 2x2 dets:  (18 of them)
+
+   const Double_t det2_12_01 = pM[GF10]*pM[GF21] - pM[GF11]*pM[GF20];
+   const Double_t det2_12_02 = pM[GF10]*pM[GF22] - pM[GF21]*pM[GF20];
+   const Double_t det2_12_03 = pM[GF10]*pM[GF32] - pM[GF31]*pM[GF20];
+   const Double_t det2_12_13 = pM[GF11]*pM[GF32] - pM[GF31]*pM[GF21];
+   const Double_t det2_12_23 = pM[GF21]*pM[GF32] - pM[GF31]*pM[GF22];
+   const Double_t det2_12_12 = pM[GF11]*pM[GF22] - pM[GF21]*pM[GF21];
+   const Double_t det2_13_01 = pM[GF10]*pM[GF31] - pM[GF11]*pM[GF30];
+   const Double_t det2_13_02 = pM[GF10]*pM[GF32] - pM[GF21]*pM[GF30];
+   const Double_t det2_13_03 = pM[GF10]*pM[GF33] - pM[GF31]*pM[GF30];
+   const Double_t det2_13_12 = pM[GF11]*pM[GF32] - pM[GF21]*pM[GF31];
+   const Double_t det2_13_13 = pM[GF11]*pM[GF33] - pM[GF31]*pM[GF31];
+   const Double_t det2_13_23 = pM[GF21]*pM[GF33] - pM[GF31]*pM[GF32];
+   const Double_t det2_23_01 = pM[GF20]*pM[GF31] - pM[GF21]*pM[GF30];
+   const Double_t det2_23_02 = pM[GF20]*pM[GF32] - pM[GF22]*pM[GF30];
+   const Double_t det2_23_03 = pM[GF20]*pM[GF33] - pM[GF32]*pM[GF30];
+   const Double_t det2_23_12 = pM[GF21]*pM[GF32] - pM[GF22]*pM[GF31];
+   const Double_t det2_23_13 = pM[GF21]*pM[GF33] - pM[GF32]*pM[GF31];
+   const Double_t det2_23_23 = pM[GF22]*pM[GF33] - pM[GF32]*pM[GF32];
+
+  // Find all NECESSARY 3x3 dets:   (16 of them)
+
+   const Double_t det3_012_012 = pM[GF00]*det2_12_12 - pM[GF10]*det2_12_02 
+                                 + pM[GF20]*det2_12_01;
+   const Double_t det3_012_013 = pM[GF00]*det2_12_13 - pM[GF10]*det2_12_03 
+                                 + pM[GF30]*det2_12_01;
+   const Double_t det3_012_023 = pM[GF00]*det2_12_23 - pM[GF20]*det2_12_03 
+                                 + pM[GF30]*det2_12_02;
+   const Double_t det3_012_123 = pM[GF10]*det2_12_23 - pM[GF20]*det2_12_13 
+                                 + pM[GF30]*det2_12_12;
+   const Double_t det3_013_013 = pM[GF00]*det2_13_13 - pM[GF10]*det2_13_03
+                                 + pM[GF30]*det2_13_01;
+   const Double_t det3_013_023 = pM[GF00]*det2_13_23 - pM[GF20]*det2_13_03
+                                 + pM[GF30]*det2_13_02;
+   const Double_t det3_013_123 = pM[GF10]*det2_13_23 - pM[GF20]*det2_13_13
+                                 + pM[GF30]*det2_13_12;
+   const Double_t det3_023_023 = pM[GF00]*det2_23_23 - pM[GF20]*det2_23_03
+                                 + pM[GF30]*det2_23_02;
+   const Double_t det3_023_123 = pM[GF10]*det2_23_23 - pM[GF20]*det2_23_13
+                                 + pM[GF30]*det2_23_12;
+   const Double_t det3_123_012 = pM[GF10]*det2_23_12 - pM[GF11]*det2_23_02 
+                                 + pM[GF21]*det2_23_01;
+   const Double_t det3_123_013 = pM[GF10]*det2_23_13 - pM[GF11]*det2_23_03 
+                                  + pM[GF31]*det2_23_01;
+   const Double_t det3_123_023 = pM[GF10]*det2_23_23 - pM[GF21]*det2_23_03 
+                                 + pM[GF31]*det2_23_02;
+   const Double_t det3_123_123 = pM[GF11]*det2_23_23 - pM[GF21]*det2_23_13 
+                                 + pM[GF31]*det2_23_12;
+
+  // Find the 4x4 det:
+
+   const Double_t det = pM[GF00]*det3_123_123 - pM[GF10]*det3_123_023 
+                        + pM[GF20]*det3_123_013 - pM[GF30]*det3_123_012;
+
+   assert(det>3e-33);
+
+   const Double_t oneOverDet = 1.0/det;
+   const Double_t mn1OverDet = - oneOverDet;
+
+   pMi[GF00] =  det3_123_123 * oneOverDet;
+   pMi[GF10] =  det3_023_123 * mn1OverDet;
+   pMi[GF20] =  det3_013_123 * oneOverDet;
+   pMi[GF30] =  det3_012_123 * mn1OverDet;
+
+   pMi[GF11] =  det3_023_023 * oneOverDet;
+   pMi[GF21] =  det3_013_023 * mn1OverDet;
+   pMi[GF31] =  det3_012_023 * oneOverDet;
+
+   pMi[GF22] =  det3_013_013 * oneOverDet;
+   pMi[GF32] =  det3_012_013 * mn1OverDet;
+
+   pMi[GF33] =  det3_012_012 * oneOverDet;
+
+}  
+// GMij are indices for a 5x5 matrix.
+
+//  0
+//  1  2 
+//  3  4  5
+//  6  7  8  9
+// 10 11 12 13 14
+#define GM00 0
+
+#define GM10 1
+#define GM11 2
+
+#define GM20 3
+#define GM21 4
+#define GM22 5
+
+#define GM30 6
+#define GM31 7
+#define GM32 8
+#define GM33 9
+
+#define GM40 10
+#define GM41 11
+#define GM42 12
+#define GM43 13
+#define GM44 14
+
+//______________________________________________________________________________
+void TCLx::trsinv5x5(const double  *pM,double  *pMi)
+{
+  // Find all NECESSARY 2x2 dets:  (30 of them)
+
+   const Double_t det2_23_01 = pM[GM20]*pM[GM31] - pM[GM21]*pM[GM30];
+   const Double_t det2_23_02 = pM[GM20]*pM[GM32] - pM[GM22]*pM[GM30];
+   const Double_t det2_23_03 = pM[GM20]*pM[GM33] - pM[GM32]*pM[GM30];
+   const Double_t det2_23_04 = pM[GM20]*pM[GM43] - pM[GM42]*pM[GM30];
+   const Double_t det2_23_12 = pM[GM21]*pM[GM32] - pM[GM22]*pM[GM31];
+   const Double_t det2_23_13 = pM[GM21]*pM[GM33] - pM[GM32]*pM[GM31];
+   const Double_t det2_23_14 = pM[GM21]*pM[GM43] - pM[GM42]*pM[GM31];
+   const Double_t det2_23_23 = pM[GM22]*pM[GM33] - pM[GM32]*pM[GM32];
+   const Double_t det2_23_24 = pM[GM22]*pM[GM43] - pM[GM42]*pM[GM32];
+   const Double_t det2_23_34 = pM[GM32]*pM[GM43] - pM[GM42]*pM[GM33];
+   const Double_t det2_24_01 = pM[GM20]*pM[GM41] - pM[GM21]*pM[GM40];
+   const Double_t det2_24_02 = pM[GM20]*pM[GM42] - pM[GM22]*pM[GM40];
+   const Double_t det2_24_03 = pM[GM20]*pM[GM43] - pM[GM32]*pM[GM40];
+   const Double_t det2_24_04 = pM[GM20]*pM[GM44] - pM[GM42]*pM[GM40];
+   const Double_t det2_24_12 = pM[GM21]*pM[GM42] - pM[GM22]*pM[GM41];
+   const Double_t det2_24_13 = pM[GM21]*pM[GM43] - pM[GM32]*pM[GM41];
+   const Double_t det2_24_14 = pM[GM21]*pM[GM44] - pM[GM42]*pM[GM41];
+   const Double_t det2_24_23 = det2_23_24;
+   const Double_t det2_24_24 = pM[GM22]*pM[GM44] - pM[GM42]*pM[GM42];
+   const Double_t det2_24_34 = pM[GM32]*pM[GM44] - pM[GM42]*pM[GM43];
+   const Double_t det2_34_01 = pM[GM30]*pM[GM41] - pM[GM31]*pM[GM40];
+   const Double_t det2_34_02 = pM[GM30]*pM[GM42] - pM[GM32]*pM[GM40];
+   const Double_t det2_34_03 = pM[GM30]*pM[GM43] - pM[GM33]*pM[GM40];
+   const Double_t det2_34_04 = pM[GM30]*pM[GM44] - pM[GM43]*pM[GM40];
+   const Double_t det2_34_12 = pM[GM31]*pM[GM42] - pM[GM32]*pM[GM41];
+   const Double_t det2_34_13 = pM[GM31]*pM[GM43] - pM[GM33]*pM[GM41];
+   const Double_t det2_34_14 = pM[GM31]*pM[GM44] - pM[GM43]*pM[GM41];
+   const Double_t det2_34_23 = det2_23_34;
+
+   const Double_t det2_34_24 = pM[GM32]*pM[GM44] - pM[GM43]*pM[GM42];
+   const Double_t det2_34_34 = pM[GM33]*pM[GM44] - pM[GM43]*pM[GM43];
+
+  // Find all NECESSARY 3x3 dets:   (40 of them)
+
+   const Double_t det3_123_012 = pM[GM10]*det2_23_12 - pM[GM11]*det2_23_02 + pM[GM21]*det2_23_01;
+   const Double_t det3_123_013 = pM[GM10]*det2_23_13 - pM[GM11]*det2_23_03 + pM[GM31]*det2_23_01;
+   const Double_t det3_123_014 = pM[GM10]*det2_23_14 - pM[GM11]*det2_23_04 + pM[GM41]*det2_23_01;
+   const Double_t det3_123_023 = pM[GM10]*det2_23_23 - pM[GM21]*det2_23_03 + pM[GM31]*det2_23_02;
+   const Double_t det3_123_024 = pM[GM10]*det2_23_24 - pM[GM21]*det2_23_04 + pM[GM41]*det2_23_02;
+   const Double_t det3_123_034 = pM[GM10]*det2_23_34 - pM[GM31]*det2_23_04 + pM[GM41]*det2_23_03;
+   const Double_t det3_123_123 = pM[GM11]*det2_23_23 - pM[GM21]*det2_23_13 + pM[GM31]*det2_23_12;
+   const Double_t det3_123_124 = pM[GM11]*det2_23_24 - pM[GM21]*det2_23_14 + pM[GM41]*det2_23_12;
+   const Double_t det3_123_134 = pM[GM11]*det2_23_34 - pM[GM31]*det2_23_14 + pM[GM41]*det2_23_13;
+   const Double_t det3_123_234 = pM[GM21]*det2_23_34 - pM[GM31]*det2_23_24 + pM[GM41]*det2_23_23;
+   const Double_t det3_124_012 = pM[GM10]*det2_24_12 - pM[GM11]*det2_24_02 + pM[GM21]*det2_24_01;
+   const Double_t det3_124_013 = pM[GM10]*det2_24_13 - pM[GM11]*det2_24_03 + pM[GM31]*det2_24_01;
+   const Double_t det3_124_014 = pM[GM10]*det2_24_14 - pM[GM11]*det2_24_04 + pM[GM41]*det2_24_01;
+   const Double_t det3_124_023 = pM[GM10]*det2_24_23 - pM[GM21]*det2_24_03 + pM[GM31]*det2_24_02;
+   const Double_t det3_124_024 = pM[GM10]*det2_24_24 - pM[GM21]*det2_24_04 + pM[GM41]*det2_24_02;
+   const Double_t det3_124_034 = pM[GM10]*det2_24_34 - pM[GM31]*det2_24_04 + pM[GM41]*det2_24_03;
+   const Double_t det3_124_123 = pM[GM11]*det2_24_23 - pM[GM21]*det2_24_13 + pM[GM31]*det2_24_12;
+   const Double_t det3_124_124 = pM[GM11]*det2_24_24 - pM[GM21]*det2_24_14 + pM[GM41]*det2_24_12;
+   const Double_t det3_124_134 = pM[GM11]*det2_24_34 - pM[GM31]*det2_24_14 + pM[GM41]*det2_24_13;
+   const Double_t det3_124_234 = pM[GM21]*det2_24_34 - pM[GM31]*det2_24_24 + pM[GM41]*det2_24_23;
+   const Double_t det3_134_013 = pM[GM10]*det2_34_13 - pM[GM11]*det2_34_03 + pM[GM31]*det2_34_01;
+   const Double_t det3_134_014 = pM[GM10]*det2_34_14 - pM[GM11]*det2_34_04 + pM[GM41]*det2_34_01;
+   const Double_t det3_134_023 = pM[GM10]*det2_34_23 - pM[GM21]*det2_34_03 + pM[GM31]*det2_34_02;
+   const Double_t det3_134_024 = pM[GM10]*det2_34_24 - pM[GM21]*det2_34_04 + pM[GM41]*det2_34_02;
+   const Double_t det3_134_034 = pM[GM10]*det2_34_34 - pM[GM31]*det2_34_04 + pM[GM41]*det2_34_03;
+   const Double_t det3_134_123 = pM[GM11]*det2_34_23 - pM[GM21]*det2_34_13 + pM[GM31]*det2_34_12;
+   const Double_t det3_134_124 = pM[GM11]*det2_34_24 - pM[GM21]*det2_34_14 + pM[GM41]*det2_34_12;
+   const Double_t det3_134_134 = pM[GM11]*det2_34_34 - pM[GM31]*det2_34_14 + pM[GM41]*det2_34_13;
+   const Double_t det3_134_234 = pM[GM21]*det2_34_34 - pM[GM31]*det2_34_24 + pM[GM41]*det2_34_23;
+   const Double_t det3_234_012 = pM[GM20]*det2_34_12 - pM[GM21]*det2_34_02 + pM[GM22]*det2_34_01;
+   const Double_t det3_234_013 = pM[GM20]*det2_34_13 - pM[GM21]*det2_34_03 + pM[GM32]*det2_34_01;
+   const Double_t det3_234_014 = pM[GM20]*det2_34_14 - pM[GM21]*det2_34_04 + pM[GM42]*det2_34_01;
+   const Double_t det3_234_023 = pM[GM20]*det2_34_23 - pM[GM22]*det2_34_03 + pM[GM32]*det2_34_02;
+   const Double_t det3_234_024 = pM[GM20]*det2_34_24 - pM[GM22]*det2_34_04 + pM[GM42]*det2_34_02;
+   const Double_t det3_234_034 = pM[GM20]*det2_34_34 - pM[GM32]*det2_34_04 + pM[GM42]*det2_34_03;
+   const Double_t det3_234_123 = pM[GM21]*det2_34_23 - pM[GM22]*det2_34_13 + pM[GM32]*det2_34_12;
+   const Double_t det3_234_124 = pM[GM21]*det2_34_24 - pM[GM22]*det2_34_14 + pM[GM42]*det2_34_12;
+   const Double_t det3_234_134 = pM[GM21]*det2_34_34 - pM[GM32]*det2_34_14 + pM[GM42]*det2_34_13;
+   const Double_t det3_234_234 = pM[GM22]*det2_34_34 - pM[GM32]*det2_34_24 + pM[GM42]*det2_34_23;
+
+  // Find all NECESSARY 4x4 dets:   (25 of them)
+
+   const Double_t det4_0123_0123 = pM[GM00]*det3_123_123 - pM[GM10]*det3_123_023 
+                                   + pM[GM20]*det3_123_013 - pM[GM30]*det3_123_012;
+   const Double_t det4_0123_0124 = pM[GM00]*det3_123_124 - pM[GM10]*det3_123_024 
+                                   + pM[GM20]*det3_123_014 - pM[GM40]*det3_123_012;
+   const Double_t det4_0123_0134 = pM[GM00]*det3_123_134 - pM[GM10]*det3_123_034 
+                                   + pM[GM30]*det3_123_014 - pM[GM40]*det3_123_013;
+   const Double_t det4_0123_0234 = pM[GM00]*det3_123_234 - pM[GM20]*det3_123_034 
+                                   + pM[GM30]*det3_123_024 - pM[GM40]*det3_123_023;
+   const Double_t det4_0123_1234 = pM[GM10]*det3_123_234 - pM[GM20]*det3_123_134 
+                                   + pM[GM30]*det3_123_124 - pM[GM40]*det3_123_123;
+   const Double_t det4_0124_0124 = pM[GM00]*det3_124_124 - pM[GM10]*det3_124_024 
+                                   + pM[GM20]*det3_124_014 - pM[GM40]*det3_124_012;
+   const Double_t det4_0124_0134 = pM[GM00]*det3_124_134 - pM[GM10]*det3_124_034 
+                                   + pM[GM30]*det3_124_014 - pM[GM40]*det3_124_013;
+   const Double_t det4_0124_0234 = pM[GM00]*det3_124_234 - pM[GM20]*det3_124_034 
+                                   + pM[GM30]*det3_124_024 - pM[GM40]*det3_124_023;
+   const Double_t det4_0124_1234 = pM[GM10]*det3_124_234 - pM[GM20]*det3_124_134 
+                                   + pM[GM30]*det3_124_124 - pM[GM40]*det3_124_123;
+   const Double_t det4_0134_0134 = pM[GM00]*det3_134_134 - pM[GM10]*det3_134_034 
+                                   + pM[GM30]*det3_134_014 - pM[GM40]*det3_134_013;
+   const Double_t det4_0134_0234 = pM[GM00]*det3_134_234 - pM[GM20]*det3_134_034 
+                                   + pM[GM30]*det3_134_024 - pM[GM40]*det3_134_023;
+   const Double_t det4_0134_1234 = pM[GM10]*det3_134_234 - pM[GM20]*det3_134_134 
+                                   + pM[GM30]*det3_134_124 - pM[GM40]*det3_134_123;
+   const Double_t det4_0234_0234 = pM[GM00]*det3_234_234 - pM[GM20]*det3_234_034 
+                                   + pM[GM30]*det3_234_024 - pM[GM40]*det3_234_023;
+   const Double_t det4_0234_1234 = pM[GM10]*det3_234_234 - pM[GM20]*det3_234_134 
+                                   + pM[GM30]*det3_234_124 - pM[GM40]*det3_234_123;
+   const Double_t det4_1234_0123 = pM[GM10]*det3_234_123 - pM[GM11]*det3_234_023 
+                                   + pM[GM21]*det3_234_013 - pM[GM31]*det3_234_012;
+   const Double_t det4_1234_0124 = pM[GM10]*det3_234_124 - pM[GM11]*det3_234_024 
+                                    + pM[GM21]*det3_234_014 - pM[GM41]*det3_234_012;
+   const Double_t det4_1234_0134 = pM[GM10]*det3_234_134 - pM[GM11]*det3_234_034 
+                                   + pM[GM31]*det3_234_014 - pM[GM41]*det3_234_013;
+   const Double_t det4_1234_0234 = pM[GM10]*det3_234_234 - pM[GM21]*det3_234_034 
+                                   + pM[GM31]*det3_234_024 - pM[GM41]*det3_234_023;
+   const Double_t det4_1234_1234 = pM[GM11]*det3_234_234 - pM[GM21]*det3_234_134 
+                                   + pM[GM31]*det3_234_124 - pM[GM41]*det3_234_123;
+
+  // Find the 5x5 det:
+
+   const Double_t det = pM[GM00]*det4_1234_1234 - pM[GM10]*det4_1234_0234 + pM[GM20]*det4_1234_0134 
+                      - pM[GM30]*det4_1234_0124 + pM[GM40]*det4_1234_0123;
+   assert(det>3e-33);
+
+   const Double_t oneOverDet = 1.0/det;
+   const Double_t mn1OverDet = - oneOverDet;
+
+   pMi[GM00] =  det4_1234_1234 * oneOverDet;
+   pMi[GM10] =  det4_0234_1234 * mn1OverDet;
+   pMi[GM20] =  det4_0134_1234 * oneOverDet;
+   pMi[GM30] =  det4_0124_1234 * mn1OverDet;
+   pMi[GM40] =  det4_0123_1234 * oneOverDet;
+
+   pMi[GM11] =  det4_0234_0234 * oneOverDet;
+   pMi[GM21] =  det4_0134_0234 * mn1OverDet;
+   pMi[GM31] =  det4_0124_0234 * oneOverDet;
+   pMi[GM41] =  det4_0123_0234 * mn1OverDet;
+
+   pMi[GM22] =  det4_0134_0134 * oneOverDet;
+   pMi[GM32] =  det4_0124_0134 * mn1OverDet;
+   pMi[GM42] =  det4_0123_0134 * oneOverDet;
+
+   pMi[GM33] =  det4_0124_0124 * oneOverDet;
+   pMi[GM43] =  det4_0123_0124 * mn1OverDet;
+
+   pMi[GM44] =  det4_0123_0123 * oneOverDet;
+
+}
+#include "TCernLib.h"
+#include "TRandom.h"
+
+//______________________________________________________________________________
+void TCLx::Test()
+{
+  int nErr = 0;
+  double e[15],e1inv[15],e2inv[15];
+  for (int i=0,li=0;i< 5;li+=++i) {
+    e[li+i] = gRandom->Rndm()*10+10;
+    for (int j=0;j<i;j++) {
+      e[li+j] = gRandom->Rndm();
+  } }
+
+   for (int N=2;N<=5;N++) {
+     TCL::trsinv(e,e1inv,N);
+     switch (N) {
+       case 2:TCLx::trsinv2x2(e,e2inv); break;
+       case 3:TCLx::trsinv3x3(e,e2inv); break;
+       case 4:TCLx::trsinv4x4(e,e2inv); break;
+       case 5:TCLx::trsinv5x5(e,e2inv); break;
+       default: assert(0);
+    }
+    int l = (N*N+N)/2;
+    for (int i=0;i<l;i++) {
+      double delta = fabs(e1inv[i]-e2inv[i]);
+      printf("%d.%d = %g %g \t%g\n",N,i,e1inv[i],e2inv[i],delta);
+      if (delta<1e-8) continue;
+      delta /= fabs(e1inv[i])+fabs(e2inv[i]);
+      if (delta<1e-8) continue;
+      printf("%d.%d = %g %g \t%g\n",N,i,e1inv[i],e2inv[i],delta);
+      nErr++;
+    }
+  }
+  printf("TCLx::Test()  %d errors\n",nErr);
+
+}
+
+
+
+
 double JoinTwoT(int nP1,const double *P1,const double *E1
                ,int nP2,const double *P2,const double *E2
 	               ,      double *PJ,      double *EJ);
@@ -57,10 +462,36 @@ StvDebug::Break(nCall);
   double *P1J = (a+=nP2);
   double *P2J = (a+=nP2);
 
-  TCL::trsinv(E1,E1i,nP1);		//E1i = 1/E1
-  TCL::trsinv(E2,E2i,nP2);		//E2i = 1/E2
+//  TCL::trsinv(E1,E1i,nP1);		//E1i = 1/E1
+  switch(nP1) {
+    case 2: TCLx::trsinv2x2(E1,E1i); break;
+    case 5: TCLx::trsinv5x5(E1,E1i); break;
+    default: TCL::trsinv   (E1,E1i,nP1);
+  }
+
+//  TCL::trsinv(E2,E2i,nP2);		//E2i = 1/E2
+  switch(nP2) {
+    case 2: TCLx::trsinv2x2(E2,E2i); break;
+    case 5: TCLx::trsinv5x5(E2,E2i); break;
+    default: TCL::trsinv   (E2,E2i,nP2);
+  }
+
+
+
+
+
   TCL::vadd (E1i,E2i,EJi ,nE2);		//EJi = E1i+E2i
-  TCL::trsinv(EJi,EJm,nP2);		//EJ = 1/EJi
+//TCL::trsinv(EJi,EJm,nP2);		//EJ = 1/EJi
+  switch(nP2) {
+    case 2: TCLx::trsinv2x2(EJi,EJm); break;
+    case 5: TCLx::trsinv5x5(EJi,EJm); break;
+    default: TCL::trsinv   (EJi,EJm,nP2);
+  }
+
+
+
+
+
   if (P2) TCL::vsub (P1 ,P2 ,Pdif,nP1);	//Pdif = P1-P2
   else    TCL::ucopy(P1     ,Pdif,nP1);
   TCL::trqsq(E1i,EJm,ERi ,nP1);		//ERi = E1i*EJm*E1i
@@ -101,11 +532,11 @@ double JoinTwoT(int nP1,const double *P1,const double *E1
     for (int j=0;j<=i; j++) {E2i[i][j]=E2[li+j]; E2i[j][i]=E2[li+j];}}
 
   for (int i=nP1;i<nP2;i++) {E1i[i][i]=1;};
-  E1i.Invert();
+  E1i.InvertFast();
   for (int i=nP1;i<nP2;i++) {E1i[i][i]=0;};
-  E2i.Invert();
+  E2i.InvertFast();
   TMatrixD  EJi = E1i+E2i;
-  TMatrixD  EJm = EJi; EJm.Invert();
+  TMatrixD  EJm = EJi; EJm.InvertFast();
   TVectorD P1v(nP2); TCL::ucopy(P1,P1v.GetMatrixArray(),nP1);
   TVectorD P2v(nP2,P2);
   
@@ -137,13 +568,13 @@ double JoinVtx(int nP1,const double *P1,const double *E1
   TVectorD D = (P1t-P2t.GetSub(0,nP1-1));
   TMatrixDSym smaMx(nP1);
   TCL::trupck(E2,smaMx.GetMatrixArray(),nP1);
-  smaMx.Invert();
+  smaMx.InvertFast();
   double Xi2 = D*(smaMx*D);
   if (!PJ) return Xi2;
 
   TMatrixDSym E2t(nP2);
   TCL::trupck(E2,E2t.GetMatrixArray(),nP2);
-  E2t.Invert();
+  E2t.InvertFast();
 
   TVectorD bigB(nPBig),bigP(nPBig);
   bigB.SetSub(0,E2t*P2t);
@@ -152,7 +583,7 @@ double JoinVtx(int nP1,const double *P1,const double *E1
   TMatrixDSym bigMx(nPBig);
   bigMx.SetSub(0,E2t);
   for (int i=nP2,j=0;i< nPBig;++i,j++) {bigMx[i][j]=1;bigMx[j][i]=1;}
-  bigMx.Invert();
+  bigMx.InvertFast();
   bigP = bigMx*bigB;
   assert(fabs(bigP[0]-P1[0])<1e-5);
   assert(fabs(bigP[1]-P1[1])<1e-5);
