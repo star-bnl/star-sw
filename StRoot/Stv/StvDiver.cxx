@@ -257,6 +257,7 @@ StvMCStepping::StvMCStepping(const char *name,const char *tit)
 {
   memset(fFist,0,fLast-fFist);
   fNTarget = 2;
+  fHALLVolu = gGeoManager->FindVolumeFast("HALL");
 }   
 //_____________________________________________________________________________
 StvMCStepping::~StvMCStepping()
@@ -289,7 +290,9 @@ int StvMCStepping::Fun()
 {
 static int nCall = 0;
 nCall++;
-static StTGeoProxy *tgh = StTGeoProxy::Instance();
+static       StTGeoProxy    *tgh      	= StTGeoProxy::Instance();
+static const StTGeoHitShape *hitShape 	= tgh->GetHitShape();
+static       TVirtualMC     *virtualMC	= TVirtualMC::GetMC();
 int meAgain = 0;
 
 mybreak(nCall);
@@ -319,10 +322,10 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
 
     case kENTERtrack:;{
          double *X = &fCurrentPosition[0];
-         fHitted = (tgh->IsHitted(X) && (!meAgain));
-         if (strcmp(fVolume->GetName(),"HALL")==0) fKaze=kENDEDtrack;
-         if (!StTGeoProxy::Inst()->GetHitShape()->Inside(fCurrentPosition.Z(),fCurrentPosition.Perp()))
-	    fKaze=kENDEDtrack;
+         fHitted = ((!meAgain) && tgh->IsHitted(X));
+         if (fVolume==fHALLVolu) {fKaze=kENDEDtrack; break;}
+         if (!hitShape->Inside(fCurrentPosition.Z(),fCurrentPosition.Perp()))
+	    {fKaze=kENDEDtrack;  break;}
          if (fKaze==kENDEDtrack) break;
          if ((fExit = BegVolume())) fKaze=kENDEDtrack;}
     break;
@@ -334,7 +337,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
     case kOUTtrack:
     case kENDEDtrack:
       fExit=StvDiver::kDiveBreak;
-      TVirtualMC::GetMC()->StopTrack();
+      virtualMC->StopTrack();
       break;
 
     case kEXITtrack:
@@ -343,7 +346,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
       if (!fExit) break;
       fPrevPath ="";
       if (fExit & StvDiver::kDiveHits) fPrevPath = tgh->GetPath();
-      TVirtualMC::GetMC()->StopTrack();
+      virtualMC->StopTrack();
     }
     break;
 
@@ -358,7 +361,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
   fLastNumb=0;
   fExit  =StvDiver::kDiveMany; 
   fExit |= TooMany();
-  TVirtualMC::GetMC()->StopTrack();
+  virtualMC->StopTrack();
   return 0;
 }		
 //_____________________________________________________________________________
