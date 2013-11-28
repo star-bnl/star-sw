@@ -467,6 +467,7 @@ static const double kEps = 1.e-2,kEPS=1e-1;
     if (!state) 		break;
     if (nHits < kons->mMinHits) 	break;
     StvNode *badNode=mCurrTrak->GetNode(StvTrack::kMaxXi2);
+//    StvNode *badNode=mCurrTrak->GetMaxKnnNode();
     if (!badNode) 		break;
     badNode->SetHit(0); nDrops++;
     nHits--; if (nHits < kons->mMinHits) { state = 1000000; break;}
