@@ -121,7 +121,9 @@ StvHlxDers   *fDeriv;		//Derivative matrix in THelixTrack notation
 StvELossTrak *fELossTrak;	//Energy loss calculator
 StvMCField   *fField;		//Mag field calculator
 const TGeoMaterial *fPrevMat;
+TGeoVolume *fHALLVolu;
 char fLast[1];
+TString fCurrPath;		//Path in current  Dive()
 TString fPrevPath;		//Path in previous Dive()
 private:
 
