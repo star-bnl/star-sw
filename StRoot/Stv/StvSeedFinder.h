@@ -14,6 +14,9 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+//#define KNNDEBUG 1
+
+
 /// \class StvSeedFinder
 class StvDraw;
 class StvHit;
@@ -24,7 +27,10 @@ class THelixTrack;
 class StvSeedFinder : public TNamed
 {
 public:
-enum {kMinHits=5,kMaxHits = 10};
+//enum {kMinHits=5,kMaxHits = 10};
+//enum {kMinHits=5,kMaxHits = 8};
+//enum {kMinHits=5,kMaxHits = 7};
+enum {kMinHits=5,kMaxHits = 6};
 public:
   StvSeedFinder(const char *name);
   virtual ~StvSeedFinder(){;}
@@ -55,6 +61,13 @@ StvHits  fSeedHits;
 THelixFitter fHelix;
 StvDraw *fDraw;
 double   fXi2[2];	//Xi2[0] without hit errs,[1] with hit errs
+
+#ifdef KNNDEBUG
+double mKNNMiMax[3];
+int    mKNNIdx[2];  
+#endif //  KNNDEBUG
+
+
 ClassDef(StvSeedFinder,0);
 };
 
