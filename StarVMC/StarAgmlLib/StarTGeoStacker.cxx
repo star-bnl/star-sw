@@ -371,6 +371,7 @@ StarTGeoStacker::StarTGeoStacker( const Char_t *name, const Char_t *title )
   // Ensure that we have a geometry manager
   if ( !gGeoManager ) {
     TGeoManager *manager = new TGeoManager("dyson","The STAR Geometry Manager");
+    //manager -> GetListOfMaterials() -> SetOwner(false);
   }
 
 
@@ -381,7 +382,8 @@ StarTGeoStacker::StarTGeoStacker( const Char_t *name, const Char_t *title )
       AgMaterial &m = AgMaterial::Get(ag[i]);
       TString name = ag[i];
       name.ToUpper();
-      gGeoManager->AddMaterial(new TGeoMaterial(name, m.par("a"),m.par("z"),m.par("dens"),m.par("radl"),m.par("absl")));
+      TGeoMaterial *temp = new TGeoMaterial(name, m.par("a"),m.par("z"),m.par("dens"),m.par("radl"),m.par("absl"));
+      gGeoManager->AddMaterial( temp );
       gGeoManager->GetMaterial(name)->SetTitle("AgML Default Material");
     }
   
