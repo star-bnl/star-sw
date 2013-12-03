@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.266 2013/09/30 16:12:09 jwebb Exp $
+* $Id: geometry.g,v 1.267 2013/12/03 16:54:36 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.267  2013/12/03 16:54:36  jwebb
+* Added y2014 first cut geometry.
+*
 * Revision 1.266  2013/09/30 16:12:09  jwebb
 * Fixes for IDSM / PIPE.
 *
@@ -357,7 +360,7 @@
 * upgr16 (Jan)
 *
 * Revision 1.167  2008/06/03 22:27:16  fisyak
-* Add y2005g and y2007g geometries for SVT with latest Rene's corrections
+* Add y2005g and y2007g geometries for SVT with latest Renes corrections
 *
 * Revision 1.166  2008/04/23 22:00:29  perev
 * tofZ0=0.00 ==> tofZ0=-0.50 /xin
@@ -446,7 +449,7 @@
 * which they share with Y2007.
 *
 * Revision 1.146  2007/02/16 22:57:50  potekhin
-* As per Xin's communications, the correct logic for year 2007
+* As per Xins communications, the correct logic for year 2007
 * in the upVPD code is triggered when the config flag is set to 7.
 * I make this tweak in steering for Y2007.
 *
@@ -501,7 +504,7 @@
 *
 * Revision 1.135  2006/11/22 17:41:49  potekhin
 * Added a tag which will be used exclusively for the material
-* balance effect study, i.e. it won't contains any realistic
+* balance effect study, i.e. it won`t contains any realistic
 * detectors in the center of STAR, and feature a variable
 * thickness cylinder instead.
 *
@@ -584,7 +587,7 @@
 * Revision 1.119  2006/01/18 23:06:13  potekhin
 * Introducing the baseline year 2006 geometry, which is "the best"
 * Y2005 geo plus the bugfix in the TPC backplane (not too important).
-* Pending a better definition of the SSD from Lilian which we'll have
+* Pending a better definition of the SSD from Lilian which we`ll have
 * to version and maybe cut new tags of 2004-5 geometries if there is
 * a need.
 *
@@ -624,7 +627,7 @@
 * geometry for the shielding studies. Added steering for
 * the shield and renamed a variable to avoid naming clash.
 * Also, removed ZCAL from this tag, because it would take
-* time to reconsile its geometry with the shield, and it's
+* time to reconsile its geometry with the shield, and it`s
 * not too important for teh shielding study.
 *
 * Revision 1.113  2005/07/14 22:13:32  potekhin
@@ -667,7 +670,7 @@
 * the latest TOF upgrades from Xin
 *
 * Revision 1.107  2005/04/07 19:52:30  potekhin
-* As per Janet's note, update the FTPC config
+* As per Janet`s note, update the FTPC config
 * in Y2004C (Ar+CO2)
 *
 * Revision 1.106  2005/04/04 22:13:37  potekhin
@@ -747,7 +750,7 @@
 * Revision 1.95  2004/10/26 21:46:23  potekhin
 * 1) Cleaned out the remaining test code from Y2004B
 * 2) Created Y2005X which is same as Y2004B except for
-* the full barrel calorimeter as per Thomas' request
+* the full barrel calorimeter as per Thomas` request
 *
 * Revision 1.94  2004/10/26 21:11:00  potekhin
 * 1) Moved filling of GDAT to the end of code after a consultation
@@ -774,14 +777,14 @@
 * the other dubbed MITT, necessitates the creation
 * of dedicated geometries that can be used for R&D
 * for both. The previous COMPLETE geometry was not
-* well suited for this at all, and didn't allow
+* well suited for this at all, and didn`t allow
 * proper versioning. Hence, the new MITT1 tag has
 * been created, on same footing as COMPLETE but
 * with a different structure.
 *
 * Revision 1.90  2004/05/10 21:49:38  potekhin
 * For consistency, the SSD config in the y2004a tag should
-* be equal 2 (even if the SSD data won't be used)
+* be equal 2 (even if the SSD data won`t be used)
 *
 * Revision 1.89  2004/04/28 23:30:37  potekhin
 * Deleted an unnecessary line setting the
@@ -800,7 +803,7 @@
 * Revision 1.86  2004/04/14 19:02:12  potekhin
 * Introducing the geometry Y2004A, which is same as
 * Y2004 but with full Barrel Calorimeter, a-la Y2003X,
-* as per requests of PWG's. Subject to final approval.
+* as per requests of PWG`s. Subject to final approval.
 *
 * Revision 1.85  2004/03/31 16:37:51  potekhin
 * Added version control for the FPD,
@@ -816,7 +819,7 @@
 *
 * Revision 1.82  2004/03/04 02:38:38  potekhin
 * Added modifications COMPLETE, to exclude SISD
-* as per Kai request -- won't affect anybody else
+* as per Kai request -- won`t affect anybody else
 *
 * Revision 1.81  2004/02/10 00:27:57  potekhin
 * The SVT group wanted the correction in the SVT geometry,
@@ -835,7 +838,7 @@
 *
 * Revision 1.79  2004/01/22 00:21:32  potekhin
 * Provide a facility to position the SVT with the MANY option,
-* which we'll likely need due to overlap of the PIXL (embedded
+* which we`ll likely need due to overlap of the PIXL (embedded
 * in SVT) and the mother volume of the beampipe
 *
 * Revision 1.78  2004/01/19 22:53:27  potekhin
@@ -878,7 +881,7 @@
 * Revision 1.74  2003/11/14 22:56:19  potekhin
 * We are about to redo a sim run with y2003x,
 * and it seems that me might put in some of the
-* prior corrections as well. Therefore, I'm changing
+* prior corrections as well. Therefore, I`m changing
 * the correctin level to 2.
 *
 * Revision 1.73  2003/11/13 00:54:50  potekhin
@@ -932,18 +935,18 @@
 * and which had been missing before.
 *
 * Revision 1.66  2003/10/10 23:59:18  potekhin
-* Per Jerome's suggestion, which I agree with, we should
+* Per Jerome`s suggestion, which I agree with, we should
 * semantically separate our current geometry tags from the
 * future development ones. Also, it makes sense to have a more
 * complete (as compared to 2003) geometry, for the pixel
 * studies. Therefore, the pixel testbed tag has been
 * renamed and the STAR detector more fully populated.
-* It's now ASYMPT1, and the indexing may continue.
+* It`s now ASYMPT1, and the indexing may continue.
 *
 * Revision 1.65  2003/10/10 23:15:35  potekhin
 * In previous check-n: forgot to mention the new CorrNum=3
 * which actually programmatically modifies the inner radius of
-* the shield in the SVT -- otherwise the pixel detector won't
+* the shield in the SVT -- otherwise the pixel detector won`t
 * fit. Plus, put in extra flags PIXL_ON and PIPE_OFF to facilitate
 * experimentation.
 *
@@ -1000,7 +1003,7 @@
 * logic.
 *
 * Revision 1.59  2003/08/21 20:29:27  potekhin
-* As per discussion with Jerome, I'm introducing
+* As per discussion with Jerome, I`m introducing
 * a cleaner versioning of the 2003 geometries:
 *
 * y2003a is now really the corrected year2003,
@@ -1011,7 +1014,7 @@
 * include extra material in the SVT, new ECAL configuration
 * as well as a new FPD, plus the Photon Multiplicity Detector.
 * Other changes will be done as needed. So for practical
-* purposes, this will be the actual Fall'03 geometry.
+* purposes, this will be the actual Fall`03 geometry.
 *
 * Revision 1.58  2003/08/05 23:37:09  potekhin
 * Continued to use the CorrNum "correction level" to
@@ -1207,6 +1210,7 @@ replace [exe EMCUTS(#,#);] with [ "Set eemc / bemc cuts to #1";
 
 *                                                                                      FPD Calorimeter 
 
+replace [exe FPDMof;] with [; "FMS/FPD off"; FPDM=off; FpdmConfig=0; ]
 replace [exe FPDM00;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 0;]
 replace [exe FPDM01;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 1;]
 replace [exe FPDM02;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 2;]
@@ -1427,6 +1431,7 @@ replace [exe VPDD04;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConf
 replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=7;]
 
 
+replace [exe FGTDof;] with  [;FGTD=off;FgtdConfig=0; "FGT off";]
 replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
 replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 5 half plus one full disk"]
 replace [exe FGTDv32;] with [;FGTD=on;FgtdConfig=32; "FGT v3 6 disks"]
@@ -2174,16 +2179,16 @@ REPLACE [exe y2013_2x;] with [ "Y2013 asymptotic sans PIXL";
 c ===============================================================================
 c ===============================================================================
 c ===============================================================================
-
-REPLACE [exe dev14;] with ["DEV14 upgrade geometry";
+REPLACE [exe y2014;] with ["Y2014 first cut geometry";
+    exe FGTDof;      "switch off FGT";
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
-    exe BTOF67;      "time of flight";
+    exe BTOFv8;      "time of flight";
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
     exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe BBCMon;      "beam beam counters";
-    exe FPDM03;      "Latest version of FPD";
+    exe FPDMof;      "Latest version of FPD";
     exe VPDD07;      "Latest version of VPD";
     exe FTPCof;      "no FTPC";
     exe SVTTof;      "No SVT";
@@ -2198,6 +2203,7 @@ REPLACE [exe dev14;] with ["DEV14 upgrade geometry";
     exe PIXL06;      "Full config of the pixl detector";
     exe DTUB01;      "DTUB";
 ]
+
 
 
 
@@ -3092,9 +3098,9 @@ If LL>0
   Case Y2013_1a { Y2013_1a : Y2013 1st prod geometry w/  PIXL; Geom = 'y2013a    '; exe y2013a;   }
   Case Y2013_2a { Y2013_2a : Y2013 1st prod geometry w/o PIXL; Geom = 'y2013a    '; exe y2013a;   }
 
-  Case dev14 { dev14 : y2014 studies;
-                 Geom = 'dev14   ';
-                 exe dev14; }
+  Case y2014 { y2014 : y2014 first cut;
+                 Geom = 'y2014   ';
+                 exe y2014; }
 
   Case devE  { devE : eSTAR development geometry;
                  Geom = 'devE    ';

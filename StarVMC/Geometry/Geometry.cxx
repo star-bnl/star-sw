@@ -1168,7 +1168,8 @@ Bool_t Geometry::FpdmInit()
 {
 
   fpdmGeom.position = 0; // closed
-  fpdmGeom.select="FPDM00"; fpdmGeom.config=0; fpdmGeom.module="FpdmGeo"; fpdmGeom.fill();
+  fpdmGeom.select="FPDMof"; fpdmGeom.config=0; fpdmGeom.module="None";     fpdmGeom.fill();
+  fpdmGeom.select="FPDM00"; fpdmGeom.config=0; fpdmGeom.module="FpdmGeo";  fpdmGeom.fill();
   fpdmGeom.select="FPDM01"; fpdmGeom.config=1; fpdmGeom.module="FpdmGeo1"; fpdmGeom.fill();
   fpdmGeom.select="FPDM02"; fpdmGeom.config=2; fpdmGeom.module="FpdmGeo2"; fpdmGeom.fill();
   fpdmGeom.select="FPDM03"; fpdmGeom.config=3; fpdmGeom.module="FpdmGeo3"; fpdmGeom.fill();
