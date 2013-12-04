@@ -1,7 +1,7 @@
 <Document file="StarVMC/Geometry/Compat/xgeometry.xml">   
  
 <Export language="Mortran"> 
-<Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
+  <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
 
 
@@ -15,9 +15,12 @@ call geometry
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.25 2013/12/03 16:54:25 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.26 2013/12/04 20:01:29 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.26  2013/12/04 20:01:29  jwebb
+  Removes FGT cables from IDSM in y2014.
+
   Revision 1.25  2013/12/03 16:54:25  jwebb
   Added y2014 first cut geometry.
 

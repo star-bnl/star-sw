@@ -931,8 +931,9 @@ Bool_t Geometry::ConstructIdsm( const Char_t *flag, Bool_t go )
     }
 
   AgStructure::AgDetpNew( idsmGeom.module, Form("Inner Detector Support Module with configuration %s",flag));
-  if ( geom.fgtdStat ) AgStructure::AgDetpAdd( "Idsc_t", "version", (Float_t)2.0 );
-  else                 AgStructure::AgDetpAdd( "Idsc_t", "version", (Float_t)1.0 );
+  //  if ( geom.fgtdStat ) AgStructure::AgDetpAdd( "Idsc_t", "version", (Float_t)2.0 );
+  //  else                 AgStructure::AgDetpAdd( "Idsc_t", "version", (Float_t)1.0 );
+  AgStructure::AgDetpAdd( "Idsc_t", "version", float( idsmGeom.config ) );
 
   if ( go )
   if ( !CreateModule( idsmGeom.module  ) )
@@ -2042,6 +2043,7 @@ Bool_t Geometry::IdsmInit()
   idsmGeom.select="IDSMon"; idsmGeom.module="IdsmGeo1"; idsmGeom.config=1; idsmGeom.fill();
   idsmGeom.select="IDSM01"; idsmGeom.module="IdsmGeo1"; idsmGeom.config=1; idsmGeom.fill();
   idsmGeom.select="IDSM02"; idsmGeom.module="IdsmGeo2"; idsmGeom.config=2; idsmGeom.fill();
+  idsmGeom.select="IDSM14"; idsmGeom.module="IdsmGeo2"; idsmGeom.config=14;idsmGeom.fill();
   return true;
 }
 
