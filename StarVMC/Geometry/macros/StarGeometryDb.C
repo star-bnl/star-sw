@@ -1018,7 +1018,7 @@ void y2014()
     geom.istdFlag = "ISTD02";  geom.istdStat = 1;
     // ================================================
     geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
-    geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
+    geom.idsmFlag = "IDSM14";  geom.idsmStat = 1;
     // ================================================
     //
     setTitle("Upgrade studies with 6 complete FGT disks");

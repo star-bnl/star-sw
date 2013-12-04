@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.267 2013/12/03 16:54:36 jwebb Exp $
+* $Id: geometry.g,v 1.268 2013/12/04 20:01:33 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.268  2013/12/04 20:01:33  jwebb
+* Removes FGT cables from IDSM in y2014.
+*
 * Revision 1.267  2013/12/03 16:54:36  jwebb
 * Added y2014 first cut geometry.
 *
@@ -1439,6 +1442,7 @@ replace [exe FGTDv55;] with [;FGTD=on;FgtdConfig=55; "FGT very forward upgrade w
 
 replace [exe IDSM01;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
 replace [exe IDSM02;] with [;IDSM=on;IdsmConfig=2; "Inner Detector Support"]
+replace [exe IDSM14;] with [;IDSM=on;IdsmConfig=14; "Y2014 version of IDSM"]
 
 replace [exe FSTDof;] with  [;FSTD=off;]
 replace [exe ITSPof;] with  [;ITSP=off;] "prototype of the Inner Tracker SuPport structure"
@@ -4524,8 +4528,9 @@ If LL>0
    IF IDSM { "Inner detector support module" 
       Call AgDETP new ('IDSM')
       Call AgDETP add ('IDSC.version=',IdsmConfig,1)
-      IF IdsmConfig==1 { CONSTRUCT IdsmGeo1; }
-      IF IdsmConfig==2 { CONSTRUCT IdsmGeo2; }
+      IF IdsmConfig==1  { CONSTRUCT IdsmGeo1; }
+      IF IdsmConfig==2  { CONSTRUCT IdsmGeo2; }
+      IF IdsmConfig==14 { CONSTRUCT IdsmGeo2; }
    }
 
 * Pipe:

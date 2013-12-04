@@ -173,7 +173,9 @@
    <var name="fgtNdisk"     value="6"   comment="number of disks" />
    <var name="ewcsInnerRad" value="39.91" comment="Inner radius of ESC OSC " />
    <var name="ewcsOuterRad" value="40.005" comment="Inner radius of ESC OSC " />
-
+</Fill>
+<Fill name="IDSG" comment="IDS Geometry data, 46.1cm inner radii of IFC">
+   <var name="version" value="14" comment="Year 14, strip out the FGT cables" />
 </Fill>
 
 
