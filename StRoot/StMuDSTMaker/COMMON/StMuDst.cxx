@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.59 2012/11/26 23:14:32 fisyak Exp $
+ * $Id: StMuDst.cxx,v 1.60 2013/12/04 19:56:32 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -36,6 +36,7 @@
 #include "StBTofHeader.h"
 #include "StBTofPidTraits.h"
 #include "StMuBTofHit.h"
+#include "StMuMtdHit.h"
 #include "TClonesArray.h"
 #include "TTree.h"
 #ifndef __NO_STRANGE_MUDST__
@@ -396,6 +397,62 @@ void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, T
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+void StMuDst::fixMtdTrackIndices() {
+  /// global and primary tracks share the same id, so we can fix the 
+  /// index2Global up in case they got out of order (e.g. by removing 
+  /// a track from the TClonesArrays
+    fixMtdTrackIndices( mtdArrays[muBTofHit], arrays[muPrimary], arrays[muGlobal] );  
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDst::fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TClonesArray* global) {
+
+  if ( !(primary&&global&&mtdHit) ) return;
+  DEBUGMESSAGE1("");
+  StTimer timer;
+  timer.start();
+
+ int nPrimarys = primary->GetEntriesFast();
+  int nGlobals = global->GetEntriesFast();
+  int nMtdHits = mtdHit->GetEntriesFast();
+  // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
+  map<short,unsigned short> mtdIndex;
+  map<short,unsigned short> globalIndex;
+  map<short,unsigned short> primaryIndex;
+
+  for (int i=0; i<nMtdHits; i++) {
+    StMuMtdHit *t = (StMuMtdHit*) mtdHit->UncheckedAt(i);
+    if (t) {
+      mtdIndex[t->associatedTrackKey()] = i+1;  // starting from 1
+    }
+  }
+
+  for (int i=0; i<nGlobals; i++) {
+    StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
+    if (g) {
+      globalIndex[g->id()] = i+1;
+
+      if(mtdIndex[g->id()])
+        g->setIndex2MtdHit( mtdIndex[g->id()]-1 );
+      else
+        g->setIndex2MtdHit(-1);
+    }
+  }
+  for (int i=0; i<nPrimarys; i++) {
+    StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
+    if (p) {
+      primaryIndex[p->id()] = i+1;
+
+      if(mtdIndex[p->id()])
+        p->setIndex2MtdHit( mtdIndex[p->id()]-1 );
+      else
+        p->setIndex2MtdHit(-1);
+    }
+  }
+
+  DEBUGVALUE2(timer.elapsedTime());
+}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -750,6 +807,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.60  2013/12/04 19:56:32  jdb
+ * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
+ *
  * Revision 1.59  2012/11/26 23:14:32  fisyak
  * Replace GetEntries() by GetEntriesFast(), fix print outs
  *

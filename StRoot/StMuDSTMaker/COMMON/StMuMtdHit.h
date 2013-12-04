@@ -25,6 +25,8 @@ public:
     short associatedTrackKey() const;
     int             idTruth() const;
     int             qaTruth() const;
+
+    void setAssociatedTrackKey(short);
 	
 private:
 
@@ -41,5 +43,7 @@ private:
 ClassDef(StMuMtdHit,1)
 
 };
+
+inline void StMuMtdHit::setAssociatedTrackKey(short id) { mTrackKey=id; }
 
 #endif

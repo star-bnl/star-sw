@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.48 2012/05/07 14:47:06 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.49 2013/12/04 19:56:32 jdb Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -15,6 +15,8 @@
 ///dongx
 #include "StEvent/StBTofHit.h"
 #include "StEvent/StBTofPidTraits.h"
+#include "StEvent/StMtdHit.h"
+#include "StEvent/StMtdPidTraits.h"
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "StEvent/StTpcDedxPidAlgorithm.h"
 #include "StarClassLibrary/StThreeVectorD.hh"
@@ -222,6 +224,9 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
  /// dongx
   mIndex2BTofHit = -1;   // filled later
   fillMuBTofPidTraits(track);
+  
+  mIndex2MtdHit = -1;    
+  fillMuMtdPidTraits(track);
 
   if ( track->outerGeometry() ) 
     mOuterHelix = StMuHelix(track->outerGeometry()->helix(),event->runInfo()->magneticField());
@@ -457,6 +462,17 @@ void StMuTrack::fillMuBTofPidTraits(const StTrack* t) {
     }    
   }
 }
+void StMuTrack::fillMuMtdPidTraits(const StTrack* t) {
+  StMtdPidTraits* mtdPidTraits = 0;
+  StPtrVecTrackPidTraits traits = t->pidTraits(kMtdId);
+  unsigned int size = traits.size();
+  for (unsigned int i = 0; i < size; i++) {
+    if ( (mtdPidTraits=dynamic_cast<StMtdPidTraits*>(traits[i])) ) {   
+      mMtdPidTraits.setMtdPidTraits(mtdPidTraits);
+    }    
+  }
+}
+
 #if 0
 void StMuTrack::Print(Option_t *option) const {
   //
@@ -665,6 +681,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.49  2013/12/04 19:56:32  jdb
+ * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
+ *
  * Revision 1.48  2012/05/07 14:47:06  fisyak
  * Add handles for track to fast detector matching
  *

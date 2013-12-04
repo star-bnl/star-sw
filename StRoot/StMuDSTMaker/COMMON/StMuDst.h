@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.49 2013/07/23 11:02:59 jeromel Exp $
+ * $Id: StMuDst.h,v 1.50 2013/12/04 19:56:32 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -137,8 +137,10 @@ public:
   StTrack* createStTrack(StMuTrack*);
   /// dongx
   static void fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global);
+  static void fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TClonesArray* global);
   ///
   void fixTofTrackIndices();
+  void fixMtdTrackIndices();
 
  protected:
   /// array of TClonesArrays
@@ -440,6 +442,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.50  2013/12/04 19:56:32  jdb
+ * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
+ *
  * Revision 1.49  2013/07/23 11:02:59  jeromel
  * Undo changes (KF and other)
  *
