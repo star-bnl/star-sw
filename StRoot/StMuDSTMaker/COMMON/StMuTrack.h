@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.46 2013/11/16 00:19:49 jdb Exp $
+ * $Id: StMuTrack.h,v 1.47 2013/12/04 19:56:32 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -22,6 +22,7 @@
 #include "StMuUtilities.h"
 #include "StMuProbPidTraits.h"
 #include "StMuBTofPidTraits.h" /// dongx
+#include "StMuMtdPidTraits.h" /// Bingchu
 #include "StMuPrimaryTrackCovariance.h"
 
 
@@ -48,6 +49,7 @@ class StEmcGeom;
 class StEmcPosition;
 class StuProbabilityPidAlgorithm;
 
+class StMuMtdHit;
 class TObjArray;
 
 class StMuTrack : public TObject {
@@ -65,11 +67,13 @@ class StMuTrack : public TObject {
     int index2Cov() const;
     int index2RichSpectra() const; ///< Returns index of associated rich spectra.
     int index2BTofHit() const; /// dongx
+    int index2MtdHit() const; /// 
     int vertexIndex() const; ///< Returns index of associated primary vertex.
 	const StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
 	const StMuTrack* primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
 	const StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
     const StMuBTofHit* tofHit() const;  /// dongx
+    const StMuMtdHit* mtdHit() const;  /// Bingchu
     unsigned short nHits() const;     ///< Return total number of hits on track.
     unsigned short nHitsPoss() const; ///< Return number of possible hits on track.
     unsigned short nHitsPoss(StDetectorId) const; ///< Return number of possible hits on track.
@@ -108,11 +112,14 @@ class StMuTrack : public TObject {
     StPhysicalHelixD outerHelix() const; ///< Returns outer helix (last measured point)
     const StMuProbPidTraits &probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
     const StMuBTofPidTraits &btofPidTraits() const; /// dongx
+    const StMuMtdPidTraits &mtdPidTraits() const; /// 
     void setBTofPidTraits(const StMuBTofPidTraits& pid); /// dongx
+    void setMtdPidTraits(const StMuMtdPidTraits& pid); /// 
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
     virtual void Print(Option_t* option = "") const;  ///< Print track info
     void setIndex2BTofHit(int i) {mIndex2BTofHit=i;} /// dongx
+    void setIndex2MtdHit(int i) {mIndex2MtdHit=i;} /// Bingchu
     void setIndex2Cov(int i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
 
 	//Matching to BEMC related functions
@@ -126,14 +133,14 @@ class StMuTrack : public TObject {
   void         setIdParentVx(Int_t id) {mIdParentVx = id;}
 
 protected:
-  
-  Int_t   mId;
+  Int_t mId;
   Short_t mType;
   Short_t mFlag;
   UInt_t  mFlagExtension; // bit wise fast detector matching status
   Int_t mIndex2Global;
   Int_t mIndex2RichSpectra;
   Int_t mIndex2BTofHit;     // dongx
+  Int_t mIndex2MtdHit;      // 
   Int_t mVertexIndex;       // Primary vertex id for this track's dca
   UChar_t mNHits;           // Total number of points (was (F)tpc only)
   UChar_t mNHitsPoss;       // Total possible points (was (F)tpc only)
@@ -167,6 +174,7 @@ protected:
   StMuHelix mOuterHelix;
   StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyak pid probabilities.
   StMuBTofPidTraits mBTofPidTraits; /// dongx
+  StMuMtdPidTraits  mMtdPidTraits; /// Bingchu
   Int_t mIndex2Cov;
   // IdTruth
   UShort_t         mIdTruth; // MC track id if any 
@@ -180,6 +188,7 @@ protected:
   StThreeVectorD momentumAtPrimaryVertex(const StEvent *event, const StTrack* track, const StVertex *vertex) const; ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
   void fillMuProbPidTraits(const StEvent*, const StTrack*); ///< Helper function to fill all the different pid values 
   void fillMuBTofPidTraits(const StTrack*); /// dongx
+  void fillMuMtdPidTraits(const StTrack*); /// Bingchu
   static StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm; ///< StuProbabilityPidAlgorithm, we will use the same algorithm for all tracks
   static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
   friend class StMuDst;
@@ -195,6 +204,7 @@ inline int StMuTrack::index2Global() const {return mIndex2Global;}
 inline int StMuTrack::index2Cov() const {return mIndex2Cov;}
 inline int StMuTrack::index2RichSpectra() const {return mIndex2RichSpectra;}
 inline int StMuTrack::index2BTofHit() const {return mIndex2BTofHit;}  /// dongx
+inline int StMuTrack::index2MtdHit() const {return mIndex2MtdHit;}  ///
 inline unsigned short StMuTrack::nHits() const {return mNHits;}
 inline unsigned short  StMuTrack::nHitsDedx() const {return mNHitsDedx;}
 inline unsigned short  StMuTrack::nHitsFit() const {return mNHitsFit;}
@@ -224,21 +234,24 @@ inline const StThreeVectorF &StMuTrack::lastPoint() const {return mLastPoint;}
 //!inline StPhysicalHelixD StMuTrack::outerHelix() const {return mOuterHelix;}
 inline const StMuProbPidTraits &StMuTrack::probPidTraits() const { return mProbPidTraits;} ///< Returns Yuri Fisyak new pid probabilities. 
 inline const StMuBTofPidTraits &StMuTrack::btofPidTraits() const { return mBTofPidTraits;} /// dongx
+inline const StMuMtdPidTraits &StMuTrack::mtdPidTraits() const { return mMtdPidTraits;} /// Bingchu
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
 inline void StMuTrack::setProbabilityPidCentrality(double cent) { mProbabilityPidCentrality = cent;}
 inline void StMuTrack::setBTofPidTraits(const StMuBTofPidTraits& pid) { mBTofPidTraits = pid; }
+inline void StMuTrack::setMtdPidTraits(const StMuMtdPidTraits& pid) { mMtdPidTraits = pid; }
 
 inline const StMuTrack* StMuTrack::globalTrack() const { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
 inline const StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
 inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (StMuBTofHit*)StMuDst::btofArray(muBTofHit)->UncheckedAt(mIndex2BTofHit) :0;} /// dongx
+inline const StMuMtdHit* StMuTrack::mtdHit() const { return (mIndex2MtdHit>=0) ? (StMuMtdHit*)StMuDst::mtdArray(muMTDHit)->UncheckedAt(mIndex2MtdHit) :0;} /// 
 ostream&              operator<<(ostream& os, StMuTrack const & v);
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
- * Revision 1.46  2013/11/16 00:19:49  jdb
- * StMuTrack.h, changed mId from Short_t to Int_t
+ * Revision 1.47  2013/12/04 19:56:32  jdb
+ * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
  *
  * Revision 1.45  2013/07/23 11:02:59  jeromel
  * Undo changes (KF and other)

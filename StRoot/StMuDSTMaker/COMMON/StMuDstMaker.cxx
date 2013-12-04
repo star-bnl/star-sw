@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.117 2013/07/23 11:02:59 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.118 2013/12/04 19:56:32 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1005,6 +1005,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
 
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
+  mStMuDst->fixMtdTrackIndices();
   mStMuDst->fixTrackIndicesG(mStMuDst->numberOfPrimaryVertices());
 }
 
@@ -1816,6 +1817,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.118  2013/12/04 19:56:32  jdb
+ * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
+ *
  * Revision 1.117  2013/07/23 11:02:59  jeromel
  * Undo changes (KF and other)
  *
