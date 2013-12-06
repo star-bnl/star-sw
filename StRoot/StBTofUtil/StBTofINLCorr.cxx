@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.10 2012/12/14 06:35:41 geurts Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.11 2013/12/06 23:27:59 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.11  2013/12/06 23:27:59  geurts
+ * improve diagnostics in log output (when comparing max ranges to actual ranges)
+ *
  * Revision 1.10  2012/12/14 06:35:41  geurts
  * Changed global database calls to direct table access and/or removed deprecated database access code.
  *
@@ -109,13 +112,13 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
   tofINLSCorr_st* inlcorr = static_cast<tofINLSCorr_st*>(tofINLCorr->GetArray());
   numRows = tofINLCorr->GetNRows();
   if(numRows>mNTDIGMAX*mNChanOnTDIG) {
-    { LOG_WARN << "number of rows in tofINLSCorr table exceed the array limit in this function! Entries truncated !!!" << endm; }
+    { LOG_WARN << "number of rows in tofINLSCorr table ("<< numRows<<") exceeds the array limit ("<<mNTDIGMAX*mNChanOnTDIG << ") in this function! Entries truncated !!!" << endm; }
   }
   Int_t NTdig = 0;
   Int_t tdigId_old = 0;
   for (Int_t i=0;i<numRows;i++) {
-    if(NTdig>=mNTDIGMAX) {
-      { LOG_WARN << " number of boards read-in exceeds the array limit in this function! NTDIG Truncated !!! " << endm; }
+    if(NTdig>mNTDIGMAX) {
+      { LOG_WARN << " number of boards read-in ("<< NTdig <<") exceeds the array limit ("<<mNTDIGMAX <<") in this function! NTDIG Truncated !!! " << endm; }
       NTdig = mNTDIGMAX;
       break;
     }
