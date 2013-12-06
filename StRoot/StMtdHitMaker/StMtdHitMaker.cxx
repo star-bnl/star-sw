@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.9 2013/04/25 14:52:06 geurts Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.10 2013/12/06 23:29:59 geurts Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -139,6 +139,38 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber) {
 				mTray2TdigMap[i][4] = 4;
 			}
 		}
+		/// Run-13 tray mapping from UT Austin database -- this will move to STAR database
+		/// backlegs backlegs: 1-8, 10, 22, and  25-30
+		/// http://wjllope.rice.edu/~MTD/MTDInstallDocumentation.pdf (p.3), with tray 240 originally being 255.
+		int bl; // note that this "bl" really is BackLeg-1
+		bl=21; mTrayId[bl][0]=273; mTrayId[bl][1]=247; mTrayId[bl][2]=250; mTrayId[bl][3]=252; mTrayId[bl][4]=251;
+		bl=24; mTrayId[bl][0]=213; mTrayId[bl][1]=236; mTrayId[bl][2]=218; mTrayId[bl][3]=244; mTrayId[bl][4]=228;
+		bl=25; mTrayId[bl][0]=237; mTrayId[bl][1]=200; mTrayId[bl][2]=211; mTrayId[bl][3]=210; mTrayId[bl][4]=246;
+		bl=26; mTrayId[bl][0]=212; mTrayId[bl][1]=207; mTrayId[bl][2]=206; mTrayId[bl][3]=204; mTrayId[bl][4]=225;
+		bl=27; mTrayId[bl][0]=208; mTrayId[bl][1]=205; mTrayId[bl][2]=202; mTrayId[bl][3]=201; mTrayId[bl][4]=203;
+		bl=28; mTrayId[bl][0]=223; mTrayId[bl][1]=241; mTrayId[bl][2]=215; mTrayId[bl][3]=233; mTrayId[bl][4]=229;
+		bl=29; mTrayId[bl][0]=214; mTrayId[bl][1]=224; mTrayId[bl][2]=217; mTrayId[bl][3]=221; mTrayId[bl][4]=234;
+		bl=0;  mTrayId[bl][0]=227; mTrayId[bl][1]=242; mTrayId[bl][2]=216; mTrayId[bl][3]=222; mTrayId[bl][4]=231;
+		bl=1;  mTrayId[bl][0]=230; mTrayId[bl][1]=226; mTrayId[bl][2]=219; mTrayId[bl][3]=232; mTrayId[bl][4]=235;
+		bl=2;  mTrayId[bl][0]=251; mTrayId[bl][1]=253; mTrayId[bl][2]=254; mTrayId[bl][3]=248; mTrayId[bl][4]=269;
+		bl=3;  mTrayId[bl][0]=267; mTrayId[bl][1]=249; mTrayId[bl][2]=268; mTrayId[bl][3]=272; mTrayId[bl][4]=270;
+		bl=4;  mTrayId[bl][0]=280; mTrayId[bl][1]=256; mTrayId[bl][2]=262; mTrayId[bl][3]=277; mTrayId[bl][4]=281;
+		bl=5;  mTrayId[bl][0]=283; mTrayId[bl][1]=265; mTrayId[bl][2]=260; mTrayId[bl][3]=239; mTrayId[bl][4]=282;
+		bl=6;  mTrayId[bl][0]=276; mTrayId[bl][1]=261; mTrayId[bl][2]=245; mTrayId[bl][3]=257; mTrayId[bl][4]=255;
+		bl=9;  mTrayId[bl][0]=241; mTrayId[bl][1]=258; mTrayId[bl][2]=264; mTrayId[bl][3]=259; mTrayId[bl][4]=279;
+
+		/// TrayID/TDIGId mapping
+		/// one[0] TDIG per MTD tray (data distilled from UT Austin database, cf. run12/INL/tdigs_120106.txt) 
+		Int_t mTdigIdRun13[90] = {  494, 1150, 1151, 1152, 1153, 1141, 1143, 1149, 1155, 1134,
+					    1157, 1140, 1145, 1174, 1148, 1142, 1175, 1172, 1165, 492,
+					    0,   1164, 1144, 1136, 1138, 1146, 1135, 588, 1025, 1130, 
+					    1169, 1170, 1177, 589, 304, 1126, 591, 592, 0, 1237, 
+					    0, 945, 1187, 1173, 1219, 1246, 1125, 1167, 1223, 594,
+					    1198, 1220, 1235, 1234, 593, 1195, 1214, 1238, 1166, 1229,
+					    967, 1161, 1156, 1216, 1240, 1192, 0, 328, 1242, 1230, 
+					    1247, 1217, 1182, 1193, 0, 0, 1194, 1218, 1211, 1183,
+					    698, 1190, 1178, 1210, 0, 0, 0, 0, 0, 0};
+		for (int i=0;i<90;i++) mTdigId[i]=mTdigIdRun13[i];
 	}
 	else{
 		LOG_INFO << "No InitRun for Run " << mYear << endm;
@@ -849,7 +881,7 @@ Int_t StMtdHitMaker::getTdigBoardId(Int_t backlegid, Int_t tray, Int_t chn) {
 		}   
 
 	}
-	if(mYear==12){
+	else if (mYear>11) {
 
 		int itray;
 		for (itray=1;itray<=5;itray++){
