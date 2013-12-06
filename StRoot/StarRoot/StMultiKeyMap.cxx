@@ -215,6 +215,7 @@ StMultiKeyMapIter::StMultiKeyMapIter(const StMultiKeyNode *node,const float *kMi
 void StMultiKeyMapIter::Set(const StMultiKeyNode *node,const float *kMin,const float *kMax)
 {
   memset(mTouched,0,sizeof(mTouched));
+  mTop = node;
   mStk.resize(32);
   mNK = node->GetNKey();
   mKMin=0;mKMax=0;
@@ -228,7 +229,16 @@ void StMultiKeyMapIter::Set(const StMultiKeyNode *node,const float *kMin,const f
   }
   mLev = 0; mStk[0]=0;
   
-  Left(node);
+  Left(mTop);
+  if (FullCheck()) ++(*this);
+}
+//______________________________________________________________________________
+void StMultiKeyMapIter::Reset()
+{
+  memset(mTouched,0,sizeof(mTouched));
+  mStk.resize(32);
+  mLev = 0; mStk[0]=0;
+  Left(mTop);
   if (FullCheck()) ++(*this);
 }
 //______________________________________________________________________________
@@ -313,6 +323,7 @@ static const unsigned int us=1000000007;
 //______________________________________________________________________________
 //______________________________________________________________________________
 #include "TRandom.h"
+#include "TStopwatch.h"
 void StMultiKeyMap::Test()
 {
 printf("StMultiKeyMap::Test() started\n");
@@ -368,13 +379,18 @@ void StMultiKeyMap::Test2()
 printf("StMultiKeyMap::Test2() started\n");
    StMultiKeyMap map(4);
    float key[4];
-   int nEvts = 10000;
+   int nEvts = 1000000;
+
+   TStopwatch TW;
+   TW.Start();
    for (int iEv=0;iEv<nEvts ;iEv++) {
      for (int ik=0;ik<4;ik++) { key[ik]= gRandom->Rndm();}
      map.Add((void*)1,key);
    }  
-
    map.MakeTree(1946);
+   TW.Stop();
+   printf ( "MakeTree Cpu = %g\n",TW.CpuTime());
+   TW.Print();
 //   map.ls();
    double qa = map.Quality();
    printf(" Quality of tree = %g\n\n",qa);
@@ -382,12 +398,16 @@ printf("StMultiKeyMap::Test2() started\n");
 
    float dow[4]={0,  0.1,0.2,0.3};
    float upp[4]={0.2,0.3,0.4,0.5};
-
-   StMultiKeyMapIter iter(map.GetTop(),dow,upp);
    double ev = nEvts;for (int i=0;i<4;i++){ev*=(upp[i]-dow[i]);};
 printf("\n%d ~evts \n",int(ev+0.5));
    int nk = map.GetNKey();
    int nSel = 0,nBad=0;
+   StMultiKeyMapIter iter(map.GetTop(),dow,upp);
+
+   TW.Start(1);
+for (int jkl=0;jkl<10000;jkl++) {
+   iter.Reset();
+   nSel = 0;nBad=0;
    for (StMultiKeyNode *node=0;(node = *iter);++iter)
    {
      nSel++; int good = 0;
@@ -396,6 +416,9 @@ printf("\n%d ~evts \n",int(ev+0.5));
      nBad += (good!=nk); 
 //     printf("%4d - %g %g %g %g \n",nSel,key[0],key[1],key[2],key[3]);
    }
+}//end jkl
+   TW.Stop();
+   printf ( "Search Cpu = %g\n",TW.CpuTime()*1e-4);
    int nb = map.Size();
    StMultiKeyNode **nodes = map.GetArr();
    int nMust=0;
@@ -417,4 +440,5 @@ printf("Touched %d %d %d\n"
       ,iter.Touched()[0],iter.Touched()[1],iter.Touched()[2]);
 
 }
+
 
