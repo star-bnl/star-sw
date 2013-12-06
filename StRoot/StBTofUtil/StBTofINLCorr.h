@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.h,v 1.5 2012/02/11 02:13:23 geurts Exp $
+ * $Id: StBTofINLCorr.h,v 1.6 2013/12/06 23:27:04 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.h,v $
+ * Revision 1.6  2013/12/06 23:27:04  geurts
+ * increasee max number of TDIGs that are stored in database from 1200 to 1202
+ *
  * Revision 1.5  2012/02/11 02:13:23  geurts
  * allow direct access to INL corrections given TDIG-Id
  *
@@ -51,7 +54,7 @@ class StBTofINLCorr{
   static const Int_t mNTDIGOnTray = 8;
   static const Int_t mNGLOBALCHANMAX = 192;
 
-  static const Int_t mNTDIGMAX = 1200;
+  static const Int_t mNTDIGMAX = 1202;
   static const Int_t mNChanOnTDIG = 24;
   static const Int_t mNChanMAX = 1024;
   static const Int_t mNBoardIdMAX = 4800;
