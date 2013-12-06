@@ -36,10 +36,10 @@ static inline double MyXi2(const double G[3],double dA,double dB)
 class TCLx 
 {
 public:
-static void trsinv2x2(const double *pM,double *pMi);
-static void trsinv3x3(const double *pM,double *pMi);
-static void trsinv4x4(const double *pM,double *pMi);
-static void trsinv5x5(const double *pM,double *pMi);
+static int trsinv2x2(const double *pM,double *pMi);
+static int trsinv3x3(const double *pM,double *pMi);
+static int trsinv4x4(const double *pM,double *pMi);
+static int trsinv5x5(const double *pM,double *pMi);
 static void Test();
 };
 
@@ -47,21 +47,21 @@ static void Test();
 #include <math.h>
 
 //______________________________________________________________________________
-void TCLx::trsinv2x2(const double *pM,double *pMi)
+int TCLx::trsinv2x2(const double *pM,double *pMi)
 {
    const double det = pM[0] * pM[2] - pM[1] * pM[1];
 
-   assert(det>3e-33);
+   if (det<=3e-33) return 1;
    const double s = 1./det;
 
    const double tmp = s*pM[2];
    pMi[1] = -pM[1]*s;
    pMi[2] = s*pM[0];
    pMi[0] = tmp;
-
+   return 0;
 }
 //______________________________________________________________________________
-void TCLx::trsinv3x3(const double *pM,double *pMi)
+int TCLx::trsinv3x3(const double *pM,double *pMi)
 {
 //  0
 //  1  2 
@@ -107,7 +107,7 @@ void TCLx::trsinv3x3(const double *pM,double *pMi)
       det = c20*c21-c10*c22;
    }
 
-   assert ( det >3e-33 && tmp >3e-33); 
+   if (det<=3e-33) return 1;
 
    const double s = tmp/det;
 
@@ -117,7 +117,7 @@ void TCLx::trsinv3x3(const double *pM,double *pMi)
    pMi[3] = s*c20;
    pMi[4] = s*c21;
    pMi[5] = s*c22;
-  
+   return 0;  
 }
 //______________________________________________________________________________
 // GFij are indices for a 4x4 matrix.
@@ -141,7 +141,7 @@ void TCLx::trsinv3x3(const double *pM,double *pMi)
 #define GF33 9
 
 //______________________________________________________________________________
-void TCLx::trsinv4x4(const double *pM,double *pMi)
+int TCLx::trsinv4x4(const double *pM,double *pMi)
 {
 
   // Find all NECESSARY 2x2 dets:  (18 of them)
@@ -199,7 +199,7 @@ void TCLx::trsinv4x4(const double *pM,double *pMi)
    const Double_t det = pM[GF00]*det3_123_123 - pM[GF10]*det3_123_023 
                         + pM[GF20]*det3_123_013 - pM[GF30]*det3_123_012;
 
-   assert(det>3e-33);
+   if (det<=3e-33) return 1;
 
    const Double_t oneOverDet = 1.0/det;
    const Double_t mn1OverDet = - oneOverDet;
@@ -217,6 +217,7 @@ void TCLx::trsinv4x4(const double *pM,double *pMi)
    pMi[GF32] =  det3_012_013 * mn1OverDet;
 
    pMi[GF33] =  det3_012_012 * oneOverDet;
+   return 0;
 
 }  
 // GMij are indices for a 5x5 matrix.
@@ -247,7 +248,7 @@ void TCLx::trsinv4x4(const double *pM,double *pMi)
 #define GM44 14
 
 //______________________________________________________________________________
-void TCLx::trsinv5x5(const double  *pM,double  *pMi)
+int TCLx::trsinv5x5(const double  *pM,double  *pMi)
 {
   // Find all NECESSARY 2x2 dets:  (30 of them)
 
@@ -370,7 +371,8 @@ void TCLx::trsinv5x5(const double  *pM,double  *pMi)
 
    const Double_t det = pM[GM00]*det4_1234_1234 - pM[GM10]*det4_1234_0234 + pM[GM20]*det4_1234_0134 
                       - pM[GM30]*det4_1234_0124 + pM[GM40]*det4_1234_0123;
-   assert(det>3e-33);
+
+   if (det<=3e-33) return 1;
 
    const Double_t oneOverDet = 1.0/det;
    const Double_t mn1OverDet = - oneOverDet;
@@ -394,7 +396,7 @@ void TCLx::trsinv5x5(const double  *pM,double  *pMi)
    pMi[GM43] =  det4_0123_0124 * mn1OverDet;
 
    pMi[GM44] =  det4_0123_0123 * oneOverDet;
-
+   return 0;
 }
 #include "TCernLib.h"
 #include "TRandom.h"
@@ -463,16 +465,18 @@ StvDebug::Break(nCall);
   double *P2J = (a+=nP2);
 
 //  TCL::trsinv(E1,E1i,nP1);		//E1i = 1/E1
-  switch(nP1) {
-    case 2: TCLx::trsinv2x2(E1,E1i); break;
-    case 5: TCLx::trsinv5x5(E1,E1i); break;
+  int kase = nP1;
+SWITCHa:  switch(kase) {
+    case 2: if (TCLx::trsinv2x2(E1,E1i)) {kase = 0; goto SWITCHa;}; break;
+    case 5: if (TCLx::trsinv5x5(E1,E1i)) {kase = 0; goto SWITCHa;}; break;
     default: TCL::trsinv   (E1,E1i,nP1);
   }
 
 //  TCL::trsinv(E2,E2i,nP2);		//E2i = 1/E2
-  switch(nP2) {
-    case 2: TCLx::trsinv2x2(E2,E2i); break;
-    case 5: TCLx::trsinv5x5(E2,E2i); break;
+  kase = nP2;
+SWITCHb:  switch(kase) {
+    case 2: if (TCLx::trsinv2x2(E2,E2i)) {kase = 0; goto SWITCHb;}; break;
+    case 5: if (TCLx::trsinv5x5(E2,E2i)) {kase = 0; goto SWITCHb;}; break;
     default: TCL::trsinv   (E2,E2i,nP2);
   }
 
@@ -482,9 +486,10 @@ StvDebug::Break(nCall);
 
   TCL::vadd (E1i,E2i,EJi ,nE2);		//EJi = E1i+E2i
 //TCL::trsinv(EJi,EJm,nP2);		//EJ = 1/EJi
-  switch(nP2) {
-    case 2: TCLx::trsinv2x2(EJi,EJm); break;
-    case 5: TCLx::trsinv5x5(EJi,EJm); break;
+  kase = nP2;
+SWITCHc:  switch(kase) {
+    case 2: if (TCLx::trsinv2x2(EJi,EJm)) {kase = 0; goto SWITCHc;}; break;
+    case 5: if (TCLx::trsinv5x5(EJi,EJm)) {kase = 0; goto SWITCHc;}; break;
     default: TCL::trsinv   (EJi,EJm,nP2);
   }
 
@@ -786,7 +791,7 @@ int StvFitter::Hpdate()
   double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  mQQPars.Arr(),mOtErrs->Arr());
-  assert(fabs(myXi2-mXi2)<1e-1*(myXi2+mXi2+1));
+  assert((myXi2+mXi2)>100 || fabs(myXi2-mXi2)<1e-1*(myXi2+mXi2+1));
   *mOtPars = mTkPars;
 
   return mFailed;
