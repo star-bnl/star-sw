@@ -1,6 +1,6 @@
 <Document file="StarVMC/Geometry/PixGeo/DtubGeo1.xml">
 <!--
-    AgML tutorial geometry
+    PXL DTUB geometry
   -->
 
    <Module name="DtubGeo1" comment="Geometry for Pixel DTube">
@@ -20,8 +20,7 @@
   For a given number of iteration (10), one can get a relatively curvated tube
 -->
 
-   <Content>DTUB,
-            DTUH,
+   <Content>DTUH, <!-- 2 mastervolumes -->
             APTO,
             UCTO,
             OUCY,
@@ -79,6 +78,21 @@
             TUBA
    </Content>
 
+<!-- Note this parameter comes from the PixlGeo, and defines the end of the PXMO master volume
+     The DTUH volume must end at the same distance otherwise we will have overlap issues.
+     The Dtube is also truncated at this distance for the same reason.
+     The 11 long cables (coming from the driver boards needs to be split across volumes i.e. ~1/2 in DTUH and
+     the other half (i.e. 3 per sector in the sector module).
+     The other parts of cables ok. Some part are missing. We could also attempt just to 'average the copper mass over the cylinder
+     to have the approximate right overall mass. This may be sufficient and easier on tracking.
+  (FV) Nov 26 2013
+    For now truncate the 'long' cables so the fit completely with the master DTUH volume.
+    The outside part will have to be made into the active PXLA of the PXL detector itself.
+    Done December 1, 2013
+
+-->
+   <varlist type="float" comment=" Z of the TUBS defining the main volume (PXMO) "> maxZvol/23.26/</varlist>
+
    <varlist type="float" comment=" length of the Dtube SEction A">DSEA/27.5145/</varlist>
    <varlist type="float" comment=" length of the Dtube SEction B">DSEB/2.6467/</varlist>
    <varlist type="float" comment=" length of the Dtube SEction C">DSEC/1.5153/</varlist>
@@ -114,9 +128,9 @@
    <varlist type="int"   comment="internal computations"> ii,jj,kk,ll </varlist> 
    <varlist type="float" comment="internal computations"> xcable,ycable </varlist> 
    <varlist type="float" comment="Radius DTube Cable">RadCable/0.165/ </varlist>
-   <varlist type="float" comment="Length DTube Cable Long">LengthCaL/9.9572/ </varlist>
+   <varlist type="float" comment="Length DTube Cable Long">LengthCaL/4.7996/ </varlist>
    <varlist type="float" comment="Length DTube Cable Sort">LengthCaS/1.8518/ </varlist>
-   <varlist type="float" comment="ZOffsetDTubeCableLong">zoffCableL/-23.0986/ </varlist>
+   <varlist type="float" comment="ZOffsetDTubeCableLong">zoffCableL/-25.6745/ </varlist>
    <varlist type="float" comment="ZOffsetDTubeCableShort">zoffCableS/-27.0759/ </varlist>
     <varlist type="float" comment="internal computations"> SectionLength,angleori,ArcLength,piratio,twopiratio</varlist> 
 
@@ -174,37 +188,30 @@
    <!--  DEFINITION of MATERIALS/MIXTURES  -->
    <Material a="12" z="6" name="CFRPMix" dens="1.3" radl="23.9"/>
 
-   <Create    block="DTUB" />
-   <Placement z="zoffd+zoffdm" block="DTUB" in="IDSM" konly="'MANY'"/>
-
-   <Volume name="DTUB" comment="Main volume in the AGML tutorial geometry">
-
-   <Material  name="Air"      /> 
-   <Medium    name="Standard" />
-   <Attribute seen="0"        />
-   <Shape type="TUBS" dz="37/2." rmin="2.1" rmax="9" phi1="0" phi2="360" />
-   <!--<Shape type="BOX" dz="(DSEA+DSEB+DSEC+DSED+100)/2." dx="(DTubeW+5)/2." dy="(DTubeH+5)/2." />-->
-   <!--<Shape type="BOX" dz="80/2." dx="40/2." dy="40/2." />-->
+ 
    
    OuterTubeLength = 360-2*AngleTopLeft
-   zoffd = zoffd+zoffdm
+<!--   zoffd = zoffd+zoffdm -->
+<!--  offset relative to DTUH mothervolume for DESA volume -->
+   zoffdm = -(33.95 - DSEA)/2.0
    piratio=PI/180.0
    twopiratio=(2*PI)/360
-
+<!--
+  Place two master DTUH volumes, identical but rotated 180 deg
+  Place directly in IDSM, no need for DTUB
+-->
    <Create block="DTUH"/>
-   <Placement block="DTUH" in="DTUB" konly="'MANY'" x="0" y="0" z="0"/>
-   <Placement block="DTUH" in="DTUB" konly="'MANY'" x="0" y="0" z="0">
+   <Placement block="DTUH" in="IDSM" konly="'MANY'" x="0" y="0" z="zoffd" />
+ 
+  <Placement block="DTUH" in="IDSM" konly="'MANY'" x="0" y="0" z="zoffd" >
    <Rotation alphay="180" />
    <Rotation ort="XY-Z"/> 
    </Placement>
-   </Volume>
 
    <Volume name="DTUH" comment="half DTube">
    <Material name="Air"/>
    <Attribute for="DTUH" seen="0" colo="1"/>
-<!--   <Shape type="BOX" dz="(DSEA+DSEB+DSEC+DSED+20)/2." dx="(DTubeW+4)/2." dy="(DTubeH+4)/2." />-->
-   <!--<Shape type="BOX" dz="35/2." dx="16/2." dy="16/2." />-->
-   <Shape type="TUBS" dz="36/2." rmin="2.15" rmax="8.9" phi1="-270" phi2="-90"/>
+   <Shape type="TUBS" dz="33.95/2." rmin="2.7" rmax="8.9" phi1="-270" phi2="-90"/>
 
    <!--placement of vertcial cables -->
 
@@ -230,114 +237,114 @@
       </Do>
 
    <Create    block="APTO" />
-   <Placement block="APTO" x="-0.8-Thk/2." y="5.1887" z="0"/>
+   <Placement block="APTO" x="-0.8-Thk/2." y="5.1887" z="0+zoffdm"/>
 
    <Create    block="UCTO" />
-   <Placement block="UCTO" x="-1.22" y="7.0756" z="0"/>
+   <Placement block="UCTO" x="-1.22" y="7.0756" z="0+zoffdm"/>
 
    <Create    block="OUCY" />
-   <Placement block="OUCY" x="0" y="0" z="0"/>
+   <Placement block="OUCY" x="0" y="0" z="0+zoffdm" kOnly="'ONLY'"/>
 
    <Create    block="DCBO" />
-   <Placement block="DCBO" x="-1.22" y="-7.0756" z="0"/>
+   <Placement block="DCBO" x="-1.22" y="-7.0756" z="0+zoffdm"/>
 
    <Create    block="APBM" />
-   <Placement block="APBM" x="-.8-Thk/2." y="-5.1887" z="0"/>
+   <Placement block="APBM" x="-.8-Thk/2." y="-5.1887" z="0+zoffdm"/>
 
    <Create    block="UCBO" />
-   <Placement block="UCBO" x="-1.22" y="3.3018" z="0"/>
+   <Placement block="UCBO" x="-1.22" y="3.3018" z="0+zoffdm"/>
 
    <Create    block="DCTO" />
-   <Placement block="DCTO" x="-1.22" y="-3.3018" z="0"/>
+   <Placement block="DCTO" x="-1.22" y="-3.3018" z="0+zoffdm"/>
 
    <Create    block="INCY" />
-   <Placement block="INCY" x="0" y="0" z="0"/>
+   <Placement block="INCY" x="0" y="0" z="0+zoffdm"/>
 
    <Create    block="CYTR" />
-   <Placement block="CYTR" x="0" y="0" z="0"/>
+   <Placement block="CYTR" x="0" y="0" z="0+zoffdm"/>
 
    <Create    block="APTE" />
-   <Placement block="APTE" x="-0.8-Thk/2." y="4.9624" z="DSEA/2. + DSEB + DSEC/2.+0"/>
+   <Placement block="APTE" x="-0.8-Thk/2." y="4.9624" z="DSEA/2. + DSEB + DSEC/2.+zoffdm"/>
 
    <Create    block="UCTE" />
-   <Placement block="UCTE" x="-1.22" y="7.0756" z="DSEA/2. + DSEB + DSEC/2.+0"/>
+   <Placement block="UCTE" x="-1.22" y="7.0756" z="DSEA/2. + DSEB + DSEC/2.+zoffdm"/>
 
    <Create    block="APBE" />
-   <Placement block="APBE" x="-0.8-Thk/2." y="-4.9624" z="DSEA/2. + DSEB + DSEC/2.+0"/>
+   <Placement block="APBE" x="-0.8-Thk/2." y="-4.9624" z="DSEA/2. + DSEB + DSEC/2.+zoffdm"/>
 
    <Create    block="DCBE" />
-   <Placement block="DCBE" x="-1.22" y="-7.0756" z="DSEA/2. + DSEB + DSEC/2.+0"/>
+   <Placement block="DCBE" x="-1.22" y="-7.0756" z="DSEA/2. + DSEB + DSEC/2.+zoffdm"/>
 
    <Create    block="OUCE" />
-   <Placement block="OUCE" x="0" y="0" z="DSEA/2. + DSEB + DSEC/2.+0"/>
+   <Placement block="OUCE" x="0" y="0" z="DSEA/2. + DSEB + DSEC/2.+zoffdm"/>
 
    <Create    block="OUCI" />
-   <Placement block="OUCI" x="0" y="0" z="DSEA/2. + DSEB/2.+0"/>
+   <Placement block="OUCI" x="0" y="0" z="DSEA/2. + DSEB/2.+zoffdm"/>
   
    <Create    block="UCTI" />
-   <Placement block="UCTI" x="-1.22" y="7.0756" z="DSEA/2. + DSEB/2.+0"/>
+   <Placement block="UCTI" x="-1.22" y="7.0756" z="DSEA/2. + DSEB/2.+zoffdm"/>
 
    <Create    block="DCBI" />
-   <Placement block="DCBI" x="-1.22" y="-7.0756" z="DSEA/2. + DSEB/2.+0"/>
+   <Placement block="DCBI" x="-1.22" y="-7.0756" z="DSEA/2. + DSEB/2.+zoffdm"/>
 
    <Create    block="ATTI"/>
-   <Placement block="ATTI" x="-0.8-Thk/2." y="5.0705" z="15.0806+0">
+   <Placement block="ATTI" x="-0.8-Thk/2." y="5.0705" z="15.0806+zoffdm">
    <Rotation alphay="90"/>
    <Rotation alphax="-90"/>
    <Rotation alphaz="180"/>
    </Placement>
 
    <Create    block="ATBI"/>
-   <Placement block="ATBI" x="-0.8-Thk/2." y="-5.0705" z="15.0806+0">
+   <Placement block="ATBI" x="-0.8-Thk/2." y="-5.0705" z="15.0806+zoffdm">
    <Rotation alphay="90"/>
    <Rotation alphax="-90"/>
    </Placement>
 
    <Create    block="DCTH" />
-   <Placement block="DCTH" x="-0.8-Thk/2.0+Thk/2.-0.32+0.02" y="2.4967+Thk/2.+0.32-0.02" z="DSEA/2.+DSEB+(DSEC+DSED)/2.+0"/> 
+   <Placement block="DCTH" x="-0.8-Thk/2.0+Thk/2.-0.32+0.02" y="2.4967+Thk/2.+0.32-0.02" z="DSEA/2.+DSEB+(DSEC+DSED)/2.+zoffdm"/> 
 
    <Create    block="TCTH" />
-   <Placement block="TCTH" x="-0.8-Thk/2.0+Thk/2.-0.32+0.02" y="-1*(2.4967+Thk/2.+0.32-0.02)" z="DSEA/2.+DSEB+(DSEC+DSED)/2.+0"/> 
+   <Placement block="TCTH" x="-0.8-Thk/2.0+Thk/2.-0.32+0.02" y="-1*(2.4967+Thk/2.+0.32-0.02)" z="DSEA/2.+DSEB+(DSEC+DSED)/2.+zoffdm"/> 
  
   <!-- this piece is adjusted by hand -->
    <Create    block="CSTI" />
-   <Placement block="CSTI" x="-.8-.2*Thk-.32+.02" y="-1*(2.4967+2*Thk+.4)" z="DSEA/2.+DSEB/2.+.1+0">
+   <Placement block="CSTI" x="-.8-.2*Thk-.32+.02" y="-1*(2.4967+2*Thk+.4)" z="DSEA/2.+DSEB/2.+.1+zoffdm">
    <Rotation alphax="-8.75"/>
    <Rotation alphay="6"/>
    </Placement> 
 
    <Create    block="CSBI" />
-   <Placement block="CSBI" x="-.8-.2*Thk-.32+.02" y="(2.4967+2*Thk+.4)" z="DSEA/2.+DSEB/2.+.1+0">
+   <Placement block="CSBI" x="-.8-.2*Thk-.32+.02" y="(2.4967+2*Thk+.4)" z="DSEA/2.+DSEB/2.+.1+zoffdm">
    <Rotation alphax="8.75"/>
    <Rotation alphay="6"/>
    </Placement> 
 
    <Create    block="APET" />
-   <Placement block="APET" x="-0.8-Thk/2." y="4.9624" z="DSEA/2.+DSEB+DSEC+DSED/2.+0"/>
+   <Placement block="APET" x="-0.8-Thk/2." y="4.9624" z="DSEA/2.+DSEB+DSEC+DSED/2.+zoffdm"/>
 
    <Create    block="APEB" />
-   <Placement block="APEB" x="-0.8-Thk/2." y="-4.9624" z="DSEA/2.+DSEB+DSEC+DSED/2.+0"/>
+   <Placement block="APEB" x="-0.8-Thk/2." y="-4.9624" z="DSEA/2.+DSEB+DSEC+DSED/2.+zoffdm"/>
 
    <Create    block="OCYE" />
-   <Placement block="OCYE" x="0" y="0" z="DSEA/2.+DSEB+DSEC+(DSED-0.475)/2.+0"/>
+   <Placement block="OCYE" x="0" y="0" z="DSEA/2.+DSEB+DSEC+(DSED-0.475)/2.+zoffdm"/>
 
    <Create    block="OCEA" />
-   <Placement block="OCEA" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+0"/>
+   <Placement block="OCEA" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+zoffdm"/>
 
    <Create    block="OCEB" />
-   <Placement block="OCEB" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+0"/>
+   <Placement block="OCEB" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+zoffdm"/>
 
    <Create    block="OCEC" />
-   <Placement block="OCEC" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+0"/>
+   <Placement block="OCEC" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+zoffdm"/>
 
    <Create    block="OCED" />
-   <Placement block="OCED" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+0"/>
+   <Placement block="OCED" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+zoffdm"/>
 
    <Create    block="UPTE" />
-   <Placement block="UPTE" x="-1.22" y="7.0756" z="DSEA/2.+DSEB+DSEC+DSED/2.+0"/>
+   <Placement block="UPTE" x="-1.22" y="7.0756" z="DSEA/2.+DSEB+DSEC+DSED/2.+zoffdm"/>
 
    <Create    block="BOTE" />
-   <Placement block="BOTE" x="-1.22" y="-7.0756" z="DSEA/2.+DSEB+DSEC+DSED/2.+0"/>
+   <Placement block="BOTE" x="-1.22" y="-7.0756" z="DSEA/2.+DSEB+DSEC+DSED/2.+zoffdm"/>
 
    <!--cables -->
 
