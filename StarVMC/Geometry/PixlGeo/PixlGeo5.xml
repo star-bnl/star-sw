@@ -38,6 +38,9 @@
      peculiar PXLA positioning problem.
     Update July end
      PXLW data structure added so it can be set from the steering geometry,g and Geometry.cxx
+    November 2013
+     While implementing the geometry for y2014 discovered that the mothervolumes PXMO and PXSE, PXLA were too short du to the
+     dovetail extensions.
 
 
 
@@ -84,18 +87,17 @@
     <varlist type="float" comment=" Cable Half Length" > cableLength/15.325/</varlist> 
     <varlist type="float" comment=" Al cable Offset" > cableZOffset/0/</varlist>
 
-    <varlist type="float" comment=" Ladder half Z length"> HalfLadZLen/21/</varlist>
-    <varlist type="int"   comment=" number of sectors"> nsector /10/</varlist> 
+     <varlist type="int"   comment=" number of sectors"> nsector /10/</varlist> 
     <varlist type="float" comment=" min radius of the TUBS defining a sector volume"> minradsec/2.12/</varlist>
     <varlist type="float" comment=" max radius of the TUBS defining a sector volume"> maxradsec/10/</varlist>
-    <varlist type="float" comment=" Z of the TUBS defining a sector volume"> maxZsec/21/</varlist>
+    <varlist type="float" comment=" Z of the TUBS defining a sector volume"> maxZsec/23.26/</varlist>
     <varlist type="float" comment=" min radius of the TUBS defining the main volume"> minRvol/2.1/</varlist>
     <varlist type="float" comment=" max radius of the TUBS defining the main volume"> maxRvol/11/</varlist>
 
 
-    <varlist type="float" comment=" Z of the TUBS defining the main volume"> maxZvol/21.2/</varlist>
+    <varlist type="float" comment=" Z of the TUBS defining the main volume (PXMO) "> maxZvol/23.26/</varlist>
    <!-- 06/27 : volume increased to take into account that the pixel is not centered at 0-->
-    <varlist type="float" comment=" halfZ of the TUBS defining a sector volume"> halfMaxZ/20.0/</varlist>
+    <varlist type="float" comment=" halfZ of the TUBS defining a sector volume (PXLA) "> halfMaxZ/23.26/</varlist>
     <varlist type="float" comment=" phi1 of the TUBS defining a sector volume"> minphisec/72.0/</varlist>
     <varlist type="float" comment=" phi2 of the TUBS defining a sector volume"> maxphisec/132.0/</varlist> 
     <varlist type="float" comment=" phi1 of the TUBS defining a bare sector volume"> minphisecbare/90.0/</varlist>
@@ -457,7 +459,7 @@
     <Volume name="PXSE" comment="pixel sector"  >
     <Material name="Air" />
     <Attribute for="PXSE" seen="0" colo="1" />
-    <Shape type="TUBS" dz="HalfLadZLen" rmin="minradsec" rmax="maxradsec" phi1="minphisecbare" phi2="maxphisecbare" />
+    <Shape type="TUBS" dz="HalfMaxZ" rmin="minradsec" rmax="maxradsec" phi1="minphisecbare" phi2="maxphisecbare" />
 
 
 <!--  Placement of arcs in sector beam --> 
