@@ -75,13 +75,10 @@ void StvDefaultSeedFinder::Reset()
   *f1stHitMapIter = f1stHitMap->begin();
 }    
 //_____________________________________________________________________________
-int StvDefaultSeedFinder::Again(int repeat)
+int StvDefaultSeedFinder::Again(int )
 {
   *f1stHitMapIter = f1stHitMap->begin();
    mNDejavu = 0;
-   if (!repeat) return 1;
-   Clear();
-   Reset();
    return 1;
 }
 //_____________________________________________________________________________
