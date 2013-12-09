@@ -6,11 +6,14 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.3 2013/11/19 22:30:34 jeromel Exp $
+ * $Id: StMtdMatchMaker.h,v 1.4 2013/12/09 22:53:25 geurts Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.4  2013/12/09 22:53:25  geurts
+ * update: enable filling of MTD Pid traits and include a few more protections against zero-pointers [Bingchu]
+ *
  * Revision 1.3  2013/11/19 22:30:34  jeromel
  * Added name
  *
@@ -45,6 +48,9 @@ class StEvent;
 //class StMuBTofHit;
 class StTrack; 
 class StMuTrack; 
+class StTriggerData;
+class StMtdPidTraits;
+class StMuMtdPidTraits;
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
 typedef vector<Int_t>  IntVec;
 typedef vector<UInt_t>  UIntVec;
@@ -68,7 +74,26 @@ struct MtdEvtData {
 	Float_t  bField;
 	Float_t vertexX, vertexY, vertexZ;
 
-	Double_t  triggerTime;
+	Double_t  triggerTime[2];
+	UShort_t  mtdVpdTacDiff;
+	Float_t   vpdVz;
+	Float_t   tStart;
+	UShort_t  lastDSM[8];
+	Int_t	  prepost;
+	Int_t	  pre;
+	Int_t	  post;
+	Float_t	  fasteast[11];
+	Float_t	  fastwest[11];
+	Float_t	  fasteastHi[11];
+	Float_t	  fastwestHi[11];
+	Float_t   Vpd[11][64];
+	Float_t   VpdHi[11][64];
+	Float_t   MT001[11][32];
+	Float_t   MT002[11][32];
+	Float_t   MT003[11][32];
+	Float_t   MT004[11][32];
+
+
 
 	/// raw hits information
 	Int_t  nMtdRawHits;
@@ -93,6 +118,10 @@ struct MtdEvtData {
 	Float_t gpt[kMaxHits];
 	Float_t geta[kMaxHits];
 	Float_t gphi[kMaxHits];
+	Float_t ppt[kMaxHits];
+	Float_t peta[kMaxHits];
+	Float_t pphi[kMaxHits];
+	Short_t vertexIndex[kMaxHits];
 	
 	Float_t ghelixpx[kMaxHits];
 	Float_t ghelixpy[kMaxHits];
@@ -102,6 +131,7 @@ struct MtdEvtData {
 	Float_t ghelixoz[kMaxHits];
 
 	Float_t gdedx[kMaxHits];
+	Float_t gdca[kMaxHits];
 	Float_t gnSigmaPi[kMaxHits];
 	Float_t gnSigmaK[kMaxHits];
 	Float_t gnSigmaP[kMaxHits];
@@ -198,6 +228,8 @@ class StMtdMatchMaker: public StMaker
 		void setEtaRange(Float_t etaMin, Float_t etaMax);
 		/// set minimum nHitsFit 
 		void setMinPt(Float_t val);
+		/// set maximum matching cells
+		void setMaxNeighbors(Int_t val);
 		
 		/// check track quality 
 		bool validTrack(StTrack *track);
@@ -280,12 +312,15 @@ class StMtdMatchMaker: public StMaker
 		TH2F *hTofZvsProj;
 		TH2F *hMtdZvsProj;
 		TH2F *hMtdPhivsProj;
+		TH2F *hMtddPhivsBackleg;
+		TH2F *hMtddZvsBackleg;
 		
 		TF1 *fZReso;
 		TF1 *fPhiReso;
 
 		StEvent *mEvent;
 		StMuDst *mMuDst;
+  		StTriggerData *trgData;
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 		typedef vector<Int_t> idVector;
 #else
@@ -305,6 +340,7 @@ class StMtdMatchMaker: public StMaker
 			pair<Double_t,Double_t> leadingEdgeTime;
 			Int_t index2MtdHit;
 			Double_t theta;
+			Double_t pathLength;
 		};
 		MtdEvtData  mMtdEvtData;
 
@@ -355,7 +391,7 @@ class StMtdMatchMaker: public StMaker
 		void initEventData();
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.3 2013/11/19 22:30:34 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.4 2013/12/09 22:53:25 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,1)
 };
 
@@ -366,4 +402,5 @@ inline void StMtdMatchMaker::setMinFitPoints(Int_t val) { mMinFitPointsPerTrack 
 inline void StMtdMatchMaker::setMindEdxFitPoints(Int_t val) { mMindEdxFitPoints= val; }
 inline void StMtdMatchMaker::setEtaRange(Float_t etaMin,Float_t etaMax) {mMinEta=etaMin;mMaxEta=etaMax; }
 inline void StMtdMatchMaker::setMinPt(Float_t val) {mMinPt=val; }
+inline void StMtdMatchMaker::setMaxNeighbors(Int_t val) {mnNeighbors=val; }
 #endif
