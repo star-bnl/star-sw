@@ -1,5 +1,5 @@
-#ifndef MULTYKEYMAP_H
-#define MULTYKEYMAP_H
+#ifndef MULTIKEYMAP_H
+#define MULTIKEYMAP_H
 #include <vector>
 class StMultiKeyMapIter;
 class StMultiKeyNode;
