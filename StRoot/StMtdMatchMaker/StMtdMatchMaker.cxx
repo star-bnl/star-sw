@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.7 2013/11/25 16:10:43 geurts Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.8 2013/12/09 22:53:25 geurts Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.8  2013/12/09 22:53:25  geurts
+ * update: enable filling of MTD Pid traits and include a few more protections against zero-pointers [Bingchu]
+ *
  * Revision 1.7  2013/11/25 16:10:43  geurts
  * Remove AddHist for uninitialized histogram [Jason Webb]
  *
@@ -94,6 +97,7 @@
 #include "StMuDSTMaker/COMMON/StMuMtdHit.h"
 #include "StMuDSTMaker/COMMON/StMuBTofHit.h"
 #include "StMuDSTMaker/COMMON/StMuBTofPidTraits.h"
+#include "StMuDSTMaker/COMMON/StMuMtdPidTraits.h"
 
 #include "StEventMaker/StEventMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
@@ -110,6 +114,7 @@
 #include "StBTofUtil/StBTofDaqMap.h"
 #include "StBTofUtil/StBTofHitCollection.h"
 #include "StarGenerator/StarLight/starlightconstants.h"
+#include "StMtdPidTraits.h"
 
 #include "StMtdUtil/StMtdGeometry.h"
 #include "StMtdMatchMaker.h"
@@ -124,8 +129,8 @@ StMtdMatchMaker::StMtdMatchMaker(const Char_t *name): StMaker(name)
    doPrintCpuInfo    = kFALSE;
    mMinFitPointsPerTrack=15;
    mMindEdxFitPoints=10;
-   mMinEta=-1.5;
-   mMaxEta=1.5;
+	mMinEta=-0.8;
+	mMaxEta=0.8;
    mMinPt = 1.0;
    mMinFitPointsOverMax=0.52;
    mCosmicFlag=kFALSE;
@@ -260,8 +265,10 @@ void StMtdMatchMaker::bookHistograms(){
 	hphivsz =new TH2F("hphivsz","hphivsz",500,0,TMath::Pi()*2,500,-500,500);
 	hTofPhivsProj=new TH2F("hTofPhivsProj","hTofPhivsProj",100,0,TMath::Pi()*2,100,0,TMath::Pi()*2);
 	hTofZvsProj=new TH2F("hTofZvsProj","hTofzvsProj",600,-300,300,600,-300,300);
-	hMtdPhivsProj=new TH2F("hMtdPhivsProj","hMtdPhivsProj",1000,0,TMath::Pi()*2,1000,0,TMath::Pi()*2);
-	hMtdZvsProj=new TH2F("hMtdZvsProj","hMtdzvsProj",600,-300,300,600,-300,300);
+	hMtdPhivsProj=new TH2F("hMtdPhivsProj","hMtdPhivsProj;projected #phi; fired #phi",360,-TMath::Pi(),TMath::Pi(),180,0,2.*TMath::Pi());
+	hMtddPhivsBackleg=new TH2F("hMtddPhivsBackleg","hMtddPhivsBackleg;backleg; d#phi",30,0,30,1000,-2.*TMath::Pi(),2.*TMath::Pi());
+	hMtddZvsBackleg =new TH2F("hMtddZvsBackleg","hMtddZvsBackleg;backleg; dz",30,0,30,400,-200,200);
+	hMtdZvsProj=new TH2F("hMtdZvsProj","hMtdzvsProj;projected z(cm); fired z(cm)",600,-300,300,600,-300,300);
 
 	AddHist(mTrackPtEta);
 	AddHist(mTrackPtPhi);
@@ -297,6 +304,8 @@ void StMtdMatchMaker::bookHistograms(){
 	AddHist(hTofZvsProj);
 	AddHist(hMtdZvsProj);
 	AddHist(hMtdPhivsProj);
+	AddHist(hMtddPhivsBackleg);
+	AddHist(hMtddZvsBackleg);
 
 	return;
 }
@@ -315,7 +324,9 @@ void StMtdMatchMaker::bookTree(){
 		mMtdEvt->Branch("vertexZ",&mMtdEvtData.vertexZ,"vertexZ/F");
 		mMtdEvt->Branch("nMtdRawHits",&mMtdEvtData.nMtdRawHits,"nMtdRawHits/I");
 		mMtdEvt->Branch("nMtdHits",&mMtdEvtData.nMtdHits,"nMtdHits/I");
-		mMtdEvt->Branch("triggerTime",&mMtdEvtData.triggerTime,"triggerTime/D");
+		mMtdEvt->Branch("triggerTime",&mMtdEvtData.triggerTime,"triggerTime[2]/D");
+		mMtdEvt->Branch("vpdVz",&mMtdEvtData.vpdVz,"vpdVz/F");
+		mMtdEvt->Branch("tStart",&mMtdEvtData.tStart,"tStart/F");
 
 		/// raw hits
 		mMtdEvt->Branch("flag",&mMtdEvtData.flag,"flag[nMtdRawHits]/B");
@@ -338,6 +349,9 @@ void StMtdMatchMaker::bookTree(){
 		mMtdEvt->Branch("gpt",&mMtdEvtData.gpt,"gpt[ngTracks]/F");
 		mMtdEvt->Branch("geta",&mMtdEvtData.geta,"geta[ngTracks]/F");
 		mMtdEvt->Branch("gphi",&mMtdEvtData.gphi,"gphi[ngTracks]/F");
+		mMtdEvt->Branch("ppt",&mMtdEvtData.ppt,"ppt[ngTracks]/F");
+		mMtdEvt->Branch("peta",&mMtdEvtData.peta,"peta[ngTracks]/F");
+		mMtdEvt->Branch("pphi",&mMtdEvtData.pphi,"pphi[ngTracks]/F");
 
 		mMtdEvt->Branch("ghelixpx",&mMtdEvtData.ghelixpx,"ghelixpx[ngTracks]/F");
 		mMtdEvt->Branch("ghelixpy",&mMtdEvtData.ghelixpy,"ghelixpy[ngTracks]/F");
@@ -369,6 +383,7 @@ void StMtdMatchMaker::bookTree(){
 
 
 		/// project to MTD
+		mMtdEvt->Branch("gdca",&mMtdEvtData.gdca,"gdca[ngTracks]/F");
 		mMtdEvt->Branch("gprojMtdBackLeg",&mMtdEvtData.gprojMtdBackLeg,"gprojMtdBackLeg[ngTracks]/b");
 		mMtdEvt->Branch("gprojMtdModule",&mMtdEvtData.gprojMtdModule,"gprojMtdModule[ngTracks]/b");
 		mMtdEvt->Branch("gprojMtdCell",&mMtdEvtData.gprojMtdCell,"gprojMtdCell[ngTracks]/b");
@@ -384,15 +399,15 @@ void StMtdMatchMaker::bookTree(){
 		/// Matched Mtd Hits
 		mMtdEvt->Branch("gnMatchMtdHits",&mMtdEvtData.gnMatchMtdHits,"gnMatchMtdHits[ngTracks]/I");
 		mMtdEvt->Branch("gmMtdHitIndex",&mMtdEvtData.gmMtdHitIndex,"gmMtdHitIndex[ngTracks]/I");
-		mMtdEvt->Branch("gmBackLeg",&mMtdEvtData.gmBackLeg,"gmBackLeg[ngTracks]g/b");
-		mMtdEvt->Branch("gmModule",&mMtdEvtData.gmModule,"gmModule[ngTracks]g/b");
-		mMtdEvt->Branch("gmCell",&mMtdEvtData.gmCell,"gmCell[ngTracks]g/b");
-		mMtdEvt->Branch("gmLeTimeWest",&mMtdEvtData.gmLeTimeWest,"gmLeTimeWest[ngTracks]g/F");
-		mMtdEvt->Branch("gmTotWest",&mMtdEvtData.gmTotWest,"gmTotWest[ngTracks]g/F");
-		mMtdEvt->Branch("gmLeTimeEast",&mMtdEvtData.gmLeTimeEast,"gmLeTimeEast[ngTracks]g/F");
-		mMtdEvt->Branch("gmTotEast",&mMtdEvtData.gmTotEast,"gmTotEast[ngTracks]g/F");
-		mMtdEvt->Branch("gmLocalZ",&mMtdEvtData.gmLocalZ,"gmLocalZ[ngTracks]g/F");
-		mMtdEvt->Branch("gmLocalY",&mMtdEvtData.gmLocalY,"gmLocalY[ngTracks]g/F");
+		mMtdEvt->Branch("gmBackLeg",&mMtdEvtData.gmBackLeg,"gmBackLeg[ngTracks]/b");
+		mMtdEvt->Branch("gmModule",&mMtdEvtData.gmModule,"gmModule[ngTracks]/b");
+		mMtdEvt->Branch("gmCell",&mMtdEvtData.gmCell,"gmCell[ngTracks]/b");
+		mMtdEvt->Branch("gmLeTimeWest",&mMtdEvtData.gmLeTimeWest,"gmLeTimeWest[ngTracks]/F");
+		mMtdEvt->Branch("gmTotWest",&mMtdEvtData.gmTotWest,"gmTotWest[ngTracks]/F");
+		mMtdEvt->Branch("gmLeTimeEast",&mMtdEvtData.gmLeTimeEast,"gmLeTimeEast[ngTracks]/F");
+		mMtdEvt->Branch("gmTotEast",&mMtdEvtData.gmTotEast,"gmTotEast[ngTracks]/F");
+		mMtdEvt->Branch("gmLocalZ",&mMtdEvtData.gmLocalZ,"gmLocalZ[ngTracks]/F");
+		mMtdEvt->Branch("gmLocalY",&mMtdEvtData.gmLocalY,"gmLocalY[ngTracks]/F");
 		AddObj(mMtdEvt,".hist");
 }
 
@@ -579,6 +594,7 @@ Int_t StMtdMatchMaker::Make(){
 			int singleChn = (singleIter->module-1)*12 + (singleIter->cell);
 			int singleBackleg = singleIter->backleg;
 			LOG_INFO<<" 	single backleg:"<<singleBackleg<<" chn:"<<singleChn<<endm;
+			LOG_INFO<<" 	LeTimeWest:"<<singleIter->leadingEdgeTime.first<<" LeTimeEast:"<<singleIter->leadingEdgeTime.second<<endm;
 		}
 		LOG_INFO<<"	multiCellsHitVec:"<<endm;
 		mtdCellHitVectorIter multiIter = multiHitsCellsVec.begin();
@@ -646,34 +662,37 @@ Int_t StMtdMatchMaker::Make(){
 	/// Look for the mtdCollection in either the MuDST or StEvent environment
 	if(mMuDstIn){
 		StMuMtdCollection *theMtd = mMuDst->MtdCollection();
-		if(theMtd->hitsPresent()){
-			LOG_DEBUG <<" MtdCollection: hit container present. "<<endm;
-			if(Debug()){
-				LOG_INFO << "# of hits in this event:" << theMtd->hitsPresent() <<endm;
-				for(Int_t i=0;i<theMtd->hitsPresent();i++){
-					StMuMtdHit* aHit = theMtd->MtdHit(i) ;
-					if(!aHit) continue;
-					LOG_INFO <<"backleg:"<<aHit->backleg()
-						<<" module:"<<aHit->backleg()
-						<<" cell:"<<aHit->cell()
-						<<" tof:"<<aHit->tof()<<endm;
+		if(theMtd){
+			if(theMtd->hitsPresent()){
+				LOG_DEBUG <<" MtdCollection: hit container present. "<<endm;
+				if(Debug()){
+					LOG_INFO << "# of hits in this event:" << theMtd->hitsPresent() <<endm;
+					for(Int_t i=0;i<theMtd->hitsPresent();i++){
+						StMuMtdHit* aHit = theMtd->MtdHit(i) ;
+						if(!aHit) continue;
+						LOG_INFO <<"backleg:"<<aHit->backleg()
+							<<" module:"<<aHit->backleg()
+							<<" cell:"<<aHit->cell()
+							<<" tof:"<<aHit->tof()<<endm;
+					}
 				}
 			}
 		}
 	}else{
 		StMtdCollection *theMtd = mEvent->mtdCollection();
-		if(theMtd->hitsPresent()){
-			LOG_DEBUG <<" MtdCollection: hit container present. "<<endm;
-			if(Debug()){
-				StSPtrVecMtdHit& tmpCellMtdVec = theMtd->mtdHits();
-				LOG_INFO << "# of hits in this event:" << tmpCellMtdVec.size()<<endm;
-				for(size_t i=0;i<tmpCellMtdVec.size();i++){
-					StMtdHit* p=tmpCellMtdVec[i];
-					LOG_INFO <<(*p)<<endm;
+		if(theMtd){
+			if(theMtd->hitsPresent()){
+				LOG_DEBUG <<" MtdCollection: hit container present. "<<endm;
+				if(Debug()){
+					StSPtrVecMtdHit& tmpCellMtdVec = theMtd->mtdHits();
+					LOG_INFO << "# of hits in this event:" << tmpCellMtdVec.size()<<endm;
+					for(size_t i=0;i<tmpCellMtdVec.size();i++){
+						StMtdHit* p=tmpCellMtdVec[i];
+						LOG_INFO <<(*p)<<endm;
+					}
 				}
 			}
 		}
-
 	}
 	//-- end check
 	if(doPrintMemoryInfo){
@@ -705,20 +724,11 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			LOG_INFO << "No Mudst ... bye-bye" <<endm;
 			return kFALSE;
 		}
-		if(!(mMuDst->MtdCollection())){
-			LOG_INFO <<"no mtd collection ... bye-bye"<<endm;
-			return kFALSE;
-		}
-		if(!(mMuDst->MtdCollection()->hitsPresent())){
-			LOG_INFO << "no mtd hit present! ... bye-bye"<<endm;
-			return kFALSE;
-		}
-
                 /// A. build vector of candidate cells
-		StMuMtdCollection* muMtdCollection=mMuDst->MtdCollection();
-		LOG_DEBUG << "Number of Mtd Hits = " << muMtdCollection->hitsPresent() <<endm;
-		for(Int_t i=0;i<muMtdCollection->hitsPresent();i++){
-			StMuMtdHit* aHit =muMtdCollection->MtdHit(i) ;
+		int nMtdHits = mMuDst->numberOfMTDHit();
+		if(nMtdHits<=0) return kFALSE;
+		for(Int_t i=0;i<nMtdHits;i++){
+			StMuMtdHit* aHit = mMuDst->mtdHit(i) ;
 			if(!aHit) continue;
 			if(aHit->backleg()<=0||aHit->backleg()>mNBacklegs) continue;   // barrel BackLeg hits
 			int backlegId = aHit->backleg();
@@ -730,6 +740,8 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			aDaqCellHit.backleg = backlegId;
 			aDaqCellHit.module= moduleId;
 			aDaqCellHit.cell=cellId;
+			aDaqCellHit.tot=aHit->tot();
+			aDaqCellHit.leadingEdgeTime=aHit->leadingEdgeTime();
 			aDaqCellHit.index2MtdHit=i;
 			daqCellsHitVec.push_back(aDaqCellHit);
 
@@ -737,10 +749,20 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			int id=backlegId*100+moduleId;
 			if(find(validModuleVec.begin(),validModuleVec.end(),id) == validModuleVec.end())
 				validModuleVec.push_back(id);
+			int hisIndex = backlegId - 1;
+			if(mHisto) {
+				mDaqOccupancy[hisIndex]->Fill((moduleId-1)*12+cellId);
+			}
 		}
-		StMuMtdHeader* mtdHeader=muMtdCollection->mtdHeader();
-		unsigned int trgTime=mtdHeader->triggerTime(0);
-		Double_t triggerTime=25.*(trgTime&0xfff);//ns
+		StMuMtdHeader* mtdHeader=mMuDst->mtdHeader();
+		unsigned int trgTime[2];
+		if(mtdHeader){
+			trgTime[0]=mtdHeader->triggerTime(1);
+			trgTime[1]=mtdHeader->triggerTime(2);
+		}
+		Double_t triggerTime[2]={0};
+		triggerTime[0]=25.*(trgTime[0]&0xfff);//ns
+		triggerTime[1]=25.*(trgTime[1]&0xfff);//ns
 
 		if(mSaveTree){
 
@@ -756,9 +778,10 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			    }
 			  }
 		   //fg	}
-			mMtdEvtData.run = mEvent->runId();       // the run number
-			mMtdEvtData.evt = mEvent->id();       // the event number
-			mMtdEvtData.bField= mEvent->runInfo()->magneticField()/10.; 
+			mMtdEvtData.nTrgIds = nTrgIds;       
+			mMtdEvtData.run = mMuDst->event()->runNumber();       // the run number
+			mMtdEvtData.evt = mMuDst->event()->eventId();       // the event number
+			mMtdEvtData.bField= mMuDst->event()->runInfo().magneticField()/10.; 
 
 			StPrimaryVertex *pVtx = mEvent->primaryVertex();
 			float xvtx = -999.;
@@ -777,13 +800,20 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			mMtdEvtData.vertexY = yvtx;              
 			mMtdEvtData.vertexZ = zvtx;              
 
-			mMtdEvtData.triggerTime = triggerTime; // ns 
+			StBTofHeader *mBTofHeader = mMuDst->btofHeader();
+			if(mBTofHeader) {
+				mMtdEvtData.vpdVz  = mBTofHeader->vpdVz();
+				mMtdEvtData.tStart = mBTofHeader->tStart();
+			}
+			mMtdEvtData.triggerTime[0] = triggerTime[0]; // ns 
+			mMtdEvtData.triggerTime[1] = triggerTime[1]; // ns 
 
-			mMtdEvtData.nMtdRawHits = muMtdCollection->rawHitsPresent();  
-			mMtdEvtData.nMtdHits = muMtdCollection->hitsPresent(); 
+			int nMtdRawHits = mMuDst->numberOfBMTDRawHit();
+			mMtdEvtData.nMtdRawHits = nMtdRawHits;  
+			mMtdEvtData.nMtdHits = nMtdHits; 
 
-			for(Int_t i=0;i<muMtdCollection->rawHitsPresent();i++){
-				StMuMtdRawHit* aRawHit=muMtdCollection->RawMtdHit(i);
+			for(Int_t i=0;i<nMtdRawHits;i++){
+				StMuMtdRawHit* aRawHit=mMuDst->mtdRawHit(i);
 				int mrflag=aRawHit->flag();
 				int mrbackleg=aRawHit->backleg();
 				int mrchn=aRawHit->channel();
@@ -794,10 +824,10 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 				mMtdEvtData.tdc[i] = mrtdc;
 			}
 
-			LOG_DEBUG << "Number of Mtd Raw Hits = " << muMtdCollection->rawHitsPresent() <<endm;
-			LOG_DEBUG << "Number of Mtd Hits = " << muMtdCollection->hitsPresent()<<endm;
-			for(Int_t i=0;i<muMtdCollection->hitsPresent();i++){
-				StMuMtdHit* aHit = muMtdCollection->MtdHit(i);
+			LOG_DEBUG << "Number of Mtd Raw Hits = " << nMtdRawHits <<endm;
+			LOG_DEBUG << "Number of Mtd Hits = " << nMtdHits <<endm;
+			for(Int_t i=0;i<nMtdHits;i++){
+				StMuMtdHit* aHit = mMuDst->mtdHit(i);
 				if(!aHit) continue;
 				if(aHit->backleg()<=0||aHit->backleg()>mNBacklegs) continue;   // barrel BackLeg hits
 				int backlegId = aHit->backleg();
@@ -817,35 +847,6 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 				mMtdEvtData.totEast[i] = mtrailingeast-mleadingeast;
 			}
 		}
-		for(Int_t i=0;i<muMtdCollection->hitsPresent();i++){
-			StMuMtdHit* aHit = muMtdCollection->MtdHit(i);
-			if(!aHit) continue;
-			if(aHit->backleg()<=0||aHit->backleg()>mNBacklegs) continue;   // barrel BackLeg hits
-			int backlegId = aHit->backleg();
-			int moduleId = aHit->module();
-			int cellId = aHit->cell();
-
-			if(Debug()) {LOG_INFO <<"A: fired hit in " << "backleg=" << backlegId <<" module="<<moduleId<<" cell="<<cellId<<endm;}
-			LOG_DEBUG <<"A: fired hit in " << "backleg=" << backlegId <<" module="<<moduleId<<" cell="<<cellId<<" leadingWest="<<aHit->leadingEdgeTime().first<<" leadingEast="<<aHit->leadingEdgeTime().second<<endm;
-			StructCellHit aDaqCellHit;
-			aDaqCellHit.backleg = backlegId;
-			aDaqCellHit.module= moduleId;
-			aDaqCellHit.cell=cellId;
-			aDaqCellHit.tot=aHit->tot();
-			aDaqCellHit.leadingEdgeTime=aHit->leadingEdgeTime();
-			aDaqCellHit.index2MtdHit=i;
-			daqCellsHitVec.push_back(aDaqCellHit);
-
-			//additional valid number configuration
-			int id=backlegId*100+moduleId;
-			if(find(validModuleVec.begin(),validModuleVec.end(),id) == validModuleVec.end())
-				validModuleVec.push_back(id);
-
-			int hisIndex = backlegId - 1;
-			if(mHisto) {
-				mDaqOccupancy[hisIndex]->Fill((moduleId-1)*12+cellId);
-			}
-		}
 	}else{  
 		if(!mEvent||!(mEvent->mtdCollection())||!(mEvent->mtdCollection()->hitsPresent())){
 			if(!mEvent){LOG_INFO << "no StEvent" <<endm; return kFALSE;}
@@ -861,13 +862,21 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 		//.........................................................................
 		/// check for mtdCollection and fill local copy with ADC and TDC data
 		StMtdCollection *theMtd = mEvent->mtdCollection();
+		StMtdHeader* mtdHeader=theMtd->mtdHeader();
+		unsigned int trgTime[2];
+		if(mtdHeader){
+			trgTime[0]=mtdHeader->triggerTime(0);
+			trgTime[1]=mtdHeader->triggerTime(1);
+		}
+		Double_t triggerTime[2]={0};
+		triggerTime[0]=25.*(trgTime[0]&0xfff);//ns
+		triggerTime[1]=25.*(trgTime[1]&0xfff);//ns
+
+
+
+
 		//.........................................................................
 		/// read data from StMtdHit
-		//
-		StMtdHeader* mtdHeader=theMtd->mtdHeader();
-		unsigned int trgTime=mtdHeader->triggerTime(0);
-		Double_t triggerTime=25.*(trgTime&0xfff);//ns
-
 		StSPtrVecMtdHit& mtdHits= theMtd->mtdHits();
 		StSPtrVecMtdRawHit& mtdRawHits=theMtd->mtdRawHits();
 		if(mSaveTree){
@@ -884,6 +893,7 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			    }
 			  }
 			}
+			mMtdEvtData.nTrgIds = nTrgIds;       
 			mMtdEvtData.run = mEvent->runId();       // the run number
 			mMtdEvtData.evt = mEvent->id();       // the event number
 			mMtdEvtData.bField= mEvent->runInfo()->magneticField()/10.; 
@@ -905,8 +915,8 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			mMtdEvtData.vertexY = yvtx;              
 			mMtdEvtData.vertexZ = zvtx;              
 
-			mMtdEvtData.triggerTime = triggerTime; // ns 
-
+			mMtdEvtData.triggerTime[0] = triggerTime[0]; // ns 
+			mMtdEvtData.triggerTime[1] = triggerTime[1]; // ns 
 			mMtdEvtData.nMtdRawHits = mtdRawHits.size();  
 			mMtdEvtData.nMtdHits = mtdHits.size(); 
 			for(size_t i=0;i<mtdRawHits.size();i++){
@@ -993,6 +1003,7 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 
 		float gdEdx=-999.;
 		float gpt=-999.,geta=-999.,gphi=-999.;
+		float ppt=-999.,peta=-999.,pphi=-999.;
 		float nSigmaE = -999.,nSigmaPi = -999.,nSigmaK = -999.,nSigmaP = -999.;
 		float gyLocal=-999.,gzLocal=-999.;
 		float gtdc=-999.,gtof=-999.,gtot=-999.;
@@ -1023,6 +1034,12 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			gpt 		= theTrack->momentum().perp();
 			geta 		= theTrack->momentum().pseudoRapidity();
 			gphi 		= theTrack->momentum().phi();
+			
+			if(isPrimary){
+				ppt 	= thePrimaryTrack->momentum().perp();
+				peta 	= thePrimaryTrack->momentum().pseudoRapidity();
+				pphi 	= thePrimaryTrack->momentum().phi();
+			}
 			while(gphi<0.)gphi+=2.*(TMath::Pi());
 			while(gphi>2*(TMath::Pi()))gphi-=2.*(TMath::Pi());
 			if(isPrimary) idx2primary = thePrimaryTrack->id();
@@ -1085,6 +1102,13 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			gpt		= theTrack->geometry()->momentum().perp();
 			geta 	= theTrack->geometry()->momentum().pseudoRapidity();
 			gphi 	= theTrack->geometry()->momentum().phi();
+			if(isPrimary){
+
+				ppt		= pTrack->geometry()->momentum().perp();
+				peta 	= pTrack->geometry()->momentum().pseudoRapidity();
+				pphi 	= pTrack->geometry()->momentum().phi();
+
+			}
 			gnFtPts	= theTrack->fitTraits().numberOfFitPoints(kTpcId);
 			while(gphi<0.)gphi+=2.*(TMath::Pi());
 			while(gphi>2*(TMath::Pi()))gphi-=2.*(TMath::Pi());
@@ -1133,8 +1157,13 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			if(fabs(nSigmaPi)<5.) mNSigmaPivsPt->Fill(gpt, nSigmaPi+5.*gq);
 		}
 		if(mSaveTree){
+
+			float mField = 0;
+			if(mMuDstIn) mField = mMuDst->event()->runInfo().magneticField();
+			else mField = mEvent->runInfo()->magneticField();
+
 			StThreeVector<double> helixOrigin = helix.origin();
-			StThreeVector<double> helixMomentum = helix.momentum(mEvent->runInfo()->magneticField()*kilogauss);
+			StThreeVector<double> helixMomentum = helix.momentum(mField*kilogauss);
 			float ghelixpx  = helixMomentum.x();
 			float ghelixpy  = helixMomentum.y();
 			float ghelixpz  = helixMomentum.z();
@@ -1147,6 +1176,9 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			mMtdEvtData.gpt[ngTracks] = gpt;
 			mMtdEvtData.geta[ngTracks] = geta;
 			mMtdEvtData.gphi[ngTracks] = gphi;
+			mMtdEvtData.ppt[ngTracks] = ppt;
+			mMtdEvtData.peta[ngTracks] = peta;
+			mMtdEvtData.pphi[ngTracks] = pphi;
 			mMtdEvtData.ghelixpx[ngTracks] = ghelixpx;
 			mMtdEvtData.ghelixpy[ngTracks] = ghelixpy;
 			mMtdEvtData.ghelixpz[ngTracks] = ghelixpz;
@@ -1183,9 +1215,12 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 
 /// Match extrapolated TPC tracks to hits in the MTD
 bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalHelixD helix, Int_t gq, mtdCellHitVector& allCellsHitVec, unsigned int iNode, StThreeVectorD globalPos){
+	float mField = 0;
+	if(mMuDstIn) mField = mMuDst->event()->runInfo().magneticField();
+	else mField = mEvent->runInfo()->magneticField();
 
 	StThreeVector<double> helixOrigin = helix.origin();
-	StThreeVector<double> helixMomentum = helix.momentum(mEvent->runInfo()->magneticField()*kilogauss);
+	StThreeVector<double> helixMomentum = helix.momentum(mField*kilogauss);
 	float ghelixpx  = helixMomentum.x();
 	float ghelixpy  = helixMomentum.y();
 	float ghelixpz  = helixMomentum.z();
@@ -1193,42 +1228,48 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	float ghelixoy  = helixOrigin.y();
 	float ghelixoz  = helixOrigin.z();
 
-	float bField = mEvent->runInfo()->magneticField()/10.;
+	float bField = mField/10.;
 	StThreeVector<double> g1P(ghelixpx,ghelixpy,ghelixpz);//momentum 
 	StThreeVector<double> g1O(ghelixox,ghelixoy,ghelixoz);//origin
 	StPhysicalHelixD gHelixTpc(g1P,g1O,bField*tesla,gq); 
-
 	LOG_DEBUG <<"StMtdMatchMaker::matchTrack2Mtd() "<<" bField"<<bField<<endm;
-
-	StEventSummary *vertexPosInfo = mEvent->summary();
+	StThreeVectorF vertexPos;
+	if(mMuDstIn) vertexPos	= mMuDst->event()->primaryVertexPosition();
+	else vertexPos	= mEvent->summary()->primaryVertexPosition();
 	double length2Vtx = -99999.;
-	if (vertexPosInfo) {
-	  StThreeVectorF vertexPos = vertexPosInfo->primaryVertexPosition();
-	  length2Vtx 	  = TMath::Abs(gHelixTpc.pathLength(vertexPos));
-	  LOG_DEBUG<<" vertex x,y,z:"<<vertexPos.x()<<","<<vertexPos.y()<<","<<vertexPos.z()<<endm;
-	}
-	else {
-	  LOG_WARN << "No (default) primary vertex information for this (st-) event"  << endm;
-	}
-
+	length2Vtx = TMath::Abs(gHelixTpc.pathLength(vertexPos));
+	LOG_DEBUG<<" vertex x,y,z:"<<vertexPos.x()<<","<<vertexPos.y()<<","<<vertexPos.z()<<endm;
 	LOG_DEBUG<<" gq:"<<gq<<" ghelix ox,oy,oz:"<<ghelixox<<","<<ghelixoy<<","<<ghelixoz
 		<<" ghelix p,pt,eta,phi:"<<helixMomentum.mag()<<","<<helixMomentum.perp()<<","<<helixMomentum.pseudoRapidity()<<","<<helixMomentum.phi()
 		<<" length2vertex:"<<length2Vtx<<endm;
 
-	StThreeVector<double> dcaPos  = gHelixTpc.at(gHelixTpc.pathLengths(*mBeamHelix).first);
-	StThreeVector<double> beamPos = mBeamHelix->at(gHelixTpc.pathLengths(*mBeamHelix).second);
-	StThreeVector<double> dca 	  = dcaPos - beamPos;
+
+
+	StThreeVector<double> dcaPos  = gHelixTpc.at(gHelixTpc.pathLength(vertexPos));
+	StThreeVector<double> dca 	  = dcaPos - vertexPos;
+	if(!mCosmicFlag && dca.mag()>10) return kFALSE;
 
 	//project track to TOF radius
-
-	double rTof = gHelixTpc.pathLength(globalPos);
-	StThreeVector<double> tofPos  = globalPos;
+	double rTof = 0;
+	StThreeVector<double> tofPos;
+	if(globalPos.perp()>100){
+		rTof = gHelixTpc.pathLength(globalPos);
+		tofPos = globalPos;
+	}else{
+		pairD sTof = gHelixTpc.pathLength(tofRadius);	
+		if(sTof.first<=0 && sTof.second<=0){
+		}else{
+			rTof =  (sTof.first < 0 || sTof.second < 0) 
+				? max(sTof.first, sTof.second) : min(sTof.first, sTof.second); 
+		}
+		if(rTof>0) tofPos = gHelixTpc.at(rTof);
+	}
 	StThreeVector<double> tofMom = gHelixTpc.momentumAt(rTof,bField*tesla);
 
 	double betaGam = g1P.mag()/muonMass;
-	double vInner  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light;
+	double vInner  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light*1e-9;
 	double tof2Tof = -9999.;
-	if (vertexPosInfo) tof2Tof = (length2Vtx+rTof)/vInner;
+	tof2Tof = (length2Vtx+rTof)/vInner;
 
 	LOG_DEBUG<<" to TOF: pos x,y,z:"<<tofPos.x()<<","<<tofPos.y()<<","<<tofPos.z()<<endm;
 	LOG_DEBUG<<" to TOF: mom p,pt,eta,phi:"<<tofMom.mag()<<","<<tofMom.perp()<<","<<tofMom.pseudoRapidity()<<","<<tofMom.phi()<<endm;
@@ -1252,7 +1293,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	StPhysicalHelixD helixInEMC(innerEMCMom,innerEMCPos,bField*tesla,gq);
 
 	double tof2InnerEMC = -9999.;
-	if (vertexPosInfo) tof2InnerEMC = (length2Vtx+rInnerEMC)/vInner;
+	tof2InnerEMC = (length2Vtx+rInnerEMC)/vInner;
 
 	LOG_DEBUG<<" to EMCinner: pos x,y,z:"<<innerEMCPos.x()<<","<<innerEMCPos.y()<<","<<innerEMCPos.z()<<endm;
 	LOG_DEBUG<<" to EMCinner: mom p,pt,eta,phi:"<<innerEMCMom.mag()<<","<<innerEMCMom.perp()<<","<<innerEMCMom.pseudoRapidity()<<","<<innerEMCMom.phi()<<endm;
@@ -1269,7 +1310,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	innerBSMDMom=(sqrt(pow((sqrt(pow((abs(innerBSMDMom)),2)+pow(muonMass,2))-rInnerBSMD*EMCenergyloss),2)-pow(muonMass,2)))/(abs(innerBSMDMom))*innerBSMDMom;
 
 	betaGam = innerBSMDMom.mag()/muonMass;
-	vInner  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light;
+	vInner  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light*1e-9;
 	double tof2InnerBSMD = rInnerBSMD/vInner;
 
 	LOG_DEBUG<<" to BSMDinner: pos x,y,z:"<<innerBSMDPos.x()<<","<<innerBSMDPos.y()<<","<<innerBSMDPos.z()<<endm;
@@ -1288,7 +1329,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	StPhysicalHelixD helixOutBSMD(outerBSMDMom,outerBSMDPos,bField*tesla,gq);
 
 	betaGam = outerBSMDMom.mag()/muonMass;
-	vInner  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light;
+	vInner  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light*1e-9;
 	double tof2OuterBSMD = rOuterBSMD/vInner;
 	LOG_DEBUG<<" to BSMDouter: pos x,y,z:"<<outerBSMDPos.x()<<","<<outerBSMDPos.y()<<","<<outerBSMDPos.z()<<endm;
 	LOG_DEBUG<<" to BSMDouter: mom p,pt,eta,phi:"<<outerBSMDMom.mag()<<","<<outerBSMDMom.perp()<<","<<outerBSMDMom.pseudoRapidity()<<","<<outerBSMDMom.phi()<<endm;
@@ -1316,7 +1357,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 			? max(sEMCLayer.first, sEMCLayer.second) : min(sEMCLayer.first, sEMCLayer.second); 
 
 		betaGamEMC 	= EMCLayerMom.mag()/muonMass;
-		vEMC  	    = sqrt(betaGamEMC*betaGamEMC/(1.+betaGamEMC*betaGamEMC))*c_light;
+		vEMC  	    = sqrt(betaGamEMC*betaGamEMC/(1.+betaGamEMC*betaGamEMC))*c_light*1e-9;
 		EMClengthLayer[i]  = rEMCLayer;
 		EMCtofLayer[i]     = rEMCLayer/vEMC;
 
@@ -1335,14 +1376,13 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	StPhysicalHelixD helixOutEMC(EMCLayerMom,EMCLayerPos,bField*tesla,gq);
 	pairD sInnerSteel = helixOutEMC.pathLength(innerSteelRadius);
 	if(sInnerSteel.first<=0 && sInnerSteel.second<=0) return kFALSE;
-	//Float_t mInnerSteelOx,mInnerSteelOy,mInnerSteelOz,mInnerSteelPx,mInnerSteelPy,mInnerSteelPz;
 	double rInnerSteel =  (sInnerSteel.first < 0 || sInnerSteel.second < 0) 
 		? max(sInnerSteel.first, sInnerSteel.second) : min(sInnerSteel.first, sInnerSteel.second); 
 	StThreeVector<double> innerSteelPos = helixOutEMC.at(rInnerSteel);
 	StThreeVector<double> innerSteelMom = helixOutEMC.momentumAt(rInnerSteel,bField*tesla);
 
 	betaGam = innerSteelMom.mag()/muonMass;
-	vInner  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light;
+	vInner  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light*1e-9;
 	double tof2InnerSteel = rInnerSteel/vInner;
 
 	LOG_DEBUG<<" to InnerSteel: pos x,y,z:"<<innerSteelPos.x()<<","<<innerSteelPos.y()<<","<<innerSteelPos.z()<<endm;
@@ -1374,7 +1414,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 			? max(sSteelLayer.first, sSteelLayer.second) : min(sSteelLayer.first, sSteelLayer.second); 
 
 		betaGamSteel    = steelLayerMom.mag()/muonMass;
-		vSteel  	    = sqrt(betaGamSteel*betaGamSteel/(1+betaGamSteel*betaGamSteel))*c_light;
+		vSteel  	    = sqrt(betaGamSteel*betaGamSteel/(1+betaGamSteel*betaGamSteel))*c_light*1e-9;
 		lengthLayer[i]  = rSteelLayer;
 		tofLayer[i]     = rSteelLayer/vSteel;
 
@@ -1402,36 +1442,32 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	StThreeVector<double> mtdPos = helixOutSteel.at(rMtd);
 	StThreeVector<double> mtdMom = steelLayerMom;
 	double betaGamOuter = steelLayerMom.mag()/muonMass;
-	double vOuter  	    = sqrt(betaGamOuter*betaGamOuter/(1+betaGamOuter*betaGamOuter))*c_light;
+	double vOuter  	    = sqrt(betaGamOuter*betaGamOuter/(1+betaGamOuter*betaGamOuter))*c_light*1e-9;
 	double tof2Outer = rMtd/vOuter;
 
 	LOG_DEBUG<<" to MTD: pos x,y,z:"<<mtdPos.x()<<","<<mtdPos.y()<<","<<mtdPos.z()<<endm;
 	LOG_DEBUG<<" to MTD: mom p,pt,eta,phi:"<<mtdMom.mag()<<","<<mtdMom.perp()<<","<<mtdMom.pseudoRapidity()<<","<<mtdMom.phi()<<endm;
 	LOG_DEBUG<<" to MTD: tof:"<<tof2Outer<<endm;
 
-	double length2Tof = -9999.;
-	if (vertexPosInfo) length2Tof = length2Vtx+rTof;
 
+	double length2Tof = -9999.;
+	length2Tof = length2Vtx+rTof;
 	double length2Mtd[2] = {0};
 	double length2SteelOuter = -9999.;
-	if (vertexPosInfo){
-	  length2SteelOuter += length2Vtx+rInnerEMC;
-	  length2SteelOuter += rInnerBSMD+rOuterBSMD;
-	  for(int i=0;i<nEMCStep;i++) length2SteelOuter += EMClengthLayer[i];
-	  length2SteelOuter += rInnerSteel;
-	  for(int i=0;i<nStep;i++) length2SteelOuter += lengthLayer[i];
-	}
+	length2SteelOuter += length2Vtx+rInnerEMC;
+	length2SteelOuter += rInnerBSMD+rOuterBSMD;
+	for(int i=0;i<nEMCStep;i++) length2SteelOuter += EMClengthLayer[i];
+	length2SteelOuter += rInnerSteel;
+	for(int i=0;i<nStep;i++) length2SteelOuter += lengthLayer[i];
 	for(int i=0;i<2;i++) length2Mtd[i] = length2SteelOuter;
 
 	double tof2Mtd[2] = {0};
 	double tof2SteelOuter = -9999.;
-	if (vertexPosInfo){
-	  tof2SteelOuter += tof2InnerEMC; 
-	  tof2SteelOuter += tof2InnerBSMD+tof2OuterBSMD; 
-	  for(int i=0;i<nEMCStep;i++) tof2SteelOuter += EMCtofLayer[i];
-	  tof2SteelOuter += tof2InnerSteel; 
-	  for(int i=0;i<nStep;i++) tof2SteelOuter += tofLayer[i];
-	}
+	tof2SteelOuter += tof2InnerEMC; 
+	tof2SteelOuter += tof2InnerBSMD+tof2OuterBSMD; 
+	for(int i=0;i<nEMCStep;i++) tof2SteelOuter += EMCtofLayer[i];
+	tof2SteelOuter += tof2InnerSteel; 
+	for(int i=0;i<nStep;i++) tof2SteelOuter += tofLayer[i];
 	for(int i=0;i<2;i++) tof2Mtd[i] = tof2SteelOuter;
 
 	LOG_DEBUG<<" pathLength from vertex to MTD:"<<length2SteelOuter+rMtd<<endm;
@@ -1494,7 +1530,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 		  cellCan[i]=(int)((local[i].y()+(stripWidth+stripGap)*nStrips/2.)/(stripWidth+stripGap));
 		}
 	}
-
+	
 	double LowEdge = mFirstBackLegPhi+(projMtdBackLeg-1.)*(backLegPhiWidth+backLegPhiGap)-(nChannels/4.)*(stripWidth+stripGap)/mtdRadius;
 	if(LowEdge > 2.*(TMath::Pi())) LowEdge -= 2.*(TMath::Pi());
 	if(LowEdge < 0) 	LowEdge += 2.*(TMath::Pi());
@@ -1513,7 +1549,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 
 	StructCellHit cellHit;
 	for(int i=0;i<2;i++){
-		if(moduleCan[i]<1||moduleCan[i]>5) continue;
+		//if(moduleCan[i]<1||moduleCan[i]>5) continue;
 		cellHit.backleg=projMtdBackLeg;
 		cellHit.module=moduleCan[i];
 		cellHit.cell=cellCan[i];
@@ -1566,6 +1602,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	if(nCells>0&&mHisto) mHitsMultPerTrack->Fill(nCells);
 
 	if(mSaveTree){
+		mMtdEvtData.gdca[ngTracks] = dca.mag();	
 		mMtdEvtData.gprojMtdBackLeg[ngTracks] = projMtdBackLeg;	
 		mMtdEvtData.gprojMtdModule[ngTracks] = projMtdModule;	
 		mMtdEvtData.gprojMtdCell[ngTracks] = projMtdCell;
@@ -1607,6 +1644,34 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 			int daqIndex = (daqIter->module-1)*12 + (daqIter->cell);
 			int proIndex = (proIter->module-1)*12 + (proIter->cell);
 			int hisIndex = daqIter->backleg - 1;
+			if (mHisto) {
+				double backLegPhiCen = mFirstBackLegPhi+(daqIter->backleg-1)*(backLegPhiWidth+backLegPhiGap);
+					if(backLegPhiCen>2.*TMath::Pi()) backLegPhiCen -= 2.*TMath::Pi();
+
+					double stripPhiCen = 0.;
+					int trayId=daqIter->module;
+					int channel = daqIter->cell;
+					if(trayId>0&&trayId<4){
+						stripPhiCen = backLegPhiCen-(nChannels/4.-0.5-channel)*(stripWidth+stripGap)/mtdRadius; // approximation
+					}else{
+						stripPhiCen = backLegPhiCen+(nChannels/4.-0.5-channel)*(stripWidth+stripGap)/mtdRadius; 
+					}
+					double mLeTimeWest = daqIter->leadingEdgeTime.first;
+					double mLeTimeEast = daqIter->leadingEdgeTime.second;
+					double stripZCen   = (trayId-3.)*stripLength - (mLeTimeWest-mLeTimeEast)/2./vDrift*1000.;
+
+					if(stripPhiCen>2.*TMath::Pi()) stripPhiCen -= 2.*TMath::Pi();
+					if(stripPhiCen<0.)    stripPhiCen += 2.*TMath::Pi();
+					double daqphi = stripPhiCen;
+					double daqz   = stripZCen;
+
+					hMtdZvsProj->Fill(proIter->hitPosition.z(),daqz);
+					hMtdPhivsProj->Fill(proIter->hitPosition.phi(),daqphi);
+					hMtddPhivsBackleg->Fill(hisIndex,proIter->hitPosition.phi()-daqphi);
+					hMtddZvsBackleg->Fill(hisIndex,proIter->hitPosition.z()-daqz);
+
+			}
+
 			if(daqIter->backleg==proIter->backleg) {
 				if (mHisto) {
 					if(hisIndex>=0&&hisIndex<30) {
@@ -1661,6 +1726,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 				cellHit.leadingEdgeTime = daqIter->leadingEdgeTime;
 				cellHit.index2MtdHit = daqIter->index2MtdHit;
 				cellHit.theta = proIter->theta;
+				cellHit.pathLength = proIter->pathLength;
 				matchHitCellsVec.push_back(cellHit);
 			}
 		} 
@@ -1704,6 +1770,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 		cellHit.leadingEdgeTime = tempIter->leadingEdgeTime;
 		cellHit.index2MtdHit = tempIter->index2MtdHit;
 		cellHit.theta = tempIter->theta;
+		cellHit.pathLength = tempIter->pathLength;
 
 		if(mHisto) {
 			Float_t ycenter = (tempIter->cell-nStrips/2+0.5)*(stripWidth+stripGap);
@@ -1764,6 +1831,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 		vector<pairD> vtot; 
 		vector<pairD> vtdc; 
 		vector<Double_t> vtheta;
+		vector<Double_t> vpathLength;
 		vector<Int_t> vindex2MtdHit;
 
 		mtdCellHitVectorIter tempIter=tempVec.begin();
@@ -1782,6 +1850,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 				vtdc.push_back(erasedIter->leadingEdgeTime);
 				vindex2MtdHit.push_back(erasedIter->index2MtdHit);
 				vtheta.push_back(erasedIter->theta);
+				vpathLength.push_back(erasedIter->pathLength);
 
 				erasedVec.erase(erasedIter);
 				erasedIter--;
@@ -1803,6 +1872,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 			cellHit.leadingEdgeTime = vtdc[0];
 			cellHit.index2MtdHit = vindex2MtdHit[0];
 			cellHit.theta = vtheta[0];
+			cellHit.pathLength = vpathLength[0];
 
 			finalMatchedCellsVec.push_back(cellHit);
 
@@ -1880,6 +1950,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 				cellHit.leadingEdgeTime = vtdc[thiscandidate];
 				cellHit.index2MtdHit = vindex2MtdHit[thiscandidate];
 				cellHit.theta = vtheta[thiscandidate];
+				cellHit.pathLength = vpathLength[thiscandidate];
 
 				finalMatchedCellsVec.push_back(cellHit);
 
@@ -1900,9 +1971,6 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 
 /// Take final matched MTD hits and update the track PID traits with MTD information
 void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t& nValidSingleHitCells,Int_t& nValidSinglePrimHitCells){
-	StSPtrVecTrackNode& nodes=mEvent->trackNodes();
-	StMtdCollection *theMtd = mEvent->mtdCollection();
-	StSPtrVecMtdHit& mtdHits= theMtd->mtdHits();
 	for (size_t ii=0; ii < finalMatchedCellsVec.size(); ii++){
 		Int_t backleg = finalMatchedCellsVec[ii].backleg;
 		Int_t module = finalMatchedCellsVec[ii].module;
@@ -1924,21 +1992,87 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 
 		// get track-id from cell hit vector
 		int trackNode = finalMatchedCellsVec[ii].trackIdVec[0];
-		StGlobalTrack *globalTrack = dynamic_cast<StGlobalTrack*>(nodes[trackNode]->track(global));
-		if(!globalTrack) {
-			LOG_WARN << "Wrong global track!" << endm;
-			continue;
-		}
+		if(mMuDstIn){
+			StMuTrack *gTrack = mMuDst->globalTracks(trackNode);
+			StMuTrack *pTrack = (StMuTrack*)gTrack->primaryTrack();
+			if(!gTrack) {
+				LOG_WARN << "Wrong global track!" << endm;
+				continue;
+			}
+			StMuMtdHit *mtdHit = mMuDst->mtdHit(finalMatchedCellsVec[ii].index2MtdHit);
+			if(mtdHit->backleg()!=backleg || mtdHit->module()!=module || mtdHit->cell()!=cell) {
+				LOG_WARN << "Wrong hit in the MtdHitCollection!" << endm;
+				continue;
+			}
+			nValidSingleHitCells++;
 
-		// Fill association in MTD Hit Collection
-		StMtdHit *mtdHit = mtdHits[finalMatchedCellsVec[ii].index2MtdHit];
-		if(mtdHit->backleg()!=backleg || mtdHit->module()!=module || mtdHit->cell()!=cell) {
-			LOG_WARN << "Wrong hit in the MtdHitCollection!" << endm;
-			continue;
-		}
-		nValidSingleHitCells++;
+			mtdHit->setAssociatedTrackKey(gTrack->id());
 
-		mtdHit->setAssociatedTrack(globalTrack);
+			StMuMtdPidTraits pidMtd = gTrack->mtdPidTraits();
+			pidMtd.setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
+			pidMtd.setYLocal(dy);
+			pidMtd.setZLocal(dz);
+			pidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
+			pidMtd.setPosition(finalMatchedCellsVec[ii].hitPosition);
+			pidMtd.setPathLength(finalMatchedCellsVec[ii].pathLength);
+			gTrack->setMtdPidTraits(pidMtd);
+
+			if(pTrack){
+				StMuMtdPidTraits ppidMtd = pTrack->mtdPidTraits();
+				ppidMtd.setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
+				ppidMtd.setYLocal(dy);
+				ppidMtd.setZLocal(dz);
+				ppidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
+				ppidMtd.setPosition(finalMatchedCellsVec[ii].hitPosition);
+				ppidMtd.setPathLength(finalMatchedCellsVec[ii].pathLength);
+				pTrack->setMtdPidTraits(ppidMtd);
+			}
+
+		}else{
+			// get track-id from cell hit vector
+			StSPtrVecTrackNode &nodes = mEvent->trackNodes();
+			StGlobalTrack *globalTrack = dynamic_cast<StGlobalTrack*>(nodes[trackNode]->track(global));
+			StPrimaryTrack *primaryTrack =dynamic_cast<StPrimaryTrack*>(globalTrack->node()->track(primary));
+			if(!globalTrack) {
+				LOG_WARN << "Wrong global track!" << endm;
+				continue;
+			}
+
+			// Fill association in MTD Hit Collection
+
+			StMtdCollection *theMtd  = mEvent->mtdCollection();
+			StSPtrVecMtdHit& mtdHits = theMtd->mtdHits();
+			StMtdHit *mtdHit = mtdHits[finalMatchedCellsVec[ii].index2MtdHit];
+			if(mtdHit->backleg()!=backleg || mtdHit->module()!=module || mtdHit->cell()!=cell) {
+				LOG_WARN << "Wrong hit in the MtdHitCollection!" << endm;
+				continue;
+			}
+			nValidSingleHitCells++;
+
+			mtdHit->setAssociatedTrack(globalTrack);
+
+			StMtdPidTraits *pidMtd = new StMtdPidTraits();
+			pidMtd->setMtdHit(mtdHit);
+			pidMtd->setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
+			pidMtd->setYLocal(dy);
+			pidMtd->setZLocal(dz);
+			pidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
+			pidMtd->setPosition(finalMatchedCellsVec[ii].hitPosition);
+			pidMtd->setPathLength(finalMatchedCellsVec[ii].pathLength);
+			globalTrack->addPidTraits(pidMtd);
+
+			if(primaryTrack){
+				StMtdPidTraits *ppidMtd = new StMtdPidTraits();
+				ppidMtd->setMtdHit(mtdHit);
+				ppidMtd->setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
+				ppidMtd->setYLocal(dy);
+				ppidMtd->setZLocal(dz);
+				ppidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
+				ppidMtd->setPosition(finalMatchedCellsVec[ii].hitPosition);
+				ppidMtd->setPathLength(finalMatchedCellsVec[ii].pathLength);
+				primaryTrack->addPidTraits(ppidMtd);
+			}
+		}
 
 		if(mSaveTree){
 			int iNode = trackNode;	
