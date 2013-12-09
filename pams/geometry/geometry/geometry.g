@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.268 2013/12/04 20:01:33 jwebb Exp $
+* $Id: geometry.g,v 1.269 2013/12/09 14:45:58 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.269  2013/12/09 14:45:58  jwebb
+* Changes to pixel detector for y2014.
+*
 * Revision 1.268  2013/12/04 20:01:33  jwebb
 * Removes FGT cables from IDSM in y2014.
 *
@@ -4859,8 +4862,8 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
      IF PixlConfig==60 {               "Dev14 Pixel Configuration"
            call AgDetp new ('PIXL')
            call AgDetp add ('PXLW.SecVersion=',   1.0, 1); 
-           call AgDetp add ('PXLW.LadrConfig=',   2.0, 1);
-           CONSTRUCT PixlGeo5   """ Pixl Detector """
+           call AgDetp add ('PXLW.LadrConfig=',   1.0, 1);
+           CONSTRUCT PixlGeo6   """ Pixl Detector """
            CONSTRUCT DtubGeo1   """ Electronics etc... """
      }
 
