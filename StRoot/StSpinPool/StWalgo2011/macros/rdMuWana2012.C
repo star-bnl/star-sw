@@ -82,9 +82,11 @@ int rdMuWana2012(
     gSystem->Load("StMCAsymMaker");
     gSystem->Load("StRandomSelector");
     gSystem->Load("libfastjet.so");
-    gSystem->Load("libsiscone.so");
-    gSystem->Load("libsiscone_spherical.so");
-    gSystem->Load("libfastjetplugins.so");
+    gSystem->Load("libCDFConesPlugin.so");
+    gSystem->Load("libEECambridgePlugin.so");
+    gSystem->Load("libJadePlugin.so");
+    gSystem->Load("libNestedDefsPlugin.so");
+    gSystem->Load("libSISConePlugin.so");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetSkimEvent");
     gSystem->Load("StJets");
@@ -264,6 +266,35 @@ int rdMuWana2012(
     anapars12_noEEMC->addJetCut(new StProtoJetCutPt(3.5,200));
     anapars12_noEEMC->addJetCut(new StProtoJetCutEta(-100,100));
 
+    // Set cone jet finder parameters
+    StConePars* conepars = new StConePars;
+    conepars->setGridSpacing(105,-3.0,3.0,120,-TMath::Pi(),TMath::Pi());
+    conepars->setConeRadius(0.7);
+    conepars->setSeedEtMin(0.5);
+    conepars->setAssocEtMin(0.1);
+    conepars->setSplitFraction(0.5);
+    conepars->setPerformMinimization(true);
+    conepars->setAddMidpoints(true);
+    conepars->setRequireStableMidpoints(true);
+    conepars->setDoSplitMerge(true);
+    conepars->setDebug(false);
+
+    // Set CDF midpoint R=0.7 parameters
+    const double coneRadius = 0.7;
+    StFastJetPars* CdfMidpointR070Pars = new StFastJetPars;
+    CdfMidpointR070Pars->setJetAlgorithm(StFastJetPars::plugin_algorithm);
+    CdfMidpointR070Pars->setRparam(coneRadius);
+    CdfMidpointR070Pars->setRecombinationScheme(StFastJetPars::E_scheme);
+    CdfMidpointR070Pars->setStrategy(StFastJetPars::plugin_strategy);
+    CdfMidpointR070Pars->setPtMin(3.5);
+
+    const double overlapThreshold = 0.75;
+    const double seedThreshold = 0.5;
+    const double coneAreaFraction = 1.0;
+
+    StPlugin* cdf = new StCDFMidPointPlugin(coneRadius,overlapThreshold,seedThreshold,coneAreaFraction);
+    CdfMidpointR070Pars->setPlugin(cdf);
+
     // Set anti-kt R=0.6 parameters
     StFastJetPars* AntiKtR060Pars = new StFastJetPars;
     AntiKtR060Pars->setJetAlgorithm(StFastJetPars::antikt_algorithm);
@@ -280,6 +311,8 @@ int rdMuWana2012(
     AntiKtR050Pars->setStrategy(StFastJetPars::Best);
     AntiKtR050Pars->setPtMin(3.5);
 
+    jetmaker->addBranch("ConeJets12_100",anapars12,CdfMidpointR070Pars);
+    jetmaker->addBranch("ConeJets12_100_noEEMC",anapars12_noEEMC,CdfMidpointR070Pars);
     jetmaker->addBranch("AntiKtR060NHits12",anapars12,AntiKtR060Pars);
     jetmaker->addBranch("AntiKtR060NHits12_noEEMC",anapars12_noEEMC,AntiKtR060Pars);
     jetmaker->addBranch("AntiKtR050NHits12",anapars12,AntiKtR050Pars);
@@ -433,9 +466,6 @@ int rdMuWana2012(
 
 
 // $Log: rdMuWana2012.C,v $
-// Revision 1.14  2013/12/06 14:21:22  stevens4
-// update jet library loading for SL6 and remove mid-point cone
-//
 // Revision 1.13  2013/10/11 14:22:34  stevens4
 // changed order of library loading to be compatible with ROOT/SL upgradex
 //

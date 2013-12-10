@@ -1,5 +1,5 @@
-#ifndef MULTIKEYMAP_H
-#define MULTIKEYMAP_H
+#ifndef MULTYKEYMAP_H
+#define MULTYKEYMAP_H
 #include <vector>
 class StMultiKeyMapIter;
 class StMultiKeyNode;
@@ -84,31 +84,29 @@ int    mId;
 class StMultiKeyMapIter
 {
 public:
-  StMultiKeyMapIter(const StMultiKeyNode *node,const float *kMin=0,const float *kMax=0);
-  void          Set(const StMultiKeyNode *node,const float *kMin=0,const float *kMax=0);
-  void       Update(const float *kMin=0,const float *kMax=0);
-  void        Reset();
+StMultiKeyMapIter(const StMultiKeyNode *node,const float *kMin=0,const float *kMax=0);
+void          Set(const StMultiKeyNode *node,const float *kMin=0,const float *kMax=0);
+void       Update(const float *kMin=0,const float *kMax=0);
 
-  ~StMultiKeyMapIter();
-  StMultiKeyNode *operator*() const 	{return (StMultiKeyNode*)mStk[mLev];}
-  StMultiKeyMapIter &operator++();
-  int Level() const 			{return mLev;}
-  float *GetKMin() const 		{return mKMin;}
-  float *GetKMax() const 		{return mKMax;}
-  const int *Touched() const 		{return mTouched;}
-  private:
-  void Left(const StMultiKeyNode *node);
-  int FullCheck();
-  int FilterLeft(const StMultiKeyNode *node) const;
-  int FilterRite(const StMultiKeyNode *node) const;
-  protected:
-  mutable int mTouched[3];
-  std::vector<float> mMinMax;
-  float *mKMin;
-  float *mKMax;
-  int mNK;
-  int mLev;
-  const StMultiKeyNode *mTop;
-  std::vector<const StMultiKeyNode*> mStk;
+~StMultiKeyMapIter();
+StMultiKeyNode *operator*() const { return (StMultiKeyNode*)mStk[mLev];}
+StMultiKeyMapIter &operator++();
+int Level() const {return mLev;}
+float *GetKMin() const {return mKMin;}
+float *GetKMax() const {return mKMax;}
+const int *Touched() const {return mTouched;}
+private:
+void Left(const StMultiKeyNode *node);
+int FullCheck();
+int FilterLeft(const StMultiKeyNode *node) const;
+int FilterRite(const StMultiKeyNode *node) const;
+protected:
+mutable int mTouched[3];
+std::vector<float> mMinMax;
+float *mKMin;
+float *mKMax;
+int mNK;
+int mLev;
+std::vector<const StMultiKeyNode*> mStk;
 };
 #endif //MULTYKEYBINTREE_H
