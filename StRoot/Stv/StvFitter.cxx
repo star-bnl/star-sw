@@ -49,15 +49,22 @@ static void Test();
 //______________________________________________________________________________
 int TCLx::trsinv2x2(const double *pM,double *pMi)
 {
-   const double det = pM[0] * pM[2] - pM[1] * pM[1];
+   double F[3]={pM[0],0,pM[2]};
+   if (F[0]<1e-20) F[0]=1e-20;if (F[2]>1e+20) F[2]=1e+20;
+   F[0] =1./F[0]; F[2] =1./F[2];
+   F[1] = sqrt(F[0]*F[2]);
+   for (int i=0;i<3;i++) {pMi[i] = pM[i]*F[i];}
+
+   const double det = pMi[0] * pMi[2] - pMi[1] * pMi[1];
 
    if (det<=3e-33) return 1;
    const double s = 1./det;
 
-   const double tmp = s*pM[2];
-   pMi[1] = -pM[1]*s;
-   pMi[2] = s*pM[0];
+   const double tmp = s*pMi[2];
+   pMi[1] = -pMi[1]*s;
+   pMi[2] = s*pMi[0];
    pMi[0] = tmp;
+   for (int i=0;i<3;i++) {pMi[i] = pMi[i]*F[i];}
    return 0;
 }
 //______________________________________________________________________________
@@ -107,7 +114,8 @@ int TCLx::trsinv3x3(const double *pM,double *pMi)
       det = c20*c21-c10*c22;
    }
 
-   if (det<=3e-33) return 1;
+   if (det<=0) 		return -1;
+   if (det<=3e-33) 	return  1;
 
    const double s = tmp/det;
 
@@ -143,7 +151,6 @@ int TCLx::trsinv3x3(const double *pM,double *pMi)
 //______________________________________________________________________________
 int TCLx::trsinv4x4(const double *pM,double *pMi)
 {
-
   // Find all NECESSARY 2x2 dets:  (18 of them)
 
    const Double_t det2_12_01 = pM[GF10]*pM[GF21] - pM[GF11]*pM[GF20];
@@ -248,8 +255,19 @@ int TCLx::trsinv4x4(const double *pM,double *pMi)
 #define GM44 14
 
 //______________________________________________________________________________
-int TCLx::trsinv5x5(const double  *pM,double  *pMi)
+int TCLx::trsinv5x5(const double  *pMp,double  *pMi)
 {
+   double F[5],pM[15];
+   for (int i=0,li=0;i< 5;li+=++i) {
+     F[i] = sqrt(pMp[li+i]);
+     if (F[i]<1e-10) F[i]=1e-10;
+     if (F[i]>1e+10) F[i]=1e+10;
+  }
+
+   for (int i=0,li=0;i< 5;li+=++i) {
+     for (int j=0;j<=i;j++) {
+       pM[li+j] = pMp[li+j]/F[i]/F[j];
+  } }
   // Find all NECESSARY 2x2 dets:  (30 of them)
 
    const Double_t det2_23_01 = pM[GM20]*pM[GM31] - pM[GM21]*pM[GM30];
@@ -372,7 +390,8 @@ int TCLx::trsinv5x5(const double  *pM,double  *pMi)
    const Double_t det = pM[GM00]*det4_1234_1234 - pM[GM10]*det4_1234_0234 + pM[GM20]*det4_1234_0134 
                       - pM[GM30]*det4_1234_0124 + pM[GM40]*det4_1234_0123;
 
-   if (det<=3e-33) return 1;
+   if (det<=    0) return -1;
+   if (det<=3e-33) return  1;
 
    const Double_t oneOverDet = 1.0/det;
    const Double_t mn1OverDet = - oneOverDet;
@@ -396,6 +415,11 @@ int TCLx::trsinv5x5(const double  *pM,double  *pMi)
    pMi[GM43] =  det4_0123_0124 * mn1OverDet;
 
    pMi[GM44] =  det4_0123_0123 * oneOverDet;
+
+   for (int i=0,li=0;i< 5;li+=++i) {
+     for (int j=0;j<=i;j++) {
+       pMi[li+j] = pMi[li+j]/F[i]/F[j];
+  } }
    return 0;
 }
 #include "TCernLib.h"
@@ -467,16 +491,18 @@ StvDebug::Break(nCall);
 //  TCL::trsinv(E1,E1i,nP1);		//E1i = 1/E1
   int kase = nP1;
 SWITCHa:  switch(kase) {
-    case 2: if (TCLx::trsinv2x2(E1,E1i)) {kase = 0; goto SWITCHa;}; break;
-    case 5: if (TCLx::trsinv5x5(E1,E1i)) {kase = 0; goto SWITCHa;}; break;
+    case 2: if ((kase=TCLx::trsinv2x2(E1,E1i))) {goto SWITCHa;}; break;
+    case 5: if ((kase=TCLx::trsinv5x5(E1,E1i))) {goto SWITCHa;}; break;
+    case -1: return 1e11;
     default: TCL::trsinv   (E1,E1i,nP1);
   }
 
 //  TCL::trsinv(E2,E2i,nP2);		//E2i = 1/E2
   kase = nP2;
 SWITCHb:  switch(kase) {
-    case 2: if (TCLx::trsinv2x2(E2,E2i)) {kase = 0; goto SWITCHb;}; break;
-    case 5: if (TCLx::trsinv5x5(E2,E2i)) {kase = 0; goto SWITCHb;}; break;
+    case 2: if ((kase=TCLx::trsinv2x2(E2,E2i))) {goto SWITCHb;}; break;
+    case 5: if ((kase=TCLx::trsinv5x5(E2,E2i))) {goto SWITCHb;}; break;
+    case -1: return 1e11;
     default: TCL::trsinv   (E2,E2i,nP2);
   }
 
@@ -488,8 +514,9 @@ SWITCHb:  switch(kase) {
 //TCL::trsinv(EJi,EJm,nP2);		//EJ = 1/EJi
   kase = nP2;
 SWITCHc:  switch(kase) {
-    case 2: if (TCLx::trsinv2x2(EJi,EJm)) {kase = 0; goto SWITCHc;}; break;
-    case 5: if (TCLx::trsinv5x5(EJi,EJm)) {kase = 0; goto SWITCHc;}; break;
+    case 2: if ((kase=TCLx::trsinv2x2(EJi,EJm))) {goto SWITCHc;}; break;
+    case 5: if ((kase=TCLx::trsinv5x5(EJi,EJm))) {goto SWITCHc;}; break;
+    case -1: return 1e11;
     default: TCL::trsinv   (EJi,EJm,nP2);
   }
 
@@ -749,6 +776,7 @@ double StvFitter::Xi2()
   mXi2 = JoinTwo(5,F.Arr()    ,mInErrs->Arr()
                 ,5,Zero       ,mJnErrs->Arr()
 		,mQQPars.Arr(),mQQErrs.Arr());
+  mFailed = (mXi2>kXtraBigXi2); 
   return mXi2;
 }  
 //______________________________________________________________________________
@@ -791,7 +819,7 @@ int StvFitter::Hpdate()
   double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  mQQPars.Arr(),mOtErrs->Arr());
-  assert((myXi2+mXi2)>100 || fabs(myXi2-mXi2)<1e-1*(myXi2+mXi2+1));
+  mFailed = (myXi2>kXtraBigXi2); 
   *mOtPars = mTkPars;
 
   return mFailed;
