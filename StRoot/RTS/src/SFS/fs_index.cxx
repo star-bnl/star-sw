@@ -425,9 +425,11 @@ void fs_index::umount()
   index_created = 0;
 }
 
-fs_dirent *fs_index::readdirent(char *dir)
+fs_dirent *fs_index::readdirent(char *dir, fs_dirent *ent)
 {
-  fs_dirent *ent = &_readdirent_static_;
+  if(ent == NULL) {
+      ent = &_readdirent_static_;
+  }
 
   if(!index_created) return NULL;
 
@@ -505,7 +507,7 @@ void fs_index::closedir(fs_dir *dir)
 }
 
 
-fs_dirent *fs_index::readdir(fs_dir *dir)
+fs_dirent *fs_index::readdir(fs_dir *dir, fs_dirent *ent)
 {
   if(!index_created) return NULL;
   
@@ -520,7 +522,9 @@ fs_dirent *fs_index::readdir(fs_dir *dir)
 
   dir->currchild = node;
 
-  fs_dirent *ent = &_readdirent_static_;
+  if(ent == NULL) {
+   ent = &_readdirent_static_;
+  }
 
   strcpy(ent->d_name, node->name);
 
