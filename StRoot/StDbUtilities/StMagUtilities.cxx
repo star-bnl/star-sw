@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.94 2013/09/25 20:38:56 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.95 2013/12/11 18:27:56 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.95  2013/12/11 18:27:56  genevb
+ * Account for GG voltage errorsi + shifts in UndoGGVoltErrorDistortion(), other minor optimizations
+ *
  * Revision 1.94  2013/09/25 20:38:56  genevb
  * Meaningful return codes for Predict...()
  *
@@ -384,6 +387,7 @@ StMagUtilities *StMagUtilities::fgInstance = 0 ;
 static const Float_t  PiOver12 = TMath::Pi()/12. ;  // Commonly used constant
 static const Float_t  PiOver6 = TMath::Pi()/6. ;  // Commonly used constant
 
+
 //________________________________________
 
 
@@ -410,12 +414,12 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
   GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
+  GetHVPlanes()         ;    // Get the parameters that describe the HV plane errors (after GetTPCVoltages!)
   GetOmegaTau ()        ;    // Get Omega Tau parameters
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
   GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB and EWRatio
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
   GetGridLeak()         ;    // Get the parameters that describe the gating grid leaks
-  GetHVPlanes()         ;    // Get the parameters that describe the HV plane errors
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
   UseManualSCForPredict(kFALSE) ; // Initialize use of Predict() functions;
 }
@@ -499,18 +503,35 @@ void StMagUtilities::GetTPCParams ()
     TPCROWR[i] = pads->radialDistanceAtRow(i+1);
 }
 
-void StMagUtilities::GetTPCVoltages ()  
-{ 
-  fTpcVolts      =  StDetectorDbTpcVoltages::instance() ;  // Initialize the DB for TpcVoltages
-  CathodeV       =  fTpcVolts->getCathodeVoltage() * 1000 ; 
-  GG             =  fTpcVolts->getGGVoltage() ; 
-  StarMagE       =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;         // STAR Electric Field (V/cm) Magnitude
+void StMagUtilities::GetE()
+{
+  RPitch         =  1.150 ;            // Field Cage Ring to Ring pitch (cm)
+  Float_t R_0    =  2.130 ;            // First resistor (R0) between CM and ring number one (Mohm)
+  Float_t RStep  =  2.000 ;            // Resistor chain value (except the first one) (Mohm)
+  Float_t R_182  =  0.310 ;            // Last resistor in the IFC chain
+  Rtot           =  R_0 + 181*RStep + R_182 ;    // Total resistance of the (normal) resistor chain
+  Rfrac          =  TPC_Z0*RStep/(Rtot*RPitch) ; // Fraction of full resistor chain inside TPC drift volume (~1.0)
+
+  // Effectivenesses determined from voltage tuning tool at:
+  // http://www.star.bnl.gov/public/tpc/hard/tpcrings/page6.html
+  GGeffectiveness      =  0.981;       // Effectiveness of GG voltage to be the average at its plane
+  deltaGGeffectiveness =  0.964;       // Effectiveness of GG voltage changes to be expressed in average
+  GGideal              =  CathodeV * (1.0 - Rfrac) / GGeffectiveness ;
+  StarMagE             =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;         // STAR Electric Field (V/cm) Magnitude
   if (TMath::Abs(StarMagE) < 1e-6) {
     cout << "StMagUtilities ERROR **** Calculations fail with extremely small or zero primary E field:" << endl;
     cout << "StMagUtilities     StarMagE = (CathodeV - GG) / TPC_Z0 = (" << CathodeV
       << " - " << GG << ") / " << TPC_Z0 << " = " << StarMagE << " V/cm" << endl;
     exit(1);
   } 
+}
+
+void StMagUtilities::GetTPCVoltages ()  
+{ 
+  fTpcVolts      =  StDetectorDbTpcVoltages::instance() ;  // Initialize the DB for TpcVoltages
+  CathodeV       =  fTpcVolts->getCathodeVoltage() * 1000 ; 
+  GG             =  fTpcVolts->getGGVoltage() ; 
+  GetE() ;
   St_tpcAnodeHVavgC* anodeVolts = St_tpcAnodeHVavgC::instance() ;
   // Placeholder: InnerCoef and OuterCoef need to be calibrated
   //for (Int_t i = 1 ; i < 25; i++ ) {
@@ -679,10 +700,12 @@ void StMagUtilities::ManualGridLeakWidth (Double_t inner, Double_t middle, Doubl
 
 void StMagUtilities::GetHVPlanes ()
 {
+   // GetTPCVoltages() must be called first!
    fHVPlanes = St_tpcHVPlanesC::instance() ;
    tpcHVPlanes_st* HVplanes = fHVPlanes -> Struct();
-   deltaVGGEast =   HVplanes -> GGE_shift_z * StarMagE;
-   deltaVGGWest = - HVplanes -> GGW_shift_z * StarMagE;
+   Float_t deltaVGGCathode = GG - GGideal;
+   deltaVGGEast = (  HVplanes -> GGE_shift_z * StarMagE) + deltaVGGCathode;
+   deltaVGGWest = (- HVplanes -> GGW_shift_z * StarMagE) + deltaVGGCathode;
 }
 
 void StMagUtilities::ManualGGVoltError (Double_t east, Double_t west)
@@ -788,7 +811,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
     { 
       CathodeV    = -27950.0 ;      // Cathode Voltage (volts)
       GG          =   -115.0 ;      // Gating Grid voltage (volts)
-      StarMagE    =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;         // STAR Electric Field (V/cm) Magnitude
+      GetE() ;
       for (Int_t i = 0 ; i < 25; i++ ) GLWeights[i] = 1; // Initialize as uniform
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVoltages setting. " << endl ;
     } 
@@ -1690,6 +1713,8 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
     {
       cout << "StMagUtilities::IFCShift   Please wait for the tables to fill ...  ~5 seconds" << endl ;
       Int_t Nterms = 100 ;
+      Double_t Denominator[100];
+      memset(Denominator,0,100*sizeof(Double_t));
       for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
 	{
 	  z = TMath::Abs( eZList[i] ) ;
@@ -1708,11 +1733,11 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 		  Double_t Numerator =
 		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI1( k*r ) +
 		    TMath::BesselK1( k*r )         * TMath::BesselI0( k*OFCRadius ) ;
-		  Double_t Denominator =
+		  if (Denominator[n] == 0) Denominator[n] =
 		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
 		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
 		  Double_t zterm = 1 + TMath::Cos( k*z ) ;
-		  Double_t qwe = Numerator / Denominator ;
+		  Double_t qwe = Numerator / Denominator[n] ;
 		  IntegralOverZ += Cn * zterm * qwe ;
 	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe) ) break;
 		}
@@ -1764,6 +1789,8 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   if ( DoOnce )
     {
       Int_t Nterms = 100 ;
+      Double_t Denominator[100];
+      memset(Denominator,0,100*sizeof(Double_t));
       for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
 	{
 	  z = TMath::Abs( eZList[i] ) ;
@@ -1787,10 +1814,10 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 		    TMath::BesselI1( k*r )         * TMath::BesselK0( k*IFCRadius ) +
 		    TMath::BesselK1( k*r )         * TMath::BesselI0( k*OFCRadius ) -
 		    TMath::BesselK1( k*r )         * TMath::BesselI0( k*IFCRadius ) ;
-		  Double_t Denominator =
+		  if (Denominator[n] == 0) Denominator[n] =
 		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
 		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
-		  Double_t qwe = Numerator / Denominator ;
+		  Double_t qwe = Numerator / Denominator[n] ;
 		  IntegralOverZ += Cn * zterm * qwe ;
 	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe) ) break;
 		}
@@ -1999,10 +2026,6 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 { 
   
   const   Int_t   ORDER     = 1     ;            // Linear interpolation = 1, Quadratic = 2         
-  const   Float_t R0        = 2.130 ;            // First resistor (R0) between CM and ring number one (Mohm)
-  const   Float_t R182      = 0.310 ;            // Last resistor in the IFC chain
-  const   Float_t RStep     = 2.000 ;            // Resistor chain value (except the first one) (Mohm)
-  const   Float_t Pitch     = 1.150 ;            // Ring to Ring pitch (cm)
   const   Float_t Z01       = 1.225 ;            // Distance from CM to center of first ring (cm)
   
   static  Bool_t DoOnceLocal = true ;
@@ -2034,35 +2057,36 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 	  if ( Side[i] == 0 && Cage[i] == 0 ) 
 	    { NumberOfEastInnerShorts++ ; EastInnerMissingSum += MissingResistance[i] ; EastInnerExtraSum += Resistor[i] ; 
 	    EastInnerMissingOhms[NumberOfEastInnerShorts-1]  = MissingResistance[i] ; 
-	    EastInnerShortZ[NumberOfEastInnerShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
+	    EastInnerShortZ[NumberOfEastInnerShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*RPitch) ; }
 	  if ( Side[i] == 0 && Cage[i] == 1 ) 
 	    { NumberOfEastOuterShorts++ ; EastOuterMissingSum += MissingResistance[i] ; EastOuterExtraSum += Resistor[i] ; 
 	    EastOuterMissingOhms[NumberOfEastOuterShorts-1]  = MissingResistance[i] ; 
-	    EastOuterShortZ[NumberOfEastOuterShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
+	    EastOuterShortZ[NumberOfEastOuterShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*RPitch) ; }
 	  if ( Side[i] == 1 && Cage[i] == 0 ) 
 	    { NumberOfWestInnerShorts++ ; WestInnerMissingSum += MissingResistance[i] ; WestInnerExtraSum += Resistor[i] ; 
 	    WestInnerMissingOhms[NumberOfWestInnerShorts-1]  = MissingResistance[i] ; 
-	    WestInnerShortZ[NumberOfWestInnerShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
+	    WestInnerShortZ[NumberOfWestInnerShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*RPitch) ; }
 	  if ( Side[i] == 1 && Cage[i] == 1 ) 
 	    { NumberOfWestOuterShorts++ ; WestOuterMissingSum += MissingResistance[i] ; WestOuterExtraSum += Resistor[i] ; 
 	    WestOuterMissingOhms[NumberOfWestOuterShorts-1]  = MissingResistance[i] ; 
-	    WestOuterShortZ[NumberOfWestOuterShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
+	    WestOuterShortZ[NumberOfWestOuterShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*RPitch) ; }
 	}
       
       // Don't fill the tables if there aren't any shorts
       if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
 	  { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ;  return ; }
 
-      Float_t Rtot   =  R0 + 181*RStep + R182     ;    // Total resistance of the (normal) resistor chain
-      Float_t Rfrac  =  RStep*TPC_Z0/(Rtot*Pitch) ;    // Fraction of full resistor chain inside TPC drift volume (~1.0)
       Float_t EastInnerRtot = Rtot + EastInnerExtraSum - EastInnerMissingSum ;  // Total resistance of the real resistor chain
       Float_t EastOuterRtot = Rtot + EastOuterExtraSum - EastOuterMissingSum ;  // Total resistance of the real resistor chain
       Float_t WestInnerRtot = Rtot + WestInnerExtraSum - WestInnerMissingSum ;  // Total resistance of the real resistor chain
       Float_t WestOuterRtot = Rtot + WestOuterExtraSum - WestOuterMissingSum ;  // Total resistance of the real resistor chain
       
-      //Float_t deltaV    = GG*0.99 - CathodeV * (1.0-TPC_Z0*RStep/(Pitch*Rtot)) ;    // (test) Error on GG voltage from nominal (99% effective)
+      //Float_t deltaV    = GG*0.99 - CathodeV * (1.0-TPC_Z0*RStep/(RPitch*Rtot)) ;    // (test) Error on GG voltage from nominal (99% effective)
+      //    GVB (2013-12-11): Superseded by UndoGGVoltErrorDistortion()
       
       Int_t Nterms = 100 ;
+      Double_t Denominator[100];
+      memset(Denominator,0,100*sizeof(Double_t));
       for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
 	{
 	  z = eZList[i] ;
@@ -2085,11 +2109,11 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 		      sum  = 0.0 ;
 		      for  ( Int_t m = 0 ; m < NumberOfEastInnerShorts ; m++ ) 
 			sum += ( 1 - Rfrac - TMath::Cos(k*EastInnerShortZ[m]) ) * EastInnerMissingOhms[m] ; 
-		      Ein  = 2 * ( Rfrac*EastInnerExtraSum + sum ) / (k*EastInnerRtot*TPC_Z0) ;		
+		      Ein  = 2 * ( Rfrac*EastInnerExtraSum + sum ) / (k*EastInnerRtot) ;		
 		      sum  = 0.0 ;
 		      for  ( Int_t m = 0 ; m < NumberOfEastOuterShorts ; m++ ) 
 			sum += ( 1 - Rfrac - TMath::Cos(k*EastOuterShortZ[m]) ) * EastOuterMissingOhms[m] ; 
-		      Eout = 2 * ( Rfrac*EastOuterExtraSum + sum ) / (k*EastOuterRtot*TPC_Z0) ;		
+		      Eout = 2 * ( Rfrac*EastOuterExtraSum + sum ) / (k*EastOuterRtot) ;		
 		    }
 		  if ( z == 0 ) continue ;
 		  if ( z > 0 ) 
@@ -2097,28 +2121,30 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 		      sum  = 0.0 ;
 		      for  ( Int_t m = 0 ; m < NumberOfWestInnerShorts ; m++ ) 
 			sum += ( 1 - Rfrac - TMath::Cos(k*WestInnerShortZ[m]) ) * WestInnerMissingOhms[m] ; 
-		      Ein  = 2 * ( Rfrac*WestInnerExtraSum + sum ) / (k*WestInnerRtot*TPC_Z0) ;		
+		      Ein  = 2 * ( Rfrac*WestInnerExtraSum + sum ) / (k*WestInnerRtot) ;		
 		      sum  = 0.0 ;
 		      for  ( Int_t m = 0 ; m < NumberOfWestOuterShorts ; m++ ) 
 			sum += ( 1 - Rfrac - TMath::Cos(k*WestOuterShortZ[m]) ) * WestOuterMissingOhms[m] ; 
-		      Eout = 2 * ( Rfrac*WestOuterExtraSum + sum ) / (k*WestOuterRtot*TPC_Z0) ;		
+		      Eout = 2 * ( Rfrac*WestOuterExtraSum + sum ) / (k*WestOuterRtot) ;		
 		    }
 		  //if ( z > 0 )                       // (test) Gating Grid studies
+                  //  GVB (2013-12-11): Superseded by UndoGGVoltErrorDistortion()
+                  //                    Previous math here was incorrect anyhow! Fixing...
                   //  {
-		  //    Ein   =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;  // (test) Gating Grid studies (note -1)
-		  //    Eout  =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;  // (test) Gating Grid studies (note -1)
+		  //    Ein   =  2 * -1*deltaV / ( k * Rfrac * CathodeV ) ;  // (test) Gating Grid studies (note -1)
+		  //    Eout  =  2 * -1*deltaV / ( k * Rfrac * CathodeV ) ;  // (test) Gating Grid studies (note -1)
                   //  }
                   //else { Ein = 0.0 ; Eout = 0.0 ; }  // (test) Gating Grid studies
 		  Double_t An   =  Ein  * TMath::BesselK0( k*OFCRadius ) - Eout * TMath::BesselK0( k*IFCRadius ) ;
 		  Double_t Bn   =  Eout * TMath::BesselI0( k*IFCRadius ) - Ein  * TMath::BesselI0( k*OFCRadius ) ;
 		  Double_t Numerator =
 		    An * TMath::BesselI1( k*r ) - Bn * TMath::BesselK1( k*r ) ;
-		  Double_t Denominator =
+		  if (Denominator[n] == 0) Denominator[n] =
 		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
 		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
 		  Double_t zterm = TMath::Cos( k*(TPC_Z0-TMath::Abs(z)) ) - 1 ;
-		  Double_t qwe = Numerator / Denominator ;
-		  IntegralOverZ += TPC_Z0 * zterm * qwe ;
+		  Double_t qwe = Numerator / Denominator[n] ;
+		  IntegralOverZ += zterm * qwe ;
 	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe) ) break;   // Assume series converges, break if small terms
 		}
 	      shortEr[i][j] = IntegralOverZ ;
@@ -2181,6 +2207,8 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
       cout << "StMagUtilities::UndoGG VE  Please wait for the tables to fill ...  ~5 seconds" << endl ;
 
       Int_t Nterms = 100 ;
+      Double_t Denominator[100];
+      memset(Denominator,0,100*sizeof(Double_t));
       for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
 	{
 	  z = eZList[i] ;
@@ -2194,32 +2222,23 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
 	      Double_t IntegralOverZ = 0.0 ;
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
-		  Double_t k    =  n * TMath::Pi() / TPC_Z0 ;
-		  Double_t Ein  =  0 ;                    // Error potential on the IFC
-		  Double_t Eout =  0 ;                    // Error potential on the OFC
-		  if ( z < 0 ) 
-		    {
-		      Ein   =  -2.0 * deltaVGGEast / ( k * (CathodeV - GG) ) ;        // GG (note -1)
-		      Eout  =  -2.0 * deltaVGGEast / ( k * (CathodeV - GG) ) ;        // GG (note -1)
-
-		    }
 		  if ( z == 0 ) continue ;
-		  if ( z > 0 ) 
-		    {
-		      Ein   =  -2.0 * deltaVGGWest / ( k * (CathodeV - GG) ) ;        // GG (note -1)
-		      Eout  =  -2.0 * deltaVGGWest / ( k * (CathodeV - GG) ) ;        // GG (note -1)
-		    }
+		  Double_t k    =  n * TMath::Pi() / TPC_Z0 ;
+                  Double_t Ein  =  -2.0 * (z < 0 ? deltaVGGEast : deltaVGGWest) * deltaGGeffectiveness /
+                           (k * (CathodeV - GGideal));  // Error potential on the IFC
+                  Double_t Eout =  Ein ;                // Error potential on the OFC
 
 		  Double_t An   =  Ein  * TMath::BesselK0( k*OFCRadius ) - Eout * TMath::BesselK0( k*IFCRadius ) ;
 		  Double_t Bn   =  Eout * TMath::BesselI0( k*IFCRadius ) - Ein  * TMath::BesselI0( k*OFCRadius ) ;
 		  Double_t Numerator =
 		    An * TMath::BesselI1( k*r ) - Bn * TMath::BesselK1( k*r ) ;
-		  Double_t Denominator =
+		  if (Denominator[n] == 0) Denominator[n] =
 		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
 		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
 		  Double_t zterm = TMath::Cos( k*(TPC_Z0-TMath::Abs(z)) ) - 1 ;
-		  IntegralOverZ += zterm * Numerator / Denominator ;
-	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(Numerator/Denominator) ) break;   // Assume series converges, break if small terms
+		  Double_t qwe = Numerator / Denominator[n] ;
+		  IntegralOverZ += zterm * qwe ;
+	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe) ) break;   // Assume series converges, break if small terms
 		}
 	      GGVoltErrorEr[i][j] = IntegralOverZ ;
  	    }

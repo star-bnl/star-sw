@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.53 2013/03/07 23:02:48 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.54 2013/12/11 18:27:56 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.54  2013/12/11 18:27:56  genevb
+ * Account for GG voltage errorsi + shifts in UndoGGVoltErrorDistortion(), other minor optimizations
+ *
  * Revision 1.53  2013/03/07 23:02:48  genevb
  * Accessor functions for Const_n parameters
  *
@@ -241,6 +244,7 @@ class StMagUtilities {
   virtual void    GetOmegaTau ()      ;
   virtual void    GetGridLeak()       ;
   virtual void    GetHVPlanes()       ;
+  virtual void    GetE()              ;
 
   virtual void    CommonStart ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
@@ -284,6 +288,12 @@ class StMagUtilities {
   Float_t  YTWIST ;                     // Y Displacement of West end of TPC wrt magnet (mRad)
   Double_t CathodeV ;                   // Cathode Potential (volts)
   Double_t GG ;                         // Gating Grid voltage (volts)
+  Float_t  GGideal ;                    // Ideal set GG voltage, not effective voltage
+  Float_t  Rtot ;                       // Total resistance of the (normal) resistor chain
+  Float_t  Rfrac ;                      // Fraction of full resistor chain inside TPC drift volume (~1.0)
+  Float_t  RPitch ;                     // Field Cage Ring to Ring pitch (cm)
+  Float_t  GGeffectiveness ;            // Effectiveness of GG voltage to be the average at its plane
+  Float_t  deltaGGeffectiveness ;       // Effectiveness of GG voltage changes to be expressed in average
   Float_t  EASTCLOCKERROR ;             // Phi rotation of East end of TPC in milli-radians
   Float_t  WESTCLOCKERROR ;             // Phi rotation of West end of TPC in milli-radians
   Float_t  IFCRadius ;                  // Radius of the Inner Field Cage
