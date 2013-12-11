@@ -40,14 +40,25 @@ void Hijing()
   StarHijing *hijing = new StarHijing("hijing");
   hijing->SetTitle("Hijing 1.383");
 
+  // Setup collision frame, energy and beam species
   hijing->SetFrame("CMS",200.0);
   hijing->SetBlue("Au");
-  hijing->SetYell("Au");
+  hijing->SetYell("Au");  
+  hijing->SetImpact(0.0, 30.0);       // Impact parameter min/max (fm)    0.   30.
+  hijing->hiparnt().ihpr2(4) = 0;     // Jet quenching (1=yes/0=no)       0
+  hijing->hiparnt().ihpr2(3) = 0;     // Hard scattering (1=yes/0=no)
+  hijing->hiparnt().hipr1(10) = 2.0;  //    pT jet
+  hijing->hiparnt().ihpr2(8)  = 10;   // Max number of jets / nucleon
+  hijing->hiparnt().ihpr2(11) = 1;    // Set baryon production
+  hijing->hiparnt().ihpr2(12) = 1;    // Turn on/off decay of particles [1=recommended]
+  hijing->hiparnt().ihpr2(18) = 1;    // Turn on/off B production
+  hijing->hiparnt().hipr1(7) = 5.35;  // Set B production ???? Not really used... Really ????
 
-  hijing->SetImpact(0.0, 30.0);
+  // For more configuration options, see the HIJING manual
+  // http://ntc0.lbl.gov/~xnwang/hijing/doc.html
 
   primary -> AddGenerator(hijing);
-  primary -> SetCuts( 1.0E-6 , -1., -1.5, +1.5 );
+  primary -> SetCuts( 1.0E-6 , -1., -2.5, +2.5 );
   
 }
 // ----------------------------------------------------------------------------
