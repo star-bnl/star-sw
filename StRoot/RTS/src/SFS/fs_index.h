@@ -133,8 +133,8 @@ class fs_index {
   // directory functions
   fs_dir *opendir(char *dir);
   void closedir(fs_dir *dir);
-  fs_dirent *readdir(fs_dir *dir);
-  fs_dirent *readdirent(char *name);
+  fs_dirent *readdir(fs_dir *dir, fs_dirent *storage=NULL);
+  fs_dirent *readdirent(char *name, fs_dirent *storage=NULL);
 
   // meant for users that have memory mapped/memory sfs indexes
   // and want to use the buffers in place to avoid memcpy

@@ -115,7 +115,7 @@ int fs_mount(int argc, char *argv[])
   t = record_time();
 
 #if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-  printf("Mounted file %s: %lld bytes in %5.2f sec\n",fn,filestat.st_size,t);
+  printf("Mounted file %s: %lld bytes in %5.2f sec\n",fn,(long long int)filestat.st_size,t);
 #else
   printf("Mounted file %s: %d bytes in %5.2f sec\n",fn,filestat.st_size,t);
 #endif
@@ -128,17 +128,53 @@ int fs_mount(int argc, char *argv[])
   return 0;
 }
 
+int getDirSize(fs_dir *dir) {
+    int sz = 0;
+
+    fs_dirent *entry;
+    fs_dirent storage;
+    while((entry = idx->readdir(dir, &storage))) {
+
+	sz += entry->sz;
+	
+	if(entry->has_child) {
+	    fs_dir *ndir = idx->opendir(entry->full_name);
+	    sz += getDirSize(ndir);
+	    idx->closedir(ndir);
+	}
+    }
+    
+    return sz;
+}
+
+int getEntrySize(fs_dirent *entry)
+{
+    int sz = entry->sz;
+
+    if(entry->has_child) {
+	fs_dir *ndir = idx->opendir(entry->full_name);
+	sz += getDirSize(ndir);
+	idx->closedir(ndir);
+    }
+    
+    return sz;
+}
+
 int ls_dir(char *tabs, int recurse, fs_dir *dir)
 {
   //  char ntabs[40];
   // sprintf(ntabs, "%s\t", tabs);
-
+    if(recurse > 0) recurse--;
+ 
   fs_dirent *entry;
-  while((entry = idx->readdir(dir))) {
+  fs_dirent storage;
+  while((entry = idx->readdir(dir, &storage))) {
+
+      int sz = getEntrySize(entry);
     printf("%s [%7d bytes] %s%c\n",
-	   tabs,entry->sz,entry->full_name,entry->has_child?'/':' ');
+	   tabs, sz, entry->full_name,entry->has_child?'/':' ');
      
-    if(recurse & entry->has_child) {
+    if(recurse && entry->has_child) {
       fs_dir *ndir = idx->opendir(entry->full_name);
       ls_dir(tabs, recurse, ndir);
       idx->closedir(ndir);
@@ -152,9 +188,13 @@ int fs_ls(int argc, char *argv[])
   int recurse = 0;
 
   if(argc > 1) {
-    if(strcmp(argv[1], "-r") == 0) {
-      recurse = 1;
-    }
+      if(memcmp(argv[1], "-r", 2) == 0) {
+	  recurse = 999;
+	  if(strlen(argv[1]) > 2) {
+	      recurse = atoi(&argv[1][2]);
+	  }
+      
+      }
   }
 
   //printf("start.n\n");
@@ -379,9 +419,10 @@ int main(int argc, char *argv[])
       do {
 
 	if(strcmp(argv[2],"ls") != 0) {  // if not cd to event directory
-	  fs_dir *d = idx->opendir("/");
+	    fs_dir *d = idx->opendir("/");
 	  if(d) {
-	    fs_dirent *e = idx->readdir(d);
+	      fs_dirent storage;
+	      fs_dirent *e = idx->readdir(d, &storage);
 	    if(e) idx->cd(e->full_name);
 	    idx->closedir(d);
 	  }
