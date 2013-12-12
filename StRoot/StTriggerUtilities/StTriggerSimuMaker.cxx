@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.57 2013/11/21 20:52:53 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.58 2013/12/12 18:20:09 zchang Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -463,7 +463,8 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   // Open connection to online database
 
   MYSQL mysql;
-  const char* host = "dbbak.starp.bnl.gov";
+  //  const char* host = "dbbak.starp.bnl.gov";
+  const char* host = "db04.star.bnl.gov";
   const char* user = "";
   const char* pass = "";
   //unsigned int port = 3400+GetDBTime().GetYear()%100-1;
@@ -874,6 +875,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.58  2013/12/12 18:20:09  zchang
+ * use new database node "db04.star.bnl.gov", wait till it's back.
+ *
  * Revision 1.57  2013/11/21 20:52:53  zchang
  * add getpwuid to get user name to access database
  *
