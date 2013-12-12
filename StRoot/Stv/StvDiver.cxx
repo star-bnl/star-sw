@@ -6,6 +6,7 @@
 #include "StarVMC/GeoTestMaker/StVMCApplication.h"
 #include "StarVMC/GeoTestMaker/StMCStack.h"
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
+#include "StvUtil/StvDebug.h"
 #include "StvUtil/StvNodePars.h"
 #include "StarMagField.h"
 #include "StvUtil/StvELossTrak.h"
@@ -293,6 +294,10 @@ nCall++;
 static       StTGeoProxy    *tgh      	= StTGeoProxy::Instance();
 static const StTGeoHitShape *hitShape 	= tgh->GetHitShape();
 static       TVirtualMC     *virtualMC	= TVirtualMC::GetMC();
+static const TVirtualMCApplication *virtApp = TVirtualMCApplication::Instance();
+static const double Rmax = virtApp->TrackingRmax();
+static const double Zmax = virtApp->TrackingZmax();
+
 int meAgain = 0;
 
 mybreak(nCall);
@@ -300,6 +305,8 @@ mybreak(nCall);
   fKount++;
   Case();
 
+  if (fabs(fCurrentPosition.Z()) >Zmax) fKaze = kOUTtrack;
+  if (fCurrentPosition.Pt()      >Rmax) fKaze = kOUTtrack;
 
   assert(fCurrentLength< 10000);
   assert(fEnterLength  < 10000);
@@ -378,6 +385,7 @@ static int nCall=0; nCall++;
 int StvMCStepping::EndVolume()
 {
 static int nCall=0; nCall++;
+StvDebug::Break(nCall);
   double pos[4]={0},mom[4]={0};
 
   int isDca = (IsDca00(1));
