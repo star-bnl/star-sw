@@ -44,8 +44,10 @@ StvKalmanTrackFinder::StvKalmanTrackFinder(const char *name):StvTrackFinder(name
   StTGeoProxy::Inst()->GetHitShape()->Get(zMin,zMax,rMax);
   if (zMax < -zMin) zMax = -zMin;
   mDive->SetRZmax(rMax,zMax);
+  const StvConst  *kons = StvConst::Inst();
+  mDive->SetRZmax(kons->mRxyMax,kons->mZMax);
   mHitter = new StvHitter();
-}  
+ }  
 //_____________________________________________________________________________
 void StvKalmanTrackFinder::Clear(const char*)
 {
@@ -211,6 +213,7 @@ StvFitDers derivFit;
 
 //+++++++++++++++++++++++++++++++++++++
     nTally++;
+    StvDebug::Break(nTally);
     idive = mDive->Dive();
 //+++++++++++++++++++++++++++++++++++++
     if (idive & StvDiver::kDiveBreak) 		break;
