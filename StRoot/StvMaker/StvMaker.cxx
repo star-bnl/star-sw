@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.44 2013/11/13 20:32:24 perev Exp $
+// $Id: StvMaker.cxx,v 1.45 2013/12/12 16:59:31 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -245,6 +245,7 @@ Int_t StvMaker::InitRun(int run)
 {
 static int initialized = 0;
   if (initialized) return 0;
+  new StvConst();
   TString geom;
 // 		Geometry via DBMaker
   TDataSet *myGeo = GetDataBase("VmcGeometry"); if (myGeo){};
@@ -296,7 +297,6 @@ static int initialized = 0;
   int iRefit = IAttr("Refit");
   tf->SetRefit(iRefit);
   
-  new StvConst();
   new StvFitter();
   new StvKalmanTrackFitter();
   if (IAttr("useEventFiller"))
