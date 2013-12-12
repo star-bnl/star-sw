@@ -16,8 +16,8 @@ memset(&row,0,tableSet->GetRowSize());
   row.mXi2Vtx = ROOT::Math::chisquared_quantile_c(myProb,2);		//Xi2 to accept vertex
   row.mXi2Joi = ROOT::Math::chisquared_quantile_c(myProb,5)*myFaktor;	//Xi2 in Refit join left & right subtrack
   row.mXi2Hlx = row.mXi2Hit*9;  //Xi2 in Helix, .
-  row.mRxyMax = 300;		//Max radius for tracking
-  row.mZMax   = 300;		//Max Z      for tracking
+  row.mRxyMax = 220;		//Max radius for tracking
+  row.mZMax   = 220;		//Max Z      for tracking
   row.mDca2dZeroXY = 6.;	//max 2d dca to X=Y=0  for primary track
   row.mDca3dVertex = 3.;	//max 3d dca to vertex for primary track
   row.mMaxCurv     = 0.2;	//Maximal allowed curvature(5cm radius)
