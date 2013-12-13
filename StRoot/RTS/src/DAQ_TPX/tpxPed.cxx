@@ -705,7 +705,8 @@ int tpxPed::to_cache(char *fname, u_int run)
 					continue ;
 				}
 
-				sscanf(buff,"%d %d %d %f %f",&r,&p,&t,&fped,&frms) ;
+				int ret = sscanf(buff,"%d %d %d %f %f",&r,&p,&t,&fped,&frms) ;
+				if(ret != 5) continue ;
 
 				if(t < 22) {
 					old_sum[r][p] += fped ;
@@ -743,9 +744,13 @@ int tpxPed::to_cache(char *fname, u_int run)
 
 		LOG(NOTE,"Writing pedestals to cache \"%s\"...",fn) ;
 
-		fprintf(f,"# Run %09u, Date %s",run,asc_date) ;
+
+		fprintf(f,"# Detector %s\n","TPX") ;
+		fprintf(f,"# Run %08u\n",run) ;
+		fprintf(f,"# Date %s",asc_date) ;
 		fprintf(f,"# Logical sector %d, logical RDO %d\n",sector,rdo) ;
 		fprintf(f,"# Hardware sector %d, hardware RDO %d\n",s_real, r_real) ;
+		fprintf(f,"\n") ;
 
 
 		for(r=0;r<=45;r++) {
