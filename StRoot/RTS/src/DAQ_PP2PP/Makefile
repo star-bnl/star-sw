@@ -26,8 +26,6 @@ libs: $(LIBS)
 libpp2pp.a : $(OBJS)
 	@$(RTS_AR)
 
-clean:
-	@$(CLEAN) $(BINS) $(LIBS)
 
 # DO NOT DELETE
 
