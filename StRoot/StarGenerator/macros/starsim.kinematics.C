@@ -71,7 +71,7 @@ void Kinematics()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=1 )
+void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
@@ -88,6 +88,10 @@ void starsim( Int_t nevents=1 )
 
   gSystem->Load( "libMathMore.so"   );  
   gSystem->Load( "xgeometry.so"     );
+
+  // Setup RNG seed and map all ROOT TRandom here
+  StarRandom::seed( rngSeed );
+  StarRandom::capture();
   
   //
   // Create the primary event generator and insert it

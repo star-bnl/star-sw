@@ -64,7 +64,7 @@ void Hijing()
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=50 )
+void starsim( Int_t nevents=50, Int_t rngSeed=1234 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
@@ -84,6 +84,9 @@ void starsim( Int_t nevents=50 )
   gSystem->Load( "libHijing1_383.so");
   gSystem->Load( "xgeometry.so"     );
 
+  // Setup RNG seed and map all ROOT TRandom here
+  StarRandom::seed( rngSeed );
+  StarRandom::capture();
   
   //
   // Create the primary event generator and insert it

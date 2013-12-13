@@ -81,13 +81,17 @@ void Pythia8( TString config="pp:W", Double_t ckin3=0.0, Double_t ckin4=-1.0 )
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void Pythia6( TString mode="pp:minbias", Double_t ckin3=0.0, Double_t ckin4=-1.0, Int_t tune=320 )
+void Pythia6( TString mode="pp:minbias", Double_t ckin3=0.0, Double_t ckin4=-1.0, Int_t tune=320, Int_t rngSeed=1234 )
 {
   
   //  gSystem->Load( "libStarGeneratorPoolPythia6_4_23.so" );
   gSystem->Load( "libPythia6_4_23.so");
   //  gSystem->Load( "StarPythia6.so"   );
 
+  // Setup RNG seed and captuire ROOT TRandom
+  StarRandom::seed(rngSeed);
+  StarRandom::capture();
+ 
   StarPythia6 *pythia6 = new StarPythia6("pythia6");
 
   //
