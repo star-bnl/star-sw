@@ -90,7 +90,7 @@ void standalone( Int_t nevents=100, UInt_t rngSeed = 12345 )
   gSystem->Load( "StarGeneratorBase.so" );
 
   gSystem->Load( "libMathMore.so"   );  
-  
+
   //
   // Create the primary event generator and insert it
   // before the geant maker

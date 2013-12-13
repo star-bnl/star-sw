@@ -76,7 +76,7 @@ void Pythia8( TString config="pp:W" )
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=10 )
+void starsim( Int_t nevents=10, Int_t rngSeed=1234 )
 { 
 
   gROOT->ProcessLine(".L bfc.C");
@@ -106,7 +106,10 @@ void starsim( Int_t nevents=10 )
 //   }
 
   gSystem->Load( "Pythia8_1_62.so"  );
- 
+
+  // Setup RNG seed and map all ROOT TRandom here
+  StarRandom::seed( rngSeed );
+  StarRandom::capture();
   
   //
   // Create the primary event generator and insert it
