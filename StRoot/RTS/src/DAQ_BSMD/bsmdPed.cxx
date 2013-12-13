@@ -26,6 +26,8 @@ bsmdPed::bsmdPed()
 	ped_store = 0 ;	// unassigned!
 
 	sector = -1 ;	// uniti...
+
+
 	return ;
 }
 
@@ -57,13 +59,14 @@ void bsmdPed::init(int active_rbs)
 }
 
 
-int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
+int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1, u_int *adc_sum)
 {
 	u_short *d_out = (u_short *) dst ;
 	int fiber ;
 	u_short cap ;
 	u_short *d ;
 	u_int *d32 = (u_int *) src ;
+	double sum_adc = 0.0 ;	// for phase scanning
 
 	LOG(NOTE,"BSMD ZS: rdo %d: in bytes %d",rdo1,in_bytes) ;
 
@@ -86,6 +89,9 @@ int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	for(int ii=0;ii<4800;ii++) {
 		u_short dta = *d ;
 		if(dta > *thr) {
+
+			sum_adc += (double)dta - (*ped) ;
+
 			*d_out++ = ii ;
 			*d_out++ = dta - (int)(*ped + 0.5) ;
 		}
@@ -106,6 +112,11 @@ int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	}
 
 	evts[rdo1-1]++ ;
+
+	if(adc_sum) {
+		*adc_sum = (u_int) (sum_adc + 0.5) ;
+	}
+
 	return out_bytes ;
 }
 
@@ -356,8 +367,13 @@ int bsmdPed::from_cache(char *fname)
 	while(!feof(f)) {
 		int r, p , t ;
 		float pp, rr ;
+		char buff[128] ;
 
-		int ret = fscanf(f,"%d %d %d %f %f",&r,&p,&t,&pp,&rr) ;
+		if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+		if(buff[0]=='#' || buff[0]=='/') continue ;
+
+		int ret = sscanf(buff,"%d %d %d %f %f",&r,&p,&t,&pp,&rr) ;
 		if(ret != 5) continue ;
 
 		struct peds *peds = ped_store + (r-1) ;
@@ -403,6 +419,12 @@ int bsmdPed::to_cache(char *fname, u_int run)
 
 
 	LOG(NOTE,"Writing pedestals to cache \"%s\"...",fn) ;
+	time_t tim = time(0) ;
+	fprintf(f,"# Detector %s\n","BSMD") ;
+	fprintf(f,"# Sector %2d\n",sector) ;
+	fprintf(f,"# Run %08u\n",run) ;
+	fprintf(f,"# Date %s",ctime(&tim)) ;
+	fprintf(f,"\n") ;
 
 	for(r=0;r<6;r++) {
 		struct peds *peds = ped_store + r ;

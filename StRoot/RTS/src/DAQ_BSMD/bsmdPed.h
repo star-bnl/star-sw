@@ -23,7 +23,7 @@ public:
 	void accum(char *evbuff, int bytes, int rdo) ;
 	void calc() ;					// calculates mean/rms into ped_store
 	void do_thresh(double n_sm, double n_pre) ;
-	int do_zs(char *src, int in_bytes, char *dst, int rdo1) ;
+	int do_zs(char *src, int in_bytes, char *dst, int rdo1, u_int *adc_sum=0) ;
 	int to_evb(char *buff) ;			// to EVB format from ped_store
 
 	int from_cache(char *fname = 0) ;		// from cached file to ped_store
