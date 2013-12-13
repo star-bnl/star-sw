@@ -30,7 +30,7 @@ public:
 //enum {kMinHits=5,kMaxHits = 10};
 //enum {kMinHits=5,kMaxHits = 8};
 //enum {kMinHits=5,kMaxHits = 7};
-enum {kMinHits=5,kMaxHits = 6};
+enum {kMinHits=5,kMaxHits = 10};
 public:
   StvSeedFinder(const char *name);
   virtual ~StvSeedFinder(){;}
