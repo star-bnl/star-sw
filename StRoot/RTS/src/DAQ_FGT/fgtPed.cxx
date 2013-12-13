@@ -22,8 +22,8 @@ fgtPed::fgtPed()
 	valid = 0 ;
 	rb_mask = 0x03 ;	// assume all..
 
-	memset(evts,0,sizeof(evts)) ;
-	memset(valid_evts,0,sizeof(valid_evts)) ;
+	memset(fgt_stat,0,sizeof(fgt_stat)) ;
+
 	
 	sizeof_ped = sizeof(struct peds) * FGT_RDO_COU ;	// for FGT_RDO_COU RDOs
 
@@ -62,13 +62,43 @@ fgtPed::~fgtPed()
 }
 
 
+int fgtPed::run_stop()
+{
+	for(int r=0;r<FGT_RDO_COU;r++) {
+		if(rb_mask & (1<<r)) ;
+		else continue ;
+
+		int evts = fgt_stat[r].evts ;
+
+		if(fgt_stat[r].err) {
+			LOG(ERR,"RDO %d: %d errors in %d events",r+1,fgt_stat[r].err,evts) ;
+		}
+
+		for(int arm=0;arm<FGT_ARM_COU;arm++) {
+			if(fgt_stat[r].arm_mask & (1<<arm)) ;
+			else continue ;
+
+			for(int apv=0;apv<FGT_APV_COU;apv++) {
+				int errs = fgt_stat[r].err_apv[arm][apv] ;
+				int cou = fgt_stat[r].cou_apv[arm][apv] ;
+
+				if(errs || (cou && (cou!=evts))) {
+					LOG(ERR,"RDO %d: ARM %d, APV %2d: %d errors, in %d/%d events",
+					    r+1,arm,apv,errs,cou,evts) ;
+				}
+			}
+		}
+	}
+
+	return 0 ;
+}
+
 
 void fgtPed::init(int active_rbs, int rts)
 {
 	valid = 0 ;
 
-	memset(evts,0,sizeof(evts)) ;
-	memset(valid_evts,0,sizeof(valid_evts)) ;
+	memset(fgt_stat,0,sizeof(fgt_stat)) ;
 
 	rb_mask = active_rbs ;
 
@@ -102,7 +132,6 @@ void fgtPed::init(int active_rbs, int rts)
 	}
 
 	memset(ped_store,0,sizeof_ped) ;
-	memset(err_counter,0,sizeof(err_counter)) ;
 
 	LOG(TERR,"Pedestals zapped: rb_mask 0x%02X, expected tb count %d",rb_mask,tb_cou_xpect) ;
 }
@@ -117,8 +146,8 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	short *d16 = (short *) dst ;
 	u_int *d32 = (u_int *)dst ;
 
-
-
+	fgt_stat[rdo1-1].evts++ ;
+	
 	daq_dta *dd = fgt_rdr[rdo1-1]->handle_adc(0, rdo1, src) ;
 
 
@@ -147,13 +176,14 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 			int tb_cou = meta->arc[rdo1].arm[arm].apv[apv].ntim ;
 
 			if(tb_cou != tb_cou_xpect) {
-				if(err_counter[rdo1-1] < 100) {
+				if(fgt_stat[rdo1-1].err < 10) {
 					LOG(WARN,"wrong tb_cou %d(expect %d): ARC %d, ARM %d, APV %d",tb_cou,tb_cou_xpect,rdo1,arm,apv) ;
 				}
-				err_counter[rdo1-1]++ ;
+				fgt_stat[rdo1-1].err++ ;
 			}
 
 			if(tb_cou == 0) {
+				// fully missing!
 				err = 1 ;
 			}
 			else if(max_tb >= 0) {
@@ -168,21 +198,31 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 			if(err) {
 				meta_zs.status[arm][apv] |= 2 ;
 			}
-
 		}
 
 		if(meta->arc[rdo1].arm[arm].apv[apv].error || meta->arc[rdo1].arm[arm].error) {
 			meta_zs.status[arm][apv] |= 4 ;	// error ;
 		}
 
+		if(meta_zs.status[arm][apv] & 1) {
+			fgt_stat[rdo1-1].cou_apv[arm][apv]++ ;
+		}
+
+		if(meta_zs.status[arm][apv] & 0xFE) {
+			fgt_stat[rdo1-1].err_apv[arm][apv]++ ;
+		}
+
 		switch(meta_zs.status[arm][apv]) {
-		case 0 :
-		case 1 :
-		case 3 :
+		case 0 :	// not present
+		case 1 :	// present
+		case 3 :	// present but wrong tb
 			break ;
 		default :
-
-			LOG(ERR,"ARC %d, ARM %d, APV %d: meta_zs 0x%X",rdo1,arm,apv,meta_zs.status[arm][apv]) ;
+			if(fgt_stat[rdo1-1].err < 100) {
+				LOG(ERR,"ARC %d, ARM %d, APV %d: meta_zs 0x%X",rdo1,arm,apv,meta_zs.status[arm][apv]) ;
+			}
+			fgt_stat[rdo1-1].err++ ;
+			break ;
 		}
 
 	}}
@@ -276,6 +316,8 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 				dump = 0 ;
 				thr = p_thr->thr[arm][apv][ch] ;
 				cou_tb = 0 ;
+
+
 				all_cou++ ;
 
 			}
@@ -354,7 +396,7 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 
 
-	evts[rdo]++ ;
+	fgt_stat[rdo].evts++ ;
 
 	// skip first few events!
 //	if(evts[rdo] <= 3) {
@@ -362,9 +404,8 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 //		return ;
 //	}
 
-	if(valid_evts[rdo] > 0xFF00) return ;	// don't allow more than 16bits worth...
+	if(fgt_stat[rdo].evts > 0xFF00) return ;	// don't allow more than 16bits worth...
 
-	valid_evts[rdo]++ ;
 
 
 	struct peds *p = ped_store + rdo ;
@@ -388,10 +429,10 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 			
 			if(meta->arc[rdo1].arm[arm].apv[apv].ntim != tb_cou_xpect) {
-				if(err_counter[rdo1-1] < 100) {
-					LOG(WARN,"evt %d: RDO %d, ARM %d, APV %d: ntim %d??",evts[rdo],rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].ntim) ;
+				if(fgt_stat[rdo1-1].err < 10) {
+					LOG(WARN,"evt %d: RDO %d, ARM %d, APV %d: ntim %d??",fgt_stat[rdo].evts,rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].ntim) ;
 				}
-				err_counter[rdo1-1]++ ;
+				fgt_stat[rdo1-1].err++ ;
 			}
 
 			need[arm][apv] |= 1 ;
@@ -530,7 +571,7 @@ void fgtPed::do_thresh(double ns, int k)
 void fgtPed::calc()
 {
 
-	const u_int MIN_EVENTS = 100 ;
+	const int MIN_EVENTS = 100 ;
 
 
 	LOG(NOTE,"Calculating pedestals") ;
@@ -605,19 +646,18 @@ void fgtPed::calc()
 		if(rb_mask & (1<<r)) ;
 		else continue ;
 
-		if(valid_evts[r] < MIN_EVENTS) not_enough = 1 ;
+		if(fgt_stat[r].evts < MIN_EVENTS) not_enough = 1 ;
 	}
 
 
-	LOG(TERR,"Pedestals calculated. tb_count %d, RDO counts: %u %u",tb_cou,valid_evts[0],valid_evts[1]) ;
-
+	LOG(TERR,"Pedestals calculated. tb_count %d, RDO counts: %u",tb_cou,fgt_stat[0].evts) ;
 	valid = 1 ;	// assume all OK...
 
 	if(not_enough) valid = 0 ;
 	else valid = !bad ;
 
 	if(!valid) {
-		LOG(ERR,"FGT pedestals not good: APVs bad %d, events %d %d",bad,valid_evts[0],valid_evts[1]) ;
+		LOG(ERR,"FGT pedestals not good: APVs bad %d, events %d",bad,fgt_stat[0].evts) ;
 	}
 
 	return ;
@@ -772,35 +812,40 @@ int fgtPed::from_cache(char *fname)
 int fgtPed::to_cache(char *fname, u_int run)
 {
 	FILE *f ;
-	char *fn ;
-
+	char f_fname[128] ;
+	int do_ln = 1 ;
 
 	if(!valid) {
-		LOG(CAUTION,"Pedestals are not valid -- not caching!") ;
-		LOG(ERR,"ped::to_cache peds are bad: valid %d -- not caching",valid) ;
-		return -1 ;
+		LOG(ERR,"ped::to_cache peds are bad: valid %d -- caching anyway...",valid) ;
+		//do_ln = 0 ;
+
+		//LOG(CAUTION,"Pedestals are not valid -- not caching!") ;
 	}
 
 	if(fname) {
-		fn = fname ;
+		strcpy(f_fname,fname) ;
+		do_ln = 0 ;
 	}
 	else {
-		fn = "/RTScache/pedestals.txt" ;
+		sprintf(f_fname,"/RTScache/%s_pedestals_%08u.txt",rts2name(rts_id),run) ;
 	}
 
 
-	f = fopen(fn,"w") ;
+	f = fopen(f_fname,"w") ;
 	if(f==0) {
-		LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]",fn,strerror(errno)) ;
+		LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]",f_fname,strerror(errno)) ;
 		return -1 ;
 	}
 
 
-	LOG(NOTE,"Writing pedestals to cache \"%s\"...",fn) ;
+	LOG(TERR,"Writing pedestals to cache \"%s\" [valid %d]...",f_fname,valid) ;
 
 	time_t tim = time(0) ;
-	fprintf(f,"### Detector %s, Run number %u, Date %s",fgt_rdr[0]->name,run,ctime(&tim)) ;
-	fprintf(f,"### Timebin %d\n",tb_cou) ;
+	fprintf(f,"# Detector %s\n",rts2name(rts_id)) ;
+	fprintf(f,"# Run %08u\n",run) ;
+	fprintf(f,"# Date %s",ctime(&tim)) ;
+	fprintf(f,"# Timebins %d\n",tb_cou) ;
+	fprintf(f,"\n") ;
 
 	for(int r=0;r<FGT_RDO_COU;r++) {
 		if(rb_mask & (1<<r)) ;
@@ -829,7 +874,13 @@ int fgtPed::to_cache(char *fname, u_int run)
 
 	fclose(f) ;	
 
-	LOG(TERR,"Pedestals written to cache \"%s\"",fn) ;
+	if(do_ln) {
+		char cmd[128] ;
+		sprintf(cmd,"/bin/ln -f -s %s_pedestals_%08u.txt /RTScache/pedestals.txt",rts2name(rts_id),run) ;
+		system(cmd) ;
+	}
+
+	LOG(TERR,"Pedestals written to cache \"%s\"",f_fname) ;
 
 	return 1 ;
 }

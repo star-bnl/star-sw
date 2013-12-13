@@ -700,7 +700,8 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 		continue;
 unrecoverable_error:
 		apv_meta.arc[r].error = 1 ;
-		LOG(WARN,"[evt %d]: RDO %d: Cannot reliably recover pointer to next item, dropping the rest of this event on this rdo");
+		LOG(WARN,"[evt %d]: RDO %d: Cannot reliably recover pointer to next item, dropping the rest of this event on this rdo",
+		    get_global_event_num(),r);
 	}
 
 	adc->rewind() ;
@@ -1059,7 +1060,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 		if(id_check_failed) {
 			rdo_warns[rdo]++ ;
-			if(rdo_warns[rdo] < 5) {
+			if(rdo_warns[rdo] < 15) {
 				LOG(CAUTION,"RDO %d: rdo check failed: expect 0x%02X, found 0x%02X",
 				    rdo,rdo_id[rdo],rdo_in_dta) ;
 			}			
