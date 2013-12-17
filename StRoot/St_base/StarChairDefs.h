@@ -1,11 +1,15 @@
 #ifndef __StarChairDefs_h
+#define __StarChairDefs_h
 #include <assert.h>
 #include "TDatime.h"
-#define __StarChairDefs_h
+#include "tables/St_tpcCorrection_Table.h"
 #define DEBUGTABLE(STRUCT)						\
   TDatime t[2];								\
   if (St_db_Maker::GetValidity(table,t) > 0) {				\
     Int_t Nrows = table->GetNRows();					\
+    if (table->InheritsFrom("St_tpcCorrection")) {			\
+      St_tpcCorrection *t = (St_tpcCorrection *) table;			\
+      tpcCorrection_st *s = t->GetTable(); Nrows = s->nrows;}		\
     LOG_WARN << "St_" << # STRUCT << "C::instance found table " << table->GetName() \
 	     << " with NRows = " << Nrows << " in db" << endm;		\
     LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	\
@@ -53,4 +57,20 @@ St_ ## STRUCT ## C *St_ ## STRUCT ## C::instance() { \
     fgInstance = new CLASS(table);					\
     return fgInstance;							\
   }
-#endif
+#define MakeChairOptionalInstance2(STRUCT,CLASS,PATH)			\
+  ClassImp(CLASS);						\
+  CLASS *CLASS::fgInstance = 0;		\
+  CLASS *CLASS::instance() {			\
+    if (fgInstance) return fgInstance;					\
+    St_ ## STRUCT *table = (St_ ## STRUCT *) StMaker::GetChain()->GetDataBase(MakeString(PATH)); \
+    if (! table) {							\
+      table = new St_ ## STRUCT(# STRUCT ,0);				\
+      table->Mark();							\
+      LOG_WARN << "St_" << # STRUCT << "C::instance create optional " << # CLASS << " table" << endm; \
+    }									\
+    assert(table);	DEBUGTABLE(STRUCT);				\
+    fgInstance = new CLASS(table);				\
+    return fgInstance;							\
+  }
+#endif /* __StarChairDefs_h */
+
