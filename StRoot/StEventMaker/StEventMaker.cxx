@@ -28,6 +28,7 @@
 #include "StDetectorDbMaker/StDetectorDbRichScalers.h"
 #include "StDetectorDbMaker/StDetectorDbBeamInfo.h"
 #include "StDetectorDbMaker/StDetectorDbTriggerID.h"
+#include "StDetectorDbMaker/St_trigDetSumsC.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StPrompt.hh"
 #include "StMath.hh"
@@ -48,7 +49,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.94 2013/04/11 18:57:36 jeromel Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.95 2013/12/17 15:48:19 fisyak Exp $";
 //______________________________________________________________________________
 ClassImp(StEventMaker)
     //______________________________________________________________________________
@@ -270,11 +271,32 @@ StEventMaker::makeEvent()
     triggerIdColl->setL1((trigId[0] = new StTriggerId()));
     triggerIdColl->setL2((trigId[1] = new StTriggerId()));
     triggerIdColl->setL3((trigId[2] = new StTriggerId()));
-
+    // copy trigDetSums table to StEvent
+    St_trigDetSums *table = 0;
+    // reuse table from StDetectorDbMaker
+    if ( St_trigDetSumsC::GetInstance()) {
+      table = new St_trigDetSums(*((St_trigDetSums *)St_trigDetSumsC::GetInstance()->Table()));
+      table->Shunt(mCurrentEvent);
+    }
+    if (! table) {
+      TDataSet *set = GetDataSet("inputStream_DAQ");
+      if (set) table = (St_trigDetSums *) set->Find("trigDetSums");
+      if ( table) { 
+	gMessMgr->Info("get trigDetSums from inputStream_DAQ");
+	St_trigDetSums *copytable = new St_trigDetSums(*table);
+	copytable->Shunt(mCurrentEvent); //  keep table from daq in StEvent
+	table = copytable;
+      }  else        {
+	table = (St_trigDetSums *) GetDataBase("Calibrations/rich/trigDetSums");
+	if ( table) { gMessMgr->Info("get trigDetSums from Calibrations/rich/trigDetSums");}
+      }
+      if (table) {
+	AddData(new St_trigDetSumsC(table));
+      }
+    }
     St_DataSet *daqReaderSet=GetDataSet("StDAQReader");
-    if (daqReaderSet) {
-
-        StTrigSummary* trigSummary =
+    if (daqReaderSet) { 
+      StTrigSummary* trigSummary =
             ((StDAQReader*) (daqReaderSet->GetObject()))->getTrigSummary();
         if (!trigSummary) gMessMgr->Warning("StEventMaker: No StTrigSummary found");
 
@@ -850,8 +872,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.94 2013/04/11 18:57:36 jeromel Exp $
+ * $Id: StEventMaker.cxx,v 2.95 2013/12/17 15:48:19 fisyak Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.95  2013/12/17 15:48:19  fisyak
+ * Copy trigDetSums table to StEvent
+ *
  * Revision 2.94  2013/04/11 18:57:36  jeromel
  * cast to unsigned as mask is 2x32 in a unint64
  *
