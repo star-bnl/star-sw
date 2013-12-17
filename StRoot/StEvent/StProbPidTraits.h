@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StProbPidTraits.h,v 2.5 2004/07/21 14:09:57 fisyak Exp $
+ * $Id: StProbPidTraits.h,v 2.6 2013/12/17 15:07:34 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -19,19 +19,7 @@
 #include "StTrackPidTraits.h"
 #include "TArrayF.h"
 #include "StParticleDefinition.hh"
-
-enum StPidParticle {
-    kPidElectron ,
-    kPidProton   ,
-    kPidKaon     ,
-    kPidPion     ,
-    kPidMuon     ,
-    kPidDeuteron ,
-    kPidTriton   ,
-    kPidHe3      ,
-    kPidAlpha    ,
-    KPidParticles
-};
+#include "StPidParticleDefinition.h"
 
 class StProbPidTraits : public StTrackPidTraits {
 public:
