@@ -9,9 +9,9 @@
 //:Pointer to data:  Survey.time.C:
 //   Translation from local to Master
 //   m = R*l + t
-//           ( r00 r01 r02 ) (xl)   ( t0 )    ( r00 r02 r01 ) (xl)   ( t0 )
-//       R = ( r10 r11 r12 ) (yl) + ( t1 ) =  ( r10 r12 r11 ) (zl) + ( t1 )
-//           ( r20 r21 r22 ) (zl)   ( t2 )    ( r20 r22 r21 ) (yl)   ( t2 )
+//           ( r00 r01 r02 ) (xl)   ( t0 )    ( r00 r01 r02 ) (xl)   ( t0 )
+//       R = ( r10 r11 r12 ) (yl) + ( t1 ) =  ( r10 r11 r12 ) (zl) + ( t1 )
+//           ( r20 r21 r22 ) (zl)   ( t2 )    ( r20 r21 r22 ) (yl)   ( t2 )
 // SVT
 // Id = 0                                for SvtOnGlobal
 // Id = [0, 1]                           for ShellOnGlobal, 
@@ -27,7 +27,15 @@
 // Id = 7000 + 100*wafer + ladder        SsdWafersOnLadders
 struct Survey {
   long   Id;
-  double r00, r01, r02, r10, r11, r12, r20, r21, r22;
+  double r00;
+  double r01; /* -gamma */
+  double r02; /*  beta  */
+  double r10; /*  gamma */
+  double r11; 
+  double r12; /* -alpha */ 
+  double r20; /* -beta  */
+  double r21; /*  alpha */
+  double r22;
   double t0, t1, t2;
   double sigmaRotX, sigmaRotY, sigmaRotZ;
   double sigmaTrX, sigmaTrY, sigmaTrZ;
