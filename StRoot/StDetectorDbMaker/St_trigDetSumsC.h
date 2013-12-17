@@ -6,11 +6,13 @@
 #include "tables/St_trigDetSums_Table.h"
 #include "StDetectorDbClock.h"
 #include "St_richvoltagesC.h"
+#include "TMath.h"
 class St_trigDetSumsC : public TChair {
  public:
-  St_trigDetSumsC(St_trigDetSums *table) : TChair(table) {SafeDelete(fgInstance); fgInstance = this; fMargin = 0;}
+  St_trigDetSumsC(St_trigDetSums *table=0) : TChair(table) {SafeDelete(fgInstance); fgInstance = this; fMargin = 0;}
   virtual ~St_trigDetSumsC() {fgInstance = 0;}
-  static St_trigDetSumsC* 	instance()      {return fgInstance;}
+  static St_trigDetSumsC* 	instance();
+  static St_trigDetSumsC*      GetInstance() {return fgInstance;}
   trigDetSums_st 	*Struct(Int_t i = 0) 	{return ((St_trigDetSums*) Table())->GetTable()+i;}
   UInt_t     	getNumRows()                	{return GetNRows();}
   UInt_t 	runNumber(Int_t i = 0) 	        {return Struct(i)->runNumber;}
