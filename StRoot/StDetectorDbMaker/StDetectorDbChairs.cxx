@@ -532,6 +532,20 @@ Float_t St_TpcAvgCurrentC::AcChargeL(Int_t sector, Int_t channel) {
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
 #include "St_trigDetSumsC.h"
 St_trigDetSumsC *St_trigDetSumsC::fgInstance = 0;
+St_trigDetSumsC *St_trigDetSumsC::instance() {
+  if (fgInstance) return fgInstance;
+  St_trigDetSums *table = 0;
+  TDataSet *event = StMaker::GetChain()->GetDataSet("StEvent");
+  if (event) table = (St_trigDetSums *) event->Find("trigDetSums");
+  if (! table) table = (St_trigDetSums *) StMaker::GetChain()->GetDataBase("Calibrations/rich/trigDetSums");
+  assert(table);
+  fgInstance = new St_trigDetSumsC(table);
+  fgInstance->SetName("trigDetSumsC");
+  StMaker *db = StMaker::GetChain()->Maker("db");
+  assert(db);
+  db->AddData(fgInstance);
+  return fgInstance;
+}
 ClassImp(St_trigDetSumsC);
 //___________________tpc_____________________________________________________________
 #include "St_tss_tssparC.h"
@@ -762,10 +776,27 @@ MakeChairInstance2(Survey,StTpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPo
 MakeChairInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition);
 MakeChairInstance2(Survey,StTpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPosition);
 MakeChairInstance2(Survey,StTpcHalfPosition,Geometry/tpc/TpcHalfPosition);
+MakeChairOptionalInstance2(Survey,StTpcPosition,Geometry/tpc/TpcPosition);
+MakeChairInstance2(Survey,StTpcInnerSectorPositionB,Geometry/tpc/TpcInnerSectorPositionB);
+MakeChairInstance2(Survey,StTpcOuterSectorPositionB,Geometry/tpc/TpcOuterSectorPositionB);
+MakeChairInstance2(Survey,StTpcSuperSectorPositionB,Geometry/tpc/TpcSuperSectorPositionB);
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   static TGeoHMatrix rot;
+  rot.SetName(Table()->GetName());
   rot.SetRotation(Rotation(i));
+  rot.SetTranslation(Translation(i));
+  return *&rot;
+}
+//________________________________________________________________________________
+const TGeoHMatrix &St_SurveyC::GetMatrixR(Int_t i) {
+  static TGeoHMatrix rot;
+  Double_t rotations[9] = {
+    r00(i), r01(i),      0,
+    r10(i), r11(i),      0,
+    0     ,      0, r22(i)};
+  rot.SetName(Form("%s_%i",Table()->GetName(),i));
+  rot.SetRotation(rotations);
   rot.SetTranslation(Translation(i));
   return *&rot;
 }
@@ -808,6 +839,9 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "TpcOuterSectorPosition") return (St_SurveyC   *) StTpcOuterSectorPosition::instance();
   if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
   if (Name == "TpcHalfPosition")        return (St_SurveyC   *) StTpcHalfPosition::instance();
+  if (Name == "TpcInnerSectorPositionB") return (St_SurveyC   *) StTpcInnerSectorPositionB::instance();
+  if (Name == "TpcOuterSectorPositionB") return (St_SurveyC   *) StTpcOuterSectorPositionB::instance();
+  if (Name == "TpcSuperSectorPositionB") return (St_SurveyC   *) StTpcSuperSectorPositionB::instance();
   return 0;
 }
 //__________________Calibrations/rhic______________________________________________________________
