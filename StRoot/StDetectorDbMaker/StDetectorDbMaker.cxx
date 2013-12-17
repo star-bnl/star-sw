@@ -16,7 +16,6 @@ Int_t StDetectorDbMaker::Make(){
   // Must delete any existing St_trigDetSumsC first, or absence from DAQ stream
   //  in the middle of a file won't properly trigger looking to DB, nor do we
   //  want to keep old table around
-  delete St_trigDetSumsC::instance();
   if (GetMode() != 1) {
     TDataSet *set = GetDataSet("inputStream_DAQ");
     if (set) {
@@ -33,7 +32,7 @@ Int_t StDetectorDbMaker::Make(){
 #if 0
       LOG_QA << "get trigDetSums from DB Calibrations/rich/trigDetSums" << endm;
 #endif
-      new St_trigDetSumsC(table);
+      AddData(new St_trigDetSumsC(table));
     }
   }
 #if 0
