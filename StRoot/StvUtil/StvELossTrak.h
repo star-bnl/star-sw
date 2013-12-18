@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.4 2013/07/11 01:16:19 perev Exp $
+// $Id: StvELossTrak.h,v 1.5 2013/12/18 02:26:51 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -29,7 +29,7 @@ public:
   double dEdX () const			{return fdEdX    ;}
   double ELoss() const 			{return fTotELoss;}
   double ELossErr2() 		const	{return fTotELossErr2;}
-  double dPP     () 		const;	
+  double dPovPLen() 		const;	
   double dPPErr2() 		const;	
   double TotLen() 		const	{return fTotLen;}	
   double P() 		        const	{return fP;}	

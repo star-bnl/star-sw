@@ -157,12 +157,12 @@ static int nCall = 0; nCall++;
   }
   assert(fabs(totLen)<400);
   if (len) *len = totLen;
-  double dP0 = momB*mEl->dPP();
+  double dP0 = totLen*momB*mEl->dPovPLen();
   double dP1 = mEl->dEdX()*totLen*sqrt(momA*momA+piMass*piMass)/momA;
   if ( fabs(dP0-dP1)/(dP0+dP1)*200>1) {
     printf ("PLoss dP0=%g dP1=%g\n",dP0,dP1);
   }
-  return momB*mEl->dPP();
+  return dP0;
 
 }
 
