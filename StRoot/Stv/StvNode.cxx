@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.24 2013/10/31 20:29:06 perev Exp $
+ * $Id: StvNode.cxx,v 1.25 2013/12/18 02:25:48 perev Exp $
  *
  * /author Victor Perev
  */
@@ -219,7 +219,7 @@ static StvELossTrak *el = new StvELossTrak();
   el->Set(mELossData.mMate,p); el->Add(mELossData.mTotLen);
   mELossData.mTheta2 = el->GetTheta2();
   mELossData.mOrt2   = el->GetOrt2();
-  mELossData.mdPP    = el->dPP();
+  mELossData.mdPP    = el->dPovPLen();
   mELossData.mELoss  = el->ELoss();
   mELossData.mdPPErr2= el->dPPErr2();
   mELossData.mP      = el->P();
