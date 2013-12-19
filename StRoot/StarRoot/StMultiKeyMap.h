@@ -97,7 +97,7 @@ public:
   float *GetKMax() const 		{return mKMax;}
   const int *Touched() const 		{return mTouched;}
   private:
-  void Left(const StMultiKeyNode *node);
+  const StMultiKeyNode *Left(const StMultiKeyNode *node);
   int FullCheck();
   int FilterLeft(const StMultiKeyNode *node) const;
   int FilterRite(const StMultiKeyNode *node) const;
