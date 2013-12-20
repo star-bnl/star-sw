@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.37 2013/06/03 15:47:52 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.38 2013/12/20 05:19:46 xuanli Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.38  2013/12/20 05:19:46  xuanli
+//  Update FgtRawMaker for run13 test production.
+//
 //  Revision 1.37  2013/06/03 15:47:52  avossen
 //  changed return code from fatal to warn if #tb is to high in meta data
 //
@@ -385,6 +388,7 @@ void StFgtRawMaker::Clear( Option_t *opts )
 {
   if( mFgtCollectionPtr )
     mFgtCollectionPtr->Clear( opts );
+  mFgtCollectionPtr=NULL;
 }
 
 
