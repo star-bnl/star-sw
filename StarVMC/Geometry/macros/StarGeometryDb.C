@@ -1175,7 +1175,11 @@ void estar()
 void test()
 {
   geom.select="test"; { /* just the cave */
+
+    geom.tpcRefSys = false; // Create TPC reference system
+
     geom.caveFlag = "CAVE04";
+
     geom.sconFlag = "SCONof";  geom.sconStat = 0;
     geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
     geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
@@ -1202,6 +1206,10 @@ void test()
     geom.pxstFlag = "PXSTof";  geom.pxstFlag = 0;
     geom.dtubFlag = "DTUBof";  geom.dtubFlag = 0;
     // ================================================
+    geom.sisdFlag = "SISDof"; geom.sisdStat = 0;
+    geom.svttFlag = "SISDof"; geom.svttStat = 0;
+    geom.istdFlag = "ISTDof"; geom.istdStat = 0; // ISTD off by default
+
     setTitle("== test geometry ==");
     // ================================================
     geom.fill();
