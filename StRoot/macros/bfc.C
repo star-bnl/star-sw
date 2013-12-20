@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.185 2013/07/18 13:57:11 fisyak Exp $
+// $Id: bfc.C,v 1.186 2013/12/20 18:48:54 genevb Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -203,6 +203,7 @@ void bfc(Int_t First, Int_t Last,
   chain->SetAttr(".Privilege",1,"StTpcHitMover::*"); //May be allowed to act upon corrupt events
   chain->SetAttr(".Privilege",1,"*::tpcChain"); //May pass on messages from sub-makers
   chain->SetAttr(".Privilege",1,"StTriggerDataMaker::*"); //TriggerData could reject event based on corrupt triggers
+  chain->SetAttr(".Privilege",1,"StEventMaker::*"); //May be allowed to act upon trigger IDs (filtering)
   Int_t iInit = chain->Init();
   if (iInit >=  kStEOF) {chain->FatalErr(iInit,"on init"); return;}
   if (Last == 0) return;
