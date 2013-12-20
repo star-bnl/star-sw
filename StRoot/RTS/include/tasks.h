@@ -18,6 +18,18 @@
 #define TAPER_2_TASK         31    /* this is the aux-taper       */
 #define EVP_TAPER_TASK       31
 
+// EVBX2 task definitions
+// #define EVB_TASK 20
+// #define ETHLIB_OUTGOING_TASK  171
+#define BUILDEVENT_TASK      42
+#define L2_THREAD_TASK       43
+#define PRE_TOKEN_MANAGER_INTERNAL 44
+#define PRE_TOKEN_MANAGER_TASK 45
+
+
+
+// end EVBX2 tasks
+
 #define TAPER_3_TASK         32
 #define TAPER_4_TASK         33
 #define TAPER_5_TASK         34
