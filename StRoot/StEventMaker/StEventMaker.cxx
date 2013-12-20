@@ -29,6 +29,7 @@
 #include "StDetectorDbMaker/StDetectorDbBeamInfo.h"
 #include "StDetectorDbMaker/StDetectorDbTriggerID.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "tables/St_trgOfflineFilter_Table.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StPrompt.hh"
 #include "StMath.hh"
@@ -49,7 +50,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.95 2013/12/17 15:48:19 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.96 2013/12/20 18:41:41 genevb Exp $";
 //______________________________________________________________________________
 ClassImp(StEventMaker)
     //______________________________________________________________________________
@@ -458,6 +459,36 @@ StEventMaker::makeEvent()
 	      }
 	      StTpcDb::instance()->SetTriggerId(TriggerId);
 	    }
+
+            // Allow trigger filtering to skip events
+            Int_t FiltTrg = IAttr("FiltTrg");
+            if (FiltTrg != 0) {
+              bool unmatched = true;
+	      St_trgOfflineFilter* flaggedTrgs =
+                (St_trgOfflineFilter *) GetDataBase("Calibrations/trg/trgOfflineFilter");
+              if (!flaggedTrgs) {
+                LOG_ERROR << "Could not find Calibrations/trg/trgOfflineFilter in database" << endm;
+                return kStErr;
+              }
+              const StTriggerId* tr = triggerIdColl->nominal();
+              if (tr) {
+                vector<unsigned int> idVec = tr->triggerIds();
+                long nFlaggedTrgs = flaggedTrgs->GetNRows();
+                for (unsigned int iTrg = 0;
+                     unmatched && (iTrg < idVec.size()) ; iTrg++) {
+                  trgOfflineFilter_st* flaggedTrg = flaggedTrgs->GetTable();
+                  for (long iFlaggedTrg = 0;
+                       unmatched && iFlaggedTrg < nFlaggedTrgs; iFlaggedTrg++, flaggedTrg++) {
+                    unmatched = (idVec[iTrg] != flaggedTrg->trigid);
+                  }
+                }
+              }
+              if ((unmatched && FiltTrg>0) || // Include if trigger is matched
+                 (!unmatched && FiltTrg<0)) { // Exclude if trigger is matched
+                LOG_INFO << "Event failed trigger filter...skipping" << endm;
+                return kStSkip;
+              }
+            }
 	}
     }
 
@@ -872,8 +903,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.95 2013/12/17 15:48:19 fisyak Exp $
+ * $Id: StEventMaker.cxx,v 2.96 2013/12/20 18:41:41 genevb Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.96  2013/12/20 18:41:41  genevb
+ * Add event filtering by trigger (offline id)
+ *
  * Revision 2.95  2013/12/17 15:48:19  fisyak
  * Copy trigDetSums table to StEvent
  *
