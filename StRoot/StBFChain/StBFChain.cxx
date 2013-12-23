@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.608 2013/08/17 21:47:17 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.609 2013/12/23 20:34:26 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -95,7 +95,8 @@ void StBFChain::Setup(Int_t mode) {
   }
   FDate  = FTime  = 0;
   FDateS = FTimeS = 0;
-  fRunG  = -1;
+  fFiltTrg   = "";
+  fRunG      = -1;
   Gproperty  = ".gopt.";
   Gvalue     = "";
   Gpattern   = "*";
@@ -721,6 +722,12 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
     if (maker == "StBTofCalibMaker" && GetOption("UseProjectedVertex")) mk->SetAttr("UseProjectedVertex",kTRUE);
+    if (maker == "StEventMaker" && fFiltTrg.Length()) {
+      mk->SetAttr("FiltTrg",(Int_t) (fFiltTrg.BeginsWith('+') ? 1 : -1));
+      TString FiltTrgFlavor = fFiltTrg(1,128);
+      if (FiltTrgFlavor.Length())
+        SetFlavor((FiltTrgFlavor += "+ofl").Data(),"trgOfflineFilter");
+    }
   Add2Chain:
     if (! mk) continue;
     if (name == "") strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
@@ -963,6 +970,11 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
   // GoptXXXvvvvvv -> Gopt 4 / XXX 3 / vvvvvv 6 = 13
   if ( Tag.BeginsWith("gopt") && Tag.Length() == 13 ) return 0;
 
+  if ( Tag.BeginsWith("FiltTrg",TString::kIgnoreCase) ) {
+    Check = kTRUE;
+    if ( TPRegexp("^FiltTrg(Inc|Exc)?(_.*)*$").Match(Tag,"i") > 0) return 0;
+  }
+
   if (Check) {
     gMessMgr->Error() << "Option " << Tag.Data() << " has not been recognized" << endm;
     abort(); //assert(1);
@@ -1092,6 +1104,24 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  if (Tag.Length() > 4)  (void) sscanf(Tag.Data(),"rung.%d",&fRunG);
 	  gMessMgr->QAInfo() << Tag.Data() << " will be considered as Run number (& rndm seed set) " 
 			     << fRunG << " for simulation." << endm; 
+	} else if (Tag.BeginsWith("FiltTrg",TString::kIgnoreCase)) {
+          TString filtTrgTag = Tag;
+          Ssiz_t flavorIdx = Tag.Index('_');
+          if (flavorIdx > 0) {
+            filtTrgTag = Tag(0,flavorIdx);
+            fFiltTrg = Tag(flavorIdx+1,64);
+          }
+          if (filtTrgTag.CompareTo("FiltTrgExc",TString::kIgnoreCase)==0) {
+	    gMessMgr->QAInfo() << "Trigger Filtering exclude with flavor=" << fFiltTrg << endm;
+            fFiltTrg.Prepend('-');
+          } else if (filtTrgTag.CompareTo("FiltTrgInc",TString::kIgnoreCase)==0 ||
+                     filtTrgTag.CompareTo("FiltTrg"   ,TString::kIgnoreCase)==0) {
+	    gMessMgr->QAInfo() << "Trigger Filtering include with flavor=" << fFiltTrg << endm;
+            fFiltTrg.Prepend('+');
+          } else {
+            // not a match, disable
+            fFiltTrg = "";
+          }
 	} else { // Check for predefined db time stamps ?
 	  kgo = kOpt(Tag.Data(),kFALSE);
 	  if (kgo != 0){
