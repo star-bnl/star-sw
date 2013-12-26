@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.37 2012/12/06 14:33:47 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.38 2013/12/26 15:44:06 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -308,10 +308,10 @@ Int_t StTpcRTSHitMaker::Make() {
 	Double_t q = ADC2GeV*dta->sim_cld[i].cld.charge;
 	UShort_t idTruth = 0;
 	UShort_t quality = 0;
-	if (dta->sim_cld[i].track_id < 10000) {
-	  idTruth = dta->sim_cld[i].track_id;
-	  quality = dta->sim_cld[i].quality;
-	}
+	//yf 12/26/13 bug 2741	if (dta->sim_cld[i].track_id < 10000) {
+	idTruth = dta->sim_cld[i].track_id;
+	quality = dta->sim_cld[i].quality;
+	//yf 12/26/13 bug 2741 }
 	Id++;
 	StTpcHit *hit = StTpcHitMaker::StTpcHitFlag(L.position(),hard_coded_errors,hw,q
 						    , (UChar_t ) 0  // counter 
