@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.h,v 1.10 2013/10/28 14:18:24 ramdebbe Exp $
+// $Id: StPeCTrigger.h,v 1.11 2013/12/27 20:47:32 ramdebbe Exp $
 // $Log: StPeCTrigger.h,v $
+// Revision 1.11  2013/12/27 20:47:32  ramdebbe
+// added a set method to select a trigger
+//
 // Revision 1.10  2013/10/28 14:18:24  ramdebbe
 // added arrays to handle bbc and zdc information
 //
@@ -60,8 +63,8 @@ public:
   StPeCTrigger();
   ~StPeCTrigger();
   void  clear ( ) ;
-  Int_t process(StEvent *event);
-  Int_t process(StMuDst* mudst);
+  Int_t process(StEvent *event, string triggerSel);
+  Int_t process(StMuDst* mudst, string triggerSel);
 
   Int_t  p4 ; // p4 with swapt weigthts
   Int_t  p4c ;
@@ -96,6 +99,7 @@ public:
   Int_t     nMwcHits ;
   Int_t     nBTOFhits;
   Int_t     nBtofTriggerHits;
+  Int_t     nPrimaryTracks;
   unsigned int bunchId;
   unsigned short lastDSM0;
   unsigned short lastDSM1;
@@ -116,44 +120,16 @@ public:
   Float_t   zdcTimeDifference  ;
   //SMD information
   bool zdcSMDPresent;
-/*   unsigned short zdcSMDEastH0; */
-/*   unsigned short zdcSMDEastH1; */
-/*   unsigned short zdcSMDEastH2; */
-/*   unsigned short zdcSMDEastH3; */
-/*   unsigned short zdcSMDEastH4; */
-/*   unsigned short zdcSMDEastH5; */
-/*   unsigned short zdcSMDEastH6; */
-/*   unsigned short zdcSMDEastH7; */
+
   unsigned short zdcSMDEastH[8];
 
-/*   unsigned short zdcSMDEastV0; */
-/*   unsigned short zdcSMDEastV1; */
-/*   unsigned short zdcSMDEastV2; */
-/*   unsigned short zdcSMDEastV3; */
-/*   unsigned short zdcSMDEastV4; */
-/*   unsigned short zdcSMDEastV5; */
-/*   unsigned short zdcSMDEastV6; */
-/*   unsigned short zdcSMDEastV7; */
+
   unsigned short zdcSMDEastV[8];
 
-/*   unsigned short zdcSMDWestH0; */
-/*   unsigned short zdcSMDWestH1; */
-/*   unsigned short zdcSMDWestH2; */
-/*   unsigned short zdcSMDWestH3; */
-/*   unsigned short zdcSMDWestH4; */
-/*   unsigned short zdcSMDWestH5; */
-/*   unsigned short zdcSMDWestH6; */
-/*   unsigned short zdcSMDWestH7; */
+
   unsigned short zdcSMDWestH[8];
 
-/*   unsigned short zdcSMDWestV0; */
-/*   unsigned short zdcSMDWestV1; */
-/*   unsigned short zdcSMDWestV2; */
-/*   unsigned short zdcSMDWestV3; */
-/*   unsigned short zdcSMDWestV4; */
-/*   unsigned short zdcSMDWestV5; */
-/*   unsigned short zdcSMDWestV6; */
-/*   unsigned short zdcSMDWestV7; */
+
   unsigned short zdcSMDWestV[8];
 
   unsigned short zdcSMDHighestStripEastH;
@@ -189,8 +165,8 @@ public:
 
 
   // trigger ids efficiency analysis 
-  Int_t trg_3000;   // UPC
-  Int_t trg_3001;   // UPC+ZDC
+  Int_t trg_3000;   // UPC or ZDC_Mon
+  Int_t trg_3001;   // UPC or ZDC_Mon
   Int_t trg_2001;   // Minbias
   Int_t trg_2004;   // Minbias
 
