@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.12 2013/01/24 15:41:24 ramdebbe Exp $
+// $Id: StPeCEvent.h,v 1.13 2013/12/27 16:49:58 ramdebbe Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.13  2013/12/27 16:49:58  ramdebbe
+// added a set method setTOFgeometry to pass pointer to StBTofGeometry
+//
 // Revision 1.12  2013/01/24 15:41:24  ramdebbe
 // added more flags to choose input or output tracks tof etc.
 //
@@ -64,7 +67,7 @@
 #include "SystemOfUnits.h"
 #include "StEpcMaker/StEpcMaker.h"
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
-
+#include "StBTofUtil/StBTofGeometry.h"
 
 
 class StPeCEvent: public TObject {
@@ -98,6 +101,7 @@ public:
   Int_t                           fill(StEvent* event, StMuDst* mudst);
   Int_t                           infoLevel ;
   void                            setInfoLevel ( Int_t in ) { infoLevel = in ; } ;
+  void                            setTOFgeometry(StBTofGeometry * mTOFgeo) {mTOFgeoEv = mTOFgeo; };
   StLorentzVectorF                getEvent4Momentum(StPeCSpecies pid) const;
 #endif /*__CINT__*/
   void                            clear ( ) ;
@@ -133,6 +137,8 @@ private:
   TClonesArray                   *tofHits;
   TClonesArray                   *tofTracks;
   TClonesArray                   *vertices;
+
+  StBTofGeometry                 *mTOFgeoEv;   //!
   Int_t                           shotCount;
   Bool_t                          useBemcLocal;
   Bool_t                          useTOFlocal;
