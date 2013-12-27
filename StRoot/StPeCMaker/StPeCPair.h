@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.10 2012/07/03 19:37:40 ramdebbe Exp $
+// $Id: StPeCPair.h,v 1.11 2013/12/27 16:52:31 ramdebbe Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.11  2013/12/27 16:52:31  ramdebbe
+// added a input argument StBTofGeometry to fill method (StMuDst + StEvent) and x y z coordinates of intercept to TOF cylinder
+//
 // Revision 1.10  2012/07/03 19:37:40  ramdebbe
 // raised ClassDef from 1 to 2
 //
@@ -62,6 +65,14 @@
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include "StEmcUtil/filters/StEmcFilter.h"
+#include "StBTofUtil/StBTofGeometry.h"
+
+
+
+typedef vector<Int_t>  IntVec;
+typedef vector<UInt_t>  UIntVec;
+typedef vector<Double_t>  DoubleVec;
+typedef vector<StThreeVector<double> >  PointVec;
 
 class StPeCPair : public TObject {
 
@@ -80,11 +91,13 @@ public:
 				              Bool_t primaryFlag, StEvent* event );
 
                                   StPeCPair ( StMuTrack *trk1, StMuTrack *trk2, 
-				              Bool_t primaryFlag, StMuEvent* event, StEvent* eventP );
+				              Bool_t primaryFlag, StMuEvent* event, StEvent* eventP,  StBTofGeometry * pairTOFgeo );
 
   Int_t                           fill ( Bool_t primaryFlag, StEvent* event ) ;
   Int_t                           fill ( Bool_t primaryFlag, StMuEvent* event ) ;
   Int_t                           fill ( Bool_t primaryFlag, StMuEvent* event,  StEvent* eventP ) ;
+
+
   Int_t                           fill ( Bool_t primaryFlag, StEventSummary* summary,
                                          StThreeVectorF& p1, StPhysicalHelixD& h1, short charge1,
                                          StThreeVectorF& p2, StPhysicalHelixD& h2, short charge2,    
@@ -112,6 +125,8 @@ public:
   Float_t                         getCosThetaStar(StPeCSpecies pid) const;
   Float_t                         getPartDca ( ) { return pPartDca ; } ;
   Float_t                         getV0Dca ( ) { return pV0Dca ; } ;
+
+
 
 private:
 
@@ -168,6 +183,15 @@ private:
   float                           tr2_pathLength;
   float                           tr2_Beta;
 
+  float                           tr1_extrapolatedTOF_mX;
+  float                           tr1_extrapolatedTOF_mY;
+  float                           tr1_extrapolatedTOF_mZ;
+
+  float                           tr2_extrapolatedTOF_mX;
+  float                           tr2_extrapolatedTOF_mY;
+  float                           tr2_extrapolatedTOF_mZ;
+
+  StBTofGeometry                * pairTOFgeoLocal; //!
   
   StPeCSpec                       pionH;
   StPeCSpec                       kaonH;
@@ -183,6 +207,8 @@ private:
   StEmcGeom *                     mGeom0;
   StEmcGeom *                     mGeom2;    
   StEmcGeom *                     mGeom3;
+
+
 
   Double_t                        bFld;  
 #endif /*__CINT__*/
