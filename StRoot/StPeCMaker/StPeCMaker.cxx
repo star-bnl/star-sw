@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.30 2013/07/10 19:28:06 ramdebbe Exp $
+// $Id: StPeCMaker.cxx,v 1.31 2013/12/27 16:44:27 ramdebbe Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.31  2013/12/27 16:44:27  ramdebbe
+// added extrapolation of tracks to TOF, geometry setup in InitRun
+//
 // Revision 1.30  2013/07/10 19:28:06  ramdebbe
 // added returnValue in StEvent input mode
 //
@@ -129,13 +132,16 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.30 2013/07/10 19:28:06 ramdebbe Exp $";
+
+
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.31 2013/12/27 16:44:27 ramdebbe Exp $";
 
 ClassImp(StPeCMaker)
 
 StPeCMaker::StPeCMaker(const Char_t *name) : StMaker(name), infoLevel(0), filter(0), outputPerRun(0), muDst(0)
 {
    treeFileName = "StPeCMaker.tree.root" ;
+   triggerChoice = "something";
    return;
 }
 
@@ -154,11 +160,11 @@ Int_t StPeCMaker::Init() {
    LOG_INFO <<"StPeCMaker INIT: readStMuDst " << readStMuDst << endm;
    LOG_INFO <<"StPeCMaker INIT: readStEvent " << readStEvent << endm;
    LOG_INFO <<"StPeCMaker INIT: readBoth "    << readStMuDst_and_StEvent << endm;
-
+   LOG_INFO <<"trigger to be selected: "    << triggerChoice << endm;
    //Get the standard root format to be independent of Star IO   
    m_outfile = new TFile(treeFileName, "recreate");
    m_outfile->SetCompressionLevel(1);
-
+//    setTriggerOfInterest("another");
 
    uDstTree = new TTree("uDst", "Pcol uDst", 99);
 
@@ -169,37 +175,55 @@ Int_t StPeCMaker::Init() {
 
    trigger = new StPeCTrigger();
    trigger->setInfoLevel(infoLevel);
-
+   char test[] = "ZDC_monitor";
+//    strcpy(triggerChoice, test); 
    geant = new StPeCGeant();
     LOG_INFO << "StPeCMaker Init: before branch add ---------- " << endm;
 
    //Add branches
    uDstTree->Branch("Event", "StPeCEvent", &pevent, 94000, 99);
-    LOG_INFO << "StPeCMaker Init: after Event branch add ---------- " << endm;
+//     LOG_INFO << "StPeCMaker Init: after Event branch add ---------- " << endm;
    uDstTree->Branch("Trigger", "StPeCTrigger", &trigger, 64000, 99);
    uDstTree->Branch("Geant", "StPeCGeant", &geant, 64000, 99);
-    LOG_INFO << "StPeCMaker Init: after branch add ---------- " << endm;
+//     LOG_INFO << "StPeCMaker Init: after branch add ---------- " << endm;
    //define 2-D histogram to display snapshots of individual events
    //store then in another directory
    TDirectory * saveDir = gDirectory;
    TDirectory * snapShots = gDirectory->mkdir("snapShots");
    snapShots->cd();
    fSnapShots = new TList();
-   Int_t snapLimit = 100;
+   Int_t snapLimit = 0;
    for (Int_t i=0;i<snapLimit;i++){
 
      fSnapShots->Add(new TH2F(Form("snapShot%d",i), Form("y z view of event %d", i) , 100, -250., 250., 100, -200., 200.));
    }
    fSnapShots->Add(new TH1F("hNumVtx", "number of vertices in event" , 100, 0., 20.));
    gDirectory = saveDir;
-    LOG_INFO << "StPeCMaker leaving Init ---------- " << endm;
-   return StMaker::Init();
+
+
+
+     LOG_INFO << "StPeCMaker leaving Init ---------- " << endm;
+     return StMaker::Init();
 }
 
 
 Int_t StPeCMaker::InitRun(Int_t runnr) {
    treeFileName="StPeCMaker.tree.root";
+   // get TOF geometry to extrapolate tracks to it
+   //
+     mBTofGeom = new StBTofGeometry("btofGeometry","btofGeometry in MatchMaker");
 
+     geantU  = dynamic_cast<St_geant_Maker *>(GetMaker("myGeant"));
+
+     TVolume * mstarHall = (TVolume *)geantU->GetDataSet("HALL");
+ 
+
+     if(mBTofGeom && !mBTofGeom->IsInitDone()) {
+       LOG_INFO << " BTofGeometry initialization ... " << endm;
+       mstarHall->Print();
+       mBTofGeom->InitFromStar(mstarHall);
+       LOG_INFO << "starHall defined in StPeCMaker InitRun value of mBTofGeom  "  << mBTofGeom<<endm;
+     }
    if ( outputPerRun ) {
       StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
       if (pIOMaker)
@@ -225,6 +249,9 @@ Int_t StPeCMaker::InitRun(Int_t runnr) {
       LOG_INFO << "Initrun: open and compression "  << endm;
    }
 
+     LOG_INFO << "StPeCMaker leaving InitRun ---------- " << endm;
+
+
 
    return StMaker::InitRun(runnr);
 }
@@ -248,13 +275,15 @@ Int_t StPeCMaker::Make()
     if(!muDst )  LOG_INFO << "StPeCMaker make: muDst not present "  << endm;
 
       LOG_INFO << "StPeCMaker make: using muDst---------- "  << endm;
+      LOG_INFO << "StPeCMaker make: trigger selected ---------- "  << triggerChoice<< endm;
       NTracks = muDst->globalTracks()->GetEntries();
        
       StL0Trigger &trig = muDst->event()->l0Trigger();
       tw = trig.triggerWord();
 
-      returnValue = trigger->process(muDst);
+      returnValue = trigger->process(muDst, triggerChoice);
 //       LOG_INFO << "StPeCMaker make: trigger return ---------- "  <<returnValue<< endm;
+      pevent->setTOFgeometry(mBTofGeom);
       ok = pevent->fill(muDst);
    }   // was commented up to here  //commented mudst ends here
 //    else
@@ -268,12 +297,13 @@ Int_t StPeCMaker::Make()
 	 return kStOK; 
        }
      //Process StEvent trigger simulations
-     returnValue = trigger->process(event);
+     returnValue = trigger->process(event, triggerChoice);
 
      StSPtrVecTrackNode& tempn = event->trackNodes();
      NTracks = tempn.size();
 
      tw = event->l0Trigger()->triggerWord();                  // end of StEvent 18-NOV
+     pevent->setTOFgeometry(mBTofGeom);
      ok = pevent->fill(event);
 
    }         //rd 9DEC09
@@ -290,8 +320,11 @@ Int_t StPeCMaker::Make()
       StL0Trigger &trig = muDst->event()->l0Trigger();
       tw = trig.triggerWord();
 
-      returnValue = trigger->process(muDst);
-      ok = pevent->fill(event, muDst);
+      returnValue = trigger->process(muDst, triggerChoice);
+      pevent->setTOFgeometry(mBTofGeom);
+      LOG_INFO << "StPeCMaker make: using both StMuDst and StEvent  mBTofGeom after set  "  << mBTofGeom<<endm;
+
+      ok = pevent->fill(event, muDst);        
    }   
    
 //    //Fill geant simulations             //RD
@@ -312,10 +345,14 @@ Int_t StPeCMaker::Make()
 //    else       ok = pevent->fill(muDst);
 //    if (event) ok = pevent->fill(event, muDst);  //RD 
    //   ok = pevent->fill(muDst); // 11-DEC-2011 for embedding work
-//    if ( !ok && returnValue>0) {    // || geantBranch  ) {  RD 15-SEP
+   LOG_INFO << "ok returnValue " <<ok<<"  "<<returnValue<< endm;
+
+
+   if ( !ok && returnValue>0) {    // || geantBranch  ) {  RD 15-SEP
 //    if ( returnValue>0) {    // || geantBranch  ) {  RD 15-SEP  //25MAR2013 to read pp fast offline  //turn off trigger check
-     //LOG_INFO << "Fill Event to Tree!**********************" << endm;
+     LOG_INFO << "Fill Event to Tree!**********************" << endm;
      uDstTree->Fill();
+   }
 
      
      //      //Select only 4 prong candidates
