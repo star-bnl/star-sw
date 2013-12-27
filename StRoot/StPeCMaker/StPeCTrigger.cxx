@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.13 2013/10/28 14:18:16 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.14 2013/12/27 20:47:28 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.14  2013/12/27 20:47:28  ramdebbe
+// added a set method to select a trigger
+//
 // Revision 1.13  2013/10/28 14:18:16  ramdebbe
 // added arrays to handle bbc and zdc information
 //
@@ -84,7 +87,7 @@ void StPeCTrigger::clear() {
    ctbSlats->Clear();
 }
 
-Int_t StPeCTrigger::process(StEvent *event)
+Int_t StPeCTrigger::process(StEvent *event, string triggerSel)
 {
   unsigned int i,j;
   const StTriggerId * ttid;
@@ -413,7 +416,7 @@ Int_t StPeCTrigger::process(StEvent *event)
 }
 
 
-Int_t StPeCTrigger::process(StMuDst* mudst)
+Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 {
   unsigned int i,j;
   //make sure trg_2001 is reset before possible use
@@ -453,38 +456,36 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
     std::vector<unsigned int>::iterator iiter;
 //     for(iiter=triggerIds.begin(); iiter!=triggerIds.end(); iiter++) {
 //     }
-  
-//     trg_3000     =ttid.isTrigger(260022);  //ZDC_monitor  run10  this two lines are used for trigger efficiency study Comment the 8 lines that follow
-//     trg_3001     =ttid.isTrigger(260750);  //UPC_Main     run10
+    if(triggerSel=="ZDC_Monitor"){
+      trg_3000     =ttid.isTrigger(260022);  //ZDC_monitor  run10  this two lines are used for trigger efficiency study Comment the 8 lines that follow
+      trg_3001     =ttid.isTrigger(260750);  //UPC_Main     run10
+      LOG_INFO << "StPeCTrigger::value of trg_3000 ZDC_monitor ---------- " <<trg_3000<< endm;
+      LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Main ---------- " <<trg_3001<< endm;
+    }
+    if(triggerSel=="UPC_Main"){
+      if(runN>11011035 && runN<= 11039028) trg_3000     =ttid.isTrigger(1);       //run10 UPC Main unofficial
+      if(runN>11011035 && runN<= 11039028) trg_3001     =ttid.isTrigger(11);      //run10 UPC Topo not present
+      if(runN>11039028 && runN<= 11077018) trg_3000     =ttid.isTrigger(260750);  //run10 UPC Main official 260750
+      if(runN>11050046 && runN<= 11077018) trg_3001     =ttid.isTrigger(1);      //run10 UPC Topo was never official
 
-    if(runN>11011035 && runN<= 11039028) trg_3000     =ttid.isTrigger(1);       //run10 UPC Main unofficial
-    if(runN>11011035 && runN<= 11039028) trg_3001     =ttid.isTrigger(11);      //run10 UPC Topo not present
-    if(runN>11039028 && runN<= 11077018) trg_3000     =ttid.isTrigger(260750);  //run10 UPC Main official 260750
-    if(runN>11050046 && runN<= 11077018) trg_3001     =ttid.isTrigger(1);      //run10 UPC Topo was never official
+      if(runN>12130030 && runN<= 12146002) trg_3000     =ttid.isTrigger(4);       //run11 UPC Main unofficial
+      if(runN>12130030 && runN<= 12179050) trg_3001     =ttid.isTrigger(11);      //run11 UPC Topo was never official
+      if(runN>12146002 && runN<= 12152016) trg_3000     =ttid.isTrigger(350007);  //run11 UPC Main official
+      if(runN>12152016 && runN<= 12179050) trg_3000     =ttid.isTrigger(350017);  //run11 UPC Main official
 
-    if(runN>12130030 && runN<= 12146002) trg_3000     =ttid.isTrigger(4);       //run11 UPC Main unofficial
-    if(runN>12130030 && runN<= 12179050) trg_3001     =ttid.isTrigger(11);      //run11 UPC Topo was never official
-    if(runN>12146002 && runN<= 12152016) trg_3000     =ttid.isTrigger(350007);  //run11 UPC Main official
-    if(runN>12152016 && runN<= 12179050) trg_3000     =ttid.isTrigger(350017);  //run11 UPC Main official
-
-    if(runN>13116029 && runN<= 13116046) trg_3000     =ttid.isTrigger(1);       //run12 UU UPC Main unofficial
-    if(runN>13110010 && runN<= 13116042) trg_3001     =ttid.isTrigger(2);       //run12 UU UPC Topo
-    if(runN>13121046 && runN<= 13125024) trg_3001     =ttid.isTrigger(1);       //run12 UU UPC Topo
-    if(runN>13125024 && runN<= 13130033) trg_3001     =ttid.isTrigger(400604);  //run12 UU UPC Topo
-    if(runN>13131006 && runN<= 13136015) trg_3001     =ttid.isTrigger(400614);      //run12 UU UPC Topo
-    if(runN>13116047 && runN<= 13117027) trg_3000     =ttid.isTrigger(400601);  //run12 UU UPC Main official
-    if(runN>13117027 && runN<= 13117036) trg_3000     =ttid.isTrigger(400611);  //run12 UU UPC Main official
-    if(runN>13117036 && runN<= 13118017) trg_3000     =ttid.isTrigger(400621);  //run12 UU UPC Main official
-    if(runN>13118017 && runN<= 13130033) trg_3000     =ttid.isTrigger(400631);  //run12 UU UPC Main official
-    if(runN>13131006 && runN<= 13136015) trg_3000     =ttid.isTrigger(400641);  //run12 UU UPC Main official
-
-
-
-//     LOG_INFO << "StPeCTrigger::value of trg_3000 ZDC_monitor ---------- " <<trg_3000<< endm;
-//     LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Main ---------- " <<trg_3001<< endm;
-    LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_Main ---------- " <<trg_3000<< endm;
-    LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Topo ---------- " <<trg_3001<< endm;
-    
+      if(runN>13116029 && runN<= 13116046) trg_3000     =ttid.isTrigger(1);       //run12 UU UPC Main unofficial
+      if(runN>13110010 && runN<= 13116042) trg_3001     =ttid.isTrigger(2);       //run12 UU UPC Topo
+      if(runN>13121046 && runN<= 13125024) trg_3001     =ttid.isTrigger(1);       //run12 UU UPC Topo
+      if(runN>13125024 && runN<= 13130033) trg_3001     =ttid.isTrigger(400604);  //run12 UU UPC Topo
+      if(runN>13131006 && runN<= 13136015) trg_3001     =ttid.isTrigger(400614);      //run12 UU UPC Topo
+      if(runN>13116047 && runN<= 13117027) trg_3000     =ttid.isTrigger(400601);  //run12 UU UPC Main official
+      if(runN>13117027 && runN<= 13117036) trg_3000     =ttid.isTrigger(400611);  //run12 UU UPC Main official
+      if(runN>13117036 && runN<= 13118017) trg_3000     =ttid.isTrigger(400621);  //run12 UU UPC Main official
+      if(runN>13118017 && runN<= 13130033) trg_3000     =ttid.isTrigger(400631);  //run12 UU UPC Main official
+      if(runN>13131006 && runN<= 13136015) trg_3000     =ttid.isTrigger(400641);  //run12 UU UPC Main official
+      LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_Main ---------- " <<trg_3000<< endm;
+      LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Topo ---------- " <<trg_3001<< endm;
+    }
 
     lastDSM0 = trigData->lastDSM(0);
     lastDSM1 = trigData->lastDSM(1);
@@ -649,6 +650,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
      assert(V);
      mudst->setVertexIndex(verti);
      const StThreeVectorF &r=V->position();
+     LOG_INFO <<" number of Tracks used "<<V->nTracksUsed()<<"  number TOF hits matched "<<V->nBTOFMatch()<<" number all tracks "<<V->noTracks() <<endm;
 //      cout<<" z vertex "<<r.z()<<endl;
    }
 //   StThreeVectorF  vtx = vertex->position(); 
@@ -710,7 +712,8 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
   unsigned short tofMult;
   tofMult = trigData->tofMultiplicity();
   nBtofTriggerHits = tofMult;
-  nBTOFhits =  mudst->numberOfBTofHit();;
+  nBTOFhits =  mudst->numberOfBTofHit();
+  nPrimaryTracks = mudst->numberOfPrimaryTracks();
   
   double leadingT ;
   for(int itof=0;itof<tofMult;itof++) {
