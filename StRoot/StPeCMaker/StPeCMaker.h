@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.18 2013/01/24 15:43:14 ramdebbe Exp $
+// $Id: StPeCMaker.h,v 1.19 2013/12/27 16:45:16 ramdebbe Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.19  2013/12/27 16:45:16  ramdebbe
+// added extrapolation of tracks to TOF, StBTofGeometry and St_geant_Maker with //!
+//
 // Revision 1.18  2013/01/24 15:43:14  ramdebbe
 // added more flags to choose input or output tracks tof etc.
 //
@@ -77,11 +80,13 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"
-
+#include "StBTofUtil/StBTofGeometry.h"
+#include "St_geant_Maker/St_geant_Maker.h"
 
 
 class StEvent;
 class StPeCEvent;
+class StPeCPair;
 class TH1F;
 class TH2F;
 class StMuDst;
@@ -112,6 +117,8 @@ public:
 	void setReadBothInputs ( Bool_t includeBoth = kFALSE )    { readStMuDst_and_StEvent = includeBoth ; } ;
 	void setOutputPerRun ( Int_t in = 1 ) { outputPerRun = in ; } ;
 
+	void setStarHall ( TVolume * pointer ) { mstarHall = pointer ; } ;
+
 	TString treeFileName ;
 	Bool_t   useBemc;     //if TRUE BEMC information is written to ntuple
 	Bool_t   useTOF;      //if TRUE TOF information is written to ntuple
@@ -121,6 +128,11 @@ public:
 	Bool_t readStEvent;               //if TRUE will work with information passed in StEvent format
 	Bool_t readStMuDst_and_StEvent;   //if TRUE will work with information passed in both StMuDst and StEvent format
 
+
+	void setTriggerOfInterest ( const char * selectTrigger = "UPC_Main" ) { triggerChoice = selectTrigger ; } ;
+
+	friend class StPeCPair;
+
 protected:
 	TFile* m_outfile;
 
@@ -129,6 +141,9 @@ protected:
 
 	StPeCEvent* pevent;
 	StPeCTrigger* trigger;
+	StBTofGeometry *                mBTofGeom; //! 
+	St_geant_Maker *                geantU; //!    
+	TVolume        *                mstarHall;
 	StPeCGeant* geant;
  
 
@@ -140,6 +155,7 @@ protected:
 
 private:
 	StMuDst* muDst;
+	string triggerChoice;             // default is UPC_Main,  it will recognize UPC_Topo, ZDC_Main
 
 
 	Int_t Cuts(StEvent* event, StPeCEvent* pevent);
@@ -147,7 +163,7 @@ private:
 	Int_t triggerSim(StEvent*);
 
 	virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.18 2013/01/24 15:43:14 ramdebbe Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.19 2013/12/27 16:45:16 ramdebbe Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 	ClassDef(StPeCMaker,2)
 };
