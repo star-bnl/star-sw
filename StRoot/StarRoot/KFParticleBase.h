@@ -227,8 +227,8 @@ class KFParticleBase : public TObject {
   void  GetMeasurement( const Double_t XYZ[], Double_t m[], Double_t V[] ) const ;
   
   Char_t     fBeg[1];        //!
-  Short_t    fID;
-  Short_t    fParentID;
+  Int_t      fID;
+  Int_t      fParentID;
   Double32_t fP[8];  //  Main particle parameters {X,Y,Z,Px,Py,Pz,E,S[=DecayLength/P]}
   Double32_t fC[36]; //  Low-triangle covariance matrix of fP
   Short_t    fQ;     //  Particle charge 
@@ -241,9 +241,9 @@ class KFParticleBase : public TObject {
   Double32_t fVtxGuess[3];  //!  Guess for the position of the decay vertex ( used for linearisation of equations )
   
   Bool_t     fIsLinearized;   //!  Flag shows that the guess is present
-  Short_t    fIdTruth; // MC track id 
-  Short_t    fQuality; // quality of this information (percentage of hits coming from the above MC track)
-  Short_t    fIdParentMcVx; // for track and McTrack for vertex
+  UShort_t   fIdTruth; // MC track id 
+  UShort_t   fQuality; // quality of this information (percentage of hits coming from the above MC track)
+  UShort_t   fIdParentMcVx; // for track and McTrack for vertex
   Short_t    fPDG;     // pdg hypothesis
   Char_t     fEnd[1];        //!
   ClassDef(KFParticleBase,3)			    
