@@ -246,7 +246,7 @@ class KFParticleBase : public TObject {
   UShort_t   fIdParentMcVx; // for track and McTrack for vertex
   Short_t    fPDG;     // pdg hypothesis
   Char_t     fEnd[1];        //!
-  ClassDef(KFParticleBase,3)			    
+  ClassDef(KFParticleBase,4)			    
 };
 std::ostream&  operator<<(std::ostream& os, KFParticleBase const & particle);
 #endif 
