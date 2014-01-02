@@ -74,18 +74,18 @@ ClassImp(StSpaceChargeEbyEMaker)
 //_____________________________________________________________________________
 StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     event(0),
-    Calibmode(kFALSE), PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE),
+    Calibmode(kFALSE), PrePassmode(kFALSE), PrePassdone(kFALSE),
+    QAmode(kFALSE), TrackInfomode(kFALSE), Asymmode(kFALSE),
     doNtuple(kFALSE), doReset(kTRUE), doGaps(kFALSE),
     inGapRow(0),
     vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5), minTpcHits(25),
     reqEmcMatch(kFALSE), reqTofMatch(kFALSE), reqEmcOrTofMatch(kTRUE),
-    m_ExB(0), SCcorrection(0), GLcorrection(0),
+    m_ExB(0), SCcorrection(0), GLcorrection(0), SCEWRatio(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
     dcahist(0), dcahistN(0), dcahistP(0), dcahistE(0), dcahistW(0),
     gapZhist(0), gapZhistneg(0), gapZhistpos(0), cutshist(0), ntup(0) {
 
-  HN=96;  // max events used, cannot exceed 96 used in header file
   MINTRACKS=1500;
   //SCALER_ERROR = 0.0006; // by eye from hist: SCvsZDCEpW.gif (liberal)
   SCALER_ERROR = 0.0007; // by RMS from hist: SCvsZDCX.gif (liberal)
@@ -97,25 +97,39 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
            // Present uncetainties with scalers demands greater tolerance
 
   runid = 0;
-  memset(evts,0,HN*sizeof(int));
-  memset(times,0,HN*sizeof(int));
-  memset(evtstbin,0,HN*sizeof(float));
+  memset(evts,0,SCHN*sizeof(int));
+  memset(times,0,SCHN*sizeof(int));
+  memset(evtstbin,0,SCHN*sizeof(float));
   evtsnow = 0;
 
   SetMode(0); // default is mode 0 (no QA, no PrePass)
   //DoQAmode(); // For testing
 
-  schist = new TH1F("SpCh","Space Charge",SCN1,SCL,SCH);
-  schist->SetDirectory(0);
-  for (int i=0;i<HN;i++){
-    schists[i] = new TH1F(Form("SpCh%d",i),"Space Charge",SCN1,SCL,SCH);
-    schists[i]->SetDirectory(0);
+  schist  = new TH1F("SpCh","Space Charge"      ,SCN1,SCL,SCH);
+  schistE = new TH1F("SpChE","Space Charge East",SCN1,SCL,SCH);
+  schistW = new TH1F("SpChW","Space Charge West",SCN1,SCL,SCH);
+  schist ->SetDirectory(0);
+  schistE->SetDirectory(0);
+  schistW->SetDirectory(0);
+  for (int i=0;i<SCHN;i++){
+    schists[i]  = new TH1F(Form("SpCh%d" ,i),"Space Charge"     ,SCN1,SCL,SCH);
+    schistsE[i] = new TH1F(Form("SpChE%d",i),"Space Charge East",SCN1,SCL,SCH);
+    schistsW[i] = new TH1F(Form("SpChW%d",i),"Space Charge West",SCN1,SCL,SCH);
+    schists[i] ->SetDirectory(0);
+    schistsE[i]->SetDirectory(0);
+    schistsW[i]->SetDirectory(0);
   }
 }
 //_____________________________________________________________________________
 StSpaceChargeEbyEMaker::~StSpaceChargeEbyEMaker() {
   delete schist;
-  for (int i=0;i<HN;i++) delete schists[i];
+  delete schistE;
+  delete schistW;
+  for (int i=0;i<SCHN;i++) {
+    delete schists[i];
+    delete schistsE[i];
+    delete schistsW[i];
+  }
 }
 //_____________________________________________________________________________
 Int_t StSpaceChargeEbyEMaker::Finish() {
@@ -137,15 +151,22 @@ Int_t StSpaceChargeEbyEMaker::Finish() {
 Int_t StSpaceChargeEbyEMaker::Init() {
 
   // Use mode to set switches:
-  switch (GetMode()) {
+  // Set mode in BFC chain by attribute goptSCE100XXX, where
+  //   XXX is the mode number, e.g. goptSCE100050 sets mode 50
+  Int_t attrMode = IAttr(".gopt.sce");
+  attrMode = (attrMode ? attrMode%1000 : GetMode());
+  gMessMgr->Info() << "StSpaceChargeEbyEMaker mode: " << attrMode << endm;
+  switch (attrMode) {
     case (1) : DoQAmode(); break;
     case (2) : DoPrePassmode(); break;
     case (3) : DoPrePassmode(); DoQAmode();  break;
     case (4) : DoCalib();  break;
+    case (5) : DoCalib(); DoAsym(); break;
     case (10): DoNtuple(); break;
     case (11): DoNtuple(); DontReset(); break;
     case (12): DoNtuple(); DoQAmode(); break;
     case (13): DoNtuple(); DontReset(); DoQAmode(); break;
+    case (50): DoTrackInfo(); break;
     default  : {}
   }
 
@@ -154,11 +175,13 @@ Int_t StSpaceChargeEbyEMaker::Init() {
   evt=0;
   oldevt=1;
   lastsc=0.;
+  lastEWRatio=0.;
   curhist=0;
   lasttime=0;
   did_auto=kTRUE;
   InitQAHists();
   if (QAmode) gMessMgr->Info("StSpaceChargeEbyEMaker: Initializing");
+  if (TrackInfomode) gMessMgr->Info("StSpaceChargeEbyEMaker: Track Info mode");
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -178,6 +201,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     m_ExB = new StMagUtilities(gStTpcDb,RunLog,(kSpaceChargeR2 | kGridLeak));
   }
   lastsc = m_ExB->CurrentSpaceChargeR2();
+  lastEWRatio = m_ExB->CurrentSpaceChargeEWRatio();
 
   // Get StEvent and related info, determine if things are OK
   event = (StEvent*) GetInputDS("StEvent");
@@ -250,7 +274,9 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   }
   if (doReset) {
     if (evt>1) curhist = imodHN(curhist+1);
-    schists[curhist]->Reset();
+    schists[curhist] ->Reset();
+    schistsE[curhist]->Reset();
+    schistsW[curhist]->Reset();
     if (doGaps) {
       gapZhist->Reset();
       gapZhistpos->Reset();
@@ -269,10 +295,13 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   if (!SCcorrection) {
     SCcorrection = new TNamed("SCcorrection",
       (St_spaceChargeCorR2C::instance()->getSpaceChargeString()).Data());
+    SCEWRatio = new TNamed("SCEWRatio",Form("%f",
+      St_spaceChargeCorR2C::instance()->getEWRatio()));
     GLcorrection = new TNamed("GLcorrection",Form("%f",
       St_tpcGridLeakC::instance()->MiddlGLStrength()));
     gMessMgr->Info() << "Using the following corrections:"  << endm;
     gMessMgr->Info() << "sc = " << SCcorrection->GetTitle() << endm;
+    gMessMgr->Info() << "E/W= " << SCEWRatio->GetTitle()    << endm;
     gMessMgr->Info() << "GL = " << GLcorrection->GetTitle() << endm;
   }
 
@@ -479,7 +508,14 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           }
           if (PCT) continue; // Track has post-crossing hits
           if (QAmode) cutshist->Fill(32);
-          
+
+          if (TrackInfomode) {
+            LOG_INFO << Form("GOODTRACK %d %d %6.2f %9.4f %8.3f %8.4f %8.4f %6.4f %6.4f %d",
+              runid,event->id(),vtxPos.z(),ch/oldPt,eta,phi,DCA2,DCAerr,
+              pvtx->positionError().perp(),hits.size()) << endm;
+            continue;
+          }
+
           Float_t space = 10000.;
           Int_t predictFailed = m_ExB->PredictSpaceChargeDistortion(ch,oldPt,vtxPos.z(),
 	    eta,phi,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space);
@@ -489,7 +525,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           }
           if (QAmode) cutshist->Fill(33);
 
+          TH1F** aschists = (e_or_w > 0 ? schistsW :
+                            (e_or_w < 0 ? schistsE : 0));
+
           Double_t spaceErr = TMath::Abs(space*DCAerr/DCA2);
+          Float_t spaceEW = space + lastsc * (e_or_w < 0 ? lastEWRatio : 1.0);
 	  space += lastsc;  // Assumes additive linearity of space charge!
           if (spaceErr > 0) {
             // Fill SpaceCharge accounting for prediction error
@@ -501,10 +541,22 @@ Int_t StSpaceChargeEbyEMaker::Make() {
                 schists[curhist]->Fill(sx,ga1.Eval(sx));
               }
             }
+            // Now for east/west
+            if (aschists) {
+              ga1.SetParameters(SCX/spaceErr,spaceEW,spaceErr);
+              for (Int_t si=1;si<=SCN1;si++) {
+                Double_t sx = aschists[curhist]->GetBinCenter(si);
+                if (TMath::Abs((sx-spaceEW)/spaceErr) < 4.5) {
+                  // only within +/-4.5 sigma
+                  aschists[curhist]->Fill(sx,ga1.Eval(sx));
+                }
+              }
+            }
           } else {
             schists[curhist]->Fill(space);
+            if (aschists) aschists[curhist]->Fill(spaceEW);
           }
-          FillQAHists(DCA2,space,ch,hh,e_or_w);
+          FillQAHists(DCA2,space,spaceEW,ch,hh,e_or_w);
 
 
           if ((doGaps) &&
@@ -519,18 +571,20 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   if (QAmode) cutshist->Fill(9);
 
 
-  ntrks[curhist] = schists[curhist]->Integral();
+  ntrks[curhist]  = schists[curhist] ->Integral();
+  ntrksE[curhist] = schistsE[curhist]->Integral();
+  ntrksW[curhist] = schistsW[curhist]->Integral();
 
   // Wrap it up and make a decision
   int result = DecideSpaceCharge(thistime);
 
   if (doGaps) DetermineGaps();
   if (doNtuple) {
-      static float X[48];
+      static float X[51];
       static float ntent = 0.0;
       static float nttrk = 0.0;
 
-      if (ntent == 0.0) for (i=0; i<45; i++) X[i] = 0.0;
+      if (ntent == 0.0) memset(X,0,51*sizeof(float));
       ntent++;  // # entries since last reset, including this one
       float last_nttrk = nttrk;
       nttrk = ntrks[curhist];  // # tracks since last reset, including these
@@ -562,8 +616,6 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[13] = runinfo->magneticField();
       X[14] = event->runId();
       X[15] = event->id();
-      //X[16] = sceast;
-      //X[17] = scwest;
       if ((QAmode) && (evt <= EVN)) {
         X[16] = FindPeak(dcahistN->ProjectionZ("_dnz",fbin,evt,1,PHN),ee);
         X[17] = FindPeak(dcahistP->ProjectionZ("_dpz",fbin,evt,1,PHN),ee);
@@ -616,6 +668,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[46] = s0*X[46] + s1*m_ExB->GetConst_0();
       X[47] = s0*X[47] + s1*m_ExB->GetConst_1();
 
+      // SpaceCharge east/west asymmetry
+      X[48] = scE;
+      X[49] = scW;
+      X[50] = s0*X[50] + s1*lastEWRatio*runinfo->spaceCharge();
+
       // In calib mode, only fill when doReset (we found an sc)
       if (doReset || !Calibmode) ntup->Fill(X);
 
@@ -633,7 +690,7 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
   // curhist has only this event
   // curhist-1 has past two events...
   // curhist-x has past (x+1) events
-  // curhist-(HN-1) == curhist+1 has past HN events
+  // curhist-(SCHN-1) == curhist+1 has past SCHN events
 
   Bool_t QAout = QAmode || PrePassmode;
   Bool_t do_auto = kTRUE;
@@ -658,29 +715,46 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
     gMessMgr->Info() << "curhist = "
       << curhist << endm;
   }
-  float ntrkstot = 0; // running sum using oldness scale factor
+  float ntrkstot  = 0; // running sum using oldness scale factor
+  float ntrkstotE = 0;
+  float ntrkstotW = 0;
   Bool_t decideFromData = ((PrePassmode) || (Calibmode) || (lasttime==0) || (timedif < 30));
   if (decideFromData) {
   
     int isc;
     static int iscMax = 1;  // use only one hist for calib mode, and...
-    if (!Calibmode && iscMax<HN) iscMax = curhist+1; // don't use uninitialized
+    if (!Calibmode && iscMax<SCHN) iscMax = curhist+1; // don't use uninitialized
     for (isc=0; isc<iscMax; isc++) {
       int i = imodHN(curhist-isc);
-      ntrkstot += ntrks[i] * oldness(i);
+      ntrkstot  += ntrks[i]  * oldness(i);
+      ntrkstotE += ntrksE[i] * oldness(i);
+      ntrkstotW += ntrksW[i] * oldness(i);
       if (QAout) {
 	if (!isc) gMessMgr->Info("Building with: i, ni, oi, nt:");
 	gMessMgr->Info() << "Building with: " << i << ", "
-	  << ntrks[i] << ", " << oldness(i) << ", " << ntrkstot << endm;
+	  << ntrks[i]  << ", " << oldness(i) << ", " << ntrkstot << endm;
+	gMessMgr->Info() << "....east with: " << i << ", "
+	  << ntrksE[i] << ", " << oldness(i) << ", " << ntrkstotE << endm;
+	gMessMgr->Info() << "....west with: " << i << ", "
+	  << ntrksW[i] << ", " << oldness(i) << ", " << ntrkstotW << endm;
       }
 
       // Too little data collected? Keep trying...
-      few_stats = ntrkstot < MINTRACKS;
+      few_stats = (Asymmode ?
+                   (ntrkstotE < MINTRACKS || ntrkstotW < MINTRACKS) :
+                   (ntrkstot < MINTRACKS) );
       if (!few_stats) {
-	BuildHist(i);
-	FindSpaceCharge();
-	if (QAout) gMessMgr->Info()
-	  << "sc = " << sc << " +/- " << esc << endm;
+	BuildHist(i,schist ,schists );
+	BuildHist(i,schistE,schistsE);
+	BuildHist(i,schistW,schistsW);
+	FindSpaceCharge(schist ,sc ,esc );
+	FindSpaceCharge(schistE,scE,escE);
+	FindSpaceCharge(schistW,scW,escW);
+	if (QAout) {
+          gMessMgr->Info() << "sc  = " << sc  << " +/- " << esc  << endm;
+          gMessMgr->Info() << "scE = " << scE << " +/- " << escE << endm;
+          gMessMgr->Info() << "scW = " << scW << " +/- " << escW << endm;
+        }
 	large_err = (esc == 0) || (esc > SCALER_ERROR);
 	if (!large_err) {
 	  if (PrePassmode) { do_auto=kFALSE; break; }
@@ -699,9 +773,9 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
       // tough to know - allow for now as of 11 Jan 2008
       // if (evts[i] <= oldevt)  break;
     }
-    if (QAout && (isc == HN)) gMessMgr->Info()
+    if (QAout && (isc == SCHN)) gMessMgr->Info()
       << "STORED DATA EXHAUSTED: "
-      << HN << " events" << endm;
+      << SCHN << " events" << endm;
   }
 
   did_auto = do_auto;
@@ -714,7 +788,8 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
     if (QAout && decideFromData) {
       if (few_stats) gMessMgr->Info()
         << "(RECENT) STATS TOO FEW: "
-        << ntrkstot << " (" << MINTRACKS << ")" << endm;
+        << ntrkstot << " / " << ntrkstotE << " / " << ntrkstotW
+        << " (" << MINTRACKS << ")" << endm;
       else if (large_err) gMessMgr->Info()
         << "FIT ERROR TOO LARGE: "
         << esc << " (" << SCALER_ERROR << ")" << endm;
@@ -738,15 +813,15 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
       doReset = kTRUE;
       return kStStop; // We're happy? Let's stop!
     }
-    else m_ExB->ManualSpaceChargeR2(sc,m_ExB->CurrentSpaceChargeEWRatio());
+    else m_ExB->ManualSpaceChargeR2(sc,lastEWRatio);
   }
   return kStOk;
 }
 //_____________________________________________________________________________
-void StSpaceChargeEbyEMaker::FindSpaceCharge() {
-  esc = 0.;
-  double res = FindPeak(schist,esc);
-  sc = (res > -500. ? res : 0.0);
+void StSpaceChargeEbyEMaker::FindSpaceCharge(TH1F* aschist, float& asc, float& aesc) {
+  aesc = 0.;
+  double res = FindPeak(aschist,aesc);
+  asc = (res > -500. ? res : 0.0);
 }
 //_____________________________________________________________________________
 double StSpaceChargeEbyEMaker::FindPeak(TH1* hist,float& pkwidth) {
@@ -768,8 +843,10 @@ double StSpaceChargeEbyEMaker::FindPeak(TH1* hist,float& pkwidth) {
   ga1.SetRange(lr,ur);
   ga1.SetParLimits(0,lp,up); // Loglikelihood only works with positive functions
   ga1.SetParLimits(2,lw,uw); // To help the fit
+  hist->Sumw2();
   int fitResult = hist->Fit(&ga1,
     (gROOT->GetVersionInt() >= 53000 ? "WLRB0Q" : "LLRB0Q")); // Loglikelihood options changed!
+  hist->Sumw2(kFALSE);
   ga1.ReleaseParameter(0);
   ga1.ReleaseParameter(2);
   if (fitResult != 0) return -999.;
@@ -837,7 +914,7 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
   }
 
   if (doNtuple) ntup = new TNtuple("SC","Space Charge",
-    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:ugl:zdcc:bbcc:vpdx:vpdw:vpde:zdcxnk:zdcwnk:zdcenk:const0:const1");
+    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:ugl:zdcc:bbcc:vpdx:vpdw:vpde:zdcxnk:zdcwnk:zdcenk:const0:const1:sce:scw:usce");
 
   if (doGaps) {
     gapZhist = new TH2F("Gaps","Gaps",GN,GL,GH,GZN,GZL,GZH);
@@ -896,6 +973,7 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
   if (doNtuple) ntup->Write();
   if (SCcorrection) {
     SCcorrection->Write();
+    SCEWRatio->Write();
     GLcorrection->Write();
   }
   ff.Close();
@@ -906,8 +984,8 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
 
 }
 //_____________________________________________________________________________
-void StSpaceChargeEbyEMaker::FillQAHists(float DCA, float space, int ch,
-					 StPhysicalHelixD& hh, int e_or_w) {
+void StSpaceChargeEbyEMaker::FillQAHists(float DCA, float space, float spaceEW,
+                                         int ch, StPhysicalHelixD& hh, int e_or_w) {
   // Find a "Phi" for the track
   pairD pls = hh.pathLength(97.0);
   double pl = pls.first;
@@ -935,10 +1013,10 @@ void StSpaceChargeEbyEMaker::FillQAHists(float DCA, float space, int ch,
       dcahistN->Fill(evtn,Phi,DCA);
     }
     if (e_or_w > 0) {
-      myhistW->Fill(evtn,Phi,space);
+      myhistW->Fill(evtn,Phi,spaceEW);
       dcahistW->Fill(evtn,Phi,DCA);
     } else if (e_or_w < 0) {
-      myhistE->Fill(evtn,Phi,space);
+      myhistE->Fill(evtn,Phi,spaceEW);
       dcahistE->Fill(evtn,Phi,DCA);
     }
     if ((e_or_w != 0) && (TMath::Abs(hh.dipAngle()) < 0.05)) dczhist->Fill(hh_at_pl.z(),DCA);
@@ -947,7 +1025,7 @@ void StSpaceChargeEbyEMaker::FillQAHists(float DCA, float space, int ch,
 //_____________________________________________________________________________
 int StSpaceChargeEbyEMaker::imodHN(int i) {
   // Keep index in bounds of circular queue
-  return ( i >= HN ? imodHN(i-HN) : (i < 0 ? imodHN(i+HN) : i) );
+  return ( i >= SCHN ? imodHN(i-SCHN) : (i < 0 ? imodHN(i+SCHN) : i) );
 }
 //_____________________________________________________________________________
 float StSpaceChargeEbyEMaker::oldness(int i, int j) {
@@ -976,14 +1054,14 @@ float StSpaceChargeEbyEMaker::oldness(int i, int j) {
   return s;
 }
 //_____________________________________________________________________________
-void StSpaceChargeEbyEMaker::BuildHist(int i) {
+void StSpaceChargeEbyEMaker::BuildHist(int i, TH1F* aschist, TH1F** aschists) {
   // Build up one histogram from several events
-  schist->Reset();
+  aschist->Reset();
   int isc = curhist;
-  schist->Add(schists[isc],1.0);
+  aschist->Add(aschists[isc],1.0);
   while (isc != i) {
     isc = imodHN(isc-1);
-    schist->Add(schists[isc],oldness(isc));
+    aschist->Add(aschists[isc],oldness(isc));
   }
 }
 //_____________________________________________________________________________
@@ -1263,8 +1341,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.52 2013/09/25 20:55:51 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.53 2014/01/02 20:54:28 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.53  2014/01/02 20:54:28  genevb
+// TrackInfomode, and Basic E/W asymmetry functionality
+//
 // Revision 1.52  2013/09/25 20:55:51  genevb
 // Allow use of multiple PPVF vertices, introduce EmcOrTofMatch, keep track of Predict...() cuts
 //
