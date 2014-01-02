@@ -24,6 +24,8 @@ class St_spaceChargeCor;
 class StRunInfo;
 class StEvent;
 class StTrack;
+const int SCHN = 96;
+
 
 class StSpaceChargeEbyEMaker : public StMaker {
  
@@ -42,6 +44,8 @@ public:
           void   DontReset() { doReset = kFALSE; }
           void   DoCalib() { Calibmode = kTRUE; DoQAmode(); DoNtuple(); }
           float  EvalCalib(TDirectory* hdir=0);
+          void   DoTrackInfo() { TrackInfomode = kTRUE; }
+          void   DoAsym() { Asymmode = kTRUE; }
 
           void   setVtxEmcMatch(UInt_t x) { vtxEmcMatch = x; }
           void   setVtxTofMatch(UInt_t x) { vtxTofMatch = x; }
@@ -56,7 +60,7 @@ public:
             { reqEmcOrTofMatch = match; reqEmcMatch = kFALSE; reqTofMatch = kFALSE; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.15 2013/09/25 20:55:51 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.16 2014/01/02 20:54:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -68,7 +72,12 @@ protected:
   int lasttime;
   float sc;
   float esc;
+  float scE;
+  float escE;
+  float scW;
+  float escW;
   float lastsc;
+  float lastEWRatio;
   int oldevt;
   StRunInfo* runinfo;
   Bool_t did_auto;
@@ -76,6 +85,8 @@ protected:
   Bool_t PrePassmode;
   Bool_t PrePassdone;
   Bool_t QAmode;
+  Bool_t TrackInfomode;
+  Bool_t Asymmode;
   Bool_t doNtuple;
   Bool_t doReset;
   Bool_t doGaps;
@@ -88,29 +99,35 @@ protected:
   Bool_t reqTofMatch;
   Bool_t reqEmcOrTofMatch;
 
-  int HN;
   float MINTRACKS;
   float MAXDIFFE;
   float MAXDIFFA;
   float SCALER_ERROR;
 
   StMagUtilities* m_ExB;     //!
-  void BuildHist(int i);
-  void FindSpaceCharge();
+  void BuildHist(int i, TH1F* aschist, TH1F** aschists);
+  void FindSpaceCharge(TH1F* aschist, float& asc, float& aesc);
   double FindPeak(TH1*,float&);
   float oldness(int i,int j=-1);
   int imodHN(int i);
   float FakeAutoSpaceCharge();
 
   TH1F* schist;
-  TH1F* schists[96];
-  int times[96];
-  float ntrks[96];
-  int evts[96];
-  float evtstbin[96];
+  TH1F* schistE;
+  TH1F* schistW;
+  TH1F* schists[SCHN];
+  TH1F* schistsE[SCHN];
+  TH1F* schistsW[SCHN];
+  int times[SCHN];
+  float ntrks[SCHN];
+  float ntrksE[SCHN];
+  float ntrksW[SCHN];
+  int evts[SCHN];
+  float evtstbin[SCHN];
   float evtsnow;
   TNamed* SCcorrection;
   TNamed* GLcorrection;
+  TNamed* SCEWRatio;
   
   // PrePass info
   TString tabname;
@@ -166,7 +183,7 @@ protected:
 
   void InitQAHists();
   void WriteQAHists();
-  void FillQAHists(float,float,int,StPhysicalHelixD&,int);
+  void FillQAHists(float,float,float,int,StPhysicalHelixD&,int);
   void FillGapHists(StTrack*,StPhysicalHelixD&,int,int);
   void DetermineGaps();
   void DetermineGapHelper(TH2F*,float&,float&,float&);
@@ -178,8 +195,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.15 2013/09/25 20:55:51 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.16 2014/01/02 20:54:28 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.16  2014/01/02 20:54:28  genevb
+// TrackInfomode, and Basic E/W asymmetry functionality
+//
 // Revision 1.15  2013/09/25 20:55:51  genevb
 // Allow use of multiple PPVF vertices, introduce EmcOrTofMatch, keep track of Predict...() cuts
 //
