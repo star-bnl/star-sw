@@ -19,6 +19,7 @@ typedef unsigned char u_char;
 #define CMD2_FUTURE_DATA 0x07
 #define CMD2_FUTURE_RELEASE 0x08
 #define CMD2_EMULATE_EVENT 0x09
+#define CMD2_L4_DATA  0x10
 
 // set by daq100decision
 #define EVBFLAG_RAW_DATA (1<<0)
