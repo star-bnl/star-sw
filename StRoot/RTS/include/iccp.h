@@ -353,6 +353,9 @@ struct ic_gl3_announce_data
 struct ic_l4_startevent {
     uint sz;   // event size
     uint buff_id;   // event buffer id
+    int local_id;
+    int tmtoken;
+    int evbidx;
 };
 
 struct ic_l4_event {
@@ -363,6 +366,9 @@ struct ic_l4_event {
     uint buff_id;  // event buffer id for the hlt data
     uint evt_sz;   // sz of the original event
     uint l4_sz;    // sz of the l4 output buffer
+    int local_id;
+    int tmtoken;
+    int evbidx;
 };
 
 
