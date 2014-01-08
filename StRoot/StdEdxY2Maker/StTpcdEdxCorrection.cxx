@@ -65,6 +65,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     assert(k_tpcGas);
   }
   SettpcGas(k_tpcGas);
+#if 0
   TDatime t[2];					
   if (St_db_Maker::GetValidity(k_tpcGas,t) > 0) {				
     Int_t Nrows = k_tpcGas->GetNRows();					
@@ -75,6 +76,7 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     if (Nrows > 10) Nrows = 10;						
     if (k_tpcGas->GetRowSize() < 256) k_tpcGas->Print(0,Nrows);		
   }
+#endif
   St_TpcSecRowCor *TpcSecRow = 0;
   St_tpcCorrection *table = 0;
   St_MDFCorrection *tableMDF = 0;
@@ -198,7 +200,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
   Double_t gc, ADC, xL2, dXCorr;
   Double_t adcCF = CdEdx.adc;
-  Int_t l;
+  Int_t l = 0;
   tpcCorrection_st *cor = 0;
   tpcCorrection_st *corl = 0;
   TpcSecRowCor_st *gain = 0;
