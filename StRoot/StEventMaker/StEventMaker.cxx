@@ -50,7 +50,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.96 2013/12/20 18:41:41 genevb Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.97 2014/01/08 21:10:22 fisyak Exp $";
 //______________________________________________________________________________
 ClassImp(StEventMaker)
     //______________________________________________________________________________
@@ -292,7 +292,7 @@ StEventMaker::makeEvent()
 	if ( table) { gMessMgr->Info("get trigDetSums from Calibrations/rich/trigDetSums");}
       }
       if (table) {
-	AddData(new St_trigDetSumsC(table));
+	StMaker::GetChain()->AddData(new St_trigDetSumsC(table));
       }
     }
     St_DataSet *daqReaderSet=GetDataSet("StDAQReader");
@@ -903,8 +903,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.96 2013/12/20 18:41:41 genevb Exp $
+ * $Id: StEventMaker.cxx,v 2.97 2014/01/08 21:10:22 fisyak Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.97  2014/01/08 21:10:22  fisyak
+ * Move St_trigDetSumsC under top maker for consistency with StDetectorDbMaker
+ *
  * Revision 2.96  2013/12/20 18:41:41  genevb
  * Add event filtering by trigger (offline id)
  *
