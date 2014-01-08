@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.26 2012/09/14 13:45:40 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.27 2014/01/08 23:52:31 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -43,7 +43,8 @@ class StdEdxY2Maker : public StMaker {
 	       kZBGX                 = 13,
 	       kEmbedding            = 15,
 	       kNoUsedHits           = 16,
-	       kEmbeddingShortCut    = 17 
+	       kEmbeddingShortCut    = 17, 
+	       kV0CrossCheck         = 18
   };
   StdEdxY2Maker(const char *name="dEdxY2");
   virtual       ~StdEdxY2Maker() {}
@@ -56,13 +57,13 @@ class StdEdxY2Maker : public StMaker {
   static  void  SortdEdx();
   Double_t LikeliHood(Double_t Xlog10bg, Int_t NdEdx, dEdxY2_t *dEdx, Double_t chargeSq = 1);
   void    Histogramming(StGlobalTrack* gTrack=0);
+  void    V0CrossCheck();
   void    TrigHistos(Int_t iok = 0);
   void    XyzCheck(StGlobalCoordinate *global=0, Int_t iokCheck=0);
   void    QAPlots(StGlobalTrack* gTrack = 0);
   void    BadHit(Int_t iFlag, const StThreeVectorF &xyz);
   void    DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   void    PrintdEdx(Int_t iop = 0);
-  void    Correlations();
   static  Bichsel             *m_Bichsel;       //
   static  void Landau(Double_t x, Double_t *val);
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
@@ -79,16 +80,18 @@ class StdEdxY2Maker : public StMaker {
   Char_t               beg[1];
   TMinuit             *m_Minuit;        //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
+#ifdef __OLD_dX_Calculation__
   StThreeVectorD     **mNormal[24];     //!
   StThreeVectorD     **mRowPosition[24][3]; //!
   StThreeVectorD      *mPromptNormal[2][2]; // West/East, Inner/Outer
   StThreeVectorD      *mPromptPosition[2][2][3]; 
+#endif /* __OLD_dX_Calculation__ */
   TH2F                *mHitsUsage;//!
   Char_t              end[1];
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.26 2012/09/14 13:45:40 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.27 2014/01/08 23:52:31 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   ClassDef(StdEdxY2Maker,0)   //StAF chain virtual base class for Makers
