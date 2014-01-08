@@ -22,7 +22,7 @@ Int_t StDetectorDbMaker::Make(){
       St_trigDetSums *table = (St_trigDetSums *) set->Find("trigDetSums");
       if (table) {
 	LOG_QA << "get trigDetSums from inputStream_DAQ" << endm;
-	new St_trigDetSumsC(table);
+	StMaker::GetChain()->AddData(new St_trigDetSumsC(table));
       }
     }
   }
@@ -32,7 +32,7 @@ Int_t StDetectorDbMaker::Make(){
 #if 0
       LOG_QA << "get trigDetSums from DB Calibrations/rich/trigDetSums" << endm;
 #endif
-      AddData(new St_trigDetSumsC(table));
+      StMaker::GetChain()->AddData(new St_trigDetSumsC(table));
     }
   }
 #if 0

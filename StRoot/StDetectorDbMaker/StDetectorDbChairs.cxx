@@ -541,9 +541,7 @@ St_trigDetSumsC *St_trigDetSumsC::instance() {
   assert(table);
   fgInstance = new St_trigDetSumsC(table);
   fgInstance->SetName("trigDetSumsC");
-  StMaker *db = StMaker::GetChain()->Maker("db");
-  assert(db);
-  db->AddData(fgInstance);
+  StMaker::GetChain()->AddData(fgInstance);
   return fgInstance;
 }
 ClassImp(St_trigDetSumsC);
