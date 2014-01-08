@@ -24,18 +24,19 @@ class StTpcHitMover : public StMaker {
   virtual Int_t InitRun(Int_t runnumber);
   virtual Int_t Make();
   virtual void  FlushDB();
+  static  void moveTpcHit(StTpcLocalCoordinate &coorL, StGlobalCoordinate &coorG);
+  static  void moveTpcHit(StTpcLocalCoordinate &coorL, StTpcLocalCoordinate &coorLD);
   virtual const Char_t *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.8 2010/01/27 21:40:04 fisyak Exp $ built "__DATE__" "__TIME__;
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.9 2014/01/08 21:14:28 fisyak Exp $ built "__DATE__" "__TIME__;
     return cvs;
   }
  protected:
 
  private:
-  StTpcCoordinateTransform *mTpcTransForm; 
-  void moveTpcHit(StTpcLocalCoordinate &coorL, StGlobalCoordinate &coorG);
+  static StTpcCoordinateTransform *mTpcTransForm; 
 
-  StMagUtilities*   mExB; //!
-
+  static StMagUtilities*   mExB; //!
+  static Int_t _debug;
   ClassDef(StTpcHitMover,0)
 };
 
