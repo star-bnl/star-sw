@@ -467,81 +467,51 @@ double JoinTwoT(int nP1,const double *P1,const double *E1
                ,int nP2,const double *P2,const double *E2
 	               ,      double *PJ,      double *EJ);
 //______________________________________________________________________________
+//______________________________________________________________________________
 double JoinTwo(int nP1,const double *P1,const double *E1
               ,int nP2,const double *P2,const double *E2
 	               ,     double *PJ,      double *EJ)
 {
 static int nCall = 0;  nCall++;
-StvDebug::Break(nCall);
   assert(nP1<=nP2);
   int nE1 = nP1*(nP1+1)/2;
   int nE2 = nP2*(nP2+1)/2;
-  TArrayD ard(nE2*5+nP2*3);
-  double *a = ard.GetArray();  
-  double *E1i = a;
-  double *E2i = (a+=nE2);
-  double *EJi = (a+=nE2);
-  double *EJm = (a+=nE2);
-  double *ERi = (a+=nE2);
+//  TArrayD ard(nE2*5+nP2*3);
+  std::vector<double> ard(nE2+nP2*2+1);
+  double *a = &ard[0];  
+  double *P1sP2  = a; a+=nP2;	//=P1-P2
+  double *Ptmp   = a; a+=nP2;	//=tmp vector
+  double *E1aE2i = a; a+=nE2;	//=(E1+E2)**(-1)
+  *a = 1946;
   
-  double *Pdif= (a+=nE2);
-  double *P1J = (a+=nP2);
-  double *P2J = (a+=nP2);
-
-//  TCL::trsinv(E1,E1i,nP1);		//E1i = 1/E1
+  if (P2) { TCL::vsub (P1,P2,P1sP2,nP1);}
+  else    { TCL::ucopy(P1,   P1sP2,nP1);}
+  TCL::vadd (E1,E2,E1aE2i,nE1);
+  if (nP1<nP2) {TCL::vzero(P1sP2+nP1,nP2-nP1);TCL::vzero(E1aE2i+nE1,nE2-nE1);}
+    
+//  TCL::trsinv(E1aE2i,E1aE2i,nP1);		//E1aE2i = (E1+E2)**(-1)
   int kase = nP1;
 SWITCHa:  switch(kase) {
-    case 2: if ((kase=TCLx::trsinv2x2(E1,E1i))) {goto SWITCHa;}; break;
-    case 5: if ((kase=TCLx::trsinv5x5(E1,E1i))) {goto SWITCHa;}; break;
+    case 2: if ((kase=TCLx::trsinv2x2(E1aE2i,E1aE2i))) {goto SWITCHa;}; break;
+    case 5: if ((kase=TCLx::trsinv5x5(E1aE2i,E1aE2i))) {goto SWITCHa;}; break;
     case -1: return 1e11;
-    default: TCL::trsinv   (E1,E1i,nP1);
+    default: TCL::trsinv   (E1aE2i,E1aE2i,nP1);
   }
-
-//  TCL::trsinv(E2,E2i,nP2);		//E2i = 1/E2
-  kase = nP2;
-SWITCHb:  switch(kase) {
-    case 2: if ((kase=TCLx::trsinv2x2(E2,E2i))) {goto SWITCHb;}; break;
-    case 5: if ((kase=TCLx::trsinv5x5(E2,E2i))) {goto SWITCHb;}; break;
-    case -1: return 1e11;
-    default: TCL::trsinv   (E2,E2i,nP2);
-  }
-
-
-
-
-
-  TCL::vadd (E1i,E2i,EJi ,nE2);		//EJi = E1i+E2i
-//TCL::trsinv(EJi,EJm,nP2);		//EJ = 1/EJi
-  kase = nP2;
-SWITCHc:  switch(kase) {
-    case 2: if ((kase=TCLx::trsinv2x2(EJi,EJm))) {goto SWITCHc;}; break;
-    case 5: if ((kase=TCLx::trsinv5x5(EJi,EJm))) {goto SWITCHc;}; break;
-    case -1: return 1e11;
-    default: TCL::trsinv   (EJi,EJm,nP2);
-  }
-
-
-
-
-
-  if (P2) TCL::vsub (P1 ,P2 ,Pdif,nP1);	//Pdif = P1-P2
-  else    TCL::ucopy(P1     ,Pdif,nP1);
-  TCL::trqsq(E1i,EJm,ERi ,nP1);		//ERi = E1i*EJm*E1i
-  TCL::vsub (E1i,ERi,ERi ,nE1);         //ERi = E1i- E1i*EJi*E1i == 1/(E1+E2)
-  double chi2;
-  TCL::trasat(Pdif,ERi,&chi2,1,nP1); 
-
-  if (!PJ)      return chi2;
-  if (chi2>=kXtraBigXi2) return chi2;
-  TCL::ucopy(EJm,EJ,nE2);		//EJ = 1/EJi
   
-  TCL::trsa(E1i,P1,P1J,nP1,1);		//P1J = E1i*P1
-  TCL::trsa(E2i,P2,P2J,nP2,1);		//P2J = E2i*P2
-  TCL::vadd(P2J,P1J,P2J,nP1);		//P2J = P1J+P2J
-  TCL::trsa(EJ,P2J,PJ,nP2,1);		//PJ  = EJ*P3J
+  double Xi2=0;
+  TCL::trasat(P1sP2,E1aE2i,&Xi2,1,nP1); 
+  if (!PJ) return Xi2;
 
+//		Evaluate output parameters
+  TCL::trsa (E1aE2i,P1sP2,Ptmp,nP2,1);
+  TCL::trsa (E2,Ptmp,PJ,nP2,1);
+  if (!EJ) return Xi2;
 
-  return chi2;
+//		Evaluate output error matrix
+  TCL::trqsq(E2,E1aE2i,EJ,nP2);		// E2*(E1+E2)**(-1)*E2
+  TCL::vsub (E2    ,EJ,EJ,nE2);         // E2 - E2*(E1+E2)**(-1)*E2
+assert(!(*a-1946));
+  return Xi2;
 }
 //______________________________________________________________________________
 double JoinTwoT(int nP1,const double *P1,const double *E1
