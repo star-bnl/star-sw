@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.81 2014/01/08 23:52:31 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.82 2014/01/13 21:30:15 fisyak Exp $
 #define CompareWithToF 
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -8,6 +8,7 @@
 #include "TMath.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TF1.h"
 #include "TStyle.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
@@ -81,6 +82,7 @@ static TH1F *fZOfGoodHits = 0;
 static TH1F *fPhiOfBadHits = 0;
 static TH1F *fTracklengthInTpcTotal = 0;
 static TH1F *fTracklengthInTpc = 0;
+static TH3F *Z3A = 0;
 //______________________________________________________________________________
 ClassImp(StdEdxY2Maker);
 //_____________________________________________________________________________
@@ -268,6 +270,27 @@ Int_t StdEdxY2Maker::FinishRun(Int_t OldRunNumber) {
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Finish() {
   FinishRun(0);
+  if (Z3A) {// control Z slope
+    const Char_t *IO[2] = {"Inner", "Outer"};
+    Double_t    xmin[2] = { 70, 40};
+    Double_t    xmax[2] = {120,180};
+    for (Int_t io = 1; io <= 2; io++) {
+      Z3A->GetXaxis()->SetRange(io,io);
+      TH2 *I = (TH2 *) Z3A->Project3D(Form("zy%i",io));
+      if (I) {
+	I->FitSlicesY();
+	TH1D *proj = (TH1D*) gDirectory->Get(Form("%s_1",I->GetName()));
+	if (proj) {
+	  proj->Fit("pol1","erq","goff",xmin[io-1],xmax[io-1]);
+	  TF1 *f = (TF1 *) proj->GetListOfFunctions()->FindObject("pol1");
+	  if (f) {
+	    gMessMgr->Info() << "StdEdxY2Maker: slope in drift distance for " << IO[io-1] << " = "
+			     << f->GetParameter(1) << " +/- " << f->GetParError(1) << endm;
+	  }
+	}
+      }
+    }
+  }
   SafeDelete(m_TpcdEdxCorrection);
   SafeDelete(m_Minuit);
   SafeDelete(m_Bichsel);
@@ -1728,6 +1751,12 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
       fTdEdxPFP->SetMarkerColor(6);
       mHitsUsage  = new TH2F("HitsUsage","log10(No.of Used in dE/dx hits) versus log10(Total no. of Tpc Hits",
 			     80,0,8,60,0,6);
+      Int_t      nZBins = 200;
+      Double_t ZdEdxMin = -5;
+      Double_t ZdEdxMax =  5;
+      Z3A = new TH3F("Z3A",
+		     "log(dEdx/Pion) corrected versus row and Drift Distance for all MIP primary tracks (Inner/Outer)",
+		     2,-0.5, 1.5,105,0.,210.,nZBins,ZdEdxMin,ZdEdxMax);
     }
     if (! f && !first) {
       for (Int_t i = 0; i < fNZOfBadHits; i++) AddHist(fZOfBadHits[i]);           
@@ -1746,9 +1775,10 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
       AddHist(fTdEdxPFK);
       AddHist(fTdEdxPFP);
       AddHist(mHitsUsage);
+      AddHist(Z3A);
     }
-  }
-  else {
+    first = 2004;
+  }  else {
     StSPtrVecTrackPidTraits &traits = gTrack->pidTraits();
     static StDedxPidTraits *pid = 0;
     static Double_t TrackLength, I70, fitZ;
@@ -1795,8 +1825,18 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	}
       }
     }
+    if (Z3A && pMomentum > pMomin && pMomentum < pMomax && TrackLength > 40) {
+      Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
+      for (Int_t k = 0; k < NdEdx; k++) {
+	Double_t zP = m_Bichsel->GetMostProbableZ(bgL10,TMath::Log2(FdEdx[k].dx));
+	Double_t predB  = 1.e-6*TMath::Exp(zP);
+	Double_t dEdxN  = TMath::Log(FdEdx[k].dEdx /predB);
+	Int_t io = 0;
+	if (FdEdx[k].row > NumberOfInnerRows) io = 1;
+	Z3A->Fill(io,FdEdx[k].ZdriftDistance,  dEdxN);
+      }
+    }
   }
-  first = 2004;
 }
 //________________________________________________________________________________
 void StdEdxY2Maker::BadHit(Int_t iFlag, const StThreeVectorF &xyz) {
