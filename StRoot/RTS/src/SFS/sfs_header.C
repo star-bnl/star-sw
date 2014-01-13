@@ -42,6 +42,10 @@ int main(int argc, char *argv[])
 
   char *fn = argv[1];
   
+  struct stat statbuf;
+  stat(fn, &statbuf);
+  long long int sz = statbuf.st_size;
+
   SFS_ittr ittr;
   wrapfile file;
   
@@ -54,10 +58,35 @@ int main(int argc, char *argv[])
 
   ittr.get(&file);
 
+  long long int pos = 0;
   while((ittr.next() >=0)  && (ittr.filepos >= 0)) {
     printittr(&ittr,ctr);
     ctr++;
+    pos += ittr.entry.sz + ittr.entry.head_sz;
   }
+
+  printf("Filesz = %lld   Position = %lld\n",sz,pos);
+  if(sz != pos) {
+      int fd = open(fn, O_RDONLY);
+      lseek(fd, pos-200, SEEK_SET);
+      char buff[25600];
+      int ret = read(fd, buff, 25600);
+
+      printf("Errr Buffer: \n\t");
+      for(int i=0;i<ret;i++) {
+	  char c;
+	  c = buff[i];
+
+	  if(!isprint(c)) c = '.';
+
+	  printf("%c",c);
+	  if((i+1) % 10 == 0) printf(" ");
+	  if((i+1) % 100 == 0) printf("\n\t");
+	  if((i+1) == 200) printf("\n\t-----------------------\n\n\t");
+      }
+      
+  }
+
 }
   
  
