@@ -15,11 +15,11 @@
 #include "TDataSetIter.h"
 #include "StBFChain.h"
 #include "StIOMaker.h"
-StBFChain *bfc (const Int_t Last, 
-		const Char_t *Chain,
-		const Char_t *infile, 
-		const Char_t *outfile, 
-		const Char_t *TreeFile);
+void bfc (const Int_t Last, 
+	  const Char_t *Chain,
+	  const Char_t *infile, 
+	  const Char_t *outfile, 
+	  const Char_t *TreeFile);
 //R__EXTERN StBFChain *chain;
 #else
 #define BIT(n)       (1 << (n))
@@ -54,7 +54,7 @@ void dEdx(Int_t nevents=1000,
   //  TString Chain("in,dEdxY2,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,AlignSectors");
   //  TString Chain("in,dEdxY2,magF,StEvent,AlignSectors,Corr4,OSpaceZ2");
   //  TString Chain("in,dEdxY2,magF,StEvent,St_geom,tofrMatch,tofpMatch,tofCalib,Corr4,OSpaceZ2");
-  TString Chain("in,dEdxY2,magF,StEvent,mysql,NoDefault");
+  TString Chain("in,TpcHitMover,dEdxY2,magF,StEvent,mysql,NoDefault"); // ,analysis
   TString RootFile(rootFile);
   if (RootFile == "") {
     RootFile = gSystem->BaseName(MainFile);
@@ -68,13 +68,9 @@ void dEdx(Int_t nevents=1000,
   Int_t Mode = 0;
   if (mode%10 == 2) 
     SETBIT(Mode,StdEdxY2Maker::kCalibration);
-  if ((mode/10)%10) 
-    SETBIT(Mode,StdEdxY2Maker::kOldClusterFinder); 
-  else {
-    SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
-    //    SETBIT(Mode,StdEdxY2Maker::kProbabilityPlot);
-    //    SETBIT(Mode,StdEdxY2Maker::kZBGX);
-  }
+  SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
+  //    SETBIT(Mode,StdEdxY2Maker::kProbabilityPlot);
+  //  SETBIT(Mode,StdEdxY2Maker::kZBGX);
   if ((mode/100)%10) 
     SETBIT(Mode,StdEdxY2Maker::kDoNotCorrectdEdx);
   if ((mode/1000)%10) SETBIT(Mode,StdEdxY2Maker::kMakeTree);
@@ -84,6 +80,7 @@ void dEdx(Int_t nevents=1000,
   //  SETBIT(Mode,StdEdxY2Maker::kMip);
   //  SETBIT(Mode,StdEdxY2Maker::kAdcHistos);
   //  SETBIT(Mode,StdEdxY2Maker::kXYZcheck);
+  //  SETBIT(Mode,StdEdxY2Maker::kV0CrossCheck);
   //  SETBIT(Mode,StdEdxY2Maker::kSpaceChargeStudy);
   //  SETBIT(Mode,StdEdxY2Maker::kCORRELATION);
   if (Mode) {
