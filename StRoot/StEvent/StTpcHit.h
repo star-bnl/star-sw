@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.27 2014/01/15 20:59:14 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.28 2014/01/15 21:00:54 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.28  2014/01/15 21:00:54  fisyak
+ * Step back with version
+ *
  * Revision 2.27  2014/01/15 20:59:14  fisyak
  * Step back with version
  *
@@ -160,7 +163,7 @@ protected:
     Float_t     mChargeModified; //!
     StThreeVectorF mPositionU; //! upper position = y_local + padlength/2.
     StThreeVectorF mPositionL; //! lower position = y_local - padlength/2.
-    ClassDef(StTpcHit,7)
+    ClassDef(StTpcHit,9)
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 #endif
