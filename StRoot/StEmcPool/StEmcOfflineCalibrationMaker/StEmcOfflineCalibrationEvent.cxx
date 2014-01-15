@@ -18,7 +18,8 @@ StEmcOfflineCalibrationCluster::~StEmcOfflineCalibrationCluster()
 void StEmcOfflineCalibrationCluster::Clear(Option_t* option)
 {
   nTracks = 0;
-  tracks->Clear();
+  if(tracks)
+    tracks->Clear();
 }
 
 void StEmcOfflineCalibrationCluster::addTrack(StEmcOfflineCalibrationTrack* track)
@@ -42,6 +43,7 @@ StEmcOfflineCalibrationTrack::~StEmcOfflineCalibrationTrack()
 void StEmcOfflineCalibrationTrack::Clear(Option_t* option)
 {
 }
+
 /*
 void StEmcOfflineCalibrationTrack::takeTowerTrack(StEmcTowerCalibrationTrack* track)
 {
