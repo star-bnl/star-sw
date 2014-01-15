@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.h,v 2.9 2010/08/31 20:15:11 fisyak Exp $
+ * $Id: StTpcDedxPidAlgorithm.h,v 2.10 2014/01/15 21:01:42 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.h,v $
+ * Revision 2.10  2014/01/15 21:01:42  fisyak
+ * change default from kTruncatedMeanId => kLikelihoodFitId
+ *
  * Revision 2.9  2010/08/31 20:15:11  fisyak
  * Clean up
  *
@@ -58,7 +61,7 @@ class StDedxPidTraits;
 
 class StTpcDedxPidAlgorithm : public StPidAlgorithm {
 public:
-    StTpcDedxPidAlgorithm(StDedxMethod = kTruncatedMeanId);
+    StTpcDedxPidAlgorithm(StDedxMethod = kLikelihoodFitId);
     ~StTpcDedxPidAlgorithm() {}
     
     StParticleDefinition*  operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
