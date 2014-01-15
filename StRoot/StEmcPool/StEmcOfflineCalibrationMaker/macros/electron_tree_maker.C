@@ -44,6 +44,28 @@ void electron_tree_maker(const char* file_list="ctest3.list",const char* skimfil
   char* dbtime = "2009-03-28 00:00:00";
   StEmcOfflineCalibrationElectronAnalyzer* ana = new StEmcOfflineCalibrationElectronAnalyzer;
   
+  //2011
+  /*ana->HTtrigs.push_back(320500);
+  ana->HTtrigs.push_back(320501);
+  ana->HTtrigs.push_back(320503);
+  ana->HTtrigs.push_back(320504);
+  ana->HTtrigs.push_back(320514);
+  ana->HTtrigs.push_back(320524);
+  ana->HTtrigs.push_back(330501);
+  ana->HTtrigs.push_back(330503);
+  ana->HTtrigs.push_back(330524);
+  ana->HTtrigs.push_back(320801);
+  ana->HTtrigs.push_back(330801);
+
+  ana->TOFtrigs.push_back(320300);
+  ana->TOFtrigs.push_back(320301);
+  ana->TOFtrigs.push_back(320302);
+  ana->TOFtrigs.push_back(320311);
+  ana->TOFtrigs.push_back(330311);
+  ana->TOFtrigs.push_back(330322);
+  ana->TOFtrigs.push_back(320312);
+  ana->TOFtrigs.push_back(320322);*/
+
   //2009
   ana->HTtrigs.push_back(240530);
   ana->HTtrigs.push_back(240540);
