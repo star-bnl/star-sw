@@ -43,6 +43,8 @@
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
 
+#include "StEvent/StBTofHeader.h"
+
 //logger
 #include "StMessMgr.h"
 
@@ -93,7 +95,8 @@ Int_t StEmcOfflineCalibrationMaker::Init()
   mADCtoEMaker = dynamic_cast<StEmcADCtoEMaker*>(GetMaker("Eread")); assert(mADCtoEMaker);
   //emcTrigMaker = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); assert(emcTrigMaker);
   emcTrigMaker = dynamic_cast<StTriggerSimuMaker*>(GetMaker("StarTrigSimu")); assert(emcTrigMaker);
-
+  emcTrigMaker->useOnlineDB();
+  LOG_INFO << "Using online DB..." << endm;
 
   mTables = mADCtoEMaker->getBemcData()->getTables();
   mEmcGeom = StEmcGeom::instance("bemc");
@@ -123,6 +126,8 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
   mHT2threshold = emcTrigMaker->bemc->barrelHighTowerTh(2);
   mHT3threshold = emcTrigMaker->bemc->barrelHighTowerTh(3);
 	
+  LOG_INFO << "HT thresholds: " << mHT0threshold << " " << mHT1threshold << " " << mHT2threshold << " " << mHT3threshold << endm;
+
 	//look for histograms from this run in the current file and switch to them if found, otherwise create them
   char name[200];
   sprintf(name,"towerSlopes_R%i",run);
@@ -305,9 +310,16 @@ Int_t StEmcOfflineCalibrationMaker::Make()
       if(emcTrigMaker->bemc->getTowersAboveThreshold((int)htTriggers[i]).size() > 0){
       myEvent->towersAboveThreshold[htTriggers[i]] = emcTrigMaker->bemc->getTowersAboveThreshold((int)htTriggers[i]);
       }else{
+	// Run 9 pp 200
+	if(htTriggers[i] == 240530)myEvent->towersAboveThreshold[htTriggers[i]] = HT3towersAboveThreshold;
 	if(htTriggers[i] == 240540)myEvent->towersAboveThreshold[htTriggers[i]] = HT2towersAboveThreshold;
 	if(htTriggers[i] == 240560)myEvent->towersAboveThreshold[htTriggers[i]] = HT1towersAboveThreshold;
 	if(htTriggers[i] == 240570 || htTriggers[i] == 240550)myEvent->towersAboveThreshold[htTriggers[i]] = HT0towersAboveThreshold;
+	// Run 11
+	//if(htTriggers[i] == 320801 || htTriggers[i] == 330801)myEvent->towersAboveThreshold[htTriggers[i]] = HT3towersAboveThreshold; // add in ht3
+	//if(htTriggers[i] == 320503 || htTriggers[i] == 330503)myEvent->towersAboveThreshold[htTriggers[i]] = HT2towersAboveThreshold;
+	//if(htTriggers[i] == 320501 || htTriggers[i] == 330501)myEvent->towersAboveThreshold[htTriggers[i]] = HT1towersAboveThreshold;
+	//if(htTriggers[i] == 320500 || htTriggers[i] == 320504 || htTriggers[i] == 320514 || htTriggers[i] == 320524 || htTriggers[i] == 330524)myEvent->towersAboveThreshold[htTriggers[i]] = HT0towersAboveThreshold;
       }
     }
   }
@@ -373,10 +385,10 @@ Int_t StEmcOfflineCalibrationMaker::Make()
       center_tower = getTrackTower(track, false,1);
       smd_eta_center=getTrackTower(track,false,3);
       smd_phi_center=getTrackTower(track,false,4);
-
-
-			//project track to BEMC
-
+      
+      
+      //project track to BEMC
+      
       int id = center_tower.first;
       int exitid = (getTrackTower(track, true)).first;
 
@@ -492,7 +504,35 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	myTrack->nDedxPoints = track->nHitsDedx();
 	myTrack->nHitsPossible = track->nHitsPoss();
 	myTrack->dEdx = track->dEdx();
-				
+	
+
+	/*
+	// store TOF information
+	
+	//if(fabs(muDst->btofHeader()->vpdVz(0)-myEvent->vz[vertex_index]) < 13. && fabs(track->dcaGlobal().mag()) < 1.5 && fabs(myEvent->vz[vertex_index]) < 30. && (Double_t)track->nHitsFit()/(Double_t)track->nHitsPoss() > 0.52 && track->nHitsFit() > 14 && fabs(track->eta()) < 1.)
+	//{
+
+	// save these for track QA cuts
+	myTrack->vpd_vz = (float)(muDst->btofHeader()->vpdVz(0));
+	myTrack->dca_global = (float)(track->dcaGlobal().mag());
+
+	StMuBTofPidTraits tofTraits = track->btofPidTraits();
+	myTrack->tofmatchedflag = (int)tofTraits.matchFlag();
+	myTrack->toftime  = tofTraits.timeOfFlight();// some tof hits pass matchflag  = 1 with -999 time of flight value
+	//if(myTrack->tofmatchedflag >= 1 && myTrack->toftime > 1.0 && myTrack->toftime < 100. && tofTraits.beta() > 0.05)
+	myTrack->tofbeta   = tofTraits.beta();// some tof hits pass matchflag  = 1 with -999 beta value
+	//else
+	//myTrack->tofbeta = -999;
+	myTrack->tofpathlength = tofTraits.pathLength();
+	myTrack->tofsigmaelectron = tofTraits.sigmaElectron();
+	myTrack->tofprobelectron = tofTraits.probElectron();
+	//cout << "Added a track with TOF info!" << endl;
+	// cut on
+	// if(TofMatchedFlag >= 1 && mTofTime > -1. && mTofBeta > -1. && mTofTime < 100.)
+	//}
+	//else
+	//myTrack->tofbeta   = 999;
+	*/
 	myEvent->addTrack(myTrack);
 	//			cout<<"I think I added a track"<<endl;
       }
@@ -514,17 +554,18 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 
 void StEmcOfflineCalibrationMaker::Clear(Option_t* option)
 {	
-	myEvent->Clear();
-	for(int i=0; i<2; i++){
-		for(int j=0; j<4800; j++){
-			mADC[i][j] = 0;
-		}
-	}
-	for(int i=0; i<2; i++){
-	  for(int j=0; j<18000; j++){
-	    mADCSmd[i][j] = 0;
-	  }
-	}
+  if(myEvent)
+    myEvent->Clear();
+  for(int i=0; i<2; i++){
+    for(int j=0; j<4800; j++){
+      mADC[i][j] = 0;
+    }
+  }
+  for(int i=0; i<2; i++){
+    for(int j=0; j<18000; j++){
+      mADCSmd[i][j] = 0;
+    }
+  }
 }
 
 Int_t StEmcOfflineCalibrationMaker::Finish()
