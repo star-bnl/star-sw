@@ -195,23 +195,28 @@ void StEmcOfflineCalibrationElectronAnalyzer::analyzeTree(TChain* calib_tree, ch
   int nfidu = 0;
   int nenterexit = 0;
   for(unsigned int i=0; i<nentries; i++){
-    if(i%1000000 == 0) cout<<"processing "<<i<<" of "<<nentries<<endl;
+    if(i%100000 == 0) cout<<"processing "<<i<<" of "<<nentries<<endl;
     //cout<<i<<endl;
     calib_tree->GetEntry(i);
     
     //event level cuts
     if(TMath::Abs(myEvent->vz[0]) > 60.) continue;
     
+
+    // identify HT triggers
     int nht = 0;
     int yht = 0;
+    //cout << myEvent->triggerIds.size() << ":  ";
     for(unsigned int h = 0; h < myEvent->triggerIds.size(); h++){
       int isht = 0;
+      //cout << myEvent->triggerIds[h] << " "; //debug
       for(unsigned int f = 0; f < HTtrigs.size(); f++){
 	if(HTtrigs[f] == (int)myEvent->triggerIds[h])isht = 1;
       }
       if(!isht)nht = 1;
       if(isht)yht = 1;
     }
+    //cout << "   " << nht << " " << yht << endl;
 
     vector<int> HTtowers;
 
@@ -231,6 +236,18 @@ void StEmcOfflineCalibrationElectronAnalyzer::analyzeTree(TChain* calib_tree, ch
 	}
       }
     }
+
+    // identify TOF triggers
+    int istoftrig = 0;
+    for(unsigned int h = 0; h < myEvent->triggerIds.size(); h++){
+      int istof = 0;
+      for(unsigned int f = 0; f < TOFtrigs.size(); f++){
+	if(TOFtrigs[f] == (int)myEvent->triggerIds[h])istof = 1;
+      }
+      if(istof)istoftrig = 1;
+    }
+
+
 
     track_towers.clear();
     excluded_towers.clear();
@@ -278,11 +295,12 @@ void StEmcOfflineCalibrationElectronAnalyzer::analyzeTree(TChain* calib_tree, ch
       
       //if(track->nSigmaElectron > -2.){
       //create start using cluster
-      cluster->centralTrack = *track;
+      //cluster->centralTrack = *track;
 
       float toweta,towphi;
       emcgeom->getEtaPhi(track->tower_id[0],toweta,towphi);
       
+      // HT triggers
       int tr = 0;
       if(yht){
 	for(int ttt = 0; ttt < (int)HTtowers.size(); ttt++){
@@ -300,7 +318,14 @@ void StEmcOfflineCalibrationElectronAnalyzer::analyzeTree(TChain* calib_tree, ch
       
       track->htTrig = yht + tr;
       track->nonhtTrig = nht;
+      //(cluster->centralTrack).htTrig = yht + tr;
+      //(cluster->centralTrack).nonhtTrig = nht;
       //cout<<track->htTrig<<endl;
+
+      track->tofTrig = 0;
+      if(istoftrig)track->tofTrig = 1;
+
+      cluster->centralTrack = *track;
       
       for (int k = 1; k < 9; k++)//loop over surrounding towers
 	{
