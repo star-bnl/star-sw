@@ -64,8 +64,21 @@ public:
 	double			dEdx;
 	double			nSigmaElectron;	
 	
-	unsigned short htTrig;//was there an ht trigger
-	unsigned short nonhtTrig;//was there a non ht trigger
+
+	// information from TOF
+	float vpd_vz;
+	float dca_global;
+	int tofmatchedflag;
+	float toftime;
+	float tofbeta;
+	float tofpathlength;
+	float tofsigmaelectron;
+	float tofprobelectron;
+
+	unsigned short htTrig;//was there an ht trigger?
+	unsigned short nonhtTrig;//was there a non ht trigger?
+
+	unsigned short tofTrig; // was there a TOF trigger?
 
 	//void takeTowerTrack(StEmcTowerCalibrationTrack* track);
 	StEmcOfflineCalibrationTrack();
@@ -73,7 +86,7 @@ public:
 	
 	void Clear(Option_t* option="");
 	
-	ClassDef(StEmcOfflineCalibrationTrack, 6)
+	ClassDef(StEmcOfflineCalibrationTrack, 8)
 };
 
 //----------------------------------------------------------------------
