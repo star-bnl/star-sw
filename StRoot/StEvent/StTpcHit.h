@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.26 2014/01/14 14:48:24 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.27 2014/01/15 20:59:14 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 2.26  2014/01/14 14:48:24  fisyak
- * Freeze
+ * Revision 2.27  2014/01/15 20:59:14  fisyak
+ * Step back with version
  *
  * Revision 2.25  2013/12/17 15:01:40  fisyak
  * Add transient data members for upper and lower pad positons
@@ -160,7 +160,7 @@ protected:
     Float_t     mChargeModified; //!
     StThreeVectorF mPositionU; //! upper position = y_local + padlength/2.
     StThreeVectorF mPositionL; //! lower position = y_local - padlength/2.
-    ClassDef(StTpcHit,9)
+    ClassDef(StTpcHit,7)
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 #endif
