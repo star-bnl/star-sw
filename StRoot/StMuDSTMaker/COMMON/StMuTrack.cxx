@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.49 2013/12/04 19:56:32 jdb Exp $
+ * $Id: StMuTrack.cxx,v 1.50 2014/01/15 22:00:04 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -26,6 +26,7 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StBichsel/Bichsel.h"
 #include "THelixTrack.h"
 #include "TMath.h"
 #include "TString.h"
@@ -39,7 +40,7 @@ double StMuTrack::mProbabilityPidCentrality=0;
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : 
+StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, Int_t index2Global, Int_t index2RichSpectra, Bool_t l3, TObjArray *vtxList) : 
   mId(0), mType(0), mFlag(0), mFlagExtension(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), 
   mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), 
   /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ 
@@ -94,7 +95,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
 
   mNHitsPoss = track->numberOfPossiblePoints();
 
-  int tpc_hits;
+  Int_t tpc_hits;
   mNHitsPossTpc=0;
   if (track->numberOfPossiblePoints(kTpcId)==track->numberOfPossiblePoints(kFtpcEastId)) {
     // backward compatibility mode, figure out which TPC points are in
@@ -191,7 +192,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
       mEta = mP.pseudoRapidity();
 
       if (!l3) { // L3TRACKS seem to break pid    
-	int charge = track->geometry()->charge();
+	Int_t charge = track->geometry()->charge();
 	//	StParticleDefinition* pc = (*mProbabilityPidAlgorithm)( *track, track->pidTraits() );
 	mProbabilityPidAlgorithm->processPIDAsFunction(mProbabilityPidCentrality, mDCA.mag(), charge, mP.mag()/charge, mEta, mNHitsDedx, mdEdx);
 	mPidProbElectron= pack2UnsignedShort( (charge>0) ? mProbabilityPidAlgorithm->beingPositronProb() : mProbabilityPidAlgorithm->beingElectronProb(), __PROB_SCALE__) ;
@@ -224,7 +225,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
  /// dongx
   mIndex2BTofHit = -1;   // filled later
   fillMuBTofPidTraits(track);
-  
+
   mIndex2MtdHit = -1;    
   fillMuMtdPidTraits(track);
 
@@ -232,7 +233,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
     mOuterHelix = StMuHelix(track->outerGeometry()->helix(),event->runInfo()->magneticField());
 }
 
-unsigned short StMuTrack::nHitsPoss() const {
+UShort_t StMuTrack::nHitsPoss() const {
   // Add 1 for primary tracks in old files
   if (mNHitsPossTpc==255 && type()==primary)
     return mNHitsPoss+1;
@@ -240,7 +241,7 @@ unsigned short StMuTrack::nHitsPoss() const {
   return mNHitsPoss;
 }
 
-unsigned short StMuTrack::nHitsPoss(StDetectorId det) const {
+UShort_t StMuTrack::nHitsPoss(StDetectorId det) const {
 
   // Backward compatibility for old files
   if (mNHitsPossTpc==255) {
@@ -277,7 +278,7 @@ unsigned short StMuTrack::nHitsPoss(StDetectorId det) const {
 
 }
 
-unsigned short StMuTrack::nHitsFit(StDetectorId det) const {
+UShort_t StMuTrack::nHitsFit(StDetectorId det) const {
   // Backward compatibility for old files
   if (mNHitsFitTpc==255) {
     if (det==kTpcId || det==kFtpcEastId || det==kFtpcWestId)
@@ -401,7 +402,7 @@ double StMuTrack::length() const {
 double StMuTrack::lengthMeasured() const { 
   return fabs( helix().pathLength(StThreeVectorD(mLastPoint)) - helix().pathLength(StThreeVectorD(mFirstPoint)) ); }
 
-int StMuTrack::bad() const 
+Int_t StMuTrack::bad() const 
 {
    if (mFlag <= 0  )            return 10;
    if (mHelix.bad()) 		return 20;
@@ -414,12 +415,12 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
   StPtrVecTrackPidTraits traits = t->pidTraits(kTpcId);
   // get the StDedxPidTraits
   StDedxPidTraits* dedxPidTraits =0;
-  unsigned int size = traits.size();
+  UInt_t size = traits.size();
 
   if (StMuDebug::level()>=3) {
       cout << " dedxPidTraits->method() ";
   }
-  for (unsigned int i = 0; i < size; i++) {
+  for (UInt_t i = 0; i < size; i++) {
       if ( !(dedxPidTraits=dynamic_cast<StDedxPidTraits*>(traits[i])) ) continue;
       if (StMuDebug::level()>=3) {
 	  cout << " " << dedxPidTraits->method();
@@ -443,9 +444,9 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
   // get the StProbPidTraits 
   StProbPidTraits* probPidTraits =0;
   size = traits.size();
-  for (unsigned int i = 0; i < size; i++) {
+  for (UInt_t i = 0; i < size; i++) {
     if ( (probPidTraits=dynamic_cast<StProbPidTraits*>(traits[i])) ) {
-      for (int i=0; i<mProbPidTraits.numberOfParticles(); i++) 	mProbPidTraits.setProbability(i,probPidTraits->GetProbability(i));
+      for (Int_t i=0; i<mProbPidTraits.numberOfParticles(); i++) 	mProbPidTraits.setProbability(i,probPidTraits->GetProbability(i));
       mProbPidTraits.setNdf(probPidTraits->GetNDF());
     }
   } 
@@ -455,8 +456,8 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
 void StMuTrack::fillMuBTofPidTraits(const StTrack* t) {
   StBTofPidTraits* btofPidTraits = 0;
   StPtrVecTrackPidTraits traits = t->pidTraits(kTofId);
-  unsigned int size = traits.size();
-  for (unsigned int i = 0; i < size; i++) {
+  UInt_t size = traits.size();
+  for (UInt_t i = 0; i < size; i++) {
     if ( (btofPidTraits=dynamic_cast<StBTofPidTraits*>(traits[i])) ) {   
       mBTofPidTraits.setBTofPidTraits(btofPidTraits);
     }    
@@ -465,8 +466,8 @@ void StMuTrack::fillMuBTofPidTraits(const StTrack* t) {
 void StMuTrack::fillMuMtdPidTraits(const StTrack* t) {
   StMtdPidTraits* mtdPidTraits = 0;
   StPtrVecTrackPidTraits traits = t->pidTraits(kMtdId);
-  unsigned int size = traits.size();
-  for (unsigned int i = 0; i < size; i++) {
+  UInt_t size = traits.size();
+  for (UInt_t i = 0; i < size; i++) {
     if ( (mtdPidTraits=dynamic_cast<StMtdPidTraits*>(traits[i])) ) {   
       mMtdPidTraits.setMtdPidTraits(mtdPidTraits);
     }    
@@ -543,20 +544,20 @@ const StMuTrack* StMuTrack::primaryTrack() const {
 	
 	//For old MuDsts where there was one vertex per event
 	if(mIndex2Global==-1){
-		int nVer = StMuDst::numberOfPrimaryVertices();
+		Int_t nVer = StMuDst::numberOfPrimaryVertices();
 		StMuDst::fixTrackIndicesG(nVer);
 	}
 	if(mIndex2Global < 0 ) return prim;
 	
 	if(StMuDst::numberOfPrimaryVertices()==0) return StMuDst::primaryTracks(mIndex2Global);
-	int curVer =  StMuDst::currentVertexIndex();
+	Int_t curVer =  StMuDst::currentVertexIndex();
 	StMuDst::setVertexIndex(mVertexIndex);
 	prim =  StMuDst::primaryTracks(mIndex2Global);
 	StMuDst::setVertexIndex(curVer);
 	return prim;
 }
 
-int StMuTrack::vertexIndex() const {
+Int_t StMuTrack::vertexIndex() const {
 
 	//For old MuDsts where there was one vertex per event
 	if (StMuDst::numberOfPrimaryVertices()==0){
@@ -567,13 +568,13 @@ int StMuTrack::vertexIndex() const {
 	}
 	if(this->type()==1) return mVertexIndex;
 	if(primaryTrack()!=0) {
-		int index = primaryTrack()->vertexIndex();
+		Int_t index = primaryTrack()->vertexIndex();
 		return index;
 	}
 	else return -1;
 }
 
-TArrayI StMuTrack::getTower(bool useExitRadius,int det) const{ //1=BTOW, 3=BSMDE, 4=BSMDP... Returns TVector tower. tower[0] is module, tower[1] is eta, tower[2] is sub, and tower[3] is id
+TArrayI StMuTrack::getTower(Bool_t useExitRadius,Int_t det) const{ //1=BTOW, 3=BSMDE, 4=BSMDP... Returns TVector tower. tower[0] is module, tower[1] is eta, tower[2] is sub, and tower[3] is id
 	
 //	StMuTrack* track = this;
 	TArrayI tower(4);
@@ -601,13 +602,13 @@ TArrayI StMuTrack::getTower(bool useExitRadius,int det) const{ //1=BTOW, 3=BSMDE
 	if(useExitRadius) radius += 30.0;
 	
 	StEmcPosition mEmcPosition;
-	bool goodProjection;
+	Bool_t goodProjection;
 	if(this) goodProjection = mEmcPosition.trackOnEmc(&position,&momentum,this,mField,radius);
 	else return tower;
 	if(goodProjection){
-		int m,e,s,id=0;
-		float eta=position.pseudoRapidity();
-		float phi=position.phi();
+		Int_t m,e,s,id=0;
+		Float_t eta=position.pseudoRapidity();
+		Float_t phi=position.phi();
 		if(det==1){
 		  mEmcGeom->getBin(phi,eta,m,e,s);
 //		  s = abs(s);
@@ -619,7 +620,7 @@ TArrayI StMuTrack::getTower(bool useExitRadius,int det) const{ //1=BTOW, 3=BSMDE
 		  }
 		}
 		else if(det==3){
-		  int check=mSmdEGeom->getBin(phi,eta,m,e,s);
+		  Int_t check=mSmdEGeom->getBin(phi,eta,m,e,s);
 		  if(!check){
 		    s = abs(s);
 		    if(mSmdEGeom->getId(m,e,s,id)==0){
@@ -630,7 +631,7 @@ TArrayI StMuTrack::getTower(bool useExitRadius,int det) const{ //1=BTOW, 3=BSMDE
 		  }
 		}
 		else if(det==4){
-		  int check=mSmdPGeom->getBin(phi,eta,m,e,s);
+		  Int_t check=mSmdPGeom->getBin(phi,eta,m,e,s);
 		  s = abs(s);
 		  if(!check){
 		    if(mSmdPGeom->getId(m,e,s,id)==0){
@@ -648,16 +649,16 @@ double StMuTrack::energyBEMC() const { //Return energy of negative 100 GeV is no
 
 	double hitEnergy;
 	TArrayI tower = getTower();
-	unsigned int iMod = tower[0];
-    unsigned int iEta = tower[1];
-	int iSub = tower[2];
+	UInt_t iMod = tower[0];
+    UInt_t iEta = tower[1];
+	Int_t iSub = tower[2];
 	if(iMod < 1 ||iMod > 120) return -100.0;
 
 	if (StMuDst::emcCollection()) {
 		StEmcDetector	*bemcDet = StMuDst::emcCollection()->detector(kBarrelEmcTowerId);
 		StEmcModule	*mod = bemcDet->module(iMod);
 		StSPtrVecEmcRawHit&  hits = mod->hits();
-		for(unsigned int i=0; i<hits.size();i++){
+		for(UInt_t i=0; i<hits.size();i++){
 			if(hits[i]){
 				if((hits[i]->eta() == iEta) && (hits[i]->sub() == iSub)) {
 					hitEnergy = hits[i]->energy();
@@ -670,19 +671,52 @@ double StMuTrack::energyBEMC() const { //Return energy of negative 100 GeV is no
 	return -100.0;
 }
 
-bool StMuTrack::matchBEMC() const {
+Bool_t StMuTrack::matchBEMC() const {
 	double mEmcThres = 0.15;
 	if (energyBEMC() > mEmcThres) return true;
 	return false;
 }
+//________________________________________________________________________________
+Double_t StMuTrack::dEdxPull(Double_t mass, Bool_t fit, Int_t charge) const {
+  Double_t z = -999.;
+  if (probPidTraits().dEdxTrackLength() > 0 ) {
+    const StMuHelix &mh = muHelix();
+    Double_t momentum  = mh.p().mag();
+    Double_t log2dX = probPidTraits().log2dX();
+    if (log2dX <= 0) log2dX = 1;
+    Double_t dedx_measured, dedx_expected, dedx_resolution = -1;
+    if (! fit) { // I70
+      dedx_measured = probPidTraits().dEdxTruncated();
+      dedx_expected = 1.e-6*charge*charge*Bichsel::Instance()->GetI70M(TMath::Log10(momentum*TMath::Abs(charge)/mass)); 
+      dedx_resolution = probPidTraits().dEdxErrorTruncated();
+    } else {     // Ifit
+      dedx_measured = probPidTraits().dEdxFit();
+      dedx_expected = 1.e-6*charge*charge*TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(momentum*TMath::Abs(charge)/mass)));
+      dedx_resolution = probPidTraits().dEdxErrorFit();
+    }
+    if (dedx_resolution > 0)
+      z = TMath::Log(dedx_measured/dedx_expected)/dedx_resolution;
+  }
+  return z;
+}
+//________________________________________________________________________________
 
 ClassImp(StMuTrack)
 
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
- * Revision 1.49  2013/12/04 19:56:32  jdb
- * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
+ * Revision 1.50  2014/01/15 22:00:04  fisyak
+ * Add method to calculate dE/dx pulls for I70 and Ifit
+ *
+ * Revision 1.3  2014/01/15 21:11:08  fisyak
+ * Add dE/dx pulls calculations
+ *
+ * Revision 1.2  2013/08/19 15:03:16  fisyak
+ * Add calculation dE/dx pulls
+ *
+ * Revision 1.1.1.1  2013/07/23 14:14:48  fisyak
+ *
  *
  * Revision 1.48  2012/05/07 14:47:06  fisyak
  * Add handles for track to fast detector matching
@@ -753,7 +787,7 @@ ClassImp(StMuTrack)
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks
  *    belonging to the 'current' primary vertex. The index number of the
  *    'current' vertex can be set using StMuDst::setCurrentVertex().
- *    This also affects StMuDst::primaryTracks(int i) and
+ *    This also affects StMuDst::primaryTracks(Int_t i) and
  *    StMuDst::numberOfprimaryTracks().
  * 2) refMult is now stored for all vertices, in StMuPrimaryVertex. The
  *    obvious way to access these numbers is from the StMuprimaryVertex structures,

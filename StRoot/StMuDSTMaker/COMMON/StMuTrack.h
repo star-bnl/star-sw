@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.47 2013/12/04 19:56:32 jdb Exp $
+ * $Id: StMuTrack.h,v 1.48 2014/01/15 22:00:04 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -49,55 +49,71 @@ class StEmcGeom;
 class StEmcPosition;
 class StuProbabilityPidAlgorithm;
 
-class StMuMtdHit;
 class TObjArray;
 
 class StMuTrack : public TObject {
  public:
   StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255), mIndex2Cov(-1), 
     mIdTruth(0), mQuality(0), mIdParentVx(0) {/* no-op*/}; ///< default constructor
-    StMuTrack(const StEvent*, const StTrack*, const StVertex*, int index2Global=-2, int index2RichSpectra=-2, bool l3=false, TObjArray *vtx_list=0); ///< constructor from StEvent and StTrack
+    StMuTrack(const StEvent*, const StTrack*, const StVertex*, Int_t index2Global=-2, Int_t index2RichSpectra=-2, Bool_t l3=false, TObjArray *vtx_list=0); ///< constructor from StEvent and StTrack
     short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
     short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information) 
     short flag() const; ///< Returns flag, (see StEvent manual for type information) 
     UInt_t                         flagExtension() const { return mFlagExtension; }
-    int   bad () const; // track is bad
+    Int_t   bad () const; // track is bad
     /// Returns index of associated global track. If not in order can be set with StMuDst::fixTrackIndeces() (but is taken care of in StMuDstReader.)  
-    int index2Global() const;
-    int index2Cov() const;
-    int index2RichSpectra() const; ///< Returns index of associated rich spectra.
-    int index2BTofHit() const; /// dongx
-    int index2MtdHit() const; /// 
-    int vertexIndex() const; ///< Returns index of associated primary vertex.
+    Int_t index2Global() const;
+    Int_t index2Cov() const;
+    Int_t index2RichSpectra() const; ///< Returns index of associated rich spectra.
+    Int_t index2BTofHit() const; /// dongx
+    Int_t index2MtdHit() const; ///
+    Int_t vertexIndex() const; ///< Returns index of associated primary vertex.
 	const StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
 	const StMuTrack* primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
 	const StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
     const StMuBTofHit* tofHit() const;  /// dongx
     const StMuMtdHit* mtdHit() const;  /// Bingchu
-    unsigned short nHits() const;     ///< Return total number of hits on track.
-    unsigned short nHitsPoss() const; ///< Return number of possible hits on track.
-    unsigned short nHitsPoss(StDetectorId) const; ///< Return number of possible hits on track.
-    unsigned short nHitsDedx() const; ///< Return number of hits used for dEdx. 
-    unsigned short nHitsFit() const;  ///< Return total number of hits used in fit. 
-    unsigned short nHitsFit(StDetectorId) const;  ///< Return number of hits used in fit. 
-    double pidProbElectron() const; ///< Returns Aihong's probability of being an electron.
-    double pidProbPion() const;     ///< Returns Aihong's probability of being a pion.
-    double pidProbKaon() const;     ///< Returns Aihong's probability of being a kaon.
-    double pidProbProton() const;   ///< Returns Aihong's probability of being a proton.
-    double nSigmaElectron() const;  ///< Returns Craig's distance to the calculated dE/dx band for electrons in units of sigma.
-    double nSigmaPion() const;      ///< Returns Craig's distance to the calculated dE/dx band for pions in units of sigma.
-    double nSigmaKaon() const;      ///< Returns Craig's distance to the calculated dE/dx band for kaons in units of sigma.
-    double nSigmaProton() const;    ///< Returns Craig's distance to the calculated dE/dx band for protons in units of sigma.
-    double dEdx() const; ///< Returns measured dE/dx value.
-    double chi2() const;     ///< Returns chi2 of fit.       
-    double chi2prob() const; ///< Returns probability of fit.
-    double chi2xy() const;   ///< Returns chi2 of fit.         ATTENTIONS: does not return xy chi2 (historic)        
-    double chi2z() const;    ///< Returns probability of fit.  ATTENTIONS: does not return z chi2 (historic)        
-    double pt() const;   ///< Returns pT at point of dca to primary vertex.
-    double phi() const;  ///< Returns phi at point of dca to primary vertex.
-    double eta() const;  ///< Returns pseudo rapidity at point of dca to primary vertex.
-    double length() const; ///< Returns length of track (cm) from primary vertex to last measured point.
-    double lengthMeasured() const;  ///< Returns length of track (cm) from first to last measured point.
+    UShort_t nHits() const;     ///< Return total number of hits on track.
+    UShort_t nHitsPoss() const; ///< Return number of possible hits on track.
+    UShort_t nHitsPoss(StDetectorId) const; ///< Return number of possible hits on track.
+    UShort_t nHitsDedx() const; ///< Return number of hits used for dEdx. 
+    UShort_t nHitsFit() const;  ///< Return total number of hits used in fit. 
+    UShort_t nHitsFit(StDetectorId) const;  ///< Return number of hits used in fit. 
+    Double_t pidProbElectron() const; ///< Returns Aihong's probability of being an electron.
+    Double_t pidProbPion() const;     ///< Returns Aihong's probability of being a pion.
+    Double_t pidProbKaon() const;     ///< Returns Aihong's probability of being a kaon.
+    Double_t pidProbProton() const;   ///< Returns Aihong's probability of being a proton.
+    Double_t nSigmaElectron() const;  ///< Returns Craig's distance to the calculated dE/dx band for electrons in units of sigma.
+    Double_t nSigmaPion() const;      ///< Returns Craig's distance to the calculated dE/dx band for pions in units of sigma.
+    Double_t nSigmaKaon() const;      ///< Returns Craig's distance to the calculated dE/dx band for kaons in units of sigma.
+    Double_t nSigmaProton() const;    ///< Returns Craig's distance to the calculated dE/dx band for protons in units of sigma.
+    Double_t dEdxPull(Double_t mass, Bool_t fit = kFALSE, Int_t charge=1) const;
+    Double_t dEdxPullElectronI70() const {return dEdxPull(0.51099907e-3);}
+    Double_t dEdxPullPionI70()     const {return dEdxPull(0.13956995);}
+    Double_t dEdxPullKaonI70()     const {return dEdxPull(0.493677);}
+    Double_t dEdxPullProtonI70()   const {return dEdxPull(0.93827231);}
+    Double_t dEdxPullElectronFit() const {return dEdxPull(0.51099907e-3,kTRUE);}
+    Double_t dEdxPullPionFit()     const {return dEdxPull(0.13956995,kTRUE);}
+    Double_t dEdxPullKaonFit()     const {return dEdxPull(0.493677,kTRUE);}
+    Double_t dEdxPullProtonFit()   const {return dEdxPull(0.93827231,kTRUE);}
+    Double_t nSigmaElectron70()      const {return dEdxPullElectronI70() ;} 
+    Double_t nSigmaPion70()      	   const {return dEdxPullPionI70()     ;} 
+    Double_t nSigmaKaon70()      	   const {return dEdxPullKaonI70()     ;} 
+    Double_t nSigmaProton70()    	   const {return dEdxPullProtonI70()   ;} 
+    Double_t nSigmaElectronFit() 	   const {return dEdxPullElectronFit() ;} 
+    Double_t nSigmaPionFit()     	   const {return dEdxPullPionFit()     ;} 
+    Double_t nSigmaKaonFit()     	   const {return dEdxPullKaonFit()     ;} 
+    Double_t nSigmaProtonFit()   	   const {return dEdxPullProtonFit()   ;} 
+    Double_t dEdx() const; ///< Returns measured dE/dx value.
+    Double_t chi2() const;     ///< Returns chi2 of fit.       
+    Double_t chi2prob() const; ///< Returns probability of fit.
+    Double_t chi2xy() const;   ///< Returns chi2 of fit.         ATTENTIONS: does not return xy chi2 (historic)        
+    Double_t chi2z() const;    ///< Returns probability of fit.  ATTENTIONS: does not return z chi2 (historic)        
+    Double_t pt() const;   ///< Returns pT at point of dca to primary vertex.
+    Double_t phi() const;  ///< Returns phi at point of dca to primary vertex.
+    Double_t eta() const;  ///< Returns pseudo rapidity at point of dca to primary vertex.
+    Double_t length() const; ///< Returns length of track (cm) from primary vertex to last measured point.
+    Double_t lengthMeasured() const;  ///< Returns length of track (cm) from first to last measured point.
     StTrackTopologyMap topologyMap() const; ///< Returns topology map.
     Short_t charge() const;  ///< Returns charge. 
     const StThreeVectorF &p() const; ///< Returns 3-momentum at dca to primary vertex.
@@ -108,29 +124,31 @@ class StMuTrack : public TObject {
     Float_t dcaZ(Int_t vtx_id=-1) const; ///< Z component of global DCA
     const StThreeVectorF &firstPoint() const; ///< Returns positions of first measured point.
     const StThreeVectorF &lastPoint() const; ///< Returns positions of last measured point.
-    StPhysicalHelixD helix() const; ///< Returns inner helix (first measured point)
-    StPhysicalHelixD outerHelix() const; ///< Returns outer helix (last measured point)
+    StPhysicalHelixD helix() const;       ///< Returns inner helix (first measured point)
+    StPhysicalHelixD outerHelix() const;  ///< Returns outer helix (last measured point)
+    const StMuHelix &muHelix()      const {return mHelix;}      ///< Returns inner helix (first measured point)
+    const StMuHelix &muOuterHelix() const {return mOuterHelix;} ///< Returns outer helix (last measured point)
     const StMuProbPidTraits &probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
     const StMuBTofPidTraits &btofPidTraits() const; /// dongx
-    const StMuMtdPidTraits &mtdPidTraits() const; /// 
+    const StMuMtdPidTraits &mtdPidTraits() const; ///
     void setBTofPidTraits(const StMuBTofPidTraits& pid); /// dongx
-    void setMtdPidTraits(const StMuMtdPidTraits& pid); /// 
+    void setMtdPidTraits(const StMuMtdPidTraits& pid); ///
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
-    static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
+    static void setProbabilityPidCentrality(Double_t cent); ///< Sets the centrality for calculating Aihong's pid.
     virtual void Print(Option_t* option = "") const;  ///< Print track info
-    void setIndex2BTofHit(int i) {mIndex2BTofHit=i;} /// dongx
-    void setIndex2MtdHit(int i) {mIndex2MtdHit=i;} /// Bingchu
-    void setIndex2Cov(int i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
+    void setIndex2BTofHit(Int_t i) {mIndex2BTofHit=i;} /// dongx
+    void setIndex2MtdHit(Int_t i) {mIndex2MtdHit=i;} /// Bingchu
+    void setIndex2Cov(Int_t i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
 
-	//Matching to BEMC related functions
-	TArrayI getTower(bool useExitRadius=false, int det=1) const; //Get Tower track is pointing too -  1=BTOW, 3=BSMDE, 4=BSMDP //1=BTOW, 3=BSMDE, 4=BSMDP Returns TVector tower. tower[0] is module, tower[1] is eta, tower[2] is sub, and tower[3] is id
-	double energyBEMC() const;
-	bool matchBEMC() const;
-  Int_t            idTruth() const { return mIdTruth;}
-  Int_t            qaTruth() const { return mQuality; }
-  Int_t           idParentVx() const {return mIdParentVx;}
-  void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
-  void         setIdParentVx(Int_t id) {mIdParentVx = id;}
+    //Matching to BEMC related functions
+    TArrayI getTower(Bool_t useExitRadius=false, Int_t det=1) const; //Get Tower track is pointing too -  1=BTOW, 3=BSMDE, 4=BSMDP //1=BTOW, 3=BSMDE, 4=BSMDP Returns TVector tower. tower[0] is module, tower[1] is eta, tower[2] is sub, and tower[3] is id
+    Double_t energyBEMC() const;
+    Bool_t matchBEMC() const;
+    Int_t            idTruth() const { return mIdTruth;}
+    Int_t            qaTruth() const { return mQuality; }
+    Int_t           idParentVx() const {return mIdParentVx;}
+    void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+    void         setIdParentVx(Int_t Id) {mIdParentVx = Id;}
 
 protected:
   Int_t mId;
@@ -140,7 +158,7 @@ protected:
   Int_t mIndex2Global;
   Int_t mIndex2RichSpectra;
   Int_t mIndex2BTofHit;     // dongx
-  Int_t mIndex2MtdHit;      // 
+  Int_t mIndex2MtdHit;
   Int_t mVertexIndex;       // Primary vertex id for this track's dca
   UChar_t mNHits;           // Total number of points (was (F)tpc only)
   UChar_t mNHitsPoss;       // Total possible points (was (F)tpc only)
@@ -180,9 +198,9 @@ protected:
   UShort_t         mIdTruth; // MC track id if any 
   UShort_t         mQuality; // quality of this information (percentage of hits coming the above MC track)
   Int_t         mIdParentVx;
-  void setIndex2Global(int i) {mIndex2Global=i;} ///< Set index of associated global track.
-  void setIndex2RichSpectra(int i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
-  void setVertexIndex(int i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
+  void setIndex2Global(Int_t i) {mIndex2Global=i;} ///< Set index of associated global track.
+  void setIndex2RichSpectra(Int_t i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
+  void setVertexIndex(Int_t i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
   StThreeVectorF dca(const StThreeVectorF &pos) const; ///< Calculate dca to a given point
   StThreeVectorD dca(const StTrack*, const StVertex *vertex) const; ///< Helper function: Calculates dca from a given StTrack and the primary vertex taken from StEvent
   StThreeVectorD momentumAtPrimaryVertex(const StEvent *event, const StTrack* track, const StVertex *vertex) const; ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
@@ -190,74 +208,83 @@ protected:
   void fillMuBTofPidTraits(const StTrack*); /// dongx
   void fillMuMtdPidTraits(const StTrack*); /// Bingchu
   static StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm; ///< StuProbabilityPidAlgorithm, we will use the same algorithm for all tracks
-  static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
+  static Double_t mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,13)
+  ClassDef(StMuTrack,15)
 };
 
 inline short StMuTrack::id() const {return mId;}
 inline short StMuTrack::type() const {return mType;}
 inline short StMuTrack::flag() const {return mFlag;}
-inline int StMuTrack::index2Global() const {return mIndex2Global;}
-inline int StMuTrack::index2Cov() const {return mIndex2Cov;}
-inline int StMuTrack::index2RichSpectra() const {return mIndex2RichSpectra;}
-inline int StMuTrack::index2BTofHit() const {return mIndex2BTofHit;}  /// dongx
-inline int StMuTrack::index2MtdHit() const {return mIndex2MtdHit;}  ///
-inline unsigned short StMuTrack::nHits() const {return mNHits;}
-inline unsigned short  StMuTrack::nHitsDedx() const {return mNHitsDedx;}
-inline unsigned short  StMuTrack::nHitsFit() const {return mNHitsFit;}
-inline double StMuTrack::pidProbElectron() const {return unPack(mPidProbElectron,__PROB_SCALE__);}
-inline double StMuTrack::pidProbPion() const     {return unPack(mPidProbPion,    __PROB_SCALE__);}
-inline double StMuTrack::pidProbKaon() const     {return unPack(mPidProbKaon,    __PROB_SCALE__);}
-inline double StMuTrack::pidProbProton() const   {return unPack(mPidProbProton,  __PROB_SCALE__);}
-inline double StMuTrack::nSigmaElectron() const  {return unPack(mNSigmaElectron, __SIGMA_SCALE__);}
-inline double StMuTrack::nSigmaPion() const      {return unPack(mNSigmaPion,     __SIGMA_SCALE__);}
-inline double StMuTrack::nSigmaKaon() const      {return unPack(mNSigmaKaon,     __SIGMA_SCALE__);}
-inline double StMuTrack::nSigmaProton() const    {return unPack(mNSigmaProton,   __SIGMA_SCALE__);}
-inline double StMuTrack::dEdx() const {return mdEdx;}
-inline double StMuTrack::chi2xy() const {return mChiSqXY;}
-inline double StMuTrack::chi2z() const {return mChiSqZ;}
-inline double StMuTrack::chi2() const {return mChiSqXY;}
-inline double StMuTrack::chi2prob() const {return mChiSqZ;}
+inline Int_t StMuTrack::index2Global() const {return mIndex2Global;}
+inline Int_t StMuTrack::index2Cov() const {return mIndex2Cov;}
+inline Int_t StMuTrack::index2RichSpectra() const {return mIndex2RichSpectra;}
+inline Int_t StMuTrack::index2BTofHit() const {return mIndex2BTofHit;}  /// dongx
+inline Int_t StMuTrack::index2MtdHit() const {return mIndex2MtdHit;}  ///
+inline UShort_t StMuTrack::nHits() const {return mNHits;}
+inline UShort_t  StMuTrack::nHitsDedx() const {return mNHitsDedx;}
+inline UShort_t  StMuTrack::nHitsFit() const {return mNHitsFit;}
+inline Double_t StMuTrack::pidProbElectron() const {return unPack(mPidProbElectron,__PROB_SCALE__);}
+inline Double_t StMuTrack::pidProbPion() const     {return unPack(mPidProbPion,    __PROB_SCALE__);}
+inline Double_t StMuTrack::pidProbKaon() const     {return unPack(mPidProbKaon,    __PROB_SCALE__);}
+inline Double_t StMuTrack::pidProbProton() const   {return unPack(mPidProbProton,  __PROB_SCALE__);}
+inline Double_t StMuTrack::nSigmaElectron() const  {return unPack(mNSigmaElectron, __SIGMA_SCALE__);}
+inline Double_t StMuTrack::nSigmaPion() const      {return unPack(mNSigmaPion,     __SIGMA_SCALE__);}
+inline Double_t StMuTrack::nSigmaKaon() const      {return unPack(mNSigmaKaon,     __SIGMA_SCALE__);}
+inline Double_t StMuTrack::nSigmaProton() const    {return unPack(mNSigmaProton,   __SIGMA_SCALE__);}
+inline Double_t StMuTrack::dEdx() const {return mdEdx;}
+inline Double_t StMuTrack::chi2xy() const {return mChiSqXY;}
+inline Double_t StMuTrack::chi2z() const {return mChiSqZ;}
+inline Double_t StMuTrack::chi2() const {return mChiSqXY;}
+inline Double_t StMuTrack::chi2prob() const {return mChiSqZ;}
 inline StTrackTopologyMap StMuTrack::topologyMap() const {return mTopologyMap;}
 inline short StMuTrack::charge() const {return mHelix.q();}
-inline double StMuTrack::pt() const {return mPt;}
-inline double StMuTrack::eta() const {return mEta;}
-inline double StMuTrack::phi() const {return mPhi;}
+inline Double_t StMuTrack::pt() const {return mPt;}
+inline Double_t StMuTrack::eta() const {return mEta;}
+inline Double_t StMuTrack::phi() const {return mPhi;}
 inline const StThreeVectorF &StMuTrack::p() const {return mP;}
 inline const StThreeVectorF &StMuTrack::momentum() const {return mP;}
 inline const StThreeVectorF &StMuTrack::firstPoint() const {return mFirstPoint;}
 inline const StThreeVectorF &StMuTrack::lastPoint() const {return mLastPoint;}
-//!inline StPhysicalHelixD StMuTrack::helix() const {return mHelix;}
-//!inline StPhysicalHelixD StMuTrack::outerHelix() const {return mOuterHelix;}
 inline const StMuProbPidTraits &StMuTrack::probPidTraits() const { return mProbPidTraits;} ///< Returns Yuri Fisyak new pid probabilities. 
 inline const StMuBTofPidTraits &StMuTrack::btofPidTraits() const { return mBTofPidTraits;} /// dongx
 inline const StMuMtdPidTraits &StMuTrack::mtdPidTraits() const { return mMtdPidTraits;} /// Bingchu
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
-inline void StMuTrack::setProbabilityPidCentrality(double cent) { mProbabilityPidCentrality = cent;}
+inline void StMuTrack::setProbabilityPidCentrality(Double_t cent) { mProbabilityPidCentrality = cent;}
 inline void StMuTrack::setBTofPidTraits(const StMuBTofPidTraits& pid) { mBTofPidTraits = pid; }
-inline void StMuTrack::setMtdPidTraits(const StMuMtdPidTraits& pid) { mMtdPidTraits = pid; }
 
 inline const StMuTrack* StMuTrack::globalTrack() const { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
 inline const StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
 inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (StMuBTofHit*)StMuDst::btofArray(muBTofHit)->UncheckedAt(mIndex2BTofHit) :0;} /// dongx
-inline const StMuMtdHit* StMuTrack::mtdHit() const { return (mIndex2MtdHit>=0) ? (StMuMtdHit*)StMuDst::mtdArray(muMTDHit)->UncheckedAt(mIndex2MtdHit) :0;} /// 
+inline const StMuMtdHit* StMuTrack::mtdHit() const { return (mIndex2MtdHit>=0) ? (StMuMtdHit*)StMuDst::mtdArray(muMTDHit)->UncheckedAt(mIndex2MtdHit) :0;} ///
 ostream&              operator<<(ostream& os, StMuTrack const & v);
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
- * Revision 1.47  2013/12/04 19:56:32  jdb
- * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
+ * Revision 1.48  2014/01/15 22:00:04  fisyak
+ * Add method to calculate dE/dx pulls for I70 and Ifit
  *
- * Revision 1.45  2013/07/23 11:02:59  jeromel
- * Undo changes (KF and other)
+ * Revision 1.4  2014/01/15 21:11:08  fisyak
+ * Add dE/dx pulls calculations
  *
- * Revision 1.43  2013/04/10 19:28:35  jeromel
- * Step back to 04/04 version (van aware) - previous changes may be recoverred
+ * Revision 1.3  2013/08/19 15:03:16  fisyak
+ * Add calculation dE/dx pulls
+ *
+ * Revision 1.2  2013/08/07 12:58:40  fisyak
+ * Add access to StMuHelix
+ *
+ * Revision 1.1.1.1  2013/07/23 14:14:48  fisyak
+ *
+ *
+ * Revision 1.44  2013/07/16 14:30:30  fisyak
+ * Restore mass fit tracks
+ *
+ * Revision 1.42  2013/04/08 18:07:55  fisyak
+ * Add branches for KFParticles, fix problem with zero cov. matrix for primary tracks
  *
  * Revision 1.41  2012/05/07 14:47:06  fisyak
  * Add handles for track to fast detector matching
@@ -325,7 +352,7 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks
  *    belonging to the 'current' primary vertex. The index number of the
  *    'current' vertex can be set using StMuDst::setCurrentVertex().
- *    This also affects StMuDst::primaryTracks(int i) and
+ *    This also affects StMuDst::primaryTracks(Int_t i) and
  *    StMuDst::numberOfprimaryTracks().
  * 2) refMult is now stored for all vertices, in StMuPrimaryVertex. The
  *    obvious way to access these numbers is from the StMuprimaryVertex structures,
