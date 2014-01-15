@@ -1,9 +1,10 @@
+// use this macro first to create trees from MuDsts
+
 void bemcCalibMacro(const char* dir="./",
 			   const char* name  = "test.root",
 			   const char* filelist = "test.list",
-			   int nFiles = 1,
-			   int nEvents = 1000,
-		           const char* outPath = "./")
+			   int nFiles = 8,
+			   int nEvents = 10000)
 {
 	gROOT->Macro("LoadLogger.C");
 	gROOT->Macro("loadMuDst.C");
@@ -117,6 +118,7 @@ void bemcCalibMacro(const char* dir="./",
 	*/
 
 	//2009 200 GeV triggers
+	
 	bemcCalibMaker->addMinBiasTrigger(240010);//BBCMB
 	bemcCalibMaker->addMinBiasTrigger(240110);//BBCMB
 	bemcCalibMaker->addMinBiasTrigger(240120);//BBCMB
@@ -161,7 +163,68 @@ void bemcCalibMacro(const char* dir="./",
 	bemcCalibMaker->addFastTrigger(240801);//fms-fast
 	bemcCalibMaker->addFastTrigger(240802);//fms-fast
 
-	bemcCalibMaker->addFastTrigger(240640);//upsilon broken so skip
+	//bemcCalibMaker->addFastTrigger(240640);//upsilon broken so skip
+	
+
+	//2011 500 GeV triggers
+
+	/*	
+	// minbias
+	bemcCalibMaker->addMinBiasTrigger(320000);//VPDMB
+	bemcCalibMaker->addMinBiasTrigger(320001);//VPDMB
+	bemcCalibMaker->addMinBiasTrigger(320011);//VPDMB
+	bemcCalibMaker->addMinBiasTrigger(320021);//VPDMB
+	bemcCalibMaker->addMinBiasTrigger(320100);//ZDCMB-Cat0
+	bemcCalibMaker->addMinBiasTrigger(320101);//ZDCMB-Cat1
+	bemcCalibMaker->addMinBiasTrigger(320102);//ZDCMB-Cat2
+	bemcCalibMaker->addMinBiasTrigger(320102);//ZDCMB-Cat3
+	bemcCalibMaker->addMinBiasTrigger(320103);//BBCMB
+	bemcCalibMaker->addMinBiasTrigger(320111);//ZDCMB-Cat1
+	bemcCalibMaker->addMinBiasTrigger(320113);//BBCMB
+	bemcCalibMaker->addMinBiasTrigger(320123);//BBCMB
+	bemcCalibMaker->addMinBiasTrigger(320300);//TOF0*VPDMB
+	bemcCalibMaker->addMinBiasTrigger(320301);//TOF1
+	bemcCalibMaker->addMinBiasTrigger(320302);//TOF0*VPDMB
+	bemcCalibMaker->addMinBiasTrigger(320311);//TOF1
+	bemcCalibMaker->addMinBiasTrigger(330311);//TOF1
+	bemcCalibMaker->addMinBiasTrigger(330322);//TOF0*VPDMB
+	bemcCalibMaker->addMinBiasTrigger(320312);//TOF0*VPDMB
+	bemcCalibMaker->addMinBiasTrigger(320322);//TOF0*VPDMB
+	bemcCalibMaker->addMinBiasTrigger(330021);//VPDMB
+	bemcCalibMaker->addMinBiasTrigger(330100);//ZDCMB-Cat0
+	bemcCalibMaker->addMinBiasTrigger(330102);//ZDCMB-Cat3
+	bemcCalibMaker->addMinBiasTrigger(330111);//ZDCMB-Cat1
+	bemcCalibMaker->addMinBiasTrigger(330123);//BBCMB
+	// high tower
+	bemcCalibMaker->addHighTowerTrigger(320500);//BHT0*VPDMB
+	bemcCalibMaker->addHighTowerTrigger(320501);//BHT1
+	bemcCalibMaker->addHighTowerTrigger(320503);//BHT2
+	bemcCalibMaker->addHighTowerTrigger(320504);//BHT0*VPDMB
+	bemcCalibMaker->addHighTowerTrigger(320514);//BHT0*VPDMB
+	bemcCalibMaker->addHighTowerTrigger(320524);//BHT0*VPDMB
+	//bemcCalibMaker->addHighTowerTrigger(320600);//JP0
+	//bemcCalibMaker->addHighTowerTrigger(320601);//JP1
+	//bemcCalibMaker->addHighTowerTrigger(320602);//JP2*L2JetHigh
+	//bemcCalibMaker->addHighTowerTrigger(320603);//AJP
+	//bemcCalibMaker->addHighTowerTrigger(320800);//BHT2*JP1*L2Bgamma
+	//bemcCalibMaker->addHighTowerTrigger(320850);//EHT0*JP1*L2Egamma
+	//bemcCalibMaker->addHighTowerTrigger(330228);//FMS*BEMC*JP0
+	bemcCalibMaker->addHighTowerTrigger(330501);//BHT1
+	bemcCalibMaker->addHighTowerTrigger(330503);//BHT2
+	bemcCalibMaker->addHighTowerTrigger(330524);//BHT0*VPDMB
+	//bemcCalibMaker->addHighTowerTrigger(330600);//JP0
+	//bemcCalibMaker->addHighTowerTrigger(330601);//JP1
+	//bemcCalibMaker->addHighTowerTrigger(330602);//JP2*L2JetHigh
+	//bemcCalibMaker->addHighTowerTrigger(330603);//AJP
+	//bemcCalibMaker->addHighTowerTrigger(330612);//JP2*L2JetHigh
+	//bemcCalibMaker->addHighTowerTrigger(330621);//BJP1
+	//bemcCalibMaker->addHighTowerTrigger(330622);//BJP2*L2JetHigh
+	//bemcCalibMaker->addHighTowerTrigger(330800);//BHT2*JP1*L2Bgamma
+	//bemcCalibMaker->addHighTowerTrigger(330850);//EHT0*JP1*L2Egamma
+	//bemcCalibMaker->addHighTowerTrigger(330852);//EHT0
+	bemcCalibMaker->addHighTowerTrigger(320801);//BHT3*L2BW (W stream)
+	bemcCalibMaker->addHighTowerTrigger(330801);//BHT3*L2BW (W stream)
+	*/	
 
 
 
@@ -191,4 +254,10 @@ void bemcCalibMacro(const char* dir="./",
 	chain->Finish();
 	printf("my macro processed %i events in %s",i,name);
 	cout<<"\tcpu: "<<total.CpuTime()<<"\treal: "<<total.RealTime()<<"\tratio: "<<total.CpuTime()/total.RealTime()<<endl;
+
+  cout << endl;
+  cout << "-------------" << endl;
+  cout << "(-: Done :-) " << endl;
+  cout << "-------------" << endl;
+  cout << endl;
 }
