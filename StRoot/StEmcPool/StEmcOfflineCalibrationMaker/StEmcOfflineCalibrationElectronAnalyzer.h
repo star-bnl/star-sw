@@ -13,8 +13,9 @@ class StEmcOfflineCalibrationElectronAnalyzer : public TObject
   virtual ~StEmcOfflineCalibrationElectronAnalyzer(){}
 
   vector<int> HTtrigs;
+  vector<int> TOFtrigs;
 
   void analyze(TChain*, char*,char*);
   void analyzeTree(TChain*, char*,char*);
-  ClassDef(StEmcOfflineCalibrationElectronAnalyzer,1)
+  ClassDef(StEmcOfflineCalibrationElectronAnalyzer,2)
 };
