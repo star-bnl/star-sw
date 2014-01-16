@@ -25,8 +25,8 @@ bool isBadTower2005(int id);
 bool isPmtNew(int id);
 bool isBadTower2006(int id);
 
-void mip_histogram_fitter(const char* file_list="mips.list", const char* postscript="mip.ps", const char* gainfile="mip.gains.long",const char* ofname="2008.mipfit.root",const char* gfiles="mip.gains"){
-const int ntowers = 4800;
+void mip_histogram_fitter(const char* file_list="mips.list", const char* postscript="mip.ps", const char* gainfile="mip.gains.long",const char* ofname="2009.mipfit.root",const char* gfiles="mip.gains"){
+  const int ntowers = 4800;//4800;
 
  int mipstatus[ntowers];
 	cout<<"input files:  "<<file_list<<endl;
@@ -50,10 +50,8 @@ const int ntowers = 4800;
 	TH1 *mip_histo[ntowers];
 	TH2F* etaphi = new TH2F("etaphi","Mip peaks",40,-1.0,1.0,120,-pi,pi);
 	TH2F* statcode = new TH2F("statcode","Mip peaks",40,-1.0,1.0,120,-pi,pi);
-	etaphi->SetXTitle("#eta");
-	etaphi->SetYTitle("#phi");
-	statcode->SetXTitle("#eta");
-	statcode->SetYTitle("#phi");
+	etaphi->SetXTitle("#eta"); etaphi->SetYTitle("#phi");
+	statcode->SetXTitle("#eta"); statcode->SetYTitle("#phi");
 	TH1 *dumhist;
 	char file[200];
 	int nfiles = 0;
@@ -84,7 +82,7 @@ const int ntowers = 4800;
 		input_file.Clear();
 	}
 
-	TF1 *gaussian_fit[ntowers], *landau_fit[ntowers];
+	TF1 *gaussian_fit[ntowers];
 	char name[100];
 	
 	int counter = 0;
@@ -108,41 +106,27 @@ const int ntowers = 4800;
 		sprintf(name,"fit_%i",i+1);
 		
 		gaussian_fit[i] = new TF1(name,"gaus(0) + pol0(3)",5.,250.);
-		//gaussian_fit[i] = new TF1(name,"gaus(0)",5.,250.);
-		landau_fit[i] = new TF1(name,"landau",5.,200.);
-//		fit[i] = new TF1(name,"gaus(0)+expo(3)",5.,250.);
 
 		if((i+1) % 20 == 0){
 		  //cout<<i+1<<endl;
-		  mip_histo[i]->Rebin(5);
+		  //mip_histo[i]->Rebin(5);
 		  mip_histo[i]->GetXaxis()->SetRangeUser(6.,100.);
 		}else{
-		  mip_histo[i]->Rebin(2);
+		  //mip_histo[i]->Rebin(2);
 		  mip_histo[i]->GetXaxis()->SetRangeUser(6.,50.);
 		}
-		float guesspeak = mip_histo[i]->GetBinCenter(mip_histo[i]->GetMaximumBin());	
+		float guesspeak = mip_histo[i]->GetBinCenter(mip_histo[i]->GetMaximumBin());
+		float peakmax = mip_histo[i]->GetMaximum();	
 		float guessrms = mip_histo[i]->GetRMS();
 		gaussian_fit[i]->SetParameter(1,guesspeak);
 		gaussian_fit[i]->SetParameter(2,guessrms);
-		gaussian_fit[i]->SetParLimits(0,1,1000000);
+		gaussian_fit[i]->SetParLimits(0,1,peakmax*2);
 		gaussian_fit[i]->SetParLimits(1,1,250);
-		gaussian_fit[i]->SetParLimits(2,0,100);
+		gaussian_fit[i]->SetParLimits(2,guessrms/8.,100);
 		gaussian_fit[i]->SetParLimits(3,0,1000000);
-		landau_fit[i]->SetParameter(1,17.);
-		landau_fit[i]->SetParameter(2,3.);
-									
-		//these parameters are for the swap-finding version							
-//		fit[i]->SetParameter(0,10.);
-//		fit[i]->SetParameter(1,20.);
-//		fit[i]->SetParameter(2,1.5);
-//		fit[i]->SetParameter(3,7.);
-//		fit[i]->SetParameter(4,-0.1);
 		
 		gaussian_fit[i]->SetLineColor(kBlue);
 		gaussian_fit[i]->SetLineWidth(0.6);
-		
-		landau_fit[i]->SetLineColor(kYellow);
-		landau_fit[i]->SetLineWidth(0.6);
 
 		double histogram_top = mip_histo[i]->GetBinContent(mip_histo[i]->GetMaximumBin());
 		double gaussian_mean = 0;
@@ -153,7 +137,7 @@ const int ntowers = 4800;
 		  double gauss_const = gaussian_fit[i]->GetParameter(0);
 		  gaussian_mean = gaussian_fit[i]->GetParameter(1);
 		  //if((histogram_top / gauss_const > 2) || (histogram_top / gauss_const < 0.5))mipstatus[i]+=16;
-		  if(gaussian_mean < 5)mipstatus[i]+=4;
+		  if(gaussian_mean < 5)mipstatus[i]+=4; //change to <6?
 		  if((i+1)%20==0){
 		    if(abs(gaussian_mean-guesspeak) > 10)mipstatus[i]+=8;
 		    if(gaussian_fit[i]->GetParameter(2) > 20)mipstatus[i]+=2;
@@ -164,13 +148,12 @@ const int ntowers = 4800;
 		  if(guesspeak > 50)mipstatus[i]+=64;
 		  if(mipstatus[i]==1){
 		    etaphi->Fill(helper->getEta(i+1),helper->getPhi(i+1),gaussian_mean);
-		    mipstatus[i]+=128;
+		    //mipstatus[i]+=128;
 		  }
 		  statcode->Fill(helper->getEta(i+1),helper->getPhi(i+1),mipstatus[i]);
 
 		}
-		if(mipstatus[i]==129)mipstatus[i] = 1;
-//		mip_histo[i]->Fit(landau_fit[i],"rq+");
+		//if(mipstatus[i]==129)mipstatus[i] = 1;
 		if(mipstatus[i]>1){
 		  //cout<<i+1<<" "<<mipstatus[i]<<endl;
 		  mip_histo[i]->GetFunction(name)->SetLineColor(kRed);
@@ -182,13 +165,10 @@ const int ntowers = 4800;
 		if(mipstatus[i]!=1)gaussian_peak->SetLineColor(kRed);
 		gaussian_peak->SetLineWidth(2.0);
 		gaussian_peak->Draw("same");
+	       
+
+
 		
-/*		double landau_mean = landau_fit[i]->Mean(-1000.,60.);
-		TLine *landau_peak = new TLine(landau_mean,0.,landau_mean,histogram_top+15);
-		landau_peak->SetLineColor(kYellow);
-		landau_peak->SetLineWidth(1.5);
-		landau_peak->Draw("same");
-*/		
 //		if(fit[i]->GetParameter(0) > 10. && fit[i]->GetParameter(1)>0. && fit[i]->GetParameter(1)<40. && fit[i]->GetParameter(2)>0.3 && fit[i]->GetParameter(2)<5.){
 //			printf("%4i     %f     %f     %f\n",i+1,fit[i]->GetParameter(0),fit[i]->GetParameter(1),fit[i]->GetParameter(2));
 //		}
@@ -312,10 +292,10 @@ void drawTower(TH1* h, TF1* f, int id, int status, CalibrationHelperFunctions* h
 	sprintf(tphi,"p:%1.2f",helper->getPhi(id));
 	TLatex eta_latex;
 	TLatex phi_latex;
-	eta_latex.SetTextSize(0.15);
-	phi_latex.SetTextSize(0.15);
-	eta_latex.DrawTextNDC(0.65,0.5,teta);
-	phi_latex.DrawTextNDC(0.65,0.3,tphi);
+	eta_latex.SetTextSize(0.1);
+	phi_latex.SetTextSize(0.1);
+	eta_latex.DrawTextNDC(0.6,0.5,teta);
+	phi_latex.DrawTextNDC(0.6,0.3,tphi);
 	sprintf(tower_title,"%i",id);//,f->GetParameter(1));
 	TLatex title_latex;
 	title_latex.SetTextSize(0.15);
