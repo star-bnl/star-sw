@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.30 2013/03/24 20:25:24 jeromel Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.31 2014/01/16 18:22:51 xuanli Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.31  2014/01/16 18:22:51  xuanli
+//  Fix the error for stardev production
+//
 //  Revision 1.30  2013/03/24 20:25:24  jeromel
 //  SeededClusterAlgo created a canvas on exit, removed
 //
@@ -681,6 +684,8 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
 
 Int_t StFgtSeededClusterAlgo::Finish()
 {
+#if 0
+  if(gFile){
   //TCanvas c;
   hGaussFitStatus->Write();
   hGaussFitChi2->Write();
@@ -690,7 +695,8 @@ Int_t StFgtSeededClusterAlgo::Finish()
   hTbMaxRatio->Write();
   hTbSideCorr->Write();
   hTbSideRatio->Write();
-
+  }
+#endif
   return kStOk;
 }
 
