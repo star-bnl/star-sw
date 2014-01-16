@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.95 2013/12/11 18:27:56 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.96 2014/01/16 17:55:13 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.96  2014/01/16 17:55:13  genevb
+ * Two speed improvements: less calls to DB for SpaceCharge, avoid unnecessary cartesian/cylindrical coordinate conversions
+ *
  * Revision 1.95  2013/12/11 18:27:56  genevb
  * Account for GG voltage errorsi + shifts in UndoGGVoltErrorDistortion(), other minor optimizations
  *
@@ -374,7 +377,6 @@ To do:  <br>
 #include "TH2.h"
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_MagFactor_Table.h"
-#include "tables/St_tpcFieldCageShort_Table.h"
 #include "StDetectorDbMaker/St_tpcHVPlanesC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
@@ -386,6 +388,7 @@ static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scal
 StMagUtilities *StMagUtilities::fgInstance = 0 ;
 static const Float_t  PiOver12 = TMath::Pi()/12. ;  // Commonly used constant
 static const Float_t  PiOver6 = TMath::Pi()/6. ;  // Commonly used constant
+static const size_t threeFloats = 3 * sizeof(Float_t);
 
 
 //________________________________________
@@ -563,13 +566,27 @@ void StMagUtilities::GetTPCVoltages ()
 
 void StMagUtilities::GetSpaceCharge ()  
 { 
-  fSpaceCharge   =  StDetectorDbSpaceCharge::instance()  ; 
+  static spaceChargeCor_st* spaceTable = 0;
+
+  StDetectorDbSpaceCharge* spaceChair = StDetectorDbSpaceCharge::instance();
+  spaceChargeCor_st* new_spaceTable = spaceChair->Struct();
+  if (new_spaceTable == spaceTable) return;
+  fSpaceCharge =  spaceChair;
+  spaceTable = new_spaceTable;
+
   SpaceCharge    =  fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ; 
 }
 
 void StMagUtilities::GetSpaceChargeR2 ()  
 { 
-  fSpaceChargeR2 =  StDetectorDbSpaceChargeR2::instance() ;  
+  static spaceChargeCor_st* spaceTable = 0;
+
+  StDetectorDbSpaceChargeR2* spaceChair = StDetectorDbSpaceChargeR2::instance();
+  spaceChargeCor_st* new_spaceTable = spaceChair->Struct();
+  if (new_spaceTable == spaceTable) return;
+  fSpaceChargeR2 =  spaceChair;
+  spaceTable = new_spaceTable;
+
   SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
   SpaceChargeEWRatio = fSpaceChargeR2->getEWRatio() ;
 }
@@ -868,6 +885,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   printf("StMagUtilities::CommonSta  Using correction mode 0x%X\n",mCorrectionsMode);
   iterateDistortion = mCorrectionsMode & kIterateUndo;
   iterationFailCounter = -1;
+  usingCartesian = kTRUE; // default
 
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
   Float_t  OmegaTau ;                       // For an electron, OmegaTau carries the sign opposite of B 
@@ -968,11 +986,11 @@ void StMagUtilities::B3DField( const Float_t x[], Float_t B[] )
   Float_t r, z, phi, Br_value, Bz_value, Bphi_value ;
 
   z  = x[2] ;
-  r  = TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   
-  if ( r != 0.0 )
+  if ( x[0] != 0.0 || ( usingCartesian && x[1] != 0.0 ) )
     {
-      phi = TMath::ATan2( x[1], x[0] ) ;
+      if (usingCartesian) Cart2Polar(x,r,phi);
+      else { r = x[0]; phi = x[1]; }
       if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
       Interpolate3DBfield( r, z, phi, Br_value, Bz_value, Bphi_value ) ;
       B[0] = Br_value * (x[0]/r) - Bphi_value * (x[1]/r) ;
@@ -981,8 +999,7 @@ void StMagUtilities::B3DField( const Float_t x[], Float_t B[] )
     }
   else
     {
-      phi = 0 ;
-      Interpolate3DBfield( r, z, phi, Br_value, Bz_value, Bphi_value ) ;
+      Interpolate3DBfield( 0, z, 0, Br_value, Bz_value, Bphi_value ) ;
       B[0] = Br_value ;
       B[1] = Bphi_value ;
       B[2] = Bz_value ;
@@ -1023,8 +1040,10 @@ void StMagUtilities::BrBz3DField( const Float_t r, const Float_t z, const Float_
 void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
   // Control by flags JCD Oct 4, 2001
+  //
+  // NOTE: x[],Xprime[] must be Cartesian for this function!
+
   Float_t Xprime1[3], Xprime2[3] ;
-  size_t threeFloats = 3 * sizeof(Float_t);
 
   SectorNumber( Sector, x ) ;
 
@@ -1034,23 +1053,23 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 
     memcpy(Xprime1,x,threeFloats);
     memcpy(Xprime,x,threeFloats);
-    const Float_t MINDIST = 1e-4; // ~1 micron accuracy
-    Float_t dist = 2000;
-    int iter =0;
-    while (dist > MINDIST) { // iterate to a precision of 10 microns
+    const Float_t MINDIST_SQ = 1e-8; // ~1 micron accuracy
+    Float_t dist_sq = 1e10;
+    int iter = 0;
+    while (dist_sq > MINDIST_SQ) { // iterate to a precision of 10 microns
       UndoDistortion ( Xprime1, Xprime2, Sector ) ;
       Xprime1[0] = x[0] - (Xprime1[0] - Xprime2[0]) ;
       Xprime1[1] = x[1] - (Xprime1[1] - Xprime2[1]) ;
       Xprime1[2] = x[2] - (Xprime1[2] - Xprime2[2]) ;
-      dist = TMath::Sqrt( (Xprime1[0]-Xprime[0])*(Xprime1[0]-Xprime[0])
-                        + (Xprime1[1]-Xprime[1])*(Xprime1[1]-Xprime[1])
-                        + (Xprime1[2]-Xprime[2])*(Xprime1[2]-Xprime[2]) );
-      if (++iter > 20 && dist > MINDIST) { // Not converging
+      dist_sq = (Xprime1[0]-Xprime[0])*(Xprime1[0]-Xprime[0])
+              + (Xprime1[1]-Xprime[1])*(Xprime1[1]-Xprime[1])
+              + (Xprime1[2]-Xprime[2])*(Xprime1[2]-Xprime[2]) ;
+      if (++iter > 20 && dist_sq > MINDIST_SQ) { // Not converging
         // Take average of last two solutions
         Xprime[0] = 0.5*(Xprime[0] + Xprime1[0]);
         Xprime[1] = 0.5*(Xprime[1] + Xprime1[1]);
         Xprime[2] = 0.5*(Xprime[2] + Xprime1[2]);
-        dist = 0;
+        dist_sq = 0;
         if (iterationFailCounter >=0) iterationFailCounter++;
       } else {
         memcpy(Xprime,Xprime1,threeFloats);
@@ -1063,6 +1082,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 
 
   // Set it up
+/*
   memcpy(Xprime1,x,threeFloats);
  
 
@@ -1072,12 +1092,20 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
       memcpy(Xprime,x,threeFloats);
       return ;
     }
+*/
+  if ( TMath::Abs(x[2]) >= TPC_Z0 )
+    { memcpy(Xprime,x,threeFloats); return ; }
+  Cart2Polar(x,Xprime1[0],Xprime1[1]);
+  if  (Xprime1[0] > OFCRadius || Xprime1[0] < IFCRadius )
+    { memcpy(Xprime,x,threeFloats); return ; }
+  Xprime1[2] = x[2];
+  usingCartesian = kFALSE;
       
   if (mDistortionMode & kBMap) {
       FastUndoBDistortion    ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
   }
-      
+
   if (mDistortionMode & kFast2DBMap) {
       FastUndo2DBDistortion    ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
@@ -1088,7 +1116,6 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
       cout << "StMagUtilities ERROR **** These routines have duplicate functionality so don't do both." << endl ;
       exit(1) ;
   }
-
 
   if (mDistortionMode & kPadrow13) {
       UndoPad13Distortion    ( Xprime1, Xprime2, Sector ) ;
@@ -1167,9 +1194,13 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
       memcpy(Xprime1,Xprime2,threeFloats);
   }
 
+
   // Return it
 
-  memcpy(Xprime,Xprime1,threeFloats);
+  //memcpy(Xprime,Xprime1,threeFloats);
+  Polar2Cart(Xprime1[0],Xprime1[1],Xprime);
+  Xprime[2] = Xprime1[2];
+  usingCartesian = kTRUE;
 
   DoOnce = kFALSE;
   
@@ -1181,6 +1212,9 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 /// Main Entry Point for requests to DO the E and B field distortions (for simulations)
 void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
+
+  // NOTE: x[],Xprime[] must be Cartesian for this function!
+
   Bool_t tempIterDist = iterateDistortion;
   iterateDistortion = kFALSE; // Do not iterate for DoDistortion()
 
@@ -1207,12 +1241,13 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t S
 void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
+  // NOTE: x[],Xprime[] must be Cartesian for this function!
+
   Double_t ah ;                                        // ah carries the sign opposite of E (for forward integration)
   Float_t  B[3] ; 
   Int_t    sign, index = 1 , NSTEPS ;              
   
-  SectorNumber( Sector, x ) ;                          // Calculate sector number if not known
-  sign = ( Sector <= 12 ? 1 : -1 ) ;                   // 1 = TPC West, -1 = TPC East
+  sign = SectorSide( Sector, x ) ;                     // 1 = TPC West, -1 = TPC East
 
   Xprime[0]  =  x[0] ;                                 // Integrate backwards from TPC plane to 
   Xprime[1]  =  x[1] ;                                 // the point the electron cluster was born. 
@@ -1249,12 +1284,13 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_
 void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
+  // NOTE: x[],Xprime[] must be Cartesian for this function!
+
   Double_t ah ;                             // ah carries the sign opposite of E (for forward integration)
   Float_t  B[3] ; 
   Int_t    sign, index = 1 , NSTEPS ;              
   
-  SectorNumber( Sector, x ) ;                          // Calculate sector number if not known
-  sign = ( Sector <= 12 ? 1 : -1 ) ;                   // 1 = TPC West, -1 = TPC East
+  sign = SectorSide( Sector, x ) ;                     // 1 = TPC West, -1 = TPC East
 
   Xprime[0]  =  x[0] ;                                 // Integrate backwards from TPC plane to 
   Xprime[1]  =  x[1] ;                                 // the point the electron cluster was born. 
@@ -1279,6 +1315,8 @@ void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] , In
       if ( index != 4 ) index = 4; else index = 2 ;
     }    
 
+
+
 }
 
 
@@ -1301,8 +1339,9 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , 
   Float_t save_x[ORDER+1], saved_x[ORDER+1] ;
   Float_t save_y[ORDER+1], saved_y[ORDER+1] ;
 
-  Float_t r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  Float_t phi    =  TMath::ATan2(x[1],x[0]) ;
+  Float_t r, phi ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
 
@@ -1318,7 +1357,7 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , 
 	      for ( j = 0 ; j < EMap_nZ ; j++ )
 		{
 		  xx[2] = eZList[j] ;
-		  UndoBDistortion(xx,Xprime) ;
+		  UndoBDistortion(xx,Xprime) ;  // uses Cartesian coordinates
 		  dx3D[k][i][j]   = Xprime[0] - xx[0] ;
 		  dy3D[k][i][j]   = Xprime[1] - xx[1] ;
 		}
@@ -1347,9 +1386,15 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , 
       saved_y[k-klow]  = Interpolate( &eRList[ilow], save_y, ORDER, r )   ; 
     }
   
-  Xprime[0] = Interpolate( &ePhiList[klow], saved_x, PHIORDER, phi ) + x[0] ;
-  Xprime[1] = Interpolate( &ePhiList[klow], saved_y, PHIORDER, phi ) + x[1];
-
+  if (usingCartesian) {
+    Xprime[0] = Interpolate( &ePhiList[klow], saved_x, PHIORDER, phi ) + x[0] ;
+    Xprime[1] = Interpolate( &ePhiList[klow], saved_y, PHIORDER, phi ) + x[1];
+  } else {
+    Polar2Cart(x[0],x[1],xx);
+    xx[0] += Interpolate( &ePhiList[klow], saved_x, PHIORDER, phi ) ;
+    xx[1] += Interpolate( &ePhiList[klow], saved_y, PHIORDER, phi ) ;
+    Cart2Polar(xx,Xprime[0],Xprime[1]);
+  }
   Xprime[2] = x[2] ;
 
 }
@@ -1377,8 +1422,9 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
   Float_t save_dR[ORDER+1], saved_dR ;
   Float_t save_dRPhi[ORDER+1], saved_dRPhi ;
 
-  Float_t r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  Float_t phi    =  TMath::ATan2(x[1],x[0]) ;
+  Float_t r,phi;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
 
@@ -1392,7 +1438,7 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
 	  for ( j = 0 ; j < EMap_nZ ; j++ )
 	    {
 	      xx[2] = eZList[j] ;
-	      Undo2DBDistortion(xx,Xprime) ;
+	      Undo2DBDistortion(xx,Xprime) ; // uses Cartesian coords
 	      dR[i][j] = Xprime[0] ;
 	      dRPhi[i][j] = Xprime[1] ;
 	    }
@@ -1415,6 +1461,7 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
   saved_dR    = Interpolate( &eRList[ilow], save_dR,    ORDER, r )   ; 
   saved_dRPhi = Interpolate( &eRList[ilow], save_dRPhi, ORDER, r )   ; 
 
+
   if ( r > 0.0 ) 
     {
       r   =  saved_dR ;  // Note that we calculate these quantities as if on the X axis, so phi == 0 while calculating.  
@@ -1422,8 +1469,8 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
       if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
     }
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
   
 }
@@ -1448,11 +1495,19 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] , 
   // so they have been negated (below)  
   
   Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
-  sign = ( Sector <= 12 ? 1 : -1 ) ;                // 1 = TPC West, -1 = TPC East
+  sign = SectorSide( Sector, x ) ;                  // 1 = TPC West, -1 = TPC East
 
   Zdrift = sign * ( TPC_Z0 - TMath::Abs(z) ) ;
-  Xprime[0] = x[0] - (     Const_1 * YTWIST - Const_2 * XTWIST ) * Zdrift/1000 ;
-  Xprime[1] = x[1] - ( -1* Const_1 * XTWIST - Const_2 * YTWIST ) * Zdrift/1000 ;
+  if (usingCartesian) {
+    Xprime[0] = x[0] - (     Const_1 * YTWIST - Const_2 * XTWIST ) * Zdrift/1000 ;
+    Xprime[1] = x[1] - ( -1* Const_1 * XTWIST - Const_2 * YTWIST ) * Zdrift/1000 ;
+  } else {
+    Float_t xx[2];
+    Polar2Cart(x[0],x[1],xx);
+    xx[0] -= (     Const_1 * YTWIST - Const_2 * XTWIST ) * Zdrift/1000 ;
+    xx[1] -= ( -1* Const_1 * XTWIST - Const_2 * YTWIST ) * Zdrift/1000 ;
+    Cart2Polar(xx,Xprime[0],Xprime[1]);
+  }
   Xprime[2] = x[2] ;                                   // Subtract to undo the distortion 
 
 }
@@ -1531,8 +1586,8 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
 	}
     }
   
-  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi    =  TMath::ATan2(x[1],x[0]) ;               // Phi ranges from pi to -pi
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }               // Phi ranges from pi to -pi
   phi0   =  ( (Int_t)((TMath::Abs(phi)+PiOver12)/PiOver6 + 6.0 ) - 6.0 ) * PiOver6 ;
   if ( phi < 0 ) phi0 *= -1. ;
   y      =  r * TMath::Cos( phi0 - phi ) ;
@@ -1559,9 +1614,10 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
       phi =  phi - ( Const_1*(-1*sum)*TMath::Cos(phi0-phi) + Const_0*sum*TMath::Sin(phi0-phi) ) / r ;      
       r   =  r   - ( Const_0*sum*TMath::Cos(phi0-phi) - Const_1*(-1*sum)*TMath::Sin(phi0-phi) ) ;  
     }                                               // Subtract to Undo the distortions
+  Polar2Cart(r,phi,Xprime);
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
   
 }
@@ -1585,8 +1641,8 @@ void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] , 
 
   Double_t r, phi, z ;
 
-  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
 
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
@@ -1594,8 +1650,8 @@ void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] , 
   if ( z > 0 )  phi += WESTCLOCKERROR/1000. ;       // Phi rotation error in milli-radians
   // Do nothing if z = 0 
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
 }
@@ -1746,8 +1802,8 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 	}
     }
   
-  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
@@ -1761,8 +1817,8 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
       r   =  r   - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
 }
@@ -1826,8 +1882,8 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 	}
     }
   
-  r   =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi =  TMath::ATan2(x[1],x[0]) ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
@@ -1845,8 +1901,8 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
       r   =  r   - SpaceCharge * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
 }
@@ -1873,18 +1929,20 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 { 
   
   const Int_t     ORDER       =    1 ;  // Linear interpolation = 1, Quadratic = 2         
-  const Int_t     ROWS        =  257 ;  // (2**n + 1)    
-  const Int_t     COLUMNS     =  129 ;  // (2**m + 1) 
-  const Int_t     ITERATIONS  =  100 ;  // About 0.05 seconds per iteration
-  const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
-  const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
 
   Float_t   Er_integral, Ephi_integral ;
   Double_t  r, phi, z ;
 
+  if (fSpaceChargeR2) { GetSpaceChargeR2();} // need to reset it. 
+
   if ( DoOnce )
     {
       cout << "StMagUtilities::UndoSpace  Please wait for the tables to fill ...  ~5 seconds" << endl ;
+      const Int_t     ROWS        =  257 ;  // (2**n + 1)    
+      const Int_t     COLUMNS     =  129 ;  // (2**m + 1) 
+      const Int_t     ITERATIONS  =  100 ;  // About 0.05 seconds per iteration
+      const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+      const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
       TMatrix  ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
       TMatrix  ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
       Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
@@ -1962,8 +2020,8 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 
     }
   
-  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
@@ -1972,7 +2030,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 
   // Get Space Charge **** Every Event (JCD This is actually per hit)***
   // Need to reset the instance every hit.  May be slow, but there's no per-event hook.
-  if (fSpaceChargeR2) GetSpaceChargeR2(); // need to reset it. 
+  //if (fSpaceChargeR2) GetSpaceChargeR2(); // need to reset it. 
 
   // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC 
   if ( r > 0.0 ) 
@@ -1989,8 +2047,8 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	}
     }
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
 }
@@ -2026,7 +2084,6 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 { 
   
   const   Int_t   ORDER     = 1     ;            // Linear interpolation = 1, Quadratic = 2         
-  const   Float_t Z01       = 1.225 ;            // Distance from CM to center of first ring (cm)
   
   static  Bool_t DoOnceLocal = true ;
   static  Int_t  NumberOfEastInnerShorts = 0, NumberOfEastOuterShorts = 0 , NumberOfWestInnerShorts = 0, NumberOfWestOuterShorts = 0 ;
@@ -2034,7 +2091,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
-  if (fTpcVolts) DoOnceLocal = UpdateShortedRing() ;
+  if (fTpcVolts) {DoOnceLocal = UpdateShortedRing() ;}
 
   if ( DoOnceLocal )
     {
@@ -2043,6 +2100,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 
       // Parse the Table and separate out the four different resistor chains
       // Definition: A "missing" resistor is a shorted resistor, an "extra" resistor is a compensating resistor added at the end
+      const   Float_t Z01       = 1.225 ;            // Distance from CM to center of first ring (cm)
 
       Float_t EastInnerMissingSum = 0,     EastOuterMissingSum = 0,      WestInnerMissingSum = 0,     WestOuterMissingSum = 0 ; 
       Float_t EastInnerExtraSum   = 0,     EastOuterExtraSum   = 0,      WestInnerExtraSum   = 0,     WestOuterExtraSum   = 0 ;   
@@ -2074,7 +2132,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
       
       // Don't fill the tables if there aren't any shorts
       if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
-	  { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ;  return ; }
+	  { memcpy(Xprime,x,threeFloats);  return ; }
 
       Float_t EastInnerRtot = Rtot + EastInnerExtraSum - EastInnerMissingSum ;  // Total resistance of the real resistor chain
       Float_t EastOuterRtot = Rtot + EastOuterExtraSum - EastOuterMissingSum ;  // Total resistance of the real resistor chain
@@ -2153,11 +2211,14 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
       DoOnceLocal = false ;
     }
   
-  if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
-       { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
+  if ( SectorSide( Sector, x ) > 0 ) {
+         if ( (NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
+	  { memcpy(Xprime,x,threeFloats);  return ; }
+  } else if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts) == 0 ) 
+	  { memcpy(Xprime,x,threeFloats);  return ; }
   
-  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
@@ -2171,8 +2232,8 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
       r   =  r   - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
 }
@@ -2246,10 +2307,10 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
     }
   
   if ( deltaVGGEast == 0.0 && deltaVGGWest == 0 ) 
-       { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
+       { memcpy(Xprime,x,threeFloats) ; return ; }
   
-  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
@@ -2263,8 +2324,8 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
       r   =  r   - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
 }
@@ -4234,7 +4295,7 @@ Int_t StMagUtilities::IsPowerOfTwo(Int_t i)
 void StMagUtilities::SectorNumber( Int_t& Sector , const Float_t x[] )
 {
   if ( Sector > 0 ) return              ;  // Already valid
-  Float_t phi = TMath::ATan2(x[1],x[0]) ;
+  Float_t phi = (usingCartesian ? TMath::ATan2(x[1],x[0]) : x[1]) ;
   SectorNumber( Sector, phi, x[2] )     ;
 }
 void StMagUtilities::SectorNumber( Int_t& Sector , Float_t phi, const Float_t z )
@@ -4244,6 +4305,17 @@ void StMagUtilities::SectorNumber( Int_t& Sector , Float_t phi, const Float_t z 
   Sector = ( ( 30 - (int)(phi/PiOver12) )%24 ) / 2 ;
   if ( z < 0 ) Sector = 24 - Sector     ;  // Note that order of these two if statements is important
   else if ( Sector == 0 ) Sector = 12   ;
+}
+
+/// Calculate Sector Side from Sector number (-1 for east, +1 for west)
+Int_t StMagUtilities::SectorSide( Int_t& Sector , const Float_t x[] )
+{
+  return SectorSide(Sector, x[2]) ;
+}
+Int_t StMagUtilities::SectorSide( Int_t& Sector , const Float_t z )
+{
+  if ( Sector <= 0 ) SectorNumber(Sector,0,z);
+  return (Sector <= 12 ? 1 : -1) ;
 }
 
 
@@ -4258,9 +4330,9 @@ void StMagUtilities::SectorNumber( Int_t& Sector , Float_t phi, const Float_t z 
 Float_t StMagUtilities::LimitZ( Int_t& Sector , const Float_t x[] )
 {
   Float_t z = x[2];
-  SectorNumber( Sector, 0, z ) ;
-  if ( Sector <= 12 && z < 0.2 ) z = 0.2 ;
-  else if ( Sector >= 13 && z > -0.2 ) z = -0.2 ;
+  const Float_t zlimit = 0.2;
+  Int_t sign = SectorSide(Sector, z);
+  if (sign * z < zlimit) z = sign * zlimit;
   return z ;
 }
 
@@ -4292,7 +4364,7 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
   Double_t  r, phi, z ;
 
   if ( InnerGridLeakStrength == 0 && MiddlGridLeakStrength == 0 && OuterGridLeakStrength == 0 )
-    { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
+    { memcpy(Xprime,x,threeFloats) ; return ; }
 
   if ( DoOnce )
     {
@@ -4343,8 +4415,8 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
 
     }
   
-  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;             // Table uses phi from 0 to 2*Pi
   z = LimitZ( Sector, x ) ;                          // Protect against discontinuity at CM
   
@@ -4373,8 +4445,8 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
 	}
     }
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
 }
@@ -4434,9 +4506,7 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
   Float_t  Er_integral, Ephi_integral ;
   Float_t  r, phi, z ;
 
-  Xprime[0] = x[0] ;  
-  Xprime[1] = x[1] ; 
-  Xprime[2] = x[2] ; 
+  memcpy(Xprime,x,threeFloats) ;
 
   if ( MiddlGridLeakStrength == 0 ) return ; 
 
@@ -4551,8 +4621,8 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
     }
   
-  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
@@ -4589,8 +4659,8 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
       r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
 
 }
@@ -4660,9 +4730,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
   //Int_t lastSec = -1;
 
 
-  Xprime[0] = x[0] ;  
-  Xprime[1] = x[1] ; 
-  Xprime[2] = x[2] ; 
+  memcpy(Xprime,x,threeFloats) ;
 
   if ( DoOnce )
     {
@@ -4847,8 +4915,8 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
           
     }
   
-  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if (usingCartesian) Cart2Polar(x,r,phi);
+  else { r = x[0]; phi = x[1]; }
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
   
@@ -4862,8 +4930,8 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
       r   =  r   - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
   
-  Xprime[0] = r * TMath::Cos(phi) ;
-  Xprime[1] = r * TMath::Sin(phi) ;
+  if (usingCartesian) Polar2Cart(r,phi,Xprime);
+  else { Xprime[0] = r; Xprime[1] = phi; }
   Xprime[2] = x[2] ;
   
 }

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.54 2013/12/11 18:27:56 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.55 2014/01/16 17:55:14 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.55  2014/01/16 17:55:14  genevb
+ * Two speed improvements: less calls to DB for SpaceCharge, avoid unnecessary cartesian/cylindrical coordinate conversions
+ *
  * Revision 1.54  2013/12/11 18:27:56  genevb
  * Account for GG voltage errorsi + shifts in UndoGGVoltErrorDistortion(), other minor optimizations
  *
@@ -164,6 +167,7 @@
 #include "TSystem.h"
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 #include "TMatrix.h"      // TMatrix keeps changing ... keep it here until proven otherwise.
+#include "TMath.h"
 
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
 enum   Prime    { IsPrimary = 0 , IsGlobal = 1 } ;
@@ -252,6 +256,8 @@ class StMagUtilities {
   virtual Int_t   IsPowerOfTwo (Int_t i) ;
   virtual void    SectorNumber ( Int_t& Sector , const Float_t x[] ) ;
   virtual void    SectorNumber ( Int_t& Sector , Float_t phi, const Float_t z ) ;
+  virtual Int_t   SectorSide   ( Int_t& Sector , const Float_t x[] ) ; // -1 for east, +1 for west
+  virtual Int_t   SectorSide   ( Int_t& Sector , const Float_t z   ) ;
   virtual Float_t LimitZ (Int_t& Sector, const Float_t x[] ) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
 				const Int_t ORDER, const Float_t x ) ;
@@ -335,6 +341,7 @@ class StMagUtilities {
   Bool_t   useManualSCForPredict      ; // Flag on using fixed SC value or manually set one for Predict()
   Bool_t   iterateDistortion          ; // Flag on whether to iterate in determining distortions
   Int_t    iterationFailCounter       ; // Count of number of iteration fails
+  Bool_t   usingCartesian             ; // Using Cartesian or cylindrical coordinates
 
 
   Float_t  Bz[BMap_nZ][BMap_nR], Br[BMap_nZ][BMap_nR] ;         
@@ -442,10 +449,24 @@ class StMagUtilities {
   virtual void     ManualGGVoltError(Double_t east, Double_t west);
   virtual void     UseIterativeUndoDistortion(Bool_t flag=kTRUE) { iterateDistortion=flag; }
   virtual Int_t    IterationFailCount(); // must be called once before first actual use
-
           Float_t  GetConst_0() { return Const_0; }
           Float_t  GetConst_1() { return Const_1; }
           Float_t  GetConst_2() { return Const_2; }
+
+  virtual void     Cart2Polar(const Float_t* x, Float_t& r, Float_t& phi) {
+    r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+    phi    =  TMath::ATan2(x[1],x[0]) ;
+  }
+  virtual void     Cart2Polar(const Float_t* x, Double_t& r, Double_t& phi) {
+    r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+    phi    =  TMath::ATan2(x[1],x[0]) ;
+  }
+  virtual void     Polar2Cart(const Double_t r, const Double_t phi, Float_t* Xprime) {
+    Xprime[0] = r * TMath::Cos(phi) ;
+    Xprime[1] = r * TMath::Sin(phi) ;
+  }
+ 
+
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
