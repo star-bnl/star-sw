@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.96 2014/01/16 17:55:13 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.97 2014/01/17 03:52:41 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.97  2014/01/17 03:52:41  genevb
+ * More careful check on updating SpaceCharge
+ *
  * Revision 1.96  2014/01/16 17:55:13  genevb
  * Two speed improvements: less calls to DB for SpaceCharge, avoid unnecessary cartesian/cylindrical coordinate conversions
  *
@@ -380,6 +383,7 @@ To do:  <br>
 #include "StDetectorDbMaker/St_tpcHVPlanesC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
+#include "StDetectorDbMaker/St_trigDetSumsC.h"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
@@ -580,12 +584,15 @@ void StMagUtilities::GetSpaceCharge ()
 void StMagUtilities::GetSpaceChargeR2 ()  
 { 
   static spaceChargeCor_st* spaceTable = 0;
+  static St_trigDetSumsC* scalers = 0;
 
   StDetectorDbSpaceChargeR2* spaceChair = StDetectorDbSpaceChargeR2::instance();
   spaceChargeCor_st* new_spaceTable = spaceChair->Struct();
-  if (new_spaceTable == spaceTable) return;
+  St_trigDetSumsC* new_scalers = St_trigDetSumsC::instance();
+  if (new_spaceTable == spaceTable && new_scalers == scalers) return;
   fSpaceChargeR2 =  spaceChair;
   spaceTable = new_spaceTable;
+  scalers = new_scalers;
 
   SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
   SpaceChargeEWRatio = fSpaceChargeR2->getEWRatio() ;
