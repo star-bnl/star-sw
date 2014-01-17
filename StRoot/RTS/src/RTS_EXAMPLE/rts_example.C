@@ -1158,8 +1158,8 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 	s_found[0] = 0 ;
 
-	short adc_data[2][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][15] ;
-	short zs_data[2][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][15] ;
+	short adc_data[6][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][15] ;
+	short zs_data[6][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][15] ;
 	memset(adc_data,0,sizeof(adc_data)) ;
 	memset(zs_data,0,sizeof(zs_data)) ;
 
