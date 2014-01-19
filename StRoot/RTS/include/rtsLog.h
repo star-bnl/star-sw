@@ -47,6 +47,7 @@ extern "C" {
 #define RTS_LOG_PORT_ESB	8008
 #define RTS_LOG_PORT_L3		8009
 #define RTS_LOG_PORT_DET	8010
+#define RTS_LOG_PORT_EMAIL	8013
 
 #define RTS_LOG_PORT	RTS_LOG_PORT_TEST	/* default, test.log, port */
 
@@ -77,11 +78,15 @@ void rtsLogAddJmlFile (char *fname);
 
 #define CAUTION	"CAUTION"	/* unmasked - for the operator */
 
-#define TERR	"Tonko"		/* this will go away! */
+#define TERR	"Tonko"	
+
+#define U_TONKO	"U_TONKO"		/* Tonko gets email */
+#define U_JEFF	"U_JEFF"		/* Jeff gets email */
+#define U_IST	"U_IST"			/* IST manager gets email currently Gerrit */
 
 #define SAVEme	"SAVEme"	/* gets saved in saved.log */
 
-//#define SHIFT	"SHIFTLOG"	/* this will go away! */
+
 
 
 /*Tonko: not used Special (mis)handling for STAR Offline Code
