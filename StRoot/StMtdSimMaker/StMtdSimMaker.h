@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.h,v 1.4 2013/11/14 16:17:08 geurts Exp $
+ * $Id: StMtdSimMaker.h,v 1.5 2014/01/20 18:01:05 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMtdSimMaker.h,v $
+ * Revision 1.5  2014/01/20 18:01:05  geurts
+ * bug update: changed default Maker name from TofSim to MtdSim in order to prevent name clashes with StBTofSimMaker [Bill LLope]
+ *
  * Revision 1.4  2013/11/14 16:17:08  geurts
  * Correct mapping based on GEANT volume_id [Alex Jentsch]
  *
@@ -128,7 +131,7 @@ class StMtdSimMaker : public StMaker
 
 
  public:
-    StMtdSimMaker(const char *name="TofSim");
+    StMtdSimMaker(const char *name="MtdSim");
     virtual ~StMtdSimMaker();
 
     void           Reset();
@@ -148,7 +151,7 @@ class StMtdSimMaker : public StMaker
 //fg    void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.4 2013/11/14 16:17:08 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.5 2014/01/20 18:01:05 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StMtdSimMaker,1)
 };
