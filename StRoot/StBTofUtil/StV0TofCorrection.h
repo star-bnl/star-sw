@@ -1,4 +1,4 @@
-// $Id: StV0TofCorrection.h,v 1.1 2011/01/24 21:01:49 geurts Exp $
+// $Id: StV0TofCorrection.h,v 1.2 2014/01/20 16:55:50 geurts Exp $
 /*! \file StV0TofCorrection.h
     \brief header file of StV0TofCorrection class created by Patrick Huck (phuck@lbl.gov) [12/13/2010]
 
@@ -7,6 +7,12 @@
 */
 // ---
 // $Log: StV0TofCorrection.h,v $
+// Revision 1.2  2014/01/20 16:55:50  geurts
+// Major update by Patrick Huck:
+// - fixed memory leaks, clean-up
+// - switch from a custom closest-points-of-approach-finder to the StHelix::pathLengths()
+// - added a public helper function calcM2() to calculate mass^2 after TOF correction
+//
 // Revision 1.1  2011/01/24 21:01:49  geurts
 // *** empty log message ***
 //
@@ -26,10 +32,12 @@
 #include "TVirtualStreamerInfo.h"
 
 #include <vector>
+#include <map>
 
 //! template class defining an inline container 
 /*! used to store 3d-vectors and mother tracks */ 
-template < class T, class container = std::vector<T> > class StInlineContainer : public container {
+template < class T, class container = std::vector<T> >
+class StInlineContainer : public container {
  private:
   Int_t NrArgs; //!< number of arguments
   StInlineContainer<T>* pContainer; //!< pointer to inline container
@@ -37,7 +45,8 @@ template < class T, class container = std::vector<T> > class StInlineContainer :
  public:
   StInlineContainer() { NrArgs = 0; pContainer = NULL; }
   virtual ~StInlineContainer() {}
-  explicit StInlineContainer(const T vec) : container(1,vec) { } //!< explicit constructor
+  //! explicit constructor
+  explicit StInlineContainer(const T vec) : container(1,vec) { } //!<
   //! operater () overloaded for filling container
   StInlineContainer<T> operator()(const T vec) {
     NrArgs++;
@@ -46,36 +55,41 @@ template < class T, class container = std::vector<T> > class StInlineContainer :
     return *pContainer;
   }
   //! setter for number of arguments
-  void  setNrArgs(Int_t c) { NrArgs = c; }
+  void setNrArgs(const Int_t& c) { NrArgs = c; }
   //! getter for number of arguments
-  Int_t getNrArgs()        { return NrArgs; }
+  Int_t getNrArgs() { return NrArgs; }
   //! set pointer to container
-  void  setPointer2Container(StInlineContainer<T>* p) { pContainer = p; }
+  void setPointer2Container(StInlineContainer<T>* p) { pContainer = p; }
 };
 
+typedef std::map< std::string, std::pair<float, float> > M2CutType;
+
 //! A class providing tools to correct the time of flight of V0 particles
-/*! detailed class description see http://drupal.star.bnl.gov/STAR/system/files/stv0tofcorrection_v3.pdf */
+/*! detailed class description see
+    http://drupal.star.bnl.gov/STAR/system/files/stv0tofcorrection_v3.pdf */
 class StV0TofCorrection {
  private:
   //! inline function for time-of-flight calculation 
-  inline Float_t calcTof(StLorentzVectorD trackAB, Float_t PathAB); 
-  //! function for calculation of corrected path length
-  Float_t calcPathCorr(StPhysicalHelixD helixA, StThreeVectorD vectorAB, StThreeVectorD vectorTof) ;
-  //! function for calculation of path length on helix to a space point
-  Float_t calcPathOnHelixToPoint(StPhysicalHelixD helixA, StThreeVectorD space_vec) ; 
+  inline Float_t calcTof(const StLorentzVectorD&, const Float_t&);
   //! inline function for input check
   inline Bool_t inputOk();
   //! inline function for m2 cuts
-  inline Bool_t cutOnMass2(Float_t Mass2, Int_t pidnr);
-  //! set number of decays
-  void setNrDecays(Int_t n) { NrDecays = n; } 
+  inline Bool_t cutOnMass2(const Float_t&, const std::string&);
 
   Float_t clight; //!< speed of light in cm/ns
   Bool_t cleared, cleared2; //!< status of containers (cleared?) 
-
   Int_t NrDecays; //!< number of decays
   StInlineContainer<StThreeVectorD>* Vectors3D; //!< container for 3d-vectors
   StInlineContainer<StLorentzVectorD>* tracks; //!< container for mother tracks
+
+  //! hardcoded default m2 limits for pi,K,p
+  static M2CutType createM2CutMap() {
+    M2CutType m;
+    m["pi"] = std::make_pair(0.015, 0.025);
+    m["K"] = std::make_pair(0.2, 0.3);
+    m["p"] = std::make_pair(0.8085, 1.15);
+    return m;
+  }
 
  public:
   StV0TofCorrection() ; //!< constructor
@@ -87,7 +101,11 @@ class StV0TofCorrection {
       Vectors3D = new StInlineContainer<StThreeVectorD>;
     }
     else {
-      Error("StV0TofCorrection::setVectors3D","Make sure to call clearContainers() function every time a correction of a particle is done! Otherwise you're using the same container over and over again!");
+      const char* err_msg =
+	"Make sure to call clearContainers() function"
+	"every time a correction of a particle is done!"
+	"Otherwise you're using the same container over and over again!";
+      Error("StV0TofCorrection::setVectors3D", err_msg);
     }
     Vectors3D->setNrArgs(0);
     Vectors3D->setPointer2Container(Vectors3D);
@@ -105,25 +123,38 @@ class StV0TofCorrection {
       return (*tracks)(tr);
     }
     else {
-      Error("StV0TofCorrection::setMotherTracks","Again: Don't forget clearContainers()!");
+      Error(
+	  "StV0TofCorrection::setMotherTracks",
+	  "Again: Don't forget clearContainers()!"
+	  );
       return (*tracks);
     }
   }
 
   //! main function for beta correction
-  Bool_t correctBeta(StPhysicalHelixD helixA, Float_t TofA, Float_t& BetaCorr, Float_t MomentumA = -999., Int_t pidnr = -1) ;
+  Bool_t correctBeta(
+      const StPhysicalHelixD&, const Float_t&, Float_t&,
+      const Float_t& MomentumA = -999.,
+      const std::string& particle = ""
+      );
  
-  //! function for finalization by destroying containers (free allocated memory and set pointers to NULL)
+  //! function for finalization by destroying containers
+  //  (free allocated memory and set pointers to NULL)
   void clearContainers() {
     delete Vectors3D; delete tracks;
     Vectors3D = NULL; tracks = NULL;
     cleared = kTRUE; cleared2 = kTRUE;
   }
 
+  //! helper function to calculate m2 from momentum & beta
+  inline Float_t calcM2(const Float_t& mom, const Float_t& beta) {
+    Float_t f2 = 1./(beta*beta) - 1.;
+    return mom*mom * f2;
+  }
+
+  //! default m2 cuts
+  static M2CutType mM2CutMap;
+
   ClassDef(StV0TofCorrection,1)
-
 };
-
-
 #endif
-
