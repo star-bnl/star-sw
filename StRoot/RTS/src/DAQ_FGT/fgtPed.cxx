@@ -176,7 +176,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 			int tb_cou = meta->arc[rdo1].arm[arm].apv[apv].ntim ;
 
 			if(tb_cou != tb_cou_xpect) {
-				if(fgt_stat[rdo1-1].err < 10) {
+				if(fgt_stat[rdo1-1].err < 12) {
 					LOG(WARN,"wrong tb_cou %d(expect %d): ARC %d, ARM %d, APV %d",tb_cou,tb_cou_xpect,rdo1,arm,apv) ;
 				}
 				fgt_stat[rdo1-1].err++ ;
@@ -242,7 +242,8 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 		*d32++ = META_ZS_VERSION ;		// version
 		break ;
 	case IST_ID :
-		*d32++ = META_ZS_VERSION ;		// version
+		do_ped_sub = 1 ;
+		*d32++ = META_PED_ZS_VERSION ;	// zs _AND_ ped subtracted
 		break ;		
 	case GMT_ID :
 		do_ped_sub = 1 ;	// subtract peds
@@ -498,21 +499,39 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 }
 
-void fgtPed::do_thresh(double ns, int k)
+static int fgt_bad_heuristics(int rts_id, double ped, double rms)
 {
-	tb_cou = -1 ;
+	switch(rts_id) {
+	case IST_ID :
+		if((rms < 5.0)||(rms>50.0)||(ped>2000.0)||(ped<5.0)) return -1 ;
+		break ;
+	default :
+		if((rms<=0.0) || (ped<0.0)) return -1 ;
+		break ;
+	}
+
+	return 0 ;	// take it!
+}
+
+
+double fgtPed::do_thresh(double ns, int k)
+{
+	tb_cou = tb_cou_xpect ;
+	char bad[FGT_RDO_COU][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
 
 	if(!ped_store || !valid) {
 		LOG(ERR,"fgt:do_thresh invalid") ;
-		return ;
+		return -1.0 ;
 	}
 
 	n_sigma = ns ;
 	k_seq = k ;
 
+	memset(bad,0,sizeof(bad)) ;
+
 	LOG(TERR,"do_thresh: n-sigma %f, k-seq %d",n_sigma, k_seq) ;
 
-	// use the 0th timebin!
+	// use the 0th timebin! For what???
 	for(int r=0;r<FGT_RDO_COU;r++) {
 		struct peds *p = ped_store + r ;
 
@@ -522,15 +541,25 @@ void fgtPed::do_thresh(double ns, int k)
 
 		p->thr[arm][apv][c] = 0xFFFF ;	// max it out
 
+		if(p->rms[arm][apv][c][0] < -1.5) continue ;	// not necessary at all
+
 		double ped = 0.0 ;
 		double rms = 0.0 ;
 		int cou = 0 ;
 
-		for(int t=0;t<FGT_TB_COU;t++) {
+		int c_bad = 0 ;
+		for(int t=0;t<tb_cou;t++) {
 			double pp = p->ped[arm][apv][c][t] ;
 			double rm = p->rms[arm][apv][c][t] ;
 
-			if(rm < 0.0) continue ;
+	
+			if(fgt_bad_heuristics(rts_id,pp,rm)) {
+				//LOG(TERR,"%d %d %d %d %d %f %f\n",r,arm,apv,c,t,pp,rm) ;
+				c_bad = 1 ;
+			}
+
+			if(rm < 0.0) continue ;	// should be here but not found in data, damn...
+
 			//if(cou == 7) continue ;
 
 			ped += pp ;
@@ -538,14 +567,14 @@ void fgtPed::do_thresh(double ns, int k)
 			cou++ ;
 		}
 
-		if(cou==0) continue ;
+		if(c_bad) bad[r][arm][apv][c] = 1 ;
 
-		if(tb_cou < 0) tb_cou = cou ;
-		else {
-			if(tb_cou != cou) {
-				LOG(WARN,"%d %d %d %d: expect %d timebins but have %d",r,arm,apv,c,tb_cou,cou) ;
-			}
+		if(cou == 0) continue ;
+
+		if(tb_cou != cou) {
+			LOG(WARN,"%d %d %d %d: expect %d timebins but have %d",r,arm,apv,c,tb_cou,cou) ;
 		}
+
 
 		ped /= cou ;
 		rms /= cou ;
@@ -564,7 +593,36 @@ void fgtPed::do_thresh(double ns, int k)
 		}
 	}
 
-	return ;
+	// kill bad
+	int all_cou = 0 ;
+	int bad_cou = 0 ;
+	for(int r=0;r<FGT_RDO_COU;r++) {
+		struct peds *p = ped_store + r ;
+
+		for(int arm=0;arm<FGT_ARM_COU;arm++) {
+		for(int apv=0;apv<FGT_APV_COU;apv++) {
+
+		int b_cou = 0 ;
+		for(int c=0;c<FGT_CH_COU;c++) {
+			if(p->rms[arm][apv][c][0] < -1.5) continue ;	// not necessary at all
+			if(bad[r][arm][apv][c]) {
+				//p->thr[arm][apv][c] = 0xFFFF ;	// max it out
+				b_cou++ ;
+			}
+			all_cou++ ;
+		}
+
+		if(b_cou) {
+			bad_cou += b_cou ;
+			LOG(WARN,"ARC %d, ARM %d, APV %2d: has %d bad channels",r,arm,apv,b_cou) ;
+		}
+
+		}
+		}
+	}
+	double perc = 100.0*(double)bad_cou/(double)all_cou ;
+
+	return  perc ;
 
 }
 
@@ -744,7 +802,7 @@ int fgtPed::from_cache(char *fname)
 
 		for(int t=0;t<FGT_TB_COU;t++) {
 			ped->ped[arm][apv][c][t] = 0.0 ;
-			ped->rms[arm][apv][c][t] = -1.0 ;
+			ped->rms[arm][apv][c][t] = -2.0 ;	// mark as not needed...
 		}
 
 		ped->thr[arm][apv][c] = 0xFFFF ;
