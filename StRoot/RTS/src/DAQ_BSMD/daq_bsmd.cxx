@@ -750,7 +750,7 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	int rdo_in_dta = d32[3] & 0xFF ;	// fiber ID via jumpers...
-	if(rdo_id[rdo] != 0xFF) {
+	if(rdo_id[rdo] != 0xFF) {		// skip the check!
 		if(rdo_id[rdo] != rdo_in_dta) {
 			id_check_failed++ ;
 		}
@@ -955,8 +955,14 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		if(id_check_failed) {
 			rdo_warns[rdo]++ ;
 			if(rdo_warns[rdo] < 5) {
-				LOG(CAUTION,"RDO %d: rdo check failed: expect 0x%02X, found 0x%02X",
-				    rdo,rdo_id[rdo],rdo_in_dta) ;
+				if(rdo_id[rdo]==0x5 || rdo_id[rdo]==0xD) {
+					LOG(ERR,"RDO %d: rdo check failed: expect 0x%02X, found 0x%02X",
+					    rdo,rdo_id[rdo],rdo_in_dta) ;
+				}
+				else {
+					LOG(CAUTION,"RDO %d: rdo check failed: expect 0x%02X, found 0x%02X",
+					    rdo,rdo_id[rdo],rdo_in_dta) ;
+				}
 			}			
 		}
 
