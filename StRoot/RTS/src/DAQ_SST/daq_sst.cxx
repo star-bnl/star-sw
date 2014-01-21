@@ -163,21 +163,27 @@ int daq_sst::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	// quick sanity checks...
 	if(d32[0] != 0xAAAAAAAA) err |= 1 ;	// header error
 	if(d32[last_ix] != 0xBBBBBBBB) err |= 2	;	// trailer error
+
+#if 0
 	if((d32[1] & 0xFFF00000) != 0xCCC00000) err |= 8 ;	// junk in trigger/daq/token
 	
 	// special TCD-only event check
 	if(d32[1] == 0xCCC0FFFF) {
-		LOG(NOTE,"RDO %d: trigger-only event...",rdo) ;
+		LOG(WARN,"RDO %d: trigger-only event...",rdo) ;
 		token = 4097 ;
 		daq_cmd = 0 ;
 		trg_cmd = 4 ;
 	}
 	else {
+#endif
 	
 		token = d32[1] & 0xFFF ;
 		daq_cmd = (d32[1] & 0xF000) >> 12 ;
 		trg_cmd = (d32[1] & 0xF0000) >> 16 ;
+
+#if 0
 	}
+#endif
 
 	// more sanity
 	if(token == 0) {
@@ -194,7 +200,7 @@ int daq_sst::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	trg[t_cou].rhic_delta = 0 ;
 	t_cou++ ;
 
-	
+#if 0	
 	// get other trigger commands...
 	int last_p = last_ix - 1 ;	// at CRC
 
@@ -236,6 +242,7 @@ int daq_sst::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 			}
 		}
 	}
+#endif
 
 	//err = t_cou ;
 	if(err) {
