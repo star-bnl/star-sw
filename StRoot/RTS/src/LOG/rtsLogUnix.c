@@ -222,10 +222,22 @@ int rtsLogUnix_v(const char *str, ...)
 			sprintf(string+len,"%s%s",ANSI_BLUE,ANSI_REVERSE) ;
 			len += strlen(string+len) ;
 		}
-		else  {
+		else if(strncmp(str,"U_",2)==0) {
 			colored = 1 ;
+			to_file = 1 ;
+			sprintf(string+len,"%s",ANSI_REVERSE) ;
+			len += strlen(string+len) ;
+		}
+		else if(strncmp(str,INFO,strlen(INFO))==0) {
+			colored = 1 ;
+			to_file = 1 ;
 			sprintf(string+len,"%s",ANSI_BLUE) ;
 			len += strlen(string+len) ;
+		}
+		else  {
+			//colored = 1 ;
+			//sprintf(string+len,"%s",ANSI_BLUE) ;
+			//len += strlen(string+len) ;
 		}
 
 	}
