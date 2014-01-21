@@ -387,7 +387,7 @@ LINK.o = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
 
 # misc. executables
 export MAKEDEPEND = makedepend -Y -w7 -- ${CXXFLAGS} -- *.cxx *.C *.h *.c *.hh 2>rts.makedepend.err
-export INSTALL:=$(RTS_DIR_PATH)/../../online/RTS/src/SH_UTIL/install.sh
+export INSTALL:=/RTS/bin/install.sh
 export CLEAN := rm -f rts.makedepend.err err out *.o *.a *.so *.bak *~ #* 
 
 #added stuff so that we can compile .cxx
