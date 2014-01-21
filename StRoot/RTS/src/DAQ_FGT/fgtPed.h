@@ -22,7 +22,7 @@ public:
 	void calc() ;					// calculates mean/rms into ped_store
 	int to_evb(char *buff) ;			// to EVB format from ped_store
 
-	void do_thresh(double n_sigma, int k_seq) ;
+	double do_thresh(double n_sigma, int k_seq) ;
 
 	int do_zs(char *src, int in_bytes, char *dst, int rdo1) ;
 	int run_stop() ;	// prints errors etc.
