@@ -1,34 +1,35 @@
 /*!
  * \class StPxlClusterMaker 
  * \author Qiu Hao, Jan 2013, according codes from Xiangming Sun
+ * \Initial Revision.
  */
 /***************************************************************************
  * 
- * $Id: StPxlClusterMaker.cxx,v 1.2 2013/09/25 11:53:59 qiuh Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.3 2014/01/23 01:04:43 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun 
  ***************************************************************************
  *
  * Description:
  * Group neighboring pixel raw hits from into clusters.
+ * More information at
+ * https://www.star.bnl.gov/protected/heavy/qiuh/HFT/software/PXL_software.pdf
  *
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
- * Revision 1.2  2013/09/25 11:53:59  qiuh
+ * Revision 1.3  2014/01/23 01:04:43  qiuh
  * *** empty log message ***
  *
- * Revision 1.1  2013/05/23 20:57:17  qiuh
- * *** empty log message ***
  * 
  **************************************************************************/ 
 
 #include "StPxlClusterMaker.h"
 #include "StMessMgr.h"
-#include "StPxlUtil/StPxlCluster.h"
-#include "StPxlUtil/StPxlClusterCollection.h"
-#include "StPxlUtil/StPxlRawHit.h"
-#include "StPxlUtil/StPxlRawHitCollection.h"
+#include "StPxlCluster.h"
+#include "StPxlClusterCollection.h"
+#include "StPxlRawHitMaker/StPxlRawHit.h"
+#include "StPxlRawHitMaker/StPxlRawHitCollection.h"
 #include "StPxlUtil/StPxlConstants.h"
 
 ClassImp(StPxlClusterMaker);
@@ -48,7 +49,7 @@ Int_t StPxlClusterMaker::Init() {
 Int_t StPxlClusterMaker::Make() {
     LOG_INFO<<"StPxlClusterMaker::Make()"<<endm;
 
-    //input data
+    /// input data
     TObjectSet* pxlRawHitDataSet = (TObjectSet*)GetDataSet("pxlRawHit");
     if (! pxlRawHitDataSet) {
         LOG_WARN << "Make() - there is no pxlRawHitDataSet " << endm;
@@ -61,42 +62,40 @@ Int_t StPxlClusterMaker::Make() {
         return kStWarn;
     }
     
-    //output cluster data structures
-    m_pxlClusterDataSet = new TObjectSet("pxlCluster");
-    m_DataSet = m_pxlClusterDataSet;
-    m_pxlClusterCollection = new StPxlClusterCollection();
-    m_pxlClusterDataSet->AddObject(m_pxlClusterCollection);
+    /// output cluster data structures
+    mPxlClusterCollection = new StPxlClusterCollection();
+    ToWhiteBoard("pxlCluster", mPxlClusterCollection);
     
-    //real work
+    /// real work
     for (int i=0; i<nPxlSectors; i++) 
         for(int j=0; j<nPxlLaddersPerSector; j++)
             for(int k=0; k<nPxlSensorsPerLadder; k++)
                 {
-                    //clear bitMap
+                    /// clear bitMap
                     for(int l=0;l<nPxlRowsOnSensor;l++){
-                        bitMap[l].reset();
+                        mBitMap[l].reset();
                     }
-                    memset(mapIdTruth, 0, nPxlRowsOnSensor*nPxlColumnsOnSensor*sizeof(int));
+                    memset(mMapIdTruth, 0, nPxlRowsOnSensor*nPxlColumnsOnSensor*sizeof(int));
                     
-                    //load bitMap
-                    int vectorSize = pxlRawHitCollection->pxlRawHitVec[i][j][k].size();
+                    /// load bitMap
+                    int vectorSize = pxlRawHitCollection->numberOfRawHits(i+1, j+1, k+1);
                     for(int l=0; l<vectorSize; l++)
                         {
-                            StPxlRawHit* rawHit = pxlRawHitCollection->pxlRawHitVec[i][j][k][l];
-                            bitMap[rawHit->row()].set(rawHit->column());
-                            if(rawHit->idTruth()) mapIdTruth[rawHit->row()][rawHit->column()] = rawHit->idTruth();
+                            StPxlRawHit* rawHit = pxlRawHitCollection->rawHit(i+1, j+1, k+1, l);
+                            mBitMap[rawHit->row()].set(rawHit->column());
+                            if(rawHit->idTruth()) mMapIdTruth[rawHit->row()][rawHit->column()] = rawHit->idTruth();
                         }
                     
-                    //find clusters
+                    /// find clusters
                     for(int l=0; l<vectorSize; l++)
                         {
-                            StPxlRawHit* rawHit = pxlRawHitCollection->pxlRawHitVec[i][j][k][l];
+                            StPxlRawHit* rawHit = pxlRawHitCollection->rawHit(i+1, j+1, k+1, l);
                             StPxlCluster* cluster = new StPxlCluster();
-                            FindCluster(cluster, rawHit->column(), rawHit->row());
+                            findCluster(cluster, rawHit->column(), rawHit->row());
                             if(cluster->nRawHits() > 0)
                                 {
-                                    cluster->Summarize();
-                                    m_pxlClusterCollection->clusterVec[i][j][k].push_back(cluster);
+                                    cluster->summarize();
+                                    mPxlClusterCollection->addCluster(i+1, j+1, k+1, cluster);
                                 }
                             else delete cluster;
                         }
@@ -105,19 +104,21 @@ Int_t StPxlClusterMaker::Make() {
     return kStOK;
 }
 
-void StPxlClusterMaker::FindCluster(StPxlCluster* cluster, int column, int row)
+void StPxlClusterMaker::findCluster(StPxlCluster* cluster, Int_t column, Int_t row)
 {    
-    if(bitMap[row][column]==0) return; //already included in another cluster
-    bitMap[row][column]=0; //unmark this used raw hit
-    if(column-1 >= 0) FindCluster(cluster, column-1, row);
-    if(column+1 < nPxlColumnsOnSensor) FindCluster(cluster, column+1, row);
-    if(row-1 >= 0) FindCluster(cluster, column, row-1);
-    if(row+1 < nPxlRowsOnSensor) FindCluster(cluster, column, row+1);
-    if(column-1 >=0 && row-1 >= 0) FindCluster(cluster, column-1, row-1);
-    if(column-1 >=0 && row+1 < nPxlRowsOnSensor) FindCluster(cluster, column-1, row+1);
-    if(column+1 < nPxlColumnsOnSensor && row-1 >= 0) FindCluster(cluster, column+1, row-1);
-    if(column+1 < nPxlColumnsOnSensor && row+1 < nPxlRowsOnSensor) FindCluster(cluster, column+1, row+1);
-    cluster->AddRawHit(column, row, mapIdTruth[row][column]);
+    if(mBitMap[row][column]==0) return; ///< skip if already included in another cluster
+    mBitMap[row][column]=0; ///< unmark this used raw hit
+    /// looking at the 8 neighboring pixels, if fired, continue looking from that pixel
+    if(column-1 >= 0) findCluster(cluster, column-1, row);
+    if(column+1 < nPxlColumnsOnSensor) findCluster(cluster, column+1, row);
+    if(row-1 >= 0) findCluster(cluster, column, row-1);
+    if(row+1 < nPxlRowsOnSensor) findCluster(cluster, column, row+1);
+    if(column-1 >=0 && row-1 >= 0) findCluster(cluster, column-1, row-1);
+    if(column-1 >=0 && row+1 < nPxlRowsOnSensor) findCluster(cluster, column-1, row+1);
+    if(column+1 < nPxlColumnsOnSensor && row-1 >= 0) findCluster(cluster, column+1, row-1);
+    if(column+1 < nPxlColumnsOnSensor && row+1 < nPxlRowsOnSensor) findCluster(cluster, column+1, row+1);
+    /// fill cluster
+    cluster->addRawHit(column, row, mMapIdTruth[row][column]);
     
 }
 

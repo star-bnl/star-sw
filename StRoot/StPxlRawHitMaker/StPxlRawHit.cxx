@@ -1,22 +1,26 @@
 /*!
  * \class StPxlRawHit 
  * \author Qiu Hao, Jan 2012
+ * \Initial Revision.
  */
 /***************************************************************************
  * 
- * $Id: StPxlRawHit.cxx,v 1.5 2013/05/23 21:28:44 qiuh Exp $
+ * $Id: StPxlRawHit.cxx,v 1.1 2014/01/23 01:05:02 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2012
  ***************************************************************************
  *
  * Description:
  * pixel raw hit before clustering. One raw hit is one fired pixel.
+ * More information at
+ * https://www.star.bnl.gov/protected/heavy/qiuh/HFT/software/PXL_software.pdf
  *
  ***************************************************************************
  *
  * $Log: StPxlRawHit.cxx,v $
- * Revision 1.5  2013/05/23 21:28:44  qiuh
+ * Revision 1.1  2014/01/23 01:05:02  qiuh
  * *** empty log message ***
+ *
  * 
  **************************************************************************/
 
@@ -36,7 +40,7 @@ StPxlRawHit::StPxlRawHit()
     mIdTruth = 0;
 }
 
-StPxlRawHit::StPxlRawHit(int sector, int ladder, int sensor, int row, int column, int idTruth)
+StPxlRawHit::StPxlRawHit(Int_t sector, Int_t ladder, Int_t sensor, Int_t row, Int_t column, Int_t idTruth)
 {
     mSector = sector;
     mLadder = ladder;
@@ -46,39 +50,39 @@ StPxlRawHit::StPxlRawHit(int sector, int ladder, int sensor, int row, int column
     mIdTruth = idTruth;
 }
 
-int StPxlRawHit::sector() const {return mSector;}
-int StPxlRawHit::ladder() const {return mLadder;}
-int StPxlRawHit::sensor() const {return mSensor;}
-int StPxlRawHit::row() const {return mRow;}
-int StPxlRawHit::column() const {return mColumn;}
-int StPxlRawHit::idTruth() const {return mIdTruth;}
+Int_t StPxlRawHit::sector() const {return mSector;}
+Int_t StPxlRawHit::ladder() const {return mLadder;}
+Int_t StPxlRawHit::sensor() const {return mSensor;}
+Int_t StPxlRawHit::row() const {return mRow;}
+Int_t StPxlRawHit::column() const {return mColumn;}
+Int_t StPxlRawHit::idTruth() const {return mIdTruth;}
 
-void StPxlRawHit::setSector(int sector)
+void StPxlRawHit::setSector(Int_t sector)
 {
     mSector = sector;
 }
 
-void StPxlRawHit::setLadder(int ladder)
+void StPxlRawHit::setLadder(Int_t ladder)
 {
     mLadder = ladder;
 }
 
-void StPxlRawHit::setSensor(int sensor)
+void StPxlRawHit::setSensor(Int_t sensor)
 {
     mSensor = sensor;
 }
 
-void StPxlRawHit::setRow(int row)
+void StPxlRawHit::setRow(Int_t row)
 {
     mRow = row;
 }
 
-void StPxlRawHit::setColumn(int column)
+void StPxlRawHit::setColumn(Int_t column)
 {
     mColumn = column;
 }
 
-void StPxlRawHit::setIdTruth(int idTruth)
+void StPxlRawHit::setIdTruth(Int_t idTruth)
 {
     mIdTruth = idTruth;
 }

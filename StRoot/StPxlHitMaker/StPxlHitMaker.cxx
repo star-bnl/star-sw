@@ -1,25 +1,26 @@
 /*!
  * \class StPxlHitMaker 
  * \author Qiu Hao, Jan 2013
+ * \Initial Revision.
  */
 /***************************************************************************
  * 
- * $Id: StPxlHitMaker.cxx,v 1.3 2013/06/05 01:01:46 qiuh Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.4 2014/01/23 01:04:53 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013 
  ***************************************************************************
  *
  * Description:
- * Create pxl hits according to clusters and calculate their global position.
+ * Create pxl hits according to clusters and calculate pxl hit global positions.
+ * More information at
+ * https://www.star.bnl.gov/protected/heavy/qiuh/HFT/software/PXL_software.pdf
  *
  ***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
- * Revision 1.3  2013/06/05 01:01:46  qiuh
+ * Revision 1.4  2014/01/23 01:04:53  qiuh
  * *** empty log message ***
  *
- * Revision 1.2  2013/05/24 20:26:00  qiuh
- * *** empty log message ***
  * 
  **************************************************************************/ 
 
@@ -28,11 +29,12 @@
 #include "StEventTypes.h"
 #include "TGeoMatrix.h"
 #include "StPxlUtil/Tps.h"
-#include "StPxlUtil/StPxlCluster.h"
-#include "StPxlUtil/StPxlClusterCollection.h"
+#include "StPxlClusterMaker/StPxlCluster.h"
+#include "StPxlClusterMaker/StPxlClusterCollection.h"
 #include "StPxlUtil/StPxlConstants.h"
 #include "StPxlDbMaker/StPxlDbMaker.h"
 #include "tables/St_pxlSensorTps_Table.h"
+#include "tables/St_pxlControl_Table.h"
 
 ClassImp(StPxlHitMaker)
 
@@ -48,9 +50,7 @@ Int_t StPxlHitMaker::Init() {
 }
 //________________________________________________________________________________
 Int_t StPxlHitMaker::InitRun(Int_t runnumber) {
-    listGeoMSensorOnGlobal = gStPxlDbMaker->GetRotations();
-
-    //read Tps DB
+    /// read Tps DB
     TDataSet *dbTps = 0;
     dbTps = GetDataBase("Geometry/pxl/pxlSensorTps");
     if (!dbTps) {
@@ -59,33 +59,33 @@ Int_t StPxlHitMaker::InitRun(Int_t runnumber) {
 
     St_pxlSensorTps *datasetTps = 0;
     datasetTps = (St_pxlSensorTps*) dbTps->Find("pxlSensorTps");
-    Int_t rowsTps = datasetTps->GetNRows();
-    if (rowsTps > 1) {
-        LOG_INFO << "found tps table with " << rowsTps << " rows" << endm;
-    }
 
     if (datasetTps) {
         pxlSensorTps_st *tableTps = datasetTps->GetTable();
-        for (Int_t i = 0; i < rowsTps; i++) {
-            // sample output of first member variable
+        for (Int_t i = 0; i < nPxlSectors*nPxlLaddersPerSector*nPxlSensorsPerLadder; i++) {
             int id = tableTps[i].Id;
-            int iSector = (id-1)/40;
-            int iLadder = (id-1)/10%4;
-            int iSensor = (id-1)%10;
+            int iSector = (id-1)/nPxlSensorsPerLadder/nPxlLaddersPerSector;
+            int iLadder = (id-1)/nPxlSensorsPerLadder%nPxlLaddersPerSector;
+            int iSensor = (id-1)%nPxlSensorsPerLadder;
             int nMeasurements = tableTps[i].nMeasurements;
-            tps[iSector][iLadder][iSensor] = new Tps(nMeasurements);
-            for(int j=0; j<3; j++)
-                (*tps[iSector][iLadder][iSensor]->A)[j][0] = tableTps[i].A[j];
-            for(int j=0; j<nMeasurements; j++)
-                (*tps[iSector][iLadder][iSensor]->X)[j][0] = tableTps[i].X[j];
-            for(int j=0; j<nMeasurements; j++)
-                (*tps[iSector][iLadder][iSensor]->Y)[j][0] = tableTps[i].Y[j];
-            for(int j=0; j<nMeasurements; j++)
-                (*tps[iSector][iLadder][iSensor]->W)[j][0] = tableTps[i].W[j];
+            cout<<"nMeasurements: "<<nMeasurements<<endl;
+            mTps[iSector][iLadder][iSensor] = new Tps(nMeasurements, tableTps[i].X, tableTps[i].Y, tableTps[i].W, tableTps[i].A);
+            cout<<"tps done"<<endl;
         }
     } else {
         LOG_WARN << "ERROR: dataset does not contain tps table" << endm;
     }
+
+    /// read pxl size from DB
+    St_pxlControl* pxlControl = (St_pxlControl*)GetDataBase("Geometry/pxl/pxlControl");
+    if (!pxlControl)
+        {
+            LOG_ERROR << "InitRun : No access to pxlControl table, abort PXL reconstruction" << endm;
+            return kStErr;
+        }
+    pxlControl_st *pxlControlTable = pxlControl->GetTable();
+    mPixelSize = pxlControlTable[0].pixelSize;
+
     return kStOk;
 }
 
@@ -93,60 +93,70 @@ Int_t StPxlHitMaker::InitRun(Int_t runnumber) {
 Int_t StPxlHitMaker::Make() {
     LOG_INFO<<"StPxlHitMaker::Make()"<<endm;
 
-    Bool_t EmbeddingShortCut = IAttr("EmbeddingShortCut");
+    Bool_t EmbeddingShortCut = IAttr("EmbeddingShortCut"); ///< 1 for embedding, use ideal geometry with no corrections
 
+    /// get StEvent pointer
     StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
     if (! pEvent) {
         LOG_WARN << "StPxlHitMaker::Make there is no StEvent " << endm;
         return kStWarn;
     }
 
+    /// The input data can be both clusters and pxl hits. 
+    /// If there are already pxl hits, their positions will be recalculated. 
+    /// If there are clusters but no pxl hits collection, a new pxl hit collection will be created.
+    /// If there are both pxl hits and clusters, new pxl hits from clusters will be added to hits collection. 
+
+    /// input pxl cluster collection
     TObjectSet* pxlClusterDataSet = (TObjectSet*)GetDataSet("pxlCluster");
     StPxlClusterCollection* pxlClusterCollection = 0;
     if(pxlClusterDataSet)
         pxlClusterCollection = (StPxlClusterCollection*)pxlClusterDataSet->GetObject();
 
+    /// input pxl hit collection
     StPxlHitCollection* pxlHitCollection = pEvent->pxlHitCollection();
 
+    /// if no pxl hit collection nor pxl cluster collection, nothing to work on
     if (!pxlClusterCollection && !pxlHitCollection) {
         LOG_WARN << "StPxlHitMaker::Make()  no pxlClusterCollection or pxlHitCollection to work on" << endm;
         return kStWarn;
     }
 
+    /// if no pxl hit collection, create one for output
     if(!pxlHitCollection) pxlHitCollection = new StPxlHitCollection();
 
-    double firstPixelZ = -(nPxlColumnsOnSensor-1)*pxlPixelSize/2;
-    double firstPixelX = (nPxlRowsOnSensor-1)*pxlPixelSize/2;
+    double firstPixelZ = -(nPxlColumnsOnSensor-1)*mPixelSize/2;
+    double firstPixelX = (nPxlRowsOnSensor-1)*mPixelSize/2;
+
+    StPxlDbMaker* pxlDb = (StPxlDbMaker*)GetMaker("pxlDb");
 
     for (int i=0; i<nPxlSectors; i++)
         for(int j=0; j<nPxlLaddersPerSector; j++)
             for(int k=0; k<nPxlSensorsPerLadder; k++)
                 {
-                    int sensorId = i*40+j*10+k+1;
-
-                    //add in new hit from cluster
+                    /// add in new hits from clusters
                     if(pxlClusterCollection)
                         {
-                            int vecSize = pxlClusterCollection->clusterVec[i][j][k].size();
+                            int vecSize = pxlClusterCollection->numberOfClusters(i+1, j+1, k+1);
                             for(int l=0; l<vecSize; l++)
                                 {
-                                    StPxlCluster* cluster = pxlClusterCollection->clusterVec[i][j][k][l];
+                                    StPxlCluster* cluster = pxlClusterCollection->cluster(i+1, j+1, k+1, l);
                                     StPxlHit* pxlHit = new StPxlHit();
                                     pxlHit->setSector(i+1);
                                     pxlHit->setLadder(j+1);
                                     pxlHit->setSensor(k+1);
                                     pxlHit->setDetectorId(kPxlId);
-                                    pxlHit->setMeanRow(cluster->rowCenter);
-                                    pxlHit->setMeanColumn(cluster->columnCenter);
+                                    pxlHit->setMeanRow(cluster->rowCenter());
+                                    pxlHit->setMeanColumn(cluster->columnCenter());
                                     pxlHit->setNRawHits(cluster->nRawHits());
-                                    pxlHit->setIdTruth(cluster->idTruth);
+                                    pxlHit->setIdTruth(cluster->idTruth());
                                     
                                     pxlHitCollection->addHit(pxlHit);
                                 }
                         }
 
-                    //get hit positions
-                    TGeoHMatrix *geoMSensorOnGlobal=(TGeoHMatrix*)listGeoMSensorOnGlobal->FindObject(Form("R%03i",sensorId));
+                    /// get hit positions
+                    TGeoHMatrix *geoMSensorOnGlobal = pxlDb->geoHMatrixSensorOnGlobal(i+1, j+1, k+1);
                     int nHitsInSensor = pxlHitCollection->sector(i)->ladder(j)->sensor(k)->hits().size();
                     for(int l=0; l<nHitsInSensor; l++)
                         {
@@ -154,15 +164,16 @@ Int_t StPxlHitMaker::Make() {
                             double local[3];
                             double global[3];
                         
-                            local[2] = firstPixelZ + pxlPixelSize*pxlHit->meanColumn();
-                            local[0] = firstPixelX - pxlPixelSize*pxlHit->meanRow();
-                            
+                            local[2] = firstPixelZ + mPixelSize*pxlHit->meanColumn();
+                            local[0] = firstPixelX - mPixelSize*pxlHit->meanRow();
+                        
+                            /// apply Tps correction if not embedding
                             if(EmbeddingShortCut && pxlHit->idTruth())
                                 local[1] = 0;
                             else
-                                local[1] = tps[i][j][k]->Z(local[2], local[0]); // the Tps x, y, z are sensor local z, x, y respectively
+                                local[1] = mTps[i][j][k]->z(local[2], local[0]); ///< the Tps x, y, z are sensor local z, x, y respectively
                             
-                            geoMSensorOnGlobal->LocalToMaster(local, global);
+                            geoMSensorOnGlobal->LocalToMaster(local, global); ///< rotation and shift from sensor local to STAR global coordinate
                             pxlHit->setLocalPosition(local[0], local[1], local[2]);
                             StThreeVectorF vecGlobal(global);
                             pxlHit->setPosition(vecGlobal);
