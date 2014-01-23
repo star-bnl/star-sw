@@ -1,10 +1,10 @@
 // 12/12/2012 : modification of the builder to take into account the new geometry path names
 // backward compatibility with upgr15 geometry is lost
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.30 2014/01/23 17:38:18 bouchet Exp $
+ * $Id: StiPixelDetectorBuilder.cxx~,v 1.1 2014/01/23 17:38:18 bouchet Exp $
  *
- * $Log: StiPixelDetectorBuilder.cxx,v $
- * Revision 1.30  2014/01/23 17:38:18  bouchet
+ * $Log: StiPixelDetectorBuilder.cxx~,v $
+ * Revision 1.1  2014/01/23 17:38:18  bouchet
  * *** empty log message ***
  *
  * Revision 1.29  2013/03/11 17:24:08  bouchet
@@ -243,7 +243,6 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
       {"PXSI","mother silicon volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""},
       {"PLAC","Active silicon volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""}
       */
-      //average weight of a ladder
       {"PXLA","PXL LADDER",                 "HALL_1/CAVE_1/TpcRefSys_1","",""}
     };
   
@@ -294,6 +293,10 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
 	  int matPix=0;
 	  matPix=(ii)*40+(jj)*10+(kk+1);
 	  LOG_DEBUG <<" ii/jj/kk/matPix : " << ii<<" "<<" " << jj <<" " << kk << " " << matPix << endm;
+	  //TGeoHMatrix *combP=(TGeoHMatrix *)PxlRot->FindObject(Form("R%03i",matPix));
+	  //if(combP){
+	  //combP->Print();
+	  //}	
 	  if(kk!=0) continue;
 	  //we place the ladder as a whole
 #if 0
@@ -323,6 +326,12 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
 					     10*box->GetDZ(),          
 					     box->GetDY(),           
 					     box->GetDX());         
+	  /*
+	    StiShape *sh  = new StiPlanarShape(name,
+	    20*1.0,        // halfDepth
+	    1,           // thickness
+	    2);          // halfWidth
+	  */
 	  
 	  add(sh);
 	  TGeoHMatrix *combP=(TGeoHMatrix *)PxlRot->FindObject(Form("R%03i",matPix));
@@ -338,8 +347,7 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
 	  Double_t prod = centerVector*normalVector;
 	  if (prod < 0) normalVector *= -1;
 	  // Normalize normal vector, just in case....
-	  
-	  normalVector /= normalVector.magnitude();
+	  //normalVector /= normalVector.magnitude();
 	  
 	  // Volume positioning
 	  StiPlacement *pPlacement = new StiPlacement;
