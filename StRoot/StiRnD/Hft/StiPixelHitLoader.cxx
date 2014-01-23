@@ -1,7 +1,10 @@
  /*
- * $Id: StiPixelHitLoader.cxx,v 1.26 2013/03/12 15:04:00 bouchet Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.27 2014/01/23 17:38:18 bouchet Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.27  2014/01/23 17:38:18  bouchet
+ * *** empty log message ***
+ *
  * Revision 1.26  2013/03/12 15:04:00  bouchet
  * StPxlHit navigation to retrieve hits
  *
@@ -113,25 +116,24 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 	  
 	  LOG_DEBUG<<"StiPixelHitLoader - collection size: "<<vec.size()<<endm;
 	  
-	  for(unsigned int j=0; j<vec.size(); j++)	{
-	    StPxlHit *pxlH = vec[j];
+	  for(unsigned int jj=0; jj<vec.size(); jj++){
+	    StPxlHit *pxlH = vec[jj];
 	    if(!pxlH)
 	      throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL hit in container");
 	    
 	    if (pxlH->detector()!=kPxlId) continue;
-	    
+	    if (pxlH->sector()==2 || pxlH->sector()==4 || pxlH->sector()==7){ //olny sectors 4 and 7
 	    int LAY=0, LAD=0;
 	    
-	    if(pxlH->layer()==1)
-	      {
-		LAY=0;//(int)pxlH->layer()-1;
-		LAD=(int)pxlH->sector()-1;
-	      }
-	    else
-	      {
-		LAY=1;//(int)pxlH->layer()-1;
-		LAD=(((int)pxlH->sector()-1)*3 + (int)pxlH->ladder()-1);
-	      }
+	    if(pxlH->layer()==1){
+	      LAY=0;//(int)pxlH->layer()-1;
+	      LAD=(int)pxlH->sector()-1;
+	    }
+	    else{
+	      LAY=1;//(int)pxlH->layer()-1;
+	      LAD=(((int)pxlH->sector()-1)*3 + (int)pxlH->ladder()-2);
+	    }
+	    LOG_DEBUG << " hit sector : " << (int)pxlH->sector() << " ladder : " << (int)pxlH->ladder() << endm; 
 	    LOG_DEBUG << " layer : "<< LAY <<" ladder :  "<< LAD << endm;
 	    LOG_DEBUG << "X/Y/Z    : " << pxlH->position().x()<<"/"<< pxlH->position().y()<<"/"<<pxlH->position().z()<<endm;
 	    LOG_DEBUG << "Xl/Yl/Zl : " << pxlH->localPosition(0)<<"/"<< pxlH->localPosition(1)<<"/"<<pxlH->localPosition(2)<<endm;
@@ -157,13 +159,15 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 	    
 	    stiHit->setGlobal(detector, pxlH,
 			      pxlH->position().x(), pxlH->position().y(),
-			      pxlH->position().z(), pxlH->charge());
+				pxlH->position().z(), pxlH->charge());
 	    
 	    _hitContainer->add(stiHit);
-	    LOG_DEBUG <<" nHit = "<<nHit<<" Sector = "<<pxlH->sector()<<" Ladder = "<<pxlH->ladder()<<" x = "<<pxlH->position().x()<<" y = "<<pxlH->position().y()<<" z = "<<pxlH->position().z()<<endm;
+	    LOG_DEBUG <<" nHit = "<<nHit<<" Sector = "<<(int)pxlH->sector()<<" Ladder = "<<(int)pxlH->ladder()<<" x = "<<(float)pxlH->position().x()<<" y = "<<(float)pxlH->position().y()<<" z = "<<(float)pxlH->position().z()<<endm;
+	    LOG_DEBUG <<" " << endm;
 	    
 	    //done loop over hits
 	    nHit++;
+	    }
 	  }
 	}
       }
