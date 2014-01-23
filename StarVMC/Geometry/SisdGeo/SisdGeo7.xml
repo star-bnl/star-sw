@@ -1,6 +1,5 @@
 <Document file="StarVMC/Geometry/SisdGeo/SisdGeo7.xml">
 
-
   <Module name="SISDGEO7" comment="  is the Silicon Strip Detector with TUP modifications "  >
     <Author name="Bouchet and Potekhin"  />
     <Created date=" 1 Feb 07 "  />
@@ -21,9 +20,19 @@
          ==== Should not be used with versions of STAR including the SVT // JW ====
 
     --> 
+<!-- update : 201312/23 : no more long+short cables : only 1 long cable -->
+<!-- update : 2013/12/14 A. Quintero
+To match with the SW model :
+1) tilt angle = -7 degrees
+2) opening angle btw ladders is 18 degrees (360/20) for all ladders
+-->
+
     <Content  >
-      SFMO,SFLM,SFDM,SFSW,SFSD,SFSL,SFSM,SFLT,SFLU,SFFK,SFFL,SFKK,SFKL,SFRA,SFRS,SFFX,SFPI,SFPJ,SFAA,SFAM,SFAB,SFAS,SAPP,SAPC,SAPS,SAPT,SFLA,SFLB,SFLC,SFES,SFEB,SFCO,SFCM,SFCB,SFCS,SFKF,SFKS,SSBS,SSBB,SFPR,SFPB,SSST,SSSS,SSRS,SSRT,SSLB,SBCH,SBCV,SBFH,SBFV,SSLT,SCMP,SCVM,SCVB,SCVS,SOSK
+      SFMO,SFLM,SFDM,SFSW,SFSD,SFSL,SFSM,SFLT,SFLU,SFFK,SFFL,SFKK,SFKL,SFRA,SFRS,SFFX,SFPI,SFPJ,SFAA,SFAM,SFAB,SFAS,SAPP,SAPC,SAPS,SAPT,SFLA,SFLB,SFLC,SFES,SFEB,SFCO,SFCM,SFCB,SFCS,SFKF,SFKS,SSBS,SSBB,SFPR,SFPB,SSST,SSSS,SSRS,SSRT,SSLB,SBCH,SBCV,SBFH,SBFV,SSLT,SCMP,SCVM,SCVB,SCVS,SOSK,SSER,SPCL,SOFI,<!--SOFL,-->SROC,AROC,ARCA,SAPL,SOFC,SCFO,SOOA,SOFA,SRTR,TEST<!--,SRTR Ssd Optic Fiber A-->
     </Content>
+    <!-- SSER :Ssd SERvices : mother volume of services : power cables and optic fibers
+    -->
+
     
     <Structure name="SSDP"  >
       <var name="Version"   type="float"  />
@@ -186,9 +195,6 @@
       <var name="SFEB_Py" />
     </Structure>
         
-
-
-
         <Structure name="SFPB"  >
             <var name="Hhight" />
             <var name="Khight" />
@@ -227,11 +233,31 @@
             <var name="ladderTilt(20)" />
             <var name="LadderRadius(20)" />
         </Structure>
-        
 
+        <Structure name="LPOC" >
+          <var name="version" type="int"/>
+          <var name="numberOfCables" type="int"/>
+          <var name="xpos(10)" type="float"/>
+          <var name="ypos(10)" type="float"/>
+          <var name="tilt(10)" type="float"/>
+       </Structure>
+
+        <Structure name="LOPF" >
+          <var name="version" type="int"/>
+          <var name="numberOfCables" type="int"/>
+          <var name="xpos(10)" type="float"/>
+          <var name="ypos(10)" type="float"/>
+          <var name="MidLength(10)" type="float"/>
+        </Structure>
+
+        <Structure name="OPFR" >
+          <var name="version" type="int"/>
+          <var name="numberOfCables" type="int"/>
+          <var name="radius(10)" type="float"/>
+        </Structure>
 
         <varlist type="INTEGER"  >
-            ilad,iwaf,jwaf,nc
+            ilad,iwaf,jwaf,nc,ll,mm
         </varlist>
         
         <varlist type="REAL"  >
@@ -242,6 +268,21 @@
             essai,hight,lng,leng,yoffset
         </varlist>
         
+        <varlist type="float" comment="length of power cable"> PowerCable/162.6/ </varlist>
+        <varlist type="float" comment="length of optic fiber"> OpticFiber/162.6/ </varlist>
+        <varlist type="float" comment="length of optic fiber -horizontal part- after the OSC"> OpticFiberShort/11.921/ </varlist>
+<!--
+        <varlist type="float" comment="position of optic fiber at receiver"> OpticFiberT/42.35/ </varlist>
+        <varlist type="float" comment="position of optic fiber at OSC"> OpticFiberO/55.18/ </varlist>
+-->
+        <varlist type="float" comment="position of optic fiber at receiver"> OpticFiberT/44.184/ </varlist>
+        <varlist type="float" comment="position of optic fiber at OSC"> OpticFiberO/56.1/ </varlist>
+
+        <varlist type="float" comment="internal variables for round cables">piratio,twopiratio,ArcLength,angle,angleSection,xarc,yarc,zarc,angleMin,angleMax,radiiPowerCable,radii</varlist>
+
+        <varlist type="int" comment="internal variables for round cables">nsections,ii,jj,kk,counterCables</varlist>
+        <varlist type="float" comment="internal variables for optic fiber">angleOp</varlist>
+        <varlist type="float" comment="distanceToOSC">distanceToOSC/10.7/</varlist>
 
         <Fill name="SSDP" comment="Silicon Strips"  >
             <var name="Version" value="1" comment=" Version " />
@@ -249,8 +290,6 @@
             <var name="Placement" value="1" comment=" 0=cave, 1=idsm " />
         </Fill>
         
-
-
         <Fill name="SFJP" comment="Different Dimension parameters"  >
             <var name="Version" value="1" comment=" new version information  " />
             <var name="AlphaZ" value="54" comment=" Alpha of the SFLA and other parts " />
@@ -408,10 +447,7 @@
         <Fill name="SFJP" comment="Different Dimension parameters"  >
             <var name="Version" value="2" comment=" Version  " />
             <var name="SSRS_Rmin" value="23.3" comment=" Width of the side of the small rib (outside structure) " />
-        </Fill>
-        
-
-
+        </Fill>      
 
         <Fill name="SFPB" comment="Some SSD Shell dimensions"  >
             <var name="Hhight" value="(0.02/tan(54*pi/180)+0.02/(2*tan(pi/5))+0.2)*sin(pi/5)" comment=" haut 1 " />
@@ -420,15 +456,13 @@
             <var name="Kbase" value="0.02/sin(63*pi/180)" comment=" bas 2 " />
             <var name="Fsize" value="0.6/cos(15*pi/180)+0.02*tan(15*pi/180)" comment=" lenght of the side kapton film " />
             <var name="Zcoor" value="5.18462095393834410" comment=" z coord " />
-        </Fill>
-        
-
+        </Fill>        
 
         <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="1" comment=" geometry version " />
            <!-- <var name="rmin" value="21.8" comment=" mother rmin " />-->
            <!-- new rmin to accomodate the new radius -->
-            <var name="rmin" value="21." comment=" mother rmin " />
+            <var name="rmin" value="21.6" comment=" mother rmin " />
             <var name="rmax" value="32." comment=" mother rmax " />
             <var name="SOutRInn" value="29.5" comment=" outer shield cylinder, inner radius " />
             <var name="SOutROut" value="29.52" comment=" outer shield cylinder, outer radius " />
@@ -498,13 +532,57 @@
             <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
         </Fill>
 
+           <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version" value="7" comment=" geometry version " />
+            <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
+            <var name="ladderAngle" value="{81.0,99.0,117.0,135.0,153.0,171.0,189.0,207.0,225.0,243.0,261.0,279.0,297.0,315,333,351,9.0,27.0,45.0,63.0}" comment=" individual angles " />
+            <var name="ladderTilt" value="{-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
+            </Fill>
+
+            <Fill name="LPOC" comment="Long POwer Cable">
+             <var name="version" value="1"/>
+             <var name="numberOfCables" value="5"/>
+             <var name="xpos" value="{36.03,36.35,36.67,35.46,35.78}"/>
+             <var name="ypos" value="{15.75,14.91,14.07,15.05,14.16}"/>
+             <var name="tilt" value="{90,90,90,90,90}"/>
+             <var name="tilt" value="{0,0,0,0,0}"/>
+<!--
+             <var name="xpos" value="{36.03,36.35,36.67,35.46,35.78,38.55,38.73,38.91,38.05,37.88}"/>
+             <var name="ypos" value="{15.75,14.91,14.07,15.05,14.16,7.50,6.61,5.73,6.02,6.90}"/>
+             <var name="tilt" value="{-90,-90,-90,-90,-90,90,90,90,90,90}"/>
+             <var name="tilt" value="{0,0,0,0,0,0,0,0,0,0}"/>
+-->
+             </Fill>
+
+             <Fill name="LOPF" comment="Long OPtic Fiber">
+             <var name="version" value="1"/>
+             <var name="numberOfCables" value="5"/>
+             <var name="xpos" value="{33.81,33.95,34.17,34.35,34.52}"/>
+             <var name="ypos" value="{20.07,19.61,19.14,18.67,18.20}"/>
+             <var name="MidLength" value="{6.54,6.14,5.83,5.52,5.22}"/>
+<!--
+             <var name="xpos" value="{33.81,33.95,34.17,34.35,34.52,39.34,39.24,39.14,39.04,38.95}"/>
+             <var name="ypos" value="{20.07,19.61,19.14,18.67,18.20,0.81,1.30,1.79,2.28,2.77}"/>
+-->
+            </Fill>
+
+            <Fill name="OPFR" comment="OPtic Fiber Round">
+             <var name="version" value="1"/>
+             <var name="numberOfCables" value="5"/>
+             <var name="radius" value="{25.5,26.1}"/>
+            </Fill>
+
         <Use struct="SSDP" />
         ConfigA = mod(SSDP_Config   ,10) 
         ConfigB = mod(SSDP_Config/10,10) 
 
 <!--        <Use struct="SFPA" select="version" value="ConfigA " />-->
-        <Use struct="SFPA" select="version" value="6" />
+
+        <Use struct="SFPA" select="version" value="7" />
         <Use struct="SFJP" select="version" value="2 " />
+        <Use struct="LPOC" select="version" value="1" />
+        <Use struct="LOPF" select="version" value="1" />
 
         <Mixture name="G10" dens="1.7"  >
             <Component name="Si" a="28.08" z="14" w="0.6*1*28./60." />
@@ -519,22 +597,40 @@
             <Component name="C" a="12" z="6" w="0.4*8*12./174." />
             <Component name="H" a="1" z="1" w="0.4*14*1./174." />
         </Mixture>
-        
 
         <Mixture name="DELRIN" dens="1.2"  >
             <Component name="O" a="16" z="8" w="2*16./100." />
             <Component name="C" a="12" z="6" w="5*12./100." />
             <Component name="H" a="1" z="1" w="8*1.0/100." />
         </Mixture>
-        
+           
+        <!-- from Gerard Visser :
+        64 strands of 28 AWG copper-clad aluminum wire is 64*4.81x10^4 pounds per foot and is 26.8% copper by weight.        If I didn't make any calculation mistake, this amounts to 
+           0.123 g/cm of copper
+           0.335 g/cm of aluminum
 
+        From Jim Thomas :
+        The Yellow Power cables (280 cm long) weight 205 grams each
+        density  = 205 / (pi * (0.72/2)^2) = 205 /114 =1.79
+        -->
 
-    <!-- Create the SSD mother volume and place it w/in the IDSM, flagging it as overlapping -->
+        <Mixture name="matPowerCable" dens="1.79" >
+            <Component name="Aluminum" a="27" z="13" w="0.732"  />
+            <Component name="copper" a="63.54" z="29" w="0.268"  />
+        </Mixture>
+        <!-- calculations needed for round cables -->
+        piratio=PI/180.0
+        twopiratio=(2*PI)/360
+        nsections=10
+        radiiPowerCable=0.36
+
+        <!-- Create the SSD mother volume and place it w/in the IDSM, flagging it as overlapping -->
         <Create    block="SFMO" />
         <Placement block="SFMO" in="IDSM" konly="'MANY'"         if="SSDP_placement==1" />
-        <Placement block="SFMO" in="CAVE" konly="'ONLY'"         if="SSDP_placement==0" /> 
-
-
+        <Placement block="SFMO" in="CAVE" konly="'ONLY'"         if="SSDP_placement==0" />  
+        <Create block="SSER" />
+        <Placement block="SSER" in="IDSM" konly="'MANY'" /> 
+       
 	<Block name="SFMO" comment="is the mother of all Silicon Strip Detector volumes"  >
 
 	  <Material name="Air" />
@@ -570,8 +666,7 @@
 	      
 	    </If>
 	    
-	  </Do>
-            
+	  </Do>           
 
             <Create block="SSST" />
 <!--
@@ -896,7 +991,6 @@
                 <Rotation alphax="90" />
             </Placement>
             
-
             <Create block="SFAA" />
             <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA"  >
             </Placement>
@@ -934,26 +1028,20 @@
             <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA"  >
             </Placement>
             
-
         </Block>
         
-
-
         <Block name="SFRA" comment="is the hybrid stiffneer"  >
             <Material name="Carbon" />
             <Attribute for="SFRA" seen="2" colo="1" />
             <Shape type="BOX" dz="SFJP_SFRA_Dz" dx="SFJP_SFRA_Dx" dy="SFJP_SFRA_Dy" />
         </Block>
         
-
-
         <Block name="SFRS" comment="two supports of the hybrid stiffneer (piece of it)"  >
             <Material name="Carbon" />
             <Attribute for="SFRS" seen="2" colo="1" />
             <Shape type="BOX" dz="SFJP_SFRA_Dz" dx="SFJP_SFRS_Dx" dy="SFJP_SFRS_Dy" />
         </Block>
         
-
         <Block name="SFFX" comment="is the flex"  >
             <Material name="Copper" />
             <Attribute for="SFFX" seen="1" colo="42" />
@@ -967,8 +1055,6 @@
             <Shape type="BOX" dz="SFJP_SFAA_Dz" dx="SFJP_SFAA_Dx" dy="SFJP_SFAA_Dy" />
         </Block>
         
-
-
         <Block name="SFPI" comment="are the pions"  >
             <Material name="Aluminium" />
             <Attribute for="SFPI" seen="2" colo="33" />
@@ -980,15 +1066,11 @@
             
         </Block>
         
-
-
         <Block name="SFPJ" comment="is the base of the pions"  >
             <Material name="Aluminium" />
             <Attribute for="SFPJ" seen="2" colo="33" />
             <Shape type="TUBE" rmax="SFJP_SFPJ_Dy" rmin="SFJP_SFPJ_Dx1+SFJP_SFPJ_Dx2" dz="SFJP_SFPJ_Dz" />
-        </Block>
-        
-
+        </Block>      
 
         <Block name="SFSL" comment="is the Silicon of the strip detector"  >
             <Material name="Silicon" />
@@ -997,12 +1079,10 @@
 
             <Create block="SFSD" />
             <Placement block="SFSD"  >
-            </Placement>
-            
+            </Placement>       
 
         </Block>
         
-
         <Block name="SFSD" comment="is the strip detector"  >
             <Material name="Silicon" />
             <Material name="Sensitive" isvol="1" />
@@ -1033,6 +1113,29 @@
             <Shape type="BOX" dz="SFPA_smLen/2." dx="SFPA_dmWid/2" dy="SFPA_smThk/2" />
             yoffset = -1.7 
 
+            <Create block="SAPL" />
+            <Placement block="SAPL" in="SFSM" konly="'MANY'" z="-50.20-(5.69)/2.0" x="0.0" y="0.0">
+            </Placement>
+
+            <Create block="SCFO" />
+            <Placement block="SCFO" in="SFSM" konly="'MANY'" z="-1*(-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)-SFJP_SFAM_Dz/2.)" x="2.1+.15" y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+(1.0)" >
+            <Rotation alphaz="-54" />
+            </Placement>
+
+            <Create block="SCFO" />
+            <Placement block="SCFO" in="SFSM" konly="'MANY'" z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)-SFJP_SFAM_Dz/2." x="-2.1-0.15" y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+(1.0)" >
+            <Rotation alphaz="54" />
+            </Placement>
+
+            <!-- 1.4 is to avoid contact with air plenum -->
+            <Create block="SOFC" />
+            <Placement block="SOFC" in="SFSM" konly="'MANY'" z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)-SFJP_SFAM_Dz/2.-5.721/2-(OpticFiberO-OpticFiberT)/2."  x="-2.1-0.15" y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+(1.4)" >
+<!--
+           <Info format="y={7.3f}"> -SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+(1.4) </Info>
+-->
+            <Rotation alphaz="54" />
+            </Placement>
+
             <Create block="SFLT" />
             hight = SFJP_SFSM_Ll*tan(54*pi/180)-SFPB_Hhight/tan(pi/5)-0.02 
             <Placement y="hight+yoffset" x="-(SFPB_Hhight-SFPB_Khight)" z="0.0" block="SFLT"  >
@@ -1042,8 +1145,7 @@
             <Placement y="hight+yoffset" x="(SFPB_Hhight-SFPB_Khight)" z="0" block="SFLT"  >
                 <Rotation alphay="180." />
                 <Rotation alphaz="90.+36." />
-            </Placement>
-            
+            </Placement>          
 
             <Create block="SFLU" />
             <Placement y="0.+yoffset" x="0.-(SFJP_SFSM_Ll-(SFJP_SFLU_bl1+SFJP_SFLU_h1/2*1/tan(pi/5)))" z="0." block="SFLU"  >
@@ -1064,9 +1166,6 @@
                 <Rotation alphaz="-essai" />
             </Placement>
             
-
-
-
             <Create block="SFFK" />
             <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="SFJP_SFFK_Px/2+SFJP_SFFK_Dxe" z="0.0" block="SFFK"  >
             </Placement>
@@ -1074,7 +1173,6 @@
             <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="-SFJP_SFFK_Px/2-SFJP_SFFK_Dxe" z="0.0" block="SFFK"  >
             </Placement>
             
-
             <Create block="SFFL" />
             <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)" z="0" block="SFFL"  >
                 <Rotation alphaz="15" />
@@ -1084,12 +1182,10 @@
                 <Rotation alphaz="-15" />
             </Placement>
             
-
             <Create block="SFKK" />
             <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Py2+yoffset-SFJP_SFKK_Dy/2." x="0." z="0." block="SFKK"  >
             </Placement>
             
-
             <Create block="SFKL" />
             <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)+0.005" z="0" block="SFKL"  >
                 <Rotation alphaz="15" />
@@ -1099,8 +1195,6 @@
                 <Rotation alphaz="-15" />
             </Placement>
             
-
-
             <Create block="SAPP" />
             <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2." block="SAPP"  >
                 <Rotation alphay="180." />
@@ -1109,7 +1203,6 @@
             <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2.)" block="SAPP"  >
             </Placement>
             
-
             <Create block="SFAM" />
             <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)-SFJP_SFAM_Dz/2." block="SFAM"  >
             </Placement>
@@ -1118,7 +1211,6 @@
                 <Rotation alphay="180." />
             </Placement>
             
-
             <Create block="SFCO" />
             <Placement y="SFJP_SFCO_Py" x="-SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCO"  >
                 <Rotation alphaz="+SFJP_AlphaZ" />
@@ -1128,7 +1220,6 @@
                 <Rotation alphaz="-SFJP_AlphaZ" />
             </Placement>
             
-
             <Create block="SFCM" />
             <Placement y="SFJP_SFCO_Py" x="+SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCM"  >
                 <Rotation alphaz="-SFJP_AlphaZ" />
@@ -1139,7 +1230,6 @@
                 <Rotation alphaz="+SFJP_AlphaZ" />
             </Placement>
             
-
             <Create block="SFKF" />
             <Placement y="SFJP_SFKF_Py" x="-SFJP_SFKF_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKF"  >
                 <Rotation alphaz="+SFJP_AlphaZ" />
@@ -1157,8 +1247,7 @@
             <Placement y="SFJP_SFKS_Py" x="-SFJP_SFKS_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKS"  >
                 <Rotation alphaz="+SFJP_AlphaZ" />
             </Placement>
-            
-
+           
             <Create block="SFPR" />
             <Placement y="+SFJP_SFPR_Py" x="0" z="-SFJP_SFLU_Dz" block="SFPR"  >
             </Placement>
@@ -1166,7 +1255,6 @@
             <Placement y="+SFJP_SFPR_Py" x="0" z="+SFJP_SFLU_Dz-3.7" block="SFPR"  >
             </Placement>
             
-
             <Create block="SFPB" />
             <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2" x="0" z="-SFJP_SFLU_Dz-SFJP_SFPBDz/2." block="SFPB"  >
             </Placement>
@@ -1174,14 +1262,12 @@
             <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2" x="0" z="+SFJP_SFLU_Dz+SFJP_SFPBDz/2." block="SFPB"  >
             </Placement>
             
-
             <Create block="SSBS" />
             <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz+SFJP_SSBS_Dx/2." block="SSBS"  >
             </Placement>
             
             <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz-SFJP_SSBS_Dx/2." block="SSBS"  >
             </Placement>
-            
 
             <Create block="SSBB" />
             <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz/2." block="SSBB"  >
@@ -1190,7 +1276,6 @@
             <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz/2." block="SSBB"  >
             </Placement>
             
-
             <Create block="SFLA" />
             <Create block="SFLB" />
             <Create block="SFLC" />
@@ -1207,7 +1292,6 @@
                         <Rotation alphaz="+SFJP_AlphaZ" />
                     </Placement>
                     
-
                     <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC"  >
                         <Rotation alphaz="-SFJP_AlphaZ" />
                     </Placement>
@@ -1216,7 +1300,6 @@
                         <Rotation alphaz="+SFJP_AlphaZ" />
                     </Placement>
                     
-
                     <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA"  >
                         <Rotation alphaz="-SFJP_AlphaZ" />
                     </Placement>
@@ -1225,7 +1308,6 @@
                         <Rotation alphaz="+SFJP_AlphaZ" />
                     </Placement>
                     
-
                     <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC"  >
                         <Rotation alphaz="-SFJP_AlphaZ" />
                     </Placement>
@@ -1233,10 +1315,9 @@
                     <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC"  >
                         <Rotation alphaz="+SFJP_AlphaZ" />
                     </Placement>
-                    
+                
                 </Do>
                 
-
                 <Do var="jwaf" from="1" to="8"  >
                     <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA"  >
                         <Rotation alphaz="-SFJP_AlphaZ" />
@@ -1248,7 +1329,6 @@
                     
                 </Do>
                 
-
                 <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*iwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz/2." block="SFLB"  >
                     <Rotation alphaz="-SFJP_AlphaZ" />
                 </Placement>
@@ -1257,7 +1337,6 @@
                     <Rotation alphaz="+SFJP_AlphaZ" />
                 </Placement>
                 
-
                 <Placement y="-SFJP_SFES_Py" x="-SFJP_SFES_Px" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFES"  >
                     <Rotation alphaz="57.66" />
                 </Placement>
@@ -1275,29 +1354,21 @@
                     <Rotation alphaz="-55.35" />
                 </Placement>
                 
-
             </Do>
             
-
         </Block>
         
-
-
         <Block name="SFLT" comment="is (half) the top corner of the triangular ladder skeleton"  >
             <Material name="Carbon" />
             <Attribute for="SFLT" seen="1" colo="1" />
             <Shape type="TRAP" tl2="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(pi/5)" phi="0" alp2="(pi/2-atan(2*tan(pi/5)))*360/(2*pi)" h2="SFJP_SFLU_h1" h1="SFJP_SFLU_h1" bl1="SFJP_SFLU_bl1" tl1="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(pi/5)" alp1="(pi/2-atan(2*tan(pi/5)))*360/(2*pi)" dz="SFJP_SFLU_Dz" thet="0" bl2="SFJP_SFLU_bl1" />
         </Block>
         
-
-
         <Block name="SFLU" comment="is (half) the side corner of the triangular ladder skeleton"  >
             <Material name="Carbon" />
             <Attribute for="SFLU" seen="1" colo="1" />
             <Shape type="TRAP" tl2="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(27*2*pi/360)" phi="0" alp2="(pi/2-atan(2*tan(27*2*pi/360)))*360/(2*pi)" h2="SFJP_SFLU_h1" h1="SFJP_SFLU_h1" bl1="SFJP_SFLU_bl1" tl1="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(27*2*pi/360)" alp1="(pi/2-atan(2*tan(27*2*pi/360)))*360/(2*pi)" dz="SFJP_SFLU_Dz" thet="0" bl2="SFJP_SFLU_bl1" />
         </Block>
-        
-
 
         <Block name="SFFK" comment="horizontal part of the ladder skeleton carbon base"  >
             <Material name="Carbon" />
@@ -1305,31 +1376,23 @@
             <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFK_Dxe" dy="SFJP_SFFK_Dy" />
         </Block>
         
-
-
         <Block name="SFFL" comment="titled part of the ladder skeleton carbon base"  >
             <Material name="Carbon" />
             <Attribute for="SFFL" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFL_Dx/cos(15*pi/180)" dy="SFJP_SFFK_Dy" />
         </Block>
         
-
-
         <Block name="SFKK" comment="horizontal part of the kapton film under the ladder base"  >
             <Material name="Mylar" />
             <Attribute for="SFKK" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFK_Dxz/2." dy="SFJP_SFKK_Dy/2." />
         </Block>
         
-
-
         <Block name="SFKL" comment="titled part of the kpaton film under the ladder base"  >
             <Material name="Mylar" />
             <Attribute for="SFKL" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFL_Dx/cos(15*pi/180)" dy="SFJP_SFKK_Dy/2." />
-        </Block>
-        
-
+        </Block>      
 
         <Block name="SFLA" comment="is the long part of the bus cable linking the modules to the connection board"  >
             <Material name="Mylar" />
@@ -1337,35 +1400,29 @@
             <Shape type="BOX" dz="SFJP_SFLA_Dz/2." dx="SFJP_SFLA_Dx/2." dy="SFJP_SFLA_Dy/2." />
         </Block>
         
-
         <Block name="SFLB" comment="is the part of the long bus cable on the connection board"  >
             <Material name="Mylar" />
             <Attribute for="SFLB" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFLB_Dz/2." dx="SFJP_SFLA_Dx/2." dy="SFJP_SFLA_Dy/2." />
         </Block>
         
-
         <Block name="SFLC" comment="is the part of the long bus cable on the connection board up to the connector"  >
             <Material name="Mylar" />
             <Attribute for="SFLC" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFLC_Dz/2." dx="SFJP_SFLA_Dx/2." dy="SFJP_SFLA_Dy/2." />
         </Block>
         
-
         <Block name="SFEB" comment="is the big bus elbow"  >
             <Material name="Mylar" />
             <Attribute for="SFEB" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFEB_Dz/2." dx="SFJP_SFEB_Dx/2." dy="SFJP_SFLA_Dy/2." />
         </Block>
         
-
         <Block name="SFES" comment="is the small bus elbow"  >
             <Material name="Mylar" />
             <Attribute for="SFES" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFEB_Dz/2." dx="SFJP_SFES_Dx/2." dy="SFJP_SFLA_Dy/2." />
-        </Block>
-        
-
+        </Block>       
 
         <Block name="SFAM" comment="is the mother volume of the adc board"  >
             <Material name="Air" />
@@ -1374,8 +1431,7 @@
 
             <Create block="SFAB" />
             <Placement y="0." x="0." z="SFJP_SFAM_DZs/2" block="SFAB"  >
-            </Placement>
-            
+            </Placement>        
 
             <Create block="SFAS" />
             <Placement y="0." x="(SFJP_SFAM_Dxe-SFJP_SFAM_Dxz)/2." z="(-SFJP_SFAM_Dz+SFJP_SFAM_DZs)/2" block="SFAS"  >
@@ -1383,16 +1439,33 @@
             
             <Placement y="0." x="(-SFJP_SFAM_Dxe+SFJP_SFAM_Dxz)/2." z="(-SFJP_SFAM_Dz+SFJP_SFAM_DZs)/2" block="SFAS"  >
             </Placement>
-            
-        </Block>
-        
+
+        </Block>        
 
         <Block name="SFAB" comment="is the big volume of the adc board"  >
             <Material name="G10" />
             <Attribute for="SFAB" seen="1" colo="30" />
             <Shape type="BOX" dz="(SFJP_SFAM_Dz-SFJP_SFAM_DZs)/2" dx="SFJP_SFAM_Dxe/2." dy="SFJP_SFAM_Dy/2." />
         </Block>
-        
+
+        <Volume name="SCFO" comment="is the connector fiber Material"  >
+            <Material name="POLYETHYLENE" />
+            <Attribute for="SCFO" seen="1" colo="616" />
+            <Shape type="BOX" dz="5.721/2." dx="1.625/2." dy="0.8/2." />
+        </Volume>
+
+        <Volume name="SOFC" comment="is the short connection fiber from transceiver to OSC"  >
+            <Material name="POLYETHYLENE" />
+            <Attribute for="SOFC" seen="1" colo="800" />
+            <Shape type="BOX" dz="(OpticFiberO-OpticFiberT)/2." dx="0.3" dy="0.15" />
+        </Volume>
+
+        <Volume name="SAPL" comment="is the Air Plenum ">
+        <Material name="POLYETHYLENE" />
+            <Attribute for="SAPL" seen="1" colo="3" />
+            <Shape type="TUBS" rmin="0" rmax="0.6" dz="5.69/2." phi1="0" phi2="360" />
+        </Volume>
+
         <Block name="SFAS" comment="is the small volume of the adc board"  >
             <Material name="G10" />
             <Attribute for="SFAS" seen="1" colo="30" />
@@ -1407,7 +1480,6 @@
             <Placement y="0." x="0." z="(-SFJP_SAPP_Dz+SFJP_SAPP_Dy)/2." block="SAPC"  >
             </Placement>
             
-
             <Create block="SAPS" />
             <Placement y="0" x="SFJP_SAPP_Dxe/2.+SFJP_SAPP_Dxz/2" z="0." block="SAPS"  >
             </Placement>
@@ -1425,36 +1497,30 @@
             
         </Block>
         
-
         <Block name="SAPC" comment="is the core (Epoxy) of the adc board appendice"  >
             <Material name="Carbon" />
             <Attribute for="SAPC" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SAPP_Dy/2." dx="SFJP_SAPP_Dxe/2." dy="SFJP_SAPP_Dy/2." />
         </Block>
         
-
         <Block name="SAPS" comment="is the side shell (Carbon) of the adc board appendice"  >
             <Material name="Carbon" />
             <Attribute for="SAPS" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SAPP_Dz/2." dx="SFJP_SAPP_Dxz/2." dy="(SFJP_SAPP_Dy+2*SFJP_SAPP_Dxz)/2." />
-        </Block>
-        
+        </Block>       
 
         <Block name="SAPT" comment="is the top-bottom shell (Carbon) of the adc board appendice"  >
             <Material name="Carbon" />
             <Attribute for="SAPT" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SAPP_Dz/2." dx="SFJP_SAPP_Dxe/2." dy="SFJP_SAPP_Dxz/2." />
         </Block>
-        
-
-
+       
         <Block name="SFCO" comment="is the connection board (rectangular with Hirose connectors)"  >
             <Material name="G10" />
             <Attribute for="SFCO" seen="1" colo="30" />
             <Shape type="BOX" dz="SFJP_SFCO_Dz/2" dx="SFJP_SFCO_Dx/2." dy="SFJP_SFCO_Dy/2." />
         </Block>
         
-
         <Block name="SFCM" comment="is the mother volume of the second connection board"  >
             <Material name="Air" />
             <Attribute for="SFCM" seen="0" colo="6" />
@@ -1470,20 +1536,17 @@
             
         </Block>
         
-
         <Block name="SFCB" comment="is the big part of the second connection board"  >
             <Material name="G10" />
             <Attribute for="SFCB" seen="1" colo="30" />
             <Shape type="BOX" dz="SFJP_SFCO_Dz/2" dx="SFJP_SFCB_Dx/2." dy="SFJP_SFCO_Dy/2." />
         </Block>
         
-
         <Block name="SFCS" comment="is the big part of the second connection board"  >
             <Material name="G10" />
             <Attribute for="SFCS" seen="1" colo="30" />
             <Shape type="BOX" dz="SFJP_SFCS_Dz/2" dx="(SFJP_SFCM_Dx-SFJP_SFCB_Dx)/2." dy="SFJP_SFCO_Dy/2." />
-        </Block>
-        
+        </Block>    
 
         <Block name="SFKF" comment="is the first part of the kapton flex circuit"  >
             <Material name="G10" />
@@ -1491,20 +1554,17 @@
             <Shape type="BOX" dz="SFJP_SFKF_Dz/2" dx="SFJP_SFKF_Dx/2." dy="SFJP_SFKF_Dy/2." />
         </Block>
         
-
         <Block name="SFKS" comment="is the second part of the kapton flex circuit"  >
             <Material name="G10" />
             <Attribute for="SFKS" seen="1" colo="30" />
             <Shape type="BOX" dz="SFJP_SFKF_Dz/2" dx="SFJP_SFKS_Dx/2." dy="SFJP_SFKF_Dy/2." />
-        </Block>
-        
+        </Block>       
 
         <Block name="SFPR" comment="is the ladder end inside mechanical part (prism with g10 with half density)"  >
             <Material name="G5" />
             <Attribute for="SFPR" seen="1" colo="4" />
             <Shape type="PGON" zi="{0,3.7}" rmn="{0,0}" rmx="{3.48,3.48}"  nz="2" npdiv="1" phi1="-126" dphi="72" />
-        </Block>
-        
+        </Block>   
 
         <Block name="SFPB" comment="is the ladder end outside mechanical part (rectangle with g10)"  >
             <Material name="G10" />
@@ -1517,8 +1577,7 @@
             <Material name="Aluminium" />
             <Attribute for="SSBS" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SSBS_Dx/2." dx="SFJP_SSBS_Dx/2." dy="SFJP_SSBS_Dy/2." />
-        </Block>
-        
+        </Block>       
 
         <Block name="SSBB" comment="is the Big part of the aluminium plate linking the ladder to the sector"  >
             <Material name="Aluminium" />
@@ -1526,14 +1585,12 @@
             <Shape type="BOX" dz="SFJP_SSBB_Dz/2." dx="SFJP_SSBB_Dx/2." dy="SFJP_SSBS_Dy/2." />
         </Block>
         
-
         <Block name="SSST" comment="is the top of the small sector"  >
             <Material name="Aluminium" />
             <Attribute for="SSST" seen="1" colo="1" />
             <Shape type="TUBS" rmin="SFJP_SSST_Rmin" rmax="SFJP_SSST_Rmax" dz="SFJP_SSST_Width/2." phi2="(180.-SFJP_AlphaZH)" phi1="SFJP_AlphaZH" />
         </Block>
         
-
         <Block name="SSSS" comment="is the side of the small sector"  >
             <Material name="Aluminium" />
             <Attribute for="SSSS" seen="1" colo="1" />
@@ -1548,14 +1605,12 @@
                     <Material name="Carbon" />
                 </Else>
                 
-            </If>
-            
+            </If>           
 
             <Attribute for="SSRT" seen="1" colo="1" />
             <Shape type="TUBS" rmin="SFJP_SSST_Rmin" rmax="SFJP_SSST_Rmax" dz="SFJP_SSST_Width/2." phi2="+SFJP_AlphaZH" phi1="-SFJP_AlphaZH" />
         </Block>
         
-
         <Block name="SSRS" comment="is the side of the small rib"  >
             <If expr="ConfigB.le.5"  >
                 <Material name="Aluminium" />
@@ -1569,7 +1624,6 @@
             <Shape type="TUBS" rmin="SFJP_SSRS_Rmin" rmax="SFJP_SSST_Rmin" dz="SFJP_SSSS_Width/2." phi2="+SFJP_AlphaZH" phi1="-SFJP_AlphaZH" />
         </Block>
         
-
         <Block name="SSLB" comment="is the linking (sector to the cone) box"  >
             <Material name="Air" />
             <Attribute for="SSLB" seen="0" colo="6" />
@@ -1595,13 +1649,9 @@
             </Placement>
             
             <Placement y="-(SFJP_SSCR_Wd+SFJP_SSCR_Vl)/2" x="0" z="SFJP_SSLB_Dz/2.-SFJP_SSCR_ThD-SFJP_SSCR_ThA/2." block="SBFV"  >
-            </Placement>
-            
+            </Placement>            
 
-        </Block>
-        
-
-
+        </Block>       
 
         <Block name="SBCH" comment="is the horizontal branch of the DELRIN cross"  >
             <Material name="Delrin" />
@@ -1634,14 +1684,12 @@
             <Shape type="TUBE" rmax="SFJP_SSLT_Rmax" rmin="0." dz="SFJP_SSLT_Dz/2." />
         </Block>
         
-
         <Block name="SCMP" comment="is the mounting plate inserted in the cones."  >
             <Material name="Aluminium" />
             <Attribute for="SCMP" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SCMP_Dz/2" dx="SFJP_SCMP_Dx/2." dy="SFJP_SCMP_Dy/2." />
         </Block>
         
-
         <Block name="SCVM" comment="is the mother volume of the V-shape piece"  >
             <Material name="Air" />
             <Attribute for="SCVM" seen="0" colo="6" />
@@ -1673,7 +1721,6 @@
             <Shape type="BOX" dz="SFJP_SCVM_Dz/2" dx="SFJP_SCVS_Dx/2." dy="SFJP_SCVS_Dy/2." />
         </Block>
         
-
 <!-- Material weights have been corrected to account for the Natoms=(int) vs Natoms=(float)
      difference between AgSTAR and ROOT.
   -->
@@ -1690,8 +1737,247 @@
             <Shape type="TUBE" rmax="SFPA_SOutROut" rmin="SFPA_SOutRInn" dz="SFPA_SOutLen" />
         </Block>
 
+        <Volume name="SSER" comment="Main volume of SSD power cables and optic fibers">
+        <Material name="Air"/>
+        <Attribute for="SSER" seen="0" colo="1"/>
+        <Shape type="TUBE" rmin="21.6" rmax="40.0" dz="400" />
+
+        <Do var="ll" from="1" to="LPOC_numberOfCables">
+        <Create    block="SPCL" />  
+        <Placement in="SSER" x="LPOC_xpos(ll)" y="LPOC_ypos(ll)" z="-68.0-(PowerCable)/2." block="SPCL" konly="'MANY'"> 
+        </Placement> 
+        </Do>
+
+<!--
+        <Do var="ll" from="1" to="LPOC_numberOfCables">
+        <Create    block="SPCL" />  
+        <Placement in="SSER" x="LPOC_xpos(ll)" y="LPOC_ypos(ll)" z="68.0+(PowerCable)/2." block="SPCL" konly="'MANY'"> 
+        </Placement>
+        </Do>
+        
+        <Do var="ll" from="1" to="LPOC_numberOfCables">
+        <Create    block="SPCL" />  
+        <Placement in="SSER" x="-LPOC_xpos(ll)" y="-LPOC_ypos(ll)" z="-68.0-(PowerCable)/2." block="SPCL" konly="'MANY'"> 
+        </Placement> 
+        </Do>
+
+        <Do var="ll" from="1" to="LPOC_numberOfCables">
+        <Create    block="SPCL" />  
+        <Placement in="SSER" x="-LPOC_xpos(ll)" y="-LPOC_ypos(ll)" z="68.0+(PowerCable)/2." block="SPCL" konly="'MANY'"> 
+        </Placement> 
+        </Do>
+-->
+        <!-- ssd services : optic fiber -->
+
+        <Do var="ll" from="1" to="LOPF_numberOfCables">
+        <Create    block="SOFI" />  
+        <Placement block="SOFI" in="SSER" x="LOPF_xpos(ll)" y="LOPF_ypos(ll)" z="-68.0-OpticFiber/2." /> 
+        </Do>
+<!--
+        <Do var="ll" from="1" to="LOPF_numberOfCables">
+        <Create    block="SOFI" />  
+        <Placement block="SOFI" in="SSER" x="LOPF_xpos(ll)" y="LOPF_ypos(ll)" z="68.0+OpticFiber/2." /> 
+        </Do>
+
+        <Do var="ll" from="1" to="LOPF_numberOfCables">
+        <Create    block="SOFI" />  
+        <Placement block="SOFI" in="SSER" x="-LOPF_xpos(ll)" y="-LOPF_ypos(ll)" z="-68.0-OpticFiber/2." /> 
+        </Do>
+
+        <Do var="ll" from="1" to="LOPF_numberOfCables">
+        <Create    block="SOFI" />  
+        <Placement block="SOFI" in="SSER" x="-LOPF_xpos(ll)" y="-LOPF_ypos(ll)" z="68.0+OpticFiber/2." /> 
+        </Do>
+-->
+        <Create block="SOOA" />
+        <Placement block="SOOA" in="SSER" x="0" y="0" z="0" />
+
+<!--
+        <Do var="kk" from="1" to="5">
+        <Create block="SRTR" />
+        <Placement block="SRTR" in="SSER" x="LOPF_xpos(kk)-LOPF_MidLength(kk)" y="LOPF_ypos(kk)" z="-68.0-LOPF_MidLength(kk)" >
+        <Rotation alphay="90"/>
+        </Placement>
+
+        <Create block="TEST"/>
+        <Placement block="TEST" in="SSER" x="LOPF_xpos(kk)- (distanceToOSC/2)-7.14/2" y="LOPF_ypos(kk)" z="-68.0+LOPF_MidLength(kk)" >
+        <Rotation alphay="90"/>
+        </Placement>
+
+        <Create block="SRTR" />
+        <Placement block="SRTR" in="SSER" x="LOPF_xpos(kk)-LOPF_MidLength(kk)*2" y="LOPF_ypos(kk)" z="-68+3*LOPF_MidLength(kk)" >
+        <Rotation alphay="-90"/>
+        </Placement>
+        </Do>
+-->
+        <Do var="counterCables" from="1" to="5">
+        <!--<Info format="current iteration : counterCables ={2i}"> counterCables </Info>-->
+        <Create block="SRTR" />
+        <Placement block="SRTR" in="SSER" x="LOPF_xpos(counterCables)-(distanceToOSC/2)" y="LOPF_ypos(counterCables)" z="-68.0-(distanceToOSC/2)" >
+        <Rotation alphay="90"/>
+        </Placement>
+
+        <Create block="TEST"/>
+        <Placement block="TEST" in="SSER" x="LOPF_xpos(counterCables)-(distanceToOSC/2)-LOPF_MidLength(counterCables)/2" y="LOPF_ypos(counterCables)" z="-68.0+(distanceToOSC/2)" >
+        <Rotation alphay="90"/>
+        </Placement>
+
+        <Create block="SRTR" />
+        <Placement block="SRTR" in="SSER" x="LOPF_xpos(counterCables)-(distanceToOSC/2)-LOPF_MidLength(counterCables)" y="LOPF_ypos(counterCables)" z="-68+3*(distanceToOSC/2)" >
+        <Rotation alphay="-90"/>
+        </Placement>
+        </Do>
+
+        <!-- placement of curved cables -->
+
+        <Do var="mm" from="1" to="LPOC_numberOfCables">
+        <Create block="SROC"/>
+        <Placement block="SROC" in="SSER" x="LPOC_xpos(mm)-radii+radii*cos(piratio*LPOC_tilt(mm))" y="LPOC_ypos(mm)-radii-radii*sin(piratio*LPOC_tilt(mm))" z="-68+radii">
+        <Rotation alphaz="LPOC_tilt(mm)"/>
+        </Placement>
+        </Do>
+
+        </Volume>
+        <!-- close SSER volume here -->
+
+        <Volume name="SPCL" comment="power cable"> 
+        <Material name="matPowerCable"/> 
+        <Attribute for="SPCL" seen="1" colo="4"/> 
+        <Shape type="TUBS" phi1="0" phi2="360" rmin="0" rmax="0.72/2." dz="(PowerCable)/2." />
+        </Volume>
+
+        <Volume name="SOFI" comment="optic fiber"> 
+        <Material name="POLYETHYLENE"/> 
+        <Attribute for="SOFI" seen="1" colo="800"/> 
+        <Shape type="BOX" dx=".3" dy=".15" dz="OpticFiber/2." />
+        </Volume>
+
+        <Volume name="SOOA" comment="Ssd Optic fiber Osc Assembly">
+         <Attribute for="SOOA" seen="1" colo="5"/>
+         <Material name="Air" />
+         <Shape type="TUBE" rmin="0" rmax="100" dz="100" />
+
+          angleMax=85.60
+          angleMin=12.06
+          radii = 26.03
+<!--
+          <Info format="SOOA : angleMax={7.3f}"> angleMax </Info>
+          <Info format="SOOA : angleMin={7.3f}"> angleMin </Info>
+          <Info format="SOOA : radii={7.3f}"> radii </Info>
+-->
+
+          <Do var="jj" from="1" to="1">
+             ArcLength=(angleMax - angleMin - 18*(jj-1))*radii*twopiratio
+             angleSection=(angleMax - angleMin - 18*(jj-1))/(1.0*nsections)
+            <Do var="ii" from="1" to="nsections">
+              angle=piratio*(angleSection*(ii-1)+angleMin+0.5*angleSection) 
+              xarc=(radii)*cos(angle)
+              yarc=(radii)*sin(angle)
+              zarc=-57.3 - 0.3*(jj-1)<!--OpticFiberO - 0.3*(jj-1)-->
+              <Create    block="SOFA" />  
+              <Placement block="SOFA" x="xarc" y="yarc" z="zarc">
+              <Rotation alphax="90"/>
+              <Rotation alphaz="(angleSection*(ii-1)+0.5*angleSection+angleMin)"/>
+              </Placement>
+            </Do>
+          </Do>    
+        </Volume>
+
+
+        <Volume name="SRTR" comment="Ssd optic fiber Round TRansition">
+        <!--<Do var="kk" from="1" to="1">-->
+         <Attribute for="SRTR" seen="1" colo="5"/>
+         <Material name="Air" />
+         <Shape type="TUBE" rmin="0" rmax="100" dz="100" />
+
+          angleMax=90
+          angleMin=0
+          radii = distanceToOSC/2.
+<!--
+          <Info format="SRTR : angleMax={7.3f}"> angleMax </Info>
+          <Info format="SRTR : angleMin={7.3f}"> angleMin </Info>
+          <Info format="SRTR : radii={7.3f}"> radii </Info>
+-->
+
+          <!--<Do var="jj" from="1" to="2">-->
+          ArcLength=(angleMax - angleMin)*radii*twopiratio
+          angleSection=(angleMax - angleMin)/(1.0*nsections)
+            <Do var="ii" from="1" to="nsections">
+              angle=piratio*((ii-1)*angleSection+angleMin+0.5*angleSection) 
+              xarc=(radii)*cos(angle)
+              zarc=(radii)*sin(angle)
+              yarc=0
+              <Create    block="SOFA" />  
+              <Placement block="SOFA" x="-radii-xarc" y="yarc" z="zarc">
+              <Rotation alphay="(angleSection*(ii-1)+0.5*angleSection+angleMin)"/>
+              </Placement>
+            </Do>
+          <!--</Do>-->
+        </Volume>
+
+        <Volume name="SOFA" comment="A box">
+         <Attribute for="SOFA" seen="1" colo="800" trans="0"/>
+         <Shape type="box" dx=".3" dy=".15" dz="ArcLength/(2*nsections)" />
+        </Volume> 
+
+        <!--<Do var="kk" from="1" to="5">
+        <If expr="kk.eq.counterCables">-->
+        <Volume name="TEST" comment="A box">
+        <Attribute for="TEST" seen="1" colo="800" trans="0"/>
+        <Shape type="box" dx=".3" dy=".15" dz="LOPF_MidLength(counterCables)/2"/> 
+        </Volume>
+        <!--</If>
+        </Do>-->
+
+<!--
+        <Volume name="SOFL" comment="optic fiber"> 
+        <Material name="POLYETHYLENE"/> 
+        <Attribute for="SOFL" seen="1" colo="5"/> 
+        <Shape type="BOX" dx=".3" dy=".15" dz="OpticFiberShort/2." />
+        </Volume>
+-->
+        <!-- re init Arclength and arc section for this cable -->
+        <Volume name="SROC" comment="is the assembly of 2 rounded cables">
+        <Attribute for="SROC" seen="0" colo="410"/>
+         <Material name="Air" />
+         <Shape type="TUBE" rmin="0" rmax="100" dz="100" />
+            <Create block="AROC"/>
+            <Placement block="AROC" in="SROC" x="0" y="0" z="-radii">
+            </Placement>
+
+            <Create block="AROC"/>
+            <Placement block="AROC" in="SROC" x="0" y="0" z="radii">
+            <Rotation alphax="180"/>
+            </Placement>
+        </Volume>
+
+        <Volume name="AROC" comment="test">
+         <Attribute for="AROC" seen="0" colo="410"/>
+         <Material name="Air" />
+         <Shape type="TUBE" rmin="0" rmax="100" dz="100" />
+
+          angleMax=90
+          angleMin=0
+          radii = 17.825/2.
+          ArcLength=((angleMax - angleMin)*radii)*(twopiratio)
+          angleSection=(angleMax - angleMin)/(1.0*nsections)
+          <Do var="ii" from="1" to="nsections">
+            angle=piratio*(angleSection*(ii-1)+angleMin+0.5*angleSection) 
+            yarc=radii*sin(angle)
+            zarc=radii*cos(angle)
+            <Create    block="ARCA" />  
+            <Placement block="ARCA" x="0" y="yarc" z="zarc">
+            <Rotation alphax="90-(angleSection*(ii-1)+0.5*angleSection+angleMin)"/>
+            </Placement>
+          </Do>    
+        </Volume>
+
+        <Volume name="ARCA" comment="A TUBE with innner and outer radius">
+         <Attribute for="ARCA" seen="1" colo="4" trans="0"/>
+         <Shape type="TUBE" rmin="0" rmax="radiiPowerCable" dz="ArcLength/(2*nsections)"/>
+        </Volume> 
+
     </Module>
     
-
 </Document>
 
