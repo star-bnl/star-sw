@@ -139,8 +139,8 @@ All Volumes are directly in IDSM to avoid overlap issues by defining a mastervol
 
 <Create block="PSUP"/>
 
-<Placement block="PSUP" in="IDSM" x="0" y="0" z="zfirst" kOnly="'MANY'"  />
-<Placement block="PSUP" in="IDSM" x="0" y="0" z="zfirst" kOnly="'MANY'"  >
+<Placement block="PSUP" in="IDSM" x="0" y="0" z="0" kOnly="'MANY'"  />
+<Placement block="PSUP" in="IDSM" x="0" y="0" z="0" kOnly="'MANY'"  >
   <Rotation alphaz="180" />
 </Placement>
 
@@ -152,7 +152,7 @@ All Volumes are directly in IDSM to avoid overlap issues by defining a mastervol
  
      <Shape    type = "Pcon"  
                nz   = "3" phi1="85" dphi="190"
-               zi   = "{zfirst-zfirst, zlast-5-zfirst, zlast-zfirst}"
+               zi   = "{zfirst, zlast-5, zlast}"
                rmn  = "{2.5, 2.5, 2.5}"
                rmx  = "{21.5, 21.5, 8.5}" />
 <!-- The phi size is picked such the structures for the MTB boards are included even when the cross the
