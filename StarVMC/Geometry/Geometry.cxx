@@ -50,6 +50,7 @@
 /* ClassImp(TpcxGeom_t); */ TpcxGeom_t tpcxGeom;
 
 /* ClassImp(PxstGeom_t); */ PxstGeom_t pxstGeom;
+/* ClassImp(PsupGeom_t); */ PsupGeom_t psupGeom;
 /* ClassImp(DtubGeom_t); */ DtubGeom_t dtubGeom;
 
 // ----------------------------------------------------------------------
@@ -61,7 +62,7 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
   CalbInit(); CaveInit(); EcalInit(); FpdmInit(); FtpcInit(); MutdInit(); PipeInit();
   PixlInit(); SconInit(); SisdInit(); SvttInit(); BtofInit(); TpceInit(); VpddInit();
   UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IdsmInit();
-  FsceInit(); EiddInit(); TpcxInit(); IstdInit(); PxstInit();
+  FsceInit(); EiddInit(); TpcxInit(); IstdInit(); PxstInit(); PsupInit();
 
   const Char_t *path = ".:StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
   const Char_t *file = gSystem->Which( path, "StarGeometryDb.C", kReadPermission );
@@ -146,6 +147,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   geom.success_dtub = ConstructDtub( geom.dtubFlag, geom.dtubStat );
   geom.success_istd = ConstructIstd( geom.istdFlag, geom.istdStat ); // JB : ist 
   geom.success_pxst = ConstructPxst( geom.pxstFlag, geom.pxstStat ); // JB : ist 
+  geom.success_psup = ConstructPsup( geom.psupFlag, geom.psupStat );
 
   geom.success_ftpc = ConstructFtpc( geom.ftpcFlag, geom.ftpcStat );
   geom.success_ftro = ConstructFtro( geom.ftroFlag, geom.ftroStat );
@@ -1037,6 +1039,31 @@ Bool_t Geometry::ConstructPxst( const Char_t *flag, Bool_t go )
   return true;
 
 }
+
+Bool_t Geometry::ConstructPsup( const Char_t *flag, Bool_t go )
+{                                                  if (!go) return false;
+
+  if ( !psupGeom.Use("select",flag) )
+    {
+      Error( GetName(), Form("Cannot locate configuration %s",flag) );
+      return false;
+    }
+
+  AgStructure::AgDetpNew(psupGeom.module, Form("PSUP Configuration %s",flag));
+  /* Not required for PixlGeo4 --> pixlgeo00
+     AgStructure::AgDetpAdd("Pxlv_t","ladver",   2.0f );
+     AgStructure::AgDetpAdd("Pxlv_t","location", pixlGeom.location );
+  */
+
+
+  if (go) if ( !CreateModule(psupGeom.module) ) {
+    Warning(GetName(),Form("Could not create module %s",psupGeom.module.Data()));
+    return false;
+  }
+
+  return true;
+
+}
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -1414,6 +1441,12 @@ Bool_t Geometry::PxstInit() // Probably breaks config=-1 scheme
 {
   pxstGeom.module="NONE"    ;  pxstGeom.select="PXSTof"; pxstGeom.config=-0; pxstGeom.fill(); 
   pxstGeom.module="PxstGeo1";  pxstGeom.select="PXST01"; pxstGeom.config=-1; pxstGeom.fill(); 
+  return true;
+}
+Bool_t Geometry::PsupInit() // Probably breaks config=-1 scheme
+{
+  psupGeom.module="NONE"    ;  psupGeom.select="PSUPof"; psupGeom.config=-0; psupGeom.fill(); 
+  psupGeom.module="PsupGeo";  psupGeom.select="PSUP01"; psupGeom.config=-1; psupGeom.fill(); 
   return true;
 }
 // ----------------------------------------------------------------------------
