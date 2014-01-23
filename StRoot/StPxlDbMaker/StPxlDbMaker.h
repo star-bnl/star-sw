@@ -1,58 +1,98 @@
-// $Id: StPxlDbMaker.h,v 1.4 2013/09/14 17:46:58 bouchet Exp $
-// $Log: StPxlDbMaker.h,v $
-// Revision 1.4  2013/09/14 17:46:58  bouchet
-// *** empty log message ***
-//
-// Revision 1.3  2013/06/20 19:19:01  bouchet
-// update for pxlSensorRowColumnMask tables
-//
-// Revision 1.2  2013/05/29 18:12:16  bouchet
-// added GetCVS tags
-//
-// Revision 1.1  2013/05/24 15:59:53  bouchet
-// first version
-//
+/*!
+ * \class StPxlDbMaker
+ * \author J. Bouchet, M. Lomnitz, May 2013
+ * \Initial Revision.
+ */
 /***************************************************************************
- * Author:  J. Bouchet, M. Lomnitz , KSU
- * Description: PXL DB access Maker
+ *
+ * $Id: StPxlDbMaker.h,v 1.5 2014/01/23 01:04:49 qiuh Exp $
+ *
+ * Author: J. Bouchet, M. Lomnitz, May 2013
+ ***************************************************************************
+ *
+ * Description:
+ * Read DB and prepare information on pxl geometry and sensor/row/column status
+ * More information at
+ * https://www.star.bnl.gov/protected/heavy/qiuh/HFT/software/PXL_software.pdf
+ * 
+ ***************************************************************************
+ *
+ * $Log: StPxlDbMaker.h,v $
+ * Revision 1.5  2014/01/23 01:04:49  qiuh
+ * *** empty log message ***
+ *
+ *
  **************************************************************************/
 
 #ifndef STPXLDBMAKER_H
 #define STPXLDBMAKER_H
 
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
-#include "THashList.h"
+#include "StPxlUtil/StPxlConstants.h"
+
 class St_pxlSensorStatus;
 class St_pxlRowColumnStatus;
+class pxlSensorStatus_st;
+class pxlRowColumnStatus_st;
+class TGeoHMatrix;
+
 class StPxlDbMaker : public StMaker {
- private:
-  static THashList *fRotList;
-  St_pxlSensorStatus     *mSensorStatus;    //!
-  St_pxlRowColumnStatus  *mRowColumnStatus; //!
+public: 
+    StPxlDbMaker(const char *name="pxlDb");
+    ~StPxlDbMaker();
+    Int_t  Init();
+    Int_t  InitRun(Int_t runNumber);
+    Int_t  Make();
+    Int_t  Finish();
+    void   Clear(const char *opt);
 
- public: 
-  StPxlDbMaker(const char *name="PxlDb");
-  virtual       ~StPxlDbMaker();
-  virtual Int_t  Init();
-  virtual Int_t  InitRun(Int_t runNumber);
-  virtual Int_t  Make();
-  virtual Int_t  Finish();
-  virtual void   Clear(const char *opt);
-  virtual THashList *GetRotations() {return fRotList;}
-  virtual Int_t CalculateSensorsPosition();
-  virtual St_pxlSensorStatus    *GetSensorStatus(){return mSensorStatus;}//will return the table for all sectors and ladders
-  virtual St_pxlRowColumnStatus *GetRowColumnStatus(){return mRowColumnStatus;}//will return a table for all sectors and ladders
-  void    GetPxlSensorStatus();
-  void    GetPxlRowColumnStatus();
+    /// get geoHMatrix for rotation and shift
+    TGeoHMatrix *geoHMatrixTpcOnGlobal() const
+    {return mGeoHMatrixTpcOnGlobal;}
+    TGeoHMatrix *geoHMatrixIdsOnTpc() const
+    {return mGeoHMatrixIdsOnTpc;}
+    TGeoHMatrix *geoHMatrixPstOnIds() const
+    {return mGeoHMatrixPstOnIds;}
+    TGeoHMatrix *geoHMatrixPxlOnPst() const
+    {return mGeoHMatrixPxlOnPst;}
+    TGeoHMatrix *geoHMatrixHalfOnPxl(Int_t half) const   ///< 1: north   2: south
+    {return mGeoHMatrixHalfOnPxl[half-1];}
+    TGeoHMatrix *geoHMatrixSectorOnHalf(Int_t sector) const
+    {return mGeoHMatrixSectorOnHalf[sector-1];}
+    TGeoHMatrix *geoHMatrixLadderOnSector(Int_t sector, Int_t ladder) const
+    {return mGeoHMatrixLadderOnSector[sector-1][ladder-1];}
+    TGeoHMatrix *geoHMatrixSensorOnLadder(Int_t sector, Int_t ladder, Int_t sensor) const
+    {return mGeoHMatrixSensorOnLadder[sector-1][ladder-1][sensor-1];}
+    TGeoHMatrix *geoHMatrixSensorOnGlobal(Int_t sector, Int_t ladder, Int_t sensor) const
+    {return mGeoHMatrixSensorOnGlobal[sector-1][ladder-1][sensor-1];}
 
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.4 2013/09/14 17:46:58 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    /// get status for sensor/row/column
+    Int_t sensorStatus(Int_t sector, Int_t ladder, Int_t sensor) const; ///< 1-9: good or usable status
+    Int_t rowStatus(Int_t sector, Int_t ladder, Int_t sensor, Int_t row) const; ///< 1: good status
+    Int_t columnStatus(Int_t sector, Int_t ladder, Int_t sensor, Int_t column) const; ///< 1: good status
+
+    virtual const char *GetCVS() const {
+        static const char cvs[]="Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.5 2014/01/23 01:04:49 qiuh Exp $ built "__DATE__" "__TIME__ ;
+        return cvs;
+    }
+
+private:
+    Int_t getPositions(); ///< read and calculate geometry
+
+    TGeoHMatrix *mGeoHMatrixTpcOnGlobal;
+    TGeoHMatrix *mGeoHMatrixIdsOnTpc;
+    TGeoHMatrix *mGeoHMatrixPstOnIds;
+    TGeoHMatrix *mGeoHMatrixPxlOnPst;
+    TGeoHMatrix *mGeoHMatrixHalfOnPxl[2];
+    TGeoHMatrix *mGeoHMatrixSectorOnHalf[nPxlSectors];
+    TGeoHMatrix *mGeoHMatrixLadderOnSector[nPxlSectors][nPxlLaddersPerSector];
+    TGeoHMatrix *mGeoHMatrixSensorOnLadder[nPxlSectors][nPxlLaddersPerSector][nPxlSensorsPerLadder];
+    TGeoHMatrix *mGeoHMatrixSensorOnGlobal[nPxlSectors][nPxlLaddersPerSector][nPxlSensorsPerLadder];
+    pxlSensorStatus_st *mSensorStatusTable;
+    pxlRowColumnStatus_st *mRowColumnStatusTable;
+
   ClassDef(StPxlDbMaker,0)   //StAF chain virtual base class for Makers
 };
-// Global pointers:
-R__EXTERN StPxlDbMaker* gStPxlDbMaker;
 #endif
 
 

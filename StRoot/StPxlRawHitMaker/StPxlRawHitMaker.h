@@ -1,25 +1,26 @@
 /*!
  * \class StPxlRawHitMaker 
  * \author Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
+ * \Initial Revision.
  */
 /***************************************************************************
  * 
- * $Id: StPxlRawHitMaker.h,v 1.2 2013/09/26 14:58:49 qiuh Exp $
+ * $Id: StPxlRawHitMaker.h,v 1.3 2014/01/23 01:05:02 qiuh Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun 
  ***************************************************************************
  *
  * Description:
  * Read pixel raw hits from daq format. One raw hit is one fired pixel.
+ * More information at
+ * https://www.star.bnl.gov/protected/heavy/qiuh/HFT/software/PXL_software.pdf
  *
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.h,v $
- * Revision 1.2  2013/09/26 14:58:49  qiuh
+ * Revision 1.3  2014/01/23 01:05:02  qiuh
  * *** empty log message ***
  *
- * Revision 1.1  2013/05/23 20:57:30  qiuh
- * *** empty log message ***
  * 
  **************************************************************************/ 
 
@@ -30,56 +31,74 @@
 #include "StRTSBaseMaker.h"
 #include "StPxlUtil/StPxlConstants.h"
 class StPxlRawHitCollection;
-class St_pxlSensorStatus;
-class St_pxlSensorRowColumnStatus;
+class StPxlDbMaker;
 class StPxlRawHitMaker : public StRTSBaseMaker {
 public:
     StPxlRawHitMaker(const char *name="pxl_raw_hit");
-    virtual Int_t Init();
-    virtual Int_t InitRun(Int_t runumber);
-    virtual Int_t Make();
-    void DecodeSectorData();
-    Int_t GetHitsDataLength();    
-    void DecodeHitsData();
-    void DecodeWord(UInt_t val);
-    UInt_t Mid(Int_t start, Int_t end, UInt_t input);
-    Int_t ElementGetBit(UInt_t data, Int_t position);
-    Int_t DecodeState0(Int_t val);
-    Int_t DecodeStateN(Int_t val);
+    ~StPxlRawHitMaker();
+    Int_t Init();
+    Int_t InitRun(Int_t runumber);
+    Int_t Make();
+    void decodeSectorData(); ///< decode data of a sector
+    Int_t getHitsDataLength(); ///< get length of the hits data block
+    void decodeHitsData(); ///< decode the hits data block of a sector
+    void decodeWord(UInt_t val); ///< decode a word (32 bits)
+    UInt_t mid(Int_t start, Int_t end, UInt_t input); ///< decode the bits between "start" and "end" in the "input" word
+    Int_t elementGetBit(UInt_t data, Int_t position); ///< get the bit at "position" of "data" word 
+    Int_t decodeState0(Int_t val); ///< decoding mainly to get the row number for the following fired columns
+    Int_t decodeStateN(Int_t val); ///< decoding mainly to get fired column numbers in the current row
+    virtual const char *GetCVS() const {
+        static const char cvs[]="Tag $Name:  $ $Id: StPxlRawHitMaker.h,v 1.3 2014/01/23 01:05:02 qiuh Exp $ built "__DATE__" "__TIME__ ;
+        return cvs;
+    }
 
- protected:
-    UInt_t* m_sectorData;
-    Int_t m_sectorDataLength;
-    UInt_t* m_headerData;
-    UInt_t* m_hitsData;
-    Int_t m_hitsDataLength;
-    UInt_t* m_trailerData;
-    Int_t m_trailerDataLength;
+protected:
+    /// pointers and lengths for data blocks
+    UInt_t* mSectorData;
+    Int_t mSectorDataLength;
+    UInt_t* mHeaderData;
+    UInt_t* mHitsData;
+    Int_t mHitsDataLength;
+    UInt_t* mTrailerData;
+    Int_t mTrailerDataLength;
     
-    Int_t m_overFlowCount;
+    Int_t mOverFlowCount; ///< count for overflow rows
 
-    Int_t m_sector;
-    Int_t m_ladder;
-    Int_t m_sensor;
-    Int_t m_row;
-    Int_t m_column;
+    /// current sector, ladder, sensor, row, column that is being worked on
+    Int_t mSector; ///< sector 1-10
+    Int_t mLadder; ///< ladder 1-4
+    Int_t mSensor; ///< sensor 1-10
+    Int_t mRow; ///< row 0-927
+    Int_t mColumn; ///< column 0-959
 
-    Int_t sensorStatus[400];
-    std::map<unsigned int,short> mapRow;
-    std::map<unsigned int,short>::const_iterator gotRow;
-    std::map<unsigned int,short> mapCol;
-    std::map<unsigned int,short>::const_iterator gotCol;
-    // row_id = 928*sensor_id + k
-    // col_id = 960*sensor_id + k
-    // sensor_id = (sector)*40 + ladder*10 + sensor
-    // with :
-    // 0<= sector <10
-    // 0<= ladder < 4
-    // 0<= sensor <10
+    StPxlDbMaker* mPxlDbMaker;
 
-    Bool_t doCalibRowColumn;
-    Bool_t doCalibSensor;
-    StPxlRawHitCollection* m_pxlRawHitCollection;
+    StPxlRawHitCollection* mPxlRawHitCollection; ///< generated raw hit collection
+
+    /// decoding control paramters according to firmware
+    Short_t mHeaderLength;
+    Short_t mHardwareIdPosition; ///< position for hardware id, including sector number
+    UInt_t  mHeaderToken;
+    UInt_t  mSeparatorToken;
+    UInt_t  mEndToken;
+    Short_t mChipIdStartBit; ///< start bit for chip id
+    Short_t mChipIdEndBit; ///< end bit for chip id
+    Short_t mChipIdPow; ///< chipId = mChipIdPow*chipIdFromHigher16Bits+chipIdFromLower16Bits
+    Short_t mOverflowBit; ///< bit for row overflow (more fired columns than can be read)
+    Short_t mRowOrColumnFlagBit; ///< bit for rowOrColumnFlag, which determine whether "data" is row or column number
+    Short_t mCodingStartBit; ///< start bit for "coding", which means how many sequential fired columns
+    Short_t mCodingEndBit; ///< end bit for "coding", which means how many sequential fired columns
+    Short_t mDataStartBit; ///< start bit for "data", which can be row or column number, depending on rowOrColumnFlag
+    Short_t mDataEndBit; ///< end bit for "data", which can be row or column number, depending on rowOrColumnFlag
+    Short_t mDummyState; ///< dummy state when the last state from a sensor ends on the lower 16 bits of a 32-bit word
+
+    /// sensor good status range
+    Short_t mSensorGoodStatusMin;
+    Short_t mSensorGoodStatusMax;
+
+    /// row and column good status
+    Short_t mRowColumnGoodStatus;
+
     ClassDef(StPxlRawHitMaker,1)   //StAF chain virtual base class for Makers
 };
 
