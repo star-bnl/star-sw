@@ -337,11 +337,15 @@ AgMaterial &AgMaterial::Get( const Char_t *name )
 AgMaterial AgMaterial::CopyMaterial( const Char_t *name )
 { 
 
-  AgModule   *module = AgBlock::module();
+  AgModule   *module   = AgBlock::module();
+  AgBlock    *current = AgBlock::active();
   AgMaterial *material = 0;
 
   TString modname="None";
-  if ( module ) modname = module->GetName();
+  TString volname="None";
+  if ( module  ) modname = module->GetName();
+  if ( current ) volname = current->GetName();
+  
 
   //  std::cout << "Info in <AgMaterial::Get(name)>: module="<<modname.Data()<<" material="<<name<<std::endl;
 
@@ -402,6 +406,7 @@ AgMaterial AgMaterial::CopyMaterial( const Char_t *name )
 
   cout << "AgML Error detected.  Copy of nonexistant material." << endl;
   cout << Form("<Material name=\"%s\" />",name) << endl;
+  cout << Form("  In module %s volume %s", modname.Data(), volname.Data() ) << endl;
 
   assert(0); // should never get here
 }
