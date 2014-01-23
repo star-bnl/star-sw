@@ -4,8 +4,6 @@
   <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
   
-
-
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
@@ -16,9 +14,12 @@ call geometry
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.27 2013/12/09 14:39:06 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.28 2014/01/23 17:16:13 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.28  2014/01/23 17:16:13  jwebb
+  Force recompilation to pickup y2013b series and y2014.
+
   Revision 1.27  2013/12/09 14:39:06  jwebb
   Changes to pixel detector for y2014.
 
