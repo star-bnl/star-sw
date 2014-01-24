@@ -120,7 +120,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   char buffer[100];
   char buffer2[100];
 
-  int nBins       = 100;
+  int nBins       = 50;
   int nBinsTB     = 32;
   double ADCMax   = 4100.;
   double ADCMin   = -100.;
@@ -150,7 +150,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
     sprintf( buffer, "HitMult_Ladder_%d", index+1 );
     sprintf( buffer2, "Hit Multiplicity per Event, Ladder: %d", index+1 );
 
-    hMultContents.multArray[index] = new TH1F(buffer, buffer2, ChPerLadder+1, 0, ChPerLadder+1);
+    hMultContents.multArray[index] = new TH1F(buffer, buffer2, 100, 0, ChPerLadder+1);
     hMultContents.multArray[index]->GetXaxis()->SetTitle("Number of Hits");
     hMultContents.multArray[index]->GetYaxis()->SetTitle("Counts");
     hMultContents.multArray[index]->SetStats(true);
@@ -162,7 +162,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
     sprintf( buffer, "HitMap_Ladder_%d", index+1 );
     sprintf( buffer2, "Hit Map (density) per Event, Ladder: %d", index+1 );
 
-    hHitMapContents.hitMapArray[index] = new TH2F(buffer, buffer2, numRow, 1, numRow+1, numColumn*numSensor, 1, numColumn*numSensor+1);
+    hHitMapContents.hitMapArray[index] = new TH2F(buffer, buffer2, 100, 1, numRow+1, 100, 1, numColumn*numSensor+1);
     hHitMapContents.hitMapArray[index]->GetXaxis()->SetTitle("Row Index (#phi)");
     hHitMapContents.hitMapArray[index]->GetYaxis()->SetTitle("Column Index (Z)");
     hHitMapContents.hitMapArray[index]->GetYaxis()->SetNdivisions(numSensor,false);
@@ -246,7 +246,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   }
 
   //////////////////
-  hSumContents.hHitMap = new TH2F("HitMapOfIST", "Hit map (density) of IST layer", numRow*numLadder, 1, numRow*numLadder+1, numColumn*numSensor, 1, numColumn*numSensor+1);
+  hSumContents.hHitMap = new TH2F("HitMapOfIST", "Hit map (density) of IST layer", 100, 1, numRow*numLadder+1, 100, 1, numColumn*numSensor+1);
   hSumContents.hHitMap->GetXaxis()->SetNdivisions(-numLadder, false);
   hSumContents.hHitMap->GetYaxis()->SetNdivisions(-numSensor, false);
   hSumContents.hHitMap->SetStats(false);
@@ -254,7 +254,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   hSumContents.hHitMap->GetYaxis()->SetTitle("Column Index in Z");
   hSumContents.hHitMap->SetLabelSize(0.02);
 
-  hSumContents.hMultVsLadder = new TH2F("HitMultVsLadder", "Hit multiplicity of each ladder", numLadder, 1, numLadder+1, ChPerLadder+1, 0, ChPerLadder+1);
+  hSumContents.hMultVsLadder = new TH2F("HitMultVsLadder", "Hit multiplicity of each ladder", numLadder, 1, numLadder+1, 100, 0, ChPerLadder+1);
   hSumContents.hMultVsLadder->GetXaxis()->SetNdivisions(-numLadder, false);
   hSumContents.hMultVsLadder->SetStats(false);
   hSumContents.hMultVsLadder->GetXaxis()->SetTitle("Ladder Index");
@@ -265,20 +265,20 @@ void istBuilder::initialize(int argc, char *argv[]) {
     hSumContents.hMultVsLadder->GetXaxis()->SetBinLabel(iLad+1,buffer);
   }
 
-  hSumContents.hSumPed = new TH2F("PedestalPerChannel", "Pedestal per Channel", totCh, 1, totCh+1, nBins, PedMin, PedMax);
+  hSumContents.hSumPed = new TH2F("PedestalPerChannel", "Pedestal per Channel", 50, 1, totCh+1, nBins, PedMin, PedMax);
   hSumContents.hSumPed->GetXaxis()->SetNdivisions(-numLadder,false);
   hSumContents.hSumPed->SetStats(false);
   hSumContents.hSumPed->GetXaxis()->SetTitle("Channel Index");
   hSumContents.hSumPed->GetYaxis()->SetTitle("Mean Pedestal [ADC counts]");
   hSumContents.hSumPed->GetYaxis()->SetTitleOffset(1.1);
 
-  hSumContents.hSumSig = new TH2F("PedestalRmsPerChannel", "Pedestal RMS per Channel", totCh, 1, totCh+1, nBins, SigMin, SigMax);
+  hSumContents.hSumSig = new TH2F("PedestalRmsPerChannel", "Pedestal RMS per Channel", 50, 1, totCh+1, nBins, SigMin, SigMax);
   hSumContents.hSumSig->GetXaxis()->SetNdivisions(-numLadder,false);
   hSumContents.hSumSig->SetStats(false);
   hSumContents.hSumSig->GetXaxis()->SetTitle("Channel Index");
   hSumContents.hSumSig->GetYaxis()->SetTitle("Pedestal RMS [ADC counts]");
 
-  hSumContents.hCommonModeNoise = new TH2F("CommonModeNoisePerAPV", "Common Mode Noise per APV", totAPV, 0, totAPV, nBins, CmnMin, CmnMax);
+  hSumContents.hCommonModeNoise = new TH2F("CommonModeNoisePerAPV", "Common Mode Noise per APV", 50, 0, totAPV, nBins, CmnMin, CmnMax);
   hSumContents.hCommonModeNoise->GetXaxis()->SetNdivisions(-numLadder, false);
   hSumContents.hCommonModeNoise->SetStats(false);
   hSumContents.hCommonModeNoise->GetXaxis()->SetTitle("APV Index");
