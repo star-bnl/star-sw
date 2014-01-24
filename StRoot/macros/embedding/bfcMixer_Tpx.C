@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.37 2013/04/02 00:14:43 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.38 2014/01/24 16:30:45 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.38  2014/01/24 16:30:45  zhux
+// added chain for run12 p+p 200GeV
+//
 // Revision 1.37  2013/04/02 00:14:43  zhux
 // added chain for run12 U+U 193GeV
 //
@@ -115,6 +118,8 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   // Run12 U+U 193 GeV chain
   TString prodP12idUU193("DbV20120921,P2012b,AgML,mtdDat,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu -VFMinuit -hitfilt");
 
+  TString prodP12idpp200("DbV20130212,pp2012b,AgML,mtdDat,btof,fmsDat,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-hitfilt");
+
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
   TString geomP10ih("ry2010c");
@@ -156,6 +161,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P11idAuAu19")  { chain3Opt = prodP11idAuAu19;   chain2Opt += geomP11id;}
   else if (prodName == "P11idpp500")   { chain3Opt = prodP11idpp500;    chain2Opt += geomP11id;}
   else if (prodName == "P12idUU193")   { chain3Opt = prodP12idUU193;    chain2Opt += geomP12id;}
+  else if (prodName == "P12idpp200")   { chain3Opt = prodP12idpp200;    chain2Opt += geomP12id;}
 
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
