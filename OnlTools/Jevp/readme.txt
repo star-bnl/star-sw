@@ -10,10 +10,23 @@ readme files:
     readme-server.txt
     readme-presenter.txt
 
-*********************************
-* I.  Obtain and compile the code
-*********************************
+***************************************************************************
+* I.  Obtain and compile the code according to rules for the current distro
+***************************************************************************
 
+> cvs co OnlTools/Jevp
+
+
+
+*** Most current OFFLINE DISTRO:   SL14a ******
+> cvs co OnlTools/Jevp
+> cvs co OnlTools/RTS
+> starver SL14a
+> cons
+
+
+
+*** old OFFLINE: SL12d ****
 > cvs co OnlTools/Jevp
 > cvs co OnlTools/PDFUtil
 > cvs co StRoot/RTS
@@ -24,8 +37,10 @@ Modify the file mgr/construct with the following changes:
 #   375a376
 #   >     push @sysdirlist, "OnlTools/Jevp"; 
 
-> starlevel SL12d
+> starver SL12d
 > cons
+***************************
+
 
 
 Should build everything.   The "executables" will be in the form
