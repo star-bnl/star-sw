@@ -3,6 +3,7 @@
 # pro as of 10/28/11
 #starver SL11d
 #stardev
-starver SL13b
+setenv USE_64BITS 1
+starver SL14a
 
 echo `STAR_LEVELS`
