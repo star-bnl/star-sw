@@ -25,6 +25,10 @@ readme files:
 > cons
 
 
+> cd .sl53_gcc432/obj/OnlTools/Jevp/StJevpPresenter/
+> /opt/star/sl53_gcc432/qt4/bin/uic EventInfoUi.ui -o ui_EventInfoUi.h
+> /opt/star/sl53_gcc432/qt4/bin/uic ServerInfoUi.ui -o ui_ServerInfoUi.h
+> /opt/star/sl53_gcc432/qt4/bin/uic TriggerDetectorBitsInfoUi.ui -o
 
 *** old OFFLINE: SL12d ****
 > cvs co OnlTools/Jevp
