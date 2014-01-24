@@ -3,6 +3,7 @@
 <Export language="Mortran"> 
   <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
+
   
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
@@ -14,9 +15,12 @@ call geometry
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.28 2014/01/23 17:16:13 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.29 2014/01/24 19:45:08 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.29  2014/01/24 19:45:08  jwebb
+  Revert to CaveGeo for y2014 geometry / force recompile.
+
   Revision 1.28  2014/01/23 17:16:13  jwebb
   Force recompilation to pickup y2013b series and y2014.
 
