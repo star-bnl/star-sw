@@ -134,7 +134,7 @@ For now (Dec 2013) I will add a Tube section from the Al into the position of th
 
 
 <!--Almost all structures have two instances North and South Side. Placed in PSUP mother volume.
-All Volumes are directly in IDSM to avoid overlap issues by defining a mastervolume tht is then rotated
+All Volumes are directly in IDSM to avoid overlap issues by defining a mastervolume that is then rotated
 -->
 
 <Create block="PSUP"/>
@@ -527,7 +527,6 @@ It is fairly complicated and will be approximated -->
 <!-- MTB cable --> 
 
 <Create block="PSDB" />
-<!-- 
 <Placement block="PSDB" x="-4.275" y="14.8375" z="-75.95" >
   <Rotation alphay="6.37038" />
   <Rotation alphaz="-48.2809" />
@@ -544,13 +543,13 @@ It is fairly complicated and will be approximated -->
   <Rotation alphay="6.37038" />
   <Rotation alphaz="-48.2809" />
 </Placement>
--->
+
 
 <!-- MTB cable --> 
 
 
 <Create block="PSDC" />
-<!--
+
  <Placement block="PSDC" x="-2.85" y="15.0875" z="-79.35" >
 <Rotation alphay="4.7303" />
 <Rotation alphaz="-79.0113" />
@@ -567,13 +566,13 @@ It is fairly complicated and will be approximated -->
 <Rotation alphay="4.7303" />
 <Rotation alphaz="-79.0113" />
  </Placement>
--->
+
 
 <!-- MTB cable --> 
 
 
 <Create block="PSDD" />
-<!--
+
  <Placement block="PSDD" x="-1.425" y="15.23" z="-82.75" >
 <Rotation alphay="4.4314" />
 <Rotation alphaz="-106.552" />
@@ -590,11 +589,11 @@ It is fairly complicated and will be approximated -->
 <Rotation alphay="4.4314" />
 <Rotation alphaz="-106.552" />
  </Placement>
--->
+
 <!-- MTB cable --> 
 
 <Create block="PSDE" />
-<!--
+
  <Placement block="PSDE" x="4.44089e-16" y="15.23" z="-86.15" >
 <Rotation alphay="4.55415" />
 <Rotation alphaz="-127.569" />
@@ -611,7 +610,7 @@ It is fairly complicated and will be approximated -->
 <Rotation alphay="4.55415" />
 <Rotation alphaz="-127.569" />
  </Placement>
--->
+
 
 
 
@@ -700,6 +699,7 @@ It is fairly complicated and will be approximated -->
 
 <!-- the hinge release Al density should be roughly 40% of bare aluminium
      due to the cutouts. -->
+
 <Volume name="PSHA" comment="PSHA Hinge release partA (1)"  >
   <Attribute for="PSHA" seen="1" colo="3" />
   <Material name="Al40" a="26.8" z="13" dens="2.7*0.4" radl="8.9/0.4" absl="37.2/0.4"/>
