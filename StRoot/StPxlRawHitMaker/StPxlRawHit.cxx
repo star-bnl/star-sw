@@ -1,11 +1,11 @@
 /*!
- * \class StPxlRawHit 
+ * \class StPxlRawHit
  * \author Qiu Hao, Jan 2012
  * \Initial Revision.
  */
 /***************************************************************************
- * 
- * $Id: StPxlRawHit.cxx,v 1.1 2014/01/23 01:05:02 qiuh Exp $
+ *
+ * $Id: StPxlRawHit.cxx,v 1.2 2014/01/27 02:37:25 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2012
  ***************************************************************************
@@ -18,36 +18,34 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHit.cxx,v $
- * Revision 1.1  2014/01/23 01:05:02  qiuh
+ * Revision 1.2  2014/01/27 02:37:25  qiuh
  * *** empty log message ***
  *
- * 
+ *
  **************************************************************************/
 
 #include "StPxlRawHit.h"
 
 ClassImp(StPxlRawHit)
 
-StPxlRawHit::~StPxlRawHit() { /* noop */ }
-
-StPxlRawHit::StPxlRawHit()
+StPxlRawHit::StPxlRawHit() : TObject()
 {
-    mSector = -1;
-    mLadder = -1;
-    mSensor = -1;
-    mRow = -1;
-    mColumn = -1;
-    mIdTruth = 0;
+   mSector = -1;
+   mLadder = -1;
+   mSensor = -1;
+   mRow = -1;
+   mColumn = -1;
+   mIdTruth = 0;
 }
 
-StPxlRawHit::StPxlRawHit(Int_t sector, Int_t ladder, Int_t sensor, Int_t row, Int_t column, Int_t idTruth)
+StPxlRawHit::StPxlRawHit(Int_t sector, Int_t ladder, Int_t sensor, Int_t row, Int_t column, Int_t idTruth) : TObject()
 {
-    mSector = sector;
-    mLadder = ladder;
-    mSensor = sensor;
-    mRow = row;
-    mColumn = column;
-    mIdTruth = idTruth;
+   mSector = sector;
+   mLadder = ladder;
+   mSensor = sensor;
+   mRow = row;
+   mColumn = column;
+   mIdTruth = idTruth;
 }
 
 Int_t StPxlRawHit::sector() const {return mSector;}
@@ -59,35 +57,35 @@ Int_t StPxlRawHit::idTruth() const {return mIdTruth;}
 
 void StPxlRawHit::setSector(Int_t sector)
 {
-    mSector = sector;
+   mSector = sector;
 }
 
 void StPxlRawHit::setLadder(Int_t ladder)
 {
-    mLadder = ladder;
+   mLadder = ladder;
 }
 
 void StPxlRawHit::setSensor(Int_t sensor)
 {
-    mSensor = sensor;
+   mSensor = sensor;
 }
 
 void StPxlRawHit::setRow(Int_t row)
 {
-    mRow = row;
+   mRow = row;
 }
 
 void StPxlRawHit::setColumn(Int_t column)
 {
-    mColumn = column;
+   mColumn = column;
 }
 
 void StPxlRawHit::setIdTruth(Int_t idTruth)
 {
-    mIdTruth = idTruth;
+   mIdTruth = idTruth;
 }
 
 void StPxlRawHit::print()
 {
-    printf("StPxlRawHit: sec:%i lad:%i sen:%i row:%i col:%i idT:%i\n", sector(), ladder(), sensor(), row(), column(), idTruth());
+   printf("StPxlRawHit: sec:%i lad:%i sen:%i row:%i col:%i idT:%i\n", sector(), ladder(), sensor(), row(), column(), idTruth());
 }
