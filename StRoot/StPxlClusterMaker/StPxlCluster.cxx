@@ -4,10 +4,10 @@
  * \Initial Revision.
  */
 /***************************************************************************
- * 
- * $Id: StPxlCluster.cxx,v 1.1 2014/01/23 01:04:43 qiuh Exp $
  *
- * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun 
+ * $Id: StPxlCluster.cxx,v 1.2 2014/01/27 02:37:02 qiuh Exp $
+ *
+ * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
  *
  * Description:
@@ -18,79 +18,62 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.cxx,v $
- * Revision 1.1  2014/01/23 01:04:43  qiuh
+ * Revision 1.2  2014/01/27 02:37:02  qiuh
  * *** empty log message ***
  *
- * 
- **************************************************************************/ 
+ *
+ **************************************************************************/
 
 #include "StPxlCluster.h"
+#include "StPxlRawHitMaker/StPxlRawHit.h"
+#include <algorithm>
+#include <map>
+using namespace std;
 
 ClassImp(StPxlCluster)
 
-StPxlCluster::StPxlCluster(){
-}
-
-StPxlCluster::~StPxlCluster()
+StPxlCluster::StPxlCluster()
 {
-    mColumnVec.clear();
-    mRowVec.clear();
+   mColumnCenter = -9999;
+   mRowCenter = -9999;
+   mIdTruth = -9999;
 }
 
-Int_t StPxlCluster::nRawHits()
+Int_t StPxlCluster::nRawHits() const
 {
-    return mColumnVec.size();
+   return mRawHitVec.size();
 }
 
-void StPxlCluster::addRawHit(Int_t columnAdd, Int_t rowAdd, Int_t idTruthAdd){
-    mColumnVec.push_back(columnAdd);
-    mRowVec.push_back(rowAdd);
-    mIdVec.push_back(idTruthAdd);
+void StPxlCluster::addRawHit(const StPxlRawHit *rawHit)
+{
+   mRawHitVec.push_back(rawHit);
 }
 
-void StPxlCluster::summarize(){
-    float columnSum=0;
-    float rowSum=0;
-    int nRawHits_ = nRawHits();
+bool compareSecond(const pair<int, int> &pair1, const pair<int, int> &pair2)
+{
+   return pair1.second < pair2.second;
+}
 
-    std::vector<int> differentIdVec;
-    std::vector<int> differentIdCountVec;
-    for(int i=0;i<nRawHits_;i++){
-        columnSum += mColumnVec[i];
-        rowSum += mRowVec[i];
+void StPxlCluster::summarize()
+{
+   // calculate average column and row
+   float columnSum = 0;
+   float rowSum = 0;
+   int nRawHits_ = nRawHits();
+   for (int i = 0; i < nRawHits_; i++) {
+      columnSum += mRawHitVec[i]->column();
+      rowSum += mRawHitVec[i]->row();
+   }
+   mColumnCenter = columnSum / float(nRawHits_);
+   mRowCenter = rowSum / float(nRawHits_);
 
-        int idRegistered = 0;
-        for(unsigned int j=0; j<differentIdVec.size(); j++)
-            {
-                if(mIdVec[i] == differentIdVec[j])
-                    {
-                        differentIdCountVec[j]++;
-                        idRegistered = 1;
-                        break;
-                    }
-            }
-        if(!idRegistered)
-            {
-                differentIdVec.push_back(mIdVec[i]);
-                differentIdCountVec.push_back(1);
-            }
-    }
-
-    mColumnCenter = columnSum/float(nRawHits_);
-    mRowCenter = rowSum/float(nRawHits_);
-
-    int maxIdCount = 0;
-    int maxIdCountIndex = 0;
-    for(unsigned int i=0; i<differentIdVec.size(); i++)
-        {
-            if(maxIdCount<differentIdCountVec[i])
-                {
-                    maxIdCount = differentIdCountVec[i];
-                    maxIdCountIndex = i;
-                }
-        }
-    mIdTruth = differentIdVec[maxIdCountIndex];
-
+   // find the most frequent raw hit idTruth as cluster idTruth
+   map<int, int> idTruthMap;
+   for (int i = 0; i < nRawHits_; i++) {
+      if (mRawHitVec[i]->idTruth()) {idTruthMap[mRawHitVec[i]->idTruth()] ++;}
+   }
+   if (!idTruthMap.size()) {mIdTruth = 0;}
+   else { mIdTruth = max_element(idTruthMap.begin(), idTruthMap.end(), compareSecond)->first;}
 }
 
 

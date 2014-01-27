@@ -1,11 +1,11 @@
 /*!
- * \class StPxlClusterCollection 
+ * \class StPxlClusterCollection
  * \author Qiu Hao, March 2013
  * \Initial Revision.
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterCollection.h,v 1.1 2014/01/23 01:04:43 qiuh Exp $
+ * $Id: StPxlClusterCollection.h,v 1.2 2014/01/27 02:37:02 qiuh Exp $
  *
  * Author: Qiu Hao, March 2013
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterCollection.h,v $
- * Revision 1.1  2014/01/23 01:04:43  qiuh
+ * Revision 1.2  2014/01/27 02:37:02  qiuh
  * *** empty log message ***
  *
  *
@@ -30,22 +30,22 @@
 #include "StPxlCluster.h"
 #include "StPxlUtil/StPxlConstants.h"
 
-class StPxlClusterCollection : public StObject {
+class StPxlClusterCollection : public StObject
+{
 public:
-    StPxlClusterCollection();
-    ~StPxlClusterCollection();
-    void addCluster(Int_t sector, Int_t ladder, Int_t sensor, StPxlCluster* cluster); ///< add a cluster to the collection
-    Int_t numberOfClusters(Int_t sector, Int_t ladder, Int_t sensor); ///< number of clusters in a sensor
-    StPxlCluster* cluster(Int_t sector, Int_t ladder, Int_t sensor, Int_t clusterIndex); ///< pointer to a cluster
-    virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StPxlClusterCollection.h,v 1.1 2014/01/23 01:04:43 qiuh Exp $ built "__DATE__" "__TIME__ ;
-        return cvs;
-    }
+   StPxlClusterCollection();
+   void addCluster(Int_t sector, Int_t ladder, Int_t sensor, const StPxlCluster &cluster); ///< add a cluster to the collection
+   Int_t numberOfClusters(Int_t sector, Int_t ladder, Int_t sensor) const; ///< number of clusters in a sensor
+   const StPxlCluster *cluster(Int_t sector, Int_t ladder, Int_t sensor, Int_t clusterIndex) const; ///< pointer to a cluster in the collection
+   virtual const char *GetCVS() const {
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterCollection.h,v 1.2 2014/01/27 02:37:02 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      return cvs;
+   }
 
 protected:
-    vector<StPxlCluster*> mClusterVec[nPxlSectors][nPxlLaddersPerSector][nPxlSensorsPerLadder]; ///< vectors to store cluster pointers
+   vector<StPxlCluster> mClusterVec[kNumberOfPxlSectors][kNumberOfPxlLaddersPerSector][kNumberOfPxlSensorsPerLadder]; ///< vectors to store clusters
 
-    ClassDef(StPxlClusterCollection,1)
+   ClassDef(StPxlClusterCollection, 1)
 };
 
 #endif

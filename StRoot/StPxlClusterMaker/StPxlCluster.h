@@ -4,10 +4,10 @@
  * \Initial Revision.
  */
 /***************************************************************************
- * 
- * $Id: StPxlCluster.h,v 1.1 2014/01/23 01:04:43 qiuh Exp $
  *
- * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun 
+ * $Id: StPxlCluster.h,v 1.2 2014/01/27 02:37:02 qiuh Exp $
+ *
+ * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
  *
  * Description:
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.h,v $
- * Revision 1.1  2014/01/23 01:04:43  qiuh
+ * Revision 1.2  2014/01/27 02:37:02  qiuh
  * *** empty log message ***
  *
  *
@@ -29,29 +29,29 @@
 
 #include "Rtypes.h"
 
-class StPxlCluster{
+class StPxlRawHit;
+
+class StPxlCluster
+{
 public:
-    StPxlCluster();
-    ~StPxlCluster();
-    Int_t nRawHits();  ///< number of raw hits
-    void addRawHit(Int_t column, Int_t row, Int_t idTruthAdd); ///< add a raw hit to the cluster
-    void summarize(); ///< calculate column center, row center, and most frequent idTruth
-    Float_t columnCenter() {return mColumnCenter;} ///< average raw hit column
-    Float_t rowCenter() {return mRowCenter;} ///< average raw hit row
-    Int_t idTruth() {return mIdTruth;} ///< for embedding, 0 as background, most frequent raw hit idTruth as idTruth of the cluster
-    virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StPxlCluster.h,v 1.1 2014/01/23 01:04:43 qiuh Exp $ built "__DATE__" "__TIME__ ;
-        return cvs;
-    }
+   StPxlCluster();
+   Int_t nRawHits() const;  ///< number of raw hits
+   void addRawHit(const StPxlRawHit *rawHit); ///< add a raw hit to the cluster
+   void summarize(); ///< calculate column center, row center, and most frequent idTruth among raw hits
+   Float_t columnCenter() const {return mColumnCenter;} ///< average raw hit column
+   Float_t rowCenter() const {return mRowCenter;} ///< average raw hit row
+   Int_t idTruth() const {return mIdTruth;} ///< for embedding, 0 as background, most frequent raw hit idTruth as idTruth of the cluster
+   virtual const char *GetCVS() const {
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlCluster.h,v 1.2 2014/01/27 02:37:02 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      return cvs;
+   }
 
 protected:
-    std::vector<int> mColumnVec; ///< vector of raw hit column
-    std::vector<int> mRowVec; ///< vector of raw hit row
-    std::vector<int> mIdVec; ///< vector of raw hit idTruth
-    Float_t mColumnCenter; ///< average raw hit column
-    Float_t mRowCenter; ///< average raw hit row
-    Int_t mIdTruth; ///< for embedding, 0 as background, most frequent raw hit idTruth as idTruth of the cluster
-    ClassDef(StPxlCluster,1)
+   std::vector<const StPxlRawHit *> mRawHitVec; ///< vector of raw hits
+   Float_t mColumnCenter; ///< average raw hit column
+   Float_t mRowCenter; ///< average raw hit row
+   Int_t mIdTruth; ///< for embedding, 0 as background, most frequent raw hit idTruth as idTruth of the cluster
+   ClassDef(StPxlCluster, 1)
 };
 
-#endif 
+#endif
