@@ -19,4 +19,5 @@ struct istControl {
   octet kIstADCdata;			// non-ZS data
   octet kIstZSdata;			// ZS data
   octet kIstDefaultTimeBin;		// default maximum ADC time bin index
+  octet kIstCurrentTimeBinNum;  // time bin number for current run/fill
 };
