@@ -271,8 +271,8 @@ StMultiKeyMapIter &StMultiKeyMapIter::operator++()
 const StMultiKeyNode *StMultiKeyMapIter::Left(const StMultiKeyNode *node) 
 {
   while(node) {
-    if ((int)mStk.size() <=mLev) mStk.resize(mLev*2);
-    mStk[++mLev] = node;
+    if ((int)mStk.size() <=++mLev) mStk.resize(mLev*2);
+    mStk[mLev] = node;
     if (!node->mLink[0]) 		break;
     if (mKMin && FilterLeft(node))	break;
     node = node->mLink[0];
