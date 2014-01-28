@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.43 2013/07/22 20:45:56 jwebb Exp $
+* $Id: gstar_part.g,v 1.44 2014/01/28 15:12:57 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.44  2014/01/28 15:12:57  jwebb
+* Corrected charge states for two hypernuclei
+*
 * Revision 1.43  2013/07/22 20:45:56  jwebb
 * Changed lifetime... previous values were the width of the particle in GeV
 * not the time in seconds.
@@ -651,7 +654,7 @@ Particle hyperTriton_he3_pi_minus code      = 61053            ,
 
 Particle anti_hyperTriton_he3_pi_plus  code      = 61054       ,
                                   mass      = 2.99131          , 
-                                  charge    = +1               ,
+                                  charge    = -1               ,
                                   tlife     = 2.6320e-10       ,
                                   pdg       = UNDEFINED        ,
                                   trktyp    = kGtHADR          ,
@@ -661,7 +664,7 @@ Particle anti_hyperTriton_he3_pi_plus  code      = 61054       ,
 
 Particle hyperTriton_d_p_pi_minus code      = 62053            ,
                                   mass      = 2.99131          ,
-                                  charge    = -1               ,
+                                  charge    = +1               ,
                                   tlife     = 2.6320e-10       ,
                                   pdg       = UNDEFINED        ,
                                   trktyp    = kGtHADR          ,
