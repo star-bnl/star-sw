@@ -1,5 +1,9 @@
-* $Id: g2t_ist.F,v 1.4 2006/12/17 22:45:10 potekhin Exp $
+* $Id: g2t_ist.F,v 1.5 2014/01/28 14:33:52 jwebb Exp $
 * $Log: g2t_ist.F,v $
+* Revision 1.5  2014/01/28 14:33:52  jwebb
+* IST group prefers local over global coordinates to be pushed into the g2t
+* structures.
+*
 * Revision 1.4  2006/12/17 22:45:10  potekhin
 * Commented out gratuitous print statements
 * left over from
@@ -14,7 +18,7 @@
 #include "g2t_ist.inc"
 #include "genhit.h"
       INTEGER   G2T_IST,G2R_GET_HIT,Iprin/0/,Idigi,i,isys
-      logical   Local/.false./
+      logical   Local/.true./ !changed by YPWANG Dec. 9, 2013
 *
       G2T_IST=STAFCV_OK
       if (g2t_ist_hit_h.maxlen.le.0) return
@@ -25,7 +29,8 @@
 
       call G2R_GET_SYS ('ISTB','IBSS',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
-       Local  = Idigi.ge.2
+!       Local  = Idigi.ge.2
+! -- commented out by YPWANG Dec. 9, 2013
 
        Do While (G2R_GET_HIT('ist') .eq. 0)
 *          print *,i,id,trac,next,volume,
