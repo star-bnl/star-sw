@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitCollection.h,v 1.2 2014/01/27 02:37:25 qiuh Exp $
+ * $Id: StPxlRawHitCollection.h,v 1.3 2014/01/28 19:29:44 qiuh Exp $
  *
  * Author: Qiu Hao, March 2013
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitCollection.h,v $
- * Revision 1.2  2014/01/27 02:37:25  qiuh
+ * Revision 1.3  2014/01/28 19:29:44  qiuh
  * *** empty log message ***
  *
  *
@@ -38,7 +38,7 @@ public:
    Int_t numberOfRawHits(Int_t sector, Int_t ladder, Int_t sensor); ///< number of raw hits in a sensor
    const StPxlRawHit *rawHit(Int_t sector, Int_t ladder, Int_t sensor, Int_t rawHitIndex) const; ///< pionter to a rawHit in the collection
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitCollection.h,v 1.2 2014/01/27 02:37:25 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitCollection.h,v 1.3 2014/01/28 19:29:44 qiuh Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 

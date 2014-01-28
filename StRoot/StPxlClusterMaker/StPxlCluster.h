@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlCluster.h,v 1.2 2014/01/27 02:37:02 qiuh Exp $
+ * $Id: StPxlCluster.h,v 1.3 2014/01/28 19:29:35 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.h,v $
- * Revision 1.2  2014/01/27 02:37:02  qiuh
+ * Revision 1.3  2014/01/28 19:29:35  qiuh
  * *** empty log message ***
  *
  *
@@ -37,12 +37,12 @@ public:
    StPxlCluster();
    Int_t nRawHits() const;  ///< number of raw hits
    void addRawHit(const StPxlRawHit *rawHit); ///< add a raw hit to the cluster
-   void summarize(); ///< calculate column center, row center, and most frequent idTruth among raw hits
+   void summarize(int embeddingShortCut = 0); ///< calculate column center, row center, and most frequent idTruth among raw hits
    Float_t columnCenter() const {return mColumnCenter;} ///< average raw hit column
    Float_t rowCenter() const {return mRowCenter;} ///< average raw hit row
    Int_t idTruth() const {return mIdTruth;} ///< for embedding, 0 as background, most frequent raw hit idTruth as idTruth of the cluster
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlCluster.h,v 1.2 2014/01/27 02:37:02 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlCluster.h,v 1.3 2014/01/28 19:29:35 qiuh Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 

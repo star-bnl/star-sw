@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.h,v 1.3 2014/01/27 02:37:02 qiuh Exp $
+ * $Id: StPxlClusterMaker.h,v 1.4 2014/01/28 19:29:35 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.h,v $
- * Revision 1.3  2014/01/27 02:37:02  qiuh
+ * Revision 1.4  2014/01/28 19:29:35  qiuh
  * *** empty log message ***
  *
  *
@@ -42,7 +42,7 @@ public:
    void Clear(const Option_t * = "");
    Int_t Make();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterMaker.h,v 1.3 2014/01/27 02:37:02 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterMaker.h,v 1.4 2014/01/28 19:29:35 qiuh Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 

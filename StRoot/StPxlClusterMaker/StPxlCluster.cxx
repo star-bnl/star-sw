@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlCluster.cxx,v 1.2 2014/01/27 02:37:02 qiuh Exp $
+ * $Id: StPxlCluster.cxx,v 1.3 2014/01/28 19:29:35 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.cxx,v $
- * Revision 1.2  2014/01/27 02:37:02  qiuh
+ * Revision 1.3  2014/01/28 19:29:35  qiuh
  * *** empty log message ***
  *
  *
@@ -54,7 +54,7 @@ bool compareSecond(const pair<int, int> &pair1, const pair<int, int> &pair2)
    return pair1.second < pair2.second;
 }
 
-void StPxlCluster::summarize()
+void StPxlCluster::summarize(int embeddingShortCut)
 {
    // calculate average column and row
    float columnSum = 0;
@@ -68,12 +68,15 @@ void StPxlCluster::summarize()
    mRowCenter = rowSum / float(nRawHits_);
 
    // find the most frequent raw hit idTruth as cluster idTruth
+   mIdTruth = 0;
+   if(embeddingShortCut) {return;}
    map<int, int> idTruthMap;
    for (int i = 0; i < nRawHits_; i++) {
       if (mRawHitVec[i]->idTruth()) {idTruthMap[mRawHitVec[i]->idTruth()] ++;}
    }
-   if (!idTruthMap.size()) {mIdTruth = 0;}
-   else { mIdTruth = max_element(idTruthMap.begin(), idTruthMap.end(), compareSecond)->first;}
+   if(idTruthMap.size()) {
+       mIdTruth = max_element(idTruthMap.begin(), idTruthMap.end(), compareSecond)->first;
+   }
 }
 
 

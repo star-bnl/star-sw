@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StThinPlateSpline.h,v 1.1 2014/01/27 02:39:08 qiuh Exp $
+ * $Id: StThinPlateSpline.h,v 1.2 2014/01/28 19:29:47 qiuh Exp $
  *
  * Author: Qiu Hao, March 2013
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StThinPlateSpline.h,v $
- * Revision 1.1  2014/01/27 02:39:08  qiuh
+ * Revision 1.2  2014/01/28 19:29:47  qiuh
  * *** empty log message ***
  *
  *
@@ -41,7 +41,7 @@ public:
    Double_t z(Double_t x, Double_t y) const; ///< calculate z on the profile at (x,y)
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StThinPlateSpline.h,v 1.1 2014/01/27 02:39:08 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StThinPlateSpline.h,v 1.2 2014/01/28 19:29:47 qiuh Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
