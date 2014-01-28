@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.cxx,v 1.4 2014/01/27 02:37:02 qiuh Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.5 2014/01/28 19:29:35 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
- * Revision 1.4  2014/01/27 02:37:02  qiuh
+ * Revision 1.5  2014/01/28 19:29:35  qiuh
  * *** empty log message ***
  *
  *
@@ -69,6 +69,7 @@ Int_t StPxlClusterMaker::Make()
    ToWhiteBoard("pxlCluster", mPxlClusterCollection);
 
    // real work
+   int embeddingShortCut = IAttr("EmbeddingShortCut");
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
          for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
@@ -88,7 +89,7 @@ Int_t StPxlClusterMaker::Make()
                StPxlCluster cluster;
                findCluster(&cluster, rawHit->column(), rawHit->row());
                if (cluster.nRawHits() > 0) {
-                  cluster.summarize();
+                  cluster.summarize(embeddingShortCut);
                   mPxlClusterCollection->addCluster(i + 1, j + 1, k + 1, cluster);
                }
             }

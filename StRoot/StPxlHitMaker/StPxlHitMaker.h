@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.h,v 1.3 2014/01/27 02:37:16 qiuh Exp $
+ * $Id: StPxlHitMaker.h,v 1.4 2014/01/28 19:29:40 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlHitMaker.h,v $
- * Revision 1.3  2014/01/27 02:37:16  qiuh
+ * Revision 1.4  2014/01/28 19:29:40  qiuh
  * *** empty log message ***
  *
  *
@@ -45,7 +45,7 @@ public:
    //! Then global positions are obtained from local positions through rotation + shift by geoHMatrix
    Int_t Make();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.3 2014/01/27 02:37:16 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.4 2014/01/28 19:29:40 qiuh Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 

@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterCollection.h,v 1.2 2014/01/27 02:37:02 qiuh Exp $
+ * $Id: StPxlClusterCollection.h,v 1.3 2014/01/28 19:29:35 qiuh Exp $
  *
  * Author: Qiu Hao, March 2013
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterCollection.h,v $
- * Revision 1.2  2014/01/27 02:37:02  qiuh
+ * Revision 1.3  2014/01/28 19:29:35  qiuh
  * *** empty log message ***
  *
  *
@@ -38,7 +38,7 @@ public:
    Int_t numberOfClusters(Int_t sector, Int_t ladder, Int_t sensor) const; ///< number of clusters in a sensor
    const StPxlCluster *cluster(Int_t sector, Int_t ladder, Int_t sensor, Int_t clusterIndex) const; ///< pointer to a cluster in the collection
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterCollection.h,v 1.2 2014/01/27 02:37:02 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterCollection.h,v 1.3 2014/01/28 19:29:35 qiuh Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 

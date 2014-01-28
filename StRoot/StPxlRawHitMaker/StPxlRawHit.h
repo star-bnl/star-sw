@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHit.h,v 1.2 2014/01/27 02:37:25 qiuh Exp $
+ * $Id: StPxlRawHit.h,v 1.3 2014/01/28 19:29:44 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013
  ***************************************************************************
@@ -18,7 +18,7 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHit.h,v $
- * Revision 1.2  2014/01/27 02:37:25  qiuh
+ * Revision 1.3  2014/01/28 19:29:44  qiuh
  * *** empty log message ***
  *
  *
@@ -52,7 +52,7 @@ public:
 
    void print(); ///< print all information
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHit.h,v 1.2 2014/01/27 02:37:25 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHit.h,v 1.3 2014/01/28 19:29:44 qiuh Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
