@@ -142,6 +142,10 @@ Int_t StTpcHitMover::Make() {
       }
     }
   }
+  if (mExB) {
+    pEvent->runInfo()->setSpaceCharge(mExB->CurrentSpaceChargeR2());
+    pEvent->runInfo()->setSpaceChargeCorrectionMode(mExB->GetSpaceChargeMode());
+  }
   return kStOK;
 }
 //________________________________________________________________________________
@@ -196,8 +200,11 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.23 2014/01/08 21:14:28 fisyak Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.24 2014/01/28 17:10:39 genevb Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.24  2014/01/28 17:10:39  genevb
+// Fill otherwise empty SpaceCharge info in StRunInfo
+//
 // Revision 1.23  2014/01/08 21:14:28  fisyak
 // Add transformations for Upper and Lower tpc hits postions (new dX calculation in dE/dx)
 //
