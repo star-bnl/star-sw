@@ -53,7 +53,7 @@ class istBuilder : public JevpPlotSet {
   static const int numColumn    = 12;
   static const int numRow       = 64;
 
-  static const int numTimeBin   = 7;
+  static const int numTimeBin   = 9;//update from 7 to 9: YPWANG 25/1/2014
   static const int goodChCut    = 64;
   static const int minPedVal    = 200;
   static const int maxPedVal    = 1500;
