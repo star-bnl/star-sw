@@ -280,7 +280,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   hSumContents.hSumSig->GetXaxis()->SetTitle("Channel Index");
   hSumContents.hSumSig->GetYaxis()->SetTitle("Pedestal RMS [ADC counts]");
 
-  hSumContents.hCommonModeNoise = new TH2F("CommonModeNoisePerAPV", "Common Mode Noise per APV", nBinsAPV, 0, totAPV, nBins, CmnMin, CmnMax);//864*50 bins
+  hSumContents.hCommonModeNoise = new TH2F("CommonModeNoisePerAPV", "Common Mode Noise per APV", nBinsAPV, 1, totAPV+1, nBins, CmnMin, CmnMax);//864*50 bins
   hSumContents.hCommonModeNoise->GetXaxis()->SetNdivisions(-numLadder, false);
   hSumContents.hCommonModeNoise->SetStats(false);
   hSumContents.hCommonModeNoise->GetXaxis()->SetTitle("APV Index");
