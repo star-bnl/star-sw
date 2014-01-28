@@ -1165,6 +1165,7 @@ Bfc_st BFC[] = {
   {"MtdUtil"    ,""  ,"","",""                                        ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"   ,"","","globT,SCL,TRGDef,StBichsel,EmcUtil,TbUtil,detDb","","StEvent","Load StEvent",kFALSE},
+  {"PxlUtil"     ,""  ,"","","",                                       "StPxlUtil","Load StPxlUtil",kFALSE},
   {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T,geomT,StDbT",""                      ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
@@ -1175,6 +1176,7 @@ Bfc_st BFC[] = {
   {"l3Util"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
+
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
   {"Stu"         ,""  ,"","","",                         "StEventUtilities","Load StEventUtilities",kFALSE},
 #ifndef  __NoStrangeMuDst__
@@ -1227,6 +1229,7 @@ Bfc_st BFC[] = {
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db",                  "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
+  {"pxlDb"       ,"pxlDb","","db",                  "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
