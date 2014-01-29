@@ -15,6 +15,8 @@ public:
 	int send(void *ptr, int bytes, int tmout) ;
 	int receive(void *ptr, int bytes, int tmout) ;
 	int peek(void) ;
+
+	static int remove(int id, u_short node_id=0) ;
 	static ipcQClass *find(u_short node, int task, int crea=0) ;
 
 	int task ;
