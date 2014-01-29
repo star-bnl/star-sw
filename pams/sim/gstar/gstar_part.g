@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.44 2014/01/28 15:12:57 jwebb Exp $
+* $Id: gstar_part.g,v 1.45 2014/01/29 16:21:43 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.45  2014/01/29 16:21:43  jwebb
+* Added D_star_plus (minus) --> D0 (bar) pi+ (-) 100% BR
+*
 * Revision 1.44  2014/01/28 15:12:57  jwebb
 * Corrected charge states for two hypernuclei
 *
@@ -237,20 +240,20 @@ MODULE gstar_part Is the STAR Particle Database
 ************************************************************************************ 
 * D0 and pi+, D+ and pi0
   Particle D_star_plus   code=60  TrkTyp=4 mass=2.01027  charge=1  tlife=6.86e-21,
-                     pdg=413  bratio= { 0.69, 0.31}       mode= { 3708, 3507 }
+                         pdg=413  bratio= { 0.69, 0.31}       mode= { 3708, 3507 }
 
 * decay into D0 and pi-, D- and pi0
 *
   Particle D_star_minus  code=61  TrkTyp=4 mass=2.01027  charge=-1 tlife=6.86e-21,
-                     pdg=-413 bratio= { 0.69, 0.31}       mode= { 3809, 3607 }
+                         pdg=-413 bratio= { 0.69, 0.31}       mode= { 3809, 3607 }
 
 * decay into D0 and pi0, D0 and gamma
   Particle D_star_0       code=62  TrkTyp=4 mass=2.007  charge=0 tlife=3.13e-22,
-                     pdg=423  bratio= { 0.62, 0.38}       mode= { 3507, 3501}
+                          pdg=423  bratio= { 0.62, 0.38}       mode= { 3507, 3501}
 
 * D0_bar and pi0, D0_bar and gamma
   Particle D_star_0_bar   code=63  TrkTyp=4 mass=2.007  charge=0 tlife=3.13e-22,
-                     pdg=-423 bratio= { 0.62, 0.38}       mode= { 3807, 3801}
+                          pdg=-423 bratio= { 0.62, 0.38}       mode= { 3807, 3801}
 ************************************************************************************ 
 
 * decay into D_star_0_bar, positron and neutrino, or D0_bar, positron and neutrino
@@ -428,6 +431,13 @@ MODULE gstar_part Is the STAR Particle Database
                        trktyp=3 bratio={1.0,} mode={040902,}
 
 
+* D_star_plus, D_star_minus 100% BR to pi+ D0 or pi- D0bar
+
+  PARTICLE D_star_plus code=10060 TrkTyp=4 mass=2.01027  charge=1  tlife=6.86e-21,
+                       pdg=413  bratio= { 1.00, }       mode= { 3708,  }
+
+  PARTICLE D_star_minus  code=10061  TrkTyp=4 mass=2.01027  charge=-1 tlife=6.86e-21,
+                         pdg=-413 bratio= { 1.0, }       mode= { 3809,  }
 
 
 
