@@ -1,4 +1,4 @@
-// $Id: St2011ZMaker.cxx,v 1.6 2012/09/14 21:02:29 balewski Exp $
+// $Id: St2011ZMaker.cxx,v 1.5 2012/08/21 17:40:09 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -338,19 +338,6 @@ St2011ZMaker::find_Z_boson(){
 	if (mass>par_maxMassZ) continue; //enforce an upper bound
 	hA[0]->Fill("Zhigh",1.);
 
-	 int bxStar7=wMK->wEve->bxStar7;
-	 int bxStar48=wMK->wEve->bxStar48; 
-	 if(bxStar48!=bxStar7) {
-	   hA[0]->Fill("badBx48",1.);
-	   return; // both counters must be in sync
-	 }
-	 
-	 int spin4=wMK->wEve->spin4;  
-	 hA[38]->Fill(spin4); 
-  
-
-
-
 	// **** I stoped changes here, Jan 
 
 	float fmax1=T1.cluster.ET/T1.cl4x4.ET;
@@ -393,10 +380,6 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
-// Revision 1.6  2012/09/14 21:02:29  balewski
-// *lumi-maker re-written to accumulate alternative rel lumi monitors,
-// * added spin sorting to Zs
-//
 // Revision 1.5  2012/08/21 17:40:09  stevens4
 // Revert to previous version
 //

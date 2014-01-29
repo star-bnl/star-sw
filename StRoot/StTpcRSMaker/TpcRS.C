@@ -37,13 +37,11 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   TString Opt(opt);
   TString RunOpt(Run);
   RunOpt.ToLower();
-  //ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
+  //  ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
   //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
-  //  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,tree,";
-  ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,";
-  // ChainOpt += ",tree,";
+  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,tree,";
   if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2") ChainOpt += "McTpcAna,NoHistos,NoRunco,";
   else                                                     ChainOpt += "tags,";
   // ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
@@ -72,23 +70,25 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     else                                                     ChainOpt += "FieldOn,";
   } else {
     RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
-    if        (FileIn.Contains(".daq",TString::kIgnoreCase)) {
+    if (FileIn.Contains(".daq",TString::kIgnoreCase)) {
       ChainOpt += "in,TpxRaw,";
       RootFile.ReplaceAll(".daq","");
-    } else if (FileIn.Contains(".fz",TString::kIgnoreCase)) {
-      ChainOpt += "fzin,";
-      RootFile.ReplaceAll(".fzd","");
-      RootFile.ReplaceAll(".fz","");
-    } else if (FileIn.Contains(".nt",TString::kIgnoreCase)) {
-      ChainOpt += "ntin,";
-      RootFile.ReplaceAll(".nt","");
-      RootFile.ReplaceAll(".","_");
-    } else if (FileIn.Contains(".geant.root",TString::kIgnoreCase)) {
-      ChainOpt += "in,";
-      RootFile.ReplaceAll(".geant.root","");
-    } else if (FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
-      ChainOpt += "mtin,";
-      RootFile.ReplaceAll(".MuDst.root","");
+    } else {
+      if (FileIn.Contains(".fz",TString::kIgnoreCase)) {
+	ChainOpt += "fzin,";
+	RootFile.ReplaceAll(".fzd","");
+	RootFile.ReplaceAll(".fz","");
+      } else {
+	if (FileIn.Contains(".geant.root",TString::kIgnoreCase)) {
+	  ChainOpt += "in,";
+	  RootFile.ReplaceAll(".geant.root","");
+	} else {
+	  if (FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
+	    ChainOpt += "mtin,";
+	    RootFile.ReplaceAll(".MuDst.root","");
+	  }
+	}
+      }
     }
   }
   ChainOpt += RunOpt;
@@ -110,7 +110,6 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     bfc(-1,ChainOpt.Data(),0,0,0);
     return;
   }
-  if (RunOpt.Contains("devT",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
   bfc(-1,ChainOpt.Data(),fileIn,output.Data(),RootFile.Data());
   if (ChainOpt.Contains("TpcRS",TString::kIgnoreCase)) {
     StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
@@ -177,89 +176,60 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
       dEdx->SetMask(mask); 
     }
   }
-  if (Last < 0) return;
   Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
   if (initStat) {
     cout << "Chain initiation has failed" << endl;
     chain->Fatal(initStat, "during Init()");
   }
-  if (gClassTable->GetID("TGiant3") >= 0) {
+  if (FileIn == "" && gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
-/** Setup interaction region
- **  mean and sigma for Vx Vy Vz
- **  0.31  -0.35  -1.4  and 0.91   0.77   33.68   respectively .
- 
- XVERTEX =                                            0.31
- YVERTEX =                                           -0.35
- ZVERTEX =                                           -1.40
- 
- XSIGMA  =                                            0.910
- YSIGMA  =                                            0.770
- ZSIGMA  =                                           36.680
- 
- PTmin   =                                            0.000
- PTmax   =                                          100.000
- ETAmin  =                                           -4.500
- ETAmax  =                                           +2.500
- Zmin    =                                         -100.000
- Zmax    =                                         +100.000
- GVERTEX [XVERTEX] [YVERTEX] [ZVERTEX]
- GSPREAD [XSIGMA]  [YSIGMA]  [ZSIGMA]
- GKINE -1 0 [PTmin] [PTmax] [ETAmin] [ETAmax] 0.000 6.283 [Zmin] [Zmax]
-*/
-    geant->Do("GVERTEX 0.31 -0.35 -1.40");
-    geant->Do("GSPREAD 0.910 0.770 36.680");
-    if (FileIn != "") {
-      geant->Do("GKINE -1 0 0. 100.0 -4.5 4.5 0.000 6.283 -100. 100.");
-    } else {// FileIn == ""
-      if (Opt.Contains("debug",TString::kIgnoreCase)) {
-	geant->Do("debug on");
-	geant->SetDebug(1);
-	geant->Do("swit 1 2");
-	geant->Do("swit 2 2");
-      }
-      //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
-      //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
-      cout << Opt << endl;
-      if (Opt.Contains(":")) {
-	Int_t i = (gSystem->GetPid()+ First)%256;
-	geant->Do(Form("rndm %i; rndm;",i));
-      }
-      if ( Opt.Contains("laser",TString::kIgnoreCase)) {
-	gSystem->Load("gstar.so");
-	geant->Do("call gstar");
-	geant->Do("gkine 1 170   1   1  0   0   0  0    180.00    180.00;");
-	geant->Do("gprint kine");
-	geant->Do("gvert 0  54   0");
-	geant->Do("mode TRAC prin 15");
-      } else {
-	Int_t    NTRACK = 100;
-	Int_t    ID = 5;
-	Double_t mass = 0.1057;
-	if      (Opt.Contains("muon",TString::kIgnoreCase))     {ID =  5;                 if (Opt.Contains("muon-",TString::kIgnoreCase)) ID = 6;}
-	else if (Opt.Contains("electron",TString::kIgnoreCase)) {ID =  2; mass = 0.5110E-03;}
-	else if (Opt.Contains("positron",TString::kIgnoreCase)) {ID =  3; mass = 0.5110E-03;}
-	else if (Opt.Contains("pion",TString::kIgnoreCase))     {ID =  8; mass = 0.1396; if (Opt.Contains("pion-",TString::kIgnoreCase)) ID =  9;}
-	else if (Opt.Contains("kaon",TString::kIgnoreCase))     {ID = 11; mass = 0.4937; if (Opt.Contains("kaon-",TString::kIgnoreCase)) ID = 12;}
-	else if (Opt.Contains("proton",TString::kIgnoreCase))   {ID = 14; mass = 0.9383; if (Opt.Contains("antiproton",TString::kIgnoreCase)) ID = 15;}
-	else if (Opt.Contains("deuteron",TString::kIgnoreCase)) {ID = 45; mass = 1.876;}
-	else if (Opt.Contains("triton",TString::kIgnoreCase))   {ID = 46; mass = 2.80925;}
-	else if (Opt.Contains("He3",TString::kIgnoreCase))      {ID = 49; mass = 2.80925;}
-	else if (Opt.Contains("alpha",TString::kIgnoreCase))    {ID = 47; mass = 3.727;}
-	Double_t bgMin  = 1e-2; // 3.5;// 1e2; // 1e-2;
-	Double_t bgMax  = 1e5;  // 1e2;// 1e5;
-	Double_t pTmin = mass*bgMin; if (pTmin <   0.1) pTmin =   0.1;
-	Double_t pTmax = mass*bgMax; if (pTmax > 100.0) pTmax = 100.0;
-	if (Opt.Contains("pionMIP",TString::kIgnoreCase))       {pTmin = 0.2; pTmax = 0.5;}
-	if (Opt.Contains("50muons1GeV",TString::kIgnoreCase))   {NTRACK =   50; pTmin = pTmax = 1.0;}
-	if (Opt.Contains("50muons0.5GeV",TString::kIgnoreCase)) {NTRACK =   50; pTmin = pTmax = 0.5;}
-	if (Opt.Contains("1000muons1GeV",TString::kIgnoreCase)) {NTRACK = 1000; pTmin = pTmax = 1.0;}
-	if (Opt.Contains("1muon",TString::kIgnoreCase))          NTRACK = 1;
-	if (Opt.Contains("1alpha1GeV",TString::kIgnoreCase))    {NTRACK = 1;    pTmin = pTmax = 1.0;}
-	TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
-	cout << "Set kinematics: " << Kine.Data() << endl;
-	geant->Do(Kine.Data());
-      }
+    if (Opt.Contains("debug",TString::kIgnoreCase)) {
+      geant->Do("debug on");
+      geant->SetDebug(1);
+      geant->Do("swit 1 2");
+      geant->Do("swit 2 2");
+    }
+    //                   NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
+    //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
+    cout << Opt << endl;
+    if (Opt.Contains(":")) {
+      Int_t i = (gSystem->GetPid()+ First)%256;
+      geant->Do(Form("rndm %i; rndm;",i));
+    }
+    if ( Opt.Contains("laser",TString::kIgnoreCase)) {
+      gSystem->Load("gstar.so");
+      geant->Do("call gstar");
+      geant->Do("gkine 1 170   1   1  0   0   0  0    180.00    180.00;");
+      geant->Do("gprint kine");
+      geant->Do("gvert 0  54   0");
+      geant->Do("mode TRAC prin 15");
+    } else {
+      Int_t    NTRACK = 100;
+      Int_t    ID = 5;
+      Double_t mass = 0.1057;
+      if      (Opt.Contains("muon",TString::kIgnoreCase))     {ID =  5;                 if (Opt.Contains("muon-",TString::kIgnoreCase)) ID = 6;}
+      else if (Opt.Contains("electron",TString::kIgnoreCase)) {ID =  2; mass = 0.5110E-03;}
+      else if (Opt.Contains("positron",TString::kIgnoreCase)) {ID =  3; mass = 0.5110E-03;}
+      else if (Opt.Contains("pion",TString::kIgnoreCase))     {ID =  8; mass = 0.1396; if (Opt.Contains("pion-",TString::kIgnoreCase)) ID =  9;}
+      else if (Opt.Contains("kaon",TString::kIgnoreCase))     {ID = 11; mass = 0.4937; if (Opt.Contains("kaon-",TString::kIgnoreCase)) ID = 12;}
+      else if (Opt.Contains("proton",TString::kIgnoreCase))   {ID = 14; mass = 0.9383; if (Opt.Contains("antiproton",TString::kIgnoreCase)) ID = 15;}
+      else if (Opt.Contains("deuteron",TString::kIgnoreCase)) {ID = 45; mass = 1.876;}
+      else if (Opt.Contains("triton",TString::kIgnoreCase))   {ID = 46; mass = 2.80925;}
+      else if (Opt.Contains("He3",TString::kIgnoreCase))      {ID = 49; mass = 2.80925;}
+      else if (Opt.Contains("alpha",TString::kIgnoreCase))    {ID = 47; mass = 3.727;}
+      Double_t bgMin  = 1e-2;
+      Double_t bgMax  = 1e5;
+      Double_t pTmin = mass*bgMin; if (pTmin <   0.1) pTmin =   0.1;
+      Double_t pTmax = mass*bgMax; if (pTmax > 100.0) pTmax = 100.0;
+      if (Opt.Contains("pionMIP",TString::kIgnoreCase))       {pTmin = 0.2; pTmax = 0.5;}
+      if (Opt.Contains("50muons1GeV",TString::kIgnoreCase))   {NTRACK =   50; pTmin = pTmax = 1.0;}
+      if (Opt.Contains("50muons0.5GeV",TString::kIgnoreCase)) {NTRACK =   50; pTmin = pTmax = 0.5;}
+      if (Opt.Contains("1000muons1GeV",TString::kIgnoreCase)) {NTRACK = 1000; pTmin = pTmax = 1.0;}
+      if (Opt.Contains("1muon",TString::kIgnoreCase))          NTRACK = 1;
+      if (Opt.Contains("1alpha1GeV",TString::kIgnoreCase))    {NTRACK = 1;    pTmin = pTmax = 1.0;}
+      TString Kine(Form("gkine %i %i %f %f -2  2 0 %f -50 50;",NTRACK,ID,pTmin,pTmax,TMath::TwoPi()));
+      cout << "Set kinematics: " << Kine.Data() << endl;
+      geant->Do(Kine.Data());
     }
     if (kuip) {
       TString Kuip(kuip);

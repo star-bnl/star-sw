@@ -177,6 +177,7 @@ if ( $pkg eq "Jevp") {
 
 $CPPFLAGS .= " -DNEW_DAQ_READER";
 if ($pkg eq "StDAQMaker") {
+  $CPPFLAGS .= " -DNEW_EVP_READER"; # we should uncomment that later
   $LIBS = "-lStDaqLib -lRTS";
 }
 my ($i, $obj);

@@ -2,11 +2,11 @@
 *
 *  Table: TpcSecRowCor
 *  
-*       description: Tpc gain correction for sector & row
+*       description: Tpc gain correction for secot row
 */ 
 
 
 struct TpcSecRowCor { 
-  float  GainScale[100];   /*  Gains for sector & row */
-  float  GainRms[100];     /*  RMS  - " -  */
+  float  GainScale[45];   /*  Gains for sector & row */
+  float  GainRms[45];     /*  RMS  - " -  */
  };  

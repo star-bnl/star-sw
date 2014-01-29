@@ -42,6 +42,7 @@
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcGainCorrectionC.h"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
 #include "Altro.h"
@@ -55,7 +56,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.62 2012/09/13 21:54:43 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.66 2012/11/13 20:46:16 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -497,12 +498,12 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   // constants
 #ifdef __DEBUG__
   static Int_t iBreak = 0;
-  static Int_t iSec  = 0;
 #endif
+  static Int_t iSec  = 0;
   if (Debug()%10) {
     gBenchmark->Reset();
     gBenchmark->Start("TpcRS");
-    LOG_INFO << "\n -- Begin TpcRS Processing -- \n";
+    LOG_INFO << "Begin TpcRS Processing" << endm;;
   }
   static StTpcCoordinateTransform transform(gStTpcDb);
 #if defined(__PAD_BLOCK__) || defined(__ClusterProfile__)
@@ -512,6 +513,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   static Double_t XDirectionCouplings[kPadMax];
   static Double_t TimeCouplings[kTimeBacketMax];
 #endif /* __PAD_BLOCK__ */
+  Int_t Ndebug = 0, Idebug; // debug printout depth
+  if (Debug()%10) {
+    if (Debug()%10 > 1) Ndebug = 10;
+    gBenchmark->Reset();
+    gBenchmark->Start("TpcRS");
+    LOG_INFO << "\n -- Begin TpcRS Processing -- \n";
+  }
+  Double_t vminI = St_tpcGainCorrectionC::instance()->Struct(1)->min;
+  Double_t vminO = St_tpcGainCorrectionC::instance()->Struct(0)->min;
   St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) GetDataSet("geant/g2t_tpc_hit");
   if (!g2t_tpc_hit) return kStWarn;
   Int_t no_tpc_hits       = g2t_tpc_hit->GetNRows();               if (no_tpc_hits<1) return kStOK;
@@ -524,6 +534,17 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   if (g2t_ver) gver = g2t_ver->GetTable();
   g2t_tpc_hit_st *tpc_hit_begin = g2t_tpc_hit->GetTable();
   g2t_tpc_hit_st *tpc_hit = tpc_hit_begin;
+  if (m_TpcdEdxCorrection) {
+    St_tpcGainCorrectionC::instance()->Struct(0)->min = -500;
+    St_tpcGainCorrectionC::instance()->Struct(1)->min = -500;
+    if (Debug()) {
+      LOG_INFO << "Reset min for gain Correction to I/O\t" 
+	       << St_tpcGainCorrectionC::instance()->Struct(1)->min 
+	       << "\t" 
+	       << St_tpcGainCorrectionC::instance()->Struct(0)->min 
+	       << " (V)" << endm;
+    }
+  }
   // sort 
   TTableSorter sorter(g2t_tpc_hit,&SearchT,&CompareT);//, 0, no_tpc_hits);
   Int_t sortedIndex = 0;
@@ -544,9 +565,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	assert( iSector > sector );
 	break;
       }
-#ifdef __DEBUG__
-      if (Debug() && iSec && iSec != sector) {sortedIndex++; continue;}
-#endif
+      if (iSec && iSec != sector) {sortedIndex++; continue;}
       if (tpc_hit->volume_id <= 0 || tpc_hit->volume_id > 1000000) {sortedIndex++; continue;}
       Int_t Id         = tpc_hit->track_p;
       Int_t id3 = 0, ipart = 8, charge = 1;
@@ -594,14 +613,16 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	StTpcLocalSectorDirection dirLS, BLS;
 	StTpcPadCoordinate Pad;	
       };
-      static HitPoint_t TrackSegmentHits[40];
+      enum {NoMaxTrackSegmentHits = 50};
+      static HitPoint_t TrackSegmentHits[NoMaxTrackSegmentHits];
       static TRVector Pred;
       Double_t sMin = 9999;
       Double_t sMax = -9999;
       Int_t nSegHits = 0;
       Int_t sIndex = sortedIndex;
       Int_t io = -1;
-      for (nSegHits = 0, sIndex = sortedIndex;  sIndex < no_tpc_hits && nSegHits < 40; sIndex++) {
+      for (nSegHits = 0, sIndex = sortedIndex;  
+	   sIndex < no_tpc_hits && nSegHits < NoMaxTrackSegmentHits - 1; sIndex++) {
 	indx = sorter.GetIndex(sIndex);
 	g2t_tpc_hit_st *tpc_hitC = tpc_hit_begin + indx;
 	if ((tpc_hitC->volume_id%100000)/100 != sector) break;
@@ -709,9 +730,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Int_t row = volId%100;
 	io = (row <= NoOfInnerRows) ? 0 : 1;
 	// Generate signal 
-	Double_t Gain = 0;
-	if (NoOfRows == 45) Gain = St_tss_tssparC::instance()->gain(sector,row);                // ! iTpx
-	else                Gain = St_tss_tssparC::instance()->gain(sector, (! io ) ? 13 : 45); //   iTpx
+	Double_t Gain = St_tss_tssparC::instance()->gain(sector,row); 
 	TF1F *mShaperResponse = mShaperResponses[io][sector-1];
 	Double_t dY   = TMath::Abs(tpc_hitC->ds)/2 + mChargeFraction[io]->GetXmax();
 	Double_t yLmin = TrackSegmentHits[iSegHits].coorLS.position().y() - dY;
@@ -775,14 +794,14 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	StPhysicalHelixD track(TrackSegmentHits[iSegHits].dirLS.position(),
 			       TrackSegmentHits[iSegHits].coorLS.position(),
 			       BField[2]*kilogauss*charge,1);  
-	StThreeVectorD unit = track.momentum(0).unit();
+	StThreeVectorD unit = TrackSegmentHits[iSegHits].dirLS.position().unit();
 	Double_t *cxyz = unit.xyz();
 	TRMatrix L2L(3,3, 
 		     cxyz[2], - cxyz[0]*cxyz[2]                  , cxyz[0],
 		     cxyz[0], - cxyz[1]*cxyz[2]                  , cxyz[1],
 		     0.0    ,   cxyz[0]*cxyz[0] + cxyz[1]*cxyz[1], cxyz[2]);
 #ifdef __DEBUG__
-	if (Debug() % 10 > 1) PrPP(Make,track);
+	if (Debug() > 11) PrPP(Make,track);
 #endif	
 	Double_t s_low   = -dStep/2;
 	Double_t s_upper = s_low + dStep;
@@ -891,7 +910,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    dS = dE*eV/(TMath::Abs(mLaserScale*tpc_hitC->de/tpc_hitC->ds));
 	  }	  
 #ifdef __DEBUG__
-	  if (Debug()%10 > 1) { 	
+	  if (Debug() > 12) { 	
 	    LOG_INFO << "s_low/s_upper/dSD\t" << s_low << "/\t" << s_upper << "\t" << dS <<  endm;
 	  }
 #endif
@@ -902,7 +921,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  nP++;
 	  newPosition += dS;
 #ifdef __DEBUG__
-	  if (Debug()%10 > 2) {
+	  if (Debug() > 12) {
 	    LOG_INFO << "dESum = " << dESum << " /\tdSSum " << dSSum << " /\t newPostion " << newPosition << endm;
 	  }
 #endif
@@ -947,7 +966,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      TRVector xyzRangeL(3, xR*rX, xR*rY, 0.);
 	      TRVector xyzR(L2L,TRArray::kAxB,xyzRangeL);
 #ifdef __DEBUG__
-	      if (Debug()%10 > 2) {
+	      if (Debug() > 12) {
 		LOG_INFO << "xyzRangeL: " << xyzRangeL << endm;
 		LOG_INFO << "L2L: " << L2L << endm;
 		LOG_INFO << "xyzR: " << xyzR << endm;
@@ -1025,7 +1044,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      for(Int_t pad = padMin; pad <= padMax; pad++) {
 		Double_t gain = QAv*GainLocal;
 		Double_t dt = dT;
-		if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
+		if (NoOfRows ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
 		  gain   *= St_tpcPadGainT0BC::instance()->Gain(sector,r,pad);
 		  if (gain <= 0.0) continue;
 		  dt -= St_tpcPadGainT0BC::instance()->T0(sector,r,pad);
@@ -1082,7 +1101,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 			SignalSum[index].TrackId = TrackSegmentHits[iSegHits].TrackId;
 		  }
 #ifdef __DEBUG__
-		  if (Debug()%10 > 2 && (SignalSum[index].Sum > 0 || ! TMath::Finite(SignalSum[index].Sum)) ) {
+		  if (Debug() > 12 && (SignalSum[index].Sum > 0 || ! TMath::Finite(SignalSum[index].Sum)) ) {
 		    LOG_INFO << "simu R/P/T/I = " << r << " /\t" << pad << " /\t" << itbin << " /\t" << index 
 			     << "\tSum/Adc/TrackId = " << SignalSum[index].Sum << " /\t" 
 			     << SignalSum[index].Adc << " /\t" << SignalSum[index].TrackId 
@@ -1100,7 +1119,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	tpc_hitC->adc = -99;
 	if (dESum > 0 && dSSum) {
 #ifdef __DEBUG__
-	  if (Debug()%10 > 2) {
+	  if (Debug() > 12) {
 	    LOG_INFO << "sIndex = " << sIndex << " volId = " << volId
 		     << " dESum = " << dESum << " /\tdSSum " << dSSum << " /\t TotalSignal " << TotalSignal << endm;
 	  }
@@ -1134,6 +1153,17 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     }
   } // sector
   if (Debug()%10) gBenchmark->Show("TpcRS");
+  if (m_TpcdEdxCorrection) {
+    St_tpcGainCorrectionC::instance()->Struct(1)->min = vminI;
+    St_tpcGainCorrectionC::instance()->Struct(0)->min = vminO;
+    if (Debug()) {
+      LOG_INFO << "Reset min for gain Correction to I/O\t" 
+	       << St_tpcGainCorrectionC::instance()->Struct(1)->min 
+	       << "\t" 
+	       << St_tpcGainCorrectionC::instance()->Struct(0)->min 
+	       << " (V)" << endm;
+    }
+  }
   return kStOK;
 }
 //________________________________________________________________________________
@@ -1327,7 +1357,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
 	ADCs[bin] = adc;
 	IDTs[bin] = SignalSum[index].TrackId;
 #ifdef __DEBUG__
-	if (Debug()%10 > 2 && SignalSum[index].Sum > 0) {
+	if (Debug() > 12 && SignalSum[index].Sum > 0) {
 	  LOG_INFO << "digi R/P/T/I = " << row << " /\t" << pad << " /\t" << bin << " /\t" << index 
 	       << "\tSum/Adc/TrackId = " << SignalSum[index].Sum << " /\t" 
 	       << SignalSum[index].Adc << " /\t" << SignalSum[index].TrackId << endm;
@@ -1379,7 +1409,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
 	  if (ADCs[i]) {
 	    NoTB++;
 #ifdef __DEBUG__
-	    if (Debug()%10 > 2) {
+	    if (Debug() > 12) {
 	      LOG_INFO << "Altro R/P/T/I = " << row << " /\t" << pad << " /\t" << i 
 		       << "\tAdc/TrackId = " << ADCs[i] << " /\t" << IDTs[i] << endm;
 	    }
@@ -1606,8 +1636,20 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.62 2012/09/13 21:54:43 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.66 2012/11/13 20:46:16 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.66  2012/11/13 20:46:16  fisyak
+// Add wider Voltage range for accepted clusteds (-500V) than for dEdx calculation
+//
+// Revision 1.65  2012/10/23 20:08:57  fisyak
+// Add corrections for iTpx upgrade
+//
+// Revision 1.64  2012/09/27 19:17:02  fisyak
+// Fix missing declaration
+//
+// Revision 1.63  2012/09/27 16:14:43  fisyak
+// Change debug print out scheme
+//
 // Revision 1.62  2012/09/13 21:54:43  fisyak
 // replace elsif by else and if
 //

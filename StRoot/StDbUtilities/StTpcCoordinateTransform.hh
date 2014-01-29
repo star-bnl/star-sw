@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.20 2012/09/13 20:57:28 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.21 2012/10/23 20:13:17 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.21  2012/10/23 20:13:17  fisyak
+ * Move xFromPad from h- to cxx-file
+ *
  * Revision 1.20  2012/09/13 20:57:28  fisyak
  * Corrections for iTpx
  *
@@ -220,10 +223,7 @@ public:
   // tpc local sector Coordinates from Raw Data
   StThreeVector<Double_t> xyFromRow(const StTpcPadCoordinate& a) {return StThreeVector<Double_t> (xFromPad(a.row(),a.pad()),yFromRow(a.row()),0);}
   Double_t                yFromRow(Int_t row)                        const {return (gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(row));}
-  Double_t                xFromPad(Int_t row, Double_t pad)          const {    // x coordinate in sector 12
-    Double_t pitch = (row<14) ?	gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch() : gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
-    return -pitch*(pad - (gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2.);
-  }
+  Double_t                xFromPad(Int_t row, Double_t pad)          const;
 // sector from Tpc local coordinates
   Int_t sectorFromCoordinate(const StThreeVector<double>& a) const{
     Double_t angle = TMath::RadToDeg()*TMath::ATan2(a.y(),a.x());

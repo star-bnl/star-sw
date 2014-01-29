@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.41 2012/06/11 14:33:47 fisyak Exp $
+ * $Id: StDbManagerImpl.cc,v 1.41.2.1 2013/06/13 14:14:41 didenko Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.41.2.1  2013/06/13 14:14:41  didenko
+ * branch revision for db fixes
+ *
  * Revision 1.41  2012/06/11 14:33:47  fisyak
  * std namespace
  *
@@ -1140,7 +1143,10 @@ char*  StDbManagerImpl::getConfigNodeName(StDbType type, StDbDomain domain){
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::getExternalVersion(StDbType type, StDbDomain domain){
-  return getenv(printDbName(type,domain));
+  if (!type || !domain) return 0;
+  char* dbname = printDbName(type,domain);
+  if (!dbname) return 0;
+  return getenv(dbname);
 }
   
 ////////////////////////////////////////////////////////////////
@@ -1647,7 +1653,7 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
-
+  if (!typeName || !domainName) return 0;
   std::string tpName(typeName);
   std::string dmName(domainName);
   std::string mergedName = tpName + "_" + dmName;

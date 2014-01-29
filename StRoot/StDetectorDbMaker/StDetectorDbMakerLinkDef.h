@@ -17,5 +17,5 @@
 #pragma link C++ class StDetectorDbTpcRDOMasks;
 #pragma link C++ class StDetectorDbTpcVoltages;
 #pragma link C++ class StDetectorDbTriggerID;
- 
+#pragma C++ typedef StDetectorDbRichScalers;
 #endif

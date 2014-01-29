@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.43 2012/09/13 20:01:49 fisyak Exp $
+ * $Id: StDAQReader.h,v 1.42 2009/10/13 15:51:48 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
- * Revision 1.43  2012/09/13 20:01:49  fisyak
- * Clean up, use Jeff's skip_then_get
- *
  * Revision 1.42  2009/10/13 15:51:48  fine
  * Activate the new DAT file format
  *
@@ -139,6 +136,9 @@
  **************************************************************************/
 #ifndef _StDAQReader_
 #define _StDAQReader_
+#ifndef  NEW_EVP_READER
+#define OLD_EVP_READER 1
+#endif
 //		Forward declarations
 struct  EventInfo;
 typedef  EventInfo DAQEventInfo;

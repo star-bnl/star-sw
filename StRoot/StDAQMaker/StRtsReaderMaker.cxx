@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.33 2012/09/13 20:01:49 fisyak Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.32 2010/12/14 15:27:04 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,9 +13,6 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
- * Revision 1.33  2012/09/13 20:01:49  fisyak
- * Clean up, use Jeff's skip_then_get
- *
  * Revision 1.32  2010/12/14 15:27:04  genevb
  * Use LOG_DEBUG only in maker's Debug modes
  *
@@ -165,6 +162,16 @@
 
 #include "TDataSetIter.h"
 
+#if !defined(OLD_EVP_READER) && !defined(NEW_DAQ_READER)
+#  include "RTS/src/RTS_READER/daq_det.h"
+#  include "RTS/src/RTS_READER/daq_dta.h"
+#  include "RTS/src/RTS_READER/daq_dta_structs.h"
+    typedef unsigned int UINT32;
+#  include "RTS/include/evp.h"
+#  include "RTS/src/EVP_READER/cfgutil.h"
+#  include "RTS/src/EVP_READER/evpReaderClass.h"
+#  include "RTS/src/RTS_READER/rts_reader.h"
+#elif defined(NEW_DAQ_READER)
 #  include "RTS/src/DAQ_READER/daq_det.h"
 #  include "RTS/src/DAQ_READER/daq_dta.h"
 #  include "RTS/src/DAQ_READER/daq_dta_structs.h"
@@ -172,6 +179,7 @@
 #  include "RTS/include/evp.h"
 #  include "RTS/src/DAQ_READER/cfgutil.h"
 #  include "RTS/src/DAQ_READER/daqReader.h"
+#endif
 
 #include "StStreamFile.h"
 
