@@ -37,7 +37,7 @@
 #define kIstPadPitchColumn          0.6275   // IST pad dimension in beam direction is 0.6275 cm
 
 //general APV chip constants
-#define kIstNumTimeBins             7       // 7 time bins for ADC sampling
+#define kIstNumTimeBins             9       // 9 time bins for ADC sampling (maximum time bin number)
 #define kIstMaxAdc                  4096    // ADC value should be less than 4096 (12 bits ADC)
 
 //IST space resolution

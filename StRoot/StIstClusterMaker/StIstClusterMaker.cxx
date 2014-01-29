@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.1 2014/01/23 20:11:29 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.2 2014/01/29 18:25:01 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,8 +9,8 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
-* Revision 1.1  2014/01/23 20:11:29  ypwang
-* adding scripts
+* Revision 1.2  2014/01/29 18:25:01  ypwang
+* updating scripts
 *
 *
 ****************************************************************************
@@ -139,10 +139,6 @@ Int_t StIstClusterMaker::Init()
   if( !mClusterAlgoPtr ){
      LOG_INFO << "IST clustering algorithm: Scanning algorithm" << endm;
      mClusterAlgoPtr=new StIstScanClusterAlgo();
-  }
-  else {
-     LOG_INFO << "IST clustering algorithm: Simple algorithm" << endm;
-     mClusterAlgoPtr=new StIstSimpleClusterAlgo();
   }
 
   if( !ierr )

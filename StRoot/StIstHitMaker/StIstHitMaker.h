@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.h,v 1.1 2014/01/23 20:11:30 ypwang Exp $
+* $Id: StIstHitMaker.h,v 1.2 2014/01/29 18:25:02 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,8 +9,8 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
-* Revision 1.1  2014/01/23 20:11:30  ypwang
-* adding scripts
+* Revision 1.2  2014/01/29 18:25:02  ypwang
+* updating scripts
 *
 *
 ****************************************************************************
@@ -39,11 +39,13 @@ class StIstHitMaker : public StMaker
   virtual void Clear( Option_t *opts = "" );
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.1 2014/01/23 20:11:30 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.2 2014/01/29 18:25:02 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   THashList *listGeoMSensorOnGlobal;
   StIstDbMaker *mIstDbMaker;
+
+  UShort_t mMinNumOfRawHits, mMaxNumOfRawHits;
 
   StIstHitCollection *istHitCollection;
 
