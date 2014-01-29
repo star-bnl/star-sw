@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.20 2013/04/18 20:05:29 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.21 2014/01/29 16:21:43 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.21  2014/01/29 16:21:43  jwebb
+ * Added D_star_plus (minus) --> D0 (bar) pi+ (-) 100% BR
+ *
  * Revision 1.20  2013/04/18 20:05:29  jwebb
  * Ticket #2574 Wrong Omega/Anti-Omega Geant ID.
  *
@@ -219,6 +222,8 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 62, +423, DStar0 ); // D*0
        Geant2Pdg( 63, -423, DStar0Bar ); // D*0 bar      
 
+
+
        Geant2Pdg(70, +521, B+);    // B+ meson
        Geant2Pdg(71, -521, B-);    // B- meson
        Geant2Pdg(72, +511, B0);    // B0 meson
@@ -315,7 +320,14 @@ StParticleTable::StParticleTable()
 
     Geant2Pdg(15011, 321,  Kaon+ --> pi+ pi0 pi0 );    // K+
     Geant2Pdg(15012, -321, Kaon- --> pi- pi0 pi0 );   // K-
-             
+
+
+       Geant2Pdg( 10060, +413, DStar+ ); // D*+
+       Geant2Pdg( 10061, -413, DStar- ); // D*-
+       Geant2Pdg( 10062, +423, DStar0 ); // D*0
+       Geant2Pdg( 10063, -423, DStar0Bar ); // D*0 bar      
+
+            
        Geant2Pdg( 40001, -3334, Omega+); 
        Geant2Pdg( 40002,  3334, Omega-); 
        Geant2Pdg( 40003, +3312, XiMinus );       
