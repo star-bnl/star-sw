@@ -16,6 +16,7 @@
   2) The A,B and C cables are identical. A single Volume suffices. Same comments for some of identical
      cooling volumes
   3) Final volumes should not be MANY.
+  4) Placed ICLE inside ICTJ as it properly belongs.
  December 8, 2013 Yaping
  volume ICCM for cabling/cooling sets modeling is added to the IDSM volume
  1) thin cone shape volume filled with average density (copper cables, aluminium tube and cooling liquid) is added in transition area
@@ -107,11 +108,13 @@
     </varlist>
     
   <!-- Global stuffs--> 
-  <Content> ICCT, <!-- cone shape to describe cables/cooling lines in transition area-->
-	    ICCA,       <!-- cables on PIT -->
+  <Content> 
+    ICCT,
+ <!--  cone shape to describe cables/cooling lines in transition area-->
+            ICCA,       <!-- cables on PIT -->
 	    ICCL, ICLP, <!-- cooling line on PIT -->
   	    IBMO, <!-- IST mother volume for stave, west cooling loops, east short cables/cooling lines-->
-            IBAM, <!-- IST ladder mother volume-->
+            IBAM, <!-- *IST ladder mother volume-->
             ILCC, <!-- IST ladder carbon honeycomb mother volume-->
             ICCU, <!-- IST carbon honeycomb BOX volume on east side (connecter side)-->
             ICCD, <!-- IST carbon honeycomb BOX volume on west side-->
@@ -299,7 +302,7 @@
     <!-- readout cable diameter -->
     <varlist type="float" comment=" mass weighted of readout cable diameter" > cableDiameter/0.372/</varlist>
     <!-- IST detector parameters -->
-    <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.5/</varlist>
+    <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.84/</varlist>
     <varlist type="float" comment=" Outer radius of mother volume whole detector" > IBMOOuterRadius/18.5/</varlist>
     <varlist type="int"   comment=" Number of ladders" > nLadder/24/</varlist>
     <varlist type="int"   comment=" Number of silicon sensor per ladder" > nUnit/6/</varlist>
@@ -492,6 +495,7 @@
   <!-- ICCM volume declaration -->
 <!-- IST cables and cooling line in transition area and PIT -->
  
+
  <Create    block="ICCT" />
  <Placement block="ICCT" in="IDSM"  x="0.0" y="0.0" z="-53.0448-0.5*8.7144"/>
 
@@ -596,29 +600,26 @@
 	angle_T=(360.0/24)*(nCableSet-1)+tilt_T
 
    	<Create block="ISCA"/>
-   	<Placement in="IBMO" x="radius_A*sin(angle_A*raddeg)" y="radius_A*cos(angle_A*raddeg)" z="-34.7832-0.5*18.2616" block="ISCA" konly="'MANY'">
+   	<Placement in="IBMO" x="radius_A*sin(angle_A*raddeg)" y="radius_A*cos(angle_A*raddeg)" z="-34.7832-0.5*18.2616" block="ISCA" konly="'ONLY'">
    	<Rotation alphaz="-1.0*angle_A"/>
    	</Placement>
 
    	<Create block="ISCB"/>
-   	<Placement in="IBMO" x="radius_B*sin(angle_B*raddeg)" y="radius_B*cos(angle_B*raddeg)" z="-32.1233-0.5*20.9215" block="ISCB" konly="'MANY'">
+   	<Placement in="IBMO" x="radius_B*sin(angle_B*raddeg)" y="radius_B*cos(angle_B*raddeg)" z="-32.1233-0.5*20.9215" block="ISCB" konly="'ONLY'">
    	<Rotation alphaz="-1.0*angle_B"/>
    	</Placement>
 
    	<Create block="ISCC"/>
-   	<Placement in="IBMO" x="radius_C*sin(angle_C*raddeg)" y="radius_C*cos(angle_C*raddeg)" z="-29.203-0.5*23.8418" block="ISCC" konly="'MANY'">
+   	<Placement in="IBMO" x="radius_C*sin(angle_C*raddeg)" y="radius_C*cos(angle_C*raddeg)" z="-29.203-0.5*23.8418" block="ISCC" konly="'ONLY'">
    	<Rotation alphaz="-1.0*angle_C"/>
    	</Placement>
 
    	<Create block="ISCT"/>
-   	<Placement in="IBMO" x="radius_T*sin(angle_T*raddeg)" y="radius_T*cos(angle_T*raddeg)" z="-44.5806-0.5*8.4642" block="ISCT" konly="'MANY'">
+   	<Placement in="IBMO" x="radius_T*sin(angle_T*raddeg)" y="radius_T*cos(angle_T*raddeg)" z="-44.5806-0.5*8.4642" block="ISCT" konly="'ONLY'">
    	<Rotation alphaz="-1.0*angle_T"/>
    	</Placement>
 
-	<Create block="ICLE"/>
-	<Placement in="IBMO" x="radius_T*sin(angle_T*raddeg)" y="radius_T*cos(angle_T*raddeg)" z="-44.5806-0.5*8.4642" block="ICLE" konly="'MANY'">
-	<Rotation alphaz="-1.0*angle_T"/>
-	</Placement>
+
    </Do>
  </Volume> 
 
@@ -710,11 +711,6 @@
  <Shape type="TUBE" rmin="0" rmax="0.5*cableDiameter" dz="0.5*23.8418"/>
  </Volume>
 
- <Volume name="ICLE" comment="cooling liquid in ISCT volume">
- <Attribute for="ICLE" seen="1" colo="920"/>
- <Material name="NOVEC7200"/>
- <Shape type="TUBE" rmin="0" rmax="0.5*0.5334" dz="0.5*8.4642" />
- </Volume>
 
  <Volume name="ISCT" comment="IST short cooling tube in transition cone ">
  <Material name="Air" />
@@ -728,7 +724,18 @@
 
       <Create    block="ICTB" />
       <Placement block="ICTB" in="ISCT"  x="0.0" y="0.0" z="-0.5*8.4642+0.5*5.3975"/>
+
+      <Create block="ICLE"/>
+      <Placement block="ICLE" in="ISCT" x="0.0" y="0.0" z="0.0" />
  </Volume>
+
+
+ <Volume name="ICLE" comment="cooling liquid in ISCT volume">
+ <Attribute for="ICLE" seen="1" colo="920"/>
+ <Material name="NOVEC7200"/>
+ <Shape type="TUBE" rmin="0" rmax="0.5*0.5334" dz="0.5*8.4642" />
+ </Volume>
+
 
  <Volume name="ICTA" comment="cooling tube cone part">
  <Attribute for="ICTA" seen="1" colo="4"/>
@@ -739,7 +746,7 @@
  <Volume name="ICTJ" comment="cooling tube connector left">
  <Attribute for="ICTJ" seen="1" colo="4"/>
  <Material name="Aluminium"/>
- <Shape type="TUBE" rmin="0.18225" rmax="0.5*1.8331" dz="0.5*2.8889" />
+ <Shape type="TUBE" rmin="0.5*0.5334" rmax="0.5*1.8331" dz="0.5*2.8889" />
  </Volume>
 
  <Volume name="ICTB" comment="cooling tube part">
@@ -1490,11 +1497,13 @@
 
  
  <!-- ICCT volume for simply cables/cooling lines description in transition area -->
+
  <Volume name="ICCT" comment="average volume of average cables/cooling line in transition area">
   <Material name="CuAlNovecMix"/>
   <Attribute for="ICCT" seen="1" colo="629"/>
   <Shape type="CONE" rmn1="24.068" rmx1="24.8745" rmn2="14.7727" rmx2="17.4338" dz="0.5*8.7144" />
  </Volume>
+
 
  <!-- volumes definitions for purples cables and cooling line on PIT -->
  <Volume name="ICCA" comment="IST purple cable A on PIT">
