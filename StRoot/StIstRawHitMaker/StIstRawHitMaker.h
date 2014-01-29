@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.1 2014/01/23 20:11:30 ypwang Exp $
+* $Id: StIstRawHitMaker.h,v 1.2 2014/01/29 18:25:03 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -14,8 +14,8 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
-* Revision 1.1  2014/01/23 20:11:30  ypwang
-* adding scripts
+* Revision 1.2  2014/01/29 18:25:03  ypwang
+* updating scripts
 *
 *
 ****************************************************************************
@@ -62,26 +62,27 @@ class StIstRawHitMaker : public StRTSBaseMaker {
 
  protected:
    Bool_t mIsCaliMode, mDoCmnCorrection;
-   Float_t mHitCut, mCmnCut, mChanMinRmsNoiseLevel;
-   UChar_t mALLdata, mADCdata, mZSdata, mDefaultTimeBin;
+   //control paramters
+   Float_t mHitCut, mCmnCut, mChanMinRmsNoiseLevel, mChanMaxRmsNoiseLevel, mApvMaxCmNoiseLevel;
+   UChar_t mALLdata, mADCdata, mZSdata, mDefaultTimeBin, mCurrentTimeBinNum;
 
    StIstCollection *mIstCollectionPtr;
    StIstDbMaker *mIstDbMaker;
 
    // common mode noise
-   typedef std::vector< float > CmnVec_t; //APV chip index, CM noise
+   typedef std::vector< float > CmnVec_t; //APV chip geom. index, CM noise
    CmnVec_t mCmnVec;
    // pedestal
-   typedef std::vector< float > PedVec_t; //Channel index, pedestal
+   typedef std::vector< float > PedVec_t; //Channel elec. index, pedestal
    PedVec_t mPedVec;
    // RMS noise
-   typedef std::vector< float > RmsVec_t; //Channel index, RMS noise
+   typedef std::vector< float > RmsVec_t; //Channel elec. index, RMS noise
    RmsVec_t mRmsVec;
    // gain
-   typedef std::vector< float > GainVec_t;//Channel index, gain
+   typedef std::vector< float > GainVec_t;//Channel elec. index, gain
    GainVec_t mGainVec;
    // mapping
-   typedef std::vector< int > MappingVec_t;//Channel index, geometry ID
+   typedef std::vector< int > MappingVec_t;//Channel elec. index, geometry ID
    MappingVec_t mMappingVec;
 
  private:
@@ -98,7 +99,7 @@ inline void StIstRawHitMaker::setCmnCut(float cmnCut)			{ mCmnCut = cmnCut;     
 inline void StIstRawHitMaker::setDataType(int nDataType)		{ mDataType = nDataType;   };
 
 inline const char *StIstRawHitMaker::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.1 2014/01/23 20:11:30 ypwang Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.2 2014/01/29 18:25:03 ypwang Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.h,v 1.1 2014/01/23 20:11:29 ypwang Exp $
+* $Id: StIstClusterMaker.h,v 1.2 2014/01/29 18:25:01 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,8 +9,8 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.h,v $
-* Revision 1.1  2014/01/23 20:11:29  ypwang
-* adding scripts
+* Revision 1.2  2014/01/29 18:25:01  ypwang
+* updating scripts
 *
 *
 ****************************************************************************
@@ -41,7 +41,7 @@ class StIstClusterMaker : public StMaker
   void setClusterSplitFlag( bool splitFlag = 1);	//cluster splitting switch
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.1 2014/01/23 20:11:29 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.2 2014/01/29 18:25:01 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StIstIClusterAlgo* mClusterAlgoPtr;

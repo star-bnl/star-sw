@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.1 2014/01/23 20:11:30 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.2 2014/01/29 18:25:02 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,8 +9,8 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
-* Revision 1.1  2014/01/23 20:11:30  ypwang
-* adding scripts
+* Revision 1.2  2014/01/29 18:25:02  ypwang
+* updating scripts
 *
 *
 ****************************************************************************
@@ -35,7 +35,9 @@
 #include "StEventTypes.h"
 #include "StContainers.h"
 #include "StRoot/StIstUtil/StIstConsts.h"
+
 #include "StRoot/StIstDbMaker/StIstDbMaker.h"
+#include "tables/St_istControl_Table.h"
 
 void StIstHitMaker::Clear(Option_t *opts)
 {
@@ -72,6 +74,16 @@ Int_t StIstHitMaker::Make()
             StIstClusterCollection *clusterCollectionPtr = istCollectionPtr->getClusterCollection(ladderIdx );
     
             if( clusterCollectionPtr ){
+		unsigned int numClusters = clusterCollectionPtr->getNumClusters();
+                if(numClusters<mMinNumOfRawHits)   { // Here mMinNumOfRawHits indicate minimum number of found clusters
+                    LOG_WARN <<"no cluster found in ladder " << ladderIdx+1 << "! " <<endl;
+                    continue;
+                }
+                if(numClusters>mMaxNumOfRawHits)   { // Here mMaxNumOfRawHits indicate maximum number of found clusters
+                    LOG_WARN <<"too large number of clusters found in ladder " << ladderIdx+1 << "! " <<endl;
+                    continue;
+                }
+
                 StIstHit *newHit = 0;
                 
                 unsigned short idTruth = 0;
@@ -89,7 +101,7 @@ Int_t StIstHitMaker::Make()
                     meanRow 	= (*clusterIter)->getMeanRow();
                     meanColumn 	= (*clusterIter)->getMeanColumn();
                     maxTb 	= (*clusterIter)->getMaxTimeBin();
-                    charge 	= (*clusterIter)->getTotCharge();
+		    charge      = (*clusterIter)->getTotCharge();
                     chargeErr	= (*clusterIter)->getTotChargeErr();
 		    nClusteringType = (*clusterIter)->getClusteringType();
                     nRawHits 	= (*clusterIter)->getNRawHits();
@@ -158,7 +170,16 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
 {
    Int_t ierr = kStOk;
 
+   // geometry Db tables
    listGeoMSensorOnGlobal = mIstDbMaker->GetRotations();
+
+   // control parameters
+   St_istControl *istControl = (St_istControl *)GetDataBase("Calibrations/ist/istControl");
+   if (!istControl)  LOG_WARN << " no istControl table " << endm;
+   istControl_st *istControlTable = istControl->GetTable();
+
+   mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
+   mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
 
    return ierr;
 };

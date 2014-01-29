@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.1 2014/01/23 20:11:30 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.2 2014/01/29 18:25:03 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,8 +9,8 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
-* Revision 1.1  2014/01/23 20:11:30  ypwang
-* adding scripts
+* Revision 1.2  2014/01/29 18:25:03  ypwang
+* updating scripts
 *
 *
 ****************************************************************************
@@ -42,7 +42,7 @@
 #include <string.h>
 #include <time.h>
 
-StIstRawHitMaker::StIstRawHitMaker( const char* name ): StRTSBaseMaker( "ist", name ), mIsCaliMode(0), mDoCmnCorrection(0), mIstCollectionPtr(0), mIstDbMaker(0), mDataType(0){
+StIstRawHitMaker::StIstRawHitMaker( const char* name ): StRTSBaseMaker( "ist", name ), mIsCaliMode(1), mDoCmnCorrection(0), mIstCollectionPtr(0), mIstDbMaker(0), mDataType(0){
    // set all vectors to zeros
    mCmnVec.resize( kIstNumApvs );
    mPedVec.resize( kIstNumElecIds );
@@ -98,10 +98,13 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    mHitCut  = istControlTable[0].kIstHitCutDefault;
    mCmnCut  = istControlTable[0].kIstCMNCutDefault;
    mChanMinRmsNoiseLevel = istControlTable[0].kIstChanMinRmsNoiseLevel;
+   mChanMaxRmsNoiseLevel = istControlTable[0].kIstChanMaxRmsNoiseLevel;
+   mApvMaxCmNoiseLevel   = istControlTable[0].kIstApvMaxCmNoiseLevel;
    mALLdata = istControlTable[0].kIstAlldata;
    mADCdata = istControlTable[0].kIstADCdata;
    mZSdata  = istControlTable[0].kIstZSdata;
    mDefaultTimeBin = istControlTable[0].kIstDefaultTimeBin;
+   mCurrentTimeBinNum = istControlTable[0].kIstCurrentTimeBinNum;
 
    // open db files for non-calibration mode
    St_istPedNoise *istPedNoise;
@@ -174,7 +177,7 @@ Int_t StIstRawHitMaker::Make() {
     if( !ierr ){
 	StRtsTable* rts_tbl = 0;
 	UChar_t dataFlag = mALLdata;
-        static Int_t ntimebin = kIstNumTimeBins;
+        static Int_t ntimebin = mCurrentTimeBinNum;
 
 	while(1) { //loops over input raw data
 	    if(dataFlag==mALLdata){
@@ -252,14 +255,14 @@ Int_t StIstRawHitMaker::Make() {
                 Int_t channel   = f->ch;  //channel index  0, 1, ..., 127
                 Int_t adc       = f->adc; //adc
                 Short_t timebin = f->tb;  //time bin
-                
+		LOG_DEBUG << "channel: " << channel << "   adc: " << adc << "  time bin: " << timebin << endm;
+ 
                 flag=0;
-		//Yaping 17/1/2014: For ZS data, adc maybe less than 0 due to pedestal subtracted
-		//if(adc	  <0 || adc>=kIstMaxAdc) 		    flag=1;
+		if(adc	  <0 || adc>=kIstMaxAdc) 		    flag=1;
                 if(channel<0 || channel>=kIstNumApvChannels)        flag=1;
-                if(timebin<0 || timebin>=ntimebin)           	    flag=1;
+                if(timebin<0 || timebin>=kIstNumTimeBins)           flag=1;
                 if(flag==1){
-                    LOG_INFO<< "Corrupt data channel: " << channel << " tbin: " << timebin << " adc: " << adc << endm;
+                    LOG_INFO << "Corrupt data channel: " << channel << " tbin: " << timebin << " adc: " << adc << endm;
                     continue;
                 }
 
@@ -303,13 +306,8 @@ Int_t StIstRawHitMaker::Make() {
 		Int_t elecId = (rdo-1)*kIstNumArmsPerRdo*kIstNumApvsPerArm*kIstNumApvChannels + arm*kIstNumApvsPerArm*kIstNumApvChannels + apv*kIstNumApvChannels + iChan;
 		Int_t geoId  = mMappingVec[elecId]; // channel geometry ID which is numbering from 1 to 110592
 		Int_t ladder = 1 + (geoId - 1)/(kIstApvsPerLadder * kIstNumApvChannels); // ladder geometry ID: 1, 2, ..., 24
-                Int_t apvId  = (geoId - 1)/kIstNumApvChannels; // APV geometry ID: 0, 1, ..., 863 (numbering from ladder 1 to ladder 24)
-		//skip current APV filling once the APV chip behaviors w/ ultra high common mode noise
-		cmNoisePerChip = mCmnVec[apvId];
-                if( cmNoisePerChip > 999.0) {
-                    LOG_INFO<< "Bad behavior APV chip: " << apvId << " on ladder " << ladder << endm;
-                    continue;
-                }
+                Int_t apvId  = 1 + (geoId - 1)/kIstNumApvChannels; // APV geometry ID: 1, ..., 864 (numbering from ladder 1 to ladder 24)
+		cmNoisePerChip = mCmnVec[apvId-1];
 
 		//store raw hits information
                 StIstRawHitCollection *rawHitCollectionPtr = mIstCollectionPtr->getRawHitCollection( ladder-1 );
@@ -327,18 +325,35 @@ Int_t StIstRawHitMaker::Make() {
 			else continue;
 		    }
 		    else { //physics mode: pedestal subtracted + dynamical common mode correction
-                    	for(int iTB=1; iTB<ntimebin-1; iTB++)    {
-			    //skip current channel once this channel is marked as bad status
-			    if(mRmsVec[elecId] > 999.0)	{
-			    	LOG_INFO<<"Bad behavior channel: " << elecId << endm;
-			    	continue;
-			    }
+			//skip current APV channels marked as bad/dead (common mode noise set to 100.)
+                	if( cmNoisePerChip > 99.0) {
+                    	    LOG_DEBUG<< "Bad/dead behavior APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
+                    	    continue;
+                	}
 
+			//skip current APV channels behaviored noisy ...
+			if( cmNoisePerChip > mApvMaxCmNoiseLevel) {
+                            LOG_DEBUG<< "Noisy behavior APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
+                            continue;
+                        }
+
+			//skip current channel marked as bad/dead status
+			if(mRmsVec[elecId] > 99.0)  {
+                            LOG_DEBUG<<"Bad/dead behavior channel electronics index: " << elecId << endm;
+                            continue;
+                        }
+
+			//skip current channel marked as suspicious status
+			if(mRmsVec[elecId]<mChanMinRmsNoiseLevel || mRmsVec[elecId]>mChanMaxRmsNoiseLevel)  {
+                            LOG_DEBUG<<"Noisy behavior channel electronics index: " << elecId << endm;
+                            continue;
+                        }
+
+                    	for(int iTB=1; iTB<ntimebin-1; iTB++)    {
                       	    // raw hit decision: the method is stolen from Gerrit's ARMdisplay.C
                             if( (signalUnCorrected[iChan][iTB] > 0) && (signalUnCorrected[iChan][iTB] < kIstMaxAdc) && 
 			    	(signalUnCorrected[iChan][0]   > 0) && (signalUnCorrected[iChan][0]   < kIstMaxAdc) &&
 			    	(signalUnCorrected[iChan][ntimebin-1] > 0) && (signalUnCorrected[iChan][ntimebin-1] < kIstMaxAdc) &&
-			    	(mRmsVec[elecId] > mChanMinRmsNoiseLevel)  &&
                             	(signalCorrected[iChan][iTB-1] > mHitCut * mRmsVec[elecId])     &&
                             	(signalCorrected[iChan][iTB]   > mHitCut * mRmsVec[elecId])     &&
                             	(signalCorrected[iChan][iTB+1] > mHitCut * mRmsVec[elecId])     &&
