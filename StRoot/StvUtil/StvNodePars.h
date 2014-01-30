@@ -175,7 +175,7 @@ operator const double *() const { return &mHH;}
 operator       double *()       { return &mHH;}
 StvFitErrs &operator=(const StvFitErrs &fr) ;
 StvFitErrs &operator*=(double f) {for (int i=0;i<kNErrs;i++){(*this)[i]*=f;};return *this;}
-  void Add(const StvELossData &el,const StvNodePars &pa,double len);
+  void Add(const StvELossData &el,const StvNodePars &pa,double len=0);
   void Backward();
 const StvFitErrs &operator*(const StvFitDers &mtx) const; 
 double Sign() const;
