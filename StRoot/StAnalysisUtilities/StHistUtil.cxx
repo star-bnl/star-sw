@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.91 2013/03/12 03:42:55 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.92 2014/01/30 19:44:06 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.92  2014/01/30 19:44:06  genevb
+// Additional TPC histogram for monitoring gas contamination
+//
 // Revision 2.91  2013/03/12 03:42:55  genevb
 // typo correction
 //
@@ -306,6 +309,7 @@
 #include "St_DataSetIter.h"
 #include "StMaker.h"
 #include "TF1.h"
+#include "TH3.h"
 
 #include "StHistUtil.h"
 
@@ -922,7 +926,46 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           // actually draw,print
           if ((chkdim == 3) && (hobj->InheritsFrom("StMultiH2F"))) {
             hobj->Draw("Col");
-          } else  if ((chkdim==2) && (oName.Contains("PointRPTpc") ||
+          } else if ((chkdim == 3) && (oName.Contains("Z3A"))) {
+            latex.SetTextAngle(0);
+            latex.SetTextAlign(12);
+            TH3F* Z3A = (TH3F*) hobj;
+            Bool_t noneYet = kTRUE;
+            // copied from StdEdxY2Maker::FinishRun() vers. 1.82,
+            //   with minor modifications for plotting the results
+            const Char_t *IO[2] = {"Inner", "Outer"};
+            Double_t    xmin[2] = { 70, 40};
+            Double_t    xmax[2] = {120,180};
+            for (Int_t io = 1; io <= 2; io++) {
+              Z3A->GetXaxis()->SetRange(io,io);
+              TH2 *I = (TH2 *) Z3A->Project3D(Form("zy%i",io));
+              if (I) {
+                I->FitSlicesY();
+                TH1D *proj = (TH1D*) gDirectory->Get(Form("%s_1",I->GetName()));
+                if (proj) {
+                  proj->Fit("pol1","erq",(noneYet ? "" : "same"),xmin[io-1],xmax[io-1]);
+                  proj->SetMinimum(-0.25);
+                  proj->SetMaximum( 0.45);
+                  proj->SetLineColor(8-io);
+                  proj->SetMarkerColor(8-io);
+                  proj->SetMarkerStyle(24-io);
+                  proj->SetStats(0);
+                  proj->SetTitle(otitle);
+                  TF1 *f = (TF1 *) proj->GetListOfFunctions()->FindObject("pol1");
+                  if (f) {
+                    gMessMgr->Info() << "StHistUtil: slope in drift distance for " << IO[io-1] << " = "
+                                     << f->GetParameter(1) << " +/- " << f->GetParError(1) << endm;
+                    f->SetLineColor(6-2*io);
+                    latex.SetTextColor(6-2*io);
+                    latex.DrawLatex(20,-0.65+0.5*io,Form("%s : %f +/- %f\n",
+                      IO[io-1],f->GetParameter(1),f->GetParError(1)));
+                  }
+                  noneYet = kFALSE;
+                }
+              }
+            }
+            latex.SetTextColor(1);
+          } else if ((chkdim==2) && (oName.Contains("PointRPTpc") ||
                       (oName.Contains("PointXYTpc") &&  // Unfortunately was polar for a short time
                        TMath::Abs((hobj->GetYaxis()->GetXmax()/TMath::Pi())-2)<1e-5))) {
             TH2F* htmp = new TH2F(Form("%s.",hobj->GetName()),hobj->GetTitle(),1,-200,200,1,-200,200);
@@ -2180,6 +2223,7 @@ void StHistUtil::SetDefaultPrintList(const Char_t *dirName, const Char_t *analTy
     if (addIt) {
       if (!(ilgString.BeginsWith("fcl") ||
             ilgString.BeginsWith("fms_qt_") ||
+            ilgString.BeginsWith("Z3A") ||
             ilgString.BeginsWith("fpd_channel_"))) {
         for (Int_t k=0; k<numOfPosPrefixes; k++) {
           TString listString = type;

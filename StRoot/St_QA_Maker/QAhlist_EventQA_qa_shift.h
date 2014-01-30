@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.45 2013/03/20 20:17:37 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.46 2014/01/30 19:44:06 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.46  2014/01/30 19:44:06  genevb
+// Additional TPC histogram for monitoring gas contamination
+//
 // Revision 2.45  2013/03/20 20:17:37  genevb
 // Run 13 edits
 //
@@ -225,6 +228,7 @@
   ":tpx;tpc:QaGtrkZdcaTanl",
   ":tpx;tpc:QaPidGlobtrkDstdedxPVsDedx",
   ":tpx;tpc:QaDedxBBTTS",
+  ":tpx;tpc:Z3A",
   ":tpx;tpc:QaEvsumTotChg",
   ":tpx;tpc:QaGtrkRZf0",
   ":tpx,svt;tpc,svt:QaGtrkRZf0TS",

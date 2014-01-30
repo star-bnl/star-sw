@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.39 2013/03/12 03:06:02 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.40 2014/01/30 19:44:06 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.40  2014/01/30 19:44:06  genevb
+// Additional TPC histogram for monitoring gas contamination
+//
 // Revision 2.39  2013/03/12 03:06:02  genevb
 // Add FMS/FPD histograms for Run 13+
 //
@@ -168,6 +171,9 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   m_ftpc_chargestepE=0; //! Chargestep from ftpc east
   m_ftpc_fcl_radialW=0;  //! ftpc west cluster radial position
   m_ftpc_fcl_radialE=0;  //! ftpc east cluster radial position
+
+// TPC dE/dx over time
+  m_dedx_Z3A=0; // dE/dx vs. drift distance
 
 }
 //_____________________________________________________________________________
@@ -340,6 +346,7 @@ void StQAMakerBase::BookHist() {
 
   BookHistTrigger();
   BookHistGeneral();
+  BookHistDE();
   BookHistFcl();
   if (histsSet>=StQA_run13) BookHistFMS(); 
 
@@ -390,6 +397,30 @@ void StQAMakerBase::BookHistTrigger(){
   mTrigWord = QAH::H1F("QaTrigWord","trigger word",8,0.5,8.5);
   mTrigWord->SetXTitle("1:MinBias 2:Central 3:HiPt 4:Jet 5:HiTower 6:OtherPhys");
   mTrigBits = QAH::H1F("QaTrigBits","trigger bits",32,-0.5,31.5);
+}
+//_____________________________________________________________________________
+void StQAMakerBase::BookHistDE(){
+
+  // Get dE/dx histogram from dE/dx maker
+  if (!(m_dedx_Z3A)) {
+    // First try to get histograms from dE/dx maker named "dEdxY2"
+    StMaker* fhMaker = GetMaker("dEdxY2");
+    if (fhMaker) {
+      m_dedx_Z3A = (TH3F*) (fhMaker->GetHist("Z3A"));
+      AddHist(m_dedx_Z3A);
+    } else {
+      // "dEdxY2" maker doesn't exist, so look in hist branch
+      St_DataSet* hDS = GetDataSet("histBranch");
+      if (hDS) {
+        // hDS->ls(9);
+        St_DataSet* fhDS = hDS->Find("dEdxY2Hist");
+        if (fhDS) {
+          m_dedx_Z3A = (TH3F*) (fhDS->FindObject("Z3A"));
+          AddHist(m_dedx_Z3A);
+        }
+      }
+    }
+  }
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistFcl(){
