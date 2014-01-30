@@ -29,7 +29,6 @@
 #include <math.h>
 #include <DAQ_HLT/daq_hlt.h>
 #include "RTS/include/HLT/HLTFormats.h"
-//#include "/star/u/jiezhao/lbl/jiezhao/HLT/BES/offline/users/jml/StJevpPool/StJevpBuilders/HLTFormats.h"
 //#include <time.h>
 //#include <sys/time.h>
 
