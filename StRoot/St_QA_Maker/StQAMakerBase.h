@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.20 2013/03/12 03:06:02 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.21 2014/01/30 19:44:06 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.21  2014/01/30 19:44:06  genevb
+// Additional TPC histogram for monitoring gas contamination
+//
 // Revision 2.20  2013/03/12 03:06:02  genevb
 // Add FMS/FPD histograms for Run 13+
 //
@@ -80,7 +83,8 @@ enum StQAHistSetType {
   StQA_run8 = 5,
   StQA_run12all = 6,
   StQA_run12 = 7,
-  StQA_run13 = 8
+  StQA_run13 = 8,
+  StQA_run14 = 9
 };
 
 #include "StMaker.h"
@@ -88,6 +92,7 @@ class StQABookHist;
 class TObjArray;
 class TH1F;
 class TH2F;
+class TH3F;
 
 // FMS needs
 typedef std::map<int, TH1*> TH1PtrMap;
@@ -116,7 +121,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.20 2013/03/12 03:06:02 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.21 2014/01/30 19:44:06 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -146,6 +151,9 @@ class StQAMakerBase : public StMaker {
   TH1F     *m_ftpc_chargestepE; //! Chargestep from ftpc east
   TH1F     *m_ftpc_fcl_radialW;  //! ftpc west cluster radial position
   TH1F     *m_ftpc_fcl_radialE;  //! ftpc east cluster radial position
+
+  // TPC dE/dx over time
+  TH3F     *m_dedx_Z3A; // dE/dx vs. drift distance
 
   // FMS histograms
   // ADC vs. channel histograms keyed by QT crate number.
@@ -177,6 +185,7 @@ class StQAMakerBase : public StMaker {
   virtual void BookHistTrigger();
   virtual void BookHistFcl();
   virtual void BookHistFMS();
+  virtual void BookHistDE();
 
   virtual void MakeHistGlob() = 0;
   virtual void MakeHistDE() = 0;
