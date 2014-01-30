@@ -12,7 +12,7 @@ public:
 
 
     void useVMCGeometry();
-    //void AverageVolume(TGeoPhysicalNode *nodeP);
+    void AverageVolume(TGeoPhysicalNode *nodeP);
 
     /// returns the azimuthal angle [-pi, pi) for tpc sector [1-24]
     double phiForPixelSector(unsigned int iSector) const;
