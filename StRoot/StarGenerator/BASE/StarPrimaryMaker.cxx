@@ -551,6 +551,10 @@ Int_t StarPrimaryMaker::Finalize()
 	  if ( i )
 	    {
 
+	      // Offset z-vertex first so that we can apply the beamline
+	      // constraint.
+	      vz += vertex.Z();
+
 	      // Rotate the particle along the specified beamline
 	      RotateBeamline( px, py, pz, E, M, vx, vy, vz, vt );
 
@@ -562,7 +566,7 @@ Int_t StarPrimaryMaker::Finalize()
 	      //       a good approximation.
 	      vx += vertex.X();
 	      vy += vertex.Y();
-	      vz += vertex.Z();
+	      // vz was already offset
 	      vt += vertex.T();
 
 
