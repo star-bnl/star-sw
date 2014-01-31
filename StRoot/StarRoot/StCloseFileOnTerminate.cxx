@@ -4,7 +4,7 @@
 #include "TSystem.h"
 #include "TApplication.h"
 #include "TFile.h"
-
+#include "TError.h"
 StCloseFileOnTerminate *StCloseFileOnTerminate::fgCloseFileOnTerminate = 0;
 //_________________________________________________________
 StCloseFileOnTerminate:: StCloseFileOnTerminate() : TSignalHandler(kSigTermination, kFALSE)
@@ -15,8 +15,10 @@ StCloseFileOnTerminate:: StCloseFileOnTerminate() : TSignalHandler(kSigTerminati
 StCloseFileOnTerminate &StCloseFileOnTerminate::Instantiate()
 {
    // Create Asynch signal handler
-  if (! fgCloseFileOnTerminate ) 
+  if (! fgCloseFileOnTerminate ) {
      fgCloseFileOnTerminate = new StCloseFileOnTerminate;
+     ::Warning("StCloseFileOnTerminate::Instantiate","Asynch signal handler has been created");
+  }
   return *fgCloseFileOnTerminate;
 }
 //_________________________________________________________
