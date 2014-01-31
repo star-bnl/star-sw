@@ -23,7 +23,8 @@ static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,kMaxPti  };
 static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
 static const double kERRFACT     = 3*3;
 //??static const double kFitErrs[5]   ={1.,1. 
-static const double kFitErrs[5]   ={.2,.2 
+//static const double kFitErrs[5]   ={.2,.2 
+static const double kFitErrs[5]   ={1,1 
                                    ,10./180*M_PI
 				   ,10./180*M_PI
 				   ,kMaxPti};
@@ -241,7 +242,7 @@ StvDebug::Break(nCall);
      double mom[3]={_cosCA,_sinCA,_tanl};
      THelixTrack hlx(&_x,mom,_curv);
      myLen = hlx.Path(v);
-     move(myLen); 
+     move(myLen/cosL); 
    } else {
      myLen /= cosL;
    }
@@ -304,7 +305,7 @@ void StvNodePars::moveToR(double R)
   dis = sqrt(dis);
   double dL = (dR2)/(dis+fabs(myDot));
   if (myDot<0) dL = -dL;
-  move(dL);
+  move(dL/getCosL());
 //  assert(fabs(_x*_x+ _y*_y-R*R)/(2*R)<1e-2);
 }
 
