@@ -34,9 +34,9 @@ public:
 
 	int rts_id ;
 
-//	int err_counter[FGT_RDO_COU] ;
+	int tb_cou_xpect ; // as set in the conf file "ntimebins"!
+	int tb_cou_ped ; // as in the pedestals/load file!
 
-	int tb_cou_xpect ;
 
 //private:
 	// allocated per RDO
@@ -64,12 +64,15 @@ public:
 	int k_seq ;
 	double n_sigma ;
 
-	int tb_cou ;
+//	int tb_cou ;
 
+	
 	struct fgt_stat_t {
 		int err ;
 		int evts ;
 		int arm_mask ;
+
+
 		int err_apv[FGT_ARM_COU][FGT_APV_COU] ;
 		int cou_apv[FGT_ARM_COU][FGT_APV_COU] ;
 	} fgt_stat[FGT_RDO_COU] ;	// counts from 0!
