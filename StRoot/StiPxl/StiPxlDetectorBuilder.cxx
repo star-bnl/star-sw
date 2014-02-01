@@ -1,9 +1,12 @@
 // 12/12/2012 : modification of the builder to take into account the new geometry path names
 // backward compatibility with upgr15 geometry is lost
 /*
- * $Id: StiPxlDetectorBuilder.cxx,v 1.1 2014/02/01 19:19:34 smirnovd Exp $
+ * $Id: StiPxlDetectorBuilder.cxx,v 1.2 2014/02/01 19:23:15 smirnovd Exp $
  *
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.2  2014/02/01 19:23:15  smirnovd
+ * Corrected location of included header files
+ *
  * Revision 1.1  2014/02/01 19:19:34  smirnovd
  * Initial commit: Changed files prefix StiPixel... to StiPxl... according to STAR convention
  *
@@ -143,7 +146,7 @@
 #include "Sti/StiElossCalculator.h"
 #include "StiPxlDetectorBuilder.h"
 #include "StiPxlIsActiveFunctor.h"
-#include "StDetectorDbMaker/StiPxlHitErrorCalculator.h"
+#include "StiPxlHitErrorCalculator.h"
 #include "tables/St_HitError_Table.h"
 #include "StEvent.h"
 #include "StEventTypes.h"

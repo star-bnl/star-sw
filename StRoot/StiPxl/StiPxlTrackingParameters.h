@@ -1,6 +1,6 @@
 #ifndef StiPxlTrackingParameters_h
 #define StiPxlTrackingParameters_h
-#include "Sti/StiTrackingParameters.h"
+#include "StDetectorDbMaker/StiTrackingParameters.h"
 class StiPxlTrackingParameters : public StiTrackingParameters {
  public:
   static StiPxlTrackingParameters* 	instance();

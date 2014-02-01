@@ -1,6 +1,6 @@
 #ifndef StiPxlHitErrorCalculator_h
 #define StiPxlHitErrorCalculator_h
-#include "Sti/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 class StiPxlHitErrorCalculator : public StiHitErrorCalculator {
  public:
   static StiPxlHitErrorCalculator* 	instance();
