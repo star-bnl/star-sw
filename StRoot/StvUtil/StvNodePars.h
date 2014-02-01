@@ -250,8 +250,9 @@ public:
 public:
   double mTheta2;	//multiple scattering angle error
   double mOrt2;		//multiple scattering position error
-  double mdPP;		//dP/P
   double mELoss;	//Energy loss
+  double mdPP;		//dP/P/len
+  double mdPPP;		//d(dP/P/len)/dP
   double mdPPErr2;	//Square error of mdPP
   double mTotLen;	//Total length where errors accumulated
   double mP;		//Total momentum

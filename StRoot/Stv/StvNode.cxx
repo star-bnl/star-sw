@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.25 2013/12/18 02:25:48 perev Exp $
+ * $Id: StvNode.cxx,v 1.26 2014/02/01 02:21:48 perev Exp $
  *
  * /author Victor Perev
  */
@@ -206,23 +206,38 @@ int StvNode::Check(const char *tit, int dirs) const
   return nerr;
 }
 //________________________________________________________________________________
-int StvNode::ResetELoss(const StvNodePars &pars)
+int StvNode::ResetELoss(const StvNodePars &pars,double len)
 {
+static const double kBigP=1,kBigP2=kBigP*kBigP,kSmallDiff=1e-2;
+
 static StvELossTrak *el = new StvELossTrak();
 
-  double p2 = pars.getP2();  
-  if (p2>1 && mELossData.mP>1) return 0;
-  if (fabs(mELossData.mP*mELossData.mP-p2) <0.01*p2) return 0;
-  if (!mELossData.mMate) return 1;
+  if (!len) {len = mELossData.mTotLen;} else {len = fabs(len);}
+  double p2 = pars.getP2();
+  if ((p2>kBigP2 && mELossData.mP>kBigP) 
+  ||  (fabs(mELossData.mP*mELossData.mP-p2)<kSmallDiff*p2)) 	return 0;
+  if (!mELossData.mMate) 					return 1;
+
+//		Save the eloss and p to calculate (dP/P/len)/dP
+  double pPrev   = mELossData.mP;
+  double dPPPrev = mELossData.mdPP;
+
   el->Reset();
   double p = sqrt(p2);
-  el->Set(mELossData.mMate,p); el->Add(mELossData.mTotLen);
+  el->Set(mELossData.mMate,p); el->Add(len);
+  mELossData.mP      = el->P();
+  if (fabs(pPrev-mELossData.mP)<1e-6) 				return 0;
   mELossData.mTheta2 = el->GetTheta2();
   mELossData.mOrt2   = el->GetOrt2();
   mELossData.mdPP    = el->dPovPLen();
   mELossData.mELoss  = el->ELoss();
   mELossData.mdPPErr2= el->dPPErr2();
-  mELossData.mP      = el->P();
+  mELossData.mTotLen = el->TotLen();  
+  double dP = mELossData.mP - pPrev;
+  double dPPP = (mELossData.mdPP-dPPPrev)/(mELossData.mdPP+1e-11);
+  if (fabs(dPPP) <1e-2) {dPPP =  dPPP        *mELossData.mdPP/dP;}
+  else                  {dPPP = -log(1.-dPPP)*mELossData.mdPP/dP;}
+  mELossData.mdPPP = dPPP;
   return 0;
 }
  
