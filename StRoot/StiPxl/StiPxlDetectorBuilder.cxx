@@ -1,9 +1,12 @@
 // 12/12/2012 : modification of the builder to take into account the new geometry path names
 // backward compatibility with upgr15 geometry is lost
 /*
- * $Id: StiPxlDetectorBuilder.cxx,v 1.2 2014/02/01 19:23:15 smirnovd Exp $
+ * $Id: StiPxlDetectorBuilder.cxx,v 1.3 2014/02/01 19:23:29 smirnovd Exp $
  *
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.3  2014/02/01 19:23:29  smirnovd
+ * Use defined constants
+ *
  * Revision 1.2  2014/02/01 19:23:15  smirnovd
  * Corrected location of included header files
  *
@@ -333,9 +336,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          mSiMaterial->getZ(),
          mSiMaterial->getDensity());
 
-   for (UInt_t ii = 0; ii < nPxlSectors; ++ii) {
-      for (UInt_t jj = 0; jj < nPxlLaddersPerSector; ++jj) {
-         for (UInt_t kk = 0; kk < nPxlSensorsPerLadder; kk++) {
+   for (UInt_t ii = 0; ii < kNumberOfPxlSectors; ++ii) {
+      for (UInt_t jj = 0; jj < kNumberOfPxlLaddersPerSector; ++jj) {
+         for (UInt_t kk = 0; kk < kNumberOfPxlSensorsPerLadder; kk++) {
             if (ii == 1 || ii == 3 || ii == 6) {
                //for run 13, only sector 2,4,7
                int matPix = 0;
