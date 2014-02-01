@@ -1,14 +1,14 @@
-#ifndef StiPixelDetectorBuilder_H
-#define StiPixelDetectorBuilder_H
+#ifndef StiPxlDetectorBuilder_H
+#define StiPxlDetectorBuilder_H
 
 #include "Sti/StiDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 
 
-class StiPixelDetectorBuilder : public StiDetectorBuilder
+class StiPxlDetectorBuilder : public StiDetectorBuilder
 {
 public:
-   StiPixelDetectorBuilder(bool active, const string &inputFile);
+   StiPxlDetectorBuilder(bool active, const string &inputFile);
    virtual void buildDetectors(StMaker &source);
    double phiForSector(unsigned int iSector) const;
 
@@ -26,7 +26,7 @@ protected:
    StiMaterial *mHybridMaterial;
 };
 
-inline double StiPixelDetectorBuilder::phiForSector(unsigned int sector) const
+inline double StiPxlDetectorBuilder::phiForSector(unsigned int sector) const
 {
    int nSectors = 12;
    int offset = nSectors / 4;
@@ -35,11 +35,11 @@ inline double StiPixelDetectorBuilder::phiForSector(unsigned int sector) const
    return nice(dPhi);
 }
 
-inline double StiPixelDetectorBuilder::phiForPixelSector(unsigned int sector) const
+inline double StiPxlDetectorBuilder::phiForPixelSector(unsigned int sector) const
 {
    if (sector < 0 || sector >= 24) {
       cout << "phiForPixelSector(" << sector << "): invalid sector" << endl;
-      throw runtime_error("StiPixelDetectorBuilder::phiForPixelSector - ERROR - Invalid Sector");
+      throw runtime_error("StiPxlDetectorBuilder::phiForPixelSector - ERROR - Invalid Sector");
    }
 
    double phi = -1000.;
@@ -145,11 +145,11 @@ inline double StiPixelDetectorBuilder::phiForPixelSector(unsigned int sector) co
    return (phi / 180.*M_PI);
 } // phiForPixelSector
 
-inline double StiPixelDetectorBuilder::radiusForPixelSector(unsigned int sector) const
+inline double StiPxlDetectorBuilder::radiusForPixelSector(unsigned int sector) const
 {
    if (sector < 0 || sector >= 24) {
       cout << "radiusForPixelSector(" << sector << "): invalid sector" << endl;
-      throw runtime_error("StiPixelDetectorBuilder::radiusForPixelSector - ERROR - Invalid Sector");
+      throw runtime_error("StiPxlDetectorBuilder::radiusForPixelSector - ERROR - Invalid Sector");
    }
 
    double radius = -1000.;
@@ -196,11 +196,11 @@ inline double StiPixelDetectorBuilder::radiusForPixelSector(unsigned int sector)
    return radius;
 } // radiusForPixelSector
 
-inline double StiPixelDetectorBuilder::psiForPixelSector(unsigned int sector) const
+inline double StiPxlDetectorBuilder::psiForPixelSector(unsigned int sector) const
 {
    if (sector < 0 || sector >= 24) {
       cout << "psiForPixelSector(" << sector << "): invalid sector" << endl;
-      throw runtime_error("StiPixelDetectorBuilder::psiForPixelSector - ERROR - Invalid Sector");
+      throw runtime_error("StiPxlDetectorBuilder::psiForPixelSector - ERROR - Invalid Sector");
    }
 
    double psi = -1000.;

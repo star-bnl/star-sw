@@ -1,5 +1,5 @@
-#ifndef StiPixelDetectorGroup_H_INCLUDED
-#define StiPixelDetectorGroup_H_INCLUDED
+#ifndef StiPxlDetectorGroup_H_INCLUDED
+#define StiPxlDetectorGroup_H_INCLUDED
 
 #include "Sti/StiDetectorGroup.h"
 class StEvent;
@@ -8,11 +8,11 @@ class StEvent;
   <p>
   \author Claude A Pruneau, Wayne State University
 */
-class StiPixelDetectorGroup : public StiDetectorGroup<StEvent>
+class StiPxlDetectorGroup : public StiDetectorGroup<StEvent>
 {
 public:
-   StiPixelDetectorGroup(bool active, const string &inputFile);
-   ~StiPixelDetectorGroup();
+   StiPxlDetectorGroup(bool active, const string &inputFile);
+   ~StiPxlDetectorGroup();
 };
 
 #endif

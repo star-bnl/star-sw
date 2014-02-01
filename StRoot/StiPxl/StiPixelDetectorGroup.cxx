@@ -1,16 +1,16 @@
 #include <stdexcept>
 #include "StEvent.h"
-#include "StiPixelDetectorGroup.h"
-#include "StiPixelDetectorBuilder.h"
-#include "StiPixelHitLoader.h"
+#include "StiPxlDetectorGroup.h"
+#include "StiPxlDetectorBuilder.h"
+#include "StiPxlHitLoader.h"
 
 
-StiPixelDetectorGroup::StiPixelDetectorGroup(bool active, const string &inputFile)
+StiPxlDetectorGroup::StiPxlDetectorGroup(bool active, const string &inputFile)
    : StiDetectorGroup<StEvent>("Pixel",
-                               active ? new StiPixelHitLoader() : 0,
-                               new StiPixelDetectorBuilder(active, inputFile), 0)
+                               active ? new StiPxlHitLoader() : 0,
+                               new StiPxlDetectorBuilder(active, inputFile), 0)
 {}
 
-StiPixelDetectorGroup::~StiPixelDetectorGroup()
+StiPxlDetectorGroup::~StiPxlDetectorGroup()
 {}
 

@@ -1,14 +1,14 @@
-#ifndef StiPixelHitErrorCalculator_h
-#define StiPixelHitErrorCalculator_h
+#ifndef StiPxlHitErrorCalculator_h
+#define StiPxlHitErrorCalculator_h
 #include "Sti/StiHitErrorCalculator.h"
-class StiPixelHitErrorCalculator : public StiHitErrorCalculator {
+class StiPxlHitErrorCalculator : public StiHitErrorCalculator {
  public:
-  static StiPixelHitErrorCalculator* 	instance();
+  static StiPxlHitErrorCalculator* 	instance();
  protected:
-  StiPixelHitErrorCalculator(St_HitError *table=0) : StiHitErrorCalculator(table) {}
-  virtual ~StiPixelHitErrorCalculator() {fgInstance = 0;}
+  StiPxlHitErrorCalculator(St_HitError *table=0) : StiHitErrorCalculator(table) {}
+  virtual ~StiPxlHitErrorCalculator() {fgInstance = 0;}
  private:
-  static StiPixelHitErrorCalculator* fgInstance;
-  ClassDef(StiPixelHitErrorCalculator,1) //C++ TChair for PixelHitError table class
+  static StiPxlHitErrorCalculator* fgInstance;
+  ClassDef(StiPxlHitErrorCalculator,1) //C++ TChair for PixelHitError table class
 };
 #endif
