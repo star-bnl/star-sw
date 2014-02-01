@@ -1,7 +1,10 @@
  /*
- * $Id: StiPixelHitLoader.cxx,v 1.1 2014/02/01 19:02:45 smirnovd Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.2 2014/02/01 19:04:21 smirnovd Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.2  2014/02/01 19:04:21  smirnovd
+ * Changed class prefix StiPixel to StiPxl to be consistent with STAR convention
+ *
  * Revision 1.1  2014/02/01 19:02:45  smirnovd
  * Renamed StRoot/Hft to StRoot/StiPxl to be consistent with existing convention
  *
@@ -71,22 +74,22 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiTrackContainer.h"
-#include "StiPixelHitLoader.h"
+#include "StiPxlHitLoader.h"
 
-StiPixelHitLoader::StiPixelHitLoader()
+StiPxlHitLoader::StiPxlHitLoader()
    : StiHitLoader<StEvent, StiDetectorBuilder>("PixelHitLoader")
 {}
 
-StiPixelHitLoader::StiPixelHitLoader(StiHitContainer *hitContainer,
+StiPxlHitLoader::StiPxlHitLoader(StiHitContainer *hitContainer,
                                      Factory<StiHit> *hitFactory,
                                      StiDetectorBuilder *detector)
    : StiHitLoader<StEvent, StiDetectorBuilder>("PixelHitLoader", hitContainer, hitFactory, detector)
 {}
 
-StiPixelHitLoader::~StiPixelHitLoader()
+StiPxlHitLoader::~StiPxlHitLoader()
 {}
 
-void StiPixelHitLoader::loadHits(StEvent *source,
+void StiPxlHitLoader::loadHits(StEvent *source,
                                  Filter<StiTrack> *trackFilter,
                                  Filter<StiHit> *hitFilter)
 {
@@ -94,15 +97,15 @@ void StiPixelHitLoader::loadHits(StEvent *source,
    LOG_INFO << " -I- Started" << endl;
 
    if (!_detector)
-      throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
+      throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
 
    if (!_hitContainer)
-      throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
+      throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
 
    StPxlHitCollection *col = source->pxlHitCollection();
 
    if (!col) {
-      LOG_ERROR << "StiPixelHitLoader::loadHits\tERROR:\tcol==0"
+      LOG_ERROR << "StiPxlHitLoader::loadHits\tERROR:\tcol==0"
                 << "You must not have pixelFastSim in your chain"
                 << "will return with no action taken" << endm;
       return;
@@ -136,13 +139,13 @@ void StiPixelHitLoader::loadHits(StEvent *source,
             StPxlSensorHitCollection *PxlSensorHitCollection = PxlLadderHitCollection->sensor(l);
             StSPtrVecPxlHit &vec = PxlSensorHitCollection->hits();
 
-            LOG_DEBUG << "StiPixelHitLoader - collection size: " << vec.size() << endm;
+            LOG_DEBUG << "StiPxlHitLoader - collection size: " << vec.size() << endm;
 
             for (unsigned int jj = 0; jj < vec.size(); jj++) {
                StPxlHit *pxlH = vec[jj];
 
                if (!pxlH)
-                  throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL hit in container");
+                  throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL hit in container");
 
                if (pxlH->detector() != kPxlId) continue;
 
@@ -165,7 +168,7 @@ void StiPixelHitLoader::loadHits(StEvent *source,
                   detector = _detector->getDetector(LAY, LAD);
 
                   if (!detector)
-                     throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
+                     throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
 
                   LOG_DEBUG << "add hit to detector:\t" << detector->getName() << endm;
                   double angle     = detector->getPlacement()->getNormalRefAngle();
@@ -181,7 +184,7 @@ void StiPixelHitLoader::loadHits(StEvent *source,
 
                   StiHit *stiHit = _hitFactory->getInstance();
 
-                  if (!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
+                  if (!stiHit) throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- stiHit==0");
 
                   stiHit->reset();
 
@@ -201,6 +204,6 @@ void StiPixelHitLoader::loadHits(StEvent *source,
       }
    }
 
-   LOG_INFO << "StiPixelHitLoader:loadHits -I- Loaded " << nHit << " pixel hits." << endm;
+   LOG_INFO << "StiPxlHitLoader:loadHits -I- Loaded " << nHit << " pixel hits." << endm;
 }
 

@@ -1,6 +1,6 @@
 /**
- * @file StiPixelIsActiveFunctor.h
- * @class StiPixelIsActiveFunctor
+ * @file StiPxlIsActiveFunctor.h
+ * @class StiPxlIsActiveFunctor
  * @brief function object for determine a Pixel padrow's active regions
  *
  * @author Ben Norman, Kent State University
@@ -12,11 +12,11 @@
 
 #include "Sti/StiIsActiveFunctor.h"
 
-class StiPixelIsActiveFunctor : public StiIsActiveFunctor
+class StiPxlIsActiveFunctor : public StiIsActiveFunctor
 {
 public:
-   StiPixelIsActiveFunctor();
-   virtual ~StiPixelIsActiveFunctor();
+   StiPxlIsActiveFunctor();
+   virtual ~StiPxlIsActiveFunctor();
    virtual bool operator()(double dYlocal, double dZlocal) const;
 
 protected:

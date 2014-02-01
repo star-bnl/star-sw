@@ -1,14 +1,14 @@
-#ifndef StiPixelTrackingParameters_h
-#define StiPixelTrackingParameters_h
+#ifndef StiPxlTrackingParameters_h
+#define StiPxlTrackingParameters_h
 #include "Sti/StiTrackingParameters.h"
-class StiPixelTrackingParameters : public StiTrackingParameters {
+class StiPxlTrackingParameters : public StiTrackingParameters {
  public:
-  static StiPixelTrackingParameters* 	instance();
+  static StiPxlTrackingParameters* 	instance();
  protected:
-  StiPixelTrackingParameters(St_TrackingParameters *table=0) : StiTrackingParameters(table) {}
-  virtual ~StiPixelTrackingParameters() {fgInstance = 0;}
+  StiPxlTrackingParameters(St_TrackingParameters *table=0) : StiTrackingParameters(table) {}
+  virtual ~StiPxlTrackingParameters() {fgInstance = 0;}
  private:
-  static StiPixelTrackingParameters* fgInstance;
-  ClassDef(StiPixelTrackingParameters,1) //C++ TChair for PixelTrackingParameters table class
+  static StiPxlTrackingParameters* fgInstance;
+  ClassDef(StiPxlTrackingParameters,1) //C++ TChair for PixelTrackingParameters table class
 };
 #endif

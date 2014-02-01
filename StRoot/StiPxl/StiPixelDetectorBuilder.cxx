@@ -1,9 +1,12 @@
 // 12/12/2012 : modification of the builder to take into account the new geometry path names
 // backward compatibility with upgr15 geometry is lost
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.1 2014/02/01 19:02:45 smirnovd Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.2 2014/02/01 19:04:21 smirnovd Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.2  2014/02/01 19:04:21  smirnovd
+ * Changed class prefix StiPixel to StiPxl to be consistent with STAR convention
+ *
  * Revision 1.1  2014/02/01 19:02:45  smirnovd
  * Renamed StRoot/Hft to StRoot/StiPxl to be consistent with existing convention
  *
@@ -138,12 +141,12 @@
 #include "Sti/StiDetector.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
-#include "StiPixelIsActiveFunctor.h"
+#include "StiPxlIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
-#include "StiPixelDetectorBuilder.h"
-#include "StiPixelIsActiveFunctor.h"
-#include "StDetectorDbMaker/StiPixelHitErrorCalculator.h"
+#include "StiPxlDetectorBuilder.h"
+#include "StiPxlIsActiveFunctor.h"
+#include "StDetectorDbMaker/StiPxlHitErrorCalculator.h"
 #include "tables/St_HitError_Table.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
@@ -151,7 +154,7 @@
 #include "StPxlUtil/StPxlConstants.h"
 
 
-StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active, const string &inputFile)
+StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile)
    : StiDetectorBuilder("Pixel", active, inputFile)
 {
    //Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
@@ -161,10 +164,10 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active, const string &inpu
 
 
 /// Build all detector components of the Pixel detector.
-void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
+void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 {
    char name[50];
-   LOG_INFO << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endm;
+   LOG_INFO << "StiPxlDetectorBuilder::buildDetectors() -I- Started" << endm;
 
    unsigned int nRows = 2;
 
@@ -192,7 +195,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
    for (unsigned int row = 0; row < nRows; row++) {
       pShape = new StiPlanarShape;
 
-      if (!pShape) throw runtime_error("StiPixelDetectorBuilder::buildDetectors() - FATAL - pShape==0||ifcShape==0");
+      if (!pShape) throw runtime_error("StiPxlDetectorBuilder::buildDetectors() - FATAL - pShape==0||ifcShape==0");
 
       sprintf(name, "Pixel/Layer_%d", row);
       pShape->setName(name);
@@ -220,7 +223,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
          StiDetector *pDetector = _detectorFactory->getInstance();
          pDetector->setName(name);
          pDetector->setIsOn(true);
-         pDetector->setIsActive(new StiPixelIsActiveFunctor);
+         pDetector->setIsActive(new StiPxlIsActiveFunctor);
          pDetector->setIsContinuousMedium(true);
          pDetector->setIsDiscreteScatterer(false);
          pDetector->setMaterial(mSiMaterial);
@@ -228,7 +231,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
          pDetector->setGroupId(kPxlId);
          pDetector->setShape(pShape);
          pDetector->setPlacement(pPlacement);
-         pDetector->setHitErrorCalculator(StiPixelHitErrorCalculator::instance());
+         pDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
          pDetector->setElossCalculator(siElossCalculator);
 
          if (sector < 18) {
@@ -251,9 +254,9 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 }
 
 
-void StiPixelDetectorBuilder::useVMCGeometry()
+void StiPxlDetectorBuilder::useVMCGeometry()
 {
-   LOG_INFO << "StiPixelDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endm;
+   LOG_INFO << "StiPxlDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endm;
 
    THashList *PxlRot = new THashList(400, 0);
    // XXX:ds At the moment gStPxlDbMaker is not defined in offline/hft/StRoot/StPxlDbMaker or
@@ -411,7 +414,7 @@ void StiPixelDetectorBuilder::useVMCGeometry()
                StiDetector *p = getDetectorFactory()->getInstance();
 
                if ( !p ) {
-                  LOG_INFO << "StiPixelDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
+                  LOG_INFO << "StiPxlDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
                   return;
                }
 
@@ -421,7 +424,7 @@ void StiPixelDetectorBuilder::useVMCGeometry()
                p->setIsOn(kTRUE);
                //if (ActiveVolume) {
                //LOG_DEBUG << " current node : " << name << " is set active" <<endm;
-               p->setIsActive(new StiPixelIsActiveFunctor);
+               p->setIsActive(new StiPxlIsActiveFunctor);
                //}
                //else {
                //LOG_DEBUG << " current node : " << name << " is set inactive" <<endm;
@@ -439,7 +442,7 @@ void StiPixelDetectorBuilder::useVMCGeometry()
 
                p->setMaterial(mSiMaterial);
                p->setElossCalculator(ElossCalculator);
-               p->setHitErrorCalculator(StiPixelHitErrorCalculator::instance());
+               p->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 
                Int_t ROW    = 0;
                Int_t SECTOR = 0;

@@ -1,15 +1,15 @@
 #include "Stiostream.h"
-#include "StiPixelIsActiveFunctor.h"
+#include "StiPxlIsActiveFunctor.h"
 
-StiPixelIsActiveFunctor::StiPixelIsActiveFunctor()
+StiPxlIsActiveFunctor::StiPxlIsActiveFunctor()
 {
-} // StiPixelIsActiveFunctor
+} // StiPxlIsActiveFunctor
 
-StiPixelIsActiveFunctor::~StiPixelIsActiveFunctor()
+StiPxlIsActiveFunctor::~StiPxlIsActiveFunctor()
 {
-} // ~StiPixelIsActiveFunctor
+} // ~StiPxlIsActiveFunctor
 
-bool StiPixelIsActiveFunctor::operator()(double dYlocal, double dZlocal) const
+bool StiPxlIsActiveFunctor::operator()(double dYlocal, double dZlocal) const
 {
    return true;
    //return false;
