@@ -24,7 +24,7 @@ static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
 static const double kERRFACT     = 3*3;
 //??static const double kFitErrs[5]   ={1.,1. 
 //static const double kFitErrs[5]   ={.2,.2 
-static const double kFitErrs[5]   ={1,1 
+static const double kFitErrs[5]   ={3,3 
                                    ,10./180*M_PI
 				   ,10./180*M_PI
 				   ,kMaxPti};
