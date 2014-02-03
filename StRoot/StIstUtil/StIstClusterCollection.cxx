@@ -1,15 +1,15 @@
 /***************************************************************************
 *
-* $Id: StIstClusterCollection.cxx,v 1.2 2014/01/29 18:25:03 ypwang Exp $
+* $Id: StIstClusterCollection.cxx,v 1.3 2014/02/03 16:12:20 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
-* Description: 
-* See header file. 
+* Description:
+* See header file.
 ****************************************************************************
 *
 * $Log: StIstClusterCollection.cxx,v $
-* Revision 1.2  2014/01/29 18:25:03  ypwang
+* Revision 1.3  2014/02/03 16:12:20  ypwang
 * updating scripts
 *
 *
@@ -22,12 +22,55 @@
 #include "StIstCluster.h"
 #include "StIstClusterCollection.h"
 
-//deconstructor
-StIstClusterCollection::~StIstClusterCollection() {/* no op */}
+//constructors
+StIstClusterCollection::StIstClusterCollection( unsigned char ladder ) : StObject(), mLadder( ladder )
+{
+   /* nothing to do */
+};
 
-void StIstClusterCollection::Clear( Option_t *opt ){
-    // clear the vector
-    mClusterVec.clear();
+//deconstructor
+StIstClusterCollection::~StIstClusterCollection()
+{
+   //free memory and clear the vector
+   std::vector< StIstCluster * >::iterator vecIter;
+   for ( vecIter = mClusterVec.begin(); vecIter != mClusterVec.end(); ++vecIter ) {
+      if (*vecIter != NULL) {
+         delete *vecIter;
+         *vecIter = NULL;
+      }
+   }
+   mClusterVec.clear();
 }
+
+void StIstClusterCollection::Clear( Option_t *opt )
+{
+   // clear the vector
+   mClusterVec.clear();
+}
+
+vector<StIstCluster *> &StIstClusterCollection::getClusterVec()
+{
+   return mClusterVec;
+};
+
+const vector<StIstCluster *> &StIstClusterCollection::getClusterVec() const
+{
+   return mClusterVec;
+};
+
+size_t StIstClusterCollection::getNumClusters() const
+{
+   return mClusterVec.size();
+};
+
+void StIstClusterCollection::setLadder( unsigned char ladder )
+{
+   mLadder = ladder;
+};
+
+unsigned char StIstClusterCollection::getLadder() const
+{
+   return mLadder;
+};
 
 ClassImp(StIstClusterCollection);

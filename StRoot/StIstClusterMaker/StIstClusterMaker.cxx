@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.2 2014/01/29 18:25:01 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.3 2014/02/03 16:12:19 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,7 +9,7 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
-* Revision 1.2  2014/01/29 18:25:01  ypwang
+* Revision 1.3  2014/02/03 16:12:19  ypwang
 * updating scripts
 *
 *
@@ -33,19 +33,14 @@
 
 #include "tables/St_istControl_Table.h"
 
-void StIstClusterMaker::Clear(Option_t *opts)
-{
-  // no op
-};
-
 StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mClusterAlgoPtr(0), mTimeBin(-1), mSplitCluster(1)
 {
-  // no op
+  /* nothing to do */
 };
 
 StIstClusterMaker::~StIstClusterMaker()
 {
-  // no op
+  /* nothing to do */
 };
 
 Int_t StIstClusterMaker::Make()

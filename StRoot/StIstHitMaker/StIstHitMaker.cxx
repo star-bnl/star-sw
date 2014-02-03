@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.2 2014/01/29 18:25:02 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.3 2014/02/03 16:12:19 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,7 +9,7 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
-* Revision 1.2  2014/01/29 18:25:02  ypwang
+* Revision 1.3  2014/02/03 16:12:19  ypwang
 * updating scripts
 *
 *
@@ -56,6 +56,25 @@ void StIstHitMaker::Clear(Option_t *opts)
 Int_t StIstHitMaker::Make()
 {
     Int_t ierr = kStOk;
+
+    //obtain hit collection
+    StEvent* eventPtr=0;
+    eventPtr= (StEvent*)GetInputDS("StEvent");
+
+    istHitCollection = NULL;
+    if(eventPtr) {
+       istHitCollection = eventPtr->istHitCollection();
+    } else {
+       eventPtr=new StEvent();
+       AddData(eventPtr); 
+       istHitCollection = eventPtr->istHitCollection();
+    }
+    
+    if(!istHitCollection) {
+       istHitCollection = new StIstHitCollection();
+       eventPtr->setIstHitCollection(istHitCollection);
+       LOG_DEBUG <<"StIstHitMaker::Make() has added a non existing StIstHitCollection()"<<endm;
+    }
 
     //obtain raw hits or clusters info.
     TObjectSet* istDataSet = (TObjectSet*)GetDataSet("istRawHitAndCluster");
@@ -137,24 +156,6 @@ Int_t StIstHitMaker::Make()
 
 Int_t StIstHitMaker::Init() {
     Int_t ierr = kStOk;
-
-    StEvent* eventPtr=0;
-    eventPtr= (StEvent*)GetInputDS("StEvent");
-
-    istHitCollection = NULL;
-    if(eventPtr) {
-       istHitCollection = eventPtr->istHitCollection();
-    } else {
-       eventPtr=new StEvent();
-       AddData(eventPtr); 
-       istHitCollection = eventPtr->istHitCollection();
-    }
-    
-    if(!istHitCollection) {
-       istHitCollection = new StIstHitCollection();
-       eventPtr->setIstHitCollection(istHitCollection);
-       LOG_DEBUG <<"StIstHitMaker::Make() has added a non existing StIstHitCollection()"<<endm;
-    }
 
     mIstDbMaker = (StIstDbMaker*)GetMaker("istDb");
 
