@@ -137,7 +137,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   //////////////////////
   for ( int index=0; index<mAdcHist; index++ ) {
     sprintf( buffer, "ADC_Vs_Channel_Ladder_%d", index+1 );
-    sprintf( buffer2, "ADC Vs. Channel ID, Ladder: %d", index+1 );
+    sprintf( buffer2, "IST - ADC vs Channel Id, Ladder: %d", index+1 );
     
     hAdcContents.adcArray[index] = new TH2F(buffer, buffer2, 48, 1, ChPerLadder+1, nBins, ADCMin, ADCMax); //48*50 bins
     hAdcContents.adcArray[index]->GetXaxis()->SetTitle("Channel Index");
@@ -150,7 +150,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   /////////////////////
   for ( int index=0; index<mMultHist; index++ ) {
     sprintf( buffer, "HitMult_Ladder_%d", index+1 );
-    sprintf( buffer2, "Hit Multiplicity per Event, Ladder: %d", index+1 );
+    sprintf( buffer2, "IST - Hit Multiplicity, Ladder: %d", index+1 );
 
     hMultContents.multArray[index] = new TH1F(buffer, buffer2, nBins, 0, ChPerLadder); // 50 bins
     hMultContents.multArray[index]->GetXaxis()->SetTitle("Number of Hits");
@@ -162,7 +162,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   /////////////////////
   for ( int index=0; index<mHitMapHist; index++ ) {
     sprintf( buffer, "HitMap_Ladder_%d", index+1 );
-    sprintf( buffer2, "Hit Map (density) per Event, Ladder: %d", index+1 );
+    sprintf( buffer2, "IST - Hit Map (density), Ladder: %d", index+1 );
 
     hHitMapContents.hitMapArray[index] = new TH2F(buffer, buffer2, numRow, 1, numRow+1, numColumn*numSensor, 1, numColumn*numSensor+1); //64*72 bins
     hHitMapContents.hitMapArray[index]->GetXaxis()->SetTitle("Row Index (#phi)");
@@ -174,7 +174,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   ////////////////////
   for ( int index=0; index<mTbVsAdcHist; index++ ) {
     sprintf( buffer, "ADC_Vs_Tb_Ladder_%d", index+1 );
-    sprintf( buffer2, "ADC Vs. Timebin, Ladder: %d", index+1 );
+    sprintf( buffer2, "IST - ADC vs Timebin, Ladder: %d", index+1 );
 
     hTbVsAdcContents.tbVsAdcArray[index] = new TH2F(buffer, buffer2, numTimeBin, 0, numTimeBin, nBins, ADCMin, ADCMax); //9*50 bins
     hTbVsAdcContents.tbVsAdcArray[index]->GetXaxis()->SetTitle("Time Bin Index");
@@ -189,27 +189,27 @@ void istBuilder::initialize(int argc, char *argv[]) {
   }
 
   ///////////////////
-  hEventSumContents.hMeanPed = new TH1F("MeanPeds", "Mean Pedestal Values", nBins*2, PedMin, PedMax); //100 bins
+  hEventSumContents.hMeanPed = new TH1F("MeanPeds", "IST - <Mean Pedestal>", nBins*2, PedMin, PedMax); //100 bins
   hEventSumContents.hMeanPed->GetXaxis()->SetTitle("Mean Pedestal [ADC counts]");
   hEventSumContents.hMeanPed->SetFillColor(kYellow-9);
   hEventSumContents.hMeanPed->SetStats(true);
 
-  hEventSumContents.hMeanRMS = new TH1F("MeanRMS", "Mean Pedestal RMS", nBins*2, SigMin, SigMax); //100 bins
+  hEventSumContents.hMeanRMS = new TH1F("MeanRMS", "IST - <RMS Pedestal>", nBins*2, SigMin, SigMax); //100 bins
   hEventSumContents.hMeanRMS->GetXaxis()->SetTitle("RMS pedestal [ADC counts]");
   hEventSumContents.hMeanRMS->SetFillColor(kYellow-9);
   hEventSumContents.hMeanRMS->SetStats(true);
 
-  hEventSumContents.hSumTB = new TH1F("NumberOfTB", "Number of Time Bins", nBinsTB, 0, TBMax); //15 bins
+  hEventSumContents.hSumTB = new TH1F("NumberOfTB", "IST - Number of Time Bins", nBinsTB, 0, TBMax); //15 bins
   hEventSumContents.hSumTB->SetFillColor(kYellow-9);
   hEventSumContents.hSumTB->SetStats(true);
   hEventSumContents.hSumTB->GetXaxis()->SetTitle("No. of Time Bin");
 
-  hEventSumContents.hMaxTimeBin = new TH1F("MaxTimeBin", "Max ADC Time Bin", numTimeBin, 0, numTimeBin); //9 bins
+  hEventSumContents.hMaxTimeBin = new TH1F("MaxTimeBin", "IST - Max ADC Time Bin", numTimeBin, 0, numTimeBin); //9 bins
   hEventSumContents.hMaxTimeBin->SetFillColor(kYellow-9);
   hEventSumContents.hMaxTimeBin->SetStats(true);
   hEventSumContents.hMaxTimeBin->GetXaxis()->SetTitle("Time Bin Index");
 
-  hEventSumContents.hSumBad = new TH1F("NumberOfGoodChannelsPerAPV", "Number of good channels per APV", totAPV, 0, totAPV); //864 bins
+  hEventSumContents.hSumBad = new TH1F("NumberOfGoodChannelsPerAPV", "IST - Good Channels per APV", totAPV, 0, totAPV); //864 bins
   hEventSumContents.hSumBad->SetNdivisions(-numLadder,"X");
   hEventSumContents.hSumBad->SetFillColor(kYellow-9);
   hEventSumContents.hSumBad->GetXaxis()->SetTitle("APV Index");
@@ -220,17 +220,17 @@ void istBuilder::initialize(int argc, char *argv[]) {
     hEventSumContents.hSumBad->GetXaxis()->SetBinLabel(iLad*ApvPerLadder+ApvPerLadder/2,buffer);
   }
 
-  hEventSumContents.hApvCorpt = new TH1F("VisibleAPV", "Frequency of visible APVs per event", nBins*2, 0, totAPV+1); //100 bins
+  hEventSumContents.hApvCorpt = new TH1F("VisibleAPV", "IST - Visible APVs Frequency", nBins*2, 0, totAPV+1); //100 bins
   hEventSumContents.hApvCorpt->GetXaxis()->SetTitle("Number of visible APVs");
   hEventSumContents.hApvCorpt->SetFillColor(kYellow-9);
   hEventSumContents.hApvCorpt->SetStats(true);
 
-  hEventSumContents.hEventSize = new TH1F("ISTEventSize", "IST Event Size", nBins, 0, 6000); //50 bins
+  hEventSumContents.hEventSize = new TH1F("ISTEventSize", "IST - Event Size", nBins, 0, 6000); //50 bins
   hEventSumContents.hEventSize->GetXaxis()->SetTitle("Unpacked Event size [kB]");
   hEventSumContents.hEventSize->SetFillColor(kYellow-9);
   hEventSumContents.hEventSize->SetStats(true);
 
-  hEventSumContents.hMIPvsSensor = new TH1F("MIPvsSensor", "MIP MPV of Sensors", totSensor, 1, totSensor+1); //144 bins
+  hEventSumContents.hMIPvsSensor = new TH1F("MIPvsSensor", "IST - MPV vs Sensor Id", totSensor, 1, totSensor+1); //144 bins
   hEventSumContents.hMIPvsSensor->GetXaxis()->SetTitle("Sensor Index");
   hEventSumContents.hMIPvsSensor->GetXaxis()->SetTitle("<MIP> [ADC Counts]");
   hEventSumContents.hMIPvsSensor->SetFillColor(kYellow-9);
@@ -239,7 +239,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   ///////////////////
   for ( int index=0; index<mMipHist; index++ ) {
     sprintf( buffer, "MIP_Sensor_%d", index+1 );
-    sprintf( buffer2,"MipPerSensor, Ladder %d Sensor %d", index/6+1, index%6+1 );
+    sprintf( buffer2,"IST - MipPerSensor, Ladder %d Sensor %d", index/6+1, index%6+1 );
 
     hMipContents.mipArray[index] = new TH1F(buffer, buffer2, nBins*2, 0, 4096); //100 bins
     hMipContents.mipArray[index]->GetXaxis()->SetTitle("Pedestal Subtracted ADC [ADC Counts]");
@@ -248,7 +248,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   }
 
   //////////////////
-  hSumContents.hHitMap = new TH2F("HitMapOfIST", "Hit map (density) of IST layer", numRow*numLadder, 1, numRow*numLadder+1, numColumn*numSensor, 1, numColumn*numSensor+1);//1536*72 bins
+  hSumContents.hHitMap = new TH2F("HitMapOfIST", "IST - Hit map (density)", numRow*numLadder, 1, numRow*numLadder+1, numColumn*numSensor, 1, numColumn*numSensor+1);//1536*72 bins
   hSumContents.hHitMap->GetXaxis()->SetNdivisions(-numLadder, false);
   hSumContents.hHitMap->GetYaxis()->SetNdivisions(-numSensor, false);
   hSumContents.hHitMap->SetStats(false);
@@ -256,7 +256,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   hSumContents.hHitMap->GetYaxis()->SetTitle("Column Index in Z");
   hSumContents.hHitMap->SetLabelSize(0.02);
 
-  hSumContents.hMultVsLadder = new TH2F("HitMultVsLadder", "Hit multiplicity of each ladder", numLadder, 1, numLadder+1, 72, 0, ChPerLadder);//24*72 bins
+  hSumContents.hMultVsLadder = new TH2F("HitMultVsLadder", "IST - Hit Multiplicity vs Ladder Id", numLadder, 1, numLadder+1, 72, 0, ChPerLadder);//24*72 bins
   hSumContents.hMultVsLadder->GetXaxis()->SetNdivisions(-numLadder, false);
   hSumContents.hMultVsLadder->SetStats(false);
   hSumContents.hMultVsLadder->GetXaxis()->SetTitle("Ladder Index");
@@ -267,20 +267,20 @@ void istBuilder::initialize(int argc, char *argv[]) {
     hSumContents.hMultVsLadder->GetXaxis()->SetBinLabel(iLad+1,buffer);
   }
 
-  hSumContents.hSumPed = new TH2F("PedestalPerChannel", "Pedestal per Channel", nBinsCh, 1, totCh+1, nBins, PedMin, PedMax); //864*50 bins
+  hSumContents.hSumPed = new TH2F("PedestalPerChannel", "IST - Pedestal vs Channel", nBinsCh, 1, totCh+1, nBins, PedMin, PedMax); //864*50 bins
   hSumContents.hSumPed->GetXaxis()->SetNdivisions(-numLadder,false);
   hSumContents.hSumPed->SetStats(false);
   hSumContents.hSumPed->GetXaxis()->SetTitle("Channel Index");
   hSumContents.hSumPed->GetYaxis()->SetTitle("Mean Pedestal [ADC counts]");
   hSumContents.hSumPed->GetYaxis()->SetTitleOffset(1.1);
 
-  hSumContents.hSumSig = new TH2F("PedestalRmsPerChannel", "Pedestal RMS per Channel", nBinsCh, 1, totCh+1, nBins, SigMin, SigMax); //864*50 bins
+  hSumContents.hSumSig = new TH2F("PedestalRmsPerChannel", "IST - RMS vs Channel", nBinsCh, 1, totCh+1, nBins, SigMin, SigMax); //864*50 bins
   hSumContents.hSumSig->GetXaxis()->SetNdivisions(-numLadder,false);
   hSumContents.hSumSig->SetStats(false);
   hSumContents.hSumSig->GetXaxis()->SetTitle("Channel Index");
   hSumContents.hSumSig->GetYaxis()->SetTitle("Pedestal RMS [ADC counts]");
 
-  hSumContents.hCommonModeNoise = new TH2F("CommonModeNoisePerAPV", "Common Mode Noise per APV", nBinsAPV, 1, totAPV+1, nBins, CmnMin, CmnMax);//864*50 bins
+  hSumContents.hCommonModeNoise = new TH2F("CommonModeNoisePerAPV", "IST - Common Mode Noise vs APV", nBinsAPV, 1, totAPV+1, nBins, CmnMin, CmnMax);//864*50 bins
   hSumContents.hCommonModeNoise->GetXaxis()->SetNdivisions(-numLadder, false);
   hSumContents.hCommonModeNoise->SetStats(false);
   hSumContents.hCommonModeNoise->GetXaxis()->SetTitle("APV Index");
