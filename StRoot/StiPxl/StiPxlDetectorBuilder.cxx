@@ -1,9 +1,12 @@
 // 12/12/2012 : modification of the builder to take into account the new geometry path names
 // backward compatibility with upgr15 geometry is lost
 /*
- * $Id: StiPxlDetectorBuilder.cxx,v 1.3 2014/02/01 19:23:29 smirnovd Exp $
+ * $Id: StiPxlDetectorBuilder.cxx,v 1.4 2014/02/04 16:56:38 smirnovd Exp $
  *
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.4  2014/02/04 16:56:38  smirnovd
+ * Decreased indentation by one level
+ *
  * Revision 1.3  2014/02/01 19:23:29  smirnovd
  * Use defined constants
  *
@@ -338,156 +341,157 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
    for (UInt_t ii = 0; ii < kNumberOfPxlSectors; ++ii) {
       for (UInt_t jj = 0; jj < kNumberOfPxlLaddersPerSector; ++jj) {
-         for (UInt_t kk = 0; kk < kNumberOfPxlSensorsPerLadder; kk++) {
-            if (ii == 1 || ii == 3 || ii == 6) {
-               //for run 13, only sector 2,4,7
-               int matPix = 0;
-               matPix = (ii) * 40 + (jj) * 10 + (kk + 1);
-               LOG_DEBUG << " ii/jj/kk/matPix : " << ii << " " << " " << jj << " " << kk << " " << matPix << endm;
+         for (UInt_t kk = 0; kk < kNumberOfPxlSensorsPerLadder; kk++)
+         {
+            if (ii != 1 && ii != 3 && ii != 6) continue;
 
-               if (kk != 0) continue;
+            //for run 13, only sector 2,4,7
+            int matPix = 0;
+            matPix = (ii) * 40 + (jj) * 10 + (kk + 1);
+            LOG_DEBUG << " ii/jj/kk/matPix : " << ii << " " << " " << jj << " " << kk << " " << matPix << endm;
 
-               //we place the ladder as a whole
+            if (kk != 0) continue;
+
+            //we place the ladder as a whole
 #if 0
-               TString path(PxlVolumes[7].path);
+            TString path(PxlVolumes[7].path);
 
-               //LOG_DEBUG << " path : " << path << endm;
-               if (! _TpcRefSys_1) path.ReplaceAll("/TpcRefSys_1", "");
+            //LOG_DEBUG << " path : " << path << endm;
+            if (! _TpcRefSys_1) path.ReplaceAll("/TpcRefSys_1", "");
 
-               gGeoManager->cd(path); // retrieve info of PLAC volume
-               TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-               // Extract volume geometry for this node
-               TGeoBBox *box = (TGeoBBox *) nodeT->GetVolume()->GetShape();
+            gGeoManager->cd(path); // retrieve info of PLAC volume
+            TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+            // Extract volume geometry for this node
+            TGeoBBox *box = (TGeoBBox *) nodeT->GetVolume()->GetShape();
 #else
-               TGeoVolume *vol = gGeoManager->GetVolume("PLAC");
+            TGeoVolume *vol = gGeoManager->GetVolume("PLAC");
 
-               if (! vol) continue;
+            if (! vol) continue;
 
-               TGeoBBox *box = (TGeoBBox *) vol->GetShape();
+            TGeoBBox *box = (TGeoBBox *) vol->GetShape();
 #endif
-               char name[50];
-               sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", ii + 1, jj + 1, kk + 1);
-               LOG_DEBUG << " weigh/daughters/Material/A/Z : " << vol->Weight() << " "
-                         << vol->GetNdaughters() << " " << vol->GetMaterial()->GetName() << " "
-                         << vol->GetMaterial()->GetA() << " " << vol->GetMaterial()->GetZ() << endm;
-               LOG_DEBUG << " DZ/DY/DX : " << box->GetDZ()
-                         << " " << box->GetDY()
-                         << " " << box->GetDX()
-                         << " " << endm;
+            char name[50];
+            sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", ii + 1, jj + 1, kk + 1);
+            LOG_DEBUG << " weigh/daughters/Material/A/Z : " << vol->Weight() << " "
+                      << vol->GetNdaughters() << " " << vol->GetMaterial()->GetName() << " "
+                      << vol->GetMaterial()->GetA() << " " << vol->GetMaterial()->GetZ() << endm;
+            LOG_DEBUG << " DZ/DY/DX : " << box->GetDZ()
+                      << " " << box->GetDY()
+                      << " " << box->GetDX()
+                      << " " << endm;
 
-               //PLAC shape : DX =.961cm ; DY = .002cm ; DZ = .94 cm
+            //PLAC shape : DX =.961cm ; DY = .002cm ; DZ = .94 cm
 
-               StiShape *sh  = new StiPlanarShape(name,
-                                                  10 * box->GetDZ(),
-                                                  box->GetDY(),
-                                                  box->GetDX());
+            StiShape *sh  = new StiPlanarShape(name,
+                                               10 * box->GetDZ(),
+                                               box->GetDY(),
+                                               box->GetDX());
 
-               add(sh);
-               TGeoHMatrix *combP = (TGeoHMatrix *)PxlRot->FindObject(Form("R%03i", matPix));
-               assert(combP);
-               combP->Print();
+            add(sh);
+            TGeoHMatrix *combP = (TGeoHMatrix *)PxlRot->FindObject(Form("R%03i", matPix));
+            assert(combP);
+            combP->Print();
 
-               Double_t     *xyz    = combP->GetTranslation();
-               Double_t     *rot    = combP->GetRotationMatrix();
-               StThreeVectorD centerVector(xyz[0], xyz[1], xyz[2]);
-               StThreeVectorD normalVector(rot[1], rot[4], rot[7]);
+            Double_t     *xyz    = combP->GetTranslation();
+            Double_t     *rot    = combP->GetRotationMatrix();
+            StThreeVectorD centerVector(xyz[0], xyz[1], xyz[2]);
+            StThreeVectorD normalVector(rot[1], rot[4], rot[7]);
 
-               Double_t prod = centerVector * normalVector;
+            Double_t prod = centerVector * normalVector;
 
-               if (prod < 0) normalVector *= -1;
+            if (prod < 0) normalVector *= -1;
 
-               // Normalize normal vector, just in case....
+            // Normalize normal vector, just in case....
 
-               normalVector /= normalVector.magnitude();
+            normalVector /= normalVector.magnitude();
 
-               // Volume positioning
-               StiPlacement *pPlacement = new StiPlacement;
-               Double_t phi  = centerVector.phi();
-               Double_t phiD = normalVector.phi();
-               Double_t r    = centerVector.perp();
-               pPlacement->setZcenter(0);
-               pPlacement->setLayerRadius(r);
+            // Volume positioning
+            StiPlacement *pPlacement = new StiPlacement;
+            Double_t phi  = centerVector.phi();
+            Double_t phiD = normalVector.phi();
+            Double_t r    = centerVector.perp();
+            pPlacement->setZcenter(0);
+            pPlacement->setLayerRadius(r);
 
-               pPlacement->setLayerAngle(phi);
-               pPlacement->setRegion(StiPlacement::kMidRapidity);
-               pPlacement->setNormalRep(phiD, r * TMath::Cos(phi - phiD), r * TMath::Sin(phi - phiD));
+            pPlacement->setLayerAngle(phi);
+            pPlacement->setRegion(StiPlacement::kMidRapidity);
+            pPlacement->setNormalRep(phiD, r * TMath::Cos(phi - phiD), r * TMath::Sin(phi - phiD));
 
-               //Build final detector object
+            //Build final detector object
 
-               StiDetector *p = getDetectorFactory()->getInstance();
+            StiDetector *p = getDetectorFactory()->getInstance();
 
-               if ( !p ) {
-                  LOG_INFO << "StiPxlDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
-                  return;
-               }
-
-               //char name[50];
-               //sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", ii,jj,kk);
-               p->setName(name);
-               p->setIsOn(kTRUE);
-               //if (ActiveVolume) {
-               //LOG_DEBUG << " current node : " << name << " is set active" <<endm;
-               p->setIsActive(new StiPxlIsActiveFunctor);
-               //}
-               //else {
-               //LOG_DEBUG << " current node : " << name << " is set inactive" <<endm;
-               //p->setIsActive(new StiNeverActiveFunctor);
-               //}
-               //if(nameP.Contains("PXSI")) {layer=layer+10;}
-
-               p->setIsContinuousMedium(false);
-               p->setIsDiscreteScatterer(true);
-               p->setShape(sh);
-               p->setPlacement(pPlacement);
-               p->setGas(GetCurrentDetectorBuilder()->getGasMat());
-
-               if (!p->getGas()) LOG_INFO << "gas not there!" << endm;
-
-               p->setMaterial(mSiMaterial);
-               p->setElossCalculator(ElossCalculator);
-               p->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
-
-               Int_t ROW    = 0;
-               Int_t SECTOR = 0;
-
-               /* numbering is :
-                  ladder = 0-1- ...9 for inner layer --> ROW =0
-                  ladder = 0-1-2 for sector 0 of outer layer, then 3-4-5 for the second sector until 29 for the last sectro
-                  ladder=4 is the inner ladder
-               */
-               // update 05-15 : inner ladder is ladder 1
-               if (jj == 0) {
-                  ROW = 0 ;
-                  SECTOR = ii;
-               }
-               else {
-                  ROW = 1;
-                  SECTOR = (ii) * 3 + (jj - 1);
-               }
-
-               p->setKey(1, ROW);
-               p->setKey(2, SECTOR);
-               add(ROW, SECTOR, p);
-
-               // Whole bunch of debugging information
-
-               Float_t rad2deg = 180.0 / 3.1415927;
-               LOG_DEBUG << "===>NEW:PIXEL:pDetector:Name               = " << p->getName()                               << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pDetector:sector             = " << ii + 1                                       << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pDetector:Ladder             = " << jj + 1                                       << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pDetector:sensor             = " << kk + 1                                       << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pDetector:row/sector (ITTF)  = " << ROW << " / " << SECTOR                      << endm;
-               LOG_DEBUG << "===>NEW:PIXEL:pDetector:Active?            = " << p->isActive()                              << endm;
+            if ( !p ) {
+               LOG_INFO << "StiPxlDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
+               return;
             }
+
+            //char name[50];
+            //sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", ii,jj,kk);
+            p->setName(name);
+            p->setIsOn(kTRUE);
+            //if (ActiveVolume) {
+            //LOG_DEBUG << " current node : " << name << " is set active" <<endm;
+            p->setIsActive(new StiPxlIsActiveFunctor);
+            //}
+            //else {
+            //LOG_DEBUG << " current node : " << name << " is set inactive" <<endm;
+            //p->setIsActive(new StiNeverActiveFunctor);
+            //}
+            //if(nameP.Contains("PXSI")) {layer=layer+10;}
+
+            p->setIsContinuousMedium(false);
+            p->setIsDiscreteScatterer(true);
+            p->setShape(sh);
+            p->setPlacement(pPlacement);
+            p->setGas(GetCurrentDetectorBuilder()->getGasMat());
+
+            if (!p->getGas()) LOG_INFO << "gas not there!" << endm;
+
+            p->setMaterial(mSiMaterial);
+            p->setElossCalculator(ElossCalculator);
+            p->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
+
+            Int_t ROW    = 0;
+            Int_t SECTOR = 0;
+
+            /* numbering is :
+               ladder = 0-1- ...9 for inner layer --> ROW =0
+               ladder = 0-1-2 for sector 0 of outer layer, then 3-4-5 for the second sector until 29 for the last sectro
+               ladder=4 is the inner ladder
+            */
+            // update 05-15 : inner ladder is ladder 1
+            if (jj == 0) {
+               ROW = 0 ;
+               SECTOR = ii;
+            }
+            else {
+               ROW = 1;
+               SECTOR = (ii) * 3 + (jj - 1);
+            }
+
+            p->setKey(1, ROW);
+            p->setKey(2, SECTOR);
+            add(ROW, SECTOR, p);
+
+            // Whole bunch of debugging information
+
+            Float_t rad2deg = 180.0 / 3.1415927;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Name               = " << p->getName()                               << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:sector             = " << ii + 1                                       << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Ladder             = " << jj + 1                                       << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:sensor             = " << kk + 1                                       << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:row/sector (ITTF)  = " << ROW << " / " << SECTOR                      << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Active?            = " << p->isActive()                              << endm;
          }
       }
    }
