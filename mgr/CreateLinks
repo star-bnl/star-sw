@@ -1,7 +1,7 @@
-#!/bin/csh 
+#!/bin/csh
 
 # This file will be kept up to date per library so we can create the links
-# appropriate for the supported platform and the backward compatible ones. 
+# appropriate for the supported platform and the backward compatible ones.
 # Added comments a MUST (thanks)
 #
 set arg=$#argv
@@ -51,7 +51,7 @@ else
     echo "The base OS support directory, .rh80_gcc32, does not exists"
 endif
 
-# 
+#
 # Redhat 9.0
 #
 if ( -e .rh80_gcc32) then
@@ -105,12 +105,12 @@ foreach arch ( _ _x8664_ )
 	    if ( -e .$refos && ! -e .$Urefos ) then
 	       echo "  Backward compatibility $Urefos -> $refos"
 	       /bin/ln -s .$refos .$Urefos
-	    endif 
+	    endif
 	    if ( -e $refos && ! -e $Urefos ) then
 	       echo "  Backward compatibility $Urefos -> $refos"
 	       /bin/ln -s $refos $Urefos
 	    endif
-        else 
+        else
 	    # expected SL5
 	    foreach ospf ( sl rh )
 	        foreach vers ( 55 56 57 58 59 )
@@ -131,7 +131,7 @@ foreach arch ( _ _x8664_ )
 	    end
         endif
     endif
-    
+
     #+
     # SL64
     #-
@@ -141,7 +141,7 @@ foreach arch ( _ _x8664_ )
         # *** PLACEHOLDER ***
 	foreach ospf ( sl rh )
 	    foreach vers ( 65 )
-		set dir=$ospf$vers$arch"gcc432"
+		set dir=$ospf$vers$arch"gcc447"
 		if ( ! -e .$dir && -e .$refos ) then
 		    echo "  Backward compatibility assumed between $dir -> $refos "
 		    /bin/ln -s .$refos .$dir
@@ -158,8 +158,8 @@ foreach arch ( _ _x8664_ )
 	end
     #else
     #	echo "Could not find anything suitable for $refos in `pwd`"
-    endif    
-    
+    endif
+
 end
 
 
@@ -179,12 +179,12 @@ if ( -e .sl44_gcc346) then
     	/bin/ln -s .sl44_gcc346 .sl45_gcc346
     endif
     if ( ! -e .rh4_gcc346) then
-	# Legacy RH4 
+	# Legacy RH4
 	echo "Backward compatibility assumed between RH4 -> SL404"
     	/bin/ln -s .sl44_gcc346 .rh4_gcc346
     endif
     if ( ! -e .i386_sl4) then
-	# Generic RH4 
+	# Generic RH4
 	echo "Assuming standard SL4 is compatible with default SL44 GCC-346"
     	/bin/ln -s .sl44_gcc346 .i386_sl4
     endif
@@ -227,15 +227,15 @@ if ( -e .sl302_gcc323) then
     if ( ! -e .sl303_gcc323) then
     	echo "Backward compatibility assumed between SL303 -> SL302"
     	/bin/ln -s .sl302_gcc323 .sl303_gcc323
-    endif    
+    endif
     if ( ! -e .sl304_gcc323) then
     	echo "Backward compatibility assumed between SL304 -> SL302"
     	/bin/ln -s .sl302_gcc323 .sl304_gcc323
-    endif    
+    endif
     if ( ! -e .sl305_gcc323) then
     	echo "Backward compatibility assumed between SL305 -> SL302"
     	/bin/ln -s .sl302_gcc323 .sl305_gcc323
-    endif    
+    endif
 
     # Any early SL
     if ( ! -e .rh3_gcc323 ) then
