@@ -1,9 +1,12 @@
 // 12/12/2012 : modification of the builder to take into account the new geometry path names
 // backward compatibility with upgr15 geometry is lost
 /*
- * $Id: StiPxlDetectorBuilder.cxx,v 1.4 2014/02/04 16:56:38 smirnovd Exp $
+ * $Id: StiPxlDetectorBuilder.cxx,v 1.5 2014/02/04 16:56:48 smirnovd Exp $
  *
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.5  2014/02/04 16:56:48  smirnovd
+ * Clean up and improved readability
+ *
  * Revision 1.4  2014/02/04 16:56:38  smirnovd
  * Decreased indentation by one level
  *
@@ -160,16 +163,18 @@
 #include "StPxlUtil/StPxlConstants.h"
 
 
+/**
+ * Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
+ * returns average error once you actually want to do tracking, the results
+ * depend strongly on the numbers below.
+ */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile)
    : StiDetectorBuilder("Pixel", active, inputFile)
 {
-   //Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
-   //returns average error once you actually want to do tracking, the results
-   //depend strongly on the numbers below.
 }
 
 
-/// Build all detector components of the Pixel detector.
+/** Build the pixel detector components. */
 void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 {
    char name[50];
@@ -382,18 +387,16 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
             //PLAC shape : DX =.961cm ; DY = .002cm ; DZ = .94 cm
 
-            StiShape *sh  = new StiPlanarShape(name,
-                                               10 * box->GetDZ(),
-                                               box->GetDY(),
-                                               box->GetDX());
+            StiShape *sh  = new StiPlanarShape(name, 10*box->GetDZ(), box->GetDY(), box->GetDX());
 
             add(sh);
             TGeoHMatrix *combP = (TGeoHMatrix *)PxlRot->FindObject(Form("R%03i", matPix));
             assert(combP);
             combP->Print();
 
-            Double_t     *xyz    = combP->GetTranslation();
-            Double_t     *rot    = combP->GetRotationMatrix();
+            Double_t *xyz = combP->GetTranslation();
+            Double_t *rot = combP->GetRotationMatrix();
+
             StThreeVectorD centerVector(xyz[0], xyz[1], xyz[2]);
             StThreeVectorD normalVector(rot[1], rot[4], rot[7]);
 
@@ -402,7 +405,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             if (prod < 0) normalVector *= -1;
 
             // Normalize normal vector, just in case....
-
             normalVector /= normalVector.magnitude();
 
             // Volume positioning
