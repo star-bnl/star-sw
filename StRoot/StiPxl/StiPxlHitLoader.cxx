@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.1 2014/02/01 19:19:35 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.2 2014/02/04 16:56:48 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.2  2014/02/04 16:56:48  smirnovd
+ * Clean up and improved readability
+ *
  * Revision 1.1  2014/02/01 19:19:35  smirnovd
  * Initial commit: Changed files prefix StiPixel... to StiPxl... according to STAR convention
  *
@@ -63,34 +66,31 @@
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiHit.h"
-//#include "StRnDHit.h"
 #include "StPxlHitCollection.h"
 #include "StPxlHit.h"
-//#include "StRnDHitCollection.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiTrackContainer.h"
 #include "StiPxlHitLoader.h"
 
+
 StiPxlHitLoader::StiPxlHitLoader()
    : StiHitLoader<StEvent, StiDetectorBuilder>("PixelHitLoader")
 {}
 
+
 StiPxlHitLoader::StiPxlHitLoader(StiHitContainer *hitContainer,
-                                     Factory<StiHit> *hitFactory,
-                                     StiDetectorBuilder *detector)
+                                 Factory<StiHit> *hitFactory,
+                                 StiDetectorBuilder *detector)
    : StiHitLoader<StEvent, StiDetectorBuilder>("PixelHitLoader", hitContainer, hitFactory, detector)
 {}
 
-StiPxlHitLoader::~StiPxlHitLoader()
-{}
 
 void StiPxlHitLoader::loadHits(StEvent *source,
                                  Filter<StiTrack> *trackFilter,
                                  Filter<StiHit> *hitFilter)
 {
-
    LOG_INFO << " -I- Started" << endl;
 
    if (!_detector)
@@ -109,93 +109,103 @@ void StiPxlHitLoader::loadHits(StEvent *source,
    }
 
    //Added by Michael Lomnitz (KSU):  Loops over Sector/Ladder/Sensor to obtain the whole hit collection
-   StiDetector *detector = 0;
    int nHit = 0;
 
-   StPxlHitCollection *PxlHitCollection = source->pxlHitCollection();
+   StPxlHitCollection *pxlHitCollection = source->pxlHitCollection();
 
-   if (! PxlHitCollection) {cout << "No PXL hit collection" << endl; return;}
+   if ( !pxlHitCollection ) {cout << "No PXL hit collection" << endl; return;}
 
-   UInt_t numberOfSectors = PxlHitCollection->numberOfSectors();
+   UInt_t numberOfSectors = pxlHitCollection->numberOfSectors();
 
-   for (UInt_t i = 0; i < numberOfSectors; i++) {
-      StPxlSectorHitCollection *PxlSectorHitCollection = PxlHitCollection->sector(i);
+   for (UInt_t i = 0; i < numberOfSectors; i++)
+   {
+      StPxlSectorHitCollection *pxlSectorHitCollection = pxlHitCollection->sector(i);
+      if ( !pxlSectorHitCollection ) {cout << "No PXLSector hit collection" << endl; return;}
 
-      if (! PxlSectorHitCollection) {cout << "No PXLSector hit collection" << endl; return;}
+      UInt_t numberOfLadders = pxlSectorHitCollection->numberOfLadders();
 
-      UInt_t numberOfLadders = PxlSectorHitCollection->numberOfLadders();
+      for (UInt_t j = 0; j < numberOfLadders; j++)
+      {
+         StPxlLadderHitCollection *pxlLadderHitCollection = pxlSectorHitCollection->ladder(j);
+         if ( !pxlLadderHitCollection ) {cout << "No PXLLadder hit collection" << endl; return;}
 
-      for (UInt_t j = 0; j < numberOfLadders; j++) {
-         StPxlLadderHitCollection *PxlLadderHitCollection = PxlSectorHitCollection->ladder(j);
+         UInt_t numberOfSensors = pxlLadderHitCollection->numberOfSensors();
 
-         if (! PxlLadderHitCollection) {cout << "No PXLLadder hit collection" << endl; return;}
+         for (UInt_t l = 0; l < numberOfSensors; l++)
+         {
+            StPxlSensorHitCollection *PxlSensorHitCollection = pxlLadderHitCollection->sensor(l);
+            StSPtrVecPxlHit &pxlHits = PxlSensorHitCollection->hits();
 
-         UInt_t numberOfSensors = PxlLadderHitCollection->numberOfSensors();
+            LOG_DEBUG << "StiPxlHitLoader - collection size: " << pxlHits.size() << endm;
 
-         for (UInt_t l = 0; l < numberOfSensors; l++) {
-            StPxlSensorHitCollection *PxlSensorHitCollection = PxlLadderHitCollection->sensor(l);
-            StSPtrVecPxlHit &vec = PxlSensorHitCollection->hits();
+            for (unsigned int iPxlHit = 0; iPxlHit < pxlHits.size(); iPxlHit++)
+            {
+               StPxlHit *pxlHit = pxlHits[iPxlHit];
 
-            LOG_DEBUG << "StiPxlHitLoader - collection size: " << vec.size() << endm;
-
-            for (unsigned int jj = 0; jj < vec.size(); jj++) {
-               StPxlHit *pxlH = vec[jj];
-
-               if (!pxlH)
+               if (!pxlHit)
                   throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL hit in container");
 
-               if (pxlH->detector() != kPxlId) continue;
+               if (pxlHit->detector() != kPxlId) continue;
 
-               if (pxlH->sector() == 2 || pxlH->sector() == 4 || pxlH->sector() == 7) { //olny sectors 4 and 7
-                  int LAY = 0, LAD = 0;
+               // Consider olny sectors 2, 4, and 7
+               if (pxlHit->sector() != 2 && pxlHit->sector() != 4 && pxlHit->sector() != 7) continue;
 
-                  if (pxlH->layer() == 1) {
-                     LAY = 0; //(int)pxlH->layer()-1;
-                     LAD = (int)pxlH->sector() - 1;
-                  }
-                  else {
-                     LAY = 1; //(int)pxlH->layer()-1;
-                     LAD = (((int)pxlH->sector() - 1) * 3 + (int)pxlH->ladder() - 2);
-                  }
+               int LAY = 0, LAD = 0;
 
-                  LOG_DEBUG << " hit sector : " << (int)pxlH->sector() << " ladder : " << (int)pxlH->ladder() << endm;
-                  LOG_DEBUG << " layer : " << LAY << " ladder :  " << LAD << endm;
-                  LOG_DEBUG << "X/Y/Z    : " << pxlH->position().x() << "/" << pxlH->position().y() << "/" << pxlH->position().z() << endm;
-                  LOG_DEBUG << "Xl/Yl/Zl : " << pxlH->localPosition(0) << "/" << pxlH->localPosition(1) << "/" << pxlH->localPosition(2) << endm;
-                  detector = _detector->getDetector(LAY, LAD);
-
-                  if (!detector)
-                     throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
-
-                  LOG_DEBUG << "add hit to detector:\t" << detector->getName() << endm;
-                  double angle     = detector->getPlacement()->getNormalRefAngle();
-                  double radius    = detector->getPlacement()->getNormalRadius();
-                  double zcenter   = detector->getPlacement()->getZcenter();
-                  double halfDepth = detector->getShape()->getHalfDepth();
-                  double halfWidth = detector->getShape()->getHalfWidth();
-                  double thick     = detector->getShape()->getThickness();
-                  LOG_DEBUG << " detector info " << *detector << endm;
-                  LOG_DEBUG << " radius = " << radius << " angle = " << angle << " zCenter = " << zcenter << endm;
-                  LOG_DEBUG << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm;
-                  LOG_DEBUG << " key 1 : " << detector->getKey(1) << " key 2 : " << detector->getKey(2) << endm;
-
-                  StiHit *stiHit = _hitFactory->getInstance();
-
-                  if (!stiHit) throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- stiHit==0");
-
-                  stiHit->reset();
-
-                  stiHit->setGlobal(detector, pxlH,
-                                    pxlH->position().x(), pxlH->position().y(),
-                                    pxlH->position().z(), pxlH->charge());
-
-                  _hitContainer->add(stiHit);
-                  LOG_DEBUG << " nHit = " << nHit << " Sector = " << (int)pxlH->sector() << " Ladder = " << (int)pxlH->ladder() << " x = " << (float)pxlH->position().x() << " y = " << (float)pxlH->position().y() << " z = " << (float)pxlH->position().z() << endm;
-                  LOG_DEBUG << " " << endm;
-
-                  //done loop over hits
-                  nHit++;
+               if (pxlHit->layer() == 1) {
+                  LAY = 0; //(int) pxlHit->layer()-1;
+                  LAD = (int) pxlHit->sector() - 1;
                }
+               else {
+                  LAY = 1; //(int) pxlHit->layer()-1;
+                  LAD = (((int) pxlHit->sector() - 1) * 3 + (int) pxlHit->ladder() - 2);
+               }
+
+               LOG_DEBUG << " hit sector : " << (int) pxlHit->sector() << " ladder : " << (int) pxlHit->ladder() << endm;
+               LOG_DEBUG << " layer : " << LAY << " ladder :  " << LAD << endm;
+               LOG_DEBUG << "X/Y/Z    : " << pxlHit->position().x() << "/" << pxlHit->position().y() << "/" << pxlHit->position().z() << endm;
+               LOG_DEBUG << "Xl/Yl/Zl : " << pxlHit->localPosition(0) << "/" << pxlHit->localPosition(1) << "/" << pxlHit->localPosition(2) << endm;
+
+               StiDetector *detector = _detector->getDetector(LAY, LAD);
+
+               if (!detector)
+                  throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
+
+               LOG_DEBUG << "add hit to detector:\t" << detector->getName() << endm;
+
+               double angle     = detector->getPlacement()->getNormalRefAngle();
+               double radius    = detector->getPlacement()->getNormalRadius();
+               double zcenter   = detector->getPlacement()->getZcenter();
+               double halfDepth = detector->getShape()->getHalfDepth();
+               double halfWidth = detector->getShape()->getHalfWidth();
+               double thick     = detector->getShape()->getThickness();
+
+               LOG_DEBUG << " detector info " << *detector << endm;
+               LOG_DEBUG << " radius = " << radius << " angle = " << angle << " zCenter = " << zcenter << endm;
+               LOG_DEBUG << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm;
+               LOG_DEBUG << " key 1 : " << detector->getKey(1) << " key 2 : " << detector->getKey(2) << endm;
+
+               StiHit *stiHit = _hitFactory->getInstance();
+
+               if (!stiHit) throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- stiHit==0");
+
+               stiHit->reset();
+
+               stiHit->setGlobal(detector, pxlHit,
+                                 pxlHit->position().x(), pxlHit->position().y(),
+                                 pxlHit->position().z(), pxlHit->charge());
+
+               _hitContainer->add(stiHit);
+               LOG_DEBUG << " nHit = " << nHit
+                  << " Sector = " << (int) pxlHit->sector()
+                  << " Ladder = " << (int) pxlHit->ladder()
+                  << " x = " << (float) pxlHit->position().x()
+                  << " y = " << (float) pxlHit->position().y()
+                  << " z = " << (float) pxlHit->position().z() << endm;
+               LOG_DEBUG << " " << endm;
+
+               //done loop over hits
+               nHit++;
             }
          }
       }

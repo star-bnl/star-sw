@@ -1,10 +1,11 @@
-#ifndef StiPxlHitLoader_H
-#define StiPxlHitLoader_H
+#ifndef StiPxlHitLoader_h
+#define StiPxlHitLoader_h
+
 #include "Sti/StiHitLoader.h"
 
 class StEvent;
 class StiDetectorBuilder;
-class StTpcHit;
+
 
 /*! \class StiPxlHitLoader
 StiPxlHitLoader is a concrete class implementing the StiHitLoader abstract
@@ -20,16 +21,8 @@ class StiPxlHitLoader : public StiHitLoader<StEvent, StiDetectorBuilder>
 {
 public:
    StiPxlHitLoader();
-   StiPxlHitLoader(StiHitContainer *hitContainer,
-                     Factory<StiHit> *hitFactory,
-                     StiDetectorBuilder *detector);
-   virtual ~StiPxlHitLoader();
-   virtual void loadHits(StEvent *source,
-                         Filter<StiTrack> *trackFilter,
-                         Filter<StiHit> *hitFilter);
-protected:
-   // temporary hit ptr used to determine whether mc hits from a given event are
-   // already loaded.
+   StiPxlHitLoader(StiHitContainer *hitContainer, Factory<StiHit> *hitFactory, StiDetectorBuilder *detector);
+   virtual void loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter);
 };
 
 #endif
