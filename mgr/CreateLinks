@@ -156,6 +156,8 @@ foreach arch ( _ _x8664_ )
 		endif
 	    end
 	end
+    #else
+    #	echo "Could not find anything suitable for $refos in `pwd`"
     endif    
     
 end
