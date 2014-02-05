@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.3 2014/02/03 16:12:19 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.4 2014/02/05 17:32:46 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,8 +9,8 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
-* Revision 1.3  2014/02/03 16:12:19  ypwang
-* updating scripts
+* Revision 1.4  2014/02/05 17:32:46  ypwang
+* updating script
 *
 *
 ****************************************************************************
@@ -21,18 +21,12 @@
 /*
   relation within STAR frame
   IstOnGlobal = Tpc2Magnet * Ids2Tpc *    Ist2Ids     * Ladder2Ist * Sensor2Ladder * PS
-
   with
-
   Ids2Tpc = IstIdsOnTpc
   Ist2Ids = IstIstOnPst * IstPstOnIds
 
   Naming of roatation matrices in this maker :
-  PG          = Tpc2Global *  GL     *  IPOI * ISOP   *    LI      *      WLL      * PS
-
-  note to self :
-  LI is the IstLadderOnIst
-  WLL is the old IstSensorOnLadder table
+  positionGlobal  = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder * positionOnSensor
 
   numbering
   Id  = 1000 + (ladder-1)*6 + sensor
@@ -59,11 +53,7 @@ ClassImp(StIstDbMaker)
 //_____________________________________________________________________________
 StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mPedNoise(NULL), mGain(NULL), mMapping(NULL)
 {
-}
-//_____________________________________________________________________________
-Int_t StIstDbMaker::Init()
-{
-   return StMaker::Init();
+/* no op */
 }
 //_____________________________________________________________________________
 Int_t StIstDbMaker::InitRun(Int_t runNumber)
@@ -79,25 +69,6 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 
    return kStOK;
 }
-
-//_____________________________________________________________________________
-Int_t StIstDbMaker::Make()
-{
-   LOG_DEBUG << "Make" << endm;
-   return kStOK;
-}
-//_____________________________________________________________________________
-void StIstDbMaker::Clear(const char *)
-{
-   LOG_DEBUG << "Clear" << endm;
-   StMaker::Clear();
-}
-//_____________________________________________________________________________
-Int_t StIstDbMaker::Finish()
-{
-   LOG_DEBUG << "Finish" << endm;
-   return kStOK;
-}
 //_____________________________________________________________________________
 Int_t StIstDbMaker::CalculateSensorsPosition()
 {
@@ -105,101 +76,114 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
    fRotList = new THashList(kIstNumLadders * kIstNumSensorsPerLadder, 0);
    fRotList->SetOwner(kFALSE);
 
-   TGeoHMatrix GL, LI, SD, WG, IPOI , ISOP, DP;
+   TGeoHMatrix ids2Tpc, pst2Ids, ist2Pst, ladder2Ist, sensorGlobal;
 
    //get TPC positionement relative to STAR
    assert(gStTpcDb);
-   const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
+   const TGeoHMatrix &tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
 
-   St_Survey *idsOnTpc          = (St_Survey *) GetDataBase("Geometry/ist/idsOnTpc");         //GL
-   if (! idsOnTpc)          {cout << "idsOnTpc has not been found"  << endl; return 0;}
+   //get IDS positionment relative to TPC
+   St_Survey *st_idsOnTpc          = (St_Survey *) GetDataBase("Geometry/ist/idsOnTpc");       
+   if (!st_idsOnTpc)          {cout << "idsOnTpc has not been found"  << endl; return 0;}
 
-   St_Survey *pstOnIds          = (St_Survey *) GetDataBase("Geometry/ist/pstOnIds");         //IPOI
-   if (! pstOnIds)          {cout << "pstOnIds has not been found"  << endl; return 0;}
+   //get PST positionment relative to IDS
+   St_Survey *st_pstOnIds          = (St_Survey *) GetDataBase("Geometry/ist/pstOnIds");       
+   if (!st_pstOnIds)          {cout << "pstOnIds has not been found"  << endl; return 0;}
 
-   St_Survey *istOnPst          = (St_Survey *) GetDataBase("Geometry/ist/istOnPst");         //ISOP
-   if (! istOnPst)          {cout << "istOnPst has not been found"  << endl; return 0;}
+   //get IST positionment relative to PST
+   St_Survey *st_istOnPst          = (St_Survey *) GetDataBase("Geometry/ist/istOnPst");        
+   if (!st_istOnPst)          {cout << "istOnPst has not been found"  << endl; return 0;}
 
-   St_Survey *istLadderOnIst    = (St_Survey *) GetDataBase("Geometry/ist/istLadderOnIst");   //LI
-   if (! istLadderOnIst)    {cout << "istLadderOnIst has not been found"  << endl; return 0;}
+   //get ladder positionments relative to IST
+   St_Survey *st_istLadderOnIst    = (St_Survey *) GetDataBase("Geometry/ist/istLadderOnIst"); 
+   if (!st_istLadderOnIst)    {cout << "istLadderOnIst has not been found"  << endl; return 0;}
 
-   St_Survey *istSensorOnLadder = (St_Survey *) GetDataBase("Geometry/ist/istSensorOnLadder");//WLL
-   if (! istSensorOnLadder) {cout << "istSensorOnLadder has not been found"  << endl; return 0;}
+   //get sensor positionments relative to ladder
+   St_Survey *st_istSensorOnLadder = (St_Survey *) GetDataBase("Geometry/ist/istSensorOnLadder");
+   if (!st_istSensorOnLadder) {cout << "istSensorOnLadder has not been found"  << endl; return 0;}
 
-   //get these tables
-   Survey_st *IdsOnTpc          = idsOnTpc->GetTable();
-   Survey_st *PstOnIds          = pstOnIds->GetTable();
-   Survey_st *IstOnPst          = istOnPst->GetTable();
-   Survey_st *LaddersOnIst      = istLadderOnIst->GetTable();
-   Survey_st *SensorsOnLadders  = istSensorOnLadder->GetTable();
+   //obtain these tables
+   Survey_st *idsOnTpc          = st_idsOnTpc->GetTable();
+   Survey_st *pstOnIds          = st_pstOnIds->GetTable();
+   Survey_st *istOnPst          = st_istOnPst->GetTable();
+   Survey_st *laddersOnIst      = st_istLadderOnIst->GetTable();
+   Survey_st *sensorsOnLadders  = st_istSensorOnLadder->GetTable();
 
    //get the number of rows of each tables
-   int NoIds                  = idsOnTpc->GetNRows();
-   int NoPst                  = pstOnIds->GetNRows();
-   int NoIst                  = istOnPst->GetNRows();
-   int NoLadders              = istLadderOnIst->GetNRows();
-   int NoSensors              = istSensorOnLadder->GetNRows();
+   int nIds                  = st_idsOnTpc->GetNRows(); // 1
+   int nPst                  = st_pstOnIds->GetNRows(); // 1
+   int nIst                  = st_istOnPst->GetNRows(); // 1
+   int nLadders              = st_istLadderOnIst->GetNRows(); //24
+   int nSensors              = st_istSensorOnLadder->GetNRows(); //144
 
    if (Debug() > 2) {
-      LOG_DEBUG << " # of Ids     : " << NoIds << endm;
-      LOG_DEBUG << " # of Pst     : " << NoPst << endm;
-      LOG_DEBUG << " # of Ist     : " << NoIst << endm;
-      LOG_DEBUG << " # of Ladders : " << NoLadders << endm;
-      LOG_DEBUG << " # of Sensors : " << NoSensors << endm;
+      LOG_DEBUG << " # of IDS     : " << nIds << endm;
+      LOG_DEBUG << " # of PST     : " << nPst << endm;
+      LOG_DEBUG << " # of IST     : " << nIst << endm;
+      LOG_DEBUG << " # of Ladders : " << nLadders << endm;
+      LOG_DEBUG << " # of Sensors : " << nSensors << endm;
    }
 
-   GL.SetRotation(&IdsOnTpc->r00);
-   GL.SetTranslation(&IdsOnTpc->t0);
+   //setting rotation and translation
+   ids2Tpc.SetRotation(&idsOnTpc->r00);
+   ids2Tpc.SetTranslation(&idsOnTpc->t0);
 
-   IPOI.SetRotation(&PstOnIds->r00);
-   IPOI.SetTranslation(&PstOnIds->t0);
+   pst2Ids.SetRotation(&pstOnIds->r00);
+   pst2Ids.SetTranslation(&pstOnIds->t0);
 
-   ISOP.SetRotation(&IstOnPst->r00);
-   ISOP.SetTranslation(&IstOnPst->t0);
+   ist2Pst.SetRotation(&istOnPst->r00);
+   ist2Pst.SetTranslation(&istOnPst->t0);
 
    if (Debug() > 2) {
       LOG_DEBUG << "IDS on TPC :" << endm;
-      GL.Print();
+      ids2Tpc.Print();
       LOG_DEBUG << "PST on IDS :" << endm;
-      IPOI.Print();
+      pst2Ids.Print();
       LOG_DEBUG << "IST on PST :" << endm;
-      ISOP.Print();
+      ist2Pst.Print();
    }
 
-   for (int i = 0; i < NoSensors; i++, SensorsOnLadders++) {
-      int Id = SensorsOnLadders->Id;
-      TGeoHMatrix *comb = (TGeoHMatrix *) fRotList->FindObject(Form("R%04i", Id));
+   for (int i = 0; i < nSensors; i++, sensorsOnLadders++) {
+      int id = sensorsOnLadders->Id;
+      TGeoHMatrix *comb = (TGeoHMatrix *) fRotList->FindObject(Form("R%04i", id));
       if (comb) continue;
-      comb = new TGeoHMatrix(Form("R%04i", Id));
-      int ladder = ((Id - 1000) - 1) / 6 + 1;  // 1 <= ladder <= 24
-      TGeoHMatrix WLL;
-      WLL.SetRotation(&SensorsOnLadders->r00);
-      WLL.SetTranslation(&SensorsOnLadders->t0);
-      TGeoHMatrix *WL = (TGeoHMatrix *) fRotList->FindObject(Form("WL%04i", Id));
-      if (! WL) {
-         WL = new  TGeoHMatrix(Form("WL%04i", Id));
-         WL->SetRotation(WLL.GetRotationMatrix());
-         WL->SetTranslation(WLL.GetTranslation());
-         fRotList->Add(WL);
+      comb = new TGeoHMatrix(Form("R%04i", id));
+      int ladder = ((id - 1000) - 1)/kIstNumSensorsPerLadder + 1;  // 1 <= ladder <= 24
+
+      //setting rotation/translation for sensor geometry matrix
+      TGeoHMatrix sensor2Ladder;
+      sensor2Ladder.SetRotation(&sensorsOnLadders->r00);
+      sensor2Ladder.SetTranslation(&sensorsOnLadders->t0);
+      TGeoHMatrix *sensorLocal = (TGeoHMatrix *) fRotList->FindObject(Form("sensorLocal%04i", id));
+      if (!sensorLocal) {
+         sensorLocal = new  TGeoHMatrix(Form("sensorLocal%04i", id));
+         sensorLocal->SetRotation(sensor2Ladder.GetRotationMatrix());
+         sensorLocal->SetTranslation(sensor2Ladder.GetTranslation());
+         fRotList->Add(sensorLocal);
       }
 
-      if (ladder <= 0 || ladder > 24) { cout << "Ladder has not been defined!" << endl; continue; }
-      for (int l = 0; l < NoLadders; l++, LaddersOnIst++) {
-         if (ladder == LaddersOnIst->Id) {
-            LI.SetRotation(&LaddersOnIst->r00);
-            LI.SetTranslation(&LaddersOnIst->t0);
+      //seeting rotation/translation for ladder geometry matrix
+      if (ladder <= 0 || ladder > kIstNumLadders) { 
+	 cout << "Ladder has not been defined!" << endl; 
+	 continue; 
+      }
+      for (int l = 0; l < nLadders; l++, laddersOnIst++) {
+         if (ladder == laddersOnIst->Id) {
+            ladder2Ist.SetRotation(&laddersOnIst->r00);
+            ladder2Ist.SetTranslation(&laddersOnIst->t0);
             break;
          }
       }
 
-      WG = Tpc2Global * GL * IPOI * ISOP * LI * WLL;
+      //calculate sensor global position
+      sensorGlobal = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder;
       if (Debug() > 2) {
-         cout << "WG\t";
-         WG.Print();
+         cout << "sensorGlobal\t";
+         sensorGlobal.Print();
       }
 
-      comb->SetRotation(WG.GetRotationMatrix());
-      comb->SetTranslation(WG.GetTranslation());
+      comb->SetRotation(sensorGlobal.GetRotationMatrix());
+      comb->SetTranslation(sensorGlobal.GetTranslation());
       fRotList->Add(comb);
       if (Debug() > 2) {
          comb->Print();
