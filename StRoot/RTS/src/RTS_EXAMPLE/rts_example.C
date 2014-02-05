@@ -1586,7 +1586,7 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 	else do_print = 0 ;
 
 
-	// right now only the "raw" pointer is available/known
+
 	dd = rdr->det("sst")->get("raw") ;
 	if(dd) {
 		while(dd->iterate()) {
@@ -1605,6 +1605,26 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 
 				for(int i=0;i<cou;i++) {
 					printf(" %2d: 0x%08X\n",i,d[i]) ;
+				}
+			}
+
+		}
+	}
+
+	dd = rdr->det("sst")->get("adc") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+			
+			daq_sst_data_t *sst = (daq_sst_data_t *)dd->Void ;
+
+			if(do_print) {
+				printf("SST ADC: Sector %d, RDO %d, fiber %d: %d ADCs\n",dd->sec,dd->rdo,dd->pad,dd->ncontent) ;
+
+
+			
+				for(u_int i=0;i<dd->ncontent;i++) {
+					printf("   Strip %3d, hybrid %2d: %4d\n",sst[i].strip,sst[i].hybrid,sst[i].adc) ;
 				}
 			}
 
