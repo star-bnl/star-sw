@@ -4,11 +4,20 @@
 #include <DAQ_READER/daq_det.h>
 
 
+struct daq_sst_data_t {
+	u_short strip ;
+	u_short adc ;
+
+	u_char hybrid ;
+} ;
+
 class daq_sst : public daq_det {
 private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
+	class daq_dta *handle_adc(int sec, int rdo, char *buff=0, int words=0) ;
 
 	class daq_dta *raw ;
+	class daq_dta *adc ;
 
 	static const char *help_string ;
 
