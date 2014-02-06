@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.8 2011/07/27 16:15:12 geurts Exp $
+ * $Id: StBTofGeometry.h,v 1.9 2014/02/06 21:21:13 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.9  2014/02/06 21:21:13  geurts
+ * Fix Index() of modules in GEMTOF trays, only applies to Run 13+ geometries [Joey Butterworth]
+ *
  * Revision 1.8  2011/07/27 16:15:12  geurts
  * Alignment calibration modifications [Patrick Huck]:
  *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
@@ -241,7 +244,7 @@ class StBTofGeomSensor : public StBTofNode {
    static Bool_t     IsDebugOn() { return mDebug; }
 
    static Int_t      GetCells()    { return mCells; }
-
+   void              SetIndex(Int_t imod);
    Int_t             Index() const { return mModuleIndex; }
    Double_t          GetCellYMin(const Int_t icell) const;
    Double_t          GetCellYMax(const Int_t icell) const;
@@ -255,6 +258,8 @@ class StBTofGeomSensor : public StBTofNode {
    ClassDef(StBTofGeomSensor,1)  //Module node in TOF geometry
 #endif
 };
+//____________________________________________________________________________
+inline void StBTofGeomSensor::SetIndex(Int_t imod){ mModuleIndex = imod;}
 
 //_____________________________________________________________________________
 inline Int_t StBTofGeomSensor::PrevCellIndex(const Int_t icell)
