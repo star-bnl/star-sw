@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.10 2014/02/07 22:58:08 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.11 2014/02/07 22:58:17 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -23,10 +23,10 @@
 
 ClassImp(StPxlHitMaker)
 
-StPxlHitMaker::StPxlHitMaker(const Char_t *name) : StMaker(name)
+
+StPxlHitMaker::StPxlHitMaker(const Char_t *name) : StMaker(name),
+   mPxlDb(0), mPixelSize(20.7e-4)
 {
-   mPxlDb = 0;
-   mPixelSize = 0;
 }
 
 
@@ -152,6 +152,9 @@ Int_t StPxlHitMaker::Make()
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.11  2014/02/07 22:58:17  smirnovd
+ * Initialize member variables through initialization list
+ *
  * Revision 1.10  2014/02/07 22:58:08  smirnovd
  * Added check to validate mPxlDb pointer
  *
