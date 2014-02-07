@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.h,v 1.4 2014/01/28 19:29:40 qiuh Exp $
+ * $Id: StPxlHitMaker.h,v 1.5 2014/02/07 22:18:06 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlHitMaker.h,v $
+ * Revision 1.5  2014/02/07 22:18:06  smirnovd
+ * Set stricter access modifier for member variables
+ *
  * Revision 1.4  2014/01/28 19:29:40  qiuh
  * *** empty log message ***
  *
@@ -45,11 +48,11 @@ public:
    //! Then global positions are obtained from local positions through rotation + shift by geoHMatrix
    Int_t Make();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.4 2014/01/28 19:29:40 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.5 2014/02/07 22:18:06 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
-protected:
+private:
    StPxlDb *mPxlDb; ///< db structure containing geometry, status information and so on
    Double_t mPixelSize; ///< size of a pxiel
 
