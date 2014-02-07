@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.9 2014/02/07 22:56:39 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.10 2014/02/07 22:58:08 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -67,6 +67,10 @@ Int_t StPxlHitMaker::Make()
       return kStWarn;
    }
 
+   if (!mPxlDb) {
+      LOG_WARN << "StPxlHitMaker::Make(): StPxlDb mPxlDb is not initialized" << endm;
+      return kStWarn;
+   }
 
    // input pxl cluster collection
    TObjectSet *pxlClusterDataSet = (TObjectSet *)GetDataSet("pxlCluster");
@@ -148,6 +152,9 @@ Int_t StPxlHitMaker::Make()
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.10  2014/02/07 22:58:08  smirnovd
+ * Added check to validate mPxlDb pointer
+ *
  * Revision 1.9  2014/02/07 22:56:39  smirnovd
  * Moved CVS log list to the bottom of file
  *
