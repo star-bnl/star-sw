@@ -5,19 +5,15 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.7 2014/02/07 14:56:00 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.8 2014/02/07 22:38:12 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  ***************************************************************************
  *
- * Description:
- * Create pxl hits according to clusters and calculate pxl hit global positions.
- * More information at
- * https://www.star.bnl.gov/protected/heavy/qiuh/HFT/software/PXL_software.pdf
- *
- ***************************************************************************
- *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.8  2014/02/07 22:38:12  smirnovd
+ * Doxygen comments reshuffled
+ *
  * Revision 1.7  2014/02/07 14:56:00  smirnovd
  * When a new StPxlHitCollection is created put it in the event right away
  *
@@ -40,16 +36,17 @@
 
 ClassImp(StPxlHitMaker)
 
-//________________________________________________________________________________
 StPxlHitMaker::StPxlHitMaker(const Char_t *name) : StMaker(name)
 {
    mPxlDb = 0;
    mPixelSize = 0;
 }
-//________________________________________________________________________________
+
+
 Int_t StPxlHitMaker::InitRun(Int_t runnumber)
 {
    TObjectSet *pxlDbDataSet = (TObjectSet *)GetDataSet("pxlDb");
+
    if (pxlDbDataSet) {
       mPxlDb = (StPxlDb *)pxlDbDataSet->GetObject();
    }
@@ -57,16 +54,23 @@ Int_t StPxlHitMaker::InitRun(Int_t runnumber)
       LOG_ERROR << "InitRun : not pxlDb" << endm;
       return kStErr;
    }
+
    mPixelSize = mPxlDb->pxlControl()->pixelSize;
 
    return kStOk;
 }
 
-//________________________________________________________________________________
+
+/**
+ * The input data can be both clusters and pxl hits.
+ * If there are already pxl hits, their positions will be recalculated.
+ * If there are clusters but no pxl hits collection, a new pxl hit collection will be created.
+ * If there are both pxl hits and clusters, new pxl hits from clusters will be added to hits collection.
+ * Hit sensor local positions are calculated with the thin plate spline funciton which describe the sensor surface
+ * Then global positions are obtained from local positions through rotation + shift by geoHMatrix
+ */
 Int_t StPxlHitMaker::Make()
 {
-   LOG_INFO << "StPxlHitMaker::Make()" << endm;
-
    Bool_t embeddingShortCut = IAttr("EmbeddingShortCut"); // 1 for embedding, use ideal geometry with no corrections
 
    // get StEvent pointer
@@ -76,14 +80,11 @@ Int_t StPxlHitMaker::Make()
       return kStWarn;
    }
 
-   /// The input data can be both clusters and pxl hits.
-   /// If there are already pxl hits, their positions will be recalculated.
-   /// If there are clusters but no pxl hits collection, a new pxl hit collection will be created.
-   /// If there are both pxl hits and clusters, new pxl hits from clusters will be added to hits collection.
 
    // input pxl cluster collection
    TObjectSet *pxlClusterDataSet = (TObjectSet *)GetDataSet("pxlCluster");
    StPxlClusterCollection *pxlClusterCollection = 0;
+
    if (pxlClusterDataSet)
       pxlClusterCollection = (StPxlClusterCollection *)pxlClusterDataSet->GetObject();
 
@@ -155,4 +156,3 @@ Int_t StPxlHitMaker::Make()
 
    return kStOK;
 }
-
