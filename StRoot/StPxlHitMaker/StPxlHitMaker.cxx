@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.6 2014/01/28 19:29:40 qiuh Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.7 2014/02/07 14:56:00 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.7  2014/02/07 14:56:00  smirnovd
+ * When a new StPxlHitCollection is created put it in the event right away
+ *
  * Revision 1.6  2014/01/28 19:29:40  qiuh
  * *** empty log message ***
  *
@@ -94,7 +97,10 @@ Int_t StPxlHitMaker::Make()
    }
 
    // if no pxl hit collection, create one for output
-   if (!pxlHitCollection) pxlHitCollection = new StPxlHitCollection();
+   if (!pxlHitCollection) {
+      pxlHitCollection = new StPxlHitCollection();
+      pEvent->setPxlHitCollection(pxlHitCollection);
+   }
 
    // pixel local x, z at the sensor left lower corner
    double firstPixelZ = -(kNumberOfPxlColumnsOnSensor - 1) * mPixelSize / 2;
@@ -147,8 +153,6 @@ Int_t StPxlHitMaker::Make()
             }
          }
 
-   if (!pEvent->pxlHitCollection())
-      pEvent->setPxlHitCollection(pxlHitCollection);
    return kStOK;
 }
 
