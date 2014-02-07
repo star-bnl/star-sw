@@ -1241,7 +1241,7 @@ void JevpServer::writePdf(char *filename, int combo_index)
   // Index the file...
   char indexedfilename[256];
   strcpy(indexedfilename, filename);
-  strcat(indexedfilename, ".idx");
+  // strcat(indexedfilename, ".idx");
   index.CreateIndexedFile(filename, indexedfilename);
 
   CP;
