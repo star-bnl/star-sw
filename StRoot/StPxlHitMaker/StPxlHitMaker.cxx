@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.11 2014/02/07 22:58:17 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.12 2014/02/07 22:58:30 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -32,10 +32,10 @@ StPxlHitMaker::StPxlHitMaker(const Char_t *name) : StMaker(name),
 
 Int_t StPxlHitMaker::InitRun(Int_t runnumber)
 {
-   TObjectSet *pxlDbDataSet = (TObjectSet *)GetDataSet("pxlDb");
+   TObjectSet *pxlDbDataSet = (TObjectSet*) GetDataSet("pxlDb");
 
    if (pxlDbDataSet) {
-      mPxlDb = (StPxlDb *)pxlDbDataSet->GetObject();
+      mPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
    }
    else {
       LOG_ERROR << "InitRun : not pxlDb" << endm;
@@ -60,10 +60,10 @@ Int_t StPxlHitMaker::Make()
 {
    Bool_t embeddingShortCut = IAttr("EmbeddingShortCut"); // 1 for embedding, use ideal geometry with no corrections
 
-   // get StEvent pointer
-   StEvent *pEvent = (StEvent *)GetInputDS("StEvent");
-   if (! pEvent) {
-      LOG_WARN << "StPxlHitMaker::Make there is no StEvent " << endm;
+   StEvent *pEvent = (StEvent*) GetInputDS("StEvent");
+
+   if (!pEvent) {
+      LOG_WARN << "StPxlHitMaker::Make(): There is no StEvent " << endm;
       return kStWarn;
    }
 
@@ -73,11 +73,11 @@ Int_t StPxlHitMaker::Make()
    }
 
    // input pxl cluster collection
-   TObjectSet *pxlClusterDataSet = (TObjectSet *)GetDataSet("pxlCluster");
+   TObjectSet *pxlClusterDataSet = (TObjectSet*) GetDataSet("pxlCluster");
    StPxlClusterCollection *pxlClusterCollection = 0;
 
    if (pxlClusterDataSet)
-      pxlClusterCollection = (StPxlClusterCollection *)pxlClusterDataSet->GetObject();
+      pxlClusterCollection = (StPxlClusterCollection*) pxlClusterDataSet->GetObject();
 
    // input pxl hit collection
    StPxlHitCollection *pxlHitCollection = pEvent->pxlHitCollection();
@@ -152,6 +152,9 @@ Int_t StPxlHitMaker::Make()
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.12  2014/02/07 22:58:30  smirnovd
+ * Cosmetic style changes
+ *
  * Revision 1.11  2014/02/07 22:58:17  smirnovd
  * Initialize member variables through initialization list
  *
