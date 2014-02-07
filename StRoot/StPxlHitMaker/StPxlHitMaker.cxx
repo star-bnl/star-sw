@@ -5,22 +5,9 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.8 2014/02/07 22:38:12 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.9 2014/02/07 22:56:39 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
- ***************************************************************************
- *
- * $Log: StPxlHitMaker.cxx,v $
- * Revision 1.8  2014/02/07 22:38:12  smirnovd
- * Doxygen comments reshuffled
- *
- * Revision 1.7  2014/02/07 14:56:00  smirnovd
- * When a new StPxlHitCollection is created put it in the event right away
- *
- * Revision 1.6  2014/01/28 19:29:40  qiuh
- * *** empty log message ***
- *
- *
  **************************************************************************/
 
 #include "StPxlHitMaker.h"
@@ -156,3 +143,22 @@ Int_t StPxlHitMaker::Make()
 
    return kStOK;
 }
+
+
+/***************************************************************************
+ *
+ * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.9  2014/02/07 22:56:39  smirnovd
+ * Moved CVS log list to the bottom of file
+ *
+ * Revision 1.8  2014/02/07 22:38:12  smirnovd
+ * Doxygen comments reshuffled
+ *
+ * Revision 1.7  2014/02/07 14:56:00  smirnovd
+ * When a new StPxlHitCollection is created put it in the event right away
+ *
+ * Revision 1.6  2014/01/28 19:29:40  qiuh
+ * *** empty log message ***
+ *
+ *
+ **************************************************************************/

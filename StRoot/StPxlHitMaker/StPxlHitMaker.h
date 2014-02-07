@@ -5,22 +5,9 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.h,v 1.6 2014/02/07 22:38:12 smirnovd Exp $
+ * $Id: StPxlHitMaker.h,v 1.7 2014/02/07 22:56:39 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
- ***************************************************************************
- *
- * $Log: StPxlHitMaker.h,v $
- * Revision 1.6  2014/02/07 22:38:12  smirnovd
- * Doxygen comments reshuffled
- *
- * Revision 1.5  2014/02/07 22:18:06  smirnovd
- * Set stricter access modifier for member variables
- *
- * Revision 1.4  2014/01/28 19:29:40  qiuh
- * *** empty log message ***
- *
- *
  **************************************************************************/
 
 #ifndef StPxlHitMaker_hh
@@ -45,7 +32,7 @@ public:
    Int_t InitRun(Int_t runnumber);
    Int_t Make();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.6 2014/02/07 22:38:12 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.7 2014/02/07 22:56:39 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -57,3 +44,22 @@ private:
 };
 
 #endif
+
+
+/***************************************************************************
+ *
+ * $Log: StPxlHitMaker.h,v $
+ * Revision 1.7  2014/02/07 22:56:39  smirnovd
+ * Moved CVS log list to the bottom of file
+ *
+ * Revision 1.6  2014/02/07 22:38:12  smirnovd
+ * Doxygen comments reshuffled
+ *
+ * Revision 1.5  2014/02/07 22:18:06  smirnovd
+ * Set stricter access modifier for member variables
+ *
+ * Revision 1.4  2014/01/28 19:29:40  qiuh
+ * *** empty log message ***
+ *
+ *
+ **************************************************************************/
