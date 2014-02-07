@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.7 2013/12/18 02:26:51 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.8 2014/02/07 19:27:14 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -40,7 +40,7 @@ void StvELossTrak::Set(double A, double Z,    double dens, double x0
     fM=mass; fCharge2=charge*charge;
   }
 
-  if (p<=0 || fabs(fP-p)<1e-6) return;
+  if (p<=0) return;
 
   fP = p; 
   if (fP>kMaxP) fP=kMaxP;
