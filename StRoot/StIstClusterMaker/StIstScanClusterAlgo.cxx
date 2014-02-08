@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.cxx,v 1.2 2014/01/29 18:25:01 ypwang Exp $
+* $Id: StIstScanClusterAlgo.cxx,v 1.3 2014/02/08 03:34:16 ypwang Exp $
 *
 * Author: Yaping Wang, October 2013
 ****************************************************************************
@@ -9,7 +9,7 @@
 ****************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
-* Revision 1.2  2014/01/29 18:25:01  ypwang
+* Revision 1.3  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
 *
@@ -37,7 +37,7 @@
 
 StIstScanClusterAlgo::StIstScanClusterAlgo(): mSplitCluster(1), mTimeBin(-1)
 {
-  //nothing else to do....
+  //nothing to do....
 };
 
 Int_t StIstScanClusterAlgo::Init()
@@ -231,10 +231,4 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection& istCollection, S
     
     return kStOk;
 };
-
-StIstScanClusterAlgo::~StIstScanClusterAlgo()
-{
-
-};
-
 ClassImp(StIstScanClusterAlgo);

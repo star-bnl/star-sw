@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.3 2014/02/03 16:12:19 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.4 2014/02/08 03:34:16 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,7 +9,7 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
-* Revision 1.3  2014/02/03 16:12:19  ypwang
+* Revision 1.4  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
 *
@@ -31,14 +31,10 @@
 #include "StIstSimpleClusterAlgo.h"
 #include "StIstScanClusterAlgo.h"
 
+#include "StRoot/StIstDbMaker/StIstDbMaker.h"
 #include "tables/St_istControl_Table.h"
 
-StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mClusterAlgoPtr(0), mTimeBin(-1), mSplitCluster(1)
-{
-  /* nothing to do */
-};
-
-StIstClusterMaker::~StIstClusterMaker()
+StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mClusterAlgoPtr(0), mIstDbMaker(0), mTimeBin(-1), mSplitCluster(1)
 {
   /* nothing to do */
 };
@@ -139,6 +135,12 @@ Int_t StIstClusterMaker::Init()
   if( !ierr )
      ierr = mClusterAlgoPtr->Init();
 
+  mIstDbMaker = (StIstDbMaker*)GetMaker("istDb");
+  if(!mIstDbMaker) {
+      LOG_WARN << "Error getting IST Db maker handler" << endm;
+      ierr = kStWarn;
+  }
+
   return ierr;
 };
 
@@ -147,7 +149,7 @@ Int_t StIstClusterMaker::InitRun(Int_t runnumber)
   Int_t ierr = kStOk;
 
   // control parameters
-  St_istControl *istControl = (St_istControl *)GetDataBase("Calibrations/ist/istControl");
+  St_istControl *istControl = mIstDbMaker->GetControl();
   if (!istControl)  LOG_WARN << " no istControl table " << endm;
   istControl_st *istControlTable = istControl->GetTable();
 

@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.cxx,v 1.2 2014/01/29 18:25:01 ypwang Exp $
+* $Id: StIstSimpleClusterAlgo.cxx,v 1.3 2014/02/08 03:34:16 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,7 +9,7 @@
 ****************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.cxx,v $
-* Revision 1.2  2014/01/29 18:25:01  ypwang
+* Revision 1.3  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
 *
@@ -810,10 +810,4 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
  
   return kStOk;
 };
-
-StIstSimpleClusterAlgo::~StIstSimpleClusterAlgo()
-{
-
-};
-
 ClassImp(StIstSimpleClusterAlgo);
