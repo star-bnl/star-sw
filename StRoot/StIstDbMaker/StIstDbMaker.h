@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.4 2014/02/05 17:32:46 ypwang Exp $
+* $Id: StIstDbMaker.h,v 1.5 2014/02/08 03:34:16 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,8 +9,8 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
-* Revision 1.4  2014/02/05 17:32:46  ypwang
-* updating script
+* Revision 1.5  2014/02/08 03:34:16  ypwang
+* updating scripts
 *
 *
 ****************************************************************************
@@ -29,6 +29,7 @@
 class St_istPedNoise;
 class St_istGain;
 class St_istMapping;
+class St_istControl;
 
 class StIstDbMaker : public StMaker
 {
@@ -36,24 +37,27 @@ class StIstDbMaker : public StMaker
 public:
    StIstDbMaker(const char *name = "istDb");
    Int_t  InitRun(Int_t runNumber);
-   THashList *GetRotations() 	{return fRotList; }
+   THashList *GetRotations() 	 {return fRotList; }
    St_istPedNoise *GetPedNoise() {return mPedNoise;}
-   St_istGain	 *GetGain()	{return mGain;    }
+   St_istGain	  *GetGain()	 {return mGain;    }
    St_istMapping  *GetMapping()  {return mMapping; }
+   St_istControl  *GetControl()  {return mControl; }
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.4 2014/02/05 17:32:46 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.5 2014/02/08 03:34:16 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    Int_t CalculateSensorsPosition();
    void   GetIstPedNoise();
    void   GetIstGain();
-   void    GetIstMapping();
+   void   GetIstMapping();
+   void   GetIstControl();
 
    static THashList *fRotList;
    St_istPedNoise   *mPedNoise;
    St_istGain       *mGain;
-   St_istMapping	   *mMapping;
+   St_istMapping    *mMapping;
+   St_istControl    *mControl;
 
    ClassDef(StIstDbMaker, 0)
 };

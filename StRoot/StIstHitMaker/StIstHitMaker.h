@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.h,v 1.3 2014/02/03 16:12:19 ypwang Exp $
+* $Id: StIstHitMaker.h,v 1.4 2014/02/08 03:34:16 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,7 +9,7 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
-* Revision 1.3  2014/02/03 16:12:19  ypwang
+* Revision 1.4  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
 *
@@ -26,20 +26,20 @@
 
 class StIstDbMaker;
 class THashList;
+class St_istControl;
 class StIstHitCollection;
 
 class StIstHitMaker : public StMaker
 {
  public:
   StIstHitMaker( const char* name="ist_hit" );
-  virtual ~StIstHitMaker();
-  virtual Int_t Init();
-  virtual Int_t InitRun(Int_t runnumber);
-  virtual Int_t Make();
-  virtual void Clear( Option_t *opts = "" );
+  Int_t Init();
+  Int_t InitRun(Int_t runnumber);
+  Int_t Make();
+  void Clear( Option_t *opts = "" );
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.3 2014/02/03 16:12:19 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.4 2014/02/08 03:34:16 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   THashList *listGeoMSensorOnGlobal;

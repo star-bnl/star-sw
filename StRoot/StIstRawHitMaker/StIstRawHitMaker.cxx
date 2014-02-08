@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.3 2014/02/07 21:36:26 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.4 2014/02/08 03:34:17 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,10 +9,7 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
-* Revision 1.3  2014/02/07 21:36:26  ypwang
-* updating script
-*
-* Revision 1.2  2014/01/29 18:25:03  ypwang
+* Revision 1.4  2014/02/08 03:34:17  ypwang
 * updating scripts
 *
 *
@@ -29,7 +26,6 @@
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
 #include "StChain/StRtsTable.h"
-
 
 #include "StRoot/StIstUtil/StIstCollection.h"
 #include "StRoot/StIstUtil/StIstRawHitCollection.h"
@@ -94,7 +90,7 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    Int_t ierr = kStOk;
 
    // IST control parameters
-   St_istControl *istControl = (St_istControl *)GetDataBase("Calibrations/ist/istControl");
+   St_istControl *istControl = mIstDbMaker->GetControl();
    if (!istControl) LOG_WARN << " no istControl table " << endm;
    istControl_st *istControlTable = istControl->GetTable();
 
@@ -314,11 +310,12 @@ Int_t StIstRawHitMaker::Make() {
 
 		//store raw hits information
                 StIstRawHitCollection *rawHitCollectionPtr = mIstCollectionPtr->getRawHitCollection( ladder-1 );
+
 		if( rawHitCollectionPtr ) {
 		    if( mIsCaliMode ) { //calibration mode (non-ZS data): only write raw ADC value
 			if(dataFlag==mADCdata) {
 			    StIstRawHit* rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
-                            if(!rawHitPtr) continue;
+
                             for(int iTimeBin=0; iTimeBin<ntimebin; iTimeBin++) {
                             	rawHitPtr->setCharge( (float)signalUnCorrected[iChan][iTimeBin], (unsigned char)iTimeBin );
                             }
@@ -366,7 +363,7 @@ Int_t StIstRawHitMaker::Make() {
 			    	Float_t tempMaxCharge = -999.0;
 
 			    	StIstRawHit* rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
-			    	if(!rawHitPtr) continue;
+
 			    	for(int iTBin=0; iTBin<ntimebin; iTBin++)      {
 				    if( mDoCmnCorrection && dataFlag==mADCdata )
                                	    	signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
@@ -384,7 +381,7 @@ Int_t StIstRawHitMaker::Make() {
 				rawHitPtr->setMaxTimeBin( tempMaxTB );
                             }//end raw hit decision cut
                     	}//end loop over time bins
-		    }
+		    }//end filling hit info
 		}
 		else {
                     LOG_WARN << "StIstRawHitMaker::Make() -- Could not access rawHitCollection for ladder " << ladder << endm;

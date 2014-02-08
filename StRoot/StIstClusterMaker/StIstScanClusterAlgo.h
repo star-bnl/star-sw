@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.h,v 1.2 2014/01/29 18:25:01 ypwang Exp $
+* $Id: StIstScanClusterAlgo.h,v 1.3 2014/02/08 03:34:16 ypwang Exp $
 *
 * Author: Yaping Wang, October 2013
 ****************************************************************************
@@ -13,7 +13,7 @@
 ****************************************************************************
 *
 * $Log: StIstScanClusterAlgo.h,v $
-* Revision 1.2  2014/01/29 18:25:01  ypwang
+* Revision 1.3  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
 *
@@ -37,14 +37,12 @@ class StIstScanClusterAlgo :public StIstIClusterAlgo
 
 public:
     StIstScanClusterAlgo();
-    virtual Int_t doClustering(const StIstCollection& istCollection, StIstRawHitCollection& rawHits, StIstClusterCollection& clusters );
-    virtual Int_t Init();
+    Int_t doClustering(const StIstCollection& istCollection, StIstRawHitCollection& rawHits, StIstClusterCollection& clusters );
+    Int_t Init();
 
-    virtual void setUsedTimeBin(unsigned char tb = -1);    
-    virtual void setSplitFlag( bool splitFlag = 1);
+    void setUsedTimeBin(unsigned char tb = -1);    
+    void setSplitFlag( bool splitFlag = 1);
  
-    virtual ~StIstScanClusterAlgo();
-
 protected:
     Bool_t mSplitCluster;
     UChar_t mTimeBin;

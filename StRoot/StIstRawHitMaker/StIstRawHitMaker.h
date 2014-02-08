@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.2 2014/01/29 18:25:03 ypwang Exp $
+* $Id: StIstRawHitMaker.h,v 1.3 2014/02/08 03:34:17 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -14,7 +14,7 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
-* Revision 1.2  2014/01/29 18:25:03  ypwang
+* Revision 1.3  2014/02/08 03:34:17  ypwang
 * updating scripts
 *
 *
@@ -41,6 +41,7 @@ class StIstDbMaker;
 class St_istPedNoise;
 class St_istGain;
 class St_istMapping;
+class St_istControl;
 
 class StIstRawHitMaker : public StRTSBaseMaker {
  public: 
@@ -99,7 +100,7 @@ inline void StIstRawHitMaker::setCmnCut(float cmnCut)			{ mCmnCut = cmnCut;     
 inline void StIstRawHitMaker::setDataType(int nDataType)		{ mDataType = nDataType;   };
 
 inline const char *StIstRawHitMaker::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.2 2014/01/29 18:25:03 ypwang Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.3 2014/02/08 03:34:17 ypwang Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 #endif

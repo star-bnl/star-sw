@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.h,v 1.3 2014/02/03 16:12:19 ypwang Exp $
+* $Id: StIstClusterMaker.h,v 1.4 2014/02/08 03:34:16 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,7 +9,7 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.h,v $
-* Revision 1.3  2014/02/03 16:12:19  ypwang
+* Revision 1.4  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
 *
@@ -25,25 +25,29 @@
 #include "StMaker.h"
 #include "StIstIClusterAlgo.h"
 
+class StIstDbMaker;
+class St_istControl;
+
 class StIstClusterMaker : public StMaker
 {
  public:
   StIstClusterMaker( const char* name="ist_cluster");
-  ~StIstClusterMaker();
 
-  virtual Int_t Init();
-  virtual Int_t InitRun(Int_t runumber);
-  virtual Int_t Make();
+  Int_t Init();
+  Int_t InitRun(Int_t runumber);
+  Int_t Make();
 
   Int_t setClusterAlgo(StIstIClusterAlgo*);
   void setUsedTimeBin(unsigned char tb = -1);			//time bin to be used
   void setClusterSplitFlag( bool splitFlag = 1);	//cluster splitting switch
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.3 2014/02/03 16:12:19 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.4 2014/02/08 03:34:16 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StIstIClusterAlgo* mClusterAlgoPtr;
+  StIstDbMaker *mIstDbMaker;
+
   UChar_t mTimeBin;
   Bool_t mSplitCluster;
   UShort_t mMinNumOfRawHits, mMaxNumOfRawHits;

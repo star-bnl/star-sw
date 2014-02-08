@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.4 2014/02/05 17:32:46 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.5 2014/02/08 03:34:16 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,8 +9,8 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
-* Revision 1.4  2014/02/05 17:32:46  ypwang
-* updating script
+* Revision 1.5  2014/02/08 03:34:16  ypwang
+* updating scripts
 *
 *
 ****************************************************************************
@@ -39,33 +39,38 @@
 #include "StIstDbMaker.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
+#include "StTpcDb/StTpcDb.h"
+#include "St_db_Maker/St_db_Maker.h"
+
 #include "tables/St_Survey_Table.h"
 #include "tables/St_istPedNoise_Table.h"
 #include "tables/St_istGain_Table.h"
 #include "tables/St_istMapping_Table.h"
+#include "tables/St_istControl_Table.h"
+
 #include "TMath.h"
 #include "TVector3.h"
-#include "StTpcDb/StTpcDb.h"
-#include "St_db_Maker/St_db_Maker.h"
 THashList *StIstDbMaker::fRotList = 0;
 
 ClassImp(StIstDbMaker)
 //_____________________________________________________________________________
-StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mPedNoise(NULL), mGain(NULL), mMapping(NULL)
+StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mPedNoise(NULL), mGain(NULL), mMapping(NULL), mControl(NULL)
 {
 /* no op */
 }
 //_____________________________________________________________________________
 Int_t StIstDbMaker::InitRun(Int_t runNumber)
 {
-   LOG_DEBUG << " StIstDbMaker::InitRun() --> CalculateSensorPosition" << endm;
+   LOG_DEBUG << " StIstDbMaker::InitRun() --> Calculate Sensor Position" << endm;
    CalculateSensorsPosition();
-   LOG_DEBUG << " StIstDbMaker::InitRun() --> GetIstPedNoise" << endm;
+   LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Pedestal and Noise Table" << endm;
    GetIstPedNoise();
-   LOG_DEBUG << " StIstDbMaker::InitRun() --> GetIstGain" << endm;
+   LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Gain Table" << endm;
    GetIstGain();
-   LOG_DEBUG << " StIstDbMaker::InitRun() --> GetIstMapping" << endm;
+   LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Mapping Table" << endm;
    GetIstMapping();
+   LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Control Table" << endm;
+   GetIstControl();
 
    return kStOK;
 }
@@ -205,4 +210,9 @@ void StIstDbMaker::GetIstGain()
 void StIstDbMaker::GetIstMapping()
 {
    mMapping = (St_istMapping *)GetDataBase("Calibrations/ist/istMapping");
+}
+//_____________________________________________________________________________
+void StIstDbMaker::GetIstControl()
+{
+   mControl = (St_istControl *)GetDataBase("Calibrations/ist/istControl");
 }
