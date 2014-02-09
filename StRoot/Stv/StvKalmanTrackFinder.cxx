@@ -355,7 +355,7 @@ static StvToolkit *kit = StvToolkit::Inst();
 static const StvConst  *kons = StvConst::Inst();
 
   StvNode *start = tk->front();
-  if (start->GetFP().getRxy()>kons->mDca2dZeroXY*10) return 0;
+//  if (start->GetFP().getRxy()>kons->mDca2dZeroXY*10) return 0;
   int opt = StvDiver::kTarg2D | StvDiver::kDoErrs;
   StvNodePars dcaPars;
   StvFitErrs  dcaErrs;
