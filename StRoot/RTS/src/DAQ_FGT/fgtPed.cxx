@@ -61,6 +61,7 @@ fgtPed::~fgtPed()
 	return ;
 }
 
+#if 0
 static int fgt_bad_heuristics(int rts_id, double ped, double rms)
 {
 	switch(rts_id) {
@@ -74,7 +75,7 @@ static int fgt_bad_heuristics(int rts_id, double ped, double rms)
 
 	return 0 ;	// take it!
 }
-
+#endif
 
 int fgtPed::run_stop()
 {
@@ -509,7 +510,7 @@ double fgtPed::do_thresh(double ns, int k)
 {
 	// suspect
 	// tb_cou set in from_cache
-	char bad[FGT_RDO_COU][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
+
 
 	if(!ped_store || !valid) {
 		LOG(ERR,"fgt:do_thresh invalid") ;
@@ -519,9 +520,8 @@ double fgtPed::do_thresh(double ns, int k)
 	n_sigma = ns ;
 	k_seq = k ;
 
-	memset(bad,0,sizeof(bad)) ;
 
-	LOG(TERR,"do_thresh: n-sigma %f, k-seq %d",n_sigma, k_seq) ;
+	LOG(INFO,"do_thresh: n-sigma %f, k-seq %d",n_sigma, k_seq) ;
 
 	// use the 0th timebin! For what???
 	for(int r=0;r<FGT_RDO_COU;r++) {
@@ -531,24 +531,19 @@ double fgtPed::do_thresh(double ns, int k)
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
 		for(int c=0;c<FGT_CH_COU;c++) {
 
-		p->thr[arm][apv][c] = 0xFFFF ;	// max it out
+		p->thr[arm][apv][c] = 0xFFFE ;	// kill it first... talk later...
 
-		if(p->rms[arm][apv][c][0] < -1.5) continue ;	// not necessary at all
+		if(p->rms[arm][apv][c][0] < -1.5) continue ;	// not necessary at all; not present in pedestals
+
+		// calculate the mean of the pedestal & RMS over the timebins
 
 		double ped = 0.0 ;
 		double rms = 0.0 ;
 		int cou = 0 ;
 
-		int c_bad = 0 ;
 		for(int t=0;t<tb_cou_ped;t++) {
 			double pp = p->ped[arm][apv][c][t] ;
 			double rm = p->rms[arm][apv][c][t] ;
-
-	
-			if(fgt_bad_heuristics(rts_id,pp,rm)) {
-				//LOG(TERR,"%d %d %d %d %d %f %f\n",r,arm,apv,c,t,pp,rm) ;
-				c_bad = 1 ;
-			}
 
 			if(rm < 0.0) continue ;	// should be here but not found in data, damn...
 
@@ -557,27 +552,22 @@ double fgtPed::do_thresh(double ns, int k)
 			cou++ ;
 		}
 
-		if(c_bad) bad[r][arm][apv][c] = 1 ;
-
-		if(cou == 0) continue ;
+		if(cou == 0) {	// channel should have been present but it wasn't in the pedestal file...
+			p->thr[arm][apv][c] = 0xFFFD ;
+			continue ;
+		}
 
 		if(tb_cou_ped != cou) {
 			LOG(WARN,"%d %d %d %d: expect %d timebins but have %d",r,arm,apv,c,tb_cou_ped,cou) ;
 		}
 
+		if(cou == 0) continue ;	// this shouldn't be!!!
 
 		ped /= cou ;
 		rms /= cou ;
 
 		p->thr[arm][apv][c] = (u_short) (ped + rms * n_sigma + 0.5) ;
 
-		int aa = apv ;
-		int off_id = (r)*6*20*128 + arm*20*128 ;
-		if(apv >= 12) aa = apv - 2 ;
-
-		off_id += aa*128+c ;
-
-		//printf("TH %d: %f %f %d\n",off_id,ped,rms,cou) ;
 		}
 		}
 		}
@@ -586,6 +576,7 @@ double fgtPed::do_thresh(double ns, int k)
 	// kill bad
 	int all_cou = 0 ;
 	int bad_cou = 0 ;
+
 	for(int r=0;r<FGT_RDO_COU;r++) {
 		struct peds *p = ped_store + r ;
 
@@ -593,18 +584,36 @@ double fgtPed::do_thresh(double ns, int k)
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
 
 		int b_cou = 0 ;
+		int b_ped_cou = 0 ;
+		int b_bad_cou = 0 ;
+
 		for(int c=0;c<FGT_CH_COU;c++) {
-			if(p->rms[arm][apv][c][0] < -1.5) continue ;	// not necessary at all
+			// thr is:
+			// 0xFFFE	never found in ped file; wasn;t needed
+			// 0xFFFD	not found in ped file but was needed...
+			if(p->thr[arm][apv][c] == 0xFFFE) {	// wasn't needed
+				continue ;
+			}
+
+			if(p->thr[arm][apv][c] >= 0xFFFD) {
+				b_ped_cou++ ;
+			}
+
 			if(bad[r][arm][apv][c]) {
-				//p->thr[arm][apv][c] = 0xFFFF ;	// max it out
+				p->thr[arm][apv][c] = 0xFFFF ;	// max it
+				b_bad_cou++ ;
+			}
+	
+			if(p->thr[arm][apv][c] >= 0xFFFD) {
 				b_cou++ ;
 			}
+
 			all_cou++ ;
 		}
 
 		if(b_cou) {
 			bad_cou += b_cou ;
-			LOG(WARN,"ARC %d, ARM %d, APV %2d: has %d bad channels",r,arm,apv,b_cou) ;
+			LOG(WARN,"ARC %d, ARM %d, APV %2d: has %d[%d ped, %d bad] bad channels",r+1,arm,apv,b_cou,b_ped_cou,b_bad_cou) ;
 		}
 
 		}
@@ -798,13 +807,15 @@ int fgtPed::from_cache(char *fname)
 			ped->rms[arm][apv][c][t] = -2.0 ;	// mark as not needed...
 		}
 
-		ped->thr[arm][apv][c] = 0xFFFF ;
+		ped->thr[arm][apv][c] = 0xFFFE ;
 
 		}
 		}
 		}
 	}	
 	
+	memset(bad,0,sizeof(bad)) ;	// default is no bad
+
 	// trivial load from disk...
 	if(fname) {
 		fn = fname ;
@@ -844,6 +855,7 @@ int fgtPed::from_cache(char *fname)
 		   
 		int ret = sscanf(buff,"%d %d %d %d %d %f %f",&r,&arm,&apv,&ch,&tb,&pp,&rr) ;
 		if(ret != 7) continue ;
+
 
 		struct peds *peds = ped_store + (r-1) ;
 
@@ -964,3 +976,123 @@ int fgtPed::special_setup(int run_type, int sub_type)
 
 
 
+
+int fgtPed::bad_from_cache(char *fname) 
+{
+	FILE *f ;
+	char *fn ;
+	
+	int b_cou = 0 ;
+	
+	
+	// trivial load from disk...
+	if(fname) {
+		fn = fname ;
+		f = fopen(fname,"r") ;
+	}
+	else {
+		switch(rts_id) {
+		case GMT_ID :
+			fn = "/RTS/conf/gmt/gmt_bad_channels.txt" ;
+			break ;
+		case IST_ID :
+			fn = "/RTS/conf/ist/ist_bad_channels.txt" ;
+			break ;
+		case FGT_ID :
+		default:
+			fn = "/RTS/conf/fgt/fgt_bad_channels.txt" ;
+			break ;
+		}
+
+		f = fopen(fn,"r") ;
+	}
+
+	if(f==0) {
+		LOG(ERR,"ped::bad_from_cache can't open input file \"%s\" [%s]",fn,strerror(errno)) ;
+		return -1 ;
+	}
+
+
+	LOG(NOTE,"Loading bad from cache \"%s\"...",fn) ;
+	memset(bad,0,sizeof(bad)) ;
+	
+
+	while(!feof(f)) {
+		int r, arm, apv, ch  ;
+		char buff[256] ;
+
+		if(fgets(buff,sizeof(buff),f) == 0) continue ;
+		
+		switch(buff[0]) {
+		case '#' :
+		case '!' :
+		case '*' :
+		case '/' :
+		case '.' :
+			continue ;
+		}
+
+		   
+		int ret = sscanf(buff,"%d %d %d %d",&r,&arm,&apv,&ch) ;
+		if(ret != 4) continue ;
+		//check for negative 0!
+
+		char ca[4][16] ;
+		char n[4] ;
+		memset(n,0,sizeof(n)) ;
+		sscanf(buff,"%s %s %s %s",ca[0],ca[1],ca[2],ca[3]) ;
+		for(int i=0;i<4;i++) {
+			int dummy ;
+			if(sscanf(ca[i],"%d",&dummy)!=1) continue ;
+			if(dummy==0) {
+				if(index(ca[i],'-')) n[i] = '-' ;
+				else n[i] = '+' ;
+			}
+			else {
+				if(dummy<0) n[i] = '-' ;
+				else n[i] = '+' ;
+			}
+		}
+
+		if(r<0) r *= -1 ;
+		if(arm < 0) arm *= -1 ;
+		if(apv < 0) apv *= -1 ;
+		if(ch < 0) ch *= -1 ;
+
+
+
+		if(n[1]=='-') {	//nix ARM
+			for(int a=0;a<FGT_APV_COU;a++) {
+			for(int c=0;c<FGT_CH_COU;c++) {
+				bad[r-1][arm][a][c] = 1 ;
+			}
+			}
+		}
+		else if(n[2]=='-') {	//nix APV
+			for(int c=0;c<FGT_CH_COU;c++) {
+				bad[r-1][arm][apv][c] = 1 ;
+			}
+		}
+		else {
+			bad[r-1][arm][apv][ch] = 1 ;
+		}
+		
+
+	}
+
+	fclose(f) ;
+
+	for(int r=0;r<FGT_RDO_COU;r++) {
+	for(int m=0;m<FGT_ARM_COU;m++) {
+	for(int a=0;a<FGT_APV_COU;a++) {
+	for(int c=0;c<FGT_CH_COU;c++) {
+		if(bad[r][m][a][c]) b_cou++ ;
+	}
+	}
+	}
+	}
+
+	LOG(INFO,"Loaded %d bad channels from \"%s\"",b_cou,fn) ;
+
+	return b_cou ;
+}
