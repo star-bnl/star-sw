@@ -86,16 +86,7 @@ daq_dta *daq_sst::handle_adc(int sec, int rdo, char *rdobuff, int words)
 {
 	int r_start, r_stop ;
 	int s_start, s_stop ;
-	daq_trg_word trg[1] ;
 
-	assert(caller) ;	// sanity...
-
-	if(!present) {
-		return 0 ;
-	}
-	else {
-		LOG(DBG,"%s: present %d",name,present) ;
-	}
 
 
 	if(sec <= 0) {
@@ -117,6 +108,7 @@ daq_dta *daq_sst::handle_adc(int sec, int rdo, char *rdobuff, int words)
 
 	adc->create(128,"sst_adc",rts_id,DAQ_DTA_STRUCT(daq_sst_data_t)) ;
 
+	LOG(NOTE,"handle_adc: %d %d, %d %d",s_start,s_stop,r_start,r_stop) ;
 
 	for(int s=s_start;s<=s_stop;s++) {
 
@@ -132,13 +124,17 @@ daq_dta *daq_sst::handle_adc(int sec, int rdo, char *rdobuff, int words)
 			dta = (u_int *) raw_d->Void ;
 			words = raw_d->ncontent/4 ;
 
+			//for ERRORs printounts
+			daq_trg_word trg[120] ;
+			get_l2((char *)dta,words,trg,r) ;
+
 		}
 		else {
 			dta = (u_int *) rdobuff ;
+
+//			LOG(WARN,"Running from buffer: words %d, RDO %d",words,r) ;
 		} ;
 
-		//for ERRORs printounts
-		get_l2((char *)dta,words,trg,r) ;
 
 		u_int *d32 = dta ;
 		u_int *d32_end = dta + words ;

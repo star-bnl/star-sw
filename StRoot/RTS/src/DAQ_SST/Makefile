@@ -12,7 +12,7 @@ DEFINES += -DRTS_LOG_COLORED
 
 
 
-OBJS := daq_sst.o
+OBJS := daq_sst.o sstPed.o
 
 LIBS = libsst.a
 BINS = 
@@ -38,4 +38,15 @@ daq_sst.o: ../../../../StRoot/RTS/include/rts.h
 daq_sst.o: ../DAQ_READER/daq_dta_structs.h
 daq_sst.o: daq_sst.h
 daq_sst.o: ../DAQ_READER/daq_det.h
+sstPed.o: ../../../../StRoot/RTS/include/rtsLog.h
+sstPed.o: ../../../../StRoot/RTS/include/daqModes.h
+sstPed.o: ../../../../StRoot/RTS/include/rtsSystems.h
+sstPed.o: ../DAQ_READER/daq_dta.h
+sstPed.o: ../../../../StRoot/RTS/include/rts.h
+sstPed.o: ../DAQ_READER/daq_dta_structs.h
+sstPed.o: sstPed.h
+sstPed.o: daq_sst.h
+sstPed.o: ../DAQ_READER/daq_det.h
 daq_sst.o: ../DAQ_READER/daq_det.h
+sstPed.o: daq_sst.h
+sstPed.o: ../DAQ_READER/daq_det.h
