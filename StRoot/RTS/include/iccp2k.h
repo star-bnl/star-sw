@@ -29,6 +29,7 @@ typedef unsigned char u_char;
 // Used in EVB
 #define EVBFLAG_DET_RELEASE (1<<5)              // Released by DET
 #define EVBFLAG_TIMEOUT     (1<<6)              // Timedout by EVB
+#define EVBFLAG_BADBUILD    (1<<7)
 
 // Appended by prepare_gb_payload
 #define EVBFLAG_L1ABORT (1<<11)
