@@ -29,6 +29,7 @@ public:
 
 	int from_cache(char *fname = 0) ;		// from cached file to ped_store
 	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
+	int bad_from_cache(char *fname = 0) ;
 
 	int special_setup(int run_type, int sub_type) ;
 
@@ -37,7 +38,7 @@ public:
 	int tb_cou_xpect ; // as set in the conf file "ntimebins"!
 	int tb_cou_ped ; // as in the pedestals/load file!
 
-
+	char bad[FGT_RDO_COU][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
 //private:
 	// allocated per RDO
 
