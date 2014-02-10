@@ -40,6 +40,13 @@
 #include <DAQ_PXL/daq_pxl.h>
 #include <DAQ_SST/daq_sst.h>
 
+
+/* various test routines... typically used by Tonko only */
+#include <DAQ_FGT/fgtPed.h>
+static int fgt_test(daqReader *rdr, const char *do_print, int which) ;
+#include <DAQ_SST/sstPed.h>
+static int sst_test(daqReader *rdr, int mode) ;
+
 // I wrapped more complicated detectors inside their own functions
 // for this example
 #ifdef INSIST_ON_EMC_PSEUDO
@@ -75,7 +82,7 @@ int main(int argc, char *argv[])
 	int c ;
 	const char *print_det = "" ;
 	char _mountpoint[256];
-	char *mountpoint = NULL;
+	char *mountpoint = "/net/evp";	// sensible default from daqman...
 
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel((char *)WARN) ;
@@ -288,18 +295,18 @@ int main(int argc, char *argv[])
 		}
 
 		/*************************** FGT **************************/
-		fgt_doer(evp,print_det,0) ;
+		fgt_doer(evp,print_det,FGT_ID) ;
 
 		/*************************** MTD **************************/
 		if(mtd_doer(evp,print_det)) LOG(INFO,"MTD found") ;
 
 
 		/*************************** GMT **************************/
-		fgt_doer(evp,print_det,1) ;
+		fgt_doer(evp,print_det,GMT_ID) ;
 
 		/*************************** IST **************************/
-		fgt_doer(evp,print_det,2) ;
-
+		fgt_doer(evp,print_det,IST_ID) ;
+		fgt_test(evp,print_det,IST_ID) ;
 
 		/*************************** PXL **************************/
 		if(pxl_doer(evp,print_det)) LOG(INFO,"PXL found") ;
@@ -319,6 +326,7 @@ int main(int argc, char *argv[])
 
 //	delete evp ;	// cleanup i.e. if running through a set of files.
 
+	sst_test(0,2) ;
 	return 0 ;
 }
 
@@ -1141,13 +1149,13 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 
 	switch(which) {
-	case 1 :
+	case GMT_ID :
 		d_name = "GMT" ;
 		break ;
-	case 2 :
+	case IST_ID :
 		d_name = "IST" ;
 		break ;
-	case 0 :
+	case FGT_ID :
 	default :
 		d_name = "FGT" ;
 	}
@@ -1157,11 +1165,6 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 	else do_print = 0 ;
 
 	s_found[0] = 0 ;
-
-	short adc_data[6][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][15] ;
-	short zs_data[6][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][15] ;
-	memset(adc_data,0,sizeof(adc_data)) ;
-	memset(zs_data,0,sizeof(zs_data)) ;
 
 	dd = rdr->det(d_name)->get("raw") ;
 	if(dd) {
@@ -1238,7 +1241,6 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			printf("%s ADC: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
-				adc_data[dd->rdo-1][dd->sec][dd->pad][f[i].ch][f[i].tb] = f[i].adc ;
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
 			}
 		}
@@ -1304,30 +1306,11 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			printf("%s ZS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
-				zs_data[dd->rdo-1][dd->sec][dd->pad][f[i].ch][f[i].tb] = f[i].adc ;
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
 			}
 		}
 	}
 
-#if 0 				
-	if(do_print) {	// only then...
-
-	for(int r=0;r<2;r++) {
-	for(int arm=0;arm<FGT_ARM_COU;arm++) {
-	for(int apv=0;apv<FGT_APV_COU;apv++) {
-	for(int ch=0;ch<FGT_CH_COU;ch++) {
-	for(int tb=0;tb<15;tb++) {
-		int zs = zs_data[r][arm][apv][ch][tb] ;
-		int adc = adc_data[r][arm][apv][ch][tb] ;
-		
-		if(zs && (zs != adc)) {
-			printf("ZS ERROR: %d %d %d %d %d = zs %d, adc %d\n",r+1,arm,apv,ch,tb,zs,adc) ;
-		}
-
-	}}}}}
-	}
-#endif
 
 	dd = rdr->det(d_name)->get("pedrms") ;
 	while(dd && dd->iterate()) {
@@ -1340,11 +1323,10 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			int arm = dd->sec ;
 			int apv = dd->pad ;
 
-			//printf("%s PEDRMS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+			printf("%s PEDRMS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
 				printf("%d %d %2d %3d %2d: %.3f +- %.3f\n",arc,arm,apv,f[i].ch,f[i].tb,f[i].ped,f[i].rms) ;
-				//printf(" %5d: ch %3d, tb %d = %.3f +- %.3f\n",i,f[i].ch,f[i].tb,f[i].ped,f[i].rms) ;
 			}
 		}
 
@@ -1403,104 +1385,6 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 	return found ;
 }
 
-#if 0
-static int gmt_doer(daqReader *rdr, const char *do_print)
-{
-	int found = 0 ;
-	daq_dta *dd ;
-
-	if(strcasestr(do_print,"gmt")) ;	// leave as is...
-	else do_print = 0 ;
-
-
-	// right now only the "raw" pointer is available/known
-	dd = rdr->det("gmt")->get("raw") ;
-	if(dd) {
-		while(dd->iterate()) {
-			found = 1 ;
-
-			// point to the start of the DDL raw data
-			u_int *d = (u_int *) dd->Void ;	
-
-
-			if(do_print) {
-				printf("GMT RAW: ARC %d: %d bytes (%d words)\n",dd->rdo,dd->ncontent,dd->ncontent/4) ;
-				// dump a few
-				for(int i=0;i<10;i++) {
-					printf(" %2d: 0x%08X\n",i,d[i]) ;
-				}
-			}
-
-		}
-	}
-
-
-	// one can get the data in the electronics/logical layout
-	dd = rdr->det("gmt")->get("adc") ;
-
-
-	// let's dump the meta-data first
-	if(dd && dd->meta && do_print) {
-		apv_meta_t *meta = (apv_meta_t *)dd->meta ;
-				
-		printf("GMT meta data:\n") ;
-		for(int r=1;r<=FGT_RDO_COU;r++) {
-			if(meta->arc[r].present == 0) continue ;
-				
-			printf("  ARC %d: error %c; format %d, ARM mask 0x%X\n",r,meta->arc[r].error?'Y':'N',
-			       meta->arc[r].format_code,
-			       meta->arc[r].arm_mask) ;
-
-			for(int arm=0;arm<FGT_ARM_COU;arm++) {
-				if(meta->arc[r].arm[arm].present == 0) continue ;
-
-				printf("    ARM %d: error %c\n",arm,meta->arc[r].arm[arm].error?'Y':'N') ;
-				printf("         : arm_id %d, arm_seq %d, arm_err %d, apv_mask 0x%X\n",
-				       meta->arc[r].arm[arm].arm_id,
-				       meta->arc[r].arm[arm].arm_seq,
-				       meta->arc[r].arm[arm].arm_err,
-				       meta->arc[r].arm[arm].apv_mask) ;
-
-				for(int apv=0;apv<FGT_APV_COU;apv++) {
-					if(meta->arc[r].arm[arm].apv[apv].present == 0) continue ;
-							
-					printf("      APV %2d: error %c\n",apv,meta->arc[r].arm[arm].apv[apv].error?'Y':'N') ;
-					printf("            : apv_id %d, fmt %d, length %d, seq %d, capid %d, nhits %d, is_error %d, refadc %d, ntim %d\n",
-					       meta->arc[r].arm[arm].apv[apv].apv_id,
-					       meta->arc[r].arm[arm].apv[apv].fmt,
-					       meta->arc[r].arm[arm].apv[apv].length,
-					       meta->arc[r].arm[arm].apv[apv].seq,
-					       meta->arc[r].arm[arm].apv[apv].capid,
-					       meta->arc[r].arm[arm].apv[apv].nhits,
-					       meta->arc[r].arm[arm].apv[apv].is_error,
-					       meta->arc[r].arm[arm].apv[apv].refadc,
-					       meta->arc[r].arm[arm].apv[apv].ntim) ;
-				}
-			}
-		}
-
-	}
-
-
-	while(dd && dd->iterate()) {
-		found = 1 ;
-
-		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
-
-		if(do_print) {
-			printf("GMT ADC: ARC %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
-
-			for(u_int i=0;i<dd->ncontent;i++) {
-				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
-			}
-		}
-	}
-				
-
-
-	return found ;
-}
-#endif
 
 
 
@@ -1611,6 +1495,7 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 		}
 	}
 
+
 	dd = rdr->det("sst")->get("adc") ;
 	if(dd) {
 		while(dd->iterate()) {
@@ -1632,6 +1517,70 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 	}
 
 
+	sst_test(rdr,1) ;
 
 	return found ;
 }
+
+
+
+/* various test routines... typically used by Tonko only */
+static int fgt_test(daqReader *rdr, const char *do_print, int which)
+{
+//#define DO_FGT_TEST
+#ifdef DO_FGT_TEST
+	fgtPed *ped = new fgtPed() ;
+
+	ped->tb_cou_xpect = 9 ;
+	ped->init(0x3F, which) ;
+	ped->from_cache("/net/ist01/RTScache/pedestals.txt") ;
+	ped->bad_from_cache() ;
+	double perc_bad = ped->do_thresh(5.0,2) ;
+
+	LOG(INFO,"IST: bad channels %.1f%%",perc_bad) ;
+#endif
+	return 0 ;
+}
+
+static int sst_test(daqReader *rdr, int mode)
+{
+#define DO_SST_TEST
+#ifdef DO_SST_TEST
+	static sstPed *ped ;
+
+	if(ped==0) {
+		ped = new sstPed() ;
+
+
+		ped->init(0x7) ;
+		ped->sector = 1 ;
+		LOG(NOTE,"store %p",ped->ped_store) ;
+	}
+
+	LOG(NOTE,"Mode is %d %p",mode,ped) ;
+
+	if(mode==1) {
+		daq_dta *dd = rdr->det("sst")->get("raw") ;
+
+		LOG(NOTE,"Here") ;
+
+		while(dd && dd->iterate()) {
+			if(dd->sec != 1) continue ;
+
+			LOG(NOTE,"Here: %d %d %d %p",dd->sec,dd->rdo,dd->ncontent,ped->ped_store) ;
+
+			ped->accum((char *)dd->Void, dd->ncontent, dd->rdo) ;
+
+			LOG(NOTE,"Accum done") ;
+
+		}
+	}
+	else {
+		ped->calc() ;
+		ped->to_cache("/log",123123) ;
+	}
+
+#endif
+	return 0 ;
+}
+
