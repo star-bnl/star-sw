@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.4 2014/02/10 16:33:46 smirnovd Exp $
+* $Id: StIstCluster.cxx,v 1.5 2014/02/10 16:34:21 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.5  2014/02/10 16:34:21  smirnovd
+* Use constructor initialization list, other nit-picks
+*
 * Revision 1.4  2014/02/10 16:33:46  smirnovd
 * Trimmed trailing spaces, expanded tabs to eight spaces
 *
@@ -25,19 +28,26 @@
 #include "StIstConsts.h"
 #include "StIstCluster.h"
 
-StIstCluster::StIstCluster(int key, unsigned char ladder, unsigned char sensor, float meanRow, float meanColumn, float totCharge, float totChargeErr, unsigned char clusteringType): mMaxTimeBin(3), mNRawHits(1), mNRawHitsRPhi(1), mNRawHitsZ(1), mIdTruth(0)
+
+StIstCluster::StIstCluster(int key, unsigned char ladder, unsigned char sensor,
+   float meanRow, float meanColumn, float totCharge, float totChargeErr, unsigned
+   char clusteringType):
+   mKey(key),
+   mLadderId(ladder),
+   mSensorId(sensor),
+   mMeanRow(meanRow),
+   mMeanColumn(meanColumn),
+   mTotCharge(totCharge),
+   mTotChargeErr(totChargeErr),
+   mClusteringType(clusteringType),
+   mMaxTimeBin(3), mNRawHits(1), mNRawHitsRPhi(1),
+   mNRawHitsZ(1), mIdTruth(0)
 {
-   mKey = key;
-   mLadderId = ladder;
-   mSensorId = sensor;
-   mMeanRow = meanRow;
-   mMeanColumn = meanColumn;
-   mTotCharge = totCharge;
-   mTotChargeErr = totChargeErr;
-   mClusteringType = clusteringType;
 }
 
-StIstCluster::~StIstCluster() { /*  no op  */ }
+
+StIstCluster::~StIstCluster() {}
+
 
 //accessors
 rawHitMap_t &StIstCluster::getRawHitMap()               {    return mRawHitMap;     };

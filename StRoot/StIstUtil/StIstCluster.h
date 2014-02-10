@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.h,v 1.5 2014/02/10 16:34:09 smirnovd Exp $
+* $Id: StIstCluster.h,v 1.6 2014/02/10 16:34:22 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstCluster.h,v $
+* Revision 1.6  2014/02/10 16:34:22  smirnovd
+* Use constructor initialization list, other nit-picks
+*
 * Revision 1.5  2014/02/10 16:34:09  smirnovd
 * Addressed minor doxygen and style issues
 *
@@ -39,12 +42,10 @@ typedef std::map< StIstRawHit*, float, rawHitPtrLessThan > rawHitMap_t;
 class StIstCluster: public TObject
 {
 public:
-   //constructor
 
    StIstCluster(int key = -1, unsigned char ladder = -1, unsigned char sensor = -1,
       float meanRow = -1, float meanColumn = -1, float totCharge = 0,
       float totChargeErr = 0, unsigned char clusteringType = -1);
-
    ~StIstCluster();
 
    //accessors
@@ -64,7 +65,6 @@ public:
    unsigned char        getNRawHitsZ()      const;
    unsigned short       getIdTruth()        const;
 
-   //modifiers
    void        setLadder(unsigned char ladder);
    void        setSensor(unsigned char sensor);
    void        setMeanRow(float meanRow);
@@ -94,7 +94,6 @@ protected:
    UShort_t    mIdTruth;                //!< For embedding, 0 as background
    rawHitMap_t mRawHitMap;              ///< Map container to save raw hits who contribute to the cluster
 
-private:
    ClassDef(StIstCluster, 1);
 };
 #endif
