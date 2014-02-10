@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.h,v 1.4 2014/02/10 16:33:46 smirnovd Exp $
+* $Id: StIstCluster.h,v 1.5 2014/02/10 16:34:09 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstCluster.h,v $
+* Revision 1.5  2014/02/10 16:34:09  smirnovd
+* Addressed minor doxygen and style issues
+*
 * Revision 1.4  2014/02/10 16:33:46  smirnovd
 * Trimmed trailing spaces, expanded tabs to eight spaces
 *
@@ -30,33 +33,36 @@
 #include "StObject.h"
 #include "StIstRawHit.h"
 
-typedef std::map< StIstRawHit *, float, rawHitPtrLessThan > rawHitMap_t;
+typedef std::map< StIstRawHit*, float, rawHitPtrLessThan > rawHitMap_t;
+
 
 class StIstCluster: public TObject
 {
 public:
    //constructor
-   StIstCluster(int key = -1, unsigned char ladder = -1, unsigned char sensor = -1, float meanRow = -1, float meanColumn = -1, float totCharge = 0, float totChargeErr = 0, unsigned char clusteringType = -1);
 
-   //deconstructor
+   StIstCluster(int key = -1, unsigned char ladder = -1, unsigned char sensor = -1,
+      float meanRow = -1, float meanColumn = -1, float totCharge = 0,
+      float totChargeErr = 0, unsigned char clusteringType = -1);
+
    ~StIstCluster();
 
    //accessors
    rawHitMap_t &getRawHitMap();
-   const rawHitMap_t &getRawHitMap() const;
-   int                  getKey()                const;
-   unsigned char        getLadder()             const;//!< 1-24
-   unsigned char        getSensor()             const;//!< 1-6
-   float                getMeanRow()            const;
-   float                getMeanColumn()         const;
-   float                getTotCharge()          const;
-   float                getTotChargeErr()       const;
-   unsigned char        getMaxTimeBin()         const;
-   unsigned char        getClusteringType()     const;
-   unsigned char        getNRawHits()           const;
-   unsigned char        getNRawHitsRPhi()       const;
-   unsigned char        getNRawHitsZ()          const;
-   unsigned short       getIdTruth()            const;
+   const rawHitMap_t   &getRawHitMap() const;
+   int                  getKey()            const;
+   unsigned char        getLadder()         const; //!< 1-24
+   unsigned char        getSensor()         const; //!< 1-6
+   float                getMeanRow()        const;
+   float                getMeanColumn()     const;
+   float                getTotCharge()      const;
+   float                getTotChargeErr()   const;
+   unsigned char        getMaxTimeBin()     const;
+   unsigned char        getClusteringType() const;
+   unsigned char        getNRawHits()       const;
+   unsigned char        getNRawHitsRPhi()   const;
+   unsigned char        getNRawHitsZ()      const;
+   unsigned short       getIdTruth()        const;
 
    //modifiers
    void        setLadder(unsigned char ladder);
@@ -73,19 +79,20 @@ public:
    void        setIdTruth(unsigned short idTruth);
 
 protected:
-   Int_t        mKey;                       //cluster unique lable
-   UChar_t     mLadderId;                  //ladder id the cluster belongs to
-   UChar_t     mSensorId;                  //sensor id the cluster belongs to
-   Float_t     mMeanRow, mMeanColumn;      //mean row and mean column
-   Float_t     mTotCharge;                 //charge sum of the cluster
-   Float_t     mTotChargeErr;              //RMS noise of the cluster
-   UChar_t     mClusteringType;            //clustering algorithm type
-   UChar_t     mMaxTimeBin;                //max ADC time bin index
-   UChar_t     mNRawHits;                   //cluster size
-   UChar_t     mNRawHitsRPhi;               //cluster size in r-phi direction
-   UChar_t     mNRawHitsZ;                  //cluster size in beam direction
-   UShort_t    mIdTruth;                    //!< for embedding, 0 as background
-   rawHitMap_t mRawHitMap;                 //map container to save raw hits who contribute to the cluster
+   Int_t       mKey;                    ///< Cluster unique label
+   UChar_t     mLadderId;               ///< Ladder id the cluster belongs to
+   UChar_t     mSensorId;               ///< Sensor id the cluster belongs to
+   Float_t     mMeanRow;                ///< Cluster's mean row
+   Float_t     mMeanColumn;             ///< Cluster's mean column
+   Float_t     mTotCharge;              ///< Charge sum of the cluster
+   Float_t     mTotChargeErr;           ///< rMS noise of the cluster
+   UChar_t     mClusteringType;         ///< Clustering algorithm type
+   UChar_t     mMaxTimeBin;             ///< Max ADC time bin index
+   UChar_t     mNRawHits;               ///< Cluster size
+   UChar_t     mNRawHitsRPhi;           ///< Cluster size in r-phi direction
+   UChar_t     mNRawHitsZ;              ///< Cluster size in beam direction
+   UShort_t    mIdTruth;                //!< For embedding, 0 as background
+   rawHitMap_t mRawHitMap;              ///< Map container to save raw hits who contribute to the cluster
 
 private:
    ClassDef(StIstCluster, 1);
