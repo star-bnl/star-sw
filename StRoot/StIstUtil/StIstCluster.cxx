@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.3 2014/02/03 16:12:19 ypwang Exp $
+* $Id: StIstCluster.cxx,v 1.4 2014/02/10 16:33:46 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.4  2014/02/10 16:33:46  smirnovd
+* Trimmed trailing spaces, expanded tabs to eight spaces
+*
 * Revision 1.3  2014/02/03 16:12:19  ypwang
 * updating scripts
 *
@@ -38,20 +41,20 @@ StIstCluster::~StIstCluster() { /*  no op  */ }
 
 //accessors
 rawHitMap_t &StIstCluster::getRawHitMap()               {    return mRawHitMap;     };
-const rawHitMap_t &StIstCluster::getRawHitMap() const  	{    return mRawHitMap;     };
-int              StIstCluster::getKey() const  		{    return mKey;           };
-unsigned char    StIstCluster::getLadder() const  	{    return mLadderId;      };
-unsigned char    StIstCluster::getSensor() const  	{    return mSensorId;      };
-float            StIstCluster::getMeanRow() const  	{    return mMeanRow;       };
-float            StIstCluster::getMeanColumn() const  	{    return mMeanColumn;    };
-float            StIstCluster::getTotCharge() const  	{    return mTotCharge;     };
+const rawHitMap_t &StIstCluster::getRawHitMap() const   {    return mRawHitMap;     };
+int              StIstCluster::getKey() const           {    return mKey;           };
+unsigned char    StIstCluster::getLadder() const        {    return mLadderId;      };
+unsigned char    StIstCluster::getSensor() const        {    return mSensorId;      };
+float            StIstCluster::getMeanRow() const       {    return mMeanRow;       };
+float            StIstCluster::getMeanColumn() const    {    return mMeanColumn;    };
+float            StIstCluster::getTotCharge() const     {    return mTotCharge;     };
 float            StIstCluster::getTotChargeErr() const  {    return mTotChargeErr;  };
-unsigned char    StIstCluster::getMaxTimeBin() const  	{    return mMaxTimeBin;    };
+unsigned char    StIstCluster::getMaxTimeBin() const    {    return mMaxTimeBin;    };
 unsigned char    StIstCluster::getClusteringType() const {    return mClusteringType;};
-unsigned char    StIstCluster::getNRawHits() const  	{    return mNRawHits;      };
+unsigned char    StIstCluster::getNRawHits() const      {    return mNRawHits;      };
 unsigned char    StIstCluster::getNRawHitsRPhi() const  {    return mNRawHitsRPhi;  };
-unsigned char    StIstCluster::getNRawHitsZ() const  	{    return mNRawHitsZ;     };
-unsigned short   StIstCluster::getIdTruth() const  	{    return mIdTruth;       };
+unsigned char    StIstCluster::getNRawHitsZ() const     {    return mNRawHitsZ;     };
+unsigned short   StIstCluster::getIdTruth() const       {    return mIdTruth;       };
 
 //modifiers
 void StIstCluster::setLadder(unsigned char ladder)
