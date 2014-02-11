@@ -1,10 +1,9 @@
 <Document file="StarVMC/Geometry/Compat/xgeometry.xml">   
  
+
 <Export language="Mortran"> 
   <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
-
-  
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
@@ -12,12 +11,19 @@ call geometry
 </Export>
 </Module>
 
+
+
+
+
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.29 2014/01/24 19:45:08 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.30 2014/02/11 21:40:59 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.30  2014/02/11 21:40:59  jwebb
+  Force recompilation to pickup correct y2014 definition.
+
   Revision 1.29  2014/01/24 19:45:08  jwebb
   Revert to CaveGeo for y2014 geometry / force recompile.
 
