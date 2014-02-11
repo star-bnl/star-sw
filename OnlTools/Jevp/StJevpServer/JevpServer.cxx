@@ -326,6 +326,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-l4production") == 0) {
       LOG("JEFF", "Using L4");
       isL4 = 1;
+      log_dest = "172.17.0.1";
       nodb = 0;
       myport = JEVP_PORT;
       basedir = (char *)"/RTScache/conf/l4jevp";
@@ -839,7 +840,6 @@ void JevpServer::performStopRun()
   CP;
 
   // Add any new plots to the pallet...
-
   freePallete();
 
   next.Reset();
@@ -1177,6 +1177,7 @@ void JevpServer::writeRunPdf(int display, int run)
   char filename[256];
   sprintf(filename, "%s/%s_%d.pdf",pdfdir, displays->displayRoot->name, run);
   CP;
+       
   writePdf(filename, 1);
 
   t = pdfclock.record_time();
@@ -1185,7 +1186,7 @@ void JevpServer::writeRunPdf(int display, int run)
 
   // Save it in the database...
   if(nodb != 1) {
-    LOG(DBG, "Writing PDF file: %s to DB",filename);
+    LOG("JEFF", "Writing PDF file: %s to DB",filename);
 
     char *args[5];
 
@@ -1599,8 +1600,12 @@ int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
 
 DisplayNode *JevpServer::getPalleteNode()
 {
+  if(!displays) return NULL;
+  if(!displays->root) return NULL;
   DisplayNode *palleteNode = displays->root->child;
   
+  CP;
+
   while(palleteNode) {
     if(strcmp(palleteNode->name, "pallete") == 0) {
       return palleteNode;
@@ -1612,9 +1617,13 @@ DisplayNode *JevpServer::getPalleteNode()
 
 void JevpServer::freePallete()
 {
+  CP;
   DisplayNode *palleteNode = getPalleteNode();
+  CP;
   if(palleteNode) {
+    CP;
     palleteNode->freeChildren();
+    CP;
   }
 }
 

@@ -12,7 +12,8 @@
 #include <signal.h>
 #include <time.h>
 
-#define DB_HOST "onldb.daq.bnl.local"
+char *DB_HOST = (char *)"onldb.daq.bnl.local";
+
 #define DB_PORT 3501
 #define DB_NAME "RunLog"
 #define DB_TABLE "qaFiles"
@@ -41,7 +42,14 @@ int writeToDB(int runNumber, char *pdfname, char *flavor)
   int ret;
 
   rtsLogOutput(RTS_LOG_NET);
-  rtsLogAddDest((char *)"172.16.0.1",8004);
+
+  if(strstr(flavor, "l4")) {
+    rtsLogAddDest((char *)"172.17.0.1", 8004);
+    DB_HOST = (char *)"onldb.starp.bnl.gov";
+  }
+  else {
+    rtsLogAddDest((char *)"172.16.0.1",8004);
+  }
   rtsLogLevel((char *)WARN);
 
   if(!init) {
