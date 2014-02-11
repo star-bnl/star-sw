@@ -13,7 +13,7 @@
    FGTQ quadrant is divided along z on to 5 volumes with contend being approximation of actual detector
    Unit depth spacers  at the edge of a quadrant:  FGQA, FGQB, FGQC , FGQD, FGQE, FGQF
    Unit depth grid has 4 sections: FGXA - FGXD
-   Non-active volumes of made of the same material do overlap and are declared as 'kOnly' - it is not a problem.
+   Non-active volumes of made of the same material do overlap and are declared as 'konly' - it is not a problem.
    Active volume FGZC is larger than actual GEM active area and some hits need to be rejected by the slow simu
 
    Description of quadrant geometry by Doug Hasell , December 18, 2010 :
