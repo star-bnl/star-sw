@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+
 # this snippet ensures only one copy running
 # it locks itself...
 use Fcntl ':flock';
@@ -12,7 +13,7 @@ sub catch_zap {
     my $signame = shift;
     my $pid = waitpid(-1, WNOHANG);
     
-    system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"GOT SIG $signame $pid\"");
+    system("rtsLog -d \"WARN\" -p 8004 -h \"172.16.0.1\" -c jevpHistoMother \"GOT SIG $signame $pid\"");
     die();
 }
 
@@ -35,24 +36,24 @@ for(;;) {   # // Keep running Jevp
 	$ret = fork();
 
 	if($ret == 0) {
-		system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"launching JevpServerMain\"");
+		system("rtsLog -d \"WARN\" -p 8004 -h \"172.16.0.1\" -c evpHistoMother \"launching JevpServerMain\"");
 		#exec("OnlTools/Jevp/launch JevpServerMain -l4production -die -file \"/a/15041018\"");
                 exec("OnlTools/Jevp/launch JevpServerMain -production");
-		system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"exec returned?\"");	
+		system("rtsLog -d \"WARN\" -p 8004 -h \"172.16.0.1\" -c jevpHistoMother \"exec returned?\"");	
 		exit(0);
 	}
 	else {
 	     $jevp_pid = $ret;
 
-	     #system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"Wait for JevpServerMain pid=$jevp_pid\"");
+	     #system("rtsLog -d \"WARN\" -p 8004 -h \"172.16.0.1\" -c jevpHistoMother \"Wait for JevpServerMain pid=$jevp_pid\"");
 	
 	     do {
 	     	$ret = waitpid(-1,0);
-		#system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"got SIGCHLD from $ret\"");
+		#system("rtsLog -d \"WARN\" -p 8004 -h \"172.16.0.1\" -c jevpHistoMother \"got SIGCHLD from $ret\"");
              }
 	     while($ret != $jevp_pid);
 
-	     system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"JevpServerMain died, wait 10 sec and relaunch\"");
+	     system("rtsLog -d \"WARN\" -p 8004 -h \"172.16.0.1\" -c jevpHistoMother \"JevpServerMain died, wait 10 sec and relaunch\"");
 
 	     sleep(10);	    
         }
