@@ -5,6 +5,12 @@
 #  3.  Install HistoMother
 #
 
+HOSTNAME := $(shell hostname -s)
+ifeq ($(HOSTNAME),l4evp) 
+	HISTOMOTHER := l4HistoMother
+else
+	HISTOMOTHER := jevpHistoMother
+endif
 
 CVSDIR=../../..
 
@@ -20,6 +26,7 @@ WritePDFToDB:	WritePDFToDB.o rtsLogUnix.o
 
 install:
 	/RTS/bin/install.sh WritePDFToDB /RTScache/bin/LINUX/x86_64
+	/RTS/bin/install.sh $(HISTOMOTHER) ~
 
 clean:
 	rm *.o
