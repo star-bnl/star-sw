@@ -54,6 +54,7 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
 
   // Create a TObjectSet for this volume filled with a 2D histogram
   TH2F *hist = new TH2F(name,"radlen",nEta,mnEta,mxEta,nPhi,mnPhi,mxPhi);  
+  hist->SetDirectory(0);
   TObjectSet *topSet = new TObjectSet(name, hist);
 
   filler.push_back( Hist_t(hist) );
@@ -70,6 +71,7 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
 
       // If set wasn't found, create and hang on topSet
       hist = new TH2F(vol->GetName(),"radlen",nEta,mnEta,mxEta,nPhi,mnPhi,mxPhi);  
+      hist->SetDirectory(0);
       set  = new TObjectSet(vol->GetName(),hist);
       filler.push_back(Hist_t(hist));
 

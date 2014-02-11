@@ -9,7 +9,13 @@ TEveCalo3D*   MakeCalo3D(TEveCaloData* data, TEveWindowSlot* slot);
 const Double_t RADIUS      = 364.90;   // cm  MAGP rmax
 const Double_t HALF_LENGTH = 715.00/2; // cm  MAGP length/2
 
-void viewAgml( const Char_t *tag = "y2014", const Char_t *top = "CAVE", Double_t thresh=0.01 )
+TObjectSet *set = 0;
+
+void viewAgml( const Char_t *tag = "y2014", 
+	       const Char_t *top = "IDSM", 
+	       const Char_t *filename = 0,
+	       Double_t thresh=0.01 )
+
 {
   TString _chain = Form("r%s agml sti gstar",tag);
 
@@ -24,16 +30,18 @@ void viewAgml( const Char_t *tag = "y2014", const Char_t *top = "CAVE", Double_t
   view = new StarAgmlViewer();
   chain->Init();
 
+  if ( filename ) TGeoManager::Import(filename); 
+    
   // Generate histogram
   StarAgmlChecker checker( gGeoManager );
-  TObjectSet *set = (TObjectSet *)
-    checker.MaterialPlot( top, 50, -2.50, +2.50 );
+  set = (TObjectSet *) checker.MaterialPlot( top, 50, -2.50, +2.50 );
 			  
   TBrowser *b = new TBrowser();
   b->Add(set);
   // Retrieve histogram from set
   //  TH2F *radlen = (TH2F *)set->GetObject();
 
+  return;
 
   // Create a TEve calo histo
   Int_t colors[] = { 

@@ -139,8 +139,8 @@ All Volumes are directly in IDSM to avoid overlap issues by defining a mastervol
 
 <Create block="PSUP"/>
 
-<Placement block="PSUP" in="IDSM" x="0" y="0" z="0" kOnly="'MANY'"  />
-<Placement block="PSUP" in="IDSM" x="0" y="0" z="0" kOnly="'MANY'"  >
+<Placement block="PSUP" in="IDSM" x="0" y="0" z="0" konly="'MANY'"  />
+<Placement block="PSUP" in="IDSM" x="0" y="0" z="0" konly="'MANY'"  >
   <Rotation alphaz="180" />
 </Placement>
 
@@ -212,7 +212,7 @@ All Volumes are directly in IDSM to avoid overlap issues by defining a mastervol
 
 <!-- Hingeleaf inner -->
 <Create block="PSHL" />
-<Placement block="PSHL" in="PSUP" x="-4.62" z="-69.57" y="0" kOnly="'MANY'" >
+<Placement block="PSHL" in="PSUP" x="-4.62" z="-69.57" y="0" konly="'MANY'" >
  <Rotation alphay="25.8+90.0"/>
 </Placement>
 

@@ -526,8 +526,8 @@
 
 
 
-  <Create block="IBMO"/>
-  <Placement block="IBMO" in="IDSM" kOnly="'MANY'"/>
+  <Create    block="IBMO"/>
+  <Placement block="IBMO" in="IDSM" konly="'MANY'"/>
 
 
   <!-- IBMO volume declaration -->

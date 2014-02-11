@@ -243,7 +243,7 @@
    <Placement block="UCTO" x="-1.22" y="7.0756" z="0+zoffdm"/>
 
    <Create    block="OUCY" />
-   <Placement block="OUCY" x="0" y="0" z="0+zoffdm" kOnly="'ONLY'"/>
+   <Placement block="OUCY" x="0" y="0" z="0+zoffdm" konly="'ONLY'"/>
 
    <Create    block="DCBO" />
    <Placement block="DCBO" x="-1.22" y="-7.0756" z="0+zoffdm"/>
