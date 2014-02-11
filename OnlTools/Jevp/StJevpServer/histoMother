@@ -1,0 +1,61 @@
+#!/usr/bin/perl
+
+# this snippet ensures only one copy running
+# it locks itself...
+use Fcntl ':flock';
+use Carp;
+open my $self, '<', $0 or die "Couldn't open self: $!";
+flock $self, LOCK_EX | LOCK_NB or croak "This script is already running...";
+# end snippet!
+
+sub catch_zap {
+    my $signame = shift;
+    my $pid = waitpid(-1, WNOHANG);
+    
+    system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"GOT SIG $signame $pid\"");
+    die();
+}
+
+chdir "/home/evpops/cvs";
+$jevp_pid = 0;
+
+
+$SIG{HUP} = \&catch_zap;
+$SIG{INT} = \&catch_zap;
+$SIG{QUIT} = \&catch_zap;
+$SIG{BUS} = \&catch_zap;
+$SIG{KILL} = \&catch_zap;
+$SIG{SEGV} = \&catch_zap;
+$SIG{PIPE} = \&catch_zap;
+$SIG{TERM} = \&catch_zap;
+
+#$SIG{CHLD} = \&catch_zap;
+
+for(;;) {   # // Keep running Jevp
+	$ret = fork();
+
+	if($ret == 0) {
+		system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"launching JevpServerMain\"");
+		#exec("OnlTools/Jevp/launch JevpServerMain -l4production -die -file \"/a/15041018\"");
+                exec("OnlTools/Jevp/launch JevpServerMain -production");
+		system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"exec returned?\"");	
+		exit(0);
+	}
+	else {
+	     $jevp_pid = $ret;
+
+	     #system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"Wait for JevpServerMain pid=$jevp_pid\"");
+	
+	     do {
+	     	$ret = waitpid(-1,0);
+		#system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"got SIGCHLD from $ret\"");
+             }
+	     while($ret != $jevp_pid);
+
+	     system("rtsLog -d \"WARN\" -p 8009 -h \"172.17.0.1\" -c histoMother \"JevpServerMain died, wait 10 sec and relaunch\"");
+
+	     sleep(10);	    
+        }
+}
+	
+

@@ -1,3 +1,11 @@
+#  We need the makefile for several things:
+#
+#  1.  Build/install WritePDFToDB
+#  2.  Install l4HistoMother
+#  3.  Install HistoMother
+#
+
+
 CVSDIR=../../..
 
 CC = g++
