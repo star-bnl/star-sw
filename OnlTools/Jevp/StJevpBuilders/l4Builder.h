@@ -110,7 +110,12 @@ class l4Builder : public JevpPlotSet {
  * @see 
  * @author 
  */  
-  JevpPlot *HltPlots[48];
+  JevpPlot *HltPlots[41];
+  JevpPlot *BesGoodPlots[2];
+  JevpPlot *BesMontinorPlots[2];
+  JevpPlot *FixedTargetPlots[2];
+  JevpPlot *FixedTargetMonitorPlots[2];
+  JevpPlot *HeavyFragmentPlots[1];
   JevpPlot *JPsiPlots[14];
   JevpPlot *HltPlots_UPC[36];
   PlotHisto *ph;
@@ -140,6 +145,11 @@ class l4Builder : public JevpPlotSet {
   void inputDedx();
   double getDedx(double p, const int name);
   void defineHltPlots();
+  void defineBesGoodPlots();
+  void defineBesMontinorPlots();
+  void defineFixedTargetPlots();
+  void defineFixedTargetMonitorPlots();
+  void defineHeavyFragmentPlots();
   void defineJPsiPlots();
   void defineHltPlots_UPC();
   void setAllPlots();
@@ -167,6 +177,11 @@ class l4Builder : public JevpPlotSet {
   int primaryTracks_UPC ;
   int runnumber;
   int iBin;
+  int switch_BesGood;
+  int switch_BesMonitor;
+  int switch_FixedTarget;
+  int switch_FixedTargetMonitor;
+  int switch_HeavyFragment;  
   int switch_jpsi;
   int switch_upc;
   double innerGainPara;
@@ -293,6 +308,7 @@ class l4Builder : public JevpPlotSet {
 
   // heavy fragments
   TH2F *hdEdx;
+  TH2F *hdEdx_HeavyFragment;
   TH2F *hHFM_dEdx;
   TH2F *hdEdx_UPC;
   TH2F *hHFM_dEdx_UPC;
@@ -313,6 +329,17 @@ class l4Builder : public JevpPlotSet {
   TH1D *hInnerGain;
   TH1D *hOuterGain;
   TH1D *hMeanDcaXy;
+
+  TH2D *hBesGoodVertexXY;
+  TH1D *hBesGoodVr;
+  TH2D *hBesMonitorVertexXY;
+  TH1D *hBesMonitorVr;
+  TH2D *hFixedTargetVertexXY;
+  TH1D *hFixedTargetVr;
+  TH2D *hFixedTargetMonitorVertexXY;
+  TH1D *hFixedTargetMonitorVr;
+  TH2D *hVertexXY;
+  TH1D *hVertexR;
 
   ClassDef(l4Builder, 1);
 };

@@ -8,13 +8,13 @@
  * day-by-day check through webpage.
  * UPC plots[#0-35], as well as JPsi plots can be chosen to turn on/off by
  * setting switch in inputPara.dat.
- *
- * Default mode contains Basic plots + JPsi plots.
+ * 
+ * Default mode contains Basic plots.
  * The directory of dE/dx theoretical curve should be pointed in inputPara.dat.
  * Essential Functions init/start/stop/event/main
  *
  * @todo Weird TheoDedx_K_neg value if set mininum P at 0.1(0.101 now)
- * @author Q-Y. Shou
+ * @author Q-Y. Shou, Zhengqiao
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -90,8 +90,13 @@ void l4Builder::initialize(int argc, char *argv[])
   innerGainPara = -999;
   outerGainPara = -999;
   eventCounter = 0;
+  switch_BesGood = 1;
+  switch_BesMonitor = 1;
+  switch_FixedTarget = 1;
+  switch_FixedTargetMonitor = 1;
+  switch_HeavyFragment = 0;
   switch_upc = 0;
-  switch_jpsi = 1;
+  switch_jpsi = 0;
   
   ifstream inData;
   string paraName;
@@ -103,6 +108,11 @@ void l4Builder::initialize(int argc, char *argv[])
   else {
     while(!inData.eof()) {
       inData>>paraName;
+      if (paraName == "BesGood") inData>>switch_BesGood;
+      if (paraName == "BesMonitor") inData>>switch_BesMonitor;
+      if (paraName == "FixedTarget") inData>>switch_FixedTarget;
+      if (paraName == "FixedTargetMonitor") inData>>switch_FixedTargetMonitor;
+      if (paraName == "HeavyFragment") inData>>switch_HeavyFragment;
       if (paraName == "JPsi") inData>>switch_jpsi;
       if (paraName == "UPC") inData>>switch_upc;
       if (paraName == "dEdxTheoDir") inData>>dEdxTheoDir;
@@ -160,11 +170,41 @@ void l4Builder::initialize(int argc, char *argv[])
   gStyle->SetPadGridX(0);
   gStyle->SetPadGridY(0);
   
-  for (int i=0; i<48; i++) {
+  for (int i=0; i<41; i++) {
     HltPlots[i] = new JevpPlot();
     HltPlots[i]->gridx=0;
     HltPlots[i]->gridy=0;
     HltPlots[i]->setPalette(1);
+  }
+  for(int i=0; i<2;i++) {
+    BesGoodPlots[i] = new JevpPlot();
+    BesGoodPlots[i]->gridx=0;
+    BesGoodPlots[i]->gridy=0;
+    BesGoodPlots[i]->setPalette(1);
+  }
+  for(int i=0; i<2;i++) {
+    BesMontinorPlots[i] = new JevpPlot();
+    BesMontinorPlots[i]->gridx=0;
+    BesMontinorPlots[i]->gridy=0;
+    BesMontinorPlots[i]->setPalette(1);
+  }
+  for(int i=0; i<2;i++) {
+    FixedTargetPlots[i] = new JevpPlot(); 
+    FixedTargetPlots[i]->gridx=0;
+    FixedTargetPlots[i]->gridy=0;
+    FixedTargetPlots[i]->setPalette(1);
+  }
+  for(int i=0; i<2;i++) {
+    FixedTargetMonitorPlots[i] = new JevpPlot();
+    FixedTargetMonitorPlots[i]->gridx=0;
+    FixedTargetMonitorPlots[i]->gridy=0;
+    FixedTargetMonitorPlots[i]->setPalette(1);
+  }
+  for(int i=0; i<1;i++) { 
+    HeavyFragmentPlots[i] = new JevpPlot();  
+    HeavyFragmentPlots[i]->gridx=0;  
+    HeavyFragmentPlots[i]->gridy=0;
+    HeavyFragmentPlots[i]->setPalette(1);
   }
   for (int i=0; i<14; i++) {
     JPsiPlots[i] = new JevpPlot();
@@ -180,18 +220,56 @@ void l4Builder::initialize(int argc, char *argv[])
   }
 
   cout<<"HltPlots OK"<<endl;
+  if (switch_BesGood == 1) cout<<"with BesGood shown in monitor"<<endl; 
+  if (switch_BesMonitor == 1) cout<<"with BesMonitor shown in monitor"<<endl;
+  if (switch_FixedTarget == 1) cout<<"with FixedTarget shown in monitor"<<endl;
+  if (switch_FixedTargetMonitor == 1) cout<<"with FixedTargetMonitor shown in monitor"<<endl;
+  if (switch_HeavyFragment == 1) cout<<"with HeavyFragment shown in monitor"<<endl;
   if (switch_jpsi == 1) cout<<"with J/Psi shown in monitor"<<endl;
   if (switch_upc == 1) cout<<"with UPC shown in monitor"<<endl;
-
   defineHltPlots();
+  defineBesGoodPlots();
+  defineBesMontinorPlots(); 
+  defineFixedTargetPlots();
+  defineFixedTargetMonitorPlots();
+  defineHeavyFragmentPlots();
   defineJPsiPlots();
   defineHltPlots_UPC();
   setAllPlots();
-
-  for (int i=0; i<48; i++) {
+  for (int i=0; i<41; i++) {
     LOG(DBG, "Adding plot %d",i);
     addPlot(HltPlots[i]);
   }
+  if(switch_BesGood==1){
+    for (int i=0;i<2;i++) {
+      LOG(DBG, "Adding plot %d",i); 
+      addPlot(BesGoodPlots[i]);
+    }
+ }
+  if(switch_BesMonitor==1){
+    for (int i=0;i<2;i++) {
+      LOG(DBG, "Adding plot %d",i);  
+      addPlot(BesMontinorPlots[i]); 
+    }
+ }
+  if(switch_FixedTarget==1){
+    for (int i=0;i<2;i++) {  
+      LOG(DBG, "Adding plot %d",i); 
+      addPlot(FixedTargetPlots[i]);
+    }
+ }
+  if(switch_FixedTargetMonitor==1){ 
+    for (int i=0;i<2;i++) {  
+      LOG(DBG, "Adding plot %d",i);
+      addPlot(FixedTargetMonitorPlots[i]); 
+    }
+ }
+  if(switch_HeavyFragment==1){
+    for (int i=0;i<1;i++) { 
+      LOG(DBG, "Adding plot %d",i); 
+      addPlot(HeavyFragmentPlots[i]); 
+    }  
+ }
   if (switch_jpsi==1) {
     for (int i=0;i<14;i++) {
       LOG(DBG, "Adding plot %d",i);
@@ -213,36 +291,28 @@ void l4Builder::startrun(daqReader *rdr)
   printf("hello there. This is startrun\n");
   runnumber = rdr->run;
 
-  if (switch_jpsi==1 && switch_upc==1) {
-    for (int i=0; i<98; i++) getPlotByIndex(i)->getHisto(0)->histo->Reset();
-    hHFM_dEdx->Reset();
+  int initialno = 41;
+  if(switch_BesGood == 1) initialno+=2;
+  if(switch_BesMonitor == 1) initialno+=2;
+  if(switch_FixedTarget == 1) initialno+=2; 
+  if(switch_FixedTargetMonitor == 1) initialno+=2;
+  if(switch_HeavyFragment == 1) initialno+=1;
+  if(switch_jpsi == 1) initialno+=14;
+  if(switch_upc == 1) initialno+=36;
+  for (int i=0; i<initialno; i++) {getPlotByIndex(i)->getHisto(0)->histo->Reset();    }                 
+    if(switch_HeavyFragment==1){hHFM_dEdx->Reset();}
+    if(switch_jpsi == 1){
     hDiElectronInvMassTpxEmcBG->Reset();
     hDiElectronInvMassFullRangeBG->Reset();
     hDiElectronInvMassCutBG->Reset();
     hDiPionInvMassFullRangeBG->Reset();
     hDiMuonInvMassFullRangeBG->Reset();
     hDiMuonInvMassTpxCutBG->Reset();
+    }
+    if(switch_upc == 1){
     hHFM_dEdx_UPC->Reset();
     hDiElectronInvMassFullRangeBG_UPC->Reset();
-  }
-  else if (switch_jpsi==1 && switch_upc==0) {
-    for (int i=0; i<62; i++) getPlotByIndex(i)->getHisto(0)->histo->Reset();
-    hHFM_dEdx->Reset();
-    hDiElectronInvMassTpxEmcBG->Reset();
-    hDiElectronInvMassFullRangeBG->Reset();
-    hDiElectronInvMassCutBG->Reset();
-    hDiPionInvMassFullRangeBG->Reset();
-    hDiMuonInvMassFullRangeBG->Reset();
-    hDiMuonInvMassTpxCutBG->Reset();
-  }
-  else if (switch_jpsi==0 && switch_upc==1) {
-    for (int i=0; i<84; i++) getPlotByIndex(i)->getHisto(0)->histo->Reset();
-    hHFM_dEdx_UPC->Reset();
-    hDiElectronInvMassFullRangeBG_UPC->Reset();
-  }
-  else
-    for (int i=0; i<48; i++) getPlotByIndex(i)->getHisto(0)->histo->Reset();
-
+    }
   printf("Starting run #%d\n",runnumber);    
 };
 
@@ -413,38 +483,31 @@ void l4Builder::stoprun(daqReader *rdr)
 void l4Builder::writeHistogram()
 {
   char histfile[256];
-  sprintf(histfile,"%s/run12_hlt_%d_current_hist.root",Destindir,runnumber);
+  sprintf(histfile,"%s/run14_hlt_%d_current_hist.root",Destindir,runnumber);
   TFile file(histfile,"RECREATE");
-  if (switch_jpsi==1 && switch_upc==1) {
-    for (int i=0; i<98; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();
-    hHFM_dEdx->Write();
-    hDiElectronInvMassTpxEmcBG->Write();
-    hDiElectronInvMassFullRangeBG->Write();
-    hDiElectronInvMassCutBG->Write();
-    hDiPionInvMassFullRangeBG->Write();
-    hDiMuonInvMassFullRangeBG->Write();
-    hDiMuonInvMassTpxCutBG->Write();
-    hHFM_dEdx_UPC->Write();
-    hDiElectronInvMassFullRangeBG_UPC->Write();
-  }
-  else if (switch_jpsi==1 && switch_upc==0) {
-    for (int i=0; i<62; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();
-    hHFM_dEdx->Write();
-    hDiElectronInvMassTpxEmcBG->Write();
-    hDiElectronInvMassFullRangeBG->Write();
-    hDiElectronInvMassCutBG->Write();
-    hDiPionInvMassFullRangeBG->Write();
-    hDiMuonInvMassFullRangeBG->Write();
-    hDiMuonInvMassTpxCutBG->Write();
-  }
-  else if (switch_jpsi==0 && switch_upc==1) {
-    for (int i=0; i<84; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();
-    hHFM_dEdx_UPC->Write();
-    hDiElectronInvMassFullRangeBG_UPC->Write();
-  }
-  else
-    for (int i=0; i<48; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();
+  int initialno = 41;
+  if(switch_BesGood == 1) initialno+=2;
+  if(switch_BesMonitor == 1) initialno+=2;
+  if(switch_FixedTarget == 1) initialno+=2;
+  if(switch_FixedTargetMonitor == 1) initialno+=2;
+  if(switch_HeavyFragment == 1) initialno+=1;
+  if(switch_jpsi == 1) initialno+=14;
+  if(switch_upc == 1) initialno+=36;
 
+  for (int i=0; i<initialno; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();     
+    if(switch_HeavyFragment==1){hHFM_dEdx->Write();}           
+    if(switch_jpsi == 1){
+    hDiElectronInvMassTpxEmcBG->Write();                                                              
+    hDiElectronInvMassFullRangeBG->Write();                                                           
+    hDiElectronInvMassCutBG->Write();                                                                 
+    hDiPionInvMassFullRangeBG->Write();                                                               
+    hDiMuonInvMassFullRangeBG->Write();                                                               
+    hDiMuonInvMassTpxCutBG->Write();   
+    }
+    if(switch_upc == 1){
+    hHFM_dEdx_UPC->Write();                                                                           
+    hDiElectronInvMassFullRangeBG_UPC->Write();  
+    }
   file.Close();
 }
 
@@ -495,6 +558,9 @@ void l4Builder::event(daqReader *rdr)
   int triggerBitUPC = 0x4000000;
   int triggerBitUPCDiElectron = 0x2000000;
   int triggerBitDiMuon = 0x8000000;
+  int triggerBitFixedTarget = 0x10000000; 
+  int triggerBitFixedTargetMonitor = 0x20000000;
+  int triggerBitBesMonitor = 0x40000000;
   
   //cout<<"event begin"<<endl;
 
@@ -543,71 +609,19 @@ void l4Builder::event(daqReader *rdr)
   int upc = 0x2; int mtd = 0x0; int npehtnozdc = 0x40; int vpdmb = 0x20; int central = 0x4; 
   int npeht = 0x40000; int npe11 = 0x800; int npe15 = 0x10000; int npe18 = 0x20000; int atom = 0x8;
   int central_1_protected = 0x100000;
-  //   cout<<decision<<endl;
-  if (daqID & upc) {
-    if (decision & triggerBitHighPt) hUpc->Fill(0.);
-    if (decision & triggerBitUPCDiElectron) hUpc->Fill(1.);
-    if (decision & triggerBitUPC) hUpc->Fill(2.);
-    if (decision & triggerBitHeavyFragment) hUpc->Fill(3.);
-  }
-  if (daqID & mtd) {
-      if (decision & triggerBitHighPt) hMtd->Fill(0.);
-      if (decision & triggerBitDiElectron) hMtd->Fill(1.);
-      if (decision & triggerBitHeavyFragment) hMtd->Fill(2.);
-    }
-  if (daqID & npehtnozdc) {
-      if (decision & triggerBitHighPt) hNpeHt_25_NoZdc->Fill(0.);
-      if (decision & triggerBitDiElectron) hNpeHt_25_NoZdc->Fill(1.);
-      if (decision & triggerBitHeavyFragment) hNpeHt_25_NoZdc->Fill(2.);
-    }
-  if (daqID & vpdmb) {
-      if (decision & triggerBitHighPt) hVpdMb->Fill(0.);
-      if (decision & triggerBitDiElectron) hVpdMb->Fill(1.);
-      if (decision & triggerBitHeavyFragment) hVpdMb->Fill(2.);
-    }
-  if (daqID & central) {
-      if (decision & triggerBitHighPt) hCentral->Fill(0.);
-      if (decision & triggerBitDiElectron) hCentral->Fill(1.);
-      if (decision & triggerBitHeavyFragment) hCentral->Fill(2.);
-    }
-  if (daqID & npeht) {
-      if (decision & triggerBitHighPt) hNpeHt_25->Fill(0.);
-      if (decision & triggerBitDiElectron) hNpeHt_25->Fill(1.);
-      if (decision & triggerBitHeavyFragment) hNpeHt_25->Fill(2.);
-    }
-  if (daqID & npe11) {
-      if (decision & triggerBitHighPt) hNpe->Fill(0.);
-      if (decision & triggerBitDiElectron) hNpe->Fill(1.);
-      if (decision & triggerBitHeavyFragment) hNpe->Fill(2.);
-    }
-  if (daqID & npe15) {
-      if (decision & triggerBitHighPt) hNpe->Fill(3.);
-      if (decision & triggerBitDiElectron) hNpe->Fill(4.);
-      if (decision & triggerBitHeavyFragment) hNpe->Fill(5.);
-    }
-  if (daqID & npe18) {
-      if (decision & triggerBitHighPt) hNpe->Fill(6.);
-      if (decision & triggerBitDiElectron) hNpe->Fill(7.);
-      if (decision & triggerBitHeavyFragment) hNpe->Fill(8.);
-    }
-  if (daqID & atom) {
-      if (decision & triggerBitHighPt) hAtomcule->Fill(0.);
-      if (decision & triggerBitDiElectron) hAtomcule->Fill(1.);
-      if (decision & triggerBitHeavyFragment) hAtomcule->Fill(2.);
-    }
-
-  if (decision & triggerBitHighPt) { hEvtsAccpt->Fill(1.); hEvtsAccpt->Fill(0.); }
-  if (decision & triggerBitDiElectron) { hEvtsAccpt->Fill(2.); hEvtsAccpt->Fill(0.); }
-  if (decision & triggerBitHeavyFragment) { hEvtsAccpt->Fill(3.); hEvtsAccpt->Fill(0.); }
-  if (decision & triggerBitRandomEvents) { hEvtsAccpt->Fill(4.); hEvtsAccpt->Fill(0.); }
-  if (decision & triggerBitUPCDiElectron) { hEvtsAccpt->Fill(5.); hEvtsAccpt->Fill(0.); }
-  if (decision & triggerBitUPC) { hEvtsAccpt->Fill(6.); hEvtsAccpt->Fill(0.); } 
-  if (decision & triggerBitDiMuon) { hEvtsAccpt->Fill(7.); hEvtsAccpt->Fill(0.); }
-
+  
+  if (decision & triggerBitAllEvents) { hEvtsAccpt->Fill(0.); }
+  if (decision & triggerBitRandomEvents) { hEvtsAccpt->Fill(1.); } 
+  if (decision & triggerBitBesgoodEvents) { hEvtsAccpt->Fill(2.); }
+  if (decision & triggerBitBesMonitor ) { hEvtsAccpt->Fill(3.); }
+  if (decision & triggerBitFixedTarget) { hEvtsAccpt->Fill(4.); }
+  if (decision & triggerBitFixedTargetMonitor) { hEvtsAccpt->Fill(5.); }
+  
   // fill events
   float vertX = hlt_eve->vertexX;
   float vertY = hlt_eve->vertexY;
   float vertZ = hlt_eve->vertexZ;
+  float vertR = sqrt(vertX*vertX+vertY*vertY);
   float lmvertX = hlt_eve->lmVertexX;
   float lmvertY = hlt_eve->lmVertexY;
   float lmvertZ = hlt_eve->lmVertexZ;
@@ -619,11 +633,33 @@ void l4Builder::event(daqReader *rdr)
   hVertexX->Fill(vertX);
   hVertexY->Fill(vertY);
   hVertexZ->Fill(vertZ);
+  hVertexXY->Fill(vertX,vertY);
+  hVertexR->Fill(vertR);
   hLm_VertexX->Fill(lmvertX);
   hLm_VertexY->Fill(lmvertY);
   hLm_VertexZ->Fill(lmvertZ); 
   hVzvpd_Vz->Fill(VzVpd, lmvertZ);
   hVzDiff->Fill(VzVpd-lmvertZ);
+
+  if(decision & triggerBitBesgoodEvents){
+      hBesGoodVertexXY->Fill(vertX,vertY);
+      hBesGoodVr->Fill(vertR);
+    }
+  
+  if(decision & triggerBitBesMonitor){
+      hBesMonitorVertexXY->Fill(vertX,vertY);
+      hBesMonitorVr->Fill(vertR);
+    }
+
+  if(decision & triggerBitFixedTarget){
+      hFixedTargetVertexXY->Fill(vertX,vertY);
+      hFixedTargetVr->Fill(vertR);
+    }
+
+  if(decision & triggerBitFixedTargetMonitor){
+      hFixedTargetMonitorVertexXY->Fill(vertX,vertY);
+      hFixedTargetMonitorVr->Fill(vertR);
+    }
 
   if (daqID & upc) {
       hVertexX_UPC->Fill(vertX);
@@ -721,7 +757,7 @@ void l4Builder::event(daqReader *rdr)
 	}
       }
       if (nHits >= 20 && ndedx >= 20) {
- 	hdEdx->Fill(p*q,dedx); // for HF reference
+        hdEdx_HeavyFragment->Fill(p*q,dedx);//HeavyFragment Trigger
 	if (daqID & upc) {
 	  hdEdx_UPC->Fill(p*q,dedx); // for HF reference
 	}
@@ -1406,7 +1442,7 @@ static Double_t funcDedx_He4_neg(Double_t *x, Double_t *par) {
 void l4Builder::defineHltPlots()
 {
   HltPlots[index]->logy = 1;
-  hEvtsAccpt = new TH1I("EvtsAccpt","EvtsAccpt",10,0.,10);
+  hEvtsAccpt = new TH1I("EvtsAccpt","EvtsAccpt",6,0.,6);
   ph = new PlotHisto();
   ph->histo = hEvtsAccpt;
   HltPlots[index]->addHisto(ph);
@@ -1536,31 +1572,43 @@ void l4Builder::defineHltPlots()
   HltPlots[index]->addHisto(ph);
 
   index++; //17
+  hVertexXY = new TH2D("VertexXY","VertexXY",200,-2,2,200,-2,2);
+  ph = new PlotHisto();
+  ph->histo = hVertexXY;
+  HltPlots[index]->addHisto(ph);
+
+  index++; //18
+  hVertexR = new TH1D("VertexR","VertexR",200,0,4);
+  ph = new PlotHisto();
+  ph->histo = hVertexR;
+  HltPlots[index]->addHisto(ph);
+
+  index++; //19
   hLm_VertexX = new TH1D("Lm_VertexX","Lm_VertexX",200,-2.,2.);
   ph = new PlotHisto();
   ph->histo = hLm_VertexX;
   HltPlots[index]->addHisto(ph);
 
-  index++; //18
+  index++; //20
   hLm_VertexY = new TH1D("Lm_VertexY","Lm_VertexY",200,-2.,2.);
   ph = new PlotHisto();
   ph->histo = hLm_VertexY;
   HltPlots[index]->addHisto(ph);
 
-  index++; //19
+  index++; //21
   hLm_VertexZ = new TH1D("Lm_VertexZ","Lm_VertexZ",1000,-200.,200.);
   ph = new PlotHisto();
   ph->histo = hLm_VertexZ;
   HltPlots[index]->addHisto(ph);
 
-  index++; //20
+  index++; //22
   HltPlots[index]->logy=1;
   hglobalMult = new TH1I("globalMult", "globalMult",4200,0,4200);
   ph = new PlotHisto();
   ph->histo = hglobalMult;
   HltPlots[index]->addHisto(ph);
 
-  index++; //21
+  index++; //23
   HltPlots[index]->logy=1;
   hprimaryMult = new TH1I("primaryMult", "primaryMult",2200,0,2200);
   ph = new PlotHisto();
@@ -1576,37 +1624,37 @@ void l4Builder::defineHltPlots()
   //   addPlot(HltPlots[index]);
 
   // Emc
-  index++; //22
+  index++; //24
   hMatchPhi_Diff = new TH1D("Emc_matchPhiDiff","Emc_matchPhiDiff",50,0.,0.1);
   ph = new PlotHisto();
   ph->histo = hMatchPhi_Diff;
   HltPlots[index]->addHisto(ph);
 
-  index++; //23
+  index++; //25
   hTowerEnergy = new TH1D("Emc_towerEnergy","Emc_towerEnergy",200,0.,20.);
   ph = new PlotHisto();
   ph->histo = hTowerEnergy;
   HltPlots[index]->addHisto(ph);
 
-  index++; //24
+  index++; //26
   hTowerDaqId = new TH1I("Emc_towerDaqId","Emc_towerDaqId",5000,0.,5000.);
   ph = new PlotHisto();
   ph->histo = hTowerDaqId;
   HltPlots[index]->addHisto(ph);
 
-  index++; //25
+  index++; //27
   hTowerSoftId = new TH1I("Emc_towerSoftId","Emc_towerSoftId",5000,0.,5000.);
   ph = new PlotHisto();
   ph->histo = hTowerSoftId;
   HltPlots[index]->addHisto(ph);
 
-  index++; //26
+  index++; //28
   hzEdge = new TH1D("Emc_zEdge","Emc_zEdge",100,0.,5.);
   ph = new PlotHisto();
   ph->histo = hzEdge;
   HltPlots[index]->addHisto(ph);
 
-  index++; //27
+  index++; //29
   //   HltPlots[index]->optstat = 0;
   HltPlots[index]->setDrawOpts("colz");
   hTowerEtaPhi = new TH2F("Emc_towerEtaPhi","Emc_towerEtaPhi",120,-pi,pi,40,-1,1);
@@ -1615,136 +1663,59 @@ void l4Builder::defineHltPlots()
   HltPlots[index]->addHisto(ph);
 
   // ToF
-  index++; //28
+  index++; //30
   hLocalZ = new TH1D("Tof_LocalZ","Tof_LocalZ",100,-5.,5.0);
   ph = new PlotHisto();
   ph->histo = hLocalZ;
   HltPlots[index]->addHisto(ph);
 
-  index++; //29
+  index++; //31
   hLocalY = new TH1D("Tof_LocalY","Tof_LocalY",300,-15.,15.);
   ph = new PlotHisto();
   ph->histo = hLocalY;
   HltPlots[index]->addHisto(ph);
 
-  index++; //30
+  index++; //32
   HltPlots[index]->setDrawOpts("colz");
   hInverseBeta = new TH2F("Tof_InverseBeta","Tof_InverseBeta",500,0,5,500,0.0,5.);
   ph = new PlotHisto();
   ph->histo = hInverseBeta;
   HltPlots[index]->addHisto(ph);
 
-  index++; //31
+  index++; //33
   HltPlots[index]->setDrawOpts("colz");
   hMatchId_fiberId = new TH2F("Tof_matchId_fireId","Tof_matchId_fireId",200,0,200,200,0,200); 
   ph = new PlotHisto();
   ph->histo = hMatchId_fiberId;
   HltPlots[index]->addHisto(ph);
 
-  index++; //32
+  index++; //34
   HltPlots[index]->setDrawOpts("colz");
   hTrayID_TrgTime = new TH2F("Tof_TrayID_TrgTime","Tof_TrayID_TrgTime",124,0.,124,400,2700,3100);
   ph = new PlotHisto();
   ph->histo = hTrayID_TrgTime;
   HltPlots[index]->addHisto(ph);
 
-  index++; //33
+  index++; //35
   hchannelID = new TH1D("Tof_channelID","Tof_channelID",200,0,200);
   ph = new PlotHisto();
   ph->histo = hchannelID;
   HltPlots[index]->addHisto(ph);
 
-  index++; //34
+  index++; //36
   HltPlots[index]->setDrawOpts("colz");
   hVzvpd_Vz = new TH2F("Vzvpd_Vz","Vzvpd_Vz",400,-100,100,400,-100,100);
   ph = new PlotHisto();
   ph->histo = hVzvpd_Vz;
   HltPlots[index]->addHisto(ph);
 
-  index++; //35
+  index++; //37
   hVzDiff = new TH1D("VzDiff","VzDiff",200,-20,20);
   ph = new PlotHisto();
   ph->histo = hVzDiff;
   HltPlots[index]->addHisto(ph);
 
-  index++; //36
-  HltPlots[index]->setDrawOpts("colz");
-  HltPlots[index]->gridx=1;
-  HltPlots[index]->gridy=1;
-  HltPlots[index]->addElement(fTheoDedx_e_pos);
-  HltPlots[index]->addElement(fTheoDedx_e_neg);
-  HltPlots[index]->addElement(fTheoDedx_Pi_pos);
-  HltPlots[index]->addElement(fTheoDedx_Pi_neg);
-  HltPlots[index]->addElement(fTheoDedx_K_pos);
-  HltPlots[index]->addElement(fTheoDedx_K_neg);
-  HltPlots[index]->addElement(fTheoDedx_P_pos);
-  HltPlots[index]->addElement(fTheoDedx_P_neg);
-  HltPlots[index]->addElement(fTheoDedx_D_pos);
-  HltPlots[index]->addElement(fTheoDedx_D_neg);
-  HltPlots[index]->addElement(fTheoDedx_T_pos);
-  HltPlots[index]->addElement(fTheoDedx_T_neg);
-  HltPlots[index]->addElement(fTheoDedx_He3_pos);
-  HltPlots[index]->addElement(fTheoDedx_He3_neg);
-  HltPlots[index]->addElement(fTheoDedx_He4_pos);
-  HltPlots[index]->addElement(fTheoDedx_He4_neg);
-  hdEdx = new TH2F("dEdx","dEdx",500,-5,5,300,0,3.e-5);
-  ph = new PlotHisto();
-  ph->histo = hdEdx;
-  HltPlots[index]->addHisto(ph);
-  hHFM_dEdx = new TH2F("HFM_dEdx","HFM_dEdx",500,-5,5,300,0,3.e-5);
-  ph = new PlotHisto();
-  ph->histo = hHFM_dEdx;
-  HltPlots[index]->addHisto(ph);
-
-  index++; //37
-  hUpc = new TH1I("UPC","UPC",10,0.,10);
-  ph = new PlotHisto(); 
-  ph->histo = hUpc;
-  HltPlots[index]->addHisto(ph);
-
   index++; //38
-  hMtd = new TH1I("MTD","MTD",10,0.,10);
-  ph = new PlotHisto();
-  ph->histo = hMtd;
-  HltPlots[index]->addHisto(ph);
-
-  index++; //39
-  hNpeHt_25_NoZdc = new TH1I("NPEHt_25_NOZDC","NPEHT_25_NOZDC",10,0.,10);
-  ph = new PlotHisto();
-  ph->histo = hNpeHt_25_NoZdc;
-  HltPlots[index]->addHisto(ph);
-
-  index++; //40
-  hVpdMb = new TH1I("VPDMB","VPDMB",10,0.,10);
-  ph = new PlotHisto();
-  ph->histo = hVpdMb;
-  HltPlots[index]->addHisto(ph);
-
-  index++; //41
-  hCentral = new TH1I("Central","Central",10,0.,10);
-  ph = new PlotHisto();
-  ph->histo = hCentral;
-  HltPlots[index]->addHisto(ph);
-
-  index++; //42
-  hNpeHt_25 = new TH1I("NPEHt_25","NPEHt_25",10,0.,10);
-  ph = new PlotHisto();
-  ph->histo = hNpeHt_25;
-  HltPlots[index]->addHisto(ph);
-
-  index++; //43
-  hNpe = new TH1I("NPE11_NPE15_NPE18","NPE11_NPE15_NPE18",10,0.,10);
-  ph = new PlotHisto();
-  ph->histo = hNpe;
-  HltPlots[index]->addHisto(ph);
-
-  index++; //44
-  hAtomcule = new TH1I("Atomcule","Atomcule",10,0.,10);
-  ph = new PlotHisto();
-  ph->histo = hAtomcule;
-  HltPlots[index]->addHisto(ph);
-
-  index++; //45
   HltPlots[index]->setDrawOpts("p");
   //   HltPlots[index]->addElement(leg1);
   //   HltPlots[index]->addElement(leg2);
@@ -1757,7 +1728,7 @@ void l4Builder::defineHltPlots()
   ph->histo = hBeamY;
   HltPlots[index]->addHisto(ph);
 
-  index++; //46
+  index++; //39
   HltPlots[index]->setDrawOpts("p");
   hInnerGain = new TH1D("innerGain","innerGain",105,0.,105);
   ph = new PlotHisto();
@@ -1768,15 +1739,106 @@ void l4Builder::defineHltPlots()
   ph->histo = hOuterGain;
   HltPlots[index]->addHisto(ph);
 
-  index++; //47
+  index++; //40
   HltPlots[index]->setDrawOpts("p");
   hMeanDcaXy = new TH1D("meanDcaXy","meanDcaXy",105,0.,105);
   ph = new PlotHisto();
   ph->histo = hMeanDcaXy;
   HltPlots[index]->addHisto(ph);
+
 }
 
-  
+void l4Builder::defineBesGoodPlots()
+{
+  index=0; 
+  hBesGoodVertexXY = new TH2D("BesGood_VertexXY","BesGood_VertexXY",200,-5,5,200,-5,5);               
+  ph = new PlotHisto();
+  ph->histo = hBesGoodVertexXY;
+  BesGoodPlots[index]->addHisto(ph);   
+
+  index++; //1
+  hBesGoodVr = new TH1D("BesGood_Vr","BesGood_Vr",100,0,5);
+  ph = new PlotHisto();
+  ph->histo = hBesGoodVr;
+  BesGoodPlots[index]->addHisto(ph);
+}
+
+void l4Builder::defineBesMontinorPlots()
+{
+  index=0;
+  hBesMonitorVertexXY = new TH2D("BesMonitor_VertexXY","BesMonitor_VertexXY",200,-5,5,200,-5,5);
+  ph = new PlotHisto();
+  ph->histo = hBesMonitorVertexXY;
+  BesMontinorPlots[index]->addHisto(ph);
+
+  index++; //1
+  hBesMonitorVr = new TH1D("BesMonitor_Vr","BesMonitor_Vr",100,0,5);
+  ph = new PlotHisto();
+  ph->histo = hBesMonitorVr;
+  BesMontinorPlots[index]->addHisto(ph); 
+}
+
+void l4Builder::defineFixedTargetPlots()
+{
+  index=0;
+  hFixedTargetVertexXY = new TH2D("FixedTarget_VertexXY","FixedTarget_VertexXY",200,-5,5,200,-5,5);   
+  ph = new PlotHisto();                                                                               
+  ph->histo = hFixedTargetVertexXY;                                                                   
+  FixedTargetPlots[index]->addHisto(ph); 
+
+  index++; //1
+  hFixedTargetVr = new TH1D("FixedTarget_Vr","FixedTarget_Vr",300,0,10);
+  ph = new PlotHisto();
+  ph->histo = hFixedTargetVr;
+  FixedTargetPlots[index]->addHisto(ph);
+}
+
+void l4Builder::defineFixedTargetMonitorPlots()
+{
+  index=0;
+  hFixedTargetMonitorVertexXY = new TH2D("FixedTargetMonitor_VertexXY","FixedTargetMonitor_VertexXY",200,-5,5,200,-5,5);
+  ph = new PlotHisto();
+  ph->histo = hFixedTargetMonitorVertexXY;
+  FixedTargetMonitorPlots[index]->addHisto(ph);
+
+  index++; //1
+  hFixedTargetMonitorVr = new TH1D("FixedTargetMonitor_Vr","FixedTargetMonitor_Vr",300,0,10);
+  ph = new PlotHisto();
+  ph->histo = hFixedTargetMonitorVr;
+  FixedTargetMonitorPlots[index]->addHisto(ph);
+}
+ 
+void l4Builder::defineHeavyFragmentPlots()
+{
+  index=0;
+  HeavyFragmentPlots[index]->setDrawOpts("colz");
+  HeavyFragmentPlots[index]->gridx=1;
+  HeavyFragmentPlots[index]->gridy=1;
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_e_pos);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_e_neg);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_Pi_pos);                                                      
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_Pi_neg);                                                      
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_K_pos);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_K_neg);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_P_pos);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_P_neg);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_D_pos);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_D_neg);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_T_pos);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_T_neg);                                                       
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_He3_pos);                                                     
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_He3_neg);                                                     
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_He4_pos);                                                     
+  HeavyFragmentPlots[index]->addElement(fTheoDedx_He4_neg);                                                     
+  hdEdx_HeavyFragment = new TH2F("HeavyFragment_dEdx","HeavyFragment_dEdx",500,-5,5,300,0,3.e-5);                                               
+  ph = new PlotHisto();
+  ph->histo = hdEdx_HeavyFragment;
+  HeavyFragmentPlots[index]->addHisto(ph);                                                                      
+  hHFM_dEdx = new TH2F("HFM_dEdx","HFM_dEdx",500,-5,5,300,0,3.e-5);                                   
+  ph = new PlotHisto();
+  ph->histo = hHFM_dEdx;
+  HeavyFragmentPlots[index]->addHisto(ph);
+}
 void l4Builder::defineJPsiPlots() // not only J/Psi, but di-pion, di-muon
 {
   // jpsi invariant mass
@@ -2205,30 +2267,33 @@ void l4Builder::setAllPlots()
   hHFM_dEdx->SetMarkerColor(2);
   hnhits->GetXaxis()->SetTitle("nHits");
   hnDedx->GetXaxis()->SetTitle("ndedx");
-  hDcaXy->GetXaxis()->SetTitle("DcaXY");
-  hDcaZ->GetXaxis()->SetTitle("DcaZ");
-  hLn_dEdx->GetXaxis()->SetTitle("log(dEdx) GeV/cm)");
-  hGlob_Pt->GetXaxis()->SetTitle("Pt");
+  hDcaXy->GetXaxis()->SetTitle("DcaXY (cm)");
+  hDcaZ->GetXaxis()->SetTitle("DcaZ (cm)");
+  hLn_dEdx->GetXaxis()->SetTitle("log(dEdx) (GeV/cm)");
+  hGlob_Pt->GetXaxis()->SetTitle("Pt (GeV/c)");
   hGlob_Phi->GetXaxis()->SetTitle("#phi");
   hGlob_Eta->GetXaxis()->SetTitle("#eta");
-  hGlob_dEdx->GetXaxis()->SetTitle("Global Momentum");
-  hGlob_dEdx->GetYaxis()->SetTitle("dEdx in GeV/cm");
-  hPrim_Pt->GetXaxis()->SetTitle("Pt");
+  hGlob_dEdx->GetXaxis()->SetTitle("Global Momentum (GeV/c)");
+  hGlob_dEdx->GetYaxis()->SetTitle("dEdx (GeV/cm)");
+  hPrim_Pt->GetXaxis()->SetTitle("Pt (GeV/c)");
   hPrim_Phi->GetXaxis()->SetTitle("#phi");
   hPrim_Eta->GetXaxis()->SetTitle("#eta");
-  hPrim_dEdx->GetXaxis()->SetTitle("Primary Mommentum");
-  hPrim_dEdx->GetYaxis()->SetTitle("dEdx in GeV/cm");
-  hVertexX->GetXaxis()->SetTitle("VertexX");
-  hVertexY->GetXaxis()->SetTitle("VertexY");
-  hVertexZ->GetXaxis()->SetTitle("VertexZ");
-  hLm_VertexX->GetXaxis()->SetTitle("LmVertexX");
-  hLm_VertexY->GetXaxis()->SetTitle("LmVertexY");
-  hLm_VertexZ->GetXaxis()->SetTitle("LmVertexZ");
+  hPrim_dEdx->GetXaxis()->SetTitle("Primary Momentum (GeV/c)");
+  hPrim_dEdx->GetYaxis()->SetTitle("dEdx (GeV/cm)");
+  hVertexX->GetXaxis()->SetTitle("VertexX (cm)");
+  hVertexY->GetXaxis()->SetTitle("VertexY (cm)");
+  hVertexZ->GetXaxis()->SetTitle("VertexZ (cm)");
+  hVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
+  hVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
+  hVertexR->GetXaxis()->SetTitle("VertexR (cm)");
+  hLm_VertexX->GetXaxis()->SetTitle("LmVertexX (cm)");
+  hLm_VertexY->GetXaxis()->SetTitle("LmVertexY (cm)");
+  hLm_VertexZ->GetXaxis()->SetTitle("LmVertexZ (cm)");
   hglobalMult->GetXaxis()->SetTitle("Multiplicity");
   hprimaryMult->GetXaxis()->SetTitle("Multiplicity");
   //	hLmPrimaryMult->GetXaxis()->SetTitle("Primary Multiplicity");
   hMatchPhi_Diff->GetXaxis()->SetTitle("matchPhiDiff");
-  hTowerEnergy->GetXaxis()->SetTitle("TowerEnergy");
+  hTowerEnergy->GetXaxis()->SetTitle("TowerEnergy (GeV)");
   hTowerDaqId->GetXaxis()->SetTitle("TowerDaqId");
   hTowerSoftId->GetXaxis()->SetTitle("TowerSoftId");
   hzEdge->GetXaxis()->SetTitle("zEdge");
@@ -2245,7 +2310,7 @@ void l4Builder::setAllPlots()
   hDiMuonInvMassTpxCut->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}");
   hDiMuonInvMassTpxCutBG->GetXaxis()->SetTitle("M_{inv}(uu) GeV/c^{2}");
   hdEdx_P1->GetXaxis()->SetTitle("Daughter1 Momentum");
-  hdEdx_P1->GetYaxis()->SetTitle("dEdx in GeV/cm");
+  hdEdx_P1->GetYaxis()->SetTitle("dEdx (GeV/cm)");
   hDaughter1P_TowerEnergy->GetXaxis()->SetTitle("TowerEnergy/P");
   hDaughter1TpxEmcInverseBeta->GetXaxis()->SetTitle("1/#beta");
   hdEdx_P2->GetXaxis()->SetTitle("Daughter2 Momentum");
@@ -2257,18 +2322,18 @@ void l4Builder::setAllPlots()
   hLocalY->GetXaxis()->SetTitle("LocalY");
   //	hTofprimaryMult->GetXaxis()->SetTitle("Primary Multiplicity");
   //	hTofprimaryMult->GetYaxis()->SetTitle("Tof Multiplicity");
-  hInverseBeta->GetXaxis()->SetTitle("Momentum");
+  hInverseBeta->GetXaxis()->SetTitle("Momentum (GeV/c)");
   hInverseBeta->GetYaxis()->SetTitle("1/#beta");
   hMatchId_fiberId->GetXaxis()->SetTitle("matchId");
   hMatchId_fiberId->GetYaxis()->SetTitle("fiberId");
   hTrayID_TrgTime->GetXaxis()->SetTitle("TrayId");
   hTrayID_TrgTime->GetYaxis()->SetTitle("TriggerTime");
   hchannelID->GetXaxis()->SetTitle("ChannelId");
-  hVzvpd_Vz->GetXaxis()->SetTitle("pvpd VertexZ");
-  hVzvpd_Vz->GetYaxis()->SetTitle("LmVertexZ");
-  hVzDiff->GetXaxis()->SetTitle("Vzvpd - LmVertexZ");
-  hdEdx->GetXaxis()->SetTitle("Primary Momentum");
-  hdEdx->GetYaxis()->SetTitle("dEdx in GeV/cm");
+  hVzvpd_Vz->GetXaxis()->SetTitle("pvpd VertexZ (cm)");
+  hVzvpd_Vz->GetYaxis()->SetTitle("LmVertexZ (cm)");
+  hVzDiff->GetXaxis()->SetTitle("Vzvpd - LmVertexZ (cm)");
+  hdEdx_HeavyFragment->SetTitle("Primary Momentum");
+  hdEdx_HeavyFragment->GetYaxis()->SetTitle("dEdx in GeV/cm");
   hHFM_dEdx->GetXaxis()->SetTitle("Primary Momentum");
   hHFM_dEdx->GetYaxis()->SetTitle("dEdx in GeV/cm");
   hDiPionInvMassFullRange->GetXaxis()->SetTitle("M_{inv}(#pi#pi) GeV/c^{2}");
@@ -2293,47 +2358,30 @@ void l4Builder::setAllPlots()
   hMeanDcaXy->SetName("dcaXy mean value");
   hMeanDcaXy->SetTitle("dcaXy mean value");
   hMeanDcaXy->SetLabelSize(0.04,"X");
+  hBesGoodVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
+  hBesGoodVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
+  //hBesGoodVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30); 
+  hBesGoodVr->GetXaxis()->SetTitle("VertexR (cm)");
+  hBesMonitorVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
+  hBesMonitorVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
+  hBesMonitorVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30);
+  hBesMonitorVr->GetXaxis()->SetTitle("VertexR (cm)");
+  hFixedTargetVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
+  hFixedTargetVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
+  hFixedTargetVr->GetXaxis()->SetTitle("VertexR (cm)");
+  //hFixedTargetVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30);
+  hFixedTargetMonitorVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
+  hFixedTargetMonitorVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
+  hFixedTargetMonitorVr->GetXaxis()->SetTitle("VertexR (cm)");
+  //hFixedTargetMonitorVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30);
   hEvtsAccpt->GetXaxis()->SetBinLabel(1,"All");
   //        hEvtsAccpt->GetXaxis()->SetBinLabel(2,"BES good Events");
   //        hEvtsAccpt->GetXaxis()->SetBinLabel(3,"HLT zerobias");
-  hEvtsAccpt->GetXaxis()->SetBinLabel(2,"High Pt");
-  hEvtsAccpt->GetXaxis()->SetBinLabel(3,"J/psi");
-  hEvtsAccpt->GetXaxis()->SetBinLabel(4,"Heavy Fragment");
-  hEvtsAccpt->GetXaxis()->SetBinLabel(5,"HLT zerobias");
-  hEvtsAccpt->GetXaxis()->SetBinLabel(6,"UPC J/psi");
-  hEvtsAccpt->GetXaxis()->SetBinLabel(7,"UPC rho");
-  hEvtsAccpt->GetXaxis()->SetBinLabel(8,"Di-Muon");
-  hUpc->GetXaxis()->SetBinLabel(1,"High Pt");
-  hUpc->GetXaxis()->SetBinLabel(2,"J/psi");
-  hUpc->GetXaxis()->SetBinLabel(3,"rho");
-  hUpc->GetXaxis()->SetBinLabel(4,"Heavy Fragment");
-  hMtd->GetXaxis()->SetBinLabel(1,"High Pt");
-  hMtd->GetXaxis()->SetBinLabel(2,"J/psi");
-  hMtd->GetXaxis()->SetBinLabel(3,"Heavy Fragment");
-  hNpeHt_25_NoZdc->GetXaxis()->SetBinLabel(1,"High Pt");
-  hNpeHt_25_NoZdc->GetXaxis()->SetBinLabel(2,"J/psi");
-  hNpeHt_25_NoZdc->GetXaxis()->SetBinLabel(3,"Heavy Fragment");
-  hVpdMb->GetXaxis()->SetBinLabel(1,"High Pt");
-  hVpdMb->GetXaxis()->SetBinLabel(2,"J/psi");
-  hVpdMb->GetXaxis()->SetBinLabel(3,"Heavy Fragment");
-  hCentral->GetXaxis()->SetBinLabel(1,"High Pt");
-  hCentral->GetXaxis()->SetBinLabel(2,"J/psi");
-  hCentral->GetXaxis()->SetBinLabel(3,"Heavy Fragment");
-  hNpeHt_25->GetXaxis()->SetBinLabel(1,"High Pt");
-  hNpeHt_25->GetXaxis()->SetBinLabel(2,"J/psi");
-  hNpeHt_25->GetXaxis()->SetBinLabel(3,"Heavy Fragment");
-  hNpe->GetXaxis()->SetBinLabel(1,"High Pt NPE11");
-  hNpe->GetXaxis()->SetBinLabel(2,"J/psi NPE11");
-  hNpe->GetXaxis()->SetBinLabel(3,"Heavy Fragment NPE11");
-  hNpe->GetXaxis()->SetBinLabel(4,"High Pt NPE15");
-  hNpe->GetXaxis()->SetBinLabel(5,"J/psi NPE15");
-  hNpe->GetXaxis()->SetBinLabel(6,"Heavy Fragment NPE15");
-  hNpe->GetXaxis()->SetBinLabel(7,"High Pt NPE18");
-  hNpe->GetXaxis()->SetBinLabel(8,"J/psi NPE18");
-  hNpe->GetXaxis()->SetBinLabel(9,"Heavy Fragment NPE18");
-  hAtomcule->GetXaxis()->SetBinLabel(1,"High Pt");
-  hAtomcule->GetXaxis()->SetBinLabel(2,"J/psi");
-  hAtomcule->GetXaxis()->SetBinLabel(3,"Heavy Fragment");
+  hEvtsAccpt->GetXaxis()->SetBinLabel(2,"Random");
+  hEvtsAccpt->GetXaxis()->SetBinLabel(3,"Bes Good Events");
+  hEvtsAccpt->GetXaxis()->SetBinLabel(4,"Bes Monior");
+  hEvtsAccpt->GetXaxis()->SetBinLabel(5,"Fixed Target");
+  hEvtsAccpt->GetXaxis()->SetBinLabel(6,"Fixed Target Monitor");
 
   hGlob_Phi_UPC->SetMinimum(0.);
   hPrim_Phi_UPC->SetMinimum(0.);
@@ -2353,7 +2401,7 @@ void l4Builder::setAllPlots()
   hPrim_Pt_UPC->GetXaxis()->SetTitle("Pt");
   hPrim_Phi_UPC->GetXaxis()->SetTitle("#phi");
   hPrim_Eta_UPC->GetXaxis()->SetTitle("#eta");
-  hPrim_dEdx_UPC->GetXaxis()->SetTitle("Primary Mommentum");
+  hPrim_dEdx_UPC->GetXaxis()->SetTitle("Primary Momentum");
   hPrim_dEdx_UPC->GetYaxis()->SetTitle("dEdx in GeV/cm");
   hVertexX_UPC->GetXaxis()->SetTitle("VertexX");
   hVertexY_UPC->GetXaxis()->SetTitle("VertexY");
