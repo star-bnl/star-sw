@@ -16,31 +16,34 @@ readme files:
 
 > cvs co OnlTools/Jevp
 
-
-
 *** Most current OFFLINE DISTRO:   SL14a ******
 > cvs co OnlTools/Jevp
-> cvs co OnlTools/RTS
 > starver SL14a
 > cons
+(....  At this point, depending on the linux distribution  ...)
+(....  You may find many errors                            ...)
+(....  If so, type the following lines                     ...)
+(....  Otherwise you are done                              ...)
+> cd .$STAR_HOST_SYS/obj/OnlTools/Jevp/StJevpPresenter/
+> $QTDIR/bin/uic EventInfoUi.ui -o ui_EventInfoUi.h
+> $QTDIR/bin/uic ServerInfoUi.ui -o ui_ServerInfoUi.h
+> $QTDIR/bin/uic TriggerDetectorBitsInfoUi.ui -o ui_TriggerDetectorBitsInfoUi.h
+> cd
+> cd cvs  
+(....  This assumes your base directory was cvs ....)
+> cons
+(....  This time, the compile should finish!    ....)
 
-
-> cd .sl53_gcc432/obj/OnlTools/Jevp/StJevpPresenter/
-> /opt/star/sl53_gcc432/qt4/bin/uic EventInfoUi.ui -o ui_EventInfoUi.h
-> /opt/star/sl53_gcc432/qt4/bin/uic ServerInfoUi.ui -o ui_ServerInfoUi.h
-> /opt/star/sl53_gcc432/qt4/bin/uic TriggerDetectorBitsInfoUi.ui -o
 
 *** old OFFLINE: SL12d ****
 > cvs co OnlTools/Jevp
 > cvs co OnlTools/PDFUtil
 > cvs co StRoot/RTS
 > cvs co mgr
-
 Modify the file mgr/construct with the following changes:
 #   diff -r1.180 Construct
 #   375a376
 #   >     push @sysdirlist, "OnlTools/Jevp"; 
-
 > starver SL12d
 > cons
 ***************************
