@@ -28,6 +28,11 @@ sub catch_zap {
     
     system("$LOGCMD \"GOT signal:  $signame.  Kill $jevp_pid\"");
     system("kill $jevp_pid");
+
+    if($signame eq "HUP") {
+	return;
+    }
+
     die();
 }
 
