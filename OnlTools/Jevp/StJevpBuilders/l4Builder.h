@@ -110,7 +110,7 @@ class l4Builder : public JevpPlotSet {
  * @see 
  * @author 
  */  
-  JevpPlot *HltPlots[41];
+  JevpPlot *HltPlots[42];
   JevpPlot *BesGoodPlots[2];
   JevpPlot *BesMontinorPlots[2];
   JevpPlot *FixedTargetPlots[2];
@@ -177,6 +177,23 @@ class l4Builder : public JevpPlotSet {
   int primaryTracks_UPC ;
   int runnumber;
   int iBin;
+  
+ 
+  bool TriggerFilled;
+  bool EventFilled;
+  bool GlobalTracksFilled;
+  bool PrimaryTracksFilled;
+  bool EMCFilled;
+  bool TOFFilled; 
+  bool BESGoodFilled;
+  bool BESMonitorFilled;
+  bool FixedTargetFilled;
+  bool FixedTargetMonirotFilled; 
+  bool UPCFilled; 
+  bool DiMuonFilled;
+  bool UPCDiElectronFilled;
+  bool DiElectronFilled;
+
   int switch_BesGood;
   int switch_BesMonitor;
   int switch_FixedTarget;
