@@ -1,21 +1,3 @@
-/*
-   numbering should be the following :
-   hardware : sector ladder   ITTF : layer  ladder
-   1      1                          1      0
-   1      2                          1      1
-   1      3                          1      2
-   1      4                          0      0
-
-   2      1                          1      3
-   2      2                          1      4
-   2      3                          1      5
-   2      4                          0      1
-   (...)
-   10     1                          1     27
-   10     2                          1     28
-   10     3                          1     29
-   10     4                          0     9
-*/
 
 #include <stdio.h>
 #include <stdexcept>
@@ -45,6 +27,23 @@
  * Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
  * returns average error once you actually want to do tracking, the results
  * depend strongly on the numbers below.
+ *
+   numbering should be the following :
+   hardware : sector ladder   ITTF : layer  ladder
+   1      1                          1      0
+   1      2                          1      1
+   1      3                          1      2
+   1      4                          0      0
+
+   2      1                          1      3
+   2      2                          1      4
+   2      3                          1      5
+   2      4                          0      1
+   (...)
+   10     1                          1     27
+   10     2                          1     28
+   10     3                          1     29
+   10     4                          0     9
  */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile)
    : StiDetectorBuilder("Pixel", active, inputFile)
@@ -63,7 +62,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
    // 2 real rows, but we have detector elements and support elements.
    setNRows(nRows);
 
-   if (StiVMCToolKit::GetVMC()) {useVMCGeometry(); return;}
+   if (StiVMCToolKit::GetVMC()) { useVMCGeometry(); return; }
 
    _gasMat    = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
    mSiMaterial = add(new StiMaterial("PixelSi",  14.,  28.0855,   2.33,     21.82,   14.*12.*1e-9) );
@@ -75,10 +74,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
    double ionization = mSiMaterial->getIonization();
 
    StiElossCalculator *siElossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
-         ionization * ionization,
-         mSiMaterial->getA(),
-         mSiMaterial->getZ(),
-         mSiMaterial->getDensity());
+         ionization * ionization, mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
    StiPlanarShape *pShape;
 
    for (unsigned int row = 0; row < nRows; row++) {
@@ -145,9 +141,9 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 
 void StiPxlDetectorBuilder::useVMCGeometry()
 {
-   LOG_INFO << "StiPxlDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endm;
+   LOG_INFO << "StiPxlDetectorBuilder::useVMCGeometry() -I- Use VMC geometry" << endm;
 
-   THashList *PxlRot = new THashList(400, 0);
+   //THashList *PxlRot = new THashList(400, 0);
    // XXX:ds At the moment gStPxlDbMaker is not defined in offline/hft/StRoot/StPxlDbMaker or
    // StRoot/
    //PxlRot = gStPxlDbMaker->GetRotations();
@@ -155,7 +151,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    //check geometry tables
    /*
      for(int ii=0;ii<400;++ii){
-     TGeoHMatrix *combP=(TGeoHMatrix *)PxlRot->FindObject(Form("R%03i",ii+1));
+     TGeoHMatrix *combP=(TGeoHMatrix *) PxlRot->FindObject(Form("R%03i",ii+1));
      if(combP){
      combP->Prnt();
      }
@@ -400,6 +396,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.7  2014/02/13 02:36:12  smirnovd
+ * Minor corrections
+ *
  * Revision 1.6  2014/02/13 02:36:03  smirnovd
  * Moved CVS log to the bottom
  *
