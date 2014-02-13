@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.8 2014/02/13 02:36:19 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.9 2014/02/13 02:36:26 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -163,21 +163,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
      }
    */
    SetCurrentDetectorBuilder(this);
-
-   const VolumeMap_t PxlVolumes[] = {
-      /*
-      {"GLUA","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"GLUB","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"GLUC","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"ALCA","Aluminum Cable volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"CFBK","Carbon Fiber BacKing volume","HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"DRIV","Driver Board",               "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"PXSI","mother silicon volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"PLAC","Active silicon volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""}
-      */
-      //average weight of a ladder
-      {"PXLA", "PXL LADDER",                 "HALL_1/CAVE_1/TpcRefSys_1", "", ""}
-   };
 
    // Get Materials
 
@@ -377,6 +362,21 @@ void StiPxlDetectorBuilder::useVMCGeometry()
       }
    }
 
+   const VolumeMap_t PxlVolumes[] = {
+      /*
+      {"GLUA","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
+      {"GLUB","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
+      {"GLUC","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
+      {"ALCA","Aluminum Cable volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""},
+      {"CFBK","Carbon Fiber BacKing volume","HALL_1/CAVE_1/TpcRefSys_1","",""},
+      {"DRIV","Driver Board",               "HALL_1/CAVE_1/TpcRefSys_1","",""},
+      {"PXSI","mother silicon volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""},
+      {"PLAC","Active silicon volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""}
+      */
+      //average weight of a ladder
+      {"PXLA", "PXL LADDER",                 "HALL_1/CAVE_1/TpcRefSys_1", "", ""}
+   };
+
    Int_t NoPxlVols = sizeof(PxlVolumes) / sizeof(VolumeMap_t);
    LOG_DEBUG << " # of volume(s) : " << NoPxlVols << endm;
    gGeoManager->RestoreMasterVolume();
@@ -401,6 +401,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.9  2014/02/13 02:36:26  smirnovd
+ * Move struct closer to where it is used
+ *
  * Revision 1.8  2014/02/13 02:36:19  smirnovd
  * Includes and file header corrections
  *
