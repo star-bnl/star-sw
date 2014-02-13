@@ -1,8 +1,14 @@
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.8 2014/02/13 02:36:19 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
+
 #include "TDataSetIter.h"
 #include "THashList.h"
+#include "TGeoVolume.h"
+#include "TGeoMatrix.h"
+#include "TVector3.h"
+
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
 #include "Sti/StiMaterial.h"
@@ -10,7 +16,6 @@
 #include "Sti/StiDetector.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
-#include "StiPxlIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
 #include "StiPxlDetectorBuilder.h"
@@ -396,6 +401,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.8  2014/02/13 02:36:19  smirnovd
+ * Includes and file header corrections
+ *
  * Revision 1.7  2014/02/13 02:36:12  smirnovd
  * Minor corrections
  *
