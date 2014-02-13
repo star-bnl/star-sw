@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.12 2014/02/13 02:36:46 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.13 2014/02/13 02:36:53 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -204,9 +204,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
    StiElossCalculator *ElossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
          ionization * ionization,
-         mSiMaterial->getA(),
-         mSiMaterial->getZ(),
-         mSiMaterial->getDensity());
+         mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
 
    for (UInt_t iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
    {
@@ -372,6 +370,8 @@ void StiPxlDetectorBuilder::useVMCGeometry()
       }
    }
 
+   return;
+
    const VolumeMap_t PxlVolumes[] = {
       /*
       {"GLUA","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
@@ -411,6 +411,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.13  2014/02/13 02:36:53  smirnovd
+ * Minor style issue + exit function before considering inactive material
+ *
  * Revision 1.12  2014/02/13 02:36:46  smirnovd
  * Major change in sti planes creation logic + bunch of variables renamed to improve readability
  *
