@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.11 2014/02/13 02:36:39 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.12 2014/02/13 02:36:46 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -208,95 +208,126 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          mSiMaterial->getZ(),
          mSiMaterial->getDensity());
 
-   for (UInt_t ii = 0; ii < kNumberOfPxlSectors; ++ii) {
-      for (UInt_t jj = 0; jj < kNumberOfPxlLaddersPerSector; ++jj) {
-         for (UInt_t kk = 0; kk < kNumberOfPxlSensorsPerLadder; kk++)
+   for (UInt_t iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
+   {
+      ostringstream geoPath;
+      geoPath << "HALL_1/CAVE_1/IDSM_1/PXMO_1/PXLA_" << iSector;
+      string pxlGeoSector = geoPath.str();
+
+      gGeoManager->cd(pxlGeoSector.c_str());
+      TGeoMatrix*  sectorPos = gGeoManager->GetCurrentNode()->GetMatrix();
+      TGeoRotation sectorRot(*sectorPos);
+
+      for (UInt_t iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
+      {
+         ostringstream geoPathLadder;
+         geoPathLadder << "/LADR_" << iLadder;
+         string pxlGeoLadder = pxlGeoSector + geoPathLadder.str();
+
+         gGeoManager->cd(pxlGeoLadder.c_str());
+         TGeoMatrix*  ladderPos = gGeoManager->GetCurrentNode()->GetMatrix();
+         TGeoRotation ladderRot(*ladderPos);
+
+         for (UInt_t iSensor = 1; iSensor <= kNumberOfPxlSensorsPerLadder; iSensor++)
          {
+            ostringstream geoPathSensor;
+            geoPathSensor << "/PXSI_" << iSensor;
+            string pxlGeoSensor = pxlGeoLadder + geoPathSensor.str();
 
+            gGeoManager->cd(pxlGeoSensor.c_str());
+            TGeoVolume*  sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
+            TGeoMatrix*  sensorPos = gGeoManager->GetCurrentNode()->GetMatrix();
 
+            if (!sensorVol) {
+               Error("useVMCGeometry", "sensorVol PXLA not found");
+               continue;
+            }
 
+            // Convert origin of the sensor geobox to coordinates in the ladder coordinate system
+            double sensorXyzLocal[3]  = {0, 0, 0};
+            double sensorXyzLadder[3] = {0, 0, 0};
+            sensorPos->LocalToMaster(sensorXyzLocal, sensorXyzLadder);
 
+            // Convert origin of the sensor geobox to coordinates in the sector coordinate system
+            double sensorXyzSector[3] = {0, 0, 0};
+            ladderPos->LocalToMaster(sensorXyzLadder, sensorXyzSector);
 
+            // Convert origin of the sensor geobox to coordinates in the sector's mother coordinate system
+            double sensorXyz[3] = {0, 0, 0};
+            sectorPos->LocalToMaster(sensorXyzSector, sensorXyz);
 
+            TVector3 sensorVec(sensorXyz);
+            sensorVec.Print();
 
-            char name[50];
-            sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", ii + 1, jj + 1, kk + 1);
-            LOG_DEBUG << " weigh/daughters/Material/A/Z : " << vol->Weight() << " "
-                      << vol->GetNdaughters() << " " << vol->GetMaterial()->GetName() << " "
-                      << vol->GetMaterial()->GetA() << " " << vol->GetMaterial()->GetZ() << endm;
-            LOG_DEBUG << " DZ/DY/DX : " << box->GetDZ()
-                      << " " << box->GetDY()
-                      << " " << box->GetDX()
-                      << " " << endm;
+            // Build global rotation for the sensor
+            TGeoRotation sensorRot(*sensorPos);
+            sensorRot.MultiplyBy(&ladderRot, false);
+            sensorRot.MultiplyBy(&sectorRot, false);
 
-            //PLAC shape : DX =.961cm ; DY = .002cm ; DZ = .94 cm
+            cout << "sensorRot.GetPhiRotation(): " << sensorRot.GetPhiRotation() << endl;
 
-            StiShape *sh  = new StiPlanarShape(name, 10*box->GetDZ(), box->GetDY(), box->GetDX());
+            TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-            add(sh);
             int matPix = (iSector-1) * 40 + (iLadder-1) * 10 + (iSensor-1);
             cout << " iSector/iLadder/iSensor/matPix : " << iSector << "/" << iLadder << "/" << iSensor
                << "/" << matPix << endl;
 
-            Double_t *xyz = combP->GetTranslation();
-            Double_t *rot = combP->GetRotationMatrix();
+            char name[50];
+            sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", iSector, iLadder, iSensor);
+            LOG_DEBUG << " weigh/daughters/Material/A/Z : " << sensorVol->Weight() << " "
+                      << sensorVol->GetNdaughters() << " " << sensorVol->GetMaterial()->GetName() << " "
+                      << sensorVol->GetMaterial()->GetA() << " " << sensorVol->GetMaterial()->GetZ() << endm;
+            LOG_DEBUG << " DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
-            StThreeVectorD centerVector(xyz[0], xyz[1], xyz[2]);
-            StThreeVectorD normalVector(rot[1], rot[4], rot[7]);
+            // PLAC shape : DX =.961cm ; DY = .002cm ; DZ = .94 cm
 
-            Double_t prod = centerVector * normalVector;
+            StiShape *stiShape = new StiPlanarShape(name, sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
 
-            if (prod < 0) normalVector *= -1;
+            add(stiShape);
 
-            // Normalize normal vector, just in case....
-            normalVector /= normalVector.magnitude();
+            Double_t phi  = sensorVec.Phi();
+            Double_t phiD = sensorRot.GetPhiRotation()/180*M_PI;
+            Double_t r    = sensorVec.Perp();
 
             // Volume positioning
-            StiPlacement *pPlacement = new StiPlacement;
-            Double_t phi  = centerVector.phi();
-            Double_t phiD = normalVector.phi();
-            Double_t r    = centerVector.perp();
-            pPlacement->setZcenter(0);
-            pPlacement->setLayerRadius(r);
+            StiPlacement *pPlacement = new StiPlacement();
 
+            pPlacement->setZcenter(sensorVec.Z());
+            pPlacement->setLayerRadius(r);
             pPlacement->setLayerAngle(phi);
             pPlacement->setRegion(StiPlacement::kMidRapidity);
-            pPlacement->setNormalRep(phiD, r * TMath::Cos(phi - phiD), r * TMath::Sin(phi - phiD));
+            pPlacement->setNormalRep(phiD, r*cos(phi - phiD), r*sin(phi - phiD));
 
-            //Build final detector object
+            // Build final detector object
+            StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
-            StiDetector *p = getDetectorFactory()->getInstance();
-
-            if ( !p ) {
+            if ( !stiDetector ) {
                LOG_INFO << "StiPxlDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
                return;
             }
 
             //char name[50];
-            //sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", ii,jj,kk);
-            p->setName(name);
-            p->setIsOn(kTRUE);
+            //sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", iSector,iLadder,iSensor);
+            stiDetector->setName(name);
+            stiDetector->setIsOn(kTRUE);
             //if (ActiveVolume) {
             //LOG_DEBUG << " current node : " << name << " is set active" <<endm;
-            p->setIsActive(new StiPxlIsActiveFunctor);
+            stiDetector->setIsActive(new StiPxlIsActiveFunctor);
             //}
             //else {
             //LOG_DEBUG << " current node : " << name << " is set inactive" <<endm;
-            //p->setIsActive(new StiNeverActiveFunctor);
+            //stiDetector->setIsActive(new StiNeverActiveFunctor);
             //}
             //if(nameP.Contains("PXSI")) {layer=layer+10;}
 
-            p->setIsContinuousMedium(false);
-            p->setIsDiscreteScatterer(true);
-            p->setShape(sh);
-            p->setPlacement(pPlacement);
-            p->setGas(GetCurrentDetectorBuilder()->getGasMat());
-
-            if (!p->getGas()) LOG_INFO << "gas not there!" << endm;
-
-            p->setMaterial(mSiMaterial);
-            p->setElossCalculator(ElossCalculator);
-            p->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
+            stiDetector->setIsContinuousMedium(false);
+            stiDetector->setIsDiscreteScatterer(true);
+            stiDetector->setShape(stiShape);
+            stiDetector->setPlacement(pPlacement);
+            stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
+            stiDetector->setMaterial(mSiMaterial);
+            stiDetector->setElossCalculator(ElossCalculator);
+            stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 
             Int_t ROW    = 0;
             Int_t SECTOR = 0;
@@ -307,23 +338,22 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                ladder=4 is the inner ladder
             */
             // update 05-15 : inner ladder is ladder 1
-            if (jj == 0) {
+            if (iLadder == 1) {
                ROW = 0 ;
-               SECTOR = ii;
+               SECTOR = iSector-1;
             }
             else {
                ROW = 1;
-               SECTOR = (ii) * 3 + (jj - 1);
+               SECTOR = (iSector-1) * 3 + (iLadder-1);
             }
 
-            p->setKey(1, ROW);
-            p->setKey(2, SECTOR);
-            add(ROW, SECTOR, p);
+            stiDetector->setKey(1, ROW);
+            stiDetector->setKey(2, SECTOR);
+            add(ROW, SECTOR, stiDetector);
 
             // Whole bunch of debugging information
-
             Float_t rad2deg = 180.0 / 3.1415927;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Name               = " << p->getName()                               << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Name               = " << stiDetector->getName()                               << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm;
@@ -333,11 +363,11 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:sector             = " << ii + 1                                       << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Ladder             = " << jj + 1                                       << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:sensor             = " << kk + 1                                       << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:row/sector (ITTF)  = " << ROW << " / " << SECTOR                      << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Active?            = " << p->isActive()                              << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:sector             = " << iSector                                    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Ladder             = " << iLadder                                    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:sensor             = " << iSensor                                    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:row/sector (ITTF)  = " << ROW << " / " << SECTOR                     << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Active?            = " << stiDetector->isActive()                              << endm;
          }
       }
    }
@@ -381,6 +411,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.12  2014/02/13 02:36:46  smirnovd
+ * Major change in sti planes creation logic + bunch of variables renamed to improve readability
+ *
  * Revision 1.11  2014/02/13 02:36:39  smirnovd
  * Revised sensor index
  *
