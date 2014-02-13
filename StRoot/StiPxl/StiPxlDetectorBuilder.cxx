@@ -1,125 +1,3 @@
-// 12/12/2012 : modification of the builder to take into account the new geometry path names
-// backward compatibility with upgr15 geometry is lost
-/*
- * $Id: StiPxlDetectorBuilder.cxx,v 1.5 2014/02/04 16:56:48 smirnovd Exp $
- *
- * $Log: StiPxlDetectorBuilder.cxx,v $
- * Revision 1.5  2014/02/04 16:56:48  smirnovd
- * Clean up and improved readability
- *
- * Revision 1.4  2014/02/04 16:56:38  smirnovd
- * Decreased indentation by one level
- *
- * Revision 1.3  2014/02/01 19:23:29  smirnovd
- * Use defined constants
- *
- * Revision 1.2  2014/02/01 19:23:15  smirnovd
- * Corrected location of included header files
- *
- * Revision 1.1  2014/02/01 19:19:34  smirnovd
- * Initial commit: Changed files prefix StiPixel... to StiPxl... according to STAR convention
- *
- * Revision 1.19  2014/02/01 02:49:12  smirnovd
- * Renamed class member variables to be consistent with STAR styles
- *
- * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
- *
- * Revision 1.18  2014/02/01 02:49:03  smirnovd
- * Switched to already defined constants
- *
- * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
- *
- * Revision 1.17  2014/02/01 02:48:56  smirnovd
- * Minor stylistic clean-up
- *
- * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
- *
- * Revision 1.16  2014/02/01 02:48:47  smirnovd
- * Remove pointless empty destructor
- *
- * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
- *
- * Revision 1.15  2014/02/01 02:48:39  smirnovd
- * For the time being ignore undefined variable gStPxlDbMaker
- *
- * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
- *
- * Revision 1.14  2014/02/01 02:48:30  smirnovd
- * Added ROOT header to get rid of compiler error
- *
- * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
- *
- * Revision 1.13  2014/02/01 02:48:07  smirnovd
- * Improved style format by running astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
- *
- * Revision 1.12  2014/02/01 02:37:17  smirnovd
- * This commit is intended to sync with what we had in StRoot/StiRnD
- *
- * Revision 1.30  2014/01/23 17:38:18  bouchet
- * *** empty log message ***
- *
- * Revision 1.29  2013/03/11 17:24:08  bouchet
- * StiRnD for Y2013
- *
- * Revision 1.28  2012/12/18 20:52:32  bouchet
- * update for DEV13 geometry
- *
- * Revision 1.27  2011/04/22 22:00:18  fisyak
- * warn off
- *
- * Revision 1.26  2010/08/25 21:57:41  fisyak
- * Get rid off access to specfic detector tracking parameters which usage has been  disable since 2008/06/11
- *
- * Revision 1.25  2009/03/16 13:51:00  fisyak
- * Move out all Sti Chairs into StDetectorDb
- *
- * Revision 1.24  2009/02/09 02:47:19  andrewar
- * UPGR15 update. Will break backward compatibility with older geometries.
- *
- * Revision 1.23  2008/04/03 20:04:20  fisyak
- * Straighten out DB access via chairs
- *
- * Revision 1.22  2007/10/20 00:16:27  fisyak
- * Active hit errors from DB
- *
- * Revision 1.21  2007/10/16 19:50:24  fisyak
- * rename Hft => Pxl, remove Hpd, Igt and Fst
- *
- * Revision 1.20  2007/05/16 15:02:57  andrewar
- * Removed couts in favor of LOG_INFO.
- *
- * Revision 1.19  2007/05/03 06:14:56  andrewar
- * Geometry fix to conform to StiHit:setGlobal() test.
- *
- * Revision 1.18  2007/03/30 02:14:19  andrewar
- * Removed some debug output.
- *
- * Revision 1.17  2006/11/30 16:37:19  andrewar
- * Removed call to dbase for tracking parameter loading for the review. Dynamic
- * access will be debugged and restored after the STAR review. Hit errors are
- * forced to 60um.
- *
- * Revision 1.16  2006/11/29 04:02:01  andrewar
- * Make use of pre-existing STAR DB inteface.
- *
- * Revision 1.15  2006/11/29 00:44:04  andrewar
- * Added call to get tracking parameters from DBase.
- *
- * Revision 1.14  2006/11/17 15:39:03  wleight
- * Changes to make PXL hits work with UPGR05 geometry
- *
- * Revision 1.13  2006/04/19 19:49:47  andrewar
- * Added call to setLayerAngle, needed for detector container sort.
- *
- * Revision 1.12  2006/02/23 00:22:54  andrewar
- * Set Detector Id to kPxlId, corrected Ist*pars -> Pixel*pars
- *
- * Revision 1.11  2006/02/17 21:39:32  andrewar
- * Added calls to StiDetector::setKey(key,val)
- *
- *
- */
-
 /*
    numbering should be the following :
    hardware : sector ladder   ITTF : layer  ladder
@@ -518,3 +396,109 @@ void StiPxlDetectorBuilder::useVMCGeometry()
       StiVMCToolKit::LoopOverNodes(nodeT, path, PxlVolumes[i].name, MakeAverageVolume);
    }
 }
+
+
+/*
+ * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.6  2014/02/13 02:36:03  smirnovd
+ * Moved CVS log to the bottom
+ *
+ * Revision 1.19  2014/02/01 02:49:12  smirnovd
+ * Renamed class member variables to be consistent with STAR styles
+ *
+ * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
+ *
+ * Revision 1.18  2014/02/01 02:49:03  smirnovd
+ * Switched to already defined constants
+ *
+ * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
+ *
+ * Revision 1.17  2014/02/01 02:48:56  smirnovd
+ * Minor stylistic clean-up
+ *
+ * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
+ *
+ * Revision 1.16  2014/02/01 02:48:47  smirnovd
+ * Remove pointless empty destructor
+ *
+ * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
+ *
+ * Revision 1.15  2014/02/01 02:48:39  smirnovd
+ * For the time being ignore undefined variable gStPxlDbMaker
+ *
+ * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
+ *
+ * Revision 1.14  2014/02/01 02:48:30  smirnovd
+ * Added ROOT header to get rid of compiler error
+ *
+ * Signed-off-by: Dmitri Smirnov <d.s@plexoos.com>
+ *
+ * Revision 1.13  2014/02/01 02:48:07  smirnovd
+ * Improved style format by running astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+ *
+ * Revision 1.12  2014/02/01 02:37:17  smirnovd
+ * This commit is intended to sync with what we had in StRoot/StiRnD
+ *
+ * Revision 1.30  2014/01/23 17:38:18  bouchet
+ * *** empty log message ***
+ *
+ * Revision 1.29  2013/03/11 17:24:08  bouchet
+ * StiRnD for Y2013
+ *
+ * Revision 1.28  2012/12/18 20:52:32  bouchet
+ * update for DEV13 geometry
+ *
+ * Revision 1.27  2011/04/22 22:00:18  fisyak
+ * warn off
+ *
+ * Revision 1.26  2010/08/25 21:57:41  fisyak
+ * Get rid off access to specfic detector tracking parameters which usage has been  disable since 2008/06/11
+ *
+ * Revision 1.25  2009/03/16 13:51:00  fisyak
+ * Move out all Sti Chairs into StDetectorDb
+ *
+ * Revision 1.24  2009/02/09 02:47:19  andrewar
+ * UPGR15 update. Will break backward compatibility with older geometries.
+ *
+ * Revision 1.23  2008/04/03 20:04:20  fisyak
+ * Straighten out DB access via chairs
+ *
+ * Revision 1.22  2007/10/20 00:16:27  fisyak
+ * Active hit errors from DB
+ *
+ * Revision 1.21  2007/10/16 19:50:24  fisyak
+ * rename Hft => Pxl, remove Hpd, Igt and Fst
+ *
+ * Revision 1.20  2007/05/16 15:02:57  andrewar
+ * Removed couts in favor of LOG_INFO.
+ *
+ * Revision 1.19  2007/05/03 06:14:56  andrewar
+ * Geometry fix to conform to StiHit:setGlobal() test.
+ *
+ * Revision 1.18  2007/03/30 02:14:19  andrewar
+ * Removed some debug output.
+ *
+ * Revision 1.17  2006/11/30 16:37:19  andrewar
+ * Removed call to dbase for tracking parameter loading for the review. Dynamic
+ * access will be debugged and restored after the STAR review. Hit errors are
+ * forced to 60um.
+ *
+ * Revision 1.16  2006/11/29 04:02:01  andrewar
+ * Make use of pre-existing STAR DB inteface.
+ *
+ * Revision 1.15  2006/11/29 00:44:04  andrewar
+ * Added call to get tracking parameters from DBase.
+ *
+ * Revision 1.14  2006/11/17 15:39:03  wleight
+ * Changes to make PXL hits work with UPGR05 geometry
+ *
+ * Revision 1.13  2006/04/19 19:49:47  andrewar
+ * Added call to setLayerAngle, needed for detector container sort.
+ *
+ * Revision 1.12  2006/02/23 00:22:54  andrewar
+ * Set Detector Id to kPxlId, corrected Ist*pars -> Pixel*pars
+ *
+ * Revision 1.11  2006/02/17 21:39:32  andrewar
+ * Added calls to StiDetector::setKey(key,val)
+ *
+ */
