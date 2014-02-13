@@ -1,22 +1,11 @@
 /***************************************************************************
 *
-* $Id: StIstCollection.cxx,v 1.3 2014/02/03 16:12:20 ypwang Exp $
+* $Id: StIstCollection.cxx,v 1.4 2014/02/13 02:35:49 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
 * Description:
 * See header file.
-****************************************************************************
-*
-* $Log: StIstCollection.cxx,v $
-* Revision 1.3  2014/02/03 16:12:20  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstCollection.cxx,v 1.0
-* Revision 1.0 2013/11/04 15:15:30 Yaping
-* Initial version
 ****************************************************************************/
 
 #include "StIstConsts.h"
@@ -114,3 +103,20 @@ void StIstCollection::Clear( Option_t *opt )
 };
 
 ClassImp(StIstCollection);
+
+
+/***************************************************************************
+*
+* $Log: StIstCollection.cxx,v $
+* Revision 1.4  2014/02/13 02:35:49  smirnovd
+* Moved CVS log to the bottom of the file
+*
+* Revision 1.3  2014/02/03 16:12:20  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstCollection.cxx,v 1.0
+* Revision 1.0 2013/11/04 15:15:30 Yaping
+* Initial version
+****************************************************************************/

@@ -1,31 +1,11 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.h,v 1.6 2014/02/10 16:34:22 smirnovd Exp $
+* $Id: StIstCluster.h,v 1.7 2014/02/13 02:35:49 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
 * Description:
 * Data structure for IST cluster (neighboring pads fired by the same track).
-****************************************************************************
-*
-* $Log: StIstCluster.h,v $
-* Revision 1.6  2014/02/10 16:34:22  smirnovd
-* Use constructor initialization list, other nit-picks
-*
-* Revision 1.5  2014/02/10 16:34:09  smirnovd
-* Addressed minor doxygen and style issues
-*
-* Revision 1.4  2014/02/10 16:33:46  smirnovd
-* Trimmed trailing spaces, expanded tabs to eight spaces
-*
-* Revision 1.3  2014/02/03 16:12:20  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstCluster.h,v 1.0
-* Revision 1.0 2013/11/04 15:15:30 Yaping
-* Initial version
 ****************************************************************************/
 
 #ifndef StIstCluster_hh
@@ -96,4 +76,31 @@ protected:
 
    ClassDef(StIstCluster, 1);
 };
+
 #endif
+
+
+/***************************************************************************
+*
+* $Log: StIstCluster.h,v $
+* Revision 1.7  2014/02/13 02:35:49  smirnovd
+* Moved CVS log to the bottom of the file
+*
+* Revision 1.6  2014/02/10 16:34:22  smirnovd
+* Use constructor initialization list, other nit-picks
+*
+* Revision 1.5  2014/02/10 16:34:09  smirnovd
+* Addressed minor doxygen and style issues
+*
+* Revision 1.4  2014/02/10 16:33:46  smirnovd
+* Trimmed trailing spaces, expanded tabs to eight spaces
+*
+* Revision 1.3  2014/02/03 16:12:20  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstCluster.h,v 1.0
+* Revision 1.0 2013/11/04 15:15:30 Yaping
+* Initial version
+****************************************************************************/
