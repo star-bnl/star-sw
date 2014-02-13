@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.10 2014/02/13 02:36:33 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.11 2014/02/13 02:36:39 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -213,10 +213,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          for (UInt_t kk = 0; kk < kNumberOfPxlSensorsPerLadder; kk++)
          {
 
-            //for run 13, only sector 2,4,7
-            int matPix = 0;
-            matPix = (ii) * 40 + (jj) * 10 + (kk + 1);
-            LOG_DEBUG << " ii/jj/kk/matPix : " << ii << " " << " " << jj << " " << kk << " " << matPix << endm;
 
 
 
@@ -238,9 +234,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             StiShape *sh  = new StiPlanarShape(name, 10*box->GetDZ(), box->GetDY(), box->GetDX());
 
             add(sh);
-            TGeoHMatrix *combP = (TGeoHMatrix *)PxlRot->FindObject(Form("R%03i", matPix));
-            assert(combP);
-            combP->Print();
+            int matPix = (iSector-1) * 40 + (iLadder-1) * 10 + (iSensor-1);
+            cout << " iSector/iLadder/iSensor/matPix : " << iSector << "/" << iLadder << "/" << iSensor
+               << "/" << matPix << endl;
 
             Double_t *xyz = combP->GetTranslation();
             Double_t *rot = combP->GetRotationMatrix();
@@ -385,6 +381,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.11  2014/02/13 02:36:39  smirnovd
+ * Revised sensor index
+ *
  * Revision 1.10  2014/02/13 02:36:33  smirnovd
  * Remove outdated code
  *
