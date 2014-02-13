@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.9 2014/02/13 02:36:26 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.10 2014/02/13 02:36:33 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -212,33 +212,17 @@ void StiPxlDetectorBuilder::useVMCGeometry()
       for (UInt_t jj = 0; jj < kNumberOfPxlLaddersPerSector; ++jj) {
          for (UInt_t kk = 0; kk < kNumberOfPxlSensorsPerLadder; kk++)
          {
-            if (ii != 1 && ii != 3 && ii != 6) continue;
 
             //for run 13, only sector 2,4,7
             int matPix = 0;
             matPix = (ii) * 40 + (jj) * 10 + (kk + 1);
             LOG_DEBUG << " ii/jj/kk/matPix : " << ii << " " << " " << jj << " " << kk << " " << matPix << endm;
 
-            if (kk != 0) continue;
 
-            //we place the ladder as a whole
-#if 0
-            TString path(PxlVolumes[7].path);
 
-            //LOG_DEBUG << " path : " << path << endm;
-            if (! _TpcRefSys_1) path.ReplaceAll("/TpcRefSys_1", "");
 
-            gGeoManager->cd(path); // retrieve info of PLAC volume
-            TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-            // Extract volume geometry for this node
-            TGeoBBox *box = (TGeoBBox *) nodeT->GetVolume()->GetShape();
-#else
-            TGeoVolume *vol = gGeoManager->GetVolume("PLAC");
 
-            if (! vol) continue;
 
-            TGeoBBox *box = (TGeoBBox *) vol->GetShape();
-#endif
             char name[50];
             sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", ii + 1, jj + 1, kk + 1);
             LOG_DEBUG << " weigh/daughters/Material/A/Z : " << vol->Weight() << " "
@@ -401,6 +385,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.10  2014/02/13 02:36:33  smirnovd
+ * Remove outdated code
+ *
  * Revision 1.9  2014/02/13 02:36:26  smirnovd
  * Move struct closer to where it is used
  *
