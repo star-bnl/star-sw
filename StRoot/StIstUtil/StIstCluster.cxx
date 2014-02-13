@@ -1,28 +1,11 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.5 2014/02/10 16:34:21 smirnovd Exp $
+* $Id: StIstCluster.cxx,v 1.6 2014/02/13 02:35:48 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
 * Description:
 * See header file.
-****************************************************************************
-*
-* $Log: StIstCluster.cxx,v $
-* Revision 1.5  2014/02/10 16:34:21  smirnovd
-* Use constructor initialization list, other nit-picks
-*
-* Revision 1.4  2014/02/10 16:33:46  smirnovd
-* Trimmed trailing spaces, expanded tabs to eight spaces
-*
-* Revision 1.3  2014/02/03 16:12:19  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstCluster.cxx,v 1.0
-* Revision 1.0 2013/11/04 15:15:30 Yaping
-* Initial version
 ****************************************************************************/
 
 #include "StIstConsts.h"
@@ -128,3 +111,27 @@ void StIstCluster::setIdTruth(unsigned short idTruth)
 };
 
 ClassImp(StIstCluster);
+
+
+/***************************************************************************
+*
+*
+* $Log: StIstCluster.cxx,v $
+* Revision 1.6  2014/02/13 02:35:48  smirnovd
+* Moved CVS log to the bottom of the file
+*
+* Revision 1.5  2014/02/10 16:34:21  smirnovd
+* Use constructor initialization list, other nit-picks
+*
+* Revision 1.4  2014/02/10 16:33:46  smirnovd
+* Trimmed trailing spaces, expanded tabs to eight spaces
+*
+* Revision 1.3  2014/02/03 16:12:19  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstCluster.cxx,v 1.0
+* Revision 1.0 2013/11/04 15:15:30 Yaping
+* Initial version
+****************************************************************************/
