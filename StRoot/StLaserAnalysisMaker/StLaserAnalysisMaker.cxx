@@ -1,6 +1,9 @@
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.16 2009/03/11 15:49:40 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.17 2014/02/13 18:21:28 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.17  2014/02/13 18:21:28  fisyak
+// Add protection against cicling in fitting
+//
 // Revision 1.16  2009/03/11 15:49:40  fisyak
 // Remove hits not beloging to primary tracks
 //
@@ -56,6 +59,7 @@ static TGeoHMatrix *Bundles2Tpc[14][6];
 static TGeoHMatrix *Mirrors2Tpc[14][6][7];
 //________________________________________________________________________________
 Int_t StLaserAnalysisMaker::Init(){
+  if (! IsActive()) return kStOk;
   event = new LaserEvent();
   TFile *f = GetTFile();
 #if 0
@@ -231,10 +235,12 @@ Int_t StLaserAnalysisMaker::Make(){
 		   EvtHddr->GetInputTriggerMask());
   event->SetDVWest(gStTpcDb->DriftVelocity(1));
   event->SetDVEast(gStTpcDb->DriftVelocity(13));
+  //  event->SetScaleY(gStTpcDb->ScaleY());
   event->GetHeader()->SetDriftDistance(gStTpcDb->Dimensions()->gatingGridZ());
   event->GetHeader()->SetInnerSectorzOffset(gStTpcDb->Dimensions()->zInnerOffset());
   event->GetHeader()->SetOuterSectorzOffset(gStTpcDb->Dimensions()->zOuterOffset());
   event->GetHeader()->SettriggerTimeOffset(gStTpcDb->triggerTimeOffset());
+  event->GetHeader()->SetBField(pEvent->runInfo()->magneticField());
   StDetectorDbClock* dbclock = StDetectorDbClock::instance();
   double freq = dbclock->getCurrentFrequency()/1000000.0;
   event->GetHeader()->SetOnlClock(freq);
@@ -251,10 +257,9 @@ Int_t StLaserAnalysisMaker::Make(){
     if (!node) continue;
     StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
     if (! gTrack) continue;
+    Int_t key = gTrack->key();
     //    if (gTrack->numberOfPossiblePoints(kTpcId) < 25) continue;
     StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
-    StTrackFitTraits&  fitTraits =  gTrack->fitTraits();
-    //    if (fitTraits.numberOfFitPoints(kTpcId) < 25) continue;
     StThreeVectorD g3 = gTrack->outerGeometry()->momentum();
     if (g3.mag() < 10) continue;
     StThreeVectorD unit = g3.unit();
@@ -279,10 +284,10 @@ Int_t StLaserAnalysisMaker::Make(){
 #ifndef __TRACKHITS__
 #ifdef ADDPRIMTRACKHITS
       if (pTrack) 
-	event->AddHit(tpcHit);
+	event->AddHit(tpcHit, key);
 #endif
 #else
-      event->AddHit(tpcHit);
+      event->AddHit(tpcHit,key);
 #endif
       if (tpcHit->position().perp() > rMax) {
 	rMax = tpcHit->position().perp();
@@ -329,7 +334,7 @@ Int_t StLaserAnalysisMaker::Make(){
 	  bundle > 0 && bundle <= 6 &&
 	  mirror > 0 && mirror <= 7) {
 	t->SetPredictions(Raft2Tpc[raft-1], Bundles2Tpc[raft-1][bundle-1], Mirrors2Tpc[raft-1][bundle-1][mirror-1]);
-	if (t->Flag == 2 || theLaser->IsValid)  event->AddTrackFit(t);
+	if (theLaser->IsValid)  event->AddTrackFit(t);
       }
     }
     if (Debug()) {
@@ -339,8 +344,9 @@ Int_t StLaserAnalysisMaker::Make(){
   static const Double_t sigma = 0.0385; // run 8090018 Full Field.
   for (Int_t k = 0; k < 11; k++) {
     FitDV *fit = (FitDV *) (*event->Fit())[k];
+    Bool_t ok = kTRUE;
     Int_t N = fit->N;
-    if (N > 2) {
+    if (N > 3) {
       for (;;) {
 	TRVector Y;
 	TRMatrix A(0,2);
@@ -353,10 +359,11 @@ Int_t StLaserAnalysisMaker::Make(){
 	  }
 	}
 	Int_t ndf = A.GetNrows() - 2;
-	if (ndf < 1) break;
+	if (ndf < 2) break;
 	TRSymMatrix S(A,TRArray::kATxA);        if (Debug()) cout << "S: " << S << endl;
 	TRVector    B(A,TRArray::kATxB,Y);      if (Debug()) cout << "B: " << B << endl;
-	TRSymMatrix SInv(S,TRArray::kInverted); if (Debug()) cout << "SInv: " << SInv << endl;
+	TRSymMatrix SInv(S,TRArray::kInvertedA);if (Debug()) cout << "SInv: " << SInv << endl;
+	if (! SInv.IsValid()) {ok = kFALSE; break;}
 	TRVector    X(SInv,TRArray::kSxA,B);    if (Debug()) cout << "X: " << X << endl;
 	TRVector    R(Y);               
 	R -= TRVector(A,TRArray::kAxB,X);       if (Debug()) cout << "R: " << R << endl;
@@ -367,7 +374,7 @@ Int_t StLaserAnalysisMaker::Make(){
 	  fit->slope   = X[1];
 	  fit->chisq   = chisq;
 	  fit->dslope  = SInv[2];
-	  fit->doffset = SInv[0];
+ 	  fit->doffset = SInv[0];
 	  fit->Prob = prob;
 	  fit->ndf = ndf;
 	  if (Debug()) fit->Print();
@@ -401,6 +408,7 @@ Int_t StLaserAnalysisMaker::Make(){
 	}
       }
     }
+    if (! ok) break;
   }
   m_laser->Fill(); //Fill the Tree
   return kStOK;

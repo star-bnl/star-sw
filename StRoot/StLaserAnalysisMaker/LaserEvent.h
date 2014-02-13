@@ -1,5 +1,8 @@
-//$Id: LaserEvent.h,v 1.8 2011/05/27 18:25:32 genevb Exp $
+//$Id: LaserEvent.h,v 1.9 2014/02/13 18:21:28 fisyak Exp $
 //$Log: LaserEvent.h,v $
+//Revision 1.9  2014/02/13 18:21:28  fisyak
+//Add protection against cicling in fitting
+//
 //Revision 1.8  2011/05/27 18:25:32  genevb
 //Propagate StTrack::key => Int_t to other codes
 //
@@ -29,6 +32,7 @@
 #include "Stiostream.h"
 #include "StThreeVectorF.hh"
 #include "StHelixModel.h"
+#include "StDcaGeometry.h"
 #include "TString.h"
 #include "TGeoMatrix.h"
 #ifdef __CINT__
@@ -52,6 +56,7 @@ class LaserRaft : public TObject {
   //  Double_t psi, dpsi, tanl, dtanl, xl, dxL, yl, dyL, zl, dzl;
   Char_t *Name;
   virtual void Print(const Option_t* opt="") const {
+    if (opt) {}
 	  cout << Form("Raft:%2i,%2i,%1i,%1i,%9.4f,%9.4f",
 		       Sector, Raft, Bundle, Mirror, Theta, Phi) << endl;
 	  cout << " XyzL: " << XyzL << " U: " << XyzU << " B: " << XyzB << endl;
@@ -63,7 +68,7 @@ class  FitDV : public TObject {
  public:
   FitDV() {Clear();}
   virtual ~FitDV() {}
-  void Clear(Option_t *opt="") {memset(first, 0, last - first); chisq = -1;}
+  void Clear(Option_t *opt="") {if (opt) {}; memset(first, 0, last - first); chisq = -1;}
   Char_t     first[1];
   Int_t      N;
   Int_t      Sector;
@@ -81,6 +86,7 @@ class  FitDV : public TObject {
   Int_t      Flag[42];
   Char_t     last[1];
   virtual void Print(const Option_t* opt="") const {
+    if (opt) {}
     cout << Form("FitDV:%5i,%2i,%9.4f,%9.4f,%9.4f,%9.4f,%9.4f",
 		 N, Sector, offset, slope, doffset, dslope, chisq) 
 	 << endl;
@@ -108,6 +114,7 @@ class  LaserB {
   Double_t Theta,  Phi;
   Double_t ThetaG, PhiG; // in GCS
   virtual void Print(const Option_t* opt="") const {
+    if (opt) {}
     cout << "LaserB:" << IsValid << " S/R/B/M = " << Sector << "/" << Raft << "/" << Bundle << "/" << Mirror
 	 << " xyz B:" << XyzB << " U: " << XyzU << " L: " << XyzL << " G: " << XyzG << endl;
     cout << "\tdir B:" << dirB << " U: " << dirU << " L: " << dirL << " G: " << dirG << endl;
@@ -137,8 +144,11 @@ class EventHeader {
    Float_t fOuterSectorzOffset;
    Float_t ftriggerTimeOffset; 
    Float_t fOnlClock;
+   Float_t fBField;
+ public:
+   Float_t fScaleY;
 public:
-   EventHeader() : fEvtNum(0), fRun(0), fDate(0), fTime(0), fOnlClock(0) { }
+   EventHeader() : fEvtNum(0), fRun(0), fDate(0), fTime(0), fOnlClock(0), fBField(0), fScaleY(0) { }
    virtual ~EventHeader() { }
    void   Set(Int_t i, Int_t r, Int_t d, Int_t t) { fEvtNum = i; fRun = r; fDate = d; fTime = t; }
    void   SetE(Float_t tz, Float_t dv, Float_t ck) {
@@ -150,6 +160,7 @@ public:
    void   SetOuterSectorzOffset(Double_t p) {fOuterSectorzOffset= p;}
    void   SettriggerTimeOffset(Double_t p)  {ftriggerTimeOffset= p;}
    void   SetOnlClock(Double_t p)           {fOnlClock = p;} 
+   void   SetBField(Float_t p) {fBField = p;}
    Int_t  GetEvtNum() const { return fEvtNum; }
    Int_t  GetRun() const { return fRun; }
    Int_t  GetDate() const { return fDate; }
@@ -163,8 +174,9 @@ public:
    Float_t InnerSectorzOffset() {return fInnerSectorzOffset;}
    Float_t OuterSectorzOffset() {return fOuterSectorzOffset;}
    Float_t triggerTimeOffset()  {return  ftriggerTimeOffset;} 
+   Float_t GetBField() {return fBField;}
    
-   ClassDef(EventHeader,1)  //Event Header
+   ClassDef(EventHeader,3)  //Event Header
 };
 class Vertex : public TObject {
  public:
@@ -173,16 +185,17 @@ class Vertex : public TObject {
   StVertexId     mType;
   Int_t          WestEast; // = 1 for West and 2 for East, 0 - undefined
   StThreeVectorD Xyz;
-  StThreeVectorD XyzL;
+  StThreeVectorD XyzL;     // Tpc Local
   UInt_t         numberOfDaughter;
   virtual void Print(const Option_t* opt="") const {
+    if (opt) {}
     cout << "Vertex: WE = " << WestEast << " XYZ L: " << XyzL << " G: " << Xyz << " Nd " << numberOfDaughter << endl;
   }    
   ClassDef(Vertex,1) 
 };
 class Hit : public TObject {
  public:
-  Hit(StTpcHit *tpcHit=0);
+  Hit(StTpcHit *tpcHit=0, Int_t trackKey=0);
   virtual ~Hit() {}
   UShort_t sector;
   UShort_t row;
@@ -190,10 +203,13 @@ class Hit : public TObject {
   UInt_t   flag;
   Int_t    usedInFit;
   StThreeVectorF xyz;
-  StThreeVectorF xyzL;
+  StThreeVectorF xyzL;     // Tpc Local Sector 
+  StThreeVectorF xyzTpcL;  // Tpc Local
   Float_t  pad;
   Float_t  tbk;
-  ClassDef(Hit,2) 
+  Int_t    trackKey;
+  StTpcHit hit;
+  ClassDef(Hit,5) 
 };
 class Track : public TObject {
  public:
@@ -203,7 +219,7 @@ class Track : public TObject {
   StThreeVectorD Vertex;
   // StTrack
   Int_t          mSector;
-  Int_t       mKey;
+  Int_t          mKey;
   Short_t        mFlag;
   UShort_t       mNumberOfPossiblePointsTpc;
   Float_t        mImpactParameter;
@@ -217,6 +233,7 @@ class Track : public TObject {
 #endif
   StHelixModel   fgeoIn;
   StHelixModel   fgeoOut;
+  StDcaGeometry  fDca;
   Double32_t     fpTInv;
   Double32_t     fTheta;
   Double32_t     fPhi;
@@ -246,6 +263,7 @@ class Track : public TObject {
   Int_t Matched();
   void SetPredictions(TGeoHMatrix *Raft2Tpc = 0, TGeoHMatrix *Bundle2Tpc = 0, TGeoHMatrix *Mirror2Tpc = 0);
   virtual void Print(const Option_t* opt="") const {
+    if (opt) {}
     cout << "Track F: " << Flag << " Vtx: " << Vertex << " Sec/Key = " << mSector << "/" << mKey << endl;
     cout << "\tgeoIn pxyz " << fgeoIn.momentum() << " geoIn xyz " << fgeoIn.origin() << endl;
     cout << "\tgeoOut pxyz " << fgeoOut.momentum() << " geoOut xyz " << fgeoOut.origin() << endl;
@@ -256,7 +274,7 @@ class Track : public TObject {
     Laser.Print();
     cout << "\tdTheta " << dTheta << " dPhi " << dPhi << endl;
   }
-  ClassDef(Track,2)  
+  ClassDef(Track,3)  
 };
 class LaserEvent : public TObject {
 
@@ -294,9 +312,10 @@ private:
 			   Float_t tzero, Float_t drivel, Float_t clock, Float_t trigger);
    void          SetDVWest(Float_t dv) {fEvtHdr.fDriVelWest = dv;}
    void          SetDVEast(Float_t dv) {fEvtHdr.fDriVelEast = dv;}
+   void          SetScaleY(Float_t sY) {fEvtHdr.fScaleY = sY;}
    Vertex       *AddVertex(StPrimaryVertex *vertex = 0);
    Track        *AddTrack(Int_t sector = 0, StTrack *track = 0, LaserB *laser = 0, Double_t zLastHit=0);
-   Hit          *AddHit(StTpcHit *tpcHit = 0);
+   Hit          *AddHit(StTpcHit *tpcHit = 0, Int_t trackKey = 0);
    void          AddTrackFit(Track *t = 0);
    Int_t         GetNtrack() const { return fNtrack; }
    Int_t         GetNhit() const { return fNhit; }

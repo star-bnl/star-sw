@@ -1,5 +1,8 @@
-//$Id: LaserEvent.cxx,v 1.7 2011/01/10 20:36:12 fisyak Exp $
+//$Id: LaserEvent.cxx,v 1.8 2014/02/13 18:21:28 fisyak Exp $
 // $Log: LaserEvent.cxx,v $
+// Revision 1.8  2014/02/13 18:21:28  fisyak
+// Add protection against cicling in fitting
+//
 // Revision 1.7  2011/01/10 20:36:12  fisyak
 // Use sector/padrow in global => local transformation
 //
@@ -27,6 +30,7 @@
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StEventTypes.h"
 #include "TGeoMatrix.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 ClassImp(LaserRaft);
 ClassImp(EventHeader);
 ClassImp(LaserEvent);
@@ -89,10 +93,10 @@ Track *LaserEvent::AddTrack(Int_t sector, StTrack *track, LaserB *laser, Double_
   return t;
 }
 //______________________________________________________________________________
-Hit *LaserEvent::AddHit(StTpcHit *hit) {
+Hit *LaserEvent::AddHit(StTpcHit *hit, Int_t trackKey) {
   if (! hit) return 0;
   TClonesArray &hits = *fHits;
-  Hit *t = new(hits[fNhit++]) Hit(hit);
+  Hit *t = new(hits[fNhit++]) Hit(hit,trackKey);
   return t;
 }
 //________________________________________________________________________________
@@ -164,6 +168,7 @@ Track::Track(Int_t sector, StTrack *track, LaserB *theLaser, Double_t z) :
   StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
   fgeoIn = *((StHelixModel *) gTrack->geometry());
   fgeoOut = *((StHelixModel *) gTrack->outerGeometry());
+  fDca    = *((StDcaGeometry *) gTrack->dcaGeometry());
   StThreeVectorD g3 = fgeoOut.momentum();
   fpTInv = fgeoOut.charge()/g3.perp();
   fTheta = fgeoOut.momentum().theta();
@@ -298,8 +303,9 @@ Int_t Track::Matched() {
   return iok + 10*status;
 }
 //________________________________________________________________________________
-Hit::Hit(StTpcHit *tpcHit)  : sector(0),row(0),charge(0),flag(0),usedInFit(0) {
+Hit::Hit(StTpcHit *tpcHit, Int_t trKey)  : sector(0),row(0),charge(0),flag(0),usedInFit(0), trackKey(trKey) {
   if (tpcHit) {
+    hit = *tpcHit;
     sector = tpcHit->sector();
     row = tpcHit->padrow();;
     charge = tpcHit->charge();
@@ -308,27 +314,13 @@ Hit::Hit(StTpcHit *tpcHit)  : sector(0),row(0),charge(0),flag(0),usedInFit(0) {
     xyz = tpcHit->position(); // from StTpcHitMover
     static StTpcCoordinateTransform transform(gStTpcDb);
     StGlobalCoordinate glob(xyz.x(),xyz.y(),xyz.z());
-#if 0
-    static StTpcLocalCoordinate  coorLT;
-    transform(glob,coorLT);
-    static StTpcLocalSectorAlignedCoordinate  coorLSA;
-    transform(coorLT,coorLSA); //
-    static StTpcLocalSectorCoordinate  local;
-    transform(coorLSA,local); 
-#else
     static StTpcLocalSectorCoordinate  local;
     transform(glob,local,tpcHit->sector(),tpcHit->padrow()); 
-#endif
     xyzL = StThreeVectorF(local.position().x(),local.position().y(),local.position().z());
-    static const Int_t NumberOfPadsAtRow[45] = {
-      88, 96,104,112,118,126,134,142,150,158,
-      166,174,182,  
-      98,100,102,104,106,106,108,
-      110,112,112,114,116,118,120,122,122,124,
-      126,128,128,130,132,134,136,138,138,140,
-      142,144,144,144,144
-    };
-    pad  = tpcHit->pad() - NumberOfPadsAtRow[row-1]/2 - 1;
+    static StTpcLocalCoordinate  localTpc;
+    transform(glob,localTpc,tpcHit->sector(),tpcHit->padrow()); 
+    xyzTpcL = StThreeVectorF(localTpc.position().x(),localTpc.position().y(),localTpc.position().z());
+    pad  = tpcHit->pad() - St_tpcPadPlanesC::instance()->padsPerRow(row)/2 - 1;
     tbk  = tpcHit->timeBucket();
   }
 }
