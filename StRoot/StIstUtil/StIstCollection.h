@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstCollection.h,v 1.4 2014/02/13 02:35:49 smirnovd Exp $
+* $Id: StIstCollection.h,v 1.5 2014/02/14 14:37:57 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -25,7 +25,6 @@ public:
    //deconstructor
    ~StIstCollection();
 
-   size_t getNumLadders() const;
    size_t getNumRawHits() const;                   // overall
    size_t getNumRawHits( unsigned char ladder) const;      // per ladder
    size_t getNumClusters() const;                  // overall
@@ -42,8 +41,6 @@ public:
    void Clear( Option_t *opts = "" );
 
 protected:
-   friend class StMuDstMaker; // needed for StMuDstMaker
-
    StIstRawHitCollection mRawHitCollection[kIstNumLadders];
    StIstClusterCollection mClusterCollection[kIstNumLadders];
    size_t mNumTimeBins;
@@ -58,6 +55,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstCollection.h,v $
+* Revision 1.5  2014/02/14 14:37:57  ypwang
+* remove StMuDstMaker and getNumLadders() member function from StIstCollection
+*
 * Revision 1.4  2014/02/13 02:35:49  smirnovd
 * Moved CVS log to the bottom of the file
 *
