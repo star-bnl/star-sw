@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterCollection.cxx,v 1.4 2014/02/13 02:35:49 smirnovd Exp $
+* $Id: StIstClusterCollection.cxx,v 1.5 2014/02/14 14:51:06 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -20,6 +20,11 @@ StIstClusterCollection::StIstClusterCollection( unsigned char ladder ) : StObjec
 //deconstructor
 StIstClusterCollection::~StIstClusterCollection()
 {
+   Clear("");
+}
+
+void StIstClusterCollection::Clear( Option_t *opt )
+{
    //free memory and clear the vector
    std::vector< StIstCluster * >::iterator vecIter;
    for ( vecIter = mClusterVec.begin(); vecIter != mClusterVec.end(); ++vecIter ) {
@@ -28,12 +33,6 @@ StIstClusterCollection::~StIstClusterCollection()
          *vecIter = NULL;
       }
    }
-   mClusterVec.clear();
-}
-
-void StIstClusterCollection::Clear( Option_t *opt )
-{
-   // clear the vector
    mClusterVec.clear();
 }
 
@@ -68,6 +67,9 @@ ClassImp(StIstClusterCollection);
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.cxx,v $
+* Revision 1.5  2014/02/14 14:51:06  ypwang
+* update Clear() function, and call Clear() function in deconstructor
+*
 * Revision 1.4  2014/02/13 02:35:49  smirnovd
 * Moved CVS log to the bottom of the file
 *
