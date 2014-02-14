@@ -13,6 +13,7 @@
 
 #include <DAQ_READER/daq_dta.h>
 
+#include "daq_sst.h"
 #include "sstPed.h"
 
 
@@ -23,12 +24,11 @@ sstPed::sstPed()
 	rb_mask = 0x07 ;	// assume max...
 	sector = 1 ;		// assume 1
 
-	sizeof_ped = sizeof(struct peds) * SST_RDO_COU ;	// for SST_RDO_COU RDOs
+	sizeof_ped = sizeof(daq_sst_ped_t) * SST_RDO_COU ;	// for SST_RDO_COU RDOs
 	
 	ped_store = 0 ;	// unassigned!
 
-	memset(sst_rdr,0,sizeof(sst_rdr)) ;
-
+	sst_rdr = 0 ;
 
 	return ;
 }
@@ -41,11 +41,9 @@ sstPed::~sstPed()
 		ped_store = 0 ;
 	}
 
-	for(int i=0;i<SST_RDO_COU;i++) {
-		if(sst_rdr[i]) {
-			delete sst_rdr[i] ;
-			sst_rdr[i] = 0 ;	
-		}
+	if(sst_rdr) {
+		delete sst_rdr ;
+		sst_rdr = 0 ;	
 	}
 
 	valid = 0 ;
@@ -53,39 +51,6 @@ sstPed::~sstPed()
 	return ;
 }
 
-#if 0
-int sstPed::run_stop()
-{
-	for(int r=0;r<SST_RDO_COU;r++) {
-		if(rb_mask & (1<<r)) ;
-		else continue ;
-
-		int evts = sst_stat[r].evts ;
-
-		if(sst_stat[r].err) {
-			LOG(ERR,"RDO %d: %d errors in %d events",r+1,sst_stat[r].err,evts) ;
-		}
-
-		for(int arm=0;arm<SST_ARM_COU;arm++) {
-			if(sst_stat[r].arm_mask & (1<<arm)) ;
-			else continue ;
-
-			for(int apv=0;apv<SST_APV_COU;apv++) {
-				int errs = sst_stat[r].err_apv[arm][apv] ;
-				int cou = sst_stat[r].cou_apv[arm][apv] ;
-
-				if(errs || (cou && (cou!=evts))) {
-					LOG(ERR,"RDO %d: ARM %d, APV %2d: %d errors, in %d/%d events",
-					    r+1,arm,apv,errs,cou,evts) ;
-				}
-			}
-		}
-	}
-
-	return 0 ;
-}
-
-#endif
 
 void sstPed::init(int active_rbs)
 {
@@ -94,16 +59,15 @@ void sstPed::init(int active_rbs)
 	rb_mask = active_rbs ;
 
 	if(ped_store == 0) {
-		ped_store = (struct peds *) malloc(sizeof_ped) ;
+		ped_store = (daq_sst_ped_t *) malloc(sizeof_ped) ;
 	}
 
-	for(int i=0;i<SST_RDO_COU;i++) {
-		if((rb_mask & (1<<i)) && (sst_rdr[i]==0)) {
-			sst_rdr[i] = new daq_sst(0) ;
-		}
-	}
+	if(sst_rdr == 0) sst_rdr = new daq_sst(0) ;
 
 	memset(ped_store,0,sizeof_ped) ;
+
+	memset(sst_rdr->events,0,sizeof(sst_rdr->events)) ;
+	memset(sst_rdr->fiber_events,0,sizeof(sst_rdr->fiber_events)) ;
 
 	LOG(TERR,"Pedestals zapped: rb_mask 0x%02X",rb_mask) ;
 }
@@ -121,55 +85,13 @@ void sstPed::accum(char *evbuff, int bytes, int rdo1)
 
 	int rdo = rdo1 - 1 ;	// since rdo1 is from 1
 
-	LOG(NOTE,"accum %d",rdo) ;
-
-	struct peds *p = ped_store + rdo ;
-
 	LOG(NOTE,"accum %d",rdo1) ;
 
-	daq_dta *dd  ;
+	daq_sst_ped_t *p = ped_store + rdo ;
 
-	LOG(NOTE,"accum %d",rdo1) ;
+	sst_rdr->raw_to_adc_utility(sector,rdo1,evbuff,bytes/4,p,2) ;
 
-	dd = sst_rdr[rdo1-1]->handle_adc(sector,rdo1, evbuff,bytes/4) ;
-
-//	LOG(TERR,"Got %p",dd) ;
-
-	while(dd && dd->iterate()) {
-		if(dd->sec != sector) continue ;
-		if(dd->rdo != rdo1) continue ;
-
-		int fiber = dd->pad ;	// that's the fiber...
-
-		daq_sst_data_t *f = (daq_sst_data_t *) dd->Void ;
-
-
-		LOG(NOTE,"sec %d, rdo %d, fiber %d: %d",dd->sec,dd->rdo,fiber,dd->ncontent) ;
-
-		for(u_int i=0;i<dd->ncontent;i++) {
-			int adc ;
-			int hy ;
-			int strip ;
-
-			hy = f[i].hybrid ;
-			adc = f[i].adc ;
-			strip = f[i].strip ;
-
-			int adc_prime = (adc+300)%1024 ;	//tha SST oddness; Jim Thomas email
-
-
-//			LOG(TERR,"    %d %d %d %d",hy,strip,adc,adc_prime) ;
-
-//			if((adc_prime<300)||(adc_prime>700)) continue ;	// outlier cuts; Jim Thomas email
-			
-			if(p->cou[fiber][hy][strip] > 0xFFF0) continue ;	// protect u_short
-
-			p->ped[fiber][hy][strip] += (float) adc_prime ;
-			p->rms[fiber][hy][strip] += (float) (adc_prime * adc_prime) ;
-			p->cou[fiber][hy][strip]++ ;
-		}
-	}
-
+	LOG(NOTE,"accum done %d",rdo1) ;
 
 	return ;
 
@@ -179,7 +101,7 @@ void sstPed::accum(char *evbuff, int bytes, int rdo1)
 void sstPed::calc()
 {
 
-	const int MIN_EVENTS = 99 ;
+	const u_int MIN_EVENTS = 90 ;
 
 
 	LOG(NOTE,"Calculating pedestals") ;
@@ -192,7 +114,7 @@ void sstPed::calc()
 		if(rb_mask & (1<<r)) ;
 		else continue ;
 
-		struct peds *ped = ped_store + r ;
+		daq_sst_ped_t *ped = ped_store + r ;
 
 		for(int fib=0;fib<SST_FIBER_COU;fib++) {
 		for(int hy=0;hy<SST_HYBRID_COU;hy++) {
@@ -207,15 +129,15 @@ void sstPed::calc()
 				double pp, rr ;
 
 				
-				pp = ped->ped[fib][hy][strip] / (double) ped->cou[fib][hy][strip] ;
+				pp = (double) ped->ped[fib][hy][strip] / (double) ped->cou[fib][hy][strip] ;
 
-				rr = ped->rms[fib][hy][strip] / (double) ped->cou[fib][hy][strip] ;
+				rr = (double) ped->rms[fib][hy][strip] / (double) ped->cou[fib][hy][strip] ;
 
 				// due to roundoff I can have super small negative numbers
 				if(rr < (pp*pp)) rr = 0.0 ;
 				else rr = sqrt(rr - pp*pp) ;
 
-				ped->ped[fib][hy][strip] = pp ;
+				ped->ped[fib][hy][strip] = pp - SST_PED_ADC_OFFSET;
 				ped->rms[fib][hy][strip] = rr ;
 
 
@@ -223,9 +145,7 @@ void sstPed::calc()
 
 			}
 
-
 			if(ped->cou[fib][hy][strip] < MIN_EVENTS) {
-				//LOG(WARN,"%d %d %d %d: %d",r,fib,hy,strip,ped->cou[fib][hy][strip]) ;
 				bad[r][fib]++ ;
 			}
 		}
@@ -241,7 +161,10 @@ void sstPed::calc()
 
 		for(int fib=0;fib<SST_FIBER_COU;fib++) {
 			if(bad[r][fib]) {
-				LOG(ERR,"RDO %d, FIBER %d: has %d strips with insufficent counts!",r+1,fib,bad[r][fib]) ;
+				LOG(WARN,"RDO %d, FIBER %d: has %d strips with insufficent counts!",r+1,fib,bad[r][fib]) ;
+			}
+			if(sst_rdr->fiber_events[r][fib] < MIN_EVENTS) {
+				LOG(ERR,"RDO %d, FIBER %d has only %d events (< %d)",r+1,fib,sst_rdr->fiber_events[r][fib],MIN_EVENTS) ;
 				valid = 0 ;
 			}
 		}
@@ -252,10 +175,10 @@ void sstPed::calc()
 	return ;
 }
 
-#if 0
+
 int sstPed::to_evb(char *buff)
 {
-	int r, arm, apv, c, t ;
+	int r,f,h,s ;
 	u_short *dta = (u_short *) buff ;	
 
 
@@ -264,69 +187,69 @@ int sstPed::to_evb(char *buff)
 		LOG(ERR,"ped::to_evb peds are bad: valid %d",valid) ;
 	}
 
-	LOG(NOTE,"Preparing pedestals for later EVB...") ;
+
+
+	int rdo_cou = 0 ;
+	for(r=0;r<SST_RDO_COU;r++) {
+		if(rb_mask & (1<<r)) ;
+		else continue ;
+
+		rdo_cou++ ;
+	}
+
+
+	LOG(TERR,"Preparing pedestals for later EVB: mask 0x%X, rdos %d",rb_mask,rdo_cou) ;
 
 	*dta++ = 0xBEEF ;		// signature
 	*dta++ = 0x0001 ;		// version
-	*dta++ = SST_RDO_COU ;		// ARM
+	*dta++ = rdo_cou ;		
 	*dta++ = SST_FIBER_COU ;
-	*dta++ = SST_HYBRID_COU ;		// channel count
-	*dta++ = SST_STRIP_COU ;		// timebin count
+	*dta++ = SST_HYBRID_COU ;	
+	*dta++ = SST_STRIP_COU ;	
 
 
 	for(r=0;r<SST_RDO_COU;r++) {
-		if(rb_mask && (1<<r)) ;
+		if(rb_mask & (1<<r)) ;
 		else continue ;
 
-		struct peds *ped = ped_store + r ;
+		daq_sst_ped_t *ped = ped_store + r ;
 
-		*dta++ = r+1 ;			// ARC, from 1
-		u_short *apv_cou = dta++ ;
-		*apv_cou = 0 ;
+		*dta++ = r+1 ;			// RDO, from 1
 
-		// need to dump the apv_meta_zs_t bank!!!
 
-		for(arm=0;arm<SST_ARM_COU;arm++) {
-		for(apv=0;apv<SST_APV_COU;apv++) {
+		for(f=0;f<SST_FIBER_COU;f++) {
+		for(h=0;h<SST_HYBRID_COU;h++) {
 
-		if(ped->expect_cou[arm][apv] == 0) continue ;	// no hits at all...
+			for(s=0;s<SST_STRIP_COU;s++) {
+				
+				short pp ;
 
-		*dta++ = arm ;
-		*dta++ = apv ;
-		(*apv_cou)++ ;
-
-		for(c=0;c<SST_CH_COU;c++) {
-		for(t=0;t<tb_cou_ped;t++) {
-
-				u_short pp ;
-
-				pp = (u_short)(ped->ped[arm][apv][c][t] + 0.5)  ;
+				pp = (short)(ped->ped[f][h][s] + 0.5)  ;
 				*dta++ = pp;
 
-				pp = (u_short)(ped->rms[arm][apv][c][t]*16.0  + 0.5) ;
-
+				pp = (u_short)(ped->rms[f][h][s]*16.0  + 0.5) ;
 				*dta++ = pp ;
+			}
 		}
 		}
-		}
-		}
-
 	}
+
+	while(((char *)dta-buff)%4) dta++ ;
 
 	LOG(TERR,"Pedestals prepared for later EVB, %d bytes",(char *)dta-buff) ;
 
 	return ((char *)dta-buff) ;
 }
-#endif
+
 
 int sstPed::to_cache(char *fname, u_int run)
 {
 	FILE *f ;
 	char f_fname[128] ;
+	int ret ;
 
 	if(!valid) {
 		LOG(CAUTION,"Pedestals are not valid -- not caching!") ;
-		return -1 ;
 	}
 
 	time_t tim = time(0) ;
@@ -344,9 +267,9 @@ int sstPed::to_cache(char *fname, u_int run)
 		}
 
 
-		f = fopen(f_fname,"w") ;
+		f = fopen("/tmp/ssd_peds","w") ;
 		if(f==0) {
-			LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]",f_fname,strerror(errno)) ;
+			LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]","/tmp/ssd_peds",strerror(errno)) ;
 			continue ;
 		}
 
@@ -359,13 +282,13 @@ int sstPed::to_cache(char *fname, u_int run)
 
 		fprintf(f,"\n") ;
 
-		struct peds *peds = ped_store + r ;
+		daq_sst_ped_t *peds = ped_store + r ;
 
 		for(int fib=0;fib<SST_FIBER_COU;fib++) {
 		for(int hy=0;hy<SST_HYBRID_COU;hy++) {
 		for(int strip=0;strip<SST_STRIP_COU;strip++) {
 
-			fprintf(f,"%d %2d %3d %.3f %.3f\n",fib,hy,strip,
+			fprintf(f,"%d %2d %3d %.1f %.1f\n",fib,hy,strip,
 				peds->ped[fib][hy][strip],
 				peds->rms[fib][hy][strip]) ;
 		}
@@ -373,7 +296,31 @@ int sstPed::to_cache(char *fname, u_int run)
 		}
 
 		fclose(f) ;
-		LOG(TERR,"Pedestals written to cache \"%s\"",f_fname) ;
+
+
+		char sys[256] ;
+
+		if(valid) {
+			sprintf(sys,"/bin/cp  /tmp/ssd_peds %s",f_fname) ;
+			ret = system(sys) ;
+			if(ret==0) {
+				LOG(TERR,"Pedestals written to cache \"%s\" [ret %d]",f_fname,ret) ;
+			}
+			else {
+				LOG(ERR,"Pedestals not written to cache \"%s\" [ret %d]",f_fname,ret) ;
+			}
+		}
+
+
+
+		sprintf(sys,"/bin/cp  /tmp/ssd_peds /net/ssd-upgrade/data/PEDESTALS/sst_pedestals_%08u_s%d_r%d.txt >/dev/null 2>/dev/null",run,sector,r+1) ;
+		ret = system(sys) ;
+		if(ret==0) {
+			LOG(TERR,"Executed [%s], ret %d",sys,ret) ;
+		}
+		else {
+			LOG(ERR,"Not executed [%s], ret %d",sys,ret) ;
+		}
 	}
 
 

@@ -6,6 +6,8 @@
 
 #include "daq_sst.h"
 
+
+
 class sstPed {
 public:
 	sstPed() ;
@@ -24,20 +26,15 @@ public:
 	void calc() ;					// calculates mean/rms into ped_store
 	int to_evb(char *buff) ;			// to EVB format from ped_store
 
-	int run_stop() ;	// prints errors etc.
 
 	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
 
 
 	// allocated per RDO
-	struct peds {
-		float ped[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
-		float rms[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
-		u_short cou[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];
-	} *ped_store ;
+	daq_sst_ped_t *ped_store ;
 
 
-	daq_sst *sst_rdr[SST_RDO_COU] ;
+	daq_sst *sst_rdr ;	// need it for something...
 
 	int sizeof_ped ;
 

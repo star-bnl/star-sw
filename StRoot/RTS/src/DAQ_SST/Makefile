@@ -44,9 +44,9 @@ sstPed.o: ../../../../StRoot/RTS/include/rtsSystems.h
 sstPed.o: ../DAQ_READER/daq_dta.h
 sstPed.o: ../../../../StRoot/RTS/include/rts.h
 sstPed.o: ../DAQ_READER/daq_dta_structs.h
-sstPed.o: sstPed.h
 sstPed.o: daq_sst.h
 sstPed.o: ../DAQ_READER/daq_det.h
+sstPed.o: sstPed.h
 daq_sst.o: ../DAQ_READER/daq_det.h
 sstPed.o: daq_sst.h
 sstPed.o: ../DAQ_READER/daq_det.h
