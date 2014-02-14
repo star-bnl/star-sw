@@ -73,7 +73,10 @@ static int tinfo_doer(daqReader *rdr, const char *do_print);
 static int pxl_doer(daqReader *rdr, const char *do_print) ;
 static int sst_doer(daqReader *rdr, const char *do_print) ;
 
+
 static int good ;
+
+static int run_number ;
 
 int main(int argc, char *argv[])
 {
@@ -87,6 +90,8 @@ int main(int argc, char *argv[])
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel((char *)WARN) ;
 
+
+	run_number = -1 ;
 
 	while((c = getopt(argc, argv, "D:d:m:h")) != EOF) {
 		switch(c) {
@@ -111,6 +116,7 @@ int main(int argc, char *argv[])
 	if(mountpoint) {
 		evp->setEvpDisk(mountpoint);
 	}
+
 
 	good=0;
 	int bad=0;
@@ -148,7 +154,12 @@ int main(int argc, char *argv[])
 		  }
 		}
 
-		
+		if(run_number < 0) {
+			
+			run_number = evp->run ;		
+			LOG(INFO,"Opened run number %08u",evp->run) ;
+		}
+
 		if(evp->status == EVP_STAT_EOR) {
 			LOG(INFO,"End of File reached...") ;
 			break ;	// of the for() loop...
@@ -312,7 +323,7 @@ int main(int argc, char *argv[])
 		if(pxl_doer(evp,print_det)) LOG(INFO,"PXL found") ;
 		
 		/*************************** SST **************************/
-		if(sst_doer(evp,print_det)) LOG(INFO,"SST found") ;
+		sst_doer(evp,print_det) ;
 		
 
 
@@ -1474,7 +1485,7 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 	dd = rdr->det("sst")->get("raw") ;
 	if(dd) {
 		while(dd->iterate()) {
-			found = 1 ;
+			found |= 1 ;
 
 			// point to the start of the DDL raw data
 			u_int *d = (u_int *) dd->Void ;	
@@ -1499,14 +1510,14 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 	dd = rdr->det("sst")->get("adc") ;
 	if(dd) {
 		while(dd->iterate()) {
-			found = 1 ;
+			found |= 2 ;
 			
 			daq_sst_data_t *sst = (daq_sst_data_t *)dd->Void ;
 
+			
 			if(do_print) {
+
 				printf("SST ADC: Sector %d, RDO %d, fiber %d: %d ADCs\n",dd->sec,dd->rdo,dd->pad,dd->ncontent) ;
-
-
 			
 				for(u_int i=0;i<dd->ncontent;i++) {
 					printf("   Strip %3d, hybrid %2d: %4d\n",sst[i].strip,sst[i].hybrid,sst[i].adc) ;
@@ -1516,6 +1527,46 @@ static int sst_doer(daqReader *rdr, const char *do_print)
 		}
 	}
 
+	dd = rdr->det("sst")->get("pedrms") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found |= 4 ;
+			
+			daq_sst_pedrms_t *sst = (daq_sst_pedrms_t *)dd->Void ;
+
+			
+			if(do_print) {
+
+				printf("SST PEDRMS: Sector %d, RDO %d, fiber %d: %d vals\n",dd->sec,dd->rdo,dd->pad,dd->ncontent) ;
+			
+				for(u_int i=0;i<dd->ncontent;i++) {
+					for(int h=0;h<SST_HYBRID_COU;h++) {
+					for(int s=0;s<SST_STRIP_COU;s++) {
+						printf("     ped %d, rms %.3f\n",sst->ped[h][s],(float)sst->rms[h][s]/16.0) ;
+					}
+					}
+				}
+			}
+
+		}
+	}
+
+
+
+	char s_found[128] ;
+	s_found[0] = 0 ;
+	
+	if(found & 1) {
+		strcat(s_found,"RAW ") ;
+	}
+	if(found & 2) {
+		strcat(s_found,"ADC ") ;
+	}
+	if(found & 4) {
+		strcat(s_found,"PEDRMS ") ;
+	}
+
+	if(found) LOG(INFO,"SST: found %s",s_found) ;
 
 	sst_test(rdr,1) ;
 
@@ -1544,20 +1595,22 @@ static int fgt_test(daqReader *rdr, const char *do_print, int which)
 
 static int sst_test(daqReader *rdr, int mode)
 {
-#define DO_SST_TEST
+//#define DO_SST_TEST
 #ifdef DO_SST_TEST
-	static sstPed *ped ;
+	static sstPed *ped[2] ;
 
-	if(ped==0) {
-		ped = new sstPed() ;
+	LOG(TERR,"sst_test: mode %d",mode) ;
 
+	if(ped[0]==0) {
+		ped[0] = new sstPed() ;
+		ped[0]->init(0x7) ;
+		ped[0]->sector = 1 ;
 
-		ped->init(0x7) ;
-		ped->sector = 1 ;
-		LOG(NOTE,"store %p",ped->ped_store) ;
+		ped[1] = new sstPed() ;
+		ped[1]->init(0x3) ;
+		ped[1]->sector = 2 ;
+
 	}
-
-	LOG(NOTE,"Mode is %d %p",mode,ped) ;
 
 	if(mode==1) {
 		daq_dta *dd = rdr->det("sst")->get("raw") ;
@@ -1565,19 +1618,22 @@ static int sst_test(daqReader *rdr, int mode)
 		LOG(NOTE,"Here") ;
 
 		while(dd && dd->iterate()) {
-			if(dd->sec != 1) continue ;
+			// this part works in non-ped runs
+			((daq_sst *)(rdr->det("sst")))->raw_to_adc_utility(dd->sec,dd->rdo,(char *)dd->Void,dd->ncontent/4,0,0) ;
 
-			LOG(NOTE,"Here: %d %d %d %p",dd->sec,dd->rdo,dd->ncontent,ped->ped_store) ;
 
-			ped->accum((char *)dd->Void, dd->ncontent, dd->rdo) ;
+			ped[dd->sec-1]->accum((char *)dd->Void, dd->ncontent, dd->rdo) ;
 
 			LOG(NOTE,"Accum done") ;
 
 		}
 	}
 	else {
-		ped->calc() ;
-		ped->to_cache("/log",123123) ;
+		ped[0]->calc() ;
+		ped[1]->calc() ;
+
+		ped[0]->to_cache("/log",run_number) ;
+		ped[1]->to_cache("/log",run_number) ;
 	}
 
 #endif
