@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCollection.cxx,v 1.4 2014/02/13 02:35:49 smirnovd Exp $
+* $Id: StIstCollection.cxx,v 1.5 2014/02/14 14:37:57 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -25,12 +25,7 @@ StIstCollection::StIstCollection() : StObject()
 //deconstructor
 StIstCollection::~StIstCollection()
 {
-   /* nothing to do */
-};
-
-size_t StIstCollection::getNumLadders() const
-{
-   return kIstNumLadders;
+   Clear("");
 };
 
 size_t StIstCollection::getNumTimeBins() const
@@ -108,6 +103,9 @@ ClassImp(StIstCollection);
 /***************************************************************************
 *
 * $Log: StIstCollection.cxx,v $
+* Revision 1.5  2014/02/14 14:37:57  ypwang
+* remove StMuDstMaker and getNumLadders() member function from StIstCollection
+*
 * Revision 1.4  2014/02/13 02:35:49  smirnovd
 * Moved CVS log to the bottom of the file
 *
