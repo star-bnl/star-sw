@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.4 2014/02/13 02:35:49 smirnovd Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.5 2014/02/14 14:51:06 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -21,22 +21,7 @@ StIstRawHitCollection::StIstRawHitCollection( unsigned char ladder ) : StObject(
 //deconstructor
 StIstRawHitCollection::~StIstRawHitCollection()
 {
-   //free memory and clear the vector
-   std::vector< StIstRawHit * >::iterator vecIter;
-   for ( vecIter = mRawHitVec.begin(); vecIter != mRawHitVec.end(); ++vecIter ) {
-      if (*vecIter != NULL) {
-         delete *vecIter;
-         *vecIter = NULL;
-      }
-   }
-   mRawHitVec.clear();
-
-   //free memory and clear the vector
-   std::vector< StIstRawHit * >::iterator vecIterT;
-   for ( vecIterT = mRawHitElecIdVec.begin(); vecIterT != mRawHitElecIdVec.end(); ++vecIterT ) {
-      delete[] (*vecIterT);
-   }
-   mRawHitElecIdVec.clear();
+   Clear("");
 };
 
 //sort internal vector by raw hit geometry ID
@@ -104,11 +89,22 @@ unsigned char StIstRawHitCollection::getLadder() const
 
 void StIstRawHitCollection::Clear( Option_t *opt )
 {
-   //clear the vector
+   //free memory and clear the vector
+   std::vector< StIstRawHit * >::iterator vecIter;
+   for ( vecIter = mRawHitVec.begin(); vecIter != mRawHitVec.end(); ++vecIter ) {
+      if (*vecIter != NULL) {
+         delete *vecIter;
+         *vecIter = NULL;
+      }
+   }
    mRawHitVec.clear();
-   //clear the vector for alternate lookups
-   for (unsigned int i = 0; i < mRawHitElecIdVec.size(); i++)
-      mRawHitElecIdVec[i] = static_cast< StIstRawHit * >(0);
+
+   //free memory and clear the vector
+   std::vector< StIstRawHit * >::iterator vecIterT;
+   for ( vecIterT = mRawHitElecIdVec.begin(); vecIterT != mRawHitElecIdVec.end(); ++vecIterT ) {
+      delete[] (*vecIterT);
+   }
+   mRawHitElecIdVec.clear();
 };
 
 StIstRawHit *StIstRawHitCollection::getRawHit( int elecId )
@@ -126,6 +122,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.5  2014/02/14 14:51:06  ypwang
+* update Clear() function, and call Clear() function in deconstructor
+*
 * Revision 1.4  2014/02/13 02:35:49  smirnovd
 * Moved CVS log to the bottom of the file
 *
