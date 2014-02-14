@@ -275,6 +275,12 @@ $(OBJDIR)/MediumCdTe.o: \
 	$(INCDIR)/FundamentalConstants.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/MediumGaAs.o: \
+	$(SRCDIR)/MediumGaAs.cc $(INCDIR)/MediumGaAs.hh \
+	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh \
+	$(INCDIR)/FundamentalConstants.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/OpticalData.o: \
 	$(SRCDIR)/OpticalData.cc $(INCDIR)/OpticalData.hh \
 	$(INCDIR)/FundamentalConstants.hh
