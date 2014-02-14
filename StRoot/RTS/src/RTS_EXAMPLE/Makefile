@@ -89,6 +89,10 @@ rts_example.o: ../DAQ_FGT/daq_fgt.h
 rts_example.o: ../DAQ_MTD/daq_mtd.h
 rts_example.o: ../DAQ_PXL/daq_pxl.h
 rts_example.o: ../DAQ_SST/daq_sst.h
+rts_example.o: ../DAQ_FGT/fgtPed.h
+rts_example.o: ../DAQ_FGT/daq_fgt.h
+rts_example.o: ../DAQ_SST/sstPed.h
+rts_example.o: ../DAQ_SST/daq_sst.h
 rts_example.trg.o: ../../../../StRoot/RTS/include/rtsLog.h
 rts_example.trg.o: ../../../../StRoot/RTS/include/rtsSystems.h
 rts_example.trg.o: ../DAQ_READER/daqReader.h
