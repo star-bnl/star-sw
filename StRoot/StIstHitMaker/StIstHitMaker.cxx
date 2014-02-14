@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.4 2014/02/08 03:34:16 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.5 2014/02/14 14:47:20 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.5  2014/02/14 14:47:20  ypwang
+* update due to removal of getNumLadders() member function from StIstCollection
+*
 * Revision 1.4  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
@@ -89,7 +92,7 @@ Int_t StIstHitMaker::Make()
     }
 
     if(!ierr)   {   
-        for(unsigned char ladderIdx=0; ladderIdx<istCollectionPtr->getNumLadders() && ladderIdx<kIstNumLadders; ++ladderIdx)   { 
+        for(unsigned char ladderIdx=0; ladderIdx<kIstNumLadders; ++ladderIdx)   { 
             StIstClusterCollection *clusterCollectionPtr = istCollectionPtr->getClusterCollection(ladderIdx );
     
             if( clusterCollectionPtr ){

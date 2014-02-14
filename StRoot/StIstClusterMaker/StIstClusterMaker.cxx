@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.4 2014/02/08 03:34:16 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.5 2014/02/14 14:45:56 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.5  2014/02/14 14:45:56  ypwang
+* update due to removal of getNumLadders() member function from StIstCollection
+*
 * Revision 1.4  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
@@ -57,7 +60,7 @@ Int_t StIstClusterMaker::Make()
   }   
  
   if( !ierr ){
-      for( unsigned char ladderIdx=0; ladderIdx<(unsigned char)istCollectionPtr->getNumLadders() && ladderIdx < kIstNumLadders; ++ladderIdx ){  
+      for( unsigned char ladderIdx=0; ladderIdx < kIstNumLadders; ++ladderIdx ){  
            StIstRawHitCollection *rawHitCollectionPtr = istCollectionPtr->getRawHitCollection( ladderIdx );
            StIstClusterCollection *clusterCollectionPtr = istCollectionPtr->getClusterCollection( ladderIdx );
        
@@ -86,11 +89,11 @@ Int_t StIstClusterMaker::Make()
   }
 
   LOG_DEBUG << "End of ist-clust-maker, print all raw hits & clusters: " << endm;
-  LOG_DEBUG << "Number of Ladders=" << istCollectionPtr->getNumLadders()<<", total raw hits=" <<istCollectionPtr->getNumRawHits()<<", total Clusters=" <<  istCollectionPtr->getNumClusters() <<endm;
+  LOG_DEBUG << "Total raw hits=" <<istCollectionPtr->getNumRawHits()<<", total Clusters=" <<  istCollectionPtr->getNumClusters() <<endm;
     
   if(Debug()>2) {
     Int_t rawHitIdx = 0, clusterIdx = 0;
-    for(unsigned char iLadder=0; iLadder<(unsigned char)istCollectionPtr->getNumLadders() && iLadder < kIstNumLadders; iLadder++) {
+    for(unsigned char iLadder=0; iLadder < kIstNumLadders; iLadder++) {
         LOG_DEBUG <<"Content: iLadder="<<(short) iLadder+1<< " # of : raw hits="<<istCollectionPtr->getNumRawHits(iLadder) <<"  clusters=" <<istCollectionPtr->getNumClusters( iLadder)<<endm;
         // ..... print all raw hits ....
         StIstRawHitCollection *rawHitPtr = istCollectionPtr->getRawHitCollection(iLadder);
