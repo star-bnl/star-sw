@@ -208,6 +208,7 @@ $(OBJDIR)/GeometryRoot.o: \
 
 $(OBJDIR)/ViewFEMesh.o: \
 	$(SRCDIR)/ViewFEMesh.cc $(INCDIR)/ViewFEMesh.hh \
+	$(SRCDIR)/ViewDrift.cc $(INCDIR)/ViewDrift.hh \
 	$(INCDIR)/ComponentFieldMap.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@

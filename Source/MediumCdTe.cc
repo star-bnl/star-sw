@@ -14,7 +14,7 @@ namespace Garfield {
 
 MediumCdTe::MediumCdTe() :
   Medium(), 
-  bandGap(1.44), 
+  // bandGap(1.44), 
   eMobility(1.1e-6), hMobility(0.1e-6),
   eSatVel(1.02e-2), hSatVel(0.72e-2),
   eHallFactor(1.15), hHallFactor(0.7),

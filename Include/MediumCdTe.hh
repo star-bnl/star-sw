@@ -55,7 +55,7 @@ class MediumCdTe : public Medium {
 
   private:
 
-    double bandGap;
+    // double bandGap;
 
     // Low-field mobility
     double eMobility, hMobility;

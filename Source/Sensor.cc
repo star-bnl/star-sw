@@ -20,8 +20,6 @@ Sensor::Sensor() :
   m_hasTransferFunction(false), m_fTransfer(0),
   m_hasNoiseFunction(false), m_fNoise(0),
   m_nThresholdCrossings(0),
-  m_xMin(0.), m_yMin(0.), m_zMin(0.),
-  m_xMax(0.), m_yMax(0.), m_zMax(0),
   m_hasUserArea(false),
   m_xMinUser(0.), m_yMinUser(0.), m_zMinUser(0.), 
   m_xMaxUser(0.), m_yMaxUser(0.), m_zMaxUser(0.),
@@ -798,8 +796,12 @@ Sensor::IntegrateSignal() {
   for (int i = 0; i < m_nElectrodes; ++i) {
     for (int j = 0; j < m_nTimeBins; ++j) {
       m_electrodes[i].signal[j] *= m_tStep;
+      m_electrodes[i].electronsignal[j] *= m_tStep;
+      m_electrodes[i].ionsignal[j] *= m_tStep;
       if (j > 0) {
         m_electrodes[i].signal[j] += m_electrodes[i].signal[j - 1];
+        m_electrodes[i].electronsignal[j] += m_electrodes[i].electronsignal[j - 1];
+        m_electrodes[i].ionsignal[j] += m_electrodes[i].ionsignal[j - 1];
       }
     }
   }

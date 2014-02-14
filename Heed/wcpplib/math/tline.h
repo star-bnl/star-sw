@@ -1347,9 +1347,9 @@ template<class T> class AbsCoorMesh: public RegPassivePtr
   macro_copy_total_zero(AbsCoorMesh<T>);
   virtual ~AbsCoorMesh() {};
 
-  virtual int operator==(const AbsCoorMesh<T>& m2)
+  virtual int operator==(const AbsCoorMesh<T>&)
   {
-    mfunnamep("virtual int operator==(const AbsCoorMesh<T>& m2)");
+    mfunnamep("virtual int operator==(const AbsCoorMesh<T>&)");
     funnw.ehdr(cerr);
     mcerr<<"AbsCoorMesh::operator == cannot be called since this is abstract class\n";
     spexit(mcerr);
@@ -1357,9 +1357,9 @@ template<class T> class AbsCoorMesh: public RegPassivePtr
     return 0; // to calm compiler
 #endif
   }
-  virtual int operator!=(const AbsCoorMesh<T>& m2)
+  virtual int operator!=(const AbsCoorMesh<T>&)
   {
-    mfunnamep("virtual int operator!=(const AbsCoorMesh<T>& m2)");
+    mfunnamep("virtual int operator!=(const AbsCoorMesh<T>&)");
     funnw.ehdr(cerr);
     mcerr<<"AbsCoorMesh::operator != cannot be called since this is abstract class\n";
     spexit(mcerr);
@@ -1367,7 +1367,7 @@ template<class T> class AbsCoorMesh: public RegPassivePtr
     return 0;  // to calm compiler
 #endif
   }
-  virtual int apeq_mant(const AbsCoorMesh<T>& m2, T prec)
+  virtual int apeq_mant(const AbsCoorMesh<T>&, T /*prec*/)
   {
     mfunnamep("virtual int apeq_mant(const AbsCoorMesh<T>& m2, T prec)");
     funnw.ehdr(cerr);
@@ -2298,7 +2298,6 @@ T t_find_x_for_integ_step_ar(const M& mesh,
   double xmin = mesh.get_xmin();
   double xmax = mesh.get_xmax();
   if(integ == 0.0) return xmin;
-  long istart, iafterend; // indexes to sum total intervals
   T s(0.0);
   long n=0;
   T xp1(0.0);
@@ -2924,7 +2923,6 @@ T t_integ_straight_point_ar(const M& mesh,
   if(x1 >= xmax && s_extrap_right == 0) return 0.0;
   if(x2 <= left_bond ) return 0.0;
   if(x1 >= right_bond ) return 0.0;
-  long istart, iafterend; // indexes to sum total intervals
   T s(0.0);
   if(x1 < left_bond) x1 = left_bond;
   if(x2 > right_bond) x2 = right_bond;

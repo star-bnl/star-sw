@@ -88,7 +88,7 @@ private:
     prev_node = f.prev_node;
     next_node = f.next_node;
   }  
-  AbsListNode<T>& operator=(const AbsListNode<T>& f) {return *this;} 
+  AbsListNode<T>& operator=(const AbsListNode<T>& /*f*/) {return *this;} 
 public:
   T el;
   inline AbsList<T>* get_head_node(void) const {return head_node;}

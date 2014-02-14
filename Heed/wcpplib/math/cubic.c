@@ -25,10 +25,8 @@ const double_complex iu(0,1);
 void  Cubic::find_zero(double_complex &z1, 
                        double_complex &z2, 
                        double_complex &z3) const 
-//int Cubic::find_zero(complex xzero[3]) const 
 {
   mfunname("void  Cubic::find_zero(double_complex &z1, double_complex &z2, double_complex &z3) const");
-  //mfunnamep("int Cubic::find_zero(complex xzero[3]) const");
   convmut(Cubic);
   if (s_dxzero == 0) {
     check_econd11a(da, == 0.0, "this is not cubic polynomial!", mcerr);
@@ -38,10 +36,7 @@ void  Cubic::find_zero(double_complex &z1,
     double Q = (3.0 * a1 - a2 * a2) / 9.0;
     double R = (9.0 * a2 * a1 - 27.0 * a0 - 2.0 * a2 * a2 * a2) / 54.0;
     double D = Q * Q * Q + R * R;
-    //Iprint3n(mcout, Q, R, D);
-    //check_econd11( D , < 0.0 , mcerr);
     double sD = sqrt(fabs(D));
-    //double_complex sD = sqrt( double_complex(D) );
     double_complex S;
     double_complex T;
     if (D >= 0.0) {
@@ -65,7 +60,6 @@ void  Cubic::find_zero(double_complex &z1,
       S = pow(R + iu * sD, 1 / 3.0);
       T = pow(R - iu * sD, 1 / 3.0);
     }
-    //Iprint3n(mcout, sD, S, T);
     z1 = -a2 / 3.0 + (S + T);
     z2 = -a2 / 3.0 - (S + T)/2.0 + 0.5 * iu * sqrt(3.0) * (S - T);
     z3 = -a2 / 3.0 - (S + T)/2.0 - 0.5 * iu * sqrt(3.0) * (S - T);
@@ -114,14 +108,8 @@ int Cubic::find_real_zero(double z[3]) const {
     }
   }
   for (n1 = 0; n1 < q - 1; n1++) {
-    //Iprint2n(mcout, n1, q);
-    //Iprintn(mcout, fabs(z[n1]));
-    //Iprintn(mcout, fabs(z[n2]));
-    //Iprintn(mcout, fabs((z[n1] - z[n1+1])/(z[n1] + z[n1+1])) );
-
     if ((fabs(z[n1]) < thresh && fabs(z[n2]) < thresh) ||
         fabs((z[n1] - z[n1+1])/(z[n1] + z[n1+1])) < thresh) {
-      //mcout<<"used\n";
       for (n2 = n1 + 1; n2 < q - 1; n2++) {
         z[n2] = z[n2+1];
       }
@@ -166,7 +154,6 @@ std::ostream& operator<<(std::ostream& file, const Cubic& f) {
   double_complex z3;
   Ifile << "Cubic: s_xzero=" << f.s_xzero() << '\n'; 
   indn.n += 2;
-    //<<" s_dxmm="<<f.s_dxmm<<'\n'; 
   f.find_zero(z1, z2, z3);
   Ifile << "Cubic: a=" << f.a() 
         << " b=" << f.b() 

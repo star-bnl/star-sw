@@ -124,7 +124,6 @@ class ComponentTcad2d : public ComponentBase {
     double pMin, pMax;
 
     // Bounding box
-    bool hasBoundingBox;
     bool hasRangeZ;
     double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
     double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;

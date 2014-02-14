@@ -26,32 +26,30 @@ class ViewSignal {
     void SetCanvas(TCanvas* c);
  
     void PlotSignal(const std::string label);
+    TH1D* GetHistogram() {return m_hSignal;}
 
-    void EnableDebugging()  {debug = true;}
-    void DisableDebugging() {debug = false;}
+    void EnableDebugging()  {m_debug = true;}
+    void DisableDebugging() {m_debug = false;}
 
   private:
  
-    std::string className;
+    std::string m_className;
  
     // Options
-    bool debug;
+    bool m_debug;
     
     // Sensor
-    Sensor* sensor;
+    Sensor* m_sensor;
 
-    // Time window
-    double tmin, tmax;
-    
     // Canvas
-    TCanvas* canvas;
-    bool hasExternalCanvas;
+    TCanvas* m_canvas;
+    bool m_hasExternalCanvas;
 
     // Histogram
-    TH1D* hSignal;
+    TH1D* m_hSignal;
 
     // Threshold crossings
-    TGraph* gCrossings;
+    TGraph* m_gCrossings;
     
 };
 

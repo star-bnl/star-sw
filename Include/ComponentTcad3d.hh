@@ -39,7 +39,7 @@ class ComponentTcad3d : public ComponentBase {
     // List all currently defined regions.
     void PrintRegions();
     // Get the number of regions in the device.
-    int  GetNumberOfRegions() const {return nRegions;}
+    int  GetNumberOfRegions() const {return m_nRegions;}
     void GetRegion(const int ireg, std::string& name, bool& active);
     void SetDriftRegion(const int ireg);
     void UnsetDriftRegion(const int ireg);
@@ -47,14 +47,14 @@ class ComponentTcad3d : public ComponentBase {
     void SetMedium(const int ireg, Medium* m);
     bool GetMedium(const int ireg, Medium*& m) const;
     
-    int GetNumberOfElements() const {return nElements;}
+    int GetNumberOfElements() const {return m_nElements;}
     bool GetElement(const int i, double& vol,
                     double& dmin, double& dmax, int& type);
     bool GetElement(const int i, double& vol,
                     double& dmin, double& dmax, int& type,
                     int& node1, int& node2, int& node3, int& node4,
                     int& node5, int& node6, int& node7, int& reg);
-    int GetNumberOfNodes() const {return nVertices;}
+    int GetNumberOfNodes() const {return m_nVertices;}
     bool GetNode(const int i, double& x, double& y, double& z,
                  double& v, double& ex, double& ey, double& ez); 
 
@@ -64,7 +64,7 @@ class ComponentTcad3d : public ComponentBase {
     static const int nMaxVertices = 7;
   
     // Regions
-    int nRegions;
+    int m_nRegions;
     struct region {
       // Name of region (from Tcad)
       std::string name;
@@ -72,10 +72,10 @@ class ComponentTcad3d : public ComponentBase {
       bool drift;
       Medium* medium;
     };
-    std::vector<region> regions;
+    std::vector<region> m_regions;
 
     // Vertices
-    int nVertices;
+    int m_nVertices;
     struct vertex {
       // Coordinates [cm]
       double x, y, z;
@@ -84,10 +84,10 @@ class ComponentTcad3d : public ComponentBase {
       // Flag indicating if vertex belongs to more than one region
       bool   isShared;
     };
-    std::vector<vertex> vertices;
+    std::vector<vertex> m_vertices;
 
     // Elements
-    int nElements;
+    int m_nElements;
     struct element {
       // Indices of vertices
       int vertex[nMaxVertices];
@@ -107,7 +107,7 @@ class ComponentTcad3d : public ComponentBase {
       // Associated region
       int region; 
     };
-    std::vector<element> elements;
+    std::vector<element> m_elements;
 
     // Face
     struct face {
@@ -117,18 +117,17 @@ class ComponentTcad3d : public ComponentBase {
     };
     
     // Voltage range
-    double pMin, pMax;
+    double m_pMin, m_pMax;
 
     // Bounding box
-    bool hasBoundingBox;
-    double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
-    double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
+    double m_xMinBoundingBox, m_yMinBoundingBox, m_zMinBoundingBox;
+    double m_xMaxBoundingBox, m_yMaxBoundingBox, m_zMaxBoundingBox;
 
     // Element from the previous call
-    int lastElement;
+    int m_lastElement;
     // Node point weighting factors for interpolation 
     // (local coordinates)
-    double w[nMaxVertices];
+    double m_w[nMaxVertices];
     
     // Reset the component
     void Reset();

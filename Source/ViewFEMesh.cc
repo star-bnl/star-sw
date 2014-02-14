@@ -531,7 +531,7 @@ ViewFEMesh::DrawElements() {
       const unsigned int npts = viewDrift->driftLines[dline].vect.size();
       // Create a TPolyLine that is a 2D projection of the original.
       TPolyLine* poly = new TPolyLine();
-      poly->SetLineColor(viewDrift->driftLines[dline].col);
+      poly->SetLineColor(viewDrift->driftLines[dline].n);
       int polyPts = 0;
       for (unsigned int pt = 0; pt < npts; pt++) {
         // Get the coordinates of this point.
@@ -832,7 +832,7 @@ ViewFEMesh::DrawCST(ComponentCST* componentCST) {
       const unsigned int npts = viewDrift->driftLines[dline].vect.size();
       // Create a TPolyLine that is a 2D projection of the original
       TPolyLine* poly = new TPolyLine();
-      poly->SetLineColor(viewDrift->driftLines[dline].col);
+      poly->SetLineColor(viewDrift->driftLines[dline].n);
       int polyPts = 0;
       for (unsigned int pt = 0; pt < npts; pt++) {
         // Get the coordinates of this point in the TPolyLine3D

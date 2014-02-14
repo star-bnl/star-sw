@@ -83,12 +83,9 @@ is that if x is outside the edge elements of array, the functions return 0.0.
 */
 
 template<class T>
-double lin_interpolation(T x, DynLinArr< T2DPoint<T> > ar)
-{
-  long n;
-  long q=ar.get_qel();
-  long nstart=find_interval(x , ar);
-  if(nstart < 0) return 0.0;
+double lin_interpolation(T x, DynLinArr< T2DPoint<T> > ar) {
+  long nstart = find_interval(x , ar);
+  if (nstart < 0) return 0.0;
   return ar[nstart].y + 
     (ar[nstart+1].y-ar[nstart].y)/(ar[nstart+1].x-ar[nstart].x)*
     (x-ar[nstart].x);
@@ -108,15 +105,13 @@ double double_parab_interpolation
 template<class T>
 double lin_inter_extra_polation(T x, DynLinArr< T2DPoint<T> > ar)
 {
-  long n;
-  long q=ar.get_qel();
-  long nstart=find_interval(x , ar);
-  if(nstart < 0) 
-  {
-    if(x<ar[0].x)
-      nstart=0;
-    else
-      nstart=ar.get_qel()-2;
+  long nstart=find_interval(x, ar);
+  if (nstart < 0) {
+    if (x < ar[0].x) {
+      nstart = 0;
+    } else { 
+      nstart = ar.get_qel() - 2;
+    }
   }
   return ar[nstart].y + 
     (ar[nstart+1].y-ar[nstart].y)/(ar[nstart+1].x-ar[nstart].x)*

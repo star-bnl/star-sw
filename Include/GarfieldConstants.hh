@@ -34,7 +34,9 @@ static const int PhotonCollisionTypeInelastic  = 2;
 static const int PhotonCollisionTypeExcitation = 3;
 
 // Status codes for drift lines
-static const int StatusLeftDriftArea        =  -1; 
+static const int StatusAlive                =   0;
+static const int StatusLeftDriftArea        =  -1;
+static const int StatusTooManySteps         =  -2;
 static const int StatusCalculationAbandoned =  -3;
 static const int StatusLeftDriftMedium      =  -5;
 static const int StatusAttached             =  -7;

@@ -15,7 +15,7 @@ ComponentTcad2d::ComponentTcad2d() :
   hasPotential(false), hasField(false),
   hasElectronMobility(false), hasHoleMobility(false),
   pMin(0.), pMax(0.),
-  hasBoundingBox(false), hasRangeZ(false), 
+  hasRangeZ(false), 
   lastElement(0) {
 
   className = "ComponentTcad2d";

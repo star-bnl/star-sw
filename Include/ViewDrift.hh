@@ -27,24 +27,22 @@ class ViewDrift {
     void SetArea(double xmin, double ymin, double zmin, 
                  double xmax, double ymax, double zmax);
     void Clear();
-    void Plot(const bool twod = false, const bool axis = true);
-    void Plot2d(const bool axis);
-    void Plot3d(const bool axis);
+    void Plot(const bool twod, const bool axis);
     
     void SetClusterMarkerSize(const double size);
     void SetCollisionMarkerSize(const double size);
 
     // Functions to be used by transport classes.
-    void NewElectronDriftLine(const int np, int& id,
+    void NewElectronDriftLine(const unsigned int np, int& id,
                               const double x0, const double y0, 
                               const double z0);
-    void NewHoleDriftLine(const int np, int& id,
+    void NewHoleDriftLine(const unsigned int np, int& id,
                           const double x0, const double y0, const double z0);
-    void NewIonDriftLine(const int np, int& id,
+    void NewIonDriftLine(const unsigned int np, int& id,
                          const double x0, const double y0, const double z0);
     void NewPhotonTrack(const double x0, const double y0, const double z0,
                         const double x1, const double y1, const double z1);
-    void NewChargedParticleTrack(const int np, int& id,
+    void NewChargedParticleTrack(const unsigned int np, int& id,
                                  const double x0, const double y0, 
                                  const double z0);
 
@@ -79,7 +77,6 @@ class ViewDrift {
       double y;
       double z;
     };
-
     // Canvas
     TCanvas* canvas;
     bool hasExternalCanvas;
@@ -92,7 +89,7 @@ class ViewDrift {
     int nDriftLines;
     struct driftLine {
       std::vector<marker> vect;
-      int col; 
+      int n;  //what kind of particle?
     };
     std::vector<driftLine> driftLines;
 
@@ -100,16 +97,19 @@ class ViewDrift {
     std::vector<TPointSet3D> tracks;
     int nExcMarkers;
     std::vector<marker> excMarkers;
-    TPointSet3D* excPlot;
+    TPointSet3D* excPlot;//=new TGraph();
     int nIonMarkers;
     std::vector<marker> ionMarkers;
-    TPointSet3D* ionPlot;
+    TPointSet3D* ionPlot;// = new TGraph();
     int nAttMarkers;
     std::vector<marker> attMarkers;
-    TPointSet3D* attPlot;
+    TPointSet3D* attPlot;// = new TGraph();
 
     double markerSizeCluster;
     double markerSizeCollision;
+
+    void Plot2d(const bool axis);
+    void Plot3d(const bool axis);
 
 };
 

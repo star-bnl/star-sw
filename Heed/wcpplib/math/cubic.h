@@ -15,41 +15,10 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-/*
-Macros double_complex and other 2 similar are defined in file complex in
-gcc version egcs-2.91.66 19990314/Linux (egcs-1.1.2 release)
-together with definition __STD_COMPLEX
-Below is the total file complex:
-#ifndef __COMPLEX__
-#define __COMPLEX__
-
-#include <std/complext.h>
-
-extern "C++" {
-#define __STD_COMPLEX
-
-// ANSI complex types
-typedef complex<float> float_complex;
-typedef complex<double> double_complex;
-typedef complex<long double> long_double_complex;
-}
-
-#endif
-
-In the newer versions there is no definitions of double_complex and similar
-in the standard environment, but there is a separate file backward/complex.h
-with them. This file is absent in the older versions. To assure automatic
-compilation of the programs at any versions, I included three control
-lines:
-*/
-
-//#ifndef __STD_COMPLEX
-//#include <backward/complex.h>
-//#endif
 using std::complex;
-typedef complex<float>		float_complex;
-typedef complex<double>		double_complex;
-typedef complex<long double>	long_double_complex;
+typedef complex<float> float_complex;
+typedef complex<double>	double_complex;
+typedef complex<long double> long_double_complex;
 
 
 class Cubic     
@@ -59,15 +28,14 @@ class Cubic
   inline double c(void) const {return dc;}
   inline double d(void) const {return dd;}
   inline double s_xzero(void) const {return s_dxzero;} // for debug
-  inline void put_a(double fa) { da=fa; s_dxzero=0; s_dxmm=0;} 
-  inline void put_b(double fb) { db=fb; s_dxzero=0; s_dxmm=0;} 
-  inline void put_c(double fc) { dc=fc; s_dxzero=0; s_dxmm=0;} 
-  inline void put_d(double fd) { dd=fd; s_dxzero=0; s_dxmm=0;} 
+  inline void put_a(double fa) {da=fa; s_dxzero=0;} 
+  inline void put_b(double fb) {db=fb; s_dxzero=0;} 
+  inline void put_c(double fc) {dc=fc; s_dxzero=0;} 
+  inline void put_d(double fd) {dd=fd; s_dxzero=0;} 
 
-  Cubic(void): da(0.0), db(0.0), dc(0.0), dd(0.0), s_dxzero(0), s_dxmm(0) {}
-  //Cubic(const Cubic& f);
+  Cubic(void): da(0.0), db(0.0), dc(0.0), dd(0.0), s_dxzero(0) {}
   Cubic(double fa, double fb, double fc, double fd): 
-    da(fa), db(fb), dc(fc), dd(fd), s_dxzero(0), s_dxmm(0) {}
+    da(fa), db(fb), dc(fc), dd(fd), s_dxzero(0) {}
 
   inline double y(double x) const 
     { return da * x*x*x + db * x*x + dc * x + dd; }
@@ -80,7 +48,6 @@ class Cubic
   // returns number of solutions
   // Analysed and ordered real solutions
 
-  //int find_zero(double_complex xzero[3]) const ;  
   // returns number of solutions
   // first is the least.
   int find_maxmin(double xmm[2], double ymm[2], 
@@ -91,12 +58,6 @@ private:
   mutable double_complex dz1;
   mutable double_complex dz2; 
   mutable double_complex dz3;
-  //mutable int qdxzero;
-  //mutable double dxzero[3];
-  mutable int s_dxmm;  // this seems to be unused. Left here
-  // in order to avoid editing constructors. 
-  mutable int qdxmm;  // the same
-  mutable double dxmm[2]; // the same
 };
 
 std::ostream& operator<<(std::ostream& file, const Cubic& f);

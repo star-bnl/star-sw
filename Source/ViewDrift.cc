@@ -116,7 +116,7 @@ ViewDrift::SetCollisionMarkerSize(const double size) {
 }
   
 void
-ViewDrift::NewElectronDriftLine(const int np, int& id,
+ViewDrift::NewElectronDriftLine(const unsigned int np, int& id,
                       const double x0, const double y0, const double z0) {
 
   int col = plottingEngine.GetRootColorElectron();
@@ -125,24 +125,27 @@ ViewDrift::NewElectronDriftLine(const int np, int& id,
     // Number of points is not yet known.
     driftLine d;
     std::vector<marker> p(1); 
-    p[0].x = x0;
-    p[0].y = y0;
-    p[0].z = z0;
-    d.vect = p;
-    d.col = col;
+    p[0].x =x0;
+    p[0].y =y0;
+    p[0].z =z0;
+    d.vect=p;
+    d.n=col;
     driftLines.push_back(d);
     std::cout<<"Error: Number of points not specified for plotting"<<std::endl;
   } else {
     std::vector<marker> p(np);
-    for (int i = 0; i < np; ++i) {
+    for (unsigned int i = 0; i < np; ++i) {
       p[i].x = x0;
       p[i].y = y0;
       p[i].z = z0;
     }
     driftLine d;
-    d.vect = p;
-    d.col = col;
+    d.vect=p;
+    d.n=col;
     driftLines.push_back(d);
+    //p.SetLineColor(col);
+    //p.SetPoint(0,x0,y0,z0);
+    //driftLines.push_back(p);
   }
   // Return the index of this drift line.
   id = nDriftLines;
@@ -151,7 +154,7 @@ ViewDrift::NewElectronDriftLine(const int np, int& id,
 } 
 
 void
-ViewDrift::NewHoleDriftLine(const int np, int& id,
+ViewDrift::NewHoleDriftLine(const unsigned int np, int& id,
                       const double x0, const double y0, const double z0) {
 
   int col = plottingEngine.GetRootColorHole(); 
@@ -159,22 +162,23 @@ ViewDrift::NewHoleDriftLine(const int np, int& id,
     // Number of points is not yet known.
     driftLine d;
     std::vector<marker> p(1); 
-    p[0].x = x0;
-    p[0].y = y0;
-    p[0].z = z0;
-    d.vect = p;
-    d.col = col;
+    p[0].x =x0;
+    p[0].y =y0;
+    p[0].z =z0;
+    d.vect=p;
+    d.n=col;
     driftLines.push_back(d);
+    std::cout<<"Error: Number of points not specified for plotting"<<std::endl;
   } else {
     std::vector<marker> p(np);
-    for (int i = 0; i < np; ++i) {
+    for (unsigned int i = 0; i < np; ++i) {
       p[i].x = x0;
       p[i].y = y0;
       p[i].z = z0;
     }
     driftLine d;
-    d.vect = p;
-    d.col = col;
+    d.vect=p;
+    d.n=col;
     driftLines.push_back(d);
   }
   // Return the index of this drift line.
@@ -184,30 +188,31 @@ ViewDrift::NewHoleDriftLine(const int np, int& id,
 }
 
 void
-ViewDrift::NewIonDriftLine(const int np, int& id,
+ViewDrift::NewIonDriftLine(const unsigned int np, int& id,
                  const double x0, const double y0, const double z0) {
 
-  int col = plottingEngine.GetRootColorIon();
+  int col = 47;
   if (np <= 0) {
     // Number of points is not yet known.
     driftLine d;
     std::vector<marker> p(1); 
-    p[0].x = x0;
-    p[0].y = y0;
-    p[0].z = z0;
-    d.vect = p;
-    d.col = col;
+    p[0].x =x0;
+    p[0].y =y0;
+    p[0].z =z0;
+    d.vect=p;
+    d.n=col;
     driftLines.push_back(d);
+    std::cout<<"Error: Number of points not specified for plotting"<<std::endl;
   } else {
     std::vector<marker> p(np);
-    for (int i = 0; i < np; ++i) {
+    for (unsigned int i = 0; i < np; ++i) {
       p[i].x = x0;
       p[i].y = y0;
       p[i].z = z0;
     }
     driftLine d;
-    d.vect = p;
-    d.col = col;
+    d.vect=p;
+    d.n=col;
     driftLines.push_back(d);
   }
   // Return the index of this drift line.
@@ -221,23 +226,18 @@ ViewDrift::NewPhotonTrack(const double x0, const double y0, const double z0,
 
   int col = plottingEngine.GetRootColorPhoton();
   // Create a new photon track (line between start and end point).
-  std::vector<marker> p(2);
-  p[0].x = x0;
-  p[0].y = y0;
-  p[0].z = z0;
-  p[1].x = x1;
-  p[1].y = y1;
-  p[1].z = z1;
-  driftLine d;
-  d.vect = p;
-  d.col = col;
-  driftLines.push_back(d);
-   ++nDriftLines;
+  TPolyLine3D p(2);
+  p.SetLineColor(col);
+  p.SetLineStyle(7);
+  p.SetNextPoint(x0, y0, z0);
+  p.SetNextPoint(x1, y1, z1);
+  //driftLines.push_back(p);
+  ++nDriftLines;
 
 }
 
 void
-ViewDrift::NewChargedParticleTrack(const int np, int& id,
+ViewDrift::NewChargedParticleTrack(const unsigned int np, int& id,
                      const double x0, const double y0, const double z0) {
 
   int col = plottingEngine.GetRootColorChargedParticle();
@@ -274,34 +274,27 @@ ViewDrift::SetDriftLinePoint(const int iL, const int iP,
     return;
   }
 
-  const int nPoints = driftLines[iL].vect.size();
-  if (iP < 0 || iP >= nPoints) {
-    marker p;
-    p.x = x;
-    p.y = y;
-    p.z = z;
-    driftLines[iL].vect.push_back(p);
-  } else {
-    driftLines[iL].vect[iP].x = x;
-    driftLines[iL].vect[iP].y = y;
-    driftLines[iL].vect[iP].z = z;
-  }
-
+  if (iP < 0) return;
+  std::cout<<"Seting points in a vector.\n";
+  driftLines[iL].vect[iP].x=x;
+  driftLines[iL].vect[iP].y=y;
+  driftLines[iL].vect[iP].z=z;
 }
 
 void
 ViewDrift::AddDriftLinePoint(const int iL,
                              const double x, const double y, const double z) {
 
-  if (iL >= nDriftLines) {
+  if (iL < 0 || iL >= nDriftLines) {
     std::cerr << className << "::AddDriftLinePoint:\n";
     std::cerr << "    Drift line index " << iL << " is out of range.\n";
     return;
   }
   marker m;
-  m.x = x;
-  m.y = y;
-  m.z = z;
+  m.x=x;
+  m.y=y;
+  m.z=z;
+
   driftLines[iL].vect.push_back(m);
 
 }
@@ -315,6 +308,9 @@ ViewDrift::SetTrackPoint(const int iL, const int iP,
     std::cerr << "    Track index " << iL << " is out of range.\n";
     return;
   }
+
+  if (iP < 0) return;
+  
   tracks[iL].SetPoint(iP, x, y, z);
 
 }
@@ -386,6 +382,7 @@ ViewDrift::Plot(const bool twod, const bool axis) {
 void
 ViewDrift::Plot2d(const bool axis) {
 
+  std::cout<<"Plotting in 2D..."<<std::endl;  
   if (canvas == 0) {
     canvas = new TCanvas();
     canvas->SetTitle(label.c_str());
@@ -394,21 +391,27 @@ ViewDrift::Plot2d(const bool axis) {
   canvas->cd();
   canvas->Update();
 
+  //if (canvas->GetView() == 0) {
+   // if (view == 0) view = TVi/ew::CreateView(1, 0, 0);
+   // view->SetRange(xMin, yMin, zMin, xMax, yMax, zMax);
+   // view->ShowAxis();
+   // view->Top();
+   // canvas->SetView(view);
+  //}
+
   for (int i = 0; i < nDriftLines; ++i) {
     TGraph t(driftLines[i].vect.size());
     for(int j = driftLines[i].vect.size(); j--;){
+      //std::cout<<"Plotting point by point"<<std::endl;
       t.SetPoint(j, driftLines[i].vect[j].x, driftLines[i].vect[j].y);
     }
-    t.SetLineColor(driftLines[i].col);
+      t.SetLineColor(driftLines[i].n);
+      t.SetLineWidth(1);
     if (i == 0) {
       t.GetXaxis()->SetLimits(xMin, xMax);
       t.GetHistogram()->SetMaximum(yMax);
       t.GetHistogram()->SetMinimum(yMin);
-      if (axis) {
-        t.DrawClone("ALsame");
-      } else {
-        t.DrawClone("Lsame");
-      }
+      t.DrawClone("Lsame");
     } else {
       t.DrawClone("Lsame");
     }
@@ -420,33 +423,39 @@ ViewDrift::Plot2d(const bool axis) {
 void
 ViewDrift::Plot3d(const bool axis) {
 
+  std::cout<<"Plotting in 3D..."<<std::endl;
+  
   if (canvas == 0) {
     canvas = new TCanvas();
     canvas->SetTitle(label.c_str());
     if (hasExternalCanvas) hasExternalCanvas = false;
   }
   canvas->cd();
-  canvas->Update();
 
   if (canvas->GetView() == 0) {
     if (view == 0) view = TView::CreateView(1, 0, 0);
     view->SetRange(xMin, yMin, zMin, xMax, yMax, zMax);
-    if (axis) view->ShowAxis();
+    view->ShowAxis();
     view->Top();
     canvas->SetView(view);
   }
   for (int i = 0; i < nDriftLines; ++i) {
     TPointSet3D t(driftLines[i].vect.size());
-    for(int j = driftLines[i].vect.size(); j--;) {
+    for(int j = driftLines[i].vect.size(); j--;){
+      //std::cout<<"Plotting point by point"<<std::endl;
       t.SetPoint(j, driftLines[i].vect[j].x, driftLines[i].vect[j].y,driftLines[i].vect[j].z);
     }
-    t.SetMarkerColor(driftLines[i].col);
-    t.DrawClone("same");
+      t.SetMarkerColor(driftLines[i].n);
+    if (i == 0) {
+      t.DrawClone("Lsame");
+    } else {
+      t.DrawClone("Lsame");
+    }
   }
   canvas->Update();
 
   for (int i = nTracks; i--;) {
-    tracks[i].Draw("same");
+    tracks[i].Draw("Lsame");
   }
 
   if (excPlot != 0) {
@@ -457,6 +466,7 @@ ViewDrift::Plot3d(const bool axis) {
   excPlot->SetMarkerStyle(20);
   excPlot->SetMarkerSize(markerSizeCollision);
   for (int i = 0; i < nExcMarkers; ++i) {
+    // excPlot->SetPoint(i + 1, 
     excPlot->SetNextPoint(
                       excMarkers[i].x, excMarkers[i].y, excMarkers[i].z);
   }
@@ -468,6 +478,7 @@ ViewDrift::Plot3d(const bool axis) {
   ionPlot->SetMarkerStyle(20);
   ionPlot->SetMarkerSize(markerSizeCollision);
   for (int i = 0; i < nIonMarkers; ++i) {
+    // ionPlot->SetPoint(i + 1, 
     ionPlot->SetNextPoint(
                       ionMarkers[i].x, ionMarkers[i].y, ionMarkers[i].z);
   }
@@ -479,6 +490,7 @@ ViewDrift::Plot3d(const bool axis) {
   attPlot->SetMarkerStyle(20);
   attPlot->SetMarkerSize(markerSizeCollision);
   for (int i = 0; i < nAttMarkers; ++i) {
+    // attPlot->SetPoint(i + 1, 
     attPlot->SetNextPoint(
                       attMarkers[i].x, attMarkers[i].y, attMarkers[i].z);
   }

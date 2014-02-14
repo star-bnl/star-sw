@@ -92,8 +92,7 @@ T normsq_DynLinArr_part(const DynLinArr<T>& f, const DynLinArr<int>& s_use)
   return s;
 }
 
-// Matrix multiplication of two matrises:
-  
+// Matrix multiplication of two matrices:
 template<class T>
 DynArr<T> operator*(const DynArr<T>& mt1, const DynArr<T>& mt2)
 {
@@ -104,39 +103,29 @@ DynArr<T> operator*(const DynArr<T>& mt1, const DynArr<T>& mt2)
   const DynLinArr<long>& qel_mt1(mt1.get_qel());
   const DynLinArr<long>& qel_mt2(mt2.get_qel());
   check_econd12( qel_mt1[1] , != , qel_mt2[0] , mcerr);
-  if(mt2.get_qdim() == 2)  // otherwise 1
-  {
-    long q1=qel_mt1[0];
-    long q2=qel_mt2[1];
-    long q3=qel_mt1[1];
+  if (mt2.get_qdim() == 2) { // otherwise 1
+    long q1 = qel_mt1[0];
+    long q2 = qel_mt2[1];
+    long q3 = qel_mt1[1];
     DynArr<T> res(q1, q2);
-    long n1, n2, n3;
-    for(n1=0; n1<q1; n1++)
-    {
-      for(n2=0; n2<q2; n2++)
-      {
-	T t(0.0);
-	for(n3=0; n3<q3; n3++)
-	{
-	  t += mt1.acu(n1,n3) * mt2.acu(n3,n2);
-	}
-	res.acu(n1,n2) = t;
+    for (long n1 = 0; n1 < q1; ++n1) {
+      for (long n2 = 0; n2 < q2; ++n2) {
+        T t(0.0);
+        for (long n3 = 0; n3 < q3; ++n3) {
+	        t += mt1.acu(n1,n3) * mt2.acu(n3,n2);
+        }
+        res.acu(n1,n2) = t;
       }
     }
     return res;
-  }
-  else
-  {
-    long q1=qel_mt1[0];
-    long q3=qel_mt1[1];
+  } else {
+    long q1 = qel_mt1[0];
+    long q3 = qel_mt1[1];
     DynArr<T> res(q1);
-    long n1, n2, n3;
-    for(n1=0; n1<q1; n1++)
-    {
+    for (long n1 = 0; n1 < q1; ++n1) {
       T t(0.0);
-      for(n3=0; n3<q3; n3++)
-      {
-	t += mt1.acu(n1,n3) * mt2.acu(n3);
+      for (long n3 = 0; n3 < q3; ++n3) {
+        t += mt1.acu(n1,n3) * mt2.acu(n3);
       }
       res.acu(n1) = t;
     }

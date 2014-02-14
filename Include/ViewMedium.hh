@@ -29,25 +29,21 @@ class ViewMedium {
     
     void SetElectricFieldRange(const double emin, const double emax);
     void SetMagneticFieldRange(const double bmin, const double bmax); 
+    void SetBAngleRange(const double amin, const double amax); //new
     void SetFunctionRange(const double vmin, const double vmax);
     void SetFunctionRange();
 
-    void PlotElectronVelocity();
-    void PlotHoleVelocity();
-    void PlotIonVelocity();
-
-    void PlotElectronDiffusion();
-    void PlotHoleDiffusion();
-    void PlotIonDiffusion();
-
-    void PlotElectronTownsend();
-    void PlotHoleTownsend();
-
-    void PlotElectronAttachment();
-    void PlotHoleAttachment();
-   
-    void PlotElectronCrossSections();
-
+    void PlotElectronVelocity(const char xaxis, const double e, const double b, const double a);
+    void PlotHoleVelocity(const char xaxis, const double e, const double b, const double a);
+    void PlotIonVelocity(const char xaxis, const double e, const double b, const double a);
+    void PlotElectronDiffusion(const char xaxis, const double e, const double b, const double a);
+    void PlotHoleDiffusion(const char xaxis, const double e, const double b, const double a);
+    void PlotIonDiffusion(const char xaxis, const double e, const double b, const double a);
+    void PlotElectronTownsend(const char xaxis, const double e, const double b, const double a);
+    void PlotHoleTownsend(const char xaxis, const double e, const double b, const double a);
+    void PlotElectronAttachment(const char xaxis, const double e, const double b, const double a);
+    void PlotHoleAttachment(const char xaxis, const double e, const double b, const double a);
+    void PlotElectronCrossSections(const char xaxis, const double e, const double b, const double a);
     double EvaluateFunction(double* pos, double* par);
 
   private:
@@ -63,10 +59,21 @@ class ViewMedium {
 
     Medium* medium;
   
-    // Ranges 
+    // Ranges for variable parameters
     double eMin, eMax;
     double bMin, bMax;
+    double aMin, aMax;
     double vMin, vMax;
+    
+    // Fixed parameters
+    double efield;
+    double bfield;
+    double angle;    
+    
+    // Tolerances for marker plotting
+    double etolerance;
+    double btolerance;
+    double atolerance;
 
     // Functions
     std::vector<TF1> functions;
@@ -80,7 +87,8 @@ class ViewMedium {
                      const double ymin, const double ymax,
                      const bool keep, 
                      const std::string xlabel, const std::string ylabel,
-                     const int type);
+                     const int type, const char xaxis, const double e, 
+                     const double b, const double a);
  
 };
 

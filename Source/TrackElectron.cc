@@ -24,7 +24,7 @@ TrackElectron::TrackElectron() :
   mass = ElectronMass;
   isElectron = true;
   SetBetaGamma(3.);
-  particleName == "electron";
+  particleName = "electron";
 
   components.clear(); 
   electrons.clear(); 

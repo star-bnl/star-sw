@@ -140,7 +140,6 @@ class Sensor {
    
     // Transfer function
     bool m_hasTransferFunction;
-    bool m_hasTransferFunctionTable; 
     double (*m_fTransfer) (double t);
     std::vector<double> m_transferFunctionTimes;
     std::vector<double> m_transferFunctionValues;
@@ -157,10 +156,7 @@ class Sensor {
     std::vector<thresholdCrossing> m_thresholdCrossings;
     double m_thresholdLevel;
 
-    // Bounding box
-    double m_xMin, m_yMin, m_zMin;
-    double m_xMax, m_yMax, m_zMax;
-    // User bounds
+    // User bounding box
     bool m_hasUserArea;
     double m_xMinUser, m_yMinUser, m_zMinUser;
     double m_xMaxUser, m_yMaxUser, m_zMaxUser;

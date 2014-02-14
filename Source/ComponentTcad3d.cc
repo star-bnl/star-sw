@@ -12,17 +12,16 @@ namespace Garfield {
 
 ComponentTcad3d::ComponentTcad3d() : 
   ComponentBase(), 
-  nRegions(0), nVertices(0), nElements(0),
-  hasBoundingBox(false), 
-  lastElement(0) {
+  m_nRegions(0), m_nVertices(0), m_nElements(0),
+  m_lastElement(0) {
 
   className = "ComponentTcad3d";
     
-  regions.clear();
-  vertices.clear();
-  elements.clear();
+  m_regions.clear();
+  m_vertices.clear();
+  m_elements.clear();
   
-  for (int i = nMaxVertices; i--;) w[i] = 0.;
+  for (int i = nMaxVertices; i--;) m_w[i] = 0.;
   
 }
 
@@ -47,55 +46,55 @@ ComponentTcad3d::ElectricField(
   double x = xin, y = yin, z = zin;
   // In case of periodicity, reduce to the cell volume.
   bool xMirrored = false;
-  const double cellsx = xMaxBoundingBox - xMinBoundingBox;
+  const double cellsx = m_xMaxBoundingBox - m_xMinBoundingBox;
   if (xPeriodic) {
-    x = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
-    if (x < xMinBoundingBox) x += cellsx;
+    x = m_xMinBoundingBox + fmod(x - m_xMinBoundingBox, cellsx);
+    if (x < m_xMinBoundingBox) x += cellsx;
   } else if (xMirrorPeriodic) {
-    double xNew = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
-    if (xNew < xMinBoundingBox) xNew += cellsx;
+    double xNew = m_xMinBoundingBox + fmod(x - m_xMinBoundingBox, cellsx);
+    if (xNew < m_xMinBoundingBox) xNew += cellsx;
     int nx = int(floor(0.5 + (xNew - x) / cellsx));
     if (nx != 2 * (nx / 2)) {
-      xNew = xMinBoundingBox + xMaxBoundingBox - xNew;
+      xNew = m_xMinBoundingBox + m_xMaxBoundingBox - xNew;
       xMirrored = true;
     }
     x = xNew;
   }
   bool yMirrored = false;
-  const double cellsy = yMaxBoundingBox - yMinBoundingBox;
+  const double cellsy = m_yMaxBoundingBox - m_yMinBoundingBox;
   if (yPeriodic) {
-    y = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
-    if (y < yMinBoundingBox) y += cellsy;
+    y = m_yMinBoundingBox + fmod(y - m_yMinBoundingBox, cellsy);
+    if (y < m_yMinBoundingBox) y += cellsy;
   } else if (yMirrorPeriodic) {
-    double yNew = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
-    if (yNew < yMinBoundingBox) yNew += cellsy;
+    double yNew = m_yMinBoundingBox + fmod(y - m_yMinBoundingBox, cellsy);
+    if (yNew < m_yMinBoundingBox) yNew += cellsy;
     int ny = int(floor(0.5 + (yNew - y) / cellsy));
     if (ny != 2 * (ny / 2)) {
-      yNew = yMinBoundingBox + yMaxBoundingBox - yNew;
+      yNew = m_yMinBoundingBox + m_yMaxBoundingBox - yNew;
       yMirrored = true;
     }
     y = yNew;
   }
   bool zMirrored = false;
-  const double cellsz = zMaxBoundingBox - zMinBoundingBox;
+  const double cellsz = m_zMaxBoundingBox - m_zMinBoundingBox;
   if (zPeriodic) {
-    z = zMinBoundingBox + fmod(z - zMinBoundingBox, cellsz);
-    if (z < zMinBoundingBox) z += cellsz;
+    z = m_zMinBoundingBox + fmod(z - m_zMinBoundingBox, cellsz);
+    if (z < m_zMinBoundingBox) z += cellsz;
   } else if (zMirrorPeriodic) {
-    double zNew = zMinBoundingBox + fmod(z - zMinBoundingBox, cellsz);
-    if (zNew < zMinBoundingBox) zNew += cellsz;
+    double zNew = m_zMinBoundingBox + fmod(z - m_zMinBoundingBox, cellsz);
+    if (zNew < m_zMinBoundingBox) zNew += cellsz;
     int nz = int(floor(0.5 + (zNew - z) / cellsz));
     if (nz != 2 * (nz / 2)) {
-      zNew = zMinBoundingBox + zMaxBoundingBox - zNew;
+      zNew = m_zMinBoundingBox + m_zMaxBoundingBox - zNew;
       zMirrored = true;
     }
     z = zNew;
   }
 
   // Check if the point is inside the bounding box.
-  if (x < xMinBoundingBox || x > xMaxBoundingBox ||
-      y < yMinBoundingBox || y > yMaxBoundingBox ||
-      z < zMinBoundingBox || z > zMaxBoundingBox) {
+  if (x < m_xMinBoundingBox || x > m_xMaxBoundingBox ||
+      y < m_yMinBoundingBox || y > m_yMaxBoundingBox ||
+      z < m_zMinBoundingBox || z > m_zMaxBoundingBox) {
     if (debug) {
       std::cerr << className << "::ElectricField:\n";
       std::cerr << "    Point (" << x << ", " << y << ", " << z
@@ -108,60 +107,60 @@ ComponentTcad3d::ElectricField(
   // Assume this will work.
   status = 0;
   // Check if the point is still located in the previously found element.
-  int i = lastElement;
-  switch (elements[i].type) {
+  int i = m_lastElement;
+  switch (m_elements[i].type) {
     case 2:
       if (CheckTriangle(x, y, z, i)) {
-        ex = w[0] * vertices[elements[i].vertex[0]].ex + 
-             w[1] * vertices[elements[i].vertex[1]].ex + 
-             w[2] * vertices[elements[i].vertex[2]].ex;
-        ey = w[0] * vertices[elements[i].vertex[0]].ey + 
-             w[1] * vertices[elements[i].vertex[1]].ey + 
-             w[2] * vertices[elements[i].vertex[2]].ey;
-        ez = w[0] * vertices[elements[i].vertex[0]].ez + 
-             w[1] * vertices[elements[i].vertex[1]].ez + 
-             w[2] * vertices[elements[i].vertex[2]].ez;
-        p  = w[0] * vertices[elements[i].vertex[0]].p + 
-             w[1] * vertices[elements[i].vertex[1]].p + 
-             w[2] * vertices[elements[i].vertex[2]].p;
+        ex = m_w[0] * m_vertices[m_elements[i].vertex[0]].ex + 
+             m_w[1] * m_vertices[m_elements[i].vertex[1]].ex + 
+             m_w[2] * m_vertices[m_elements[i].vertex[2]].ex;
+        ey = m_w[0] * m_vertices[m_elements[i].vertex[0]].ey + 
+             m_w[1] * m_vertices[m_elements[i].vertex[1]].ey + 
+             m_w[2] * m_vertices[m_elements[i].vertex[2]].ey;
+        ez = m_w[0] * m_vertices[m_elements[i].vertex[0]].ez + 
+             m_w[1] * m_vertices[m_elements[i].vertex[1]].ez + 
+             m_w[2] * m_vertices[m_elements[i].vertex[2]].ez;
+        p  = m_w[0] * m_vertices[m_elements[i].vertex[0]].p + 
+             m_w[1] * m_vertices[m_elements[i].vertex[1]].p + 
+             m_w[2] * m_vertices[m_elements[i].vertex[2]].p;
         if (xMirrored) ex = -ex;
         if (yMirrored) ey = -ey;
         if (zMirrored) ez = -ez;
-        m = regions[elements[i].region].medium;
-        if (!regions[elements[i].region].drift || m == 0) status = -5;
+        m = m_regions[m_elements[i].region].medium;
+        if (!m_regions[m_elements[i].region].drift || m == 0) status = -5;
         return;
       }
       break;  
     case 5:
       if (CheckTetrahedron(x, y, z, i)) {
-        ex = w[0] * vertices[elements[i].vertex[0]].ex + 
-             w[1] * vertices[elements[i].vertex[1]].ex + 
-             w[2] * vertices[elements[i].vertex[2]].ex +
-             w[3] * vertices[elements[i].vertex[3]].ex;
-        ey = w[0] * vertices[elements[i].vertex[0]].ey + 
-             w[1] * vertices[elements[i].vertex[1]].ey + 
-             w[2] * vertices[elements[i].vertex[2]].ey +
-             w[3] * vertices[elements[i].vertex[3]].ey;
-        ez = w[0] * vertices[elements[i].vertex[0]].ez + 
-             w[1] * vertices[elements[i].vertex[1]].ez + 
-             w[2] * vertices[elements[i].vertex[2]].ez +
-             w[3] * vertices[elements[i].vertex[3]].ez;
-        p  = w[0] * vertices[elements[i].vertex[0]].p + 
-             w[1] * vertices[elements[i].vertex[1]].p + 
-             w[2] * vertices[elements[i].vertex[2]].p +
-             w[3] * vertices[elements[i].vertex[3]].p;
+        ex = m_w[0] * m_vertices[m_elements[i].vertex[0]].ex + 
+             m_w[1] * m_vertices[m_elements[i].vertex[1]].ex + 
+             m_w[2] * m_vertices[m_elements[i].vertex[2]].ex +
+             m_w[3] * m_vertices[m_elements[i].vertex[3]].ex;
+        ey = m_w[0] * m_vertices[m_elements[i].vertex[0]].ey + 
+             m_w[1] * m_vertices[m_elements[i].vertex[1]].ey + 
+             m_w[2] * m_vertices[m_elements[i].vertex[2]].ey +
+             m_w[3] * m_vertices[m_elements[i].vertex[3]].ey;
+        ez = m_w[0] * m_vertices[m_elements[i].vertex[0]].ez + 
+             m_w[1] * m_vertices[m_elements[i].vertex[1]].ez + 
+             m_w[2] * m_vertices[m_elements[i].vertex[2]].ez +
+             m_w[3] * m_vertices[m_elements[i].vertex[3]].ez;
+        p  = m_w[0] * m_vertices[m_elements[i].vertex[0]].p + 
+             m_w[1] * m_vertices[m_elements[i].vertex[1]].p + 
+             m_w[2] * m_vertices[m_elements[i].vertex[2]].p +
+             m_w[3] * m_vertices[m_elements[i].vertex[3]].p;
         if (xMirrored) ex = -ex;
         if (yMirrored) ey = -ey;
         if (zMirrored) ez = -ez;
-        m = regions[elements[i].region].medium;
-        if (!regions[elements[i].region].drift || m == 0) status = -5;
+        m = m_regions[m_elements[i].region].medium;
+        if (!m_regions[m_elements[i].region].drift || m == 0) status = -5;
         return;
       }
       break;  
     default: 
       std::cerr << className << "::ElectricField:\n";
       std::cerr << "    Unknown element type (" 
-                << elements[i].type << ").\n";
+                << m_elements[i].type << ").\n";
       status = -11;
       return;
       break;
@@ -169,62 +168,62 @@ ComponentTcad3d::ElectricField(
   
   // The point is not in the previous element.
   // We have to loop over all elements.
-  for (i = nElements; i--;) {
-    switch (elements[i].type) {
+  for (i = m_nElements; i--;) {
+    switch (m_elements[i].type) {
       case 2:
         if (CheckTriangle(x, y, z, i)) {
-          ex = w[0] * vertices[elements[i].vertex[0]].ex + 
-               w[1] * vertices[elements[i].vertex[1]].ex + 
-               w[2] * vertices[elements[i].vertex[2]].ex;
-          ey = w[0] * vertices[elements[i].vertex[0]].ey + 
-               w[1] * vertices[elements[i].vertex[1]].ey + 
-               w[2] * vertices[elements[i].vertex[2]].ey;
-          ez = w[0] * vertices[elements[i].vertex[0]].ez + 
-               w[1] * vertices[elements[i].vertex[1]].ez + 
-               w[2] * vertices[elements[i].vertex[2]].ez;
-          p  = w[0] * vertices[elements[i].vertex[0]].p + 
-               w[1] * vertices[elements[i].vertex[1]].p + 
-               w[2] * vertices[elements[i].vertex[2]].p;
+          ex = m_w[0] * m_vertices[m_elements[i].vertex[0]].ex + 
+               m_w[1] * m_vertices[m_elements[i].vertex[1]].ex + 
+               m_w[2] * m_vertices[m_elements[i].vertex[2]].ex;
+          ey = m_w[0] * m_vertices[m_elements[i].vertex[0]].ey + 
+               m_w[1] * m_vertices[m_elements[i].vertex[1]].ey + 
+               m_w[2] * m_vertices[m_elements[i].vertex[2]].ey;
+          ez = m_w[0] * m_vertices[m_elements[i].vertex[0]].ez + 
+               m_w[1] * m_vertices[m_elements[i].vertex[1]].ez + 
+               m_w[2] * m_vertices[m_elements[i].vertex[2]].ez;
+          p  = m_w[0] * m_vertices[m_elements[i].vertex[0]].p + 
+               m_w[1] * m_vertices[m_elements[i].vertex[1]].p + 
+               m_w[2] * m_vertices[m_elements[i].vertex[2]].p;
           if (xMirrored) ex = -ex;
           if (yMirrored) ey = -ey;
           if (zMirrored) ez = -ez;
-          lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (!regions[elements[i].region].drift || m == 0) status = -5; 
+          m_lastElement = i;
+          m = m_regions[m_elements[i].region].medium;
+          if (!m_regions[m_elements[i].region].drift || m == 0) status = -5; 
           return;
         }
         break;    
       case 5:
         if (CheckTetrahedron(x, y, z, i)) {
-          ex = w[0] * vertices[elements[i].vertex[0]].ex + 
-               w[1] * vertices[elements[i].vertex[1]].ex + 
-               w[2] * vertices[elements[i].vertex[2]].ex +
-               w[3] * vertices[elements[i].vertex[3]].ex;
-          ey = w[0] * vertices[elements[i].vertex[0]].ey + 
-               w[1] * vertices[elements[i].vertex[1]].ey + 
-               w[2] * vertices[elements[i].vertex[2]].ey +
-               w[3] * vertices[elements[i].vertex[3]].ey;
-          ez = w[0] * vertices[elements[i].vertex[0]].ez + 
-               w[1] * vertices[elements[i].vertex[1]].ez + 
-               w[2] * vertices[elements[i].vertex[2]].ez +
-               w[3] * vertices[elements[i].vertex[3]].ez;
-          p  = w[0] * vertices[elements[i].vertex[0]].p + 
-               w[1] * vertices[elements[i].vertex[1]].p +
-               w[2] * vertices[elements[i].vertex[2]].p +
-               w[3] * vertices[elements[i].vertex[3]].p;               
+          ex = m_w[0] * m_vertices[m_elements[i].vertex[0]].ex + 
+               m_w[1] * m_vertices[m_elements[i].vertex[1]].ex + 
+               m_w[2] * m_vertices[m_elements[i].vertex[2]].ex +
+               m_w[3] * m_vertices[m_elements[i].vertex[3]].ex;
+          ey = m_w[0] * m_vertices[m_elements[i].vertex[0]].ey + 
+               m_w[1] * m_vertices[m_elements[i].vertex[1]].ey + 
+               m_w[2] * m_vertices[m_elements[i].vertex[2]].ey +
+               m_w[3] * m_vertices[m_elements[i].vertex[3]].ey;
+          ez = m_w[0] * m_vertices[m_elements[i].vertex[0]].ez + 
+               m_w[1] * m_vertices[m_elements[i].vertex[1]].ez + 
+               m_w[2] * m_vertices[m_elements[i].vertex[2]].ez +
+               m_w[3] * m_vertices[m_elements[i].vertex[3]].ez;
+          p  = m_w[0] * m_vertices[m_elements[i].vertex[0]].p + 
+               m_w[1] * m_vertices[m_elements[i].vertex[1]].p +
+               m_w[2] * m_vertices[m_elements[i].vertex[2]].p +
+               m_w[3] * m_vertices[m_elements[i].vertex[3]].p;               
           if (xMirrored) ex = -ex;
           if (yMirrored) ey = -ey;
           if (zMirrored) ez = -ez;
-          lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (!regions[elements[i].region].drift || m == 0) status = -5; 
+          m_lastElement = i;
+          m = m_regions[m_elements[i].region].medium;
+          if (!m_regions[m_elements[i].region].drift || m == 0) status = -5; 
           return;
         }
         break;
       default:
         std::cerr << className << "::ElectricField:\n";
         std::cerr << "    Invalid element type (" 
-                  << elements[i].type << ").\n";
+                  << m_elements[i].type << ").\n";
         status = -11;
         return;
         break;
@@ -266,66 +265,66 @@ ComponentTcad3d::GetMedium(
   
   double x = xin, y = yin, z = zin;
   // In case of periodicity, reduce to the cell volume.
-  const double cellsx = xMaxBoundingBox - xMinBoundingBox;
+  const double cellsx = m_xMaxBoundingBox - m_xMinBoundingBox;
   if (xPeriodic) {
-    x = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
-    if (x < xMinBoundingBox) x += cellsx;
+    x = m_xMinBoundingBox + fmod(x - m_xMinBoundingBox, cellsx);
+    if (x < m_xMinBoundingBox) x += cellsx;
   } else if (xMirrorPeriodic) {
-    double xNew = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
-    if (xNew < xMinBoundingBox) xNew += cellsx;
+    double xNew = m_xMinBoundingBox + fmod(x - m_xMinBoundingBox, cellsx);
+    if (xNew < m_xMinBoundingBox) xNew += cellsx;
     int nx = int(floor(0.5 + (xNew - x) / cellsx));
     if (nx != 2 * (nx / 2)) {
-      xNew = xMinBoundingBox + xMaxBoundingBox - xNew;
+      xNew = m_xMinBoundingBox + m_xMaxBoundingBox - xNew;
     }
     x = xNew;
   }
-  const double cellsy = yMaxBoundingBox - yMinBoundingBox;
+  const double cellsy = m_yMaxBoundingBox - m_yMinBoundingBox;
   if (yPeriodic) {
-    y = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
-    if (y < yMinBoundingBox) y += cellsy;
+    y = m_yMinBoundingBox + fmod(y - m_yMinBoundingBox, cellsy);
+    if (y < m_yMinBoundingBox) y += cellsy;
   } else if (yMirrorPeriodic) {
-    double yNew = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
-    if (yNew < yMinBoundingBox) yNew += cellsy;
+    double yNew = m_yMinBoundingBox + fmod(y - m_yMinBoundingBox, cellsy);
+    if (yNew < m_yMinBoundingBox) yNew += cellsy;
     int ny = int(floor(0.5 + (yNew - y) / cellsy));
     if (ny != 2 * (ny / 2)) {
-      yNew = yMinBoundingBox + yMaxBoundingBox - yNew;
+      yNew = m_yMinBoundingBox + m_yMaxBoundingBox - yNew;
     }
     y = yNew;
   }
-  const double cellsz = zMaxBoundingBox - zMinBoundingBox;
+  const double cellsz = m_zMaxBoundingBox - m_zMinBoundingBox;
   if (zPeriodic) {
-    z = zMinBoundingBox + fmod(z - zMinBoundingBox, cellsz);
-    if (z < zMinBoundingBox) z += cellsz;
+    z = m_zMinBoundingBox + fmod(z - m_zMinBoundingBox, cellsz);
+    if (z < m_zMinBoundingBox) z += cellsz;
   } else if (zMirrorPeriodic) {
-    double zNew = zMinBoundingBox + fmod(z - zMinBoundingBox, cellsz);
-    if (zNew < zMinBoundingBox) zNew += cellsz;
+    double zNew = m_zMinBoundingBox + fmod(z - m_zMinBoundingBox, cellsz);
+    if (zNew < m_zMinBoundingBox) zNew += cellsz;
     int nz = int(floor(0.5 + (zNew - z) / cellsz));
     if (nz != 2 * (nz / 2)) {
-      zNew = zMinBoundingBox + zMaxBoundingBox - zNew;
+      zNew = m_zMinBoundingBox + m_zMaxBoundingBox - zNew;
     }
     z = zNew;
   }
 
   // Check if the point is inside the bounding box.
-  if (x < xMinBoundingBox || x > xMaxBoundingBox || 
-      y < yMinBoundingBox || y > yMaxBoundingBox ||
-      z < zMinBoundingBox || z > zMaxBoundingBox) {
+  if (x < m_xMinBoundingBox || x > m_xMaxBoundingBox || 
+      y < m_yMinBoundingBox || y > m_yMaxBoundingBox ||
+      z < m_zMinBoundingBox || z > m_zMaxBoundingBox) {
     return false;
   }
   
   // Check if the point is still located in the previous element.
-  int i = lastElement;
-  switch (elements[i].type) {
+  int i = m_lastElement;
+  switch (m_elements[i].type) {
     case 2:
       if (CheckTriangle(x, y, z, i)) {
-        m = regions[elements[i].region].medium;
+        m = m_regions[m_elements[i].region].medium;
         if (m == 0) return false;
         return true;
       }
       break;  
     case 5:
       if (CheckTetrahedron(x, y, z, i)) {
-        m = regions[elements[i].region].medium;
+        m = m_regions[m_elements[i].region].medium;
         if (m == 0) return false;
         return true;
       }
@@ -333,27 +332,27 @@ ComponentTcad3d::GetMedium(
     default: 
       std::cerr << className << "::GetMedium:\n";
       std::cerr << "    Invalid element type (" 
-                << elements[i].type << ").\n";
+                << m_elements[i].type << ").\n";
       return false;
       break;
   }
   
   // The point is not in the previous element.
   // We have to loop over all elements.
-  for (i = nElements; i--;) {
-    switch (elements[i].type) {
+  for (i = m_nElements; i--;) {
+    switch (m_elements[i].type) {
       case 2:
         if (CheckTriangle(x, y, z, i)) {
-          lastElement = i;
-          m = regions[elements[i].region].medium;
+          m_lastElement = i;
+          m = m_regions[m_elements[i].region].medium;
           if (m == 0) return false;
           return true;
         }
         break;
       case 5:
         if (CheckTetrahedron(x, y, z, i)) {
-          lastElement = i;
-          m = regions[elements[i].region].medium;
+          m_lastElement = i;
+          m = m_regions[m_elements[i].region].medium;
           if (m == 0) return false;
           return true;
         }
@@ -361,7 +360,7 @@ ComponentTcad3d::GetMedium(
       default:
         std::cerr << className << "::GetMedium:\n";
         std::cerr << "    Invalid element type (" 
-                  << elements[i].type << ").\n";
+                  << m_elements[i].type << ").\n";
         return false;
         break;
     }
@@ -391,52 +390,55 @@ ComponentTcad3d::Initialise(const std::string gridfilename,
   }
   
   // Find min./max. coordinates and potentials.
-  xMaxBoundingBox = xMinBoundingBox = vertices[elements[0].vertex[0]].x;
-  yMaxBoundingBox = yMinBoundingBox = vertices[elements[0].vertex[0]].y;  
-  zMaxBoundingBox = zMinBoundingBox = vertices[elements[0].vertex[0]].z;
-  pMax = pMin = vertices[elements[0].vertex[0]].p;
-  for (int i = nElements; i--;) {
-    for (int j = 0; j <= elements[i].type; ++j) {
-      if (vertices[elements[i].vertex[j]].x < xMinBoundingBox) {
-        xMinBoundingBox = vertices[elements[i].vertex[j]].x;
-      } else if (vertices[elements[i].vertex[j]].x > xMaxBoundingBox) {
-        xMaxBoundingBox = vertices[elements[i].vertex[j]].x;
+  m_xMaxBoundingBox = m_vertices[m_elements[0].vertex[0]].x;
+  m_yMaxBoundingBox = m_vertices[m_elements[0].vertex[0]].y;  
+  m_zMaxBoundingBox = m_vertices[m_elements[0].vertex[0]].z;
+  m_xMinBoundingBox = m_xMaxBoundingBox;
+  m_yMinBoundingBox = m_yMaxBoundingBox;
+  m_zMinBoundingBox = m_zMaxBoundingBox;
+  m_pMax = m_pMin = m_vertices[m_elements[0].vertex[0]].p;
+  for (int i = m_nElements; i--;) {
+    for (int j = 0; j <= m_elements[i].type; ++j) {
+      if (m_vertices[m_elements[i].vertex[j]].x < m_xMinBoundingBox) {
+        m_xMinBoundingBox = m_vertices[m_elements[i].vertex[j]].x;
+      } else if (m_vertices[m_elements[i].vertex[j]].x > m_xMaxBoundingBox) {
+        m_xMaxBoundingBox = m_vertices[m_elements[i].vertex[j]].x;
       }
-      if (vertices[elements[i].vertex[j]].y < yMinBoundingBox) {
-        yMinBoundingBox = vertices[elements[i].vertex[j]].y;
-      } else if (vertices[elements[i].vertex[j]].y > yMaxBoundingBox) {
-        yMaxBoundingBox = vertices[elements[i].vertex[j]].y;
+      if (m_vertices[m_elements[i].vertex[j]].y < m_yMinBoundingBox) {
+        m_yMinBoundingBox = m_vertices[m_elements[i].vertex[j]].y;
+      } else if (m_vertices[m_elements[i].vertex[j]].y > m_yMaxBoundingBox) {
+        m_yMaxBoundingBox = m_vertices[m_elements[i].vertex[j]].y;
       }
-      if (vertices[elements[i].vertex[j]].z < zMinBoundingBox) {
-        zMinBoundingBox = vertices[elements[i].vertex[j]].z;
-      } else if (vertices[elements[i].vertex[j]].z > zMaxBoundingBox) {
-        zMaxBoundingBox = vertices[elements[i].vertex[j]].z;
+      if (m_vertices[m_elements[i].vertex[j]].z < m_zMinBoundingBox) {
+        m_zMinBoundingBox = m_vertices[m_elements[i].vertex[j]].z;
+      } else if (m_vertices[m_elements[i].vertex[j]].z > m_zMaxBoundingBox) {
+        m_zMaxBoundingBox = m_vertices[m_elements[i].vertex[j]].z;
       }
-      if (vertices[elements[i].vertex[j]].p < pMin) {
-        pMin = vertices[elements[i].vertex[j]].p;
-      } else if (vertices[elements[i].vertex[j]].p > pMax) {
-        pMax = vertices[elements[i].vertex[j]].p;
+      if (m_vertices[m_elements[i].vertex[j]].p < m_pMin) {
+        m_pMin = m_vertices[m_elements[i].vertex[j]].p;
+      } else if (m_vertices[m_elements[i].vertex[j]].p > m_pMax) {
+        m_pMax = m_vertices[m_elements[i].vertex[j]].p;
       }
     }
   }
   
   std::cout << className << "::Initialise:\n";
   std::cout << "    Bounding box:\n";
-  std::cout << "      " << xMinBoundingBox << " < x [cm] < " 
-                        << xMaxBoundingBox << "\n";
-  std::cout << "      " << yMinBoundingBox << " < y [cm] < "
-                        << yMaxBoundingBox << "\n";
-  std::cout << "      " << zMinBoundingBox << " < z [cm] < "
-                        << zMaxBoundingBox << "\n";
+  std::cout << "      " << m_xMinBoundingBox << " < x [cm] < " 
+                        << m_xMaxBoundingBox << "\n";
+  std::cout << "      " << m_yMinBoundingBox << " < y [cm] < "
+                        << m_yMaxBoundingBox << "\n";
+  std::cout << "      " << m_zMinBoundingBox << " < z [cm] < "
+                        << m_zMaxBoundingBox << "\n";
   std::cout << "    Voltage range:\n";
-  std::cout << "      " << pMin << " < V < " << pMax << "\n";
+  std::cout << "      " << m_pMin << " < V < " << m_pMax << "\n";
   
   bool ok = true;
   
   // Count the number of elements belonging to a region.
   std::vector<int> nElementsRegion;
-  nElementsRegion.resize(nRegions);
-  for (int i = nRegions; i--;) nElementsRegion[i] = 0;
+  nElementsRegion.resize(m_nRegions);
+  for (int i = m_nRegions; i--;) nElementsRegion[i] = 0;
   
   // Count the different element shapes.
   int nTriangles = 0;
@@ -453,22 +455,22 @@ ComponentTcad3d::Initialise(const std::string gridfilename,
   std::vector<int> degenerateElements;
   degenerateElements.clear();
   
-  for (int i = nElements; i--;) {
-    if (elements[i].type == 2) {
+  for (int i = m_nElements; i--;) {
+    if (m_elements[i].type == 2) {
       ++nTriangles;
-      if (elements[i].vertex[0] == elements[i].vertex[1] ||
-          elements[i].vertex[1] == elements[i].vertex[2] ||
-          elements[i].vertex[2] == elements[i].vertex[0]) {
+      if (m_elements[i].vertex[0] == m_elements[i].vertex[1] ||
+          m_elements[i].vertex[1] == m_elements[i].vertex[2] ||
+          m_elements[i].vertex[2] == m_elements[i].vertex[0]) {
         degenerateElements.push_back(i);
         ++nDegenerate;
       }
-    } else if (elements[i].type == 5) {
-      if (elements[i].vertex[0] == elements[i].vertex[1] ||
-          elements[i].vertex[0] == elements[i].vertex[2] ||
-          elements[i].vertex[0] == elements[i].vertex[3] ||
-          elements[i].vertex[1] == elements[i].vertex[2] ||
-          elements[i].vertex[1] == elements[i].vertex[3] ||
-          elements[i].vertex[2] == elements[i].vertex[3]) {
+    } else if (m_elements[i].type == 5) {
+      if (m_elements[i].vertex[0] == m_elements[i].vertex[1] ||
+          m_elements[i].vertex[0] == m_elements[i].vertex[2] ||
+          m_elements[i].vertex[0] == m_elements[i].vertex[3] ||
+          m_elements[i].vertex[1] == m_elements[i].vertex[2] ||
+          m_elements[i].vertex[1] == m_elements[i].vertex[3] ||
+          m_elements[i].vertex[2] == m_elements[i].vertex[3]) {
         degenerateElements.push_back(i);
         ++nDegenerate;
       }
@@ -477,8 +479,8 @@ ComponentTcad3d::Initialise(const std::string gridfilename,
       // Other shapes should not occur, since they were excluded in LoadGrid.
       ++nOtherShapes;
     }
-    if (elements[i].region >= 0 && elements[i].region < nRegions) {
-      ++nElementsRegion[elements[i].region];
+    if (m_elements[i].region >= 0 && m_elements[i].region < m_nRegions) {
+      ++nElementsRegion[m_elements[i].region];
     } else {
       looseElements.push_back(i);
       ++nLoose;
@@ -504,13 +506,13 @@ ComponentTcad3d::Initialise(const std::string gridfilename,
   }
   
   std::cout << className << "::Initialise:\n";
-  std::cout << "    Number of regions: " << nRegions << "\n";
-  for (int i = 0; i < nRegions; ++i) {
-    std::cout << "      " << i << ": " << regions[i].name << ", "
+  std::cout << "    Number of regions: " << m_nRegions << "\n";
+  for (int i = 0; i < m_nRegions; ++i) {
+    std::cout << "      " << i << ": " << m_regions[i].name << ", "
               << nElementsRegion[i] << " elements\n";
   }
   
-  std::cout << "    Number of elements: " << nElements << "\n";
+  std::cout << "    Number of elements: " << m_nElements << "\n";
   if (nTriangles > 0) {
     std::cout << "      " << nTriangles << " triangles\n";
   }
@@ -526,31 +528,31 @@ ComponentTcad3d::Initialise(const std::string gridfilename,
   }
   if (debug) {
     // For each element, print the indices of the constituting vertices.
-    for (int i = 0; i < nElements; ++i) {
-      if (elements[i].type == 2) {
+    for (int i = 0; i < m_nElements; ++i) {
+      if (m_elements[i].type == 2) {
         std::cout << "      " << i << ": " 
-                  << elements[i].vertex[0] << "  "
-                  << elements[i].vertex[1] << "  "
-                  << elements[i].vertex[2] 
-                  << " (triangle, region " << elements[i].region << ")\n";
-      } else if (elements[i].type == 5) {
+                  << m_elements[i].vertex[0] << "  "
+                  << m_elements[i].vertex[1] << "  "
+                  << m_elements[i].vertex[2] 
+                  << " (triangle, region " << m_elements[i].region << ")\n";
+      } else if (m_elements[i].type == 5) {
         std::cout << "      " << i << ": "
-                  << elements[i].vertex[0] << "  " 
-                  << elements[i].vertex[1] << "  "
-                  << elements[i].vertex[2] << "  "
-                  << elements[i].vertex[3] 
-                  << " (tetrahedron, region " << elements[i].region << ")\n";
+                  << m_elements[i].vertex[0] << "  " 
+                  << m_elements[i].vertex[1] << "  "
+                  << m_elements[i].vertex[2] << "  "
+                  << m_elements[i].vertex[3] 
+                  << " (tetrahedron, region " << m_elements[i].region << ")\n";
       }
     }
   }
   
-  std::cout << "    Number of vertices: " << nVertices << "\n";
+  std::cout << "    Number of vertices: " << m_nVertices << "\n";
   if (debug) {
-    for (int i = 0; i < nVertices; ++i) {
+    for (int i = 0; i < m_nVertices; ++i) {
       std::cout << "      " << i << ": (x, y, z) = (" 
-                << vertices[i].x << ", " 
-                << vertices[i].y << ", "
-                << vertices[i].z << "), V = " << vertices[i].p << "\n";
+                << m_vertices[i].x << ", " 
+                << m_vertices[i].y << ", "
+                << m_vertices[i].z << "), V = " << m_vertices[i].p << "\n";
     }
   }
   
@@ -571,8 +573,12 @@ ComponentTcad3d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                                 double& xmax, double& ymax, double& zmax) {
 
   if (!ready) return false;
-  xmin = xMinBoundingBox; ymin = yMinBoundingBox; zmin = zMinBoundingBox;
-  xmax = xMaxBoundingBox; ymax = yMaxBoundingBox; zmax = zMaxBoundingBox;
+  xmin = m_xMinBoundingBox; 
+  ymin = m_yMinBoundingBox; 
+  zmin = m_zMinBoundingBox;
+  xmax = m_xMaxBoundingBox; 
+  ymax = m_yMaxBoundingBox; 
+  zmax = m_zMaxBoundingBox;
   if (xPeriodic || xMirrorPeriodic) {
     xmin = -INFINITY;
     xmax = +INFINITY;
@@ -593,7 +599,8 @@ bool
 ComponentTcad3d::GetVoltageRange(double& vmin, double& vmax) {
 
   if (!ready) return false;
-  vmin = pMin; vmax = pMax;
+  vmin = m_pMin; 
+  vmax = m_pMax;
   return true;
   
 }
@@ -609,24 +616,24 @@ ComponentTcad3d::PrintRegions() {
     return;
   }
 
-  if (nRegions < 0) {
+  if (m_nRegions < 0) {
     std::cerr << className << "::PrintRegions:\n";
     std::cerr << "    No regions are currently defined.\n";
     return;
   }
 
   std::cout << className << "::PrintRegions:\n";
-  std::cout << "    Currently " << nRegions
+  std::cout << "    Currently " << m_nRegions
             << " regions are defined.\n";
   std::cout << "      Index  Name      Medium\n";
-  for (int i = 0; i < nRegions; ++i) {
-    std::cout << "      " << i << "  " << regions[i].name;
-    if (regions[i].medium == 0) {
+  for (int i = 0; i < m_nRegions; ++i) {
+    std::cout << "      " << i << "  " << m_regions[i].name;
+    if (m_regions[i].medium == 0) {
       std::cout << "      none  ";
     } else {
-      std::cout << "      " << regions[i].medium->GetName();
+      std::cout << "      " << m_regions[i].medium->GetName();
     }
-    if (regions[i].drift) {
+    if (m_regions[i].drift) {
       std::cout << " (active region)\n";
     } else {
       std::cout << "\n";
@@ -638,44 +645,44 @@ ComponentTcad3d::PrintRegions() {
 void 
 ComponentTcad3d::GetRegion(const int i, std::string& name, bool& active) {
 
-  if (i < 0 || i >= nRegions) {
+  if (i < 0 || i >= m_nRegions) {
     std::cerr << className << "::GetRegion:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return;
   }  
-  name = regions[i].name;
-  active = regions[i].drift;
+  name = m_regions[i].name;
+  active = m_regions[i].drift;
 
 }
 
 void 
 ComponentTcad3d::SetDriftRegion(const int i) {
 
-  if (i < 0 || i >= nRegions) {
+  if (i < 0 || i >= m_nRegions) {
     std::cerr << className << "::SetDriftRegion:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return;
   }
-  regions[i].drift = true;
+  m_regions[i].drift = true;
 
 }
 
 void
 ComponentTcad3d::UnsetDriftRegion(const int i) {
 
-  if (i < 0 || i >= nRegions) {
+  if (i < 0 || i >= m_nRegions) {
     std::cerr << className << "::UnsetDriftRegion:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return;
   }
-  regions[i].drift = false;
+  m_regions[i].drift = false;
   
 }
 
 void 
 ComponentTcad3d::SetMedium(const int i, Medium* medium) {
 
-  if (i < 0 || i >= nRegions) {
+  if (i < 0 || i >= m_nRegions) {
     std::cerr << className << "::SetMedium:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return;
@@ -687,20 +694,20 @@ ComponentTcad3d::SetMedium(const int i, Medium* medium) {
     return;
   }
   
-  regions[i].medium = medium;
+  m_regions[i].medium = medium;
   
 }
 
 bool
 ComponentTcad3d::GetMedium(const int i, Medium*& m) const {
 
-  if (i < 0 || i >= nRegions) {
+  if (i < 0 || i >= m_nRegions) {
     std::cerr << className << "::GetMedium:\n";
     std::cerr << "    Region " << i << " does not exist.\n";
     return false;
   }
   
-  m = regions[i].medium;
+  m = m_regions[i].medium;
   if (m == 0) return false;
   return true;
 
@@ -710,95 +717,95 @@ bool
 ComponentTcad3d::GetElement(const int i, double& vol,
                             double& dmin, double& dmax, int& type) {
                             
-  if (i < 0 || i >= nElements) {
+  if (i < 0 || i >= m_nElements) {
     std::cerr << className << "::GetElement:\n";
     std::cerr << "    Element index (" << i << ") out of range.\n";
     return false;
   }
   
-  type = elements[i].type;
-  if (elements[i].type == 2) {
+  type = m_elements[i].type;
+  if (m_elements[i].type == 2) {
     // Triangle
-    const double vx = (vertices[elements[i].vertex[1]].y - 
-                       vertices[elements[i].vertex[0]].y) *
-                      (vertices[elements[i].vertex[2]].z - 
-                       vertices[elements[i].vertex[0]].z) -
-                      (vertices[elements[i].vertex[1]].z -
-                       vertices[elements[i].vertex[0]].z) *
-                      (vertices[elements[i].vertex[2]].y -
-                       vertices[elements[i].vertex[0]].y);
-    const double vy = (vertices[elements[i].vertex[1]].z -
-                       vertices[elements[i].vertex[0]].z) *
-                      (vertices[elements[i].vertex[2]].x -
-                       vertices[elements[i].vertex[0]].x) -
-                      (vertices[elements[i].vertex[1]].x -
-                       vertices[elements[i].vertex[0]].x) *
-                      (vertices[elements[i].vertex[2]].z -
-                       vertices[elements[i].vertex[0]].z);
-    const double vz = (vertices[elements[i].vertex[1]].x -
-                       vertices[elements[i].vertex[0]].x) *
-                      (vertices[elements[i].vertex[2]].y -
-                       vertices[elements[i].vertex[0]].y) -
-                      (vertices[elements[i].vertex[1]].y -
-                       vertices[elements[i].vertex[0]].y) *
-                      (vertices[elements[i].vertex[2]].x -
-                       vertices[elements[i].vertex[0]].x);
+    const double vx = (m_vertices[m_elements[i].vertex[1]].y - 
+                       m_vertices[m_elements[i].vertex[0]].y) *
+                      (m_vertices[m_elements[i].vertex[2]].z - 
+                       m_vertices[m_elements[i].vertex[0]].z) -
+                      (m_vertices[m_elements[i].vertex[1]].z -
+                       m_vertices[m_elements[i].vertex[0]].z) *
+                      (m_vertices[m_elements[i].vertex[2]].y -
+                       m_vertices[m_elements[i].vertex[0]].y);
+    const double vy = (m_vertices[m_elements[i].vertex[1]].z -
+                       m_vertices[m_elements[i].vertex[0]].z) *
+                      (m_vertices[m_elements[i].vertex[2]].x -
+                       m_vertices[m_elements[i].vertex[0]].x) -
+                      (m_vertices[m_elements[i].vertex[1]].x -
+                       m_vertices[m_elements[i].vertex[0]].x) *
+                      (m_vertices[m_elements[i].vertex[2]].z -
+                       m_vertices[m_elements[i].vertex[0]].z);
+    const double vz = (m_vertices[m_elements[i].vertex[1]].x -
+                       m_vertices[m_elements[i].vertex[0]].x) *
+                      (m_vertices[m_elements[i].vertex[2]].y -
+                       m_vertices[m_elements[i].vertex[0]].y) -
+                      (m_vertices[m_elements[i].vertex[1]].y -
+                       m_vertices[m_elements[i].vertex[0]].y) *
+                      (m_vertices[m_elements[i].vertex[2]].x -
+                       m_vertices[m_elements[i].vertex[0]].x);
     vol = sqrt(vx * vx + vy * vy + vz * vz);
     const double a = sqrt(
-      pow(vertices[elements[i].vertex[1]].x -
-          vertices[elements[i].vertex[0]].x, 2) +
-      pow(vertices[elements[i].vertex[1]].y -
-          vertices[elements[i].vertex[0]].y, 2) +
-      pow(vertices[elements[i].vertex[1]].z -
-          vertices[elements[i].vertex[0]].z, 2));
+      pow(m_vertices[m_elements[i].vertex[1]].x -
+          m_vertices[m_elements[i].vertex[0]].x, 2) +
+      pow(m_vertices[m_elements[i].vertex[1]].y -
+          m_vertices[m_elements[i].vertex[0]].y, 2) +
+      pow(m_vertices[m_elements[i].vertex[1]].z -
+          m_vertices[m_elements[i].vertex[0]].z, 2));
     const double b = sqrt(
-      pow(vertices[elements[i].vertex[2]].x -
-          vertices[elements[i].vertex[0]].x, 2) +
-      pow(vertices[elements[i].vertex[2]].y -
-          vertices[elements[i].vertex[0]].y, 2) +
-      pow(vertices[elements[i].vertex[2]].z -
-          vertices[elements[i].vertex[0]].z, 2));
+      pow(m_vertices[m_elements[i].vertex[2]].x -
+          m_vertices[m_elements[i].vertex[0]].x, 2) +
+      pow(m_vertices[m_elements[i].vertex[2]].y -
+          m_vertices[m_elements[i].vertex[0]].y, 2) +
+      pow(m_vertices[m_elements[i].vertex[2]].z -
+          m_vertices[m_elements[i].vertex[0]].z, 2));
     const double c = sqrt(
-      pow(vertices[elements[i].vertex[1]].x -
-          vertices[elements[i].vertex[2]].x, 2) +
-      pow(vertices[elements[i].vertex[1]].y -
-          vertices[elements[i].vertex[2]].y, 2) +
-      pow(vertices[elements[i].vertex[1]].z -
-          vertices[elements[i].vertex[2]].z, 2));
+      pow(m_vertices[m_elements[i].vertex[1]].x -
+          m_vertices[m_elements[i].vertex[2]].x, 2) +
+      pow(m_vertices[m_elements[i].vertex[1]].y -
+          m_vertices[m_elements[i].vertex[2]].y, 2) +
+      pow(m_vertices[m_elements[i].vertex[1]].z -
+          m_vertices[m_elements[i].vertex[2]].z, 2));
     dmin = dmax = a;
     if (b < dmin) dmin = b;
     if (c < dmin) dmin = c;
     if (b > dmax) dmax = b;
     if (c > dmax) dmax = c;
-  } else if (elements[i].type == 5) {
+  } else if (m_elements[i].type == 5) {
     // Tetrahedron
     vol = fabs(
-      (vertices[elements[i].vertex[3]].x - vertices[elements[i].vertex[0]].x) * (
-        (vertices[elements[i].vertex[1]].y - vertices[elements[i].vertex[0]].y) * 
-        (vertices[elements[i].vertex[2]].z - vertices[elements[i].vertex[0]].z) - 
-        (vertices[elements[i].vertex[2]].y - vertices[elements[i].vertex[0]].y) * 
-        (vertices[elements[i].vertex[1]].z - vertices[elements[i].vertex[0]].z)) +
-    (vertices[elements[i].vertex[3]].y - vertices[elements[i].vertex[0]].y) * (
-      (vertices[elements[i].vertex[1]].z - vertices[elements[i].vertex[0]].z) * 
-      (vertices[elements[i].vertex[2]].x - vertices[elements[i].vertex[0]].x) -
-      (vertices[elements[i].vertex[2]].z - vertices[elements[i].vertex[0]].z) * 
-      (vertices[elements[i].vertex[1]].x - vertices[elements[i].vertex[0]].x)) +
-    (vertices[elements[i].vertex[3]].z - vertices[elements[i].vertex[0]].z) * (
-      (vertices[elements[i].vertex[1]].x - vertices[elements[i].vertex[0]].x) * 
-      (vertices[elements[i].vertex[2]].y - vertices[elements[i].vertex[0]].y) -
-      (vertices[elements[i].vertex[3]].x - vertices[elements[i].vertex[0]].x) * 
-      (vertices[elements[i].vertex[1]].y - vertices[elements[i].vertex[0]].y))) / 6.;
-    // Loop over all pairs of vertices.
+      (m_vertices[m_elements[i].vertex[3]].x - m_vertices[m_elements[i].vertex[0]].x) * (
+        (m_vertices[m_elements[i].vertex[1]].y - m_vertices[m_elements[i].vertex[0]].y) * 
+        (m_vertices[m_elements[i].vertex[2]].z - m_vertices[m_elements[i].vertex[0]].z) - 
+        (m_vertices[m_elements[i].vertex[2]].y - m_vertices[m_elements[i].vertex[0]].y) * 
+        (m_vertices[m_elements[i].vertex[1]].z - m_vertices[m_elements[i].vertex[0]].z)) +
+    (m_vertices[m_elements[i].vertex[3]].y - m_vertices[m_elements[i].vertex[0]].y) * (
+      (m_vertices[m_elements[i].vertex[1]].z - m_vertices[m_elements[i].vertex[0]].z) * 
+      (m_vertices[m_elements[i].vertex[2]].x - m_vertices[m_elements[i].vertex[0]].x) -
+      (m_vertices[m_elements[i].vertex[2]].z - m_vertices[m_elements[i].vertex[0]].z) * 
+      (m_vertices[m_elements[i].vertex[1]].x - m_vertices[m_elements[i].vertex[0]].x)) +
+    (m_vertices[m_elements[i].vertex[3]].z - m_vertices[m_elements[i].vertex[0]].z) * (
+      (m_vertices[m_elements[i].vertex[1]].x - m_vertices[m_elements[i].vertex[0]].x) * 
+      (m_vertices[m_elements[i].vertex[2]].y - m_vertices[m_elements[i].vertex[0]].y) -
+      (m_vertices[m_elements[i].vertex[3]].x - m_vertices[m_elements[i].vertex[0]].x) * 
+      (m_vertices[m_elements[i].vertex[1]].y - m_vertices[m_elements[i].vertex[0]].y))) / 6.;
+    // Loop over all pairs of m_vertices.
     for (int j = 0; j < nMaxVertices - 1; ++j) {
       for (int k = j + 1; k < nMaxVertices; ++k) {
         // Compute distance.
         const double dist = sqrt(
-          pow(vertices[elements[i].vertex[j]].x - 
-              vertices[elements[i].vertex[k]].x, 2) +
-          pow(vertices[elements[i].vertex[j]].y - 
-              vertices[elements[i].vertex[k]].y, 2) +
-          pow(vertices[elements[i].vertex[j]].z - 
-              vertices[elements[i].vertex[k]].z, 2));
+          pow(m_vertices[m_elements[i].vertex[j]].x - 
+              m_vertices[m_elements[i].vertex[k]].x, 2) +
+          pow(m_vertices[m_elements[i].vertex[j]].y - 
+              m_vertices[m_elements[i].vertex[k]].y, 2) +
+          pow(m_vertices[m_elements[i].vertex[j]].z - 
+              m_vertices[m_elements[i].vertex[k]].z, 2));
         if (k == 1) {
           dmin = dist;
           dmax = dist;
@@ -824,14 +831,14 @@ ComponentTcad3d::GetElement(const int i, double& vol,
                             int& node5, int& node6, int& node7, int& reg) {
 
   if (!GetElement(i, vol, dmin, dmax, type)) return false;
-  node1 = elements[i].vertex[0];   
-  node2 = elements[i].vertex[1];
-  node3 = elements[i].vertex[2];
-  node4 = elements[i].vertex[3];
-  node5 = elements[i].vertex[4];
-  node6 = elements[i].vertex[5];
-  node7 = elements[i].vertex[6];
-  reg = elements[i].region;
+  node1 = m_elements[i].vertex[0];   
+  node2 = m_elements[i].vertex[1];
+  node3 = m_elements[i].vertex[2];
+  node4 = m_elements[i].vertex[3];
+  node5 = m_elements[i].vertex[4];
+  node6 = m_elements[i].vertex[5];
+  node7 = m_elements[i].vertex[6];
+  reg = m_elements[i].region;
   return true;
  
 }
@@ -840,19 +847,19 @@ bool
 ComponentTcad3d::GetNode(const int i, double& x, double& y, double& z,
                          double& v, double& ex, double& ey, double& ez) {
 
-  if (i < 0 || i >= nVertices) {
+  if (i < 0 || i >= m_nVertices) {
     std::cerr << className << "::GetNode:\n";
     std::cerr << "    Node index (" << i << ") out of range.\n";
     return false;
   }
 
-  x = vertices[i].x;
-  y = vertices[i].y;
-  z = vertices[i].z;
-  v = vertices[i].p;
-  ex = vertices[i].ex;
-  ey = vertices[i].ey;
-  ez = vertices[i].ez;
+  x = m_vertices[i].x;
+  y = m_vertices[i].y;
+  z = m_vertices[i].z;
+  v = m_vertices[i].p;
+  ex = m_vertices[i].ex;
+  ey = m_vertices[i].ey;
+  ez = m_vertices[i].ez;
   return true;
 
 }
@@ -871,16 +878,14 @@ ComponentTcad3d::LoadData(const std::string datafilename) {
   std::string line;
   std::istringstream data;
   
-  std::vector<bool> isInRegion(nVertices);
-  std::vector<int> fillCount(nVertices);
-  
-  for (int i = nVertices; i--;) {
-    fillCount[i] = 0;
-    vertices[i].p = 0.;
-    vertices[i].ex = 0.;
-    vertices[i].ey = 0.;
-    vertices[i].ez = 0.;
-    vertices[i].isShared = false;
+  std::vector<bool> isInRegion(m_nVertices);
+  std::vector<int> fillCount(m_nVertices, 0);
+  for (int i = m_nVertices; i--;) {
+    m_vertices[i].p = 0.;
+    m_vertices[i].ex = 0.;
+    m_vertices[i].ey = 0.;
+    m_vertices[i].ez = 0.;
+    m_vertices[i].isShared = false;
   }
   
   std::string::size_type pBra, pKet, pEq;
@@ -928,8 +933,8 @@ ComponentTcad3d::LoadData(const std::string datafilename) {
         data.str(line); data >> name; data.clear();
         // Check if the region name matches one from the mesh file.
         int index = -1;
-        for (int j = 0; j < nRegions; ++j) {
-          if (name == regions[j].name) {
+        for (int j = 0; j < m_nRegions; ++j) {
+          if (name == m_regions[j].name) {
             index = j;
             break;
           }
@@ -956,11 +961,11 @@ ComponentTcad3d::LoadData(const std::string datafilename) {
         int nValues;
         data.str(line); data >> nValues; data.clear();
         // Mark the vertices belonging to this region.
-        for (int j = nVertices; j--;) isInRegion[j] = false;
-        for (int j = 0; j < nElements; ++j) {
-          if (elements[j].region != index) continue;
-          for (int k = 0; k <= elements[j].type; ++k) {
-            isInRegion[elements[j].vertex[k]] = true;
+        for (int j = m_nVertices; j--;) isInRegion[j] = false;
+        for (int j = 0; j < m_nElements; ++j) {
+          if (m_elements[j].region != index) continue;
+          for (int k = 0; k <= m_elements[j].type; ++k) {
+            isInRegion[m_elements[j].vertex[k]] = true;
           } 
         }
         int ivertex = 0;
@@ -969,13 +974,13 @@ ComponentTcad3d::LoadData(const std::string datafilename) {
           // Read the next value.
           datafile >> val;
           // Find the next vertex belonging to the region.
-          while (ivertex < nVertices) {
+          while (ivertex < m_nVertices) {
             if (isInRegion[ivertex]) break;
             ++ivertex;
           }
-          // Check if there is a mismatch between the number of vertices
+          // Check if there is a mismatch between the number of m_vertices
           // and the number of potential values.
-          if (ivertex >= nVertices) {
+          if (ivertex >= m_nVertices) {
             std::cerr << className << "::LoadData:\n";
             std::cerr << "    Error reading file " << datafilename << "\n";
             std::cerr << "    Dataset has more values than "
@@ -984,7 +989,7 @@ ComponentTcad3d::LoadData(const std::string datafilename) {
             datafile.close(); Cleanup();
             return false;
           }
-          vertices[ivertex].p = val;
+          m_vertices[ivertex].p = val;
           ++fillCount[ivertex];
           ++ivertex;
         }
@@ -1006,8 +1011,8 @@ ComponentTcad3d::LoadData(const std::string datafilename) {
         std::string name; 
         data.str(line); data >> name; data.clear();
         int index = -1;
-        for (int j = 0; j < nRegions; ++j) {
-          if (name == regions[j].name) {
+        for (int j = 0; j < m_nRegions; ++j) {
+          if (name == m_regions[j].name) {
             index = j;
             break;
           }
@@ -1034,22 +1039,22 @@ ComponentTcad3d::LoadData(const std::string datafilename) {
         data.str(line); data >> nValues; data.clear();
         // In case of the electric field, there are three values per vertex.
         nValues = nValues / 3;
-        for (int j = nVertices; j--;) isInRegion[j] = false;
-        for (int j = 0; j < nElements; ++j) {
-          if (elements[j].region != index) continue;
-          for (int k = 0; k <= elements[j].type; ++k) {
-            isInRegion[elements[j].vertex[k]] = true;
+        for (int j = m_nVertices; j--;) isInRegion[j] = false;
+        for (int j = 0; j < m_nElements; ++j) {
+          if (m_elements[j].region != index) continue;
+          for (int k = 0; k <= m_elements[j].type; ++k) {
+            isInRegion[m_elements[j].vertex[k]] = true;
           } 
         }
         int ivertex = 0;
         double val1, val2, val3;
         for (int j = 0; j < nValues; ++j) {
           datafile >> val1 >> val2 >> val3;
-          while (ivertex < nVertices) {
+          while (ivertex < m_nVertices) {
             if (isInRegion[ivertex]) break;
             ++ivertex;
           }
-          if (ivertex >= nVertices) {
+          if (ivertex >= m_nVertices) {
             std::cerr << className << "::LoadData\n"
                       << "    Error reading file " << datafilename << "\n"
                       << "    Dataset has more values than" 
@@ -1058,9 +1063,9 @@ ComponentTcad3d::LoadData(const std::string datafilename) {
             datafile.close(); Cleanup();
             return false;
           }
-          vertices[ivertex].ex = val1;
-          vertices[ivertex].ey = val2;
-          vertices[ivertex].ez = val3;
+          m_vertices[ivertex].ex = val1;
+          m_vertices[ivertex].ey = val2;
+          m_vertices[ivertex].ez = val3;
           ++ivertex;
         }
       }
@@ -1073,8 +1078,8 @@ ComponentTcad3d::LoadData(const std::string datafilename) {
     return false;
   }
   
-  for (int i = nVertices; i--;) {
-    if (fillCount[i] > 1) vertices[i].isShared = true;
+  for (int i = m_nVertices; i--;) {
+    if (fillCount[i] > 1) m_vertices[i].isShared = true;
   }
     
   datafile.close();
@@ -1123,7 +1128,7 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
         return false;
       }
       line = line.substr(pEq + 1);
-      data.str(line); data >> nRegions; data.clear();
+      data.str(line); data >> m_nRegions; data.clear();
       break;
     }
     if (gridfile.fail()) break;
@@ -1145,16 +1150,16 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
     gridfile.close();
     return false;
   }
-  regions.resize(nRegions);
-  for (int j = nRegions; j--;) {
-    regions[j].name = "";
-    regions[j].drift = false;
-    regions[j].medium = 0;
+  m_regions.resize(m_nRegions);
+  for (int j = m_nRegions; j--;) {
+    m_regions[j].name = "";
+    m_regions[j].drift = false;
+    m_regions[j].medium = 0;
   }
   
   if (debug) {
     std::cout << className << "::LoadGrid:\n";
-    std::cout << "    Found " << nRegions << " regions.\n";
+    std::cout << "    Found " << m_nRegions << " regions.\n";
   }
 
   // Get the region names.
@@ -1177,12 +1182,12 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       }
       line = line.substr(pBra + 1, pKet - pBra - 1);
       data.str(line);
-      for (int j = 0; j < nRegions; ++j) {
-        data >> regions[j].name;
+      for (int j = 0; j < m_nRegions; ++j) {
+        data >> m_regions[j].name;
         data.clear();
         // Assume by default that all regions are active.
-        regions[j].drift = true;
-        regions[j].medium = 0;
+        m_regions[j].drift = true;
+        m_regions[j].medium = 0;
       }
       break;
     }
@@ -1224,17 +1229,17 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
         return false;
       }
       line = line.substr(pBra + 1, pKet - pBra - 1);
-      data.str(line); data >> nVertices; data.clear();
-      vertices.resize(nVertices);
+      data.str(line); data >> m_nVertices; data.clear();
+      m_vertices.resize(m_nVertices);
       // Get the coordinates of this vertex.
-      for (int j = 0; j < nVertices; ++j) {
-        gridfile >> vertices[j].x >> vertices[j].y >> vertices[j].z;
+      for (int j = 0; j < m_nVertices; ++j) {
+        gridfile >> m_vertices[j].x >> m_vertices[j].y >> m_vertices[j].z;
         // Change units from micron to cm.
-        vertices[j].x *= 1.e-4;
-        vertices[j].y *= 1.e-4;
-        vertices[j].z *= 1.e-4;
+        m_vertices[j].x *= 1.e-4;
+        m_vertices[j].y *= 1.e-4;
+        m_vertices[j].z *= 1.e-4;
       }
-      iLine += nVertices - 1;
+      iLine += m_nVertices - 1;
       break;
     }
   }
@@ -1306,8 +1311,8 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
   
   for (int i = nEdges; i--;) {
     // Make sure the indices of the edge endpoints are not out of range.
-    if (edgeP1[i] < 0 || edgeP1[i] >= nVertices ||
-        edgeP2[i] < 0 || edgeP2[i] >= nVertices) {
+    if (edgeP1[i] < 0 || edgeP1[i] >= m_nVertices ||
+        edgeP2[i] < 0 || edgeP2[i] >= m_nVertices) {
       std::cerr << className << "::LoadGrid:\n";
       std::cerr << "    Vertex index of edge " << i 
                 << " out of range.\n";
@@ -1408,11 +1413,11 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
         return false;
       }
       line = line.substr(pBra + 1, pKet - pBra - 1);
-      data.str(line); data >> nElements; data.clear();
+      data.str(line); data >> m_nElements; data.clear();
       // Resize array of elements.
-      elements.resize(nElements);
+      m_elements.resize(m_nElements);
       // Get type and constituting edges of each element.
-      for (int j = 0; j < nElements; ++j) {
+      for (int j = 0; j < m_nElements; ++j) {
         ++iLine;
         gridfile >> type;
         if (type == 2) {
@@ -1437,13 +1442,13 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
           }
           if (edge0 < 0) edge0 = -edge0 - 1;
           if (edge1 < 0) edge1 = -edge1 - 1;
-          elements[j].vertex[0] = edgeP1[edge0];
-          elements[j].vertex[1] = edgeP2[edge0];
-          if (edgeP1[edge1] != elements[j].vertex[0] &&
-              edgeP1[edge1] != elements[j].vertex[1]) {
-            elements[j].vertex[2] = edgeP1[edge1];
+          m_elements[j].vertex[0] = edgeP1[edge0];
+          m_elements[j].vertex[1] = edgeP2[edge0];
+          if (edgeP1[edge1] != m_elements[j].vertex[0] &&
+              edgeP1[edge1] != m_elements[j].vertex[1]) {
+            m_elements[j].vertex[2] = edgeP1[edge1];
           } else {
-            elements[j].vertex[2] = edgeP2[edge1];
+            m_elements[j].vertex[2] = edgeP2[edge1];
           }
         } else if (type == 5) {
           // Tetrahedron
@@ -1485,13 +1490,13 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
             return false;
           }
           // Get the first three vertices.
-          elements[j].vertex[0] = edgeP1[edge0];
-          elements[j].vertex[1] = edgeP2[edge0];
-          if (edgeP1[edge1] != elements[j].vertex[0] &&
-              edgeP1[edge1] != elements[j].vertex[1]) {
-            elements[j].vertex[2] = edgeP1[edge1];
+          m_elements[j].vertex[0] = edgeP1[edge0];
+          m_elements[j].vertex[1] = edgeP2[edge0];
+          if (edgeP1[edge1] != m_elements[j].vertex[0] &&
+              edgeP1[edge1] != m_elements[j].vertex[1]) {
+            m_elements[j].vertex[2] = edgeP1[edge1];
           } else {
-            elements[j].vertex[2] = edgeP2[edge1];
+            m_elements[j].vertex[2] = edgeP2[edge1];
           }
           // Get the fourth vertex from face 1.
           edge0 = faces[face1].edge[0];
@@ -1500,22 +1505,22 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
           if (edge0 < 0) edge0 = -edge0 - 1;
           if (edge1 < 0) edge1 = -edge1 - 1;
           if (edge2 < 0) edge2 = -edge2 - 1;
-          if (edgeP1[edge0] != elements[j].vertex[0] &&
-              edgeP1[edge0] != elements[j].vertex[1] &&
-              edgeP1[edge0] != elements[j].vertex[2]) {
-            elements[j].vertex[3] = edgeP1[edge0];
-          } else if (edgeP2[edge0] != elements[j].vertex[0] &&
-                     edgeP2[edge0] != elements[j].vertex[1] &&
-                     edgeP2[edge0] != elements[j].vertex[2]) {
-            elements[j].vertex[3] = edgeP2[edge0];
-          } else if (edgeP1[edge1] != elements[j].vertex[0] &&
-                     edgeP1[edge1] != elements[j].vertex[1] &&
-                     edgeP1[edge1] != elements[j].vertex[2]) {
-            elements[j].vertex[3] = edgeP1[edge1];
-          } else if (edgeP2[edge1] != elements[j].vertex[0] &&
-                     edgeP2[edge1] != elements[j].vertex[1] &&
-                     edgeP2[edge1] != elements[j].vertex[2]) {
-            elements[j].vertex[3] = edgeP2[edge1];
+          if (edgeP1[edge0] != m_elements[j].vertex[0] &&
+              edgeP1[edge0] != m_elements[j].vertex[1] &&
+              edgeP1[edge0] != m_elements[j].vertex[2]) {
+            m_elements[j].vertex[3] = edgeP1[edge0];
+          } else if (edgeP2[edge0] != m_elements[j].vertex[0] &&
+                     edgeP2[edge0] != m_elements[j].vertex[1] &&
+                     edgeP2[edge0] != m_elements[j].vertex[2]) {
+            m_elements[j].vertex[3] = edgeP2[edge0];
+          } else if (edgeP1[edge1] != m_elements[j].vertex[0] &&
+                     edgeP1[edge1] != m_elements[j].vertex[1] &&
+                     edgeP1[edge1] != m_elements[j].vertex[2]) {
+            m_elements[j].vertex[3] = edgeP1[edge1];
+          } else if (edgeP2[edge1] != m_elements[j].vertex[0] &&
+                     edgeP2[edge1] != m_elements[j].vertex[1] &&
+                     edgeP2[edge1] != m_elements[j].vertex[2]) {
+            m_elements[j].vertex[3] = edgeP2[edge1];
           } else {
             std::cerr << className << "::LoadGrid:\n";
             std::cerr << "    Error reading file " << gridfilename << "\n";
@@ -1543,8 +1548,8 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
           gridfile.close();
           return false;
         }
-        elements[j].type = type;
-        elements[j].region = -1;
+        m_elements[j].type = type;
+        m_elements[j].region = -1;
       }
       break;
     }
@@ -1586,8 +1591,8 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       line = line.substr(pBra + 1, pKet - pBra - 1);
       data.str(line); data >> name; data.clear();
       int index = -1;
-      for (int j = 0; j < nRegions; ++j) {
-        if (name == regions[j].name) {
+      for (int j = 0; j < m_nRegions; ++j) {
+        if (name == m_regions[j].name) {
           index = j;
           break;
         }
@@ -1618,7 +1623,7 @@ ComponentTcad3d::LoadGrid(const std::string gridfilename) {
       data.str(line); data >> nElementsRegion; data.clear();
       for (int j = 0; j < nElementsRegion; ++j) {
         gridfile >> iElement;
-        elements[iElement].region = index;
+        m_elements[iElement].region = index;
       } 
     }
   }
@@ -1639,16 +1644,16 @@ void
 ComponentTcad3d::Cleanup() {
 
   // Vertices
-  vertices.clear();
-  nVertices = 0;
+  m_vertices.clear();
+  m_nVertices = 0;
   
   // Elements
-  elements.clear();
-  nElements = 0;
+  m_elements.clear();
+  m_nElements = 0;
   
   // Regions
-  regions.clear();
-  nRegions = 0;
+  m_regions.clear();
+  m_nRegions = 0;
   
 }
 
@@ -1656,113 +1661,113 @@ bool
 ComponentTcad3d::CheckTetrahedron(const double x, const double y, 
                                   const double z, const int i) {
 
-  w[0] = w[1] = w[2] = w[3] = 0.;
+  m_w[0] = m_w[1] = m_w[2] = m_w[3] = 0.;
   
-  const double x10 = vertices[elements[i].vertex[1]].x -
-                     vertices[elements[i].vertex[0]].x;
-  const double y10 = vertices[elements[i].vertex[1]].y -
-                     vertices[elements[i].vertex[0]].y;
-  const double z10 = vertices[elements[i].vertex[1]].z -
-                     vertices[elements[i].vertex[0]].z;
+  const double x10 = m_vertices[m_elements[i].vertex[1]].x -
+                     m_vertices[m_elements[i].vertex[0]].x;
+  const double y10 = m_vertices[m_elements[i].vertex[1]].y -
+                     m_vertices[m_elements[i].vertex[0]].y;
+  const double z10 = m_vertices[m_elements[i].vertex[1]].z -
+                     m_vertices[m_elements[i].vertex[0]].z;
                      
-  const double x20 = vertices[elements[i].vertex[2]].x -
-                     vertices[elements[i].vertex[0]].x;
-  const double y20 = vertices[elements[i].vertex[2]].y -
-                     vertices[elements[i].vertex[0]].y;
-  const double z20 = vertices[elements[i].vertex[2]].z -
-                     vertices[elements[i].vertex[0]].z;
+  const double x20 = m_vertices[m_elements[i].vertex[2]].x -
+                     m_vertices[m_elements[i].vertex[0]].x;
+  const double y20 = m_vertices[m_elements[i].vertex[2]].y -
+                     m_vertices[m_elements[i].vertex[0]].y;
+  const double z20 = m_vertices[m_elements[i].vertex[2]].z -
+                     m_vertices[m_elements[i].vertex[0]].z;
                      
-  const double x30 = vertices[elements[i].vertex[3]].x -
-                     vertices[elements[i].vertex[0]].x;
-  const double y30 = vertices[elements[i].vertex[3]].y -
-                     vertices[elements[i].vertex[0]].y;
-  const double z30 = vertices[elements[i].vertex[3]].z -
-                     vertices[elements[i].vertex[0]].z;
+  const double x30 = m_vertices[m_elements[i].vertex[3]].x -
+                     m_vertices[m_elements[i].vertex[0]].x;
+  const double y30 = m_vertices[m_elements[i].vertex[3]].y -
+                     m_vertices[m_elements[i].vertex[0]].y;
+  const double z30 = m_vertices[m_elements[i].vertex[3]].z -
+                     m_vertices[m_elements[i].vertex[0]].z;
 
-  const double x21 = vertices[elements[i].vertex[2]].x -
-                     vertices[elements[i].vertex[1]].x;
-  const double y21 = vertices[elements[i].vertex[2]].y -
-                     vertices[elements[i].vertex[1]].y;
-  const double z21 = vertices[elements[i].vertex[2]].z -
-                     vertices[elements[i].vertex[1]].z;
+  const double x21 = m_vertices[m_elements[i].vertex[2]].x -
+                     m_vertices[m_elements[i].vertex[1]].x;
+  const double y21 = m_vertices[m_elements[i].vertex[2]].y -
+                     m_vertices[m_elements[i].vertex[1]].y;
+  const double z21 = m_vertices[m_elements[i].vertex[2]].z -
+                     m_vertices[m_elements[i].vertex[1]].z;
   
-  const double x31 = vertices[elements[i].vertex[3]].x -
-                     vertices[elements[i].vertex[1]].x;
-  const double y31 = vertices[elements[i].vertex[3]].y -
-                     vertices[elements[i].vertex[1]].y;
-  const double z31 = vertices[elements[i].vertex[3]].z -
-                     vertices[elements[i].vertex[1]].z;
+  const double x31 = m_vertices[m_elements[i].vertex[3]].x -
+                     m_vertices[m_elements[i].vertex[1]].x;
+  const double y31 = m_vertices[m_elements[i].vertex[3]].y -
+                     m_vertices[m_elements[i].vertex[1]].y;
+  const double z31 = m_vertices[m_elements[i].vertex[3]].z -
+                     m_vertices[m_elements[i].vertex[1]].z;
                      
-  const double x32 = vertices[elements[i].vertex[3]].x -
-                     vertices[elements[i].vertex[2]].x;
-  const double y32 = vertices[elements[i].vertex[3]].y -
-                     vertices[elements[i].vertex[2]].y;
-  const double z32 = vertices[elements[i].vertex[3]].z -
-                     vertices[elements[i].vertex[2]].z;
+  const double x32 = m_vertices[m_elements[i].vertex[3]].x -
+                     m_vertices[m_elements[i].vertex[2]].x;
+  const double y32 = m_vertices[m_elements[i].vertex[3]].y -
+                     m_vertices[m_elements[i].vertex[2]].y;
+  const double z32 = m_vertices[m_elements[i].vertex[3]].z -
+                     m_vertices[m_elements[i].vertex[2]].z;
 
-  w[0] = (x - vertices[elements[i].vertex[1]].x) * (y21 * z31 - y31 * z21) +
-         (y - vertices[elements[i].vertex[1]].y) * (z21 * x31 - z31 * x21) +
-         (z - vertices[elements[i].vertex[1]].z) * (x21 * y31 - x31 * y21);
+  m_w[0] = (x - m_vertices[m_elements[i].vertex[1]].x) * (y21 * z31 - y31 * z21) +
+           (y - m_vertices[m_elements[i].vertex[1]].y) * (z21 * x31 - z31 * x21) +
+           (z - m_vertices[m_elements[i].vertex[1]].z) * (x21 * y31 - x31 * y21);
 
-  w[0] /= x10 * (y31 * z21 - y21 * z31) +
-          y10 * (z31 * x21 - z21 * x31) +
-          z10 * (x31 * y21 - x21 * y31);
+  m_w[0] /= x10 * (y31 * z21 - y21 * z31) +
+            y10 * (z31 * x21 - z21 * x31) +
+            z10 * (x31 * y21 - x21 * y31);
 
-  if (w[0] < 0.) return false;
+  if (m_w[0] < 0.) return false;
               
-  w[1] = (x - vertices[elements[i].vertex[2]].x) * (-y20 * z32 + y32 * z20) +
-         (y - vertices[elements[i].vertex[2]].y) * (-z20 * x32 + z32 * x20) +
-         (z - vertices[elements[i].vertex[2]].z) * (-x20 * y32 + x32 * y20);
+  m_w[1] = (x - m_vertices[m_elements[i].vertex[2]].x) * (-y20 * z32 + y32 * z20) +
+           (y - m_vertices[m_elements[i].vertex[2]].y) * (-z20 * x32 + z32 * x20) +
+           (z - m_vertices[m_elements[i].vertex[2]].z) * (-x20 * y32 + x32 * y20);
   
-  w[1] /= x21 * (y20 * z32 - y32 * z20) +
-          y21 * (z20 * x32 - z32 * x20) +
-          z21 * (x20 * y32 - x32 * y20);
+  m_w[1] /= x21 * (y20 * z32 - y32 * z20) +
+            y21 * (z20 * x32 - z32 * x20) +
+            z21 * (x20 * y32 - x32 * y20);
   
-  if (w[1] < 0.) return false;
+  if (m_w[1] < 0.) return false;
   
-  w[2] = (x - vertices[elements[i].vertex[3]].x) * (y30 * z31 - y31 * z30) +
-         (y - vertices[elements[i].vertex[3]].y) * (z30 * x31 - z31 * x30) +
-         (z - vertices[elements[i].vertex[3]].z) * (x30 * y31 - x31 * y30);
+  m_w[2] = (x - m_vertices[m_elements[i].vertex[3]].x) * (y30 * z31 - y31 * z30) +
+           (y - m_vertices[m_elements[i].vertex[3]].y) * (z30 * x31 - z31 * x30) +
+           (z - m_vertices[m_elements[i].vertex[3]].z) * (x30 * y31 - x31 * y30);
   
-  w[2] /= x32 * (y31 * z30 - y30 * z31) +
-          y32 * (z31 * x30 - z30 * x31) + 
-          z32 * (x31 * y30 - x30 * y31);
+  m_w[2] /= x32 * (y31 * z30 - y30 * z31) +
+            y32 * (z31 * x30 - z30 * x31) + 
+            z32 * (x31 * y30 - x30 * y31);
       
-  if (w[2] < 0.) return false;
+  if (m_w[2] < 0.) return false;
   
-  w[3] = (x - vertices[elements[i].vertex[0]].x) * (y20 * z10 - y10 * z20) +
-         (y - vertices[elements[i].vertex[0]].y) * (z20 * x10 - z10 * x20) +
-         (z - vertices[elements[i].vertex[0]].z) * (x20 * y10 - x10 * y20);
+  m_w[3] = (x - m_vertices[m_elements[i].vertex[0]].x) * (y20 * z10 - y10 * z20) +
+           (y - m_vertices[m_elements[i].vertex[0]].y) * (z20 * x10 - z10 * x20) +
+           (z - m_vertices[m_elements[i].vertex[0]].z) * (x20 * y10 - x10 * y20);
+ 
+  m_w[3] /= x30 * (y20 * z10 - y10 * z20) +
+            y30 * (z20 * x10 - z10 * x20) +
+            z30 * (x20 * y10 - x10 * y20);
   
-  w[3] /= x30 * (y20 * z10 - y10 * z20) +
-          y30 * (z20 * x10 - z10 * x20) +
-          z30 * (x20 * y10 - x10 * y20);
-  
-  if (w[3] < 0.) return false;
+  if (m_w[3] < 0.) return false;
                  
   if (debug) {
     // Reconstruct the point from the local coordinates.
-    const double xr = w[0] * vertices[elements[i].vertex[0]].x +
-                      w[1] * vertices[elements[i].vertex[1]].x +
-                      w[2] * vertices[elements[i].vertex[2]].x +
-                      w[3] * vertices[elements[i].vertex[3]].x;
-    const double yr = w[0] * vertices[elements[i].vertex[0]].y +
-                      w[1] * vertices[elements[i].vertex[1]].y +
-                      w[2] * vertices[elements[i].vertex[2]].y +
-                      w[3] * vertices[elements[i].vertex[3]].y;
-    const double zr = w[0] * vertices[elements[i].vertex[0]].z +
-                      w[1] * vertices[elements[i].vertex[1]].z +
-                      w[2] * vertices[elements[i].vertex[2]].z +
-                      w[3] * vertices[elements[i].vertex[3]].z;
+    const double xr = m_w[0] * m_vertices[m_elements[i].vertex[0]].x +
+                      m_w[1] * m_vertices[m_elements[i].vertex[1]].x +
+                      m_w[2] * m_vertices[m_elements[i].vertex[2]].x +
+                      m_w[3] * m_vertices[m_elements[i].vertex[3]].x;
+    const double yr = m_w[0] * m_vertices[m_elements[i].vertex[0]].y +
+                      m_w[1] * m_vertices[m_elements[i].vertex[1]].y +
+                      m_w[2] * m_vertices[m_elements[i].vertex[2]].y +
+                      m_w[3] * m_vertices[m_elements[i].vertex[3]].y;
+    const double zr = m_w[0] * m_vertices[m_elements[i].vertex[0]].z +
+                      m_w[1] * m_vertices[m_elements[i].vertex[1]].z +
+                      m_w[2] * m_vertices[m_elements[i].vertex[2]].z +
+                      m_w[3] * m_vertices[m_elements[i].vertex[3]].z;
     std::cout << className << "::CheckTetrahedron:\n";
     std::cout << "    Original coordinates:      ("
               << x << ", " << y << ", " << z << ")\n";
     std::cout << "    Local coordinates:         ("
-              << w[0] << ", " << w[1] << ", " 
-              << w[2] << ", " << w[3] << ")\n";
+              << m_w[0] << ", " << m_w[1] << ", " 
+              << m_w[2] << ", " << m_w[3] << ")\n";
     std::cerr << "    Reconstructed coordinates: (" 
               << xr << ", " << yr << ", " << zr << ")\n";
-    std::cerr << "    Checksum: " << w[0] + w[1] + w[2] + w[3] - 1. << "\n";
+    std::cerr << "    Checksum: " << m_w[0] + m_w[1] + m_w[2] + m_w[3] - 1. << "\n";
   }
   
   return true;
@@ -1773,27 +1778,27 @@ bool
 ComponentTcad3d::CheckTriangle(const double x, 
                                const double y, const double z, const int i) {
 
-  const double v1x = vertices[elements[i].vertex[1]].x -
-                     vertices[elements[i].vertex[0]].x;
-  const double v2x = vertices[elements[i].vertex[2]].x -
-                     vertices[elements[i].vertex[0]].x;
-  const double v1y = vertices[elements[i].vertex[1]].y -
-                     vertices[elements[i].vertex[0]].y;
-  const double v2y = vertices[elements[i].vertex[2]].y -
-                     vertices[elements[i].vertex[0]].y;
-  const double v1z = vertices[elements[i].vertex[1]].z -
-                     vertices[elements[i].vertex[0]].z;
-  const double v2z = vertices[elements[i].vertex[2]].z -
-                     vertices[elements[i].vertex[0]].z;
+  const double v1x = m_vertices[m_elements[i].vertex[1]].x -
+                     m_vertices[m_elements[i].vertex[0]].x;
+  const double v2x = m_vertices[m_elements[i].vertex[2]].x -
+                     m_vertices[m_elements[i].vertex[0]].x;
+  const double v1y = m_vertices[m_elements[i].vertex[1]].y -
+                     m_vertices[m_elements[i].vertex[0]].y;
+  const double v2y = m_vertices[m_elements[i].vertex[2]].y -
+                     m_vertices[m_elements[i].vertex[0]].y;
+  const double v1z = m_vertices[m_elements[i].vertex[1]].z -
+                     m_vertices[m_elements[i].vertex[0]].z;
+  const double v2z = m_vertices[m_elements[i].vertex[2]].z -
+                     m_vertices[m_elements[i].vertex[0]].z;
     
   // Check whether the point lies in the plane of the triangle.
   // Compute the coefficients of the plane equation.
   const double a = v1y * v2z - v2y * v1z;
   const double b = v1z * v2x - v2z * v1x;
   const double c = v1x * v2y - v2x * v1y;
-  const double d = a * vertices[elements[i].vertex[0]].x +
-                   b * vertices[elements[i].vertex[0]].y +
-                   c * vertices[elements[i].vertex[0]].z;
+  const double d = a * m_vertices[m_elements[i].vertex[0]].x +
+                   b * m_vertices[m_elements[i].vertex[0]].y +
+                   c * m_vertices[m_elements[i].vertex[0]].z;
   // Check if the point satisfies the plane equation.
   if (a * x + b * y + c * z != d) return false;
   
@@ -1802,16 +1807,16 @@ ComponentTcad3d::CheckTriangle(const double x,
   // A point P is inside the triangle ABC if b, c > 0 and b + c < 1;
   // b, c are also weighting factors for points B, C
 
-  w[1] = ((x - vertices[elements[i].vertex[0]].x) * v2y - 
-          (y - vertices[elements[i].vertex[0]].y) * v2x) / (v1x * v2y - v1y * v2x);
-  if (w[1] < 0. || w[1] > 1.) return false;
+  m_w[1] = ((x - m_vertices[m_elements[i].vertex[0]].x) * v2y - 
+          (y - m_vertices[m_elements[i].vertex[0]].y) * v2x) / (v1x * v2y - v1y * v2x);
+  if (m_w[1] < 0. || m_w[1] > 1.) return false;
   
-  w[2] = ((vertices[elements[i].vertex[0]].x - x) * v1y - 
-          (vertices[elements[i].vertex[0]].y - y) * v1x) / (v1x * v2y - v1y * v2x);
-  if (w[2] < 0. || w[1] + w[2] > 1.) return false;
+  m_w[2] = ((m_vertices[m_elements[i].vertex[0]].x - x) * v1y - 
+          (m_vertices[m_elements[i].vertex[0]].y - y) * v1x) / (v1x * v2y - v1y * v2x);
+  if (m_w[2] < 0. || m_w[1] + m_w[2] > 1.) return false;
   
   // Weighting factor for point A
-  w[0] = 1. - w[1] - w[2];
+  m_w[0] = 1. - m_w[1] - m_w[2];
   
   return true;
 

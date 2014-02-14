@@ -66,10 +66,8 @@ The file is provided "as is" without express or implied warranty.
 */
 #include <iostream>
 #include <iomanip>
-//#include <CLHEP/Alist/AList.h>
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
-//#include "math/minmax.h"
 #include "wcpplib/util/emul_new_stand.h"
 #include "wcpplib/util/String.h"
 
@@ -154,20 +152,17 @@ template<class T>class DynLinArr: public RegPassivePtr
 template<class T>class DynLinArr
 #endif
 {public:
+  // Constructors
   DynLinArr(void): qel(0), el(NULL) {;}
-  explicit DynLinArr(long fqel): qel(fqel), 
-    el( NULL ) 
-  { 
-    if(qel > max_qel_DynLinArr)
-    {
+  explicit DynLinArr(long fqel): qel(fqel), el(NULL) { 
+    if (qel > max_qel_DynLinArr) {
       mcerr<<"ERROR in DynLinArr(long fqel):\n";
       mcerr<<"qel > max_qel_DynLinArr:\n"; 
       Iprint2n(mcout, qel, max_qel_DynLinArr);
       mcerr<<"Type of T is (in internal notations) "<<typeid(T).name()<<'\n';
       spexit(mcerr);
     }
-    if(qel < 0)
-    {
+    if (qel < 0) {
       mcerr<<"ERROR in DynLinArr(long fqel):\n";
       mcerr<<"qel < 0:\n"; 
       Iprintn(mcout, qel);
@@ -175,32 +170,24 @@ template<class T>class DynLinArr
       spexit(mcerr);
     }
 #ifdef USE_REPLACE_ALLOC
-    if(fqel > 0)
-    {
+    if (fqel > 0) {
       el = (T*)malloc(sizeof(T) * fqel);
-      
-      //T temp;
       long n; for(n=0; n<fqel; n++) new(&(el[n])) T;
     }
-    else el = NULL;
 #else
     el = (fqel > 0) ? (new T[fqel]) : (T*)NULL;
 #endif 
   }
 
-  DynLinArr(long fqel, const T& val): qel(fqel), 
-      el( NULL ) 
-  { 
-    if(qel > max_qel_DynLinArr)
-    {
+  DynLinArr(long fqel, const T& val): qel(fqel), el(NULL) { 
+    if (qel > max_qel_DynLinArr) {
       mcerr<<"ERROR in DynLinArr(long fqel, const T& val):\n";
       mcerr<<"qel > max_qel_DynLinArr:\n"; 
       Iprint2n(mcout, qel, max_qel_DynLinArr);
       mcerr<<"Type of T is (in internal notations) "<<typeid(T).name()<<'\n';
       spexit(mcerr);
     }
-    if(qel < 0)
-    {
+    if(qel < 0) {
       mcerr<<"ERROR in DynLinArr(long fqel, const T& val):\n";
       mcerr<<"qel < 0:\n"; 
       Iprintn(mcout, qel);
@@ -208,32 +195,24 @@ template<class T>class DynLinArr
       spexit(mcerr);
     }
 #ifdef USE_REPLACE_ALLOC
-    if(fqel > 0)
-    {
+    if(fqel > 0) {
       el = (T*)malloc(sizeof(T) * fqel);
       long n; for(n=0; n<fqel; n++) new(&(el[n])) T;
     }
-    else el = NULL;
 #else
     el = (fqel > 0) ? (new T[fqel]) : (T*)NULL; 
 #endif
     assignAll(val); 
   }
-  DynLinArr(long fqel, const T* ar, ArgInterp_Arr t):
-    qel(fqel), 
-    //DynLinArr(long fqel, const T* ar, int s):qel(fqel), 
-    el( NULL ) 
-  { 
-    if(qel > max_qel_DynLinArr)
-    {
+  DynLinArr(long fqel, const T* ar, ArgInterp_Arr /*t*/): qel(fqel), el(NULL) { 
+    if(qel > max_qel_DynLinArr) {
       mcerr<<"ERROR in DynLinArr(long fqel, const T* ar, ArgInterp_Arr):\n";
       mcerr<<"qel > max_qel_DynLinArr:\n";
       Iprint2n(mcout, qel, max_qel_DynLinArr);
       mcerr<<"Type of T is (in internal notations) "<<typeid(T).name()<<'\n';
       spexit(mcerr);
     }
-    if(qel < 0)
-    {
+    if (qel < 0) {
       mcerr<<"ERROR in DynLinArr(long fqel, const T* ar, ArgInterp_Arr):\n";
       mcerr<<"qel < 0:\n"; 
       Iprintn(mcout, qel);
@@ -241,53 +220,39 @@ template<class T>class DynLinArr
       spexit(mcerr);
     }
 #ifdef USE_REPLACE_ALLOC
-    if(fqel > 0)
-    {
+    if (fqel > 0) {
       el = (T*)malloc(sizeof(T) * fqel);
       long n; for(n=0; n<fqel; n++) new(&(el[n])) T;
     }
-    else el = NULL;
 #else
     el = (fqel > 0) ? (new T[fqel]) : (T*)NULL; 
 #endif
-    long n; for( n=0; n<qel; n++) el[n]=ar[n]; 
+    long n; for (n = 0; n < qel; n++) el[n] = ar[n]; 
   } 
-    // const T* ar is array here (of course).
-    // ArgInterp_Arr serves to distinguish this
-    // from previous constructor when second argument
-    // does not coincide with T but can be converted to it.
-    // Typical example is when T is double and second argument is 0.
-    // It is assumed that  0 should be converted to 0.0 and previous 
-    // constructor should be called. But in practice (Red Hat Linux 6.0)
-    // the compiler says 
-    // call of overloaded `DynLinArr(int &, int)' is ambiguous.
-    // I don't know whether this is error of particular compiler or 
-    // general problem. But the third dummy argument is anyway convenient
-    // to distringuish these cases.  
+  // const T* ar is array here (of course).
+  // ArgInterp_Arr serves to distinguish this
+  // from previous constructor when second argument
+  // does not coincide with T but can be converted to it.
+  // Typical example is when T is double and second argument is 0.
+  // It is assumed that  0 should be converted to 0.0 and previous 
+  // constructor should be called. But in practice (Red Hat Linux 6.0)
+  // the compiler says 
+  // call of overloaded `DynLinArr(int &, int)' is ambiguous.
+  // I don't know whether this is error of particular compiler or 
+  // general problem. But the third dummy argument is anyway convenient
+  // to distringuish these cases.  
+
   DynLinArr<T>& operator=(const DynLinArr<T>& f);
   template<class D> DynLinArr<T>& operator=(const DynLinArr<D>& f);
 
-  void pass(long fqel, T* fel) // Do not call directly! Is to be used only 
+  void pass(long fqel, T* fel) {
+    // Do not call directly! Is to be used only 
     // from assignment operator above 
-  { clear(); qel = fqel; el = fel; }
+    clear(); qel = fqel; el = fel;
+  }
 
   inline DynLinArr(const DynLinArr<T>& f);
-  /*
-  //DynLinArr(      DynLinArr<T>& f):qel(0), el(NULL) {*this=f;}
-  DynLinArr(const DynLinArr<T>& f):
-#ifndef DONT_USE_ABSPTR
-    RegPassivePtr(),
-#endif
-    qel(0), el(NULL) 
-  {
-#ifdef DEBUG_DYNLINARR
-    mcout<<"DynLinArr(const DynLinArr<T>& f) is working\n";
-#endif
-    *this=f;
-  }
-  */
-  DynLinArr(PILF_CONST  DynLinArr<T>& f, Pilfer):qel(f.qel), el(f.el) 
-  { 
+  DynLinArr(PILF_CONST  DynLinArr<T>& f, Pilfer):qel(f.qel), el(f.el) { 
 #ifdef DEBUG_DYNLINARR
     mcout<<"DynLinArr( DynLinArr<T>& f, Pilfer) is working\n";
 #endif
@@ -1409,6 +1374,8 @@ std::istream& operator>>(std::istream& file, DynLinArr<T>& f)
   return file;
 }
 
+// Commented out unused function (hschindl)
+/*
 template<class T>
 void output_DynLinArr(std::ostream& file, const DynLinArr<T>& f, int l, long q)
 {  
@@ -1436,7 +1403,7 @@ void output_DynLinArr(std::ostream& file, const DynLinArr<T>& f, int l, long q)
   //file<<yesindent;
   indn.n-=2;
 }
-
+*/
 
 template<class T>
 void print_DynLinArr(std::ostream& file, const DynLinArr<T>& f, int l)
@@ -1745,132 +1712,119 @@ template<class T>class DynArr: public RegPassivePtr
 template<class T>class DynArr
 #endif
 {public:
+  // Constructors
   DynArr(void) {;}
-
   // For one-dimensional array:
-  explicit DynArr(long fqel, T* val=NULL): qel(DynLinArr<long>(1)), 
+  explicit DynArr(long fqel, T* val = NULL) : 
+    qel(DynLinArr<long>(1)), 
     cum_qel(DynLinArr<long>(1)),
-    el(DynLinArr<T>(fqel)) 
-    {
+    el(DynLinArr<T>(fqel)) {
 #ifdef DEBUG_DYNARR
-      mcout<<"explicit DynArr(long fqel, T* val=NULL) is called\n";
+    mcout<<"explicit DynArr(long fqel, T* val=NULL) is called\n";
 #endif
-      qel[0]=fqel; cum_qel[0]=1; if(val!=NULL) assignAll(*val); 
-    }
-
-  DynArr(long fqel, T val, ArgInterp_Val t): qel(DynLinArr<long>(1)), 
+    qel[0]=fqel; cum_qel[0]=1; if(val!=NULL) assignAll(*val); 
+  }
+  DynArr(long fqel, T val, ArgInterp_Val /*t*/): 
+    qel(DynLinArr<long>(1)), 
     cum_qel(DynLinArr<long>(1)),
-    el(DynLinArr<T>(fqel)) 
-    {
+    el(DynLinArr<T>(fqel)) {
 #ifdef DEBUG_DYNARR
       mcout<<"explicit DynArr(long fqel, T* val=NULL) is called\n";
 #endif
       qel[0]=fqel; cum_qel[0]=1; assignAll(val); 
-    }
-
-  DynArr(long fqel, const T* ar, ArgInterp_Arr t): qel(DynLinArr<long>(1)), 
+  }
+  DynArr(long fqel, const T* ar, ArgInterp_Arr /*t*/) : 
+    qel(DynLinArr<long>(1)), 
     cum_qel(DynLinArr<long>(1)),
-    el(fqel) 
-    //el(DynLinArr<T>(fqel),steal) 
-    { qel[0]=fqel; cum_qel[0]=1; 
-      long n; for( n=0; n<fqel; n++) el.acu(n)=ar[n]; 
-    }
-
+    el(fqel) {   
+    qel[0]=fqel; cum_qel[0]=1; 
+    long n; for( n=0; n<fqel; n++) el.acu(n)=ar[n]; 
+  }
   // Another variant for one-dimensional array
   // Attention: if the T is long, this might be mixed with array of dimensions.
   // To avoid this the latter should be accompanied by address, see below.
   DynArr(const DynLinArr<T>& f): qel(DynLinArr<long>(1)),
     cum_qel(DynLinArr<long>(1)),
-    el(f.get_qel()) 
-    //el(DynLinArr<T>(f.get_qel())) 
-    { qel[0]=f.get_qel(); cum_qel[0]=1; 
-    for( long n=0; n<qel[0]; n++ ) ac(n) = f[n]; }
-    
+    el(f.get_qel()) {  
+    qel[0]=f.get_qel(); cum_qel[0]=1; 
+    for( long n=0; n<qel[0]; n++ ) ac(n) = f[n];
+  }
 
   // For two-dimensional array:
   DynArr(long fqel1, long fqel2, T* val=NULL): 
     qel(DynLinArr<long>(2)), cum_qel(DynLinArr<long>(2)),
-    el(fqel1*fqel2) 
-    //el(DynLinArr<T>(fqel1*fqel2)) 
-    { 
+    el(fqel1*fqel2) { 
 #ifdef DEBUG_DYNARR
-      mcout<<"DynArr(long fqel1, long fqel2, T* val=NULL) is called\n";
+    mcout<<"DynArr(long fqel1, long fqel2, T* val=NULL) is called\n";
 #endif
-      qel[0]=fqel1; qel[1]=fqel2; cum_qel[0]=fqel2; cum_qel[1]=1; 
-      if(val!=NULL) assignAll(*val);
-    }
+    qel[0]=fqel1; qel[1]=fqel2; cum_qel[0]=fqel2; cum_qel[1]=1; 
+    if(val!=NULL) assignAll(*val);
+  }
   
-  DynArr(long fqel1, long fqel2, T val, ArgInterp_Val t): 
+  DynArr(long fqel1, long fqel2, T val, ArgInterp_Val /*t*/) : 
     qel(DynLinArr<long>(2)), cum_qel(DynLinArr<long>(2)),
-    el(fqel1*fqel2) 
-    //el(DynLinArr<T>(fqel1*fqel2)) 
-    { 
+    el(fqel1*fqel2) { 
 #ifdef DEBUG_DYNARR
       mcout<<"DynArr(long fqel1, long fqel2, T val, ArgInterp_Val t) is called\n";
 #endif
-      qel[0]=fqel1; qel[1]=fqel2; cum_qel[0]=fqel2; cum_qel[1]=1; 
-      assignAll(val);
-    }
+    qel[0]=fqel1; qel[1]=fqel2; cum_qel[0]=fqel2; cum_qel[1]=1; 
+    assignAll(val);
+  }
   
   // For three-dimensional array:
   DynArr(long fqel1, long fqel2, long fqel3, T* val=NULL): 
     qel(DynLinArr<long>(3)), cum_qel(DynLinArr<long>(3)),
-    el(fqel1*fqel2*fqel3) 
-    //el(DynLinArr<T>(fqel1*fqel2*fqel3)) 
-    { qel[0]=fqel1; qel[1]=fqel2; qel[2]=fqel3; 
+    el(fqel1*fqel2*fqel3) { 
+    qel[0]=fqel1; qel[1]=fqel2; qel[2]=fqel3; 
     cum_qel[0]=fqel2*fqel3; cum_qel[1]=fqel3; cum_qel[2]=1;
-    if(val!=NULL) assignAll(*val);}
+    if(val!=NULL) assignAll(*val);
+  }
 
   // For four-dimensional array:
   DynArr(long fqel1, long fqel2, long fqel3, long fqel4, T* val=NULL): 
     qel(DynLinArr<long>(4)), cum_qel(DynLinArr<long>(4)),
-    el(fqel1*fqel2*fqel3*fqel4) 
-    //el(DynLinArr<T>(fqel1*fqel2*fqel3*fqel4)) 
-    { qel[0]=fqel1; qel[1]=fqel2; qel[2]=fqel3; qel[3]=fqel4;
+    el(fqel1*fqel2*fqel3*fqel4) { 
+    qel[0]=fqel1; qel[1]=fqel2; qel[2]=fqel3; qel[3]=fqel4;
     cum_qel[0]=fqel2*fqel3*fqel4; cum_qel[1]=fqel3*fqel4; 
-    cum_qel[2]=fqel4; cum_qel[3]=1; if(val!=NULL) assignAll(*val); }
-
-  // For many-dimensional array:
-  //explicit DynArr(const DynLinArr<long>& fqel, T* val=NULL): 
+    cum_qel[2]=fqel4; cum_qel[3]=1; if(val!=NULL) assignAll(*val);
+  }
 
   // Default value is removed in order to avoid confusions with copy
   // constructor from DynLinArr at T = long.
   // If initialization of values is not necessary, just put NULL as argument.
   // It creates array with structure determined by fqel.
 
-  DynArr(const DynLinArr<long>& fqel, T val, ArgInterp_Val t): 
-    qel(fqel)  
-    { 
-      long qdim=qel.get_qel();
-      if(qdim<=0) return;
-      cum_qel.put_qel(qdim);
-      long ndim;
-      long size=qel[0];
-      for( ndim=1; ndim<qdim; ndim++) size *= qel[ndim];
-      el.put_qel(size); 
-      cum_qel[qdim-1]=1;
-      for( ndim=qdim-2; ndim>=0; ndim--)
-	cum_qel[ndim] = qel[ndim+1] * cum_qel[ndim+1];
-      assignAll(val);
-    }
+  DynArr(const DynLinArr<long>& fqel, T val, ArgInterp_Val /*t*/): 
+    qel(fqel) { 
+    long qdim=qel.get_qel();
+    if(qdim<=0) return;
+    cum_qel.put_qel(qdim);
+    long ndim;
+    long size=qel[0];
+    for( ndim=1; ndim<qdim; ndim++) size *= qel[ndim];
+    el.put_qel(size); 
+    cum_qel[qdim-1]=1;
+    for( ndim=qdim-2; ndim>=0; ndim--)
+      cum_qel[ndim] = qel[ndim+1] * cum_qel[ndim+1];
+    assignAll(val);
+  }
 
-  explicit DynArr(const DynLinArr<long>& fqel,  // array of dimensions 
-		  T* val):                      // address of value to fill, 
-		                                // may be NULL
-    qel(fqel)  
-    { 
-      long qdim=qel.get_qel();
-      if(qdim<=0) return;
-      cum_qel.put_qel(qdim);
-      long ndim;
-      long size=qel[0];
-      for( ndim=1; ndim<qdim; ndim++) size *= qel[ndim];
-      el.put_qel(size); 
-      cum_qel[qdim-1]=1;
-      for( ndim=qdim-2; ndim>=0; ndim--)
-	cum_qel[ndim] = qel[ndim+1] * cum_qel[ndim+1];
-       if(val!=NULL) assignAll(*val);
-    }
+  explicit DynArr(const DynLinArr<long>& fqel, T* val) :
+    qel(fqel) {
+    // fqel: array of dimensions 
+		// val: address of value to fill, may be NULL 
+    long qdim=qel.get_qel();
+    if(qdim<=0) return;
+    cum_qel.put_qel(qdim);
+    long ndim;
+    long size=qel[0];
+    for( ndim=1; ndim<qdim; ndim++) size *= qel[ndim];
+    el.put_qel(size); 
+    cum_qel[qdim-1]=1;
+    for( ndim=qdim-2; ndim>=0; ndim--)
+      cum_qel[ndim] = qel[ndim+1] * cum_qel[ndim+1];
+     if(val!=NULL) assignAll(*val);
+  }
 
   DynArr(const DynArr<T>& f) 
 #ifndef DONT_USE_ABSPTR

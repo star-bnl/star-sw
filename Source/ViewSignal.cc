@@ -9,9 +9,9 @@
 namespace Garfield {
 
 ViewSignal::ViewSignal() :
-  className("ViewSignal"), debug(false), sensor(0),
-  canvas(0), hasExternalCanvas(false),
-  hSignal(0), gCrossings(0) {
+  m_className("ViewSignal"), m_debug(false), m_sensor(0),
+  m_canvas(0), m_hasExternalCanvas(false),
+  m_hSignal(0), m_gCrossings(0) {
 
   plottingEngine.SetDefaultStyle();
 
@@ -19,9 +19,9 @@ ViewSignal::ViewSignal() :
 
 ViewSignal::~ViewSignal() {
 
-  if (!hasExternalCanvas && canvas != 0) delete canvas;
-  if (hSignal != 0) delete hSignal;
-  if (gCrossings != 0) delete gCrossings;
+  if (!m_hasExternalCanvas && m_canvas != 0) delete m_canvas;
+  if (m_hSignal != 0) delete m_hSignal;
+  if (m_gCrossings != 0) delete m_gCrossings;
 
 }
 
@@ -29,12 +29,12 @@ void
 ViewSignal::SetSensor(Sensor* s) {
 
   if (s == 0) {
-    std::cerr << className << "::SetSensor:\n";
+    std::cerr << m_className << "::SetSensor:\n";
     std::cerr << "    Sensor pointer is null.\n";
     return;
   }
 
-  sensor = s; 
+  m_sensor = s; 
 
 }
 
@@ -42,74 +42,74 @@ void
 ViewSignal::SetCanvas(TCanvas* c) {
 
   if (c == 0) return;
-  if (!hasExternalCanvas && canvas != 0) {
-    delete canvas;
-    canvas = 0;
+  if (!m_hasExternalCanvas && m_canvas != 0) {
+    delete m_canvas;
+    m_canvas = 0;
   }
-  canvas = c;
-  hasExternalCanvas = true;
+  m_canvas = c;
+  m_hasExternalCanvas = true;
 
 }
 
 void 
 ViewSignal::PlotSignal(const std::string label) {
 
-  if (sensor == 0) {
-    std::cerr << className << "::PlotSignal:\n";
+  if (m_sensor == 0) {
+    std::cerr << m_className << "::PlotSignal:\n";
     std::cerr << "    Sensor is not defined.\n";
     return;
   }
   
   // Setup the canvas
-  if (canvas == 0) {
-    canvas = new TCanvas();
-    canvas->SetTitle("Signal");
-    if (hasExternalCanvas) hasExternalCanvas = false;
+  if (m_canvas == 0) {
+    m_canvas = new TCanvas();
+    m_canvas->SetTitle("Signal");
+    if (m_hasExternalCanvas) m_hasExternalCanvas = false;
   }
-  canvas->cd();
+  m_canvas->cd();
 
   int nBins;
   double t0, dt;
-  sensor->GetTimeWindow(t0, dt, nBins);
+  m_sensor->GetTimeWindow(t0, dt, nBins);
   
-  if (hSignal != 0) {
-    delete hSignal;
-    hSignal = 0;
+  if (m_hSignal != 0) {
+    delete m_hSignal;
+    m_hSignal = 0;
   }
-  hSignal = new TH1D("hSignal", label.c_str(), nBins, t0, t0 + nBins * dt);
-  hSignal->SetLineColor(plottingEngine.GetRootColorLine1());
-  hSignal->GetXaxis()->SetTitle("time [ns]");
-  hSignal->GetYaxis()->SetTitle("signal [fC / ns]");
+  m_hSignal = new TH1D("hSignal", label.c_str(), nBins, t0, t0 + nBins * dt);
+  m_hSignal->SetLineColor(plottingEngine.GetRootColorLine1());
+  m_hSignal->GetXaxis()->SetTitle("time [ns]");
+  m_hSignal->GetYaxis()->SetTitle("signal [fC / ns]");
   
   double sig = 0.;  
   for (int i = nBins; i--;) {
-    sig = sensor->GetSignal(label, i);
-    hSignal->SetBinContent(i + 1, sig);
+    sig = m_sensor->GetSignal(label, i);
+    m_hSignal->SetBinContent(i + 1, sig);
   }
 
-  if (gCrossings != 0) {
-    delete gCrossings;
-    gCrossings = 0;
+  if (m_gCrossings != 0) {
+    delete m_gCrossings;
+    m_gCrossings = 0;
   }
 
   // Get threshold crossings.
-  const int nCrossings = sensor->GetNumberOfThresholdCrossings();
+  const int nCrossings = m_sensor->GetNumberOfThresholdCrossings();
   if (nCrossings > 0) {
-    gCrossings = new TGraph(nCrossings);
-    gCrossings->SetMarkerStyle(20);
-    gCrossings->SetMarkerColor(plottingEngine.GetRootColorLine1());
+    m_gCrossings = new TGraph(nCrossings);
+    m_gCrossings->SetMarkerStyle(20);
+    m_gCrossings->SetMarkerColor(plottingEngine.GetRootColorLine1());
     double time = 0., level = 0.;
     bool rise = true;
     for (int i = nCrossings; i--;) {
-      if (sensor->GetThresholdCrossing(i, time, level, rise)) {
-        gCrossings->SetPoint(i, time, level);
+      if (m_sensor->GetThresholdCrossing(i, time, level, rise)) {
+        m_gCrossings->SetPoint(i, time, level);
       }
     }
   }   
   
-  hSignal->Draw();
-  if (nCrossings > 0) gCrossings->Draw("psame");
-  canvas->Update();
+  m_hSignal->Draw("");
+  if (nCrossings > 0) m_gCrossings->Draw("psame");
+  m_canvas->Update();
 
 }
 

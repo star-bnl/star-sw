@@ -184,8 +184,8 @@ class MediumSilicon : public Medium {
     // Impact ionisation parameters
     double eImpactA0, eImpactA1, eImpactA2;
     double eImpactB0, eImpactB1, eImpactB2;
-    double hImpactA0, hImpactA1, hImpactA2;
-    double hImpactB0, hImpactB1, hImpactB2;    
+    double hImpactA0, hImpactA1;
+    double hImpactB0, hImpactB1;
     
     // Models
     bool hasUserMobility;
