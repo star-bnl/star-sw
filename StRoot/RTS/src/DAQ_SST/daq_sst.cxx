@@ -45,6 +45,7 @@ daq_sst::daq_sst(daqReader *rts_caller)
 
 	raw = new daq_dta ;
 	adc = new daq_dta ;
+	ped = new daq_dta ;
 
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -56,6 +57,7 @@ daq_sst::~daq_sst()
 
 	delete raw ;
 	delete adc ;
+	delete ped ;
 
 	return ;
 }
@@ -75,10 +77,274 @@ daq_dta *daq_sst::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 	else if(strcasecmp(bank,"adc")==0) {
 		return handle_adc(sec,rdo) ;
 	}
+	else if(strcasecmp(bank,"pedrms")==0) {
+		return handle_ped(sec) ;
+	}
 
 
 	LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
 	return 0 ;
+}
+
+
+
+
+/*
+	mode = 0     just check
+	mode = 1     insert int adc strucutres
+	mode = 2     pedestal calculation
+*/
+int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_ped_t *peds, int mode)
+{
+	u_int *dta = (u_int *)rdobuff ;
+
+	u_int *d32 = dta ;
+	u_int *d32_end = dta + words ;
+	u_int *d32_start = dta ;
+
+	int adc_count = 0 ;
+
+	events[r-1]++ ;
+
+	int e = events[r-1] ;
+
+	//sanity!
+	if(d32_end[-1] != 0xBBBBBBBB) {
+		LOG(ERR,"S%d-%d: %u: last word is 0x%08X, expect 0xBBBBBBBB -- data corrupt,skipping!",s,r,e,d32_end[-1]) ;
+		return -1 ;
+	}
+
+	
+	//we'll assume SST has bugs in the header so we don't do any checks but search for the data
+	//immediatelly
+	int found = 0 ;
+	while(d32<d32_end) {
+		u_int d = *d32++ ;
+
+		if(d == 0xDDDDDDDD) {
+			d32-- ;	// move back ;
+			found = 1 ;
+			break ;
+		}
+	}
+
+	if(!found) {
+		LOG(ERR,"S%d-%d: %u: can't find 0xDDDDDDDD -- data corrupt, skipping!",s,r,e) ;
+		return -1 ;
+	}
+
+
+	int fib = 0 ;
+	while(d32<d32_end) {
+		u_int d = *d32++ ;
+
+		if(d != 0xDDDDDDDD) {
+			u_int *d_here = d32 - 1 ;	// go back one
+			LOG(ERR,"S%d-%d: %u: fiber %d: can't find 0xDDDDDDDD at offset %d [0x%08X] -- data corrupt, skipping!",s,r,e,fib,
+			    d_here-d32_start,*d_here) ;
+
+			d_here -= 2 ;
+			for(int i=0;i<5;i++) {
+				LOG(ERR,"     %d: 0x%08X",d_here-d32_start,*d_here) ;
+				d_here++ ;
+			}
+			goto err_ret ;
+		}
+
+		int words = d32[0] & 0x000FFFF0 ;
+		words >>= 4 ;
+
+		LOG(NOTE,"S%d-%d: fiber %d: ID 0x%08X, words %d",
+		    s,r,fib,d32[0],words) ;
+				
+		if(d32[0] & 0xFFF00000) {
+			if(d32[0] == 0x001000A0) {	// empty
+				LOG(WARN,"S%d-%d: %u: fiber %d: empty [0x%08X]",s,r,e,fib,d32[0]) ;					
+			}
+			else {
+				LOG(ERR,"S%d-%d: %u: fiber %d: odd data header 0x%08X",s,r,e,fib,d32[0]) ;
+				goto err_ret ;
+			}
+		}
+
+		words -= 1 ;	// for some reason...
+
+		//first 9 words are some header
+		for(int i=0;i<12;i++) {
+			LOG(NOTE,"   %d: 0x%08X",i,d32[i]) ;
+		}
+			
+		d32 += 9 ;	// skip this header
+		words -= 9 ;
+
+		int strip = 0 ;
+		int hybrid = 0 ;
+
+
+		daq_sst_data_t *sst = 0 ;
+		daq_sst_data_t *sst_start  ;
+
+		switch(mode) {
+		case 1 :
+			if(words) {
+				sst = (daq_sst_data_t *)adc->request(3*words) ;
+			}
+			break ;
+		case 2 :
+
+			break ;
+		default :
+			mode = 0 ;
+			break ;
+		}
+
+		sst_start = sst ;
+
+		//here is the ADC
+		for(int i=0;i<words;i++) {
+			d = *d32++ ;
+			int adc_prime ;
+			int aadc ;
+
+			if(strip >= 768) {
+				LOG(ERR,"S%d-%d: fiber %d, bad strip %d",s,r,fib,strip) ;
+				goto err_ret ;
+			}
+					
+			aadc = d & 0x3FF ;
+			switch(mode) {
+			case 1 :
+				sst->strip = strip ;	
+				sst->hybrid = hybrid ;
+				sst->adc = aadc ;
+				break ;
+			case 2 :
+				adc_prime = (aadc+SST_PED_ADC_OFFSET)%1024 ;
+				if((adc_prime < SST_PED_ADC_HI) && (adc_prime > SST_PED_ADC_LO)) {
+					if(peds->cou[fib][hybrid][strip] < 0xFFF0) {	// protect the 16bit counter
+						peds->ped[fib][hybrid][strip] += adc_prime ;
+						peds->rms[fib][hybrid][strip] += adc_prime * adc_prime ;
+						peds->cou[fib][hybrid][strip]++ ;
+					}
+				}
+				break ;
+			}
+			hybrid++ ;
+			sst++ ;
+
+			if(hybrid==16) {
+				hybrid = 0 ;
+				strip++ ;
+			}
+
+			////////////////////////////
+
+			if(strip >= 768) {
+				LOG(ERR,"S%d-%d: fiber %d, bad strip %d",s,r,fib,strip) ;
+				goto err_ret ;
+			}
+
+			aadc = (d & 0xFFC00)  >> 10 ;
+			switch(mode) {
+			case 1 :
+				sst->strip = strip ;
+				sst->hybrid = hybrid ;
+				sst->adc = aadc ;
+				break ;
+			case 2 :
+				adc_prime = (aadc+SST_PED_ADC_OFFSET)%1024 ;
+				if((adc_prime < SST_PED_ADC_HI) && (adc_prime > SST_PED_ADC_LO)) {
+					if(peds->cou[fib][hybrid][strip] < 0xFFF0) {	// protect the 16bit counter
+						peds->ped[fib][hybrid][strip] += adc_prime ;
+						peds->rms[fib][hybrid][strip] += adc_prime * adc_prime ;
+						peds->cou[fib][hybrid][strip]++ ;
+					}
+				}
+				break ;
+
+			}
+			hybrid++ ;
+			sst++ ;
+				
+			if(hybrid==16) {
+				hybrid = 0 ;
+				strip++ ;
+			}
+
+
+			///////////////////////////////
+
+			if(strip >= 768) {
+				LOG(ERR,"S%d-%d: fiber %d, bad strip %d",s,r,fib,strip) ;
+				goto err_ret ;
+			}
+
+			aadc = (d & 0x3FF00000) >> 20 ;
+			switch(mode) {
+			case 1 :
+				sst->strip = strip ;
+				sst->hybrid = hybrid ;
+				sst->adc = aadc ; 
+				break ;
+			case 2 :
+				adc_prime = (aadc+SST_PED_ADC_OFFSET)%1024 ;
+				if((adc_prime < SST_PED_ADC_HI) && (adc_prime > SST_PED_ADC_LO)) {
+					if(peds->cou[fib][hybrid][strip] < 0xFFF0) {	// protect the 16bit counter
+						peds->ped[fib][hybrid][strip] += adc_prime ;
+						peds->rms[fib][hybrid][strip] += adc_prime * adc_prime ;
+						peds->cou[fib][hybrid][strip]++ ;
+					}
+				}
+				break ;
+			}
+			hybrid++ ;
+			sst++ ;
+
+			if(hybrid==16) {
+				hybrid = 0 ;
+				strip++ ;
+			}
+
+		}
+
+			
+		//end of adc
+		if((mode==1) && (sst-sst_start)) {
+			LOG(NOTE,"Got %d structs, requested %d",sst-sst_start,3*words) ;
+			adc->finalize(sst-sst_start,s,r,fib) ;
+		}
+
+		adc_count += sst-sst_start ;
+
+		//all OK with fiber; came to then end and counted all the necessary strips
+		if(words==(SST_STRIP_COU*SST_HYBRID_COU)/3) fiber_events[r-1][fib]++ ;
+		
+		LOG(NOTE,"RDO %d, fiber %d: words %d",r,fib,words) ;
+
+		fib++ ;
+		if(fib==8) break ;
+
+			
+	}
+
+	if(*d32 != 0xCCCCCCCC) {
+		LOG(ERR,"S%d-%d: %u: can't find 0xCCCCCCCC at offset %d [0x%08X] -- data corrupt, skipping!",s,r,e,d32-d32_start,*d32) ;
+		d32 -= 2 ;
+		while(d32 < d32_end) {
+			LOG(ERR,"    %d: 0x%08X",d32-d32_start,*d32) ;
+			d32++ ;
+		}
+		goto err_ret ;
+	}
+		
+
+	LOG(NOTE,"%d %d -- returing %d",s,r,adc_count) ;
+
+	return adc_count  ;	// objects
+
+	err_ret:;
+
+	return -1 ;
 }
 
 
@@ -114,7 +380,6 @@ daq_dta *daq_sst::handle_adc(int sec, int rdo, char *rdobuff, int words)
 
 	for(int r=r_start;r<=r_stop;r++) {
 		u_int *dta ;
-		int found ;	// helper
 
 		if(rdobuff == 0) {
 			daq_dta *raw_d = handle_raw(s,r) ;
@@ -136,6 +401,8 @@ daq_dta *daq_sst::handle_adc(int sec, int rdo, char *rdobuff, int words)
 		} ;
 
 
+		raw_to_adc_utility(s,r,(char *)dta,words,0,1) ;
+#if 0
 		u_int *d32 = dta ;
 		u_int *d32_end = dta + words ;
 		u_int *d32_start = dta ;
@@ -296,6 +563,7 @@ daq_dta *daq_sst::handle_adc(int sec, int rdo, char *rdobuff, int words)
 		
 
 		err_ret:;
+#endif
 
 
 	}	// end of loop over RDOs [1..3]
@@ -547,3 +815,108 @@ int daq_sst::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 	return t_cou ;
 }
+
+daq_dta *daq_sst::handle_ped(int sec)
+{
+
+
+
+
+	char str[128] ;
+	char *full_name ;
+	int bytes ;
+	u_short *d, *d_in ;
+	int s_start, s_stop ;
+
+
+	LOG(NOTE,"handle_ped(%d)",sec) ;
+
+	if(sec<=0) {
+		s_start = 1 ;
+		s_stop = 2 ;
+	}
+	else {
+		s_start = s_stop = sec ;
+	}
+
+	ped->create(8,"sst_pedrms",rts_id,DAQ_DTA_STRUCT(daq_sst_pedrms_t)) ;
+
+	for(sec=s_start;sec<=s_stop;sec++) {
+
+	sprintf(str,"%s/sec%02d/pedrms",sfs_name, sec) ;
+
+	LOG(NOTE,"Trying %s",str) ;
+
+	full_name = caller->get_sfs_name(str) ;
+		
+	if(full_name) {
+		LOG(NOTE,"full_name %s",full_name) ;
+	}
+
+	if(!full_name) continue  ;
+	bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+	LOG(NOTE,"bytes %d",bytes) ;
+
+	d = (u_short *) malloc(bytes) ;
+	d_in = d ;
+			
+	int ret = caller->sfs->read(str, (char *)d, bytes) ;
+	if(ret != bytes) {
+		LOG(ERR,"ret is %d") ;
+	}
+
+	if(d[0] != 0xBEEF) {
+		LOG(ERR,"Bad pedestal version") ;
+	}
+
+	if(d[1] != 1 ) {
+		LOG(ERR,"Bad pedestal version") ;
+	}
+
+	int rdo_cou = d[2] ;
+	int fib_cou = d[3] ;
+	int hy_cou = d[4] ;
+	int strip_cou = d[5] ;
+
+
+	d += 6 ;	// skip header
+
+//	int max_ix = (bytes/2) ;
+
+	daq_sst_pedrms_t *f_ped = 0 ;
+
+	for(int r=0;r<rdo_cou;r++) {
+		int rdo1 = *d++ ;
+
+		for(int f=0;f<fib_cou;f++) {
+
+			f_ped = (daq_sst_pedrms_t *) ped->request(1) ;
+
+			for(int h=0;h<hy_cou;h++) {
+			for(int s=0;s<strip_cou;s++) {
+				short ped = (short)*d++ ;
+				short rms = (short)*d++ ;
+
+				f_ped->ped[h][s] = ped ;
+				f_ped->rms[h][s] = rms ;
+
+			}
+			}
+
+			ped->finalize(1,sec,rdo1,f) ;
+		}
+
+	}
+
+	free(d_in) ;
+
+	}
+
+	ped->rewind() ;
+
+
+	return ped ;
+}
+
+
