@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.cxx,v 1.4 2014/02/10 16:33:44 smirnovd Exp $
+* $Id: StIstSimpleClusterAlgo.cxx,v 1.5 2014/02/15 20:12:58 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.cxx,v $
+* Revision 1.5  2014/02/15 20:12:58  ypwang
+* update due to replace raw hit container type from std::map to std::vector, and minor bug corrected for the simple clustering algorithm
+*
 * Revision 1.4  2014/02/10 16:33:44  smirnovd
 * Trimmed trailing spaces, expanded tabs to eight spaces
 *
@@ -111,10 +114,11 @@ Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StI
         clusterIt->setNRawHitsZ(clusterSizeZ);
         clusterIt->setMaxTimeBin(maxTb);
         clusterIt->setClusteringType(clusterType);
-        rawHitMap_t &rawHitMapTmp = clusterIt->getRawHitMap();
-        rawHitMap_t::iterator rawHitIterator = rawHitMapTmp.end();
-        rawHitIterator--;
-        rawHitMapTmp.erase(rawHitIterator); //remove the rawHit[2]
+
+	std::vector< StIstRawHit* > &rawHitVecTmp = clusterIt->getRawHitVec();
+	std::vector< StIstRawHit* >::iterator rawHitIterator = rawHitVecTmp.end();
+        rawHitIterator--; 
+        rawHitVecTmp.erase(rawHitIterator); //remove the rawHit[2]
 
         //cluster spliting: part of raw hit 1 + raw hit 2
         tmpSumChargeSplit = tmpRawHitMaxCharge2 + tmpRawHitMaxCharge1 * tmpRawHitMaxCharge2 / (tmpRawHitMaxCharge0 + tmpRawHitMaxCharge2);
@@ -138,9 +142,10 @@ Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StI
         newClusterTmp->setNRawHitsZ(clusterSizeZ);
         newClusterTmp->setMaxTimeBin(maxTb);
 
-        rawHitMap_t &rawHitMapTmp2 = newClusterTmp->getRawHitMap();
-        rawHitMapTmp2[rawHitPtr1] = 1;
-        rawHitMapTmp2[rawHitPtr2] = 1;
+	std::vector< StIstRawHit* > &rawHitVecTmp2 = newClusterTmp->getRawHitVec();
+	rawHitVecTmp2.push_back(rawHitPtr1);
+	rawHitVecTmp2.push_back(rawHitPtr2);
+
         clusters.getClusterVec().push_back(newClusterTmp);
     }
 
@@ -192,10 +197,13 @@ Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StI
         clusterIt->setNRawHitsZ(clusterSizeZ);
         clusterIt->setMaxTimeBin(maxTb);
         clusterIt->setClusteringType(clusterType);
-        rawHitMap_t &rawHitMapTmp3 = clusterIt->getRawHitMap();
-        rawHitMapTmp3.clear();
-        rawHitMapTmp3[rawHitPtr0] = 1;
-        rawHitMapTmp3[rawHitPtr1] = 1;
+
+	std::vector< StIstRawHit* > &rawHitVecTmp3 = clusterIt->getRawHitVec();
+	std::vector< StIstRawHit* >::iterator rawHitIterator = rawHitVecTmp3.end();
+        rawHitIterator--;
+        rawHitVecTmp3.erase(rawHitIterator); //remove the rawHit[3]
+	rawHitIterator--;
+        rawHitVecTmp3.erase(rawHitIterator); //remove the rawHit[2]
 
         //cluster spliting: part of raw hit 1 + raw hit 2 + raw hit 3
         tmpSumChargeSplit = tmpRawHitMaxCharge2 + tmpRawHitMaxCharge3 + tmpRawHitMaxCharge1 * (tmpRawHitMaxCharge2 + tmpRawHitMaxCharge3) / (tmpRawHitMaxCharge0 + tmpRawHitMaxCharge2 + tmpRawHitMaxCharge3);
@@ -220,10 +228,11 @@ Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StI
         newClusterTmp->setNRawHitsZ(clusterSizeZ);
         newClusterTmp->setMaxTimeBin(maxTb);
 
-        rawHitMap_t &rawHitMapTmp4 = newClusterTmp->getRawHitMap();
-        rawHitMapTmp4[rawHitPtr1] = 1;
-        rawHitMapTmp4[rawHitPtr2] = 1;
-        rawHitMapTmp4[rawHitPtr3] = 1;
+        std::vector< StIstRawHit* > &rawHitVecTmp4 = newClusterTmp->getRawHitVec();
+        rawHitVecTmp4.push_back(rawHitPtr1);
+        rawHitVecTmp4.push_back(rawHitPtr2);
+	rawHitVecTmp4.push_back(rawHitPtr3);
+
         clusters.getClusterVec().push_back(newClusterTmp);
     }
 
@@ -244,8 +253,8 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
             tmpClusterSizeList[0] = 2; tmpClusterSizeList[3] = 2;
             int index = 0;
 
-            for(rawHitMap_t::iterator rawHitMapIt=(*clusterIt)->getRawHitMap().begin(); index<3 && rawHitMapIt!=(*clusterIt)->getRawHitMap().end(); rawHitMapIt++)      {
-                rawHitPtr[index]        = rawHitMapIt->first;
+	    for(std::vector< StIstRawHit* >::iterator rawHitVecIt=(*clusterIt)->getRawHitVec().begin(); index<3 && rawHitVecIt!=(*clusterIt)->getRawHitVec().end(); rawHitVecIt++)      {
+                rawHitPtr[index]        = *rawHitVecIt;
                 if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins) {
                     tmpRawHitMaxTb[index]   = mTimeBin;
                 }
@@ -317,8 +326,8 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
             tmpClusterSizeList[0] = 2; tmpClusterSizeList[3] = 3;
             Int_t index = 0;
 
-            for(rawHitMap_t::iterator rawHitMapIt=(*clusterIt)->getRawHitMap().begin(); index<4 && rawHitMapIt!=(*clusterIt)->getRawHitMap().end(); rawHitMapIt++)      {
-                rawHitPtr[index]        = rawHitMapIt->first;
+	    for(std::vector< StIstRawHit* >::iterator rawHitVecIt=(*clusterIt)->getRawHitVec().begin(); index<4 && rawHitVecIt!=(*clusterIt)->getRawHitVec().end(); rawHitVecIt++)      {
+                rawHitPtr[index]        = *rawHitVecIt;
                 if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins) {
                     tmpRawHitMaxTb[index]   = mTimeBin;
                 }
@@ -613,8 +622,6 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
 
 Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection, StIstRawHitCollection& rawHitsOriginal, StIstClusterCollection& clusters )
 {
-    StIstCluster* newCluster = 0;
-
     unsigned char maxTb=-1, usedTb=-1;
     unsigned char ladder=0, sensor=0, column=0, row=0;
     float meanRow=0., meanColumn=0.;
@@ -636,14 +643,12 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
              rawHitsOriginal.getRawHitVec().erase( rawHitIt );
              continue;
         }
-
         rawHits.push_back( new StIstRawHit( *(*rawHitIt)) );
     }
 
     //do clustering
     if(rawHits.size() > 0)  {
         std::vector<StIstRawHit*>::iterator rawHitIt = rawHits.begin();
-
         //first raw hit
         maxTb       = (*rawHitIt)->getMaxTimeBin();
         if(maxTb<0 || maxTb>=kIstNumTimeBins)   maxTb = (*rawHitIt)->getDefaultTimeBin();
@@ -667,14 +672,15 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
         clusterSizeZ = 1;
 
         //first cluster (the 1st raw hit)
-        newCluster = new StIstCluster((int)ladder*10000+clusters.getClusterVec().size(), ladder, sensor, meanRow, meanColumn, totCharge, totChargeErr, clusterType);
+        StIstCluster* newCluster = new StIstCluster((int)ladder*10000+clusters.getClusterVec().size(), ladder, sensor, meanRow, meanColumn, totCharge, totChargeErr, clusterType);
         newCluster->setNRawHits(clusterSize);
         newCluster->setNRawHitsRPhi(clusterSizeRPhi);
         newCluster->setNRawHitsZ(clusterSizeZ);
         newCluster->setMaxTimeBin(maxTb);
 
-        rawHitMap_t &rawHitMap = newCluster->getRawHitMap();
-        rawHitMap[ *rawHitIt ] = 1;
+	std::vector< StIstRawHit* > &rawHitVec = newCluster->getRawHitVec();
+	rawHitVec.push_back(*rawHitIt);
+
         clusters.getClusterVec().push_back(newCluster); //store the first raw hit as the first cluster in the vector container
 
         //remove the clustered 1st raw hit from the raw hits list
@@ -688,12 +694,12 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
            while( clusterIt != clusters.getClusterVec().end() && !rawHits.empty() )
            {
                //loop the raw hits belong to the ith cluster
-               for(rawHitMap_t::iterator rawHitMapIt=(*clusterIt)->getRawHitMap().begin(); rawHitMapIt!=(*clusterIt)->getRawHitMap().end(); rawHitMapIt++)
-               {
-                   StIstRawHit *rawHitPtr = rawHitMapIt->first;
-                   //loop raw hits from the 2nd element to the last one in the vector container
+	       for(std::vector< StIstRawHit* >::iterator rawHitVecIt=(*clusterIt)->getRawHitVec().begin(); rawHitVecIt!=(*clusterIt)->getRawHitVec().end(); rawHitVecIt++)
+                {
+		   StIstRawHit *rawHitPtr = *rawHitVecIt; 
+                   //loop rest raw hits in vector container
                    rawHitIt = rawHits.begin();
-                   while( rawHitIt != rawHits.end() && !rawHits.empty() )
+		   while( rawHitIt != rawHits.end() )
                    {
                         // check raw hit[i] and raw hit of ith existed cluster in a same column/row over one sensor area
                         if( (((*rawHitIt)->getSensor() == rawHitPtr->getSensor()) && ((*rawHitIt)->getRow() == rawHitPtr->getRow()) && (((*rawHitIt)->getColumn() == rawHitPtr->getColumn() + 1) || ((*rawHitIt)->getColumn() == rawHitPtr->getColumn() - 1) )) ||
@@ -737,27 +743,23 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
                             (*clusterIt)->setMaxTimeBin(maxTb);
                             (*clusterIt)->setClusteringType(clusterType);
 
-                            rawHitMap_t &rawHitMap = (*clusterIt)->getRawHitMap();
-                            rawHitMap[ *rawHitIt ] = 1;//add the raw hit into the cluster rawhits vector
+			    //include the raw hit to the cluster's component vector
+			    int itPosition = std::distance((*clusterIt)->getRawHitVec().begin(), rawHitVecIt);
+			    (*clusterIt)->getRawHitVec().push_back(*rawHitIt);
+			    rawHitVecIt = (*clusterIt)->getRawHitVec().begin() + itPosition;
 
                             //remove the clustered ith raw hit from the raw hits list
                             int distance = std::distance(rawHits.begin(), rawHitIt);
                             rawHits.erase( rawHitIt );
-
-                            if(distance == 0)
-                                rawHitIt = rawHits.begin();
-                            else        {
-                                rawHitIt = rawHits.begin() + distance - 1;
-                                rawHitIt++;
-                            }
+                            rawHitIt = rawHits.begin() + distance;
                         }//same row/column decision loop over
                         else
-                                rawHitIt++;
+                            rawHitIt++;
                    } //raw hits loop over
             }//ith cluster's raw hits loop over
 
             //if the rawHitIt_th raw hit does not belong to the existed ith clusters then create a new cluster.
-            if(rawHits.size() == 0)
+            if(rawHits.size() < 1)
                 continue;
 
             rawHitIt = rawHits.begin();
@@ -783,17 +785,18 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
             clusterSizeRPhi = 1;
             clusterSizeZ = 1;
 
-            newCluster = new StIstCluster((int)ladder*10000+clusters.getClusterVec().size(), ladder, sensor, meanRow, meanColumn, totCharge, totChargeErr, clusterType);
-            newCluster->setNRawHits(clusterSize);
-            newCluster->setNRawHitsRPhi(clusterSizeRPhi);
-            newCluster->setNRawHitsZ(clusterSizeZ);
-            newCluster->setMaxTimeBin(maxTb);
+            StIstCluster* newCluster1 = new StIstCluster((int)ladder*10000+clusters.getClusterVec().size(), ladder, sensor, meanRow, meanColumn, totCharge, totChargeErr, clusterType);
+            newCluster1->setNRawHits(clusterSize);
+            newCluster1->setNRawHitsRPhi(clusterSizeRPhi);
+            newCluster1->setNRawHitsZ(clusterSizeZ);
+            newCluster1->setMaxTimeBin(maxTb);
 
             int distanceCluster = std::distance(clusters.getClusterVec().begin(), clusterIt);
 
-            rawHitMap_t &rawHitMap = newCluster->getRawHitMap();
-            rawHitMap[ *rawHitIt ] = 1;
-            clusters.getClusterVec().push_back(newCluster);
+	    std::vector< StIstRawHit* > &rawHitVec1 = newCluster1->getRawHitVec();
+            rawHitVec1.push_back(*rawHitIt);
+
+            clusters.getClusterVec().push_back(newCluster1);
 
             clusterIt = clusters.getClusterVec().begin() + distanceCluster;
             clusterIt++;
