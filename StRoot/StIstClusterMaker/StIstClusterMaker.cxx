@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.5 2014/02/14 14:45:56 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.6 2014/02/15 20:02:37 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,8 +9,8 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
-* Revision 1.5  2014/02/14 14:45:56  ypwang
-* update due to removal of getNumLadders() member function from StIstCollection
+* Revision 1.6  2014/02/15 20:02:37  ypwang
+* Clear() member function added, and mIstCollectionPtr data member defined
 *
 * Revision 1.4  2014/02/08 03:34:16  ypwang
 * updating scripts
@@ -37,9 +37,15 @@
 #include "StRoot/StIstDbMaker/StIstDbMaker.h"
 #include "tables/St_istControl_Table.h"
 
-StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mClusterAlgoPtr(0), mIstDbMaker(0), mTimeBin(-1), mSplitCluster(1)
+StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mIstDbMaker(0), mTimeBin(-1), mSplitCluster(1)
 {
   /* nothing to do */
+};
+
+void StIstClusterMaker::Clear( Option_t *opts )
+{
+   if( mIstCollectionPtr )
+      mIstCollectionPtr->Clear( opts );
 };
 
 Int_t StIstClusterMaker::Make()
@@ -53,16 +59,16 @@ Int_t StIstClusterMaker::Make()
       ierr = kStWarn;
   }
 
-  StIstCollection* istCollectionPtr = (StIstCollection*)istDataSet->GetObject();
-  if(!istCollectionPtr) {
+  mIstCollectionPtr = (StIstCollection*)istDataSet->GetObject();
+  if(!mIstCollectionPtr) {
       LOG_WARN << "Make() - no istCollection."<<endm;
       ierr = kStWarn;
   }   
  
   if( !ierr ){
       for( unsigned char ladderIdx=0; ladderIdx < kIstNumLadders; ++ladderIdx ){  
-           StIstRawHitCollection *rawHitCollectionPtr = istCollectionPtr->getRawHitCollection( ladderIdx );
-           StIstClusterCollection *clusterCollectionPtr = istCollectionPtr->getClusterCollection( ladderIdx );
+           StIstRawHitCollection *rawHitCollectionPtr   = mIstCollectionPtr->getRawHitCollection( ladderIdx );
+           StIstClusterCollection *clusterCollectionPtr = mIstCollectionPtr->getClusterCollection( ladderIdx );
        
            if( rawHitCollectionPtr && clusterCollectionPtr ){
 		UShort_t numRawHits = rawHitCollectionPtr->getNumRawHits();
@@ -78,7 +84,7 @@ Int_t StIstClusterMaker::Make()
                // clustering and splitting
 	       mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
 	       mClusterAlgoPtr->setSplitFlag(mSplitCluster);
-               Int_t loc_ierr = mClusterAlgoPtr->doClustering(*istCollectionPtr, *rawHitCollectionPtr, *clusterCollectionPtr );
+               Int_t loc_ierr = mClusterAlgoPtr->doClustering(*mIstCollectionPtr, *rawHitCollectionPtr, *clusterCollectionPtr );
                if(loc_ierr!=kStOk) {
                    LOG_WARN <<"StClusterMaker::Make(): clustering for ladder " << (short) (ladderIdx+1) << " returned " << loc_ierr <<endm;
                    if(loc_ierr>ierr)
@@ -89,14 +95,14 @@ Int_t StIstClusterMaker::Make()
   }
 
   LOG_DEBUG << "End of ist-clust-maker, print all raw hits & clusters: " << endm;
-  LOG_DEBUG << "Total raw hits=" <<istCollectionPtr->getNumRawHits()<<", total Clusters=" <<  istCollectionPtr->getNumClusters() <<endm;
+  LOG_DEBUG << "Total raw hits=" <<mIstCollectionPtr->getNumRawHits()<<", total Clusters=" <<  mIstCollectionPtr->getNumClusters() <<endm;
     
   if(Debug()>2) {
     Int_t rawHitIdx = 0, clusterIdx = 0;
     for(unsigned char iLadder=0; iLadder < kIstNumLadders; iLadder++) {
-        LOG_DEBUG <<"Content: iLadder="<<(short) iLadder+1<< " # of : raw hits="<<istCollectionPtr->getNumRawHits(iLadder) <<"  clusters=" <<istCollectionPtr->getNumClusters( iLadder)<<endm;
+        LOG_DEBUG <<"Content: iLadder="<<(short) iLadder+1<< " # of : raw hits="<<mIstCollectionPtr->getNumRawHits(iLadder) <<"  clusters=" <<mIstCollectionPtr->getNumClusters( iLadder)<<endm;
         // ..... print all raw hits ....
-        StIstRawHitCollection *rawHitPtr = istCollectionPtr->getRawHitCollection(iLadder);
+        StIstRawHitCollection *rawHitPtr = mIstCollectionPtr->getRawHitCollection(iLadder);
         vector<StIstRawHit*> &rawHitVec = rawHitPtr->getRawHitVec();
         for( std::vector< StIstRawHit* >::iterator it=rawHitVec.begin();it!=rawHitVec.end();++it)    {
 	    unsigned char maxTb = (*it)->getMaxTimeBin();
@@ -108,7 +114,7 @@ Int_t StIstClusterMaker::Make()
         }
     
         // ..... print all 1D clusters  ....
-        StIstClusterCollection *clustPtr= istCollectionPtr->getClusterCollection(iLadder);
+        StIstClusterCollection *clustPtr= mIstCollectionPtr->getClusterCollection(iLadder);
         vector<StIstCluster*> &clustVec = clustPtr->getClusterVec();
         for( std::vector< StIstCluster* >::iterator it=clustVec.begin();it!=clustVec.end();++it)    {
             LOG_DEBUG << "cluster: Idx=" << clusterIdx << " totCharge=" << (*it)->getTotCharge() << " totChargeErr=" << (*it)->getTotChargeErr() << " meanColumn=" <<(*it)->getMeanColumn() << " meanRow= " << (*it)->getMeanRow() << " at ladder=" << (short)(*it)->getLadder() << " sensor=" << (short)(*it)->getSensor() << " clusterSize=" << (short)(*it)->getNRawHits() << " clusterSize(Z)=" << (short)(*it)->getNRawHitsZ() << " clusterSize(R-Phi)="<< (short)(*it)->getNRawHitsRPhi() << endm;
