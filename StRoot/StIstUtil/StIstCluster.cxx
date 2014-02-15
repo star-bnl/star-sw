@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.6 2014/02/13 02:35:48 smirnovd Exp $
+* $Id: StIstCluster.cxx,v 1.7 2014/02/15 01:16:18 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -28,26 +28,35 @@ StIstCluster::StIstCluster(int key, unsigned char ladder, unsigned char sensor,
 {
 }
 
-
-StIstCluster::~StIstCluster() {}
-
+StIstCluster::~StIstCluster() 
+{
+   //free memory and clear the vector
+   std::vector< StIstRawHit * >::iterator vecIter;
+   for ( vecIter = mRawHitVec.begin(); vecIter != mRawHitVec.end(); ++vecIter ) {
+      if (*vecIter != NULL) {
+         delete *vecIter;
+         *vecIter = NULL;
+      }
+   }
+   mRawHitVec.clear();
+}
 
 //accessors
-rawHitMap_t &StIstCluster::getRawHitMap()               {    return mRawHitMap;     };
-const rawHitMap_t &StIstCluster::getRawHitMap() const   {    return mRawHitMap;     };
-int              StIstCluster::getKey() const           {    return mKey;           };
-unsigned char    StIstCluster::getLadder() const        {    return mLadderId;      };
-unsigned char    StIstCluster::getSensor() const        {    return mSensorId;      };
-float            StIstCluster::getMeanRow() const       {    return mMeanRow;       };
-float            StIstCluster::getMeanColumn() const    {    return mMeanColumn;    };
-float            StIstCluster::getTotCharge() const     {    return mTotCharge;     };
-float            StIstCluster::getTotChargeErr() const  {    return mTotChargeErr;  };
-unsigned char    StIstCluster::getMaxTimeBin() const    {    return mMaxTimeBin;    };
-unsigned char    StIstCluster::getClusteringType() const {    return mClusteringType;};
-unsigned char    StIstCluster::getNRawHits() const      {    return mNRawHits;      };
-unsigned char    StIstCluster::getNRawHitsRPhi() const  {    return mNRawHitsRPhi;  };
-unsigned char    StIstCluster::getNRawHitsZ() const     {    return mNRawHitsZ;     };
-unsigned short   StIstCluster::getIdTruth() const       {    return mIdTruth;       };
+vector<StIstRawHit *> &StIstCluster::getRawHitVec()     	{    return mRawHitVec;     };
+const vector<StIstRawHit *> &StIstCluster::getRawHitVec() const {    return mRawHitVec;     };
+int              StIstCluster::getKey() const           	{    return mKey;           };
+unsigned char    StIstCluster::getLadder() const        	{    return mLadderId;      };
+unsigned char    StIstCluster::getSensor() const        	{    return mSensorId;      };
+float            StIstCluster::getMeanRow() const       	{    return mMeanRow;       };
+float            StIstCluster::getMeanColumn() const    	{    return mMeanColumn;    };
+float            StIstCluster::getTotCharge() const     	{    return mTotCharge;     };
+float            StIstCluster::getTotChargeErr() const  	{    return mTotChargeErr;  };
+unsigned char    StIstCluster::getMaxTimeBin() const    	{    return mMaxTimeBin;    };
+unsigned char    StIstCluster::getClusteringType() const 	{    return mClusteringType;};
+unsigned char    StIstCluster::getNRawHits() const      	{    return mNRawHits;      };
+unsigned char    StIstCluster::getNRawHitsRPhi() const  	{    return mNRawHitsRPhi;  };
+unsigned char    StIstCluster::getNRawHitsZ() const     	{    return mNRawHitsZ;     };
+unsigned short   StIstCluster::getIdTruth() const       	{    return mIdTruth;       };
 
 //modifiers
 void StIstCluster::setLadder(unsigned char ladder)
@@ -117,6 +126,9 @@ ClassImp(StIstCluster);
 *
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.7  2014/02/15 01:16:18  ypwang
+* replace the std::map() with std::vector() for StIstCluster
+*
 * Revision 1.6  2014/02/13 02:35:48  smirnovd
 * Moved CVS log to the bottom of the file
 *
