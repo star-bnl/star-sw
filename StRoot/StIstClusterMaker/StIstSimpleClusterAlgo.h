@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.h,v 1.4 2014/02/10 16:33:44 smirnovd Exp $
+* $Id: StIstSimpleClusterAlgo.h,v 1.5 2014/02/16 21:42:54 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -14,6 +14,9 @@
 ****************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.h,v $
+* Revision 1.5  2014/02/16 21:42:54  ypwang
+* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
+*
 * Revision 1.4  2014/02/10 16:33:44  smirnovd
 * Trimmed trailing spaces, expanded tabs to eight spaces
 *
@@ -54,8 +57,8 @@ protected:
     UChar_t mTimeBin;
     enum {kIstSimpleClusterAlgo=1};
 
-    Int_t doSplitting(StIstClusterCollection& clusters);
-    Int_t splitCluster(int cSize, int clusterSizeList[], StIstRawHit *rawHitPtr[], StIstCluster *clusterIt, StIstClusterCollection& clusters);
+    Int_t doSplitting(StIstClusterCollection& clusters, unsigned char numTimeBins);
+    Int_t splitCluster(int cSize, int clusterSizeList[], StIstRawHit *rawHitPtr[], StIstCluster *clusterIt, StIstClusterCollection& clusters, unsigned char numTimeBins);
 
  private:
   ClassDef(StIstSimpleClusterAlgo,1);
