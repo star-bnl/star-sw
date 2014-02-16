@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.cxx,v 1.5 2014/02/15 20:12:58 ypwang Exp $
+* $Id: StIstSimpleClusterAlgo.cxx,v 1.6 2014/02/16 21:42:54 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.cxx,v $
+* Revision 1.6  2014/02/16 21:42:54  ypwang
+* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
+*
 * Revision 1.5  2014/02/15 20:12:58  ypwang
 * update due to replace raw hit container type from std::map to std::vector, and minor bug corrected for the simple clustering algorithm
 *
@@ -50,7 +53,7 @@ Int_t StIstSimpleClusterAlgo::Init()
   return kStOk;
 };
 
-Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StIstRawHit *rawHitPtr[], StIstCluster *clusterIt, StIstClusterCollection& clusters)
+Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StIstRawHit *rawHitPtr[], StIstCluster *clusterIt, StIstClusterCollection& clusters, unsigned char numTimeBins)
 {
     StIstRawHit *rawHitPtr0 = 0;
     StIstRawHit *rawHitPtr1 = 0;
@@ -77,7 +80,7 @@ Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StI
         rawHitPtr2 = rawHitPtr[2];
 
         unsigned char tmpRawHitMaxTb0, tmpRawHitMaxTb1, tmpRawHitMaxTb2;
-        if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins) {
+        if(mTimeBin>=0 && mTimeBin<numTimeBins) {
             tmpRawHitMaxTb0 = tmpRawHitMaxTb1 = tmpRawHitMaxTb2 = mTimeBin;
         }
         else {
@@ -158,7 +161,7 @@ Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StI
         rawHitPtr3 = rawHitPtr[3];
 
         unsigned char tmpRawHitMaxTb0, tmpRawHitMaxTb1, tmpRawHitMaxTb2, tmpRawHitMaxTb3;
-        if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins) {
+        if(mTimeBin>=0 && mTimeBin<numTimeBins) {
             tmpRawHitMaxTb0 = tmpRawHitMaxTb1 = tmpRawHitMaxTb2 = tmpRawHitMaxTb3 = mTimeBin;
         }
         else {
@@ -239,7 +242,7 @@ Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StI
     return kStOk;
 };
 
-Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
+Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters, unsigned char numTimeBins)
 {
     //loop found clusters in current event
     for(std::vector< StIstCluster* >::iterator clusterIt=clusters.getClusterVec().begin(); clusterIt!=clusters.getClusterVec().end(); clusterIt++)      {
@@ -255,7 +258,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
 
 	    for(std::vector< StIstRawHit* >::iterator rawHitVecIt=(*clusterIt)->getRawHitVec().begin(); index<3 && rawHitVecIt!=(*clusterIt)->getRawHitVec().end(); rawHitVecIt++)      {
                 rawHitPtr[index]        = *rawHitVecIt;
-                if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins) {
+                if(mTimeBin>=0 && mTimeBin<numTimeBins) {
                     tmpRawHitMaxTb[index]   = mTimeBin;
                 }
                 else {
@@ -281,7 +284,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     else        {
                         tmpClusterSizeList[1] = 2; tmpClusterSizeList[2] = 1; tmpClusterSizeList[4] = 1; tmpClusterSizeList[5] = 2; }
 
-                    Int_t split3_4_ierr = splitCluster(3, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split3_4_ierr = splitCluster(3, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
 
                     if(split3_4_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split3_4_ierr <<endm;
@@ -301,7 +304,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[1] = rawHitPtr[3];
                     rawHitPtr[3] = 0;
 
-                    Int_t split3_5_ierr = splitCluster(3, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split3_5_ierr = splitCluster(3, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split3_5_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split3_5_ierr <<endm;
                     }
@@ -314,7 +317,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[1] = rawHitPtr[3];
                     rawHitPtr[3] = 0;
 
-                    Int_t split3_6_ierr = splitCluster(3, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split3_6_ierr = splitCluster(3, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split3_6_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split3_6_ierr <<endm;
                 }
@@ -328,7 +331,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
 
 	    for(std::vector< StIstRawHit* >::iterator rawHitVecIt=(*clusterIt)->getRawHitVec().begin(); index<4 && rawHitVecIt!=(*clusterIt)->getRawHitVec().end(); rawHitVecIt++)      {
                 rawHitPtr[index]        = *rawHitVecIt;
-                if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins) {
+                if(mTimeBin>=0 && mTimeBin<numTimeBins) {
                     tmpRawHitMaxTb[index]   = mTimeBin;
                 }
                 else {
@@ -370,7 +373,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     else        {
                         tmpClusterSizeList[1] = 1; tmpClusterSizeList[2] = 2; tmpClusterSizeList[4] = 2; tmpClusterSizeList[5] = 2;}
 
-                    Int_t split4_8_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_8_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_8_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_8_ierr <<endm;
                 }
@@ -402,7 +405,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     else
                         { tmpClusterSizeList[1] = 1; tmpClusterSizeList[2] = 2; tmpClusterSizeList[4] = 2; tmpClusterSizeList[5] = 2; }
 
-                    Int_t split4_8_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_8_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_8_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_8_ierr <<endm;
                 }
@@ -420,7 +423,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[3] = rawHitPtr[2];
                     rawHitPtr[2] = rawHitPtrTmp;
 
-                    Int_t split4_9_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_9_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_9_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_9_ierr <<endm;
                 }
@@ -435,7 +438,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[1] = rawHitPtr[3];
                     rawHitPtr[3] = rawHitPtrTmp;
 
-                    Int_t split4_9_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_9_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_9_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_9_ierr <<endm;
                 }
@@ -453,7 +456,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[0] = rawHitPtr[1];
                     rawHitPtr[1] = rawHitPtrTmp;
 
-                    Int_t split4_10_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_10_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_10_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_10_ierr <<endm;
                 }
@@ -468,7 +471,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[1] = rawHitPtr[2];
                     rawHitPtr[2] = rawHitPtrTmp;
 
-                    Int_t split4_10_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_10_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_10_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_10_ierr <<endm;
                 }
@@ -489,7 +492,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[2] = rawHitPtr[1];
                     rawHitPtr[1] = rawHitPtrTmp;
 
-                    Int_t split4_11_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_11_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_11_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_11_ierr <<endm;
                 }
@@ -502,7 +505,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[0] = rawHitPtr[2];
                     rawHitPtr[2] = rawHitPtrTmp;
 
-                    Int_t split4_11_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_11_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_11_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_11_ierr <<endm;
                 }
@@ -521,7 +524,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[1] = rawHitPtr[3];
                     rawHitPtr[3] = rawHitPtrTmp;
 
-                    Int_t split4_12_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_12_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_12_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_12_ierr <<endm;
                 }
@@ -536,7 +539,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[2] = rawHitPtr[3];
                     rawHitPtr[3] = rawHitPtrTmp;
 
-                    Int_t split4_12_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_12_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_12_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_12_ierr <<endm;
                 }
@@ -554,7 +557,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[1] = rawHitPtr[2];
                     rawHitPtr[2] = rawHitPtrTmp;
 
-                    Int_t split4_13_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_13_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_13_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_13_ierr <<endm;
                 }
@@ -567,7 +570,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[0] = rawHitPtr[3];
                     rawHitPtr[3] = rawHitPtrTmp;
 
-                    Int_t split4_13_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_13_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_13_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_13_ierr <<endm;
                 }
@@ -589,7 +592,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[2] = rawHitPtr[3];
                     rawHitPtr[3] = rawHitPtrTmp;
 
-                    Int_t split4_14_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_14_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_14_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_14_ierr <<endm;
                 }
@@ -605,7 +608,7 @@ Int_t StIstSimpleClusterAlgo::doSplitting(StIstClusterCollection& clusters )
                     rawHitPtr[1] = rawHitPtr[3];
                     rawHitPtr[3] = rawHitPtrTmp;
 
-                    Int_t split4_14_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters); // do splitting for the current cluster
+                    Int_t split4_14_ierr = splitCluster(4, tmpClusterSizeList, rawHitPtr, *clusterIt, clusters, numTimeBins); // do splitting for the current cluster
                     if(split4_14_ierr != kStOk)
                         LOG_WARN <<"Cluster (ladder/sensor/meanColumn/meanRow: " << (*clusterIt)->getLadder() << "/" << (*clusterIt)->getSensor() << "/" << (*clusterIt)->getMeanColumn() << "/" << (*clusterIt)->getMeanRow() << ") splitting failed! returned " << split4_14_ierr <<endm;
                 }
@@ -629,6 +632,8 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
     unsigned char clusterSize=0, clusterSizeRPhi=0, clusterSizeZ=0;
     unsigned char clusterType=kIstSimpleClusterAlgo;
 
+    //get number of time bin used in this event
+    static unsigned char nTimeBins = istCollection.getNumTimeBins();
     //sort raw hits in increasing order by geometry ID
     rawHitsOriginal.sortByGeoId();
 
@@ -651,9 +656,9 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
         std::vector<StIstRawHit*>::iterator rawHitIt = rawHits.begin();
         //first raw hit
         maxTb       = (*rawHitIt)->getMaxTimeBin();
-        if(maxTb<0 || maxTb>=kIstNumTimeBins)   maxTb = (*rawHitIt)->getDefaultTimeBin();
+        if(maxTb<0 || maxTb>=nTimeBins)   maxTb = (*rawHitIt)->getDefaultTimeBin();
 
-        if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins) {
+        if(mTimeBin>=0 && mTimeBin<nTimeBins) {
             usedTb  = mTimeBin;
         }
         else
@@ -714,7 +719,7 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
 
                             maxTb  = (*clusterIt)->getMaxTimeBin();
 
-                            if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins) {
+                            if(mTimeBin>=0 && mTimeBin<nTimeBins) {
                                 usedTb = mTimeBin;
                             }
                             else
@@ -765,9 +770,9 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
             rawHitIt = rawHits.begin();
 
             maxTb       = (*rawHitIt)->getMaxTimeBin();
-            if(maxTb<0 || maxTb>=kIstNumTimeBins)       maxTb = (*rawHitIt)->getDefaultTimeBin();
+            if(maxTb<0 || maxTb>=nTimeBins)       maxTb = (*rawHitIt)->getDefaultTimeBin();
 
-            if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins) {
+            if(mTimeBin>=0 && mTimeBin<nTimeBins) {
                 usedTb  = mTimeBin;
             }
             else
@@ -808,7 +813,7 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
 
     ////////////////////////////////  do cluster splitting  /////////////////////////////////////////
     if(mSplitCluster)   {
-        Int_t loc_ierr = doSplitting(clusters);
+        Int_t loc_ierr = doSplitting(clusters, nTimeBins);
         if(loc_ierr!=kStOk) {
             LOG_WARN <<"StIstClusterMaker::Make(): Cluster splitting for ladder " << ladder << " returned " << loc_ierr <<endm;
         }

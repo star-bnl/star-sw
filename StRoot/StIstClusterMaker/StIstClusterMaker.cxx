@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.6 2014/02/15 20:02:37 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.7 2014/02/16 21:42:54 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.7  2014/02/16 21:42:54  ypwang
+* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
+*
 * Revision 1.6  2014/02/15 20:02:37  ypwang
 * Clear() member function added, and mIstCollectionPtr data member defined
 *
@@ -96,8 +99,9 @@ Int_t StIstClusterMaker::Make()
 
   LOG_DEBUG << "End of ist-clust-maker, print all raw hits & clusters: " << endm;
   LOG_DEBUG << "Total raw hits=" <<mIstCollectionPtr->getNumRawHits()<<", total Clusters=" <<  mIstCollectionPtr->getNumClusters() <<endm;
-    
+
   if(Debug()>2) {
+    static unsigned char nTimeBin = mIstCollectionPtr->getNumTimeBins();
     Int_t rawHitIdx = 0, clusterIdx = 0;
     for(unsigned char iLadder=0; iLadder < kIstNumLadders; iLadder++) {
         LOG_DEBUG <<"Content: iLadder="<<(short) iLadder+1<< " # of : raw hits="<<mIstCollectionPtr->getNumRawHits(iLadder) <<"  clusters=" <<mIstCollectionPtr->getNumClusters( iLadder)<<endm;
@@ -106,7 +110,7 @@ Int_t StIstClusterMaker::Make()
         vector<StIstRawHit*> &rawHitVec = rawHitPtr->getRawHitVec();
         for( std::vector< StIstRawHit* >::iterator it=rawHitVec.begin();it!=rawHitVec.end();++it)    {
 	    unsigned char maxTb = (*it)->getMaxTimeBin();
-	    if( maxTb < 0 || maxTb >= kIstNumTimeBins)
+	    if( maxTb < 0 || maxTb >= nTimeBin)
 		maxTb = (*it)->getDefaultTimeBin();
 
             LOG_DEBUG << "raw hit: Idx=" << rawHitIdx << " elecId=" << (*it)->getChannelId() << " Charge=" << (*it)->getCharge(maxTb) << " ChargeErr=" << (*it)->getChargeErr(maxTb) << " decode0: at ladder=" <<(short)(*it)->getLadder() << " sensor=" << (short)(*it)->getSensor() << " column=" <<(short)(*it)->getColumn() << " row=" << (short)(*it)->getRow() <<endm;
