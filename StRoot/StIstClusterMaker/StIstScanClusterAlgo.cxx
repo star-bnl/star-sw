@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.cxx,v 1.3 2014/02/08 03:34:16 ypwang Exp $
+* $Id: StIstScanClusterAlgo.cxx,v 1.4 2014/02/16 23:18:34 ypwang Exp $
 *
 * Author: Yaping Wang, October 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.4  2014/02/16 23:18:34  ypwang
+* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
+*
 * Revision 1.3  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
@@ -56,6 +59,9 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection& istCollection, S
     float meanRow=0., meanColumn=0.;
     float totCharge=0., totChargeErr=0.;
     unsigned char clusterSize=0, clusterSizeRPhi=0, clusterSizeZ=0;
+
+    //get number of time bin used in this event
+    static unsigned char nTimeBins = istCollection.getNumTimeBins();
 
     //sort raw hits in increasing order by geometry ID
     rawHitsOriginal.sortByGeoId();
@@ -116,7 +122,7 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection& istCollection, S
 				    (rawHitTemp->getCharge(rawHitTemp->getMaxTimeBin()) < (*rawHitsToMergePtr)->getCharge((*rawHitsToMergePtr)->getMaxTimeBin())) && 
 				    (rawHitTemp->getCharge(rawHitTemp->getMaxTimeBin()) < rawHitNext->getCharge(rawHitNext->getMaxTimeBin())) ) {
 					float weightBack = rawHitNext->getCharge(rawHitNext->getMaxTimeBin()) / ((*rawHitsToMergePtr)->getCharge((*rawHitsToMergePtr)->getMaxTimeBin()) + rawHitNext->getCharge(rawHitNext->getMaxTimeBin()));
-					for(unsigned char iTB=0; iTB<kIstNumTimeBins; iTB++) {
+					for(unsigned char iTB=0; iTB<nTimeBins; iTB++) {
 						rawHitTempBack->setCharge(weightBack * rawHitTemp->getCharge(iTB), iTB);
 						rawHitTemp->setCharge((1.0 - weightBack) * rawHitTemp->getCharge(iTB), iTB);
 					}
@@ -133,8 +139,8 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection& istCollection, S
 
 		    //used time bin index (raw hits with maximum ADC holds the time-bin priority)
                     maxTb       = rawHitMaxAdcTemp->getMaxTimeBin();
-                    if(maxTb<0 || maxTb>=kIstNumTimeBins)               maxTb   = rawHitMaxAdcTemp->getDefaultTimeBin();
-                    if(mTimeBin>=0 && mTimeBin < kIstNumTimeBins)       usedTb  = mTimeBin;
+                    if(maxTb<0 || maxTb>=nTimeBins)               	maxTb   = rawHitMaxAdcTemp->getDefaultTimeBin();
+                    if(mTimeBin>=0 && mTimeBin<nTimeBins)       		usedTb  = mTimeBin;
                     else                                                usedTb  = maxTb;
 
 		    ladder      	= rawHitMaxAdcTemp->getLadder();
