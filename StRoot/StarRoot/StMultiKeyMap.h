@@ -17,11 +17,10 @@ const StMultiKeyNode *GetTop() const 	{return mTop;}
       StMultiKeyNode *GetTop()       	{return mTop;}
                 void  SetTop(StMultiKeyNode *top) {mTop = top;}
 double Quality();
-   int MakeTree(int keepArray=0);
+   int MakeTree();
    int ls(const char *file="") const;
    int Size() const;
    int GetNKey() const { return mNKey;} 
-StMultiKeyNode** GetArr() 		{return &mArr[0];}
 // statics
 static void Test();
 static void Test2();
@@ -97,10 +96,10 @@ public:
   float *GetKMax() const 		{return mKMax;}
   const int *Touched() const 		{return mTouched;}
   private:
-  void Left(const StMultiKeyNode *node);
+  const StMultiKeyNode *LLink(const StMultiKeyNode *node) const;
+  const StMultiKeyNode *RLink(const StMultiKeyNode *node) const;
+  const StMultiKeyNode *Left(const StMultiKeyNode *node);
   int FullCheck();
-  int FilterLeft(const StMultiKeyNode *node) const;
-  int FilterRite(const StMultiKeyNode *node) const;
   protected:
   mutable int mTouched[3];
   std::vector<float> mMinMax;
