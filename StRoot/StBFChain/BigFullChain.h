@@ -980,13 +980,20 @@ Bfc_st BFC[] = {
    "","",                "Production chain for 2013 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
 
 
+  // Year 14 chains 
+  {"B2014","","","ry2014,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                               "Base chain for 2014 ITTF (tpc)",kFALSE},
+
+  {"P2014a","" ,"",
+   "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis"
+   ,                      "","","Production chain for 2011 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
   // TEST
   //{"B2013_X","","","ry2012,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
-  // ,                                                               "Base chain for 2013 ITTF (tpc)",kFALSE},
+  // ,                                                               "Base chain for 2014 ITTF (tpc)",kFALSE},
   //{"pp2013X","" ,"",
   // "B2013_X,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
-  // "","",                "Production chain for 2013 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
+  // "","",                "Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
 
 
 
