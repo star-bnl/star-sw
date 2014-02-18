@@ -788,7 +788,7 @@ Bool_t Geometry::ConstructCave( const Char_t *flag, Bool_t go )
       return false;      
     }
 
-  AgStructure::AgDetpNew( "CaveGeo", Form("Wide Angle Hall configuration %s",flag));
+  AgStructure::AgDetpNew( caveGeom.module, Form("Wide Angle Hall configuration %s",flag));
   AgStructure::AgDetpAdd( "Cvcf_t", "config", int(caveGeom.config) );
   if ( geom.tpcRefSys )
     {
