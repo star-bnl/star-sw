@@ -192,6 +192,10 @@
 	   rmx="{+cave_Rmax(2),+cave_Rmax(2),+cave_Rmax(1),+cave_Rmax(1),+cave_Rmax(2),+cave_Rmax(2)}" 
 	   />
 
+    <!-- Create TPC reference system -->
+    <If expr="CVCF_tpcrefsys!=0"><Group name="TpcRefSys" /></If>
+
+
 
     CDIM_Rmax = cave_Rmax(1) 
     TDIM_Rmax = cave_Rmax(2) 
