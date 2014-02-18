@@ -214,8 +214,8 @@ double StvNodePars::move(const double v[3],double dPP, int dir)
 
 static int  nCall=0; nCall++;
 static const double kMomAccu = 1e-3;	//momentum relative accuracy
-static const double kAngAcc[2]={0.1,0.01};
-static const double kAngMax=0.5;
+static const double kAngAcc[2]={3.14/180, kAngAcc[0]*0.1};
+static const double kAngMax=0.1;
 StvDebug::Break(nCall);
 
  double MOM[3]={_cosCA,_sinCA,_tanl};
@@ -224,28 +224,24 @@ StvDebug::Break(nCall);
  double myLen = 0;
  for (int jk=0;jk<2;jk++) {//jk=0=move without energy loss,=1 with
    int converge = 0;
+   StvNodePars save = *this;
    for (int it=0;it<5;it++) {
      double mom[3]={_cosCA,_sinCA,_tanl};
      double vtx[3]={v[0]-_x,v[1]-_y,v[2]-_z};
-     double tau = vtx[0]*mom[0]+vtx[1]*mom[1]+vtx[2]*mom[2];
-     if (fabs(tau*_curv)>kAngMax)	break;
-     double den = cos2Li + (vtx[0]*mom[1]-vtx[1]*mom[0])*_curv;
-     if (den<0.1 || den>3) 		break;
-     tau /= den;
-     if (fabs(tau*_curv)>kAngMax)	break;
-     move(tau/cosL);
-     myLen+=tau;
-     if (fabs(tau*_curv) < kAngAcc[!!jk]) 	{converge = 1; break;}
+     double tau = (vtx[0]*mom[0]+vtx[1]*mom[1]+vtx[2]*mom[2])*cosL;
+     double dang = tau*_curv*cosL;
+     if (fabs(dang)>kAngMax)	break;
+     move(tau); myLen+=tau;
+     if (fabs(dang) < kAngAcc[jk]) 	{converge = 1; break;}
    }// end iters
    if (!converge) { //failed, try THelix
-     if (myLen) move(-myLen/cosL);
+     *this = save;
      double mom[3]={_cosCA,_sinCA,_tanl};
      THelixTrack hlx(&_x,mom,_curv);
      myLen = hlx.Path(v);
-     move(myLen/cosL); 
-   } else {
-     myLen /= cosL;
-   }
+     move(myLen); 
+   } 
+   
 assert(fabs(_z)<999);
    if (jk)			return myLen;
    double dRho = dPP*myLen,fak = 1+dRho;
