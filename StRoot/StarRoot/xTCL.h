@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: xTCL.h,v 1.3 2008/10/29 19:38:02 perev Exp $
+ * $Id: xTCL.h,v 1.4 2014/02/18 19:45:49 perev Exp $
  *
  * Author: Victor Perev, Feb 2007
  ***************************************************************************
@@ -38,7 +38,7 @@ static void   mxmlrt (const TMatrixD &A,const TMatrixD &B,TMatrixD &X);
 static void   mxmlrtS(const TMatrixD &A,const TMatrixD &B,TMatrixD &X);   
 static void   mxmlrtS(const double *A,const double *B,double *X,int nra,int nca);  
 static TMatrixD T(const TMatrixD &mx);  
-static void   eigen2 (const double err[3], double lam[2], double eig[2][2]);
+static void   eigen2 (const double err[3], double lam[2], double eig[2]);
 static double simpson(const double *F,double A,double B,int NP);
 static double vasum  (const double *a, int na);
 static double vasum  (const TVectorD &a);
