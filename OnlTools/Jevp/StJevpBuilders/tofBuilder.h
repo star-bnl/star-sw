@@ -51,6 +51,8 @@ public:
       // TOFL1HistogramGroup
       TH1 *TOF_L1mult_vs_ZDCadcsum;
       TH1 *TOF_L1mult_vs_sumL0;
+      TH1 *TOF_L1mult;
+      TH1 *TOF_sumL0;
       
       // TOFCheckHistogramGroup
       TH1 *TOF_Error1;
