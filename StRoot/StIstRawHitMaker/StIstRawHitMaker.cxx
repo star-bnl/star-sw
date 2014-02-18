@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.5 2014/02/15 19:55:25 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.6 2014/02/18 07:57:09 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.6  2014/02/18 07:57:09  ypwang
+* add setDefaultTimeBin() while filling raw hits information
+*
 * Revision 1.5  2014/02/15 19:55:25  ypwang
 * remove virtual type declaration from member function
 *
@@ -260,9 +263,9 @@ Int_t StIstRawHitMaker::Make() {
 		LOG_DEBUG << "channel: " << channel << "   adc: " << adc << "  time bin: " << timebin << endm;
  
                 flag=0;
-		if(adc	  <0 || adc>=kIstMaxAdc) 		    flag=1;
-                if(channel<0 || channel>=kIstNumApvChannels)        flag=1;
-                if(timebin<0 || timebin>=kIstNumTimeBins)           flag=1;
+		if((dataFlag==mADCdata) && (adc<0 || adc>=kIstMaxAdc))	flag=1;
+                if(channel<0 || channel>=kIstNumApvChannels)        	flag=1;
+                if(timebin<0 || timebin>=kIstNumTimeBins)           	flag=1;
                 if(flag==1){
                     LOG_INFO << "Corrupt data channel: " << channel << " tbin: " << timebin << " adc: " << adc << endm;
                     continue;
@@ -382,6 +385,7 @@ Int_t StIstRawHitMaker::Make() {
                               	rawHitPtr->setChannelId( elecId );
 				rawHitPtr->setGeoId( geoId );
 				rawHitPtr->setMaxTimeBin( tempMaxTB );
+				rawHitPtr->setDefaultTimeBin( mDefaultTimeBin );
                             }//end raw hit decision cut
                     	}//end loop over time bins
 		    }//end filling hit info
