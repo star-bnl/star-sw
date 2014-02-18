@@ -20,6 +20,7 @@ StarGenerator::StarGenerator( const Char_t *name )//, StarGenEvent *event )
     mYell("-"),
     mFrame("CMS"),
     mRootS(510.0),
+    mDirect(1.0),
     mImpactMin(0.0),
     mImpactMax(-1.0),
     mBlueMomentum(0,0,+255,255.0), 
@@ -82,7 +83,9 @@ void StarGenerator::SetFrame( const Char_t *frame, const Double_t value )
 {
   mFrame=frame;
   mFrame.ToUpper();
-  mRootS=value;
+  mRootS=TMath::Abs(value);
+  mDirect=value / mRootS;  assert(mDirect==1.0 || mDirect==-1.0); 
+  
   if ( mFrame!="CMS" && mFrame != "FIXT" )
     {
       Error(GetName(),"This method only applies to CMS and FIXT frames");
