@@ -308,7 +308,7 @@ StvDebug::Break(nCall);
 
 double dSh,dS=0;
 //if (PropagateHelix) 	//Propagate with THelixTrack
-if (!PropagateHelix) 	//Propagate with THelixTrack ????? HACK
+if (PropagateHelix) 	//Propagate with THelixTrack ????? HACK
 {
   THelixTrack myHlx;
   preNode->mFP[lane].get(&myHlx);
@@ -360,10 +360,8 @@ else
   if (node->mHit) 	{ TCL::ucopy(node->mHit->x(),Xnode,3);}
   else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
   StvNodePars pars = preNode->mFP[lane];
-assert(fabs(pars._cosCA)<=1);
   dS = pars.move(Xnode,dPP,dir);
   node->mPP[lane] = pars;
-assert(fabs(pars._cosCA)<=1);
   pars.Deriv(dS,derFit);
   StvFitErrs  &nowErrs = node->mPE[lane];
   const StvFitErrs  &preErrs =  preNode->mFE[lane];
