@@ -159,7 +159,7 @@ class StarGenerator : public StMaker
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.3 2013/05/30 17:36:10 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.4 2014/02/18 23:30:26 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  private:
@@ -184,6 +184,8 @@ class StarGenerator : public StMaker
   TString  mFrame;
   /// CMS energy or incident beam momentum for fixed target collisions
   Double_t mRootS;      
+  /// Direction (+1 = W, -1 = E) of the beam in fixted target mode
+  Double_t mDirect;
 
   /// Minimum impact parameter in a HI collision
   Double_t mImpactMin;
