@@ -38,34 +38,14 @@ void xTCL::vfill(double *a,double f,int na)
 {
   for (int i=0;i<na;i++) {a[i]=f;}
 }
-//_____________________________________________________________________________
-void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
-{
-
-  double spur = err[0]+err[2];
-  double det  = err[0]*err[2]-err[1]*err[1];
-  double dis  = spur*spur-4*det;
-  if (dis<0) dis = 0;
-  dis = TMath::Sqrt(dis);
-  lam[0] = 0.5*(spur+dis);
-  lam[1] = 0.5*(spur-dis);
-  eig[0][0] = 1; eig[0][1]=0;
-  if (dis>1e-6*spur) {// eigenvalues are different
-    if (TMath::Abs(err[0]-lam[0])>TMath::Abs(err[2]-lam[0])) {
-     eig[0][1] = 1; eig[0][0]= -err[1]/(err[0]-lam[0]);
-    } else {
-     eig[0][0] = 1; eig[0][1]= -err[1]/(err[2]-lam[0]);
-    }
-    double tmp = TMath::Sqrt(eig[0][0]*eig[0][0]+eig[0][1]*eig[0][1]);
-    eig[0][0]/=tmp; eig[0][1]/=tmp;
-  }
-  eig[1][0]=-eig[0][1];  eig[1][1]= eig[0][0];
-}
 //______________________________________________________________________________
 /*
-* $Id: xTCL.cxx,v 1.4 2009/08/28 16:38:55 fine Exp $
+* $Id: xTCL.cxx,v 1.5 2014/02/18 19:45:49 perev Exp $
 *
 * $Log: xTCL.cxx,v $
+* Revision 1.5  2014/02/18 19:45:49  perev
+* Eigen2 copy of THelix one
+*
 * Revision 1.4  2009/08/28 16:38:55  fine
 * fix the compilation issues under SL5_64_bits  gcc 4.3.2
 *
@@ -81,6 +61,37 @@ void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 * Revision 1.1.1.1  1996/04/01 15:02:13  mclareni
 * Mathlib gen
 */
+//_____________________________________________________________________________
+static void eigen2(double G[3], double lam[2], double eig[2])
+{
+  double spur = G[0]+G[2];
+//double det  = G[0]*G[2]-G[1]*G[1];
+  double dis  = (G[0]-G[2])*(G[0]-G[2])+4*G[1]*G[1];
+  dis = sqrt(dis);
+  if (lam) {
+    lam[0] = 0.5*(spur+dis);
+    lam[1] = 0.5*(spur-dis);
+  }
+  if (!eig) return;
+  double g[3]={G[0]-G[2]-dis,2*G[1],G[2]-G[0]-dis};
+  int kase =0;
+  for (int i=1;i<3;i++) { if (fabs(g[i])>fabs(g[kase])) kase = i;}
+  switch(kase) {
+    case 0: eig[0] = g[1]/g[0]; eig[1]=-1; break;
+    case 1: eig[1] = g[0]/g[1]; eig[0]=-1; break;
+    case 2: eig[1] = g[1]/g[2]; eig[0]=-1; break;
+  }
+  double nor = sqrt(eig[0]*eig[0]+eig[1]*eig[1]);
+  if (nor>1e-11) {
+    int j=(fabs(eig[0])>fabs(eig[1]))? 0:1;
+    if(eig[j]<0) nor = -nor;
+    eig[0]/=nor;eig[1]/=nor;}
+  else {
+    eig[0]=1;eig[1]=0;
+  }
+
+}
+//_____________________________________________________________________________
 double  xTCL::simpson(const double *F,double A,double B,int NP)
 {
   int N2=NP-1;
