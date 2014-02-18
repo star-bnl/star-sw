@@ -82,11 +82,13 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   contents.TOF_L1mult_vs_ZDCadcsum->SetXTitle("TOF Mult in TRG");
   contents.TOF_L1mult_vs_ZDCadcsum->SetYTitle("ZDC hardware adc Sum");
 
-  //contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF_L1_vs_sumL0",144,0.5,2880.5,144,0.5,2880.5);//auau
-  contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF hit mult: sum(TOF) vs sum(TRG)",200,0.5,200.5,200,0.5,200.5);//pp
-  contents.TOF_L1mult_vs_sumL0->SetXTitle("TOF Mult in TRG data");
-  contents.TOF_L1mult_vs_sumL0->SetYTitle("TOF Mult in TOF data");
-
+  contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF hit mult: sum(TRG) vs sum(TOF)",400,-0.5,799.5,400,-0.5,799.5);
+  contents.TOF_L1mult_vs_sumL0->SetXTitle("TOF Mult in TOF data");
+  contents.TOF_L1mult_vs_sumL0->SetYTitle("TOF Mult in TRG data");
+  contents.TOF_L1mult=new TH1F("TOF_L1mult","TOFmult: sum(TRG)",800,-0.5,799.5);
+  contents.TOF_L1mult->SetXTitle("TOFmult from TRG data");
+  contents.TOF_sumL0=new TH1F("TOF_sumL0","TOFmult: sum(TOF)",800,-0.5,799.5);
+  contents.TOF_sumL0->SetXTitle("TOFmult from TOF data");
 
   contents.TOF_Error1 = new TH1F("TOF_Error1","TOF electronics errors",244,0.5,122.5);
   contents.TOF_Error1->SetXTitle("Tray #");
@@ -117,13 +119,23 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   }
   n--;
   
-  //L1mult
+  //TOF mult plots....
   plots[++n] = new JevpPlot(contents.TOF_L1mult_vs_ZDCadcsum);
   plots[n]->optstat = 0;
   plots[n]->setDrawOpts("colz");
   plots[++n] = new JevpPlot(contents.TOF_L1mult_vs_sumL0);
   plots[n]->optstat = 0;
   plots[n]->setDrawOpts("colz");
+  plots[++n] = new JevpPlot(contents.TOF_L1mult);
+  plots[n]->optstat = 1;
+  plots[n]->logy = 1;
+  plots[n]->gridx = 1;
+  plots[n]->gridy = 1;
+  plots[++n] = new JevpPlot(contents.TOF_sumL0);
+  plots[n]->optstat = 1;
+  plots[n]->logy = 1;
+  plots[n]->gridx = 1;
+  plots[n]->gridy = 1;
   
   //error check
   plots[++n] = new JevpPlot(contents.TOF_Error1);
@@ -655,7 +667,9 @@ void tofBuilder::event(daqReader *rdr)
 
   float zdcHardwaresum = float(trgd->zdcAttenuated(east)) + float(trgd->zdcAttenuated(west));
   contents.TOF_L1mult_vs_ZDCadcsum->Fill(TOF_L1mult, zdcHardwaresum);
-  contents.TOF_L1mult_vs_sumL0->Fill(TOF_L1mult, sum_L0_hit);
+  contents.TOF_L1mult_vs_sumL0->Fill(sum_L0_hit, TOF_L1mult);
+  contents.TOF_L1mult->Fill(TOF_L1mult);
+  contents.TOF_sumL0->Fill(sum_L0_hit);
 
   contents.TOF_EventCount->Fill(1);
 
