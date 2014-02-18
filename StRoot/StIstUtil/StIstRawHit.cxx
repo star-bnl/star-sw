@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.3 2014/02/03 16:12:20 ypwang Exp $
+* $Id: StIstRawHit.cxx,v 1.4 2014/02/18 07:52:40 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.4  2014/02/18 07:52:40  ypwang
+* updating mDefaultTimeBin initial value to 2
+*
 * Revision 1.3  2014/02/03 16:12:20  ypwang
 * updating scripts
 *
@@ -160,6 +163,6 @@ void StIstRawHit::setMaxTimeBin(unsigned char tb)
    mMaxTimeBin = ((tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb);
 };
 
-unsigned char StIstRawHit::mDefaultTimeBin = 3;
+unsigned char StIstRawHit::mDefaultTimeBin = 2;
 
 ClassImp(StIstRawHit);
