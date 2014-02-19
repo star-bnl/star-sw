@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.6 2014/02/18 07:57:09 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.7 2014/02/19 06:26:14 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.7  2014/02/19 06:26:14  ypwang
+* update raw hit decision cuts to be compatible to ZS and non-ZS data
+*
 * Revision 1.6  2014/02/18 07:57:09  ypwang
 * add setDefaultTimeBin() while filling raw hits information
 *
@@ -358,8 +361,6 @@ Int_t StIstRawHitMaker::Make() {
                     	for(int iTB=1; iTB<ntimebin-1; iTB++)    {
                       	    // raw hit decision: the method is stolen from Gerrit's ARMdisplay.C
                             if( (signalUnCorrected[iChan][iTB] > 0) && (signalUnCorrected[iChan][iTB] < kIstMaxAdc) && 
-			    	(signalUnCorrected[iChan][0]   > 0) && (signalUnCorrected[iChan][0]   < kIstMaxAdc) &&
-			    	(signalUnCorrected[iChan][ntimebin-1] > 0) && (signalUnCorrected[iChan][ntimebin-1] < kIstMaxAdc) &&
                             	(signalCorrected[iChan][iTB-1] > mHitCut * mRmsVec[elecId])     &&
                             	(signalCorrected[iChan][iTB]   > mHitCut * mRmsVec[elecId])     &&
                             	(signalCorrected[iChan][iTB+1] > mHitCut * mRmsVec[elecId])     &&
