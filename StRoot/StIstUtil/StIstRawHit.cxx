@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.4 2014/02/18 07:52:40 ypwang Exp $
+* $Id: StIstRawHit.cxx,v 1.5 2014/02/20 02:29:27 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.5  2014/02/20 02:29:27  smirnovd
+* Remove destructor that does nothing
+*
 * Revision 1.4  2014/02/18 07:52:40  ypwang
 * updating mDefaultTimeBin initial value to 2
 *
@@ -33,10 +36,6 @@ bool rawHitPtrLessThan::operator() (const StIstRawHit *rawHit1, const StIstRawHi
       return 0;
 }
 
-StIstRawHit::~StIstRawHit()
-{
-   /* nothing to do */
-}
 
 StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mMaxTimeBin(3), mIdTruth(0)
 {

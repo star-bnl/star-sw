@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.h,v 1.4 2014/02/13 02:35:49 smirnovd Exp $
+* $Id: StIstRawHit.h,v 1.5 2014/02/20 02:29:27 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -21,8 +21,6 @@ public:
    StIstRawHit();
    StIstRawHit( const StIstRawHit & );
    StIstRawHit &operator=( const StIstRawHit & );
-   //deconstructors
-   ~StIstRawHit();
 
    //accessors
    int       	      getChannelId()  const; //!< 0-110591
@@ -75,6 +73,9 @@ struct rawHitPtrLessThan {
 /***************************************************************************
 *
 * $Log: StIstRawHit.h,v $
+* Revision 1.5  2014/02/20 02:29:27  smirnovd
+* Remove destructor that does nothing
+*
 * Revision 1.4  2014/02/13 02:35:49  smirnovd
 * Moved CVS log to the bottom of the file
 *
