@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.10 2014/02/20 02:31:00 smirnovd Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.11 2014/02/20 02:31:22 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -28,7 +28,6 @@ StIstRawHitCollection::~StIstRawHitCollection()
 void StIstRawHitCollection::sortByGeoId()
 {
    std::sort( mRawHitVec.begin(), mRawHitVec.end(), &StIstRawHitCollection::rawHitIdLessThan );
-   return;
 };
 
 //remove all hits with negative geoIds
@@ -89,12 +88,11 @@ unsigned char StIstRawHitCollection::getLadder() const
 
 void StIstRawHitCollection::Clear( Option_t *opt )
 {
-   //clear the vector 
    mRawHitVec.clear();
 
    //clear the vector for alternate lookups
    for (unsigned int i = 0; i < mRawHitElecIdVec.size(); i++)
-      mRawHitElecIdVec[i] = static_cast< StIstRawHit * >(0);
+      mRawHitElecIdVec[i] = 0;
 };
 
 StIstRawHit *StIstRawHitCollection::getRawHit( int elecId )
@@ -112,6 +110,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.11  2014/02/20 02:31:22  smirnovd
+* Minor style corrections
+*
 * Revision 1.10  2014/02/20 02:31:00  smirnovd
 * Use constructor list to initialize vectors of pointers and arrays
 *
