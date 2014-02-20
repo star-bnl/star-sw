@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.7 2014/02/20 02:29:55 smirnovd Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.8 2014/02/20 02:30:26 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -52,25 +52,25 @@ void StIstRawHitCollection::removeFlagged()
 {
    if ( mRawHitVec.empty() ) return;
 
-      // container to hold a copy
-      std::vector< StIstRawHit * > copy;
-      copy.reserve( mRawHitVec.size() );
-      sortByGeoId();
+   // container to hold a copy
+   std::vector< StIstRawHit * > copy;
+   copy.reserve( mRawHitVec.size() );
+   sortByGeoId();
 
-      // copy all valid events
-      std::vector< StIstRawHit * >::iterator srcIter;
-      for ( srcIter = mRawHitVec.begin(); srcIter != mRawHitVec.end(); ++srcIter )
-         if ( (*srcIter) && (*srcIter)->getChannelId() >= 0 )
-            copy.push_back( new StIstRawHit( *(*srcIter) ) );
+   // copy all valid events
+   std::vector< StIstRawHit * >::iterator srcIter;
+   for ( srcIter = mRawHitVec.begin(); srcIter != mRawHitVec.end(); ++srcIter )
+      if ( (*srcIter) && (*srcIter)->getChannelId() >= 0 )
+         copy.push_back( new StIstRawHit( *(*srcIter) ) );
 
-      if ( copy.size() != mRawHitVec.size() ) {
-         // this deletes the objects
-         mRawHitVec.clear();
-         // note: ownership of new objects passed to StSPtrVec
-         std::vector< StIstRawHit * >::iterator copyIter;
-         for ( copyIter = copy.begin(); copyIter != copy.end(); ++copyIter )
-            mRawHitVec.push_back( *copyIter );
-      }
+   if ( copy.size() != mRawHitVec.size() ) {
+      // this deletes the objects
+      mRawHitVec.clear();
+      // note: ownership of new objects passed to StSPtrVec
+      std::vector< StIstRawHit * >::iterator copyIter;
+      for ( copyIter = copy.begin(); copyIter != copy.end(); ++copyIter )
+         mRawHitVec.push_back( *copyIter );
+   }
 }
 
 bool StIstRawHitCollection::rawHitIdLessThan( const StIstRawHit *h1, const StIstRawHit *h2 )
@@ -128,6 +128,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.8  2014/02/20 02:30:26  smirnovd
+* Remove one level of indentation
+*
 * Revision 1.7  2014/02/20 02:29:55  smirnovd
 * Reverse if statement to remove extra indentation
 *
