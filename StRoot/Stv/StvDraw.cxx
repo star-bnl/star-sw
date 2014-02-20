@@ -26,6 +26,7 @@ StvDraw::StvDraw(const char *name):StDraw3D(name)
 //_____________________________________________________________________________
 TObject *StvDraw::Hits(const std::vector<StvHit*> &hits, EDraw3DStyle sty)
 {
+if (!hits.size()) return 0;
 const std::vector<const StvHit*>&vc = (std::vector<const StvHit*>&)hits;
 return Hits(vc,sty);
 }
@@ -34,7 +35,7 @@ return Hits(vc,sty);
 //_____________________________________________________________________________
 TObject *StvDraw::Hits(const std::vector<const StvHit*> &hits, EDraw3DStyle sty)
 {
-  int n = hits.size();
+  int n = hits.size(); if (!n) return 0;
   std::vector<float> vec(n*3);
   const float *f;float *v=&vec[0];
   for (int i=0;i<n; i++) {
@@ -51,7 +52,7 @@ TObject *StvDraw::Hits(const std::vector<const StvHit*> &hits, EDraw3DStyle sty)
 //_____________________________________________________________________________
 TObject *StvDraw::Hits(const std::vector<const float*> &hits, EDraw3DStyle sty)
 {
-  int n = hits.size();
+  int n = hits.size(); if (!n) return 0;
   std::vector<float> vec(n*3);
   const float *f;float *v=&vec[0];
   for (int i=0;i<n; i++) {
@@ -64,6 +65,7 @@ TObject *StvDraw::Hits(const std::vector<const float*> &hits, EDraw3DStyle sty)
 //_____________________________________________________________________________
 TObject *StvDraw::Hits(int nHits,const TVector3* hits, EDraw3DStyle sty)
 {
+  if (!nHits) return 0;
   std::vector<double> vec(nHits*3);
   int n =0;
   for (int i=0;i<nHits; i++) {
