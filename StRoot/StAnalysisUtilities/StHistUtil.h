@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.16 2012/01/31 22:14:54 genevb Exp $
+// $Id: StHistUtil.h,v 2.17 2014/02/20 20:16:19 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.17  2014/02/20 20:16:19  genevb
+// Adjust dE/dx slope hist range, handle ROOT change for 2D polar plots
+//
 // Revision 2.16  2012/01/31 22:14:54  genevb
 // QA Shift Mode, optimized for AutoQA Browser
 //
@@ -133,6 +136,7 @@ class StHistUtil {
   virtual TString StripPrefixes(const Char_t* histName, Int_t& prenum, Int_t mode=1);
   virtual Bool_t  CheckOutFile(const Char_t* histName);
   virtual TList*  TrimListByPrefix(TList* dList, const Char_t* withPrefix);
+  virtual TH1*    FlipAxes(TH1* hist);
 
 
  public: 
@@ -201,7 +205,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.16 2012/01/31 22:14:54 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.17 2014/02/20 20:16:19 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };

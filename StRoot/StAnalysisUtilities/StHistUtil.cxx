@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.92 2014/01/30 19:44:06 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.93 2014/02/20 20:16:19 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.93  2014/02/20 20:16:19  genevb
+// Adjust dE/dx slope hist range, handle ROOT change for 2D polar plots
+//
 // Revision 2.92  2014/01/30 19:44:06  genevb
 // Additional TPC histogram for monitoring gas contamination
 //
@@ -291,7 +294,7 @@
 #include <string.h>
 #include <Stsstream.h>
 #include "TFile.h"
-
+#include "TROOT.h"
 #include "PhysicalConstants.h"
 #include "TStyle.h"
 #include "TCanvas.h"
@@ -936,6 +939,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             const Char_t *IO[2] = {"Inner", "Outer"};
             Double_t    xmin[2] = { 70, 40};
             Double_t    xmax[2] = {120,180};
+            float histmiddle = 0;
             for (Int_t io = 1; io <= 2; io++) {
               Z3A->GetXaxis()->SetRange(io,io);
               TH2 *I = (TH2 *) Z3A->Project3D(Form("zy%i",io));
@@ -944,8 +948,6 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                 TH1D *proj = (TH1D*) gDirectory->Get(Form("%s_1",I->GetName()));
                 if (proj) {
                   proj->Fit("pol1","erq",(noneYet ? "" : "same"),xmin[io-1],xmax[io-1]);
-                  proj->SetMinimum(-0.25);
-                  proj->SetMaximum( 0.45);
                   proj->SetLineColor(8-io);
                   proj->SetMarkerColor(8-io);
                   proj->SetMarkerStyle(24-io);
@@ -955,12 +957,17 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                   if (f) {
                     gMessMgr->Info() << "StHistUtil: slope in drift distance for " << IO[io-1] << " = "
                                      << f->GetParameter(1) << " +/- " << f->GetParError(1) << endm;
+                    if (noneYet) histmiddle = f->Eval(100.0);
                     f->SetLineColor(6-2*io);
                     latex.SetTextColor(6-2*io);
-                    latex.DrawLatex(20,-0.65+0.5*io,Form("%s : %f +/- %f\n",
+                    latex.DrawLatex(20,histmiddle-0.9+0.6*io,Form("%s : %f +/- %f\n",
                       IO[io-1],f->GetParameter(1),f->GetParError(1)));
                   }
-                  noneYet = kFALSE;
+                  if (noneYet) {
+                    proj->SetMinimum(histmiddle-0.4);
+                    proj->SetMaximum(histmiddle+0.4);
+                    noneYet = kFALSE;
+                  }
                 }
               }
             }
@@ -972,7 +979,15 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             htmp->Fill(0.,0.,.1);htmp->SetMinimum(1);
             htmp->SetStats(kFALSE);
             htmp->Draw();
-            hobj->Draw("Pol ZCol Same");
+            if (gROOT->GetVersionInt() < 52800) {
+              hobj->Draw("Pol ZCol Same");
+            } else {
+              // lego plots always needed phi,r from x,y
+              // (z)zcol plots, however, neded r,phi from x,y
+              // Now, (z)col plots also need phi,r from x,y
+              // https://sft.its.cern.ch/jira/browse/ROOT-2845
+              FlipAxes(hobj)->Draw("Pol ZCol Same");
+            }
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SvtLoc") ||
                       oName.EndsWith("PVsDedx") ||
@@ -2613,6 +2628,26 @@ Bool_t StHistUtil::DetectorIn(const Char_t *detector) {
     isIn = kTRUE;
   }
   return isIn;
+}
+
+//_____________________________________________________________________________
+
+TH1* StHistUtil::FlipAxes(TH1* hist) {
+  if (!(hist->InheritsFrom("TH2"))) return hist;
+  // For now, just converts whatever into TH2D
+  // ...and there is no automatic garbage collection
+  Int_t xbins = hist->GetNbinsX();
+  Int_t ybins = hist->GetNbinsY();
+  TH2D* newhist = new TH2D(Form("%s_flip",hist->GetName()),hist->GetTitle(),
+    ybins,hist->GetYaxis()->GetXmin(),hist->GetYaxis()->GetXmax(),
+    xbins,hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
+  for (int xbin=1; xbin<=xbins; xbin++) {
+    for (int ybin=1; ybin<=ybins; ybin++) {
+      newhist->SetBinContent(ybin,xbin,hist->GetBinContent(xbin,ybin));
+      newhist->SetBinError(ybin,xbin,hist->GetBinError(xbin,ybin));
+    }
+  }
+  return newhist;
 }
 
 //_____________________________________________________________________________
