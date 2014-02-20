@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.8 2014/02/20 02:30:26 smirnovd Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.9 2014/02/20 02:30:45 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -18,26 +18,13 @@ StIstRawHitCollection::StIstRawHitCollection( unsigned char ladder ) : StObject(
       mRawHitElecIdVec[i] = static_cast< StIstRawHit * >(0);
 };
 
-//deconstructor
+
+/** Free memory and clear the vector */
 StIstRawHitCollection::~StIstRawHitCollection()
 {
-   //free memory and clear the vector
-   std::vector< StIstRawHit * >::iterator vecIter;
-   for ( vecIter = mRawHitVec.begin(); vecIter != mRawHitVec.end(); ++vecIter ) {
-      if (*vecIter != NULL) {
-         delete *vecIter;
-         *vecIter = NULL;
-      }
-   }
-   mRawHitVec.clear();
+   while (!mRawHitVec.empty()) delete mRawHitVec.back(), mRawHitVec.pop_back();
 
-   //free memory and clear the vector
-   std::vector< StIstRawHit * >::iterator vecIterT;
-   for ( vecIterT = mRawHitElecIdVec.begin(); vecIterT != mRawHitElecIdVec.end(); ++vecIterT ) {
-      delete[] (*vecIterT);
-   }
    mRawHitElecIdVec.clear();
-
 };
 
 //sort internal vector by raw hit geometry ID
@@ -128,6 +115,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.9  2014/02/20 02:30:45  smirnovd
+* Simplified the destructor
+*
 * Revision 1.8  2014/02/20 02:30:26  smirnovd
 * Remove one level of indentation
 *

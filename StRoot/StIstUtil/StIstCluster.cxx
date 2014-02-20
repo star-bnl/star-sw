@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.7 2014/02/15 01:16:18 ypwang Exp $
+* $Id: StIstCluster.cxx,v 1.8 2014/02/20 02:30:44 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -30,15 +30,7 @@ StIstCluster::StIstCluster(int key, unsigned char ladder, unsigned char sensor,
 
 StIstCluster::~StIstCluster() 
 {
-   //free memory and clear the vector
-   std::vector< StIstRawHit * >::iterator vecIter;
-   for ( vecIter = mRawHitVec.begin(); vecIter != mRawHitVec.end(); ++vecIter ) {
-      if (*vecIter != NULL) {
-         delete *vecIter;
-         *vecIter = NULL;
-      }
-   }
-   mRawHitVec.clear();
+   while (!mRawHitVec.empty()) delete mRawHitVec.back(), mRawHitVec.pop_back();
 }
 
 //accessors
@@ -126,6 +118,9 @@ ClassImp(StIstCluster);
 *
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.8  2014/02/20 02:30:44  smirnovd
+* Simplified the destructor
+*
 * Revision 1.7  2014/02/15 01:16:18  ypwang
 * replace the std::map() with std::vector() for StIstCluster
 *
