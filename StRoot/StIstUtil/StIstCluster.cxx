@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.8 2014/02/20 02:30:44 smirnovd Exp $
+* $Id: StIstCluster.cxx,v 1.9 2014/02/20 02:30:58 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -24,7 +24,7 @@ StIstCluster::StIstCluster(int key, unsigned char ladder, unsigned char sensor,
    mTotChargeErr(totChargeErr),
    mClusteringType(clusteringType),
    mMaxTimeBin(3), mNRawHits(1), mNRawHitsRPhi(1),
-   mNRawHitsZ(1), mIdTruth(0)
+   mNRawHitsZ(1), mIdTruth(0), mRawHitVec()
 {
 }
 
@@ -118,6 +118,9 @@ ClassImp(StIstCluster);
 *
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.9  2014/02/20 02:30:58  smirnovd
+* Use constructor list to initialize vectors of pointers and arrays
+*
 * Revision 1.8  2014/02/20 02:30:44  smirnovd
 * Simplified the destructor
 *

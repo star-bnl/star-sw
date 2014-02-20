@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.5 2014/02/20 02:29:27 smirnovd Exp $
+* $Id: StIstRawHit.cxx,v 1.6 2014/02/20 02:30:59 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.6  2014/02/20 02:30:59  smirnovd
+* Use constructor list to initialize vectors of pointers and arrays
+*
 * Revision 1.5  2014/02/20 02:29:27  smirnovd
 * Remove destructor that does nothing
 *
@@ -37,7 +40,8 @@ bool rawHitPtrLessThan::operator() (const StIstRawHit *rawHit1, const StIstRawHi
 }
 
 
-StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mMaxTimeBin(3), mIdTruth(0)
+StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), mChargeErr(), mMaxTimeBin(3),
+   mIdTruth(0)
 {
    for ( unsigned char i = 0; i < kIstNumTimeBins; ++i )	{
       mCharge[i] = -999.;
@@ -45,7 +49,8 @@ StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mMaxTimeBin
    }
 }
 
-StIstRawHit::StIstRawHit(const StIstRawHit &h) : StObject(), mChannelId(h.mChannelId), mGeoId(h.mGeoId), mMaxTimeBin(h.mMaxTimeBin), mIdTruth(h.mIdTruth)
+StIstRawHit::StIstRawHit(const StIstRawHit &h) : StObject(), mChannelId(h.mChannelId), mGeoId(h.mGeoId), mCharge(),
+   mChargeErr(), mMaxTimeBin(h.mMaxTimeBin), mIdTruth(h.mIdTruth)
 {
    for ( unsigned char i = 0; i < kIstNumTimeBins; ++i )	{
       mCharge[i] = h.mCharge[i];

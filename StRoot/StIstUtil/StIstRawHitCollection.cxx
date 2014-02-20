@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.9 2014/02/20 02:30:45 smirnovd Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.10 2014/02/20 02:31:00 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -10,13 +10,10 @@
 #include <iostream>
 
 
-//constructor
-StIstRawHitCollection::StIstRawHitCollection( unsigned char ladder ) : StObject(), mLadder( ladder )
+StIstRawHitCollection::StIstRawHitCollection( unsigned char ladder ) : StObject(), mLadder(ladder), mRawHitVec(),
+   mRawHitElecIdVec(kIstNumElecIds)
 {
-   mRawHitElecIdVec.resize( kIstNumElecIds );
-   for (unsigned int i = 0; i < mRawHitElecIdVec.size(); i++)
-      mRawHitElecIdVec[i] = static_cast< StIstRawHit * >(0);
-};
+}
 
 
 /** Free memory and clear the vector */
@@ -115,6 +112,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.10  2014/02/20 02:31:00  smirnovd
+* Use constructor list to initialize vectors of pointers and arrays
+*
 * Revision 1.9  2014/02/20 02:30:45  smirnovd
 * Simplified the destructor
 *
