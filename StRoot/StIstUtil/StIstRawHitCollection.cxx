@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.6 2014/02/15 23:32:57 ypwang Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.7 2014/02/20 02:29:55 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -50,7 +50,8 @@ void StIstRawHitCollection::sortByGeoId()
 //remove all hits with negative geoIds
 void StIstRawHitCollection::removeFlagged()
 {
-   if ( !mRawHitVec.empty() ) {
+   if ( mRawHitVec.empty() ) return;
+
       // container to hold a copy
       std::vector< StIstRawHit * > copy;
       copy.reserve( mRawHitVec.size() );
@@ -70,7 +71,6 @@ void StIstRawHitCollection::removeFlagged()
          for ( copyIter = copy.begin(); copyIter != copy.end(); ++copyIter )
             mRawHitVec.push_back( *copyIter );
       }
-   }
 }
 
 bool StIstRawHitCollection::rawHitIdLessThan( const StIstRawHit *h1, const StIstRawHit *h2 )
@@ -128,6 +128,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.7  2014/02/20 02:29:55  smirnovd
+* Reverse if statement to remove extra indentation
+*
 * Revision 1.6  2014/02/15 23:32:57  ypwang
 * update destructor and Clear() function
 *
