@@ -595,11 +595,11 @@ double fgtPed::do_thresh(double ns, int k)
 				continue ;
 			}
 
-			if(p->thr[arm][apv][c] >= 0xFFFD) {
+			if(p->thr[arm][apv][c] >= 0xFFFD) {	// bad as determined in the pedestal run...
 				b_ped_cou++ ;
 			}
 
-			if(bad[r][arm][apv][c]) {
+			if(bad[r][arm][apv][c]) {	// known bad
 				p->thr[arm][apv][c] = 0xFFFF ;	// max it
 				b_bad_cou++ ;
 			}
@@ -628,7 +628,7 @@ double fgtPed::do_thresh(double ns, int k)
 void fgtPed::calc()
 {
 
-	const int MIN_EVENTS = 100 ;
+	const int MIN_EVENTS =  1000 ;
 
 
 	LOG(NOTE,"Calculating pedestals") ;
@@ -636,7 +636,7 @@ void fgtPed::calc()
 	tb_cou_ped = -1 ;
 
 	int bad = 0 ;
-	int real_bad = 0 ;
+
 
 
 	for(int r=0;r<FGT_RDO_COU;r++) {
@@ -654,10 +654,10 @@ void fgtPed::calc()
 		int got_cou = ped->cou[arm][apv][0][0] ;
 
 		if(got_cou != expect) {
-			bad++ ;
-			real_bad++ ;
 
-			LOG(ERR,"ARC %d, ARM %d, APV %2d: got %d, expect %d",
+			bad++ ;
+
+			LOG(WARN,"ARC %d, ARM %d, APV %2d: got %d, expect %d",
 			    r+1,arm,apv,got_cou,expect) ;
 		}
 
@@ -702,7 +702,9 @@ void fgtPed::calc()
 		if(rb_mask & (1<<r)) ;
 		else continue ;
 
-		if(fgt_stat[r].evts < MIN_EVENTS) not_enough = 1 ;
+		if(fgt_stat[r].evts < MIN_EVENTS) {
+			not_enough = 1 ;
+		}
 	}
 
 
@@ -711,7 +713,7 @@ void fgtPed::calc()
 	valid = 1 ;	// assume all OK...
 
 	if(not_enough) valid = 0 ;
-	else valid = !bad ;
+
 
 	if(!valid) {
 		LOG(ERR,"FGT pedestals not good: APVs bad %d, events %d",bad,fgt_stat[0].evts) ;
@@ -893,8 +895,7 @@ int fgtPed::to_cache(char *fname, u_int run)
 
 	if(!valid) {
 		LOG(ERR,"ped::to_cache peds are bad: valid %d -- caching anyway...",valid) ;
-		//do_ln = 0 ;
-
+		do_ln = 0 ;
 		//LOG(CAUTION,"Pedestals are not valid -- not caching!") ;
 	}
 
