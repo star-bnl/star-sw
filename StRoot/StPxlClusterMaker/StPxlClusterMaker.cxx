@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.cxx,v 1.5 2014/01/28 19:29:35 qiuh Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.6 2014/02/21 21:10:58 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
+ * Revision 1.6  2014/02/21 21:10:58  smirnovd
+ * Move zeroing of mRawHitMap outside the loop. The map is zeroed automatically during the cluster finding
+ *
  * Revision 1.5  2014/01/28 19:29:35  qiuh
  * *** empty log message ***
  *
@@ -68,13 +71,14 @@ Int_t StPxlClusterMaker::Make()
    mPxlClusterCollection = new StPxlClusterCollection();
    ToWhiteBoard("pxlCluster", mPxlClusterCollection);
 
+   // clear rawHitMap
+   memset(mRawHitMap, 0, kNumberOfPxlRowsOnSensor * kNumberOfPxlColumnsOnSensor * sizeof(StPxlRawHit *));
+
    // real work
    int embeddingShortCut = IAttr("EmbeddingShortCut");
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
          for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
-            // clear rawHitMap
-            memset(mRawHitMap, 0, kNumberOfPxlRowsOnSensor * kNumberOfPxlColumnsOnSensor * sizeof(StPxlRawHit *));
 
             // load rawHitMap
             int vectorSize = pxlRawHitCollection->numberOfRawHits(i + 1, j + 1, k + 1);
