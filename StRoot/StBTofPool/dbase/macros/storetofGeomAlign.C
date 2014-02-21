@@ -51,7 +51,9 @@ void storetofGeomAlign() {
 //  TString ZStoreTime = "2010-12-20 00:00:01";  //  Run11 update with final TPC calib (19.6GeV based) 
 //  TString ZStoreTime = "2009-05-27 00:00:01";  //  Run9-FF, alignment update following major TPC geometry update
 //  TString ZStoreTime = "2011-12-20 00:00:01";  //  Run12 update with final TPC calib (193GeV UU based, w/ TPC y2000 geometry) 
-  TString ZStoreTime = "2009-02-01 00:00:01";  //  Run9-RFF, alignment update (based on FF)  following major TPC geometry update
+//  TString ZStoreTime = "2009-02-01 00:00:01";  //  Run9-RFF, alignment update (based on FF)  following major TPC geometry update
+//  TString ZStoreTime = "2012-12-20 00:00:01";  // Run-13 aligment 
+  TString ZStoreTime = "2013-12-20 00:00:01";  // Run-14 aligment for FastOffline (based on Run-13)
 
 
 
@@ -64,7 +66,7 @@ void storetofGeomAlign() {
 // year10+
   float shifty[NMAX], shiftz[NMAX], shiftx[NMAX];
   ifstream inData;
-  inData.open("data/run9/alignment/geomAlign_200GeV_120322.txt");
+  inData.open("data/run13/pp510/geometryAlignment.dat");
   for(int i=0;i<NMAX;i++) {
     inData >> shifty[i] >> shiftz[i] >> shiftx[i];
   }
