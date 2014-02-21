@@ -101,4 +101,8 @@ Run 9 pp 200GeV FF-2500 FF1 2009-05-27 00:00:01
 Run 9 pp 200GeV FF-2500 FF2 new firmware : 2009-06-03 16:00:01
 Run 9 pp 200GeV FF-1200 FF3 : 2009-06-10 22:00:01
 
- 
+Run 13 pp 510GeV part (a) 2012-12-20 00:00:01
+Run 13 pp 510GeV part (b) 2013-04-03 13:22:00
+
+Run 14 fast-offline (15GeV) 2013-12-20 00:00:01
+
