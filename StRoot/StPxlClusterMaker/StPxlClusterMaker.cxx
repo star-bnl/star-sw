@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.cxx,v 1.6 2014/02/21 21:10:58 smirnovd Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.7 2014/02/21 21:11:06 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
+ * Revision 1.7  2014/02/21 21:11:06  smirnovd
+ * Minor style and empty space adjustments
+ *
  * Revision 1.6  2014/02/21 21:10:58  smirnovd
  * Move zeroing of mRawHitMap outside the loop. The map is zeroed automatically during the cluster finding
  *
@@ -102,38 +105,45 @@ Int_t StPxlClusterMaker::Make()
    return kStOK;
 }
 
+
+/**
+ * Start from (column, row), look at 8 neighboring pixels for fired pixels (raw
+ * hits) If a raw hit is found nearby, continue to look from that pixel, until
+ * all neighboring raw hits are found Fill the neighboring raw hits into
+ * a cluster
+ */
 void StPxlClusterMaker::findCluster(StPxlCluster *cluster, Int_t column, Int_t row)
 {
    const StPxlRawHit *rawHit = mRawHitMap[row][column];
-   if (rawHit == 0) return; // skip if already included in another cluster
+   if ( !rawHit ) return; // skip if already included in another cluster
+
    mRawHitMap[row][column] = 0; // unmark this used raw hit
+
    // looking at the 8 neighboring pixels, if fired, continue looking from that pixel
-   if ((column - 1) >= 0) {
+   if ((column - 1) >= 0)
       findCluster(cluster, column - 1, row);
-   }
-   if ((column + 1) < kNumberOfPxlColumnsOnSensor) {
+
+   if ((column + 1) < kNumberOfPxlColumnsOnSensor)
       findCluster(cluster, column + 1, row);
-   }
-   if ((row - 1) >= 0) {
+
+   if ((row - 1) >= 0)
       findCluster(cluster, column, row - 1);
-   }
-   if ((row + 1) < kNumberOfPxlRowsOnSensor) {
+
+   if ((row + 1) < kNumberOfPxlRowsOnSensor)
       findCluster(cluster, column, row + 1);
-   }
-   if (((column - 1) >= 0) && ((row - 1) >= 0)) {
+
+   if (((column - 1) >= 0) && ((row - 1) >= 0))
       findCluster(cluster, column - 1, row - 1);
-   }
-   if (((column - 1) >= 0) && ((row + 1) < kNumberOfPxlRowsOnSensor)) {
+
+   if (((column - 1) >= 0) && ((row + 1) < kNumberOfPxlRowsOnSensor))
       findCluster(cluster, column - 1, row + 1);
-   }
-   if (((column + 1) < kNumberOfPxlColumnsOnSensor) && ((row - 1) >= 0)) {
+
+   if (((column + 1) < kNumberOfPxlColumnsOnSensor) && ((row - 1) >= 0))
       findCluster(cluster, column + 1, row - 1);
-   }
-   if (((column + 1) < kNumberOfPxlColumnsOnSensor) && ((row + 1) < kNumberOfPxlRowsOnSensor)) {
+
+   if (((column + 1) < kNumberOfPxlColumnsOnSensor) && ((row + 1) < kNumberOfPxlRowsOnSensor))
       findCluster(cluster, column + 1, row + 1);
-   }
-   // fill cluster
+
+   // Add hit to the cluster
    cluster->addRawHit(rawHit);
-
 }
-

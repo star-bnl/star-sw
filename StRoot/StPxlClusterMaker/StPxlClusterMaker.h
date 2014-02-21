@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.h,v 1.4 2014/01/28 19:29:35 qiuh Exp $
+ * $Id: StPxlClusterMaker.h,v 1.5 2014/02/21 21:11:06 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.h,v $
+ * Revision 1.5  2014/02/21 21:11:06  smirnovd
+ * Minor style and empty space adjustments
+ *
  * Revision 1.4  2014/01/28 19:29:35  qiuh
  * *** empty log message ***
  *
@@ -27,8 +30,9 @@
 #ifndef StPxlClusterMaker_hh
 #define StPxlClusterMaker_hh
 
-#include "StMaker.h"
 #include <bitset>
+
+#include "StMaker.h"
 #include "StPxlUtil/StPxlConstants.h"
 #include "StPxlCluster.h"
 
@@ -42,14 +46,11 @@ public:
    void Clear(const Option_t * = "");
    Int_t Make();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterMaker.h,v 1.4 2014/01/28 19:29:35 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterMaker.h,v 1.5 2014/02/21 21:11:06 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
 protected:
-   //! Start from (column, row), look at 8 neighboring pixels for fired pixels (raw hits)
-   //! If a raw hit is found nearby, continue to look from that pixel, until all neighboring raw hits are found
-   //! Fill the neighboring raw hits into a cluster
    void findCluster(StPxlCluster *cluster, Int_t column, Int_t row);
 
    StPxlClusterCollection *mPxlClusterCollection; ///< pointer to the pxl cluster collection
