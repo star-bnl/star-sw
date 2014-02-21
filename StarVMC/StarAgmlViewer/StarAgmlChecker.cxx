@@ -18,13 +18,14 @@ struct Hist_t {
   Hist_t( TH2F *h ){ _name=h->GetName(); _hist=h; }
   void  operator()( Double_t eta, Double_t phi, Double_t prop ){
     TString path = gGeoManager->GetPath();
+
     if ( path.Contains(_name) ) _hist->Fill( eta, phi, prop );
-    //std::cout << _name.Data() << " in " << path.Data() << "?" << std::endl;
+
+
   };
 };
 
-std::vector<Hist_t> filler;
-
+std::vector<Hist_t>  filler;     
 
 TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
 					   const Int_t     nEta   ,
@@ -35,6 +36,8 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
 					   const Double_t  mxPhi  ,
 					   const Double_t  rmin   ,
 					   const Double_t  rmax   ,
+					   const Double_t  zmin   ,
+					   const Double_t  zmax   ,
 					   const Option_t *_opts  )
 {
 
@@ -59,8 +62,8 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
 
   filler.push_back( Hist_t(hist) );
 
-  TGeoNode *node = 0;
 
+  TGeoNode *node = 0;
   while( (node=(TGeoNode *)next()) )
     {
 
@@ -80,14 +83,14 @@ TObjectSet *StarAgmlChecker::MaterialPlot( const Char_t   *_top   ,
 
     }
 
-  Fill( topSet );
+  Fill( topSet, rmin, rmax, zmin, zmax );
 
   return topSet;
 
 }
 
 
-void StarAgmlChecker::Fill( TObjectSet *set )
+void StarAgmlChecker::Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Double_t zmin, Double_t zmax )
 {
 
   TH2F *hist = (TH2F *)set->GetObject();
@@ -146,14 +149,24 @@ void StarAgmlChecker::Fill( TObjectSet *set )
 		endnode = gGeoManager->Step();
 	      }
 
-	    //	    if ( matprop > 0 ) hist -> Fill( eta, phi, step/matprop ); //x += step/matprop; // accumulate material
-
-	    if ( matprop > 0 ) //filler[0]( eta, phi, step/matprop );
+	    
+	    const Double_t *p = gGeoManager->GetCurrentPoint();
+	    const Double_t  R = TMath::Sqrt( p[0]*p[0]+p[1]*p[1] );	
+	    const Double_t  Z = p[2];
+	    
+	    //
+	    // Fill if material property is nonzero AND w/in the specified rmin,rmax range
+	    //
+	    if ( matprop > 0 && R > rmin && R < rmax && Z > zmin && Z < zmax ) //filler[0]( eta, phi, step/matprop );
 	      {
 		for ( UInt_t ii=0;ii<filler.size();ii++ ) filler[ii]( eta, phi, step/matprop );
+
 	      }
 
+	    // Done when leaving the world volume or when we exceed user specified max/min positions
 	    if (endnode==0 && step>1E10) break;
+	    if (R < rmin || R > rmax ) break;
+	    if (Z < zmin || Z > zmax ) break;
 
 	    // generate an extra step to cross boundary
 	    startnode = endnode;
