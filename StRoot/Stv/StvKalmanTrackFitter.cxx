@@ -306,7 +306,7 @@ StvDebug::Break(nCall);
   if (!dir) {innNode = node; outNode=preNode;}
   else      {outNode = node; innNode=preNode;}
 
-double dSh,dS=0;
+double dS=0;
 //if (PropagateHelix) 	//Propagate with THelixTrack
 if (PropagateHelix) 	//Propagate with THelixTrack ????? HACK
 {
@@ -322,7 +322,6 @@ if (PropagateHelix) 	//Propagate with THelixTrack ????? HACK
   else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
 
   double dS = myHlx.Path(Xnode);
-dSh = dS;
   StvHlxDers derHlx;
 //		reset ELossData for may be new momentum
   innNode->ResetELoss(preNode->mFP[lane]);
@@ -354,12 +353,17 @@ else
   {
   innNode->ResetELoss(preNode->mFP[lane]);
   const StvELossData &el = innNode->GetELoss();
-  double dPP = el.mdPP;
-  assert(dPP>=0);
+  StvNodePars pars = preNode->mFP[lane];
+  double p2 = pars.getP2(); 
+  double m2 = el.mM*el.mM;
+  double fak = (p2 < m2*100)? sqrt(1.+ m2/p2): 1.+0.5*m2/p2;
+  double dPP = el.mELoss*fak/sqrt(p2);
+  if (dPP > kMaxCorr) dPP = kMaxCorr;
+  dPP/=el.mTotLen;
+
   double Xnode[3];
   if (node->mHit) 	{ TCL::ucopy(node->mHit->x(),Xnode,3);}
   else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
-  StvNodePars pars = preNode->mFP[lane];
   dS = pars.move(Xnode,dPP,dir);
   node->mPP[lane] = pars;
   pars.Deriv(dS,derFit);
