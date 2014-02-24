@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.11 2014/02/20 02:31:22 smirnovd Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.12 2014/02/24 14:24:40 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -10,8 +10,7 @@
 #include <iostream>
 
 
-StIstRawHitCollection::StIstRawHitCollection( unsigned char ladder ) : StObject(), mLadder(ladder), mRawHitVec(),
-   mRawHitElecIdVec(kIstNumElecIds)
+StIstRawHitCollection::StIstRawHitCollection( unsigned char ladder ) : StObject(), mLadder(ladder), mRawHitVec(), mRawHitElecIdVec(kIstNumElecIds)
 {
 }
 
@@ -29,32 +28,6 @@ void StIstRawHitCollection::sortByGeoId()
 {
    std::sort( mRawHitVec.begin(), mRawHitVec.end(), &StIstRawHitCollection::rawHitIdLessThan );
 };
-
-//remove all hits with negative geoIds
-void StIstRawHitCollection::removeFlagged()
-{
-   if ( mRawHitVec.empty() ) return;
-
-   // container to hold a copy
-   std::vector< StIstRawHit * > copy;
-   copy.reserve( mRawHitVec.size() );
-   sortByGeoId();
-
-   // copy all valid events
-   std::vector< StIstRawHit * >::iterator srcIter;
-   for ( srcIter = mRawHitVec.begin(); srcIter != mRawHitVec.end(); ++srcIter )
-      if ( (*srcIter) && (*srcIter)->getChannelId() >= 0 )
-         copy.push_back( new StIstRawHit( *(*srcIter) ) );
-
-   if ( copy.size() != mRawHitVec.size() ) {
-      // this deletes the objects
-      mRawHitVec.clear();
-      // note: ownership of new objects passed to StSPtrVec
-      std::vector< StIstRawHit * >::iterator copyIter;
-      for ( copyIter = copy.begin(); copyIter != copy.end(); ++copyIter )
-         mRawHitVec.push_back( *copyIter );
-   }
-}
 
 bool StIstRawHitCollection::rawHitIdLessThan( const StIstRawHit *h1, const StIstRawHit *h2 )
 {
@@ -110,6 +83,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.12  2014/02/24 14:24:40  ypwang
+* get rid of StIstRawHitCollection::removeFlagged()
+*
 * Revision 1.11  2014/02/20 02:31:22  smirnovd
 * Minor style corrections
 *

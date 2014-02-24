@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitCollection.h,v 1.4 2014/02/13 02:35:49 smirnovd Exp $
+* $Id: StIstRawHitCollection.h,v 1.5 2014/02/24 14:24:40 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -29,9 +29,6 @@ public:
 
    //sort internal vector by raw hit geometry ID
    void sortByGeoId();
-
-   //remove all hits with negative geometry IDs
-   void removeFlagged();
 
    //size of internal vector
    size_t getNumRawHits() const;
@@ -67,6 +64,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstRawHitCollection.h,v $
+* Revision 1.5  2014/02/24 14:24:40  ypwang
+* get rid of StIstRawHitCollection::removeFlagged()
+*
 * Revision 1.4  2014/02/13 02:35:49  smirnovd
 * Moved CVS log to the bottom of the file
 *
