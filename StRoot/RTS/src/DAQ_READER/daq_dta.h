@@ -144,7 +144,7 @@ public:
 	}
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.7 2012/11/27 11:45:54 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.8 2014/02/24 11:43:53 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
@@ -219,6 +219,7 @@ public:
 
 	u_int ncontent ;
 
+	u_int mode ;	// bank/detector specific; can be error, can be something else...
 } ;
 
 
