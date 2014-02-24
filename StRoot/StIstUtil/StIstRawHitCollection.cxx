@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.12 2014/02/24 14:24:40 ypwang Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.13 2014/02/24 14:49:23 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -61,7 +61,7 @@ unsigned char StIstRawHitCollection::getLadder() const
 
 void StIstRawHitCollection::Clear( Option_t *opt )
 {
-   mRawHitVec.clear();
+   while (!mRawHitVec.empty()) delete mRawHitVec.back(), mRawHitVec.pop_back();
 
    //clear the vector for alternate lookups
    for (unsigned int i = 0; i < mRawHitElecIdVec.size(); i++)
@@ -83,6 +83,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.13  2014/02/24 14:49:23  ypwang
+* update Clear( Option_t *opt ) to delete StIstRawHit objects from mRawHitVec
+*
 * Revision 1.12  2014/02/24 14:24:40  ypwang
 * get rid of StIstRawHitCollection::removeFlagged()
 *
