@@ -15,7 +15,8 @@ daq_dta::daq_dta()
 	store_cur = 0 ;
 	do_swap = 0 ;	// obviosly
 	nitems = 0 ;
-	
+
+	mode = 0 ;
 	meta = 0 ;
 } ;
 
@@ -89,6 +90,7 @@ daq_store *daq_dta::create(u_int bytes, const char *name, int rts_id, const char
 		LOG(DBG,"Reusing %d bytes for %d bytes required",bytes_alloced,bytes) ;
 	}
 		
+
 	// put header
 	store->sec = rts_id ;
 
@@ -105,6 +107,7 @@ daq_store *daq_dta::create(u_int bytes, const char *name, int rts_id, const char
 	strncpy(hdr->obj_name,o_name,sizeof(hdr->obj_name)-1) ;
 	sprintf(hdr->describe,"%s[%d]:%s[%d bytes]:%s",name,rts_id,o_name,obj_size,__DATE__) ;
 
+	mode = 0 ;
 
 	LOG(DBG,"CREATE:%s: nitems %d, bytes %u/%u",hdr->describe,store->nitems,hdr->bytes_used,bytes_alloced) ;
 

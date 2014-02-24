@@ -167,6 +167,12 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 			}
 		}
 
+		if((d32[0] & 0xF) != 0) {	// not raw data!!! I haven't coded the ZS data yet so let's skip it...
+			LOG(ERR,"S%d-%d: %u: fiber %d: not raw data 0x%08X",s,r,e,fib,d32[0]) ;
+			goto err_ret ;			
+
+		}
+
 		words -= 1 ;	// for some reason...
 
 		//first 9 words are some header
@@ -185,16 +191,16 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 		daq_sst_data_t *sst_start  ;
 
 		switch(mode) {
-		case 1 :
+		case 1 :	// used in the DAQ Reader
 			if(words) {
 				sst = (daq_sst_data_t *)adc->request(3*words) ;
 			}
 			break ;
-		case 2 :
+		case 2 :	// used during real-time pedestal calc
 
 			break ;
 		default :
-			mode = 0 ;
+			mode = 0 ;	// just check the data...
 			break ;
 		}
 
@@ -690,26 +696,35 @@ int daq_sst::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		token_word = d32[2] ;
 		err |= 0x40000 ;	
 		break ;
+	case -1 :	// none found
+		if(token_word == 0x22200000) ;	// trigger only event?
+		else {
+			err |= 0x2 ;	// unknown case so far...
+		}
+		break ;
 	default :
 		err |= 0x2 ;	// unknown case so far...
 		break ;
 	}
 
 
-#if 0
 	// special TCD-only event check; is this implemented by SST?? Should be!
-	if(token_word == 0x0000FFFF) {
+	if(token_word == 0x22200000) {
 		LOG(WARN,"RDO %d: trigger-only event...",rdo) ;
 		token = 4097 ;
 		daq_cmd = 0 ;
 		trg_cmd = 4 ;
 	}
-	else {
-#endif
-	
-	token = token_word & 0xFFF ;
-	daq_cmd = (token_word & 0xF000) >> 12 ;
-	trg_cmd = (token_word & 0xF0000) >> 16 ;
+	else {	
+		//check for USB trigger
+		if(token_word & 0xFFF00000) {	// USB trigger?? Can't be
+			err |= 4 ;
+		}
+
+		token = token_word & 0xFFF ;
+		daq_cmd = (token_word & 0xF000) >> 12 ;
+		trg_cmd = (token_word & 0xF0000) >> 16 ;
+	}
 
 	// more sanity
 	if(token == 0) {
@@ -717,10 +732,6 @@ int daq_sst::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		err |= 4 ;
 	}
 
-	//check for USB trigger
-	if(token_word & 0xFFF00000) {	// USB trigger?? Can't be
-		err |= 4 ;
-	}
 
 	if(trg_cmd != 4) err |= 4 ;
 

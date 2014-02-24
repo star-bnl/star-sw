@@ -160,10 +160,12 @@ int daq_pxl::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	// quick sanity checks...
 	if(d32[0] != 0xAAAAAAAA) err |= 1 ;	// header error
 	if(d32[last_ix] != 0xBBBBBBBB) err |= 2	;	// trailer error
-	if((d32[1] & 0xFFF00000) != 0xCCC00000) err |= 8 ;	// junk in trigger/daq/token
+//	if((d32[1] & 0xFFF00000) != 0xCCC00000) err |= 8 ;	// junk in trigger/daq/token
+	if((d32[1] & 0xFFF00000) != 0xC0000000) err |= 8 ;	// junk in trigger/daq/token
 	
 	// special TCD-only event check
-	if(d32[1] == 0xCCC0FFFF) {
+//	if(d32[1] == 0xCCC0FFFF) {
+	if(d32[1] == 0xC000FFFF) {
 		LOG(NOTE,"RDO %d: trigger-only event...",rdo) ;
 		token = 4097 ;
 		daq_cmd = 0 ;
