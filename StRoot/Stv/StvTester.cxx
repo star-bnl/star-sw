@@ -36,8 +36,10 @@ StvTester *StvTester::Inst()
 //______________________________________________________________________________
 int StvTester::TestIt(const char* tit,const StvTrack *tk)
 {
+  int iErr=0;
+#if 0
 static int nCall = 0; nCall++;
-  int n=0,iErr=0,pora=0;
+  int n=0,pora=0;
   const StvNode *curNode,*preNode=0;
   double pCur,pPre=0,pBeg[2],pErr,lenTot=0,eAcc[2]={0};
   double len=0,pLos,pDlt,pct,sample=0;
@@ -94,6 +96,7 @@ static int nCall = 0; nCall++;
 	                 ,pCur,lenTot,pDlt,eAcc[0],pct);}
 
   }
+#endif
   return iErr;
 }
 //______________________________________________________________________________
@@ -117,6 +120,7 @@ double StvTester::DeltaLen(const StvNode* curNode,const StvNode* preNode,double 
 //______________________________________________________________________________
 double StvTester::PLoss(const StvNode* curNode,const StvNode* preNode, double *len) const
 {
+#if 0
 static int nCall = 0; nCall++;
   const StvNodePars &parA = preNode->GetFP();
   const StvNodePars &parB = curNode->GetFP();
@@ -163,9 +167,9 @@ static int nCall = 0; nCall++;
     printf ("PLoss dP0=%g dP1=%g\n",dP0,dP1);
   }
   return dP0;
-
+#endif
+return 0;
 }
-
 
 
 
