@@ -41,11 +41,11 @@ const StvELossData StvDiver::GetELossData() const
 {
  StvELossData eld;
  
+  eld.mdEdXdP = 0;
   eld.mTheta2 = mELoss->GetTheta2();
   eld.mOrt2   = mELoss->GetOrt2();
-  eld.mdPP    = mELoss->dPovPLen();
   eld.mELoss  = mELoss->ELoss();
-  eld.mdPPErr2= mELoss->dPPErr2();
+  eld.mELossErr2  = mELoss->ELossErr2();
   eld.mTotLen = mELoss->TotLen();
   eld.mP      = mELoss->P();
   eld.mM      = mELoss->M();

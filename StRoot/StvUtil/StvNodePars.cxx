@@ -29,7 +29,7 @@ static const double kFitErrs[5]   ={3,3
 				   ,10./180*M_PI
 				   ,kMaxPti};
 static const double kPiMass=0.13956995;
-static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass),kMaxCurv=1./5;
+static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxCorr = 0.1;
 //______________________________________________________________________________ 
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
@@ -244,27 +244,42 @@ StvDebug::Break(nCall);
    
 assert(fabs(_z)<999);
    if (jk)			return myLen;
-   double dRho = dPP*myLen,fak = 1+dRho;
+   double dRho = dPP*myLen,fak = 1+dRho;	//accounts sign dP/P = -dRho/Rho & sign of len
    if (fabs(dRho)<kMomAccu)	return myLen;
-   if (_curv*fak < -kMaxCurv) dRho = (-kMaxCurv-_curv)/_curv;
-   if (_curv*fak >  kMaxCurv) dRho = ( kMaxCurv-_curv)/_curv;
-   if (dRho< -kMaxCorr) dRho = -kMaxCorr;
-   if (dRho>  kMaxCorr) dRho =  kMaxCorr;
+   if (_curv*fak < -kMaxCurv) {
+     double mydRho = (-kMaxCurv-_curv)/_curv;
+     dRho = (mydRho*dRho>0) ? mydRho:0;
+   }
+   if (_curv*fak >  kMaxCurv) {
+     double mydRho = (kMaxCurv-_curv)/_curv;
+     dRho = (mydRho*dRho>0) ? mydRho:0;
+   }
    double lxy=myLen*cosL;
 
    double ang = _curv*lxy,ang2=ang*ang;
    double dH,dT,dA;
-   if (fabs(ang)<0.1) {
+   if (fabs(ang)<0.1) 		{//Small angle
      dH = 1./3 ; dT = 1./4  ;}
-   else               {
+   else if ( fabs(ang)<1) 	{//Reasonable angle
      double qqCos = ((cos(ang)-1)/ang2+1./2)/ang2; 	//~ 1/24
      double qqSin = (sin(ang)/(ang)-1)/ang2;  		//~-1/6
      dT = ((qqCos+qqSin)*2-qqCos*ang2+1./2);		//~1/4
      dH = ((2*qqCos+qqSin)*ang2 -2*qqSin );             //~1/3
    }
+   else				{//Big angle, approximation does NOT work
+     dH = 0;
+     dT = 0;
+   }
 
    dH*= dRho*ang *lxy/2;
    dT*=-dRho*ang2*lxy/2;
+
+int testSgn = 1; 
+if (myLen<0) testSgn*=-1; if (_curv<0) testSgn*=-1;
+assert(dH*testSgn>=0);
+assert(dT<=0);
+
+
    dA  = dRho*ang/2;
    _x += MOM[0]*dT-MOM[1]*dH;
    _y += MOM[1]*dT+MOM[0]*dH;

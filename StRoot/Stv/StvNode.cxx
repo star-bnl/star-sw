@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.26 2014/02/01 02:21:48 perev Exp $
+ * $Id: StvNode.cxx,v 1.27 2014/02/24 22:49:24 perev Exp $
  *
  * /author Victor Perev
  */
@@ -208,36 +208,38 @@ int StvNode::Check(const char *tit, int dirs) const
 //________________________________________________________________________________
 int StvNode::ResetELoss(const StvNodePars &pars,double len)
 {
-static const double kBigP=1,kBigP2=kBigP*kBigP,kSmallDiff=1e-2;
+static const double kBigP=3,kBigP2=kBigP*kBigP,kSmaDiff=1e-2;
+static const double kSmaP=0.01,kSmaP2=kSmaP*kSmaP;
 
 static StvELossTrak *el = new StvELossTrak();
 
   if (!len) {len = mELossData.mTotLen;} else {len = fabs(len);}
-  double p2 = pars.getP2();
-  if ((p2>kBigP2 && mELossData.mP>kBigP) 
-  ||  (fabs(mELossData.mP*mELossData.mP-p2)<kSmallDiff*p2)) 	return 0;
-  if (!mELossData.mMate) 					return 1;
+  double p2 = pars.getP2(); 
+  if (p2>kBigP2) p2=kBigP2;
+  if (p2<kSmaP2) p2=kSmaP2;
+  double myP = mELossData.mP;
+  if (fabs(myP*myP-p2)<kSmaDiff*p2) 		return 0;
+  if (!mELossData.mMate) 			return 1;
 
 //		Save the eloss and p to calculate (dP/P/len)/dP
   double pPrev   = mELossData.mP;
-  double dPPPrev = mELossData.mdPP;
+  double dEdXBef = mELossData.mELoss/mELossData.mTotLen;
 
   el->Reset();
   double p = sqrt(p2);
   el->Set(mELossData.mMate,p); el->Add(len);
   mELossData.mP      = el->P();
-  if (fabs(pPrev-mELossData.mP)<1e-6) 				return 0;
   mELossData.mTheta2 = el->GetTheta2();
   mELossData.mOrt2   = el->GetOrt2();
-  mELossData.mdPP    = el->dPovPLen();
   mELossData.mELoss  = el->ELoss();
-  mELossData.mdPPErr2= el->dPPErr2();
+  mELossData.mELossErr2= el->ELossErr2();
   mELossData.mTotLen = el->TotLen();  
   double dP = mELossData.mP - pPrev;
-  double dPPP = (mELossData.mdPP-dPPPrev)/(mELossData.mdPP+1e-11);
-  if (fabs(dPPP) <1e-2) {dPPP =  dPPP        *mELossData.mdPP/dP;}
-  else                  {dPPP = -log(1.-dPPP)*mELossData.mdPP/dP;}
-  mELossData.mdPPP = dPPP;
+  if (fabs(dP)<1e-3) return 0;
+  double dEdXNow = mELossData.mELoss/mELossData.mTotLen;
+  double dEdXdP = (dEdXNow-dEdXBef);
+  if (fabs(dEdXdP)> 0.1*dEdXNow) dEdXdP = dEdXNow*log(dEdXNow/dEdXBef);
+  dEdXdP/=dP; mELossData.mdEdXdP = dEdXdP;
   return 0;
 }
  

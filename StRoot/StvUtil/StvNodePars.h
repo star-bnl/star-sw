@@ -13,7 +13,7 @@ class StvFitErrs;
 class StvImpact;
 class StvELossData;
 
-enum ENode {kMaxPti=200,kMaxEta = 6};
+static const double kMaxPti=200,kMaxCurv=(0.000299792458 * 4.98478)*kMaxPti,kMaxEta = 6;
 static const double kMaxLamda = 3.14159265358/2-atan(exp(-kMaxEta))*2;
 static const double kMaxTanL  = tan(kMaxLamda);
 
@@ -251,9 +251,8 @@ public:
   double mTheta2;	//multiple scattering angle error
   double mOrt2;		//multiple scattering position error
   double mELoss;	//Energy loss
-  double mdPP;		//dP/P/len
-  double mdPPP;		//d(dP/P/len)/dP
-  double mdPPErr2;	//Square error of mdPP
+  double mELossErr2;	//Square error of energy loss
+  double mdEdXdP;       //d(dEdX)/dP
   double mTotLen;	//Total length where errors accumulated
   double mP;		//Total momentum
   double mM;		//Mass
@@ -311,15 +310,15 @@ inline void StvNodePars::reverse()
 //------------------------------------------------------------------------------
 inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &pa, double len)
 {    
-  double fak = (len)? fabs(len/el.mTotLen):1.;
-  mAA+= el.mTheta2 			*fak;
-  mLL+= el.mTheta2 			*fak;
-  mHH+= el.mOrt2 			*fak;
-  mZZ+= el.mOrt2 			*fak;
-  mPP+= el.mdPPErr2*(pa._ptin*pa._ptin) *fak;
-  assert(el.mTheta2>0 && el.mOrt2>0 &&el.mdPPErr2>0);
-
-
+  double fakLen = (len)? fabs(len/el.mTotLen):1.;
+  double p2 = pa.getP2();
+  double e2 = p2+el.mM*el.mM;
+  double fakNrj = e2/p2*(pa._ptin*pa._ptin)/p2;
+  mAA+= el.mTheta2 			*fakLen;
+  mLL+= el.mTheta2 			*fakLen;
+  mHH+= el.mOrt2 			*fakLen;
+  mZZ+= el.mOrt2 			*fakLen;
+  mPP+= el.mELossErr2*fakNrj 		*fakLen;
 }
 //------------------------------------------------------------------------------
 inline double StvNodePars::getCosL() const

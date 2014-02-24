@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.8 2014/02/07 19:27:14 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.9 2014/02/24 22:51:46 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -109,16 +109,6 @@ double StvELossTrak::GetTheta2() const
 double StvELossTrak::GetOrt2() const 
 {
   return fOrth2;
-}
-//_____________________________________________________________________________
-double StvELossTrak::dPovPLen() const	
-{
- return fTotELoss*fE/(fP*fP)/fTotLen;
-}
-//_____________________________________________________________________________
-double StvELossTrak::dPPErr2() const	
-{
- return fTotELossErr2*fE*fE/(fP*fP*fP*fP);
 }
 //_____________________________________________________________________________
 #if 0
