@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.7 2014/02/19 06:26:14 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.8 2014/02/25 01:07:02 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.8  2014/02/25 01:07:02  smirnovd
+* Minor pointer initialization and declaration fixes
+*
 * Revision 1.7  2014/02/19 06:26:14  ypwang
 * update raw hit decision cuts to be compatible to ZS and non-ZS data
 *
@@ -72,14 +75,11 @@ Int_t StIstRawHitMaker::Init(){
    LOG_INFO << "Initializing StIstRawHitMaker ..." << endm;
    Int_t ierr = kStOk;
 
-   mIstCollectionPtr = NULL;
-
    //prepare output data collection
-   TObjectSet* istDataSet = new TObjectSet("istRawHitAndCluster");
-   m_DataSet = istDataSet;
+   m_DataSet = new TObjectSet("istRawHitAndCluster");
 
    mIstCollectionPtr = new StIstCollection();
-   istDataSet->AddObject(mIstCollectionPtr);
+   m_DataSet->AddObject(mIstCollectionPtr);
 
    if( ierr || !mIstCollectionPtr ) {
       LOG_WARN << "Error constructing istCollection" << endm;
@@ -159,11 +159,10 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    }
    else LOG_DEBUG << " no IST gain table found" << endm;
 
-   St_istMapping *istMapping;
-   istMapping_st *gM;
-   istMapping = mIstDbMaker->GetMapping();
+   St_istMapping *istMapping = mIstDbMaker->GetMapping();
+
    if(istMapping) {
-       gM = istMapping->GetTable();
+       istMapping_st *gM = istMapping->GetTable();
        if( !gM ) {
             LOG_WARN << "Pointer to IST mapping table is null" << endm;
             ierr = kStWarn;
