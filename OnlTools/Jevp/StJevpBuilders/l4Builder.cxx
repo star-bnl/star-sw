@@ -176,7 +176,7 @@ void l4Builder::initialize(int argc, char *argv[])
         HltPlots[i]->gridy = 0;
         HltPlots[i]->setPalette(1);
     }
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < 4; i++) {
         BesGoodPlots[i] = new JevpPlot();
         BesGoodPlots[i]->gridx = 0;
         BesGoodPlots[i]->gridy = 0;
@@ -241,7 +241,7 @@ void l4Builder::initialize(int argc, char *argv[])
         addPlot(HltPlots[i]);
     }
     if(switch_BesGood == 1) {
-        for(int i = 0; i < 2; i++) {
+        for(int i = 0; i < 4; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(BesGoodPlots[i]);
         }
@@ -292,7 +292,7 @@ void l4Builder::startrun(daqReader *rdr)
     runnumber = rdr->run;
 
     int initialno = 42;
-    if(switch_BesGood == 1) initialno += 2;
+    if(switch_BesGood == 1) initialno += 4;
     if(switch_BesMonitor == 1) initialno += 2;
     if(switch_FixedTarget == 1) initialno += 2;
     if(switch_FixedTargetMonitor == 1) initialno += 2;
@@ -506,7 +506,7 @@ void l4Builder::writeHistogram()
     sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
     TFile file(histfile, "RECREATE");
     int initialno = 42;
-    if(switch_BesGood == 1) initialno += 2;
+    if(switch_BesGood == 1) initialno += 4;
     if(switch_BesMonitor == 1) initialno += 2;
     if(switch_FixedTarget == 1) initialno += 2;
     if(switch_FixedTargetMonitor == 1) initialno += 2;
@@ -899,7 +899,9 @@ void l4Builder::event(daqReader *rdr)
         hglobalMult_UPC->Fill(hlt_gt->nGlobalTracks);
         hprimaryMult_UPC->Fill(count_UPC);
     }
-
+    if(decision & triggerBitBesgoodEvents){
+      hBesGoodprimaryMult->Fill(count);
+    }
     // fill nodes
     for(u_int i = 0; i < hlt_node->nNodes; i++) {
         int     primaryTrackSN = hlt_node->node[i].primaryTrackSN;
@@ -954,6 +956,7 @@ void l4Builder::event(daqReader *rdr)
             addServerTags("L4BesGoodEvents");
         }
         hBesGoodVertexXY->Fill(vertX, vertY);
+        hBesGoodVertexZ->Fill(vertZ);
         hBesGoodVr->Fill(vertR);
     }
 //BESMonitor
@@ -1913,18 +1916,30 @@ void l4Builder::defineHltPlots()
 
 void l4Builder::defineBesGoodPlots()
 {
-    index = 0;
-    BesGoodPlots[index]->setDrawOpts("colz");
-    hBesGoodVertexXY = new TH2D("BesGood_VertexXY", "BesGood_VertexXY", 200, -5, 5, 200, -5, 5);
-    ph = new PlotHisto();
-    ph->histo = hBesGoodVertexXY;
-    BesGoodPlots[index]->addHisto(ph);
+  index=0;
+  hBesGoodVertexXY = new TH2D("BesGood_VertexXY","BesGood_VertexXY",200,-5,5,200,-5,5);
+  ph = new PlotHisto();
+  ph->histo = hBesGoodVertexXY;
+  BesGoodPlots[index]->addHisto(ph);
 
-    index++; //1
-    hBesGoodVr = new TH1D("BesGood_Vr", "BesGood_Vr", 100, 0, 5);
-    ph = new PlotHisto();
-    ph->histo = hBesGoodVr;
-    BesGoodPlots[index]->addHisto(ph);
+  index++; //1
+  hBesGoodVertexZ = new TH1D("BesGood_VertexZ","BesGood_VertexZ",1000,-200.,200.);
+  ph = new PlotHisto();
+  ph->histo = hBesGoodVertexZ;
+  BesGoodPlots[index]->addHisto(ph);
+
+  index++; //2
+  hBesGoodVr = new TH1D("BesGood_Vr","BesGood_Vr",100,0,5);
+  ph = new PlotHisto();
+  ph->histo = hBesGoodVr;
+  BesGoodPlots[index]->addHisto(ph);
+
+  index++; //3
+  BesGoodPlots[index]->logy=1;
+  hBesGoodprimaryMult = new TH1I("BesGood_primaryMult", "BesGood_primaryMult",2200,0,2200);
+  ph = new PlotHisto();
+  ph->histo = hBesGoodprimaryMult;
+  BesGoodPlots[index]->addHisto(ph);
 }
 
 void l4Builder::defineBesMontinorPlots()
@@ -2528,8 +2543,10 @@ void l4Builder::setAllPlots()
     hMeanDcaXy->SetLabelSize(0.04, "X");
     hBesGoodVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
     hBesGoodVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
+    hBesGoodVertexZ->GetXaxis()->SetTitle("VertexZ (cm)");
     //hBesGoodVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30);
     hBesGoodVr->GetXaxis()->SetTitle("VertexR (cm)");
+    hBesGoodprimaryMult->GetXaxis()->SetTitle("Multiplicity");
     hBesMonitorVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
     hBesMonitorVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
     hBesMonitorVertexXY->GetZaxis()->SetRangeUser(1.e-10, 1.e30);

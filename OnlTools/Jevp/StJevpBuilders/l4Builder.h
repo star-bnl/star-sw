@@ -111,7 +111,7 @@ class l4Builder : public JevpPlotSet {
  * @author 
  */  
   JevpPlot *HltPlots[42];
-  JevpPlot *BesGoodPlots[2];
+  JevpPlot *BesGoodPlots[4];
   JevpPlot *BesMontinorPlots[2];
   JevpPlot *FixedTargetPlots[2];
   JevpPlot *FixedTargetMonitorPlots[2];
@@ -349,6 +349,8 @@ class l4Builder : public JevpPlotSet {
 
   TH2D *hBesGoodVertexXY;
   TH1D *hBesGoodVr;
+  TH1D *hBesGoodVertexZ;
+  TH1I *hBesGoodprimaryMult;
   TH2D *hBesMonitorVertexXY;
   TH1D *hBesMonitorVr;
   TH2D *hFixedTargetVertexXY;
