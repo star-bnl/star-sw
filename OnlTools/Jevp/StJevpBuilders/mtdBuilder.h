@@ -12,7 +12,7 @@
 #include <math.h>
 
 #define nMTDtrays 30
-#define nMTDtrig 96
+#define nMTDtrig 128
 
 class mtdBuilder : public JevpPlotSet {
  public:
@@ -70,14 +70,14 @@ class mtdBuilder : public JevpPlotSet {
   //information from the QT map...
   int isADC[nMTDtrig];		// nonzero if ADC, value is channel number
   int isTAC[nMTDtrig];		// nonzero if TAC, value is channel number
-  TString QTslot[96];
-  TString QTslothex[96];
-  TString QTboard[96];
-  TString QTchanname[96];
-  TString QTchanno[96];
-  TString QTchanstring[96];
-  TString QTcable[96];
-  TString QTtpcsector[96];
+  TString QTslot[128];
+  TString QTslothex[128];
+  TString QTboard[128];
+  TString QTchanname[128];
+  TString QTchanno[128];
+  TString QTchanstring[128];
+  TString QTcable[128];
+  TString QTtpcsector[128];
  
   double numberforsort;
   vector<double> leadinghits;
