@@ -85,7 +85,7 @@ class mtdBuilder : public JevpPlotSet {
   TLatex *MTD_Error1_label;
   TLatex *MTD_Error2_label;
   TLatex *MTD_Error3_label;
-  TLatex *MTD_BL_label[15];		// Run-13 15 trays
+  TLatex *MTD_BL_label[30];		// Run-13 15 trays
 
   JevpPlot **plots;
   ClassDef(mtdBuilder, 1);
