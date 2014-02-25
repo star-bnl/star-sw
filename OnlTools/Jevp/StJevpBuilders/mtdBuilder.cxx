@@ -19,15 +19,16 @@
 #include <RTS/include/rtsLog.h>
 
 // Backleg lists
-const int nTray3bl		= 0;
-      int tray3bl[1] 	= {0};
-const int nTray5bl		= 15;
-      int tray5bl[15]	= {22,25,26,27,28,29,30,1,2,3,4,5,6,7,10};
-int tray[15]			= {22,25,26,27,28,29,30,1,2,3,4,5,6,7,10};
+const int nTray3bl			=  9;
+      int tray3bl[nTray3bl]	= {12,13,14,15,16,17,18,19,20};
+const int nTray5bl			= 21;
+      int tray5bl[nTray5bl]	= {21,22,23,24,25,26,27,28,29,30,1,2,3,4,5,6,7,8,9,10,11};
 
-//                   BL        1 2  3  4  5  6  7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
-const int HitmapXbyTray[30] = {8,9,10,11,12,13,14,0,0,15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 3, 4, 5, 6, 7};
-const int TrayToRDO[30]     = {2,2, 2, 2, 2, 2, 2,2,2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+int tray[30]			= {1,2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
+
+//                   BL        1 2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
+const int HitmapXbyTray[30] = {1,2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30};
+const int TrayToRDO[30]     = {2,2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 int nGlobalSlot	= nTray3bl*3 + nTray5bl*5;
 int ntray		= nTray3bl   + nTray5bl;
@@ -68,12 +69,12 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 
   //---- build Root Histograms...
   //
-  char tmpchr[200];
-  char tmpchrt[200];
+  char tmpchr[300];
+  char tmpchrt[300];
   
   sprintf(tmpchr,"MTD strips vs BL");
-  contents.hMTD_hitmap2D = new TH2F(tmpchr,tmpchr,15,0.5,15.5,120.,0.5,120.5);		// 15 active backlegs
-  for (int i=0;i<15;i++){
+  contents.hMTD_hitmap2D = new TH2F(tmpchr,tmpchr,30,0.5,30.5,120.,0.5,120.5);		// 30 active backlegs
+  for (int i=0;i<ntray;i++){
 	sprintf(tmpchr, "%d", tray[i]);
   	contents.hMTD_hitmap2D->GetXaxis()->SetBinLabel(i+1,tmpchr);
   }
@@ -93,9 +94,9 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 //    contents.hMTD_trig2D = new TH2F(tmpchr,tmpchr,96,-0.5,95.5,60,0,3000);
     contents.hMTD_trig2D     = new TH2F(tmpchr,tmpchr,512,-0.5,511.5,164, 0, 4100);
 	sprintf(tmpchr,"MTD_Trig2D_adc");
-    contents.hMTD_trig2D_adc = new TH2F(tmpchr,tmpchr,42,0.5,42.5,164, 0, 4100);
+    contents.hMTD_trig2D_adc = new TH2F(tmpchr,tmpchr,56,0.5,56.5,164, 0, 4100);
 	sprintf(tmpchr,"MTD_Trig2D_tac");
-    contents.hMTD_trig2D_tac = new TH2F(tmpchr,tmpchr,42,0.5,42.5,164, 0, 4100);
+    contents.hMTD_trig2D_tac = new TH2F(tmpchr,tmpchr,56,0.5,56.5,164, 0, 4100);
 	//
 	int kadc,ktac,kadctac;
 	TString adctac[2];
@@ -108,7 +109,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
  		if (isADC[i]){ kadc=isADC[i]; }else{ ktac=isTAC[i]; }
  		if (kadc){ kadctac=0; } else if (ktac){ kadctac=1; }
 		if (kadctac>=0){
-	 		sprintf(tmpchrt,"%s %s %s",QTboard[i].Data(),adctac[kadctac].Data(),QTcable[i].Data()); 
+	 		sprintf(tmpchrt,"%s %s %s",QTboard[i].Data(),adctac[kadctac].Data(),QTchanstring[i].Data()); 
 	 		//cout<<i<<" "<<tmpchrt<<endl;
 	 		names[i] = TString(tmpchrt);
 	 	} else {
@@ -176,9 +177,9 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   //}
   
 //  contents.MTD_Tray_hits=new TH1F("MTD_Tray_hits","MTD Hits by Tray",150,0.5,150.5);
-  contents.MTD_Tray_hits=new TH1F("MTD_Tray_hits","MTD Hits by Tray",75,0.5,75.5);
-  contents.MTD_Tray_hitsEvenOdd=new TH1F("MTD_Tray_hitsEvenOdd","MTD Hits by Tray",75,0.5,75.5);
-  contents.MTD_Tray_hitsBinEven=new TH1F("MTD_Tray_hitsBinEven","MTD Hits by Tray",75,0.5,75.5);
+  contents.MTD_Tray_hits=new TH1F("MTD_Tray_hits","MTD Hits by Tray",150,0.5,150.5);
+  contents.MTD_Tray_hitsEvenOdd=new TH1F("MTD_Tray_hitsEvenOdd","MTD Hits by Tray",150,0.5,150.5);
+  contents.MTD_Tray_hitsBinEven=new TH1F("MTD_Tray_hitsBinEven","MTD Hits by Tray",150,0.5,150.5);
   
 //  int i=0;
 //   for (unsigned int itray3bl=0; itray3bl<nTray3bl; itray3bl++) {
@@ -201,7 +202,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 
   // Add root histograms to Plots
   LOG("====MTD====", "Adding Plots...........................");
-  JevpPlot *plots[200];				// was 100
+  JevpPlot *plots[300];				// was 200
   int nhhit=0;
   int nhtrig=0;
   int n=0;
@@ -212,24 +213,25 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   JLine *ln = new JLine(12.5, 0.1, 12.5, 0.9 );
   		 ln -> SetLineColor(4);
 
-  TLatex *qtid[42];						// Run-13 - 42 connections to TRG.
+  TLatex *qtid[56];						// Run-14 - 56 connections to TRG.
   int kadctacind;
+  //cout<<"nMTDtrig="<<nMTDtrig<<endl;
   for (int i=0;i<nMTDtrig;i++){
     kadctacind	= 0;
 	if (isADC[i]){ kadctacind=isADC[i]; }else if (isTAC[i]){ kadctacind=isTAC[i]; }
 	if (kadctacind){		
-		sprintf(tmpchr,"%s %s",QTboard[i].Data(),QTcable[i].Data());
+		sprintf(tmpchr,"%s %s",QTboard[i].Data(),QTchanstring[i].Data());
 		//cout<<kadctacind<<" "<<tmpchr<<endl;
-		qtid[kadctacind-1]	= new TLatex(kadctacind+0.3,3300.,tmpchr);
+		qtid[kadctacind-1]	= new TLatex(kadctacind+0.3,3000.,tmpchr);
 		qtid[kadctacind-1]->SetTextAngle(90);
 		qtid[kadctacind-1]->SetTextSize(0.02);
 	}
   }
   TLine *qtlines[2];
-  for (int i=0;i<2;i++){
-	qtlines[i] = new TLine(16.5+14.*i,0.,16.5+14.*i,4095.);		// Run-13 config....
+  for (int i=0;i<3;i++){
+	qtlines[i] = new TLine(16.5+14.*i,0.,16.5+14.*i,4095.);		// Run-14 config....
 	qtlines[i]->SetLineColor(1);
-	qtlines[i]->SetLineWidth(2);
+	qtlines[i]->SetLineWidth(1);
   }
   
   plots[nhhit++] = new JevpPlot(contents.hMTD_hitmap2D);
@@ -269,7 +271,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 		plots[i]->getHisto(0)->histo->SetFillColor(19);
 		plots[i]->getHisto(0)->histo->SetMinimum(0);
 		plots[i]->getHisto(0)->histo->SetFillStyle(1001);
-		plots[i]->optstat=1111111;
+		plots[i]->optstat=10;
 		plots[i]->addElement(latexW);
 		plots[i]->addElement(latexE);
 		plots[i]->addElement(ln);
@@ -285,10 +287,10 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 	if (i>=nhhit&&i<nhhit+3){				// TRG data 2D plots...
 		plots[i]->optstat=0;
 		if (i==nhhit+1||i==nhhit+2){
-			for (int j=0;j<42;j++){			// Run-13 42 trg connections...
+			for (int j=0;j<56;j++){			// Run-14 56 trg connections...
 				plots[i]->addElement(qtid[j]);
 			}
-			for (int j=0;j<2;j++){			// Run-13 3 QT boards...
+			for (int j=0;j<3;j++){			// Run-14 4 QT boards...
 				//cout<<qtlines[j]<<endl;
 				plots[i]->addElement(qtlines[j]);
 			}
@@ -298,7 +300,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 		plots[i]->getHisto(0)->histo->SetMinimum(0);
 		plots[i]->getHisto(0)->histo->SetFillStyle(1001);
 		plots[i]->logy		= 1;
-		plots[i]->optstat	= 1111111;
+		plots[i]->optstat	= 10;
 	}
   }
   LOG("====MTD====", "%d trig plots added", nhtrig);
@@ -358,12 +360,12 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   plots[n]->gridy = 0;
   plots[n]->logy=1;
   plots[n]->getHisto(0)->histo->SetFillColor(18);
-  JLine *vlines[15];								// Run-13, 15 backlegs
-  for (int i=0;i<15;i++){			
-  	vlines[i] = new JLine(5.5+i*5,1.,5.5+i*5,100000);
-	vlines[i]->SetLineColor(3);
-	plots[n]->addElement(vlines[i]);
-  }
+//  JLine *vlines[30];								// Run-13, 15 backlegs
+//  for (int i=0;i<30;i++){			
+// 	vlines[i] = new JLine(5.5+i*5,1.,5.5+i*5,100000);
+//	vlines[i]->SetLineColor(3);
+//	plots[n]->addElement(vlines[i]);
+//  }
   LOG("====MTD====", "MTD_Tray_hits added %d",n);
 
   plots[++n] = new JevpPlot(contents.MTD_Tray_hitsEvenOdd);
@@ -378,10 +380,11 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   plots[n]->getHisto(1)->histo->SetFillColor(5);
   plots[n]->getHisto(0)->histo->SetMinimum(0.5);
   plots[n]->getHisto(1)->histo->SetMinimum(0.5);
-  for (int i=0;i<15;i++){
+  for (int i=0;i<30;i++){
 	sprintf(tmpchr, "%d", tray[i]);
   	MTD_BL_label[i]=new TLatex(3.+i*5,1.1,tmpchr);
   	MTD_BL_label[i]->SetTextAlign(21);
+  	MTD_BL_label[i]->SetTextSize(0.03);
     plots[n]->addElement(MTD_BL_label[i]);
   }
   LOG("====MTD====", "MTD_Tray_hits(odd/even) added %d",n);
@@ -481,11 +484,13 @@ void mtdBuilder::event(daqReader *rdr) {
 			contents.hMTD_hitmap2D->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
 			contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);        
 //			contents.MTD_Tray_hits->Fill(iGlobalSlot(trayid,slot));
-			contents.MTD_Tray_hits->Fill(5*(HitmapXbyTray[trayid-1]-1)+slot);
+			int ntrayonbl	= 5;
+			//if (trayid>=12&&trayid<=20) ntrayonbl = 3;
+			contents.MTD_Tray_hits->Fill(ntrayonbl*(HitmapXbyTray[trayid-1]-1)+slot);
 			if (HitmapXbyTray[trayid-1]%2==0){
-				contents.MTD_Tray_hitsBinEven->Fill(5*(HitmapXbyTray[trayid-1]-1)+slot);
+				contents.MTD_Tray_hitsBinEven->Fill(ntrayonbl*(HitmapXbyTray[trayid-1]-1)+slot);
 			} else {
-				contents.MTD_Tray_hitsEvenOdd->Fill(5*(HitmapXbyTray[trayid-1]-1)+slot);
+				contents.MTD_Tray_hitsEvenOdd->Fill(ntrayonbl*(HitmapXbyTray[trayid-1]-1)+slot);
 			}
 		  }  // end loop nword
       } // end loop over fibers
@@ -520,7 +525,7 @@ void mtdBuilder::event(daqReader *rdr) {
 			  BunchIdError	= 1;
 		  }
           //
-		  if (BunchIdError && traynum!=10){	
+		  if (BunchIdError && traynum!=8 && traynum!=9 && traynum!=19 && traynum!=23){			//!!!!!!!!!!!!!!!!!!!!!!!!!!
 		    LOG("====MTD====","bunchid error or not found ... tray=%d   ref=%d,%d   bunchid=%d   diff=%d",
 		  			traynum,allbunchid[0][mReferenceTray-1],allbunchid[1][mReferenceTray-1],
 		  			allbunchid[ihalf][itray],diff);
@@ -528,7 +533,9 @@ void mtdBuilder::event(daqReader *rdr) {
 		  //
 		  if(allbunchid[ihalf][itray]!=-9999)                 contents.MTD_bunchid->Fill(traynum, diff);
 		  if(allbunchid[ihalf][itray]!=-9999 && BunchIdError) contents.MTD_Error2->Fill(traynum); 	// real bunchid errors
+		  if (traynum!=8 && traynum!=9 && traynum!=19 && traynum!=23){				//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		  if(allbunchid[ihalf][itray]==-9999)                 contents.MTD_Error3->Fill(traynum); 	// missing bunchids
+		  }
       }
     }
   }
@@ -614,8 +621,8 @@ void mtdBuilder::event(daqReader *rdr) {
 //	mtdAtAddress(ich,iprepost=0) -> mxq[iprepost=0][0][ich]			ich=[0,31]
 //	mtdgemAtAddress(ich,iprepost=0) -> mxq[iprepost=0][10][ich]		ich=[0,31]
 
- 	const int nslots 	= 3;
- 	int slots[nslots]	= {0,10,12};
+ 	const int nslots 	= 4;
+ 	int slots[nslots]	= {0,10,12,14};
  	int mh				= 0;
  	int kbin;
  	for (int kslot=0;kslot<nslots;kslot++){
@@ -673,13 +680,14 @@ int mtdBuilder::tdcchan2globalstrip(int tdigboardid, int tdcid, int tdcchan)
 
 int mtdBuilder::tdig2slot(int tdigboardid, int trayid){
   int slot=-1;  
-  if(istray3bl(trayid)) slot = (tdigboardid<4)?(tdigboardid+2):(tdigboardid); 
-  else {
+  if(istray3bl(trayid)){
+  	 slot = (tdigboardid<4)?(tdigboardid+2):(tdigboardid); 
+  } else {
     slot = (tdigboardid<4)?(tdigboardid+1):(tdigboardid);
     if(tdigboardid==4) slot=5;
     if(tdigboardid==5) slot=4;
   }
-    return slot;
+  return slot;
 }
 
 int mtdBuilder::istray3bl(int trayid){
@@ -762,111 +770,242 @@ void mtdBuilder::ReadValidBunchidPhase(){
 
 int mtdBuilder::SetMtdQTmap(){
 	char buf[200];
-	const char* MtdQTmap[96] = {
-	"06 (0x10) MT001 QT8A-J1 (ch01) MTD 25-1-J2 (TPC sectors 21,22)",
-	"06 (0x10) MT001 QT8A-J2 (ch02) MTD 25-1-J3 (TPC sectors 21,22)",
-	"06 (0x10) MT001 QT8A-J3 (ch03) MTD 25-5-J2 (TPC sectors 2,3)",
-	"06 (0x10) MT001 QT8A-J4 (ch04) MTD 25-5-J3 (TPC sectors 2,3)",
-	"06 (0x10) MT001 QT8A-J5 (ch05) MTD TAC 25-1-J2",
-	"06 (0x10) MT001 QT8A-J6 (ch06) MTD TAC 25-1-J3",
-	"06 (0x10) MT001 QT8A-J7 (ch07) MTD TAC 25-5-J2",
-	"06 (0x10) MT001 QT8A-J8 (ch08) MTD TAC 25-5-J3",
-	"06 (0x10) MT001 QT8B-J1 (ch09) MTD 25-2-J2 (TPC sectors 21,22)",
-	"06 (0x10) MT001 QT8B-J2 (ch10) MTD 25-2-J3 (TPC sectors 21,22)",
-	"06 (0x10) MT001 QT8B-J3 (ch11) MTD 25-4-J2 (TPC sectors 2,3)",
-	"06 (0x10) MT001 QT8B-J4 (ch12) MTD 25-4-J3 (TPC sectors 2,3)",
-	"06 (0x10) MT001 QT8B-J5 (ch13) MTD TAC 25-2-J2",
-	"06 (0x10) MT001 QT8B-J6 (ch14) MTD TAC 25-2-J3",
-	"06 (0x10) MT001 QT8B-J7 (ch15) MTD TAC 25-4-J2",
-	"06 (0x10) MT001 QT8B-J8 (ch16) MTD TAC 25-4-J3",
-	"06 (0x10) MT001 QT8C-J1 (ch17) MTD 25-3-J2 (TPC sectors 21,22,2,3)",
-	"06 (0x10) MT001 QT8C-J2 (ch18) MTD 25-3-J3 (TPC sectors 21,22,2,3)",
-	"06 (0x10) MT001 QT8C-J3 (ch19) MTD 30-3-J2 (TPC sectors 23,24,1,12)",
-	"06 (0x10) MT001 QT8C-J4 (ch20) MTD 30-3-J3 (TPC sectors 23,24,1,12)",
-	"06 (0x10) MT001 QT8C-J5 (ch21) MTD TAC 25-3-J2",
-	"06 (0x10) MT001 QT8C-J6 (ch22) MTD TAC 25-3-J3",
-	"06 (0x10) MT001 QT8C-J7 (ch23) MTD TAC 30-3-J2",
-	"06 (0x10) MT001 QT8C-J8 (ch24) MTD TAC 30-3-J3",
-	"06 (0x10) MT001 QT8D-J1 (ch25) MTD 30-1-J2 (TPC sectors 23,24)",
-	"06 (0x10) MT001 QT8D-J2 (ch26) MTD 30-1-J3 (TPC sectors 23,24)",
-	"06 (0x10) MT001 QT8D-J3 (ch27) MTD 30-5-J2 (TPC sectors 1,12)",
-	"06 (0x10) MT001 QT8D-J4 (ch28) MTD 30-5-J3 (TPC sectors 1,12)",
-	"06 (0x10) MT001 QT8D-J5 (ch29) MTD TAC 30-1-J2",
-	"06 (0x10) MT001 QT8D-J6 (ch30) MTD TAC 30-1-J3",
-	"06 (0x10) MT001 QT8D-J7 (ch31) MTD TAC 30-5-J2",
-	"06 (0x10) MT001 QT8D-J8 (ch32) MTD TAC 30-5-J3",
-	"16 (0x1a) MT002 QT8A-J1 (ch01) MTD 05-1-J2 (TPC sectors 13,14)",
-	"16 (0x1a) MT002 QT8A-J2 (ch02) MTD 05-1-J3 (TPC sectors 13,14)",
-	"16 (0x1a) MT002 QT8A-J3 (ch03) MTD 05-5-J2 (TPC sectors 10,11)",
-	"16 (0x1a) MT002 QT8A-J4 (ch04) MTD 05-5-J3 (TPC sectors 10,11)",
-	"16 (0x1a) MT002 QT8A-J5 (ch05) MTD TAC 05-1-J2",
-	"16 (0x1a) MT002 QT8A-J6 (ch06) MTD TAC 05-1-J2",
-	"16 (0x1a) MT002 QT8A-J7 (ch07) MTD TAC 05-5-J2",
-	"16 (0x1a) MT002 QT8A-J8 (ch08) MTD TAC 05-5-J3",
-	"16 (0x1a) MT002 QT8B-J1 (ch09) MTD 05-2-J2 (TPC sectors 13,14)",
-	"16 (0x1a) MT002 QT8B-J2 (ch10) MTD 05-2-J3 (TPC sectors 13,14)",
-	"16 (0x1a) MT002 QT8B-J3 (ch11) MTD 05-4-J2 (TPC sectors 10,11)",
-	"16 (0x1a) MT002 QT8B-J4 (ch12) MTD 05-4-J3 (TPC sectors 10,11)",
-	"16 (0x1a) MT002 QT8B-J5 (ch13) MTD TAC 05-2-J2",
-	"16 (0x1a) MT002 QT8B-J6 (ch14) MTD TAC 05-2-J3",
-	"16 (0x1a) MT002 QT8B-J7 (ch15) MTD TAC 05-4-J2",
-	"16 (0x1a) MT002 QT8B-J8 (ch16) MTD TAC 05-4-J3",
-	"16 (0x1a) MT002 QT8C-J1 (ch17) MTD 05-3-J2 (TPC sectors 13,14,10,11)",
-	"16 (0x1a) MT002 QT8C-J2 (ch18) MTD 05-3-J3 (TPC sectors 13,14,10,11)",
-	"16 (0x1a) MT002 QT8C-J3 (ch19) MTD",
-	"16 (0x1a) MT002 QT8C-J4 (ch20) MTD",
-	"16 (0x1a) MT002 QT8C-J5 (ch21) MTD TAC 05-3-J2",
-	"16 (0x1a) MT002 QT8C-J6 (ch22) MTD TAC 05-3-J3",
-	"16 (0x1a) MT002 QT8C-J7 (ch23) MTD",
-	"16 (0x1a) MT002 QT8C-J8 (ch24) MTD",
-	"16 (0x1a) MT002 QT8D-J1 (ch25) MTD 30-2-J2 (TPC sectors 23,24)",
-	"16 (0x1a) MT002 QT8D-J2 (ch26) MTD 30-2-J3 (TPC sectors 23,24)",
-	"16 (0x1a) MT002 QT8D-J3 (ch27) MTD 30-4-J2 (TPC sectors 1,12)",
-	"16 (0x1a) MT002 QT8D-J4 (ch28) MTD 30-4-J3 (TPC sectors 1,12)",
-	"16 (0x1a) MT002 QT8D-J5 (ch29) MTD TAC 30-2-J2",
-	"16 (0x1a) MT002 QT8D-J6 (ch30) MTD TAC 30-2-J3",
-	"16 (0x1a) MT002 QT8D-J7 (ch31) MTD TAC 30-4-J2",
-	"16 (0x1a) MT002 QT8D-J8 (ch32) MTD TAC 30-4-J3",
-	"18 (0x1c) MT003 QT8A-J1 (ch09) MTD 10-2-J2 (TPC sectors 8,16)",
-	"18 (0x1c) MT003 QT8A-J2 (ch10) MTD 10-2-J3 (TPC sectors 8,16)",
-	"18 (0x1c) MT003 QT8A-J3 (ch11) MTD 22-2-J2 (TPC sectors 4,20)",
-	"18 (0x1c) MT003 QT8A-J4 (ch12) MTD 22-2-J3 (TPC sectors 4,20)",
-	"18 (0x1c) MT003 QT8A-J5 (ch13) MTD TAC 10-2-J2",
-	"18 (0x1c) MT003 QT8A-J6 (ch14) MTD TAC 10-2-J3",
-	"18 (0x1c) MT003 QT8A-J7 (ch15) MTD TAC 22-2-J2",
-	"18 (0x1c) MT003 QT8A-J8 (ch16) MTD TAC 22-2-J3",
-	"18 (0x1c) MT003 QT8B-J1 (ch09) MTD 10-3-J2 (TPC sectors 8,16)",
-	"18 (0x1c) MT003 QT8B-J2 (ch10) MTD 10-3-J3 (TPC sectors 8,16)",
-	"18 (0x1c) MT003 QT8B-J3 (ch11) MTD 22-3-J2 (TPC sectors 4,20)",
-	"18 (0x1c) MT003 QT8B-J4 (ch12) MTD 22-3-J3 (TPC sectors 4,20)",
-	"18 (0x1c) MT003 QT8B-J5 (ch13) MTD TAC 10-3-J2",
-	"18 (0x1c) MT003 QT8B-J6 (ch14) MTD TAC 10-3-J3",
-	"18 (0x1c) MT003 QT8B-J7 (ch15) MTD TAC 22-3-J2",
-	"18 (0x1c) MT003 QT8B-J8 (ch16) MTD TAC 22-3-J3",
-	"18 (0x1c) MT003 QT8C-J1 (ch17) MTD",
-	"18 (0x1c) MT003 QT8C-J2 (ch18) MTD",
-	"18 (0x1c) MT003 QT8C-J3 (ch19) MTD",
-	"18 (0x1c) MT003 QT8C-J4 (ch20) MTD",
-	"18 (0x1c) MT003 QT8C-J5 (ch21) MTD",
-	"18 (0x1c) MT003 QT8C-J6 (ch22) MTD",
-	"18 (0x1c) MT003 QT8C-J7 (ch23) MTD",
-	"18 (0x1c) MT003 QT8C-J8 (ch24) MTD",
-	"18 (0x1c) MT003 QT8D-J1 (ch25) MTD 10-4-J2 (TPC sectors 8,16)",
-	"18 (0x1c) MT003 QT8D-J2 (ch26) MTD 10-4-J3 (TPC sectors 8,16)",
-	"18 (0x1c) MT003 QT8D-J3 (ch27) MTD 22-4-J2 (TPC sectors 4,20)",
-	"18 (0x1c) MT003 QT8D-J4 (ch28) MTD 22-4-J3 (TPC sectors 4,20)",
-	"18 (0x1c) MT003 QT8D-J5 (ch29) MTD TAC 10-4-J2",
-	"18 (0x1c) MT003 QT8D-J6 (ch30) MTD TAC 10-4-J3",
-	"18 (0x1c) MT003 QT8D-J7 (ch31) MTD TAC 22-4-J2",
-	"18 (0x1c) MT003 QT8D-J8 (ch32) MTD TAC 22-4-J3"
+// 	const char* MtdQTmap[96] = {
+// 	"06 (0x10) MT001 QT8A-J1 (ch01) MTD 25-1-J2 (TPC sectors 21,22)",
+// 	"06 (0x10) MT001 QT8A-J2 (ch02) MTD 25-1-J3 (TPC sectors 21,22)",
+// 	"06 (0x10) MT001 QT8A-J3 (ch03) MTD 25-5-J2 (TPC sectors 2,3)",
+// 	"06 (0x10) MT001 QT8A-J4 (ch04) MTD 25-5-J3 (TPC sectors 2,3)",
+// 	"06 (0x10) MT001 QT8A-J5 (ch05) MTD TAC 25-1-J2",
+// 	"06 (0x10) MT001 QT8A-J6 (ch06) MTD TAC 25-1-J3",
+// 	"06 (0x10) MT001 QT8A-J7 (ch07) MTD TAC 25-5-J2",
+// 	"06 (0x10) MT001 QT8A-J8 (ch08) MTD TAC 25-5-J3",
+// 	"06 (0x10) MT001 QT8B-J1 (ch09) MTD 25-2-J2 (TPC sectors 21,22)",
+// 	"06 (0x10) MT001 QT8B-J2 (ch10) MTD 25-2-J3 (TPC sectors 21,22)",
+// 	"06 (0x10) MT001 QT8B-J3 (ch11) MTD 25-4-J2 (TPC sectors 2,3)",
+// 	"06 (0x10) MT001 QT8B-J4 (ch12) MTD 25-4-J3 (TPC sectors 2,3)",
+// 	"06 (0x10) MT001 QT8B-J5 (ch13) MTD TAC 25-2-J2",
+// 	"06 (0x10) MT001 QT8B-J6 (ch14) MTD TAC 25-2-J3",
+// 	"06 (0x10) MT001 QT8B-J7 (ch15) MTD TAC 25-4-J2",
+// 	"06 (0x10) MT001 QT8B-J8 (ch16) MTD TAC 25-4-J3",
+// 	"06 (0x10) MT001 QT8C-J1 (ch17) MTD 25-3-J2 (TPC sectors 21,22,2,3)",
+// 	"06 (0x10) MT001 QT8C-J2 (ch18) MTD 25-3-J3 (TPC sectors 21,22,2,3)",
+// 	"06 (0x10) MT001 QT8C-J3 (ch19) MTD 30-3-J2 (TPC sectors 23,24,1,12)",
+// 	"06 (0x10) MT001 QT8C-J4 (ch20) MTD 30-3-J3 (TPC sectors 23,24,1,12)",
+// 	"06 (0x10) MT001 QT8C-J5 (ch21) MTD TAC 25-3-J2",
+// 	"06 (0x10) MT001 QT8C-J6 (ch22) MTD TAC 25-3-J3",
+// 	"06 (0x10) MT001 QT8C-J7 (ch23) MTD TAC 30-3-J2",
+// 	"06 (0x10) MT001 QT8C-J8 (ch24) MTD TAC 30-3-J3",
+// 	"06 (0x10) MT001 QT8D-J1 (ch25) MTD 30-1-J2 (TPC sectors 23,24)",
+// 	"06 (0x10) MT001 QT8D-J2 (ch26) MTD 30-1-J3 (TPC sectors 23,24)",
+// 	"06 (0x10) MT001 QT8D-J3 (ch27) MTD 30-5-J2 (TPC sectors 1,12)",
+// 	"06 (0x10) MT001 QT8D-J4 (ch28) MTD 30-5-J3 (TPC sectors 1,12)",
+// 	"06 (0x10) MT001 QT8D-J5 (ch29) MTD TAC 30-1-J2",
+// 	"06 (0x10) MT001 QT8D-J6 (ch30) MTD TAC 30-1-J3",
+// 	"06 (0x10) MT001 QT8D-J7 (ch31) MTD TAC 30-5-J2",
+// 	"06 (0x10) MT001 QT8D-J8 (ch32) MTD TAC 30-5-J3",
+// 	"16 (0x1a) MT002 QT8A-J1 (ch01) MTD 05-1-J2 (TPC sectors 13,14)",
+// 	"16 (0x1a) MT002 QT8A-J2 (ch02) MTD 05-1-J3 (TPC sectors 13,14)",
+// 	"16 (0x1a) MT002 QT8A-J3 (ch03) MTD 05-5-J2 (TPC sectors 10,11)",
+// 	"16 (0x1a) MT002 QT8A-J4 (ch04) MTD 05-5-J3 (TPC sectors 10,11)",
+// 	"16 (0x1a) MT002 QT8A-J5 (ch05) MTD TAC 05-1-J2",
+// 	"16 (0x1a) MT002 QT8A-J6 (ch06) MTD TAC 05-1-J2",
+// 	"16 (0x1a) MT002 QT8A-J7 (ch07) MTD TAC 05-5-J2",
+// 	"16 (0x1a) MT002 QT8A-J8 (ch08) MTD TAC 05-5-J3",
+// 	"16 (0x1a) MT002 QT8B-J1 (ch09) MTD 05-2-J2 (TPC sectors 13,14)",
+// 	"16 (0x1a) MT002 QT8B-J2 (ch10) MTD 05-2-J3 (TPC sectors 13,14)",
+// 	"16 (0x1a) MT002 QT8B-J3 (ch11) MTD 05-4-J2 (TPC sectors 10,11)",
+// 	"16 (0x1a) MT002 QT8B-J4 (ch12) MTD 05-4-J3 (TPC sectors 10,11)",
+// 	"16 (0x1a) MT002 QT8B-J5 (ch13) MTD TAC 05-2-J2",
+// 	"16 (0x1a) MT002 QT8B-J6 (ch14) MTD TAC 05-2-J3",
+// 	"16 (0x1a) MT002 QT8B-J7 (ch15) MTD TAC 05-4-J2",
+// 	"16 (0x1a) MT002 QT8B-J8 (ch16) MTD TAC 05-4-J3",
+// 	"16 (0x1a) MT002 QT8C-J1 (ch17) MTD 05-3-J2 (TPC sectors 13,14,10,11)",
+// 	"16 (0x1a) MT002 QT8C-J2 (ch18) MTD 05-3-J3 (TPC sectors 13,14,10,11)",
+// 	"16 (0x1a) MT002 QT8C-J3 (ch19) MTD",
+// 	"16 (0x1a) MT002 QT8C-J4 (ch20) MTD",
+// 	"16 (0x1a) MT002 QT8C-J5 (ch21) MTD TAC 05-3-J2",
+// 	"16 (0x1a) MT002 QT8C-J6 (ch22) MTD TAC 05-3-J3",
+// 	"16 (0x1a) MT002 QT8C-J7 (ch23) MTD",
+// 	"16 (0x1a) MT002 QT8C-J8 (ch24) MTD",
+// 	"16 (0x1a) MT002 QT8D-J1 (ch25) MTD 30-2-J2 (TPC sectors 23,24)",
+// 	"16 (0x1a) MT002 QT8D-J2 (ch26) MTD 30-2-J3 (TPC sectors 23,24)",
+// 	"16 (0x1a) MT002 QT8D-J3 (ch27) MTD 30-4-J2 (TPC sectors 1,12)",
+// 	"16 (0x1a) MT002 QT8D-J4 (ch28) MTD 30-4-J3 (TPC sectors 1,12)",
+// 	"16 (0x1a) MT002 QT8D-J5 (ch29) MTD TAC 30-2-J2",
+// 	"16 (0x1a) MT002 QT8D-J6 (ch30) MTD TAC 30-2-J3",
+// 	"16 (0x1a) MT002 QT8D-J7 (ch31) MTD TAC 30-4-J2",
+// 	"16 (0x1a) MT002 QT8D-J8 (ch32) MTD TAC 30-4-J3",
+// 	"18 (0x1c) MT003 QT8A-J1 (ch09) MTD 10-2-J2 (TPC sectors 8,16)",
+// 	"18 (0x1c) MT003 QT8A-J2 (ch10) MTD 10-2-J3 (TPC sectors 8,16)",
+// 	"18 (0x1c) MT003 QT8A-J3 (ch11) MTD 22-2-J2 (TPC sectors 4,20)",
+// 	"18 (0x1c) MT003 QT8A-J4 (ch12) MTD 22-2-J3 (TPC sectors 4,20)",
+// 	"18 (0x1c) MT003 QT8A-J5 (ch13) MTD TAC 10-2-J2",
+// 	"18 (0x1c) MT003 QT8A-J6 (ch14) MTD TAC 10-2-J3",
+// 	"18 (0x1c) MT003 QT8A-J7 (ch15) MTD TAC 22-2-J2",
+// 	"18 (0x1c) MT003 QT8A-J8 (ch16) MTD TAC 22-2-J3",
+// 	"18 (0x1c) MT003 QT8B-J1 (ch09) MTD 10-3-J2 (TPC sectors 8,16)",
+// 	"18 (0x1c) MT003 QT8B-J2 (ch10) MTD 10-3-J3 (TPC sectors 8,16)",
+// 	"18 (0x1c) MT003 QT8B-J3 (ch11) MTD 22-3-J2 (TPC sectors 4,20)",
+// 	"18 (0x1c) MT003 QT8B-J4 (ch12) MTD 22-3-J3 (TPC sectors 4,20)",
+// 	"18 (0x1c) MT003 QT8B-J5 (ch13) MTD TAC 10-3-J2",
+// 	"18 (0x1c) MT003 QT8B-J6 (ch14) MTD TAC 10-3-J3",
+// 	"18 (0x1c) MT003 QT8B-J7 (ch15) MTD TAC 22-3-J2",
+// 	"18 (0x1c) MT003 QT8B-J8 (ch16) MTD TAC 22-3-J3",
+// 	"18 (0x1c) MT003 QT8C-J1 (ch17) MTD",
+// 	"18 (0x1c) MT003 QT8C-J2 (ch18) MTD",
+// 	"18 (0x1c) MT003 QT8C-J3 (ch19) MTD",
+// 	"18 (0x1c) MT003 QT8C-J4 (ch20) MTD",
+// 	"18 (0x1c) MT003 QT8C-J5 (ch21) MTD",
+// 	"18 (0x1c) MT003 QT8C-J6 (ch22) MTD",
+// 	"18 (0x1c) MT003 QT8C-J7 (ch23) MTD",
+// 	"18 (0x1c) MT003 QT8C-J8 (ch24) MTD",
+// 	"18 (0x1c) MT003 QT8D-J1 (ch25) MTD 10-4-J2 (TPC sectors 8,16)",
+// 	"18 (0x1c) MT003 QT8D-J2 (ch26) MTD 10-4-J3 (TPC sectors 8,16)",
+// 	"18 (0x1c) MT003 QT8D-J3 (ch27) MTD 22-4-J2 (TPC sectors 4,20)",
+// 	"18 (0x1c) MT003 QT8D-J4 (ch28) MTD 22-4-J3 (TPC sectors 4,20)",
+// 	"18 (0x1c) MT003 QT8D-J5 (ch29) MTD TAC 10-4-J2",
+// 	"18 (0x1c) MT003 QT8D-J6 (ch30) MTD TAC 10-4-J3",
+// 	"18 (0x1c) MT003 QT8D-J7 (ch31) MTD TAC 22-4-J2",
+// 	"18 (0x1c) MT003 QT8D-J8 (ch32) MTD TAC 22-4-J3"
+// 	};
+
+	const char* MtdQTmap[128] = {
+		"06 (0x10) MT001 QT8A-J1 (ch1) ADC 25-1 (J2)",
+		"06 (0x10) MT001 QT8A-J2 (ch2) ADC 25-1 (J3)",
+		"06 (0x10) MT001 QT8A-J3 (ch3) ADC 25-5 (J2)",
+		"06 (0x10) MT001 QT8A-J4 (ch4) ADC 25-5 (J3)",
+		"06 (0x10) MT001 QT8A-J5 (ch5) TAC 25-1 (J2)",
+		"06 (0x10) MT001 QT8A-J6 (ch6) TAC 25-1 (J3)",
+		"06 (0x10) MT001 QT8A-J7 (ch7) TAC 25-5 (J2)",
+		"06 (0x10) MT001 QT8A-J8 (ch8) TAC 25-5 (J3)",
+		"06 (0x10) MT001 QT8B-J1 (ch1) ADC 25-2 (J2)",
+		"06 (0x10) MT001 QT8B-J2 (ch2) ADC 25-2 (J3)",
+		"06 (0x10) MT001 QT8B-J3 (ch3) ADC 25-4 (J2)",
+		"06 (0x10) MT001 QT8B-J4 (ch4) ADC 25-4 (J3)",
+		"06 (0x10) MT001 QT8B-J5 (ch5) TAC 25-2 (J2)",
+		"06 (0x10) MT001 QT8B-J6 (ch6) TAC 25-2 (J3)",
+		"06 (0x10) MT001 QT8B-J7 (ch7) TAC 25-4 (J2)",
+		"06 (0x10) MT001 QT8B-J8 (ch8) TAC 25-4 (J3)",
+		"06 (0x10) MT001 QT8C-J1 (ch1) ADC 25-3 (J2)",
+		"06 (0x10) MT001 QT8C-J2 (ch2) ADC 25-3 (J3)",
+		"06 (0x10) MT001 QT8C-J3 (ch3) ADC 30-3 (J2)",
+		"06 (0x10) MT001 QT8C-J4 (ch4) ADC 30-3 (J3)",
+		"06 (0x10) MT001 QT8C-J5 (ch5) TAC 25-3 (J2)",
+		"06 (0x10) MT001 QT8C-J6 (ch6) TAC 25-3 (J3)",
+		"06 (0x10) MT001 QT8C-J7 (ch7) TAC 30-3 (J2)",
+		"06 (0x10) MT001 QT8C-J8 (ch8) TAC 30-3 (J3)",
+		"06 (0x10) MT001 QT8D-J1 (ch1) ADC 30-1 (J2)",
+		"06 (0x10) MT001 QT8D-J2 (ch2) ADC 30-1 (J3)",
+		"06 (0x10) MT001 QT8D-J3 (ch3) ADC 30-5 (J2)",
+		"06 (0x10) MT001 QT8D-J4 (ch4) ADC 30-5 (J3)",
+		"06 (0x10) MT001 QT8D-J5 (ch5) TAC 30-1 (J2)",
+		"06 (0x10) MT001 QT8D-J6 (ch6) TAC 30-1 (J3)",
+		"06 (0x10) MT001 QT8D-J7 (ch7) TAC 30-5 (J2)",
+		"06 (0x10) MT001 QT8D-J8 (ch8) TAC 30-5 (J3)",
+		"16 (0x1A) MT002 QT8A-J1 (ch1) ADC 5-1 (J2)",
+		"16 (0x1A) MT002 QT8A-J2 (ch2) ADC 5-1 (J3)",
+		"16 (0x1A) MT002 QT8A-J3 (ch3) ADC 5-5 (J2)",
+		"16 (0x1A) MT002 QT8A-J4 (ch4) ADC 5-5 (J3)",
+		"16 (0x1A) MT002 QT8A-J5 (ch5) TAC 5-1 (J2)",
+		"16 (0x1A) MT002 QT8A-J6 (ch6) TAC 5-1 (J3)",
+		"16 (0x1A) MT002 QT8A-J7 (ch7) TAC 5-5 (J2)",
+		"16 (0x1A) MT002 QT8A-J8 (ch8) TAC 5-5 (J3)",
+		"16 (0x1A) MT002 QT8B-J1 (ch1) ADC 5-2 (J2)",
+		"16 (0x1A) MT002 QT8B-J2 (ch2) ADC 5-2 (J3)",
+		"16 (0x1A) MT002 QT8B-J3 (ch3) ADC 5-4 (J2)",
+		"16 (0x1A) MT002 QT8B-J4 (ch4) ADC 5-4 (J3)",
+		"16 (0x1A) MT002 QT8B-J5 (ch5) TAC 5-2 (J2)",
+		"16 (0x1A) MT002 QT8B-J6 (ch6) TAC 5-2 (J3)",
+		"16 (0x1A) MT002 QT8B-J7 (ch7) TAC 5-4 (J2)",
+		"16 (0x1A) MT002 QT8B-J8 (ch8) TAC 5-4 (J3)",
+		"16 (0x1A) MT002 QT8C-J1 (ch1) ADC 5-3 (J2)",
+		"16 (0x1A) MT002 QT8C-J2 (ch2) ADC 5-3 (J3)",
+		"16 (0x1A) MT002 QT8C-J3 (ch3) ",
+		"16 (0x1A) MT002 QT8C-J4 (ch4) ",
+		"16 (0x1A) MT002 QT8C-J5 (ch5) TAC 5-3 (J2)",
+		"16 (0x1A) MT002 QT8C-J6 (ch6) TAC 5-3 (J3)",
+		"16 (0x1A) MT002 QT8C-J7 (ch7) ",
+		"16 (0x1A) MT002 QT8C-J8 (ch8) ",
+		"16 (0x1A) MT002 QT8D-J1 (ch1) ADC 30-2 (J2)",
+		"16 (0x1A) MT002 QT8D-J2 (ch2) ADC 30-2 (J3)",
+		"16 (0x1A) MT002 QT8D-J3 (ch3) ADC 30-4 (J2)",
+		"16 (0x1A) MT002 QT8D-J4 (ch4) ADC 30-4 (J3)",
+		"16 (0x1A) MT002 QT8D-J5 (ch5) TAC 30-2 (J2)",
+		"16 (0x1A) MT002 QT8D-J6 (ch6) TAC 30-2 (J3)",
+		"16 (0x1A) MT002 QT8D-J7 (ch7) TAC 30-4 (J2)",
+		"16 (0x1A) MT002 QT8D-J8 (ch8) TAC 30-4 (J3)",
+		"18 (0x1C) MT003 QT8A-J1 (ch1) ADC 10-1 (J2)",
+		"18 (0x1C) MT003 QT8A-J2 (ch2) ADC 10-1 (J3)",
+		"18 (0x1C) MT003 QT8A-J3 (ch3) ADC 10-5 (J2)",
+		"18 (0x1C) MT003 QT8A-J4 (ch4) ADC 10-5 (J3)",
+		"18 (0x1C) MT003 QT8A-J5 (ch5) TAC 10-1 (J2)",
+		"18 (0x1C) MT003 QT8A-J6 (ch6) TAC 10-1 (J3)",
+		"18 (0x1C) MT003 QT8A-J7 (ch7) TAC 10-5 (J2)",
+		"18 (0x1C) MT003 QT8A-J8 (ch8) TAC 10-5 (J3)",
+		"18 (0x1C) MT003 QT8B-J1 (ch1) ADC 10-2 (J2)",
+		"18 (0x1C) MT003 QT8B-J2 (ch2) ADC 10-2 (J3)",
+		"18 (0x1C) MT003 QT8B-J3 (ch3) ADC 10-4 (J2)",
+		"18 (0x1C) MT003 QT8B-J4 (ch4) ADC 10-4 (J3)",
+		"18 (0x1C) MT003 QT8B-J5 (ch5) TAC 10-2 (J2)",
+		"18 (0x1C) MT003 QT8B-J6 (ch6) TAC 10-2 (J3)",
+		"18 (0x1C) MT003 QT8B-J7 (ch7) TAC 10-4 (J2)",
+		"18 (0x1C) MT003 QT8B-J8 (ch8) TAC 10-4 (J3)",
+		"18 (0x1C) MT003 QT8C-J1 (ch1) ADC 10-3 (J2)",
+		"18 (0x1C) MT003 QT8C-J2 (ch2) ADC 10-3 (J3)",
+		"18 (0x1C) MT003 QT8C-J3 (ch3) ADC 15-3 (J2)",
+		"18 (0x1C) MT003 QT8C-J4 (ch4) ADC 15-3 (J3)",
+		"18 (0x1C) MT003 QT8C-J5 (ch5) TAC 10-3 (J2)",
+		"18 (0x1C) MT003 QT8C-J6 (ch6) TAC 10-3 (J3)",
+		"18 (0x1C) MT003 QT8C-J7 (ch7) TAC 15-3 (J2)",
+		"18 (0x1C) MT003 QT8C-J8 (ch8) TAC 15-3 (J3)",
+		"18 (0x1C) MT003 QT8D-J1 (ch1) ",
+		"18 (0x1C) MT003 QT8D-J2 (ch2) ",
+		"18 (0x1C) MT003 QT8D-J3 (ch3) ",
+		"18 (0x1C) MT003 QT8D-J4 (ch4) ",
+		"18 (0x1C) MT003 QT8D-J5 (ch5) ",
+		"18 (0x1C) MT003 QT8D-J6 (ch6) ",
+		"18 (0x1C) MT003 QT8D-J7 (ch7) ",
+		"18 (0x1C) MT003 QT8D-J8 (ch8) ",
+		"20 (0x1E) MT004 QT8A-J1 (ch1) ADC 21-1 (J2)",
+		"20 (0x1E) MT004 QT8A-J2 (ch2) ADC 21-1 (J3)",
+		"20 (0x1E) MT004 QT8A-J3 (ch3) ADC 21-5 (J2)",
+		"20 (0x1E) MT004 QT8A-J4 (ch4) ADC 21-5 (J3)",
+		"20 (0x1E) MT004 QT8A-J5 (ch5) TAC 21-1 (J2)",
+		"20 (0x1E) MT004 QT8A-J6 (ch6) TAC 21-1 (J3)",
+		"20 (0x1E) MT004 QT8A-J7 (ch7) TAC 21-5 (J2)",
+		"20 (0x1E) MT004 QT8A-J8 (ch8) TAC 21-5 (J3)",
+		"20 (0x1E) MT004 QT8B-J1 (ch1) ADC 20-2 (J2)",
+		"20 (0x1E) MT004 QT8B-J2 (ch2) ADC 20-2 (J3)",
+		"20 (0x1E) MT004 QT8B-J3 (ch3) ADC 20-4 (J2)",
+		"20 (0x1E) MT004 QT8B-J4 (ch4) ADC 20-4 (J3)",
+		"20 (0x1E) MT004 QT8B-J5 (ch5) TAC 20-2 (J2)",
+		"20 (0x1E) MT004 QT8B-J6 (ch6) TAC 20-2 (J3)",
+		"20 (0x1E) MT004 QT8B-J7 (ch7) TAC 20-4 (J2)",
+		"20 (0x1E) MT004 QT8B-J8 (ch8) TAC 20-4 (J3)",
+		"20 (0x1E) MT004 QT8C-J1 (ch1) ADC 20-3 (J2)",
+		"20 (0x1E) MT004 QT8C-J2 (ch2) ADC 20-3 (J3)",
+		"20 (0x1E) MT004 QT8C-J3 (ch3) ",
+		"20 (0x1E) MT004 QT8C-J4 (ch4) ",
+		"20 (0x1E) MT004 QT8C-J5 (ch5) TAC 20-3 (J2)",
+		"20 (0x1E) MT004 QT8C-J6 (ch6) TAC 20-3 (J3)",
+		"20 (0x1E) MT004 QT8C-J7 (ch7) ",
+		"20 (0x1E) MT004 QT8C-J8 (ch8) ",
+		"20 (0x1E) MT004 QT8D-J1 (ch1) ADC 15-2 (J2)",
+		"20 (0x1E) MT004 QT8D-J2 (ch2) ADC 15-2 (J3)",
+		"20 (0x1E) MT004 QT8D-J3 (ch3) ADC 15-4 (J2)",
+		"20 (0x1E) MT004 QT8D-J4 (ch4) ADC 15-4 (J3)",
+		"20 (0x1E) MT004 QT8D-J5 (ch5) TAC 15-2 (J2)",
+		"20 (0x1E) MT004 QT8D-J6 (ch6) TAC 15-2 (J3)",
+		"20 (0x1E) MT004 QT8D-J7 (ch7) TAC 15-4 (J2)",
+		"20 (0x1E) MT004 QT8D-J8 (ch8) TAC 15-4 (J3)"
 	};
 	
-	TString QTmap[96];
+	TString QTmap[128];
 	//
 	int nTAC=0,nADC=0,nOPEN=0;
 	bool thisisADC,thisisOPEN;
 	//
-	for (int i=0;i<96;i++){
+	for (int i=0;i<128;i++){
 		sprintf(buf,"%s",MtdQTmap[i]);
 		QTmap[i]	= TString(buf);
 		//cout<<QTmap[i].Data()<<endl;
@@ -875,8 +1014,8 @@ int mtdBuilder::SetMtdQTmap(){
 		QTslothex[i]	= QTmap[i](4,4);
 		QTboard[i]		= QTmap[i](10,5);
 		QTchanname[i]	= QTmap[i](16,7);
-		QTchanno[i]		= QTmap[i](27,2);
-		QTchanstring[i]	= QTmap[i](35,QTmap[i].Length()-1);
+		QTchanno[i]		= QTmap[i](25,3);
+		QTchanstring[i]	= QTmap[i](30,QTmap[i].Length()-1);
 		//
 		thisisADC = thisisOPEN = false;
  		if (QTchanstring[i].Length()==0){ ++nOPEN; thisisOPEN=true; } else 
@@ -886,14 +1025,14 @@ int mtdBuilder::SetMtdQTmap(){
 			thisisADC = true;
  		    ++nADC; isADC[i]=nADC; 
  		}
- 		if (!thisisOPEN){
- 			if (thisisADC){
- 				QTcable[i] = QTchanstring[i](0,7);
- 				QTtpcsector[i] = QTchanstring[i](21,QTchanstring[i].Length()-21-1);
- 			} else {
- 				QTcable[i] = QTchanstring[i](4,7);
- 			}
- 		}
+ 		//if (!thisisOPEN){
+ 		//	if (thisisADC){
+ 		//		QTcable[i] = QTchanstring[i](0,7);
+ 		//		QTtpcsector[i] = QTchanstring[i](21,QTchanstring[i].Length()-21-1);
+ 		//	} else {
+ 		//		QTcable[i] = QTchanstring[i](4,7);
+ 		//	}
+ 		//}
 		//
 		//cout<<QTmap[i].Length()<<"  ..."<<QTslot[i].Data()<<"..."<<QTslothex[i].Data()<<"..."
 		//	<<QTboard[i].Data()<<"..."
@@ -901,8 +1040,8 @@ int mtdBuilder::SetMtdQTmap(){
 		//	<<QTchanno[i].Data()<<"..."
 		//	<<QTchanstring[i].Data()<<"\t"
 		//	<<isADC[i]<<" "<<isTAC[i]<<"\t..."
-		//	<<QTcable[i].Data()<<"..."
-		//	<<QTtpcsector[i].Data()<<"..."			
+		//	//<<QTcable[i].Data()<<"..."
+		//	//<<QTtpcsector[i].Data()<<"..."			
 		//	<<endl;
 		//
 	}
