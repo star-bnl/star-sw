@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.8 2014/02/25 01:07:02 smirnovd Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.9 2014/02/25 01:08:30 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.9  2014/02/25 01:08:30  smirnovd
+* Explicit pointer type conversion
+*
 * Revision 1.8  2014/02/25 01:07:02  smirnovd
 * Minor pointer initialization and declaration fixes
 *
@@ -79,7 +82,7 @@ Int_t StIstRawHitMaker::Init(){
    m_DataSet = new TObjectSet("istRawHitAndCluster");
 
    mIstCollectionPtr = new StIstCollection();
-   m_DataSet->AddObject(mIstCollectionPtr);
+   ((TObjectSet*) m_DataSet)->AddObject(mIstCollectionPtr);
 
    if( ierr || !mIstCollectionPtr ) {
       LOG_WARN << "Error constructing istCollection" << endm;
