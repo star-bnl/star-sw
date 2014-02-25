@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.5 2014/02/14 14:47:20 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.6 2014/02/25 17:10:55 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.6  2014/02/25 17:10:55  ypwang
+* minor update due to mClusteringType moved to StIstHitCollection
+*
 * Revision 1.5  2014/02/14 14:47:20  ypwang
 * update due to removal of getNumLadders() member function from StIstCollection
 *
@@ -91,10 +94,11 @@ Int_t StIstHitMaker::Make()
         ierr = kStWarn;
     }
 
-    if(!ierr)   {   
+    if(!ierr)   {
+	unsigned char  nClusteringType = -1;   
         for(unsigned char ladderIdx=0; ladderIdx<kIstNumLadders; ++ladderIdx)   { 
             StIstClusterCollection *clusterCollectionPtr = istCollectionPtr->getClusterCollection(ladderIdx );
-    
+   	     
             if( clusterCollectionPtr ){
 		unsigned int numClusters = clusterCollectionPtr->getNumClusters();
                 if(numClusters<mMinNumOfRawHits)   { // Here mMinNumOfRawHits indicate minimum number of found clusters
@@ -109,7 +113,7 @@ Int_t StIstHitMaker::Make()
                 StIstHit *newHit = 0;
                 
                 unsigned short idTruth = 0;
-		unsigned char  nClusteringType = -1, nRawHits = -1, nRawHitsZ = -1, nRawHitsRPhi = -1;
+		unsigned char  nRawHits = -1, nRawHitsZ = -1, nRawHitsRPhi = -1;
                 unsigned char  ladder = -1, sensor = -1;
 		float  meanRow = 0., meanColumn = 0., charge = 0., chargeErr = 0.;
 		unsigned char  maxTb = -1;
@@ -125,13 +129,12 @@ Int_t StIstHitMaker::Make()
                     maxTb 	= (*clusterIter)->getMaxTimeBin();
 		    charge      = (*clusterIter)->getTotCharge();
                     chargeErr	= (*clusterIter)->getTotChargeErr();
-		    nClusteringType = (*clusterIter)->getClusteringType();
                     nRawHits 	= (*clusterIter)->getNRawHits();
                     nRawHitsZ 	= (*clusterIter)->getNRawHitsZ();
                     nRawHitsRPhi= (*clusterIter)->getNRawHitsRPhi();
+		    nClusteringType = (*clusterIter)->getClusteringType();
 
 		    newHit = new StIstHit(ladder, sensor, charge, chargeErr, maxTb, nRawHits, nRawHitsZ, nRawHitsRPhi, meanColumn, meanRow);
-		    newHit->setClusteringType(nClusteringType);
                     newHit->setId(key);
 		    newHit->setIdTruth(idTruth);
  
@@ -152,6 +155,7 @@ Int_t StIstHitMaker::Make()
                 } //cluster loop over                
             } //end clusterCollectionPtr
         } //ladder loop over
+	istHitCollection->setClusteringType(nClusteringType);
     } //ierr
  
     return ierr;
