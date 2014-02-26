@@ -87,9 +87,7 @@ void StiIstHitLoader::loadHits(StEvent *source,
                int layer  = 1; //active area
                int ladder = hit->getLadder();
                int sensor = hit->getSensor();
-               float meanColumn = hit->getMeanColumn();
-               float meanRow    = hit->getMeanRow();
-               LOG_DEBUG << "StiIstHitLoader: hit found on ladder: " << ladder << "; sensor: " << sensor << "; meanColumn: " << meanColumn << "; meanRow: " << meanRow << endm;
+               LOG_DEBUG << "StiIstHitLoader: hit found on ladder: " << ladder << "; sensor: " << sensor << endm;
                LOG_DEBUG << "Xg/Yg/Zg : " << hit->position().x() << "/" << hit->position().y() << "/" << hit->position().z() << endm;
                LOG_DEBUG << "Xl/Yl/Zl : " << hit->localPosition(0) << "/" << hit->localPosition(1) << "/" << hit->localPosition(2) << endm;
 
