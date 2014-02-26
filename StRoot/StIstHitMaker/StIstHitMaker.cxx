@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.6 2014/02/25 17:10:55 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.7 2014/02/26 01:39:27 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.7  2014/02/26 01:39:27  ypwang
+* minor updates on hit local position setting: meanColumn/meanRow transform to local position here
+*
 * Revision 1.6  2014/02/25 17:10:55  ypwang
 * minor update due to mClusteringType moved to StIstHitCollection
 *
@@ -134,7 +137,7 @@ Int_t StIstHitMaker::Make()
                     nRawHitsRPhi= (*clusterIter)->getNRawHitsRPhi();
 		    nClusteringType = (*clusterIter)->getClusteringType();
 
-		    newHit = new StIstHit(ladder, sensor, charge, chargeErr, maxTb, nRawHits, nRawHitsZ, nRawHitsRPhi, meanColumn, meanRow);
+		    newHit = new StIstHit(ladder, sensor, charge, chargeErr, maxTb, nRawHits, nRawHitsZ, nRawHitsRPhi);
                     newHit->setId(key);
 		    newHit->setIdTruth(idTruth);
  
@@ -143,14 +146,15 @@ Int_t StIstHitMaker::Make()
 
 		    double local[3];
 		    double global[3];
-		    local[0] = newHit->localPosition(0); //unit: cm
-                    local[1] = -0.; 			 //to be defined later
-		    local[2] = newHit->localPosition(2); //unit: cm
+		    local[0] = 0.5*kIstSensorActiveSizeRPhi - (meanRow-0.5)*kIstPadPitchRow;//unit: cm
+                    local[1] = 0.;
+		    local[2] = (meanColumn-0.5)*kIstPadPitchColumn - 0.5*kIstSensorActiveSizeZ;//unit: cm
+		    newHit->setLocalPosition(local[0], local[1], local[2]); //set local position on sensor
 
 		    geoMSensorOnGlobal->LocalToMaster(local, global);
 		    StThreeVectorF vecGlobal(global);
 		    newHit->setPosition(vecGlobal); //set global position
-		    
+
                     istHitCollection->addHit(newHit);
                 } //cluster loop over                
             } //end clusterCollectionPtr
