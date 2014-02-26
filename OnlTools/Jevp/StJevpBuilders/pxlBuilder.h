@@ -12,11 +12,10 @@
 
 #include <math.h>
 
-const int NSENSOR = 40;
-const int NCOL = 960;
-const int NROW = 928;
-const int NRDO = 10;
-
+const int _NSENSOR = 40;
+const int _NCOL = 960;
+const int _NROW = 928;
+const int _NRDO = 10;
 
 class pxlBuilder : public JevpPlotSet {
 public:
@@ -33,18 +32,8 @@ public:
   
   static void main(int argc, char *argv[]);
 
-  static const int PXLERR_HEADER;
-  static const int PXLERR_HITLEN;
-  static const int PXLERR_SENSORNUM;
-  static const int PXLERR_DUPLICATE;
-  static const int PXLERR_ENDER;
-  static const int PXLERR_RANGE;
-  static const int PXLERR_OUTOFORDER;
-  static const int PXLERR_UNKNOWNROW;
-  
-
-  bitset<NCOL> bs[NSENSOR][NROW];
-  float ave_runlength[NSENSOR];
+  bitset<_NCOL> bs[_NSENSOR][_NROW];
+  float ave_runlength[_NSENSOR];
 
  private:
 
@@ -92,17 +81,6 @@ public:
   map<int,double> *AverageRunLength;
   map<int,int> *LadderCount;
   map<int,int> *LadderMap;
-  
-  struct _pxlHeaderInfo {
-    unsigned short tcdWord;
-    unsigned int rhicStrobeCtr;
-    unsigned short temperature[4][2];
-  };
-
-  _pxlHeaderInfo pxlHeaderInfo;
-
-  int pxl_decoder(const u_int *d, const int wordLength,bitset<NCOL> bs[][NROW],int *OVF, struct _pxlHeaderInfo *pxlHeaderInfo,int *error_cnt,float *ave_runlength);
-  int decode16bit(unsigned short val, bool MS16,int sensor,int *row,int *prev_row,int *prev_col,int *error_cnt,int *OVF,bitset<NCOL> bs[][NROW],int runlength[][4]);
 
   void IncrementMultiplicity(int sensor_number,int row_count);
   int WhichLadder(int sector_number,int sensor_number);
@@ -143,6 +121,7 @@ public:
       TH1 *HitMultiplicityPerEvent;
 
       TH1 *HitsPerLadder;
+      TH1 *HitsPerLadderPerEvent;
 
       TH1 *HitCorrelation;
 
