@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-#include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TF1.h>
 #include <TGraph.h>
@@ -15,8 +14,6 @@ class Medium;
 
 class ViewMedium { 
 
-  RQ_OBJECT("ViewMedium")
-  
   public:
     // Constructor
     ViewMedium();

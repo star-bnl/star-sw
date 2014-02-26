@@ -1,14 +1,10 @@
 #include <iomanip>
 #include "heed++/code/HeedCluster.h"
-//#include "heed++/code/HeedDeltaElectron.h"
-//#include "heed++/code/HeedPhoton.h"
-//#include "heed++/code/EnTransfCS.h"
-//#include "wcpplib/clhep_units/WPhysicalConstants.h"
 /*
 2003, I. Smirnov
 */
 
-void HeedCluster::print(ostream& file, int l) const
+void HeedCluster::print(std::ostream& file, int l) const
 {
   if(l <= 0) return;
   Ifile<<"HeedCluster (l="<<l<<"): transferred_energy="<<transferred_energy

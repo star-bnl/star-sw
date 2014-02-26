@@ -1,5 +1,6 @@
 #ifndef MPARTICLE_H
 #define MPARTICLE_H
+#include <iostream>
 #include "wcpplib/geometry/gparticle.h" 
 #include "wcpplib/math/lorgamma.h"
 
@@ -17,33 +18,10 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
  */
 
-/*
-// The following class is made because the ordinary speed may be not
-// good measurement of travel for very light particles flying with
-// sub-light speed. 
-
-No it seems that correspondence between kin_energy and gamma_1
-depends on mass which is assumed constant (although we can imagine
-the case with not constant mass, such as space rocket, but we will not 
-consider seriously such applications).
-Therefore there is no sence in declaration such a class.
-class RelativisticTravelParameters
-{public:
-  double kin_energy;
-  double gamma_1;   // gamma-1
-  RelativisticTravelParameters(void): kin_energy(0.0), gamma_1(0.0) {;}
-  RelativisticTravelParameters(double fkin_energy, double fgamma_1):
-    kin_energy(fkin_energy), gamma_1(fgamma_1) {;}
-  void check_consistency(double speed); // checks that kin_energy,
-  // gamma_1, speed, speed_of_light
-};
-*/
-
-
 class mparticle: public gparticle
 {public:
   static double speed_of_light; // numerical value depends on system of units,
-  // to make this class applicable in any system, this spees is included
+  // to make this class applicable in any system, this speed is included
   // as a static parameter.
 
   double mass;  // depends on system of units, of course
@@ -56,10 +34,6 @@ class mparticle: public gparticle
   double prev_gamma_1;   // gamma-1
   double curr_kin_energy;
   double curr_gamma_1;  // gamma-1 
-  //double next_kin_energy;
-  //double next_gamma_1;  // gamma-1 
-  //double next_kin_energy;
-  //double accel;       // longitudinal acceleration
   void check_consistency(void) const; // checks that kin_energy,
   // gamma_1, speed, speed_of_light and mass correspond to each other
 
@@ -119,12 +93,11 @@ class mparticle: public gparticle
   mparticle(manip_absvol* primvol, const point& pt, 
 	    const vec& vel, vfloat time, double fmass, double gamma_1); 
 
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(gparticle);
-  //AnyType_copy(mparticle, gparticle);
   virtual ~mparticle() {;}
 };
 
-ostream& operator<<(ostream& file, const mparticle& f);
+std::ostream& operator<<(std::ostream& file, const mparticle& f);
 
 #endif

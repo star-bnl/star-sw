@@ -1,7 +1,6 @@
 #ifndef G_VIEW_FIELD
 #define G_VIEW_FIELD
 
-#include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TF2.h>
 #include <TF1.h>
@@ -13,8 +12,6 @@ class ComponentBase;
 
 class ViewField { 
 
-  RQ_OBJECT("ViewField")
-  
   public:
     // Constructor
     ViewField();

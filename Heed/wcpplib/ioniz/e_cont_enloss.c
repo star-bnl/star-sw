@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <limits.h>
-#include <math.h>
+#include <cmath>
 #include "wcpplib/ioniz/e_cont_enloss.h"
 #include "wcpplib/math/lorgamma.h"
 #include "wcpplib/stream/prstream.h"

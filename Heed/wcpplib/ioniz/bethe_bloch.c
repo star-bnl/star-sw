@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <limits.h>
-#include <math.h>
+#include <cmath>
 #include "wcpplib/ioniz/bethe_bloch.h"
 #include "wcpplib/math/lorgamma.h"
 #include "wcpplib/stream/prstream.h"

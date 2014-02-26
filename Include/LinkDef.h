@@ -10,6 +10,7 @@
 #pragma link C++ class Garfield::AvalancheMicroscopic;
 #pragma link C++ class Garfield::AvalancheMC;
 
+/*
 #pragma link C++ class Garfield::Medium;
 #pragma link C++ class Garfield::MediumGas;
 #pragma link C++ class Garfield::MediumMagboltz;
@@ -48,5 +49,5 @@
 #pragma link C++ class Garfield::TrackPAI;
 
 #pragma link C++ function Garfield::RndmUniform();
-
+*/
 #endif

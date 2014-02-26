@@ -17,7 +17,6 @@ The file is provided "as is" without express or implied warranty.
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/geometry/straight.h"
 
-
 //             **** plane ****
 
 class polyline;
@@ -86,10 +85,10 @@ public:
   		 polyline *crpll, int& qcrpll, vfloat prec) const ;
 
   vfloat distance(const point& fpt) const ;
-  friend ostream& operator<<(ostream& file, const plane& s);
+  friend std::ostream& operator<<(std::ostream& file, const plane& s);
 };
 
-ostream& operator<<(ostream& file, const plane& s);
+std::ostream& operator<<(std::ostream& file, const plane& s);
 
 #include "wcpplib/geometry/polyline.h"
 

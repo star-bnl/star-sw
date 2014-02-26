@@ -5,6 +5,7 @@
 #include "ComponentFieldMap.hh"
 #include "ComponentCST.hh"
 #include "Plotting.hh"
+#include "Random.hh"
 #include "ViewFEMesh.hh"
 
 namespace Garfield {

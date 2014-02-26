@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 
 #include "wcpplib/random/pois.h"
 #include "wcpplib/random/rnorm.h"

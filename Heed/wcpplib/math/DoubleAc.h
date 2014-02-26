@@ -19,18 +19,14 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-//#include <math.h>  // at S. Linux 4.1 gives errors like 
-// DoubleAc.c:534: error: `sqrt' is not a member of `std'
 #ifdef VISUAL_STUDIO
 #define _USE_MATH_DEFINES
-// see comment in math.h:
 /* Define _USE_MATH_DEFINES before including math.h to expose these macro
  * definitions for common math constants.  These are placed under an #ifdef
  * since these commonly-defined names are not part of the C/C++ standards.
  */
 #endif
 #include <cmath>
-//#include <values.h>
 #include <climits>
 #include <cfloat>
 #include "wcpplib/util/FunNameStack.h"

@@ -1,7 +1,3 @@
-//#include <stdlib.h>
-//#include <iostream.h>
-//#include <iomanip.h>
-//#include <math.h>
 #include "wcpplib/geometry/mparticle.h"
 #include "wcpplib/clhep_units/PhysicalConstants.h"
 /*
@@ -25,14 +21,11 @@ mparticle::mparticle(gparticle const & gp, double fmass):
   prev_kin_energy = prev_gamma_1 * mass * pow(speed_of_light, 2);
   curr_gamma_1 = lorgamma_1(currpos.speed / speed_of_light);
   curr_kin_energy = curr_gamma_1 * mass * pow(speed_of_light, 2);
-  //next_gamma_1 = lorgamma_1(nextpos.speed / speed_of_light);
-  //next_kin_energy = next_gamma_1 * mass * pow(speed_of_light, 2);
 }
 
 mparticle::mparticle(gparticle const & gp, double fmass, double gamma_1): 
   gparticle(gp), mass(fmass), orig_gamma_1(gamma_1),
   prev_kin_energy(0.0), prev_gamma_1(0.0), curr_gamma_1(gamma_1) 
-  //next_gamma_1(0.0), next_kin_energy(0.0) 
 {
   curr_kin_energy = curr_gamma_1 * mass * pow(speed_of_light, 2);
   orig_kin_energy = curr_kin_energy;
@@ -47,7 +40,6 @@ mparticle::mparticle(manip_absvol* primvol, const point& pt,
   prev_kin_energy(0.0), prev_gamma_1(0.0), curr_gamma_1(gamma_1) 
 {
   mfunname("mparticle::mparticle(...)");
-  //mcout<<"origin.namvol="<<origin.namvol<<'\n';
   origin.tid.eid[0].nembed=0; // just to clear
   primvol->m_find_embed_vol(pt, vel, &origin.tid);
   origin.pt=pt; 
@@ -69,10 +61,6 @@ mparticle::mparticle(manip_absvol* primvol, const point& pt,
   s_life=1;
   currpos=origin;
   nextpos=currpos; nextpos.s_ent=0;
-  //mcout<<"origin.namvol="<<origin.namvol<<'\n';
-  //mcout<<"origin=\n"; origin.print(mcout,1);
-  //mcout<<"currpos=\n"; currpos.print(mcout,1);
-  //nextpos=calc_step_to_bord();
   curr_kin_energy = curr_gamma_1 * mass * pow(speed_of_light, 2);
   orig_kin_energy = curr_kin_energy;
   check_consistency(); 
@@ -94,8 +82,6 @@ void mparticle::check_consistency(void) const
   speed = speed_of_light * lorbetta( curr_gamma_1 );
   check_econd11a(fabs(speed - currpos.speed)/(speed + currpos.speed), 
 		> 1.0e-10 , (*this), mcerr); 
-  //speed = speed_of_light * lorbetta( next_gamma_1 );
-  //check_econd12(speed, != , nextpos.speed , mcerr); 
   double kin_ener = orig_gamma_1 * mass * pow( speed_of_light, 2.0);
   if(kin_ener > 1000.0 * DBL_MIN)  // otherwise it is unprecision
   {
@@ -114,14 +100,6 @@ void mparticle::check_consistency(void) const
     check_econd11a(fabs(curr_kin_energy - kin_ener)/(curr_kin_energy + kin_ener),
 		   > 1.0e-9 , "kin_ener="<<kin_ener<<'\n'<<(*this), mcerr); 
   }
-  //check_econd12(orig_kin_energy , != , 
-  //		orig_gamma_1 * mass * pow( speed_of_light, 2.0) , mcerr);
-  //check_econd12(prev_kin_energy , != , 
-  //		prev_gamma_1 * mass * pow( speed_of_light, 2.0) , mcerr);
-  //check_econd12(curr_kin_energy , != , 
-  //		curr_gamma_1 * mass * pow( speed_of_light, 2.0) , mcerr);
-  //check_econd12(next_kin_energy , != , 
-  //		next_gamma_1 * mass * pow( speed_of_light, 2.0) , mcerr);
 }
 
 void mparticle::step(void)
@@ -132,8 +110,6 @@ void mparticle::step(void)
   prev_gamma_1    = curr_gamma_1;
   currpos         = nextpos;
   curr_relcen     = dv0;
-  //curr_kin_energy = next_kin_energy;
-  //curr_gamma_1    = next_gamma_1;
   total_range_from_origin += currpos.prange;
   nstep++;
   if(currpos.prange==0)
@@ -153,8 +129,6 @@ void mparticle::step(void)
   if(s_life == 1)
   {
     if(prevpos.tid != currpos.tid)
-      //prevpos.namvol != currpos.namvol ||
-      //prevpos.amvol[prevpos.namvol-1] != currpos.amvol[currpos.namvol-1])
       change_vol();  // possible correction ( reflection..)
     nextpos=calc_step_to_bord();
   }
@@ -171,7 +145,6 @@ void mparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
   vec f_perp=currpos.speed * (currpos.dir||f_perp_fl);
   f += f_perp;
   int j;
-  //if(i==0 || f==dv0 || currpos.dir==dv0 || check_par(currpos.dir, f)!=0)
   if(i==0 || f==dv0)
   {
     fs_cf=0; frelcen=dv0; //fmrange=max_vfloat;
@@ -196,13 +169,7 @@ void mparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
     vec fn=project_to_plane(f, currpos.dir);  // normal component
     frelcen=unit_vec(fn);
     double len=length(fn); 
-    //mcout<<"f="<<f<<"fn="<<fn<<"len="<<len<<'\n';
-    //len=len/((curr_gamma_1+1) * mass * currpos.speed * currpos.speed);  
-	   // normal acceleration
-    //mcout<<"curr_gamma_1="<<curr_gamma_1
-    //	 <<" mass="<<mass<<" speed_of_light="<<speed_of_light<<'\n';
     vfloat rad=(currpos.speed * currpos.speed * (curr_gamma_1+1) * mass)/len;
-    //mcout<<"len="<<len<<" rad="<<rad<<'\n';
     frelcen*=rad;
   }
   currpos.dirloc = currpos.dir; currpos.tid.up_absref(&currpos.dirloc);
@@ -216,27 +183,11 @@ int mparticle::force(const point& /*pt*/, vec& f, vec& f_perp, vfloat& mrange) {
   return 0;
 }
 
-//double mparticle::speed_of_light; 
-
-/*
-void mparticle::new_speed(const point& old_pt, 
-			  double old_speed, 
-			  double old_kin_energy,
-			  const point& new_pt,
-			  double& new_speed, 
-			  double& new_kin_energy)
-*/
-
 void mparticle::new_speed(void)
 {
   pvecerror("void mparticle::new_speed(void)");
-  //prev_kin_energy=curr_kin_energy;
-  //prev_gamma_1=curr_gamma_1;
   if(currpos.prange==0.0)
   {
-    //curr_kin_energy=prev_kin_energy;
-    //curr_gamma_1=prev_gamma_1;
-    // speed is preserved by gparticle
     check_consistency();
     return;
   }    
@@ -249,7 +200,6 @@ void mparticle::new_speed(void)
   check_econd11a(vecerror , != 0 , "position 1, after computing force\n", 
 		 mcerr);
   f_perp1=prevpos.speed * (prevpos.dir||f_perp_fl1);
-  //f_perp1=currpos.speed * (currpos.dir||f_perp_fl1);  // for debug
   f_perp2=currpos.speed * (currpos.dir||f_perp_fl2);
   // Later f_perp are ignored since they can not do the work;
   f_mean=(f1+f2)/2.0;
@@ -369,47 +319,13 @@ void mparticle::new_speed(void)
     check_econd11a(vecerror , != 0 , "position 9, after turn\n", 
 		   mcerr);
 
-    /*
-    double f_perp_len = (length(f_perp1) + length(f_perp2))*0.5;
-    // Assumed that direction of turn is stable !!!
-    // It is intended mainly for magnetic spectrometers
-    // if(f_perp1 != dv0) the particle turns according to it and
-    // direction of f_perp2 is ignored.
-    // Otherwise the particle is turned according to f_perp2
-    if(f_perp_len > 0.0)
-    {
-      vec frelcen;  // new vector to radious 
-      if(length(f_perp1) > 0.0)
-	frelcen=unit_vec(f_perp1);
-      else
-	frelcen=unit_vec(f_perp2);
-      double mean_speed=(prevpos.speed + currpos.speed)*0.5;
-      vfloat new_rad=(mean_speed * mean_speed * 
-		      ((prev_gamma_1+curr_gamma_1)*0.5 + 1) * mass)/f_perp_len;
-      if(new_rad > 0.0)
-      {
-	vfloat ang=currpos.prange/new_rad;  // angle to turn
-	vec fdir=prevpos.dir;
-	fdir.turn(prevpos.dir||frelcen, ang);       // direction at the end
-	//mcout<<"curvature:\n";
-	//mcout<<"prevpos="<<noindent; prevpos.print(mcout, 10);
-	//mcout<<"currpos="<<noindent; currpos.print(mcout, 10);
-	//mcout<<"f_perp1="<<f_perp1;
-	//mcout<<"f_perp2="<<f_perp2;
-	//mcout<<"prevpos.dir="<<prevpos.dir;
-	//mcout<<"currpos.dir="<<currpos.dir;
-	//mcout<<"fdir="<<fdir;
-	currpos.dir=fdir;
-      }
-    }
-    */
   }
   currpos.dirloc = currpos.dir; currpos.tid.up_absref(&currpos.dirloc);
   currpos.time = prevpos.time +  currpos.prange/
     ((prevpos.speed + currpos.speed)/2.0);
   check_consistency();
 }
-void mparticle::print(ostream& file, int l) const 
+void mparticle::print(std::ostream& file, int l) const 
 {
   if(l >=0 )
   {  
@@ -432,7 +348,7 @@ void mparticle::print(ostream& file, int l) const
   }
 }
 
-ostream& operator<<(ostream& file, const mparticle& f)
+std::ostream& operator<<(std::ostream& file, const mparticle& f)
 {
   (&f)->print(file, 10);
   return file;

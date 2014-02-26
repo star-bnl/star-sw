@@ -1,7 +1,3 @@
-//#include <stdlib.h>
-//#include <iostream.h>
-//#include <iomanip.h>
-//#include <cmath>
 #include "wcpplib/geometry/plane.h"
 /*
 Copyright (c) 2000 Igor B. Smirnov
@@ -74,17 +70,9 @@ int apeq(const plane &pl1, const plane &pl2, vfloat prec)
 int plane::check_point_in(const point &fp, vfloat prec) const 
 {
   pvecerror("int plane::check_point_in(point fp, vfloat prec)");
-  vfloat f=distance(fp);
-  if( f < prec ) return 1;
-  else return 0;
-  /*
-  if(apeq(fp , piv , prec))
-    return 1;
-  if(check_perp(dir, (fp-piv), prec)==1)  // 1 
-    return 1;
-  else
-    return 0;
-  */
+  vfloat f = distance(fp);
+  if (f < prec) return 1;
+  return 0;
 }
 
 point plane::cross(const straight& sl) const 
@@ -93,17 +81,14 @@ point plane::cross(const straight& sl) const
   point slpiv=sl.Gpiv();
   vec sldir=sl.Gdir();
   vfloat r=dir * sldir;
-  if(r==0.0)
-  {
-    if(slpiv == piv || check_perp((piv-slpiv), dir, 0.0)==1)
-    {       // line is in plane
-      vecerror=3; return point();
+  if (r==0.0) {
+    if (slpiv == piv || check_perp((piv-slpiv), dir, 0.0)==1) {
+      // Line is in plane
+      vecerror = 3; 
+    } else {
+      vecerror = 2;
     }
-    else
-    {
-//		cerr<<"plane::cross : straight is parallel to plane\n";
-      vecerror=2; return point();
-    }
+    return point();
   }
 
   vfloat t = (piv.v - slpiv.v) * dir ;
@@ -124,7 +109,6 @@ straight plane::cross(const plane &pl) const
     }
     else
     {
-//		cerr<<"plane::cross : straight is parallel to plane\n";
       vecerror=2; return straight();
     }
   }
@@ -187,7 +171,7 @@ vfloat plane::distance(const point& fpt) const
 }
 
 
-ostream& operator<<(ostream& file, const plane& pl)
+std::ostream& operator<<(std::ostream& file, const plane& pl)
 {
   Ifile<<"plane:\n";
   indn.n+=2;

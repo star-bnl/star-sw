@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TH1D.h>
 #include <TGraph.h>
@@ -14,8 +13,6 @@ class Sensor;
 
 class ViewSignal { 
 
-  RQ_OBJECT("ViewSignal")
-  
   public:
     // Constructor
     ViewSignal();

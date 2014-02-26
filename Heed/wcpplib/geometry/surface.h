@@ -1,6 +1,6 @@
 #ifndef SURFACE_H
 #define SURFACE_H
-#include <string.h>
+#include <iostream>
 #include "wcpplib/geometry/polyline.h"
 #include "wcpplib/geometry/volume.h"
 /*
@@ -64,7 +64,7 @@ class surface: public absref virt_common_base_pcomma       // abstract class
 
   virtual int cross(const polyline& fpl, point *cntrpt, int& qcntrpt, 
 		    vfloat prec) const =0;
-  virtual void print(ostream& file, int l) const =0;
+  virtual void print(std::ostream& file, int l) const =0;
   virtual ~surface() {;}
 };
 
@@ -135,7 +135,7 @@ public:
     delete plh;
     return i;
   }
-  virtual void print(ostream& file, int l) const;
+  virtual void print(std::ostream& file, int l) const;
 
 };
 
@@ -212,7 +212,7 @@ public:
 #else
     { strcpy(nm,"ulsvolume: "); strcat(nm,name); }
 #endif
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   virtual int mandatory(void) const  {return 0;}
    
 };
@@ -235,7 +235,7 @@ class manip_ulsvolume: virtual public manip_absvol, public ulsvolume
 #else
     { strcpy(nm,"manip_ulsvolume: "); strcat(nm,name); }
 #endif
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
 
 };
   

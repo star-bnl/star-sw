@@ -14,8 +14,6 @@ The file is provided "as is" without express or implied warranty.
 #include "wcpplib/math/minmax.h"
 #include "wcpplib/math/DoubleAc.h"
 
-using std::isnan;
-
 DoubleAc::DoubleAc(double f, double ffmin, double ffmax) 
 {
   mfunname("DoubleAc::DoubleAc(double f, double ffmin, double ffmax)");
@@ -44,10 +42,6 @@ DoubleAc::DoubleAc(double f, double relative_prec)
   }
 }    
 
-//#define POSSIBLE_FAILURE_ISNAN
-//#define DEBUG_OPERATOR_MULT
-//#define DEBUG_OPERATOR_MULT_PRINT
-
 DoubleAc& DoubleAc::operator*=(DoubleAc f)
 {
   mfunnamep("DoubleAc& DoubleAc::operator*=(const DoubleAc& f)");
@@ -61,10 +55,10 @@ DoubleAc& DoubleAc::operator*=(DoubleAc f)
   mcout<<"f.da="<<f.da<<'\n';
 #endif
 #ifndef VISUAL_STUDIO
-  if(isnan(di) == 1) di = -DBL_MAX;
-  if(isnan(da) == 1) da =  DBL_MAX;
-  if(isnan(f.di) == 1) f.di = -DBL_MAX;
-  if(isnan(f.da) == 1) f.da =  DBL_MAX;
+  if(std::isnan(di) == 1) di = -DBL_MAX;
+  if(std::isnan(da) == 1) da =  DBL_MAX;
+  if(std::isnan(f.di) == 1) f.di = -DBL_MAX;
+  if(std::isnan(f.da) == 1) f.da =  DBL_MAX;
 #else
   if(_isnan(di) == 1) di = -DBL_MAX;
   if(_isnan(da) == 1) da =  DBL_MAX;
@@ -77,13 +71,10 @@ DoubleAc& DoubleAc::operator*=(DoubleAc f)
     if(!(f.di < f.d) && !(f.di >= f.d) ) f.di = -DBL_MAX;
     if(!(f.da < f.d) && !(f.da >= f.d) ) f.da =  DBL_MAX;
 #endif
-  //if(isfinite(f.di) == 0) di = -DBL_MAX;
-  //if(isfinite(da) == 0) da =  DBL_MAX;
 #ifdef DEBUG_OPERATOR_MULT
   DoubleAc temp(*this);  // for debug
 #endif
   d*=f.d;
-  //double r = NAN;
   if(di >= 0)
   {
     if(f.di >= 0)
@@ -194,24 +185,6 @@ DoubleAc& DoubleAc::operator*=(DoubleAc f)
     mcerr<<"old value:\n";
     temp.print(mcerr, 6);
 #endif
-    /*
-    if(temp.di < temp.d && temp.di > temp.d)
-    {
-      mcout<<"temp.di < temp.d && temp.di > temp.d\n";
-    }
-    if(!(temp.di < temp.d) && !(temp.di >= temp.d) )
-    {
-      mcout<<"!(temp.di < temp.d) && !(temp.di >= temp.d)\n";
-    }
-    if( !(temp.di == temp.d) && !(temp.di != temp.d) )
-    {
-      mcout<<"!(temp.di == temp.d) && !(temp.di != temp.d)\n";
-    }
-    if(temp.da < temp.d && temp.da > temp.d)
-    {
-      mcout<<"temp.da < temp.d && temp.da > temp.d\n";
-    }
-    */
     spexit(mcerr);
   }
   if(d  >  da)
@@ -236,208 +209,14 @@ DoubleAc& DoubleAc::operator*=(DoubleAc f)
 #endif
     spexit(mcerr);
   }
-  //check_econd12a(d , < , di , "(*this)="<<(*this)<<" f="<<f<<'\n' , mcerr);
-  //check_econd12a(d , > , da , "(*this)="<<(*this)<<" f="<<f<<'\n' , mcerr);
  mend:
 #endif
   return *this;
 }
 
-/*
-DoubleAc& DoubleAc::operator*=(const DoubleAc& f)
-{
-  mfunname("DoubleAc& DoubleAc::operator*=(const DoubleAc& f)");
-  //mcout.precision(17);
-  //mcout<<"d="<<d<<'\n';
-  //mcout<<"di="<<di<<'\n';
-  //mcout<<"da="<<da<<'\n';
-  //mcout<<"f.d="<<f.d<<'\n';
-  //mcout<<"f.di="<<f.di<<'\n';
-  //mcout<<"f.da="<<f.da<<'\n';
-  if(isnan(di) == 1) di = -DBL_MAX;
-  if(isnan(da) == 1) da =  DBL_MAX;
-  //if(isfinite(f.di) == 0) di = -DBL_MAX;
-  //if(isfinite(da) == 0) da =  DBL_MAX;
-  DoubleAc temp(*this);  // for debug
-  d*=f.d;
-  //double r = NAN;
-  if(di >= 0)
-  {
-    if(isnan(f.di) == 1)  // assumed -infinity
-    {
-      di = -DBL_MAX;
-      if(isnan(f.da) == 1)
-      {
-	da = DBL_MAX;
-      }
-      else if(f.da >= 0)
-      {
-	da *= f.da;
-      }
-      else
-	da = di * f.da;
-    }
-    else if(f.di >= 0)
-    {
-      di*=f.di;
-      if(isnan(f.da) == 1)
-	da = DBL_MAX;
-      else
-	da*=f.da;
-    }
-    else if(isnan(f.da) == 1) // assumed that f.di < 0
-    {
-      di=f.di * da;
-      da = DBL_MAX;
-    }
-    else if(f.da >= 0)  // assumed that f.di < 0
-    {
-      di=f.di * da;
-      da*=f.da;
-    }
-    else  // assumed that f.da < 0
-    {
-      double ti = da * f.di;
-      da = di * f.da;
-      di = ti;
-    }
-  }
-  else if(da >= 0) // assumed that di < 0
-  {
-    if(isnan(f.di) == 1)  // assumed -infinity
-    {
-      di = -DBL_MAX;
-      if(isnan(f.da) == 1)
-      {
-	da = DBL_MAX;
-      }
-      else if(f.da >= 0)
-      {
-	da *= f.da;
-      }
-      else
-	da = di * f.da;
-    }    
-    else if(f.di >= 0)
-    {
-      if(isnan(f.da) == 1)
-      {
-	di = -DBL_MAX;
-	da = DBL_MAX;
-      }
-      else
-      {
-	di*=f.da;
-	da*=f.da;
-      }
-    }
-    else if(isnan(f.da) == 1)
-    {
-      di = -DBL_MAX;
-      da = DBL_MAX;
-    }
-    else if(f.da >= 0)
-    {
-      double ti = find_min(di * f.da , da * f.di);
-      da = find_max(di * f.di , da * f.da);
-      di = ti;
-    }
-    else
-    {
-      double ti = da * f.di;
-      da = di * f.di;
-      di=ti;
-    }
-  }
-  else  // assumed that di < 0 and da < 0
-  {
-    if(isnan(f.di) == 1)  // assumed -infinity
-    {
-      if(isnan(f.da) == 1)
-      {
-	di = -DBL_MAX;
-      }
-      else if(f.da >= 0)
-      {
-	di *= f.da;
-      }
-      else
-	di = da * f.da;
-      da = DBL_MAX;
-    }    
-    else if(f.di >= 0)
-    {
-      if(isnan(f.da) == 1)
-	di = -DBL_MAX;
-      else
-	di*=f.da;
-      da*=f.di;
-    }
-    else if(isnan(f.da) == 1)
-    {
-      di = -DBL_MAX;
-      da = di * f.di ;
-    }
-    else if(f.da >= 0)
-    {
-      double ti=di * f.da;
-      da = di * f.di;
-      di=ti;
-    }
-    else
-    {
-      double ti = da * f.da;
-      da = di * f.di;
-      di = ti;
-    }
-  }
-  //mcout<<"d="<<d<<'\n';
-  //mcout<<"di="<<di<<'\n';
-  //mcout<<"da="<<da<<'\n';
-  if(d  <  di)
-  {
-    funnw.ehdr(mcerr);
-    mcerr<<"d  <  di at the end of computations\n";
-    mcerr<<"This number:\n";
-    print(mcerr, 6);
-    mcerr<<"Argument:\n";
-    f.print(mcerr, 6);
-    // for debug:
-    mcerr<<"old value:\n";
-    temp.print(mcerr, 6);
-    spexit(mcerr);
-  }
-  if(d  >  da)
-  {
-    funnw.ehdr(mcerr);
-    mcerr<<"d  >  di at the end of computations\n";
-    mcerr<<"This number:\n";
-    print(mcerr, 6);
-    mcerr<<"Argument:\n";
-    f.print(mcerr, 6);
-    // for debug:
-    mcerr<<"old value:\n";
-    temp.print(mcerr, 6);
-    spexit(mcerr);
-  }
-  //check_econd12a(d , < , di , "(*this)="<<(*this)<<" f="<<f<<'\n' , mcerr);
-  //check_econd12a(d , > , da , "(*this)="<<(*this)<<" f="<<f<<'\n' , mcerr);
-  return *this;
-}
-*/
-
 DoubleAc& DoubleAc::operator/=(DoubleAc f) {
   mfunnamep("DoubleAc& DoubleAc::operator/=(const DoubleAc& f)");
   check_econd11(f.d , == 0 , mcerr); 
-  //check_econd24( f.di , < , 0 , && , f.da , > , 0 , mcerr);
-  //check_econd24( f.di , == , 0 , && , f.da , == , 0 , mcerr);
-  //mcout.precision(20);
-  //mcout<<"d="<<d<<'\n';
-  //mcout<<"di="<<di<<'\n';
-  //mcout<<"da="<<da<<'\n';
-  //mcout<<"f.d="<<f.d<<'\n';
-  //mcout<<"f.di="<<f.di<<'\n';
-  //mcout<<"f.da="<<f.da<<'\n';
   check_econd11(f.d , == 0.0, mcerr);
 #ifndef VISUAL_STUDIO
   if(isnan(di) == 1) di = -DBL_MAX;
@@ -570,24 +349,6 @@ DoubleAc sqrt(const DoubleAc& f) {
 		  std::sqrt( double(f.get_right_limit()) )
 		  );
 }
-
-/*
-DoubleAc sqrt(const DoubleAc& f)
-{
-  mfunname("DoubleAc sqrt(const DoubleAc& f)");
-  check_econd11(f.get() , < 0 , mcerr);
-  //using namespace std;
-  DoubleAc da(sqrt( double(f.get()) ),
-	      sqrt( double(find_max( f.get_left_limit() , 0.0)) ),
-	      sqrt( double(f.get_right_limit()) )
-	      );
-  return da;
-  //return DoubleAc(sqrt( double(f.get()) ),
-  //		  sqrt( double(find_max( f.get_left_limit() , 0.0)) ),
-  //		  sqrt( double(f.get_right_limit()) )
-  //		  );
-}
-*/  
 
 DoubleAc square(const DoubleAc& f) {
   if(f.left_limit() >= 0.0) {
@@ -795,21 +556,6 @@ DoubleAc pow(const DoubleAc& /*f*/, const DoubleAc& /*p*/) {
   mcerr<<"ERROR in inline DoubleAc pow(const DoubleAc& f, const DoubleAc& p):\n";
   mcerr<<"not implemented yet\n";
   spexit(mcerr);
-  /*
-  double d =  pow( f.get(), p);
-  double di = pow( f.left_limit(), p);
-  double da = pow( f.right_limit(), p);
-  if(p.get() >= 0.0) 
-    return DoubleAc(pow( f.get() , p.get() ),
-                    pow( f.get_left_limit() , p.get_left_limit() ),
-                    pow( f.get_right_limit() , p.get_right_limit() )
-                    );
-   else
-    return DoubleAc(pow( f.get() , p.get() ),
-                    pow( f.get_right_limit() , p.get_right_limit() ),
-                    pow( f.get_left_limit() , p.get_left_limit() )
-                    );
-  */
   return 0.0;
 }
 

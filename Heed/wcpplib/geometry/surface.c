@@ -1,7 +1,3 @@
-//#include <stdlib.h>
-//#include <iostream.h>
-//#include <iomanip.h>
-//#include <math.h>
 #include "wcpplib/geometry/surface.h"
 /*
 Copyright (c) 2000 Igor B. Smirnov
@@ -19,8 +15,6 @@ The file is provided "as is" without express or implied warranty.
 //             **** splane ****
 absref absref::*(splane::aref_splane[2])=
 {(absref absref::*)&splane::pn, (absref absref::*)&splane::dir_ins};
-//absref absref::*(splane::aref_splane[3])=
-//{&splane::piv, &splane::dir, &splane::dir_ins};
 
 void splane::get_components(ActivePtr<absref_transmit>& aref_tran)
 {
@@ -32,95 +26,51 @@ int splane::check_point_inside(const point& fpt, const vec& dir, vfloat fprec)
   const 
 {
   mfunname("int splane::check_point_inside(const point& fpt, const vec& dir, vfloat fprec)");
-  //mcout<<"int splane::check_point_inside:\n";
-  //print(mcout);
-  if(dir==dv0)
-  {  // this is not useful
-    if(fpt==pn.Gpiv()) return 1;
-    vec v=fpt-pn.Gpiv();
-    if(cos2vec(dir_ins,v)>=-vprecision) return 1;
-    else return 0;
+  if (dir == dv0) {  
+    // this is not useful
+    if (fpt==pn.Gpiv()) return 1;
+    vec v = fpt - pn.Gpiv();
+    if (cos2vec(dir_ins,v) >= -vprecision) return 1;
+    return 0;
   }
-  else
-  {
-    if(pn.check_point_in(fpt, fprec)==1)
-    {
-      vfloat ca=cos2vec(dir, dir_ins);
-      //mcout<<"dir="<<dir<<"dir_ins="<<dir_ins<<"ca="<<ca<<'\n';
-      if(ca < 0)  // exitting
-	return 0;
-      else
-	return 1;
-    }
-    else
-    {
-      vec v=fpt-pn.Gpiv();
-      //mcout<<"cos2vec="<<cos2vec(dir_ins,v)<<'\n';
-      if(cos2vec(dir_ins,v) >= 0) return 1;
-      else return 0;
-    }
+  if (pn.check_point_in(fpt, fprec) == 1) {
+    vfloat ca = cos2vec(dir, dir_ins);
+    if (ca < 0) return 0;
+    return 1;
   }
+  vec v = fpt - pn.Gpiv();
+  if (cos2vec(dir_ins,v) >= 0) return 1;
+  return 0;
+
 }
 
 int splane::check_point_inside1(const point& fpt, int s_ext, vfloat fprec)
   const 
 {
-  //mcout<<"splane::check_point_inside1:\n";
-  if(pn.check_point_in(fpt, fprec)==1)
-  {
-    //mcout<<"pn.check_point_in(fpt, fprec)=1\n";
-    if( s_ext==1)
-      return 0;
-    else
-      return 1;
+  if (pn.check_point_in(fpt, fprec) == 1) {
+    if (s_ext == 1) return 0;
+    return 1;
   }
-  else
-  {
-    //mcout<<"pn.check_point_in(fpt, fprec)!=1\n";
-    vec v=fpt-pn.Gpiv();
-    //Iprint(mcout, v);
-    //mcout<<"cos2vec(dir_ins,v)="<<cos2vec(dir_ins,v)<<'\n';
-    //if(cos2vec(dir_ins,v) > 0) 
-    //{mcout<<"cos2vec(dir_ins,v) > 0)\n"; return 1;}
-    //else {mcout<<"cos2vec(dir_ins,v) <= 0)\n"; return 0; }
-    if(cos2vec(dir_ins,v) > 0) return 1;
-    else return 0;
-  }
+  vec v = fpt - pn.Gpiv();
+  if (cos2vec(dir_ins,v) > 0) return 1;
+  return 0;
+
 }
 
 
 int splane::range(const trajestep& fts, 
 		  vfloat* crange, point* cpt, int* s_ext) const 
-//int range(const point& fpt, const vec& dir, vfloat& rng, point& fpte) const 
 {
   mfunname("int splane::range(...)");
-  /*  it is not corrent
-  if(pn.check_point_in(fts.currpos, 0.0)==1)  
-  { 
-    crange[0]=0.0; cpt[0]=fts.currpos;
-    vfloat c=cos2vec(fts.dir, dir_ins);
-    if(c > 0)
-      s_ext[0]=0;
-    else if(c < 0)
-      s_ext[0]=1;
-    else
-      s_ext[0]=2;
-    //rng=0; fpte=pn.Gpiv(); 
-    return 1; 
-  }
-  */
   if(fts.s_range_cf==0) // straight line
   {
     point pt = pn.cross(straight(fts.currpos, fts.dir));
-    //mcout<<"int splane::range(...), vecerror="<<vecerror<<'\n';
     if(vecerror!=0)
     {
       vecerror=0;
       return 0;
     }
     vfloat rng = length( pt - fts.currpos );
-    //mcout<<"check_par( pt-fts.currpos , fts.dir, 0.01 )="
-    // <<check_par( pt-fts.currpos , fts.dir, 0.01 )<<'\n';
     if(pt==fts.currpos || check_par( pt-fts.currpos , fts.dir, 0.01 )==1)
       //                                   looks like not matter ^
     { // otherwise the point is behind plane
@@ -220,18 +170,6 @@ int splane::range(const trajestep& fts,
 	  ins=1;  // means the point was inside and now exiting
 	else
 	  ins=0;
-	/*
-	if(angle[0] > 0.0)
-	  ins=check_point_inside(fts.currpos, fts.dir, 0.0);
-	else
-	{
-	  vfloat t=cos2vec(fts.dir, dir_ins);
-	  if(t < 0)
-	    ins=1;  // means the point was inside and now exiting
-	  else
-	    ins=0;
-	}
-	*/
 	cpt[0]=pt[0]; crange[0]=rng; s_ext[0]=ins; qq++;
 	rng = cf.Grad()*angle[1];
 	if(fts.mrange>=rng)
@@ -239,18 +177,13 @@ int splane::range(const trajestep& fts,
 	  cpt[1]=pt[1]; crange[1]=rng; s_ext[1]=( ins == 0 ? 1 : 0);   qq++;
 	}
       }
-      //for(int n=0; n<qq; n++)
-      //{
-      //	mcout<<"n="<<n<<" cpt="<<cpt[n]
-      //	     <<"crange="<<crange[n]<<" s_ext="<<s_ext[n]<<'\n';
-      //}
       return qq;
     }
   }
-  return 0;  // to calc compiler of IRIX
+  return 0;
 }
 
-void splane::print(ostream& file, int l) const 
+void splane::print(std::ostream& file, int l) const 
 {
   if(l>0)
   {
@@ -258,15 +191,11 @@ void splane::print(ostream& file, int l) const
     indn.n+=2;
     file<<pn;
     Ifile<<"dir_ins: "<<noindent<<dir_ins<<'\n';
-    //Ifile<<dir_ins<<'\n';
-    //file<<*((plane*)this);
     indn.n-=2;
   }
 }
 
-
-
-//             **** ulsvolume ****
+// **** ulsvolume ****
 void ulsvolume::get_components(ActivePtr<absref_transmit>& aref_tran)
 {
   int n;
@@ -280,13 +209,10 @@ int ulsvolume::check_point_inside(const point& fpt, const vec& dir) const
   mfunname("ulsvolume::check_point_inside(...)");
   check_econd11(qsurf , <= 0 , mcerr);
   int n;
-  //mcout<<"int check_point_inside:\n";
-  //mcout<<"fpt="<<fpt<<"dir="<<dir<<"prec="<<prec<<'\n';
   for(n=0; n<qsurf; n++)
   {
     if(!(surf[n].get()-> check_point_inside(fpt, dir, prec)) )
     {
-      //mcout<<"int check_point_inside: n="<<n<<" will return 0"<<'\n';
       return 0;
     }
   }
@@ -297,17 +223,13 @@ int ulsvolume::check_point_inside(const point& fpt, const vec& dir) const
   print(mcout,0);
   indn.n--;
 #endif
-  //mcout<<"will return 1\n";
   return 1;
 }
-
-//#define DEBUG_ulsvolume_range_ext
 
 int ulsvolume::range_ext(trajestep& fts, int s_ext) const 
 {
   mfunnamep("int ulsvolume::range_ext(trajestep& fts, int s_ext) const");
   check_econd11(qsurf , <= 0 , mcerr);
-  //trajestep ts(fts);
 #ifdef DEBUG_ulsvolume_range_ext
   mcout<<"ulsvolume::range_ext, START, s_ext="<<s_ext<<" qsurf="<<qsurf<<'\n';
   mcout<<fts;
@@ -317,26 +239,13 @@ int ulsvolume::range_ext(trajestep& fts, int s_ext) const
   int fs_ext[pqcrossurf];
   int n, m, nc;
   int s=0;  // sign of crossing
-  //mcout<<"ulsvolume::range_ext: starting, s_ext="<<s_ext<<'\n';
   if(s_ext==1)
   {
     for(n=0; n<qsurf; n++)
     {
       int qc=surf[n].get()->range( fts, crange, cpt, fs_ext );
-      //if(n==5)
-      //{
-      //	mcout<<"ulsvolume::range_ext:\n";
-      //	surf[n]->print(mcout);
-      //	mcout<<fts;
-      //	mcout<<"qc="<<qc<<" fs_ext[0]="<<fs_ext[0]<<'\n';
-      //}
-      //surf[n]->print(mcout, 2);
-      //Iprintn(mcout, qc);
-      //mcout<<fts;
       for( m=0; m<qc; m++)
       {
-	//Iprintn(mcout, fs_ext[m]);
-	//Iprintn(mcout, cpt[m]);
 	if(fs_ext[m]==1)
 	{
 	  s=1;
@@ -464,13 +373,8 @@ void ulsvolume::ulsvolume_init(surface *fsurf[pqqsurf],
     for (int n = 0; n < qsurf; ++n) surf[n].put(NULL);
   }
   qsurf = fqsurf;
-  //mcerr<<"ulsvolume::ulsvolume_init:\n";
   for (int n = 0; n < qsurf; ++n) {
-    //mcerr<<"n="<<n<<'\n';
-    //fsurf[n]->print(mcerr) ;
     surf[n].put(fsurf[n]);
-    //mcerr<<"n="<<n<<'\n';
-    //surf[n]->print(mcerr) ;
   } 
 }
 
@@ -497,16 +401,9 @@ ulsvolume::ulsvolume(const ulsvolume& f): absref(f), absvol(f), qsurf(f.qsurf), 
   for (int n = 0; n < qsurf; ++n) surf[n].put(f.surf[n].get());
 }
 
-//ulsvolume& ulsvolume::operator=(const ulsvolume& fv) {
-//  //delete name;
-//  //for(int n=0; n<qsurf; n++) delete surf[n];
-//  ulsvolume_init(((ulsvolume&)fv).surf, fv.qsurf, fv.name, fv.prec);
-//  return *this;
-//}
-
 macro_copy_body(ulsvolume)
 
-void ulsvolume::print(ostream& file, int l) const {
+void ulsvolume::print(std::ostream& file, int l) const {
   char s[1000];
   chname(s);
   Ifile<<"ulsvolume::print(l="<<l<<"): "<<s<<'\n';
@@ -530,12 +427,8 @@ manip_ulsvolume::manip_ulsvolume(const manip_ulsvolume& f) :
   absref(f), manip_absvol(f), ulsvolume(f) {
 }
 macro_copy_body(manip_ulsvolume)
-/*
-ulsvolume* manip_ulsvolume::copy(void) const {
-  return new manip_ulsvolume(*this); 
-}
-*/
-void manip_ulsvolume::print(ostream& file, int l) const {
+
+void manip_ulsvolume::print(std::ostream& file, int l) const {
   if (l <= 0) return;
   char s[1000];
   chname(s);
@@ -543,7 +436,6 @@ void manip_ulsvolume::print(ostream& file, int l) const {
   l=l-1;
   if (l > 0) {
     indn.n+=2;
-    //manip_absvol::print(file, l-1); 
     // If to call this it calls manip_ulsvolume::print again and loop...
     ulsvolume::print(file, l-1);
     indn.n-=2;

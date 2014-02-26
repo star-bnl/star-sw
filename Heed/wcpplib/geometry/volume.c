@@ -17,7 +17,7 @@ manip_absvol_eid::manip_absvol_eid(void) {
   nembed = -1; 
 }
 
-void manip_absvol_eid::print(ostream& file, int l) const {
+void manip_absvol_eid::print(std::ostream& file, int l) const {
   if (l < 0) return;
   char s[1000];
   amvol->m_chname(s);
@@ -66,7 +66,7 @@ int operator==(manip_absvol_treeid& tid1, manip_absvol_treeid& tid2) {
   return 1;
 }
 
-void manip_absvol_treeid::print(ostream& file, int l) const {
+void manip_absvol_treeid::print(std::ostream& file, int l) const {
   if (l >= 0) {
     if (qeid <= 0) {
       Ifile << "no volume defined, qeid=" << qeid << '\n';
@@ -140,7 +140,7 @@ int absvol::range(trajestep& fts, int s_ext,
   return 0;
 }
 
-void absvol::print(ostream& file, int l) const {
+void absvol::print(std::ostream& file, int l) const {
   if (l <= 0) return;
   char s[1000];
   chname(s);
@@ -241,7 +241,7 @@ void manip_absvol::m_chname(char* nm) const {
   Gavol()->chname(&nm[6]);
 }
 
-void manip_absvol::m_print(ostream& file, int l) const {
+void manip_absvol::m_print(std::ostream& file, int l) const {
   if (l <= 0) return;
   char s[1000];
   m_chname(s);
@@ -287,7 +287,7 @@ void sh_manip_absvol::m_chname(char *nm) const {
 
 macro_copy_body_not_defined(sh_manip_absvol)
 
-void sh_manip_absvol::m_print(ostream& file, int l) const {
+void sh_manip_absvol::m_print(std::ostream& file, int l) const {
   if (l <= 0) return;
   char s[1000];
   m_chname(s);

@@ -1,7 +1,3 @@
-//#include <stdlib.h>
-//#include <iostream.h>
-//#include <iomanip.h>
-//#include <math.h>
 #include "wcpplib/geometry/straight.h"
 #include "wcpplib/geometry/plane.h"
 #include "wcpplib/math/linexi2.h"

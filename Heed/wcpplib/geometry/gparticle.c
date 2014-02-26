@@ -1,7 +1,3 @@
-//#include <stdlib.h>
-//#include <iostream.h>
-//#include <iomanip.h>
-//#include <math.h>
 #include "wcpplib/geometry/gparticle.h"
 /*
 Copyright (c) 2000 Igor B. Smirnov

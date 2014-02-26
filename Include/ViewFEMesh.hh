@@ -3,13 +3,12 @@
 #define G_VIEW_FE_MESH
 
 #include <string>
+#include <map>
 
-#include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TMatrixD.h>
 #include <TArrayD.h>
 #include <TGaxis.h>
-#include <map>
 #include <TPolyLine.h>
 #include <TPolyLine3D.h>
 #include <TString.h>
@@ -18,13 +17,10 @@
 #include "ViewDrift.hh"
 #include "ComponentFieldMap.hh"
 #include "ComponentCST.hh"
-#include "Random.hh"
 
 namespace Garfield {
 
 class ViewFEMesh {
-
-  RQ_OBJECT("ViewFEMesh")
 
   public:
     // Constructor

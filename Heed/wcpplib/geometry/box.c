@@ -1,7 +1,3 @@
-//#include <stdlib.h>
-//#include <iostream.h>
-//#include <iomanip.h>
-//#include <math.h>
 #include "wcpplib/geometry/box.h"
 /*
 Copyright (c) 2000 Igor B. Smirnov
@@ -24,19 +20,8 @@ void box::get_components(ActivePtr<absref_transmit>& /*aref_tran*/) {
   spexit(mcerr);
 }
 
-//void box::Garef(int& fqaref , absref absref::**&faref, //fixed memory
-//	            int& fqareff, absref **&fareff) // free memory
-//{ 
-//mfunnamep("box::Garef(...)");
-//funnw.ehdr(cerr);
-//mcerr<<
-//"one should not call this function, sinec this object can not be modified\n";
-//spexit(mcerr);
-//}
-
 box::box(void): dx(0), dy(0), dz(0), dxh(0), dyh(0), dzh(0), name("none") {
   mfunname("box::box(void)");
-  //mcerr<<"box::box(void) is being inited\n";
   init_prec(); init_planes();
 }
 
@@ -60,7 +45,6 @@ box::box(vfloat fdx, vfloat fdy, vfloat fdz, vfloat fprec, const String& fname) 
 
 box::box(box& fb) : absref(fb), absvol(fb) { 
   pvecerror("box(const box& fb)");
-  //mcout<<"box::box is called, name="<<fb.name<<"\n";
   dx = fb.dx; dy = fb.dy; dz = fb.dz; 
   dxh = 0.5 * dx; dyh = 0.5 * dy; dzh = 0.5 * dz; 
   prec = fb.prec;
@@ -70,27 +54,12 @@ box::box(box& fb) : absref(fb), absvol(fb) {
 
 box::box(const box& fb) : absref(fb), absvol(fb) { 
   pvecerror("box(const box& fb)");
-  //mcout<<"box::box is called, name="<<fb.name<<"\n";
   dx = fb.dx; dy = fb.dy; dz = fb.dz; 
   dxh = 0.5 * dx; dyh = 0.5 * dy; dzh = 0.5 * dz; 
   name = fb.name;
   prec = fb.prec;
   init_planes();
 }
-
-/*
-box& box::operator=(const box& fb) { 
-  pvecerror("box& operator=(const box& fb)");
-  if (this != &fb) {
-    dx = fb.dx; dy = fb.dy; dz = fb.dz; 
-    dxh = 0.5 * dx; dyh = 0.5 * dy; dzh = 0.5 * dz;  
-    name = fb.name;
-    init_prec(); 
-    init_planes();
-  }
-  return *this;
-}
-*/
 
 void box::init_prec(void) {
   prec = (dxh + dyh + dzh) / 3.0;
@@ -114,9 +83,7 @@ void box::init_planes(void) {
 		                             vec(   0,   0, 1));
   surface *fsurf[6];
   for (int n = 0; n < 6; ++n) fsurf[n] = &spl[n];
-  //mcout<<"box::init_planes: prec="<<prec<<'\n';
   ulsv.ulsvolume_init(fsurf, 6, "ulsv of box", prec);
-  //Iprintn(mcout,ulsv.prec);
 }
 
 int box::check_point_inside(const point& fpt, const vec& dir) const { 
@@ -245,7 +212,7 @@ int box::check_point_inside(const point& fpt, const vec& dir) const {
   }
 }
 
-void box::print(ostream& file, int l) const {
+void box::print(std::ostream& file, int l) const {
   if (l <= 0) return;
   char s[1000];
   chname(s);
@@ -262,28 +229,9 @@ void box::print(ostream& file, int l) const {
   absvol::print(file,l);
   indn.n-=2;
 }
-/*
-int box::range(const point& fpt, const vec& dir, int s_ext,  
-	       int& sb, vfloat& rng,  point &fpte, 
-	       manip_absvol_eid* faeid) const 
-  //		      manip_absvol** famvol) const 
-{
-  pvecerror("int box::range(const point& fpt, const vec& dir, int s_ext,int& sb, vfloat& rng,  point &fpte, manip_absvol_eid* faeid)");
-  faeid->amvol=NULL; faeid->nembed=-1; sb=1; 
-  //return range_ext(fpt, dir, s_ext, rng, fpte);
-  //mcout<<"int box::range: now calling range_ext\n";
-  int s=range_ext(fpt, dir, s_ext, rng, fpte);
-  //mcout<<"int box::range:\n";
-  //mcout<<fpt<<dir<<fpte;
-  //mcout<<"rng="<<rng<<'\n';
-  return s;
-}
-*/
 
 int box::range_ext(trajestep& fts, int s_ext) const {
   mfunname("virtual int box::range_ext(trajestep& fts, int s_ext) const");
-  //mcout<<"box::range_ext: s_ext="<<s_ext<<" fts="<<fts;
-  //print(mcout,1);
   if (s_ext == 0) {
     if (abslt(fts.currpos.v.x) > dxh + fts.mrange) return 0;
     if (abslt(fts.currpos.v.y) > dyh + fts.mrange) return 0;
@@ -292,16 +240,13 @@ int box::range_ext(trajestep& fts, int s_ext) const {
     if (abslt(fts.currpos.v.x) < dxh - fts.mrange &&
 	abslt(fts.currpos.v.y) < dyh - fts.mrange &&
 	abslt(fts.currpos.v.z) < dzh - fts.mrange ) {
-      //mcout<<"box::range_ext: fts="<<fts;
-      //mcout<<"box::range_ext: returning 0 due to simple check\n";
       return 0;
     }
   }
-  //mcout<<"box::range_ext: calling ulsv.range_ext\n";
   return ulsv.range_ext(fts, s_ext);
 }
 macro_copy_body(box)
-//absvol* box::copy(void) const {return new box(*this);}
+
 void box::income(gparticle* /*gp*/) {;}
 void box::chname(char *nm) const { 
 #ifdef USE_STLSTRING
@@ -314,13 +259,7 @@ strcpy(nm,"box: "); strcat(nm,name);
 // *****   manip_box  ********         
 
 absvol*  manip_box::Gavol(void) const {return (box*) this; }
-
-//manip_box::manip_box(const manip_box& f): manip_absvol(f) {}
-
 macro_copy_body(manip_box)
-//absvol* manip_box::copy(void) const {
-//  return new manip_box(*this); 
-//}
 void manip_box::chname(char *nm) const {
 #ifdef USE_STLSTRING
   strcpy(nm,"manip_box: "); strcat(nm,name.c_str());
@@ -329,7 +268,7 @@ void manip_box::chname(char *nm) const {
 #endif
 }
 
-void manip_box::print(ostream& file, int l) const {
+void manip_box::print(std::ostream& file, int l) const {
   if (l > 0) {
     char s[1000];
     chname(s);
@@ -337,9 +276,6 @@ void manip_box::print(ostream& file, int l) const {
     l=l-1;
     if (l > 0) {
       indn.n+=2;
-      //manip_absvol::print(file, l-1); 
-      // If to call this^ it calls manip_ulsvolume::print again and loop...
-      
       box::print(file, l);
       indn.n-=2;
     }
@@ -351,17 +287,11 @@ void manip_box::print(ostream& file, int l) const {
 
 absvol* sh_manip_box::Gavol(void) const {return (box*) this;}
 
-//manip_box::manip_box(const manip_box& f): manip_absvol(f) {}
-
 void sh_manip_box::get_components(ActivePtr<absref_transmit>& aref_tran) {
   sh_manip_absvol::get_components(aref_tran);
 }
 
 macro_copy_body(sh_manip_box)
-//absvol* sh_manip_box::copy(void) const 
-//{
-//  return new sh_manip_box(*this); 
-//}
 void sh_manip_box::chname(char *nm) const {
 #ifdef USE_STLSTRING
   strcpy(nm,"sh_manip_box: "); strcat(nm,name.c_str());
@@ -370,7 +300,7 @@ void sh_manip_box::chname(char *nm) const {
 #endif
 }
 
-void sh_manip_box::print(ostream& file, int l) const {
+void sh_manip_box::print(std::ostream& file, int l) const {
   if (l>0) {
     char s[1000];
     chname(s);
@@ -379,9 +309,6 @@ void sh_manip_box::print(ostream& file, int l) const {
     if (l > 0) {
       indn.n+=2;
       csys.print(file, l);
-      //manip_absvol::print(file, l-1); 
-      // If to call this^ it calls manip_ulsvolume::print again and loop...
-      
       box::print(file, l);
       indn.n-=2;
     }

@@ -68,7 +68,7 @@ int circumf::cross(const plane& pn, point pt[2], vfloat prec) const {
   return 2;
 }
 
-ostream& operator<<(ostream& file, const circumf& f) {
+std::ostream& operator<<(std::ostream& file, const circumf& f) {
   Ifile<<"circumf(erence):\n";
   indn.n+=2;
   Ifile<<"rad="<<f.rad<<'\n';

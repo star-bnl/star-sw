@@ -44,7 +44,6 @@ HEEDOBJS = \
 	$(OBJDIR)/Heed/surface.o \
 	$(OBJDIR)/Heed/trajestep.o \
 	$(OBJDIR)/Heed/vec.o \
-	$(OBJDIR)/Heed/volume_int.o \
 	$(OBJDIR)/Heed/volume.o
 
 HEEDOBJS += \
@@ -322,12 +321,6 @@ $(OBJDIR)/Heed/vec.o: \
 	$(HEEDDIR)/wcpplib/geometry/vec.c \
 	$(HEEDDIR)/wcpplib/geometry/vec.h \
 	$(HEEDDIR)/wcpplib/geometry/vec.ic
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-
-$(OBJDIR)/Heed/volume_int.o: \
-	$(HEEDDIR)/wcpplib/geometry/volume_int.c \
-	$(HEEDDIR)/wcpplib/geometry/volume_int.h
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 

@@ -1,5 +1,6 @@
 #ifndef VOLUME_H
 #define VOLUME_H
+#include <iostream>
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/geometry/trajestep.h"
 #include "wcpplib/safetl/AbsArr.h"
@@ -20,7 +21,6 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-// enum type_obt {Eprivate, Ealien, Eshifted_private, Eshifted_alien};
 class gparticle;
 class manip_absvol;
 class volume;
@@ -39,7 +39,7 @@ public:
   PassivePtr<manip_absvol> amvol;
   // Index of this volume in array 
   int nembed; 
-  void print(ostream& file, int l) const;
+  void print(std::ostream& file, int l) const;
 };
 // (2) Array of manip_absvol_eid classes
 class manip_absvol_treeid { 
@@ -73,7 +73,7 @@ public:
   // not necessary the last volume.
   int check_manip_absvol_registered(manip_absvol* amvol);
   int check_absvol_registered(absvol* avol);
-  void print(ostream& file, int l) const ;
+  void print(std::ostream& file, int l) const ;
 }; 
 
 int operator==(manip_absvol_treeid& tid1, manip_absvol_treeid& tid2);
@@ -141,7 +141,7 @@ public:
   macro_copy_header(absvol);
   virtual void income(gparticle*) {}
   virtual void chname(char *nm) const {strcpy(nm, "absvol");}
-  virtual void print(ostream& file, int l) const;
+  virtual void print(std::ostream& file, int l) const;
   virtual DynLinArr< manip_absvol * > Gamanip_embed(void) const ;
 };
 
@@ -216,7 +216,7 @@ public:
     if (asc != NULL) f->up(asc);
   }
   void m_chname(char* nm) const;
-  virtual void m_print(ostream& file, int l) const;
+  virtual void m_print(std::ostream& file, int l) const;
   macro_copy_header(manip_absvol);
   virtual ~manip_absvol() {;}
 };
@@ -241,7 +241,7 @@ public:
   virtual ~sh_manip_absvol() {;}
 
   virtual void m_chname(char *nm) const ; 
-  virtual void m_print(ostream& file, int l) const ;
+  virtual void m_print(std::ostream& file, int l) const ;
 
   macro_copy_header(sh_manip_absvol);
 };

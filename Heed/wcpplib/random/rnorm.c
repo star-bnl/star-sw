@@ -6,7 +6,7 @@
  * since these commonly-defined names are not part of the C/C++ standards.
  */
 #endif
-#include <math.h>
+#include <cmath>
 #include "wcpplib/random/rnorm.h"
 #include "wcpplib/random/ranluxint.h"
 

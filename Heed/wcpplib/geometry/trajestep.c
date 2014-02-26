@@ -14,13 +14,7 @@ The file is provided "as is" without express or implied warranty.
 void trajestep_limit::range(int fs_cf0, vfloat rad,
 			    int& fs_cf1, vfloat& mrange)
 {
-  if(mrange<0 || mrange>max_range)
-    mrange=max_range;
-  //if(force > 0)
-  //{
-  // vfloat m=max_prange/force;
-  //  if( mrange > m ) mrange = m;
-  //}
+  if (mrange<0 || mrange>max_range) mrange=max_range;
   fs_cf1 = fs_cf0;
   if(fs_cf1 == 1)
   {
@@ -119,21 +113,6 @@ void trajestep::Gnextpoint(vfloat frange, point& fpos, vec& fdir) const
     vec frelcen = relcen;
     frelcen.turn(dir||relcen, ang);
     fpos=currpos + relcen - frelcen;
-    //mcout<<"trajestep::Gnextpoint:\n";
-    //Iprint(mcout, relcen);
-    //Iprintn(mcout, ang);
-    //Iprint(mcout, dir);
-    //Iprint(mcout, fdir);
-    //Iprint(mcout, frelcen);
-    //Iprint(mcout, currpos);
-    //Iprint(mcout, fpos);
-    //fpos=currpos;
-    //point pt(currpos+relcen);
-    //basis bs("temp");
-    //fixsyscoor sc(&pt, &bs, "temp");
-    //fpos.up(&sc);
-    //fpos.turn(dir||relcen, ang);
-    //fpos.down(&sc);
     return;
   }
 }
@@ -171,17 +150,11 @@ void trajestep::Gnextpoint1(vfloat frange, point& fpos,
     frelcen = relcen;
     frelcen.turn(dir||relcen, ang);
     fpos=currpos + relcen - frelcen;
-    //fpos=currpos;
-    //point pt(currpos+relcen);
-    //basis bs("temp");
-    //fixsyscoor sc(&pt, &bs, "temp");
-    //fpos.up(&sc);
-    //fpos.turn(dir||relcen, ang);
-    //fpos.down(&sc);
     return;
   }
 }
-ostream& operator<<(ostream& file, const trajestep& f)
+
+std::ostream& operator<<(std::ostream& file, const trajestep& f)
 {
   Ifile<<"trajestep: s_cf="<<f.s_cf<<"\n";
   indn.n+=2;

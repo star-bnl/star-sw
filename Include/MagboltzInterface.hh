@@ -3,6 +3,8 @@
 #ifndef G_MAGBOLTZ_INTERFACE
 #define G_MAGBOLTZ_INTERFACE
 
+#ifndef __CINT__
+
 namespace Garfield {
 
 namespace Magboltz {
@@ -133,4 +135,5 @@ extern "C" {
 }
 
 }
+#endif
 #endif

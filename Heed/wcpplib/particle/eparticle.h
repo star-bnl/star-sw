@@ -14,7 +14,6 @@ known by science.
 
 class eparticle: public mparticle, public particle_type
 {public:
-  //particle_def* pardef;
   virtual int force(const point& pt, vec& f,  vec& f_perp, vfloat& mrange);
   // if returns 0 then no force, but it should fill zero to f anyway
   // mrange - distance at which the force should not change much
@@ -24,10 +23,8 @@ class eparticle: public mparticle, public particle_type
 	    const vec& vel,  // length does not have meaning 
 	    vfloat time, particle_def* fpardef, 
 	    double gamma_1);
-  //eparticle(const mparticle& fmp, particle_def* fpardef):
   eparticle(void): mparticle(), particle_type()  {;}
-  //eparticle(void): mparticle(),  pardef(NULL) {;}
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   AnyType_copy(eparticle, gparticle);
   virtual ~eparticle() {;}
 };

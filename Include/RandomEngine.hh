@@ -8,6 +8,8 @@ namespace Garfield {
 class RandomEngine {
 
   public:
+    // Constructor
+    RandomEngine() {}
     // Destructor
     virtual ~RandomEngine() {}
     

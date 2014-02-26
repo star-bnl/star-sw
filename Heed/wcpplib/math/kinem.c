@@ -6,7 +6,7 @@
  * since these commonly-defined names are not part of the C/C++ standards.
  */
 #endif
-#include <math.h>
+#include <cmath>
 #include "wcpplib/math/kinem.h"
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"

@@ -13,7 +13,7 @@ and notices about any modifications of the original text
 appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
-
+#include <iostream>
 #include "wcpplib/geometry/vec.h"
 
 class plane;
@@ -151,10 +151,10 @@ public:
     //  while(mean2dist_prev<mean2dist || 
     //	  (mean2dist != 0 && mean2dist_prev-mean2dist>precision) );
 
-  friend ostream& operator<<(ostream& file, const straight& s);
+  friend std::ostream& operator<<(std::ostream& file, const straight& s);
 };
 
-ostream& operator<<(ostream& file, const straight& s);
+std::ostream& operator<<(std::ostream& file, const straight& s);
 
 
 #endif

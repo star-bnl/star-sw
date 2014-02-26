@@ -31,7 +31,7 @@ public:
     eparticle(primvol, pt, vel, time, fpardef), s_add_loss(fs_add_loss),
     total_Eloss(0.0) {;}
   eiparticle(void): eparticle(){;}
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   AnyType_copy(eiparticle, gparticle);
   virtual ~eiparticle() {;}
 };

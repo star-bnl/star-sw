@@ -14,67 +14,21 @@ double eiparticle::Bethe_Bloch_en_loss(void)
   mfunname("double eiparticle::Bethe_Bloch_energy_loss(void)");
   const absvol* av = currpos.G_lavol(); // get least address of volume
   const MatterType* amt = dynamic_cast< const MatterType*  >(av);
-  //PassivePtr< MatterDef >* amt = dynamic_cast< PassivePtr< MatterDef >*  >(av);
-  //char name[1000];
-  if(amt == NULL) 
-  {
-    //mcout<<"eiparticle::Bethe_Bloch_en_loss: dynamic_cast is not successful, return 0\n";
-    //av->chname(name);
-    //mcout<<"name="<<name<<'\n';
-    return 0.0;
-  }
-  else
-  {
-    //mcout<<"eiparticle::Bethe_Bloch_en_loss: dynamic_cast is successful\n";
-    //av->chname(name);
-    //mcout<<"name="<<name<<'\n';
-    MatterDef* amd = amt->matdef.get();
-    double gamma_1 = curr_gamma_1;
-    double betta = lorbetta(gamma_1);
-    double Eloss = Bethe_Bloch_energy_loss(amd->Z_mean() / amd->A_mean(),
-					   amd->I_eff(), 
-					   betta, 
-					   pardef->charge/eplus);
-    Eloss *= amd->density();
-    //mcout<<"Eloss/(keV / cm  )="<<Eloss/(keV / cm)<<'\n';;
-    return Eloss;
-  }
+  if (amt == NULL) return 0.;
+  MatterDef* amd = amt->matdef.get();
+  const double beta = lorbetta(curr_gamma_1);
+  double Eloss = Bethe_Bloch_energy_loss(amd->Z_mean() / amd->A_mean(),
+                                         amd->I_eff(), beta, pardef->charge/eplus);
+  Eloss *= amd->density();
+  return Eloss;
 }
-/*
-void eiparticle::step(void)
-{          // make step to nextpos and calculate new step to border
-  mfunname("void eiparticle::step(void)");
-  prevpos=currpos;
-  currpos=nextpos;
-  nstep++;
-  if(currpos.prange==0)
-  {
-    n_zero_step++;
-    check_econd12a(n_zero_step , > , max_q_zero_step, 
-		  "too many zero steps, possible infinite loop\n"; 
-		   print(mcout,10);, mcerr);
-  }
-  else
-    n_zero_step=0;
-  new_speed();
-  ionization_loss();
-  if(prevpos.tid != currpos.tid)
-    //prevpos.namvol != currpos.namvol ||
-    //prevpos.amvol[prevpos.namvol-1] != currpos.amvol[currpos.namvol-1])
-    change_vol();  // possible correction ( reflection..)
-  nextpos=calc_step_to_bord();
-}
-*/
-//void eiparticle::ionization_loss(void)
-//{
-//  mfunname("void eiparticle::ionization_loss(void)");
+
 void eiparticle::physics_after_new_speed(void)
 {
   mfunname("void eiparticle::physics_after_new_speed(void)");
   double Eloss=Bethe_Bloch_en_loss();
   Eloss *= currpos.prange;
   total_Eloss += Eloss;
-  //mcout<<"total_Eloss/keV="<<total_Eloss/keV<<'\n';
   if(s_add_loss == 0)
   {
     curr_kin_energy -= Eloss;
@@ -100,7 +54,7 @@ void eiparticle::physics_after_new_speed(void)
     currpos.speed=speed_of_light * lorbetta( curr_gamma_1 );
   }
 }
-void eiparticle::print(ostream& file, int l) const 
+void eiparticle::print(std::ostream& file, int l) const 
 {
   if(l >=0 )
   {  
