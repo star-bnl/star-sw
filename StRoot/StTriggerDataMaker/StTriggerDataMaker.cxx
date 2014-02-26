@@ -128,7 +128,7 @@ Int_t StTriggerDataMaker::Make()
 
   if(year==0){
     LOG_INFO << "StTriggerDataMaker Make() finished. Found no trigger data" << endm;  
-    return kStErr;
+    return kStWarn;
   }else{
     TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
     if (os) {
@@ -144,11 +144,11 @@ Int_t StTriggerDataMaker::Make()
 	  pTrg->setDebug(1);
 	  if(year>=2009) pTrg->readData();
 	  pTrg->setDebug(mDebug);
-	  return kStErr;
+	  return kStWarn;
 	}
       }    
     }
     LOG_INFO << "StTriggerDataMaker Make() finished. Failed to addData trigger data" << endm;  
-    return kStErr;
+    return kStWarn;
   }
 }
