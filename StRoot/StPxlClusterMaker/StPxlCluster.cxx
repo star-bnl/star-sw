@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlCluster.cxx,v 1.5 2014/02/27 00:44:08 smirnovd Exp $
+ * $Id: StPxlCluster.cxx,v 1.6 2014/02/27 00:44:15 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.cxx,v $
+ * Revision 1.6  2014/02/27 00:44:15  smirnovd
+ * Make sorting function static class method
+ *
  * Revision 1.5  2014/02/27 00:44:08  smirnovd
  * Use constructor initializer list
  *
@@ -60,7 +63,7 @@ void StPxlCluster::addRawHit(const StPxlRawHit *rawHit)
 }
 
 
-bool compareSecond(const pair<int, int> &pair1, const pair<int, int> &pair2)
+bool StPxlCluster::compareSecond(const pair<int, int> &pair1, const pair<int, int> &pair2)
 {
    return pair1.second < pair2.second;
 }
