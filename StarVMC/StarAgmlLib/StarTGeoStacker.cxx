@@ -69,6 +69,11 @@ const Double_t _epsil = 2.0E-6;
   }
 
 
+Bool_t isAssembly( TGeoVolume *volume )
+{
+  return volume->IsA() == TClass::GetClass("TGeoVolumeAssembly");
+}
+
 //
 // Parses the title string for the specified tag and returns
 // the floating point value stored in between <tag> ... </tag>
@@ -94,6 +99,10 @@ Bool_t GetFloatValue( TString tag, TString title, Double_t &value )
 
 Bool_t Compare( TGeoVolume *volume, AgMedium *agmedium )
 {
+
+  // No medium params to check?  Return true.
+  if ( isAssembly(volume) ) return true;
+
   TGeoMedium *medium = volume->GetMedium();
   const Char_t *keys[]=
     {
@@ -120,6 +129,9 @@ Bool_t Compare( TGeoVolume *volume, AgMedium *agmedium )
 Bool_t Compare( TGeoVolume *volume, AgShape *agshape )
 {
 
+  // No shape parameters to check?  return true.
+  if ( isAssembly(volume) ) return true;
+
   //
   // Return early if agshape is a division (protects against badness
   // when the volume is really the division of the volume and the 
@@ -129,6 +141,8 @@ Bool_t Compare( TGeoVolume *volume, AgShape *agshape )
     {
       return false;
     }
+
+
 
   TGeoShape *tgshape  = volume->GetShape();
   TClass    *tgclass  = tgshape->IsA();
@@ -588,7 +602,14 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 
       // Create the volume applying the nicknaming convention
       TString nn = StarAgmlStacker::nickname( block->GetName() );	  
-      volume = new TGeoVolume( nn, shape, medium );
+      if ( block->GetAssembly() ) 
+	{
+	  volume = new TGeoVolumeAssembly( nn );
+	}
+      else 
+	{
+	  volume = new TGeoVolume( nn, shape, medium );
+	}
 
       volume_title += nn; 
       volume_title += " ";
