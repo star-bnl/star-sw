@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlCluster.cxx,v 1.4 2014/02/21 21:11:06 smirnovd Exp $
+ * $Id: StPxlCluster.cxx,v 1.5 2014/02/27 00:44:08 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.cxx,v $
+ * Revision 1.5  2014/02/27 00:44:08  smirnovd
+ * Use constructor initializer list
+ *
  * Revision 1.4  2014/02/21 21:11:06  smirnovd
  * Minor style and empty space adjustments
  *
@@ -37,11 +40,11 @@ using namespace std;
 ClassImp(StPxlCluster)
 
 
-StPxlCluster::StPxlCluster()
+StPxlCluster::StPxlCluster() : mRawHitVec(),
+   mColumnCenter(-9999),
+   mRowCenter(-9999),
+   mIdTruth(-9999)
 {
-   mColumnCenter = -9999;
-   mRowCenter = -9999;
-   mIdTruth = -9999;
 }
 
 
