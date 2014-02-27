@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlCluster.h,v 1.4 2014/02/21 21:11:06 smirnovd Exp $
+ * $Id: StPxlCluster.h,v 1.5 2014/02/27 00:44:15 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.h,v $
+ * Revision 1.5  2014/02/27 00:44:15  smirnovd
+ * Make sorting function static class method
+ *
  * Revision 1.4  2014/02/21 21:11:06  smirnovd
  * Minor style and empty space adjustments
  *
@@ -46,9 +49,11 @@ public:
    Float_t rowCenter() const {return mRowCenter;}       ///< average raw hit row
    Int_t idTruth() const {return mIdTruth;}             ///< for embedding, 0 as background, most frequent raw hit idTruth as idTruth of the cluster
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlCluster.h,v 1.4 2014/02/21 21:11:06 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlCluster.h,v 1.5 2014/02/27 00:44:15 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
+
+   static bool compareSecond(const std::pair<int, int> &pair1, const std::pair<int, int> &pair2);
 
 protected:
    std::vector<const StPxlRawHit *> mRawHitVec; ///< vector of raw hits
