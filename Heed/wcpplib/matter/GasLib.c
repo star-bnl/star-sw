@@ -8,119 +8,123 @@
 1998-2003,  I. Smirnov
 */
 
-AtomDef Hydrogen(  "Hydrogen",   "H",   1, 1.0        * gram/mole);
+AtomDef Hydrogen("Hydrogen", "H", 1, 1.0 * gram / mole);
 //AtomDef Hydrogen(  "Hydrogen",   "H",   1, 1.00794 * gram/mole);
-AtomDef Helium(    "Helium",     "He",  2, 4.002602   * gram/mole);
-AtomDef Lithium(   "Lithium",    "Li",  3, 6.941      * gram/mole);
-AtomDef Beryllium( "Beryllium",  "Be",  4, 9.012182   * gram/mole);
-AtomDef Boron(     "Boron",      "B",   5, 10.811     * gram/mole);
-AtomDef Carbon(    "Carbon",     "C",   6, 12.011     * gram/mole);
-AtomDef Nitrogen(  "Nitrogen",   "N",   7, 14.00674   * gram/mole);
-AtomDef Oxygen(    "Oxygen",     "O",   8, 15.9994    * gram/mole);
-AtomDef Fluorine(  "Fluorine",   "F",   9, 18.9984032 * gram/mole);
-AtomDef Neon(      "Neon",       "Ne", 10, 20.1797    * gram/mole);
-AtomDef Sodium(    "Sodium",     "Na", 11, 22.989768  * gram/mole);
-AtomDef Magnesium( "Magnesium",  "Mg", 12, 24.3050    * gram/mole);
-AtomDef Aluminium( "Aluminium",  "Al", 13, 26.981539  * gram/mole);
-AtomDef Silicon(   "Silicon",    "Si", 14, 28.0855    * gram/mole);
-AtomDef Phosphorus("Phosphorus", "P",  15, 30.973762  * gram/mole);
-AtomDef Sulfur(    "Sulfur",     "S",  16, 32.066     * gram/mole);
-AtomDef Chlorine(  "Chlorine",   "Cl", 17, 35.066     * gram/mole);
-AtomDef Argon(     "Argon",      "Ar", 18, 39.948     * gram/mole);
-AtomDef Argon_without_K( 
-                   "Argon_without_K",  "Ar_without_K", 16, 39.948 * gram/mole);
-AtomDef Potassium( "Potassium",  "K",  19, 39.098     * gram/mole);  
-AtomDef Calcium(   "Calcium",    "Ca", 20, 40.08      * gram/mole);  
-AtomDef Scandium(  "Scandium",   "Sc", 21, 44.9559    * gram/mole);  
-AtomDef Titanium(  "Titanium",   "Ti", 22, 47.867     * gram/mole);  
-AtomDef Vanadium(  "Vanadium",   "V",  23, 50.9414    * gram/mole);  
-AtomDef Chromium(  "Chromium",   "Cr", 24, 51.996     * gram/mole);  
-AtomDef Manganese( "Manganese",  "Mn", 25, 54.9380    * gram/mole);  
-AtomDef Iron(      "Iron",       "Fe", 26, 55.845     * gram/mole);  
-AtomDef Cobalt(    "Cobalt",     "Co", 27, 58.9332    * gram/mole);  
-AtomDef Nickel(    "Nickel",     "Ni", 28, 58.70      * gram/mole);  
-AtomDef Copper(    "Copper",     "Cu", 29, 63.546     * gram/mole);
-AtomDef Zinc(      "Zinc",       "Zn", 30, 65.38      * gram/mole);  
-AtomDef Gallium(   "Gallium",    "Ga", 31, 69.72      * gram/mole);  
-AtomDef Germanium( "Germanium",  "Ge", 32, 72.59      * gram/mole);  
-AtomDef Arsenic(   "Arsenic",    "As", 33, 74.9216    * gram/mole);   
-AtomDef Selenium(  "Selenium",   "Se", 34, 78.96      * gram/mole);  
-AtomDef Bromine(   "Bromine",    "Br", 35, 79.904     * gram/mole);   
-AtomDef Krypton(   "Krypton",    "Kr", 36, 83.80      * gram/mole);
-AtomDef Rubidium(  "Rubidium",   "Rb", 37, 85.4673    * gram/mole);  
-AtomDef Strontium( "Strontium",  "Sr", 38, 87.62      * gram/mole); 
-AtomDef Yttrium(   "Yttrium",    "Y",  39, 88.9059    * gram/mole);    
-AtomDef Zirconium( "Zirconium",  "Zr", 40, 91.22      * gram/mole);   
-AtomDef Niobium(   "Niobium",    "Nb", 41, 92.9064    * gram/mole);    
-AtomDef Molybdenum("Molybdenum", "Mo", 42, 95.94      * gram/mole);  
-AtomDef Technetium("Technetium", "Tc", 43, 98         * gram/mole); 
-AtomDef Ruthenium( "Ruthenium",  "Ru", 44, 101.07     * gram/mole); 
-AtomDef Rhodium(   "Rhodium",    "Rh", 45, 102.9055   * gram/mole);    
-AtomDef Palladium( "Palladium",  "Pd", 46, 106.4      * gram/mole);    
-AtomDef Silver(    "Silver",     "Ag", 47, 107.868    * gram/mole);    
-AtomDef Cadmium(   "Cadmium",    "Cd", 48, 112.411    * gram/mole);
-AtomDef Indium(    "Indium",     "In", 49, 114.818    * gram/mole);
-AtomDef Tin(       "Tin",        "Sn", 50, 118.710    * gram/mole);
-AtomDef Antimony(  "Antimony",   "Sb", 51, 121.760    * gram/mole);
-AtomDef Tellurium( "Tellurium",  "Te", 52, 127.60     * gram/mole); 
-AtomDef Iodine(    "Iodine",     "I",  53, 126.9045   * gram/mole);    
-AtomDef Xenon(     "Xenon",      "Xe", 54, 131.293    * gram/mole);
-AtomDef Caesium(   "Caesium",    "Cs", 55, 132.9054519 * gram/mole);
-AtomDef Tungsten(  "Tungsten",   "W",  74, 183.85     * gram/mole);
-AtomDef Mercury(   "Mercury",    "Hg", 80, 200.59     * gram/mole);
-AtomDef Bismuth(   "Bismuth",    "Bi", 83, 208.9804   * gram/mole);    
-AtomDef Uranium(   "Uranium",    "U",  92, 238.0289   * gram/mole);
-AtomDef Plutonium( "Plutonium",  "Pu", 94, 244.0      * gram/mole);
+AtomDef Helium("Helium", "He", 2, 4.002602 * gram / mole);
+AtomDef Lithium("Lithium", "Li", 3, 6.941 * gram / mole);
+AtomDef Beryllium("Beryllium", "Be", 4, 9.012182 * gram / mole);
+AtomDef Boron("Boron", "B", 5, 10.811 * gram / mole);
+AtomDef Carbon("Carbon", "C", 6, 12.011 * gram / mole);
+AtomDef Nitrogen("Nitrogen", "N", 7, 14.00674 * gram / mole);
+AtomDef Oxygen("Oxygen", "O", 8, 15.9994 * gram / mole);
+AtomDef Fluorine("Fluorine", "F", 9, 18.9984032 * gram / mole);
+AtomDef Neon("Neon", "Ne", 10, 20.1797 * gram / mole);
+AtomDef Sodium("Sodium", "Na", 11, 22.989768 * gram / mole);
+AtomDef Magnesium("Magnesium", "Mg", 12, 24.3050 * gram / mole);
+AtomDef Aluminium("Aluminium", "Al", 13, 26.981539 * gram / mole);
+AtomDef Silicon("Silicon", "Si", 14, 28.0855 * gram / mole);
+AtomDef Phosphorus("Phosphorus", "P", 15, 30.973762 * gram / mole);
+AtomDef Sulfur("Sulfur", "S", 16, 32.066 * gram / mole);
+AtomDef Chlorine("Chlorine", "Cl", 17, 35.066 * gram / mole);
+AtomDef Argon("Argon", "Ar", 18, 39.948 * gram / mole);
+AtomDef Argon_without_K("Argon_without_K", "Ar_without_K", 16,
+                        39.948 * gram / mole);
+AtomDef Potassium("Potassium", "K", 19, 39.098 * gram / mole);
+AtomDef Calcium("Calcium", "Ca", 20, 40.08 * gram / mole);
+AtomDef Scandium("Scandium", "Sc", 21, 44.9559 * gram / mole);
+AtomDef Titanium("Titanium", "Ti", 22, 47.867 * gram / mole);
+AtomDef Vanadium("Vanadium", "V", 23, 50.9414 * gram / mole);
+AtomDef Chromium("Chromium", "Cr", 24, 51.996 * gram / mole);
+AtomDef Manganese("Manganese", "Mn", 25, 54.9380 * gram / mole);
+AtomDef Iron("Iron", "Fe", 26, 55.845 * gram / mole);
+AtomDef Cobalt("Cobalt", "Co", 27, 58.9332 * gram / mole);
+AtomDef Nickel("Nickel", "Ni", 28, 58.70 * gram / mole);
+AtomDef Copper("Copper", "Cu", 29, 63.546 * gram / mole);
+AtomDef Zinc("Zinc", "Zn", 30, 65.38 * gram / mole);
+AtomDef Gallium("Gallium", "Ga", 31, 69.72 * gram / mole);
+AtomDef Germanium("Germanium", "Ge", 32, 72.59 * gram / mole);
+AtomDef Arsenic("Arsenic", "As", 33, 74.9216 * gram / mole);
+AtomDef Selenium("Selenium", "Se", 34, 78.96 * gram / mole);
+AtomDef Bromine("Bromine", "Br", 35, 79.904 * gram / mole);
+AtomDef Krypton("Krypton", "Kr", 36, 83.80 * gram / mole);
+AtomDef Rubidium("Rubidium", "Rb", 37, 85.4673 * gram / mole);
+AtomDef Strontium("Strontium", "Sr", 38, 87.62 * gram / mole);
+AtomDef Yttrium("Yttrium", "Y", 39, 88.9059 * gram / mole);
+AtomDef Zirconium("Zirconium", "Zr", 40, 91.22 * gram / mole);
+AtomDef Niobium("Niobium", "Nb", 41, 92.9064 * gram / mole);
+AtomDef Molybdenum("Molybdenum", "Mo", 42, 95.94 * gram / mole);
+AtomDef Technetium("Technetium", "Tc", 43, 98 * gram / mole);
+AtomDef Ruthenium("Ruthenium", "Ru", 44, 101.07 * gram / mole);
+AtomDef Rhodium("Rhodium", "Rh", 45, 102.9055 * gram / mole);
+AtomDef Palladium("Palladium", "Pd", 46, 106.4 * gram / mole);
+AtomDef Silver("Silver", "Ag", 47, 107.868 * gram / mole);
+AtomDef Cadmium("Cadmium", "Cd", 48, 112.411 * gram / mole);
+AtomDef Indium("Indium", "In", 49, 114.818 * gram / mole);
+AtomDef Tin("Tin", "Sn", 50, 118.710 * gram / mole);
+AtomDef Antimony("Antimony", "Sb", 51, 121.760 * gram / mole);
+AtomDef Tellurium("Tellurium", "Te", 52, 127.60 * gram / mole);
+AtomDef Iodine("Iodine", "I", 53, 126.9045 * gram / mole);
+AtomDef Xenon("Xenon", "Xe", 54, 131.293 * gram / mole);
+AtomDef Caesium("Caesium", "Cs", 55, 132.9054519 * gram / mole);
+AtomDef Tungsten("Tungsten", "W", 74, 183.85 * gram / mole);
+AtomDef Mercury("Mercury", "Hg", 80, 200.59 * gram / mole);
+AtomDef Bismuth("Bismuth", "Bi", 83, 208.9804 * gram / mole);
+AtomDef Uranium("Uranium", "U", 92, 238.0289 * gram / mole);
+AtomDef Plutonium("Plutonium", "Pu", 94, 244.0 * gram / mole);
 
-VanDerVaals Argon_VanDerVaals(   48.6 * bar, 150.7 * kelvin);
-VanDerVaals Krypton_VanDerVaals( 55.0 * bar, 209.4 * kelvin);
-VanDerVaals Xenon_VanDerVaals(   55.0 * bar, 209.4 * kelvin);
-VanDerVaals Water_VanDerVaals(22.9e6  * hep_pascal, (273.15 + 374.15) * kelvin);
-VanDerVaals CH4_VanDerVaals(   4.64e6 * hep_pascal, (273.15 - 82.5) * kelvin);
-VanDerVaals CF4_VanDerVaals(     42.5 * bar, 369.8 * kelvin);
-VanDerVaals C3H8_VanDerVaals(    42.5 * bar, 369.8 * kelvin);
-VanDerVaals C4H10_VanDerVaals(   40.0 * bar, 418.3 * kelvin);
+VanDerVaals Argon_VanDerVaals(48.6 * bar, 150.7 * kelvin);
+VanDerVaals Krypton_VanDerVaals(55.0 * bar, 209.4 * kelvin);
+VanDerVaals Xenon_VanDerVaals(55.0 * bar, 209.4 * kelvin);
+VanDerVaals Water_VanDerVaals(22.9e6 * hep_pascal, (273.15 + 374.15) * kelvin);
+VanDerVaals CH4_VanDerVaals(4.64e6 * hep_pascal, (273.15 - 82.5) * kelvin);
+VanDerVaals CF4_VanDerVaals(42.5 * bar, 369.8 * kelvin);
+VanDerVaals C3H8_VanDerVaals(42.5 * bar, 369.8 * kelvin);
+VanDerVaals C4H10_VanDerVaals(40.0 * bar, 418.3 * kelvin);
 VanDerVaals Methylal_VanDerVaals(39.5 * bar, 480.6 * kelvin);
 
-MoleculeDef Hydrogen2(       "Hydrogen",   "H2", "H",  2);
-MoleculeDef Helium_molec(    "Helium",     "He", "He", 1);
-MoleculeDef Nitrogen_molec(  "Nitrogen",   "N2", "N",  2);
-MoleculeDef Oxygen_molec(    "Oxygen",     "O2", "O",  2);
-MoleculeDef Neon_molec(      "Neon",       "Ne", "Ne", 1);
-// MoleculeDef Argon_molec(     "Argon",      "Ar", "Ar", 1, &Argon_VanDerVaals);
-// MoleculeDef Argon_without_K_molec("Argon_without_K", "Ar_without_K", "Ar_without_K", 1);
-MoleculeDef Argon_molec(     "Argon",      "Ar", "Ar", 1, 
-  ActivePtr<VanDerVaals>(&Argon_VanDerVaals, do_clone));
-MoleculeDef Krypton_molec(   "Krypton",    "Kr", "Kr", 1, 
-  ActivePtr<VanDerVaals>(&Krypton_VanDerVaals, do_clone));
-MoleculeDef Xenon_molec(     "Xenon",      "Xe", "Xe", 1, 
-  ActivePtr<VanDerVaals>(&Xenon_VanDerVaals, do_clone));
+MoleculeDef Hydrogen2("Hydrogen", "H2", "H", 2);
+MoleculeDef Helium_molec("Helium", "He", "He", 1);
+MoleculeDef Nitrogen_molec("Nitrogen", "N2", "N", 2);
+MoleculeDef Oxygen_molec("Oxygen", "O2", "O", 2);
+MoleculeDef Neon_molec("Neon", "Ne", "Ne", 1);
+// MoleculeDef Argon_molec(     "Argon",      "Ar", "Ar", 1,
+// &Argon_VanDerVaals);
+// MoleculeDef Argon_without_K_molec("Argon_without_K", "Ar_without_K",
+// "Ar_without_K", 1);
+MoleculeDef Argon_molec("Argon", "Ar", "Ar", 1,
+                        ActivePtr<VanDerVaals> (&Argon_VanDerVaals, do_clone));
+MoleculeDef Krypton_molec("Krypton", "Kr", "Kr", 1,
+                          ActivePtr<VanDerVaals> (&Krypton_VanDerVaals,
+                                                  do_clone));
+MoleculeDef Xenon_molec("Xenon", "Xe", "Xe", 1,
+                        ActivePtr<VanDerVaals> (&Xenon_VanDerVaals, do_clone));
 
 MoleculeDef NH3("NH3", "NH3", "N", 1, "H", 3);
 MoleculeDef N2O("N2O", "N2O", "N", 2, "O", 1);
 MoleculeDef CO2("CO2", "CO2", "C", 1, "O", 2);
-MoleculeDef CH4("CH4", "CH4", "C", 1, "H", 4, 
-  ActivePtr<VanDerVaals>(&CH4_VanDerVaals, do_clone));
+MoleculeDef CH4("CH4", "CH4", "C", 1, "H", 4,
+                ActivePtr<VanDerVaals> (&CH4_VanDerVaals, do_clone));
 // MoleculeDef CH4(CH4", "CH4", "C", 1, "H", 4);
-MoleculeDef CF4("CF4", "CF4", "C", 1, "F", 4, 
-  ActivePtr<VanDerVaals>(&CF4_VanDerVaals, do_clone));
+MoleculeDef CF4("CF4", "CF4", "C", 1, "F", 4,
+                ActivePtr<VanDerVaals> (&CF4_VanDerVaals, do_clone));
 // MoleculeDef CF4("CF4", "CF4", "C", 1, "F", 4);
 MoleculeDef SF4("SF4", "SF4", "S", 1, "F", 4);
 MoleculeDef SF6("SF6", "SF6", "S", 1, "F", 6);
-MoleculeDef C2H2("C2H2", "C2H2",  "C", 2, "H", 2);
-MoleculeDef C2H4("C2H4", "C2H4",  "C", 2, "H", 4);
-MoleculeDef C2H6("C2H6", "C2H6",  "C", 2, "H", 6);
-MoleculeDef C3H8("C3H8", "C3H8",  "C", 3, "H", 8, 
-  ActivePtr< VanDerVaals >(&C3H8_VanDerVaals, do_clone));
+MoleculeDef C2H2("C2H2", "C2H2", "C", 2, "H", 2);
+MoleculeDef C2H4("C2H4", "C2H4", "C", 2, "H", 4);
+MoleculeDef C2H6("C2H6", "C2H6", "C", 2, "H", 6);
+MoleculeDef C3H8("C3H8", "C3H8", "C", 3, "H", 8,
+                 ActivePtr<VanDerVaals> (&C3H8_VanDerVaals, do_clone));
 // MoleculeDef C3H8( "C3H8", "C3H8", "C", 3, "H", 8);
-MoleculeDef C4H10( "C4H10",  "C4H10", "C", 4, "H", 10, 
-  ActivePtr< VanDerVaals >(&C4H10_VanDerVaals, do_clone));
+MoleculeDef C4H10("C4H10", "C4H10", "C", 4, "H", 10,
+                  ActivePtr<VanDerVaals> (&C4H10_VanDerVaals, do_clone));
 // MoleculeDef C4H10( "C4H10",  "C4H10",  "C", 4, "H", 10);
 MoleculeDef C2F4H2("C2F4H2", "C2F4H2", "C", 2, "F", 4, "H", 2);
-MoleculeDef Water_molec("Water", "Water", "H", 2, "O", 1, 
-  ActivePtr<VanDerVaals>(&Water_VanDerVaals, do_clone));
-MoleculeDef Methylal_molec("Methylal", "Methylal", "O", 2, "C", 3, "H", 8, 
-  ActivePtr<VanDerVaals>(&Methylal_VanDerVaals, do_clone));
+MoleculeDef Water_molec("Water", "Water", "H", 2, "O", 1,
+                        ActivePtr<VanDerVaals> (&Water_VanDerVaals, do_clone));
+MoleculeDef Methylal_molec("Methylal", "Methylal", "O", 2, "C", 3, "H", 8,
+                           ActivePtr<VanDerVaals> (&Methylal_VanDerVaals,
+                                                   do_clone));
 
 // Additional molecule definitions for compatibility with Magboltz
 MoleculeDef C5H12_molec("C5H12", "C5H12", "C", 5, "H", 12);
@@ -145,5 +149,4 @@ MoleculeDef O3_molec("O3", "O3", "O", 3);
 MoleculeDef Hg_molec("Hg", "Hg", "Hg", 1);
 MoleculeDef H2S_molec("H2S", "H2S", "H", 2, "S", 1);
 MoleculeDef GeH4_molec("GeH4", "GeH4", "Ge", 1, "H", 4);
-MoleculeDef SiH4_molec("SiH4", "SiH4", "Si", 1, "H", 4); 
-
+MoleculeDef SiH4_molec("SiH4", "SiH4", "Si", 1, "H", 4);

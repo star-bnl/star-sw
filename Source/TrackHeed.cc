@@ -94,8 +94,6 @@ long last_particle_number;
 extern trajestep_limit gtrajlim;
 trajestep_limit gtrajlim(100.*cm, 1000.*cm, 0.1*rad, 0.2* rad);
 
-double mparticle::speed_of_light=c_light;
-
 // Actual class implementation
 
 namespace Garfield {
@@ -263,7 +261,7 @@ TrackHeed::NewTrack(
     dx /= d; dy /= d; dz /= d;
   }
   vec velocity(dx, dy, dz);
-  velocity = velocity * mparticle::speed_of_light * GetBeta();
+  velocity = velocity * c_light * GetBeta();
   
   if (debug) {
     std::cout << className << "::NewTrack:\n";
@@ -724,7 +722,7 @@ TrackHeed::TransportDeltaElectron(
   // Calculate the speed for the given kinetic energy.
   const double gamma = 1. + e0 / ElectronMass;
   const double beta = sqrt(1. - 1. / (gamma * gamma)); 
-  double speed = mparticle::speed_of_light * beta;
+  double speed = c_light * beta;
   velocity = velocity * speed;
   
   // Initial position (shift with respect to bounding box center and 
@@ -846,7 +844,7 @@ TrackHeed::TransportPhoton(
     dx /= d; dy /= d; dz /= d;
   }
   vec velocity(dx, dy, dz);
-  velocity = velocity * mparticle::speed_of_light;
+  velocity = velocity * c_light;
   
   // Initial position (shift with respect to bounding box center and 
   // convert from cm to mm).

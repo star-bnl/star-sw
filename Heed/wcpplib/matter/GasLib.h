@@ -1,7 +1,7 @@
 #ifndef GASLIB_H
 #define GASLIB_H
 
-/* 
+/*
 There are not only gases but also atoms and molecules.
 The gas is the highest class in this hierarchy.
 
@@ -10,7 +10,7 @@ order of initialization of the global objects in C++.
 This order is definite only for objects presented in single object file.
 Since each atom, molecula, and matter should be registered in the system,
 the logbooks should be initialized and ready for work prior to
-initialization of the first registered object. 
+initialization of the first registered object.
 This is now guaranteed with the help of singleton class.
 But moleculas and matters depend on atoms, and the order of initialization
 should be kept strongly.
@@ -22,7 +22,7 @@ since global static logbooks are anyway initialized before running main().
 Therefore the definitions "extern ..." are gathered in this file,
 the corresponding initializations followed by initializations of
 logbooks are gathered in GasLib.c. This latter file is not put into
-a library file, but just compiled. 
+a library file, but just compiled.
 If the user program need to initialize other global objects like these, or
 objects depending on them, it has to gather all the additional
 initializations in another single file and include
@@ -43,7 +43,7 @@ The last half of Mendeleev's (Mendel's) table is not totally included yet.
 #include "wcpplib/matter/MoleculeDef.h"
 #include "wcpplib/matter/GasDef.h"
 
-extern AtomDef Hydrogen; 
+extern AtomDef Hydrogen;
 extern AtomDef Helium;
 extern AtomDef Lithium;
 extern AtomDef Beryllium;
@@ -104,8 +104,8 @@ extern AtomDef Mercury;
 extern AtomDef Bismuth;
 extern AtomDef Uranium;
 extern AtomDef Plutonium;
-		  
-extern MoleculeDef Hydrogen2; 
+
+extern MoleculeDef Hydrogen2;
 extern MoleculeDef Helium_molec;
 extern MoleculeDef Nitrogen_molec;
 extern MoleculeDef Oxygen_molec;
@@ -168,6 +168,6 @@ extern MoleculeDef O3_molec;
 extern MoleculeDef Hg_molec;
 extern MoleculeDef H2S_molec;
 extern MoleculeDef GeH4_molec;
-extern MoleculeDef SiH4_molec; 
+extern MoleculeDef SiH4_molec;
 
 #endif

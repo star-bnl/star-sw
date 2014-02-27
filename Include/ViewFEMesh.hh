@@ -3,7 +3,9 @@
 #define G_VIEW_FE_MESH
 
 #include <string>
+#ifndef __CINT__
 #include <map>
+#endif
 
 #include <TCanvas.h>
 #include <TMatrixD.h>
@@ -116,12 +118,13 @@ class ViewFEMesh {
     std::vector<TPolyLine*> driftLines;
 
     // The color map
+#ifndef __CINT__
     std::map<int,int> colorMap;
     std::map<int,int> colorMap_fill;
 
-    // Disabaled materials -> not shown in the mesh view
+    // Disabled materials -> not shown in the mesh view
     std::map<int,bool> disabledMaterial;
-
+#endif
     // Element plotting methods
     void DrawElements();
     void DrawCST(ComponentCST* componentCST);

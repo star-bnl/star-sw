@@ -3,10 +3,9 @@
 #ifndef G_COMPONENT_VOXEL_H
 #define G_COMPONENT_VOXEL_H
 
-#include <string>
-#include <vector>
+#ifndef __CINT__
 #include <map>
-
+#endif
 #include "ComponentBase.hh"
 
 namespace Garfield {
@@ -72,9 +71,9 @@ class ComponentVoxel : public ComponentBase {
     void PrintRegions();
 
   private:
-
+#ifndef __CINT__
     std::map<int, Medium*> media;
-
+#endif
     struct element {
       // Electric field
       double ex, ey, ez;

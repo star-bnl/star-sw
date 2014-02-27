@@ -6,36 +6,38 @@
 
 float chispre(float *x, float *p, float *f, long q) {
   mfunnamep("float chispre(float *x, float *p, float *f, long q)");
-  check_econd11(q, <=0, mcerr);
+  check_econd11(q, <= 0, mcerr);
   float r = 0;
   for (long i = 0; i < q; ++i) {
-    check_econd11(p[i], <0.0, mcerr);
+    check_econd11(p[i], < 0.0, mcerr);
     r += p[i] * (x[i + 1] - x[i]);
     f[i] = r;
   }
-  check_econd11(r, <=0, mcerr);
-  for (long i = 0; i < q; ++i) f[i] /= r;
+  check_econd11(r, <= 0, mcerr);
+  for (long i = 0; i < q; ++i)
+    f[i] /= r;
   return r;
 }
 
 float chisran(float flat_random_number, float *x, float *f, long q) {
-  mfunnamep("float chisran(float flat_random_number, float *x, float *f, long q)");
-  check_econd11(q, <=0, mcerr);
-  check_econd21(flat_random_number, < 0.0 && , > 1.0, mcerr);
+  mfunnamep(
+      "float chisran(float flat_random_number, float *x, float *f, long q)");
+  check_econd11(q, <= 0, mcerr);
+  check_econd21(flat_random_number, < 0.0 &&, > 1.0, mcerr);
   if (flat_random_number == 0.0) {
     for (long n = 0; n < q; ++n) {
       if (f[n] > 0.0) return x[n];
     }
   } else {
     if (flat_random_number == 1.0) {
-      for (long n = q - 1; n >=0; n--) {
-        if (f[n] < 1.0) return x[n+1];
+      for (long n = q - 1; n >= 0; n--) {
+        if (f[n] < 1.0) return x[n + 1];
       }
     } else {
       if (flat_random_number <= f[0]) {
         return flat_random_number / f[0];
       } else {
-        long nl = 0; 
+        long nl = 0;
         long nr = q - 1;
         long nc;
         while (nr - nl > 1) {
@@ -43,7 +45,7 @@ float chisran(float flat_random_number, float *x, float *f, long q) {
           if (flat_random_number < f[nc]) {
             nr = nc;
           } else {
-            nl=nc;
+            nl = nc;
           }
         }
         const float xl = x[nl + 1];
@@ -57,23 +59,24 @@ float chisran(float flat_random_number, float *x, float *f, long q) {
     }
   }
   funnw.ehdr(mcerr);
-  mcerr<<"should never happen\n";
+  mcerr << "should never happen\n";
   spexit(mcerr);
   return 0.0;
 }
 
-double chispre(DynLinArr< double >& f, int s_allow_zero_f) {
+double chispre(DynLinArr<double> &f, int s_allow_zero_f) {
   mfunnamep("double chispre(DynLinArr< double >& f, int s_allow_zero_f=0)");
   //check_econd12(p.get_qel() , != , f.get_qel() , mcerr);
   const long q = f.get_qel();
-  check_econd11(q , <=0 , mcerr);
+  check_econd11(q, <= 0, mcerr);
   double r = 0;
   for (int i = 0; i < q; ++i) {
     if (s_allow_zero_f == 0) {
-      check_econd11a(f[i], <0.0 , "i="<<i<<'\n', mcerr);
+      check_econd11a(f[i], < 0.0, "i=" << i << '\n', mcerr);
     } else {
       if (f[i] < 0.0) {
-        mcout<<"Warning: f[i] < 0.0 in double chispre(DynLinArr< double >& f, int s_allow_zero_f)\n";
+        mcout << "Warning: f[i] < 0.0 in double chispre(DynLinArr< double >& "
+                 "f, int s_allow_zero_f)\n";
         Iprint2n(mcout, i, f[i]);
         f[i] = 0.0;
       }
@@ -81,18 +84,20 @@ double chispre(DynLinArr< double >& f, int s_allow_zero_f) {
     r += f[i];
     f[i] = r;
   }
-  check_econd11(r , <=0 , mcerr);
-  for (int i = 0; i < q; ++i) f[i] /= r;
+  check_econd11(r, <= 0, mcerr);
+  for (int i = 0; i < q; ++i)
+    f[i] /= r;
   return r;
 }
 
-double chisran(double flat_random_number, DynLinArr < double >  f) {
-  mfunnamep("double chisran(double flat_random_number, DynLinArr < double >  f)");
+double chisran(double flat_random_number, DynLinArr<double> f) {
+  mfunnamep(
+      "double chisran(double flat_random_number, DynLinArr < double >  f)");
   //mcout<<"chisran is started\n";
   //Iprintn(mcout, flat_random_number);
   const long q = f.get_qel();
-  check_econd11(q , <=0 , mcerr);
-  check_econd21(flat_random_number, < 0.0 && , > 1.0, mcerr);
+  check_econd11(q, <= 0, mcerr);
+  check_econd21(flat_random_number, < 0.0 &&, > 1.0, mcerr);
   if (flat_random_number == 0.0) {
     for (long n = 0; n < q; ++n) {
       if (f[n] > 0.0) return double(n);
@@ -100,13 +105,13 @@ double chisran(double flat_random_number, DynLinArr < double >  f) {
   } else {
     if (flat_random_number == 1.0) {
       for (long n = q - 1; n >= 0; n--) {
-        if (f[n] < 1.0) return double(n+1);
+        if (f[n] < 1.0) return double(n + 1);
       }
     } else {
       if (flat_random_number <= f[0]) {
         return flat_random_number / f[0];
       } else {
-        long nl = 0; 
+        long nl = 0;
         long nr = q - 1;
         long nc;
         while (nr - nl > 1) {
@@ -132,8 +137,7 @@ double chisran(double flat_random_number, DynLinArr < double >  f) {
     }
   }
   funnw.ehdr(mcerr);
-  mcerr<<"should never happen\n";
+  mcerr << "should never happen\n";
   spexit(mcerr);
   return 0.0;
 }
-

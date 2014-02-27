@@ -7,28 +7,17 @@ it is ordinary malloc and free.
 */
 #include <stdlib.h>
 
-#define macro_alloc \
-public: \
-  void* operator new(size_t size, void* adr = NULL) \
-  { \
-    if(adr == NULL) return malloc(size); \
-    return adr; \
-  } \
-  void* operator new[](size_t size, void* adr = NULL) \
-  { \
-    if(adr == NULL) return malloc(size); \
-    return adr; \
-  } \
-  void operator delete (void *f) \
-  { \
-    free(f); \
-  } \
-  void operator delete[] (void *f) \
-  { \
-    free(f); \
-  }
-
-
-
+#define macro_alloc                                     \
+  public:                                               \
+  void* operator new(size_t size, void* adr = NULL) {   \
+    if (adr == NULL) return malloc(size);               \
+    return adr;                                         \
+  }                                                     \
+  void* operator new[](size_t size, void* adr = NULL) { \
+    if (adr == NULL) return malloc(size);               \
+    return adr;                                         \
+  }                                                     \
+  void operator delete(void * f) { free(f); }           \
+  void operator delete[](void * f) { free(f); }
 
 #endif

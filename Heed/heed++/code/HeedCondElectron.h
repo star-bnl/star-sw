@@ -5,7 +5,7 @@
 #include "wcpplib/safetl/BlkArr.h"
 
 /*
-Conduction electrons deposited in gas. 
+Conduction electrons deposited in gas.
 Usually these are electron-ion pairs created by the delta-electron.
 But the delta-electron is itself converted in conduction electron
 at the end of its route. In this case the ion may be located somewhere else.
@@ -21,7 +21,7 @@ must be derived from class SensitiveVolume.
 */
 
 class HeedCondElectron {
-public:
+ public:
   // position (in the first system from tid system)
   // point pt;
   // position (in the local system, the last system from tid)
@@ -29,8 +29,8 @@ public:
   // time
   double time;
   // manip_absvol_treeid tid;
-  // reference to parent  
-  // PassivePtr< HeedDeltaElectron > parent_de;  
+  // reference to parent
+  // PassivePtr< HeedDeltaElectron > parent_de;
   // constructors
   HeedCondElectron() {}
   HeedCondElectron(point fptloc, double ftime) : ptloc(fptloc), time(ftime) {}
@@ -42,11 +42,11 @@ public:
   virtual void print(std::ostream& file, int l) const;
 };
 
-//extern AbsList< HeedCondElectron > conduction_electron_bank;  
-//extern BlkArr< HeedCondElectron > conduction_electron_bank; 
+//extern AbsList< HeedCondElectron > conduction_electron_bank;
+//extern BlkArr< HeedCondElectron > conduction_electron_bank;
 
 class SensitiveVolume {
-public:
+ public:
   BlkArr<HeedCondElectron> conduction_electron_bank;
   SensitiveVolume() {}
 };

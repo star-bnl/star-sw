@@ -76,7 +76,7 @@ extern MolecPhotoAbsCS CO2_MPACS;
 extern MolecPhotoAbsCS CH4_MPACS;
 extern MolecPhotoAbsCS CF4_MPACS;
 
-// The definition of the following in PhotoAbsLib.c may be refined 
+// The definition of the following in PhotoAbsLib.c may be refined
 // (to adjust outer shell energies).
 extern MolecPhotoAbsCS SF4_MPACS;
 extern MolecPhotoAbsCS SF6_MPACS;
@@ -87,12 +87,12 @@ extern MolecPhotoAbsCS C2H6_MPACS;
 extern MolecPhotoAbsCS C3H8_MPACS;
 extern MolecPhotoAbsCS C4H10_MPACS;
 
-// The definition of the following in PhotoAbsLib.c may be refined 
+// The definition of the following in PhotoAbsLib.c may be refined
 // (to adjust outer shell energies).
 extern MolecPhotoAbsCS C2F4H2_MPACS;
 extern MolecPhotoAbsCS Methylal_MPACS;
 
-// Additional molecular photoabsorption-cross sections 
+// Additional molecular photoabsorption-cross sections
 // for compatibility with Magboltz
 extern MolecPhotoAbsCS C5H12_MPACS;
 extern MolecPhotoAbsCS H2O_MPACS;

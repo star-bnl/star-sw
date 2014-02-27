@@ -9,105 +9,58 @@
 2002, I. Smirnov
 */
 
+double Bethe_Bloch_energy_loss(const double ratio_Z_to_A, const double I_eff,
+                               const double beta, const double z) {
 
-double Bethe_Bloch_energy_loss(double ratio_Z_to_A, double I_eff, 
-			 double betta, double z)
-{
-  //mcout<<"Bethe_Bloch_energy_loss:\n";
-  //Iprintn(mcout, ratio_Z_to_A/(1.0/(gram/mole)));
-  //Iprintn(mcout, ratio_Z_to_A);
-  //Iprintn(mcout, I_eff/eV);
-  //Iprintn(mcout, betta);
-  //Iprintn(mcout, z);
-  double betta2=betta*betta;
-  double gamma2 = pow( lorgamma_1(betta) + 1.0 , 2.0 ); 
-  double coef1 = 4 * M_PI * pow( classic_electr_radius, 2.0) * 
-    electron_mass_c2 * Avogadro;  // should be 0.3071 according to PDG
-  //mcout<<"classic_electr_radius/cm="<<classic_electr_radius/cm<<'\n';
-  //mcout<<"electron_mass_c2/MeV="<<electron_mass_c2/MeV<<'\n';
-  //mcout<<"Avogadro="<<Avogadro<<'\n';
-  //mcout<<"Avogadro/mole="<<Avogadro/mole<<'\n';
-  //mcout<<"coef1/(MeV*cm2/mole)="<<coef1/(MeV*cm2/mole)<<'\n';
-  double coef2=pow( z , 2.0) * ratio_Z_to_A / betta2 ;
-  //mcout<<"coef2/(1.0/gram)="<<coef2/(1.0/gram)<<'\n';
-  double sum = log( 2.0 * electron_mass_c2 * betta2 * gamma2 / I_eff ) -
-    betta2;
-  //mcout<<"sum="<<sum<<'\n';
-  //mcout<<"result/(keV*cm2/gram)="<<coef1 * coef2 * sum /(keV*cm2/gram)<<'\n';
+  const double beta2 = beta * beta;
+  const double gamma2 = pow(lorgamma_1(beta) + 1.0, 2);
+  const double coef1 =
+      4 * M_PI * pow(classic_electr_radius, 2) * electron_mass_c2 * Avogadro;
+  const double coef2 = z * z * ratio_Z_to_A / beta2;
+  const double sum =
+      log(2. * electron_mass_c2 * beta2 * gamma2 / I_eff) - beta2;
   return coef1 * coef2 * sum;
 }
 
-double Bethe_Bloch_energy_loss_gamma_1(double ratio_Z_to_A, double I_eff, 
-			 double gamma_1, double z)
-{
-  //mcout<<"Bethe_Bloch_energy_loss:\n";
-  //Iprintn(mcout, ratio_Z_to_A/(1.0/(gram/mole)));
-  //Iprintn(mcout, ratio_Z_to_A);
-  //Iprintn(mcout, I_eff/eV);
-  //Iprintn(mcout, betta);
-  //Iprintn(mcout, z);
-  double betta = lorbetta(gamma_1);
-  double betta2 = betta * betta;
-  double gamma  = gamma_1 + 1.0;
-  double gamma2 = gamma * gamma;
-  double coef1 = 4 * M_PI * pow( classic_electr_radius, 2.0) * 
-    electron_mass_c2 * Avogadro;  // should be 0.3071 according to PDG
-  //mcout<<"classic_electr_radius/cm="<<classic_electr_radius/cm<<'\n';
-  //mcout<<"electron_mass_c2/MeV="<<electron_mass_c2/MeV<<'\n';
-  //mcout<<"Avogadro="<<Avogadro<<'\n';
-  //mcout<<"Avogadro/mole="<<Avogadro/mole<<'\n';
-  //mcout<<"coef1/(MeV*cm2/mole)="<<coef1/(MeV*cm2/mole)<<'\n';
-  double coef2=pow( z , 2.0) * ratio_Z_to_A / betta2 ;
-  //mcout<<"coef2/(1.0/gram)="<<coef2/(1.0/gram)<<'\n';
-  double sum = log( 2.0 * electron_mass_c2 * betta2 * gamma2 / I_eff ) -
-    betta2;
-  //mcout<<"sum="<<sum<<'\n';
-  //mcout<<"result/(keV*cm2/gram)="<<coef1 * coef2 * sum /(keV*cm2/gram)<<'\n';
+double Bethe_Bloch_energy_loss_gamma_1(const double ratio_Z_to_A,
+                                       const double I_eff, const double gamma_1,
+                                       const double z) {
+
+  const double beta = lorbeta(gamma_1);
+  const double beta2 = beta * beta;
+  const double gamma = gamma_1 + 1.0;
+  const double gamma2 = gamma * gamma;
+  const double coef1 =
+      4 * M_PI * pow(classic_electr_radius, 2) * electron_mass_c2 *
+      Avogadro;  // should be 0.3071 according to PDG
+  const double coef2 = z * z * ratio_Z_to_A / beta2;
+  const double sum =
+      log(2. * electron_mass_c2 * beta2 * gamma2 / I_eff) - beta2;
   return coef1 * coef2 * sum;
 }
-    
-double Bethe_Bloch_restricted_energy_loss_gamma_1
-(double ratio_Z_to_A, double I_eff, 
- double M,
- double gamma_1, 
- double Ecut, // in internal units
- double z)
-{
-  //mcout<<"Bethe_Bloch_energy_loss:\n";
-  //Iprintn(mcout, ratio_Z_to_A/(1.0/(gram/mole)));
-  //Iprintn(mcout, ratio_Z_to_A);
-  //Iprintn(mcout, I_eff/eV);
-  //Iprintn(mcout, betta);
-  //Iprintn(mcout, z);
-  double betta = lorbetta(gamma_1);
-  double betta2 = betta * betta;
-  double gamma  = gamma_1 + 1.0;
-  double gamma2 = gamma * gamma;
-  double coef1 = 2 * M_PI * pow( classic_electr_radius, 2.0) * 
-    electron_mass_c2 * Avogadro;  // should be 0.3071 according to PDG
-  //mcout<<"classic_electr_radius/cm="<<classic_electr_radius/cm<<'\n';
-  //mcout<<"electron_mass_c2/MeV="<<electron_mass_c2/MeV<<'\n';
-  //mcout<<"Avogadro="<<Avogadro<<'\n';
-  //mcout<<"Avogadro/mole="<<Avogadro/mole<<'\n';
-  //mcout<<"coef1/(MeV*cm2/mole)="<<coef1/(MeV*cm2/mole)<<'\n';
-  double coef2=pow( z , 2.0) * ratio_Z_to_A / betta2 ;
-  //mcout<<"coef2/(1.0/gram)="<<coef2/(1.0/gram)<<'\n';
-  double Mrat = electron_mass_c2 / (M * c_squared);
-  double Emax = 2.0 * electron_mass_c2 * betta2 * gamma2 /
-    (1.0 + 2.0 * gamma * Mrat + Mrat * Mrat);
-  double sum;
-  if(Ecut >= Emax)
-  {
-    sum = log( 2.0 * electron_mass_c2 * betta2 * gamma2 * Emax / 
-	       pow(I_eff, 2.0) ) - 2.0 * betta2;
+
+double Bethe_Bloch_restricted_energy_loss_gamma_1(
+    const double ratio_Z_to_A, const double I_eff, const double m,
+    const double gamma_1, const double ecut, const double z) {
+
+  const double beta = lorbeta(gamma_1);
+  const double beta2 = beta * beta;
+  const double gamma = gamma_1 + 1.0;
+  const double gamma2 = gamma * gamma;
+  const double coef1 =
+      2 * M_PI * pow(classic_electr_radius, 2) * electron_mass_c2 *
+      Avogadro;  // should be 0.3071 according to PDG
+  const double coef2 = z * z * ratio_Z_to_A / beta2;
+  const double mrat = electron_mass_c2 / (m * c_squared);
+  const double emax = 2.0 * electron_mass_c2 * beta2 * gamma2 /
+                      (1.0 + 2.0 * gamma * mrat + mrat * mrat);
+  double sum = 0.;
+  if (ecut >= emax) {
+    sum = log(2.0 * electron_mass_c2 * beta2 * gamma2 * emax / pow(I_eff, 2)) -
+          2.0 * beta2;
+  } else {
+    sum = log(2.0 * electron_mass_c2 * beta2 * gamma2 * ecut / pow(I_eff, 2)) -
+          beta2 * (1.0 + ecut / emax);
   }
-  else
-  {
-    sum = log( 2.0 * electron_mass_c2 * betta2 * gamma2 * Ecut / 
-	       pow(I_eff, 2.0) ) - betta2 * (1.0 + Ecut / Emax);
-  }
-  //mcout<<"sum="<<sum<<'\n';
-  //mcout<<"result/(keV*cm2/gram)="<<coef1 * coef2 * sum /(keV*cm2/gram)<<'\n';
   return coef1 * coef2 * sum;
 }
-    

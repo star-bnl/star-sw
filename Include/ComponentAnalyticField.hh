@@ -2,9 +2,6 @@
 #define G_COMPONENT_ANALYTIC_FIELD_H
 
 #include <cmath>
-
-#include <string>
-#include <vector>
 #include <complex>
 
 #include "ComponentBase.hh"

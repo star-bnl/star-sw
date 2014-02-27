@@ -6,7 +6,6 @@
 #ifndef G_COMPONENT_CST_H
 #define G_COMPONENT_CST_H
 
-#include <vector>
 #include "TMatrixD.h"
 #include "ComponentFieldMap.hh"
 

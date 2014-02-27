@@ -1,15 +1,13 @@
 
 #include "heed++/code/ParticleBank.h"
 
-void treat_particle_bank(int s_erase)
-{
+void treat_particle_bank(int s_erase) {
   mfunname("void treat_particle_bank(int s_erase)");
-  AbsListNode< ActivePtr< gparticle > >* aln;
-  AbsListNode< ActivePtr< gparticle > >* aln1;
+  AbsListNode<ActivePtr<gparticle> >* aln;
+  AbsListNode<ActivePtr<gparticle> >* aln1;
 
   aln = particle_bank.get_first_node();
-  while(aln != NULL)
-  {
+  while (aln != NULL) {
     /*
     // For debug:
     mcout<<"treat_particle_bank: flying the particle:\n";
@@ -32,10 +30,8 @@ void treat_particle_bank(int s_erase)
     //mcout<<"now erase \n";
     //aln->el.print(mcout, 2);
     //RegPassivePtr::s_allow_delete_with_references = 1;
-    if(s_erase == 1)
-      particle_bank.erase(aln);
+    if (s_erase == 1) particle_bank.erase(aln);
     //RegPassivePtr::s_allow_delete_with_references = 0;
     aln = aln1;
   }
 }
-  

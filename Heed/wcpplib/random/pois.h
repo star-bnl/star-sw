@@ -9,7 +9,7 @@ class PoisState
 {public:
   double SECOND_RAN;
   int s_inited_SECOND_RAN;
-  PoisState(void): SECOND_RAN(0.0), s_inited_SECOND_RAN(0) {} 
+  PoisState(void): SECOND_RAN(0.0), s_inited_SECOND_RAN(0) {}
 };
 
 extern PoisState pois_state;
@@ -18,7 +18,7 @@ extern PoisState pois_state;
 // it for SRANLUX.
 // It needs also to set/get pois_state.
 
-long pois (double AMU,int &IERROR);
+long pois(double AMU, int &IERROR);
 //long pois (float AMU,int &IERROR);
 
 // Now it calls SRANLUX

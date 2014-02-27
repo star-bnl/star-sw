@@ -11,7 +11,7 @@ void HeedCondElectron::print(std::ostream& file, int l) const {
   /*
   if (l > 1) {
     indn.n += 2;
-    absvol* av = tid.G_lavol();  
+    absvol* av = tid.G_lavol();
     if (av != NULL) {
       Ifile << "av="; av->print(mcout, 1);
     } else {
@@ -25,7 +25,7 @@ void HeedCondElectron::print(std::ostream& file, int l) const {
       de->print(file, 1);
     } else {
       Ifile << "no parent particle\n";
-    } 
+    }
     indn.n -= 2;
   }
   */

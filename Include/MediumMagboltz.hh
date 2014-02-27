@@ -3,8 +3,6 @@
 #ifndef G_MEDIUM_MAGBOLTZ_9
 #define G_MEDIUM_MAGBOLTZ_9
 
-#include <vector>
-
 #include "MediumGas.hh"
 
 namespace Garfield {

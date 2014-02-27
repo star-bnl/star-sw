@@ -2,9 +2,6 @@
 #ifndef G_MEDIUM_GAAS_H
 #define G_MEDIUM_GAAS_H
 
-#include <string>
-#include <vector>
-
 #include "Medium.hh"
 
 namespace Garfield {

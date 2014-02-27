@@ -3,9 +3,6 @@
 #ifndef G_COMPONENT_TCAD_2D_H
 #define G_COMPONENT_TCAD_2D_H
 
-#include <string>
-#include <vector>
-
 #include "ComponentBase.hh"
 
 namespace Garfield {

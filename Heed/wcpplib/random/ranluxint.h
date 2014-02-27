@@ -5,16 +5,12 @@
 
 #include "Random.hh"
 
-inline double SRANLUX() {
-
-  return Garfield::RndmUniform();
-  
-}
+inline double SRANLUX() { return Garfield::RndmUniform(); }
 
 #else
 
 #ifdef USE_CPP_SRANLUX
-// If this is the case 
+// If this is the case
 // ranluxint.f is unnecessary
 // SRANLUX is a function returning double.
 // (In the case of fortran SRANLUX is function returning float.)
@@ -27,35 +23,35 @@ inline double SRANLUX() {
 extern WHepRandomEngine& random_engine;
 
 inline double SRANLUX(void)  // trying double
-{
+    {
   return random_engine.flat();
 }
 
-#else // for  ifdef USE_CPP_RANLUX 
-// getting rid of everything else
+#else  // for  ifdef USE_CPP_RANLUX
+       // getting rid of everything else
 
 #include "wcpplib/cfortran/ftypes.h"
 //#include <string.h>
 
 //#define RANF_INSTEAD_OF_RNDM
-#define RANLUX_INSTEAD_OF_RNDM    // currently only this option works
+#define RANLUX_INSTEAD_OF_RNDM  // currently only this option works
 
 //#define PRINT_RANLUX  // for debug, allows to print in mcout
-// sequencial random number which is returned and the number(index) of 
+// sequencial random number which is returned and the number(index) of
 // this number, which allows to check random generator and program
 /* Operation with seed for RANLUX:
 There is a file with a fixed name ranluxsd.dat.
 This name is fixed in fortran subroutines which write or read it:
 myiniteranlux - reads,
 mysaveranlux - writes.
-There is also third subroutine which simply fills a vector: 
+There is also third subroutine which simply fills a vector:
 myextractranlux(vector).
 With it the seed can be extracted into the program and written into its
 output stream in order to grant to the user the possibility
 to re-start calculations from any point.
 From C++ these functions are available through:
 inline void INITE_RANLUX(void);
-inline void SAVE_RANLUX(void); 
+inline void SAVE_RANLUX(void);
 inline void EXTRACT_RANLUX(fint* ivec);
 where ivec has to have length 25 words.
 For example, you can insert in the program the line:
@@ -69,7 +65,7 @@ In the end:
 and insert into the event loop the following sequence:
       if(eventcount.Gn()%1000 == 0)
       {
-	EXTRACT_RANLUX(ranlux_seed); 
+	EXTRACT_RANLUX(ranlux_seed);
 	mcout<<"ranlux seed:";
 	int n;
 	for(n=0; n<25; n++)
@@ -83,8 +79,6 @@ and insert into the event loop the following sequence:
       }
 
 */
-
-
 
 #ifdef PRINT_RANLUX
 #include <iomanip.h>
@@ -113,10 +107,10 @@ extern "C" void myextractrndm__(fint* iseed);
 #endif
 extern "C" ffloat lranor__(ffloat* arg1, ffloat* arg2);
 extern "C" void lspois__(ffloat* amu, fint* n, fint* ierror);
-extern "C" void hisran__(ffloat* y, fint* n, ffloat* xlo, ffloat* xwid, 
-			 ffloat* xran);
+extern "C" void hisran__(ffloat* y, fint* n, ffloat* xlo, ffloat* xwid,
+                         ffloat* xran);
 extern "C" ffloat flande__(ffloat* x);
- 
+
 #elif FORT_UNDERSCORES_01
 #ifdef RANLUX_INSTEAD_OF_RNDM
 extern "C" void myiniteranlux_(void);
@@ -136,8 +130,8 @@ extern "C" void myextractrndm_(fint* iseed);
 #endif
 extern "C" ffloat lranor_(ffloat* arg1, ffloat* arg2);
 extern "C" void lspois_(ffloat* amu, fint* n, fint* ierror);
-extern "C" void hisran_(ffloat* y, fint* n, ffloat* xlo, ffloat* xwid, 
-			 ffloat* xran);
+extern "C" void hisran_(ffloat* y, fint* n, ffloat* xlo, ffloat* xwid,
+                        ffloat* xran);
 extern "C" ffloat flande_(ffloat* x);
 
 #elif FORT_UNDERSCORES_11
@@ -159,8 +153,8 @@ extern "C" void _myextractrndm_(fint* iseed);
 #endif
 extern "C" void _lspois_(ffloat* amu, fint* n, fint* ierror);
 extern "C" ffloat _lranor_(ffloat* arg1, ffloat* arg2);
-extern "C" void _hisran_(ffloat* y, fint* n, ffloat* xlo, ffloat* xwid, 
-			 ffloat* xran);
+extern "C" void _hisran_(ffloat* y, fint* n, ffloat* xlo, ffloat* xwid,
+                         ffloat* xran);
 extern "C" ffloat _flande_(ffloat* x);
 
 #else
@@ -182,16 +176,15 @@ extern "C" void myextractrndm(fint* iseed);
 #endif
 extern "C" void lspois(ffloat* amu, fint* n, fint* ierror);
 extern "C" ffloat lranor(ffloat* arg1, ffloat* arg2);
-extern "C" void hisran(ffloat* y, fint* n, ffloat* xlo, ffloat* xwid, 
-			 ffloat* xran);
+extern "C" void hisran(ffloat* y, fint* n, ffloat* xlo, ffloat* xwid,
+                       ffloat* xran);
 extern "C" ffloat flande(ffloat* x);
 
 #endif
 
 #ifdef RANLUX_INSTEAD_OF_RNDM
 
-inline void INITE_RANLUX(void)
-{
+inline void INITE_RANLUX(void) {
 #ifdef FORT_UNDERSCORES_02
   myiniteranlux__();
 #elif FORT_UNDERSCORES_01
@@ -203,8 +196,7 @@ inline void INITE_RANLUX(void)
 #endif
 }
 
-inline void SAVE_RANLUX(void)
-{
+inline void SAVE_RANLUX(void) {
 #ifdef FORT_UNDERSCORES_02
   mysaveranlux__();
 #elif FORT_UNDERSCORES_01
@@ -216,8 +208,7 @@ inline void SAVE_RANLUX(void)
 #endif
 }
 
-inline void EXTRACT_RANLUX(fint* ivec)
-{
+inline void EXTRACT_RANLUX(fint* ivec) {
 #ifdef FORT_UNDERSCORES_02
   myextractranlux__(ivec);
 #elif FORT_UNDERSCORES_01
@@ -229,9 +220,7 @@ inline void EXTRACT_RANLUX(fint* ivec)
 #endif
 }
 
- 
-inline void RANLUX(ffloat* vec, fint len)
-{
+inline void RANLUX(ffloat* vec, fint len) {
 #ifdef FORT_UNDERSCORES_02
   ranlux__(vec, &len);
 #elif FORT_UNDERSCORES_01
@@ -242,42 +231,35 @@ inline void RANLUX(ffloat* vec, fint len)
   ranlux(vec, &len);
 #endif
 #ifdef PRINT_RANLUX
-  if(step_of_print_ranlux > 1)
-  {
+  if (step_of_print_ranlux > 1) {
     int n;
-    for(n=0; n<len; n++)
-    {
+    for (n = 0; n < len; n++) {
       long rest = num_ranlux % step_of_print_ranlux;
-      if(rest == 0)
-      {
-	int qp=mcout.precision();
-	mcout.precision(FLT_DIG);
-	mcout<<"RANLUX: num_ranlux="<<num_ranlux<<" r="<<vec[n]<<'\n';
-	mcout.precision(qp);
+      if (rest == 0) {
+        int qp = mcout.precision();
+        mcout.precision(FLT_DIG);
+        mcout << "RANLUX: num_ranlux=" << num_ranlux << " r=" << vec[n] << '\n';
+        mcout.precision(qp);
       }
       num_ranlux++;
     }
-  }
-  else
-  {
-    mcout<<"RANLUX: len = "<<len<<'\n';
-    indn.n+=2;
+  } else {
+    mcout << "RANLUX: len = " << len << '\n';
+    indn.n += 2;
     int n;
-    int qp=mcout.precision();
+    int qp = mcout.precision();
     mcout.precision(FLT_DIG);
-    for(n=0; n<len; n++)
-    {
-      mcout<<"n="<<n<<"num_ranlux="<<num_ranlux++
-	   <<" vec[n]="<<vec[n]<<'\n';
+    for (n = 0; n < len; n++) {
+      mcout << "n=" << n << "num_ranlux=" << num_ranlux++
+            << " vec[n]=" << vec[n] << '\n';
     }
     mcout.precision(qp);
-    indn.n-=2;
+    indn.n -= 2;
   }
 #endif
 }
 
-inline ffloat SRANLUX(void)
-{
+inline ffloat SRANLUX(void) {
 #ifndef PRINT_RANLUX
 
 #ifdef FORT_UNDERSCORES_02
@@ -290,27 +272,25 @@ inline ffloat SRANLUX(void)
   return sranlux();
 #endif
 
-#else // PRINT_RANLUX
+#else  // PRINT_RANLUX
 
 #ifdef FORT_UNDERSCORES_02
-  float r= sranlux__();
+  float r = sranlux__();
 #elif FORT_UNDERSCORES_01
-  float r= sranlux_();
+  float r = sranlux_();
 #elif FORT_UNDERSCORES_11
-  float r= _sranlux_();
+  float r = _sranlux_();
 #else
-  float r= sranlux();
+  float r = sranlux();
 #endif
   long rest = 0;
-  if(step_of_print_ranlux > 1)
-  {
-      rest = num_ranlux % step_of_print_ranlux;
+  if (step_of_print_ranlux > 1) {
+    rest = num_ranlux % step_of_print_ranlux;
   }
-  if(rest == 0)
-  {
-    int qp=mcout.precision();
+  if (rest == 0) {
+    int qp = mcout.precision();
     mcout.precision(FLT_DIG);
-    mcout<<"SRANLUX: num_ranlux="<<num_ranlux<<" r="<<r<<'\n';
+    mcout << "SRANLUX: num_ranlux=" << num_ranlux << " r=" << r << '\n';
     mcout.precision(qp);
   }
   num_ranlux++;
@@ -319,12 +299,11 @@ inline ffloat SRANLUX(void)
 #endif
 }
 
-#else // ifdef RANLUX_INSTEAD_OF_RNDM
+#else  // ifdef RANLUX_INSTEAD_OF_RNDM
 
 #ifndef RANF_INSTEAD_OF_RNDM
 
-inline ffloat RNDM(void)
-{
+inline ffloat RNDM(void) {
 #ifdef FORT_UNDERSCORES_02
   return rndm__(0);
 #elif FORT_UNDERSCORES_01
@@ -336,8 +315,7 @@ inline ffloat RNDM(void)
 #endif
 }
 #else
-inline ffloat RNDM(void)
-{
+inline ffloat RNDM(void) {
 #ifdef FORT_UNDERSCORES_02
   return ranfl__();
 #elif FORT_UNDERSCORES_01
@@ -349,8 +327,7 @@ inline ffloat RNDM(void)
 #endif
 }
 #endif
-inline void INITE_RNDM(void)
-{
+inline void INITE_RNDM(void) {
 #ifdef FORT_UNDERSCORES_02
   myiniterndm__();
 #elif FORT_UNDERSCORES_01
@@ -361,8 +338,7 @@ inline void INITE_RNDM(void)
   myiniterndm();
 #endif
 }
-inline void SAVE_RNDM(void)
-{
+inline void SAVE_RNDM(void) {
 #ifdef FORT_UNDERSCORES_02
   mysaverndm__();
 #elif FORT_UNDERSCORES_01
@@ -374,8 +350,7 @@ inline void SAVE_RNDM(void)
 #endif
 }
 
-inline void EXTRACT_RNDM(fint* iseed)
-{
+inline void EXTRACT_RNDM(fint* iseed) {
 #ifdef FORT_UNDERSCORES_02
   myextractrndm__(iseed);
 #elif FORT_UNDERSCORES_01
@@ -389,8 +364,7 @@ inline void EXTRACT_RNDM(fint* iseed)
 
 #endif  //  ifdef RANLUX_INSTEAD_OF_RNDM
 
-inline ffloat LRANOR(ffloat* arg1, ffloat* arg2)
-{
+inline ffloat LRANOR(ffloat* arg1, ffloat* arg2) {
 #ifdef FORT_UNDERSCORES_02
   return lranor__(arg1, arg2);
 #elif FORT_UNDERSCORES_01
@@ -402,8 +376,7 @@ inline ffloat LRANOR(ffloat* arg1, ffloat* arg2)
 #endif
 }
 
-inline void LSPOIS(ffloat* amu, fint& n, fint& ierror)
-{
+inline void LSPOIS(ffloat* amu, fint& n, fint& ierror) {
 #ifdef FORT_UNDERSCORES_02
   lspois__(amu, &n, &ierror);
 #elif FORT_UNDERSCORES_01
@@ -415,9 +388,7 @@ inline void LSPOIS(ffloat* amu, fint& n, fint& ierror)
 #endif
 }
 
-inline void HISRAN(ffloat* y, fint n, ffloat xlo, ffloat xwid, 
-	      ffloat& xran)
-{
+inline void HISRAN(ffloat* y, fint n, ffloat xlo, ffloat xwid, ffloat& xran) {
 #ifdef FORT_UNDERSCORES_02
   hisran__(y, &n, &xlo, &xwid, &xran);
 #elif FORT_UNDERSCORES_01
@@ -429,8 +400,7 @@ inline void HISRAN(ffloat* y, fint n, ffloat xlo, ffloat xwid,
 #endif
 }
 
-inline ffloat FLANDE(ffloat* x)
-{
+inline ffloat FLANDE(ffloat* x) {
 #ifdef FORT_UNDERSCORES_02
   return flande__(x);
 #elif FORT_UNDERSCORES_01
@@ -442,10 +412,8 @@ inline ffloat FLANDE(ffloat* x)
 #endif
 }
 
-#endif // for  ifdef USE_CPP_RANLUX
-
+#endif  // for  ifdef USE_CPP_RANLUX
 
 #endif
-
 
 #endif

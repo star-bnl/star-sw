@@ -3,9 +3,6 @@
 #ifndef G_MEDIUM_SILICON_H
 #define G_MEDIUM_SILICON_H
 
-#include <string>
-#include <vector>
-
 #include "Medium.hh"
 
 namespace Garfield {
