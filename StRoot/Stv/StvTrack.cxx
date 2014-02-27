@@ -238,7 +238,7 @@ static StvToolkit *kit = StvToolkit::Inst();
 	if (node->GetHit()) break;
 	nDel ++;kit->FreeNode(node);
     }
-    if (nDel)  { --it; erase(begin(),it);}
+    if (nDel)  {erase(begin(),it);}
 
     it = end(); --it; 
     nDel=0;
@@ -322,8 +322,8 @@ void StvTrack::Print(const char *opt) const
   int n=0;
   for (StvNodeConstIter it=begin();it!=end();++it) {
     const StvNode *node = (*it);
-    const StvHit *hit = node->GetHit();
-    if (!hit && strchr(opt,'H')) continue;
+//    const StvHit *hit = node->GetHit();
+//    if (!hit && strchr(opt,'H')) continue;
     n++;printf("%3d - ",n);
     node->Print(opt);
   }
