@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.cxx,v 1.8 2014/02/27 00:44:08 smirnovd Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.9 2014/02/27 00:44:20 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
+ * Revision 1.9  2014/02/27 00:44:20  smirnovd
+ * Switch to c++ style array zeroing
+ *
  * Revision 1.8  2014/02/27 00:44:08  smirnovd
  * Use constructor initializer list
  *
@@ -32,6 +35,8 @@
  *
  *
  **************************************************************************/
+
+#include <algorithm>
 
 #include "StPxlClusterMaker.h"
 #include "StMessMgr.h"
@@ -78,8 +83,8 @@ Int_t StPxlClusterMaker::Make()
    mPxlClusterCollection = new StPxlClusterCollection();
    ToWhiteBoard("pxlCluster", mPxlClusterCollection);
 
-   // clear rawHitMap
-   memset(mRawHitMap, 0, kNumberOfPxlRowsOnSensor * kNumberOfPxlColumnsOnSensor * sizeof(StPxlRawHit *));
+   // Set all elements (pointers) of rawHitMap to 0
+   fill_n(*mRawHitMap, sizeof(mRawHitMap), static_cast<StPxlRawHit*>(0) );
 
    // real work
    int embeddingShortCut = IAttr("EmbeddingShortCut");
