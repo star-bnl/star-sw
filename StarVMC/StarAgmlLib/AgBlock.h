@@ -137,7 +137,8 @@ class AgBlock : public TNamed
   /// Get the list of alignment groups
   //  const vector<TString> &groups(){ return mGroups; }
 
-    
+  void   SetAssembly() { mMakeAssembly=true; }
+  Bool_t GetAssembly() { return mMakeAssembly; }
 
  private:
  protected:
@@ -163,10 +164,10 @@ class AgBlock : public TNamed
   static std::vector< AgBlock *>       mStack;      // Stack of blocks... 
   static StarAgmlStacker              *_stacker;
 
-
   std::vector< TString >               mNicknames;  // Nicknames
   std::vector< TString > mGroups;
 
+  Bool_t mMakeAssembly;
 
   friend class _AgBlockDummy;
 

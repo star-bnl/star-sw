@@ -30,6 +30,7 @@ AgBlock::AgBlock(const Char_t *name, const Char_t *title)
 {
   addNickname(name); // ensure that the vector is populated
   _valid = true;
+  mMakeAssembly=false;
 }
 
 
