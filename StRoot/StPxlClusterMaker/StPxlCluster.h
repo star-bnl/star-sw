@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlCluster.h,v 1.5 2014/02/27 00:44:15 smirnovd Exp $
+ * $Id: StPxlCluster.h,v 1.6 2014/02/27 00:44:25 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.h,v $
+ * Revision 1.6  2014/02/27 00:44:25  smirnovd
+ * Minor corrections
+ *
  * Revision 1.5  2014/02/27 00:44:15  smirnovd
  * Make sorting function static class method
  *
@@ -32,6 +35,8 @@
 
 #ifndef StPxlCluster_hh
 #define StPxlCluster_hh
+
+#include <utility>
 
 #include "Rtypes.h"
 
@@ -49,7 +54,7 @@ public:
    Float_t rowCenter() const {return mRowCenter;}       ///< average raw hit row
    Int_t idTruth() const {return mIdTruth;}             ///< for embedding, 0 as background, most frequent raw hit idTruth as idTruth of the cluster
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlCluster.h,v 1.5 2014/02/27 00:44:15 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlCluster.h,v 1.6 2014/02/27 00:44:25 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -60,6 +65,7 @@ protected:
    Float_t mColumnCenter;                       ///< average raw hit column
    Float_t mRowCenter;                          ///< average raw hit row
    Int_t   mIdTruth;                            ///< for embedding, 0 as background, most frequent raw hit idTruth as idTruth of the cluster
+
    ClassDef(StPxlCluster, 1)
 };
 

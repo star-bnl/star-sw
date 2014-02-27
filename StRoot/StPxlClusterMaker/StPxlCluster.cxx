@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlCluster.cxx,v 1.6 2014/02/27 00:44:15 smirnovd Exp $
+ * $Id: StPxlCluster.cxx,v 1.7 2014/02/27 00:44:25 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.cxx,v $
+ * Revision 1.7  2014/02/27 00:44:25  smirnovd
+ * Minor corrections
+ *
  * Revision 1.6  2014/02/27 00:44:15  smirnovd
  * Make sorting function static class method
  *
@@ -33,10 +36,11 @@
  *
  **************************************************************************/
 
-#include "StPxlCluster.h"
-#include "StPxlRawHitMaker/StPxlRawHit.h"
 #include <algorithm>
 #include <map>
+
+#include "StPxlCluster.h"
+#include "StPxlRawHitMaker/StPxlRawHit.h"
 
 using namespace std;
 
