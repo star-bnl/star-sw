@@ -38,7 +38,6 @@ static void LinearCurv (double Rho,double dRho,double len, double &dT,double &dH
 
   double X[2]={0},D[2]={1};
   double X0End[2];
-  
   TCircle tc(X,D,Rho);
   tc.Eval(len,X0End);
   double step = 0.1/fabs(Rho)+1e-10;
@@ -283,7 +282,7 @@ assert(fabs(_z)<999);
    int jkFlag=1;
    if (fabs(ang)<0.1) 		{//Small angle
      dH = 1./3 ; dT = 1./4;}
-   else if ( fabs(ang)<1) 	{//Reasonable angle
+   else if ( fabs(ang)<0.5) 	{//Reasonable angle
      double qqCos = ((cos(ang)-1)/ang2+1./2)/ang2; 	//~ 1/24
      double qqSin = (sin(ang)/(ang)-1)/ang2;  		//~-1/6
      dT = ((qqCos+qqSin)*2-qqCos*ang2+1./2);		//~1/4
@@ -297,13 +296,6 @@ assert(fabs(_z)<999);
      dH*= dRho*ang *lxy/2;
      dT*=-dRho*ang2*lxy/2;
    }
-
-int testSgn = 1; 
-if (myLen<0) testSgn*=-1; if (_curv<0) testSgn*=-1;
-assert(dH*testSgn>=0);
-assert(dT<=0);
-
-
    dA  = dRho*ang/2;
 
 
