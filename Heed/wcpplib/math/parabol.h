@@ -29,10 +29,6 @@ It is provided "as is" without express or implied warranty.
 #include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/util/emul_new_stand.h"
 
-//#include <CLHEP/Matrix/Vector.h>
-//#define MATRIX_BOUND_CHECK
-//#include <CLHEP/Matrix/Matrix.h>
-
 class Parabol  // a is omited to avoid coincidences with any other libraries
     {
  public:
@@ -90,10 +86,6 @@ class Parabol  // a is omited to avoid coincidences with any other libraries
   mutable int qdxzero;
   mutable double dxzero[2];
 };
-
-//std::ostream& operator<<(std::ostream& file, const Parabol& f);
-// made inline because otherwise it can not find indn at linking.
-// Why I don't know.
 
 std::ostream& operator<<(std::ostream& file, const Parabol& f);
 

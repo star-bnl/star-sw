@@ -27,7 +27,6 @@ HEEDOBJS = \
 	$(OBJDIR)/Heed/cubic.o \
 	$(OBJDIR)/Heed/DoubleAc.o \
 	$(OBJDIR)/Heed/kinem.o \
-	$(OBJDIR)/Heed/line.o \
 	$(OBJDIR)/Heed/linexi2.o \
 	$(OBJDIR)/Heed/lorgamma.o \
 	$(OBJDIR)/Heed/parabol.o \

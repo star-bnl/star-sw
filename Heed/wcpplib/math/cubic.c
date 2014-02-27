@@ -20,7 +20,7 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-const double_complex iu(0, 1);
+const Cubic::double_complex Cubic::iu(0, 1);
 
 void Cubic::find_zero(double_complex& z1, double_complex& z2,
                       double_complex& z3) const {
@@ -148,9 +148,9 @@ int Cubic::find_maxmin(double xmm[2], double ymm[2], int s_mm[2]) const {
 }
 
 std::ostream& operator<<(std::ostream& file, const Cubic& f) {
-  double_complex z1;
-  double_complex z2;
-  double_complex z3;
+  Cubic::double_complex z1;
+  Cubic::double_complex z2;
+  Cubic::double_complex z3;
   Ifile << "Cubic: s_xzero=" << f.s_xzero() << '\n';
   indn.n += 2;
   f.find_zero(z1, z2, z3);

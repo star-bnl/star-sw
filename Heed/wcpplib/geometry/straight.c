@@ -31,10 +31,8 @@ int operator==(const straight& sl1, const straight& sl2) {
 
   if (!(sl1.dir == sl2.dir || sl1.dir == -sl2.dir)) return 0;
   if (sl1.piv == sl2.piv) return 1;
-  if (sl1.check_point_in(sl2.piv, 0.0) == 1)
-    return 1;
-  else
-    return 0;
+  if (sl1.check_point_in(sl2.piv, 0.0) == 1) return 1;
+  return 0;
 }
 
 int apeq(const straight& sl1, const straight& sl2, vfloat prec) {
@@ -43,26 +41,15 @@ int apeq(const straight& sl1, const straight& sl2, vfloat prec) {
   int i = check_par(sl1.dir, sl2.dir, prec);
   if (i == 0) return 0;
   if (apeq(sl1.piv, sl2.piv, prec)) return 1;
-  if (sl1.check_point_in(sl2.piv, prec) == 1)
-    return 1;
-  else
-    return 0;
+  if (sl1.check_point_in(sl2.piv, prec) == 1) return 1;
+  return 0;
 }
 
 int straight::check_point_in(const point& fp, vfloat prec) const {
   pvecerror("int straight::check_point_in(point fp, vfloat prec)");
   vfloat f = distance(fp);
-  if (f <= prec)
-    return 1;
-  else
-    return 0;
-  /*
-  if(apeq(fp, piv, prec)) return 1;
-  if(check_par(dir, (fp-piv), prec)!=0)  // 1 or -1
-    return 1;
-  else
-    return 0;
-  */
+  if (f <= prec) return 1;
+  return 0;
 }
 point straight::cross(const straight& sl, vfloat prec) const {
   pvecerror("point straight::cross(straight& sl, vfloat prec)");
@@ -371,7 +358,7 @@ straight::straight(const straight sl[4], point pt[2], vfloat precision) {
   *this = straight(ptcurr[0], ptcurr[1]);
 }
 
-ostream& operator<<(ostream& file, const straight& s) {
+std::ostream& operator<<(std::ostream& file, const straight& s) {
   Ifile << "straight (line):\n";
   indn.n += 2;
   file << s.piv << s.dir;

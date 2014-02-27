@@ -2,8 +2,6 @@
 #define LINEXI2_H
 
 #include <iostream>
-using std::ostream;
-//#include <values.h>
 
 /*
 Drawing straight line by a range of points by method xi2
@@ -36,7 +34,7 @@ class linexi2_coor {
     return *this;
   }
 };
-ostream& operator<<(ostream& file, const linexi2_coor& l);
+std::ostream& operator<<(std::ostream& file, const linexi2_coor& l);
 
 class linexi2 : public linexi2_coor {
  public:
@@ -67,7 +65,7 @@ class linexi2 : public linexi2_coor {
     return a * x + b;
   }  //??
 };
-ostream& operator<<(ostream& file, const linexi2& l);
+std::ostream& operator<<(std::ostream& file, const linexi2& l);
 
 class linexi2B : public linexi2 {
  public:

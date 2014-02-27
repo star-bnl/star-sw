@@ -41,49 +41,6 @@ const double one_minus_def_dbl_prec = double(1.0) - DEF_DBL_PREC;
 const double one_plus_def_flt_prec = double(1.0) + DEF_FLT_PREC;
 const double one_minus_def_flt_prec = double(1.0) - DEF_FLT_PREC;
 
-//#define CHECK_CORRECTNESS_AT_MULT // ..tiplication
-/* strange but at Scientific Linux 4.0 with compilation with -O2
-multiplication of two numbers
-  DoubleAc a1(-5.134443206949733e-197, -5.134443206949745e-197,
-	      -5.134443206949721e-197);
-  DoubleAc a2(4.237289132339917e-176, 4.237289132339908e-176,
-	      4.237289132339927e-176);
-  DoubleAc a3 = a1 * a2;
-gives error diagnistic:
-DoubleAc& DoubleAc::operator*=(const DoubleAc& f): ERROR:
-d  <  di at the end of computations
-This number:
-DoubleAc: d=                  -0 di=                  -0 da=                  -0
-Argument:
-DoubleAc: d=4.237289132339917e-176 di=4.237289132339908e-176
-da=4.237289132339927e-176
-if(d == di) is also positive
-d - di=0
-old value:
-DoubleAc: d=-5.134443206949733e-197 di=-5.134443206949745e-197
-da=-5.134443206949721e-197
-FunNameStack: s_init=1 qname=2
-  0  main()
-  1  DoubleAc& DoubleAc::operator*=(const DoubleAc& f)
-File is DoubleAc.c , line number is 214
-spexit_action: the streams will be now flushed
-spexit_action: the abort function is called
-Abort (core dumped)
-
-Intersting that if compiled without optimization, this code works
-correctly.
-
-It can be assumed that it is due to some transitions to and from
-internal registers of Intel arithmetic co-processor with
-larger internal precision (80 bits?)
-with rounding at backward transition.
-
-There is currently no solution except either compiling without -O2
-or switching out control at multiplication of DoubleAc by the macro above.
-
-The same problem and the same macro are applied to division as well.
-*/
-
 class DoubleAc {
   double d;   // the main  value
   double di;  // the left limit   di <= d
@@ -199,22 +156,6 @@ inline DoubleAc::DoubleAc(double f)
         da = f;
     }
   }
-  /*
-  mcout<<"DoubleAc::DoubleAc(double f)\n";
-  print(mcout, 3);
-  if( d < di )
-  {
-    mcerr<<"error in inline DoubleAc::DoubleAc(double f)\n";
-    mcerr<<"d < di\n";
-    spexit(mcerr);
-  }
-  if( d > da )
-  {
-    mcerr<<"error in inline DoubleAc::DoubleAc(double f)\n";
-    mcerr<<"d > da\n";
-    spexit(mcerr);
-  }
-  */
 }
 
 inline DoubleAc& DoubleAc::operator=(double f) {
@@ -243,29 +184,6 @@ inline DoubleAc& DoubleAc::operator=(double f) {
         da = f;
     }
   }
-  /*
-  if(f > -DBL_MAX/one_minus_def_dbl_prec ) di = f * one_minus_def_dbl_prec;
-  else di = f;
-  d=f;
-  if(f < DBL_MAX/one_plus_def_dbl_prec ) da = f*one_plus_def_dbl_prec;
-  else da = f;
-  */
-  /*
-  mcout<<"DoubleAc::operator=(double f)\n";
-  print(mcout, 3);
-  if( d < di )
-  {
-    mcerr<<"error in inline DoubleAc::operator=(double f)\n";
-    mcerr<<"d < di\n";
-    spexit(mcerr);
-  }
-  if( d > da )
-  {
-    mcerr<<"error in inline DoubleAc::operator=(double f)\n";
-    mcerr<<"d > da\n";
-    spexit(mcerr);
-  }
-  */
   return *this;
 }
 

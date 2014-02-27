@@ -2,7 +2,6 @@
 #include <fstream>
 #include "wcpplib/clhep_units/WSystemOfUnits.h"
 #include "wcpplib/math/lorgamma.h"
-#include "wcpplib/math/line.h"
 #include "wcpplib/math/tline.h"
 #include "heed++/code/EnTransfCS.h"
 #include "heed++/code/HeedMatterDef.h"

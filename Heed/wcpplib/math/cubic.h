@@ -15,13 +15,9 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-using std::complex;
-typedef complex<float> float_complex;
-typedef complex<double> double_complex;
-typedef complex<long double> long_double_complex;
-
 class Cubic {
  public:
+  typedef std::complex<double> double_complex;
   inline double a(void) const { return da; }
   inline double b(void) const { return db; }
   inline double c(void) const { return dc; }
@@ -66,6 +62,7 @@ class Cubic {
   int find_maxmin(double xmm[2], double ymm[2],
                   int s_mm[2]) const;  // 1 - maximum, -1 - minimum, 0 - non
  private:
+  static const double_complex iu;
   double da, db, dc, dd;
   mutable int s_dxzero;
   mutable double_complex dz1;

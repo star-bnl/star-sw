@@ -25,7 +25,7 @@ linexi2_coor::linexi2_coor(const long fqlr, const double* fax)
   Dx /= qlr;
   Dx = Dx - x_mean * x_mean;
 }
-ostream& operator<<(ostream& file, const linexi2_coor& l) {
+std::ostream& operator<<(std::ostream& file, const linexi2_coor& l) {
   Ifile << "linexi2_coor: qlr=" << l.qlr << " x_mean=" << l.x_mean
         << " Dx=" << l.Dx << '\n';
   int n;
@@ -67,7 +67,7 @@ linexi2::linexi2(const long fqlr, const double* fax, const double* fay)
     a = DBL_MAX;
   b = y_mean - a * x_mean;
 }
-ostream& operator<<(ostream& file, const linexi2& l) {
+std::ostream& operator<<(std::ostream& file, const linexi2& l) {
   Ifile << "linexi2_coor: qlr=" << l.qlr << '\n';
   Ifile << "x_mean=" << l.x_mean << " Dx=" << l.Dx << '\n';
   Ifile << "y_mean=" << l.y_mean << " xy_mean=" << l.xy_mean << '\n';
