@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.cxx,v 1.9 2014/02/27 00:44:20 smirnovd Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.10 2014/02/27 03:50:17 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
+ * Revision 1.10  2014/02/27 03:50:17  qiuh
+ * *** empty log message ***
+ *
  * Revision 1.9  2014/02/27 00:44:20  smirnovd
  * Switch to c++ style array zeroing
  *
@@ -84,7 +87,7 @@ Int_t StPxlClusterMaker::Make()
    ToWhiteBoard("pxlCluster", mPxlClusterCollection);
 
    // Set all elements (pointers) of rawHitMap to 0
-   fill_n(*mRawHitMap, sizeof(mRawHitMap), static_cast<StPxlRawHit*>(0) );
+   fill_n(*mRawHitMap, kNumberOfPxlRowsOnSensor * kNumberOfPxlColumnsOnSensor, static_cast<StPxlRawHit*>(0) );
 
    // real work
    int embeddingShortCut = IAttr("EmbeddingShortCut");
@@ -110,7 +113,6 @@ Int_t StPxlClusterMaker::Make()
                }
             }
          }
-
    return kStOK;
 }
 
