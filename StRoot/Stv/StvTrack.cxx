@@ -227,6 +227,30 @@ static StvToolkit *kit = StvToolkit::Inst();
   erase(tail,end());
 }
 //_____________________________________________________________________________
+void StvTrack::CutEnds()
+{
+static StvToolkit *kit = StvToolkit::Inst();
+  StvNodeIter it =begin();
+   int nDel=0;
+   for (; it != end();++it) 
+     {
+       StvNode *node = *it;
+	if (node->GetHit()) break;
+	nDel ++;kit->FreeNode(node);
+    }
+    if (nDel)  { --it; erase(begin(),it);}
+
+    it = end(); --it; 
+    nDel=0;
+    for (; it !=begin();--it) 
+    {
+       StvNode *node = *it;
+	if (node->GetHit()) break;
+	nDel ++; kit->FreeNode(node);
+    }
+    if (nDel)  { ++it; erase(it,end());}
+}
+//_____________________________________________________________________________
 //_____________________________________________________________________________
 double StvTrack::Approx(int mode)
 {

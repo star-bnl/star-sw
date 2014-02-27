@@ -46,6 +46,9 @@ const StvNode *GetNode(EPointType poTy) const;
    	/// Delete all the nodes started form given
   void CutTail(const StvNode *start=0);
 
+   	/// Delete all the hitless nodes a the the begining and at the end
+  void CutEnds();
+
    /*!
      Returns the track length (in centimeters) from the :
       - first point (kFirstPoint) default;
