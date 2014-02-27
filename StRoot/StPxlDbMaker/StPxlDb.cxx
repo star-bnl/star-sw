@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.2 2014/01/28 19:29:37 qiuh Exp $
+ * $Id: StPxlDb.cxx,v 1.3 2014/02/27 21:40:19 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.3  2014/02/27 21:40:19  smirnovd
+ * Remove unnecessary print out
+ *
  * Revision 1.2  2014/01/28 19:29:37  qiuh
  * *** empty log message ***
  *
@@ -175,7 +178,6 @@ void StPxlDb::setThinPlateSpline(pxlSensorTps_st *pxlSensorTps)
       int iLadder = (id - 1) / kNumberOfPxlSensorsPerLadder % kNumberOfPxlLaddersPerSector;
       int iSensor = (id - 1) % kNumberOfPxlSensorsPerLadder;
       int nMeasurements = pxlSensorTps[i].nMeasurements;
-      LOG_INFO << "thin plate spline: " << iSector << " " << iLadder << " " << iSensor << "    " << nMeasurements << " measurements." << endl;
       if (mThinPlateSpline[iSector][iLadder][iSensor]) {delete mThinPlateSpline[iSector][iLadder][iSensor];}
       mThinPlateSpline[iSector][iLadder][iSensor] = new StThinPlateSpline(nMeasurements, pxlSensorTps[i].X, pxlSensorTps[i].Y, pxlSensorTps[i].W, pxlSensorTps[i].A);
    }
