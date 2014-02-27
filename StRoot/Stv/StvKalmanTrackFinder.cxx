@@ -88,7 +88,7 @@ enum {kRepeatSeedFinder = 2};
 //=============================
 
         if (!nAdded) {mSeedFinder->FeedBack(0); continue;}
-
+        mCurrTrak->CutEnds();  	//remove ends without hits
 	int ans = 0,fail=13;
 //		Refit track   
         int nFitHits = mCurrTrak->GetNHits();
