@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.cxx,v 1.7 2014/02/21 21:11:06 smirnovd Exp $
+ * $Id: StPxlClusterMaker.cxx,v 1.8 2014/02/27 00:44:08 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.cxx,v $
+ * Revision 1.8  2014/02/27 00:44:08  smirnovd
+ * Use constructor initializer list
+ *
  * Revision 1.7  2014/02/21 21:11:06  smirnovd
  * Minor style and empty space adjustments
  *
@@ -41,9 +44,10 @@
 ClassImp(StPxlClusterMaker);
 
 //________________________________________________________________________________
-StPxlClusterMaker::StPxlClusterMaker(const Char_t *name) : StMaker(name)
+StPxlClusterMaker::StPxlClusterMaker(const Char_t *name) : StMaker(name),
+   mPxlClusterCollection(0),
+   mRawHitMap()
 {
-   mPxlClusterCollection = 0;
 }
 //________________________________________________________________________________
 void StPxlClusterMaker::Clear(const Option_t *)
