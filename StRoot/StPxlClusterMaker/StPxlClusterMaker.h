@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlClusterMaker.h,v 1.5 2014/02/21 21:11:06 smirnovd Exp $
+ * $Id: StPxlClusterMaker.h,v 1.6 2014/02/27 00:44:25 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlClusterMaker.h,v $
+ * Revision 1.6  2014/02/27 00:44:25  smirnovd
+ * Minor corrections
+ *
  * Revision 1.5  2014/02/21 21:11:06  smirnovd
  * Minor style and empty space adjustments
  *
@@ -46,7 +49,7 @@ public:
    void Clear(const Option_t * = "");
    Int_t Make();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterMaker.h,v 1.5 2014/02/21 21:11:06 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlClusterMaker.h,v 1.6 2014/02/27 00:44:25 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -54,7 +57,9 @@ protected:
    void findCluster(StPxlCluster *cluster, Int_t column, Int_t row);
 
    StPxlClusterCollection *mPxlClusterCollection; ///< pointer to the pxl cluster collection
-   const StPxlRawHit *mRawHitMap[kNumberOfPxlRowsOnSensor][kNumberOfPxlColumnsOnSensor]; ///< map of fired pixels in a sensor
+
+private:
+   const StPxlRawHit * mRawHitMap[kNumberOfPxlRowsOnSensor][kNumberOfPxlColumnsOnSensor]; ///< map of fired pixels in a sensor
 
    ClassDef(StPxlClusterMaker, 0)
 };
