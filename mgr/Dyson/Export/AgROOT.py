@@ -594,8 +594,13 @@ class Block( Handler ):
     def startElement(self, tag, attr):
         global current, current_block
         
-        name = attr.get('name','NONE')
-        comm = attr.get('comment',None)
+        name     = attr.get('name','NONE')
+        comm     = attr.get('comment',None)
+        assembly = attr.get('assembly',False)
+        if assembly:
+            comm += " [transformed into assembly in TGeo]"
+        else:
+            comm += " [TGeoVolume]"
 
         # Error checking
         if len(name)!= 4:
@@ -605,8 +610,9 @@ class Block( Handler ):
             ##raise AgmlCommentError( name, tag )
             RaiseException( AgmlCommentError(name,tag) )
         
-        self.name    = name
-        self.comment = comm
+        self.name      = name
+        self.comment   = comm
+        self.assembly  = assembly
 
         current_block = name
         
@@ -643,7 +649,10 @@ class Block( Handler ):
         document.head('class %s : public AgBlock' % name )
         document.head('{  public:')
         document.head('   static AgBlock *Instance();' )
-        document.head('%s() : AgBlock("%s","%s"){ };'%(name,name,comm))
+        document.head('%s() : AgBlock("%s","%s"){'%(name,name,comm))
+        if assembly:
+            document.head('  mMakeAssembly=true;')
+        document.head('};')
         document.head('~%s(){ };'%name)
         document.head('virtual void Block( AgCreate c );')
         document.head('virtual void End(){ };')
