@@ -21,6 +21,8 @@ extern long ns_single_transf;
 extern double ener_single_transf;
 #endif
 
+namespace Heed {
+
 extern long last_particle_number;  // for debug print
 // Each particle is identified by particle_number.
 // It is assigned by current last_particle_number which is then incremented
@@ -53,5 +55,7 @@ class HeedParticle : public eparticle {
   BlkArr<long> nshell;
 
 };
+
+}
 
 #endif

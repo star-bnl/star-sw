@@ -22,6 +22,9 @@ Definition of elastic scattering for low-energy delta-electron.
 
 // Fit parameters for particular element and energy,
 // The fit gives dependence of cross section on angle.
+
+namespace Heed {
+
 class ElElasticScatDataStruct {
  public:
   double A[4];  // in -1.0 then the combination is not valid
@@ -107,23 +110,6 @@ class ElElasticScat : public RegPassivePtr {
 
 class ElElasticScatLowSigma : public RegPassivePtr {
  public:
-  /*
-  // perhaps it is not necessary right here.
-  // For real matter in needs to mix the atoms.
-  // It is more conveniently to do in HeedDeltaElectronCS.*
-  // for new format:
-  double get_mean(  // return value in radians
-		   long Z, double energy,  // MeV
-		   double nscat) const;  // number of scatterings may be
-                                         // not entire
-  // old method:
-  double get_sigma(  // return value in radians
-		   long Z, double energy,  // MeV
-		   double nscat) const;  // number of scatterings may be
-                                         // not entire
-  // this is more precise for little stept
-  */
-
   double get_mean_coef(long Z, long ne) const { return mean_coef[Z - 1][ne]; }
   double get_coef(long Z, long ne) const { return coef[Z - 1][ne]; }
   long get_qscat(void) const { return qscat; }
@@ -136,7 +122,6 @@ class ElElasticScatLowSigma : public RegPassivePtr {
   long qat;    // number of atoms registered in this class (Z is sequencial)
   long qscat;  // maximal number of scaterings
                // qe and energies are taken form ElElasticScat
-               //DynLinArr< long > zat;
 
   // addition for new format:
   DynLinArr<DynLinArr<double> > mean_coef;  // mean( (1-cos(theta)) )
@@ -147,25 +132,6 @@ class ElElasticScatLowSigma : public RegPassivePtr {
 
 };
 
-/*
-class ElElasticScatLowSigma: public RegPassivePtr
-{public:
-  double get_sigma(  // return value in radians
-		   long Z, double energy,  // MeV
-		   long nscat) const;
-  ElElasticScatLowSigma(void){;}
-  ElElasticScatLowSigma(ElElasticScat* fees, const String& file_name);
-private:
-  PassivePtr<ElElasticScat> ees;
-  long qat;
-  long qscat;
-  // qe and energies are taken form ElElasticScat
-  //DynLinArr< long > zat;
-  DynLinArr< DynLinArr <DynLinArr< double > > > sigma;
-  // first index - number of atom = z - 1
-  // second index - energy
-  // third index - scattering number - 1
-};
-*/
+}
 
 #endif

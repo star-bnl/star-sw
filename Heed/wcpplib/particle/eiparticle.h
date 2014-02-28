@@ -11,6 +11,8 @@ accurate but complicted future classes).
 1999 - 2002  I. Smirnov.
 */
 
+namespace Heed {
+
 class eiparticle : public eparticle {
  public:
   /// Constructors
@@ -34,10 +36,11 @@ class eiparticle : public eparticle {
   /// 1 - loss is added (simulation of particle passage to opposite
   //      direction at intergation of field equations).
   //      Do not forget to assign opposite charge.
-  // WTF
   int s_add_loss;
   double total_loss;
 
 };
+
+}
 
 #endif

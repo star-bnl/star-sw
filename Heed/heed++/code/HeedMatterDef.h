@@ -21,6 +21,8 @@ and no formal ban to duplicate these definitions
 2003, I. Smirnov
 */
 
+namespace Heed {
+
 const int s_use_mixture_thresholds = 0;
 /*
 Affects the mixtures in which atoms have different potentials of ionization.
@@ -91,5 +93,7 @@ class HeedMatterDef : public RegPassivePtr {
   // Initialization after assignment of matter and apacs
   void inite_HeedMatterDef(void);
 };
+
+}
 
 #endif

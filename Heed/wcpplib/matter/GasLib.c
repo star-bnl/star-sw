@@ -8,6 +8,8 @@
 1998-2003,  I. Smirnov
 */
 
+namespace Heed {
+
 AtomDef Hydrogen("Hydrogen", "H", 1, 1.0 * gram / mole);
 //AtomDef Hydrogen(  "Hydrogen",   "H",   1, 1.00794 * gram/mole);
 AtomDef Helium("Helium", "He", 2, 4.002602 * gram / mole);
@@ -150,3 +152,5 @@ MoleculeDef Hg_molec("Hg", "Hg", "Hg", 1);
 MoleculeDef H2S_molec("H2S", "H2S", "H", 2, "S", 1);
 MoleculeDef GeH4_molec("GeH4", "GeH4", "Ge", 1, "H", 4);
 MoleculeDef SiH4_molec("SiH4", "SiH4", "Si", 1, "H", 4);
+
+}

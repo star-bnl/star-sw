@@ -7,6 +7,8 @@
 1998-2004, I. Smirnov.
 */
 
+namespace Heed {
+
 void AtomDef::print(std::ostream& file, int l) const {
   if (l > 0) file << (*this);
 }
@@ -465,9 +467,6 @@ std::ostream& operator<<(std::ostream& file, const AtomMixDef& f) {
   indn.n += 2;
   Ifile << "Z_mean()=" << std::setw(3) << f.Z_mean()
         << " A_mean()/(gram/mole)=" << f.A_mean() / (gram / mole) << '\n';
-  // Ifile << "total Z =" << std::setw(3) << f.qatom() * f.Z_mean()
-  //       << " total A /(gram/mole)=" << f.qatom() * f.A_mean() / (gram/mole)
-  // << '\n';
   Ifile << "inv_A_mean()*(gram/mole)=" << f.inv_A_mean() * (gram / mole)
         << '\n';
   Ifile << "mean_ratio_Z_to_A()*(gram/mole)=" << f.mean_ratio_Z_to_A() *
@@ -477,10 +476,7 @@ std::ostream& operator<<(std::ostream& file, const AtomMixDef& f) {
   // therefore there is no need to divide by gram.
   Iprintn(file, f.qatom());
   indn.n += 2;
-  long n;
-  for (n = 0; n < f.qatom(); n++) {
-    //Ifile<<"n="<<n<<'\n';
-    //Ifile<<"atom(n)="<<f.atom(n);
+  for (long n = 0; n < f.qatom(); n++) {
     Ifile << "n=" << n << " atom(n)->notation=" << f.atom(n)->notation()
           << "\n";
     indn.n += 2;
@@ -491,4 +487,6 @@ std::ostream& operator<<(std::ostream& file, const AtomMixDef& f) {
   indn.n -= 2;
   indn.n -= 2;
   return file;
+}
+
 }

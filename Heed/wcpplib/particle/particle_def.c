@@ -7,6 +7,9 @@
 /*
 1998 - 2004,   I. Smirnov
 */
+
+namespace Heed {
+
 spin_def::spin_def(float ftotal, float fprojection)
     : total(ftotal), projection(fprojection) {
   mfunname("spin_def::spin_def(float ftotal, float fprojection)");
@@ -216,4 +219,6 @@ std::ostream& operator<<(std::ostream& file, const particle_type& f) {
     file << (f.pardef->name);
   }
   return file;
+}
+
 }

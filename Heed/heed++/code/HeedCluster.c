@@ -4,6 +4,8 @@
 2003, I. Smirnov
 */
 
+namespace Heed {
+
 void HeedCluster::print(std::ostream& file, int l) const {
   if (l <= 0) return;
   Ifile << "HeedCluster (l=" << l
@@ -22,4 +24,6 @@ void HeedCluster::print(std::ostream& file, int l) const {
     Ifile << "natom=" << natom << " nshell=" << nshell << '\n';
     indn.n -= 2;
   }
+}
+
 }

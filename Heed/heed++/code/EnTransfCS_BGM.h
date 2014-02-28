@@ -4,6 +4,8 @@
 #include "heed++/code/BGMesh.h"
 #include "heed++/code/EnTransfCS.h"
 
+namespace Heed {
+
 // Energy Transfer Cross Section
 class EnTransfCS_BGM : public RegPassivePtr {
  public:
@@ -35,5 +37,7 @@ class EnTransfCS_BGM_Type {
   EnTransfCS_BGM_Type(EnTransfCS_BGM* md) : etcs_bgm(md) { ; }
 };
 std::ostream& operator<<(std::ostream& file, const EnTransfCS_BGM_Type& f);
+
+}
 
 #endif

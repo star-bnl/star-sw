@@ -54,6 +54,8 @@ names without this suffix 'h'.
 1998-2004, I. Smirnov.
 */
 
+namespace Heed {
+
 const int max_poss_atom_z = 100;
 
 class AtomDef : public RegPassivePtr {
@@ -153,5 +155,7 @@ class AtomMixDef : public RegPassivePtr {
   }
 };
 std::ostream& operator<<(std::ostream& file, const AtomMixDef& f);
+
+}
 
 #endif

@@ -7,13 +7,14 @@
 #include "heed++/code/EnTransfCS_BGM.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/random/ranluxint.h"
-//#include "wcpplib/random/chisran.h"
 #include "wcpplib/random/pois.h"
 #include "wcpplib/math/kinem.h"
 #include "wcpplib/math/tline.h"
 /*
 2003-2008, I. Smirnov
 */
+
+namespace Heed {
 
 HeedParticle_BGM::HeedParticle_BGM(manip_absvol* primvol, const point& pt,
                                    const vec& vel, vfloat time,
@@ -327,5 +328,7 @@ void HeedParticle_BGM::print(ostream& file, int l) const {
       }
     }
   }
+
+}
 
 }

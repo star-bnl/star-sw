@@ -9,6 +9,8 @@
 2002, I. Smirnov
 */
 
+namespace Heed {
+
 double Bethe_Bloch_energy_loss(const double ratio_Z_to_A, const double I_eff,
                                const double beta, const double z) {
 
@@ -63,4 +65,6 @@ double Bethe_Bloch_restricted_energy_loss_gamma_1(
           beta2 * (1.0 + ecut / emax);
   }
   return coef1 * coef2 * sum;
+}
+
 }

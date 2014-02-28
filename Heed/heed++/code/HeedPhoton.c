@@ -13,6 +13,8 @@
 2003, I. Smirnov
 */
 
+namespace Heed {
+
 HeedPhoton::HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
                        vfloat time, long fparent_particle_number,
                        double fenergy, int fs_print_listing)
@@ -236,4 +238,6 @@ void HeedPhoton::print(ostream& file, int l) const {
     gparticle::print(file, l - 1);
     indn.n -= 2;
   }
+}
+
 }

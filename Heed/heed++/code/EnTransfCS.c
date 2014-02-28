@@ -9,6 +9,8 @@
 2003, I. Smirnov
 */
 
+namespace Heed {
+
 EnTransfCS::EnTransfCS(double fparticle_mass, double fgamma_1,
                        int fs_primary_electron, HeedMatterDef* fhmd,
                        long fparticle_charge)
@@ -647,4 +649,6 @@ std::ostream& operator<<(std::ostream& file, const EnTransfCSType& f) {
     f.etcs->print(file, 1);
   }
   return file;
+}
+
 }

@@ -8,6 +8,8 @@
 2003, I. Smirnov
 */
 
+namespace Heed {
+
 HeedMatterDef::HeedMatterDef(void)
     : eldens_cm_3(0.0),
       eldens(0.0),
@@ -407,4 +409,6 @@ void HeedMatterDef::print(std::ostream& file, int l) const {
     indn.n -= 2;
   }
   indn.n -= 2;
+}
+
 }

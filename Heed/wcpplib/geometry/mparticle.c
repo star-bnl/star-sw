@@ -12,6 +12,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 mparticle::mparticle(gparticle const& gp, double fmass)
     : gparticle(gp), mass(fmass) {
 
@@ -323,4 +325,6 @@ void mparticle::print(std::ostream& file, int l) const {
 std::ostream& operator<<(std::ostream& file, const mparticle& f) {
   (&f)->print(file, 10);
   return file;
+}
+
 }

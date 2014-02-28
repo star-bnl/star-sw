@@ -12,15 +12,15 @@ and traced through the geometry.
 
 //#define SFER_PHOTOEL  // make direction of photoelectron absolutely random
 
+namespace Heed {
+
 class HeedPhoton : public gparticle {
  public:
-  //PassivePtr< EnTransfCS > encs;
   long particle_number;
   long parent_particle_number;
   int s_print_listing;  // convenient to print internal algorithms
                         // of a selected event
 
-  //PassivePtr< gparticle > parent_part;
   double energy;          // MeV
   int s_photon_absorbed;  // used in physics_after_new_speed
   long na_absorbing;      // number of absorbing atom
@@ -33,9 +33,7 @@ class HeedPhoton : public gparticle {
 
   HeedPhoton(manip_absvol* primvol, const point& pt, const vec& vel,
              vfloat time, long fparent_particle_number,
-             //PassivePtr< gparticle > fparent_part,
              double fenergy, int fs_print_listing = 0);
-  //EnTransfCS* encs);
   void physics_after_new_speed(void);
   virtual void physics(void);
   HeedPhoton(void) : gparticle() { ; }
@@ -44,5 +42,7 @@ class HeedPhoton : public gparticle {
   virtual ~HeedPhoton() { ; }
 
 };
+
+}
 
 #endif

@@ -7,6 +7,9 @@ used in this field and applied in the old versions of HEED.
 The old names are preserved.
 2003, I. Smirnov.
 */
+
+namespace Heed {
+
 const double ELMAS = 0.51099906;             // Electron mass (MeV)
 const double FSCON = 137.0359895;            // The fine ctructure constant
 const double ELRAD = 1.0 / (FSCON * ELMAS);  // Electron radius (1/MeV)
@@ -30,5 +33,7 @@ const double PLANKCLIGHT = 197.327e-13;  // crossed plank * CLIGHT (Mev* cm)
 // The length of wave vector k in vacuum in units 1/[length]
 // (that is 1/cm in this system)
 // is the energy divided by PLANKCLIGHT
+
+}
 
 #endif

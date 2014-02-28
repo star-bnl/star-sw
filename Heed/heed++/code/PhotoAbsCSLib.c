@@ -23,6 +23,8 @@ If GasLib.c is already included here, there is no need to include
 it again there and there will be only one line of initializations.
 */
 
+namespace Heed {
+
 char* a_internal_HDB;
 String shelllist_dir_name = String(
     (a_internal_HDB = getenv("HEED_DATABASE")) == NULL ? "" : a_internal_HDB) +
@@ -336,3 +338,5 @@ MolecPhotoAbsCS Hg_MPACS(Mercury_PACS, 1);
 MolecPhotoAbsCS H2S_MPACS(Hydrogen_for_H2_PACS, 2, Sulfur_PACS, 1);
 MolecPhotoAbsCS GeH4_MPACS(Germanium_PACS, 1, Hydrogen_for_H2_PACS, 4);
 MolecPhotoAbsCS SiH4_MPACS(Silicon_PACS, 1, Hydrogen_for_H2_PACS, 4);
+
+}

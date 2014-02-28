@@ -5,6 +5,8 @@
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/geometry/volume.h"
 
+namespace Heed {
+
 class HeedCluster : public RegPassivePtr {
  public:
   double transferred_energy;  // internal units
@@ -34,5 +36,7 @@ class HeedCluster : public RegPassivePtr {
 };
 
 extern BlkArr<HeedCluster> cluster_bank;
+
+}
 
 #endif

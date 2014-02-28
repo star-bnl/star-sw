@@ -11,6 +11,8 @@ known by science.
 1998 - 2004, I. Smirnov.
 */
 
+namespace Heed {
+
 class eparticle : public mparticle, public particle_type {
  public:
   /// Constructors
@@ -30,5 +32,7 @@ class eparticle : public mparticle, public particle_type {
   // mrange - distance at which the force should not change much
 
 };
+
+}
 
 #endif

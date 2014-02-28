@@ -4,6 +4,8 @@
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 
+namespace Heed {
+
 double lorgamma_1(double beta) {
   if (beta == 0.0) return 0.0;
   if (beta >= 1.0) {
@@ -32,4 +34,6 @@ double lorbeta(const double momentum, const double mass) {
   x = 1.0 / x;
   x = sqrt(x);
   return x;
+}
+
 }

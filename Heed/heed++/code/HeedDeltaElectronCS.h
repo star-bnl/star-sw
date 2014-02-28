@@ -17,6 +17,8 @@ Cross sections and various parameters necessary for passing delta-electron.
 // than the old variant
 // that is use of sqrt( mean ( square (1-cos(theta)) ) )
 
+namespace Heed {
+
 const long q_angular_mesh = 50;
 
 class HeedDeltaElectronCS : public RegPassivePtr {
@@ -109,5 +111,7 @@ class HeedDeltaElectronCSType {
   HeedDeltaElectronCSType(HeedDeltaElectronCS* md) : hdecs(md) { ; }
 };
 std::ostream& operator<<(std::ostream& file, const HeedDeltaElectronCSType& f);
+
+}
 
 #endif

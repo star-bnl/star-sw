@@ -20,6 +20,8 @@ must be derived from class SensitiveVolume.
 
 */
 
+namespace Heed {
+
 class HeedCondElectron {
  public:
   // position (in the first system from tid system)
@@ -50,5 +52,7 @@ class SensitiveVolume {
   BlkArr<HeedCondElectron> conduction_electron_bank;
   SensitiveVolume() {}
 };
+
+}
 
 #endif

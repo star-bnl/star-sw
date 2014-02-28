@@ -7,6 +7,8 @@ Continuous energy loss of electron similar to GDRELE from GEANT 3.21
 2003,  I. Smirnov
 */
 
+namespace Heed {
+
 double e_cont_enloss(const double ratio_Z_to_A, const double I_eff,
                      const double density, const double Ekin, const double Ecut,
                      const double z);
@@ -19,5 +21,7 @@ double e_cont_enloss(const double ratio_Z_to_A, const double I_eff,
 // To convert it to real values it need to multiply it by real density and
 // by real length.
 //
+
+}
 
 #endif

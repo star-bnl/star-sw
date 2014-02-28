@@ -14,6 +14,8 @@
 2003-2008, I. Smirnov
 */
 
+namespace Heed {
+
 HeedParticle::HeedParticle(manip_absvol* primvol, const point& pt,
                            const vec& vel, vfloat time, particle_def* fpardef,
                            int fs_loss_only, int fs_print_listing)
@@ -188,5 +190,7 @@ void HeedParticle::print(ostream& file, int l) const {
       }
     }
   }
+
+}
 
 }

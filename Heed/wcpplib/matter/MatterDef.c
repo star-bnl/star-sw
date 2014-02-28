@@ -6,6 +6,8 @@
 1998-2004 I. Smirnov
 */
 
+namespace Heed {
+
 void MatterDef::calc_I_eff(void) { I_effh = Z_mean() * 12.0 * eV; }
 
 MatterDef::MatterDef(void) : nameh("none"), notationh("none") {
@@ -162,3 +164,5 @@ std::ostream& operator<<(std::ostream& file, const MatterType& f) {
 }
 
 MatterDef::~MatterDef() { MatterDef::get_logbook().remove(this); }
+
+}

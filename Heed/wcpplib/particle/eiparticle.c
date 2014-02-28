@@ -9,6 +9,8 @@
 1998 - 2002,   I. Smirnov
 */
 
+namespace Heed {
+
 double eiparticle::Bethe_Bloch_en_loss() {
 
   mfunname("double eiparticle::Bethe_Bloch_energy_loss()");
@@ -48,10 +50,13 @@ void eiparticle::physics_after_new_speed() {
     currpos.speed = c_light * lorbeta(curr_gamma_1);
   }
 }
+
 void eiparticle::print(std::ostream& file, int l) const {
   if (l >= 0) {
     Ifile << "eiparticle: s_add_loss=" << s_add_loss
           << " total_loss/keV=" << total_loss / keV << '\n';
     eparticle::print(file, l);
   }
+}
+
 }

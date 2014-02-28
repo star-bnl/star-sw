@@ -34,6 +34,8 @@ parameter giving the total number of atoms in molecule.
 1998-2004 I. Smirnov
 */
 
+namespace Heed {
+
 class GasDef : public MatterDef {
   double pressureh;
   // Number of different molecules
@@ -119,5 +121,7 @@ extern const double mm_rt_st_in_atmosphere;
 double gasdensity(double temperature, double pressure,
                   DynLinArr<PassivePtr<MoleculeDef> > molec,
                   DynLinArr<double> weight_quan_molec, long qmolec);
+
+}
 
 #endif

@@ -1,5 +1,7 @@
 #include "heed++/code/BGMesh.h"
 
+namespace Heed {
+
 BGMesh::BGMesh(double fxmin, double fxmax, long fq)
     : xmin(fxmin), xmax(fxmax), q(fq) {
   x = make_log_mesh(fxmin, fxmax, fq);
@@ -41,4 +43,6 @@ DynLinArr<double> make_log_mesh(double fxmin, double fxmax, long fq) {
     x[n] = xr;
   }
   return x;
+}
+
 }

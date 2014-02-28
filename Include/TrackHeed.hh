@@ -7,18 +7,21 @@
 
 #include "Track.hh"
 
-class HeedParticle;
-class HeedMatterDef;
-class GasDef;
-class MatterDef;
-class AtomPhotoAbsCS;
-class MolecPhotoAbsCS;
-class EnergyMesh;
-class EnTransfCS;
-class ElElasticScat;
-class ElElasticScatLowSigma;
-class PairProd;
-class HeedDeltaElectronCS;
+namespace Heed {
+  class HeedParticle;
+  class HeedMatterDef;
+  class GasDef;
+  class MatterDef;
+  class AtomPhotoAbsCS;
+  class MolecPhotoAbsCS;
+  class EnergyMesh;
+  class EnTransfCS;
+  class ElElasticScat;
+  class ElElasticScatLowSigma;
+  class PairProd;
+  class HeedDeltaElectronCS;
+}
+
 
 namespace Garfield {
 
@@ -104,28 +107,28 @@ class TrackHeed : public Track {
     std::vector<deltaElectron> deltaElectrons;
 
     // Primary particle
-    HeedParticle* particle;
+    Heed::HeedParticle* particle;
 
     // Material properties
-    HeedMatterDef* matter;
-    GasDef* gas;
-    MatterDef* material;
+    Heed::HeedMatterDef* matter;
+    Heed::GasDef* gas;
+    Heed::MatterDef* material;
  
     // Photoabsorption cross-sections
-    AtomPhotoAbsCS** atPacs;
-    MolecPhotoAbsCS** molPacs;
+    Heed::AtomPhotoAbsCS** m_atPacs;
+    Heed::MolecPhotoAbsCS** m_molPacs;
  
     // Energy mesh
     double emin, emax;
     int nEnergyIntervals;
-    EnergyMesh* energyMesh;
+    Heed::EnergyMesh* energyMesh;
  
     // Cross-sections
-    EnTransfCS* transferCs;
-    ElElasticScat* elScat;
-    ElElasticScatLowSigma* lowSigma;
-    PairProd* pairProd;
-    HeedDeltaElectronCS* deltaCs;
+    Heed::EnTransfCS* transferCs;
+    Heed::ElElasticScat* elScat;
+    Heed::ElElasticScatLowSigma* lowSigma;
+    Heed::PairProd* pairProd;
+    Heed::HeedDeltaElectronCS* deltaCs;
 
     HeedChamber* chamber;
     // Bounding box

@@ -15,7 +15,7 @@ of course.
 1998-2004 I. Smirnov
 */
 
-//This is not finished
+namespace Heed {
 
 class VanDerVaals virt_common_base_col {
  private:
@@ -107,5 +107,7 @@ class MoleculeDef : public AtomMixDef {
   macro_copy_total(MoleculeDef);
 };
 std::ostream& operator<<(std::ostream& file, const MoleculeDef& f);
+
+}
 
 #endif

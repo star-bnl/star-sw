@@ -14,6 +14,9 @@
 #define USE_ADJUSTED_W
 #define RANDOM_POIS
 #define DIRECT_LOW_IF_LITTLE
+
+namespace Heed {
+
 const long max_q_low_path_length_for_direct = 5;
 
 int HeedDeltaElectron::s_low_mult_scattering = 1;
@@ -527,21 +530,9 @@ void HeedDeltaElectron::print(std::ostream& file, int l) const {
           << " necessary_energy/eV=" << necessary_energy / eV << '\n';
     Ifile << " parent_particle_number=" << parent_particle_number << '\n';
 
-    /*
-    if(parent_part.get() != NULL)
-    {
-      //Ifile<<"parent particle: particle_number="
-      //   <<parent_part->particle_number<<'\n';
-      Ifile<<"parent particle: ";
-      parent_part->print(file, 1);
-      //Ifile<<"parent particle_number="<<parent_part->particle_number<<'\n';
-    }
-    else
-    {
-      Ifile<<"no parent particle\n";
-    }
-    */
     mparticle::print(file, l - 1);
     indn.n -= 2;
   }
+}
+
 }

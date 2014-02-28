@@ -43,6 +43,8 @@ pointers.
 
 */
 
+namespace Heed {
+
 class spin_def {
  public:
   float total;
@@ -147,9 +149,7 @@ class particle_type {
  public:
   PassivePtr<particle_def> pardef;
   particle_type(void) : pardef(NULL) {}
-  ;
   particle_type(particle_def* f) : pardef(f) {}
-  ;
   particle_type(const char* name, int s = 0);
   // name is notation or name.
   // First the list of notations is checked,
@@ -167,5 +167,7 @@ class particle_type {
   void print_notation(std::ostream& file) const;
 };
 std::ostream& operator<<(std::ostream& file, const particle_type& f);
+
+}
 
 #endif

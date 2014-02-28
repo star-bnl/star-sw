@@ -3,6 +3,8 @@
 #include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 
+namespace Heed {
+
 GasDef::GasDef(void) : MatterDef(), pressureh(0.0), qmolech(0) {}
 
 GasDef::GasDef(const String& fname, const String& fnotation, long fqmolec,
@@ -325,9 +327,8 @@ double gasdensity(double temperature, double pressure,
     sa += weight_quan_molec[n] * molec[n]->A_total();
     sw += weight_quan_molec[n];
   }
-  //double ridberg=8.314 * (joule/(kelvin*mole));  // for debug
   double ridberg = k_Boltzmann * Avogadro;  // more precise
-  //mcout<<"ridberg/(joule/(kelvin*mole)) ="
-  //     << ridberg/(joule/(kelvin*mole))<<'\n';
   return sa * pressure / (ridberg * temperature * sw);
+}
+
 }

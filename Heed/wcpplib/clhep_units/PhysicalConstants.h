@@ -38,9 +38,7 @@
 #define HEP_PHYSICAL_CONSTANTS_H
 
 // adaptation for wcpplib:
-#include "wcpplib/clhep_units/WSystemOfUnits.h"
-//#include "CLHEP/Units/SystemOfUnits.h"
-
+#include "wcpplib/clhep_units/SystemOfUnits.h"
 
 //
 //

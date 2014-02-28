@@ -16,6 +16,8 @@ the energies could be in any units.
 2003, I. Smirnov
 */
 
+namespace Heed {
+
 class PairProd : public RegPassivePtr {
  public:
   PairProd(void) { ; }
@@ -51,10 +53,10 @@ class PairProd : public RegPassivePtr {
   */
   double k;
   double s;
-  //DynLinArr< double > xx;
-  //DynLinArr< double > yy;
   PointsRan pran;
 
 };
+
+}
 
 #endif

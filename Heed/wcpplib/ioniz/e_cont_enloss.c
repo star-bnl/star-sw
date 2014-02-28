@@ -7,10 +7,12 @@
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 #include "wcpplib/util/FunNameStack.h"
 /*
-Continious energy loss of electron similar to GDRELE from GEANT 3.21
+Continuous energy loss of electron similar to GDRELE from GEANT 3.21
 
 2003,  I. Smirnov
 */
+
+namespace Heed {
 
 double e_cont_enloss(double ratio_Z_to_A,  // do not forget:
                      // 1.0/(gram/mole)
@@ -104,11 +106,8 @@ double e_cont_enloss(double ratio_Z_to_A,  // do not forget:
   double xa = C / 4.606;
   double aa = 4.606 * (xa - x0) / pow(x1 - x0, 3.0);
   double x = log(gamma_1 * (gamma + 1.0)) / 4.606;
-  // gamma2 - 1.0
   double del = 0.0;
   if (x > x0) {
-    //mcout<<"x > x0\n";
-    //mcout<<"x="<<x<<" x0="<<x0<<" x1="<<x1<<'\n';
     del = 4.606 * x - C;
     if (x <= x1) del = del + aa * pow(x1 - x, 3.0);
   }
@@ -118,6 +117,7 @@ double e_cont_enloss(double ratio_Z_to_A,  // do not forget:
   dedx = cons * eldens * (log(2.0 * gamma_1 + 4.0) - 2.0 * logI + F - del) /
          betta2;
   if (dedx < 0.0) dedx = 0.0;
-  //Iprintn(mcout, dedx /(keV/cm));
   return dedx;
+}
+
 }

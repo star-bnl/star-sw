@@ -37,6 +37,8 @@ for more detailed descriptions.
 
 */
 
+namespace Heed {
+
 const double Thomas_sum_rule_const =
     2.0 * M_PI * M_PI / (FSCON * ELMAS);  // [1/MeV]
                                           // constant per one electron.
@@ -634,5 +636,7 @@ class PhotoAbsorptionCS
   // convert to another existing mesh
 };
 */
+
+}
 
 #endif

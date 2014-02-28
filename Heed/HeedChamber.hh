@@ -11,17 +11,17 @@ namespace Garfield {
 
 class HeedChamber : 
     public sh_manip_absvol, public box,
-    public EnTransfCSType, public HeedDeltaElectronCSType,
-    public SensitiveVolume {
+    public Heed::EnTransfCSType, public Heed::HeedDeltaElectronCSType,
+    public Heed::SensitiveVolume {
                     
   public:
     HeedChamber(const abssyscoor& fcsys,
                 const double dx, const double dy, const double dz, 
-                const EnTransfCSType etcst,
-                const HeedDeltaElectronCSType hdecst) :
+                const Heed::EnTransfCSType etcst,
+                const Heed::HeedDeltaElectronCSType hdecst) :
         sh_manip_absvol(fcsys),
-        box(dx * cm, dy * cm, dz * cm, "chamber"),
-        EnTransfCSType(etcst), HeedDeltaElectronCSType(hdecst) {
+        box(dx * Heed::cm, dy * Heed::cm, dz * Heed::cm, "chamber"),
+        Heed::EnTransfCSType(etcst), Heed::HeedDeltaElectronCSType(hdecst) {
 
     }
 

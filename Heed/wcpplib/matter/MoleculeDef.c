@@ -8,6 +8,8 @@
 1998-2004 I. Smirnov
 */
 
+namespace Heed {
+
 VanDerVaals::VanDerVaals(double fPk, double fTk) : Pkh(fPk), Tkh(fTk) {
   double R = k_Boltzmann * Avogadro;  // more precise
 
@@ -286,3 +288,5 @@ std::ostream& operator<<(std::ostream& file, const MoleculeDef& f) {
 }
 
 MoleculeDef::~MoleculeDef() { MoleculeDef::get_logbook().remove(this); }
+
+}

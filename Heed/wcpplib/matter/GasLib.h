@@ -43,6 +43,8 @@ The last half of Mendeleev's (Mendel's) table is not totally included yet.
 #include "wcpplib/matter/MoleculeDef.h"
 #include "wcpplib/matter/GasDef.h"
 
+namespace Heed {
+
 extern AtomDef Hydrogen;
 extern AtomDef Helium;
 extern AtomDef Lithium;
@@ -169,5 +171,7 @@ extern MoleculeDef Hg_molec;
 extern MoleculeDef H2S_molec;
 extern MoleculeDef GeH4_molec;
 extern MoleculeDef SiH4_molec;
+
+}
 
 #endif

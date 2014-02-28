@@ -18,6 +18,8 @@
 2003, I. Smirnov
 */
 
+namespace Heed {
+
 double ElElasticScatDataStruct::CS(double theta) {
   if (A[0] == -1.0) return -1.0;
   double s = 0.0;
@@ -687,4 +689,6 @@ ElElasticScatLowSigma::ElElasticScatLowSigma(ElElasticScat* fees,
       check_econd11(coef[nat][ne], <= 0, mcerr);
     }
   }
+}
+
 }

@@ -14,6 +14,8 @@ const double w_cut_ratio = 0.2;
 const double V_ratio = 0.5;
 #endif
 
+namespace Heed {
+
 PairProd::PairProd(const String& file_name, double fwa, double ffactorFano)
     : wa(fwa), factorFano(ffactorFano) {
   mfunnamep("PairProd::PairProd(const String& file_name, double fwa, double "
@@ -103,4 +105,6 @@ void PairProd::print(std::ostream& file, int l) const {
     pran.print(file);
     indn.n -= 2;
   }
+}
+
 }

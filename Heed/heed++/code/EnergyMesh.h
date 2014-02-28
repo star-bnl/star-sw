@@ -34,6 +34,8 @@ The violation of boundaries triggers error and termination.
 
 // Energies in MeV, as everywhere in HEED (unless otherwise specified)
 
+namespace Heed {
+
 const int pqener = 1001;
 // qener-1 is maximal possible quantity of bins
 // In principle it is not clear whether it is better to use DynLinArr instead
@@ -88,5 +90,7 @@ class EnergyMesh : public RegPassivePtr {
 };
 
 DynLinArr<double> make_log_mesh_ec(double emin, double emax, long q);
+
+}
 
 #endif

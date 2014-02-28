@@ -12,6 +12,8 @@
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
 
+namespace Heed {
+
 double cos_theta_two_part(double Ep0, double Ep1, double Mp, double Mt) {
   mfunname("double cos_theta_two_part(...)");
 
@@ -67,4 +69,6 @@ void theta_two_part(double Ep0, double Ep1, double Mp, double Mt,
       theta_t = 0.5 * M_PI;
     }
   }
+}
+
 }

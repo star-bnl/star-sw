@@ -8,6 +8,8 @@
 2003, I. Smirnov
 */
 
+namespace Heed {
+
 HeedDeltaElectronCS::HeedDeltaElectronCS(HeedMatterDef* fhmd,
                                          ElElasticScat* fees,
                                          ElElasticScatLowSigma* feesls,
@@ -381,4 +383,6 @@ std::ostream& operator<<(std::ostream& file, const HeedDeltaElectronCSType& f) {
     f.hdecs->print(file, 1);
   }
   return file;
+}
+
 }

@@ -14,6 +14,8 @@ of course.
 1998-2004 I. Smirnov
 */
 
+namespace Heed {
+
 class MatterDef : public AtomMixDef {
   String nameh;
   String notationh;
@@ -72,5 +74,7 @@ class MatterType {
   MatterType(MatterDef* md) : matdef(md) { ; }
 };
 std::ostream& operator<<(std::ostream& file, const MatterType& f);
+
+}
 
 #endif

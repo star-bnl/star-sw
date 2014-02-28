@@ -3,6 +3,8 @@
 #include "wcpplib/util/FunNameStack.h"
 #include "heed++/code/EnergyMesh.h"
 
+namespace Heed {
+
 EnergyMesh::EnergyMesh(double femin, double femax, long fq)
     : q(fq), emin(femin), emax(femax) {
   mfunname("EnergyMesh::EnergyMesh(double femin, double femax, long fq)");
@@ -156,4 +158,6 @@ DynLinArr<double> make_log_mesh_ec(double emin, double emax, long q) {
     ec[n] = (e1 + e2) * 0.5;
   }
   return ec;
+}
+
 }

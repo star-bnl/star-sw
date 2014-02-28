@@ -4,6 +4,8 @@
 1998 - 2004,   I. Smirnov
 */
 
+namespace Heed {
+
 void field_map(const point& pt, vec& Efield, vec& Hfield, vfloat& mrange);
 // defined anywhere outside
 
@@ -35,4 +37,6 @@ void eparticle::print(std::ostream& file, int l) const {
     file << '\n';
     mparticle::print(file, l);
   }
+}
+
 }

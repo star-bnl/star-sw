@@ -3,6 +3,8 @@
 
 #include "wcpplib/safetl/AbsArr.h"
 
+namespace Heed {
+
 // Here q is the total number of points (not interval).
 // Minimum one interval and two points
 
@@ -21,5 +23,7 @@ class BGMesh : public RegPassivePtr {
 std::ostream& operator<<(std::ostream& file, const BGMesh& bgm);
 
 DynLinArr<double> make_log_mesh(double fxmin, double fxmax, long fq);
+
+}
 
 #endif

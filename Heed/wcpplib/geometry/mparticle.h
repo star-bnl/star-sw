@@ -17,6 +17,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
  */
 
+namespace Heed {
+
 class mparticle : public gparticle {
  public:
   /// Mass (not mass * speed_of_light^2)
@@ -94,5 +96,7 @@ class mparticle : public gparticle {
 };
 
 std::ostream& operator<<(std::ostream& file, const mparticle& f);
+
+}
 
 #endif

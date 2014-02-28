@@ -12,6 +12,8 @@ too little if compared with the particle energy.
 2003, I. Smirnov
 */
 
+namespace Heed {
+
 //#define DEBUG_EnTransfCS  // allows to print additional information
 // and keeps it in class, which makes it bigger
 
@@ -151,5 +153,7 @@ class EnTransfCSType {
   EnTransfCSType(EnTransfCS* md) : etcs(md) { ; }
 };
 std::ostream& operator<<(std::ostream& file, const EnTransfCSType& f);
+
+}
 
 #endif

@@ -2,7 +2,6 @@
 #define HEEDDELTAELECTRON_H
 
 #include "wcpplib/particle/eparticle.h"
-//#include "heed++/code/HeedParticle.h"
 
 /*
 Definition of delta-electron which can be traced
@@ -10,6 +9,8 @@ through the geometry
 
 2003, I. Smirnov
 */
+
+namespace Heed {
 
 extern long last_particle_number;  // for debug print
 // Each particle is identified by particle_number.
@@ -51,13 +52,11 @@ class HeedDeltaElectron : public eparticle {
   // Attention: if 0.0, then the electron is already left.
 
   long parent_particle_number;
-  //PassivePtr< gparticle > parent_part;
 
   // Constructors
   HeedDeltaElectron() : eparticle(), s_print_listing(0) {}
   HeedDeltaElectron(manip_absvol* primvol, const point& pt, const vec& vel,
                     vfloat time, long fparent_particle_number,
-                    //PassivePtr< gparticle > fparent_part
                     int fs_print_listing = 0);
   // Destructor
   virtual ~HeedDeltaElectron() {}
@@ -68,5 +67,7 @@ class HeedDeltaElectron : public eparticle {
   macro_copy_total(HeedDeltaElectron);
 
 };
+
+}
 
 #endif

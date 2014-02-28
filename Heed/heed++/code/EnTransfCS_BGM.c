@@ -1,5 +1,7 @@
 #include "heed++/code/EnTransfCS_BGM.h"
 
+namespace Heed {
+
 EnTransfCS_BGM::EnTransfCS_BGM(double fparticle_mass, PassivePtr<BGMesh> fmesh,
                                int fs_primary_electron, HeedMatterDef* fhmd,
                                long fparticle_charge)
@@ -62,4 +64,6 @@ std::ostream& operator<<(std::ostream& file, const EnTransfCS_BGM_Type& f) {
     f.etcs_bgm->print(file, 1);
   }
   return file;
+}
+
 }

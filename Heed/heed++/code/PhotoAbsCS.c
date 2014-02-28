@@ -17,6 +17,8 @@
 
 //#define ALWAYS_LINEAR_INTERPOLATION  // how the paper was computed
 
+namespace Heed {
+
 int sign_nonlinear_interpolation(double e1, double cs1, double e2, double cs2,
                                  double threshold) {
 #ifdef ALWAYS_LINEAR_INTERPOLATION
@@ -2760,3 +2762,5 @@ PassivePtr< EnergyMesh > fenergy_mesh)");
   *fenergy_mesh = EnergyMesh(en);
 }
 */
+
+}
