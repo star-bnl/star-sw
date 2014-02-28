@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.17 2014/02/28 01:42:02 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.18 2014/02/28 01:42:07 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -235,6 +235,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
             stiDetector->setIsContinuousMedium(false); // XXX:ds: should it be true?
             stiDetector->setIsDiscreteScatterer(true); // false?
+            stiDetector->setGroupId(kPxlId);
             stiDetector->setShape(stiShape);
             stiDetector->setPlacement(pPlacement);
             stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
@@ -326,6 +327,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.18  2014/02/28 01:42:07  smirnovd
+ * Specify detector group id
+ *
  * Revision 1.17  2014/02/28 01:42:02  smirnovd
  * Update comments
  *
