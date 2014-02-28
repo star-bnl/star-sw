@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.9 2014/02/24 22:51:46 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.10 2014/02/28 03:53:42 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -74,6 +74,7 @@ void StvELossTrak::Set(const TGeoMaterial *mate
 
   if (!Same(mate)) {
     fNMats ++; fMate = mate;
+    if (fNMats>1) fMate = 0;
     fA = fMate->GetA();
     fZ = fMate->GetZ();
     fDens= fMate->GetDensity();
