@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.15 2014/02/28 01:41:52 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.16 2014/02/28 01:41:57 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -60,18 +60,12 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFil
 /** Build the pixel detector components. */
 void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 {
-   char name[50];
    LOG_INFO << "StiPxlDetectorBuilder::buildDetectors() -I- Started" << endm;
 
-   unsigned int nRows = 2;
-
    // 2 real rows, but we have detector elements and support elements.
-   setNRows(nRows);
+   setNRows(2);
 
-   if (StiVMCToolKit::GetVMC()) { useVMCGeometry(); return; }
-
-
-   LOG_INFO << " -I- Done" << endl;
+   if (StiVMCToolKit::GetVMC()) { useVMCGeometry(); }
 }
 
 
@@ -342,6 +336,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.16  2014/02/28 01:41:57  smirnovd
+ * Remove excessive code and give consistent style
+ *
  * Revision 1.15  2014/02/28 01:41:52  smirnovd
  * Remove old fake geometry
  *
