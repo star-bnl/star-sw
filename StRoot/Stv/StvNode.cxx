@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.27 2014/02/24 22:49:24 perev Exp $
+ * $Id: StvNode.cxx,v 1.28 2014/02/28 03:50:41 perev Exp $
  *
  * /author Victor Perev
  */
@@ -208,18 +208,18 @@ int StvNode::Check(const char *tit, int dirs) const
 //________________________________________________________________________________
 int StvNode::ResetELoss(const StvNodePars &pars,double len)
 {
-static const double kBigP=3,kBigP2=kBigP*kBigP,kSmaDiff=1e-2;
-static const double kSmaP=0.01,kSmaP2=kSmaP*kSmaP;
+static const double kBigP  =3     ,kBigP2   =kBigP*kBigP       ,kSmaDiff=1e-2;
+static const double kSmaP=0.01, kSmaP2=kSmaP*kSmaP;
 
 static StvELossTrak *el = new StvELossTrak();
 
   if (!len) {len = mELossData.mTotLen;} else {len = fabs(len);}
   double p2 = pars.getP2(); 
-  if (p2>kBigP2) p2=kBigP2;
+  if (p2>kBigP2  ) p2=kBigP2;
   if (p2<kSmaP2) p2=kSmaP2;
   double myP = mELossData.mP;
-  if (fabs(myP*myP-p2)<kSmaDiff*p2) 		return 0;
-  if (!mELossData.mMate) 			return 1;
+  if (fabs(myP*myP-p2)<kSmaDiff*p2)	return 0;
+  if (!mELossData.mMate)			return 1;
 
 //		Save the eloss and p to calculate (dP/P/len)/dP
   double pPrev   = mELossData.mP;
