@@ -41,13 +41,12 @@ StiIstDetectorBuilder::~StiIstDetectorBuilder()
 
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 {
-   int nRows = 1 ;
-   gMessMgr->Info() << "StiIstDetectorBuilder::buildDetectors() - I - Started " << endm;
+   LOG_INFO << "StiIstDetectorBuilder::buildDetectors() - I - Started " << endm;
 
-   setNRows(nRows);
-   mIstDb = (StIstDbMaker *)source.GetMaker("istDb");
+   setNRows(1);
+   mIstDb = (StIstDbMaker*) source.GetMaker("istDb");
 
-   if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
+   if (StiVMCToolKit::GetVMC()) { useVMCGeometry(); }
 }
 
 
