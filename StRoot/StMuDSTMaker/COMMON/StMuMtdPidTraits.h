@@ -12,7 +12,6 @@ public:
     ~StMuMtdPidTraits();
     
     StMtdPidTraits* createMtdPidTraits() const;
-    int       		mtdHit() const;
     
     /// Matching information
     unsigned char    matchFlag() const;
@@ -32,11 +31,8 @@ public:
     float   sigmaMuon() const;
     
     float   probMuon() const;
-    int     MtdHit() const;
     
-    ///
-    void    setMtdHit(int);
-    
+    /// Setters
 	void    setMtdPidTraits(const StMtdPidTraits*);
     
     void    setMatchFlag(unsigned char);
