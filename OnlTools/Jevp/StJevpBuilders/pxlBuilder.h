@@ -87,12 +87,16 @@ public:
   void UpdateLadderCount(int sector_number,int sensor_number,int sensor_count);
   void SetRunLength(int sensor_number,double average_run_length);
   bool UpdateTH1(TH1 *hist,int bin,double value);
+  bool UpdateTH1I(TH1 *hist,int bin,int value);
   bool UpdateTH2(TH1 *hist,int x_bin,int y_bin,double value);
   bool UpdateTH2(const char* name,TH1 *hist,int x_bin,int y_bin,double value);
   bool UpdateTH1(TH1 *hist,int bin,double value,bool scale,int mod_val);
   bool ScaleTH1Bin(TH1 *hist,int bin,int scale_factor);
   void SetLadderMap();
   int IncrementArray(const char* name,int x_bin,int y_bin);
+
+  void UpdateTH2I(TH1 *hist,int x_bin,int y_bin);
+  void UpdateSectorErrorTypeTH2(TH1 *hist, int ret, int sector_number);
 
   //*** Histogram Declarations...
   //*** Use the union to be able to treat in bulk
@@ -115,7 +119,17 @@ public:
       TH1 *GlobalHitMultiplicitySector8;
       TH1 *GlobalHitMultiplicitySector9;
       TH1 *GlobalHitMultiplicitySector10;
-      
+
+      TH1 *ErrorCountSector1;
+      TH1 *ErrorCountSector2;
+      TH1 *ErrorCountSector3;
+      TH1 *ErrorCountSector4;
+      TH1 *ErrorCountSector5;
+      TH1 *ErrorCountSector6;
+      TH1 *ErrorCountSector7;
+      TH1 *ErrorCountSector8;
+      TH1 *ErrorCountSector9;
+      TH1 *ErrorCountSector10;
 
       //Tab 2: Hit Multiplicity
       TH1 *HitMultiplicityPerEvent;
@@ -124,7 +138,7 @@ public:
       TH1 *HitsPerLadderPerEvent;
 
       TH1 *HitCorrelation;
-
+      TH1 *SectorErrorType;
 
       //Tab 2: Hit Maps
       TH1 *SensorHitsInnerLayer;
