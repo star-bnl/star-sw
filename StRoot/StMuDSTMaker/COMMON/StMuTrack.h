@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.48 2014/01/15 22:00:04 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.49 2014/02/28 05:40:09 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -239,6 +239,7 @@ inline Double_t StMuTrack::chi2xy() const {return mChiSqXY;}
 inline Double_t StMuTrack::chi2z() const {return mChiSqZ;}
 inline Double_t StMuTrack::chi2() const {return mChiSqXY;}
 inline Double_t StMuTrack::chi2prob() const {return mChiSqZ;}
+inline void     StMuTrack::setMtdPidTraits(const StMuMtdPidTraits& pid) { mMtdPidTraits = pid; }
 inline StTrackTopologyMap StMuTrack::topologyMap() const {return mTopologyMap;}
 inline short StMuTrack::charge() const {return mHelix.q();}
 inline Double_t StMuTrack::pt() const {return mPt;}
@@ -265,6 +266,9 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.49  2014/02/28 05:40:09  jdb
+ * jdb StMuTrack: Added setMtdPidTraits, StMuMtdPidTraits: removed mtdHit(), MtdHit(), setMtdHit()
+ *
  * Revision 1.48  2014/01/15 22:00:04  fisyak
  * Add method to calculate dE/dx pulls for I70 and Ifit
  *
