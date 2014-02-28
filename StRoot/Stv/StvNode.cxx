@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.28 2014/02/28 03:50:41 perev Exp $
+ * $Id: StvNode.cxx,v 1.29 2014/02/28 21:51:52 perev Exp $
  *
  * /author Victor Perev
  */
@@ -40,7 +40,7 @@ StvNode &StvNode::operator=(const StvNode &from)
 }
 
 //______________________________________________________________________________
-void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir) 	
+void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir)  
 {
   assert(err.mHH>0);
   mPP[dir]=par;mPE[dir]=err;
@@ -48,7 +48,7 @@ void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir)
   mFP[  2]=par;mFE[  2]=err;
 }
 //______________________________________________________________________________
-void StvNode::SetFit(StvNodePars &par,StvFitErrs &err,int dir) 	
+void StvNode::SetFit(StvNodePars &par,StvFitErrs &err,int dir)  
 {
   assert(err.mHH>0);
   mFP[dir]=par;mFE[dir]=err;
@@ -105,25 +105,25 @@ static const char *hhh = "x y z r e ";
     int idx =(txt[i+1]=='[') ? strtol(myopt+iopt+2,&e,10):0;
     
     {//Single letter request 
-           if (ts=="X ") 	{val = fp._x;}
-      else if (ts=="Y ") 	{val = fp._y;}
-      else if (ts=="Z ") 	{val = fp._z;}
-      else if (ts=="R ") 	{val = fp.getRxy();}
-      else if (ts=="Ps")	{val = fp._psi ;}
-      else if (ts=="Tl")	{val = fp._tanl ;}
-      else if (ts=="Pt")	{val = fp.getPt() ;}
-      else if (ts=="E ")	{err[0] = sqrt(fe.mHH); err[1] = sqrt(fe.mZZ);}
-      else if (ts=="Ep")	{err[0] = sqrt(pe.mHH); err[1] = sqrt(pe.mZZ);}
-      else if (ts=="L ")	{val = GetLen();}
-      else if (ts=="H ")	{val = fp._hz;}
-      else if (ts=="P[")	{val = fp[idx];}
-      else if (ts=="E[")	{val = fe[idx];}
-      else if (ts=="Pa")	{cal = (mHitPlane)? mHitPlane->GetPath():"";}
+           if (ts=="X ")        {val = fp._x;}
+      else if (ts=="Y ")        {val = fp._y;}
+      else if (ts=="Z ")        {val = fp._z;}
+      else if (ts=="R ")        {val = fp.getRxy();}
+      else if (ts=="Ps")        {val = fp._psi ;}
+      else if (ts=="Tl")        {val = fp._tanl ;}
+      else if (ts=="Pt")        {val = fp.getPt() ;}
+      else if (ts=="E ")        {err[0] = sqrt(fe.mHH); err[1] = sqrt(fe.mZZ);}
+      else if (ts=="Ep")        {err[0] = sqrt(pe.mHH); err[1] = sqrt(pe.mZZ);}
+      else if (ts=="L ")        {val = GetLen();}
+      else if (ts=="H ")        {val = fp._hz;}
+      else if (ts=="P[")        {val = fp[idx];}
+      else if (ts=="E[")        {val = fe[idx];}
+      else if (ts=="Pa")        {cal = (mHitPlane)? mHitPlane->GetPath():"";}
       if (!cal && val==-999 && err[0]==-999) continue;
       printf("\t%s=",ts.Data());
-      if (cal) 			{ printf("%s ",cal);}
-      if (abs(val+999)>1e-6) 	{ printf("%g",val);}
-      if (err[0]>-999)  	{ printf("HH(%7.2g) ZZ(%7.2g)",err[0],err[1]);}
+      if (cal)                  { printf("%s ",cal);}
+      if (abs(val+999)>1e-6)    { printf("%g",val);}
+      if (err[0]>-999)          { printf("HH(%7.2g) ZZ(%7.2g)",err[0],err[1]);}
     } 
   }//end for i
 
@@ -132,17 +132,17 @@ static const char *hhh = "x y z r e ";
        err[0]=-999;val=-999;
       if (hhh[i]==' ') continue;
       if ((iopt=myOpt.Index(TString(hhh+i,2)))<0) continue;
-      if (hhh[i+1]==' ')  	{//Single letter request 
-        if (hhh[i]=='r')  	{ val = hit->getRxy();}
-        else if (hhh[i]=='e')	{err[0] = sqrt(mHrr[0]); err[1] = sqrt(mHrr[2]);}
-      else 			{val = hit->x()[i];} 
-      if (abs(val+999)>1e-6) 	{printf("\th%c=%g",hhh[i],val);}
-      if (err[0]>-999)  	{printf("\thh=%7.2g zz=%7.2g",err[0],err[1]);}
+      if (hhh[i+1]==' ')        {//Single letter request 
+        if (hhh[i]=='r')        { val = hit->getRxy();}
+        else if (hhh[i]=='e')   {err[0] = sqrt(mHrr[0]); err[1] = sqrt(mHrr[2]);}
+      else                      {val = hit->x()[i];} 
+      if (abs(val+999)>1e-6)    {printf("\th%c=%g",hhh[i],val);}
+      if (err[0]>-999)          {printf("\thh=%7.2g zz=%7.2g",err[0],err[1]);}
       } else if (txt[i+1]=='[') {// now print by index
 
       int idx = strtol(myopt+i+2,&e,10);
       TString tnam(myopt+i,e-(myopt+i)+1);
-      if      (txt[i]=='e') 	{val = mHrr[idx];}
+      if      (txt[i]=='e')     {val = mHrr[idx];}
       printf("\t%s=%g",tnam.Data(),val);
       } 
     }
@@ -161,10 +161,10 @@ void StvNode::SetDer(const StvFitDers &der, int dir)
 //________________________________________________________________________________
 void StvNode::SetHit(StvHit *hit)
 {
-   if (mHit == hit) 	return;
+   if (mHit == hit)     return;
    if (mHit) mHit->setTimesUsed(0);
    mHit = hit;
-   if (!mHit) 		return;
+   if (!mHit)           return;
    assert(!mHit->timesUsed());
    mHit->setTimesUsed(1);
 } 
@@ -181,7 +181,7 @@ void StvNode::UpdateDca()
   double dL = -( P._x*P._cosCA+P._y*P._sinCA)
               /(1+(-P._x*P._sinCA+P._y*P._cosCA)*P._curv);
     if (fabs(dL)<1e-6) return;
-    THelixTrack hlx;		
+    THelixTrack hlx;            
     mFP[2].get(&hlx);
     mFE[2].Get(&hlx);
     dL = hlx.Path(0.,0.);
@@ -208,8 +208,9 @@ int StvNode::Check(const char *tit, int dirs) const
 //________________________________________________________________________________
 int StvNode::ResetELoss(const StvNodePars &pars,double len)
 {
-static const double kBigP  =3     ,kBigP2   =kBigP*kBigP       ,kSmaDiff=1e-2;
-static const double kSmaP=0.01, kSmaP2=kSmaP*kSmaP;
+//??static const double kBigP  =3      , kBigP2    = kBigP*kBigP       ,kSmaDiff=1e-2;
+static const double kSmaP      =0.01,  kSmaP2 = kSmaP*kSmaP;
+static const double kBigP         =3     , kBigP2   = kBigP*kBigP       ,kSmaDiff=1e-4;
 
 static StvELossTrak *el = new StvELossTrak();
 
@@ -218,10 +219,10 @@ static StvELossTrak *el = new StvELossTrak();
   if (p2>kBigP2  ) p2=kBigP2;
   if (p2<kSmaP2) p2=kSmaP2;
   double myP = mELossData.mP;
-  if (fabs(myP*myP-p2)<kSmaDiff*p2)	return 0;
-  if (!mELossData.mMate)			return 1;
-
-//		Save the eloss and p to calculate (dP/P/len)/dP
+  if (fabs(myP*myP-p2)<kSmaDiff*p2) 		return 0;
+  if (!mELossData.mMate)				return 1;
+	
+//              Save the eloss and p to calculate (dP/P/len)/dP
   double pPrev   = mELossData.mP;
   double dEdXBef = mELossData.mELoss/mELossData.mTotLen;
 
