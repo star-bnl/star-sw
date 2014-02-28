@@ -29,12 +29,14 @@ using namespace std;
 
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFile)
-   : StiDetectorBuilder("Ist", active, inputFile), _siMat(0), _hybridMat(0), mIstDb(0)
+   : StiDetectorBuilder("Ist", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mIstDb(0)
 {}
 
 
 StiIstDetectorBuilder::~StiIstDetectorBuilder()
-{ mIstDb = 0; }
+{
+   mIstDb = 0;
+}
 
 
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
@@ -163,8 +165,8 @@ void StiIstDetectorBuilder::useVMCGeometry()
    };
    Material_t map[] = {
       {"AIR", &_gasMat},
-      {"SILICON", &_siMat},
-      {"SILICON", &_hybridMat}
+      {"SILICON", &mSiMaterial},
+      {"SILICON", &mHybridMaterial}
    };
    Int_t M = sizeof(map) / sizeof(Material_t);
 
@@ -182,12 +184,12 @@ void StiIstDetectorBuilder::useVMCGeometry()
                                       PotI));
    }
 
-   double ionization = _siMat->getIonization();
-   StiElossCalculator *ElossCalculator = new StiElossCalculator(_siMat->getZOverA(),
+   double ionization = mSiMaterial->getIonization();
+   StiElossCalculator *ElossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
          ionization * ionization,
-         _siMat->getA(),
-         _siMat->getZ(),
-         _siMat->getDensity());
+         mSiMaterial->getA(),
+         mSiMaterial->getZ(),
+         mSiMaterial->getDensity());
 
 
    for (unsigned int ladderIdx = 0; ladderIdx < nLadders; ++ladderIdx) {
@@ -271,7 +273,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
          if (!p->getGas()) LOG_INFO << "gas not there!" << endm;
 
-         p->setMaterial(_siMat);
+         p->setMaterial(mSiMaterial);
          p->setElossCalculator(ElossCalculator);
          p->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
 

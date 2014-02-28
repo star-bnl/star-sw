@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.13 2014/02/13 02:36:53 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.14 2014/02/28 01:41:46 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -27,6 +27,8 @@
 #include "StPxlDbMaker/StPxlDbMaker.h"
 #include "StPxlUtil/StPxlConstants.h"
 
+using namespace std;
+
 
 /**
  * Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
@@ -51,9 +53,8 @@
    10     4                          0     9
  */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile)
-   : StiDetectorBuilder("Pixel", active, inputFile)
-{
-}
+   : StiDetectorBuilder("Pixel", active, inputFile), mSiMaterial(0), mHybridMaterial(0)
+{}
 
 
 /** Build the pixel detector components. */
@@ -411,6 +412,10 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.14  2014/02/28 01:41:46  smirnovd
+ * Class definition clean-up. Remove unused members, get rid of virtuality becasue there is no need for it. Give consisten
+ * names
+ *
  * Revision 1.13  2014/02/13 02:36:53  smirnovd
  * Minor style issue + exit function before considering inactive material
  *
