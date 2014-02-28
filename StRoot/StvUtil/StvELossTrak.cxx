@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.10 2014/02/28 03:53:42 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.11 2014/02/28 21:53:49 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -60,7 +60,7 @@ void StvELossTrak::Set(double A, double Z,    double dens, double x0
 int StvELossTrak::Same(const TGeoMaterial *mate) const
 {
   if (fMate == mate) 					return 1;
-  if (!fMate       )	 				return 0;
+  if (!fMate       )	 					return 0;
   if (fabs(fA-mate->GetA())> 1e-3*fA) 			return 0;
   if (fabs(fZ-mate->GetZ())> 1e-3*fZ) 			return 0;
   if (fabs(fDens-mate->GetDensity())< 1e-6) 		return 1;
@@ -74,8 +74,7 @@ void StvELossTrak::Set(const TGeoMaterial *mate
 
   if (!Same(mate)) {
     fNMats ++; fMate = mate;
-    if (fNMats>1) fMate = 0;
-    fA = fMate->GetA();
+     fA = fMate->GetA();
     fZ = fMate->GetZ();
     fDens= fMate->GetDensity();
     fX0  = fMate->GetRadLen();
@@ -83,7 +82,8 @@ void StvELossTrak::Set(const TGeoMaterial *mate
 
     Set(fMate->GetA(),fMate->GetZ(),fMate->GetDensity()
        ,fMate->GetRadLen(),p,mass,charge);
-    return;
+      if (fNMats>1) fMate = 0;
+ return;
   }
   Set(0,0,0,0,p,mass,charge);
 }
