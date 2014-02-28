@@ -13,6 +13,8 @@ class LaserReader;
 class tpxBuilder : public JevpPlotSet {
  public:
   int run;
+  int nlasers;
+  double drift_vel;
 
   tpxBuilder(JevpServer *parent=NULL); 
   ~tpxBuilder();

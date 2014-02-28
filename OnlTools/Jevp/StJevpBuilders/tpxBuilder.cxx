@@ -325,6 +325,9 @@ void tpxBuilder::startrun(daqReader *rdr) {
   laserReader->resetAll();
   n_cld = 0;
   n_adc = 0;
+  nlasers = 0;
+  drift_vel = 0;
+  run = rdr->run;
 }
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
@@ -529,8 +532,27 @@ void tpxBuilder::event(daqReader *rdr)
      
       LOG("JEFF","%d vDrift = %lf",rdr->event_number, vDrift);
 
-      if((vDrift > 5.4) && (vDrift < 5.8))
+      if((vDrift > 5.4) && (vDrift < 5.8)) {
+	nlasers++;
 	contents.h102_tpc_drift_vel->Fill(vDrift);
+      }
+
+      drift_vel = contents.h102_tpc_drift_vel->GetMean();
+
+      LOG("JEFF", "run=%d nlasers: %d curr_drift=%lf", run, nlasers, drift_vel);
+      //if(nlasers == 50) {
+      if(1) {    // inneficient!  write all of them :-)
+	FILE *f = fopen("/RTS/conf/handler/.l4_drift_velocity","w");
+	if(f) {
+	  fprintf(f, "%lf", drift_vel);
+	  fclose(f);
+	}
+	f = fopen("/RTS/conf/handler/.l4_drift_velocity_run","w");
+	if(f) {
+	  fprintf(f, "%d", run);
+	  fclose(f);
+	}	
+      }
       
     }
     break;
