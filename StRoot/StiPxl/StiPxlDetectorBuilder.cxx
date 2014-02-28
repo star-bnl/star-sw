@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.16 2014/02/28 01:41:57 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.17 2014/02/28 01:42:02 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -78,19 +78,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    // StRoot/
    //PxlRot = gStPxlDbMaker->GetRotations();
 
-   //check geometry tables
-   /*
-     for(int ii=0;ii<400;++ii){
-     TGeoHMatrix *combP=(TGeoHMatrix *) PxlRot->FindObject(Form("R%03i",ii+1));
-     if(combP){
-     combP->Prnt();
-     }
-     }
-   */
    SetCurrentDetectorBuilder(this);
 
    // Get Materials
-
    struct Material_t {
       const Char_t *name;
       StiMaterial    **p;
@@ -243,8 +233,8 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             //}
             //if(nameP.Contains("PXSI")) {layer=layer+10;}
 
-            stiDetector->setIsContinuousMedium(false);
-            stiDetector->setIsDiscreteScatterer(true);
+            stiDetector->setIsContinuousMedium(false); // XXX:ds: should it be true?
+            stiDetector->setIsDiscreteScatterer(true); // false?
             stiDetector->setShape(stiShape);
             stiDetector->setPlacement(pPlacement);
             stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
@@ -276,7 +266,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
             // Whole bunch of debugging information
             Float_t rad2deg = 180.0 / 3.1415927;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Name               = " << stiDetector->getName()                               << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Name               = " << stiDetector->getName()                               << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm;
@@ -286,11 +276,11 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:sector             = " << iSector                                    << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Ladder             = " << iLadder                                    << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:sensor             = " << iSensor                                    << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:row/sector (ITTF)  = " << ROW << " / " << SECTOR                     << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:pDetector:Active?            = " << stiDetector->isActive()                              << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sector             = " << iSector                                    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Ladder             = " << iLadder                                    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sensor             = " << iSensor                                    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:row/sector (ITTF)  = " << ROW << " / " << SECTOR                     << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Active?            = " << stiDetector->isActive()                              << endm;
          }
       }
    }
@@ -336,6 +326,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.17  2014/02/28 01:42:02  smirnovd
+ * Update comments
+ *
  * Revision 1.16  2014/02/28 01:41:57  smirnovd
  * Remove excessive code and give consistent style
  *
