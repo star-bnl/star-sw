@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.14 2014/02/28 01:41:46 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.15 2014/02/28 01:41:52 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -70,76 +70,6 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 
    if (StiVMCToolKit::GetVMC()) { useVMCGeometry(); return; }
 
-   _gasMat    = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
-   mSiMaterial = add(new StiMaterial("PixelSi",  14.,  28.0855,   2.33,     21.82,   14.*12.*1e-9) );
-   mHybridMaterial = add(new StiMaterial("PixelHyb", 14.,  28.0855,   2.33,     21.82,   14.*12.*1e-9) );
-
-   //Instantiate energy loss detector for si material
-   //const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
-   //double ionization = material->getIonization();
-   double ionization = mSiMaterial->getIonization();
-
-   StiElossCalculator *siElossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
-         ionization * ionization, mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
-   StiPlanarShape *pShape;
-
-   for (unsigned int row = 0; row < nRows; row++) {
-      pShape = new StiPlanarShape;
-
-      if (!pShape) throw runtime_error("StiPxlDetectorBuilder::buildDetectors() - FATAL - pShape==0||ifcShape==0");
-
-      sprintf(name, "Pixel/Layer_%d", row);
-      pShape->setName(name);
-      pShape->setThickness(0.0280); //cm
-      pShape->setHalfDepth( 20. / 2. );
-      pShape->setHalfWidth(1.0);
-
-      for (unsigned int sector = 0; sector < 24; sector++) {
-         StiPlacement *pPlacement = new StiPlacement;
-         pPlacement->setZcenter(0.);
-         double phi = phiForPixelSector(sector) + psiForPixelSector(sector);
-         double r = radiusForPixelSector(sector) * cos(psiForPixelSector(sector)) - 0.0040; // note 40 microns offset
-         double dY = radiusForPixelSector(sector) * sin(psiForPixelSector(sector));
-         /*printf(" sector: %g phi: %g radius: %g normal: %g dY: %g\n",sector
-              ,phi*180/3.1415
-              << " radius:"<<radiusForPixelSector(sector)
-              << " normal r:"<<r
-              << "     dY:"<<dY<<endl;*/
-         pPlacement->setNormalRep(phi, r, dY);
-         pPlacement->setLayerRadius(r);
-         pPlacement->setLayerAngle(phi);
-         pPlacement->setRegion(StiPlacement::kMidRapidity);
-         sprintf(name, "Pixel/Layer_%d/Ladder_%d", row, sector);
-
-         StiDetector *pDetector = _detectorFactory->getInstance();
-         pDetector->setName(name);
-         pDetector->setIsOn(true);
-         pDetector->setIsActive(new StiPxlIsActiveFunctor);
-         pDetector->setIsContinuousMedium(true);
-         pDetector->setIsDiscreteScatterer(false);
-         pDetector->setMaterial(mSiMaterial);
-         pDetector->setGas(_gasMat);
-         pDetector->setGroupId(kPxlId);
-         pDetector->setShape(pShape);
-         pDetector->setPlacement(pPlacement);
-         pDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
-         pDetector->setElossCalculator(siElossCalculator);
-
-         if (sector < 18) {
-            pDetector->setKey(1, 1);
-            pDetector->setKey(2, sector);
-            add(1, sector, pDetector);
-         }
-         else {
-            pDetector->setKey(1, 0);
-            pDetector->setKey(2, sector - 18);
-            add(0, (sector - 18), pDetector);
-         }
-
-         //cout << "Setting detector: " << name << " with key values: "
-         //     << pDetector->getKey(1) << " "  << pDetector->getKey(2) << endl;
-      }
-   }
 
    LOG_INFO << " -I- Done" << endl;
 }
@@ -412,6 +342,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.15  2014/02/28 01:41:52  smirnovd
+ * Remove old fake geometry
+ *
  * Revision 1.14  2014/02/28 01:41:46  smirnovd
  * Class definition clean-up. Remove unused members, get rid of virtuality becasue there is no need for it. Give consisten
  * names
