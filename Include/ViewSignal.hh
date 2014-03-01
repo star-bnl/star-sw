@@ -11,44 +11,41 @@ namespace Garfield {
 
 class Sensor;
 
-class ViewSignal { 
+class ViewSignal {
 
-  public:
-    // Constructor
-    ViewSignal();
-    // Destructor
-    ~ViewSignal();
-   
-    void SetSensor(Sensor* s);
-    void SetCanvas(TCanvas* c);
- 
-    void PlotSignal(const std::string label);
-    TH1D* GetHistogram() {return m_hSignal;}
+ public:
+  // Constructor
+  ViewSignal();
+  // Destructor
+  ~ViewSignal();
 
-    void EnableDebugging()  {m_debug = true;}
-    void DisableDebugging() {m_debug = false;}
+  void SetSensor(Sensor* s);
+  void SetCanvas(TCanvas* c);
 
-  private:
- 
-    std::string m_className;
- 
-    // Options
-    bool m_debug;
-    
-    // Sensor
-    Sensor* m_sensor;
+  void PlotSignal(const std::string label);
+  TH1D* GetHistogram() { return m_hSignal; }
 
-    // Canvas
-    TCanvas* m_canvas;
-    bool m_hasExternalCanvas;
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
-    // Histogram
-    TH1D* m_hSignal;
+ private:
+  std::string m_className;
 
-    // Threshold crossings
-    TGraph* m_gCrossings;
-    
+  // Options
+  bool m_debug;
+
+  // Sensor
+  Sensor* m_sensor;
+
+  // Canvas
+  TCanvas* m_canvas;
+  bool m_hasExternalCanvas;
+
+  // Histogram
+  TH1D* m_hSignal;
+
+  // Threshold crossings
+  TGraph* m_gCrossings;
 };
-
 }
 #endif

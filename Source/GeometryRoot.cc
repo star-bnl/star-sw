@@ -9,18 +9,13 @@
 
 namespace Garfield {
 
-GeometryRoot::GeometryRoot() :
-  theGeoManager(0),
-  nMaterials(0), 
-  debug(false) {
+GeometryRoot::GeometryRoot() : theGeoManager(0), nMaterials(0), debug(false) {
 
   className = "GeometryRoot";
   materials.clear();
-
 }
 
-void
-GeometryRoot::SetGeometry(TGeoManager* geoman) {
+void GeometryRoot::SetGeometry(TGeoManager* geoman) {
 
   if (geoman == 0) {
     std::cerr << "GeometryRoot::SetGeometry:\n";
@@ -31,14 +26,12 @@ GeometryRoot::SetGeometry(TGeoManager* geoman) {
   theGeoManager = geoman;
   materials.clear();
   nMaterials = 0;
-
 }
 
-bool 
-GeometryRoot::GetMedium(const double x, const double y, const double z, 
-                        Medium*& m) {
+bool GeometryRoot::GetMedium(const double x, const double y, const double z,
+                             Medium*& m) {
 
-  m = 0;  
+  m = 0;
   if (theGeoManager == 0) return false;
   theGeoManager->SetCurrentPoint(x, y, z);
   if (theGeoManager->IsOutside()) return false;
@@ -52,11 +45,9 @@ GeometryRoot::GetMedium(const double x, const double y, const double z,
     }
   }
   return false;
-               
 }
 
-int
-GeometryRoot::GetNumberOfMaterials() {
+int GeometryRoot::GetNumberOfMaterials() {
 
   if (theGeoManager == 0) {
     std::cerr << "GeometryRoot::GetNumberOfMaterials:\n";
@@ -64,13 +55,11 @@ GeometryRoot::GetNumberOfMaterials() {
     std::cerr << "    Call SetGeometry first.\n";
     return 0;
   }
-  
-  return theGeoManager->GetListOfMaterials()->GetEntries(); 
 
+  return theGeoManager->GetListOfMaterials()->GetEntries();
 }
 
-TGeoMaterial*
-GeometryRoot::GetMaterial(const int i) {
+TGeoMaterial* GeometryRoot::GetMaterial(const int i) {
 
   if (theGeoManager == 0) {
     std::cerr << "GeometryRoot::GetMaterial:\n";
@@ -80,12 +69,9 @@ GeometryRoot::GetMaterial(const int i) {
   }
 
   return theGeoManager->GetMaterial(i);
-
 }
 
-
-TGeoMaterial*
-GeometryRoot::GetMaterial(const char* name) {
+TGeoMaterial* GeometryRoot::GetMaterial(const char* name) {
 
   if (theGeoManager == 0) {
     std::cerr << "GeometryRoot::GetMaterial:\n";
@@ -95,11 +81,9 @@ GeometryRoot::GetMaterial(const char* name) {
   }
 
   return theGeoManager->GetMaterial(name);
-
 }
 
-void
-GeometryRoot::SetMedium(const int imat, Medium* med) {
+void GeometryRoot::SetMedium(const int imat, Medium* med) {
 
   if (theGeoManager == 0) {
     std::cerr << "GeometryRoot::SetMedium:\n";
@@ -117,7 +101,7 @@ GeometryRoot::SetMedium(const int imat, Medium* med) {
   TGeoMaterial* mat = theGeoManager->GetMaterial(imat);
   if (mat == 0) {
     std::cerr << "GeometryRoot::SetMedium:\n";
-    std::cerr << "    ROOT material with index " << imat 
+    std::cerr << "    ROOT material with index " << imat
               << " does not exist.\n";
     return;
   }
@@ -128,13 +112,12 @@ GeometryRoot::SetMedium(const int imat, Medium* med) {
   for (int i = nMaterials; i--;) {
     if (name == materials[i].name) {
       std::cout << "GeometryRoot::SetMedium:\n";
-      std::cout << "    Current association of material " << name 
-                << " with medium " << med->GetName() 
-                << " is overwritten.\n";
+      std::cout << "    Current association of material " << name
+                << " with medium " << med->GetName() << " is overwritten.\n";
       materials[i].medium = med;
       isNew = false;
       break;
-    } 
+    }
   }
 
   if (isNew) {
@@ -156,11 +139,9 @@ GeometryRoot::SetMedium(const int imat, Medium* med) {
   if (rho1 > 0 && fabs(rho1 - rho2) / rho1 > 0.01) {
     std::cout << "    WARNING: Densities differ by > 1%.\n";
   }
-
 }
 
-void
-GeometryRoot::SetMedium(const char* name, Medium* med) {
+void GeometryRoot::SetMedium(const char* name, Medium* med) {
 
   if (theGeoManager == 0) {
     std::cerr << "GeometryRoot::SetMedium:\n";
@@ -178,18 +159,16 @@ GeometryRoot::SetMedium(const char* name, Medium* med) {
   int imat = theGeoManager->GetMaterialIndex(name);
   if (imat < 0) {
     std::cerr << "GeometryRoot::SetMedium:" << std::endl;
-    std::cerr << "    ROOT material " << name 
-              << " does not exist." << std::endl;
+    std::cerr << "    ROOT material " << name << " does not exist."
+              << std::endl;
     return;
   }
 
   SetMedium(imat, med);
-
 }
 
-bool
-GeometryRoot::GetBoundingBox(double& xmin, double& ymin, double& zmin,
-                             double& xmax, double& ymax, double& zmax) {
+bool GeometryRoot::GetBoundingBox(double& xmin, double& ymin, double& zmin,
+                                  double& xmax, double& ymax, double& zmax) {
 
   if (theGeoManager == 0) return false;
   TGeoBBox* box = (TGeoBBox*)theGeoManager->GetTopVolume()->GetShape();
@@ -199,11 +178,12 @@ GeometryRoot::GetBoundingBox(double& xmin, double& ymin, double& zmin,
   const double ox = box->GetOrigin()[0];
   const double oy = box->GetOrigin()[1];
   const double oz = box->GetOrigin()[2];
-  xmin = ox - dx; xmax = ox + dx;
-  ymin = oy - dy; ymax = oy + dy;
-  zmin = oz - dz; zmax = oz + dz;
+  xmin = ox - dx;
+  xmax = ox + dx;
+  ymin = oy - dy;
+  ymax = oy + dy;
+  zmin = oz - dz;
+  zmax = oz + dz;
   return true;
-
 }
-
 }

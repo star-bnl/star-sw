@@ -7,19 +7,17 @@ namespace Garfield {
 
 class RandomEngine {
 
-  public:
-    // Constructor
-    RandomEngine() {}
-    // Destructor
-    virtual ~RandomEngine() {}
-    
-    // Draw a random number
-    virtual double Draw() = 0;
-    // Initialise the random number generator
-    virtual void   Seed(unsigned int s) = 0;
-  
-};
+ public:
+  // Constructor
+  RandomEngine() {}
+  // Destructor
+  virtual ~RandomEngine() {}
 
+  // Draw a random number
+  virtual double Draw() = 0;
+  // Initialise the random number generator
+  virtual void Seed(unsigned int s) = 0;
+};
 }
 
 #endif

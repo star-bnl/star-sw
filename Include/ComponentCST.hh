@@ -1,7 +1,7 @@
-//Copied and modified ComponentAnsys123.hh
-//This Interface assumes a certain format of the ascii files
-//Please find the tools to extract the field data from CST
-//in the correct way here: http://www.desy.de/~zenker/garfieldpp.html
+// Copied and modified ComponentAnsys123.hh
+// This Interface assumes a certain format of the ascii files
+// Please find the tools to extract the field data from CST
+// in the correct way here: http://www.desy.de/~zenker/garfieldpp.html
 
 #ifndef G_COMPONENT_CST_H
 #define G_COMPONENT_CST_H
@@ -11,75 +11,84 @@
 
 namespace Garfield {
 
-class ComponentCST: public ComponentFieldMap {
+class ComponentCST : public ComponentFieldMap {
 
-  public:
-    // Constructor
-    ComponentCST();
-    // Destructor
-    ~ComponentCST() {}
-    std::vector<double> m_xlines;
-    std::vector<double> m_ylines;
-    std::vector<double> m_zlines;
+ public:
+  // Constructor
+  ComponentCST();
+  // Destructor
+  ~ComponentCST() {}
+  std::vector<double> m_xlines;
+  std::vector<double> m_ylines;
+  std::vector<double> m_zlines;
 
-    bool GetMedium(const double x, const double y, const double z,
-                   Medium*& medium);
-    void ElectricField(const double x, const double y, const double z,
-                       double& ex, double& ey, double& ez,
-                       Medium*& m, int& status);
-    void ElectricField(const double x, const double y, const double z,
-                       double& ex, double& ey, double& ez, double& v,
-                       Medium*& m, int& status);
+  bool GetMedium(const double x, const double y, const double z,
+                 Medium*& medium);
+  void ElectricField(const double x, const double y, const double z, double& ex,
+                     double& ey, double& ez, Medium*& m, int& status);
+  void ElectricField(const double x, const double y, const double z, double& ex,
+                     double& ey, double& ez, double& v, Medium*& m,
+                     int& status);
 
-    void WeightingField(const double x, const double y, const double z,
-                        double& wx, double& wy, double& wz,
-                        const std::string label);
+  void WeightingField(const double x, const double y, const double z,
+                      double& wx, double& wy, double& wz,
+                      const std::string label);
 
-    double WeightingPotential(const double x, const double y, const double z,
-                              const std::string label);
+  double WeightingPotential(const double x, const double y, const double z,
+                            const std::string label);
 
-    bool Initialise(std::string elist = "ELIST.lis",
-                    std::string nlist = "NODELINES.lis",
-                    std::string mplist = "MPLIST.lis",
-                    std::string prnsol = "PRNSOL.lis",
-                    std::string unit = "cm");
-    bool SetWeightingField(std::string prnsol, std::string label);
+  bool Initialise(std::string elist = "ELIST.lis",
+                  std::string nlist = "NODELINES.lis",
+                  std::string mplist = "MPLIST.lis",
+                  std::string prnsol = "PRNSOL.lis", std::string unit = "cm");
+  bool SetWeightingField(std::string prnsol, std::string label);
 
-    // Range
-    bool IsInBoundingBox(const double x, const double y, const double z) {
-      return x >= xMinBoundingBox && x <= xMaxBoundingBox &&
-             y >= yMinBoundingBox && y <= yMaxBoundingBox &&
-             z >= zMinBoundingBox && z <= zMaxBoundingBox;
-    }
+  // Range
+  bool IsInBoundingBox(const double x, const double y, const double z) {
+    return x >= xMinBoundingBox && x <= xMaxBoundingBox &&
+           y >= yMinBoundingBox && y <= yMaxBoundingBox &&
+           z >= zMinBoundingBox && z <= zMaxBoundingBox;
+  }
 
-    void SetRangeZ(const double zmin, const double zmax);
-    /**
-     * Use these functions to disable a certain field component.
-     * Is a field component is disabled ElectricField and WeightingField will return 0 for this component.
-     * This is useful if you want to have calculated global field distortions and you want to
-     * add the field of a GEM. If you would simply add both components the field component
-     * in drift direction would be added twice!
-     */
-    void DisableXField(){disableFieldComponent[0] = true;};
-    void DisableYField(){disableFieldComponent[1] = true;};
-    void DisableZField(){disableFieldComponent[2] = true;};
-  protected:
+  void SetRangeZ(const double zmin, const double zmax);
+  /**
+   * Use these functions to disable a certain field component.
+   * Is a field component is disabled ElectricField and WeightingField will
+   * return 0 for this component.
+   * This is useful if you want to have calculated global field distortions and
+   * you want to
+   * add the field of a GEM. If you would simply add both components the field
+   * component
+   * in drift direction would be added twice!
+   */
+  void DisableXField() {
+    disableFieldComponent[0] = true;
+  };
+  void DisableYField() {
+    disableFieldComponent[1] = true;
+  };
+  void DisableZField() {
+    disableFieldComponent[2] = true;
+  };
 
-    // Verify periodicities
-    void UpdatePeriodicity();
-    int FindElementCube(const double x, const double y, const double z,
-                        double& t1, double& t2, double& t3,
-                        TMatrixD* &jac, std::vector<TMatrixD*> &dN);
-    double GetElementVolume(const int i);
-    void GetAspectRatio(const int i, double& dmin, double& dmax);
-    static bool Greater(const double &a, const double &b) {return (a > b);};
-    void Element2Index(int element,int &i,int &j, int &k);
-    void GetNodesForElement(int element, std::vector<int> &nodes);
+ protected:
+  // Verify periodicities
+  void UpdatePeriodicity();
+  int FindElementCube(const double x, const double y, const double z,
+                      double& t1, double& t2, double& t3, TMatrixD*& jac,
+                      std::vector<TMatrixD*>& dN);
+  double GetElementVolume(const int i);
+  void GetAspectRatio(const int i, double& dmin, double& dmax);
+  static bool Greater(const double& a, const double& b) {
+    return (a > b);
+  };
+  void Element2Index(int element, int& i, int& j, int& k);
+  void GetNodesForElement(int element, std::vector<int>& nodes);
 
-  private:
-    void ClearVec(std::vector<TMatrixD*> &vec);
-    // If true x,y,z fields of this component are disabled (e=0 V/cm).
-    bool disableFieldComponent[3];
+ private:
+  void ClearVec(std::vector<TMatrixD*>& vec);
+  // If true x,y,z fields of this component are disabled (e=0 V/cm).
+  bool disableFieldComponent[3];
 };
 
 struct PolygonInfo {
@@ -91,7 +100,6 @@ struct PolygonInfo {
   int element;
   int material;
 };
-
 }
 
 #endif

@@ -8,21 +8,19 @@
 namespace Garfield {
 
 class MediumConductor : public Medium {
-    
-  public:
-    // Constructor  
-    MediumConductor() : Medium() {
-      className = "MediumConductor";
-      name = "Conductor";
-    }    
-    // Destructor
-    ~MediumConductor() {}
-    
-    void EnableDrift() {}
-    void EnableIonisation() {}
-    
-};
 
+ public:
+  // Constructor
+  MediumConductor() : Medium() {
+    className = "MediumConductor";
+    name = "Conductor";
+  }
+  // Destructor
+  ~MediumConductor() {}
+
+  void EnableDrift() {}
+  void EnableIonisation() {}
+};
 }
 
 #endif

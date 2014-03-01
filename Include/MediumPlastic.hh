@@ -8,21 +8,19 @@
 namespace Garfield {
 
 class MediumPlastic : public Medium {
-    
-  public:
-    // Constructor
-    MediumPlastic() : Medium() {
-      className = "MediumPlastic";
-      name = "Plastic";
-    }
-    // Destructor
-    ~MediumPlastic() {}
-    
-    void EnableDrift() {}
-    void EnableIonisation() {}    
 
+ public:
+  // Constructor
+  MediumPlastic() : Medium() {
+    className = "MediumPlastic";
+    name = "Plastic";
+  }
+  // Destructor
+  ~MediumPlastic() {}
+
+  void EnableDrift() {}
+  void EnableIonisation() {}
 };
-
 }
 
 #endif

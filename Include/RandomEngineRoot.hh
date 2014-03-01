@@ -11,21 +11,19 @@ namespace Garfield {
 
 class RandomEngineRoot : public RandomEngine {
 
-  public:
-    // Constructor
-    RandomEngineRoot();
-    // Destructor    
-    ~RandomEngineRoot();    
-    // Call the random number generator
-    double Draw() {return rng.Rndm();}
-    // Initialise the random number generator
-    void Seed(unsigned int s);
-    
-  private:
-    TRandom3 rng;
-  
-};
+ public:
+  // Constructor
+  RandomEngineRoot();
+  // Destructor
+  ~RandomEngineRoot();
+  // Call the random number generator
+  double Draw() { return rng.Rndm(); }
+  // Initialise the random number generator
+  void Seed(unsigned int s);
 
+ private:
+  TRandom3 rng;
+};
 }
 
 #endif

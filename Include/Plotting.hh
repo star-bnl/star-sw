@@ -6,8 +6,7 @@
 
 namespace Garfield {
 
-  extern PlottingEngineRoot plottingEngine;
-  
+extern PlottingEngineRoot plottingEngine;
 }
 
 #endif

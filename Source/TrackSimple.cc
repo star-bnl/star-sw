@@ -8,40 +8,37 @@
 
 namespace Garfield {
 
-TrackSimple::TrackSimple() :
-  isReady(false),
-  x(0.), y(0.), z(0.), t(0.),
-  dx(0.), dy(0.), dz(1.),
-  mfp(0.04), eloss(2530.), useEqualSpacing(false) {
+TrackSimple::TrackSimple()
+    : isReady(false),
+      x(0.),
+      y(0.),
+      z(0.),
+      t(0.),
+      dx(0.),
+      dy(0.),
+      dz(1.),
+      mfp(0.04),
+      eloss(2530.),
+      useEqualSpacing(false) {
 
   className = "TrackSimple";
-
 }
 
-void
-TrackSimple::SetClusterDensity(const double d) {
+void TrackSimple::SetClusterDensity(const double d) {
 
   if (d < Small) {
     std::cerr << className << "::SetClusterDensity:\n";
     std::cerr << "    Cluster density (number of clusters per cm)"
-              << " must be positive.\n"
-              << std::endl;
+              << " must be positive.\n" << std::endl;
     return;
   }
 
   mfp = 1. / d;
-
 }
 
-double
-TrackSimple::GetClusterDensity() {
+double TrackSimple::GetClusterDensity() { return 1. / mfp; }
 
-  return 1. / mfp;
-
-}
-
-void
-TrackSimple::SetStoppingPower(const double dedx) {
+void TrackSimple::SetStoppingPower(const double dedx) {
 
   if (dedx < Small) {
     std::cerr << className << "::SetStoppingPower:\n";
@@ -51,20 +48,13 @@ TrackSimple::SetStoppingPower(const double dedx) {
   }
 
   eloss = dedx;
-
 }
 
-double
-TrackSimple::GetStoppingPower() {
+double TrackSimple::GetStoppingPower() { return eloss; }
 
-  return eloss;
-
-}
-
-bool
-TrackSimple::NewTrack(const double x0, const double y0, const double z0, 
-                      const double t0,
-                      const double dx0, const double dy0, const double dz0) {
+bool TrackSimple::NewTrack(const double x0, const double y0, const double z0,
+                           const double t0, const double dx0, const double dy0,
+                           const double dz0) {
 
   // Check if a sensor has been defined
   if (sensor == 0) {
@@ -85,7 +75,10 @@ TrackSimple::NewTrack(const double x0, const double y0, const double z0,
 
   isReady = true;
 
-  x = x0; y = y0; z = z0; t = t0;
+  x = x0;
+  y = y0;
+  z = z0;
+  t = t0;
 
   // Normalise the direction
   const double d = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
@@ -98,36 +91,38 @@ TrackSimple::NewTrack(const double x0, const double y0, const double z0,
     dy = sin(phi) * stheta;
     dz = ctheta;
   } else {
-   dx = dx0 / d; dy = dy0 / d; dz = dz0 / d;
+    dx = dx0 / d;
+    dy = dy0 / d;
+    dz = dz0 / d;
   }
   return true;
-
 }
 
-bool
-TrackSimple::GetCluster(double& xcls, double& ycls, double& zcls, 
-                        double& tcls,
-                        int& n, double& e, double& extra) {
+bool TrackSimple::GetCluster(double& xcls, double& ycls, double& zcls,
+                             double& tcls, int& n, double& e, double& extra) {
 
   extra = 0.;
   if (!isReady) return false;
 
   if (useEqualSpacing) {
-    x += dx * mfp; 
+    x += dx * mfp;
     y += dy * mfp;
     z += dz * mfp;
   } else {
-    const double d = - mfp * log(RndmUniformPos());
+    const double d = -mfp * log(RndmUniformPos());
     x += dx * d;
     y += dy * d;
     z += dz * d;
   }
- 
-  xcls = x; ycls = y; zcls = z; tcls = t;
+
+  xcls = x;
+  ycls = y;
+  zcls = z;
+  tcls = t;
 
   n = 1;
   e = eloss * mfp;
- 
+
   Medium* medium;
   if (!sensor->GetMedium(x, y, z, medium)) {
     isReady = false;
@@ -139,7 +134,5 @@ TrackSimple::GetCluster(double& xcls, double& ycls, double& zcls,
   }
 
   return true;
-
 }
-
 }

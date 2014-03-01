@@ -2,7 +2,7 @@
 #include <iomanip>
 
 #include <TCanvas.h>
-#include <TAxis.h> 
+#include <TAxis.h>
 
 #include "PlottingEngineRoot.hh"
 
@@ -10,8 +10,7 @@ namespace Garfield {
 
 PlottingEngineRoot plottingEngine;
 
-PlottingEngineRoot::PlottingEngineRoot() :
-  garfieldStyle(0) {
+PlottingEngineRoot::PlottingEngineRoot() : garfieldStyle(0) {
 
   colorElectronDefault = "orange";
   colorHoleDefault = "red";
@@ -20,7 +19,6 @@ PlottingEngineRoot::PlottingEngineRoot() :
   colorChargedParticleDefault = "dark-green";
   colorLine1Default = "dark-blue";
   colorLine2Default = "olive";
-
 }
 
 PlottingEngineRoot::~PlottingEngineRoot() {
@@ -29,18 +27,16 @@ PlottingEngineRoot::~PlottingEngineRoot() {
     delete garfieldStyle;
     garfieldStyle = 0;
   }
-
 }
 
-void 
-PlottingEngineRoot::SetDefaultStyle() {
+void PlottingEngineRoot::SetDefaultStyle() {
 
   if (garfieldStyle != 0) {
     garfieldStyle->cd();
     return;
   }
   garfieldStyle = new TStyle("Garfield", "Garfield Style");
-  garfieldStyle->Reset(); 
+  garfieldStyle->Reset();
   garfieldStyle->SetFillColor(1);
   garfieldStyle->SetFillStyle(1001);
   garfieldStyle->SetCanvasBorderMode(0);
@@ -67,7 +63,7 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetPadGridX(kTRUE);
   garfieldStyle->SetPadGridY(kTRUE);
 
-// const int font = 132;
+  // const int font = 132;
   const int font = 42;
   garfieldStyle->SetTextFont(font);
   garfieldStyle->SetTitleStyle(0);
@@ -82,7 +78,7 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetTitleSize(0.05, "t");
 
   garfieldStyle->SetStatStyle(0);
-  garfieldStyle->SetStatBorderSize(0);    
+  garfieldStyle->SetStatBorderSize(0);
   garfieldStyle->SetStatColor(0);
   garfieldStyle->SetStatFont(font);
   garfieldStyle->SetStatFontSize(0.03);
@@ -103,19 +99,17 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetAxisColor(kBlack, "X");
   garfieldStyle->SetAxisColor(kBlack, "Y");
   garfieldStyle->SetAxisColor(kBlack, "Z");
-  const double lw = 2; 
+  const double lw = 2;
   garfieldStyle->SetLineWidth(lw);
   garfieldStyle->SetFrameLineWidth(lw);
   garfieldStyle->SetHistLineWidth(lw);
   garfieldStyle->SetFuncWidth(lw);
   garfieldStyle->SetGridWidth(lw);
 
-garfieldStyle->cd();  
-    
+  garfieldStyle->cd();
 }
 
-int
-PlottingEngineRoot::GetRootColorLine1() {
+int PlottingEngineRoot::GetRootColorLine1() {
 
   int rootcol;
   if (!GetRootColor(colorLine1, rootcol)) {
@@ -123,11 +117,9 @@ PlottingEngineRoot::GetRootColorLine1() {
     GetRootColor(colorLine1, rootcol);
   }
   return rootcol;
-
 }
 
-int
-PlottingEngineRoot::GetRootColorLine2() {
+int PlottingEngineRoot::GetRootColorLine2() {
 
   int rootcol;
   if (!GetRootColor(colorLine2, rootcol)) {
@@ -135,11 +127,9 @@ PlottingEngineRoot::GetRootColorLine2() {
     GetRootColor(colorLine2, rootcol);
   }
   return rootcol;
-
 }
 
-int 
-PlottingEngineRoot::GetRootColorElectron() {
+int PlottingEngineRoot::GetRootColorElectron() {
 
   int rootcol;
   if (!GetRootColor(colorElectron, rootcol)) {
@@ -147,11 +137,9 @@ PlottingEngineRoot::GetRootColorElectron() {
     GetRootColor(colorElectron, rootcol);
   }
   return rootcol;
-
 }
 
-int 
-PlottingEngineRoot::GetRootColorHole() {
+int PlottingEngineRoot::GetRootColorHole() {
 
   int rootcol;
   if (!GetRootColor(colorHole, rootcol)) {
@@ -159,11 +147,9 @@ PlottingEngineRoot::GetRootColorHole() {
     GetRootColor(colorHole, rootcol);
   }
   return rootcol;
-
 }
 
-int 
-PlottingEngineRoot::GetRootColorIon() {
+int PlottingEngineRoot::GetRootColorIon() {
 
   int rootcol;
   if (!GetRootColor(colorIon, rootcol)) {
@@ -171,11 +157,9 @@ PlottingEngineRoot::GetRootColorIon() {
     GetRootColor(colorIon, rootcol);
   }
   return rootcol;
-
 }
 
-int
-PlottingEngineRoot::GetRootColorPhoton() {
+int PlottingEngineRoot::GetRootColorPhoton() {
 
   int rootcol;
   if (!GetRootColor(colorPhoton, rootcol)) {
@@ -183,11 +167,9 @@ PlottingEngineRoot::GetRootColorPhoton() {
     GetRootColor(colorPhoton, rootcol);
   }
   return rootcol;
-
 }
 
-int
-PlottingEngineRoot::GetRootColorChargedParticle() {
+int PlottingEngineRoot::GetRootColorChargedParticle() {
 
   int rootcol;
   if (!GetRootColor(colorChargedParticle, rootcol)) {
@@ -195,11 +177,9 @@ PlottingEngineRoot::GetRootColorChargedParticle() {
     GetRootColor(colorChargedParticle, rootcol);
   }
   return rootcol;
-
 }
 
-bool 
-PlottingEngineRoot::GetRootColor(std::string color, int& rootcol) {
+bool PlottingEngineRoot::GetRootColor(std::string color, int& rootcol) {
 
   rootcol = kBlack;
 
@@ -248,7 +228,5 @@ PlottingEngineRoot::GetRootColor(std::string color, int& rootcol) {
     std::cerr << "    Unknown color (" << color << ").\n";
   }
   return false;
-
 }
-
 }

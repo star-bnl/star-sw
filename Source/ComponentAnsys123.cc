@@ -13,13 +13,11 @@ ComponentAnsys123::ComponentAnsys123() : ComponentFieldMap() {
 
   className = "ComponentAnsys123";
   ready = false;
-
 }
 
-bool
-ComponentAnsys123::Initialise(std::string elist,  std::string nlist, 
-                              std::string mplist, std::string prnsol, 
-                              std::string unit) {
+bool ComponentAnsys123::Initialise(std::string elist, std::string nlist,
+                                   std::string mplist, std::string prnsol,
+                                   std::string unit) {
 
   ready = false;
   // Keep track of the success.
@@ -34,8 +32,9 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
     std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Could not open material file " << mplist << " for reading.\n", 
-    std::cerr << "    The file perhaps does not exist.\n";
+    std::cerr << "    Could not open material file " << mplist
+              << " for reading.\n",
+        std::cerr << "    The file perhaps does not exist.\n";
     return false;
   }
 
@@ -46,31 +45,39 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   while (fmplist.getline(line, size, '\n')) {
     il++;
     // Skip page feed
-    if (strcmp(line,"1") == 0) {
-      fmplist.getline(line, size, '\n'); il++;
-      fmplist.getline(line, size, '\n'); il++;
-      fmplist.getline(line, size, '\n'); il++;
-      fmplist.getline(line, size, '\n'); il++;
-      fmplist.getline(line, size, '\n'); il++;
+    if (strcmp(line, "1") == 0) {
+      fmplist.getline(line, size, '\n');
+      il++;
+      fmplist.getline(line, size, '\n');
+      il++;
+      fmplist.getline(line, size, '\n');
+      il++;
+      fmplist.getline(line, size, '\n');
+      il++;
+      fmplist.getline(line, size, '\n');
+      il++;
       continue;
     }
     // Split the line in tokens
     char* token = NULL;
     token = strtok(line, " ");
     // Skip blank lines and headers
-    if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 || 
-        strcmp(token,"TEMPERATURE") == 0 || strcmp(token,"PROPERTY=") == 0 ||
-        int(token[0]) == 10 || int(token[0]) == 13) continue;
-    // Read number of materials, 
+    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 ||
+        strcmp(token, "TEMPERATURE") == 0 || strcmp(token, "PROPERTY=") == 0 ||
+        int(token[0]) == 10 || int(token[0]) == 13)
+      continue;
+    // Read number of materials,
     // ensure it does not exceed the maximum and initialise the list
-    if (strcmp(token,"LIST") == 0) {
-      token = strtok(NULL, " "); token = strtok(NULL, " ");
-      token = strtok(NULL, " "); token = strtok(NULL, " "); 
+    if (strcmp(token, "LIST") == 0) {
+      token = strtok(NULL, " ");
+      token = strtok(NULL, " ");
+      token = strtok(NULL, " ");
+      token = strtok(NULL, " ");
       nMaterials = ReadInteger(token, -1, readerror);
       if (readerror) {
         std::cerr << className << "::Initialise:\n";
-        std::cerr << "    Error reading file " << mplist 
-                  << " (line " << il << ").\n";
+        std::cerr << "    Error reading file " << mplist << " (line " << il
+                  << ").\n";
         fmplist.close();
         ok = false;
         return false;
@@ -88,12 +95,12 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     } else if (strcmp(token, "MATERIAL") == 0) {
       // Version 12 format: read material number
       token = strtok(NULL, " ");
-      token = strtok(NULL, " "); 
+      token = strtok(NULL, " ");
       icurrmat = ReadInteger(token, -1, readerror);
       if (readerror) {
         std::cerr << className << "::Initialise:\n";
-        std::cerr << "    Error reading file " << mplist 
-                  << " (line " << il << ").\n";
+        std::cerr << "    Error reading file " << mplist << " (line " << il
+                  << ").\n";
         fmplist.close();
         ok = false;
         return false;
@@ -102,23 +109,26 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
       // Version 12 format: read property tag and value
       token = strtok(NULL, " ");
       int itype = 0;
-      if (strncmp(token, "PERX",4) == 0) {
+      if (strncmp(token, "PERX", 4) == 0) {
         itype = 1;
-      } else if (strncmp(token, "RSVX",4) == 0) {
+      } else if (strncmp(token, "RSVX", 4) == 0) {
         itype = 2;
       } else {
         std::cerr << className << "::Initialise:\n";
-        std::cerr << "    Found unknown material property flag " << token << "\n";
-        std::cerr << "    on material properties file " << mplist 
-                  << " (line " << il << ").\n";
+        std::cerr << "    Found unknown material property flag " << token
+                  << "\n";
+        std::cerr << "    on material properties file " << mplist << " (line "
+                  << il << ").\n";
         ok = false;
       }
-      fmplist.getline(line, size, '\n'); il++;
+      fmplist.getline(line, size, '\n');
+      il++;
       token = NULL;
       token = strtok(line, " ");
       if (icurrmat < 1 || icurrmat > nMaterials) {
         std::cerr << className << "::Initialise:\n";
-        std::cerr << "    Found out-of-range current material index " << icurrmat << "\n"; 
+        std::cerr << "    Found out-of-range current material index "
+                  << icurrmat << "\n";
         std::cerr << "    in material properties file " << mplist << ".\n";
         ok = false;
         readerror = false;
@@ -129,8 +139,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
       }
       if (readerror) {
         std::cerr << className << "::Initialise:\n";
-        std::cerr << "    Error reading file " << mplist 
-                  << " line " << il << ").\n";
+        std::cerr << "    Error reading file " << mplist << " line " << il
+                  << ").\n";
         fmplist.close();
         ok = false;
         return false;
@@ -146,18 +156,19 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
         itype = 2;
       } else {
         std::cerr << className << "::Initialise:\n";
-        std::cerr << "    Found unknown material property flag " << token << "\n";
-        std::cerr << "    on material properties file " << mplist 
-                  << " (line " << il << ").\n";
+        std::cerr << "    Found unknown material property flag " << token
+                  << "\n";
+        std::cerr << "    on material properties file " << mplist << " (line "
+                  << il << ").\n";
         ok = false;
       }
       token = strtok(NULL, " ");
-      token = strtok(NULL, " "); 
+      token = strtok(NULL, " ");
       int imat = ReadInteger(token, -1, readerror);
       if (readerror) {
         std::cerr << className << "::Initialise:\n";
-        std::cerr << "    Error reading file " << mplist 
-                  << " (line " << il << ").\n";
+        std::cerr << "    Error reading file " << mplist << " (line " << il
+                  << ").\n";
         fmplist.close();
         ok = false;
         return false;
@@ -167,8 +178,10 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
         std::cerr << "    in material properties file " << mplist << ".\n";
         ok = false;
       } else {
-        fmplist.getline(line, size, '\n'); il++;
-        fmplist.getline(line, size, '\n'); il++;
+        fmplist.getline(line, size, '\n');
+        il++;
+        fmplist.getline(line, size, '\n');
+        il++;
         token = NULL;
         token = strtok(line, " ");
         token = strtok(NULL, " ");
@@ -179,8 +192,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
         }
         if (readerror) {
           std::cerr << className << "::Initialise:\n";
-          std::cerr << "    Error reading file " << mplist 
-                    << " (line " << il << ").\n";
+          std::cerr << "    Error reading file " << mplist << " (line " << il
+                    << ").\n";
           fmplist.close();
           ok = false;
           return false;
@@ -188,17 +201,19 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
       }
     }
   }
-  
+
   // Close the file
   fmplist.close();
 
   // Find the lowest epsilon, check for eps = 0, set default drift media
-  double epsmin = -1; int iepsmin = -1;
+  double epsmin = -1;
+  int iepsmin = -1;
   for (int imat = 0; imat < nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Material " << imat << " has been assigned a permittivity\n";
+      std::cerr << "    Material " << imat
+                << " has been assigned a permittivity\n";
       std::cerr << "    equal to zero in " << mplist << ".\n";
       ok = false;
     } else if (iepsmin < 0 || epsmin > materials[imat].eps) {
@@ -206,7 +221,7 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
       iepsmin = imat;
     }
   }
-  
+
   if (iepsmin < 0) {
     std::cerr << className << "::Initialise:\n";
     std::cerr << "    No material with positive permittivity found \n";
@@ -221,25 +236,26 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
       }
     }
   }
-  
+
   // Tell how many lines read
   std::cout << className << "::Initialise:\n";
-  std::cout << "    Read properties of " << nMaterials 
+  std::cout << "    Read properties of " << nMaterials
             << " materials from file " << mplist << ".\n";
   if (debug) PrintMaterials();
-  
+
   // Open the element list
   std::ifstream felist;
   felist.open(elist.c_str(), std::ios::in);
   if (felist.fail()) {
     std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Could not open element file " << elist << " for reading.\n";
+    std::cerr << "    Could not open element file " << elist
+              << " for reading.\n";
     std::cerr << "    The file perhaps does not exist.\n";
     return false;
   }
 
   // Read the element list
-  elements.clear();  
+  elements.clear();
   nElements = 0;
   element newElement;
   int nbackground = 0;
@@ -248,12 +264,17 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   while (felist.getline(line, size, '\n')) {
     il++;
     // Skip page feed
-    if (strcmp(line,"1") == 0) {
-      felist.getline(line, size, '\n'); il++;
-      felist.getline(line, size, '\n'); il++;
-      felist.getline(line, size, '\n'); il++;
-      felist.getline(line, size, '\n'); il++;
-      felist.getline(line, size, '\n'); il++;
+    if (strcmp(line, "1") == 0) {
+      felist.getline(line, size, '\n');
+      il++;
+      felist.getline(line, size, '\n');
+      il++;
+      felist.getline(line, size, '\n');
+      il++;
+      felist.getline(line, size, '\n');
+      il++;
+      felist.getline(line, size, '\n');
+      il++;
       continue;
     }
     // Split the line in tokens
@@ -261,27 +282,35 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     // Split into tokens
     token = strtok(line, " ");
     // Skip blank lines and headers
-    if (!token || strcmp(token, " ") == 0 || 
-        strcmp(token,"\n") == 0 || 
-        int(token[0]) == 10 || 
-        int(token[0]) == 13 ||
-        strcmp(token, "LIST") == 0 || 
-        strcmp(token, "ELEM") == 0) {
+    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 ||
+        int(token[0]) == 10 || int(token[0]) == 13 ||
+        strcmp(token, "LIST") == 0 || strcmp(token, "ELEM") == 0) {
       continue;
     }
     // Read the element
     int ielem = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int imat = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); token = strtok(NULL, " ");
-    token = strtok(NULL, " "); token = strtok(NULL, " ");
-    token = strtok(NULL, " "); int in0 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in1 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in2 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in3 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in4 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in5 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in6 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in7 = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    int imat = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    token = strtok(NULL, " ");
+    token = strtok(NULL, " ");
+    token = strtok(NULL, " ");
+    token = strtok(NULL, " ");
+    int in0 = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    int in1 = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    int in2 = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    int in3 = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    int in4 = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    int in5 = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    int in6 = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    int in7 = ReadInteger(token, -1, readerror);
     if (!felist.getline(line, size, '\n')) {
       std::cerr << className << "::Initialise:\n";
       std::cerr << "    Error reading element " << ielem << ".\n";
@@ -289,64 +318,63 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
       break;
     }
     token = NULL;
-    token = strtok(line, " "); int in8 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in9 = ReadInteger(token, -1, readerror);
-    
+    token = strtok(line, " ");
+    int in8 = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " ");
+    int in9 = ReadInteger(token, -1, readerror);
+
     // Check synchronisation
     if (readerror) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Error reading file " << elist 
-                << " (line " << il << ").\n";
+      std::cerr << "    Error reading file " << elist << " (line " << il
+                << ").\n";
       felist.close();
       ok = false;
       return false;
     } else if (ielem - 1 != nElements + nbackground) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Synchronisation lost on file " << elist 
-                << " (line " << il << ").\n"; 
-      std::cerr << "    Element: " << ielem << " (expected " << nElements 
+      std::cerr << "    Synchronisation lost on file " << elist << " (line "
+                << il << ").\n";
+      std::cerr << "    Element: " << ielem << " (expected " << nElements
                 << "), material: " << imat << ",\n";
-      std::cerr << "    nodes: (" 
-                << in0 << ", " << in1 << ", " << in2 << ", " << in3 << ", "
-                << in4 << ", " << in5 << ", " << in6 << ", " << in7 << ", "
-                << in8 << ", " << in9 << ")\n";
+      std::cerr << "    nodes: (" << in0 << ", " << in1 << ", " << in2 << ", "
+                << in3 << ", " << in4 << ", " << in5 << ", " << in6 << ", "
+                << in7 << ", " << in8 << ", " << in9 << ")\n";
       ok = false;
     }
-    
+
     // Check the material number and ensure that epsilon is non-negative
     if (imat < 1 || imat > nMaterials) {
       std::cerr << className << "::Initialise:\n";
       std::cerr << "    Out-of-range material number on file " << elist
                 << " (line " << il << ").\n";
       std::cerr << "    Element: " << ielem << ", material: " << imat << ",\n";
-      std::cerr << "    nodes: (" 
-                << in0 << ", " << in1 << ", " << in2 << ", " << in3 << ", "
-                << in4 << ", " << in5 << ", " << in6 << ", " << in7 << ", "
-                << in8 << ", " << in9 << ")\n";
+      std::cerr << "    nodes: (" << in0 << ", " << in1 << ", " << in2 << ", "
+                << in3 << ", " << in4 << ", " << in5 << ", " << in6 << ", "
+                << in7 << ", " << in8 << ", " << in9 << ")\n";
       ok = false;
     }
     if (materials[imat - 1].eps < 0) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Element " << ielem 
-                << " in element list " << elist << "\n";
-      std::cerr << "    uses material " << imat 
+      std::cerr << "    Element " << ielem << " in element list " << elist
+                << "\n";
+      std::cerr << "    uses material " << imat
                 << " which has not been assigned\n";
-      std::cerr << "    a positive permittivity in material list "
-                << mplist << ".\n";
+      std::cerr << "    a positive permittivity in material list " << mplist
+                << ".\n";
       ok = false;
     }
 
     // Check the node numbers
-    if (in0 < 1 || in1 < 1 || in2 < 1 || in3 < 1 || in4 < 1 || 
-        in5 < 1 || in6 < 1 || in7 < 1 || in8 < 1 || in9 < 1) {
+    if (in0 < 1 || in1 < 1 || in2 < 1 || in3 < 1 || in4 < 1 || in5 < 1 ||
+        in6 < 1 || in7 < 1 || in8 < 1 || in9 < 1) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Found a node number < 1 on file " << elist 
-                << " (line " << il << ").\n";
+      std::cerr << "    Found a node number < 1 on file " << elist << " (line "
+                << il << ").\n";
       std::cerr << "    Element: " << ielem << ", material: " << imat << ",\n";
-      std::cerr << "    nodes: (" 
-                << in0 << ", " << in1 << ", " << in2 << ", " << in3 << ", "
-                << in4 << ", " << in5 << ", " << in6 << ", " << in7 << ", "
-                << in8 << ", " << in9 << ")\n";
+      std::cerr << "    nodes: (" << in0 << ", " << in1 << ", " << in2 << ", "
+                << in3 << ", " << in4 << ", " << in5 << ", " << in6 << ", "
+                << in7 << ", " << in8 << ", " << in9 << ")\n";
       ok = false;
     }
     if (in0 > highestnode) highestnode = in0;
@@ -364,34 +392,30 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     if (deleteBackground && materials[imat - 1].ohm == 0) {
       nbackground++;
       continue;
-    }    
-    
+    }
+
     // These elements must not be degenerate.
-    if (in0 == in1 || in0 == in2 || in0 == in3 || in0 == in4 || in0 == in5 || 
-        in0 == in6 || in0 == in7 || in0 == in8 || in0 == in9 || 
-        in1 == in2 || in1 == in3 || in1 == in4 || in1 == in5 || 
-        in1 == in6 || in1 == in7 || in1 == in8 || in1 == in9 || 
-        in2 == in3 || in2 == in4 || in2 == in5 || in2 == in6 || 
-        in2 == in7 || in2 == in8 || in2 == in9 || 
-        in3 == in4 || in3 == in5 || in3 == in6 || 
-        in3 == in7 || in3 == in8 || in3 == in9 || 
-        in4 == in5 || in4 == in6 || in4 == in7 || in4 == in8 || in4 == in9 || 
-        in5 == in6 || in5 == in7 || in5 == in8 || in5 == in9 || 
-        in6 == in7 || in6 == in8 || in6 == in9 || 
-        in7 == in8 || in7 == in9 || 
-        in8 == in9) {
+    if (in0 == in1 || in0 == in2 || in0 == in3 || in0 == in4 || in0 == in5 ||
+        in0 == in6 || in0 == in7 || in0 == in8 || in0 == in9 || in1 == in2 ||
+        in1 == in3 || in1 == in4 || in1 == in5 || in1 == in6 || in1 == in7 ||
+        in1 == in8 || in1 == in9 || in2 == in3 || in2 == in4 || in2 == in5 ||
+        in2 == in6 || in2 == in7 || in2 == in8 || in2 == in9 || in3 == in4 ||
+        in3 == in5 || in3 == in6 || in3 == in7 || in3 == in8 || in3 == in9 ||
+        in4 == in5 || in4 == in6 || in4 == in7 || in4 == in8 || in4 == in9 ||
+        in5 == in6 || in5 == in7 || in5 == in8 || in5 == in9 || in6 == in7 ||
+        in6 == in8 || in6 == in9 || in7 == in8 || in7 == in9 || in8 == in9) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Element " << ielem << " of file " 
-                << elist << " is degenerate,\n"; 
+      std::cerr << "    Element " << ielem << " of file " << elist
+                << " is degenerate,\n";
       std::cerr << "    no such elements allowed in this type of map.\n";
       ok = false;
     }
-    
+
     newElement.degenerate = false;
-    
+
     // Store the material reference
     newElement.matmap = imat - 1;
-    
+
     // Node references
     newElement.emap[0] = in0 - 1;
     newElement.emap[1] = in1 - 1;
@@ -405,42 +429,41 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     newElement.emap[9] = in9 - 1;
     elements.push_back(newElement);
     nElements++;
-  }  
+  }
   // Close the file
   felist.close();
-  
+
   // Tell how many lines read.
   std::cout << className << "::Initialise:\n";
-  std::cout << "    Read " << nElements << " elements from file "
-            << elist << ",\n";
+  std::cout << "    Read " << nElements << " elements from file " << elist
+            << ",\n";
   std::cout << "    highest node number: " << highestnode << ",\n";
   std::cout << "    background elements skipped: " << nbackground << "\n";
   // Check the value of the unit
   double funit;
-  if (strcmp(unit.c_str(), "mum") == 0 || 
-      strcmp(unit.c_str(), "micron") == 0 || 
+  if (strcmp(unit.c_str(), "mum") == 0 || strcmp(unit.c_str(), "micron") == 0 ||
       strcmp(unit.c_str(), "micrometer") == 0) {
     funit = 0.0001;
-  } else if (strcmp(unit.c_str(), "mm") == 0 || 
+  } else if (strcmp(unit.c_str(), "mm") == 0 ||
              strcmp(unit.c_str(), "millimeter") == 0) {
     funit = 0.1;
-  } else if (strcmp(unit.c_str(), "cm") == 0 || 
+  } else if (strcmp(unit.c_str(), "cm") == 0 ||
              strcmp(unit.c_str(), "centimeter") == 0) {
     funit = 1.0;
-  } else if (strcmp(unit.c_str(), "m") == 0 || 
+  } else if (strcmp(unit.c_str(), "m") == 0 ||
              strcmp(unit.c_str(), "meter") == 0) {
     funit = 100.0;
   } else {
     std::cerr << className << "::Initialise:\n";
     std::cerr << "    Unknown length unit " << unit << ".\n";
     ok = false;
-    funit = 1.0;    
+    funit = 1.0;
   }
   if (debug) {
     std::cout << className << ":Initialise:\n";
     std::cout << "    Unit scaling factor = " << funit << ".\n";
   }
-                         
+
   // Open the node list
   std::ifstream fnlist;
   fnlist.open(nlist.c_str(), std::ios::in);
@@ -460,31 +483,40 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   while (fnlist.getline(line, size, '\n')) {
     il++;
     // Skip page feed
-    if (strcmp(line,"1") == 0) {
-      fnlist.getline(line, size, '\n'); il++;
-      fnlist.getline(line, size, '\n'); il++;
-      fnlist.getline(line, size, '\n'); il++;
-      fnlist.getline(line, size, '\n'); il++;
-      fnlist.getline(line, size, '\n'); il++;
+    if (strcmp(line, "1") == 0) {
+      fnlist.getline(line, size, '\n');
+      il++;
+      fnlist.getline(line, size, '\n');
+      il++;
+      fnlist.getline(line, size, '\n');
+      il++;
+      fnlist.getline(line, size, '\n');
+      il++;
+      fnlist.getline(line, size, '\n');
+      il++;
       continue;
     }
     // Split the line in tokens
     char* token = NULL;
     token = strtok(line, " ");
     // Skip blank lines and headers
-    if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 || 
+    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 ||
         int(token[0]) == 10 || int(token[0]) == 13 ||
-        strcmp(token,"LIST") == 0 || strcmp(token,"NODE") == 0) continue;
+        strcmp(token, "LIST") == 0 || strcmp(token, "NODE") == 0)
+      continue;
     // Read the element
     int inode = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); double xnode = ReadDouble(token, -1, readerror);
-    token = strtok(NULL, " "); double ynode = ReadDouble(token, -1, readerror);
-    token = strtok(NULL, " "); double znode = ReadDouble(token, -1, readerror);
+    token = strtok(NULL, " ");
+    double xnode = ReadDouble(token, -1, readerror);
+    token = strtok(NULL, " ");
+    double ynode = ReadDouble(token, -1, readerror);
+    token = strtok(NULL, " ");
+    double znode = ReadDouble(token, -1, readerror);
     // Check syntax
     if (readerror) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Error reading file " << nlist 
-                << " (line " << il << ").\n";
+      std::cerr << "    Error reading file " << nlist << " (line " << il
+                << ").\n";
       fnlist.close();
       ok = false;
       return false;
@@ -492,13 +524,13 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     // Check synchronisation
     if (inode - 1 != nNodes) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Synchronisation lost on file " << nlist 
-                << " (line " << il <<").\n";
-      std::cerr << "    Node: " << inode 
-                << " (expected " << nNodes << "), (x,y,z) = (" 
-                << xnode << ", " << ynode << ", " << znode << ")\n";
+      std::cerr << "    Synchronisation lost on file " << nlist << " (line "
+                << il << ").\n";
+      std::cerr << "    Node: " << inode << " (expected " << nNodes
+                << "), (x,y,z) = (" << xnode << ", " << ynode << ", " << znode
+                << ")\n";
       ok = false;
-    }    
+    }
     // Store the point coordinates
     newNode.x = xnode * funit;
     newNode.y = ynode * funit;
@@ -514,7 +546,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   // Check number of nodes
   if (nNodes != highestnode) {
     std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Number of nodes read (" << nNodes << ") on " << nlist << "\n";
+    std::cerr << "    Number of nodes read (" << nNodes << ") on " << nlist
+              << "\n";
     std::cerr << "    does not match element list (" << highestnode << ").\n";
     ok = false;
   }
@@ -524,7 +557,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   fprnsol.open(prnsol.c_str(), std::ios::in);
   if (fprnsol.fail()) {
     std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Could not open potential file " << prnsol << " for reading.\n"; 
+    std::cerr << "    Could not open potential file " << prnsol
+              << " for reading.\n";
     std::cerr << "    The file perhaps does not exist.\n";
     return false;
   }
@@ -535,33 +569,39 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   while (fprnsol.getline(line, size, '\n')) {
     il++;
     // Skip page feed
-    if (strcmp(line,"1") == 0) {
-      fprnsol.getline(line, size, '\n'); il++;
-      fprnsol.getline(line, size, '\n'); il++;
-      fprnsol.getline(line, size, '\n'); il++;
-      fprnsol.getline(line, size, '\n'); il++;
-      fprnsol.getline(line, size, '\n'); il++;
+    if (strcmp(line, "1") == 0) {
+      fprnsol.getline(line, size, '\n');
+      il++;
+      fprnsol.getline(line, size, '\n');
+      il++;
+      fprnsol.getline(line, size, '\n');
+      il++;
+      fprnsol.getline(line, size, '\n');
+      il++;
+      fprnsol.getline(line, size, '\n');
+      il++;
       continue;
-    }    
+    }
     // Split the line in tokens
     char* token = NULL;
     token = strtok(line, " ");
     // Skip blank lines and headers
-    if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 || 
+    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 ||
         int(token[0]) == 10 || int(token[0]) == 13 ||
-        strcmp(token,"PRINT")   == 0 || strcmp(token,"*****")   == 0 ||
-        strcmp(token,"LOAD")    == 0 || strcmp(token,"TIME=")   == 0 ||
-        strcmp(token,"MAXIMUM") == 0 || strcmp(token,"VALUE")   == 0 ||
-        strcmp(token,"NODE")    == 0) continue;
+        strcmp(token, "PRINT") == 0 || strcmp(token, "*****") == 0 ||
+        strcmp(token, "LOAD") == 0 || strcmp(token, "TIME=") == 0 ||
+        strcmp(token, "MAXIMUM") == 0 || strcmp(token, "VALUE") == 0 ||
+        strcmp(token, "NODE") == 0)
+      continue;
     // Read the element
     int inode = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); 
+    token = strtok(NULL, " ");
     double volt = ReadDouble(token, -1, readerror);
     // Check syntax
     if (readerror) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Error reading file " << prnsol 
-                << " (line << " << il << ").\n";
+      std::cerr << "    Error reading file " << prnsol << " (line << " << il
+                << ").\n";
       fprnsol.close();
       ok = false;
       return false;
@@ -570,8 +610,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     if (inode < 1 || inode > highestnode) {
       std::cerr << className << "::Initialise:\n";
       std::cerr << "    Node number " << inode << " out of range\n";
-      std::cerr << "    on potential file " << prnsol 
-                << " (line " << il << ").\n";
+      std::cerr << "    on potential file " << prnsol << " (line " << il
+                << ").\n";
       ok = false;
     } else {
       nodes[inode - 1].v = volt;
@@ -582,13 +622,13 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   fprnsol.close();
   // Tell how many lines read
   std::cout << className << "::Initialise:\n";
-  std::cout << "    Read " << nread << " potentials from file " 
-            << prnsol << ".\n";
+  std::cout << "    Read " << nread << " potentials from file " << prnsol
+            << ".\n";
   // Check number of nodes
   if (nread != nNodes) {
     std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Number of nodes read (" << nread 
-              << ") on potential file " << prnsol << "\n";
+    std::cerr << "    Number of nodes read (" << nread << ") on potential file "
+              << prnsol << "\n";
     std::cerr << "    does not match the node list (" << nNodes << ").\n";
     ok = false;
   }
@@ -598,7 +638,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     ready = true;
   } else {
     std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Field map could not be read and can not be interpolated.\n";
+    std::cerr
+        << "    Field map could not be read and can not be interpolated.\n";
     return false;
   }
 
@@ -611,13 +652,12 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   SetRange();
   UpdatePeriodicity();
   return true;
-
 }
 
-bool
-ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
+bool ComponentAnsys123::SetWeightingField(std::string prnsol,
+                                          std::string label) {
 
- if (!ready) {
+  if (!ready) {
     std::cerr << className << "::SetWeightingField:\n";
     std::cerr << "    No valid field map is present.\n";
     std::cerr << "    Weighting field cannot be added.\n";
@@ -629,13 +669,14 @@ ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
   fprnsol.open(prnsol.c_str(), std::ios::in);
   if (fprnsol.fail()) {
     std::cerr << className << "::SetWeightingField:\n";
-    std::cerr << "    Could not open potential file " << prnsol << " for reading.\n"; 
+    std::cerr << "    Could not open potential file " << prnsol
+              << " for reading.\n";
     std::cerr << "    The file perhaps does not exist.\n";
     return false;
   }
-  
+
   // Check if a weighting field with the same label already exists.
-  int iw = nWeightingFields; 
+  int iw = nWeightingFields;
   for (int i = nWeightingFields; i--;) {
     if (wfields[i] == label) {
       iw = i;
@@ -655,7 +696,7 @@ ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
   }
   wfields[iw] = label;
   wfieldsOk[iw] = false;
-        
+
   // Buffer for reading
   const int size = 100;
   char line[size];
@@ -669,32 +710,39 @@ ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
   while (fprnsol.getline(line, size, '\n')) {
     il++;
     // Skip page feed
-    if (strcmp(line,"1") == 0) {
-      fprnsol.getline(line, size, '\n'); il++;
-      fprnsol.getline(line, size, '\n'); il++;
-      fprnsol.getline(line, size, '\n'); il++;
-      fprnsol.getline(line, size, '\n'); il++;
-      fprnsol.getline(line, size, '\n'); il++;
+    if (strcmp(line, "1") == 0) {
+      fprnsol.getline(line, size, '\n');
+      il++;
+      fprnsol.getline(line, size, '\n');
+      il++;
+      fprnsol.getline(line, size, '\n');
+      il++;
+      fprnsol.getline(line, size, '\n');
+      il++;
+      fprnsol.getline(line, size, '\n');
+      il++;
       continue;
-    }    
+    }
     // Split the line in tokens.
     char* token = NULL;
     token = strtok(line, " ");
     // Skip blank lines and headers.
-    if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 || 
+    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 ||
         int(token[0]) == 10 || int(token[0]) == 13 ||
-        strcmp(token,"PRINT")   == 0 || strcmp(token,"*****")   == 0 ||
-        strcmp(token,"LOAD")    == 0 || strcmp(token,"TIME=")   == 0 ||
-        strcmp(token,"MAXIMUM") == 0 || strcmp(token,"VALUE")   == 0 ||
-        strcmp(token,"NODE")    == 0) continue;
+        strcmp(token, "PRINT") == 0 || strcmp(token, "*****") == 0 ||
+        strcmp(token, "LOAD") == 0 || strcmp(token, "TIME=") == 0 ||
+        strcmp(token, "MAXIMUM") == 0 || strcmp(token, "VALUE") == 0 ||
+        strcmp(token, "NODE") == 0)
+      continue;
     // Read the element.
     int inode = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); double volt = ReadDouble(token, -1, readerror);
+    token = strtok(NULL, " ");
+    double volt = ReadDouble(token, -1, readerror);
     // Check the syntax.
     if (readerror) {
       std::cerr << className << "::SetWeightingField:\n";
-      std::cerr << "    Error reading file " << prnsol.c_str() 
-                << " (line " << il << ").\n";
+      std::cerr << "    Error reading file " << prnsol.c_str() << " (line "
+                << il << ").\n";
       fprnsol.close();
       return false;
     }
@@ -702,8 +750,8 @@ ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
     if (inode < 1 || inode > nNodes) {
       std::cerr << className << "::SetWeightingField:\n";
       std::cerr << "    Node number " << inode << " out of range\n";
-      std::cerr << "    on potential file " << prnsol.c_str() 
-                << " (line " << il << ").\n";
+      std::cerr << "    on potential file " << prnsol.c_str() << " (line " << il
+                << ").\n";
       ok = false;
     } else {
       nodes[inode - 1].w[iw] = volt;
@@ -712,9 +760,9 @@ ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
   }
   // Close the file.
   fprnsol.close();
-  
+
   std::cout << className << "::SetWeightingField:\n";
-  std::cout << "    Read " << nread << " potentials from file " 
+  std::cout << "    Read " << nread << " potentials from file "
             << prnsol.c_str() << ".\n";
   // Check the number of nodes.
   if (nread != nNodes) {
@@ -734,24 +782,20 @@ ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
     return false;
   }
   return true;
-
 }
 
-void 
-ComponentAnsys123::ElectricField(const double x, const double y, const double z,
-                                 double& ex, double& ey, double& ez,
-                                 Medium*& m, int& status) {
+void ComponentAnsys123::ElectricField(const double x, const double y,
+                                      const double z, double& ex, double& ey,
+                                      double& ez, Medium*& m, int& status) {
 
   double v = 0.;
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
-
 }
 
-void 
-ComponentAnsys123::ElectricField(
-                   const double xin, const double yin, const double zin,
-                   double& ex, double& ey, double& ez, double& volt, 
-                   Medium*& m, int& status) {
+void ComponentAnsys123::ElectricField(const double xin, const double yin,
+                                      const double zin, double& ex, double& ey,
+                                      double& ez, double& volt, Medium*& m,
+                                      int& status) {
 
   // Copy the coordinates
   double x = xin, y = yin, z = zin;
@@ -759,15 +803,14 @@ ComponentAnsys123::ElectricField(
   // Map the coordinates onto field map coordinates
   bool xmirrored, ymirrored, zmirrored;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, 
-                 xmirrored, ymirrored, zmirrored,
-                 rcoordinate, rotation);
+  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
+                 rotation);
 
   // Initial values
   ex = ey = ez = volt = 0.;
   status = 0;
   m = 0;
-  
+
   // Do not proceed if not properly initialised.
   if (!ready) {
     status = -10;
@@ -775,7 +818,7 @@ ComponentAnsys123::ElectricField(
     std::cerr << "    Field map not available for interpolation.\n";
     return;
   }
-  
+
   if (warning) {
     std::cerr << className << "::ElectricField:\n";
     std::cerr << "    Warnings have been issued for this field map.\n";
@@ -787,105 +830,101 @@ ComponentAnsys123::ElectricField(
   if (imap < 0) {
     if (debug) {
       std::cerr << className << "::ElectricField:\n";
-      std::cerr << "    Point (" << x << ", " << y << ", " << z 
+      std::cerr << "    Point (" << x << ", " << y << ", " << z
                 << ") not in the mesh.\n";
     }
     status = -6;
     return;
   }
-  
+
   if (debug) {
     std::cout << className << "::ElectricField:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " 
-                                << t3 << ", " << t4 << ") in element " 
-                                << imap << ".\n";
-    std::cout << "      Node             x            y            z            V\n";
+    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
+              << ") in element " << imap << ".\n";
+    std::cout
+        << "      Node             x            y            z            V\n";
     for (int i = 0; i < 10; i++) {
-      printf("      %-5d %12g %12g %12g %12g\n",
-             elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x,
-             nodes[elements[imap].emap[i]].y,
-             nodes[elements[imap].emap[i]].z,
-             nodes[elements[imap].emap[i]].v);
+      printf("      %-5d %12g %12g %12g %12g\n", elements[imap].emap[i],
+             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
+             nodes[elements[imap].emap[i]].z, nodes[elements[imap].emap[i]].v);
     }
   }
 
   // Tetrahedral field
-  volt =
-        nodes[elements[imap].emap[0]].v * t1 * (2 * t1 - 1) + 
-        nodes[elements[imap].emap[1]].v * t2 * (2 * t2 - 1) + 
-        nodes[elements[imap].emap[2]].v * t3 * (2 * t3 - 1) + 
-        nodes[elements[imap].emap[3]].v * t4 * (2 * t4 - 1) + 
-    4 * nodes[elements[imap].emap[4]].v * t1 * t2 +
-    4 * nodes[elements[imap].emap[5]].v * t1 * t3 + 
-    4 * nodes[elements[imap].emap[6]].v * t1 * t4 + 
-    4 * nodes[elements[imap].emap[7]].v * t2 * t3 + 
-    4 * nodes[elements[imap].emap[8]].v * t2 * t4 +  
-    4 * nodes[elements[imap].emap[9]].v * t3 * t4;
-    
-  ex = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][1] + 
-         nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][1] + 
-         nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][1] + 
-         nodes[elements[imap].emap[3]].v * (4 * t4 - 1) * jac[3][1] + 
-         nodes[elements[imap].emap[4]].v * (4 * t2 * jac[0][1] + 
-                                            4 * t1 * jac[1][1]) + 
-         nodes[elements[imap].emap[5]].v * (4 * t3 * jac[0][1] + 
-                                            4 * t1 * jac[2][1]) + 
-         nodes[elements[imap].emap[6]].v * (4 * t4 * jac[0][1] + 
-                                            4 * t1 * jac[3][1]) + 
-         nodes[elements[imap].emap[7]].v * (4 * t3 * jac[1][1] + 
-                                            4 * t2 * jac[2][1]) + 
-         nodes[elements[imap].emap[8]].v * (4 * t4 * jac[1][1] + 
-                                            4 * t2 * jac[3][1]) + 
-         nodes[elements[imap].emap[9]].v * (4 * t4 * jac[2][1] + 
-                                            4 * t3 * jac[3][1])) / det;
-                                               
-  ey = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][2] + 
-         nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][2] + 
-         nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][2] + 
-         nodes[elements[imap].emap[3]].v * (4 * t4 - 1) * jac[3][2] + 
-         nodes[elements[imap].emap[4]].v * (4 * t2 * jac[0][2] + 
-                                            4 * t1 * jac[1][2]) + 
-         nodes[elements[imap].emap[5]].v * (4 * t3 * jac[0][2] + 
-                                            4 * t1 * jac[2][2]) + 
-         nodes[elements[imap].emap[6]].v * (4 * t4 * jac[0][2] + 
-                                            4 * t1 * jac[3][2]) + 
-         nodes[elements[imap].emap[7]].v * (4 * t3 * jac[1][2] +
-                                            4 * t2 * jac[2][2]) + 
-         nodes[elements[imap].emap[8]].v * (4 * t4 * jac[1][2] + 
-                                            4 * t2 * jac[3][2]) + 
-         nodes[elements[imap].emap[9]].v * (4 * t4 * jac[2][2] + 
-                                            4 * t3 * jac[3][2])) / det;
-                                               
-  ez = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][3] + 
-         nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][3] + 
-         nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][3] + 
-         nodes[elements[imap].emap[3]].v * (4 * t4 - 1) * jac[3][3] + 
-         nodes[elements[imap].emap[4]].v * (4 * t2 * jac[0][3] + 
-                                            4 * t1 * jac[1][3]) + 
-         nodes[elements[imap].emap[5]].v * (4 * t3 * jac[0][3] + 
-                                            4 * t1 * jac[2][3]) + 
-         nodes[elements[imap].emap[6]].v * (4 * t4 * jac[0][3] + 
-                                            4 * t1 * jac[3][3]) + 
-         nodes[elements[imap].emap[7]].v * (4 * t3 * jac[1][3] +
-                                            4 * t2 * jac[2][3]) + 
-         nodes[elements[imap].emap[8]].v * (4 * t4 * jac[1][3] + 
-                                            4 * t2 * jac[3][3]) + 
-         nodes[elements[imap].emap[9]].v * (4 * t4 * jac[2][3] + 
-                                            4 * t3 * jac[3][3])) / det;
+  volt = nodes[elements[imap].emap[0]].v * t1 * (2 * t1 - 1) +
+         nodes[elements[imap].emap[1]].v * t2 * (2 * t2 - 1) +
+         nodes[elements[imap].emap[2]].v * t3 * (2 * t3 - 1) +
+         nodes[elements[imap].emap[3]].v * t4 * (2 * t4 - 1) +
+         4 * nodes[elements[imap].emap[4]].v * t1 * t2 +
+         4 * nodes[elements[imap].emap[5]].v * t1 * t3 +
+         4 * nodes[elements[imap].emap[6]].v * t1 * t4 +
+         4 * nodes[elements[imap].emap[7]].v * t2 * t3 +
+         4 * nodes[elements[imap].emap[8]].v * t2 * t4 +
+         4 * nodes[elements[imap].emap[9]].v * t3 * t4;
+
+  ex = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][1] +
+         nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][1] +
+         nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][1] +
+         nodes[elements[imap].emap[3]].v * (4 * t4 - 1) * jac[3][1] +
+         nodes[elements[imap].emap[4]].v *
+             (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
+         nodes[elements[imap].emap[5]].v *
+             (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
+         nodes[elements[imap].emap[6]].v *
+             (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
+         nodes[elements[imap].emap[7]].v *
+             (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
+         nodes[elements[imap].emap[8]].v *
+             (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
+         nodes[elements[imap].emap[9]].v *
+             (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) /
+       det;
+
+  ey = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][2] +
+         nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][2] +
+         nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][2] +
+         nodes[elements[imap].emap[3]].v * (4 * t4 - 1) * jac[3][2] +
+         nodes[elements[imap].emap[4]].v *
+             (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
+         nodes[elements[imap].emap[5]].v *
+             (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
+         nodes[elements[imap].emap[6]].v *
+             (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
+         nodes[elements[imap].emap[7]].v *
+             (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
+         nodes[elements[imap].emap[8]].v *
+             (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
+         nodes[elements[imap].emap[9]].v *
+             (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) /
+       det;
+
+  ez = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][3] +
+         nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][3] +
+         nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][3] +
+         nodes[elements[imap].emap[3]].v * (4 * t4 - 1) * jac[3][3] +
+         nodes[elements[imap].emap[4]].v *
+             (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
+         nodes[elements[imap].emap[5]].v *
+             (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
+         nodes[elements[imap].emap[6]].v *
+             (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
+         nodes[elements[imap].emap[7]].v *
+             (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
+         nodes[elements[imap].emap[8]].v *
+             (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
+         nodes[elements[imap].emap[9]].v *
+             (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) /
+       det;
 
   // Transform field to global coordinates
-  UnmapFields(ex, ey, ez,
-              x, y, z,
-              xmirrored, ymirrored, zmirrored,
-              rcoordinate, rotation);
+  UnmapFields(ex, ey, ez, x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
+              rotation);
 
   // Drift medium?
   if (debug) {
     std::cout << className << "::ElectricField:\n";
-    std::cout << "    Material " << elements[imap].matmap 
-              << ", drift flag " 
+    std::cout << "    Material " << elements[imap].matmap << ", drift flag "
               << materials[elements[imap].matmap].driftmedium << ".\n";
   }
   m = materials[elements[imap].matmap].medium;
@@ -895,21 +934,18 @@ ComponentAnsys123::ElectricField(
       if (m->IsDriftable()) status = 0;
     }
   }
-
 }
 
-void
-ComponentAnsys123::WeightingField(
-                    const double xin, const double yin, const double zin,
-                    double& wx, double& wy, double& wz,
-                    const std::string label) {
+void ComponentAnsys123::WeightingField(const double xin, const double yin,
+                                       const double zin, double& wx, double& wy,
+                                       double& wz, const std::string label) {
 
   // Initial values
   wx = wy = wz = 0;
-  
+
   // Do not proceed if not properly initialised.
   if (!ready) return;
-  
+
   // Look for the label.
   int iw = 0;
   bool found = false;
@@ -932,10 +968,9 @@ ComponentAnsys123::WeightingField(
   // Map the coordinates onto field map coordinates
   bool xmirrored, ymirrored, zmirrored;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z, 
-                 xmirrored, ymirrored, zmirrored,
-                 rcoordinate, rotation);
-  
+  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
+                 rotation);
+
   if (warning) {
     std::cerr << className << "::WeightingField:\n";
     std::cerr << "    Warnings have been issued for this field map.\n";
@@ -946,92 +981,89 @@ ComponentAnsys123::WeightingField(
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   // Check if the point is in the mesh.
   if (imap < 0) return;
-  
+
   if (debug) {
     std::cout << className << "::WeightingField:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << ")\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", " 
-                                << t3 << ", " << t4 << ") in element " 
-                                << imap << "\n",
-    std::cout << "      Node             x            y            z            V\n";
+    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
+              << ") in element " << imap << "\n",
+        std::cout << "      Node             x            y            z       "
+                     "     V\n";
     for (int i = 0; i < 10; i++) {
-      printf("      %-5d %12g %12g %12g %12g\n",
-             elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x,
-             nodes[elements[imap].emap[i]].y,
+      printf("      %-5d %12g %12g %12g %12g\n", elements[imap].emap[i],
+             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
              nodes[elements[imap].emap[i]].z,
              nodes[elements[imap].emap[i]].w[iw]);
     }
   }
 
   // Tetrahedral field
-  wx = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][1] + 
-         nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][1] + 
-         nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][1] + 
-         nodes[elements[imap].emap[3]].w[iw] * (4 * t4 - 1) * jac[3][1] + 
-         nodes[elements[imap].emap[4]].w[iw] * (4 * t2 * jac[0][1] + 
-                                                4 * t1 * jac[1][1]) + 
-         nodes[elements[imap].emap[5]].w[iw] * (4 * t3 * jac[0][1] + 
-                                                4 * t1 * jac[2][1]) + 
-         nodes[elements[imap].emap[6]].w[iw] * (4 * t4 * jac[0][1] + 
-                                                4 * t1 * jac[3][1]) + 
-         nodes[elements[imap].emap[7]].w[iw] * (4 * t3 * jac[1][1] + 
-                                                4 * t2 * jac[2][1]) + 
-         nodes[elements[imap].emap[8]].w[iw] * (4 * t4 * jac[1][1] + 
-                                                4 * t2 * jac[3][1]) + 
-         nodes[elements[imap].emap[9]].w[iw] * (4 * t4 * jac[2][1] + 
-                                                4 * t3 * jac[3][1])) / det;
-                                               
-  wy = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][2] + 
-         nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][2] + 
-         nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][2] + 
-         nodes[elements[imap].emap[3]].w[iw] * (4 * t4 - 1) * jac[3][2] + 
-         nodes[elements[imap].emap[4]].w[iw] * (4 * t2 * jac[0][2] + 
-                                                4 * t1 * jac[1][2]) + 
-         nodes[elements[imap].emap[5]].w[iw] * (4 * t3 * jac[0][2] + 
-                                                4 * t1 * jac[2][2]) + 
-         nodes[elements[imap].emap[6]].w[iw] * (4 * t4 * jac[0][2] + 
-                                                4 * t1 * jac[3][2]) + 
-         nodes[elements[imap].emap[7]].w[iw] * (4 * t3 * jac[1][2] + 
-                                                4 * t2 * jac[2][2]) + 
-         nodes[elements[imap].emap[8]].w[iw] * (4 * t4 * jac[1][2] + 
-                                                4 * t2 * jac[3][2]) + 
-         nodes[elements[imap].emap[9]].w[iw] * (4 * t4 * jac[2][2] + 
-                                                4 * t3 * jac[3][2])) / det;
-                                               
-  wz = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][3] + 
-         nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][3] + 
-         nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][3] + 
-         nodes[elements[imap].emap[3]].w[iw] * (4 * t4 - 1) * jac[3][3] + 
-         nodes[elements[imap].emap[4]].w[iw] * (4 * t2 * jac[0][3] + 
-                                                4 * t1 * jac[1][3]) + 
-         nodes[elements[imap].emap[5]].w[iw] * (4 * t3 * jac[0][3] + 
-                                                4 * t1 * jac[2][3]) + 
-         nodes[elements[imap].emap[6]].w[iw] * (4 * t4 * jac[0][3] + 
-                                                4 * t1 * jac[3][3]) + 
-         nodes[elements[imap].emap[7]].w[iw] * (4 * t3 * jac[1][3] + 
-                                                4 * t2 * jac[2][3]) + 
-         nodes[elements[imap].emap[8]].w[iw] * (4 * t4 * jac[1][3] + 
-                                                4 * t2 * jac[3][3]) + 
-         nodes[elements[imap].emap[9]].w[iw] * (4 * t4 * jac[2][3] + 
-                                                4 * t3 * jac[3][3])) / det;
+  wx = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][1] +
+         nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][1] +
+         nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][1] +
+         nodes[elements[imap].emap[3]].w[iw] * (4 * t4 - 1) * jac[3][1] +
+         nodes[elements[imap].emap[4]].w[iw] *
+             (4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
+         nodes[elements[imap].emap[5]].w[iw] *
+             (4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
+         nodes[elements[imap].emap[6]].w[iw] *
+             (4 * t4 * jac[0][1] + 4 * t1 * jac[3][1]) +
+         nodes[elements[imap].emap[7]].w[iw] *
+             (4 * t3 * jac[1][1] + 4 * t2 * jac[2][1]) +
+         nodes[elements[imap].emap[8]].w[iw] *
+             (4 * t4 * jac[1][1] + 4 * t2 * jac[3][1]) +
+         nodes[elements[imap].emap[9]].w[iw] *
+             (4 * t4 * jac[2][1] + 4 * t3 * jac[3][1])) /
+       det;
+
+  wy = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][2] +
+         nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][2] +
+         nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][2] +
+         nodes[elements[imap].emap[3]].w[iw] * (4 * t4 - 1) * jac[3][2] +
+         nodes[elements[imap].emap[4]].w[iw] *
+             (4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
+         nodes[elements[imap].emap[5]].w[iw] *
+             (4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
+         nodes[elements[imap].emap[6]].w[iw] *
+             (4 * t4 * jac[0][2] + 4 * t1 * jac[3][2]) +
+         nodes[elements[imap].emap[7]].w[iw] *
+             (4 * t3 * jac[1][2] + 4 * t2 * jac[2][2]) +
+         nodes[elements[imap].emap[8]].w[iw] *
+             (4 * t4 * jac[1][2] + 4 * t2 * jac[3][2]) +
+         nodes[elements[imap].emap[9]].w[iw] *
+             (4 * t4 * jac[2][2] + 4 * t3 * jac[3][2])) /
+       det;
+
+  wz = -(nodes[elements[imap].emap[0]].w[iw] * (4 * t1 - 1) * jac[0][3] +
+         nodes[elements[imap].emap[1]].w[iw] * (4 * t2 - 1) * jac[1][3] +
+         nodes[elements[imap].emap[2]].w[iw] * (4 * t3 - 1) * jac[2][3] +
+         nodes[elements[imap].emap[3]].w[iw] * (4 * t4 - 1) * jac[3][3] +
+         nodes[elements[imap].emap[4]].w[iw] *
+             (4 * t2 * jac[0][3] + 4 * t1 * jac[1][3]) +
+         nodes[elements[imap].emap[5]].w[iw] *
+             (4 * t3 * jac[0][3] + 4 * t1 * jac[2][3]) +
+         nodes[elements[imap].emap[6]].w[iw] *
+             (4 * t4 * jac[0][3] + 4 * t1 * jac[3][3]) +
+         nodes[elements[imap].emap[7]].w[iw] *
+             (4 * t3 * jac[1][3] + 4 * t2 * jac[2][3]) +
+         nodes[elements[imap].emap[8]].w[iw] *
+             (4 * t4 * jac[1][3] + 4 * t2 * jac[3][3]) +
+         nodes[elements[imap].emap[9]].w[iw] *
+             (4 * t4 * jac[2][3] + 4 * t3 * jac[3][3])) /
+       det;
 
   // Transform field to global coordinates
-  UnmapFields(wx, wy, wz,
-              x, y, z,
-              xmirrored, ymirrored, zmirrored,
-              rcoordinate, rotation);
-	      
+  UnmapFields(wx, wy, wz, x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
+              rotation);
 }
 
-double
-ComponentAnsys123::WeightingPotential(
-                    const double xin, const double yin, const double zin,
-                    const std::string label) {
+double ComponentAnsys123::WeightingPotential(const double xin, const double yin,
+                                             const double zin,
+                                             const std::string label) {
 
   // Do not proceed if not properly initialised.
   if (!ready) return 0.;
-  
+
   // Look for the label.
   int iw = 0;
   bool found = false;
@@ -1054,55 +1086,49 @@ ComponentAnsys123::WeightingPotential(
   // Map the coordinates onto field map coordinates.
   bool xmirrored, ymirrored, zmirrored;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z,
-                 xmirrored, ymirrored, zmirrored,
-                 rcoordinate, rotation);
+  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
+                 rotation);
 
   if (warning) {
     std::cerr << className << "::WeightingPotential:\n";
     std::cerr << "    Warnings have been issued for this field map.\n";
   }
-   
+
   // Find the element that contains this point.
   double t1, t2, t3, t4, jac[4][4], det;
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) return 0.;
-  
+
   if (debug) {
     std::cerr << className << "::WeightingPotential:\n";
-    std::cout << "    Global: (" << x << ", " << y << ", " << ", " << z << ")\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", "
-                                << t3 << ", " << t4 << ") in element "
-                                << imap << "\n";
-    std::cout << "      Node             x            y            z            V\n";
+    std::cout << "    Global: (" << x << ", " << y << ", "
+              << ", " << z << ")\n";
+    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
+              << ") in element " << imap << "\n";
+    std::cout
+        << "      Node             x            y            z            V\n";
     for (int i = 0; i < 10; i++) {
-      printf("      %-5d %12g %12g %12g %12g\n",
-             elements[imap].emap[i],
-             nodes[elements[imap].emap[i]].x,
-             nodes[elements[imap].emap[i]].y,
-             nodes[elements[imap].emap[i]].z,
-             nodes[elements[imap].emap[i]].v);
+      printf("      %-5d %12g %12g %12g %12g\n", elements[imap].emap[i],
+             nodes[elements[imap].emap[i]].x, nodes[elements[imap].emap[i]].y,
+             nodes[elements[imap].emap[i]].z, nodes[elements[imap].emap[i]].v);
     }
   }
 
   // Tetrahedral field
-  return nodes[elements[imap].emap[0]].w[iw] * t1 * (2 * t1 - 1) + 
-         nodes[elements[imap].emap[1]].w[iw] * t2 * (2 * t2 - 1) + 
-         nodes[elements[imap].emap[2]].w[iw] * t3 * (2 * t3 - 1) + 
-         nodes[elements[imap].emap[3]].w[iw] * t4 * (2 * t4 - 1) + 
-     4 * nodes[elements[imap].emap[4]].w[iw] * t1 * t2 +
-     4 * nodes[elements[imap].emap[5]].w[iw] * t1 * t3 + 
-     4 * nodes[elements[imap].emap[6]].w[iw] * t1 * t4 + 
-     4 * nodes[elements[imap].emap[7]].w[iw] * t2 * t3 + 
-     4 * nodes[elements[imap].emap[8]].w[iw] * t2 * t4 +  
-     4 * nodes[elements[imap].emap[9]].w[iw] * t3 * t4;
-
+  return nodes[elements[imap].emap[0]].w[iw] * t1 * (2 * t1 - 1) +
+         nodes[elements[imap].emap[1]].w[iw] * t2 * (2 * t2 - 1) +
+         nodes[elements[imap].emap[2]].w[iw] * t3 * (2 * t3 - 1) +
+         nodes[elements[imap].emap[3]].w[iw] * t4 * (2 * t4 - 1) +
+         4 * nodes[elements[imap].emap[4]].w[iw] * t1 * t2 +
+         4 * nodes[elements[imap].emap[5]].w[iw] * t1 * t3 +
+         4 * nodes[elements[imap].emap[6]].w[iw] * t1 * t4 +
+         4 * nodes[elements[imap].emap[7]].w[iw] * t2 * t3 +
+         4 * nodes[elements[imap].emap[8]].w[iw] * t2 * t4 +
+         4 * nodes[elements[imap].emap[9]].w[iw] * t3 * t4;
 }
 
-bool 
-ComponentAnsys123::GetMedium(
-            const double xin, const double yin, const double zin, 
-            Medium*& m) {
+bool ComponentAnsys123::GetMedium(const double xin, const double yin,
+                                  const double zin, Medium*& m) {
 
   // Copy the coordinates.
   double x = xin, y = yin, z = zin;
@@ -1110,9 +1136,8 @@ ComponentAnsys123::GetMedium(
   // Map the coordinates onto field map coordinates.
   bool xmirrored, ymirrored, zmirrored;
   double rcoordinate, rotation;
-  MapCoordinates(x, y, z,
-                 xmirrored, ymirrored, zmirrored,
-                 rcoordinate, rotation);
+  MapCoordinates(x, y, z, xmirrored, ymirrored, zmirrored, rcoordinate,
+                 rotation);
 
   // Initial value
   m = 0;
@@ -1134,87 +1159,88 @@ ComponentAnsys123::GetMedium(
   if (imap < 0) {
     if (debug) {
       std::cerr << className << "::GetMedium:\n";
-      std::cerr << "    Point (" 
-                << x << ", " << y << ", " << z << ") not in the mesh.\n";
+      std::cerr << "    Point (" << x << ", " << y << ", " << z
+                << ") not in the mesh.\n";
     }
     return false;
   }
-  if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials ) {
+  if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials) {
     if (debug) {
       std::cerr << className << "::GetMedium:\n";
-      std::cerr << "    Point (" 
-                << x << ", " << y << ", " << z << ")"
+      std::cerr << "    Point (" << x << ", " << y << ", " << z << ")"
                 << " has out of range material number " << imap << ".\n";
     }
     return false;
   }
-  
+
   if (debug) {
     std::cout << className << "::GetMedium:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << ")\n";
-    std::cout << "    Local: (" << t1 << ", " << t2 << ", "
-                                << t3 << ", " << t4 << ") in element "
-                                << imap << "\n";
-    std::cout << "      Node             x            y            z            V\n";
+    std::cout << "    Local: (" << t1 << ", " << t2 << ", " << t3 << ", " << t4
+              << ") in element " << imap << "\n";
+    std::cout
+        << "      Node             x            y            z            V\n";
     for (int ii = 0; ii < 10; ++ii) {
-      printf("      %-5d %12g %12g %12g %12g\n",
-             elements[imap].emap[ii],
-             nodes[elements[imap].emap[ii]].x,
-             nodes[elements[imap].emap[ii]].y,
+      printf("      %-5d %12g %12g %12g %12g\n", elements[imap].emap[ii],
+             nodes[elements[imap].emap[ii]].x, nodes[elements[imap].emap[ii]].y,
              nodes[elements[imap].emap[ii]].z,
              nodes[elements[imap].emap[ii]].v);
     }
   }
-  
+
   // Assign a medium.
   m = materials[elements[imap].matmap].medium;
   if (m == 0) return false;
   return true;
-    
 }
 
-double
-ComponentAnsys123::GetElementVolume(const int i) {
+double ComponentAnsys123::GetElementVolume(const int i) {
 
   if (i < 0 || i >= nElements) return 0.;
-  
-  const double vol = fabs(
-    (nodes[elements[i].emap[3]].x - nodes[elements[i].emap[0]].x) * (
-      (nodes[elements[i].emap[1]].y - nodes[elements[i].emap[0]].y) * 
-      (nodes[elements[i].emap[2]].z - nodes[elements[i].emap[0]].z) - 
-      (nodes[elements[i].emap[2]].y - nodes[elements[i].emap[0]].y) * 
-      (nodes[elements[i].emap[1]].z - nodes[elements[i].emap[0]].z)) +
-    (nodes[elements[i].emap[3]].y - nodes[elements[i].emap[0]].y) * (
-      (nodes[elements[i].emap[1]].z - nodes[elements[i].emap[0]].z) * 
-      (nodes[elements[i].emap[2]].x - nodes[elements[i].emap[0]].x) -
-      (nodes[elements[i].emap[2]].z - nodes[elements[i].emap[0]].z) * 
-      (nodes[elements[i].emap[1]].x - nodes[elements[i].emap[0]].x)) +
-    (nodes[elements[i].emap[3]].z - nodes[elements[i].emap[0]].z) * (
-      (nodes[elements[i].emap[1]].x - nodes[elements[i].emap[0]].x) * 
-      (nodes[elements[i].emap[2]].y - nodes[elements[i].emap[0]].y) -
-      (nodes[elements[i].emap[3]].x - nodes[elements[i].emap[0]].x) * 
-      (nodes[elements[i].emap[1]].y - nodes[elements[i].emap[0]].y))) / 6.;
-  return vol;
 
+  const double vol =
+      fabs((nodes[elements[i].emap[3]].x - nodes[elements[i].emap[0]].x) *
+               ((nodes[elements[i].emap[1]].y - nodes[elements[i].emap[0]].y) *
+                    (nodes[elements[i].emap[2]].z -
+                     nodes[elements[i].emap[0]].z) -
+                (nodes[elements[i].emap[2]].y - nodes[elements[i].emap[0]].y) *
+                    (nodes[elements[i].emap[1]].z -
+                     nodes[elements[i].emap[0]].z)) +
+           (nodes[elements[i].emap[3]].y - nodes[elements[i].emap[0]].y) *
+               ((nodes[elements[i].emap[1]].z - nodes[elements[i].emap[0]].z) *
+                    (nodes[elements[i].emap[2]].x -
+                     nodes[elements[i].emap[0]].x) -
+                (nodes[elements[i].emap[2]].z - nodes[elements[i].emap[0]].z) *
+                    (nodes[elements[i].emap[1]].x -
+                     nodes[elements[i].emap[0]].x)) +
+           (nodes[elements[i].emap[3]].z - nodes[elements[i].emap[0]].z) *
+               ((nodes[elements[i].emap[1]].x - nodes[elements[i].emap[0]].x) *
+                    (nodes[elements[i].emap[2]].y -
+                     nodes[elements[i].emap[0]].y) -
+                (nodes[elements[i].emap[3]].x - nodes[elements[i].emap[0]].x) *
+                    (nodes[elements[i].emap[1]].y -
+                     nodes[elements[i].emap[0]].y))) /
+      6.;
+  return vol;
 }
 
-void
-ComponentAnsys123::GetAspectRatio(const int i, double& dmin, double& dmax) {
+void ComponentAnsys123::GetAspectRatio(const int i, double& dmin,
+                                       double& dmax) {
 
   if (i < 0 || i >= nElements) {
     dmin = dmax = 0.;
     return;
   }
-  
+
   const int np = 4;
   // Loop over all pairs of vertices.
   for (int j = 0; j < np - 1; ++j) {
     for (int k = j + 1; k < np; ++k) {
       // Compute distance.
       const double dist = sqrt(
-        pow(nodes[elements[i].emap[j]].x - nodes[elements[i].emap[k]].x, 2) +
-        pow(nodes[elements[i].emap[j]].y - nodes[elements[i].emap[k]].y, 2) +
-        pow(nodes[elements[i].emap[j]].z - nodes[elements[i].emap[k]].z, 2));
+          pow(nodes[elements[i].emap[j]].x - nodes[elements[i].emap[k]].x, 2) +
+          pow(nodes[elements[i].emap[j]].y - nodes[elements[i].emap[k]].y, 2) +
+          pow(nodes[elements[i].emap[j]].z - nodes[elements[i].emap[k]].z, 2));
       if (k == 1) {
         dmin = dist;
         dmax = dist;
@@ -1224,8 +1250,5 @@ ComponentAnsys123::GetAspectRatio(const int i, double& dmin, double& dmax) {
       }
     }
   }
-  
 }
-
-
 }

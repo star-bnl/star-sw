@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <TAxis.h> 
+#include <TAxis.h>
 
 #include "Plotting.hh"
 #include "Sensor.hh"
@@ -8,13 +8,16 @@
 
 namespace Garfield {
 
-ViewSignal::ViewSignal() :
-  m_className("ViewSignal"), m_debug(false), m_sensor(0),
-  m_canvas(0), m_hasExternalCanvas(false),
-  m_hSignal(0), m_gCrossings(0) {
+ViewSignal::ViewSignal()
+    : m_className("ViewSignal"),
+      m_debug(false),
+      m_sensor(0),
+      m_canvas(0),
+      m_hasExternalCanvas(false),
+      m_hSignal(0),
+      m_gCrossings(0) {
 
   plottingEngine.SetDefaultStyle();
-
 }
 
 ViewSignal::~ViewSignal() {
@@ -22,11 +25,9 @@ ViewSignal::~ViewSignal() {
   if (!m_hasExternalCanvas && m_canvas != 0) delete m_canvas;
   if (m_hSignal != 0) delete m_hSignal;
   if (m_gCrossings != 0) delete m_gCrossings;
-
 }
 
-void
-ViewSignal::SetSensor(Sensor* s) {
+void ViewSignal::SetSensor(Sensor* s) {
 
   if (s == 0) {
     std::cerr << m_className << "::SetSensor:\n";
@@ -34,12 +35,10 @@ ViewSignal::SetSensor(Sensor* s) {
     return;
   }
 
-  m_sensor = s; 
-
+  m_sensor = s;
 }
 
-void
-ViewSignal::SetCanvas(TCanvas* c) {
+void ViewSignal::SetCanvas(TCanvas* c) {
 
   if (c == 0) return;
   if (!m_hasExternalCanvas && m_canvas != 0) {
@@ -48,18 +47,16 @@ ViewSignal::SetCanvas(TCanvas* c) {
   }
   m_canvas = c;
   m_hasExternalCanvas = true;
-
 }
 
-void 
-ViewSignal::PlotSignal(const std::string label) {
+void ViewSignal::PlotSignal(const std::string label) {
 
   if (m_sensor == 0) {
     std::cerr << m_className << "::PlotSignal:\n";
     std::cerr << "    Sensor is not defined.\n";
     return;
   }
-  
+
   // Setup the canvas
   if (m_canvas == 0) {
     m_canvas = new TCanvas();
@@ -71,7 +68,7 @@ ViewSignal::PlotSignal(const std::string label) {
   int nBins;
   double t0, dt;
   m_sensor->GetTimeWindow(t0, dt, nBins);
-  
+
   if (m_hSignal != 0) {
     delete m_hSignal;
     m_hSignal = 0;
@@ -80,8 +77,8 @@ ViewSignal::PlotSignal(const std::string label) {
   m_hSignal->SetLineColor(plottingEngine.GetRootColorLine1());
   m_hSignal->GetXaxis()->SetTitle("time [ns]");
   m_hSignal->GetYaxis()->SetTitle("signal [fC / ns]");
-  
-  double sig = 0.;  
+
+  double sig = 0.;
   for (int i = nBins; i--;) {
     sig = m_sensor->GetSignal(label, i);
     m_hSignal->SetBinContent(i + 1, sig);
@@ -105,12 +102,10 @@ ViewSignal::PlotSignal(const std::string label) {
         m_gCrossings->SetPoint(i, time, level);
       }
     }
-  }   
-  
+  }
+
   m_hSignal->Draw("");
   if (nCrossings > 0) m_gCrossings->Draw("psame");
   m_canvas->Update();
-
 }
-
 }

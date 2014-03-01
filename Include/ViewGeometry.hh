@@ -15,67 +15,62 @@ class Solid;
 
 class ViewGeometryShape : public TObject {
 
-  public:
-    ViewGeometryShape();
-    ~ViewGeometryShape() {}
+ public:
+  ViewGeometryShape();
+  ~ViewGeometryShape() {}
 
-    void SetSolid(Solid* s);    
-    void SetColor(int col);
-    TBuffer3D& GetBuffer(bool& ok);
+  void SetSolid(Solid* s);
+  void SetColor(int col);
+  TBuffer3D& GetBuffer(bool& ok);
 
-  private:
-    std::string className;
+ private:
+  std::string className;
 
-    Solid* solid;
-    int col;
-
+  Solid* solid;
+  int col;
 };
 
-class ViewGeometry : public TObject { 
+class ViewGeometry : public TObject {
 
   RQ_OBJECT("ViewGeometry")
-  
-  public:
-    // Constructor
-    ViewGeometry();
-    // Destructor
-    ~ViewGeometry();
-    
-    void SetCanvas(TCanvas* c);
-    
-    void SetGeometry(GeometrySimple* geo);
-    
-    void Plot();
 
-    void EnableDebugging()  {debug = true;}
-    void DisableDebugging() {debug = false;}
+ public:
+  // Constructor
+  ViewGeometry();
+  // Destructor
+  ~ViewGeometry();
 
-  protected:
+  void SetCanvas(TCanvas* c);
 
-    void Draw(Option_t* option);
-    void Paint(Option_t* option);
+  void SetGeometry(GeometrySimple* geo);
 
-  private:
-   
-    std::string className;
- 
-    // Options
-    bool debug;
+  void Plot();
 
-    std::string label;
+  void EnableDebugging() { debug = true; }
+  void DisableDebugging() { debug = false; }
 
-    // Canvas
-    TCanvas* canvas;
-    bool hasExternalCanvas;
-    
-    GeometrySimple* geometry;
+ protected:
+  void Draw(Option_t* option);
+  void Paint(Option_t* option);
 
-    int nShapes;
-    std::vector<ViewGeometryShape> shapes;
+ private:
+  std::string className;
 
-    ClassDef(ViewGeometry, 0);
+  // Options
+  bool debug;
 
+  std::string label;
+
+  // Canvas
+  TCanvas* canvas;
+  bool hasExternalCanvas;
+
+  GeometrySimple* geometry;
+
+  int nShapes;
+  std::vector<ViewGeometryShape> shapes;
+
+  ClassDef(ViewGeometry, 0);
 };
-
 }
 #endif

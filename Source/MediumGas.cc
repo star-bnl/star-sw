@@ -11,20 +11,28 @@
 #include "OpticalData.hh"
 #include "FundamentalConstants.hh"
 
-namespace Garfield{
+namespace Garfield {
 
-MediumGas::MediumGas() :
-  Medium(),
-  usePenning(false), rPenningGlobal(0.), lambdaPenningGlobal(0.),
-  pressureTable(pressure), temperatureTable(temperature), 
-  hasExcRates(false), hasIonRates(false),
-  nExcListElements(0), nIonListElements(0),
-  extrLowExcRates(0), extrHighExcRates(1),
-  extrLowIonRates(0), extrHighIonRates(1),
-  intpExcRates(2), intpIonRates(2) {
+MediumGas::MediumGas()
+    : Medium(),
+      usePenning(false),
+      rPenningGlobal(0.),
+      lambdaPenningGlobal(0.),
+      pressureTable(pressure),
+      temperatureTable(temperature),
+      hasExcRates(false),
+      hasIonRates(false),
+      nExcListElements(0),
+      nIonListElements(0),
+      extrLowExcRates(0),
+      extrHighExcRates(1),
+      extrLowIonRates(0),
+      extrHighIonRates(1),
+      intpExcRates(2),
+      intpIonRates(2) {
 
   className = "MediumGas";
-  
+
   // Default gas mixture: pure argon
   for (int i = nMaxGases; i--;) {
     fraction[i] = 0.;
@@ -51,16 +59,14 @@ MediumGas::MediumGas() :
   tabElectronTownsend.clear();
   excitationList.clear();
   ionisationList.clear();
-
 }
 
-bool 
-MediumGas::SetComposition(const std::string gas1, const double f1, 
-                          const std::string gas2, const double f2,
-                          const std::string gas3, const double f3,
-                          const std::string gas4, const double f4,
-                          const std::string gas5, const double f5, 
-                          const std::string gas6, const double f6) {
+bool MediumGas::SetComposition(const std::string gas1, const double f1,
+                               const std::string gas2, const double f2,
+                               const std::string gas3, const double f3,
+                               const std::string gas4, const double f4,
+                               const std::string gas5, const double f5,
+                               const std::string gas6, const double f6) {
 
   // Make a backup copy of the gas composition.
   std::string gasOld[nMaxGases];
@@ -70,61 +76,73 @@ MediumGas::SetComposition(const std::string gas1, const double f1,
   int nComponentsOld = nComponents;
 
   int i = 0;
-  
+
   // Find the gas name corresponding to the input string.
   std::string gasname = "";
   if (f1 > 0. && GetGasName(gas1, gasname)) {
-    gas[i] = gasname; fraction[i] = f1; ++i;
+    gas[i] = gasname;
+    fraction[i] = f1;
+    ++i;
   }
   if (f2 > 0. && GetGasName(gas2, gasname)) {
-    gas[i] = gasname; fraction[i] = f2; ++i;
+    gas[i] = gasname;
+    fraction[i] = f2;
+    ++i;
   }
   if (f3 > 0. && GetGasName(gas3, gasname)) {
-    gas[i] = gasname; fraction[i] = f3; ++i;
+    gas[i] = gasname;
+    fraction[i] = f3;
+    ++i;
   }
   if (f4 > 0. && GetGasName(gas4, gasname)) {
-    gas[i] = gasname; fraction[i] = f4; ++i;
+    gas[i] = gasname;
+    fraction[i] = f4;
+    ++i;
   }
   if (f5 > 0. && GetGasName(gas5, gasname)) {
-    gas[i] = gasname; fraction[i] = f5; ++i;
+    gas[i] = gasname;
+    fraction[i] = f5;
+    ++i;
   }
   if (f6 > 0. && GetGasName(gas6, gasname)) {
-    gas[i] = gasname; fraction[i] = f6; ++i;
-  }    
-  
-  // Check if at least one valid ingredient was specified. 
+    gas[i] = gasname;
+    fraction[i] = f6;
+    ++i;
+  }
+
+  // Check if at least one valid ingredient was specified.
   if (i <= 0) {
     std::cerr << className << "::SetComposition:\n";
     std::cerr << "    Error setting the composition.\n";
     std::cerr << "    No valid ingredients were specified.\n";
     return false;
   }
-  
+
   nComponents = i;
   // Establish the name.
-  name = "";  
+  name = "";
   double sum = 0.;
   for (i = 0; i < nComponents; ++i) {
-    if (i > 0) name += "/";  
+    if (i > 0) name += "/";
     name += gas[i];
     sum += fraction[i];
   }
   // Normalise the fractions to one.
-  for (i = 0; i < nMaxGases; ++i) { 
+  for (i = 0; i < nMaxGases; ++i) {
     if (i < nComponents) {
       fraction[i] /= sum;
     } else {
       fraction[i] = 0.;
     }
   }
-  
+
   // Set the atomic weight and number
   for (i = 0; i < nComponents; ++i) {
     atWeight[i] = 0.;
     atNum[i] = 0.;
     GetGasInfo(gas[i], atWeight[i], atNum[i]);
   }
-  
+
   // Print the composition.
   std::cout << className << "::SetComposition:\n";
   std::cout << "    " << name;
@@ -136,10 +154,10 @@ MediumGas::SetComposition(const std::string gas1, const double f1,
     std::cout << ")";
   }
   std::cout << "\n";
-  
+
   // Force a recalculation of the collision rates.
   isChanged = true;
-  
+
   // Copy the previous Penning transfer parameters.
   double rPenningGasOld[nMaxGases];
   double lambdaPenningGasOld[nMaxGases];
@@ -154,10 +172,10 @@ MediumGas::SetComposition(const std::string gas1, const double f1,
       if (gas[i] == gasOld[j]) {
         if (rPenningGasOld[j] > 0.) {
           rPenningGas[i] = rPenningGasOld[j];
-	  lambdaPenningGas[i] = lambdaPenningGasOld[i];
+          lambdaPenningGas[i] = lambdaPenningGasOld[i];
           std::cout << className << "::SetComposition:\n";
-          std::cout << "    Adopting Penning transfer parameters for " 
-                    << gas[i] << " from previous mixture.\n";
+          std::cout << "    Adopting Penning transfer parameters for " << gas[i]
+                    << " from previous mixture.\n";
           std::cout << "      r      = " << rPenningGas[i] << "\n";
           std::cout << "      lambda = " << lambdaPenningGas[i] << " cm\n";
         }
@@ -165,28 +183,28 @@ MediumGas::SetComposition(const std::string gas1, const double f1,
     }
   }
   return true;
-  
 }
 
-void 
-MediumGas::GetComposition(std::string& gas1, double& f1,
-                          std::string& gas2, double& f2,
-                          std::string& gas3, double& f3,
-                          std::string& gas4, double& f4,
-                          std::string& gas5, double& f5,
-                          std::string& gas6, double& f6) {
+void MediumGas::GetComposition(std::string& gas1, double& f1, std::string& gas2,
+                               double& f2, std::string& gas3, double& f3,
+                               std::string& gas4, double& f4, std::string& gas5,
+                               double& f5, std::string& gas6, double& f6) {
 
-  gas1 = gas[0]; f1 = fraction[0];
-  gas2 = gas[1]; f2 = fraction[1];
-  gas3 = gas[2]; f3 = fraction[2];
-  gas4 = gas[3]; f4 = fraction[3];
-  gas5 = gas[4]; f5 = fraction[4];
-  gas6 = gas[5]; f6 = fraction[5];
-
+  gas1 = gas[0];
+  f1 = fraction[0];
+  gas2 = gas[1];
+  f2 = fraction[1];
+  gas3 = gas[2];
+  f3 = fraction[2];
+  gas4 = gas[3];
+  f4 = fraction[3];
+  gas5 = gas[4];
+  f5 = fraction[4];
+  gas6 = gas[5];
+  f6 = fraction[5];
 }
 
-void
-MediumGas::GetComponent(const int i, std::string& label, double& f) {
+void MediumGas::GetComponent(const int i, std::string& label, double& f) {
 
   if (i < 0 || i >= nComponents) {
     std::cerr << className << "::GetComponent:\n";
@@ -195,54 +213,43 @@ MediumGas::GetComponent(const int i, std::string& label, double& f) {
     f = 0.;
     return;
   }
-  
+
   label = gas[i];
   f = fraction[i];
-
 }
 
-void
-MediumGas::SetAtomicNumber(const double z) {
+void MediumGas::SetAtomicNumber(const double z) {
 
   std::cerr << className << "::SetAtomicNumber:\n";
   std::cerr << "    Effective Z cannot be changed"
-            << " directly to " << z << ".\n"; 
+            << " directly to " << z << ".\n";
   std::cerr << "    Use SetComposition to define the gas mixture.\n";
-
 }
 
-void
-MediumGas::SetAtomicWeight(const double a) {
+void MediumGas::SetAtomicWeight(const double a) {
 
   std::cerr << className << "::SetAtomicWeight:\n";
   std::cerr << "    Effective A cannot be changed"
             << " directly to " << a << ".\n";
   std::cerr << "    Use SetComposition to define the gas mixture.\n";
-
 }
 
-void
-MediumGas::SetNumberDensity(const double n) {
+void MediumGas::SetNumberDensity(const double n) {
 
   std::cerr << className << "::SetNumberDensity:\n";
   std::cerr << "    Density cannot directly be changed to " << n << ".\n";
   std::cerr << "    Use SetTemperature and SetPressure.\n";
-  
 }
 
-void
-MediumGas::SetMassDensity(const double rho) {
+void MediumGas::SetMassDensity(const double rho) {
 
   std::cerr << className << "::SetMassDensity:\n";
-  std::cerr << "    Density cannot directly be changed to "
-            << rho << ".\n";
+  std::cerr << "    Density cannot directly be changed to " << rho << ".\n";
   std::cerr << "    Use SetTemperature, SetPressure"
             << " and SetComposition.\n";
-            
 }
 
-double
-MediumGas::GetAtomicWeight() const {
+double MediumGas::GetAtomicWeight() const {
 
   // Effective A, weighted by the fractions of the components.
   double a = 0.;
@@ -250,27 +257,21 @@ MediumGas::GetAtomicWeight() const {
     a += atWeight[i] * fraction[i];
   }
   return a;
-  
 }
 
-double
-MediumGas::GetNumberDensity() const {
+double MediumGas::GetNumberDensity() const {
 
   // Ideal gas law.
-  return LoschmidtNumber * (pressure / AtmosphericPressure) * 
-                           (ZeroCelsius / temperature);
-                                                         
+  return LoschmidtNumber * (pressure / AtmosphericPressure) *
+         (ZeroCelsius / temperature);
 }
 
-double
-MediumGas::GetMassDensity() const {
+double MediumGas::GetMassDensity() const {
 
   return GetNumberDensity() * GetAtomicWeight() * AtomicMassUnit;
-  
 }
 
-double
-MediumGas::GetAtomicNumber() const {
+double MediumGas::GetAtomicNumber() const {
 
   // Effective Z, weighted by the fractions of the components.
   double z = 0.;
@@ -278,11 +279,9 @@ MediumGas::GetAtomicNumber() const {
     z += atNum[i] * fraction[i];
   }
   return z;
-  
 }
-  
-bool 
-MediumGas::LoadGasFile(const std::string filename) {
+
+bool MediumGas::LoadGasFile(const std::string filename) {
 
   std::ifstream gasfile;
   // Open the file.
@@ -307,14 +306,14 @@ MediumGas::LoadGasFile(const std::string filename) {
 
   int excCount = 0;
   int ionCount = 0;
-  
+
   int eFieldRes = 1;
   int bFieldRes = 1;
   int angRes = 1;
-  
+
   int versionNumber = 12;
- 
-  // Start reading the data. 
+
+  // Start reading the data.
   bool atTables = false;
   while (!atTables) {
     gasfile.getline(line, 256);
@@ -338,19 +337,18 @@ MediumGas::LoadGasFile(const std::string filename) {
           token = strtok(NULL, " :,%");
           versionNumber = atoi(token);
           // Check the version number.
-          if (versionNumber != 10 && 
-              versionNumber != 11 &&
+          if (versionNumber != 10 && versionNumber != 11 &&
               versionNumber != 12) {
             std::cerr << className << "::LoadGasFile:\n";
-            std::cerr << "    The file has version number " 
-                      << versionNumber << ".\n";
+            std::cerr << "    The file has version number " << versionNumber
+                      << ".\n";
             std::cerr << "    Files written in this format cannot be read.\n";
             gasfile.close();
             return false;
           } else {
-             std::cout << className << "::LoadGasFile:\n";
-             std::cout << "    Version: " << versionNumber << "\n";
-          } 
+            std::cout << className << "::LoadGasFile:\n";
+            std::cout << "    Version: " << versionNumber << "\n";
+          }
         } else if (strcmp(token, "GASOK") == 0) {
           // Get the GASOK bits indicating if a parameter
           // is present in the table (T) or not (F).
@@ -392,7 +390,7 @@ MediumGas::LoadGasFile(const std::string filename) {
             gasfile.close();
             return false;
           }
-          
+
           token = strtok(NULL, " :,%\t");
           bFieldRes = atoi(token);
           // Check the number of B points.
@@ -402,7 +400,7 @@ MediumGas::LoadGasFile(const std::string filename) {
             gasfile.close();
             return false;
           }
-          
+
           eFields.resize(eFieldRes);
           nEfields = eFieldRes;
           bFields.resize(bFieldRes);
@@ -420,7 +418,7 @@ MediumGas::LoadGasFile(const std::string filename) {
           if (nexc >= 0) nExcListElements = nexc;
           if (nExcListElements > 0) {
             excitationList.resize(nExcListElements);
-          } 
+          }
           // Ionization
           token = strtok(NULL, " :,%\t");
           int nion = atoi(token);
@@ -439,7 +437,7 @@ MediumGas::LoadGasFile(const std::string filename) {
               gasfile >> eFields[i];
             }
           }
-        }  else if (strcmp(token, "E-B") == 0) {
+        } else if (strcmp(token, "E-B") == 0) {
           token = strtok(NULL, " :,%");
           if (strcmp(token, "angles") == 0) {
             for (int i = 0; i < angRes; i++) {
@@ -496,7 +494,7 @@ MediumGas::LoadGasFile(const std::string filename) {
           ionisationList[ionCount].energy = atof(token);
           // Increase counter.
           ionCount++;
-        } 
+        }
         token = strtok(NULL, " :,%");
       }
     }
@@ -520,7 +518,7 @@ MediumGas::LoadGasFile(const std::string filename) {
   // (14) allocated for HEED data (not used)
   // (15) excitation rates
   // (16) ionisation rates
-  
+
   if (debug) {
     std::cout << className << "::LoadGasFile:\n";
     std::cout << "    GASOK bits: " << gasBits << "\n";
@@ -528,34 +526,29 @@ MediumGas::LoadGasFile(const std::string filename) {
 
   if (gasBits[0] == 'T') {
     hasElectronVelocityE = true;
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabElectronVelocityE, 0.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronVelocityE, 0.);
   } else {
     hasElectronVelocityE = false;
     tabElectronVelocityE.clear();
   }
   if (gasBits[1] == 'T') {
     hasIonMobility = true;
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabIonMobility, 0.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabIonMobility, 0.);
   } else {
     hasIonMobility = false;
     tabIonMobility.clear();
   }
   if (gasBits[2] == 'T') {
     hasElectronDiffLong = true;
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabElectronDiffLong, 0.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronDiffLong, 0.);
   } else {
     hasElectronDiffLong = false;
     tabElectronDiffLong.clear();
   }
   if (gasBits[3] == 'T') {
     hasElectronTownsend = true;
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabElectronTownsend, -30.);
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabTownsendNoPenning, -30.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronTownsend, -30.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabTownsendNoPenning, -30.);
   } else {
     hasElectronTownsend = false;
     tabElectronTownsend.clear();
@@ -564,8 +557,7 @@ MediumGas::LoadGasFile(const std::string filename) {
   // gasBits[4]: cluster size distribution; skipped
   if (gasBits[5] == 'T') {
     hasElectronAttachment = true;
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabElectronAttachment, -30.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronAttachment, -30.);
   } else {
     hasElectronAttachment = false;
     tabElectronAttachment.clear();
@@ -573,40 +565,35 @@ MediumGas::LoadGasFile(const std::string filename) {
   // gasBits[6]: Lorentz angle; skipped
   if (gasBits[7] == 'T') {
     hasElectronDiffTrans = true;
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabElectronDiffTrans, 0.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronDiffTrans, 0.);
   } else {
     hasElectronDiffTrans = false;
     tabElectronDiffTrans.clear();
   }
   if (gasBits[8] == 'T') {
     hasElectronVelocityB = true;
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabElectronVelocityB, 0.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronVelocityB, 0.);
   } else {
     hasElectronVelocityB = false;
     tabElectronVelocityB.clear();
   }
   if (gasBits[9] == 'T') {
     hasElectronVelocityExB = true;
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabElectronVelocityExB, 0.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabElectronVelocityExB, 0.);
   } else {
     hasElectronVelocityExB = false;
     tabElectronVelocityExB.clear();
   }
   if (gasBits[10] == 'T') {
     hasElectronDiffTens = true;
-    InitParamTensor(eFieldRes, bFieldRes, angRes, 6, 
-                    tabElectronDiffTens, 0.); 
+    InitParamTensor(eFieldRes, bFieldRes, angRes, 6, tabElectronDiffTens, 0.);
   } else {
     hasElectronDiffTens = false;
     tabElectronDiffTens.clear();
   }
   if (gasBits[11] == 'T') {
     hasIonDissociation = true;
-    InitParamArrays(eFieldRes, bFieldRes, angRes, 
-                    tabIonDissociation, -30.);
+    InitParamArrays(eFieldRes, bFieldRes, angRes, tabIonDissociation, -30.);
   } else {
     hasIonDissociation = false;
     tabIonDissociation.clear();
@@ -615,31 +602,33 @@ MediumGas::LoadGasFile(const std::string filename) {
   // gasBits[13]: HEED; skipped
   if (gasBits[14] == 'T') {
     hasExcRates = true;
-    InitParamTensor(eFieldRes, bFieldRes, angRes, nExcListElements,
-                    tabExcRates, 0.);
+    InitParamTensor(eFieldRes, bFieldRes, angRes, nExcListElements, tabExcRates,
+                    0.);
   } else {
     hasExcRates = false;
     tabExcRates.clear();
   }
   if (gasBits[15] == 'T') {
     hasIonRates = true;
-    InitParamTensor(eFieldRes, bFieldRes, angRes, nIonListElements,
-                    tabIonRates, 0.);
+    InitParamTensor(eFieldRes, bFieldRes, angRes, nIonListElements, tabIonRates,
+                    0.);
   } else {
     hasIonRates = false;
     tabIonRates.clear();
   }
-  
+
   // Check the gas mixture.
-  std::vector<std::string> gasnames; gasnames.clear();
-  std::vector<double> percentages;   percentages.clear();
+  std::vector<std::string> gasnames;
+  gasnames.clear();
+  std::vector<double> percentages;
+  percentages.clear();
   bool gasMixOk = true;
   int gasCount = 0;
   for (int i = 0; i < nMagboltzGases; ++i) {
     if (mixture[i] > 0.) {
       std::string gasname = "";
       if (!GetGasName(i + 1, versionNumber, gasname)) {
-        std::cerr << className << "::LoadGasFile:\n"; 
+        std::cerr << className << "::LoadGasFile:\n";
         std::cerr << "    Unknown gas (gas number ";
         std::cerr << i + 1 << ")\n";
         gasMixOk = false;
@@ -647,7 +636,7 @@ MediumGas::LoadGasFile(const std::string filename) {
       }
       gasnames.push_back(gasname);
       percentages.push_back(mixture[i]);
-      ++gasCount;      
+      ++gasCount;
     }
   }
   if (gasCount > nMaxGases) {
@@ -667,7 +656,7 @@ MediumGas::LoadGasFile(const std::string filename) {
     std::cerr << "    Percentages are not normalized to 100.\n";
     for (int i = 0; i < gasCount; ++i) percentages[i] *= 100. / sum;
   }
-    
+
   // Force re-initialisation of collision rates etc.
   isChanged = true;
 
@@ -700,7 +689,7 @@ MediumGas::LoadGasFile(const std::string filename) {
     std::cout << className << "::LoadGasFile:\n";
     std::cout << "    Reading gas tables.\n";
   }
-  
+
   // Temporary variables
   // Velocities
   double ve = 0., vb = 0., vexb = 0.;
@@ -716,7 +705,7 @@ MediumGas::LoadGasFile(const std::string filename) {
   double diff = 0.;
   double rate = 0.;
   double waste = 0.;
-  
+
   if (map2d) {
     if (debug) {
       std::cout << className << "::LoadGasFile:\n";
@@ -726,9 +715,11 @@ MediumGas::LoadGasFile(const std::string filename) {
       for (int j = 0; j < angRes; j++) {
         for (int k = 0; k < bFieldRes; k++) {
           // Drift velocity along E, Bt and ExB
-          gasfile >> ve >> vb >> vexb; 
+          gasfile >> ve >> vb >> vexb;
           // Convert from cm / us to cm / ns
-          ve *= 1.e-3; vb *= 1.e-3; vexb *= 1.e-3;
+          ve *= 1.e-3;
+          vb *= 1.e-3;
+          vexb *= 1.e-3;
           if (hasElectronVelocityE) tabElectronVelocityE[j][k][i] = ve;
           if (hasElectronVelocityB) tabElectronVelocityB[j][k][i] = vb;
           if (hasElectronVelocityExB) tabElectronVelocityExB[j][k][i] = vexb;
@@ -782,13 +773,15 @@ MediumGas::LoadGasFile(const std::string filename) {
       if (debug) std::cout << "    Done table: " << i << "\n";
       // Drift velocity along E, Bt, ExB
       gasfile >> ve >> waste >> vb >> waste >> vexb >> waste;
-      ve *= 1.e-3; vb *= 1.e-3; vexb *= 1.e-3;
-      if (hasElectronVelocityE)   tabElectronVelocityE[0][0][i] = ve;
-      if (hasElectronVelocityB)   tabElectronVelocityB[0][0][i] = vb;
+      ve *= 1.e-3;
+      vb *= 1.e-3;
+      vexb *= 1.e-3;
+      if (hasElectronVelocityE) tabElectronVelocityE[0][0][i] = ve;
+      if (hasElectronVelocityB) tabElectronVelocityB[0][0][i] = vb;
       if (hasElectronVelocityExB) tabElectronVelocityExB[0][0][i] = vexb;
       // Longitudinal and transferse diffusion coefficients
       gasfile >> dl >> waste >> dt >> waste;
-      if (hasElectronDiffLong)  tabElectronDiffLong[0][0][i] = dl;
+      if (hasElectronDiffLong) tabElectronDiffLong[0][0][i] = dl;
       if (hasElectronDiffTrans) tabElectronDiffTrans[0][0][i] = dt;
       // Townsend and attachment coefficients
       gasfile >> alpha >> waste >> alpha0 >> eta >> waste;
@@ -862,7 +855,7 @@ MediumGas::LoadGasFile(const std::string filename) {
           token = strtok(NULL, " :,%=\t");
           if (token != NULL) interpMeth[i] = atoi(token);
         }
-      } else if(strcmp(token, "A") == 0) {
+      } else if (strcmp(token, "A") == 0) {
         token = strtok(NULL, " :,%=\t");
         // Parameter for energy loss distribution, currently not used
         // double a;
@@ -896,7 +889,7 @@ MediumGas::LoadGasFile(const std::string filename) {
         // if (token != NULL) clsPerCm = atof(token);
       } else if (strcmp(token, "RHO") == 0) {
         // Parameter for energy loss distribution, currently not used
-        token = strtok(NULL, " :,%=\t"); 
+        token = strtok(NULL, " :,%=\t");
         // double rho;
         // if (token != NULL) rho = atof(token);
       } else if (strcmp(token, "PGAS") == 0) {
@@ -914,7 +907,7 @@ MediumGas::LoadGasFile(const std::string filename) {
       } else {
         done = true;
         break;
-      } 
+      }
       token = strtok(NULL, " :,%=\t");
     }
   }
@@ -961,33 +954,33 @@ MediumGas::LoadGasFile(const std::string filename) {
 
   // Decode the extrapolation and interpolation tables.
   extrHighVelocity = hExtrap[0];
-  extrLowVelocity  = lExtrap[0];
-  intpVelocity     = interpMeth[0];
+  extrLowVelocity = lExtrap[0];
+  intpVelocity = interpMeth[0];
   // Indices 1 and 2 correspond to velocities along Bt and ExB.
   extrHighDiffusion = hExtrap[3];
-  extrLowDiffusion  = lExtrap[3];
-  intpDiffusion     = interpMeth[3];
+  extrLowDiffusion = lExtrap[3];
+  intpDiffusion = interpMeth[3];
   extrHighTownsend = hExtrap[4];
-  extrLowTownsend  = lExtrap[4];
-  intpTownsend     = interpMeth[4];
+  extrLowTownsend = lExtrap[4];
+  intpTownsend = interpMeth[4];
   extrHighAttachment = hExtrap[5];
-  extrLowAttachment  = lExtrap[5];
-  intpAttachment     = interpMeth[5];
+  extrLowAttachment = lExtrap[5];
+  intpAttachment = interpMeth[5];
   extrHighMobility = hExtrap[6];
-  extrLowMobility  = lExtrap[6];
-  intpMobility     = interpMeth[6];
+  extrLowMobility = lExtrap[6];
+  intpMobility = interpMeth[6];
   // Index 7, 8: Lorentz angle, transv. diff.
   extrHighDissociation = hExtrap[9];
-  extrLowDissociation  = lExtrap[9];
-  intpDissociation     = interpMeth[9];
+  extrLowDissociation = lExtrap[9];
+  intpDissociation = interpMeth[9];
   // Index 10: diff. tensor
   extrHighExcRates = hExtrap[11];
-  extrLowExcRates  = lExtrap[11];
-  intpExcRates     = interpMeth[11];
+  extrLowExcRates = lExtrap[11];
+  intpExcRates = interpMeth[11];
   extrHighIonRates = hExtrap[12];
-  extrLowIonRates  = lExtrap[12];
-  intpIonRates     = interpMeth[12];
-  
+  extrLowIonRates = lExtrap[12];
+  intpIonRates = interpMeth[12];
+
   // Ion diffusion
   if (ionDiffLong > 0.) {
     hasIonDiffLong = true;
@@ -1017,18 +1010,16 @@ MediumGas::LoadGasFile(const std::string filename) {
     hasIonDiffTrans = false;
     tabIonDiffTrans.clear();
   }
- 
+
   if (debug) {
     std::cout << className << "::LoadGasFile:\n";
     std::cout << "    Gas file sucessfully read.\n";
   }
-    
-  return true;
 
+  return true;
 }
 
-bool
-MediumGas::WriteGasFile(const std::string filename) {
+bool MediumGas::WriteGasFile(const std::string filename) {
 
   const int nMagboltzGases = 60;
   std::vector<double> mixture(nMagboltzGases);
@@ -1038,8 +1029,8 @@ MediumGas::WriteGasFile(const std::string filename) {
     int ng = 0;
     if (!GetGasNumberGasFile(gas[i], ng)) {
       std::cerr << className << "::WriteGasFile:\n";
-      std::cerr << "    Error retrieving gas number for gas "
-                << gas[i] << ".\n";
+      std::cerr << "    Error retrieving gas number for gas " << gas[i]
+                << ".\n";
     } else {
       mixture[ng - 1] = fraction[i] * 100.;
     }
@@ -1061,25 +1052,25 @@ MediumGas::WriteGasFile(const std::string filename) {
     std::cerr << "    File could not be opened.\n";
     outFile.close();
     return false;
-  } 
- 
+  }
+
   // Assemble the GASOK bits.
   std::string gasBits = "FFFFFFFFFFFFFFFFFFFF";
-  if (hasElectronVelocityE)   gasBits[0]  = 'T';
-  if (hasIonMobility)         gasBits[1]  = 'T';
-  if (hasElectronDiffLong)    gasBits[2]  = 'T';
-  if (hasElectronTownsend)    gasBits[3]  = 'T';
+  if (hasElectronVelocityE) gasBits[0] = 'T';
+  if (hasIonMobility) gasBits[1] = 'T';
+  if (hasElectronDiffLong) gasBits[2] = 'T';
+  if (hasElectronTownsend) gasBits[3] = 'T';
   // Custer size distribution; skippped
-  if (hasElectronAttachment)  gasBits[5]  = 'T';
+  if (hasElectronAttachment) gasBits[5] = 'T';
   // Lorentz angle; skipped
-  if (hasElectronDiffTrans)   gasBits[7]  = 'T';
-  if (hasElectronVelocityB)   gasBits[8]  = 'T';
-  if (hasElectronVelocityExB) gasBits[9]  = 'T';
-  if (hasElectronDiffTens)    gasBits[10] = 'T';
-  if (hasIonDissociation)     gasBits[11] = 'T';
+  if (hasElectronDiffTrans) gasBits[7] = 'T';
+  if (hasElectronVelocityB) gasBits[8] = 'T';
+  if (hasElectronVelocityExB) gasBits[9] = 'T';
+  if (hasElectronDiffTens) gasBits[10] = 'T';
+  if (hasIonDissociation) gasBits[11] = 'T';
   // SRIM, HEED; skipped
-  if (hasExcRates)            gasBits[14] = 'T';
-  if (hasIonRates)            gasBits[15] = 'T';
+  if (hasExcRates) gasBits[14] = 'T';
+  if (hasIonRates) gasBits[15] = 'T';
 
   // Get the current time.
   time_t rawtime = time(0);
@@ -1092,8 +1083,8 @@ MediumGas::WriteGasFile(const std::string filename) {
   // Set the member name.
   std::string member = "< none >";
   // Write the header.
-  outFile <<  "*----.----1----.----2----.----3----.----4----.----"
-          <<  "5----.----6----.----7----.----8----.----9----.---"
+  outFile << "*----.----1----.----2----.----3----.----4----.----"
+          << "5----.----6----.----7----.----8----.----9----.---"
           << "10----.---11----.---12----.---13--\n";
   outFile << "% Created " << datebuf << " at " << timebuf << " ";
   outFile << member << " GAS      ";
@@ -1109,8 +1100,7 @@ MediumGas::WriteGasFile(const std::string filename) {
   idStream << name << ", p = " << pressureTable / AtmosphericPressure
            << " atm, T = " << temperatureTable << " K";
   std::string idString = idStream.str();
-  outFile << " Identifier: " << std::setw(80) << std::left 
-          << idString << "\n";
+  outFile << " Identifier: " << std::setw(80) << std::left << idString << "\n";
   outFile << std::right;
   buffer = std::string(80, ' ');
   outFile << " Clusters  : " << buffer << "\n";
@@ -1120,11 +1110,10 @@ MediumGas::WriteGasFile(const std::string filename) {
   } else {
     outFile << "F ";
   }
-  outFile << std::setw(9) << eFieldRes << " "
-             << std::setw(9) << angRes    << " " 
-             << std::setw(9) << bFieldRes << " " 
-             << std::setw(9) << nExcListElements << " " 
-             << std::setw(9) << nIonListElements << "\n";
+  outFile << std::setw(9) << eFieldRes << " " << std::setw(9) << angRes << " "
+          << std::setw(9) << bFieldRes << " " << std::setw(9)
+          << nExcListElements << " " << std::setw(9) << nIonListElements
+          << "\n";
   outFile << " E fields   \n";
   outFile << std::scientific << std::setw(15) << std::setprecision(8);
   for (int i = 0; i < eFieldRes; i++) {
@@ -1145,7 +1134,7 @@ MediumGas::WriteGasFile(const std::string filename) {
     // List 5 values, then new line.
     // B fields are stored in hGauss (to be checked!).
     outFile << std::setw(15) << bFields[i] * 100.;
-    if ((i + 1) % 5 == 0) outFile <<"\n";
+    if ((i + 1) % 5 == 0) outFile << "\n";
   }
   if (bFieldRes % 5 != 0) outFile << "\n";
   outFile << " Mixture:   \n";
@@ -1156,17 +1145,16 @@ MediumGas::WriteGasFile(const std::string filename) {
   }
   if (nMagboltzGases % 5 != 0) outFile << "\n";
   for (int i = 0; i < nExcListElements; i++) {
-    outFile << " Excitation " << std::setw(5) << i + 1 << ": " 
-            << std::setw(45) << std::left << excitationList[i].label << "  "
-            << std::setw(15) << std::right << excitationList[i].energy 
-            << std::setw(15) << excitationList[i].prob 
-            << std::setw(15) << excitationList[i].rms 
+    outFile << " Excitation " << std::setw(5) << i + 1 << ": " << std::setw(45)
+            << std::left << excitationList[i].label << "  " << std::setw(15)
+            << std::right << excitationList[i].energy << std::setw(15)
+            << excitationList[i].prob << std::setw(15) << excitationList[i].rms
             << std::setw(15) << excitationList[i].dt << "\n";
   }
   for (int i = 0; i < nIonListElements; i++) {
-    outFile << " Ionisation " << std::setw(5) << i + 1 << ": " 
-            << std::setw(45) << std::left << ionisationList[i].label  << "  "
-            << std::setw(15) << std::right << ionisationList[i].energy << "\n";
+    outFile << " Ionisation " << std::setw(5) << i + 1 << ": " << std::setw(45)
+            << std::left << ionisationList[i].label << "  " << std::setw(15)
+            << std::right << ionisationList[i].energy << "\n";
   }
 
   const double sqrtPressure = sqrt(pressureTable);
@@ -1178,15 +1166,18 @@ MediumGas::WriteGasFile(const std::string filename) {
     for (int j = 0; j < angRes; j++) {
       for (int k = 0; k < bFieldRes; k++) {
         double ve = 0., vb = 0., vexb = 0.;
-        if (hasElectronVelocityE)   ve   = tabElectronVelocityE[j][k][i];
-        if (hasElectronVelocityB)   vb   = tabElectronVelocityB[j][k][i];
+        if (hasElectronVelocityE) ve = tabElectronVelocityE[j][k][i];
+        if (hasElectronVelocityB) vb = tabElectronVelocityB[j][k][i];
         if (hasElectronVelocityExB) vexb = tabElectronVelocityExB[j][k][i];
         // Convert from cm / ns to cm / us.
-        ve *= 1.e3; vb *= 1.e3; vexb *= 1.e3;
+        ve *= 1.e3;
+        vb *= 1.e3;
+        vexb *= 1.e3;
         double dl = 0., dt = 0.;
-        if (hasElectronDiffLong)  dl = tabElectronDiffLong[j][k][i];
+        if (hasElectronDiffLong) dl = tabElectronDiffLong[j][k][i];
         if (hasElectronDiffTrans) dt = tabElectronDiffTrans[j][k][i];
-        dl *= sqrtPressure; dt *= sqrtPressure;
+        dl *= sqrtPressure;
+        dt *= sqrtPressure;
         double alpha = -30., alpha0 = -30., eta = -30.;
         if (hasElectronTownsend) {
           alpha = tabElectronTownsend[j][k][i];
@@ -1215,66 +1206,108 @@ MediumGas::WriteGasFile(const std::string filename) {
         const double spl = 0.;
         // Write the values to file.
         outFile << std::setw(15);
-        outFile << ve;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << ve;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         if (!map2d) {
           outFile << std::setw(15);
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n"; 
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
         }
         outFile << std::setw(15);
-        outFile << vb;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << vb;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         if (!map2d) {
           outFile << std::setw(15);
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
         }
         outFile << std::setw(15);
-        outFile << vexb;   ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << vexb;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         if (!map2d) {
           outFile << std::setw(15);
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
         }
         outFile << std::setw(15);
-        outFile << dl;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << dl;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         if (!map2d) {
           outFile << std::setw(15);
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
         }
         outFile << std::setw(15);
-        outFile << dt;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << dt;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         if (!map2d) {
           outFile << std::setw(15);
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
         }
         outFile << std::setw(15);
-        outFile << alpha;  ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << alpha;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         if (!map2d) {
           outFile << std::setw(15);
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
         }
         outFile << std::setw(15);
-        outFile << alpha0; ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << alpha0;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         outFile << std::setw(15);
-        outFile << eta;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << eta;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         outFile << std::setw(15);
         if (!map2d) {
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
           outFile << std::setw(15);
         }
-        outFile << mu;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << mu;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         if (!map2d) {
           outFile << std::setw(15);
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
         }
         outFile << std::setw(15);
-        outFile << lor;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << lor;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         if (!map2d) {
           outFile << std::setw(15);
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
         }
         outFile << std::setw(15);
-        outFile << diss;   ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << diss;
+        ++cnt;
+        if (cnt % 8 == 0) outFile << "\n";
         if (!map2d) {
           outFile << std::setw(15);
-          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n"; 
+          outFile << spl;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
         }
         outFile << std::setw(15);
         for (int l = 0; l < 6; ++l) {
@@ -1284,19 +1317,24 @@ MediumGas::WriteGasFile(const std::string filename) {
             diff *= pressureTable;
           }
           outFile << std::setw(15);
-          outFile << diff; ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << diff;
+          ++cnt;
+          if (cnt % 8 == 0) outFile << "\n";
           if (!map2d) {
-            outFile << std::setw(15) << spl; ++cnt; 
-            if (cnt % 8 == 0) outFile << "\n"; 
+            outFile << std::setw(15) << spl;
+            ++cnt;
+            if (cnt % 8 == 0) outFile << "\n";
           }
         }
         if (hasExcRates && nExcListElements > 0) {
           for (int l = 0; l < nExcListElements; l++) {
             outFile << std::setw(15);
-            outFile << tabExcRates[l][j][k][i]; ++cnt;
+            outFile << tabExcRates[l][j][k][i];
+            ++cnt;
             if (cnt % 8 == 0) outFile << "\n";
             if (!map2d) {
-              outFile << std::setw(15) << spl; ++cnt;
+              outFile << std::setw(15) << spl;
+              ++cnt;
               if (cnt % 8 == 0) outFile << "\n";
             }
           }
@@ -1304,10 +1342,12 @@ MediumGas::WriteGasFile(const std::string filename) {
         if (hasIonRates && nIonListElements > 0) {
           for (int l = 0; l < nIonListElements; l++) {
             outFile << std::setw(15);
-            outFile << tabIonRates[l][j][k][i]; ++cnt;
+            outFile << tabIonRates[l][j][k][i];
+            ++cnt;
             if (cnt % 8 == 0) outFile << "\n";
             if (!map2d) {
-              outFile << std::setw(15) << spl; ++cnt;
+              outFile << std::setw(15) << spl;
+              ++cnt;
               if (cnt % 8 == 0) outFile << "\n";
             }
           }
@@ -1315,7 +1355,7 @@ MediumGas::WriteGasFile(const std::string filename) {
       }
     }
     if (cnt % 8 != 0) outFile << "\n";
-    cnt = 0; 
+    cnt = 0;
   }
 
   // Extrapolation methods
@@ -1350,7 +1390,7 @@ MediumGas::WriteGasFile(const std::string filename) {
   hExtrap[12] = extrHighIonRates;
   lExtrap[12] = extrLowIonRates;
   interpMeth[12] = intpIonRates;
-    
+
   outFile << " H Extr: ";
   for (int i = 0; i < 13; i++) {
     outFile << std::setw(5) << hExtrap[i];
@@ -1361,44 +1401,41 @@ MediumGas::WriteGasFile(const std::string filename) {
     outFile << std::setw(5) << lExtrap[i];
   }
   outFile << "\n";
-  outFile << " Thresholds: " 
-             << std::setw(10) << thrElectronTownsend
-             << std::setw(10) << thrElectronAttachment
-             << std::setw(10) << thrIonDissociation << "\n";
+  outFile << " Thresholds: " << std::setw(10) << thrElectronTownsend
+          << std::setw(10) << thrElectronAttachment << std::setw(10)
+          << thrIonDissociation << "\n";
   outFile << " Interp: ";
   for (int i = 0; i < 13; i++) {
     outFile << std::setw(5) << interpMeth[i];
   }
   outFile << "\n";
-  outFile << " A     =" << std::setw(15) << 0. << "," 
+  outFile << " A     =" << std::setw(15) << 0. << ","
           << " Z     =" << std::setw(15) << 0. << ","
           << " EMPROB=" << std::setw(15) << 0. << ","
           << " EPAIR =" << std::setw(15) << 0. << "\n";
   double ionDiffLong = 0., ionDiffTrans = 0.;
   if (hasIonDiffLong) ionDiffLong = tabIonDiffLong[0][0][0];
   if (hasIonDiffTrans) ionDiffTrans = tabIonDiffTrans[0][0][0];
-  outFile << " Ion diffusion: " << std::setw(15) << ionDiffLong 
-                                << std::setw(15) << ionDiffTrans << "\n";
-  outFile << " CMEAN =" << std::setw(15) << 0. << "," 
-          << " RHO   =" << std::setw(15) << 0. << "," 
+  outFile << " Ion diffusion: " << std::setw(15) << ionDiffLong << std::setw(15)
+          << ionDiffTrans << "\n";
+  outFile << " CMEAN =" << std::setw(15) << 0. << ","
+          << " RHO   =" << std::setw(15) << 0. << ","
           << " PGAS  =" << std::setw(15) << pressureTable << ","
           << " TGAS  =" << std::setw(15) << temperatureTable << "\n";
   outFile << " CLSTYP    : NOT SET   \n";
   buffer = std::string(80, ' ');
   outFile << " FCNCLS    : " << buffer << "\n";
   outFile << " NCLS      : " << std::setw(10) << 0 << "\n";
-  outFile << " Average   : " << std::setw(25) 
-                             << std::setprecision(18) << 0. << "\n";
+  outFile << " Average   : " << std::setw(25) << std::setprecision(18) << 0.
+          << "\n";
   outFile << "  Heed initialisation done: F\n";
   outFile << "  SRIM initialisation done: F\n";
   outFile.close();
 
   return true;
-
 }
 
-void
-MediumGas::PrintGas() {
+void MediumGas::PrintGas() {
 
   // Print a summary.
   std::cout << className << "::PrintGas:\n";
@@ -1417,27 +1454,26 @@ MediumGas::PrintGas() {
   std::cout << "      Pressure:    " << pressureTable << " Torr\n";
   std::cout << "      Temperature: " << temperatureTable << " K\n";
   if (nEfields > 1) {
-    std::cout << "    Electric field range:  " << eFields[0] 
-              << " - " << eFields[nEfields - 1] 
-              << " V/cm in " << nEfields  - 1 << " steps.\n";
+    std::cout << "    Electric field range:  " << eFields[0] << " - "
+              << eFields[nEfields - 1] << " V/cm in " << nEfields - 1
+              << " steps.\n";
   } else if (nEfields == 1) {
     std::cout << "    Electric field:        " << eFields[0] << " V/cm\n";
   } else {
     std::cout << "    Electric field range: not set\n";
   }
   if (nBfields > 1) {
-    std::cout << "    Magnetic field range:  " << bFields[0]
-              << " - " << bFields[nBfields - 1] 
-              << " T in " << nBfields - 1 << " steps.\n";
+    std::cout << "    Magnetic field range:  " << bFields[0] << " - "
+              << bFields[nBfields - 1] << " T in " << nBfields - 1
+              << " steps.\n";
   } else if (nBfields == 1) {
     std::cout << "    Magnetic field:        " << bFields[0] << "\n";
   } else {
     std::cout << "    Magnetic field range: not set\n";
   }
   if (nAngles > 1) {
-    std::cout << "    Angular range:         " << bAngles[0]
-              << " - " << bAngles[nAngles - 1]
-              << " in " << nAngles - 1 << " steps.\n";
+    std::cout << "    Angular range:         " << bAngles[0] << " - "
+              << bAngles[nAngles - 1] << " in " << nAngles - 1 << " steps.\n";
   } else if (nAngles == 1) {
     std::cout << "    Angle between E and B: " << bAngles[0] << "\n";
   } else {
@@ -1454,18 +1490,25 @@ MediumGas::PrintGas() {
   if (hasElectronVelocityExB) {
     std::cout << "      Velocity along ExB\n";
   }
-  if (hasElectronVelocityE || hasElectronVelocityB || 
-      hasElectronVelocityExB) {
+  if (hasElectronVelocityE || hasElectronVelocityB || hasElectronVelocityExB) {
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowVelocity == 0) std::cout << " constant\n";
-    else if (extrLowVelocity == 1) std::cout << " linear\n";
-    else if (extrLowVelocity == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrLowVelocity == 0)
+      std::cout << " constant\n";
+    else if (extrLowVelocity == 1)
+      std::cout << " linear\n";
+    else if (extrLowVelocity == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighVelocity == 0) std::cout << " constant\n";
-    else if (extrHighVelocity == 1) std::cout << " linear\n";
-    else if (extrHighVelocity == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrHighVelocity == 0)
+      std::cout << " constant\n";
+    else if (extrHighVelocity == 1)
+      std::cout << " linear\n";
+    else if (extrHighVelocity == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << intpVelocity << "\n";
   }
   if (hasElectronDiffLong) {
@@ -1473,102 +1516,147 @@ MediumGas::PrintGas() {
   }
   if (hasElectronDiffTrans) {
     std::cout << "      Transverse diffusion coefficient\n";
-  } 
+  }
   if (hasElectronDiffTens) {
     std::cout << "      Diffusion tensor\n";
   }
-  if (hasElectronDiffLong || hasElectronDiffTrans ||
-      hasElectronDiffTens) {
+  if (hasElectronDiffLong || hasElectronDiffTrans || hasElectronDiffTens) {
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowDiffusion == 0) std::cout << " constant\n";
-    else if (extrLowDiffusion == 1) std::cout << " linear\n";
-    else if (extrLowDiffusion == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrLowDiffusion == 0)
+      std::cout << " constant\n";
+    else if (extrLowDiffusion == 1)
+      std::cout << " linear\n";
+    else if (extrLowDiffusion == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighDiffusion == 0) std::cout << " constant\n";
-    else if (extrHighDiffusion == 1) std::cout << " linear\n";
-    else if (extrHighDiffusion == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrHighDiffusion == 0)
+      std::cout << " constant\n";
+    else if (extrHighDiffusion == 1)
+      std::cout << " linear\n";
+    else if (extrHighDiffusion == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << intpDiffusion << "\n";
   }
   if (hasElectronTownsend) {
     std::cout << "      Townsend coefficient\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowTownsend == 0) std::cout << " constant\n";
-    else if (extrLowTownsend == 1) std::cout << " linear\n";
-    else if (extrLowTownsend == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrLowTownsend == 0)
+      std::cout << " constant\n";
+    else if (extrLowTownsend == 1)
+      std::cout << " linear\n";
+    else if (extrLowTownsend == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighTownsend == 0) std::cout << " constant\n";
-    else if (extrHighTownsend == 1) std::cout << " linear\n";
-    else if (extrHighTownsend == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrHighTownsend == 0)
+      std::cout << " constant\n";
+    else if (extrHighTownsend == 1)
+      std::cout << " linear\n";
+    else if (extrHighTownsend == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << intpTownsend << "\n";
   }
   if (hasElectronAttachment) {
     std::cout << "      Attachment coefficient\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowAttachment == 0) std::cout << " constant\n";
-    else if (extrLowAttachment == 1) std::cout << " linear\n";
-    else if (extrLowAttachment == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrLowAttachment == 0)
+      std::cout << " constant\n";
+    else if (extrLowAttachment == 1)
+      std::cout << " linear\n";
+    else if (extrLowAttachment == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighAttachment == 0) std::cout << " constant\n";
-    else if (extrHighAttachment == 1) std::cout << " linear\n";
-    else if (extrHighAttachment == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrHighAttachment == 0)
+      std::cout << " constant\n";
+    else if (extrHighAttachment == 1)
+      std::cout << " linear\n";
+    else if (extrHighAttachment == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << intpAttachment << "\n";
   }
   if (hasExcRates) {
     std::cout << "      Excitation rates\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowExcRates == 0) std::cout << " constant\n";
-    else if (extrLowExcRates == 1) std::cout << " linear\n";
-    else if (extrLowExcRates == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrLowExcRates == 0)
+      std::cout << " constant\n";
+    else if (extrLowExcRates == 1)
+      std::cout << " linear\n";
+    else if (extrLowExcRates == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighExcRates == 0) std::cout << " constant\n";
-    else if (extrHighExcRates == 1) std::cout << " linear\n";
-    else if (extrHighExcRates == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrHighExcRates == 0)
+      std::cout << " constant\n";
+    else if (extrHighExcRates == 1)
+      std::cout << " linear\n";
+    else if (extrHighExcRates == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << intpExcRates << "\n";
   }
   if (hasIonRates) {
     std::cout << "      Ionisation rates\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowIonRates == 0) std::cout << " constant\n";
-    else if (extrLowIonRates == 1) std::cout << " linear\n";
-    else if (extrLowIonRates == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrLowIonRates == 0)
+      std::cout << " constant\n";
+    else if (extrLowIonRates == 1)
+      std::cout << " linear\n";
+    else if (extrLowIonRates == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighIonRates == 0) std::cout << " constant\n";
-    else if (extrHighIonRates == 1) std::cout << " linear\n";
-    else if (extrHighIonRates == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrHighIonRates == 0)
+      std::cout << " constant\n";
+    else if (extrHighIonRates == 1)
+      std::cout << " linear\n";
+    else if (extrHighIonRates == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << intpIonRates << "\n";
-  }      
-  if (!hasElectronVelocityE && !hasElectronVelocityB && 
-      !hasElectronVelocityExB && 
-      !hasElectronDiffLong && !hasElectronDiffTrans && 
-      !hasElectronDiffTens && 
-      !hasElectronTownsend && !hasElectronAttachment &&
-      !hasExcRates && !hasIonRates) {
+  }
+  if (!hasElectronVelocityE && !hasElectronVelocityB &&
+      !hasElectronVelocityExB && !hasElectronDiffLong &&
+      !hasElectronDiffTrans && !hasElectronDiffTens && !hasElectronTownsend &&
+      !hasElectronAttachment && !hasExcRates && !hasIonRates) {
     std::cout << "      none\n";
   }
-  
+
   std::cout << "    Available ion transport data:\n";
   if (hasIonMobility) {
     std::cout << "      Mobility\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowMobility == 0) std::cout << " constant\n";
-    else if (extrLowMobility == 1) std::cout << " linear\n";
-    else if (extrLowMobility == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrLowMobility == 0)
+      std::cout << " constant\n";
+    else if (extrLowMobility == 1)
+      std::cout << " linear\n";
+    else if (extrLowMobility == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighMobility == 0) std::cout << " constant\n";
-    else if (extrHighMobility == 1) std::cout << " linear\n";
-    else if (extrHighMobility == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrHighMobility == 0)
+      std::cout << " constant\n";
+    else if (extrHighMobility == 1)
+      std::cout << " linear\n";
+    else if (extrHighMobility == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << intpMobility << "\n";
   }
   if (hasIonDiffLong) {
@@ -1579,41 +1667,54 @@ MediumGas::PrintGas() {
   }
   if (hasIonDiffLong || hasIonDiffTrans) {
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowDiffusion == 0) std::cout << " constant\n";
-    else if (extrLowDiffusion == 1) std::cout << " linear\n";
-    else if (extrLowDiffusion == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrLowDiffusion == 0)
+      std::cout << " constant\n";
+    else if (extrLowDiffusion == 1)
+      std::cout << " linear\n";
+    else if (extrLowDiffusion == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighDiffusion == 0) std::cout << " constant\n";
-    else if (extrHighDiffusion == 1) std::cout << " linear\n";
-    else if (extrHighDiffusion == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrHighDiffusion == 0)
+      std::cout << " constant\n";
+    else if (extrHighDiffusion == 1)
+      std::cout << " linear\n";
+    else if (extrHighDiffusion == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << intpDiffusion << "\n";
   }
   if (hasIonDissociation) {
     std::cout << "      Dissociation coefficient\n";
     std::cout << "        Low field extrapolation:  ";
-    if (extrLowDissociation == 0) std::cout << " constant\n";
-    else if (extrLowDissociation == 1) std::cout << " linear\n";
-    else if (extrLowDissociation == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrLowDissociation == 0)
+      std::cout << " constant\n";
+    else if (extrLowDissociation == 1)
+      std::cout << " linear\n";
+    else if (extrLowDissociation == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        High field extrapolation: ";
-    if (extrHighDissociation == 0) std::cout << " constant\n";
-    else if (extrHighDissociation == 1) std::cout << " linear\n";
-    else if (extrHighDissociation == 2) std::cout << " exponential\n";
-    else std::cout << " unknown\n";
+    if (extrHighDissociation == 0)
+      std::cout << " constant\n";
+    else if (extrHighDissociation == 1)
+      std::cout << " linear\n";
+    else if (extrHighDissociation == 2)
+      std::cout << " exponential\n";
+    else
+      std::cout << " unknown\n";
     std::cout << "        Interpolation order: " << intpDissociation << "\n";
   }
-  if (!hasIonMobility && 
-      !hasIonDiffLong && !hasIonDiffTrans && 
+  if (!hasIonMobility && !hasIonDiffLong && !hasIonDiffTrans &&
       !hasIonDissociation) {
     std::cout << "      none\n";
   }
-
 }
 
-bool
-MediumGas::LoadIonMobility(const std::string filename) {
+bool MediumGas::LoadIonMobility(const std::string filename) {
 
   // Open the file.
   std::ifstream infile;
@@ -1625,17 +1726,17 @@ MediumGas::LoadIonMobility(const std::string filename) {
     std::cerr << "    " << filename << ".\n";
     return false;
   }
-  
+
   double field = -1., mu = -1.;
   double lastField = field;
   std::vector<double> efields;
   std::vector<double> mobilities;
   efields.clear();
   mobilities.clear();
-  
+
   // Read the file line by line.
   char line[100];
-   
+
   int i = 0;
   while (!infile.eof()) {
     ++i;
@@ -1646,25 +1747,27 @@ MediumGas::LoadIonMobility(const std::string filename) {
     token = strtok(line, " ,\t");
     if (!token) {
       break;
-    } else if (strcmp(token, "#") == 0 || strcmp(token, "*") == 0 || strcmp(token, "//") == 0) {
+    } else if (strcmp(token, "#") == 0 || strcmp(token, "*") == 0 ||
+               strcmp(token, "//") == 0) {
       continue;
     } else {
       field = atof(token);
       token = strtok(NULL, " ,\t");
       if (!token) {
-	std::cerr << className << "::LoadIonMobility:\n";
-	std::cerr << "    Found E/N but no mobility before the end-of-line\n";
-	std::cerr << "    " << filename << " (line " << i << ").\n";
-	continue;
+        std::cerr << className << "::LoadIonMobility:\n";
+        std::cerr << "    Found E/N but no mobility before the end-of-line\n";
+        std::cerr << "    " << filename << " (line " << i << ").\n";
+        continue;
       }
       mu = atof(token);
     }
     token = strtok(NULL, " ,\t");
-    if(token && strcmp(token, "//") != 0) {
-	std::cerr << className << "::LoadIonMobility:\n";
-	std::cerr << "    Unexpected non-comment characters after the mobility; line skipped.\n";
-	std::cerr << "    " << filename << " (line " << i << ").\n";
-	continue;
+    if (token && strcmp(token, "//") != 0) {
+      std::cerr << className << "::LoadIonMobility:\n";
+      std::cerr << "    Unexpected non-comment characters after the mobility; "
+                   "line skipped.\n";
+      std::cerr << "    " << filename << " (line " << i << ").\n";
+      continue;
     }
     // printf("E/N = %g Td: mu = %g cm2/(V.s)\n", field, mu);
     // Check if the data has been read correctly.
@@ -1678,15 +1781,13 @@ MediumGas::LoadIonMobility(const std::string filename) {
     // Negative field values are not allowed.
     if (field < 0.) {
       std::cerr << className << "::LoadIonMobility:\n";
-      std::cerr << "    Negative electric field (line " 
-                << i << ").\n";
+      std::cerr << "    Negative electric field (line " << i << ").\n";
       return false;
     }
     // The table has to be in ascending order.
     if (field <= lastField) {
       std::cerr << className << "::LoadIonMobility:\n";
-      std::cerr << "    Table is not in ascending order (line " 
-                << i << ").\n"; 
+      std::cerr << "    Table is not in ascending order (line " << i << ").\n";
       return false;
     }
     // Add the values to the list.
@@ -1694,37 +1795,33 @@ MediumGas::LoadIonMobility(const std::string filename) {
     mobilities.push_back(mu);
     lastField = field;
   }
-  
+
   const int ne = efields.size();
   if (ne <= 0) {
     std::cerr << className << "::LoadIonMobilities:\n";
     std::cerr << "    No valid data found.\n";
     return false;
   }
-   
+
   // The E/N values in the file are supposed to be in Td (10^-17 V cm2).
   const double scaleField = 1.e-17 * GetNumberDensity();
   // The reduced mobilities in the file are supposed to be in cm2/(V s).
-  const double scaleMobility = 1.e-9 * (AtmosphericPressure / pressure) * 
-                                       (temperature / ZeroCelsius);
+  const double scaleMobility =
+      1.e-9 * (AtmosphericPressure / pressure) * (temperature / ZeroCelsius);
   for (int j = ne; j--;) {
     // Scale the fields and mobilities.
     efields[j] *= scaleField;
     mobilities[j] *= scaleMobility;
   }
-  
+
   std::cout << className << "::LoadIonMobility:\n";
-  std::cout << "    Read " << ne << " values from file " 
-            << filename << "\n";
+  std::cout << "    Read " << ne << " values from file " << filename << "\n";
 
-  
   return SetIonMobility(efields, mobilities);
-
 }
 
-void
-MediumGas::SetExtrapolationMethodExcitationRates(const std::string extrLow,
-                                                 const std::string extrHigh) {
+void MediumGas::SetExtrapolationMethodExcitationRates(
+    const std::string extrLow, const std::string extrHigh) {
 
   int iExtr;
   if (GetExtrapolationIndex(extrLow, iExtr)) {
@@ -1732,19 +1829,17 @@ MediumGas::SetExtrapolationMethodExcitationRates(const std::string extrLow,
   } else {
     std::cerr << className << "::SetExtrapolationMethodExcitationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
-  } 
+  }
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighExcRates = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodExcitationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
-
 }
 
-void
-MediumGas::SetExtrapolationMethodIonisationRates(const std::string extrLow,
-                                                 const std::string extrHigh) {
+void MediumGas::SetExtrapolationMethodIonisationRates(
+    const std::string extrLow, const std::string extrHigh) {
 
   int iExtr;
   if (GetExtrapolationIndex(extrLow, iExtr)) {
@@ -1752,289 +1847,331 @@ MediumGas::SetExtrapolationMethodIonisationRates(const std::string extrLow,
   } else {
     std::cerr << className << "::SetExtrapolationMethodIonisationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
-  } 
+  }
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighIonRates = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodIonisationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
-
 }
 
-void
-MediumGas::SetInterpolationMethodExcitationRates(const int intrp) {
+void MediumGas::SetInterpolationMethodExcitationRates(const int intrp) {
 
   if (intrp > 0) {
     intpExcRates = intrp;
   }
-
 }
 
-void
-MediumGas::SetInterpolationMethodIonisationRates(const int intrp) {
+void MediumGas::SetInterpolationMethodIonisationRates(const int intrp) {
 
   if (intrp > 0) {
     intpIonRates = intrp;
   }
-
 }
 
-bool 
-MediumGas::GetGasInfo(const std::string gasname, 
-                      double& a, double& z) const {
-  
+bool MediumGas::GetGasInfo(const std::string gasname, double& a,
+                           double& z) const {
+
   if (gasname == "CF4") {
-    a = 12.0107 + 4 * 18.9984032; z = 6 + 4 * 9;
+    a = 12.0107 + 4 * 18.9984032;
+    z = 6 + 4 * 9;
     return true;
   } else if (gasname == "Ar") {
-    a =  39.948;         z = 18;
+    a = 39.948;
+    z = 18;
   } else if (gasname == "He") {
-    a =   4.002602;      z =  2;
+    a = 4.002602;
+    z = 2;
   } else if (gasname == "He-3") {
-    a =   3.01602931914; z =  2;
+    a = 3.01602931914;
+    z = 2;
   } else if (gasname == "Ne") {
-    a =  20.1797;        z = 10;  
+    a = 20.1797;
+    z = 10;
   } else if (gasname == "Kr") {
-    a =  37.798;         z = 36;
+    a = 37.798;
+    z = 36;
   } else if (gasname == "Xe") {
-    a = 131.293;         z = 54;
+    a = 131.293;
+    z = 54;
   } else if (gasname == "CH4") {
-    a =     12.0107 +  4 * 1.00794; z =     6 +  4;
+    a = 12.0107 + 4 * 1.00794;
+    z = 6 + 4;
   } else if (gasname == "C2H6") {
-    a = 2 * 12.0107 +  6 * 1.00794; z = 2 * 6 +  6;
+    a = 2 * 12.0107 + 6 * 1.00794;
+    z = 2 * 6 + 6;
   } else if (gasname == "C3H8") {
-    a = 3 * 12.0107 +  8 * 1.00794; z = 3 * 6 +  8;
+    a = 3 * 12.0107 + 8 * 1.00794;
+    z = 3 * 6 + 8;
   } else if (gasname == "iC4H10") {
-    a = 4 * 12.0107 + 10 * 1.00794; z = 4 * 6 + 10;
+    a = 4 * 12.0107 + 10 * 1.00794;
+    z = 4 * 6 + 10;
   } else if (gasname == "CO2") {
-    a = 12.0107 + 2 * 15.9994; z = 6 + 2 * 8;
+    a = 12.0107 + 2 * 15.9994;
+    z = 6 + 2 * 8;
   } else if (gasname == "neoC5H12") {
-    a = 5 * 12.0107 + 12 * 1.00794; z = 5 * 6 + 12;
+    a = 5 * 12.0107 + 12 * 1.00794;
+    z = 5 * 6 + 12;
   } else if (gasname == "H2O") {
-    a = 2 * 1.00794 + 15.9994; z = 2 + 8;
+    a = 2 * 1.00794 + 15.9994;
+    z = 2 + 8;
   } else if (gasname == "O2") {
-    a = 2 * 15.9994; z = 2 * 8;
+    a = 2 * 15.9994;
+    z = 2 * 8;
   } else if (gasname == "N2") {
-    a = 2 * 14.0067; z = 2 * 7;
+    a = 2 * 14.0067;
+    z = 2 * 7;
   } else if (gasname == "NO") {
-    a = 14.0067 + 15.9994; z = 7 + 8;
+    a = 14.0067 + 15.9994;
+    z = 7 + 8;
   } else if (gasname == "N2O") {
-    a = 2 * 14.0067 + 15.9994; z = 2 * 7 + 8;
+    a = 2 * 14.0067 + 15.9994;
+    z = 2 * 7 + 8;
   } else if (gasname == "C2H4") {
-    a = 2 * 12.0107 + 4 * 1.00794; z = 2 * 6 + 4;
+    a = 2 * 12.0107 + 4 * 1.00794;
+    z = 2 * 6 + 4;
   } else if (gasname == "C2H2") {
-    a = 2 * 12.0107 + 2 * 1.00794; z = 2 * 6 + 2;
+    a = 2 * 12.0107 + 2 * 1.00794;
+    z = 2 * 6 + 2;
   } else if (gasname == "H2") {
-    a = 2 * 1.00794; z = 2;
+    a = 2 * 1.00794;
+    z = 2;
   } else if (gasname == "D2") {
-    a = 2 * 2.01410177785; z = 2;
+    a = 2 * 2.01410177785;
+    z = 2;
   } else if (gasname == "CO") {
-    a = 12.0107 + 15.9994; z = 6 + 8;
+    a = 12.0107 + 15.9994;
+    z = 6 + 8;
   } else if (gasname == "Methylal") {
-    a = 3 * 12.0107 +  8 * 1.00794 + 2 * 15.9994; 
-    z = 3 * 6 +  8 + 2 * 8;
+    a = 3 * 12.0107 + 8 * 1.00794 + 2 * 15.9994;
+    z = 3 * 6 + 8 + 2 * 8;
   } else if (gasname == "DME") {
-    a = 4 * 12.0107 + 10 * 1.00794 + 2 * 15.9994; 
+    a = 4 * 12.0107 + 10 * 1.00794 + 2 * 15.9994;
     z = 4 * 6 + 10 + 2 * 8;
-  } else if (gasname == "Reid-Step" || 
-             gasname == "Mawell-Model" ||
+  } else if (gasname == "Reid-Step" || gasname == "Mawell-Model" ||
              gasname == "Reid-Ramp") {
-    a = 1.; z = 1.;
+    a = 1.;
+    z = 1.;
   } else if (gasname == "C2F6") {
-    a = 2 * 12.0107 + 6 * 18.9984032; z = 2 * 6 + 6 * 9;
+    a = 2 * 12.0107 + 6 * 18.9984032;
+    z = 2 * 6 + 6 * 9;
   } else if (gasname == "SF6") {
-    a =     32.065  + 6 * 18.9984032; z = 16 + 6 * 9;
+    a = 32.065 + 6 * 18.9984032;
+    z = 16 + 6 * 9;
   } else if (gasname == "NH3") {
-    a = 14.0067 + 3 * 1.00794; z = 7 + 3;
+    a = 14.0067 + 3 * 1.00794;
+    z = 7 + 3;
   } else if (gasname == "C3H6") {
-    a = 3 * 12.0107 + 6 * 1.00794; z = 3 * 6 + 6;
+    a = 3 * 12.0107 + 6 * 1.00794;
+    z = 3 * 6 + 6;
   } else if (gasname == "cC3H6") {
-    a = 3 * 12.0107 + 6 * 1.00794; z = 3 * 6 + 6;
+    a = 3 * 12.0107 + 6 * 1.00794;
+    z = 3 * 6 + 6;
   } else if (gasname == "CH3OH") {
-    a =     12.0107 + 4 * 1.00794 + 15.9994; z =     6 + 4 + 8;
+    a = 12.0107 + 4 * 1.00794 + 15.9994;
+    z = 6 + 4 + 8;
   } else if (gasname == "C2H5OH") {
-    a = 2 * 12.0107 + 6 * 1.00794 + 15.9994; z = 2 * 6 + 6 + 8;
+    a = 2 * 12.0107 + 6 * 1.00794 + 15.9994;
+    z = 2 * 6 + 6 + 8;
   } else if (gasname == "C3H7OH") {
-    a = 3 * 12.0107 + 8 * 1.00794 + 15.9994; z = 3 * 6 + 8 * 8;
+    a = 3 * 12.0107 + 8 * 1.00794 + 15.9994;
+    z = 3 * 6 + 8 * 8;
   } else if (gasname == "Cs") {
-    a = 132.9054519; z = 55;
+    a = 132.9054519;
+    z = 55;
   } else if (gasname == "F2") {
-    a = 2 * 18.9984032; z = 2 * 9;
+    a = 2 * 18.9984032;
+    z = 2 * 9;
   } else if (gasname == "CS2") {
-    a = 12.0107 + 2 * 32.065; z = 6 + 2 * 16;
+    a = 12.0107 + 2 * 32.065;
+    z = 6 + 2 * 16;
   } else if (gasname == "COS") {
-    a = 12.0107 + 15.9994 + 32.065; z = 6 + 8 + 16;
+    a = 12.0107 + 15.9994 + 32.065;
+    z = 6 + 8 + 16;
   } else if (gasname == "CD4") {
-    a = 12.0107 + 4 * 2.01410177785; z = 6 + 4;
+    a = 12.0107 + 4 * 2.01410177785;
+    z = 6 + 4;
   } else if (gasname == "BF3") {
-    a = 10.811 + 3 * 18.9984032; z = 5 + 3 * 9;
+    a = 10.811 + 3 * 18.9984032;
+    z = 5 + 3 * 9;
   } else if (gasname == "C2H2F4") {
-    a = 2 * 12.0107 + 2 * 1.00794 + 4 * 18.9984032; z = 2 * 6 + 2 + 4 * 9;
+    a = 2 * 12.0107 + 2 * 1.00794 + 4 * 18.9984032;
+    z = 2 * 6 + 2 + 4 * 9;
   } else if (gasname == "CHF3") {
-    a =     12.0107 + 1.00794 + 3 * 18.9984032; z =     6 + 1 + 3 * 9;
+    a = 12.0107 + 1.00794 + 3 * 18.9984032;
+    z = 6 + 1 + 3 * 9;
   } else if (gasname == "CF3Br") {
-    a = 12.0107 + 3 * 18.9984032 + 79.904; z = 6 + 3 * 9 + 35;
+    a = 12.0107 + 3 * 18.9984032 + 79.904;
+    z = 6 + 3 * 9 + 35;
   } else if (gasname == "C3F8") {
-    a = 3 * 12.0107 + 8 * 18.9984032; z = 3 * 6 + 8 * 9;
+    a = 3 * 12.0107 + 8 * 18.9984032;
+    z = 3 * 6 + 8 * 9;
   } else if (gasname == "O3") {
-    a = 3 * 15.9994; z = 3 * 8;
+    a = 3 * 15.9994;
+    z = 3 * 8;
   } else if (gasname == "Hg") {
-    a = 2 * 200.59; z = 80;
+    a = 2 * 200.59;
+    z = 80;
   } else if (gasname == "H2S") {
-    a = 2 * 1.00794 + 32.065; z = 2 + 16;
+    a = 2 * 1.00794 + 32.065;
+    z = 2 + 16;
   } else if (gasname == "nC4H10") {
-    a = 4 * 12.0107 + 10 * 1.00794; z = 4 * 6 + 10;
+    a = 4 * 12.0107 + 10 * 1.00794;
+    z = 4 * 6 + 10;
   } else if (gasname == "nC5H12") {
-    a = 5 * 12.0107 + 12 * 1.00794; z = 5 * 6 + 12;
+    a = 5 * 12.0107 + 12 * 1.00794;
+    z = 5 * 6 + 12;
   } else if (gasname == "N2") {
-    a = 2 * 14.0067; z = 2 * 7;
+    a = 2 * 14.0067;
+    z = 2 * 7;
   } else if (gasname == "GeH4") {
-    a = 72.64   + 4 * 1.00794; z = 32 + 4;
+    a = 72.64 + 4 * 1.00794;
+    z = 32 + 4;
   } else if (gasname == "SiH4") {
-    a = 28.0855 + 4 * 1.00794; z = 14 + 4;
+    a = 28.0855 + 4 * 1.00794;
+    z = 14 + 4;
   } else {
-    a = 0.; z = 0.;
+    a = 0.;
+    z = 0.;
     return false;
   }
-  
-  return true;
 
+  return true;
 }
 
-bool 
-MediumGas::GetGasName(const int gasnumber, const int version,
-                      std::string& gasname) {
+bool MediumGas::GetGasName(const int gasnumber, const int version,
+                           std::string& gasname) {
 
   switch (gasnumber) {
     case 1:
       gasname = "CF4";
       break;
     case 2:
-      gasname = "Ar";   
+      gasname = "Ar";
       break;
-    case 3:  
-      gasname = "He";   
+    case 3:
+      gasname = "He";
       break;
-    case 4:  
-      gasname = "He-3"; 
+    case 4:
+      gasname = "He-3";
       break;
-    case 5:  
-      gasname = "Ne";   
+    case 5:
+      gasname = "Ne";
       break;
-    case 6:  
-      gasname = "Kr";   
+    case 6:
+      gasname = "Kr";
       break;
-    case 7:  
-      gasname = "Xe";   
+    case 7:
+      gasname = "Xe";
       break;
-    case 8:  
+    case 8:
       gasname = "CH4";
       break;
-    case 9:  
-      gasname = "C2H6";  
+    case 9:
+      gasname = "C2H6";
       break;
-    case 10: 
-      gasname = "C3H8";     
+    case 10:
+      gasname = "C3H8";
       break;
-    case 11: 
-      gasname = "iC4H10";   
+    case 11:
+      gasname = "iC4H10";
       break;
-    case 12: 
-      gasname = "CO2";  
+    case 12:
+      gasname = "CO2";
       break;
-    case 13: 
-      gasname = "neoC5H12"; 
+    case 13:
+      gasname = "neoC5H12";
       break;
-    case 14: 
-      gasname = "H2O";  
+    case 14:
+      gasname = "H2O";
       break;
-    case 15: 
-      gasname = "O2";   
+    case 15:
+      gasname = "O2";
       break;
-    case 16: 
-      gasname = "N2";   
+    case 16:
+      gasname = "N2";
       break;
-    case 17: 
-      gasname = "NO";   
+    case 17:
+      gasname = "NO";
       break;
-    case 18: 
-      gasname = "N2O";  
+    case 18:
+      gasname = "N2O";
       break;
-    case 19: 
-      gasname = "C2H4"; 
+    case 19:
+      gasname = "C2H4";
       break;
-    case 20: 
-      gasname = "C2H2"; 
+    case 20:
+      gasname = "C2H2";
       break;
-    case 21: 
-      gasname = "H2";   
+    case 21:
+      gasname = "H2";
       break;
-    case 22: 
-      gasname = "D2";   
+    case 22:
+      gasname = "D2";
       break;
-    case 23: 
-      gasname = "CO";   
+    case 23:
+      gasname = "CO";
       break;
-    case 24: 
-      gasname = "Methylal"; 
+    case 24:
+      gasname = "Methylal";
       break;
-    case 25: 
-      gasname = "DME";      
+    case 25:
+      gasname = "DME";
       break;
-    case 26: 
+    case 26:
       gasname = "Reid-Step";
       break;
-    case 27: 
+    case 27:
       gasname = "Maxwell-Model";
       break;
-    case 28: 
+    case 28:
       gasname = "Reid-Ramp";
       break;
-    case 29: 
-      gasname = "C2F6";    
+    case 29:
+      gasname = "C2F6";
       break;
-    case 30: 
-      gasname = "SF6";     
+    case 30:
+      gasname = "SF6";
       break;
-    case 31: 
-      gasname = "NH3";     
+    case 31:
+      gasname = "NH3";
       break;
-    case 32: 
-      gasname = "C3H6";   
+    case 32:
+      gasname = "C3H6";
       break;
-    case 33: 
-      gasname = "cC3H6";  
+    case 33:
+      gasname = "cC3H6";
       break;
-    case 34: 
-      gasname = "CH3OH";  
+    case 34:
+      gasname = "CH3OH";
       break;
-    case 35: 
-      gasname = "C2H5OH"; 
+    case 35:
+      gasname = "C2H5OH";
       break;
-    case 36: 
-      gasname = "C3H7OH"; 
+    case 36:
+      gasname = "C3H7OH";
       break;
-    case 37: 
-      gasname = "Cs";      
+    case 37:
+      gasname = "Cs";
       break;
-    case 38: 
-      gasname = "F2";      
+    case 38:
+      gasname = "F2";
       break;
-    case 39: 
-      gasname = "CS2";     
+    case 39:
+      gasname = "CS2";
       break;
-    case 40: 
-      gasname = "COS";     
+    case 40:
+      gasname = "COS";
       break;
-    case 41: 
-      gasname = "CD4";     
+    case 41:
+      gasname = "CD4";
       break;
-    case 42: 
-      gasname = "BF3";     
+    case 42:
+      gasname = "BF3";
       break;
-    case 43: 
-      gasname = "C2H2F4";   
+    case 43:
+      gasname = "C2H2F4";
       break;
     case 44:
       if (version <= 11) {
@@ -2058,63 +2195,61 @@ MediumGas::GetGasName(const int gasnumber, const int version,
     case 49:
       gasname = "Xe";
       break;
-    case 50: 
-      gasname = "CHF3";    
+    case 50:
+      gasname = "CHF3";
       break;
-    case 51: 
-      gasname = "CF3Br";   
+    case 51:
+      gasname = "CF3Br";
       break;
-    case 52: 
-      gasname = "C3F8";    
+    case 52:
+      gasname = "C3F8";
       break;
-    case 53: 
-      gasname = "O3";      
+    case 53:
+      gasname = "O3";
       break;
-    case 54: 
-      gasname = "Hg";      
+    case 54:
+      gasname = "Hg";
       break;
-    case 55: 
-      gasname = "H2S";     
+    case 55:
+      gasname = "H2S";
       break;
-    case 56: 
-      gasname = "nC4H10"; 
+    case 56:
+      gasname = "nC4H10";
       break;
-    case 57: 
-      gasname = "nC5H12"; 
+    case 57:
+      gasname = "nC5H12";
       break;
-    case 58: 
-      gasname = "N2";      
+    case 58:
+      gasname = "N2";
       break;
-    case 59: 
-      gasname = "GeH4"; 
+    case 59:
+      gasname = "GeH4";
       break;
-    case 60: 
-      gasname = "SiH4"; 
+    case 60:
+      gasname = "SiH4";
       break;
-    default: 
-      gasname = ""; 
-      return false; 
+    default:
+      gasname = "";
+      return false;
       break;
   }
   return true;
-
 }
 
-bool 
-MediumGas::GetGasName(std::string input, std::string& gasname) const {
+bool MediumGas::GetGasName(std::string input, std::string& gasname) const {
 
   // Convert to upper-case
   for (unsigned int i = 0; i < input.length(); ++i) {
     input[i] = toupper(input[i]);
   }
-  
+
   gasname = "";
-  
+
   if (input == "") return false;
- 
+
   // CF4
-  if (input == "CF4" || input == "FREON" || 
-      input == "FREON-14" || input == "TETRAFLUOROMETHANE") {
+  if (input == "CF4" || input == "FREON" || input == "FREON-14" ||
+      input == "TETRAFLUOROMETHANE") {
     gasname = "CF4";
     return true;
   }
@@ -2124,16 +2259,16 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // Helium 4
-  if (input == "HE" || input == "HELIUM" || 
-      input == "HE-4" || input == "HE 4" || input == "HE4" ||
-      input == "4-HE" || input == "4 HE" || input == "4HE" || 
-      input == "HELIUM-4" || input == "HELIUM 4" || input == "HELIUM4") {
+  if (input == "HE" || input == "HELIUM" || input == "HE-4" ||
+      input == "HE 4" || input == "HE4" || input == "4-HE" || input == "4 HE" ||
+      input == "4HE" || input == "HELIUM-4" || input == "HELIUM 4" ||
+      input == "HELIUM4") {
     gasname = "He";
     return true;
   }
   // Helium 3
-  if (input == "HE-3" || input == "HE3" || 
-      input == "HELIUM-3" || input == "HELIUM 3" || input == "HELIUM3") {
+  if (input == "HE-3" || input == "HE3" || input == "HELIUM-3" ||
+      input == "HELIUM 3" || input == "HELIUM3") {
     gasname = "He-3";
     return true;
   }
@@ -2144,588 +2279,624 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
   }
   // Krypton
   if (input == "KR" || input == "KRYPTON") {
-    gasname = "Kr"; 
+    gasname = "Kr";
     return true;
   }
   // Xenon
   if (input == "XE" || input == "XENON") {
-    gasname = "Xe"; 
+    gasname = "Xe";
     return true;
   }
   // Methane
-  if (input == "CH4" || input == "METHANE" ) {
-    gasname = "CH4"; 
+  if (input == "CH4" || input == "METHANE") {
+    gasname = "CH4";
     return true;
   }
   // Ethane
   if (input == "C2H6" || input == "ETHANE") {
-    gasname = "C2H6"; 
+    gasname = "C2H6";
     return true;
   }
   // Propane
   if (input == "C3H8" || input == "PROPANE") {
-    gasname = "C3H8"; 
+    gasname = "C3H8";
     return true;
   }
   // Isobutane
-  if (input == "C4H10" || input == "ISOBUTANE" || input == "ISO" || 
+  if (input == "C4H10" || input == "ISOBUTANE" || input == "ISO" ||
       input == "IC4H10" || input == "ISO-C4H10" || input == "ISOC4H10") {
-    gasname = "iC4H10"; 
+    gasname = "iC4H10";
     return true;
   }
   // Carbon dioxide (CO2)
   if (input == "CO2" || input == "CARBON-DIOXIDE" ||
       input == "CARBON DIOXIDE" || input == "CARBONDIOXIDE") {
-    gasname = "CO2"; 
+    gasname = "CO2";
     return true;
   }
   // Neopentane
-  if (input == "NEOPENTANE" || input == "NEO-PENTANE" || 
-      input == "NEO-C5H12" || input == "NEOC5H12" || 
-      input == "DIMETHYLPROPANE" || input == "C5H12") {
-    gasname = "neoC5H12"; 
+  if (input == "NEOPENTANE" || input == "NEO-PENTANE" || input == "NEO-C5H12" ||
+      input == "NEOC5H12" || input == "DIMETHYLPROPANE" || input == "C5H12") {
+    gasname = "neoC5H12";
     return true;
   }
   // Water
-  if (input == "H2O" || input == "WATER" || 
-      input == "WATER-VAPOUR" || input == "WATER VAPOUR") {
-    gasname = "H2O"; 
+  if (input == "H2O" || input == "WATER" || input == "WATER-VAPOUR" ||
+      input == "WATER VAPOUR") {
+    gasname = "H2O";
     return true;
   }
   // Oxygen
   if (input == "O2" || input == "OXYGEN") {
-    gasname = "O2"; 
+    gasname = "O2";
     return true;
   }
   // Nitrogen
-  if (input == "NI" || input == "NITRO" || 
-      input == "N2" || input == "NITROGEN") {
-    gasname = "N2"; 
+  if (input == "NI" || input == "NITRO" || input == "N2" ||
+      input == "NITROGEN") {
+    gasname = "N2";
     return true;
   }
   // Nitric oxide (NO)
-  if (input == "NO" || 
-      input == "NITRIC-OXIDE" || input == "NITRIC OXIDE" ||  
+  if (input == "NO" || input == "NITRIC-OXIDE" || input == "NITRIC OXIDE" ||
       input == "NITROGEN-MONOXIDE" || input == "NITROGEN MONOXIDE") {
-    gasname = "NO"; 
+    gasname = "NO";
     return true;
   }
   // Nitrous oxide (N2O)
-  if (input == "N2O" || 
-      input == "NITROUS-OXIDE" || input == "NITROUS OXIDE" ||  
+  if (input == "N2O" || input == "NITROUS-OXIDE" || input == "NITROUS OXIDE" ||
       input == "DINITROGEN-MONOXIDE" || input == "LAUGHING-GAS") {
-    gasname = "N2O"; 
+    gasname = "N2O";
     return true;
   }
   // Ethene (C2H4)
   if (input == "C2H4" || input == "ETHENE" || input == "ETHYLENE") {
-    gasname = "C2H4"; 
+    gasname = "C2H4";
     return true;
   }
   // Acetylene (C2H2)
-  if (input == "C2H2" || input == "ACETYL" || 
-      input == "ACETYLENE" || input == "ETHYNE") {
-    gasname = "C2H2"; 
+  if (input == "C2H2" || input == "ACETYL" || input == "ACETYLENE" ||
+      input == "ETHYNE") {
+    gasname = "C2H2";
     return true;
   }
   // Hydrogen
   if (input == "H2" || input == "HYDROGEN") {
-    gasname = "H2"; 
+    gasname = "H2";
     return true;
   }
   // Deuterium
   if (input == "D2" || input == "DEUTERIUM") {
-    gasname = "D2"; 
+    gasname = "D2";
     return true;
   }
   // Carbon monoxide (CO)
-  if (input == "CO" || input == "CARBON-MONOXIDE" || 
+  if (input == "CO" || input == "CARBON-MONOXIDE" ||
       input == "CARBON MONOXIDE") {
-    gasname = "CO"; 
+    gasname = "CO";
     return true;
   }
   // Methylal (dimethoxymethane, CH3-O-CH2-O-CH3, "hot" version)
   if (input == "METHYLAL" || input == "METHYLAL-HOT" || input == "DMM" ||
-      input == "DIMETHOXYMETHANE" || input == "FORMAL" || 
-      input == "C3H8O2") {
-    gasname = "Methylal"; 
+      input == "DIMETHOXYMETHANE" || input == "FORMAL" || input == "C3H8O2") {
+    gasname = "Methylal";
     return true;
   }
   // DME
-  if (input == "DME" || 
-      input == "DIMETHYL-ETHER" || input == "DIMETHYLETHER" ||
-      input == "DIMETHYL ETHER" || input == "METHYL ETHER" || 
+  if (input == "DME" || input == "DIMETHYL-ETHER" || input == "DIMETHYLETHER" ||
+      input == "DIMETHYL ETHER" || input == "METHYL ETHER" ||
       input == "METHYL-ETHER" || input == "METHYLETHER" ||
-      input == "WOOD-ETHER" || input == "WOODETHER" ||
-      input == "WOOD ETHER" || input == "DIMETHYL OXIDE" || 
-      input == "DIMETHYL-OXIDE" || input == "DEMEON" || 
-      input == "METHOXYMETHANE" || input == "C4H10O2") {
-    gasname = "DME"; 
+      input == "WOOD-ETHER" || input == "WOODETHER" || input == "WOOD ETHER" ||
+      input == "DIMETHYL OXIDE" || input == "DIMETHYL-OXIDE" ||
+      input == "DEMEON" || input == "METHOXYMETHANE" || input == "C4H10O2") {
+    gasname = "DME";
     return true;
   }
   // Reid step
   if (input == "REID-STEP") {
-    gasname = "Reid-Step"; 
+    gasname = "Reid-Step";
     return true;
   }
   // Maxwell model
   if (input == "MAXWELL-MODEL") {
-    gasname = "Maxwell-Model"; 
+    gasname = "Maxwell-Model";
     return true;
   }
   // Reid ramp
   if (input == "REID-RAMP") {
-    gasname = "Reid-Ramp"; 
+    gasname = "Reid-Ramp";
     return true;
   }
   // C2F6
-  if (input == "C2F6" || input == "FREON-116" || input == "ZYRON-116" || 
+  if (input == "C2F6" || input == "FREON-116" || input == "ZYRON-116" ||
       input == "ZYRON-116-N5" || input == "HEXAFLUOROETHANE") {
-    gasname = "C2F6"; 
+    gasname = "C2F6";
     return true;
   }
   // SF6
-  if (input == "SF6" || 
-      input == "SULPHUR-HEXAFLUORIDE" || input == "SULFUR-HEXAFLUORIDE" ||
-      input == "SULPHUR HEXAFLUORIDE" || input == "SULFUR HEXAFLUORIDE") {
-    gasname = "SF6"; 
+  if (input == "SF6" || input == "SULPHUR-HEXAFLUORIDE" ||
+      input == "SULFUR-HEXAFLUORIDE" || input == "SULPHUR HEXAFLUORIDE" ||
+      input == "SULFUR HEXAFLUORIDE") {
+    gasname = "SF6";
     return true;
   }
   // NH3
   if (input == "NH3" || input == "AMMONIA") {
-    gasname = "NH3"; 
+    gasname = "NH3";
     return true;
   }
   // Propene
   if (input == "C3H6" || input == "PROPENE" || input == "PROPYLENE") {
-    gasname = "C3H6"; 
+    gasname = "C3H6";
     return true;
   }
   // Cyclopropane
   if (input == "C-PROPANE" || input == "CYCLO-PROPANE" ||
       input == "CYCLO PROPANE" || input == "CYCLOPROPANE" ||
       input == "C-C3H6" || input == "CC3H6" || input == "CYCLO-C3H6") {
-    gasname = "cC3H6"; 
+    gasname = "cC3H6";
     return true;
   }
   // Methanol
   if (input == "METHANOL" || input == "METHYL-ALCOHOL" ||
-      input == "METHYL ALCOHOL" || input == "WOOD ALCOHOL" ||  
+      input == "METHYL ALCOHOL" || input == "WOOD ALCOHOL" ||
       input == "WOOD-ALCOHOL" || input == "CH3OH") {
-    gasname = "CH3OH"; 
+    gasname = "CH3OH";
     return true;
   }
   // Ethanol
   if (input == "ETHANOL" || input == "ETHYL-ALCOHOL" ||
-      input == "ETHYL ALCOHOL" || input == "GRAIN ALCOHOL" ||  
+      input == "ETHYL ALCOHOL" || input == "GRAIN ALCOHOL" ||
       input == "GRAIN-ALCOHOL" || input == "C2H5OH") {
-    gasname = "C2H5OH"; 
+    gasname = "C2H5OH";
     return true;
   }
   // Propanol
-  if (input == "PROPANOL" || input == "2-PROPANOL" || 
-      input == "ISOPROPYL" || input == "ISO-PROPANOL" || 
-      input == "ISOPROPANOL" || input == "ISOPROPYL ALCOHOL" ||
-      input == "ISOPROPYL-ALCOHOL" || input == "C3H7OH") {
-    gasname = "C3H7OH"; 
+  if (input == "PROPANOL" || input == "2-PROPANOL" || input == "ISOPROPYL" ||
+      input == "ISO-PROPANOL" || input == "ISOPROPANOL" ||
+      input == "ISOPROPYL ALCOHOL" || input == "ISOPROPYL-ALCOHOL" ||
+      input == "C3H7OH") {
+    gasname = "C3H7OH";
     return true;
   }
   // Cesium / Caesium.
   if (input == "CS" || input == "CESIUM" || input == "CAESIUM") {
-    gasname = "Cs"; 
+    gasname = "Cs";
     return true;
   }
   // Fluorine
   if (input == "F2" || input == "FLUOR" || input == "FLUORINE") {
-    gasname = "F2"; 
+    gasname = "F2";
     return true;
   }
   // CS2
-  if (input == "CS2" || 
-      input == "CARBON-DISULPHIDE" || input == "CARBON-DISULFIDE" || 
-      input == "CARBON DISULPHIDE" || input == "CARBON DISULFIDE") {
-    gasname = "CS2"; 
+  if (input == "CS2" || input == "CARBON-DISULPHIDE" ||
+      input == "CARBON-DISULFIDE" || input == "CARBON DISULPHIDE" ||
+      input == "CARBON DISULFIDE") {
+    gasname = "CS2";
     return true;
   }
   // COS
-  if (input == "COS" || input == "CARBONYL-SULPHIDE" || 
+  if (input == "COS" || input == "CARBONYL-SULPHIDE" ||
       input == "CARBONYL-SULFIDE" || input == "CARBONYL SULFIDE") {
-    gasname = "COS"; 
+    gasname = "COS";
     return true;
   }
   // Deuterated methane
-  if (input == "DEUT-METHANE" || input == "DEUTERIUM-METHANE" || 
+  if (input == "DEUT-METHANE" || input == "DEUTERIUM-METHANE" ||
       input == "DEUTERATED-METHANE" || input == "DEUTERATED METHANE" ||
       input == "DEUTERIUM METHANE" || input == "CD4") {
-    gasname = "CD4"; 
+    gasname = "CD4";
     return true;
   }
   // BF3
-  if (input == "BF3" || input == "BORON-TRIFLUORIDE" || 
+  if (input == "BF3" || input == "BORON-TRIFLUORIDE" ||
       input == "BORON TRIFLUORIDE") {
-    gasname = "BF3"; 
+    gasname = "BF3";
     return true;
   }
   // C2H2F4 (and C2HF5).
-  if (input == "C2HF5" || input == "C2H2F4" || input == "C2F5H" || 
-      input == "C2F4H2" || 
-      input == "FREON 134" || input == "FREON 134A" || 
-      input == "FREON-134" || input == "FREON-134-A" || 
-      input == "FREON 125" || input == "ZYRON 125" ||
-      input == "FREON-125" || input == "ZYRON-125" || 
+  if (input == "C2HF5" || input == "C2H2F4" || input == "C2F5H" ||
+      input == "C2F4H2" || input == "FREON 134" || input == "FREON 134A" ||
+      input == "FREON-134" || input == "FREON-134-A" || input == "FREON 125" ||
+      input == "ZYRON 125" || input == "FREON-125" || input == "ZYRON-125" ||
       input == "TETRAFLUOROETHANE" || input == "PENTAFLUOROETHANE") {
-    gasname = "C2H2F4"; 
+    gasname = "C2H2F4";
     return true;
   }
   // TMA
-  if (input == "TMA" || input == "TRIMETHYLAMINE" || 
-      input == "N(CH3)3" || input == "N-(CH3)3") {
+  if (input == "TMA" || input == "TRIMETHYLAMINE" || input == "N(CH3)3" ||
+      input == "N-(CH3)3") {
     gasname = "TMA";
     return true;
   }
   // CHF3
-  if (input == "CHF3" || input == "FREON-23" || 
-      input == "TRIFLUOROMETHANE" || input == "FLUOROFORM") {
-    gasname = "CHF3"; 
+  if (input == "CHF3" || input == "FREON-23" || input == "TRIFLUOROMETHANE" ||
+      input == "FLUOROFORM") {
+    gasname = "CHF3";
     return true;
   }
   // CF3Br
   if (input == "CF3BR" || input == "TRIFLUOROBROMOMETHANE" ||
-      input == "BROMOTRIFLUOROMETHANE" ||  
-      input == "HALON-1301" || input == "HALON 1301" || 
-      input == "FREON-13B1" || input == "FREON 13BI") {
-    gasname = "CF3Br"; 
+      input == "BROMOTRIFLUOROMETHANE" || input == "HALON-1301" ||
+      input == "HALON 1301" || input == "FREON-13B1" || input == "FREON 13BI") {
+    gasname = "CF3Br";
     return true;
   }
   // C3F8
-  if (input == "C3F8" || input == "OCTAFLUOROPROPANE" || 
-      input == "R218" || input == "R-218" || input == "FREON 218" || 
-      input == "FREON-218" || input == "PERFLUOROPROPANE" || 
-      input == "RC 218" || input == "PFC 218" || 
-      input == "RC-218" || input == "PFC-218" || 
-      input == "FLUTEC PP30" || input == "GENETRON 218") {
-    gasname = "C3F8"; 
+  if (input == "C3F8" || input == "OCTAFLUOROPROPANE" || input == "R218" ||
+      input == "R-218" || input == "FREON 218" || input == "FREON-218" ||
+      input == "PERFLUOROPROPANE" || input == "RC 218" || input == "PFC 218" ||
+      input == "RC-218" || input == "PFC-218" || input == "FLUTEC PP30" ||
+      input == "GENETRON 218") {
+    gasname = "C3F8";
     return true;
   }
   // Ozone
   if (input == "OZONE" || input == "O3") {
-    gasname = "O3"; 
+    gasname = "O3";
     return true;
   }
   // Mercury
   if (input == "MERCURY" || input == "HG" || input == "HG2") {
-    gasname = "Hg"; 
+    gasname = "Hg";
     return true;
   }
   // H2S
-  if (input == "H2S" || 
-      input == "HYDROGEN SULPHIDE" || input == "SEWER GAS" ||  
+  if (input == "H2S" || input == "HYDROGEN SULPHIDE" || input == "SEWER GAS" ||
       input == "HYDROGEN-SULPHIDE" || input == "SEWER-GAS" ||
       input == "HYDROGEN SULFIDE" || input == "HEPATIC ACID" ||
       input == "HYDROGEN-SULFIDE" || input == "HEPATIC-ACID" ||
-      input == "SULFUR HYDRIDE" || input == "DIHYDROGEN MONOSULFIDE" || 
-      input == "SULFUR-HYDRIDE" || input == "DIHYDROGEN-MONOSULFIDE" || 
+      input == "SULFUR HYDRIDE" || input == "DIHYDROGEN MONOSULFIDE" ||
+      input == "SULFUR-HYDRIDE" || input == "DIHYDROGEN-MONOSULFIDE" ||
       input == "DIHYDROGEN MONOSULPHIDE" || input == "SULPHUR HYDRIDE" ||
       input == "DIHYDROGEN-MONOSULPHIDE" || input == "SULPHUR-HYDRIDE" ||
-      input == "STINK DAMP" || input == "SULFURATED HYDROGEN" || 
+      input == "STINK DAMP" || input == "SULFURATED HYDROGEN" ||
       input == "STINK-DAMP" || input == "SULFURATED-HYDROGEN") {
-    gasname = "H2S"; 
+    gasname = "H2S";
     return true;
   }
   // n-Butane
-  if (input == "N-BUTANE" || input == "N-C4H10" ||
-      input == "NBUTANE" || input == "NC4H10") {
-    gasname = "nC4H10"; 
+  if (input == "N-BUTANE" || input == "N-C4H10" || input == "NBUTANE" ||
+      input == "NC4H10") {
+    gasname = "nC4H10";
     return true;
   }
   // n-Pentane
-  if (input == "N-PENTANE" || input == "N-C5H12" ||
-      input == "NPENTANE" || input == "NC5H12") {
-    gasname = "nC5H12"; 
+  if (input == "N-PENTANE" || input == "N-C5H12" || input == "NPENTANE" ||
+      input == "NC5H12") {
+    gasname = "nC5H12";
     return true;
   }
   // Nitrogen
-  if (input == "NI-PHELPS" || input == "NI PHELPS" || 
+  if (input == "NI-PHELPS" || input == "NI PHELPS" ||
       input == "NITROGEN-PHELPS" || input == "NITROGEN PHELPHS" ||
-      input == "N2-PHELPS" || input == "N2 PHELPS" ||
-      input == "N2 (PHELPS)") {
-    gasname = "N2 (Phelps)"; 
+      input == "N2-PHELPS" || input == "N2 PHELPS" || input == "N2 (PHELPS)") {
+    gasname = "N2 (Phelps)";
     return true;
   }
   // Germane, GeH4
-  if (input == "GERMANE" || input == "GERM" || 
-      input == "GERMANIUM-HYDRIDE" || input == "GERMANIUM HYDRIDE" || 
-      input == "GERMANIUM TETRAHYDRIDE" ||  
-      input == "GERMANIUM-TETRAHYDRIDE" || input == "GERMANOMETHANE" || 
+  if (input == "GERMANE" || input == "GERM" || input == "GERMANIUM-HYDRIDE" ||
+      input == "GERMANIUM HYDRIDE" || input == "GERMANIUM TETRAHYDRIDE" ||
+      input == "GERMANIUM-TETRAHYDRIDE" || input == "GERMANOMETHANE" ||
       input == "MONOGERMANE" || input == "GEH4") {
-    gasname = "GeH4"; 
+    gasname = "GeH4";
     return true;
   }
   // Silane, SiH4
-  if (input == "SILANE" || input == "SIL" || 
-      input == "SILICON-HYDRIDE" || input == "SILICON HYDRIDE" || 
-      input == "SILICON-TETRAHYDRIDE" || input == "SILICANE" || 
-      input == "MONOSILANE" || input == "SIH4") {
-    gasname = "SiH4"; 
+  if (input == "SILANE" || input == "SIL" || input == "SILICON-HYDRIDE" ||
+      input == "SILICON HYDRIDE" || input == "SILICON-TETRAHYDRIDE" ||
+      input == "SILICANE" || input == "MONOSILANE" || input == "SIH4") {
+    gasname = "SiH4";
     return true;
   }
-  
+
   std::cerr << className << "::GetGasName:\n";
   std::cerr << "    Gas " << input << " is not defined.\n";
   return false;
-  
 }
 
-bool 
-MediumGas::GetGasNumberGasFile(const std::string input, int& number) const {
+bool MediumGas::GetGasNumberGasFile(const std::string input,
+                                    int& number) const {
 
   if (input == "") {
-    number = 0; return false;
+    number = 0;
+    return false;
   }
- 
+
   // CF4
-  if (input == "CF4") { 
-    number = 1; return true;
+  if (input == "CF4") {
+    number = 1;
+    return true;
   }
   // Argon
   if (input == "Ar") {
-    number = 2; return true;
+    number = 2;
+    return true;
   }
   // Helium 4
   if (input == "He" || input == "He-4") {
-    number = 3; return true;
+    number = 3;
+    return true;
   }
   // Helium 3
   if (input == "He-3") {
-    number = 4; return true;
+    number = 4;
+    return true;
   }
   // Neon
   if (input == "Ne") {
-    number = 5; return true;
+    number = 5;
+    return true;
   }
   // Krypton
   if (input == "Kr") {
-    number = 6; return true;
+    number = 6;
+    return true;
   }
   // Xenon
   if (input == "Xe") {
-    number = 7; return true;
+    number = 7;
+    return true;
   }
   // Methane
   if (input == "CH4") {
-    number = 8; return true;
+    number = 8;
+    return true;
   }
   // Ethane
   if (input == "C2H6") {
-    number = 9; return true;
+    number = 9;
+    return true;
   }
   // Propane
   if (input == "C3H8") {
-    number = 10; return true;
+    number = 10;
+    return true;
   }
   // Isobutane
   if (input == "iC4H10") {
-    number = 11; return true;
+    number = 11;
+    return true;
   }
   // Carbon dioxide (CO2)
   if (input == "CO2") {
-    number = 12; return true;
+    number = 12;
+    return true;
   }
   // Neopentane
   if (input == "neoC5H12") {
-    number = 13; return true;
+    number = 13;
+    return true;
   }
   // Water
   if (input == "H2O") {
-    number = 14; return true;
+    number = 14;
+    return true;
   }
   // Oxygen
   if (input == "O2") {
-    number = 15; return true;
+    number = 15;
+    return true;
   }
   // Nitrogen
   if (input == "N2") {
-    number = 16; return true;
+    number = 16;
+    return true;
   }
   // Nitric oxide (NO)
   if (input == "NO") {
-    number = 17; return true;
+    number = 17;
+    return true;
   }
   // Nitrous oxide (N2O)
   if (input == "N2O") {
-    number = 18; return true;
+    number = 18;
+    return true;
   }
   // Ethene (C2H4)
   if (input == "C2H4") {
-    number = 19; return true;
+    number = 19;
+    return true;
   }
   // Acetylene (C2H2)
   if (input == "C2H2") {
-    number = 20; return true;
+    number = 20;
+    return true;
   }
   // Hydrogen
   if (input == "H2") {
-    number = 21; return true;
+    number = 21;
+    return true;
   }
   // Deuterium
   if (input == "D2") {
-    number = 22; return true;
+    number = 22;
+    return true;
   }
   // Carbon monoxide (CO)
   if (input == "CO") {
-    number = 23; return true;
+    number = 23;
+    return true;
   }
   // Methylal (dimethoxymethane, CH3-O-CH2-O-CH3, "hot" version)
   if (input == "Methylal") {
-    number = 24; return true;
+    number = 24;
+    return true;
   }
   // DME
   if (input == "DME") {
-    number = 25; return true;
+    number = 25;
+    return true;
   }
   // Reid step
   if (input == "Reid-Step") {
-    number = 26; return true;
+    number = 26;
+    return true;
   }
   // Maxwell model
   if (input == "Maxwell-Model") {
-    number = 27; return true;
+    number = 27;
+    return true;
   }
   // Reid ramp
   if (input == "Reid-Ramp") {
-    number = 28; return true;
+    number = 28;
+    return true;
   }
   // C2F6
   if (input == "C2F6") {
-    number = 29; return true;
+    number = 29;
+    return true;
   }
   // SF6
   if (input == "SF6") {
-    number = 30; return true;
+    number = 30;
+    return true;
   }
   // NH3
   if (input == "NH3") {
-    number = 31; return true;
+    number = 31;
+    return true;
   }
   // Propene
   if (input == "C3H6") {
-    number = 32; return true;
+    number = 32;
+    return true;
   }
   // Cyclopropane
   if (input == "cC3H6") {
-    number = 33; return true;
+    number = 33;
+    return true;
   }
   // Methanol
   if (input == "CH3OH") {
-    number = 34; return true;
+    number = 34;
+    return true;
   }
   // Ethanol
   if (input == "C2H5OH") {
-    number = 35; return true;
+    number = 35;
+    return true;
   }
   // Propanol
   if (input == "C3H7OH") {
-    number = 36; return true;
+    number = 36;
+    return true;
   }
   // Cesium / Caesium.
   if (input == "Cs") {
-    number = 37; return true;
+    number = 37;
+    return true;
   }
   // Fluorine
   if (input == "F2") {
-    number = 38; return true;
+    number = 38;
+    return true;
   }
   // CS2
   if (input == "CS2") {
-    number = 39; return true;
+    number = 39;
+    return true;
   }
   // COS
   if (input == "COS") {
-    number = 40; return true;
+    number = 40;
+    return true;
   }
   // Deuterated methane
   if (input == "CD4") {
-    number = 41; return true;
+    number = 41;
+    return true;
   }
   // BF3
   if (input == "BF3") {
-    number = 42; return true;
+    number = 42;
+    return true;
   }
   // C2HF5 and C2H2F4.
   if (input == "C2HF5" || input == "C2H2F4") {
-    number = 43; return true;
+    number = 43;
+    return true;
   }
   // TMA
   if (input == "TMA") {
-    number = 44; return true;
+    number = 44;
+    return true;
   }
   // CHF3
   if (input == "CHF3") {
-    number = 50; return true;
+    number = 50;
+    return true;
   }
   // CF3Br
   if (input == "CF3Br") {
-    number = 51; return true;
+    number = 51;
+    return true;
   }
   // C3F8
   if (input == "C3F8") {
-    number = 52; return true;
+    number = 52;
+    return true;
   }
   // Ozone
   if (input == "O3") {
-    number = 53; return true;
+    number = 53;
+    return true;
   }
   // Mercury
   if (input == "Hg") {
-    number = 54; return true;
+    number = 54;
+    return true;
   }
   // H2S
   if (input == "H2S") {
-    number = 55; return true;
+    number = 55;
+    return true;
   }
   // n-butane
   if (input == "nC4H10") {
-    number = 56; return true;
+    number = 56;
+    return true;
   }
   // n-pentane
   if (input == "nC5H12") {
-    number = 57; return true;
+    number = 57;
+    return true;
   }
   // Nitrogen
   if (input == "N2 (Phelps)") {
-    number = 58; return true;
+    number = 58;
+    return true;
   }
   // Germane, GeH4
   if (input == "GeH4") {
-    number = 59; return true;
+    number = 59;
+    return true;
   }
   // Silane, SiH4
   if (input == "SiH4") {
-    number = 60; return true;
+    number = 60;
+    return true;
   }
-  
+
   std::cerr << className << "::GetGasNumberGasFile:\n";
   std::cerr << "    Gas " << input << " is not defined.\n";
   return false;
-  
 }
 
-bool
-MediumGas::GetPhotoabsorptionCrossSection(const double e, double& sigma,
-                                          const int i) {
+bool MediumGas::GetPhotoabsorptionCrossSection(const double e, double& sigma,
+                                               const int i) {
 
   if (i < 0 || i >= nMaxGases) {
     std::cerr << className << "::GetPhotoabsorptionCrossSection:\n";
     std::cerr << "    Index (" << i << ") out of range.\n";
     return false;
   }
-  
+
   OpticalData optData;
   if (!optData.IsAvailable(gas[i])) return false;
   double eta = 0.;
-  return optData.GetPhotoabsorptionCrossSection(gas[i], e, sigma, eta);  
-
+  return optData.GetPhotoabsorptionCrossSection(gas[i], e, sigma, eta);
 }
-
 }
- 

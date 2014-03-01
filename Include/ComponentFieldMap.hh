@@ -8,231 +8,222 @@ namespace Garfield {
 
 class ComponentFieldMap : public ComponentBase {
 
-  public:
-    // Constructor
-    ComponentFieldMap();
-    // Destructor
-    virtual ~ComponentFieldMap() {}
+ public:
+  // Constructor
+  ComponentFieldMap();
+  // Destructor
+  virtual ~ComponentFieldMap() {}
 
-    // Ranges
-    // Calculates x, y, z, V and angular ranges
-    void SetRange();
-    // Shows x, y, z, V and angular ranges
-    void PrintRange();
-    // Returns the current sensor size
-    virtual 
-    bool IsInBoundingBox(const double x, const double y, const double z);
-    virtual
-    bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
-                        double& xmax, double& ymax, double& zmax);
- 
-    bool GetVoltageRange(double& vmin, double& vmax) {
-      vmin = mapvmin; vmax = mapvmax; return true;
-    }
+  // Ranges
+  // Calculates x, y, z, V and angular ranges
+  void SetRange();
+  // Shows x, y, z, V and angular ranges
+  void PrintRange();
+  // Returns the current sensor size
+  virtual bool IsInBoundingBox(const double x, const double y, const double z);
+  virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
+                              double& xmax, double& ymax, double& zmax);
 
-    // Materials
-    // List all currently defined materials
-    void PrintMaterials();
-    // Make into a drift medium
-    void DriftMedium(int imat);
-    // Make into a non-drift medium
-    void NotDriftMedium(int imat);
-    // Number of materials
-    int GetNumberOfMaterials() {return nMaterials;}
-    // Return permittivity
-    double GetPermittivity(const int imat);
-    // Return conductivity
-    double GetConductivity(const int imat);
-    // Associate a material with a Medium class
-    void SetMedium(const int imat, Medium* medium);
-    // Returns the medium for a material
-    bool GetMedium(const int i, Medium*& m) const;
-    virtual
-    bool GetMedium(const double x, const double y, const double z, 
-                   Medium*& medium) = 0;
-    int GetNumberOfMedia() {return nMaterials;}
+  bool GetVoltageRange(double& vmin, double& vmax) {
+    vmin = mapvmin;
+    vmax = mapvmax;
+    return true;
+  }
 
-    int GetNumberOfElements() const {return nElements;}
-    bool GetElement(const int i, double& vol, double& dmin, double& dmax);
+  // Materials
+  // List all currently defined materials
+  void PrintMaterials();
+  // Make into a drift medium
+  void DriftMedium(int imat);
+  // Make into a non-drift medium
+  void NotDriftMedium(int imat);
+  // Number of materials
+  int GetNumberOfMaterials() { return nMaterials; }
+  // Return permittivity
+  double GetPermittivity(const int imat);
+  // Return conductivity
+  double GetConductivity(const int imat);
+  // Associate a material with a Medium class
+  void SetMedium(const int imat, Medium* medium);
+  // Returns the medium for a material
+  bool GetMedium(const int i, Medium*& m) const;
+  virtual bool GetMedium(const double x, const double y, const double z,
+                         Medium*& medium) = 0;
+  int GetNumberOfMedia() { return nMaterials; }
 
-    virtual 
-    void ElectricField(const double x, const double y, const double z,
-                       double& ex, double& ey, double& ez, 
-                       Medium*& m, int& status) = 0;
-    virtual 
-    void ElectricField(const double x, const double y, const double z, 
-                       double& ex, double& ey, double& ez, double& v, 
-                       Medium*& m, int& status) = 0;
+  int GetNumberOfElements() const { return nElements; }
+  bool GetElement(const int i, double& vol, double& dmin, double& dmax);
 
-    virtual
-    void WeightingField(const double x, const double y, const double z,
-                        double& wx, double& wy, double& wz,
-                        const std::string label) = 0;
+  virtual void ElectricField(const double x, const double y, const double z,
+                             double& ex, double& ey, double& ez, Medium*& m,
+                             int& status) = 0;
+  virtual void ElectricField(const double x, const double y, const double z,
+                             double& ex, double& ey, double& ez, double& v,
+                             Medium*& m, int& status) = 0;
 
-    virtual
-    double WeightingPotential(const double x, const double y, const double z,
+  virtual void WeightingField(const double x, const double y, const double z,
+                              double& wx, double& wy, double& wz,
                               const std::string label) = 0;
 
-    // Options
-    void EnableCheckMapIndices() {
-      checkMultipleElement = true; lastElement = -1;
-    }
-    void DisableCheckMapIndices() {checkMultipleElement = false;}
-    void EnableDeleteBackgroundElements()  {deleteBackground = true;}
-    void DisableDeleteBackgroundElements() {deleteBackground = false;}
+  virtual double WeightingPotential(const double x, const double y,
+                                    const double z,
+                                    const std::string label) = 0;
 
-    friend class ViewFEMesh;
-    
-  protected:
+  // Options
+  void EnableCheckMapIndices() {
+    checkMultipleElement = true;
+    lastElement = -1;
+  }
+  void DisableCheckMapIndices() { checkMultipleElement = false; }
+  void EnableDeleteBackgroundElements() { deleteBackground = true; }
+  void DisableDeleteBackgroundElements() { deleteBackground = false; }
 
-    bool is3d;
- 
-    // Elements
-    int nElements;
-    struct element {
-      // Nodes
-      int emap[10];
-      // Material
-      int matmap;
-      bool degenerate;
-    };
-    std::vector<element> elements;
-    int lastElement;
+  friend class ViewFEMesh;
 
+ protected:
+  bool is3d;
+
+  // Elements
+  int nElements;
+  struct element {
     // Nodes
-    int nNodes;
-    struct node {
-      // Coordinates
-      double x, y, z;
-      // Potential
-      double v;
-      // Weighting potentials
-      std::vector<double> w;
-    };
-    std::vector<node> nodes;
+    int emap[10];
+    // Material
+    int matmap;
+    bool degenerate;
+  };
+  std::vector<element> elements;
+  int lastElement;
 
-    // Materials
-    int nMaterials;
-    struct material {
-      // Permittivity
-      double eps;
-      // Resistivity
-      double ohm;
-      bool driftmedium;
-      // Associated medium
-      Medium* medium;
-    };
-    std::vector<material> materials;
+  // Nodes
+  int nNodes;
+  struct node {
+    // Coordinates
+    double x, y, z;
+    // Potential
+    double v;
+    // Weighting potentials
+    std::vector<double> w;
+  };
+  std::vector<node> nodes;
 
-    int nWeightingFields;
-    std::vector<std::string> wfields;
-    std::vector<bool> wfieldsOk;
+  // Materials
+  int nMaterials;
+  struct material {
+    // Permittivity
+    double eps;
+    // Resistivity
+    double ohm;
+    bool driftmedium;
+    // Associated medium
+    Medium* medium;
+  };
+  std::vector<material> materials;
 
-    // Bounding box
-    bool hasBoundingBox;
-    double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
-    double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
+  int nWeightingFields;
+  std::vector<std::string> wfields;
+  std::vector<bool> wfieldsOk;
 
-    // Ranges and periodicities
-    double mapxmin, mapymin, mapzmin;
-    double mapxmax, mapymax, mapzmax;
-    double mapxamin, mapyamin, mapzamin;
-    double mapxamax, mapyamax, mapzamax;
-    double mapvmin, mapvmax;
+  // Bounding box
+  bool hasBoundingBox;
+  double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
+  double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
 
-    bool setangx, setangy, setangz;
-    double mapsx, mapsy, mapsz;
+  // Ranges and periodicities
+  double mapxmin, mapymin, mapzmin;
+  double mapxmax, mapymax, mapzmax;
+  double mapxamin, mapyamin, mapzamin;
+  double mapxamax, mapyamax, mapzamax;
+  double mapvmin, mapvmax;
 
-    double cellsx, cellsy, cellsz;
-    double mapnxa, mapnya, mapnza;
+  bool setangx, setangy, setangz;
+  double mapsx, mapsy, mapsz;
 
-    // Options
-    // Delete meshing in conductors
-    bool deleteBackground;
-    // Scan for multiple elements that contain a point
-    bool checkMultipleElement;
+  double cellsx, cellsy, cellsz;
+  double mapnxa, mapnya, mapnza;
 
-    // Warnings flag
-    bool warning;
+  // Options
+  // Delete meshing in conductors
+  bool deleteBackground;
+  // Scan for multiple elements that contain a point
+  bool checkMultipleElement;
 
-    // Reset the component
-    void Reset() {};
+  // Warnings flag
+  bool warning;
 
-    // Periodicities
-    virtual void UpdatePeriodicity() = 0;
-    void UpdatePeriodicity2d();
-    void UpdatePeriodicityCommon();
-    
-    // Local coordinates
-    // Calculate coordinates for curved quadratic triangles
-    int Coordinates3(double x, double y, double z,
-            double& t1, double& t2, double& t3, double& t4,
-            double jac[4][4], double& det, int imap);
-    // Calculate coordinates for linear quadrilaterals             
-    int Coordinates4(double x, double y, double z,
-            double& t1, double& t2, double& t3, double& t4,
-            double jac[4][4], double& det, int imap);
-    // Calculate coordinates for curved quadratic quadrilaterals
-    int Coordinates5(double x, double y, double z,
-            double& t1, double& t2, double& t3, double& t4,
-            double jac[4][4], double& det, int imap);
-    // Calculate coordinates in linear tetrahedra            
-    int Coordinates12(double x, double y, double z,
-            double& t1, double& t2, double& t3, double& t4,
-            int imap);
-    // Calculate coordinates for curved quadratic tetrahedra            
-    int Coordinates13(double x, double y, double z,
-            double& t1, double& t2, double& t3, double& t4,
-            double jac[4][4], double& det, int imap);
-    // Calculate coordinates for a cube
-    int CoordinatesCube(double x, double y, double z,
-            double& t1, double& t2, double& t3,
-            TMatrixD* &jac, std::vector<TMatrixD*> &dN, int imap);
+  // Reset the component
+  void Reset() {};
 
-    // Calculate Jacobian for curved quadratic triangles            
-    void Jacobian3(int i, double u, double v, double w,
-                   double& det, double jac[4][4]);
-    // Calculate Jacobian for curved quadratic quadrilaterals                   
-    void Jacobian5(int i, double u, double v,
-                   double& det, double jac[4][4]);
-    // Calculate Jacobian for curved quadratic tetrahedra                   
-    void Jacobian13(int i, double t, double u, double v, double w,
-                    double& det, double jac[4][4]);
-    // Calculate Jacobian for a cube
-    void JacobianCube(int i, double t1, double t2, double t3,
-                    TMatrixD* &jac, std::vector<TMatrixD*> &dN);
+  // Periodicities
+  virtual void UpdatePeriodicity() = 0;
+  void UpdatePeriodicity2d();
+  void UpdatePeriodicityCommon();
 
-    // Find the element for a point in curved quadratic quadrilaterals
-    int FindElement5(const double x, const double y, const double z,
-                     double& t1, double& t2, double& t3, double& t4,
-                     double jac[4][4], double& det);
-    // Find the element for a point in curved quadratic tetrahedra                     
-    int FindElement13(const double x, const double y, const double z,
-                      double& t1, double& t2, double& t3, double& t4,
-                      double jac[4][4], double& det);
-    // Find the element for a point in a cube
-    int FindElementCube(const double x, const double y, const double z,
-                      double& t1, double& t2, double& t3,
-                      TMatrixD* &jac, std::vector<TMatrixD*> &dN);
-                      
-    // Move (xpos, ypos, zpos) to field map coordinates
-    void MapCoordinates(double& xpos, double& ypos, double& zpos,
-            bool& xmirrored, bool& ymirrored, bool& zmirrored,
-            double& rcoordinate, double& rotation);
-    // Move (ex, ey, ez) to global coordinates
-    void UnmapFields(double& ex, double& ey, double& ez,
-            double& xpos, double& ypos, double& zpos,
-            bool& xmirrored, bool& ymirrored, bool& zmirrored,
-            double& rcoordinate, double& rotation);
-    
-    int    ReadInteger(char* token, int def, bool& error);
-    double ReadDouble(char* token, double def, bool& error);
+  // Local coordinates
+  // Calculate coordinates for curved quadratic triangles
+  int Coordinates3(double x, double y, double z, double& t1, double& t2,
+                   double& t3, double& t4, double jac[4][4], double& det,
+                   int imap);
+  // Calculate coordinates for linear quadrilaterals
+  int Coordinates4(double x, double y, double z, double& t1, double& t2,
+                   double& t3, double& t4, double jac[4][4], double& det,
+                   int imap);
+  // Calculate coordinates for curved quadratic quadrilaterals
+  int Coordinates5(double x, double y, double z, double& t1, double& t2,
+                   double& t3, double& t4, double jac[4][4], double& det,
+                   int imap);
+  // Calculate coordinates in linear tetrahedra
+  int Coordinates12(double x, double y, double z, double& t1, double& t2,
+                    double& t3, double& t4, int imap);
+  // Calculate coordinates for curved quadratic tetrahedra
+  int Coordinates13(double x, double y, double z, double& t1, double& t2,
+                    double& t3, double& t4, double jac[4][4], double& det,
+                    int imap);
+  // Calculate coordinates for a cube
+  int CoordinatesCube(double x, double y, double z, double& t1, double& t2,
+                      double& t3, TMatrixD*& jac, std::vector<TMatrixD*>& dN,
+                      int imap);
 
-    virtual double GetElementVolume(const int i) = 0;
-    virtual void GetAspectRatio(const int i, double& dmin, double& dmax) = 0;
+  // Calculate Jacobian for curved quadratic triangles
+  void Jacobian3(int i, double u, double v, double w, double& det,
+                 double jac[4][4]);
+  // Calculate Jacobian for curved quadratic quadrilaterals
+  void Jacobian5(int i, double u, double v, double& det, double jac[4][4]);
+  // Calculate Jacobian for curved quadratic tetrahedra
+  void Jacobian13(int i, double t, double u, double v, double w, double& det,
+                  double jac[4][4]);
+  // Calculate Jacobian for a cube
+  void JacobianCube(int i, double t1, double t2, double t3, TMatrixD*& jac,
+                    std::vector<TMatrixD*>& dN);
 
+  // Find the element for a point in curved quadratic quadrilaterals
+  int FindElement5(const double x, const double y, const double z, double& t1,
+                   double& t2, double& t3, double& t4, double jac[4][4],
+                   double& det);
+  // Find the element for a point in curved quadratic tetrahedra
+  int FindElement13(const double x, const double y, const double z, double& t1,
+                    double& t2, double& t3, double& t4, double jac[4][4],
+                    double& det);
+  // Find the element for a point in a cube
+  int FindElementCube(const double x, const double y, const double z,
+                      double& t1, double& t2, double& t3, TMatrixD*& jac,
+                      std::vector<TMatrixD*>& dN);
+
+  // Move (xpos, ypos, zpos) to field map coordinates
+  void MapCoordinates(double& xpos, double& ypos, double& zpos, bool& xmirrored,
+                      bool& ymirrored, bool& zmirrored, double& rcoordinate,
+                      double& rotation);
+  // Move (ex, ey, ez) to global coordinates
+  void UnmapFields(double& ex, double& ey, double& ez, double& xpos,
+                   double& ypos, double& zpos, bool& xmirrored, bool& ymirrored,
+                   bool& zmirrored, double& rcoordinate, double& rotation);
+
+  int ReadInteger(char* token, int def, bool& error);
+  double ReadDouble(char* token, double def, bool& error);
+
+  virtual double GetElementVolume(const int i) = 0;
+  virtual void GetAspectRatio(const int i, double& dmin, double& dmax) = 0;
 };
-
 }
 
 #endif

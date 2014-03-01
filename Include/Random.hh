@@ -13,33 +13,25 @@ namespace Garfield {
 extern RandomEngineRoot randomEngine;
 
 // Draw a random number uniformly distributed in the range [0, 1)
-inline
-double RndmUniform() {
-
-  return randomEngine.Draw();
-
-}
+inline double RndmUniform() { return randomEngine.Draw(); }
 
 // Draw a random number uniformly distributed in the range (0, 1)
-inline
-double RndmUniformPos() {
+inline double RndmUniformPos() {
 
   double r = RndmUniform();
   while (r <= 0.) r = RndmUniform();
   return r;
-
 }
 
 // Draw a Gaussian random variate with mean zero and standard deviation one
-inline
-double RndmGaussian() {
+inline double RndmGaussian() {
 
   static bool cached = false;
   static double u = 0.;
   if (cached) {
     cached = false;
     return u;
-  } 
+  }
   // Box-Muller algorithm
   u = 2. * RndmUniform() - 1.;
   double v = 2. * RndmUniform() - 1.;
@@ -53,47 +45,40 @@ double RndmGaussian() {
   u *= p;
   cached = true;
   return v * p;
-
 }
 
 // Draw a Gaussian random variate with mean mu and standard deviation sigma
-inline
-double RndmGaussian(const double mu, const double sigma) {
+inline double RndmGaussian(const double mu, const double sigma) {
 
-  return mu + sigma * RndmGaussian();    
-
+  return mu + sigma * RndmGaussian();
 }
 
-// Draw a Lorentzian random variate with mean mu 
-// and half-width at half maximum gamma 
-inline
-double RndmLorentzian(const double mu, const double gamma) {
+// Draw a Lorentzian random variate with mean mu
+// and half-width at half maximum gamma
+inline double RndmLorentzian(const double mu, const double gamma) {
 
   return mu + gamma * tan(Pi * (RndmUniform() - 0.5));
-
 }
 
 // Draw a random number according to a Voigt function with mean mu.
-// The Voigt function is a convolution of a 
-// Gaussian (standard deviation sigma) and 
-// a Lorentzian (half width gamma). 
-inline
-double RndmVoigt(const double mu, const double sigma, const double gamma) { 
+// The Voigt function is a convolution of a
+// Gaussian (standard deviation sigma) and
+// a Lorentzian (half width gamma).
+inline double RndmVoigt(const double mu, const double sigma,
+                        const double gamma) {
 
   if (sigma <= 0.) return RndmLorentzian(mu, gamma);
   const double a = gamma / (Sqrt2 * sigma);
   const double x = RndmLorentzian(0., a) + RndmGaussian(0., 1. / Sqrt2);
   return mu + x * Sqrt2 * sigma;
-
 }
 
 // Draw a Polya distributed random number
-inline
-double RndmPolya(const double theta) { 
-  
+inline double RndmPolya(const double theta) {
+
   // Algorithm from Review of Particle Physics
   // C. Amsler et al, Phys. Lett. B 667 (2008)
-  if (theta <= 0.) return - log(RndmUniformPos());
+  if (theta <= 0.) return -log(RndmUniformPos());
   const double c = 3 * (theta + 1.) - 0.75;
   double u1, u2, v1, v2, v3;
   double x;
@@ -111,9 +96,7 @@ double RndmPolya(const double theta) {
       return x / (theta + 1.);
     }
   }
-
 }
-
 }
 
 #endif

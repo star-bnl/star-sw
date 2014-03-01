@@ -9,15 +9,23 @@
 
 namespace Garfield {
 
-TrackElectron::TrackElectron() : 
-  ready(false),
-  x(0.), y(0.), z(0.), t(0.), 
-  dx(0.), dy(0), dz(1.),
-  nComponents(0), nElectrons(0),
-  mediumName(""), mediumDensity(0.), mfp(0.) {
-  
+TrackElectron::TrackElectron()
+    : ready(false),
+      x(0.),
+      y(0.),
+      z(0.),
+      t(0.),
+      dx(0.),
+      dy(0),
+      dz(1.),
+      nComponents(0),
+      nElectrons(0),
+      mediumName(""),
+      mediumDensity(0.),
+      mfp(0.) {
+
   className = "TrackElectron";
-  
+
   // Setup the particle properties.
   q = -1;
   spin = 1;
@@ -26,37 +34,31 @@ TrackElectron::TrackElectron() :
   SetBetaGamma(3.);
   particleName = "electron";
 
-  components.clear(); 
-  electrons.clear(); 
-  
+  components.clear();
+  electrons.clear();
 }
 
-void
-TrackElectron::SetParticle(std::string particle) {
+void TrackElectron::SetParticle(std::string particle) {
 
-  if (particle != "electron" && 
-      particle != "e" && 
-      particle != "e-") {
+  if (particle != "electron" && particle != "e" && particle != "e-") {
     std::cerr << className << "::SetParticle:\n";
-    std::cerr << "    Only electrons can be transported.\n";   
+    std::cerr << "    Only electrons can be transported.\n";
   }
-  
 }
 
-bool 
-TrackElectron::NewTrack(const double x0, const double y0, const double z0,
-                        const double t0, 
-                        const double dx0, const double dy0, const double dz0) {
+bool TrackElectron::NewTrack(const double x0, const double y0, const double z0,
+                             const double t0, const double dx0,
+                             const double dy0, const double dz0) {
 
   ready = false;
-  
+
   // Make sure the sensor has been set.
   if (sensor == 0) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Sensor is not defined.\n";
     return false;
   }
-  
+
   // Get the medium at this location and check if it is "ionisable".
   Medium* medium = 0;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
@@ -69,30 +71,33 @@ TrackElectron::NewTrack(const double x0, const double y0, const double z0,
     std::cerr << "    Medium at initial position is not ionisable.\n";
     return false;
   }
-  
+
   // Check if the medium is a gas.
   if (!medium->IsGas()) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Medium at initial position is not a gas.\n";
     return false;
   }
-  
+
   if (!SetupGas(medium)) {
     std::cerr << className << "::NewTrack:\n";
-    std::cerr << "    Properties of medium "
-              << medium->GetName() << " are not available.\n";
+    std::cerr << "    Properties of medium " << medium->GetName()
+              << " are not available.\n";
     return false;
   }
-  
+
   if (!UpdateCrossSection()) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Cross-sections could not be calculated.\n";
     return false;
   }
-  
+
   mediumName = medium->GetName();
-  
-  x = x0; y = y0; z = z0; t = t0;
+
+  x = x0;
+  y = y0;
+  z = z0;
+  t = t0;
   const double dd = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
   if (dd < Small) {
     if (debug) {
@@ -108,55 +113,60 @@ TrackElectron::NewTrack(const double x0, const double y0, const double z0,
     dz = ctheta;
   } else {
     // Normalize the direction vector.
-    dx = dx0 / dd; dy = dy0 / dd; dz = dz0 / dd;
+    dx = dx0 / dd;
+    dy = dy0 / dd;
+    dz = dz0 / dd;
   }
-  
+
   ready = true;
   return true;
-
 }
 
-bool
-TrackElectron::GetCluster(double& xcls, double& ycls, double& zcls, 
-                          double& tcls, int& ncls, double& edep, double& extra) {
+bool TrackElectron::GetCluster(double& xcls, double& ycls, double& zcls,
+                               double& tcls, int& ncls, double& edep,
+                               double& extra) {
 
   edep = extra = 0.;
   ncls = 0;
-  
+
   nElectrons = 0;
   electrons.clear();
-  
+
   if (!ready) {
     std::cerr << className << "::GetCluster:\n";
     std::cerr << "    Track not initialized.\n";
     std::cerr << "    Call NewTrack first.\n";
     return false;
   }
-  
+
   // Draw a step length and propagate the electron.
-  const double d = - mfp * log(RndmUniformPos());
-  x += d * dx; y += d * dy; z += d * dz; 
+  const double d = -mfp * log(RndmUniformPos());
+  x += d * dx;
+  y += d * dy;
+  z += d * dz;
   t += d / (sqrt(beta2) * SpeedOfLight);
-  
+
   if (!sensor->IsInArea(x, y, z)) {
     ready = false;
     return false;
   }
-  
+
   Medium* medium = 0;
   if (!sensor->GetMedium(x, y, z, medium)) {
     ready = false;
     return false;
   }
-  
-  if (medium->GetName() != mediumName || 
-      medium->GetNumberDensity() != mediumDensity ||
-      !medium->IsIonisable()) {
+
+  if (medium->GetName() != mediumName ||
+      medium->GetNumberDensity() != mediumDensity || !medium->IsIonisable()) {
     ready = false;
     return false;
   }
-  
-  xcls = x; ycls = y; zcls = z; tcls = t;
+
+  xcls = x;
+  ycls = y;
+  zcls = z;
+  tcls = t;
   const double r = RndmUniform();
   int iComponent = 0;
   for (int i = 0; i < nComponents; ++i) {
@@ -165,30 +175,29 @@ TrackElectron::GetCluster(double& xcls, double& ycls, double& zcls,
       break;
     }
   }
-  
-  // Sample secondary electron energy according to 
+
+  // Sample secondary electron energy according to
   // Opal-Beaty-Peterson splitting function.
   const double e0 = ElectronMass * (sqrt(1. / (1. - beta2)) - 1.);
-  double esec = components[iComponent].wSplit * 
-                tan(RndmUniform() * 
-                    atan((e0 - components[iComponent].ethr) / 
-                         (2. * components[iComponent].wSplit)));
-  esec = components[iComponent].wSplit * 
+  double esec = components[iComponent].wSplit *
+                tan(RndmUniform() * atan((e0 - components[iComponent].ethr) /
+                                         (2. * components[iComponent].wSplit)));
+  esec = components[iComponent].wSplit *
          pow(esec / components[iComponent].wSplit, 0.9524);
   nElectrons = 1;
   electrons.resize(nElectrons);
   electrons[0].energy = esec;
-  electrons[0].x = xcls; electrons[0].y = ycls; electrons[0].z = zcls;
+  electrons[0].x = xcls;
+  electrons[0].y = ycls;
+  electrons[0].z = zcls;
 
   ncls = nElectrons;
   edep = esec;
 
   return true;
-
 }
 
-double 
-TrackElectron::GetClusterDensity() {
+double TrackElectron::GetClusterDensity() {
 
   if (!ready) {
     std::cerr << className << "::GetClusterDensity:\n";
@@ -201,20 +210,18 @@ TrackElectron::GetClusterDensity() {
     std::cerr << "    Mean free path is not available.\n";
     return 0.;
   }
-  
+
   return 1. / mfp;
-  
 }
 
-double 
-TrackElectron::GetStoppingPower() {
+double TrackElectron::GetStoppingPower() {
 
   if (!ready) {
     std::cerr << className << "::GetStoppingPower:\n";
     std::cerr << "    Track has not been initialised.\n";
     return 0.;
   }
-  
+
   const double prefactor = 4 * Pi * pow(HbarC / ElectronMass, 2);
   const double lnBg2 = log(beta2 / (1. - beta2));
 
@@ -223,36 +230,30 @@ TrackElectron::GetStoppingPower() {
   const double e0 = ElectronMass * (sqrt(1. / (1. - beta2)) - 1.);
   for (int i = nComponents; i--;) {
     // Calculate the mean number of clusters per cm.
-    const double cmean = mediumDensity * components[i].fraction * 
-                         (prefactor / beta2) *
-                         (components[i].m2Ion * (lnBg2 - beta2) + 
-                          components[i].cIon);
-    const double ew = (e0 - components[i].ethr) / 
-                      (2 * components[i].wSplit);
+    const double cmean =
+        mediumDensity * components[i].fraction * (prefactor / beta2) *
+        (components[i].m2Ion * (lnBg2 - beta2) + components[i].cIon);
+    const double ew = (e0 - components[i].ethr) / (2 * components[i].wSplit);
     // Calculate the mean secondary electron energy.
-    const double emean = (components[i].wSplit / (2 * atan(ew))) * 
-                         log(1. + ew * ew);
+    const double emean =
+        (components[i].wSplit / (2 * atan(ew))) * log(1. + ew * ew);
     dedx += cmean * emean;
   }
 
-
   return dedx;
-
 }
 
-bool
-TrackElectron::SetupGas(Medium* gas) {
-
+bool TrackElectron::SetupGas(Medium* gas) {
 
   nComponents = 0;
   components.clear();
-    
+
   if (gas == 0) {
     std::cerr << className << "::SetupGas:\n";
     std::cerr << "     Medium is not defined.\n";
     return false;
   }
-  
+
   mediumDensity = gas->GetNumberDensity();
   nComponents = gas->GetNumberOfComponents();
   if (nComponents <= 0) {
@@ -262,10 +263,10 @@ TrackElectron::SetupGas(Medium* gas) {
     return false;
   }
   components.resize(nComponents);
- 
+
   // Density correction parameters from
   //   R. M. Sternheimer, M. J. Berger, S. M. Seltzer,
-  //   Atomic Data and Nuclear Data Tables 30 (1984), 261-271 
+  //   Atomic Data and Nuclear Data Tables 30 (1984), 261-271
   bool ok = true;
   for (int i = nComponents; i--;) {
     std::string gasname = "";
@@ -384,62 +385,58 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].wSplit = 13.8;
     } else {
       std::cerr << className << "::SetupGas:\n";
-      std::cerr << "    Cross-section for " << gasname 
+      std::cerr << "    Cross-section for " << gasname
                 << " is not available.\n";
-      ok =  false;
+      ok = false;
     }
   }
-  
+
   if (!ok) {
     nComponents = 0;
     components.clear();
   }
-  
-  return true;
 
+  return true;
 }
 
-bool
-TrackElectron::UpdateCrossSection() {
+bool TrackElectron::UpdateCrossSection() {
 
   const double prefactor = 4 * Pi * pow(HbarC / ElectronMass, 2);
   const double lnBg2 = log(beta2 / (1. - beta2));
-  // Parameter X in the Sternheimer fit formula 
+  // Parameter X in the Sternheimer fit formula
   const double eta = mediumDensity / LoschmidtNumber;
   const double x = 0.5 * (lnBg2 + log(eta)) / log(10.);
   double csSum = 0.;
   for (int i = nComponents; i--;) {
     double delta = 0.;
-    if (components[i].x0Dens < components[i].x1Dens && 
+    if (components[i].x0Dens < components[i].x1Dens &&
         x >= components[i].x0Dens) {
       delta = 2 * log(10.) * x - components[i].cDens;
       if (x < components[i].x1Dens) {
-        delta += components[i].aDens * pow(components[i].x1Dens - x, 
-                                           components[i].mDens);
+        delta += components[i].aDens *
+                 pow(components[i].x1Dens - x, components[i].mDens);
       }
     }
-    double cs = (components[i].fraction * prefactor / beta2) * 
-                (components[i].m2Ion * (lnBg2 - beta2 - delta) + 
-                 components[i].cIon);
+    double cs =
+        (components[i].fraction * prefactor / beta2) *
+        (components[i].m2Ion * (lnBg2 - beta2 - delta) + components[i].cIon);
     components[i].p = cs;
     csSum += cs;
   }
-  
+
   if (csSum <= 0.) {
     std::cerr << className << "::UpdateCrossSection:\n";
     std::cerr << "    Total cross-section <= 0.\n";
     return false;
   }
-  
+
   mfp = 1. / (csSum * mediumDensity);
-  
+
   for (int i = 0; i < nComponents; ++i) {
     components[i].p /= csSum;
     if (i > 0) components[i].p += components[i - 1].p;
   }
-  
-  return true;
-  
-}
 
+  return true;
+}
 }
