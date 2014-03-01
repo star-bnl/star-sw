@@ -46,31 +46,31 @@ class ViewDrift {
                                  const double x0, const double y0, 
                                  const double z0);
 
-    void SetDriftLinePoint(const int iL, const int iP, 
+    void SetDriftLinePoint(const unsigned int iL, const unsigned int iP, 
                   const double x, const double y, const double z);
-    void AddDriftLinePoint(const int iL,
+    void AddDriftLinePoint(const unsigned int iL,
                   const double x, const double y, const double z);
-    void SetTrackPoint(const int iL, const int iP,
+    void SetTrackPoint(const unsigned int iL, const unsigned int iP,
                   const double x, const double y, const double z);
-    void AddTrackPoint(const int iL, 
+    void AddTrackPoint(const unsigned int iL, 
                   const double x, const double y, const double z);
     void AddExcitationMarker(const double x, const double y, const double z);
     void AddIonisationMarker(const double x, const double y, const double z);
     void AddAttachmentMarker(const double x, const double y, const double z);
 
-    void EnableDebugging()  {debug = true;}
-    void DisableDebugging() {debug = false;}
+    void EnableDebugging()  {m_debug = true;}
+    void DisableDebugging() {m_debug = false;}
 
     friend class ViewFEMesh;
 
   private:
 
-    std::string className;
+    std::string m_className;
  
     // Options
-    bool debug;
+    bool m_debug;
 
-    std::string label;
+    std::string m_label;
    
     struct marker {
       double x;
@@ -78,35 +78,36 @@ class ViewDrift {
       double z;
     };
     // Canvas
-    TCanvas* canvas;
-    bool hasExternalCanvas;
+    TCanvas* m_canvas;
+    bool m_hasExternalCanvas;
     
     // Box dimensions
-    double xMin, yMin, zMin, xMax, yMax, zMax;
+    double m_xMin, m_yMin, m_zMin;
+    double m_xMax, m_yMax, m_zMax;
     // View
-    TView* view;
+    TView* m_view;
 
-    int nDriftLines;
+    unsigned int m_nDriftLines;
     struct driftLine {
       std::vector<marker> vect;
       int n;  //what kind of particle?
     };
-    std::vector<driftLine> driftLines;
+    std::vector<driftLine> m_driftLines;
 
-    int nTracks;
-    std::vector<TPointSet3D> tracks;
-    int nExcMarkers;
-    std::vector<marker> excMarkers;
-    TPointSet3D* excPlot;//=new TGraph();
-    int nIonMarkers;
-    std::vector<marker> ionMarkers;
-    TPointSet3D* ionPlot;// = new TGraph();
-    int nAttMarkers;
-    std::vector<marker> attMarkers;
-    TPointSet3D* attPlot;// = new TGraph();
+    unsigned int m_nTracks;
+    std::vector<TPointSet3D> m_tracks;
+    unsigned int m_nExcMarkers;
+    std::vector<marker> m_excMarkers;
+    TPointSet3D* m_excPlot;
+    unsigned int m_nIonMarkers;
+    std::vector<marker> m_ionMarkers;
+    TPointSet3D* m_ionPlot;
+    unsigned int m_nAttMarkers;
+    std::vector<marker> m_attMarkers;
+    TPointSet3D* m_attPlot;
 
-    double markerSizeCluster;
-    double markerSizeCollision;
+    double m_markerSizeCluster;
+    double m_markerSizeCollision;
 
     void Plot2d(const bool axis);
     void Plot3d(const bool axis);

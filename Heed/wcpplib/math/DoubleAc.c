@@ -191,10 +191,10 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f) {
   check_econd11(f.d, == 0, mcerr);
   check_econd11(f.d, == 0.0, mcerr);
 #ifndef VISUAL_STUDIO
-  if (isnan(di) == 1) di = -DBL_MAX;
-  if (isnan(da) == 1) da = DBL_MAX;
-  if (isnan(f.di) == 1) f.di = -DBL_MAX;
-  if (isnan(f.da) == 1) f.da = DBL_MAX;
+  if (std::isnan(di) == 1) di = -DBL_MAX;
+  if (std::isnan(da) == 1) da = DBL_MAX;
+  if (std::isnan(f.di) == 1) f.di = -DBL_MAX;
+  if (std::isnan(f.da) == 1) f.da = DBL_MAX;
 #else
   if (_isnan(di) == 1) di = -DBL_MAX;
   if (_isnan(da) == 1) da = DBL_MAX;

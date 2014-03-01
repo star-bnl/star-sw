@@ -526,19 +526,19 @@ ViewFEMesh::DrawElements() {
   // If we have an associated ViewDrift, plot projections of the drift lines.
   if (viewDrift != 0) {
 
-    for (int dline = 0; dline < (int)viewDrift->driftLines.size(); dline++) {
+    for (int dline = 0; dline < (int)viewDrift->m_driftLines.size(); dline++) {
 
       // Get the number of points.
-      const unsigned int npts = viewDrift->driftLines[dline].vect.size();
+      const unsigned int npts = viewDrift->m_driftLines[dline].vect.size();
       // Create a TPolyLine that is a 2D projection of the original.
       TPolyLine* poly = new TPolyLine();
-      poly->SetLineColor(viewDrift->driftLines[dline].n);
+      poly->SetLineColor(viewDrift->m_driftLines[dline].n);
       int polyPts = 0;
       for (unsigned int pt = 0; pt < npts; pt++) {
         // Get the coordinates of this point.
-        double ptx = viewDrift->driftLines[dline].vect[pt].x;
-        double pty = viewDrift->driftLines[dline].vect[pt].y;
-        double ptz = viewDrift->driftLines[dline].vect[pt].z;
+        double ptx = viewDrift->m_driftLines[dline].vect[pt].x;
+        double pty = viewDrift->m_driftLines[dline].vect[pt].y;
+        double ptz = viewDrift->m_driftLines[dline].vect[pt].z;
         // Project this point onto the plane.
         PlaneCoords(ptx, pty, ptz, projMat, xMat);
         // Add this point if it is within the view.
@@ -827,19 +827,19 @@ ViewFEMesh::DrawCST(ComponentCST* componentCST) {
   // If we have an associated ViewDrift, plot projections of the drift lines
   if(viewDrift != 0) {
 
-    for(int dline = 0; dline < (int)viewDrift->driftLines.size(); dline++) {
+    for(int dline = 0; dline < (int)viewDrift->m_driftLines.size(); dline++) {
 
       // Get the number of points.
-      const unsigned int npts = viewDrift->driftLines[dline].vect.size();
+      const unsigned int npts = viewDrift->m_driftLines[dline].vect.size();
       // Create a TPolyLine that is a 2D projection of the original
       TPolyLine* poly = new TPolyLine();
-      poly->SetLineColor(viewDrift->driftLines[dline].n);
+      poly->SetLineColor(viewDrift->m_driftLines[dline].n);
       int polyPts = 0;
       for (unsigned int pt = 0; pt < npts; pt++) {
         // Get the coordinates of this point in the TPolyLine3D
-        double ptx = viewDrift->driftLines[dline].vect[pt].x;
-        double pty = viewDrift->driftLines[dline].vect[pt].y;
-        double ptz = viewDrift->driftLines[dline].vect[pt].z;
+        double ptx = viewDrift->m_driftLines[dline].vect[pt].x;
+        double pty = viewDrift->m_driftLines[dline].vect[pt].y;
+        double ptz = viewDrift->m_driftLines[dline].vect[pt].z;
         // Project this point onto the plane
         PlaneCoords(ptx, pty, ptz, projMat, xMat);
         // Add this point if it is within the view

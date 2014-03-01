@@ -51,8 +51,6 @@ class MediumGaAs : public Medium {
 
   private:
 
-    double bandGap;
-
     // Low-field mobility
     double eMobility, hMobility;
     // Hall factor

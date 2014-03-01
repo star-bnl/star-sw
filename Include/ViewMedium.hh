@@ -26,7 +26,7 @@ class ViewMedium {
     
     void SetElectricFieldRange(const double emin, const double emax);
     void SetMagneticFieldRange(const double bmin, const double bmax); 
-    void SetBAngleRange(const double amin, const double amax); //new
+    void SetBAngleRange(const double amin, const double amax); 
     void SetFunctionRange(const double vmin, const double vmax);
     void SetFunctionRange();
 
@@ -40,44 +40,44 @@ class ViewMedium {
     void PlotHoleTownsend(const char xaxis, const double e, const double b, const double a);
     void PlotElectronAttachment(const char xaxis, const double e, const double b, const double a);
     void PlotHoleAttachment(const char xaxis, const double e, const double b, const double a);
-    void PlotElectronCrossSections(const char xaxis, const double e, const double b, const double a);
+    void PlotElectronCrossSections();
     double EvaluateFunction(double* pos, double* par);
 
   private:
 
-    std::string className;
+    std::string m_className;
  
     // Options
-    bool debug;
+    bool m_debug;
 
     // Canvas
-    TCanvas* canvas;
-    bool hasExternalCanvas;
+    TCanvas* m_canvas;
+    bool m_hasExternalCanvas;
 
-    Medium* medium;
+    Medium* m_medium;
   
     // Ranges for variable parameters
-    double eMin, eMax;
-    double bMin, bMax;
-    double aMin, aMax;
-    double vMin, vMax;
+    double m_eMin, m_eMax;
+    double m_bMin, m_bMax;
+    double m_aMin, m_aMax;
+    double m_vMin, m_vMax;
     
     // Fixed parameters
-    double efield;
-    double bfield;
-    double angle;    
+    double m_efield;
+    double m_bfield;
+    double m_angle;    
     
     // Tolerances for marker plotting
-    double etolerance;
-    double btolerance;
-    double atolerance;
+    double m_etolerance;
+    double m_btolerance;
+    double m_atolerance;
 
     // Functions
-    std::vector<TF1> functions;
-    int nFunctions;
+    std::vector<TF1> m_functions;
+    int m_nFunctions;
     // Graphs
-    std::vector<TGraph> graphs;
-    int nGraphs;
+    std::vector<TGraph> m_graphs;
+    int m_nGraphs;
     
     void SetupCanvas();
     void AddFunction(const double xmin, const double xmax, 

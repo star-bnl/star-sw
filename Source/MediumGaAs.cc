@@ -13,7 +13,7 @@ namespace Garfield {
 
 MediumGaAs::MediumGaAs() :
   Medium(), 
-  bandGap(1.42), 
+  // bandGap(1.42), 
   eMobility(8.8e-6), hMobility(3.2e-6),
   eHallFactor(1.05), hHallFactor(1.25),
   eTrapCs(1.e-15), hTrapCs(1.e-15),
