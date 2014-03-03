@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.23 2014/03/03 20:56:39 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.24 2014/03/03 20:56:44 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -147,7 +147,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
 
             if (!sensorVol) {
-               Error("useVMCGeometry", "sensorVol PXLA not found");
+               Error("useVMCGeometry()", "sensorVol PLAC not found");
                continue;
             }
 
@@ -160,7 +160,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             }
 
             if (!sensorMatrix) {
-               Error("useVMCGeometry()", "Could not get pixel sensor position matrix. Skipping this pixel sensor");
+               Error("useVMCGeometry()", "Could not get pixel sensor position matrix. Skipping to next pixel sensor volume");
                continue;
             }
 
@@ -175,13 +175,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             // Build global rotation for the sensor
             TGeoRotation sensorRot(*sensorMatrix);
 
-            cout << "sensorRot.GetPhiRotation(): " << sensorRot.GetPhiRotation() << endl;
-
             TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
-
-            int matPix = (iSector-1) * 40 + (iLadder-1) * 10 + (iSensor-1);
-            cout << " iSector/iLadder/iSensor/matPix : " << iSector << "/" << iLadder << "/" << iSensor
-               << "/" << matPix << endl;
 
             char name[50];
             sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", iSector, iLadder, iSensor);
@@ -190,8 +184,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                       << sensorVol->GetMaterial()->GetA() << " " << sensorVol->GetMaterial()->GetZ() << endm;
             LOG_DEBUG << " DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
-            // PLAC shape : DX =.961cm ; DY = .002cm ; DZ = .94 cm
-
+            // Create new Sti shape based on the sensor geometry
             StiShape *stiShape = new StiPlanarShape(name, sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
 
             add(stiShape);
@@ -220,12 +213,10 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
             if ( !stiDetector ) {
-               LOG_INFO << "StiPxlDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
-               return;
+               Error("useVMCGeometry()", "Failed to create a valid Sti detector. Skipping to next pixel sensor volume");
+               continue;
             }
 
-            //char name[50];
-            //sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", iSector,iLadder,iSensor);
             stiDetector->setName(name);
             stiDetector->setIsOn(kTRUE);
             //if (ActiveVolume) {
@@ -254,14 +245,13 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             /* numbering is :
                ladder = 0-1- ...9 for inner layer --> ROW =0
                ladder = 0-1-2 for sector 0 of outer layer, then 3-4-5 for the second sector until 29 for the last sectro
-               ladder=4 is the inner ladder
+               ladder=1 is the inner ladder
             */
             // update 05-15 : inner ladder is ladder 1
             if (iLadder == 1) {
                ROW = 0 ;
                SECTOR = iSector-1;
-            }
-            else {
+            } else {
                ROW = 1;
                SECTOR = (iSector-1) * 3 + (iLadder-1);
             }
@@ -332,6 +322,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.24  2014/03/03 20:56:44  smirnovd
+ * Updated error messages + minor clean up changes
+ *
  * Revision 1.23  2014/03/03 20:56:39  smirnovd
  * Made conversion from sensor local to global in one step. Previously was sensor->ladder->sector->global
  *
