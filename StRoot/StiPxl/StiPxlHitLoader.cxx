@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.2 2014/02/04 16:56:48 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.3 2014/03/03 23:54:35 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.3  2014/03/03 23:54:35  smirnovd
+ * Remove extra pointer validation check
+ *
  * Revision 1.2  2014/02/04 16:56:48  smirnovd
  * Clean up and improved readability
  *
@@ -99,9 +102,9 @@ void StiPxlHitLoader::loadHits(StEvent *source,
    if (!_hitContainer)
       throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
 
-   StPxlHitCollection *col = source->pxlHitCollection();
+   StPxlHitCollection *pxlHitCollection = source->pxlHitCollection();
 
-   if (!col) {
+   if (!pxlHitCollection) {
       LOG_ERROR << "StiPxlHitLoader::loadHits\tERROR:\tcol==0"
                 << "You must not have pixelFastSim in your chain"
                 << "will return with no action taken" << endm;
@@ -110,10 +113,6 @@ void StiPxlHitLoader::loadHits(StEvent *source,
 
    //Added by Michael Lomnitz (KSU):  Loops over Sector/Ladder/Sensor to obtain the whole hit collection
    int nHit = 0;
-
-   StPxlHitCollection *pxlHitCollection = source->pxlHitCollection();
-
-   if ( !pxlHitCollection ) {cout << "No PXL hit collection" << endl; return;}
 
    UInt_t numberOfSectors = pxlHitCollection->numberOfSectors();
 
