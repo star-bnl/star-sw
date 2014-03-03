@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.21 2014/03/03 20:56:30 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.22 2014/03/03 20:56:34 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -136,33 +136,15 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
    for (UInt_t iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
    {
-      ostringstream geoPath;
-      geoPath << "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector;
-      string pxlGeoSector = geoPath.str();
-
-      gGeoManager->cd(pxlGeoSector.c_str());
-      TGeoMatrix*  sectorPos = gGeoManager->GetCurrentNode()->GetMatrix();
-      TGeoRotation sectorRot(*sectorPos);
-
       for (UInt_t iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
       {
-         ostringstream geoPathLadder;
-         geoPathLadder << "/LADR_" << iLadder;
-         string pxlGeoLadder = pxlGeoSector + geoPathLadder.str();
-
-         gGeoManager->cd(pxlGeoLadder.c_str());
-         TGeoMatrix*  ladderPos = gGeoManager->GetCurrentNode()->GetMatrix();
-         TGeoRotation ladderRot(*ladderPos);
-
          for (UInt_t iSensor = 1; iSensor <= kNumberOfPxlSensorsPerLadder; iSensor++)
          {
-            ostringstream geoPathSensor;
-            geoPathSensor << "/PXSI_" << iSensor;
-            string pxlGeoSensor = pxlGeoLadder + geoPathSensor.str();
+            ostringstream geoPath;
+            geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
 
-            gGeoManager->cd(pxlGeoSensor.c_str());
-            TGeoVolume*  sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-            TGeoMatrix*  sensorPos = gGeoManager->GetCurrentNode()->GetMatrix();
+            gGeoManager->cd(geoPath.str().c_str());
+            TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
 
             if (!sensorVol) {
                Error("useVMCGeometry", "sensorVol PXLA not found");
@@ -347,6 +329,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.22  2014/03/03 20:56:34  smirnovd
+ * Simplified retrieval of sensor volumes from the geometry
+ *
  * Revision 1.21  2014/03/03 20:56:30  smirnovd
  * Allow user to switch between the survey and ideal pixel geometries
  *
