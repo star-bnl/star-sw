@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.19 2014/03/03 20:56:17 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.20 2014/03/03 20:56:24 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -124,7 +124,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    for (UInt_t iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
    {
       ostringstream geoPath;
-      geoPath << "HALL_1/CAVE_1/IDSM_1/PXMO_1/PXLA_" << iSector;
+      geoPath << "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector;
       string pxlGeoSector = geoPath.str();
 
       gGeoManager->cd(pxlGeoSector.c_str());
@@ -334,6 +334,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.20  2014/03/03 20:56:24  smirnovd
+ * Switch to detector volumes in TpcRefSys
+ *
  * Revision 1.19  2014/03/03 20:56:17  smirnovd
  * Corrected Sti volume position
  *
