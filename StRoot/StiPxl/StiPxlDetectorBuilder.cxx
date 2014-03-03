@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.18 2014/02/28 01:42:07 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.19 2014/03/03 20:56:17 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -201,6 +201,12 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             Double_t phi  = sensorVec.Phi();
             Double_t phiD = sensorRot.GetPhiRotation()/180*M_PI;
             Double_t r    = sensorVec.Perp();
+            double normVecMag = fabs(r*sin(phi - phiD));
+
+            TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
+
+            if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
+            else                            normVec *=  normVecMag;
 
             // Volume positioning
             StiPlacement *pPlacement = new StiPlacement();
@@ -209,7 +215,8 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             pPlacement->setLayerRadius(r);
             pPlacement->setLayerAngle(phi);
             pPlacement->setRegion(StiPlacement::kMidRapidity);
-            pPlacement->setNormalRep(phiD, r*cos(phi - phiD), r*sin(phi - phiD));
+            double centerOrient = sensorVec.Phi() - normVec.Phi();
+            pPlacement->setNormalRep(normVec.Phi(), normVecMag, r*sin(centerOrient));
 
             // Build final detector object
             StiDetector *stiDetector = getDetectorFactory()->getInstance();
@@ -327,6 +334,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.19  2014/03/03 20:56:17  smirnovd
+ * Corrected Sti volume position
+ *
  * Revision 1.18  2014/02/28 01:42:07  smirnovd
  * Specify detector group id
  *
