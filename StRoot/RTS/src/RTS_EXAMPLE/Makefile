@@ -9,11 +9,11 @@ DEFINES += -DRTS_LOG_COLORED
 
 VOBJS += libbsmd.a libbtow.a libemc.a libesmd.a libfpd.a libftp.a libl3.a libpmd.a libpp2pp.a  \
 	libric.a libsc.a libssd.a libsvt.a libtof.a libtpc.a libtpcfcf.a libtpx.a libtrg.a libfgt.a libmtd.a libhlt.a libl4.a libetow.a \
-	libpxl.a libsst.a \
+	libpxl.a libsst.a libfps.a \
 	libdaqReader.a libsfs.a librtslog.a
 VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ../DAQ_L3 ../DAQ_PMD \
 	../DAQ_PP2PP ../DAQ_RIC ../DAQ_SC ../DAQ_SSD ../DAQ_SVT ../DAQ_TOF ../DAQ_TPC ../FCF ../DAQ_HLT ../DAQ_ETOW \
-	../DAQ_TPX ../DAQ_TRG ../DAQ_FGT ../DAQ_MTD ../DAQ_PXL ../DAQ_L4 ../DAQ_SST \
+	../DAQ_TPX ../DAQ_TRG ../DAQ_FGT ../DAQ_MTD ../DAQ_PXL ../DAQ_L4 ../DAQ_SST ../DAQ_FPS \
 	../DAQ_READER  ../SFS ../LOG 
 
 
@@ -89,6 +89,7 @@ rts_example.o: ../DAQ_FGT/daq_fgt.h
 rts_example.o: ../DAQ_MTD/daq_mtd.h
 rts_example.o: ../DAQ_PXL/daq_pxl.h
 rts_example.o: ../DAQ_SST/daq_sst.h
+rts_example.o: ../DAQ_FPS/daq_fps.h
 rts_example.o: ../DAQ_FGT/fgtPed.h
 rts_example.o: ../DAQ_FGT/daq_fgt.h
 rts_example.o: ../DAQ_SST/sstPed.h
@@ -128,9 +129,6 @@ rts_example.trg.o: ../DAQ_L4/daq_l4.h
 rts_example.trg.o: ../DAQ_FGT/daq_fgt.h
 rts_example.trg.o: ../DAQ_MTD/daq_mtd.h
 rts_example.trg.o: ../DAQ_PXL/daq_pxl.h
-sfs_stuff.o: ../../../../StRoot/RTS/include/rtsLog.h
-sfs_stuff.o: ../DAQ_READER/daqReader.h
-sfs_stuff.o: ../DAQ_READER/daqConfig.h
 testReader.o: ../../../../StRoot/RTS/include/rtsLog.h
 testReader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 testReader.o: ../DAQ_READER/daqReader.h
