@@ -47,8 +47,7 @@ install:
 	cp fs daq_fs
 	$(INSTALL) daq_fs $(BINDIR)
 	$(INSTALL) sfs_header $(BINDIR)
-
-#	$(INSTALL) libsfs.a $(LIBDIR)
+	$(INSTALL) libsfs.a $(LIBDIR)
 
 clean:
 	@$(CLEAN) $(BINS) $(LIBS)
