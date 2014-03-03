@@ -4,6 +4,7 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 
+class StPxlDb;
 
 class StiPxlDetectorBuilder : public StiDetectorBuilder
 {
@@ -21,6 +22,8 @@ public:
 protected:
    StiMaterial *mSiMaterial;
    StiMaterial *mHybridMaterial;
+   StPxlDb     *mPxlDb;
+   Bool_t       mUseDbGeom;
 };
 
 inline double StiPxlDetectorBuilder::phiForSector(unsigned int sector) const
