@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.22 2014/03/03 20:56:34 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.23 2014/03/03 20:56:39 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -151,26 +151,29 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                continue;
             }
 
-            // Convert origin of the sensor geobox to coordinates in the ladder coordinate system
-            double sensorXyzLocal[3]  = {0, 0, 0};
-            double sensorXyzLadder[3] = {0, 0, 0};
-            sensorPos->LocalToMaster(sensorXyzLocal, sensorXyzLadder);
+            TGeoMatrix* sensorMatrix = 0;
 
-            // Convert origin of the sensor geobox to coordinates in the sector coordinate system
-            double sensorXyzSector[3] = {0, 0, 0};
-            ladderPos->LocalToMaster(sensorXyzLadder, sensorXyzSector);
+            if (mUseDbGeom) {
+               sensorMatrix = (TGeoMatrix*) mPxlDb->geoHMatrixSensorOnGlobal(iSector, iLadder, iSensor);
+            } else {
+               sensorMatrix = gGeoManager->GetCurrentMatrix();
+            }
 
-            // Convert origin of the sensor geobox to coordinates in the sector's mother coordinate system
-            double sensorXyz[3] = {0, 0, 0};
-            sectorPos->LocalToMaster(sensorXyzSector, sensorXyz);
+            if (!sensorMatrix) {
+               Error("useVMCGeometry()", "Could not get pixel sensor position matrix. Skipping this pixel sensor");
+               continue;
+            }
 
-            TVector3 sensorVec(sensorXyz);
-            sensorVec.Print();
+            // Convert origin (0, 0, 0) of the sensor geobox to coordinates in the global coordinate system
+            double sensorXyzLocal[3]  = {};
+            double sensorXyzGlobal[3] = {};
+
+            sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
+
+            TVector3 sensorVec(sensorXyzGlobal);
 
             // Build global rotation for the sensor
-            TGeoRotation sensorRot(*sensorPos);
-            sensorRot.MultiplyBy(&ladderRot, false);
-            sensorRot.MultiplyBy(&sectorRot, false);
+            TGeoRotation sensorRot(*sensorMatrix);
 
             cout << "sensorRot.GetPhiRotation(): " << sensorRot.GetPhiRotation() << endl;
 
@@ -329,6 +332,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.23  2014/03/03 20:56:39  smirnovd
+ * Made conversion from sensor local to global in one step. Previously was sensor->ladder->sector->global
+ *
  * Revision 1.22  2014/03/03 20:56:34  smirnovd
  * Simplified retrieval of sensor volumes from the geometry
  *
