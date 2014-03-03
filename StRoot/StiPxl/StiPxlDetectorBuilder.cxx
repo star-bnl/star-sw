@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.24 2014/03/03 20:56:44 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.25 2014/03/03 23:54:22 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -239,26 +239,26 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             stiDetector->setElossCalculator(ElossCalculator);
             stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 
-            Int_t ROW    = 0;
-            Int_t SECTOR = 0;
+            int stiRow    = 0;
+            int stiSector = 0;
 
             /* numbering is :
-               ladder = 0-1- ...9 for inner layer --> ROW =0
+               ladder = 0-1- ...9 for inner layer --> stiRow =0
                ladder = 0-1-2 for sector 0 of outer layer, then 3-4-5 for the second sector until 29 for the last sectro
                ladder=1 is the inner ladder
             */
             // update 05-15 : inner ladder is ladder 1
             if (iLadder == 1) {
-               ROW = 0 ;
-               SECTOR = iSector-1;
+               stiRow = 0 ;
+               stiSector = iSector-1;
             } else {
-               ROW = 1;
-               SECTOR = (iSector-1) * 3 + (iLadder-1);
+               stiRow = 1;
+               stiSector = (iSector-1) * 3 + (iLadder-1);
             }
 
-            stiDetector->setKey(1, ROW);
-            stiDetector->setKey(2, SECTOR);
-            add(ROW, SECTOR, stiDetector);
+            stiDetector->setKey(1, stiRow);
+            stiDetector->setKey(2, stiSector);
+            add(stiRow, stiSector, stiDetector);
 
             // Whole bunch of debugging information
             Float_t rad2deg = 180.0 / 3.1415927;
@@ -275,7 +275,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sector             = " << iSector                                    << endm;
             LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Ladder             = " << iLadder                                    << endm;
             LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sensor             = " << iSensor                                    << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:row/sector (ITTF)  = " << ROW << " / " << SECTOR                     << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:stiRow/stiSector (ITTF)  = " << stiRow << " / " << stiSector                     << endm;
             LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Active?            = " << stiDetector->isActive()                              << endm;
          }
       }
@@ -322,6 +322,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.25  2014/03/03 23:54:22  smirnovd
+ * Renamed local variables according to STAR style guidelines
+ *
  * Revision 1.24  2014/03/03 20:56:44  smirnovd
  * Updated error messages + minor clean up changes
  *
