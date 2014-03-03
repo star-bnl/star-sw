@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.25 2014/03/03 23:54:22 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.26 2014/03/03 23:54:29 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -219,16 +219,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
             stiDetector->setName(name);
             stiDetector->setIsOn(kTRUE);
-            //if (ActiveVolume) {
-            //LOG_DEBUG << " current node : " << name << " is set active" <<endm;
             stiDetector->setIsActive(new StiPxlIsActiveFunctor);
-            //}
-            //else {
-            //LOG_DEBUG << " current node : " << name << " is set inactive" <<endm;
-            //stiDetector->setIsActive(new StiNeverActiveFunctor);
-            //}
-            //if(nameP.Contains("PXSI")) {layer=layer+10;}
-
             stiDetector->setIsContinuousMedium(false); // XXX:ds: should it be true?
             stiDetector->setIsDiscreteScatterer(true); // false?
             stiDetector->setGroupId(kPxlId);
@@ -242,12 +233,11 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             int stiRow    = 0;
             int stiSector = 0;
 
-            /* numbering is :
-               ladder = 0-1- ...9 for inner layer --> stiRow =0
-               ladder = 0-1-2 for sector 0 of outer layer, then 3-4-5 for the second sector until 29 for the last sectro
-               ladder=1 is the inner ladder
-            */
-            // update 05-15 : inner ladder is ladder 1
+            // Add created sti pixel detector to the system
+            // The numbering is:
+            // ladder = 0-1- ...9 for inner layer --> stiRow =0
+            // ladder = 0-1-2 for sector 0 of outer layer, then 3-4-5 for the second sector until 29 for the last sectro
+            // ladder=1 is the inner ladder
             if (iLadder == 1) {
                stiRow = 0 ;
                stiSector = iSector-1;
@@ -322,6 +312,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.26  2014/03/03 23:54:29  smirnovd
+ * Changes in comments and commented out code only
+ *
  * Revision 1.25  2014/03/03 23:54:22  smirnovd
  * Renamed local variables according to STAR style guidelines
  *
