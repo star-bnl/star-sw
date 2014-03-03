@@ -39,7 +39,7 @@
 #include <DAQ_MTD/daq_mtd.h>
 #include <DAQ_PXL/daq_pxl.h>
 #include <DAQ_SST/daq_sst.h>
-
+#include <DAQ_FPS/daq_fps.h>
 
 /* various test routines... typically used by Tonko only */
 #include <DAQ_FGT/fgtPed.h>
@@ -72,7 +72,7 @@ static int mtd_doer(daqReader *rdr, const char *do_print) ;
 static int tinfo_doer(daqReader *rdr, const char *do_print);
 static int pxl_doer(daqReader *rdr, const char *do_print) ;
 static int sst_doer(daqReader *rdr, const char *do_print) ;
-
+static int fps_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
 
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	int c ;
 	const char *print_det = "" ;
 	char _mountpoint[256];
-	char *mountpoint = "/net/evp";	// sensible default from daqman...
+	const char *mountpoint = "/net/evp";	// sensible default from daqman...
 
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel((char *)WARN) ;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 			break ;
 		case 'm' :
 			mountpoint = _mountpoint;
-			strcpy(mountpoint, optarg);
+			strcpy(_mountpoint, (char *)optarg);
 			break;
 		  
 		default :
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 	class daqReader *evp ;			// tha main guy
 	evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
 	if(mountpoint) {
-		evp->setEvpDisk(mountpoint);
+		evp->setEvpDisk((char *)mountpoint);
 	}
 
 
@@ -324,6 +324,9 @@ int main(int argc, char *argv[])
 		
 		/*************************** SST **************************/
 		sst_doer(evp,print_det) ;
+
+		/*************************** FPS **************************/
+		if(fps_doer(evp,print_det)) LOG(INFO,"FPS found") ;
 		
 
 
@@ -1156,7 +1159,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 	char s_found[128] ;
 	daq_dta *dd ;
 
-	char *d_name = 0 ;
+	const char *d_name = 0 ;
 
 
 	switch(which) {
@@ -1640,3 +1643,35 @@ static int sst_test(daqReader *rdr, int mode)
 	return 0 ;
 }
 
+
+
+static int fps_doer(daqReader *rdr, const char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"fps")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("fps")->get("adc") ;
+	while(dd && dd->iterate()) {
+		found = 1 ;
+
+		if(do_print) {
+			printf("FPS: xing %2d, QT %d, chs %d\n",(char)dd->sec,dd->rdo,dd->ncontent) ;
+		}
+
+		fps_adc_t *a = (fps_adc_t *)dd->Void ;
+
+		for(u_int i=0;i<dd->ncontent;i++) {
+			if(do_print) {
+				printf("   ch %2d: ADC %4d, TDC %2d\n",a[i].ch, a[i].adc, a[i].tdc) ;
+			}
+		}
+
+	}
+
+	return found ;
+
+}
