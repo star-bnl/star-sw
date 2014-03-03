@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.60 2013/12/04 19:56:32 jdb Exp $
+ * $Id: StMuDst.cxx,v 1.61 2014/03/03 23:11:46 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -451,6 +451,22 @@ void StMuDst::fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TC
     }
   }
 
+  /// set the indices for MtdHits
+  for (int i=0; i<nMtdHits; i++) {
+    StMuMtdHit *t = (StMuMtdHit*) mtdHit->UncheckedAt(i);
+    if (t) {
+      if(globalIndex[t->associatedTrackKey()])
+        t->setIndex2Global( globalIndex[t->associatedTrackKey()]-1 );
+      else
+        t->setIndex2Global(-1);
+
+      if(primaryIndex[t->associatedTrackKey()])
+        t->setIndex2Primary( primaryIndex[t->associatedTrackKey()]-1 );
+      else
+        t->setIndex2Primary(-1);
+    }
+  }
+
   DEBUGVALUE2(timer.elapsedTime());
 }
 //-----------------------------------------------------------------------
@@ -807,6 +823,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.61  2014/03/03 23:11:46  jdb
+ * Added Rongrongs changes to StMuDst.cxx and StMuMtdHit.{cxx,h} for mtd tracks
+ *
  * Revision 1.60  2013/12/04 19:56:32  jdb
  * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
  *

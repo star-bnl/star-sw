@@ -18,6 +18,10 @@ StMuMtdHit::StMuMtdHit(const StMtdHit *hit){
 	mQuality  = hit->qaTruth(); 
 	if(hit->associatedTrack()!=0) mTrackKey = hit->associatedTrack()->key();	
 	else mTrackKey = 0;
+	
+	// rongrong
+	mIndex2Primary = -1;
+	mIndex2Global = -1;
 }
 
 int
@@ -46,3 +50,10 @@ StMuMtdHit::idTruth() const { return mIdTruth; }
 
 int
 StMuMtdHit::qaTruth() const { return mQuality; }
+
+
+int
+StMuMtdHit::index2Primary() const { return mIndex2Primary; }
+
+int
+StMuMtdHit::index2Global() const {return mIndex2Global; }

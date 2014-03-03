@@ -25,8 +25,13 @@ public:
     short associatedTrackKey() const;
     int             idTruth() const;
     int             qaTruth() const;
+    int       index2Primary() const;
+    int        index2Global() const;
+
 
     void setAssociatedTrackKey(short);
+    void setIndex2Primary(int);
+    void setIndex2Global(int);
 	
 private:
 
@@ -38,12 +43,17 @@ private:
 	
     UShort_t  mIdTruth;  // simulation associated track id
     UShort_t  mQuality;  // quality of this information (percentage of charge produced by mIdTruth)
-	UShort_t  mTrackKey;
+    UShort_t  mTrackKey;
+    Int_t     mIndex2Primary;
+    Int_t     mIndex2Global;
 
-ClassDef(StMuMtdHit,1)
+
+ClassDef(StMuMtdHit,2)
 
 };
 
 inline void StMuMtdHit::setAssociatedTrackKey(short id) { mTrackKey=id; }
+inline void StMuMtdHit::setIndex2Primary(int index)     { mIndex2Primary=index; }
+inline void StMuMtdHit::setIndex2Global(int index)      { mIndex2Global=index; }
 
 #endif
