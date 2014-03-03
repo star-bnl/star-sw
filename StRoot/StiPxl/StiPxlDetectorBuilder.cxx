@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.20 2014/03/03 20:56:24 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.21 2014/03/03 20:56:30 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -24,6 +24,7 @@
 #include "tables/St_HitError_Table.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
+#include "StPxlDbMaker/StPxlDb.h"
 #include "StPxlDbMaker/StPxlDbMaker.h"
 #include "StPxlUtil/StPxlConstants.h"
 
@@ -52,8 +53,9 @@ using namespace std;
    10     3                          1     29
    10     4                          0     9
  */
-StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile)
-   : StiDetectorBuilder("Pixel", active, inputFile), mSiMaterial(0), mHybridMaterial(0)
+StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile) :
+   StiDetectorBuilder("Pixel", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mPxlDb(0),
+   mUseDbGeom(false)
 {}
 
 
@@ -64,6 +66,17 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 
    // 2 real rows, but we have detector elements and support elements.
    setNRows(2);
+
+   TObjectSet *pxlDbDataSet = (TObjectSet*) source.GetDataSet("pxlDb");
+   if (pxlDbDataSet) {
+      mPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
+      LOG_INFO << "buildDetectors : initialize geometry with DB tables" << endm;
+   }
+
+   if(mUseDbGeom && !mPxlDb) {
+      LOG_ERROR << "buildDetectors : no pxlDb for Geometry" << endm;
+      return;
+   }
 
    if (StiVMCToolKit::GetVMC()) { useVMCGeometry(); }
 }
@@ -334,6 +347,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.21  2014/03/03 20:56:30  smirnovd
+ * Allow user to switch between the survey and ideal pixel geometries
+ *
  * Revision 1.20  2014/03/03 20:56:24  smirnovd
  * Switch to detector volumes in TpcRefSys
  *
