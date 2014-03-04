@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.3 2014/03/03 23:54:35 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.4 2014/03/04 15:36:38 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.4  2014/03/04 15:36:38  smirnovd
+ * Remove constraint on sectors used in engeneering run in 2013
+ *
  * Revision 1.3  2014/03/03 23:54:35  smirnovd
  * Remove extra pointer validation check
  *
@@ -145,9 +148,6 @@ void StiPxlHitLoader::loadHits(StEvent *source,
                   throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL hit in container");
 
                if (pxlHit->detector() != kPxlId) continue;
-
-               // Consider olny sectors 2, 4, and 7
-               if (pxlHit->sector() != 2 && pxlHit->sector() != 4 && pxlHit->sector() != 7) continue;
 
                int LAY = 0, LAD = 0;
 
