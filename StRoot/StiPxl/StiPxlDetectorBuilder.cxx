@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.27 2014/03/04 15:36:51 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.28 2014/03/04 15:36:58 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -94,11 +94,6 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 void StiPxlDetectorBuilder::useVMCGeometry()
 {
    LOG_INFO << "StiPxlDetectorBuilder::useVMCGeometry() -I- Use VMC geometry" << endm;
-
-   //THashList *PxlRot = new THashList(400, 0);
-   // XXX:ds At the moment gStPxlDbMaker is not defined in offline/hft/StRoot/StPxlDbMaker or
-   // StRoot/
-   //PxlRot = gStPxlDbMaker->GetRotations();
 
    SetCurrentDetectorBuilder(this);
 
@@ -321,6 +316,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.28  2014/03/04 15:36:58  smirnovd
+ * Removed expired commented code
+ *
  * Revision 1.27  2014/03/04 15:36:51  smirnovd
  * Added destructor to invalidate the pointers
  *

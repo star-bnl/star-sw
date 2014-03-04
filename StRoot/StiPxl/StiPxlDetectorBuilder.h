@@ -6,6 +6,7 @@
 
 class StPxlDb;
 
+
 class StiPxlDetectorBuilder : public StiDetectorBuilder
 {
 public:
