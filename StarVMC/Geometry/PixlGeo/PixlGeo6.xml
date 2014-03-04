@@ -1,3 +1,4 @@
+
 <Document file="StarVMC/Geometry/PixlGeo/PixlGeo6.xml">
    <Module name="PixlGeo6" comment="Pixel Detector Geometry  ">
 
@@ -47,6 +48,10 @@ December 1
     Add the part of the driverboard cables that reside within the PXLA volume.
     The positions are taken from the DtubGeo geometry file.
 
+Feburary 2014 FV
+   The sensitive area was not placed correctly in z within PXSI.
+   The final matrices are now in good agreement with the SW model
+
 
 
 -->
@@ -71,13 +76,13 @@ December 1
             PTOB,  <!-- tooling ball structure -->
             PCAD   <!-- outewr driver board cables -->
     <!-- names/nomenclatures start from a point located a the bottom right of a sector -->
-    </Content>
+    </Content> 
 
     <varlist type="float" comment=" Half length of Carbon Fibre sector" > sectorLength/17.55/</varlist> 
     <varlist type="float" comment=" Thickness of Carbon Fibre sector" > sectorThickness/0.024/</varlist>  
     <varlist type="float" comment=" negative Thickness of Carbon Fibre sector" > sectorThicknessNeg/-0.024/</varlist> 
     <varlist type="float" comment=" HalfThickness of Carbon Fibre sector" > sectorHalfThickness/0.012/</varlist> 
-    <varlist type="float" comment=" Z offset for Sector" > sectorZOffset/-3.8105/</varlist> 
+    <varlist type="float" comment=" Z offset for Sector" > sectorZOffset/-3.8/</varlist> 
     <varlist type="float" comment="  Half Length of Ladder CF backing" > backingLength/14.95/</varlist> 
     <varlist type="float" comment="  Half Width of Ladder CF backing" > backingWidth/1.245/</varlist> 
     <varlist type="float" comment="  Thickness of Ladder CF backing" > backingThickness/0.0175/</varlist> 
@@ -199,7 +204,7 @@ December 1
     <Fill name="SENP" comment=" SENsors Placement on a ladder" >
     <var name="version" value="1.0" />
     <var name="sensor"  value="10" comment=" number of sectors" />
-    <var name="zpos"  value="{-4.2315, -2.2055, -0.1795 ,1.8465, 3.8725, 5.8985, 7.9245, 9.9505, 11.9765, 14.0025}" comment="z positions [cm] of the 10 sensors inside a ladder"/>
+    <var name="zpos"  value="{-4.222, -2.197, -0.172 ,1.853, 3.878, 5.903, 7.928, 9.953, 11.978, 14.003}" comment="z positions [cm] of the 10 sensors inside a ladder"/>
     </Fill>
 
 
@@ -214,7 +219,6 @@ December 1
     </Fill>
 
  
-
     <Fill name="PARO" comment="default">
     <var name="version" value="0"/>
     <var name="DX" value="0"   comment=" no shift "/>
@@ -889,7 +893,7 @@ December 1
   <Placement block="BHSH" x="-1.08495" y="2.876" z="BullHornZOffset">
   <Rotation alphaz="357.305" />
  </Placement>
-<!--  --> 
+<!--  -->  
 
 <Create block="PTOB" />
  <Placement block="PTOB" x="-0.3264" y="5.3446" z="14.2125">
@@ -901,22 +905,22 @@ December 1
 
 
 <Create block="LADR" />
-  <Placement block="LADR" x="-0.707197" y="2.74331" z="-4.8875">
+  <Placement block="LADR" x="-0.73444" y="2.74331" z="-4.875">
   <Rotation alphaz="175.437" />
  </Placement>
 
 <Create block="LADR" />
-  <Placement block="LADR" x="-1.30523" y="8.1723" z="-4.8875">
+  <Placement block="LADR" x="-1.30523" y="8.1723" z="-4.875">
   <Rotation alphaz="349.963" />
  </Placement>
 
 <Create block="LADR" />
-  <Placement block="LADR" x="-2.97583" y="7.72235" z="-4.8875">
+  <Placement block="LADR" x="-2.97583" y="7.72235" z="-4.875">
   <Rotation alphaz="1.963" />
  </Placement>
 
 <Create block="LADR" />
-  <Placement block="LADR" x="-4.51636" y="6.93489" z="-4.8875">
+  <Placement block="LADR" x="-4.51636" y="6.93489" z="-4.875">
   <Rotation alphaz="13.963" />
  </Placement>
 
@@ -937,8 +941,7 @@ December 1
 
 
    
-  
-   
+     
 
 
 
@@ -1652,9 +1655,10 @@ December 1
     <Material name="Silicon"/>
     <Attribute for="PXSI" seen="1" colo="594"/>
     <Shape type="BOX" dz="1.0120" dx="1.1365" dy="0.0025"/>
-    
+<!-- The active area (PLAC) is not centered, by has different inactive area   *339 vs 299 microns) on each z side =-->    
+
     <Create block="PLAC"/>
-    <Placement block="PLAC" x="0.1533" z="0.0" y="0.0013" in="PXSI" >
+    <Placement block="PLAC" x="0.1533" z="0.01604" y="0.0013" in="PXSI" >
     </Placement>
     </Volume>
 
