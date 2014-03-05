@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtAlignmentMaker.cxx,v 1.8 2013/06/04 23:19:32 akio Exp $
+ * $Id: StFgtAlignmentMaker.cxx,v 1.9 2014/03/05 17:58:01 akio Exp $
  *
  */
 
@@ -47,12 +47,13 @@
 #include "StRoot/StFgtPool/StFgtClusterTools/StFgtStraightTrackMaker.h"
 
 #include "StRoot/StEEmcPool/StEEmcIUPi0/StEEmcIUPointMaker.h"
+#include "StRoot/StEmcUtil/geometry/StEmcGeom.h"
 
 static const int mDebug=0;      // debug mesasge level
 static const int mEventDisp=0;  // event display
 
-static const int MAXTRK=50000;   //max number of tracks
-static const int MAXHIT=100;      //max number of hits
+static const int MAXTRK=500000;   //max number of tracks
+static const int MAXHIT=8;      //max number of hits
 static const int NPAR=24*6;      //number of parameters=(6 discs)*(4 quads)*(3 angles + 3 offset)
 
 static const int NAXIS=4;                                  //  number of axis for hist
@@ -62,21 +63,24 @@ static TH1F *histdz;
 
 static const double PI = 4.0*atan(1);
 
-const float maxdfgt=0.1,    maxdvtx=3.0,  maxdtpc=10.0, maxdemc=10.0;
-const float maxpfgt=0.005,  maxpvtx=3.15, maxptpc= 0.3, maxpemc=0.4;
+const float ISOCUT=0.5;
+const float maxdfgt=0.15,   maxdvtx=0.5,  maxdtpc=10.0, maxdemc=10.0;
+const float maxpfgt=0.005,  maxpvtx=0.5, maxptpc= 0.3, maxpemc=0.3;
 
 struct TRKHIT{  
-  int run,evt,nhit,nhitUse,nhitFgt,nhitTpc,nhitPrompt,nhitEemc,used;
-  float dca, chi2, trkz, dz, eta, phi, opt;          //track parameters (last one is 1/pT)
-  int det[MAXHIT];                                   //0-23=FGT(disc*4+quad), 24-27=vertex, 28-31=TPC, 32-35=Prompt, 36-39=EEMC separated by quad
-  float x[MAXHIT],y[MAXHIT],z[MAXHIT];               //xyz
-  float ex[MAXHIT],ey[MAXHIT],ez[MAXHIT];            //xyz error  
-  float lr[MAXHIT],lp[MAXHIT],r[MAXHIT],p[MAXHIT];   //local and globak r and phi
-  float dx[MAXHIT],dy[MAXHIT],dr[MAXHIT],dp[MAXHIT]; //residuals
-  float tw[MAXHIT],p1[MAXHIT],p2[MAXHIT],po[MAXHIT]; //EEMC energies (FGT: tw=ChgPhi, p1=ChgR, p2=PhiRAsy, po=EvenOddAsy)
-  float su[MAXHIT],sv[MAXHIT];                       //ESMD energies
-  int nrl[MAXHIT],nsu[MAXHIT],nsv[MAXHIT];           //eemc number of relatives, strips in smd u & v
-  bool use[MAXHIT];                                  //false=do not use in fit true=use in fit
+  int run,evt,nhit,nhitUse,nhitFgt,nhitVtx,nhitTpc,nhitPrompt,nhitEemc,used;
+  float dca, chi2, trkz, dz, eta, phi, opt;                 //track parameters (last one is 1/pT)
+  int det[MAXHIT];                                          //0-23=FGT(disc*4+quad), 24-27=vertex, 28-31=TPC, 32-35=Prompt, 36-39=EEMC separated by quad
+  float x[MAXHIT],y[MAXHIT],z[MAXHIT];                      //xyz
+  float ex[MAXHIT],ey[MAXHIT],ez[MAXHIT];                   //xyz error  
+  float lr[MAXHIT],lp[MAXHIT],r[MAXHIT],p[MAXHIT];          //local and globak r and phi
+  float dx[MAXHIT],dy[MAXHIT],dr[MAXHIT],dp[MAXHIT];        //residuals
+  float tw[MAXHIT],p1[MAXHIT],p2[MAXHIT],po[MAXHIT];        //EEMC energies (FGT: tw=ChgPhi, p1=ChgR, p2=PhiRAsy, po=EvenOddAsy)
+  float su[MAXHIT],sv[MAXHIT];                              //ESMD energies
+  int nrl[MAXHIT],nsu[MAXHIT],nsv[MAXHIT];                  //eemc number of relatives, strips in smd u & v
+  float ele[4],trk[4],bemc[4],eemc[4],tot[4],rec[4],iso[4]; //4 momentums of ele/tracks/bemc/eemc/total(trk+bemc+eemc)/recoil(=tot-ele)/isolation cone
+  float ptbal,riso;                                         //pt balance & energy ratio ele/total in isolation cone
+  bool use[MAXHIT];                                         //false=do not use in fit true=use in fit
 };
 
 static int mNtrk[kFgtNumQuads];            // number of tracks per quad
@@ -84,20 +88,20 @@ static int mNtrkUse[kFgtNumQuads];         // number of usable tracks per quad a
 static TRKHIT mHit[kFgtNumQuads][MAXTRK];  // storage to keep hit for track
 static TRKHIT mHitAlg;                     // current working hits to be modified with aliggnment parameters
 static int mQuad;                          // quad currently working on
+static int mStep;                          // step number
 static int mHitMaskDisc;                   // disc mask to define hits to be used hits in track fits. bit0-5=fgt, bit6=vtx, bit7=tpc, bit8=prompt, bit9=eemc
 static int mResidMaskDisc;                 // disc mask to include residual sum of all tracks for alignments
 static int mFgtInputRPhi;                  // 0=x/y/z or  1=r/phi/z for fgt hits in mHit
 static int mFillHist;                      // 0=not filling histo 1=filling histo before alignments 2=filling histo after alignment
 static int mReqHit=0;                      // required # of hits
 static int mReqFgtHit=0;                   // required # of FGT hits
+static int mReqVtx=0;                      // required vertex
 static int mReqTpcHit=0;                   // required # of TPC hits
 static int mReqPromptHit=0;                // required # of TPC prompt hits
 static int mReqEemcHit=0;                  // required # of EEMC hits
-static float mReqDca=0;                    // max dca to accept track
-static float mReqChi2=0;                   // max chi2 to accept track
 static float mErrFGT=0;
 static float mErrVTX=0;
-static float mErrVTCZ=0;
+static float mErrVTXZ=0;
 static float mErrTPCI=0;
 static float mErrTPCO=0;
 static float mErrTPCZ=0;
@@ -107,6 +111,9 @@ static int mBeamLine=1;
 
 static StFgtDb* mDb; 
 static fgtAlignment_st* orig_algpar;
+
+static StThreeVectorF ele,tracks,bemcs,eemcs,tot,rec,iso;
+static float ptbal,riso;
 
 #define SMALL_NUM   1e-4
 
@@ -163,16 +170,21 @@ double distance(Line l1, Line l2, Vector& p1, Vector& p2){
 }
 
 void getZvtxAndDca(double* p, double& dca, double& z, double zmin=-900, double zmax=900){
-  St_vertexSeedC* vSeed = St_vertexSeedC::instance();
+  double x0=0,y0=0,dxdz=0,dydz=0;
+  if(mFgtInputRPhi>0){
+    St_vertexSeedC* vSeed = St_vertexSeedC::instance();
+    x0=vSeed->x0(); dxdz=vSeed->dxdz();
+    y0=vSeed->y0(); dydz=vSeed->dydz();
+  }
   Vector p1(p[0]+p[1]*zmin, p[2]+p[3]*zmin, zmin);
   Vector p2(p[0]+p[1]*zmax, p[2]+p[3]*zmax, zmax);
-  Vector p3(vSeed->x0()+vSeed->dxdz()*zmin, vSeed->y0()+vSeed->dydz()*zmin, zmin);
-  Vector p4(vSeed->x0()+vSeed->dxdz()*zmax, vSeed->y0()+vSeed->dydz()*zmax, zmax);
+  Vector p3(x0+dxdz*zmin, y0+dydz*zmin, zmin);
+  Vector p4(x0+dxdz*zmax, y0+dydz*zmax, zmax);
   Vector p5,p6;
   Line l1(p1,p2), l2(p3,p4);
   dca=distance(l1,l2,p5,p6); //3d DCA length
-  //printf("BEAM=%8.2f %8.2f %8.2f FGT=%8.2f %8.2f %8.2f\n",p6.x,p6.y,p6.z,p5.x,p5.y,p5.z);
   z=p6.z;  //z of DCA point on beamline constrain
+  //printf("BEAM=%8.2f %8.2f %8.2f FGT=%8.2f %8.2f %8.2f\n",p6.x,p6.y,p6.z,p5.x,p5.y,p5.z);
 }
 
 inline StPhysicalHelix getStPhysicalHelix(double x0, double y0, double curve, double dip, double slp){
@@ -222,6 +234,7 @@ void getZvtxAndDcaFromHelix(double* par, double& dca, double& z, double &eta, do
   
   //get DCA
   double x0=0, y0=0, z0=0;
+  if(mFgtInputRPhi>0){ x0=vSeed->x0(); y0=vSeed->y0();}
   double ss3=0;
   for(int i=0; i<5; i++){
     ss3=hh.Path(x0,y0); //closest point to x0,y0 line
@@ -441,14 +454,15 @@ double residHelix(double *par){
     double dx = mHitAlg.x[i] - x;
     double dy = mHitAlg.y[i] - y;
     int disc=mHitAlg.det[i]/4;
+    double ff=(dx*dx+dy*dy)/(mHitAlg.ex[i]*mHitAlg.ex[i]+mHitAlg.ey[i]*mHitAlg.ey[i]);
     if(mResidMaskDisc & (1<<disc)) {
       if(disc==6) ifvtx=1;
-      f += (dx*dx+dy*dy)/(mHitAlg.ex[i]*mHitAlg.ex[i]+mHitAlg.ey[i]*mHitAlg.ey[i]);
+      f += ff;
       ndf+=2;
     }
     if(mHitMaskDisc & (1<<disc)) {
       if(disc==6) ifvtx2=1;
-      chi2 += (dx*dx+dy*dy)/(mHitAlg.ex[i]*mHitAlg.ex[i]+mHitAlg.ey[i]*mHitAlg.ey[i]);
+      chi2 += ff;
       ndf2+=2;
     }
     if(mDebug>3) printf("residHelix %3d dx=%12.8f dy=%12.8f f=%12.8f\n",i,dx,dy,f);
@@ -461,6 +475,7 @@ double residHelix(double *par){
       double hp=mHitAlg.p[i];
       double dr = hr-r;
       double dp = hp-phi;
+      //if(disc>8) printf("EEMCDR n=%2d used=%d %8.4f ->%8.4f\n",mHitAlg.nhitEemc,mHitAlg.used,mHitAlg.dr[i],dr);
       while(dp>PI)  dp-=2*PI;
       while(dp<-PI) dp+=2*PI;
       mHitAlg.dx[i]=dx;
@@ -486,11 +501,11 @@ double residHelix(double *par){
   f/=double(ndf);
   if(mFillHist>0) {
     ndf2-=5;
-    if(ndf2<=0) printf("ERROR residHelix ndf2=%d\n",ndf2);
-    chi2/=double(ndf2);
+    if(ndf2<=0) {printf("ERROR residHelix ndf2=%d\n",ndf2);}
+    else {chi2/=double(ndf2);}
     double z,dca,eta,phi,opt;
     getZvtxAndDcaFromHelix(par,dca,z,eta,phi,opt);
-    printf("UPDATE Dca=%8.4f->%8.4f  trkz=%8.4f->%8.4f chi2=%8.4f->%8.4f ndf=%d\n",mHitAlg.dca,dca,mHitAlg.trkz,z,mHitAlg.chi2,chi2,ndf2);
+    if(mDebug>0) printf("UPDATE Dca=%8.4f->%8.4f  trkz=%8.4f->%8.4f chi2=%8.4f->%8.4f ndf=%d\n",mHitAlg.dca,dca,mHitAlg.trkz,z,mHitAlg.chi2,chi2,ndf2); 
     mHitAlg.dca=dca;
     mHitAlg.dz=mHitAlg.dz-mHitAlg.trkz+z;
     mHitAlg.trkz=z;
@@ -567,13 +582,26 @@ void funcHelix(Int_t &npar, Double_t* gin, Double_t &f, Double_t *par, Int_t ifl
 void fitLine(Int_t &npar, Double_t* gin, Double_t &f, Double_t *par, Int_t iflag){
   if(mDebug>4) printf("fitLine nhit=%d\n",mHitAlg.nhit);
   f=0;  
+  int ifvtx=0;
+  int ndf=0;
   for(int i=0; i<mHitAlg.nhit; i++){    
     if(mHitAlg.use[i]==false) continue;
+    if(mHitAlg.det[i]/4==6) ifvtx=1;
     double dx = par[0] + par[1] * mHitAlg.z[i] - mHitAlg.x[i];
     double dy = par[2] + par[3] * mHitAlg.z[i] - mHitAlg.y[i];    
     f += (dx*dx+dy*dy)/(mHitAlg.ex[i]*mHitAlg.ex[i]+mHitAlg.ey[i]*mHitAlg.ey[i]);
+    ndf+=2;
     if(mDebug>5) printf("dx=%8.4f dy=%8.4f dr=%8.4f\n",dx,dy,f);
   } 
+  if(ifvtx==0 && mBeamLine==1){
+    double z,dca;
+    getZvtxAndDca(par,dca,z);
+    f += dca*dca/mErrVTX/mErrVTX;
+    ndf++;
+  }
+  ndf-=4;
+  if(ndf<=0) {printf("ERROR fitLine ndf=%d\n",ndf);}
+  else {f/=double(ndf);}
   if(mDebug>4) printf("fitLine x0=%12.8f x1=%12.8f y0=%12.8f y1=%12.8f f=%12.8f\n",par[0],par[1],par[2],par[3],f);
 }
 
@@ -581,6 +609,8 @@ void fitLine(Int_t &npar, Double_t* gin, Double_t &f, Double_t *par, Int_t iflag
 double residLine(double *par){
   //printf("residLine mQuad=%d mNtrk=%d mFillHist=%d\n",mQuad,mNtrk[mQuad],mFillHist);
   double f=0, chi2=0;
+  int ifvtx=0, ifvtx2=0;
+  int ndf=0, ndf2=0;
   for(int i=0; i<mHitAlg.nhit; i++){    
     double x=par[0] + par[1] * mHitAlg.z[i];
     double y=par[2] + par[3] * mHitAlg.z[i];
@@ -589,9 +619,11 @@ double residLine(double *par){
     int disc=mHitAlg.det[i]/4;
     if(mResidMaskDisc & (1<<disc)) {
       f += (dx*dx+dy*dy)/(mHitAlg.ex[i]*mHitAlg.ex[i]+mHitAlg.ey[i]*mHitAlg.ey[i]);
+      ndf+=2;
     }
     if(mHitMaskDisc & (1<<disc)) {
       chi2 += (dx*dx+dy*dy)/(mHitAlg.ex[i]*mHitAlg.ex[i]+mHitAlg.ey[i]*mHitAlg.ey[i]);
+      ndf2+=2;
     }
     if(mDebug>5) printf("residLine %3d dx=%12.8f dy=%12.8f dr=%8.2f\n",i,dx,dy,dx*dx+dy*dy);
     if(mFillHist>0) {
@@ -615,20 +647,32 @@ double residLine(double *par){
 	while(phi<StFgtGeom::phiQuadXaxis(1)) phi+=2*PI;
       }
       fillHist(disc,quad,dx,dy,dr,dp,x,y,r,phi);
-      if(disc==6 && fabs(dx)<0.01 && fabs(dy)<0.01){
-	printf("VTX %3d q=%1d d=%1d trk=%6.4f %6.4f %6.4f %6.4f fgt=%6.4f %6.4f %6.4f %6.4f xyrp=%6.4f %6.4f %6.4f %6.4f dxyrp=%6.4f %6.4f %6.4f %6.4f\n",
-	       i,quad,disc,par[0],par[1],par[2],par[3],x,y,r,phi,hx,hy,hr,hp,dx,dy,dr,dp);
-      }
-      if(disc>6)
-	printf("EEMC2 %3d q=%1d d=%1d trk=%6.2f %6.2f %6.2f %6.2f fgt=%6.1f %6.1f %6.1f %6.2f xyrp=%6.1f %6.1f %6.1f %6.2f dxyrp=%6.1f %6.1f %6.1f %6.2f\n",
-	       i,quad,disc,par[0],par[1],par[2],par[3],x,y,r,phi,hx,hy,hr,hp,dx,dy,dr,dp);
+      //if(disc==6 && fabs(dx)<0.01 && fabs(dy)<0.01){
+      //	printf("VTX %3d q=%1d d=%1d trk=%6.4f %6.4f %6.4f %6.4f fgt=%6.4f %6.4f %6.4f %6.4f xyrp=%6.4f %6.4f %6.4f %6.4f dxyrp=%6.4f %6.4f %6.4f %6.4f\n",
+      //	       i,quad,disc,par[0],par[1],par[2],par[3],x,y,r,phi,hx,hy,hr,hp,dx,dy,dr,dp);
+      //}
+      //if(disc>6)
+	//printf("EEMC2 %3d q=%1d d=%1d trk=%6.2f %6.2f %6.2f %6.2f fgt=%6.1f %6.1f %6.1f %6.2f xyrp=%6.1f %6.1f %6.1f %6.2f dxyrp=%6.1f %6.1f %6.1f %6.2f\n",
+	//      i,quad,disc,par[0],par[1],par[2],par[3],x,y,r,phi,hx,hy,hr,hp,dx,dy,dr,dp);
     }
   }
+  if(ifvtx+ifvtx2<2 && mBeamLine==1){
+    double z,dca;
+    getZvtxAndDca(par,dca,z);
+    if(ifvtx==0)  {f    += dca*dca/mErrVTX/mErrVTX; ndf++; }
+    if(ifvtx2==0) {chi2 += dca*dca/mErrVTX/mErrVTX; ndf2++;}
+  }
+  ndf-=4;
+  if(ndf<=0) printf("ERROR residLine ndf=%d\n",ndf);
+  f/=double(ndf);
   if(mFillHist>0) {
+    ndf2-=4;
+    if(ndf2<=0) printf("ERROR residLine ndf2=%d\n",ndf2);
+    chi2/=double(ndf2);
     //update DCA and Trkz
     double dca,z;
     getZvtxAndDca(par,dca,z);
-    printf("UPDATE Dca=%8.3f -> %8.3f  trkz=%8.3f -> %8.3f \n",mHitAlg.dca,dca,mHitAlg.trkz,z);
+    if(mDebug>0) printf("UPDATE Dca=%8.4f->%8.4f  trkz=%8.4f->%8.4f chi2=%8.4f->%8.4f ndf=%d\n",mHitAlg.dca,dca,mHitAlg.trkz,z,mHitAlg.chi2,chi2,ndf2);
     mHitAlg.dca=dca;
     mHitAlg.dz=mHitAlg.dz-mHitAlg.trkz+z;
     mHitAlg.trkz=z;
@@ -700,9 +744,19 @@ ClassImp(StFgtAlignmentMaker);
 StFgtAlignmentMaker::StFgtAlignmentMaker(const Char_t *name) : StMaker(name),mEventCounter(0),
 							       mErrFgt(0.02), mErrVtx(0.02), mErrVtxZ(1.0), 
 							       mErrTpcI(0.6), mErrTpcO(0.12),mErrTpcZ(0.12),mErrPpt(0.1),mErrEmc(0.3),
+							       mFakeNtrk(2000),mFakeEmin(40),mFakeEmax(40),mFakeEtamin(1.6),mFakeEtamax(1.6),
+							       mFakePhimin(0),mFakePhimax(0),mFakeVtxSig(0),
 							       mDataSource(0),
 							       mOutTreeFile(0),mInTreeFile(0),mReadParFile(0),
-							       mDcaCut(5.0),mChi2Cut(0.02),mRunNumber(0),mSeqNumber(0),mNStep(0) {
+							       mRunNumber(0),mSeqNumber(0),mDay(0),mNStep(0){
+  memset(mDzCut  ,0,sizeof(mDzCut  ));
+  memset(mDcaCut ,0,sizeof(mDcaCut ));
+  memset(mFgtRCut,0,sizeof(mFgtRCut));
+  memset(mFgtPCut,0,sizeof(mFgtPCut));
+  memset(mTpcRCut,0,sizeof(mTpcRCut));
+  memset(mTpcPCut,0,sizeof(mTpcPCut));
+  memset(mEmcRCut,0,sizeof(mEmcRCut));
+  memset(mEmcPCut,0,sizeof(mEmcPCut));  
 }
 
 Int_t StFgtAlignmentMaker::Init(){
@@ -737,10 +791,10 @@ Int_t StFgtAlignmentMaker::InitRun(Int_t runnum){
 }
 
 static const int mMaxStep=100;
-int mNStep;
 
 void StFgtAlignmentMaker::setStep(int discmask,int quadmask, int parmask, int hitmask_disc, int residmask,
-				  int trackType, int minHit, int minFgtHit, int minTpcHit, int minPromptHit, int minEemcHit){
+				  int trackType, int minHit, int minFgtHit, int minVtx, int minTpcHit, int minPromptHit, int minEemcHit,
+				  float dzcut, float dcacut, float fgtrcut, float fgtpcut, float tpcrcut, float tpcpcut, float emcrcut, float emcpcut){
   if(mNStep>=mMaxStep) {printf("Reached MaxStep\n"); return; }
   if(mNStep==0) { printf("Step0 is making before histo, and masks are set to 0\n"); discmask=0; quadmask=0; parmask=0; }
   mDiscMask[mNStep]=discmask;
@@ -751,22 +805,31 @@ void StFgtAlignmentMaker::setStep(int discmask,int quadmask, int parmask, int hi
   mTrackType[mNStep]=trackType;
   mMinHit[mNStep]=minHit;
   mMinFgtHit[mNStep]=minFgtHit;
+  mMinVtx[mNStep]=minVtx;
   mMinTpcHit[mNStep]=minTpcHit;
   mMinPromptHit[mNStep]=minPromptHit;
   mMinEemcHit[mNStep]=minEemcHit;
+  mDzCut[mNStep]=dzcut;
+  mDcaCut[mNStep]=dcacut;
+  mFgtRCut[mNStep]=fgtrcut;
+  mFgtPCut[mNStep]=fgtpcut;
+  mTpcRCut[mNStep]=tpcrcut;
+  mTpcPCut[mNStep]=tpcpcut;
+  mEmcRCut[mNStep]=emcrcut;
+  mEmcPCut[mNStep]=emcpcut;
   printf("Adding step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x trkType=%d minHit=%d minFgt=%d minTpc=%d minPrompt=%d minEemc=%d\n",
 	 mNStep,discmask,quadmask,parmask,hitmask_disc,trackType,minHit,minFgtHit,minTpcHit,minPromptHit,minEemcHit);
+  printf("                    Cuts dz=%8.3f dca=%8.3f fgtdr=%8.3f fgtdp=%8.3f tpcdr=%8.3f tpcdp=%8.3f emcdr=%8.3f emcdp=%8.3f\n",
+	 mDzCut[mNStep],mDcaCut[mNStep],mFgtRCut[mNStep],mFgtPCut[mNStep],mTpcRCut[mNStep],mTpcPCut[mNStep],mEmcRCut[mNStep],mEmcPCut[mNStep]);
   mNStep++;
 }
 
 
 Int_t StFgtAlignmentMaker::Make() {
   orig_algpar=mDb->getAlignment();
-  mReqDca=mDcaCut;
-  mReqChi2=mChi2Cut;
   mErrFGT=mErrFgt;
   mErrVTX=mErrVtx;
-  mErrVTCZ=mErrVtxZ;
+  mErrVTXZ=mErrVtxZ;
   mErrTPCI=mErrTpcI;
   mErrTPCO=mErrTpcO;
   mErrTPCZ=mErrTpcZ;
@@ -780,6 +843,7 @@ Int_t StFgtAlignmentMaker::Make() {
     readFromStraightTrackMaker();  
     DispFromStraightTrackMaker();
   }else if(mDataSource==5){
+    calcETBalanceFromStEvent();
     readFromStraightTrackAndStEvent();  
   }else if(mDataSource==6){
     readFromStraightTrackAndMudst();  
@@ -789,60 +853,42 @@ Int_t StFgtAlignmentMaker::Make() {
 
 Int_t StFgtAlignmentMaker::Finish() {
   gMessMgr->Info() << "StFgtAlignmentMaker::Finish()" << endm;
-
+  
   if(mDataSource==4)      {fakeData();}
   else if(mDataSource==3) {readFromTree();}
   overWriteError();
   fgtAlignment_st result;  
   memcpy(&result,orig_algpar,sizeof(fgtAlignment_st));
 
-  cout << "Creating Histo before alignment"<<endl;  
-  mFillHist=1;
-  for(int quad=0; quad<kFgtNumQuads; quad++){ 
-    mQuad=quad; 
-    printf("Quad=%d Step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x residMask=%x trkType=%d minHit=%d minFgt=%d minTpc=%d minPrompt=%d minEEmc=%d\n",
-	   quad,0,mDiscMask[0],mQuadMask[0],mParMask[0],mHitMask[0],mResidMask[0],mTrackType[0],mMinHit[0],mMinFgtHit[0],mMinTpcHit[0],mMinPromptHit[0],mMinEemcHit[0]);
-    doAlignment(&result,0,0,0,mHitMask[0],mResidMask[0],mTrackType[0],mMinHit[0],mMinFgtHit[0],mMinTpcHit[0],mMinPromptHit[0],mMinEemcHit[0],&result);
-  } 
-  saveHist();
-  if(mNStep<=1){
-    if(mOutTreeFile) {writeTree();}
-    writePar(&result);        
-    return kStOK; //exit if only step0 exist
-  }
-
-  cout << "Doing Alignment with Number of steps = "<<mNStep<<endl;  
-  mFillHist=0;  
-  for(int quad=0; quad<kFgtNumQuads; quad++){
-    mQuad=quad;
-    int quadmask= 1<<quad;
-    cout << Form("Doing alignment for quad=%1d with Ntrk=%4d",quad,mNtrk[quad])<<endl;
-    if(mNtrk[mQuad]>0){
-      for(int s=1; s<mNStep; s++){	
-	if( quadmask && mQuadMask[s] ){
-	  printf("Quad=%d Step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x residMask=%x trkType=%d minHit=%d minFgt=%d minTpc=%d minPrompt=%d minEEmc=%d\n",
+  cout << "Doing Alignment with Number of steps = "<<mNStep<<endl;
+  for(int s=0; s<mNStep; s++){
+    mStep=s;
+    if(mDiscMask[s]+mParMask[s]>0) {mFillHist=0;}
+    else {mFillHist=1; resetHist(); printf("Saving hist for step=%d\n",mStep);}
+    for(int quad=0; quad<kFgtNumQuads; quad++){ 
+      mQuad=quad; 
+      int quadmask= 1<<quad;
+      if( (mFillHist>0) || (quadmask & mQuadMask[s]) ){
+	cout << Form("Doing alignment for quad=%1d with Ntrk=%4d",quad,mNtrk[quad])<<endl;
+	if(mNtrk[mQuad]>0){
+	  printf("Quad=%d Step=%d with discMask=%x quadMask=%x parMask=%x hitMask=%x residMask=%x trkType=%d minHit=%d minFgt=%d vtx=%d minTpc=%d minPrompt=%d minEEmc=%d\n",
 		 quad,s,mDiscMask[s],quadmask,mParMask[s],mHitMask[s],mResidMask[s],
-		 mTrackType[s],mMinHit[s],mMinFgtHit[s],mMinTpcHit[s],mMinPromptHit[s],mMinEemcHit[s]);
+		 mTrackType[s],mMinHit[s],mMinFgtHit[s],mMinVtx[s],mMinTpcHit[s],mMinPromptHit[s],mMinEemcHit[s]);
+	  printf(" Cuts dz=%8.3f dca=%8.3f fgtdr=%8.3f fgtdp=%8.3f tpcdr=%8.3f tpcdp=%8.3f emcdr=%8.3f emcdp=%8.3f\n",
+		 mDzCut[s],mDcaCut[s],mFgtRCut[s],mFgtPCut[s],mTpcRCut[s],mTpcPCut[s],mEmcRCut[s],mEmcPCut[s]);
 	  doAlignment(&result,mDiscMask[s],quadmask,mParMask[s],mHitMask[s],mResidMask[s],
-		      mTrackType[s],mMinHit[s],mMinFgtHit[s],mMinTpcHit[s],mMinPromptHit[s],mMinEemcHit[s],&result);
-	}
+		      mTrackType[s],mMinHit[s],mMinFgtHit[s],mMinVtx[s],mMinTpcHit[s],mMinPromptHit[s],mMinEemcHit[s],&result);
+	} 
       }
     }
+    if(mFillHist>0){ 
+      saveHist();   
+      if(mOutTreeFile) writeTree();
+    }    
   }
   writePar(&result);        
-  cout << "Creating Histo after alignment using last step's parameters"<<endl;
-  mFillHist=2;
-  resetHist();
-  int s=mNStep-1;
-  for(int quad=0; quad<kFgtNumQuads; quad++){ 
-    mQuad=quad; 
-    doAlignment(&result,0,0,0,mHitMask[s],0,mTrackType[s],mMinHit[s],mMinFgtHit[s],mMinTpcHit[s],mMinPromptHit[s],mMinEemcHit[s],&result);
-  }
-  if(mOutTreeFile) {writeTree();}
-  saveHist();
   return kStOK;
 }
-
 
 void StFgtAlignmentMaker::fakeData() {
   mFgtInputRPhi=0;
@@ -880,29 +926,10 @@ void StFgtAlignmentMaker::fakeData() {
     }
   }else{
     //fake track inputs
-    int ntrk=2000;
-    //double pt=20.0;
-    double ene=1.0;
-    //double eta=1.5;
-    double eta=1.6;
-    //double eta=1.8;
-    double phi=0.0;
-    StThreeVectorD v(0,0,0);
-    int mFgt=1,mVtx=1,mTpc=1,mPpt=1,mEmc=1;
+    mQuad=0;
+    TRandom rand;
+    int mFgt=1,mVtx=1,mTpc=0,mPpt=1,mEmc=1;
     const double B = 0.5*tesla;  
-
-    //Making helix
-    double theta=2*atan(exp(-eta));  
-    double pt=ene*sin(theta);
-    double pz=ene*cos(theta);
-    double px=ene*sin(theta)*cos(phi);
-    double py=ene*sin(theta)*sin(phi);
-    StThreeVectorD p(px, py, pz);
-    StPhysicalHelixD pos(p,v,B,1);
-    StPhysicalHelixD neg(p,v,B,-1);
-    printf("FAKE pt=%8.3f eta=%8.3f phi=%8.3f ene=%8.3f\n",pt,eta,phi,ene);
-    printf("FAKE pxyz=%8.3f %8.3f %8.3f\n",px,py,pz);
-    printf("FAKE vxyz=%8.3f %8.3f %8.3f\n",v.x(),v.y(),v.z());
     StThreeVectorD zvec(0,0,1);
     //TPC and EEMC z positions
     static const int NTPC=45;
@@ -913,21 +940,44 @@ void StFgtAlignmentMaker::fakeData() {
     double zppt=209;
     double zemc=280;
     
-    //print rough trajectory
-    StThreeVectorD xyz;
-    for (double z=0; z<=300; z+=20) { 
-      StThreeVectorD zplane(0,0,z);
-      double sp=pos.pathLength(zplane,zvec);
-      double sn=pos.pathLength(zplane,zvec);
-      StThreeVectorD pxyz = pos.at(sp);    
-      StThreeVectorD nxyz = neg.at(sn);    
-      printf("FAKE z=%8.3f pos=%8.3f %8.3f neg=%8.3f %8.3f\n",z,pxyz.x(),pxyz.y(),nxyz.x(),nxyz.y());
-    }
-    
-    //make hits
-    mQuad=0;
-    TRandom rand;
-    for(int itrk=0; itrk<ntrk; itrk++){
+    for(int itrk=0; itrk<mFakeNtrk; itrk++){      
+      double ene=mFakeEmin;
+      double eta=mFakeEtamin;
+      double phi=mFakePhimin;
+      StThreeVectorD v(0,0,0);
+      if(mFakeEmax>mFakeEmin)     ene=rand.Uniform(mFakeEmin,mFakeEmax);
+      if(mFakeEtamax>mFakeEtamin) eta=rand.Uniform(mFakeEtamin,mFakeEtamax);
+      if(mFakePhimax>mFakePhimin) phi=rand.Uniform(mFakePhimin,mFakePhimax);
+      if(mFakeVtxSig>0) {
+	double zz=-999;
+	while (zz>60 || zz<-120) {zz=rand.Gaus(0,mFakeVtxSig);}
+	v.setZ(zz);
+      }
+      //Making helix
+      double theta=2*atan(exp(-eta));  
+      double pt=ene*sin(theta);
+      double pz=ene*cos(theta);
+      double px=ene*sin(theta)*cos(phi);
+      double py=ene*sin(theta)*sin(phi);
+      StThreeVectorD p(px, py, pz);
+      StPhysicalHelixD pos(p,v,B,1);
+      StPhysicalHelixD neg(p,v,B,-1);
+      if(itrk<3){
+	printf("FAKE pt=%8.3f eta=%8.3f phi=%8.3f ene=%8.3f\n",pt,eta,phi,ene);
+	printf("FAKE pxyz=%8.3f %8.3f %8.3f\n",px,py,pz);
+	printf("FAKE vxyz=%8.3f %8.3f %8.3f\n",v.x(),v.y(),v.z());
+	//print rough trajectory
+	for (double z=0; z<=300; z+=20) { 
+	  StThreeVectorD zplane(0,0,z);
+	  double sp=pos.pathLength(zplane,zvec);
+	  double sn=pos.pathLength(zplane,zvec);
+	  StThreeVectorD pxyz = pos.at(sp);    
+	  StThreeVectorD nxyz = neg.at(sn);    
+	  printf("FAKE z=%8.3f pos=%8.3f %8.3f neg=%8.3f %8.3f\n",z,pxyz.x(),pxyz.y(),nxyz.x(),nxyz.y());
+	}
+      }
+
+      //make hits
       StPhysicalHelixD trk;
       if(itrk%2==0) {trk=pos;}
       else          {trk=neg;}
@@ -940,10 +990,14 @@ void StFgtAlignmentMaker::fakeData() {
 	mHit[mQuad][itrk].ex[nhit]=mErrVtx; mHit[mQuad][itrk].ey[nhit]=mErrVtx; mHit[mQuad][itrk].ez[nhit]=mErrVtxZ;
 	mHit[mQuad][itrk].det[nhit]=4*6+mQuad;
 	nhit++;
-	if(itrk<1) printf("VTX  %8.3f %8.3f %8.3f %8.4f %8.4f\n",xyz.x(),xyz.y(),xyz.z(),mErrVtx,mErrVtxZ);      
+	if(itrk<5) printf("VTX  %8.3f %8.3f %8.3f %8.4f %8.4f\n",xyz.x(),xyz.y(),xyz.z(),mErrVtx,mErrVtxZ);      
       }
+      mHit[mQuad][itrk].dz=0;
+      mHit[mQuad][itrk].trkz=v.z();
       if(mFgt){
+	int nfgt=0;
 	for(int idisc=0; idisc<6; idisc++){
+	  if(idisc==3) continue;
 	  StThreeVectorD zplane(0,0,StFgtGeom::getDiscZ(idisc));
 	  double s=trk.pathLength(zplane,zvec);
 	  StThreeVectorD xyz = trk.at(s);    
@@ -952,9 +1006,11 @@ void StFgtAlignmentMaker::fakeData() {
 	    mHit[mQuad][itrk].ex[nhit]=mErrFgt; mHit[mQuad][itrk].ey[nhit]=mErrFgt; mHit[mQuad][itrk].ez[nhit]=0.0;
 	    mHit[mQuad][itrk].det[nhit]=4*idisc+mQuad;
 	    nhit++;
-	    if(itrk<1) printf("FGT%1d %8.3f %8.3f %8.3f %8.4f\n",idisc+1,xyz.x(),xyz.y(),xyz.z(),mErrFgt);      
+	    nfgt++;
+	    if(itrk<5) printf("FGT%1d %8.3f %8.3f %8.3f %8.4f\n",idisc+1,xyz.x(),xyz.y(),xyz.z(),mErrFgt);      
 	  }
 	}
+	if(nfgt<3) {continue;}
       }
       if(mTpc){
 	for(int ipad=0; ipad<NTPC; ipad++){
@@ -971,7 +1027,7 @@ void StFgtAlignmentMaker::fakeData() {
 	    mHit[mQuad][itrk].ez[nhit]=mErrTpcZ;
 	    mHit[mQuad][itrk].det[nhit]=4*7+mQuad;
 	    nhit++;
-	    if(itrk<1) printf("TPC  %8.3f %8.3f %8.3f %8.4f %8.4f\n",xyz.x(),xyz.y(),xyz.z(),mHit[mQuad][itrk].ex[nhit],mErrTpcZ);
+	    if(itrk<5) printf("TPC  %8.3f %8.3f %8.3f %8.4f %8.4f\n",xyz.x(),xyz.y(),xyz.z(),mHit[mQuad][itrk].ex[nhit],mErrTpcZ);
 	  }
 	}
       }
@@ -984,7 +1040,7 @@ void StFgtAlignmentMaker::fakeData() {
 	  mHit[mQuad][itrk].ex[nhit]=mErrPpt; mHit[mQuad][itrk].ey[nhit]=mErrPpt; mHit[mQuad][itrk].ez[nhit]=0.0;
 	  mHit[mQuad][itrk].det[nhit]=4*8+mQuad;
 	  nhit++;
-	  if(itrk<1) printf("PPT  %8.3f %8.3f %8.3f %8.4f\n",xyz.x(),xyz.y(),xyz.z(),mErrPpt);      
+	  if(itrk<5) printf("PPT  %8.3f %8.3f %8.3f %8.4f\n",xyz.x(),xyz.y(),xyz.z(),mErrPpt);      
 	}
       }
       if(mEmc){
@@ -994,23 +1050,29 @@ void StFgtAlignmentMaker::fakeData() {
 	if(xyz.perp()>tpcr[0] && xyz.perp()<tpcr[NTPC-1]){
 	  mHit[mQuad][itrk].x[nhit]=xyz.x(); mHit[mQuad][itrk].y[nhit]=xyz.y(); mHit[mQuad][itrk].z[nhit]=xyz.z();
 	  mHit[mQuad][itrk].ex[nhit]=mErrEmc; mHit[mQuad][itrk].ey[nhit]=mErrEmc; mHit[mQuad][itrk].ez[nhit]=0.0;
-	  mHit[mQuad][itrk].det[nhit]=4*9+mQuad;
+	  mHit[mQuad][itrk].det[nhit]=4*11+mQuad;
+	  mHit[mQuad][itrk].tw[nhit]=float(ene);
+	  mHit[mQuad][itrk].nrl[nhit]=0;
+	  mHit[mQuad][itrk].su[nhit]=100.0;
+	  mHit[mQuad][itrk].sv[nhit]=100.0;
 	  nhit++;
-	  if(itrk<1) printf("EMC  %8.3f %8.3f %8.3f %8.4f\n",xyz.x(),xyz.y(),xyz.z(),mErrEmc);      
+	  if(itrk<5) printf("EMC  %8.3f %8.3f %8.3f %8.4f\n",xyz.x(),xyz.y(),xyz.z(),mErrEmc);      
 	}
       }
       mHit[mQuad][itrk].nhit=nhit;
       mHit[mQuad][itrk].dca=0.0;
       mHit[mQuad][itrk].chi2=0.0;
+      mHit[mQuad][itrk].riso=1.0;
       //adding gauusian error for each track
       for(int ii=0; ii<nhit; ii++){
 	mHit[mQuad][itrk].x[ii]+= mHit[mQuad][itrk].ex[ii]*rand.Gaus();
 	mHit[mQuad][itrk].y[ii]+= mHit[mQuad][itrk].ey[ii]*rand.Gaus();
+	mHit[mQuad][itrk].z[ii]+= mHit[mQuad][itrk].ez[ii]*rand.Gaus();
 	mHit[mQuad][itrk].r[ii]=sqrt(mHit[mQuad][itrk].x[ii]*mHit[mQuad][itrk].x[ii]+mHit[mQuad][itrk].y[ii]*mHit[mQuad][itrk].y[ii]);
 	mHit[mQuad][itrk].p[ii]=atan2(mHit[mQuad][itrk].y[ii],mHit[mQuad][itrk].x[ii]);
       }      
     }
-    mNtrk[mQuad]=ntrk;
+    mNtrk[mQuad]=mFakeNtrk;
   }
 }
 
@@ -1092,7 +1154,7 @@ void StFgtAlignmentMaker::readFromStraightTrackMaker(){
 void StFgtAlignmentMaker::readFromStraightTrackAndStEvent(){
   float MaxDrTpc=maxdtpc, MaxDpTpc=maxptpc;
   float MaxDrEemc=maxdemc, MaxDpEemc=maxpemc;
-  float MaxDz=5.0, MaxDca=3.0;
+  float MaxDz=5.0, MaxDca=3.0, MaxChi2=50;
 
   mFgtInputRPhi=1;
   mEventCounter++;  // increase counter
@@ -1135,7 +1197,7 @@ void StFgtAlignmentMaker::readFromStraightTrackAndStEvent(){
     if(flagvtx){dz=t->trkZ - vertex.z();}
     if(mDebug>0) cout<<Form("Trk chi2=%8.3f dca=%8.3f zvtx=%8.3f dz=%8.3f",t->chi2,t->dca,t->trkZ,dz)<<endl;
     if(t->dca>MaxDca) continue;
-    if(t->chi2>mReqChi2) continue;
+    if(t->chi2>MaxChi2) continue;
     vector<AVPoint>* points=t->points;
     int quad=-1, nhit=0, ntrk=-1;    
     //FGT hits on track
@@ -1342,6 +1404,7 @@ void StFgtAlignmentMaker::readFromStraightTrackAndStEvent(){
     }
     if(mHit[quad][ntrk].nhitPrompt>0) nhit++;
     mHit[quad][ntrk].nhit=nhit;
+    fillETBalance(ntrk);
     mNtrk[quad]++;
   }
   if(mEventCounter%100==0) cout << Form("StFgtAlignmentMaker::readFromStraightTrackMaker EVT=%d NTRK=%d %d %d %d",
@@ -1350,7 +1413,7 @@ void StFgtAlignmentMaker::readFromStraightTrackAndStEvent(){
 
 void StFgtAlignmentMaker::readFromStraightTrackAndMudst(){
   float MaxDrEemc=maxdemc, MaxDpEemc=maxpemc;
-  float MaxDz=10.0, MaxDca=5.0;
+  float MaxDz=10.0, MaxDca=5.0, MaxChi2=50;
 
   mFgtInputRPhi=1;
   mEventCounter++;  // increase counter
@@ -1396,7 +1459,7 @@ void StFgtAlignmentMaker::readFromStraightTrackAndMudst(){
     float dz=t->trkZ - vertex.z();
     if(mDebug>0) cout<<Form("Trk chi2=%8.3f dca=%8.3f zvtx=%8.3f dz=%8.3f",t->chi2,t->dca,t->trkZ,dz)<<endl;
     if(t->dca>MaxDca) continue;
-    if(t->chi2>mReqChi2) continue;
+    if(t->chi2>MaxChi2) continue;
     histdz->Fill(dz);
     if(fabs(dz)>MaxDz) continue;
     vector<AVPoint>* points=t->points;
@@ -1805,6 +1868,140 @@ void StFgtAlignmentMaker::DispFromStraightTrackMaker(){
   }
 }
 
+void StFgtAlignmentMaker::calcETBalanceFromStEvent() {
+  StEvent* event;
+  event = (StEvent *) GetInputDS("StEvent");
+  if (!event){
+    gMessMgr->Warning() << "StFgtAlignmentMaker::Make : No StEvent" << endm;
+    return;          // if no event, we're done
+  }
+  ele.set(0,0,0); tracks.set(0,0,0); bemcs.set(0,0,0); eemcs.set(0,0,0); tot.set(0,0,0); rec.set(0,0,0); iso.set(0,0,0);
+  int nele=0,ntrack=0, nbemc=0, neemc=0, ntot=0, nrec=0, niso=0;
+  UInt_t NpVX = event->numberOfPrimaryVertices();
+  if (!NpVX) return;
+  NpVX=1; //only 1st vertex for now
+  for (UInt_t i = 0; i < NpVX; i++) {
+    const StPrimaryVertex *vtx = event->primaryVertex(i);
+    if(mDebug>2) cout << Form("Vertex: %3i ",i) << *vtx << endl;
+    //EEMC find W candidate
+    StEEmcIUPointMaker *mEEpoints = (StEEmcIUPointMaker *)GetMaker("mEEpoints");
+    if(mEEpoints){
+      StEEmcIUPointVec_t mPoints = mEEpoints->points();
+      for ( Int_t ipoint=0; ipoint<mEEpoints->numberOfPoints(); ipoint++){	
+	StEEmcIUPoint point=mEEpoints->point(ipoint);
+	float e=point.energy(0);
+	StThreeVectorF pp(point.position().x(),point.position().y(),point.position().z());
+	StThreeVectorF d=pp - vtx->position();
+	d=d/d.mag();
+	StThreeVectorF ee=e*d;
+	eemcs+=ee;
+	if(e>10.0 && 
+	   // point.numberOfRelatives()==0 && 
+	   point.cluster(0).energy()>0.02 && 
+	   point.cluster(1).energy()>0.02){	  
+	  if(ee.perp() > ele.perp()) ele=ee;
+	  nele++;
+	}
+      }
+    }
+    //EEMC isolation cone around W candidate
+    if(mEEpoints && nele>0){
+      StEEmcIUPointVec_t mPoints = mEEpoints->points();
+      for ( Int_t ipoint=0; ipoint<mEEpoints->numberOfPoints(); ipoint++){
+	StEEmcIUPoint point=mEEpoints->point(ipoint);
+        float e=point.energy(0);
+        StThreeVectorF pp(point.position().x(),point.position().y(),point.position().z());
+        StThreeVectorF d=pp - vtx->position();
+        d=d/d.mag();
+	neemc++;
+	double deta = ele.pseudoRapidity() - d.pseudoRapidity();
+	double dphi = ele.phi() - d.phi(); if(dphi>PI) {dphi-=2*PI;} if(dphi<-PI) {dphi+=2*PI;}
+	if(fabs(deta)<ISOCUT && fabs(dphi)<ISOCUT) { StThreeVectorF ee=e*d; iso+=ee; niso++;}
+      }
+    }
+    //Tracks
+    UInt_t nDaughters = vtx->numberOfDaughters();
+    for (UInt_t j = 0; j < nDaughters; j++) {
+      StPrimaryTrack* pTrack = (StPrimaryTrack*) vtx->daughter(j);
+      if (! pTrack) continue;
+      tracks+=pTrack->geometry()->momentum();
+      ntrack++;
+      double deta = ele.pseudoRapidity() - pTrack->geometry()->momentum().pseudoRapidity();
+      double dphi = ele.phi() - pTrack->geometry()->momentum().phi(); if(dphi>PI) {dphi-=2*PI;} if(dphi<-PI) {dphi+=2*PI;}
+      if(fabs(deta)<ISOCUT && fabs(dphi)<ISOCUT) { iso+=pTrack->geometry()->momentum(); }
+    }
+    //BEMC    
+    StEmcDetector *btow=event->emcCollection()->detector(kBarrelEmcTowerId);    
+    if(btow){
+      for(int i=0; i<btow->numberOfModules(); i++){
+	StEmcModule* mod=btow->module(i+1);
+	StSPtrVecEmcRawHit& hits = mod->hits();
+	for(UInt_t k=0;k<hits.size();k++) {
+	  float e=hits[k]->energy();
+	  if(e<0.2) continue;
+	  int mod=hits[k]->module();
+	  int eta=hits[k]->eta();
+	  int sub=hits[k]->sub();
+	  float x,y,z;	    
+	  StEmcGeom::instance("bemc")->getXYZ(mod,eta,sub,x,y,z);
+	  //printf("mod=%3d eta=%3d sub=%3d ene=%8.2f xyz=%8.2f %8.2f %8.2f\n",mod,eta,sub,e,x,y,z);
+	  StThreeVectorF d = StThreeVectorF(x,y,z) - vtx->position();
+	  d=d/d.mag();	    
+	  bemcs+=e*d;
+	  nbemc++;
+	  double deta = ele.pseudoRapidity() - d.pseudoRapidity();
+	  double dphi = ele.phi() - d.phi(); if(dphi>PI) {dphi-=2*PI;} if(dphi<-PI) {dphi+=2*PI;}
+	  if(fabs(deta)<ISOCUT && fabs(dphi)<ISOCUT) { StThreeVectorF ee=e*d; iso+=ee; }
+	}
+      }
+    }      
+  } 
+  tot=tracks+bemcs+eemcs; ntot=ntrack+nbemc+neemc;
+  rec=tot-ele; if(nele>0) {nrec=ntot-1;} else {nrec=ntot;}
+  float dphi=ele.phi() - tot.phi();
+  ptbal = tot.perp()*cos(dphi);
+  riso = ele.mag()/iso.mag();
+  printf("NELE=%4d NTRK=%4d NBEMC=%4d NEEMC=%4d NTOT=%4d NREC=%4d NISO=%4d\n",nele,ntrack,nbemc,neemc,ntot,nrec,niso);
+  printf("EELE=%6.1f ETRK=%6.1f EBEMC=%6.1f EEEMC=%6.1f ETOT=%6.1f EREC=%6.1f EISO=%6.1f\n",
+	 ele.mag(),tracks.mag(),bemcs.mag(),eemcs.mag(),tot.mag(),rec.mag(),iso.mag());
+  printf("PELE=%6.1f PTRK=%6.1f PBEMC=%6.1f PEEMC=%6.1f PTOT=%6.1f PREC=%6.1f PISO=%6.1f\n",
+	 ele.perp(),tracks.perp(),bemcs.perp(),eemcs.perp(),tot.perp(),rec.perp(),iso.perp());
+  printf("Dphi=%6.1f ETBal=%6.1f R(ele/iso)=%6.3f\n",dphi,ptbal,riso);
+}
+
+void StFgtAlignmentMaker::fillETBalance(int itrk){
+  mHit[mQuad][itrk].ele[0]=ele.x();
+  mHit[mQuad][itrk].ele[1]=ele.y();
+  mHit[mQuad][itrk].ele[2]=ele.z();
+  mHit[mQuad][itrk].ele[3]=ele.mag();
+  mHit[mQuad][itrk].trk[0]=tracks.x();
+  mHit[mQuad][itrk].trk[1]=tracks.y();
+  mHit[mQuad][itrk].trk[2]=tracks.z();
+  mHit[mQuad][itrk].trk[3]=tracks.mag();
+  mHit[mQuad][itrk].bemc[0]=bemcs.x();
+  mHit[mQuad][itrk].bemc[1]=bemcs.y();
+  mHit[mQuad][itrk].bemc[2]=bemcs.z();
+  mHit[mQuad][itrk].bemc[3]=bemcs.mag();
+  mHit[mQuad][itrk].eemc[0]=eemcs.x();
+  mHit[mQuad][itrk].eemc[1]=eemcs.y();
+  mHit[mQuad][itrk].eemc[2]=eemcs.z();
+  mHit[mQuad][itrk].eemc[3]=eemcs.mag();
+  mHit[mQuad][itrk].tot[0]=tot.x();
+  mHit[mQuad][itrk].tot[1]=tot.y();
+  mHit[mQuad][itrk].tot[2]=tot.z();
+  mHit[mQuad][itrk].tot[3]=tot.mag();
+  mHit[mQuad][itrk].rec[0]=rec.x();
+  mHit[mQuad][itrk].rec[1]=rec.y();
+  mHit[mQuad][itrk].rec[2]=rec.z();
+  mHit[mQuad][itrk].rec[3]=rec.mag();
+  mHit[mQuad][itrk].iso[0]=iso.x();
+  mHit[mQuad][itrk].iso[1]=iso.y();
+  mHit[mQuad][itrk].iso[2]=iso.z();
+  mHit[mQuad][itrk].iso[3]=iso.mag();
+  mHit[mQuad][itrk].ptbal=ptbal;
+  mHit[mQuad][itrk].riso=riso;
+}
+
 void StFgtAlignmentMaker::readFromStEvent() {
   mFgtInputRPhi=1;
   mEventCounter++;  // increase counter	
@@ -1989,8 +2186,19 @@ void StFgtAlignmentMaker::readFromStEventGlobal() {
 }
 
 void StFgtAlignmentMaker::writeTree(){
-  cout << "Creating "<<mOutTreeFile<<endl;
-  TFile *f=new TFile(mOutTreeFile,"RECREATE","tracks");
+  char fname[200];
+  sprintf(fname,"alignment_trkout_step%d.root",mStep+1);
+  if(mDay>0){
+    sprintf(fname,"%d/alignment_trkout_step%d_day%d.root",mDay,mStep+1,mDay);
+  } else if(mRunNumber>0) {
+    int yearday=mRunNumber/1000;
+    sprintf(fname,"%d/alignment_trkout_step%d.%d.root",yearday,mStep+1,mRunNumber);
+    if(mSeqNumber>0){
+      sprintf(fname,"%d/alignment_trkout_step%d.%d.%d.root",yearday,mStep+1,mRunNumber,mSeqNumber);
+    }
+  }
+  cout << "Creating "<<fname<<endl;
+  TFile *f=new TFile(fname,"RECREATE","tracks");
   for(int quad=0; quad<kFgtNumQuads; quad++){
     char c[10];
     sprintf(c,"q%1d",quad);
@@ -2000,6 +2208,7 @@ void StFgtAlignmentMaker::writeTree(){
     t->Branch("nhit",&(mHitAlg.nhit),      "nhit/I");
     t->Branch("nuse",&(mHitAlg.nhitUse),   "nuse/I");
     t->Branch("nfgt",&(mHitAlg.nhitFgt),   "nfgt/I");
+    t->Branch("nvtx",&(mHitAlg.nhitVtx),   "nvtx/I");
     t->Branch("ntpc",&(mHitAlg.nhitTpc),   "ntpc/I");
     t->Branch("nppt",&(mHitAlg.nhitPrompt),"nppt/I");
     t->Branch("nemc",&(mHitAlg.nhitEemc),  "nemc/I");
@@ -2032,19 +2241,29 @@ void StFgtAlignmentMaker::writeTree(){
     t->Branch("po",  mHitAlg.po,           "po[nhit]/F");
     t->Branch("su",  mHitAlg.su,           "su[nhit]/F");
     t->Branch("sv",  mHitAlg.sv,           "sv[nhit]/F");
-    t->Branch("nrl",  mHitAlg.nrl,         "nrl[nhit]/I");
-    t->Branch("nsu",  mHitAlg.nsu,         "nsu[nhit]/I");
-    t->Branch("nsv",  mHitAlg.nsv,         "nsv[nhit]/I");
+    t->Branch("nrl", mHitAlg.nrl,          "nrl[nhit]/I");
+    t->Branch("nsu", mHitAlg.nsu,          "nsu[nhit]/I");
+    t->Branch("nsv", mHitAlg.nsv,          "nsv[nhit]/I");
+    t->Branch("ele", mHitAlg.ele,          "ele[4]/F");
+    t->Branch("trk", mHitAlg.trk,          "trk[4]/F");
+    t->Branch("bemc",mHitAlg.bemc,         "bemc[4]/F");
+    t->Branch("eemc",mHitAlg.eemc,         "eemc[4]/F");
+    t->Branch("tot", mHitAlg.tot,          "tot[4]/F");
+    t->Branch("rec", mHitAlg.rec,          "rec[4]/F");
+    t->Branch("iso", mHitAlg.iso,          "iso[4]/F");
+    t->Branch("ptbal",&(mHitAlg.ptbal),    "ptbal/F");
+    t->Branch("riso", &(mHitAlg.riso),     "riso/F");
     t->Branch("use", mHitAlg.use,          "use[nhit]/O");
 
-    int itrk;
+    int itrk=0,ntrk=0;
     for(itrk=0; itrk<mNtrk[quad]; itrk++){
       if(mHit[quad][itrk].used==0) continue;
       memcpy(&mHitAlg,&mHit[quad][itrk],sizeof(mHitAlg));
       //printf("WTREE %1d %8d %2d %6.2f %6.2f %6.2f\n",quad,itrk,mHitAlg.nhit,mHitAlg.z[0],mHitAlg.z[1],mHitAlg.z[2]);
       t->Fill();
+      ntrk++;
     }
-    cout<<Form(" Wrote %6d tracks for quad=%1d",itrk,quad)<<endl;
+    cout<<Form(" Wrote %6d/%6d tracks for quad=%1d",ntrk,itrk,quad)<<endl;
   }
   f->Write();
   f->Close();   
@@ -2100,13 +2319,27 @@ void StFgtAlignmentMaker::readFromTree(){
     t->SetBranchAddress("po",  mHitAlg.po);
     t->SetBranchAddress("su",  mHitAlg.su);
     t->SetBranchAddress("sv",  mHitAlg.sv);
-    t->SetBranchAddress("nrl",  mHitAlg.nrl);
-    t->SetBranchAddress("nsu",  mHitAlg.nsu);
-    t->SetBranchAddress("nsv",  mHitAlg.nsv);
+    t->SetBranchAddress("nrl", mHitAlg.nrl);
+    t->SetBranchAddress("nsu", mHitAlg.nsu);
+    t->SetBranchAddress("nsv", mHitAlg.nsv);
+    t->SetBranchAddress("ele", mHitAlg.ele);
+    t->SetBranchAddress("trk", mHitAlg.trk);
+    t->SetBranchAddress("bemc",mHitAlg.bemc);
+    t->SetBranchAddress("eemc",mHitAlg.eemc);
+    t->SetBranchAddress("tot", mHitAlg.tot);
+    t->SetBranchAddress("rec", mHitAlg.rec);
+    t->SetBranchAddress("iso", mHitAlg.iso);
+    t->SetBranchAddress("ptbal",&(mHitAlg.ptbal));
+    t->SetBranchAddress("riso", &(mHitAlg.riso));
     t->SetBranchAddress("use", mHitAlg.use);
     mNtrk[quad]=t->GetEntries();
     int itrk;
     for(itrk=0; itrk<mNtrk[quad]; itrk++){
+      if(itrk>=MAXTRK){
+	cout<<Form(" MAXTRK=%d reached\n",MAXTRK)<<endl;
+	mNtrk[quad]=MAXTRK;
+	break;
+      }
       t->GetEntry(itrk);
       memcpy(&mHit[quad][itrk],&mHitAlg,sizeof(mHitAlg));
       //cout << Form("q=%1d itrk=%6d ",quad,itrk)<<" mDb="<<mDb<<endl;
@@ -2268,20 +2501,19 @@ void StFgtAlignmentMaker::resetHist(){
 }
 
 void StFgtAlignmentMaker::saveHist(){
-  char fname[3][50]={"alignment.root","alignment_before.root","alignment_after.root"};
-  if(mRunNumber>0) {
+  char fname[100];
+  sprintf(fname,"alignment_step%d.root",mStep+1);
+  if(mDay>0){
+    sprintf(fname,"%d/alignment_step%d_day%d.root",mDay,mStep+1,mDay);
+  } else if(mRunNumber>0) {
     int yearday=mRunNumber/1000;
-    sprintf(fname[0],"%d/alignment_%d.root",yearday,mRunNumber);
-    sprintf(fname[1],"%d/alignment_before.%d.root",yearday,mRunNumber);
-    sprintf(fname[2],"%d/alignment_after.%d.root",yearday,mRunNumber);
+    sprintf(fname,"%d/alignment_step%d.%d.root",yearday,mStep+1,mRunNumber);
     if(mSeqNumber>0){
-      sprintf(fname[0],"%d/alignment_%d.%d.root",yearday,mRunNumber,mSeqNumber);
-      sprintf(fname[1],"%d/alignment_before.%d.%d.root",yearday,mRunNumber,mSeqNumber);
-      sprintf(fname[2],"%d/alignment_after.%d.%d.root",yearday,mRunNumber,mSeqNumber);
+      sprintf(fname,"%d/alignment_step%d.%d.%d.root",yearday,mStep+1,mRunNumber,mSeqNumber);
     }
   }
-  cout << "Writing " << fname[mFillHist] << endl;
-  TFile *hfile = new TFile(fname[mFillHist],"RECREATE");  
+  cout << "Writing " << fname << endl;
+  TFile *hfile = new TFile(fname,"RECREATE");  
   for(int disc=0; disc<kFgtNumDiscs+6; disc++){
     for(int quad=0; quad<kFgtNumQuads; quad++){
       for(int axis=0; axis<NAXIS; axis++){
@@ -2296,7 +2528,7 @@ void StFgtAlignmentMaker::saveHist(){
 }
 
 void StFgtAlignmentMaker::setHitMask(int hitmask_disc){
-  cout << Form("Alignment for Quad=%1d using Hits from=",mQuad);
+  cout << Form("Alignment Step %d for Quad=%1d using Hits from=",mStep,mQuad);
   for(int i=0; i<6; i++) {if(hitmask_disc & (1<<i) ) {cout << Form("FgtD%1d ",i+1);}}
   if(hitmask_disc & 0x40) cout << "Vertex ";
   if(hitmask_disc & 0x80) cout << "TPC ";
@@ -2310,6 +2542,7 @@ void StFgtAlignmentMaker::setHitMask(int hitmask_disc){
   for(int itrk=0; itrk<mNtrk[mQuad]; itrk++){
     mHit[mQuad][itrk].nhitUse=0;
     mHit[mQuad][itrk].nhitFgt=0;
+    mHit[mQuad][itrk].nhitVtx=0;
     mHit[mQuad][itrk].nhitTpc=0;
     mHit[mQuad][itrk].nhitPrompt=0;
     mHit[mQuad][itrk].nhitEemc=0;
@@ -2318,52 +2551,47 @@ void StFgtAlignmentMaker::setHitMask(int hitmask_disc){
       mHit[mQuad][itrk].use[ihit]=false;
       int det=mHit[mQuad][itrk].det[ihit];      
       int disc=det/4;          //fgt disc0-5
+      if((hitmask_disc & (1<<disc)) ==0) continue;
       if     (disc<6)  {
+	if(mFgtRCut[mStep]>0 && fabs(mHit[mQuad][itrk].dr[ihit])>mFgtRCut[mStep]) continue;
+	if(mFgtPCut[mStep]>0 && fabs(mHit[mQuad][itrk].dp[ihit])>mFgtPCut[mStep]) continue;
 	mHit[mQuad][itrk].nhitFgt++;
-      }
-      else if(disc==6) {} //vertex
-      else if(disc==7) { //tpc
+      }else if(disc==6) { //vertex
+	if(mDzCut[mStep]>0 &&  fabs(mHit[mQuad][itrk].dz )>mDzCut[mStep] ) continue;
+	if(mDcaCut[mStep]>0 && fabs(mHit[mQuad][itrk].dca)>mDcaCut[mStep]) continue;       
+	mHit[mQuad][itrk].nhitVtx++;
+      }else if(disc==7) { //tpc
+	if(mTpcRCut[mStep]>0 && fabs(mHit[mQuad][itrk].dr[ihit])>mTpcRCut[mStep]) continue;
+	if(mTpcPCut[mStep]>0 && fabs(mHit[mQuad][itrk].dp[ihit])>mTpcPCut[mStep]) continue;
 	mHit[mQuad][itrk].nhitTpc++;
-      }
-      else if(disc==8) { //tpc prompt
+      }else if(disc==8) { //tpc prompt
+	if(mTpcRCut[mStep]>0 && fabs(mHit[mQuad][itrk].dr[ihit])>mTpcRCut[mStep]) continue;
+	if(mTpcPCut[mStep]>0 && fabs(mHit[mQuad][itrk].dp[ihit])>mTpcPCut[mStep]) continue;
 	mHit[mQuad][itrk].nhitTpc++;
 	mHit[mQuad][itrk].nhitPrompt++;
-      }
-      else if(disc==9 || disc==10 || disc==11) { //eemc, mip, electron
+      }else if(disc==9 || disc==10 || disc==11) { //eemc, mip, electron
+	if(mEmcRCut[mStep]>0 && fabs(mHit[mQuad][itrk].dr[ihit])>mEmcRCut[mStep]) continue;
+	if(mEmcPCut[mStep]>0 && fabs(mHit[mQuad][itrk].dp[ihit])>mEmcPCut[mStep]) continue;
 	mHit[mQuad][itrk].nhitEemc++;
+	//if(mHit[mQuad][itrk].dr[itrk]!=0)
+	//  printf("EEMCCUT %10.6f %10.6f %d\n",mHit[mQuad][itrk].dr[ihit],mEmcRCut[mStep],mHit[mQuad][itrk].nhitEemc);	
       }
-      if(hitmask_disc & (1<<disc)) {
-	mHit[mQuad][itrk].use[ihit]=true; 
-	mHit[mQuad][itrk].nhitUse++;
-	/*
-	if(disc==8 && (fabs(mHit[mQuad][itrk].dr[ihit])>5.0 || fabs(mHit[mQuad][itrk].dp[ihit])>0.2)) {
-	  mHit[mQuad][itrk].use[ihit]=false;
-	  mHit[mQuad][itrk].nhitUse--;
-	  mHit[mQuad][itrk].nhitTpc--;
-	  mHit[mQuad][itrk].nhitPrompt--;
-	}
-	if(disc>8 && (fabs(mHit[mQuad][itrk].dr[ihit])>5.0 || fabs(mHit[mQuad][itrk].dp[ihit])>0.2)) {
-	  mHit[mQuad][itrk].use[ihit]=false;
-	  mHit[mQuad][itrk].nhitUse--;
-	  mHit[mQuad][itrk].nhitEemc--;
-	}
-	*/
-      }
+      mHit[mQuad][itrk].use[ihit]=true; 
+      mHit[mQuad][itrk].nhitUse++;
     }
     //printf("SetHitMask %d n=%d %d %d %d %d %f %f\n",itrk,mHit[mQuad][itrk].nhitUse,mHit[mQuad][itrk].nhitFgt,mHit[mQuad][itrk].nhitTpc,mHit[mQuad][itrk].nhitPrompt,mHit[mQuad][itrk].nhitEemc,mHit[mQuad][itrk].dca,mHit[mQuad][itrk].chi2);
     if(mHit[mQuad][itrk].nhitUse>=mReqHit &&
        mHit[mQuad][itrk].nhitFgt>=mReqFgtHit &&
+       mHit[mQuad][itrk].nhitVtx>=mReqVtx &&
        mHit[mQuad][itrk].nhitTpc>=mReqTpcHit &&
        mHit[mQuad][itrk].nhitPrompt>=mReqPromptHit &&
-       mHit[mQuad][itrk].nhitEemc>=mReqEemcHit &&
-       mHit[mQuad][itrk].dca<=mReqDca &&
-       mHit[mQuad][itrk].chi2<=mReqChi2 ) {
+       mHit[mQuad][itrk].nhitEemc>=mReqEemcHit){
       mHit[mQuad][itrk].used=1;
       mNtrkUse[mQuad]++;
     }
   }
-  cout << Form(" usable ntrack=%d with nhit>=%d nFgt>=%d nTpc>=%d nPrompt>=%d nEemc>=%d dca<%f chi2<%f",
-	       mNtrkUse[mQuad],mReqHit,mReqFgtHit,mReqTpcHit,mReqPromptHit,mReqEemcHit,mReqDca,mReqChi2)<<endl;
+  cout << Form(" usable ntrack=%d with nhit>=%d nFgt>=%d vVtx>=%d nTpc>=%d nPrompt>=%d nEemc>=%d",
+	       mNtrkUse[mQuad],mReqHit,mReqFgtHit,mReqVtx,mReqTpcHit,mReqPromptHit,mReqEemcHit)<<endl;
 }
 
 void StFgtAlignmentMaker::overWriteError(){
@@ -2371,7 +2599,6 @@ void StFgtAlignmentMaker::overWriteError(){
   for(int iquad=0; iquad<kFgtNumQuads; iquad++){
     printf("  quad=%d ntrk=%d\n",iquad,mNtrk[iquad]);
     for(int itrk=0; itrk<mNtrk[iquad]; itrk++){
-      printf("AAA  quad=%d itrk=%d nhit=%d 1928=%d\n",iquad,itrk,mHit[iquad][itrk].nhit,mHit[iquad][1928].nhit);
       for(int ihit=0; ihit<mHit[iquad][itrk].nhit; ihit++){
 	//	printf("BBB  quad=%d itrk=%d nhit=%d ihit=%d 1928=%d\n",iquad,itrk,mHit[iquad][itrk].nhit,ihit,mHit[iquad][1928].nhit);
 	if(ihit>100) return; //hack
@@ -2414,7 +2641,7 @@ void StFgtAlignmentMaker::overWriteError(){
 
 void StFgtAlignmentMaker::doAlignment(fgtAlignment_st* input, 
 				      int discmask,int quadmask, int parmask, int hitmask_disc, int residmask,
-				      int trackType, int minHit, int minFgtHit, int minTpcHit, int minPromptHit, int minEemcHit,
+				      int trackType, int minHit, int minFgtHit, int minVtx, int minTpcHit, int minPromptHit, int minEemcHit,
 				      fgtAlignment_st* result){  
   double arg[10];
   int iflag, min=0;
@@ -2428,6 +2655,7 @@ void StFgtAlignmentMaker::doAlignment(fgtAlignment_st* input,
   mReqHit=minHit;
   if(mReqHit<min) mReqHit=min;
   mReqFgtHit=minFgtHit;
+  mReqVtx=minVtx;
   mReqTpcHit=minTpcHit;
   mReqPromptHit=minPromptHit;
   mReqEemcHit=minEemcHit;
