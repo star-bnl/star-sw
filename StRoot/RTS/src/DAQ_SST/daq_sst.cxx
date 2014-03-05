@@ -151,25 +151,37 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 			goto err_ret ;
 		}
 
-		int words = d32[0] & 0x000FFFF0 ;
+		u_int fiber_id = d32[0] ;
+
+		int words = fiber_id & 0x000FFFF0 ;
 		words >>= 4 ;
 
 		LOG(NOTE,"S%d-%d: fiber %d: ID 0x%08X, words %d",
-		    s,r,fib,d32[0],words) ;
-				
-		if(d32[0] & 0xFFF00000) {
-			if(d32[0] == 0x001000A0) {	// empty
-				LOG(WARN,"S%d-%d: %u: fiber %d: empty [0x%08X]",s,r,e,fib,d32[0]) ;					
+		    s,r,fib,fiber_id,words) ;
+		
+		int known_data_format = 1 ;
+		if(fiber_id & 0xFFF00000) {
+			if(fiber_id == 0x001000A0) {	// empty
+				LOG(WARN,"S%d-%d: %u: fiber %d: empty [0x%08X]",s,r,e,fib,fiber_id) ;					
 			}
 			else {
-				LOG(ERR,"S%d-%d: %u: fiber %d: odd data header 0x%08X",s,r,e,fib,d32[0]) ;
-				goto err_ret ;
+				LOG(ERR,"S%d-%d: %u: fiber %d: odd data header 0x%08X",s,r,e,fib,fiber_id) ;
+				known_data_format = 0 ;
+				//goto err_ret ;
 			}
 		}
 
-		if((d32[0] & 0xF) != 0) {	// not raw data!!! I haven't coded the ZS data yet so let's skip it...
-			LOG(ERR,"S%d-%d: %u: fiber %d: not raw data 0x%08X",s,r,e,fib,d32[0]) ;
-			goto err_ret ;			
+		if((fiber_id & 0xF) != 0) {	// not raw data!!! I haven't coded the ZS data yet so let's skip it...
+			if((fiber_id & 0xF)==1) {
+				LOG(WARN,"S%d-%d: %u: fiber %d: ZS data 0x%08X...",s,r,e,fib,fiber_id) ;
+				known_data_format = 2 ;
+				//goto err_ret ;			
+			}
+			else {
+				LOG(ERR,"S%d-%d: %u: fiber %d: unknown data 0x%08X",s,r,e,fib,fiber_id) ;
+				goto err_ret ;			
+			}
+
 
 		}
 
@@ -181,7 +193,25 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 		}
 			
 		d32 += 9 ;	// skip this header
-		words -= 9 ;
+		words -= 9 ;	// adjust the remaining words...
+
+		// If I don't know what the data format is, I'll skip decoding...
+		if(!known_data_format) {
+			d32 += words ;
+			fib++ ;
+			if(fib==8) break ;
+			continue ;
+		}
+
+		// want only non-ZS data in pedestal runs!
+		if((mode==2) && (known_data_format != 1)) {			
+			LOG(ERR,"S%d-%d: %u: fiber %d: ZS data 0x%08X in pedestal runs is not allowed",s,r,e,fib,fiber_id) ;
+			d32 += words ;
+			fib++ ;
+			if(fib==8) break ;
+			continue ;
+		}
+
 
 		int strip = 0 ;
 		int hybrid = 0 ;
@@ -205,6 +235,35 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 		}
 
 		sst_start = sst ;
+
+		int no_error = 1 ;
+		switch(known_data_format) {
+		case 2 :	// ZS data
+
+			for(int i=0;i<words;i++) {
+				d = *d32++ ;
+
+				int strip = (d & 0xFFC000)>>14 ;
+
+				if(mode==1) {
+					sst->adc = d & 0x3FF ;
+					sst->hybrid = (d & 0x3C00)>>10 ;
+					sst->strip = strip ;
+				}
+				if(strip >= 768) {
+					LOG(ERR,"S%d-%d: fiber %d, bad strip %d",s,r,fib,strip) ;
+					no_error = 0 ;
+				}
+				sst++ ;
+
+			}
+			//assume all OK with fiber
+			if(no_error) fiber_events[r-1][fib]++ ;
+
+			break ;
+		case 1 :
+			
+		
 
 		//here is the ADC
 		for(int i=0;i<words;i++) {
@@ -312,7 +371,11 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 			}
 
 		}
+		//all OK with fiber; came to the end and counted all the necessary strips
+		if(words==(SST_STRIP_COU*SST_HYBRID_COU)/3) fiber_events[r-1][fib]++ ;
 
+		break ;
+		}
 			
 		//end of adc
 		if((mode==1) && (sst-sst_start)) {
@@ -322,8 +385,6 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 
 		adc_count += sst-sst_start ;
 
-		//all OK with fiber; came to then end and counted all the necessary strips
-		if(words==(SST_STRIP_COU*SST_HYBRID_COU)/3) fiber_events[r-1][fib]++ ;
 		
 		LOG(NOTE,"RDO %d, fiber %d: words %d",r,fib,words) ;
 
@@ -408,168 +469,6 @@ daq_dta *daq_sst::handle_adc(int sec, int rdo, char *rdobuff, int words)
 
 
 		raw_to_adc_utility(s,r,(char *)dta,words,0,1) ;
-#if 0
-		u_int *d32 = dta ;
-		u_int *d32_end = dta + words ;
-		u_int *d32_start = dta ;
-
-		//sanity!
-		if(d32_end[-1] != 0xBBBBBBBB) {
-			LOG(ERR,"S%2-%d: last word is 0x%08X, expect 0xBBBBBBBB -- data corrupt,skipping!",s,r,d32_end[-1]) ;
-			continue ;
-		}
-
-	
-		//we'll assume SST has bugs in the header so we don't do any checks but search for the data
-		//immediatelly
-		while(d32<d32_end) {
-			u_int d = *d32++ ;
-
-			if(d == 0xDDDDDDDD) {
-				d32-- ;	// move back ;
-				found = 1 ;
-				break ;
-			}
-		}
-
-		if(!found) {
-			LOG(ERR,"S%d-%d: can't find 0xDDDDDDDD -- data corrupt, skipping!",s,r) ;
-			continue ;
-		}
-
-
-		int fib = 0 ;
-		while(d32<d32_end) {
-			u_int d = *d32++ ;
-
-			if(d != 0xDDDDDDDD) {
-				u_int *d_here = d32 - 1 ;	// go back one
-				LOG(ERR,"S%d-%d: fiber %d: can't find 0xDDDDDDDD at offset %d [0x%08X] -- data corrupt, skipping!",s,r,fib,
-				    d_here-d32_start,*d_here) ;
-
-				d_here -= 2 ;
-				for(int i=0;i<5;i++) {
-					LOG(ERR,"     %d: 0x%08X",d_here-d32_start,*d_here) ;
-					d_here++ ;
-				}
-				goto err_ret ;
-			}
-
-			int words = d32[0] & 0x000FFFF0 ;
-			words >>= 4 ;
-
-			LOG(NOTE,"S%d-%d: fiber %d: ID 0x%08X, words %d",
-			    s,r,fib,d32[0],words) ;
-				
-			if(d32[0] & 0xFFF00000) {
-				if(d32[0] == 0x001000A0) {	// empty
-					LOG(WARN,"S%d-%d: fiber %d: empty [0x%08X]",s,r,fib,d32[0]) ;					
-				}
-				else {
-					LOG(ERR,"S%d-%d: fiber %d: odd data header 0x%08X",s,r,fib,d32[0]) ;
-				}
-			}
-
-			words -= 1 ;	// for some reason...
-
-			//first 9 words are some header
-			for(int i=0;i<12;i++) {
-				LOG(NOTE,"   %d: 0x%08X",i,d32[i]) ;
-			}
-			
-			d32 += 9 ;	// skip this header
-			words -= 9 ;
-
-			int strip = 0 ;
-			int hybrid = 0 ;
-
-
-			daq_sst_data_t *sst = 0 ;
-			daq_sst_data_t *sst_start  ;
-
-			if(words) {
-				sst = (daq_sst_data_t *)adc->request(3*words) ;
-			}
-
-			sst_start = sst ;
-
-			//here is the ADC
-			for(int i=0;i<words;i++) {
-				d = *d32++ ;
-
-				if(strip >= 768) {
-					LOG(ERR,"S%d-%d: fiber %d, bad strip %d",s,r,fib,strip) ;
-					goto err_ret ;
-				}
-				
-				sst->strip = strip ;	
-				sst->hybrid = hybrid++ ;
-				sst->adc = d & 0x3FF ;
-				sst++ ;
-
-				if(hybrid==16) {
-					hybrid = 0 ;
-					strip++ ;
-				}
-
-				if(strip >= 768) {
-					LOG(ERR,"S%d-%d: fiber %d, bad strip %d",s,r,fib,strip) ;
-					goto err_ret ;
-				}
-
-				sst->strip = strip ;
-				sst->hybrid = hybrid++ ;
-				sst->adc = (d & 0xFFC00)  >> 10 ;
-				sst++ ;
-				
-				if(hybrid==16) {
-					hybrid = 0 ;
-					strip++ ;
-				}
-
-				if(strip >= 768) {
-					LOG(ERR,"S%d-%d: fiber %d, bad strip %d",s,r,fib,strip) ;
-					goto err_ret ;
-				}
-
-				sst->strip = strip ;
-				sst->hybrid = hybrid++ ;
-				sst->adc = (d & 0x3FF00000) >> 20 ;
-				sst++ ;
-
-				if(hybrid==16) {
-					hybrid = 0 ;
-					strip++ ;
-				}
-
-			}
-
-			
-			//end of adc
-			if(sst-sst_start) {
-				LOG(NOTE,"Got %d structs, requested %d",sst-sst_start,3*words) ;
-				adc->finalize(sst-sst_start,s,r,fib) ;
-			}
-
-			fib++ ;
-			if(fib==8) break ;
-
-			
-		}
-
-		if(*d32 != 0xCCCCCCCC) {
-			LOG(ERR,"S%d-%d: can't find 0xCCCCCCCC at offset %d [0x%08X] -- data corrupt, skipping!",s,r,d32-d32_start,*d32) ;
-			d32 -= 2 ;
-			while(d32 < d32_end) {
-				LOG(ERR,"    %d: 0x%08X",d32-d32_start,*d32) ;
-				d32++ ;
-			}
-			goto err_ret ;
-		}
-		
-
-		err_ret:;
-#endif
 
 
 	}	// end of loop over RDOs [1..3]
