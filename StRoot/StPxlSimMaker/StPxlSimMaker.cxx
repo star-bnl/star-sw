@@ -1,6 +1,9 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.2  2014/03/05 01:46:15  mstftsm
+ * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06
  *
@@ -22,13 +25,15 @@
 #include "StMcEventTypes.hh"
 
 #include "TGeoManager.h"
+#include "TGeoMatrix.h"
+
 #include "TObjectSet.h"
 
 ClassImp(StPxlSimMaker)
 
 using namespace std;
 
-StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(kFALSE), mUseDIGMAPSSim(kFALSE) 
+StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(kFALSE), mUseDIGMAPSSim(kFALSE) , mUseIdealGeom(kTRUE), mUseDbGeom(kFALSE)
 {
 }
 //____________________________________________________________
@@ -63,15 +68,25 @@ Int_t StPxlSimMaker::InitRun(Int_t RunNo)
 {
    LOG_INFO << "StPxlSimMaker::InitRun" << endm;
 
-   TDataSet *set = GetDataBase("Calibrations/tracker/PixelHitError");
-
-   if (!set)
+   TDataSet *hitErrSet = GetDataBase("Calibrations/tracker/PixelHitError");
+   if (!hitErrSet)
    {
       LOG_ERROR << "StPxlSimMaker - E - could not Get Calibrations/tracker." << endm;
       return kStErr;
    }
 
-   return mPxlSimulator->initRun(*set, RunNo);
+   TObjectSet *pxlDbDataSet = 0; 
+   if(mUseDbGeom)
+   {
+	   pxlDbDataSet = (TObjectSet*)GetDataSet("pxlDb");
+	   if (!pxlDbDataSet)
+	   {
+		   LOG_ERROR << "StPxlSimMaker - E - pxlDb  is not available" << endm;
+		   return kStErr;
+	   }
+   }
+
+   return mPxlSimulator->initRun(*hitErrSet, pxlDbDataSet, RunNo);
 }
 //____________________________________________________________
 
@@ -96,14 +111,14 @@ Int_t StPxlSimMaker::Make()
 
    //Get MC Pxl hit collection. This contains all PXL hits.
    StMcPxlHitCollection* mcPxlHitCol = mcEvent->pxlHitCollection();
-   if(!mcPxlHitCol)
-   { 
-       LOG_INFO << "StPxlSimMaker no PXL hits in this StMcEvent!" << endm;
-       return kStOk;
+   if (!mcPxlHitCol)
+   {
+      LOG_INFO << "StPxlSimMaker no PXL hits in this StMcEvent!" << endm;
+      return kStOk;
    }
 
-   if (!gGeoManager) GetDataBase("VmcGeometry");
-   if (!gGeoManager)
+   if (mUseIdealGeom && !gGeoManager) GetDataBase("VmcGeometry");
+   if (mUseIdealGeom && !gGeoManager)
    {
       LOG_ERROR << " StPxlSimMaker - E - gGeoManager is not available." << endm;
       return kStErr;
@@ -126,30 +141,30 @@ Int_t StPxlSimMaker::Make()
    }
    else if (mUseDIGMAPSSim)
    {
-       // for testing
-       /*StPxlRawHitCollection* pxlRawHitCol = 0;
+      // for testing
+      /*StPxlRawHitCollection* pxlRawHitCol = 0;
 
-       TObjectSet* pxlRawHitDataSet = (TObjectSet*)GetDataSet("pxlRawHit");
-       
-       if (!pxlRawHitDataSet) 
-       {
-            pxlRawHitDataSet = new TObjectSet("pxlRawHit");
-            m_DataSet = pxlRawHitDataSet;
-            pxlRawHitCol = new StPxlRawHitCollection();
-            pxlRawHitDataSet->AddObject(pxlRawHitCol);
-       }   
-       else
-       {
-           pxlRawHitCol= (StPxlRawHitCollection*)pxlRawHitDataSet->GetObject();
-       }
+      TObjectSet* pxlRawHitDataSet = (TObjectSet*)GetDataSet("pxlRawHit");
 
-       if(!pxlRawHitCol) 
-       {
-	   LOG_ERROR << "Make() - no pxlRawHitCollection."<<endm;
-	   return kStErr;
-       }   
+      if (!pxlRawHitDataSet)
+      {
+           pxlRawHitDataSet = new TObjectSet("pxlRawHit");
+           m_DataSet = pxlRawHitDataSet;
+           pxlRawHitCol = new StPxlRawHitCollection();
+           pxlRawHitDataSet->AddObject(pxlRawHitCol);
+      }
+      else
+      {
+          pxlRawHitCol= (StPxlRawHitCollection*)pxlRawHitDataSet->GetObject();
+      }
 
-       mPxlSimulator->addPxlRawHits(*mcPxlHitCol,*pxlRawHitCol); */
+      if(!pxlRawHitCol)
+      {
+      LOG_ERROR << "Make() - no pxlRawHitCollection."<<endm;
+      return kStErr;
+      }
+
+      mPxlSimulator->addPxlRawHits(*mcPxlHitCol,*pxlRawHitCol); */
    }
 
 
@@ -158,6 +173,9 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.2  2014/03/05 01:46:15  mstftsm
+ * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06
  *
