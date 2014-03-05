@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.3  2014/03/05 01:46:15  mstftsm
+ * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ *
  * Revision 1.2  2013/11/14 19:10:27  mstftsm
  * StMcPxlHit has been changed to be on local coordinates. We no longer transfor from global to local before smearing
  *
@@ -30,21 +33,42 @@
 #include "tables/St_HitError_Table.h"
 #include "StarClassLibrary/StRandom.hh"
 #include "StThreeVectorF.hh"
+#include "StPxlDbMaker/StPxlDb.h"
 
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
+
 #include "TDataSet.h"
+#include "TObjectSet.h"
 
 StPxlFastSim::~StPxlFastSim()
 {
    if (mRandom) delete mRandom;
+   if (mPxlDb) delete mPxlDb;
 }
 //____________________________________________________________
-Int_t StPxlFastSim::initRun(const TDataSet& calib_db, const Int_t run)
+Int_t StPxlFastSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDataSet, const Int_t run)
 {
    // run is not used in the current implementation, but might be necessary in the future.
-
    LOG_INFO << "StPxlFastSim::init()" << endm;
+
+   if(pxlDbDataSet != 0)
+   {
+	   mPxlDb = (StPxlDb *)pxlDbDataSet->GetObject();
+	   if (!mPxlDb)
+	   {
+		   LOG_ERROR << "StPxlFastSim - E - mPxlDb is not available" << endm;
+		   return kStErr;
+	   }
+	   else
+	   {
+		   LOG_INFO << "StPxlFastSim - Using geometry from pxlDB" <<endm;
+	   }
+   }
+   else
+   {
+	   LOG_INFO << "StPxlFastSim - Using ideal geometry" <<endm;
+   }
 
    if (!mRandom) mRandom = new StRandom();
    Int_t seed = time(NULL);
@@ -68,10 +92,10 @@ Int_t StPxlFastSim::initRun(const TDataSet& calib_db, const Int_t run)
 
    // please note that what is called local Y in the PXL sensor design
    // is actually called Z in STAR coordinates convention
-   if(pxlHitError->coeff[0]<=0 || pxlHitError->coeff[3]<=0)
+   if (pxlHitError->coeff[0] <= 0 || pxlHitError->coeff[3] <= 0)
    {
-	   LOG_ERROR << "StPxlFastSim - E - negative or corrupted PXL hits errors in DB" <<endm;
-	   return kStErr;
+      LOG_ERROR << "StPxlFastSim - E - negative or corrupted PXL hits errors in DB" << endm;
+      return kStErr;
    }
 
    mResXPix = sqrt(pxlHitError->coeff[0]); // local x
@@ -99,51 +123,38 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
          if (!mcPxlLadderHitCol) continue;
 
          for (UInt_t iSen = 0; iSen < mcPxlLadderHitCol->numberOfSensors(); iSen++)
-         { 
+         {
             const StMcPxlSensorHitCollection* mcPxlSensorHitCol = mcPxlLadderHitCol->sensor(iSen);
             if (!mcPxlSensorHitCol) continue;
 
             UInt_t nSenHits = mcPxlSensorHitCol->hits().size();
-	    LOG_DEBUG << "Sector/Ladder/Sensor = " << iSec+1 <<"/"<<iLad+1<<"/"<<iSen+1 << ". Number of sensor hits = "<< nSenHits <<endm;
+            LOG_DEBUG << "Sector/Ladder/Sensor = " << iSec + 1 << "/" << iLad + 1 << "/" << iSen + 1 << ". Number of sensor hits = " << nSenHits << endm;
 
             // Loop over hits in the sensor
             for (UInt_t iHit = 0; iHit < nSenHits; iHit++)
             {
                StMcPxlHit* mcPix = mcPxlSensorHitCol->hits()[iHit];
 
-               Long_t volId = mcPix->volumeId();
+               //Long_t volId = mcPix->volumeId();
                Int_t sector = mcPix->sector();
                Int_t ladder = mcPix->ladder();
-               Int_t sensor = mcPix->sensor();
-
-               TString Path("");
-               LOG_DEBUG << endm;
-	       Path = Form("/HALL_1/CAVE_1/IDSM_1/PXMO_1/PXLA_%i/LADR_%i/PXSI_%i/PLAC_1", sector, ladder, sensor);
-               LOG_DEBUG << "PATH: " << Path << endm;
-               LOG_DEBUG << "pxl hit volId/sector/ladder/sensor is " << volId << "/" << sector << "/" << ladder << "/" << sensor << endm;
-
-               gGeoManager->RestoreMasterVolume();
-               gGeoManager->CdTop();
-               gGeoManager->cd(Path);
+               //Int_t sensor = mcPix->sensor();
 
                Double_t localPixHitPos[3] = {mcPix->position().x(), mcPix->position().y(), mcPix->position().z()};
-	       // StMcPxlHit has local coordinates now, do not transform. 
-               //Double_t localPixHitPos[3]  = {0, 0, 0};
-               //gGeoManager->GetCurrentMatrix()->MasterToLocal(globalPixHitPos, localPixHitPos);
 
                LOG_DEBUG << "localPixHitPos = " << localPixHitPos[0] << " " << localPixHitPos[1] << " " << localPixHitPos[2] << endm;
                // please note that what is called local Y in the PXL sensor design
                // is actually called Z in STAR coordinates convention and vice-versa
                smearedX = distortHit(localPixHitPos[0], mResXPix, PXL_ACTIVE_X_LENGTH / 2.0);
                smearedZ = distortHit(localPixHitPos[2], mResZPix, PXL_ACTIVE_Y_LENGTH / 2.0);
-               if(mResYPix) smearedY = distortHit(localPixHitPos[1], mResYPix, 0.0020); // Not properly constrained yet
-	       else smearedY = localPixHitPos[1];
+               if (mResYPix) smearedY = distortHit(localPixHitPos[1], mResYPix, 0.0020); // Not properly constrained yet
+               else smearedY = localPixHitPos[1];
                localPixHitPos[0] = smearedX;
                localPixHitPos[2] = smearedZ;
                localPixHitPos[1] = smearedY;
                LOG_DEBUG << "smearedlocal = " << localPixHitPos[0] << " " << localPixHitPos[1] << " " << localPixHitPos[2] << endm;
                Double_t smearedGlobalPixHitPos[3] = {0, 0, 0};
-               gGeoManager->GetCurrentMatrix()->LocalToMaster(localPixHitPos, smearedGlobalPixHitPos);
+	       localToMatser(localPixHitPos,smearedGlobalPixHitPos,iSec+1,iLad+1,iSen+1);
 
                StThreeVectorF gpixpos(smearedGlobalPixHitPos);
                StThreeVectorF mRndHitError(0., 0., 0.);
@@ -154,8 +165,8 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
                tempHit->setLadder(mcPix->ladder());
                tempHit->setSensor(mcPix->sensor());
                tempHit->setIdTruth(mcPix->parentTrack()->key(), 100);
-	       tempHit->setDetectorId(kPxlId);
-	       tempHit->setId(mcPix->key());
+               tempHit->setDetectorId(kPxlId);
+               tempHit->setId(mcPix->key());
                tempHit->setLocalPosition(localPixHitPos[0], localPixHitPos[1], localPixHitPos[2]);
 
                LOG_DEBUG << "key() : " << mcPix->key() - 1 << " idTruth: " << mcPix->parentTrack()->key() << endm;
@@ -185,6 +196,27 @@ Double_t StPxlFastSim::distortHit(Double_t x, Double_t res, Double_t constraint)
 
    return test;
 }
+//____________________________________________________________
+void StPxlFastSim::localToMatser(Double_t* local,Double_t* master,Int_t sector,Int_t ladder,Int_t sensor)
+{
+	if(mPxlDb)
+	{
+               TGeoHMatrix *combP = (TGeoHMatrix *)mPxlDb->geoHMatrixSensorOnGlobal(sector, ladder,sensor);
+               combP->LocalToMaster(local, master);
+	}
+	else
+	{
+		TString Path("");
+		LOG_DEBUG << endm;
+		Path = Form("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_%i/LADR_%i/PXSI_%i/PLAC_1", sector, ladder, sensor);
+
+		gGeoManager->RestoreMasterVolume();
+		gGeoManager->CdTop();
+		gGeoManager->cd(Path);
+
+		gGeoManager->GetCurrentMatrix()->LocalToMaster(local, master);
+	}
+}
 /*
  *
  * Author: M. Mustafa
@@ -192,6 +224,9 @@ Double_t StPxlFastSim::distortHit(Double_t x, Double_t res, Double_t constraint)
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.3  2014/03/05 01:46:15  mstftsm
+ * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ *
  * Revision 1.2  2013/11/14 19:10:27  mstftsm
  * StMcPxlHit has been changed to be on local coordinates. We no longer transfor from global to local before smearing
  *

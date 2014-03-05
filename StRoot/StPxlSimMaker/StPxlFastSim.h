@@ -1,11 +1,14 @@
 /*
- * $Id: StPxlFastSim.h,v 1.1 2013/05/12 21:43:33 jeromel Exp $
+ * $Id: StPxlFastSim.h,v 1.2 2014/03/05 01:46:15 mstftsm Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.2  2014/03/05 01:46:15  mstftsm
+ * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06
  *
@@ -32,13 +35,15 @@
 
 #include "StPxlISim.h"
 class StRandom;
+class StPxlDb;
+class TObjectSet;
 
 class StPxlFastSim: public StPxlISim
 {
  public:
 
   /*! \brief Constructor */ 
-  StPxlFastSim(const Char_t *name="pxlFastSim"): StPxlISim(name), mRandom(0), mResXPix(0), mResYPix(0), mResZPix(0){}
+  StPxlFastSim(const Char_t *name="pxlFastSim"): StPxlISim(name), mPxlDb(0), mRandom(0), mResXPix(0), mResYPix(0), mResZPix(0){}
 
   /*! \brief This class does not own any hit containers.
    *        mRandom is deleted here. 
@@ -51,7 +56,7 @@ class StPxlFastSim: public StPxlISim
    * 
    * returns kStOk if resolutions have been fetched successfully. kStErr otherwise.
    */
-  virtual Int_t initRun(const TDataSet& calib_db, const Int_t run);
+  virtual Int_t initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDataSet,const Int_t run);
 
    /*! \brief creates an StPxlHit object for every StMcPxlHit, and fills the
    *  hit StPxlHitCollection container. 
@@ -65,13 +70,16 @@ class StPxlFastSim: public StPxlISim
    *  of all maker versions in use.
   */
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.1 2013/05/12 21:43:33 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.2 2014/03/05 01:46:15 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
   //Routine to smear hit by resolution with gaussian, mean zero and width res.
   Double_t distortHit(Double_t x, Double_t res, Double_t constraint);
 
+  void localToMatser(Double_t* local,Double_t* master,Int_t sector,Int_t ladder,Int_t sensor);
+
  private:
+  StPxlDb* mPxlDb;
   StRandom* mRandom;
 
   Double_t mResXPix;
@@ -80,13 +88,16 @@ class StPxlFastSim: public StPxlISim
 };
 #endif
 /*
- * $Id: StPxlFastSim.h,v 1.1 2013/05/12 21:43:33 jeromel Exp $
+ * $Id: StPxlFastSim.h,v 1.2 2014/03/05 01:46:15 mstftsm Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.2  2014/03/05 01:46:15  mstftsm
+ * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06
  *

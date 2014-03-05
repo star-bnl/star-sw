@@ -13,6 +13,7 @@
 #include "TNamed.h"
 
 class TDataSet;
+class TObjectSet;
 class StMcPxlHitCollection;
 class StPxlHitCollection;
 class StPxlRawHitCollection;
@@ -27,7 +28,7 @@ class StPxlISim : public TNamed
 public:
     StPxlISim(const Char_t *name): TNamed(name,name){}
 
-   virtual Int_t initRun(const TDataSet& calib_db,const Int_t run) = 0;
+   virtual Int_t initRun(const TDataSet& calib_db,const TObjectSet* pxlDbDataSet,const Int_t run) = 0;
 
   /*! \brief this function is to be implemented by algorithms which create PXL hits points.
   */
