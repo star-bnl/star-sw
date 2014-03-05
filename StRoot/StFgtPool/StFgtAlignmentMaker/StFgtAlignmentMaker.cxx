@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtAlignmentMaker.cxx,v 1.9 2014/03/05 17:58:01 akio Exp $
+ * $Id: StFgtAlignmentMaker.cxx,v 1.10 2014/03/05 18:28:59 akio Exp $
  *
  */
 
@@ -763,12 +763,6 @@ Int_t StFgtAlignmentMaker::Init(){
   memset(mNtrk,0,sizeof(mNtrk));
   memset(mHit,0,sizeof(mHit));
   bookHist();
-  if(mReadParFile==0){
-    cout << "mDb="<<mDb<<endl;
-    orig_algpar=mDb->getAlignment();
-  }else{
-    readPar(orig_algpar);
-  }
   return kStOK; 
 }
 
@@ -786,6 +780,12 @@ Int_t StFgtAlignmentMaker::InitRun(Int_t runnum){
 		<< fgtDbMkr->GetName() << endm;
       return kStFatal;
     }
+  }
+  if(mReadParFile==0){
+    cout << "mDb="<<mDb<<endl;
+    orig_algpar=mDb->getAlignment();
+  }else{
+    readPar(orig_algpar);
   }
   return kStOK;
 }
