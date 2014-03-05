@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.12 2013/03/19 01:27:35 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.13 2014/03/05 19:10:16 akio Exp $
  *
  */
 
@@ -269,15 +269,21 @@ void StFgtQAMaker::saveHist(){
   hfile->Close();
 }
 
-void StFgtQAMaker::fillHist(){
+void StFgtQAMaker::fillHist(){  
   StEvent* eventPtr = (StEvent*)GetInputDS("StEvent");
-  if( !eventPtr ) {
-    LOG_ERROR << "Error getting pointer to StEvent from '" << ClassName() << "'" << endm;
-    return;
-  };
-  StFgtCollection* fgtCollectionPtr = eventPtr->fgtCollection();
+  fgtCollectionPtr=0;
+  if( eventPtr ) {
+    //LOG_Info << "Found StFgtCollection from StEvent in '" << ClassName() << "'" << endm;
+    fgtCollectionPtr = eventPtr->fgtCollection();
+  }else{
+    TObjectSet *os = (TObjectSet*)GetDataSet("FGTCOLLECTION");
+    if (os) {
+      fgtCollectionPtr = (StFgtCollection*)os->GetObject();
+      //LOG_Info << "Found StFgtCollection from FGTCOLLECTION in '" << ClassName() << "'" << endm;
+    }
+  }
   if( !fgtCollectionPtr) {
-    LOG_ERROR << "Error getting pointer to StFgtCollection from '" << ClassName() << "'" << endm;
+    LOG_ERROR << "Error getting pointer to StFgtCollection in '" << ClassName() << "'" << endm;
     return;
   };
   
@@ -447,9 +453,6 @@ void StFgtQAMaker::pulseFit(StFgtHit* cluster){
   static int MAXPAGE=10;
   if(NPAGE>MAXPAGE) return;
 
-  StEvent* eventPtr = (StEvent*)GetInputDS("StEvent");
-  StFgtCollection* fgtCollectionPtr = eventPtr->fgtCollection();
-
   if(C1==0) C1=new TCanvas("Pulse","Pulse",50,50,750,800);
   if(NPLOT==0){
     C1->Clear();
@@ -468,7 +471,7 @@ void StFgtQAMaker::pulseFit(StFgtHit* cluster){
   StFgtStrip* strips[20]; 
   StFgtStripCollection *cstrip = fgtCollectionPtr->getStripCollection(disc);
   StSPtrVecFgtStrip &strip=cstrip->getStripVec();
-  for(StSPtrVecFgtStripIterator it=strip.begin(); it!=strip.end(); it++) {
+   for(StSPtrVecFgtStripIterator it=strip.begin(); it!=strip.end(); it++) {
     int igeoid   =(*it)->getGeoId();
     char ilayer;
     short idisc,iquad,ipr,istr;
