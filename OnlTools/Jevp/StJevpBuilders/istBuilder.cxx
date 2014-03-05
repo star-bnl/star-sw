@@ -94,7 +94,13 @@ void istBuilder::initialize(int argc, char *argv[]) {
                     else
                         ladder = 46 - channelId/ChPerLadder;
 
-                    sensor = 6 - (channelId%ChPerLadder)/ChPerSensor;
+		    //Update 03/03/14 Yaping: sections B and C swapped on ladder 13
+		    if(channelId>=43008 && channelId<44544) //section C
+                        sensor = 4 - (channelId%ChPerLadder)/ChPerSensor;
+                    else if(channelId>=44544 && channelId<46080) //section B
+                        sensor = 8 - (channelId%ChPerLadder)/ChPerSensor;
+                    else
+                    	sensor = 6 - (channelId%ChPerLadder)/ChPerSensor;
 
                     Int_t pad = (channelId%ChPerLadder)%ChPerSensor;
                     column = 12 - pad/numRow;
@@ -256,6 +262,11 @@ void istBuilder::initialize(int argc, char *argv[]) {
   hSumContents.hHitMap->GetYaxis()->SetTitle("Column Index in Z");
   hSumContents.hHitMap->SetLabelSize(0.02);
 
+  hSumContents.hHitMapVsAPV = new TH2F("HitMapPerAPV", "IST - Hit map in Ladder vs APV", 36, 1, 37, 24, 1, 25);
+  hSumContents.hHitMapVsAPV->SetStats(false);
+  hSumContents.hHitMapVsAPV->GetXaxis()->SetTitle("APV geometry ID");
+  hSumContents.hHitMapVsAPV->GetYaxis()->SetTitle("Ladder geometry ID");
+
   hSumContents.hMultVsLadder = new TH2F("HitMultVsLadder", "IST - Hit Multiplicity vs Ladder Id", numLadder, 1, numLadder+1, 72, 0, ChPerLadder);//24*72 bins
   hSumContents.hMultVsLadder->GetXaxis()->SetNdivisions(-numLadder, false);
   hSumContents.hMultVsLadder->SetStats(false);
@@ -348,7 +359,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
     plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+i] = new JevpPlot(hSumContents.sumArray[i]);
     hSumContents.sumArray[i]->SetStats(false);
   }
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+1]->logy=true;
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+2]->logy=true;
 
   // Add Plots to plot set...
   for ( int i=0; i<totPlots ;i++ ) {
@@ -555,6 +566,7 @@ void istBuilder::event(daqReader *rdr) {
       int columnIdx = 1 + padIdx/numRow;  //column index 1 to 12
       int rowIdx    = 1 + padIdx%numRow;  //row index 1 to 64
       int sensorIndex = (ladderIdx-1)*numSensor + sensorIdx;  // sensor index 1 to 144 in all 
+      int apvGeoIdx = (sensorIdx-1)*6+(columnIdx-1)/2 + 1;    // apv index 1 to 36 
 
       //float pedestal   = runningAvg[geoIdx-1];
       float rms        = oldStdDevs[geoIdx-1];
@@ -565,6 +577,7 @@ void istBuilder::event(daqReader *rdr) {
 	  HitCount[ladderIdx-1]++;
 	  hHitMapContents.hitMapArray[ladderIdx-1]->Fill(rowIdx, (sensorIdx-1)*numColumn+columnIdx);
 	  hSumContents.hHitMap->Fill((ladderIdx-1)*numRow+rowIdx, (sensorIdx-1)*numColumn+columnIdx);
+	  hSumContents.hHitMapVsAPV->Fill(apvGeoIdx, ladderIdx);
           hMipContents.mipArray[sensorIndex-1]->Fill(adc_max);
 	  hEventSumContents.hMaxTimeBin->Fill(tb_max);
       }
