@@ -112,9 +112,10 @@ class l4Builder : public JevpPlotSet {
  */  
   JevpPlot *HltPlots[42];
   JevpPlot *BesGoodPlots[4];
+  JevpPlot *HLTGood2Plots[4];
   JevpPlot *BesMontinorPlots[2];
-  JevpPlot *FixedTargetPlots[2];
-  JevpPlot *FixedTargetMonitorPlots[2];
+  JevpPlot *FixedTargetPlots[5];
+  JevpPlot *FixedTargetMonitorPlots[5];
   JevpPlot *HeavyFragmentPlots[1];
   JevpPlot *JPsiPlots[14];
   JevpPlot *HltPlots_UPC[36];
@@ -146,6 +147,7 @@ class l4Builder : public JevpPlotSet {
   double getDedx(double p, const int name);
   void defineHltPlots();
   void defineBesGoodPlots();
+  void defineHLTGood2Plots();
   void defineBesMontinorPlots();
   void defineFixedTargetPlots();
   void defineFixedTargetMonitorPlots();
@@ -186,6 +188,7 @@ class l4Builder : public JevpPlotSet {
   bool EMCFilled;
   bool TOFFilled; 
   bool BESGoodFilled;
+  bool HLTGood2Filled;
   bool BESMonitorFilled;
   bool FixedTargetFilled;
   bool FixedTargetMonirotFilled; 
@@ -195,6 +198,7 @@ class l4Builder : public JevpPlotSet {
   bool DiElectronFilled;
 
   int switch_BesGood;
+  int switch_HLTGood2;
   int switch_BesMonitor;
   int switch_FixedTarget;
   int switch_FixedTargetMonitor;
@@ -351,12 +355,22 @@ class l4Builder : public JevpPlotSet {
   TH1D *hBesGoodVr;
   TH1D *hBesGoodVertexZ;
   TH1I *hBesGoodprimaryMult;
+  TH2D *hHLTGood2VertexXY;
+  TH1D *hHLTGood2Vr;
+  TH1D *hHLTGood2VertexZ;
+  TH1I *hHLTGood2primaryMult;
   TH2D *hBesMonitorVertexXY;
   TH1D *hBesMonitorVr;
   TH2D *hFixedTargetVertexXY;
   TH1D *hFixedTargetVr;
+  TH1D *hFixedTarget_VertexZ;
+  TH1D *hFixedTarget_Prim_Eta;
+  TH1D *hFixedTarget_Glob_Eta;
   TH2D *hFixedTargetMonitorVertexXY;
   TH1D *hFixedTargetMonitorVr;
+  TH1D *hFixedTargetMonitor_VertexZ;
+  TH1D *hFixedTargetMonitor_Prim_Eta;
+  TH1D *hFixedTargetMonitor_Glob_Eta;
   TH2D *hVertexXY;
   TH1D *hVertexR;
 

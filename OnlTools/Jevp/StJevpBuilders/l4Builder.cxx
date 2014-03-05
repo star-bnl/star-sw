@@ -91,6 +91,7 @@ void l4Builder::initialize(int argc, char *argv[])
     outerGainPara = -999;
     eventCounter = 0;
     switch_BesGood = 1;
+    switch_HLTGood2 = 1;
     switch_BesMonitor = 1;
     switch_FixedTarget = 1;
     switch_FixedTargetMonitor = 1;
@@ -188,13 +189,19 @@ void l4Builder::initialize(int argc, char *argv[])
         BesMontinorPlots[i]->gridy = 0;
         BesMontinorPlots[i]->setPalette(1);
     }
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < 4; i++) {
+        HLTGood2Plots[i] = new JevpPlot();
+        HLTGood2Plots[i]->gridx = 0;
+        HLTGood2Plots[i]->gridy = 0;
+        HLTGood2Plots[i]->setPalette(1);
+    }
+    for(int i = 0; i < 5; i++) {
         FixedTargetPlots[i] = new JevpPlot();
         FixedTargetPlots[i]->gridx = 0;
         FixedTargetPlots[i]->gridy = 0;
         FixedTargetPlots[i]->setPalette(1);
     }
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < 5; i++) {
         FixedTargetMonitorPlots[i] = new JevpPlot();
         FixedTargetMonitorPlots[i]->gridx = 0;
         FixedTargetMonitorPlots[i]->gridy = 0;
@@ -221,6 +228,7 @@ void l4Builder::initialize(int argc, char *argv[])
 
     cout << "HltPlots OK" << endl;
     if(switch_BesGood == 1) cout << "with BesGood shown in monitor" << endl;
+    if(switch_HLTGood2 == 1) cout << "with HLTGood2 shown in monitor" << endl;
     if(switch_BesMonitor == 1) cout << "with BesMonitor shown in monitor" << endl;
     if(switch_FixedTarget == 1) cout << "with FixedTarget shown in monitor" << endl;
     if(switch_FixedTargetMonitor == 1) cout << "with FixedTargetMonitor shown in monitor" << endl;
@@ -229,6 +237,7 @@ void l4Builder::initialize(int argc, char *argv[])
     if(switch_upc == 1) cout << "with UPC shown in monitor" << endl;
     defineHltPlots();
     defineBesGoodPlots();
+    defineHLTGood2Plots();
     defineBesMontinorPlots();
     defineFixedTargetPlots();
     defineFixedTargetMonitorPlots();
@@ -246,6 +255,12 @@ void l4Builder::initialize(int argc, char *argv[])
             addPlot(BesGoodPlots[i]);
         }
     }
+    if(switch_HLTGood2 == 1) {
+        for(int i = 0; i < 4; i++) {
+            LOG(DBG, "Adding plot %d", i);
+            addPlot(HLTGood2Plots[i]);
+        }
+    }
     if(switch_BesMonitor == 1) {
         for(int i = 0; i < 2; i++) {
             LOG(DBG, "Adding plot %d", i);
@@ -253,13 +268,13 @@ void l4Builder::initialize(int argc, char *argv[])
         }
     }
     if(switch_FixedTarget == 1) {
-        for(int i = 0; i < 2; i++) {
+        for(int i = 0; i < 5; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(FixedTargetPlots[i]);
         }
     }
     if(switch_FixedTargetMonitor == 1) {
-        for(int i = 0; i < 2; i++) {
+        for(int i = 0; i < 5; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(FixedTargetMonitorPlots[i]);
         }
@@ -293,9 +308,10 @@ void l4Builder::startrun(daqReader *rdr)
 
     int initialno = 42;
     if(switch_BesGood == 1) initialno += 4;
+    if(switch_HLTGood2 == 1) initialno += 4;
     if(switch_BesMonitor == 1) initialno += 2;
-    if(switch_FixedTarget == 1) initialno += 2;
-    if(switch_FixedTargetMonitor == 1) initialno += 2;
+    if(switch_FixedTarget == 1) initialno += 5;
+    if(switch_FixedTargetMonitor == 1) initialno += 5;
     if(switch_HeavyFragment == 1) initialno += 1;
     if(switch_jpsi == 1) initialno += 14;
     if(switch_upc == 1) initialno += 36;
@@ -325,6 +341,7 @@ void l4Builder::startrun(daqReader *rdr)
     EMCFilled = false;
     TOFFilled = false;
     BESGoodFilled = false;
+    HLTGood2Filled = false;
     BESMonitorFilled = false;
     FixedTargetFilled = false;
     FixedTargetMonirotFilled = false;
@@ -507,9 +524,10 @@ void l4Builder::writeHistogram()
     TFile file(histfile, "RECREATE");
     int initialno = 42;
     if(switch_BesGood == 1) initialno += 4;
+    if(switch_HLTGood2 == 1) initialno += 4;
     if(switch_BesMonitor == 1) initialno += 2;
-    if(switch_FixedTarget == 1) initialno += 2;
-    if(switch_FixedTargetMonitor == 1) initialno += 2;
+    if(switch_FixedTarget == 1) initialno += 5;
+    if(switch_FixedTargetMonitor == 1) initialno += 5;
     if(switch_HeavyFragment == 1) initialno += 1;
     if(switch_jpsi == 1) initialno += 14;
     if(switch_upc == 1) initialno += 36;
@@ -582,7 +600,7 @@ void l4Builder::event(daqReader *rdr)
     int triggerBitFixedTarget = 0x10000000;
     int triggerBitFixedTargetMonitor = 0x20000000;
     int triggerBitBesMonitor = 0x40000000;
-
+    unsigned int triggerBitHLTGood2 = 0x80000000;
     //cout<<"event begin"<<endl;
 
     //EXTRACT L4 TRACK INFO FROM DAQ FILE
@@ -637,7 +655,7 @@ void l4Builder::event(daqReader *rdr)
         return;
     }
 
-    int decision = hlt_eve->hltDecision;
+    unsigned int decision = hlt_eve->hltDecision;
     int upc = 0x2;
     int mtd = 0x0;
     int npehtnozdc = 0x40;
@@ -673,7 +691,9 @@ void l4Builder::event(daqReader *rdr)
     if(decision & triggerBitFixedTargetMonitor) {
         hEvtsAccpt->Fill(5.);
     }
-
+    if(decision & triggerBitHLTGood2) {
+        hEvtsAccpt->Fill(6.);
+    }
     // fill events
     if(!EventFilled) {
         EventFilled = true;
@@ -701,6 +721,14 @@ void l4Builder::event(daqReader *rdr)
     hLm_VertexZ->Fill(lmvertZ);
     hVzvpd_Vz->Fill(VzVpd, lmvertZ);
     hVzDiff->Fill(VzVpd - lmvertZ);
+
+    if(decision & triggerBitFixedTarget) {
+        hFixedTarget_VertexZ->Fill(vertZ);
+    }
+
+        if(decision & triggerBitFixedTargetMonitor) {
+        hFixedTargetMonitor_VertexZ->Fill(vertZ);
+    }
 
     if(daqID & upc) {
         hVertexX_UPC->Fill(vertX);
@@ -809,6 +837,14 @@ void l4Builder::event(daqReader *rdr)
                 hGlob_Phi_UPC->Fill(phi);
             }
         }
+
+	if(decision & triggerBitFixedTarget) {
+        hFixedTarget_Glob_Eta->Fill(eta);
+    }
+
+	if(decision & triggerBitFixedTargetMonitor) {
+        hFixedTargetMonitor_Glob_Eta->Fill(eta);
+    }
         if(nHits >= 20 && ndedx >= 15) {
             hGlob_dEdx->Fill(p * q, dedx);
             if(daqID & upc) {
@@ -880,6 +916,12 @@ void l4Builder::event(daqReader *rdr)
                 hPrim_Phi_UPC->Fill(phi);
             }
         }
+	if(decision & triggerBitFixedTarget) {
+        hFixedTarget_Prim_Eta->Fill(eta);
+    }
+	if(decision & triggerBitFixedTargetMonitor) {
+        hFixedTargetMonitor_Prim_Eta->Fill(eta);
+    }
         if(nHits >= 20 && ndedx >= 15) {
             hPrim_dEdx->Fill(p * q, dedx);
             if(daqID & upc) hPrim_dEdx_UPC->Fill(p * q, dedx);
@@ -901,6 +943,9 @@ void l4Builder::event(daqReader *rdr)
     }
     if(decision & triggerBitBesgoodEvents){
       hBesGoodprimaryMult->Fill(count);
+    }
+    if(decision & triggerBitHLTGood2){
+      hHLTGood2primaryMult->Fill(count);
     }
     // fill nodes
     for(u_int i = 0; i < hlt_node->nNodes; i++) {
@@ -956,9 +1001,21 @@ void l4Builder::event(daqReader *rdr)
             addServerTags("L4BesGoodEvents");
         }
         hBesGoodVertexXY->Fill(vertX, vertY);
-        hBesGoodVertexZ->Fill(vertZ);
         hBesGoodVr->Fill(vertR);
     }
+
+//HLTGood2
+
+     if(decision & triggerBitHLTGood2) {
+        if(!HLTGood2Filled) {
+            HLTGood2Filled = true;
+            addServerTags("L4HLTGood2");
+        }
+        hHLTGood2VertexXY->Fill(vertX, vertY);
+        hHLTGood2VertexZ->Fill(vertZ);
+        hHLTGood2Vr->Fill(vertR);
+    }
+
 //BESMonitor
 
     if(decision & triggerBitBesMonitor) {
@@ -1600,7 +1657,7 @@ static Double_t funcDedx_He4_neg(Double_t *x, Double_t *par)
 void l4Builder::defineHltPlots()
 {
     HltPlots[index]->logy = 1;
-    hEvtsAccpt = new TH1I("EvtsAccpt", "EvtsAccpt", 6, 0., 6);
+    hEvtsAccpt = new TH1I("EvtsAccpt", "EvtsAccpt", 7, 0., 7);
     ph = new PlotHisto();
     ph->histo = hEvtsAccpt;
     HltPlots[index]->addHisto(ph);
@@ -1942,6 +1999,34 @@ void l4Builder::defineBesGoodPlots()
   BesGoodPlots[index]->addHisto(ph);
 }
 
+void l4Builder::defineHLTGood2Plots()
+{
+  index=0;
+  hHLTGood2VertexXY = new TH2D("HLTGood2_VertexXY","HLTGood2_VertexXY",200,-5,5,200,-5,5);
+  ph = new PlotHisto();
+  ph->histo = hHLTGood2VertexXY;
+  HLTGood2Plots[index]->addHisto(ph);
+
+  index++; //1
+  hHLTGood2VertexZ = new TH1D("HLTGood2_VertexZ","HLTGood2_VertexZ",1000,-200.,200.);
+  ph = new PlotHisto();
+  ph->histo = hHLTGood2VertexZ;
+  HLTGood2Plots[index]->addHisto(ph);
+
+  index++; //2
+  hHLTGood2Vr = new TH1D("HLTGood2_Vr","HLTGood2_Vr",100,0,5);
+  ph = new PlotHisto();
+  ph->histo = hHLTGood2Vr;
+  HLTGood2Plots[index]->addHisto(ph);
+
+  index++; //3
+  HLTGood2Plots[index]->logy=1;
+  hHLTGood2primaryMult = new TH1I("HLTGood2_primaryMult", "HLTGood2_primaryMult",2200,0,2200);
+  ph = new PlotHisto();
+  ph->histo = hHLTGood2primaryMult;
+  HLTGood2Plots[index]->addHisto(ph);
+}
+
 void l4Builder::defineBesMontinorPlots()
 {
     index = 0;
@@ -1972,6 +2057,24 @@ void l4Builder::defineFixedTargetPlots()
     ph = new PlotHisto();
     ph->histo = hFixedTargetVr;
     FixedTargetPlots[index]->addHisto(ph);
+
+    index++; //2
+    hFixedTarget_VertexZ = new TH1D("FixedTarget_VertexZ","FixedTarget_VertexZ",1000,-200.,200.);
+    ph = new PlotHisto();
+    ph->histo = hFixedTarget_VertexZ;
+    FixedTargetPlots[index]->addHisto(ph);
+
+    index++; //3
+    hFixedTarget_Prim_Eta = new TH1D("FixedTarget_Prim_Eta", "FixedTarget_Prim_Eta", 120, -3, 3);
+    ph = new PlotHisto();
+    ph->histo = hFixedTarget_Prim_Eta;
+    FixedTargetPlots[index]->addHisto(ph);
+
+    index++;  //4
+    hFixedTarget_Glob_Eta = new TH1D("FixedTarget_Glob_Eta", "FixedTarget_Glob_Eta", 120, -3, 3);
+    ph = new PlotHisto();
+    ph->histo = hFixedTarget_Glob_Eta;
+    FixedTargetPlots[index]->addHisto(ph);
 }
 
 void l4Builder::defineFixedTargetMonitorPlots()
@@ -1987,6 +2090,24 @@ void l4Builder::defineFixedTargetMonitorPlots()
     hFixedTargetMonitorVr = new TH1D("FixedTargetMonitor_Vr", "FixedTargetMonitor_Vr", 300, 0, 10);
     ph = new PlotHisto();
     ph->histo = hFixedTargetMonitorVr;
+    FixedTargetMonitorPlots[index]->addHisto(ph);
+
+    index++; //2
+    hFixedTargetMonitor_VertexZ = new TH1D("FixedTargetMonitor_VertexZ","FixedTargetMonitor_VertexZ",1000,-200.,200.);
+    ph = new PlotHisto();
+    ph->histo = hFixedTargetMonitor_VertexZ;
+    FixedTargetMonitorPlots[index]->addHisto(ph);
+
+    index++; //3
+    hFixedTargetMonitor_Prim_Eta = new TH1D("FixedTargetMonitor_Prim_Eta", "FixedTargetMonitor_Prim_Eta", 120, -3, 3);
+    ph = new PlotHisto();
+    ph->histo = hFixedTargetMonitor_Prim_Eta;
+    FixedTargetMonitorPlots[index]->addHisto(ph);
+
+    index++;  //4
+    hFixedTargetMonitor_Glob_Eta = new TH1D("FixedTargetMonitor_Glob_Eta", "FixedTargetMonitor_Glob_Eta", 120, -3, 3);
+    ph = new PlotHisto();
+    ph->histo = hFixedTargetMonitor_Glob_Eta;
     FixedTargetMonitorPlots[index]->addHisto(ph);
 }
 
@@ -2455,16 +2576,22 @@ void l4Builder::setAllPlots()
     hGlob_Pt->GetXaxis()->SetTitle("Pt (GeV/c)");
     hGlob_Phi->GetXaxis()->SetTitle("#phi");
     hGlob_Eta->GetXaxis()->SetTitle("#eta");
+    hFixedTarget_Glob_Eta->GetXaxis()->SetTitle("#eta");
+    hFixedTargetMonitor_Glob_Eta->GetXaxis()->SetTitle("#eta");
     hGlob_dEdx->GetXaxis()->SetTitle("Global Momentum (GeV/c)");
     hGlob_dEdx->GetYaxis()->SetTitle("dEdx (GeV/cm)");
     hPrim_Pt->GetXaxis()->SetTitle("Pt (GeV/c)");
     hPrim_Phi->GetXaxis()->SetTitle("#phi");
     hPrim_Eta->GetXaxis()->SetTitle("#eta");
+    hFixedTarget_Prim_Eta->GetXaxis()->SetTitle("#eta");
+    hFixedTargetMonitor_Prim_Eta->GetXaxis()->SetTitle("#eta");
     hPrim_dEdx->GetXaxis()->SetTitle("Primary Momentum (GeV/c)");
     hPrim_dEdx->GetYaxis()->SetTitle("dEdx (GeV/cm)");
     hVertexX->GetXaxis()->SetTitle("VertexX (cm)");
     hVertexY->GetXaxis()->SetTitle("VertexY (cm)");
     hVertexZ->GetXaxis()->SetTitle("VertexZ (cm)");
+    hFixedTarget_VertexZ->GetXaxis()->SetTitle("VertexZ (cm)");
+    hFixedTargetMonitor_VertexZ->GetXaxis()->SetTitle("VertexZ (cm)");
     hVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
     hVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
     hVertexR->GetXaxis()->SetTitle("VertexR (cm)");
@@ -2547,6 +2674,11 @@ void l4Builder::setAllPlots()
     //hBesGoodVertexXY->GetZaxis()->SetRangeUser(1.e-10,1.e30);
     hBesGoodVr->GetXaxis()->SetTitle("VertexR (cm)");
     hBesGoodprimaryMult->GetXaxis()->SetTitle("Multiplicity");
+    hHLTGood2VertexXY->GetXaxis()->SetTitle("VertexX (cm)");
+    hHLTGood2VertexXY->GetYaxis()->SetTitle("VertexY (cm)");
+    hHLTGood2VertexZ->GetXaxis()->SetTitle("VertexZ (cm)");
+    hHLTGood2Vr->GetXaxis()->SetTitle("VertexR (cm)");
+    hHLTGood2primaryMult->GetXaxis()->SetTitle("Multiplicity");
     hBesMonitorVertexXY->GetXaxis()->SetTitle("VertexX (cm)");
     hBesMonitorVertexXY->GetYaxis()->SetTitle("VertexY (cm)");
     hBesMonitorVertexXY->GetZaxis()->SetRangeUser(1.e-10, 1.e30);
@@ -2567,6 +2699,7 @@ void l4Builder::setAllPlots()
     hEvtsAccpt->GetXaxis()->SetBinLabel(4, "Bes Monior");
     hEvtsAccpt->GetXaxis()->SetBinLabel(5, "Fixed Target");
     hEvtsAccpt->GetXaxis()->SetBinLabel(6, "Fixed Target Monitor");
+    hEvtsAccpt->GetXaxis()->SetBinLabel(7, "HLTGood2");    
 
     hGlob_Phi_UPC->SetMinimum(0.);
     hPrim_Phi_UPC->SetMinimum(0.);
