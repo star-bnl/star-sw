@@ -155,9 +155,9 @@ Int_t StFgtGeneralBase::Make()
   //if we constructed fgtCollection ourself, delete it ourself
       if(fgtCollection)
 	{
-	  fgtCollection->Clear();
-	  delete fgtCollection;
-    }
+	  //fgtCollection->Clear();
+	  //delete fgtCollection;
+	}
     }
 
   Int_t ierr=kStOk;
@@ -186,6 +186,7 @@ Int_t StFgtGeneralBase::Make()
     {
       fgtCollection=new StFgtCollection();
       fillFromMuDst(*fgtCollection);
+      AddData(new TObjectSet("FGTCOLLECTION",fgtCollection,kTRUE));
       //      cout <<"read mDst " <<endl;
       fillFromStEvent(fgtCollection);
       //      cout <<"filled event" <<endl;
