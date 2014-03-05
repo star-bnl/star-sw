@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtQAMaker.h,v 1.9 2013/03/15 20:07:41 akio Exp $
+ * $Id: StFgtQAMaker.h,v 1.10 2014/03/05 19:10:16 akio Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtQAMaker.h,v $
+ * Revision 1.10  2014/03/05 19:10:16  akio
+ * added getting StFgtCollection from dataset called FGTCOLLECTION made from MuDST
+ *
  * Revision 1.9  2013/03/15 20:07:41  akio
  * *** empty log message ***
  *
@@ -57,6 +60,7 @@
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
 class StFgtHit;
+class StFgtCollection;
 
 class StFgtQAMaker : public StMaker {
 public:
@@ -72,7 +76,7 @@ public:
   inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.9 2013/03/15 20:07:41 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.10 2014/03/05 19:10:16 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   };
   
@@ -86,6 +90,8 @@ protected:
   void dip();
 
 private:
+  StFgtCollection* fgtCollectionPtr; //!
+
   Int_t   mEventCounter; //!
   Int_t   mRunNumber;    //!  Run# for output file name
   StFgtDb* mDb;          //!
