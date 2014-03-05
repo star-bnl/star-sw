@@ -356,6 +356,7 @@ class istBuilder : public JevpPlotSet {
     TH2 *sumArray[];
     struct{
       TH2* hHitMap;       //hit density (phi vs. z -- 64*24 vs. 12*6)
+      TH2* hHitMapVsAPV;  //Update 03/03/2014 Yaping Wang: hit map on APV (APV geometry ID vs. ladder geometry ID) 
       TH2* hMultVsLadder; //total number of hits per event vs. ladder
       TH2* hSumPed;	  //pedestal per channel (ADC vs. channel index)
       TH2* hSumSig;	  //pedestal RMS per channel (RMS vs. channel index)
