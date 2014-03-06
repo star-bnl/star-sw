@@ -24,6 +24,7 @@
 #include "StEventTypes.h"
 #include "StDetectorDbMaker/StiIst1HitErrorCalculator.h"
 #include "StIstDbMaker/StIstDbMaker.h"
+#include "StIstUtil/StIstConsts.h"
 
 using namespace std;
 
@@ -54,8 +55,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
 {
    cout << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
 
-   unsigned int nLadders = 24;
-   unsigned int nSensors = 6;
    unsigned int ROW      = 1;
 
    THashList *istRot = new THashList(144, 0);
@@ -191,8 +190,10 @@ void StiIstDetectorBuilder::useVMCGeometry()
          mSiMaterial->getDensity());
 
 
-   for (unsigned int ladderIdx = 0; ladderIdx < nLadders; ++ladderIdx) {
-      for (unsigned int sensorIdx = 0; sensorIdx < nSensors; sensorIdx++) {
+   for (unsigned int ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)
+   {
+      for (unsigned int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
+      {
          unsigned int matIst = 1000 + (ladderIdx) * 6 + (sensorIdx + 1);
          LOG_DEBUG << " ladderIdx/sensorIdx/matIst : " << ladderIdx << " " << sensorIdx << " " << matIst << endm;
          TGeoHMatrix *combI = (TGeoHMatrix *)istRot->FindObject(Form("R%04i", matIst));
@@ -222,7 +223,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
          //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
          StiShape *sh  = new StiPlanarShape(name,
-                                            nSensors * (box->GetDZ() + 0.10), // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
+                                            kIstNumSensorsPerLadder * (box->GetDZ() + 0.10), // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
                                             2 * box->GetDY(),              // thickness
                                             box->GetDX());                 // halfWidth
          add(sh);
