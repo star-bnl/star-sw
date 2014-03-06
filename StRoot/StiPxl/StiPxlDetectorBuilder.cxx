@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.28 2014/03/04 15:36:58 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.29 2014/03/06 19:30:04 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -57,15 +57,6 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFil
    StiDetectorBuilder("Pixel", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mPxlDb(0),
    mUseDbGeom(false)
 {}
-
-
-StiPxlDetectorBuilder::~StiPxlDetectorBuilder()
-{
-   // We do not own the resources but it is good to invalidate the pointers
-   mSiMaterial = 0;
-   mHybridMaterial = 0;
-   mPxlDb = 0;
-}
 
 
 /** Build the pixel detector components. */
@@ -316,6 +307,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.29  2014/03/06 19:30:04  smirnovd
+ * Simplified code by removing unnecessary destructors
+ *
  * Revision 1.28  2014/03/04 15:36:58  smirnovd
  * Removed expired commented code
  *

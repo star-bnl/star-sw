@@ -34,12 +34,6 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFil
 {}
 
 
-StiIstDetectorBuilder::~StiIstDetectorBuilder()
-{
-   mIstDb = 0;
-}
-
-
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 {
    LOG_INFO << "StiIstDetectorBuilder::buildDetectors() - I - Started " << endm;
