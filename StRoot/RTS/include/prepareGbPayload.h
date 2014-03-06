@@ -59,7 +59,7 @@ class Lxgbx {
       
 	    evpCfg.rate[i] = xml->getParamI("trg_setup.evpGroup[%d].rate", i);
 
-	    LOG(NOTE , "Groups[%d].rate = %f",i,evpCfg.rate[i],0,0,0);
+	    LOG(NOTE , "Groups[%d].rate = %f : def[0] = 0x%x  def[1] = 0x%x",i,evpCfg.rate[i],evpCfg.groupdef[i][0],evpCfg.groupdef[i][1],0);
 
 	    if((evpCfg.rate[i] > 0.0) && (divisor > 1)) {
 		evpCfg.rate[i] /= (float)divisor;
@@ -88,7 +88,7 @@ class Lxgbx {
 	    evpCfg.groupdef[i][0] = groups[i].definition[0];
 	    evpCfg.groupdef[i][1] = groups[i].definition[1];
       
-	    LOG(DBG, "Groups[%d].rate = %f",i,groups[i].rate,0,0,0);
+	    LOG(NOTE , "Groups[%d].rate = %f : def[0] = 0x%x  def[1] = 0x%x",i,evpCfg.rate[i],evpCfg.groupdef[i][0],evpCfg.groupdef[i][1],0);
 
 	    evpCfg.rate[i] = groups[i].rate;
 	    if((evpCfg.rate[i] > 0.0) && (divisor > 1)) {
@@ -216,8 +216,8 @@ class Lxgbx {
 	}
 
 	double et = currtime - resettime;
-	if(et < .1) et = .1;
-	LOG(DBG, "currtime=%lf resettime=%lf et=%lf",currtime,resettime,et,0,0);
+	if(et < .1) et = 1;
+	LOG(NOTE, "currtime=%d resettime=%d et*1000=%d",(int)currtime,(int)resettime,(int)(et*1000),0,0);
 
 	// get event group mask
 	UINT32 grpmask = 0;
@@ -228,7 +228,7 @@ class Lxgbx {
 	    }
 	}
 
-	LOG(DBG, "Event: et*1000=%d trg_lo=0x%x trg_hi=0x%x grpmask=0x%x",1000*((int)et),trg_lo,trg_hi,grpmask,0);
+	LOG(NOTE, "Event: et*1000=%d trg_lo=0x%x trg_hi=0x%x grpmask=0x%x",(int)(et*1000),trg_lo,trg_hi,grpmask,0);
 
 	// get firemask (after rates)
 	UINT32 firemask = 0;
@@ -236,32 +236,33 @@ class Lxgbx {
 	    if(!(grpmask & (1<<i))) continue;
       
 	    double r = ((double)evpCtrs.cnt[i]/et);
-      
+	    LOG(NOTE, "group[%d] rate*1000=%d",i, (int)(r * 1000),0,0,0);
+
 	    if(r < evpCfg.rate[i]) {
 		firemask |= (1<<i);
 	
-		LOG(DBG, "EVP[%d]: r*1000=%d rate*1000=%d, cnt=%d et=%d",i,(int)(r*1000),(int)(evpCfg.rate[i]*1000),evpCtrs.cnt[i],(int)et);
+		LOG(NOTE, "EVP[%d]: r*1000=%d rate*1000=%d, cnt=%d et=%d",i,(int)(r*1000),(int)(evpCfg.rate[i]*1000),evpCtrs.cnt[i],(int)et);
 	    }
 	    else {
-		LOG(DBG, "NOEVP[%d]: r*1000=%d rate*1000=%d, cnt=%d et=%d",i,(int)(r*1000),(int)(evpCfg.rate[i]*1000),evpCtrs.cnt[i],(int)et);
+		LOG(NOTE, "NOEVP[%d]: r*1000=%d rate*1000=%d, cnt=%d et=%d",i,(int)(r*1000),(int)(evpCfg.rate[i]*1000),evpCtrs.cnt[i],(int)et);
 	    }
       
 	    if(evpCfg.rate[i] < 0) {
-		LOG(DBG, "Set fire mask because of neg rate[%d]*1000 %d?",i,(int)(evpCfg.rate[i]*1000),0,0,0);
+		LOG(NOTE, "Set fire mask because of neg rate[%d]*1000 %d?",i,(int)(evpCfg.rate[i]*1000),0,0,0);
 		firemask |= (1<<i);
 	    }
 	}
     
 
 	if(evpCfg.policy == 1) { // all events
-	    LOG(DBG, "Set fire mask because of take all",0,0,0,0,0);
+	    LOG(NOTE, "Set fire mask because of take all",0,0,0,0,0);
 	    firemask = 1;
 	}
     
 	if(evpCfg.policy == 2) { // 10 hz
 	    double r = ((double)evpCtrs.cnt[0]/et);
 	    if(r < 10.0) {
-		LOG(DBG, "Set fire mask because of 10hz",0,0,0,0,0);
+		LOG(NOTE, "Set fire mask because of 10hz",0,0,0,0,0);
 		firemask = 1;
 	    }
 	    else {

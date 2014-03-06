@@ -758,6 +758,9 @@ class EvbChooser
   int nservers;
 
   int getIdxByNode(int evbnode);
+  
+  int getEvb4Token(int token) { return evb4token[token]; }
+
  private:
   int evbNodes[10][5];          // idx to server by evb/server
   int nevbserv[10];             // nservers by evb
