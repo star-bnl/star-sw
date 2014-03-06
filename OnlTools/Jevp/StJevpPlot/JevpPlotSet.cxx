@@ -819,14 +819,27 @@ void JevpPlotSet::writePdfFile()
 
 void JevpPlotSet::addServerTags(char *tags)
 {
+  char *tmp = (char *)malloc(strlen(tags) + 3);
+  if(!tmp) {
+    LOG(CRIT, "Can't malloc");
+  }
+  
+  if(tags[0] == '|') {
+    strcpy(tmp, tags);
+  }
+  else {
+    sprintf(tmp,"|%s|",tags);
+  }
   
   if(parent) {
-    LOG("JEFF", "Adding: %s",tags);
-    parent->addServerTags(tags);
+    LOG("JEFF", "Adding: %s",tmp);
+    parent->addServerTags(tmp);
   }
   else {
     LOG("JEFF", "NO parent");
   }
+  
+  free(tmp);
 }
 
 

@@ -1541,7 +1541,7 @@ void JevpServer::addServerTags(char *tags)
 {
   LOG(DBG, "Adding tag: %s",tags);
 
-  char *tmp = (char *)malloc(sizeof(tags)+1);
+  char *tmp = (char *)malloc(strlen(tags)+1);
   strcpy(tmp, tags);
   
   if(tmp[0] != '|') {
