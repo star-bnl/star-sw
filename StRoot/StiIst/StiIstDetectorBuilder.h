@@ -10,7 +10,6 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 {
 public:
    StiIstDetectorBuilder(bool active, const string &inputFile);
-   virtual ~StiIstDetectorBuilder();
    void buildDetectors(StMaker &source);
    void useVMCGeometry();
 

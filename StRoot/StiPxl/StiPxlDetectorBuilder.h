@@ -11,7 +11,6 @@ class StiPxlDetectorBuilder : public StiDetectorBuilder
 {
 public:
    StiPxlDetectorBuilder(bool active, const string &inputFile);
-   ~StiPxlDetectorBuilder();
    void buildDetectors(StMaker &source);
    void useVMCGeometry();
 
