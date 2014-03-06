@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.h,v 1.2 2014/01/28 19:29:37 qiuh Exp $
+ * $Id: StPxlDb.h,v 1.3 2014/03/06 00:50:45 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.h,v $
+ * Revision 1.3  2014/03/06 00:50:45  smirnovd
+ * Nothing changed, it is a test
+ *
  * Revision 1.2  2014/01/28 19:29:37  qiuh
  * *** empty log message ***
  *
@@ -81,7 +84,7 @@ public:
    void setPxlControl(pxlControl_st *pxlControl) {mPxlControl = pxlControl;}
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.2 2014/01/28 19:29:37 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.3 2014/03/06 00:50:45 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -107,4 +110,3 @@ private:
    ClassDef(StPxlDb, 0)  //StAF chain virtual base class for Makers
 };
 #endif
-
