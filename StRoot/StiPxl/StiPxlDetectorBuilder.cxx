@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.31 2014/03/07 16:27:53 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.32 2014/03/07 16:28:00 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -103,9 +103,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
       {"SILICON", &mSiMaterial},
       {"SILICON", &mHybridMaterial}
    };
-   Bool_t  _TpcRefSys_1 = kFALSE;
-
-   if (gGeoManager->GetVolume("TpcRefSys_1")) _TpcRefSys_1 = kTRUE;
 
    Int_t M = sizeof(map) / sizeof(Material_t);
 
@@ -293,7 +290,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    for (Int_t i = 0; i < NoPxlVols; i++) {
       TString path(PxlVolumes[i].path);
 
-      if (! _TpcRefSys_1) path.ReplaceAll("/TpcRefSys_1", "");
 
       gGeoManager->cd(path);
       TGeoNode *nodeT = gGeoManager->GetCurrentNode();
@@ -309,6 +305,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.32  2014/03/07 16:28:00  smirnovd
+ * Don't make option out of TpcRefSys, rather specify it in the volume specific geo paths
+ *
  * Revision 1.31  2014/03/07 16:27:53  smirnovd
  * Prevent signed type comparison warnings
  *
