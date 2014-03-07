@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.30 2014/03/07 16:27:46 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.31 2014/03/07 16:27:53 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -129,11 +129,12 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          ionization * ionization,
          mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
 
-   for (UInt_t iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
+   // Build active sti volumes for pixel sensors
+   for (int iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
    {
-      for (UInt_t iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
+      for (int iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
       {
-         for (UInt_t iSensor = 1; iSensor <= kNumberOfPxlSensorsPerLadder; iSensor++)
+         for (int iSensor = 1; iSensor <= kNumberOfPxlSensorsPerLadder; iSensor++)
          {
             ostringstream geoPath;
             geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
@@ -308,6 +309,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.31  2014/03/07 16:27:53  smirnovd
+ * Prevent signed type comparison warnings
+ *
  * Revision 1.30  2014/03/07 16:27:46  smirnovd
  * Updated assignment and extraction of sti (pixel sensor) detectors by keys
  *
