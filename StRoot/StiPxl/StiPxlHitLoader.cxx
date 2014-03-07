@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.4 2014/03/04 15:36:38 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.5 2014/03/07 16:27:46 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.5  2014/03/07 16:27:46  smirnovd
+ * Updated assignment and extraction of sti (pixel sensor) detectors by keys
+ *
  * Revision 1.4  2014/03/04 15:36:38  smirnovd
  * Remove constraint on sectors used in engeneering run in 2013
  *
@@ -79,6 +82,7 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiTrackContainer.h"
 #include "StiPxlHitLoader.h"
+#include "StPxlUtil/StPxlConstants.h"
 
 
 StiPxlHitLoader::StiPxlHitLoader()
@@ -149,23 +153,25 @@ void StiPxlHitLoader::loadHits(StEvent *source,
 
                if (pxlHit->detector() != kPxlId) continue;
 
-               int LAY = 0, LAD = 0;
+               // Extract individual sti detector by using the stiRow/stiSensor keys
+               int stiRow    = 0;
+               int stiSensor = 0;
 
-               if (pxlHit->layer() == 1) {
-                  LAY = 0; //(int) pxlHit->layer()-1;
-                  LAD = (int) pxlHit->sector() - 1;
-               }
-               else {
-                  LAY = 1; //(int) pxlHit->layer()-1;
-                  LAD = (((int) pxlHit->sector() - 1) * 3 + (int) pxlHit->ladder() - 2);
+               if (pxlHit->ladder() == 1) {
+                  stiRow = 0 ;
+                  stiSensor = (pxlHit->sector()-1) * kNumberOfPxlSensorsPerLadder + (pxlHit->sensor()-1);
+               } else {
+                  stiRow = 1;
+                  stiSensor = (pxlHit->sector()-1) * (kNumberOfPxlLaddersPerSector-1) * kNumberOfPxlSensorsPerLadder
+                            + (pxlHit->ladder()-2) * kNumberOfPxlSensorsPerLadder + (pxlHit->sensor()-1);
                }
 
                LOG_DEBUG << " hit sector : " << (int) pxlHit->sector() << " ladder : " << (int) pxlHit->ladder() << endm;
-               LOG_DEBUG << " layer : " << LAY << " ladder :  " << LAD << endm;
+               LOG_DEBUG << "stiRow: " << stiRow << ", stiSensor: " << stiSensor << endm;
                LOG_DEBUG << "X/Y/Z    : " << pxlHit->position().x() << "/" << pxlHit->position().y() << "/" << pxlHit->position().z() << endm;
                LOG_DEBUG << "Xl/Yl/Zl : " << pxlHit->localPosition(0) << "/" << pxlHit->localPosition(1) << "/" << pxlHit->localPosition(2) << endm;
 
-               StiDetector *detector = _detector->getDetector(LAY, LAD);
+               StiDetector *detector = _detector->getDetector(stiRow, stiSensor);
 
                if (!detector)
                   throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL detector pointer");

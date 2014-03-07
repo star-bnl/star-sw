@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.29 2014/03/06 19:30:04 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.30 2014/03/07 16:27:46 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -226,7 +226,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 
             int stiRow    = 0;
-            int stiSector = 0;
+            int stiSensor = 0;
 
             // Add created sti pixel detector to the system
             // The numbering is:
@@ -235,15 +235,16 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             // ladder=1 is the inner ladder
             if (iLadder == 1) {
                stiRow = 0 ;
-               stiSector = iSector-1;
+               stiSensor = (iSector-1) * kNumberOfPxlSensorsPerLadder + iSensor-1;
             } else {
                stiRow = 1;
-               stiSector = (iSector-1) * 3 + (iLadder-1);
+               stiSensor = (iSector-1) * (kNumberOfPxlLaddersPerSector-1) * kNumberOfPxlSensorsPerLadder
+                         + (iLadder-2) * kNumberOfPxlSensorsPerLadder + iSensor-1;
             }
 
             stiDetector->setKey(1, stiRow);
-            stiDetector->setKey(2, stiSector);
-            add(stiRow, stiSector, stiDetector);
+            stiDetector->setKey(2, stiSensor);
+            add(stiRow, stiSensor, stiDetector);
 
             // Whole bunch of debugging information
             Float_t rad2deg = 180.0 / 3.1415927;
@@ -260,7 +261,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sector             = " << iSector                                    << endm;
             LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Ladder             = " << iLadder                                    << endm;
             LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sensor             = " << iSensor                                    << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:stiRow/stiSector (ITTF)  = " << stiRow << " / " << stiSector                     << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor                     << endm;
             LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Active?            = " << stiDetector->isActive()                              << endm;
          }
       }
@@ -307,6 +308,9 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.30  2014/03/07 16:27:46  smirnovd
+ * Updated assignment and extraction of sti (pixel sensor) detectors by keys
+ *
  * Revision 1.29  2014/03/06 19:30:04  smirnovd
  * Simplified code by removing unnecessary destructors
  *
