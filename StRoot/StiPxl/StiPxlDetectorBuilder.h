@@ -19,6 +19,9 @@ protected:
    StiMaterial *mHybridMaterial;
    StPxlDb     *mPxlDb;
    Bool_t       mUseDbGeom;
+
+private:
+   void buildInactiveVolumes();
 };
 
 #endif
