@@ -135,6 +135,7 @@ class l4Builder : public JevpPlotSet {
   char Currentrun[256];
   char CurrentNtuple[256];
   char Currentdir[256];
+  char Destindir_dat[256];
   char Destindir[256];
   char dEdxTheoDir[256];
   char dEdxMeanFiles[8][256];

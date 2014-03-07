@@ -408,7 +408,7 @@ void l4Builder::stoprun(daqReader *rdr)
     hDcaXy_UPC->Fit(func, "EMR", "", maxVal_UPC - 1.8, maxVal_UPC + 1.8);
 
     char OutParas[256];
-    sprintf(OutParas, "%s/%d.dat", Destindir, runnumber);
+    sprintf(OutParas, "%s/%d.dat", Destindir_dat, runnumber);//qiao
     ofstream outstream;
     outstream.open(OutParas);
     outstream << "beamX" << "    " << BeamX << endl;
@@ -425,7 +425,7 @@ void l4Builder::stoprun(daqReader *rdr)
     string paraname;
     int icount = 100;
     for(int i = 0; i < 20000; i++) {
-        sprintf(inum, "%s/output/%i.dat", Currentdir, tmpRunNum);
+        sprintf(inum, "%s/%i.dat", Destindir_dat, tmpRunNum);//qiao
         sprintf(label, "%i", tmpRunNum);
         tmpRunNum--;
 
@@ -561,13 +561,22 @@ void l4Builder::main(int argc, char *argv[])
     strcpy(me.Currentdir, tmp);
 
     struct stat64 st;
-    sprintf(me.Destindir, "%s/output", me.Currentdir);
+    sprintf(me.Destindir, "%s/output", me.Currentdir);//qiao
     if(stat64(me.Destindir, &st) == 0) {
         printf("%s exist.\n", me.Destindir);
     } else {
         printf("%s does not exist. Create.\n", me.Destindir);
         if(mkdir(me.Destindir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) perror("mkdir() error");
     }
+    struct stat64 st2;
+    sprintf(me.Destindir_dat,"%s/HLT_paras",me.clientdatadir);   
+     if(stat64(me.Destindir_dat, &st2) == 0) {
+        printf("%s exist.\n", me.Destindir_dat);
+    } else {
+        printf("%s does not exist. Create.\n", me.Destindir_dat);
+        if(mkdir(me.Destindir_dat, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) perror("mkdir() error");
+    }
+
     //-------------------
     me.Main(argc, argv);
 };
