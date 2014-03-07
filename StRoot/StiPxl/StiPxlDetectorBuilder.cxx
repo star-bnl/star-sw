@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.32 2014/03/07 16:28:00 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.33 2014/03/07 16:28:07 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -78,7 +78,10 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
       return;
    }
 
-   if (StiVMCToolKit::GetVMC()) { useVMCGeometry(); }
+   if (StiVMCToolKit::GetVMC()) {
+      useVMCGeometry();
+      buildInactiveVolumes();
+   }
 }
 
 
@@ -264,47 +267,41 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          }
       }
    }
+}
 
-   return;
 
-   const VolumeMap_t PxlVolumes[] = {
-      /*
-      {"GLUA","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"GLUB","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"GLUC","Glu volume",                 "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"ALCA","Aluminum Cable volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"CFBK","Carbon Fiber BacKing volume","HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"DRIV","Driver Board",               "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"PXSI","mother silicon volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""},
-      {"PLAC","Active silicon volume",      "HALL_1/CAVE_1/TpcRefSys_1","",""}
-      */
-      //average weight of a ladder
-      {"PXLA", "PXL LADDER",                 "HALL_1/CAVE_1/TpcRefSys_1", "", ""}
+/** Creates inactive sti volumes for the pixel support material. */
+void StiPxlDetectorBuilder::buildInactiveVolumes()
+{
+   // Build average inactive volumes
+   const VolumeMap_t pxlVolumes[] = {
+      //{"PXMO", "Pixel mother volume", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSUP", "Mother volume for half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""}
    };
 
-   Int_t NoPxlVols = sizeof(PxlVolumes) / sizeof(VolumeMap_t);
-   LOG_DEBUG << " # of volume(s) : " << NoPxlVols << endm;
-   gGeoManager->RestoreMasterVolume();
-   gGeoManager->CdTop();
+   int nPxlVolumes = sizeof(pxlVolumes) / sizeof(VolumeMap_t);
+   LOG_DEBUG << " # of volume(s) : " << nPxlVolumes << endm;
 
-   for (Int_t i = 0; i < NoPxlVols; i++) {
-      TString path(PxlVolumes[i].path);
-
+   for (int i = 0; i < nPxlVolumes; i++) {
+      TString path(pxlVolumes[i].path);
 
       gGeoManager->cd(path);
-      TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+      TGeoNode *geoNode = gGeoManager->GetCurrentNode();
 
-      if (! nodeT) continue;;
+      if (!geoNode) continue;
 
-      LOG_DEBUG << " current node : " << i << "/" << NoPxlVols << " path is : " << PxlVolumes[i].name << endm;
-      LOG_DEBUG << " # of daughters : " << nodeT->GetNdaughters() << " weight : " << nodeT->GetVolume()->Weight() << endm;
-      StiVMCToolKit::LoopOverNodes(nodeT, path, PxlVolumes[i].name, MakeAverageVolume);
+      LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
+      LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+      StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
    }
 }
 
 
 /*
  * $Log: StiPxlDetectorBuilder.cxx,v $
+ * Revision 1.33  2014/03/07 16:28:07  smirnovd
+ * Move creation of incative sti volumes to a private method. Minor local variable changes made on the way
+ *
  * Revision 1.32  2014/03/07 16:28:00  smirnovd
  * Don't make option out of TpcRefSys, rather specify it in the volume specific geo paths
  *
