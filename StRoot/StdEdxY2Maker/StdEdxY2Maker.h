@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.27 2014/01/08 23:52:31 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.28 2014/03/10 20:14:21 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -67,6 +67,8 @@ class StdEdxY2Maker : public StMaker {
   static  Bichsel             *m_Bichsel;       //
   static  void Landau(Double_t x, Double_t *val);
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
+  static  Double_t gaus2(Double_t *x, Double_t *p);
+  static  TF1 *Gaus2();
  private:
   static Int_t Propagate(const StThreeVectorD &middle,const StThreeVectorD &normal,
 			 const StPhysicalHelixD &helixI, const StPhysicalHelixD &helixO,
@@ -91,7 +93,7 @@ class StdEdxY2Maker : public StMaker {
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.27 2014/01/08 23:52:31 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.28 2014/03/10 20:14:21 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   ClassDef(StdEdxY2Maker,0)   //StAF chain virtual base class for Makers
