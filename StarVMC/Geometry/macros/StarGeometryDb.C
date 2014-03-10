@@ -43,11 +43,11 @@ void StarGeometryDb()
   y2007();   geom.Last(); setTitle("Year 2007 Production Geometry");  geom.select="y2007pro"; geom.fill();
   y2008();   geom.Last(); setTitle("Year 2008 Production Geometry");  geom.select="y2008pro"; geom.fill();
   y2009();   geom.Last(); setTitle("Year 2009 Production Geometry");  geom.select="y2009pro"; geom.fill();
-  y2010();   geom.Last(); setTitle("Year 2010 Production Geometry");  geom.select="y2010pro"; geom.fill();
-  y2011();   geom.Last(); setTitle("Year 2011 Production Geometry");  geom.select="y2011pro"; geom.fill();
-  y2012();   geom.Last(); setTitle("Year 2012 Production Geometry");  geom.select="y2012pro"; geom.fill();
-  y2013();   geom.Last(); setTitle("Year 2013 Production Geometry");  geom.select="y2013pro"; geom.fill();
-  y2014();   geom.Last(); setTitle("Year 2014 First Cut Geometry");   geom.select="y2014fst"; geom.fill();
+  y2010();   geom.Last(); setTitle("Year 2010 Production Geometry");  //geom.select="y2010pro"; geom.fill();
+  y2011();   geom.Last(); setTitle("Year 2011 Production Geometry");  //geom.select="y2011pro"; geom.fill();
+  y2012();   geom.Last(); setTitle("Year 2012 Production Geometry");  //geom.select="y2012pro"; geom.fill();
+  y2013();   geom.Last(); setTitle("Year 2013 Production Geometry");  //geom.select="y2013pro"; geom.fill();
+  y2014();   geom.Last(); setTitle("Year 2014 First Cut Geometry");   //geom.select="y2014pro"; geom.fill();
 
   // Setup upgrade geometries
   upgrade();
@@ -848,6 +848,13 @@ void y2010()
     geom.fill();
   }
 
+  geom.Use("select","y2010c");
+  geom.select="y2010x";
+  {
+    geom.tpceFlag="TPCE40"; geom.tpceStat=1;
+    geom.fill();
+  }
+
 }
 
 void y2011()
@@ -913,6 +920,12 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
     geom.caveFlag = "CAVE04"; geom.caveStat = 1;
     geom.pipeFlag = "PIPE12"; geom.pipeStat = 1;
     setTitle("Production geometry y2011a");
+    geom.fill();
+  }
+
+  geom.select="y2011x";
+  {
+    geom.tpceFlag="TPCE40"; geom.tpceStat=1;
     geom.fill();
   }
 
@@ -987,6 +1000,11 @@ void y2012()
     geom.fill();
   }
 
+  geom.select="y2012x";
+  {
+    geom.tpceFlag="TPCE40"; geom.tpceStat=1;
+    geom.fill();
+  }
 
 }
 
@@ -1343,7 +1361,7 @@ void y2013()
   geom.select = "y2013_1x"; {
     // Inherits y2013 and
     geom.caveFlag = "CAVE05";
-    geom.tpceFlag = "TPCE31"; geom.tpceStat = 1;
+    geom.tpceFlag = "TPCE40"; geom.tpceStat = 1;
     geom.tpcRefSys = true; // Create TPC reference system
     setTitle("Asymptotic y2013");
     geom.fill();
@@ -1405,6 +1423,13 @@ void y2014()
     // ================================================
     geom.fill();
   };
+
+
+  geom.select="y2014x";
+  {
+    geom.tpceFlag="TPCE40"; geom.tpceStat=1;
+    geom.fill();
+  }
 
 }
 
