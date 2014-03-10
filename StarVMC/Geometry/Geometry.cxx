@@ -1941,6 +1941,7 @@ Bool_t Geometry::TpceInit()
     tpceGeom.fill();
   }
 
+
   tpceGeom.select="TPCE31";
   {
     tpceGeom.config = 4;
@@ -1950,6 +1951,7 @@ Bool_t Geometry::TpceInit()
     tpceGeom.module="TpceGeo3a";
     tpceGeom.fill();
   }
+  tpceGeom.select="TPCE40"; { tpceGeom.subversion=3.1; tpceGeom.module="TpceGeo4"; tpceGeom.fill(); }
 
   return true;
 }
