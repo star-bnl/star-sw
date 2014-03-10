@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.82 2014/01/13 21:30:15 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.83 2014/03/10 20:14:21 fisyak Exp $
 #define CompareWithToF 
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -267,25 +267,52 @@ Int_t StdEdxY2Maker::FinishRun(Int_t OldRunNumber) {
   SafeDelete(m_TpcdEdxCorrection);
   return StMaker::FinishRun(OldRunNumber);
 }
+//________________________________________________________________________________
+Double_t StdEdxY2Maker::gaus2(Double_t *x, Double_t *p) {
+  Double_t NormL = p[0];
+  Double_t mu    = p[1];
+  Double_t muP   = mu + p[4];
+  Double_t sigma = p[2];
+  Double_t sigmaP = TMath::Sqrt(sigma*sigma + 0.101741*0.101741);
+  Double_t phi   = p[3];
+  Double_t frac = TMath::Sin(phi);
+  frac *= frac;
+  return TMath::Exp(NormL)*((1 - frac)*TMath::Gaus(x[0],mu ,sigma ,kTRUE) + 
+			    frac      *TMath::Gaus(x[0],muP,sigmaP,kTRUE)); 
+}
+//________________________________________________________________________________
+TF1 *StdEdxY2Maker::Gaus2() {
+  TF1 *f = new TF1("Gaus2",gaus2,-3,3,5);
+  f->SetParName(0,"NormL"); f->SetParLimits(0,-10.,10.);
+  f->SetParName(1,"mu");    f->SetParLimits(1,-0.5,0.5);
+  f->SetParName(2,"sigma"); f->SetParLimits(2, 0.2,0.5);
+  f->SetParName(3,"phiP");  f->SetParLimits(3, 0.0,TMath::Pi()/4);
+  f->SetParName(4,"muP");
+  f->SetParameters(10,0,0.3,0.1,1.315);
+  //  f->FixParameter(4,1.425);
+  return f;
+}
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Finish() {
+  static Double_t slope = 1.7502e-6;// slope from Blair   1/( O2 in ppm., cm )
   FinishRun(0);
   if (Z3A) {// control Z slope
     const Char_t *IO[2] = {"Inner", "Outer"};
-    Double_t    xmin[2] = { 70, 40};
-    Double_t    xmax[2] = {120,180};
+    Double_t    xmin[2] = { 40, 40};
+    Double_t    xmax[2] = {200,180};
+    TF1 *gg = Gaus2(); 
     for (Int_t io = 1; io <= 2; io++) {
       Z3A->GetXaxis()->SetRange(io,io);
       TH2 *I = (TH2 *) Z3A->Project3D(Form("zy%i",io));
       if (I) {
-	I->FitSlicesY();
+	I->FitSlicesY(gg);
 	TH1D *proj = (TH1D*) gDirectory->Get(Form("%s_1",I->GetName()));
 	if (proj) {
 	  proj->Fit("pol1","erq","goff",xmin[io-1],xmax[io-1]);
 	  TF1 *f = (TF1 *) proj->GetListOfFunctions()->FindObject("pol1");
 	  if (f) {
-	    gMessMgr->Info() << "StdEdxY2Maker: slope in drift distance for " << IO[io-1] << " = "
-			     << f->GetParameter(1) << " +/- " << f->GetParError(1) << endm;
+	    gMessMgr->Info() << "StdEdxY2Maker: Estimated content of O2 (ppm) from slope in drift distance for " << 
+	      Form("%s = %10.2f +/- %10.2f", IO[io-1], -f->GetParameter(1)/slope, f->GetParError(1)/slope) << endm;
 	  }
 	}
       }
