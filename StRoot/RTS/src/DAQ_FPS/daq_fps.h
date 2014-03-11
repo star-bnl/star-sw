@@ -65,7 +65,9 @@ struct fps_config_t {
 	u_int run_number ;
 
 	u_int trg_type ;	//2:pulser, 4:coinc, 0x1000:STP
-	u_int reserved[30] ;
+	u_int rcc_required ;
+	u_int events_required ;	
+	u_int reserved[28] ;
 
 };
 
