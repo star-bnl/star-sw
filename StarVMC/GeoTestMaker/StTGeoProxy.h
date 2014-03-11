@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.5 2013/10/31 15:43:04 perev Exp $
+// $Id: StTGeoProxy.h,v 1.6 2014/03/11 01:30:52 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -309,7 +309,6 @@ StHitPlane    * GetCurrentHitPlane ();
 const StHitPlane *AddHit(void *hit,const float xyz[3],unsigned int hardw,int seed);
       StHitPlane *FindHitPlane(const float xyz[3],int &sure);
 
-        void  ShootZR(double z,double rxy);
 
 const StTGeoHitShape* GetHitShape() const {return fHitShape;}
         void SetHitLoadActor(StActorFunctor *fun) {fHitLoadActor = fun;}
@@ -389,18 +388,21 @@ TGeoNavigator *fNavi;
 class StTGeoHitShape
 {
 public:
-     StTGeoHitShape(double zMin,double zMax);
+     StTGeoHitShape();
 void Update(double z1, double z2, double rxy);
-int  Inside(double z,double rxy) const;
+void Smooth(double zl=-100, double zr=100);
+int  Outside(double z,double rxy) const;
 void Get(double &zMin,double &zMax,double &rMax) const;
-
+void Print(const char *opt=0) const;
 
 private:
-enum {kNZ=100};
+enum {kNZ=20};
 double fZMin;
 double fZMax;
+double fRMin;
 double fRMax;
-double fRxy[kNZ];
+double fZStp;
+double fRxy[kNZ][2];
 };
 #endif //ST_TGEOHELPER_H
 
