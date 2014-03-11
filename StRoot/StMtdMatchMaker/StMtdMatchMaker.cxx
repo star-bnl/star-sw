@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.9 2014/03/11 02:15:53 geurts Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.10 2014/03/11 22:18:11 geurts Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.10  2014/03/11 22:18:11  geurts
+ * corrected pvtx retrieval in StEvent environment
+ *
  * Revision 1.9  2014/03/11 02:15:53  geurts
  * Protect against potentially non-existing primary vertex in StEvent [Bingchu]
  *
@@ -1240,7 +1243,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	if(mMuDstIn) vertexPos	= mMuDst->event()->primaryVertexPosition();
 	else{
 	  if (mEvent->primaryVertex()){
-	    vertexPos = mEvent->summary()->primaryVertexPosition();	    
+	    vertexPos = mEvent->primaryVertex()->position();
 	  }
 	}
 	double length2Vtx = -99999.;
