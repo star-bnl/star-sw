@@ -1,4 +1,4 @@
-// $Id: StMCStepping2Hist.cxx,v 1.6 2013/04/20 21:53:53 perev Exp $
+// $Id: StMCStepping2Hist.cxx,v 1.7 2014/03/11 01:29:48 perev Exp $
 //
 //
 // Class StMCStepping2Hist
@@ -555,7 +555,7 @@ if (strcmp(fVolume->GetName(),"TPAD")==0) Break(1);
 
     case kENTERtrack:;
          if (strcmp(fVolume->GetName(),"HALL")==0) fKaze=kENDEDtrack;
-         if (!fHitShape->Inside(fCurrentPosition.Z(),fCurrentPosition.Perp()))
+         if (fHitShape->Outside(fCurrentPosition.Z(),fCurrentPosition.Perp()))
 	                                           fKaze=kENDEDtrack;
     break;
     
