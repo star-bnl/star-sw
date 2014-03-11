@@ -1352,6 +1352,35 @@ void y2013()
     geom.fill();
   };
   
+
+  //
+  // y2013_1c and 2c are defined to match the configuration used in
+  // the y2013 production.  The production was mistakenly launched 
+  // using the asymptotic geometry as defined in the SL14a library.
+  // That geometry uses the new model of the cave and the version3.1
+  // of the TPC.  Version3.1 of the TPC changes the 
+  //
+  geom.Use("select","y2013_1b"); // Inherit from 1b
+  geom.select = "y2013_1c"; {
+    geom.caveFlag = "CAVE05";
+    geom.tpceFlag = "TPCE31";
+    geom.tpcRefSys = true;
+    setTitle("Y2013_1c production geometry = y2013_1x in SL14a");
+    geom.fill();
+    geom.select("y2013c"); 
+    geom.fill();
+  };
+
+  geom.select = "y2013_2c"; {
+    geom.caveFlag = "CAVE05";
+    geom.tpceFlag = "TPCE31";
+    geom.tpcRefSys = true;
+    setTitle("Y2013_2c production geometry = y2013_2x in SL14a");
+    geom.pixlStat = 0;
+    geom.dtubStat = 0;
+    geom.fill();
+  }
+  geom.Use("select","y2013_1c"); // restore pixel detector
     
     
 
@@ -1418,7 +1447,7 @@ void y2014()
     geom.idsmFlag = "IDSM14";  geom.idsmStat = 1;
     // ================================================
     //
-    setTitle("Upgrade studies with 6 complete FGT disks");
+    setTitle("Y2014 first cut geometry");
     //
     // ================================================
     geom.fill();
