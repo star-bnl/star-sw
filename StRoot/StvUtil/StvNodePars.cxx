@@ -8,6 +8,10 @@
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvToolkit.h"
 
+static const double kMaxPti=200,kMaxCurv=(0.000299792458 * 4.98478)*kMaxPti,kMaxEta = 6;
+static const double kMaxLamda = 3.14159265358/2-atan(exp(-kMaxEta))*2;
+static const double kMaxTanL  = tan(kMaxLamda);
+
 enum {kHf,kZf,kAf,kLf,kPf};
 enum {kHh,kAh,kCh,kZh,kLh};
   static const int idx66[6][6] =
@@ -22,8 +26,6 @@ static double MAXNODPARS[]   ={555,555,555,6.66,kMaxPti+10, kMaxTanL+10, .1};
 static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,kMaxPti  };
 static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
 static const double kERRFACT     = 3*3;
-//??static const double kFitErrs[5]   ={1.,1. 
-//static const double kFitErrs[5]   ={.2,.2 
 static const double kFitErrs[5]   ={3,3 
                                    ,10./180*M_PI
 				   ,10./180*M_PI
@@ -31,6 +33,8 @@ static const double kFitErrs[5]   ={3,3
 static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxCorr = 0.1;
+
+
 //______________________________________________________________________________ 
 static void LinearCurv (double Rho,double dRho,double len, double &dT,double &dH)
 {
