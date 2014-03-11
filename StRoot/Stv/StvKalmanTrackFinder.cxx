@@ -196,7 +196,8 @@ hitCount->Clear();
   mHitter->Reset();
 StvFitDers derivFit;
   mDive->Reset();
-  mDive->SetOpt(StvDiver::kTargHit | StvDiver::kDoErrs | StvDiver::kTarg2D);
+//		We need here to find a hit and calulate errs. No Dca yet
+  mDive->SetOpt(StvDiver::kTargHit | StvDiver::kDoErrs);
   mDive->Set(par+0,err+0,idir);
   mDive->Set(par+1,err+1,&derivFit);	//Output of diving in par[1]
 
@@ -355,7 +356,7 @@ static StvToolkit *kit = StvToolkit::Inst();
 //static const StvConst  *kons = StvConst::Inst();
 
   StvNode *start = tk->front();
-//  if (start->GetFP().getRxy()>kons->mDca2dZeroXY*10) return 0;
+//		We search DCA point + errors only (no hits)
   int opt = StvDiver::kTarg2D | StvDiver::kDoErrs;
   StvNodePars dcaPars;
   StvFitErrs  dcaErrs;
