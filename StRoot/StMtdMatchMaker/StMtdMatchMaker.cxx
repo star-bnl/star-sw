@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.8 2013/12/09 22:53:25 geurts Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.9 2014/03/11 02:15:53 geurts Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.9  2014/03/11 02:15:53  geurts
+ * Protect against potentially non-existing primary vertex in StEvent [Bingchu]
+ *
  * Revision 1.8  2013/12/09 22:53:25  geurts
  * update: enable filling of MTD Pid traits and include a few more protections against zero-pointers [Bingchu]
  *
@@ -1235,7 +1238,11 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalH
 	LOG_DEBUG <<"StMtdMatchMaker::matchTrack2Mtd() "<<" bField"<<bField<<endm;
 	StThreeVectorF vertexPos;
 	if(mMuDstIn) vertexPos	= mMuDst->event()->primaryVertexPosition();
-	else vertexPos	= mEvent->summary()->primaryVertexPosition();
+	else{
+	  if (mEvent->primaryVertex()){
+	    vertexPos = mEvent->summary()->primaryVertexPosition();	    
+	  }
+	}
 	double length2Vtx = -99999.;
 	length2Vtx = TMath::Abs(gHelixTpc.pathLength(vertexPos));
 	LOG_DEBUG<<" vertex x,y,z:"<<vertexPos.x()<<","<<vertexPos.y()<<","<<vertexPos.z()<<endm;
