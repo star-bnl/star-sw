@@ -602,12 +602,9 @@ int sfs_index::writev(fs_iovec *fsiovec, int n)
 // Non-interruptable writev
 int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
 {
-  
-  struct iovec iovec_new[MAX_SEND_IOVECS];
-  int vec_new=0;
-
   if(vec > MAX_SEND_IOVECS) {
     LOG(CRIT, "writev with too %d iovecs... max=%d",vec,MAX_SEND_IOVECS);
+    return -1;
   }
 
   int len=0;
@@ -615,63 +612,28 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
     len += iovec[i].iov_len;
   }
 
-  //LOG("JEFF", "writev: %d",fd);
-  int ret = ::writev(fd, iovec, vec);
-  //LOG("JEFF", "ret=%d",ret);
+  int ret = 0;
+  int retries = 0;
+  if((ret == 0) && (retries<5)) {   // retry 1 time!
+      ret = ::writev(fd, iovec, vec);
+      retries++;
+  }
+
+  if((ret==len) && (retries > 1)) {
+      LOG(U_JEFF, "successful writev took %d tries!");
+  }
+
   if(ret != len) {
-   for(int i=0;i<vec;i++) {
-      LOG("JEFF", "socket error iovec[%d].base=%d,  len=%d",
-	  i,iovec[i].iov_base,iovec[i].iov_len);
-    }
-
-   LOG("JEFF", "writev failed: ret=%d of %d, err=%s.  will retry",ret, len, strerror(errno));
-  }
-
-  // keep retrying!
-  if(ret < 0) {
-    if((errno != EINTR) &&
-       (errno != EAGAIN)) {
-      
-      LOG(ERR, "Error on writev (%s)",strerror(errno));
-      return -1;
-    }
-  
-    ret = 0;
-  }
-
-  if(ret != len) {  // Need to retry...
-    int nstart = ret;
-    LOG(NOTE, "writev only wrote %d of %d... Retry", ret, len);
-    
-
-    for(int i=0;i<vec;i++) {
-      if(nstart < (int)iovec[i].iov_len) {
-	char *base = (char *)iovec[i].iov_base;
-	base += nstart;
-	
-	iovec_new[vec_new].iov_base = (void *)base;
-	iovec_new[vec_new].iov_len = iovec[i].iov_len - nstart;
-	vec_new++;
+      for(int i=0;i<vec;i++) {
+	  LOG(ERR, "socket error: ret=%d of %d in %d tries  (%s)", ret, len, retries, strerror(errno));
+	  LOG("JEFF", "socket error (%d)(%s) vec[%d]:base=%p len=%d",
+	      ret, strerror(errno), i, iovec[i].iov_base, iovec[i].iov_len);
       }
-      
-      nstart -= iovec[i].iov_len;
-      if(nstart<0) nstart = 0;
-    }
-
-    // only returns < 0 on hard error...,  
-    // return of 0 is valid, but results in retry
-    int ret2 = writev_call_retry(fd, iovec_new, vec_new);
-
-    // errno should still be set to the real failure reason, 
-    // the error has already been logged in the previous call
-    if(ret2 < 0) return -1;
-
-    ret += ret2;
-    LOG(NOTE, "writev retry returned %d (retry was %d)",ret,ret2);
+      return -1;
   }
+
   return ret;
 }
-
 
 
 // Header is an optional, non-fs file header
