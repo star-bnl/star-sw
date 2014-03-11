@@ -331,8 +331,8 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
          double *X = &fCurrentPosition[0];
          fHitted = ((!meAgain) && tgh->IsHitted(X));
          if (fVolume==fHALLVolu) {fKaze=kENDEDtrack; break;}
-         if (!hitShape->Inside(fCurrentPosition.Z(),fCurrentPosition.Perp()))
-	    {fKaze=kENDEDtrack;  break;}
+         int outSide = hitShape->Outside(fCurrentPosition.Z(),fCurrentPosition.Perp());
+         if (outSide && ((fOpt&(StvDiver::kTarg2D|StvDiver::kTarg3D))==0)) {fKaze=kENDEDtrack;  break;}
          if (fKaze==kENDEDtrack) break;
          if ((fExit = BegVolume())) fKaze=kENDEDtrack;}
     break;
