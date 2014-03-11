@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.h,v 1.6 2014/03/11 01:30:52 perev Exp $
+// $Id: StTGeoProxy.h,v 1.7 2014/03/11 19:56:49 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -396,12 +396,18 @@ void Get(double &zMin,double &zMax,double &rMax) const;
 void Print(const char *opt=0) const;
 
 private:
-enum {kNZ=20};
+enum E_Safe {kSafe=110}; 	// Used Rmax = Rmax*kSafe/100, etc...
+enum {kNZ=20};			// Number of Z bins
+
+private:
 double fZMin;
 double fZMax;
 double fRMin;
 double fRMax;
 double fZStp;
+double fRMinMax;
+double fRMaxMin;
+
 double fRxy[kNZ][2];
 };
 #endif //ST_TGEOHELPER_H
