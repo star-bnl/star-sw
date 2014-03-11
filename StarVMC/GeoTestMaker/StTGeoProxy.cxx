@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.9 2014/03/11 01:31:12 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.10 2014/03/11 19:56:53 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -1564,6 +1564,24 @@ void StTGeoHitShape::Smooth(double zl, double zr)
        }
      }
    }
+//	Increase volume, do not lose the boundary hits
+   fZMin*=kSafe/100.;
+   fZMax*=kSafe/100.;
+   fRMin*=100./kSafe;
+   fRMax*=kSafe/100.;
+
+   for (int j=0;j<kNZ;j++) {
+     fRxy[j][0]*=100./kSafe;
+     fRxy[j][1]*=kSafe/100.;
+   }
+
+// 	eval RMaxMin & RMinMax
+  fRMinMax= fRMax;  fRMaxMin= fRMin; 
+  for (int j=0;j<kNZ;j++) {
+    if (fRMaxMin<fRxy[j][0]) fRMaxMin=fRxy[j][0];
+    if (fRMinMax>fRxy[j][1]) fRMinMax=fRxy[j][1];
+  }
+
 
 }
 //_____________________________________________________________________________
@@ -1571,9 +1589,10 @@ int  StTGeoHitShape::Outside(double z,double rxy) const
 {
    if (z<fZMin) 		return  1;
    if (z>fZMax) 		return  2;
-// if (rxy<fRMin) 		return -3;
-// if (rxy>fRMax) 		return  4;
+   if (rxy<fRMinMax && rxy>fRMaxMin ) 	return 0;
    int jj = (int)(z-fZMin)/fZStp;
+   if (jj<   0) jj=0;
+   if (jj>=kNZ) jj=kNZ-1;
    if (rxy > fRxy[jj][1]) 	return  5;
    if (rxy < fRxy[jj][0]) 	return -6;
    return 0;
