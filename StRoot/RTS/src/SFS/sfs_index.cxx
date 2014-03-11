@@ -625,10 +625,10 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
 
   if(ret != len) {
       for(int i=0;i<vec;i++) {
-	  LOG(ERR, "socket error: ret=%d of %d in %d tries  (%s)", ret, len, retries, strerror(errno));
-	  LOG("JEFF", "socket error (%d)(%s) vec[%d]:base=%p len=%d",
+	  LOG(NOTE, "socket error (%d)(%s) vec[%d]:base=%p len=%d",
 	      ret, strerror(errno), i, iovec[i].iov_base, iovec[i].iov_len);
       }
+      LOG(ERR, "socket error: ret=%d of %d in %d tries  (%s)", ret, len, retries, strerror(errno));
       return -1;
   }
 
