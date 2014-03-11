@@ -13,10 +13,6 @@ class StvFitErrs;
 class StvImpact;
 class StvELossData;
 
-static const double kMaxPti=200,kMaxCurv=(0.000299792458 * 4.98478)*kMaxPti,kMaxEta = 6;
-static const double kMaxLamda = 3.14159265358/2-atan(exp(-kMaxEta))*2;
-static const double kMaxTanL  = tan(kMaxLamda);
-
 //------------------------------------------------------------------------------
 typedef double Mtx55D_t[5][5];
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B);
@@ -253,10 +249,10 @@ public:
   double mELoss;	//Energy loss
   double mELossErr2;	//Square error of energy loss
   double mdEdXdP;       //d(dEdX)/dP
-  double mTotLen;	//Total length where errors accumulated
-  double mP;		//Total momentum
-  double mM;		//Mass
-     int mTally;	//Counter for debug only, remove later
+  double mTotLen;		//Total length where errors accumulated
+  double mP;			//Total momentum
+  double mM;			//Mass
+        int mTally;		//Counter for debug only, remove later
 const TGeoMaterial *mMate;	//
 public:
 
