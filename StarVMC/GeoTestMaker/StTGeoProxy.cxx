@@ -1,4 +1,4 @@
-// $Id: StTGeoProxy.cxx,v 1.8 2013/10/31 15:43:00 perev Exp $
+// $Id: StTGeoProxy.cxx,v 1.9 2014/03/11 01:31:12 perev Exp $
 //
 //
 // Class StTGeoProxy
@@ -170,7 +170,7 @@ void StTGeoProxy::Init(int mode)
   fMode = mode;
   InitInfo();
   if (fMode&2) InitHitPlane();
-  if (fMode&1) InitHitShape();
+//  if (fMode&1) InitHitShape();
 }
 //_____________________________________________________________________________
 void StTGeoProxy::InitLayers(StDetectorId did)
@@ -373,50 +373,48 @@ int StTGeoProxy::Edit(StDetectorId did,StActorFunctor *af)
 void StTGeoProxy::InitHitShape()
 {
   
+  fHitShape = new StTGeoHitShape();
+  for (int pass=0;pass<2;pass++) {
   StTGeoIter it;
-  it.Print("StTGeoProxy_Init");
-//	Create HitShape
-  const TGeoVolume *vol= *it;
-  TGeoBBox *bb = (TGeoBBox*)vol->GetShape();
-  bb->ComputeBBox();
-  const double *ori = bb->GetOrigin();
-  double z1 = ori[2]-bb->GetDZ();
-  double z2 = ori[2]+bb->GetDZ();
-//  double rxy = sqrt(pow(fabs(ori[0])+bb->GetDX(),2)
-//                   +pow(fabs(ori[1])+bb->GetDY(),2));
-  fHitShape = new StTGeoHitShape(z1,z2);
+    for (const TGeoVolume *vol=0;(vol=*it);++it) {
+      vol->GetShape()->ComputeBBox();
+  //		First visit
+      if (!it.IsFirst()) continue;	//First visit only
 
-  for (;(vol=*it);++it) {
-    vol->GetShape()->ComputeBBox();
-//		First visit
-    if (!it.IsFirst()) continue;	//First visit only
-//			Update HitShape
-    if (!IsSensitive(vol)) continue;		
-    if (!IsHitPlane(vol) ) continue;		
+      if(IsModule(vol) && !IsActive(vol)) {it.Skip();continue;}
+  //			Update HitShape
+      if (!IsSensitive(vol)) continue;		
+      if (!IsHitPlane(vol) ) continue;		
 
-    double global[8][3],local[3],D[3];
-    TGeoBBox *bb = (TGeoBBox*)vol->GetShape();
-    bb->ComputeBBox();
-    ori = bb->GetOrigin();
-    D[0] = bb->GetDX();
-    D[1] = bb->GetDY();
-    D[2] = bb->GetDZ();
-    for (int jk=0;jk<8;jk++) {
-      for (int ix=0,im=1; ix<3; ix++,im<<=1) {
-	local[ix] = ori[ix] + D[ix]* ((!!(jk&im))*2 -1);}
-      it.LocalToMaster(local,global[jk]);
-    } 
-    z1 = 3e33; z2 = -3e33; 
-    double rMax = 0;
-    for (int jk=0;jk<8;jk++) {
-      if (z1 > global[jk][2]) z1 = global[jk][2];
-      if (z2 < global[jk][2]) z2 = global[jk][2];
-      double r2 = pow(global[jk][0],2)+pow(global[jk][1],2);
-      if (rMax<r2) rMax=r2;
+      double global[8][3],local[3],D[3];
+      TGeoBBox *bb = (TGeoBBox*)vol->GetShape();
+      bb->ComputeBBox();
+      const double *ori = bb->GetOrigin();
+      D[0] = bb->GetDX();
+      D[1] = bb->GetDY();
+      D[2] = bb->GetDZ();
+      for (int jk=0;jk<8;jk++) {
+	for (int ix=0,im=1; ix<3; ix++,im<<=1) {
+	  local[ix] = ori[ix] + D[ix]* ((!!(jk&im))*2 -1);}
+	it.LocalToMaster(local,global[jk]);
+      } 
+      double z1 = 3e33, z2 = -3e33; 
+      double rMax = 0;
+      for (int jk=0;jk<8;jk++) {
+	if (z1 > global[jk][2]) z1 = global[jk][2];
+	if (z2 < global[jk][2]) z2 = global[jk][2];
+	double r2 = pow(global[jk][0],2)+pow(global[jk][1],2);
+	if (rMax<r2) rMax=r2;
+      }
+           
+      rMax = sqrt(rMax);
+      if (!pass) rMax = 0; //calculation only zMin & zMax
+      fHitShape->Update(z1,z2,rMax);
+
     }
-    rMax = sqrt(rMax);
-    fHitShape->Update(z1,z2,rMax);
   }
+  fHitShape->Smooth(-100,100);
+  fHitShape->Print();
 
 }
 //_____________________________________________________________________________
@@ -1512,95 +1510,89 @@ StVoluInfo::~StVoluInfo()
 
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-StTGeoHitShape::StTGeoHitShape(double zMin,double zMax)
+StTGeoHitShape::StTGeoHitShape()
 {
-  fZMin = zMin; fZMax = zMax; fRMax = 0;
-  memset(fRxy,0,sizeof(fRxy));
+  fZMin = 1e11; fZMax = -1e11; fRMin=1e11; fRMax = 0;
+  for (int i=0;i<kNZ;i++) {fRxy[i][0]=1e11;fRxy[i][1]=0;};
 }
 //_____________________________________________________________________________
 void StTGeoHitShape::Update(double z1, double z2, double rxy)
 {
-   assert(z1>fZMin && z1<fZMax);
-   assert(z2>fZMin && z2<fZMax);
+   if (rxy<=0) {//Only zMin & zMax evaluation
+     
+     if (fZMin>z1) fZMin=z1;
+     if (fZMax<z2) fZMax=z2;
+     return;
+   }
+   fZStp = (fZMax-fZMin)/kNZ * 1.001;
+   assert(z1>=fZMin && z1<=fZMax);
+   assert(z2>=fZMin && z2<=fZMax);
+   if (fRMin>rxy) fRMin=rxy;
    if (fRMax<rxy) fRMax=rxy;
-   rxy*=1.1;
-   int jl = (int)((z1-fZMin)/(fZMax-fZMin)*kNZ);
-   int jr = (int)((z2-fZMin)/(fZMax-fZMin)*kNZ);
-   for (int jj=jl;jj<=jr;jj++) {if(fRxy[jj]<rxy) fRxy[jj]=rxy;}
-   double zz = (fabs(z1) < fabs(z1))? z1:z2;
+   int jl = (int)(z1-fZMin)/fZStp;
+   int jr = (int)(z2-fZMin)/fZStp;
+   for (int jj=jl;jj<=jr;jj++) {if(fRxy[jj][0]>rxy) fRxy[jj][0]=rxy; 
+                                if(fRxy[jj][1]<rxy) fRxy[jj][1]=rxy;}
+}
+//_____________________________________________________________________________
+void StTGeoHitShape::Smooth(double zl, double zr)
+{
 
-   jl = (int)((0 -fZMin)/(fZMax-fZMin)*kNZ);
-   jr = (int)((zz-fZMin)/(fZMax-fZMin)*kNZ);
-   int js = (jl<jr)? 1:-1;
-   if (jl==jr) return;
-   for (int jj=jl;jj!=jr;jj+=js) {
-     double rrr = ((jj-jl)*rxy)/(jr-jl);
-     if(fRxy[jj]<rrr) fRxy[jj]=rrr;
+   double zVtx[2]={zl,zr};;
+   for (int iVtx=0;iVtx<2;iVtx++) {
+     int jVtx = (int)(zVtx[iVtx] -fZMin)/fZStp;
+     for (int jE=0; jE <kNZ; jE++) {
+       if (abs(jVtx-jE)<2) continue;
+       double rE = fRxy[jE][1];
+       if (rE<=0) continue;
+       int jl,jr;
+       if (jE>jVtx) {jl = jVtx+1;jr = jE  -1;}
+       else         {jl = jE  +1;jr = jVtx-1;}
+
+       if (jl>=jr) {jl = jE+1; jr = jVtx-1;}
+       assert(jl<kNZ && jr<kNZ);
+       for (int j=jl; j<=jr; j++) {
+         double r = rE/(jE-jVtx)*(j-jVtx);
+         if (r>fRxy[j][1]) fRxy[j][1] = r;
+       }
+       rE = fRxy[jE][0];
+       if (jE>jVtx) {jl = jE+1;jr = kNZ-1;}
+       else         {jl = 0   ;jr = jE -1;}
+       for (int j=jl; j<=jr; j++) {
+         double r = rE/(jE-jVtx)*(j-jVtx);
+         if (r<fRxy[j][0]) fRxy[j][0] = r;
+       }
+     }
    }
 
 }
 //_____________________________________________________________________________
-int  StTGeoHitShape::Inside(double z,double rxy) const
+int  StTGeoHitShape::Outside(double z,double rxy) const
 {
-   if (z<=fZMin) 	return 0;
-   if (z>=fZMax) 	return 0;
-   if (rxy>=fRMax) 	return 0;
-   int jj = (int)((z-fZMin)/(fZMax-fZMin)*kNZ);
-   if (rxy >=fRxy[jj]) return 0;
-   return 1;
-}
-//_____________________________________________________________________________
-void  StTGeoProxy::ShootZR(double z,double rxy) 
-{
-    typedef std::set<std::string> MySet_t ;
-    MySet_t  mySet;
-
-    double step = rxy*0.01; 
-    if (step>1.0) step = 1;
-    if (step<0.1) step = 0.1;
-    int nStep = (int)(2*M_PI*rxy/step);
-    double dAng = (2*M_PI)/nStep;
-    
-    for (int iStep=0;iStep<nStep;iStep++) {
-      double xyz[3];xyz[2]=z;
-      xyz[0]= rxy*cos(iStep*dAng);
-      xyz[1]= rxy*sin(iStep*dAng);
-      
-      gGeoManager->FindNode(xyz[0],xyz[1],xyz[2]);
-      TString tPath(gGeoManager->GetPath()); 
-//      printf("path=%s\n",tPath.Data());
-      if (gGeoManager->GetLevel()<2) 	continue;
-      tPath.Replace(0,15,"");
-      int j = tPath.Length()-1;
-      if (j<0) 				continue;
-      for(;tPath[j]!='_'&&j>0;j--){}
-      if (j<0) 				continue;
-      tPath.Replace(j,999,"");
-      tPath.Replace(4,tPath.Length()-8,"...");
-//      printf("path=%s\n",tPath.Data());
-      std::string path(tPath.Data()); 
-      mySet.insert(path);
-//      printf("path=%s\n",path.c_str());
-   }
-   MySet_t::iterator it; int cnt=0;
-   for (it=mySet.begin();it != mySet.end();++it) {
-     cnt++; printf("%4d - %s\n",cnt,(*it).c_str());
-   }
-
+   if (z<fZMin) 		return  1;
+   if (z>fZMax) 		return  2;
+// if (rxy<fRMin) 		return -3;
+// if (rxy>fRMax) 		return  4;
+   int jj = (int)(z-fZMin)/fZStp;
+   if (rxy > fRxy[jj][1]) 	return  5;
+   if (rxy < fRxy[jj][0]) 	return -6;
+   return 0;
 }
 //_____________________________________________________________________________
 void StTGeoHitShape::Get(double &zMin,double &zMax,double &rMax) const
 {
-  zMin = 3e33; zMax= -3e33; rMax=0;
-  double step = (fZMax-fZMin)/kNZ;
-  for (int i=0;i<kNZ;i++) {
-    if (fRxy[i]<=0) continue;
-    double z = fZMin+i*step;
-    if (zMin>z) zMin=z;
-    if (zMax<z+step) zMax=z+step;
-    if (rMax<fRxy[i]) rMax=fRxy[i];
+  zMin = fZMin; zMax = fZMax; zMax = fRMax; 
+}
+//_____________________________________________________________________________
+void StTGeoHitShape::Print(const char *) const
+{
+printf("StTGeoHitShape::Print() Zmin = %g Zmax = %g  Rmax = %g\n",fZMin,fZMax,fRMax);
+  for (int j=0;j<kNZ;j++) {
+    if (fRxy[j][1]<=0) continue;
+    double zL=fZMin+fZStp*j, zR = zL+fZStp;
+    printf ("Zl = %g Zr = %g Rxy = %g %g\n",zL,zR,fRxy[j][0],fRxy[j][1]);
   }
-  zMin-=step; zMax+=step; rMax += step;
+  printf ("\n");
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
