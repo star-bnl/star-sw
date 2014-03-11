@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.45 2013/12/12 16:59:31 perev Exp $
+// $Id: StvMaker.cxx,v 1.46 2014/03/11 01:28:11 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -152,7 +152,7 @@ Int_t StvMaker::InitDetectors()
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
 //		Now Initialize TGeo proxy
   tgh->Init(1+2+4);
-  if (yGeo>=2009) { 	//no prompt hits for geo <y2009
+  if (1946 || yGeo>=2009) { 	//no prompt hits for geo <y2009
     StvTpcPrompt promp;
     tgh->InitHitPlane(&promp);
   }
@@ -164,6 +164,7 @@ Int_t StvMaker::InitDetectors()
     Info("InitDetectors","%d fake TPC padrows disabled",nEdit);
 //  }
   tgh->InitLayers();
+  tgh->InitHitShape();
 
   tgh->Summary();
 
