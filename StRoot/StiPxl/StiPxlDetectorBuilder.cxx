@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.36 2014/03/12 00:19:29 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.37 2014/03/12 00:19:36 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -67,6 +67,8 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
    // 2 real rows, but we have detector elements and support elements.
    setNRows(2);
 
+   SetCurrentDetectorBuilder(this);
+
    TObjectSet *pxlDbDataSet = (TObjectSet*) source.GetDataSet("pxlDb");
    if (pxlDbDataSet) {
       mPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
@@ -88,8 +90,6 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 void StiPxlDetectorBuilder::useVMCGeometry()
 {
    LOG_INFO << "StiPxlDetectorBuilder::useVMCGeometry() -I- Use VMC geometry" << endm;
-
-   SetCurrentDetectorBuilder(this);
 
    // Get Materials
    struct Material_t {
