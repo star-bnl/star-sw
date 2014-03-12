@@ -108,6 +108,9 @@ daq_dta *daq_fps::handle_adc()
 	int tb_cou = hdr->pre_post_cou ;
 	int qt_cou = hdr->qt_cou ;
 
+	memcpy(&meta_hdr,hdr,sizeof(meta_hdr)) ;
+	adc->meta = (void *) &meta_hdr ;
+
 	d32 += (hdr->ver & 0xFF) ;	// skip to data...
 	
 	for(int tb=0;tb<tb_cou;tb++) {

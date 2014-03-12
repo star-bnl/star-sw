@@ -27,6 +27,8 @@ struct fps_evt_hdr_t {
 
 	u_int tick ;		//at event start, in us
 	int delta ;		//in us
+
+	u_int reserved[5] ;
 } ;
 
 // raw data
@@ -88,6 +90,9 @@ public:
 	~daq_fps() ;
 
 	daq_dta *get(const char *bank="*",int c1=-1,int c2=-1,int c3=-1, void *p1=0, void *p2=0) ;
+
+	// this is the meta data, per event!
+	struct fps_evt_hdr_t meta_hdr ;
 
 	const char *GetCVS() const {
 		static const char cvs[] = "Tag $Name:  $Id built "__DATE__" "__TIME__ ; return cvs ;
