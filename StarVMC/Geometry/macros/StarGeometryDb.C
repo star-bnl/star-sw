@@ -1378,6 +1378,7 @@ void y2013()
     setTitle("Y2013_2c production geometry = y2013_2x in SL14a");
     geom.pixlStat = 0;
     geom.dtubStat = 0;
+    geom.psupStat = 0;     // switch psup off
     geom.fill();
   }
   geom.Use("select","y2013_1c"); // restore pixel detector
