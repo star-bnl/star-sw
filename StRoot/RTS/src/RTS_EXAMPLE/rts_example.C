@@ -1655,18 +1655,26 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 
 
 	dd = rdr->det("fps")->get("adc") ;
-	while(dd && dd->iterate()) {
-		found = 1 ;
+	if(dd) {
 
+		fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
 		if(do_print) {
-			printf("FPS: xing %2d, QT %d, chs %d\n",(char)dd->sec,dd->rdo,dd->ncontent) ;
+			printf("FPS META: %u us\n",hdr->delta) ;
 		}
 
-		fps_adc_t *a = (fps_adc_t *)dd->Void ;
+		while(dd->iterate()) {
+			found = 1 ;
 
-		for(u_int i=0;i<dd->ncontent;i++) {
 			if(do_print) {
-				printf("   ch %2d: ADC %4d, TDC %2d\n",a[i].ch, a[i].adc, a[i].tdc) ;
+				printf("  xing %2d, QT %d, chs %d\n",(char)dd->sec,dd->rdo,dd->ncontent) ;
+			}
+
+			fps_adc_t *a = (fps_adc_t *)dd->Void ;
+
+			for(u_int i=0;i<dd->ncontent;i++) {
+				if(do_print) {
+					printf("    ch %2d: ADC %4d, TDC %2d\n",a[i].ch, a[i].adc, a[i].tdc) ;
+				}
 			}
 		}
 
