@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstCollection.h,v 1.5 2014/02/14 14:37:57 ypwang Exp $
+* $Id: StIstCollection.h,v 1.6 2014/03/13 22:10:12 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -12,9 +12,13 @@
 #define StIstCollection_hh
 
 #include "StObject.h"
+#include "StEvent/StEnumerations.h"
 #include "StIstRawHitCollection.h"
 #include "StIstClusterCollection.h"
 #include "StIstConsts.h"
+
+using namespace StIstConsts;
+
 
 class StIstCollection : public StObject
 {
@@ -55,6 +59,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstCollection.h,v $
+* Revision 1.6  2014/03/13 22:10:12  smirnovd
+* Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
+*
 * Revision 1.5  2014/02/14 14:37:57  ypwang
 * remove StMuDstMaker and getNumLadders() member function from StIstCollection
 *
