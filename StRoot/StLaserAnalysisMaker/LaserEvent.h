@@ -1,5 +1,8 @@
-//$Id: LaserEvent.h,v 1.9 2014/02/13 18:21:28 fisyak Exp $
+//$Id: LaserEvent.h,v 1.10 2014/03/13 21:59:44 fisyak Exp $
 //$Log: LaserEvent.h,v $
+//Revision 1.10  2014/03/13 21:59:44  fisyak
+//add cluster position in Local Sector Coordinate System
+//
 //Revision 1.9  2014/02/13 18:21:28  fisyak
 //Add protection against cicling in fitting
 //
@@ -105,10 +108,12 @@ class  LaserB {
   Int_t Sector, Raft, Bundle, Mirror;
   StThreeVectorD XyzG; // [cm]  in GCS
   StThreeVectorD XyzL; // [cm]  in TPC
+  StThreeVectorD XyzS; // [cm]  in TPC super Sector
   StThreeVectorD XyzU; // [cm]  in raft
   StThreeVectorD XyzB; // [cm]  in bundle
   StThreeVectorD dirG;
   StThreeVectorD dirL;
+  StThreeVectorD dirS;
   StThreeVectorD dirU;
   StThreeVectorD dirB;
   Double_t Theta,  Phi;
@@ -121,7 +126,7 @@ class  LaserB {
     cout << "\tTheta L: " << Theta << " G: " << ThetaG << " Phi L: " << Phi << " G: " << PhiG 
 	 << endl;
   }
-  ClassDef(LaserB,2)
+  ClassDef(LaserB,3)
 };
 
 class EventHeader {
@@ -204,12 +209,13 @@ class Hit : public TObject {
   Int_t    usedInFit;
   StThreeVectorF xyz;
   StThreeVectorF xyzL;     // Tpc Local Sector 
+  StThreeVectorF xyzS;     // Tpc Super Sector 
   StThreeVectorF xyzTpcL;  // Tpc Local
   Float_t  pad;
   Float_t  tbk;
   Int_t    trackKey;
   StTpcHit hit;
-  ClassDef(Hit,5) 
+  ClassDef(Hit,6) 
 };
 class Track : public TObject {
  public:

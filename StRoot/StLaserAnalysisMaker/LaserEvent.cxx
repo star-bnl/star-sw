@@ -1,5 +1,8 @@
-//$Id: LaserEvent.cxx,v 1.8 2014/02/13 18:21:28 fisyak Exp $
+//$Id: LaserEvent.cxx,v 1.9 2014/03/13 21:59:44 fisyak Exp $
 // $Log: LaserEvent.cxx,v $
+// Revision 1.9  2014/03/13 21:59:44  fisyak
+// add cluster position in Local Sector Coordinate System
+//
 // Revision 1.8  2014/02/13 18:21:28  fisyak
 // Add protection against cicling in fitting
 //
@@ -320,6 +323,9 @@ Hit::Hit(StTpcHit *tpcHit, Int_t trKey)  : sector(0),row(0),charge(0),flag(0),us
     static StTpcLocalCoordinate  localTpc;
     transform(glob,localTpc,tpcHit->sector(),tpcHit->padrow()); 
     xyzTpcL = StThreeVectorF(localTpc.position().x(),localTpc.position().y(),localTpc.position().z());
+    Double_t xyzs[3];
+    gStTpcDb->SupS2Tpc(tpcHit->sector()).MasterToLocal(localTpc.position().xyz(),xyzs);
+    xyzS = StThreeVectorF(xyzs[0],xyzs[1],xyzs[2]);
     pad  = tpcHit->pad() - St_tpcPadPlanesC::instance()->padsPerRow(row)/2 - 1;
     tbk  = tpcHit->timeBucket();
   }
