@@ -22,14 +22,6 @@ const int kIstApvsPerSection = 12;      // 12 APV chips covered by one section o
 const int kIstApvsPerLadder = 36;      	// 36 APV chips covered in one Ladder
 const int kIstNumApvs = 864;     	// 864 APV chips in whole IST detector
 
-//physical constants
-const int kIstNumLadders = 24;      	// 24 IST Ladders
-const int kIstNumSensorsPerLadder = 6;  // 6 sensor per one IST Ladder
-const int kIstNumSensors = 144;      	// 144 sensors
-const int kIstNumPadsPerSensor = 768;   // 768 pads in each sensor
-const int kIstNumRowsPerSensor = 64;    // 64 rows in r-phi direction per each sensor
-const int kIstNumColumnsPerSensor = 12; // 12 columns in beam direction per each sensor
-
 //IST pad dimenssion
 const float kIstSensorActiveSizeRPhi = 3.8016;  // IST sensor active area in R-Phi direction
 const float kIstSensorActiveSizeZ = 7.5300;   	// IST sensor active area in Z direction

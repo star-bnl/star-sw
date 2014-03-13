@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.h,v 1.5 2014/02/20 02:29:27 smirnovd Exp $
+* $Id: StIstRawHit.h,v 1.6 2014/03/13 22:10:13 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -12,6 +12,7 @@
 #define StIstRawHit_hh
 
 #include "StObject.h"
+#include "StEvent/StEnumerations.h"
 #include "StIstConsts.h"
 
 class StIstRawHit : public StObject
@@ -73,6 +74,9 @@ struct rawHitPtrLessThan {
 /***************************************************************************
 *
 * $Log: StIstRawHit.h,v $
+* Revision 1.6  2014/03/13 22:10:13  smirnovd
+* Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
+*
 * Revision 1.5  2014/02/20 02:29:27  smirnovd
 * Remove destructor that does nothing
 *

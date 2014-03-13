@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.5 2014/02/08 03:34:16 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.6 2014/03/13 22:10:12 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.6  2014/03/13 22:10:12  smirnovd
+* Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
+*
 * Revision 1.5  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
@@ -35,7 +38,7 @@
 */
 
 #include <assert.h>
-#include "StRoot/StIstUtil/StIstConsts.h"
+#include "StIstUtil/StIstConsts.h"
 #include "StIstDbMaker.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
@@ -50,6 +53,9 @@
 
 #include "TMath.h"
 #include "TVector3.h"
+
+using namespace StIstConsts;
+
 THashList *StIstDbMaker::fRotList = 0;
 
 ClassImp(StIstDbMaker)

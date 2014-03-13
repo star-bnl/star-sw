@@ -17,6 +17,7 @@
 #include "StiIstIsActiveFunctor.h"
 #include "StiIstDetectorBuilder.h"
 #include "Sti/StiElossCalculator.h"
+#include "StEvent/StEnumerations.h"
 #include "TDataSetIter.h"
 #include "THashList.h"
 #include "tables/St_HitError_Table.h"
@@ -27,6 +28,7 @@
 #include "StIstUtil/StIstConsts.h"
 
 using namespace std;
+using namespace StIstConsts;
 
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFile)

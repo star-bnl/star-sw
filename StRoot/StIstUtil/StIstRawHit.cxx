@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.6 2014/02/20 02:30:59 smirnovd Exp $
+* $Id: StIstRawHit.cxx,v 1.7 2014/03/13 22:10:12 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.7  2014/03/13 22:10:12  smirnovd
+* Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
+*
 * Revision 1.6  2014/02/20 02:30:59  smirnovd
 * Use constructor list to initialize vectors of pointers and arrays
 *
@@ -29,6 +32,9 @@
 ****************************************************************************/
 
 #include "StIstRawHit.h"
+
+using namespace StIstConsts;
+
 
 bool rawHitPtrLessThan::operator() (const StIstRawHit *rawHit1, const StIstRawHit *rawHit2) const
 {
