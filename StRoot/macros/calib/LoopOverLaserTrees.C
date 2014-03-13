@@ -1,5 +1,8 @@
-// $Id: LoopOverLaserTrees.C,v 1.13 2013/05/28 20:08:49 fisyak Exp $
+// $Id: LoopOverLaserTrees.C,v 1.14 2014/03/13 21:58:43 fisyak Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.14  2014/03/13 21:58:43  fisyak
+// Add more plots
+//
 // Revision 1.13  2013/05/28 20:08:49  fisyak
 // Increase cut on membrane drift distance precision 1e-3 => 2e-3
 //
@@ -33,6 +36,11 @@
 // Revision 1.3  2007/12/10 19:54:02  fisyak
 // Add Id and Log, correct spelling error in README
 //
+/* 
+   foreach r (53004 53015 53022)
+      root.exe -q -b 'LoopOverLaserTrees.C+("*'${r}'*.laser.root","LaserPlots.'${r}'.root")' >& ${r}.log
+   end
+ */
 //#define ADJUSTABLE_BINNING
 //#define __REFIT__
 //#define INTEGRATE_OVER_HOURS
@@ -72,14 +80,17 @@ static Double_t dDVAll[2][3];
 static Int_t  _debug = 0; 
 TH2D *dv = 0;
 TH2D *slope = 0;
+TH2D *memAdc = 0;
 //             io
 TH2D *zMembrane[2];
+//              io  we xy
+TH2D *dMembraneY[2][2][2];
 TNtuple *runNT = 0;
 struct Run_t {
   Float_t run, date, time, events, day, dvAll, ddvAll, dvWest, ddvWest, dvEast, ddvEast, slAll, dslAll, slWest, dslWest, slEast, dslEast;
-  Float_t vWest, vEast, zWI, dzWI, zEI, dzEI, zWO, dzWO, zEO, dzEO, utime, ok, dvSet;
+  Float_t vWest, vEast, zWI, dzWI, zEI, dzEI, zWO, dzWO, zEO, dzEO, utime, ok, dvSet, XWI, dXWI, XEI, dXEI, XWO, dXWO, XEO, dXEO, YWI, dYWI, YEI, dYEI, YWO, dYWO, YEO, dYEO;
 };
-const Char_t *vRun = "run:date:time:events:day:dvAll:ddvAll:dvWest:ddvWest:dvEast:ddvEast:slAll:dslAll:slWest:dslWest:slEast:dslEast:vWest:vEast:zWI:dzWI:zEI:dzEI:zWO:dzWO:zEO:dzEO:utime:ok:dvSet";
+const Char_t *vRun = "run:date:time:events:day:dvAll:ddvAll:dvWest:ddvWest:dvEast:ddvEast:slAll:dslAll:slWest:dslWest:slEast:dslEast:vWest:vEast:zWI:dzWI:zEI:dzEI:zWO:dzWO:zEO:dzEO:utime:ok:dvSet:XWI:dXWI:XEI:dXEI:XWO:dXWO:XEO:dXEO:YWI:dYWI:YEI:dYEI:YWO:dYWO:YEO:dYEO";
 Run_t Run;
 //________________________________________________________________________________
 Double_t ScaleE2W(Double_t day) {// scale East to West drift velocity
@@ -132,6 +143,22 @@ void MakeTable() {
     dv = 1e-6*Run.vWest*(1. + (5.85670e-01 -1.42815e-03*(Run.zWO + Run.zEO)));
   }
   TString fOut =  Form("tpcDriftVelocity.%8i.%06i.C",date,Time);
+  Double_t scaleY = 0;
+  Double_t dscaleY = 0;
+  Float_t *par = &Run.YWI;
+  for (Int_t io = 0; io < 2; io++) {
+    for (Int_t we = 0; we < 2; we++) {
+      if (par[4*io+2*we+1] > 0) {
+	Double_t w2 = par[4*io+2*we+1]*par[4*io+2*we+1];
+	scaleY  += par[4*io+2*we]/w2;
+	dscaleY += 1./w2;
+      }
+    }
+  }
+  if (dscaleY > 0) {
+    scaleY  /= dscaleY;
+    dscaleY = 1./TMath::Sqrt(dscaleY);
+  }
   ofstream out;
   cout << "Create " << fOut << endl;
   out.open(fOut.Data());
@@ -139,6 +166,7 @@ void MakeTable() {
   out << "  if (!gROOT->GetClass(\"St_tpcDriftVelocity\")) return 0;" << endl;
   out << "  St_tpcDriftVelocity *tableSet = new St_tpcDriftVelocity(\"tpcDriftVelocity\",1);" << endl;
   out << "  tpcDriftVelocity_st row;// Laser Run " << run << endl;
+  out << "  memset(&row, 0, tableSet->GetRowSize());"<< endl;
   if (! Run.ok) {// ok == 0 => use both: west and east
     Run.dvSet = dvWest;
 #if 0
@@ -151,15 +179,19 @@ void MakeTable() {
       dvEast = dvWest*(1 + 1e-3*ScaleE2W(Run.day));
     }
 #endif 
-  out << "  row.laserDriftVelocityEast	 =   " << dvEast << "; // +/- " << ddvEast 
-      << " cm/us East: Slope = " << DVAll[1][2] << " +/- " << dDVAll[1][2] << " DV = " << dvEast << " +/- " << ddvEast
-      << endl;
-  out << "  row.laserDriftVelocityWest	 =   " << dvWest << "; // +/- " << ddvWest 
-      << " cm/us West: Slope = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << " DV = " << dvWest << " +/- " << ddvWest<< endl;
-  out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
-  out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
-  out << "  tableSet->AddAt(&row); " << endl;
-  out << "  return (TDataSet *)tableSet; // 1e3*Delta: All = " << dv << " +/- " << ddv << endl;
+    
+    out << "  row.laserDriftVelocityEast	 =   " << dvEast << "; // +/- " << ddvEast 
+	<< " cm/us East: Slope = " << DVAll[1][2] << " +/- " << dDVAll[1][2] << " DV = " << dvEast << " +/- " << ddvEast
+	<< endl;
+    out << "  row.laserDriftVelocityWest	 =   " << dvWest << "; // +/- " << ddvWest 
+	<< " cm/us West: Slope = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << " DV = " << dvWest << " +/- " << ddvWest<< endl;
+#if 0
+    out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
+    out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
+#endif
+    out << "//row.scaleY                  	 = " << scaleY << ";// +/-" << dscaleY << endl;
+    out << "  tableSet->AddAt(&row); " << endl;
+    out << "  return (TDataSet *)tableSet; // 1e3*Delta: All = " << dv << " +/- " << ddv << endl;
   } else { // averaged drif tvelocity
     Run.dvSet = dv;
     out << "  row.laserDriftVelocityEast	 =   " << dv << "; // +/- " << ddv 
@@ -168,8 +200,10 @@ void MakeTable() {
     out << endl;
     out << "  row.laserDriftVelocityWest	 =   " << dv << "; // +/- " << ddv 
 	<< " cm/us All: West = " << DVAll[1][1] << " +/- " << dDVAll[1][1] << endl;
+#if 0
     out << "  row.cathodeDriftVelocityEast	 =          0; // cm/us : from cathode emission  ;" << endl;
     out << "  row.cathodeDriftVelocityWest	 =          0; // cm/us : from cathode emission  ;" << endl;
+#endif
     out << "  tableSet->AddAt(&row);// 1e3*Delta: All = " << dv << " +/- " << ddv << endl;
     out << "  return (TDataSet *)tableSet;//" 
 	<< " West = " << dvWest << " +/- " << ddvWest
@@ -245,11 +279,30 @@ void Fit() {
     }
     fit->Write();
   }
-  MakeTable();
+  // X & Y slope from Memberane
+  for (Int_t xy = 0; xy < 2; xy++) {
+    for (Int_t io = 0; io < 2; io++) {
+      Float_t *par = &Run.XWI;
+      for (Int_t we = 0; we < 2; we++) {
+	dMembraneY[io][we][xy]->FitSlicesY(0,1,0,10,"QNRI");
+	TString fitN(dMembraneY[io][we][xy]->GetName());
+	fitN += "_1";
+	TH1D *fit = (TH1D *) gDirectory->Get(fitN);
+	if (! fit) continue;
+	fit->SetMarkerStyle(20);
+	TF1 *pol1 = (TF1*) gROOT->GetFunction("pol1");
+	fit->Fit(pol1);
+	par[8*xy+4*io+2*we  ] = pol1->GetParameter(1)/210;
+	par[8*xy+4*io+2*we+1] = pol1->GetParError(1)/210;
+	fit->Write();
+      }
+    }
+  }
+   MakeTable();
   runNT->Fill(&Run.run);
 }
 //________________________________________________________________________________
-void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
+void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root", const Char_t *Out = "LaserPlots.root") {
   TDirIter Dir(files);
   TTreeIter iter("laser");
   iter.AddFile(files);
@@ -270,7 +323,14 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
   const Int_t&       fNhit                                    = iter("fNhit");
   const UShort_t*&   fHits_sector                             = iter("fHits.sector");
   const UShort_t*&   fHits_row                                = iter("fHits.row");
+  const Float_t*&    fHits_xyz_mX1                            = iter("fHits.xyz.mX1");
+  const Float_t*&    fHits_xyz_mX2                            = iter("fHits.xyz.mX2");
+  const Float_t*&    fHits_xyz_mX3                            = iter("fHits.xyz.mX3");
   const Float_t*&    fHits_xyzL_mX3                            = iter("fHits.xyzL.mX3");
+  const Float_t*&    fHits_xyzTpcL_mX1                            = iter("fHits.xyzTpcL.mX1");
+  const Float_t*&    fHits_xyzTpcL_mX2                            = iter("fHits.xyzTpcL.mX2");
+  const Float_t*&    fHits_xyzTpcL_mX3                            = iter("fHits.xyzTpcL.mX3");
+  const UShort_t*&    Adc                                      = iter("fHits.hit.mAdc"); 
   const Float_t&     fEvtHdr_fOnlClock                        = iter("fEvtHdr.fOnlClock");
   const Int_t*&      fFit_Sector                              = iter("fFit.Sector");
 #ifdef __REFIT__
@@ -288,7 +348,7 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
   const Double32_t*& fFit_Prob                                = iter("fFit.Prob");
   const Int_t*&      fFit_ndf                                 = iter("fFit.ndf");
   //  const Int_t*&      fFit_Flag                                = (Int_t **) iter("fFit.Flag[42]");
-  TFile *fOut = new TFile("LaserPlots.root","recreate");
+  TFile *fOut = new TFile(Out,"recreate");
   runNT = new TNtuple("RunNT","Run date time",vRun);
   static const Double_t EastWRTWestDiff = 0;//3.55700e-01; // +/- 1.77572e-01   3.38530e-01; // +/- 1.39566e-01 permill
 
@@ -336,6 +396,9 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
 #endif
 	slope->SetXTitle("Sector");
 	slope->SetYTitle("Difference wrt reference Drift Velocity in pemill");
+	memAdc = new TH2D(Form("memAdc%i", fEvtHdr_fRun%1000000),
+			  Form("Log(Adc) @ Membrane for West and East, Inner and Outer sectors for run %i",fEvtHdr_fRun%1000000),
+			  4, 0.5, 4.5, 100, 0, 10);
 	for (Int_t io = 0; io < 2; io++) {// 0 => Inner, 1 => Outer
 	  TString name("Z");
 	  TString title("Z[cm] of Membrane");
@@ -343,8 +406,21 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
 	  else          {name += "O"; title += " Outer";}
 	  name += Form("%i",fEvtHdr_fRun%1000000);
 	  title += Form(" for run %i",fEvtHdr_fRun%1000000); 
-	  //	  zMembrane[io] = new TH2D(name,title,24,0.5,24.5,2000,-10.,10.);
+	  //	  dMembraneY[io] = new TH2D(name,title,24,0.5,24.5,2000,-10.,10.);
 	  zMembrane[io] = new TH2D(name,title,24,0.5,24.5,2000,200,210);
+	  for (Int_t we = 0; we < 2; we++) {
+	    for (Int_t xy = 0; xy < 2; xy++) {
+	      name  = "R"; name += Form("%i",fEvtHdr_fRun%1000000); 
+	      title = "Drift length for Membrane clusters versus";
+	      if (xy == 0) {name += "X"; title += " X. ";}
+	      else         {name += "Y"; title += " Y. ";}
+	      if (io == 0)  {name += "I"; title += " Inner";} 
+	      else          {name += "O"; title += " Outer";}
+	      if (we == 0)  {name += "W"; title += " West";}
+	      else          {name += "E"; title += " East";}
+	      dMembraneY[io][we][xy] = new TH2D(name,title,100,-200,200,1000,-10,10);
+	    }
+	  }
 	}
 	oldRun = (Int_t) fEvtHdr_fRun;
 	oldDate = Date;
@@ -355,6 +431,10 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
     for (Int_t i = 0; i <  fNhit; i++) {
       Int_t io = 0; if (fHits_row[i]    > 13) io = 1;
       zMembrane[io]->Fill(fHits_sector[i],fHits_xyzL_mX3[i]);
+      Int_t we = 0; if (fHits_sector[i] > 12) we = 1;
+      dMembraneY[io][we][0]->Fill(fHits_xyz_mX1[i],fHits_xyzTpcL_mX3[i]);
+      dMembraneY[io][we][1]->Fill(fHits_xyz_mX2[i],fHits_xyzTpcL_mX3[i]);
+      if (TMath::Abs(TMath::Abs(fHits_xyzTpcL_mX3[i])-205) < 25 && Adc[i] > 0) memAdc->Fill(2.*we + io + 1., TMath::Log(Adc[i]));
     }
     Double_t dt =  fEvtHdr_fDate%1000000 + ((Double_t) fEvtHdr_fTime)*1e-6;
     Double_t DT =  Run.date + Run.time*1e-6;
@@ -442,8 +522,8 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
     }
   }  
   Fit();
-  runNT->Write();
-  delete fOut;
+  //  runNT->Write();
+  fOut->Write();
 }
 //________________________________________________________________________________
 /*
