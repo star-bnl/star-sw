@@ -1,8 +1,8 @@
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.17 2014/02/13 18:21:28 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.18 2014/03/13 21:59:45 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
-// Revision 1.17  2014/02/13 18:21:28  fisyak
-// Add protection against cicling in fitting
+// Revision 1.18  2014/03/13 21:59:45  fisyak
+// add cluster position in Local Sector Coordinate System
 //
 // Revision 1.16  2009/03/11 15:49:40  fisyak
 // Remove hits not beloging to primary tracks
@@ -26,7 +26,7 @@
 // Before Selection of good runs
 //
 #define CORRECT_LASER_POSITIONS
-//#define __TRACKHITS__
+#define __TRACKHITS__
 #ifndef __TRACKHITS__
 #define ADDPRIMTRACKHITS
 #endif
@@ -191,6 +191,8 @@ Int_t StLaserAnalysisMaker::InitRun(Int_t run){
     Lasers[s][b][m] = theLaser;
     Tpc2Global.LocalToMaster(theLaser->XyzL.xyz(),theLaser->XyzG.xyz());
     Tpc2Global.LocalToMasterVect(theLaser->dirL.xyz(),theLaser->dirG.xyz());
+    gStTpcDb->SupS2Tpc(theLaser->Sector).MasterToLocal(theLaser->XyzL.xyz(),theLaser->XyzS.xyz());
+    gStTpcDb->SupS2Tpc(theLaser->Sector).MasterToLocalVect(theLaser->dirL.xyz(),theLaser->dirS.xyz());
     theLaser->PhiG = theLaser->dirG.phi();
     theLaser->ThetaG = theLaser->dirG.theta();
     theLaser->IsValid = 0;
@@ -235,7 +237,7 @@ Int_t StLaserAnalysisMaker::Make(){
 		   EvtHddr->GetInputTriggerMask());
   event->SetDVWest(gStTpcDb->DriftVelocity(1));
   event->SetDVEast(gStTpcDb->DriftVelocity(13));
-  //  event->SetScaleY(gStTpcDb->ScaleY());
+  event->SetScaleY(gStTpcDb->ScaleY());
   event->GetHeader()->SetDriftDistance(gStTpcDb->Dimensions()->gatingGridZ());
   event->GetHeader()->SetInnerSectorzOffset(gStTpcDb->Dimensions()->zInnerOffset());
   event->GetHeader()->SetOuterSectorzOffset(gStTpcDb->Dimensions()->zOuterOffset());
