@@ -1,13 +1,13 @@
 /*
- * $Id: StPxlFastSim.h,v 1.2 2014/03/05 01:46:15 mstftsm Exp $
+ * $Id: StPxlFastSim.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
- * Revision 1.2  2014/03/05 01:46:15  mstftsm
- * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ * Revision 1.3  2014/03/13 17:00:19  mstftsm
+ * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06
@@ -43,12 +43,12 @@ class StPxlFastSim: public StPxlISim
  public:
 
   /*! \brief Constructor */ 
-  StPxlFastSim(const Char_t *name="pxlFastSim"): StPxlISim(name), mPxlDb(0), mRandom(0), mResXPix(0), mResYPix(0), mResZPix(0){}
+  StPxlFastSim(const Char_t *name="pxlFastSim",Bool_t randomSeed=kFALSE): StPxlISim(name), mPxlDb(0), mRandom(0), mResXPix(0), mResYPix(0), mResZPix(0), mUseRandomSeed(randomSeed) {}
 
   /*! \brief This class does not own any hit containers.
    *        mRandom is deleted here. 
   */
-  virtual ~StPxlFastSim();
+  ~StPxlFastSim();
 
 
   /*! \brief A random seed is passed to mRandom 
@@ -56,7 +56,7 @@ class StPxlFastSim: public StPxlISim
    * 
    * returns kStOk if resolutions have been fetched successfully. kStErr otherwise.
    */
-  virtual Int_t initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDataSet,const Int_t run);
+  Int_t initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDataSet,const Int_t run);
 
    /*! \brief creates an StPxlHit object for every StMcPxlHit, and fills the
    *  hit StPxlHitCollection container. 
@@ -64,13 +64,14 @@ class StPxlFastSim: public StPxlISim
    *  Returns:
    *  kStOk: if hits have been loaded to StPxlHitCollection successfully.
   */
-  virtual Int_t addPxlHits(const StMcPxlHitCollection&, StPxlHitCollection&);
+  Int_t addPxlHits(const StMcPxlHitCollection&, StPxlHitCollection&);
 
   /*! \brief Documentation method. GetCVS can be called from the chain, providing a list
    *  of all maker versions in use.
   */
+
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.2 2014/03/05 01:46:15 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
   //Routine to smear hit by resolution with gaussian, mean zero and width res.
@@ -85,18 +86,20 @@ class StPxlFastSim: public StPxlISim
   Double_t mResXPix;
   Double_t mResYPix;
   Double_t mResZPix;
+
+  Bool_t mUseRandomSeed;
 };
 #endif
 /*
- * $Id: StPxlFastSim.h,v 1.2 2014/03/05 01:46:15 mstftsm Exp $
+ * $Id: StPxlFastSim.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
- * Revision 1.2  2014/03/05 01:46:15  mstftsm
- * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ * Revision 1.3  2014/03/13 17:00:19  mstftsm
+ * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06

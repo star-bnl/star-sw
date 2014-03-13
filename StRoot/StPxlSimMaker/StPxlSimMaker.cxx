@@ -1,8 +1,8 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
- * Revision 1.2  2014/03/05 01:46:15  mstftsm
- * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ * Revision 1.3  2014/03/13 17:00:19  mstftsm
+ * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06
@@ -33,7 +33,7 @@ ClassImp(StPxlSimMaker)
 
 using namespace std;
 
-StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(kFALSE), mUseDIGMAPSSim(kFALSE) , mUseIdealGeom(kTRUE), mUseDbGeom(kFALSE)
+StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(kFALSE), mUseDIGMAPSSim(kFALSE) , mUseIdealGeom(kTRUE), mUseDbGeom(kFALSE), mUseRandomSeed(kFALSE)
 {
 }
 //____________________________________________________________
@@ -56,7 +56,8 @@ Int_t StPxlSimMaker::Init()
    //{
    // temporary till DIGMAPS algorithm is added and option added in StMaker
    mUseFastSim = kTRUE;
-   mPxlSimulator = new StPxlFastSim();
+   mPxlSimulator = new StPxlFastSim("pxlFastSim",mUseRandomSeed);
+
    LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
    //}
 
@@ -173,8 +174,8 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
- * Revision 1.2  2014/03/05 01:46:15  mstftsm
- * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ * Revision 1.3  2014/03/13 17:00:19  mstftsm
+ * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06

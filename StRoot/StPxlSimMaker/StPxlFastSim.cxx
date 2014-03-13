@@ -5,8 +5,8 @@
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
- * Revision 1.3  2014/03/05 01:46:15  mstftsm
- * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ * Revision 1.4  2014/03/13 17:00:19  mstftsm
+ * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
  * Revision 1.2  2013/11/14 19:10:27  mstftsm
  * StMcPxlHit has been changed to be on local coordinates. We no longer transfor from global to local before smearing
@@ -71,8 +71,16 @@ Int_t StPxlFastSim::initRun(const TDataSet& calib_db, const TObjectSet* pxlDbDat
    }
 
    if (!mRandom) mRandom = new StRandom();
-   Int_t seed = time(NULL);
-   mRandom->setSeed(seed);
+   if(mUseRandomSeed)
+   {
+	   Int_t seed = time(NULL);
+	   mRandom->setSeed(seed);
+	   LOG_INFO << "StPxlFastSim - smearing random generator is using random seed = " << seed <<endm;
+   }
+   else
+   {
+	   LOG_INFO << "StPxlFastSim - smearing random generator is using default seed" <<endm;
+   }
 
    St_HitError *pxlTableSet = (St_HitError*)calib_db.Find("PixelHitError");
 
@@ -224,8 +232,8 @@ void StPxlFastSim::localToMatser(Double_t* local,Double_t* master,Int_t sector,I
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
- * Revision 1.3  2014/03/05 01:46:15  mstftsm
- * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ * Revision 1.4  2014/03/13 17:00:19  mstftsm
+ * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
  * Revision 1.2  2013/11/14 19:10:27  mstftsm
  * StMcPxlHit has been changed to be on local coordinates. We no longer transfor from global to local before smearing

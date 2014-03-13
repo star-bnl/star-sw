@@ -1,13 +1,13 @@
 /*
- * $Id: StPxlSimMaker.h,v 1.2 2014/03/05 01:46:15 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
- * Revision 1.2  2014/03/05 01:46:15  mstftsm
- * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ * Revision 1.3  2014/03/13 17:00:19  mstftsm
+ * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06
@@ -68,12 +68,13 @@ class StPxlSimMaker : public StMaker
   void useDIGMAPSSim() {SetAttr("useDIGMAPSSim",kTRUE);}
   void useIdealGeom() {mUseIdealGeom = kTRUE;}
   void useDbGeom() {mUseDbGeom = kTRUE;}
+  void useRandomSeed() {mUseRandomSeed = kTRUE;}
 
   /*! \brief Documentation method. GetCVS can be called from the chain, providing a list
    *  of all maker versions in use.
   */
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.2 2014/03/05 01:46:15 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
     StPxlISim* mPxlSimulator;
@@ -83,6 +84,7 @@ private:
 
     Bool_t mUseIdealGeom;
     Bool_t mUseDbGeom;
+    Bool_t mUseRandomSeed;
 
 
   ClassDef(StPxlSimMaker,1)   //StAF chain virtual base class for Makers
@@ -90,13 +92,13 @@ private:
 #endif
 
 /*
- * $Id: StPxlSimMaker.h,v 1.2 2014/03/05 01:46:15 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
- * Revision 1.2  2014/03/05 01:46:15  mstftsm
- * Now StPxlSimMaker has methods to switch between ideal geometry and DB geometry. The default is ideal.
+ * Revision 1.3  2014/03/13 17:00:19  mstftsm
+ * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
  * Revision 1.1  2013/05/12 21:43:33  jeromel
  * Initial revision, code peer review closed 2013/05/06
