@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.46 2014/03/11 01:28:11 perev Exp $
+// $Id: StvMaker.cxx,v 1.47 2014/03/14 18:17:59 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -142,7 +142,7 @@ Int_t StvMaker::InitDetectors()
 
 //	What is the geo version
   TString geoName(gGeoManager->GetName()); geoName.ToLower();
-  int yGeo = 0;
+  int yGeo = 2014;
   if (geoName(0,2)=="y2") yGeo = TString(geoName(1,99)).Atoi();
 
 
@@ -152,17 +152,17 @@ Int_t StvMaker::InitDetectors()
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
 //		Now Initialize TGeo proxy
   tgh->Init(1+2+4);
-  if (1946 || yGeo>=2009) { 	//no prompt hits for geo <y2009
+  if (yGeo>=2009) { 	//no prompt hits for geo <y2009
     StvTpcPrompt promp;
     tgh->InitHitPlane(&promp);
   }
 
 //	TPC has non standard TGeo. Edit it
-//  if (yGeo>=2009) { 
+  if (yGeo>=2009) { 
     StvTpcEdit tpce;
     int nEdit = tgh->Edit(kTpcId,&tpce);	//Disable fake padrows
     Info("InitDetectors","%d fake TPC padrows disabled",nEdit);
-//  }
+  }
   tgh->InitLayers();
   tgh->InitHitShape();
 
