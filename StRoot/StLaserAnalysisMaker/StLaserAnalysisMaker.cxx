@@ -1,6 +1,9 @@
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.18 2014/03/13 21:59:45 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.19 2014/03/14 13:11:20 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.19  2014/03/14 13:11:20  fisyak
+// comment out gStTpcDb->ScaleY()
+//
 // Revision 1.18  2014/03/13 21:59:45  fisyak
 // add cluster position in Local Sector Coordinate System
 //
@@ -237,7 +240,9 @@ Int_t StLaserAnalysisMaker::Make(){
 		   EvtHddr->GetInputTriggerMask());
   event->SetDVWest(gStTpcDb->DriftVelocity(1));
   event->SetDVEast(gStTpcDb->DriftVelocity(13));
+#if 0
   event->SetScaleY(gStTpcDb->ScaleY());
+#endif
   event->GetHeader()->SetDriftDistance(gStTpcDb->Dimensions()->gatingGridZ());
   event->GetHeader()->SetInnerSectorzOffset(gStTpcDb->Dimensions()->zInnerOffset());
   event->GetHeader()->SetOuterSectorzOffset(gStTpcDb->Dimensions()->zOuterOffset());
