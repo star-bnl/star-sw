@@ -227,9 +227,11 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
 		qtid[kadctacind-1]->SetTextSize(0.02);
 	}
   }
-  TLine *qtlines[2];
+  TLine *qtlines[3];
   for (int i=0;i<3;i++){
-	qtlines[i] = new TLine(16.5+14.*i,0.,16.5+14.*i,4095.);		// Run-14 config....
+  	float xval = 16.5+14.*i; 						// Run-14 config....
+  		if (i==2){ xval-=2.; }						// Run-14 config....
+	qtlines[i] = new TLine(xval,0.,xval,4095.);		// Run-14 config....
 	qtlines[i]->SetLineColor(1);
 	qtlines[i]->SetLineWidth(1);
   }
@@ -397,6 +399,41 @@ void mtdBuilder::startrun(daqReader *rdr) {
   LOG("MTD", "TriggerPlotBuilder starting run #%d",rdr->run);
   resetAllPlots();
   //
+  ReadTraymaskoutList();
+  //
+}
+void mtdBuilder::ReadTraymaskoutList(){
+  //
+  TString buffer;
+  char mTraymaskoutList[256];
+  char mTraymaskoutListLocal[256];
+  //
+  for(int i=0;i<30;i++){MaskoutTray[i]=false;}
+  //
+  sprintf(mTraymaskoutList, "%s/mtd/%s",confdatadir,"MTD_TrayMaskout.txt");
+  ifstream filein(mTraymaskoutList);
+  //  
+  //try local if not in conf dir
+  if(!filein) {
+    filein.close(); 
+    sprintf(mTraymaskoutListLocal, "mtdconfig/%s","MTD_TrayMaskout.txt");
+    filein.open(mTraymaskoutListLocal);
+  }
+  if(filein){ 
+    while(!filein.eof()) {
+      buffer.ReadLine(filein);
+      if(buffer.BeginsWith("/")) continue;
+      if(buffer.BeginsWith("#")) continue;
+      int trayid = atoi(buffer.Data());
+      if(trayid<1 || trayid>30) continue;
+      LOG("====MTD====", "...Masking out Backleg %d...", trayid);
+      MaskoutTray[trayid]=true;
+    }   
+  } else {
+    LOG("====MTD====", "Can not open file: %s or %s", mTraymaskoutList, mTraymaskoutListLocal);
+  }
+  filein.close();
+  //
 }
 
 void mtdBuilder::event(daqReader *rdr) {
@@ -525,7 +562,9 @@ void mtdBuilder::event(daqReader *rdr) {
 			  BunchIdError	= 1;
 		  }
           //
-		  if (BunchIdError && traynum!=8 && traynum!=9 && traynum!=19 && traynum!=23){			//!!!!!!!!!!!!!!!!!!!!!!!!!!
+          if (MaskoutTray[traynum]) continue;
+          //
+		  if (BunchIdError){
 		    LOG("====MTD====","bunchid error or not found ... tray=%d   ref=%d,%d   bunchid=%d   diff=%d",
 		  			traynum,allbunchid[0][mReferenceTray-1],allbunchid[1][mReferenceTray-1],
 		  			allbunchid[ihalf][itray],diff);
@@ -533,9 +572,7 @@ void mtdBuilder::event(daqReader *rdr) {
 		  //
 		  if(allbunchid[ihalf][itray]!=-9999)                 contents.MTD_bunchid->Fill(traynum, diff);
 		  if(allbunchid[ihalf][itray]!=-9999 && BunchIdError) contents.MTD_Error2->Fill(traynum); 	// real bunchid errors
-		  if (traynum!=8 && traynum!=9 && traynum!=19 && traynum!=23){				//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		  if(allbunchid[ihalf][itray]==-9999)                 contents.MTD_Error3->Fill(traynum); 	// missing bunchids
-		  }
       }
     }
   }

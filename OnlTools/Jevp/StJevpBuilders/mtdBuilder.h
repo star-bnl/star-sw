@@ -59,6 +59,9 @@ class mtdBuilder : public JevpPlotSet {
   int  SetMtdQTmap();
   int  mReferenceTray;
   int  mValidShiftTray[2][2];	// index1=value, index2=RDO
+
+  void ReadTraymaskoutList(); 
+  bool MaskoutTray[30];
   
   int tdcchan2globalstrip(int,int,int);
   int tdig2slot(int, int);
