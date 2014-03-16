@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.11 2007/11/07 00:54:54 ullrich Exp $
+ * $Id: StTrackTopologyMap.h,v 2.12 2014/03/16 16:06:24 fisyak Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
+ * Revision 2.12  2014/03/16 16:06:24  fisyak
+ * Xin\'s fix for HFT
+ *
  * Revision 2.11  2007/11/07 00:54:54  ullrich
  * Added PXL and IST.
  *
@@ -76,7 +79,8 @@ public:
     bool           hasHitInSvtLayer(unsigned int) const;          // first layer = 1
     bool           hasHitInPxlLayer(unsigned int) const;          // first layer = 1
     bool           hasHitInIstLayer(unsigned int) const;          // first layer = 1
-
+    bool           hasHitInSsdLayer(unsigned int) const;          // first layer = 1
+    
     bool           trackTpcOnly() const;
     bool           trackSvtOnly() const;
     bool           trackTpcSvt() const;
@@ -92,6 +96,7 @@ public:
 protected:
     bool bit(int) const;             // range 0-63
     bool ftpcFormat() const;
+    bool hftFormat() const;  // TPC tracks with HFT (Run13++) hit format
     
 private:
     UInt_t  mMap0;

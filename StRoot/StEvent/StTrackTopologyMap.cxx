@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.17 2007/11/07 00:54:54 ullrich Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.18 2014/03/16 16:06:24 fisyak Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -20,11 +20,11 @@
  *  0            primary-vertex-used
  *  1            SVT layer=1      FTPC-West row=1     PXL layer=1
  *  2            SVT layer=2      FTPC-West row=2     PXL layer=2
- *  3            SVT layer=3      FTPC-West row=3     IST layer=1
- *  4            SVT layer=4      FTPC-West row=4     IST layer=2
- *  5            SVT layer=5      FTPC-West row=5     IST layer=3 (?)
- *  6            SVT layer=6      FTPC-West row=6
- *  7            SSD              FTPC-West row=7
+ *  3            SVT layer=3      FTPC-West row=3     PXL layer=3
+ *  4            SVT layer=4      FTPC-West row=4     IST layer=1
+ *  5            SVT layer=5      FTPC-West row=5     IST layer=2
+ *  6            SVT layer=6      FTPC-West row=6     SSD layer=1
+ *  7            SSD              FTPC-West row=7     SSD layer=2
  *  8            TPC row=1        FTPC-West row=8
  *  9            TPC row=2        FTPC-West row=9
  *  10           TPC row=3        FTPC-West row=10
@@ -79,13 +79,16 @@
  *  58     26    Endcap EMC/SMD
  *  59     27
  *  60     28
- *  61     29
+ *  61     29    HFT Format (case 3) - TPC tracks
  *  62     30    turn around flag  (flags that track spirals back)
  *  63     31    FTPC Format (flags TOC or FTPC)
  *
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.18  2014/03/16 16:06:24  fisyak
+ * Xin\'s fix for HFT
+ *
  * Revision 2.17  2007/11/07 00:54:54  ullrich
  * Added PXL and IST.
  *
@@ -148,7 +151,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.17 2007/11/07 00:54:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.18 2014/03/16 16:06:24 fisyak Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -175,6 +178,12 @@ bool
 StTrackTopologyMap::ftpcFormat() const
 {
     return bit(63);
+}
+
+bool
+StTrackTopologyMap::hftFormat() const
+{
+    return bit(61);
 }
 
 unsigned int
@@ -236,7 +245,21 @@ StTrackTopologyMap::hasHitInIstLayer(unsigned int layer) const
     if(ftpcFormat())
         return false;
     else
-        return bit(layer+2);
+//        return bit(layer+2);
+        return bit(layer+3);
+}
+
+bool
+StTrackTopologyMap::hasHitInSsdLayer(unsigned int layer) const
+{
+    if(ftpcFormat())
+        return false;
+    else {
+      if(hftFormat())
+        return bit(layer+5);
+      else
+        return bit(layer+6);
+    }
 }
 
 bool
@@ -274,14 +297,21 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
             if (hasHitInSvtLayer(i)) n++;
         break;
     case kSsdId:
-        if (bit(7)) n++;
+        if(hftFormat()) {
+          if (bit(7)) n++;        
+        } else {
+          for(int i=1;i<=2;i++) {
+            if (hasHitInSsdLayer(i)) n++;
+          }
+        }
         break;
     case kPxlId:
-        for(i=1;i<3;i++)
+        for(i=1;i<=3;i++)
 	  if(hasHitInPxlLayer(i)) n++;
         break;
     case kIstId:
-        for(i=1;i<4;i++)
+//        for(i=1;i<4;i++)
+        for(i=1;i<=2;i++)
 	  if(hasHitInIstLayer(i)) n++;
         break;
     case kFtpcWestId:
@@ -328,8 +358,12 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
 bool
 StTrackTopologyMap::trackTpcOnly() const
 {
-    return ((hasHitInDetector(kTpcId)) &
-           ~((hasHitInDetector(kSvtId)) | (hasHitInDetector(kSsdId))));
+    if(hftFormat())
+      return ((hasHitInDetector(kTpcId)) & 
+             ~((hasHitInDetector(kPxlId)) | (hasHitInDetector(kIstId)) | (hasHitInDetector(kSsdId))));
+    else
+      return ((hasHitInDetector(kTpcId)) &
+             ~((hasHitInDetector(kSvtId)) | (hasHitInDetector(kSsdId))));
 }
 
 bool
@@ -375,10 +409,6 @@ StTrackTopologyMap::largestGap(StDetectorId id) const
     case kSvtId:
         for (i=1; i<7; i++)
             if (hasHitInSvtLayer(i)) rows.push_back(i);
-        break;
-    case kIstId:
-        for (i=1; i<4; i++)
-            if (hasHitInIstLayer(i)) rows.push_back(i);
         break;
     case kFtpcWestId:
     case kFtpcEastId:

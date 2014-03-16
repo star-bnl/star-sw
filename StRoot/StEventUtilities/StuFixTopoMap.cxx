@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuFixTopoMap.cxx,v 1.4 2013/03/11 09:42:31 ullrich Exp $
+ * $Id: StuFixTopoMap.cxx,v 1.5 2014/03/16 16:06:52 fisyak Exp $
  *
  * Author: Thomas Ullrich, May 2000
  ***************************************************************************
@@ -44,6 +44,35 @@
  *               27-29     reserved for future use                   
  *                30       Turn around flag, some elements used >1   
  *                31       Format interpreter; (SVT/SSD/TPC=0,FTPC=1)
+ *
+ *    HFT and/or TPC Tracks
+ *    --------------------------------
+ *    map[0]   Bit number  Quantity
+ *    ------   ----------  --------
+ *                 0       Primary Vertex used(1) or not(0);
+ *                         also used to indicate that a secondary
+ *                         vertex constraint was used for special
+ *                         track fitting methods for decay vertices
+ *                         (see method variable).
+ *                1-3      PXL 2 layers, possible 2 hits on the second layer (overlapping ladders)
+ *                4-5      IST layer, possible 2 hits
+ *                6-7      SSD layer, possible 2 hits
+ *                8-31     TPC, first 24 padrows
+ *
+ *    map[1]   Bit number  Quantity
+ *    ------   ----------  --------
+ *                0-20     TPC, remaining 21 padrows
+ *                21       Track extrapolates to MWC (no=0, yes=1)
+ *                22       Track extrapolates to CTB (no=0, yes=1)
+ *                23       Track extrapolates to TOF (no=0, yes=1)
+ *                24       Track extrapolates to RCH (no=0, yes=1)
+ *                25       Track extrapolates to EMCB (no=0, yes=1)
+ *                26       Track extrapolates to EMCEC (no=0, yes=1)
+ *               27-28     reserved for future use
+ *                29       HFT flag  (HFT=1, SVT/SSD=0)
+ *                30       Turn around flag, some elements used >1
+ *                31       Format interpreter; (SVT/SSD/TPC=0,FTPC=1)
+ *
  *                                                                   
  *    FTPC Tracks                                                    
  *    -----------                                                    
@@ -105,39 +134,63 @@ bool StuFixTopoMap(StTrack* track)
         }
     }
     else {
+
+        // ???
+        if (info->numberOfReferencedPoints(kPxlId) ||
+            info->numberOfReferencedPoints(kIstId)) {
+          LOG_DEBUG<<" HFT track!" << endm;
+          word2 |= 1U<<29;
+        }
         
         //
-        // TPC/SVT/SSD
+        // TPC/SVT/SSD or TPC/SSD/IST/PXL
         //
+
         for (i=0; i<hits.size(); i++) {
             if (hits[i]->detector() == kSvtId) {
                 k = dynamic_cast<const StSvtHit*>(hits[i])->layer();
                 if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
                 word1 |= 1U<<k;
             }
-            if (hits[i]->detector() == kPxlId) {
-                // k = dynamic_cast<const StRnDHit*>(hits[i])->layer();
-                k = dynamic_cast<const StPxlHit*>(hits[i])->layer();                
+            else if (hits[i]->detector() == kPxlId) {
+                k = dynamic_cast<const StPxlHit*>(hits[i])->layer();       
                 LOG_DEBUG<<"track has hit in pixel detector, layer "<<k<<endm;
-                if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
-                word1 |= 1U<<k;
+                if (k==2 && (word1 & 1U<<k)) {
+                  word1 |= 1U<<(k+1);  // second layer, possible has two hits
+                  LOG_DEBUG<<"set bit for PXL 3rd-layer to 1"<<endm;    
+                } else {
+                  word1 |= 1U<<k;
+                  LOG_DEBUG<<"set bit for PXL "<<k<<"th-layer to 1"<<endm;
+                }
                 LOG_DEBUG<<"word1: "<<word1<<endm;
             }
-            if (hits[i]->detector() == kIstId) {
-                k = dynamic_cast<const StRnDHit*>(hits[i])->layer();
-                s = dynamic_cast<const StRnDHit*>(hits[i])->extraByte0();
-                LOG_DEBUG<<"track has hit in ist, layer "<<k<<", side "<<s<<endm;
-                if(k==2) k=k+s-1;
-                LOG_DEBUG<<"set bit for layer "<<k<<" to 1"<<endm;
-                if (word1 & 1U<<(k+2)) word2 |= 1U<<30; // turnaround flag    
-                word1 |= 1U<<(k+2);
+            else if (hits[i]->detector() == kIstId) {
+                LOG_DEBUG<<"track has hit in ist" << endm;
+                if (word1 & 1U<<4) { 
+                  word1 |= 1U<<5;  // second hit
+                  LOG_DEBUG<<"set bit for IST 2nd-layer to 1"<<endm;
+                } else {
+                  word1 |= 1U<<4;
+                  LOG_DEBUG<<"set bit for IST 1st-layer to 1"<<endm;
+                }
                 LOG_DEBUG<<"word1: "<<word1<<endm;
             }
             else if (hits[i]->detector() == kSsdId) {
-                if (word1 & 1U<<7) word2 |= 1U<<30; // turnaround flag    
-                LOG_DEBUG<<"track has hit in ssd"<<endm;
-                word1 |= 1U<<7;
-                LOG_DEBUG<<"word1: "<<endm;
+                if(word2 & 1U<<29) { // HFT format
+                  LOG_DEBUG<<"HFT format for the SSD hit map"<<endm;
+                  if (word1 & 1U<<6) {
+                    word1 |= 1U<<7;  // second hit
+                    LOG_DEBUG<<"set bit for SSD 2nd-layer to 1"<<endm;
+                  } else {
+                    word1 |= 1U<<6;
+                    LOG_DEBUG<<"set bit for SSD 1st-layer to 1"<<endm;
+                  }
+                } else {
+                  if (word1 & 1U<<7) word2 |= 1U<<30; // turnaround flag    
+                  LOG_DEBUG<<"track has hit in ssd"<<endm;
+                  word1 |= 1U<<7;
+                }
+                LOG_DEBUG<<"word1: "<<word1<<endm;
             }
             else if (hits[i]->detector() == kTpcId) {
                 k = dynamic_cast<const StTpcHit*>(hits[i])->padrow();
