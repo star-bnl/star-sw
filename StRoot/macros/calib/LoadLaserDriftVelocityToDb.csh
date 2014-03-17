@@ -18,7 +18,7 @@ set CP=/bin/cp
 set MV=/bin/mv
 set RM=/bin/rm
 set GREP=/bin/grep
-set COLRM=/usr/bin/colrm
+set CUT=/usr/bin/cut
 set DATEC=/bin/date
 set TOUCH=/bin/touch
 set SED=/bin/sed
@@ -26,6 +26,10 @@ set CAT=/bin/cat
 set GZIP=/usr/bin/gzip
 set SORT=/bin/sort
 set FIND=/usr/bin/find
+set MYSQL=/usr/bin/mysql
+set MYDB="$MYSQL -h robinson.star.bnl.gov -P 3306 -C Calibrations_tpc"
+set MYROOT="${ROOTSYS}/bin/root.exe -b -l"
+set MYROOT4STAR="$STAR/.$STAR_HOST_SYS/bin/root4star -b -l"
 
 if( "$1" == "") then
     set  DIR=/star/institutions/bnl/genevb/DRIFTVEL/work
@@ -56,31 +60,29 @@ endif
 
 #
 # Determine what new laser.root files exist
-# copy them to $DIR and determine runs to process
 #
-set laserdirs = (/star/data09/reco  /star/data10/reco)
-set listOfRuns = ()
-foreach laserdir ($laserdirs)
-  if (-d $laserdir) then
-    cd $laserdir
-    set laserfiles = `$FIND . -name "st_laser_*.laser.root" -cnewer $timeFile -wholename "*ield/dev/20*"`
-    foreach laserfile ($laserfiles)
-        set run = ${laserfile:h:t}
-        if ($listOfRuns[$#listOfRuns] != $run) set listOfRuns = ($listOfRuns $run)
-        set runDir = $DIR/runs/$run
-        $MKDIR -p $runDir
-        $CP $laserfile $runDir
-    end
-  endif
-end
+set laserdirs = "/star/data{09,10,11,12}/reco"
+set laserfiles = `$FIND $laserdirs -name "st_laser_*.laser.root" -cnewer $timeFile -wholename "*ield/dev/20*"`
 $TOUCH $timeFile
 
 #
 # Test if any new files and leave if not. 
 # This will prevent empty dirs
 #
-if ($#listOfRuns == 0) exit
+if ($#laserfiles == 0) exit
 
+#
+# copy new files to $DIR and determine runs to process
+#
+set listOfRuns = `echo ${laserfiles:gh:gt} | $SED "s/ /\n/g" | $SORT -n -u`
+foreach run ($listOfRuns)
+  set runDir = $DIR/runs/$run
+  $MKDIR -p $runDir
+end
+foreach laserfile ($laserfiles)
+  set runDir = $DIR/runs/${laserfile:h:t}
+  $CP $laserfile $runDir
+end
 
 setenv STAR_LEVEL dev
 source ${GROUP_DIR}/.stardev
@@ -96,7 +98,7 @@ if ( -e $laserFiles ) $RM $laserFiles
 foreach run ($listOfRuns)
     set runDir = $DIR/runs/$run
     cd $runDir
-    ${ROOTSYS}/bin/root.exe -b -l <<EOF 
+    $MYROOT <<EOF 
 .x $WDIR/LoopOverLaserTrees.C+("st_laser_*.laser.root")
 .q
 EOF
@@ -104,30 +106,40 @@ EOF
     if ( $#laserMacro != 0) then
         set macros = $runDir/macros
         $MKDIR -p $macros
-        set fileToUpload = $laserMacro
 
         # Look for old macro files
         cd $macros
         set oldLaserMacro = `$LS -t -1 tpcDriftVelocity.*`
         if ( $#oldLaserMacro != 0) then
+
             set oldMacro = $oldLaserMacro[1]
             set oldDate = ${oldMacro:r:r:e}
             set oldTime = ${oldMacro:r:e}
-            set oldHour = `echo $oldTime | $COLRM 3 `
-            set oldMin = `echo $oldTime | $COLRM 1 2 | $COLRM 3 `
-            set oldSec = `echo $oldTime | $COLRM 1 4 | $COLRM 3 `
-            @ newSec = $oldSec + 1
-            # format for date command to convert (handles date/time rollovers properly)
-            set newDateTime = "$oldDate ${oldHour}:${oldMin}:${newSec}"
-            set newDT = ` $DATEC --date="$newDateTime" '+%Y%m%d.%H%M%S' `
-            set fileToUpload = "tpcDriftVelocity.$newDT.C"
+            set oldYear = `echo $oldDate | $CUT -c 1-4 `
+            set oldMonth = `echo $oldDate | $CUT -c 5-6 `
+            set oldDay = `echo $oldDate | $CUT -c 7-8 `
+            set oldHour = `echo $oldTime | $CUT -c 1-2 `
+            set oldMin = `echo $oldTime | $CUT -c 3-4 `
+            set oldSec = `echo $oldTime | $CUT -c 5-6 `
+            set oldBeginTime = "${oldYear}-${oldMonth}-${oldDay} ${oldHour}:${oldMin}:${oldSec}"
+            echo "Deactivating old DB entry with beginTime=${oldBeginTime}";
+            $MYDB -e "UPDATE tpcDriftVelocity SET entryTime=entryTime,deactive=UNIX_TIMESTAMP(CURRENT_TIMESTAMP) WHERE beginTime='${oldBeginTime}' and deactive=0;"
+            echo "UPDATE tpcDriftVelocity SET entryTime=entryTime,deactive=UNIX_TIMESTAMP(CURRENT_TIMESTAMP) WHERE beginTime='${oldBeginTime}' and deactive=0;"
+
+            @ ndeactive = 1
+            set deactiveLaserMacro = deactive_${oldMacro}_${ndeactive}
+            while (-e $deactiveLaserMacro)
+                @ ndeactive ++
+                set deactiveLaserMacro = deactive_${oldMacro}_${ndeactive}
+            end
+            $MV $oldMacro $deactiveLaserMacro
         endif
 
-        $CP $runDir/$laserMacro $DIR/$fileToUpload
-        $MV $runDir/$laserMacro $macros/$fileToUpload
+        $CP $runDir/$laserMacro $DIR/$laserMacro
+        $MV $runDir/$laserMacro $macros/$laserMacro
         $MV $runDir/LaserPlots.root $DIR/LaserPlots.$run.root
         $TOUCH $laserFiles
-        echo $fileToUpload >> $laserFiles
+        echo $laserMacro >> $laserFiles
     endif
 end
   
@@ -179,11 +191,11 @@ $MKDIR $DIR/Check/VarOth || exit
 
 
 cd $WDIR
-echo `/bin/pwd`
+echo $PWD
 
 echo "$DIR $listLaserFiles"
 setenv DB_ACCESS_MODE write
-$LS LoadLaserDriftVelocityToDb.C && $STAR/.$STAR_HOST_SYS/bin/root4star -b -l <<EOF 
+$LS LoadLaserDriftVelocityToDb.C && $MYROOT4STAR <<EOF 
 .x $WDIR/LoadLaserDriftVelocityToDb.C("$DIR","$listLaserFiles","tpcDriftVelocity",1)
 .q
 EOF
@@ -208,7 +220,7 @@ endif
 #
 cd $DIR/runs
 set nowTime = `$DATEC --utc '+%s' `
-foreach run (`ls -1`)
+foreach run (`$LS -1`)
     set rfile = $DIR/runs/$run/first
     if ( -e $rfile) then
         set firstTime = `$CAT $rfile`
