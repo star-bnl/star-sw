@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.7 2014/02/16 21:42:54 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.8 2014/03/17 21:51:56 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.8  2014/03/17 21:51:56  ypwang
+* minor update due to some IST constants moved to StEnumurations.h
+*
 * Revision 1.7  2014/02/16 21:42:54  ypwang
 * getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
 *
@@ -27,6 +30,7 @@
 
 #include "StIstClusterMaker.h"
 #include "StEvent.h"
+#include "StEvent/StEnumerations.h"
 #include "StRoot/StIstUtil/StIstCollection.h"
 #include "StRoot/StIstUtil/StIstRawHit.h"
 #include "StRoot/StIstUtil/StIstRawHitCollection.h"
