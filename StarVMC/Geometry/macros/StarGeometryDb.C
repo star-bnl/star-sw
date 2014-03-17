@@ -1330,12 +1330,16 @@ void y2013()
   };
 
   // Setup y2013b
+  geom.Use( "select","y2013a");
   geom.select = "y2013b"; {
     setTitle("Y2013a first production geometry PIXL in");
     geom.tpcRefSys = true; // set reference system for TPC
     geom.caveFlag = "CAVE05";
     geom.pipeFlag = "PIPEv3";
     geom.psupFlag = "PSUP01"; geom.psupStat = 1;
+    geom.pixlFlag = "PIXL05"; geom.pixlStat = 1; 
+    geom.pxstFlag = "PXST01"; geom.pxstStat = 1; 
+    geom.dtubFlag = "DTUB01"; geom.dtubStat = 1;
     geom.fill();
   };
   geom.select = "y2013_1b"; {
