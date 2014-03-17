@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.cxx,v 1.4 2014/02/16 23:18:34 ypwang Exp $
+* $Id: StIstScanClusterAlgo.cxx,v 1.5 2014/03/17 21:51:56 ypwang Exp $
 *
 * Author: Yaping Wang, October 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.5  2014/03/17 21:51:56  ypwang
+* minor update due to some IST constants moved to StEnumurations.h
+*
 * Revision 1.4  2014/02/16 23:18:34  ypwang
 * getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
 *
@@ -23,6 +26,7 @@
 ****************************************************************************/
 
 #include "StEvent.h"
+#include "StEvent/StEnumerations.h"
 #include "StMessMgr.h"
 #include "StIstScanClusterAlgo.h"
 #include "StRoot/StIstUtil/StIstCollection.h"
