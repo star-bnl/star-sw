@@ -129,8 +129,7 @@ Int_t StEventQAMaker::InitRun(int runnumber) {
   }
 
   // vpd calibration parameters
-  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
-  St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(mDbDataSet->Find("tofTotCorr"));
+  St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(GetDataBase("Calibrations/tof/tofTotCorr"));
   if(!tofTotCorr) {
     gMessMgr->Error("unable to get tof TotCorr table parameters","OS");
     return kStWarn;
@@ -701,9 +700,11 @@ void StEventQAMaker::MakeHistGlob() {
           if (primVtx && TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
               map.numberOfHits(kTpcId)>15) {
             StPtrVecHit ssd_hits = detInfo->hits(kSsdId);
-            Float_t sphi = ssd_hits[0]->position().phi()/degree;
-            if (sphi<0) sphi+=360.;
-            hists->m_glb_ssd_phi->Fill(sphi);
+	    if (ssd_hits.size()) {
+	      Float_t sphi = ssd_hits[0]->position().phi()/degree;
+	      if (sphi<0) sphi+=360.;
+	      hists->m_glb_ssd_phi->Fill(sphi);
+	    }
           }
         } // SSD Requirement
 
@@ -1231,10 +1232,12 @@ void StEventQAMaker::MakeHistPrim() {
             if (TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
                 map.numberOfHits(kTpcId)>15) {
               StPtrVecHit ssd_hits = detInfo->hits(kSsdId);
-              Float_t sphi = ssd_hits[0]->position().phi()/degree;
-              if (sphi<0) sphi+=360.;
-              hists->m_prim_ssd_phi->Fill(sphi);
-            }
+	      if (ssd_hits.size()) {
+		Float_t sphi = ssd_hits[0]->position().phi()/degree;
+		if (sphi<0) sphi+=360.;
+		hists->m_prim_ssd_phi->Fill(sphi);
+	      }
+	    }
           } // SSD Requirement
 
           if (map.trackTpcSvt()) {
@@ -2458,8 +2461,11 @@ void StEventQAMaker::MakeHistFMS() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.113 2013/03/20 20:17:37 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.114 2014/03/17 14:06:18 fisyak Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.114  2014/03/17 14:06:18  fisyak
+// Add check on ssd_hits.size()
+//
 // Revision 2.113  2013/03/20 20:17:37  genevb
 // Run 13 edits
 //
