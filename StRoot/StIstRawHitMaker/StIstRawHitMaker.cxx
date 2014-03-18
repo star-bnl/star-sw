@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.9 2014/02/25 01:08:30 smirnovd Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.10 2014/03/18 02:45:19 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.10  2014/03/18 02:45:19  ypwang
+* update raw hit decision algorithm: removed 1st time bin restriction cut
+*
 * Revision 1.9  2014/02/25 01:08:30  smirnovd
 * Explicit pointer type conversion
 *
@@ -56,7 +59,7 @@
 #include <string.h>
 #include <time.h>
 
-StIstRawHitMaker::StIstRawHitMaker( const char* name ): StRTSBaseMaker( "ist", name ), mIsCaliMode(0), mDoCmnCorrection(0), mIstCollectionPtr(0), mIstDbMaker(0), mDataType(0){
+StIstRawHitMaker::StIstRawHitMaker( const char* name ): StRTSBaseMaker( "ist", name ), mIsCaliMode(0), mDoCmnCorrection(0), mIstCollectionPtr(0), mIstDbMaker(0), mDataType(2){
    // set all vectors to zeros
    mCmnVec.resize( kIstNumApvs );
    mPedVec.resize( kIstNumElecIds );
@@ -192,14 +195,17 @@ Int_t StIstRawHitMaker::Make() {
 	while(1) { //loops over input raw data
 	    if(dataFlag==mALLdata){
             	if(mDataType==mALLdata){
-              	    rts_tbl = GetNextDaqElement("ist/adc"); dataFlag=mADCdata;
-                    if(!rts_tbl) { rts_tbl = GetNextDaqElement("ist/zs"); dataFlag=mZSdata; }
+              	    rts_tbl = GetNextDaqElement("ist/zs"); 	dataFlag=mZSdata;
+                    if(!rts_tbl) { 
+			LOG_WARN << "NO ZS-DATA BANK FOUND!!!" << endm;
+			rts_tbl = GetNextDaqElement("ist/adc"); dataFlag=mADCdata; 
+		    }
            	}
 	   	else if(mDataType==mADCdata){
-              	    rts_tbl = GetNextDaqElement("ist/adc"); dataFlag=mADCdata;
+              	    rts_tbl = GetNextDaqElement("ist/adc"); 	dataFlag=mADCdata;
            	}
 	   	else if(mDataType==mZSdata){
-              	    rts_tbl = GetNextDaqElement("ist/zs");  dataFlag=mZSdata;
+              	    rts_tbl = GetNextDaqElement("ist/zs");  	dataFlag=mZSdata;
            	}
             }
             else if(dataFlag==mADCdata){ rts_tbl = GetNextDaqElement("ist/adc"); }
@@ -365,8 +371,8 @@ Int_t StIstRawHitMaker::Make() {
                             if( (signalUnCorrected[iChan][iTB] > 0) && (signalUnCorrected[iChan][iTB] < kIstMaxAdc) && 
                             	(signalCorrected[iChan][iTB-1] > mHitCut * mRmsVec[elecId])     &&
                             	(signalCorrected[iChan][iTB]   > mHitCut * mRmsVec[elecId])     &&
-                            	(signalCorrected[iChan][iTB+1] > mHitCut * mRmsVec[elecId])     &&
-                            	(signalCorrected[iChan][0]     < signalCorrected[iChan][mDefaultTimeBin]) )  {
+                            	(signalCorrected[iChan][iTB+1] > mHitCut * mRmsVec[elecId]) ) {
+
                             	iTB = 999;
 			    	UChar_t tempMaxTB = -1;
 			    	Float_t tempMaxCharge = -999.0;
