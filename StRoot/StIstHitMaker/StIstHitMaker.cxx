@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.8 2014/03/17 21:41:49 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.9 2014/03/18 02:30:25 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.9  2014/03/18 02:30:25  ypwang
+* minor typo error correction
+*
 * Revision 1.8  2014/03/17 21:41:49  ypwang
 * update to process hit from cluster collection or existed hit collection
 *
@@ -160,7 +163,7 @@ Int_t StIstHitMaker::Make()
 
 	    //set global position
 	    StIstLadderHitCollection* ladderHitCollection = istHitCollection->ladder(ladderIdx);
-	    for(int sensorIdx=0; sensorIdx<sensorIdx<kIstNumSensorsPerLadder; sensorIdx++) {
+	    for(int sensorIdx=0; sensorIdx<kIstNumSensorsPerLadder; sensorIdx++) {
                	StIstSensorHitCollection* sensorHitCollection = ladderHitCollection->sensor(sensorIdx);
 		for(int idx=0; idx<(int)sensorHitCollection->hits().size(); idx++ ){
 		    StIstHit *newHit = sensorHitCollection->hits()[idx];
