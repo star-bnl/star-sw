@@ -28,7 +28,6 @@
 
 class TStopwatch;
 
-
 class CheckSum_t 
 { 
 public:
@@ -62,10 +61,11 @@ protected:
   TMD5  add( ULong_t   a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
   TMD5  add( ULong64_t a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
   TMD5  add( Bool_t    a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
-  TMD5  add( Float_t   a ){ Int_t  b = *( (Int_t*) &a ); return add(b); } 
-  TMD5  add( Double_t  a ){ Long_t b = *( (Long_t*)&a ); return add(b); } 
+  TMD5  add( Float_t   a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
+  TMD5  add( Double_t  a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
   TMD5  add( TString   a ){ UChar_t *b = (UChar_t *)a.Data(); mResult.Update(b,a.Length()); return *this; }
 
+  ClassDef(CheckSum_t,1);
 
 };
 
