@@ -221,24 +221,24 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoMedium *medium )
 // Update checksum based on shape
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoShape *shape )
 {
-  if (shape->TestShapeBit (TGeoShape::kGeoBox))     Update( _sum, (TGeoBBox    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoArb8))    Update( _sum, (TGeoArb8    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoTrap))    Update( _sum, (TGeoTrap    *)shape ); 
-//if (shape->TestShapeBit (TGeoShape::kGeoGtra))    Update( _sum, (TGeoGtra    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoCone))    Update( _sum, (TGeoCone    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoConeSeg)) Update( _sum, (TGeoConeSeg *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoTube))    Update( _sum, (TGeoTube    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoTubeSeg)) Update( _sum, (TGeoTubeSeg *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoCtub))    Update( _sum, (TGeoCtub    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoEltu))    Update( _sum, (TGeoEltu    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoHype))    Update( _sum, (TGeoHype    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoPara))    Update( _sum, (TGeoPara    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoPcon))    Update( _sum, (TGeoPcon    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoPgon))    Update( _sum, (TGeoPgon    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoSph))     Update( _sum, (TGeoSphere  *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoTorus))   Update( _sum, (TGeoTorus   *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoTrd1))    Update( _sum, (TGeoTrd1    *)shape ); 
-  if (shape->TestShapeBit (TGeoShape::kGeoTrd2))    Update( _sum, (TGeoTrd2    *)shape ); 
+  if (shape->IsA() == TGeoBBox::Class()    ) Update( _sum, (TGeoBBox    *)shape ); 
+  if (shape->IsA() == TGeoArb8::Class()    ) Update( _sum, (TGeoArb8    *)shape ); 
+  if (shape->IsA() == TGeoTrap::Class()    ) Update( _sum, (TGeoTrap    *)shape ); 
+  if (shape->IsA() == TGeoGtra::Class()    ) Update( _sum, (TGeoGtra    *)shape ); 
+  if (shape->IsA() == TGeoCone::Class()    ) Update( _sum, (TGeoCone    *)shape ); 
+  if (shape->IsA() == TGeoConeSeg::Class() ) Update( _sum, (TGeoConeSeg *)shape ); 
+  if (shape->IsA() == TGeoTube::Class()    ) Update( _sum, (TGeoTube    *)shape ); 
+  if (shape->IsA() == TGeoTubeSeg::Class() ) Update( _sum, (TGeoTubeSeg *)shape ); 
+  if (shape->IsA() == TGeoCtub::Class()    ) Update( _sum, (TGeoCtub    *)shape ); 
+  if (shape->IsA() == TGeoEltu::Class()    ) Update( _sum, (TGeoEltu    *)shape ); 
+  if (shape->IsA() == TGeoHype::Class()    ) Update( _sum, (TGeoHype    *)shape ); 
+  if (shape->IsA() == TGeoPara::Class()    ) Update( _sum, (TGeoPara    *)shape ); 
+  if (shape->IsA() == TGeoPcon::Class()    ) Update( _sum, (TGeoPcon    *)shape ); 
+  if (shape->IsA() == TGeoPgon::Class()    ) Update( _sum, (TGeoPgon    *)shape ); 
+  if (shape->IsA() == TGeoSphere::Class()  ) Update( _sum, (TGeoSphere  *)shape ); 
+  if (shape->IsA() == TGeoTorus::Class()   ) Update( _sum, (TGeoTorus   *)shape ); 
+  if (shape->IsA() == TGeoTrd1::Class()    ) Update( _sum, (TGeoTrd1    *)shape ); 
+  if (shape->IsA() == TGeoTrd2::Class()    ) Update( _sum, (TGeoTrd2    *)shape ); 
 }
 
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoBBox *shape ) { CheckSum_t &sum = *_sum; 
@@ -268,10 +268,14 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoConeSeg *shape ) { CheckSum_
   sum += shape->GetPhi1();
   sum += shape->GetPhi2();
 }
-void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTube *shape ) { CheckSum_t &sum = *_sum;
+void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTube *shape ) { 
+  CheckSum_t &sum = *_sum;  
+  //  TMD5 start = *_sum;
+  sum += shape->GetRmin() + 1.0;
+  sum += shape->GetRmax();
   sum += shape->GetDz();
-  sum += shape->GetRmin();
-  sum += shape->GetRmax(); 
+  //  TMD5 finish = *_sum;
+  //  std::cout << start.AsString() << " " << finish.AsString() << std::endl;
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTubeSeg *shape ) { CheckSum_t &sum = *_sum; 
   Update( _sum, (TGeoTube *)shape );
@@ -381,13 +385,17 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoVolume *volume )
 {
   CheckSum_t &sum = *_sum;
 
-  // Do nothing for assemblies
-  if ( volume->IsAssembly() ) return;
+  TString name = volume->GetName();
 
-  // Now update the volume with material, medium and shape parameters
-  Update( _sum, volume->GetMaterial() );
-  Update( _sum, volume->GetMedium() );
-  Update( _sum, volume->GetShape() );
+
+  if ( !volume->IsAssembly() ) 
+    { // Assemblies have no material, medium or shape...
+
+      Update( _sum, volume->GetMaterial() );
+      Update( _sum, volume->GetMedium() );
+      Update( _sum, volume->GetShape() );
+      
+  }
 
   // Loop over daughter nodes
   for ( Int_t i=0;i<volume->GetNdaughters(); i++ )
@@ -399,7 +407,6 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoVolume *volume )
       // Add the matrix
       Update( _sum, mat );  
 
-
       // First time visiting a daughter
       if ( mCheckSum[kid]==0 )
 	{
@@ -410,20 +417,6 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoVolume *volume )
       // to the running sum.
       TMD5 md5kid = CheckSum( kid->GetName() );
       sum += md5kid.AsString();
-
-
-      // CheckSum_t *sumk = mCheckSum[kid];
-      // if ( !sumk ) 
-      // 	{
-      // 	  CheckSum( kid->GetName() );
-      // 	  sumk = mCheckSum[kid];
-      // 	  Update( _sum, kid );
-      // 	}
-
-      // // Add the child's md5 sum
-      // TMD5 md5 = *sumk;
-      // //      TString str = md5.AsString();
-      // //      sum += str;
 
     }
 
