@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlCluster.cxx,v 1.7 2014/02/27 00:44:25 smirnovd Exp $
+ * $Id: StPxlCluster.cxx,v 1.8 2014/03/18 14:45:29 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.cxx,v $
+ * Revision 1.8  2014/03/18 14:45:29  qiuh
+ * *** empty log message ***
+ *
  * Revision 1.7  2014/02/27 00:44:25  smirnovd
  * Minor corrections
  *
@@ -93,10 +96,13 @@ void StPxlCluster::summarize(int embeddingShortCut)
    if (embeddingShortCut) {return;}
    map<int, int> idTruthMap;
    for (int i = 0; i < nRawHits_; i++) {
-      if (mRawHitVec[i]->idTruth()) {idTruthMap[mRawHitVec[i]->idTruth()] ++;}
+      if (mRawHitVec[i])
+         {
+            if (mRawHitVec[i]->idTruth()) {idTruthMap[mRawHitVec[i]->idTruth()] ++;}
+         }
    }
 
-   if (idTruthMap.size()) {
+   if (!idTruthMap.empty()) {
       mIdTruth = max_element(idTruthMap.begin(), idTruthMap.end(), compareSecond)->first;
    }
 }
