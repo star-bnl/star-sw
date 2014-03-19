@@ -242,21 +242,26 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoShape *shape )
 }
 
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoBBox *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "bbox";
   sum += shape->GetDX();
   sum += shape->GetDY();
   sum += shape->GetDZ();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoArb8 *shape ) { CheckSum_t &sum = *_sum;
+  sum += "arb8";
   sum += shape->GetDz();
   for ( Int_t i = 0; i<16; i++ ) sum += shape->GetVertices()[i]; 
 }
-void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTrap *shape ) { //CheckSum_t &sum = *_sum; 
+void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTrap *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "trap";
   Update(_sum, (TGeoArb8 *)shape );
 }
-void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoGtra *shape ) { //CheckSum_t &sum = *_sum; 
+void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoGtra *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "gtra";
   Update(_sum, (TGeoArb8 *)shape );
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoCone *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "cone";
   sum += shape->GetDz();
   sum += shape->GetRmin1();
   sum += shape->GetRmax1();
@@ -264,12 +269,13 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoCone *shape ) { CheckSum_t &
   sum += shape->GetRmax2();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoConeSeg *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "cons";
   Update( _sum, (TGeoCone *)shape );
   sum += shape->GetPhi1();
   sum += shape->GetPhi2();
 }
-void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTube *shape ) { 
-  CheckSum_t &sum = *_sum;  
+void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTube *shape ) {   CheckSum_t &sum = *_sum;  
+  sum += "tube";
   //  TMD5 start = *_sum;
   sum += shape->GetRmin() + 1.0;
   sum += shape->GetRmax();
@@ -278,11 +284,13 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTube *shape ) {
   //  std::cout << start.AsString() << " " << finish.AsString() << std::endl;
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTubeSeg *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "tubs";
   Update( _sum, (TGeoTube *)shape );
   sum += shape->GetPhi1();
   sum += shape->GetPhi2();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoCtub *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "ctub";
   Update( _sum, (TGeoTube *)shape );
   for ( Int_t i=0;i<3;i++ ) {
     sum += shape->GetNhigh()[i];
@@ -290,16 +298,19 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoCtub *shape ) { CheckSum_t &
   }
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoEltu *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "eltu";
   sum += shape->GetA();
   sum += shape->GetB();
   sum += shape->GetDz();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoHype *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "hype";
   Update( _sum, (TGeoTube *)shape );
   sum += shape->GetStIn();
   sum += shape->GetStOut();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoPara *shape ) { CheckSum_t &sum = *_sum;
+  sum += "para";
   Update( _sum, (TGeoBBox *)shape );
   sum += shape->GetAlpha();
   sum += shape->GetPhi();
@@ -309,6 +320,7 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoPara *shape ) { CheckSum_t &
   sum += shape->GetZ();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoPcon *shape ) { CheckSum_t &sum = *_sum;
+  sum += "pcon";
   sum += shape->GetNz();
   sum += shape->GetPhi1();
   sum += shape->GetDphi();
@@ -320,10 +332,12 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoPcon *shape ) { CheckSum_t &
     }
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoPgon *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "pgon";
   Update( _sum, (TGeoPcon *)shape );
   sum += shape->GetNedges();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoSphere *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "sphere";
   sum += shape -> GetRmin();
   sum += shape -> GetRmax();
   sum += shape -> GetPhi1();
@@ -332,6 +346,7 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoSphere *shape ) { CheckSum_t
   sum += shape -> GetTheta2();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTorus *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "torus";
   sum += shape -> GetRmin();
   sum += shape -> GetRmax();
   sum += shape -> GetR();
@@ -339,12 +354,14 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTorus *shape ) { CheckSum_t 
   sum += shape -> GetDphi();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTrd1 *shape ) { CheckSum_t &sum = *_sum;
+  sum += "trd1";
   sum += shape -> GetDx1();
   sum += shape -> GetDx2();
   sum += shape -> GetDy();
   sum += shape -> GetDz();
 }
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoTrd2 *shape ) { CheckSum_t &sum = *_sum; 
+  sum += "trd2";
   sum += shape -> GetDx1();
   sum += shape -> GetDx2();
   sum += shape -> GetDy1();
@@ -384,19 +401,16 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoMaterial *material )
 void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoVolume *volume )
 {
   CheckSum_t &sum = *_sum;
-
   TString name = volume->GetName();
-
 
   if ( !volume->IsAssembly() ) 
     { // Assemblies have no material, medium or shape...
-
+      
       Update( _sum, volume->GetMaterial() );
       Update( _sum, volume->GetMedium() );
-      Update( _sum, volume->GetShape() );
-      
-  }
-
+      Update( _sum, volume->GetShape() );      
+    }
+  
   // Loop over daughter nodes
   for ( Int_t i=0;i<volume->GetNdaughters(); i++ )
     {
@@ -419,9 +433,6 @@ void StarAgmlChecker::Update( CheckSum_t *_sum, TGeoVolume *volume )
       sum += md5kid.AsString();
 
     }
-
-  
-  
 
   return;
 
