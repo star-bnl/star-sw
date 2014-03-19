@@ -1,5 +1,8 @@
-// $Id: LoopOverLaserTrees.C,v 1.14 2014/03/13 21:58:43 fisyak Exp $
+// $Id: LoopOverLaserTrees.C,v 1.15 2014/03/19 20:52:37 fisyak Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.15  2014/03/19 20:52:37  fisyak
+// Tight good velocity cut
+//
 // Revision 1.14  2014/03/13 21:58:43  fisyak
 // Add more plots
 //
@@ -107,10 +110,10 @@ void MakeTable() {
   Double_t dvEast  =  DVAll[0][2]; 
   Double_t ddvEast = dDVAll[0][2]; 
   Run.ok = 0; // ok == 0 => use both: west and east; ok == 1 => use averaged drift velocities; ok > 1 ==> no. acceptable drift velocities
-  if (dvWest < 5.3 || dvWest > 5.9 || ddvWest <= 0 || ddvWest> 1e-3 ||
-      dvEast < 5.3 || dvEast > 5.9 || ddvEast <= 0 || ddvEast> 1e-3) {
-    //  if (! (dvWest < 5.3 && dvWest > 5.9 && ddvWest < 0 && ddvWest> 1e-3) ||
-    //      ! (dvEast < 5.3 && dvEast > 5.9 && ddvEast < 0 && ddvEast> 1e-3)) {
+  if (dvWest < 5.3 || dvWest > 5.9 || ddvWest <= 0 || ddvWest> 5e-5 ||
+      dvEast < 5.3 || dvEast > 5.9 || ddvEast <= 0 || ddvEast> 5e-5) {
+    //  if (! (dvWest < 5.3 && dvWest > 5.9 && ddvWest < 0 && ddvWest> 5e-5) ||
+    //      ! (dvEast < 5.3 && dvEast > 5.9 && ddvEast < 0 && ddvEast> 5e-5)) {
     cout << "Run " << run << " fails ============================= to make separated East and West drift velocities" << endl;
     cout << "vWest = " << dvWest << " +/- " << ddvWest 
 	 << "\tvEast = " << dvEast << " +/- " << ddvEast << endl;
@@ -119,8 +122,8 @@ void MakeTable() {
 #ifndef SeparateWestandEast
   Run.ok = 1;
 #endif
-  //  if (ok == 1 && ! (dv > 5.3 && dv < 5.9 && ddv > 0 && ddv< 1e-3)) {
-  if (Run.ok == 1 && (dv < 5.3 || dv > 5.9 || ddv <= 0 || ddv > 1e-3)) {
+  //  if (ok == 1 && ! (dv > 5.3 && dv < 5.9 && ddv > 0 && ddv< 5e-5)) {
+  if (Run.ok == 1 && (dv < 5.3 || dv > 5.9 || ddv <= 0 || ddv > 5e-5)) {
     cout << "Run " << run << " fails ============================= to make averaged drift velocities" << endl;
     cout << "v = " << dv << " +/- " << ddv << endl;
     Run.ok = 2;
