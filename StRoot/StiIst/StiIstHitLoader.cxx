@@ -3,7 +3,7 @@
 #include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "StEvent/StEnumerations.h"
 #include "StMcEvent/StMcEvent.hh"
 #include "StEventTypes.h"
 #include "StDbUtilities/StGlobalCoordinate.hh"
@@ -63,12 +63,12 @@ void StiIstHitLoader::loadHits(StEvent *source,
    LOG_DEBUG << "StiIstHitLoader: IST Hits: " << nIsthits << endm;
 
    if (nIsthits) {
-      for (unsigned int ladderIdx = 0; ladderIdx < col->numberOfLadders(); ++ladderIdx ) {
+      for (int ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx ) {
          StIstLadderHitCollection *ladderHitCollection = col->ladder(ladderIdx);
 
          if (! ladderHitCollection) {cout << "No IST ladder hit collection" << endl; return;}
 
-         for (unsigned int sensorIdx = 0; sensorIdx < ladderHitCollection->numberOfSensors(); sensorIdx++)   {
+         for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)   {
             StIstSensorHitCollection *sensorHitCollection = ladderHitCollection->sensor(sensorIdx);
 
             if (! sensorHitCollection) {cout << "No IST sensor hit collection" << endl; return;}
