@@ -20,23 +20,28 @@ int main(int argc, char *argv[])
 	short logport ;
 	char loglevel[128] ;
 	char logstr[1024] ;
+	char filearg[128] ;
+	char cmdarg[128] ;
+	int linenum ;
 
-
-	logport = 8000 ;	// rts.log
+	logport = RTS_LOG_PORT_TEST ;	// test.log
 	strcpy(logdest,"172.16.0.1") ;	// daqman on local net
 	strcpy(loglevel,INFO);
+	strcpy(filearg,"shell.sh") ;
+	strcpy(cmdarg,"shell") ;
+	linenum = 0 ;
 
 	rtsLogLevel(DBG) ;
 	rtsLogOutput(RTS_LOG_NET) ;
 
 	memset(logstr,0,sizeof(logstr)) ;
 
-	while((c = getopt(argc,argv,"c:d:p:w:h:")) != EOF) {
+	while((c = getopt(argc,argv,"c:d:p:w:h:f:l:")) != EOF) {
 	switch(c) {
 	case 'c' :
-		rtsLogAddCmd(optarg) ;
+		strcpy(cmdarg,optarg) ;
 		break ;
-	case 'd' :	// loglevel
+	case 'd' :	// loglevel as string
 		strcpy(loglevel,optarg) ;
 		break ;
 	case 'w' :
@@ -48,6 +53,12 @@ int main(int argc, char *argv[])
 	case 'h' :
 		strcpy(logdest,optarg) ;
 		break ;
+	case 'f' :
+		strcpy(filearg,optarg) ;
+		break ;
+	case 'l' :
+		linenum = atoi(optarg) ;
+		break ;
 	case '?' :
 	default :
 		fprintf(stderr,"Usage %s: [-d loglevel] [-p port] [-w output] [-h log host] [-c cmd]\n",argv[0]) ;
@@ -55,9 +66,10 @@ int main(int argc, char *argv[])
 	}
 	}
 		
+	rtsLogAddCmd(cmdarg) ;
 	rtsLogAddDest(logdest,logport) ;
 
-	sprintf(logstr,"COLOR%s: %s [line 0]:",loglevel,__FILE__) ;
+	sprintf(logstr,"COLOR%s: %s [line %d]:",loglevel,filearg,linenum) ;
 
 	while(optind < argc) {
 		strcat(logstr," ") ;
