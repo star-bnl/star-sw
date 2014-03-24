@@ -186,9 +186,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
          mSiMaterial->getDensity());
 
 
-   for (unsigned int ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)
+   for (int ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)
    {
-      for (unsigned int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
+      for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
       {
          unsigned int matIst = 1000 + (ladderIdx) * 6 + (sensorIdx + 1);
          LOG_DEBUG << " ladderIdx/sensorIdx/matIst : " << ladderIdx << " " << sensorIdx << " " << matIst << endm;
