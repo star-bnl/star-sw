@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.6 2014/03/13 22:10:12 smirnovd Exp $
+* $Id: StIstDbMaker.cxx,v 1.7 2014/03/24 15:49:48 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.7  2014/03/24 15:49:48  ypwang
+* checks added and const pointers returned for GetIstPedNoise, GetIstGain, GetIstMapping and GetIstControl functions
+*
 * Revision 1.6  2014/03/13 22:10:12  smirnovd
 * Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
 *
@@ -203,22 +206,42 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
    return kStOk;
 }
 //_____________________________________________________________________________
-void StIstDbMaker::GetIstPedNoise()
+Int_t StIstDbMaker::GetIstPedNoise()
 {
    mPedNoise = (St_istPedNoise *)GetDataBase("Calibrations/ist/istPedNoise");
+   if(!mPedNoise) {
+	LOG_ERROR << "StIstDbMaker: No input pedestal/noise data set!" << endm;
+	return kStErr;
+   }
+   return kStOk;
 }
 //_____________________________________________________________________________
-void StIstDbMaker::GetIstGain()
+Int_t StIstDbMaker::GetIstGain()
 {
    mGain = (St_istGain *)GetDataBase("Calibrations/ist/istGain");
+   if(!mGain) {
+        LOG_ERROR << "StIstDbMaker: No input gain data set!" << endm;
+        return kStErr;
+   }
+   return kStOk;
 }
 //_____________________________________________________________________________
-void StIstDbMaker::GetIstMapping()
+Int_t StIstDbMaker::GetIstMapping()
 {
    mMapping = (St_istMapping *)GetDataBase("Calibrations/ist/istMapping");
+   if(!mMapping) {
+        LOG_ERROR << "StIstDbMaker: No input mapping data set!" << endm;
+        return kStErr;
+   }
+   return kStOk;
 }
 //_____________________________________________________________________________
-void StIstDbMaker::GetIstControl()
+Int_t StIstDbMaker::GetIstControl()
 {
    mControl = (St_istControl *)GetDataBase("Calibrations/ist/istControl");
+   if(!mControl) {
+        LOG_ERROR << "StIstDbMaker: No input control parameter data set!" << endm;
+        return kStErr;
+   }
+   return kStOk;
 }

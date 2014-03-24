@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.5 2014/02/08 03:34:16 ypwang Exp $
+* $Id: StIstDbMaker.h,v 1.6 2014/03/24 15:49:48 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.6  2014/03/24 15:49:48  ypwang
+* checks added and const pointers returned for GetIstPedNoise, GetIstGain, GetIstMapping and GetIstControl functions
+*
 * Revision 1.5  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
@@ -37,27 +40,27 @@ class StIstDbMaker : public StMaker
 public:
    StIstDbMaker(const char *name = "istDb");
    Int_t  InitRun(Int_t runNumber);
-   THashList *GetRotations() 	 {return fRotList; }
-   St_istPedNoise *GetPedNoise() {return mPedNoise;}
-   St_istGain	  *GetGain()	 {return mGain;    }
-   St_istMapping  *GetMapping()  {return mMapping; }
-   St_istControl  *GetControl()  {return mControl; }
+   THashList *GetRotations() 	{return fRotList; }
+   const  St_istPedNoise *GetPedNoise() {return mPedNoise;}
+   const  St_istGain	*GetGain()      {return mGain;    }
+   const  St_istMapping  *GetMapping()  {return mMapping; }
+   const  St_istControl  *GetControl()  {return mControl; }
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.5 2014/02/08 03:34:16 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.6 2014/03/24 15:49:48 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    Int_t CalculateSensorsPosition();
-   void   GetIstPedNoise();
-   void   GetIstGain();
-   void   GetIstMapping();
-   void   GetIstControl();
+   Int_t GetIstPedNoise();
+   Int_t GetIstGain();
+   Int_t GetIstMapping();
+   Int_t GetIstControl();
 
    static THashList *fRotList;
-   St_istPedNoise   *mPedNoise;
-   St_istGain       *mGain;
-   St_istMapping    *mMapping;
-   St_istControl    *mControl;
+   const St_istPedNoise   *mPedNoise;
+   const St_istGain       *mGain;
+   const St_istMapping    *mMapping;
+   const St_istControl    *mControl;
 
    ClassDef(StIstDbMaker, 0)
 };
