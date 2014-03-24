@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.147 2013/06/26 18:55:05 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.148 2014/03/24 19:57:15 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.148  2014/03/24 19:57:15  jwebb
+// Added code to support reading new MTD active layers.
+//
 // Revision 1.147  2013/06/26 18:55:05  jwebb
 // Updated MTD sensitive volume.
 //
@@ -1424,8 +1427,11 @@ Int_t St_geant_Maker::Make() {
     //           ==============================
   }
 
-  nhits = 0;
-  geant3->Gfnhit("MUTH","MIGG", nhits);
+  nhits = 0; nhit1 = 0; nhit2 = 0; nhit3 = 0;
+  geant3->Gfnhit("MUTH","MIGG", nhit1);
+  geant3->Gfnhit("MUTH","MTTT", nhit2);
+  geant3->Gfnhit("MUTH","MTTF", nhit3); 
+  nhits=nhit1+nhit2+nhit3;
   if (nhits>0) {
     St_g2t_mtd_hit *g2t_mtd_hit = new St_g2t_mtd_hit("g2t_mtd_hit",nhits);
     m_DataSet->Add(g2t_mtd_hit);
