@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.8 2014/03/17 21:51:56 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.9 2014/03/24 15:55:07 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.9  2014/03/24 15:55:07  ypwang
+* minor updates due to returned const pointers in StIstDbMaker
+*
 * Revision 1.8  2014/03/17 21:51:56  ypwang
 * minor update due to some IST constants moved to StEnumurations.h
 *
@@ -166,9 +169,9 @@ Int_t StIstClusterMaker::InitRun(Int_t runnumber)
   Int_t ierr = kStOk;
 
   // control parameters
-  St_istControl *istControl = mIstDbMaker->GetControl();
-  if (!istControl)  LOG_WARN << " no istControl table " << endm;
+  const St_istControl *istControl = mIstDbMaker->GetControl();
   istControl_st *istControlTable = istControl->GetTable();
+  if (!istControlTable)  LOG_WARN << "Pointer to IST control table is null" << endm;
 
   mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
   mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;

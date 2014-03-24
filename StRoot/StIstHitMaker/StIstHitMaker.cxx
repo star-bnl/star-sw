@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.9 2014/03/18 02:30:25 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.10 2014/03/24 15:55:08 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.10  2014/03/24 15:55:08  ypwang
+* minor updates due to returned const pointers in StIstDbMaker
+*
 * Revision 1.9  2014/03/18 02:30:25  ypwang
 * minor typo error correction
 *
@@ -208,9 +211,9 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
    listGeoMSensorOnGlobal = mIstDbMaker->GetRotations();
 
    // control parameters
-   St_istControl *istControl = mIstDbMaker->GetControl();
-   if (!istControl)  LOG_WARN << " no istControl table " << endm;
+   const St_istControl *istControl = mIstDbMaker->GetControl();
    istControl_st *istControlTable = istControl->GetTable();
+   if (!istControlTable)  LOG_WARN << "Pointer to IST control table is null" << endm;
 
    mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
    mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;

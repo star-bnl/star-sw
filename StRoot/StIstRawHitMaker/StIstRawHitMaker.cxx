@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.10 2014/03/18 02:45:19 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.11 2014/03/24 15:55:08 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.11  2014/03/24 15:55:08  ypwang
+* minor updates due to returned const pointers in StIstDbMaker
+*
 * Revision 1.10  2014/03/18 02:45:19  ypwang
 * update raw hit decision algorithm: removed 1st time bin restriction cut
 *
@@ -105,9 +108,9 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    Int_t ierr = kStOk;
 
    // IST control parameters
-   St_istControl *istControl = mIstDbMaker->GetControl();
-   if (!istControl) LOG_WARN << " no istControl table " << endm;
+   const St_istControl *istControl = mIstDbMaker->GetControl();
    istControl_st *istControlTable = istControl->GetTable();
+   if (!istControlTable) LOG_WARN << "Pointer to IST control table is null" << endm;
 
    mHitCut  = istControlTable[0].kIstHitCutDefault;
    mCmnCut  = istControlTable[0].kIstCMNCutDefault;
@@ -121,65 +124,51 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    mCurrentTimeBinNum = istControlTable[0].kIstCurrentTimeBinNum;
 
    // open db files for non-calibration mode
-   St_istPedNoise *istPedNoise;
-   istPedNoise_st *gPN;
-   istPedNoise = mIstDbMaker->GetPedNoise();
-   if(istPedNoise) {
-       	gPN = istPedNoise->GetTable();
-        if( !gPN ) {
-	    LOG_WARN << "Pointer to IST pedestal/noise table is null" << endm;
-	    ierr = kStWarn;
-	}
-
-        for(int i=0; i<kIstNumApvs; i++) {
-            LOG_DEBUG<<Form(" Print entry %d : CM noise=%f ",i,(float)gPN[0].cmNoise[i]/100.)<<endm;
-	    mCmnVec[i] = (float)gPN[0].cmNoise[i]/100.0;
-        }
-
-        for(int i=0; i<kIstNumElecIds; i++) {
-            LOG_DEBUG<<Form(" Print entry %d : pedestal=%f ",i,(float)gPN[0].pedestal[i])<<endm;
-	    mPedVec[i] = (float)gPN[0].pedestal[i];
-        }
-
-        for(int i=0; i<kIstNumElecIds; i++) {
-            LOG_DEBUG<<Form(" Print entry %d : RMS noise=%f ",i,(float)gPN[0].rmsNoise[i]/100.)<<endm;
-	    mRmsVec[i] = (float)gPN[0].rmsNoise[i]/100.;
-        }
+   const St_istPedNoise *istPedNoise = mIstDbMaker->GetPedNoise();
+   istPedNoise_st *gPN = istPedNoise->GetTable();
+   if( !gPN ) {
+	LOG_WARN << "Pointer to IST pedestal/noise table is null" << endm;
+	ierr = kStWarn;
    }
-   else LOG_DEBUG << " no IST pedestal/noise tables found" << endm;
 
-   St_istGain *istGain;
-   istGain_st *gG;
-   istGain = mIstDbMaker->GetGain();
-   if(istGain) {
-        gG = istGain->GetTable();
-	if( !gG ) {
-	    LOG_WARN << "Pointer to IST gain table is null" << endm;
-            ierr = kStWarn;
-	}
-
-        for(int i=0; i<kIstNumElecIds; i++) {
-            LOG_DEBUG<<Form(" Print entry %d : gain=%f ",i,(float)gG[0].gain[i])<<endm;
-	    mGainVec[i] = (float)gG[0].gain[i];
-        }
+   for(int i=0; i<kIstNumApvs; i++) {
+        LOG_DEBUG<<Form(" Print entry %d : CM noise=%f ",i,(float)gPN[0].cmNoise[i]/100.)<<endm;
+	mCmnVec[i] = (float)gPN[0].cmNoise[i]/100.0;
    }
-   else LOG_DEBUG << " no IST gain table found" << endm;
 
-   St_istMapping *istMapping = mIstDbMaker->GetMapping();
-
-   if(istMapping) {
-       istMapping_st *gM = istMapping->GetTable();
-       if( !gM ) {
-            LOG_WARN << "Pointer to IST mapping table is null" << endm;
-            ierr = kStWarn;
-       }
-
-       for(int i=0; i<kIstNumElecIds; i++) {
-           LOG_DEBUG<<Form(" Print entry %d : geoId=%d ",i,gM[0].mapping[i])<<endm;
-           mMappingVec[i] = gM[0].mapping[i];
-       }
+   for(int i=0; i<kIstNumElecIds; i++) {
+        LOG_DEBUG<<Form(" Print entry %d : pedestal=%f ",i,(float)gPN[0].pedestal[i])<<endm;
+	mPedVec[i] = (float)gPN[0].pedestal[i];
    }
-   else LOG_DEBUG << " no IST mapping table found" << endm;
+
+   for(int i=0; i<kIstNumElecIds; i++) {
+        LOG_DEBUG<<Form(" Print entry %d : RMS noise=%f ",i,(float)gPN[0].rmsNoise[i]/100.)<<endm;
+	mRmsVec[i] = (float)gPN[0].rmsNoise[i]/100.;
+   }
+
+   const St_istGain *istGain = mIstDbMaker->GetGain();
+   istGain_st *gG = istGain->GetTable();
+   if( !gG ) {
+	LOG_WARN << "Pointer to IST gain table is null" << endm;
+        ierr = kStWarn;
+   }
+
+   for(int i=0; i<kIstNumElecIds; i++) {
+        LOG_DEBUG<<Form(" Print entry %d : gain=%f ",i,(float)gG[0].gain[i])<<endm;
+	mGainVec[i] = (float)gG[0].gain[i];
+   }
+
+   const St_istMapping *istMapping = mIstDbMaker->GetMapping();
+   istMapping_st *gM = istMapping->GetTable();
+   if( !gM ) {
+        LOG_WARN << "Pointer to IST mapping table is null" << endm;
+        ierr = kStWarn;
+   }
+
+   for(int i=0; i<kIstNumElecIds; i++) {
+        LOG_DEBUG<<Form(" Print entry %d : geoId=%d ",i,gM[0].mapping[i])<<endm;
+        mMappingVec[i] = gM[0].mapping[i];
+   }
    
    return ierr; 
 };
