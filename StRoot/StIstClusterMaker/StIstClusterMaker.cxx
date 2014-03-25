@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.9 2014/03/24 15:55:07 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.10 2014/03/25 03:06:52 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.10  2014/03/25 03:06:52  ypwang
+* updates on Db table accessory method
+*
 * Revision 1.9  2014/03/24 15:55:07  ypwang
 * minor updates due to returned const pointers in StIstDbMaker
 *
@@ -169,12 +172,24 @@ Int_t StIstClusterMaker::InitRun(Int_t runnumber)
   Int_t ierr = kStOk;
 
   // control parameters
-  const St_istControl *istControl = mIstDbMaker->GetControl();
-  istControl_st *istControlTable = istControl->GetTable();
-  if (!istControlTable)  LOG_WARN << "Pointer to IST control table is null" << endm;
-
-  mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
-  mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
+  const TDataSet *dbControl = mIstDbMaker->GetControl();
+  St_istControl *istControl = 0;
+  istControl = (St_istControl *)dbControl->Find("istControl");
+  if(!istControl) {
+       LOG_ERROR << "Dataset does not contain IST control table!" << endm;
+       ierr = kStErr;
+  }
+  else {
+       istControl_st *istControlTable = istControl->GetTable() ;
+       if (!istControlTable)  {
+            LOG_ERROR << "Pointer to IST control table is null" << endm;
+            ierr = kStErr;
+       }
+       else {
+	    mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
+  	    mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
+       }
+  }
 
   return ierr;
 };
