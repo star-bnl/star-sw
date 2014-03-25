@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.7 2014/03/24 15:49:48 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.8 2014/03/25 03:01:57 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.8  2014/03/25 03:01:57  ypwang
+* get rid of GetIstPedNoise(), GetIstGain(), GetIstMapping() and GetIstControl() functions; use TDataSet instead of Db table structure
+*
 * Revision 1.7  2014/03/24 15:49:48  ypwang
 * checks added and const pointers returned for GetIstPedNoise, GetIstGain, GetIstMapping and GetIstControl functions
 *
@@ -43,16 +46,12 @@
 #include <assert.h>
 #include "StIstUtil/StIstConsts.h"
 #include "StIstDbMaker.h"
+#include "TDataSet.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
 #include "StTpcDb/StTpcDb.h"
 #include "St_db_Maker/St_db_Maker.h"
-
 #include "tables/St_Survey_Table.h"
-#include "tables/St_istPedNoise_Table.h"
-#include "tables/St_istGain_Table.h"
-#include "tables/St_istMapping_Table.h"
-#include "tables/St_istControl_Table.h"
 
 #include "TMath.h"
 #include "TVector3.h"
@@ -72,14 +71,34 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 {
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Calculate Sensor Position" << endm;
    CalculateSensorsPosition();
+
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Pedestal and Noise Table" << endm;
-   GetIstPedNoise();
+   mPedNoise = GetDataBase("Calibrations/ist/istPedNoise");
+   if(!mPedNoise) {
+        LOG_ERROR << "StIstDbMaker: No input pedestal/noise data set!" << endm;
+        return kStErr;
+   }
+
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Gain Table" << endm;
-   GetIstGain();
+   mGain = GetDataBase("Calibrations/ist/istGain");
+   if(!mGain) {
+        LOG_ERROR << "StIstDbMaker: No input gain data set!" << endm;
+        return kStErr;
+   }
+
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Mapping Table" << endm;
-   GetIstMapping();
+   mMapping = GetDataBase("Calibrations/ist/istMapping");
+   if(!mMapping) {
+        LOG_ERROR << "StIstDbMaker: No input mapping data set!" << endm;
+        return kStErr;
+   }
+
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Control Table" << endm;
-   GetIstControl();
+   mControl = GetDataBase("Calibrations/ist/istControl");
+   if(!mControl) {
+        LOG_ERROR << "StIstDbMaker: No input control parameter data set!" << endm;
+        return kStErr;
+   }
 
    return kStOK;
 }
@@ -98,23 +117,23 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
 
    //get IDS positionment relative to TPC
    St_Survey *st_idsOnTpc          = (St_Survey *) GetDataBase("Geometry/ist/idsOnTpc");       
-   if (!st_idsOnTpc)          {cout << "idsOnTpc has not been found"  << endl; return 0;}
+   if (!st_idsOnTpc)          {LOG_ERROR << "idsOnTpc has not been found"  << endl; return kStErr;}
 
    //get PST positionment relative to IDS
    St_Survey *st_pstOnIds          = (St_Survey *) GetDataBase("Geometry/ist/pstOnIds");       
-   if (!st_pstOnIds)          {cout << "pstOnIds has not been found"  << endl; return 0;}
+   if (!st_pstOnIds)          {LOG_ERROR << "pstOnIds has not been found"  << endl; return kStErr;}
 
    //get IST positionment relative to PST
    St_Survey *st_istOnPst          = (St_Survey *) GetDataBase("Geometry/ist/istOnPst");        
-   if (!st_istOnPst)          {cout << "istOnPst has not been found"  << endl; return 0;}
+   if (!st_istOnPst)          {LOG_ERROR << "istOnPst has not been found"  << endl; return kStErr;}
 
    //get ladder positionments relative to IST
    St_Survey *st_istLadderOnIst    = (St_Survey *) GetDataBase("Geometry/ist/istLadderOnIst"); 
-   if (!st_istLadderOnIst)    {cout << "istLadderOnIst has not been found"  << endl; return 0;}
+   if (!st_istLadderOnIst)    {LOG_ERROR << "istLadderOnIst has not been found"  << endl; return kStErr;}
 
    //get sensor positionments relative to ladder
    St_Survey *st_istSensorOnLadder = (St_Survey *) GetDataBase("Geometry/ist/istSensorOnLadder");
-   if (!st_istSensorOnLadder) {cout << "istSensorOnLadder has not been found"  << endl; return 0;}
+   if (!st_istSensorOnLadder) {LOG_ERROR << "istSensorOnLadder has not been found"  << endl; return kStErr;}
 
    //obtain these tables
    Survey_st *idsOnTpc          = st_idsOnTpc->GetTable();
@@ -202,46 +221,6 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
       if (Debug() > 2) {
          comb->Print();
       }
-   }
-   return kStOk;
-}
-//_____________________________________________________________________________
-Int_t StIstDbMaker::GetIstPedNoise()
-{
-   mPedNoise = (St_istPedNoise *)GetDataBase("Calibrations/ist/istPedNoise");
-   if(!mPedNoise) {
-	LOG_ERROR << "StIstDbMaker: No input pedestal/noise data set!" << endm;
-	return kStErr;
-   }
-   return kStOk;
-}
-//_____________________________________________________________________________
-Int_t StIstDbMaker::GetIstGain()
-{
-   mGain = (St_istGain *)GetDataBase("Calibrations/ist/istGain");
-   if(!mGain) {
-        LOG_ERROR << "StIstDbMaker: No input gain data set!" << endm;
-        return kStErr;
-   }
-   return kStOk;
-}
-//_____________________________________________________________________________
-Int_t StIstDbMaker::GetIstMapping()
-{
-   mMapping = (St_istMapping *)GetDataBase("Calibrations/ist/istMapping");
-   if(!mMapping) {
-        LOG_ERROR << "StIstDbMaker: No input mapping data set!" << endm;
-        return kStErr;
-   }
-   return kStOk;
-}
-//_____________________________________________________________________________
-Int_t StIstDbMaker::GetIstControl()
-{
-   mControl = (St_istControl *)GetDataBase("Calibrations/ist/istControl");
-   if(!mControl) {
-        LOG_ERROR << "StIstDbMaker: No input control parameter data set!" << endm;
-        return kStErr;
    }
    return kStOk;
 }
