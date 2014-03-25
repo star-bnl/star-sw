@@ -481,7 +481,7 @@ void istBuilder::event(daqReader *rdr) {
     for ( u_int i=0; i<maxI; i++ ) {
       //not zs data
       if ( f[i].ch  < 0 || f[i].ch  > 127 )       continue;      //valid Channel numbering: 0, 1, ..., 127 
-      if ( f[i].tb  < 0 || f[i].tb  > numTb )     continue;      //valid Time bin numbering: 0, 1, ..., 9 (default 9 time bins)
+      if ( f[i].tb  < 0 || f[i].tb  > numTb )     continue;      //valid Time bin numbering: 0, 1, ..., numTb-1 (default 9 time bins, or 4, 5)
       if ( f[i].adc < 0 || f[i].adc > 4095 )      continue;      //valid ADC counts from 0 to 4095
  
       //count the found channel (only taking time bin 0 to avoid double counting)
@@ -526,7 +526,7 @@ void istBuilder::event(daqReader *rdr) {
       }
 
       //counts for dynamical common mode noise calculation
-      if ( f[i].tb==(numTimeBin-1) ) {       //only take last time bin
+      if ( f[i].tb==(numTb-1) ) {       //only take last time bin
 	  //exclude signal-related channels for common mode noise calculation
 	  if ( oldStdDevs[geoId-1]>0 && abs(maxAdc[geoId-1] < cmnCut*oldStdDevs[geoId-1]) ) {
 	      sumAdcPerEvent[apvId] += (maxAdc[geoId-1]+runningAvg[geoId-1]);
