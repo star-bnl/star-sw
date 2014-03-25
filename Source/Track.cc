@@ -88,6 +88,11 @@ void Track::SetParticle(std::string part) {
     mass = 1875.612793e6;
     spin = 2;
     particleName = "d";
+  } else if (part == "alpha" || part == "Alpha") {
+    q = 2;
+    mass = 3.727379240e9;
+    spin = 0;
+    particleName = "alpha";
   } else {
     std::cerr << className << "::SetParticle:\n";
     std::cerr << "    Particle " << part << " is not defined.\n";

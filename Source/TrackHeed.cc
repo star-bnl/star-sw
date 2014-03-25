@@ -318,6 +318,8 @@ bool TrackHeed::NewTrack(const double x0, const double y0, const double z0,
     particleType = &Heed::anti_proton_def;
   } else if (particleName == "d") {
     particleType = &Heed::deuteron_def;
+  } else if (particleName == "alpha") {
+    particleType = &Heed::alpha_particle_def;
   } else if (particleName == "exotic") {
     // User defined particle
     Heed::user_particle_def.set_mass(mass * 1.e-6);
