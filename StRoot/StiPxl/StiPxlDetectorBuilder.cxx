@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.37 2014/03/12 00:19:36 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.38 2014/03/25 22:02:49 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -139,14 +139,14 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             ostringstream geoPath;
             geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
 
-            gGeoManager->cd(geoPath.str().c_str());
-            TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
+            bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
-            if (!sensorVol) {
-               Error("useVMCGeometry()", "sensorVol PLAC not found");
+            if (!isAvail) {
+               Error("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next node...");
                continue;
             }
 
+            TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
             TGeoMatrix* sensorMatrix = 0;
 
             if (mUseDbGeom) {
