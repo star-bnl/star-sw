@@ -11,7 +11,9 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-//             **** plane ****
+namespace Heed {
+
+// **** plane ****
 
 absref absref::*(plane::aref[2]) = {(absref absref::*)&plane::piv,
                                     (absref absref::*)&plane::dir };
@@ -161,4 +163,6 @@ std::ostream& operator<<(std::ostream& file, const plane& pl) {
   file << pl.piv << pl.dir;
   indn.n -= 2;
   return file;
+}
+
 }

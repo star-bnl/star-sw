@@ -17,6 +17,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 // ********  box (3-dimensional rectangle (rectangular parallelogram)  *******
 // center of coordinate system is meant in the center of the box
 class box : public absvol {
@@ -26,11 +28,9 @@ class box : public absvol {
   ulsvolume ulsv;
   String name;
 
- protected:
-  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
 
  public:
-  // Constructors
+  /// Constructors
   box(void);
   // Compute precision as a ratio vprecision from mean of dimensions
   box(vfloat fdx, vfloat fdy, vfloat fdz, const String& fname);
@@ -38,7 +38,8 @@ class box : public absvol {
   box(vfloat fdx, vfloat fdy, vfloat fdz, vfloat fprec, const String& fname);
   box(box& fb);
   box(const box& fb);
-  // Destructor
+  macro_copy_header(box);
+  /// Destructor
   virtual ~box() {}
 
   void init_prec(void);
@@ -48,49 +49,53 @@ class box : public absvol {
 
   // Range till exit from given volume or to entry only
   virtual int range_ext(trajestep& fts, int s_ext) const;
-
- public:
-  macro_copy_header(box);
   virtual void income(gparticle* gp);
   virtual void chname(char* nm) const;
   virtual void print(std::ostream& file, int l) const;
+
+ protected:
+  virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
+
 };
 
 // *****   manip_box  ********
 
 class manip_box : public manip_absvol, public box {
  public:
-  virtual absvol* Gavol(void) const;
-  manip_box(void) : manip_absvol(), box() { ; }
-  manip_box(const box& f) : manip_absvol(), box(f) { ; }
+  /// Constructors
+  manip_box(void) : manip_absvol(), box() {}
+  manip_box(const box& f) : manip_absvol(), box(f) {}
   macro_copy_header(manip_box);
+  /// Destructor
+  virtual ~manip_box() {}
+
+  virtual absvol* Gavol(void) const;
   virtual void chname(char* nm) const;
   virtual void print(std::ostream& file, int l) const;
-  virtual ~manip_box() { ; }
-
 };
 
 // *****   sh_manip_box  ********
 
 class sh_manip_box : virtual public sh_manip_absvol, public box {
  public:
+  /// Constructors
+  sh_manip_box(void) : sh_manip_absvol(), box() {}
+  sh_manip_box(const box& f) : sh_manip_absvol(), box(f) {}
+  sh_manip_box(const abssyscoor& fcsys, const box& fbx)
+      : sh_manip_absvol(fcsys), box(fbx) {}
+  macro_copy_header(sh_manip_box);
+  /// Dstructor
+  virtual ~sh_manip_box() { ; }
+
   virtual absvol* Gavol(void) const;
+  virtual void chname(char* nm) const;
+  virtual void print(std::ostream& file, int l) const;
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
 
- public:
-  sh_manip_box(void) : sh_manip_absvol(), box() { ; }
-  sh_manip_box(const box& f) : sh_manip_absvol(), box(f) { ; }
-  sh_manip_box(const abssyscoor& fcsys, const box& fbx)
-      : sh_manip_absvol(fcsys), box(fbx) {
-    ;
-  }
-  macro_copy_header(sh_manip_box);
-  virtual void chname(char* nm) const;
-  virtual void print(std::ostream& file, int l) const;
-  virtual ~sh_manip_box() { ; }
-
 };
+
+}
 
 #endif

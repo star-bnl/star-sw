@@ -17,34 +17,26 @@ The file is provided "as is" without express or implied warranty.
 #include "wcpplib/geometry/vec.h"
 #include "wcpplib/geometry/straight.h"
 
-//             **** plane ****
+namespace Heed {
+
+// **** plane ****
 
 class polyline;
 
 class plane : public absref {
  protected:
-  // internals are private, because it should be another way to define the
-  // plane. We want the program to be independant on way.
-  // The same line can have different piv's along it, and different vec's:
-  // dir or -dir. Vector supposed to be of unit length.
-
   point piv;  // origin point, pivot
-  vec dir;    // directionof normal, unit vector
-              //
+  vec dir;    // direction of normal, unit vector
  public:
   point Gpiv(void) const {
     return piv;
-  }  //It should return one any point of line
+  }
   vec Gdir(void) const {
     return dir;
-  }  // return any direction
+  }
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //	            int& fqareff, absref **&fareff) // free memory
-  //  {
-  //    fqaref=2; fqareff=0; faref=&aref[0]; fareff=NULL; }
   static absref(absref::* aref[2]);
 
  public:
@@ -59,8 +51,6 @@ class plane : public absref {
   // Otherwise vecerror != 0
   // Prec is used for crossing of lines.
 
-  //plane(const plane &fpl):
-  //  piv(fpl.piv), dir(fpl.dir) { ; }
   plane& operator=(const plane& fpl) {
     piv = fpl.piv;
     dir = fpl.dir;
@@ -98,6 +88,8 @@ class plane : public absref {
 };
 
 std::ostream& operator<<(std::ostream& file, const plane& s);
+
+}
 
 #include "wcpplib/geometry/polyline.h"
 

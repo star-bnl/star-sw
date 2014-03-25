@@ -11,6 +11,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 //             **** surface ****
 //             **** splane ****
 absref absref::*(splane::aref_splane[2]) = {
@@ -58,22 +60,21 @@ int splane::check_point_inside1(const point& fpt, int s_ext,
 int splane::range(const trajestep& fts, vfloat* crange, point* cpt,
                   int* s_ext) const {
   mfunname("int splane::range(...)");
-  if (fts.s_range_cf == 0)  // straight line
-      {
+  if (fts.s_range_cf == 0) {
+    // straight line
     point pt = pn.cross(straight(fts.currpos, fts.dir));
     if (vecerror != 0) {
       vecerror = 0;
       return 0;
     }
     vfloat rng = length(pt - fts.currpos);
-    if (pt == fts.currpos || check_par(pt - fts.currpos, fts.dir, 0.01) == 1)
+    if (pt == fts.currpos || check_par(pt - fts.currpos, fts.dir, 0.01) == 1) {
         //                                   looks like not matter ^
-        {                     // otherwise the point is behind plane
-      if (fts.mrange >= rng)  // otherwise it can not reach the plane
-          {
+      // otherwise the point is behind plane
+      if (fts.mrange >= rng) {
+        // otherwise it can not reach the plane
         cpt[0] = pt;
         crange[0] = rng;
-        //if(check_point_inside(fts.currpos, fts.dir, 0.0) == 1)
         vfloat t = cos2vec(fts.dir, dir_ins);
         if (t < 0)
           s_ext[0] = 1;
@@ -82,10 +83,8 @@ int splane::range(const trajestep& fts, vfloat* crange, point* cpt,
         else
           s_ext[0] = 2;
         return 1;
-      } else {
-        //mcout<<"fts.mrange<rng\n";
-        return 0;
       }
+      return 0;
     } else
       return 0;
   } else {
@@ -109,10 +108,10 @@ int splane::range(const trajestep& fts, vfloat* crange, point* cpt,
       vfloat rng = cf.Grad() * angle;
       if (fts.mrange >= rng) {
         cpt[0] = pt[0];
-        crange[0] = rng;  //s_ext[0]=2;
+        crange[0] = rng;
         vfloat c = cos2vec(dir_ins, fts.relcen);
-        if (angle == 0.0)  // cross in the current point
-            {
+        if (angle == 0.0) {
+          // cross in the current point
           if (c > 0)
             s_ext[0] = 0;
           else if (c < 0)
@@ -139,11 +138,7 @@ int splane::range(const trajestep& fts, vfloat* crange, point* cpt,
       vcr[1] = pt[1] - cf.Gpiv();
       vfloat angle[2];
       angle[0] = ang2projvec(r, vcr[0], cf.Gdir());
-      //mcout<<"r="<<r<<"vcr[0]="<<vcr[0]<<"cf.Gdir()="<<cf.Gdir();
-      //mcout<<"angle[0]="<<angle[0]<<'\n';
       angle[1] = ang2projvec(r, vcr[1], cf.Gdir());
-      //mcout<<"r="<<r<<"vcr[1]="<<vcr[1]<<"cf.Gdir()="<<cf.Gdir();
-      //mcout<<"angle[1]="<<angle[1]<<'\n';
       if (angle[0] > angle[1]) {  // ordering
         vfloat a = angle[0];
         angle[0] = angle[1];
@@ -194,17 +189,14 @@ void splane::print(std::ostream& file, int l) const {
 
 // **** ulsvolume ****
 void ulsvolume::get_components(ActivePtr<absref_transmit>& aref_tran) {
-  int n;
-  for (n = 0; n < qsurf; n++)
-    adrsurf[n] = surf[n].get();
+  for (int n = 0; n < qsurf; n++) adrsurf[n] = surf[n].get();
   aref_tran.pass(new absref_transmit(qsurf, (absref**)adrsurf));
 }
 
 int ulsvolume::check_point_inside(const point& fpt, const vec& dir) const {
   mfunname("ulsvolume::check_point_inside(...)");
   check_econd11(qsurf, <= 0, mcerr);
-  int n;
-  for (n = 0; n < qsurf; n++) {
+  for (int n = 0; n < qsurf; n++) {
     if (!(surf[n].get()->check_point_inside(fpt, dir, prec))) {
       return 0;
     }
@@ -260,8 +252,7 @@ int ulsvolume::range_ext(trajestep& fts, int s_ext) const {
       fts.s_prec = 0;
     }
     return s;
-  } else  // for if(s_ext==1)
-      {
+  } else { // for if(s_ext==1)
     int ss = 0;  // sign that there is cross with any of the surfaces
     for (n = 0; n < qsurf; n++) {
 #ifdef DEBUG_ulsvolume_range_ext
@@ -424,4 +415,6 @@ void manip_ulsvolume::print(std::ostream& file, int l) const {
     ulsvolume::print(file, l - 1);
     indn.n -= 2;
   }
+}
+
 }

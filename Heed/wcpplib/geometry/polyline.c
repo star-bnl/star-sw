@@ -12,7 +12,9 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-//             **** polyline  ****
+namespace Heed {
+
+// **** polyline  ****
 void polyline::get_components(ActivePtr<absref_transmit>& aref_tran) {
   aref_tran.pass(new absref_transmit(qpt + qsl, aref));
 }
@@ -47,15 +49,12 @@ polyline& polyline::operator=(const polyline& fpl) {
 
 void polyline::polyline_init(const point* fpt, int fqpt) {
   pvecerror("void polyline::polyline_init(const point* fpt, int fqpt)");
-  //static char* FunNameIIII1="polyline::polyline_init,  1";
-  //static char* FunNameIIII2="polyline::polyline_init,  2";
   check_econd11(fqpt, < 0, mcerr)
   if (fqpt >= 1) {
     pt = new point[fqpt];
     for (qpt = 0; qpt < fqpt; ++qpt)
       pt[qpt] = fpt[qpt];
     if (fqpt >= 2) {
-      //funnamestack.put(FunNameIIII1);
       sl = new straight[qpt - 1];
       for (qsl = 0; qsl < qpt - 1; ++qsl) {
         sl[qsl] = straight(pt[qsl], pt[qsl + 1]);
@@ -63,8 +62,6 @@ void polyline::polyline_init(const point* fpt, int fqpt) {
     } else {
       sl = NULL;
     }
-    //mcout<<"qpt="<<qpt<<" qsl="<<qsl<<'\n';
-    //funnamestack.put(FunNameIIII2);
     aref = new absref* [qpt + qsl];
     for (int n = 0; n < qpt; ++n)
       aref[n] = &pt[n];
@@ -78,63 +75,6 @@ void polyline::polyline_init(const point* fpt, int fqpt) {
     aref = NULL;
   }
 }
-/*
-void polyline::polyline_init(straight* fsl, int fqsl)
-{
-  if(fqsl<0)
-  {
-    mcerr<<"error in polyline_init(straight* fsl, int fqsl):"
-	 <<" fqsl cannot be less 0, fqsl="<<fqsl<<'\n';
-    exit(1);
-  }
-  if(fqsl>=1)
-  {
-    sl=new straight[fqsl];
-    for( qsl=0; qsl<fqsl; qsl++) sl[qsl]=fsl[qsl];
-    if(fqsl>=2)
-    {
-      pt=new point[qsl-1];
-      for( qpt=0; qpt<qsl-1; qpt++)
-      {
-	pt[qpt]=sl[qpt].cross(sl[qpt+1]);
-	//mcout<<" qpt="<<qpt
-	// <<"\nstraight1="<<sl[qpt]
-	// <<"straight2="<<sl[qpt+1];
-	if(vecerror != 0)
-	{
-	  mcerr<<"error in void polyline_init(straight* fsl, int fqsl):\n"
-	       <<" straight lines are not crossed properly\n"
-	       <<"sl[n]="<<sl[qpt]
-	       <<"sl[n+1]="<<sl[qpt+1]
-	       <<"vecerror="<<vecerror<<'\n';
-	  exit(1);
-	}
-	if(qpt>=2)
-	{
-	  int s=check_par(sl[qpt].dir,pt[qpt]-pt[qpt-1]);
-	  if(s==-1)
-	    sl[qpt].dir=-sl[qpt].dir;
-	  else if(s==0)
-	  {
-	    mcerr<<"void polyline::polyline_init(straight* fsl, int fqsl):\n"
-		 <<"strange, should never happen\n";
-	    exit(1);
-	  }
-	}
-      }
-    }
-    else
-      pt=NULL;
-    aref = new absref* [qpt+qsl];
-    for( int n=0; n<qpt; n++) aref[n]=&pt[n];
-    for( int n=0; n<qsl; n++) aref[n+qpt]=&sl[n];
-  }
-  else
-  {
-    pt=NULL; sl=NULL; aref=NULL;
-  }
-}
-*/
 
 int polyline::check_point_in(const point& fpt, vfloat prec) const {
   pvecerror("int polyline::check_point_in(point& fpt, vfloat prec)");
@@ -157,7 +97,6 @@ int polyline::check_point_in(const point& fpt, vfloat prec) const {
 int polyline::cross(const straight& fsl, point* pc, int& qpc, polyline* pl,
                     int& qpl, vfloat prec) const {
   pvecerror("void polyline::cross(const straight& fsl, ...)");
-  //pc=new point[qpt];
   qpc = 0;
   qpl = 0;
   for (int n = 0; n < qsl; ++n) {
@@ -186,40 +125,7 @@ int polyline::cross(const straight& fsl, point* pc, int& qpc, polyline* pl,
   if (qpc > 0 || qpl > 0) return 1;
   return 0;
 }
-/*
-int polyline::vecdistance(const vec normal, const straight& slt, point& outpt)
-{
-  pvecerror(
-"int polyline::vecdistance(const vec normal, const straight& slt, point&
-outpt)");
-  check_econd11a(qpt, >2,
-	   "this function is applyed only to one segment polyline\n", mcerr);
 
-  if(check_perp(normal, slt.Gdir())==1) // if it is perp.
-  {
-    mcout<<"polyline::vecdistance: normal="<<normal
-	 <<" slt.Gdir()="<<slt.Gdir();
-    vecerror=1;
-    outpt=point(0,0,0);
-    return 0;
-  }
-  basis bash(sl[0].Gdir(), normal, "along line");
-  point pth=sl[0].Gpiv();
-  syscoor sc(&pth, &bash, "temprorary");
-  straight slh=slt;
-  slh.up(&sc);
-  plane pn=plane(point(0,0,0), vec(1,0,0));
-  outpt = pn.cross(slh);
-  point pt0=pt[0]; pt0.up(&sc);
-  point pt1=pt[1]; pt1.up(&sc);
-  mcout<<"polyline::vecdistance: pt0, pt1="<<pt0<<pt1;
-  if(pt0.v.z < pt1.v.z && (outpt.v.z > pt0.v.z && outpt.v.z < pt1.v.z) ||
-     pt0.v.z >= pt1.v.z && (outpt.v.z < pt0.v.z && outpt.v.z > pt1.v.z))
-    return 1;
-  else
-    return 0;
-}
-*/
 vfloat polyline::dist_two_inter(polyline& pl2, vfloat prec) const {
   pvecerror("vfloat polyline::dist_two_inter(polyline& pl)");
   const polyline& pl1 = *this;
@@ -344,9 +250,6 @@ polyline_pl::polyline_pl(polyline& pl) {
     spexit(mcerr);
   }
   polyline::operator=(pl);
-  //*(statcast(polyline*, this))=pl;
-  //*(static_cast<polyline*>(this))=pl;
-  //*((polyline*)this)=pl;
   pn = plane(pl.Gsl(0).Gpiv(), pl.Gsl(0).Gdir() || pl.Gsl(1).Gdir());
 }
 
@@ -357,9 +260,6 @@ polyline_pl::polyline_pl(const polyline& pl) {
     spexit(mcerr);
   }
   polyline::operator=(pl);
-  //*(statcast(polyline*, this))=pl;
-  //*(static_cast<polyline*>(this))=pl;
-  //*((polyline*)this)=pl;
   pn = plane(pl.Gsl(0).Gpiv(), pl.Gsl(0).Gdir() || pl.Gsl(1).Gdir());
 }
 
@@ -376,7 +276,6 @@ std::ostream& operator<<(std::ostream& file, const polyline_pl& p) {
   indn.n += 2;
   file << p.pn;
   file << statcast(const polyline&, p);
-  //file<<static_cast<const polyline&>(p);
   indn.n -= 2;
   return file;
 }
@@ -426,33 +325,14 @@ polygon::polygon(const straight* fsl, int fqsl, vfloat prec)
     spexit(mcerr);
   }
   ptl[fqsl] = ptl[0];
-  //for( n=0; n<fqsl; n++)
-  //{
-  //  mcout<<"n="<<n<<ptl[n];
-  //}
   plane pnl = plane(fsl[0].Gpiv(), fsl[0].Gdir() || fsl[1].Gdir());
-  //*((polyline_pl*)this)=polyline_pl(pnl,ptl,qptl);
-  //*((polyline_pl*)this)=polyline_pl(pnl,ptl,qptl);
-  //polyline_pl::(*this)(pnl,ptl,qptl);
   polyline_pl pll(pnl, ptl, qptl);
   *this = polygon(pll, 1);
 
   delete ptl;
 
-  //for( n=0; n<qsl; n++)
-  //{
-  // int s=check_par(sl[n].dir,pt[n]-pt[n+1]);
-  // if(s==-1)
-  //   sl[n].dir=-sl[n].dir;
-  // else if(s==0)
-  // {
-  //   mcerr<<"void polyline::polyline_init(straight* fsl, int fqsl):\n"
-  //	   <<"strange, should never happen\n";
-  //   exit(1);
-  // }
-  //}
-
 }
+
 polygon& polygon::operator=(const polygon& fpl) {
   mfunname("polygon& polygon::operator=(const polygon& fpl)");
   polyline_del();
@@ -464,16 +344,11 @@ polygon& polygon::operator=(const polygon& fpl) {
 
 int polygon::check_point_in(const point& fpt, vfloat prec) const {
   pvecerror("int polygon::check_point_in(point& fpt)");
-  //mcout<<"polygon::check_point_in:\n";
-  //mcout<<(*this);
-  //mcout<<"fpt="<<fpt;
   int i;
   if ((i = polyline::check_point_in(fpt, prec)) > 0) {
-    //mcout<<"polygon::check_point_in: inside poliline\n";
     return i;
   }
   if ((i = pn.check_point_in(fpt, prec)) == 0) {
-    //mcout<<"polygon::check_point_in: outside plane\n";
     return i;
   }
   /* The idea of the following algorithm is circulating around the polygon
@@ -501,15 +376,8 @@ int polygon::check_point_in(const point& fpt, vfloat prec) const {
       ang2 = 2 * M_PI - ang;
       totang -= ang2;
     }
-    //mcout<<"polygon::check_point_in: n="<<n<<'\n';
-    //mcout<<" totang="<<totang<<'\n';
-    //mcout<<"polygon::check_point_in:   endpt="
-    //     <<endpt[0]<<endpt[1]<<'\n';
   }
 
-  //if(s_start[0]==1 && endpt[0]==pt[0] ||
-  //   s_start[1]==1 && endpt[1]==pt[0] )
-  //if( endpt[0] == endpt[1])
   if (fabs(totang) > 6.0) return 3;
   return 0;
 }
@@ -532,20 +400,14 @@ int polygon::range(const point& fpt, const vec& dir, vfloat& rng, point& fptenr,
                    vfloat prec) const {
   pvecerror("int polygon::range(const point& fpt, const vec& dir, vfloat& rng, "
             " point &fptenr)");
-  //mcout<<"polygon::range:\n"<<*this;
-  //mcout<<"dir="<<'\n';
-
   straight stl(fpt, dir);
-  //mcout<<"stl="<<stl;
   point pnt = cross(stl, prec);
-  //mcout<<"vecerror="<<vecerror<<'\n';
   if (vecerror != 0) {
     vecerror = 0;
     return 0;
   }
   vec dif = pnt - fpt;
-  int i = check_par(dif, dir, prec);
-  //mcout<<"i="<<i<<'\n';
+  const int i = check_par(dif, dir, prec);
   if (i == 1) {
     rng = length(dif);
     fptenr = pnt;
@@ -559,7 +421,6 @@ std::ostream& operator<<(std::ostream& file, const polygon& p) {
   indn.n += 2;
   Ifile << "s_convex=" << p.s_convex << '\n';
   file << statcast(const polyline_pl&, p);
-  //file<<static_cast<const polyline_pl&>(p);
   indn.n -= 2;
   return file;
 }
@@ -607,19 +468,7 @@ rectangle::rectangle(const point& fpiv, vec fdir[2], vfloat fdim[2],
   slh[1] = straight(piv + dir2 * dim[1] / 2.0, -dir1);
   slh[2] = straight(piv - dir1 * dim[0] / 2.0, -dir2);
   slh[3] = straight(piv - dir2 * dim[1] / 2.0, dir1);
-  /*
-  {
-    mcout<<"rectangle::rectangle:\n";
-    mcout<<"piv="<<piv<<'\n';
-    mcout<<"dir:\n"<<dir[0]<<dir[1];
-    mcout<<"dim="<<dim[0]<<' '<<dim[1];
-    for( int n=0; n<4; n++)
-      mcout<<slh[n];
-  }
-  */
   polygon::operator=(polygon(slh, 4, prec));
-  //statcast(polygon& , *this) = polygon(slh,4,prec);
-  //static_cast<polygon&>(*this) = polygon(slh,4,prec);
 }
 
 std::ostream& operator<<(std::ostream& file, const rectangle& f) {
@@ -629,7 +478,6 @@ std::ostream& operator<<(std::ostream& file, const rectangle& f) {
   Ifile << "dir1,2(directions of sides):\n" << f.dir1 << f.dir2;
   Ifile << "dim (dimensions):" << f.dim[0] << ' ' << f.dim[1] << '\n';
   file << statcast(const polygon&, f);
-  //file<<static_cast<const polygon&>(f);
   indn.n -= 2;
   return file;
 }
@@ -679,11 +527,6 @@ spquadr::spquadr(const point& fpiv, const straight& sl1, const straight& sl2,
   slh[1] = straight(piv, dir1);
   slh[2] = sl2;
   slh[3] = straight(piv, dir2);
-  //mcout<<"spquadr: slh=\n";
-  //for( int n=0; n<4; n++)
-  //mcout<<slh[n];
-  //*((polygon*)this) = polygon(slh,4);
-  //awidth = acos(cos2vec(dir1,dir2));
   polygon plgn = polygon(slh, 4, prec);
   *this = spquadr(fpiv, sl1, sl2, fdir1, fdir2, plgn);
 }
@@ -698,10 +541,9 @@ std::ostream& operator<<(std::ostream& file, const spquadr& p) {
   Ifile << "dir2:\n";
   file << p.dir2;
   Ifile << " awidth=" << p.awidth << '\n';
-  //Ifile<<"s_convex="<<p.s_convex<<'\n';
   file << statcast(const polygon&, p);
-  //file<<static_cast<const polygon&>(p);
-  //file<<spquadr::polygon;
   indn.n -= 2;
   return file;
+}
+
 }

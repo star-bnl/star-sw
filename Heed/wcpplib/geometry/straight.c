@@ -13,7 +13,9 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-//             **** straight ****
+namespace Heed {
+
+// **** straight ****
 
 absref absref::*(straight::aref[2]) = {(absref absref::*)&straight::piv,
                                        (absref absref::*)&straight::dir };
@@ -69,64 +71,7 @@ point straight::cross(const straight& sl, vfloat prec) const {
     return ptt;
   }
 }
-/*
-point straight::cross(const straight& sl, vfloat prec) const
-{
-  pvecerror("point straight::cross(straight& sl, vfloat prec)");
-  straight s1,s2;
-  s1 = *this;
-  s2 = sl;    // s2 may be changed
-  //mcout<<s1<<s2;
-  point pt(dv0);
-  if(apeq(s1.piv, s2.piv, prec))
-  {                // the same origin point
-    if(check_par(s1.dir, s2.dir, prec)!=0)  // parallel or anti-parallel
-    {
-      vecerror=3;
-      return pt;   // for coincidence  the point has no sence
-    }
-    else
-    {             // crossed in piv;
-      return s1.piv;
-    }
-  }
-  if(check_par(s1.dir, s2.dir, prec)!=0)  // parallel or anti-parallel
-  {
-    if(s1.check_point_in( s2.piv, prec ) == 1)
-    {                            // point in => the same line
-      vecerror=3;
-      return pt;
-    }
-    else                     // not crossed
-    {
-      vecerror=2;            // different parallel lines
-      return pt;
-    }
-  }    // now we know that the lines are not parallel
 
-  basis bs(s1.dir, s2.dir, "local");
-  //mcout<<bs;
-  syscoor scl(&s1.piv,&bs,"local");
-  //mcout<<scl;
-  plane pn(point(0,0,0), vec(1,0,0));
-  //mcout<<pn;
-  s2.up(&scl);
-  //mcout<<s2;
-  pt=pn.cross(s2, prec);
-  //mcout<<pt;
-  if( apeq(pt.v.y, 0.0, prec) )
-  {
-    pt.down(&scl);
-    return pt;
-  }
-  else
-  {
-    vecerror=1;
-    return pt;
-  }
-  return pt;
-}
-*/
 vfloat straight::vecdistance(const straight& sl, int& type_of_cross,
                              point pt[2]) const {
   pvecerror("vfloat straight::distance(const straight& sl, int type_of_cross,  "
@@ -364,4 +309,6 @@ std::ostream& operator<<(std::ostream& file, const straight& s) {
   file << s.piv << s.dir;
   indn.n -= 2;
   return file;
+}
+
 }

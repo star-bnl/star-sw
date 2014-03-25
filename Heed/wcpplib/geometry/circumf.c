@@ -12,6 +12,8 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 absref absref::*(circumf::aref[2]) = {(absref absref::*)&circumf::piv,
                                       (absref absref::*)&circumf::dir };
 
@@ -88,4 +90,6 @@ std::ostream& operator<<(std::ostream& file, const circumf& f) {
   file << f.piv << f.dir;
   indn.n -= 2;
   return file;
+}
+
 }

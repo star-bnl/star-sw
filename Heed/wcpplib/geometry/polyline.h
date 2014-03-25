@@ -17,7 +17,9 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-//             **** polyline  ****
+namespace Heed {
+
+// **** polyline  ****
 
 #define vec_polyline_index 5
 
@@ -52,12 +54,7 @@ class polyline : public absref {
  protected:
   absref** aref;
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //	            int& fqareff, absref **&fareff) // free memory
-  //  {
-  //    fqaref=0; faref=0;  // no vector elements in foxed memory
-  //    fqareff=qpt+qsl; fareff=&aref[0];
-  //  }
+
  public:
 
   int check_point_in(const point& fpt, vfloat prec) const;
@@ -72,13 +69,6 @@ class polyline : public absref {
   //segment itself.
   //If one of the points is common, it is given several times.
   //For example, if line crosses break point the point is given two times.
-  /*
-  int vecdistance(const vec normal, const straight& slt, point& outpt);
-  // applied to only interval, one segment line.
-  // returns 1 if cross is between ends of this segment,
-  // not necessary directly in line.
-  // not debugged
-  */
   vfloat dist_two_inter(polyline& pl, vfloat prec) const;
   // Distance between two intervals, polylines with one segment of line
   // and two points
@@ -115,9 +105,6 @@ class polyline : public absref {
   polyline(const point* fpt, int fqpt);
   polyline(const point& fpt1, const point& fpt2);  // interval
 
-  //polyline(straight* fsl, int fqsl)
-  //  { polyline_init(fsl, fqsl); }
-
   polyline& operator=(const polyline& fpl);
 
   ~polyline(void) { polyline_del(); }
@@ -134,9 +121,7 @@ int cross4pllines(const polyline pl[4], vfloat precision, straight& sl,
 
 std::ostream& operator<<(std::ostream& file, const polyline& p);
 
-//             **** polyline in plane  ****
-
-//#define vec_polyline_pl_index 6
+// **** polyline in plane  ****
 
 class polyline_pl : public polyline {
  protected:
@@ -148,12 +133,6 @@ class polyline_pl : public polyline {
  protected:
   static absref(absref::* aref_pl);
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //	            int& fqareff, absref **&fareff) // free memory
-  //  {
-  //    polyline::Garef(fqaref, faref, fqareff, fareff);
-  //    fqaref=1; faref=&aref_pl;
-  //  }
  public:
   polyline_pl(void) : polyline(), pn() { ; }
   polyline_pl(const polyline_pl& pl) : polyline(pl), pn(pl.pn) { ; }
@@ -161,11 +140,6 @@ class polyline_pl : public polyline {
       : polyline(fpt, fqpt), pn(fpn) {
     ;
   }
-  //polyline_pl(plane& fpn, straight* fsl, int fqsl):
-  //polyline(fsl,fqsl),pn(fpn){;}
-  //polyline_pl(straight* fsl, int fqsl):
-  //  polyline(fsl,fqsl),pn()
-  //  { pn=plane(fsl[0].Gpiv(),fsl[0].Gdir()||fsl[1].Gdir()); }
   polyline_pl(polyline& pl);
   polyline_pl(const polyline& pl);
 
@@ -228,12 +202,6 @@ class rectangle : public polygon {
  protected:
   static absref(absref::* aref_rct[4]);
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //	            int& fqareff, absref **&fareff) // free memory
-  //  {
-  //    polyline::Garef(fqaref, faref, fqareff, fareff);
-  //    fqaref=4; faref=&aref_rct[0];
-  //  }
 };
 std::ostream& operator<<(std::ostream& file, const rectangle& f);
 
@@ -254,12 +222,6 @@ class spquadr : public polygon {
  protected:
   static absref(absref::* aref_sp[4]);
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //	            int& fqareff, absref **&fareff) // free memory
-  //  {
-  //    polyline::Garef(fqaref, faref, fqareff, fareff);
-  //    fqaref=4; faref=&aref_sp[0];
-  //  }
  public:
 
   vfloat apos(const point& fpt) const  // position in units of radians
@@ -308,5 +270,7 @@ class spquadr : public polygon {
 };
 
 std::ostream& operator<<(std::ostream& file, const spquadr& p);
+
+}
 
 #endif

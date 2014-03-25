@@ -10,7 +10,7 @@
 namespace Garfield {
 
 class HeedChamber : 
-    public sh_manip_absvol, public box,
+    public sh_manip_absvol, public Heed::box,
     public Heed::EnTransfCSType, public Heed::HeedDeltaElectronCSType,
     public Heed::SensitiveVolume {
                     
@@ -20,13 +20,13 @@ class HeedChamber :
                 const Heed::EnTransfCSType etcst,
                 const Heed::HeedDeltaElectronCSType hdecst) :
         sh_manip_absvol(fcsys),
-        box(dx * Heed::cm, dy * Heed::cm, dz * Heed::cm, "chamber"),
+        Heed::box(dx * Heed::cm, dy * Heed::cm, dz * Heed::cm, "chamber"),
         Heed::EnTransfCSType(etcst), Heed::HeedDeltaElectronCSType(hdecst) {
 
     }
 
     macro_copy_total(Garfield::HeedChamber);
-    virtual absvol* Gavol() const {return (box*) this;}
+    virtual absvol* Gavol() const {return (Heed::box*) this;}
     
   protected:
     virtual void get_components(ActivePtr<absref_transmit>& aref_tran) {

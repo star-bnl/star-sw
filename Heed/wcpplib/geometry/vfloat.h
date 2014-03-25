@@ -17,6 +17,7 @@ const vfloat max_safe_vfloat = 0.5 * sqrt(DBL_MAX);  //e+307
 const vfloat vprecision = 1.0E-12;
 
 inline vfloat abslt(vfloat f) { return f > 0.0 ? f : -f; }
+
 inline int apeq(vfloat f1, vfloat f2, vfloat prec = vprecision) {
   if (abslt(f1 - f2) <= prec)
     return 1;
@@ -28,6 +29,21 @@ inline int not_apeq(vfloat f1, vfloat f2, vfloat prec = vprecision) {
     return 0;
   else
     return 1;
+}
+
+namespace Heed {
+inline int apeq(vfloat f1, vfloat f2, vfloat prec = vprecision) {
+  if (abslt(f1 - f2) <= prec)
+    return 1;
+  else
+    return 0;
+}
+inline int not_apeq(vfloat f1, vfloat f2, vfloat prec = vprecision) {
+  if (abslt(f1 - f2) <= prec)
+    return 0;
+  else
+    return 1;
+}
 }
 
 #endif

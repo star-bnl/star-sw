@@ -11,7 +11,9 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-// ********  box (3-dimansional rectangle (rectangular parallelogram)  *******
+namespace Heed {
+
+// ********  box (3-dimensional rectangle (rectangular parallelogram)  *******
 
 void box::get_components(ActivePtr<absref_transmit>& /*aref_tran*/) {
   mfunnamep("box::get_components(...)");
@@ -108,11 +110,11 @@ int box::check_point_inside(const point& fpt, const vec& dir) const {
   mcout << "fpt=" << fpt << "dir=" << dir;
 #endif
   if (dir == dv0) {
-    // this is not useful
-    if (abslt(fpt.v.x) <= dxh && abslt(fpt.v.y) <= dyh && abslt(fpt.v.z) <= dzh)
+    if (abslt(fpt.v.x) <= dxh && abslt(fpt.v.y) <= dyh && 
+        abslt(fpt.v.z) <= dzh) {
       return 1;
-    else
-      return 0;
+    }
+    return 0;
   } else {
     if (abslt(fpt.v.x) <= dxh - prec && abslt(fpt.v.y) <= dyh - prec &&
         abslt(fpt.v.z) <= dzh - prec) {
@@ -131,7 +133,7 @@ int box::check_point_inside(const point& fpt, const vec& dir) const {
 #endif
       return 0;
     }
-// what remains is point belonging to border
+    // What remains is point belonging to border
 #ifdef IMPROVED_BOUNDARY
     // Below we detect cases when particle is exiting, leaving the
     // case when it is entering
@@ -194,7 +196,7 @@ int box::check_point_inside(const point& fpt, const vec& dir) const {
 #ifdef TRACE_find_embed_vol
       mcout << "cond 3, returning 0\n";
 #endif
-      return 0;  // exitting
+      return 0;  // exiting
     }
     if (abslt(fpt.v.y) > dyh - prec &&
         ((fpt.v.y > 0 && dir.y > 0) || (fpt.v.y < 0 && dir.y < 0))) {
@@ -254,7 +256,7 @@ int box::range_ext(trajestep& fts, int s_ext) const {
 }
 macro_copy_body(box)
 
-void box::income(gparticle* /*gp*/) { ; }
+void box::income(gparticle* /*gp*/) {}
 void box::chname(char* nm) const {
 #ifdef USE_STLSTRING
   strcpy(nm, "box: ");
@@ -327,4 +329,6 @@ void sh_manip_box::print(std::ostream& file, int l) const {
     }
     file.flush();
   }
+}
+
 }

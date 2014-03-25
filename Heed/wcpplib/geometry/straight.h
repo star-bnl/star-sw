@@ -16,48 +16,32 @@ The file is provided "as is" without express or implied warranty.
 #include <iostream>
 #include "wcpplib/geometry/vec.h"
 
+namespace Heed {
+
 class plane;
 
-//             **** straight ****
+// **** straight ****
 
 class straight : public absref {
  protected:
-  // internals are private, because it should be another way to define the
-  // straight line. We want the program to be independant on way.
-  // The same line can have different piv's along it, and different vec's:
-  // dir or -dir. Vector supposed to be of unit length.
-
   point piv;  // origin point, pivot
   vec dir;    // direction, unit vector
-              //
  public:
   point Gpiv(void) const { return piv; }
-  // It should return one any point of line
   vec Gdir(void) const {
     return dir;
-  }  // return any direction
+  }
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //	            int& fqareff, absref **&fareff) // free memory
-  //  { //mcout<<"straight::Garef is called\n";
-  //    fqaref=2; fqareff=0; faref=&aref[0]; fareff=NULL; }
   static absref(absref::* aref[2]);
 
  public:
-
-  straight() : piv(), dir() { ; }
+  straight() : piv(), dir() {}
   straight(const point& fpiv, const vec& fdir)
       : piv(fpiv), dir(unit_vec(fdir)) {
-    ;
   }
-  //straight(const straight &fsl):
-  //  piv(fsl.piv), dir(fsl.dir) { ; }
-  straight& operator=(
-      const straight&
-          fsl) {  //pvecerror(" straight& operator=(const straight& fsl)");
+  straight& operator=(const straight& fsl) {
     piv = fsl.piv;
     dir = fsl.dir;
     return *this;
@@ -161,5 +145,7 @@ class straight : public absref {
 };
 
 std::ostream& operator<<(std::ostream& file, const straight& s);
+
+}
 
 #endif

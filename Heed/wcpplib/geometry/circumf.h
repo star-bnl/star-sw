@@ -16,9 +16,11 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
+namespace Heed {
+
 class plane;
 
-//             **** circumference ****
+// **** circumference ****
 
 class circumf : public absref {
  protected:
@@ -35,10 +37,6 @@ class circumf : public absref {
 
  protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-  //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //                    int& fqareff, absref **&fareff) // free memory
-  //  { //mcout<<"straight::Garef is called\n";
-  //    fqaref=2; fqareff=0; faref=&aref[0]; fareff=NULL; }
   static absref(absref::* aref[2]);
 
  public:
@@ -72,5 +70,7 @@ class circumf : public absref {
   friend std::ostream& operator<<(std::ostream& file, const circumf& f);
 };
 std::ostream& operator<<(std::ostream& file, const circumf& f);
+
+}
 
 #endif
