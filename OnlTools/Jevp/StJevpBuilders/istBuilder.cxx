@@ -440,9 +440,12 @@ void istBuilder::event(daqReader *rdr) {
 	  if ( meta->arc[r].arm[arm].apv[apv].present == 0 ) continue ;
 	  int Tb = meta->arc[r].arm[arm].apv[apv].ntim;
 
-	  if( numTb != 0 && Tb != 0 && numTb != Tb )	    
-		printf("Different number of timebins in different APV!!! Taking larger one!!!\n");
-	  if( numTb < Tb )	    numTb = Tb;
+	  if( numTb != 0 && Tb != 0 && numTb != Tb ) {
+		printf("Different number of timebins in different APV!!! Taking real one!!!\n");
+		numTb = Tb; //update by Yaping: 03/25/2014
+	  }
+	  //update by Yaping: 3/25/2014
+	  //if( numTb < Tb )	    numTb = Tb;
 	  hEventSumContents.hSumTB->Fill(numTb);
 	}
       }
