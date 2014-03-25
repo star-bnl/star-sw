@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.6 2014/03/24 15:49:48 ypwang Exp $
+* $Id: StIstDbMaker.h,v 1.7 2014/03/25 03:01:57 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.7  2014/03/25 03:01:57  ypwang
+* get rid of GetIstPedNoise(), GetIstGain(), GetIstMapping() and GetIstControl() functions; use TDataSet instead of Db table structure
+*
 * Revision 1.6  2014/03/24 15:49:48  ypwang
 * checks added and const pointers returned for GetIstPedNoise, GetIstGain, GetIstMapping and GetIstControl functions
 *
@@ -29,10 +32,7 @@
 #include "StMaker.h"
 #endif
 #include "THashList.h"
-class St_istPedNoise;
-class St_istGain;
-class St_istMapping;
-class St_istControl;
+class TDataSet;
 
 class StIstDbMaker : public StMaker
 {
@@ -41,26 +41,22 @@ public:
    StIstDbMaker(const char *name = "istDb");
    Int_t  InitRun(Int_t runNumber);
    THashList *GetRotations() 	{return fRotList; }
-   const  St_istPedNoise *GetPedNoise() {return mPedNoise;}
-   const  St_istGain	*GetGain()      {return mGain;    }
-   const  St_istMapping  *GetMapping()  {return mMapping; }
-   const  St_istControl  *GetControl()  {return mControl; }
+   const TDataSet *GetPedNoise() {return mPedNoise;}
+   const TDataSet *GetGain()     {return mGain;    }
+   const TDataSet *GetMapping()  {return mMapping; }
+   const TDataSet *GetControl()  {return mControl; }
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.6 2014/03/24 15:49:48 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.7 2014/03/25 03:01:57 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    Int_t CalculateSensorsPosition();
-   Int_t GetIstPedNoise();
-   Int_t GetIstGain();
-   Int_t GetIstMapping();
-   Int_t GetIstControl();
 
    static THashList *fRotList;
-   const St_istPedNoise   *mPedNoise;
-   const St_istGain       *mGain;
-   const St_istMapping    *mMapping;
-   const St_istControl    *mControl;
+   const TDataSet *mPedNoise;
+   const TDataSet *mGain;
+   const TDataSet *mMapping;
+   const TDataSet *mControl;
 
    ClassDef(StIstDbMaker, 0)
 };
