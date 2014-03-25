@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.10 2014/03/24 15:55:08 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.11 2014/03/25 03:06:53 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.11  2014/03/25 03:06:53  ypwang
+* updates on Db table accessory method
+*
 * Revision 1.10  2014/03/24 15:55:08  ypwang
 * minor updates due to returned const pointers in StIstDbMaker
 *
@@ -211,12 +214,24 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
    listGeoMSensorOnGlobal = mIstDbMaker->GetRotations();
 
    // control parameters
-   const St_istControl *istControl = mIstDbMaker->GetControl();
-   istControl_st *istControlTable = istControl->GetTable();
-   if (!istControlTable)  LOG_WARN << "Pointer to IST control table is null" << endm;
-
-   mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
-   mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
+   const TDataSet *dbControl = mIstDbMaker->GetControl();
+   St_istControl *istControl = 0;
+   istControl = (St_istControl *)dbControl->Find("istControl");
+   if(!istControl) {
+       LOG_ERROR << "Dataset does not contain IST control table!" << endm;
+       ierr = kStErr;
+   }
+   else {
+        istControl_st *istControlTable = istControl->GetTable() ;
+        if (!istControlTable)  {
+            LOG_ERROR << "Pointer to IST control table is null" << endm;
+            ierr = kStErr;
+        }
+        else {
+            mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
+            mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
+        }
+   }
 
    return ierr;
 };
