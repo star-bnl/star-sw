@@ -23,6 +23,12 @@
 // It has no plots (currently)
 //
 
+// JML 3/17/14
+//     These are offsets in the display of the vertex
+//     May need to change each year!
+double h146_zdc_vertex_offset = 12.88 - .55; 
+
+
 
 ClassImp(trgBuilder);
   
@@ -359,7 +365,9 @@ void trgBuilder::event(daqReader *rdr)
     //mZdcVertex   = mZdcTimeDiff/2*40.0/0.03;
     mZdcVertex   = (mZdcTimeDiff/2)*0.02*30;
     h78_zdc_timediff_east_west->Fill(mZdcTimeDiff);          
-    h146_zdc_Vertex_cm->Fill(mZdcVertex);
+
+    
+    h146_zdc_Vertex_cm->Fill(mZdcVertex + h146_zdc_vertex_offset);
   } 
   h480_zdc_unatt_eastsum->Fill(float(trgd->zdcUnAttenuated(east)));
   h481_zdc_unatt_westsum->Fill(float(trgd->zdcUnAttenuated(west)));
