@@ -176,6 +176,7 @@
 #define L4_RUNSTOPDONE                 0xa4
 #define L4_SHIPEVENT                   0xa5
 #define L4_SHIPEVENTDONE               0xa6
+#define L4_EVP_DONE                    0xa7
 
 
 // SL3
