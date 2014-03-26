@@ -10,7 +10,9 @@
 // code that should always be seen
 #endif
 #endif
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,18)
 #define __USE_ROOFIT__
+#endif
 //________________________________________________________________________________
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -389,40 +391,43 @@ Double_t func_lz5xg_mult(Double_t *x, Double_t *par) {
 //--------------------Function for creating TF1 for particle fractions -----//
 void Sep_func(RooFFTConvPdf *l5xg, RooRealVar *t, RooRealVar *norm, RooRealVar *mu, RooRealVar *sg, RooRealVar *fProton, RooRealVar *fKaon, RooRealVar *fElektron, RooRealVar *fDeuteron, RooRealVar *total, RooRealVar *width, Int_t i )
 {
-  RooFFTConvPdf *hope;
-  hope = new RooFFTConvPdf(*l5xg);
 
     switch(i){
     case 0://Pion//
-      func_pi = (TF1*)hope->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t ); 
+      if (func_pi) delete func_pi;
+      func_pi = (TF1*)l5xg->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t ); 
       func_pi->FixParameter(3,0.);
       func_pi->FixParameter(4,0.);
       func_pi->FixParameter(5,0.);
       func_pi->FixParameter(6,0.);
       break;
     case 1://Proton//
-      func_pr = (TF1*)hope->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t );
+      if (func_pr) delete func_pr;
+      func_pr = (TF1*)l5xg->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t );
       frac_pr = TMath::Power(TMath::Sin(func_pr->GetParameter(i+2)),2);
       func_pr->FixParameter(4,0.);
       func_pr->FixParameter(5,0.);
       func_pr->FixParameter(6,0.);
       break;
     case 2: //Kaon//
-      func_k = (TF1*)hope->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t );
+      if (func_k) delete func_k;
+      func_k = (TF1*)l5xg->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t );
       frac_k = TMath::Power(TMath::Sin(func_k->GetParameter(i+2)),2);
       func_k->FixParameter(3,0.);
       func_k->FixParameter(5,0.);
       func_k->FixParameter(6,0.);
       break;
     case 3: //Elektron//
-      func_el = (TF1*)hope->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t );
+      if (func_el) delete func_el;
+      func_el = (TF1*)l5xg->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t );
       frac_el = TMath::Power(TMath::Sin(func_el->GetParameter(i+2)),2);
       func_el->FixParameter(3,0.);
       func_el->FixParameter(4,0.);
       func_el->FixParameter(6,0.);
       break;
     case 4: //Deuteron//
-      func_de = (TF1*)hope->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t );
+      if (func_de) delete func_de;
+      func_de = (TF1*)l5xg->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*total,*width),*t );
       frac_de = TMath::Power(TMath::Sin(func_de->GetParameter(i+2)),2);
       func_de->FixParameter(3,0.);
       func_de->FixParameter(4,0.);
@@ -465,9 +470,9 @@ TF1 *FitRL5(TH1 *hist)
   if (! l5xg)      l5xg      = new RooFFTConvPdf("l5xg","landauZ5 (X) gauss",*t,*landauZ5,*gauss) ; 
   //Import data
   //--------------------------------------------------------------
-  RooDataHist *data = new RooDataHist("data","data",*t,Import(*hist));
+  RooDataHist data("data","data",*t,Import(*hist));
   //------- Fit to data -----------------------//
-  l5xg->fitTo(*data,Save());
+  l5xg->fitTo(data,Save());
   //----- Create TF1 -------------//
   if (l5xg_func) delete l5xg_func;
   l5xg_func = (TF1*)l5xg->asTF(RooArgList(*t), RooArgList(*norm,*mu,*sg,*fProton,*fKaon,*fElektron,*fDeuteron,*width,*total),*t );
@@ -512,21 +517,13 @@ TF1 *FitRL5(TH1 *hist)
   l5xg_mult->SetParent(hist);
   Double_t X = l5xg_mult->GetParameter(1);
   Double_t Y = 0;
-  TPolyMarker *pm = new TPolyMarker(1, &X, &Y);
+  static TPolyMarker *pm = 0;
+  if (pm) delete pm;
+  pm = new TPolyMarker(1, &X, &Y);
   hist->GetListOfFunctions()->Add(pm);
   pm->SetMarkerStyle(23);
   pm->SetMarkerColor(kRed);
   pm->SetMarkerSize(1.3);
-#if 0
-  //------ Plot data, landauZ5 pdf, landauZ5 (X) gauss pdf -------//
-  RooPlot* frame = t->frame(Title("landauZ5 (x) gauss convolution")) ;
-  data->plotOn(frame,MarkerColor(1),MarkerSize(0.8),DataError(RooAbsData::SumW2),XErrorSize(0.)) ;
-
-   //----- Draw frame on canvas ---//
-  new TCanvas("Fit","Fit",600,600) ;
-  gPad->SetLeftMargin(0.15) ; frame->GetYaxis()->SetTitleOffset(1.6) ; frame->Draw() ;
-  l5xg_mult->Draw("same");
-#endif  
     //-- Fits for particles: 0.Pion, 1.Proton, 2.Kaon, 3.Elektron, 4.Deuteron --//
   for (Int_t i = 1; i <= 5; i++) {
     Int_t k = i;
@@ -2266,8 +2263,8 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
       proj->Write();
       if (! canvas) delete proj;
       //      delete g;
-      if (f) f->Flush();
-      gObjectTable->Print();
+      //      if (f) f->Flush();
+      //      gObjectTable->Print();
     }
   }
   if (f) {
