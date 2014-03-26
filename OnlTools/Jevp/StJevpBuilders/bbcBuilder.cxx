@@ -22,6 +22,8 @@
 // It has no plots (currently)
 //
 
+double h452_bbc_vertex_offset = 10.28 -.55;
+
 ClassImp(bbcBuilder);
   
 typedef JevpPlot * ptrJevpPlot;
@@ -206,7 +208,7 @@ void bbcBuilder::event(daqReader *rdr)
     //mBbcVertex   = mBbcTimeDiff/3/10.0;     
     bbcVertex   = bbcTimeDiff/2 *0.02*30;      
     contents.h204_bbc_tac_difference_ew->Fill(bbcTimeDiff);
-    contents.h452_bbc_tac_difference_ew->Fill(bbcVertex);
+    contents.h452_bbc_tac_difference_ew->Fill(bbcVertex + h452_bbc_vertex_offset);
   }
   contents.h205_bbc_tac_e_w->Fill(trgd->bbcEarliestTDC(east), trgd->bbcEarliestTDC(west));
 
