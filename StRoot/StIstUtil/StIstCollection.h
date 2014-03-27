@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstCollection.h,v 1.6 2014/03/13 22:10:12 smirnovd Exp $
+* $Id: StIstCollection.h,v 1.7 2014/03/27 22:47:02 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -42,8 +42,6 @@ public:
    StIstClusterCollection *getClusterCollection( unsigned char ladder );
    const StIstClusterCollection *getClusterCollection( unsigned char ladder ) const;
 
-   void Clear( Option_t *opts = "" );
-
 protected:
    StIstRawHitCollection mRawHitCollection[kIstNumLadders];
    StIstClusterCollection mClusterCollection[kIstNumLadders];
@@ -59,6 +57,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstCollection.h,v $
+* Revision 1.7  2014/03/27 22:47:02  smirnovd
+* Remove unnecessary Clear() method. Use destructor instead
+*
 * Revision 1.6  2014/03/13 22:10:12  smirnovd
 * Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
 *
