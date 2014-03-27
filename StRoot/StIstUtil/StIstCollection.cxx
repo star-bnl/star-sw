@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCollection.cxx,v 1.6 2014/03/27 22:46:47 smirnovd Exp $
+* $Id: StIstCollection.cxx,v 1.7 2014/03/27 22:47:02 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -26,7 +26,10 @@ StIstCollection::StIstCollection() : StObject()
 //deconstructor
 StIstCollection::~StIstCollection()
 {
-   Clear("");
+   for ( unsigned char i = 0; i < kIstNumLadders; ++i ) {
+      mRawHitCollection[i].Clear("");
+      mClusterCollection[i].Clear("");
+   }
 };
 
 size_t StIstCollection::getNumTimeBins() const
@@ -93,14 +96,6 @@ size_t StIstCollection::getNumClusters( unsigned char ladder ) const
    return (ladder < kIstNumLadders ? mClusterCollection[ladder].getNumClusters() : 0 );
 };
 
-//Clear
-void StIstCollection::Clear( Option_t *opt )
-{
-   for ( unsigned char i = 0; i < kIstNumLadders; ++i ) {
-      mRawHitCollection[i].Clear( opt );
-      mClusterCollection[i].Clear( opt );
-   }
-};
 
 ClassImp(StIstCollection);
 
@@ -108,6 +103,9 @@ ClassImp(StIstCollection);
 /***************************************************************************
 *
 * $Log: StIstCollection.cxx,v $
+* Revision 1.7  2014/03/27 22:47:02  smirnovd
+* Remove unnecessary Clear() method. Use destructor instead
+*
 * Revision 1.6  2014/03/27 22:46:47  smirnovd
 * Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
