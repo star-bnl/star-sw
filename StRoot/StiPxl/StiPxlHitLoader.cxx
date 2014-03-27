@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.5 2014/03/07 16:27:46 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.6 2014/03/27 22:48:08 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.6  2014/03/27 22:48:08  smirnovd
+ * Minor improvements in feedback
+ *
  * Revision 1.5  2014/03/07 16:27:46  smirnovd
  * Updated assignment and extraction of sti (pixel sensor) detectors by keys
  *
@@ -112,8 +115,8 @@ void StiPxlHitLoader::loadHits(StEvent *source,
    StPxlHitCollection *pxlHitCollection = source->pxlHitCollection();
 
    if (!pxlHitCollection) {
-      LOG_ERROR << "StiPxlHitLoader::loadHits\tERROR:\tcol==0"
-                << "You must not have pixelFastSim in your chain"
+      LOG_ERROR << "StiPxlHitLoader::loadHits\tERROR:\t pxlHitCollection not found "
+                << "You may not have StPxlSimMaker or StPxlHitMaker in your chain "
                 << "will return with no action taken" << endm;
       return;
    }
@@ -166,7 +169,9 @@ void StiPxlHitLoader::loadHits(StEvent *source,
                             + (pxlHit->ladder()-2) * kNumberOfPxlSensorsPerLadder + (pxlHit->sensor()-1);
                }
 
-               LOG_DEBUG << " hit sector : " << (int) pxlHit->sector() << " ladder : " << (int) pxlHit->ladder() << endm;
+               LOG_DEBUG << " hit sector : " << (int) pxlHit->sector()
+                         << " ladder : " << (int) pxlHit->ladder()
+                         << " sensor : " << (int) pxlHit->sensor() << endm;
                LOG_DEBUG << "stiRow: " << stiRow << ", stiSensor: " << stiSensor << endm;
                LOG_DEBUG << "X/Y/Z    : " << pxlHit->position().x() << "/" << pxlHit->position().y() << "/" << pxlHit->position().z() << endm;
                LOG_DEBUG << "Xl/Yl/Zl : " << pxlHit->localPosition(0) << "/" << pxlHit->localPosition(1) << "/" << pxlHit->localPosition(2) << endm;
