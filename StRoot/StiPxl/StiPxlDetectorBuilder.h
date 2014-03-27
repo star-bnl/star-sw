@@ -22,6 +22,12 @@ protected:
 
 private:
    void buildInactiveVolumes();
+   void buildSimpleBoxes();
+   void buildSimpleTube();
+
+   enum EGeomDebug {kNoDebug, kSimpleBoxes, kSimpleTube};
+
+   EGeomDebug mGeomDebug;
 };
 
 #endif
