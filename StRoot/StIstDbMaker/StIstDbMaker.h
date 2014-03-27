@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.7 2014/03/25 03:01:57 ypwang Exp $
+* $Id: StIstDbMaker.h,v 1.8 2014/03/27 22:46:38 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.8  2014/03/27 22:46:38  smirnovd
+* Renamed static data member according to mixed star/root convention
+*
 * Revision 1.7  2014/03/25 03:01:57  ypwang
 * get rid of GetIstPedNoise(), GetIstGain(), GetIstMapping() and GetIstControl() functions; use TDataSet instead of Db table structure
 *
@@ -40,19 +43,19 @@ class StIstDbMaker : public StMaker
 public:
    StIstDbMaker(const char *name = "istDb");
    Int_t  InitRun(Int_t runNumber);
-   THashList *GetRotations() 	{return fRotList; }
+   THashList *GetRotations() 	{return mgRotList; }
    const TDataSet *GetPedNoise() {return mPedNoise;}
    const TDataSet *GetGain()     {return mGain;    }
    const TDataSet *GetMapping()  {return mMapping; }
    const TDataSet *GetControl()  {return mControl; }
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.7 2014/03/25 03:01:57 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.8 2014/03/27 22:46:38 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    Int_t CalculateSensorsPosition();
 
-   static THashList *fRotList;
+   static THashList *mgRotList;
    const TDataSet *mPedNoise;
    const TDataSet *mGain;
    const TDataSet *mMapping;
