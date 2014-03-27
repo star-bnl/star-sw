@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterCollection.cxx,v 1.5 2014/02/14 14:51:06 ypwang Exp $
+* $Id: StIstClusterCollection.cxx,v 1.6 2014/03/27 22:46:47 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -27,12 +27,14 @@ void StIstClusterCollection::Clear( Option_t *opt )
 {
    //free memory and clear the vector
    std::vector< StIstCluster * >::iterator vecIter;
+
    for ( vecIter = mClusterVec.begin(); vecIter != mClusterVec.end(); ++vecIter ) {
       if (*vecIter != NULL) {
          delete *vecIter;
          *vecIter = NULL;
       }
    }
+
    mClusterVec.clear();
 }
 
@@ -67,6 +69,9 @@ ClassImp(StIstClusterCollection);
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.cxx,v $
+* Revision 1.6  2014/03/27 22:46:47  smirnovd
+* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.5  2014/02/14 14:51:06  ypwang
 * update Clear() function, and call Clear() function in deconstructor
 *

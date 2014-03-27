@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.9 2014/02/20 02:30:58 smirnovd Exp $
+* $Id: StIstCluster.cxx,v 1.10 2014/03/27 22:46:47 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -13,8 +13,8 @@
 
 
 StIstCluster::StIstCluster(int key, unsigned char ladder, unsigned char sensor,
-   float meanRow, float meanColumn, float totCharge, float totChargeErr, unsigned
-   char clusteringType):
+                           float meanRow, float meanColumn, float totCharge, float totChargeErr, unsigned
+                           char clusteringType):
    mKey(key),
    mLadderId(ladder),
    mSensorId(sensor),
@@ -28,7 +28,7 @@ StIstCluster::StIstCluster(int key, unsigned char ladder, unsigned char sensor,
 {
 }
 
-StIstCluster::~StIstCluster() 
+StIstCluster::~StIstCluster()
 {
    while (!mRawHitVec.empty()) delete mRawHitVec.back(), mRawHitVec.pop_back();
 }
@@ -118,6 +118,9 @@ ClassImp(StIstCluster);
 *
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.10  2014/03/27 22:46:47  smirnovd
+* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.9  2014/02/20 02:30:58  smirnovd
 * Use constructor list to initialize vectors of pointers and arrays
 *

@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.7 2014/03/13 22:10:12 smirnovd Exp $
+* $Id: StIstRawHit.cxx,v 1.8 2014/03/27 22:46:47 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.8  2014/03/27 22:46:47  smirnovd
+* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.7  2014/03/13 22:10:12  smirnovd
 * Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
 *
@@ -75,6 +78,7 @@ StIstRawHit &StIstRawHit::operator=( const StIstRawHit &h)
       mCharge[i]     = h.mCharge[i];
       mChargeErr[i]  = h.mChargeErr[i];
    }
+
    return *this;
 }
 

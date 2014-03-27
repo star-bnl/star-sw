@@ -1,14 +1,17 @@
 /***************************************************************************
 *
-* $Id: StIstDigiHit.cxx,v 1.2 2014/03/01 00:19:37 ypwang Exp $
+* $Id: StIstDigiHit.cxx,v 1.3 2014/03/27 22:46:47 smirnovd Exp $
 *
 * Author: Yaping Wang (Thank Dmitri Smirnov's updates)
 ****************************************************************************
-* Description: 
+* Description:
 * Data structure for additional function of StIstHit..
 ****************************************************************************
 *
 * $Log: StIstDigiHit.cxx,v $
+* Revision 1.3  2014/03/27 22:46:47  smirnovd
+* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.2  2014/03/01 00:19:37  ypwang
 * correct return value of getMeanRow() and Log added
 *
@@ -27,7 +30,7 @@ StIstDigiHit::StIstDigiHit() : StIstHit(), mApv(0), mMeanColumn(-1),
 { }
 
 
-StIstDigiHit::StIstDigiHit(const StIstHit& istHit) : StIstHit(istHit)
+StIstDigiHit::StIstDigiHit(const StIstHit &istHit) : StIstHit(istHit)
 {
    mApv        = ((unsigned char)((0.5 * kIstSensorActiveSizeZ + istHit.localPosition(2)) / kIstPadPitchColumn)) / 2 + 1;
    mMeanColumn = 0.5 + (0.5 * kIstSensorActiveSizeZ + istHit.localPosition(2)) / kIstPadPitchColumn;
