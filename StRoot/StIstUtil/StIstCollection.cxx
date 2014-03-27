@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCollection.cxx,v 1.5 2014/02/14 14:37:57 ypwang Exp $
+* $Id: StIstCollection.cxx,v 1.6 2014/03/27 22:46:47 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -19,6 +19,7 @@ StIstCollection::StIstCollection() : StObject()
       mRawHitCollection[i].setLadder( i );
       mClusterCollection[i].setLadder( i );
    }
+
    mNumTimeBins = kIstNumTimeBins; //reasonable default
 };
 
@@ -62,8 +63,10 @@ const StIstClusterCollection *StIstCollection::getClusterCollection( unsigned ch
 size_t StIstCollection::getNumRawHits() const
 {
    size_t n = 0;
+
    for ( const StIstRawHitCollection *ptr = &mRawHitCollection[0]; ptr != &mRawHitCollection[kIstNumLadders]; ++ptr )
       n += ptr->getNumRawHits();
+
    return n;
 };
 
@@ -77,8 +80,10 @@ size_t StIstCollection::getNumRawHits( unsigned char ladder ) const
 size_t StIstCollection::getNumClusters() const
 {
    size_t n = 0;
+
    for ( const StIstClusterCollection *ptr = &mClusterCollection[0]; ptr != &mClusterCollection[kIstNumLadders]; ++ptr )
       n += ptr->getNumClusters();
+
    return n;
 };
 
@@ -103,6 +108,9 @@ ClassImp(StIstCollection);
 /***************************************************************************
 *
 * $Log: StIstCollection.cxx,v $
+* Revision 1.6  2014/03/27 22:46:47  smirnovd
+* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.5  2014/02/14 14:37:57  ypwang
 * remove StMuDstMaker and getNumLadders() member function from StIstCollection
 *

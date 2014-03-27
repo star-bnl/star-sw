@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.h,v 1.8 2014/02/15 01:16:18 ypwang Exp $
+* $Id: StIstCluster.h,v 1.9 2014/03/27 22:46:47 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -21,8 +21,8 @@ class StIstCluster: public TObject
 public:
 
    StIstCluster(int key = -1, unsigned char ladder = -1, unsigned char sensor = -1,
-      float meanRow = -1, float meanColumn = -1, float totCharge = 0,
-      float totChargeErr = 0, unsigned char clusteringType = -1);
+                float meanRow = -1, float meanColumn = -1, float totCharge = 0,
+                float totChargeErr = 0, unsigned char clusteringType = -1);
    ~StIstCluster();
 
    //accessors
@@ -80,6 +80,9 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstCluster.h,v $
+* Revision 1.9  2014/03/27 22:46:47  smirnovd
+* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.8  2014/02/15 01:16:18  ypwang
 * replace the std::map() with std::vector() for StIstCluster
 *

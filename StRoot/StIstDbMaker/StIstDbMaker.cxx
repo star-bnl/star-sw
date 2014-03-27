@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.9 2014/03/27 22:46:38 smirnovd Exp $
+* $Id: StIstDbMaker.cxx,v 1.10 2014/03/27 22:46:46 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.10  2014/03/27 22:46:46  smirnovd
+* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.9  2014/03/27 22:46:38  smirnovd
 * Renamed static data member according to mixed star/root convention
 *
@@ -67,7 +70,7 @@ ClassImp(StIstDbMaker)
 //_____________________________________________________________________________
 StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mPedNoise(NULL), mGain(NULL), mMapping(NULL), mControl(NULL)
 {
-/* no op */
+   /* no op */
 }
 //_____________________________________________________________________________
 Int_t StIstDbMaker::InitRun(Int_t runNumber)
@@ -77,30 +80,34 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Pedestal and Noise Table" << endm;
    mPedNoise = GetDataBase("Calibrations/ist/istPedNoise");
-   if(!mPedNoise) {
-        LOG_ERROR << "StIstDbMaker: No input pedestal/noise data set!" << endm;
-        return kStErr;
+
+   if (!mPedNoise) {
+      LOG_ERROR << "StIstDbMaker: No input pedestal/noise data set!" << endm;
+      return kStErr;
    }
 
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Gain Table" << endm;
    mGain = GetDataBase("Calibrations/ist/istGain");
-   if(!mGain) {
-        LOG_ERROR << "StIstDbMaker: No input gain data set!" << endm;
-        return kStErr;
+
+   if (!mGain) {
+      LOG_ERROR << "StIstDbMaker: No input gain data set!" << endm;
+      return kStErr;
    }
 
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Mapping Table" << endm;
    mMapping = GetDataBase("Calibrations/ist/istMapping");
-   if(!mMapping) {
-        LOG_ERROR << "StIstDbMaker: No input mapping data set!" << endm;
-        return kStErr;
+
+   if (!mMapping) {
+      LOG_ERROR << "StIstDbMaker: No input mapping data set!" << endm;
+      return kStErr;
    }
 
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Control Table" << endm;
    mControl = GetDataBase("Calibrations/ist/istControl");
-   if(!mControl) {
-        LOG_ERROR << "StIstDbMaker: No input control parameter data set!" << endm;
-        return kStErr;
+
+   if (!mControl) {
+      LOG_ERROR << "StIstDbMaker: No input control parameter data set!" << endm;
+      return kStErr;
    }
 
    return kStOK;
@@ -119,23 +126,28 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
    const TGeoHMatrix &tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
 
    //get IDS positionment relative to TPC
-   St_Survey *st_idsOnTpc          = (St_Survey *) GetDataBase("Geometry/ist/idsOnTpc");       
+   St_Survey *st_idsOnTpc          = (St_Survey *) GetDataBase("Geometry/ist/idsOnTpc");
+
    if (!st_idsOnTpc)          {LOG_ERROR << "idsOnTpc has not been found"  << endl; return kStErr;}
 
    //get PST positionment relative to IDS
-   St_Survey *st_pstOnIds          = (St_Survey *) GetDataBase("Geometry/ist/pstOnIds");       
+   St_Survey *st_pstOnIds          = (St_Survey *) GetDataBase("Geometry/ist/pstOnIds");
+
    if (!st_pstOnIds)          {LOG_ERROR << "pstOnIds has not been found"  << endl; return kStErr;}
 
    //get IST positionment relative to PST
-   St_Survey *st_istOnPst          = (St_Survey *) GetDataBase("Geometry/ist/istOnPst");        
+   St_Survey *st_istOnPst          = (St_Survey *) GetDataBase("Geometry/ist/istOnPst");
+
    if (!st_istOnPst)          {LOG_ERROR << "istOnPst has not been found"  << endl; return kStErr;}
 
    //get ladder positionments relative to IST
-   St_Survey *st_istLadderOnIst    = (St_Survey *) GetDataBase("Geometry/ist/istLadderOnIst"); 
+   St_Survey *st_istLadderOnIst    = (St_Survey *) GetDataBase("Geometry/ist/istLadderOnIst");
+
    if (!st_istLadderOnIst)    {LOG_ERROR << "istLadderOnIst has not been found"  << endl; return kStErr;}
 
    //get sensor positionments relative to ladder
    St_Survey *st_istSensorOnLadder = (St_Survey *) GetDataBase("Geometry/ist/istSensorOnLadder");
+
    if (!st_istSensorOnLadder) {LOG_ERROR << "istSensorOnLadder has not been found"  << endl; return kStErr;}
 
    //obtain these tables
@@ -182,15 +194,18 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
    for (int i = 0; i < nSensors; i++, sensorsOnLadders++) {
       int id = sensorsOnLadders->Id;
       TGeoHMatrix *comb = (TGeoHMatrix *) mgRotList->FindObject(Form("R%04i", id));
+
       if (comb) continue;
+
       comb = new TGeoHMatrix(Form("R%04i", id));
-      int ladder = ((id - 1000) - 1)/kIstNumSensorsPerLadder + 1;  // 1 <= ladder <= 24
+      int ladder = ((id - 1000) - 1) / kIstNumSensorsPerLadder + 1; // 1 <= ladder <= 24
 
       //setting rotation/translation for sensor geometry matrix
       TGeoHMatrix sensor2Ladder;
       sensor2Ladder.SetRotation(&sensorsOnLadders->r00);
       sensor2Ladder.SetTranslation(&sensorsOnLadders->t0);
       TGeoHMatrix *sensorLocal = (TGeoHMatrix *) mgRotList->FindObject(Form("sensorLocal%04i", id));
+
       if (!sensorLocal) {
          sensorLocal = new  TGeoHMatrix(Form("sensorLocal%04i", id));
          sensorLocal->SetRotation(sensor2Ladder.GetRotationMatrix());
@@ -199,10 +214,11 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
       }
 
       //seeting rotation/translation for ladder geometry matrix
-      if (ladder <= 0 || ladder > kIstNumLadders) { 
-	 cout << "Ladder has not been defined!" << endl; 
-	 continue; 
+      if (ladder <= 0 || ladder > kIstNumLadders) {
+         cout << "Ladder has not been defined!" << endl;
+         continue;
       }
+
       for (int l = 0; l < nLadders; l++, laddersOnIst++) {
          if (ladder == laddersOnIst->Id) {
             ladder2Ist.SetRotation(&laddersOnIst->r00);
@@ -213,6 +229,7 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
 
       //calculate sensor global position
       sensorGlobal = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder;
+
       if (Debug() > 2) {
          cout << "sensorGlobal\t";
          sensorGlobal.Print();
@@ -221,9 +238,11 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
       comb->SetRotation(sensorGlobal.GetRotationMatrix());
       comb->SetTranslation(sensorGlobal.GetTranslation());
       mgRotList->Add(comb);
+
       if (Debug() > 2) {
          comb->Print();
       }
    }
+
    return kStOk;
 }

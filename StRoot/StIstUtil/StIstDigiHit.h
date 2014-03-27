@@ -1,14 +1,17 @@
 /***************************************************************************
 *
-* $Id: StIstDigiHit.h,v 1.2 2014/03/01 00:19:38 ypwang Exp $
+* $Id: StIstDigiHit.h,v 1.3 2014/03/27 22:46:47 smirnovd Exp $
 *
 * Author: Yaping Wang (Thank Dmitri Smirnov's updates)
 ****************************************************************************
-* Description: 
+* Description:
 * Data structure for additional function of StIstHit..
 ****************************************************************************
 *
 * $Log: StIstDigiHit.h,v $
+* Revision 1.3  2014/03/27 22:46:47  smirnovd
+* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.2  2014/03/01 00:19:38  ypwang
 * correct return value of getMeanRow() and Log added
 *
@@ -32,7 +35,7 @@ class StIstDigiHit: public StIstHit
 {
 public:
    StIstDigiHit();
-   StIstDigiHit(const StIstHit& istHit);
+   StIstDigiHit(const StIstHit &istHit);
 
    void setApv(unsigned char apvId);
    void setMeanColumn(float meanColumn);
