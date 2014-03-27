@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.8 2014/03/27 22:46:38 smirnovd Exp $
+* $Id: StIstDbMaker.h,v 1.9 2014/03/27 22:46:55 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.9  2014/03/27 22:46:55  smirnovd
+* Remove unnecessary protection
+*
 * Revision 1.8  2014/03/27 22:46:38  smirnovd
 * Renamed static data member according to mixed star/root convention
 *
@@ -31,10 +34,9 @@
 #ifndef StIstDbMaker_hh
 #define StIstDbMaker_hh
 
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
 #include "THashList.h"
+
 class TDataSet;
 
 class StIstDbMaker : public StMaker
@@ -50,7 +52,7 @@ public:
    const TDataSet *GetControl()  {return mControl; }
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.8 2014/03/27 22:46:38 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.9 2014/03/27 22:46:55 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    Int_t CalculateSensorsPosition();
@@ -63,4 +65,5 @@ private:
 
    ClassDef(StIstDbMaker, 0)
 };
+
 #endif
