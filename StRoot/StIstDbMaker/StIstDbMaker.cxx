@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.8 2014/03/25 03:01:57 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.9 2014/03/27 22:46:38 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.9  2014/03/27 22:46:38  smirnovd
+* Renamed static data member according to mixed star/root convention
+*
 * Revision 1.8  2014/03/25 03:01:57  ypwang
 * get rid of GetIstPedNoise(), GetIstGain(), GetIstMapping() and GetIstControl() functions; use TDataSet instead of Db table structure
 *
@@ -58,7 +61,7 @@
 
 using namespace StIstConsts;
 
-THashList *StIstDbMaker::fRotList = 0;
+THashList *StIstDbMaker::mgRotList = 0;
 
 ClassImp(StIstDbMaker)
 //_____________________________________________________________________________
@@ -105,9 +108,9 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 //_____________________________________________________________________________
 Int_t StIstDbMaker::CalculateSensorsPosition()
 {
-   SafeDelete(fRotList);
-   fRotList = new THashList(kIstNumLadders * kIstNumSensorsPerLadder, 0);
-   fRotList->SetOwner(kFALSE);
+   SafeDelete(mgRotList);
+   mgRotList = new THashList(kIstNumLadders * kIstNumSensorsPerLadder, 0);
+   mgRotList->SetOwner(kFALSE);
 
    TGeoHMatrix ids2Tpc, pst2Ids, ist2Pst, ladder2Ist, sensorGlobal;
 
@@ -178,7 +181,7 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
 
    for (int i = 0; i < nSensors; i++, sensorsOnLadders++) {
       int id = sensorsOnLadders->Id;
-      TGeoHMatrix *comb = (TGeoHMatrix *) fRotList->FindObject(Form("R%04i", id));
+      TGeoHMatrix *comb = (TGeoHMatrix *) mgRotList->FindObject(Form("R%04i", id));
       if (comb) continue;
       comb = new TGeoHMatrix(Form("R%04i", id));
       int ladder = ((id - 1000) - 1)/kIstNumSensorsPerLadder + 1;  // 1 <= ladder <= 24
@@ -187,12 +190,12 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
       TGeoHMatrix sensor2Ladder;
       sensor2Ladder.SetRotation(&sensorsOnLadders->r00);
       sensor2Ladder.SetTranslation(&sensorsOnLadders->t0);
-      TGeoHMatrix *sensorLocal = (TGeoHMatrix *) fRotList->FindObject(Form("sensorLocal%04i", id));
+      TGeoHMatrix *sensorLocal = (TGeoHMatrix *) mgRotList->FindObject(Form("sensorLocal%04i", id));
       if (!sensorLocal) {
          sensorLocal = new  TGeoHMatrix(Form("sensorLocal%04i", id));
          sensorLocal->SetRotation(sensor2Ladder.GetRotationMatrix());
          sensorLocal->SetTranslation(sensor2Ladder.GetTranslation());
-         fRotList->Add(sensorLocal);
+         mgRotList->Add(sensorLocal);
       }
 
       //seeting rotation/translation for ladder geometry matrix
@@ -217,7 +220,7 @@ Int_t StIstDbMaker::CalculateSensorsPosition()
 
       comb->SetRotation(sensorGlobal.GetRotationMatrix());
       comb->SetTranslation(sensorGlobal.GetTranslation());
-      fRotList->Add(comb);
+      mgRotList->Add(comb);
       if (Debug() > 2) {
          comb->Print();
       }
