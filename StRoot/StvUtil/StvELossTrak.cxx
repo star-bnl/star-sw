@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.11 2014/02/28 21:53:49 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.12 2014/03/28 15:25:01 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -8,6 +8,7 @@
 #include <math.h>
 #include <assert.h>
 #include "TGeoMaterial.h"
+#include "StvUtil/StvDebug.h"
 #include "StvELossTrak.h"
 static double gsigma2(double ZoverA,double DENS,double CHARGE2
                      ,double AMASS ,double BET2,double STEP  );
@@ -19,9 +20,27 @@ static const double kMaxP = 1000,kMaxE = sqrt(kMaxP*kMaxP+kPiMass*kPiMass);
 ClassImp(StvELossTrak)
 
 //_____________________________________________________________________________
-void StvELossTrak::Reset()
+StvELossTrak::StvELossTrak()
 {
   memset(fBeg,0,fEnd-fBeg+1);
+}
+//______________________________________________________________________________
+void StvELossTrak::reset()
+{
+  fMats.clear();
+}
+//______________________________________________________________________________
+void StvELossTrak::unset()
+{
+  fMats.clear();
+}
+//_____________________________________________________________________________
+void StvELossTrak::Reset(int dir,double mass, double charge)
+{
+  memset(fBeg,0,fEnd-fBeg+1);
+  fMats.resize(0);
+  fDir = dir; fM=mass; fCharge=charge;
+  
 }
 //_____________________________________________________________________________
 void StvELossTrak::Clear(const char*)
@@ -29,78 +48,82 @@ void StvELossTrak::Clear(const char*)
   memset(fMed,0,fEnd-fMed+1);
 }
 //_____________________________________________________________________________
-void StvELossTrak::Set(double A, double Z,    double dens, double x0
-                      ,double p, double mass, double charge)
+void StvELossTrak::Set(double A, double Z, double dens, double x0, double p)
 {
-  if (A>0) {
-    fdEdX=0;
-    fA=A; fZ=Z; fDens=dens,fX0=x0; 
-    if (fA<=0) fX0 = 1e+11;
-    assert(fX0>0);
-    fM=mass; fCharge2=charge*charge;
+  fdEdX=0;
+  assert(p>0 || fP>0);
+  if (p<=0) p = fP[1];
+  if (A<=0) x0 = 1e+11;
+  {// Normal, non update mode. Save material data
+    fMats.resize(fMats.size()+1);
+    Aux &M = fMats.back();
+    M.fLen=0;
+    M.fA=A;
+    M.fZ=Z;
+    M.fDens=dens;
+    M.fX0=x0; 
+    M.fP = p;
   }
-
   if (p<=0) return;
 
-  fP = p; 
-  if (fP>kMaxP) fP=kMaxP;
-  if (fP<kMinP) fP=kMinP;
+  if (fP[0]<=0) fP[0] = p; 
+  fP[1] = p;
   fdEdX=0;fdEdXErr2=0;
-  double p2 = fP*fP,m2 = fM*fM;
+  double p2 = fP[1]*fP[1],m2 = fM*fM;
   fE = sqrt(p2+m2);
   fFak = (14.1*14.1)*(p2+m2)/(p2*p2*1e6);
   double T = fE-fM;
-  if (fA>0) {
-    fdEdX = gdrelx(fA,fZ,fDens,T,fM) * fDens*fCharge2;
+  if (A>0) {
+    double charge2 = fCharge*fCharge;
+    fdEdX = gdrelx(A,Z,dens,T,fM) * dens*charge2;
     double beta2 = p2/(p2+m2);
-    fdEdXErr2 = gsigma2(fZ/(fA+1e-6),fDens,fCharge2,fM ,beta2,1.);
+    fdEdXErr2 = gsigma2(Z/(A+1e-6),dens,charge2,fM ,beta2,1.);
   }
 }
 //_____________________________________________________________________________
 int StvELossTrak::Same(const TGeoMaterial *mate) const
 {
-  if (fMate == mate) 					return 1;
-  if (!fMate       )	 					return 0;
-  if (fabs(fA-mate->GetA())> 1e-3*fA) 			return 0;
-  if (fabs(fZ-mate->GetZ())> 1e-3*fZ) 			return 0;
-  if (fabs(fDens-mate->GetDensity())< 1e-6) 		return 1;
-  if (fabs(fDens-mate->GetDensity())> 1e-3*fDens) 	return 0;
+return 0;
+//   if (fMate == mate) 					return 1;
+//   if (!fMate       )	 				return 0;
+//   if (fabs(fA-mate->GetA())> 1e-3*fA) 			return 0;
+//   if (fabs(fZ-mate->GetZ())> 1e-3*fZ) 			return 0;
+//   if (fabs(fDens-mate->GetDensity())< 1e-6) 		return 1;
+//   if (fabs(fDens-mate->GetDensity())> 1e-3*fDens) 	return 0;
   							return 1;
 }
 //_____________________________________________________________________________
-void StvELossTrak::Set(const TGeoMaterial *mate
-                      ,double p, double mass, double charge)
+void StvELossTrak::Set(const TGeoMaterial *mate,double p)
 {
-
-  if (!Same(mate)) {
-    fNMats ++; fMate = mate;
-     fA = fMate->GetA();
-    fZ = fMate->GetZ();
-    fDens= fMate->GetDensity();
-    fX0  = fMate->GetRadLen();
-    fM=mass; fCharge2=charge*charge;
-
-    Set(fMate->GetA(),fMate->GetZ(),fMate->GetDensity()
-       ,fMate->GetRadLen(),p,mass,charge);
-      if (fNMats>1) fMate = 0;
- return;
-  }
-  Set(0,0,0,0,p,mass,charge);
+    Set(mate->GetA(),mate->GetZ(),mate->GetDensity(),mate->GetRadLen(),p);
+    fMats.back().fMat = mate;
 }
 //______________________________________________________________________________
 //_____________________________________________________________________________
 void StvELossTrak::Add(double len)
 {
-  assert(fX0>0);
-  double addTheta2 = len/fX0*fFak;
+assert(len>0 &&len <1000);
+  fMats.back().fLen+=len;
+assert(fMats.back().fLen>0 &&fMats.back().fLen <1000);
+  double addTheta2 = len/fMats.back().fX0*fFak;
   fOrth2 += (fTheta2 + addTheta2/3)*len*len;
   fTheta2 += addTheta2;
 
-  fTotELoss += fdEdX *len;
+  double ELoss  = fdEdX *len;
+  fTotELoss += ELoss;
   fTotELossErr2 += fdEdXErr2*len;
+  double dp = ELoss*fE/fP[1];
+  fP[1] = (fDir)? fP[1] - dp: fP[1] + dp;
 
   fTotLen+=len;
 }
+//_____________________________________________________________________________
+const StvELossTrak::Aux &StvELossTrak::GetMate(int idx)
+{
+  assert(idx<(int)fMats.size());
+  return fMats[idx];
+}
+
 //_____________________________________________________________________________
 double StvELossTrak::GetTheta2() const 
 {
@@ -111,6 +134,58 @@ double StvELossTrak::GetOrt2() const
 {
   return fOrth2;
 }
+//_____________________________________________________________________________
+double StvELossTrak::PLoss(double p) const 
+{
+  double ep = (fM/p)*(fM/p);
+  ep = (ep<0.1)? (1+ep*0.5) : sqrt(1+ep);
+  return fTotELoss*ep/fTotLen;
+}
+//_____________________________________________________________________________
+double StvELossTrak::dPLossdP0(double p) const 
+{
+  double ep = (fM/p)*(fM/p);
+  ep = (ep<0.1)? (1+ep*0.5) : sqrt(1+ep);
+  return fdLogEdLogP*fTotELoss*ep/(p*fTotLen);
+
+}
+//_____________________________________________________________________________
+void StvELossTrak::Update(int dir,double pMom)
+{
+static int nCall = 0; nCall++;
+StvDebug::Break(nCall);
+
+  int jBeg=0,jEnd=fMats.size(),jStp=1;
+  if (dir!=(int)fDir) {jBeg=jEnd-1;jEnd=-1;jStp=-1;}
+//              Save the eloss and p to calculate (dP/P/len)/dP
+  double pBef = fP[0];;
+  double eBef = fTotELoss/fTotLen;
+  
+  double p = pMom;
+  if (fabs(pBef -pMom)<1e-2*pBef) return;
+  Clear(); 
+  fDir=dir; fP[0]=0;
+  AuxVect mats; mats.swap(fMats);
+  for (int jMat=jBeg; jMat!=jEnd; jMat+=jStp) {
+    Aux &M = mats[jMat];
+    Set(M.fA, M.fZ, M.fDens, M.fX0,p);
+    Add(M.fLen);
+    fMats.back().fMat = M.fMat;
+    p = 0;
+  }
+  double pNow =  fP[0]; 
+  double eNow = fTotELoss/fTotLen;
+  double dP = (pNow-pBef)/pBef;
+  if (fabs(dP)<1e-3) return;
+  if (fabs(dP)>0.1) dP = log(1.+dP);
+
+  double dE = (eNow-eBef)/eBef;
+  if (fabs(dE)>0.1) dE = log(1.+dE);
+  fdLogEdLogP = dE/dP;
+
+
+}
+
 //_____________________________________________________________________________
 #if 0
 extern "C" void g3drelx_(float &A,float &Z    ,float &DENS
