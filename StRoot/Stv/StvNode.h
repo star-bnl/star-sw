@@ -10,6 +10,7 @@
 
 class StvHit;
 class StHitPlane;
+class StvELossTrak;
   
   
 /*! \class StvNode
@@ -66,17 +67,17 @@ public:
   void  SetMem(StvHit *hit[2],double xi2[2]); 			
   const StHitPlane *GetHitPlane() const 	{ return mHitPlane  ;}
   void  SetHitPlane(const StHitPlane *hitPlane) { mHitPlane=hitPlane;}
-  void  SetELoss(const StvELossData &el,int   ) { mELossData=el;}  
-const StvELossData &GetELoss() const		{ return mELossData;}  
+  void  SetELoss(StvELossTrak *el,int  )        { mELoss=el         ;}  
+  const StvELossTrak *GetELoss() const		{ return mELoss     ;}  
   
- double GetXi2(int dir=2) const 		{ return mXi2[dir];}
- double GetLen() const 				{ return mLen;}
+ double GetXi2(int dir=2) const 		{ return mXi2[dir]  ;}
+ double GetLen() const 				{ return mLen       ;}
    void SetXi2(double Xi2,int dir=2) 		{ mXi2[dir]=Xi2; mXi2[2]=Xi2;}
    void SetPre(StvNodePars &par,StvFitErrs &err,int dir); 	
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 
    void SetDer(const StvFitDers &der, int dir);
    void SetXDive(const double xdive[3])		{memcpy(mXDive,xdive,sizeof(mXDive));}
-    int ResetELoss(const StvNodePars &pars,double len=0);
+    int ResetELoss(const StvNodePars &pars,int dir);
  StvNode::ENodeType GetType() const 			{return (StvNode::ENodeType)mType;}
                void SetType(StvNode::ENodeType ty) 	{mType =(char)ty;}
 StDetectorId GetDetId() const;  
@@ -106,7 +107,7 @@ StvHit *memHit[2];
   double      mHrr[3];  // Hit errors in DCA frame
   float       mXi2[4]; 	// Xi2 of fit to hit,join,helix
   float       mLen; 	// Length
-  StvELossData mELossData; //EnergyLoss&MCS from the upper node 
+  StvELossTrak *mELoss; //EnergyLoss&MCS from the upper node 
   char   mEnd[1];
 public:
   int mId;  //for debug only 

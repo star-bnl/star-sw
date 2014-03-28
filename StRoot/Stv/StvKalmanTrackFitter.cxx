@@ -11,6 +11,7 @@
 #include "Stv/StvHit.h"
 #include "StvUtil/StvNodePars.h"
 #include "StvUtil/StvDebug.h"
+#include "StvUtil/StvELossTrak.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvEnum.h"
 #include "Stv/StvConst.h"
@@ -324,15 +325,13 @@ if (PropagateHelix) 	//Propagate with THelixTrack ????? HACK
   double dS = myHlx.Path(Xnode);
   StvHlxDers derHlx;
 //		reset ELossData for may be new momentum
-  innNode->ResetELoss(preNode->mFP[lane]);
-  const StvELossData &el = innNode->GetELoss();
-  double dE = el.mELoss; if (dS>0) dE = -dE;
-  double P = sqrt(prePars.getP2()); 
-  double E = sqrt(P*P+ kPiMass*kPiMass);
-  if (E+dE < kMinE) dE = kMinE - E;
-  double dP = dE/P*(2*E+dE)/(sqrt(P*P+dE*(2*E+dE))+P);
-         dP = dE/P*(E)/(P);
-  
+  innNode->ResetELoss(preNode->mFP[lane],dir);
+  const StvELossTrak *el = innNode->GetELoss();
+  double dP = 0;
+  if (el) {//account energy loss
+    double P = sqrt(prePars.getP2()); 
+    dP = el->PLoss(P)*(-dS);
+  }
   if (dP > kMaxCorr) dP = kMaxCorr;
   if (dP <-kMaxCorr) dP =-kMaxCorr;
   double rho = prePars._curv;
@@ -351,26 +350,43 @@ if (PropagateHelix) 	//Propagate with THelixTrack ????? HACK
   } 
 else
   {
-  innNode->ResetELoss(preNode->mFP[lane]);
-  const StvELossData &el = innNode->GetELoss();
   StvNodePars pars = preNode->mFP[lane];
-  double p2 = pars.getP2(); 
-  double m2 = el.mM*el.mM;
-  double fak = (p2 < m2*100)? sqrt(1.+ m2/p2): 1.+0.5*m2/p2;
-  double dPP = el.mELoss*fak/sqrt(p2);
-  if (dPP > kMaxCorr) dPP = kMaxCorr;
-  dPP/=el.mTotLen;
+  double p = pars.getP(); 
+  
+  const StvELossTrak *el = innNode->GetELoss();
+  double dPP = 0,dPdP0=0;
+  if (el) {
+    innNode->ResetELoss(preNode->mFP[lane],dir);
+    dPP = el->PLoss(p)*(el->TotLen())/p;
+    if (dPP > kMaxCorr) dPP = kMaxCorr;
+    dPP/=el->TotLen();
+  }
 
   double Xnode[3];
   if (node->mHit) 	{ TCL::ucopy(node->mHit->x(),Xnode,3);}
   else        		{ TCL::ucopy(node->mXDive   ,Xnode,3);}
+  
   dS = pars.move(Xnode,dPP,dir);
+  if ((dS>0)!=(dir>0)) {
+    pars = preNode->mFP[lane];
+    dS = pars.move(node->mXDive,dPP,dir);
+  }
+
+//assert((dS>0)==(dir>0));
   node->mPP[lane] = pars;
+
   pars.Deriv(dS,derFit);
+  if (el) {
+    dPdP0 = el->dPLossdP0(p);
+    if (fabs(dPdP0)>0) pars.Deriv(dS,dPdP0,derFit);
+  }
   StvFitErrs  &nowErrs = node->mPE[lane];
   const StvFitErrs  &preErrs =  preNode->mFE[lane];
+assert(preErrs.mHH>0);
   nowErrs = preErrs*derFit;
+assert(nowErrs.mHH>0);
   nowErrs.Add(el,pars,dS);
+assert(nowErrs.mHH>0);
   innNode->SetDer(derFit,lane);
   } 
   return 0;

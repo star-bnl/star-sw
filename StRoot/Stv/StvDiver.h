@@ -34,7 +34,8 @@ void Set(      StvNodePars *otpar,      StvFitErrs *oterr,StvFitDers *deriv);
 void SetTarget(const double *target,int nTarget=3);
 void SetOpt(int opt);
 double GetLength() const;
-const StvELossData GetELossData() const;
+     StvELossTrak *GetELoss()  const{ return mELoss;}
+     StvELossTrak *TakeELoss()      { StvELossTrak *el=mELoss; mELoss=0; return el;}
 void SetRZmax(double rMax,double zMax); 
 
 protected:
@@ -69,7 +70,7 @@ protected:
     ClassDef(StvMCInitApp,0) // 
 };
 
-// Class StMCStepping
+// Class StvMCStepping
 // ------------------
 
 

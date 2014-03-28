@@ -5,13 +5,14 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <vector>
 #include "THelixTrack.h"
 
 class StvNodePars;
 class StvFitPars;
 class StvFitErrs;
 class StvImpact;
-class StvELossData;
+class StvELossTrak;
 
 //------------------------------------------------------------------------------
 typedef double Mtx55D_t[5][5];
@@ -90,11 +91,13 @@ double getPt() const			{ return 1./(fabs(_ptin)+1e-6); }
   void getMom(double p[3]) const; 
   void getDir(double d[3]) const; 
 double getP2()  const;
+double getP()  const;
 double getRxy() const;
 double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
 double getCosL() const;
   void reverse(); 
-  void Deriv(double len,StvFitDers &der) const;
+  void Deriv(double len,             StvFitDers &der) const;
+  void Deriv(double len,double dPdP0,StvFitDers &der) const;
    int isValid() const 	{return  (_hz && _cosCA);};
 ///		convert THelixTrack derivativ matrix into StvFitPar one
   void convert( StvFitDers &fitDer , const StvHlxDers &hlxDer) const;
@@ -171,7 +174,7 @@ operator const double *() const { return &mHH;}
 operator       double *()       { return &mHH;}
 StvFitErrs &operator=(const StvFitErrs &fr) ;
 StvFitErrs &operator*=(double f) {for (int i=0;i<kNErrs;i++){(*this)[i]*=f;};return *this;}
-  void Add(const StvELossData &el,const StvNodePars &pa,double len=0);
+  void Add(const StvELossTrak *el,const StvNodePars &pa,double len=0);
   void Backward();
 const StvFitErrs &operator*(const StvFitDers &mtx) const; 
 double Sign() const;
@@ -239,23 +242,29 @@ public:
 
 //------------------------------------------------------------------------------
 class TGeoMaterial; 
+
 class StvELossData 
 {
 public:
+class Aux 
+{
+public:
+const TGeoMaterial* mMat;
+double mLen,mA,mZ,mDens,mX0;
+};
 
 public:
   double mTheta2;	//multiple scattering angle error
   double mOrt2;		//multiple scattering position error
   double mELoss;	//Energy loss
   double mELossErr2;	//Square error of energy loss
-  double mdEdXdP;       //d(dEdX)/dP
+  double mdLogEdXdLogP;       	//d(log(dEdX))/d(log(P))
   double mTotLen;		//Total length where errors accumulated
+  double mE;			//Total energy
   double mP;			//Total momentum
   double mM;			//Mass
-        int mTally;		//Counter for debug only, remove later
-const TGeoMaterial *mMate;	//
-public:
-
+     int mTally;		//Counter for debug only, remove later
+std::vector<Aux> mMats;
 };
 //------------------------------------------------------------------------------
 class StvNodeParsTest
@@ -292,6 +301,14 @@ inline void StvNodePars::getDir(double d[3]) const
   d[0]=_cosCA/nor;d[1]=_sinCA/nor;d[2]=_tanl/nor;
 }
 //------------------------------------------------------------------------------
+inline double StvNodePars::getP() const 
+{ 
+  double t =_tanl*_tanl;
+  t = (t<0.01)? (1.+t*(0.5-t*0.125)) : sqrt(1.+t);
+  return t/(fabs(_ptin)+1e-12);
+}
+
+//------------------------------------------------------------------------------
 inline double StvNodePars::getP2() const 
 { return 1./(_ptin*_ptin+1e-12)*(1.+_tanl*_tanl);}
 
@@ -302,19 +319,6 @@ inline void StvNodePars::reverse()
  while (_psi> M_PI) {_psi-=2*M_PI;}
  while (_psi<-M_PI) {_psi+=2*M_PI;}
  _tanl  = -_tanl ; _curv = -_curv ; _ptin = -_ptin;
-}
-//------------------------------------------------------------------------------
-inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &pa, double len)
-{    
-  double fakLen = (len)? fabs(len/el.mTotLen):1.;
-  double p2 = pa.getP2();
-  double e2 = p2+el.mM*el.mM;
-  double fakNrj = e2/p2*(pa._ptin*pa._ptin)/p2;
-  mAA+= el.mTheta2 			*fakLen;
-  mLL+= el.mTheta2 			*fakLen;
-  mHH+= el.mOrt2 			*fakLen;
-  mZZ+= el.mOrt2 			*fakLen;
-  mPP+= el.mELossErr2*fakNrj 		*fakLen;
 }
 //------------------------------------------------------------------------------
 inline double StvNodePars::getCosL() const
