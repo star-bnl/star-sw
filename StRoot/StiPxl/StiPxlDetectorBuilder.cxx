@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.43 2014/03/28 19:47:58 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.44 2014/03/28 19:48:05 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -92,6 +92,9 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
       return;
    }
 
+   // Gas material must be defined. Here we use air properties
+   _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
+
    if (StiVMCToolKit::GetVMC()) {
 
       switch (mGeomDebug) {
@@ -119,7 +122,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
       StiMaterial    **p;
    };
 
-   _gasMat    = add(new StiMaterial("PixelAir", 7.3,   14.61,     0.001205, 30420.*0.001205, 7.3 * 12.e-9));
    mSiMaterial = add(new StiMaterial("PixelSi",  14.,  28.0855,   2.33,     21.82,           14.*12.*1e-9) );
    mHybridMaterial = add(new StiMaterial("PixelHyb", 14.,  28.0855,   2.33,     21.82,           14.*12.*1e-9) );
 
