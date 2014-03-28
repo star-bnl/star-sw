@@ -31,7 +31,7 @@ friend class StvTrack;
 enum ENodeType {kRegNode=0,kDcaNode=1,kPrimNode=2};
 
 public:
-  StvNode(){mBeg[0] = 0; unset();}
+  StvNode(){mBeg[0]='@';}
   StvNode(const StvNode &node);
   virtual ~StvNode(){mId=-1;};
   StvNode &operator=(const StvNode &from);
