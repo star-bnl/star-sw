@@ -35,7 +35,7 @@ void SetTarget(const double *target,int nTarget=3);
 void SetOpt(int opt);
 double GetLength() const;
      StvELossTrak *GetELoss()  const{ return mELoss;}
-     StvELossTrak *TakeELoss()      { StvELossTrak *el=mELoss; mELoss=0; return el;}
+     StvELossTrak *TakeELoss();
 void SetRZmax(double rMax,double zMax); 
 
 protected:
