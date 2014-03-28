@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.44 2014/03/28 19:48:05 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.45 2014/03/28 19:48:13 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -112,6 +112,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 }
 
 
+/** Builds the sensors of the pixel detector. */
 void StiPxlDetectorBuilder::useVMCGeometry()
 {
    LOG_INFO << "StiPxlDetectorBuilder::useVMCGeometry() -I- Use VMC geometry" << endm;
@@ -149,7 +150,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
    double ionization = mSiMaterial->getIonization();
 
-   StiElossCalculator *ElossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
+   StiElossCalculator *elossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
          ionization * ionization,
          mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
 
@@ -247,7 +248,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             stiDetector->setPlacement(pPlacement);
             stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
             stiDetector->setMaterial(mSiMaterial);
-            stiDetector->setElossCalculator(ElossCalculator);
+            stiDetector->setElossCalculator(elossCalculator);
             stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 
             int stiRow    = 0;
@@ -273,7 +274,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
             // Whole bunch of debugging information
             Float_t rad2deg = 180.0 / 3.1415927;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Name               = " << stiDetector->getName()                               << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Name             = " << stiDetector->getName()                     << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm;
@@ -283,11 +284,11 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm;
             LOG_DEBUG << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sector             = " << iSector                                    << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Ladder             = " << iLadder                                    << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sensor             = " << iSensor                                    << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor                     << endm;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Active?            = " << stiDetector->isActive()                              << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sector           = " << iSector                                    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Ladder           = " << iLadder                                    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sensor           = " << iSensor                                    << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor       << endm;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
          }
       }
    }
@@ -300,7 +301,6 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
    // Build average inactive volumes
    const VolumeMap_t pxlVolumes[] = {
       {"DTUH1", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/DTUH_1", "", ""},
-      {"DTUH2", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/DTUH_2", "", ""},
       {"PSHA1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
       {"PSHC1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
       {"PSHE1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
@@ -312,6 +312,8 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
       {"PSAB1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
       {"PSAE1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
       {"PSMD1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
+
+      {"DTUH2", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/DTUH_2", "", ""},
       {"PSHA2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
       {"PSHC2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
       {"PSHE2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
