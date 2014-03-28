@@ -38,6 +38,10 @@ public:
   int ValidBunchid(int trayid, int halftrayid, int bunchid, int refbunchid);
   bool ValidDataword(int packetid);
 
+  void ReadTrayList();
+  void ReadValidBunchidPhase();
+  void GetInfoTF00X(int it,int* in);
+
   //*** Histogram Declarations...
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
@@ -71,6 +75,9 @@ public:
       TH1 *upvpd_eastT_vs_westT;
       
       TH2 *hBunchidShiftVSthub;
+
+      TH2 *TOF_TF00X[6];
+      
     };
   } contents;
   //*** End Histogram Declarations...
@@ -94,9 +101,6 @@ public:
   TLatex *TOF_Error3_list;
   int nperror1, nperror2, nperror3;
   
-  void ReadTrayList();
-  void ReadValidBunchidPhase();
-
   int mReferenceTray;
   int mValidShiftTray[2][4];
   int mValidShift121[2][2];

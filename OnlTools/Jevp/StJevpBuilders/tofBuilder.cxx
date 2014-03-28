@@ -18,6 +18,14 @@
 #include <assert.h>
 
 ClassImp(tofBuilder);
+
+int mapTF00X[6][20] = 
+{{13,12,11,10,9,8,7,6,5,4,103,104,105,106,107,108,109,110,111,112},
+ {3,2,1,60,59,58,57,56,55,54,113,114,115,116,117,118,119,120,61,62},
+ {53,52,51,50,49,48,47,46,45,44,63,64,65,66,67,68,69,70,71,72},
+ {43,42,41,40,39,38,37,36,35,34,73,74,75,76,77,78,79,80,81,82},
+ {33,32,31,30,29,28,27,26,25,24,83,84,85,86,87,88,89,90,91,92},
+ {23,22,21,20,19,18,17,16,15,14,93,94,95,96,97,98,99,100,101,102}};
   
 tofBuilder::tofBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"tof";
@@ -38,6 +46,7 @@ tofBuilder::tofBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   TOF_Error1_list = NULL;
   TOF_Error2_list = NULL;
   TOF_Error3_list = NULL;
+  
 }
 
 tofBuilder::~tofBuilder() {
@@ -109,6 +118,29 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   contents.upvpd_eastT_vs_westT=new TH2F("upvpd_eastT_vs_westT","upvpd eastT vs westT",400,0,51200,400,0,51200);
   contents.upvpd_eastT_vs_westT->SetXTitle("east time (ns)");
 
+  for(int i=0;i<6;i++) {
+    static char tmpchr[255];
+    static char tmpchr1[255];
+    sprintf(tmpchr,"TOF_TF00X%d",i+1);
+    sprintf(tmpchr1,"TRG TF00%d TofMult by Tray",i+1);
+    contents.TOF_TF00X[i]= new TH2F(tmpchr,tmpchr1,20,-0.5,19.5,32,-0.5,31.5);
+  }
+  for(int i=0;i<6;i++) {
+    for (int it=1;it<=120;it++){
+    	int info[2] = {0};
+ 		GetInfoTF00X(it, info);
+ 		int itf	= info[0]-1;
+ 		int ibx	= info[1]+1;
+ 		//cout<<it<<" "<<itf<<" "<<ibx-1<<" "<<endl;
+	    contents.TOF_TF00X[i]->GetXaxis()->LabelsOption("v");
+		contents.TOF_TF00X[itf]->GetXaxis()->SetBinLabel(ibx,Form("%d",it));
+ 		contents.TOF_TF00X[itf]->GetXaxis()->SetLabelSize(0.06);
+ 		//contents.TOF_TF00X[itf]->GetXaxis()->SetLabelAngle(45);
+    }
+    //
+  }
+
+  //----------------------------------
   int n=0;
   for(n=0;n<NTRAYS;n++) {
     plots[n] = new JevpPlot(contents.TOF_L0_trg[n]);
@@ -183,7 +215,7 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.TOF_EventCount);
   plots[++n] = new JevpPlot(contents.hBunchidShiftVSthub);
   plots[n]->optstat = 1111111;
-  
+
   for(int i=0;i<NTRAYS;i++) {
     n++;
     plots[n] = new JevpPlot(contents.TOF_Tray_LEhitmap[i]);
@@ -192,69 +224,78 @@ void tofBuilder::initialize(int argc, char *argv[]) {
     plots[n]->gridx = 0;
     plots[n]->gridy = 0;
   }
-  
-  plots[++n] = new JevpPlot(contents.upvpd_hitmap[0]);
 
-  JLine *ln;
+ JLine *ln;
   JLatex *l; 
   l = new JLatex(.25, .12, "THUB1-NW0");
   l->SetTextSize(.035);
   l->SetTextAlign(13);
   l->SetTextAngle(90); 
 
-  contents.upvpd_hitmap[0]->SetFillColor(19);
-  ln = new JLine(18.5,.1,18.5,.9);
-  ln->SetLineColor(4);
-  plots[n]->addElement(ln);
-  ln = new JLine(37.5,.1,37.5,.9);
-  ln->SetLineColor(4);
-  plots[n]->addElement(ln);
-  l = new JLatex(7.5, .8, "west side");
-  plots[n]->addElement(l);
-  l = new JLatex(26.5, .8, "east side");
-  plots[n]->addElement(l);
-  l = new JLatex(45.5, .8, "PP2PP");
-  plots[n]->addElement(l);
-  plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.upvpd_hitmap[0]);
+	  contents.upvpd_hitmap[0]->SetFillColor(19);
+	  ln = new JLine(18.5,.1,18.5,.9);
+	  ln->SetLineColor(4);
+	  plots[n]->addElement(ln);
+	  ln = new JLine(37.5,.1,37.5,.9);
+	  ln->SetLineColor(4);
+	  plots[n]->addElement(ln);
+	  l = new JLatex(7.5, .8, "west side");
+	  plots[n]->addElement(l);
+	  l = new JLatex(26.5, .8, "east side");
+	  plots[n]->addElement(l);
+	  l = new JLatex(45.5, .8, "PP2PP");
+	  plots[n]->addElement(l);
+	  plots[n]->optstat = 0;
 
   plots[++n] = new JevpPlot(contents.upvpd_hitmap[1]);
-
-  contents.upvpd_hitmap[1]->SetFillColor(19);
-  ln = new JLine(18.5,.1,18.5,.9);
-  ln->SetLineColor(4);
-  plots[n]->addElement(ln);
-  ln = new JLine(37.5,.1,37.5,.9);
-  ln->SetLineColor(4);
-  plots[n]->addElement(ln);
-  l = new JLatex(7.5, .8, "west side");
-  plots[n]->addElement(l);
-  l = new JLatex(26.5, .8, "east side");
-  plots[n]->addElement(l);
-  l = new JLatex(45.5, .8, "PP2PP");
-  plots[n]->addElement(l);
-  plots[n]->optstat = 0;
+	  contents.upvpd_hitmap[1]->SetFillColor(19);
+	  ln = new JLine(18.5,.1,18.5,.9);
+	  ln->SetLineColor(4);
+	  plots[n]->addElement(ln);
+	  ln = new JLine(37.5,.1,37.5,.9);
+	  ln->SetLineColor(4);
+	  plots[n]->addElement(ln);
+	  l = new JLatex(7.5, .8, "west side");
+	  plots[n]->addElement(l);
+	  l = new JLatex(26.5, .8, "east side");
+	  plots[n]->addElement(l);
+	  l = new JLatex(45.5, .8, "PP2PP");
+	  plots[n]->addElement(l);
+	  plots[n]->optstat = 0;
 
   plots[++n] = new JevpPlot(contents.upvpd_ToT);
-  plots[n]->setDrawOpts("colz");
-
-  ln = new JLine(18.5,.1,18.5,.9);
-  ln->SetLineColor(44);
-  plots[n]->addElement(ln);
-  ln = new JLine(37.5,.1,37.5,.9);
-  ln->SetLineColor(44);
-  plots[n]->addElement(ln);
-  l = new JLatex(7.5, .8, "west side");
-  plots[n]->addElement(l);
-  l = new JLatex(26.5, .8, "east side");
-  plots[n]->addElement(l);
-  l = new JLatex(45.5, .8, "PP2PP");
-  plots[n]->addElement(l);
-  plots[n]->optstat = 0;
+	  plots[n]->setDrawOpts("colz");
+	  ln = new JLine(18.5,.1,18.5,.9);
+	  ln->SetLineColor(44);
+	  plots[n]->addElement(ln);
+	  ln = new JLine(37.5,.1,37.5,.9);
+	  ln->SetLineColor(44);
+	  plots[n]->addElement(ln);
+	  l = new JLatex(7.5, .8, "west side");
+	  plots[n]->addElement(l);
+	  l = new JLatex(26.5, .8, "east side");
+	  plots[n]->addElement(l);
+	  l = new JLatex(45.5, .8, "PP2PP");
+	  plots[n]->addElement(l);
+	  plots[n]->optstat = 0;
 
   plots[++n] = new JevpPlot(contents.upvpd_eastT_vs_westT);
-  plots[n]->setDrawOpts("col");
-  plots[n]->optstat = 0;
+	  plots[n]->setDrawOpts("col");
+	  plots[n]->optstat = 0;
  
+  plots[n]->optlogz = 1;		// HACK as there's no ->logz option!!!
+  for(int i=0;i<6;i++) {
+    n++;
+    plots[n] = new JevpPlot(contents.TOF_TF00X[i]);
+    plots[n]->optstat = 0;
+    plots[n]->optlogz = 1;
+    plots[n]->gridx = 1;
+    plots[n]->gridy = 1;
+  }
+  plots[n]->optlogz = 0;		// HACK as there's no ->logz option!!!
+ 
+  //---------------------------------------------------
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
     LOG(DBG, "Adding plot %d",i);
@@ -655,9 +696,14 @@ void tofBuilder::event(daqReader *rdr)
 
     for(int tray=1;tray<=120;tray++){
       int trigger_mult	 = trgd->tofTrayMultiplicity(tray,prepost);
+      int info[2] = {0};			// idTF00X, ibinTF00X
+      GetInfoTF00X(tray,info);		//
+      int idTF00X		 = info[0];	//
+      int ixTF00X		 = info[1];	//
       TOF_L1mult_sum	+= trigger_mult;
       if(trigger_mult > 31) trigger_mult=31;
       contents.TOF_L0_trg[tray-1]->Fill(trigger_mult);
+      contents.TOF_TF00X[idTF00X-1]->Fill(ixTF00X,trigger_mult);
     }
   }
   //printf("to parsedata\n");
@@ -785,6 +831,25 @@ void tofBuilder::event(daqReader *rdr)
 
   if(trgd) delete trgd;
 }
+
+void tofBuilder::GetInfoTF00X(int tray, int* info){
+	info[0]	= -1;
+	info[1]	= -1;
+	for (int itf=0;itf<6;itf++){
+		for (int i=0;i<20;i++){
+			//cout<<"TF00"<<itf+1<<"  i="<<i<<"   tray="<<mapTF00X[itf][i]<<endl;
+			if (tray==mapTF00X[itf][i]){
+				info[0]	= itf+1;
+				info[1]	= i;
+				break;
+			}
+		}
+	}
+	if (info[0]<1||info[0]> 6){ cout<<"tofBuilder PROBLEM mapping TF00X ID"<<endl; }
+	if (info[1]<0||info[1]>19){ cout<<"tofBuilder PROBLEM mapping TF00X xval"<<endl; }
+}
+
+
 
 void tofBuilder::stoprun(daqReader *rdr) {
   
