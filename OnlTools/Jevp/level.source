@@ -6,4 +6,4 @@
 #setenv USE_64BITS 1
 starver SL14a
 
-echo `STAR_LEVELS`
+#echo `STAR_LEVELS`
