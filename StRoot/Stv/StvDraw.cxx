@@ -290,8 +290,10 @@ void  StvDraw::All(const char *opt)
 
   if (strstr(opt,"T")) {
     StvTracks &tks = StvToolkit::Inst()->GetTracks();
+    int nTk = 0;
     for (StvTrackConstIter it=tks.begin(); it!=tks.end(); ++it) {
       const StvTrack *tk = *it;
+      nTk++;
       Trak(tk);
   }  }
 
