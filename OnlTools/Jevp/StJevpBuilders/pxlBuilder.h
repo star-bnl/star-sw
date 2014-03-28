@@ -81,22 +81,30 @@ public:
   map<int,double> *AverageRunLength;
   map<int,int> *LadderCount;
   map<int,int> *LadderMap;
+  
+  int sensor_hits[10][40];
+  int sensor_hit_frequency[10][40];
+  int sensor_hit_frequency_SE[10][40];
+  double avg_run_length[10][40];
 
   void IncrementMultiplicity(int sensor_number,int row_count);
   int WhichLadder(int sector_number,int sensor_number);
   void UpdateLadderCount(int sector_number,int sensor_number,int sensor_count);
   void SetRunLength(int sensor_number,double average_run_length);
   bool UpdateTH1(TH1 *hist,int bin,double value);
-  bool UpdateTH1I(TH1 *hist,int bin,int value);
+  bool UpdateTH1_Scale(TH1 *hist,int bin,double value, int number_of_events_old);
   bool UpdateTH2(TH1 *hist,int x_bin,int y_bin,double value);
-  bool UpdateTH2(const char* name,TH1 *hist,int x_bin,int y_bin,double value);
-  bool UpdateTH1(TH1 *hist,int bin,double value,bool scale,int mod_val);
-  bool ScaleTH1Bin(TH1 *hist,int bin,int scale_factor);
+  bool UpdateTH2_Scale(TH1 *hist,int x_bin,int y_bin,double value, int number_of_events_old);
+  bool UpdateTH2_Scale2(const char* name,TH1 *hist,int x_bin,int y_bin,double value, int number_of_events_old);
   void SetLadderMap();
   int IncrementArray(const char* name,int x_bin,int y_bin);
 
-  void UpdateTH2I(TH1 *hist,int x_bin,int y_bin);
   void UpdateSectorErrorTypeTH2(TH1 *hist, int ret, int sector_number);
+
+  int GetLadderCount(int ladder_number);
+  void FillLadderHistogram(TH1 *hist);
+  void UpdateLadderHistogram(TH1 *hist, TH1 *hist_single_evt, int number_of_events_old);
+  void UpdateLayerHistograms(TH1 *h_hits_inner, TH1 *h_rl_inner, TH1 *h_hits_outer, TH1 *h_rl_outer, int number_of_events);
 
   //*** Histogram Declarations...
   //*** Use the union to be able to treat in bulk
