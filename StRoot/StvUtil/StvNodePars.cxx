@@ -5,6 +5,7 @@
 #include "TMath.h"
 #include "TMath.h"
 #include "StvUtil/StvNodePars.h"
+#include "StvUtil/StvELossTrak.h"
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvToolkit.h"
 
@@ -492,6 +493,22 @@ StvFitErrs StvNodePars::deltaErrs() const
    return fe;
 }
 //_____________________________________________________________________________
+void StvFitErrs::Add(const StvELossTrak *el,const StvNodePars &pa, double len)
+{    
+  if (!el) return;
+
+  double fakLen = (len)? fabs(len/el->TotLen()):1.;
+  double p2 = pa.getP2();
+  double e2 = p2+el->M()*el->M();
+  double fakNrj = e2/p2*(pa._ptin*pa._ptin)/p2;
+  mAA+= el->GetTheta2() 		*fakLen;
+  mLL+= el->GetTheta2()  		*fakLen;
+  mHH+= el->GetOrt2() 			*fakLen;
+  mZZ+= el->GetOrt2() 			*fakLen;
+  mPP+= el->ELossErr2()	*fakNrj *fakLen;
+  assert(mHH>0);
+}
+//_____________________________________________________________________________
 double StvNodePars::diff(const StvNodePars &other) const 
 { 
   StvFitPars fp = *this-other;
@@ -528,7 +545,7 @@ double StvNodePars::diff(const float hit[3]) const
   return myMax;
 }
 //______________________________________________________________________________
-void StvNodePars::Deriv(double len,StvFitDers &der) const
+void StvNodePars::Deriv(double len, StvFitDers &der) const
 {
    double Rho   = _curv;
    double cos2L = 1./(1.+_tanl*_tanl);
@@ -629,7 +646,30 @@ void StvNodePars::Deriv(double len,StvFitDers &der) const
    der[kHf][kPf]*=_hz;
    der[kZf][kPf]*=_hz;
    der[kAf][kPf]*=_hz;
+
+
 }
+//______________________________________________________________________________
+void StvNodePars::Deriv(double len, double dPdP0, StvFitDers &der) const
+{
+// Update existing derivatives using energy loss info:
+//	len   	- new length
+//	dPdP0 	- d(Ploss)/dP0 /len/
+//
+//  dP = dPdP0* dP0
+//  d(Pt/cosL) = dPdP0* d(Pt0/cosL)
+//  dPt/cosL + Pt*sinL/cosL**2*dL = dPdP0* ( dPt0/cosL + Pt0*sinL/cosL**2*dL)
+
+
+
+  double dPLossdP0 = -dPdP0*len;
+  double dPtidPti0 = dPLossdP0;
+  double dPtidLam0 =-dPLossdP0*_tanl*_ptin;
+  
+  der[kPf][kPf]+= dPtidPti0;		// dPti/dRho ;
+  der[kPf][kLf]+= dPtidLam0;		// dPti/dLam ;
+}  
+
 //______________________________________________________________________________
 //______________________________________________________________________________
 void StvHitErrs::rotate(double angle)
