@@ -17,11 +17,16 @@ class StvEventFiller;
 class StvHit;
 class StvHitFactory;
 class StvVertexFactory;
+
 class StvNode;
 class StvNodeFactory;
+
 class StvTrack;
 class StvTrackFactory;
 class StvTracks;
+
+class StvELossTrak;
+class StvELossTrakFactory;
 
 class StvToolkit 
 {
@@ -54,6 +59,8 @@ StvNode         *GetNode();
 void            FreeNode(StvNode*   &stiNode);       
 StvTrack       *GetTrack();       
 void            FreeTrack(StvTrack* &stiTrak);       
+StvELossTrak   *GetELossTrak();       
+void            FreeELossTrak(StvELossTrak* &stiELossTrak);       
 
 
 void SetHitLoader  (StvHitLoader   *loadHits   ){ mHitLoader   = loadHits   ;}
@@ -75,6 +82,7 @@ StvEventFiller  *mEventFiller;
 StvHitFactory  	*mHitFactory;
 StvNodeFactory  *mNodeFactory;
 StvTrackFactory *mTrackFactory;
+StvELossTrakFactory *mELossTrakFactory;
 StvVertexFactory 	*mVertexFactory;
 char            mEnd[1];
 

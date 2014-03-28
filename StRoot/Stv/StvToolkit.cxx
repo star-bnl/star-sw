@@ -6,6 +6,7 @@
 #include "Stv/StvHit.h"
 #include "Stv/StvNode.h"
 #include "Stv/StvTrack.h"
+#include "StvUtil/StvELossTrak.h"
 #include "Stv/StvStl.h"
 #include "Stv/StvDraw.h"
 #include "StarMagField.h"
@@ -16,6 +17,7 @@
 class StvHitFactory  : public StvFactory<StvHit ,StvHit > 	{public:};
 class StvNodeFactory : public StvFactory<StvNode,StvNode> 	{public:};
 class StvTrackFactory: public StvFactory<StvTrack,StvTrack> 	{public:};
+class StvELossTrakFactory: public StvFactory<StvELossTrak,StvELossTrak> 	{public:};
 class StvVertexFactory  : public StvFactory<StvVertex ,StvVertex > 	{public:};
 
 
@@ -73,9 +75,23 @@ StvTrack *StvToolkit::GetTrack()
   return mTrackFactory->getInstance();	
 }
 //_____________________________________________________________________________
+StvELossTrak *StvToolkit::GetELossTrak()
+{
+  if (!mELossTrakFactory) {
+    mELossTrakFactory = (StvELossTrakFactory*)StvELossTrakFactory::myInstance();
+    mELossTrakFactory->setMaxIncrementCount(4000000);
+  }
+  return mELossTrakFactory->getInstance();	
+}
+//_____________________________________________________________________________
 void StvToolkit::FreeTrack(StvTrack *&stiTrack)
 {
   StvTrackFactory::Free(stiTrack);	stiTrack=0;
+}
+//_____________________________________________________________________________
+void StvToolkit::FreeELossTrak(StvELossTrak *&stiELossTrak)
+{
+  StvELossTrakFactory::Free(stiELossTrak);	stiELossTrak=0;
 }
 //_____________________________________________________________________________
 StvNode *StvToolkit::GetNode()
@@ -113,6 +129,7 @@ void StvToolkit::Clear(const char*)
   if (mTrakFinder)  	mTrakFinder->Clear();
 
   if (mTrackFactory)	mTrackFactory->clear();
+  if (mELossTrakFactory) mELossTrakFactory->clear();
   if (mNodeFactory) 	mNodeFactory->clear();
   if (mHitFactory)  	mHitFactory->clear();
   if (mVertexFactory)   mVertexFactory->clear();
