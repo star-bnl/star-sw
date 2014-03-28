@@ -1,3 +1,15 @@
+/* 
+ * saveTriggerLoad.C
+ * Update: 03/27/2014 Kevin Adkins
+ * Change previous access method of
+ * saveTrigger(...). Previously it was accessed
+ * via StOnlineTriggerMonitoring::saveTrigger(...)
+ * now declare StOnlineTriggerMonitoring member onltrg
+ * and use -> class access operator to call
+ * saveTrigger(...)
+ * 
+ */
+
 void saveTriggerLoad(
 char *timestamp = "",
 bool status = true,
@@ -18,5 +30,7 @@ char *bcwTable = "bcw_table.txt"
     gSystem->Load("St_db_Maker");
     gSystem->Load("StDaqLib");
     gSystem->Load("StOnlineTriggerMonitoring");
-    StOnlineTriggerMonitoring::saveTrigger(timestamp, status, pedestal, lut, statusOffline, pedestalOffline, saveDB, saveTables, tables_dir, saved_dir, bemcStatusCopy, bceTable, bcwTable);
+
+    StOnlineTriggerMonitoring *onltrg = new StOnlineTriggerMonitoring();
+    onltrg->saveTrigger(timestamp, status, pedestal, lut, statusOffline, pedestalOffline, saveDB, saveTables, tables_dir, saved_dir, bemcStatusCopy, bceTable, bcwTable);
 }
