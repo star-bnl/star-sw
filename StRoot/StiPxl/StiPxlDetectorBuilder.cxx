@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.40 2014/03/27 22:47:08 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.41 2014/03/28 02:34:51 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -66,7 +66,7 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFil
       if ( chain->GetOption("StiPxlSimpleBox") )
          mGeomDebug = kSimpleBoxes;
       else if ( chain->GetOption("StiPxlSimpleTube") )
-         mGeomDebug = kSimpleBoxes;
+         mGeomDebug = kSimpleTube;
    }
 }
 
