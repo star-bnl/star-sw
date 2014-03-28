@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.41 2014/03/28 02:34:51 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.42 2014/03/28 02:34:56 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -370,8 +370,7 @@ void StiPxlDetectorBuilder::buildSimpleBoxes()
       int sector = 0;
       StiDetector *stiDetector = getDetector(row, sector);
       StiMaterial *mat = stiDetector->getMaterial();
-      float alumDensity = 2.7; // g/cm^3
-      mat->set(mat->getName(), mat->getZ(), mat->getA(), alumDensity, mat->getRadLength(), mat->getIonization());
+      mat->set(mat->getName(), mat->getZ(), mat->getA(), mat->getDensity()*10, mat->getRadLength(), mat->getIonization());
    }
 }
 
