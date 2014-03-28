@@ -59,6 +59,8 @@
 
         ln -sf $SRC_PATH/macros/bce_table.txt $DST_PATH
         ln -sf $SRC_PATH/macros/bcw_table.txt $DST_PATH
+	
+	ln -sf $SRC_PATH/macros/scp $DST_PATH
 
 	export CRONTAB_FILE=$DST_PATH/crontab.emconline_trg
 	rm -f $CRONTAB_FILE
