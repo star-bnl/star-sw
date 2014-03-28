@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.29 2014/02/28 21:51:52 perev Exp $
+ * $Id: StvNode.cxx,v 1.30 2014/03/28 15:33:48 perev Exp $
  *
  * /author Victor Perev
  */
@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "TString.h"
 
+#include "Stv/StvToolkit.h"
 #include "Stv/StvNode.h"
 #include "Stv/StvHit.h"
 #include "StvUtil/StvDebug.h"
@@ -30,6 +31,8 @@ static int myCount=0;
 //______________________________________________________________________________
 void StvNode::unset()
 { 
+static StvToolkit *kit = StvToolkit::Inst();
+  if (mELoss) kit->FreeELossTrak(mELoss); 
   assert(mBeg[0]!='@');
   memset(mBeg,'@',mEnd-mBeg+1);
 }
@@ -206,41 +209,18 @@ int StvNode::Check(const char *tit, int dirs) const
   return nerr;
 }
 //________________________________________________________________________________
-int StvNode::ResetELoss(const StvNodePars &pars,double len)
+int StvNode::ResetELoss(const StvNodePars &pars,int dir)
 {
-//??static const double kBigP  =3      , kBigP2    = kBigP*kBigP       ,kSmaDiff=1e-2;
-static const double kSmaP      =0.01,  kSmaP2 = kSmaP*kSmaP;
-static const double kBigP         =3     , kBigP2   = kBigP*kBigP       ,kSmaDiff=1e-4;
+static const double kSmaP      =0.01;
+static const double kBigP      =3     	,kSmaDiff=1e-4;
 
-static StvELossTrak *el = new StvELossTrak();
-
-  if (!len) {len = mELossData.mTotLen;} else {len = fabs(len);}
-  double p2 = pars.getP2(); 
-  if (p2>kBigP2  ) p2=kBigP2;
-  if (p2<kSmaP2) p2=kSmaP2;
-  double myP = mELossData.mP;
-  if (fabs(myP*myP-p2)<kSmaDiff*p2) 		return 0;
-  if (!mELossData.mMate)				return 1;
-	
-//              Save the eloss and p to calculate (dP/P/len)/dP
-  double pPrev   = mELossData.mP;
-  double dEdXBef = mELossData.mELoss/mELossData.mTotLen;
-
-  el->Reset();
-  double p = sqrt(p2);
-  el->Set(mELossData.mMate,p); el->Add(len);
-  mELossData.mP      = el->P();
-  mELossData.mTheta2 = el->GetTheta2();
-  mELossData.mOrt2   = el->GetOrt2();
-  mELossData.mELoss  = el->ELoss();
-  mELossData.mELossErr2= el->ELossErr2();
-  mELossData.mTotLen = el->TotLen();  
-  double dP = mELossData.mP - pPrev;
-  if (fabs(dP)<1e-3) return 0;
-  double dEdXNow = mELossData.mELoss/mELossData.mTotLen;
-  double dEdXdP = (dEdXNow-dEdXBef);
-  if (fabs(dEdXdP)> 0.1*dEdXNow) dEdXdP = dEdXNow*log(dEdXNow/dEdXBef);
-  dEdXdP/=dP; mELossData.mdEdXdP = dEdXdP;
+  if (!mELoss) return 0;
+  double p = pars.getP(); 
+  if (p>kBigP) p=kBigP;
+  if (p<kSmaP) p=kSmaP;
+  double myP = mELoss->P();
+  if (fabs(myP-p)<kSmaDiff*p) 		return 0;
+  mELoss->Update(dir,p);	
   return 0;
 }
  

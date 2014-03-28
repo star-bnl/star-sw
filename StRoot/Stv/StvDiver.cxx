@@ -12,6 +12,7 @@
 #include "StvUtil/StvELossTrak.h"
 #include "THelixTrack.h"
 #include "TRandom.h"
+#include "StvToolkit.h"
 
 class MyRandom : public TRandom 
 {
@@ -37,23 +38,6 @@ static void mybreak(int key)
 ClassImp(StvDiver)
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-const StvELossData StvDiver::GetELossData() const
-{
- StvELossData eld;
- 
-  eld.mdEdXdP = 0;
-  eld.mTheta2 = mELoss->GetTheta2();
-  eld.mOrt2   = mELoss->GetOrt2();
-  eld.mELoss  = mELoss->ELoss();
-  eld.mELossErr2  = mELoss->ELossErr2();
-  eld.mTotLen = mELoss->TotLen();
-  eld.mP      = mELoss->P();
-  eld.mM      = mELoss->M();
-  eld.mMate   = (mELoss->GetNMats()==1)? mELoss->GetMate():0;
-  
-  return eld;
-}
-//_____________________________________________________________________________
 StvDiver::StvDiver(const char *name):TNamed(name,"")
 {
   memset(mBeg,0,mEnd-mBeg+1);
@@ -61,9 +45,10 @@ StvDiver::StvDiver(const char *name):TNamed(name,"")
 //_____________________________________________________________________________
 int StvDiver::Init() 
 {
+static StvToolkit* kit = StvToolkit::Inst();
   gMyRandom = new MyRandom;
   mHelix = new THelixTrack;
-  mELoss = new StvELossTrak;
+  mELoss = kit->GetELossTrak();
   StVMCApplication *app = (StVMCApplication*)TVirtualMCApplication::Instance();
   assert(app);
   mSteps =  ( StvMCStepping*)app->GetStepping();
@@ -105,6 +90,7 @@ void StvDiver::SetTarget(const double target[3],int nTarget)
 //_____________________________________________________________________________
 int  StvDiver::Dive()
 {
+static StvToolkit* kit = StvToolkit::Inst();
   mGen->Set(mInpPars,mDir);
 
 
@@ -116,7 +102,8 @@ int  StvDiver::Dive()
 
   mFld->SetHz(mInpPars->_hz);	//Set initial value of mag field
   assert(fabs(mInpPars->_hz)<0.01);
-  mELoss->Reset();
+  if (!mELoss) {mELoss = kit->GetELossTrak(); mSteps->Set(mELoss);}
+  mELoss->Reset(mDir);
   int myExit = 0;
   mInpPars->get(mHelix);
   mInpErrs->Get(mHelix);
