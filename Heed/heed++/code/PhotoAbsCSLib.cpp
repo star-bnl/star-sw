@@ -2,7 +2,7 @@
 #include "heed++/code/PhysicalConstants.h"
 #ifdef NOT_INCLUDE_GASLIB_IN_PACSLIB
 #else
-#include "wcpplib/matter/GasLib.c"
+#include "wcpplib/matter/GasLib.cpp"
 #endif
 
 /*
