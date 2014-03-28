@@ -1,0 +1,31 @@
+#!/bin/bash
+
+export FROM_FILE="${1}"
+export TO_FILE="${2}"
+
+echo "Copying from ${FROM_FILE} to ${TO_FILE}"
+
+export LOGIN_NAME=''
+if [[ ( "${LOGIN_NAME}" == "") && ( "${FROM_FILE#*:}" != "${FROM_FILE}" ) ]] ; then export LOGIN_NAME=${FROM_FILE%%:*} ; fi
+if [[ ( "${LOGIN_NAME}" == "") && ( "${TO_FILE#*:}" != "${TO_FILE}" ) ]] ; then export LOGIN_NAME=${TO_FILE%%:*} ; fi
+
+if [[ "${LOGIN_NAME}" == "" ]]
+then
+    export PASSW=""
+else
+    source ${0%/*}/.scprc
+    export PASSW=`getPassw ${LOGIN_NAME}`
+fi
+
+export CMD='scp -v '${FROM_FILE}' '${TO_FILE}
+#export CMD_EXPECT='spawn "'${CMD}'"; expect "assword"; send -- "'${PASSW}'\r"; expect eof'
+export CMD_EXPECT='spawn bash -c "scp '${FROM_FILE}' '${TO_FILE}'"; expect "assword"; send -- "'${PASSW}'\r"; expect eof'
+#env
+
+if [[ "${PASSW}" == "" ]]
+then
+    ${CMD}
+else
+#    expect -c 'spawn scp '${FROM_FILE}' '${TO_FILE}'; expect "assword"; send -- "'${PASSW}'\r"; expect eof'
+    expect -c "${CMD_EXPECT}"
+fi
