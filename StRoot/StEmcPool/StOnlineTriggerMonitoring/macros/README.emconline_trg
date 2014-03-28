@@ -54,7 +54,7 @@ In this file one should/change set three things:
 cons
 Don't forget to compile under the correct star level which you specified as EMCONLINE_TRG_STARVER above.
 
-4. Copy the file ".scprc" from a previous bemctrgdbYYYY/ directory. This has the following form (if you cannot find it):
+4. Copy the file ".scprc" from a previous bemctrgdbYYYY/ directory to your current working bemctrgdbYYYY/ directory. This has the following form (if you cannot find it):
 
 function getPassw () {
     if [[ "${1}" == "sysuser@sc5.starp.bnl.gov" ]] ; then echo '$properPass' ; fi
@@ -62,7 +62,7 @@ function getPassw () {
     if [[ "${1}" == "staruser@startrg.starp.bnl.gov" ]] ; then echo '$properPass' ; fi  
 }
 
-Where $properPass is the password associated with the node you wish to log into. If you don't know these, you will have to find someone that does (They're always in the control room...)
+Where $properPass is the password associated with the node you wish to log into. If you don't know these, you will have to find someone that does (They're always in the control room...). The point of this file is for the "scp" script  to work correctly. The ".scprc" holds the login and password information to get and send information to other computer systems
 
 5. Start monitoring
 ./status.emconline_trg RUN
