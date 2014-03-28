@@ -66,6 +66,11 @@ static StvToolkit* kit = StvToolkit::Inst();
   return 0;
 }
 //_____________________________________________________________________________
+StvELossTrak *StvDiver::TakeELoss()      
+{ 
+  StvELossTrak *el=mELoss; mELoss=0;mSteps->Set(mELoss); return el;
+}
+//_____________________________________________________________________________
 void StvDiver::SetRZmax(double rMax,double zMax) 
 {   
   StVMCApplication *app = (StVMCApplication*)TVirtualMCApplication::Instance();
