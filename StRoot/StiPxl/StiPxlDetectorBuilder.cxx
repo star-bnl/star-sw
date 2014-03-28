@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.42 2014/03/28 02:34:56 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.43 2014/03/28 19:47:58 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -378,4 +378,32 @@ void StiPxlDetectorBuilder::buildSimpleBoxes()
 /** Creates inactive sti volumes for the pixel support material. */
 void StiPxlDetectorBuilder::buildSimpleTube()
 {
+   // Build average inactive volumes
+   const VolumeMap_t pxlVolumes[] = {
+      {"DTUH1", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/DTUH_1", "", ""},
+      {"DTUH2", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/DTUH_2", "", ""}
+   };
+
+   int nPxlVolumes = sizeof(pxlVolumes) / sizeof(VolumeMap_t);
+   LOG_DEBUG << " # of volume(s) : " << nPxlVolumes << endm;
+
+   for (int i = 0; i < nPxlVolumes; i++) {
+      TString path(pxlVolumes[i].path);
+
+      gGeoManager->cd(path);
+      TGeoNode *geoNode = gGeoManager->GetCurrentNode();
+
+      if (!geoNode) continue;
+
+      LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
+      LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+      StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
+
+      // Access just added volume
+      int row = getNRows() - 1;
+      int sector = 0;
+      StiDetector *stiDetector = getDetector(row, sector);
+      StiMaterial *mat = stiDetector->getMaterial();
+      mat->set(mat->getName(), mat->getZ(), mat->getA(), mat->getDensity()*10, mat->getRadLength(), mat->getIonization());
+   }
 }
