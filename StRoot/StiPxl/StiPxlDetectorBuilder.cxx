@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.45 2014/03/28 19:48:13 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.46 2014/03/29 00:33:11 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -373,6 +373,7 @@ void StiPxlDetectorBuilder::buildSimpleBoxes()
       int row = getNRows() - 1;
       int sector = 0;
       StiDetector *stiDetector = getDetector(row, sector);
+      stiDetector->setIsOn(true);
       StiMaterial *mat = stiDetector->getMaterial();
       mat->set(mat->getName(), mat->getZ(), mat->getA(), mat->getDensity()*10, mat->getRadLength(), mat->getIonization());
    }
@@ -407,6 +408,7 @@ void StiPxlDetectorBuilder::buildSimpleTube()
       int row = getNRows() - 1;
       int sector = 0;
       StiDetector *stiDetector = getDetector(row, sector);
+      stiDetector->setIsOn(true);
       StiMaterial *mat = stiDetector->getMaterial();
       mat->set(mat->getName(), mat->getZ(), mat->getA(), mat->getDensity()*10, mat->getRadLength(), mat->getIonization());
    }
