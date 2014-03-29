@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.46 2014/03/29 00:33:11 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.47 2014/03/29 00:33:19 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -376,6 +376,11 @@ void StiPxlDetectorBuilder::buildSimpleBoxes()
       stiDetector->setIsOn(true);
       StiMaterial *mat = stiDetector->getMaterial();
       mat->set(mat->getName(), mat->getZ(), mat->getA(), mat->getDensity()*10, mat->getRadLength(), mat->getIonization());
+
+      // Replace the original StiElossCalculator with one based on the modified material
+      StiElossCalculator *elossCalculator = stiDetector->getElossCalculator();
+      delete elossCalculator;
+      stiDetector->setElossCalculator(new StiElossCalculator(mat->getZOverA(), mat->getIonization(), mat->getA(), mat->getZ(), mat->getDensity()));
    }
 }
 
@@ -411,5 +416,10 @@ void StiPxlDetectorBuilder::buildSimpleTube()
       stiDetector->setIsOn(true);
       StiMaterial *mat = stiDetector->getMaterial();
       mat->set(mat->getName(), mat->getZ(), mat->getA(), mat->getDensity()*10, mat->getRadLength(), mat->getIonization());
+
+      // Replace the original StiElossCalculator with one based on the modified material
+      StiElossCalculator *elossCalculator = stiDetector->getElossCalculator();
+      delete elossCalculator;
+      stiDetector->setElossCalculator(new StiElossCalculator(mat->getZOverA(), mat->getIonization(), mat->getA(), mat->getZ(), mat->getDensity()));
    }
 }
