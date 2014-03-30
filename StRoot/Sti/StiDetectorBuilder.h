@@ -49,18 +49,18 @@ public:
   virtual StiMaterial * add(StiMaterial *material);
   virtual StiShape    * add(StiShape *shape);
   virtual StiDetector * add(StiDetector *detector);
-  virtual StiDetector * add(unsigned int row, unsigned int sector, StiDetector *detector);
+  virtual StiDetector * add(UInt_t row, UInt_t sector, StiDetector *detector);
   virtual StiMaterial * findMaterial(const string& szName) const;
   virtual StiShape    * findShape(const string& szName) const;
   virtual StiDetector * findDetector(const string& szName) const;
-  virtual StiDetector * getDetector(unsigned int layer, unsigned int sector) const;
-  virtual void setDetector(unsigned int layer, unsigned int sector, StiDetector * detector);
+  virtual StiDetector * getDetector(UInt_t layer, UInt_t sector) const;
+  virtual void setDetector(UInt_t layer, UInt_t sector, StiDetector * detector);
 ///Returns the number of active rows in the detector
 ///Rows can be counted radially or longitudinally
-  virtual void setNRows(unsigned int nRows) {if (_detectors.size() < nRows) _detectors.resize(nRows);}
-  virtual unsigned int  getNRows() const {return _detectors.size();}
-  virtual unsigned int  getNSectors(unsigned int row=0) const;
-  virtual void setNSectors(unsigned int row, unsigned int nSectors) {
+  virtual void setNRows(UInt_t nRows) {if (_detectors.size() < nRows) _detectors.resize(nRows);}
+  virtual UInt_t  getNRows() const {return _detectors.size();}
+  virtual UInt_t  getNSectors(UInt_t row=0) const;
+  virtual void setNSectors(UInt_t row, UInt_t nSectors) {
     setNRows(row+1);if (_detectors[row].size() < nSectors) _detectors[row].resize(nSectors);
   }
   virtual bool hasMore() const;
