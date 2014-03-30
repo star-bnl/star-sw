@@ -38,6 +38,8 @@ void StiStarDetectorBuilder::useVMCGeometry() {
   }
   TGeoVolume *osca = gGeoManager->GetVolume("OSCA"); 
   if (osca) NewSuppCone();
+  TGeoVolume *fgtm = gGeoManager->GetVolume("FGTM"); 
+  if (fgtm) Fgt();
 }
 //________________________________________________________________________________
 void StiStarDetectorBuilder::OldBeamPipe() {
@@ -53,17 +55,20 @@ void StiStarDetectorBuilder::OldBeamPipe() {
   //{"SCON", "Support cone mother","HALL_1/CAVE_1/SVTT_1/SCON_1-2/*","",""},
     {"SROD", "Support rod","HALL_1/CAVE_1/SVTT_1/SROD_1-2","",""},
     {"SBSP", "Beampipe support mother","HALL_1/CAVE_1/SVTT_1/SBSP_1-2","",""},
+#if 0    
   //{"FGTM", "Beampipe support mother","HALL_1/CAVE_1/FGTM_1","",""},
     {"FGCM", "FGT nylon and Al ring","HALL_1/CAVE_1/FGTM_1","",""},
     {"FGTH", "mother volume for FGT disk","HALL_1/CAVE_1/FGTM_1","",""},
     {"FGTD", "mother volume for FGT disk","HALL_1/CAVE_1/FGTM_1","",""},
     {"FGCN", "FGT nylon 1st ring","HALL_1/CAVE_1/FGTM_1","",""},
     {"FGCT", "FGT inner cooling tube","HALL_1/CAVE_1/FGTM_1","",""}
+#endif
   };
   
   for (Int_t i = 1; i < 5; i += 2) {// loop over Be and Steel pipes
     MakePipe(i, &PipeVolumes[i],&PipeVolumes[i+1]);
   }
+#if 0
   Int_t NoExtraVols = sizeof(PipeVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1");
   TString path("");
@@ -75,6 +80,7 @@ void StiStarDetectorBuilder::OldBeamPipe() {
     if (! nodeT) continue;
     StiVMCToolKit::LoopOverNodes(nodeT, path, PipeVolumes[i].name, MakeAverageVolume);
   }
+#endif
 }
 //________________________________________________________________________________
 void StiStarDetectorBuilder::HftBeamPipe() {
@@ -123,23 +129,23 @@ void StiStarDetectorBuilder::HftBeamPipe() {
               PFLT           <!-- Flanges for bellow section, tube
 ================
     */
-  //{"PIPI", "Mother volume of the middle section Placed in IDSM"  ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPI_1"        ,"",""},
-  //{"PIHI", "Hole inside the beam pipe of middle section"         ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPI_1/PIHI_1" ,"",""},
-    {"PALS", "East aluminium part"                                 ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPI_1/PALS_1" ,"",""},
-    {"PBES", "Berillium  part"                                     ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPI_1/PBES_1" ,"",""},
-    {"PALI", "West aluminium part"                                 ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPI_1/PALI_1" ,"",""},
-    {"SSCF", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPI_1/SSCF_%d","",""},
-  //{"PIPE", "Mother volume of the east sect"                      ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPE_1"        ,"",""}, 
-  //{"PIHE", "Hole inside the beam pipe of east sect"              ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPE_1/PIHE_1" ,"",""},
-    {"PALQ", "East end tube"                                       ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPE_1/PALQ_1" ,"",""},
-    {"PALR", "East transition tube"                                ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPE_1/PALR_1" ,"",""},
-    {"SSCG", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPE_1/SSCG_%d","",""},
-    {"SSCF", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPE_1/SSCF_1" ,"",""},
-  //{"PIPW", "Mother volume of the west sect"                      ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPW_1"        ,"",""}, 
-  //{"PIHW", "Hole inside the beam pipe of west sect"              ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPW_1/PIHW_1" ,"",""},
-    {"PALJ", "West transition tube"                                ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPW_1/PALJ_1" ,"",""},
-    {"PALK", "West end tube"                                       ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPW_1/PALK_1" ,"",""},
-    {"SSCG", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/PIPW_1/SSCG_%d","",""},
+  //{"PIPI", "Mother volume of the middle section Placed in IDSM"  ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPI_1"        ,"",""},
+  //{"PIHI", "Hole inside the beam pipe of middle section"         ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPI_1/PIHI_1" ,"",""},
+    {"PALS", "East aluminium part"                                 ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPI_1/PALS_1" ,"",""},
+    {"PBES", "Berillium  part"                                     ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPI_1/PBES_1" ,"",""},
+    {"PALI", "West aluminium part"                                 ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPI_1/PALI_1" ,"",""},
+    {"SSCF", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPI_1/SSCF_%d","",""},
+  //{"PIPE", "Mother volume of the east sect"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1"        ,"",""}, 
+  //{"PIHE", "Hole inside the beam pipe of east sect"              ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/PIHE_1" ,"",""},
+    {"PALQ", "East end tube"                                       ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/PALQ_1" ,"",""},
+    {"PALR", "East transition tube"                                ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/PALR_1" ,"",""},
+    {"SSCG", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/SSCG_%d","",""},
+    {"SSCF", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/SSCF_1" ,"",""},
+  //{"PIPW", "Mother volume of the west sect"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1"        ,"",""}, 
+  //{"PIHW", "Hole inside the beam pipe of west sect"              ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1/PIHW_1" ,"",""},
+    {"PALJ", "West transition tube"                                ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1/PALJ_1" ,"",""},
+    {"PALK", "West end tube"                                       ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1/PALK_1" ,"",""},
+    {"SSCG", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1/SSCG_%d","",""},
     {"PIPA", "outer East section"                                  ,"/HALL_1/CAVE_1/PIPA_1"               ,"",""},
     {"PIPB", "outer east bellow section"                           ,"/HALL_1/CAVE_1/PIPA_1/PIPB_1"        ,"",""},
     {"PVPB", "vacuum part of bellow"                               ,"/HALL_1/CAVE_1/PIPA_1/PIPB_1/PVPB_1" ,"",""},
@@ -158,11 +164,13 @@ void StiStarDetectorBuilder::HftBeamPipe() {
   //{"PRWD", "the Bellow Steel Rib Set"                            ,"/HALL_1/CAVE_1/PIWA_1/PRWS_1/PRWD_%d","",""},
     {"PFLO", "is the 1nd set of flange"                            ,"/HALL_1/CAVE_1/PIWA_1/PFLO_1"        ,"",""},
     {"PFLT", "Flanges for bellow section"                          ,"/HALL_1/CAVE_1/PIWA_1/PFLT_1"        ,"",""},
-  //{"FGTM", "Beampipe support mother"                             ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/FGTM_1"        ,"",""},
-    {"FGCM", "FGT nylon and Al ring"                               ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/FGTM_1/FGCM_1" ,"",""},
-    {"FGTD", "mother volume for FGT disk"                          ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/FGTM_1/FGTD_1" ,"",""},
-    {"FGCN", "FGT nylon 1st ring"                                  ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/FGTM_1/FGCN_1" ,"",""},
-    {"FGCT", "FGT inner cooling tube"                              ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/FGTM_1/FGCT_1" ,"",""}
+#if 0
+  //{"FGTM", "Beampipe support mother"                             ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGTM_1"        ,"",""},
+    {"FGCM", "FGT nylon and Al ring"                               ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGTM_1/FGCM_1" ,"",""},
+    {"FGTD", "mother volume for FGT disk"                          ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGTM_1/FGTD_1" ,"",""},
+    {"FGCN", "FGT nylon 1st ring"                                  ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGTM_1/FGCN_1" ,"",""},
+    {"FGCT", "FGT inner cooling tube"                              ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGTM_1/FGCT_1" ,"",""}
+#endif
   }; 
   Int_t NVol = sizeof(PipeVolumes)/sizeof(VolumeMap_t);
   for (Int_t i = 0;  i < NVol; i++) {
@@ -185,7 +193,7 @@ void StiStarDetectorBuilder::HftBeamPipe() {
       } else {
 	gGeoManager->RestoreMasterVolume(); 
 	gGeoManager->CdTop();
-	if (! _TpcRefSys) pathT.ReplaceAll("/TpcRefSys","");
+	if (! _TpcRefSys) pathT.ReplaceAll("/TpcRefSys_1","");
 	gGeoManager->cd(pathT); path = pathT;
 	TGeoNode *nodeT = gGeoManager->GetCurrentNode();
 	if (! nodeT) continue;
@@ -267,7 +275,7 @@ void StiStarDetectorBuilder::HftBeamPipe() {
       p->setRegion(StiPlacement::kMidRapidity);
       TString nameP = PipeVolumes[i].name; nameP += "#"; section++; nameP += section;
       nameP.ReplaceAll("HALL_1/CAVE_1/","");
-      nameP.ReplaceAll("/TpcRefSys","");
+      nameP.ReplaceAll("/TpcRefSys_1","");
       nameP.ReplaceAll("/IDSM_1","");
       nameP.Resize(30); nameP.Strip();
       StiDetector *pipeVolume = _detectorFactory->getInstance();
@@ -292,16 +300,16 @@ void StiStarDetectorBuilder::NewSuppCone() {
   SetCurrentDetectorBuilder(this);
   const VolumeMap_t PipeVolumes[] = { 
     // cone 
-    {"OSCA", "central CFiber tube"                     ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/OSCA_1" ,"",""}, 
-    {"SUCB", "small Alu ring"                          ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/SUCB_%d","",""},
-    {"SUCC", "CFiber cone section"                     ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/SUCC_%d","",""},
-    {"SUCD", "large Al ring at cone"                   ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/SUCD_%d","",""},
-    {"SUCE", "CFiber tube"                             ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/SUCE_%d","",""},
-    {"SUCF", "large Alu ring"                          ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/SUCF_%d","",""},
-    {"SUCG", "large Alu end disk"                      ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/SUCG_%d","",""},
-    {"FGRL", "FGT rail"                                ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/FGRL_%d","",""}, 
-  //{"FGHV", "FGT cables mixture"                      ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/FGHV_%d","",""}, 
-    {"EFSA", "Electrostatic shroud"                    ,"/HALL_1/CAVE_1/TpcRefSys/IDSM_1/EFSA_%d","",""}
+    {"OSCA", "central CFiber tube"                     ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/OSCA_1" ,"",""}, 
+    {"SUCB", "small Alu ring"                          ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCB_%d","",""},
+    {"SUCC", "CFiber cone section"                     ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCC_%d","",""},
+    {"SUCD", "large Al ring at cone"                   ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCD_%d","",""},
+    {"SUCE", "CFiber tube"                             ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCE_%d","",""},
+    {"SUCF", "large Alu ring"                          ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCF_%d","",""},
+    {"SUCG", "large Alu end disk"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCG_%d","",""},
+    {"FGRL", "FGT rail"                                ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGRL_%d","",""}, 
+  //{"FGHV", "FGT cables mixture"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGHV_%d","",""}, 
+    {"EFSA", "Electrostatic shroud"                    ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/EFSA_%d","",""}
   }; 
   Int_t NVol = sizeof(PipeVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1");
@@ -309,7 +317,7 @@ void StiStarDetectorBuilder::NewSuppCone() {
   for (Int_t i = 0;  i < NVol; i++) {
     gGeoManager->RestoreMasterVolume(); 
     gGeoManager->CdTop();
-    if (! _TpcRefSys) pathT.ReplaceAll("/TpcRefSys","");
+    if (! _TpcRefSys) pathT.ReplaceAll("/TpcRefSys_1","");
     gGeoManager->cd(pathT); path = pathT;
     TGeoNode *nodeT = gGeoManager->GetCurrentNode();
     if (! nodeT) continue;
@@ -381,7 +389,7 @@ void StiStarDetectorBuilder::MakePipe(Int_t iflag, const VolumeMap_t *ptube,cons
     StiDetector *pipeVolume = _detectorFactory->getInstance();
     TString nameP = pathT.Data();
     nameP.ReplaceAll("HALL_1/CAVE_1/","");
-    nameP.ReplaceAll("/TpcRefSys","");
+    nameP.ReplaceAll("/TpcRefSys_1","");
     nameP.ReplaceAll("/IDSM","");
     nameP.Resize(30); nameP.Strip();
     pipeVolume->setName(nameP.Data());
@@ -396,5 +404,29 @@ void StiStarDetectorBuilder::MakePipe(Int_t iflag, const VolumeMap_t *ptube,cons
     pipeVolume->setElossCalculator(pipeElossCalculator);
     Int_t layer = getNRows();
     add(layer,0,pipeVolume);
+  }
+}
+//________________________________________________________________________________
+void StiStarDetectorBuilder::Fgt() {
+  cout << "StiStarDetectorBuilder::buildDetectors() -I- Use VMC old beam pipe geometry" << endl;
+  SetCurrentDetectorBuilder(this);
+  const VolumeMap_t FgtVolumes[] = { 
+    //{"FGTM", "Beampipe support mother","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGCM", "FGT nylon and Al ring","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGTH", "mother volume for FGT disk","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGTD", "mother volume for FGT disk","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGCN", "FGT nylon 1st ring","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGCT", "FGT inner cooling tube","HALL_1/CAVE_1/FGTM_1","",""}
+  };
+  Int_t NoExtraVols = sizeof(FgtVolumes)/sizeof(VolumeMap_t);
+  TString pathT("HALL_1/CAVE_1");
+  TString path("");
+  for (Int_t i = 0; i < NoExtraVols; i++) {
+    gGeoManager->RestoreMasterVolume(); 
+    gGeoManager->CdTop();
+    gGeoManager->cd(pathT); path = pathT;
+    TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+    if (! nodeT) continue;
+    StiVMCToolKit::LoopOverNodes(nodeT, path, FgtVolumes[i].name, MakeAverageVolume);
   }
 }
