@@ -106,19 +106,22 @@ Int_t StDAQMaker::Make(){
 
 
   StTPCReader *myTPCReader = fDAQReader->getTPCReader();
+  
   int nPads=0;
-  for (int sector =1; sector <=12; sector++)
-  {
-    unsigned char* padList;
-    for (int padRow=1; padRow<=45; padRow++)
-    {
-      int npad = myTPCReader->getPadList(sector,padRow,padList);
-      if (npad <0) break;
-      if (npad==0) continue;
-      nPads+=npad;
-      if (GetDebug()>1)
-      LOG_INFO << Form("Sector=%2d PadRow=%2d nPads=%3d\n",sector,padRow,npad) << endm;
-    }
+  if ( myTPCReader ) {
+    for (int sector =1; sector <=12; sector++)
+      {
+	unsigned char* padList;
+	for (int padRow=1; padRow<=45; padRow++)
+	  {
+	    int npad = myTPCReader->getPadList(sector,padRow,padList);
+	    if (npad <0) break;
+	    if (npad==0) continue;
+	    nPads+=npad;
+	    if (GetDebug()>1)
+	      LOG_INFO << Form("Sector=%2d PadRow=%2d nPads=%3d\n",sector,padRow,npad) << endm;
+	  }
+      }
   }
   if (nPads==0 && adcOnly) return kStSKIP;
   return 0;
