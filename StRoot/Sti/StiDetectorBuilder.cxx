@@ -79,7 +79,7 @@ StiShape * StiDetectorBuilder::add(StiShape *shape)
 	return shape;
 }
 
-StiDetector * StiDetectorBuilder::add(unsigned int row, unsigned int sector, StiDetector *detector)
+StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *detector)
 {
   setNSectors(row,sector+1);
   _detectors[row][sector] = detector;
@@ -103,6 +103,7 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   // in the base class nothing is actually done
   // but ROOT stuff is built in the drawable version of this class.
   detector->setGroupId(_groupId);
+  if (! detector->getTrackingParameters())
   detector->setTrackingParameters(StiDefaultTrackingParameters::instance());
   return detector;
 }
@@ -257,27 +258,27 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
   Int_t layer = getNRows();
-  add(layer+1,0,pDetector); 
+  add(layer,0,pDetector); 
   cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
 }
 ///Returns the number of sectors (or segments) in a the
 ///given row. Sector are expected to be azimuthally
 ///distributed.
-unsigned int  StiDetectorBuilder::getNSectors(unsigned int row) const
+UInt_t  StiDetectorBuilder::getNSectors(UInt_t row) const
 {
   assert(row<_detectors.size());
   return _detectors[row].size();
 }
 
 
-StiDetector * StiDetectorBuilder::getDetector(unsigned int row, unsigned int sector) const
+StiDetector * StiDetectorBuilder::getDetector(UInt_t row, UInt_t sector) const
 {
   assert(row<_detectors.size());
   assert(sector<_detectors[row].size());
   return _detectors[row][sector];
 }
 
-void StiDetectorBuilder::setDetector(unsigned int row, unsigned int sector, StiDetector *detector)
+void StiDetectorBuilder::setDetector(UInt_t row, UInt_t sector, StiDetector *detector)
 {
   setNSectors(row+1,sector+1);
    _detectors[row][sector] = detector;
