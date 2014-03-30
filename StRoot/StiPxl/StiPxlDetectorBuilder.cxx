@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.47 2014/03/29 00:33:19 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.48 2014/03/30 22:55:34 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -381,6 +381,10 @@ void StiPxlDetectorBuilder::buildSimpleBoxes()
       StiElossCalculator *elossCalculator = stiDetector->getElossCalculator();
       delete elossCalculator;
       stiDetector->setElossCalculator(new StiElossCalculator(mat->getZOverA(), mat->getIonization(), mat->getA(), mat->getZ(), mat->getDensity()));
+
+      // Adjust the volume position by placing it at z=0
+      StiPlacement *stiPlacement = stiDetector->getPlacement();
+      stiPlacement->setZcenter(0);
    }
 }
 
@@ -421,5 +425,9 @@ void StiPxlDetectorBuilder::buildSimpleTube()
       StiElossCalculator *elossCalculator = stiDetector->getElossCalculator();
       delete elossCalculator;
       stiDetector->setElossCalculator(new StiElossCalculator(mat->getZOverA(), mat->getIonization(), mat->getA(), mat->getZ(), mat->getDensity()));
+
+      // Adjust the volume position by placing it at z=0
+      StiPlacement *stiPlacement = stiDetector->getPlacement();
+      stiPlacement->setZcenter(0);
    }
 }
