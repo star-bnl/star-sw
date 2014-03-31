@@ -369,6 +369,7 @@ struct ic_l4_event {
     int local_id;
     int tmtoken;
     int evbidx;
+    int writeTracks;
 };
 
 
