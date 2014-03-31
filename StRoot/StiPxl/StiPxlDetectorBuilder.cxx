@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.49 2014/03/31 20:12:27 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.50 2014/03/31 20:28:42 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -64,7 +64,7 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFil
       Info("StiPxlDetectorBuilder", "Valid global pointer to chain");
 
       if ( chain->GetOption("StiPxlSimpleBox") )
-         mGeomDebug = kSimpleBoxes;
+         mGeomDebug = kSimpleBox;
       else if ( chain->GetOption("StiPxlSimplePlane") )
          mGeomDebug = kSimplePlane;
       else if ( chain->GetOption("StiPxlSimpleTube") )
@@ -100,8 +100,9 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
    if (StiVMCToolKit::GetVMC()) {
 
       switch (mGeomDebug) {
-      case kSimpleBoxes:
-         buildSimpleBoxes();
+      case kSimpleBox:
+         buildSimpleBox();
+         break;
       case kSimplePlane:
          buildSimplePlane();
          break;
@@ -350,7 +351,7 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
 
 
 /** Creates inactive sti volumes for the pixel support material. */
-void StiPxlDetectorBuilder::buildSimpleBoxes()
+void StiPxlDetectorBuilder::buildSimpleBox()
 {
    // Build average inactive volumes
    const VolumeMap_t pxlVolumes[] = {
@@ -396,6 +397,8 @@ void StiPxlDetectorBuilder::buildSimpleBoxes()
 /** Creates inactive sti volumes for the pixel support material. */
 void StiPxlDetectorBuilder::buildSimplePlane()
 {
+   Info("StiPxlDetectorBuilder::buildSimplePlane", "XXX");
+
    // Build average inactive volumes
    const VolumeMap_t pxlVolumes[] = {
       {"PSCL1", "Long plane in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1/PSCL_1", "", ""},

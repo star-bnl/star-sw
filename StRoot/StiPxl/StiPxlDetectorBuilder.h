@@ -25,7 +25,7 @@ protected:
 private:
 
    void buildInactiveVolumes();
-   void buildSimpleBoxes();
+   void buildSimpleBox();
    void buildSimplePlane();
    void buildSimpleTube();
 
