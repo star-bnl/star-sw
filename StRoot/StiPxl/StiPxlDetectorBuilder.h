@@ -10,22 +10,26 @@ class StPxlDb;
 class StiPxlDetectorBuilder : public StiDetectorBuilder
 {
 public:
+
    StiPxlDetectorBuilder(bool active, const string &inputFile);
    void buildDetectors(StMaker &source);
    void useVMCGeometry();
 
 protected:
+
    StiMaterial *mSiMaterial;
    StiMaterial *mHybridMaterial;
    StPxlDb     *mPxlDb;
    Bool_t       mUseDbGeom;
 
 private:
+
    void buildInactiveVolumes();
    void buildSimpleBoxes();
+   void buildSimplePlane();
    void buildSimpleTube();
 
-   enum EGeomDebug {kNoDebug, kSimpleBoxes, kSimpleTube};
+   enum EGeomDebug {kNoDebug, kSimpleBox, kSimplePlane, kSimpleTube};
 
    EGeomDebug mGeomDebug;
 };

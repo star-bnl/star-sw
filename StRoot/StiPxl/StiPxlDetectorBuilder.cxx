@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.48 2014/03/30 22:55:34 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.49 2014/03/31 20:12:27 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -65,6 +65,8 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFil
 
       if ( chain->GetOption("StiPxlSimpleBox") )
          mGeomDebug = kSimpleBoxes;
+      else if ( chain->GetOption("StiPxlSimplePlane") )
+         mGeomDebug = kSimplePlane;
       else if ( chain->GetOption("StiPxlSimpleTube") )
          mGeomDebug = kSimpleTube;
    }
@@ -100,6 +102,8 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
       switch (mGeomDebug) {
       case kSimpleBoxes:
          buildSimpleBoxes();
+      case kSimplePlane:
+         buildSimplePlane();
          break;
       case kSimpleTube:
          buildSimpleTube();
@@ -390,6 +394,60 @@ void StiPxlDetectorBuilder::buildSimpleBoxes()
 
 
 /** Creates inactive sti volumes for the pixel support material. */
+void StiPxlDetectorBuilder::buildSimplePlane()
+{
+   // Build average inactive volumes
+   const VolumeMap_t pxlVolumes[] = {
+      {"PSCL1", "Long plane in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1/PSCL_1", "", ""},
+      {"PSCL2", "Long plane in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2/PSCL_1", "", ""}
+   };
+
+   int nPxlVolumes = sizeof(pxlVolumes) / sizeof(VolumeMap_t);
+   LOG_DEBUG << " # of volume(s) : " << nPxlVolumes << endm;
+
+   for (int i = 0; i < nPxlVolumes; i++) {
+      TString path(pxlVolumes[i].path);
+
+      bool isAvail = gGeoManager->cd(path);
+
+      if (!isAvail) {
+         Error("buildSimpleBoxes()", "Cannot find node %s. Skipping to next node...", path.Data());
+         continue;
+      }
+
+      TGeoNode *geoNode = gGeoManager->GetCurrentNode();
+
+      if (!geoNode) continue;
+
+      LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
+      LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+      StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
+   }
+
+   // The created Sti detectors share the same shape and material
+   // Access last added volume
+   int row = getNRows() - 1;
+   int sector = 0;
+   StiDetector *stiDetector = getDetector(row, sector);
+   stiDetector->setIsOn(true);
+
+   StiMaterial *mat = stiDetector->getMaterial();
+   mat->set(mat->getName(), mat->getZ(), mat->getA(), mat->getDensity()*10, mat->getRadLength(), mat->getIonization());
+
+   // Replace the original StiElossCalculator with one based on the modified material
+   StiElossCalculator *elossCalculator = stiDetector->getElossCalculator();
+   delete elossCalculator;
+   stiDetector->setElossCalculator(new StiElossCalculator(mat->getZOverA(), mat->getIonization(), mat->getA(), mat->getZ(), mat->getDensity()));
+
+   // Adjust the volume position by placing it at z=0
+   StiPlacement *stiPlacement = stiDetector->getPlacement();
+   stiPlacement->setZcenter(0);
+
+   StiPlanarShape *stiShape = (StiPlanarShape*) stiDetector->getShape();
+   stiShape->setHalfWidth(stiShape->getHalfWidth()*10);
+}
+
+
 void StiPxlDetectorBuilder::buildSimpleTube()
 {
    // Build average inactive volumes
