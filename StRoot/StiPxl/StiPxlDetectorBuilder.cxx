@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.52 2014/03/31 21:31:57 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.53 2014/03/31 21:32:05 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -133,8 +133,8 @@ void StiPxlDetectorBuilder::useVMCGeometry()
       StiMaterial    **p;
    };
 
-   mSiMaterial = add(new StiMaterial("PixelSi",  14.,  28.0855,   2.33,     21.82,           14.*12.*1e-9) );
-   mHybridMaterial = add(new StiMaterial("PixelHyb", 14.,  28.0855,   2.33,     21.82,           14.*12.*1e-9) );
+   mSiMaterial     = add(new StiMaterial("PixelSi",  14., 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
+   mHybridMaterial = add(new StiMaterial("PixelHyb", 14., 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
 
    Material_t map[] = {
       {"AIR", &_gasMat},
@@ -249,10 +249,10 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             }
 
             stiDetector->setName(name);
-            stiDetector->setIsOn(kTRUE);
+            stiDetector->setIsOn(true);
             stiDetector->setIsActive(new StiPxlIsActiveFunctor);
-            stiDetector->setIsContinuousMedium(false); // XXX:ds: should it be true?
-            stiDetector->setIsDiscreteScatterer(true); // false?
+            stiDetector->setIsContinuousMedium(false); // true for gases
+            stiDetector->setIsDiscreteScatterer(true); // true for anything other than gas
             stiDetector->setGroupId(kPxlId);
             stiDetector->setShape(stiShape);
             stiDetector->setPlacement(pPlacement);
@@ -335,6 +335,15 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
       {"PSAB2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
       {"PSAE2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
       {"PSMD2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""}
+
+      /* The following are the largest planar components of the pixel sector support
+      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXRB", "", ""}
+      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTR", "", ""}
+      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTM", "", ""}
+      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTL", "", ""}
+      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXLB", "", ""}
+      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXIB", "", ""}
+      */
    };
 
    int nPxlVolumes = sizeof(pxlVolumes) / sizeof(VolumeMap_t);
@@ -385,7 +394,7 @@ void StiPxlDetectorBuilder::buildSimpleBox()
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
       StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
 
-      // Access just added volume
+      // Access last added volume
       int row = getNRows() - 1;
       int sector = 0;
       StiDetector *stiDetector = getDetector(row, sector);
@@ -462,6 +471,7 @@ void StiPxlDetectorBuilder::buildSimplePlane()
 }
 
 
+/** Creates inactive sti volumes for the pixel support material. */
 void StiPxlDetectorBuilder::buildSimpleTube()
 {
    // Build average inactive volumes
@@ -491,7 +501,7 @@ void StiPxlDetectorBuilder::buildSimpleTube()
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
       StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
 
-      // Access just added volume
+      // Access last added volume
       int row = getNRows() - 1;
       int sector = 0;
       StiDetector *stiDetector = getDetector(row, sector);
