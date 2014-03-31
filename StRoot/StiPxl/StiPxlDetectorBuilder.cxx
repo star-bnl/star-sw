@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.51 2014/03/31 21:31:50 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.52 2014/03/31 21:31:57 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -370,7 +370,13 @@ void StiPxlDetectorBuilder::buildSimpleBox()
    for (int i = 0; i < nPxlVolumes; i++) {
       TString path(pxlVolumes[i].path);
 
-      gGeoManager->cd(path);
+      bool isAvail = gGeoManager->cd(path);
+
+      if (!isAvail) {
+         Error("buildSimpleBoxes()", "Cannot find node %s. Skipping to next node...", path.Data());
+         continue;
+      }
+
       TGeoNode *geoNode = gGeoManager->GetCurrentNode();
 
       if (!geoNode) continue;
@@ -470,7 +476,13 @@ void StiPxlDetectorBuilder::buildSimpleTube()
    for (int i = 0; i < nPxlVolumes; i++) {
       TString path(pxlVolumes[i].path);
 
-      gGeoManager->cd(path);
+      bool isAvail = gGeoManager->cd(path);
+
+      if (!isAvail) {
+         Error("buildSimpleTube()", "Cannot find node %s. Skipping to next node...", path.Data());
+         continue;
+      }
+
       TGeoNode *geoNode = gGeoManager->GetCurrentNode();
 
       if (!geoNode) continue;
