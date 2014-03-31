@@ -33,6 +33,8 @@ TDataSet *CreateGeometry(const Char_t *name="y2011") {
     return geom;
   }
 
+  cout << "AgML: Building geometry " << name << " " << endl;
+
   // Create the geometry using TGeo
   AgBlock::SetStacker( new StarTGeoStacker() ); 
 
