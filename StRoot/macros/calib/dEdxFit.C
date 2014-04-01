@@ -439,7 +439,7 @@ void Sep_func(RooFFTConvPdf *l5xg, RooRealVar *t, RooRealVar *norm, RooRealVar *
 
 //----------------------------------------------------------------------//
 
-TF1 *FitRL5(TH1 *hist)
+TF1 *FitRL5(TH1 *hist, Bool_t outer = kFALSE)
 {
   if(!hist) return 0;
 
@@ -559,10 +559,10 @@ TF1 *FitRL5(TH1 *hist)
   return l5xg_mult;
 }
 //________________________________________________________________________________
-TF1 *FitRL5(const Char_t *hName = "f1_1") {
+TF1 *FitRL5(const Char_t *hName = "f1_1",Bool_t outer = kFALSE ) {
   TH1 *hist = (TH1 *) gDirectory->Get(hName);
   if (! hist) return 0;
-  return FitRL5(hist);
+  return FitRL5(hist,outer);
 }
 //---------------------------------------------------------------------------//
 //----------------------------LANDAU Z 5 END --------------------------------//
@@ -2018,6 +2018,8 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
   TAxis *yax = hist->GetYaxis();
   Int_t dim = hist->GetDimension();
   Int_t ny = yax->GetNbins();
+  Int_t NX = nx;
+  Int_t NY = ny;
   if (dim < 3) ny = 1;  printf ("ny = %i",ny);
   Axis_t ymin = yax->GetXmin(); printf (" ymin = %f",ymin);
   Axis_t ymax = yax->GetXmax(); printf (" ymax = %f\n",ymax);
@@ -2169,7 +2171,12 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
 #ifdef __USE_ROOFIT__
       else if (TString(FitName) == "R1") g  = FitR5(proj,opt,0);
       else if (TString(FitName) == "R5") g  = FitR5(proj,opt,5);
-      else if (TString(FitName) == "RL5") g = FitRL5(proj);
+      else if (TString(FitName) == "RL5") {
+	Bool_t outer = kFALSE;
+	if      (NX == 45) {outer = i > 13;}
+	else if (NY == 45) {outer = j > 13;}
+	g = FitRL5(proj,outer);
+      }
       else if (TString(FitName) == "RL1") g = FitRL1(proj);
 #endif /* __USE_ROOFIT__ */
       else if (TString(FitName) == "GB") {
