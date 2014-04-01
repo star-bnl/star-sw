@@ -110,15 +110,19 @@ class l4Builder : public JevpPlotSet {
  * @see 
  * @author 
  */  
-  JevpPlot *HltPlots[42];
+  JevpPlot *HltPlots[39];
+  JevpPlot *BeamPlots[3];
   JevpPlot *BesGoodPlots[4];
   JevpPlot *HLTGood2Plots[4];
   JevpPlot *BesMontinorPlots[2];
   JevpPlot *FixedTargetPlots[5];
   JevpPlot *FixedTargetMonitorPlots[5];
   JevpPlot *HeavyFragmentPlots[1];
-  JevpPlot *JPsiPlots[14];
-  JevpPlot *HltPlots_UPC[36];
+  JevpPlot *DiElectronPlots[10];
+  JevpPlot *DiPionPlots[2];
+  JevpPlot *DiMuonPlots[2];
+  JevpPlot *UPCDiElectronPlots[10];   
+  JevpPlot *HltPlots_UPC[30];
   PlotHisto *ph;
 
   l4Builder(JevpServer *parent=NULL) : JevpPlotSet(parent) {
@@ -147,14 +151,18 @@ class l4Builder : public JevpPlotSet {
   void inputDedx();
   double getDedx(double p, const int name);
   void defineHltPlots();
+  void defineBeamPlots();
   void defineBesGoodPlots();
   void defineHLTGood2Plots();
   void defineBesMontinorPlots();
   void defineFixedTargetPlots();
   void defineFixedTargetMonitorPlots();
   void defineHeavyFragmentPlots();
-  void defineJPsiPlots();
+  void defineDiElectronPlots();
+  void defineDiPionPlots();
+  void defineDiMuonPlots();
   void defineHltPlots_UPC();
+  void defineUPCDiElectronPlots();
   void setAllPlots();
   void writeHistogram();
   
@@ -192,11 +200,12 @@ class l4Builder : public JevpPlotSet {
   bool HLTGood2Filled;
   bool BESMonitorFilled;
   bool FixedTargetFilled;
-  bool FixedTargetMonirotFilled; 
+  bool FixedTargetMonitorFilled; 
   bool UPCFilled; 
   bool DiMuonFilled;
   bool UPCDiElectronFilled;
   bool DiElectronFilled;
+  bool HeavyFragmentFilled;
 
   int switch_BesGood;
   int switch_HLTGood2;

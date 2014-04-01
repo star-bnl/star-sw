@@ -6,8 +6,6 @@
  * two daughters(e) info, and corresponding plots for di-pion, di-muon, should be
  * saved into root files which then can be added later for expert run-by-run or
  * day-by-day check through webpage.
- * UPC plots[#0-35], as well as JPsi plots can be chosen to turn on/off by
- * setting switch in inputPara.dat.
  *
  * Default mode contains Basic plots.
  * The directory of dE/dx theoretical curve should be pointed in inputPara.dat.
@@ -90,37 +88,7 @@ void l4Builder::initialize(int argc, char *argv[])
     innerGainPara = -999;
     outerGainPara = -999;
     eventCounter = 0;
-    switch_BesGood = 1;
-    switch_HLTGood2 = 1;
-    switch_BesMonitor = 1;
-    switch_FixedTarget = 1;
-    switch_FixedTargetMonitor = 1;
-    switch_HeavyFragment = 0;
-    switch_upc = 0;
-    switch_jpsi = 0;
 
-    ifstream inData;
-    string paraName;
-    char paraDir[256];
-    sprintf(paraDir, "%s/inputPara.dat", Currentdir);
-    inData.open(paraDir);
-    if(!inData)
-        cout << "inputPara.dat not found, I'll run in default mode." << endl;
-    else {
-        while(!inData.eof()) {
-            inData >> paraName;
-            if(paraName == "BesGood") inData >> switch_BesGood;
-            if(paraName == "BesMonitor") inData >> switch_BesMonitor;
-            if(paraName == "FixedTarget") inData >> switch_FixedTarget;
-            if(paraName == "FixedTargetMonitor") inData >> switch_FixedTargetMonitor;
-            if(paraName == "HeavyFragment") inData >> switch_HeavyFragment;
-            if(paraName == "JPsi") inData >> switch_jpsi;
-            if(paraName == "UPC") inData >> switch_upc;
-            if(paraName == "dEdxTheoDir") inData >> dEdxTheoDir;
-        }
-    }
-    inData.close();
-    inData.clear();
 
     sprintf(dEdxMeanFiles[0], "%s/dedx_mean_Electron", dEdxTheoDir);
     sprintf(dEdxMeanFiles[1], "%s/dedx_mean_Pion", dEdxTheoDir);
@@ -171,12 +139,18 @@ void l4Builder::initialize(int argc, char *argv[])
     gStyle->SetPadGridX(0);
     gStyle->SetPadGridY(0);
 
-    for(int i = 0; i < 42; i++) {
+    for(int i = 0; i < 39; i++) {
         HltPlots[i] = new JevpPlot();
         HltPlots[i]->gridx = 0;
         HltPlots[i]->gridy = 0;
         HltPlots[i]->setPalette(1);
     }
+    for(int i = 0; i < 3; i++) {                                                                     
+        BeamPlots[i] = new JevpPlot();                                                                 
+        BeamPlots[i]->gridx = 0;                                                                       
+        BeamPlots[i]->gridy = 0;                                                                       
+        BeamPlots[i]->setPalette(1);                                                                   
+    }    
     for(int i = 0; i < 4; i++) {
         BesGoodPlots[i] = new JevpPlot();
         BesGoodPlots[i]->gridx = 0;
@@ -213,13 +187,31 @@ void l4Builder::initialize(int argc, char *argv[])
         HeavyFragmentPlots[i]->gridy = 0;
         HeavyFragmentPlots[i]->setPalette(1);
     }
-    for(int i = 0; i < 14; i++) {
-        JPsiPlots[i] = new JevpPlot();
-        JPsiPlots[i]->gridx = 0;
-        JPsiPlots[i]->gridy = 0;
-        JPsiPlots[i]->setPalette(1);
+    for(int i = 0; i < 10; i++) {
+        DiElectronPlots[i] = new JevpPlot();
+        DiElectronPlots[i]->gridx = 0;
+        DiElectronPlots[i]->gridy = 0;
+        DiElectronPlots[i]->setPalette(1);
     }
-    for(int i = 0; i < 36; i++) {
+    for(int i = 0; i < 2; i++) {
+        DiPionPlots[i] = new JevpPlot();
+        DiPionPlots[i]->gridx = 0;     
+        DiPionPlots[i]->gridy = 0;     
+        DiPionPlots[i]->setPalette(1); 
+   }
+   for(int i = 0; i < 2; i++) {
+        DiMuonPlots[i] = new JevpPlot();
+        DiMuonPlots[i]->gridx = 0;         
+        DiMuonPlots[i]->gridy = 0;         
+        DiMuonPlots[i]->setPalette(1); 
+   }
+   for(int i = 0; i < 6; i++) {
+        UPCDiElectronPlots[i] = new JevpPlot();
+        UPCDiElectronPlots[i]->gridx = 0;
+        UPCDiElectronPlots[i]->gridy = 0;
+        UPCDiElectronPlots[i]->setPalette(1);
+   }
+    for(int i = 0; i < 30; i++) {
         HltPlots_UPC[i] = new JevpPlot();
         HltPlots_UPC[i]->gridx = 0;
         HltPlots_UPC[i]->gridy = 0;
@@ -227,77 +219,73 @@ void l4Builder::initialize(int argc, char *argv[])
     }
 
     cout << "HltPlots OK" << endl;
-    if(switch_BesGood == 1) cout << "with BesGood shown in monitor" << endl;
-    if(switch_HLTGood2 == 1) cout << "with HLTGood2 shown in monitor" << endl;
-    if(switch_BesMonitor == 1) cout << "with BesMonitor shown in monitor" << endl;
-    if(switch_FixedTarget == 1) cout << "with FixedTarget shown in monitor" << endl;
-    if(switch_FixedTargetMonitor == 1) cout << "with FixedTargetMonitor shown in monitor" << endl;
-    if(switch_HeavyFragment == 1) cout << "with HeavyFragment shown in monitor" << endl;
-    if(switch_jpsi == 1) cout << "with J/Psi shown in monitor" << endl;
-    if(switch_upc == 1) cout << "with UPC shown in monitor" << endl;
     defineHltPlots();
+    defineBeamPlots();
     defineBesGoodPlots();
     defineHLTGood2Plots();
     defineBesMontinorPlots();
     defineFixedTargetPlots();
     defineFixedTargetMonitorPlots();
     defineHeavyFragmentPlots();
-    defineJPsiPlots();
+    defineDiElectronPlots();
+    defineDiPionPlots();
+    defineDiMuonPlots();
+    defineUPCDiElectronPlots();
     defineHltPlots_UPC();
     setAllPlots();
-    for(int i = 0; i < 42; i++) {
-        LOG(DBG, "Adding plot %d", i);
-        addPlot(HltPlots[i]);
-    }
-    if(switch_BesGood == 1) {
+        for(int i = 0; i < 39; i++) {
+            LOG(DBG, "Adding plot %d", i);
+            addPlot(HltPlots[i]);
+        }
+/*	for(int i = 0; i < 3; i++) {
+            LOG(DBG, "Adding plot %d", i);
+            addPlot(BeamPlots[i]);
+        }*/
         for(int i = 0; i < 4; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(BesGoodPlots[i]);
         }
-    }
-    if(switch_HLTGood2 == 1) {
         for(int i = 0; i < 4; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(HLTGood2Plots[i]);
         }
-    }
-    if(switch_BesMonitor == 1) {
-        for(int i = 0; i < 2; i++) {
+ /*       for(int i = 0; i < 2; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(BesMontinorPlots[i]);
         }
-    }
-    if(switch_FixedTarget == 1) {
         for(int i = 0; i < 5; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(FixedTargetPlots[i]);
         }
-    }
-    if(switch_FixedTargetMonitor == 1) {
         for(int i = 0; i < 5; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(FixedTargetMonitorPlots[i]);
-        }
-    }
-    if(switch_HeavyFragment == 1) {
+        }*/
         for(int i = 0; i < 1; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(HeavyFragmentPlots[i]);
         }
-    }
-    if(switch_jpsi == 1) {
-        for(int i = 0; i < 14; i++) {
+        for(int i = 0; i < 10; i++) {
             LOG(DBG, "Adding plot %d", i);
-            addPlot(JPsiPlots[i]);
+            addPlot(DiElectronPlots[i]);
         }
-    }
-    if(switch_upc == 1) {
-        for(int i = 0; i < 36; i++) {
+     /*   for(int i = 0; i < 2; i++) {
+            LOG(DBG, "Adding plot %d", i);
+            addPlot(DiPionPlots[i]);
+        }*/
+/*	for(int i = 0; i < 2; i++) {
+            LOG(DBG, "Adding plot %d", i);
+            addPlot(DiMuonPlots[i]);
+        }*/
+      /*  for(int i = 0; i < 6; i++) {
+            LOG(DBG, "Adding plot %d", i);
+            addPlot(UPCDiElectronPlots[i]);
+        }
+        for(int i = 0; i < 30; i++) {
             LOG(DBG, "Adding plot %d", i);
             addPlot(HltPlots_UPC[i]);
         }
-    }
-
+*/
     cout << "Initialization Done" << endl;
 }
 
@@ -306,32 +294,9 @@ void l4Builder::startrun(daqReader *rdr)
     printf("hello there. This is startrun\n");
     runnumber = rdr->run;
 
-    int initialno = 42;
-    if(switch_BesGood == 1) initialno += 4;
-    if(switch_HLTGood2 == 1) initialno += 4;
-    if(switch_BesMonitor == 1) initialno += 2;
-    if(switch_FixedTarget == 1) initialno += 5;
-    if(switch_FixedTargetMonitor == 1) initialno += 5;
-    if(switch_HeavyFragment == 1) initialno += 1;
-    if(switch_jpsi == 1) initialno += 14;
-    if(switch_upc == 1) initialno += 36;
+    int initialno = 39;
     for(int i = 0; i < initialno; i++) {
         getPlotByIndex(i)->getHisto(0)->histo->Reset();
-    }
-    if(switch_HeavyFragment == 1) {
-        hHFM_dEdx->Reset();
-    }
-    if(switch_jpsi == 1) {
-        hDiElectronInvMassTpxEmcBG->Reset();
-        hDiElectronInvMassFullRangeBG->Reset();
-        hDiElectronInvMassCutBG->Reset();
-        hDiPionInvMassFullRangeBG->Reset();
-        hDiMuonInvMassFullRangeBG->Reset();
-        hDiMuonInvMassTpxCutBG->Reset();
-    }
-    if(switch_upc == 1) {
-        hHFM_dEdx_UPC->Reset();
-        hDiElectronInvMassFullRangeBG_UPC->Reset();
     }
 
     TriggerFilled = false;
@@ -344,11 +309,12 @@ void l4Builder::startrun(daqReader *rdr)
     HLTGood2Filled = false;
     BESMonitorFilled = false;
     FixedTargetFilled = false;
-    FixedTargetMonirotFilled = false;
+    FixedTargetMonitorFilled = false;
     DiElectronFilled = false;
     UPCFilled = false;
     DiMuonFilled = false;
     UPCDiElectronFilled = false;
+    HeavyFragmentFilled = false;
 
     printf("Starting run #%d\n", runnumber);
 };
@@ -522,31 +488,44 @@ void l4Builder::writeHistogram()
     char histfile[256];
     sprintf(histfile, "%s/run14_hlt_%d_current_hist.root", Destindir, runnumber);
     TFile file(histfile, "RECREATE");
-    int initialno = 42;
-    if(switch_BesGood == 1) initialno += 4;
-    if(switch_HLTGood2 == 1) initialno += 4;
-    if(switch_BesMonitor == 1) initialno += 2;
-    if(switch_FixedTarget == 1) initialno += 5;
-    if(switch_FixedTargetMonitor == 1) initialno += 5;
-    if(switch_HeavyFragment == 1) initialno += 1;
-    if(switch_jpsi == 1) initialno += 14;
-    if(switch_upc == 1) initialno += 36;
+    int initialno = 39;
+	cout<<"FixTar="<<FixedTargetFilled<<endl;
+   /* if(BESGoodFilled) initialno += 4;
+    if(HLTGood2Filled) initialno += 4;
+    if(BESMonitorFilled) initialno += 2;
+    if(FixedTargetFilled) initialno += 5;
+    if(FixedTargetMonitorFilled) initialno += 5;
+    if(HeavyFragmentFilled) initialno += 1;
+    if(DiElectronFilled) initialno += 14;*/
+   // if(upcFilled) initialno += 36;
 
     for(int i = 0; i < initialno; i++) getPlotByIndex(i)->getHisto(0)->histo->Write();
-    if(switch_HeavyFragment == 1) {
-        hHFM_dEdx->Write();
+    if(BESGoodFilled){
+	for(int i = 0; i < 4; i++)BesGoodPlots[i]->getHisto(0)->histo->Write();
+	}
+    if(HLTGood2Filled){
+	for(int i = 0; i < 4; i++)HLTGood2Plots[i]->getHisto(0)->histo->Write();
+        }
+    if(BESMonitorFilled){
+	for(int i = 0; i < 2; i++)BesMontinorPlots[i]->getHisto(0)->histo->Write();
+        }
+    if(FixedTargetFilled){
+	for(int i = 0; i < 5; i++)FixedTargetPlots[i]->getHisto(0)->histo->Write();
+        }
+    if(FixedTargetMonitorFilled){
+        for(int i = 0; i < 5; i++)FixedTargetMonitorPlots[i]->getHisto(0)->histo->Write();
+        }
+    if(HeavyFragmentFilled) {
+        for(int i = 0; i < 1; i++)HeavyFragmentPlots[i]->getHisto(0)->histo->Write();
     }
-    if(switch_jpsi == 1) {
-        hDiElectronInvMassTpxEmcBG->Write();
-        hDiElectronInvMassFullRangeBG->Write();
-        hDiElectronInvMassCutBG->Write();
-        hDiPionInvMassFullRangeBG->Write();
-        hDiMuonInvMassFullRangeBG->Write();
-        hDiMuonInvMassTpxCutBG->Write();
+    if(DiElectronFilled){
+	for(int i = 0; i < 14; i++)DiElectronPlots[i]->getHisto(0)->histo->Write();
     }
-    if(switch_upc == 1) {
-        hHFM_dEdx_UPC->Write();
-        hDiElectronInvMassFullRangeBG_UPC->Write();
+    if(UPCDiElectronFilled){
+        for(int i = 0; i < 6; i++)UPCDiElectronPlots[i]->getHisto(0)->histo->Write();
+    }
+    if(UPCFilled){
+        for(int i = 0; i < 30; i++)HltPlots_UPC[i]->getHisto(0)->histo->Write();
     }
     file.Close();
 }
@@ -691,7 +670,7 @@ void l4Builder::event(daqReader *rdr)
     if(decision & triggerBitBesgoodEvents) {
         hEvtsAccpt->Fill(2.);
     }
-    if(decision & triggerBitBesMonitor) {
+/*    if(decision & triggerBitBesMonitor) {
         hEvtsAccpt->Fill(3.);
     }
     if(decision & triggerBitFixedTarget) {
@@ -699,9 +678,15 @@ void l4Builder::event(daqReader *rdr)
     }
     if(decision & triggerBitFixedTargetMonitor) {
         hEvtsAccpt->Fill(5.);
-    }
+    }*/
     if(decision & triggerBitHLTGood2) {
-        hEvtsAccpt->Fill(6.);
+        hEvtsAccpt->Fill(3.);
+    }
+    if(decision & triggerBitDiElectron) {
+        hEvtsAccpt->Fill(4.);
+    }
+    if(decision & triggerBitHeavyFragment) {
+        hEvtsAccpt->Fill(5.);
     }
     // fill events
     if(!EventFilled) {
@@ -1003,13 +988,13 @@ void l4Builder::event(daqReader *rdr)
     }
 
 //BesGood
-
     if(decision & triggerBitBesgoodEvents) {
         if(!BESGoodFilled) {
             BESGoodFilled = true;
             addServerTags("L4BesGoodEvents");
         }
         hBesGoodVertexXY->Fill(vertX, vertY);
+        hBesGoodVertexZ->Fill(vertZ);
         hBesGoodVr->Fill(vertR);
     }
 
@@ -1052,8 +1037,8 @@ void l4Builder::event(daqReader *rdr)
 //FixedTargetMonitor
 
     if(decision & triggerBitFixedTargetMonitor) {
-        if(!FixedTargetMonirotFilled) {
-            FixedTargetMonirotFilled = true;
+        if(!FixedTargetMonitorFilled) {
+            FixedTargetMonitorFilled = true;
 
             addServerTags("L4FixedTargetMonitor");
         }
@@ -1071,6 +1056,10 @@ if(decision & triggerBitDiElectron) {
 
     // heavy fragment
     for(u_int i = 0; i < hlt_hf->nHeavyFragments; i++) {
+	if(!HeavyFragmentFilled) {
+	    HeavyFragmentFilled = true;
+            addServerTags("L4HeavyFragment");
+        }
         int heavyFrag_NodeSN = hlt_hf->heavyFragmentSN[i];
         int heavyFragmentglobSN  = hlt_node->node[heavyFrag_NodeSN].globalTrackSN;
         hlt_track HFtrack = hlt_gt->globalTrack[heavyFragmentglobSN];
@@ -1666,7 +1655,7 @@ static Double_t funcDedx_He4_neg(Double_t *x, Double_t *par)
 void l4Builder::defineHltPlots()
 {
     HltPlots[index]->logy = 1;
-    hEvtsAccpt = new TH1I("EvtsAccpt", "EvtsAccpt", 7, 0., 7);
+    hEvtsAccpt = new TH1I("EvtsAccpt", "EvtsAccpt", 6, 0., 6);
     ph = new PlotHisto();
     ph->histo = hEvtsAccpt;
     HltPlots[index]->addHisto(ph);
@@ -1741,7 +1730,7 @@ void l4Builder::defineHltPlots()
     HltPlots[index]->addElement(fTheoDedx_P_pos);
     HltPlots[index]->addElement(fTheoDedx_P_neg);*/
 
-    hGlob_dEdx = new TH2F("Glob_dEdx", "Glob_dEdx", 200, -5, 5, 100, 0, 1.e-5);
+    hGlob_dEdx = new TH2F("Glob_dEdx", "Glob_dEdx", 500, -5, 5, 300, 0, 3.e-5);
     ph = new PlotHisto();
     ph->histo = hGlob_dEdx;
     HltPlots[index]->addHisto(ph);
@@ -1778,7 +1767,7 @@ void l4Builder::defineHltPlots()
     HltPlots[index]->addElement(fTheoDedx_P_pos);
     HltPlots[index]->addElement(fTheoDedx_P_neg);*/
 
-    hPrim_dEdx = new TH2F("Prim_dEdx", "Prim_dEdx", 200, -5, 5, 100, 0, 1.e-5);
+    hPrim_dEdx = new TH2F("Prim_dEdx", "Prim_dEdx", 500, -5, 5, 300, 0, 3.e-5);
     ph = new PlotHisto();
     ph->histo = hPrim_dEdx;
     HltPlots[index]->addHisto(ph);
@@ -1835,14 +1824,14 @@ void l4Builder::defineHltPlots()
 
     index++; //22
     HltPlots[index]->logy = 1;
-    hglobalMult = new TH1I("globalMult", "globalMult", 4200, 0, 4200);
+    hglobalMult = new TH1I("globalMult", "globalMult", 1500, 0, 7000);
     ph = new PlotHisto();
     ph->histo = hglobalMult;
     HltPlots[index]->addHisto(ph);
 
     index++; //23
     HltPlots[index]->logy = 1;
-    hprimaryMult = new TH1I("primaryMult", "primaryMult", 2200, 0, 2200);
+    hprimaryMult = new TH1I("primaryMult", "primaryMult", 500, 0, 1600);
     ph = new PlotHisto();
     ph->histo = hprimaryMult;
     HltPlots[index]->addHisto(ph);
@@ -1947,36 +1936,40 @@ void l4Builder::defineHltPlots()
     ph->histo = hVzDiff;
     HltPlots[index]->addHisto(ph);
 
-    index++; //38
-    HltPlots[index]->setDrawOpts("p");
-    //   HltPlots[index]->addElement(leg1);
-    //   HltPlots[index]->addElement(leg2);
+}
+
+void l4Builder::defineBeamPlots()
+{
+    index = 0; //0
+    BeamPlots[index]->setDrawOpts("p");
+    //   BeamPlots[index]->addElement(leg1);
+    //   BeamPlots[index]->addElement(leg2);
     hBeamX = new TH1D("BeamX", "BeamX", 105, 0., 105);
     ph = new PlotHisto();
     ph->histo = hBeamX;
-    HltPlots[index]->addHisto(ph);
+    BeamPlots[index]->addHisto(ph);
     hBeamY = new TH1D("BeamY", "BeamY", 105, 0., 105);
     ph = new PlotHisto();
     ph->histo = hBeamY;
-    HltPlots[index]->addHisto(ph);
+    BeamPlots[index]->addHisto(ph);
 
-    index++; //39
-    HltPlots[index]->setDrawOpts("p");
+    index++; //1
+    BeamPlots[index]->setDrawOpts("p");
     hInnerGain = new TH1D("innerGain", "innerGain", 105, 0., 105);
     ph = new PlotHisto();
     ph->histo = hInnerGain;
-    HltPlots[index]->addHisto(ph);
+    BeamPlots[index]->addHisto(ph);
     hOuterGain = new TH1D("outerGain", "outerGain", 105, 0., 105);
     ph = new PlotHisto();
     ph->histo = hOuterGain;
-    HltPlots[index]->addHisto(ph);
+    BeamPlots[index]->addHisto(ph);
 
-    index++; //40
-    HltPlots[index]->setDrawOpts("p");
+    index++; //2
+    BeamPlots[index]->setDrawOpts("p");
     hMeanDcaXy = new TH1D("meanDcaXy", "meanDcaXy", 105, 0., 105);
     ph = new PlotHisto();
     ph->histo = hMeanDcaXy;
-    HltPlots[index]->addHisto(ph);
+    BeamPlots[index]->addHisto(ph);
 
 }
 
@@ -2002,7 +1995,7 @@ void l4Builder::defineBesGoodPlots()
 
   index++; //3
   BesGoodPlots[index]->logy=1;
-  hBesGoodprimaryMult = new TH1I("BesGood_primaryMult", "BesGood_primaryMult",2200,0,2200);
+  hBesGoodprimaryMult = new TH1I("BesGood_primaryMult", "BesGood_primaryMult",500,0,1600);
   ph = new PlotHisto();
   ph->histo = hBesGoodprimaryMult;
   BesGoodPlots[index]->addHisto(ph);
@@ -2030,7 +2023,7 @@ void l4Builder::defineHLTGood2Plots()
 
   index++; //3
   HLTGood2Plots[index]->logy=1;
-  hHLTGood2primaryMult = new TH1I("HLTGood2_primaryMult", "HLTGood2_primaryMult",2200,0,2200);
+  hHLTGood2primaryMult = new TH1I("HLTGood2_primaryMult", "HLTGood2_primaryMult",500,0,1600);
   ph = new PlotHisto();
   ph->histo = hHLTGood2primaryMult;
   HLTGood2Plots[index]->addHisto(ph);
@@ -2126,7 +2119,7 @@ void l4Builder::defineHeavyFragmentPlots()
     HeavyFragmentPlots[index]->setDrawOpts("colz");
     HeavyFragmentPlots[index]->gridx = 1;
     HeavyFragmentPlots[index]->gridy = 1;
-    HeavyFragmentPlots[index]->addElement(fTheoDedx_e_pos);
+/*    HeavyFragmentPlots[index]->addElement(fTheoDedx_e_pos);
     HeavyFragmentPlots[index]->addElement(fTheoDedx_e_neg);
     HeavyFragmentPlots[index]->addElement(fTheoDedx_Pi_pos);
     HeavyFragmentPlots[index]->addElement(fTheoDedx_Pi_neg);
@@ -2141,143 +2134,149 @@ void l4Builder::defineHeavyFragmentPlots()
     HeavyFragmentPlots[index]->addElement(fTheoDedx_He3_pos);
     HeavyFragmentPlots[index]->addElement(fTheoDedx_He3_neg);
     HeavyFragmentPlots[index]->addElement(fTheoDedx_He4_pos);
-    HeavyFragmentPlots[index]->addElement(fTheoDedx_He4_neg);
-   // hdEdx = new TH2F("dEdx", "dEdx", 500, -5, 5, 300, 0, 3.e-5);
-    ph = new PlotHisto();
-    ph->histo = hdEdx;
-    HeavyFragmentPlots[index]->addHisto(ph);
-    hHFM_dEdx = new TH2F("HFM_dEdx", "HFM_dEdx", 500, -5, 5, 300, 0, 3.e-5);
+    HeavyFragmentPlots[index]->addElement(fTheoDedx_He4_neg);*/
+    hHFM_dEdx = new TH2F("HeavyFragment_dEdx", "HeavyFragment_dEdx", 500, -5, 5, 300, 0, 3.e-5);
     ph = new PlotHisto();
     ph->histo = hHFM_dEdx;
     HeavyFragmentPlots[index]->addHisto(ph);
+    //hdEdx = new TH2F("dEdx", "dEdx", 500, -5, 5, 300, 0, 3.e-5);
+    ph = new PlotHisto();
+    ph->histo = hdEdx;
+    HeavyFragmentPlots[index]->addHisto(ph);
 }
-void l4Builder::defineJPsiPlots() // not only J/Psi, but di-pion, di-muon
+void l4Builder::defineDiElectronPlots() // not only J/Psi, but di-pion, di-muon
 {
     // jpsi invariant mass
     index = 0;
     hDiElectronInvMassTpxEmc = new TH1D("DiElectronInvMassTpxEmc", "DiElectronInvMassTpxEmc", 120, 1., 13.);
     ph = new PlotHisto();
     ph->histo = hDiElectronInvMassTpxEmc;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
     hDiElectronInvMassTpxEmcBG = new TH1D("DiElectronInvMassTpxEmcBG", "DiElectronInvMassTpxEmcBG", 120, 1., 13.);
     ph = new PlotHisto();
     ph->histo = hDiElectronInvMassTpxEmcBG;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
 
     index++; //1
     hDiElectronInvMassCut = new TH1D("DiElectronInvMassCut", "DiElectronInvMassCut", 120, 1., 13.);
     ph = new PlotHisto();
     ph->histo = hDiElectronInvMassCut;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
     hDiElectronInvMassCutBG = new TH1D("DiElectronInvMassCutBG", "DiElectronInvMassCutBG", 120, 1., 13.);
     ph = new PlotHisto();
     ph->histo = hDiElectronInvMassCutBG;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
 
     index++; //2
     hDiElectronInvMassFullRange = new TH1D("DiElectronInvMassFullRange", "DiElectronInvMassFullRange", 130, 0., 13.);
     ph = new PlotHisto();
     ph->histo = hDiElectronInvMassFullRange;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
     hDiElectronInvMassFullRangeBG = new TH1D("DiElectronInvMassFullRangeBG", "DiElectronInvMassFullRangeBG", 130, 0., 13.);
     ph = new PlotHisto();
     ph->histo = hDiElectronInvMassFullRangeBG;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
 
     // daug e1
     index++; //3
-    JPsiPlots[index]->setDrawOpts("colz");
-    JPsiPlots[index]->addElement(fTheoDedx_e_pos);
-    //   JPsiPlots[index]->addElement(fTheoDedx_e_neg);
-    JPsiPlots[index]->addElement(fTheoDedx_Pi_pos);
-    //   JPsiPlots[index]->addElement(fTheoDedx_Pi_neg);
+    DiElectronPlots[index]->setDrawOpts("colz");
+   // DiElectronPlots[index]->addElement(fTheoDedx_e_pos);
+    //   DiElectronPlots[index]->addElement(fTheoDedx_e_neg);
+   // DiElectronPlots[index]->addElement(fTheoDedx_Pi_pos);
+    //   DiElectronPlots[index]->addElement(fTheoDedx_Pi_neg);
     hdEdx_P1 = new TH2F("dEdx_P1", "dEdx_P1", 200, 0., 10., 55, 0., 5.5e-06);
     ph = new PlotHisto();
     ph->histo = hdEdx_P1;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
 
     index++; //4
     hDaughter1P_TowerEnergy = new TH1D("Daughter1P_TowerEnergy", "Daughter1P_TowerEnergy", 100, 0, 5);
     ph = new PlotHisto();
     ph->histo = hDaughter1P_TowerEnergy;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
 
     index++; //5
     hDaughter1TpxEmcInverseBeta = new TH1D("Daughter1TpxEmcInverseBeta", "Daughter1TpxEmcInverseBeta", 100, 0, 5);
     ph = new PlotHisto();
     ph->histo =  hDaughter1TpxEmcInverseBeta;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
 
     // daug e2
     index++; //6
-    JPsiPlots[index]->setDrawOpts("colz");
-    JPsiPlots[index]->addElement(fTheoDedx_e_pos);
-    //JPsiPlots[index]->addElement(fTheoDedx_e_neg);
-    JPsiPlots[index]->addElement(fTheoDedx_Pi_pos);
-    //JPsiPlots[index]->addElement(fTheoDedx_Pi_neg);
+    DiElectronPlots[index]->setDrawOpts("colz");
+    //DiElectronPlots[index]->addElement(fTheoDedx_e_pos);
+    //DiElectronPlots[index]->addElement(fTheoDedx_e_neg);
+    //DiElectronPlots[index]->addElement(fTheoDedx_Pi_pos);
+    //DiElectronPlots[index]->addElement(fTheoDedx_Pi_neg);
     hdEdx_P2 = new TH2F("dEdx_P2", "dEdx_P2", 200, 0., 10., 55, 0., 5.5e-06);
     ph = new PlotHisto();
     ph->histo = hdEdx_P2;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
 
     index++; //7
     hDaughter2P_TowerEnergy = new TH1D("Daughter2P_TowerEnergy", "Daughter2P_TowerEnergy", 100, 0, 5);
     ph = new PlotHisto();
     ph->histo = hDaughter2P_TowerEnergy;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
 
     index++; //8
     hDaughter2TpxEmcInverseBeta = new TH1D("Daughter2TpxEmcInverseBeta", "Daughter2TpxEmcInverseBeta", 100, 0, 5);
     ph = new PlotHisto();
     ph->histo =  hDaughter2TpxEmcInverseBeta;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
 
     index++; //9
     hDiLeptonRapidity = new TH1D("DiLeptonRapidity", "DiLeptonRapidity", 150, -7.5, 7.5);
     ph = new PlotHisto();
     ph->histo = hDiLeptonRapidity;
-    JPsiPlots[index]->addHisto(ph);
+    DiElectronPlots[index]->addHisto(ph);
+}
 
-    index++; //10
+void l4Builder::defineDiPionPlots()
+{
+    index = 0; //0
     hDiPionInvMassFullRange = new TH1D("DiPionInvMassFullRange ", "DiPionInvMassFullRange", 130, 0., 1.3);
     ph = new PlotHisto();
     ph->histo = hDiPionInvMassFullRange;
-    JPsiPlots[index]->addHisto(ph);
+    DiPionPlots[index]->addHisto(ph);
     hDiPionInvMassFullRangeBG = new TH1D("DiPionInvMassFullRangeBG ", "DiPionInvMassFullRangeBG", 130, 0., 1.3);
     ph = new PlotHisto();
     ph->histo = hDiPionInvMassFullRangeBG;
-    JPsiPlots[index]->addHisto(ph);
+    DiPionPlots[index]->addHisto(ph);
 
-    index++; //11
+    index++; //1
     hDiPionDeltphi = new TH1D("DiPionDeltphi", "DiPionDeltphi", 120, -pi, pi);
     ph = new PlotHisto();
     ph->histo = hDiPionDeltphi;
-    JPsiPlots[index]->addHisto(ph);
+    DiPionPlots[index]->addHisto(ph);
+}
 
-    index++; //12
+void l4Builder::defineDiMuonPlots()
+{
+    index = 0; //0
     hDiMuonInvMassFullRange = new TH1D("DiMuonInvMassFullRange ", "DiMuonInvMassFullRange", 130, 0., 13.);
     ph = new PlotHisto();
     ph->histo = hDiMuonInvMassFullRange;
-    JPsiPlots[index]->addHisto(ph);
+    DiMuonPlots[index]->addHisto(ph);
     hDiMuonInvMassFullRangeBG = new TH1D("DiMuonInvMassFullRangeBG", "DiMuonInvMassFullRangeBG", 130, 0., 13.);
     ph = new PlotHisto();
     ph->histo = hDiMuonInvMassFullRangeBG;
-    JPsiPlots[index]->addHisto(ph);
+    DiMuonPlots[index]->addHisto(ph);
 
-    index++; //13
+    index++; //1
     hDiMuonInvMassTpxCut = new TH1D("DiMuonInvMassTpxCut ", "DiMuonInvMassTpxCut", 130, 0., 13.);
     ph = new PlotHisto();
     ph->histo = hDiMuonInvMassTpxCut;
-    JPsiPlots[index]->addHisto(ph);
+    DiMuonPlots[index]->addHisto(ph);
     hDiMuonInvMassTpxCutBG = new TH1D("DiMuonInvMassTpxCutBG", "DiMuonInvMassTpxCutBG", 130, 0., 13.);
     ph = new PlotHisto();
     ph->histo = hDiMuonInvMassTpxCutBG;
-    JPsiPlots[index]->addHisto(ph);
+    DiMuonPlots[index]->addHisto(ph);
 }
 
 void l4Builder::defineHltPlots_UPC()
 {
-    index = 0;
+    index = 0;//0
     hnhits_UPC = new TH1I("nHits_UPC", "nHits_UPC", 50, 0, 50);
     ph = new PlotHisto();
     ph->histo = hnhits_UPC;
@@ -2413,14 +2412,14 @@ void l4Builder::defineHltPlots_UPC()
 
     index++; //19
     HltPlots_UPC[index]->logy = 1;
-    hglobalMult_UPC = new TH1I("globalMult_UPC", "globalMult_UPC", 4200, 0, 4200);
+    hglobalMult_UPC = new TH1I("globalMult_UPC", "globalMult_UPC", 1500, 0, 7000);
     ph = new PlotHisto();
     ph->histo = hglobalMult_UPC;
     HltPlots_UPC[index]->addHisto(ph);
 
     index++; //20
     HltPlots_UPC[index]->logy = 1;
-    hprimaryMult_UPC = new TH1I("primaryMult_UPC", "primaryMult_UPC", 2200, 0, 2200);
+    hprimaryMult_UPC = new TH1I("primaryMult_UPC", "primaryMult_UPC", 500, 0, 1600);
     ph = new PlotHisto();
     ph->histo = hprimaryMult_UPC;
     HltPlots_UPC[index]->addHisto(ph);
@@ -2461,65 +2460,15 @@ void l4Builder::defineHltPlots_UPC()
     ph = new PlotHisto();
     ph->histo = hTowerEtaPhi_UPC;
     HltPlots_UPC[index]->addHisto(ph);
-
-    index++; //27
-    hDiElectronInvMassFullRange_UPC = new TH1D("DiElectronInvMassFullRange_UPC ", "DiElectronInvMassFullRange_UPC", 130, 0., 13.);
-    ph = new PlotHisto();
-    ph->histo = hDiElectronInvMassFullRange_UPC;
-    HltPlots_UPC[index]->addHisto(ph);
-    hDiElectronInvMassFullRangeBG_UPC = new TH1D("DiElectronInvMassFullRangeBG_UPC", "DiElectronInvMassFullRangeBG_UPC", 130, 0., 13.);
-    ph = new PlotHisto();
-    ph->histo = hDiElectronInvMassFullRangeBG_UPC;
-    HltPlots_UPC[index]->addHisto(ph);
-
-    index++; //28
-    HltPlots_UPC[index]->setDrawOpts("colz");
-    HltPlots_UPC[index]->addElement(fTheoDedx_e_pos);
-    //HltPlots_UPC[index]->addElement(fTheoDedx_e_neg);
-    HltPlots_UPC[index]->addElement(fTheoDedx_Pi_pos);
-    //HltPlots_UPC[index]->addElement(fTheoDedx_Pi_neg);
-    hdEdx_P1_UPC = new TH2F("dEdx_P1_UPC", "dEdx_P1_UPC", 200, 0., 10., 55, 0., 5.5e-06);
-    ph = new PlotHisto();
-    ph->histo = hdEdx_P1_UPC;
-    HltPlots_UPC[index]->addHisto(ph);
-
-    index++; //29
-    hDaughter1P_TowerEnergy_UPC = new TH1D("Daughter1P_TowerEnergy_UPC", "Daughter1P_TowerEnergy_UPC", 100, 0, 5);
-    ph = new PlotHisto();
-    ph->histo = hDaughter1P_TowerEnergy_UPC;
-    HltPlots_UPC[index]->addHisto(ph);
-
-    index++; //30
-    HltPlots_UPC[index]->setDrawOpts("colz");
-    HltPlots_UPC[index]->addElement(fTheoDedx_e_pos);
-    //HltPlots_UPC[index]->addElement(fTheoDedx_e_neg);
-    HltPlots_UPC[index]->addElement(fTheoDedx_Pi_pos);
-    //HltPlots_UPC[index]->addElement(fTheoDedx_Pi_neg);
-    hdEdx_P2_UPC = new TH2F("dEdx_P2_UPC", "dEdx_P2_UPC", 200, 0., 10., 55, 0., 5.5e-06);
-    ph = new PlotHisto();
-    ph->histo = hdEdx_P2_UPC;
-    HltPlots_UPC[index]->addHisto(ph);
-
-    index++; //31
-    hDaughter2P_TowerEnergy_UPC = new TH1D("Daughter2P_TowerEnergy_UPC", "Daughter2P_TowerEnergy_UPC", 100, 0, 5);
-    ph = new PlotHisto();
-    ph->histo = hDaughter2P_TowerEnergy_UPC;
-    HltPlots_UPC[index]->addHisto(ph);
-
-    index++;//32
-    hDiLeptonRapidity_UPC = new TH1D("DiLeptonRapidity_UPC", "DiLeptonRapidity_UPC", 150, -7.5, 7.5);
-    ph = new PlotHisto();
-    ph->histo = hDiLeptonRapidity_UPC;
-    HltPlots_UPC[index]->addHisto(ph);
-
-    index++;//33
+ 
+    index++;//27
     HltPlots_UPC[index]->setDrawOpts("colz");
     hVzvpd_Vz_UPC = new TH2F("Vzvpd_Vz_UPC", "Vzvpd_Vz_UPC", 400, -100, 100, 400, -100, 100);
     ph = new PlotHisto();
     ph->histo = hVzvpd_Vz_UPC;
     HltPlots_UPC[index]->addHisto(ph);
 
-    index++;//34
+    index++;//28
     HltPlots_UPC[index]->setDrawOpts("colz");
     HltPlots_UPC[index]->gridx = 1;
     HltPlots_UPC[index]->gridy = 1;
@@ -2548,17 +2497,71 @@ void l4Builder::defineHltPlots_UPC()
     ph->histo = hHFM_dEdx_UPC;
     HltPlots_UPC[index]->addHisto(ph);
 
-    index++;//35
+    index++;//29
     hVzDiff_UPC = new TH1D("VzDiff_UPC", "VzDiff_UPC", 200, -20, 20);
     ph = new PlotHisto();
     ph->histo = hVzDiff_UPC;
-    HltPlots_UPC[index]->addHisto(ph);
+    HltPlots_UPC[index]->addHisto(ph); 
+
+}
+
+void l4Builder::defineUPCDiElectronPlots()
+{
+    index = 0; //0
+    hDiElectronInvMassFullRange_UPC = new TH1D("DiElectronInvMassFullRange_UPC ", "DiElectronInvMassFullRange_UPC", 130, 0., 13.);
+    ph = new PlotHisto();
+    ph->histo = hDiElectronInvMassFullRange_UPC;
+    UPCDiElectronPlots[index]->addHisto(ph);
+    hDiElectronInvMassFullRangeBG_UPC = new TH1D("DiElectronInvMassFullRangeBG_UPC", "DiElectronInvMassFullRangeBG_UPC", 130, 0., 13.);
+    ph = new PlotHisto();
+    ph->histo = hDiElectronInvMassFullRangeBG_UPC;
+    UPCDiElectronPlots[index]->addHisto(ph);
+
+    index++; //1
+    UPCDiElectronPlots[index]->setDrawOpts("colz");
+    UPCDiElectronPlots[index]->addElement(fTheoDedx_e_pos);
+    //UPCDiElectronPlots[index]->addElement(fTheoDedx_e_neg);
+    UPCDiElectronPlots[index]->addElement(fTheoDedx_Pi_pos);
+    //UPCDiElectronPlots[index]->addElement(fTheoDedx_Pi_neg);
+    hdEdx_P1_UPC = new TH2F("dEdx_P1_UPC", "dEdx_P1_UPC", 200, 0., 10., 55, 0., 5.5e-06);
+    ph = new PlotHisto();
+    ph->histo = hdEdx_P1_UPC;
+    UPCDiElectronPlots[index]->addHisto(ph);
+
+    index++; //2
+    hDaughter1P_TowerEnergy_UPC = new TH1D("Daughter1P_TowerEnergy_UPC", "Daughter1P_TowerEnergy_UPC", 100, 0, 5);
+    ph = new PlotHisto();
+    ph->histo = hDaughter1P_TowerEnergy_UPC;
+    UPCDiElectronPlots[index]->addHisto(ph);
+
+    index++; //3
+    UPCDiElectronPlots[index]->setDrawOpts("colz");
+    UPCDiElectronPlots[index]->addElement(fTheoDedx_e_pos);
+    //UPCDiElectronPlots[index]->addElement(fTheoDedx_e_neg);
+    UPCDiElectronPlots[index]->addElement(fTheoDedx_Pi_pos);
+    //UPCDiElectronPlots[index]->addElement(fTheoDedx_Pi_neg);
+    hdEdx_P2_UPC = new TH2F("dEdx_P2_UPC", "dEdx_P2_UPC", 200, 0., 10., 55, 0., 5.5e-06);
+    ph = new PlotHisto();
+    ph->histo = hdEdx_P2_UPC;
+    UPCDiElectronPlots[index]->addHisto(ph);
+
+    index++; //4
+    hDaughter2P_TowerEnergy_UPC = new TH1D("Daughter2P_TowerEnergy_UPC", "Daughter2P_TowerEnergy_UPC", 100, 0, 5);
+    ph = new PlotHisto();
+    ph->histo = hDaughter2P_TowerEnergy_UPC;
+    UPCDiElectronPlots[index]->addHisto(ph);
+
+    index++;//5
+    hDiLeptonRapidity_UPC = new TH1D("DiLeptonRapidity_UPC", "DiLeptonRapidity_UPC", 150, -7.5, 7.5);
+    ph = new PlotHisto();
+    ph->histo = hDiLeptonRapidity_UPC;
+    UPCDiElectronPlots[index]->addHisto(ph);
 }
 
 void l4Builder::setAllPlots()
 {
-    hdEdx_P1->GetZaxis()->SetRangeUser(1.e-10, 1.e30);
-    hdEdx_P2->GetZaxis()->SetRangeUser(1.e-10, 1.e30);
+    //hdEdx_P1->GetZaxis()->SetRangeUser(1.e-10, 1.e30);
+    //hdEdx_P2->GetZaxis()->SetRangeUser(1.e-10, 1.e30);
     hGlob_dEdx_UPC->GetZaxis()->SetRangeUser(1.e-10, 1.e30);
     hPrim_dEdx_UPC->GetZaxis()->SetRangeUser(1.e-10, 1.e30);
     hTowerEtaPhi_UPC->GetZaxis()->SetRangeUser(1.e-10, 1.e30);
@@ -2705,10 +2708,12 @@ void l4Builder::setAllPlots()
     //        hEvtsAccpt->GetXaxis()->SetBinLabel(3,"HLT zerobias");
     hEvtsAccpt->GetXaxis()->SetBinLabel(2, "Random");
     hEvtsAccpt->GetXaxis()->SetBinLabel(3, "Bes Good Events");
-    hEvtsAccpt->GetXaxis()->SetBinLabel(4, "Bes Monior");
-    hEvtsAccpt->GetXaxis()->SetBinLabel(5, "Fixed Target");
-    hEvtsAccpt->GetXaxis()->SetBinLabel(6, "Fixed Target Monitor");
-    hEvtsAccpt->GetXaxis()->SetBinLabel(7, "HLTGood2");    
+    //hEvtsAccpt->GetXaxis()->SetBinLabel(4, "Bes Monior");
+    //hEvtsAccpt->GetXaxis()->SetBinLabel(5, "Fixed Target");
+    //hEvtsAccpt->GetXaxis()->SetBinLabel(6, "Fixed Target Monitor");
+    hEvtsAccpt->GetXaxis()->SetBinLabel(4, "HLTGood2");  
+    hEvtsAccpt->GetXaxis()->SetBinLabel(5, "DiElectron");
+    hEvtsAccpt->GetXaxis()->SetBinLabel(6, "HeavyFragment"); 
 
     hGlob_Phi_UPC->SetMinimum(0.);
     hPrim_Phi_UPC->SetMinimum(0.);
