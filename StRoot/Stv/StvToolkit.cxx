@@ -14,11 +14,11 @@
 #include "Stv/StvSeedFinder.h"
 #include "Stv/StvTrackFinder.h"
 
-class StvHitFactory  : public StvFactory<StvHit ,StvHit > 	{public:};
-class StvNodeFactory : public StvFactory<StvNode,StvNode> 	{public:};
-class StvTrackFactory: public StvFactory<StvTrack,StvTrack> 	{public:};
-class StvELossTrakFactory: public StvFactory<StvELossTrak,StvELossTrak> 	{public:};
-class StvVertexFactory  : public StvFactory<StvVertex ,StvVertex > 	{public:};
+class StvHitFactory  : public StvFactory<StvHit ,StvHit > 		{public:};
+class StvNodeFactory : public StvFactory<StvNode,StvNode> 		{public:};
+class StvTrackFactory: public StvFactory<StvTrack,StvTrack> 		{public:};
+class StvELossTrakFactory: public StvFactory<StvELossTrak,StvELossTrak> {public:};
+class StvVertexFactory   : public StvFactory<StvVertex ,StvVertex > 	{public:};
 
 
 StvToolkit *StvToolkit::mgInstance = 0;
@@ -77,6 +77,8 @@ StvTrack *StvToolkit::GetTrack()
 //_____________________________________________________________________________
 StvELossTrak *StvToolkit::GetELossTrak()
 {
+return new StvELossTrak(); ///?????
+
   if (!mELossTrakFactory) {
     mELossTrakFactory = (StvELossTrakFactory*)StvELossTrakFactory::myInstance();
     mELossTrakFactory->setMaxIncrementCount(4000000);
@@ -91,6 +93,7 @@ void StvToolkit::FreeTrack(StvTrack *&stiTrack)
 //_____________________________________________________________________________
 void StvToolkit::FreeELossTrak(StvELossTrak *&stiELossTrak)
 {
+  delete stiELossTrak; stiELossTrak=0; return;////????
   StvELossTrakFactory::Free(stiELossTrak);	stiELossTrak=0;
 }
 //_____________________________________________________________________________
@@ -168,4 +171,9 @@ void StvToolkit::SetSeedFinder(StvSeedFinder *seedFinder )
   assert(seedFinder);
   if (!mSeedFinders) mSeedFinders = new StvSeedFinders;
   mSeedFinders->push_back(seedFinder);
+}
+//______________________________________________________________________________
+int StvToolkit::Alive(void *obj)
+{
+  return FactoryB::Alive(obj);
 }
