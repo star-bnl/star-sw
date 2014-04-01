@@ -70,6 +70,7 @@ void SetEventFiller(StvEventFiller *eventFiller){ mEventFiller = eventFiller;}
 
 public:
 static StvToolkit* Inst(); 
+static        int  Alive(void *obj); 
 
 protected:
 char           	mBeg[1];
