@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.31 2014/03/28 20:51:52 perev Exp $
+ * $Id: StvNode.cxx,v 1.32 2014/04/01 02:46:16 perev Exp $
  *
  * /author Victor Perev
  */
@@ -32,14 +32,20 @@ static int myCount=0;
 void StvNode::unset()
 { 
 static StvToolkit *kit = StvToolkit::Inst();
-//??  if (mELoss) kit->FreeELossTrak(mELoss); 
+  if (mELoss) kit->FreeELossTrak(mELoss); 
   assert(mBeg[0]!='@');
   memset(mBeg,'@',mEnd-mBeg+1);
 }
 //______________________________________________________________________________
 StvNode &StvNode::operator=(const StvNode &from)
 { 
-  memcpy(mBeg,from.mBeg,mEnd-mBeg+1); return *this;
+static StvToolkit* kit=StvToolkit::Inst();
+  memcpy(mBeg,from.mBeg,mEnd-mBeg+1); 
+  if (mELoss) { //Recreate ELossTrak
+    mELoss = kit->GetELossTrak();
+   *mELoss = *from.mELoss;
+  }
+  return *this;
 }
 
 //______________________________________________________________________________
