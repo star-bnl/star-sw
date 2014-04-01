@@ -34,6 +34,7 @@ public:
 
   ///Free an object for reuse 
   static void Free(void *obj);
+  static  int Alive(void *obj);
 
   void setFastDelete()	{fFastDel=1;}
   void setMaxIncrementCount(int maxCount)	{fMaxCount=maxCount;}
@@ -75,8 +76,15 @@ inline void FactoryB::Free(void *obj)
    void **v = ((void**)obj) - 1;
    if (!*v) v--;
    assert((*v)!=(void*)0xFF);
+   assert(((*(int*)v)&3)==0);
    FactoryB *f = (FactoryB*)((*v));
    f->free(obj);
+}
+inline int FactoryB::Alive(void *obj)
+{
+   void **v = ((void**)obj) - 1;
+   if (!*v) v--;
+   return ((*v)!=(void*)0xFF);
 }
 
 #endif
