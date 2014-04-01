@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.3 2014/02/27 21:40:19 smirnovd Exp $
+ * $Id: StPxlDb.cxx,v 1.4 2014/04/01 15:28:18 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.4  2014/04/01 15:28:18  qiuh
+ * add single hot pixel masking
+ *
  * Revision 1.3  2014/02/27 21:40:19  smirnovd
  * Remove unnecessary print out
  *
@@ -46,6 +49,7 @@
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_pxlSensorStatus_Table.h"
 #include "tables/St_pxlRowColumnStatus_Table.h"
+#include "tables/St_pxlHotPixels_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
 #include "tables/St_pxlControl_Table.h"
 
@@ -170,6 +174,18 @@ Int_t StPxlDb::columnStatus(Int_t sector, Int_t ladder, Int_t sensor, Int_t colu
    return mRowColumnStatusTable->cols[kNumberOfPxlColumnsOnSensor * ((sector - 1) * (kNumberOfPxlSensorsPerLadder * kNumberOfPxlLaddersPerSector) + (ladder - 1) * kNumberOfPxlSensorsPerLadder + (sensor - 1)) + column];
 }
 //_____________________________________________________________________________
+Int_t StPxlDb::pixelHot(Int_t sector, Int_t ladder, Int_t sensor, Int_t row, Int_t column) const
+{
+  map<unsigned int,short>::const_iterator got;
+  got = mMapHotPixels.find(1000000*((sector-1)*40+(ladder-1)*10+sensor) + 1000*row + column);
+  if ( got == mMapHotPixels.end() ) {
+    return 0;
+  }
+  else {
+    return 1;
+  }
+}
+//_____________________________________________________________________________
 void StPxlDb::setThinPlateSpline(pxlSensorTps_st *pxlSensorTps)
 {
    for (Int_t i = 0; i < kNumberOfPxlSectors * kNumberOfPxlLaddersPerSector * kNumberOfPxlSensorsPerLadder; i++) {
@@ -181,4 +197,14 @@ void StPxlDb::setThinPlateSpline(pxlSensorTps_st *pxlSensorTps)
       if (mThinPlateSpline[iSector][iLadder][iSensor]) {delete mThinPlateSpline[iSector][iLadder][iSensor];}
       mThinPlateSpline[iSector][iLadder][iSensor] = new StThinPlateSpline(nMeasurements, pxlSensorTps[i].X, pxlSensorTps[i].Y, pxlSensorTps[i].W, pxlSensorTps[i].A);
    }
+}
+//_____________________________________________________________________________
+void StPxlDb::setHotPixels(pxlHotPixels_st *hotPixelsTable)
+{
+  for(Int_t i=0; i<10000; i++){ 
+    if(hotPixelsTable[0].hotPixel[i]>0){ 
+      mMapHotPixels.insert ( std::pair<unsigned long, short>(hotPixelsTable[0].hotPixel[i],i) ); 
+    } 
+    else break;
+  }
 }

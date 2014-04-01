@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.h,v 1.3 2014/03/06 00:50:45 smirnovd Exp $
+ * $Id: StPxlDb.h,v 1.4 2014/04/01 15:28:18 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.h,v $
+ * Revision 1.4  2014/04/01 15:28:18  qiuh
+ * add single hot pixel masking
+ *
  * Revision 1.3  2014/03/06 00:50:45  smirnovd
  * Nothing changed, it is a test
  *
@@ -33,9 +36,10 @@
 #include "StPxlUtil/StPxlConstants.h"
 #include "StObject.h"
 #include "TGeoMatrix.h"
-
+#include <map>
 class pxlSensorStatus_st;
 class pxlRowColumnStatus_st;
+class pxlHotPixels_st;
 class Survey_st;
 class pxlSensorTps_st;
 class pxlControl_st;
@@ -48,29 +52,29 @@ public:
 
    //! geoHMatrices describing rotation + shift tranlations between different coordinate systems
    const TGeoHMatrix *geoHMatrixTpcOnGlobal() const
-   {return mGeoHMatrixTpcOnGlobal;}
+     {return mGeoHMatrixTpcOnGlobal;}
    const TGeoHMatrix *geoHMatrixIdsOnTpc() const
-   {return &mGeoHMatrixIdsOnTpc;}
+     {return &mGeoHMatrixIdsOnTpc;}
    const TGeoHMatrix *geoHMatrixPstOnIds() const
-   {return &mGeoHMatrixPstOnIds;}
+     {return &mGeoHMatrixPstOnIds;}
    const TGeoHMatrix *geoHMatrixPxlOnPst() const
-   {return &mGeoHMatrixPxlOnPst;}
+     {return &mGeoHMatrixPxlOnPst;}
    const TGeoHMatrix *geoHMatrixHalfOnPxl(Int_t half) const   ///< 1: north   2: south
-   {return &mGeoHMatrixHalfOnPxl[half - 1];}
+     {return &mGeoHMatrixHalfOnPxl[half - 1];}
    const TGeoHMatrix *geoHMatrixSectorOnHalf(Int_t sector) const
-   {return &mGeoHMatrixSectorOnHalf[sector - 1];}
+     {return &mGeoHMatrixSectorOnHalf[sector - 1];}
    const TGeoHMatrix *geoHMatrixLadderOnSector(Int_t sector, Int_t ladder) const
-   {return &mGeoHMatrixLadderOnSector[sector - 1][ladder - 1];}
+     {return &mGeoHMatrixLadderOnSector[sector - 1][ladder - 1];}
    const TGeoHMatrix *geoHMatrixSensorOnLadder(Int_t sector, Int_t ladder, Int_t sensor) const
-   {return &mGeoHMatrixSensorOnLadder[sector - 1][ladder - 1][sensor - 1];}
+     {return &mGeoHMatrixSensorOnLadder[sector - 1][ladder - 1][sensor - 1];}
    const TGeoHMatrix *geoHMatrixSensorOnGlobal(Int_t sector, Int_t ladder, Int_t sensor) const
-   {return &mGeoHMatrixSensorOnGlobal[sector - 1][ladder - 1][sensor - 1];}
-
+     {return &mGeoHMatrixSensorOnGlobal[sector - 1][ladder - 1][sensor - 1];}
+   
    //! status for sensor/row/column
    Int_t sensorStatus(Int_t sector, Int_t ladder, Int_t sensor) const; ///< 1-9: good or usable status
    Int_t rowStatus(Int_t sector, Int_t ladder, Int_t sensor, Int_t row) const; ///< 1: good status
    Int_t columnStatus(Int_t sector, Int_t ladder, Int_t sensor, Int_t column) const; ///< 1: good status
-
+   Int_t pixelHot(Int_t sector, Int_t ladder, Int_t sensor, Int_t row, Int_t column) const; ///< 1: hot; 0: good
    const StThinPlateSpline *thinPlateSpline(Int_t sector, Int_t ladder, Int_t sensor) const ///< thin plate spline function to describe the sensor surface
    {return mThinPlateSpline[sector - 1][ladder - 1][sensor - 1];}
 
@@ -80,11 +84,12 @@ public:
    void setGeoHMatrices(Survey_st **tables); ///< set geoHMatrix parameters with parameters from Survey_st tables
    void setSensorStatus(pxlSensorStatus_st *sensorStatus) {mSensorStatusTable = sensorStatus;}
    void setRowColumnStatus(pxlRowColumnStatus_st *rowColumnStatus) {mRowColumnStatusTable = rowColumnStatus;}
+   void setHotPixels(pxlHotPixels_st *hotPixelsTable);
    void setThinPlateSpline(pxlSensorTps_st *pxlSensorTps); ///< create sensor thin plate spline functions and set their parameters
    void setPxlControl(pxlControl_st *pxlControl) {mPxlControl = pxlControl;}
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.3 2014/03/06 00:50:45 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.4 2014/04/01 15:28:18 qiuh Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -103,7 +108,7 @@ private:
    //! status for sensor/row/column
    pxlSensorStatus_st *mSensorStatusTable;
    pxlRowColumnStatus_st *mRowColumnStatusTable;
-
+   map<unsigned int,short> mMapHotPixels; //! 
    pxlControl_st *mPxlControl; ///< control parameters for raw data decoding and so on
    StThinPlateSpline *mThinPlateSpline[kNumberOfPxlSectors][kNumberOfPxlLaddersPerSector][kNumberOfPxlSensorsPerLadder]; ///< thin plate spline function to describe the sensor surface
 

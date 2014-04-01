@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.11 2014/01/28 19:29:37 qiuh Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.12 2014/04/01 15:28:18 qiuh Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.12  2014/04/01 15:28:18  qiuh
+ * add single hot pixel masking
+ *
  * Revision 1.11  2014/01/28 19:29:37  qiuh
  * *** empty log message ***
  *
@@ -31,6 +34,7 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_pxlSensorStatus_Table.h"
 #include "tables/St_pxlRowColumnStatus_Table.h"
+#include "tables/St_pxlHotPixels_Table.h"
 #include "tables/St_pxlControl_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
 
@@ -82,6 +86,10 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    St_pxlRowColumnStatus *rowColumnStatus = (St_pxlRowColumnStatus *)GetDataBase("Calibrations/pxl/pxlRowColumnStatus");
    if (rowColumnStatus) mPxlDb->setRowColumnStatus(rowColumnStatus->GetTable());
    else {LOG_WARN << " no pxl row column status table " << endm; return kStErr;}
+
+   St_pxlHotPixels *hotPixels = (St_pxlHotPixels *)GetDataBase("Calibrations/pxl/pxlHotPixels");
+   if (hotPixels) mPxlDb->setHotPixels(hotPixels->GetTable());
+   else {LOG_WARN << " no pxl hot pixels table " << endm; return kStErr;}
 
    // set pxlControl
    St_pxlControl *pxlControl = (St_pxlControl *)GetDataBase("Geometry/pxl/pxlControl");

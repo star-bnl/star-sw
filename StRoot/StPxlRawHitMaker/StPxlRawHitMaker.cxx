@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.cxx,v 1.5 2014/01/28 19:29:44 qiuh Exp $
+ * $Id: StPxlRawHitMaker.cxx,v 1.6 2014/04/01 15:29:24 qiuh Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.cxx,v $
+ * Revision 1.6  2014/04/01 15:29:24  qiuh
+ * add single hot pixel masking
+ *
  * Revision 1.5  2014/01/28 19:29:44  qiuh
  * *** empty log message ***
  *
@@ -290,24 +293,25 @@ Int_t StPxlRawHitMaker::decodeStateN(Int_t val)
    for (int c = 0; c < coding + 1; c++) {
       // check sector, ladder, sensor row and column range
       if (mSector > 0 && mSector <= kNumberOfPxlSectors && mLadder > 0 && mLadder <= kNumberOfPxlLaddersPerSector && mSensor > 0 && mSensor <= kNumberOfPxlSensorsPerLadder && mRow >= 0 && mRow < kNumberOfPxlRowsOnSensor && mColumn + c < kNumberOfPxlColumnsOnSensor && mColumn + c >= 0) {
-         // check raw and column status
+         // check raw and column status and hot pixels
          if (mPxlDb->rowStatus(mSector, mLadder, mSensor, mRow) == mRowColumnGoodStatus
-               && mPxlDb->columnStatus(mSector, mLadder, mSensor, mColumn + c) == mRowColumnGoodStatus) {
-            // fill raw hit
-            StPxlRawHit pxlRawHit;
-            pxlRawHit.setSector(mSector);
-            pxlRawHit.setLadder(mLadder);
-            pxlRawHit.setSensor(mSensor);
-            pxlRawHit.setRow(mRow);
-            pxlRawHit.setColumn(mColumn + c);
-            pxlRawHit.setIdTruth(0);
-            if (Debug() > 4) pxlRawHit.print();
-
-            mPxlRawHitCollection->addRawHit(pxlRawHit);
+             && mPxlDb->columnStatus(mSector, mLadder, mSensor, mColumn + c) == mRowColumnGoodStatus
+             && (!mPxlDb->pixelHot(mSector, mLadder, mSensor, mRow, mColumn + c))) {
+	   // fill raw hit
+	   StPxlRawHit pxlRawHit;
+	   pxlRawHit.setSector(mSector);
+	   pxlRawHit.setLadder(mLadder);
+	   pxlRawHit.setSensor(mSensor);
+	   pxlRawHit.setRow(mRow);
+	   pxlRawHit.setColumn(mColumn + c);
+	   pxlRawHit.setIdTruth(0);
+	   if (Debug() > 4) pxlRawHit.print();
+	   
+	   mPxlRawHitCollection->addRawHit(pxlRawHit);
          }
       }
       else if (mColumn != mDummyState) { // 1023: dummy state when the last state from a sensor ends on the lower 16 bits of a 32-bit word
-         LOG_WARN << "wrong senctor/ladder/sensor/row/column: " << mSector << "/" << mLadder << "/" << mSensor << "/" << mRow << "/" << mColumn << endm;
+	LOG_WARN << "wrong sector/ladder/sensor/row/column: " << mSector << "/" << mLadder << "/" << mSensor << "/" << mRow << "/" << mColumn << endm;
       }
    }
    return 0;
