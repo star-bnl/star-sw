@@ -34,7 +34,6 @@ void Set(      StvNodePars *otpar,      StvFitErrs *oterr,StvFitDers *deriv);
 void SetTarget(const double *target,int nTarget=3);
 void SetOpt(int opt);
 double GetLength() const;
-     StvELossTrak *GetELoss()  const{ return mELoss;}
      StvELossTrak *TakeELoss();
 void SetRZmax(double rMax,double zMax); 
 
