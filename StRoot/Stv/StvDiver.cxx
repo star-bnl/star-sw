@@ -369,6 +369,8 @@ int StvMCStepping::BegVolume()
 static int nCall=0; nCall++;
 
   fPrevMat = fMaterial;
+
+assert(StvToolkit::Alive(fELossTrak));
   fELossTrak->Set(fMaterial,fEnterMomentum.Vect().Mag());
   fTooManyLength = fCurrentLength;
   return (IsDca00(0));
