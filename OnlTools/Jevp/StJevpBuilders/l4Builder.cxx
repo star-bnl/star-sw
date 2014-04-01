@@ -516,10 +516,23 @@ void l4Builder::writeHistogram()
         for(int i = 0; i < 5; i++)FixedTargetMonitorPlots[i]->getHisto(0)->histo->Write();
         }
     if(HeavyFragmentFilled) {
-        for(int i = 0; i < 1; i++)HeavyFragmentPlots[i]->getHisto(0)->histo->Write();
+        for(int i = 0; i < 1; i++){
+	HeavyFragmentPlots[i]->getHisto(0)->histo->Write();
+	}
     }
     if(DiElectronFilled){
-	for(int i = 0; i < 14; i++)DiElectronPlots[i]->getHisto(0)->histo->Write();
+	for(int i = 3; i < 10; i++)DiElectronPlots[i]->getHisto(0)->histo->Write();
+	for(int i = 0; i < 3; i++)
+	{
+		DiElectronPlots[i]->getHisto(0)->histo->Write();
+		DiElectronPlots[i]->getHisto(1)->histo->Write();
+    		}
+	}
+    if(UPCFilled){
+        for(int i = 0; i < 2; i++)DiPionPlots[i]->getHisto(0)->histo->Write();
+    }
+    if(DiMuonFilled){
+        for(int i = 0; i < 2; i++)DiMuonPlots[i]->getHisto(0)->histo->Write();
     }
     if(UPCDiElectronFilled){
         for(int i = 0; i < 6; i++)UPCDiElectronPlots[i]->getHisto(0)->histo->Write();
@@ -2135,11 +2148,12 @@ void l4Builder::defineHeavyFragmentPlots()
     HeavyFragmentPlots[index]->addElement(fTheoDedx_He3_neg);
     HeavyFragmentPlots[index]->addElement(fTheoDedx_He4_pos);
     HeavyFragmentPlots[index]->addElement(fTheoDedx_He4_neg);*/
+   //HeavyFragmentPlots[index]->addElement(hdEdx); HeavyFragmentPlots[index]->addElement(hdEdx);
     hHFM_dEdx = new TH2F("HeavyFragment_dEdx", "HeavyFragment_dEdx", 500, -5, 5, 300, 0, 3.e-5);
     ph = new PlotHisto();
     ph->histo = hHFM_dEdx;
     HeavyFragmentPlots[index]->addHisto(ph);
-    //hdEdx = new TH2F("dEdx", "dEdx", 500, -5, 5, 300, 0, 3.e-5);
+    hdEdx = new TH2F("dEdx", "dEdx", 500, -5, 5, 300, 0, 3.e-5);
     ph = new PlotHisto();
     ph->histo = hdEdx;
     HeavyFragmentPlots[index]->addHisto(ph);
