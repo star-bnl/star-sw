@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.12 2014/03/28 15:25:01 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.13 2014/04/01 02:49:54 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -28,6 +28,7 @@ StvELossTrak::StvELossTrak()
 void StvELossTrak::reset()
 {
   fMats.clear();
+  memset(fBeg,0,fEnd-fBeg+1);
 }
 //______________________________________________________________________________
 void StvELossTrak::unset()
@@ -38,7 +39,7 @@ void StvELossTrak::unset()
 void StvELossTrak::Reset(int dir,double mass, double charge)
 {
   memset(fBeg,0,fEnd-fBeg+1);
-  fMats.resize(0);
+  fMats.clear();
   fDir = dir; fM=mass; fCharge=charge;
   
 }
