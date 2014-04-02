@@ -25,12 +25,6 @@ TDataSet *CreateTable()
       return NULL;
     }
 
-  std::cout << "\033[91m" 
-	    <<"The y2014x tag is for testing purposes only.  It is not guarenteed to be stable" << std::endl
-	    << " in DEV or production libraries." 
-	    << "\033[0m"
-	    << std::endl;
-
   // Return the requested geometry
   return CreateGeometry(tag);
 
