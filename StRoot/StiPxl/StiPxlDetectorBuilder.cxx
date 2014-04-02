@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.53 2014/03/31 21:32:05 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.54 2014/04/02 04:11:58 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -369,8 +369,8 @@ void StiPxlDetectorBuilder::buildSimpleBox()
 {
    // Build average inactive volumes
    const VolumeMap_t pxlVolumes[] = {
-      {"PSAL1", "Long tube in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSAL2", "Long tube in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""}
+      {"PSAL1", "Long tube in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1/PSAL_1", "", ""},
+      {"PSAL2", "Long tube in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2/PSAL_1", "", ""}
    };
 
    int nPxlVolumes = sizeof(pxlVolumes) / sizeof(VolumeMap_t);
