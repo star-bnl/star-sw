@@ -1,5 +1,8 @@
-/* $Id: g2t_mtd_hit.idl,v 1.1 2011/08/03 20:28:32 jwebb Exp $
+/* $Id: g2t_mtd_hit.idl,v 1.2 2014/04/02 19:03:52 jwebb Exp $
    $Log: g2t_mtd_hit.idl,v $
+   Revision 1.2  2014/04/02 19:03:52  jwebb
+   Save MTD local *and* global coordinates.
+
    Revision 1.1  2011/08/03 20:28:32  jwebb
    Add MTD to the g2t hit tables.
 
@@ -15,5 +18,6 @@ struct g2t_mtd_hit {        /* G2T Muon Telescope Hit */
        float p[3];          /* track momentum */
        float s_track;       /* track length */
        float tof;           /* Time of flight */
-       float x[3];          /* Hit position */
+       float x[3];          /* Hit local position */
+       float xglobal[3];    /* Hit global position */
 };

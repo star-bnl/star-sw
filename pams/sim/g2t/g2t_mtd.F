@@ -32,6 +32,10 @@ if (isys==3) call G2R_GET_SYS ('MUTD','MTTF',Iprin,Idigi)
          g2t_mtd_hit(i).x(2)        = x(2)
          g2t_mtd_hit(i).x(3)        = x(3)
 
+         g2t_mtd_hit(i).xglobal(1)  = xx(1)
+         g2t_mtd_hit(i).xglobal(2)  = xx(2)
+         g2t_mtd_hit(i).xglobal(3)  = xx(3)
+
          If (local) then
            g2t_mtd_hit(i).p(1)        = c(1)*p(4)
            g2t_mtd_hit(i).p(2)        = c(2)*p(4)
