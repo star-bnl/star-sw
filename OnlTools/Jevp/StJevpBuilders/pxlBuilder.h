@@ -12,10 +12,10 @@
 
 #include <math.h>
 
-const int _NSENSOR = 40;
-const int _NCOL = 960;
-const int _NROW = 928;
-const int _NRDO = 10;
+const int NSENSOR = 40;
+const int NCOL = 960;
+const int NROW = 928;
+const int NRDO = 10;
 
 class pxlBuilder : public JevpPlotSet {
 public:
@@ -32,8 +32,8 @@ public:
   
   static void main(int argc, char *argv[]);
 
-  bitset<_NCOL> bs[_NSENSOR][_NROW];
-  float ave_runlength[_NSENSOR];
+  bitset<NCOL> bs[NSENSOR][NROW];
+  float ave_runlength[NSENSOR];
 
  private:
 
@@ -44,48 +44,30 @@ public:
   int number_of_events;
 
   int max_count;
-  int max_count_sector1;
-  int max_count_sector2;
-  int max_count_sector3;
-  int max_count_sector4;
-  int max_count_sector5;
-  int max_count_sector6;
-  int max_count_sector7;
-  int max_count_sector8;
-  int max_count_sector9;
-  int max_count_sector10;
+  int max_count_sector[NRDO];
 
   int max_count_inner;
   int max_count_outer;
 
   int min_count;
-  int min_count_sector1;
-  int min_count_sector2;
-  int min_count_sector3;
-  int min_count_sector4;
-  int min_count_sector5;
-  int min_count_sector6;
-  int min_count_sector7;
-  int min_count_sector8;
-  int min_count_sector9;
-  int min_count_sector10;
+  int min_count_sector[NRDO];
 
   int min_count_inner;
   int min_count_outer;
 
-  int count_hits_inner[10][10];
-  int count_hits_outer[30][10];
-  int count_length_inner[10][10];
-  int count_length_outer[30][10];
+  int count_hits_inner[10][NRDO];
+  int count_hits_outer[30][NRDO];
+  int count_length_inner[10][NRDO];
+  int count_length_outer[30][NRDO];
 
   map<int,double> *AverageRunLength;
   map<int,int> *LadderCount;
   map<int,int> *LadderMap;
   
-  int sensor_hits[10][40];
-  int sensor_hit_frequency[10][40];
-  int sensor_hit_frequency_SE[10][40];
-  double avg_run_length[10][40];
+  int sensor_hits[NRDO][NSENSOR];
+  int sensor_hit_frequency[NRDO][NSENSOR];
+  int sensor_hit_frequency_SE[NRDO][NSENSOR];
+  double avg_run_length[NRDO][NSENSOR];
 
   void IncrementMultiplicity(int sensor_number,int row_count);
   int WhichLadder(int sector_number,int sensor_number);
@@ -112,32 +94,12 @@ public:
   union {
     TH1 *array[];
     struct {
-      //TH1 *myhisto;
-
       //Tab 1: Global Multiplicity
       TH1 *GlobalHitMultiplicity;
 
-      TH1 *GlobalHitMultiplicitySector1;
-      TH1 *GlobalHitMultiplicitySector2;
-      TH1 *GlobalHitMultiplicitySector3;
-      TH1 *GlobalHitMultiplicitySector4;
-      TH1 *GlobalHitMultiplicitySector5;
-      TH1 *GlobalHitMultiplicitySector6;
-      TH1 *GlobalHitMultiplicitySector7;
-      TH1 *GlobalHitMultiplicitySector8;
-      TH1 *GlobalHitMultiplicitySector9;
-      TH1 *GlobalHitMultiplicitySector10;
+      TH1 *GlobalHitMultiplicitySector[NRDO];
 
-      TH1 *ErrorCountSector1;
-      TH1 *ErrorCountSector2;
-      TH1 *ErrorCountSector3;
-      TH1 *ErrorCountSector4;
-      TH1 *ErrorCountSector5;
-      TH1 *ErrorCountSector6;
-      TH1 *ErrorCountSector7;
-      TH1 *ErrorCountSector8;
-      TH1 *ErrorCountSector9;
-      TH1 *ErrorCountSector10;
+      TH1 *ErrorCountSector[NRDO];
 
       //Tab 2: Hit Multiplicity
       TH1 *HitMultiplicityPerEvent;
