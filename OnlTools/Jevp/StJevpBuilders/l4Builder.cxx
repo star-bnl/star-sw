@@ -78,6 +78,17 @@ void l4Builder::initialize(int argc, char *argv[])
     cout << "Initialization ...(Timing begin)" << endl;
     timer.Start();
 
+    l4Builder me2;
+    struct stat64 st2;
+    sprintf(me2.Destindir_dat,"%s/HLT_paras","/a/l4jevp/client");   // /a/jevp/client
+ if(stat64(me2.Destindir_dat, &st2) == 0) {
+        LOG(DBG,"%s exist.\n", me2.Destindir_dat);
+    } else {
+        LOG(DBG,"%s does not exist. Create.\n", me2.Destindir_dat);
+        if(mkdir(me2.Destindir_dat, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) LOG(DBG,"mkdir() error");
+    }
+
+
     index = 0;
     runnumber = 0;
     pi = 3.1415927;
@@ -374,7 +385,7 @@ void l4Builder::stoprun(daqReader *rdr)
     hDcaXy_UPC->Fit(func, "EMR", "", maxVal_UPC - 1.8, maxVal_UPC + 1.8);
 
     char OutParas[256];
-    sprintf(OutParas, "%s/%d.dat", Destindir_dat, runnumber);//qiao
+    sprintf(OutParas, "%s/%d.dat", "/a/l4jevp/client/HLT_paras", runnumber);//qiao
     ofstream outstream;
     outstream.open(OutParas);
     outstream << "beamX" << "    " << BeamX << endl;
@@ -391,7 +402,7 @@ void l4Builder::stoprun(daqReader *rdr)
     string paraname;
     int icount = 100;
     for(int i = 0; i < 20000; i++) {
-        sprintf(inum, "%s/%i.dat", Destindir_dat, tmpRunNum);//qiao
+        sprintf(inum, "%s/%i.dat", "/a/l4jevp/client/HLT_paras", tmpRunNum);//qiao
         sprintf(label, "%i", tmpRunNum);
         tmpRunNum--;
 
@@ -560,14 +571,14 @@ void l4Builder::main(int argc, char *argv[])
         printf("%s does not exist. Create.\n", me.Destindir);
         if(mkdir(me.Destindir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) perror("mkdir() error");
     }
-    struct stat64 st2;
+/*    struct stat64 st2;
     sprintf(me.Destindir_dat,"%s/HLT_paras","/a/l4jevp/client");   // /a/jevp/client
  if(stat64(me.Destindir_dat, &st2) == 0) {
         printf("%s exist.\n", me.Destindir_dat);
     } else {
         printf("%s does not exist. Create.\n", me.Destindir_dat);
         if(mkdir(me.Destindir_dat, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) perror("mkdir() error");
-    }
+    }*/
 
     //-------------------
     me.Main(argc, argv);
