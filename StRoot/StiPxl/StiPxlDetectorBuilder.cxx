@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.54 2014/04/02 04:11:58 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.55 2014/04/03 15:59:27 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -445,29 +445,30 @@ void StiPxlDetectorBuilder::buildSimplePlane()
       LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
       StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
+
+      // The created Sti detectors share the same shape and material
+      // Access last added volume
+      int row = getNRows() - 1;
+      int sector = 0;
+      StiDetector *stiDetector = getDetector(row, sector);
+      stiDetector->setIsOn(true);
+   
+      StiMaterial *mat = stiDetector->getMaterial();
+      // Set density to 2 g/cm^3
+      mat->set(mat->getName(), mat->getZ(), mat->getA(), 2., mat->getRadLength(), mat->getIonization());
+   
+      // Replace the original StiElossCalculator with one based on the modified material
+      StiElossCalculator *elossCalculator = stiDetector->getElossCalculator();
+      delete elossCalculator;
+      stiDetector->setElossCalculator(new StiElossCalculator(mat->getZOverA(), mat->getIonization(), mat->getA(), mat->getZ(), mat->getDensity()));
+   
+      // Adjust the volume position by placing it at z=0
+      StiPlacement *stiPlacement = stiDetector->getPlacement();
+      stiPlacement->setZcenter(0);
+   
+      StiPlanarShape *stiShape = (StiPlanarShape*) stiDetector->getShape();
+      stiShape->setThickness(2); // set thickness to 2 cm
    }
-
-   // The created Sti detectors share the same shape and material
-   // Access last added volume
-   int row = getNRows() - 1;
-   int sector = 0;
-   StiDetector *stiDetector = getDetector(row, sector);
-   stiDetector->setIsOn(true);
-
-   StiMaterial *mat = stiDetector->getMaterial();
-   mat->set(mat->getName(), mat->getZ(), mat->getA(), mat->getDensity()*10, mat->getRadLength(), mat->getIonization());
-
-   // Replace the original StiElossCalculator with one based on the modified material
-   StiElossCalculator *elossCalculator = stiDetector->getElossCalculator();
-   delete elossCalculator;
-   stiDetector->setElossCalculator(new StiElossCalculator(mat->getZOverA(), mat->getIonization(), mat->getA(), mat->getZ(), mat->getDensity()));
-
-   // Adjust the volume position by placing it at z=0
-   StiPlacement *stiPlacement = stiDetector->getPlacement();
-   stiPlacement->setZcenter(0);
-
-   StiPlanarShape *stiShape = (StiPlanarShape*) stiDetector->getShape();
-   stiShape->setHalfWidth(stiShape->getHalfWidth()*10);
 }
 
 
