@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.7 2013/05/23 03:04:10 perev Exp $
+// $Id: StMCStepping.cxx,v 1.8 2014/04/03 21:55:55 perev Exp $
 //
 //
 // Class StMCStepping
@@ -244,11 +244,11 @@ void StMCStepping::RecovEloss()
     if (fEdep<=0) 	break;
     double dL = fCurrentLength-fLastLength;
     if (dL<1e-5) 	break;
-    double cL0 = sqrt((1.-fLastVect[kDz])*(1+fLastVect[kDz]));
-    double cL1 = sqrt((1.-     vout[kDz])*(1+     vout[kDz]));
+    double cL0 = sqrt((1.-fLastVect[kDz])*(1+fLastVect[kDz]));		//cos(Lambda0)
+    double cL1 = sqrt((1.-     vout[kDz])*(1+     vout[kDz]));		//cos(Lambda1)
     double ang = ((vout[kDy]-fLastVect[kDy])*fLastVect[kDx]
-               -  (vout[kDx]-fLastVect[kDx])*fLastVect[kDy])/(cL0*cL1);
-    ang = (fabs(ang)<0.1)? ang*(1.-ang*ang/6)  :  asin(ang);
+               -  (vout[kDx]-fLastVect[kDx])*fLastVect[kDy])/(cL0*cL1);	//sin(dAng)
+    ang = (fabs(ang)<0.1)? ang*(1.-ang*ang/6)  :  asin(ang);		//dAng
     double dLxy = dL*cL1;
     double Rho = ang/dLxy;
     double dE = (fDir)? -fEdep:fEdep*2;
