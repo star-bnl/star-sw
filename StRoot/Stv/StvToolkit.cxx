@@ -70,18 +70,16 @@ StvTrack *StvToolkit::GetTrack()
 {
   if (!mTrackFactory) {
     mTrackFactory = (StvTrackFactory*)StvTrackFactory::myInstance();
-    mTrackFactory->setMaxIncrementCount(4000000);
+    mTrackFactory->setMaxIncrementCount(40000);
   }
   return mTrackFactory->getInstance();	
 }
 //_____________________________________________________________________________
 StvELossTrak *StvToolkit::GetELossTrak()
 {
-return new StvELossTrak(); ///?????
-
   if (!mELossTrakFactory) {
     mELossTrakFactory = (StvELossTrakFactory*)StvELossTrakFactory::myInstance();
-    mELossTrakFactory->setMaxIncrementCount(4000000);
+    mELossTrakFactory->setMaxIncrementCount(1000000);
   }
   return mELossTrakFactory->getInstance();	
 }
@@ -93,7 +91,6 @@ void StvToolkit::FreeTrack(StvTrack *&stiTrack)
 //_____________________________________________________________________________
 void StvToolkit::FreeELossTrak(StvELossTrak *&stiELossTrak)
 {
-  delete stiELossTrak; stiELossTrak=0; return;////????
   StvELossTrakFactory::Free(stiELossTrak);	stiELossTrak=0;
 }
 //_____________________________________________________________________________
