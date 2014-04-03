@@ -29,7 +29,6 @@ class ssdBuilder : public JevpPlotSet {
   void FindStripNumber(int &strip);  
   void fillSumHistos();
   int evtCt; //all event number 
-  int evtTrue;  //real event number(removed some bad data)
   //SSD paraneters
   static const int nSide           = 2;  
   static const int nRdo            = 5; 

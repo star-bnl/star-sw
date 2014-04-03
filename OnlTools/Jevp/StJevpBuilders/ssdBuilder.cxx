@@ -21,7 +21,7 @@
 
 ClassImp(ssdBuilder);
 
-ssdBuilder::ssdBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0),evtTrue(0) {
+ssdBuilder::ssdBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
   plotsetname = (char *)"ssd";
 }
 
@@ -72,7 +72,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hAdcStrip[ns][nl]->GetXaxis()->SetTitle("Strip #");
 	  hAdcStrip[ns][nl]->GetYaxis()->SetTitle("ADC value");
 	  hAdcStrip[ns][nl]->GetXaxis()->SetNdivisions(96,0,0,false);
-	  //hAdcStrip[ns][nl]->GetXaxis()->SetNdivisions(nWaferPerLadder,false);
+
 	  hAdcStrip[ns][nl]->SetStats(false);//true
 	  //------
 	  sprintf( buffer, "ADCEvent_%d_%d",ns,nl);
@@ -80,7 +80,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	    sprintf( buffer2, "ADC Vs. Event number, P-side Ladder: %d",nl);
 	  else 
 	    sprintf( buffer2, "ADC Vs. Event number, N-side Ladder: %d",nl);
-          //hAdcStrip[ns][nlx]->GetYaxis()->SetTitleOffset(1.1);	  
+
 	  hAdcEvent[ns][nl] = new TH2I(buffer, buffer2,12288,0,12288,nBinsY/4,0,nBinsY);
 	  hAdcEvent[ns][nl]->GetXaxis()->SetTitle("Event #");
 	  hAdcEvent[ns][nl]->GetYaxis()->SetTitle("ADC value");
@@ -156,6 +156,15 @@ void ssdBuilder::startrun(daqReader *rdr)
 {
   LOG ( DBG, "ssdBuilder starting run #%d", rdr->run );
   resetAllPlots();
+ 
+  mSector = 0;
+  mRDO    = 0;
+  mSide   = 0;
+  mFiber  = 0;
+  mLadder = 0;
+  mWafer  = 0;
+  mStrip  = 0;
+  evtCt   = 0; 
   //errorMsg->SetText("No Error Message");    
 
 }
@@ -187,12 +196,14 @@ void ssdBuilder::event(daqReader *rdr) {
       if ( mFiber < 0 || mFiber > 7 )        continue;      //fiber 0-7
       if ( mSector < 1 || mSector > 2 )        continue;      //sector 1-2
       if ( mRDO < 1 || mRDO > 5 )        continue;  //RDO 1-5
-      LOG(DBG,"##SST ADC: Sector %d , RDO %d , Fiber %d",mSector,mRDO,mFiber);
+      LOG(DBG,"SST ADC: Sector %d , RDO %d , Fiber %d",mSector,mRDO,mFiber);
       u_int maxI = dd->ncontent;    
       FindLadderSide(mRDO,mFiber,mLadder,mSide);   
-     if(evtCt==0)
-       hAdcEvent[mSide][mLadder]->GetXaxis()->SetRangeUser(0,500);
-      LOG(DBG,"##SST ADC: Ladder %d , side %d",mLadder,mSide);
+
+      if(evtCt==0)
+	hAdcEvent[mSide][mLadder]->GetXaxis()->SetRangeUser(0,500);
+
+      LOG(DBG,"SST ADC: Ladder %d , side %d",mLadder,mSide);
       
       for ( u_int i=0; i<maxI; i++ ) {
   
@@ -239,6 +250,10 @@ void ssdBuilder::event(daqReader *rdr) {
           
       FindLadderSide(mRDO,mFiber,mLadder,mSide);   
       LOG(DBG,"##SST ADC: Ladder %d , side %d",mLadder,mSide);
+      //change histograms arguments to suite pedestal run.
+      hAdcEvent[mSide][mLadder]->GetYaxis()->SetRangeUser(0,100);
+      hAdcEvent[mSide][mLadder]->GetXaxis()->SetTitle("strip #");
+      hAdcEvent[mSide][mLadder]->GetYaxis()->SetTitle("rms");
            
       for ( u_int i=0; i<maxI; i++ )
 	{
@@ -255,11 +270,7 @@ void ssdBuilder::event(daqReader *rdr) {
 		  hLadderWafer[0]->Fill(mLadder,h);
 		if(mSide==1)
 		  hLadderWafer[1]->Fill(mLadder,h);
-	
 		hAdcStrip[mSide][mLadder]->Fill((s+h*nStripPerWafer),mPed);
-		hAdcEvent[mSide][mLadder]->GetYaxis()->SetRangeUser(0,100);
-		hAdcEvent[mSide][mLadder]->GetXaxis()->SetTitle("strip #");
-		hAdcEvent[mSide][mLadder]->GetYaxis()->SetTitle("rms");
 	        hAdcEvent[mSide][mLadder]->Fill((s+h*nStripPerWafer),mRms);
 		//in pedestal mode, the hAdcEvent is RMS distribution.
 	      }
@@ -274,12 +285,13 @@ void ssdBuilder::event(daqReader *rdr) {
 void ssdBuilder::stoprun(daqReader *rdr) 
 {
   mSector = 0;
-  mRDO = 0;
-  mSide = 0;
-  mFiber = 0;
+  mRDO    = 0;
+  mSide   = 0;
+  mFiber  = 0;
   mLadder = 0;
-  mWafer = 0;
-  mStrip = 0;
+  mWafer  = 0;
+  mStrip  = 0;
+  evtCt   = 0;
 }
 //-----------------------------
 void ssdBuilder::main(int argc, char *argv[])
