@@ -554,15 +554,15 @@ void l4Builder::main(int argc, char *argv[])
 
     struct stat64 st;
     sprintf(me.Destindir, "%s/output", me.Currentdir);//qiao
-    if(stat64(me.Destindir, &st) == 0) {
+ if(stat64(me.Destindir, &st) == 0) {
         printf("%s exist.\n", me.Destindir);
     } else {
         printf("%s does not exist. Create.\n", me.Destindir);
         if(mkdir(me.Destindir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) perror("mkdir() error");
     }
     struct stat64 st2;
-    sprintf(me.Destindir_dat,"%s/HLT_paras",me.clientdatadir);   
-     if(stat64(me.Destindir_dat, &st2) == 0) {
+    sprintf(me.Destindir_dat,"%s/HLT_paras","/a/l4jevp/client");   // /a/jevp/client
+ if(stat64(me.Destindir_dat, &st2) == 0) {
         printf("%s exist.\n", me.Destindir_dat);
     } else {
         printf("%s does not exist. Create.\n", me.Destindir_dat);
@@ -2153,7 +2153,7 @@ void l4Builder::defineHeavyFragmentPlots()
     ph = new PlotHisto();
     ph->histo = hHFM_dEdx;
     HeavyFragmentPlots[index]->addHisto(ph);
-    hdEdx = new TH2F("dEdx", "dEdx", 500, -5, 5, 300, 0, 3.e-5);
+//    hdEdx = new TH2F("dEdx", "dEdx", 500, -5, 5, 300, 0, 3.e-5);
     ph = new PlotHisto();
     ph->histo = hdEdx;
     HeavyFragmentPlots[index]->addHisto(ph);
