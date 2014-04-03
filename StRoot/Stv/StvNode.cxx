@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.32 2014/04/01 02:46:16 perev Exp $
+ * $Id: StvNode.cxx,v 1.33 2014/04/03 22:03:46 perev Exp $
  *
  * /author Victor Perev
  */
@@ -218,7 +218,7 @@ int StvNode::Check(const char *tit, int dirs) const
 int StvNode::ResetELoss(const StvNodePars &pars,int dir)
 {
 static const double kSmaP      =0.01;
-static const double kBigP      =3     	,kSmaDiff=1e-4;
+static const double kBigP      =3     	,kSmaDiff=1e-2;
 
   if (!mELoss) return 0;
   double p = pars.getP(); 
