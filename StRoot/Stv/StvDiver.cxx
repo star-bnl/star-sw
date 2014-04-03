@@ -48,13 +48,12 @@ int StvDiver::Init()
 static StvToolkit* kit = StvToolkit::Inst();
   gMyRandom = new MyRandom;
   mHelix = new THelixTrack;
-  mELoss = kit->GetELossTrak();
+  mELoss = 0;
   StVMCApplication *app = (StVMCApplication*)TVirtualMCApplication::Instance();
   assert(app);
   mSteps =  ( StvMCStepping*)app->GetStepping();
   assert(mSteps);
   mSteps->Set(mHelix);
-  mSteps->Set(mELoss);
   mGen = (StvMCPrimaryGenerator*)app->GetPrimaryGenerator();
   mFld = (StvMCField*           )app->GetField();
   mSteps->Set(mFld);
@@ -107,7 +106,7 @@ static StvToolkit* kit = StvToolkit::Inst();
 
   mFld->SetHz(mInpPars->_hz);	//Set initial value of mag field
   assert(fabs(mInpPars->_hz)<0.01);
-  if (!mELoss) {mELoss = kit->GetELossTrak(); mSteps->Set(mELoss);}
+  mELoss = kit->GetELossTrak(); mSteps->Set(mELoss);
   mELoss->Reset(mDir);
   int myExit = 0;
   mInpPars->get(mHelix);

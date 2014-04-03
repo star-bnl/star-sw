@@ -255,13 +255,16 @@ static float gate[4]={myConst->mCoeWindow,myConst->mCoeWindow
     curNode->mLen = (!idir)? totLen:-totLen;
 		// Set prediction
 
-    StvELossTrak *eld = 0;
-    if (par[0].getP2() < kBigMom2) eld = mDive->TakeELoss();
-    if (eld) {
+    StvELossTrak *eld = mDive->TakeELoss();
+    if (par[0].getP2() < kBigMom2) {
       innNode->SetELoss(eld,idir);
       err[0].Add(eld,par[0],0);
       err[0].Recov();
-    }
+    } else {
+      kit->FreeELossTrak(eld);
+    }      
+
+
     curNode->SetXDive(par[0]);
     curNode->SetPre(par[0],err[0],0);
     innNode->SetDer(derivFit,idir);
@@ -373,11 +376,12 @@ static StvToolkit *kit = StvToolkit::Inst();
   tk->push_front(dcaNode);
   dcaNode->mLen =  start->mLen + mDive->GetLength();
 	       // Set prediction
-  StvELossTrak *eld = 0;
+  StvELossTrak *eld = mDive->TakeELoss();
   if (dcaPars.getP2()<kBigMom) {
-    eld = mDive->TakeELoss();
     dcaNode->SetELoss(eld,0);
     dcaErrs.Add(eld,dcaPars,0);
+  } else {
+    kit->FreeELossTrak(eld);
   }
   dcaNode->SetPre(dcaPars,dcaErrs,0);
   dcaNode->SetDer(dcaDers,0);
