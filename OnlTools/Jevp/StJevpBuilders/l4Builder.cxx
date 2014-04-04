@@ -332,166 +332,177 @@ void l4Builder::startrun(daqReader *rdr)
 
 void l4Builder::stoprun(daqReader *rdr)
 {
-    printf("Number of events processed in daq file = %d\n", eventCounter);
+  //printf("Number of events processed in daq file = %d\n", eventCounter);
+  LOG(WARN, "Number of events processed in daq file = %d\n", eventCounter);
+  
+  gStyle->SetOptStat(000000);
+  gStyle->SetStatW(0.13);
+  gStyle->SetStatH(0.08);
+  gStyle->SetOptFit(111);
 
-    gStyle->SetOptStat(000000);
-    gStyle->SetStatW(0.13);
-    gStyle->SetStatH(0.08);
-    gStyle->SetOptFit(111);
+  hDiElectronInvMassTpxEmc->SetLineColor(4);
+  hDiElectronInvMassFullRange->SetLineColor(4);
+  hDiElectronInvMassCut->SetLineColor(4);
+  hDiElectronInvMassFullRange_UPC->SetLineColor(4);
+  hDiPionInvMassFullRange->SetLineColor(4);
+  hDiMuonInvMassFullRange->SetLineColor(4);
+  hDiMuonInvMassTpxCut->SetLineColor(4);
 
-    hDiElectronInvMassTpxEmc->SetLineColor(4);
-    hDiElectronInvMassFullRange->SetLineColor(4);
-    hDiElectronInvMassCut->SetLineColor(4);
-    hDiElectronInvMassFullRange_UPC->SetLineColor(4);
-    hDiPionInvMassFullRange->SetLineColor(4);
-    hDiMuonInvMassFullRange->SetLineColor(4);
-    hDiMuonInvMassTpxCut->SetLineColor(4);
+  float low = -13.12;
+  float high = -12.8;
+  TF1 *fit = new TF1("fit", "gaus", low, high);
+  fit->SetParName(0, "Apt");
+  fit->SetParName(1, "Pos");
+  fit->SetParName(2, "Sig");
+  //      fit->SetParameter(0,10000);
+  fit->SetParameter(1, -12.92);
+  fit->SetParameter(2, 0.08);
+  hLn_dEdx->Fit(fit, "EMR");
 
-    float low = -13.12;
-    float high = -12.8;
-    TF1 *fit = new TF1("fit", "gaus", low, high);
-    fit->SetParName(0, "Apt");
-    fit->SetParName(1, "Pos");
-    fit->SetParName(2, "Sig");
-    //      fit->SetParameter(0,10000);
-    fit->SetParameter(1, -12.92);
-    fit->SetParameter(2, 0.08);
-    hLn_dEdx->Fit(fit, "EMR");
+  TF1 *fit_UPC = new TF1("fit_UPC", "gaus", low, high);
+  fit_UPC->SetParName(0, "Apt");
+  fit_UPC->SetParName(1, "Pos");
+  fit_UPC->SetParName(2, "Sig");
+  //      fit->SetParameter(0,10000);
+  fit_UPC->SetParameter(1, -12.92);
+  fit_UPC->SetParameter(2, 0.08);
+  hLn_dEdx_UPC->Fit(fit_UPC, "EMR");
 
-    TF1 *fit_UPC = new TF1("fit_UPC", "gaus", low, high);
-    fit_UPC->SetParName(0, "Apt");
-    fit_UPC->SetParName(1, "Pos");
-    fit_UPC->SetParName(2, "Sig");
-    //      fit->SetParameter(0,10000);
-    fit_UPC->SetParameter(1, -12.92);
-    fit_UPC->SetParameter(2, 0.08);
-    hLn_dEdx_UPC->Fit(fit_UPC, "EMR");
+  TF1 *func = new TF1("func", "gaus", -6., 6.);
+  func->SetParName(0, "Apt");
+  func->SetParName(1, "Mean");
+  func->SetParName(2, "Sigma");
+  func->SetParameter(1, 0.);
+  func->SetParameter(2, 0.4);
 
-    TF1 *func = new TF1("func", "gaus", -6., 6.);
-    func->SetParName(0, "Apt");
-    func->SetParName(1, "Mean");
-    func->SetParName(2, "Sigma");
-    func->SetParameter(1, 0.);
-    func->SetParameter(2, 0.4);
+  int maxBin = hDcaXy->GetMaximumBin();
+  double maxVal = -6. + 0.1 * maxBin;
+  hDcaXy->Fit(func, "EMR", "", maxVal - 1.8, maxVal + 1.8);
 
-    int maxBin = hDcaXy->GetMaximumBin();
-    double maxVal = -6. + 0.1 * maxBin;
-    hDcaXy->Fit(func, "EMR", "", maxVal - 1.8, maxVal + 1.8);
+  double meanpar = func->GetParameter(1);
+  //   double errpar = func->GetParError(1);
+  int maxBin_UPC = hDcaXy_UPC->GetMaximumBin();
+  double maxVal_UPC = -6. + 0.1 * maxBin_UPC;
+  hDcaXy_UPC->Fit(func, "EMR", "", maxVal_UPC - 1.8, maxVal_UPC + 1.8);
 
-    double meanpar = func->GetParameter(1);
-    //   double errpar = func->GetParError(1);
-    int maxBin_UPC = hDcaXy_UPC->GetMaximumBin();
-    double maxVal_UPC = -6. + 0.1 * maxBin_UPC;
-    hDcaXy_UPC->Fit(func, "EMR", "", maxVal_UPC - 1.8, maxVal_UPC + 1.8);
+  char OutParas[256];
+  sprintf(OutParas, "%s/HLT_paras/%d.dat", clientdatadir, runnumber);//qiao
+  ofstream outstream;
+  outstream.open(OutParas);
 
-    char OutParas[256];
-    sprintf(OutParas, "%s/%d.dat", "/a/l4jevp/client/HLT_paras", runnumber);//qiao
-    ofstream outstream;
-    outstream.open(OutParas);
-    outstream << "beamX" << "    " << BeamX << endl;
-    outstream << "beamY" << "    " << BeamY << endl;
-    outstream << "innerGain" << "    " << innerGainPara << endl;
-    outstream << "outerGain" << "    " << outerGainPara << endl;
-    outstream << "dcaXy" << "    " << meanpar << endl;
-    outstream.close();
+  if(outstream.fail()) {
+    LOG(ERR, "Open failed for file %s!", OutParas);
+  }
+  
+  outstream << "beamX" << "    " << BeamX << endl;
+  outstream << "beamY" << "    " << BeamY << endl;
+  outstream << "innerGain" << "    " << innerGainPara << endl;
+  outstream << "outerGain" << "    " << outerGainPara << endl;
+  outstream << "dcaXy" << "    " << meanpar << endl;
 
-    int tmpRunNum = runnumber;
-    char inum[256];
-    char label[256];
-    ifstream indata;
-    string paraname;
-    int icount = 100;
-    for(int i = 0; i < 20000; i++) {
-        sprintf(inum, "%s/%i.dat", "/a/l4jevp/client/HLT_paras", tmpRunNum);//qiao
-        sprintf(label, "%i", tmpRunNum);
-        tmpRunNum--;
+  if(outstream.fail()) {
+    LOG(ERR, "Writing failed for file %s!", OutParas);
+  }
 
-        double beamX;
-        double beamY;
-        double innerGain;
-        double outerGain;
-        double dcaXy;
-        indata.open(inum);
-        if(indata.good()) {
-            while(!indata.eof()) {
-                indata >> paraname;
-                if(paraname == "beamX") indata >> beamX;
-                if(paraname == "beamY") indata >> beamY;
-                if(paraname == "innerGain") indata >> innerGain;
-                if(paraname == "outerGain") indata >> outerGain;
-                if(paraname == "dcaXy") indata >> dcaXy;
-            }
-        } else {
-            continue;
-        }
-        indata.close();
-        indata.clear();
+  outstream.close();
 
-        hBeamX->SetBinContent(icount, beamX);
-        hBeamY->SetBinContent(icount, beamY);
-        if(innerGain > 0) hInnerGain->SetBinContent(icount, innerGain);
-        if(outerGain > 0) hOuterGain->SetBinContent(icount, outerGain);
-        hMeanDcaXy->SetBinContent(icount, dcaXy);
-        if((icount - 1) % 5 == 0) {
-            hBeamX->GetXaxis()->SetBinLabel(icount, label);
-            hBeamY->GetXaxis()->SetBinLabel(icount, label);
-            hInnerGain->GetXaxis()->SetBinLabel(icount, label);
-            hOuterGain->GetXaxis()->SetBinLabel(icount, label);
-            hMeanDcaXy->GetXaxis()->SetBinLabel(icount, label);
+  int tmpRunNum = runnumber;
+  char inum[256];
+  char label[256];
+  ifstream indata;
+  string paraname;
+  int icount = 100;
+  for(int i = 0; i < 20000; i++) {
+    sprintf(inum, "%s/%i.dat", "/a/l4jevp/client/HLT_paras", tmpRunNum);//qiao
+    sprintf(label, "%i", tmpRunNum);
+    tmpRunNum--;
 
-            hBeamX->GetXaxis()->LabelsOption("d");
-            hInnerGain->GetXaxis()->LabelsOption("d");
-            hMeanDcaXy->GetXaxis()->LabelsOption("d");
-        }
-        icount--;
-        if(icount <= 0) break;
+    double beamX;
+    double beamY;
+    double innerGain;
+    double outerGain;
+    double dcaXy;
+    indata.open(inum);
+    if(indata.good()) {
+      while(!indata.eof()) {
+	indata >> paraname;
+	if(paraname == "beamX") indata >> beamX;
+	if(paraname == "beamY") indata >> beamY;
+	if(paraname == "innerGain") indata >> innerGain;
+	if(paraname == "outerGain") indata >> outerGain;
+	if(paraname == "dcaXy") indata >> dcaXy;
+      }
+    } else {
+      continue;
     }
+    indata.close();
+    indata.clear();
 
-    double lowestB;
-    double highestB;
-    double lowestBeamX = hBeamX->GetBinContent(hBeamX->GetMinimumBin());
-    double lowestBeamY = hBeamY->GetBinContent(hBeamY->GetMinimumBin());
-    double highestBeamX = hBeamX->GetBinContent(hBeamX->GetMaximumBin());
-    double highestBeamY = hBeamY->GetBinContent(hBeamY->GetMaximumBin());
-    if(lowestBeamX > lowestBeamY) lowestB = lowestBeamY;
-    else lowestB = lowestBeamX;
-    if(highestBeamX > highestBeamY) highestB = highestBeamX;
-    else highestB = highestBeamY;
-    if(lowestB < 0) lowestB = lowestB * 1.4;
-    else lowestB = lowestB * 0.8;
-    if(highestB < 0) highestB = highestB * 0.8;
-    else highestB = highestB * 1.4;
-    hBeamX->GetYaxis()->SetRangeUser(lowestB, highestB);
-    hBeamY->GetYaxis()->SetRangeUser(lowestB, highestB);
-    double lowestG;
-    double highestG;
-    double lowestInner = hInnerGain->GetBinContent(hInnerGain->GetMinimumBin());
-    double lowestOuter = hOuterGain->GetBinContent(hOuterGain->GetMinimumBin());
-    double highestInner = hInnerGain->GetBinContent(hInnerGain->GetMaximumBin());
-    double highestOuter = hOuterGain->GetBinContent(hOuterGain->GetMaximumBin());
-    if(lowestInner > lowestOuter) lowestG = lowestOuter;
-    else lowestG = lowestInner;
-    if(highestInner > highestOuter) highestG = highestInner;
-    else highestG = highestOuter;
-    lowestG = lowestG * 0.6;
-    highestG = highestG * 1.4;
-    hInnerGain->GetYaxis()->SetRangeUser(lowestG, highestG);
-    hOuterGain->GetYaxis()->SetRangeUser(lowestG, highestG);
-    double lowestD;
-    double highestD;
-    lowestD = hMeanDcaXy->GetBinContent(hMeanDcaXy->GetMinimumBin());
-    highestD = hMeanDcaXy->GetBinContent(hMeanDcaXy->GetMaximumBin());
-    if(lowestD < 0) lowestD = lowestD * 1.2;
-    else lowestD = lowestD * 0.8;
-    if(highestD < 0) highestD = highestD * 0.8;
-    else highestD = highestD * 1.2;
-    hMeanDcaXy->GetYaxis()->SetRangeUser(lowestD, highestD);
+    hBeamX->SetBinContent(icount, beamX);
+    hBeamY->SetBinContent(icount, beamY);
+    if(innerGain > 0) hInnerGain->SetBinContent(icount, innerGain);
+    if(outerGain > 0) hOuterGain->SetBinContent(icount, outerGain);
+    hMeanDcaXy->SetBinContent(icount, dcaXy);
+    if((icount - 1) % 5 == 0) {
+      hBeamX->GetXaxis()->SetBinLabel(icount, label);
+      hBeamY->GetXaxis()->SetBinLabel(icount, label);
+      hInnerGain->GetXaxis()->SetBinLabel(icount, label);
+      hOuterGain->GetXaxis()->SetBinLabel(icount, label);
+      hMeanDcaXy->GetXaxis()->SetBinLabel(icount, label);
 
-    writeHistogram();
-    timer.Stop();
-    printf("Stopping run #%d\n", runnumber);
-    cout << "Timing end. " << "\n" << "Cpu time: " << timer.CpuTime()
-         << " Real time: " << timer.RealTime() << endl;
+      hBeamX->GetXaxis()->LabelsOption("d");
+      hInnerGain->GetXaxis()->LabelsOption("d");
+      hMeanDcaXy->GetXaxis()->LabelsOption("d");
+    }
+    icount--;
+    if(icount <= 0) break;
+  }
+
+  double lowestB;
+  double highestB;
+  double lowestBeamX = hBeamX->GetBinContent(hBeamX->GetMinimumBin());
+  double lowestBeamY = hBeamY->GetBinContent(hBeamY->GetMinimumBin());
+  double highestBeamX = hBeamX->GetBinContent(hBeamX->GetMaximumBin());
+  double highestBeamY = hBeamY->GetBinContent(hBeamY->GetMaximumBin());
+  if(lowestBeamX > lowestBeamY) lowestB = lowestBeamY;
+  else lowestB = lowestBeamX;
+  if(highestBeamX > highestBeamY) highestB = highestBeamX;
+  else highestB = highestBeamY;
+  if(lowestB < 0) lowestB = lowestB * 1.4;
+  else lowestB = lowestB * 0.8;
+  if(highestB < 0) highestB = highestB * 0.8;
+  else highestB = highestB * 1.4;
+  hBeamX->GetYaxis()->SetRangeUser(lowestB, highestB);
+  hBeamY->GetYaxis()->SetRangeUser(lowestB, highestB);
+  double lowestG;
+  double highestG;
+  double lowestInner = hInnerGain->GetBinContent(hInnerGain->GetMinimumBin());
+  double lowestOuter = hOuterGain->GetBinContent(hOuterGain->GetMinimumBin());
+  double highestInner = hInnerGain->GetBinContent(hInnerGain->GetMaximumBin());
+  double highestOuter = hOuterGain->GetBinContent(hOuterGain->GetMaximumBin());
+  if(lowestInner > lowestOuter) lowestG = lowestOuter;
+  else lowestG = lowestInner;
+  if(highestInner > highestOuter) highestG = highestInner;
+  else highestG = highestOuter;
+  lowestG = lowestG * 0.6;
+  highestG = highestG * 1.4;
+  hInnerGain->GetYaxis()->SetRangeUser(lowestG, highestG);
+  hOuterGain->GetYaxis()->SetRangeUser(lowestG, highestG);
+  double lowestD;
+  double highestD;
+  lowestD = hMeanDcaXy->GetBinContent(hMeanDcaXy->GetMinimumBin());
+  highestD = hMeanDcaXy->GetBinContent(hMeanDcaXy->GetMaximumBin());
+  if(lowestD < 0) lowestD = lowestD * 1.2;
+  else lowestD = lowestD * 0.8;
+  if(highestD < 0) highestD = highestD * 0.8;
+  else highestD = highestD * 1.2;
+  hMeanDcaXy->GetYaxis()->SetRangeUser(lowestD, highestD);
+
+  writeHistogram();
+  timer.Stop();
+  printf("Stopping run #%d\n", runnumber);
+  cout << "Timing end. " << "\n" << "Cpu time: " << timer.CpuTime()
+       << " Real time: " << timer.RealTime() << endl;
 };
 
 void l4Builder::writeHistogram()

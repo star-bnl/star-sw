@@ -288,6 +288,8 @@ void JevpServer::parseArgs(int argc, char *argv[])
   log_port = 8004;
   log_level = (char *)WARN;
 
+  clientdatadir =  "/a/jevp/client";
+  
   for(int i=1;i<argc;i++) {
     if(strcmp(argv[i], "-dd")==0) {
       i++;
@@ -330,6 +332,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
       log_dest = "172.17.0.1";
       nodb = 0;
       myport = JEVP_PORT;
+      clientdatadir = (char *)"/a/l4jevp/client";
       basedir = (char *)"/RTScache/conf/l4jevp";
       pdfdir = (char *)"/a/l4jevp/pdf";
       refplotdir = (char *)"/a/l4jevp/refplots";
@@ -340,6 +343,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
       isL4 = 1;
       nodb = 0;
       myport = JEVP_PORT+10;
+      clientdatadir = (char *)"/a/l4jevp/client";
       basedir = (char *)"/RTScache/conf/l4jevp";
       pdfdir = (char *)"/a/l4jevp/pdf";
       refplotdir = (char *)"/a/l4jevp/refplots";
@@ -457,6 +461,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   while((curr = (JevpPlotSet *)next())) {
     LOG(NOTE, "init");
     curr->_initialize(argc, argv);
+    curr->clientdatadir = clientdatadir;
     LOG(NOTE, "init done");
   }
   CP;
@@ -813,6 +818,7 @@ void JevpServer::performStopRun()
   while((curr = (JevpPlotSet *)next())) {
     LOG(NOTE, "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
 	curr->getPlotSetName(), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
+    curr->stoprun(rdr);
     
     continue;
   }

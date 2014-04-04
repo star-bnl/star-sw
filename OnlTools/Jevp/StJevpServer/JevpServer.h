@@ -34,6 +34,7 @@ class JevpServer {
 
   int isL4;
 
+  char *clientdatadir;
   char *pdfdir;        // pdf dir
   char *rootfiledir;
   char *refplotdir;    // ref plot dir
