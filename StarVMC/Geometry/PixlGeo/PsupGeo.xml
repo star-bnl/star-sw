@@ -270,20 +270,22 @@ It is fairly complicated and will be approximated -->
 
 
 <!-- cable support ladder -->
-<Create block="PSCL"/>
-<Placement block="PSCL" x="-18.2+0.1" y="0" z="-(146+280.8)/2" />
-<Create block="PSCK"/>
-<Placement block="PSCK" x="-18.+2.7/2" y="-6.44" z="-(146+280.8)/2" />
-<Placement block="PSCK" x="-18.+2.7/2" y="+6.44" z="-(146+280.8)/2" />
+<Group     name="CableSupportGroup" />
+<Create    block="PSCL"/>
+<Placement block="PSCL" group="CableSupportGroup"  x="-18.2+0.1" y="0"      z="-(146+280.8)/2" />
+
+<Create    block="PSCK"/>
+<Placement block="PSCK" group="CableSupportGroup"  x="-18.+2.7/2" y="-6.44" z="-(146+280.8)/2" />
+<Placement block="PSCK" group="CableSupportGroup"  x="-18.+2.7/2" y="+6.44" z="-(146+280.8)/2" />
 
 <!-- BH ARM slide -->
-<Create block="PSAR"/>
+<Create    block="PSAR"/>
 <Placement block="PSAR" x="-18.+0.7/2" y="0" z="-(129.53+146.03)/2" />
-<Create block="PSAT"/>
+<Create    block="PSAT"/>
 <Placement block="PSAT" x="-18.+0.7+4.5/2." y="-6.8+0.55/2.0" z="-(129.53+146.03)/2" />
 <Placement block="PSAT" x="-18.+0.7+4.5/2." y="+6.8-0.55/2.0" z="-(129.53+146.03)/2" />
 
-<Create block="PSAS"/>
+<Create    block="PSAS"/>
 <Placement block="PSAS" x="-18.+0.35" y="-4.0" z="-148.53" />
 <Placement block="PSAS" x="-18.+0.35" y="+4.0" z="-148.53" />
 
@@ -424,11 +426,10 @@ It is fairly complicated and will be approximated -->
  </Placement>
 <!-- MTB cable in tray --> 
 
-<Create block="PSCS" />
- <Placement block="PSCS" x="-17.6" y="4.5" z="-213.3" >
- </Placement>
- <Placement block="PSCS" x="-17.6" y="4.5-4.6" z="-213.3" >
- </Placement>
+<Create    block="PSCS" />
+<Placement block="PSCS" group="CableSupportGroup" x="-17.6" y="4.5"     z="-213.3" />
+<Placement block="PSCS" group="CableSupportGroup" x="-17.6" y="4.5-4.6" z="-213.3" />
+
 <!-- MTB cable --> 
 
 <Create block="PSCO" />
@@ -442,11 +443,10 @@ It is fairly complicated and will be approximated -->
  </Placement>
 <!-- MTB cable in tray --> 
 
-<Create block="PSCT" />
- <Placement block="PSCT" x="-17.6" y="3.6" z="-216.7" >
- </Placement>
- <Placement block="PSCT" x="-17.6" y="3.6-4.6" z="-216.7" >
- </Placement>
+<Create    block="PSCT" />
+<Placement block="PSCT" group="CableSupportGroup" x="-17.6" y="3.6"     z="-216.7" />
+<Placement block="PSCT" group="CableSupportGroup" x="-17.6" y="3.6-4.6" z="-216.7" />
+
 <!-- MTB cable --> 
 
 <Create block="PSCP" />
@@ -461,11 +461,10 @@ It is fairly complicated and will be approximated -->
  </Placement>
 <!-- MTB cable in tray --> 
 
-<Create block="PSCU" />
- <Placement block="PSCU" x="-17.6" y="2.7" z="-220.1" >
- </Placement>
- <Placement block="PSCU" x="-17.6" y="2.7-4.6" z="-220.1" >
- </Placement>
+<Create    block="PSCU" />
+<Placement block="PSCU" group="CableSupportGroup" x="-17.6" y="2.7" z="-220.1" />
+<Placement block="PSCU" group="CableSupportGroup" x="-17.6" y="2.7-4.6" z="-220.1" />
+
 <!-- MTB cable --> 
 
 <Create block="PSCQ" />
@@ -479,11 +478,10 @@ It is fairly complicated and will be approximated -->
  </Placement>
 <!-- MTB cable in tray --> 
 
-<Create block="PSCV" />
- <Placement block="PSCV" x="-17.6" y="1.8" z="-223.5" >
- </Placement>
- <Placement block="PSCV" x="-17.6" y="1.8-4.6" z="-223.5" >
- </Placement>
+<Create    block="PSCV" />
+<Placement block="PSCV" group="CableSupportGroup" x="-17.6" y="1.8"     z="-223.5" />
+<Placement block="PSCV" group="CableSupportGroup" x="-17.6" y="1.8-4.6" z="-223.5" />
+
 <!-- MTB cable --> 
 
 <Create block="PSCR" />
@@ -497,11 +495,10 @@ It is fairly complicated and will be approximated -->
  </Placement>
 <!-- MTB cable in tray --> 
 
-<Create block="PSCW" />
- <Placement block="PSCW" x="-17.6" y="0.9" z="-226.9" >
- </Placement>
- <Placement block="PSCW" x="-17.6" y="0.9-4.6" z="-226.9" >
- </Placement>
+<Create    block="PSCW" />
+<Placement block="PSCW" group="CableSupportGroup" x="-17.6" y="0.9"     z="-226.9" />
+<Placement block="PSCW" group="CableSupportGroup" x="-17.6" y="0.9-4.6" z="-226.9" />
+
 
 
 <!-- MTB cable --> 
