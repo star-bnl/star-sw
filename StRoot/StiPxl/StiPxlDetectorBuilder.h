@@ -26,11 +26,12 @@ private:
 
    void buildInactiveVolumes();
    void buildSimpleBox();
+   void buildSimpleBox2();
    void buildSimplePlane();
    void buildSimpleTube();
    void buildSimpleTubeSector();
 
-   enum EGeomDebug {kNoDebug, kSimpleBox, kSimplePlane, kSimpleTube, kSimpleTubeSector};
+   enum EGeomDebug {kNoDebug, kSimpleBox, kSimpleBox2, kSimplePlane, kSimpleTube, kSimpleTubeSector};
 
    EGeomDebug mGeomDebug;
 };
