@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.56 2014/04/04 20:49:57 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.57 2014/04/04 20:50:04 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -364,7 +364,14 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
 
       LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+
       StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
+
+      // Access last added volume
+      int row = getNRows() - 1;
+      int sector = 0;
+      StiDetector *stiDetector = getDetector(row, sector);
+      stiDetector->setIsOn(true);
    }
 }
 
