@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.h,v 1.5 2014/01/28 19:29:44 qiuh Exp $
+ * $Id: StPxlRawHitMaker.h,v 1.6 2014/04/05 05:20:08 qiuh Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.h,v $
+ * Revision 1.6  2014/04/05 05:20:08  qiuh
+ * add Jtag file version print-out and some more warnings for data format errors
+ *
  * Revision 1.5  2014/01/28 19:29:44  qiuh
  * *** empty log message ***
  *
@@ -40,9 +43,10 @@ public:
    Int_t InitRun(Int_t runumber);
    void Clear(const Option_t * = "");
    Int_t Make();
+   Int_t Finish();
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitMaker.h,v 1.5 2014/01/28 19:29:44 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitMaker.h,v 1.6 2014/04/05 05:20:08 qiuh Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -73,6 +77,8 @@ protected:
    Int_t mSensor; ///< sensor 1-10
    Int_t mRow; ///< row 0-927
    Int_t mColumn; ///< column 0-959
+
+   Int_t mJtagFileVersion; ///< Jtag configure file version
 
    StPxlDb *mPxlDb; ///< pxl db structure containing geometry, db information and so on
 
