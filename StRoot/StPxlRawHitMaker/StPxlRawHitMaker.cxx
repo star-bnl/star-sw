@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.cxx,v 1.6 2014/04/01 15:29:24 qiuh Exp $
+ * $Id: StPxlRawHitMaker.cxx,v 1.7 2014/04/05 05:20:08 qiuh Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.cxx,v $
+ * Revision 1.7  2014/04/05 05:20:08  qiuh
+ * add Jtag file version print-out and some more warnings for data format errors
+ *
  * Revision 1.6  2014/04/01 15:29:24  qiuh
  * add single hot pixel masking
  *
@@ -39,6 +42,7 @@ ClassImp(StPxlRawHitMaker)
 StPxlRawHitMaker::StPxlRawHitMaker(const Char_t *name) : StRTSBaseMaker("pxl", name)
 {
    mPxlRawHitCollection = 0;
+   mJtagFileVersion = 0;
 }
 //_______________________________________________
 void StPxlRawHitMaker::Clear(const Option_t *)
@@ -109,6 +113,12 @@ Int_t StPxlRawHitMaker::Make()
 
    return kStOk;
 }
+//_______________________________________________                                                                                                                                                  
+Int_t StPxlRawHitMaker::Finish()
+{
+   LOG_INFO << "Jtag file version: "<<mJtagFileVersion<<endm;
+   return StMaker::Finish();
+}
 //_______________________________________________
 void StPxlRawHitMaker::decodeSectorData()
 {
@@ -144,6 +154,50 @@ void StPxlRawHitMaker::decodeSectorData()
       LOG_WARN << "wrong sector number: " << mSector << endm;
       return;
    }
+
+   mJtagFileVersion = mHeaderData[mHardwareIdPosition] >> 16;
+
+   for(int i=0; i<32; i++)
+      {
+         if(mHeaderData[8] >> i)
+            {
+               LOG_WARN << "sector "<<mSector<<"  sensor "<<i+1<<"  deserialization error!" << endm;
+            }
+      }
+
+   for(int i=0; i<8; i++)
+      {
+         if(mHeaderData[9] >> i)
+            {
+               LOG_WARN << "sector "<<mSector<<"  sensor "<<i+33<<"  deserialization error!" << endm;
+            }
+      }
+
+   if(mHeaderData[9] >> 8)
+      {
+         LOG_WARN << "sector "<<mSector<<"  event memory 1 overflow!" << endm;
+      }
+
+   if(mHeaderData[9] >> 9)
+      {
+         LOG_WARN << "sector "<<mSector<<"  event memory 2 overflow!" << endm;
+      }
+
+   for(int i=0; i<32; i++)
+      {
+         if(mHeaderData[10] >> i)
+            {
+               LOG_WARN << "sector "<<mSector<<"  sensor "<<i+1<<"  trailer or event length error!" << endm;
+            }
+      }
+
+   for(int i=0; i<8; i++)
+      {
+         if(mHeaderData[11] >> i)
+            {
+               LOG_WARN << "sector "<<mSector<<"  sensor "<<i+33<<"  trailer or event length error!" << endm;
+            }
+      }
 
    // get hits data block length
    mHitsDataLength = getHitsDataLength();
