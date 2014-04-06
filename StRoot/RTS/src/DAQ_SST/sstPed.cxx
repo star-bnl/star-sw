@@ -269,7 +269,7 @@ int sstPed::to_cache(char *fname, u_int run)
 
 		f = fopen("/tmp/ssd_peds","w") ;
 		if(f==0) {
-			LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]","/tmp/ssd_peds",strerror(errno)) ;
+			LOG(U_TONKO,"ped::to_cache can't open output file \"%s\" [%s]","/tmp/ssd_peds",strerror(errno)) ;
 			continue ;
 		}
 
@@ -307,7 +307,7 @@ int sstPed::to_cache(char *fname, u_int run)
 				LOG(TERR,"Pedestals written to cache \"%s\" [ret %d]",f_fname,ret) ;
 			}
 			else {
-				LOG(ERR,"Pedestals not written to cache \"%s\" [ret %d]",f_fname,ret) ;
+				LOG(U_TONKO,"Pedestals not written to cache \"%s\" [ret %d]",f_fname,ret) ;
 			}
 		}
 
@@ -319,7 +319,7 @@ int sstPed::to_cache(char *fname, u_int run)
 			LOG(TERR,"Executed [%s], ret %d",sys,ret) ;
 		}
 		else {
-			LOG(ERR,"Not executed [%s], ret %d",sys,ret) ;
+			LOG(U_TONKO,"Not executed [%s], ret %d",sys,ret) ;
 		}
 	}
 
