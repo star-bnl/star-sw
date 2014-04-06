@@ -363,7 +363,7 @@ ifdef TEST_RDO_ZG
 HOSTDEFINES += -DTEST_RDO_ZG
 endif
 
-ifeq ($(RTS_PROJECT),daqman.starp.bnl.gov)
+ifeq ($(HOST_NAME),daqman.starp.bnl.gov)
 	HOSTDEFINES += -DRTS_REAL_DAQMAN
 else
 
