@@ -17,49 +17,80 @@
 
 
 
-fgtPed::fgtPed()
+fgtPed::fgtPed(int rts)
 {
 	valid = 0 ;
-	rb_mask = 0x03 ;	// assume all..
+	rb_mask = 0 ;	
 
 	memset(fgt_stat,0,sizeof(fgt_stat)) ;
 
-	
-	sizeof_ped = sizeof(struct peds) * FGT_RDO_COU ;	// for FGT_RDO_COU RDOs
-
-	
-	ped_store = 0 ;	// unassigned!
-
-	memset(fgt_rdr,0,sizeof(fgt_rdr)) ;
 
 	k_seq = 0 ;	
 	n_sigma = 0.0 ;
 
-	rts_id = 0 ;
+	rts_id = rts ;
 
 	tb_cou_xpect = -1 ;
 	tb_cou_ped = -1 ;
-	return ;
-}
+
+	memset(ch_status,0,sizeof(ch_status)) ;
 
 
-fgtPed::~fgtPed()
-{
-	if(ped_store) {
-		free(ped_store) ;
-		ped_store = 0 ;
-	}
-
-	for(int i=0;i<FGT_RDO_COU;i++) {
-		if(fgt_rdr[i]) {
-			delete fgt_rdr[i] ;
-			fgt_rdr[i] = 0 ;	
+	switch(rts_id) {
+	case IST_ID :
+		for(int r=0;r<6;r++) {
+		for(int ar=0;ar<6;ar++) {
+		for(int ap=0;ap<24;ap++) {
+		for(int c=0;c<128;c++) {
+			ch_status[r][ar][ap][c] = FGT_CH_STAT_SHOULD ;
+		}}}
+		fgt_rdr[r] = new daq_fgt(0) ;
 		}
+		rb_mask = 0x3F ;
+
+		
+		break ;
+	case GMT_ID :
+		for(int ar=0;ar<2;ar++) {
+			u_int ap_mask = 0x00F00F ;
+			for(int ap=0;ap<24;ap++) {
+				if(ap_mask & (1<<ap)) ;
+				else continue ;
+
+				for(int c=0;c<128;c++) {
+					ch_status[0][ar][ap][c] = FGT_CH_STAT_SHOULD ;
+				}
+			}
+		}
+		fgt_rdr[0] = new daq_fgt(0) ;
+
+		rb_mask = 1 ;
+		break ;
+	case FGT_ID :
+		for(int r=0;r<2;r++) {
+		for(int ar=0;ar<6;ar++) {
+
+		u_int ap_mask = 0x3FF3FF ;
+		for(int ap=0;ap<24;ap++) {
+			if(ap_mask & (1<ap)) ;
+			else continue ;
+
+			for(int c=0;c<128;c++) {
+				ch_status[r][ar][ap][c] = FGT_CH_STAT_SHOULD ;
+			}
+		}}
+		fgt_rdr[r] = new daq_fgt(0) ;
+		}
+		rb_mask = 0x3 ;
+		break ;
+		
 	}
 
 
 	return ;
 }
+
+
 
 #if 0
 static int fgt_bad_heuristics(int rts_id, double ped, double rms)
@@ -109,33 +140,12 @@ int fgtPed::run_stop()
 }
 
 
-void fgtPed::init(int active_rbs, int rts)
+void fgtPed::init(int active_rbs)
 {
-	valid = 0 ;
-
 	memset(fgt_stat,0,sizeof(fgt_stat)) ;
 
 	rb_mask = active_rbs ;
 
-	if(ped_store == 0) {
-		ped_store = (struct peds *) malloc(sizeof_ped) ;
-	}
-
-	for(int i=0;i<FGT_RDO_COU;i++) {
-		if((rb_mask & (1<<i)) && (fgt_rdr[i]==0)) {
-			fgt_rdr[i] = new daq_fgt(0) ;
-		}
-	}
-
-
-	rts_id = rts ;
-
-
-	tb_cou_ped = -1 ;
-
-	memset(ped_store,0,sizeof_ped) ;
-
-	LOG(TERR,"Pedestals zapped: rb_mask 0x%02X",rb_mask) ;
 }
 
 
@@ -267,7 +277,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 
 		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
-		struct peds *p_thr = ped_store + (arc-1) ;
+		struct peds_t *p_thr = &(peds[arc-1]) ;
 
 		int i_save = -1 ;
 		int cou = 0 ;
@@ -327,7 +337,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 			}
 
 
-			if(adc >= thr) {
+			if(adc > thr) {
 				cou++ ;
 				if(cou >= ks) {
 					dump = 1 ;
@@ -383,7 +393,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 		out_bytes += 2 ;
 	}
 
-	LOG(NOTE,"ARC %d: dumped %d/%d, %d bytes",rdo1,dumped_cou,all_cou,out_bytes) ;
+	//LOG(TERR,"ARC %d: dumped %d/%d, %d bytes",rdo1,dumped_cou,all_cou,out_bytes) ;
 
 	return out_bytes ;
 }
@@ -403,23 +413,17 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 	fgt_stat[rdo].evts++ ;
 
 	// skip first few events!
-//	if(evts[rdo] <= 3) {
-//		LOG(NOTE,"RDO %d: skipping event %d < 3",rdo,evts[rdo]) ;
+//	if(fgt_stat[rdo].evts <= 3) {
 //		return ;
 //	}
 
 	if(fgt_stat[rdo].evts > 0xFF00) return ;	// don't allow more than 16bits worth...
 
-
-
-	struct peds *p = ped_store + rdo ;
-
-//	LOG(TERR,"Hello %p",fgt_rdr[0]) ;
+	struct peds_t *p = peds + rdo ;
 
 	daq_dta *dd = 0 ;
 	dd = fgt_rdr[rdo1-1]->handle_adc(0,rdo1, evbuff) ;
 
-//	LOG(TERR,"Herein") ;
 
 	int t_xpect = tb_cou_xpect ;
 
@@ -436,17 +440,13 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 			
 			if(meta->arc[rdo1].arm[arm].apv[apv].ntim != t_xpect) {
 				if(fgt_stat[rdo1-1].err < 10) {
-					LOG(WARN,"evt %d: RDO %d, ARM %d, APV %d: ntim %d??",fgt_stat[rdo].evts,rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].ntim) ;
+					LOG(WARN,"evt %d: RDO %d, ARM %d, APV %d: ntim %d, expect %d??",fgt_stat[rdo].evts,rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].ntim,t_xpect) ;
 				}
 				fgt_stat[rdo1-1].err++ ;
 			}
 
 			need[arm][apv] |= 1 ;
 			
-			p->expect_cou[arm][apv]++ ;
-
-
-
 			if(meta->arc[rdo1].arm[arm].apv[apv].apv_id != apv) {
 				LOG(ERR,"RDO %d, ARM %d, APV %d: %d",rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].apv_id) ;
 				need[arm][apv] |= 2 ;	// error
@@ -478,7 +478,7 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 			p->ped[arm][apv][ch][tb] += (float) adc ;
 			p->rms[arm][apv][ch][tb] += (float) (adc * adc) ;
-			p->cou[arm][apv][ch][tb]++ ;
+			if(tb==0) p->cou[arm][apv][ch]++ ;
 		}
 	}
 
@@ -506,16 +506,12 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 
 
-double fgtPed::do_thresh(double ns, int k)
+double fgtPed::do_thresh(double ns, int k, int do_log)
 {
 	// suspect
 	// tb_cou set in from_cache
 
 
-	if(!ped_store || !valid) {
-		LOG(ERR,"fgt:do_thresh invalid") ;
-		return -1.0 ;
-	}
 
 	n_sigma = ns ;
 	k_seq = k ;
@@ -523,19 +519,17 @@ double fgtPed::do_thresh(double ns, int k)
 
 	LOG(INFO,"do_thresh: n-sigma %f, k-seq %d",n_sigma, k_seq) ;
 
-	// use the 0th timebin! For what???
+
 	for(int r=0;r<FGT_RDO_COU;r++) {
-		struct peds *p = ped_store + r ;
+		struct peds_t *p = peds + r ;
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
 		for(int c=0;c<FGT_CH_COU;c++) {
 
-		p->thr[arm][apv][c] = 0xFFFE ;	// kill it first... talk later...
+		if(ch_status[r][arm][apv][c] & FGT_CH_STAT_SHOULD) ;
+		else continue ;
 
-		if(p->rms[arm][apv][c][0] < -1.5) continue ;	// not necessary at all; not present in pedestals
-
-		// calculate the mean of the pedestal & RMS over the timebins
 
 		double ped = 0.0 ;
 		double rms = 0.0 ;
@@ -557,12 +551,6 @@ double fgtPed::do_thresh(double ns, int k)
 			continue ;
 		}
 
-		if(tb_cou_ped != cou) {
-			LOG(WARN,"%d %d %d %d: expect %d timebins but have %d",r,arm,apv,c,tb_cou_ped,cou) ;
-		}
-
-		if(cou == 0) continue ;	// this shouldn't be!!!
-
 		ped /= cou ;
 		rms /= cou ;
 
@@ -574,54 +562,69 @@ double fgtPed::do_thresh(double ns, int k)
 	}
 
 	// kill bad
-	int all_cou = 0 ;
-	int bad_cou = 0 ;
+	int b_all_all = 0 ;
+	int b_bad_all = 0 ;
 
 	for(int r=0;r<FGT_RDO_COU;r++) {
-		struct peds *p = ped_store + r ;
+		struct peds_t *p = peds + r ;
+
+		int b_ped_0 = 0 ;
+		int b_bad  = 0 ;
+		int b_masked  = 0 ;
+		int b_misconfigured  = 0 ;
+		int b_all = 0 ;
+		int b_unknown = 0 ;
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
-
-		int b_cou = 0 ;
-		int b_ped_cou = 0 ;
-		int b_bad_cou = 0 ;
-
 		for(int c=0;c<FGT_CH_COU;c++) {
-			// thr is:
-			// 0xFFFE	never found in ped file; wasn;t needed
-			// 0xFFFD	not found in ped file but was needed...
-			if(p->thr[arm][apv][c] == 0xFFFE) {	// wasn't needed
+			if(ch_status[r][arm][apv][c] & FGT_CH_STAT_SHOULD) ;
+			else {
+				p->thr[arm][apv][c] = 0xFFFE ;	// not physically present...
 				continue ;
 			}
 
-			if(p->thr[arm][apv][c] >= 0xFFFD) {	// bad as determined in the pedestal run...
-				b_ped_cou++ ;
+			b_all++ ;
+
+			// kill any channel marked odd!
+			if(ch_status[r][arm][apv][c] & 0xFE) {
+				p->thr[arm][apv][c] = 0xFFFF ;
+				b_bad_all++ ;
 			}
-
-			if(bad[r][arm][apv][c]) {	// known bad
-				p->thr[arm][apv][c] = 0xFFFF ;	// max it
-				b_bad_cou++ ;
+			else if(p->thr[arm][apv][c] >= 0xFFFD) {
+				LOG(WARN,"Killed but not marked: %d %d %d %d",r,arm,apv,c) ;
+				b_unknown++ ;
+				b_bad_all++ ;
 			}
-	
-			if(p->thr[arm][apv][c] >= 0xFFFD) {
-				b_cou++ ;
+			
+			if(ch_status[r][arm][apv][c] & FGT_CH_STAT_NO_CONFIG) {
+				b_masked++ ;
 			}
+			if(ch_status[r][arm][apv][c] & FGT_CH_STAT_NO_RESPONSE) {
+				b_misconfigured++ ;
+			}
+			if(ch_status[r][arm][apv][c] & FGT_CH_STAT_BAD) {
+				b_bad++ ;
+			}
+			if(ch_status[r][arm][apv][c] & FGT_CH_STAT_PED_UNKNOWN) {
+				b_ped_0++ ;
+			}
+			
 
-			all_cou++ ;
-		}
+			
+		}}}
 
-		if(b_cou) {
-			bad_cou += b_cou ;
-			LOG(WARN,"ARC %d, ARM %d, APV %2d: has %d[%d ped, %d bad] bad channels",r+1,arm,apv,b_cou,b_ped_cou,b_bad_cou) ;
-		}
+		b_all_all += b_all ;
 
-		}
-		}
+		LOG(WARN,"ARC %d: masked %d, misconfigd %d, bad %d, bad ped %d, unknown %d of %d all",
+		    r+1,b_masked,b_misconfigured,b_bad,b_ped_0,b_unknown,b_all) ;
+
 	}
-	double perc = 100.0*(double)bad_cou/(double)all_cou ;
 
-	return  perc ;
+	double perc = (double)b_bad_all/(double)b_all_all ;
+	perc *= 100.0 ;
+
+	return perc ;
 
 }
 
@@ -645,26 +648,17 @@ void fgtPed::calc()
 
 
 
-		struct peds *ped = ped_store + r ;
+		struct peds_t *ped = peds + r ;
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
-
-		int expect = ped->expect_cou[arm][apv] ;
-		int got_cou = ped->cou[arm][apv][0][0] ;
-
-		if(got_cou != expect) {
-
-			bad++ ;
-
-			LOG(WARN,"ARC %d, ARM %d, APV %2d: got %d, expect %d",
-			    r+1,arm,apv,got_cou,expect) ;
-		}
-
 		for(int ch=0;ch<FGT_CH_COU;ch++) {
-		for(int t=0;t<FGT_TB_COU;t++) {
 
-			if(ped->cou[arm][apv][ch][t] == 0) {	// never seen in the data!
+		int cou = ped->cou[arm][apv][ch] ;
+		
+		for(int t=0;t<tb_cou_xpect;t++) {
+
+			if(cou == 0) {	// never seen in the data!
 				ped->ped[arm][apv][ch][t] = 0 ;
 				ped->rms[arm][apv][ch][t] = -1.0 ;
 			}
@@ -672,8 +666,8 @@ void fgtPed::calc()
 				double pp, rr ;
 
 		
-				pp = ped->ped[arm][apv][ch][t] / (double) ped->cou[arm][apv][ch][t] ;
-				rr = ped->rms[arm][apv][ch][t] / (double) ped->cou[arm][apv][ch][t] ;
+				pp = ped->ped[arm][apv][ch][t] / (double) cou ;
+				rr = ped->rms[arm][apv][ch][t] / (double) cou ;
 
 				// due to roundoff I can have super small negative numbers
 				if(rr < (pp*pp)) rr = 0.0 ;
@@ -748,7 +742,7 @@ int fgtPed::to_evb(char *buff)
 		if(rb_mask && (1<<r)) ;
 		else continue ;
 
-		struct peds *ped = ped_store + r ;
+		struct peds_t *ped = peds + r ;
 
 		*dta++ = r+1 ;			// ARC, from 1
 		u_short *apv_cou = dta++ ;
@@ -759,7 +753,7 @@ int fgtPed::to_evb(char *buff)
 		for(arm=0;arm<FGT_ARM_COU;arm++) {
 		for(apv=0;apv<FGT_APV_COU;apv++) {
 
-		if(ped->expect_cou[arm][apv] == 0) continue ;	// no hits at all...
+
 
 		*dta++ = arm ;
 		*dta++ = apv ;
@@ -788,6 +782,33 @@ int fgtPed::to_evb(char *buff)
 	return ((char *)dta-buff) ;
 }
 
+void fgtPed::clear()
+{
+	memset(peds,0,sizeof(peds)) ;
+}
+
+void fgtPed::clear_from_cache()
+{
+	for(int r=0;r<FGT_RDO_COU;r++) {
+		struct peds_t *p = peds_from_cache + r ;
+
+		for(int arm=0;arm<FGT_ARM_COU;arm++) {
+		for(int apv=0;apv<FGT_APV_COU;apv++) {
+		for(int c=0;c<FGT_CH_COU;c++) {
+			for(int t=0;t<FGT_TB_COU;t++) {
+				p->ped[arm][apv][c][t] = 0.0 ;
+				p->rms[arm][apv][c][t] = -2.0 ;
+			}
+			p->cou[arm][apv][c] = 0 ;
+			p->thr[arm][apv][c] = 0xFFFF ;
+		}
+		}
+		}
+	}
+
+
+}
+
 int fgtPed::from_cache(char *fname) 
 {
 	FILE *f ;
@@ -796,27 +817,9 @@ int fgtPed::from_cache(char *fname)
 
 	tb_cou_ped = - 1;
 
-	// zap rmses to negative!
-	for(int r=0;r<FGT_RDO_COU;r++) {
-		struct peds *ped = ped_store + r ;
+	clear() ;
+	clear_from_cache() ;
 
-		for(int arm=0;arm<FGT_ARM_COU;arm++) {
-		for(int apv=0;apv<FGT_APV_COU;apv++) {
-		for(int c=0;c<FGT_CH_COU;c++) {
-
-		for(int t=0;t<FGT_TB_COU;t++) {
-			ped->ped[arm][apv][c][t] = 0.0 ;
-			ped->rms[arm][apv][c][t] = -2.0 ;	// mark as not needed...
-		}
-
-		ped->thr[arm][apv][c] = 0xFFFE ;
-
-		}
-		}
-		}
-	}	
-	
-	memset(bad,0,sizeof(bad)) ;	// default is no bad
 
 	// trivial load from disk...
 	if(fname) {
@@ -829,7 +832,7 @@ int fgtPed::from_cache(char *fname)
 	}
 
 	if(f==0) {
-		LOG(ERR,"ped::from_cache can't open input file \"%s\" [%s]",fn,strerror(errno)) ;
+		LOG(U_TONKO,"ped::from_cache can't open input file \"%s\" [%s]",fn,strerror(errno)) ;
 		return -1 ;
 	}
 
@@ -859,15 +862,26 @@ int fgtPed::from_cache(char *fname)
 		if(ret != 7) continue ;
 
 
-		struct peds *peds = ped_store + (r-1) ;
+		struct peds_t *ped = peds + (r-1) ;
 
-		peds->ped[arm][apv][ch][tb] = pp ;
-		peds->rms[arm][apv][ch][tb] = rr ;
+		ped->ped[arm][apv][ch][tb] = pp ;
+		ped->rms[arm][apv][ch][tb] = rr ;
 
+		struct peds_t *ped_fc = peds_from_cache + (r-1) ;
+
+		ped_fc->ped[arm][apv][ch][tb] = pp ;
+		ped_fc->rms[arm][apv][ch][tb] = rr ;
+		
 		if(tb > tb_cou_ped) {
 			tb_cou_ped = tb ;
 		}
 
+
+		if(tb==0) {
+			if(pp<=0.0 || rr<=0.0) {
+				ch_status[r-1][arm][apv][ch] |= FGT_CH_STAT_PED_UNKNOWN ;
+			}
+		}
 	}
 
 	fclose(f) ;
@@ -887,7 +901,7 @@ int fgtPed::from_cache(char *fname)
 	return valid ;
 }
 
-int fgtPed::to_cache(char *fname, u_int run)
+int fgtPed::to_cache(char *fname, u_int run, int dont_cache)
 {
 	FILE *f ;
 	char f_fname[128] ;
@@ -935,20 +949,23 @@ int fgtPed::to_cache(char *fname, u_int run)
 		else continue ;
 
 
-		struct peds *peds = ped_store + r ;
+		struct peds_t *ped = peds + r ;
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
 
-		if(peds->expect_cou[arm][apv] == 0) continue ;
 
 		for(int c=0;c<FGT_CH_COU;c++) {
+
+		// dump only the ones which need to exist!
+		if(ch_status[r][arm][apv][c] & FGT_CH_STAT_SHOULD) ;
+		else continue ;
+
 		for(int t=0;t<tb_cou_ped;t++) {
-//			if(peds->rms[arm][apv][c][t] < 0.0) continue ;
 
 			fprintf(f,"%d %d %2d %3d %2d %7.3f %.3f\n",r+1,arm,apv,c,t,
-				peds->ped[arm][apv][c][t],
-				peds->rms[arm][apv][c][t]) ;
+				ped->ped[arm][apv][c][t],
+				ped->rms[arm][apv][c][t]) ;
 		}
 		}
 		}
@@ -957,24 +974,86 @@ int fgtPed::to_cache(char *fname, u_int run)
 
 	fclose(f) ;	
 
-	if(do_ln) {
-		char cmd[128] ;
-		sprintf(cmd,"/bin/ln -f -s %s_pedestals_%08u.txt /RTScache/pedestals.txt",rts2name(rts_id),run) ;
-		system(cmd) ;
+
+	if(dont_cache) {
+		LOG(CAUTION,"Pedestals NOT cached for run %08u: bad run conditions 0x%X!",run,dont_cache) ;
+		return 0 ;
 	}
 
-	LOG(TERR,"Pedestals written to cache \"%s\"",f_fname) ;
+	
+	f = fopen("/RTScache/pedestals.txt","w") ;
+	if(f==0) {
+		LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]","/RTScache/pedestals.txt",strerror(errno)) ;
+		return -1 ;
+	}
+
+	fprintf(f,"# Detector %s\n",rts2name(rts_id)) ;
+	fprintf(f,"# Run %08u\n",run) ;
+	fprintf(f,"# Date %s",ctime(&tim)) ;
+	fprintf(f,"# Timebins %d\n",tb_cou_ped) ;
+	fprintf(f,"\n") ;
+
+	int all_cou = 0 ;
+	int non_cached_cou = 0 ;
+
+	for(int r=0;r<FGT_RDO_COU;r++) {
+		if(rb_mask & (1<<r)) ;
+		else continue ;
+
+
+		struct peds_t *ped = peds + r ;
+
+		for(int arm=0;arm<FGT_ARM_COU;arm++) {
+		for(int apv=0;apv<FGT_APV_COU;apv++) {
+
+
+		for(int c=0;c<FGT_CH_COU;c++) {
+
+		// dump only the ones which need to exist!
+		if(ch_status[r][arm][apv][c] & FGT_CH_STAT_SHOULD) ;
+		else continue ;
+
+		struct peds_t *use_ped ;
+
+		all_cou++ ;
+		// use just he lower bits of status!!!
+		if((ch_status[r][arm][apv][c] & 0x0E) || (ped->cou[arm][apv][c]==0)) {
+			use_ped = peds_from_cache ;
+			non_cached_cou++ ;
+		}
+		else {
+			use_ped = ped ;
+		}
+
+		for(int t=0;t<tb_cou_ped;t++) {
+			
+			fprintf(f,"%d %d %2d %3d %2d %7.3f %.3f\n",r+1,arm,apv,c,t,
+				use_ped->ped[arm][apv][c][t],
+				use_ped->rms[arm][apv][c][t]) ;
+		}
+		}
+		}
+		}
+	}
+
+	fclose(f) ;	
+
+//	if(do_ln) {
+//		char cmd[128] ;
+//		sprintf(cmd,"/bin/ln -f -s %s_pedestals_%08u.txt /RTScache/pedestals.txt",rts2name(rts_id),run) ;
+//		system(cmd) ;
+//	}
+
+	double perc = 100.0 * (double)non_cached_cou / (double)all_cou ;
+	if(perc > 10.0) {
+		LOG(U_TONKO,"Pedestals cached for run %08u: skipped %d/%d (%d%%) channels.",run,non_cached_cou,all_cou,(int)perc) ;
+	}
+	else {
+		LOG(TERR,"Pedestals cached for run %08u: skipped %d/%d channels.",run,non_cached_cou,all_cou) ;
+	}
 
 	return 1 ;
 }
-
-int fgtPed::special_setup(int run_type, int sub_type)
-{
-
-	// we do nothing here for FGT-like detectors...
-	return 1 ;
-}
-
 
 
 
@@ -1015,7 +1094,7 @@ int fgtPed::bad_from_cache(char *fname)
 
 
 	LOG(NOTE,"Loading bad from cache \"%s\"...",fn) ;
-	memset(bad,0,sizeof(bad)) ;
+
 	
 
 	while(!feof(f)) {
@@ -1065,17 +1144,17 @@ int fgtPed::bad_from_cache(char *fname)
 		if(n[1]=='-') {	//nix ARM
 			for(int a=0;a<FGT_APV_COU;a++) {
 			for(int c=0;c<FGT_CH_COU;c++) {
-				bad[r-1][arm][a][c] = 1 ;
+				ch_status[r-1][arm][a][c] |= FGT_CH_STAT_BAD ;
 			}
 			}
 		}
 		else if(n[2]=='-') {	//nix APV
 			for(int c=0;c<FGT_CH_COU;c++) {
-				bad[r-1][arm][apv][c] = 1 ;
+				ch_status[r-1][arm][apv][c] |= FGT_CH_STAT_BAD ;
 			}
 		}
 		else {
-			bad[r-1][arm][apv][ch] = 1 ;
+			ch_status[r-1][arm][apv][ch] |= FGT_CH_STAT_BAD ;
 		}
 		
 
@@ -1087,7 +1166,7 @@ int fgtPed::bad_from_cache(char *fname)
 	for(int m=0;m<FGT_ARM_COU;m++) {
 	for(int a=0;a<FGT_APV_COU;a++) {
 	for(int c=0;c<FGT_CH_COU;c++) {
-		if(bad[r][m][a][c]) b_cou++ ;
+		if(ch_status[r][m][a][c] & FGT_CH_STAT_BAD) b_cou++ ;
 	}
 	}
 	}

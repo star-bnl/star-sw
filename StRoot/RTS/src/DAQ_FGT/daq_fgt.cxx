@@ -824,6 +824,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	int bad = 0 ;
 	u_int *d32 = (u_int *)buff ;
 	int id_check_failed = 0 ;
+	int last_ix = words - 1 ;
 
 	// FIRST we check the length
 	int buff_bytes = 4 * words ;
@@ -872,9 +873,8 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		}
 	}
 
-
-	// compare to what?
-	LOG(DBG,"RDO %d: in data %d",rdo,rdo_in_dta) ;
+	
+	LOG(DBG,"RDO %d: expect %d, in data %d",rdo,rdo_id[rdo],rdo_in_dta) ;
 
 
 	int format_code = (d32[2] >> 8) & 0xFF ;
@@ -892,7 +892,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 #if 0
 #define	 G_CONST  0x04C11DB7 
-	int last_ix = words - 1 ;
+
 	u_int crc_in_data = d32[last_ix] ;
 	register u_int crc = 0xFFFFFFFF ;
 	if(crc_in_data) {	
