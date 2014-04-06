@@ -13,18 +13,11 @@
 #define FGT_CH_COU		128	// from 0..127
 #define FGT_TB_COU		31	// from 0..30
 
-
-
-/* physical maps: UNUSED
-#define FGT_DISK_COU		6	// 0..5
-#define FGT_QUADRANT_COU	4	// A-D
-#define FGT_STRIP_TYPE_COU	2	// 2 types: see below
-#define FGT_STRIP_TYPE_R	0
-#define FGT_STRIP_TYPE_PHI	1
-
-#define FGT_STRIP_R_COU		326
-#define FGT_STRIP_PHI_COU	1138
-
+/*
+#define FGT_CH_STAT_SHOULD		0x01	// exists in hardware
+#define FGT_CH_STAT_NO_CONFIG		0x02	// killed in RC or config file
+#define FGT_CH_STAT_NO_RESPONSE		0x04	// killed in ARS_configure, non responding CH
+#define FGT_CH_STAT_BAD			0x08	// killed in bad_channel
 */
 
 // when asking for the "adc" or "phys"bank
@@ -131,6 +124,8 @@ public:
 	u_int rdo_warns[7] ;	// number of warnings issued, per rdo; count from 1
 	u_char rdo_id[7] ;	// for RDO checks in get_l2; count from 1
 	u_int t_data ;		// for trg_cmd==1 pattern tests...
+
+
 } ;
 
 
