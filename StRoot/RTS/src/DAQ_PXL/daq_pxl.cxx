@@ -179,7 +179,7 @@ int daq_pxl::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	// more sanity
-	if(token == 0) {
+	if(err || (token == 0)) {
 		token = 4097 ;	// override with dummy token!
 		err |= 8 ;
 	}
@@ -250,6 +250,8 @@ int daq_pxl::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		for(int i=s;i<=last_ix;i++) {
 			LOG(ERR,"  RDO %d: %2d/%2d: 0x%08X",rdo,i,words,d32[i]) ;
 		}
+
+
 	}
 
 
