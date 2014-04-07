@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.60 2014/04/07 22:13:30 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.61 2014/04/07 22:28:40 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -62,8 +62,6 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFil
    StBFChain *chain = (StBFChain *) StMaker::GetChain();
 
    if (chain) {
-      Info("StiPxlDetectorBuilder", "Valid global pointer to chain");
-
       if ( chain->GetOption("StiPxlSimpleBox") )
          mTestGeomType = kSimpleBox;
       else if ( chain->GetOption("StiPxlSimpleBox2") )
@@ -91,6 +89,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
    SetCurrentDetectorBuilder(this);
 
    TObjectSet *pxlDbDataSet = (TObjectSet*) source.GetDataSet("pxlDb");
+
    if (pxlDbDataSet) {
       mPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
       LOG_INFO << "buildDetectors : initialize geometry with DB tables" << endm;
@@ -376,9 +375,11 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
 
       StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
 
-      // Access last added volume
+      // Access last added volume/Sti detector
       int row = getNRows() - 1;
       int sector = 0;
+
+      // Make Sti detector active, i.e. use it in tracking
       StiDetector *stiDetector = getDetector(row, sector);
       stiDetector->setIsOn(true);
    }
@@ -388,6 +389,8 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
 /** Creates inactive sti volumes for the pixel support material. */
 void StiPxlDetectorBuilder::buildSimpleBox()
 {
+   Info("StiPxlDetectorBuilder::buildSimpleBox", "XXX");
+
    // Build average inactive volumes
    const VolumeMap_t pxlVolumes[] = {
       {"PSAL1", "Long tube in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1/PSAL_1", "", ""},
@@ -398,12 +401,13 @@ void StiPxlDetectorBuilder::buildSimpleBox()
    LOG_DEBUG << " # of volume(s) : " << nPxlVolumes << endm;
 
    for (int i = 0; i < nPxlVolumes; i++) {
+
       TString path(pxlVolumes[i].path);
 
       bool isAvail = gGeoManager->cd(path);
 
       if (!isAvail) {
-         Error("buildSimpleBoxes()", "Cannot find node %s. Skipping to next node...", path.Data());
+         Error("buildSimpleBox()", "Cannot find node %s. Skipping to next node...", path.Data());
          continue;
       }
 
@@ -413,6 +417,7 @@ void StiPxlDetectorBuilder::buildSimpleBox()
 
       LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+
       StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
 
       // Access last added volume
@@ -496,6 +501,7 @@ void StiPxlDetectorBuilder::buildSimpleBox2()
 }
 
 
+/** Creates inactive sti volumes for the pixel support material. */
 void StiPxlDetectorBuilder::buildSimplePlane()
 {
    Info("StiPxlDetectorBuilder::buildSimplePlane", "XXX");
@@ -510,12 +516,13 @@ void StiPxlDetectorBuilder::buildSimplePlane()
    LOG_DEBUG << " # of volume(s) : " << nPxlVolumes << endm;
 
    for (int i = 0; i < nPxlVolumes; i++) {
+
       TString path(pxlVolumes[i].path);
 
       bool isAvail = gGeoManager->cd(path);
 
       if (!isAvail) {
-         Error("buildSimpleBoxes()", "Cannot find node %s. Skipping to next node...", path.Data());
+         Error("buildSimplePlane()", "Cannot find node %s. Skipping to next node...", path.Data());
          continue;
       }
 
@@ -525,6 +532,7 @@ void StiPxlDetectorBuilder::buildSimplePlane()
 
       LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+
       StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
 
       // The created Sti detectors share the same shape and material
@@ -535,8 +543,8 @@ void StiPxlDetectorBuilder::buildSimplePlane()
       stiDetector->setIsOn(true);
    
       StiMaterial *mat = stiDetector->getMaterial();
-      // Set density to 2 g/cm^3
-      mat->set(mat->getName(), mat->getZ(), mat->getA(), 2., mat->getRadLength(), mat->getIonization());
+      // Set density to 2.7 g/cm^3
+      mat->set(mat->getName(), mat->getZ(), mat->getA(), 2.7, mat->getRadLength(), mat->getIonization());
    
       // Replace the original StiElossCalculator with one based on the modified material
       StiElossCalculator *elossCalculator = stiDetector->getElossCalculator();
@@ -556,6 +564,8 @@ void StiPxlDetectorBuilder::buildSimplePlane()
 /** Creates inactive sti volumes for the pixel support material. */
 void StiPxlDetectorBuilder::buildSimpleTube()
 {
+   Info("StiPxlDetectorBuilder::buildSimpleTube", "XXX");
+
    // Build average inactive volumes
    const VolumeMap_t pxlVolumes[] = {
       {"DTUH1", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/DTUH_1", "", ""},
@@ -581,6 +591,7 @@ void StiPxlDetectorBuilder::buildSimpleTube()
 
       LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+
       StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
 
       // Access last added volume
@@ -606,6 +617,8 @@ void StiPxlDetectorBuilder::buildSimpleTube()
 /** Creates inactive sti volumes for the pixel support material. */
 void StiPxlDetectorBuilder::buildSimpleTubeSector()
 {
+   Info("StiPxlDetectorBuilder::buildSimpleTubeSector", "XXX");
+
    // Build average inactive volumes
    const VolumeMap_t pxlVolumes[] = {
       {"DTUH1", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/DTUH_1", "", ""},
@@ -631,6 +644,7 @@ void StiPxlDetectorBuilder::buildSimpleTubeSector()
 
       LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+
       StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
 
       // The created Sti detectors share the same shape and material
