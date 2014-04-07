@@ -55,6 +55,7 @@ class ssdBuilder : public JevpPlotSet {
   int mPed;
   int mRms;
   JevpPlot **plots;
+
   daq_dta *dd;
 
   JLatex* errorMsg;

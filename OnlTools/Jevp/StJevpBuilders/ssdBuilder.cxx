@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "ssdBuilder.h"
+#include "TStyle.h"
 #include <RTS/include/rtsLog.h>
 
 ClassImp(ssdBuilder);
@@ -57,6 +58,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
   mStrip     = 0;
   mAdc       = 0;
   mAdcLength = 0;
+  gStyle->SetOptLogz(1);
   //---------------------
   for ( int ns=0; ns<nSide; ns++ ) 
     {
@@ -72,7 +74,6 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hAdcStrip[ns][nl]->GetXaxis()->SetTitle("Strip #");
 	  hAdcStrip[ns][nl]->GetYaxis()->SetTitle("ADC value");
 	  hAdcStrip[ns][nl]->GetXaxis()->SetNdivisions(96,0,0,false);
-
 	  hAdcStrip[ns][nl]->SetStats(false);//true
 	  //------
 	  sprintf( buffer, "ADCEvent_%d_%d",ns,nl);
@@ -98,42 +99,47 @@ void ssdBuilder::initialize(int argc, char *argv[])
   hLadderWafer[0]->SetName("hLadderWaferP");
   hLadderWafer[0]->GetXaxis()->SetTitle("Ladder #");
   hLadderWafer[0]->GetYaxis()->SetTitle("Wafer #");
+  hLadderWafer[0]->GetXaxis()->SetNdivisions(20,0,0,false);
+  hLadderWafer[0]->GetYaxis()->SetNdivisions(16,0,0,false);
   hLadderWafer[0]->SetStats(false);
+  
   hLadderWafer[1] = new TH2I("hLadderWaferN","N-side ladder vs wafer",20,0,20,16,0,16);
   hLadderWafer[1]->SetName("hLadderWaferN");
   hLadderWafer[1]->GetXaxis()->SetTitle("Ladder #");
   hLadderWafer[1]->GetYaxis()->SetTitle("Wafer #");
+  hLadderWafer[1]->GetXaxis()->SetNdivisions(20,0,0,false);
+  hLadderWafer[1]->GetYaxis()->SetNdivisions(16,0,0,false);
   hLadderWafer[1]->SetStats(false);
+
   //JEVP plots setting
+
   int totPlots = 2*nSide*nLadderPerSide+2;
 
   plots = new JevpPlot*[2*nSide*nLadderPerSide+2];
-
+  
   for( int i=0;i<nSide;i++) 
     {
     for(int j=0;j<nLadderPerSide;j++)
       {
-	hAdcStrip[i][j]->SetOption("colz");
-	hAdcEvent[i][j]->SetOption("colz");
-	
 	plots[nLadderPerSide*i+j] = new JevpPlot(hAdcStrip[i][j]);
 	plots[nLadderPerSide*i+j]->optlogz=true;
+	plots[nLadderPerSide*i+j]->setDrawOpts("COLZ");
 	plots[nSide*nLadderPerSide+nLadderPerSide*i+j] = new JevpPlot(hAdcEvent[i][j]);
 	plots[nSide*nLadderPerSide+nLadderPerSide*i+j]->optlogz=true;
+	plots[nSide*nLadderPerSide+nLadderPerSide*i+j]->setDrawOpts("COLZ");
       }
     }
   
   //p-side
-
-  hLadderWafer[0]->SetOption("COLZ");
-  plots[2*nSide*nLadderPerSide+0] = new JevpPlot(hLadderWafer[0]);
-  //addPlot(plots[2*nSide*nLadderPerSide+0]);
+  plots[2*nSide*nLadderPerSide-1]->optlogz=false;
+  plots[2*nSide*nLadderPerSide] = new JevpPlot(hLadderWafer[0]);
+  plots[2*nSide*nLadderPerSide]->setDrawOpts("COLZ");
+  
   //n-side
   
-  hLadderWafer[1]->SetOption("COLZ");
   plots[2*nSide*nLadderPerSide+1] = new JevpPlot(hLadderWafer[1]);
-  //addPlot(plots[2*nSide*nLadderPerSide+1]);
-  
+  plots[2*nSide*nLadderPerSide+1]->setDrawOpts("COLZ");
+    
   //---------
   //add plots to plot set
   for ( int i=0; i<totPlots;i++ )
@@ -141,14 +147,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
       LOG(DBG, "Adding plot %d",i);
       addPlot(plots[i]);
     }
-  /*
-  errorMsg = new JLatex(.25, .12, "#color[4]{No Error Message}");
-  errorMsg->SetTextSize(0.035);
-  errorMsg->SetTextAlign(13);
-  errorMsg->SetTextAngle(45);
-  //plots[2*nSide][nLadderPerSide].addElement(errorMsg);
-  plots[totPlots-1]->addElement(errorMsg);
-  */
+
 }
 
 //-------------------------
