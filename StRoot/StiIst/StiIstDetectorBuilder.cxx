@@ -26,6 +26,7 @@
 #include "StDetectorDbMaker/StiIst1HitErrorCalculator.h"
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstUtil/StIstConsts.h"
+#include "StiMaker/StiDetectorVolume.h"
 
 using namespace std;
 using namespace StIstConsts;
@@ -44,6 +45,12 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
    mIstDb = (StIstDbMaker*) source.GetMaker("istDb");
 
    if (StiVMCToolKit::GetVMC()) { useVMCGeometry(); }
+
+   // XXX: Check sti geometry by converting it to drawable root objects
+   TFile fileTmp("sti2rootgeo_ist.root", "RECREATE");
+   StiDetectorVolume stiDetVol(*this);
+   stiDetVol.Write();
+   fileTmp.Close();
 }
 
 
