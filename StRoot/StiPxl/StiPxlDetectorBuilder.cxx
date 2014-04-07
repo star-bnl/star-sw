@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.58 2014/04/07 22:13:09 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.59 2014/04/07 22:13:17 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -57,7 +57,7 @@ using namespace std;
  */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile) :
    StiDetectorBuilder("Pixel", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mPxlDb(0),
-   mUseDbGeom(false), mGeomDebug(kNoDebug)
+   mUseDbGeom(false), mTestGeomType(kDefault)
 {
    StBFChain *chain = (StBFChain *) StMaker::GetChain();
 
@@ -65,15 +65,17 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFil
       Info("StiPxlDetectorBuilder", "Valid global pointer to chain");
 
       if ( chain->GetOption("StiPxlSimpleBox") )
-         mGeomDebug = kSimpleBox;
-      if ( chain->GetOption("StiPxlSimpleBox2") )
-         mGeomDebug = kSimpleBox2;
+         mTestGeomType = kSimpleBox;
+      else if ( chain->GetOption("StiPxlSimpleBox2") )
+         mTestGeomType = kSimpleBox2;
+      else if ( chain->GetOption("StiPxlSimpleBox8") )
+         mTestGeomType = kSimpleBox8;
       else if ( chain->GetOption("StiPxlSimplePlane") )
-         mGeomDebug = kSimplePlane;
+         mTestGeomType = kSimplePlane;
       else if ( chain->GetOption("StiPxlSimpleTube") )
-         mGeomDebug = kSimpleTube;
+         mTestGeomType = kSimpleTube;
       else if ( chain->GetOption("StiPxlSimpleTubeSector") )
-         mGeomDebug = kSimpleTubeSector;
+         mTestGeomType = kSimpleTubeSector;
    }
 }
 
@@ -104,7 +106,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 
    if (StiVMCToolKit::GetVMC()) {
 
-      switch (mGeomDebug) {
+      switch (mTestGeomType) {
       case kSimpleBox:
          buildSimpleBox();
          break;
