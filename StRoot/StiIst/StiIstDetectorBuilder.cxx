@@ -235,18 +235,49 @@ void StiIstDetectorBuilder::useVMCGeometry()
          LOG_DEBUG << "===>NEW:IST:pDetector:Active?            = " << p->isActive()                              << endm;
       }
    }
+}
+
+
+void StiIstDetectorBuilder::buildInactiveVolumes()
+{
+   // Build average inactive volumes
+   const VolumeMap_t volumes[] = {
+      {"IBMO1", "aluminum cooling tube volume", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""}
+   };
 
    // Build the volume map and loop over all found volumes
-   Int_t NoIstVols = sizeof(IstVolumes) / sizeof(VolumeMap_t);
+   Int_t nVolumes = sizeof(volumes) / sizeof(VolumeMap_t);
    gGeoManager->RestoreMasterVolume();
    gGeoManager->CdTop();
 
-   for (Int_t i = 0; i < NoIstVols; i++) {
-      gGeoManager->cd(IstVolumes[i].path);
-      TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+   for (Int_t i = 0; i < nVolumes; i++) {
+      gGeoManager->cd(volumes[i].path);
 
-      if (! nodeT) continue;;
+      TGeoNode *geoNode = gGeoManager->GetCurrentNode();
 
-      StiVMCToolKit::LoopOverNodes(nodeT, IstVolumes[i].path, IstVolumes[i].name, MakeAverageVolume);
+      if (!geoNode) continue;
+
+      LOG_DEBUG << "Current node : " << i << "/" << nVolumes << " path is : " << volumes[i].name << endm;
+      LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+
+      StiVMCToolKit::LoopOverNodes(geoNode, volumes[i].path, volumes[i].name, MakeAverageVolume);
+
+      // Access last added volume
+      int row = getNRows() - 1;
+      int sector = 0;
+
+      // Make Sti detector active, i.e. use it in tracking
+      StiDetector *stiDetector = getDetector(row, sector);
+      stiDetector->setIsOn(true);
+
+      // Modify dimensions of the mother volume
+      if (string(volumes[i].name) == string("IBMO1"))
+      {
+         StiCylindricalShape *stiShape = (StiCylindricalShape*) stiDetector->getShape();
+         stiShape->setHalfDepth(45);
+
+         StiPlacement *stiPlacement = stiDetector->getPlacement();
+         stiPlacement->setZcenter(-5);
+      }
    }
 }
