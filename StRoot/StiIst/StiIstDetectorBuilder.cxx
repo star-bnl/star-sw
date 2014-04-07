@@ -82,12 +82,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
 {
    cout << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
 
-   THashList *istRot = new THashList(144, 0);
-   istRot = mIstDb->GetRotations();
    unsigned int ROW = 1;
 
-   SetCurrentDetectorBuilder(this);
-
+   THashList *istRot = mIstDb->GetRotations();
 
    // Build the material map
    struct Material_t {
