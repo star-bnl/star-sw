@@ -2,6 +2,7 @@
 #include <map>
 #include <exception>
 #include <stdexcept>
+
 #include "StMessMgr.h"
 #include "StThreeVectorD.hh"
 
@@ -14,19 +15,20 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "StiIstIsActiveFunctor.h"
-#include "StiIstDetectorBuilder.h"
 #include "Sti/StiElossCalculator.h"
-#include "StEvent/StEnumerations.h"
+#include "StiIst/StiIstIsActiveFunctor.h"
+#include "StiIst/StiIstDetectorBuilder.h"
 #include "TDataSetIter.h"
 #include "THashList.h"
 #include "tables/St_HitError_Table.h"
-#include "StEvent.h"
-#include "StEventTypes.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StEnumerations.h"
+#include "StEvent/StEventTypes.h"
 #include "StDetectorDbMaker/StiIst1HitErrorCalculator.h"
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstUtil/StIstConsts.h"
 #include "StiMaker/StiDetectorVolume.h"
+#include "StBFChain/StBFChain.h"
 
 using namespace std;
 using namespace StIstConsts;

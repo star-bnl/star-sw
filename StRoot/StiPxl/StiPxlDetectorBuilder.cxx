@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.59 2014/04/07 22:13:17 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.60 2014/04/07 22:13:30 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -22,8 +22,8 @@
 #include "StiPxlIsActiveFunctor.h"
 #include "StiPxlHitErrorCalculator.h"
 #include "tables/St_HitError_Table.h"
-#include "StEvent.h"
-#include "StEventTypes.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StEventTypes.h"
 #include "StPxlDbMaker/StPxlDb.h"
 #include "StPxlDbMaker/StPxlDbMaker.h"
 #include "StPxlUtil/StPxlConstants.h"
