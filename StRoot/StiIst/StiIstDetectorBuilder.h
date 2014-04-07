@@ -22,6 +22,8 @@ protected:
 
 private:
 
+   void buildInactiveVolumes();
+
    enum ETestGeomType {kDefault, kCrude};
 
    ETestGeomType mTestGeomType;
