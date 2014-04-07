@@ -49,9 +49,12 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFil
 
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 {
-   LOG_INFO << "StiIstDetectorBuilder::buildDetectors() - I - Started " << endm;
+   LOG_INFO << "StiIstDetectorBuilder::buildDetectors() -I- Started " << endm;
 
    setNRows(1);
+
+   // XXX:ds: Cannot rely on external maker! Must access DbMaker through
+   // source.GetDataSet("istDb")
    mIstDb = (StIstDbMaker*) source.GetMaker("istDb");
 
    if (StiVMCToolKit::GetVMC()) {
@@ -77,10 +80,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
 {
    cout << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
 
-   unsigned int ROW      = 1;
-
    THashList *istRot = new THashList(144, 0);
    istRot = mIstDb->GetRotations();
+   unsigned int ROW = 1;
 
    SetCurrentDetectorBuilder(this);
 
@@ -90,11 +92,13 @@ void StiIstDetectorBuilder::useVMCGeometry()
       const Char_t *name;
       StiMaterial    **p;
    };
+
    Material_t map[] = {
-      {"AIR", &_gasMat},
+      {"AIR",     &_gasMat},
       {"SILICON", &mSiMaterial},
       {"SILICON", &mHybridMaterial}
    };
+
    Int_t M = sizeof(map) / sizeof(Material_t);
 
    for (Int_t i = 0; i < M; i++) {
@@ -112,11 +116,10 @@ void StiIstDetectorBuilder::useVMCGeometry()
    }
 
    double ionization = mSiMaterial->getIonization();
+
    StiElossCalculator *ElossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
          ionization * ionization,
-         mSiMaterial->getA(),
-         mSiMaterial->getZ(),
-         mSiMaterial->getDensity());
+         mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
 
 
    for (int ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)
@@ -124,21 +127,24 @@ void StiIstDetectorBuilder::useVMCGeometry()
       for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
       {
          unsigned int matIst = 1000 + (ladderIdx) * 6 + (sensorIdx + 1);
-         LOG_DEBUG << " ladderIdx/sensorIdx/matIst : " << ladderIdx << " " << sensorIdx << " " << matIst << endm;
-         TGeoHMatrix *combI = (TGeoHMatrix *)istRot->FindObject(Form("R%04i", matIst));
+         LOG_DEBUG << "ladderIdx/sensorIdx/matIst : " << ladderIdx << " " << sensorIdx << " " << matIst << endm;
+         TGeoHMatrix *combI = (TGeoHMatrix*) istRot->FindObject(Form("R%04i", matIst));
 
          if (combI) {
             combI->Print();
+         } else {
+            Error("useVMCGeometry()", "Could not find TGeoHMatrix for sensor %d in database", matIst);
+            continue;
          }
 
          //jb added
-         if (sensorIdx != 0)continue;
+         if (sensorIdx != 0) continue;
 
          //we place the ladder as a whole
          char name[50];
          sprintf(name, "Ist/Ladder_%d/Sensor_%d", ladderIdx + 1, sensorIdx + 1);
 
-         TString Path(IstVolumes[71].path);
+         TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
          Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", ladderIdx + 1, sensorIdx + 1);
 
          gGeoManager->cd(Path); // retrieve info of IBSS volume
