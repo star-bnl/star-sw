@@ -31,9 +31,9 @@ private:
    void buildSimpleTube();
    void buildSimpleTubeSector();
 
-   enum EGeomDebug {kNoDebug, kSimpleBox, kSimpleBox2, kSimplePlane, kSimpleTube, kSimpleTubeSector};
+   enum ETestGeomType {kDefault, kSimpleBox, kSimpleBox2, kSimpleBox8, kSimplePlane, kSimpleTube, kSimpleTubeSector};
 
-   EGeomDebug mGeomDebug;
+   ETestGeomType mTestGeomType;
 };
 
 #endif
