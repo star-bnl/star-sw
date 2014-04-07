@@ -53,6 +53,8 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 
    setNRows(1);
 
+   SetCurrentDetectorBuilder(this);
+
    // XXX:ds: Cannot rely on external maker! Must access DbMaker through
    // source.GetDataSet("istDb")
    mIstDb = (StIstDbMaker*) source.GetMaker("istDb");
