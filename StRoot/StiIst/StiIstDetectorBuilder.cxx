@@ -32,9 +32,17 @@ using namespace std;
 using namespace StIstConsts;
 
 
-StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFile)
-   : StiDetectorBuilder("Ist", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mIstDb(0)
-{}
+StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFile) :
+   StiDetectorBuilder("Ist", active, inputFile), mSiMaterial(0),
+   mHybridMaterial(0), mIstDb(0), mTestGeomType(kDefault)
+{
+   StBFChain *chain = (StBFChain *) StMaker::GetChain();
+
+   if (chain) {
+      if ( chain->GetOption("StiIstCrude") )
+         mTestGeomType = kCrude;
+   }
+}
 
 
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
@@ -44,7 +52,16 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
    setNRows(1);
    mIstDb = (StIstDbMaker*) source.GetMaker("istDb");
 
-   if (StiVMCToolKit::GetVMC()) { useVMCGeometry(); }
+   if (StiVMCToolKit::GetVMC()) {
+
+      switch (mTestGeomType) {
+      case kCrude:
+         buildInactiveVolumes();
+         break;
+      default:
+         useVMCGeometry();
+      }
+   }
 
    // XXX: Check sti geometry by converting it to drawable root objects
    TFile fileTmp("sti2rootgeo_ist.root", "RECREATE");
