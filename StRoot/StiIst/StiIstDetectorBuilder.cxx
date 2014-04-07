@@ -59,6 +59,9 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
    // source.GetDataSet("istDb")
    mIstDb = (StIstDbMaker*) source.GetMaker("istDb");
 
+   // Gas material must be defined. Here we use air properties
+   _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
+
    if (StiVMCToolKit::GetVMC()) {
 
       switch (mTestGeomType) {
