@@ -9,14 +9,22 @@ class StIstDbMaker;
 class StiIstDetectorBuilder : public StiDetectorBuilder
 {
 public:
+
    StiIstDetectorBuilder(bool active, const string &inputFile);
    void buildDetectors(StMaker &source);
    void useVMCGeometry();
 
 protected:
+
    StiMaterial  *mSiMaterial;
    StiMaterial  *mHybridMaterial;
    StIstDbMaker *mIstDb;
+
+private:
+
+   enum ETestGeomType {kDefault, kCrude};
+
+   ETestGeomType mTestGeomType;
 };
 
 #endif
