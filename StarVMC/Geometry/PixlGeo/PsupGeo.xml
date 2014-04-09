@@ -93,20 +93,16 @@ For now (Dec 2013) I will add a Tube section from the Al into the position of th
 	 <!-- cable from Dtube to cable Park -->
 	 PSDA, PSDB, PSDC, PSDE, PSDD
 
-
-
-
-
 </Content>  
 
 
 <!-- Variable definitions -->
 
-<Structure name="MTB">
+<Structure name="MTBP">
   <var name="dy(5)" type="float"/>
 </Structure>
 
-<varlist type="int">DEBUG /1/</varlist>
+<varlist type="int">DEBUG /0/</varlist>
 
 <varlist type="float" comment="east start of support mother vol"> zfirst/-260./ </varlist>
 <varlist type="float" comment="east end of support mother vol">  zlast/-57.4/ </varlist>
@@ -122,7 +118,7 @@ For now (Dec 2013) I will add a Tube section from the Al into the position of th
  <varlist type="float" comment="temp variables"> i,xpos, ypos, zpos</varlist>
 
 
-<Fill name="MTB" comment="Mass TerminationBoard Paramaters" >
+<Fill name="MTBP" comment="Mass TerminationBoard Paramaters" >
   <var name="dy" value="{0.0, 0.8, 1.3, 1.585, 1.585}" comment="Offsets per MTB in y" />
 </Fill>
 
@@ -270,7 +266,11 @@ It is fairly complicated and will be approximated -->
 
 
 <!-- cable support ladder -->
-<Group     name="CableSupportGroup" />
+<!-- 
+<Group     
+    name="CableSupportGroup" 
+/>
+-->
 <Create    block="PSCL"/>
 <Placement block="PSCL" group="CableSupportGroup"  x="-18.2+0.1" y="0"      z="-(146+280.8)/2" />
 
@@ -316,7 +316,7 @@ It is fairly complicated and will be approximated -->
 
 <Do var="i" from="0" to="4">
   xpos = -7.27+i*2.1
-  ypos = 13.575+MTB_dy(i+1)
+  ypos = 13.575+MTBP_dy(i+1)
   zPos=- 108.85-6.8*i
   <Create block="PSMB" />
   <If expr="i.eq.4" >
@@ -329,7 +329,7 @@ It is fairly complicated and will be approximated -->
   </If>
 
   xpos = -7.5467-0.06+i*2.1
-  ypos = 13.575+MTB_dy(i+1)
+  ypos = 13.575+MTBP_dy(i+1)
   zPos=- 94.29-6.8*i
   <!-- Cable Park (towards IR) on MTB Board -->
 
@@ -344,7 +344,7 @@ It is fairly complicated and will be approximated -->
   </If>
 
   xpos = -7.52+0.25+i*2.1
-  ypos = 13.575+MTB_dy(i+1)
+  ypos = 13.575+MTBP_dy(i+1)
   zPos=- 87.60-6.8*i 
 
   <!-- Cable Park (towards IR) on MTB Board Part 2-->
@@ -361,7 +361,7 @@ It is fairly complicated and will be approximated -->
 
 
   xpos = -8.2+i*2.1
-  ypos = 8.214+MTB_dy(i+1)
+  ypos = 8.214+MTBP_dy(i+1)
   zPos=- 119.68-6.8*i
   <Create block="PSMT" />
   <If expr="i.eq.4" >
@@ -375,7 +375,7 @@ It is fairly complicated and will be approximated -->
 
 <!-- Cable connectors, cables -->
   xpos = -8.0+i*2.1
-  ypos =  15.8+MTB_dy(i+1)
+  ypos =  15.8+MTBP_dy(i+1)
   zPos = -126.6+1.5-6.8*i
   <Create block="PSCJ" />
   <If expr="i.eq.4" >
@@ -387,7 +387,7 @@ It is fairly complicated and will be approximated -->
   </Else>
   </If>
 
-  ypos = 11.2+MTB_dy(i+1)
+  ypos = 11.2+MTBP_dy(i+1)
   <Create block="PSCJ" />
   <If expr="i.eq.4" >
   <Then>
