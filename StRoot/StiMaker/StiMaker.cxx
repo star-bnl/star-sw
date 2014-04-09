@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.206 2013/04/10 22:14:20 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.207 2014/04/09 23:52:20 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.207  2014/04/09 23:52:20  perev
+// Ssd+Sst+Pxl
+//
 // Revision 1.206  2013/04/10 22:14:20  fisyak
 // Roll back to version 04/04/2013
 //
@@ -354,8 +357,11 @@ More detailed: 				<br>
      SetAttr("useTpc"  ,1) && SetAttr("activeTpc"  ,1) 	// default
      SetAttr("useSvt",  1) && SetAttr("activeSvt"  ,0) 	// default
      SetAttr("useSsd"  ,0) && SetAttr("activeSsd"  ,0)	// default Off
+
      SetAttr("usePixel",0) && SetAttr("activePixel",0)	// default Off
      SetAttr("useIst"  ,0) && SetAttr("activeIst"  ,0)	// default Off
+     SetAttr("useSst"  ,0) && SetAttr("activeSst"  ,0)	// default Off
+
      SetAttr("useHpd"  ,0) && SetAttr("activeHpd"  ,0)	// default Off
 
      SetAttr("useEventFiller"      ,kTRUE);		// default On
@@ -481,9 +487,15 @@ StiMaker::StiMaker(const Char_t *name) :
   _toolkit = StiToolkit::instance();
   SetAttr("useTpc"		,kTRUE);
   SetAttr("activeTpc"		,kTRUE);
+
   SetAttr("useSvt"		,kTRUE); 
 //SetAttr("activeSvt"		,kTRUE);
   SetAttr("useSsd"		,kTRUE); 
+
+  SetAttr("usePixel"		,kTRUE); 
+  SetAttr("useSst"		,kTRUE); 
+  SetAttr("useIst"		,kTRUE); 
+
 //SetAttr("activeSsd"		,kTRUE);
 //SetAttr("useAux"		,kTRUE); // Auxiliary info added to output for evaluation
   SetAttr("useEventFiller"      ,kTRUE);
@@ -597,12 +609,20 @@ Int_t StiMaker::InitDetectors()
     _toolkit->add(group = new StiSvtDetectorGroup(IAttr("activeSvt"),SAttr("svtInputFile")));
     group->setGroupId(kSvtId);
     }
-  if (IAttr("useSsd") && gStSsdDbMaker)
-      {
-	  cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
-	  _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
-	  group->setGroupId(kSsdId);
-      }
+
+  // SSD or SST - they share the db and the kSsdId
+  if (IAttr("useSsd") && gStSsdDbMaker){
+    cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
+    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
+    group->setGroupId(kSsdId);
+
+  } else if ( IAttr("useSst") && gStSsdDbMaker){
+    cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
+    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSst"),SAttr("ssdInputFile")));
+    group->setGroupId(kSsdId);
+  }
+
+
   if (IAttr("usePixel"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
