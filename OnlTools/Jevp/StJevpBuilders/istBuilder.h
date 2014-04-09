@@ -5,6 +5,8 @@
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TH1S.h>
+#include <TH2S.h>
 #include <TRandom.h>
 #include "DAQ_READER/daq_dta.h"
 #include <string>
@@ -63,9 +65,14 @@ class istBuilder : public JevpPlotSet {
   static const float cmnCut	= 3.0;
   static const float hitCut	= 5.0;
   static const float rmsMin     = 12.0;
- 
+
   //IST mapping
-  int istMapping[totCh]; //IST channel mapping (electronics ID & geometry ID transform)
+  int istMapping[totCh]; //IST channel mapping (electronics ID to geometry ID transform)
+  int istElecMapping[totCh]; //IST channel mapping (geometry ID & electronics ID transform)
+  //IST pedestal/rms
+  bool  tableFound;
+  float istPedestal[totCh];
+  float istRmsNoise[totCh];
 
   //*** Histogram Declarations...
   union {
@@ -161,6 +168,7 @@ class istBuilder : public JevpPlotSet {
   union {
     TH2 *tbVsAdcArray[];  // Time bin vs. ADC value
     struct{
+      TH2* tbVsAdc0;
       TH2* tbVsAdc1;
       TH2* tbVsAdc2;
       TH2* tbVsAdc3;
@@ -185,6 +193,53 @@ class istBuilder : public JevpPlotSet {
       TH2* tbVsAdc22;
       TH2* tbVsAdc23;
       TH2* tbVsAdc24;
+      TH2* tbVsAdc25;
+      TH2* tbVsAdc26;
+      TH2* tbVsAdc27;
+      TH2* tbVsAdc28;
+      TH2* tbVsAdc29;
+      TH2* tbVsAdc30;
+      TH2* tbVsAdc31;
+      TH2* tbVsAdc32;
+      TH2* tbVsAdc33;
+      TH2* tbVsAdc34;
+      TH2* tbVsAdc35;
+      TH2* tbVsAdc36;
+      TH2* tbVsAdc37;
+      TH2* tbVsAdc38;
+      TH2* tbVsAdc39;
+      TH2* tbVsAdc40;
+      TH2* tbVsAdc41;
+      TH2* tbVsAdc42;
+      TH2* tbVsAdc43;
+      TH2* tbVsAdc44;
+      TH2* tbVsAdc45;
+      TH2* tbVsAdc46;
+      TH2* tbVsAdc47;
+      TH2* tbVsAdc48;
+      TH2* tbVsAdc49;
+      TH2* tbVsAdc50;
+      TH2* tbVsAdc51;
+      TH2* tbVsAdc52;
+      TH2* tbVsAdc53;
+      TH2* tbVsAdc54;
+      TH2* tbVsAdc55;
+      TH2* tbVsAdc56;
+      TH2* tbVsAdc57;
+      TH2* tbVsAdc58;
+      TH2* tbVsAdc59;
+      TH2* tbVsAdc60;
+      TH2* tbVsAdc61;
+      TH2* tbVsAdc62;
+      TH2* tbVsAdc63;
+      TH2* tbVsAdc64;
+      TH2* tbVsAdc65;
+      TH2* tbVsAdc66;
+      TH2* tbVsAdc67;
+      TH2* tbVsAdc68;
+      TH2* tbVsAdc69;
+      TH2* tbVsAdc70;
+      TH2* tbVsAdc71;
     };
   } hTbVsAdcContents;
 
@@ -195,16 +250,21 @@ class istBuilder : public JevpPlotSet {
       TH1* hMeanRMS;//mean rms of all channels
       TH1* hSumTB;  //number of time bin per event
       TH1* hMaxTimeBin;  //max ADC time bin index
+      TH1* hMaxTimeBin_ZS;  //max ADC time bin index
       TH1* hSumBad; //number of good channels per APV
       TH1* hApvCorpt;//frequency of visible APVs per event
       TH1* hEventSize;//IST event size
-      TH1* hMIPvsSensor; //IST MPV of MIP per sensor
+      TH1* hMipMPVvsSection; //IST MPV of MIP per section (non-ZS)
+      TH1* hMipMPVvsSection_ZS; //IST MPV of MIP per section (ZS)
+      TH1* hMipSIGMAvsSection; //IST Sigma of MIP per section (non-ZS)
+      TH1* hMipSIGMAvsSection_ZS; //IST Sigma of MIP per section (ZS)
+      TH1* hMaxTBfractionVsSection_ZS; //max time bin fraction in 1,2,3 over all time bins vs section ID
     };
   } hEventSumContents;
   
   union {
-    TH1 *mipArray[]; //MIP signal distribution per sensor
-    struct {
+    TH1 *mipArray[]; //MIP signal distribution per section (2 sensors)
+    struct { // 1-72 non-ZS data; 73-144 ZS data
       TH1* hMip1;
       TH1* hMip2;
       TH1* hMip3;
@@ -353,8 +413,87 @@ class istBuilder : public JevpPlotSet {
   } hMipContents;
 
   union {
+    TH1 *maxTimeBinArray[]; //MaxTimeBin per section
+    struct { 
+      TH1* hMaxTB1;
+      TH1* hMaxTB2;
+      TH1* hMaxTB3;
+      TH1* hMaxTB4;
+      TH1* hMaxTB5;
+      TH1* hMaxTB6;
+      TH1* hMaxTB7;
+      TH1* hMaxTB8;
+      TH1* hMaxTB9;
+      TH1* hMaxTB10;
+      TH1* hMaxTB11;
+      TH1* hMaxTB12;
+      TH1* hMaxTB13;
+      TH1* hMaxTB14;
+      TH1* hMaxTB15;
+      TH1* hMaxTB16;
+      TH1* hMaxTB17;
+      TH1* hMaxTB18;
+      TH1* hMaxTB19;
+      TH1* hMaxTB20;
+      TH1* hMaxTB21;
+      TH1* hMaxTB22;
+      TH1* hMaxTB23;
+      TH1* hMaxTB24;
+      TH1* hMaxTB25;
+      TH1* hMaxTB26;
+      TH1* hMaxTB27;
+      TH1* hMaxTB28;
+      TH1* hMaxTB29;
+      TH1* hMaxTB30;
+      TH1* hMaxTB31;
+      TH1* hMaxTB32;
+      TH1* hMaxTB33;
+      TH1* hMaxTB34;
+      TH1* hMaxTB35;
+      TH1* hMaxTB36;
+      TH1* hMaxTB37;
+      TH1* hMaxTB38;
+      TH1* hMaxTB39;
+      TH1* hMaxTB40;
+      TH1* hMaxTB41;
+      TH1* hMaxTB42;
+      TH1* hMaxTB43;
+      TH1* hMaxTB44;
+      TH1* hMaxTB45;
+      TH1* hMaxTB46;
+      TH1* hMaxTB47;
+      TH1* hMaxTB48;
+      TH1* hMaxTB49;
+      TH1* hMaxTB50;
+      TH1* hMaxTB51;
+      TH1* hMaxTB52;
+      TH1* hMaxTB53;
+      TH1* hMaxTB54;
+      TH1* hMaxTB55;
+      TH1* hMaxTB56;
+      TH1* hMaxTB57;
+      TH1* hMaxTB58;
+      TH1* hMaxTB59;
+      TH1* hMaxTB60;
+      TH1* hMaxTB61;
+      TH1* hMaxTB62;
+      TH1* hMaxTB63;
+      TH1* hMaxTB64;
+      TH1* hMaxTB65;
+      TH1* hMaxTB66;
+      TH1* hMaxTB67;
+      TH1* hMaxTB68;
+      TH1* hMaxTB69;
+      TH1* hMaxTB70;
+      TH1* hMaxTB71;
+      TH1* hMaxTB72;
+    };
+  } hMaxTimeBinContents;
+
+  union {
     TH2 *sumArray[];
     struct{
+      TH2* hVisibleApv;//visible APVs per section per event
       TH2* hHitMap;       //hit density (phi vs. z -- 64*24 vs. 12*6)
       TH2* hHitMapVsAPV;  //Update 03/03/2014 Yaping Wang: hit map on APV (APV geometry ID vs. ladder geometry ID) 
       TH2* hMultVsLadder; //total number of hits per event vs. ladder
@@ -377,6 +516,7 @@ class istBuilder : public JevpPlotSet {
   int mTbVsAdcHist;
   int mEventSumHist;
   int mMipHist;
+  int mMaxTimeBinHist;
   int mSumHist;
 
   JevpPlot** plots;
@@ -387,6 +527,8 @@ class istBuilder : public JevpPlotSet {
   int numOverOneSig[totCh];
   int maxAdc[totCh];
   int maxTimeBin[totCh];
+  int maxAdc_zs[totCh];
+  int maxTimeBin_zs[totCh];
   double runningAvg[totCh];
   double runningStdDevSq[totCh];
 
@@ -399,8 +541,10 @@ class istBuilder : public JevpPlotSet {
 
   //num RDOs, ARM, APV, keep track of channel count per apv
   int chCntDaq[6][6][24];
+  int apvCntDaq[72];
 
   int sumHistogramsFilled;
+  int numTb;
 
   JLatex* errorMsg;
 
