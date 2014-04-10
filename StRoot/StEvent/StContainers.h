@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.33 2013/07/23 11:21:49 jeromel Exp $
+ * $Id: StContainers.h,v 2.34 2014/04/10 16:00:12 jeromel Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.34  2014/04/10 16:00:12  jeromel
+ * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
+ *
  * Revision 2.33  2013/07/23 11:21:49  jeromel
  * Undo past week changes
  *
@@ -165,6 +168,7 @@ class StHltTriggerReason;
 class StFgtStrip;
 class StFgtHit;
 class StFgtPoint;
+class StIstHit;
 
 StCollectionDef(Object)
 StCollectionDef(BTofHit)
@@ -222,6 +226,6 @@ StCollectionDef(HltTriggerReason)
 StCollectionDef(FgtHit)
 StCollectionDef(FgtStrip)
 StCollectionDef(FgtPoint)
-
+StCollectionDef(IstHit)
 
 #endif

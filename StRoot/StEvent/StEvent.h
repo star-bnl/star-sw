@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.46 2013/03/05 14:42:45 ullrich Exp $
+ * $Id: StEvent.h,v 2.47 2014/04/10 16:00:13 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.47  2014/04/10 16:00:13  jeromel
+ * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
+ *
  * Revision 2.46  2013/03/05 14:42:45  ullrich
  * Added StPxl hits and Containers.
  *
@@ -200,6 +203,7 @@ class StRnDHitCollection;
 class StHltEvent;
 class StFgtCollection;
 class StPxlHitCollection;
+class StIstHitCollection;
 
 class StEvent : public StXRefMain {
 public:
@@ -261,6 +265,8 @@ public:
     const StFgtCollection*              fgtCollection() const;
     StPxlHitCollection*                 pxlHitCollection();
     const StPxlHitCollection*           pxlHitCollection() const;
+    StIstHitCollection*                 istHitCollection();
+    const StIstHitCollection*           istHitCollection() const;
     
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
@@ -331,6 +337,7 @@ public:
     void setSvtHitCollection(StSvtHitCollection*);
     void setSsdHitCollection(StSsdHitCollection*);
     void setPxlHitCollection(StPxlHitCollection*);
+    void setIstHitCollection(StIstHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setFmsCollection(StFmsCollection*);
     void setRichCollection(StRichCollection*);

@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlHit.h,v 2.2 2013/06/09 22:04:42 ullrich Exp $
+ * $Id: StPxlHit.h,v 2.3 2014/04/10 16:00:13 jeromel Exp $
  *
  * Author: S. Margetis, J. Bouchet, Jan 2013
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPxlHit.h,v $
+ * Revision 2.3  2014/04/10 16:00:13  jeromel
+ * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
+ *
  * Revision 2.2  2013/06/09 22:04:42  ullrich
  * Modified layer() method.
  *
@@ -39,7 +42,7 @@ public:
              unsigned char trackRefCount = 0);
     ~StPxlHit();
     
-    StDetectorId detector() const;
+    virtual StDetectorId detector() const;
     
     unsigned char sector() const;
     unsigned char ladder() const;
