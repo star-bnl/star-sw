@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.55 2013/07/23 11:21:49 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.56 2014/04/10 14:35:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.56  2014/04/10 14:35:26  ullrich
+ * Add Ist constants.
+ *
  * Revision 2.55  2013/07/23 11:21:49  jeromel
  * Undo past week changes
  *
@@ -526,6 +529,17 @@ enum StFgtClusterSeedType {
     kFgtNextToCluster,
     kFgtKeepStrip
 };
+
+/** For more IST related constants see StRoot/StIstUtil/StistConsts.h */
+namespace StIstConsts
+{
+   const int kIstNumLadders = 24;          ///< 24 IST Ladders
+   const int kIstNumSensorsPerLadder = 6;  ///< 6 sensor per one IST Ladder
+   const int kIstNumSensors = 144;         ///< 144 sensors
+   const int kIstNumPadsPerSensor = 768;   ///< 768 pads in each sensor
+   const int kIstNumRowsPerSensor = 64;    ///< 64 rows in r-phi direction per each sensor
+   const int kIstNumColumnsPerSensor = 12; ///< 12 columns in beam direction per each sensor
+}
 
 const char *detectorNameById(StDetectorId id);
 StDetectorId detectorIdByName(const char *name);
