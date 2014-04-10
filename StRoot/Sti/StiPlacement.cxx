@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include "StiPlacement.h"
 
+using namespace std;
+
+
 StiPlacement::StiPlacement(){
     normalRefAngle=0; 
     normalRadius=0;   
@@ -96,3 +99,18 @@ void StiPlacement::setLayerAngle(float layerAngle)
 }
 	
 	
+ostream& operator<<(ostream& os, const StiPlacement& p)
+{
+   os << "StiPlacement:" << endl
+      << "normalRefAngle: " << p.normalRefAngle << " rad, "
+      << "normalRadius: " << p.normalRadius << " cm, "
+      << "normalYoffset: " << p.normalYoffset << " cm" << endl
+      << "centerRefAngle: " << p.centerRefAngle << " rad, "
+      << "centerRadius: "   << p.centerRadius << " cm, "
+      << "centerOrientation: "  << p.centerOrientation << " rad" << endl
+      << "zCenter: " << p.zCenter << " cm, "
+      << "layerRadius: " << p.layerRadius << " cm, "
+      << "_layerAngle: " << p._layerAngle << " rad" << endl;
+
+   return os;
+}

@@ -56,12 +56,14 @@ void StiMaterial::set(const string& name,
 
 ostream& operator<<(ostream& os, const StiMaterial& m)
 {
-  os << "Name:"<< m.getName()
+  os << "StiMaterial:" << endl
+     << "Name:"<< m.getName()
      << " Density:"<< m.getDensity()<< " g/cm^3"
      << " RadLength:"<<m.getRadLength()
      << " EffZ: "<<m.getZ()
      << " EffA: "<<m.getA()
-     << " EffIoniz: "<<m.getIonization()<<endl;
+     << " EffIoniz: "<<m.getIonization()
+     << endl;
     
     return os;
 }
