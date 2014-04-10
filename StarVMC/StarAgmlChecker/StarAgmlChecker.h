@@ -104,6 +104,10 @@ class StarAgmlChecker : public TGeoChecker
   /// Provides a checksum for the volume
   TMD5 CheckSum( const Char_t *volume );
 
+  /// Returns a "checksum data set"... i.e. the geometry tree with each node reduced
+  /// to its checksum.
+  TDataSet *CheckSet( const Char_t *volume="HALL" );
+
 
  private:
  protected:
