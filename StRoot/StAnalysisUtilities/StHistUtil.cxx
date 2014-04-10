@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.93 2014/02/20 20:16:19 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.94 2014/04/10 17:58:40 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.94  2014/04/10 17:58:40  genevb
+// Fix for dE/dx slope plot
+//
 // Revision 2.93  2014/02/20 20:16:19  genevb
 // Adjust dE/dx slope hist range, handle ROOT change for 2D polar plots
 //
@@ -341,6 +344,34 @@ UInt_t QAU1 = 1;
 
 int sizeOfCharPtr = sizeof(Char_t*);
 int sizeOfTH1Ptr = sizeof(TH1*);
+
+//_____________________________________________________________________________
+// copied from StdEdxY2Maker vers. 1.83,
+//   avoids loading that library just for these
+Double_t StdEdxY2Maker_gaus2(Double_t *x, Double_t *p) {
+  Double_t NormL = p[0];
+  Double_t mu    = p[1];
+  Double_t muP   = mu + p[4];
+  Double_t sigma = p[2];
+  Double_t sigmaP = TMath::Sqrt(sigma*sigma + 0.101741*0.101741);
+  Double_t phi   = p[3];
+  Double_t frac = TMath::Sin(phi);
+  frac *= frac;
+  return TMath::Exp(NormL)*((1 - frac)*TMath::Gaus(x[0],mu ,sigma ,kTRUE) + 
+			    frac      *TMath::Gaus(x[0],muP,sigmaP,kTRUE)); 
+}
+TF1 *StdEdxY2Maker_Gaus2() {
+  TF1 *f = new TF1("Gaus2",StdEdxY2Maker_gaus2,-3,3,5);
+  f->SetParName(0,"NormL"); f->SetParLimits(0,-10.,10.);
+  f->SetParName(1,"mu");    f->SetParLimits(1,-0.5,0.5);
+  f->SetParName(2,"sigma"); f->SetParLimits(2, 0.2,0.5);
+  f->SetParName(3,"phiP");  f->SetParLimits(3, 0.0,TMath::Pi()/4);
+  f->SetParName(4,"muP");
+  f->SetParameters(10,0,0.3,0.1,1.315);
+  //  f->FixParameter(4,1.425);
+  return f;
+}
+//_____________________________________________________________________________
 
 ClassImp(StHistUtil)
   
@@ -881,7 +912,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
               oName.Contains("fpd_channel_") ||
               oName.Contains("TpcSector") ||
               oName.Contains("PointRPTpc") ||
-              oName.Contains("PointXYTpc") ) {
+              oName.Contains("PointXYTpc")) {
             gPad->SetLogz(1);
             if (!analRepeat) {LOG_INFO << "       -- Will draw in logZ scale: " << oname <<endm;}
           } else gPad->SetLogz(0);
@@ -934,17 +965,19 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             latex.SetTextAlign(12);
             TH3F* Z3A = (TH3F*) hobj;
             Bool_t noneYet = kTRUE;
-            // copied from StdEdxY2Maker::FinishRun() vers. 1.82,
+            // copied from StdEdxY2Maker::FinishRun() vers. 1.83,
             //   with minor modifications for plotting the results
+            Double_t slope = 1.7502e-6;// slope from Blair   1/( O2 in ppm., cm )
             const Char_t *IO[2] = {"Inner", "Outer"};
-            Double_t    xmin[2] = { 70, 40};
-            Double_t    xmax[2] = {120,180};
+            Double_t    xmin[2] = { 40, 40};
+            Double_t    xmax[2] = {200,180};
+            TF1 *gg = StdEdxY2Maker_Gaus2();
             float histmiddle = 0;
             for (Int_t io = 1; io <= 2; io++) {
               Z3A->GetXaxis()->SetRange(io,io);
               TH2 *I = (TH2 *) Z3A->Project3D(Form("zy%i",io));
               if (I) {
-                I->FitSlicesY();
+                I->FitSlicesY(gg);
                 TH1D *proj = (TH1D*) gDirectory->Get(Form("%s_1",I->GetName()));
                 if (proj) {
                   proj->Fit("pol1","erq",(noneYet ? "" : "same"),xmin[io-1],xmax[io-1]);
@@ -955,13 +988,16 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                   proj->SetTitle(otitle);
                   TF1 *f = (TF1 *) proj->GetListOfFunctions()->FindObject("pol1");
                   if (f) {
-                    gMessMgr->Info() << "StHistUtil: slope in drift distance for " << IO[io-1] << " = "
-                                     << f->GetParameter(1) << " +/- " << f->GetParError(1) << endm;
+                    gMessMgr->Info() << "StHistUtil: Estimated content of O2 (ppm) "
+                                     << "from slope in drift distance for "
+                                     << Form("%s = %10.2f +/- %10.2f", IO[io-1],
+                                     -f->GetParameter(1)/slope, f->GetParError(1)/slope)
+                                     << endm;
                     if (noneYet) histmiddle = f->Eval(100.0);
                     f->SetLineColor(6-2*io);
                     latex.SetTextColor(6-2*io);
-                    latex.DrawLatex(20,histmiddle-0.9+0.6*io,Form("%s : %f +/- %f\n",
-                      IO[io-1],f->GetParameter(1),f->GetParError(1)));
+                    latex.DrawLatex(20,histmiddle+0.9-0.6*io,Form("%s : %10.2f +/- %10.2f\n",
+                      IO[io-1],-f->GetParameter(1)/slope,f->GetParError(1)/slope));
                   }
                   if (noneYet) {
                     proj->SetMinimum(histmiddle-0.4);
@@ -995,7 +1031,9 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                       oName.EndsWith("SSD") ||
                       oName.EndsWith("PointXYSvt") ||
                       oName.Contains("TpcSector") ||
-                      oName.Contains("PointXYTpc"))) {
+                      oName.Contains("PointXYTpc") ||
+                      oName.Contains("SectorvsSensor") ||
+                      oName.Contains("LaddervsSensor"))) {
             hobj->Draw("ZCol");
           } else if ((chkdim == 2) && (!hobj->InheritsFrom("StMultiH1F"))) {
             hobj->Draw("Col");
