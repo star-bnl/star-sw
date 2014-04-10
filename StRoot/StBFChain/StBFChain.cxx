@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.610 2014/04/10 11:00:31 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.611 2014/04/10 23:37:44 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -413,50 +413,60 @@ Int_t StBFChain::Instantiate()
       }
       if (GetOption("Embedding")) mk->SetAttr("Embedding",kTRUE);
     }
+
+    // ---
     //		Sti(ITTF) start
+    // ---
     if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "StvMaker") {
       if ( maker == "StvMaker" &&  GetOption("StvCA")) {
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
       }
-      if (GetOption("NoSvtIT")) mk->SetAttr("useSvt"	,kFALSE);
-      else
-	if (GetOption("SvtIT")){
-	  mk->SetAttr("useSvt"	,kTRUE);
-	  mk->SetAttr("activeSvt"	,kTRUE);
-	}
-      if (GetOption("NoSsdIT")) mk->SetAttr("useSsd"	,kFALSE);
-      else
-	if (GetOption("SsdIT")){
-	  mk->SetAttr("useSsd"	,kTRUE);
-	  mk->SetAttr("activeSsd"	,kTRUE);
-	}
 
+      // old logic for svt and ssd
+      if (GetOption("NoSvtIT")){
+	mk->SetAttr("useSvt"	,kFALSE);
+      } else {
+	if (GetOption("SvtIT")){
+	  mk->SetAttr("useSvt"	  ,kTRUE);
+	  mk->SetAttr("activeSvt" ,kTRUE);
+	}
+      }
+      if (   GetOption("NoSsdIT") &&
+	    !GetOption("SstIT") ){
+	mk->SetAttr("useSsd"	,kFALSE);
+      } else {
+	if (GetOption("SsdIT")){
+	  mk->SetAttr("useSsd"	  ,kTRUE);
+	  mk->SetAttr("activeSsd" ,kTRUE);
+	}
+      }
 
       // this was an R&D detector never implemented
       // simulations were made nonetheless
       if (GetOption("HpdIT")){
-	mk->SetAttr("useHpd"  ,kTRUE);
-	mk->SetAttr("activeHpd",kTRUE);
+	mk->SetAttr("useHpd"     ,kTRUE);
+	mk->SetAttr("activeHpd"  ,kTRUE);
       }
 
       // back to the HFT sub-system
       if (GetOption("PixelIT") || GetOption("PxlIT") ){
-	mk->SetAttr("usePixel"	,kTRUE);
+	mk->SetAttr("usePixel"	 ,kTRUE);
 	mk->SetAttr("activePixel",kTRUE);
       }
       if (GetOption("IstIT")){
-	mk->SetAttr("useIst"  ,kTRUE);
-	mk->SetAttr("activeIst",kTRUE);
+	mk->SetAttr("useIst"     ,kTRUE);
+	mk->SetAttr("activeIst"  ,kTRUE);
       }
       if (GetOption("SstIT")){
-	mk->SetAttr("useSst"	,kTRUE);
-	mk->SetAttr("activeSst",kTRUE);
+	mk->SetAttr("useSst"	 ,kTRUE);
+	mk->SetAttr("activeSst"  ,kTRUE);
       }
 
+      // other sub-systems
       if (GetOption("BTofIT")){
-	mk->SetAttr("useBTof"  ,kTRUE);
-	mk->SetAttr("activeBTof",kTRUE);
+	mk->SetAttr("useBTof"    ,kTRUE);
+	mk->SetAttr("activeBTof" ,kTRUE);
       }
 
       if (GetOption("StiPulls") || 
