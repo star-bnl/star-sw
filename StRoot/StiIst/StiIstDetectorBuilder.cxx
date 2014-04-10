@@ -35,15 +35,8 @@ using namespace StIstConsts;
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFile) :
    StiDetectorBuilder("Ist", active, inputFile), mSiMaterial(0),
-   mHybridMaterial(0), mIstDb(0), mTestGeomType(kDefault)
-{
-   StBFChain *chain = (StBFChain *) StMaker::GetChain();
-
-   if (chain) {
-      if ( chain->GetOption("StiIstCrude") )
-         mTestGeomType = kCrude;
-   }
-}
+   mHybridMaterial(0), mIstDb(0)
+{ }
 
 
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)
@@ -62,14 +55,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
    _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
 
    if (StiVMCToolKit::GetVMC()) {
-
-      switch (mTestGeomType) {
-      case kCrude:
-         buildInactiveVolumes();
-         break;
-      default:
-         useVMCGeometry();
-      }
+      buildInactiveVolumes();
    }
 }
 
