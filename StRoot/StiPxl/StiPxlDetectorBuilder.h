@@ -25,15 +25,6 @@ protected:
 private:
 
    void buildInactiveVolumes();
-   void buildSimpleBox();
-   void buildSimpleBox2();
-   void buildSimplePlane();
-   void buildSimpleTube();
-   void buildSimpleTubeSector();
-
-   enum ETestGeomType {kDefault, kSimpleBox, kSimpleBox2, kSimpleBox8, kSimplePlane, kSimpleTube, kSimpleTubeSector};
-
-   ETestGeomType mTestGeomType;
 };
 
 #endif
