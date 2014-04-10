@@ -1,4 +1,4 @@
-// $Id: StiDetectorVolume.cxx,v 2.5 2008/06/11 22:04:38 fisyak Exp $
+// $Id: StiDetectorVolume.cxx,v 2.6 2014/04/10 15:30:43 jeromel Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "StiDetectorVolume.h"
@@ -156,7 +156,7 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned i
 					     );
            }
         }  else  {
-           position = new TVolumePosition(0, 0, 0, place->getZcenter());
+           position = new TVolumePosition(0, 0, 0, place->getZcenter(), GetMatrix(place->getNormalRefAngle()));
         }
         position->SetNode(nextVolume);
         Add(nextVolume,position);
@@ -230,8 +230,8 @@ TShape *StiDetectorVolume::MakeShape(const StiCylindricalShape &shape,const char
                   ,  shape.getOuterRadius() - shape.getThickness() // rmin
                   ,  shape.getOuterRadius()                        // rmax
                   ,  shape.getHalfDepth()                          // Dz
-                  ,  -shape.getOpeningAngle()/2 
-                  ,  +shape.getOpeningAngle()/2 )
+                  ,  -shape.getOpeningAngle()*TMath::RadToDeg()/2
+                  ,  +shape.getOpeningAngle()*TMath::RadToDeg()/2 )
          :
          new  TTUBE((const char*)shape.getName().c_str()
                   , "StiCylindricalShape"
