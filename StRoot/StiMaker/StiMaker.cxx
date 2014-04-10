@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.207 2014/04/09 23:52:20 perev Exp $
+// $Id: StiMaker.cxx,v 1.208 2014/04/10 15:28:55 jeromel Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.208  2014/04/10 15:28:55  jeromel
+// Merged my previous differences commited by Victor with Dmitri's (Victor OK)
+//
 // Revision 1.207  2014/04/09 23:52:20  perev
 // Ssd+Sst+Pxl
 //
@@ -421,8 +424,7 @@ More detailed: 				<br>
 #include "StiTpc/StiTpcHitLoader.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiSsd/StiSsdDetectorGroup.h"
-#include "StiRnD/Hft/StiPixelDetectorGroup.h"
-// #include "StiBTof/StiBTofDetectorGroup.h"
+#include "StiPxl/StiPxlDetectorGroup.h
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiHitLoader.h"
@@ -626,7 +628,7 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("usePixel"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-      _toolkit->add(group = new StiPixelDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
+      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
       group->setGroupId(kPxlId);
     }
  if (IAttr("useIst"))
