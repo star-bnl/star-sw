@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "StEvent.h"
+#include "StEvent/StEnumerations.h"
 #include "StHit.h"
 #include "StEventHitIter.h"
 #include "StTpcHitCollection.h"
@@ -17,6 +18,7 @@
 #include "StFgtCollection.h"
 #include "StFgtHitCollection.h"
 #include "StFgtPointCollection.h"
+#include "StIstHitCollection.h"
 //________________________________________________________________________________
 StHitIter::StHitIter()
 {
@@ -446,6 +448,82 @@ int StSsdWaferHitIter::GetSize () const
   return ((StSsdWaferHitCollection*)fCont)->hits().size();
 }
 
+//_______IST_______IST_______IST_______IST_______IST_______IST_______IST_______IST
+//________________________________________________________________________________
+//..............................................................................
+class StIstHitIter : public StHitIter {
+public:
+                StIstHitIter();
+virtual        ~StIstHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+  StDetectorId DetectorId() const {return kIstId;}
+protected:
+};
+//..............................................................................
+class StIstLadderHitIter : public StHitIter {
+public:
+                StIstLadderHitIter();
+virtual        ~StIstLadderHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//..............................................................................
+class StIstSensorHitIter : public StHitIter {
+public:
+                StIstSensorHitIter();
+virtual        ~StIstSensorHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//________________________________________________________________________________
+StIstHitIter::StIstHitIter()
+{
+  StHitIter *iter = this,*jter=0;
+  iter->SetDowIter((jter=new StIstLadderHitIter())); iter=jter;
+  iter->SetDowIter((jter=new StIstSensorHitIter ()));
+}
+//________________________________________________________________________________
+const TObject *StIstHitIter::Reset(const TObject *cont)
+{
+  const StIstHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->istHitCollection();
+  return StHitIter::Reset(to);
+}
+//________________________________________________________________________________
+const TObject *StIstHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StIstHitCollection*)fCont)->ladder(idx);
+}
+//________________________________________________________________________________
+int StIstHitIter::GetSize () const
+{
+  return kIstNumLadders;
+}
+//________________________________________________________________________________
+const TObject *StIstLadderHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StIstLadderHitCollection*)fCont)->sensor(idx);
+}
+//________________________________________________________________________________
+int StIstLadderHitIter::GetSize () const
+{
+  return kIstNumSensorsPerLadder;
+}
+//________________________________________________________________________________
+const TObject *StIstSensorHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StIstSensorHitCollection*)fCont)->hits().at(idx);
+}
+//________________________________________________________________________________
+int StIstSensorHitIter::GetSize () const
+{
+  return ((StIstSensorHitCollection*)fCont)->hits().size();
+}
+
 //________________________________________________________________________________
 //_______FTPC______FTPC______FTPC______FTPC______FTPC______FTPC______FTPC______TPC
 //________________________________________________________________________________
@@ -671,7 +749,7 @@ int StEventHitIter::AddDetector(StDetectorId detId)
    case kFtpcEastId:
      Add(new StFtpcHitIter());break;
    case kPxlId: 
-   case kIstId: 
+   case kIstId: Add(new StIstHitIter()) ;break; 
      /* case kFgtId: n.b. This will be removing the RnD version of the FGT */ 
    case kFmsId: 
      Add(new StRnDHitIter(detId));break;
