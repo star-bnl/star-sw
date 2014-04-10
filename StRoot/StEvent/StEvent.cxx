@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.53 2013/03/05 14:49:44 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.54 2014/04/10 16:00:12 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.54  2014/04/10 16:00:12  jeromel
+ * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
+ *
  * Revision 2.53  2013/03/05 14:49:44  ullrich
  * Added PxlHits to statistics().
  *
@@ -221,6 +224,7 @@
 #include "StHltEvent.h"
 #include "StFgtCollection.h"
 #include "StPxlHitCollection.h"
+#include "StIstHitCollection.h"
 #include "StTrackNode.h"
 #include "StTrack.h"
 
@@ -228,8 +232,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.53 2013/03/05 14:49:44 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.53 2013/03/05 14:49:44 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.54 2014/04/10 16:00:12 jeromel Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.54 2014/04/10 16:00:12 jeromel Exp $";
 
 ClassImp(StEvent)
 
@@ -779,6 +783,22 @@ StEvent::fgtCollection() const
     return fgtCollection;
 }
 
+StIstHitCollection*
+StEvent::istHitCollection()
+{
+    StIstHitCollection *istHitCollection = 0;
+    _lookup(istHitCollection, mContent);
+    return istHitCollection;
+}
+
+const StIstHitCollection*
+StEvent::istHitCollection() const
+{
+    StIstHitCollection *istHitCollection = 0;
+    _lookup(istHitCollection, mContent);
+    return istHitCollection;
+}
+
 StPxlHitCollection*
 StEvent::pxlHitCollection()
 {
@@ -1228,6 +1248,12 @@ StEvent::setFgtCollection(StFgtCollection* val)
 }
 
 void
+StEvent::setIstHitCollection(StIstHitCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setPxlHitCollection(StPxlHitCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1341,6 +1367,7 @@ void StEvent::statistics()
     cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection());
     cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection());
     cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection());
+    cout << "\tStIstHitCollection:          " << static_cast<void*>(istHitCollection());
     cout << "\tStPxlHitCollection:          " << static_cast<void*>(pxlHitCollection());
     cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
     cout << "\tStFmsCollection:             " << static_cast<void*>(fmsCollection());
@@ -1366,6 +1393,7 @@ void StEvent::statistics()
     cout << "\t# of FTPC hits:              " << (ftpcHitCollection() ? ftpcHitCollection()->numberOfHits() : 0) << endl;
     cout << "\t# of SVT hits:               " << (svtHitCollection() ? svtHitCollection()->numberOfHits() : 0) << endl;
     cout << "\t# of SSD hits:               " << (ssdHitCollection() ? ssdHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of IST hits:               " << (istHitCollection() ? istHitCollection()->numberOfHits() : 0) << endl;
     cout << "\t# of PXL hits:               " << (pxlHitCollection() ? pxlHitCollection()->numberOfHits() : 0) << endl;
     cout << "\t# of track nodes:            " << trackNodes().size() << endl;
     cout << "\t# of primary tracks:         " << (primaryVertex(0) ? primaryVertex(0)->numberOfDaughters() : 0) << endl;

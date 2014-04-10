@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.30 2013/07/23 11:21:49 jeromel Exp $
+ * $Id: StContainers.cxx,v 2.31 2014/04/10 16:00:12 jeromel Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.31  2014/04/10 16:00:12  jeromel
+ * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
+ *
  * Revision 2.30  2013/07/23 11:21:49  jeromel
  * Undo past week changes
  *
@@ -149,6 +152,7 @@
 #include "StFgtPoint.h"
 #include "StFgtHit.h"
 #include "StPxlHit.h"
+#include "StIstHit.h"
 
 StCollectionImp(Object)
 StCollectionImp(CalibrationVertex)
@@ -206,4 +210,4 @@ StCollectionImp(FgtHit)
 StCollectionImp(FgtStrip)
 StCollectionImp(FgtPoint)
 StCollectionImp(PxlHit)
-
+StCollectionImp(IstHit)

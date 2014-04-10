@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.33 2013/03/05 14:42:45 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.34 2014/04/10 16:00:13 jeromel Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.34  2014/04/10 16:00:13  jeromel
+ * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
+ *
  * Revision 2.33  2013/03/05 14:42:45  ullrich
  * Added StPxl hits and Containers.
  *
@@ -113,7 +116,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.33 2013/03/05 14:42:45 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.34 2014/04/10 16:00:13 jeromel Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -162,6 +165,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRpsCollection",             "evt_aux",      7);
     setBranch("StSsdHitCollection",          "evt_hits",     8);
     setBranch("StSvtHitCollection",          "evt_hits",     8);
+    setBranch("StIstHitCollection",          "evt_hits",     8);
     setBranch("StPxlHitCollection",          "evt_hits",     8);
     setBranch("StTpcHitCollection",          "evt_hits",     8);
     setBranch("StFtpcHitCollection",         "evt_hits",     8);
@@ -185,6 +189,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRpsCollection",             "event", 1);
     setBranch("StSsdHitCollection",          "event", 1);
     setBranch("StSvtHitCollection",          "event", 1);
+    setBranch("StIstHitCollection",          "event", 1);
     setBranch("StPxlHitCollection",          "event", 1);
     setBranch("StTpcHitCollection",          "event", 1);
     setBranch("StFtpcHitCollection",         "event", 1);

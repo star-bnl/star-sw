@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.43 2013/07/23 11:21:49 jeromel Exp $
+ * $Id: StEventTypes.h,v 2.44 2014/04/10 16:00:13 jeromel Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.44  2014/04/10 16:00:13  jeromel
+ * Changes to inlcude Ist structure (Thomas OK-ed / may revisit some comments)
+ *
  * Revision 2.43  2013/07/23 11:21:49  jeromel
  * Undo past week changes
  *
@@ -278,5 +281,8 @@
 #include "StFgtHitCollection.h"
 #include "StFgtPoint.h"
 #include "StFgtPointCollection.h"
- 
+#include "StIstHit.h"
+#include "StIstSensorHitCollection.h" 
+#include "StIstLadderHitCollection.h"
+#include "StIstHitCollection.h"
 #endif
