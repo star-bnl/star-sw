@@ -981,7 +981,7 @@ Bfc_st BFC[] = {
 
 
   // Year 14 chains 
-  {"B2014","","","ry2014,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2014"  ,"","","ry2014,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2014 ITTF (tpc)",kFALSE},
   {"B2014a","","","ry2014a,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                              "Base chain for 2014a ITTF (tpc)",kFALSE},
@@ -992,7 +992,7 @@ Bfc_st BFC[] = {
 
   // Target Chain options for BES -> P2014a,DbV20140410,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
   {"P2014a","" ,"",
-   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis"
+   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,analysis"
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
@@ -1457,13 +1457,16 @@ Bfc_st BFC[] = {
   {"StiCALib" ,"","",""                                                   ,"","StiCA","Load Sti+CA",kFALSE},
   {"StiTpc"   ,"","","TpcDb,ITTF,tpc_T,dbutil,detDb,StarMagField,magF"   ,"","StiTpc","Load StiTpc",kFALSE},
   {"StiSvt"   ,"",""," "                  ,"","StSvtClassLibrary,StSvtDbMaker,StiSvt","Load StiSvt",kFALSE},
-  {"StiSsd"   ,"","",""                        ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSsd(t)",kFALSE},
+  {"StiSsd"   ,"","",""                           ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSsd",kFALSE},
   {"StiSst"   ,"","",""                        ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSsd(t)",kFALSE},
   {"StiPxl"   ,"","",""                           ,"","StPxlUtil,StPxlDbMaker,StiPxl","Load StiPxl",kFALSE},
   {"StiIst"   ,"","",""                           ,"","StIstUtil,StIstDbMaker,StiIst","Load StiIst",kFALSE},
 
-
-  {"StiLibs"  ,"","","StiTpc,StiSvt,StiSsd,StiPxl,StiIst,BTofUtil"   
+  // left for historical purpose
+  {"StiLibs0" ,"","","StiTpc,StiSvt,StiSsd,StiPxl,StiIst,BTofUtil"   
+                                                       ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
+  // switch to the SST based chain
+  {"StiLibs"  ,"","","StiTpc,StiSvt,StiSst,StiPxl,StiIst,BTofUtil"   
                                                        ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
 
   // depends on Sti symbols
