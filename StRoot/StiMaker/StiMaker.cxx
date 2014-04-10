@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.209 2014/04/10 15:48:28 jeromel Exp $
+// $Id: StiMaker.cxx,v 1.210 2014/04/10 23:39:23 jeromel Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.210  2014/04/10 23:39:23  jeromel
+// Backstep: remove default useXX as clash with older data (we need to reshape the options)
+//
 // Revision 1.209  2014/04/10 15:48:28  jeromel
 // Oops
 //
@@ -366,7 +369,6 @@ More detailed: 				<br>
 
      SetAttr("usePixel",0) && SetAttr("activePixel",0)	// default Off
      SetAttr("useIst"  ,0) && SetAttr("activeIst"  ,0)	// default Off
-     SetAttr("useSst"  ,0) && SetAttr("activeSst"  ,0)	// default Off
 
      SetAttr("useHpd"  ,0) && SetAttr("activeHpd"  ,0)	// default Off
 
@@ -497,9 +499,9 @@ StiMaker::StiMaker(const Char_t *name) :
 //SetAttr("activeSvt"		,kTRUE);
   SetAttr("useSsd"		,kTRUE); 
 
-  SetAttr("usePixel"		,kTRUE); 
-  SetAttr("useSst"		,kTRUE); 
-  SetAttr("useIst"		,kTRUE); 
+  //SetAttr("usePixel"		,kTRUE); 
+  //SetAttr("useSst"		,kTRUE); 
+  //SetAttr("useIst"		,kTRUE); 
 
 //SetAttr("activeSsd"		,kTRUE);
 //SetAttr("useAux"		,kTRUE); // Auxiliary info added to output for evaluation
@@ -616,13 +618,13 @@ Int_t StiMaker::InitDetectors()
     }
 
   // SSD or SST - they share the db and the kSsdId
-  if (IAttr("useSsd") && gStSsdDbMaker){
-    cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
+  if (IAttr("useSst") && gStSsdDbMaker){
+    cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
     _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
     group->setGroupId(kSsdId);
 
-  } else if ( IAttr("useSst") && gStSsdDbMaker){
-    cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
+  } else if ( IAttr("useSsd") && gStSsdDbMaker){
+    cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
     _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSst"),SAttr("ssdInputFile")));
     group->setGroupId(kSsdId);
   }
