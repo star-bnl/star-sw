@@ -987,12 +987,12 @@ Bfc_st BFC[] = {
    ,                                                              "Base chain for 2014a ITTF (tpc)",kFALSE},
 
   {"P2014","" ,"",
-   "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis"
+   "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
   // Target Chain options for BES -> P2014a,DbV20140410,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
   {"P2014a","" ,"",
-   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,analysis"
+   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiLibsHft,analysis,"
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
@@ -1463,11 +1463,11 @@ Bfc_st BFC[] = {
   {"StiIst"   ,"","",""                           ,"","StIstUtil,StIstDbMaker,StiIst","Load StiIst",kFALSE},
 
   // left for historical purpose
-  {"StiLibs0" ,"","","StiTpc,StiSvt,StiSsd,StiPxl,StiIst,BTofUtil"   
+  {"StiLibs"    ,"","","StiTpc,StiSvt,StiSsd,BTofUtil"   
                                                        ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
   // switch to the SST based chain
-  {"StiLibs"  ,"","","StiTpc,StiSvt,StiSst,StiPxl,StiIst,BTofUtil"   
-                                                       ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
+  {"StiLibsHft" ,"","","StiLibs,StiSst,StiPxl,StiIst"   
+                                                           ,"","","Load Sti Detector libs for HFT",kFALSE},
 
   // depends on Sti symbols
   {"VFPPV"    	,""  	,""	,"ctf_T,eemcDb,StiLib"	,"StGenericVertexMaker"
@@ -1499,7 +1499,7 @@ Bfc_st BFC[] = {
   {"PixelIT",""  ,"","PxlIT",""                                               ,"","Alias for PxlIT",kFALSE},
   {"PxlIT"  ,""  ,"","ITTF",""                             ,"Sti,StiPxl","Sti tracking: Pixel geom",kFALSE},
   {"IstIT"  ,""  ,"","ITTF",""                               ,"Sti,StiIst","Sti tracking: Ist geom",kFALSE},
-  {"SstIT"  ,""  ,"","ITTF",""                               ,"Sti,StiSsd","Sti tracking: Sst geom",kFALSE},
+  {"SstIT"  ,""  ,"","ITTF",""                               ,"Sti,StiSst","Sti tracking: Sst geom",kFALSE},
 
   {"BTofIT"  ,""  ,"","ITTF",""                            ,"Sti,StiBTof","Sti tracking: BTof geom",kFALSE},
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
