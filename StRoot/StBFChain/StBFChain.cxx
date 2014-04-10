@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.609 2013/12/23 20:34:26 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.610 2014/04/10 11:00:31 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -431,7 +431,17 @@ Int_t StBFChain::Instantiate()
 	  mk->SetAttr("useSsd"	,kTRUE);
 	  mk->SetAttr("activeSsd"	,kTRUE);
 	}
-      if (GetOption("PixelIT")){
+
+
+      // this was an R&D detector never implemented
+      // simulations were made nonetheless
+      if (GetOption("HpdIT")){
+	mk->SetAttr("useHpd"  ,kTRUE);
+	mk->SetAttr("activeHpd",kTRUE);
+      }
+
+      // back to the HFT sub-system
+      if (GetOption("PixelIT") || GetOption("PxlIT") ){
 	mk->SetAttr("usePixel"	,kTRUE);
 	mk->SetAttr("activePixel",kTRUE);
       }
@@ -439,11 +449,11 @@ Int_t StBFChain::Instantiate()
 	mk->SetAttr("useIst"  ,kTRUE);
 	mk->SetAttr("activeIst",kTRUE);
       }
-
-      if (GetOption("HpdIT")){
-	mk->SetAttr("useHpd"  ,kTRUE);
-	mk->SetAttr("activeHpd",kTRUE);
+      if (GetOption("SstIT")){
+	mk->SetAttr("useSst"	,kTRUE);
+	mk->SetAttr("activeSst",kTRUE);
       }
+
       if (GetOption("BTofIT")){
 	mk->SetAttr("useBTof"  ,kTRUE);
 	mk->SetAttr("activeBTof",kTRUE);
@@ -1325,7 +1335,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-SsdIT","Default,Stv");
       SetOption("-HpdIT","Default,Stv");
       SetOption("-BTofIT","Default,Stv");
-      SetOption("-PixelIT","Default,Stv");
+      SetOption("-PxlIT","Default,Stv");
       SetOption("-IstIT","Default,Stv");
     }  
     
