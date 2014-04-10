@@ -217,6 +217,11 @@ void StiIstDetectorBuilder::useVMCGeometry()
 }
 
 
+/**
+ * Creates a crude approximation of the IST detector. The geometry is modeled
+ * with a single tube using the dimensions and other physical properties of the
+ * IST mother volume defined in the ROOT TGeo geometry.
+ */
 void StiIstDetectorBuilder::buildInactiveVolumes()
 {
    // Build average inactive volumes
