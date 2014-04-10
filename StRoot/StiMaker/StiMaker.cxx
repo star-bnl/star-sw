@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.208 2014/04/10 15:28:55 jeromel Exp $
+// $Id: StiMaker.cxx,v 1.209 2014/04/10 15:48:28 jeromel Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.209  2014/04/10 15:48:28  jeromel
+// Oops
+//
 // Revision 1.208  2014/04/10 15:28:55  jeromel
 // Merged my previous differences commited by Victor with Dmitri's (Victor OK)
 //
@@ -424,7 +427,7 @@ More detailed: 				<br>
 #include "StiTpc/StiTpcHitLoader.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiSsd/StiSsdDetectorGroup.h"
-#include "StiPxl/StiPxlDetectorGroup.h
+#include "StiPxl/StiPxlDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiHitLoader.h"
