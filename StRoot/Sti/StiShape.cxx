@@ -1,16 +1,23 @@
 #include "StiCylindricalShape.h"
+
+
 ostream& operator<<(ostream& os, const StiShape& m)
 {
-  os << "Name:"<< m.getName()
-     << " ShapeCode:"<< m.getShapeCode()
-     << " HalfDepth:"<< m.getHalfDepth()
-     << " HalfWidth:"<< m.getHalfWidth();
+  os << "StiShape: " << endl
+     << "Name: "<< m.getName()
+     << " ShapeCode: "<< m.getShapeCode()
+     << " HalfDepth (dZ): " << m.getHalfDepth()
+     << " HalfWidth (dY): " << m.getHalfWidth();
+
   if (m.getShapeCode() == kCylindrical) {
     StiCylindricalShape *cyl = (StiCylindricalShape *) &m;
-    os << " OuterRadius:"<< cyl->getOuterRadius()
-       << " OpeningAngle:"<< cyl->getOpeningAngle();
+    os << " OuterRadius: "<< cyl->getOuterRadius()
+       << " OpeningAngle: "<< cyl->getOpeningAngle();
   }
-  os << " Thickness:"<< m.getThickness()
-     << " EdgeWidth:"<< m.getEdgeWidth();
+
+  os << " Thickness (2*dX): " << m.getThickness()
+     << " EdgeWidth: " << m.getEdgeWidth()
+     << endl;
+
   return os;
 }

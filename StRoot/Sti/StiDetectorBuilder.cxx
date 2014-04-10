@@ -14,6 +14,8 @@
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
 #include "TMath.h"
+#include "TVector3.h"
+
 StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 int StiDetectorBuilder::_debug = 0;
 StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const string & inputFile)
@@ -171,7 +173,7 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
     }
     
     for (Int_t ir = 0; ir < Nr; ir++) {
-      TString Name(volP->GetName());
+      TString Name(nodeP->GetName());
       if (ir) {Name += "__";Name += ir;}
       sh     = findShape(Name.Data());
       if (! sh) {// I assume that the shape name is unique
@@ -192,55 +194,63 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   } while(0);
 
   if (!pPlacement)  {// BBox
+
     shapeP->ComputeBBox();
-    TGeoBBox *box = (TGeoBBox *)shapeP;
-    Double_t dx = box->GetDX();
-    Double_t dy = box->GetDY();
-    Double_t dz = box->GetDZ();
-    StThreeVectorD centerVector(xyz[0],xyz[1],xyz[2]);
-    Double_t r = centerVector.perp();
-    Double_t phi  = centerVector.phi();
-    Int_t ix = -1;
-    Double_t distMax = 0;
-    Double_t dist;
-    Bool_t swap = kFALSE;
-    for (Int_t i = 0; i < 3; i++) {
-      StThreeVectorD normalVector(rot[i],rot[i+3],rot[i+6]);
-      Double_t phiD = normalVector.phi();
-      dist = r*TMath::Cos(phi-phiD);
-      swap = kFALSE;
-      if (dist < -1e-7) {normalVector *= -1; swap = kTRUE;}
-      phiD = normalVector.phi();
-      dist = r*TMath::Cos(phi-phiD);
-      if (! swap) dist += 1;
-      if (dist > distMax) {distMax = dist; ix = i; }
+
+    TGeoBBox *box = (TGeoBBox*) shapeP;
+    TGeoRotation geoRotation(*hmat);
+
+    // Sti geometry deals only with simple object rotated about the z axis
+    double euler_phi = geoRotation.GetPhiRotation()/180*M_PI;
+
+    // Define "center" and normal vectors for the considered volume
+    TVector3 centerVec(xyz);
+
+    double halfThickness = box->GetDX();
+    double halfWidth     = box->GetDY();
+    double dz            = box->GetDZ();
+    double r             = centerVec.Perp();
+    double phi           = centerVec.Phi();
+
+    // Consider two normal vectors, i.e. along the x and y axes in the local coordinate system
+    TVector3 normVec(cos(euler_phi), sin(euler_phi), 0);
+    TVector3 normVecPerp(-sin(euler_phi), cos(euler_phi), 0);
+
+    double centerOrient     = centerVec.DeltaPhi(normVec);
+    double centerOrient2    = normVec.DeltaPhi(centerVec);
+    double centerOrientPerp = centerVec.DeltaPhi(normVecPerp);
+
+    // First, select the normal vector closest to the central vector
+    if ( fabs(centerVec.Dot(normVecPerp)) > fabs(centerVec.Dot(normVec)) )
+    {
+       halfThickness = box->GetDY();
+       halfWidth     = box->GetDX();
+       normVec       = normVecPerp;
     }
-    assert( ix != -1);
-    StThreeVectorD normalVector(rot[ix],rot[ix+3],rot[ix+6]);
-    Double_t prod = centerVector*normalVector;
-    if (prod < -1e-7) normalVector *= -1;
-    Double_t phiD = normalVector.phi();
-    if (ix == 0) {
-      dx = dy;
-      dy = box->GetDX();
+
+    // Then make sure the normal is pointing outwards
+    if (normVec.Dot(centerVec) < 0) {
+       normVec     *= -1;
+       normVecPerp *= -1;
     }
-    if (ix == 2) {
-      dy = dz;
-      dz = box->GetDY();
+
+    if (!sh) {
+       // name, halfDepth, thickness, halfWidth
+       sh = new StiPlanarShape(volP->GetName(), dz, 2*halfThickness, halfWidth);
+       add(sh);
     }
-    if (! sh) {
-      sh = new StiPlanarShape(volP->GetName(),// Name
-			      dz,             // halfDepth
-			    2*dy,             // thickness
-			      dx);            // halfWidth
-      add(sh);
-    }
+
+    centerOrient = centerVec.DeltaPhi(normVec);
+
+    double normVecMag = fabs(r*cos(centerOrient));
+    double normVecOffset = r*sin(centerOrient);
+
     pPlacement = new StiPlacement;
     pPlacement->setZcenter(xyz[2]);
-    pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
+    pPlacement->setLayerRadius(r);  //this is only used for ordering in detector container...
     pPlacement->setLayerAngle(phi); //this is only used for ordering in detector container...
     pPlacement->setRegion(StiPlacement::kMidRapidity);
-    pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD)); 
+    pPlacement->setNormalRep(normVec.Phi(), normVecMag, normVecOffset);
   }
   assert(pPlacement);
   StiDetector *pDetector = getDetectorFactory()->getInstance();

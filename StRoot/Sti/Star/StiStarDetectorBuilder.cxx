@@ -135,13 +135,13 @@ void StiStarDetectorBuilder::HftBeamPipe() {
     {"PBES", "Berillium  part"                                     ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPI_1/PBES_1" ,"",""},
     {"PALI", "West aluminium part"                                 ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPI_1/PALI_1" ,"",""},
     {"SSCF", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPI_1/SSCF_%d","",""},
-  //{"PIPE", "Mother volume of the east sect"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1"        ,"",""}, 
+  //{"PIPE", "Mother volume of the east sect"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1"        ,"",""},
   //{"PIHE", "Hole inside the beam pipe of east sect"              ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/PIHE_1" ,"",""},
     {"PALQ", "East end tube"                                       ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/PALQ_1" ,"",""},
     {"PALR", "East transition tube"                                ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/PALR_1" ,"",""},
     {"SSCG", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/SSCG_%d","",""},
     {"SSCF", "Stainless Steel conflat flange"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPE_1/SSCF_1" ,"",""},
-  //{"PIPW", "Mother volume of the west sect"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1"        ,"",""}, 
+  //{"PIPW", "Mother volume of the west sect"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1"        ,"",""},
   //{"PIHW", "Hole inside the beam pipe of west sect"              ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1/PIHW_1" ,"",""},
     {"PALJ", "West transition tube"                                ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1/PALJ_1" ,"",""},
     {"PALK", "West end tube"                                       ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PIPW_1/PALK_1" ,"",""},
@@ -300,15 +300,15 @@ void StiStarDetectorBuilder::NewSuppCone() {
   SetCurrentDetectorBuilder(this);
   const VolumeMap_t PipeVolumes[] = { 
     // cone 
-    {"OSCA", "central CFiber tube"                     ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/OSCA_1" ,"",""}, 
+    {"OSCA", "central CFiber tube"                     ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/OSCA_1" ,"",""},
     {"SUCB", "small Alu ring"                          ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCB_%d","",""},
     {"SUCC", "CFiber cone section"                     ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCC_%d","",""},
     {"SUCD", "large Al ring at cone"                   ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCD_%d","",""},
     {"SUCE", "CFiber tube"                             ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCE_%d","",""},
     {"SUCF", "large Alu ring"                          ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCF_%d","",""},
     {"SUCG", "large Alu end disk"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SUCG_%d","",""},
-    {"FGRL", "FGT rail"                                ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGRL_%d","",""}, 
-  //{"FGHV", "FGT cables mixture"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGHV_%d","",""}, 
+    {"FGRL", "FGT rail"                                ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGRL_%d","",""},
+  //{"FGHV", "FGT cables mixture"                      ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/FGHV_%d","",""},
     {"EFSA", "Electrostatic shroud"                    ,"/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/EFSA_%d","",""}
   }; 
   Int_t NVol = sizeof(PipeVolumes)/sizeof(VolumeMap_t);
