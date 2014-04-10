@@ -36,6 +36,9 @@
 #ifndef STI_PLACEMENT_H
 #define STI_PLACEMENT_H
 
+#include <ostream>
+
+
 class StiPlacement{
 
 public:
@@ -65,6 +68,8 @@ public:
     void setZcenter(float val)        { zCenter = val; }
     void setRegion(StiRegion r)       { mRegion = r;}
 
+    friend std::ostream& operator<<(std::ostream& os, const StiPlacement& p);
+
 protected:
 
     // store both representations
@@ -83,5 +88,6 @@ protected:
     StiRegion mRegion; // backward, midrapidity, forwrad, default to kUndefined
 
 };
+
 
 #endif
