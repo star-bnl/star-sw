@@ -471,3 +471,25 @@ TMD5 StarAgmlChecker::CheckSum( const Char_t *name )
   return result;
 
 };
+// ................................................................................................
+TDataSet *StarAgmlChecker::CheckSet( const Char_t *name )
+{
+  TGeoVolume *top = gGeoManager->FindVolumeFast(name);
+  if ( !top ) {
+    return NULL; // should never happen...
+  }
+
+  TDataSet *set = new TDataSet(name);   set->SetTitle( CheckSum(name).AsString() );
+  std::map< TString, Int_t > kids;
+  
+  for ( Int_t i=0;i<top->GetNdaughters(); i++ )
+    {
+      TGeoNode   *node = top->GetNode(i);
+      TGeoVolume *kid  = node->GetVolume();
+      if ( kids[kid->GetName()]++ ) continue; // skip if already in set
+      set->Add( CheckSet(kid->GetName()) );   // recursively add daughters
+      
+    }
+  return set;
+
+};
