@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.61 2014/04/07 22:28:40 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.62 2014/04/10 02:00:42 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -27,7 +27,6 @@
 #include "StPxlDbMaker/StPxlDb.h"
 #include "StPxlDbMaker/StPxlDbMaker.h"
 #include "StPxlUtil/StPxlConstants.h"
-#include "StiMaker/StiDetectorVolume.h"
 #include "StBFChain/StBFChain.h"
 
 using namespace std;
@@ -126,12 +125,6 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
          buildInactiveVolumes();
       }
    }
-
-   // XXX: Check sti geometry by converting it to drawable root objects
-   TFile fileTmp("sti2rootgeo_pxl.root", "RECREATE");
-   StiDetectorVolume stiDetVol(*this);
-   stiDetVol.Write();
-   fileTmp.Close();
 }
 
 
