@@ -16,6 +16,7 @@
 #include <TF1.h>
 #include <TFile.h>
 #include <TPaveStats.h>
+#include <TString.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -202,12 +203,15 @@ void istBuilder::initialize(int argc, char *argv[]) {
     hAdcContents.adcArray[index]->GetXaxis()->SetNdivisions(-3, false);
     hAdcContents.adcArray[index]->SetStats(false);
     hAdcContents.adcArray[index]->GetYaxis()->SetTitleOffset(1.1);
-    hAdcContents.adcArray[index]->SetLabelSize(0.04);
+    hAdcContents.adcArray[index]->SetLabelSize(0.03);
     for(int iSec=0; iSec<3; iSec++) {
 	int secElecId = ladderElecId * 3 + iSec; //geometry ID is reversed to electroncis ID
-	int rdoIndex   = secElecId/12 + 1;  //1, 2, ..., 6
-    	int armIndex   = (secElecId%12)/2;  //0, 1, ..., 5
-    	int groupIndex = secElecId%2;       //0, 1
+	int tempIdx = secElecId;
+	if(secElecId==28) tempIdx += 1; // sections B & C sawpping on ladder 13
+	if(secElecId==29) tempIdx -= 1;
+	int rdoIndex   = tempIdx/12 + 1;  //1, 2, ..., 6
+    	int armIndex   = (tempIdx%12)/2;  //0, 1, ..., 5
+    	int groupIndex = tempIdx%2;       //0, 1
     	sprintf( buffer1, "RDO%d_ARM%d_GROUP%d", rdoIndex, armIndex, groupIndex);
     	hAdcContents.adcArray[index]->GetXaxis()->SetBinLabel(iSec*24+12, buffer1);
 	hAdcContents.adcArray[index]->GetXaxis()->LabelsOption("h");
@@ -336,7 +340,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
 
   hEventSumContents.hMaxTBfractionVsSection_ZS = new TH1F("maxTBfractionVsSection_ZS", "IST - maxTB fraction vs Section Id (ZS)", totSec, 0, totSec); //72 bins
   hEventSumContents.hMaxTBfractionVsSection_ZS->GetXaxis()->SetTitle("Section ID [(RDO-1)*6*2+ARM*2+GROUP]");
-  hEventSumContents.hMaxTBfractionVsSection_ZS->GetYaxis()->SetTitle("N_{0<maxTB<4}/N_{0<=maxTB<=numTB}");
+  hEventSumContents.hMaxTBfractionVsSection_ZS->GetYaxis()->SetTitle("N_{0<maxTB<numTB}/N_{0<=maxTB<=numTB}");
   hEventSumContents.hMaxTBfractionVsSection_ZS->SetFillColor(kYellow-9);
   hEventSumContents.hMaxTBfractionVsSection_ZS->SetStats(false);
 
@@ -395,10 +399,10 @@ void istBuilder::initialize(int argc, char *argv[]) {
   hSumContents.hHitMap->GetYaxis()->SetTitle("Column Index in Z");
   hSumContents.hHitMap->SetLabelSize(0.02);
 
-  hSumContents.hHitMapVsAPV = new TH2S("HitMapPerAPV", "IST - Hit map in Ladder vs APV", 36, 1, 37, 24, 1, 25);
+  hSumContents.hHitMapVsAPV = new TH2S("HitMapPerAPV", "IST - Hit map in Ladder vs APV", 24, 1, 25, 36, 1, 37);
   hSumContents.hHitMapVsAPV->SetStats(false);
-  hSumContents.hHitMapVsAPV->GetXaxis()->SetTitle("APV geometry ID");
-  hSumContents.hHitMapVsAPV->GetYaxis()->SetTitle("Ladder geometry ID");
+  hSumContents.hHitMapVsAPV->GetXaxis()->SetTitle("Ladder geometry ID");
+  hSumContents.hHitMapVsAPV->GetYaxis()->SetTitle("APV geometry ID");
 
   hSumContents.hMultVsLadder = new TH2S("HitMultVsLadder", "IST - Hit Multiplicity vs Ladder Id", numLadder, 1, numLadder+1, 72, 0, ChPerLadder);//24*72 bins
   hSumContents.hMultVsLadder->GetXaxis()->SetNdivisions(-numLadder, false);
@@ -446,10 +450,18 @@ void istBuilder::initialize(int argc, char *argv[]) {
   //JEVP plots setting
   int totPlots = mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+mMaxTimeBinHist+mSumHist;
   plots = new JevpPlot*[totPlots];
- 
+
+  JLine* line1 = new JLine(1536, -100, 1536, 4000);
+  line1->SetLineColor(kGreen);
+  line1->SetLineWidth(2.0);
+  JLine* line2 = new JLine(3072, -100, 3072, 4000);
+  line2->SetLineColor(kGreen);
+  line2->SetLineWidth(2.0); 
   for ( int i=0; i<mAdcHist; i++ ) {
     hAdcContents.adcArray[i]->SetOption("colz");
     plots[i] = new JevpPlot(hAdcContents.adcArray[i]);
+    plots[i]->addElement(line1);
+    plots[i]->addElement(line2);
   }
 
   for ( int i=0; i<mMultHist; i++ ) {
@@ -484,9 +496,32 @@ void istBuilder::initialize(int argc, char *argv[]) {
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+6]->logy=true;
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+6]->setOptStat(10);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+7]->logy=true;
-  JLine* line = new JLine(0, 128, totAPV, 128);
+
+  JLine* line = new JLine(0, goodChCut, totAPV, goodChCut);
   line->SetLineColor(kRed);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+5]->addElement(line);
+/*
+  JLine* line3_up = new JLine(0, maxMipMpv, totSec, maxMipMpv);
+  line3_up->SetLineColor(kRed);
+  JLine* line3_dn = new JLine(0, minMipMpv, totSec, minMipMpv);
+  line3_dn->SetLineColor(kRed);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+8]->addElement(line3_up);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+8]->addElement(line3_dn);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+9]->addElement(line3_up);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+9]->addElement(line3_dn);
+
+  JLine* line5_up = new JLine(0, maxMipSigma, totSec, maxMipSigma);
+  line5_up->SetLineColor(kRed);
+  JLine* line5_dn = new JLine(0, minMipSigma, totSec, minMipSigma);
+  line5_dn->SetLineColor(kRed);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+10]->addElement(line5_up);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+10]->addElement(line5_dn);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+11]->addElement(line5_up);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+11]->addElement(line5_dn);
+*/
+  JLine* line7 = new JLine(0, maxTbFracOK, totSec, maxTbFracOK);
+  line7->SetLineColor(kRed);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+12]->addElement(line7);
 
   for ( int i=0; i<mMipHist; i++ ) {
     plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+i] = new JevpPlot(hMipContents.mipArray[i]);
@@ -528,7 +563,8 @@ void istBuilder::initialize(int argc, char *argv[]) {
 void istBuilder::startrun(daqReader *rdr) {
   LOG ( NOTE, "istBuilder starting run #%d", rdr->run );
   resetAllPlots();
-  
+  run = rdr->run; 
+ 
   for ( int i=0; i<totCh; i++ ) {
     meanVals[i]        = 0;
     aVals[i]           = 0;
@@ -770,7 +806,7 @@ void istBuilder::event(daqReader *rdr) {
 	  HitCount[ladderIdx-1]++;
 	  hHitMapContents.hitMapArray[ladderIdx-1]->Fill(rowIdx, (sensorIdx-1)*numColumn+columnIdx);
 	  hSumContents.hHitMap->Fill((ladderIdx-1)*numRow+rowIdx, (sensorIdx-1)*numColumn+columnIdx);
-	  hSumContents.hHitMapVsAPV->Fill(apvGeoIdx, ladderIdx);
+	  hSumContents.hHitMapVsAPV->Fill(ladderIdx, apvGeoIdx);
           hMipContents.mipArray[elecSec]->Fill(short(adc_max+0.5));
 	  hEventSumContents.hMaxTimeBin->Fill(tb_max);
       }
@@ -795,7 +831,7 @@ void istBuilder::event(daqReader *rdr) {
 
   // Reset rolling histos if necessary..
   int tm = time(NULL);
-  if ( (tm > t_10min + 10) || (!(evtCt%50)) ) {
+  if ( (tm > t_10min + 10) || (!(evtCt%100)) ) {
     t_10min = tm;
     fillSumHistos();
   }
@@ -854,38 +890,60 @@ void istBuilder::fillSumHistos() {
 // ***********IST STOP RUN*************************
 // ------------------------------------------------
 void istBuilder::stoprun(daqReader *rdr) {
+  //common mode noise
+  for( int k=0; k<totAPV; k++ ) {
+        hSumContents.hCommonModeNoise->Fill(k+1, short(hCmnTemp.hCmnPerChip[k]->GetRMS()+0.5));
+  }
+
+  int errCt_visibleAPVperSection = 0, errCt_maxTimeBinFraction = 0, errCt_mipNonZS = 0, errCt_mipZS = 0;
+  int errLocation_visibleAPVperSection[72], errLocation_maxTimeBinFraction[72], errLocation_mipNonZS[72], errLocation_mipZS[72]; 
+  for(int j=0; j<72; j++) {
+	errLocation_visibleAPVperSection[j] = 0;
+	errLocation_maxTimeBinFraction[j] = 0;
+	errLocation_mipNonZS[j] = 0;
+	errLocation_mipZS[j] = 0;
+  }
+
   for(int j=0; j<72; j++) {
 	int rdoIndex   = j/12 + 1;  //1, 2, ..., 6
         int armIndex   = (j%12)/2;  //0, 1, ..., 5
         int groupIndex = j%2;       //0, 1
 
 
-    	if(hSumContents.hVisibleApv->GetBinContent(j+1, 12) < 1)
-	    LOG(U_IST,"visibleAPVperSection::section RDO%d_ARM%d_GROUP%d has missing APVs!", rdoIndex, armIndex, groupIndex);
-
+    	if(hSumContents.hVisibleApv->GetBinContent(j+1, 12) < 1) {
+	    //LOG(U_IST,"visibleAPVperSection::section RDO%d_ARM%d_GROUP%d has missing APVs!", rdoIndex, armIndex, groupIndex);
+	    errLocation_visibleAPVperSection[errCt_visibleAPVperSection] = rdoIndex*100 + armIndex*10 + groupIndex;
+	    errCt_visibleAPVperSection++;
+	}
         double entriesTB_123=0, entriesTB_all=0, fraction = 1.0;
         if(hMaxTimeBinContents.maxTimeBinArray[j]->GetEntries()>0) {
-                entriesTB_123 = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(2, 4);
+                entriesTB_123 = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(2, numTb-1);
                 entriesTB_all = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(1, numTb);
                 fraction = entriesTB_123/entriesTB_all;
 		if(j==6) fraction = 1.0;
-		if(fraction<0.95)
-		    LOG(U_IST,"maxTimeBinFraction::section RDO%d_ARM%d_GROUP%d with fraction %f!", rdoIndex, armIndex, groupIndex, fraction);
+		if(fraction<maxTbFracOK) {
+		    //LOG(U_IST,"maxTimeBinFraction::section RDO%d_ARM%d_GROUP%d with fraction %f!", rdoIndex, armIndex, groupIndex, fraction);
+		    errLocation_maxTimeBinFraction[errCt_maxTimeBinFraction] = rdoIndex*100 + armIndex*10 + groupIndex;
+		    errCt_maxTimeBinFraction++;
+		}
         }
         hEventSumContents.hMaxTBfractionVsSection_ZS->SetBinContent(j+1, fraction);
 
-        float lowerRange=150., upperRange=2000., mpvMIP_nonZS=0., sigmaMIP_nonZS=0., mpvMIP_ZS=0., sigmaMIP_ZS=0.;
+        float lowerRange=landauFit_dn, upperRange=landauFit_up, mpvMIP_nonZS=0., sigmaMIP_nonZS=0., mpvMIP_ZS=0., sigmaMIP_ZS=0.;
         if(hMipContents.mipArray[j]->GetEntries()>0) {
                 hMipContents.mipArray[j]->Fit("landau","QR","",lowerRange, upperRange);
                 TF1* fit_nonZS = hMipContents.mipArray[j]->GetFunction("landau");
                 mpvMIP_nonZS    = fit_nonZS->GetParameter("MPV");
                 sigmaMIP_nonZS  = fit_nonZS->GetParameter("Sigma");
 		if(j==6) {
-		    mpvMIP_nonZS = 600.;
-		    sigmaMIP_nonZS = 100.;
+		    mpvMIP_nonZS = 550.;
+		    sigmaMIP_nonZS = 140.;
 		}
-		if(mpvMIP_nonZS<400. || mpvMIP_nonZS > 900. || sigmaMIP_nonZS<60.0 || sigmaMIP_nonZS>240.)
-		    LOG(U_IST,"MIP_nonZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_nonZS, sigmaMIP_nonZS);
+		if(mpvMIP_nonZS<minMipMpv || mpvMIP_nonZS>maxMipMpv || sigmaMIP_nonZS<minMipSigma || sigmaMIP_nonZS>maxMipSigma) {
+		    //LOG(U_IST,"MIP_nonZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_nonZS, sigmaMIP_nonZS);
+		    errLocation_mipNonZS[errCt_mipNonZS] = rdoIndex*100 + armIndex*10 + groupIndex;
+		    errCt_mipNonZS++;
+		}
         }
         hEventSumContents.hMipMPVvsSection->SetBinContent(j+1, short(mpvMIP_nonZS+0.5));
         hEventSumContents.hMipSIGMAvsSection->SetBinContent(j+1, short(sigmaMIP_nonZS+0.5));
@@ -897,18 +955,45 @@ void istBuilder::stoprun(daqReader *rdr) {
                 mpvMIP_ZS      = fit_ZS->GetParameter("MPV");
                 sigmaMIP_ZS    = fit_ZS->GetParameter("Sigma");
 		if(j==6) {
-                    mpvMIP_ZS = 600.;
-                    sigmaMIP_ZS = 100.;
+                    mpvMIP_ZS = 550.;
+                    sigmaMIP_ZS = 140.;
                 }
-		if(mpvMIP_ZS<400. || mpvMIP_ZS > 900. || sigmaMIP_ZS<60.0 || sigmaMIP_ZS>240.)
-                    LOG(U_IST,"MIP_ZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_ZS, sigmaMIP_ZS);
+		if(mpvMIP_ZS<minMipMpv || mpvMIP_ZS>maxMipMpv || sigmaMIP_ZS<minMipSigma || sigmaMIP_ZS>maxMipSigma)  {
+                    //LOG(U_IST,"MIP_ZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_ZS, sigmaMIP_ZS);
+		    errLocation_mipZS[errCt_mipZS] = rdoIndex*100 + armIndex*10 + groupIndex;
+		    errCt_mipZS++;
+		}
         }
         hEventSumContents.hMipMPVvsSection_ZS->SetBinContent(j+1, short(mpvMIP_ZS+0.5));
         hEventSumContents.hMipSIGMAvsSection_ZS->SetBinContent(j+1, short(sigmaMIP_ZS+0.5));
   }
 
-  for( int k=0; k<totAPV; k++ ) {
-        hSumContents.hCommonModeNoise->Fill(k+1, short(hCmnTemp.hCmnPerChip[k]->GetRMS()+0.5));
+  TString buffer_Err = "";
+  if(errCt_visibleAPVperSection>0) {
+	for(int i=0; i<errCt_visibleAPVperSection; i++)
+	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d ", errLocation_visibleAPVperSection[i]/100, (errLocation_visibleAPVperSection[i]%100)/10, errLocation_visibleAPVperSection[i]%10);
+	LOG(U_IST,"visibleAPVperSection:: In #%d, %d sections have missing APVs, they are %s!", run, errCt_visibleAPVperSection, buffer_Err.Data());
+  }
+
+  buffer_Err = "";
+  if(errCt_maxTimeBinFraction>0) {
+	for(int i=0; i<errCt_maxTimeBinFraction; i++)
+	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d ", errLocation_maxTimeBinFraction[i]/100, (errLocation_maxTimeBinFraction[i]%100)/10, errLocation_maxTimeBinFraction[i]%10);
+	LOG(U_IST,"maxTimeBinFraction:: In #%d, %d sections have max time bin fraction less than %f, they are %s!", run, errCt_maxTimeBinFraction, maxTbFracOK, buffer_Err.Data());
+  }
+
+  buffer_Err = "";
+  if(errCt_mipNonZS>0) {
+	for(int i=0; i<errCt_mipNonZS; i++)
+	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d ", errLocation_mipNonZS[i]/100, (errLocation_mipNonZS[i]%100)/10, errLocation_mipNonZS[i]%10);
+	LOG(U_IST,"MIP_nonZS:: In #%d, %d sections have unnormal MIP mpv or sigma for non-ZS data, they are %s!", run, errCt_mipNonZS, buffer_Err.Data());
+  }
+
+  buffer_Err = "";
+  if(errCt_mipZS>0) {
+        for(int i=0; i<errCt_mipZS; i++)
+            buffer_Err += Form("RDO%d_ARM%d_GROUP%d ", errLocation_mipZS[i]/100, (errLocation_mipZS[i]%100)/10, errLocation_mipZS[i]%10);
+        LOG(U_IST,"MIP_ZS:: In #%d, %d sections have unnormal MIP mpv or sigma for ZS data, they are %s!", run, errCt_mipZS, buffer_Err.Data());
   }
 
   for ( int i=0; i<totCh; i++ )    {
