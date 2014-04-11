@@ -992,7 +992,7 @@ Bfc_st BFC[] = {
 
   // Target Chain options for BES -> P2014a,DbV20140410,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
   {"P2014a","" ,"",
-   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiLibsHft,analysis,"
+   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis,"
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
@@ -1465,9 +1465,12 @@ Bfc_st BFC[] = {
   // left for historical purpose
   {"StiLibs"    ,"","","StiTpc,StiSvt,StiSsd,BTofUtil"   
                                                        ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
-  // switch to the SST based chain
-  {"StiLibsHft" ,"","","StiLibs,StiSst,StiPxl,StiIst"   
-                                                           ,"","","Load Sti Detector libs for HFT",kFALSE},
+  // switch to the HFT based chain
+  {"StiLibsHft" ,"","","StiLibs,StiSst,StiPxl,StiIst"       ,"","","Load Sti Detector libs for HFT",kFALSE},
+  {"StiHftP", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT",""            ,"","Enables partial  Hft (PXL)",kFALSE},
+  {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,IstIT,istDb,SstIT,ssdDb"
+                                                           ,"","Enables complete Hft (PXL+IST+SST)",kFALSE},
+
 
   // depends on Sti symbols
   {"VFPPV"    	,""  	,""	,"ctf_T,eemcDb,StiLib"	,"StGenericVertexMaker"
