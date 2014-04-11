@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.63 2014/04/10 02:00:59 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.64 2014/04/11 17:30:21 perev Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -148,7 +148,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
             if (!isAvail) {
-               Error("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next node...");
+               Warning("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next node...");
                continue;
             }
 
@@ -162,7 +162,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             }
 
             if (!sensorMatrix) {
-               Error("useVMCGeometry()", "Could not get pixel sensor position matrix. Skipping to next pixel sensor volume");
+               Warning("useVMCGeometry()", "Could not get pixel sensor position matrix. Skipping to next pixel sensor volume");
                continue;
             }
 
@@ -215,7 +215,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
             if ( !stiDetector ) {
-               Error("useVMCGeometry()", "Failed to create a valid Sti detector. Skipping to next pixel sensor volume");
+               Warning("useVMCGeometry()", "Failed to create a valid Sti detector. Skipping to next pixel sensor volume");
                continue;
             }
 
@@ -321,9 +321,12 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
    LOG_DEBUG << " # of volume(s) : " << nPxlVolumes << endm;
 
    for (int i = 0; i < nPxlVolumes; i++) {
-      TString path(pxlVolumes[i].path);
 
-      gGeoManager->cd(path);
+      if (! gGeoManager->cd(pxlVolumes[i].path) ) {
+         Warning("buildInactiveVolumes()", "Cannot find path to %s node. Skipping to next node...", pxlVolumes[i].name);
+         continue;
+      }
+
       TGeoNode *geoNode = gGeoManager->GetCurrentNode();
 
       if (!geoNode) continue;
@@ -331,7 +334,7 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
       LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
 
-      StiVMCToolKit::LoopOverNodes(geoNode, path, pxlVolumes[i].name, MakeAverageVolume);
+      StiVMCToolKit::LoopOverNodes(geoNode, pxlVolumes[i].path, pxlVolumes[i].name, MakeAverageVolume);
 
       // Access last added volume/Sti detector
       int row = getNRows() - 1;
