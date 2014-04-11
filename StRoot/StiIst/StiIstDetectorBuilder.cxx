@@ -235,7 +235,11 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    gGeoManager->CdTop();
 
    for (Int_t i = 0; i < nVolumes; i++) {
-      gGeoManager->cd(volumes[i].path);
+
+      if ( !gGeoManager->cd(volumes[i].path) ) {
+         Warning("buildInactiveVolumes()", "Cannot find path to %s node. Skipping to next node...", volumes[i].name);
+         continue;
+      }
 
       TGeoNode *geoNode = gGeoManager->GetCurrentNode();
 
