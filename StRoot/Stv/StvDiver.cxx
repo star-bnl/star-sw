@@ -45,7 +45,7 @@ StvDiver::StvDiver(const char *name):TNamed(name,"")
 //_____________________________________________________________________________
 int StvDiver::Init() 
 {
-static StvToolkit* kit = StvToolkit::Inst();
+//static StvToolkit* kit = StvToolkit::Inst();
   gMyRandom = new MyRandom;
   mHelix = new THelixTrack;
   mELoss = 0;
@@ -94,6 +94,7 @@ void StvDiver::SetTarget(const double target[3],int nTarget)
 //_____________________________________________________________________________
 int  StvDiver::Dive()
 {
+static int nCall=0; nCall++;
 static StvToolkit* kit = StvToolkit::Inst();
   mGen->Set(mInpPars,mDir);
 
@@ -389,10 +390,19 @@ StvDebug::Break(nCall);
   fCurrentPosition.GetXYZT(pos);
   fCurrentMomentum.GetXYZT(mom);
   double pt = fCurrentMomentum.Pt();
-  double nowRho = -fField->GetHz()/pt*fCharge;
+  double nowRho = -fField->GetHz(pos)/pt*fCharge;
   double wasRho =  fHelix->GetRho();
-  assert(nowRho*wasRho> -1./(200*200));
+
+assert(nowRho*wasRho> -1./(200*200));
   fELossTrak->Add(dL);
+
+{//?????????????????
+  double E0 = fStartMomentum.E();		
+  double E1 = fCurrentMomentum.E();		
+  double dE = fabs(E1-E0);
+//???assert(dE<kStMCSMinEabs || dE/E0<kStMCSMinEref ||fabs(dE-fELossTrak->ELoss())<0.3*dE+kStMCSMinEabs);
+}//?????????????????
+
 
   if ((fOpt&StvDiver::kDoErrs)) { 	//Errors and derivatives requested
     fHelix->Set((2*wasRho+nowRho)/3);
@@ -446,22 +456,15 @@ static int nCall=0; nCall++;
       THelixTrack th(*fHelix);
       double dcaL = (ans & StvDiver::kDiveDca)? th.Path(fTarget[0],fTarget[1]) : dL/2;
       if (dcaL< 0) 	return StvDiver::kDiveBreak;		//Crazy case		
-      double nowRho = -fField->GetHz()/fCurrentMomentum.Pt()*fCharge;
-      double wasRho =  fHelix->GetRho();
-      double delta = nowRho-wasRho;
-      if (fabs(delta) > 1e-6*fabs(nowRho)) { // significant change of curvature
-         th.Set((2*wasRho+nowRho)/3);
-         if (ans & StvDiver::kDiveDca) dcaL = th.Path(fTarget[0],fTarget[1]);
-      }
+
+      double nowP = fCurrentMomentum.P();
+      double wasP = fEnterMomentum.P();
+      double medP = (wasP*(dL-dcaL)+nowP*dcaL)/dL;
   //		Update end position
       th.Move(dcaL);
-      nowRho = (wasRho*(dL-dcaL)+nowRho*dcaL)/dL;
-
       fCurrentLength=fEnterLength+dcaL;
       fCurrentPosition.SetVect(TVector3(th.Pos()));
-      double pt = fabs(fField->GetHz()*fCharge/nowRho);
-      double p  = pt/th.GetCos();
-      fCurrentMomentum.SetVectM(TVector3(th.Dir())*p,fMass);
+      fCurrentMomentum.SetVectM(TVector3(th.Dir())*medP,fMass);
       return ans;
     }
   }
@@ -591,18 +594,22 @@ ClassImp(StvMCField)
 //_____________________________________________________________________________
 StvMCField::StvMCField() 
 {
-  mHz = 3e33;
+  mH[2] = 3e33;
   mFild =  StarMagField::Instance();
 }
 //_____________________________________________________________________________
 int StvMCField::FunDD(const double *x,double *b) 
 {     
-  if (!mFild) { mFild =  StarMagField::Instance();assert(mFild);}
 static const Double_t EC = 2.99792458e-4;
   mFild->BField(x,b); 
-  mHz = b[2]*EC;
-  if (fabs(mHz) < 1e-5) mHz=1e-5;
+  for (int i=0;i<3;i++){mH[i] = b[i]*EC;}
+  if (fabs(mH[2]) < 1e-5) mH[2]=1e-5;
   return 0;
 }
-  
-  
+//_____________________________________________________________________________
+double StvMCField::GetHz(const double *x) 
+{     
+   double B[3];
+   FunDD(x,B);
+   return mH[2];
+}   
