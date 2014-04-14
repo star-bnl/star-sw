@@ -13,6 +13,7 @@
 #include "StarVMC/GeoTestMaker/StTGeoProxy.h"
 #include "Stv/StvHit.h"
 #include "StvUtil/StvNodePars.h"
+#include "StvUtil/StvELossTrak.h"
 #include "StvUtil/StvDebug.h"
 #include "StvTester.h"
 #include "Stv/StvEnum.h"
@@ -358,6 +359,7 @@ static int nCall=0; nCall++;
 //_____________________________________________________________________________
 StvNode *StvKalmanTrackFinder::MakeDcaNode(StvTrack *tk)
 {
+static double kOneMEV = 1e-3;
 static StvToolkit *kit = StvToolkit::Inst();
 //static const StvConst  *kons = StvConst::Inst();
 
@@ -380,6 +382,15 @@ static StvToolkit *kit = StvToolkit::Inst();
   if (dcaPars.getP2()<kBigMom) {
     dcaNode->SetELoss(eld,0);
     dcaErrs.Add(eld,dcaPars,0);
+
+    double p0 = start->GetFP().getP();
+    double p1 = dcaPars.getP();
+    double PiMASS=0.13956995;      
+    double e0 = sqrt(p0*p0+PiMASS*PiMASS);
+    double e1 = sqrt(p1*p1+PiMASS*PiMASS);
+//???assert(e1>e0);
+//??assert(fabs((e1-e0)-eld->ELoss()) <0.3*eld->ELoss()+kOneMEV);
+
   } else {
     kit->FreeELossTrak(eld);
   }
