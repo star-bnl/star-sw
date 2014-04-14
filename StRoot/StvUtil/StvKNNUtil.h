@@ -1,3 +1,4 @@
+
 /// \File StvKNNUtil.h
 /// \author Victor Perev 01/2013
 #ifndef StvKNNUtil_HH
@@ -42,7 +43,7 @@ private:
 const int mNVars;				//number of variables
 const int mKNNgb;				//number of neighbours
 mutable int mIdxBestWost[2];
-mutable double mBestWost[2];
+mutable double mBestWost[2];	//[0]=max density;  [1]=min density
 
 
 std::vector<StvKNNAux> mEnt;		//KNN entries

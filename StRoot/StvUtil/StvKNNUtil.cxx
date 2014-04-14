@@ -57,6 +57,8 @@ double StvKNNUtil::Dist(const float *a,const float *b) const
 //_____________________________________________________________________________
 double StvKNNUtil::GetBest(ULong_t *id,ULong_t *ngb) const
 {  
+/// returns the max density of points
+
    double ans = mBestWost[0];
    if (mIdxBestWost[0]<0) 	return ans;
    if (id) *id = mEnt[mIdxBestWost[0]].mId;
