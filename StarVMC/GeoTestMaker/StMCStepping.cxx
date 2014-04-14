@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.8 2014/04/03 21:55:55 perev Exp $
+// $Id: StMCStepping.cxx,v 1.9 2014/04/14 16:26:41 perev Exp $
 //
 //
 // Class StMCStepping
@@ -15,8 +15,6 @@
 #include "TGeoVolume.h"
 #include "TGeoMedium.h"
 #include "TGeant3.h"
-
-static Gctrak_t *gGctrak=0;
 
 static TVirtualMC *myMC=0;
 
@@ -64,8 +62,6 @@ const char *SteppingKazesC[] = {
   0};
 
 
-
-
 //_____________________________________________________________________________
 StMCStepping::StMCStepping(const char *name,const char *tit)
   : GCall(name,tit)
@@ -111,8 +107,6 @@ void StMCStepping::Case()
 {
 static int nCall = 0; nCall++;
   fSteps++;
-
-  if(!gGctrak) gGctrak = ((TGeant3*)TVirtualMC::GetMC())->Gctrak();
   fNode = gGeoManager->GetCurrentNode();
   fVolume = fNode->GetVolume();
   fMedium = fVolume->GetMedium();
@@ -146,6 +140,7 @@ static int nCall = 0; nCall++;
 
   myMC->TrackPosition(fCurrentPosition);
   myMC->TrackMomentum(fCurrentMomentum);
+  assert(fCurrentMomentum[3]>1e-6);
   fCurrentLength = myMC->TrackLength();
   fCharge = myMC->TrackCharge();
   fMass   = myMC->TrackMass();
@@ -154,27 +149,20 @@ static int nCall = 0; nCall++;
   switch (fKaze) {
 
     case kNEWtrack:
-      fTrackNumber++;
-      myMC->TrackPosition(fStartPosition);
+      fSteps=0;
+      fTrackNumber++; 
+      fStartPosition = fCurrentPosition;
+      fStartMomentum = fCurrentMomentum;
     case kENTERtrack:;
       {
-      fSteps=0;
       fEnterPosition = fCurrentPosition;
-      myMC->TrackMomentum(fEnterMomentum);
       fEnterMomentum = fCurrentMomentum;
-      assert(fCurrentMomentum[3]>1e-6);
       fEnterLength = fCurrentLength;
       fEdep   = 0;
-      fLastVect[6] = fCurrentMomentum.P();
-      for (int i=0;i<3;i++) {
-        fLastVect[i+0] = fCurrentPosition[i];
-        fLastVect[i+3] = fCurrentMomentum[i]/fLastVect[6];}
-      }
-      break;
+      break;}
 
     case kCONTINUEtrack:;
     case kEXITtrack:;
-    case kENDEDtrack:;
     case kOUTtrack:
       fEdep   = myMC->Edep();
       fEtot   = myMC->Etot();
@@ -183,13 +171,20 @@ static int nCall = 0; nCall++;
       myMC->TrackMomentum(fCurrentMomentum);
     break;
 
+    case kENDEDtrack:
+      break;
+
     case kIgnore:;
+    assert(0 && "Ignore case??");
     break;
 
     default:
-     Error("Case","Unexpected case %x == %s",fKaze,fCasName.Data());
+     Error("Case","Unexpected case %d == %s",fKaze,fCasName.Data());
      assert(0);
   }
+  fPrevLength   = fCurrentLength;
+  fPrevPosition = fCurrentPosition;
+  fPrevMomentum = fCurrentMomentum;
 }		
 //_____________________________________________________________________________
 int StMCStepping::Fun()
@@ -198,6 +193,7 @@ int StMCStepping::Fun()
   switch (fCase) {
     case kNewTrack|kTrackEntering:;
     case kNewTrack:;
+      fPrevLength =0;
     case kTrackEntering:;
       printf("\n\nStepping %s\n",fCasName.Data());
       printf("Vol= %s Mat=%s Med=%s\n"
@@ -238,36 +234,79 @@ void StMCStepping::RecovEloss()
 {
 // 	Update directly Geant3 common when we moving bacward the track
 //	and energy loss is negative
+static int nCall = 0; nCall++;
+static int debu = 0;
   enum {kX=0,kY,kZ,kDx,kDy,kDz,kP};
-  float *vout = gGctrak->vout;
+
+static Gctrak_t *gGctrak=((TGeant3*)TVirtualMC::GetMC())->Gctrak();
+static float *vect = gGctrak->vect;
+static Float_t &getot = gGctrak->getot;
+static Float_t &gekin = gGctrak->gekin;
+
+
+
+
+
   do {
-    if (fEdep<=0) 	break;
-    double dL = fCurrentLength-fLastLength;
-    if (dL<1e-5) 	break;
-    double cL0 = sqrt((1.-fLastVect[kDz])*(1+fLastVect[kDz]));		//cos(Lambda0)
-    double cL1 = sqrt((1.-     vout[kDz])*(1+     vout[kDz]));		//cos(Lambda1)
-    double ang = ((vout[kDy]-fLastVect[kDy])*fLastVect[kDx]
-               -  (vout[kDx]-fLastVect[kDx])*fLastVect[kDy])/(cL0*cL1);	//sin(dAng)
-    ang = (fabs(ang)<0.1)? ang*(1.-ang*ang/6)  :  asin(ang);		//dAng
-    double dLxy = dL*cL1;
+//    if (fEdep<kStMCSMinEabs) 				return;
+//    if (fEdep<kStMCSMinEref*fCurrentMomentum.E()) 	return;
+    
+
+    double dL = fCurrentLength-fPrevLength;
+    assert(dL>=0);
+    if (dL<kStMCSMinDist) 				return;
+//??    assert(fabs(fPrevMomentum.E()-fCurrentMomentum.E()-fEdep)<=0.1*fEdep);
+
+    double cL0 = fPrevMomentum.CosTheta();		//cos(Lambda0)
+    double cL1 = fCurrentMomentum.CosTheta();		//cos(Lambda1)
+    double cL = 0.5*(cL0+cL1);				//cos(Lambda) average
+    double ang = fCurrentMomentum.DeltaPhi(fPrevMomentum);
+    double dLxy = dL*(cL0+cL1)*0.5;
     double Rho = ang/dLxy;
     double dE = (fDir)? -fEdep:fEdep*2;
-    double dP = dE*fEtot/vout[kP];
-    double dRho = -Rho*dP/vout[kP];
-    double dPhi = dRho*dLxy/2;
-    double dOrt = dPhi*dLxy/3;
-    vout[kX] += -vout[kDy]/cL1*dOrt;
-    vout[kY] +=  vout[kDx]/cL1*dOrt;
-    float vDx = vout[kDx];
-    vout[kDx] += -vout[kDy]*dPhi;
-    vout[kDy] +=       vDx *dPhi;
-    if (fDir) 		break;
-    fEtot += dE;
-    gGctrak->getot  = fEtot;
-    gGctrak->gekin += dE;
-    vout[kP] = sqrt(gGctrak->gekin*(fEtot+fMass));
+    double dP = dE*getot/vect[kP];
+    double dRho = -Rho*dP/vect[kP];
+
+
+    double ang2=ang*ang;
+    double dH,dT,dA;
+    if (fabs(ang)<0.1) 		{//Small angle
+      dH = 1./3 ; dT = 1./4;}
+    else                    	{//Reasonable angle
+      double qqCos = ((cos(ang)-1)/ang2+1./2)/ang2; 	//~ 1/24
+      double qqSin = (sin(ang)/(ang)-1)/ang2;  		//~-1/6
+      dT = ((qqCos+qqSin)*2-qqCos*ang2+1./2);		//~ 1/4
+      dH = ((2*qqCos+qqSin)*ang2 -2*qqSin );            //~ 1/3
+    }
+    dH*= dRho*ang *dLxy/2;
+    dT*=-dRho*ang2*dLxy/2;
+    dA = dRho*ang/2;
+
+    vect[kX] += (vect[kDx]*dT -vect[kDy]*dH)/cL;
+    vect[kY] += (vect[kDy]*dT +vect[kDx]*dH)/cL;
+    float vDx = vect[kDx];
+    vect[kDx] += -vect[kDy]*dA;
+    vect[kDy] +=       vDx *dA;
+
+    if (fDir) 		break; 		// if (Stv direction == Geant direction ) no need to update energy
+
+    getot += dE; fEtot = getot;		// update energy
+    gekin += dE;
+    if (debu) printf("dL = %g dE=%g gekin=%g\n",dL,dE,gGctrak->gekin);
     ((TGeant3*)gMC)->Gekbin();
+    vect[kP] = sqrt(gekin*(getot+fMass));
+
   } while(0);
-  fLastLength = fCurrentLength;
-  memcpy(fLastVect,vout,sizeof(fLastVect));
+  myMC->TrackPosition(fCurrentPosition);
+  myMC->TrackMomentum(fCurrentMomentum);
+
+///???????????????????????????????????
+    if (fEdep<kStMCSMinEabs) 				return;
+    if (fEdep<kStMCSMinEref*fCurrentMomentum.E()) 	return;
+  double E1 = fCurrentMomentum.E();
+  double E0 = fPrevMomentum.E();
+  double deltaE = E1-E0;
+  assert(fDir == (deltaE<0));
+  assert(fabs(fEdep-fabs(deltaE))<kStMCSMinEabs+0.3*fEdep);
+///???????????????????????????????????
 }  
