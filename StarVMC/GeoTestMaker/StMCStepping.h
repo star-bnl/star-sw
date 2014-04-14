@@ -1,4 +1,4 @@
-// $Id: StMCStepping.h,v 1.4 2011/05/04 17:43:32 perev Exp $
+// $Id: StMCStepping.h,v 1.5 2014/04/14 16:24:06 perev Exp $
 //
 //
 // Class StMCStepping
@@ -11,6 +11,11 @@
 #include "TString.h"
 #include "TLorentzVector.h"
 #include "GCall.h"
+
+#define kStMCSMinEabs 1e-3		//1MeV
+#define kStMCSMinEref 1e-4		//momentum accuracy
+#define kStMCSMinDist 1e-4		//1 micron
+
 class TGeoNode;
 class TGeoVolume;
 class TGeoMedium;
@@ -38,7 +43,8 @@ class StMCStepping : public GCall
   kEXITtrack		= 8,
   kENDEDtrack		=16,
   kOUTtrack		=32,
-  kIgnore    		=64};
+  kSTOP			=64,
+  kIgnore    		=128};
 
   enum MediumPars {
    kIsvol =0,
@@ -74,14 +80,13 @@ void RecovEloss();
    char   fBeg[1];
    float  fEnterLength;
    float  fCurrentLength;
-   float  fLastLength;
+   float  fPrevLength;
    float  fCharge;
    float  fMass;
    float  fEdep;
    float  fEtot;
    float  fLife;
    float  fX0;
-   float  fLastVect[7];
    double fTrackNumber;
    int    fPDG;
    int    fPid;
@@ -98,11 +103,13 @@ void RecovEloss();
    char   fEnd[1];
    
    TLorentzVector fStartPosition;
+   TLorentzVector fStartMomentum;
    TLorentzVector fEnterPosition;
-   TLorentzVector fCurrentPosition;
    TLorentzVector fEnterMomentum;
+   TLorentzVector fCurrentPosition;
    TLorentzVector fCurrentMomentum;
-   TLorentzVector fLastMomentum;
+   TLorentzVector fPrevPosition;
+   TLorentzVector fPrevMomentum;
    TString fParName;
    TString fCasName;
    TString fKazName;
