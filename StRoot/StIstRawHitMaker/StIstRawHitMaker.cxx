@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.12 2014/03/25 03:06:53 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.13 2014/04/14 02:45:56 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.13  2014/04/14 02:45:56  ypwang
+* update LOG_ERROR to LOG_WARN for the case when real time bin number does not equal to the value from DB
+*
 * Revision 1.12  2014/03/25 03:06:53  ypwang
 * updates on Db table accessory method
 *
@@ -254,7 +257,7 @@ Int_t StIstRawHitMaker::Make() {
                             if(meta->arc[r].arm[arm].apv[apv].present == 0) continue ;
                             int nt = meta->arc[r].arm[arm].apv[apv].ntim;
                             if(ntimebin != 0 && nt != 0 && ntimebin != nt) 
-			   	LOG_ERROR << "Different number of timebins in different APV!!! Taking larger one!!!" << endm;
+			   	LOG_WARN << "Different number of timebins in different APV!!! Taking larger one!!!" << endm;
                             if(ntimebin < nt) 
 			   	ntimebin = nt;
                     	}
@@ -308,7 +311,7 @@ Int_t StIstRawHitMaker::Make() {
                 flag=0;
 		if((dataFlag==mADCdata) && (adc<0 || adc>=kIstMaxAdc))	flag=1;
                 if(channel<0 || channel>=kIstNumApvChannels)        	flag=1;
-                if(timebin<0 || timebin>=kIstNumTimeBins)           	flag=1;
+                if(timebin<0 || timebin>=ntimebin)           		flag=1;
                 if(flag==1){
                     LOG_INFO << "Corrupt data channel: " << channel << " tbin: " << timebin << " adc: " << adc << endm;
                     continue;
