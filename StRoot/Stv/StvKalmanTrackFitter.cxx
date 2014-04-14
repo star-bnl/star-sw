@@ -308,8 +308,7 @@ StvDebug::Break(nCall);
   else      {outNode = node; innNode=preNode;}
 
 double dS=0;
-//if (PropagateHelix) 	//Propagate with THelixTrack
-if (!PropagateHelix) 	//Propagate with THelixTrack ????? HACK
+if (PropagateHelix) 	//Propagate with THelixTrack ????? HACK
 {
   THelixTrack myHlx;
   preNode->mFP[lane].get(&myHlx);
