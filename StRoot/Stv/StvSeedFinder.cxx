@@ -133,6 +133,7 @@ static int nCall=0; nCall++;
   l*= (nNode+1.)/(nNode-1.);
   fHelix.Move(l);
 
+//#define KNNDEBUG 1
 #ifdef KNNDEBUG
 static int myKNN = 1;
   if (!myKNN) return &fHelix;
@@ -152,18 +153,18 @@ static int myKNN = 1;
     var[1] = (fx[2]-pos[2])*cosL;
     var[0] = ((fx[0]-pos[0])*(-dir[1])+(fx[1]-pos[1])*(dir[0]))/cosL;
     knn.Add(iNode,var);
-StvDebug::Count("All_R_Z",var[0],var[1]);
-
 
   }
-double fak = sqrt(double(nNode)/nNei);
-mKNNMiMax[0] = sqrt(knn.GetBest(mKNNIdx[0]))*fak;  
-mKNNMiMax[1] = sqrt(knn.GetWost(mKNNIdx[1]))*fak;  
-mKNNMiMax[1]/=mKNNMiMax[0]/100;
+// double fak = sqrt(double(nNode)/nNei);
+// mKNNMiMax[0] = sqrt(knn.GetBest(mKNNIdx[0]))*fak;  
+// mKNNMiMax[1] = sqrt(knn.GetWost(mKNNIdx[1]))*fak;  
+// mKNNMiMax[1]/=mKNNMiMax[0]/100;
 
 float xKnn[2];
 gWk[0] = knn.BestPos(xKnn);
 gWk[1] = knn.WostDis(xKnn);
+StvDebug::Count("KNN_Best:Wost",gWk[0],gWk[1]);
+
 
 #endif // KNNDEBUG
 
