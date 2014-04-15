@@ -384,7 +384,7 @@ StarTGeoStacker::StarTGeoStacker( const Char_t *name, const Char_t *title )
 
   // Ensure that we have a geometry manager
   if ( !gGeoManager ) {
-    TGeoManager *manager = new TGeoManager("dyson","The STAR Geometry Manager");
+    TGeoManager *manager = new TGeoManager("dyson","The STAR Geometry Manager"); assert(manager);
   }
 
 
