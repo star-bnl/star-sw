@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.64 2014/04/11 17:30:21 perev Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.65 2014/04/15 18:46:55 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -136,14 +136,14 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
 
    // Build active sti volumes for pixel sensors
+   int iSensor =1 ;
+
    for (int iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
    {
       for (int iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
       {
-         for (int iSensor = 1; iSensor <= kNumberOfPxlSensorsPerLadder; iSensor++)
-         {
             ostringstream geoPath;
-            geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_" << iSensor << "/PLAC_1";
+            geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_1/PLAC_1";
 
             bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
@@ -187,7 +187,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             LOG_DEBUG << " DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
             // Create new Sti shape based on the sensor geometry
-            StiShape *stiShape = new StiPlanarShape(name, sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
+            StiShape *stiShape = new StiPlanarShape(name, 10*sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
 
             add(stiShape);
 
@@ -204,7 +204,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             // Volume positioning
             StiPlacement *pPlacement = new StiPlacement();
 
-            pPlacement->setZcenter(sensorVec.Z());
+            pPlacement->setZcenter(0);
             pPlacement->setLayerRadius(r);
             pPlacement->setLayerAngle(phi);
             pPlacement->setRegion(StiPlacement::kMidRapidity);
@@ -242,11 +242,10 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             // ladder=1 is the inner ladder
             if (iLadder == 1) {
                stiRow = 0 ;
-               stiSensor = (iSector-1) * kNumberOfPxlSensorsPerLadder + iSensor-1;
+               stiSensor = (iSector-1);
             } else {
                stiRow = 1;
-               stiSensor = (iSector-1) * (kNumberOfPxlLaddersPerSector-1) * kNumberOfPxlSensorsPerLadder
-                         + (iLadder-2) * kNumberOfPxlSensorsPerLadder + iSensor-1;
+               stiSensor = (iSector-1) * (kNumberOfPxlLaddersPerSector-1) + (iLadder-1);
             }
 
             stiDetector->setKey(1, stiRow);
@@ -272,7 +271,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
          }
       }
-   }
 }
 
 
