@@ -1,5 +1,0 @@
-<Document name="igtdgeo.xml">
-<Export language="Mortran">
-<Import file="pams/geometry/igtdgeo/igtdgeo.g" verbatim="true" />
-</Export>
-</Document>

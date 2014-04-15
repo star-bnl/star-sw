@@ -1,4 +1,0 @@
-# $Id $
-# package control
-# author: 
-#Library:libcontrol.so:LIBS +=   -lgeant3  -lminicern
