@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.13 2014/04/14 02:45:56 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.14 2014/04/15 06:47:00 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.14  2014/04/15 06:47:00  ypwang
+* updates for collections clear due to Clear() function removed from StIstCollection
+*
 * Revision 1.13  2014/04/14 02:45:56  ypwang
 * update LOG_ERROR to LOG_WARN for the case when real time bin number does not equal to the value from DB
 *
@@ -446,8 +449,11 @@ Int_t StIstRawHitMaker::Make() {
 
 void StIstRawHitMaker::Clear( Option_t *opts )
 {
-   if( mIstCollectionPtr )
-      mIstCollectionPtr->Clear( opts );
+   if(mIstCollectionPtr ) {
+	for ( unsigned char i = 0; i < kIstNumLadders; ++i ) {
+	    mIstCollectionPtr->getRawHitCollection(i)->Clear( "" );
+	}
+   }
 };
 
 ClassImp(StIstRawHitMaker);
