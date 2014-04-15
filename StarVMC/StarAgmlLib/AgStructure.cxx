@@ -1391,7 +1391,7 @@ Bool_t AgStructure::AgDetpAdd( const Char_t *name, const Char_t *member, Double_
       // Add a TObjString with the format structName.memberName
 
       TString n = Form("%s.%s",name,member);
-      TString t = Form("= %d",value);
+      TString t = Form("= %f",value);
       _commands -> Add( new TNamed( n.Data(), t.Data() ) );
 
       return true;
