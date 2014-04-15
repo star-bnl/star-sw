@@ -1,7 +1,12 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.6 2014/03/27 22:48:08 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.7 2014/04/15 18:46:55 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.7  2014/04/15 18:46:55  smirnovd
+ * Switched to PXL sensitive layer geometry with one Sti volume per ladder centered
+ * at z=0. The loop over sensors removed and the indexing of the volumes changed
+ * accordingly. Update from Jonathan Bouchet
+ *
  * Revision 1.6  2014/03/27 22:48:08  smirnovd
  * Minor improvements in feedback
  *
@@ -162,11 +167,10 @@ void StiPxlHitLoader::loadHits(StEvent *source,
 
                if (pxlHit->ladder() == 1) {
                   stiRow = 0 ;
-                  stiSensor = (pxlHit->sector()-1) * kNumberOfPxlSensorsPerLadder + (pxlHit->sensor()-1);
+                  stiSensor = (pxlHit->sector()-1);
                } else {
                   stiRow = 1;
-                  stiSensor = (pxlHit->sector()-1) * (kNumberOfPxlLaddersPerSector-1) * kNumberOfPxlSensorsPerLadder
-                            + (pxlHit->ladder()-2) * kNumberOfPxlSensorsPerLadder + (pxlHit->sensor()-1);
+                  stiSensor = (pxlHit->sector()-1) * (kNumberOfPxlLaddersPerSector-1) + (pxlHit->ladder()-1);
                }
 
                LOG_DEBUG << " hit sector : " << (int) pxlHit->sector()
