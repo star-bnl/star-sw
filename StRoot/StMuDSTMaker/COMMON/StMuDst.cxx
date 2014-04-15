@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.61 2014/03/03 23:11:46 jdb Exp $
+ * $Id: StMuDst.cxx,v 1.62 2014/04/15 04:48:47 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -401,7 +401,7 @@ void StMuDst::fixMtdTrackIndices() {
   /// global and primary tracks share the same id, so we can fix the 
   /// index2Global up in case they got out of order (e.g. by removing 
   /// a track from the TClonesArrays
-    fixMtdTrackIndices( mtdArrays[muBTofHit], arrays[muPrimary], arrays[muGlobal] );  
+    fixMtdTrackIndices( mtdArrays[muMTDHit], arrays[muPrimary], arrays[muGlobal] );  
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -823,6 +823,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.62  2014/04/15 04:48:47  jdb
+ * Changed mtdArrays[muBTofHit] to mtdArrays[muMTDHit] in StMuDst.cxx in function fixMtdTrackIndices
+ *
  * Revision 1.61  2014/03/03 23:11:46  jdb
  * Added Rongrongs changes to StMuDst.cxx and StMuMtdHit.{cxx,h} for mtd tracks
  *
