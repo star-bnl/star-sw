@@ -738,9 +738,7 @@ Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructMagp( const Char_t *flag, Bool_t go )
 { if (!go) return false;
-
-  cout << "magp select = " << flag << endl;
-
+ 
   if ( !magpGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));

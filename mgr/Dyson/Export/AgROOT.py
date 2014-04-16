@@ -2856,23 +2856,32 @@ class Info(Handler):
 
         return mylist
 
-    def endElement(self,tag):
-
+    def XXXendElement(self,tag):
         # Get the list of descriptors
         desc = self.descriptors()
-
         # Add to the Form...
-        output = 'std::cout << Form("%s",'%desc
-                
+        output = 'std::cout << Form("%s",'%desc                
         for i,a in enumerate(self.args):
             a = a.strip()
             if i and i<len(self.args): output += ' ,'
             output += '%s'%a
-
-        output = replacements(output)
-            
+        output = replacements(output)            
         output += ') << std::endl;'
         document.impl(output,unit=current)
+
+    def endElement(self,tag):
+        # Get list of format descriptors and build the format line
+        desc = self.descriptors()
+        form = 'Form( "%s", '%(desc)
+        for i, a in enumerate(self.args):
+            a = a.strip()
+            if i and i < len(self.args): form += ' ,'
+            form += '%s'%a
+        form = replacements(form)
+        form += ') '
+        
+        document.impl( "// - Info - ",                    unit=current )
+        document.impl( 'Info( GetName(), %s );'%form,     unit=current )
 
 
 class Print(Handler):
