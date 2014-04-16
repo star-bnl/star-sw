@@ -763,7 +763,7 @@ class EvbChooser
 
   void readWeights();
   void clearWeightedEvbEvents();
-  int nextWeightedServer();
+  int nextWeightedServer(int token);
   
  private:
   int evbNodes[10][5];          // idx to server by evb/server
