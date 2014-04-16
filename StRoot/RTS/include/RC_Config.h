@@ -741,7 +741,7 @@ int getAllEthServers(EthServerName *list, int max);
 class EvbChooser
 {
  public:
-  EvbChooser() {};
+    EvbChooser() {weights_set = 0; };
   void configure(SimpleXmlDoc *xml);
 
   void configure(STAR_CFG *cfg, int legacy);
@@ -761,9 +761,19 @@ class EvbChooser
   
   int getEvb4Token(int token) { return evb4token[token]; }
 
+  void readWeights();
+  void clearWeightedEvbEvents();
+  int nextWeightedServer();
+  
  private:
   int evbNodes[10][5];          // idx to server by evb/server
   int nevbserv[10];             // nservers by evb
+
+  double evt_ctrs_by_server[10];
+  double weights_by_evb[10];
+  int weights_set;
+
+
   int nevbs;
   int evb4token[4096];         
 };
