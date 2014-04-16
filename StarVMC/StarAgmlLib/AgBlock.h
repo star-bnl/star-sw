@@ -26,6 +26,17 @@ class AgModule;
 class AgBlock : public TNamed
 {
 
+public:
+
+  /// Info-level printout.  Ignores variadic args.
+  virtual void Info    ( const Char_t *name, const Char_t *msg, ... ) const;
+  /// Warn-level printout.  Ignores variadic args.
+  virtual void Warning ( const Char_t *name, const Char_t *msg, ... ) const;
+  /// Error-level printout.  Ignores variadic args.
+  virtual void Error   ( const Char_t *name, const Char_t *msg, ... ) const;
+  /// Fatal-level printout.  Ignores variadic args.
+  virtual void Fatal   ( const Char_t *name, const Char_t *msg, ... ) const;
+
  public:
 
   AgBlock(const Char_t *name, const Char_t *title);

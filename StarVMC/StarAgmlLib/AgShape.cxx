@@ -25,6 +25,8 @@ ClassImp(AgShape);
 
 #include <assert.h>
 
+#include "StMessMgr.h"
+
 std::map< Int_t, std::vector<TString> > AgShape::mParList;
 std::map< TString, Int_t >              AgShape::mShapeIds;
 std::map< Int_t, TString >              AgShape::mShapeNames;
@@ -223,28 +225,28 @@ void AgShape::Print( Option_t *otps ) const
       for ( UInt_t i=kBbox;i<=kDivision;i++ )
 	{
 	  TString name = mShapeNames[i];
-	  std::cout << "+ " << name.Data() << ":";
+	  LOG_INFO << "+ " << name.Data() << ":";
 	  for ( UInt_t j=0;j<mParList[i].size();j++ )
 	    {
-	      std::cout << " " << mParList[i][j];
+	      LOG_INFO << " " << mParList[i][j];
 	    }
-	  std::cout << std::endl;
+	  LOG_INFO << endm;
 	}
     }
   else
     {
       TString name = GetName();
-      std::cout << "[+] " << name.Data() << ":";
+      LOG_INFO << "[+] " << name.Data() << ":";
       std::map<TString, Double_t > mypar=mParameters;
       for ( UInt_t j=0;j<mParList[mId].size();j++ )
 	{
 	  TString key=mParList[mId][j];
 	  if ( isSet(key) )
-	    std::cout << Form(" %s=%7.4g",key.Data(),mypar[key]);
+	    {  LOG_INFO << Form(" %s=%7.4g",key.Data(),mypar[key]); }
 	  else
-	    std::cout << Form(" %s=<unset>",key.Data());
+	    { LOG_INFO << Form(" %s=<unset>",key.Data()); }
 	}
-      std::cout << std::endl;
+      LOG_INFO << endm;
 
       std::vector<Double_t> zz=mZ;
       std::vector<Double_t> rmin=mRmin;
@@ -252,7 +254,7 @@ void AgShape::Print( Option_t *otps ) const
 
       for ( UInt_t i=0;i<zz.size();i++ )
 	{
-	  std::cout << Form("  [%02i] z=%7.4g rmin=%7.4g rmax=%7.4g",i,zz[i],rmin[i],rmax[i]) << std::endl;
+	  LOG_INFO << Form("  [%02i] z=%7.4g rmin=%7.4g rmax=%7.4g",i,zz[i],rmin[i],rmax[i]) << endm;
 	}
     }
 

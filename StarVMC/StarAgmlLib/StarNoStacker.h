@@ -5,7 +5,7 @@
 
 /**
    \class StarNoStacker
-   \brief Performs no action.  
+   \brief The Seinfeld of Geometry Bulders...
 
    Allows AgML structures to be created w/out instantiating a geometry.  Useful for debugging
    purposes, documentation, dependency analysis, etc... 
