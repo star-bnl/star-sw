@@ -6,11 +6,18 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.4 2013/12/09 22:53:25 geurts Exp $
+ * $Id: StMtdMatchMaker.h,v 1.5 2014/04/16 02:23:39 huangbc Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.5  2014/04/16 02:23:39  huangbc
+ * 1. fixed a bug of un-initialized variable nDedxPts in MtdTrack construction function.
+ * 2. reoriganized project2Mtd function. Made it more readable.
+ * 3. save pathlengths of extrapolated tracks.
+ * 4. tot selection < 40 ns. drop off maximum tot selection.
+ * 5. add hits <-> track index association in mMuDstIn=true mode.
+ *
  * Revision 1.4  2013/12/09 22:53:25  geurts
  * update: enable filling of MTD Pid traits and include a few more protections against zero-pointers [Bingchu]
  *
@@ -61,10 +68,10 @@ typedef vector<UInt_t, allocator<UInt_t>>  UIntVec;
 typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
 #endif
 
-const Int_t kMaxHits = 100000;
+const Int_t kMaxHits = 20000;
 const Int_t kMaxTriggerIds = 64;
 const Int_t mNBacklegs = 30;
-const Int_t mNStrips = 30;
+const Int_t mNStrips = 12;
 const Int_t mNAllTrays = 150; 
 
 /// MTD Event data structure
@@ -114,7 +121,7 @@ struct MtdEvtData {
 	Double_t totEast[kMaxHits];
 
 	/// global tracks information
-	Int_t ngTracks;
+	Int_t ngTrks;
 	Float_t gpt[kMaxHits];
 	Float_t geta[kMaxHits];
 	Float_t gphi[kMaxHits];
@@ -181,6 +188,7 @@ struct MtdEvtData {
 /// MTD track class
 class MtdTrack{
 	public:
+		MtdTrack():pt(-999.),eta(-999.),nFtPts(0),nDedxPts(0),flag(0),nHitsPoss(999){};
 		MtdTrack(StTrack *stt);
 		MtdTrack(StMuTrack *mut);
 		~MtdTrack(){}
@@ -259,8 +267,8 @@ class StMtdMatchMaker: public StMaker
 		Bool_t			mHisto;
 		
 		Double_t		mVDrift[mNAllTrays][mNStrips];  //! drifting velocity
-		Int_t 	mnNeighbors; //! match with +- mnNeighbors cell
-		Int_t ngTracks;
+		Int_t 			mnNeighbors; //! match with +- mnNeighbors cell
+		Int_t 			ngTracks;
 
 
 		///QA histograms
@@ -345,7 +353,6 @@ class StMtdMatchMaker: public StMaker
 		MtdEvtData  mMtdEvtData;
 
 		TTree *mMtdEvt;
-		TFile *fout;
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGSA
 		typedef vector<StructCellHit> mtdCellHitVector;
@@ -375,12 +382,8 @@ class StMtdMatchMaker: public StMaker
 		/// check track quality
 		bool validTrack(MtdTrack mtt);
 
-		/// used in project2Mtd(), StEvent mode
-		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StTrack *theTrack, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
-		/// used in project2Mtd(), StMuDst mode
-		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StMuTrack *theTrack, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
 		/// used in project2Mtd() 
-		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,StPhysicalHelixD helix, Int_t gq, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
+		bool matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhysicalHelixD &helix, Int_t gq, mtdCellHitVector& allCellsHitVec,unsigned int iNode, StThreeVectorD globalPos);
 
 
 		/// convert module center to local coordinates
@@ -390,8 +393,12 @@ class StMtdMatchMaker: public StMaker
 		/// reset QA tree data
 		void initEventData();
 
+		/// fill track branch to QA tree
+		void fillTrackInfo(StTrack *t, float mField, UInt_t iNode);
+		void fillTrackInfo(StMuTrack *t, float mField, UInt_t iNode);
+
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.4 2013/12/09 22:53:25 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.5 2014/04/16 02:23:39 huangbc Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,1)
 };
 
