@@ -1,6 +1,6 @@
 #include "AgCreate.h"
 ClassImp(AgCreate);
-
+#include "StMessMgr.h"
 #include <iostream>
 
 // ---------------------------------------------------------------------------------------
@@ -38,12 +38,9 @@ void AgCreate::SetParameters( AgShape &shape )
     {     
       TString  key = (*iter).first;
       Double_t val = (*iter).second;
-      //      std::cout << "Set " << key.Data() << " = " << val << std::endl;
+ 
       if ( !shape.hasPar(key) ) goto NEXT;
-      //      std::cout << "has par" << std::endl;
-      //      if (  shape.isSet(key)  ) goto NEXT;
-      //      std::cout << "not set" << std::endl;
-
+ 
       shape.par(key) = val;
 
       NEXT:
@@ -53,15 +50,15 @@ void AgCreate::SetParameters( AgShape &shape )
 // ---------------------------------------------------------------------------------------
 void AgCreate::Print( const Option_t *otps ) const
 {
-  std::cout << "Create : " << GetName() << " " << GetTitle() << std::endl;
-  std::cout << "=============================================================" << std::endl;
+  LOG_INFO << "Create : " << GetName() << " " << GetTitle() << endm;
+  LOG_INFO << "=============================================================" << endm;
   std::map< TString, Double_t > params = mParameters;
   std::map< TString, Double_t >::iterator iter = params.begin();
   while ( iter != params.end() )
     {     
       TString  key = (*iter).first;
       Double_t val = (*iter).second;
-      std::cout << key.Data() << " = " << val << std::endl;
+      LOG_INFO << key.Data() << " = " << val << endm;
       iter++;
     }
   

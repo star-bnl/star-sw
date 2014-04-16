@@ -3,6 +3,7 @@
 #include "AgModule.h"
 #include <assert.h>
 #include <iostream>
+#include "StMessMgr.h"
 
 ClassImp(AgMedium);
 // -----------------------------------------------------------------------------------------------------------
@@ -275,18 +276,18 @@ void AgMedium::Print( const Option_t *opts ) const
 {
 
 	TString name = GetName();
-	//std::cout << "["<< ((mLock)?"-":"+") << "] " << Form("%30s:",name.Data()) << " ";
-	std::cout << Form("%20s",name.Data()) << " ";
+	//LOG_INFO << "["<< ((mLock)?"-":"+") << "] " << Form("%30s:",name.Data()) << " ";
+	LOG_INFO << Form("%20s",name.Data()) << " ";
 	std::map<TString, Double_t > mypar=mParameters;
 	for ( UInt_t j=0;j<mParameterList.size();j++ )
 	{
 		TString key=mParameterList[j];
 		if ( isSet(key) )
-			std::cout << Form(" %s=%9.5g",key.Data(),mypar[key]);
+		  { LOG_INFO << Form(" %s=%9.5g",key.Data(),mypar[key]); }
 		else
-			std::cout << Form(" %s= <unset> ",key.Data());
+		  { LOG_INFO << Form(" %s= <unset> ",key.Data()); }
 	}
-	std::cout << std::endl;
+	LOG_INFO << endm;
 
 }
 

@@ -5,6 +5,7 @@ ClassImp(AgMaterial);
 #include <assert.h>
 #include "AgBlock.h"
 #include "AgModule.h"
+#include "StMessMgr.h"
 
 std::vector< TString >            AgMaterial::mParameterList;
 std::map< TString, AgMaterial * > AgMaterial::mMaterialTable;
@@ -207,28 +208,34 @@ Bool_t AgMaterial::hasComponent( const Char_t *comp )const
 // ==============================================================================================================
 void AgMaterial::Print( Option_t *opts ) const
 {
-  TString name = GetName();
-  std::cout << "["<< ((mLock)?"-":"+") << "] " << Form("%20s:",name.Data()) << " ";
+  TString name   = GetName();
+  TString output = "";
+  //LOG_INFO << "["<< ((mLock)?"-":"+") << "] " << Form("%20s:",name.Data()) << " ";
+  output = TString("[") + TString((mLock)?"-":"+") + TString("] ") + Form("%20s:",name.Data()) + TString(" ");
   std::map<TString, Double_t > mypar=mParameters;
   for ( UInt_t j=0;j<mParameterList.size();j++ )
     {
       TString key=mParameterList[j];
-      if ( isSet(key) )
-	std::cout << Form(" %s=%9.5g",key.Data(),mypar[key]);
+      if ( isSet(key) ) 
+	{ 
+	  output += Form(" %s=%9.5g",key.Data(),mypar[key]); 
+	}
       else
-	std::cout << Form(" %s= <unset> ",key.Data());
+	{ 
+	  output += Form(" %s= <unset> ",key.Data()); 
+	}
     }
-  std::cout << std::endl;
+  LOG_INFO << output.Data() << endm;
 
   if ( mType > kMaterial )
-    std::cout << Form("\t\t\t\t\t\t\t\t\t\t           A           Z         W")<<std::endl;
+    LOG_INFO << Form("\t\t\t\t\t\t\t\t\t\t           A           Z         W")<<endm;
     for ( UInt_t i=0;i<mC.size();i++ )
       {
 	TString comp = mC[i];
 	Double_t a = mA[i];
 	Double_t z = mZ[i];
 	Double_t w = mW[i];
-	std::cout << Form("\t\t\t\t\t\t\t\t\t\t %4s   %6.3f     %6.3f    %6.3f",comp.Data(),a,z,w)<<std::endl;
+	LOG_INFO << Form("\t\t\t\t\t\t\t\t\t\t %4s   %6.3f     %6.3f    %6.3f",comp.Data(),a,z,w)<<endm;
       }
 
 }

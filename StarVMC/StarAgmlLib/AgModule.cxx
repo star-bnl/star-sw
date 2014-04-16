@@ -3,8 +3,6 @@
 
 ClassImp(AgModule);
 
-//std::vector< TString > AgModule::mDetectorParameters;
-
 // ---------------------------------------------------------------------------------------------
 AgModule::AgModule( const Char_t *name, const Char_t *comment ) : AgBlock(name,comment)
 {  

@@ -45,6 +45,8 @@ ClassImp(StarTGeoStacker);
 
 #include <assert.h>
 
+#include "StMessMgr.h"
+
 #undef min
 #undef max
 
@@ -292,7 +294,7 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
     case( AgMaterial::kMixture ):
       if ( ag_material.sumWeights() - 1.0 < -1.0E-5 ) 
 	{	  
-	  std::cout << "Warning: sum of all weights does not add up to 1.0" << std::endl;
+	  LOG_WARN << "Warning: sum of all weights does not add up to 1.0" << endm;
 	  ag_material.Print();
 	}
       mixture = new TGeoMixture( mat_name, nc, dd );
@@ -557,7 +559,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 
   if ( mShape.type() == AgShape::kUnknown )
     { gErrorIgnoreLevel=1; 
-      Error("Build(AgBlock *block",Form("This shouldn't happen... block %s has an invalid shape.  Was it initialzed?  If not, why didn't it inherit from motehr?",block->GetName()));
+      block->Error( "Build", Form("Invalid shape for block %s.",block->GetName()) );
       assert(mShape.type() != AgShape::kUnknown );
     }
 
@@ -795,7 +797,7 @@ Bool_t sanityCheck( TGeoVolume *volume )
   if ( shape->Capacity() <= 0. )
     { Int_t old=gErrorIgnoreLevel;    
       gErrorIgnoreLevel=1; // Some warnings will not be supressed
-      AgBlock::module()->Warning("sanityCheck",Form("Attempt to place volume %s with L^3=0",volume->GetName()));
+      AgBlock::module()->Warning(AgModule::module()->GetName(),Form("Volume %s shape parameters invalid.  NULL bounding box capacity.",volume->GetName()));
       //      volume -> Print();
       //      volume -> InspectShape();
       gErrorIgnoreLevel=old;

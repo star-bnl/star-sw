@@ -10,6 +10,7 @@ ClassImp(AgBlock);
 #include "AgPlacement.h"
 
 #include "StarAgmlStacker.h"
+#include "StMessMgr.h"
 
 // Setup static members
 AgBlock                      *AgBlock::mCurrent=0;
@@ -25,6 +26,23 @@ struct _AgBlockDummy {
   };
 } _agblockdumdum_;
 
+// ..................................................................................................
+// Block IO methods
+void AgBlock::Info   ( const Char_t *name, const Char_t *msg, ... ) const {
+  LOG_INFO << Form("%10s",name) << ": " << msg << endm;
+}
+void AgBlock::Warning( const Char_t *name, const Char_t *msg, ... ) const {
+  LOG_WARN << Form("%10s",name) << ": " << msg << endm; 
+}
+void AgBlock::Error  ( const Char_t *name, const Char_t *msg, ... ) const {
+  LOG_ERROR << Form("%10s",name) << ": " << msg << endm;
+}
+void AgBlock::Fatal  ( const Char_t *name, const Char_t *msg, ... ) const {
+  LOG_FATAL << Form("%10s",name) << ": " << msg << endm;
+}
+// ..................................................................................................
+  
+
 AgBlock::AgBlock(const Char_t *name, const Char_t *title)
   : TNamed(name,title)
 {
@@ -34,15 +52,14 @@ AgBlock::AgBlock(const Char_t *name, const Char_t *title)
 }
 
 
-
 void AgBlock::Create( const Char_t *name )
 {
   // Get pointer to the named block
   AgBlock *block = mBlockTable[ name ];
   if ( !block )
     {
-      Warning("Create(const Char_t *name)",Form("The specified block %s is not in the block table.",name));
-      Warning("Create(const Char_t *name)",Form("Was the block added to the module with AddBlock?"));
+      LOG_WARN << "Create(const Char_t *name)" << Form("The specified block %s is not in the block table.",name)<<endm;
+      LOG_WARN << "Create(const Char_t *name)" << Form("Was the block added to the module with AddBlock?") << endm;
       return;	      
     }
   
@@ -118,14 +135,14 @@ AgBlock* AgBlock::previous(Int_t offset)
   UInt_t size = mStack.size();
   UInt_t off  = offset;
   UInt_t index = size - off - 1;
-  //  std::cout << mStack.back() << " ==??== " << mStack[size-1] << std::endl;
+
   if (index>=0)
     {
       return mStack[index];
     }
 
   return NULL;
-  //return mStack.back(); 
+
 }
 
 
@@ -138,13 +155,13 @@ AgBlock::Find( const Char_t *name)
 void 
 AgBlock::Print(Option_t *opts)const
 {
-  std::cout << "========================================================================" << std::endl;
-  std::cout << GetName() << " :: " << GetTitle() << std::endl;
-  std::cout << "Current instance:  " << mNicknames.back().Data() << std::endl;
-  std::cout << "Defined in module: " << _module -> GetName() << std::endl;
-  std::cout << "========================================================================" << std::endl;
-  _material.Print(); std::cout << std::endl;
-  _medium.Print();   std::cout << std::endl;
+  LOG_INFO << "========================================================================" << endm;
+  LOG_INFO << GetName() << " :: " << GetTitle() << endm;
+  LOG_INFO << "Current instance:  " << mNicknames.back().Data() << endm;
+  LOG_INFO << "Defined in module: " << _module -> GetName() << endm;
+  LOG_INFO << "========================================================================" << endm;
+  _material.Print(); LOG_INFO << endm;
+  _medium.Print();   LOG_INFO << endm;
   _shape.Print();
 }
 
@@ -153,8 +170,8 @@ void AgBlock::List(Option_t *opts)
 
   TString Opts=opts;
 
-  std::cout << "========================================================================================" << std::endl;
-  std::cout << "List of known blocks: " << std::endl;
+  LOG_INFO << "========================================================================================" << endm;
+  LOG_INFO << "List of known blocks: " << endm;
   std::map< TString, AgBlock *>::iterator iter = mBlockTable.begin();
   while ( iter != mBlockTable.end() )
     {
@@ -167,22 +184,22 @@ void AgBlock::List(Option_t *opts)
       AgBlock *ptr = (*iter).second;
       TString cmnt = "";
       if ( ptr ) cmnt=ptr->GetTitle();
-      //std::cout << name.Data() << " ptr=" << ptr << std::endl;
-      std::cout << Form("%s %80s ptr=%p",name.Data(),cmnt.Data(),ptr) << " ";
+
+      LOG_INFO << Form("%s %80s ptr=%p",name.Data(),cmnt.Data(),ptr) << " ";
       std::vector<TString> nicks = _stacker -> nicknames(name);
       UInt_t nnicks = nicks.size();
       if ( nicks.size() ) 
 	{
-	  std::cout << nicks[0].Data() << " ";
+	  LOG_INFO << nicks[0].Data() << " ";
 	  if ( nicks.size()>1 )
-	    std::cout << ".. " << nicks.back().Data()<< " ";
-	  std::cout << nnicks << std::endl;
+	    LOG_INFO << ".. " << nicks.back().Data()<< " ";
+	  LOG_INFO << nnicks << endm;
 	}
-      std::cout << std::endl;
+      LOG_INFO << endm;
 
       iter++;
     }
-  std::cout << std::endl;
+  LOG_INFO << endm;
   
 }
 

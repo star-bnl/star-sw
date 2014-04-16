@@ -53,6 +53,8 @@
 /* ClassImp(PsupGeom_t); */ PsupGeom_t psupGeom;
 /* ClassImp(DtubGeom_t); */ DtubGeom_t dtubGeom;
 
+#include "StMessMgr.h"
+
 // ----------------------------------------------------------------------
 Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
 {
@@ -75,33 +77,36 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
 void Geometry::ConstructGeometry( const Char_t *tag )
 {
 
-  // Check to see if tag looks like a macro name.  If so, execut it.
-  if ( TString(tag).Contains(".") )
-    {
-      gROOT -> ProcessLine(Form(".x %s",tag));
-      return;
-    }
+  LOG_INFO << endm;
+  Info("Geometry",Form("AgML constructing geometry tag %s",tag));
+
+  // // Check to see if tag looks like a macro name.  If so, execut it.
+  // if ( TString(tag).Contains(".") )
+  //   {
+  //     gROOT -> ProcessLine(Form(".x %s",tag));
+  //     return;
+  //   }
 
   // Select y2009a configuration
   geom.Use("select", tag );
 
   // And apply the flags to each subsystem
 #define Initialize(sys){						\
-    std::cout << #sys << ": " << geom.sys##Flag.Data()<<"\t";		\
+    out += #sys;  out += ": "; out += geom.sys##Flag.Data();  out += "\t"; \
     if (! sys##Geom.Use("select", geom. sys##Flag) ) {	Int_t _save = gErrorIgnoreLevel; gErrorIgnoreLevel=0; \
-      Warning(GetName(),Form("Could not initialize %s with flag %s",#sys, geom.sys##Flag.Data())); \
+      Fatal(GetName(),Form("Could not initialize %s with flag %s",#sys, geom.sys##Flag.Data())); \
       gErrorIgnoreLevel=_save;						\
     }									\
   }
-  std::cout << "== Geometry.cxx ==============================================================================================" << std::endl;
-  std::cout << "Initializing subsystem geometry flags" << std::endl;
-  Initialize(cave);  Initialize(magp);  Initialize(pipe);  Initialize(bbcm); std::cout << std::endl;
-  Initialize(vpdd);  Initialize(zcal);  Initialize(btof);  Initialize(mutd); std::cout << std::endl;
-  Initialize(phmd);  Initialize(svtt);  Initialize(sisd);  Initialize(scon); std::cout << std::endl;
-  Initialize(idsm);  Initialize(ftpc);  Initialize(ftro);  Initialize(fgtd); std::cout << std::endl;
-  Initialize(calb);  Initialize(ecal);  Initialize(fpdm);  Initialize(upst); std::cout << std::endl;
-  Initialize(fsce);  Initialize(eidd);  Initialize(istd);  Initialize(pxst); std::cout << std::endl;
-  std::cout << "==============================================================================================================" << std::endl;
+  LOG_INFO << endm;
+  TString out = "";
+  Initialize(cave);  Initialize(magp);  Initialize(pipe);  Initialize(bbcm); Info("Geometry",out); out="";
+  Initialize(vpdd);  Initialize(zcal);  Initialize(btof);  Initialize(mutd); Info("Geometry",out); out="";
+  Initialize(phmd);  Initialize(svtt);  Initialize(sisd);  Initialize(scon); Info("Geometry",out); out="";
+  Initialize(idsm);  Initialize(ftpc);  Initialize(ftro);  Initialize(fgtd); Info("Geometry",out); out="";
+  Initialize(calb);  Initialize(ecal);  Initialize(fpdm);  Initialize(upst); Info("Geometry",out); out="";
+  Initialize(fsce);  Initialize(eidd);  Initialize(istd);  Initialize(pxst); Info("Geometry",out); out="";
+  LOG_INFO << endm;
 #undef Initialize
 
 
@@ -215,19 +220,9 @@ void Geometry::StarsimGeometry( const Char_t *tag )
 AgModule *Geometry::CreateModule( const Char_t *module, const Char_t *top )
 {
 
-#if 0
-  if (top) {
-    std::cout << ">>> Setting top volume = " << top << " <<<" << std::endl;
-  }
-  else {
-    std::cout << ">>> Creating module    = " << module << " <<<" << std::endl;
-  }
-#endif 
   Info( GetName(), Form("AgML/Geometry creating module %s",module) );
   if ( top )
-    Info( GetName(), Form("AgML/Geometry setting top module %s / volume %s", module, top) );
-	
-
+  Info( GetName(), Form("AgML/Geometry setting top module %s / volume %s", module, top) );
 
   // Set the current module to this
   _module = this;
@@ -235,7 +230,7 @@ AgModule *Geometry::CreateModule( const Char_t *module, const Char_t *top )
   TString name = module;
   TString NAME = name; NAME.ToUpper();
 
-  // Import the module's name space
+  // Import the module's name space into ROOT/CInt
   TString cmd = "using namespace "+NAME+";";
   gROOT->ProcessLine(cmd);
 
@@ -316,7 +311,6 @@ Bool_t Geometry::ConstructEcal( const Char_t *flag, Bool_t go )
 
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructBbcm( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -341,7 +335,6 @@ Bool_t Geometry::ConstructBbcm( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructPipe( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -364,7 +357,6 @@ Bool_t Geometry::ConstructPipe( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructFpdm( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -454,7 +446,6 @@ Bool_t Geometry::ConstructTpcx( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructCalb( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -482,7 +473,6 @@ Bool_t Geometry::ConstructCalb( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // -------------------------------------------------------------------
 Bool_t Geometry::ConstructBtof( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -509,7 +499,6 @@ Bool_t Geometry::ConstructBtof( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // -------------------------------------------------------------------
 Bool_t Geometry::ConstructVpdd( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -531,7 +520,6 @@ Bool_t Geometry::ConstructVpdd( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // -------------------------------------------------------------------
 Bool_t Geometry::ConstructPhmd( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -553,7 +541,6 @@ Bool_t Geometry::ConstructPhmd( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // -------------------------------------------------------------------
 Bool_t Geometry::ConstructFtpc( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -584,7 +571,6 @@ Bool_t Geometry::ConstructFtpc( const Char_t *flag, Bool_t go )
   return true;
 
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -607,8 +593,6 @@ Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructEidd( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -660,7 +644,7 @@ Bool_t Geometry::ConstructFtro( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
+// ----------------------------------------------------------------------
 Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
 { if (!go) return false;
 
@@ -715,7 +699,7 @@ Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
+// ----------------------------------------------------------------------
 Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
 { if (!go) return false;
 
@@ -751,8 +735,6 @@ Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
   return true;
 
 }
-
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructMagp( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -803,7 +785,6 @@ Bool_t Geometry::ConstructCave( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructScon( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -835,8 +816,6 @@ Bool_t Geometry::ConstructScon( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructUpst( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -854,7 +833,6 @@ Bool_t Geometry::ConstructUpst( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructZcal( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -872,7 +850,6 @@ Bool_t Geometry::ConstructZcal( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructRich( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -890,7 +867,6 @@ Bool_t Geometry::ConstructRich( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -922,7 +898,6 @@ Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructIdsm( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -945,7 +920,6 @@ Bool_t Geometry::ConstructIdsm( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
 // ---------------------------------------------------------------------- This is the old development pixel detector
 Bool_t Geometry::ConstructPixl( const Char_t *flag, Bool_t go )
 {                                                  if (!go) return false;
@@ -1039,7 +1013,7 @@ Bool_t Geometry::ConstructPxst( const Char_t *flag, Bool_t go )
   return true;
 
 }
-
+// ----------------------------------------------------------------------
 Bool_t Geometry::ConstructPsup( const Char_t *flag, Bool_t go )
 {                                                  if (!go) return false;
 
@@ -1122,7 +1096,6 @@ Bool_t Geometry::CalbInit()
 
   return true;
 }
-
 // ----------------------------------------------------------------------
 Bool_t Geometry::CaveInit()
 {
@@ -2085,7 +2058,7 @@ Bool_t Geometry::IdsmInit()
   idsmGeom.select="IDSM14"; idsmGeom.module="IdsmGeo2"; idsmGeom.config=14;idsmGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------
 Bool_t Geometry::FtroInit()
 {
   ftroGeom.select="FTROon"; ftroGeom.module="FtroGeo"; ftroGeom.config=1; ftroGeom.fill();
@@ -2168,27 +2141,12 @@ Bool_t Geometry::GeomInit()
 
   return true;
 }
-
+// ----------------------------------------------------------------------
 
 void printModule( const Char_t *system, const Char_t *flag )
 {
 
-#if 0 /* eliminated */
-
-  ofstream out( Form("/tmp/print_%s.C",flag) );
-  {
-    out << Form("void print_%s()",flag)               << std::endl;
-    out << "{"                                      << std::endl;
-    out << Form("%s _str;",system)                  << std::endl;
-    out << Form("_str.Use(\"select\",\"%s\");",flag)     << std::endl;
-    //  out << Form("std::cout << _str.module.Data();") << std::endl;
-    out << "std::cout << Form(\"%12s\",_str.module.Data());" << std::endl;
-    out << "};"                                     << std::endl;
-    out.close();
-  }
-
-  gROOT->ProcessLine(Form(".x /tmp/print_%s.C",flag));
-#endif
+  assert(0); // deprecated
 
 }
 

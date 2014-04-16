@@ -7,6 +7,8 @@
 #include "TBrowser.h"
 #include "TROOT.h"
 
+#include "StMessMgr.h"
+
 ClassImp(AgStructure);
 
 TFolder AgStructure::_top("DETP","Detector parameters");
@@ -285,7 +287,8 @@ Bool_t AgStructure::Use( const Char_t *member, Int_t value )
 	}
       else
 	{
-	  Warning(GetName(),Form("request for %s=(int)%i failed.",member,value));
+	  AgModule::module()->Warning( GetName(), Form("Invalid request for member %s",member) );
+	  //Warning(GetName(),Form("request for %s=(int)%i failed.",member,value));
 	}
 
     }
@@ -455,7 +458,6 @@ Bool_t AgStructure::Use( const Char_t *member, TString value )
       TString oname = obj->GetName();
       TString cname = _class->GetName();
 
-      //      std::cout << "module="<<module.Data()<< " oname=" << oname.Data() << " cname="<<cname.Data() << std::endl;
 
       if ( !cname.Contains( oname ) )
 	{
@@ -484,6 +486,11 @@ Bool_t AgStructure::Use( const Char_t *member, TString value )
 Bool_t AgStructure::CopyDataMembers( AgStructure *other, const Char_t *only, Bool_t verbose )
 {
 
+  TString module;
+  if ( AgModule::module() ) {
+    module = AgModule::module()->GetName();
+  };
+
   // Get the class of the current structure
   TClass *_class  = TClass::GetClass( GetName() );
   TClass *_oclass = TClass::GetClass( other->GetName() );
@@ -505,6 +512,7 @@ Bool_t AgStructure::CopyDataMembers( AgStructure *other, const Char_t *only, Boo
 
       TString _mname = m->GetName();
       TString _mtype = m->GetTypeName();
+      TString _sname = GetName(); _sname = _sname(0,4); _sname.ToLower();
       
       if ( only )
 	{ // Only selected data member
@@ -512,36 +520,46 @@ Bool_t AgStructure::CopyDataMembers( AgStructure *other, const Char_t *only, Boo
 	  if ( fqname!=only ) continue;
 	}
 
-      if ( verbose ) std::cout << Form("Copy %s::%s <-- ",GetName(),_mname.Data());
-	
-
       if ( _mtype == "Int_t" or _mtype == "int" )
 	{
 	  Int_t _value;
 	  other->GetMember( _mname, _value );
 	  SetMember( _mname, _value );
-	  if ( verbose ) std::cout << _value << "/i" << std::endl;
+	  if (verbose) {
+	    AgModule::module()->Info
+	      ( module, Form("  [ Runtime data assignment %s.%s = %i (int) ]",_sname.Data(),_mname.Data(),_value) );
+	  }
 	}
       if ( _mtype == "Float_t" or _mtype == "float" )
 	{
 	  Float_t _value;
 	  other->GetMember( _mname, _value );
 	  SetMember( _mname, _value );
-	  if ( verbose ) std::cout << _value << "/f" << std::endl;
+	  if (verbose) {
+	    AgModule::module()->Info
+	      ( module, Form("  [ Runtime data assignment %s.%s = %g (float) ]",_sname.Data(),_mname.Data(),_value) );
+	  }
 	}
       if ( _mtype == "Double_t" or _mtype == "double" )
 	{
 	  Double_t _value;
 	  other->GetMember( _mname, _value );
 	  SetMember( _mname, _value );
-	  if ( verbose ) std::cout << _value << "/d" << std::endl;
+	  if (verbose) {
+	    AgModule::module()->Info
+	      ( module, Form("  [ Runtime data assignment %s.%s = %g (double) ]",_sname.Data(),_mname.Data(),_value) );
+	  }
 	}
       if ( _mtype == "TString" )
 	{
 	  TString _value;
 	  other->GetMember( _mname, _value );
 	  SetMember( _mname, _value );
-	  if ( verbose ) std::cout << _value << "/s" << std::endl;
+	  if (verbose) {
+	    AgModule::module()->Info
+	      ( module, Form("  [ Runtime data assignment %s.%s = %s (string) ]",_sname.Data(),_mname.Data(),_value.Data()) );
+	  }
+
 	}
       if ( _mtype == "Array_t<Int_t>" )
 	{
@@ -1636,7 +1654,7 @@ Bool_t AgStructure::AgDetpSet()
       // Get the name of the member variable
       TString member = obj->GetName();
 
-      std::cout << Form(">>> Configure /DETP/%s/%s::/%-20s <<<",fname.Data(),destination->GetName(),member.Data()) << " ";
+      //    LOG_INFO << Form("[/DETP/%s/%s (%-20s)]",fname.Data(), destination->GetName(), member.Data()) << endm;
 
       // Now copy the member variable to the destination in the folder
       // and into the current structure

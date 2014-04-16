@@ -1,5 +1,6 @@
 #include "AgAttribute.h"
 #include "AgBlock.h"
+#include "StMessMgr.h"
 ClassImp(AgAttribute);
 // -----------------------------------------------------------------------------------------------------------
 std::vector< TString > AgAttribute::mParList;
@@ -85,11 +86,11 @@ void AgAttribute::Print( const Option_t *o ) const
       // If the key is set print it out
       if ( isSet(key) )
 	{
-	  std::cout << Form(" %s=%7.4g",key.Data(), params[key] );
+	  LOG_INFO << Form(" %s=%7.4g",key.Data(), params[key] ) << endm;
 	}
       else
 	{
-	  std::cout << Form(" %s=<unset>",key.Data());
+	  LOG_INFO << Form(" %s=<unset>",key.Data()) << endm;
 	}
     }
 }
