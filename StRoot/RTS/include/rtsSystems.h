@@ -346,6 +346,8 @@ so we keep it here for source compatibility
 #define TRG_MXQ_INSTANCE 22
 #define TRG_FEQ_INSTANCE 23
 
+#define TRG_TCD_NEW_INSTANCE	24
+
 #define L3EVP_INSTANCE      1
 #define L3DISP_INSTANCE     2
 
@@ -523,7 +525,9 @@ so we keep it here for source compatibility
 #define TRG_SCALER48_NODE  ((TRG_SYSTEM<<12) | TRG_SCALER48_INSTANCE)
 
 /* Temporary... for zoran...*/
-#define TDI_NODE ((TRG_SYSTEM<<12) | TRG_TDI_INSTANCE)
+/* #define TDI_NODE ((TRG_SYSTEM<<12) | TRG_TDI_INSTANCE) */
+
+#define TRG_TCD_NEW_NODE ((TRG_SYSTEM<<12) | TRG_TCD_NEW_INSTANCE)
 
 #define L201_NODE TRG_L2_NODES(1)
 

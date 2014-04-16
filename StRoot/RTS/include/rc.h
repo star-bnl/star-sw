@@ -19,17 +19,20 @@
 #define RC_PRESENT_WAIT (RC_WAITING + RC_PRESENT)
 
 // Global Handler states (new model)
-#define GS_NONE 1
-#define GS_READY 2
-#define GS_CONFIGURING 3
-#define GS_CONFIGURED 4
-#define GS_STARTING 5
-#define GS_RUNNING 6
-#define GS_PAUSING 7
-#define GS_PAUSED 8
-#define GS_STOPPING 9
-#define GS_ERROR 10
-#define GS_ANY 100
+#define GS_ZERO		0	//unused; but for completeness
+#define GS_NONE		1
+#define GS_PRESENT	1
+#define GS_READY	2
+#define GS_CONFIGURING	3
+#define GS_CONFIGURED	4
+#define GS_STARTING	5
+#define GS_RUNNING	6
+#define GS_PAUSING	7
+#define GS_PAUSED	8
+#define GS_STOPPING	9
+#define GS_ERROR	10
+#define GS_WAITING	11	// mix of states for multinode detectors...
+#define GS_ANY		100	// I want to move this to a sane value like 12
 
 // Reason for last run stop...
 #define GSR_NO_RUNS 0

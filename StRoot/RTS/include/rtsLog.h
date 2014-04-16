@@ -83,7 +83,7 @@ void rtsLogAddJmlFile (char *fname);
 #define U_TONKO	"U_TONKO"		/* Tonko gets email */
 #define U_JEFF	"U_JEFF"		/* Jeff gets email */
 #define U_IST	"U_IST"			/* IST manager gets email currently Gerrit */
-
+#define U_TOF	"U_TOF"			/* TOF/MTD manager, Geary */
 #define SAVEme	"SAVEme"	/* gets saved in saved.log */
 
 
