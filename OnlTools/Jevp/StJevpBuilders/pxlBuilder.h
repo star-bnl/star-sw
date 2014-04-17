@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <bitset>
 #include <iostream>
 
 #include "Jevp/StJevpPlot/JevpPlotSet.h"
@@ -12,9 +11,8 @@
 
 #include <math.h>
 
-const int NSENSOR = 40;
-const int NCOL = 960;
-const int NROW = 928;
+#include "pxl_decoder.h"
+
 const int NRDO = 10;
 
 class pxlBuilder : public JevpPlotSet {
@@ -32,15 +30,16 @@ public:
   
   static void main(int argc, char *argv[]);
 
-  bitset<NCOL> bs[NSENSOR][NROW];
-  float ave_runlength[NSENSOR];
 
  private:
+  /*bitset<NCOL> bs[NSENSOR][NROW];*/
+  bitset<NCOL> **bs; /* allocate dynamically in constructor */
 
   int event_multiplicity;
   int multiplicity_inner;
   int multiplicity_outer;
   int sensor_count;
+  int event_count;
   int number_of_events;
 
   int max_count;
@@ -60,25 +59,20 @@ public:
   int count_length_inner[10][NRDO];
   int count_length_outer[30][NRDO];
 
-  map<int,double> *AverageRunLength;
   map<int,int> *LadderCount;
-  map<int,int> *LadderMap;
   
   int sensor_hits[NRDO][NSENSOR];
   int sensor_hit_frequency[NRDO][NSENSOR];
-  int sensor_hit_frequency_SE[NRDO][NSENSOR];
   double avg_run_length[NRDO][NSENSOR];
 
   void IncrementMultiplicity(int sensor_number,int row_count);
   int WhichLadder(int sector_number,int sensor_number);
   void UpdateLadderCount(int sector_number,int sensor_number,int sensor_count);
-  void SetRunLength(int sensor_number,double average_run_length);
   bool UpdateTH1(TH1 *hist,int bin,double value);
   bool UpdateTH1_Scale(TH1 *hist,int bin,double value, int number_of_events_old);
   bool UpdateTH2(TH1 *hist,int x_bin,int y_bin,double value);
   bool UpdateTH2_Scale(TH1 *hist,int x_bin,int y_bin,double value, int number_of_events_old);
   bool UpdateTH2_Scale2(const char* name,TH1 *hist,int x_bin,int y_bin,double value, int number_of_events_old);
-  void SetLadderMap();
   int IncrementArray(const char* name,int x_bin,int y_bin);
 
   void UpdateSectorErrorTypeTH2(TH1 *hist, int ret, int sector_number);
