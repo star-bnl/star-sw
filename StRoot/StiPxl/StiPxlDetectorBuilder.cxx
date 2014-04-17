@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.66 2014/04/15 18:47:05 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.66.2.1 2014/04/17 14:59:44 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -86,7 +86,6 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
    _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
 
    if (StiVMCToolKit::GetVMC()) {
-
       useVMCGeometry();
       buildInactiveVolumes();
    }
@@ -303,7 +302,7 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
       {"PSCK2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
       {"PSAB2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
       {"PSAE2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSMD2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""}
+      {"PSMD2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
 
       /* The following are the largest planar components of the pixel sector support
       {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXRB", "", ""}
@@ -313,6 +312,10 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
       {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXLB", "", ""}
       {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXIB", "", ""}
       */
+
+      /* These are the components of the pixel support tube (PSTM) which is *always* on */
+      { "APTS1", "Tube shell", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSTM_1/APTS_1", "", ""},
+      { "PITN1", "Pixel insertion TubeNaked", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSTM_1/PITN_1", "", ""}
    };
 
    int nPxlVolumes = sizeof(pxlVolumes) / sizeof(VolumeMap_t);
