@@ -1821,7 +1821,7 @@ void l4Builder::defineHltPlots()
     HltPlots[index]->addHisto(ph);
 
     index++; //16
-    hVertexZ = new TH1D("VertexZ", "VertexZ", 1000, -200., 200.);
+    hVertexZ = new TH1D("VertexZ", "VertexZ", 100, -10., 10.);
     ph = new PlotHisto();
     ph->histo = hVertexZ;
     HltPlots[index]->addHisto(ph);
@@ -1852,7 +1852,7 @@ void l4Builder::defineHltPlots()
     HltPlots[index]->addHisto(ph);
 
     index++; //21
-    hLm_VertexZ = new TH1D("Lm_VertexZ", "Lm_VertexZ", 1000, -200., 200.);
+    hLm_VertexZ = new TH1D("Lm_VertexZ", "Lm_VertexZ", 100, -10., 10.);
     ph = new PlotHisto();
     ph->histo = hLm_VertexZ;
     HltPlots[index]->addHisto(ph);
@@ -2017,7 +2017,7 @@ void l4Builder::defineBesGoodPlots()
   BesGoodPlots[index]->addHisto(ph);
 
   index++; //1
-  hBesGoodVertexZ = new TH1D("BesGood_VertexZ","BesGood_VertexZ",1000,-200.,200.);
+  hBesGoodVertexZ = new TH1D("BesGood_VertexZ","BesGood_VertexZ",100,-10.,10.);
   ph = new PlotHisto();
   ph->histo = hBesGoodVertexZ;
   BesGoodPlots[index]->addHisto(ph);
@@ -2045,7 +2045,7 @@ void l4Builder::defineHLTGood2Plots()
   HLTGood2Plots[index]->addHisto(ph);
 
   index++; //1
-  hHLTGood2VertexZ = new TH1D("HLTGood2_VertexZ","HLTGood2_VertexZ",1000,-200.,200.);
+  hHLTGood2VertexZ = new TH1D("HLTGood2_VertexZ","HLTGood2_VertexZ",100,-10.,10.);
   ph = new PlotHisto();
   ph->histo = hHLTGood2VertexZ;
   HLTGood2Plots[index]->addHisto(ph);
