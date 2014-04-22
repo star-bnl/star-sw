@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.210 2014/04/10 23:39:23 jeromel Exp $
+// $Id: StiMaker.cxx,v 1.211 2014/04/22 21:43:13 jeromel Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.211  2014/04/22 21:43:13  jeromel
+// Grompf! Inverted ssd <-> sst now corrected (thx DS)
+//
 // Revision 1.210  2014/04/10 23:39:23  jeromel
 // Backstep: remove default useXX as clash with older data (we need to reshape the options)
 //
@@ -620,12 +623,12 @@ Int_t StiMaker::InitDetectors()
   // SSD or SST - they share the db and the kSsdId
   if (IAttr("useSst") && gStSsdDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
-    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
+    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSst"),SAttr("ssdInputFile")));
     group->setGroupId(kSsdId);
 
   } else if ( IAttr("useSsd") && gStSsdDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
-    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSst"),SAttr("ssdInputFile")));
+    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
     group->setGroupId(kSsdId);
   }
 
