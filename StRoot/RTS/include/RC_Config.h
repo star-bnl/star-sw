@@ -761,19 +761,18 @@ class EvbChooser
   
   int getEvb4Token(int token) { return evb4token[token]; }
 
-  void readWeights();
-  void clearWeightedEvbEvents();
-  int nextWeightedServer(int token);
-  
  private:
   int evbNodes[10][5];          // idx to server by evb/server
   int nevbserv[10];             // nservers by evb
 
-  double evt_ctrs_by_server[10];
-  double weights_by_evb[10];
+  int evt_ctrs_by_server[10];
+  int weights_by_evb[10];
   int weights_set;
 
-
+  void readWeights();
+  void clearWeightedEvbEvents();
+  int nextWeightedServer(int seq, int token);
+  
   int nevbs;
   int evb4token[4096];         
 };
