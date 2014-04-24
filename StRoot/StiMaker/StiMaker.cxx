@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.211 2014/04/22 21:43:13 jeromel Exp $
+// $Id: StiMaker.cxx,v 1.212 2014/04/24 18:15:02 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.212  2014/04/24 18:15:02  perev
+// Remove RnD as old approach
+//
 // Revision 1.211  2014/04/22 21:43:13  jeromel
 // Grompf! Inverted ssd <-> sst now corrected (thx DS)
 //
@@ -445,11 +448,14 @@ More detailed: 				<br>
 #include "TCanvas.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
+
 #include "StiTpc/StiTpcDetectorBuilder.h"
 #include "StiSvt/StiSvtDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
-#include "StiRnD/Ist/StiIstDetectorGroup.h"
-#include "StiRnD/Ist/StiIstDetectorGroup.h"
+// #include "StiRnD/Ist/StiIstDetectorGroup.h"
+// #include "StiRnD/Ist/StiIstDetectorGroup.h"
+#include "StiIst/StiIstDetectorGroup.h"
+
 #include "StiUtilities/StiDebug.h"
 #include "StiUtilities/StiPullEvent.h"
 #include "TDataSet.h"
