@@ -136,7 +136,8 @@ void cacheGeometry( const Char_t *tag, const Char_t *addons )
       gROOT -> ProcessLine(Form(".L %s",file));
 
       // Load development geometry
-      loadDevStarGeometry(tag);
+      //      loadDevStarGeometry(tag);
+      loadStarGeometry(tag);
 
       TString    addOns = addons;
       TObjArray *array  = addOns.Tokenize(" ,;");
