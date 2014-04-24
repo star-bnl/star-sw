@@ -73,6 +73,9 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
 
 void loadDevStarGeometry( const Char_t *mytag="upgr2012" )
 {
+
+  assert(0);
+
   TString tag = mytag;
   gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC ");
 
