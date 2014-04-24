@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.2 2010/01/11 20:35:30 jgma Exp $
+ * $Id: StFmsDbMaker.h,v 1.3 2014/04/24 21:15:04 tpb Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.3  2014/04/24 21:15:04  tpb
+ * Change default name to fmsDb to match BFC
+ *
  * Revision 1.2  2010/01/11 20:35:30  jgma
  * Added reversed map and some other minor updates
  *
@@ -37,7 +40,7 @@ struct fmsGainCorrection_st;
 
 class StFmsDbMaker : public StMaker {
  public: 
-  StFmsDbMaker(const Char_t *name="FmsDb");
+  StFmsDbMaker(const Char_t *name="fmsDb");
   virtual       ~StFmsDbMaker();
   virtual Int_t  Init();
   virtual Int_t  InitRun(Int_t runNumber);
