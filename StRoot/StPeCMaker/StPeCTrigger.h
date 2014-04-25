@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.h,v 1.11 2013/12/27 20:47:32 ramdebbe Exp $
+// $Id: StPeCTrigger.h,v 1.12 2014/04/25 20:00:13 ramdebbe Exp $
 // $Log: StPeCTrigger.h,v $
+// Revision 1.12  2014/04/25 20:00:13  ramdebbe
+// added more triggers for run14
+//
 // Revision 1.11  2013/12/27 20:47:32  ramdebbe
 // added a set method to select a trigger
 //
@@ -137,6 +140,7 @@ public:
   unsigned short zdcSMDHighestStripWestH;
   unsigned short zdcSMDHighestStripWestV;
 
+  Float_t zdcCoincidenceRate;
 
   //trigger word 
   Int_t     tw;
