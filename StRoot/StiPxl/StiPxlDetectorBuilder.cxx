@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.66 2014/04/15 18:47:05 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.67 2014/04/25 19:14:16 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -183,8 +183,8 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", iSector, iLadder, iSensor);
          LOG_DEBUG << " weigh/daughters/Material/A/Z : " << sensorVol->Weight() << " "
                    << sensorVol->GetNdaughters() << " " << sensorVol->GetMaterial()->GetName() << " "
-                   << sensorVol->GetMaterial()->GetA() << " " << sensorVol->GetMaterial()->GetZ() << endm;
-         LOG_DEBUG << " DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
+                   << sensorVol->GetMaterial()->GetA() << " " << sensorVol->GetMaterial()->GetZ() << endm
+                   << " DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
          // Create new Sti shape based on the sensor geometry
          StiShape *stiShape = new StiPlanarShape(name, 10*sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
@@ -254,21 +254,21 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
          // Whole bunch of debugging information
          Float_t rad2deg = 180.0 / 3.1415927;
-         LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Name             = " << stiDetector->getName()                     << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sector           = " << iSector                                    << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Ladder           = " << iLadder                                    << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:stiDetector:sensor           = " << iSensor                                    << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor       << endm;
-         LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
+         LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Name             = " << stiDetector->getName()                     << endm
+                   << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
+                   << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
+                   << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
+                   << "===>NEW:PIXEL:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
+                   << "===>NEW:PIXEL:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
+                   << "===>NEW:PIXEL:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
+                   << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
+                   << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
+                   << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
+                   << "===>NEW:PIXEL:stiDetector:sector           = " << iSector                                    << endm
+                   << "===>NEW:PIXEL:stiDetector:Ladder           = " << iLadder                                    << endm
+                   << "===>NEW:PIXEL:stiDetector:sensor           = " << iSensor                                    << endm
+                   << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor       << endm
+                   << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
       }
    }
 }
@@ -329,8 +329,9 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
 
       if (!geoNode) continue;
 
-      LOG_DEBUG << "Current node : " << i << "/" << nPxlVolumes << " path is : " << pxlVolumes[i].name << endm;
-      LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+      LOG_DEBUG << "\n\n" << endm
+                << "Current node: " << i << " of " << nPxlVolumes << ", path: " << pxlVolumes[i].path << endm
+                << "Number of daughters: " << geoNode->GetNdaughters() << ", weight: " << geoNode->GetVolume()->Weight(0.01, "a") << endm;
 
       StiVMCToolKit::LoopOverNodes(geoNode, pxlVolumes[i].path, pxlVolumes[i].name, MakeAverageVolume);
 
