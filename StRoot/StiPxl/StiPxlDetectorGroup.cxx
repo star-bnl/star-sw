@@ -1,8 +1,9 @@
 #include <stdexcept>
-#include "StEvent.h"
-#include "StiPxlDetectorGroup.h"
-#include "StiPxlDetectorBuilder.h"
-#include "StiPxlHitLoader.h"
+
+#include "StEvent/StEvent.h"
+#include "StiPxl/StiPxlDetectorGroup.h"
+#include "StiPxl/StiPxlDetectorBuilder.h"
+#include "StiPxl/StiPxlHitLoader.h"
 
 
 StiPxlDetectorGroup::StiPxlDetectorGroup(bool active, const string &inputFile)
