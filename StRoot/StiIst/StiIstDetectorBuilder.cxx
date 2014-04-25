@@ -198,20 +198,20 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
          // Whole bunch of debugging information
          Float_t rad2deg = 180.0 / 3.1415927;
-         LOG_DEBUG << "===>NEW:IST:pDetector:Name               = " << p->getName()                               << endm;
-         LOG_DEBUG << "===>NEW:IST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm;
-         LOG_DEBUG << "===>NEW:IST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm;
-         LOG_DEBUG << "===>NEW:IST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm;
-         LOG_DEBUG << "===>NEW:IST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm;
-         LOG_DEBUG << "===>NEW:IST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm;
-         LOG_DEBUG << "===>NEW:IST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm;
-         LOG_DEBUG << "===>NEW:IST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm;
-         LOG_DEBUG << "===>NEW:IST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm;
-         LOG_DEBUG << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm;
-         LOG_DEBUG << "===>NEW:IST:pDetector:Ladder             = " << ladderIdx + 1                                << endm;
-         LOG_DEBUG << "===>NEW:IST:pDetector:Sensor             = " << sensorIdx + 1                                << endm;
-         LOG_DEBUG << "===>NEW:IST:pDetector:row/ladder (ITTF)  = " << ROW << " / " << ladderIdx + 1                 << endm;
-         LOG_DEBUG << "===>NEW:IST:pDetector:Active?            = " << p->isActive()                              << endm;
+         LOG_DEBUG << "===>NEW:IST:pDetector:Name               = " << p->getName()                               << endm
+                   << "===>NEW:IST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
+                   << "===>NEW:IST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
+                   << "===>NEW:IST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
+                   << "===>NEW:IST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
+                   << "===>NEW:IST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
+                   << "===>NEW:IST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
+                   << "===>NEW:IST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
+                   << "===>NEW:IST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
+                   << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
+                   << "===>NEW:IST:pDetector:Ladder             = " << ladderIdx + 1                              << endm
+                   << "===>NEW:IST:pDetector:Sensor             = " << sensorIdx + 1                              << endm
+                   << "===>NEW:IST:pDetector:row/ladder (ITTF)  = " << ROW << " / " << ladderIdx + 1              << endm
+                   << "===>NEW:IST:pDetector:Active?            = " << p->isActive()                              << endm;
       }
    }
 }
