@@ -66,9 +66,9 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	{
 	  sprintf( buffer, "ADCStrip_%d_%d",ns,nl);
 	  if(ns==0)
-	    sprintf( buffer2, "ADC Vs. Strip number, P-side Ladder: %d",nl);
+	    sprintf( buffer2, "East-P-%d",nl+1);// east p-side
 	  else 
-	    sprintf( buffer2, "ADC Vs. Strip number, N-side Ladder: %d",nl);
+	    sprintf( buffer2, "West-N-%d",nl+1);//west n-side
     
 	  hAdcStrip[ns][nl] = new TH2I(buffer, buffer2,nBinsX/merge,0,nBinsX,nBinsY/4,0,nBinsY);
 	  hAdcStrip[ns][nl]->GetXaxis()->SetTitle("Strip #");
@@ -78,13 +78,13 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  //------
 	  sprintf( buffer, "ADCEvent_%d_%d",ns,nl);
 	  if(ns==0)
-	    sprintf( buffer2, "ADC Vs. Event number, P-side Ladder: %d",nl);
+	    sprintf( buffer2, "East-P-%d",nl+1);
 	  else 
-	    sprintf( buffer2, "ADC Vs. Event number, N-side Ladder: %d",nl);
+	    sprintf( buffer2, "West-N-%d",nl+1);
 
 	  hAdcEvent[ns][nl] = new TH2I(buffer, buffer2,12288,0,12288,nBinsY/4,0,nBinsY);
-	  hAdcEvent[ns][nl]->GetXaxis()->SetTitle("Event #");
-	  hAdcEvent[ns][nl]->GetYaxis()->SetTitle("ADC value");
+	  hAdcEvent[ns][nl]->GetXaxis()->SetTitle("Event #/Strip #");
+	  hAdcEvent[ns][nl]->GetYaxis()->SetTitle("ADC value/RMS");
 	  hAdcEvent[ns][nl]->SetStats(false);//true
 	  
 	  //set labele
@@ -95,22 +95,22 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  }
 	}
     }
-  hLadderWafer[0] = new TH2I("hLadderWaferP","P-side ladder vs wafer",20,0,20,16,0,16);
+  hLadderWafer[0] = new TH2I("hLadderWaferP","P-side Hit Map",21,0,21,16,0,16);
   hLadderWafer[0]->SetName("hLadderWaferP");
   hLadderWafer[0]->GetXaxis()->SetTitle("Ladder #");
   hLadderWafer[0]->GetYaxis()->SetTitle("Wafer #");
-  hLadderWafer[0]->GetXaxis()->SetNdivisions(20,0,0,false);
   hLadderWafer[0]->GetYaxis()->SetNdivisions(16,0,0,false);
   hLadderWafer[0]->SetStats(false);
-  
-  hLadderWafer[1] = new TH2I("hLadderWaferN","N-side ladder vs wafer",20,0,20,16,0,16);
+  hLadderWafer[0]->GetXaxis()->SetRangeUser(0,20);
+  hLadderWafer[0]->GetXaxis()->SetNdivisions(20,0,0,false);
+  hLadderWafer[1] = new TH2I("hLadderWaferN","N-side Hit Map",21,0,21,16,0,16);
   hLadderWafer[1]->SetName("hLadderWaferN");
   hLadderWafer[1]->GetXaxis()->SetTitle("Ladder #");
   hLadderWafer[1]->GetYaxis()->SetTitle("Wafer #");
-  hLadderWafer[1]->GetXaxis()->SetNdivisions(20,0,0,false);
   hLadderWafer[1]->GetYaxis()->SetNdivisions(16,0,0,false);
   hLadderWafer[1]->SetStats(false);
-
+  hLadderWafer[1]->GetXaxis()->SetRangeUser(0,20);
+  hLadderWafer[1]->GetXaxis()->SetNdivisions(20,0,0,false);
   //JEVP plots setting
 
   int totPlots = 2*nSide*nLadderPerSide+2;
@@ -198,7 +198,7 @@ void ssdBuilder::event(daqReader *rdr) {
       LOG(DBG,"SST ADC: Sector %d , RDO %d , Fiber %d",mSector,mRDO,mFiber);
       u_int maxI = dd->ncontent;    
       FindLadderSide(mRDO,mFiber,mLadder,mSide);   
-
+      //cout<<"RDO "<<mRDO<<" Fiber "<<mFiber<<" is Good !"<<endl;
       if(evtCt==0)
 	hAdcEvent[mSide][mLadder]->GetXaxis()->SetRangeUser(0,500);
 
@@ -219,9 +219,16 @@ void ssdBuilder::event(daqReader *rdr) {
 	  hLadderWafer[0]->Fill(mLadder,mWafer);
 	if(mSide==1)
 	  hLadderWafer[1]->Fill(mLadder,mWafer);
-	hAdcStrip[mSide][mLadder]->Fill((mStrip+mWafer*nStripPerWafer), (mAdc+350)%1024);
+	hAdcStrip[mSide][mLadder]->Fill((mStrip+mWafer*nStripPerWafer), (mAdc+375)%1024);
 	if(evtCt<500)
-	  hAdcEvent[mSide][mLadder]->Fill(evtCt,(mAdc+350)%1024);//default event number is 500
+	  {
+	    if(evtCt%100==0)
+	      {
+		if(evtCt<12188) //12288-100 
+		  hAdcEvent[mSide][mLadder]->GetXaxis()->SetRangeUser(0,evtCt+100);
+	      }
+	    hAdcEvent[mSide][mLadder]->Fill(evtCt,(mAdc+375)%1024);
+	  }
       }//end all RDO,Fiber,Ladder loop
      
     }
@@ -251,8 +258,9 @@ void ssdBuilder::event(daqReader *rdr) {
       LOG(DBG,"##SST ADC: Ladder %d , side %d",mLadder,mSide);
       //change histograms arguments to suite pedestal run.
       hAdcEvent[mSide][mLadder]->GetYaxis()->SetRangeUser(0,100);
-      hAdcEvent[mSide][mLadder]->GetXaxis()->SetTitle("strip #");
-      hAdcEvent[mSide][mLadder]->GetYaxis()->SetTitle("rms");
+      hAdcEvent[mSide][mLadder]->GetXaxis()->SetRangeUser(0,12288);
+      //hAdcEvent[mSide][mLadder]->GetXaxis()->SetTitle("strip #");
+      //hAdcEvent[mSide][mLadder]->GetYaxis()->SetTitle("rms");
            
       for ( u_int i=0; i<maxI; i++ )
 	{
@@ -291,6 +299,7 @@ void ssdBuilder::stoprun(daqReader *rdr)
   mWafer  = 0;
   mStrip  = 0;
   evtCt   = 0;
+
 }
 //-----------------------------
 void ssdBuilder::main(int argc, char *argv[])
