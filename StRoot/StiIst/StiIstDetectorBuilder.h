@@ -11,8 +11,8 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 public:
 
    StiIstDetectorBuilder(bool active, const string &inputFile);
-   void buildDetectors(StMaker &source);
-   void useVMCGeometry();
+   virtual void buildDetectors(StMaker &source);
+   virtual void useVMCGeometry();
 
 protected:
 
