@@ -55,6 +55,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
    _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
 
    if (StiVMCToolKit::GetVMC()) {
+      useVMCGeometry();
       buildInactiveVolumes();
    }
 }
@@ -263,6 +264,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       {
          StiCylindricalShape *stiShape = (StiCylindricalShape*) stiDetector->getShape();
          stiShape->setHalfDepth(45);
+         stiShape->setThickness(stiShape->getThickness()/3);
 
          StiPlacement *stiPlacement = stiDetector->getPlacement();
          stiPlacement->setZcenter(-5);
