@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.68 2014/04/28 23:29:25 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.69 2014/04/28 23:30:29 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -70,16 +70,19 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 
    SetCurrentDetectorBuilder(this);
 
-   TObjectSet *pxlDbDataSet = (TObjectSet*) source.GetDataSet("pxlDb");
+   // Access the (survey) geometry if requested by the user
+   if (!mBuildIdealGeom) {
+      TObjectSet *pxlDbDataSet = (TObjectSet*) source.GetDataSet("pxlDb");
 
-   if (pxlDbDataSet) {
+      if (!pxlDbDataSet) {
+         LOG_ERROR << "StiPxlDetectorBuilder::buildDetectors: PXL geometry was requested from "
+            "DB but no StPxlDb object found. Check for pxlDb option in BFC chain" << endm;
+      }
+
       mPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
-      LOG_INFO << "buildDetectors : initialize geometry with DB tables" << endm;
-   }
+      assert(mPxlDb);
 
-   if(mUseDbGeom && !mPxlDb) {
-      LOG_ERROR << "buildDetectors : no pxlDb for Geometry" << endm;
-      return;
+      LOG_INFO << "StiPxlDetectorBuilder::buildDetectors: Will build PXL geometry from DB tables" << endm;
    }
 
    // Gas material must be defined. Here we use air properties
