@@ -11,7 +11,7 @@ class StiPxlDetectorBuilder : public StiDetectorBuilder
 {
 public:
 
-   StiPxlDetectorBuilder(bool active, const string &inputFile);
+   StiPxlDetectorBuilder(bool active, const string &inputFile, bool buildIdealGeom=true);
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
 
@@ -20,7 +20,7 @@ protected:
    StiMaterial *mSiMaterial;
    StiMaterial *mHybridMaterial;
    StPxlDb     *mPxlDb;
-   Bool_t       mUseDbGeom;
+   bool         mBuildIdealGeom;
 
 private:
 
