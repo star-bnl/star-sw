@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.67 2014/04/25 19:14:16 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.68 2014/04/28 23:29:25 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -54,9 +54,9 @@ using namespace std;
    10     3                          1     29
    10     4                          0     9
  */
-StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile) :
+StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile, bool buildIdealGeom) :
    StiDetectorBuilder("Pixel", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mPxlDb(0),
-   mUseDbGeom(false)
+   mBuildIdealGeom(buildIdealGeom)
 { }
 
 
@@ -155,10 +155,10 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
          TGeoMatrix* sensorMatrix = 0;
 
-         if (mUseDbGeom) {
-            sensorMatrix = (TGeoMatrix*) mPxlDb->geoHMatrixSensorOnGlobal(iSector, iLadder, iSensor);
-         } else {
+         if (mBuildIdealGeom) {
             sensorMatrix = gGeoManager->GetCurrentMatrix();
+         } else {
+            sensorMatrix = (TGeoMatrix*) mPxlDb->geoHMatrixSensorOnGlobal(iSector, iLadder, iSensor);
          }
 
          if (!sensorMatrix) {
