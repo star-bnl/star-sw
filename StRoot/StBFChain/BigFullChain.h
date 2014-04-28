@@ -1467,8 +1467,8 @@ Bfc_st BFC[] = {
                                                        ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
   // switch to the HFT based chain
   {"StiLibsHft" ,"","","StiLibs,StiSst,StiPxl,StiIst"       ,"","","Load Sti Detector libs for HFT",kFALSE},
-  {"StiHftP", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT",""            ,"","Enables partial  Hft (PXL)",kFALSE},
-  {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,IstIT,istDb,SstIT,ssdDb"
+  {"StiHftP", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb",""      ,"","Enables partial  Hft (PXL)",kFALSE},
+  {"StiHftC", "","","StiLibsHft,-SvtIT,-SsdIT,PxlIT,pxlDb,IstIT,istDb,SstIT,ssdDb"
                                                            ,"","Enables complete Hft (PXL+IST+SST)",kFALSE},
 
 
