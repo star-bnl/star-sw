@@ -86,6 +86,11 @@ void istBuilder::initialize(int argc, char *argv[]) {
 
   // //////////////////////////////////add bad channels here///////////////////////
   // ///////////////////isChannelBad[numAssembly*ChPerSec+channel]=true;
+  //expected chips per section
+  for(int i=0; i<72; i++)
+	nExpectedChip_Sec[i] = 12;
+  nExpectedChip_Sec[67] = 11;
+  //nExpectedChip_Sec[72] = {12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 11, 12, 12, 12, 12};
 
   //filling IST mapping
   Int_t channelId=-1, ladder=-1, sensor=-1, column=-1, row=-1;
@@ -385,7 +390,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   }
 
   //////////////////
-  hSumContents.hVisibleApv = new TH2S("VisibleAPVperSection", "IST - Visible APVs per Section", totSec, 0, totSec, ApvPerSec, 1, ApvPerSec+1); //72*12 bins
+  hSumContents.hVisibleApv = new TH2S("VisibleAPVperSection", "IST - Visible APVs per Section", totSec, 0, totSec, ApvPerSec+1, 0, ApvPerSec+1); //72*13 bins
   hSumContents.hVisibleApv->SetFillColor(kYellow-9);
   hSumContents.hVisibleApv->SetStats(true);
   hSumContents.hVisibleApv->GetXaxis()->SetTitle("Section ID [(RDO-1)*6*2+ARM*2+GROUP]");
@@ -500,25 +505,21 @@ void istBuilder::initialize(int argc, char *argv[]) {
   JLine* line = new JLine(0, goodChCut, totAPV, goodChCut);
   line->SetLineColor(kRed);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+5]->addElement(line);
-/*
-  JLine* line3_up = new JLine(0, maxMipMpv, totSec, maxMipMpv);
-  line3_up->SetLineColor(kRed);
-  JLine* line3_dn = new JLine(0, minMipMpv, totSec, minMipMpv);
-  line3_dn->SetLineColor(kRed);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+8]->addElement(line3_up);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+8]->addElement(line3_dn);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+9]->addElement(line3_up);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+9]->addElement(line3_dn);
 
-  JLine* line5_up = new JLine(0, maxMipSigma, totSec, maxMipSigma);
-  line5_up->SetLineColor(kRed);
-  JLine* line5_dn = new JLine(0, minMipSigma, totSec, minMipSigma);
-  line5_dn->SetLineColor(kRed);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+10]->addElement(line5_up);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+10]->addElement(line5_dn);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+11]->addElement(line5_up);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+11]->addElement(line5_dn);
-*/
+  JLine* line3_nonZS = new JLine(0, minMipMpv_nonZS, totSec, minMipMpv_nonZS);
+  line3_nonZS->SetLineColor(kRed);
+  JLine* line3_ZS = new JLine(0, minMipMpv_ZS, totSec, minMipMpv_ZS);
+  line3_ZS->SetLineColor(kRed);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+8]->addElement(line3_nonZS);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+9]->addElement(line3_ZS);
+
+  JLine* line5_nonZS = new JLine(0, minMipSigma_nonZS, totSec, minMipSigma_nonZS);
+  line5_nonZS->SetLineColor(kRed);
+  JLine* line5_ZS = new JLine(0, minMipSigma_ZS, totSec, minMipSigma_ZS);
+  line5_ZS->SetLineColor(kRed);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+10]->addElement(line5_nonZS);
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+11]->addElement(line5_ZS);
+
   JLine* line7 = new JLine(0, maxTbFracOK, totSec, maxTbFracOK);
   line7->SetLineColor(kRed);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+12]->addElement(line7);
@@ -772,7 +773,6 @@ void istBuilder::event(daqReader *rdr) {
     }
     hEventSumContents.hApvCorpt->Fill(goodAPVs);
 
-    apvCntDaq[6] = 12; //this section is permanently physical dead.
     for(int i=0; i<totSec; i++) 
       hSumContents.hVisibleApv->Fill(i, apvCntDaq[i]);
     //do for zs and non-zs data and fill with num kB
@@ -897,11 +897,22 @@ void istBuilder::stoprun(daqReader *rdr) {
 
   int errCt_visibleAPVperSection = 0, errCt_maxTimeBinFraction = 0, errCt_mipNonZS = 0, errCt_mipZS = 0;
   int errLocation_visibleAPVperSection[72], errLocation_maxTimeBinFraction[72], errLocation_mipNonZS[72], errLocation_mipZS[72]; 
+  int errNumber_visibleAPVperSection[72];
+  float errValue_maxTimeBinFraction[72], errValue_mipNonZS[72], errValue_sigmaNonZS[72], errValue_mipZS[72], errValue_sigmaZS[72]; 
   for(int j=0; j<72; j++) {
 	errLocation_visibleAPVperSection[j] = 0;
+	errNumber_visibleAPVperSection[j] = 0;
+
 	errLocation_maxTimeBinFraction[j] = 0;
+	errValue_maxTimeBinFraction[j] = 0.;
+
 	errLocation_mipNonZS[j] = 0;
+	errValue_mipNonZS[j] = 0.;
+	errValue_sigmaNonZS[j] = 0.;
+
 	errLocation_mipZS[j] = 0;
+	errValue_mipZS[j] = 0.;
+	errValue_sigmaZS[j] = 0.;
   }
 
   for(int j=0; j<72; j++) {
@@ -909,21 +920,26 @@ void istBuilder::stoprun(daqReader *rdr) {
         int armIndex   = (j%12)/2;  //0, 1, ..., 5
         int groupIndex = j%2;       //0, 1
 
-
-    	if(hSumContents.hVisibleApv->GetBinContent(j+1, 12) < 1) {
+    	if(hSumContents.hVisibleApv->GetBinContent(j+1, nExpectedChip_Sec[j]+1) < (evtCt/50)) {
 	    //LOG(U_IST,"visibleAPVperSection::section RDO%d_ARM%d_GROUP%d has missing APVs!", rdoIndex, armIndex, groupIndex);
 	    errLocation_visibleAPVperSection[errCt_visibleAPVperSection] = rdoIndex*100 + armIndex*10 + groupIndex;
+	    for(int jBin=1; jBin<13; jBin++) {
+		if(hSumContents.hVisibleApv->GetBinContent(j+1, jBin)>1) 
+		    errNumber_visibleAPVperSection[errCt_visibleAPVperSection] = 13 - jBin;
+	    }
 	    errCt_visibleAPVperSection++;
 	}
+
         double entriesTB_123=0, entriesTB_all=0, fraction = 1.0;
         if(hMaxTimeBinContents.maxTimeBinArray[j]->GetEntries()>0) {
                 entriesTB_123 = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(2, numTb-1);
                 entriesTB_all = hMaxTimeBinContents.maxTimeBinArray[j]->Integral(1, numTb);
                 fraction = entriesTB_123/entriesTB_all;
 		if(j==6) fraction = 1.0;
-		if(fraction<maxTbFracOK) {
+		if(j<36 && fraction<maxTbFracOK) {
 		    //LOG(U_IST,"maxTimeBinFraction::section RDO%d_ARM%d_GROUP%d with fraction %f!", rdoIndex, armIndex, groupIndex, fraction);
 		    errLocation_maxTimeBinFraction[errCt_maxTimeBinFraction] = rdoIndex*100 + armIndex*10 + groupIndex;
+		    errValue_maxTimeBinFraction[errCt_maxTimeBinFraction] = fraction;
 		    errCt_maxTimeBinFraction++;
 		}
         }
@@ -935,15 +951,17 @@ void istBuilder::stoprun(daqReader *rdr) {
                 TF1* fit_nonZS = hMipContents.mipArray[j]->GetFunction("landau");
                 mpvMIP_nonZS    = fit_nonZS->GetParameter("MPV");
                 sigmaMIP_nonZS  = fit_nonZS->GetParameter("Sigma");
-		if(j==6) {
-		    mpvMIP_nonZS = 550.;
-		    sigmaMIP_nonZS = 140.;
-		}
-		if(mpvMIP_nonZS<minMipMpv || mpvMIP_nonZS>maxMipMpv || sigmaMIP_nonZS<minMipSigma || sigmaMIP_nonZS>maxMipSigma) {
+		if(mpvMIP_nonZS<minMipMpv_nonZS || mpvMIP_nonZS>maxMipMpv || sigmaMIP_nonZS<minMipSigma_nonZS || sigmaMIP_nonZS>maxMipSigma) {
 		    //LOG(U_IST,"MIP_nonZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_nonZS, sigmaMIP_nonZS);
 		    errLocation_mipNonZS[errCt_mipNonZS] = rdoIndex*100 + armIndex*10 + groupIndex;
+		    errValue_mipNonZS[errCt_mipNonZS] = mpvMIP_nonZS;
+		    errValue_sigmaNonZS[errCt_mipNonZS] = sigmaMIP_nonZS;
 		    errCt_mipNonZS++;
 		}
+        }
+	if(j==6) {
+            mpvMIP_nonZS = 550.;
+            sigmaMIP_nonZS = 140.;
         }
         hEventSumContents.hMipMPVvsSection->SetBinContent(j+1, short(mpvMIP_nonZS+0.5));
         hEventSumContents.hMipSIGMAvsSection->SetBinContent(j+1, short(sigmaMIP_nonZS+0.5));
@@ -954,46 +972,53 @@ void istBuilder::stoprun(daqReader *rdr) {
                 TF1* fit_ZS = hMipContents.mipArray[j+72]->GetFunction("landau");
                 mpvMIP_ZS      = fit_ZS->GetParameter("MPV");
                 sigmaMIP_ZS    = fit_ZS->GetParameter("Sigma");
-		if(j==6) {
-                    mpvMIP_ZS = 550.;
-                    sigmaMIP_ZS = 140.;
-                }
-		if(mpvMIP_ZS<minMipMpv || mpvMIP_ZS>maxMipMpv || sigmaMIP_ZS<minMipSigma || sigmaMIP_ZS>maxMipSigma)  {
+		if(mpvMIP_ZS<minMipMpv_ZS || mpvMIP_ZS>maxMipMpv || sigmaMIP_ZS<minMipSigma_ZS || sigmaMIP_ZS>maxMipSigma)  {
                     //LOG(U_IST,"MIP_ZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_ZS, sigmaMIP_ZS);
 		    errLocation_mipZS[errCt_mipZS] = rdoIndex*100 + armIndex*10 + groupIndex;
+		    errValue_mipZS[errCt_mipZS] = mpvMIP_ZS;
+                    errValue_sigmaZS[errCt_mipZS] = sigmaMIP_ZS;
 		    errCt_mipZS++;
 		}
+        }
+	if(j==6) {
+           mpvMIP_ZS = 550.;
+           sigmaMIP_ZS = 140.;
         }
         hEventSumContents.hMipMPVvsSection_ZS->SetBinContent(j+1, short(mpvMIP_ZS+0.5));
         hEventSumContents.hMipSIGMAvsSection_ZS->SetBinContent(j+1, short(sigmaMIP_ZS+0.5));
   }
 
+  hEventSumContents.hMipMPVvsSection->GetYaxis()->SetRangeUser(300, 800);
+  hEventSumContents.hMipSIGMAvsSection->GetYaxis()->SetRangeUser(40, 200);
+  hEventSumContents.hMipMPVvsSection_ZS->GetYaxis()->SetRangeUser(300, 800);
+  hEventSumContents.hMipSIGMAvsSection_ZS->GetYaxis()->SetRangeUser(40, 200);
+
   TString buffer_Err = "";
   if(errCt_visibleAPVperSection>0) {
 	for(int i=0; i<errCt_visibleAPVperSection; i++)
-	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d ", errLocation_visibleAPVperSection[i]/100, (errLocation_visibleAPVperSection[i]%100)/10, errLocation_visibleAPVperSection[i]%10);
-	LOG(U_IST,"visibleAPVperSection:: In #%d, %d sections have missing APVs, they are %s!", run, errCt_visibleAPVperSection, buffer_Err.Data());
+	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d (%d missing chips),\t", errLocation_visibleAPVperSection[i]/100, (errLocation_visibleAPVperSection[i]%100)/10, errLocation_visibleAPVperSection[i]%10, errNumber_visibleAPVperSection[i]);
+	LOG(U_IST,"visibleAPVperSection:: In #%d, %d sections have missing APV chips, they are %s", run, errCt_visibleAPVperSection, buffer_Err.Data());
   }
 
   buffer_Err = "";
   if(errCt_maxTimeBinFraction>0) {
 	for(int i=0; i<errCt_maxTimeBinFraction; i++)
-	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d ", errLocation_maxTimeBinFraction[i]/100, (errLocation_maxTimeBinFraction[i]%100)/10, errLocation_maxTimeBinFraction[i]%10);
-	LOG(U_IST,"maxTimeBinFraction:: In #%d, %d sections have max time bin fraction less than %f, they are %s!", run, errCt_maxTimeBinFraction, maxTbFracOK, buffer_Err.Data());
+	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d (fraction = %f),\t", errLocation_maxTimeBinFraction[i]/100, (errLocation_maxTimeBinFraction[i]%100)/10, errLocation_maxTimeBinFraction[i]%10, errValue_maxTimeBinFraction[i]);
+	LOG(U_IST,"maxTimeBinFraction:: In #%d, %d sections have max time bin fraction less than %f, they are %s", run, errCt_maxTimeBinFraction, maxTbFracOK, buffer_Err.Data());
   }
 
   buffer_Err = "";
   if(errCt_mipNonZS>0) {
 	for(int i=0; i<errCt_mipNonZS; i++)
-	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d ", errLocation_mipNonZS[i]/100, (errLocation_mipNonZS[i]%100)/10, errLocation_mipNonZS[i]%10);
-	LOG(U_IST,"MIP_nonZS:: In #%d, %d sections have unnormal MIP mpv or sigma for non-ZS data, they are %s!", run, errCt_mipNonZS, buffer_Err.Data());
+	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d (MPV=%f, Sigma=%f),\t", errLocation_mipNonZS[i]/100, (errLocation_mipNonZS[i]%100)/10, errLocation_mipNonZS[i]%10, errValue_mipNonZS[i], errValue_sigmaNonZS[i]);
+	LOG(U_IST,"MIP_nonZS:: In #%d, %d sections have unnormal MIP mpv or sigma for non-ZS data, they are %s", run, errCt_mipNonZS, buffer_Err.Data());
   }
 
   buffer_Err = "";
   if(errCt_mipZS>0) {
         for(int i=0; i<errCt_mipZS; i++)
-            buffer_Err += Form("RDO%d_ARM%d_GROUP%d ", errLocation_mipZS[i]/100, (errLocation_mipZS[i]%100)/10, errLocation_mipZS[i]%10);
-        LOG(U_IST,"MIP_ZS:: In #%d, %d sections have unnormal MIP mpv or sigma for ZS data, they are %s!", run, errCt_mipZS, buffer_Err.Data());
+            buffer_Err += Form("RDO%d_ARM%d_GROUP%d (MPV=%f, Sigma=%f),\t", errLocation_mipZS[i]/100, (errLocation_mipZS[i]%100)/10, errLocation_mipZS[i]%10, errValue_mipZS[i], errValue_sigmaZS[i]);
+        LOG(U_IST,"MIP_ZS:: In #%d, %d sections have unnormal MIP mpv or sigma for ZS data, they are %s", run, errCt_mipZS, buffer_Err.Data());
   }
 
   for ( int i=0; i<totCh; i++ )    {
