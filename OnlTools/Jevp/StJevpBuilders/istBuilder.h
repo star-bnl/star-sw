@@ -62,11 +62,13 @@ class istBuilder : public JevpPlotSet {
   static const int minRMSVal    = 10;
   static const int maxRMSVal    = 100;
   //alarm threshold
-  static const float minMipMpv    = 400;
-  static const float maxMipMpv    = 700;
-  static const float minMipSigma  = 80;
+  static const float minMipMpv_ZS    = 450;
+  static const float minMipMpv_nonZS = 400;
+  static const float maxMipMpv    = 800;
+  static const float minMipSigma_ZS     = 80;
+  static const float minMipSigma_nonZS  = 60;
   static const float maxMipSigma  = 200;
-  static const float maxTbFracOK  = 0.6;
+  static const float maxTbFracOK  = 0.95;
   //landau fitting range
   static const float landauFit_dn = 400.0;
   static const float landauFit_up = 2000.0;
@@ -551,6 +553,7 @@ class istBuilder : public JevpPlotSet {
   //num RDOs, ARM, APV, keep track of channel count per apv
   int chCntDaq[6][6][24];
   int apvCntDaq[72];
+  int nExpectedChip_Sec[72];
 
   int sumHistogramsFilled;
   int numTb;
