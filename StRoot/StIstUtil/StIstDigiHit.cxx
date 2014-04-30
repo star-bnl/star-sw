@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDigiHit.cxx,v 1.3 2014/03/27 22:46:47 smirnovd Exp $
+* $Id: StIstDigiHit.cxx,v 1.4 2014/04/30 12:11:23 smirnovd Exp $
 *
 * Author: Yaping Wang (Thank Dmitri Smirnov's updates)
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDigiHit.cxx,v $
+* Revision 1.4  2014/04/30 12:11:23  smirnovd
+* Hide static member inherited from StIstHit base class and assign a new value relevant for StIstDigiHit. Redefine static operators new and delete "inherited" from the base StIstHit class
+*
 * Revision 1.3  2014/03/27 22:46:47  smirnovd
 * Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
@@ -24,6 +27,10 @@
 ****************************************************************************/
 
 #include "StIstDigiHit.h"
+
+
+StMemoryPool StIstDigiHit::mPool(sizeof(StIstDigiHit));
+
 
 StIstDigiHit::StIstDigiHit() : StIstHit(), mApv(0), mMeanColumn(-1),
    mMeanRow(-1), mClusterSizeFlag(false)
