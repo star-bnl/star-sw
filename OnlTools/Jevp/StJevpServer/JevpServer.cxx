@@ -480,8 +480,11 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     LOG(DBG, "SERVThread: Got stoprun from reader");
     CP;
     if(runStatus.running()) {
+	CP;
       performStopRun();
+	CP;
     }
+	CP;
   }
   else if(strcmp(m->cmd, "readerr") == 0) {
     LOG(ERR, "A read err...");

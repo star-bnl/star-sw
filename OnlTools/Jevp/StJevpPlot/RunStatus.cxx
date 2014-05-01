@@ -39,6 +39,8 @@ void RunStatus::dump()
 
 int RunStatus::running()
 {
+  if(status == NULL) return 0;
+
   if(strcmp(status, "running") == 0) return 1;
   return 0;
 }
