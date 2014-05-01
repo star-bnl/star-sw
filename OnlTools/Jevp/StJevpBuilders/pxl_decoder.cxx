@@ -1,5 +1,5 @@
 #ifndef lint
-static char vcid[] = "$Id: pxl_decoder.cxx,v 1.1 2014/04/17 19:05:15 jschamba Exp $";
+static char vcid[] = "$Id: pxl_decoder.cxx,v 1.2 2014/05/01 19:46:24 jschamba Exp $";
 static const char __attribute__ ((used )) *Get_vcid(){return vcid;}
 #endif /* lint */
 
@@ -25,7 +25,7 @@ static int decode16bit(unsigned short val, bool MS16,
 		       int *prev_col,
 		       int *error_cnt,
 		       int *OVF,
-		       bitset<NCOL> **bs,
+		       bitset2D<NROW,NCOL> *bs,
 		       int runlength[][4]
 		       )
 {
@@ -97,9 +97,9 @@ static int decode16bit(unsigned short val, bool MS16,
 	runlength[sensor][coding]++;
 	for(int c=0; c<coding+1; c++) {
 	  if((column+c)<NCOL)  {
-	    if (bs[sensor][row[sensor]].test(column+c))
+	    if (bs[sensor].test(row[sensor],column+c))
 	      duplicate = true;
-	    bs[sensor][row[sensor]].set(column+c);
+	    bs[sensor].set(row[sensor],column+c);
 	  }
 	}
 	if(duplicate) {
@@ -115,7 +115,7 @@ static int decode16bit(unsigned short val, bool MS16,
 
 //**************************************************
 int pxl_decoder(const u_int *d, const int wordLength,
-		bitset<NCOL> **bs,
+		bitset2D<NROW,NCOL> *bs,
 		int *OVF, struct _pxlHeaderInfo *pxlHeaderInfo,
 		float *ave_runlength,
 		int *error_cnt)
@@ -142,8 +142,7 @@ int pxl_decoder(const u_int *d, const int wordLength,
     // init the results parameters
     *error_cnt = 0;
     OVF[i] = 0;
-    for(j=0; j<NROW; j++)
-      bs[i][j].reset();
+    bs[i].reset();
     for(j=0; j<4; j++)
       runlength[i][j] = 0;
   }

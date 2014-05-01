@@ -18,9 +18,9 @@
 
 
 
-void pxlBuilder::IncrementMultiplicity(int sensor_number,int row_count)
+void pxlBuilder::IncrementMultiplicity(int sensor_number,int count)
 {
-  (sensor_number < 11) ? multiplicity_inner += row_count : multiplicity_outer += row_count;
+  (sensor_number < 11) ? multiplicity_inner += count : multiplicity_outer += count;
 }
 
 int pxlBuilder::WhichLadder(int sector_number,int sensor_number)
@@ -269,9 +269,7 @@ pxlBuilder::pxlBuilder(JevpServer *parent) : JevpPlotSet(parent)
   memset(&contents, 0, sizeof(contents));
 
   // allocate memory for bitset
-  bs = new bitset<NCOL>*[NROW];
-  for(int i = 0; i < NSENSOR; ++i) 
-    bs[i] = new bitset<NCOL>[NROW];
+  bs = new bitset2D<NROW,NCOL>[NSENSOR];
 
   event_multiplicity = 0;
   multiplicity_inner = 0;
@@ -310,8 +308,6 @@ pxlBuilder::~pxlBuilder()
   }
 
   // Delete memory for the bitset array
-  for(int i = 0; i < NSENSOR; ++i) 
-    delete bs[i];
   delete bs;
 }
 
@@ -352,6 +348,8 @@ void pxlBuilder::initialize(int argc, char *argv[])
     contents.ErrorCountSector[i] = new TH1D(tmpchr,"",500,0,5000);
   }
   contents.SectorErrorType = new TH2I("SectorErrorType","",10,1,11, 10,1,11);
+  
+  contents.SerdesErrors = new TH2D("SerdesErrors", "", 40,1,41, 10,1,11);
 
   contents.SectorErrorType->SetTitle("[PXL] Sector Error Type;Sector ID;Bit");
   contents.SectorErrorType->SetMinimum(0.0);
@@ -417,7 +415,6 @@ void pxlBuilder::initialize(int argc, char *argv[])
   hpl_x->SetBinLabel(29,"8");
   hpl_x->SetBinLabel(33,"9");
   hpl_x->SetBinLabel(37,"10");
-
 
   sprintf(tmpchr,"%s%s%s",
 	  "[PXL] Number of Hits per Ladder Event-by-Event;",
@@ -496,7 +493,6 @@ void pxlBuilder::initialize(int argc, char *argv[])
   rli_x->SetBinLabel(9,"9");
   rli_x->SetBinLabel(10,"10");
 
-
   sprintf(tmpchr,"%s%s",
 	  "[PXL] Intensity Plot of Average Run Length (Outer Layer);",
 	  "Sector ID;Sensor ID"); 
@@ -514,6 +510,23 @@ void pxlBuilder::initialize(int argc, char *argv[])
   rlo_x->SetBinLabel(22,"8");
   rlo_x->SetBinLabel(25,"9");
   rlo_x->SetBinLabel(28,"10");
+
+  sprintf(tmpchr,"%s%s",
+	  "[PXL] Total Serdes Errors;",
+	  "Sector ID;Sensor ID"); 
+  contents.SerdesErrors->SetTitle(tmpchr);
+
+  TAxis *ser_x = (TAxis*)contents.SerdesErrors->GetXaxis();
+  ser_x->SetBinLabel(1,"1");
+  ser_x->SetBinLabel(5,"2");
+  ser_x->SetBinLabel(9,"3");
+  ser_x->SetBinLabel(13,"4");
+  ser_x->SetBinLabel(17,"5");
+  ser_x->SetBinLabel(21,"6");
+  ser_x->SetBinLabel(25,"7");
+  ser_x->SetBinLabel(29,"8");
+  ser_x->SetBinLabel(33,"9");
+  ser_x->SetBinLabel(37,"10");
 
 
   //%%%%%%%%%%%%%%Add root histograms to Plots%%%%%%%%%%%%%%
@@ -559,6 +572,9 @@ void pxlBuilder::initialize(int argc, char *argv[])
   }
 
   plots[++n] = new JevpPlot(contents.SectorErrorType);
+  plots[n]->optstat = 10;
+
+  plots[++n] = new JevpPlot(contents.SerdesErrors);
   plots[n]->optstat = 10;
 
   //plots[++n] = new JevpPlot(contents.h0_evt_size);
@@ -614,7 +630,7 @@ void pxlBuilder::event(daqReader *rdr)
   int error_cnt;
   int sector_count;
   int sensor_id;
-  int row_count;
+  //int row_count;
 
   //Reset Variables
   event_multiplicity = 0;
@@ -654,17 +670,12 @@ void pxlBuilder::event(daqReader *rdr)
       
       sector_count = 0;
       for(int i=0; i<NSENSOR; i++){
-	sensor_count = 0;
 	sensor_id = i+1;
-
-	for(int j=0; j<NROW; j++) {
-	  row_count = bs[i][j].count();
-
-	  IncrementMultiplicity(i+1, row_count);
-	  sensor_count += row_count;
-	  event_count += row_count;
-	  sector_count += row_count;
-	}
+	sensor_count = bs[i].count();
+	
+	IncrementMultiplicity(i+1, sensor_count);
+	event_count += sensor_count;
+	sector_count += sensor_count;
 
 	UpdateLadderCount(pxl_sector, sensor_id, sensor_count);
 	avg_run_length[pxl_sector - 1][i] = ave_runlength[i];
@@ -677,6 +688,18 @@ void pxlBuilder::event(daqReader *rdr)
       } //Loop over sensors
   
       int k = pxl_sector-1;
+
+      u_int serdesErr1 = d[8]; // sensors 1 - 32
+      u_int serdesErr2 = d[9]; // sensors 33 - 40
+      for (int i=0; i<32; i++)
+	if(((0x1<<i) & serdesErr1) == (u_int)(0x1<<i)) {
+	  contents.SerdesErrors->Fill(k*4+(int)(i/10)+1, i%10+1);
+	}
+      for (int i=0; i<8; i++)
+	if(((0x1<<i) & serdesErr2) == (u_int)(0x1<<i)) {
+	  contents.SerdesErrors->Fill(k*4+4, i+3);
+	}
+
       ((sector_count > max_count_sector[k]) && (max_count_sector[k] = sector_count));
       ((sector_count < min_count_sector[k]) && (min_count_sector[k] = sector_count));
 	

@@ -22,7 +22,6 @@ public:
   pxlBuilder(JevpServer *parent=NULL); 
   ~pxlBuilder();
   
-
   void initialize(int argc, char *argv[]);
   void startrun(daqReader *rdr);
   void stoprun(daqReader *rdr);
@@ -30,10 +29,8 @@ public:
   
   static void main(int argc, char *argv[]);
 
-
  private:
-  /*bitset<NCOL> bs[NSENSOR][NROW];*/
-  bitset<NCOL> **bs; /* allocate dynamically in constructor */
+  bitset2D<NROW,NCOL> *bs; /* allocate dynamically in constructor */
 
   int event_multiplicity;
   int multiplicity_inner;
@@ -90,27 +87,24 @@ public:
     struct {
       //Tab 1: Global Multiplicity
       TH1 *GlobalHitMultiplicity;
-
       TH1 *GlobalHitMultiplicitySector[NRDO];
-
-      TH1 *ErrorCountSector[NRDO];
-
+ 
       //Tab 2: Hit Multiplicity
       TH1 *HitMultiplicityPerEvent;
-
       TH1 *HitsPerLadder;
       TH1 *HitsPerLadderPerEvent;
-
       TH1 *HitCorrelation;
-      TH1 *SectorErrorType;
 
-      //Tab 2: Hit Maps
+      //Tab 3: Hit Maps
       TH1 *SensorHitsInnerLayer;
       TH1 *SensorHitsOuterLayer;
-
       TH1 *AverageRunLengthInnerLayer;
       TH1 *AverageRunLengthOuterLayer;
 
+      //Tab 4: Errors
+      TH1 *ErrorCountSector[NRDO];
+      TH1 *SectorErrorType;
+      TH1 *SerdesErrors;
     };
   } contents;
 
