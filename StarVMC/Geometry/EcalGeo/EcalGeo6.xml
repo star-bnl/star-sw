@@ -1450,23 +1450,11 @@
             nstrips
         </varlist>
         
-        <varlist type="REAL"  >
+        <varlist type="double"  >
             rdel,rth,ddn,ddup,megatile,p,xleft,yleft,xright,yright,dxy,xx,yy,sqrt2,sqrt3
-        </varlist>
-        
-        <varlist type="REAL"  >
-            base/1.0/ 
-        </varlist>
-        
-        <varlist type="REAL"  >
-            Rbot/77.41/,Rtop/213.922/
-        </varlist>
-        
-        <!-- varlist type="REAL"  >
-            EtaMin/1.086/,EtaMax/2.000/  ! not used
-        </varlist -->
-        
-        <varlist type="REAL"  >
+            base/1.0/, 
+            Rbot/77.41/,
+            Rtop/213.922/,
         <!-- tan_theta_min/0.275720567/ ! not needed -->
              tan_theta_max/0.761952162/
         </varlist>
@@ -1477,10 +1465,6 @@
         	<Return value="tan(2*atan(exp(-etax)))" />
         </Inline>   
 </Export>
-<!--        
-        tan_theta_min = tanf( EtaMax ) 
-        tan_theta_max = tanf( EtaMin ) 
--->
 
 
         <If expr="cut .eq. 1"  >
