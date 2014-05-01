@@ -108,10 +108,14 @@ class StarAgmlChecker : public TGeoChecker
   /// to its checksum.
   TDataSet *CheckSet( const Char_t *volume="HALL" );
 
+  void Skip( const Char_t *vol ){ mSkipList.push_back(vol); }
+  
 
  private:
  protected:
   void Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Double_t zmin, Double_t zmax );
+
+  std::vector<TString> mSkipList;
 
   TStopwatch *mTimer;
   Bool_t     *mFlags;
