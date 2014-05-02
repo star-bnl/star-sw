@@ -306,6 +306,8 @@ so we keep it here for source compatibility
 
 #define TOKEN_MANAGER_INSTANCE	5
 
+#define TCD_LX_INSTANCE		6
+
 //#define BB2_INSTANCE    5
 //#define TM_INSTANCE     GB_INSTANCE
 //#define EVB_INSTANCE    BB_INSTANCE
@@ -411,7 +413,7 @@ so we keep it here for source compatibility
 
 #define TOKEN_MANAGER_NODE	((DAQ_SYSTEM<<12) | TOKEN_MANAGER_INSTANCE) 
 
-
+#define TCD_LX_NODE	((DAQ_SYSTEM<<12) | TCD_LX_INSTANCE)
 
 
 
