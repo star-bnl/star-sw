@@ -44,7 +44,7 @@ public:
           void   DontReset() { doReset = kFALSE; }
           void   DoCalib() { Calibmode = kTRUE; DoQAmode(); DoNtuple(); }
           float  EvalCalib(TDirectory* hdir=0);
-          void   DoTrackInfo() { TrackInfomode = kTRUE; }
+          void   DoTrackInfo(Int_t mode=1) { TrackInfomode = mode; }
           void   DoAsym() { Asymmode = kTRUE; }
 
           void   setVtxEmcMatch(UInt_t x) { vtxEmcMatch = x; }
@@ -60,7 +60,7 @@ public:
             { reqEmcOrTofMatch = match; reqEmcMatch = kFALSE; reqTofMatch = kFALSE; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.16 2014/01/02 20:54:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.17 2014/05/02 02:38:07 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -85,7 +85,7 @@ protected:
   Bool_t PrePassmode;
   Bool_t PrePassdone;
   Bool_t QAmode;
-  Bool_t TrackInfomode;
+  Int_t  TrackInfomode;
   Bool_t Asymmode;
   Bool_t doNtuple;
   Bool_t doReset;
@@ -195,8 +195,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.16 2014/01/02 20:54:28 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.17 2014/05/02 02:38:07 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.17  2014/05/02 02:38:07  genevb
+// TrackInfo mode with pile-up tracks too
+//
 // Revision 1.16  2014/01/02 20:54:28  genevb
 // TrackInfomode, and Basic E/W asymmetry functionality
 //

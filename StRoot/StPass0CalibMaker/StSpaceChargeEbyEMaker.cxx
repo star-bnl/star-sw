@@ -75,7 +75,7 @@ ClassImp(StSpaceChargeEbyEMaker)
 StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     event(0),
     Calibmode(kFALSE), PrePassmode(kFALSE), PrePassdone(kFALSE),
-    QAmode(kFALSE), TrackInfomode(kFALSE), Asymmode(kFALSE),
+    QAmode(kFALSE), TrackInfomode(0), Asymmode(kFALSE),
     doNtuple(kFALSE), doReset(kTRUE), doGaps(kFALSE),
     inGapRow(0),
     vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5), minTpcHits(25),
@@ -166,11 +166,17 @@ Int_t StSpaceChargeEbyEMaker::Init() {
     case (11): DoNtuple(); DontReset(); break;
     case (12): DoNtuple(); DoQAmode(); break;
     case (13): DoNtuple(); DontReset(); DoQAmode(); break;
-    case (50): DoTrackInfo(); break;
+    case (50): DoTrackInfo(); break; // filter out pile-up tracks
+    case (51): DoTrackInfo(2); break; // include pile-up tracks
     default  : {}
   }
 
   if (Calibmode) doReset = kFALSE;
+  if (TrackInfomode>1) {
+    // Show pile-up tracks too
+    vtxEmcMatch=0; vtxTofMatch=0; vtxMinTrks=0;
+    reqEmcMatch=kFALSE; reqTofMatch=kFALSE; reqEmcOrTofMatch=kFALSE;
+  }
 
   evt=0;
   oldevt=1;
@@ -230,6 +236,8 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   unsigned int vtxCandidates[MAXVTXCANDIDATES];
   unsigned int numVtxCandidates = 0;
   unsigned int totVertices = event->numberOfPrimaryVertices();
+  if (TrackInfomode>1) numVtxCandidates=1;
+  else
   for (unsigned int vtxIdx = 0; vtxIdx < totVertices; vtxIdx++) {
     pvtx = event->primaryVertex(vtxIdx);
     if (QAmode) cutshist->Fill(3);
@@ -346,9 +354,13 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     emcRadius = emcGeom->Radius() + 30; // use exit radius, 30cm beyond face
   }
 
+  StThreeVectorD vtxPos(0,0,0),vtxPosErr(0,0,0);
   for (v=0; v<numVtxCandidates; v++) {
-    pvtx = event->primaryVertex(vtxCandidates[v]);
-    StThreeVectorD vtxPos = pvtx->position();
+    if (TrackInfomode<2) {
+      pvtx = event->primaryVertex(vtxCandidates[v]);
+      vtxPos = pvtx->position();
+      vtxPosErr = pvtx->positionError();
+    }
 
     for (i=0; i<nnodes; i++) {
       for (j=0; j<theNodes[i]->entries(global); j++) {
@@ -468,13 +480,24 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             THelixTrack thelix = triDcaGeom->thelix();
             thelix.Dca(vtxPos.x(),vtxPos.y(),&DCAerr);
             phi = TMath::ATan2(dcahh.cy(pathlen),dcahh.cx(pathlen));
+            if (TrackInfomode>1) {
+              vtxPos.setZ(dcahh.z(pathlen));
+            }
           } else {
             DCA3 = hh.distance(vtxPos,kFALSE);
             DCA2 = hh.geometricSignedDistance(vtxPos.x(),vtxPos.y());
             pathlen = hh.pathLength(vtxPos.x(),vtxPos.y());
             phi = TMath::ATan2(hh.cy(pathlen),hh.cx(pathlen));
+            if (TrackInfomode>1) {
+              vtxPos.setZ(hh.z(pathlen));
+              vtxPosErr.setY(1); // flag the non-DcaGeom tracks
+            }
           }
-          if (DCA3 > 4) continue; // cut out pileup tracks!
+          if (TrackInfomode>1) {
+            if (TMath::Abs(DCA2) > 2) continue; // cut out tracks not near (0,0)
+          } else {
+            if (DCA3 > 4) continue; // cut out pileup tracks!
+          }
           if (QAmode) cutshist->Fill(31);
           Int_t ch = (int) triGeom->charge();
 
@@ -506,13 +529,13 @@ Int_t StSpaceChargeEbyEMaker::Make() {
               rphierrors[maskpos] = herr;
             }
           }
-          if (PCT) continue; // Track has post-crossing hits
+          if (PCT && TrackInfomode<2) continue; // Track has post-crossing hits
           if (QAmode) cutshist->Fill(32);
 
           if (TrackInfomode) {
             LOG_INFO << Form("GOODTRACK %d %d %6.2f %9.4f %8.3f %8.4f %8.4f %6.4f %6.4f %d",
               runid,event->id(),vtxPos.z(),ch/oldPt,eta,phi,DCA2,DCAerr,
-              pvtx->positionError().perp(),hits.size()) << endm;
+              vtxPosErr.perp(),hits.size()) << endm;
             continue;
           }
 
@@ -1341,8 +1364,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.53 2014/01/02 20:54:28 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.54 2014/05/02 02:38:07 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.54  2014/05/02 02:38:07  genevb
+// TrackInfo mode with pile-up tracks too
+//
 // Revision 1.53  2014/01/02 20:54:28  genevb
 // TrackInfomode, and Basic E/W asymmetry functionality
 //
