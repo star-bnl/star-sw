@@ -66,6 +66,11 @@ template <typename T> T min(const T &a, const T &b ){ return TMath::Min(a,b); }
 Int_t mod(const Int_t &a, const Int_t &b);
 Float_t mod(const Float_t &a, const Float_t &b);
 
+#define cos(x) TMath::Cos( (Double_t) x )
+#define sin(x) TMath::Sin( (Double_t) x )
+#define tan(x) TMath::Tan( (Double_t) x )
+#define exp(x) TMath::Exp( (Double_t) x )
+
 // Overload the ^ operator
 
 
