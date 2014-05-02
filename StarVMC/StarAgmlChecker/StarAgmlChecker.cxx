@@ -8,6 +8,7 @@
 #include "TCanvas.h"
 #include "TRandom.h" // should factor randomness out of this...
 #include <cmath>
+#include <limits>
 #include <assert.h>
 
 StarAgmlChecker::StarAgmlChecker( TGeoManager *m ) : TGeoChecker(m)
@@ -206,8 +207,8 @@ Double_t Normalize( Double_t f )
   Int_t i = f;
   if (!i) return f;
 
-  Int_t    pwr  = TMath::Log10(f);
-  Double_t fact = TMath::Power(10,pwr);
+  Int_t    pwr  = TMath::Log10(    TMath::Abs(f) );
+  Double_t fact = TMath::Power(10, pwr);
 
   f /= fact;
   i  = f;
@@ -221,8 +222,8 @@ Float_t Normalize( Float_t f )
   Int_t i = f;
   if (!i) return f;
 
-  Int_t    pwr = TMath::Log10(f);
-  Float_t fact = TMath::Power(10,pwr);
+  Int_t    pwr = TMath::Log10(    TMath::Abs(f) );
+  Float_t fact = TMath::Power(10, pwr);
   f /= fact;
   i  = f;
   f /= i;
@@ -230,15 +231,40 @@ Float_t Normalize( Float_t f )
   return f;  
 };
 
+
+#define std__round __STD_ROUND__
+#ifdef  std__round
+Double_t __STD_ROUND__( Double_t x )
+{
+  if ( TMath::Abs(x) > std::numeric_limits<long long>::max() )
+    {
+      std::cout << "About to die... x = " << x << std::endl;
+    }
+  assert( TMath::Abs(x) < std::numeric_limits<long long>::max() );
+  if ( x < 0 )      return (long long)(x-0.5);
+  /* else */        return (long long)(x+0.5);  
+}
+#endif
+
+
+
 Float_t Round( Float_t value, Float_t prec = 0.002 )
 { assert(0);
   value=Normalize(value);
+#ifdef std__round
+  return std__round(value/prec) * prec;
+#else
   return std::round(value/prec) * prec;
+#endif
 }
 Double_t Round( Double_t value, Double_t prec = 0.0000250 )
 {
   value=Normalize(value);
+#ifdef std__round
+  return std__round(value/prec) * prec;
+#else
   return std::round(value/prec) * prec;
+#endif
 }
 
 
