@@ -1,6 +1,8 @@
 /* This builder is developed for IST online monitoring
  * Author: Yaping Wang, Zillay Khan
- * Latest updates  4/8/2014  Yaping
+ * Update histograms for ZS data  4/8/2014  Yaping
+ * Update trigger alarm for ZS data  4/28/2014  Yaping
+ * Fix trigger alarm issue on missing chips and add hit map for ZS data  5/1/2014 Yaping
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -396,7 +398,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
   hSumContents.hVisibleApv->GetXaxis()->SetTitle("Section ID [(RDO-1)*6*2+ARM*2+GROUP]");
   hSumContents.hVisibleApv->GetYaxis()->SetTitle("Number of APV per event");
 
-  hSumContents.hHitMap = new TH2S("HitMapOfIST", "IST - Hit map (density)", numRow*numLadder, 1, numRow*numLadder+1, numColumn*numSensor, 1, numColumn*numSensor+1);//1536*72 bins
+  hSumContents.hHitMap = new TH2S("HitMapOfIST", "IST - Hit map (non-ZS)", numRow*numLadder, 1, numRow*numLadder+1, numColumn*numSensor, 1, numColumn*numSensor+1);//1536*72 bins
   hSumContents.hHitMap->GetXaxis()->SetNdivisions(-numLadder, false);
   hSumContents.hHitMap->GetYaxis()->SetNdivisions(-numSensor, false);
   hSumContents.hHitMap->SetStats(false);
@@ -404,10 +406,23 @@ void istBuilder::initialize(int argc, char *argv[]) {
   hSumContents.hHitMap->GetYaxis()->SetTitle("Column Index in Z");
   hSumContents.hHitMap->SetLabelSize(0.02);
 
-  hSumContents.hHitMapVsAPV = new TH2S("HitMapPerAPV", "IST - Hit map in Ladder vs APV", 24, 1, 25, 36, 1, 37);
+  hSumContents.hHitMapVsAPV = new TH2S("HitMapPerAPV", "IST - Hit map in Ladder vs APV (non-ZS)", 24, 1, 25, 36, 1, 37);
   hSumContents.hHitMapVsAPV->SetStats(false);
   hSumContents.hHitMapVsAPV->GetXaxis()->SetTitle("Ladder geometry ID");
   hSumContents.hHitMapVsAPV->GetYaxis()->SetTitle("APV geometry ID");
+
+  hSumContents.hHitMap_ZS = new TH2S("HitMapOfIST_ZS", "IST - Hit map (ZS)", numRow*numLadder, 1, numRow*numLadder+1, numColumn*numSensor, 1, numColumn*numSensor+1);//1536*72 bins
+  hSumContents.hHitMap_ZS->GetXaxis()->SetNdivisions(-numLadder, false);
+  hSumContents.hHitMap_ZS->GetYaxis()->SetNdivisions(-numSensor, false);
+  hSumContents.hHitMap_ZS->SetStats(false);
+  hSumContents.hHitMap_ZS->GetXaxis()->SetTitle("Row Index in r-#phi");
+  hSumContents.hHitMap_ZS->GetYaxis()->SetTitle("Column Index in Z");
+  hSumContents.hHitMap_ZS->SetLabelSize(0.02);
+
+  hSumContents.hHitMapVsAPV_ZS = new TH2S("HitMapPerAPV_ZS", "IST - Hit map in Ladder vs APV (ZS)", 24, 1, 25, 36, 1, 37);
+  hSumContents.hHitMapVsAPV_ZS->SetStats(false);
+  hSumContents.hHitMapVsAPV_ZS->GetXaxis()->SetTitle("Ladder geometry ID");
+  hSumContents.hHitMapVsAPV_ZS->GetYaxis()->SetTitle("APV geometry ID");
 
   hSumContents.hMultVsLadder = new TH2S("HitMultVsLadder", "IST - Hit Multiplicity vs Ladder Id", numLadder, 1, numLadder+1, 72, 0, ChPerLadder);//24*72 bins
   hSumContents.hMultVsLadder->GetXaxis()->SetNdivisions(-numLadder, false);
@@ -537,7 +552,7 @@ void istBuilder::initialize(int argc, char *argv[]) {
     plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+mMaxTimeBinHist+i] = new JevpPlot(hSumContents.sumArray[i]);
     hSumContents.sumArray[i]->SetStats(false);
   }
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+mMaxTimeBinHist+3]->logy=true;
+  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+mEventSumHist+mMipHist+mMaxTimeBinHist+5]->logy=true;
 
   // Add Plots to plot set...
   for ( int i=0; i<totPlots ;i++ ) {
@@ -775,6 +790,7 @@ void istBuilder::event(daqReader *rdr) {
 
     for(int i=0; i<totSec; i++) 
       hSumContents.hVisibleApv->Fill(i, apvCntDaq[i]);
+
     //do for zs and non-zs data and fill with num kB
     hEventSumContents.hEventSize->Fill(short(evtSize/1024));
   }
@@ -816,6 +832,8 @@ void istBuilder::event(daqReader *rdr) {
       	hMipContents.mipArray[elecSec+72]->Fill(short(maxAdc_zs[geoIdx-1]+0.5));
       	hEventSumContents.hMaxTimeBin_ZS->Fill(maxTimeBin_zs[geoIdx-1]);
 	hMaxTimeBinContents.maxTimeBinArray[elecSec]->Fill(maxTimeBin_zs[geoIdx-1]);
+	hSumContents.hHitMap_ZS->Fill((ladderIdx-1)*numRow+rowIdx, (sensorIdx-1)*numColumn+columnIdx);
+        hSumContents.hHitMapVsAPV_ZS->Fill(ladderIdx, apvGeoIdx);
       }
   }
 
@@ -920,7 +938,8 @@ void istBuilder::stoprun(daqReader *rdr) {
         int armIndex   = (j%12)/2;  //0, 1, ..., 5
         int groupIndex = j%2;       //0, 1
 
-    	if(hSumContents.hVisibleApv->GetBinContent(j+1, nExpectedChip_Sec[j]+1) < (evtCt/50)) {
+        if(hSumContents.hVisibleApv->GetEntries()>0) {
+    	  if(hSumContents.hVisibleApv->GetBinContent(j+1, nExpectedChip_Sec[j]+1) < 1) {
 	    //LOG(U_IST,"visibleAPVperSection::section RDO%d_ARM%d_GROUP%d has missing APVs!", rdoIndex, armIndex, groupIndex);
 	    errLocation_visibleAPVperSection[errCt_visibleAPVperSection] = rdoIndex*100 + armIndex*10 + groupIndex;
 	    for(int jBin=1; jBin<13; jBin++) {
@@ -928,7 +947,8 @@ void istBuilder::stoprun(daqReader *rdr) {
 		    errNumber_visibleAPVperSection[errCt_visibleAPVperSection] = 13 - jBin;
 	    }
 	    errCt_visibleAPVperSection++;
-	}
+	  }
+        }
 
         double entriesTB_123=0, entriesTB_all=0, fraction = 1.0;
         if(hMaxTimeBinContents.maxTimeBinArray[j]->GetEntries()>0) {
