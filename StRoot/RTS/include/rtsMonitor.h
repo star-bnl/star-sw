@@ -197,10 +197,8 @@ struct rtsMonTCD_new {
 	unsigned int kbSecEvb ;		/* rate in kB/sec to the EVB */
 	unsigned int kbSecAux ;		/* rate in kB/sec to the L3 system */
 
-	struct {
-		int clock ;
-		int deadtime ;
-	} tcd[32] ;
+	int deadtime[32] ;
+	int clock[32] ;	// the clock of the TCD; or TCU for "Trigger"
 
 	struct {
 		int sca_hz ;
