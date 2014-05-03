@@ -1,8 +1,6 @@
 /* This builder is developed for IST online monitoring
  * Author: Yaping Wang, Zillay Khan
- * Update histograms for ZS data  4/8/2014  Yaping
- * Update trigger alarm for ZS data  4/28/2014  Yaping
- * Fix trigger alarm issue on missing chips and add hit map for ZS data  5/1/2014 Yaping
+ * Latest updates  4/8/2014  Yaping
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -1028,14 +1026,17 @@ void istBuilder::stoprun(daqReader *rdr) {
   }
 
   buffer_Err = "";
-  if(errCt_mipNonZS>0) {
+  Int_t entries_ZS = (int)hEventSumContents.hEventSize->Integral(1, 5);
+  Int_t entries_nonZS = (int)hEventSumContents.hEventSize->Integral(17, 25);
+  //cout << "non-ZS events " << entries_nonZS << "; ZS events " << entries_ZS << endl;
+  if(entries_nonZS>500 && errCt_mipNonZS>0) {
 	for(int i=0; i<errCt_mipNonZS; i++)
 	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d (MPV=%f, Sigma=%f),\t", errLocation_mipNonZS[i]/100, (errLocation_mipNonZS[i]%100)/10, errLocation_mipNonZS[i]%10, errValue_mipNonZS[i], errValue_sigmaNonZS[i]);
 	LOG(U_IST,"MIP_nonZS:: In #%d, %d sections have unnormal MIP mpv or sigma for non-ZS data, they are %s", run, errCt_mipNonZS, buffer_Err.Data());
   }
 
   buffer_Err = "";
-  if(errCt_mipZS>0) {
+  if(entries_ZS>500 && errCt_mipZS>0) {
         for(int i=0; i<errCt_mipZS; i++)
             buffer_Err += Form("RDO%d_ARM%d_GROUP%d (MPV=%f, Sigma=%f),\t", errLocation_mipZS[i]/100, (errLocation_mipZS[i]%100)/10, errLocation_mipZS[i]%10, errValue_mipZS[i], errValue_sigmaZS[i]);
         LOG(U_IST,"MIP_ZS:: In #%d, %d sections have unnormal MIP mpv or sigma for ZS data, they are %s", run, errCt_mipZS, buffer_Err.Data());
