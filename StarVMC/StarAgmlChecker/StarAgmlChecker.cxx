@@ -211,7 +211,7 @@ Double_t Normalize( Double_t f )
   Double_t fact = TMath::Power(10, pwr);
 
   f /= fact;
-  i  = f;
+  i  = TMath::Nint(f);
   f /= i;
 
   return f;  
@@ -225,7 +225,7 @@ Float_t Normalize( Float_t f )
   Int_t    pwr = TMath::Log10(    TMath::Abs(f) );
   Float_t fact = TMath::Power(10, pwr);
   f /= fact;
-  i  = f;
+  i  = TMath::Nint(f);
   f /= i;
 
   return f;  
