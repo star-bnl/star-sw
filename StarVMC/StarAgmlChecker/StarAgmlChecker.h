@@ -25,6 +25,7 @@
 #include "TGeoTorus.h"
 #include "TGeoTrd1.h"
 #include "TGeoTrd2.h"
+#include <assert.h>
 
 class TStopwatch;
 
@@ -40,15 +41,15 @@ public:
 
   /// Cast to 
 
-  TMD5  operator+=( const Int_t      &rhs ){ return add(rhs); } 
-  TMD5  operator+=( const Long_t     &rhs ){ return add(rhs); }
-  TMD5  operator+=( const Long64_t   &rhs ){ return add(rhs); } 
-  TMD5  operator+=( const ULong_t    &rhs ){ return add(rhs); }
-  TMD5  operator+=( const ULong64_t  &rhs ){ return add(rhs); } 
-  TMD5  operator+=( const Float_t    &rhs ){ return add(rhs); }
-  TMD5  operator+=( const Double_t   &rhs ){ return add(rhs); }
-  TMD5  operator+=( const Bool_t     &rhs ){ return add(rhs); }
-  TMD5  operator+=( const TString    &rhs ){ return add(rhs); }
+  TMD5  operator+=( const Int_t      &rhs ){ assert(sizeof(rhs)==4); return add(rhs); } 
+  TMD5  operator+=( const Long_t     &rhs ){ assert(sizeof(rhs)==4); return add(rhs); }
+  TMD5  operator+=( const Long64_t   &rhs ){ assert(sizeof(rhs)==8); return add(rhs); } 
+  TMD5  operator+=( const ULong_t    &rhs ){ assert(sizeof(rhs)==4); return add(rhs); }
+  TMD5  operator+=( const ULong64_t  &rhs ){ assert(sizeof(rhs)==8); return add(rhs); } 
+  TMD5  operator+=( const Float_t    &rhs ){ assert(sizeof(rhs)==4); return add(rhs); }
+  TMD5  operator+=( const Double_t   &rhs ){ assert(sizeof(rhs)==8); return add(rhs); }
+  TMD5  operator+=( const Bool_t     &rhs ){ assert(sizeof(rhs)==1); return add(rhs); }
+  TMD5  operator+=( const TString    &rhs ){                       ; return add(rhs); }
   
 private:
 protected:
