@@ -399,6 +399,8 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 #endif
+
+#if 0
 	if((t_cou==1) && (trg[0].t > 0) && (trg[0].t<=4095)) {
 		trg[t_cou].t = trg[0].t ;
 		trg[t_cou].daq = 0 ;
@@ -411,6 +413,7 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	else {
 		LOG(WARN,"%d %d %d???",t_cou,trg[0].t,trg[0].trg) ;
 	}
+#endif
 
 	if(err) {
 		LOG(ERR,"[%d] Bad Event: T %4d: words %d, trg_words %d (start at %d) : 0x%08X 0x%08X 0x%08X",

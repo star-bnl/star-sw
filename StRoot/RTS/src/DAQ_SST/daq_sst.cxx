@@ -285,7 +285,9 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 				break ;
 			case 2 :
 				adc_prime = (aadc+SST_PED_ADC_OFFSET)%1024 ;
-				if((adc_prime < SST_PED_ADC_HI) && (adc_prime > SST_PED_ADC_LO)) {
+				if(adc_prime >= (1024-SST_OUTLIERBAND)) ;
+				else if(adc_prime <= (SST_OUTLIERBAND)) ;
+				else {
 					if(peds->cou[fib][hybrid][strip] < 0xFFF0) {	// protect the 16bit counter
 						peds->ped[fib][hybrid][strip] += adc_prime ;
 						peds->rms[fib][hybrid][strip] += adc_prime * adc_prime ;
@@ -318,13 +320,17 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 				break ;
 			case 2 :
 				adc_prime = (aadc+SST_PED_ADC_OFFSET)%1024 ;
-				if((adc_prime < SST_PED_ADC_HI) && (adc_prime > SST_PED_ADC_LO)) {
+				if(adc_prime >= (1024-SST_OUTLIERBAND)) ;
+				else if(adc_prime <= (SST_OUTLIERBAND)) ;
+				else {
 					if(peds->cou[fib][hybrid][strip] < 0xFFF0) {	// protect the 16bit counter
 						peds->ped[fib][hybrid][strip] += adc_prime ;
 						peds->rms[fib][hybrid][strip] += adc_prime * adc_prime ;
 						peds->cou[fib][hybrid][strip]++ ;
 					}
 				}
+
+
 				break ;
 
 			}
@@ -353,7 +359,10 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 				break ;
 			case 2 :
 				adc_prime = (aadc+SST_PED_ADC_OFFSET)%1024 ;
-				if((adc_prime < SST_PED_ADC_HI) && (adc_prime > SST_PED_ADC_LO)) {
+
+				if(adc_prime >= (1024-SST_OUTLIERBAND)) ;
+				else if(adc_prime <= (SST_OUTLIERBAND)) ;
+				else {
 					if(peds->cou[fib][hybrid][strip] < 0xFFF0) {	// protect the 16bit counter
 						peds->ped[fib][hybrid][strip] += adc_prime ;
 						peds->rms[fib][hybrid][strip] += adc_prime * adc_prime ;

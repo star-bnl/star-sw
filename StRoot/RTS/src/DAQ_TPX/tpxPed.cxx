@@ -308,12 +308,14 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 	FILE *fff = 0 ;
 	char fname[128] ;
 
+#if 0
 	sprintf(fname,"/RTScache/altro_ped_%d_%03d.txt",rb+1,timebins) ;
 
 	fff = fopen(fname,"w") ;
 	if(fff==0) {
 		LOG(WARN,"Can't open \"%s\"",fname) ;
 	}
+#endif
 
 	char *rbuff = buff ;
 
@@ -729,6 +731,8 @@ int tpxPed::to_cache(char *fname, u_int run)
 			continue ;
 		}
 
+		f_sum = 0 ;
+#if 0
 		if(run==0) {
 			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%u_%d.txt",s_real,r_real,(u_int)time(NULL),clock_source) ;
 		}
@@ -741,6 +745,7 @@ int tpxPed::to_cache(char *fname, u_int run)
 			LOG(ERR,"ped::to_cache can't open trace file \"%s\" [%s]",f_sum_name,strerror(errno)) ;
 		}
 
+#endif
 
 		LOG(NOTE,"Writing pedestals to cache \"%s\"...",fn) ;
 

@@ -137,7 +137,7 @@ void sstPed::calc()
 				if(rr < (pp*pp)) rr = 0.0 ;
 				else rr = sqrt(rr - pp*pp) ;
 
-				ped->ped[fib][hy][strip] = pp - SST_PED_ADC_OFFSET;
+				ped->ped[fib][hy][strip] = pp ;
 				ped->rms[fib][hy][strip] = rr ;
 
 
