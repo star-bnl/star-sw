@@ -33,9 +33,11 @@ struct daq_sst_pedrms_t {
 	rms = sigma(ADCprime)
 */
 
-#define SST_PED_ADC_OFFSET	300
-#define SST_PED_ADC_HI		750
-#define SST_PED_ADC_LO		250
+#define SST_PED_ADC_OFFSET	375
+#define SST_OUTLIERBAND		256
+
+//#define SST_PED_ADC_HI		750
+//#define SST_PED_ADC_LO		250
 
 struct daq_sst_ped_t {
 	float ped[SST_FIBER_COU][SST_HYBRID_COU][SST_STRIP_COU];

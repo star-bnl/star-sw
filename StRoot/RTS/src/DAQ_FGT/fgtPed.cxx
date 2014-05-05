@@ -889,7 +889,7 @@ int fgtPed::from_cache(char *fname)
 	tb_cou_ped++ ;	// to get to the ntimbins
 
 	if(tb_cou_ped != tb_cou_xpect) {
-		LOG(CAUTION,"Pedestals loaded from cache \"%s\" but have %d timebins != expect %d!",fn,
+		LOG(ERR,"Pedestals loaded from cache \"%s\" but have %d timebins != expect %d!",fn,
 		    tb_cou_ped,tb_cou_xpect) ;
 	}
 	else {
