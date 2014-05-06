@@ -1,8 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.4 2013/11/14 16:17:08 geurts Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.5 2014/05/06 20:12:02 marr Exp $
  *
  * Author: Frank Geurts
+ *
+ * Modified: Yi Yang (yiyang@bnl.gov) 
+ * Date: 2014-05-06
+ *
  ***************************************************************************
  *
  * Description: StMtdSimMaker class for Muon Telescope Simulations
@@ -31,19 +35,17 @@
 // g2t tables and collections
 #include "tables/St_g2t_mtd_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
+#include "tables/St_mtdGeant2BacklegIDMap_Table.h"
 #include "StMcTrack.hh"
 
 #include "StEventTypes.h"
 
-
 static RanluxEngine engine;
 static RandGauss ranGauss(engine);
 
-Int_t geant2backlegID[30] = {1,2,3,4,5,6,7,10,22,25,26,27,28,29,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};  ///Corrections to backleg numbers from GEANT
-
 ClassImp(StMtdSimMaker)
 
-	//_____________________________________________________________________________
+//_____________________________________________________________________________
 StMtdSimMaker::StMtdSimMaker(const char *name):StMaker(name) {
   mBookHisto=kTRUE;
   mHistFile="mtdsim.root";
@@ -142,36 +144,56 @@ Int_t StMtdSimMaker::Make() {
 int StMtdSimMaker::CalcCellId(Int_t volume_id, Float_t ylocal, int &ibackleg,int &imodule,int &icell) 
 {
 
-        ///Decode GEANT volume_id
-  Int_t backlegTemp;
-  Int_t ires    = volume_id/100;
-  imodule = ires%10;        ///module number, i.e. where the module falls in a 5 tray backleg
-  backlegTemp = ires/10;    /// This is the backleg number produced by GEANT, does not match value from geometry
-  ibackleg = geant2backlegID[backlegTemp - 1];  /// This is the corrected backleg number, will be stored in sthit       
+    Int_t geant2backlegIDMap[30]; 
+    // Load geant2backlegID Map 
+    // Extract MTD maps from database
+    LOG_INFO << "Retrieving geant2backlegID table from database ..." << endm;
+    TDataSet *dataset = GetDataBase("Geometry/mtd/mtdGeant2BacklegIDMap");
+    St_mtdGeant2BacklegIDMap *mtdGeant2BacklegIDMap = static_cast<St_mtdGeant2BacklegIDMap*>(dataset->Find("mtdGeant2BacklegIDMap"));
+    if ( !mtdGeant2BacklegIDMap ){
+        LOG_ERROR << "No mtdTrayToTdigMap table found in database" << endm;
+        return kStErr;
+    }
+    mtdGeant2BacklegIDMap_st *mGeant2BLTable = static_cast<mtdGeant2BacklegIDMap_st*>(mtdGeant2BacklegIDMap->GetTable());
+    for ( Int_t i = 0; i < 30; i++ ){
+        geant2backlegIDMap[i] = 0;
+        geant2backlegIDMap[i] = (Int_t)mGeant2BLTable->geant2backlegID[i];
+    }
 
-  /// Construct cell ID from local Y coordinate
-  icell = Int_t((ylocal + kMtdPadWidth * kNCell/2) / kMtdPadWidth) + 1;
+    ///Decode GEANT volume_id
+    Int_t backlegTemp;
+    Int_t ires    = volume_id/100;
+    backlegTemp = ires/10;    /// This is the backleg number produced by GEANT, does not match value from geometry
+    ibackleg = geant2backlegIDMap[backlegTemp - 1];  /// This is the corrected backleg number, will be stored in sthit       
 
-  /// Verify ranges
-  if(ibackleg<0 || ibackleg>kNBackleg) return -3;
-  if(imodule <0 || imodule >kNModule ) return -2;  
-  if(icell  <=0 || icell   >kNCell   ) return -1;
-  
-  return icell + 100*(imodule+100*ibackleg);
+    imodule = ires%10;        ///module number, i.e. where the module falls in a 5 tray backleg
+    if ( ibackleg >= 12 && ibackleg <= 20 ) imodule = imodule + 1;
+
+    /// Construct cell ID from local Y coordinate
+    icell = Int_t((ylocal + kMtdPadWidth * kNCell/2) / kMtdPadWidth) + 1;
+    // Get the correct cell ID
+    if ( imodule > 3 ) icell = 11 - icell;
+
+    /// Verify ranges
+    if(ibackleg<0 || ibackleg>kNBackleg) return -3;
+    if(imodule <0 || imodule >kNModule ) return -2;  
+    if(icell  <=0 || icell   >kNCell   ) return -1;
+
+    return icell + 100*(imodule+100*ibackleg);
 }
 
 
 ///This will define the maps to store the StMtdHits and will call the necessary functions to obtain the cell, module and backleg #s to
 Int_t StMtdSimMaker::FastCellResponse() 
 {
-  std::map<int,StMtdHit*> myMap;
-  std::map<int,StMtdHit*>::const_iterator myIter;
-  
-  for (int ihit=0;ihit<mNMtdHits;ihit++) {
-    g2t_mtd_hit_st &ghit = mMtdHitsFromGeant[ihit];
-    if(ghit.s_track<=0.0 || ghit.de <=0.0) continue;
+    std::map<int,StMtdHit*> myMap;
+    std::map<int,StMtdHit*>::const_iterator myIter;
 
-    if(mBookHisto) {
+    for (int ihit=0;ihit<mNMtdHits;ihit++) {
+        g2t_mtd_hit_st &ghit = mMtdHitsFromGeant[ihit];
+        if(ghit.s_track<=0.0 || ghit.de <=0.0) continue;
+
+        if(mBookHisto) {
       mDeGeant->Fill(ghit.de / keV);
       mTofGeant->Fill(ghit.tof / nanosecond);
     }
