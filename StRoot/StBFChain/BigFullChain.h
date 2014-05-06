@@ -1427,10 +1427,13 @@ Bfc_st BFC[] = {
    "StGammaFilterMaker","StFilterMaker",  "BEmc Gamma filtering",                                   kFALSE},
   {"FiltEemcGamma" ,"","","StEvent,StMcEvent,EmcUtil",
    "StEemcGammaFilterMaker","StFilterMaker",  "EEmc Gamma filtering",                               kFALSE},
-  // fms
-  {"fmsSim",""      ,"","StEvent,fmsDb","StFmsSimulatorMaker","StFmsSimulatorMaker","Fms Simulator",kFALSE},
+
+  // FMS
+  {"fmsSim",""    ,"","StEvent,fmsDb",
+   "StFmsFastSimulatorMaker","StFmsFastSimulatorMaker","FMS Fast Simulator",                        kFALSE},
   {"fmsDat"     ,"","", "StEvent,fmsdb",
    "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",                                  kFALSE},
+
   // FGT
   {"fgt"        ,"FgtChain","","fgtDat,fgtClu,fgtAtoC"        ,"StMaker","StChain","Fgt data Chain",kFALSE},
   {"fgtDat"     ,"","", "event,fgtdb","StFgtRawMaker","StFgtRawMaker",            "FGT Data reader",kFALSE},
