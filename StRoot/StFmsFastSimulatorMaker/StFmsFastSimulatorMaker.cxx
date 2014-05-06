@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.cxx,v 1.1 2014/05/06 16:02:04 jeromel Exp $
+// $Id: StFmsFastSimulatorMaker.cxx,v 1.2 2014/05/06 16:05:56 jeromel Exp $
 //
 // $Log: StFmsFastSimulatorMaker.cxx,v $
+// Revision 1.2  2014/05/06 16:05:56  jeromel
+// Adjust for include - there is no need to specify the path
+//
 // Revision 1.1  2014/05/06 16:02:04  jeromel
 // First version of StFmsFastSimulatorMaker deliverred upon review
 //
@@ -11,7 +14,7 @@
  \author Pibero Djawotho <pibero@tamu.edu>
  \date 4 Jan 2011
  */
-#include "StFmsSimulatorMaker/StFmsFastSimulatorMaker.h"
+#include "StFmsFastSimulatorMaker.h"
 
 #include <algorithm>  // For std::fill(), std::max(), std::min()
 
