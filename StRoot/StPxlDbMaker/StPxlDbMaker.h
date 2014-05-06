@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.h,v 1.8 2014/01/28 19:29:37 qiuh Exp $
+ * $Id: StPxlDbMaker.h,v 1.9 2014/05/06 20:18:40 jeromel Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.h,v $
+ * Revision 1.9  2014/05/06 20:18:40  jeromel
+ * Changed pxl_db to pxlDb as discussed with Hao
+ *
  * Revision 1.8  2014/01/28 19:29:37  qiuh
  * *** empty log message ***
  *
@@ -34,11 +37,11 @@ class StPxlDb;
 class StPxlDbMaker : public StMaker
 {
 public:
-   StPxlDbMaker(const char *name = "pxl_db");
+   StPxlDbMaker(const char *name = "pxlDb");
    Int_t  InitRun(Int_t runNumber);
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.8 2014/01/28 19:29:37 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.9 2014/05/06 20:18:40 jeromel Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
