@@ -202,7 +202,7 @@ void StarAgmlChecker::Fill( TObjectSet *set, Double_t rmin, Double_t rmax, Doubl
 // ................................................................................................
 
 
-Double_t Normalize( Double_t f )
+Double_t Normalize( Double_t f, Int_t &norm )
 {
   Int_t i = f;
   if (!i) return f;
@@ -214,10 +214,12 @@ Double_t Normalize( Double_t f )
   i  = TMath::Nint(f);
   f /= i;
 
+  norm = i;
+
   return f;  
 };
 
-Float_t Normalize( Float_t f )
+Float_t Normalize( Float_t f, Int_t &norm )
 {
   Int_t i = f;
   if (!i) return f;
@@ -227,6 +229,8 @@ Float_t Normalize( Float_t f )
   f /= fact;
   i  = TMath::Nint(f);
   f /= i;
+
+  norm = i;
 
   return f;  
 };
@@ -250,21 +254,33 @@ Double_t __STD_ROUND__( Double_t x )
 
 Float_t Round( Float_t value, Float_t prec = 0.002 )
 { assert(0);
-  value=Normalize(value);
+  Int_t norm=0;
+  value=Normalize(value,norm);
+
+  value /= prec; // divide precision by value
+  prec  *= norm; // rescale precision by normalization
+
 #ifdef std__round
-  return std__round(value/prec) * prec;
+  return std__round(value) * prec;
 #else
-  return std::round(value/prec) * prec;
+  return std::round(value) * prec;
 #endif
+
 }
 Double_t Round( Double_t value, Double_t prec = 0.0000250 )
 {
-  value=Normalize(value);
+  Int_t norm=0;
+  value=Normalize(value,norm);
+
+  value /= prec; // divide precision by value
+  prec  *= norm; // rescale precision by normalization
+
 #ifdef std__round
-  return std__round(value/prec) * prec;
+  return std__round(value) * prec;
 #else
-  return std::round(value/prec) * prec;
+  return std::round(value) * prec;
 #endif
+
 }
 
 
