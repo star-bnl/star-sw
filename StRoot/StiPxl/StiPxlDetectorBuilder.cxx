@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.70 2014/05/07 22:10:56 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.71 2014/05/07 22:11:04 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -307,16 +307,78 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
       {"PSAE2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
       {"PSMD2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
 
-      /* The following are the largest planar components of the pixel sector support
-      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXRB", "", ""}
-      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTR", "", ""}
-      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTM", "", ""}
-      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTL", "", ""}
-      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXLB", "", ""}
-      {"", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXIB", "", ""}
-      */
+      // The following are the largest planar components of the pixel sector support
+      {"PXRB01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXRB_1", "", ""},
+      {"PXTR01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTR_1", "", ""},
+      {"PXTM01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTM_1", "", ""},
+      {"PXTL01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTL_1", "", ""},
+      {"PXLB01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXLB_1", "", ""},
+      {"PXIB01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXIB_1", "", ""},
 
-      /* These are the components of the pixel support tube (PSTM) which is *always* on */
+      {"PXRB02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXRB_1", "", ""},
+      {"PXTR02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXTR_1", "", ""},
+      {"PXTM02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXTM_1", "", ""},
+      {"PXTL02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXTL_1", "", ""},
+      {"PXLB02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXLB_1", "", ""},
+      {"PXIB02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXIB_1", "", ""},
+
+      {"PXRB03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXRB_1", "", ""},
+      {"PXTR03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXTR_1", "", ""},
+      {"PXTM03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXTM_1", "", ""},
+      {"PXTL03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXTL_1", "", ""},
+      {"PXLB03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXLB_1", "", ""},
+      {"PXIB03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXIB_1", "", ""},
+
+      {"PXRB04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXRB_1", "", ""},
+      {"PXTR04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXTR_1", "", ""},
+      {"PXTM04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXTM_1", "", ""},
+      {"PXTL04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXTL_1", "", ""},
+      {"PXLB04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXLB_1", "", ""},
+      {"PXIB04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXIB_1", "", ""},
+
+      {"PXRB05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXRB_1", "", ""},
+      {"PXTR05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXTR_1", "", ""},
+      {"PXTM05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXTM_1", "", ""},
+      {"PXTL05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXTL_1", "", ""},
+      {"PXLB05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXLB_1", "", ""},
+      {"PXIB05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXIB_1", "", ""},
+
+      {"PXRB06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXRB_1", "", ""},
+      {"PXTR06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXTR_1", "", ""},
+      {"PXTM06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXTM_1", "", ""},
+      {"PXTL06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXTL_1", "", ""},
+      {"PXLB06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXLB_1", "", ""},
+      {"PXIB06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXIB_1", "", ""},
+
+      {"PXRB07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXRB_1", "", ""},
+      {"PXTR07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXTR_1", "", ""},
+      {"PXTM07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXTM_1", "", ""},
+      {"PXTL07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXTL_1", "", ""},
+      {"PXLB07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXLB_1", "", ""},
+      {"PXIB07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXIB_1", "", ""},
+
+      {"PXRB08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXRB_1", "", ""},
+      {"PXTR08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXTR_1", "", ""},
+      {"PXTM08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXTM_1", "", ""},
+      {"PXTL08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXTL_1", "", ""},
+      {"PXLB08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXLB_1", "", ""},
+      {"PXIB08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXIB_1", "", ""},
+
+      {"PXRB09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXRB_1", "", ""},
+      {"PXTR09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXTR_1", "", ""},
+      {"PXTM09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXTM_1", "", ""},
+      {"PXTL09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXTL_1", "", ""},
+      {"PXLB09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXLB_1", "", ""},
+      {"PXIB09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXIB_1", "", ""},
+
+      {"PXRB10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXRB_1", "", ""},
+      {"PXTR10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXTR_1", "", ""},
+      {"PXTM10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXTM_1", "", ""},
+      {"PXTL10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXTL_1", "", ""},
+      {"PXLB10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXLB_1", "", ""},
+      {"PXIB10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXIB_1", "", ""},
+
+      // These are the components of the pixel support tube (PSTM)
       { "APTS1", "Tube shell", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSTM_1/APTS_1", "", ""},
       { "PITN1", "Pixel insertion TubeNaked", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSTM_1/PITN_1", "", ""}
    };
