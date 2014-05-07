@@ -306,9 +306,10 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 	int s_real, r_real ;
 
 	FILE *fff = 0 ;
-	char fname[128] ;
+
 
 #if 0
+	char fname[128] ;
 	sprintf(fname,"/RTScache/altro_ped_%d_%03d.txt",rb+1,timebins) ;
 
 	fff = fopen(fname,"w") ;
@@ -643,7 +644,7 @@ int tpxPed::to_cache(char *fname, u_int run)
 	FILE *f, *f_sum ;
 	int r, p, t ;
 	char fn[64] ;
-	char f_sum_name[128] ;
+//	char f_sum_name[128] ;
 	char *pn ;
 	char *asc_date ;
 

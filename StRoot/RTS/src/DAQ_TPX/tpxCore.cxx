@@ -90,6 +90,8 @@ void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch)
 
 }
 
+int *tpx_altro_to_row_override = 0 ;
+
 /*
 	RDO counts from 0!
 */
@@ -98,6 +100,13 @@ void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 	
 	row = tpx_altro_to_pad[rdo][a][ch].row ;
 	pad = tpx_altro_to_pad[rdo][a][ch].pad ;
+
+	if(tpx_altro_to_row_override) {
+		row = tpx_altro_to_row_override[a] ;
+		pad = ch + 1 ;
+		return ;
+	}
+
 
 #ifdef ESB_TEST_ETTIE
 	// This is a hack for ETTIE's test!
