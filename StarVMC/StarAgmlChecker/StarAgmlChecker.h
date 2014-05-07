@@ -32,7 +32,7 @@ class TStopwatch;
 class CheckSum_t 
 { 
 public:
-  CheckSum_t(){ };
+  CheckSum_t(){ mCount=0; };
   ~CheckSum_t(){ };
 
   operator TMD5()   { TMD5 final = mResult; final.Final(); return final; }      /// Cast to TMD5
@@ -50,20 +50,24 @@ public:
   TMD5  operator+=( const Double_t   &rhs ){ assert(sizeof(rhs)==8); return add(rhs); }
   TMD5  operator+=( const Bool_t     &rhs ){ assert(sizeof(rhs)==1); return add(rhs); }
   TMD5  operator+=( const TString    &rhs ){                       ; return add(rhs); }
+
+  /// Total number of values checked.
+  Int_t count(){ return mCount; }
   
 private:
 protected:
-  TMD5 mResult; // resulting checksum
+  TMD5  mResult; // resulting checksum
+  Int_t mCount;
 
-  TMD5  add( Int_t     a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
-  TMD5  add( Long_t    a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
-  TMD5  add( Long64_t  a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
-  TMD5  add( ULong_t   a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
-  TMD5  add( ULong64_t a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
-  TMD5  add( Bool_t    a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
-  TMD5  add( Float_t   a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
-  TMD5  add( Double_t  a ){ UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
-  TMD5  add( TString   a ){ UChar_t *b = (UChar_t *)a.Data(); mResult.Update(b,a.Length()); return *this; }
+  TMD5  add( Int_t     a ){ mCount++; UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
+  TMD5  add( Long_t    a ){ mCount++; UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
+  TMD5  add( Long64_t  a ){ mCount++; UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
+  TMD5  add( ULong_t   a ){ mCount++; UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
+  TMD5  add( ULong64_t a ){ mCount++; UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
+  TMD5  add( Bool_t    a ){ mCount++; UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
+  TMD5  add( Float_t   a ){ mCount++; UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
+  TMD5  add( Double_t  a ){ mCount++; UChar_t *b = (UChar_t *)&a; mResult.Update(b,sizeof(a)); return *this; }
+  TMD5  add( TString   a ){ mCount++; UChar_t *b = (UChar_t *)a.Data(); mResult.Update(b,a.Length()); return *this; }
 
   ClassDef(CheckSum_t,1);
 
