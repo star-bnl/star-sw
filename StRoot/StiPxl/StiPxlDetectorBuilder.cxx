@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.71 2014/05/07 22:11:04 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.72 2014/05/07 22:11:12 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -72,7 +72,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 
    // Access the (survey) geometry if requested by the user
    if (!mBuildIdealGeom) {
-      TObjectSet *pxlDbDataSet = (TObjectSet*) source.GetDataSet("pxlDb");
+      TObjectSet *pxlDbDataSet = (TObjectSet*) source.GetDataSet("pxl_db");
 
       if (!pxlDbDataSet) {
          LOG_ERROR << "StiPxlDetectorBuilder::buildDetectors: PXL geometry was requested from "
