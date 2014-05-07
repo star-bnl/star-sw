@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.12 2014/04/01 15:28:18 qiuh Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.13 2014/05/07 22:19:19 smirnovd Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.13  2014/05/07 22:19:19  smirnovd
+ * Change the name of PXL DB dataset to avoid conflict with StPxlDbMaker's name
+ *
  * Revision 1.12  2014/04/01 15:28:18  qiuh
  * add single hot pixel masking
  *
@@ -120,7 +123,7 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    }
 
    // finally write the data
-   ToWhiteBoard("pxlDb", mPxlDb);
+   ToWhiteBoard("pxl_db", mPxlDb);
 
    return kStOK;
 }
