@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.cxx,v 1.12 2014/02/07 22:58:30 smirnovd Exp $
+ * $Id: StPxlHitMaker.cxx,v 1.13 2014/05/08 15:10:49 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -32,10 +32,11 @@ StPxlHitMaker::StPxlHitMaker(const Char_t *name) : StMaker(name),
 
 Int_t StPxlHitMaker::InitRun(Int_t runnumber)
 {
-   TObjectSet *pxlDbDataSet = (TObjectSet*) GetDataSet("pxlDb");
+   TObjectSet *pxlDbDataSet = (TObjectSet*) GetDataSet("pxl_db");
 
    if (pxlDbDataSet) {
       mPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
+      assert(mPxlDb);
    }
    else {
       LOG_ERROR << "InitRun : not pxlDb" << endm;
@@ -152,6 +153,9 @@ Int_t StPxlHitMaker::Make()
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.cxx,v $
+ * Revision 1.13  2014/05/08 15:10:49  smirnovd
+ * PXL DB dataset has been renamed to avoid conflict with StPxlDbMaker's name
+ *
  * Revision 1.12  2014/02/07 22:58:30  smirnovd
  * Cosmetic style changes
  *
