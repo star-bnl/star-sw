@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.cxx,v 1.7 2014/04/05 05:20:08 qiuh Exp $
+ * $Id: StPxlRawHitMaker.cxx,v 1.8 2014/05/08 15:10:49 smirnovd Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.cxx,v $
+ * Revision 1.8  2014/05/08 15:10:49  smirnovd
+ * PXL DB dataset has been renamed to avoid conflict with StPxlDbMaker's name
+ *
  * Revision 1.7  2014/04/05 05:20:08  qiuh
  * add Jtag file version print-out and some more warnings for data format errors
  *
@@ -56,9 +59,10 @@ void StPxlRawHitMaker::Clear(const Option_t *)
 //_______________________________________________
 Int_t StPxlRawHitMaker::InitRun(Int_t runumber)
 {
-   TObjectSet *pxlDbDataSet = (TObjectSet *)GetDataSet("pxlDb");
+   TObjectSet *pxlDbDataSet = (TObjectSet *)GetDataSet("pxl_db");
    if (pxlDbDataSet) {
       mPxlDb = (StPxlDb *)pxlDbDataSet->GetObject();
+      assert(mPxlDb);
    }
    else {
       LOG_ERROR << "InitRun : no pxlDb" << endm;
