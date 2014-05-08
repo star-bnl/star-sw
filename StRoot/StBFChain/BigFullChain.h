@@ -1362,10 +1362,10 @@ Bfc_st BFC[] = {
 
   {"pxlFastSim"  ,"","","StMcEvent,StEvent"
    ,                                           "StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
-  {"pxlRaw"      ,"","","pxlUtil",        "StPxlRawHitMaker","StPxlRawHitMaker","Pxl Raw Hit Maker",kFALSE},
+  {"pxlRaw"      ,"","","pxlUtil,pxlDb",  "StPxlRawHitMaker","StPxlRawHitMaker","Pxl Raw Hit Maker",kFALSE},
   {"pxlCluster"  ,"","","pxlUtil",      "StPxlClusterMaker","StPxlClusterMaker","Pxl Cluster Maker",kFALSE},
   {"pxlHit"      ,"","","pxlUtil,event,pxlDb",      "StPxlHitMaker","StPxlHitMaker","Pxl Hit Maker",kFALSE},
-
+  //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},
 
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
