@@ -7,5 +7,5 @@
 */
 struct mtdTrayToTdigMap 
 {
-  char tdigId[150]; /* Tdigit Id, 0-5 */
+  short tdigId[150]; /* Tdigit Id, 0-5 */
 };
