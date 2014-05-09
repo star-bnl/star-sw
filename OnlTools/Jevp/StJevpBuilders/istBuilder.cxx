@@ -1,6 +1,7 @@
 /* This builder is developed for IST online monitoring
  * Author: Yaping Wang, Zillay Khan
  * Latest updates  4/8/2014  Yaping
+ * Latest updates  5/9/2014  Yaping
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -519,18 +520,18 @@ void istBuilder::initialize(int argc, char *argv[]) {
   line->SetLineColor(kRed);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+5]->addElement(line);
 
-  JLine* line3_nonZS = new JLine(0, minMipMpv_nonZS, totSec, minMipMpv_nonZS);
-  line3_nonZS->SetLineColor(kRed);
+  //JLine* line3_nonZS = new JLine(0, minMipMpv_nonZS, totSec, minMipMpv_nonZS);
+  //line3_nonZS->SetLineColor(kRed);
   JLine* line3_ZS = new JLine(0, minMipMpv_ZS, totSec, minMipMpv_ZS);
   line3_ZS->SetLineColor(kRed);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+8]->addElement(line3_nonZS);
+  //plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+8]->addElement(line3_nonZS);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+9]->addElement(line3_ZS);
 
-  JLine* line5_nonZS = new JLine(0, minMipSigma_nonZS, totSec, minMipSigma_nonZS);
-  line5_nonZS->SetLineColor(kRed);
+  //JLine* line5_nonZS = new JLine(0, minMipSigma_nonZS, totSec, minMipSigma_nonZS);
+  //line5_nonZS->SetLineColor(kRed);
   JLine* line5_ZS = new JLine(0, minMipSigma_ZS, totSec, minMipSigma_ZS);
   line5_ZS->SetLineColor(kRed);
-  plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+10]->addElement(line5_nonZS);
+  //plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+10]->addElement(line5_nonZS);
   plots[mAdcHist+mMultHist+mHitMapHist+mTbVsAdcHist+11]->addElement(line5_ZS);
 
   JLine* line7 = new JLine(0, maxTbFracOK, totSec, maxTbFracOK);
@@ -1015,31 +1016,36 @@ void istBuilder::stoprun(daqReader *rdr) {
   if(errCt_visibleAPVperSection>0) {
 	for(int i=0; i<errCt_visibleAPVperSection; i++)
 	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d (%d missing chips),\t", errLocation_visibleAPVperSection[i]/100, (errLocation_visibleAPVperSection[i]%100)/10, errLocation_visibleAPVperSection[i]%10, errNumber_visibleAPVperSection[i]);
-	LOG(U_IST,"visibleAPVperSection:: In #%d, %d sections have missing APV chips, they are %s", run, errCt_visibleAPVperSection, buffer_Err.Data());
+	LOG(U_IST,"IST visibleAPVperSection:: In #%d, %d sections have missing APV chips, they are %s", run, errCt_visibleAPVperSection, buffer_Err.Data());
   }
 
   buffer_Err = "";
   if(errCt_maxTimeBinFraction>0) {
 	for(int i=0; i<errCt_maxTimeBinFraction; i++)
 	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d (fraction = %f),\t", errLocation_maxTimeBinFraction[i]/100, (errLocation_maxTimeBinFraction[i]%100)/10, errLocation_maxTimeBinFraction[i]%10, errValue_maxTimeBinFraction[i]);
-	LOG(U_IST,"maxTimeBinFraction:: In #%d, %d sections have max time bin fraction less than %f, they are %s", run, errCt_maxTimeBinFraction, maxTbFracOK, buffer_Err.Data());
+	LOG(U_IST,"IST maxTimeBinFraction:: In #%d, %d sections have max time bin fraction less than %f, they are %s", run, errCt_maxTimeBinFraction, maxTbFracOK, buffer_Err.Data());
   }
 
   buffer_Err = "";
   Int_t entries_ZS = (int)hEventSumContents.hEventSize->Integral(1, 5);
   Int_t entries_nonZS = (int)hEventSumContents.hEventSize->Integral(17, 25);
   //cout << "non-ZS events " << entries_nonZS << "; ZS events " << entries_ZS << endl;
-  if(entries_nonZS>500 && errCt_mipNonZS>0) {
+  //if(entries_nonZS>500 && errCt_mipNonZS>0) {
+  if(errCt_mipNonZS>0) {
 	for(int i=0; i<errCt_mipNonZS; i++)
 	    buffer_Err += Form("RDO%d_ARM%d_GROUP%d (MPV=%f, Sigma=%f),\t", errLocation_mipNonZS[i]/100, (errLocation_mipNonZS[i]%100)/10, errLocation_mipNonZS[i]%10, errValue_mipNonZS[i], errValue_sigmaNonZS[i]);
-	LOG(U_IST,"MIP_nonZS:: In #%d, %d sections have unnormal MIP mpv or sigma for non-ZS data, they are %s", run, errCt_mipNonZS, buffer_Err.Data());
+	//LOG(U_IST,"IST MIP_nonZS:: In #%d, %d sections have unnormal MIP mpv or sigma for non-ZS data, they are %s", run, errCt_mipNonZS, buffer_Err.Data());
+	if(entries_nonZS<500)
+	    LOG(WARN,"IST MIP_nonZS (limited statistics):: In #%d, %d sections have unnormal MIP mpv or sigma for non-ZS data, they are %s", run, errCt_mipNonZS, buffer_Err.Data());
+	else
+	    LOG(WARN,"IST MIP_nonZS (statistics>=500):: In #%d, %d sections have unnormal MIP mpv or sigma for non-ZS data, they are %s", run, errCt_mipNonZS, buffer_Err.Data());
   }
 
   buffer_Err = "";
   if(entries_ZS>500 && errCt_mipZS>0) {
         for(int i=0; i<errCt_mipZS; i++)
             buffer_Err += Form("RDO%d_ARM%d_GROUP%d (MPV=%f, Sigma=%f),\t", errLocation_mipZS[i]/100, (errLocation_mipZS[i]%100)/10, errLocation_mipZS[i]%10, errValue_mipZS[i], errValue_sigmaZS[i]);
-        LOG(U_IST,"MIP_ZS:: In #%d, %d sections have unnormal MIP mpv or sigma for ZS data, they are %s", run, errCt_mipZS, buffer_Err.Data());
+        LOG(U_IST,"IST MIP_ZS:: In #%d, %d sections have unnormal MIP mpv or sigma for ZS data, they are %s", run, errCt_mipZS, buffer_Err.Data());
   }
 
   for ( int i=0; i<totCh; i++ )    {
