@@ -68,7 +68,7 @@ class istBuilder : public JevpPlotSet {
   static const float minMipSigma_ZS     = 80;
   static const float minMipSigma_nonZS  = 60;
   static const float maxMipSigma  = 200;
-  static const float maxTbFracOK  = 0.95;
+  static const float maxTbFracOK  = 0.9;
   //landau fitting range
   static const float landauFit_dn = 400.0;
   static const float landauFit_up = 2000.0;
