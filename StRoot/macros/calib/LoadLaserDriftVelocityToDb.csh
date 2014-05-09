@@ -62,7 +62,6 @@ if (-e $progFile) then
 endif
 
 set startDate = `$DATEC `
-echo $startDate > $progFile
 
 # will use in post-fix
 set DATE=`echo $startDate | $SED "s/ /_/g" | $SED "s/://g"`
@@ -74,6 +73,7 @@ if (! -e $timeFile) then
     $TOUCH $timeFile
     exit
 endif
+echo $startDate > $progFile
 
 #
 # Determine what new laser.root files exist
@@ -86,7 +86,10 @@ $TOUCH $timeFile
 # Test if any new files and leave if not. 
 # This will prevent empty dirs
 #
-if ($#laserfiles == 0) exit
+if ($#laserfiles == 0) then
+  $RM $progFile
+  exit
+endif
 
 #
 # copy new files to $DIR and determine runs to process
@@ -164,7 +167,10 @@ end
 #
 # Prepare for uploading to DB
 #
-if ( ! -e $laserFiles ) exit
+if ( ! -e $laserFiles ) then
+  $RM $progFile
+  exit
+endif
 
 set tempfile = "/tmp/$listLaserFiles"
 $SORT -u $laserFiles >! $tempfile
