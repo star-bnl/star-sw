@@ -2,6 +2,7 @@
  * Author: Yaping Wang, Zillay Khan
  * Latest updates  4/8/2014  Yaping
  * Latest updates  5/9/2014  Yaping
+ * update fit range for MIP peak distribution of center sections  5/12/2014 Yaping 
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -966,7 +967,10 @@ void istBuilder::stoprun(daqReader *rdr) {
 
         float lowerRange=landauFit_dn, upperRange=landauFit_up, mpvMIP_nonZS=0., sigmaMIP_nonZS=0., mpvMIP_ZS=0., sigmaMIP_ZS=0.;
         if(hMipContents.mipArray[j]->GetEntries()>0) {
-                hMipContents.mipArray[j]->Fit("landau","QR","",lowerRange, upperRange);
+		if(j%3==1)
+                    hMipContents.mipArray[j]->Fit("landau","QR","",lowerRange-50, upperRange);
+		else
+		    hMipContents.mipArray[j]->Fit("landau","QR","",lowerRange, upperRange);
                 TF1* fit_nonZS = hMipContents.mipArray[j]->GetFunction("landau");
                 mpvMIP_nonZS    = fit_nonZS->GetParameter("MPV");
                 sigmaMIP_nonZS  = fit_nonZS->GetParameter("Sigma");
@@ -987,7 +991,10 @@ void istBuilder::stoprun(daqReader *rdr) {
 
 
         if(hMipContents.mipArray[j+72]->GetEntries()>0) {
-                hMipContents.mipArray[j+72]->Fit("landau","QR","",lowerRange, upperRange);
+		if((j+72)%3==1)
+                    hMipContents.mipArray[j+72]->Fit("landau","QR","",lowerRange-50, upperRange);
+		else
+		    hMipContents.mipArray[j+72]->Fit("landau","QR","",lowerRange, upperRange);
                 TF1* fit_ZS = hMipContents.mipArray[j+72]->GetFunction("landau");
                 mpvMIP_ZS      = fit_ZS->GetParameter("MPV");
                 sigmaMIP_ZS    = fit_ZS->GetParameter("Sigma");
