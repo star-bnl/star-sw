@@ -554,7 +554,7 @@ void y2007()
     geom.calbFlag = "CALB02";  geom.calbStat = 1;  geom.calbCuts = 0;
     geom.ecalFlag = "ECAL31";  geom.ecalStat = 1;  geom.ecalCuts = 0;
     geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
-    geom.vpddFlag = "VPPD07";  geom.vpddStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
     geom.mfldFlag = "MFLD54";  geom.mfldStat = 0;
     geom.ftpcFlag = "FTPC01";  geom.ftpcStat = 1;
     geom.phmdFlag = "PHMD02";  geom.phmdStat = 1;
