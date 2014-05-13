@@ -481,7 +481,7 @@ void y2006()
   geom.mfldFlag = "MFLD54"; geom.mfldStat = 0;
   geom.ftpcFlag = "FTPC01"; geom.ftpcStat = 1;
   geom.phmdFlag = "PHMD02"; geom.phmdStat = 1;
-  geom.ftroFlag = "FTRP01"; geom.ftroStat = 1;
+  geom.ftroFlag = "FTRO01"; geom.ftroStat = 1;
   geom.sisdFlag = "SISD35"; geom.sisdStat = 1;
   geom.tpceFlag = "TPCE03"; geom.tpceStat = 1;
   geom.mutdFlag = "MUTD01"; geom.mutdStat = 1;
