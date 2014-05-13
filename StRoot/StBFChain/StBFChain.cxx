@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.611 2014/04/10 23:37:44 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.612 2014/05/13 17:53:18 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1095,11 +1095,12 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  }
 
 	} else if ( Tag.BeginsWith("gopt") && Tag.Length() == 13){
-	  char GOptName[3],GOptValue[6];
+	  char GOptName[4],GOptValue[7];
 	  //TString property(".gopt.");
 	  //TString pattern("*");
 
 	  (void) sscanf(Tag.Data(),"gopt%3s%6s",GOptName,GOptValue);
+          // sscanf adds null terminators for %s, so buffers need to be 1 longer
 
 	  // see StBFChain::Setup() for default values
 	  Gproperty += GOptName;
