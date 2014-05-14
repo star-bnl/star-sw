@@ -33,6 +33,7 @@ class Geom_t : public AgStructure
   SetDetector(pxst);
   SetDetector(psup);
   SetDetector(dtub);
+  SetDetector(hcal);
 
       ecalCuts=1;
       calbCuts=1;
@@ -70,6 +71,8 @@ class Geom_t : public AgStructure
   AddDetector(pxst);
   AddDetector(psup);
   AddDetector(dtub);
+
+  AddDetector(hcal);
 
   Int_t ecalCuts;
   Int_t calbCuts;
@@ -180,6 +183,18 @@ class FsceGeom_t : public AgStructure
   FsceGeom_t(): AgStructure("FsceGeom_t","STAR Forward ??? Calorimeter Master Geometry Table")
     { select="default"; module="-none-"; config=0; }
   ~FsceGeom_t(){ };
+
+  TString select;
+  TString module;
+  Int_t   config;
+};
+
+class HcalGeom_t : public AgStructure
+{ public:
+  ClassDef(HcalGeom_t,1);
+  HcalGeom_t(): AgStructure("HcalGeom_t","STAR Forward ??? Calorimeter Master Geometry Table")
+    { select="default"; module="-none-"; config=0; }
+  ~HcalGeom_t(){ };
 
   TString select;
   TString module;
@@ -590,7 +605,7 @@ class Geometry : public AgModule
   Bool_t VpddInit();  Bool_t MagpInit();  Bool_t UpstInit();
   Bool_t ZcalInit();  Bool_t FtroInit();  Bool_t RichInit();
   Bool_t FgtdInit();  Bool_t IdsmInit();  Bool_t FsceInit();
-  Bool_t EiddInit();  Bool_t TpcxInit();
+  Bool_t EiddInit();  Bool_t TpcxInit();  Bool_t HcalInit();
 
   Bool_t IstdInit();
   Bool_t PxldInit(){ /* placeholder */ return false; }
@@ -638,6 +653,7 @@ class Geometry : public AgModule
   // eSTAR Upgrades
   Bool_t ConstructFsce( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructEidd( const Char_t *flag, Bool_t go=true );
+  Bool_t ConstructHcal( const Char_t *flag, Bool_t go=true );
 
   // TPC Upgrade
   Bool_t ConstructTpcx( const Char_t *flag, Bool_t go=true );

@@ -46,6 +46,7 @@
 /* ClassImp(IdsmGeom_t); */ IdsmGeom_t idsmGeom;
 /* ClassImp(IstdGeom_t); */ IstdGeom_t istdGeom;
 /* ClassImp(FsceGeom_t); */ FsceGeom_t fsceGeom;
+/* ClassImp(HcalGeom_t); */ HcalGeom_t hcalGeom;
 /* ClassImp(EiddGeom_t); */ EiddGeom_t eiddGeom;
 /* ClassImp(TpcxGeom_t); */ TpcxGeom_t tpcxGeom;
 
@@ -64,7 +65,7 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
   CalbInit(); CaveInit(); EcalInit(); FpdmInit(); FtpcInit(); MutdInit(); PipeInit();
   PixlInit(); SconInit(); SisdInit(); SvttInit(); BtofInit(); TpceInit(); VpddInit();
   UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IdsmInit();
-  FsceInit(); EiddInit(); TpcxInit(); IstdInit(); PxstInit(); PsupInit();
+  FsceInit(); EiddInit(); TpcxInit(); IstdInit(); PxstInit(); PsupInit(); HcalInit();
 
   const Char_t *path = ".:StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
   const Char_t *file = gSystem->Which( path, "StarGeometryDb.C", kReadPermission );
@@ -106,6 +107,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   Initialize(idsm);  Initialize(ftpc);  Initialize(ftro);  Initialize(fgtd); Info("Geometry",out); out="";
   Initialize(calb);  Initialize(ecal);  Initialize(fpdm);  Initialize(upst); Info("Geometry",out); out="";
   Initialize(fsce);  Initialize(eidd);  Initialize(istd);  Initialize(pxst); Info("Geometry",out); out="";
+  Initialize(hcal);                                                          Info("Geometry",out); out="";
   LOG_INFO << endm;
 #undef Initialize
 
@@ -166,6 +168,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   // eSTAR upgrades
   geom.success_eidd = ConstructEidd( geom.eiddFlag, geom.eiddStat );
   geom.success_fsce = ConstructFsce( geom.fsceFlag, geom.fsceStat );
+  geom.success_hcal = ConstructHcal( geom.hcalFlag, geom.hcalStat );
 
   // Place the upstream areas
   geom.success_upst = ConstructUpst( geom.upstFlag, geom.upstStat );
@@ -624,6 +627,23 @@ Bool_t Geometry::ConstructFsce( const Char_t *flag, Bool_t go )
     }
   return true;
 }
+
+Bool_t Geometry::ConstructHcal( const Char_t *flag, Bool_t go )
+{ if (!go) return false;
+  //
+  if (! hcalGeom.Use("select",flag) )
+    {
+      Error(GetName(), Form("Cannot locate configuration %s",flag));
+      return false;
+    }
+  if (!CreateModule( hcalGeom.module ) )
+    {
+      Warning(GetName(),"Could not create module "+hcalGeom.module );
+      return false;
+    }
+  return true;
+}
+
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructFtro( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -1172,9 +1192,12 @@ Bool_t Geometry::FpdmInit()
   fpdmGeom.select="FPDM01"; fpdmGeom.config=1; fpdmGeom.module="FpdmGeo1"; fpdmGeom.fill();
   fpdmGeom.select="FPDM02"; fpdmGeom.config=2; fpdmGeom.module="FpdmGeo2"; fpdmGeom.fill();
   fpdmGeom.select="FPDM03"; fpdmGeom.config=3; fpdmGeom.module="FpdmGeo3"; fpdmGeom.fill();
+  fpdmGeom.select="FPDM04"; fpdmGeom.config=4; fpdmGeom.module="FpdmGeo4"; fpdmGeom.fill();
 
   fpdmGeom.position = 1; // open
   fpdmGeom.select="FPDM13"; fpdmGeom.config=3; fpdmGeom.module="FpdmGeo3"; fpdmGeom.fill();  
+
+
 
   return true;
 }
@@ -1186,6 +1209,17 @@ Bool_t Geometry::FsceInit()
   fsceGeom.SetTitle("Forward Something Calorimeter");
   fsceGeom.select="FSCEof"; fsceGeom.config=0; fsceGeom.module="NONE";    fsceGeom.fill();
   fsceGeom.select="FSCEv0"; fsceGeom.config=1; fsceGeom.module="FsceGeo"; fsceGeom.fill();
+  return true;
+}
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+Bool_t Geometry::HcalInit()
+{
+  hcalGeom.SetTitle("HCAL Prototype Calorimeter");
+  hcalGeom.select="HCALof"; hcalGeom.config=0; hcalGeom.module="NONE";     hcalGeom.fill();
+  hcalGeom.select="HCALv0"; hcalGeom.config=0; hcalGeom.module="HcalGeo";  hcalGeom.fill();
+  hcalGeom.select="HCALv1"; hcalGeom.config=1; hcalGeom.module="HcalGeo1"; hcalGeom.fill();
   return true;
 }
 // ----------------------------------------------------------------------------
