@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.277 2014/04/02 21:03:16 jwebb Exp $
+* $Id: geometry.g,v 1.278 2014/05/14 20:02:49 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.278  2014/05/14 20:02:49  jwebb
+* Support for FMS preshower in dev15a.  Support for HCAL test in y2014b.  Support for HCAL proposal in dev15b.
+*
 * Revision 1.277  2014/04/02 21:03:16  jwebb
 * y2014x geometry is moved to y2014a production.
 *
@@ -1253,6 +1256,11 @@ replace [exe FPDM00;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 0
 replace [exe FPDM01;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 1;]
 replace [exe FPDM02;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 2;]
 replace [exe FPDM03;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 3;]
+replace [exe FPDM04;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 4;]
+
+replace [exe HCALof;] with [; "HCAL off"; HCAL=off; HcalConfig=0; ]
+replace [exe HCALv0;] with [; "HCAL on "; HCAL=on;  HcalConfig=0; ]
+replace [exe HCALv1;] with [; "HCAL on "; HCAL=on;  HcalConfig=1; ]
 
 *                                                                                          Forward TPC 
 
@@ -2285,6 +2293,21 @@ REPLACE [exe y2014a;] with ["Y2014 first cut geometry";
     exe PSUP01;      "1st version of pixl supports";
 ]
 
+REPLACE [exe y2014b;] with ["Y2014 production plus hcal prototype";
+    exe y2014a;      "y2014a baseline";
+    exe hcalv0;      "Prototype hcal";
+]
+
+REPLACE [exe dev15a;] with ["Y2014 first cut geometry";
+    exe y2014a;      "Baseline is y2014a";
+    exe FPDM04;      "FMS plus preshower";
+]
+
+REPLACE [exe dev15b;] with ["Y2014 first cut geometry";
+    exe y2014a;      "Baseline is y2014a";
+    exe HCALv1;      "Naked HCAL";
+]
+
 
 
 
@@ -2517,7 +2540,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
               SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
               DUMM,SCON,IDSM,FSCE,EIDD,ISTD,
-              PXST,PSUP
+              PXST,PSUP,HCAL
 
 * Qualifiers:  TPC        TOF         etc
    Logical    emsEdit,svtWater,
@@ -2553,7 +2576,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
               FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig,
-              IstdConfig, PxstConfig, MagpConfig
+              IstdConfig, PxstConfig, MagpConfig, HcalConfig
 
    Integer    FpdmPosition / 0 /
 
@@ -2653,6 +2676,7 @@ replace[;Case#{#;] with [
    FgtdConfig  = 306 ! version
    IdsmConfig  = 1 ! version
    FpdmConfig  = 0 ! 0 means the original source code
+   HcalConfig  = 0 ! 0 means HcalGeo, 1 HcalGeo1, etc...
    FstdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
    FtpcConfig  = 0 ! 0  version, 1=gas correction
@@ -2697,7 +2721,7 @@ replace[;Case#{#;] with [
     FTRO,FGTD,SHLD,QUAD,
     MUTD,IGTD,HPDT,ITSP,
     DUMM,SCON,IDSM,FSCE,
-    EIDD,ISTD,PXST} = off;
+    EIDD,ISTD,PXST,HCAL} = off;
 
    {emsEdit,RICH}=off        " TimeOfFlight, EM calorimeter Sector            "
    nSvtLayer=7; nSvtVafer=0;  svtWaferDim=0; " SVT+SSD, wafer number and width as in code     "
@@ -3213,8 +3237,17 @@ If LL>0
   Case y2014    { y2014 : y2014 first cut;                     
                   Geom = 'y2014     '; exe y2014; }
 
-  Case y2014a   { y2014a : y2014 first cut;                     
+  Case y2014a   { y2014a : y2014 production level;              
                   Geom = 'y2014a    '; exe y2014a; }
+
+  Case y2014b   { y2014b : y2014a plus hcal prototype;          
+                  Geom = 'y2014b    '; exe y2014b; }
+
+  Case dev15a   { dev15a : y2014 a plus FMS preshower;          
+                  Geom = 'dev15a    '; exe dev15a; }
+
+  Case dev15b   { dev15a : y2014 a plus a bare naked hadron calo;
+                  Geom = 'dev15b    '; exe dev15b; }
 
   Case devE  { devE : eSTAR development geometry;
                  Geom = 'devE    ';
@@ -4870,8 +4903,16 @@ c          write(*,*) '************** Creating the 2007-     version of the Barr
      if (FpdmConfig==1) {CONSTRUCT fpdmgeo1;}
      if (FpdmConfig==2) {CONSTRUCT fpdmgeo2;}    
      if (FpdmConfig==3) {CONSTRUCT fpdmgeo3;}
+     if (FpdmConfig==4) {CONSTRUCT fpdmgeo4;}
 
    }
+
+   IF (HCAL)   {
+      IF HcalConfig==0 { CONSTRUCT HcalGeo; }
+      IF HcalConfig==1 { CONSTRUCT HcalGeo1; }
+   }
+
+
    if (ZCAL)   { CONSTRUCT zcalgeo;}
    if (MAGP)   {
         call AgDetp NEW ('MAGP')
