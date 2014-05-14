@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.72 2013/07/10 20:34:20 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.73 2014/05/14 19:54:18 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.73  2014/05/14 19:54:18  jwebb
+* Support for HCAL prototype readout.
+*
 * Revision 1.72  2013/07/10 20:34:20  jwebb
 * Detects tpadconfig from TPCG structure instead of relying on versioning of
 * the TPC... of course, the best way would be to just use teh appropriate
@@ -173,7 +176,7 @@
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          ftpv,padrow,ftpc_sector,innour,lnumber,wafer,lsub,phi_30d
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder,nwafer
-      Integer          module,layer
+      Integer          module,layer,nch
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
       Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/,imtd/0/
@@ -818,19 +821,22 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *23*                                 Pibero Djawotho
       else if (Csys=='fpd') then
 
-        if (ifpdmgeo==3 ) {                                                    !! FMS Geometry
-           n1 = numbv(1); n2 = numbv(2); sl = -999
-	   if(cd=='FLGR') sl=1
-           if(cd=='FLXF') sl=2; assert(sl.gt.0) ! Wrong sensitive detector in FPD/FMS
-           ew=(n1-1)/2+1
-           nstb = -999
-	   if(n1.eq.1) nstb=1; if(n1.eq.2) nstb=2
-	   if(n1.eq.3 .and. sl.eq.2) nstb=1
-	   if(n1.eq.4 .and. sl.eq.2) nstb=2
-	   if(n1.eq.3 .and. sl.eq.1) nstb=3
-	   if(n1.eq.4 .and. sl.eq.1) nstb=4 ; assert(nstb.gt.0) ! Wrong nstb in FPD/FMS
-           ch=n2
-           if(ew.eq.1) then
+        if (ifpdmgeo>=3 ) {                                                    !! FMS Geometry
+         n1 = numbv(1); n2 = numbv(2); sl = -999
+         if(cd=='FLGR') sl=1
+         if(cd=='FLXF') sl=2; 
+         if(cd=='FPSC') sl=3; 
+         assert(sl.gt.0)        ! Wrong sensitive detector in FPD/FMS
+         if(sl.le.2) then !fms or fpd
+          ew=(n1-1)/2+1
+          nstb = -999
+          if(n1.eq.1) nstb=1; if(n1.eq.2) nstb=2
+          if(n1.eq.3 .and. sl.eq.2) nstb=1
+          if(n1.eq.4 .and. sl.eq.2) nstb=2
+          if(n1.eq.3 .and. sl.eq.1) nstb=3
+          if(n1.eq.4 .and. sl.eq.1) nstb=4 ; assert(nstb.gt.0) ! Wrong nstb in FPD/FMS
+          ch=n2
+          if(ew.eq.1) then
            if(ch.gt.49 .and. ch.le.56) then
               ch=ch-49
               nstb=nstb+4
@@ -840,9 +846,9 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            else if(nstb.eq.3 .or. nstb.eq.4) then
               ch=ch + 4 - 2*mod(ch-1,5)
            endif
-           else if(ew.eq.2) then
-	    if(nstb.le.2) then  
-	    if(n2.ge.11  .and. n2.le.21 )  ch=n2 +  7
+          else if(ew.eq.2) then
+           if(nstb.le.2) then  
+            if(n2.ge.11  .and. n2.le.21 )  ch=n2 +  7
 	    if(n2.ge.22  .and. n2.le.33 )  ch=n2 + 13
 	    if(n2.ge.34  .and. n2.le.46 )  ch=n2 + 18
 	    if(n2.ge.47  .and. n2.le.60 )  ch=n2 + 22
@@ -858,13 +864,29 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	    if(n2.ge.374 .and. n2.le.384)  ch=n2 +171
 	    if(n2.ge.385 .and. n2.le.394)  ch=n2 +177   
             !write(*,*) 'matrix check - Large cells FMS: ',nstb, ch,n2
-	    else
-	    if(n2.ge. 85 .and. n2.le.154)  ch=n2 +  5 + 5*((n2-85)/7)
+           else
+            if(n2.ge. 85 .and. n2.le.154)  ch=n2 +  5 + 5*((n2-85)/7)
 	    if(n2.ge.155 .and. n2.le.238)  ch=n2 + 50 
             !write(*,*) 'matrix check - Small cells FMS: ',nstb, ch,n2
-            endif
-            endif
-            volume_id=ew*10000+nstb*1000+ch       
+           endif
+          endif
+          volume_id=ew*10000+nstb*1000+ch       
+         else ! FMS-Preshower
+          ew=2          
+          layer=n1
+          if(layer.eq.4) layer=3
+          nch=41
+          if(layer.eq.1) nch=40
+          if(n2.le.nch) then
+            nstb=2
+            ch=n2
+          else
+            nstb=1
+            ch=n2-nch
+          endif     
+          volume_id=100000+ew*10000+nstb*1000+layer*100+ch  
+!//          write(*,*) 'FMSPS ',n1,n2,nstb,ch,volume_id
+         endif
         }
 *24*                                 Dmitry Arkhipkin
       else if (Csys=='fsc') then
