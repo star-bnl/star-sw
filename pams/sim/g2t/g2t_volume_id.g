@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.73 2014/05/14 19:54:18 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.74 2014/05/14 20:01:23 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.74  2014/05/14 20:01:23  jwebb
+* More support for HCAL.  Also note... last checkin of g2t_volume_id was to support FMS preshower.
+*
 * Revision 1.73  2014/05/14 19:54:18  jwebb
 * Support for HCAL prototype readout.
 *
@@ -212,7 +215,10 @@
 
 
 
-
+      Integer hcal_tower  "HCAL towers 6x6"
+      Integer hcal_cell   "HCAL cells  3x3"
+      Integer hcal_fiber  "HCAL fibers 15x15 or 16x16"
+ 
       Structure  SVTG  {version}
       Structure  TPCG  {version, tpadconfig }
       Structure  VPDG  {version}
@@ -228,6 +234,7 @@
       Structure  FPDG { Version }         ! FPD geometry
       Structure  FSCG { Version }         ! FSC geometry
       Structure  MTDG { Version, Config } ! MTD geometry
+
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -915,6 +922,20 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           <W> numbv(1), numbv(2), sector, layer, section, volume_id; 
     ('numbv =',I4,2X,I4,' sector=',I4,' layer=',I4,' section=',I4,' vid=', I7);
 
+
+*******************************************************************************************
+
+      elseif (Csys=='hca') then
+     
+          hcal_tower = numbv(1)
+          hcal_cell  = numbv(2)
+
+ 	  if (cd=='HCEL') hcal_cell = hcal_cell +500
+ 	  if (cd=='HCES') hcal_cell = hcal_cell +0
+
+          volume_id  =    hcal_cell  + 1000*  hcal_tower
+
+ 
 
 *******************************************************************************************
       
