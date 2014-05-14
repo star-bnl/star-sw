@@ -22,12 +22,16 @@ void StarGeometryDb()
 
   geom.fsceFlag = "FSCEof";  geom.fsceStat = 0; // FWD calo off by default
   geom.eiddFlag = "EIDDof";  geom.eiddStat = 0; // EIDD off by default
+  geom.hcalFlag = "HCALof";  geom.hcalStat = 0; // Default HCAL off
+
   geom.tpcxFlag = "TPCXof";  geom.tpcxStat = 0; // TPC eXtreme off by default
   geom.istdFlag = "ISTDof";  geom.istdStat = 0; // ISTD off by default
 
   geom.pixlFlag = "PIXLof";  geom.pixlStat = 0; // Default pixel detector is off
   geom.pxstFlag = "PXSTof";  geom.pxstStat = 0; // Default piston support is off
   geom.psupFlag = "PSUPof";  geom.psupStat = 0; // Default supports off
+
+  
 
   //
   // Setup STAR Geometries y2000 to present
@@ -52,12 +56,17 @@ void StarGeometryDb()
   // Setup upgrade geometries
   upgrade();
 
-  test();
+
 
   //
   // Upgrade studies tagged with a year (2000+)
   //
   //  dev14(); geom.Last(); setTitle("Year 2014 Development Geometry"); geom.select="dev14pro"; geom.fill();
+
+  dev15(); 
+
+  // resets things, so be careful...
+  test();
 
   //
   // Geometries for studying future versions of the detector
@@ -1494,7 +1503,14 @@ void y2014()
     geom.idsmFlag = "IDSM14";  geom.idsmStat = 1;
     // ================================================
 
+    geom.fill();
+  }
 
+  
+  geom.Use("select","y2014a");  
+  geom.select="y2014b"; 
+  {
+    geom.hcalFlag = "HCALv0"; geom.hcalStat = 1; // HCAL prototype
     geom.fill();
   }
 
@@ -1502,6 +1518,67 @@ void y2014()
 
 
 // -----------------------------------------------------------------------------------------------------------------
+
+void dev15()
+{
+
+  // DEV 15 baseline is y2014a
+  geom.select = "dev15"; {
+
+    geom.tpcRefSys = true; // set reference system for TPC
+    // ================================================
+    geom.caveFlag = "CAVE05";  geom.caveStat = 1;
+    // ================================================
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
+    geom.fpdmFlag = "FPDMof";  geom.fpdmStat = 0;
+    geom.fgtdFlag = "FGTDof";  geom.fgtdStat = 0;
+    // ================================================
+    geom.tpceFlag = "TPCE31";  geom.tpceStat=1;
+    geom.btofFlag = "BTOFv8";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD14";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPEv3";  geom.pipeStat = 1;
+    geom.sisdFlag = "SISD85";  geom.sisdStat = 1;
+    // ================================================
+    geom.pixlFlag = "PIXL06";  geom.pixlStat = 1;
+    geom.istdFlag = "ISTD02";  geom.istdStat = 1;
+    // ================================================
+    geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.psupFlag = "PSUP01";  geom.psupStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.idsmFlag = "IDSM14";  geom.idsmStat = 1;
+    // ================================================
+
+    geom.fill();
+  }
+
+  // Define dev15a: baseline plus FMS++ (fms w/ preshower)
+  geom.Use("select","dev15");
+  geom.select="dev15a"; {    
+    geom.fpdmFlag = "FPDM04";   geom.fpdmStat = 1;  
+    geom.fill();
+  };
+
+  // Define dev15b: baseline plus HCAL
+  geom.Use("select","dev15");
+  geom.select="dev15b"; {
+    geom.hcalFlag="HCALv1"; geom.hcalStat = 1;
+    geom.fill();
+  };
+
+
+}
+
+
+
 void upgrade()
 {
   // We won't actually support these with AgML, but we will define them so that cons will be able to export
