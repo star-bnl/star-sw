@@ -843,10 +843,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
 	$extraCXXFLAGS .= " -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function";
 	$extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1";
+	if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
 #	$extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -msse3 -mssse3 -msse4.1 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1 -ltr";
 	#    $extraCXXFLAGS .= " -DUSE_TBB "; # uncomment if you do want to use TBB
 	#	$extraCXXFLAGS .= " -DDRAW3"; # uncomment for use TPCCATracker event display
 	#	$extraCXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
+	if ($STAR_SYS eq 'sl64_gcc447' or $STAR_SYS eq 'sl64_x8664_gcc447') {$extraCXXFLAGS .= " --param large-function-growth=500";}
 	$extraCXXFLAGS .= " -DNODEBUG";
 	$CXXFLAGS .= $extraCXXFLAGS;
 	$CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
