@@ -11,9 +11,10 @@
 *
       i=0
       g2t_emc_hit_h.nok = 0
-      do Isys=1,2
+      do Isys=1,3
          if (Isys.eq.1) call G2R_GET_SYS ('FPDM','FLXF',Iprin,Idigi)
          if (Isys.eq.2) call G2R_GET_SYS ('FPDM','FLGR',Iprin,Idigi)
+         if (Isys.eq.3) call G2R_GET_SYS ('FPDM','FPSC',Iprin,Idigi)
          if (Iprin.lt.0) goto 777
          Local  = Idigi.ge.2
 *
