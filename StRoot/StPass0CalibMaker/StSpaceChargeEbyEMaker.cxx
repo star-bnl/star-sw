@@ -168,15 +168,11 @@ Int_t StSpaceChargeEbyEMaker::Init() {
     case (13): DoNtuple(); DontReset(); DoQAmode(); break;
     case (50): DoTrackInfo(); break; // filter out pile-up tracks
     case (51): DoTrackInfo(2); break; // include pile-up tracks
+    case (52): DoTrackInfo(3); break; // include pile-up tracks of any length
     default  : {}
   }
 
   if (Calibmode) doReset = kFALSE;
-  if (TrackInfomode>1) {
-    // Show pile-up tracks too
-    vtxEmcMatch=0; vtxTofMatch=0; vtxMinTrks=0;
-    reqEmcMatch=kFALSE; reqTofMatch=kFALSE; reqEmcOrTofMatch=kFALSE;
-  }
 
   evt=0;
   oldevt=1;
@@ -375,7 +371,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           if (QAmode) cutshist->Fill(18);
           // Multiple silicon hits destroy sDCA <-> SpaceCharge correlation,
           // and single hit in SVT is unreliable. Only good config is NO SVT!
-          if (map.hasHitInDetector(kSvtId)) continue;
+          if (map.hasHitInDetector(kSvtId) && TrackInfomode < 1) continue;
           if (QAmode) cutshist->Fill(19);
           if (map.numberOfHits(kTpcId) < minTpcHits) continue;
           if (QAmode) cutshist->Fill(20);
@@ -1101,18 +1097,24 @@ void StSpaceChargeEbyEMaker::SetTableName() {
 
   // Set default parameters based on data time
   //   for non-calib modes
-  if (date < 20071000) {
+  if (TrackInfomode) {
+    if (TrackInfomode<2) return; // use standard defaults
+    // ...else show pile-up tracks too
+    if (TrackInfomode>2) setMinTpcHits(0);
     setVtxEmcMatch(0);
-    setReqEmcMatch(kFALSE);
     setVtxTofMatch(0);
-    setReqTofMatch(kFALSE);
+    setVtxMinTrks(0);
+    setReqEmcOrTofMatch(kFALSE);
+  } else if (date < 20071000) {
+    setVtxEmcMatch(0);
+    setVtxTofMatch(0);
     setVtxMinTrks(10);
+    setReqEmcOrTofMatch(kFALSE);
   } else if (date < 20090000) {
     setVtxEmcMatch(1);
-    setReqEmcMatch(kFALSE);
     setVtxTofMatch(0);
-    setReqTofMatch(kFALSE);
     setVtxMinTrks(5);
+    setReqEmcOrTofMatch(kFALSE);
   }
 }
 //_____________________________________________________________________________
@@ -1364,8 +1366,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.54 2014/05/02 02:38:07 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.55 2014/05/15 17:14:03 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.55  2014/05/15 17:14:03  genevb
+// Minor tweaks for TrackInfo mode
+//
 // Revision 1.54  2014/05/02 02:38:07  genevb
 // TrackInfo mode with pile-up tracks too
 //
