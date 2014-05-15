@@ -150,11 +150,11 @@
 
     <Fill name="shld" comment="shild around calorimeter">
       <var name="version"  value="1.0" coment="Shild dimintions"/>
-      <var  name="xd"      value="-50.0" coment="Dimentions of base ,Down"/>
-      <var  name="yd"      value="-32.5" coment="Dimentions of base ,Down"/>
-      <var  name="zd"      value="0.0" coment="Dimentions of base ,Down"/> 
+      <var  name="xd"      value="0.0" coment="Placement of base "/>
+      <var  name="yd"      value="-32.5" coment="Placement of base "/>
+      <var  name="zd"      value="0.0"   coment="Placement of base "/> 
       <var name="dxd"      value="35.0" coment="Dimentions of base ,Down"/>
-      <var name="dyd"      value="2.5" coment="Dimentions of base ,Down"/>
+      <var name="dyd"      value="5.0/2" coment="Dimentions of base ,Down"/>
       <var name="dzd"      value="127.0/2" coment="Dimentions of base ,Down"/>
    </Fill>
 
