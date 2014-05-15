@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.56 2013/04/12 19:03:16 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.57 2014/05/15 19:03:34 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -2115,83 +2115,83 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       return NULL;
     }
 
-  int daqReader::getStatusBasedEventDelay()
-  {
+int daqReader::getStatusBasedEventDelay()
+{
 
     int delay = 0;
 
     switch(status) {
     case EVP_STAT_EVT :	// something wrong with last event...
-      delay = 100000;
-      LOG(DBG, "Delaying for %d usec because of error on last event",delay);
-      break ;
+	delay = 100000;
+	LOG(DBG, "Delaying for %d usec because of error on last event",delay);
+	break ;
     case EVP_STAT_EOR :	// EndOfRun was the last status and yet we are asked again...
-      delay = 100000;
-      LOG(DBG, "Delaying for %d usec because last event was end of run",delay);
-      break ;
+	delay = 100000;
+	LOG(DBG, "Delaying for %d usec because last event was end of run",delay);
+	break ;
     case EVP_STAT_CRIT :
-      delay = 1000000;
-      LOG(ERR, "Delaying for %d usec because last event had critical status",delay);
+	delay = 1000000;
+	LOG(ERR, "Delaying for %d usec because last event had critical status",delay);
 
-      crit_cou++;
-      if(crit_cou > 10) {
-	LOG(ERR,"That's IT! Bye...",0,0,0,0,0);
-	sleep(1) ;	// linger...
-	exit(-1) ;
-      }
+	crit_cou++;
+	if(crit_cou > 10) {
+	    LOG(ERR,"That's IT! Bye...",0,0,0,0,0);
+	    sleep(1) ;	// linger...
+	    exit(-1) ;
+	}
     
     default :	// all OK...
-      break ;
+	break ;
     }
   
     if(status != EVP_STAT_CRIT) crit_cou = 0;
   
     return delay;
-  }
+}
 
 
-  int daqReader::writeCurrentEventToDisk(char *ofilename)
-  {
+int daqReader::writeCurrentEventToDisk(char *ofilename)
+{
     int fdo;
     int ret;
 
     if(memmap->mem == NULL) {
-      LOG(ERR, "Can't write current event.  No event");
-      return -1;
+	LOG(ERR, "Can't write current event.  No event");
+	return -1;
     }
 
   
     fdo = open(ofilename, O_APPEND | O_WRONLY | O_CREAT, 0666);
     if(fdo < 0) {  
-      LOG(ERR, "Error  opening output file %s (%s)", ofilename, strerror(errno));
-      return -1;
+	LOG(ERR, "Error  opening output file %s (%s)", ofilename, strerror(errno));
+	return -1;
     }
 
     ret = write(fdo, memmap->mem, event_size);
     if(ret != event_size) {
-      LOG(ERR, "Error writing event data (%s)",strerror(errno));
-      close(fdo);
-      return -1;
+	LOG(ERR, "Error writing event data (%s)",strerror(errno));
+	close(fdo);
+	return -1;
     }
 
     close(fdo);
     return 0;
-  }
+}
 
-  MemMap::MemMap()
-    {
-      mem=NULL; 
-      actual_mem_start=NULL; 
-      actual_size=0; 
-      fd = -1;
-      real_mem = 0;
-      page_size = sysconf(_SC_PAGESIZE);
-    }
+MemMap::MemMap()
+{
+    mem=NULL; 
+    actual_mem_start=NULL; 
+    actual_size=0; 
+    fd = -1;
+    real_mem = 0;
+    page_size = sysconf(_SC_PAGESIZE);
+}
 
-  MemMap::~MemMap()
-    {
-      unmap();    
-    }
+MemMap::~MemMap()
+{
+    unmap();    
+}
 
 char *MemMap::map_real_mem(char *buffer, int _size)
 {
