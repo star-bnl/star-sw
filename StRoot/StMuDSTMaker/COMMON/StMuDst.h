@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.50 2013/12/04 19:56:32 jdb Exp $
+ * $Id: StMuDst.h,v 1.51 2014/05/16 15:06:45 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -39,6 +39,8 @@ class StTrack;
 class StTrackGeometry;
 class StEmcCollection;
 class StFmsCollection;
+
+class StMtdCollection;
 
 class StMuTofHit;
 class StTofData;
@@ -141,6 +143,8 @@ public:
   ///
   void fixTofTrackIndices();
   void fixMtdTrackIndices();
+
+  void setMtdArray(StMtdCollection *mtd_coll); 
 
  protected:
   /// array of TClonesArrays
@@ -442,6 +446,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.51  2014/05/16 15:06:45  jdb
+ * chaned StMuDst{.h,.cxx} to add setMtdArray function
+ *
  * Revision 1.50  2013/12/04 19:56:32  jdb
  * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
  *

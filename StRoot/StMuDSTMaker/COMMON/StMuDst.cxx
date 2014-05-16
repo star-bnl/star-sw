@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.62 2014/04/15 04:48:47 jdb Exp $
+ * $Id: StMuDst.cxx,v 1.63 2014/05/16 15:06:45 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -469,6 +469,23 @@ void StMuDst::fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TC
 
   DEBUGVALUE2(timer.elapsedTime());
 }
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDst::setMtdArray(StMtdCollection *mtd_coll) {
+  /// reset MTD hit array when running StMtdHitMaker on muDst
+  /// in afterburner mode
+
+  mtdArrays[muMTDHit]->Clear();
+  StMuMtdCollection mMTD(*mtd_coll);
+  for(size_t i=0; i < (size_t)mMTD.hitsPresent(); i++) {
+    StMuMtdHit* mtdHit = (StMuMtdHit*)mMTD.MtdHit(i);
+    new((*mtdArrays[muMTDHit])[i]) StMuMtdHit(*mtdHit);
+    }
+}
+
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -823,6 +840,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.63  2014/05/16 15:06:45  jdb
+ * chaned StMuDst{.h,.cxx} to add setMtdArray function
+ *
  * Revision 1.62  2014/04/15 04:48:47  jdb
  * Changed mtdArrays[muBTofHit] to mtdArrays[muMTDHit] in StMuDst.cxx in function fixMtdTrackIndices
  *
