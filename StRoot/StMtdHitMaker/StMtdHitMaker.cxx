@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.11 2014/03/04 03:02:38 geurts Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.12 2014/05/27 20:03:01 jeromel Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -953,3 +953,12 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn) {
 
 	return ilocalChan;
 }
+
+
+//
+// $Id: StMtdHitMaker.cxx,v 1.12 2014/05/27 20:03:01 jeromel Exp $
+// $Log: StMtdHitMaker.cxx,v $
+// Revision 1.12  2014/05/27 20:03:01  jeromel
+// Adding cvs tags
+//
+//
