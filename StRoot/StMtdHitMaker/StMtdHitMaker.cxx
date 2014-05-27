@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.12 2014/05/27 20:03:01 jeromel Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.13 2014/05/27 20:04:27 jeromel Exp $
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -48,12 +48,12 @@ ClassImp(StMtdHitMaker);
 
 
 //_____________________________________________________________
-StMtdHitMaker::~StMtdHitMaker() 
+StMtdHitMaker::~StMtdHitMaker()
 { }
 
 
 //_____________________________________________________________
-void StMtdHitMaker::Clear(Option_t* option)  { 
+void StMtdHitMaker::Clear(Option_t* option)  {
 	MtdLeadingHits.clear();
 	MtdTrailingHits.clear();
 	memset(mTriggerTimeStamp,0,2);
@@ -121,15 +121,15 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber) {
 		mTrayId[27][4] = 203;
 
 		/// TrayID/TDIGId mapping
-		/// one[0] TDIG per MTD tray (data distilled from UT Austin database, cf. run12/INL/tdigs_120106.txt) 
+		/// one[0] TDIG per MTD tray (data distilled from UT Austin database, cf. run12/INL/tdigs_120106.txt)
 		Int_t mTdigIdRun12[13] = { 494, 1150, 1151, 1152, 1153, 1141, 1143, 1149, 1155, 1134, 1136, 1140, 1145};
 		for (int i=0;i<13;i++) mTdigId[i]=mTdigIdRun12[i];
 	}
-	else if(mYear==11){ 
+	else if(mYear==11){
 		Int_t mTdigIdRun11[5] = { 1049, 1048, 1138, 1161, 1163};
 		for (int i=0;i<5;i++) mTdigId[i]=mTdigIdRun11[i];
 	}
-	else if(mYear==13){ 
+	else if(mYear==13){
 		for(int i=0;i<30;i++){
 			if(i<8||i==9||i==21||i>23){
 				mTray2TdigMap[i][0] = 0; /// backleg (5 trays)
@@ -160,18 +160,18 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber) {
 		bl=9;  mTrayId[bl][0]=241; mTrayId[bl][1]=258; mTrayId[bl][2]=264; mTrayId[bl][3]=259; mTrayId[bl][4]=279;
 
 		/// TrayID/TDIGId mapping
-		/// one[0] TDIG per MTD tray (data distilled from UT Austin database, cf. run12/INL/tdigs_120106.txt) 
+		/// one[0] TDIG per MTD tray (data distilled from UT Austin database, cf. run12/INL/tdigs_120106.txt)
 		Int_t mTdigIdRun13[90] = {  494, 1150, 1151, 1152, 1153, 1141, 1143, 1149, 1155, 1134,
 					    1157, 1140, 1145, 1174, 1148, 1142, 1175, 1172, 1165, 492,
-					    0,   1164, 1144, 1136, 1138, 1146, 1135, 588, 1025, 1130, 
-					    1169, 1170, 1177, 589, 304, 1126, 591, 592, 0, 1237, 
+					    0,   1164, 1144, 1136, 1138, 1146, 1135, 588, 1025, 1130,
+					    1169, 1170, 1177, 589, 304, 1126, 591, 592, 0, 1237,
 					    0, 945, 1187, 1173, 1219, 1246, 1125, 1167, 1223, 594,
 					    1198, 1220, 1235, 1234, 593, 1195, 1214, 1238, 1166, 1229,
-					    967, 1161, 1156, 1216, 1240, 1192, 0, 328, 1242, 1230, 
+					    967, 1161, 1156, 1216, 1240, 1192, 0, 328, 1242, 1230,
 					    1247, 1217, 1182, 1193, 0, 0, 1194, 1218, 1211, 1183,
 					    698, 1190, 1178, 1210, 0, 0, 0, 0, 0, 0};
 		for (int i=0;i<90;i++) mTdigId[i]=mTdigIdRun13[i];
-	}else if(mYear==14){ 
+	}else if(mYear==14){
 		for(int i=0;i<30;i++){
 			if(i<9||(i>=9&&i<=10)||(i>=20&&i<=21)||i>=23){
 				mTray2TdigMap[i][0] = 0; /// backleg (5 trays)
@@ -206,14 +206,14 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber) {
 		bl=9;  mTrayId[bl][0]=241; mTrayId[bl][1]=258; mTrayId[bl][2]=264; mTrayId[bl][3]=259; mTrayId[bl][4]=279;
 
 		/// TrayID/TDIGId mapping
-		/// one[0] TDIG per MTD tray (data distilled from UT Austin database, cf. run12/INL/tdigs_120106.txt) 
+		/// one[0] TDIG per MTD tray (data distilled from UT Austin database, cf. run12/INL/tdigs_120106.txt)
 		Int_t mTdigIdRun13[90] = {  494, 1150, 1151, 1152, 1153, 1141, 1143, 1149, 1155, 1134,
 					    1157, 1140, 1145, 1174, 1148, 1142, 1175, 1172, 1165, 492,
-					    0,   1164, 1144, 1136, 1138, 1146, 1135, 588, 1025, 1130, 
-					    1169, 1170, 1177, 589, 304, 1126, 591, 592, 0, 1237, 
+					    0,   1164, 1144, 1136, 1138, 1146, 1135, 588, 1025, 1130,
+					    1169, 1170, 1177, 589, 304, 1126, 591, 592, 0, 1237,
 					    0, 945, 1187, 1173, 1219, 1246, 1125, 1167, 1223, 594,
 					    1198, 1220, 1235, 1234, 593, 1195, 1214, 1238, 1166, 1229,
-					    967, 1161, 1156, 1216, 1240, 1192, 0, 328, 1242, 1230, 
+					    967, 1161, 1156, 1216, 1240, 1192, 0, 328, 1242, 1230,
 					    1247, 1217, 1182, 1193, 0, 0, 1194, 1218, 1211, 1183,
 					    698, 1190, 1178, 1210, 0, 0, 0, 0, 0, 0};
 		for (int i=0;i<90;i++) mTdigId[i]=mTdigIdRun13[i];
@@ -285,7 +285,7 @@ StMtdCollection *StMtdHitMaker::GetMtdCollection() {
 				StMuMtdCollection* MuMtdCollection = mMuDst->MtdCollection();
 				StMuMtdHeader* MuMtdHeader = MuMtdCollection->mtdHeader();
 				StMtdHeader *MtdHeader = new StMtdHeader();
-				for(int i=0;i<nTHUB;i++){ 
+				for(int i=0;i<nTHUB;i++){
 					mTriggerTimeStamp[i] = MuMtdHeader->triggerTime(i+1);
 					MtdHeader->setTriggerTime(MuMtdHeader->triggerTime(i+1),i+1);
 				}
@@ -336,15 +336,15 @@ Int_t StMtdHitMaker::Make() {
 		if(!mUseMuDst){
 			if ( GetNextRaw() ) {
 				/// Unpack MTD raw data from daq structure
-				int errorType=UnpackMtdRawData(); 
-				if(errorType>0) { 
+				int errorType=UnpackMtdRawData();
+				if(errorType>0) {
 					LOG_WARN<<"MTD_READER::Unpack MTD Data ERROR!"<<endm;
 				}
 
 			}
 		}
 		fillMtdRawHitCollection();
-		fillMtdHeader(); 
+		fillMtdHeader();
 		fillMtdHitCollection();
 		fillStEvent();
 	}
@@ -354,7 +354,7 @@ Int_t StMtdHitMaker::Make() {
 
 //____________________________________________________
 /*!
- * The unpack function for MTD daq data. 
+ * The unpack function for MTD daq data.
  * Please refer to the MTD fiber data format document.
  */
 //____________________________________________________
@@ -384,7 +384,7 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 			if( (dataword&0xF0000000)>>28 == 0x2) {
 				// Save the first trigger time in each fiber
 				if(mTriggerTimeStamp[ifib]==0) mTriggerTimeStamp[ifib] = dataword;
-				continue; 
+				continue;
 			}
 
 			if( (dataword&0xF0000000)>>28 == 0xD) continue;  /// header tag word
@@ -393,7 +393,7 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 
 			/// geographical data
 			if( (dataword&0xF0000000)>>28 == 0xC) {
-				halfbacklegid =  dataword&0x01;    
+				halfbacklegid =  dataword&0x01;
 				backlegid     = (dataword&0x0FE)>>1;
 				continue;
 			}
@@ -409,7 +409,7 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 
 			/// Look for edge type (4=leading, 5=trailing)
 			int edgeid =int( (dataword & 0xF0000000)>>28 );
-			if((edgeid !=4) && (edgeid!=5)) continue;   /// not leading or trailing 
+			if((edgeid !=4) && (edgeid!=5)) continue;   /// not leading or trailing
 
 			/// From here on assume TDC data, and decode accordingly
 
@@ -432,7 +432,7 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 			/// lookup corresponding tray# for TDIG-Id
 			int itray=0;
 			for (int i=1;i<=5;i++){
-				if (mTray2TdigMap[backlegid-1][i-1] == tdigid){ 
+				if (mTray2TdigMap[backlegid-1][i-1] == tdigid){
 					itray = i; break;
 				}
 			}
@@ -445,11 +445,11 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 			temphit.fiberid = (UChar_t)ifib;
 			temphit.backlegid  = (UChar_t)backlegid;
 			temphit.tdc     = timeinbin;
-			/// global channel number here, 
+			/// global channel number here,
 			if (mYear<12)
-				temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip11(tdigid,tdcid,tdcchan,backlegid)); 
+				temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip11(tdigid,tdcid,tdcchan,backlegid));
 			else
-				temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip(itray, tdigid,tdcid,tdcchan)); 
+				temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip(itray, tdigid,tdcid,tdcchan));
 			temphit.dataword      = dataword;
 
 			if(edgeid == 4) {     /// leading edge data
@@ -460,8 +460,8 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 				LOG_WARN<<"StMtdHitMaker::Unknown TDC data type ! "<<endm;
 				continue;
 			}
-			/// end of unpack all data words.        
-		}  /// end loop data words    
+			/// end of unpack all data words.
+		}  /// end loop data words
 		///
 	} /// end loop fibers
 	///
@@ -504,10 +504,10 @@ Int_t StMtdHitMaker::tdcChan2globalStrip11(int tdigBoardId,int tdcId,int tdcChan
 
 	/// This function is only useful before Run 12.
 	if (mYear>11) {
-		LOG_WARN << "calling pre-Run12 tdc mapping for Run" << mYear << ". Not good." << endm; 
+		LOG_WARN << "calling pre-Run12 tdc mapping for Run" << mYear << ". Not good." << endm;
 	}
 
-	/// 
+	///
 	Int_t globalStripId=-1;
 	if(backlegId==26){
 		if (tdcId>3) tdcId=tdcId-4; //scale to H#
@@ -539,7 +539,7 @@ void StMtdHitMaker::fillMtdRawHitCollection() {
 			unsigned char  backlegid = MtdLeadingHits[i].backlegid;
 			unsigned char  chn    = MtdLeadingHits[i].globaltdcchan;
 			unsigned int   tdc    = MtdLeadingHits[i].tdc;
-			LOG_DEBUG << " mtd raw hit LE flag:" << (short)flag << " backlegid:"<< (short)backlegid << " chn:" << (short)chn << " tdc:"<< tdc << endm; 
+			LOG_DEBUG << " mtd raw hit LE flag:" << (short)flag << " backlegid:"<< (short)backlegid << " chn:" << (short)chn << " tdc:"<< tdc << endm;
 			mMtdCollection->addRawHit(new StMtdRawHit(flag,backlegid,chn,tdc));
 		}
 
@@ -548,9 +548,9 @@ void StMtdHitMaker::fillMtdRawHitCollection() {
 			unsigned char  backlegid = MtdTrailingHits[i].backlegid;
 			unsigned char  chn    = MtdTrailingHits[i].globaltdcchan;
 			unsigned int   tdc    = MtdTrailingHits[i].tdc;
-			LOG_DEBUG << " mtd raw hit TE flag:" << (short)flag << " backlegid:"<< (short)backlegid << " chn:" << (short)chn << " tdc:"<< tdc << endm; 
+			LOG_DEBUG << " mtd raw hit TE flag:" << (short)flag << " backlegid:"<< (short)backlegid << " chn:" << (short)chn << " tdc:"<< tdc << endm;
 			mMtdCollection->addRawHit(new StMtdRawHit(flag,backlegid,chn,tdc));
-		} 
+		}
 	}else{
 
 		MtdLeadingHits.clear();
@@ -590,9 +590,9 @@ void StMtdHitMaker::fillMtdSingleHits() {
 		int ichan = (chn-1)%24;
 		if (ibackleg>mNBACKLEG || itray<=0 || itray>mNTRAY || ichan<0 || ichan>=mNCHAN || ifiber>mNFIBER ) {
 			LOG_FATAL << " StMtdHitMaker::fillMtdSingleHits() "
-				<< ": ibackleg=" << ibackleg 
-				<< ": itray=" << itray 
-				<< ": ichan=" << ichan 
+				<< ": ibackleg=" << ibackleg
+				<< ": itray=" << itray
+				<< ": ichan=" << ichan
 				<< ": ifiber=" << ifiber*1
 				<< endm;
 			continue;
@@ -615,10 +615,10 @@ void StMtdHitMaker::fillMtdSingleHits() {
 		for(size_t j=i+1;j<MtdLeadingHits.size();j++) {
 			unsigned char  jchn    = MtdLeadingHits[j].globaltdcchan;
 			int jbackleg = MtdLeadingHits[j].backlegid;
-			int jtray = (jchn-1)/24+1; 
-			int jchan = (jchn-1)%24; 
-			int jtdc  = MtdLeadingHits[j].tdc; 
-			if(jbackleg == ibackleg 
+			int jtray = (jchn-1)/24+1;
+			int jchan = (jchn-1)%24;
+			int jtdc  = MtdLeadingHits[j].tdc;
+			if(jbackleg == ibackleg
 					&& jtray == itray
 					&& jchan == ichan
 					&& jtdc){
@@ -628,10 +628,10 @@ void StMtdHitMaker::fillMtdSingleHits() {
 		for(size_t j=0;j<MtdTrailingHits.size();j++) {
 			unsigned char  jchn    = MtdTrailingHits[j].globaltdcchan;
 			int jbackleg = MtdTrailingHits[j].backlegid;
-			int jtray = (jchn-1)/24+1; 
-			int jchan = (jchn-1)%24; 
-			int jtdc  = MtdTrailingHits[j].tdc; 
-			if(jbackleg == ibackleg 
+			int jtray = (jchn-1)/24+1;
+			int jchan = (jchn-1)%24;
+			int jtdc  = MtdTrailingHits[j].tdc;
+			if(jbackleg == ibackleg
 					&& jtray == itray
 					&& jchan == ichan
 					&& jtdc){
@@ -675,7 +675,7 @@ IntVec StMtdHitMaker::GetValidChannel(int backleg, int tray) {
 	IntVec chanVec;
 	int igtray = (backleg-1)*mNTRAY+tray;
 	for(size_t i=0 ; i<mSingleHitVec[igtray-1].size() ; i++) {
-		LOG_DEBUG<<" GetValidChannel() backleg "<<mSingleHitVec[igtray-1][i].backleg 
+		LOG_DEBUG<<" GetValidChannel() backleg "<<mSingleHitVec[igtray-1][i].backleg
 			<< " tray "<<mSingleHitVec[igtray-1][i].tray <<endm;
 		if( mSingleHitVec[igtray-1][i].tray == tray
 				&& mSingleHitVec[igtray-1][i].backleg == backleg )
@@ -698,10 +698,10 @@ UIntVec StMtdHitMaker::GetLeadingTdc(int backleg, int tray, int channel, bool tr
 			float timeDiff = mSingleHitVec[igtray-1][i].leadingEdgeTime[j]*25./1024 - trgTime;
 			while(timeDiff<0) timeDiff += 51200;
 			if(igtray<=mNALLTRAY){  //trays, keep all hits
-				if(triggerevent){ 
+				if(triggerevent){
 					LOG_DEBUG << " backleg "<<backleg<<" tray "<<tray<<" index " << igtray-1 << " trigger window "<< mTriggerTimeWindow[igtray-1][0] <<" "<<mTriggerTimeWindow[igtray-1][1]<<endm;
 					if(timeDiff>=mTriggerTimeWindow[igtray-1][0]&&timeDiff<=mTriggerTimeWindow[igtray-1][1])
-						leTdc.push_back(mSingleHitVec[igtray-1][i].leadingEdgeTime[j]);   
+						leTdc.push_back(mSingleHitVec[igtray-1][i].leadingEdgeTime[j]);
 				}
 				else {
 					leTdc.push_back(mSingleHitVec[igtray-1][i].leadingEdgeTime[j]);
@@ -726,9 +726,9 @@ UIntVec StMtdHitMaker::GetTrailingTdc(int backleg, int tray, int channel, bool t
 			float timeDiff = mSingleHitVec[igtray-1][i].trailingEdgeTime[j]*25./1024 - trgTime;
 			while(timeDiff<0) timeDiff += 51200;
 			if(igtray<=mNALLTRAY){  //trays, keep all hits
-				if(triggerevent){ 
+				if(triggerevent){
 					if(timeDiff>=mTriggerTimeWindow[igtray-1][0]&&timeDiff<=mTriggerTimeWindow[igtray-1][1]+40)
-						teTdc.push_back(mSingleHitVec[igtray-1][i].trailingEdgeTime[j]);   
+						teTdc.push_back(mSingleHitVec[igtray-1][i].trailingEdgeTime[j]);
 				}
 				else {
 					teTdc.push_back(mSingleHitVec[igtray-1][i].trailingEdgeTime[j]);
@@ -826,18 +826,18 @@ void StMtdHitMaker::fillMtdHitCollection() {
 		    pair<Double_t,Double_t>  mLeadingEdgeTime;
 		    pair<Double_t,Double_t>  mTrailingEdgeTime;
 
-			if(iCell<12){ 
+			if(iCell<12){
 				mCell 		= iCell;
-				mLeadingEdgeTime.first  = iLeadingEdgeTime;//west 
-				mLeadingEdgeTime.second = jLeadingEdgeTime;//east 
-				mTrailingEdgeTime.first  = iTrailingEdgeTime;//west 
-				mTrailingEdgeTime.second = jTrailingEdgeTime;//east 
+				mLeadingEdgeTime.first  = iLeadingEdgeTime;//west
+				mLeadingEdgeTime.second = jLeadingEdgeTime;//east
+				mTrailingEdgeTime.first  = iTrailingEdgeTime;//west
+				mTrailingEdgeTime.second = jTrailingEdgeTime;//east
 			}else{
 				mCell 		= jCell;
-				mLeadingEdgeTime.first  = jLeadingEdgeTime;//west 
-				mLeadingEdgeTime.second = iLeadingEdgeTime;//east 
-				mTrailingEdgeTime.first  = jTrailingEdgeTime;//west 
-				mTrailingEdgeTime.second = iTrailingEdgeTime;//east 
+				mLeadingEdgeTime.first  = jLeadingEdgeTime;//west
+				mLeadingEdgeTime.second = iLeadingEdgeTime;//east
+				mTrailingEdgeTime.first  = jTrailingEdgeTime;//west
+				mTrailingEdgeTime.second = iTrailingEdgeTime;//east
 			}
 			StMtdHit* aHit= new StMtdHit();
 			aHit->setBackleg(mBackLeg);
@@ -847,14 +847,14 @@ void StMtdHitMaker::fillMtdHitCollection() {
 			aHit->setTrailingEdgeTime(mTrailingEdgeTime);
 			mMtdCollection->addHit(aHit);
 			nMtdHits++;
-			LOG_DEBUG << " backleg " << mBackLeg*1 
+			LOG_DEBUG << " backleg " << mBackLeg*1
 				<< " module "<< mModule*1
-				<< " cell " <<mCell*1 
+				<< " cell " <<mCell*1
 				<< " leading.first "<<mLeadingEdgeTime.first
 				<< " leading.second "<<mLeadingEdgeTime.second
 				<< " trailing.first "<<mTrailingEdgeTime.first
 				<< " trailing.second "<<mTrailingEdgeTime.second<<endm;
-			
+
 		}
 	}
 	LOG_DEBUG << " matched hits " << nMtdHits <<endm;
@@ -893,14 +893,14 @@ void StMtdHitMaker::fillStEvent() {
 		}
 
 		if(mtdCollection->hitsPresent()) {
-			StSPtrVecMtdHit& mtdVec = mtdCollection->mtdHits();  
+			StSPtrVecMtdHit& mtdVec = mtdCollection->mtdHits();
 			if(Debug()) {
 				LOG_INFO << "MtdHitCollection: " << mtdVec.size() << " entries..." << endm;
 				for(size_t i=0;i<mtdVec.size();i++) {
-					LOG_DEBUG << (*mtdVec[i]) << endm; 
+					LOG_DEBUG << (*mtdVec[i]) << endm;
 				}
-			}  
-		}    
+			}
+		}
 		else {
 			LOG_DEBUG << "No MtdHitCollection" << endm;
 		}
@@ -916,19 +916,19 @@ void StMtdHitMaker::fillStEvent() {
 
 Int_t StMtdHitMaker::getTdigBoardId(Int_t backlegid, Int_t tray, Int_t chn) {
 
-	int   itdigid = mTray2TdigMap[backlegid-1][tray-1]; 
+	int   itdigid = mTray2TdigMap[backlegid-1][tray-1];
 
 	Int_t tdigboardid = -1;
 	if(mYear==11){
 		if(backlegid==1){
 			if(itdigid==0) tdigboardid = mTdigId[0];
 			if(itdigid==4) tdigboardid = mTdigId[1];
-		}                           
-		else if(backlegid==26) {                  
+		}
+		else if(backlegid==26) {
 			if(itdigid==0) tdigboardid = mTdigId[2];
 			if(itdigid==1) tdigboardid = mTdigId[3];
 			if(itdigid==4) tdigboardid = mTdigId[4];
-		}   
+		}
 
 	}
 	else if (mYear>11) {
@@ -945,7 +945,7 @@ Int_t StMtdHitMaker::getTdigBoardId(Int_t backlegid, Int_t tray, Int_t chn) {
 
 Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn) {
 	int   channel = chn;
-	int   itdigid = mTray2TdigMap[backlegid-1][tray-1]; 
+	int   itdigid = mTray2TdigMap[backlegid-1][tray-1];
 	if(itdigid>3) channel = (channel>11)?channel-12:channel+12;
 
 	int    iglobalChan = mtdStrip[channel];
@@ -956,8 +956,11 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn) {
 
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.12 2014/05/27 20:03:01 jeromel Exp $
+// $Id: StMtdHitMaker.cxx,v 1.13 2014/05/27 20:04:27 jeromel Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.13  2014/05/27 20:04:27  jeromel
+// No change - removed trailing space (as a demo for cvs comments)
+//
 // Revision 1.12  2014/05/27 20:03:01  jeromel
 // Adding cvs tags
 //
