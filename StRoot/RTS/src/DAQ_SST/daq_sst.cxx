@@ -152,6 +152,10 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 		}
 
 		u_int fiber_id = d32[0] ;
+		// fiber id: 0xfffwwwwm
+		// fff-> flags 000 OK, 001 empty, 002 overflow
+		// wwww -> word length
+		// m -> mode: 0 raw, 1 ped-subtracted
 
 		int words = fiber_id & 0x000FFFF0 ;
 		words >>= 4 ;
@@ -159,26 +163,32 @@ int daq_sst::raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_
 		LOG(NOTE,"S%d-%d: fiber %d: ID 0x%08X, words %d",
 		    s,r,fib,fiber_id,words) ;
 		
-		int known_data_format = 1 ;
+		int known_data_format = 1 ;	// assume I know what I'm doing...
+
 		if(fiber_id & 0xFFF00000) {
-			if(fiber_id == 0x001000A0) {	// empty
-				LOG(WARN,"S%d-%d: %u: fiber %d: empty [0x%08X]",s,r,e,fib,fiber_id) ;					
-			}
-			else {
-				LOG(ERR,"S%d-%d: %u: fiber %d: odd data header 0x%08X",s,r,e,fib,fiber_id) ;
+			switch(fiber_id) {
+			case 0x001000A0 :	// empty fiber in raw mode
+			case 0x001000A1 :	// empty fiber in ZS mode
+				LOG(NOTE,"S%d-%d: %u: fiber %d: empty [0x%08X]",s,r,e,fib,fiber_id) ;					
+				break ;
+			case 0x002100A1 : //overflow in pedestal subtracted mode *shrug*
+				LOG(NOTE,"S%d-%d: %u: fiber %d: overflow [0x%08X]",s,r,e,fib,fiber_id) ;
+				break ;
+			default:
+				LOG(NOTE,"S%d-%d: %u: fiber %d: odd fiber_id [0x%08X]",s,r,e,fib,fiber_id) ;
 				known_data_format = 0 ;
-				//goto err_ret ;
+				break ;
 			}
 		}
 
-		if((fiber_id & 0xF) != 0) {	// not raw data!!! I haven't coded the ZS data yet so let's skip it...
-			if((fiber_id & 0xF)==1) {
-				LOG(WARN,"S%d-%d: %u: fiber %d: ZS data 0x%08X...",s,r,e,fib,fiber_id) ;
+		if((fiber_id & 0xF) != 0) {
+			if((fiber_id & 0xF)==1) {	// ZS data
+				LOG(NOTE,"S%d-%d: %u: fiber %d: ZS data 0x%08X...",s,r,e,fib,fiber_id) ;
 				known_data_format = 2 ;
 				//goto err_ret ;			
 			}
 			else {
-				LOG(ERR,"S%d-%d: %u: fiber %d: unknown data 0x%08X",s,r,e,fib,fiber_id) ;
+				LOG(ERR,"S%d-%d: %u: fiber %d: unknown data mode 0x%08X",s,r,e,fib,fiber_id) ;
 				goto err_ret ;			
 			}
 
