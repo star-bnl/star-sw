@@ -108,20 +108,26 @@ daq_dta *daq_fps::handle_adc()
 	int tb_cou = hdr->pre_post_cou ;
 	int qt_cou = hdr->qt_cou ;
 
+	LOG(TERR,"tb %d, qt %d, hdr ver 0x%08X",tb_cou,qt_cou,hdr->ver) ;
+
 	memcpy(&meta_hdr,hdr,sizeof(meta_hdr)) ;
 	adc->meta = (void *) &meta_hdr ;
 
 	d32 += (hdr->ver & 0xFF) ;	// skip to data...
+
+
 	
 	for(int tb=0;tb<tb_cou;tb++) {
 		int rel_xing = *d32++ ;
 
-		//LOG(TERR,"Rel xing %d",rel_xing) ;
+		LOG(TERR,"Rel xing %d",rel_xing) ;
 		
 		for(int q=0;q<qt_cou;q++) {
 			int qt = *d32++ ;
 			int chs = *d32++ ;
 	
+			LOG(TERR,"qt %d, chs %d",qt,chs) ;
+
 			if(chs==0) continue ;
 
 			fps_adc_t *a = (fps_adc_t *) adc->request(chs) ;
@@ -178,6 +184,8 @@ daq_dta *daq_fps::handle_raw()
 	sprintf(str,"%s/sec01/rb01/raw",sfs_name) ;
 	full_name = caller->get_sfs_name(str) ;
 		
+	//LOG(TERR,"got full name") ;
+
 	if(!full_name) return 0 ;
 	bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
 
@@ -188,6 +196,7 @@ daq_dta *daq_fps::handle_raw()
 		LOG(ERR,"ret is %d") ;
 	}
 
+	//LOG(TERR,"got bytes",bytes) ;
 	
 	raw->finalize(bytes,0,0,0) ;	;
 
@@ -303,6 +312,35 @@ daq_dta *daq_fps::handle_ped()
 #endif
 }
 
+/*
+	Checks the STP trigger contribution and extracts the token
+*/
+
+int daq_fps::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
+{
+	int t_cou = 0 ;
+	int err = 0 ;
+
+	fps_evt_hdr_t *h = (fps_evt_hdr_t *) addr ;
 
 
+
+	trg[t_cou].trg = 4 ;
+	trg[t_cou].daq = 2 ;
+	trg[t_cou].rhic = h->tick ;
+	trg[t_cou].rhic_delta = 0 ;
+	trg[t_cou].t = h->token;
+	t_cou++ ;
+
+	if(h->status == 0) {
+		err |= 1 ;
+	}
+
+	if(err) {
+		LOG(ERR,"%u: bad QT event 0x%08X 0x%08X 0x%08X [%d]",h->ev,h->stp_data[0],h->stp_data[1],h->stp_data[2],err) ;
+		return -1 ;
+	}
+
+	return t_cou ;
+}
 

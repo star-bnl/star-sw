@@ -3,7 +3,7 @@
 
 #include <DAQ_READER/daq_det.h>
 
-#define FPS_FORMAT_VERSION	0x000000
+#define FPS_FORMAT_VERSION	0x000001
 #define FPS_VME_PORT		3000
 
 #define FPS_QT_COU			8
@@ -28,7 +28,8 @@ struct fps_evt_hdr_t {
 	u_int tick ;		//at event start, in us
 	int delta ;		//in us
 
-	u_int reserved[5] ;
+	u_int stp_data[3] ;
+	u_int reserved[2] ;
 } ;
 
 // raw data
@@ -69,7 +70,9 @@ struct fps_config_t {
 	u_int trg_type ;	//2:pulser, 4:coinc, 0x1000:STP
 	u_int rcc_required ;
 	u_int events_required ;	
-	u_int reserved[28] ;
+	u_int qt_cou ;
+
+	u_int reserved[27] ;
 
 };
 
@@ -90,6 +93,9 @@ public:
 	~daq_fps() ;
 
 	daq_dta *get(const char *bank="*",int c1=-1,int c2=-1,int c3=-1, void *p1=0, void *p2=0) ;
+
+	int get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo) ;
+
 
 	// this is the meta data, per event!
 	struct fps_evt_hdr_t meta_hdr ;
