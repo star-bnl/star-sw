@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.8 2013/02/25 18:31:00 geurts Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.9 2014/05/29 15:31:53 marr Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -101,19 +101,19 @@ class StMtdHitMaker:public StRTSBaseMaker {
   static const Int_t mNCHAN    = 24;
   static const Int_t mNFIBER   = 1;
   static const Int_t mNALLTRAY = 150; 
-  Int_t                   mYear;                 //! RHIC run year
-  Int_t                   mNValidTrays;          //! number of valid MTD trays
-  UInt_t           		  mTriggerTimeStamp[2];  //! Trigger Time in 4 fibers
-  StMtdCollection*        mMtdCollection;        //! pointer to StMtdCollection
+  Int_t                   mYear;                             //! RHIC run year
+  Int_t                   mNValidTrays;                      //! number of valid MTD trays
+  UInt_t           	  mTriggerTimeStamp[2];              //! Trigger Time in 4 fibers
+  StMtdCollection*        mMtdCollection;                    //! pointer to StMtdCollection
   Int_t                   mTray2TdigMap[mNBACKLEG][mNTRAY];  //! map TDIG-Id to MTD tray
   Int_t                   mTrayId[mNBACKLEG][mNTRAY];        //! map MTD trayIDs
-  Int_t                   mTdigId[118];          //! map TDIG Ids on MTD TrayIds
-  StBTofINLCorr*          mINLCorr;              //! pointer to INL correction class
-  
-  Int_t 				  mtdStrip[mNCHAN];			 //! strip channel to glabal tdc chan
-  Int_t                   mTriggerTimeWindow[mNALLTRAY][2];  //! map TDIG-Id to MTD tray
+  Int_t                   mTdigId[mNALLTRAY];                //! map TDIG Ids on MTD TrayIds
+  StBTofINLCorr*          mINLCorr;                          //! pointer to INL correction class
+  Int_t 		  mtdStrip[mNCHAN];		     //! strip channel to glabal tdc chan
+  Int_t                   mTriggerTimeWindow[mNALLTRAY][2];  //! trigger time window cut
 
   mtdSingleHitVector mSingleHitVec[mNALLTRAY];
+  Bool_t mSwapBacklegInRun13;             // Flag to swap backlegs 25 and 26 in run 13 when running in afterburner mode on muDst
 
  protected:
   StRtsTable *GetNextRaw();
@@ -130,6 +130,7 @@ class StMtdHitMaker:public StRTSBaseMaker {
   ~StMtdHitMaker() ;
   void setUseMuDst(Int_t val);
   void setTriggerWndSelection(Bool_t val);
+  void setSwapBacklegInRun13(Bool_t swap);
 
   void   Clear(Option_t* option="");
   Int_t  Init();
@@ -149,12 +150,13 @@ class StMtdHitMaker:public StRTSBaseMaker {
     static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
   }
   
-  ClassDef(StMtdHitMaker, 1)    ///StMtdHitMaker - class to fille the StEvent from DAQ reader
+  ClassDef(StMtdHitMaker, 2)    ///StMtdHitMaker - class to fille the StEvent from DAQ reader
 };
 
 inline vector<MtdRawHit> StMtdHitMaker::getLeadingHits()  { return MtdLeadingHits; }
 inline vector<MtdRawHit> StMtdHitMaker::getTrailingHits() { return MtdTrailingHits;}
 inline void StMtdHitMaker::setUseMuDst(Int_t val) { mUseMuDst = val; return;}
 inline void StMtdHitMaker::setTriggerWndSelection(Bool_t val) { mTriggerWndSelection = val; return;}
+inline void StMtdHitMaker::setSwapBacklegInRun13(Bool_t swap) { mSwapBacklegInRun13 = swap; }
 
 #endif
