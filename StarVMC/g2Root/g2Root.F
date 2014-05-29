@@ -244,10 +244,10 @@
          go to 90
       endif
       call rzfile(1,chtop,' ')
-      call rzldir(' ',' ')
+*yf      call rzldir(' ',' ')
 
       call g2rin
-      call mapGen ! map for generic names
+*yf      call mapGen ! map for generic names
       call toroot(fname)
       lg = lenocc(gname)
       lf = lenocc(fname)
@@ -301,7 +301,7 @@ C
       common/cnpos/nodepos(MAXPOS),nodediv(MAXPOS),nvflags(MAXPOS),
      +npflags(MAXPOS),nppflags(MAXPOS)  
 
-*      external itorotm
+*     external itorotm
       CHARACTER*4 KSHAP(30),klshap(30)
       character*20 matname,medname
       character*20 cname,gname,mname,pname, rname
@@ -326,7 +326,6 @@ C
       idot=index(fname,'.')
       nct=idot-1
       write(51,1111)fname(1:nct)
-      ! write(6,1111)fname(1:nct)
 1111  format('void ',a,'()',/,'{',/,
      +'//',/,
      +'//  This file has been generated automatically via the root',/,
@@ -349,7 +348,6 @@ C
       nodediv(1) = 1
 
       write(51,490)fname(1:nct),fname(1:nct),fname(1:nch)
-      ! write(6,490)fname(1:nct),fname(1:nct),fname(1:nch)
  490  format(/,'TGeoManager *',a,' = new TGeoManager("',a,'","',a,'");'
      +,/)
       IF(JVOLUM.NE.0 ) NVOLUM = IQ(JVOLUM-2)
@@ -359,9 +357,14 @@ C
 * Print Materials
 * =======================
       write(51,3019)
-      ! write(6,3019)
  3019 format(/,
      +'//-----------List of Materials and Mixtures--------------',/)
+      write(51,4001) 
+ 4001 format('TGeoMixture *mix = 0;')
+      write(51,4002) 
+ 4002 format('Int_t imat = 0;')
+      write(51,4003) 
+ 4003 format('Int_t imed = 0;')
       do 300 imat=1,nmate
          jma=lq(jmate-imat)
          if(jma.eq.0)go to 300
@@ -374,23 +377,24 @@ C
          if (nm.le.1)then
             call toreals(3,q(jma+6),creals,ncr)
             if(q(jma+6).lt.1.and.q(jma+7).lt.1)then
-               creals=',0,0,0'
+               creals=' '
                ncr=lenocc(creals)
             endif
             line=' '
 *yf            write(line,3000)astring(1:nc),matname(1:ncn),creals(1:ncr)
-            write(line,3000)matname(1:ncn),matname(1:ncn),creals(1:ncr)
- 3000       format('TGeoMaterial *mat',a,' = new TGeoMaterial("',a,
-     +       '"',a,');')
-            nch = lenocc(line)
-            write(51,'(a)')line(1:nch)
-            ! write(6,'(a)')line(1:nch)
+*            write(line,3000)matname(1:ncn),matname(1:ncn),creals(1:ncr)
+* 3000       format('TGeoMaterial *mat',a,' = new TGeoMaterial("',a,
+*yf     +       '"',a,');')
+*yf            write(line,3000) matname(1:ncn),creals(1:ncr)
+*yf 3000       format('new TGeoMaterial("',a,'"',a,');')
+            write(line,3000) matname(1:ncn),creals(1:ncr)
+ 3000       format('(new TGeoMaterial("',a,'"',a,
+     +'))->SetUniqueID(++imat);')
 *yf            write(line,3005) astring(1:nc),imat
-            write(line,3005) matname(1:ncn),imat
- 3005       format(4x,'mat',a,'->SetUniqueID(',i4,');')
+*yf            write(line,3005) matname(1:ncn),imat
+* 3005       format(4x,'mat',a,'->SetUniqueID(',i4,');')
             nch = lenocc(line)
             write(51,'(a)')line(1:nch)
-            ! write(6,'(a)')line(1:nch)
 *-*             Case of a mixture
          else
             call toint(nm,creals,ncm)
@@ -403,19 +407,20 @@ C
             endif
             line=' '
 *yf            write(line,3010)astring(1:nc),matname(1:ncn),mname(1:ncm),
-            write(line,3010)matname(1:ncn),matname(1:ncn),mname(1:ncm),
-     +      q(jma+8)
- 3010       format('TGeoMixture *mat',a,' = new TGeoMixture("',a,'",',a,
-     +              ',',g14.6,');')
-            nch = lenocc(line)
-            write(51,'(a)')line(1:nch)
-            ! write(6,'(a)')line(1:nch)
+*            write(line,3010)matname(1:ncn),matname(1:ncn),mname(1:ncm),
+*     +      q(jma+8)
+* 3010       format('mix',a,' = new TGeoMixture("',a,'",',a,
+*     +              ',',g14.6,');')
+*yf            write(line,3010) matname(1:ncn),mname(1:ncm),q(jma+8)
+*yf 3010       format('mix = new TGeoMixture("',a,'",',a, ',',g14.6,');')
+            write(line,3010) matname(1:ncn),mname(1:ncm),q(jma+8)
+ 3010       format('mix = new TGeoMixture("',a,'",',a, ',',g14.6,');',
+     +  'mix->SetUniqueID(++imat);')
 *yf            write(line,3011) astring(1:nc),imat
-            write(line,3011) matname(1:ncn),imat
- 3011       format(4x,'mat',a,'->SetUniqueID(',i4,');')
+*yf            write(line,3011) matname(1:ncn),imat
+*yf 3011       format(4x,'mat',a,'->SetUniqueID(',i4,');')
             nch = lenocc(line)
             write(51,'(a)')line(1:nch)
-            ! write(6,'(a)')line(1:nch)
             do 292 im=1,nm
                call toint(im-1,astring2,nc2)
                pmixt(1) = q(jmixt+im)
@@ -424,19 +429,19 @@ C
                call toreals(3,pmixt,creals,ncr)
                line=' '
 *yf               write(line,3020)astring(1:nc),astring2(1:nc2),
-               write(line,3020)matname(1:ncn),astring2(1:nc2),
-     +         creals(1:ncr)
- 3020          format(4x,'mat',a,'->DefineElement(',a,a,');')
+*               write(line,3020)matname(1:ncn),astring2(1:nc2),
+*     +         creals(1:ncr)
+* 3020          format(4x,'mix',a,'->DefineElement(',a,a,');')
+               write(line,3020) astring2(1:nc2), creals(1:ncr)
+ 3020          format(4x,'mix->DefineElement(',a,a,');')
                nch = lenocc(line)
                write(51,'(a)')line(1:nch)
-               ! write(6,'(a)')line(1:nch)
  292        continue
          endif
  300  continue
 * Print Tracking Media
 * ====================
       write(51,3069)
-      ! write(6,3069)
  3069 format(/,
      +'//-----------List of Tracking Media--------------',/)
       do 350 itmed=1,ntmed
@@ -454,18 +459,19 @@ C
          call toreals(8,q(jtm+7),creals,ncr)
          line=' '
 *yf         write(line,3050)astring(1:nc),medname(1:ncn),astring(1:nc),
-         write(line,3050)medname(1:ncm),medname(1:ncm),astring(1:nc),
-     +     astring2(1:ncmk),creals(1:ncr)
- 3050    format('TGeoMedium *med',a,' = new TGeoMedium("',a,'",',a,
-     +     ',mat',a,'->GetUniqueID()',a,');')
+*         write(line,3050)medname(1:ncm),medname(1:ncm),astring(1:nc),
+*     +     astring2(1:ncmk),creals(1:ncr)
+* 3050    format('TGeoMedium *med',a,' = new TGeoMedium("',a,'",',a,
+*yf     +     ',mat',a,'->GetUniqueID()',a,');')
+         write(line,3050) medname(1:ncm),astring2(1:ncmk),creals(1:ncr)
+ 3050    format('(new TGeoMedium("',a,'",0',
+     +',GetMat("',a,'")->GetUniqueID()',a,'))->SetUniqueID(++imed);')
          nch = lenocc(line)
          write(51,'(a)')line(1:nch)
-         ! write(6,'(a)')line(1:nch)
  350  continue
 * Print Rotation matrices
 * =======================
       write(51,3021)
-      ! write(6,3021)
  3021 format(/,'//-----------List of Rotation matrices--------------',/)
       do 100 irot=1,nrotm
          jr=lq(jrotm-irot)
@@ -486,21 +492,21 @@ C
          if (iok .eq. 0) go to 100
          call toreals(6,q(jr+11),creals,ncr)
          line=' '
-         ptrname = 'rot'//astring(1:nc)
-         nch = nc+3
-         write(line,1000)ptrname(1:nch),ptrname(1:nch),
-     +     creals(1:ncr)
- 1000    format('TGeoRotation *',a,
-     +        ' = new TGeoRotation("',a,'"',a,');')
+*yf         ptrname = 'rot'//astring(1:nc)
+*         nch = nc+3
+*         write(line,1000)ptrname(1:nch),ptrname(1:nch),
+*     +     creals(1:ncr)
+* 1000    format('TGeoRotation *',a,
+*     +        ' = new TGeoRotation("',a,'"',a,');')
+         write(line,1000) astring(1:nc),creals(1:ncr)
+ 1000    format('(new TGeoRotation("',a,'"',a,'))->RegisterYourself();')
          nch = lenocc(line)
          write(51,'(a)')line(1:nch)
-         ! write(6,'(a)')line(1:nch)
  100  continue
 
 *  Print volume definition (ROOT shapes)
 *  =======================
       write(51,3022)
-      ! write(6,3022)
  3022 format(/,'//-----------List of Volumes--------------',/)
       Print *,' nvolum= ',nvolum, ' jvolum=',jvolum
 C
@@ -564,17 +570,14 @@ C----------------------------------------------
       if (nvolum.gt.0) then
          call node(1,1,1)
          write(51,3023)
-         ! write(6,3023)
  3023    format(/,'//-----------List of Nodes--------------',/)
          do 89 ivo = 1,nvolum
  89      nvflags(ivo) = 0
          call node(1,1,0)
       endif   
 
-      write(51,2223)
-      ! write(6,2223)
+*      write(51,2223)
       write(51,2222)
-      ! write(6,2222)
 2222  format('}')
 2223  format(' gGeoManager->CloseGeometry();')
       close(51)
@@ -635,6 +638,7 @@ C
 *                    Volume has positioned contents
          do 300 in=1,nin
             jin=lq(jv-in)
+*yf             if (jin .eq. 0) goto 300
             ivom=q(jin+2)
             nuser  = q(jin+3)
             jinvom = lq(jvolum-ivom)
@@ -704,7 +708,7 @@ C
      +npflags(MAXPOS),nppflags(MAXPOS)  
 
       character *(*) cname, gname
-      character*23 cmater
+      character*128 cmater
       character*20 astring, pname, rname
       character*128 creals
       character*256 line
@@ -733,7 +737,7 @@ C
 *yf
       call uhtoc(iq(jtm+1),4,astring,20)
       nc=lenocc(astring)
-      cmater='med'//astring(1:nc)
+      cmater='GetMed("'//astring(1:nc)//'")'
       ncmat = lenocc(cmater)
       nord  = qjv(1)
       nin   = qjv(3)
@@ -798,37 +802,51 @@ C
       np = lenocc(pname)
       call realname(cname, rname)
       nrr = lenocc(rname)
+      ng  = lenocc(gname)
       if (iposp.eq.0) then
+#if 1
+         write(line,2000)pname(1:np),kshap(ishape)(1:nshape)
+     +         ,gname(1:ng),cmater(1:ncmat),creals(1:ncr)
+     +         ,pname(1:np),rname(1:nrr)
+#else
          write(line,2000)pname(1:np),kshap(ishape)(1:nshape)
      +         ,rname(1:nrr),cmater(1:ncmat),creals(1:ncr)
-     +         ,pname(1:np), gname
+     +         ,pname(1:np), gname(1:ng)
+#endif
       else
          if (ifirst.eq.1) then
+#if 1
+            write(line,2001)pname(1:np),gname(1:ng),cmater(1:ncmat)
+     +         ,pname(1:np),rname(1:nrr)
+#else
             write(line,2001)pname(1:np),rname(1:nrr),cmater(1:ncmat)
-     +         ,pname(1:np), gname
+     +         ,gname(1:ng), pname(1:np)
+#endif
             nch=lenocc(line)
             write(51,'(a)')line(1:nch)
-            ! write(6,'(a)')line(1:nch)
          endif
          line=' '
+#if 1
+         write(line,2002)pname(1:np),kshap(ishape)(1:nshape)
+     +         ,gname(1:ng),cmater(1:ncmat),creals(1:ncr)
+#else
          write(line,2002)pname(1:np),kshap(ishape)(1:nshape)
      +         ,rname(1:nrr),cmater(1:ncmat),creals(1:ncr)
 *     +         ,pname(1:np), gname
+#endif
          nch=lenocc(line)
          write(51,'(a)')line(1:nch) 
-         ! write(6,'(a)')line(1:nch) 
       endif           
 2000  format(
      + 'TGeoVolume',' *',a,' = gGeoManager->Make',a,'("',a,'",'
-     +,a,a,'); ',a,'->SetTitle("',a4,'");')
+     +,a,a,'); ',a,'->SetTitle("',a,'");')
 2001  format('TGeoVolumeMulti *',a,' = gGeoManager->MakeVolumeMulti("'
-     +,a,'", ',a,'); ',a,'->SetTitle("',a4,'");')
+     +,a,'", ',a,'); ',a,'->SetTitle("',a,'");')
 2002  format(' ',a,'->AddVolume(gGeoManager->Make',a,'("',a,'",',
      +a,a,'));')          
 *     +a,a,')); ',a,'->SetTitle("',a4,'");')          
       nch = lenocc(line)
       if (iposp.eq.0) write(51,'(a)')line(1:nch)
-      ! write(6,'(a)')line(1:nch)
       if(ishape.eq.11)then
          ndz=qjv(10)
          do iz=1,ndz
@@ -842,7 +860,6 @@ C
             endif
             nch = lenocc(line)
             write(51,'(a)')line(1:nch)
-            ! write(6,'(a)')line(1:nch)
          enddo
       endif
       if(ishape.eq.12)then
@@ -858,7 +875,6 @@ C
             endif
             nch = lenocc(line)
             write(51,'(a)')line(1:nch)
-            ! write(6,'(a)')line(1:nch)
          enddo
       endif
 2010  format(2x,'((TGeoPcon*)',a,'->GetShape())->DefineSection(',
@@ -884,31 +900,26 @@ C
       if(lseen.ne.1)then
          call toint(lseen,creals,ncr)
          write(51,195)pname(1:np),creals(1:ncr)
-         ! write(6,195)pname(1:np),creals(1:ncr)
 195        format(2x,a,'->SetVisibility(',a,');')
       endif
       if(lstyle.ne.1)then
          call toint(lstyle,creals,ncr)
          write(51,196)pname(1:np),creals(1:ncr)
-         ! write(6,196)pname(1:np),creals(1:ncr)
 196        format(2x,a,'->SetLineStyle(',a,');')
       endif
       if(lwidth.ne.1)then
          call toint(lwidth,creals,ncr)
          write(51,197)pname(1:np),creals(1:ncr)
-         ! write(6,197)pname(1:np),creals(1:ncr)
 197        format(2x,a,'->SetLineWidth(',a,');')
       endif
       if(lcolor.ne.1)then
          call toint(lcolor,creals,ncr)
          write(51,198)pname(1:np),creals(1:ncr)
-         ! write(6,198)pname(1:np),creals(1:ncr)
 198        format(2x,a,'->SetLineColor(',a,');')
       endif
       if(lfill.ne.0)then
          call toint(lfill,creals,ncr)
          write(51,199)pname(1:np),creals(1:ncr)
-         ! write(6,199)pname(1:np),creals(1:ncr)
 199        format(2x,a,'->SetFillStyle(',a,');')
       endif
       endif
@@ -953,7 +964,7 @@ C
       character*256 line, rline, sline
       character*128 creals, rreals
       character*20 astring,astring1
-      character*20 matrix
+      character*226 matrix
       character*256 matrixs
       character *20 cblank
       Logical map_found
@@ -978,7 +989,6 @@ C
       nmother = lenocc(mother)
       if((ivo.eq.1).and.(iposp.eq.0))then
          write(51,510)mother(1:nmother)
-         ! write(6,510)mother(1:nmother)
 *         write(51,510)
 510      format('gGeoManager->SetTopVolume(',a,');')
       endif
@@ -1089,17 +1099,18 @@ C
                if(jr.eq.0) stop 'Bad rotation matrix'
                iok = itorotm(q(jr+11),astring)
                if (iok .ne. 0) then
-                  matrix='rot'//astring(1:4)
-                  ncmatrix = 7
+                  matrix='GetRot("'//astring(1:4)//'")'
+                  ncmatrix = lenocc(matrix)
                else
                   call toint(irot,astring,nc)
                   call toreals(6,q(jr+11),rreals,ncrr)
                   sline=' '
-                  ptrname = 'rot'//astring(1:nc)
-                  nch = 3 + nc
                   matrix = 'rot'
-                  write(sline,1000) ptrname(1:nch)
-     +            ,rreals(1:ncrr)
+*yf                  ptrname = 'rot'//astring(1:nc)
+*yf                  nch = 3 + nc
+                  ptrname = 'next'
+                  nch = 4
+                  write(sline,1000) ptrname(1:nch),rreals(1:ncrr)
  1000             format('rot = new TGeoRotation("',a,'"',a,');')
                   nch = lenocc(sline)
                   do i=1,nch
@@ -1108,7 +1119,6 @@ C
                   goto 1318
  1317             if (iposp.eq.0) write(51,'(a,a)') 
      +                 cblank(1:nlevel), sline(1:nch)
-                  ! write(6,'(a,a)') cblank(1:nlevel), sline(1:nch)
                   rline = sline
  1318             continue
                endif
@@ -1155,7 +1165,6 @@ C
             endif 
             nch = lenocc(line)
             if (iposp.eq.0) write(51,'(a)')line(1:nch)
-            ! write(6,'(a)')line(1:nch)
             npar=q(jv+5)
             if(ninvom.ne.0) then
                call node2(ivom,nuser,iposp)
@@ -1175,9 +1184,9 @@ C
          ivod=q(jin+2)
          if (nvflags(ivod).eq.1) goto 996
          cname=' '
-         if(.not.map_found(iq(jvolum+ivod),cname)) then
+*         if(.not.map_found(iq(jvolum+ivod),cname)) then
             write(cname,'(a4)')iq(jvolum+ivod)
-         endif
+*         endif
             gname = ' '
             write(gname,'(a4)')iq(lq(jvolum-ivod)-4)
 *         Print 4445,iq(jvolum+ivod)
@@ -1196,12 +1205,22 @@ C
          np = lenocc(pname)
          call realname(cname, rname)
          nrr = lenocc(rname)
+#if 1
+         nr3 = index(rname,':')-1
+         nr4 = nrr
+         if (nr3 > 0) nr4 = nr3
+         write(line,995)cblank(1:nlevel),pname(1:np),mother(1:nmother),
+     +      rname(1:nr4),astring(1:nci), creals(1:ncr), 
+     +      pname(1:np), rname(1:nrr)
+ 995    format(a,'TGeoVolume *',a,' = ',a,'->Divide("',a,'",',a,a,'); '
+     + ,a,'->SetTitle("',a,'");')
+#else
          write(line,995)cblank(1:nlevel),pname(1:np),mother(1:nmother),
      +      rname(1:nrr),astring(1:nci), creals(1:ncr)
  995    format(a,'TGeoVolume *',a,' = ',a,'->Divide("',a,'",',a,a,');')
+#endif
          nch = lenocc(line)
          if (iposp.eq.0) write(51,'(a)')line(1:nch)
-         ! write(6,'(a)')line(1:nch)
 
          call node2(ivod,0,iposp)
          nvflags(ivod) = 1
@@ -1743,6 +1762,7 @@ C
   150 NIN=0
 *
   999 END
+#if 1
       SUBROUTINE RZINK(KEYU,ICYCLE,CHOPT)
 *
 ************************************************************************
@@ -2158,7 +2178,11 @@ C
             write (*,*) 'limit on map has been reached'
          else
             id(nmap) = iq(jvolum+ivo)
+#if 1
             names(nmap) = gname//':'//cname
+#else
+            names(nmap) = gname
+#endif
             ialias(nmap) = 0
 #if 0
             write(*,*) 'name : ',cname,' gname :', gname, ' names: '
@@ -2171,3 +2195,4 @@ C
          endif
  50   continue
       end
+#endif
