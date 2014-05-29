@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.cxx,v 1.8 2014/05/08 15:10:49 smirnovd Exp $
+ * $Id: StPxlRawHitMaker.cxx,v 1.9 2014/05/29 22:55:28 qiuh Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.cxx,v $
+ * Revision 1.9  2014/05/29 22:55:28  qiuh
+ * print warnings for wrong rows / columns and deserialization errors only when debug > 2
+ *
  * Revision 1.8  2014/05/08 15:10:49  smirnovd
  * PXL DB dataset has been renamed to avoid conflict with StPxlDbMaker's name
  *
@@ -163,7 +166,7 @@ void StPxlRawHitMaker::decodeSectorData()
 
    for(int i=0; i<32; i++)
       {
-         if(mHeaderData[8] >> i)
+         if(mHeaderData[8] >> i && Debug() > 2)
             {
                LOG_WARN << "sector "<<mSector<<"  sensor "<<i+1<<"  deserialization error!" << endm;
             }
@@ -171,7 +174,7 @@ void StPxlRawHitMaker::decodeSectorData()
 
    for(int i=0; i<8; i++)
       {
-         if(mHeaderData[9] >> i)
+         if(mHeaderData[9] >> i && Debug() > 2)
             {
                LOG_WARN << "sector "<<mSector<<"  sensor "<<i+33<<"  deserialization error!" << endm;
             }
@@ -337,7 +340,7 @@ Int_t StPxlRawHitMaker::decodeState0(Int_t val)
       mOverFlowCount++;
    }
    // check row number range
-   if (mRow >= kNumberOfPxlRowsOnSensor && mRow < 0) {
+   if ((mRow >= kNumberOfPxlRowsOnSensor || mRow < 0) && Debug()>2) {
       LOG_WARN << "wrong row: " << mRow << " at sector: " << mSector << " ladder: " << mLadder << " sensor: " << mSensor << endm;
    }
    return 0;
@@ -368,7 +371,7 @@ Int_t StPxlRawHitMaker::decodeStateN(Int_t val)
 	   mPxlRawHitCollection->addRawHit(pxlRawHit);
          }
       }
-      else if (mColumn != mDummyState) { // 1023: dummy state when the last state from a sensor ends on the lower 16 bits of a 32-bit word
+      else if (mColumn != mDummyState && Debug() > 2) { // 1023: dummy state when the last state from a sensor ends on the lower 16 bits of a 32-bit word
 	LOG_WARN << "wrong sector/ladder/sensor/row/column: " << mSector << "/" << mLadder << "/" << mSensor << "/" << mRow << "/" << mColumn << endm;
       }
    }
