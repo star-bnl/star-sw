@@ -120,7 +120,7 @@ class l4Builder : public JevpPlotSet {
   JevpPlot *HeavyFragmentPlots[1];
   JevpPlot *DiElectronPlots[10];
   JevpPlot *DiPionPlots[2];
-  JevpPlot *DiMuonPlots[2];
+  JevpPlot *DiMuonPlots[6];
   JevpPlot *UPCDiElectronPlots[10];   
   JevpPlot *HltPlots_UPC[30];
   PlotHisto *ph;
@@ -252,11 +252,13 @@ class l4Builder : public JevpPlotSet {
   TH1D *hPrim_Phi_UPC;
   TH1D *hPrim_Eta_UPC;
   TH2F *hPrim_dEdx_UPC;
-
+  
   // event
   TH1D *hVertexX; 
   TH1D *hVertexY;
   TH1D *hVertexZ;
+  TH2D *hVertexXY;
+  TH1D *hVertexR;
   TH1D *hLm_VertexX;
   TH1D *hLm_VertexY;
   TH1D *hLm_VertexZ;
@@ -316,6 +318,12 @@ class l4Builder : public JevpPlotSet {
   TH1D *hDiMuonInvMassFullRangeBG;
   TH1D *hDiMuonInvMassTpxCut;
   TH1D *hDiMuonInvMassTpxCutBG;
+  TH2F *hMtdHitMap;        
+  TH2F *hMtdMatchHitMap;    
+  TH2F *hMtdDeltaZvsModule; 
+  TH1F *hMtdDeltaZ;         
+  TH2F *hMtdDeltaYvsModule; 
+  TH1F *hMtdDeltaY;
 
   // di-pion
   TH1D *hDiPionInvMassFullRange;
@@ -361,16 +369,23 @@ class l4Builder : public JevpPlotSet {
   TH1D *hOuterGain;
   TH1D *hMeanDcaXy;
 
+  // BesGood
   TH2D *hBesGoodVertexXY;
   TH1D *hBesGoodVr;
   TH1D *hBesGoodVertexZ;
   TH1I *hBesGoodprimaryMult;
+
+  //HLTGood2
   TH2D *hHLTGood2VertexXY;
   TH1D *hHLTGood2Vr;
   TH1D *hHLTGood2VertexZ;
   TH1I *hHLTGood2primaryMult;
+
+  //BesMonitor
   TH2D *hBesMonitorVertexXY;
   TH1D *hBesMonitorVr;
+
+  //Fixed Target
   TH2D *hFixedTargetVertexXY;
   TH1D *hFixedTargetVr;
   TH1D *hFixedTarget_VertexZ;
@@ -381,8 +396,6 @@ class l4Builder : public JevpPlotSet {
   TH1D *hFixedTargetMonitor_VertexZ;
   TH1D *hFixedTargetMonitor_Prim_Eta;
   TH1D *hFixedTargetMonitor_Glob_Eta;
-  TH2D *hVertexXY;
-  TH1D *hVertexR;
 
   ClassDef(l4Builder, 1);
 };
