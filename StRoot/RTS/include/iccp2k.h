@@ -31,6 +31,7 @@ typedef unsigned char u_char;
 #define EVBFLAG_TIMEOUT     (1<<6)              // Timedout by EVB
 #define EVBFLAG_BADBUILD    (1<<7)
 #define EVBFLAG_FUTURE_RELEASE (1<<8)
+#define EVBFLAG_L4_PROCESSED (1<<9)
 
 // Appended by prepare_gb_payload
 #define EVBFLAG_L1ABORT (1<<11)
