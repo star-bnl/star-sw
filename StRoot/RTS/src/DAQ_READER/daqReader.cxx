@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.57 2014/05/15 19:03:34 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.58 2014/05/30 20:00:01 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1263,6 +1263,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     info->evpgroups = l2h32(pay->L3summary[3]);
     info->daqbits = l2h32(pay->L3summary[0]);
     info->evp_daqbits = daqbits;
+    info->flags = l2h32(pay->flags);
 
     // event descriptor is big endian...
     info->trgword = b2h16(pay->EventDescriptor.TriggerWord);
@@ -1289,7 +1290,8 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     info->evpgroups = l2h32(pay->L3summary[2]);
     info->daqbits = l2h32(pay->L3summary[0]);
     info->evp_daqbits = daqbits;
-  
+    info->flags = l2h32(pay->flags);
+
     // event descriptor is big endian...
     info->trgword = b2h16(pay->EventDescriptor.TriggerWord);
     info->trgcmd = pay->EventDescriptor.actionWdTrgCommand;

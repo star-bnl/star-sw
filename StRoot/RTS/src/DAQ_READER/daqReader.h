@@ -68,7 +68,8 @@ struct SummaryInfo {
   u_int daqbits_l2;
   u_int evpgroups;
   u_int evp_daqbits;
-  
+  u_int flags;
+
   u_int trgword;
   u_int trgcmd;	// current trigger command
   u_int daqcmd;	// current DAQ command
