@@ -5,6 +5,9 @@ ClassImp(StarAgmlStacker);
 #include <assert.h>
 #include <iostream>
 
+std::map <TString, std::vector< TString > > StarAgmlStacker::mNicknames;
+std::map <TString, TString>                 StarAgmlStacker::mRealnames;
+
 void StarAgmlStacker::SetMediumParameters( TGeoMedium *medium )
 {
 
