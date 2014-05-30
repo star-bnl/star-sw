@@ -58,10 +58,12 @@ class StarAgmlStacker : public TNamed
   /// Given the name of the block, returns the next possible nickname
   TString nickname( TString agname, Bool_t add=true );
 
+public:
   /// Given the nick name, returns the real name of the block
-  TString realname( TString nname );
-  std::map   < TString, std::vector< TString > > mNicknames;
-  std::map   < TString, TString >                mRealnames;
+static  TString realname( TString nname );
+protected:
+static  std::map   < TString, std::vector< TString > > mNicknames;
+static  std::map   < TString, TString >                mRealnames;
 
   std::map   < TString, TString >                mDebugOptions;
   
