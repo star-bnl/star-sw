@@ -26,14 +26,14 @@ public:
     float   timeOfFlight() const;
     float   pathLength() const;
     float   beta() const;
+    float   expTimeOfFlight() const;
     
     /// PID functions
     float   sigmaMuon() const;
-    
     float   probMuon() const;
     
     /// Setters
-	void    setMtdPidTraits(const StMtdPidTraits*);
+    void    setMtdPidTraits(const StMtdPidTraits*);
     
     void    setMatchFlag(unsigned char);
     void    setYLocal(float);
@@ -49,6 +49,7 @@ public:
     
     void    setProbMuon(float);
     
+    void    setExpTimeOfFlight(float);
 private:
    
     UChar_t   mMatchFlag;
@@ -57,14 +58,16 @@ private:
     Float_t   mThetaLocal;
     StThreeVectorF  mPosition;
     
-    Float_t   mTimeOfFlight;
-    Float_t   mPathLength;
+    Float_t   mTimeOfFlight;          // Measured time-of-flight
+    Float_t   mPathLength;            // Path length obtained from track extrapolation
     Float_t   mBeta;
     
     Float_t   mSigmaMuon;
     Float_t   mProbMuon;
+
+    Float_t   mExpTimeOfFlight;       // Expected time-of-flight obtained from track extrapolation
     
-    ClassDef(StMuMtdPidTraits,1)
+    ClassDef(StMuMtdPidTraits,2)
 };
 
 inline unsigned char StMuMtdPidTraits::matchFlag() const { return mMatchFlag; }
@@ -76,6 +79,7 @@ inline float StMuMtdPidTraits::pathLength() const { return mPathLength; }
 inline float StMuMtdPidTraits::beta() const { return mBeta; }
 inline float StMuMtdPidTraits::sigmaMuon() const { return mSigmaMuon; }
 inline float StMuMtdPidTraits::probMuon() const { return mProbMuon; }
+inline float StMuMtdPidTraits::expTimeOfFlight() const {return mExpTimeOfFlight; }
 
 inline void StMuMtdPidTraits::setMatchFlag(unsigned char flag) { mMatchFlag=flag; }
 inline void StMuMtdPidTraits::setYLocal(float y) { mYLocal=y; }
@@ -86,5 +90,5 @@ inline void StMuMtdPidTraits::setPathLength(float s) { mPathLength=s; }
 inline void StMuMtdPidTraits::setBeta(float beta) { mBeta=beta; }
 inline void StMuMtdPidTraits::setSigmaMuon(float sigma) { mSigmaMuon=sigma; }
 inline void StMuMtdPidTraits::setProbMuon(float prob) { mProbMuon=prob; }
-
+inline void StMuMtdPidTraits::setExpTimeOfFlight(float time) { mExpTimeOfFlight=time; }
 #endif

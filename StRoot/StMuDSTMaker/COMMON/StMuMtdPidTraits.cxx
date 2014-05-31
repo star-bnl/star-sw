@@ -2,23 +2,24 @@
 #include "StMuMtdPidTraits.h"
 #include "StMuMtdHit.h"
 
-static const char rcsid[] = "$Id: StMuMtdPidTraits.cxx,v 1.1 2013/12/04 19:56:32 jdb Exp $";
+static const char rcsid[] = "$Id: StMuMtdPidTraits.cxx,v 1.2 2014/05/31 01:10:40 jdb Exp $";
 
 ClassImp(StMuMtdPidTraits)
 
 StMuMtdPidTraits::StMuMtdPidTraits() 
 {
-      mMatchFlag     = 0;
-      mYLocal        = -999.;
-      mZLocal        = -999.;
-      mThetaLocal    = -999.;
-      mTimeOfFlight  = -999.;
-      mPathLength    = -999.;
-      mBeta          = -999.;
+      mMatchFlag          = 0;
+      mYLocal             = -999.;
+      mZLocal             = -999.;
+      mThetaLocal         = -999.;
+      mTimeOfFlight       = -999.;
+      mPathLength         = -999.;
+      mBeta               = -999.;
       mPosition.set(0,0,0);
 
-      mSigmaMuon     = -999.; 
-      mProbMuon      = -999.; 
+      mSigmaMuon          = -999.; 
+      mProbMuon           = -999.; 
+      mExpTimeOfFlight    = -999.;
 }
 
 StMuMtdPidTraits::~StMuMtdPidTraits() { /* noop */ }
@@ -26,16 +27,17 @@ StMuMtdPidTraits::~StMuMtdPidTraits() { /* noop */ }
 
 void StMuMtdPidTraits::setMtdPidTraits(const StMtdPidTraits* pid)
 {
-      mMatchFlag     = pid->matchFlag();
-      mYLocal        = pid->yLocal();
-      mZLocal        = pid->zLocal();
-      mThetaLocal    = pid->thetaLocal();
-      mTimeOfFlight  = pid->timeOfFlight();
-      mPathLength    = pid->pathLength();
-      mBeta          = pid->beta();
-      mPosition      = pid->position();
+      mMatchFlag        = pid->matchFlag();
+      mYLocal           = pid->yLocal();
+      mZLocal           = pid->zLocal();
+      mThetaLocal       = pid->thetaLocal();
+      mTimeOfFlight     = pid->timeOfFlight();
+      mExpTimeOfFlight  = pid->expTimeOfFlight();
+      mPathLength       = pid->pathLength();
+      mBeta             = pid->beta();
+      mPosition         = pid->position();
 
-      mSigmaMuon     = pid->sigmaMuon(); 
+      mSigmaMuon        = pid->sigmaMuon(); 
       //mProbMuon      = pid->probMuon(); 
 }
 
@@ -47,6 +49,7 @@ StMtdPidTraits* StMuMtdPidTraits::createMtdPidTraits() const
    traits->setZLocal(mZLocal);
    traits->setThetaLocal(mThetaLocal);
    traits->setTimeOfFlight(mTimeOfFlight);
+   traits->setExpTimeOfFlight(mExpTimeOfFlight);
    traits->setPathLength(mPathLength);
    traits->setBeta(mBeta);
    traits->setPosition(mPosition);
