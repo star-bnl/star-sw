@@ -23,6 +23,7 @@
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_L3/daq_l3.h>
 #include <DAQ_L4/daq_l4.h>
+#include <online/RTS/src/L4_HLT/HLTFormats.h>
 #include <TStyle.h>
 #include "TVector3.h"
 #include <fstream>
