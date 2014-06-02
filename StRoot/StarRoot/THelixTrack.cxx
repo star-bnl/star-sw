@@ -1938,7 +1938,7 @@ static int nCall=0; nCall++;
         int kase = iter;
         if (fastTrak)  kase|=2;
 	if (aux[i].wt >0) 		kase+=4;	//weight defined
-        if (aux[i].exy[0]>0) {wasErrs++;kase+=8;}	//error matrix defined
+        if (aux[i].exy[0]>0 || aux[i].exy[2]>0) {wasErrs++;kase+=8;}	//error matrix defined
         switch (kase) {
           case 0:; 
 	  case kErr:;
@@ -3666,7 +3666,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.74 2013/06/10 15:50:10 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.75 2014/06/02 18:28:22 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3682,6 +3682,9 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.75  2014/06/02 18:28:22  perev
+ * Chec XX and YY for non zero error matrix
+ *
  * Revision 1.74  2013/06/10 15:50:10  perev
  * fabs(eigen) + TComplex &x added
  *
