@@ -962,9 +962,9 @@ Bfc_st BFC[] = {
 
   // Year 13 chains 
   {"B2013"   ,"","","B2013_c2","","",                             "Alias for B2013 Configuration 2",kFALSE},
-  {"B2013_c2","","","ry2013_2,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2013_c2","","","ry2013_2c,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2013 ITTF (tpc)",kFALSE},
-  {"B2013_c1","","","ry2013_1,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+  {"B2013_c1","","","ry2013_1c,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2013 ITTF (tpc)",kFALSE},
 
   {"pp2013a","" ,"",
