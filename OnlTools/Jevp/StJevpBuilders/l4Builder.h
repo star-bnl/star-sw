@@ -120,7 +120,7 @@ class l4Builder : public JevpPlotSet {
   JevpPlot *HeavyFragmentPlots[1];
   JevpPlot *DiElectronPlots[10];
   JevpPlot *DiPionPlots[2];
-  JevpPlot *DiMuonPlots[6];
+  JevpPlot *DiMuonPlots[7];
   JevpPlot *UPCDiElectronPlots[10];   
   JevpPlot *HltPlots_UPC[30];
   PlotHisto *ph;
@@ -314,10 +314,8 @@ class l4Builder : public JevpPlotSet {
   TH1D *hDiLeptonRapidity_UPC;
 
   // di-muon
-  TH1D *hDiMuonInvMassFullRange;
-  TH1D *hDiMuonInvMassFullRangeBG;
-  TH1D *hDiMuonInvMassTpxCut;
-  TH1D *hDiMuonInvMassTpxCutBG;
+  TH1F *hInvMassUS;
+  TH1F *hInvMassLS;
   TH2F *hMtdHitMap;        
   TH2F *hMtdMatchHitMap;    
   TH2F *hMtdDeltaZvsModule; 
