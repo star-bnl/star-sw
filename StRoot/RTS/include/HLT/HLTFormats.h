@@ -6,11 +6,10 @@
 #ifndef _HLT_FORMATS_H
 #define _HLT_FORMATS_H
 
-// #define HLT_GL3_VERSION	0x20100107
-// #define HLT_GL3_VERSION	0x20110114  // add di-electron selection method bits
-#define HLT_GL3_VERSION	0x20130117  // optimazed mamoty layout
-
-// Global tracks:
+// #define HLT_GL3_VERSION 0x20100107
+// #define HLT_GL3_VERSION 0x20110114  // add di-electron selection method bits
+// #define HLT_GL3_VERSION 0x20130117  // optimazed mamoty layout
+#define HLT_GL3_VERSION 0x20140522 // add MTD data structure
 
 struct hlt_track {
     int            id ;         //primary key
@@ -59,10 +58,26 @@ struct hlt_TofHit{
     float triggertime;
 };
 
-
 struct HLT_TOF {
     unsigned int      nTofHits;
     struct hlt_TofHit tofHit[10000];
+};
+
+struct hlt_MtdHit {
+  float   leadingEdgeTime[2];
+  float   trailingEdgeTime[2];
+  char    fiberId;
+  char    backleg; // 1-30
+  char    tray;    // 1-5
+  char    channel; // 0-12
+  int     hlt_trackId;
+  float   delta_z;
+  float   delta_y;
+};
+
+struct HLT_MTD {
+  unsigned int      nMtdHits;
+  struct hlt_MtdHit mtdHit[10000];
 };
 
 struct HLT_PVPD {
