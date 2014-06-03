@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.136 2013/04/10 22:09:01 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.137 2014/06/03 16:48:38 genevb Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.137  2014/06/03 16:48:38  genevb
+ * Reduce visibility of inactive materials
+ *
  * Revision 2.136  2013/04/10 22:09:01  fisyak
  * Roll back to version 04/04/2013
  *
@@ -1794,7 +1797,6 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 //______________________________________________________________________________
 int StiKalmanTrackNode::locate()
 {
-  enum {kNStd = 5};
   int position;
   double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
   //fast way out for projections going out of fiducial volume
@@ -1802,6 +1804,7 @@ int StiKalmanTrackNode::locate()
   if (!tDet) return 0;
   const StiPlacement *place = tDet->getPlacement();
   const StiShape     *sh    = tDet->getShape();
+  double kNStd = (tDet->isActive() ? 5 : 0 ); // GVB: avoid seeing too much inactive material
 
   if (fabs(mFP.z())>kMaxZ || fabs(mFP.y())> kMaxR) return -1;
   
