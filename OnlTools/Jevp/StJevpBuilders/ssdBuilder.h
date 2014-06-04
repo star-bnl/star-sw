@@ -10,7 +10,7 @@
 #include "DAQ_READER/daq_dta.h"
 #include <string>
 #include <math.h>
-
+#include "TTree.h"
 class ssdBuilder : public JevpPlotSet {
  public:
   int run;
@@ -37,7 +37,6 @@ class ssdBuilder : public JevpPlotSet {
   static const int nStripPerWafer  = 768;
   static const int nChipPerWafer   = 6;   
   static const int nChPerLadder    = 12288;//n channel per ladder 
-
   //--book histograms---
   TH2I *hAdcStrip[nSide][nLadderPerSide]; 
   TH2I *hAdcEvent[nSide][nLadderPerSide];
@@ -54,6 +53,7 @@ class ssdBuilder : public JevpPlotSet {
   int mAdcLength;
   int mPed;
   int mRms;
+  TTree *mTree;
   JevpPlot **plots;
 
   daq_dta *dd;
