@@ -215,6 +215,7 @@ class daqReader {
   u_longlong daqbits64_l2;
 
   u_int evpgroups ;       // evp groups aka L3 summary[2]     
+  u_int flags ;
 
   u_int evt_time ;	// time in UNIX seconds
   u_int seq ;		// event sequence from EVB

@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.58 2014/05/30 20:00:01 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.59 2014/06/04 15:20:31 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1170,7 +1170,8 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     trgword = info->trgword;
     trgcmd = info->trgcmd;
     daqcmd = info->daqcmd;
-  
+    flags = info->flags;
+
     memcpy(L1summary, info->L1summary, sizeof(L1summary));
     memcpy(L2summary, info->L2summary, sizeof(L2summary));
     memcpy(L3summary, info->L3summary, sizeof(L3summary));

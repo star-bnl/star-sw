@@ -177,14 +177,15 @@ int main(int argc, char *argv[])
 
 		if(print_det[0]) {
 		  if(strcmp(print_det, "tinfo") == 0) {		    
-		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evptriggers=0x%x\n",
+		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evptriggers=0x%x flags=0x%x\n",
 			   evp->seq,
 			   evp->token,
 			   evp->detectors,
 			   evp->daqbits64_l1,
 			   evp->daqbits64_l2,
 			   evp->daqbits64,
-			   evp->evpgroups);
+			   evp->evpgroups,
+			   evp->flags);
 
 		    tinfo_doer(evp, "tinfo");
 		  }
