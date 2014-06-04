@@ -19,7 +19,8 @@
 #include "ssdBuilder.h"
 #include "TStyle.h"
 #include <RTS/include/rtsLog.h>
-
+#include "TTree.h"
+#define  OFFSET  375
 ClassImp(ssdBuilder);
 
 ssdBuilder::ssdBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
@@ -59,6 +60,18 @@ void ssdBuilder::initialize(int argc, char *argv[])
   mAdc       = 0;
   mAdcLength = 0;
   gStyle->SetOptLogz(1);
+  gStyle->SetGridWidth(0.001);
+  gStyle->SetGridStyle(2);
+  mTree = new TTree("mTree","Adc bank output ");
+  mTree->Branch("Sector",&mSector,"mSector/I");
+  mTree->Branch("Rdo",&mRDO,"mRDO/I");
+  mTree->Branch("Side",&mSide,"mSide/I");
+  mTree->Branch("Fiber",&mFiber,"mFiber/I");
+  mTree->Branch("Ladder",&mLadder,"mLadder/I");
+  mTree->Branch("Wafer",&mWafer,"mWafer/I");
+  mTree->Branch("Strip",&mStrip,"mStrip/I");
+  mTree->Branch("Adc",&mAdc,"mAdc/I");
+  mTree->Branch("AdcLength",&mAdcLength,"mAdcLength/I");
   //---------------------
   for ( int ns=0; ns<nSide; ns++ ) 
     {
@@ -73,7 +86,9 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hAdcStrip[ns][nl] = new TH2I(buffer, buffer2,nBinsX/merge,0,nBinsX,nBinsY/4,0,nBinsY);
 	  hAdcStrip[ns][nl]->GetXaxis()->SetTitle("Strip #");
 	  hAdcStrip[ns][nl]->GetYaxis()->SetTitle("ADC value");
-	  hAdcStrip[ns][nl]->GetXaxis()->SetNdivisions(96,0,0,false);
+	  hAdcStrip[ns][nl]->GetXaxis()->SetNdivisions(16,0,0,false);
+	  hAdcStrip[ns][nl]->GetYaxis()->SetNdivisions(0,0,0,false);
+	  //hAdcStrip[ns][nl]->GetYaxis()->SetNdivisions(,0,0,false);
 	  hAdcStrip[ns][nl]->SetStats(false);//true
 	  //------
 	  sprintf( buffer, "ADCEvent_%d_%d",ns,nl);
@@ -195,6 +210,7 @@ void ssdBuilder::event(daqReader *rdr) {
       if ( mFiber < 0 || mFiber > 7 )        continue;      //fiber 0-7
       if ( mSector < 1 || mSector > 2 )        continue;      //sector 1-2
       if ( mRDO < 1 || mRDO > 5 )        continue;  //RDO 1-5
+      
       LOG(DBG,"SST ADC: Sector %d , RDO %d , Fiber %d",mSector,mRDO,mFiber);
       u_int maxI = dd->ncontent;    
       FindLadderSide(mRDO,mFiber,mLadder,mSide);   
@@ -203,23 +219,26 @@ void ssdBuilder::event(daqReader *rdr) {
 	hAdcEvent[mSide][mLadder]->GetXaxis()->SetRangeUser(0,500);
 
       LOG(DBG,"SST ADC: Ladder %d , side %d",mLadder,mSide);
-      
+      //cout<<"mSector "<<mSector<<" mRDO "<<mRDO<<" mFiber "<<mFiber<<endl;
       for ( u_int i=0; i<maxI; i++ ) {
   
 	mWafer = sst[i].hybrid;
 	mStrip = sst[i].strip;
 	mAdc   = sst[i].adc;
+	//cout<<"mWafer "<<mWafer<<" mStrip "<<mStrip<<" Adc "<<mAdc<<endl;
 	if ( mStrip<0 || mStrip>767 )    continue; //strip 0-767
 	if ( mWafer<0 || mWafer>15 )     continue; //wafer 0 15
 	if ( mAdc > 1024 )               continue; //adc 0-1024
-
+	//====================
+	////////mTree->Fill();     
+	//====================
 	FindStripNumber(mStrip);
 	LOG(DBG,"##Strip %d , hybrid %d , Adc %d",mStrip,mWafer,mAdc);
 	if(mSide==0)
 	  hLadderWafer[0]->Fill(mLadder,mWafer);
 	if(mSide==1)
 	  hLadderWafer[1]->Fill(mLadder,mWafer);
-	hAdcStrip[mSide][mLadder]->Fill((mStrip+mWafer*nStripPerWafer), (mAdc+375)%1024);
+	hAdcStrip[mSide][mLadder]->Fill((mStrip+mWafer*nStripPerWafer), (mAdc+OFFSET)%1024);
 	if(evtCt<500)
 	  {
 	    if(evtCt%100==0)
@@ -227,8 +246,9 @@ void ssdBuilder::event(daqReader *rdr) {
 		if(evtCt<12188) //12288-100 
 		  hAdcEvent[mSide][mLadder]->GetXaxis()->SetRangeUser(0,evtCt+100);
 	      }
-	    hAdcEvent[mSide][mLadder]->Fill(evtCt,(mAdc+375)%1024);
+	    hAdcEvent[mSide][mLadder]->Fill(evtCt,(mAdc+OFFSET)%1024);
 	  }
+
       }//end all RDO,Fiber,Ladder loop
      
     }
@@ -299,7 +319,13 @@ void ssdBuilder::stoprun(daqReader *rdr)
   mWafer  = 0;
   mStrip  = 0;
   evtCt   = 0;
-
+  /*
+  LOG(DBG,"Writing Histogram !");
+  TFile *output = new TFile("AdcBank.root","RECREATE");
+  output->cd();
+  mTree->Write();
+  output->Close();
+  */
 }
 //-----------------------------
 void ssdBuilder::main(int argc, char *argv[])
