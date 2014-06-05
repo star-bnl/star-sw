@@ -86,9 +86,9 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  hAdcStrip[ns][nl] = new TH2I(buffer, buffer2,nBinsX/merge,0,nBinsX,nBinsY/4,0,nBinsY);
 	  hAdcStrip[ns][nl]->GetXaxis()->SetTitle("Strip #");
 	  hAdcStrip[ns][nl]->GetYaxis()->SetTitle("ADC value");
-	  hAdcStrip[ns][nl]->GetXaxis()->SetNdivisions(16,0,0,false);
-	  hAdcStrip[ns][nl]->GetYaxis()->SetNdivisions(0,0,0,false);
-	  //hAdcStrip[ns][nl]->GetYaxis()->SetNdivisions(,0,0,false);
+	  //hAdcStrip[ns][nl]->GetXaxis()->SetNdivisions(4,0,0,false);
+	  //hAdcStrip[ns][nl]->GetXaxis()->SetNdivisions(16,0,0,false);
+	  //hAdcStrip[ns][nl]->GetYaxis()->SetNdivisions(0,0,0,false);
 	  hAdcStrip[ns][nl]->SetStats(false);//true
 	  //------
 	  sprintf( buffer, "ADCEvent_%d_%d",ns,nl);
@@ -106,7 +106,7 @@ void ssdBuilder::initialize(int argc, char *argv[])
 	  for ( int index=0; index<nWaferPerLadder; index++ ) {         
 	    char label[nWaferPerLadder];
 	    sprintf(label, "Wafer%d", index);
-	    hAdcStrip[ns][nl]->GetXaxis()->SetBinLabel((index*nStripPerWafer+448)/merge, label);  
+	    //////hAdcStrip[ns][nl]->GetXaxis()->SetBinLabel((index*nStripPerWafer+448)/merge, label);  
 	  }
 	}
     }
