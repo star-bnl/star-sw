@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.7 2014/04/15 18:46:55 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.8 2014/06/05 14:28:18 genevb Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.8  2014/06/05 14:28:18  genevb
+ * Error about missing hit collection => warning
+ *
  * Revision 1.7  2014/04/15 18:46:55  smirnovd
  * Switched to PXL sensitive layer geometry with one Sti volume per ladder centered
  * at z=0. The loop over sensors removed and the indexing of the volumes changed
@@ -120,9 +123,9 @@ void StiPxlHitLoader::loadHits(StEvent *source,
    StPxlHitCollection *pxlHitCollection = source->pxlHitCollection();
 
    if (!pxlHitCollection) {
-      LOG_ERROR << "StiPxlHitLoader::loadHits\tERROR:\t pxlHitCollection not found "
-                << "You may not have StPxlSimMaker or StPxlHitMaker in your chain "
-                << "will return with no action taken" << endm;
+      LOG_WARN << "StiPxlHitLoader::loadHits\tWARN:\t pxlHitCollection not found. "
+               << "You may not have StPxlSimMaker or StPxlHitMaker in your chain. "
+               << "No pixel hits can be loaded." << endm;
       return;
    }
 
