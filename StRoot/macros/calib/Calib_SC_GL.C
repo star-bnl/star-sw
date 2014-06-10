@@ -101,7 +101,7 @@
 //
 /////////////////////////////////////////////////////////////////
 
-#ifndef __CINT__
+#if !defined(__CINT__) || defined(__MAKECINT__)
 #include "TFile.h"
 #include "TKey.h"
 #include "TCanvas.h"
@@ -126,6 +126,8 @@
 #include <Stiostream.h>
 #endif
 
+// Switches for users? Needs better arrangement
+Int_t EWmode = 0; // -1 east, 0 both, 1 west
 
 // Switches and constants for experts
 Bool_t USE_OLD_STDDEV = kTRUE; // method for determining STDDEV
@@ -337,6 +339,14 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   double temp1,temp2,vsc_min = 1e10;
   int jmin=-1;
 
+  // Asymmetrical calibration mode variables
+  TString     EWstr = (EWmode < 0 ? " EAST" : (EWmode > 0 ? " WEST" :   ""));
+  TString  scvarstr = (EWmode < 0 ?   "sce" : (EWmode > 0 ?   "scw" : "sc"));
+  TString uscvarstr = (EWmode < 0 ?  "usce" : "usc"); // "usc" is same for west
+  const char*  scvar =  scvarstr.Data();
+  const char* uscvar = uscvarstr.Data();
+  if (EWmode != 0) printf("\nAsymmetrical calibration mode:%s\n\n",EWstr.Data());
+
 
   // Data arrays
   double asg[nfip];
@@ -378,7 +388,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   // Set some dimensional variables
   nMeasures = 0;
   for (i=0;i<nfi;i++) { // parameter sets
-    TString SCvarstr = "sc:gapf:usc:const1";
+    TString SCvarstr = Form("%s:gapf:%s:const1",scvar,uscvar);
     SCi[i]->Draw(SCvarstr.Data(),cut,"goff");
     nMeasuresI = SCi[i]->GetSelectedRows();
     memcpy(&(m_sc  [nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
@@ -419,7 +429,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
     if (DO_PCA) {
       if (!ITER0) sce_init = fitParsSCGL[1]+fitParsSCGL[4];
     } else {
-      SCi[nfi-1]->Draw(Form("sc/(%s)",dt),cut,"goff");
+      SCi[nfi-1]->Draw(Form("%s/(%s)",scvar,dt),cut,"goff");
       histo = SCi[nfi-1]->GetHistogram();
       sce_init *= (histo->GetMean());
     }
@@ -651,7 +661,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   double escXgl_final = scXgl_final*TMath::Sqrt(covarAdjust*
                                                 (TMath::Power(fitParErrs[4]/fitPars[4],2)+
                                                  TMath::Power(fitParErrs[2]/fitPars[2],2)));
-  printf("\n*** FINAL CALIBRATION VALUES: ***\n");
+  printf(Form("\n***%s FINAL CALIBRATION VALUES: ***\n",EWstr.Data()));
   PrintResult(scp, escp, sop, esop, glp, eglp, (DO_PCA ? 0 : detbest));
 
   if (NO_PLOTS) return;
@@ -717,9 +727,10 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   htSC->Draw();
   for (i=0; i<nfi; i++) {
     cGL->cd();
-    SCi[i]->Draw(Form("gapf+%s*(%g)*usc+%g:%s",
+    SCi[i]->Draw(Form("gapf+%s*(%g)*%s+%g:%s",
                       (glmode[i] == 2 ? "ugl" : Form("(%g)",ugl[i])),
-                      fitParsSCGL[0],i*gapf_offset,detbest),gcut,"same");
+                      fitParsSCGL[0],uscvar,i*gapf_offset,detbest),
+                      gcut,"same");
     // should use fitParsSCGL[0] to match fnGapf and outlier bands,
     //   but fitParsGL[0] to match fiGapf
     fiGapf->SetParameter(9,0+i*gapf_offset);
@@ -735,9 +746,9 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
 
     cSC->cd();
     if (fitParsSCGL[6] == 1.0 && fitParsSCGL[7] == 1.0) {
-      SCi[i]->Draw(Form("sc+%g:%s",i*sc_offset,detbest),gcut,"same");
+      SCi[i]->Draw(Form("%s+%g:%s",scvar,i*sc_offset,detbest),gcut,"same");
     } else {
-      SCi[i]->Draw(Form("sc-usc*(1-(%g+ugl)/(%g*(%g+ugl)))+%g:%s",
+      SCi[i]->Draw(Form("%s-%s*(1-(%g+ugl)/(%g*(%g+ugl)))+%g:%s",scvar,uscvar,
                         fitParsSCGL[1],fitParsSCGL[7],fitParsSCGL[6]*fitParsSCGL[1],
                         i*sc_offset,detbest),gcut,"same");
     }
@@ -762,6 +773,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   //  for each of the GridLeaks used:
 
   if (allZeros) {
+    printf("\n\n*** The following calibration values may not be trusted at this time... ***");
     printf("\n\n*** Try the following calibration values: ***\n");
     for (i=0; i<nfi; i++) {
       printf("sc = %6.4g * ((%s) - (%6.4g))",sce[jmin],detbest,sof[jmin]);
@@ -1691,8 +1703,11 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.1 2013/03/29 23:54:22 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.2 2014/06/10 19:10:24 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.2  2014/06/10 19:10:24  genevb
+// StRoot/macros/calib/
+//
 // Revision 2.1  2013/03/29 23:54:22  genevb
 // Modified fits with additional flexibility, use self-documented files for input,  more scalers, bug fixes
 //
