@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.65 2013/11/15 17:46:38 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.66 2014/06/10 14:52:12 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.66  2014/06/10 14:52:12  dmitry
+ * Jeff L. spotted INSERT DELAYED in our API (thanks!), and I removed DELAYED keyword
+ *
  * Revision 1.65  2013/11/15 17:46:38  dmitry
  * do not try to free memory which we don\'t own..
  *
@@ -708,7 +711,7 @@ bool MysqlDb::InputStart(const char* table,StDbBuffer *aBuff, const char* colLis
   if(change) aBuff->SetStorageMode();
 
   *this << "select * from " << table << " where null"<< endsql;
-  *this << "insert delayed into " << table << " ("<<colList<<") VALUES(";
+  *this << "insert into " << table << " ("<<colList<<") VALUES(";
   int i;
 
     char* tmpString=new char[strlen(colList)+1];
