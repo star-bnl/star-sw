@@ -1703,10 +1703,13 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.2 2014/06/10 19:10:24 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.3 2014/06/10 19:16:16 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.3  2014/06/10 19:16:16  genevb
+// Fix previous commit log: Introduce basic asymmetry, note of caution on 'guesses'
+//
 // Revision 2.2  2014/06/10 19:10:24  genevb
-// StRoot/macros/calib/
+// Introduce basic asymmetry, note of caution on 'guesses'
 //
 // Revision 2.1  2013/03/29 23:54:22  genevb
 // Modified fits with additional flexibility, use self-documented files for input,  more scalers, bug fixes
