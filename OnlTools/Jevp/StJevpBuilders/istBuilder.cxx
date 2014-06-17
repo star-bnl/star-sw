@@ -1023,14 +1023,19 @@ void istBuilder::stoprun(daqReader *rdr) {
 		else
 		    hMipContents.mipArray[j]->Fit("landau","QR","",lowerRange, upperRange);
                 TF1* fit_nonZS = hMipContents.mipArray[j]->GetFunction("landau");
-                mpvMIP_nonZS    = fit_nonZS->GetParameter("MPV");
-                sigmaMIP_nonZS  = fit_nonZS->GetParameter("Sigma");
-		if(mpvMIP_nonZS<minMipMpv_nonZS || mpvMIP_nonZS>maxMipMpv || sigmaMIP_nonZS<minMipSigma_nonZS || sigmaMIP_nonZS>maxMipSigma) {
+		if(fit_nonZS) {
+		  mpvMIP_nonZS    = fit_nonZS->GetParameter("MPV");
+		  sigmaMIP_nonZS  = fit_nonZS->GetParameter("Sigma");
+		  if(mpvMIP_nonZS<minMipMpv_nonZS || mpvMIP_nonZS>maxMipMpv || sigmaMIP_nonZS<minMipSigma_nonZS || sigmaMIP_nonZS>maxMipSigma) {
 		    //LOG(U_IST,"MIP_nonZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_nonZS, sigmaMIP_nonZS);
 		    errLocation_mipNonZS[errCt_mipNonZS] = rdoIndex*100 + armIndex*10 + groupIndex;
 		    errValue_mipNonZS[errCt_mipNonZS] = mpvMIP_nonZS;
 		    errValue_sigmaNonZS[errCt_mipNonZS] = sigmaMIP_nonZS;
 		    errCt_mipNonZS++;
+		  }
+		}
+		else {
+		  LOG(ERR, "Bad fit!");
 		}
         }
 	if(j==6) {
@@ -1047,14 +1052,19 @@ void istBuilder::stoprun(daqReader *rdr) {
 		else
 		    hMipContents.mipArray[j+72]->Fit("landau","QR","",lowerRange, upperRange);
                 TF1* fit_ZS = hMipContents.mipArray[j+72]->GetFunction("landau");
-                mpvMIP_ZS      = fit_ZS->GetParameter("MPV");
-                sigmaMIP_ZS    = fit_ZS->GetParameter("Sigma");
-		if(mpvMIP_ZS<minMipMpv_ZS || mpvMIP_ZS>maxMipMpv || sigmaMIP_ZS<minMipSigma_ZS || sigmaMIP_ZS>maxMipSigma)  {
+		if(fit_ZS) {
+		  mpvMIP_ZS      = fit_ZS->GetParameter("MPV");
+		  sigmaMIP_ZS    = fit_ZS->GetParameter("Sigma");
+		  if(mpvMIP_ZS<minMipMpv_ZS || mpvMIP_ZS>maxMipMpv || sigmaMIP_ZS<minMipSigma_ZS || sigmaMIP_ZS>maxMipSigma)  {
                     //LOG(U_IST,"MIP_ZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_ZS, sigmaMIP_ZS);
 		    errLocation_mipZS[errCt_mipZS] = rdoIndex*100 + armIndex*10 + groupIndex;
 		    errValue_mipZS[errCt_mipZS] = mpvMIP_ZS;
                     errValue_sigmaZS[errCt_mipZS] = sigmaMIP_ZS;
 		    errCt_mipZS++;
+		  }
+		}
+		else {
+		  LOG(ERR, "Bad fit!");
 		}
         }
 	if(j==6) {
