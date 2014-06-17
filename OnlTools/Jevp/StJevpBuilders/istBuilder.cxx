@@ -3,6 +3,7 @@
  * Latest updates  4/8/2014  Yaping
  * Latest updates  5/9/2014  Yaping
  * update fit range for MIP peak distribution of center sections  5/12/2014 Yaping 
+ * update vertexZ cut for event selection: -10.0 cm < vertexZ < 10.0 cm   6/16/2014 Yaping
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +14,8 @@
 #include <DAQ_READER/daq_dta.h>
 #include "DAQ_READER/daq_det.h"
 #include <DAQ_FGT/daq_fgt.h> 
+#include "RTS/EventTracker/eventTrackerLib.hh"
+
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "StEvent/StTriggerData.h"
 #include <TF1.h>
@@ -601,11 +604,62 @@ void istBuilder::startrun(daqReader *rdr) {
 }
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
-
+#define MAX_L3_SZ 1000000
 
 // ************IST EVENT******************
 // ---------------------------------------
 void istBuilder::event(daqReader *rdr) {
+  float vertexZ = -9999;
+  StTriggerData *trgd = getStTriggerData(rdr);
+  if(!trgd) return;
+
+  //cout << "Event " << evtCt << ":" << endl;
+  evtCt++;
+
+  //ZDC vertex
+  double mZdcTimeDiff = -9999;
+  double mZdcVertex   = -9999;
+  int te = trgd->zdcPmtTDC(east,1);
+  int tw = trgd->zdcPmtTDC(west,1);
+  if(te>20 && te<4000 && tw>20 && tw<4000) {
+      mZdcTimeDiff = float(tw-te);
+      mZdcVertex   = (mZdcTimeDiff / 2.0) * 0.02 * 30;
+      mZdcVertex  += (12.88 - .55); //JML 3/17/14
+  }
+  //cout << "ZDC: run " << run << " vertex along Z: " << mZdcVertex << endl;
+
+  //BBC vertex
+  double mBbcTimeDiff = -9999;
+  double mBbcVertex = -9999;
+  if( trgd->bbcEarliestTDC(east)>10 && trgd->bbcEarliestTDC(east)<3000 &&
+      trgd->bbcEarliestTDC(west)>10 && trgd->bbcEarliestTDC(west)<3000 ) {
+      mBbcTimeDiff = trgd->bbcTimeDifference() - 4096;
+      mBbcVertex   = (mBbcTimeDiff / 2.0) * 0.02 * 30;
+      mBbcVertex  += (10.28 -.55); //JML 3/17/14
+  }
+  //cout << "BBC: run " << run << " vertex along Z: " << mBbcVertex << endl;
+
+  //HLT vertex
+  double mHltVertex = -9999;
+  static EventTracker *evtTracker = new EventTracker();
+  static L3_P *l3p = (L3_P *)malloc(MAX_L3_SZ);
+  static l3_t l3t;
+  int ret = evtTracker->trackEvent(rdr, (char *)rdr, l3p, MAX_L3_SZ);
+  if(ret < 0) return;
+  ret = evtTracker->copyl3_t(l3t, l3p);
+  if(ret < 0) return;
+  mHltVertex = l3t.zVertex;
+  //cout << "HLT: run " << run << " vertex along Z: " << mHltVertex << endl;
+
+  vertexZ = mHltVertex; //use HLT vertex in higher priority
+  if(mHltVertex < -9998) vertexZ = mZdcVertex;
+
+  if(trgd) delete trgd;  
+  if(fabs(vertexZ) > 10.0) {
+      LOG(DBG, "Skipping evt %d with vertexZ = %f", evtCt, vertexZ);
+      return;  //skip current event if its vertex Z was outside of +-10.0 cm
+  }
+
   // arrays to calculate dynamical common mode noise contribution to this chip in current event
   float sumAdcPerEvent[totAPV];
   int counterAdcPerEvent[totAPV];
@@ -795,9 +849,6 @@ void istBuilder::event(daqReader *rdr) {
     hEventSumContents.hEventSize->Fill(short(evtSize/1024));
   }
 
-  //counting events analyzed 
-  evtCt++;
- 
   //count hit per Ladder per Event and fill hit map and MIP
   for(int geoIdx=1; geoIdx<=totCh; geoIdx++) {
       int ladderIdx = 1 + (geoIdx-1)/ChPerLadder;               //ladder index 1 to 24
