@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.21 2013/12/27 16:49:50 ramdebbe Exp $
+// $Id: StPeCEvent.cxx,v 1.22 2014/06/18 16:30:55 ramdebbe Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.22  2014/06/18 16:30:55  ramdebbe
+// added more variables to event summary
+//
 // Revision 1.21  2013/12/27 16:49:50  ramdebbe
 // added a set method setTOFgeometry to pass pointer to StBTofGeometry
 //
@@ -165,6 +168,14 @@ ClassImp(StPeCEvent)
   zVertex = 0;
   rVertex = 0;
   infoLevel = 0;
+  nTOFhitsSum = 0;
+  nBtofTriggerHitsSum = 0;
+  nTOFtracksSum = 0;
+  zdcEastUASum = 0;
+  zdcWestUASum = 0;
+  zdcCoincidenceRateSum = 0;
+  lastDSM0Sum = 0;
+  lastDSM1Sum = 0;
 
 
   LOG_INFO << "StPeCEvent constructor: leaving constructor ---------- " << endm;
@@ -198,6 +209,14 @@ void  StPeCEvent::clear ( ) {
    nSPairs = 0 ;
    nTracks = 0 ;
 
+   nTOFhitsSum = 0;
+   nBtofTriggerHitsSum = 0;
+   nTOFtracksSum = 0;
+   zdcEastUASum = 0;
+   zdcWestUASum = 0;
+   zdcCoincidenceRateSum = 0;
+   lastDSM0Sum = 0;
+   lastDSM1Sum = 0;
 
    pPairs->Clear();
    sPairs->Clear();
@@ -461,12 +480,12 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
    eventN = event->eventInfo().id();
    
    runN = event->eventInfo().runId(); 
-   LOG_INFO << "StPeCEvent fill(muDst ): useBemc ---------- " <<useBemcLocal << endm;
-   LOG_INFO << "StPeCEvent fill(muDst ): useTOF ---------- " <<useTOFlocal << endm;
-   LOG_INFO << "StPeCEvent fill(muDst ): useVertex ---------- " <<useVertexLocal << endm;
-   LOG_INFO << "StPeCEvent fill(muDst ): useTracks ---------- " <<useTracksLocal << endm;
-   LOG_INFO << "StMuEvent Run ID: " << runN << endm;
-   LOG_INFO << "StMuEvent ID: " << eventN << endm;
+//    LOG_INFO << "StPeCEvent fill(muDst ): useBemc ---------- " <<useBemcLocal << endm;
+//    LOG_INFO << "StPeCEvent fill(muDst ): useTOF ---------- " <<useTOFlocal << endm;
+//    LOG_INFO << "StPeCEvent fill(muDst ): useVertex ---------- " <<useVertexLocal << endm;
+//    LOG_INFO << "StPeCEvent fill(muDst ): useTracks ---------- " <<useTracksLocal << endm;
+//    LOG_INFO << "StMuEvent Run ID: " << runN << endm;
+//    LOG_INFO << "StMuEvent ID: " << eventN << endm;
    
    bField = event->eventSummary().magneticField();
   acceptEvent = kFALSE;
@@ -528,8 +547,23 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
    // backwards compatibility, FLK
    nPrim    = nPrimaryTracks; 
    nTot     = nGlobalTracks;
-    size_t Nvert = muDst->numberOfPrimaryVertices();
+   size_t Nvert = muDst->numberOfPrimaryVertices();
    LOG_INFO << "StPeCEvent::fill(event mudst) #vertices: "  <<Nvert<< endm; 
+   zdcCoincidenceRateSum = mudst->event()->runInfo().zdcCoincidenceRate();
+   const StTriggerData * trigData;
+   trigData =  const_cast< StTriggerData *> (mudst->event()->triggerData());
+
+   if(!trigData) {
+     LOG_ERROR << "In StPeCEvent summary: StTriggerData not available in StMuDst "<< endm;
+   }
+   lastDSM0Sum = trigData->lastDSM(0);
+   lastDSM1Sum = trigData->lastDSM(1);
+   // attenuated signals 
+   zdcWestUASum = trigData->zdcAttenuated(west);
+   zdcEastUASum = trigData->zdcAttenuated(east);
+   //TOF hits as seen by trigger (OR of 8 cells)
+   nBtofTriggerHitsSum =  trigData->tofMultiplicity();
+   nTOFtracksSum = globalTrackCounter;
     //
     // select tracks that match TOF hits and reconstruct vertex  RD
     //
@@ -578,8 +612,8 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 
        }
      }    // loop over tracks in vertex
-   LOG_INFO << "Number of primary  TPC  tracks: " << nPrimaryTPC << " FTPC tracks " << nPrimaryFTPC<<endm; 
-   LOG_INFO << "Number of primary  tracks event summary: " << nPrimaryTracks << " global tracks " << nGlobalTracks<<endm;  
+//    LOG_INFO << "Number of primary  TPC  tracks: " << nPrimaryTPC << " FTPC tracks " << nPrimaryFTPC<<endm; 
+//    LOG_INFO << "Number of primary  tracks event summary: " << nPrimaryTracks << " global tracks " << nGlobalTracks<<endm;  
 
    if (( nPrimaryTPC > 0 ||  nPrimaryFTPC>0 ) &&   // at least one track in either FTPC or TPC
        ( nPrimaryTPC < StPeCnMaxTracks && nPrimaryFTPC< StPeCnMaxTracks )&& (nPrimaryFTPC+nPrimaryTPC>=2)) {
@@ -593,8 +627,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
        trk1 = (StMuTrack*)muTracks->UncheckedAt(i1);
        for(int i2 = i1+1; i2  <= muTracks->GetLast(); i2++) {
 	 trk2 = (StMuTrack*)muTracks->UncheckedAt(i2);
-	 cout << " id1 " << i1 << " vtx index " << trk1->vertexIndex() << endl;
-	 cout << " id2 " << i2 << " vtx index " << trk2->vertexIndex() << endl;
+
        
 	 // DANGER 
 	 if (! (trk1->flag()>0)) continue;
@@ -606,7 +639,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 
        }  //lopp mutracks 2
      } //loop mutracks 1
-     LOG_INFO << " number of pairs " << nPPairs<<"  in vertex index "<<verti<<endm;
+//      LOG_INFO << " number of pairs " << nPPairs<<"  in vertex index "<<verti<<endm;
    } else {   //accept ev
      LOG_INFO << " reject  vertex !" << endm;
      // return 1; 
@@ -663,11 +696,11 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
   StMuTrack *tp = 0;
   Bool_t acceptEvent;
 
-  LOG_INFO << "StPeCEvent fill(muDst StEvent): useBemc ---------- " <<useBemcLocal << endm;
-  LOG_INFO << "StPeCEvent fill(muDst StEvent): useTOF ---------- " <<useTOFlocal << endm;
-  LOG_INFO << "StPeCEvent fill(muDst StEvent): useVertex ---------- " <<useVertexLocal << endm;
-  LOG_INFO << "StPeCEvent fill(muDst StEvent): useTracks ---------- " <<useTracksLocal << endm;
-  LOG_INFO << "StPeCEvent fill(muDst StEvent): TOF geometry pointer ---------- " << mTOFgeoEv<<endm;
+//   LOG_INFO << "StPeCEvent fill(muDst StEvent): useBemc ---------- " <<useBemcLocal << endm;
+//   LOG_INFO << "StPeCEvent fill(muDst StEvent): useTOF ---------- " <<useTOFlocal << endm;
+//   LOG_INFO << "StPeCEvent fill(muDst StEvent): useVertex ---------- " <<useVertexLocal << endm;
+//   LOG_INFO << "StPeCEvent fill(muDst StEvent): useTracks ---------- " <<useTracksLocal << endm;
+//   LOG_INFO << "StPeCEvent fill(muDst StEvent): TOF geometry pointer ---------- " << mTOFgeoEv<<endm;
   //
   // Get Magnetic field from event summary
   //
@@ -714,6 +747,8 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
     //
 
      LOG_INFO <<"StPeCEvent::fill number of btof hits "<<mudst->numberOfBTofHit()<<endm;
+     nTOFhitsSum = mudst->numberOfBTofHit();
+ 
     int nMax = mudst->numberOfBTofHit();
     int globalTrackCounter = 0;
     for(int i=0;i<nMax;i++) {
@@ -738,8 +773,21 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
    //Save the event reference
    muDst = mudst;
    event = muDst->event();
+  zdcCoincidenceRateSum = mudst->event()->runInfo().zdcCoincidenceRate();
+  const StTriggerData * trigData;
+  trigData =  const_cast< StTriggerData *> (mudst->event()->triggerData());
 
-
+  if(!trigData) {
+    LOG_ERROR << "In StPeCEvent summary: StTriggerData not available in StMuDst "<< endm;
+  }
+    lastDSM0Sum = trigData->lastDSM(0);
+    lastDSM1Sum = trigData->lastDSM(1);
+    // attenuated signals 
+    zdcWestUASum = trigData->zdcAttenuated(west);
+    zdcEastUASum = trigData->zdcAttenuated(east);
+    //TOF hits as seen by trigger (OR of 8 cells)
+    nBtofTriggerHitsSum =  trigData->tofMultiplicity();
+    nTOFtracksSum = globalTrackCounter;
    //Set Run and Event Number
    eventN = event->eventInfo().id();
    
@@ -752,7 +800,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
    
    // number of vertices not a good number anymore ! FLK 07/03
    // if ( event->eventSummary().numberOfVertices() ) {
-   
+   nVertices = event->eventSummary().numberOfVertices();
    StThreeVectorF vtx = event->primaryVertexPosition();
    // vertex is set to 0,0,0 of no prim vertex found  FLK 07/03
    if(vtx.x() !=0 && vtx.y()!=0 && vtx.z()!=0) {
@@ -832,8 +880,8 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
 
        }
      }
-   LOG_INFO << "Number of primary  TPC  tracks: " << nPrimaryTPC << " FTPC tracks " << nPrimaryFTPC<<endm; 
-   LOG_INFO << "Number of primary  tracks event summary: " << nPrimaryTracks << " global tracks " << nGlobalTracks<<endm;  
+//    LOG_INFO << "Number of primary  TPC  tracks: " << nPrimaryTPC << " FTPC tracks " << nPrimaryFTPC<<endm; 
+//    LOG_INFO << "Number of primary  tracks event summary: " << nPrimaryTracks << " global tracks " << nGlobalTracks<<endm;  
    
    //
    // RD 19 APR 2013 comment this and modify to work with UPCpp to make pairs with tracks that have TOF hit match  **START**
