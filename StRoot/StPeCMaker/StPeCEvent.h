@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.13 2013/12/27 16:49:58 ramdebbe Exp $
+// $Id: StPeCEvent.h,v 1.14 2014/06/18 16:38:30 ramdebbe Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.14  2014/06/18 16:38:30  ramdebbe
+// added more variables to event summary
+//
 // Revision 1.13  2013/12/27 16:49:58  ramdebbe
 // added a set method setTOFgeometry to pass pointer to StBTofGeometry
 //
@@ -127,9 +130,21 @@ private:
   Float_t                         yVertex;
   Float_t                         zVertex;
   Float_t                         rVertex;
+  Int_t                           nVertices;
   Int_t                           nTracks ;
   Int_t                           nPPairs ;
   Int_t                           nSPairs ;
+  //
+  //3-JUNE2014 add more information to event summary
+  //
+  Int_t                           nTOFhitsSum;
+  Int_t                           nBtofTriggerHitsSum;
+  Int_t                           nTOFtracksSum;
+  Float_t                         zdcEastUASum;
+  Float_t                         zdcWestUASum;
+  Float_t                         zdcCoincidenceRateSum;
+  unsigned short                  lastDSM0Sum;
+  unsigned short                  lastDSM1Sum;
   TClonesArray                   *pPairs ;
   TClonesArray                   *sPairs ;
   TClonesArray                   *tracks;
