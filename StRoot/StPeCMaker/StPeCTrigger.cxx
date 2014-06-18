@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.16 2014/06/18 16:27:55 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.17 2014/06/18 19:01:42 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.17  2014/06/18 19:01:42  ramdebbe
+// reset trg_... for every event
+//
 // Revision 1.16  2014/06/18 16:27:55  ramdebbe
 // added zerobias as another trigger of interest
 //
@@ -83,6 +86,7 @@ StPeCTrigger::StPeCTrigger() {
 //
    ctbSlats  = new TClonesArray ("StPeCCtbSlat", 10);
 
+
 }
 StPeCTrigger::~StPeCTrigger() {
    ctbSlats->Clear();
@@ -96,6 +100,14 @@ void StPeCTrigger::clear() {
 Int_t StPeCTrigger::process(StEvent *event, string triggerSel)
 {
   unsigned int i,j;
+
+  //make sure trg_2001 is reset before possible use
+
+  trg_2001 = 0;
+  trg_3001 = 0;
+  trg_3000 = 0;
+  trg_2004 = 0;
+
   const StTriggerId * ttid;
   // get trigger word 
   tw = event->l0Trigger()->triggerWord();
@@ -428,8 +440,11 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 {
   unsigned int i,j;
   //make sure trg_2001 is reset before possible use
+
   trg_2001 = 0;
   trg_3001 = 0;
+  trg_3000 = 0;
+  trg_2004 = 0;
 
   // get trigger word 
   tw = mudst->event()->l0Trigger().triggerWord();
