@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.15 2014/04/25 20:00:06 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.16 2014/06/18 16:27:55 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.16  2014/06/18 16:27:55  ramdebbe
+// added zerobias as another trigger of interest
+//
 // Revision 1.15  2014/04/25 20:00:06  ramdebbe
 // added more triggers for run14
 //
@@ -430,7 +433,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 
   // get trigger word 
   tw = mudst->event()->l0Trigger().triggerWord();
-  LOG_INFO << "StPeCTrigger::reading StMuDst ---------- " << endm;
+//   LOG_INFO << "StPeCTrigger::reading StMuDst ---------- " << endm;
   // read trigger information with up to date methods
   //
   double zdcRate = mudst->event()->runInfo().zdcCoincidenceRate();
@@ -446,7 +449,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
   //
 
    runN = mudst->event()->eventInfo().runId(); 
-   LOG_INFO << "StPeCTrigger Run ID: " << runN << endm;
+//    LOG_INFO << "StPeCTrigger Run ID: " << runN << endm;
 
   // get triggger ids
   vector<unsigned int> triggerIds;
@@ -462,9 +465,15 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 //     for(iiter=triggerIds.begin(); iiter!=triggerIds.end(); iiter++) {
 //     }
     if(triggerSel=="ZDC_Monitor"){
-      trg_3000     =ttid.isTrigger(260022);  //ZDC_monitor  run10  this two lines are used for trigger efficiency study Comment the 8 lines that follow
+      trg_3000     =ttid.isTrigger(260022);  //ZDC_monitor  run10  this two lines are used for trigger efficiency study 
       trg_3001     =ttid.isTrigger(260750);  //UPC_Main     run10
-      LOG_INFO << "StPeCTrigger::value of trg_3000 ZDC_monitor ---------- " <<trg_3000<< endm;
+//       LOG_INFO << "StPeCTrigger::value of trg_3000 ZDC_monitor ---------- " <<trg_3000<< endm;
+//       LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Main ---------- " <<trg_3001<< endm;
+    }
+    if(triggerSel=="zerobias"){
+      trg_3000     =ttid.isTrigger(9300);  //zerobias  run10  this two lines are used for trigger efficiency study 
+      trg_3001     =ttid.isTrigger(260750);  //UPC_Main     run10
+      LOG_INFO << "StPeCTrigger::value of trg_3000 zerobias ---------- " <<trg_3000<< endm;
       LOG_INFO << "StPeCTrigger::value of trg_3001 UPC_Main ---------- " <<trg_3001<< endm;
     }
     if(triggerSel=="UPC_Main"){
@@ -564,7 +573,13 @@ Int_t StPeCTrigger::process(StMuDst* mudst, string triggerSel)
 	trg_2004     =ttid.isTrigger(14);       //run14 UPC_topo 
 	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_jpsiA  ------------------------------------ " <<trg_3000<< endm;
       }
-    }
+      if(triggerSel=="UPC_main_daq10k"){
+
+	trg_3000     =ttid.isTrigger(3);        //run14 200 GeV UPC_Main used to test daq10k 
+
+	LOG_INFO << "StPeCTrigger::value of trg_3000 UPC_main_daq10k  ------------------------------------ " <<trg_3000<< endm;
+      }
+    }  //15077---15170 
 
     lastDSM0 = trigData->lastDSM(0);
     lastDSM1 = trigData->lastDSM(1);
