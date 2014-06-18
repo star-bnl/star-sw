@@ -14,7 +14,6 @@
 #include <DAQ_READER/daq_dta.h>
 #include "DAQ_READER/daq_det.h"
 #include <DAQ_FGT/daq_fgt.h> 
-#include "RTS/EventTracker/eventTrackerLib.hh"
 
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "StEvent/StTriggerData.h"
@@ -609,56 +608,25 @@ void istBuilder::startrun(daqReader *rdr) {
 // ************IST EVENT******************
 // ---------------------------------------
 void istBuilder::event(daqReader *rdr) {
-  float vertexZ = -9999;
   StTriggerData *trgd = getStTriggerData(rdr);
   if(!trgd) return;
-
-  //cout << "Event " << evtCt << ":" << endl;
-  evtCt++;
 
   //ZDC vertex
   double mZdcTimeDiff = -9999;
   double mZdcVertex   = -9999;
   int te = trgd->zdcPmtTDC(east,1);
   int tw = trgd->zdcPmtTDC(west,1);
-  if(te>20 && te<4000 && tw>20 && tw<4000) {
+  if(te>20 && te<4000 && tw>20 && tw<4000) { //te=tw=0 if cosmic data, so this vertex cut not applied to cosmic runs
       mZdcTimeDiff = float(tw-te);
       mZdcVertex   = (mZdcTimeDiff / 2.0) * 0.02 * 30;
-      mZdcVertex  += (12.88 - .55); //JML 3/17/14
+      mZdcVertex  += (12.88 - .55); //copy from trgBuilder.cxx
+
+      if(fabs(mZdcVertex) > 10.0) {
+      	  LOG(DBG, "Skipping evt %d in run %d with vertexZ = %f", trgd->eventNumber(), run, mZdcVertex);
+          return;  //skip current event if its vertex Z was outside of +-10.0 cm
+      }
   }
-  //cout << "ZDC: run " << run << " vertex along Z: " << mZdcVertex << endl;
-
-  //BBC vertex
-  double mBbcTimeDiff = -9999;
-  double mBbcVertex = -9999;
-  if( trgd->bbcEarliestTDC(east)>10 && trgd->bbcEarliestTDC(east)<3000 &&
-      trgd->bbcEarliestTDC(west)>10 && trgd->bbcEarliestTDC(west)<3000 ) {
-      mBbcTimeDiff = trgd->bbcTimeDifference() - 4096;
-      mBbcVertex   = (mBbcTimeDiff / 2.0) * 0.02 * 30;
-      mBbcVertex  += (10.28 -.55); //JML 3/17/14
-  }
-  //cout << "BBC: run " << run << " vertex along Z: " << mBbcVertex << endl;
-
-  //HLT vertex
-  double mHltVertex = -9999;
-  static EventTracker *evtTracker = new EventTracker();
-  static L3_P *l3p = (L3_P *)malloc(MAX_L3_SZ);
-  static l3_t l3t;
-  int ret = evtTracker->trackEvent(rdr, (char *)rdr, l3p, MAX_L3_SZ);
-  if(ret < 0) return;
-  ret = evtTracker->copyl3_t(l3t, l3p);
-  if(ret < 0) return;
-  mHltVertex = l3t.zVertex;
-  //cout << "HLT: run " << run << " vertex along Z: " << mHltVertex << endl;
-
-  vertexZ = mHltVertex; //use HLT vertex in higher priority
-  if(mHltVertex < -9998) vertexZ = mZdcVertex;
-
   if(trgd) delete trgd;  
-  if(fabs(vertexZ) > 10.0) {
-      LOG(DBG, "Skipping evt %d with vertexZ = %f", evtCt, vertexZ);
-      return;  //skip current event if its vertex Z was outside of +-10.0 cm
-  }
 
   // arrays to calculate dynamical common mode noise contribution to this chip in current event
   float sumAdcPerEvent[totAPV];
@@ -849,6 +817,9 @@ void istBuilder::event(daqReader *rdr) {
     hEventSumContents.hEventSize->Fill(short(evtSize/1024));
   }
 
+  //counting analyzed event number
+  evtCt++;
+
   //count hit per Ladder per Event and fill hit map and MIP
   for(int geoIdx=1; geoIdx<=totCh; geoIdx++) {
       int ladderIdx = 1 + (geoIdx-1)/ChPerLadder;               //ladder index 1 to 24
@@ -1023,19 +994,20 @@ void istBuilder::stoprun(daqReader *rdr) {
 		else
 		    hMipContents.mipArray[j]->Fit("landau","QR","",lowerRange, upperRange);
                 TF1* fit_nonZS = hMipContents.mipArray[j]->GetFunction("landau");
-		if(fit_nonZS) {
-		  mpvMIP_nonZS    = fit_nonZS->GetParameter("MPV");
-		  sigmaMIP_nonZS  = fit_nonZS->GetParameter("Sigma");
-		  if(mpvMIP_nonZS<minMipMpv_nonZS || mpvMIP_nonZS>maxMipMpv || sigmaMIP_nonZS<minMipSigma_nonZS || sigmaMIP_nonZS>maxMipSigma) {
-		    //LOG(U_IST,"MIP_nonZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_nonZS, sigmaMIP_nonZS);
-		    errLocation_mipNonZS[errCt_mipNonZS] = rdoIndex*100 + armIndex*10 + groupIndex;
-		    errValue_mipNonZS[errCt_mipNonZS] = mpvMIP_nonZS;
-		    errValue_sigmaNonZS[errCt_mipNonZS] = sigmaMIP_nonZS;
-		    errCt_mipNonZS++;
-		  }
+	        if(fit_nonZS) {
+                    mpvMIP_nonZS    = fit_nonZS->GetParameter("MPV");
+                    sigmaMIP_nonZS  = fit_nonZS->GetParameter("Sigma");
+		
+		    if(mpvMIP_nonZS<minMipMpv_nonZS || mpvMIP_nonZS>maxMipMpv || sigmaMIP_nonZS<minMipSigma_nonZS || sigmaMIP_nonZS>maxMipSigma) {
+		    	//LOG(U_IST,"MIP_nonZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_nonZS, sigmaMIP_nonZS);
+		    	errLocation_mipNonZS[errCt_mipNonZS] = rdoIndex*100 + armIndex*10 + groupIndex;
+		    	errValue_mipNonZS[errCt_mipNonZS] = mpvMIP_nonZS;
+		    	errValue_sigmaNonZS[errCt_mipNonZS] = sigmaMIP_nonZS;
+		    	errCt_mipNonZS++;
+		    }
 		}
 		else {
-		  LOG(ERR, "Bad fit!");
+		    LOG(WARN, "Bad Fit due to non-enough data (non-ZS) for RDO%d_ARM%d_GROUP%d", rdoIndex, armIndex, groupIndex);
 		}
         }
 	if(j==6) {
@@ -1053,19 +1025,20 @@ void istBuilder::stoprun(daqReader *rdr) {
 		    hMipContents.mipArray[j+72]->Fit("landau","QR","",lowerRange, upperRange);
                 TF1* fit_ZS = hMipContents.mipArray[j+72]->GetFunction("landau");
 		if(fit_ZS) {
-		  mpvMIP_ZS      = fit_ZS->GetParameter("MPV");
-		  sigmaMIP_ZS    = fit_ZS->GetParameter("Sigma");
-		  if(mpvMIP_ZS<minMipMpv_ZS || mpvMIP_ZS>maxMipMpv || sigmaMIP_ZS<minMipSigma_ZS || sigmaMIP_ZS>maxMipSigma)  {
-                    //LOG(U_IST,"MIP_ZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_ZS, sigmaMIP_ZS);
-		    errLocation_mipZS[errCt_mipZS] = rdoIndex*100 + armIndex*10 + groupIndex;
-		    errValue_mipZS[errCt_mipZS] = mpvMIP_ZS;
-                    errValue_sigmaZS[errCt_mipZS] = sigmaMIP_ZS;
-		    errCt_mipZS++;
-		  }
+                    mpvMIP_ZS      = fit_ZS->GetParameter("MPV");
+                    sigmaMIP_ZS    = fit_ZS->GetParameter("Sigma");
+		
+		    if(mpvMIP_ZS<minMipMpv_ZS || mpvMIP_ZS>maxMipMpv || sigmaMIP_ZS<minMipSigma_ZS || sigmaMIP_ZS>maxMipSigma)  {
+                    	//LOG(U_IST,"MIP_ZS::section RDO%d_ARM%d_GROUP%d with MIP mpv %f, sigma %f!", rdoIndex, armIndex, groupIndex, mpvMIP_ZS, sigmaMIP_ZS);
+		    	errLocation_mipZS[errCt_mipZS] = rdoIndex*100 + armIndex*10 + groupIndex;
+		    	errValue_mipZS[errCt_mipZS] = mpvMIP_ZS;
+                    	errValue_sigmaZS[errCt_mipZS] = sigmaMIP_ZS;
+		    	errCt_mipZS++;
+		    }
 		}
 		else {
-		  LOG(ERR, "Bad fit!");
-		}
+                    LOG(WARN, "Bad Fit due to non-enough data (ZS) for RDO%d_ARM%d_GROUP%d", rdoIndex, armIndex, groupIndex);
+                }
         }
 	if(j==6) {
            mpvMIP_ZS = 550.;
