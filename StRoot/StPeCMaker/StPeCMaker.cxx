@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.31 2013/12/27 16:44:27 ramdebbe Exp $
+// $Id: StPeCMaker.cxx,v 1.32 2014/06/18 17:29:49 ramdebbe Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.32  2014/06/18 17:29:49  ramdebbe
+// ignore flag from StPeCEvent and writes all events with a summary
+//
 // Revision 1.31  2013/12/27 16:44:27  ramdebbe
 // added extrapolation of tracks to TOF, geometry setup in InitRun
 //
@@ -134,7 +137,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.31 2013/12/27 16:44:27 ramdebbe Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.32 2014/06/18 17:29:49 ramdebbe Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -160,7 +163,7 @@ Int_t StPeCMaker::Init() {
    LOG_INFO <<"StPeCMaker INIT: readStMuDst " << readStMuDst << endm;
    LOG_INFO <<"StPeCMaker INIT: readStEvent " << readStEvent << endm;
    LOG_INFO <<"StPeCMaker INIT: readBoth "    << readStMuDst_and_StEvent << endm;
-   LOG_INFO <<"trigger to be selected: "    << triggerChoice << endm;
+   LOG_INFO <<"trigger to be selected: "    << triggerChoice << endm;   // triggerChoice can be changed with the setter setTriggerOfInterest ( const char * selectTrigger = "UPC_Main" )
    //Get the standard root format to be independent of Star IO   
    m_outfile = new TFile(treeFileName, "recreate");
    m_outfile->SetCompressionLevel(1);
@@ -172,7 +175,7 @@ Int_t StPeCMaker::Init() {
 
    pevent = new StPeCEvent(useBemc, useTOF, useVertex, useTracks, readStMuDst, readStEvent, readStMuDst_and_StEvent);
    pevent->setInfoLevel(infoLevel);
-
+   if(!pevent) LOG_INFO << "StPeCMaker Init: unable to make instance of StPeCEvent ---------- " << endm;
    trigger = new StPeCTrigger();
    trigger->setInfoLevel(infoLevel);
    char test[] = "ZDC_monitor";
@@ -182,10 +185,10 @@ Int_t StPeCMaker::Init() {
 
    //Add branches
    uDstTree->Branch("Event", "StPeCEvent", &pevent, 94000, 99);
-//     LOG_INFO << "StPeCMaker Init: after Event branch add ---------- " << endm;
+    LOG_INFO << "StPeCMaker Init: after Event branch add ---------- " << endm;
    uDstTree->Branch("Trigger", "StPeCTrigger", &trigger, 64000, 99);
    uDstTree->Branch("Geant", "StPeCGeant", &geant, 64000, 99);
-//     LOG_INFO << "StPeCMaker Init: after branch add ---------- " << endm;
+    LOG_INFO << "StPeCMaker Init: after last branch add ---------- " << endm;
    //define 2-D histogram to display snapshots of individual events
    //store then in another directory
    TDirectory * saveDir = gDirectory;
@@ -211,7 +214,7 @@ Int_t StPeCMaker::InitRun(Int_t runnr) {
    treeFileName="StPeCMaker.tree.root";
    // get TOF geometry to extrapolate tracks to it
    //
-     mBTofGeom = new StBTofGeometry("btofGeometry","btofGeometry in MatchMaker");
+     mBTofGeom = new StBTofGeometry("btofGeometry","btofGeometry in MatchMaker");  //commenting this line stops the extrapolation
 
      geantU  = dynamic_cast<St_geant_Maker *>(GetMaker("myGeant"));
 
@@ -274,8 +277,8 @@ Int_t StPeCMaker::Make()
    if(readStMuDst){
     if(!muDst )  LOG_INFO << "StPeCMaker make: muDst not present "  << endm;
 
-      LOG_INFO << "StPeCMaker make: using muDst---------- "  << endm;
-      LOG_INFO << "StPeCMaker make: trigger selected ---------- "  << triggerChoice<< endm;
+//       LOG_INFO << "StPeCMaker make: using muDst---------- "  << endm;
+//       LOG_INFO << "StPeCMaker make: trigger selected ---------- "  << triggerChoice<< endm;
       NTracks = muDst->globalTracks()->GetEntries();
        
       StL0Trigger &trig = muDst->event()->l0Trigger();
@@ -348,7 +351,9 @@ Int_t StPeCMaker::Make()
    LOG_INFO << "ok returnValue " <<ok<<"  "<<returnValue<< endm;
 
 
-   if ( !ok && returnValue>0) {    // || geantBranch  ) {  RD 15-SEP
+//    if ( !ok && returnValue>0) {    // || geantBranch  ) {  RD 15-SEP
+   if ( returnValue>0) {    // || geantBranch  ) {  RD 3-JUNE2014 ignore the flag from StPeCEvent to write summary for all events
+
 //    if ( returnValue>0) {    // || geantBranch  ) {  RD 15-SEP  //25MAR2013 to read pp fast offline  //turn off trigger check
      LOG_INFO << "Fill Event to Tree!**********************" << endm;
      uDstTree->Fill();
