@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.11 2014/04/16 02:23:39 huangbc Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.12 2014/06/19 19:16:27 huangbc Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.12  2014/06/19 19:16:27  huangbc
+ * Fixed an issue of reading SL12d production data. Add expTof for MTD pidtraits.
+ *
  * Revision 1.11  2014/04/16 02:23:39  huangbc
  * 1. fixed a bug of un-initialized variable nDedxPts in MtdTrack construction function.
  * 2. reoriganized project2Mtd function. Made it more readable.
@@ -746,6 +749,7 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			LOG_INFO << "No Mudst ... bye-bye" <<endm;
 			return kFALSE;
 		}
+
 		/// A. build vector of candidate cells
 		int nMtdHits = mMuDst->numberOfMTDHit();
 		if(nMtdHits<=0) return kFALSE;
@@ -1022,6 +1026,18 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 	float mField = 0;
 	UInt_t Nnodes = 0;
 	if(mMuDstIn){
+
+		index2Primary.clear();
+		Int_t pNnodes = mMuDst->numberOfPrimaryTracks();
+		for(Int_t ii=0;ii<pNnodes;ii++){
+			StMuTrack *pTrack = mMuDst->primaryTracks(ii); 
+			if(!pTrack) continue;
+			Int_t index2Global = pTrack->index2Global();
+			StMuTrack *gTrack = mMuDst->globalTracks(index2Global);
+			if(!gTrack) continue;
+			index2Primary[index2Global] = ii;
+		}
+
 		Nnodes = mMuDst->numberOfGlobalTracks();
 		mField = mMuDst->event()->runInfo().magneticField();
 		for(UInt_t iNode=0;iNode<Nnodes;iNode++){
@@ -1035,9 +1051,14 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			theTrack->setMtdPidTraits(pidMtd);
 			theTrack->setIndex2MtdHit(-999);
 			bool isPrimary=kFALSE;
-			StMuTrack *thePrimaryTrack=(StMuTrack *)theTrack->primaryTrack();
-			if(thePrimaryTrack){
+			Int_t pIndex = -999;
+			map<Int_t, Int_t>::iterator it = index2Primary.find(iNode);
+			if(it!=index2Primary.end()){
+				pIndex = it->second;
+			}
+			if(pIndex>=0){
 				isPrimary=kTRUE;
+				StMuTrack *thePrimaryTrack= mMuDst->primaryTracks(pIndex);
 				thePrimaryTrack->setMtdPidTraits(pidMtd);
 				thePrimaryTrack->setIndex2MtdHit(-999);
 			}
@@ -1442,6 +1463,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 		cellHit.yhit=(Float_t)local[i].y();
 		cellHit.theta=(Double_t)local[i].theta();
 		cellHit.pathLength = (Double_t)length2Mtd[i];
+		cellHit.expTof2MTD = (Double_t)tof2Mtd[i];
 		allCellsHitVec.push_back(cellHit);
 		nCells++;
 		if(mHisto && mSaveTree) {
@@ -1598,6 +1620,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 				cellHit.index2MtdHit = daqIter->index2MtdHit;
 				cellHit.theta = proIter->theta;
 				cellHit.pathLength = proIter->pathLength;
+				cellHit.expTof2MTD = proIter->expTof2MTD;
 				matchHitCellsVec.push_back(cellHit);
 			}
 		} 
@@ -1642,6 +1665,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 		cellHit.index2MtdHit = tempIter->index2MtdHit;
 		cellHit.theta = tempIter->theta;
 		cellHit.pathLength = tempIter->pathLength;
+		cellHit.expTof2MTD = tempIter->expTof2MTD;
 
 		if(mHisto) {
 			Float_t ycenter = (tempIter->cell-nStrips/2+0.5)*(stripWidth+stripGap);
@@ -1703,6 +1727,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 		vector<pairD> vtdc; 
 		vector<Double_t> vtheta;
 		vector<Double_t> vpathLength;
+		vector<Double_t> vexpTof2MTD;
 		vector<Int_t> vindex2MtdHit;
 
 		mtdCellHitVectorIter tempIter=tempVec.begin();
@@ -1722,6 +1747,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 				vindex2MtdHit.push_back(erasedIter->index2MtdHit);
 				vtheta.push_back(erasedIter->theta);
 				vpathLength.push_back(erasedIter->pathLength);
+				vexpTof2MTD.push_back(erasedIter->expTof2MTD);
 
 				erasedVec.erase(erasedIter);
 				erasedIter--;
@@ -1744,6 +1770,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 			cellHit.index2MtdHit = vindex2MtdHit[0];
 			cellHit.theta = vtheta[0];
 			cellHit.pathLength = vpathLength[0];
+			cellHit.expTof2MTD = vexpTof2MTD[0];
 
 			finalMatchedCellsVec.push_back(cellHit);
 
@@ -1817,6 +1844,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 				cellHit.index2MtdHit = vindex2MtdHit[thiscandidate];
 				cellHit.theta = vtheta[thiscandidate];
 				cellHit.pathLength = vpathLength[thiscandidate];
+				cellHit.expTof2MTD = vexpTof2MTD[thiscandidate];
 
 				finalMatchedCellsVec.push_back(cellHit);
 
@@ -1837,19 +1865,6 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 
 /// Take final matched MTD hits and update the track PID traits with MTD information
 void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t& nValidSingleHitCells,Int_t& nValidSinglePrimHitCells){
-
-	map<Int_t, Int_t> index2Primary;
-	if(mMuDstIn){
-		UInt_t pNnodes = mMuDst->numberOfPrimaryTracks();
-		for(size_t ii=0;ii<pNnodes;ii++){
-			StMuTrack *pTrack = mMuDst->primaryTracks(ii); 
-			if(!pTrack) continue;
-			Int_t index2Global = pTrack->index2Global();
-			StMuTrack *gTrack = mMuDst->globalTracks(index2Global);
-			if(!gTrack) continue;
-			index2Primary[index2Global] = ii;
-		}
-	}
 
 	for (size_t ii=0; ii < finalMatchedCellsVec.size(); ii++){
 		Int_t backleg = finalMatchedCellsVec[ii].backleg;
@@ -1874,7 +1889,6 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 		Int_t trackNode = finalMatchedCellsVec[ii].trackIdVec[0];
 		if(mMuDstIn){
 			StMuTrack *gTrack = mMuDst->globalTracks(trackNode);
-			//StMuTrack *pTrack = (StMuTrack*)gTrack->primaryTrack();
 			if(!gTrack) {
 				LOG_WARN << "Wrong global track!" << endm;
 				continue;
@@ -1897,6 +1911,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			pidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
 			pidMtd.setPosition(finalMatchedCellsVec[ii].hitPosition);
 			pidMtd.setPathLength(finalMatchedCellsVec[ii].pathLength);
+			pidMtd.setExpTimeOfFlight(finalMatchedCellsVec[ii].expTof2MTD);
 			gTrack->setMtdPidTraits(pidMtd);
 
 			Int_t pNode = -999;
@@ -1904,8 +1919,8 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			if(it!=index2Primary.end()){
 				pNode = it->second;
 			}
-			StMuTrack *pTrack = mMuDst->primaryTracks(pNode);
-			if(pTrack && pNode!=-999){
+			if(pNode>=0){
+				StMuTrack *pTrack = mMuDst->primaryTracks(pNode);
 				mtdHit->setIndex2Primary(pNode);
 				pTrack->setIndex2MtdHit(finalMatchedCellsVec[ii].index2MtdHit);
 				StMuMtdPidTraits ppidMtd = pTrack->mtdPidTraits();
@@ -1915,9 +1930,9 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 				ppidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
 				ppidMtd.setPosition(finalMatchedCellsVec[ii].hitPosition);
 				ppidMtd.setPathLength(finalMatchedCellsVec[ii].pathLength);
+				ppidMtd.setExpTimeOfFlight(finalMatchedCellsVec[ii].expTof2MTD);
 				pTrack->setMtdPidTraits(ppidMtd);
 			}
-
 		}else{
 			// get track-id from cell hit vector
 			StSPtrVecTrackNode &nodes = mEvent->trackNodes();
@@ -1948,6 +1963,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			pidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
 			pidMtd->setPosition(finalMatchedCellsVec[ii].hitPosition);
 			pidMtd->setPathLength(finalMatchedCellsVec[ii].pathLength);
+			pidMtd->setExpTimeOfFlight(finalMatchedCellsVec[ii].expTof2MTD);
 			globalTrack->addPidTraits(pidMtd);
 
 			if(primaryTrack){
@@ -1959,6 +1975,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 				ppidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
 				ppidMtd->setPosition(finalMatchedCellsVec[ii].hitPosition);
 				ppidMtd->setPathLength(finalMatchedCellsVec[ii].pathLength);
+				ppidMtd->setExpTimeOfFlight(finalMatchedCellsVec[ii].expTof2MTD);
 				primaryTrack->addPidTraits(ppidMtd);
 			}
 		}
