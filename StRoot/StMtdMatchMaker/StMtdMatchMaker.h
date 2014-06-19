@@ -6,11 +6,14 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.5 2014/04/16 02:23:39 huangbc Exp $
+ * $Id: StMtdMatchMaker.h,v 1.6 2014/06/19 19:16:27 huangbc Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.6  2014/06/19 19:16:27  huangbc
+ * Fixed an issue of reading SL12d production data. Add expTof for MTD pidtraits.
+ *
  * Revision 1.5  2014/04/16 02:23:39  huangbc
  * 1. fixed a bug of un-initialized variable nDedxPts in MtdTrack construction function.
  * 2. reoriganized project2Mtd function. Made it more readable.
@@ -260,7 +263,6 @@ class StMtdMatchMaker: public StMaker
 		Float_t mMaxEta; //! maximum pseudorapidity 
 		Float_t mMinPt;  //! minimum transverse momentum 
 
-
 	private:
 		Bool_t          mMuDstIn;          //! switch - default is to read in StEvent
 		Bool_t			mSaveTree;
@@ -349,10 +351,12 @@ class StMtdMatchMaker: public StMaker
 			Int_t index2MtdHit;
 			Double_t theta;
 			Double_t pathLength;
+			Double_t expTof2MTD;
 		};
 		MtdEvtData  mMtdEvtData;
 
 		TTree *mMtdEvt;
+	    map<Int_t, Int_t> index2Primary;
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGSA
 		typedef vector<StructCellHit> mtdCellHitVector;
@@ -398,7 +402,7 @@ class StMtdMatchMaker: public StMaker
 		void fillTrackInfo(StMuTrack *t, float mField, UInt_t iNode);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.5 2014/04/16 02:23:39 huangbc Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.6 2014/06/19 19:16:27 huangbc Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,1)
 };
 
