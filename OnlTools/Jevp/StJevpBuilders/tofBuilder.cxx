@@ -47,6 +47,9 @@ tofBuilder::tofBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   TOF_Error2_list = NULL;
   TOF_Error3_list = NULL;
   
+  hist_maxtofmult_tof	= 2000;
+  hist_maxtofmult_trg	= 2000;
+  
 }
 
 tofBuilder::~tofBuilder() {
@@ -64,6 +67,8 @@ tofBuilder::~tofBuilder() {
 }
 
 void tofBuilder::initialize(int argc, char *argv[]) {
+
+  ReadHistConfig();
 
   // Initialization of histograms.
   for(int i=0;i<NTRAYS;i++) {
@@ -87,16 +92,16 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   contents.hBunchidShiftVSthub = new TH2F("hBunchidShiftVSthub","hBunchidShiftVSthub",8,0.5,8.5,250,-124.5,125.5);
   
   //contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",144,0.5,2880.5,150,0,3000);//auau
-  contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",200,0.5,200.5,200,0.5,200.5);//pp200
+  contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",200,0.,hist_maxtofmult_trg,200,0.,200.5);//pp200
   contents.TOF_L1mult_vs_ZDCadcsum->SetXTitle("TOF Mult in TRG");
   contents.TOF_L1mult_vs_ZDCadcsum->SetYTitle("ZDC hardware adc Sum");
 
-  contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF hit mult: sum(TRG) vs sum(TOF)",400,-0.5,1999.5,400,-0.5,1999.5);
+  contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF hit mult: sum(TRG) vs sum(TOF)",400,0.,hist_maxtofmult_tof,400,0,hist_maxtofmult_trg);
   contents.TOF_L1mult_vs_sumL0->SetXTitle("TOF Mult in TOF data");
   contents.TOF_L1mult_vs_sumL0->SetYTitle("TOF Mult in TRG data");
-  contents.TOF_L1mult=new TH1F("TOF_L1mult","TOFmult: sum(TRG)",500,-0.5,1999.5);
+  contents.TOF_L1mult=new TH1F("TOF_L1mult","TOFmult: sum(TRG)",250,0.,hist_maxtofmult_trg);
   contents.TOF_L1mult->SetXTitle("TOFmult from TRG data");
-  contents.TOF_sumL0=new TH1F("TOF_sumL0","TOFmult: sum(TOF)",500,-0.5,1999.5);
+  contents.TOF_sumL0=new TH1F("TOF_sumL0","TOFmult: sum(TOF)",250,0.,hist_maxtofmult_tof);
   contents.TOF_sumL0->SetXTitle("TOFmult from TOF data");
 
   contents.TOF_Error1 = new TH1F("TOF_Error1","TOF electronics errors",244,0.5,122.5);
@@ -929,6 +934,39 @@ void tofBuilder::main(int argc, char *argv[])
   me.Main(argc, argv);
 }
 
+void tofBuilder::ReadHistConfig(){
+  TString buffer;
+  char mHistConfigFile[256];
+  sprintf(mHistConfigFile, "%s/tof/%s",confdatadir,"TOF_HistConfig.txt");
+  ifstream filein(mHistConfigFile); 
+  //try local if not in conf dir
+  if(!filein) {
+    filein.close(); 
+    sprintf(mHistConfigFile, "tofconfig/%s","TOF_HistConfig.txt");
+    filein.open(mHistConfigFile);
+  }
+  int count=0;
+  if(filein){
+    while(!filein.eof()){
+      buffer.ReadLine(filein);
+      if(buffer.BeginsWith("/")) continue;
+      if(buffer.BeginsWith("#")) continue;
+      float number=atof(buffer.Data());
+      if (count==0){ 
+      	hist_maxtofmult_trg = number; 
+        cout<<"====TOF==== Set hist_maxtofmult_trg = "<<hist_maxtofmult_trg<<endl;
+      }
+      if (count==1){ 
+      	hist_maxtofmult_tof = number; 
+        cout<<"====TOF==== Set hist_maxtofmult_tof = "<<hist_maxtofmult_tof<<endl;
+      }
+      count++;
+    }
+  } else {
+      LOG("====TOF====", "Can not open file: TOF_HistConfig.txt");
+  }
+  filein.close();
+}
 
 void tofBuilder::ReadValidBunchidPhase(){
   
