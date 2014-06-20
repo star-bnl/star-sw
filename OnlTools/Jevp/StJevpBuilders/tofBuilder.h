@@ -41,6 +41,10 @@ public:
   void ReadTrayList();
   void ReadValidBunchidPhase();
   void GetInfoTF00X(int it,int* in);
+  void ReadHistConfig();
+
+  float hist_maxtofmult_tof;
+  float hist_maxtofmult_trg;
 
   //*** Histogram Declarations...
   //*** Use the union to be able to treat in bulk
