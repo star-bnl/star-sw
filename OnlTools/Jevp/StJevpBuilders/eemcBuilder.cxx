@@ -60,7 +60,7 @@ static Def defs[] = {
   { "JPpedZoom", "colz", 0, 0, 1, 11 },
   { "JPtotCor", NULL, 0, 0, 0, 11 },
   { "JPtotFreq", NULL, 0, 0, 0, 11 },
-  { "JPsumTh3b", "b", 0, 0, 0, 11 }, // swapped in for JPtotCor depending on eemcTwMask?
+  { "JPsumTh3", "b", 0, 0, 0, 11 }, // swapped in for JPtotCor depending on eemcTwMask?
   { "JPpedHot", NULL, 0, 0, 0, 11 },
   // 11 - 2, 12 -1
   { "ETowHealth", NULL, 0,0,0,11 },

@@ -295,6 +295,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
       i++;
       displays_fn = argv[i];
     }
+    else if (strcmp(argv[i], "-stderr") == 0) {
+      log_output = RTS_LOG_STDERR;
+    }
     else if (strcmp(argv[i], "-basedir") == 0) {
       i++;
       basedir = argv[i];
@@ -480,7 +483,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     LOG(DBG, "SERVThread: Got stoprun from reader");
     CP;
     if(runStatus.running()) {
-	CP;
+      CP;
       performStopRun();
 	CP;
     }
@@ -819,10 +822,14 @@ void JevpServer::performStopRun()
   TListIter next(&builders);
   
   while((curr = (JevpPlotSet *)next())) {
-    LOG(NOTE, "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
+    CP;
+    LOG("JEFF", "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
 	curr->getPlotSetName(), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
+    CP;
+
     curr->stoprun(rdr);
-    
+    CP;
+
     continue;
   }
 
@@ -1396,7 +1403,9 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     // plot = getJevpSummaryPlot();
     //}
     //else {
+    CP;
     plot = getPlot(cnode->name);
+    CP;
     //}
 
     if(plot) {
@@ -1672,7 +1681,7 @@ void JevpServer::addToPallete(JevpPlot *plot)
   CP;
   if(plotNode) {
     CP;
-    LOG(ERR, "We already have a pallete entry for %s:%s",builder,name);
+    LOG(DBG, "We already have a pallete entry for %s:%s",builder,name);
   }
   else {
     CP;
