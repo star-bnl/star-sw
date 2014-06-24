@@ -83,7 +83,7 @@ Int_t StMuEEmcCrateTimingMaker::Make(){
     lenCount = 4+192;
   }
   else {
-    std::cout << "Unknown flavor you fool! " << mFlavor << std::endl << std::flush;
+    std::cout << "Unknown flavor you fool! " << mFlavor << std::endl;
     return kStWarn;
   }
     

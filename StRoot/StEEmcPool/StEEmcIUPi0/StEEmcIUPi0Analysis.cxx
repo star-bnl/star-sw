@@ -759,10 +759,10 @@ Int_t StEEmcIUPi0Analysis::getSpinState( StMuDst *mudst, Int_t &bxStar )
   hBx48->Fill( bx48 );
   hBx7diffBx48->Fill( bx7, mSpinDb->offsetBX48minusBX7(bx48,bx7) );
 
-  //$$$::cout << "bx7=" << bx7 << " bx48=" << bx48 << std::endl << std::flush;
+  //$$$::cout << "bx7=" << bx7 << " bx48=" << bx48 << std::endl;
 
   if ( mSpinDb -> isMaskedUsingBX48(bx48) ) return -1;  // return an error flag
-  if ( mSpinDb->offsetBX48minusBX7(bx48,bx7)!=0 ) std::cout << "BUNCH CROSSINGS INCONSISTENT" << std::endl << std::flush;
+  if ( mSpinDb->offsetBX48minusBX7(bx48,bx7)!=0 ) std::cout << "BUNCH CROSSINGS INCONSISTENT" << std::endl;
 
   //  assert(mSpinDb->offsetBX48minusBX7(bx48,bx7)==0); // scaler boards were not in sync
   //  mSpinSort = (mSpinDb->offsetBX48minusBX7(bx48,bx7)==0);

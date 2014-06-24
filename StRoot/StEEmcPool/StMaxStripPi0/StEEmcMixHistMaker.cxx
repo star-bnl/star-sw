@@ -8,12 +8,12 @@ ClassImp(StEEmcMixHistMaker);
 StEEmcMixHistMaker::StEEmcMixHistMaker(const Char_t *name):StEEmcMixMaker(name)
 {
 
-  std::cout << "In constructor" << std::endl << std::flush;
+  std::cout << "In constructor" << std::endl;
 
   mMin=0.1;
   mMax=0.18;
 
-  std::cout << "..." << std::endl << std::flush;
+  std::cout << "..." << std::endl;
 
 }
 

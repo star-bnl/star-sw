@@ -7,8 +7,8 @@
  * as input. 
  *
  * \author Jason C. Webb
- * $Date: 2013/03/04 19:55:51 $
- * $Revision: 1.7 $
+ * $Date: 2014/06/24 21:11:20 $
+ * $Revision: 1.8 $
  *
  */
 
@@ -46,7 +46,7 @@ StEEmcA2EMaker::StEEmcA2EMaker(const Char_t *name) : StMaker(name)
 
   mEEgeom=new EEmcGeomSimple();
 
-  //$$$  std::cout << "StEEmcA2EMaker(" << name << ")" << std::endl << std::flush;
+  //$$$  std::cout << "StEEmcA2EMaker(" << name << ")" << std::endl;
   /// Clear all towers and init index
   for ( Int_t tower=0; tower < 720; tower++ ) {
     for ( Int_t layer=0; layer < 4; layer++ ) {

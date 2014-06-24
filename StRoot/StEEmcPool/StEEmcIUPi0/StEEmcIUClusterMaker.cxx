@@ -6,8 +6,8 @@
  * and smd strips.
  *
  * \author Weihong He
- * $Date: 2008/10/30 15:52:08 $
- * $Revision: 1.1 $
+ * $Date: 2014/06/24 21:11:20 $
+ * $Revision: 1.2 $
  *
  * \section steemcclustermaker_towers Tower, pre- and postshower algorithm
  *
@@ -896,7 +896,7 @@ void StEEmcIUClusterMaker::fillStEvent()
     return;
   }
 
-  std::cout << "Adding tower clusters to StEvent at " << stevent << std::endl << std::flush;
+  std::cout << "Adding tower clusters to StEvent at " << stevent << std::endl;
 
   ///
   /// First the eemc tower clusters  
