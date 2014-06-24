@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.15 2014/06/23 17:27:08 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.16 2014/06/24 20:01:24 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -215,15 +215,32 @@ StMtdCollection *StMtdHitMaker::GetMtdCollection()
 	}
 
       mMtdCollection = new StMtdCollection();
-      StMuMtdHeader* MuMtdHeader = mMuDst->mtdHeader();
+
+      StMuMtdCollection* muMtdCollection = mMuDst->MtdCollection();
+      StMuMtdHeader* muMtdHeader = NULL;
+      Int_t nMtdRawHits = 0;
+      
+      if(muMtdCollection)
+	{
+	  muMtdHeader = muMtdCollection->mtdHeader();
+	  nMtdRawHits = muMtdCollection->rawHitsPresent();
+	}
+      else
+	{
+	  muMtdHeader = mMuDst->mtdHeader();
+	  nMtdRawHits = mMuDst->numberOfBMTDRawHit();
+	}
+
       for(int i=0;i<nTHUB;i++)
 	{ 
-	  mTriggerTimeStamp[i] = MuMtdHeader->triggerTime(i+1);
+	  mTriggerTimeStamp[i] = muMtdHeader->triggerTime(i+1);
 	}
-      Int_t nMtdRawHits = mMuDst->numberOfBMTDRawHit();
+
+      StMuMtdRawHit *ahit = NULL;
       for(Int_t i=0; i<nMtdRawHits; i++)
 	{
-	  StMuMtdRawHit *ahit = (StMuMtdRawHit*)mMuDst->mtdRawHit(i);
+	  if(muMtdCollection) ahit = muMtdCollection->RawMtdHit(i);
+	  else ahit = mMuDst->mtdRawHit(i);
 	  Int_t backleg = (Int_t)ahit->backleg();
 	  if(mYear==13 && mSwapBacklegInRun13)
 	    {
@@ -964,8 +981,11 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.15 2014/06/23 17:27:08 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.16 2014/06/24 20:01:24 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.16  2014/06/24 20:01:24  marr
+// Able to process Run12 UU muDst where only the muMtdCollection is stored
+//
 // Revision 1.15  2014/06/23 17:27:08  marr
 // Reformatting
 //
