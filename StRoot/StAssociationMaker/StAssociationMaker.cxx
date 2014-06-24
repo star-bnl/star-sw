@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.58 2012/07/31 22:08:49 perev Exp $
+ * $Id: StAssociationMaker.cxx,v 1.59 2014/06/24 20:57:35 jeromel Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.59  2014/06/24 20:57:35  jeromel
+ * Remove flush()
+ *
  * Revision 1.58  2012/07/31 22:08:49  perev
  * Track without detectorInfo ignored
  *
@@ -855,7 +858,7 @@ Int_t StAssociationMaker::Make()
     for (unsigned int iSector=0;
 	 iSector<rcTpcHitColl->numberOfSectors(); iSector++) {
       
-      if (Debug()) cout << iSector + 1 << " "; flush(cout);
+      if (Debug()) cout << iSector + 1 << " "; 
       StTpcSectorHitCollection* tpcSectHitColl = rcTpcHitColl->sector(iSector);
       for (unsigned int iPadrow=0;
 	   iPadrow<tpcSectHitColl->numberOfPadrows();
@@ -988,7 +991,7 @@ Int_t StAssociationMaker::Make()
     for (unsigned int iBarrel=0;  nSvtHits &&
 	   iBarrel<rcSvtHitColl->numberOfBarrels(); iBarrel++) {
       
-      if (Debug()) cout << iBarrel + 1 << " "; flush(cout);
+      if (Debug()) cout << iBarrel + 1 << " "; 
       
       for (unsigned int iLadder=0;
 	   iLadder<rcSvtHitColl->barrel(iBarrel)->numberOfLadders();
@@ -1078,7 +1081,7 @@ Int_t StAssociationMaker::Make()
     for (unsigned int iLadder=0;  nSsdHits &&
 	   iLadder<rcSsdHitColl->numberOfLadders(); iLadder++) {
       
-      if (Debug()) cout << iLadder + 1 << " "; flush(cout);
+      if (Debug()) cout << iLadder + 1 << " "; 
       
       for (unsigned int iWafer=0;
 	   iWafer<rcSsdHitColl->ladder(iLadder)->numberOfWafers();
@@ -1161,7 +1164,7 @@ Int_t StAssociationMaker::Make()
     for (unsigned int iPlane=0;
 	 iPlane<rcFtpcHitColl->numberOfPlanes(); iPlane++) {
       
-      if (Debug()) cout << iPlane + 1 << " "; flush(cout);
+      if (Debug()) cout << iPlane + 1 << " "; 
       
       for (unsigned int iSector=0;
 	   iSector<rcFtpcHitColl->plane(iPlane)->numberOfSectors();
