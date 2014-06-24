@@ -29,7 +29,7 @@ StEEmcA2EMaker::StEEmcA2EMaker(const Char_t *name) : StMaker(name)
 
   mEEgeom=new EEmcGeomSimple();
 
-  //$$$  std::cout << "StEEmcA2EMaker(" << name << ")" << std::endl << std::flush;
+  //$$$  std::cout << "StEEmcA2EMaker(" << name << ")" << std::endl;
   /// Clear all towers and init index
   for ( Int_t tower=0; tower < 720; tower++ ) {
     for ( Int_t layer=0; layer < 4; layer++ ) {

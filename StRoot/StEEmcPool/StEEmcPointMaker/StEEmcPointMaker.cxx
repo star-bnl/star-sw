@@ -52,7 +52,7 @@ ClassImp(StEEmcPointMaker);
 // ----------------------------------------------------------------------------
 StEEmcPointMaker::StEEmcPointMaker(const Char_t *name):StMaker(name)
 {
-    std::cout << "StEEmcPointMaker("<<name<<")" << std::endl << std::flush; 
+  std::cout << "StEEmcPointMaker("<<name<<")" << std::endl;
 
     ///
     /// Initialize the geometry packages

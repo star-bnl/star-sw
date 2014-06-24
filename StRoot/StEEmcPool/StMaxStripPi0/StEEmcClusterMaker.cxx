@@ -642,7 +642,7 @@ void StEEmcClusterMaker::fillStEvent()
     return;
   }
 
-  std::cout << "Adding tower clusters to StEvent at " << stevent << std::endl << std::flush;
+  std::cout << "Adding tower clusters to StEvent at " << stevent << std::endl;
 
   ///
   /// First the eemc tower clusters  
