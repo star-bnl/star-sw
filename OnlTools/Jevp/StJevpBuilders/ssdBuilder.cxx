@@ -193,6 +193,18 @@ void ssdBuilder::event(daqReader *rdr) {
   daq_dta *dd ;
   dd = rdr->det("sst")->get("adc");
 
+  if(dd)
+    {
+      for ( int ns=0; ns<nSide; ns++ ) 
+	{
+	  for(int nl=0;nl<nLadderPerSide;nl++)
+	    {
+	      hAdcEvent[ns][nl]->GetYaxis()->SetRangeUser(0,1024);
+	      hAdcEvent[ns][nl]->GetXaxis()->SetTitle("Event #");
+	      hAdcEvent[ns][nl]->GetYaxis()->SetTitle("Adc");
+	    }
+	}
+    }
   while(dd && dd->iterate()) 
     { 
     
@@ -214,18 +226,17 @@ void ssdBuilder::event(daqReader *rdr) {
       LOG(DBG,"SST ADC: Sector %d , RDO %d , Fiber %d",mSector,mRDO,mFiber);
       u_int maxI = dd->ncontent;    
       FindLadderSide(mRDO,mFiber,mLadder,mSide);   
-      //cout<<"RDO "<<mRDO<<" Fiber "<<mFiber<<" is Good !"<<endl;
       if(evtCt==0)
 	hAdcEvent[mSide][mLadder]->GetXaxis()->SetRangeUser(0,500);
 
       LOG(DBG,"SST ADC: Ladder %d , side %d",mLadder,mSide);
-      //cout<<"mSector "<<mSector<<" mRDO "<<mRDO<<" mFiber "<<mFiber<<endl;
+
       for ( u_int i=0; i<maxI; i++ ) {
   
 	mWafer = sst[i].hybrid;
 	mStrip = sst[i].strip;
 	mAdc   = sst[i].adc;
-	//cout<<"mWafer "<<mWafer<<" mStrip "<<mStrip<<" Adc "<<mAdc<<endl;
+
 	if ( mStrip<0 || mStrip>767 )    continue; //strip 0-767
 	if ( mWafer<0 || mWafer>15 )     continue; //wafer 0 15
 	if ( mAdc > 1024 )               continue; //adc 0-1024
@@ -279,8 +290,8 @@ void ssdBuilder::event(daqReader *rdr) {
       //change histograms arguments to suite pedestal run.
       hAdcEvent[mSide][mLadder]->GetYaxis()->SetRangeUser(0,100);
       hAdcEvent[mSide][mLadder]->GetXaxis()->SetRangeUser(0,12288);
-      //hAdcEvent[mSide][mLadder]->GetXaxis()->SetTitle("strip #");
-      //hAdcEvent[mSide][mLadder]->GetYaxis()->SetTitle("rms");
+      hAdcEvent[mSide][mLadder]->GetXaxis()->SetTitle("Strip #");
+      hAdcEvent[mSide][mLadder]->GetYaxis()->SetTitle("Rms");
            
       for ( u_int i=0; i<maxI; i++ )
 	{
