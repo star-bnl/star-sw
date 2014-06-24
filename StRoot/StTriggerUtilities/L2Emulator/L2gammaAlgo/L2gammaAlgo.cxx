@@ -185,7 +185,6 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
   
   if ( mDb->initRun(run) ) return -7; // this must be in, if your algos are the only one in the game, _you_ must initialize DB for the new run,JB
 
-  fflush(stdout);
   mRunNumber = run;
 
   // recreate histograms (clears)
@@ -569,7 +568,6 @@ int L2gammaAlgo::initRun( int run, int I_par[5], float F_par[5] )
    fprintf(mLogFile,"total number of towers:        %d\n",mNumTower);
    fprintf(mLogFile,"number of unmasked towers:     %d\n",mNumberLive);
    fprintf(mLogFile,"\n====================================================================================================================================\n\n");
-   fflush(mLogFile);
  }
  
   /*
@@ -1034,7 +1032,6 @@ void L2gammaAlgo::finishRun()
    fprintf(mLogFile,"\n====================================================================================================================================\n\n");
    finishCommonHistos();
 
-   fflush(mLogFile);
  }
  
   finish(); /* output histogram */
