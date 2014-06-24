@@ -129,16 +129,17 @@ Int_t StarLight::Init()
     ParametersDouble["BEAM_GAMMA"] = mRootS/(((Z[myBlue]+Z[myYell])*ProtonMass)+((A[myBlue]-Z[myBlue]+A[myYell]-Z[myYell])*NeutronMass));
   }
 
-  TDatabasePDG &pdg  = (*TDatabasePDG::Instance());
-  TParticlePDG *blue = pdg.GetParticle(myBlue); assert(blue);
-  TParticlePDG *yell = pdg.GetParticle(myYell); assert(yell);
+  //  TDatabasePDG &pdg  = (*TDatabasePDG::Instance());
+  //  TParticlePDG *blue = pdg.GetParticle(myBlue); assert(blue);
+  //  TParticlePDG *yell = pdg.GetParticle(myYell); assert(yell);
 
   //
   // Setup event record based upon the beam species
   //
-  if ( (mBlue == "Au") || (mBlue == "Cu") || (mBlue == "U") ) mEvent = new StarGenAAEvent();
-  if ( (mBlue == "proton") && (mYell == "proton") )           mEvent = new StarGenPPEvent();
-  else                                                        assert(0); // figure this out
+
+  if      ( (mBlue == "Au") || (mBlue == "Cu") || (mBlue == "U") ) mEvent = new StarGenAAEvent();
+  else if ( (mBlue == "proton") && (mYell == "proton") )           mEvent = new StarGenPPEvent();
+  else                                                             assert(0); // figure this out
 
 
   //
