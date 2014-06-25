@@ -1,6 +1,9 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.4  2014/06/25 19:21:57  mstftsm
+ * pxl DB DataSet has been change to pxl_db. Name changed in this code.
+ *
  * Revision 1.3  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
@@ -79,7 +82,7 @@ Int_t StPxlSimMaker::InitRun(Int_t RunNo)
    TObjectSet *pxlDbDataSet = 0; 
    if(mUseDbGeom)
    {
-	   pxlDbDataSet = (TObjectSet*)GetDataSet("pxlDb");
+	   pxlDbDataSet = (TObjectSet*)GetDataSet("pxl_db");
 	   if (!pxlDbDataSet)
 	   {
 		   LOG_ERROR << "StPxlSimMaker - E - pxlDb  is not available" << endm;
@@ -174,6 +177,9 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.4  2014/06/25 19:21:57  mstftsm
+ * pxl DB DataSet has been change to pxl_db. Name changed in this code.
+ *
  * Revision 1.3  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
