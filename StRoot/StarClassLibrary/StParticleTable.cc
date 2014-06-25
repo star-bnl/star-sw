@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.21 2014/01/29 16:21:43 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.22 2014/06/25 14:19:24 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.22  2014/06/25 14:19:24  jwebb
+ * Added psi prime --> e+e-
+ *
  * Revision 1.21  2014/01/29 16:21:43  jwebb
  * Added D_star_plus (minus) --> D0 (bar) pi+ (-) 100% BR
  *
@@ -257,7 +260,8 @@ StParticleTable::StParticleTable()
     ///@{
     /// Quarkonia in dielectron channel
 
-       Geant2Pdg( 160, 443, JPsi );     // JPsi
+       Geant2Pdg( 160,    443, JPsi );     // JPsi
+       Geant2Pdg( 167, 100443, Psi2c );    // Psi'
     
        Geant2Pdg( 161,    553, Upsilon1S); // Upsilon(1S)
        Geant2Pdg( 162, 100553, Upsilon2S); // Upsilon(2S)
