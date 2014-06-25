@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ZS_SR.cxx,v 1.11 2007/12/24 06:04:13 fine Exp $
+ * $Id: FTPV1P0_ZS_SR.cxx,v 1.12 2014/06/25 15:33:16 jeromel Exp $
  * Author: M.J. LeVine, H.Huemmler
  ***************************************************************************
  * Description: FTPC V1.0 Zero Suppressed Reader
@@ -11,6 +11,9 @@
  * 
  ***************************************************************************
  * $Log: FTPV1P0_ZS_SR.cxx,v $
+ * Revision 1.12  2014/06/25 15:33:16  jeromel
+ * Code not used but erradicated use of flush
+ *
  * Revision 1.11  2007/12/24 06:04:13  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -100,7 +103,7 @@ int FTPV1P0_ZS_SR::initialize()
   // store pointers to the ADCD, ADCX, SEQD banks
   adcd_p = detector->getBankFTPADCD(sector);
   if ((void *)adcd_p != NULL) {
-    fflush(stdout);
+    // noop
   }
   else {
     cout<<"No FTPADCD bank found for sector "<<sector<<endl;
@@ -108,7 +111,7 @@ int FTPV1P0_ZS_SR::initialize()
   }
   adcx_p = detector->getBankFTPADCX(sector);
   if ((void *)adcx_p != NULL) {
-    fflush(stdout);
+    // noop
   }
   else {
     cout<<"No FTPADCX bank found for sector "<<sector<<endl;
@@ -116,8 +119,6 @@ int FTPV1P0_ZS_SR::initialize()
   }
   seqd_p = detector->getBankFTPSEQD(sector);
   if ((void *)seqd_p != NULL) {
-    fflush(stdout);
-
     // search through the  SEQD banks to build our tables of what's where
 
     int padrow=-1, pad=-1, lastbin=-2, oldstart=0;
@@ -156,7 +157,6 @@ int FTPV1P0_ZS_SR::initialize()
         }
         else {     // starting new pad without bit 5 set!
 	  printf("new pad detected with bit 5 clear!\n");
-	  fflush(stdout);
 	  return FALSE;
         }
       }
@@ -223,7 +223,6 @@ int FTPV1P0_ZS_SR::initialize()
         }
         else {    // starting new pad without bit 5 set!
 	  printf("new pad detected with bit 5 clear!\n");
-	  fflush(stdout);
 	  return FALSE;
         }
       }

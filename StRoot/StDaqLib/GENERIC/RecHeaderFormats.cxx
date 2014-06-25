@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.cxx,v 1.6 2007/12/24 06:04:17 fine Exp $
+ * $Id: RecHeaderFormats.cxx,v 1.7 2014/06/25 15:33:16 jeromel Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.cxx,v $
+ * Revision 1.7  2014/06/25 15:33:16  jeromel
+ * Code not used but erradicated use of flush
+ *
  * Revision 1.6  2007/12/24 06:04:17  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -60,7 +63,6 @@ void dump_data(char* buffer,int size,int width )
   char* data_char ;
   
   if(!size) return ; 
-  fflush(stdout) ;  /* clear out pending stuff */
   data = data_base;
   data_char = (char*) data ;
   for(int w = 0 ; w < size ; w++)
@@ -110,7 +112,6 @@ void dump_data(char* buffer,int size,int width )
 	}
       printf("\n") ;
     }
-  fflush(stdout);
 } 
 /*---------------------------------------------------------------------------*/
 
