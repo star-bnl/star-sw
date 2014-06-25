@@ -103,36 +103,36 @@ TF2 *TMDFParameters::ProjectionXY(Int_t code1, Int_t code2) {
 }
 //________________________________________________________________________________
 void TMDFParameters::Print(Option_t */* option */) const {
-  cout << "Sample statistics:" << endl
-       << "------------------" << endl
+  cout << "Sample statistics:" << "\n"
+       << "------------------" << "\n"
        << "          ";          
   for (Int_t i = 0; i < fNvar; i++)
-    cout << " " << setw(10) << i+1 << flush;
-  cout << endl << " Max:   " << flush;
+    cout << " " << setw(10) << i+1 << "\n";
+  cout << "\n" << " Max:   " << "\n";
   for (Int_t i = 0; i < fNvar; i++)
     cout << " " << setw(10) << setprecision(4)
-         << fVmax[i] << flush;
-  cout << endl << " Min:   " << flush;
+         << fVmax[i] << "\n";
+  cout << "\n" << " Min:   " << "\n";
   for (Int_t i = 0; i < fNvar; i++)
     cout << " " << setw(10) << setprecision(4)
-         << fVmin[i] << flush;
-  cout << endl << " Mean:  " << flush;
+         << fVmin[i] << "\n";
+  cout << "\n" << " Mean:  " << "\n";
   for (Int_t i = 0; i < fNvar; i++)
     cout << " " << setw(10) << setprecision(4)
-         << fVmean[i] << flush;
-  cout << endl;
-  cout << "Coefficients:" << endl
-       << "-------------" << endl
-       << "   #         Value        Error   Powers" << endl
-       << " ---------------------------------------" << endl;
+         << fVmean[i] << "\n";
+  cout << "\n";
+  cout << "Coefficients:" << "\n"
+       << "-------------" << "\n"
+       << "   #         Value        Error   Powers" << "\n"
+       << " ---------------------------------------" << "\n";
   for (Int_t i = 0; i < fNcoef; i++) {
     cout << " " << setw(3) << i << "  "
 	 << setw(12) << fCoef[i] << "  "
-	 << setw(12) << fdCoef[i] << "  " << flush;
+	 << setw(12) << fdCoef[i] << "  " << "\n";
     Int_t p = fCode[i];
     TArrayI Power(fNvar);
     for (Int_t j = fNvar - 1; j >= 0; j--) {Power[j] = p%10; p /= 10;}
-    for (Int_t j = 0; j < fNvar; j++) cout << " " << setw(3) << Power[j] - 1 << flush;
+    for (Int_t j = 0; j < fNvar; j++) cout << " " << setw(3) << Power[j] - 1 << "\n";
     cout << endl;
   }
 }
