@@ -21,8 +21,8 @@
 //
 // File and Version Information:
 // $Rev::                             $: revision of last commit
-// $Author: jwebb $: author of last commit
-// $Date: 2012/11/27 22:27:33 $: date of last commit
+// $Author: jeromel $: author of last commit
+// $Date: 2014/06/25 15:01:39 $: date of last commit
 //
 // Description:
 //      some simple streams for reporting plus some stream operators
@@ -61,9 +61,9 @@ getClassMethod__(std::string prettyFunction)
 	return prettyFunction;
 }
 
-#define printErr  std::cerr << "!!! " << __PRETTY_FUNCTION__ << " [" << __FILE__ << ":" << __LINE__ << "]: error: "   << std::flush
-#define printWarn std::cerr << "??? " << __PRETTY_FUNCTION__ << " [" << __FILE__ << ":" << __LINE__ << "]: warning: " << std::flush
-#define printInfo std::cout << ">>> " << getClassMethod__(__PRETTY_FUNCTION__) << "(): info: "  << std::flush
+#define printErr  std::cerr << "!!! " << __PRETTY_FUNCTION__ << " [" << __FILE__ << ":" << __LINE__ << "]: error: "
+#define printWarn std::cerr << "??? " << __PRETTY_FUNCTION__ << " [" << __FILE__ << ":" << __LINE__ << "]: warning: "
+#define printInfo std::cout << ">>> " << getClassMethod__(__PRETTY_FUNCTION__) << "(): info: "
 
 
 //////////////////////////////////////////////////////////////////////////////
