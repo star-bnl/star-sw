@@ -339,8 +339,6 @@ int PMD_Reader::pedReader(int sec, int type, Bank_PMDPEDR *pedr)
 		}
 
 
-		//fflush(stdout) ;
-		
 		for(channel=0;channel<ch;channel++) {
 			unsigned int val ;
 

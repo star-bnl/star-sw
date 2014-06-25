@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ZS_SR.cxx,v 1.8 2007/12/24 06:04:28 fine Exp $
+ * $Id: SVTV1P0_ZS_SR.cxx,v 1.9 2014/06/25 15:33:16 jeromel Exp $
  *      
  * Author: J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0_ZS_SR.cxx,v $
+ * Revision 1.9  2014/06/25 15:33:16  jeromel
+ * Code not used but erradicated use of flush
+ *
  * Revision 1.8  2007/12/24 06:04:28  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -213,7 +216,6 @@ SVTV1P0_ZS_SR::SVTV1P0_ZS_SR(int b, int l, int w, SVTV1P0_Reader *det)
 int SVTV1P0_ZS_SR::initialize()
 {
 //   printf("zs init\n");
-//   fflush(stdout);
 
   for (int hyb=0; hyb<SVT_HYBRIDS; hyb++) {
     for (int anode=0; anode<SVT_ANODES; anode++) {
@@ -226,14 +228,12 @@ int SVTV1P0_ZS_SR::initialize()
   adcd_p = detector->getBankSVTADCD(hyperSector, rcb, mezz);
   if ((void *)adcd_p != NULL) {
     if (detector->ercpy->verbose) printf("found ADCD RB%d MZ%d\n",rcb,mezz);
-    fflush(stdout);
   }
 
   seqd_p = detector->getBankSVTSEQD(hyperSector, rcb, mezz);
 
   if ((void *)seqd_p != NULL) {
     if (detector->ercpy->verbose) printf("found SEQD RB%d MZ%d\n",rcb,mezz);
-    fflush(stdout);
   }
 
   if((adcd_p == NULL) || (seqd_p == NULL)) {  // perfectly valid, just no data...
@@ -241,7 +241,6 @@ int SVTV1P0_ZS_SR::initialize()
   }
 
 //   printf("got banks  (adcd_p = 0x%x seqd = 0x%x)\n",adcd_p,seqd_p);
-//   fflush(stdout);
 
   // number of entries in SVTSEQD bank
   int banklen = seqd_p->header.BankLength - (sizeof(Bank_Header)/4);
@@ -264,7 +263,6 @@ int SVTV1P0_ZS_SR::initialize()
       if(x & 0x8000) {    // This is an index entry...
 //  	printf("[%d] index %d/%d\n",
 //  	       i,(x & 0x7fff)/256,(x&0x7fff)%256);
-// 	fflush(stdout);
 
 	if((x & 0x7fff) / 256 == hybridID) {
 	  found = 1;
@@ -278,7 +276,6 @@ int SVTV1P0_ZS_SR::initialize()
 //  	       (x & 0x7fc0)>>6, 
 //  	       x & 0x20, 
 //  	       x & 0x1f);
-// 	fflush(stdout);
 
 	adcd_offset += x & 0x1f;   // in adc counts...
       }
@@ -288,7 +285,6 @@ int SVTV1P0_ZS_SR::initialize()
 
  //    printf("hybridID = %d  found = %d  adcd_off = %d,  seqd_off = %d\n",
 //  	   hybridID, found, adcd_offset, seqd_offset);
-//     fflush(stdout);
    
 
     if(!found) continue;
@@ -331,7 +327,6 @@ int SVTV1P0_ZS_SR::initialize()
 
 	  if(!t) {
 	    printf("Failed to malloc() sequence structures\n");
-	    fflush(stdout);
 	    return FALSE;
 	  }
 
@@ -343,7 +338,6 @@ int SVTV1P0_ZS_SR::initialize()
     }
 
 //     printf("pass1 done\n");
-//     fflush(stdout);
 
     /************************************************************/
     /* Now process SVTSEQD again to fill in the sequence arrays */
@@ -384,7 +378,6 @@ int SVTV1P0_ZS_SR::initialize()
     }
 
 //     printf("pass 2 done\n");
-//     fflush(stdout);
   }
 
   return TRUE;
@@ -458,7 +451,6 @@ int SVTV1P0_ZS_SR::getSpacePts(int Hybrid, int *nSpacePts, SpacePt **SpacePts)
     if (detector->ercpy->verbose) {
       printf("SVTMZCLD for HS %d, Receiver %d, Mezz %d does not exist\n",
 	     hyperSector, rcb, mezz);
-      fflush(stdout);
     }
   }
   else { // SVTMZCLD bank exists

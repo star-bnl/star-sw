@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0_ZS_SR.cxx,v 1.11 2007/12/24 06:04:32 fine Exp $
+ * $Id: TPCV1P0_ZS_SR.cxx,v 1.12 2014/06/25 15:33:16 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V1.0 Zero Suppressed Reader
@@ -15,6 +15,9 @@
  * 23-Jun-99 MJL change declaration of row, rcb outside of all for loops
  ***************************************************************************
  * $Log: TPCV1P0_ZS_SR.cxx,v $
+ * Revision 1.12  2014/06/25 15:33:16  jeromel
+ * Code not used but erradicated use of flush
+ *
  * Revision 1.11  2007/12/24 06:04:32  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -93,17 +96,17 @@ int TPCV1P0_ZS_SR::initialize()
       adcd_p[rcb][mz] = detector->getBankTPCADCD(sector,rcb,mz);
       if ((void *)adcd_p[rcb][mz] != NULL) {
 	// printf("found ADCD RB%d MZ%d\n",rcb+1,mz+1);
-	fflush(stdout);
+	// noop
       }
       adcx_p[rcb][mz] = detector->getBankTPCADCX(sector,rcb,mz);
       if ((void *)adcx_p[rcb][mz] != NULL) {
 	// printf("found ADCX RB%d MZ%d\n",rcb+1,mz+1);
-	fflush(stdout);
+	// noop
       }
       seqd_p[rcb][mz] = detector->getBankTPCSEQD(sector,rcb,mz);
       if ((void *)seqd_p[rcb][mz] != NULL) {
 	// printf("found SEQD RB%d MZ%d\n",rcb+1,mz+1);
-	fflush(stdout);
+	// noop
       }
     }
   }
@@ -153,7 +156,6 @@ int TPCV1P0_ZS_SR::initialize()
 	  }
 	  else {     // starting new pad without bit 5 set!
 	    printf("new pad detected with bit 5 clear!\n");
-	    fflush(stdout);
 	    return FALSE;
 	  }
 	}
@@ -224,7 +226,6 @@ int TPCV1P0_ZS_SR::initialize()
 	  }
 	  else {    // starting new pad without bit 5 set!
 	    printf("new pad detected with bit 5 clear!\n");
-	    fflush(stdout);
 	    return FALSE;
 	  }
 	}

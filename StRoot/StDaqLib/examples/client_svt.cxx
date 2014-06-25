@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client_svt.cxx,v 1.1 2007/01/04 21:27:52 jml Exp $
+ * $Id: client_svt.cxx,v 1.2 2014/06/25 15:33:17 jeromel Exp $
  * Author: J. Schambach
  ***************************************************************************
  * Description: sample top-level code should be used as a tutorial
@@ -8,6 +8,9 @@
  *
  ***************************************************************************
  * $Log: client_svt.cxx,v $
+ * Revision 1.2  2014/06/25 15:33:17  jeromel
+ * Code not used but erradicated use of flush
+ *
  * Revision 1.1  2007/01/04 21:27:52  jml
  * zero suppressed reader no longer uses adcx, only seqd.  Fixes bug from early 2005
  *
@@ -103,13 +106,11 @@ int main(int argc, char *argv[])
 	  for(int kk=1;kk<=wafs[ii-1];kk++) {  // wafers
 	   
  // 	    printf("Getting zs read (%d %d %d)\n",ii,jj,kk);
-//  	    fflush(stdout);
 
 	    SVTV1P0_ZS_SR *zsr = 
 	      (SVTV1P0_ZS_SR *)dr->getZeroSuppressedReader(ii,jj,kk);
 	    
  // 	    printf("Got zs read (%d,%d,%d)\n",ii,jj,kk);
-//  	    fflush(stdout);
 
 	    if (!zsr) {
 	      //printf("zsr creation for (%d,%d,%d) failed\n", ii,jj,kk);
@@ -129,15 +130,12 @@ int main(int argc, char *argv[])
 	      //printf("getting padlist\n");
 	      nAnodes = zsr->getPadList(ll, &AnodeList);
 	      //printf("got padlist %d\n",nAnodes);
-	      fflush(stdout);
 
 	      for(int an = 0;an<nAnodes;an++) {
 
 		//printf("anode[%d] = %d   (0x%x)\n",an,AnodeList[an],zsr);
-		fflush(stdout);
 		int ret = zsr->getSequences(ll, AnodeList[an], &nSeq, &Seq);
 		//printf("got seq %d\n",nSeq);
-		fflush(stdout);
 
 		for(int seq = 0;seq<nSeq;seq++) {
 		  

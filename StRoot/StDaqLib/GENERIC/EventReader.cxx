@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.65 2012/11/20 21:25:34 fisyak Exp $
+ * $Id: EventReader.cxx,v 1.66 2014/06/25 15:33:16 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.66  2014/06/25 15:33:16  jeromel
+ * Code not used but erradicated use of flush
+ *
  * Revision 1.65  2012/11/20 21:25:34  fisyak
  * Make aware that SSD old format fix is valid only till end of 2007
  *
@@ -589,7 +592,7 @@ void EventReader::InitEventReader(int fdes, long offset)
     }
 //     if (strncmp(lr.RecordType, "ENDR", 4)==0) { // check for ENDR record
 //       if (verbose) 
-// 	printf("ENDR encountered. Processing terminated\n"); fflush(stdout);
+// 	printf("ENDR encountered. Processing terminated\n"); 
 //       next_event_offset = -1;
 //       ERROR(ERR_ENDR_ENCOUNTERED);
 //     }
