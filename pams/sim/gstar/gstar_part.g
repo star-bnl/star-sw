@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.45 2014/01/29 16:21:43 jwebb Exp $
+* $Id: gstar_part.g,v 1.46 2014/06/25 14:19:25 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.46  2014/06/25 14:19:25  jwebb
+* Added psi prime --> e+e-
+*
 * Revision 1.45  2014/01/29 16:21:43  jwebb
 * Added D_star_plus (minus) --> D0 (bar) pi+ (-) 100% BR
 *
@@ -204,6 +207,8 @@ MODULE gstar_part Is the STAR Particle Database
    Integer kGtHION / 8 /! A heavy ion
    Integer kGtCKOV / 7 /! A cherenkov photon (note mistake in geant manual)
 
+   Real *8 HBAR / 6.58211928E-16 / "eV * s"
+
 * For meaning of paramters see G3 manual
 * http://wwwasdoc.web.cern.ch/wwwasdoc/geant_html3/node72.html#SECTION024000000000000000000000
 
@@ -328,6 +333,11 @@ MODULE gstar_part Is the STAR Particle Database
 
   Particle Ups3S_mu   code=166 TrkTyp=4 mass=10.355 charge=0  tlife=2.556e-20,
                       pdg=500553  bratio= { 1, }    mode= { 506, }
+
+  Particle psi2s_ee   "Psi(2S)-->e+e-" code=167,
+                      mass=3.68609 charge=0 tlife=hbar/2380.0,
+                      pdg=100443 bratio={ 1, } mode={ 0203, }
+
 ************************************************************************************ 
 
   Particle LASERINO  code=170         TrkTyp=6 mass=0     charge=1 tlife=big
