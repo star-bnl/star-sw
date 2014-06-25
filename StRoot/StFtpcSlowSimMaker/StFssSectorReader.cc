@@ -129,7 +129,6 @@ int StFssSectorReader::initialize()
 		{     // starting new pad without bit 5 set!
 		  LOG_WARN << "1: new pad detected with bit 5 clear!" << endm;
 		  LOG_WARN << start << " < " << oldstart << endm;
-		  fflush(stdout);
 		  return FALSE;
 		}
 	    }
@@ -224,7 +223,6 @@ int StFssSectorReader::initialize()
 	    {    // starting new pad without bit 5 set!
 	      LOG_WARN << "2: new pad detected with bit 5 clear!" << endm;
 	      LOG_WARN << start << " < " << oldstart << endm;
-	      fflush(stdout);
 	      return FALSE;
 	    }
 	}
