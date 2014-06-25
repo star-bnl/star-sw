@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.63 2014/05/16 15:06:45 jdb Exp $
+ * $Id: StMuDst.cxx,v 1.64 2014/06/25 01:26:39 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -37,6 +37,7 @@
 #include "StBTofPidTraits.h"
 #include "StMuBTofHit.h"
 #include "StMuMtdHit.h"
+#include "StMuMtdHeader.h"
 #include "TClonesArray.h"
 #include "TTree.h"
 #ifndef __NO_STRANGE_MUDST__
@@ -474,16 +475,25 @@ void StMuDst::fixMtdTrackIndices(TClonesArray* mtdHit, TClonesArray* primary, TC
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDst::setMtdArray(StMtdCollection *mtd_coll) {
-  /// reset MTD hit array when running StMtdHitMaker on muDst
+  /// reset MTD hit array and header when running StMtdHitMaker on muDst
   /// in afterburner mode
 
   mtdArrays[muMTDHit]->Clear();
   StMuMtdCollection mMTD(*mtd_coll);
-  for(size_t i=0; i < (size_t)mMTD.hitsPresent(); i++) {
-    StMuMtdHit* mtdHit = (StMuMtdHit*)mMTD.MtdHit(i);
-    new((*mtdArrays[muMTDHit])[i]) StMuMtdHit(*mtdHit);
+  for(size_t i=0; i < (size_t)mMTD.hitsPresent(); i++) 
+    {
+      StMuMtdHit* mtdHit = (StMuMtdHit*)mMTD.MtdHit(i);
+      new((*mtdArrays[muMTDHit])[i]) StMuMtdHit(*mtdHit);
+    }
+
+  StMuMtdHeader *mtdHead = mMTD.mtdHeader();
+  if(mtdHead)
+    {
+      mtdArrays[muMTDHeader]->Clear();
+      new((*mtdArrays[muMTDHeader])[0]) StMuMtdHeader(*mtdHead);
     }
 }
+
 
 
 //-----------------------------------------------------------------------
@@ -840,6 +850,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.64  2014/06/25 01:26:39  jdb
+ * Updated StMuDst::setMtdArray() and reset the MTD header. Needed for Run12 UU data where only the muMtdCollection is available.
+ *
  * Revision 1.63  2014/05/16 15:06:45  jdb
  * chaned StMuDst{.h,.cxx} to add setMtdArray function
  *
