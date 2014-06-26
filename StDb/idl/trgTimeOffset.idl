@@ -8,7 +8,8 @@
 
 struct trgTimeOffset { 
 
-   float  offset;   /*   standard trigger offset in micro-seconds  */
-   float  laserOffset;   /*   laser trigger offset in micro-seconds  */
+   float  offset;       /*   standard trigger offset in micro-seconds  */
+   float  laserOffset;  /*   laser trigger offset in micro-seconds  */
+   float  laserOffsetW; /*   laser extra trigger offset for West laser */
 
  };  
