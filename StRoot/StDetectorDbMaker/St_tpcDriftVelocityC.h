@@ -13,6 +13,9 @@ class St_tpcDriftVelocityC : public TChair {
   Float_t 	laserDriftVelocityWest(Int_t i = 0) 	{return Struct(i)->laserDriftVelocityWest;}
   Float_t 	cathodeDriftVelocityEast(Int_t i = 0) 	{return Struct(i)->cathodeDriftVelocityEast;}
   Float_t 	cathodeDriftVelocityWest(Int_t i = 0) 	{return Struct(i)->cathodeDriftVelocityWest;}
+#if 0
+  Float_t 	scaleY(Int_t i = 0) 	                {return Struct(i)->scaleY;}
+#endif
  protected:
   St_tpcDriftVelocityC(St_tpcDriftVelocity *table=0) : TChair(table) {}
   virtual ~St_tpcDriftVelocityC() {fgInstance = 0;}

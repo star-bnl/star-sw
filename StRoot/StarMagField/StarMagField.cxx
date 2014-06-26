@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.26 2013/03/26 13:38:18 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.27 2014/06/26 21:50:17 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.27  2014/06/26 21:50:17  fisyak
+ * New Tpc Alignment, v632
+ *
  * Revision 1.26  2013/03/26 13:38:18  fisyak
  * restore back modififcations as not related to drop in no. of reconstructed tracks
  *
@@ -144,16 +147,16 @@ To do:  <br>
 #include "StarCallf77.h"
 #include <string>
 #include "TMath.h"
-#define myMax(A,B)  (((A)>(B))? (A):(B))
-#define myMin(A,B)  (((A)<(B))? (A):(B))
-#define mySign(A,B) (((B)>=0)? fabs(A):-fabs(A))
-
 StarMagField *StarMagField::fgInstance = 0;
 //________________________________________________________________________________
 
 #define agufld           F77_NAME(agufld,AGUFLD)
 #define mfldgeo          F77_NAME(mfldgeo,MFLDGEO)
 #ifdef __ROOT__
+#include "TString.h"
+#include "TSystem.h"
+#include "TFile.h"
+#include "TError.h"
 ClassImp(StarMagField);
 #endif
 //________________________________________________________________________________
@@ -363,6 +366,20 @@ static const BDAT_t BDAT[nZext] = { // calculated STAR field
     { 24.8,  23.8,  21.0,  16.8,  11.6,   6.1,   0.9,  -3.5,  -6.7 } , // Axial
     {  0.0,   5.2,   9.8,  13.3,  15.2,  15.4,  14.1,  11.4,   7.9 } },// Radial
 };
+#ifdef __ROOT__
+//________________________________________________________________________________
+void StarMagField::SetStarMagFieldRotation(TGeoRotation &rot) {
+  fStarMagFieldRotation = rot;
+  fStarMagFieldRotation.SetName("StarMagFieldRotation");
+  fStarMagFieldRotation.Print();
+}
+//________________________________________________________________________________
+void StarMagField::SetStarMagFieldRotation(Double_t *r) {
+  TGeoRotation rot;
+  rot.SetMatrix(r);
+  SetStarMagFieldRotation(rot);
+}
+#endif
 //________________________________________________________________________________
 StarMagField::StarMagField ( EBField map, Float_t factor, 
 			     Bool_t lock, Float_t rescale, 
@@ -372,6 +389,8 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
 #if ROOT_VERSION_CODE >= 335360 /* ROOT_VERSION(5,30,0) */
   TVirtualMagField("StarMagField"),
 #endif
+  fBzdZCorrection(0),
+  fBrdZCorrection(0),
 #endif
   fMap(map), 
   fFactor(factor),   fRescale(rescale),
@@ -390,6 +409,9 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
     if (fLock) printf("StarMagField is locked, no modification from DB will be accepted\n");
   }
   ReadField() ;                       // Read the Magnetic
+#ifdef __ROOT__
+  fStarMagFieldRotation = TGeoRotation("StarMagFieldRotation");
+#endif /* __ROOT__ */
 }
 //________________________________________
 /// B field in Cartesian coordinates - 2D field (ie. Phi symmetric)
@@ -399,10 +421,7 @@ void StarMagField::BField( const Double_t x[], Double_t B[] ) {
   BField(xx,bb);
   B[0] = bb[0]; B[1] = bb[1]; B[2] = bb[2];
 }
-
-
-
-
+//________________________________________________________________________________
 void StarMagField::BField( const Float_t x[], Float_t B[] )
 
 {                          
@@ -420,17 +439,24 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
 
   Float_t za = fabs(z);
   if (za > fZminDip && za < fZmaxDip && r < fRmaxDip) {//     beam Dipole   
-    B[1] = mySign(fBDipole, z);
+    B[1] = TMath::Sign(fBDipole, z);
     B[2] = fabs(B[1]/1000.);
     return;
   }
   if (z >= ZList[0] && z <= ZList[nZ-1] && r <= Radius[nR-1]) { // within Map
     Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
-    B[2] = Bz_value ;
+    Double_t BL[3] = {0, 0, Bz_value};
     if ( r != 0.0 )      {
-      B[0] = Br_value * (x[0]/r) ;
-      B[1] = Br_value * (x[1]/r) ;
+      BL[0] = Br_value * (x[0]/r) ;
+      BL[1] = Br_value * (x[1]/r) ;
     }
+#ifdef __ROOT__
+    Double_t BG[3];
+    fStarMagFieldRotation.LocalToMaster(BL,BG);
+    for (Int_t i = 0; i < 3; i++) B[i] = BG[i];
+#else  /* ! __ROOT__ */
+    for (Int_t i = 0; i < 3; i++) B[i] = BL[i];
+#endif /* __ROOT__ */
     return;
   }
 
@@ -468,9 +494,9 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
     static const Float_t one = 1;
     Float_t wz = (za - ZList[nZ-1] )/(BFLD.zmaxx - ZList[nZ-1]);
     Float_t wr = (r  - Radius[nR-1])/(BFLD.rmaxx - Radius[nR-1]);
-    Float_t w  = myMin(myMax(zero,myMax(wz,wr)),one);
-    Float_t rm = myMin(r,Radius[nR-1]);    
-    Float_t zm = mySign(myMin(za,ZList[nZ-1]),z);    
+    Float_t w  = TMath::Min(TMath::Max(zero,TMath::Max(wz,wr)),one);
+    Float_t rm = TMath::Min(r,Radius[nR-1]);    
+    Float_t zm = TMath::Sign(TMath::Min(za,ZList[nZ-1]),z);    
     Float_t BrI, BzI;
     Interpolate2DBfield( rm, zm, BrI, BzI ) ;
     Br_value = (1-w)*BrI + w*Br_value;
@@ -484,16 +510,8 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
 
   // cout<<"r===  "<<r<<"  z===  "<<z<<"  phi===  "<<phi<<endl;
   return;
-
-
-
-
-
 }
-
-
-
-
+//________________________________________________________________________________
 /// Bfield in Cartesian coordinates - 3D field
 void StarMagField::B3DField( const Float_t x[], Float_t B[] )
 {                          
@@ -532,7 +550,14 @@ void StarMagField::B3DField( const Float_t x[], Float_t B[] )
       B[1] = Bphi_value ;
       B[2] = Bz_value ;
     }
-  
+  Double_t BL[3] = {B[0], B[1], B[2]};
+#ifdef __ROOT__
+  Double_t BG[3];
+  fStarMagFieldRotation.LocalToMaster(BL,BG);
+  for (Int_t i = 0; i < 3; i++) B[i] = BG[i];
+#else
+  for (Int_t i = 0; i < 3; i++) B[i] = BL[i];
+#endif
   return ;
   
 }
@@ -598,13 +623,104 @@ void StarMagField::BrBz3DField( const Float_t r, const Float_t z, const Float_t 
 void StarMagField::ReadField( )
 
 {
-
   FILE    *magfile, *b3Dfile ;
   std::string comment, filename, filename3D ;
   std::string MapLocation ;
   std::string BaseLocation = getenv("STAR") ; 	// Base Directory for Maps
   BaseLocation += "/StarDb/StMagF/" ;     	// Base Directory for Maps
-
+#ifdef __ROOT__
+  TString rootf("StarFieldZ.root");
+  TString path(".:./StarDb/StMagF:$STAR/StarDb/StMagF");
+  Char_t *file = gSystem->Which(path,rootf,kReadPermission);
+  if (! file) {
+    Error("StarMagField::ReadField","File %s has not been found in path %s",rootf.Data(),path.Data());
+  } else {      
+    Warning("StarMagField::ReadField","File %s has been found",rootf.Data());
+    TFile       *pFile = new TFile(file);
+      //#define __10cm__
+#ifndef __0cm__
+    TH2F *Br0 = (TH2F *) pFile->Get("Br0");
+    TH2F *Bz0 = (TH2F *) pFile->Get("Bz0");
+    if (Br0 && Bz0) {
+#ifdef __15cm__
+      TH2F *Br15cm = (TH2F *) pFile->Get("Br15cm");
+      TH2F *Bz15cm = (TH2F *) pFile->Get("Bz15cm");
+      assert(Br15cm && Bz15cm);
+      fBzdZCorrection = new TH2F(*Bz15cm); fBzdZCorrection->SetDirectory(0);
+      fBzdZCorrection->Add(Bz0,-1.0);
+      fBrdZCorrection = new TH2F(*Br15cm); fBrdZCorrection->SetDirectory(0);
+      fBrdZCorrection->Add(Br0,-1.0);
+      Warning("StarMagField::ReadField","Use effective PMT box dZ = 15 cm");
+#else /*! __15cm__ */
+#ifdef __5cm__
+      TH2F *Br5cm = (TH2F *) pFile->Get("Br5cm");
+      TH2F *Bz5cm = (TH2F *) pFile->Get("Bz5cm");
+      assert(Br5cm && Bz5cm);
+      fBzdZCorrection = new TH2F(*Bz5cm); fBzdZCorrection->SetDirectory(0);
+      fBzdZCorrection->Add(Bz0,-1.0);
+      fBrdZCorrection = new TH2F(*Br5cm); fBrdZCorrection->SetDirectory(0);
+      fBrdZCorrection->Add(Br0,-1.0);
+      Warning("StarMagField::ReadField","Use effective PMT box dZ = 5 cm");
+#else /*! __5cm__ */
+#ifdef __10cm__
+      TH2F *Br10cm = (TH2F *) pFile->Get("Br10cm");
+      TH2F *Bz10cm = (TH2F *) pFile->Get("Bz10cm");
+      assert(Br10cm && Bz10cm);
+      fBzdZCorrection = new TH2F(*Bz10cm); fBzdZCorrection->SetDirectory(0);
+      fBzdZCorrection->Add(Bz0,-1.0);
+      fBrdZCorrection = new TH2F(*Br10cm); fBrdZCorrection->SetDirectory(0);
+      fBrdZCorrection->Add(Br0,-1.0);
+      Warning("StarMagField::ReadField","Use effective PMT box dZ = 10 cm");
+#else /* ! __10cm__ => __7.5cm__ */
+      TH2F *Br5cm = (TH2F *) pFile->Get("Br5cm");
+      TH2F *Bz5cm = (TH2F *) pFile->Get("Bz5cm");
+      assert(Br5cm && Bz5cm);
+      TH2F *Br10cm = (TH2F *) pFile->Get("Br10cm");
+      TH2F *Bz10cm = (TH2F *) pFile->Get("Bz10cm");
+      assert(Br10cm && Bz10cm);
+      fBzdZCorrection = new TH2F(*Bz5cm); fBzdZCorrection->SetDirectory(0);
+      fBzdZCorrection->Scale(0.5);
+      fBzdZCorrection->Add(Bz10cm,0.5);
+      fBzdZCorrection->Add(Bz0,-1.0);
+      fBrdZCorrection = new TH2F(*Br5cm); fBrdZCorrection->SetDirectory(0);
+      fBrdZCorrection->Scale(0.5);
+      fBrdZCorrection->Add(Br10cm,0.5);
+      fBrdZCorrection->Add(Br0,-1.0);
+      Warning("StarMagField::ReadField","Use effective PMT box dZ = 7.5 cm");
+#endif /* __10cm__ */
+#endif /* __5cm__  */
+#endif /* __15cm__ */
+    }
+#endif /* __0cm__ */
+#if defined(__mu1p2__) || defined(__mu1p5__)
+    TH2F *Brmu1 = (TH2F *) pFile->Get("Brmu1");
+    TH2F *Bzmu1 = (TH2F *) pFile->Get("Bzmu1");
+    if (Brmu1 && Bzmu1) {
+#ifdef __mu1p2__ 
+      TH2F *Brmu1p2 = (TH2F *) pFile->Get("Brmu1p2");
+      TH2F *Bzmu1p2 = (TH2F *) pFile->Get("Bzmu1p2");
+      assert(Brmu1p2 && Bzmu1p2);
+      fBzdZCorrection = new TH2F(*Bzmu1p2); fBzdZCorrection->SetDirectory(0);
+      fBzdZCorrection->Add(Bzmu1,-1.0);
+      fBrdZCorrection = new TH2F(*Brmu1p2); fBrdZCorrection->SetDirectory(0);
+      fBrdZCorrection->Add(Brmu1,-1.0);
+      Warning("StarMagField::ReadField","Use back plate mu = 1.2");
+#else /* __mu1p5__ */
+      TH2F *Brmu1p5 = (TH2F *) pFile->Get("Brmu1p5");
+      TH2F *Bzmu1p5 = (TH2F *) pFile->Get("Bzmu1p5");
+      assert(Brmu1p5 && Bzmu1p5);
+      fBzdZCorrection = new TH2F(*Bzmu1p5); fBzdZCorrection->SetDirectory(0);
+      fBzdZCorrection->Add(Bzmu1,-1.0);
+      fBrdZCorrection = new TH2F(*Brmu1p5); fBrdZCorrection->SetDirectory(0);
+      fBrdZCorrection->Add(Brmu1,-1.0);
+      Warning("StarMagField::ReadField","Use back plate mu = 1.5");
+#endif /* __mu1p2__  */
+    }
+#endif /* __mu1p2__ || __mu1p5__ */
+    delete pFile;
+  }
+  delete [] file;
+#endif
   if ( fMap == kMapped )                    	// Mapped field values
     {
       if ( fabs(fFactor) > 0.8 )      		// Scale from full field data 
@@ -667,6 +783,12 @@ void StarMagField::ReadField( )
 	    {
 	      fgets  ( cname, sizeof(cname) , magfile ) ; 
 	      sscanf ( cname, " %f %f %f %f ", &Radius[k], &ZList[j], &Br[j][k], &Bz[j][k] ) ;  
+#if defined(__ROOT__)
+	      if (fBzdZCorrection && fBrdZCorrection) {
+		Br[j][k] += fFactor*fBrdZCorrection->Interpolate(ZList[j],Radius[k]);
+		Bz[j][k] += fFactor*fBzdZCorrection->Interpolate(ZList[j],Radius[k]);
+	      }
+#endif
 	    }
 	}
     }
@@ -705,6 +827,12 @@ void StarMagField::ReadField( )
 		  sscanf ( cname, " %f %f %f %f %f %f ",
 			   &R3D[k], &Z3D[j], &Phi3D[i], &Br3D[i][j][k], &Bz3D[i][j][k], &Bphi3D[i][j][k] ) ;
 		  Phi3D[i] *= TMath::Pi() / 180. ;   // Convert to Radians  phi = 0 to 2*Pi
+#if defined(__ROOT__)
+		  if (fBzdZCorrection && fBrdZCorrection) {
+		    Br3D[i][j][k] += fFactor*fBrdZCorrection->Interpolate(Z3D[j],R3D[k]);
+		    Bz3D[i][j][k] += fFactor*fBzdZCorrection->Interpolate(Z3D[j],R3D[k]);
+		  }
+#endif
 		}
 	    }
 	}
@@ -784,6 +912,8 @@ void StarMagField::ReadField( )
     fclose(magfile);
   }
   #endif
+#if 1
+#endif
   return ;
 
 }

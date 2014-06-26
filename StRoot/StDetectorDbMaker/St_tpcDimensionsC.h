@@ -85,6 +85,8 @@ class St_tpcDimensionsC : public TChair {
       - St_tpcWirePlanesC::instance()->outerSectorGatingGridPadPlaneSeparation();}
   Double_t      zInnerOffset()                  {return St_tpcEffectiveGeomC::instance()->z_inner_offset();}
   Double_t      zOuterOffset()                  {return St_tpcEffectiveGeomC::instance()->z_outer_offset();}
+  Double_t      zInnerOffset_West()             {return St_tpcEffectiveGeomC::instance()->z_inner_offset_West();}
+  Double_t      zOuterOffset_West()             {return St_tpcEffectiveGeomC::instance()->z_outer_offset_West();}
   //TPC field cage parameters:
   Double_t ifcRadius() {return tpcInnerRadius();}
   Double_t ofcRadius() {return tpcOuterRadius();}
