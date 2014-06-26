@@ -9,9 +9,9 @@
 //:Pointer to data:  Survey.time.C:
 //   Translation from local to Master
 //   m = R*l + t
-//           ( r00 r01 r02 ) (xl)   ( t0 )    ( r00 r01 r02 ) (xl)   ( t0 )
-//       R = ( r10 r11 r12 ) (yl) + ( t1 ) =  ( r10 r11 r12 ) (zl) + ( t1 )
-//           ( r20 r21 r22 ) (zl)   ( t2 )    ( r20 r21 r22 ) (yl)   ( t2 )
+//           ( r00 r01 r02 ) (xl)   ( t0 )    ( r00 r01 r02 ) (xl)   ( t0 )    (     1 -gamma   beta ) (xl)   ( t0 )
+//       R = ( r10 r11 r12 ) (yl) + ( t1 ) =  ( r10 r11 r12 ) (zl) + ( t1 ) ~  ( gamma      1 -alpha ) (zl) + ( t1 ) 
+//           ( r20 r21 r22 ) (zl)   ( t2 )    ( r20 r21 r22 ) (yl)   ( t2 )    ( -beta  alpha      1 ) (yl)   ( t2 )
 // SVT
 // Id = 0                                for SvtOnGlobal
 // Id = [0, 1]                           for ShellOnGlobal, 
