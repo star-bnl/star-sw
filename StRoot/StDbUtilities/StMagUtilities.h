@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.55 2014/01/16 17:55:14 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.56 2014/06/26 21:29:27 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.56  2014/06/26 21:29:27  fisyak
+ * New Tpc Alignment, v632
+ *
  * Revision 1.55  2014/01/16 17:55:14  genevb
  * Two speed improvements: less calls to DB for SpaceCharge, avoid unnecessary cartesian/cylindrical coordinate conversions
  *
@@ -158,7 +161,7 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMagUtilities_H
 #define StMagUtilities_H
- 
+#define  __NEW_MagUtilities__
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -167,6 +170,9 @@
 #include "TSystem.h"
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 #include "TMatrix.h"      // TMatrix keeps changing ... keep it here until proven otherwise.
+#include "StarMagField/StarMagField.h"
+class TFile;
+class TNtuple;
 #include "TMath.h"
 
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
@@ -190,7 +196,8 @@ enum   DistortSelect
   kGridLeak          = 0x4000,   // Bit 15
   k3DGridLeak        = 0x8000,   // Bit 16
   kGGVoltError       = 0x10000,  // Bit 17
-  kSectorAlign       = 0x20000   // Bit 18
+  kSectorAlign       = 0x20000,  // Bit 18
+  kDisableTwistClock = 0x40000   // Bit 19
 } ;
 enum   CorrectSelect
 {
@@ -228,9 +235,7 @@ class StMagUtilities {
 
  private:
   static StMagUtilities *fgInstance;
- 
   StTpcDb*  thedb ;  
-  TDataSet* thedb2 ;
   StDetectorDbSpaceCharge*   fSpaceCharge   ;
   StDetectorDbSpaceChargeR2* fSpaceChargeR2 ;  
   StDetectorDbTpcVoltages*   fTpcVolts      ;
@@ -238,7 +243,7 @@ class StMagUtilities {
   StDetectorDbGridLeak*      fGridLeak      ;
   St_tpcHVPlanesC*           fHVPlanes      ;
 
-  virtual void    SetDb( StTpcDb* dbin , TDataSet* dbin2 ) ;
+  virtual void    SetDb( StTpcDb* dbin ) ;
   virtual void    GetMagFactor ()     ;
   virtual void    GetTPCParams ()     ;
   virtual void    GetTPCVoltages ()   ;
@@ -251,8 +256,8 @@ class StMagUtilities {
   virtual void    GetE()              ;
 
   virtual void    CommonStart ( Int_t mode ) ;
-  virtual void    ReadField ( ) ;
-  virtual void    Search ( const Int_t N, const Float_t Xarray[], const Float_t x, Int_t &low ) ;
+  virtual void    Search ( const Int_t N, const Float_t Xarray[], const Float_t x, Int_t &low ) 
+  {StarMagField::Instance()->Search(N,Xarray,x,low);}
   virtual Int_t   IsPowerOfTwo (Int_t i) ;
   virtual void    SectorNumber ( Int_t& Sector , const Float_t x[] ) ;
   virtual void    SectorNumber ( Int_t& Sector , Float_t phi, const Float_t z ) ;
@@ -260,7 +265,8 @@ class StMagUtilities {
   virtual Int_t   SectorSide   ( Int_t& Sector , const Float_t z   ) ;
   virtual Float_t LimitZ (Int_t& Sector, const Float_t x[] ) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
-				const Int_t ORDER, const Float_t x ) ;
+				const Int_t ORDER, const Float_t x ) 
+  {return StarMagField::Instance()->Interpolate(Xarray,Yarray,ORDER,x);}
   virtual Float_t Interpolate2DTable  ( const Int_t ORDER, const Float_t x, const Float_t y, const Int_t nx, const Int_t ny, 
  				        const Float_t XV[], const Float_t YV[], const TMatrix &Array ) ;
   virtual Float_t Interpolate3DTable ( const Int_t ORDER, const Float_t x,    const Float_t y,    const Float_t z,
@@ -268,9 +274,11 @@ class StMagUtilities {
 				       const Float_t XV[], const Float_t YV[], const Float_t ZV[],
 				       TMatrix **ArrayofArrays ) ;
   virtual void    Interpolate2DBfield ( const Float_t r, const Float_t z, 
-					Float_t &Br_value, Float_t &Bz_value ) ;
+					Float_t &Br_value, Float_t &Bz_value ) 
+  {StarMagField::Instance()->Interpolate2DBfield ( r, z, Br_value, Bz_value );}
   virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi, 
-					Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
+					Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) 
+  {StarMagField::Instance()->Interpolate3DBfield ( r, z, phi, Br_value, Bz_value, Bphi_value );}
   virtual void    Interpolate2DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t z, 
 					     const Float_t Er[EMap_nZ][EMap_nR], Float_t &Er_value ) ;
   virtual void    Interpolate3DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t phi, const Float_t z, 
@@ -344,12 +352,6 @@ class StMagUtilities {
   Bool_t   usingCartesian             ; // Using Cartesian or cylindrical coordinates
 
 
-  Float_t  Bz[BMap_nZ][BMap_nR], Br[BMap_nZ][BMap_nR] ;         
-  Float_t  Radius[BMap_nR], ZList[BMap_nZ] ;         
-  Float_t  Bz3D[BMap_nPhi][BMap_nZ][BMap_nR], Br3D[BMap_nPhi][BMap_nZ][BMap_nR], Bphi3D[BMap_nPhi][BMap_nZ][BMap_nR] ;         
-  Float_t  R3D[BMap_nR], Z3D[BMap_nZ], Phi3D[BMap_nPhi] ;         
-//Float_t  cmEr[EMap_nZ][EMap_nPhi][EMap_nR],    cmEphi[EMap_nZ][EMap_nPhi][EMap_nR]  ;
-//Float_t  endEr[EMap_nZ][EMap_nPhi][EMap_nR],   endEphi[EMap_nZ][EMap_nPhi][EMap_nR] ;
   Float_t  shiftEr[EMap_nZ][EMap_nR] ;
   Float_t  spaceEr[EMap_nZ][EMap_nR] ;
   Float_t  spaceR2Er[EMap_nZ][EMap_nR] ;
@@ -358,25 +360,33 @@ class StMagUtilities {
 
   static   Float_t ePhiList[EMap_nPhi] ;   // Note: These are initialized near CommonStart() in the .cxx file
   static   Float_t eRList[EMap_nR]     ;
-  static   Float_t eZList[EMap_nZ]     ;
-
+  static   Float_t eZList[EMap_nZ]     ; 
+  static   TNtuple *fgDoDistortion;
+  static   TNtuple *fgUnDoDistortion;
  public:
 
   StMagUtilities () ;
-  StMagUtilities ( StTpcDb* dbin,  TDataSet* dbin2, Int_t mode = 0 ) ;
-  StMagUtilities ( const EBField map, const Float_t factor, Int_t mode = 0 ) ;
-  virtual ~StMagUtilities () { fgInstance = 0; }
-  static StMagUtilities* Instance() { return fgInstance; }
+  StMagUtilities ( StTpcDb* dbin,  Int_t mode = 0 ) ;
+  StMagUtilities ( const StarMagField::EBField map, const Float_t factor, Int_t mode );
+  virtual ~StMagUtilities () {fgInstance = 0;}
+  static StMagUtilities *Instance() {return fgInstance;}
 
-  virtual void    BField ( const Float_t x[], Float_t B[] ) ;
-  virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
-  virtual void    B3DField ( const Float_t x[], Float_t B[] ) ;
+  virtual void    BField ( const Float_t x[], Float_t B[] ) 
+  {StarMagField::Instance()->BField(x,B);}
+  virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) 
+  {StarMagField::Instance()->BrBzField(r,z,Br_value,Bz_value );}
+  virtual void    B3DField ( const Float_t x[], Float_t B[] )
+  {StarMagField::Instance()->B3DField(x,B);}
+  virtual void    B3DFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector = -1 );
+  virtual void    BFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector = -1 ) {B3DFieldTpc(xTpc,BTpc,Sector);} 
   virtual void    BrBz3DField ( const Float_t r, const Float_t z, const Float_t phi,
-				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
+				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) 
+  {StarMagField::Instance()->BrBz3DField(r, z, phi, Br_value, Bz_value, Bphi_value);}
+   
   virtual void    DoDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
-  virtual void    Undo2DBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    Undo2DBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 );// {UndoBDistortion(x,Xprime,Sector);}
   virtual void    FastUndoBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    FastUndo2DBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoPad13Distortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
@@ -452,6 +462,8 @@ class StMagUtilities {
           Float_t  GetConst_0() { return Const_0; }
           Float_t  GetConst_1() { return Const_1; }
           Float_t  GetConst_2() { return Const_2; }
+  static  void    SetDoDistortionT  (TFile *f = 0);
+  static  void    SetUnDoDistortionT(TFile *f = 0);
 
   virtual void     Cart2Polar(const Float_t* x, Float_t& r, Float_t& phi) {
     r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;

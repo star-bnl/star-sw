@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.39 2012/10/23 20:13:17 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.40 2014/06/26 21:29:27 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.40  2014/06/26 21:29:27  fisyak
+ * New Tpc Alignment, v632
+ *
  * Revision 1.39  2012/10/23 20:13:17  fisyak
  * Move xFromPad from h- to cxx-file
  *
@@ -229,30 +232,29 @@
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "TMath.h"
+#include "StThreeVectorD.hh"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
 #endif
 static Int_t _debug = 0;
-StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
+StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* /* globalDbPointer */)
  {
-  
-//     mTPCdb = geomdb;
-//     mSCdb  = scdb;
-//     mElectronicsDb = eldb;
-    gTpcDbPtr    = globalDbPointer;
-    if (! gTpcDbPtr) gTpcDbPtr = StTpcDb::instance();
-    if (gTpcDbPtr->PadPlaneGeometry() &&
-	gTpcDbPtr->Electronics() &&
-        gTpcDbPtr->GlobalPosition()) { 
-	mTimeBinWidth = 1./gTpcDbPtr->Electronics()->samplingFrequency();
-        mInnerSectorzOffset = gTpcDbPtr->Dimensions()->zInnerOffset();
-        mOuterSectorzOffset = gTpcDbPtr->Dimensions()->zOuterOffset();
+    if (StTpcDb::instance()->PadPlaneGeometry() &&
+	StTpcDb::instance()->Electronics() &&
+        StTpcDb::instance()->GlobalPosition()) { 
+	mTimeBinWidth = 1./StTpcDb::instance()->Electronics()->samplingFrequency();
+        mInnerSectorzOffset = StTpcDb::instance()->Dimensions()->zInnerOffset();
+        mOuterSectorzOffset = StTpcDb::instance()->Dimensions()->zOuterOffset();
+#if 0
+        mInnerSectorzOffset_West = StTpcDb::instance()->Dimensions()->zInnerOffset_West();
+        mOuterSectorzOffset_West = StTpcDb::instance()->Dimensions()->zOuterOffset_West();
+#endif
     }
     else {
 	gMessMgr->Error() << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endm;
-	assert(gTpcDbPtr->PadPlaneGeometry());
-	assert(gTpcDbPtr->Electronics());
-        assert(gTpcDbPtr->GlobalPosition());
+	assert(StTpcDb::instance()->PadPlaneGeometry());
+	assert(StTpcDb::instance()->Electronics());
+        assert(StTpcDb::instance()->GlobalPosition());
     }
     mNoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
     mNoOfRows      = mNoOfInnerRows + St_tpcPadPlanesC::instance()->outerPadRows();
@@ -272,12 +274,15 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 #else
   Double_t                  zoffset = (row>mNoOfInnerRows) ? mOuterSectorzOffset :mInnerSectorzOffset;
 #endif /* Don't apply zOffSet for prompt hits */
+#if 0
+  if (sector <= 12)         zoffset+= (row>mNoOfInnerRows) ? mOuterSectorzOffset_West :mInnerSectorzOffset_West;
+#endif
   Double_t t0offset = (useT0 && sector>=1&&sector<=24) ? St_tpcPadGainT0BC::instance()->T0(sector,row,TMath::Nint (probablePad)) : 0;
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
-  Double_t t0zoffset = t0offset*gTpcDbPtr->DriftVelocity(sector)*1e-6;
-  Double_t tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector,row);  
+  Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(sector)*1e-6;
+  Double_t tb = tBFromZ(a.position().z()+zoffset-t0zoffset,sector,row);
   b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
 //________________________________________________________________________________
@@ -290,11 +295,14 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
 #else
   Double_t                zoffset =  (a.row()>mNoOfInnerRows) ? mOuterSectorzOffset : mInnerSectorzOffset;
 #endif /* Don't apply zOffSet for prompt hits */
+#if 0
+  if (a.sector() <= 12)         zoffset+= (a.row() > mNoOfInnerRows) ? mOuterSectorzOffset_West :mInnerSectorzOffset_West;
+#endif
   Double_t t0offset = useT0 ? St_tpcPadGainT0BC::instance()->T0(a.sector(),a.row(),TMath::Nint(a.pad())) : 0;
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
-  Double_t t0zoffset = t0offset*gTpcDbPtr->DriftVelocity(a.sector())*1e-6;
+  Double_t t0zoffset = t0offset*StTpcDb::instance()->DriftVelocity(a.sector())*1e-6;
   //t0 offset -- DH  27-Mar-00
   Double_t z = zFromTB(a.timeBucket(),a.sector(),a.row())-zoffset+t0zoffset;
   tmp.setZ(z);
@@ -302,11 +310,12 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
 }
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t row) const {
+  if (row > mNoOfRows) row = mNoOfRows;
   Double_t pitch = (row <= mNoOfInnerRows) ?
-    gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch() :
-    gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
+    StTpcDb::instance()->PadPlaneGeometry()->innerSectorPadPitch() :
+    StTpcDb::instance()->PadPlaneGeometry()->outerSectorPadPitch();
   // x coordinate in sector 12
-  Double_t probablePad = (gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2. - x/pitch;
+  Double_t probablePad = (StTpcDb::instance()->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2. - x/pitch;
   // CAUTION: pad cannot be <1
   if(probablePad<0.500001) {
     probablePad=0.500001;
@@ -315,31 +324,42 @@ Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t row) const {
 }
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::xFromPad(Int_t row, Double_t pad)          const {    // x coordinate in sector 12
+  if (row > mNoOfRows) row = mNoOfRows;
   Double_t pitch = (row <= mNoOfInnerRows) ?	
-    gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch() : 
-    gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
-  return -pitch*(pad - (gTpcDbPtr->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2.);
+    StTpcDb::instance()->PadPlaneGeometry()->innerSectorPadPitch() : 
+    StTpcDb::instance()->PadPlaneGeometry()->outerSectorPadPitch();
+  return -pitch*(pad - (StTpcDb::instance()->PadPlaneGeometry()->numberOfPadsAtRow(row)+1.)/2.);
 }
 // Coordinate from Row
 //
 //Local Transformation...
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::zFromTB(Double_t tb, Int_t sector, Int_t row) const {
-  Double_t trigT0 = gTpcDbPtr->triggerTimeOffset()*1e6;         // units are s
-  Double_t elecT0 = gTpcDbPtr->Electronics()->tZero();          // units are us 
+  if (row > mNoOfRows) row = mNoOfRows;
+  Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
+#if 0
+  if ((sector <= 12 && tb <= 350) || // extra West laser off set, membrane cluster with time bucket > 350
+      (sector >  12 && tb >  350)) {trigT0 +=  StTpcDb::instance()->triggerTimeOffsetWest()*1e6;}
+#endif
+  Double_t elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
   Double_t time = t0 + (tb + St_tpcSectorT0offsetC::instance()->t0offset(sector))*mTimeBinWidth; 
-  Double_t z = gTpcDbPtr->DriftVelocity(sector)*1e-6*time;
+  Double_t z = StTpcDb::instance()->DriftVelocity(sector)*1e-6*time;
   return z;
 }
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) const {
-  Double_t trigT0 = gTpcDbPtr->triggerTimeOffset()*1e6;         // units are s
-  Double_t elecT0 = gTpcDbPtr->Electronics()->tZero();          // units are us 
+  if (row > mNoOfRows) row = mNoOfRows;
+  Double_t trigT0 = StTpcDb::instance()->triggerTimeOffset()*1e6;         // units are s
+#if 0
+  if ((sector <= 12 && z < 195) || // extra West laser off set, membrane cluster with time z < 195
+      (sector >  12 && z > 195)) {trigT0 +=  StTpcDb::instance()->triggerTimeOffsetWest()*1e6;}
+#endif
+  Double_t elecT0 = StTpcDb::instance()->Electronics()->tZero();          // units are us 
   Double_t sectT0 = St_tpcPadrowT0C::instance()->T0(sector,row);// units are us 
   Double_t t0 = trigT0 + elecT0 + sectT0;
-  Double_t time = z / (gTpcDbPtr->DriftVelocity(sector)*1e-6);
+  Double_t time = z / (StTpcDb::instance()->DriftVelocity(sector)*1e-6);
   Double_t tb = (time - t0)/mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(sector);
   return tb;
 }
@@ -364,4 +384,22 @@ Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y) {
   row++;
   return row;
 }
-
+//________________________________________________________________________________
+void  StTpcCoordinateTransform::operator()(const        StTpcLocalSectorCoordinate& a, StTpcLocalCoordinate& b           )
+{ 
+  StThreeVectorD xGG;
+  StTpcDb::instance()->Pad2Tpc(a.sector(),a.row()).LocalToMasterVect(a.position().xyz(),xGG.xyz()); 
+  const Double_t *trans = StTpcDb::instance()->Pad2Tpc(a.sector(),a.row()).GetTranslation(); // 4
+  TGeoTranslation GG2TPC(trans[0],trans[1],trans[2]);
+  GG2TPC.LocalToMaster(xGG.xyz(), b.position().xyz());
+  b.setSector(a.sector()); b.setRow(a.row());
+}
+//________________________________________________________________________________
+void  StTpcCoordinateTransform::operator()(const              StTpcLocalCoordinate& a, StTpcLocalSectorCoordinate& b     ) 
+{ 
+  const Double_t *trans = StTpcDb::instance()->Pad2Tpc(a.sector(),a.row()).GetTranslation(); // 4
+  TGeoTranslation GG2TPC(trans[0],trans[1],trans[2]);
+  StThreeVectorD xGG;
+  GG2TPC.MasterToLocal(a.position().xyz(), xGG.xyz());
+  StTpcDb::instance()->Pad2Tpc(a.sector(),a.row()).MasterToLocalVect(xGG.xyz(),b.position().xyz()); b.setSector(a.sector()); b.setRow(a.row());
+}

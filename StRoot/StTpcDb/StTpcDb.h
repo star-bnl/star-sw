@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.39 2012/09/17 19:39:44 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.40 2014/06/26 21:32:57 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.40  2014/06/26 21:32:57  fisyak
+ * New Tpc Alignment, v632
+ *
  * Revision 1.39  2012/09/17 19:39:44  fisyak
  * Add rotation for Half Tpc's
  *
@@ -125,13 +128,11 @@
 #include "StDetectorDbMaker/St_tpcFieldCageC.h"
 #include "StDetectorDbMaker/St_tpcPedestalC.h"
 #include "StDetectorDbMaker/St_tpcPadResponseC.h"
-#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StDetectorDbMaker/St_trgTimeOffsetC.h"
 #include "TGeoMatrix.h"
 #include "TString.h"
-#include "tables/St_tpcDriftVelocity_Table.h"
-
 class StTpcDb;
 // Global pointers:
 R__EXTERN StTpcDb* gStTpcDb;
@@ -166,9 +167,9 @@ class StTpcDb {
 			       kTotalTpcSectorRotaions =14}; 
  private:
   Char_t                mBeg[1];        //!
-  St_tpcDriftVelocity*  dvel;           //!
   StMagUtilities*       mExB;           //!
   Int_t                 m_Debug;        //!
+  TGeoTranslation      *mSwap[2];       //! 
   TGeoHMatrix          *mFlip;          //!
   TGeoHMatrix          *mTpc2GlobMatrix;//!
   TGeoHMatrix          *mHalf[2];       //!
@@ -176,6 +177,8 @@ class StTpcDb {
   Float_t               mDriftVel[2];   //!
   UInt_t                mUc;            //! time for which above mDriftVel have been calculated
   Int_t                 mTriggerId;     //! to distinguish local clock and RHIC clock
+  Int_t                 mNoOfInnerRows; //!
+  Double_t              mzGG;           //! Gating Grid z
   Char_t                mEnd[1];        //!
  private:
   StTpcDb();
@@ -190,14 +193,22 @@ class StTpcDb {
   St_tpcFieldCageC      *FieldCage() {return St_tpcFieldCageC::instance();}
   St_tpcSectorPositionC *SectorPosition() {return St_tpcSectorPositionC::instance();}
   St_tpcPedestalC       *Pedestal() {return St_tpcPedestalC::instance();}
-  St_tpcPadGainT0C      *tpcGain() {return St_tpcPadGainT0C::instance();}
-  St_tpcPadGainT0C      *tpcT0()   {return St_tpcPadGainT0C::instance();}
+  St_tpcPadGainT0BC     *tpcGain() {return St_tpcPadGainT0BC::instance();}
+  St_tpcPadGainT0BC     *tpcT0()   {return St_tpcPadGainT0BC::instance();}
   St_tpcPadResponseC    *PadResponse() {return St_tpcPadResponseC::instance();}
-  Float_t                triggerTimeOffset() {return St_trgTimeOffsetC::instance()->triggerTimeOffset();}
-
+  Float_t                triggerTimeOffset()     {return St_trgTimeOffsetC::instance()->triggerTimeOffset();}
+  Float_t                triggerTimeOffsetWest() {return St_trgTimeOffsetC::instance()->triggerTimeOffsetWest();}
+#if 0
+  Float_t                ScaleY();
+#endif
+  Double_t               zGG() {return mzGG;}
   //small pieces of data:
   void    SetDriftVelocity();
+#if 0
+  Float_t DriftVelocity(Int_t sector=24, Double_t Y = 0);
+#else
   Float_t DriftVelocity(Int_t sector=24);
+#endif
   StMagUtilities* ExB() {return mExB;}
   void SetExB(StMagUtilities *m) {mExB = m;}
   void SetTpcRotations();
@@ -212,6 +223,7 @@ class StTpcDb {
   Int_t TriggerId() {return mTriggerId;}
   const TGeoHMatrix &Flip()                           const {return *mFlip;}
   const TGeoHMatrix &TpcHalf(StBeamDirection part)    const {return *mHalf[part];}
+  const TGeoTranslation &Swap(StBeamDirection part)   const {return *mSwap[part];}
   const TGeoHMatrix &Tpc2GlobalMatrix()               const {return *mTpc2GlobMatrix;}
   const TGeoHMatrix &TpcRot(Int_t sector, Int_t k)    const {return *mTpcSectorRotations[sector-1][k];}
   const TGeoHMatrix &SupS2Tpc(Int_t sector = 1)       const {return TpcRot(sector,kSupS2Tpc);}
@@ -230,13 +242,13 @@ class StTpcDb {
   const TGeoHMatrix &PadInner2Glob(Int_t sector = 1)  const {return TpcRot(sector,kPadInner2Glob);}
   const TGeoHMatrix &PadOuter2Glob(Int_t sector = 1)  const {return TpcRot(sector,kPadOuter2Glob);}
 
-  const TGeoHMatrix &SubS2SupS(Int_t sector = 1, Int_t row = 1) const {Int_t k = (row <= 13) ? kSubSInner2SupS : kSubSOuter2SupS; return TpcRot(sector,k);}
-  const TGeoHMatrix &SubS2Tpc(Int_t sector = 1, Int_t row = 1)  const {Int_t k = (row <= 13) ? kSubSInner2Tpc : kSubSOuter2Tpc; return TpcRot(sector,k);}
-  const TGeoHMatrix &SubS2Glob(Int_t sector = 1, Int_t row = 1) const {Int_t k = (row <= 13) ? kSubSInner2Glob: kSubSOuter2Glob; return TpcRot(sector,k);}
+  const TGeoHMatrix &SubS2SupS(Int_t sector = 1, Int_t row = 1) const {Int_t k = (row <= mNoOfInnerRows) ? kSubSInner2SupS : kSubSOuter2SupS; return TpcRot(sector,k);}
+  const TGeoHMatrix &SubS2Tpc(Int_t sector = 1, Int_t row = 1)  const {Int_t k = (row <= mNoOfInnerRows) ? kSubSInner2Tpc : kSubSOuter2Tpc; return TpcRot(sector,k);}
+  const TGeoHMatrix &SubS2Glob(Int_t sector = 1, Int_t row = 1) const {Int_t k = (row <= mNoOfInnerRows) ? kSubSInner2Glob: kSubSOuter2Glob; return TpcRot(sector,k);}
 
-  const TGeoHMatrix &Pad2SupS(Int_t sector = 1, Int_t row = 1)  const {Int_t k = (row <= 13) ? kPadInner2SupS: kPadOuter2SupS; return TpcRot(sector,k);}
-  const TGeoHMatrix &Pad2Tpc(Int_t sector = 1, Int_t row = 1)   const {Int_t k = (row <= 13) ? kPadInner2Tpc: kPadOuter2Tpc; return TpcRot(sector,k);}
-  const TGeoHMatrix &Pad2Glob(Int_t sector = 1, Int_t row = 1)  const {Int_t k = (row <= 13) ? kPadInner2Glob: kPadOuter2Glob; return TpcRot(sector,k);}
+  const TGeoHMatrix &Pad2SupS(Int_t sector = 1, Int_t row = 1)  const {Int_t k = (row <= mNoOfInnerRows) ? kPadInner2SupS: kPadOuter2SupS; return TpcRot(sector,k);}
+  const TGeoHMatrix &Pad2Tpc(Int_t sector = 1, Int_t row = 1)   const {Int_t k = (row <= mNoOfInnerRows) ? kPadInner2Tpc: kPadOuter2Tpc; return TpcRot(sector,k);}
+  const TGeoHMatrix &Pad2Glob(Int_t sector = 1, Int_t row = 1)  const {Int_t k = (row <= mNoOfInnerRows) ? kPadInner2Glob: kPadOuter2Glob; return TpcRot(sector,k);}
   ClassDef(StTpcDb,0)
 };
 #endif

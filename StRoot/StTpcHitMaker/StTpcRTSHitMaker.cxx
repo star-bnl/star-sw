@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.38 2013/12/26 15:44:06 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.39 2014/06/26 21:31:42 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -149,6 +149,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   if (NoRows <= 45) { // hack for now take Tonko's defaults for iTpx
     fTpx->InitRun(runnumber);
   }
+  PrintAttr();
   return kStOK;
 }
 //________________________________________________________________________________
@@ -236,7 +237,11 @@ Int_t StTpcRTSHitMaker::Make() {
     static StTpcCoordinateTransform transform(gStTpcDb);
     static StThreeVectorF hard_coded_errors;
     //      fTpx->put("cld_sim");       // clean up clusters
-    dta = fTpx->get("cld_sim"); // rerun the cluster finder on the simulated data...
+    if (IAttr("TpxClu2D")) {
+      dta = fTpx->get("cld_2d_sim"); // rerun the 2D cluster finder on the simulated data...
+    } else {
+      dta = fTpx->get("cld_sim"); // rerun the cluster finder on the simulated data...
+  }
     Double_t ADC2GeV = 0;
     Int_t rowOld = -1;
     static Int_t iBreak = 0;

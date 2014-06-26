@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.61 2012/09/17 19:39:44 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.62 2014/06/26 21:32:57 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.62  2014/06/26 21:32:57  fisyak
+ * New Tpc Alignment, v632
+ *
  * Revision 1.61  2012/09/17 19:39:44  fisyak
  * Add rotation for Half Tpc's
  *
@@ -185,7 +188,7 @@
  *
  **************************************************************************/
 
-#define StTpc_STATIC_ARRAYS
+//#define StTpc_STATIC_ARRAYS
 #include <assert.h>
 #include "StTpcDbMaker.h"
 #include "StTpcDb.h"
@@ -283,6 +286,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     StTpcDb::instance()->SetExB(magU);
   }
   StTpcDb::instance()->SetTpcRotations();
+#ifdef StTpc_STATIC_ARRAYS
   //Here I fill in the arrays for the row parameterization ax+by=1
   if (StTpcDb::instance()->GlobalPosition()) {
     for (int i=0;i<24;i++){
@@ -317,6 +321,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
       }
     }
   }
+#endif /* StTpc_STATIC_ARRAYS */
   return 0;
 }
 //_____________________________________________________________________________
@@ -327,6 +332,7 @@ Int_t StTpcDbMaker::Make(){
     return kStEOF;
   }
   StTpcDb::instance()->SetDriftVelocity();
+  St_trgTimeOffsetC::instance()->SetLaser(kFALSE);
   if (IAttr("laserIT")) {
     St_trgTimeOffsetC::instance()->SetLaser(kTRUE);
   } else {
@@ -338,7 +344,6 @@ Int_t StTpcDbMaker::Make(){
 	if (nominal) {
 	  Int_t TriggerId = 0;
 	  StTpcDb::instance()->SetTriggerId(TriggerId);
-	  St_trgTimeOffsetC::instance()->SetLaser(kFALSE);
 	  static Int_t goodIds[2] = {9200,9201}; // Laser trigger IDs
 	  for (Int_t i = 0; i < 5; i++) {
 	    if (nominal->isTrigger(goodIds[i])) {TriggerId = goodIds[i]; break;}

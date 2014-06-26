@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StTpcMixerMaker.cxx,v 1.3 2012/05/02 22:21:59 fisyak Exp $
+ * $Id: StTpcMixerMaker.cxx,v 1.4 2014/06/26 21:31:42 fisyak Exp $
  * $Log: StTpcMixerMaker.cxx,v $
+ * Revision 1.4  2014/06/26 21:31:42  fisyak
+ * New Tpc Alignment, v632
+ *
  * Revision 1.3  2012/05/02 22:21:59  fisyak
  * Remove requirement to have 2 and only 2 inputs
  *
@@ -32,12 +35,12 @@ Int_t StTpcMixerMaker::Make() {
     if (! inputs[nfound]) continue;
     LOG_INFO << "Found \t" << Path << " in " << set->Path() << "\tas Input" << nfound+1 << endm;
     nfound++;
-    if (nfound == 2) break;
   }
-  if (nfound==2) {
+  if (nfound == 2) {
     *inputs[0] += *inputs[1];
   } else {
-    LOG_INFO << "Found only " << nfound << " Event with StTpcRawData ==> Do nothing!" << endm;
+    LOG_ERROR << "Found " << nfound << " Makers with StTpcRawData Event" << endm;
+    assert(nfound > 0);
   }
   return kStOK;
 } 

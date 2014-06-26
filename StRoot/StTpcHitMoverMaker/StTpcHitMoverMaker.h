@@ -8,7 +8,6 @@
 #include "StDbUtilities/StGlobalCoordinate.hh"
 
 class StTpcCoordinateTransform;
-class StMagUtilities;
 
 //! StTpcHitMoverMaker - implements corrections on TPC hits
 /*!
@@ -27,7 +26,7 @@ class StTpcHitMover : public StMaker {
   static  void moveTpcHit(StTpcLocalCoordinate &coorL, StGlobalCoordinate &coorG);
   static  void moveTpcHit(StTpcLocalCoordinate &coorL, StTpcLocalCoordinate &coorLD);
   virtual const Char_t *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.9 2014/01/08 21:14:28 fisyak Exp $ built "__DATE__" "__TIME__;
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.10 2014/06/26 21:32:25 fisyak Exp $ built "__DATE__" "__TIME__;
     return cvs;
   }
  protected:
@@ -35,7 +34,6 @@ class StTpcHitMover : public StMaker {
  private:
   static StTpcCoordinateTransform *mTpcTransForm; 
 
-  static StMagUtilities*   mExB; //!
   static Int_t _debug;
   ClassDef(StTpcHitMover,0)
 };
