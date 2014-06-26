@@ -10,7 +10,7 @@ struct tpcElectronics {
 
    long  numberOfTimeBins;   /*   */
    double  nominalGain;   /*   mV/fC  */
-   double  samplingFrequency;   /*   MHz  */
+   double  samplingFrequency;   /* MHz, not used,  overwritten by starClockOnl*/
    double  tZero;   /*   us (microseconds)  */
    double  adcCharge;   /*   fC/adc count  */
    double  adcConversion;   /*   mV/adc count  */
