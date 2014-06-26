@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.h,v 1.15 2013/03/26 13:38:18 fisyak Exp $
+ * $Id: StarMagField.h,v 1.16 2014/06/26 21:50:17 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.h,v $
+ * Revision 1.16  2014/06/26 21:50:17  fisyak
+ * New Tpc Alignment, v632
+ *
  * Revision 1.15  2013/03/26 13:38:18  fisyak
  * restore back modififcations as not related to drop in no. of reconstructed tracks
  *
@@ -78,6 +81,8 @@
 #include <Stiostream.h>
 #include <Rtypes.h>
 #if defined (__ROOT__)
+#include "TH2.h"
+#include "TGeoMatrix.h"
 #if ROOT_VERSION_CODE >= 335360 /* ROOT_VERSION(5,30,0) */
 #include "TVirtualMagField.h"
 class StarMagField : public TVirtualMagField 
@@ -105,6 +110,12 @@ class StarMagField
  private:
 
   virtual void    ReadField ( ) ;
+  static StarMagField *fgInstance;
+#if defined (__ROOT__)
+  TGeoRotation fStarMagFieldRotation;
+  TH2F *fBzdZCorrection; // correction due to endcap calomiter
+  TH2F *fBrdZCorrection; // correction due to endcap calomiter
+#endif 
  public:
   //added by Lijuan
   
@@ -113,7 +124,6 @@ class StarMagField
   //end added by Lijuan
 
 
-  static StarMagField *fgInstance;
 
   EBField  fMap;       // (D) = kMapped; Global flag to indicate static arrays are full
   Float_t  fFactor;    // (D) = 1.0    ; Multiplicative factor (allows scaling and sign reversal)
@@ -142,9 +152,14 @@ class StarMagField
 		 Bool_t  Lock    =  kFALSE, Float_t Rescale =      1, 
 		 Float_t Bdipole =  -42.67, Float_t Rmaxdip =  15.34,
 		 Float_t Zmindip =   980.0, Float_t Zmaxdip = 1350.0) ;
+  virtual ~StarMagField () { 
+    fgInstance = 0; 
+#if defined (__ROOT__)
+    SafeDelete(fBzdZCorrection);
+    SafeDelete(fBrdZCorrection);
+#endif
+  }
   static StarMagField *Instance();
-  virtual ~StarMagField () { fgInstance = 0; }
-
 
   virtual void    BField   ( const Float_t x[], Float_t B[] ) ;
   virtual void    BField   ( const Double_t x[], Double_t B[] ) ;
@@ -168,6 +183,9 @@ class StarMagField
   virtual Bool_t  IsLocked()   {return fLock;}
   virtual void    Print(Option_t* opt="") const;
 #ifdef __ROOT__
+  void  SetStarMagFieldRotation(TGeoRotation &rot);
+  void  SetStarMagFieldRotation(Double_t *rot);
+  const TGeoRotation &StarMagFieldRotation() {return *&fStarMagFieldRotation;}
   ClassDef(StarMagField,1)    // Base class for all STAR MagField
 #endif
 };
