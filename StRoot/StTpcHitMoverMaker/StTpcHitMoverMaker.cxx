@@ -20,7 +20,6 @@ ClassImp(StTpcHitMover)
 #define PrPP(A,B)
 #endif
 StTpcCoordinateTransform *StTpcHitMover::mTpcTransForm = 0;
-StMagUtilities*   StTpcHitMover::mExB = 0;
 Int_t StTpcHitMover::_debug  = 0;
 //________________________________________________________________________________
 StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name) {
@@ -45,7 +44,7 @@ void StTpcHitMover::FlushDB() {
 }
 //________________________________________________________________________________
 Int_t StTpcHitMover::Make() {
-  if (mExB && mExB->GetSpaceChargeMode() &&
+  if (StMagUtilities::Instance() && StMagUtilities::Instance()->GetSpaceChargeMode() &&
       StDetectorDbSpaceChargeR2::instance()->IsMarked()) {
     gMessMgr->Error() << "StTpcHitMover::Make questionable hit corrections" << endm;
     return kStSkip;
@@ -142,15 +141,14 @@ Int_t StTpcHitMover::Make() {
       }
     }
   }
-  if (mExB) {
-    pEvent->runInfo()->setSpaceCharge(mExB->CurrentSpaceChargeR2());
-    pEvent->runInfo()->setSpaceChargeCorrectionMode(mExB->GetSpaceChargeMode());
+  if (StMagUtilities::Instance()) {
+    pEvent->runInfo()->setSpaceCharge(StMagUtilities::Instance()->CurrentSpaceChargeR2());
+    pEvent->runInfo()->setSpaceChargeCorrectionMode(StMagUtilities::Instance()->GetSpaceChargeMode());
   }
   return kStOK;
 }
 //________________________________________________________________________________
 void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StTpcLocalCoordinate &coorLTD) {
-  mExB = StMagUtilities::Instance();
 #if 0
   if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
   StTpcCoordinateTransform &transform = *mTpcTransForm;
@@ -179,9 +177,9 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StTpcLocalCoordinate
 #else  /* ! __Move2TpcHalf__ */
   Float_t pos[3] = {coorLTD.position().x(), coorLTD.position().y(), coorLTD.position().z()};
 #endif /* __Move2TpcHalf__ */
-  if ( mExB ) {
+  if ( StMagUtilities::Instance() ) {
     Float_t posMoved[3];
-    mExB->UndoDistortion(pos,posMoved,coorL.fromSector());   // input pos[], returns posMoved[]
+    StMagUtilities::Instance()->UndoDistortion(pos,posMoved,coorL.fromSector());   // input pos[], returns posMoved[]
     StThreeVector<double> newPos(posMoved[0],posMoved[1],posMoved[2]);
 #ifdef __Move2TpcHalf__
     StThreeVector<double> newPosL;
@@ -200,8 +198,11 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.24 2014/01/28 17:10:39 genevb Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.25 2014/06/26 21:32:25 fisyak Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.25  2014/06/26 21:32:25  fisyak
+// New Tpc Alignment, v632
+//
 // Revision 1.24  2014/01/28 17:10:39  genevb
 // Fill otherwise empty SpaceCharge info in StRunInfo
 //

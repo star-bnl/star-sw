@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.98 2014/01/17 16:33:04 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.99 2014/06/26 21:29:26 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.99  2014/06/26 21:29:26  fisyak
+ * New Tpc Alignment, v632
+ *
  * Revision 1.98  2014/01/17 16:33:04  genevb
  * Remove accidental change to B3DField for coordinates
  *
@@ -146,7 +149,7 @@
  * Add Event by Event SpaceCharge capabilities from GVB.  Start adding incomplete/unfinished work on Endcaps from JT.
  *
  * Revision 1.52  2004/04/03 00:44:10  jhthomas
- * Blew it again.  I sure wish this wasn't an archive!
+ * Blew it again.  I sure wish this wasn\'t an archive!
  *
  * Revision 1.51  2004/04/03 00:34:42  jhthomas
  * Accidently deleted a line on the previous committ
@@ -164,8 +167,8 @@
  * Improve spacecharge calculation so it is faster.
  *
  * Revision 1.47  2004/03/01 17:22:39  jhthomas
- * Change Shorted Ring Algorithm over to Wieman's Bessel Function solution.  It is faster.
- * Also Fix Jerome's famous non-ascii typo.
+ * Change Shorted Ring Algorithm over to Wieman\'s Bessel Function solution.  It is faster.
+ * Also Fix Jerome\'s famous non-ascii typo.
  *
  * Revision 1.46  2004/02/14 23:57:40  jeromel
  * File still had binary characters in CVS. Corrected and adjusted doc
@@ -220,7 +223,7 @@
  *
  * Revision 1.31  2002/02/22 17:44:18  jhthomas
  * Get CathodeV and GG from DB. Change Defaults.  Change Instantiation argument
- * order. Update D'Oxygen documentation.  Remove 2000/2001 E field switch.
+ * order. Update D\'Oxygen documentation.  Remove 2000/2001 E field switch.
  *
  * Revision 1.30  2002/02/12 22:50:57  hardtke
  * separate geometrical tpc rotation from field twist
@@ -241,7 +244,7 @@
  * Included gFactor explicitly in SpaceCharge call
  *
  * Revision 1.25  2002/02/02 01:01:09  jeromel
- * Jim's modif for FC & SpaceCharge corrections.
+ * Jim\'s modif for FC & SpaceCharge corrections.
  *
  * Revision 1.23  2001/10/25 23:00:24  hardtke
  * Use database to get a few parameters in StMagUtilities (including twist)
@@ -257,7 +260,7 @@
  * Modifications by Jamie so we can turn on/off every corrections.
  *
  * Revision 1.18  2001/09/06 18:27:39  jeromel
- * Modifications for larger number of ExB options, forcing different configuration 9EB1 EB2 ...). Added loading of StTableUtilities when 'display' option is required.
+ * Modifications for larger number of ExB options, forcing different configuration 9EB1 EB2 ...). Added loading of StTableUtilities when \'display\' option is required.
  *
  * Revision 1.17  2001/08/08 20:11:42  jeromel
  * Added debugging lines for ExB correction option. WAS NEVER ON ==> Corrected & -> | (i.e. mea culpa)
@@ -373,9 +376,10 @@ To do:  <br>
 - Spacecharge blob at negative X parameters from DB
 
 */
-
+#include <assert.h>
 #include "StMagUtilities.h"
 #include "TFile.h"
+#include "TNtuple.h"
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TGraphErrors.h"
@@ -386,41 +390,58 @@ To do:  <br>
 #include "StDetectorDbMaker/St_tpcHVPlanesC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
+#include "StDetectorDbMaker/StTpcSurveyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
-
-static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
-static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map read)
 StMagUtilities *StMagUtilities::fgInstance = 0 ;
 static const Float_t  PiOver12 = TMath::Pi()/12. ;  // Commonly used constant
 static const Float_t  PiOver6 = TMath::Pi()/6. ;  // Commonly used constant
+TNtuple *StMagUtilities::fgDoDistortion = 0;
+TNtuple *StMagUtilities::fgUnDoDistortion = 0;
 static const size_t threeFloats = 3 * sizeof(Float_t);
 
 
 //________________________________________
 
 
-ClassImp(StMagUtilities)
-
+ClassImp(StMagUtilities);
+struct Distortion_t {
+  Float_t sector, xL, yL, zL, xLC, yLC, zLC;
+};
+static Distortion_t D;
+static const Char_t *Dnames = {"sector:xL:yL:zL:xLC:yLC:zLC"};
+//________________________________________________________________________________
+void    StMagUtilities::SetDoDistortionT  (TFile *f) {
+  if (! f) return;
+  f->cd();
+  fgDoDistortion = new TNtuple("DoDist","Result of DoDistrotion in TPC CS",Dnames);
+}
+//________________________________________________________________________________
+void    StMagUtilities::SetUnDoDistortionT(TFile *f) {
+  if (! f) return;
+  f->cd();
+  fgUnDoDistortion = new TNtuple("UnDoDist","Result of UnDoDistrotion in TPC CS",Dnames);
+}
+//________________________________________________________________________________
 /// StMagUtilities default constructor
 StMagUtilities::StMagUtilities ()  
 {
   cout << "StMagUtilities:: Unfortunately, instantiation with StMagUtilities(<empty>) is obsolete" << endl ;
   cout << "StMagUtilities:: You must specify DataBase pointers or specify the requested Field settings manually" << endl ;
+  assert(0);
 }
 
 
 /// StMagUtilities constructor using the DataBase
-StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
+StMagUtilities::StMagUtilities ( StTpcDb* dbin , Int_t mode )
 { 
   if (fgInstance) {
     cout << "ReInstate StMagUtilities. Be sure that this is want you want !" << endl;
     SafeDelete(fgInstance);
   }
   fgInstance = this;
-  gMap = kMapped        ;    // Select the B field shape (kMapped == mapped field, kConstant == constant field )
-  SetDb ( dbin, dbin2 ) ;    // Put DB pointers into private/global space
+  SetDb ( dbin )        ;    // Put DB pointers into private/global space
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
   GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
@@ -436,17 +457,15 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 
 
 /// StMagUtilities constructor not using the DataBase
-StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t mode )       
+StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t factor, Int_t mode )       
 { 
   if (fgInstance) {
     cout << "ReInstate StMagUtilities. Be sure that this is want you want !" << endl;
     SafeDelete(fgInstance);
   }
   fgInstance = this;
-  gMap    = map         ;        // Select the type of field (mapped field shape or constant field)
-  thedb2  = 0           ;        // Do not get MagFactor from the DB       - use manual selection above
   thedb   = 0           ;        // Do not get TPC parameters from the DB  - use defaults in CommonStart
-  gFactor = factor      ;        // Manually selected magnetic field scale factor
+  GetMagFactor()        ;        // Get the magnetic field scale factor from the StarMagField
   fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
   fOmegaTau      =  0   ;        // Do not get OmegaTau out of the DB      - use defaults in CommonStart
   ManualSpaceCharge(0)  ;        // Do not get SpaceCharge out of the DB   - use defaults inserted here.
@@ -463,38 +482,37 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
 //________________________________________
 
 
-void StMagUtilities::SetDb ( StTpcDb* dbin , TDataSet* dbin2 )
+void StMagUtilities::SetDb ( StTpcDb* dbin )
 {
   thedb  = dbin  ;
-  thedb2 = dbin2 ;
 }
-
 void StMagUtilities::GetMagFactor () 
 { 
-  St_MagFactor *fMagFactor  =  (St_MagFactor *) thedb2->Find("MagFactor");  assert(fMagFactor) ;
-  gFactor        =  (*fMagFactor)[0].ScaleFactor ;        // Set the magnetic field scale factor
-  //if (TMath::Abs(gFactor) < 1.e-3) gFactor = 1.e-3;     // JT ... This is incorrect.  Don't do it this way.  The DB returns
-                                                          // 1.0 for full field and 0.5 for half field.  These are relative numbers
-                                                          // and are not field values in kGauss or Tesla ... so beware.
-                                                          // See Interpolate2DBField and Interpolate3DBField for a better way to
-                                                          // achieve the same goal of protecting against divide by zero with 0.0 field. 
+  gFactor = StarMagField::Instance()->GetFactor();
 }
-
 void StMagUtilities::GetTPCParams ()  
 { 
   St_tpcWirePlanesC*    wires = thedb->WirePlaneGeometry();
   St_tpcPadPlanesC*      pads = thedb->PadPlaneGeometry();
   St_tpcFieldCageC*     cages = thedb->FieldCage();
   St_tpcDimensionsC*     dims = thedb->Dimensions();
-  St_tpcGlobalPositionC* glob = thedb->GlobalPosition();
-
+  if (! StTpcPosition::instance()->Table()->IsMarked()) { // new scheme
+    XTWIST = 0; 
+    YTWIST = 0;
+    EASTCLOCKERROR = 0;
+    WESTCLOCKERROR = 0;
+    mDistortionMode = kDisableTwistClock;
+  } else {
+    St_tpcGlobalPositionC* glob = thedb->GlobalPosition();
+    XTWIST         =   1e3*glob->TpcEFieldRotationY() ; 
+    YTWIST         =  -1e3*glob->TpcEFieldRotationX() ;            
+    EASTCLOCKERROR =   1e3*cages->EastClockError();
+    WESTCLOCKERROR =   1e3*cages->WestClockError();
+    mDistortionMode= 0;
+  }
   StarDriftV     =  1e-6*thedb->DriftVelocity() ;        
   TPC_Z0         =  dims->gatingGridZ() ;
-  XTWIST         =   1e3*glob->TpcEFieldRotationY() ; 
-  YTWIST         =  -1e3*glob->TpcEFieldRotationX() ;            
   IFCShift       =      cages->InnerFieldCageShift();
-  EASTCLOCKERROR =  1e3*cages->EastClockError();
-  WESTCLOCKERROR =  1e3*cages->WestClockError();
   INNER          =  pads->innerPadRows();
   TPCROWS        =  pads->padRows();
   IFCRadius      =    47.90 ;  // Radius of the Inner Field Cage (GVB: not sure where in DB?)
@@ -795,10 +813,7 @@ Float_t StMagUtilities::eZList[EMap_nZ] = { -208.5, -208.0, -207.0, -206.0, -205
 /// Initialization method.  This will sort and apply the options received by the tpt Maker
 void StMagUtilities::CommonStart ( Int_t mode )
 {
-
-  if ( thedb2 == 0 ) cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected BFIELD setting." << endl ; 
-  else  cout << "StMagUtilities::CommonSta  Magnetic Field scale factor is " << gFactor << endl ;
-
+  cout << "StMagUtilities::CommonSta  Magnetic Field scale factor is " << gFactor << endl ;
   if ( thedb == 0 )
     {
       cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
@@ -807,11 +822,15 @@ void StMagUtilities::CommonStart ( Int_t mode )
       cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
       StarDriftV  =     5.54 ;      // Drift Velocity (cm/microSec) Magnitude
       TPC_Z0      =    208.7 ;      // Z location of STAR TPC Gated Grid (cm)
+#ifndef __NO_TWIST__
       XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
       YTWIST      =    0.219 ;      // Y Displacement of West end of TPC wrt magnet (mRad)
+#endif /*! __NO_TWIST__ */
       IFCShift    =   0.0080 ;      // Shift of the IFC towards the West Endcap (cm) (2/1/2002)
+#ifndef __NO_CLOCK__
       EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians
       WESTCLOCKERROR = -0.43 ;      // Phi rotation of West end of TPC in milli-radians
+#endif /* ! __NO_CLOCK__ */
       INNER          =  13   ;      // Number of TPC rows in the inner sectors
       TPCROWS        =  45   ;      // Total number of TPC rows per sector (Inner + Outer)
       IFCRadius   =    47.90 ;      // Radius of the Inner Field Cage
@@ -882,14 +901,21 @@ void StMagUtilities::CommonStart ( Int_t mode )
   // To turn on and off individual distortions, set these higher bits
   // Default behavior: no bits set gives you the following defaults
 
-  mDistortionMode = mode;
+  mDistortionMode |= mode;
+  if (mDistortionMode & kDisableTwistClock) {
+    mDistortionMode &= ~(mDistortionMode & kTwist);
+    mDistortionMode &= ~(mDistortionMode & kClock);
+    mDistortionMode &= ~(mDistortionMode & kFast2DBMap);
+  }
   if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 
                          | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError | kSectorAlign ))) 
     {
-       mDistortionMode |= kFast2DBMap ;
        mDistortionMode |= kPadrow13 ;
-       mDistortionMode |= kTwist ;
-       mDistortionMode |= kClock ;
+       if (! mDistortionMode & kDisableTwistClock) {
+	 mDistortionMode |= kFast2DBMap ;
+	 mDistortionMode |= kTwist ;
+	 mDistortionMode |= kClock ;
+       }
        mDistortionMode |= kIFCShift ;
        printf("StMagUtilities::CommonSta  Default mode selection\n");
     } 
@@ -898,12 +924,26 @@ void StMagUtilities::CommonStart ( Int_t mode )
   printf("StMagUtilities::CommonSta  Using correction mode 0x%X\n",mCorrectionsMode);
   iterateDistortion = mCorrectionsMode & kIterateUndo;
   iterationFailCounter = -1;
+  printf("StMagUtilities::CommonSta  Version  ");
+  if ( mDistortionMode & kBMap )          printf ("3D Mag Field Distortions") ;
+  if ( mDistortionMode & kFast2DBMap )    printf ("2D Mag Field Distortions") ;
+  if ( mDistortionMode & kPadrow13 )      printf (" + Padrow 13") ;
+  if ( mDistortionMode & kTwist )         printf (" + Twist") ;
+  if ( mDistortionMode & kClock )         printf (" + Clock") ;
+  if ( mDistortionMode & kIFCShift )      printf (" + IFCShift") ;
+  if ( mDistortionMode & kSpaceCharge )   printf (" + SpaceCharge") ;
+  if ( mDistortionMode & kSpaceChargeR2 ) printf (" + SpaceChargeR2") ;
+  if ( mDistortionMode & kMembrane )      printf (" + Central Membrane") ;
+  if ( mDistortionMode & kEndcap )        printf (" + Endcap") ;
+  if ( mDistortionMode & kShortedRing )   printf (" + ShortedRing") ;
+  if ( mDistortionMode & kGridLeak )      printf (" + GridLeak") ;
+  if ( mDistortionMode & k3DGridLeak )    printf (" + 3DGridLeak") ;
   usingCartesian = kTRUE; // default
 
+  printf("\n");
+ 
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
   Float_t  OmegaTau ;                       // For an electron, OmegaTau carries the sign opposite of B 
-
-  ReadField() ;                             // Read the Magnetic and Electric Field Data Files
   BField(X,B) ;                             // Work in kGauss, cm and assume Bz dominates
 
   // Theoretically, OmegaTau is defined as shown in the next line.  
@@ -965,96 +1005,10 @@ void StMagUtilities::CommonStart ( Int_t mode )
 //________________________________________
 
 
-/// B field in Cartesian coordinates - 2D field (ie. Phi symmetric)
-void StMagUtilities::BField( const Float_t x[], Float_t B[] )
-{                          
-
-  // NOTE: x[] must be Cartesian for this function!
-
-  Float_t r, z, Br_value, Bz_value ;
-
-  z  = x[2] ;
-  r  = TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-  
-  if ( r != 0.0 )
-    {
-      Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
-      B[0] = Br_value * (x[0]/r) ;
-      B[1] = Br_value * (x[1]/r) ;
-      B[2] = Bz_value ; 
-    }
-  else
-    {
-      Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
-      B[0] = Br_value ;
-      B[1] = 0.0 ;
-      B[2] = Bz_value ;
-    }
-
-}
-
-
-/// Bfield in Cartesian coordinates - 3D field
-void StMagUtilities::B3DField( const Float_t x[], Float_t B[] )
-{                          
-
-  // NOTE: x[] must be Cartesian for this function!
-
-  Float_t r, z, phi, Br_value, Bz_value, Bphi_value ;
-
-  z  = x[2] ;
-  r  = TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
-
-  if ( r != 0.0 )
-    {
-      phi = TMath::ATan2( x[1], x[0] ) ;
-      if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-      Interpolate3DBfield( r, z, phi, Br_value, Bz_value, Bphi_value ) ;
-      B[0] = Br_value * (x[0]/r) - Bphi_value * (x[1]/r) ;
-      B[1] = Br_value * (x[1]/r) + Bphi_value * (x[0]/r) ;
-      B[2] = Bz_value ; 
-    }
-  else
-    {
-      phi = 0 ;
-      Interpolate3DBfield( r, z, 0, Br_value, Bz_value, Bphi_value ) ;
-      B[0] = Br_value ;
-      B[1] = Bphi_value ;
-      B[2] = Bz_value ;
-    }
-
-  return ;
-
-}
-
-
-/// B field in Radial coordinates - 2D field (ie Phi symmetric)
-void StMagUtilities::BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value )
-{
-  
-  Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
-
-}
-
-
-/// B field in Radial coordinates - 3D field
-void StMagUtilities::BrBz3DField( const Float_t r, const Float_t z, const Float_t phi, 
-				  Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value )
-{
-
-  Float_t phiprime ;
-  phiprime = phi ;
-  if ( phiprime < 0 ) phiprime += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-  Interpolate3DBfield( r, z, phiprime, Br_value, Bz_value, Bphi_value ) ;
-
-}
-
-
 //________________________________________
 
 
 
-/// Main Entry Point for requests to UNDO the E and B field distortions
 void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
   // Control by flags JCD Oct 4, 2001
@@ -1144,12 +1098,10 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
       UndoTwistDistortion    ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
   }
-
   if (mDistortionMode & kClock) {
       UndoClockDistortion    ( Xprime1, Xprime2, Sector ) ; 
       memcpy(Xprime1,Xprime2,threeFloats);
   }
-
   if (mDistortionMode & kMembrane) {
       UndoMembraneDistortion ( Xprime1, Xprime2, Sector ) ;
       memcpy(Xprime1,Xprime2,threeFloats);
@@ -1221,7 +1173,16 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
   usingCartesian = kTRUE;
 
   DoOnce = kFALSE;
-  
+  if (! iterateDistortion && fgUnDoDistortion) {
+    D.sector = Sector;
+    D.xL = x[0];
+    D.yL = x[1];
+    D.zL = x[2];
+    D.xLC = Xprime[0];
+    D.yLC = Xprime[1];
+    D.zLC = Xprime[2];
+    fgUnDoDistortion->Fill(&D.sector);
+  }
 }
 
 //________________________________________
@@ -1244,6 +1205,16 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t S
 
   iterateDistortion = tempIterDist;
 
+  if (fgDoDistortion) {
+    D.sector = Sector;
+    D.xL = x[0];
+    D.yL = x[1];
+    D.zL = x[2];
+    D.xLC = Xprime[0];
+    D.yLC = Xprime[1];
+    D.zLC = Xprime[2];
+    fgDoDistortion->Fill(&D.sector);
+  }
 }
 
 
@@ -1281,7 +1252,7 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_
     {
       if ( i == NSTEPS ) index = 1 ;
       Xprime[2] +=  index*(ah/3) ;
-      B3DField( Xprime, B ) ;                          // Work in kGauss, cm (uses Cartesian coordinates)
+      B3DFieldTpc( Xprime, B , Sector) ;               // Work in kGauss, cm (uses Cartesian coordinates)
       if ( TMath::Abs(B[2]) > 0.001 )                  // Protect From Divide by Zero Faults
 	{
 	  Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
@@ -1291,7 +1262,6 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_
     }    
 
 }
-
 
 /// 2D - faster - B field distortions ( no Table ) - calculate the distortions due to the shape of the B field
 /*! 
@@ -1324,7 +1294,7 @@ void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] , In
     {
       if ( i == NSTEPS ) index = 1 ;
       Xprime[2] +=  index*(ah/3) ;
-      BField( Xprime, B ) ;                            // Work in kGauss, cm (uses Cartesian coordinates)
+      BFieldTpc( Xprime, B, Sector);                   // Work in kGauss, cm (uses Cartesian coordinates)
       if ( TMath::Abs(B[2]) > 0.001 )                  // Protect From Divide by Zero Faults
 	{
 	  Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
@@ -1336,7 +1306,6 @@ void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] , In
 
 
 }
-
 
 /// 3D - B field distortions (Table) - calculate the distortions due to the shape of the B field
 /*! 
@@ -2348,367 +2317,6 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
 
 }
 
-  
-//________________________________________
-
-
-/// Read the electric and magnetic field maps stored on disk
-void StMagUtilities::ReadField( )
-{
-
-  FILE    *magfile, *b3Dfile ;
-  TString comment, filename, filename3D ;
-  TString MapLocation ;
-  TString BaseLocation = "$STAR/StarDb/StMagF/" ;     // Base Directory for Maps
-
-  if ( gMap == kMapped )                    // Mapped field values
-    {
-      if ( TMath::Abs(gFactor) > 0.8 )      // Scale from full field data 
-	{
-	  if ( gFactor > 0 )
-	    {
-	      filename   = "bfield_full_positive_2D.dat" ;
-	      filename3D = "bfield_full_positive_3D.dat" ;
-	      comment    = "Measured Full Field" ;
-	      gRescale   = 1 ;                // Normal field 
-	    }
-	  else
-	    {
-	      filename   = "bfield_full_negative_2D.dat" ;
-	      filename3D = "bfield_full_negative_3D.dat" ;
-	      comment    = "Measured Full Field Reversed" ;
-	      gRescale   = -1 ;               // Reversed field
-	    }
-	}
-      else                                  // Scale from half field data             
-	{
-	  filename   = "bfield_half_positive_2D.dat" ;
-	  filename3D = "bfield_half_positive_3D.dat" ;
-          comment    = "Measured Half Field" ;
-	  gRescale   = 2 ;                    // Adjust scale factor to use half field data
-	}
-    }
-  else if ( gMap == kConstant )             // Constant field values
-    {
-      filename = "const_full_positive_2D.dat" ;
-      comment  = "Constant Full Field" ;
-      gRescale = 1 ;                        // Normal field
-    }
-  else
-    {
-      fprintf(stderr,"StMagUtilities::ReadField  No map available - you must choose a mapped field or a constant field\n");
-      exit(1) ;
-    }
-      
-  printf("StMagUtilities::ReadField  Reading  Magnetic Field  %s,  Scale factor = %f \n",comment.Data(),gFactor);
-  printf("StMagUtilities::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),gFactor*gRescale);
-  printf("StMagUtilities::ReadField  Version  ") ;
-  
-  if ( mDistortionMode & kBMap )          printf ("3D Mag Field Distortions") ;
-  if ( mDistortionMode & kFast2DBMap )    printf ("2D Mag Field Distortions") ;
-  if ( mDistortionMode & kPadrow13 )      printf (" + Padrow 13") ;
-  if ( mDistortionMode & kTwist )         printf (" + Twist") ;
-  if ( mDistortionMode & kClock )         printf (" + Clock") ;
-  if ( mDistortionMode & kIFCShift )      printf (" + IFCShift") ;
-  if ( mDistortionMode & kSpaceCharge )   printf (" + SpaceCharge") ;
-  if ( mDistortionMode & kSpaceChargeR2 ) printf (" + SpaceChargeR2") ;
-  if ( mDistortionMode & kMembrane )      printf (" + Central Membrane") ;
-  if ( mDistortionMode & kEndcap )        printf (" + Endcap") ;
-  if ( mDistortionMode & kShortedRing )   printf (" + ShortedRing") ;
-  if ( mDistortionMode & kGridLeak )      printf (" + GridLeak") ;
-  if ( mDistortionMode & k3DGridLeak )    printf (" + 3DGridLeak") ;
-  if ( mDistortionMode & kGGVoltError )   printf (" + GGVoltError") ;
-  if ( mDistortionMode & kSectorAlign )   printf (" + Sector Misalignment") ;
-
-  printf("\n");
-  
-  MapLocation = BaseLocation + filename ;
-  gSystem->ExpandPathName(MapLocation) ;
-  magfile = fopen(MapLocation.Data(),"r") ;
-  printf("StMagUtilities::ReadField  Reading  2D Magnetic Field file: %s \n",filename.Data());
-
-  if (magfile) 
-
-    {
-      Char_t cname[128] ;
-      fgets  ( cname, sizeof(cname) , magfile ) ;    // Read comment lines at begining of file
-      fgets  ( cname, sizeof(cname) , magfile ) ;
-      fgets  ( cname, sizeof(cname) , magfile ) ;
-      fgets  ( cname, sizeof(cname) , magfile ) ;
-      fgets  ( cname, sizeof(cname) , magfile ) ;
-
-      for ( Int_t j=0 ; j < BMap_nZ ; j++ ) 
-	{
-	  for ( Int_t k=0 ; k < BMap_nR ; k++ )
-	    {
-	      fgets  ( cname, sizeof(cname) , magfile ) ; 
-	      sscanf ( cname, " %f %f %f %f ", &Radius[k], &ZList[j], &Br[j][k], &Bz[j][k] ) ;  
-	    }
-	}
-    }
-
-  else 
-
-    { 
-      fprintf(stderr,"StMagUtilities::ReadField  File %s not found !\n",MapLocation.Data());
-      exit(1);
-    }
-
-  fclose(magfile) ;
-      
-  MapLocation = BaseLocation + filename3D ;
-  gSystem->ExpandPathName(MapLocation) ;
-  b3Dfile = fopen(MapLocation.Data(),"r") ;
-  printf("StMagUtilities::ReadField  Reading  3D Magnetic Field file: %s \n",filename3D.Data());
-
-  if (b3Dfile) 
-
-    {
-      Char_t cname[128] ;
-      fgets  ( cname, sizeof(cname) , b3Dfile ) ;    // Read comment lines at begining of file
-      fgets  ( cname, sizeof(cname) , b3Dfile ) ;    // Read comment lines at begining of file
-      fgets  ( cname, sizeof(cname) , b3Dfile ) ;    // Read comment lines at begining of file
-      fgets  ( cname, sizeof(cname) , b3Dfile ) ;    // Read comment lines at begining of file
-      fgets  ( cname, sizeof(cname) , b3Dfile ) ;    // Read comment lines at begining of file
-      fgets  ( cname, sizeof(cname) , b3Dfile ) ;    // Read comment lines at begining of file
-      
-      for ( Int_t i=0 ; i < BMap_nPhi ; i++ ) 
-	{
-	  for ( Int_t j=0 ; j < BMap_nZ ; j++ ) 
-	    {
-	      for ( Int_t k=0 ; k < BMap_nR ; k++ )
-		{
-		  fgets  ( cname, sizeof(cname) , b3Dfile ) ; 
-		  sscanf ( cname, " %f %f %f %f %f %f ",
-			   &R3D[k], &Z3D[j], &Phi3D[i], &Br3D[i][j][k], &Bz3D[i][j][k], &Bphi3D[i][j][k] ) ;
-		  Phi3D[i] *= TMath::Pi() / 180. ;   // Convert to Radians  phi = 0 to 2*Pi
-		}
-	    }
-	}
-    }
-
-  else if ( gMap == kConstant )             // Constant field values
-
-    {
-      for ( Int_t i=0 ; i < BMap_nPhi ; i++ ) 
-	{
-	  for ( Int_t j=0 ; j < BMap_nZ ; j++ ) 
-	    {
-	      for ( Int_t k=0 ; k < BMap_nR ; k++ )
-		{
-		  Br3D[i][j][k] = Br[j][k] ;
-		  Bz3D[i][j][k] = Bz[j][k] ;
-		  Bphi3D[i][j][k] = 0 ;
-		}
-	    }
-	}
-    }
-
-  else
-
-    { 
-      fprintf(stderr,"StMagUtilities::ReadField  File %s not found !\n",MapLocation.Data());
-      exit(1);
-    }
-
-  fclose(b3Dfile) ;
-
-  // Membrane correction is Obsolete (JT 2009).  It is now disabled and standard E field maps are now defined in the .h file
-  /*
-  FILE *efile ;
-  filename = "membrane_efield.dat" ;
-  MapLocation = BaseLocation + filename ;
-  gSystem->ExpandPathName(MapLocation) ;
-  efile = fopen(MapLocation.Data(),"r") ;
-  printf("StMagUtilities::ReadField  Reading  CM Electric Field Distortion File: %s \n",filename.Data());
-
-  if (efile) 
-    {
-
-      Char_t cname[128] ;
-      fgets  ( cname, sizeof(cname) , efile ) ;    // Read comment lines at begining of file
-      fgets  ( cname, sizeof(cname) , efile ) ;
-      fgets  ( cname, sizeof(cname) , efile ) ;
-      fgets  ( cname, sizeof(cname) , efile ) ;
-      fgets  ( cname, sizeof(cname) , efile ) ;
-      fgets  ( cname, sizeof(cname) , efile ) ;
-      
-      for ( Int_t i=0 ; i < EMap_nZ ; i++ ) 
-	{
-	  for ( Int_t j=0 ; j < EMap_nPhi ; j++ )
-	    {
-	      for ( Int_t k=0 ; k < EMap_nR ; k++ )
-		{
-		  if ( j == EMap_nPhi-1 )
-		    {
-		      ePhiList[j] = 6.2832 ;    // Repeat phi = 0 column in phi == 2 PI column
-		      cmEr[i][j][k] = cmEr[i][0][k] ;
-		      cmEphi[i][j][k] = cmEphi[i][0][k] ;
-		    }
-		  else
-		    {
-		      fgets  ( cname, sizeof(cname) , efile ) ; 
-		      sscanf ( cname, " %f %f %f %f %f ", &eRList[k], &ePhiList[j], 
-			       &eZList[i], &cmEr[i][j][k], &cmEphi[i][j][k] ) ; 
-		      //ePhiList[j] *= TMath::Pi() / 180. ;  // Assume table uses  phi = 0 to 2*Pi
-		    }
-		}
-	    }
-	}
-    }      
-
-  else 
-    { 
-      fprintf(stderr,"StMagUtilities::ReadField  File %s not found !\n",MapLocation.Data());
-      exit(1);
-    }
-
-  fclose(efile) ;
-  */
-  // End of Obsolete section
- 
-
-  // EndCap correction is Obsolete (JT 2009).  It is now disabled and standard E field maps are now defined in the .h file
-  /*
-  FILE *eefile ;
-  filename = "endcap_efield.dat" ;
-  MapLocation = BaseLocation + filename ;
-  gSystem->ExpandPathName(MapLocation) ;
-  eefile = fopen(MapLocation.Data(),"r") ;
-  printf("StMagUtilities::ReadField  Reading  Endcap Electric Field Distortion File: %s \n",filename.Data());
-
-  if (eefile) 
-    {
-
-      Char_t cname[128] ;
-      fgets  ( cname, sizeof(cname) , eefile ) ;    // Read comment lines at begining of file
-      fgets  ( cname, sizeof(cname) , eefile ) ;
-      fgets  ( cname, sizeof(cname) , eefile ) ;
-      fgets  ( cname, sizeof(cname) , eefile ) ;
-      fgets  ( cname, sizeof(cname) , eefile ) ;
-      fgets  ( cname, sizeof(cname) , eefile ) ;
-      
-      for ( Int_t i=0 ; i < EMap_nZ ; i++ ) 
-	{
-	  for ( Int_t j=0 ; j < EMap_nPhi ; j++ )
-	    {
-	      for ( Int_t k=0 ; k < EMap_nR ; k++ )
-		{
-		  if ( j == EMap_nPhi-1 )
-		    {
-		      ePhiList[j] = 6.2832 ;    // Repeat phi = 0 column in phi == 2 PI column
-		      endEr[i][j][k] = endEr[i][0][k] ;
-		      endEphi[i][j][k] = endEphi[i][0][k] ;
-		    }
-		  else
-		    {
-		      fgets  ( cname, sizeof(cname) , eefile ) ; 
-		      sscanf ( cname, " %f %f %f %f %f ", &eRList[k], &ePhiList[j], 
-			       &eZList[i], &endEr[i][j][k], &endEphi[i][j][k] ) ;  
-		      //eePhiList[j] *= TMath::Pi() / 180. ;  // Assume table uses  phi = 0 to 2*Pi
-		    }
-		}
-	    }
-	}
-    }      
-
-  else 
-    { 
-      fprintf(stderr,"StMagUtilities::ReadField  File %s not found !\n",MapLocation.Data());
-      exit(1);
-    }
-
-  fclose(eefile) ;
-  */
-  // End of Obsolete section
-
-  return ;
-
-}
-
-
-//________________________________________
-
-/// Interpolate the B field map - 2D interpolation
-void StMagUtilities::Interpolate2DBfield( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value )
-{
-
-  Float_t fscale ;
-
-  fscale = 0.001*gFactor*gRescale ;                 // Scale STAR maps to work in kGauss, cm
-  if ( TMath::Abs(fscale) < 4e-7 ) fscale = 4e-7 ;  // Zero field is unphysical, so set it to Earths Field (~1 gauss)
-                                                    // Note that this assumes that the 1/2 field (0.25 Tesla) map
-                                                    // is the reference map for the scaledown.  See ReadField().
-
-  const   Int_t ORDER = 1  ;                        // Linear interpolation = 1, Quadratic = 2        
-  static  Int_t jlow=0, klow=0 ;                            
-  Float_t save_Br[ORDER+1] ;
-  Float_t save_Bz[ORDER+1] ;
-
-  Search ( BMap_nZ, ZList,  z, jlow ) ;
-  Search ( BMap_nR, Radius, r, klow ) ;
-  if ( jlow < 0 ) jlow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
-  if ( klow < 0 ) klow = 0 ;
-  if ( jlow + ORDER  >=    BMap_nZ - 1 ) jlow =   BMap_nZ - 1 - ORDER ;
-  if ( klow + ORDER  >=    BMap_nR - 1 ) klow =   BMap_nR - 1 - ORDER ;
-
-  for ( Int_t j = jlow ; j < jlow + ORDER + 1 ; j++ )
-    {
-      save_Br[j-jlow]   = Interpolate( &Radius[klow], &Br[j][klow], ORDER, r )   ;
-      save_Bz[j-jlow]   = Interpolate( &Radius[klow], &Bz[j][klow], ORDER, r )   ;
-    }
-  Br_value  = fscale * Interpolate( &ZList[jlow], save_Br, ORDER, z )   ; 
-  Bz_value  = fscale * Interpolate( &ZList[jlow], save_Bz, ORDER, z )   ; 
-
-}
-
-/// Interpolate the B field map - 3D interpolation
-void StMagUtilities::Interpolate3DBfield( const Float_t r, const Float_t z, const Float_t phi, 
-			 Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value )
-{
-
-  Float_t fscale ;
-
-  fscale = 0.001*gFactor*gRescale ;                 // Scale STAR maps to work in kGauss, cm
-  if ( TMath::Abs(fscale) < 4e-7 ) fscale = 4e-7 ;  // Zero field is unphysical, set it to Earths Field (~1 gauss)
-
-  const   Int_t ORDER = 1 ;                         // Linear interpolation = 1, Quadratic = 2   
-  const   Int_t PHIORDER = 1 ;                      // Linear interpolation = 1, Quadratic = 2 ... PHI table is crude so do linear interp   
-  static  Int_t ilow=0, jlow=0, klow=0 ;
-  Float_t save_Br[ORDER+1],   saved_Br[ORDER+1] ;
-  Float_t save_Bz[ORDER+1],   saved_Bz[ORDER+1] ;
-  Float_t save_Bphi[ORDER+1], saved_Bphi[ORDER+1] ;
-
-  Search( BMap_nPhi, Phi3D, phi, ilow ) ;
-  Search( BMap_nZ,   Z3D,   z,   jlow ) ;
-  Search( BMap_nR,   R3D,   r,   klow ) ;
-  if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
-  if ( jlow < 0 ) jlow = 0 ;
-  if ( klow < 0 ) klow = 0 ;
-
-  if ( ilow + ORDER  >=  BMap_nPhi - 1 ) ilow = BMap_nPhi - 1 - ORDER ;
-  if ( jlow + ORDER  >=    BMap_nZ - 1 ) jlow =   BMap_nZ - 1 - ORDER ;
-  if ( klow + ORDER  >=    BMap_nR - 1 ) klow =   BMap_nR - 1 - ORDER ;
-
-  for ( Int_t i = ilow ; i < ilow + ORDER + 1 ; i++ )
-    {
-      for ( Int_t j = jlow ; j < jlow + ORDER + 1 ; j++ )
-	{
-	  save_Br[j-jlow]   = Interpolate( &R3D[klow], &Br3D[i][j][klow], ORDER, r )   ;
-	  save_Bz[j-jlow]   = Interpolate( &R3D[klow], &Bz3D[i][j][klow], ORDER, r )   ;
-	  save_Bphi[j-jlow] = Interpolate( &R3D[klow], &Bphi3D[i][j][klow], ORDER, r ) ; 
-	}
-      saved_Br[i-ilow]   = Interpolate( &Z3D[jlow], save_Br, ORDER, z )   ; 
-      saved_Bz[i-ilow]   = Interpolate( &Z3D[jlow], save_Bz, ORDER, z )   ; 
-      saved_Bphi[i-ilow] = Interpolate( &Z3D[jlow], save_Bphi, ORDER, z ) ; 
-    }
-  Br_value   = fscale * Interpolate( &Phi3D[ilow], saved_Br, PHIORDER, phi )   ;
-  Bz_value   = fscale * Interpolate( &Phi3D[ilow], saved_Bz, PHIORDER, phi )   ;
-  Bphi_value = fscale * Interpolate( &Phi3D[ilow], saved_Bphi, PHIORDER, phi ) ; 
-
-}
-
-
 //________________________________________
 
 /// Interpolate a 2D table - 2D interpolation within a 2D TMatrix
@@ -2833,98 +2441,6 @@ Float_t StMagUtilities::Interpolate3DTable ( const Int_t ORDER, const Float_t x,
 
 
 //________________________________________
-
-
-/// Interpolate function Y(x) using linear (ORDER=1) or quadratic (ORDER=2) interpolation.
-Float_t StMagUtilities::Interpolate( const Float_t Xarray[], const Float_t Yarray[], 
-				     const Int_t ORDER, const Float_t x )
-{
-
-  Float_t y ;
-
-  if ( ORDER == 2 )                // Quadratic Interpolation = 2 
-
-    {
-      /*
-      y  = (x-Xarray[1]) * (x-Xarray[2]) * Yarray[0] / ( (Xarray[0]-Xarray[1]) * (Xarray[0]-Xarray[2]) ) ;
-      y += (x-Xarray[2]) * (x-Xarray[0]) * Yarray[1] / ( (Xarray[1]-Xarray[2]) * (Xarray[1]-Xarray[0]) ) ;
-      y += (x-Xarray[0]) * (x-Xarray[1]) * Yarray[2] / ( (Xarray[2]-Xarray[0]) * (Xarray[2]-Xarray[1]) ) ;
-       */
-      // The version below is to resolve RT ticket 2529:
-      //  compiler does something odd with the above when optimizing
-      Float_t Xa012 = (x - Xarray[2]) / (Xarray[0] - Xarray[1]);
-      Float_t Xa120 = (x - Xarray[0]) / (Xarray[1] - Xarray[2]);
-      Float_t Xa201 = (x - Xarray[1]) / (Xarray[2] - Xarray[0]);
-      y  = - ( Xa201 * Xa012 * Yarray[0] ) - Xa120 * ( Xa012 * Yarray[1] + Xa201 * Yarray[2] ) ;
-    }
-
-  else                             // Linear Interpolation = 1
-
-    {
-      y  = Yarray[0] + ( Yarray[1]-Yarray[0] ) * ( x-Xarray[0] ) / ( Xarray[1] - Xarray[0] ) ;
-    }
-
-  return (y) ;
-
-}
-
-
-//________________________________________
-
-
-/// Search an ordered table by starting at the most recently used point
-void StMagUtilities::Search( const Int_t N, const Float_t Xarray[], const Float_t x, Int_t &low )
-{
-
-  Long_t middle, high ;
-  Int_t  ascend = 0, increment = 1 ;
-
-  if ( Xarray[N-1] >= Xarray[0] ) ascend = 1 ;  // Ascending ordered table if true
-  
-  if ( low < 0 || low > N-1 ) { low = -1 ; high = N ; }
-
-  else                                            // Ordered Search phase
-    {
-      if ( (Int_t)( x >= Xarray[low] ) == ascend ) 
-	{
-	  if ( low == N-1 ) return ;          
-	  high = low + 1 ;
-	  while ( (Int_t)( x >= Xarray[high] ) == ascend )  
-	    {
-	      low = high ;
-	      increment *= 2 ;
-	      high = low + increment ;
-	      if ( high > N-1 )  {  high = N ; break ;  }
-	    }
-	}
-      else
-	{
-	  if ( low == 0 )  {  low = -1 ;  return ;  }
-	  high = low - 1 ;
-	  while ( (Int_t)( x < Xarray[low] ) == ascend )
-	    {
-	      high = low ;
-	      increment *= 2 ;
-	      if ( increment >= high )  {  low = -1 ;  break ;  }
-	      else  low = high - increment ;
-	    }
-	}
-    }
-
-  while ( (high-low) != 1 )                      // Binary Search Phase
-    {
-      middle = ( high + low ) / 2 ;
-      if ( (Int_t)( x >= Xarray[middle] ) == ascend )
-	low = middle ;
-      else
-	high = middle ;
-    }
-
-  if ( x == Xarray[N-1] ) low = N-2 ;
-  if ( x == Xarray[0]   ) low = 0 ;
-
-}
-
 
 //________________________________________
 
@@ -3508,7 +3024,7 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
   Double_t R[ROWS], dX[ROWS], dY[ROWS], C0, X0, Y0, R0, Pt, R2, theta, theta0, DeltaTheta ;
   Double_t Xprime[ROWS+1], Yprime[ROWS+1], eX[ROWS+1], eY[ROWS+1] ;  // Extra index is to accomodate the vertex in the fit for primaries
  
-  BField(x,B) ;
+  BFieldTpc(x,B) ;
   ChargeB  = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
   Pt = TMath::Sqrt( p[0]*p[0] + p[1]*p[1] ) ;
   R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
@@ -3692,7 +3208,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
    ManualSpaceChargeR2(sc,SpaceChargeEWRatio); // Set a custom value of the spacecharge parameter but keep previous E/W ratio
    
-   BField(x,B) ;
+   BFieldTpc(x,B) ;
    ChargeB  = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
    Pt = TMath::Sqrt( p[0]*p[0] + p[1]*p[1] ) ;
    R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
@@ -3900,12 +3416,8 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
    if (!useManualSCForPredict) ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
                                                  // but keep EWRatio that was previously defined
-   if (DoOnce) {
-     xx[0] = R[0]; xx[1] = 0; xx[2] = 50;
-     DoDistortion ( xx, xxprime ) ;
-   }
    Float_t x[3] = { 0, 0, 0 } ;
-   BField(x,B) ;
+   BFieldTpc(x,B) ;
    ChargeB  = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
    R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
    X0 = ChargeB *  0.707107 * R0  ;   // Assume a test particle that shoots out at 45 degrees
@@ -4129,7 +3641,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    else if (tempDistortionMode & kGridLeak) mDistortionMode |= kGridLeak ;
  
    Float_t x[3] = { 0, 0, 0 } ;  // Get the B field at the vertex 
-   BField(x,B) ;
+   BFieldTpc(x,B) ;
    ChargeB = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
    R0 = TMath::Abs( 1000.0 * Pt / ( 0.299792 * B[2] ) ) ;     // P in GeV, R in cm, B in kGauss
    X0 = ChargeB *  0.0 * R0  ;   // Assume a test particle that shoots out at 0 degrees
@@ -4969,5 +4481,46 @@ Int_t StMagUtilities::IterationFailCount()
   return temp;
 
 }
-
-//________________________________________
+//________________________________________________________________________________
+void StMagUtilities::B3DFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector ) {
+#if 0
+  // mag. field from postion in local Half Tpc coordinate system in the local Tpc coordinate system
+  StBeamDirection side = east;
+  if (Sector >= 1 && Sector <= 24) {
+    if (Sector <= 12) side = west;
+  } else {
+    if (xTpc[2] >  0) side = west;
+  }
+  Double_t xTpcD[3] = {xTpc[0], xTpc[1], xTpc[2]};
+  Double_t Tpc[3];
+  gStTpcDb->TpcHalf(side).LocalToMaster(xTpcD,Tpc);
+#else
+  // mag. field in Tpc local coordinate system
+  Double_t Tpc[3] =  {xTpc[0], xTpc[1], xTpc[2]};
+#endif
+  Double_t coorG[3];
+  gStTpcDb->Tpc2GlobalMatrix().LocalToMaster(Tpc,coorG);
+  Float_t xyzG[3] = {coorG[0], coorG[1], coorG[2]};
+  Float_t BG[3];
+#if 0
+  B3DField( xyzG, BG) ; 
+#else
+  BField( xyzG, BG) ; 
+#endif
+  Double_t    BGD[3] = {BG[0], BG[1], BG[2]};
+  Double_t    BTpcL[3];
+  gStTpcDb->Tpc2GlobalMatrix().MasterToLocalVect(BGD,BTpcL);
+#if 0
+  Double_t BTpcH[3];
+  gStTpcDb->TpcHalf(side).MasterToLocalVect(BTpcL,BTpcH);
+  BTpc[0] = BTpcH[0];
+  BTpc[1] = BTpcH[1];
+  BTpc[2] = BTpcH[2];
+#else
+  BTpc[0] = BTpcL[0];
+  BTpc[1] = BTpcL[1];
+  BTpc[2] = BTpcL[2];
+  
+#endif
+}
+//________________________________________________________________________________
