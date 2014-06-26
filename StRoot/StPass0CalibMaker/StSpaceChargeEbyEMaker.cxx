@@ -198,9 +198,13 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   // Get instance of StMagUtilities
   m_ExB = StMagUtilities::Instance();
   if (!m_ExB) {
+#ifdef __NEW_MagUtilities__
+    m_ExB = new StMagUtilities(gStTpcDb,(kSpaceChargeR2 | kGridLeak));
+#else /* ! __NEW_MagUtilities__ */
     TDataSet *RunLog = GetDataBase("RunLog/MagFactor");
     if (!RunLog) gMessMgr->Warning("StSpaceChargeEbyEMaker: No RunLog/MagFactor found.");
     m_ExB = new StMagUtilities(gStTpcDb,RunLog,(kSpaceChargeR2 | kGridLeak));
+#endif /* __NEW_MagUtilities__ */
   }
   lastsc = m_ExB->CurrentSpaceChargeR2();
   lastEWRatio = m_ExB->CurrentSpaceChargeEWRatio();
@@ -963,6 +967,7 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
     fname = Form("Hist%d.root",runid);
     f1 = gSystem->Which(".",fname.Data());
     runid++;
+    delete [] f1;
   }
 
   TFile ff(fname.Data(),"RECREATE");
@@ -1366,8 +1371,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.55 2014/05/15 17:14:03 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.56 2014/06/26 22:06:26 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.56  2014/06/26 22:06:26  fisyak
+// New Tpc Alignment, v632
+//
 // Revision 1.55  2014/05/15 17:14:03  genevb
 // Minor tweaks for TrackInfo mode
 //
