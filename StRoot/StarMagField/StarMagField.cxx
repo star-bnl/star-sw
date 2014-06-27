@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.27 2014/06/26 21:50:17 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.28 2014/06/27 14:27:11 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.28  2014/06/27 14:27:11  fisyak
+ * Add switch between new and old schema
+ *
  * Revision 1.27  2014/06/26 21:50:17  fisyak
  * New Tpc Alignment, v632
  *
@@ -157,6 +160,7 @@ StarMagField *StarMagField::fgInstance = 0;
 #include "TSystem.h"
 #include "TFile.h"
 #include "TError.h"
+#include "TEnv.h"
 ClassImp(StarMagField);
 #endif
 //________________________________________________________________________________
@@ -629,97 +633,38 @@ void StarMagField::ReadField( )
   std::string BaseLocation = getenv("STAR") ; 	// Base Directory for Maps
   BaseLocation += "/StarDb/StMagF/" ;     	// Base Directory for Maps
 #ifdef __ROOT__
-  TString rootf("StarFieldZ.root");
-  TString path(".:./StarDb/StMagF:$STAR/StarDb/StMagF");
-  Char_t *file = gSystem->Which(path,rootf,kReadPermission);
-  if (! file) {
-    Error("StarMagField::ReadField","File %s has not been found in path %s",rootf.Data(),path.Data());
-  } else {      
-    Warning("StarMagField::ReadField","File %s has been found",rootf.Data());
-    TFile       *pFile = new TFile(file);
-      //#define __10cm__
-#ifndef __0cm__
-    TH2F *Br0 = (TH2F *) pFile->Get("Br0");
-    TH2F *Bz0 = (TH2F *) pFile->Get("Bz0");
-    if (Br0 && Bz0) {
-#ifdef __15cm__
-      TH2F *Br15cm = (TH2F *) pFile->Get("Br15cm");
-      TH2F *Bz15cm = (TH2F *) pFile->Get("Bz15cm");
-      assert(Br15cm && Bz15cm);
-      fBzdZCorrection = new TH2F(*Bz15cm); fBzdZCorrection->SetDirectory(0);
-      fBzdZCorrection->Add(Bz0,-1.0);
-      fBrdZCorrection = new TH2F(*Br15cm); fBrdZCorrection->SetDirectory(0);
-      fBrdZCorrection->Add(Br0,-1.0);
-      Warning("StarMagField::ReadField","Use effective PMT box dZ = 15 cm");
-#else /*! __15cm__ */
-#ifdef __5cm__
-      TH2F *Br5cm = (TH2F *) pFile->Get("Br5cm");
-      TH2F *Bz5cm = (TH2F *) pFile->Get("Bz5cm");
-      assert(Br5cm && Bz5cm);
-      fBzdZCorrection = new TH2F(*Bz5cm); fBzdZCorrection->SetDirectory(0);
-      fBzdZCorrection->Add(Bz0,-1.0);
-      fBrdZCorrection = new TH2F(*Br5cm); fBrdZCorrection->SetDirectory(0);
-      fBrdZCorrection->Add(Br0,-1.0);
-      Warning("StarMagField::ReadField","Use effective PMT box dZ = 5 cm");
-#else /*! __5cm__ */
-#ifdef __10cm__
-      TH2F *Br10cm = (TH2F *) pFile->Get("Br10cm");
-      TH2F *Bz10cm = (TH2F *) pFile->Get("Bz10cm");
-      assert(Br10cm && Bz10cm);
-      fBzdZCorrection = new TH2F(*Bz10cm); fBzdZCorrection->SetDirectory(0);
-      fBzdZCorrection->Add(Bz0,-1.0);
-      fBrdZCorrection = new TH2F(*Br10cm); fBrdZCorrection->SetDirectory(0);
-      fBrdZCorrection->Add(Br0,-1.0);
-      Warning("StarMagField::ReadField","Use effective PMT box dZ = 10 cm");
-#else /* ! __10cm__ => __7.5cm__ */
-      TH2F *Br5cm = (TH2F *) pFile->Get("Br5cm");
-      TH2F *Bz5cm = (TH2F *) pFile->Get("Bz5cm");
-      assert(Br5cm && Bz5cm);
-      TH2F *Br10cm = (TH2F *) pFile->Get("Br10cm");
-      TH2F *Bz10cm = (TH2F *) pFile->Get("Bz10cm");
-      assert(Br10cm && Bz10cm);
-      fBzdZCorrection = new TH2F(*Bz5cm); fBzdZCorrection->SetDirectory(0);
-      fBzdZCorrection->Scale(0.5);
-      fBzdZCorrection->Add(Bz10cm,0.5);
-      fBzdZCorrection->Add(Bz0,-1.0);
-      fBrdZCorrection = new TH2F(*Br5cm); fBrdZCorrection->SetDirectory(0);
-      fBrdZCorrection->Scale(0.5);
-      fBrdZCorrection->Add(Br10cm,0.5);
-      fBrdZCorrection->Add(Br0,-1.0);
-      Warning("StarMagField::ReadField","Use effective PMT box dZ = 7.5 cm");
-#endif /* __10cm__ */
-#endif /* __5cm__  */
-#endif /* __15cm__ */
+  if (gEnv->GetValue("NewTpcAlignment",0) != 0) {
+    TString rootf("StarFieldZ.root");
+    TString path(".:./StarDb/StMagF:$STAR/StarDb/StMagF");
+    Char_t *file = gSystem->Which(path,rootf,kReadPermission);
+    if (! file) {
+      Error("StarMagField::ReadField","File %s has not been found in path %s",rootf.Data(),path.Data());
+    } else {      
+      Warning("StarMagField::ReadField","File %s has been found",rootf.Data());
+      TFile       *pFile = new TFile(file);
+      TH2F *Br0 = (TH2F *) pFile->Get("Br0");
+      TH2F *Bz0 = (TH2F *) pFile->Get("Bz0");
+      if (Br0 && Bz0) {
+	TH2F *Br5cm = (TH2F *) pFile->Get("Br5cm");
+	TH2F *Bz5cm = (TH2F *) pFile->Get("Bz5cm");
+	assert(Br5cm && Bz5cm);
+	TH2F *Br10cm = (TH2F *) pFile->Get("Br10cm");
+	TH2F *Bz10cm = (TH2F *) pFile->Get("Bz10cm");
+	assert(Br10cm && Bz10cm);
+	fBzdZCorrection = new TH2F(*Bz5cm); fBzdZCorrection->SetDirectory(0);
+	fBzdZCorrection->Scale(0.5);
+	fBzdZCorrection->Add(Bz10cm,0.5);
+	fBzdZCorrection->Add(Bz0,-1.0);
+	fBrdZCorrection = new TH2F(*Br5cm); fBrdZCorrection->SetDirectory(0);
+	fBrdZCorrection->Scale(0.5);
+	fBrdZCorrection->Add(Br10cm,0.5);
+	fBrdZCorrection->Add(Br0,-1.0);
+	Warning("StarMagField::ReadField","Use effective PMT box dZ = 7.5 cm");
+      }
+      delete pFile;
     }
-#endif /* __0cm__ */
-#if defined(__mu1p2__) || defined(__mu1p5__)
-    TH2F *Brmu1 = (TH2F *) pFile->Get("Brmu1");
-    TH2F *Bzmu1 = (TH2F *) pFile->Get("Bzmu1");
-    if (Brmu1 && Bzmu1) {
-#ifdef __mu1p2__ 
-      TH2F *Brmu1p2 = (TH2F *) pFile->Get("Brmu1p2");
-      TH2F *Bzmu1p2 = (TH2F *) pFile->Get("Bzmu1p2");
-      assert(Brmu1p2 && Bzmu1p2);
-      fBzdZCorrection = new TH2F(*Bzmu1p2); fBzdZCorrection->SetDirectory(0);
-      fBzdZCorrection->Add(Bzmu1,-1.0);
-      fBrdZCorrection = new TH2F(*Brmu1p2); fBrdZCorrection->SetDirectory(0);
-      fBrdZCorrection->Add(Brmu1,-1.0);
-      Warning("StarMagField::ReadField","Use back plate mu = 1.2");
-#else /* __mu1p5__ */
-      TH2F *Brmu1p5 = (TH2F *) pFile->Get("Brmu1p5");
-      TH2F *Bzmu1p5 = (TH2F *) pFile->Get("Bzmu1p5");
-      assert(Brmu1p5 && Bzmu1p5);
-      fBzdZCorrection = new TH2F(*Bzmu1p5); fBzdZCorrection->SetDirectory(0);
-      fBzdZCorrection->Add(Bzmu1,-1.0);
-      fBrdZCorrection = new TH2F(*Brmu1p5); fBrdZCorrection->SetDirectory(0);
-      fBrdZCorrection->Add(Brmu1,-1.0);
-      Warning("StarMagField::ReadField","Use back plate mu = 1.5");
-#endif /* __mu1p2__  */
-    }
-#endif /* __mu1p2__ || __mu1p5__ */
-    delete pFile;
+    delete [] file;
   }
-  delete [] file;
 #endif
   if ( fMap == kMapped )                    	// Mapped field values
     {
