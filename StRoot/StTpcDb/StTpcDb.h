@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.40 2014/06/26 21:32:57 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.41 2014/06/27 14:04:25 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.41  2014/06/27 14:04:25  fisyak
+ * Add env. NewTpcAlignment to switch between new and old scheme
+ *
  * Revision 1.40  2014/06/26 21:32:57  fisyak
  * New Tpc Alignment, v632
  *
@@ -180,6 +183,7 @@ class StTpcDb {
   Int_t                 mNoOfInnerRows; //!
   Double_t              mzGG;           //! Gating Grid z
   Char_t                mEnd[1];        //!
+  static Bool_t         mOldScheme;     //! switch between Old and New alignment scheme
  private:
   StTpcDb();
  public:
@@ -198,6 +202,7 @@ class StTpcDb {
   St_tpcPadResponseC    *PadResponse() {return St_tpcPadResponseC::instance();}
   Float_t                triggerTimeOffset()     {return St_trgTimeOffsetC::instance()->triggerTimeOffset();}
   Float_t                triggerTimeOffsetWest() {return St_trgTimeOffsetC::instance()->triggerTimeOffsetWest();}
+  static Bool_t          IsOldScheme()    {return mOldScheme;}
 #if 0
   Float_t                ScaleY();
 #endif
