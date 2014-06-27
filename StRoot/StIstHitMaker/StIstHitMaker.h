@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.h,v 1.4 2014/02/08 03:34:16 ypwang Exp $
+* $Id: StIstHitMaker.h,v 1.5 2014/06/27 21:31:40 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
+* Revision 1.5  2014/06/27 21:31:40  ypwang
+* remove data member istHitCollection and related Clear() function
+*
 * Revision 1.4  2014/02/08 03:34:16  ypwang
 * updating scripts
 *
@@ -27,7 +30,6 @@
 class StIstDbMaker;
 class THashList;
 class St_istControl;
-class StIstHitCollection;
 
 class StIstHitMaker : public StMaker
 {
@@ -36,18 +38,15 @@ class StIstHitMaker : public StMaker
   Int_t Init();
   Int_t InitRun(Int_t runnumber);
   Int_t Make();
-  void Clear( Option_t *opts = "" );
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.4 2014/02/08 03:34:16 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.5 2014/06/27 21:31:40 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   THashList *listGeoMSensorOnGlobal;
   StIstDbMaker *mIstDbMaker;
 
   UShort_t mMinNumOfRawHits, mMaxNumOfRawHits;
-
-  StIstHitCollection *istHitCollection;
 
  private:
   ClassDef(StIstHitMaker,1);

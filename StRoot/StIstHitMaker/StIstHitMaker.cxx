@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.11 2014/03/25 03:06:53 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.12 2014/06/27 21:31:40 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.12  2014/06/27 21:31:40  ypwang
+* remove data member istHitCollection and related Clear() function
+*
 * Revision 1.11  2014/03/25 03:06:53  ypwang
 * updates on Db table accessory method
 *
@@ -61,18 +64,52 @@
 #include "StRoot/StIstDbMaker/StIstDbMaker.h"
 #include "tables/St_istControl_Table.h"
 
-void StIstHitMaker::Clear(Option_t *opts)
+StIstHitMaker::StIstHitMaker( const char* name ) : StMaker(name), listGeoMSensorOnGlobal(0), mIstDbMaker(0)
 {
-    if( istHitCollection )
-     {
-	for(int ladderIdx=0; ladderIdx<kIstNumLadders; ladderIdx++ ) {
-          StIstLadderHitCollection* ladderHitCollection = istHitCollection->ladder(ladderIdx);
-          for(int sensorIdx=0; sensorIdx<kIstNumSensorsPerLadder; sensorIdx++)   {
-              StIstSensorHitCollection* sensorHitCollection = ladderHitCollection->sensor(sensorIdx);
-              sensorHitCollection->hits().clear();
-	  }
-	}
-     }      
+   /* no op */
+};
+
+Int_t StIstHitMaker::Init() {
+    Int_t ierr = kStOk;
+
+    mIstDbMaker = (StIstDbMaker*)GetMaker("istDb");
+
+    if(!mIstDbMaker) {
+      LOG_WARN << "Error getting IST Db maker handler" << endm;
+      ierr = kStWarn;
+    }
+
+    return ierr;
+};
+
+Int_t StIstHitMaker::InitRun(Int_t runnumber)
+{
+   Int_t ierr = kStOk;
+
+   // geometry Db tables
+   listGeoMSensorOnGlobal = mIstDbMaker->GetRotations();
+
+   // control parameters
+   const TDataSet *dbControl = mIstDbMaker->GetControl();
+   St_istControl *istControl = 0;
+   istControl = (St_istControl *)dbControl->Find("istControl");
+   if(!istControl) {
+       LOG_ERROR << "Dataset does not contain IST control table!" << endm;
+       ierr = kStErr;
+   }
+   else {
+        istControl_st *istControlTable = istControl->GetTable() ;
+        if (!istControlTable)  {
+            LOG_ERROR << "Pointer to IST control table is null" << endm;
+            ierr = kStErr;
+        }
+        else {
+            mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
+            mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
+        }
+   }
+
+   return ierr;
 };
 
 Int_t StIstHitMaker::Make()
@@ -83,7 +120,7 @@ Int_t StIstHitMaker::Make()
     StEvent* eventPtr=0;
     eventPtr= (StEvent*)GetInputDS("StEvent");
 
-    istHitCollection = NULL;
+    StIstHitCollection *istHitCollection = NULL;
     //input ist hit collection
     if(eventPtr) {
        istHitCollection = eventPtr->istHitCollection();
@@ -192,53 +229,4 @@ Int_t StIstHitMaker::Make()
  
     return ierr;
 };
-
-Int_t StIstHitMaker::Init() {
-    Int_t ierr = kStOk;
-
-    mIstDbMaker = (StIstDbMaker*)GetMaker("istDb");
-
-    if(!mIstDbMaker) {
-      LOG_WARN << "Error getting IST Db maker handler" << endm;
-      ierr = kStWarn;
-    }
-
-    return ierr;
-}
-
-Int_t StIstHitMaker::InitRun(Int_t runnumber)
-{
-   Int_t ierr = kStOk;
-
-   // geometry Db tables
-   listGeoMSensorOnGlobal = mIstDbMaker->GetRotations();
-
-   // control parameters
-   const TDataSet *dbControl = mIstDbMaker->GetControl();
-   St_istControl *istControl = 0;
-   istControl = (St_istControl *)dbControl->Find("istControl");
-   if(!istControl) {
-       LOG_ERROR << "Dataset does not contain IST control table!" << endm;
-       ierr = kStErr;
-   }
-   else {
-        istControl_st *istControlTable = istControl->GetTable() ;
-        if (!istControlTable)  {
-            LOG_ERROR << "Pointer to IST control table is null" << endm;
-            ierr = kStErr;
-        }
-        else {
-            mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
-            mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
-        }
-   }
-
-   return ierr;
-};
- 
-StIstHitMaker::StIstHitMaker( const char* name ) : StMaker(name), listGeoMSensorOnGlobal(0), mIstDbMaker(0), istHitCollection(0)
-{
-   /* no op */
-};
-
 ClassImp(StIstHitMaker);
