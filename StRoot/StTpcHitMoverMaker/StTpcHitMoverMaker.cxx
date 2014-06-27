@@ -10,9 +10,9 @@
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcEffectiveGeomC.h"
+#include "StDetectorDbMaker/St_tpcTimeBucketCorC.h"
 #include "TMath.h"
 ClassImp(StTpcHitMover)
-//#define __Move2TpcHalf__
 #define __DEBUG__
 #ifdef __DEBUG__
 #define PrPP(A,B) if (_debug %10 > 1) {LOG_INFO << "StTpcHitMover::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
@@ -112,6 +112,14 @@ Int_t StTpcHitMover::Make() {
 		} else { //  transoform from original pad and time bucket measurements
 		  Float_t pad  = tpcHit->pad();
 		  Float_t time = tpcHit->timeBucket();
+		  if (! StTpcDb::IsOldScheme()) {
+		    if (St_tpcTimeBucketCorC::instance()->getNumRows()) {
+		      Int_t io = 0;
+		      if (row <= NoInnerPadRows) io = 1;
+		      Double_t noTmbks = tpcHit->maxTmbk() - tpcHit->minTmbk() + 1;
+		      time += St_tpcTimeBucketCorC::instance()->CalcCorrection(io, noTmbks);
+		    }
+		  }
 		  StTpcPadCoordinate padcoord(sector, row, pad, time);
 		  StTpcLocalSectorCoordinate  coorS;
 		  transform(padcoord,coorS,kFALSE);
@@ -121,12 +129,6 @@ Int_t StTpcHitMover::Make() {
 		    if      (l == 1) coorS.position().setY(y + padlength/2);
 		    else if (l == 2) coorS.position().setY(y - padlength/2);
 		    transform(coorS,coorL);
-#if 0
-		    Double_t scale = 1. + St_tpcEffectiveGeomC::instance()->scale()*coorL.position().y();
-		    StTpcDb::instance()->ScaleDriftVelocity(scale);
-		    transform(padcoord,coorL,kFALSE);
-		    StTpcDb::instance()->ScaleDriftVelocity(1./scale);
-#endif
 		    moveTpcHit(coorL,coorG);
 		    StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
 		    if      (l == 1) tpcHit->setPositionU(xyzF);
@@ -149,45 +151,13 @@ Int_t StTpcHitMover::Make() {
 }
 //________________________________________________________________________________
 void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StTpcLocalCoordinate &coorLTD) {
-#if 0
-  if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
-  StTpcCoordinateTransform &transform = *mTpcTransForm;
-  static StTpcLocalSectorCoordinate  coorLS;
-  transform(coorL,coorLS);   PrPP(moveTpcHit,coorL); PrPP(moveTpcHit,coorLS); // to sector 12
-  static StTpcPadCoordinate Pad;
-  transform(coorLS,Pad,kFALSE,kFALSE); PrPP(moveTpcHit,Pad);
-  static StTpcLocalCoordinate  coorLT; // before undo distortions
-  transform(coorLS,coorLT); PrPP(moveTpcHit,coorLT);//
-  coorLTD = coorLT;          // distortions
-#else
   coorLTD = coorL;           // distortions
-#endif
-#ifdef __Move2TpcHalf__
-  StBeamDirection side = east;
-  Int_t Sector = coorL.fromSector();
-  if (Sector >= 1 && Sector <= 24) {
-    if (Sector <= 12) side = west;
-  } else {
-    if (coorL.position().z() >  0) side = west;
-  }
-  Double_t posD[3];
-  gStTpcDb->TpcHalf(side).MasterToLocal(coorL.position().xyz(),posD);
-  // ExB corrections
-  Float_t pos[3] = {posD[0], posD[1], posD[2]};
-#else  /* ! __Move2TpcHalf__ */
   Float_t pos[3] = {coorLTD.position().x(), coorLTD.position().y(), coorLTD.position().z()};
-#endif /* __Move2TpcHalf__ */
   if ( StMagUtilities::Instance() ) {
     Float_t posMoved[3];
     StMagUtilities::Instance()->UndoDistortion(pos,posMoved,coorL.fromSector());   // input pos[], returns posMoved[]
     StThreeVector<double> newPos(posMoved[0],posMoved[1],posMoved[2]);
-#ifdef __Move2TpcHalf__
-    StThreeVector<double> newPosL;
-    gStTpcDb->TpcHalf(side).LocalToMaster(newPos.xyz(),newPosL.xyz());
-    coorLTD.setPosition(newPosL); 
-#else  /* ! __Move2TpcHalf__ */
     coorLTD.setPosition(newPos); 
-#endif /* __Move2TpcHalf__ */
   }
 }
 //________________________________________________________________________________
@@ -198,8 +168,11 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.25 2014/06/26 21:32:25 fisyak Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.26 2014/06/27 14:45:51 fisyak Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.26  2014/06/27 14:45:51  fisyak
+// Add swith between new and old schema, clean up
+//
 // Revision 1.25  2014/06/26 21:32:25  fisyak
 // New Tpc Alignment, v632
 //
