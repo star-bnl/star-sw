@@ -133,6 +133,8 @@ MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorr
 MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
 #include "St_tpcMethaneInC.h"
 MakeChairInstance2(tpcCorrection,St_tpcMethaneInC,Calibrations/tpc/tpcMethaneIn);
+#include "St_tpcTimeBucketCorC.h"
+MakeChairInstance2(tpcCorrection,St_tpcTimeBucketCorC,Calibrations/tpc/tpcTimeBucketCor);
 #include "St_tpcGasTemperatureC.h"
 MakeChairInstance2(tpcCorrection,St_tpcGasTemperatureC,Calibrations/tpc/tpcGasTemperature);
 #include "St_tpcWaterOutC.h"
@@ -390,7 +392,7 @@ MakeChairInstance(TpcPadCorrection,Calibrations/tpc/TpcPadCorrection);
 St_TpcPadCorrectionC::St_TpcPadCorrectionC(St_TpcPadCorrection *table) : TChair(table), fFunc(0) {
   Int_t nrows = GetNRows();
   if (nrows) {
-    fFunc = new TF1*[nrows]; memset(fFunc, 0, sizeof(fFunc));
+    fFunc = new TF1*[nrows]; memset(fFunc, 0, nrows*sizeof(TF1*));
     for (Int_t i = 0; i < nrows; i++) {
       Short_t io = Struct(i)->InOut;
       Short_t np = Struct(i)->npads;
@@ -446,8 +448,8 @@ Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,
   Int_t pitch = s;
   if (iXZ) pitch = 2;
   Double_t Vars[7] = {
-    Npads,             // 0 => no. of pads in cluster
-    Ntmbks,            // 1 => no. of time buckets in cluster
+    (Double_t )Npads,  // 0 => no. of pads in cluster
+    (Double_t )Ntmbks, // 1 => no. of time buckets in cluster
     -TMath::Tan(_eta), // 2 => tan(phiL)
     _tanl,             // 3 => tan(dipL)
     _z,                // 4 => zL
