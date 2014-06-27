@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.60 2014/06/26 21:32:57 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.61 2014/06/27 14:04:25 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.61  2014/06/27 14:04:25  fisyak
+ * Add env. NewTpcAlignment to switch between new and old scheme
+ *
  * Revision 1.60  2014/06/26 21:32:57  fisyak
  * New Tpc Alignment, v632
  *
@@ -178,7 +181,9 @@
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcDriftVelocityC.h"
 #include "StarMagField.h"
+#include "TEnv.h"
 StTpcDb* gStTpcDb = 0;
+Bool_t StTpcDb::mOldScheme = kTRUE;
 // C++ routines:
 //_____________________________________________________________________________
 ClassImp(StTpcDb);
@@ -357,14 +362,12 @@ void StTpcDb::SetTpcRotations() {
   TGeoRotation *rotm = 0;
   TObjArray *listOfMatrices = 0;
   TString Rot;
-  static Bool_t oldScheme = kTRUE;
-  if (! StTpcPosition::instance()->Table()->IsMarked()) {
-    oldScheme = kFALSE;
+  if (gEnv->GetValue("NewTpcAlignment",0) != 0) mOldScheme = kFALSE;
+  if (! mOldScheme) {
     LOG_INFO << "StTpcDb::SetTpcRotations use new schema for Rotation matrices" << endm;
   } else {
     LOG_INFO << "StTpcDb::SetTpcRotations use old schema for Rotation matrices" << endm;
   }
-  Int_t sectorFR;
   for (Int_t sector = 0; sector <= 24; sector++) {// loop over Tpc as whole, sectors, inner and outer subsectors
     Int_t k;
     Int_t k1 = kSupS2Tpc;
@@ -374,7 +377,7 @@ void StTpcDb::SetTpcRotations() {
       Int_t Id     = 0;
       TGeoHMatrix rotA; // After alignment
       if (!sector ) { // TPC Reference System
-	if (oldScheme) { // old scheme
+	if (mOldScheme) { // old scheme
 	  St_tpcGlobalPositionC *tpcGlobalPosition = St_tpcGlobalPositionC::instance();
 	  assert(tpcGlobalPosition);
 	  Id = 1;
@@ -390,9 +393,9 @@ void StTpcDb::SetTpcRotations() {
 	  rotA.SetTranslation(transTpcRefSys);
 	} else {
 	  rotA = StTpcPosition::instance()->GetMatrix();
+	  *mHalf[east] = StTpcHalfPosition::instance()->GetEastMatrix();
+	  *mHalf[west] = StTpcHalfPosition::instance()->GetWestMatrix();
 	}
-	*mHalf[east] = StTpcHalfPosition::instance()->GetEastMatrix();
-	*mHalf[west] = StTpcHalfPosition::instance()->GetWestMatrix();
       } else {
 	Id = 10*sector + k;
 	TGeoTranslation TIO; 
@@ -418,7 +421,7 @@ void StTpcDb::SetTpcRotations() {
 	    rotm->RotateZ(iphi);
 	  }
 	  rotA = (*mSwap[part]) * (*mHalf[part]) * (*rotm);
-	  if (oldScheme) rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
+	  if (mOldScheme) rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
 	  else           rotA *= StTpcSuperSectorPositionB::instance()->GetMatrix(sector-1);
 	  if (gGeoManager) rotm->RegisterYourself();
 	  else             SafeDelete(rotm);
@@ -427,11 +430,11 @@ void StTpcDb::SetTpcRotations() {
 	  rotA = Tpc2GlobalMatrix() * SupS2Tpc(sector); 
 	  break; 
 	case kSubSInner2SupS: 
-	  if (oldScheme) 	  rotA = Flip(); 
+	  if (mOldScheme) 	  rotA = Flip(); 
 	  else                    rotA = Flip() * StTpcInnerSectorPositionB::instance()->GetMatrix(sector-1); 
 	  break;
 	case kSubSOuter2SupS: 
-	  if (oldScheme) rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); 
+	  if (mOldScheme) rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); 
 	  else           {
 #if 1
 	    rotA = Flip() * StTpcOuterSectorPositionB::instance()->GetMatrix(sector-1); 
