@@ -1845,7 +1845,7 @@ void l4Builder::defineHltPlots()
     HltPlots[index]->addHisto(ph);
 
     index++; //16
-    hVertexZ = new TH1D("VertexZ", "VertexZ", 100, -10., 10.);
+    hVertexZ = new TH1D("VertexZ", "VertexZ", 500, -100., 100.);
     ph = new PlotHisto();
     ph->histo = hVertexZ;
     HltPlots[index]->addHisto(ph);
