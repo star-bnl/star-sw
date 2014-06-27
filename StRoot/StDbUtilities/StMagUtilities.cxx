@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.99 2014/06/26 21:29:26 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.100 2014/06/27 14:18:13 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.100  2014/06/27 14:18:13  fisyak
+ * Add switch between old and new schema
+ *
  * Revision 1.99  2014/06/26 21:29:26  fisyak
  * New Tpc Alignment, v632
  *
@@ -4483,44 +4486,22 @@ Int_t StMagUtilities::IterationFailCount()
 }
 //________________________________________________________________________________
 void StMagUtilities::B3DFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector ) {
-#if 0
-  // mag. field from postion in local Half Tpc coordinate system in the local Tpc coordinate system
-  StBeamDirection side = east;
-  if (Sector >= 1 && Sector <= 24) {
-    if (Sector <= 12) side = west;
+  if (StTpcDb::IsOldScheme()) {
+      B3DField( xTpc, BTpc) ; 
   } else {
-    if (xTpc[2] >  0) side = west;
-  }
-  Double_t xTpcD[3] = {xTpc[0], xTpc[1], xTpc[2]};
-  Double_t Tpc[3];
-  gStTpcDb->TpcHalf(side).LocalToMaster(xTpcD,Tpc);
-#else
   // mag. field in Tpc local coordinate system
-  Double_t Tpc[3] =  {xTpc[0], xTpc[1], xTpc[2]};
-#endif
-  Double_t coorG[3];
-  gStTpcDb->Tpc2GlobalMatrix().LocalToMaster(Tpc,coorG);
-  Float_t xyzG[3] = {coorG[0], coorG[1], coorG[2]};
-  Float_t BG[3];
-#if 0
-  B3DField( xyzG, BG) ; 
-#else
-  BField( xyzG, BG) ; 
-#endif
-  Double_t    BGD[3] = {BG[0], BG[1], BG[2]};
-  Double_t    BTpcL[3];
-  gStTpcDb->Tpc2GlobalMatrix().MasterToLocalVect(BGD,BTpcL);
-#if 0
-  Double_t BTpcH[3];
-  gStTpcDb->TpcHalf(side).MasterToLocalVect(BTpcL,BTpcH);
-  BTpc[0] = BTpcH[0];
-  BTpc[1] = BTpcH[1];
-  BTpc[2] = BTpcH[2];
-#else
-  BTpc[0] = BTpcL[0];
-  BTpc[1] = BTpcL[1];
-  BTpc[2] = BTpcL[2];
-  
-#endif
+    Double_t Tpc[3] =  {xTpc[0], xTpc[1], xTpc[2]};
+    Double_t coorG[3];
+    StTpcDb::instance()->Tpc2GlobalMatrix().LocalToMaster(Tpc,coorG);
+    Float_t xyzG[3] = {coorG[0], coorG[1], coorG[2]};
+    Float_t BG[3];
+    BField( xyzG, BG) ; 
+    Double_t    BGD[3] = {BG[0], BG[1], BG[2]};
+    Double_t    BTpcL[3];
+    StTpcDb::instance()->Tpc2GlobalMatrix().MasterToLocalVect(BGD,BTpcL);
+    BTpc[0] = BTpcL[0];
+    BTpc[1] = BTpcL[1];
+    BTpc[2] = BTpcL[2];
+  }  
 }
 //________________________________________________________________________________
