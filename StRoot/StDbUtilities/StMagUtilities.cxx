@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.100 2014/06/27 14:18:13 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.101 2014/06/28 16:23:18 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.101  2014/06/28 16:23:18  fisyak
+ * Use switch to chose between New and Old schema
+ *
  * Revision 1.100  2014/06/27 14:18:13  fisyak
  * Add switch between old and new schema
  *
@@ -499,13 +502,13 @@ void StMagUtilities::GetTPCParams ()
   St_tpcPadPlanesC*      pads = thedb->PadPlaneGeometry();
   St_tpcFieldCageC*     cages = thedb->FieldCage();
   St_tpcDimensionsC*     dims = thedb->Dimensions();
-  if (! StTpcPosition::instance()->Table()->IsMarked()) { // new scheme
+  if (! StTpcDb::IsOldScheme()) { // new schema
     XTWIST = 0; 
     YTWIST = 0;
     EASTCLOCKERROR = 0;
     WESTCLOCKERROR = 0;
     mDistortionMode = kDisableTwistClock;
-  } else {
+  } else { // old schema
     St_tpcGlobalPositionC* glob = thedb->GlobalPosition();
     XTWIST         =   1e3*glob->TpcEFieldRotationY() ; 
     YTWIST         =  -1e3*glob->TpcEFieldRotationX() ;            
