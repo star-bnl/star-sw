@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.56 2014/06/26 21:29:27 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.57 2014/07/01 20:29:02 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.57  2014/07/01 20:29:02  fisyak
+ * Clean up
+ *
  * Revision 1.56  2014/06/26 21:29:27  fisyak
  * New Tpc Alignment, v632
  *
@@ -235,7 +238,6 @@ class StMagUtilities {
 
  private:
   static StMagUtilities *fgInstance;
-  StTpcDb*  thedb ;  
   StDetectorDbSpaceCharge*   fSpaceCharge   ;
   StDetectorDbSpaceChargeR2* fSpaceChargeR2 ;  
   StDetectorDbTpcVoltages*   fTpcVolts      ;
@@ -243,7 +245,6 @@ class StMagUtilities {
   StDetectorDbGridLeak*      fGridLeak      ;
   St_tpcHVPlanesC*           fHVPlanes      ;
 
-  virtual void    SetDb( StTpcDb* dbin ) ;
   virtual void    GetMagFactor ()     ;
   virtual void    GetTPCParams ()     ;
   virtual void    GetTPCVoltages ()   ;
@@ -365,8 +366,7 @@ class StMagUtilities {
   static   TNtuple *fgUnDoDistortion;
  public:
 
-  StMagUtilities () ;
-  StMagUtilities ( StTpcDb* dbin,  Int_t mode = 0 ) ;
+  StMagUtilities ( StTpcDb* dbin = 0,Int_t mode = 0 ) ;
   StMagUtilities ( const StarMagField::EBField map, const Float_t factor, Int_t mode );
   virtual ~StMagUtilities () {fgInstance = 0;}
   static StMagUtilities *Instance() {return fgInstance;}
