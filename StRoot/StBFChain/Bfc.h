@@ -6,13 +6,13 @@
 #define STR_OBSOLETE "WARNING *** Option is OBSOLETE ***"
 #define USE_BFCTIMESTAMP
 struct Bfc_st {
-  Char_t       Key[63];      /* nick name */
-  Char_t       Name[63];     /* maker name */
-  Char_t       Chain[63];    /* its chain */
-  Char_t       Opts[255];    /* required options */
-  Char_t       Maker[63];    /* required Makers */
-  Char_t       Libs[255];    /* libraries to be loaded */
-  Char_t       Comment[255];  
+  Char_t       Key[64];      /* nick name */
+  Char_t       Name[64];     /* maker name */
+  Char_t       Chain[64];    /* its chain */
+  Char_t       Opts[256];    /* required options */
+  Char_t       Maker[64];    /* required Makers */
+  Char_t       Libs[256];    /* libraries to be loaded */
+  Char_t       Comment[256];  
   Char_t       Flag;         /* F/T to use it in chain */
 };
 #ifdef USE_BFCTIMESTAMP

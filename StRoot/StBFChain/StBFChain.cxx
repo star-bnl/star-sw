@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.612 2014/05/13 17:53:18 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.613 2014/07/01 20:30:39 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -18,6 +18,7 @@
 #include "StMessMgr.h"
 #include "StEnumerations.h"
 #include "TTree.h"
+#include "TEnv.h"
 #define STAR_LOGGER 1
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -79,13 +80,14 @@ void StBFChain::Setup(Int_t mode) {
   fBFC = fchainOpt->GetTable();
   // add predifined time stamps and geometry versions
   const DbAlias_t *DbAlias = GetDbAliases();
+  Bfc_st row = {"","","","db,detDb","","","",kFALSE};
   for (Int_t i = 0; DbAlias[i].tag; i++) {
     for (Int_t r = 0; r < 2; r++) {
       TString dbTag("");
       if (r) dbTag += "r";
       dbTag += DbAlias[i].tag;
       if (! kOpt(dbTag,kFALSE)) {
-	Bfc_st row = {"","","","db,detDb","","","",kFALSE};
+	memset (&row.Key, 0, sizeof(row.Key));
 	memcpy (&row.Key, dbTag.Data(), dbTag.Length());
 	fchainOpt->AddAt(&row);
 	fNoChainOptions = fchainOpt->GetNRows();
@@ -96,7 +98,7 @@ void StBFChain::Setup(Int_t mode) {
   FDate  = FTime  = 0;
   FDateS = FTimeS = 0;
   fFiltTrg   = "";
-  fRunG      = -1;
+  fRunG  = -1;
   Gproperty  = ".gopt.";
   Gvalue     = "";
   Gpattern   = "*";
@@ -269,10 +271,10 @@ Int_t StBFChain::Instantiate()
 	  Int_t j;
 	  for (j = 0; j < 10; j++) Dirs[j] = "";
 	  j = 0;
-	  if (MySQLDb    != "") {Dirs[j] = MySQLDb;    j++;}
-	  if (MainCintDb != "") {Dirs[j] = MainCintDb; j++;}
+	  if (MySQLDb       != "") {Dirs[j] = MySQLDb;    j++;}
+	  if (MainCintDb    != "") {Dirs[j] = MainCintDb; j++;}
 	  if (MainCintDbObj != "") {Dirs[j] = MainCintDbObj; j++;}
-	  if (MyCintDb   != "") {Dirs[j] = MyCintDb;   j++;}
+	  if (MyCintDb      != "") {Dirs[j] = MyCintDb;   j++;}
 	  if (MyCintDbObj   != "") {Dirs[j] = MyCintDbObj;   j++;}
 	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2],Dirs[3],Dirs[4]);
 	  if (!dbMk) goto Error;
@@ -377,6 +379,7 @@ Int_t StBFChain::Instantiate()
 	  GetOption("ntin")      || 
 	  GetOption("gstar")     || 
 	  GetOption("pythia")    || 
+	  GetOption("hijing")    || 
 	  GetOption("PrepEmbed") || 
 	  GetOption("mtin")) {
 	mk->SetActive(kTRUE);
@@ -387,6 +390,9 @@ Int_t StBFChain::Instantiate()
 	  mk->SetAttr("Pythia",kTRUE);
 	  if (GetOption("Wenu")) mk->SetAttr("Wenu",kTRUE);
 	  if (GetOption("beamLine"))  mk->SetAttr("beamLine",kTRUE);
+	}
+	if (GetOption("hijing")) {
+	  mk->SetAttr("hijing",kTRUE);
 	}
       }
       else mk->SetActive(kFALSE);
@@ -476,6 +482,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("WestOff"))   mk->SetAttr("WestOff"    ,kTRUE);
       if (GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
       if (GetOption("Alignment")) mk->SetAttr("Alignment"  ,kTRUE);
+      if (GetOption("Cosmics"))   mk->SetAttr("Cosmics"    ,kTRUE);
       mk->PrintAttr();
     }
     if (maker=="StKFVertexMaker" && GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
@@ -632,8 +639,11 @@ Int_t StBFChain::Instantiate()
       cmd += "Ximk->SetXiLanguageUsage(5);";
       ProcessLine(cmd);
     }
+    if (maker == "StTpcRTSHitMaker") {
+      if ( GetOption("TpxClu2D")) mk->SetAttr("TpxClu2D", kTRUE);
+    }
     if (maker == "StTpcDbMaker"){
-      if (GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",kTRUE);
+      if ( GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",kTRUE);
       if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",kTRUE) ;// uses laserDV database
       if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",kTRUE) ;// uses ofl database
       if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",kTRUE);// uses new laserDV
@@ -715,6 +725,15 @@ Int_t StBFChain::Instantiate()
 	cmd += "Filtmk->setPtUpperCut(-99.);";
 	cmd += "Filtmk->setAbsEtaCut(-99);";
 	cmd += "Filtmk->setAbsZVertCut(30);";
+	ProcessLine(cmd);
+      } else if (GetOption("TpcHitFilt")){
+	// Filter out TPC hits not on tracks
+	LOG_QA << "TPC hit filter is ON" << endm;
+	TString cmd(Form("StHitFilterMaker *Filtmk=(StHitFilterMaker*) %p;",mk));
+	cmd += "Filtmk->setPtLowerCut(-99.);";
+	cmd += "Filtmk->setPtUpperCut(-99.);";
+	cmd += "Filtmk->setAbsEtaCut(-99);";
+	cmd += "Filtmk->setAbsZVertCut(999);";
 	ProcessLine(cmd);
       } else {
 	LOG_QA << "Default hit filtering is ON" << endm;
@@ -815,7 +834,7 @@ Int_t StBFChain::Init() {
       SetAttr(".call","SetActive(0)","StTagsMaker::");
       SetAttr(".call","SetActive(0)","StStrangeMuDstMaker::");
     }
-#if 1
+#if 0
     // force load of geometry for VMC and Sti
     
     if (GetOption("Sti") || GetOption("StiCA") || 
@@ -861,12 +880,12 @@ Int_t StBFChain::Init() {
 /// Really the destructor (close files, delete pointers etc ...)
 Int_t StBFChain::Finish()
 {
+  TFile *tf = GetTFile();
+  if (tf) {tf->Write(); tf->Flush(); tf->Close(); delete tf; SetTFile(0);}
   if (!fBFC) return kStOK;
   Int_t ians = StChain::Finish();
   SafeDelete(fchainOpt);
   fBFC = 0;
-  TFile *tf = GetTFile();
-  if (tf) {tf->Write(); tf->Flush(); tf->Close(); delete tf; SetTFile(0);}
 //  delete gMessMgr; gMessMgr = 0;
   return ians;
 }
@@ -1285,6 +1304,10 @@ void StBFChain::SetFlags(const Char_t *Chain)
   gMessMgr->QAInfo() << "============= You are in " << STAR_VERSION.Data() << " ===============" << endm;
   gMessMgr->QAInfo() << "Requested chain " << GetName() << " is :\t" << tChain.Data() << endm;
   SetOptions(tChain,"Chain");
+  if (GetOption("NewTpcAlignment")) {
+    gMessMgr->QAInfo() << "Set environment to use NewTpcAlignment" << endm;
+    gEnv->SetValue("NewTpcAlignment",1);
+  }
   if (!GetOption("NoDefault")) { // Default
     // Check flags consistency
     if (gClassTable->GetID("TGiant3") >= 0) { // root4star
@@ -1414,26 +1437,33 @@ void StBFChain::SetInputFile (const Char_t *infile){
 //_____________________________________________________________________
 /// Takes care of output file name (extension)
 void StBFChain::SetOutputFile (const Char_t *outfile){
-  if ( GetOption("NoOutput")) return;
-  if (outfile)               fFileOut = outfile;
-  else {
-    if (GetOption("gstar") || GetOption("pythia"))  fFileOut = "gtrack.root";
-    if (GetOption("VMC"))    fFileOut = "VMC.root";
-    if (fInFile != "") {
-      if (GetOption("fzin") || GetOption("ntin")) {
-	TObjArray words;
-	ParseString(fInFile,words);
-	TIter nextL(&words);
-	TObjString *word = 0;
-	while ((word = (TObjString *) nextL())) {
-	  if (word->GetString().Contains(".fz") ||
-	      word->GetString().Contains(".nt")) {
-	    fFileOut = gSystem->BaseName(word->GetName());
-	    break;
+  if (!  GetOption("NoOutput")) {
+    if (outfile) { 
+      fFileOut = outfile;
+    } else {
+      if (fInFile != "") {
+	if (GetOption("fzin") || GetOption("ntin")) {
+	  TObjArray words;
+	  ParseString(fInFile,words);
+	  TIter nextL(&words);
+	  TObjString *word = 0;
+	  while ((word = (TObjString *) nextL())) {
+	    if (word->GetString().Contains(".fz") ||
+		word->GetString().Contains(".nt")) {
+	      fFileOut = gSystem->BaseName(word->GetName());
+	      break;
+	    }
 	  }
+	} else {
+	  fFileOut = gSystem->BaseName(fInFile.Data());
 	}
+      } 
+      if (fFileOut == "") {
+	if      (GetOption("pythia")) fFileOut = "pythia.root";
+	else if (GetOption("hijing")) fFileOut = "hijing.root";
+	else if (GetOption("VMC"))    fFileOut = "VMC.root";
+	else if (GetOption("gstar"))  fFileOut = "gtrack.root";
       }
-      else fFileOut = gSystem->BaseName(fInFile.Data());
       if (  fFileOut != "") {
 	fFileOut.ReplaceAll("*","");
 	fFileOut.ReplaceAll("@","");
@@ -1453,27 +1483,17 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   if (fFileOut != "")  gMessMgr->QAInfo() << "Output root file name " <<  fFileOut.Data() << endm;
   else                 SetOption("NoOutput","No Output File");
   if (!GetTFile()) {
-//   if (GetOption("tags")  &&  (
-//				 (fFileOut != "")    ||
-//				 GetOption("lana")   ||  GetOption("Laser") ||
-//				 GetOption("lanaDV") ||  GetOption("lanaDVtpx")  )
-//	) {
-
-     if ( ( GetOption("tags")  || GetOption("lana") ) &&  (fFileOut != "") ){
-	TString TagsName = fFileOut;
-	if( GetOption("lana") ){
-	   TagsName.ReplaceAll(".root",".laser.root");
-	} else {
-	   TagsName.ReplaceAll(".root",".tags.root");
-	}
-	SetTFile(new TFile(TagsName.Data(),"RECREATE"));
-     }
+    if ( ( GetOption("tags")  || GetOption("lana") ) &&  (fFileOut != "") ){
+      TString TagsName = fFileOut;
+      if( GetOption("lana") ){
+	TagsName.ReplaceAll(".root",".laser.root");
+      } else {
+	TagsName.ReplaceAll(".root",".tags.root");
+      }
+      SetTFile(new TFile(TagsName.Data(),"RECREATE"));
+    }
   }
-  //    gSystem->Exit(1);
 }
-
-
-
 //_____________________________________________________________________
 /// Handles all geant options
 /*!
@@ -1509,7 +1529,7 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
       GeometryOpt += GeomVersion;
       ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
     }
-    if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin")) && fInFile != "")
+    if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin") || fInFile.Data()[0] == ';') && fInFile != "")
       ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
   }
 }
@@ -1529,7 +1549,8 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
 */
 void StBFChain::SetDbOptions(StMaker *mk){
   if (! mk ) return;
-  if      (GetOption("AgML")  ) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
+  if      (GetOption("Agi"))    mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
+  else if (GetOption("AgML")  ) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
   else if (GetOption("VmcGeo")) mk->SetAlias("VmcGeometry","db/.const/StarDb/VmcGeo");
   else                          mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
   Int_t i;
@@ -1649,7 +1670,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
       SetFlavor(FieldOptions[k].name,        "MagFactor");
       gMessMgr->QAInfo() << "StBFChain::SetDbOptions SetFlavor(\"" << FieldOptions[k].name
 			 << "\",\"MagFactor\")" << endm;
-      if ( gClassTable->GetID("StarMagField") >= 0 && gClassTable->GetID("StMagFMaker") < 0) {
+      if ( gClassTable->GetID("StarMagField") >= 0) {
 	TString cmd =
 	  Form("if (!StarMagField::Instance()) new StarMagField( 2, %f, kTRUE);",
 	       FieldOptions[k].scale);
