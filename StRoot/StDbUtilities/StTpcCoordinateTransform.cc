@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.40 2014/06/26 21:29:27 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.41 2014/07/01 20:29:02 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.41  2014/07/01 20:29:02  fisyak
+ * Clean up
+ *
  * Revision 1.40  2014/06/26 21:29:27  fisyak
  * New Tpc Alignment, v632
  *
@@ -388,18 +391,22 @@ Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y) {
 void  StTpcCoordinateTransform::operator()(const        StTpcLocalSectorCoordinate& a, StTpcLocalCoordinate& b           )
 { 
   StThreeVectorD xGG;
-  StTpcDb::instance()->Pad2Tpc(a.sector(),a.row()).LocalToMasterVect(a.position().xyz(),xGG.xyz()); 
-  const Double_t *trans = StTpcDb::instance()->Pad2Tpc(a.sector(),a.row()).GetTranslation(); // 4
+  Int_t row    = a.fromRow();
+  if (row < 1 || row > mNoOfRows) row    = rowFromLocal(a);
+  StTpcDb::instance()->Pad2Tpc(a.sector(),row).LocalToMasterVect(a.position().xyz(),xGG.xyz()); 
+  const Double_t *trans = StTpcDb::instance()->Pad2Tpc(a.sector(),row).GetTranslation(); // 4
   TGeoTranslation GG2TPC(trans[0],trans[1],trans[2]);
   GG2TPC.LocalToMaster(xGG.xyz(), b.position().xyz());
-  b.setSector(a.sector()); b.setRow(a.row());
+  b.setSector(a.sector()); b.setRow(row);
 }
 //________________________________________________________________________________
 void  StTpcCoordinateTransform::operator()(const              StTpcLocalCoordinate& a, StTpcLocalSectorCoordinate& b     ) 
 { 
-  const Double_t *trans = StTpcDb::instance()->Pad2Tpc(a.sector(),a.row()).GetTranslation(); // 4
+  Int_t row    = a.fromRow();
+  assert(row >= 1 && row <= mNoOfRows);
+  const Double_t *trans = StTpcDb::instance()->Pad2Tpc(a.sector(),row).GetTranslation(); // 4
   TGeoTranslation GG2TPC(trans[0],trans[1],trans[2]);
   StThreeVectorD xGG;
   GG2TPC.MasterToLocal(a.position().xyz(), xGG.xyz());
-  StTpcDb::instance()->Pad2Tpc(a.sector(),a.row()).MasterToLocalVect(xGG.xyz(),b.position().xyz()); b.setSector(a.sector()); b.setRow(a.row());
+  StTpcDb::instance()->Pad2Tpc(a.sector(),row).MasterToLocalVect(xGG.xyz(),b.position().xyz()); b.setSector(a.sector()); b.setRow(row);
 }

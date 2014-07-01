@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.101 2014/06/28 16:23:18 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.102 2014/07/01 20:29:02 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.102  2014/07/01 20:29:02  fisyak
+ * Clean up
+ *
  * Revision 1.101  2014/06/28 16:23:18  fisyak
  * Use switch to chose between New and Old schema
  *
@@ -398,6 +401,7 @@ To do:  <br>
 #include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
 #include "StDetectorDbMaker/StTpcSurveyC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDbUtilities/StTpcCoordinateTransform.hh"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
 StMagUtilities *StMagUtilities::fgInstance = 0 ;
@@ -430,24 +434,14 @@ void    StMagUtilities::SetUnDoDistortionT(TFile *f) {
   fgUnDoDistortion = new TNtuple("UnDoDist","Result of UnDoDistrotion in TPC CS",Dnames);
 }
 //________________________________________________________________________________
-/// StMagUtilities default constructor
-StMagUtilities::StMagUtilities ()  
-{
-  cout << "StMagUtilities:: Unfortunately, instantiation with StMagUtilities(<empty>) is obsolete" << endl ;
-  cout << "StMagUtilities:: You must specify DataBase pointers or specify the requested Field settings manually" << endl ;
-  assert(0);
-}
-
-
 /// StMagUtilities constructor using the DataBase
-StMagUtilities::StMagUtilities ( StTpcDb* dbin , Int_t mode )
+StMagUtilities::StMagUtilities (StTpcDb* /* dbin */, Int_t mode )
 { 
   if (fgInstance) {
     cout << "ReInstate StMagUtilities. Be sure that this is want you want !" << endl;
     SafeDelete(fgInstance);
   }
   fgInstance = this;
-  SetDb ( dbin )        ;    // Put DB pointers into private/global space
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
   GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
@@ -470,7 +464,6 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
     SafeDelete(fgInstance);
   }
   fgInstance = this;
-  thedb   = 0           ;        // Do not get TPC parameters from the DB  - use defaults in CommonStart
   GetMagFactor()        ;        // Get the magnetic field scale factor from the StarMagField
   fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
   fOmegaTau      =  0   ;        // Do not get OmegaTau out of the DB      - use defaults in CommonStart
@@ -487,21 +480,16 @@ StMagUtilities::StMagUtilities ( const StarMagField::EBField map, const Float_t 
 
 //________________________________________
 
-
-void StMagUtilities::SetDb ( StTpcDb* dbin )
-{
-  thedb  = dbin  ;
-}
 void StMagUtilities::GetMagFactor () 
 { 
   gFactor = StarMagField::Instance()->GetFactor();
 }
 void StMagUtilities::GetTPCParams ()  
 { 
-  St_tpcWirePlanesC*    wires = thedb->WirePlaneGeometry();
-  St_tpcPadPlanesC*      pads = thedb->PadPlaneGeometry();
-  St_tpcFieldCageC*     cages = thedb->FieldCage();
-  St_tpcDimensionsC*     dims = thedb->Dimensions();
+  St_tpcWirePlanesC*    wires = StTpcDb::instance()->WirePlaneGeometry();
+  St_tpcPadPlanesC*      pads = StTpcDb::instance()->PadPlaneGeometry();
+  St_tpcFieldCageC*     cages = StTpcDb::instance()->FieldCage();
+  St_tpcDimensionsC*     dims = StTpcDb::instance()->Dimensions();
   if (! StTpcDb::IsOldScheme()) { // new schema
     XTWIST = 0; 
     YTWIST = 0;
@@ -509,14 +497,14 @@ void StMagUtilities::GetTPCParams ()
     WESTCLOCKERROR = 0;
     mDistortionMode = kDisableTwistClock;
   } else { // old schema
-    St_tpcGlobalPositionC* glob = thedb->GlobalPosition();
+    St_tpcGlobalPositionC* glob = StTpcDb::instance()->GlobalPosition();
     XTWIST         =   1e3*glob->TpcEFieldRotationY() ; 
     YTWIST         =  -1e3*glob->TpcEFieldRotationX() ;            
     EASTCLOCKERROR =   1e3*cages->EastClockError();
     WESTCLOCKERROR =   1e3*cages->WestClockError();
     mDistortionMode= 0;
   }
-  StarDriftV     =  1e-6*thedb->DriftVelocity() ;        
+  StarDriftV     =  1e-6*StTpcDb::instance()->DriftVelocity() ;        
   TPC_Z0         =  dims->gatingGridZ() ;
   IFCShift       =      cages->InnerFieldCageShift();
   INNER          =  pads->innerPadRows();
@@ -820,7 +808,7 @@ Float_t StMagUtilities::eZList[EMap_nZ] = { -208.5, -208.0, -207.0, -206.0, -205
 void StMagUtilities::CommonStart ( Int_t mode )
 {
   cout << "StMagUtilities::CommonSta  Magnetic Field scale factor is " << gFactor << endl ;
-  if ( thedb == 0 )
+  if ( StTpcDb::instance() == 0 )
     {
       cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
       cout << "StMagUtilities::CommonSta  ***NO TPC DB, Using default TPC parameters. You sure it is OK??? ***" << endl ; 
@@ -4329,20 +4317,19 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
               Double_t secSecPhi = 1.0/cosSecPhi;
               Double_t iOffsetFirst, iOffsetLast, oOffsetFirst, oOffsetLast;
 
-              if (thedb)
+              if (StTpcDb::instance())
                 {
-
                   Double_t local[3] = {0,0,0};
+#if 0		  
                   Double_t master[3];
                   
 
                   // To test internal sector alignment parameters only:
-                  //const TGeoHMatrix& iAlignMatrix = thedb->SubSInner2SupS(Seclist[k]);
-                  //const TGeoHMatrix& oAlignMatrix = thedb->SubSOuter2SupS(Seclist[k]);
-                  
+                  //const TGeoHMatrix& iAlignMatrix = StTpcDb::instance()->SubSInner2SupS(Seclist[k]);
+                  //const TGeoHMatrix& oAlignMatrix = StTpcDb::instance()->SubSOuter2SupS(Seclist[k]);
                   // For sector alignment with respect to the TPC
-                  const TGeoHMatrix& iAlignMatrix = thedb->SubSInner2Tpc(Seclist[k]);
-                  const TGeoHMatrix& oAlignMatrix = thedb->SubSOuter2Tpc(Seclist[k]);
+                  const TGeoHMatrix& iAlignMatrix = StTpcDb::instance()->SubSInner2Tpc(Seclist[k]);
+                  const TGeoHMatrix& oAlignMatrix = StTpcDb::instance()->SubSOuter2Tpc(Seclist[k]);
                   
                   // For debugging the rotation matrices
                   /*
@@ -4353,28 +4340,53 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
                   }
                   */
                   
+#else
+		  static StTpcCoordinateTransform tran;
+		  static StTpcLocalCoordinate locP;
+		  Double_t *master = locP.position().xyz();
+#endif
                   // For the alignment, 'local' is the ideal position of the point
                   // on the endcap, and 'master' is the real position of that point.
                   // For this distortion, we will only worry about z displacements.
 
                   local[0] = m * INNERGGFirst * tanSecPhi;
                   local[1] = INNERGGFirst;
+#if 0
                   iAlignMatrix.LocalToMaster(local,master);
+#else
+		  StTpcLocalSectorCoordinate lSec(local[0],local[1],local[2],Seclist[k]);
+		  tran(lSec,locP);
+#endif
                   iOffsetFirst = (TPC_Z0 + m * master[2]) * StarMagE;
                   
                   local[0] = m * INNERGGLast  * tanSecPhi;
                   local[1] = INNERGGLast;
+#if 0
                   iAlignMatrix.LocalToMaster(local,master);
+#else
+		  lSec = StTpcLocalSectorCoordinate(local[0],local[1],local[2],Seclist[k]);
+		  tran(lSec,locP);
+#endif
                   iOffsetLast  = (TPC_Z0 + m * master[2]) * StarMagE;
                   
                   local[0] = m * OUTERGGFirst * tanSecPhi;
                   local[1] = OUTERGGFirst;
+#if 0
                   oAlignMatrix.LocalToMaster(local,master);
+#else
+		  lSec = StTpcLocalSectorCoordinate(local[0],local[1],local[2],Seclist[k]);
+		  tran(lSec,locP);
+#endif
                   oOffsetFirst = (TPC_Z0 + m * master[2]) * StarMagE;
                   
                   local[0] = m * OUTERGGLast  * tanSecPhi;
                   local[1] = OUTERGGLast;
+#if 0
                   oAlignMatrix.LocalToMaster(local,master);
+#else
+		  lSec = StTpcLocalSectorCoordinate(local[0],local[1],local[2],Seclist[k]);
+		  tran(lSec,locP);
+#endif
                   oOffsetLast  = (TPC_Z0 + m * master[2]) * StarMagE;
 
                 } else {
