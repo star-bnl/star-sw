@@ -2,10 +2,10 @@
 #include "TROOT.h"
 #endif
 #include "Bfc.h"
-#include "BigFullChain.h"
 #if !defined(__CINT__)
 TableImpl(Bfc);
 #endif
+#include "BigFullChain.h"
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_Bfc")) return 0;
   Int_t NoChainOptions = sizeof (BFC)/sizeof (Bfc_st);
