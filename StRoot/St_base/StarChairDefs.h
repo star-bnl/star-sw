@@ -72,5 +72,65 @@ St_ ## STRUCT ## C *St_ ## STRUCT ## C::instance() { \
     fgInstance = new CLASS(table);				\
     return fgInstance;							\
   }
+#define PATHAorPATHB(STRUCT,PATHA,PATHB,AorB)				\
+  St_ ## STRUCT *table = (St_ ## STRUCT *)				\
+    ((AorB == 0) ? StMaker::GetChain()->GetDataBase(MakeString(PATHA)): \
+     StMaker::GetChain()->GetDataBase(MakeString(PATHB)))
+#define MakeChairAltInstance(STRUCT,PATHA,PATHB,AorB)	\
+  ClassImp(St_ ## STRUCT ## C);				\
+  St_ ## STRUCT ## C *St_ ## STRUCT ## C::fgInstance = 0;	\
+  St_ ## STRUCT ## C *St_ ## STRUCT ## C::instance() {			\
+    if (fgInstance) return fgInstance;					\
+    PATHAorPATHB(STRUCT,PATHA,PATHB,AorB); \
+    if (! table) {							\
+      LOG_WARN << "St_" << # STRUCT << "C::instance "			\
+	       << ((AorB) ? MakeString(PATHA) : MakeString(PATHB))	\
+	       << "\twas not found" << endm;				\
+      assert(table);							\
+    }									\
+    DEBUGTABLE(STRUCT);							\
+    fgInstance = new St_ ## STRUCT ## C(table);				\
+    return fgInstance;							\
+  }
+#define MakeChairAltOptionalInstance(STRUCT,PATHA,PATHB,AorB)		\
+  ClassImp(St_ ## STRUCT ## C);						\
+  St_ ## STRUCT ## C *St_ ## STRUCT ## C::fgInstance = 0;		\
+  St_ ## STRUCT ## C *St_ ## STRUCT ## C::instance() {			\
+    if (fgInstance) return fgInstance;					\
+    PATHAorPATHB(STRUCT,PATHA,PATHB,AorB); \
+    if (! table) {							\
+      table = new St_ ## STRUCT(# STRUCT ,0);				\
+      table->Mark();							\
+      LOG_WARN << "St_" << # STRUCT << "C::instance create optional " << # STRUCT << " table" << endm; \
+    }									\
+    assert(table);	DEBUGTABLE(STRUCT);				\
+    fgInstance = new St_ ## STRUCT ## C(table);				\
+    return fgInstance;							\
+  }
+#define MakeChairAltInstance2(STRUCT,CLASS,PATHA,PATHB,AorB)	\
+  ClassImp(CLASS);							\
+  CLASS *CLASS::fgInstance = 0;						\
+  CLASS *CLASS::instance() {						\
+    if (fgInstance) return fgInstance;					\
+    PATHAorPATHB(STRUCT,PATHA,PATHB,AorB); \
+    assert(table);	  DEBUGTABLE(STRUCT);				\
+    fgInstance = new CLASS(table);					\
+    return fgInstance;							\
+  }
+#define MakeChairAltOptionalInstance2(STRUCT,CLASS,PATHA,PATHB,AorB)	\
+  ClassImp(CLASS);							\
+  CLASS *CLASS::fgInstance = 0;		\
+  CLASS *CLASS::instance() {						\
+    if (fgInstance) return fgInstance;					\
+    PATHAorPATHB(STRUCT,PATHA,PATHB,AorB); \
+    if (! table) {							\
+      table = new St_ ## STRUCT(# STRUCT ,0);				\
+      table->Mark();							\
+      LOG_WARN << "St_" << # STRUCT << "C::instance create optional " << # CLASS << " table" << endm; \
+    }									\
+    assert(table);	DEBUGTABLE(STRUCT);				\
+    fgInstance = new CLASS(table);					\
+    return fgInstance;							\
+  }
 #endif /* __StarChairDefs_h */
 
