@@ -72,6 +72,9 @@ TString St_spaceChargeCorC::getSpaceChargeString(Double_t scaleFactor)
         case (10): mult = "bbcbb"; break;
         case (11): mult = "vpde"; break;
         case (12): mult = "vpdw"; break;
+        case (13): mult = "zdcxnk"; break; // zdcx-no-killer as of 2011
+        case (14): mult = "zdcenk"; break; // zdce-no-killer as of 2011
+        case (15): mult = "zdcwnk"; break; // zdcw-no-killer as of 2011
         default  : mult = "";
       }
       Double_t correction = getSpaceChargeCorrection(scaleFactor,row);
