@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.61 2014/06/27 14:04:25 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.62 2014/07/01 20:28:32 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.62  2014/07/01 20:28:32  fisyak
+ * Add alternative (B) table for new TPC alignment
+ *
  * Revision 1.61  2014/06/27 14:04:25  fisyak
  * Add env. NewTpcAlignment to switch between new and old scheme
  *
@@ -412,17 +415,13 @@ void StTpcDb::SetTpcRotations() {
 	    rotm = (TGeoRotation *) listOfMatrices->FindObject(Rot);
 	  }
 	  if (! rotm) {
-#if 1
 	    if (sector <= 12) rotm = new TGeoRotation(Rot);
 	    else              rotm = new TGeoRotation(Rot,   90.0,    0.0,  90.0,  -90.0,  180.0,    0.00); // Flip (x,y,z) => ( x,-y,-z)
-#else
-	    rotm = new TGeoRotation(Rot);
-#endif
 	    rotm->RotateZ(iphi);
 	  }
 	  rotA = (*mSwap[part]) * (*mHalf[part]) * (*rotm);
 	  if (mOldScheme) rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
-	  else           rotA *= StTpcSuperSectorPositionB::instance()->GetMatrix(sector-1);
+	  else           rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
 	  if (gGeoManager) rotm->RegisterYourself();
 	  else             SafeDelete(rotm);
 	  break;
@@ -431,25 +430,19 @@ void StTpcDb::SetTpcRotations() {
 	  break; 
 	case kSubSInner2SupS: 
 	  if (mOldScheme) 	  rotA = Flip(); 
-	  else                    rotA = Flip() * StTpcInnerSectorPositionB::instance()->GetMatrix(sector-1); 
+	  else                    rotA = Flip() * StTpcInnerSectorPosition::instance()->GetMatrix(sector-1); 
 	  break;
 	case kSubSOuter2SupS: 
 	  if (mOldScheme) rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); 
 	  else           {
-#if 1
-	    rotA = Flip() * StTpcOuterSectorPositionB::instance()->GetMatrix(sector-1); 
-	    if (StTpcOuterSectorPositionB::instance()->GetNRows() > 24) {
+	    rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); 
+	    if (StTpcOuterSectorPosition::instance()->GetNRows() > 24) {
 	      if (gFactor > 0.2) {
-		rotA *= StTpcOuterSectorPositionB::instance()->GetMatrix(sector-1+24);
+		rotA *= StTpcOuterSectorPosition::instance()->GetMatrix(sector-1+24);
 	      } else if (gFactor < -0.2) {
-		rotA *= StTpcOuterSectorPositionB::instance()->GetMatrix(sector-1+24).Inverse();
+		rotA *= StTpcOuterSectorPosition::instance()->GetMatrix(sector-1+24).Inverse();
 	      }
 	    }
-#else
-	    sectorFR = sector;
-	    if (gFactor < -0.2) sectorFR += 24;
-	    rotA = Flip() * StTpcOuterSectorPositionB::instance()->GetMatrix(sectorFR-1); 
-#endif
 	  }
 	  break;
 	case kSubSInner2Tpc:  rotA = SupS2Tpc(sector) * SubSInner2SupS(sector); break; // (Subs[io] => SupS) => Tpc

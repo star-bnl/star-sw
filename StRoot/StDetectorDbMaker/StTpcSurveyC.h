@@ -3,7 +3,7 @@
 
 #include "St_SurveyC.h"
 #include "StEnumerations.h"
-class StTpcInnerSectorPosition : public St_SurveyC {// Out part of sector to Super Sector
+class StTpcInnerSectorPosition : public St_SurveyC {// Inner part of sector to Super Sector
  public:
   static StTpcInnerSectorPosition* 	instance();
   StTpcInnerSectorPosition(St_Survey *table=0) : St_SurveyC(table) {}
@@ -12,7 +12,7 @@ class StTpcInnerSectorPosition : public St_SurveyC {// Out part of sector to Sup
   static StTpcInnerSectorPosition* fgInstance;
   ClassDef(StTpcInnerSectorPosition,1) //C++ TChair for TpcInnerSectorPosition
 };
-class StTpcOuterSectorPosition : public St_SurveyC {// Out part of sector to Super Sector
+class StTpcOuterSectorPosition : public St_SurveyC {// Outer part of sector to Super Sector
  public:
   static StTpcOuterSectorPosition* 	instance();
   StTpcOuterSectorPosition(St_Survey *table=0) : St_SurveyC(table) {}
@@ -55,33 +55,5 @@ class StTpcPosition : public St_SurveyC {// Global position of TPC in Magnet
  private:
   static StTpcPosition* fgInstance;
   ClassDef(StTpcPosition,1) //C++ TChair for TpcPosition
-};
-class StTpcInnerSectorPositionB : public St_SurveyC {// Out part of sector to Super Sector
- public:
-  static StTpcInnerSectorPositionB* 	instance();
-  StTpcInnerSectorPositionB(St_Survey *table=0) : St_SurveyC(table) {}
-  virtual ~StTpcInnerSectorPositionB() {fgInstance = 0;}
- private:
-  static StTpcInnerSectorPositionB* fgInstance;
-  ClassDef(StTpcInnerSectorPositionB,1) //C++ TChair for TpcInnerSectorPositionB
-};
-class StTpcOuterSectorPositionB : public St_SurveyC {// Out part of sector to Super Sector
- public:
-  static StTpcOuterSectorPositionB* 	instance();
-  StTpcOuterSectorPositionB(St_Survey *table=0) : St_SurveyC(table) {}
-  virtual ~StTpcOuterSectorPositionB() {fgInstance = 0;}
- private:
-  static StTpcOuterSectorPositionB* fgInstance;
-  ClassDef(StTpcOuterSectorPositionB,1) //C++ TChair for TpcOuterSectorPositionB
-};
-
-class StTpcSuperSectorPositionB : public St_SurveyC {// Extra rotation for whole Super Sector to half Tpc
- public:
-  static StTpcSuperSectorPositionB* 	instance();
-  StTpcSuperSectorPositionB(St_Survey *table=0) : St_SurveyC(table) {}
-  virtual ~StTpcSuperSectorPositionB() {fgInstance = 0;}
- private:
-  static StTpcSuperSectorPositionB* fgInstance;
-  ClassDef(StTpcSuperSectorPositionB,1) //C++ TChair for TpcSuperSectorPositionB
 };
 #endif

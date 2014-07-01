@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "StarChairDefs.h"
+#include "TEnv.h"
 #include "St_db_Maker/St_db_Maker.h"
 //___________________Calibrations/ftpc_____________________________________________________________
 #include "StDetectorDbFTPCGas.h"
@@ -247,9 +248,9 @@ Double_t St_MDFCorrectionC::EvalFactor(Int_t k, Int_t p, Double_t x) const {
   return r;
 }
 #include "St_tpcEffectiveGeomC.h"
-MakeChairInstance(tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeom);
+MakeChairAltInstance(tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeomB,gEnv->GetValue("NewTpcAlignment",0));
 #include "St_tpcElectronicsC.h"
-MakeChairInstance(tpcElectronics,Calibrations/tpc/tpcElectronics);
+MakeChairAltInstance(tpcElectronics,Calibrations/tpc/tpcElectronics,Calibrations/tpc/tpcElectronicsB,gEnv->GetValue("NewTpcAlignment",0));
 #include "St_tpcPedestalC.h"
 MakeChairInstance(tpcPedestal,Calibrations/tpc/tpcPedestal);
 #include "St_tpcPadResponseC.h"
@@ -261,7 +262,7 @@ MakeChairInstance(tpcGainMonitor,Calibrations/tpc/tpcGainMonitor);
 #include "St_tpcHighVoltagesC.h"
 MakeChairInstance(tpcHighVoltages,Calibrations/tpc/tpcHighVoltages);
 #include "St_tpcPadrowT0C.h"
-MakeChairInstance(tpcPadrowT0,Calibrations/tpc/tpcPadrowT0);
+MakeChairAltInstance(tpcPadrowT0,Calibrations/tpc/tpcPadrowT0,Calibrations/tpc/tpcPadrowT0B,gEnv->GetValue("NewTpcAlignment",0));
 #include "St_tpcSectorT0offsetC.h"
 MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
 #include "St_TpcAltroParametersC.h"
@@ -713,7 +714,7 @@ Float_t StDetectorDbTriggerID::getTotalPrescaleByTrgId(Int_t trgId) {
 StDetectorDbIntegratedTriggerID *StDetectorDbIntegratedTriggerID::fgInstance = 0;
 //___________________Conditions/trg_____________________________________________________________
 #include "St_trgTimeOffsetC.h"
-MakeChairInstance(trgTimeOffset,Conditions/trg/trgTimeOffset);
+MakeChairAltInstance(trgTimeOffset,Conditions/trg/trgTimeOffset,Conditions/trg/trgTimeOffsetB,gEnv->GetValue("NewTpcAlignment",0));
 //___________________Geometry/tpc_____________________________________________________________
 #include "St_tpcDimensionsC.h"
 MakeChairInstance(tpcDimensions,Geometry/tpc/tpcDimensions);
@@ -772,14 +773,11 @@ MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
 MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
 MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
 #include "StTpcSurveyC.h"
-MakeChairInstance2(Survey,StTpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPosition);
-MakeChairInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition);
-MakeChairInstance2(Survey,StTpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPosition);
+MakeChairAltInstance2(Survey,StTpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
+MakeChairAltInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
+MakeChairAltInstance2(Survey,StTpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairInstance2(Survey,StTpcHalfPosition,Geometry/tpc/TpcHalfPosition);
-MakeChairOptionalInstance2(Survey,StTpcPosition,Geometry/tpc/TpcPosition);
-MakeChairInstance2(Survey,StTpcInnerSectorPositionB,Geometry/tpc/TpcInnerSectorPositionB);
-MakeChairInstance2(Survey,StTpcOuterSectorPositionB,Geometry/tpc/TpcOuterSectorPositionB);
-MakeChairInstance2(Survey,StTpcSuperSectorPositionB,Geometry/tpc/TpcSuperSectorPositionB);
+MakeChairInstance2(Survey,StTpcPosition,Geometry/tpc/TpcPosition);
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   static TGeoHMatrix rot;
@@ -839,9 +837,6 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "TpcOuterSectorPosition") return (St_SurveyC   *) StTpcOuterSectorPosition::instance();
   if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
   if (Name == "TpcHalfPosition")        return (St_SurveyC   *) StTpcHalfPosition::instance();
-  if (Name == "TpcInnerSectorPositionB") return (St_SurveyC   *) StTpcInnerSectorPositionB::instance();
-  if (Name == "TpcOuterSectorPositionB") return (St_SurveyC   *) StTpcOuterSectorPositionB::instance();
-  if (Name == "TpcSuperSectorPositionB") return (St_SurveyC   *) StTpcSuperSectorPositionB::instance();
   return 0;
 }
 //__________________Calibrations/rhic______________________________________________________________
