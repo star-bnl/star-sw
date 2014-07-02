@@ -33,9 +33,9 @@ using namespace std;
 using namespace StIstConsts;
 
 
-StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFile) :
-   StiDetectorBuilder("Ist", active, inputFile), mSiMaterial(0),
-   mHybridMaterial(0), mIstDb(0)
+StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFile, bool buildIdealGeom) :
+   StiDetectorBuilder("Ist", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mIstDb(0),
+   mBuildIdealGeom(buildIdealGeom)
 { }
 
 
@@ -49,7 +49,8 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 
    // XXX:ds: Cannot rely on external maker! Must access DbMaker through
    // source.GetDataSet("istDb")
-   mIstDb = (StIstDbMaker*) source.GetMaker("istDb");
+   if(!mBuildIdealGeom)
+      mIstDb = (StIstDbMaker*) source.GetMaker("istDb");
 
    // Gas material must be defined. Here we use air properties
    _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
@@ -67,7 +68,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
    unsigned int ROW = 1;
 
-   THashList *istRot = mIstDb->GetRotations();
+   THashList *istRot = 0;
+   if(!mBuildIdealGeom)
+      istRot = mIstDb->GetRotations();
 
    // Build the material map
    struct Material_t {
@@ -110,7 +113,12 @@ void StiIstDetectorBuilder::useVMCGeometry()
       {
          unsigned int matIst = 1000 + (ladderIdx) * 6 + (sensorIdx + 1);
          LOG_DEBUG << "ladderIdx/sensorIdx/matIst : " << ladderIdx << " " << sensorIdx << " " << matIst << endm;
-         TGeoHMatrix *combI = (TGeoHMatrix*) istRot->FindObject(Form("R%04i", matIst));
+
+         TGeoHMatrix *combI = 0;
+         if(!mBuildIdealGeom)
+            combI = (TGeoHMatrix*) istRot->FindObject(Form("R%04i", matIst));
+         else
+            combI = gGeoManager->GetCurrentMatrix();
 
          if (combI) {
             combI->Print();
