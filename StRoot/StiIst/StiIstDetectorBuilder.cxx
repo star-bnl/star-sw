@@ -111,8 +111,15 @@ void StiIstDetectorBuilder::useVMCGeometry()
    {
       for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
       {
-         unsigned int matIst = 1000 + (ladderIdx) * 6 + (sensorIdx + 1);
+         unsigned int matIst = 1000 + (ladderIdx) * kIstNumSensorsPerLadder + (sensorIdx + 1);
          LOG_DEBUG << "ladderIdx/sensorIdx/matIst : " << ladderIdx << " " << sensorIdx << " " << matIst << endm;
+
+         char name[50];
+         sprintf(name, "Ist/Ladder_%d/Sensor_%d", ladderIdx + 1, sensorIdx + 1);
+
+         TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
+         Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", ladderIdx + 1, sensorIdx + 1);
+         gGeoManager->cd(Path); // retrieve info of IBSS volume
 
          TGeoHMatrix *combI = 0;
          if(!mBuildIdealGeom)
@@ -127,17 +134,8 @@ void StiIstDetectorBuilder::useVMCGeometry()
             continue;
          }
 
-         //jb added
          if (sensorIdx != 0) continue;
 
-         //we place the ladder as a whole
-         char name[50];
-         sprintf(name, "Ist/Ladder_%d/Sensor_%d", ladderIdx + 1, sensorIdx + 1);
-
-         TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-         Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", ladderIdx + 1, sensorIdx + 1);
-
-         gGeoManager->cd(Path); // retrieve info of IBSS volume
          TGeoNode *nodeT = gGeoManager->GetCurrentNode();
          // Extract volume geometry for this node
          TGeoBBox *box = (TGeoBBox *) nodeT->GetVolume()->GetShape();
