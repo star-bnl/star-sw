@@ -1,13 +1,13 @@
 /*
- * $Id: StPxlSimMaker.h,v 1.4 2014/07/03 19:43:07 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.5 2014/07/03 19:46:37 mstftsm Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
- * Revision 1.4  2014/07/03 19:43:07  mstftsm
- * Updated in accordance with the nee pileup trees stucture.
+ * Revision 1.5  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
  *
  * Revision 1.3  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
@@ -40,8 +40,6 @@
 #endif
 
 class StPxlISim;
-class TString;
-class StPxlPileupAdder;
 
 class StPxlSimMaker : public StMaker 
 {
@@ -75,15 +73,11 @@ class StPxlSimMaker : public StMaker
   void useDbGeom() {mUseDbGeom = kTRUE;}
   void useRandomSeed() {mUseRandomSeed = kTRUE;}
 
-
-  void addPileup(){mAddPileup = kTRUE;}
-  void setPileupFile(TString pileupFile) {mPileupFile = pileupFile;}
-
   /*! \brief Documentation method. GetCVS can be called from the chain, providing a list
    *  of all maker versions in use.
   */
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.4 2014/07/03 19:43:07 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.5 2014/07/03 19:46:37 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
     StPxlISim* mPxlSimulator;
@@ -95,23 +89,19 @@ private:
     Bool_t mUseDbGeom;
     Bool_t mUseRandomSeed;
 
-    TString mPileupFile; // THIS IS A HACK THAT IS NOT IN THE OFFICIAL STAR VERSION
-    Bool_t mAddPileup;
-    StPxlPileupAdder* mPileupAdder;
-
 
   ClassDef(StPxlSimMaker,1)   //StAF chain virtual base class for Makers
 };
 #endif
 
 /*
- * $Id: StPxlSimMaker.h,v 1.4 2014/07/03 19:43:07 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.5 2014/07/03 19:46:37 mstftsm Exp $
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
- * Revision 1.4  2014/07/03 19:43:07  mstftsm
- * Updated in accordance with the nee pileup trees stucture.
+ * Revision 1.5  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
  *
  * Revision 1.3  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.

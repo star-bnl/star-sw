@@ -1,8 +1,8 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
- * Revision 1.5  2014/07/03 19:43:07  mstftsm
- * Updated in accordance with the nee pileup trees stucture.
+ * Revision 1.6  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
  *
  * Revision 1.4  2014/06/25 19:21:57  mstftsm
  * pxl DB DataSet has been change to pxl_db. Name changed in this code.
@@ -23,8 +23,6 @@
 #include "StMcEvent/StMcPxlHitCollection.hh"
 #include "StEvent/StPxlHitCollection.h"
 
-#include "StPxlPileupAdder.h"
-
 #include "Stiostream.h"
 #include "StHit.h"
 #include "StEventTypes.h"
@@ -36,13 +34,12 @@
 #include "TGeoMatrix.h"
 
 #include "TObjectSet.h"
-#include "TString.h"
 
 ClassImp(StPxlSimMaker)
 
 using namespace std;
 
-StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(kFALSE), mUseDIGMAPSSim(kFALSE) , mUseIdealGeom(kTRUE), mUseDbGeom(kFALSE), mUseRandomSeed(kFALSE),mAddPileup(kFALSE)
+StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(kFALSE), mUseDIGMAPSSim(kFALSE) , mUseIdealGeom(kTRUE), mUseDbGeom(kFALSE), mUseRandomSeed(kFALSE)
 {
 }
 //____________________________________________________________
@@ -65,12 +62,6 @@ Int_t StPxlSimMaker::Init()
    //{
    // temporary till DIGMAPS algorithm is added and option added in StMaker
    mUseFastSim = kTRUE;
-
-   if(mAddPileup)
-   {
-	   mPileupAdder = new StPxlPileupAdder();
-   }
-
    mPxlSimulator = new StPxlFastSim("pxlFastSim",mUseRandomSeed);
 
    LOG_INFO << "StPxlSimMaker: using StPxlFastSim " << endm;
@@ -102,11 +93,6 @@ Int_t StPxlSimMaker::InitRun(Int_t RunNo)
 	   }
    }
 
-   if(mAddPileup)
-   {
-	   mPileupAdder->init(mPileupFile,pxlDbDataSet);
-   }
-
    return mPxlSimulator->initRun(*hitErrSet, pxlDbDataSet, RunNo);
 }
 //____________________________________________________________
@@ -136,12 +122,6 @@ Int_t StPxlSimMaker::Make()
    {
       LOG_INFO << "StPxlSimMaker no PXL hits in this StMcEvent!" << endm;
       return kStOk;
-   }
-
-   // add pile up 
-   if(mAddPileup)
-   {
-	   mPileupAdder->addPxlHits(*mcPxlHitCol);
    }
 
    if (mUseIdealGeom && !gGeoManager) GetDataBase("VmcGeometry");
@@ -200,8 +180,8 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
- * Revision 1.5  2014/07/03 19:43:07  mstftsm
- * Updated in accordance with the nee pileup trees stucture.
+ * Revision 1.6  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
  *
  * Revision 1.4  2014/06/25 19:21:57  mstftsm
  * pxl DB DataSet has been change to pxl_db. Name changed in this code.
