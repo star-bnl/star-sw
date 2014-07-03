@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.105 2013/04/10 22:14:20 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.106 2014/07/03 00:37:51 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.106  2014/07/03 00:37:51  perev
+ * c++11 fix
+ *
  * Revision 2.105  2013/04/10 22:14:20  fisyak
  * Roll back to version 04/04/2013
  *
@@ -960,6 +963,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   float chi2[2];
   //get chi2/dof
   chi2[0] = track->getChi2();  
+  assert(chi2[0]<100);
   chi2[1] = -999; // change: here goes an actual probability, need to calculate?
   // December 04: The second element of the array will now hold the incremental chi2 of adding
   // the vertex for primary tracks
@@ -1220,6 +1224,7 @@ bool StiStEventFiller::accept(StiKalmanTrack* track)
     if(track->getPt()<=0.1) 					return 0;
 #endif
     if(track->getTrackLength()<=0) 				return 0; 
+    if(track->getChi2()>100) 					return 0; 
     // insert other filters for riff-raff we don't want in StEvent here.
     
 
@@ -1318,7 +1323,8 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   const StiNodePars &pars = tNode->fitPars(); 
   const StiNodeErrs &errs = tNode->fitErrs();
   float alfa = tNode->getAlpha();
-  Float_t setp[7] = {pars.y(), pars.z(), pars.eta(), pars.ptin(), pars.tanl(), pars.curv(), pars.hz()};
+  Float_t setp[7] = {(float)pars.y(),    (float)pars.z(),    (float)pars.eta()
+                    ,(float)pars.ptin(), (float)pars.tanl(), (float)pars.curv(), (float)pars.hz()};
   setp[2]+= alfa;  
   Float_t sete[15];
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
