@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.5  2014/07/03 19:43:07  mstftsm
+ * Updated in accordance with the nee pileup trees stucture.
+ *
  * Revision 1.4  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
@@ -172,7 +175,7 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
                tempHit->setSector(iSec + 1);
                tempHit->setLadder(mcPix->ladder());
                tempHit->setSensor(mcPix->sensor());
-               tempHit->setIdTruth(mcPix->parentTrack()->key(), 100);
+               mcPix->parentTrack()? tempHit->setIdTruth(mcPix->parentTrack()->key(), 100): tempHit->setIdTruth(-999);
                tempHit->setDetectorId(kPxlId);
                tempHit->setId(mcPix->key());
                tempHit->setLocalPosition(localPixHitPos[0], localPixHitPos[1], localPixHitPos[2]);
@@ -232,6 +235,9 @@ void StPxlFastSim::localToMatser(Double_t* local,Double_t* master,Int_t sector,I
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.5  2014/07/03 19:43:07  mstftsm
+ * Updated in accordance with the nee pileup trees stucture.
+ *
  * Revision 1.4  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
