@@ -1,6 +1,10 @@
-* $Id: gstar_part.g,v 1.46 2014/06/25 14:19:25 jwebb Exp $
+* $Id: gstar_part.g,v 1.47 2014/07/07 20:10:04 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.47  2014/07/07 20:10:04  jwebb
+* Forgot to specify particle tracking type (used to determine which routine
+* is used to handle physics processes, e.g. decays, for the particle).
+*
 * Revision 1.46  2014/06/25 14:19:25  jwebb
 * Added psi prime --> e+e-
 *
@@ -334,7 +338,7 @@ MODULE gstar_part Is the STAR Particle Database
   Particle Ups3S_mu   code=166 TrkTyp=4 mass=10.355 charge=0  tlife=2.556e-20,
                       pdg=500553  bratio= { 1, }    mode= { 506, }
 
-  Particle psi2s_ee   "Psi(2S)-->e+e-" code=167,
+  Particle psi2s_ee   "Psi(2S)-->e+e-" code=167,  TrkTyp=4,
                       mass=3.68609 charge=0 tlife=hbar/2380.0,
                       pdg=100443 bratio={ 1, } mode={ 0203, }
 
