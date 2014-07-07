@@ -2,7 +2,6 @@
 #define StiPxlDetectorBuilder_h
 
 #include "Sti/StiDetectorBuilder.h"
-#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 
 class StPxlDb;
 
