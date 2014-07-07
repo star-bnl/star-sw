@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.72 2014/05/07 22:11:12 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.73 2014/07/07 18:50:26 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -77,6 +77,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
       if (!pxlDbDataSet) {
          LOG_ERROR << "StiPxlDetectorBuilder::buildDetectors: PXL geometry was requested from "
             "DB but no StPxlDb object found. Check for pxlDb option in BFC chain" << endm;
+         exit(EXIT_FAILURE);
       }
 
       mPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
