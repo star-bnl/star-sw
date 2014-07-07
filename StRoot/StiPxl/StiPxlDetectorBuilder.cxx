@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.73 2014/07/07 18:50:26 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.74 2014/07/07 18:50:51 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -182,15 +182,13 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
          TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-         char name[50];
-         sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", iSector, iLadder, iSensor);
-         LOG_DEBUG << " weigh/daughters/Material/A/Z : " << sensorVol->Weight() << " "
-                   << sensorVol->GetNdaughters() << " " << sensorVol->GetMaterial()->GetName() << " "
-                   << sensorVol->GetMaterial()->GetA() << " " << sensorVol->GetMaterial()->GetZ() << endm
-                   << " DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
+         LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
+                   << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
+                   << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
+                   << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
          // Create new Sti shape based on the sensor geometry
-         StiShape *stiShape = new StiPlanarShape(name, 10*sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
+         StiShape *stiShape = new StiPlanarShape(geoPath.str().c_str(), 10*sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
 
          add(stiShape);
 
@@ -222,7 +220,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             continue;
          }
 
-         stiDetector->setName(name);
+         stiDetector->setName(geoPath.str().c_str());
          stiDetector->setIsOn(true);
          stiDetector->setIsActive(new StiPxlIsActiveFunctor);
          stiDetector->setIsContinuousMedium(false); // true for gases
