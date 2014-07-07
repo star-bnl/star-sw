@@ -19,7 +19,7 @@
     for (int row=0;row< (int) getNumRows();row++) {
       Double_t mult = 0;
       switch ((int) getSpaceChargeDetector(row)) {
-        case (0) : mult = scalers->getMult(); break;
+        case (0) : mult = scalers->getMult(); break; // vpdx as of 2007-12-19
         case (1) : mult = scalers->getBBCX(); break;
         case (2) : mult = scalers->getZDCX(); break;
         case (3) : mult = scalers->getZDCEast()+scalers->getZDCWest(); break;
@@ -30,6 +30,8 @@
         case (8) : mult = scalers->getBBCWest(); break;
         case (9) : mult = scalers->getBBCYellowBkg(); break;
         case (10): mult = scalers->getBBCBlueBkg(); break;
+        case (11): mult = scalers->getPVPDEast(); break;
+        case (12): mult = scalers->getPVPDWest(); break;
         default  : mult = 0.;
       }
       if (mult < 0) {

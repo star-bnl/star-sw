@@ -1,5 +1,5 @@
 //
-// $Id: StMiniMcEvent.cxx,v 1.8 2011/03/22 00:31:52 perev Exp $
+// $Id: StMiniMcEvent.cxx,v 1.9 2012/03/15 23:37:20 perev Exp $
 //
 
 #include "StMiniMcEvent.h"
@@ -20,6 +20,7 @@ StMiniMcEvent::StMiniMcEvent() :
     mCentrality(0),
     mNUncorrectedNegativePrimaries(0),
     mNUncorrectedPrimaries(0),
+    mNUncorrectedGlobals(0),
     mNFtpcWUncorrectedPrimaries(0),
     mNFtpcEUncorrectedPrimaries(0),
     mMcMult(0),

@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.18 2011/07/19 19:18:23 perev Exp $
+ * $Id: StMiniMcMaker.h,v 1.19 2012/03/15 23:37:36 perev Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,9 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.19  2012/03/15 23:37:36  perev
+ * Uncorrected globals added(Chris)
+ *
  * Revision 1.18  2011/07/19 19:18:23  perev
  * Error handling fixed
  *
@@ -92,6 +95,9 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.19  2012/03/15 23:37:36  perev
+ * Uncorrected globals added(Chris)
+ *
  * Revision 1.18  2011/07/19 19:18:23  perev
  * Error handling fixed
  *
@@ -168,7 +174,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.18 2011/07/19 19:18:23 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.19 2012/03/15 23:37:36 perev Exp $ plus header comments for the macros
  *
  */
 
@@ -242,16 +248,16 @@ class StMiniMcMaker : public StMaker{
   Int_t Make();
   Int_t Finish();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.18 2011/07/19 19:18:23 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.19 2012/03/15 23:37:36 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   //---- SETS -------
 
-  void  setGhost(Bool_t doit=kTRUE)      { mGhost = doit; }
-  void  setOutDir(const char* dir= "./") { mOutDir = dir; }  
+  void  setGhost(Bool_t doit=kTRUE)      	{ mGhost = doit; }
+  void  setOutDir(const char* dir= "./") 	{ mOutDir = dir; }  
   void  setPtCut(Float_t minPt=0, Float_t maxPt=9999) 
-    { mMinPt=minPt; mMaxPt=maxPt; }
-  void  setFileName(TString& val)      { mInFileName = val; }
-  void  setFilePrefix(TString& val)      { mInFilePrefix = val; }
+    						{ mMinPt=minPt; mMaxPt=maxPt; }
+  void  setFileName(TString& val)      		{ mInFileName = val; }
+  void  setFilePrefix(TString& val)      	{ mInFilePrefix = val; }
 
  private:
   //static const Float_t mSharedHitsCut = .5;
@@ -267,6 +273,7 @@ class StMiniMcMaker : public StMaker{
   Bool_t	   acceptGood20(const StMcTrack*);
   Bool_t           acceptCentrality(const StTrack*);
   Bool_t           acceptUncorrected(const StTrack*);
+  Bool_t           acceptGlobals(const StTrack* track);
   Bool_t           acceptFTPC(const StTrack*);
   Bool_t           ok(const StTrack*);
   Bool_t           isSameSign(const StTrack*,const StMcTrack*);
@@ -296,7 +303,8 @@ class StMiniMcMaker : public StMaker{
 				 Int_t nMcGlobal, Int_t nMcGoodGlobal20,
 				 Int_t nMcNch, Int_t nMcHminus,
 				 Int_t nMcFtpcENch, Int_t nMcFtpcWNch,
-				 Int_t nFtpcEUncorrected, Int_t nFtpcWUncorrected);
+				 Int_t nFtpcEUncorrected, Int_t nFtpcWUncorrected, 
+				 Int_t nUncorrectedGlobals);
   void             fillTrackPairInfo(StMiniMcPair*,
 				     const StMcTrack*,
 				     const StTrack* prTrack, 

@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.10 2011/04/01 05:05:47 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.11 2012/03/05 10:32:29 cpowell Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.11  2012/03/05 10:32:29  cpowell
+ * Functions added to cut on refMult
+ *
  * Revision 1.10  2011/04/01 05:05:47  hmasui
  * Track selections by StEmbeddingQAUtilities. Added 1/pt(RC)-1/pt(MC) vs pt, and pt dependent Ncommon vs NhitFit histograms
  *
@@ -105,6 +108,8 @@ class StEmbeddingQA {
     /// set z-vertex cut (default is |vz|<30cm unless otherwise specified)
     /// Moved to StEmbeddingQAUtilities but keep the function for backward compatibility
     void setZVertexCut(const Float_t vz) ;
+    void setRefMultMinCut(const Int_t refMultMin) ;
+    void setRefMultMaxCut(const Int_t refMultMax) ;
 
     /// Add trigger id cut (default is no trigger id selections). Multiple trigger can be added
     /// Moved to StEmbeddingQAUtilities but keep the function for backward compatibility
@@ -148,6 +153,9 @@ class StEmbeddingQA {
     /// Z-vertex cut
     Bool_t isZVertexOk(const StMiniMcEvent& mcevent) const ;
 
+    /// RefMult cut
+    Bool_t isRefMultOk(const StMiniMcEvent& mcevent) const ;
+
     /// Trigger id cut for real data. Return true if no trigger id is found
     Bool_t isTriggerOk(StMuEvent* event) const ;
 
@@ -166,6 +174,8 @@ class StEmbeddingQA {
     Double_t mVz ;      /// z-vertex
     TH1* mhVz ;         /// z-vertex (histogram)
     TH1* mhVzAccepted ; /// z-vertex (with z-vertex cut)
+    TH1* mhRef ;         /// refMult (histogram)
+    TH1* mhRefAccepted ; /// refMult (histogram)
 
     TH2* mhVyVx ; /// y vs x vertices
     TH2* mhVxVz ; /// x vs z vertices

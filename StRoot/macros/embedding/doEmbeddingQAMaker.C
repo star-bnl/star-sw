@@ -6,7 +6,9 @@ void doEmbeddingQAMaker(
     const Char_t* inputFileList = "minimc.list",
     const Char_t* outputFileName = "", // Put the filename if you want to give some specific name, otherwise leave it blank.
     const Bool_t isSimulation = kTRUE,
-    const Float_t vzCut = 30.0
+    const Float_t vzCut = 30.0, 
+    const Int_t refMultMinCut = 0,
+    const Int_t refMultMaxCut = 1000
 ){
   const TString data = (isSimulation) ? "minimc tree" : "real data" ;
   const TString title = "Embedding QA from " + data ;
@@ -48,6 +50,8 @@ void doEmbeddingQAMaker(
 
   /// Set z-vertex cut (default is 30cm unless otherwise specified)
   maker->setZVertexCut(vzCut);
+	maker->setRefMultMinCut(refMultMinCut);
+	maker->setRefMultMaxCut(refMultMaxCut);
 
   /// Set rapidity cut (default is 10). 
   // Uncomment next line and put the rapidity cut if you want to make the rapidity cut
@@ -95,7 +99,9 @@ void doEmbeddingQAMakerOneFile(
     const Char_t* inputFileName = "/star/institutions/lbl/hmasui/embedding/data/P08if/PiPlus_st_physics_8172100_raw_1020010.minimc.root",
     const Char_t* outputFileName = "",
     const Bool_t isSimulation = kTRUE,
-    const Float_t vzCut = 30.0
+    const Float_t vzCut = 30.0, 
+    const Int_t refMultMinCut = 0, 
+    const Int_t refMultMaxCut = 1000
 ){
   gBenchmark->Start("Embedding QA from minimc tree");
 
@@ -105,6 +111,8 @@ void doEmbeddingQAMakerOneFile(
 
   StEmbeddingQA* maker = new StEmbeddingQA(year, production, isSimulation);
   maker->setZVertexCut(vzCut);
+  maker->setRefMultMinCut(refMultMinCut);
+  maker->setRefMultMaxCut(refMultMaxCut);
 
 //  maker->setRapidityCut(1.0);
 //  maker->addTriggerIdCut(210020);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.14 2011/07/20 17:57:52 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.22 2014/06/25 14:19:24 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,7 +14,47 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.22  2014/06/25 14:19:24  jwebb
+ * Added psi prime --> e+e-
+ *
+ * Revision 1.21  2014/01/29 16:21:43  jwebb
+ * Added D_star_plus (minus) --> D0 (bar) pi+ (-) 100% BR
+ *
+ * Revision 1.20  2013/04/18 20:05:29  jwebb
+ * Ticket #2574 Wrong Omega/Anti-Omega Geant ID.
+ *
+ * PDG +3334 id was incorrectly assigned to the Omega+... should be -3334 for
+ * Omega+ and +3334 for Omega-.  IDs have been swapped.
+ *
+ * Revision 1.19  2013/03/14 18:27:26  jwebb
+ * Added pi0    --> e+e- gamma 100% gid=10007
+ * Added K0long --> nu e- pi+  100% gid=10010
+ * Added K0long --> nu e+ pi-  100% gid=10110
+ *
+ * http://www.star.bnl.gov/rt2/Ticket/Display.html?id=2549
+ *
+ * Revision 1.18  2013/01/31 18:21:46  jwebb
+ * Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
+ *
+ * Revision 1.17  2012/06/25 16:02:05  jwebb
+ * Added Xi0(1530).
+ *
+ * Revision 1.16  2011/08/29 20:28:26  jwebb
+ * Added K+ --> e+ pi0 nu and K- --> e- pi0 nu to satisfy an emedding
+ * request http://drupal.star.bnl.gov/STAR/starsimrequests/2010/aug/31/ke3-pp-200-gev-run9
+ *
+ * Also added the other top 6 decay modes as 10011 -- 15011 and 10012 -- 15012.
+ *
+ * Revision 1.15  2011/08/12 15:32:54  jwebb
+ *
+ * Added anti-hypertriton.  Mapped hyper-triton and anti-hyper-triton to
+ * geant IDs 6[12]053 and 6[12]054, with two decay modes:
+ *
+ *     H3(lambda) --> He3 pi-    61053    antiparticle=61054
+ *     H3(lambda) --> d p pi-    62053    antiparticle=62054
+ *
  * Revision 1.14  2011/07/20 17:57:52  jwebb
+ *
  * Updated StParticleTable to provide access to anti-nuclei via the "geant" ID.
  *
  * Revision 1.13  2011/03/30 17:32:50  jwebb
@@ -73,7 +113,7 @@
 
 #include "StarPDGEncoding.hh"
 #define kUndefined _undefined_particle_id++
-long _undefined_particle_id = 2000000000;
+long _undefined_particle_id = 2000000000; /* Unique PDG ID for each undefined particle */
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
 #include <ospace/stl/src/treeaux.cpp> // CC4.2 with ObjectSpace only
@@ -83,6 +123,9 @@ long _undefined_particle_id = 2000000000;
 #include "StAntiTriton.hh"
 #include "StAntiAlpha.hh"
 #include "StAntiHelium3.hh"
+#include "StAntiHyperTriton.hh"
+#include "StHyperTriton.hh"
+#include "StHDibaryon.hh"
 
 
 StParticleTable* StParticleTable::mParticleTable = 0;
@@ -97,8 +140,10 @@ StParticleTable::StParticleTable()
     //
     typedef mGeantPdgMapType::value_type geantPdgPairType;
 
-#define Geant2Pdg(X,Y, NAME) {				\
-      /** NAME	*/					\
+    // Helper macro to map geant ID to PDG ID.  A "DCAY" mode is also specificied, and doxygen comments
+    // added to the source code.
+#define Geant2Pdg(X,Y, DCAY) {				\
+      /** DCAY	*/					\
       /** Geant ID: X	*/				\
       /** PDG ID:   Y	*/				\
       /** */						\
@@ -160,6 +205,9 @@ StParticleTable::StParticleTable()
     Geant2Pdg(48, kUndefined, Geantino ); // The mythical geantino 
     Geant2Pdg(49, kUndefined, Helium3  ); // Helium3
     Geant2Pdg(50, 22,         Cerenkov ); // Cerenkov photons
+
+    Geant2Pdg(54, kUndefined, AntiHelium3 ); // AntiHelium3 );
+
     ///@} 
 
     
@@ -176,6 +224,8 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 61, -413, DStar- ); // D*-
        Geant2Pdg( 62, +423, DStar0 ); // D*0
        Geant2Pdg( 63, -423, DStar0Bar ); // D*0 bar      
+
+
 
        Geant2Pdg(70, +521, B+);    // B+ meson
        Geant2Pdg(71, -521, B-);    // B- meson
@@ -210,7 +260,8 @@ StParticleTable::StParticleTable()
     ///@{
     /// Quarkonia in dielectron channel
 
-       Geant2Pdg( 160, 443, JPsi );     // JPsi
+       Geant2Pdg( 160,    443, JPsi );     // JPsi
+       Geant2Pdg( 167, 100443, Psi2c );    // Psi'
     
        Geant2Pdg( 161,    553, Upsilon1S); // Upsilon(1S)
        Geant2Pdg( 162, 100553, Upsilon2S); // Upsilon(2S)
@@ -242,6 +293,11 @@ StParticleTable::StParticleTable()
     /// Embedding particle definitions
     ///@{
 
+    Geant2Pdg( 10007, 130, pi0 --> e+ e- gamma );
+
+    Geant2Pdg( 10010, 130, K0 Long --> nu e- pi+ );
+    Geant2Pdg( 10110, 130, K0 Long --> nu e+ pi- );
+
        Geant2Pdg(10017,  221, eta --> e+ e- gamma);
        Geant2Pdg(10018, 3122, lambda --> p + pi- );
        Geant2Pdg(10026,-3122, lambdaBar --> pbar + pi+ );
@@ -250,13 +306,41 @@ StParticleTable::StParticleTable()
        Geant2Pdg(10150,  223,  omega --> e+ e- );
        Geant2Pdg(10151,  333,  phi --> K+ K- );
        Geant2Pdg(11151,  333,  phi --> e+ e- );
-             
-       Geant2Pdg( 40001,  3334, Omega-); 
-       Geant2Pdg( 40002, -3334, Omega+); 
+
+    Geant2Pdg(10011, 321,  Kaon+ --> mu+ nu );    // K+
+    Geant2Pdg(10012, -321, Kaon- --> mu- nu );   // K-
+
+    Geant2Pdg(11011, 321,  Kaon+ --> pi+ pi0 );    // K+
+    Geant2Pdg(11012, -321, Kaon- --> pi- pi0 );   // K-
+
+    Geant2Pdg(12011, 321,  Kaon+ --> 2 pi+ pi- );    // K+
+    Geant2Pdg(12012, -321, Kaon- --> 2 pi- pi+ );   // K-
+
+    Geant2Pdg(13011, 321,  Kaon+ --> e+ nu pi0 );    // K+
+    Geant2Pdg(13012, -321, Kaon- --> e- nu pi0 );   // K-
+
+    Geant2Pdg(14011, 321,  Kaon+ --> mu+ nu pi0 );    // K+
+    Geant2Pdg(14012, -321, Kaon- --> mu- nu pi0 );   // K-
+
+    Geant2Pdg(15011, 321,  Kaon+ --> pi+ pi0 pi0 );    // K+
+    Geant2Pdg(15012, -321, Kaon- --> pi- pi0 pi0 );   // K-
+
+
+       Geant2Pdg( 10060, +413, DStar+ ); // D*+
+       Geant2Pdg( 10061, -413, DStar- ); // D*-
+       Geant2Pdg( 10062, +423, DStar0 ); // D*0
+       Geant2Pdg( 10063, -423, DStar0Bar ); // D*0 bar      
+
+            
+       Geant2Pdg( 40001, -3334, Omega+); 
+       Geant2Pdg( 40002,  3334, Omega-); 
        Geant2Pdg( 40003, +3312, XiMinus );       
        Geant2Pdg( 40004, -3312, XiPlus  );      
        Geant2Pdg( 40005, +3322, XiZero );       
        Geant2Pdg( 40006, +3322, XiZeroBar );
+
+       Geant2Pdg( 40007, +3324, XiZero 1530 );
+       Geant2Pdg( 40008, -3324, XiZero 1530 bar );
 
     ///@}
 
@@ -267,6 +351,21 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 50046, kUndefined, anti-triton );
        Geant2Pdg( 50047, kUndefined, anti-alpha );
        Geant2Pdg( 50048, kUndefined, anti-He3 );
+    ///@}
+
+    ///@addtogroup ANTIHYPERNUCLEI
+    ///Definitions of anti-hypernuclei
+    ///@{
+       Geant2Pdg( 61053, kHyperTriton,         H3(Lambda) --> He3 piminus );
+       Geant2Pdg( 61054, kAntiHyperTriton, AntiH3(Lambda) --> AntiHe3 piplus );
+       Geant2Pdg( 62053, kHyperTriton,         H3(Lambda) --> d p piminus );
+       Geant2Pdg( 62054, kAntiHyperTriton, AntiH3(Lambda) --> dbar pbar piplus );	
+    ///@}
+
+    ///@addtogroup EXOTICS
+    ///Definitions of exotics, e.g. H-dibaryon
+    ///@{
+       Geant2Pdg( 60001, kUndefined,         H-Dibaryon --> Lambda + piminus + proton );
     ///@}
 
 
@@ -358,9 +457,30 @@ StParticleDefinition* StParticleTable::findParticleByGeantId(int geantId) const
     case 50047:
         p = StAntiAlpha::instance();
         break;
-    case 50048:
+
+    case 50049:
+    case 54:
         p = StAntiHelium3::instance();
         break;
+
+    case 60053:
+    case 61053:
+    case 62053:
+      p = StHyperTriton::instance();
+      break;
+    case 60054:
+    case 61054:
+    case 62054:
+      p = StAntiHyperTriton::instance();      
+      break;
+      
+      
+    case 60001:
+      p = StHDibaryon::instance();
+      break;
+
+
+
 
     default:
 	mGeantPdgMapType::const_iterator i =  mGeantPdgMap.find(geantId);

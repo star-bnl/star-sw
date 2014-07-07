@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTypes.hh,v 1.2 2000/04/06 22:25:42 ullrich Exp $
+ * $Id: StParticleTypes.hh,v 1.3 2014/06/25 14:19:24 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTypes.hh,v $
+ * Revision 1.3  2014/06/25 14:19:24  jwebb
+ * Added psi prime --> e+e-
+ *
  * Revision 1.2  2000/04/06 22:25:42  ullrich
  * Added phi and omega. More STAR specific Geant IDs.
  *
@@ -59,6 +62,7 @@
 #include "StEta.hh"
 #include "StEtaPrime.hh"
 #include "StJPsi.hh"
+#include "StPsi2s.hh"
 #include "StKaonMinus.hh"
 #include "StKaonPlus.hh"
 #include "StKaonZero.hh"

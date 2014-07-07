@@ -1,7 +1,8 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.581 2011/04/29 22:38:48 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.592 2012/03/16 18:29:56 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
+#include "TPRegexp.h"
 #include "TString.h"
 #include "TObjString.h"
 #include "TSystem.h"
@@ -22,8 +23,9 @@
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
 #if 0
-// Keep to be compartible with old documentaion
+// Keep to be compatible with old documentaion
 #define STR_OBSOLETE "WARNING *** Option is OBSOLETE ***"
+
 //#include "BFC.h"
 // ITTF Chain will be put here. Option list starting from minimalistic requirements
 // and may not initially work.
@@ -32,6 +34,10 @@
 // ITTF Chains
 //#include "BFC2.h"
 #endif
+
+// JL - define this once, use two places
+#define BFC_DBREGEXP "(dbv|sdt)(\\d+)(_)(.*)(_)(.*)"
+
 
 // NoChainOptions -> Number of chain options auto-calculated
 #define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
@@ -342,7 +348,7 @@ Int_t StBFChain::Instantiate()
       ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
       if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
       if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
-      if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed")) {
+      if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed") || GetOption("mtin")) {
 	mk->SetActive(kTRUE);
 	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
       }
@@ -371,7 +377,11 @@ Int_t StBFChain::Instantiate()
       if (GetOption("Embedding")) mk->SetAttr("Embedding",kTRUE);
     }
     //		Sti(ITTF) start
-    if (maker == "StiMaker" || maker == "StiVMCMaker") {
+    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "StvMaker") {
+      if ( maker == "StvMaker" &&  GetOption("StvCA")) {
+	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
+	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
+      }
       if (GetOption("NoSvtIT")) mk->SetAttr("useSvt"	,kFALSE);
       else
 	if (GetOption("SvtIT")){
@@ -398,17 +408,20 @@ Int_t StBFChain::Instantiate()
 	mk->SetAttr("activeHpd",kTRUE);
       }
 
-      if (GetOption("StiPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
+      if (GetOption("StiPulls") || 
+	  GetOption("StvPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
       if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,kTRUE);
       if (GetOption("EastOff"))   mk->SetAttr("EastOff"    ,kTRUE);
       if (GetOption("WestOff"))   mk->SetAttr("WestOff"    ,kTRUE);
       if (GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
+      if (GetOption("Alignment")) mk->SetAttr("Alignment"  ,kTRUE);
       mk->PrintAttr();
     }
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
       // VertexFinder methods
-      if (GetOption("Sti") ||
+      if (GetOption("Sti") || GetOption("StiCA") ||
+	  GetOption("Stv") ||
 	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , kTRUE);
       if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, kTRUE);
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
@@ -646,6 +659,7 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);
 	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", kTRUE);
 	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
+	if( GetOption("OSectorAlign"))mk->SetAttr("OSectorAlign",kTRUE);
       }
       mk->PrintAttr();
     }
@@ -737,6 +751,9 @@ Int_t StBFChain::Instantiate()
   if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats();
 
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Sti");
+  if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiCA");
+  if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
+  if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
 
   gMessMgr->QAInfo() << "+++ Setting attribute " << Gproperty.Data() << " = " << Gvalue.Data() << endm;
   SetAttr(Gproperty.Data(),Gvalue.Data(),Gpattern.Data());
@@ -772,18 +789,29 @@ Int_t StBFChain::Init() {
       SetAttr(".call","SetActive(0)","StTagsMaker::");
       SetAttr(".call","SetActive(0)","StStrangeMuDstMaker::");
     }
+#if 1
     // force load of geometry for VMC and Sti
-    if (GetOption("Sti") || GetOption("StiVMC") ||GetOption("VMC") || GetOption("VMCPassive")) {
+    
+    if (GetOption("Sti") || GetOption("StiCA") || 
+	GetOption("Stv") || 
+	GetOption("StiVMC") ||GetOption("VMC") || 
+	GetOption("VMCPassive")) {
       const DbAlias_t *DbAlias = GetDbAliases();
       for (Int_t i = 0; DbAlias[i].tag; i++) {
 	TString dbTag("r");
 	dbTag += DbAlias[i].tag;
 	if (GetOption(dbTag)) {
-	  const Char_t *path  = "./StarDb/VmcGeometry:$STAR/StarDb/VmcGeometry";
+	  TString path("./StarDb/AgiGeometry:$STAR/StarDb/AgiGeometry");
+	  if (GetOption("AgML")) {
+	    path  = "./StarDb/AgMLGeometry:$STAR/StarDb/AgMLGeometry";
+	  }
+	  if (GetOption("VmcGeo")) {
+	    path  = "./StarDb/VmcGeo:$STAR/StarDb/VmcGeo";
+	  }
 	  TString geom("Geometry.");
 	  geom +=  DbAlias[i].geometry;
 	  geom += ".C";
-	  Char_t *file = gSystem->Which(path,geom,kReadPermission);
+	  Char_t *file = gSystem->Which(path.Data(),geom,kReadPermission);
 	  if (file) {
 	    LOG_INFO << "StBFChain::Init force load of " << file << endm;
 	    TString command = ".L "; command += file;
@@ -792,12 +820,13 @@ Int_t StBFChain::Init() {
 	    command.ReplaceAll(".L ",".U ");
 	    gInterpreter->ProcessLine(command);
 	  } else {
-	    LOG_INFO << "StBFChain::Init file for geomtry tag  " << geom << " has not been found"  << endm;
+	    LOG_INFO << "StBFChain::Init file for geometry tag  " << geom << " has not been found in path" << path << endm;
 	  }
 	  break;
 	}
       }
     }
+#endif
   }
   return iok;
 }
@@ -906,11 +935,28 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     if       (Tag ==  opt) {return  i;}
     else {if (Tag == nopt) {return -i;}}
   }
+  //
+  // JL - sdt and dbv for timestamp
+  //
+  // Gopt for arbitrary property on 3 letter name (wildcard would be added) and length
+  // 6 for a value. Not advertized / not used and implementation is not complete (needed
+  // a case and di not have a clear one). TBD.
+  //
+  // 2011/11 added the possibility of detector sub-system specific timestamps.
+  // DBV only for now, logic is similar if we equally parse.
+  //
   // {sdt|dbv}YYYYMMDD -> {sdt|dbv} 3 / YYYYMMDD 8 => 11 || YYYYMMDD.HHMMSS = 15 => 18
   if (Tag.BeginsWith("dbv") || Tag.BeginsWith("sdt")) {
     Check = kTRUE;
+
     if (Tag.Length() == 11  || Tag.Length() == 18) return 0;
+
+    // Else we need to parse some more - assume a pattern {dbv|sdt}YYYYMMDD[.HHMMSS]_XXX_ZZZZZ
+    // First, detect it using quick counting 
+    Tag.ToLower();
+    if ( TPRegexp(BFC_DBREGEXP).Match(Tag)  == 7) return 0;
   }
+
   // GoptXXXvvvvvv -> Gopt 4 / XXX 3 / vvvvvv 6 = 13
   if ( Tag.BeginsWith("gopt") && Tag.Length() == 13 ) return 0;
 
@@ -953,25 +999,57 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  }
 	}
       } else {
-	// it is 0 i.e. was not recognized. Check if it is a (dbv|sdt)YYYYMMDD or (dbv|sdt)YYYYMMDD.HHMMSS
-	// We can do all of that in the
-	// SetDbOptions() only (removing the fBFC[i].Flag check) but the
-	// goal here is to avoid user's histeria by displaying extra
-	// messages NOW !!! Debug: dbv20040917
+	// it is 0 i.e. was not recognized. 
+	// Check if it is a (dbv|sdt)YYYYMMDD or (dbv|sdt)YYYYMMDD.HHMMSS and derivative
+	// We really set the options only once later in SetDbOptions() (removing the fBFC[i].Flag check) 
+	// but the goal here is to avoid user's histeria by displaying extra messages NOW.
+	//
+	// Note that kOpt() has already validated the pattern (so it has to be right here).
+	//
+	// !!! Debug: dbv20040917
 	if (Tag.BeginsWith("dbv")) {
 	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"dbv%8d",&FDate);
 	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"dbv%8d.%6d",&FDate,&FTime);
 	  if (Tag.Length() == 11 || Tag.Length() == 18) {
 	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Max DB EntryTime) "
 			       << FDate  << "." << FTime << endm;
+	  } else {
+	    // we passed kOpt() parsing was fine
+	    //if ( TPRegexp(BFC_DBREGEXP).Match(Tag)  == 7) return 0;
+	    TObjArray *subStrL = TPRegexp(BFC_DBREGEXP).MatchS(Tag);
+	    BFCTimeStamp TS;
+	    TString realm;
+
+	    TS.Type     = 1;
+	    TS.Date     = (((TObjString *) subStrL->At(2))->GetString()).Atoi();
+	    TS.Time     = 0; // for now, avoid parsing this as user use simple TS 99% of the time
+	    TS.Detector = ((TObjString *) subStrL->At(4))->GetString();
+	    TS.Realm    = ((TObjString *) subStrL->At(6))->GetString();
+
+	    if ( TS.Realm.IsNull() ){ realm = "*";}
+	    else {                    realm = TS.Realm;}
+
+	    GTSOptions.push_back(TS);
+
+	    LOG_WARN << "Override timestamp for detector requested\n\t" 
+	             << "Detector " << TS.Detector  << "\n\t"
+	             << "Realm    " << realm        << "\n\t"
+		     << "Date     " << TS.Date      << "\n\t"
+	             << "Time     " << TS.Time      << endm;
+
 	  }
+
 	} else if (Tag.BeginsWith("sdt")) {
 	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"sdt%8d",&FDateS);
 	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"sdt%8d.%6d",&FDateS,&FTimeS);
 	  if (Tag.Length() == 11 || Tag.Length() == 18) {
 	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Event Time) "
 			       << FDateS  << "." << FTimeS << endm;
+
+	    // <<< same logic for GTSOptions can be inserted here
+	    // <<< if so, use TS.Type     = 2
 	  }
+
 	} else if ( Tag.BeginsWith("gopt") && Tag.Length() == 13){
 	  char GOptName[3],GOptValue[6];
 	  //TString property(".gopt.");
@@ -981,7 +1059,9 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 
 	  // see StBFChain::Setup() for default values
 	  Gproperty += GOptName;
-	  // JL
+
+	  // JL - this is not finished, see comment in kOpt()
+	  
 	  // pattern is case sensitive, need more checks on this before
 	  // setting to something else than "*"
 	  //Gpattern  += GOptName;
@@ -1159,21 +1239,39 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	gMessMgr->Error() << "Option ntin cannot be used in root.exe. Use root4star" << endm;
 	abort();
       }
-      if (GetOption("gstar")) {
-	SetOption("VMC","Default,-TGiant3,gstar");
-	SetOption("-gstar","Default,-TGiant3");
+      if (! (GetOption("Stv"))) {
+	if (GetOption("gstar")) {
+	  SetOption("VMC","Default,-TGiant3,gstar");
+	  SetOption("-gstar","Default,-TGiant3");
+	}
       }
       SetOption("-geant","Default,-TGiant3");
       SetOption("-geantL","Default,-TGiant3");
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
-      if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
-	SetOption("VMCPassive","Default,-TGiant3");
+      if (! (GetOption("Stv"))) {
+	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
+	  SetOption("VMCPassive","Default,-TGiant3");
+	}
+	SetOption("pgf77","Default,-TGiant3");
+	SetOption("mysql","Default,-TGiant3");
+	SetOption("minicern","Default,-TGiant3");
       }
-      SetOption("pgf77","Default,-TGiant3");
-      SetOption("mysql","Default,-TGiant3");
-      SetOption("minicern","Default,-TGiant3");
     }
+    if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv") || GetOption("StiVMC"))) {
+      TString STAR_LEVEL(gSystem->Getenv("STAR_LEVEL"));
+      if (STAR_LEVEL == ".DEV2")  SetOption("StiCA","Default,ITTF");
+      else                        SetOption("Sti"  ,"Default,ITTF");
+    }  
+    if (GetOption("Stv")) {
+      SetOption("-TpcIT","Default,Stv");
+      SetOption("-SvtIT","Default,Stv");
+      SetOption("-SsdIT","Default,Stv");
+      SetOption("-HpdIT","Default,Stv");
+      SetOption("-PixelIT","Default,Stv");
+      SetOption("-IstIT","Default,Stv");
+    }  
+    
   }
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
   // Print set values
@@ -1370,7 +1468,7 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
       if (GetOption("hadr_off")) GeometryOpt += " hadr_off=1";
       ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
     }
-    if ((GetOption("fzin") || GetOption("ntin")) && fInFile != "")
+    if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin")) && fInFile != "")
       ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
   }
 }
@@ -1390,23 +1488,34 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
 */
 void StBFChain::SetDbOptions(StMaker *mk){
   if (! mk ) return;
+  if      (GetOption("AgML")  ) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
+  else if (GetOption("VmcGeo")) mk->SetAlias("VmcGeometry","db/.const/StarDb/VmcGeo");
+  else                          mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
   Int_t i;
   Int_t Idate=0,Itime=0;
+
+  // First possibility
   for (i = 1; i < fNoChainOptions; i++) {
     if (fBFC[i].Flag && !strncmp(fBFC[i].Key ,"DbV",3)){
+      // JL - we use to set timestamp as a chain option (any) starting with dbv and followed
+      // by an arbitrary set of numbers. The real stamp was taken from the comment.
+      // This supports this old mode.
       gMessMgr->QAInfo() << "StBFChain::SetDbOptions  Found time-stamp " << fBFC[i].Key << " [" << fBFC[i].Comment << "]" << endm;
       (void) sscanf(fBFC[i].Comment,"%d/%d",&Idate,&Itime);
     }
   }
 
+  // If FDate is set and we do not have the old mode, then a dynamic timestamp was used
+  // Overwrite
   if( ! Idate && FDate){
-      gMessMgr->QAInfo() << "StBFChain::SetDbOptions  watching to user chosen dynamic time-stamp (MaxEntry) "
+    gMessMgr->QAInfo() << "StBFChain::SetDbOptions Switching to user chosen dynamic time-stamp (MaxEntry) "
 			 << FDate << " " << FTime << endm;
-      gMessMgr->QAInfo() << "Chain may crash if time-stamp is not validated by db interface" << endm;
+    gMessMgr->QAInfo() << "Chain may crash if time-stamp is not validated by db interface" << endm;
 
     Idate = FDate;
     Itime = FTime;
   }
+
   St_db_Maker *db = (St_db_Maker *) mk;
   // Startup date over-write
   if (FDateS){
@@ -1416,32 +1525,65 @@ void StBFChain::SetDbOptions(StMaker *mk){
 
     db->SetDateTime(FDateS,FTimeS);
   } else {
-    const DbAlias_t *DbAlias = GetDbAliases();
-    Int_t found = 0;
-    for (Int_t i = 0; DbAlias[i].tag; i++) {
-      if (GetOption(DbAlias[i].tag,kFALSE)) {
-	db->SetDateTime(DbAlias[i].tag);
-	found = i;
-	break;
+    if (! GetOption("mtin")) {
+      const DbAlias_t *DbAlias = GetDbAliases();
+      Int_t found = 0;
+      for (Int_t i = 0; DbAlias[i].tag; i++) {
+	if (GetOption(DbAlias[i].tag,kFALSE)) {
+	  db->SetDateTime(DbAlias[i].tag);
+	  found = i;
+	  break;
+	}
+      }
+      if (! found) {gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;}
+      // Show date settings
+      gMessMgr->QAInfo() << db->GetName()
+			 << " Maker set time = "
+			 << db->GetDateTime().GetDate() << "."
+			 << db->GetDateTime().GetTime() << endm;
+      if (GetOption("SIMU") && m_EvtHddr) {
+	gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
+	m_EvtHddr->SetDateTime(db->GetDateTime());
       }
     }
-    if (! found) {gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;}
-    // Show date settings
-    gMessMgr->QAInfo() << db->GetName()
-		       << " Maker set time = "
-		       << db->GetDateTime().GetDate() << "."
-		       << db->GetDateTime().GetTime() << endm;
-    if (GetOption("SIMU") && m_EvtHddr) {
-      gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
-      m_EvtHddr->SetDateTime(db->GetDateTime());
-    }
   }
-  // MaxEntry over-write
+
+  // MaxEntry over-write - default and global for all realm and detectors
   if (Idate) {
     db->SetMaxEntryTime(Idate,Itime);
     gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
 		     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
-  } // check if maker is St_db_Maker
+  } 
+
+  //
+  // Now treat the detector specific options
+  //
+  TString realm;
+  for (unsigned int i = 0; i < GTSOptions.size() ; i++){
+    if ( (GTSOptions[i].Realm).IsNull() ){ realm = "*";}
+    else {                                 realm = GTSOptions[i].Realm;}
+
+    //LOG_INFO << "DEBUG MORE [" << (GTSOptions[i].Realm).Data() << "]" << endm;
+    //LOG_INFO << "DEBUG MORE [" << realm.Data() << "]" << endm;
+
+    if ( GTSOptions[i].Type == 1){
+      db->AddMaxEntryTimeOverride(GTSOptions[i].Date,0,
+				  (char *) realm.Data(),
+				  (char *) GTSOptions[i].Detector.Data());
+
+      LOG_INFO << "Recovering override stamp " << i << " :: " 
+	       << GTSOptions[i].Detector << ", " << realm << ", "  
+	       << GTSOptions[i].Date     << ", " << GTSOptions[i].Time  << endm;
+    } else {
+      LOG_WARN << "Found override type " << GTSOptions[i].Type << " no treated yet" 
+	       << GTSOptions[i].Detector << ", " << realm << ", "  
+	       << GTSOptions[i].Date     << ", " << GTSOptions[i].Time  << endm;
+    }
+  }
+
+  //abort();
+
+
   if (!GetOption("fzin")) {
     struct Field_t {
       const Char_t *name;

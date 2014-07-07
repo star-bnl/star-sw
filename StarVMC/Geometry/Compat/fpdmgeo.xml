@@ -1,5 +1,0 @@
-<Document name="fpdmgeo.xml">
-<Export language="Mortran">
-<Import file="$STAR/pams/geometry/fpdmgeo/fpdmgeo.g" verbatim="true" />
-</Export>
-</Document>

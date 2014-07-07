@@ -1,5 +1,32 @@
-* $Id: geometry.g,v 1.231 2011/07/20 20:23:47 jwebb Exp $
+* $Id: geometry.g,v 1.239 2011/10/13 18:23:58 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.239  2011/10/13 18:23:58  jwebb
+* Added production geometry tag y2011a.  Tag y2011a is consistent with the y2011
+* geometry tag, as it exists in the SL11c and SL11d libraries.  y2011a should be
+* used for any reproduction of production series PL11ic and PL11id.
+*
+* Revision 1.238  2011/10/07 19:44:45  jwebb
+* Switched versions of the PIXL detector.
+*
+* Revision 1.237  2011/10/06 20:38:22  jwebb
+* Fixed FGT setup.
+*
+* Revision 1.236  2011/10/06 19:54:48  jwebb
+* Moved IDSM earlier in the call sequence.
+*
+* Revision 1.235  2011/10/06 15:52:05  jwebb
+* Added dev13 tag.
+*
+* Revision 1.234  2011/10/06 14:54:00  jwebb
+* Added DEV13 geometry.  Removed pmd from y2012.  Added pixl to complete.
+*
+* Revision 1.233  2011/10/03 22:03:06  jwebb
+* Redefined the "complete" geometry for use in anticipated simulations with
+* FGT.  Did not add the HFT as we do not yet have a geometry for that.
+*
+* Revision 1.232  2011/08/19 16:44:14  jwebb
+* Definition of Y2012 geometry tag (1st cut).
+*
 * Revision 1.231  2011/07/20 20:23:47  jwebb
 * Upgr23 tag defined with FSC geometry and FMS in open position.
 *
@@ -1110,6 +1137,8 @@ replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
 
 replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
 replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
+replace [exe PIXL02;] with [ "Add the pixle detector to the IDSM"; PIXL=on; PixlConfig=6; ]
+
 replace [exe RICHof;] with [;RICH=off;]
 replace [exe RICH02;] with [;RICH=on; richPos=2; richConfig=2;]
 
@@ -1237,9 +1266,11 @@ replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConf
 
 
 replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
-replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 6 disks"]
+replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 5 half plus one full disk"]
+replace [exe FGTDv32;] with [;FGTD=on;FgtdConfig=32; "FGT v3 6 disks"]
 
-replace [exe IDSMv1;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
+replace [exe IDSM01;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
+replace [exe IDSM02;] with [;IDSM=on;IdsmConfig=2; "Inner Detector Support"]
 
 replace [exe FSTDof;] with  [;FSTD=off;]
 replace [exe ITSPof;] with  [;ITSP=off;] "prototype of the Inner Tracker SuPport structure"
@@ -1358,22 +1389,22 @@ replace [exe y2003x;] with [ "same as y2003b but with full calorimeters and PHMD
 
 
 *********  (in)complete   ***
-replace [exe COMPLETE;] with ["New Complete+correction 3 in 2003 geometry:";
-                              "TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD";
-                              "(complete tag has been out of date since 2003)x";
-         exe SVT204;
-         exe BTOF52;
-         exe CALBc0;
-         exe ECAL33;
-         exe BBCMon;
-         exe FPDM00;
-         exe TPCE01;
-         exe FTPC00;
-         exe PHMD01;
-         exe SISDof;
-         exe PIPE04; 
-         exe PIXL01;
-         ]
+!$$$    [exe COMPLETE;] with ["New Complete+correction 3 in 2003 geometry:";
+!$$$                          "TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD";
+!$$$                          "(complete tag has been out of date since 2003)x";
+!$$$     exe SVT204;
+!$$$     exe BTOF52;
+!$$$     exe CALBc0;
+!$$$     exe ECAL33;
+!$$$     exe BBCMon;
+!$$$     exe FPDM00;
+!$$$     exe TPCE01;
+!$$$     exe FTPC00;
+!$$$     exe PHMD01;
+!$$$     exe SISDof;
+!$$$     exe PIPE04; 
+!$$$     exe PIXL01;
+!$$$     ]
 
 
 
@@ -1792,10 +1823,79 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 ]
+
+REPLACE [exe y2011a;] with ["y2011a: Pro.  consistent with production series P11ic and P11id";
+    exe SCON14;      "support cone without SVT and new cable weight estimates and SROD fix";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPC01;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMD02;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe FTRO01;      "FTPC readout";
+    exe MUTD04;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+]
 c ===============================================================================
 
+!$$$    [exe upgr2012;] with [exe y2012;]   upgrade 2012 retired
+REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
 
-REPLACE [exe upgr2012;] with ["y2012 FGT upgrade studies";
+    exe IDSM01;      "Inner detector support";
+    exe FGTDv31;     "FGT v3 5 half + 1 full disks";
+]
+
+REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+
+    exe IDSM02;      "Inner detector support";
+    exe FGTDv32;     "FGT v3 6 disks";
+
+    exe PIXL02;      "Development version of the pixl detector";
+]
+
+
+
+REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently just complete FGT.  HFT when available."
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
     exe BTOF67;      "time of flight";
     exe CALB02;      "updated bemc model";
@@ -1813,10 +1913,11 @@ REPLACE [exe upgr2012;] with ["y2012 FGT upgrade studies";
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 
-    exe IDSMv1;      "Inner detector support";
-    exe FGTDv31;     "FGT v3 6 disks";
-]
+    exe IDSM02;      "Inner detector support";
+    exe FGTDv32;     "FGT v3 6 disks";
 
+    exe PIXL02;      "Development version of the pixl detector";
+]
 
 
 !//______________________________________________________________________________
@@ -2177,6 +2278,7 @@ If LL>0
 *************************************************************************************************************
   Case COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                  exe complete;
+                 geom = 'complete';
                }
 ****************************************************************************************
 * corrected: MWC readout, RICH reconstructed position, no TOF
@@ -2532,9 +2634,23 @@ If LL>0
                  Geom = 'Y2011   ';
                  exe y2011; }
 
-  Case upgr2012 { upgr2012 : FGT upgrade studies for 2012;
-                 Geom = 'upgr2012';
-                 exe upgr2012; }
+  Case y2011a   { Y2011a: Production quality tag
+                 Geom = 'Y2011a  ';
+                 exe y2011a; }
+
+
+
+  Case upgr2012 { y2012 : Y2012 geometry first cut;
+                 Geom = 'y2012   ';
+                 exe y2012; }
+
+  Case y2012 { y2012 : Y2012 geometry first cut;
+                 Geom = 'y2012   ';
+                 exe y2012; }
+
+  Case dev13 { dev13 : y2013 stufies;
+                 Geom = 'dev13   ';
+                 exe dev13; }
 
 
 ****************************************************************************************
@@ -4190,6 +4306,12 @@ c     write(*,*) 'CALB';
    if (ZCAL)   { write(*,*) 'ZCAL';Call zcalgeo;}
    if (MAGP)   { write(*,*) 'MAGP';Call magpgeo;}
 
+   IF IDSM { "Inner detector support module" 
+
+      Call AgDETP new ('IDSM')
+      Call AgDETP add ('IDSC.version=',IdsmConfig,1)
+      Call IdsmGeo1
+   }
 
    if (MUTD) {
      Call AgDetp NEW ('MUTD')
@@ -4213,6 +4335,12 @@ c    write(*,*) 'CALB'
            call AgDETP new ('PIXL')
            call AgDETP add ('PXLV.LadVer=',2.0,1)
            call pixlgeo3
+     }
+     IF PixlConfig==6 {
+           call AgDetp new ('PIXL')
+           call AgDetp add ('PXLV.LadVer=',2.0,1)
+           call AgDetp add ('PXLV.location=',2.0,1)
+           call pixlgeo4
      }
    }
 
@@ -4242,13 +4370,6 @@ c     write(*,*) 'FSTD'
       Call fstdgeo
    endif
 
-   IF IDSM {
-
-      Call AgDETP new ('IDSM')
-      Call IdsmGeo1
-
-   }
-
 
    IF (FGTD) THEN                                            
 
@@ -4259,7 +4380,8 @@ c     write(*,*) 'FSTD'
      if (FgtdConfig==3)    Call fgtdgeo2
 
      IF FgtdConfig>30 {                                           """Apply FGT configuration and construct geometry"""
-        IF FgtdConfig==31 { Call AgDETP add ( 'FGTG.FgstConfig=', 1.0, 1 ); }
+        IF FgtdConfig==31 { Call AgDETP add ( 'FGGG.FgstConfig=', 1.0, 1 ); }
+        IF FgtdConfig==32 { Call AgDetp add ( 'FGGG.FgstConfig=', 2.0, 1 ); }
         Call FgtdGeo3
      }
 

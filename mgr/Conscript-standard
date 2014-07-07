@@ -57,7 +57,7 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
 } else {
     $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
     $PKG = $pkg;
-    $OnlinePackage=true if $Dir =~ /^OnlTools/;
+    $OnlinePackage=true if $Dir =~ /^OnlTools/;# and $pkg ne "OnlinePlots";
 }
 
 $env1 = $env->clone('Package'  => $pkg);
@@ -128,17 +128,28 @@ if ($pkg eq "RTS") {
     @srcL = @src;
     @src = ();
 }
-my @VF_daq_pkgs = qw(StDAQMaker StTofHitMaker  StTpcHitMaker StEmcRawMaker  StEEmcPoolmuEztPanitkin  
-		     StBEMCPlots Stl3RawReaderMaker StBTofHitMaker StMtdHitMaker StPmdReadMaker); 
+
+# Some directories will need extra includes for the RTS DAQ reader
+my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker StTpcHitMaker StEEmcPoolmuEztPanitkin  
+		  StBEMCPlots StBTofHitMaker StMtdHitMaker StPmdReadMaker St_pp2pp_Maker
+		); 
+# But any *Raw* in StRoot/ would have this automatically done / handled
+if ( $pkg =~ m/Raw/ ){
+    print "Found [$pkg] as Raw package\n";
+    push(@DAQ_pkgs,$pkg);
+}
+
+
 my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
-    . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
-    . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include";
+                     . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
+                     . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include";
 
 
-if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@VF_daq_pkgs); }
+if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@DAQ_pkgs); }
 
 if ($OnlinePackage) {
     $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . "#OnlTools" . $main::PATH_SEPARATOR . $CPPPATH;
+#. "/usr/include/libxml2" . $main::PATH_SEPARATOR 
 }
 if ( $pkg eq "OnlinePlots") {
   $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure"
@@ -173,7 +184,9 @@ my @g77pkgs = qw(geometry gen sim tls minicern geant3);
 my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath\n" if $param::debug;
 
 
-# some compiler specific treatments below
+#+
+# some compiler specific treatments below, global or conditional
+#-
 if( $FC eq 'pgf77'){
   if ($DirPath  =~ /$g77pkgs/ or $DirPath !~ /pams/) {
     $FC       = $env1->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
@@ -201,11 +214,13 @@ if ($FC eq 'g77' or $FC eq 'gfortran'){
     }
 }
 
-
+#+
+# Now we treat anything which is neither sim nor gen
+# This will include all makers
+#-
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
   
-            
     # if user requested debug, print some info on what was found
     if ($param::debug) {
 	$i = 0;
@@ -215,26 +230,32 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$i = 0;
 	foreach my $s(@h_files) { print "i=", $i++, " h_files = ", $s, "\n"; }
     }
-  
-    
+ 
+
+    #if (0==1){
     # Generate geometries first - this will be hit on any $Dir
     # xgeometry and StarGeometry may not be created however
+    #if ( $Dir =~ m/Geometry/ ){
     if ( $Dir =~ m/Geometry/ ){
 	my @xmlGeo   = script::find_xml($Dir);
+	
+	#print "DEBUG Found ".($#xmlGeo+1)." XML files in $Dir\n";
+
 	if ($#xmlGeo > -1){
 	    # for the geometry package, generate the geom
 	    # print join(";",@xmlGeo);
-	    my($bflnm,$pref,$agM,$agF,$agX,$agH,$agO);
+	    my($agM,$agE,$agX,$agH);
+	    my($trgt);
 	    my($agml_cmd);
-	    my(@ODIR)= ("StarVMC/StarGeometry/","StarVMC/xgeometry/");
-	      
-	    # for now, generate in-situ
-	    my($in_situ)=1==1;
+	    my(@ODIR)= ("StarVMC/StarGeometry/",
+			"StarVMC/xgeometry/");
 	    
-	    if ( $in_situ  && (! $IsRepo || $IsDotDev)){
-		foreach (@ODIR){ if ( ! -d $ODIR[0] && $in_sittu ){  mkdir($ODIR[0],0755);}}
+	    # Below if() was added to prevent compilation in non-local but
+	    # allow development in .dev - commented for integration
+	    #if ( (! $IsRepo || $IsDotDev)){
+		foreach (@ODIR){ if ( ! -d $ODIR[0] ){  mkdir($ODIR[0],0755);}}
 
-		# local or global
+		# local or global install
 		if ( -e "mgr/agmlParser.py"){	$agml_cmd = "mgr/agmlParser.py";
 		} else {			$agml_cmd =     "agmlParser.py";}
 		
@@ -243,42 +264,55 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			print "xml = $xml\n" if $param::debug;
 			$agM   = $xml; $agM =~ s/\..*//; $agM =~ s/.*\///;
 			
-			$pref  = ($in_situ?"#":"");
 			$agX   = $ODIR[0].$agM.".cxx";
 			$agH   = $ODIR[0].$agM.".h";
-			$agF   = $ODIR[1].$agM.".age";
-			$agO   = $ODIR[1].$agM.".o";
+			$agE   = $ODIR[1].$agM.".age";
 			  
-		        # print "\tDEBUG $agX $xml $agO\n";
-			# my $GenCmd = "$agml_cmd --file=%< --export=AgROOT --module=$bflnm --path=$ODIR && echo %>";
-			$env->{ENV}->{AGML_WARNINGS} = !$param::debug;
-			# export AGML_WARNINGS=\$AGML_WARNINGS
+		        #print "\tDEBUG $agX $xml\n";
+			
+			# generally enable all warnings for now
+			$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
 			
 			if ( $xml =~ m/Compat/ ){
-			    Depends $env [$pref.$agF], "#$xml";
-			    Command $env [$pref.$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);			    
+			    Depends $env ["#".$agE], "#$xml";
+			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+
 			} else {
-			    Depends $env [$pref.$agX, $pref.$agH, $pref.$agF], "#$xml";
-			    Depends $env [$agO], $pref.$agX, $pref.$agH;
+			    Depends $env ["#".$agX, "#".$agH, "#".$agE], "#$xml";
 			  
-			    Command $env [$pref.$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
-			    Command $env [$pref.$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
-		    
-			    # push(@src,"#$agX"); 
-			    # push(@Defs,$agH);
+			    Command $env ["#".$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
+			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+
+			    # Install local file (#) as global
+			    # The .h file can be installed as-is
+			    $trgt = $OBJ."/".$agH;
+			    InstallAs  $env $trgt, "#".$agH;
+			    
+			    # The recently generated .cxx will create an extra source dependency
+			    $trgt = $OBJ."/".$agX;
+			    InstallAs  $env $trgt, "#".$agX;
+
+			    # Add source dependency but only cxx
+			    #>>push(@srcL, $trgt); 
 			}
-		    
+
+			# Install the "#" i.e. local file as global file - ageF created in both cases
+			# BEWARE that the agE (.age) file is created in xgeometry
+			$trgt = $OBJ."/".$agE;
+			InstallAs  $env $trgt, "#".$agE;
+
+			# Create source dependencies based on installed age, not the original
+			#>>push(@srcL, $trgt ); 
+
+
 		    } else {
 			# just be sure we pick only from one tree
 			print "Warning: found $xml but in a non-expected tree\n";
 		    }
-		}
-	    }
+		#}
+	     }
 	}
     }
-	
-
-    
 
   
     foreach my $Rep(@Repo) {
@@ -296,9 +330,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    foreach my $i(@h_filesR) { push @h_filesL, $i; }
 	}
     }
-    @src     = script::sortu(@srcL);
+    @src     = script::sortu(@srcL); 
     @h_files = script::sortu(@h_filesL);
     @idlM    = script::sortu(@idlML);
+
     # ui     /opt/star/sl305_gcc323/qt/bin/uic GeomBrowser.ui -i GeomBrowser.h -o .ui/GeomBrowser.cpp
     # xpm    /opt/star/sl305_gcc323/qt/bin/uic  -embed -o .ui/qmake_image_collection.cpp
     my $uic = $env->{Packages}->{QT}->{BINDIR} . "/uic";
@@ -479,9 +514,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      $pkg =~ m/^StTriggerUtilities$/ ||
 	      $pkg =~ m/^Stv$/                ||
 	      $pkg =~ m/^Sti/ && $pkg !~ m/StiVMC/) {
+
 	$CPPPATH = "#" . $Dir;
-#    $CPPPATH = $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . $CPPATH;
-    
+
 	print "WARNING Package $pkg requires a glob() to be called\n" if $param::debug;
     
 	foreach my $subdir ( glob("$Dir/*") ){
@@ -502,6 +537,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     
 	#print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
 
+    } elsif ( $pkg =~ m/^StJetFinder$/ ){
+	$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
+
+
     } elsif ( $pkg =~ m/^StDaqLib$/ ) {
 	$CPPPATH = "#" . $Dir;
 	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
@@ -518,6 +557,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FPPFLAGS = " -DATLAS_UNIX -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
         # $FPPFLAGS = $env1->{Packages}->{CERNLIB}->{FPPFLAGS} . " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
         # $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
+
     } elsif ( $pkg =~ m/^g2t/ || $pkg =~ m/^gstar/ || $pkg =~ m/^geometry/ ) {
 	$SO_MAP  = "";
 	$FCPATH  = $INCLUDE;
@@ -525,6 +565,19 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
 	$FCPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{CERN_ROOT} . "/include";
         # $FCPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
+
+    #} elsif ( $pkg =~ /^Geometry/ ){
+    #	$CPPPATH = "#" . $Dir;
+    #	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+    #	#$FCPATH  = $INCLUDE;
+    #	#$FCPATH .= $main::PATH_SEPARATOR . "#".$Dir;
+    #    print "DEBUG $CPPPATH\n";
+
+    } elsif ( $pkg =~ /^xgeometry/ ){
+	$LIBS .= " -lStarMagFieldNoDict ";
+	#my $libs = "-lStarMagFieldNoDict";	
+
+
     } elsif ($pkg =~ m/TGeant3|StarVMCApplication|StVMCMaker/) {
 	$CPPPATH =  $env1->{ENV}->{ROOT} . "/" .$env1->{ENV}->{ROOT_LEVEL} . "/geant3/TGeant3"
 	    . $main::PATH_SEPARATOR . $CPPPATH;
@@ -657,16 +710,16 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	@src = @srcC;
 
 
-    } elsif ( $pkg =~ m/^TBB$/) {
-	$CPPPATH = $INCLUDE 
-	    . $main::PATH_SEPARATOR . "#" . $Dir . "/src";
-	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include" . 
-	#    print "CPPPATH => $CPPPATH\n";
-	$CXXFLAGS .= " -MMD -DTBB_DO_ASSERT -DDO_ITT_NOTIFY -DUSE_PTHREAD -D__TBB_BUILD=1 -Wall -Wno-parentheses";
-
-
+#    } elsif ( $pkg =~ m/^TBB$/) {
+#	$CPPPATH = $INCLUDE 
+#	    . $main::PATH_SEPARATOR . "#" . $Dir . "/src";
+#	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include" . 
+#	#    print "CPPPATH => $CPPPATH\n";
+#	$CXXFLAGS .= " -MMD -DTBB_DO_ASSERT -DDO_ITT_NOTIFY -DUSE_PTHREAD -D__TBB_BUILD=1 -Wall -Wno-parentheses";
+#
+#
     }  elsif ( $pkg =~ m/^TPCCATracker$/) {
-	$CPPPATH .=
+        $CPPPATH .=
 	    $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code";
 	#    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/TBB/include";
 	#    print "CPPPATH => $CPPPATH\n";
@@ -680,44 +733,36 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$extraCXXFLAGS .= " -DNODEBUG";
 	$CXXFLAGS .= $extraCXXFLAGS;
 	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
-#    # stand - alone 
-#    my $libs = "-lTPCCATracker -lVc -lTBB ". $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
-#    $envTPCCA = $env->clone('Package' => $pkg,
-#			    'EXTRA_CXXFLAGS' => $extraCXXFLAGS,
-#			    'CPPPATH'  => $CPPPATH,
-#			    'LIBPATH'  => $LIB . $main::PATH_SEPARATOR .$env->{Packages}->{ROOT}->{LIBDIR},
-#			    'LIBS'     => $libs
-#			   );
-#    my @programs = qw(./StRoot/TPCCATracker/CA.C);
-#    foreach my $progD (@programs) {
-#      my $prog = File::Basename::basename($progD,".C");
-#      Program      $envTPCCA $prog, ("#" . $progD);
-#      Install $envTPCCA $BIN, $prog;
-#    }
-    }
-
-    if ( $pkg =~ m/^Sti$/) {  # For use CATracker
-	if ($env1->{DEBUG} =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
-	    $envNoDeb = $env->clone('DEBUG' => '-g');
-	    for ($i = 0; $i < $#src; $i++) {
-		if ($src[$i] =~ /StiVMCToolKit\.cxx/) {
-		    my @objfiles = Objects $envNoDeb ($src[$i]);
-		    $src[$i] = $objfiles[0];
-		    last;
-		}
-	    }
-	} else {
-	    #if ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3)) {
-	    #
-	    # do not switch on gcc version but on CATracker for now
-	    #
-	    if (  -e "StRoot/TPCCATracker" && 
-		  ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
-	    	$CXXFLAGS .= "  -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION -msse -msse2";
-	    	#    $CXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
-	    	$LIBS = "-lTPCCATracker -lVc -lTBB ". $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
-	    }
+	$LIBS = "-lVc";
+	if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
+	# stand - alone in .DEV2 only
+	if ($env->{STAR_VERSION} eq '.DEV2') {
+	  my $libs = "-lTPCCATracker " . $LIBS . $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
+	  $envTPCCA = $env->clone('Package' => $pkg,
+				  'EXTRA_CXXFLAGS' => $extraCXXFLAGS,# . " -DDRAW", # -DHLTCA_STANDALONE
+				  'CPPPATH'  => $CPPPATH,
+				  'LIBPATH'  => $LIB . $main::PATH_SEPARATOR .$env->{Packages}->{ROOT}->{LIBDIR},
+				  'LIBS'     => $libs
+				 );
+	  my @programs = ($DirPath . "/CA.C");
+	  foreach my $progD (@programs) {
+	    my $prog = File::Basename::basename($progD,".C");
+	    Program      $envTPCCA $prog, ("#" . $progD);
+	    Install $envTPCCA $BIN, $prog;
+	  }
 	}
+    }
+    if ( $pkg =~ m/^Sti$/) {  
+      if ($env1->{DEBUG} =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
+	$envNoDeb = $env->clone('DEBUG' => '-g');
+	for ($i = 0; $i < $#src; $i++) {
+	  if ($src[$i] =~ /StiVMCToolKit\.cxx/) {
+	    my @objfiles = Objects $envNoDeb ($src[$i]);
+	    $src[$i] = $objfiles[0];
+	    last;
+	  }
+	}
+      }
     }
 
     if ( $#idlM > -1 ) {
@@ -1131,7 +1176,8 @@ if ( $#src > -1 ) {
       Depends $env2 $SO_PKG, $libpkg;
     }
   }
-  #  print "SO_PKG = $SO_PKG\n";
+  # print "-=-=-=-=- SO_PKG = $SO_PKG $pkg -=-=-=-=-=-\n";
+  # print "SO_PKG = $SO_PKG\n";
   if ($SO_PKG) {
     script::Keep $SO_PKG;
     if ($pkg =~ m/StarMagField/) {
@@ -1145,7 +1191,7 @@ if ( $#src > -1 ) {
       printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
       $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
     }
-    if ($pkg =~ m/^geometry/) {
+    if ($pkg =~ m/^geometry/ ){
       $SO_PKG_PLAIN = $pkg . "NoField";
       printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
       $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
@@ -1164,6 +1210,53 @@ if ( $#src > -1 ) {
       $libs .= "." . $env2->{SUFSOLIB};
       Depends $envg, [($SO_PKG)], ($libs); #print "libs = $libs\n";
       $env2 = $envg;
+    }
+    if ($pkg =~ m/^Sti$/) { # For use CATracker
+      if (  -e "StRoot/TPCCATracker" && 
+	    ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
+	$SO_PKG_PLAIN = $pkg . "CA";
+	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+	$envCA = $env2->clone('SUFOBJ'   => "CA.o",
+			      'CXXFLAGS' => $CXXFLAGS . "  -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION -msse -msse2");
+	my @ListCA = qw( StiKalmanTrack.cxx StiKalmanTrackFinder.cxx StiKalmanTrackNode.cxx StiTPCCATrackerInterface.cxx StiTpcSeedFinder.cxx);
+	my $ListCA = join('|',@ListCA);
+	@PlainObj = ();
+	@Obj = ();
+#	print "$#src => @src \n";
+	my @o;
+	foreach my $s (@src) {
+	  $o[0] = $s;
+	  if ($s !~ m/\.o$/) {@o = Objects $env2 ($s);}
+	  push  @Obj, $o[0];
+#	  print "$s => $src[$i]\n";
+	  if ($s =~ m/$ListCA/) {@o = Objects $envCA ($s); push @PlainObj, $o[0];}
+	  else                  {push @PlainObj, $o[0];}
+	}
+	@src = @Obj;
+#	print "$#src => @src \n";
+#	print "$#PlainObj => @PlainObj \n";
+	
+	$envPlain = $env2->clone('LIBPATH'  => $LIB, # . $main::PATH_SEPARATOR . $env->{Packages}->{ROOT}->{LIBDIR},
+				 'LIBS'     => "-lTPCCATracker ");# . $env->{Packages}->{ROOT}->{LIBS} . " -lEG");
+      }
+    }
+    if ($pkg =~ m/^StGenericVertexMaker$/) { # For Stv no Sti 
+      $SO_PKG_PLAIN = $pkg . "NoSti";
+      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+      $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+      @PlainObj = ();
+      @Obj = Objects $env2  (@src);
+#      print "$#src => @src \n";
+#      print "$#Obj => @Obj \n";
+      foreach my $o (@Obj) {
+#	print "o ++++++> $o\n";
+	if ($o =~ m/\/StiPPVertex\//) {next;}
+	push @PlainObj, $o;
+      }
+      @src = @Obj;
+#      print "$#src => @src \n";
+#      print "$#PlainObj => @PlainObj \n";
     }
     LinkedModule $env2 $SO_PKG, @src;
     Install $env2 $LIB,         $SO_PKG;
@@ -1239,7 +1332,6 @@ sub script::alpha_arcom { #
   my $flag = `$cmd`; if ($?) {exit 2;}
   return 1;
 }
-
 #_________________________________________________________________________________
 
 

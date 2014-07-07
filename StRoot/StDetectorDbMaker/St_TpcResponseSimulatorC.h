@@ -32,6 +32,8 @@ class St_TpcResponseSimulatorC : public TChair {
   Float_t 	tauCO(Int_t i = 0) 	const {return Struct(i)->tauCO;}
   Float_t 	SigmaJitterTI(Int_t i = 0) 	const {return Struct(i)->SigmaJitterTI;}
   Float_t 	SigmaJitterTO(Int_t i = 0) 	const {return Struct(i)->SigmaJitterTO;}
+  Float_t 	SigmaJitterXI(Int_t i = 0) 	const {return Struct(i)->SigmaJitterXI;}
+  Float_t 	SigmaJitterXO(Int_t i = 0) 	const {return Struct(i)->SigmaJitterXO;}
   Float_t 	longitudinalDiffusion(Int_t i = 0) 	const {return Struct(i)->longitudinalDiffusion;}
   Float_t 	transverseDiffusion(Int_t i = 0) 	const {return Struct(i)->transverseDiffusion;}
   Float_t       NoElPerAdc(Int_t i = 0) const {return Struct(i)->NoElPerAdc;}

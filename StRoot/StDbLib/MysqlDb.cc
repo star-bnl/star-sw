@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.60 2011/04/04 15:44:24 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.60.2.1 2013/11/15 20:10:56 didenko Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.60.2.1  2013/11/15 20:10:56  didenko
+ * patch due to user id problem on SL6
+ *
  * Revision 1.60  2011/04/04 15:44:24  dmitry
  * fix to blacklist Calibrations_bla only
  *
@@ -321,9 +324,13 @@ mRes= new MysqlResult;
   pwd = getpwuid(geteuid());
   if (pwd) {
     mSysusername = pwd->pw_name;
+    mdbuser = (char*)mSysusername.c_str();
+    std::cout << "DB OVERRIDE default user with: " << mdbuser << std::endl;
+  } else {
+    std::cout << "DB OVERRIDE failure, user ID cannot be retrieved" << std::endl;
   }
-
 }
+
 //////////////////////////////////////////////////////////////////////
 
 MysqlDb::~MysqlDb(){
@@ -332,11 +339,11 @@ if(mQueryLast) delete [] mQueryLast;
 Release();
 if(mRes) delete mRes;
 if(mhasConnected)mysql_close(&mData);
-if(mdbhost) delete [] mdbhost;
-if(mdbuser) delete [] mdbuser;
-if(mdbpw)   delete [] mdbpw;
-if(mdbName)  delete [] mdbName;
- if(mdbServerVersion) delete [] mdbServerVersion;
+//if(mdbhost) delete [] mdbhost;
+//if(mdbuser) delete [] mdbuser;
+//if(mdbpw)   delete [] mdbpw;
+//if(mdbName)  delete [] mdbName;
+// if(mdbServerVersion) delete [] mdbServerVersion;
 
 #ifdef MYSQL_VERSION_ID
 # if MYSQL_VERSION_ID > 50044

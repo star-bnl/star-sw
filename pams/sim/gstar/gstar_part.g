@@ -1,7 +1,78 @@
-
-* $Id: gstar_part.g,v 1.32 2011/03/15 22:39:54 jwebb Exp $
+* $Id: gstar_part.g,v 1.47 2014/07/07 20:10:04 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.47  2014/07/07 20:10:04  jwebb
+* Forgot to specify particle tracking type (used to determine which routine
+* is used to handle physics processes, e.g. decays, for the particle).
+*
+* Revision 1.46  2014/06/25 14:19:25  jwebb
+* Added psi prime --> e+e-
+*
+* Revision 1.45  2014/01/29 16:21:43  jwebb
+* Added D_star_plus (minus) --> D0 (bar) pi+ (-) 100% BR
+*
+* Revision 1.44  2014/01/28 15:12:57  jwebb
+* Corrected charge states for two hypernuclei
+*
+* Revision 1.43  2013/07/22 20:45:56  jwebb
+* Changed lifetime... previous values were the width of the particle in GeV
+* not the time in seconds.
+*
+* Revision 1.42  2013/06/19 22:17:48  jwebb
+* Improved properties of lambda xi hyperon.
+*
+* Revision 1.41  2013/06/19 22:15:27  jwebb
+* Fixed decay modes.
+*
+* Revision 1.40  2013/06/13 18:44:03  jwebb
+* Added Lambda Xi dibaryon.
+*
+* Revision 1.39  2013/04/08 19:57:20  jwebb
+* Updated mass and lifetime of the phi to more recent PDG values.
+*
+* Revision 1.38  2013/03/14 18:27:29  jwebb
+* Added pi0    --> e+e- gamma 100% gid=10007
+* Added K0long --> nu e- pi+  100% gid=10010
+* Added K0long --> nu e+ pi-  100% gid=10110
+*
+* http://www.star.bnl.gov/rt2/Ticket/Display.html?id=2549
+*
+* Revision 1.37  2013/02/04 20:41:15  jwebb
+* Update to H-Dibaryon mass, to provide sufficient CMS energy for phase space
+* decay.
+*
+* Revision 1.36  2013/01/31 18:21:50  jwebb
+* Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
+*
+* Revision 1.35  2012/06/25 16:02:09  jwebb
+* Added Xi0(1530).
+*
+* Revision 1.34  2011/08/29 20:30:54  jwebb
+* Added K+ --> e+ pi0 nu and K- --> e- pi0 nu to satisfy an emedding
+* request http://drupal.star.bnl.gov/STAR/starsimrequests/2010/aug/31/ke3-pp-200-gev-run9
+*
+* Also added the other top 6 decay modes as 10011 -- 15011 and 10012 -- 15012.
+*
+* 10011 : K+ --> m+ nu
+* 11011 : K+ --> pi+ pi0
+* 12011 : K+ --> pi+ pi+ pi-
+* 13011 : K+ --> e+ nu pi0
+* 14011 : K+ --> m+ nu pi0
+* 15011 : K+ --> pi+ pi0 pi0
+*
+* and similar for K- decay modes
+*
+* Revision 1.33  2011/08/12 15:33:40  jwebb
+*
+* Added anti-hypertriton.  Mapped hyper-triton and anti-hyper-triton to
+* geant IDs 6[12]053 and 6[12]054, with two decay modes:
+*
+*     H3(lambda) --> He3 pi-    61053    antiparticle=61054
+*     H3(lambda) --> d p pi-    62053    antiparticle=62054
+*
+* Added antideuteron (gid=53) and antitriton (gid=54) to enable inclusion
+* in hypertriton decays.
+*
 * Revision 1.32  2011/03/15 22:39:54  jwebb
 * (1) Corrected mistakes in the Omega_plus, Omega_minus and XiMinus and XiPlus
 *     definitions of particles.
@@ -140,6 +211,20 @@ MODULE gstar_part Is the STAR Particle Database
    Integer kGtHION / 8 /! A heavy ion
    Integer kGtCKOV / 7 /! A cherenkov photon (note mistake in geant manual)
 
+   Real *8 HBAR / 6.58211928E-16 / "eV * s"
+
+* For meaning of paramters see G3 manual
+* http://wwwasdoc.web.cern.ch/wwwasdoc/geant_html3/node72.html#SECTION024000000000000000000000
+
+* --------------------------------------------------------------------------
+*
+* Particle ID 54 is reserved for anti-He3 to enable anti-hypertriton decay mode
+
+
+
+
+
+
 * --------------------------------------------------------------------------
 *
 * redefinition of pre-coded D's with the desired branchings
@@ -164,20 +249,20 @@ MODULE gstar_part Is the STAR Particle Database
 ************************************************************************************ 
 * D0 and pi+, D+ and pi0
   Particle D_star_plus   code=60  TrkTyp=4 mass=2.01027  charge=1  tlife=6.86e-21,
-                     pdg=413  bratio= { 0.69, 0.31}       mode= { 3708, 3507 }
+                         pdg=413  bratio= { 0.69, 0.31}       mode= { 3708, 3507 }
 
 * decay into D0 and pi-, D- and pi0
 *
   Particle D_star_minus  code=61  TrkTyp=4 mass=2.01027  charge=-1 tlife=6.86e-21,
-                     pdg=-413 bratio= { 0.69, 0.31}       mode= { 3809, 3607 }
+                         pdg=-413 bratio= { 0.69, 0.31}       mode= { 3809, 3607 }
 
 * decay into D0 and pi0, D0 and gamma
   Particle D_star_0       code=62  TrkTyp=4 mass=2.007  charge=0 tlife=3.13e-22,
-                     pdg=423  bratio= { 0.62, 0.38}       mode= { 3507, 3501}
+                          pdg=423  bratio= { 0.62, 0.38}       mode= { 3507, 3501}
 
 * D0_bar and pi0, D0_bar and gamma
   Particle D_star_0_bar   code=63  TrkTyp=4 mass=2.007  charge=0 tlife=3.13e-22,
-                     pdg=-423 bratio= { 0.62, 0.38}       mode= { 3807, 3801}
+                          pdg=-423 bratio= { 0.62, 0.38}       mode= { 3807, 3801}
 ************************************************************************************ 
 
 * decay into D_star_0_bar, positron and neutrino, or D0_bar, positron and neutrino
@@ -200,13 +285,14 @@ MODULE gstar_part Is the STAR Particle Database
 * special pi0 decay: 50% normal, 50% dalitz
   Particle Dalitz    code=149        TrkTyp=4 mass=0.135  charge=0 tlife=8.4e-17,
                      pdg=100111 bratio= { 0.5, 0.5}  mode= { 101, 10203}
+
 ************************************************************************************ 
   Particle omega     code=150 TrkTyp=3 mass=.782   charge=0  tlife=7.79E-23,
                      pdg=223  bratio  = { .888, .085, .021 },  
                               mode    = { 70809, 107,  809 }
 
 * group rho-pi and pi-pi-pi together (in practice indistinguishable)
-  Particle phi       code=151 TrkTyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
+  Particle phi       code=151 TrkTyp=3 mass=1.01946 charge=0  tlife=1.545e-22,
                      pdg=333  bratio = { .491, .343, .154, .0128, .00131 },
                               mode   = { 1112, 1016, 70809, 1701,   701  }
  
@@ -224,6 +310,9 @@ MODULE gstar_part Is the STAR Particle Database
 
   Particle anti_K0   code=156 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
                      pdg=-311  bratio= { .5, .5}    mode= { 16, 10 }
+
+
+
 ************************************************************************************ 
 * Heavy flavor studies -- July 2003 - May 2007, M.Potekhin
   Particle Jpsi       code=160 TrkTyp=4 mass=3.096  charge=0  tlife=7.48e-21,
@@ -248,6 +337,11 @@ MODULE gstar_part Is the STAR Particle Database
 
   Particle Ups3S_mu   code=166 TrkTyp=4 mass=10.355 charge=0  tlife=2.556e-20,
                       pdg=500553  bratio= { 1, }    mode= { 506, }
+
+  Particle psi2s_ee   "Psi(2S)-->e+e-" code=167,  TrkTyp=4,
+                      mass=3.68609 charge=0 tlife=hbar/2380.0,
+                      pdg=100443 bratio={ 1, } mode={ 0203, }
+
 ************************************************************************************ 
 
   Particle LASERINO  code=170         TrkTyp=6 mass=0     charge=1 tlife=big
@@ -298,6 +392,69 @@ MODULE gstar_part Is the STAR Particle Database
 * Redefinition of 'standard' particles are assigned GID 10000+
 
 
+*************************************************************************************
+*  Pion0 GID=6
+
+  Particle Dalitz    code=10007       TrkTyp=4 mass=0.135  charge=0 tlife=8.4e-17,
+                     pdg=100111 bratio= { 1.0,}  mode= {10203,}
+
+*  KAON+ GID=11
+
+   PARTICLE KAON_PLUS code=10011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={0504,}
+
+   PARTICLE KAON_PLUS code=11011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={0807,}
+
+   PARTICLE KAON_PLUS code=12011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={080809,}
+
+   PARTICLE KAON_PLUS code=13011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={020407,}
+
+   PARTICLE KAON_PLUS code=14011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={050407,}
+
+   PARTICLE KAON_PLUS code=15011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={080707,}
+
+   PARTICLE KAON_MINUS code=10012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={0604,}
+
+   PARTICLE KAON_MINUS code=11012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={0907,}
+
+   PARTICLE KAON_MINUS code=12012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={090908,}
+
+   PARTICLE KAON_MINUS code=13012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={030407,}
+
+   PARTICLE KAON_MINUS code=14012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={060407,}
+
+   PARTICLE KAON_MINUS code=15012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={090707,}
+
+
+* KAON 0 LONG GID=10
+
+   Particle K0L_pi_ele_nu code=10010 pdg=0 mass=0.4977E+00 charge=0 tlife=0.51700E-07 ,
+                       trktyp=3 bratio={1.0,} mode={040803,}
+   Particle K0L_pi_pos_nu code=10110 pdg=0 mass=0.4977E+00 charge=0 tlife=0.51700E-07 ,
+                       trktyp=3 bratio={1.0,} mode={040902,}
+
+
+* D_star_plus, D_star_minus 100% BR to pi+ D0 or pi- D0bar
+
+  PARTICLE D_star_plus code=10060 TrkTyp=4 mass=2.01027  charge=1  tlife=6.86e-21,
+                       pdg=413  bratio= { 1.00, }       mode= { 3708,  }
+
+  PARTICLE D_star_minus  code=10061  TrkTyp=4 mass=2.01027  charge=-1 tlife=6.86e-21,
+                         pdg=-413 bratio= { 1.0, }       mode= { 3809,  }
+
+
+
   """ Omega_plus --> lambdaBar K+ substitutes for standard GID 32 """
   PARTICLE Omega_plus  code=40001 pdg=0     ,
                   mass=1.67245              ,
@@ -315,7 +472,7 @@ MODULE gstar_part Is the STAR Particle Database
              bratio  = {1.000,}             ,
              mode    = {1409,}              ,
              trktyp  = kGtNEUT
-
+ 
   """ Omega_minus --> lambda + K- substitutes for standard GID 24 """
   PARTICLE Omega_minus code=40002 pdg=0     ,
                   mass=1.67245              ,
@@ -355,6 +512,21 @@ MODULE gstar_part Is the STAR Particle Database
                       trktyp = kGtNEUT   mass  = 1.31486   ,
                       charge = 0         tlife = 0.290E-9  ,
                       bratio = {1,}      mode  = {9707,}
+
+
+  PARTICLE XiZero1530 code   = 40007     pdg   = 3324      ,
+                      trktyp = kGtNeut   mass  = 1.53180   ,
+                      charge = 0         tlife = 0         ,
+                      bratio = {1.,}     mode  = {2308,}
+
+  PARTICLE XiZeroBar1530 _
+                      code   = 40008     pdg   = -3324     ,
+                      trktyp = kGtNeut   mass  = 1.53180   ,
+                      charge = 0         tlife = 0         ,
+                      bratio = {1.,}     mode  = {3109,}
+
+  
+
 
 
   ! omega(782) --> e+ e- 100%
@@ -445,6 +617,15 @@ MODULE gstar_part Is the STAR Particle Database
                         pdg       = UNDEFINED        ,
                         trktyp    = kGtHION
 
+  PARTICLE antiDeuteron code      = 53               , 
+                        mass      = 1.876            ,
+                        charge    = -1.0             ,
+                        tlife     = STABLE           ,
+                        pdg       = UNDEFINED        ,
+                        trktyp    = kGtHION
+
+
+
   PARTICLE antiTriton   code      = 50046            ,
                         mass      = 2.809            ,
                         charge    = -1.0             ,
@@ -465,6 +646,95 @@ MODULE gstar_part Is the STAR Particle Database
                         tlife     = STABLE           ,
                         pdg       = UNDEFINED        ,
                         trktyp    = kGtHION
+
+       PARTICLE antiHelium3  code      = 54               ,
+                             mass      = 2.809            ,
+                             charge    = -2.0             ,
+                             tlife     = STABLE           ,
+                             pdg       = UNDEFINED        ,
+                             trktyp    = kGtHION
+
+
+   """Define all hyper-nuclei and exotics with offset 60000"""
+* Particle hyperTriton  code      = 60053            ,   ! Placeholder for hypertriton
+*                       mass      = 2.911            ,   ! with all decay modes
+*                       charge    = 1                ,
+*                       tlife     = 2.6320e-10       ,
+*                       pdg       = UNDEFINED        ,
+*                       trktyp    = kGtHION          ,
+*                       bratio    = { , ...}         ,
+*                       mode      = { , ...}      
+                        
+* Particle antiHyperTriton code   = 60054 , ...
+
+Particle hyperTriton_he3_pi_minus code      = 61053            ,
+                                  mass      = 2.99131          , 
+                                  charge    = 1                ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          ,
+                                  bratio    = {1,}             ,
+                                  mode      = {004909,}
+
+Particle anti_hyperTriton_he3_pi_plus  code      = 61054       ,
+                                  mass      = 2.99131          , 
+                                  charge    = -1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          ,
+                                  bratio    = {1,}             ,
+                                  mode      = {005408,}
+
+
+Particle hyperTriton_d_p_pi_minus code      = 62053            ,
+                                  mass      = 2.99131          ,
+                                  charge    = +1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          ,
+                                  bratio    = {1,}             ,
+                                  mode      = {091445,}
+
+Particle anti_hyperTriton_db_pb_pi code      = 62054  ,
+                                  mass      = 2.99131          ,
+                                  charge    = -1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          ,
+                                  bratio    = {1,}             ,
+                                  mode      = {081553,}
+
+
+   """Define all dibaryons / dimesons with offset=60000 """
+
+Particle H_dibaryon               code      = 60001,
+                                  mass      = 2.232,
+                                  charge    = 0,
+                                  tlife     = 0.26320E-9/2,
+                                  pdg       = UNDEFINED,
+                                  trktyp    = kGtHADR,
+                                  bratio    = {1,},
+                                  mode      = { 98 14 09, }
+
+
+
+  PARTICLE LamXi2430 "Lambda0 Xi0 bound state " _
+                      code = 60002       pdg=0             ,
+                      trktyp = kGtNeut   mass=2.430543-0.002,
+                      charge = 0         tlife    = 1.0e-10,
+                      bratio = {0.5,  0.5 }                ,   
+                      mode   = {1423, 1818}                    
+
+  PARTICLE AntiLamXi2430 "Lambda0 Xi0 bound state " _
+                      code = 60003       pdg=0             ,
+                      trktyp = kGtNeut   mass=2.430543-0.002,
+                      charge = 0         tlife = 1.0e-10,    
+                      bratio = {0.5,  0.5 }                ,
+                      mode   = {1531, 2626}
+                      
+ 
+
+
 
                         
 

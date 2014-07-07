@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.57 2011/07/19 19:11:15 perev Exp $
+ * $Id: StAssociationMaker.cxx,v 1.58 2012/07/31 22:08:49 perev Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.58  2012/07/31 22:08:49  perev
+ * Track without detectorInfo ignored
+ *
  * Revision 1.57  2011/07/19 19:11:15  perev
  * Cleanup
  *
@@ -1350,8 +1353,14 @@ Int_t StAssociationMaker::Make()
     else { // Helen wants to keep the old global track from this node 
       rcTrack = dynamic_cast<const StGlobalTrack*>(trkNode->track(global));
     }
-    if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
-      continue; // If there are no Tpc Hits, skip track.
+    if (!rcTrack) 	continue; 
+// 		If there are no Tpc Hits, skip trackif (!rcTrack->detectorInfo()) continue;
+    if (!(rcTrack->detectorInfo())) {// There is no detectorInfo How it could be 
+static int mykount=0; mykount++;
+      Warning("Make","*** %d No detectorInfo, track ignored ***", mykount);
+      continue;
+    }
+    if (!(rcTrack->detectorInfo()->hits().size())) continue; 
     if (mInTrackerOn  && rcTrack->encodedMethod()!=263) continue; //for IT Tracks, skip the old globals
     if (!mInTrackerOn && rcTrack->encodedMethod()==263) continue; //for old globals, skip the IT tracks
     unsigned int nCandidates = 0;

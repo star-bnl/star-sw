@@ -1,5 +1,11 @@
-#define STR_OBSOLETE "WARNING *** Option is OBSOLETE ***"
+#if !defined(__CINT__)
+#include "TROOT.h"
+#endif
+#include "Bfc.h"
 #include "BigFullChain.h"
+#if !defined(__CINT__)
+TableImpl(Bfc);
+#endif
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_Bfc")) return 0;
   Int_t NoChainOptions = sizeof (BFC)/sizeof (Bfc_st);
