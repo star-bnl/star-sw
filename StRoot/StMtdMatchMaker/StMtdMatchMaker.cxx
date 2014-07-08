@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.12 2014/06/19 19:16:27 huangbc Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.13 2014/07/08 03:09:07 huangbc Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.13  2014/07/08 03:09:07  huangbc
+ * Change dca<10 to dca2Beam_R<10.
+ *
  * Revision 1.12  2014/06/19 19:16:27  huangbc
  * Fixed an issue of reading SL12d production data. Add expTof for MTD pidtraits.
  *
@@ -1141,18 +1144,19 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 			vertexPos = mEvent->primaryVertex()->position();
 		}
 	}
+	LOG_DEBUG<<"vertex "<<vertexPos.x()<<","<<vertexPos.y()<<","<<vertexPos.z()<<endm;
 	double length2Vtx = -99999.;
 	length2Vtx = TMath::Abs(gHelixTpc.pathLength(vertexPos));
-	LOG_DEBUG<<" vertex x,y,z:"<<vertexPos.x()<<","<<vertexPos.y()<<","<<vertexPos.z()<<endm;
+	//
+	StThreeVector<double> trkPos =  gHelixTpc.at(gHelixTpc.pathLengths(*mBeamHelix).first);
+	StThreeVector<double> beamPos = mBeamHelix->at(gHelixTpc.pathLengths(*mBeamHelix).second);
+	StThreeVector<double> dca2beam = trkPos - beamPos;
 	LOG_DEBUG<<" gq:"<<gq<<" ghelix ox,oy,oz:"<<ghelixox<<","<<ghelixoy<<","<<ghelixoz
 		<<" ghelix p,pt,eta,phi:"<<helixMomentum.mag()<<","<<helixMomentum.perp()<<","<<helixMomentum.pseudoRapidity()<<","<<helixMomentum.phi()
-		<<" length2vertex:"<<length2Vtx<<endm;
+		<<" dca2beam:"<<dca2beam.mag()<<" dcaR:"<<dca2beam.perp()<<endm;
+	LOG_DEBUG<<" dca2beam:"<<dca2beam.x()<<","<<dca2beam.y()<<","<<dca2beam.z()<<" mag:"<<dca2beam.mag()<<endm;
 
-
-
-	StThreeVector<double> dcaPos  = gHelixTpc.at(gHelixTpc.pathLength(vertexPos));
-	StThreeVector<double> dca 	  = dcaPos - vertexPos;
-	if(!mCosmicFlag && dca.mag()>10) return kFALSE;
+	if(!mCosmicFlag && dca2beam.perp()>10) return kFALSE;
 
 	//project track to TOF radius
 	double rTof = -9999.;
@@ -1508,7 +1512,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 	if(nCells>0&&mHisto) mHitsMultPerTrack->Fill(nCells);
 
 	if(mSaveTree){
-		mMtdEvtData.gdca[ngTracks] = dca.mag();	
+		mMtdEvtData.gdca[ngTracks] = dca2beam.mag();	
 		mMtdEvtData.gprojMtdBackLeg[ngTracks] = projMtdBackLeg;	
 		mMtdEvtData.gprojMtdModule[ngTracks] = projMtdModule;	
 		mMtdEvtData.gprojMtdCell[ngTracks] = projMtdCell;
