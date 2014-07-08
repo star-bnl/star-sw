@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.57 2014/07/01 20:29:02 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.58 2014/07/08 09:50:43 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.58  2014/07/08 09:50:43  fisyak
+ * Fix old correction with 2D and 3D mag.field
+ *
  * Revision 1.57  2014/07/01 20:29:02  fisyak
  * Clean up
  *
@@ -378,7 +381,7 @@ class StMagUtilities {
   virtual void    B3DField ( const Float_t x[], Float_t B[] )
   {StarMagField::Instance()->B3DField(x,B);}
   virtual void    B3DFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector = -1 );
-  virtual void    BFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector = -1 ) {B3DFieldTpc(xTpc,BTpc,Sector);} 
+  virtual void    BFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector = -1 );
   virtual void    BrBz3DField ( const Float_t r, const Float_t z, const Float_t phi,
 				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) 
   {StarMagField::Instance()->BrBz3DField(r, z, phi, Br_value, Bz_value, Bphi_value);}
