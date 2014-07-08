@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.103 2014/07/08 09:50:43 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.104 2014/07/08 10:07:38 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.104  2014/07/08 10:07:38  fisyak
+ * Add print out for new schema
+ *
  * Revision 1.103  2014/07/08 09:50:43  fisyak
  * Fix old correction with 2D and 3D mag.field
  *
@@ -935,6 +938,8 @@ void StMagUtilities::CommonStart ( Int_t mode )
   if ( mDistortionMode & kShortedRing )   printf (" + ShortedRing") ;
   if ( mDistortionMode & kGridLeak )      printf (" + GridLeak") ;
   if ( mDistortionMode & k3DGridLeak )    printf (" + 3DGridLeak") ;
+  if ( mDistortionMode & kSectorAlign )   printf (" + SectorAlign") ;
+  if ( ! StTpcDb::IsOldScheme())          printf (" + New TPC Alignment schema") ;
   usingCartesian = kTRUE; // default
 
   printf("\n");
