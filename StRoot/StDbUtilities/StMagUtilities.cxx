@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.102 2014/07/01 20:29:02 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.103 2014/07/08 09:50:43 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.103  2014/07/08 09:50:43  fisyak
+ * Fix old correction with 2D and 3D mag.field
+ *
  * Revision 1.102  2014/07/01 20:29:02  fisyak
  * Clean up
  *
@@ -4500,9 +4503,9 @@ Int_t StMagUtilities::IterationFailCount()
 
 }
 //________________________________________________________________________________
-void StMagUtilities::B3DFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector ) {
+void StMagUtilities::BFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector ) {
   if (StTpcDb::IsOldScheme()) {
-      B3DField( xTpc, BTpc) ; 
+      BField( xTpc, BTpc) ; 
   } else {
   // mag. field in Tpc local coordinate system
     Double_t Tpc[3] =  {xTpc[0], xTpc[1], xTpc[2]};
@@ -4517,6 +4520,14 @@ void StMagUtilities::B3DFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t S
     BTpc[0] = BTpcL[0];
     BTpc[1] = BTpcL[1];
     BTpc[2] = BTpcL[2];
+  }  
+}
+//________________________________________________________________________________
+void StMagUtilities::B3DFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sector ) {
+  if (StTpcDb::IsOldScheme()) {
+    B3DField( xTpc, BTpc) ; 
+  } else {
+    BFieldTpc(xTpc, BTpc, Sector);
   }  
 }
 //________________________________________________________________________________
