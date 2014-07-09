@@ -1,6 +1,25 @@
-* $Id: gdecay.F,v 1.5 2010/03/22 22:03:56 perev Exp $
+* $Id: gdecay.F,v 1.6 2014/07/09 18:27:55 jwebb Exp $
 * $Name:  $
 * $Log: gdecay.F,v $
+* Revision 1.6  2014/07/09 18:27:55  jwebb
+* Previous version of gdecay.F limited the decay products of a particle to
+* particles with geant ID <= 99 or <= 999.
+*
+* This version removes that restriction for the case where the geant IDs of
+* a single decay branch are placed within the user buffer of the particle.
+*
+* e.g. in gstar_part.g
+*
+*   PARTICLE P_N_XI     "(pnXi-) --> (hyper triton) pi-" _
+*                       code   = 60004     pdg   = 0             ,
+*                       trktyp = kGtNeut   mass  = 3.1975        ,
+*                       charge = 0         tlife = 1.6378e-10
+*
+*      """ Append actual decay mode in user buffer.  Up to 3 body decay """
+*      """ (phase space decay) supported """
+*      uw = { 0, 61053, 09 }
+*      Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
+*
 * Revision 1.5  2010/03/22 22:03:56  perev
 * Dealing with \/afs/rhic.bnl.gov/star/packages/.DEV fixed
 *
@@ -65,12 +84,23 @@ C.
       DIMENSION RNDM(1)
       LOGICAL   ROTATE
       Integer   Nba/100/
+      Integer   nw   
+      Real      uw(32) ! user buffer
       Real      P(5,5)
-      Integer   nt,n1,n2,n3,i,idal
+      Integer   nt,n1,n2,n3,i,idal,mytype
       character *8 cKrollWada
       character *80 cSTAR
+c     character *20 napart
       integer      iKrollWada/-1/,iYear,ln,lnblnk
       save         iKrollWada,cKrollWada
+      real mycharge, mytlife
+
+c
+c Call GFpart to retrieve user buffer.  Expect to overwrite everything
+c with poorly designed direct access to zebra below...
+c
+      Call GFpart( ipart,napart,mytype,amass,mycharge,mytlife,uw,nw )
+
 C.    ------------------------------------------------------------------
 C.
 C             Search for parent particle in decay list.
@@ -87,12 +117,17 @@ C
       JPA = LQ(JPART-IPART)
       JDK1 = LQ(JPA-1)
       JDK2 = LQ(JPA-2)
+
+      IF (nw.gt.0)                                 GO TO 666
+
       IF (JDK1.LE.0)                               GO TO 90
       IF (JDK2.LE.0)                               GO TO 90
+  
       DO 5 I=1,6
          BRATIO(I)=Q(JDK1+I)
          MODE(I)=IQ(JDK2+I)
    5  CONTINUE
+
 C
 C             Generate branching ratio and select decay mode.
 C
@@ -109,6 +144,7 @@ C
       BRAND    = 100.*RNDM(1)
       IF (BRAND.GE.BAREA(NBR)) GO TO 99
       ID       = IABS((LOCATF(BAREA,NBR,BRAND)))
+
 C
 C             Unpack decay mode.
 C
@@ -119,9 +155,22 @@ C
        nba=1000
       endif
 
-      NTYPE(1) = MOD(MXX,Nba)
-      NTYPE(2) = MOD(MXX/Nba,Nba)
-      NTYPE(3) = MOD(MXX/Nba/Nba,Nba)
+ 666  CONTINUE ! Branch here to allow unpacking of single decay mode from user words
+
+      IF (nw.eq.0) THEN
+
+         NTYPE(1) = MOD(MXX,Nba)
+         NTYPE(2) = MOD(MXX/Nba,Nba)
+         NTYPE(3) = MOD(MXX/Nba/Nba,Nba)
+         
+      ELSE ! If user buffer is filled, unpack particle ids from there...
+      
+         NTYPE(1) = uw( 3 )
+         NTYPE(2) = uw( 2 )
+         NTYPE(3) = uw( 1 )
+
+      ENDIF
+
 
       JP1 = LQ(JPART-NTYPE(1))
       JP2 = LQ(JPART-NTYPE(2))
