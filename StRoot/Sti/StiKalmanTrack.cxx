@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.125 2013/04/10 22:09:01 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.125 2013/04/10 22:09:01 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.126 2014/07/09 00:15:45 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.126 2014/07/09 00:15:45 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.126  2014/07/09 00:15:45  perev
+ * Fix wrong Xi2 for 5hits track
+ *
  * Revision 2.125  2013/04/10 22:09:01  fisyak
  * Roll back to version 04/04/2013
  *
@@ -670,7 +673,7 @@ double  StiKalmanTrack::getChi2() const
     trackChi2 += nodeChi2;
     ++fitHits;
   }
-  return (fitHits>5)?trackChi2/(2.*fitHits-5.):1e30;
+  return (fitHits>3)?trackChi2/(2.*fitHits-5.):1e30;
 }
 
 
