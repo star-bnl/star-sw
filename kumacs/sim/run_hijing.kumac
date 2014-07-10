@@ -1,52 +1,48 @@
-*MACRO hijev nevent=10 file=hijing run=1
+MACRO hijev nevent=10 file=hijing run=1
+application data hijev.inp
+' ====================================================== '
+' =====            Hijing Control file             ===== '
+' ====================================================== '
+' Run number                      '  1 
+' Event number                    '  0
+' Generator number                '  31   
+' Frame/Energy                    '  'CMS'  200.              
+' Projectile  type/A/Z            '  'A'  197 79              
+' Target      type/Z/Z            '  'A'  197 79           
+' Impact parameter min/max (fm)   '  0.   3.                  
+' Jet quenching (1=yes/0=no)      '  0                        
+' Hard scattering/pt jet          '  0   -2.25
+' Max # jets per nucleon (D=10)   '  10                        
+' Set ihpr2(11) and ihpr2(12)     '  1   1
+' Set ihpr2(21) and ihpr2(18)     '  1   0
+' set B production                '  1.5 
+hijev.inp
+* =======================================================
+*                        GSTAR setup
+detp  geometry year_2a
+RNDM  $pid [run]
+vsig  0.01  18.
+ghist [file].his 
+gstat time size mult stak
+* 
+make  hij
+make  geometry 
+make  gstar
+make  control 
+*                        set a primitive dataset structure
+mkdir evgen
+cd    evgen
+tdm/newtable particle particle 40000
+cd ..
+*                        I/O setup here
+ user/input    u  evgen/particle.staf
+ gfile         o  [file][run].fz
+*                        run event loop                 
+do i = 1, [nevent]
+  mod/call hijjet evgen/particle
+  more            evgen/particle
+  trig 1
+enddo
 *
-*****************************************
-*          OBSOLETED MACRO - WON'WORK
-*****************************************
-*application data hijev.inp
-*' ====================================================== '
-*' =====            Hijing Control file             ===== '
-*' ====================================================== '
-*' Run number                      '  1 
-*' Event number                    '  0
-*' Generator number                '  31   
-*' Frame/Energy                    '  'CMS'  200.              
-*' Projectile  type/A/Z            '  'A'  197 79              
-*' Target      type/Z/Z            '  'A'  197 79           
-*' Impact parameter min/max (fm)   '  0.   3.                  
-*' Jet quenching (1=yes/0=no)      '  0                        
-*' Hard scattering/pt jet          '  0   -2.25
-*' Max # jets per nucleon (D=10)   '  10                        
-*' Set ihpr2(11) and ihpr2(12)     '  1   1
-*' Set ihpr2(21) and ihpr2(18)     '  1   0
-*' set B production                '  1.5 
-*hijev.inp
-** =======================================================
-**                        GSTAR setup
-*detp  geometry year_2a
-*RNDM  $pid [run]
-*vsig  0.01  18.
-*ghist [file].his 
-*gstat time size mult stak
-** 
-*make  hij
-*make  geometry 
-*make  gstar
-*make  control 
-**                        set a primitive dataset structure
-*mkdir evgen
-*cd    evgen
-*tdm/newtable particle particle 40000
-*cd ..
-**                        I/O setup here
-* user/input    u  evgen/particle.staf
-* gfile         o  [file][run].fz
-**                        run event loop                 
-*do i = 1, [nevent]
-*  mod/call hijjet evgen/particle
-*  more            evgen/particle
-*  trig 1
-*enddo
-**
-*exit
-*return
+exit
+return
