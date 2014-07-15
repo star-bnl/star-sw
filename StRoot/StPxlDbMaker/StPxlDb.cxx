@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.5 2014/07/15 23:28:34 smirnovd Exp $
+ * $Id: StPxlDb.cxx,v 1.6 2014/07/15 23:28:48 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.6  2014/07/15 23:28:48  smirnovd
+ * Minor style changes
+ *
  * Revision 1.5  2014/07/15 23:28:34  smirnovd
  * .msg
  *
@@ -45,10 +48,11 @@
 #include "tables/St_pxlSensorTps_Table.h"
 #include "tables/St_pxlControl_Table.h"
 
+
 ClassImp(StPxlDb)
+
 //_____________________________________________________________________________
-StPxlDb::StPxlDb() :
-   StObject()
+StPxlDb::StPxlDb() : StObject()
 {
    mGeoHMatrixTpcOnGlobal = 0;
    mSensorStatusTable = 0;

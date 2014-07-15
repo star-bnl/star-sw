@@ -5,13 +5,16 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.h,v 1.10 2014/07/15 23:28:34 smirnovd Exp $
+ * $Id: StPxlDbMaker.h,v 1.11 2014/07/15 23:28:48 smirnovd Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  *
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.h,v $
+ * Revision 1.11  2014/07/15 23:28:48  smirnovd
+ * Minor style changes
+ *
  * Revision 1.10  2014/07/15 23:28:34  smirnovd
  * .msg
  *
@@ -49,14 +52,14 @@ public:
    Int_t  InitRun(Int_t runNumber);
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.10 2014/07/15 23:28:34 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.11 2014/07/15 23:28:48 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
 private:
    StPxlDb *mPxlDb; ///< See StPxlDb for details on created data structure. The ownership is passed to the STAR framework via ToWhiteBoard()
 
-   ClassDef(StPxlDbMaker, 0)  //StAF chain virtual base class for Makers
+   ClassDef(StPxlDbMaker, 0)
 };
 #endif
 

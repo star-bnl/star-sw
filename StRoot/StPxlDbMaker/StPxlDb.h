@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.h,v 1.5 2014/07/15 23:28:34 smirnovd Exp $
+ * $Id: StPxlDb.h,v 1.6 2014/07/15 23:28:48 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.h,v $
+ * Revision 1.6  2014/07/15 23:28:48  smirnovd
+ * Minor style changes
+ *
  * Revision 1.5  2014/07/15 23:28:34  smirnovd
  * .msg
  *
@@ -33,13 +36,14 @@
  *
  **************************************************************************/
 
-#ifndef StPxlDb_hh
-#define StPxlDb_hh
+#ifndef StPxlDb_h
+#define StPxlDb_h
 
 #include "StPxlUtil/StPxlConstants.h"
 #include "StObject.h"
 #include "TGeoMatrix.h"
 #include <map>
+
 class pxlSensorStatus_st;
 class pxlRowColumnStatus_st;
 class pxlHotPixels_st;
@@ -115,7 +119,7 @@ public:
    void setPxlControl(pxlControl_st *pxlControl) {mPxlControl = pxlControl;}
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.5 2014/07/15 23:28:34 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.6 2014/07/15 23:28:48 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -138,6 +142,6 @@ private:
    pxlControl_st *mPxlControl; ///< control parameters for raw data decoding and so on
    StThinPlateSpline *mThinPlateSpline[kNumberOfPxlSectors][kNumberOfPxlLaddersPerSector][kNumberOfPxlSensorsPerLadder]; ///< thin plate spline function to describe the sensor surface
 
-   ClassDef(StPxlDb, 0)  //StAF chain virtual base class for Makers
+   ClassDef(StPxlDb, 0)
 };
 #endif
