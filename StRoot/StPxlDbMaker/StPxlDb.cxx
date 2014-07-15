@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.4 2014/04/01 15:28:18 qiuh Exp $
+ * $Id: StPxlDb.cxx,v 1.5 2014/07/15 23:28:34 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.5  2014/07/15 23:28:34  smirnovd
+ * .msg
+ *
  * Revision 1.4  2014/04/01 15:28:18  qiuh
  * add single hot pixel masking
  *
@@ -29,17 +32,6 @@
  *
  *
  **************************************************************************/
-
-/*
-  relation within STAR frame
-  GlobalXyz = TpcOnGlobal * IdsOnTpc * PxlOnIds * HalfOnPxl * SectorOnHalf * LadderOnSector * SensorOnLadder * SensorLocalXyz
-
-  numbering :
-  Id  = (sector-1)*40 + (ladder-1)*10 + sensor
-  1<= sector <= 10
-  1<= ladder <= 4
-  1<= sensor <= 10
-*/
 
 #include "StPxlDb.h"
 #include "StPxlUtil/StPxlConstants.h"
