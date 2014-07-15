@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.14 2014/07/10 20:50:35 huangbc Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.15 2014/07/15 02:01:04 huangbc Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,9 +9,19 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.15  2014/07/15 02:01:04  huangbc
+ * Implement multi-tracks to 1 hit matching algo. Set neighbor module matching and 3 extra cells as default.
+ *
  * Revision 1.14  2014/07/10 20:50:35  huangbc
  * Use new MTD geometry class. Load geometry volume from geant.
  * Choose closest one for multi-tracks which associated with same hit.
+ * Remove dca cut
+ *
+ * Revision 1.13  2014/07/08 03:09:07  huangbc
+ * Change dca<10 to dca2Beam_R<10.
+ *
+ * Revision 1.12  2014/06/19 19:16:27  huangbc
+ * Fixed an issue of reading SL12d production data. Add expTof for MTD pidtraits.
  *
  * Revision 1.11  2014/04/16 02:23:39  huangbc
  * 1. fixed a bug of un-initialized variable nDedxPts in MtdTrack construction function.
@@ -157,8 +167,8 @@ StMtdMatchMaker::StMtdMatchMaker(const Char_t *name): StMaker(name)
 	mLockBField = kFALSE;
 	mMtdGeom = 0;
 
-	mnNeighbors = kFALSE;
-	mNExtraCells = 0;
+	mnNeighbors = kTRUE;
+	mNExtraCells = 3;
 	//mZLocalCut = 43.5;
 	mNSigReso = 3.; // n sigma of z and y resolution.
 	mSaveTree = kFALSE;
@@ -1362,7 +1372,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 	StructCellHit cellHit_candidate;
 	mtdCellHitVector tempVec = matchHitCellsVec;
 	mtdCellHitVector erasedVec = tempVec;
-
+	mtdCellHitVector multiHitsCellsVec_temp;
 	//if(Debug()){
 	//	LOG_INFO<<" matchHitCellsVec: "<<endm; 
 	//	mtdCellHitVectorIter ij=tempVec.begin();
@@ -1393,7 +1403,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 						cellHit.module = tempIter->module;
 						cellHit.backleg = tempIter->backleg;
 						cellHit.hitPosition = tempIter->hitPosition;
-						cellHit.trackIdVec = trackIdVec;
+						cellHit.trackIdVec.push_back(tempIter->trackIdVec.back());
 						cellHit.zhit = tempIter->zhit;
 						cellHit.matchFlag = -999; 
 						cellHit.yhit = tempIter->yhit;
@@ -1407,14 +1417,14 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 							LOG_INFO<<"track Info: "<<cellHit.zhit<<" "<<cellHit.yhit<<endm;
 							LOG_INFO<<"hit Info: "<<cellHit.backleg<<" "<<cellHit.module<<" "<<cellHit.cell<<endm;
 						}
-						multiHitsCellsVec.push_back(cellHit);
+						multiHitsCellsVec_temp.push_back(cellHit);
 					}
 					
 						cellHit_candidate.cell = erasedIter->cell;
 						cellHit_candidate.module = erasedIter->module;
 						cellHit_candidate.backleg = erasedIter->backleg;
 						cellHit_candidate.hitPosition = erasedIter->hitPosition;
-						cellHit_candidate.trackIdVec = trackIdVec;
+						cellHit_candidate.trackIdVec.push_back(erasedIter->trackIdVec.back());
 						cellHit_candidate.zhit = erasedIter->zhit;
 						cellHit_candidate.matchFlag = -999; 
 						cellHit_candidate.yhit = erasedIter->yhit;
@@ -1423,7 +1433,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 						cellHit_candidate.index2MtdHit = erasedIter->index2MtdHit;
 						cellHit_candidate.theta = erasedIter->theta;
 						cellHit_candidate.pathLength = erasedIter->pathLength;
-						multiHitsCellsVec.push_back(cellHit_candidate);
+						multiHitsCellsVec_temp.push_back(cellHit_candidate);
 						if(Debug())
 						{
 							LOG_INFO<<"track Info: "<<cellHit_candidate.zhit<<" "<<cellHit_candidate.yhit<<endm;
@@ -1475,6 +1485,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 			//	idVectorIter ij=tmpIdVec.begin();
 			//	while (ij != tmpIdVec.end()) { LOG_INFO<< " " << *ij<<endm; ++ij; }
 			//}
+			UInt_t temsize1 = tmpIdVec.size(); 
 			sort(tmpIdVec.begin(),tmpIdVec.end());
 			tmpIdVec.erase(unique(tmpIdVec.begin(),tmpIdVec.end()),tmpIdVec.end());
 			//if(Debug()){
@@ -1482,13 +1493,43 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 			//	idVectorIter ij=tmpIdVec.begin();
 			//	while (ij != tmpIdVec.end()) { LOG_INFO<< " " << *ij<<endm; ++ij; }
 			//}
-			cellHit.trackIdVec = tmpIdVec;
+			//cellHit.trackIdVec = tmpIdVec;
+			if(tmpIdVec.size()!=temsize1)
+			{
+				if(Debug())
+				{
+					LOG_INFO<<"mark here ="<<temsize1<<"  "<<tmpIdVec.size()<<endm;
+				}
+			}
 			if(tmpIdVec.size()==1){
+				cellHit.trackIdVec = tmpIdVec;
 				nSingleHitCells++;      
 				singleHitCellsVec.push_back(cellHit);
 			}else if(tmpIdVec.size()>1){
-				nMultiHitsCells++;
-				multiHitsCellsVec.push_back(cellHit);
+				mtdCellHitVector MutVec = multiHitsCellsVec_temp;
+				for(idVectorIter trkIdIter = tmpIdVec.begin();trkIdIter != tmpIdVec.end(); ++trkIdIter)
+				{	
+					int markflag = 0;
+					if(Debug()) LOG_INFO<<"trackId ="<<*trkIdIter<<endm;
+					
+					for(mtdCellHitVectorIter temIter=MutVec.begin();temIter != MutVec.end(); ++temIter)
+					{
+						idVector ID = temIter->trackIdVec;
+						if(Debug()) LOG_INFO<<"MutVecId ="<<ID.back()<<endm;
+						if(*trkIdIter == ID.back())
+						{
+							markflag++;
+							if(markflag==1)
+							{
+								nMultiHitsCells++;
+								multiHitsCellsVec.push_back(*temIter);
+								if(Debug()){
+									LOG_INFO<<"Accept VecId ="<<ID.back()<<endm;
+								}
+							}
+						}
+					}
+				}
 			}else{
 				LOG_WARN<<"D: something wrong here!"<<endm;
 			}
@@ -1503,6 +1544,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 			while (ij != trackIdVec.end()) { LOG_DEBUG<< " " << *ij<<endm; ij++; }
 		}
 		tempVec = erasedVec;
+		multiHitsCellsVec_temp.clear();
 	}
 	if(Debug()){
 		LOG_INFO<<"multiHitsCellsVec size="<<multiHitsCellsVec.size()<<endm;
@@ -1575,16 +1617,16 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 			if (ttCandidates.size()>1){  // sort on hitposition
 				Float_t ss(9999.);
 				vector<Int_t> ssCandidates;
-				for(size_t j=0;j<ntracks;j++) {
-					Float_t yy = vyhit[ttCandidates[j]];
-					Float_t ycell = (vcell[ttCandidates[j]]-87./2+0.5)*(3.8+0.6);
-					Float_t ll = fabs(yy-ycell);
-					Float_t mLeadingWest = vtdc[ttCandidates[j]].first;
-					Float_t mLeadingEast = vtdc[ttCandidates[j]].second;
+				for(int j=0;j<ntracks;j++) {
 					Int_t   ibackleg = vbackleg[ttCandidates[j]];
 					Int_t   imodule = vmodule[ttCandidates[j]];
 					Int_t   icell = vcell[ttCandidates[j]];
-					Float_t zcell = (mLeadingEast- mLeadingWest)/2./mVDrift[(ibackleg-1)*5+imodule-1][icell]*1e3;
+					Float_t yy = vyhit[ttCandidates[j]];
+					Float_t ycell = mMtdGeom->GetGeoModule(ibackleg,imodule)->GetCellLocalYCenter(icell);
+					Float_t ll = fabs(yy-ycell);
+					Float_t mLeadingWest = vtdc[ttCandidates[j]].first;
+					Float_t mLeadingEast = vtdc[ttCandidates[j]].second;
+					float zcell = (mLeadingEast- mLeadingWest)/2./mVDrift[(ibackleg-1)*mMtdGeom->GetNModules()+imodule-1][icell]*1e3;
 					Float_t zz = vzhit[ttCandidates[j]];
 					Float_t ww = fabs(zz-zcell);
 					Float_t rr = 9999.;
@@ -1595,7 +1637,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 					if(mCosmicFlag) rr = ll;
 					else rr = sqrt(ll*ll+ww*ww);
 					if(Debug()){
-						LOG_INFO<<"distrace::"<<" "<<ww<<" "<<ll<<" "<<rr<<endm;
+						LOG_INFO<<"distance::"<<" "<<ww<<" "<<ll<<" "<<rr<<endm;
 					}
 					if(rr<ss){
 						ss = rr; 
