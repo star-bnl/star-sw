@@ -5,19 +5,16 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.h,v 1.9 2014/05/06 20:18:40 jeromel Exp $
+ * $Id: StPxlDbMaker.h,v 1.10 2014/07/15 23:28:34 smirnovd Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
- ***************************************************************************
- *
- * Description:
- * Read DB and prepare information on pxl geometry and sensor/row/column status
- * More information at
- * https://www.star.bnl.gov/protected/heavy/qiuh/HFT/software/PXL_software.pdf
  *
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.h,v $
+ * Revision 1.10  2014/07/15 23:28:34  smirnovd
+ * .msg
+ *
  * Revision 1.9  2014/05/06 20:18:40  jeromel
  * Changed pxl_db to pxlDb as discussed with Hao
  *
@@ -34,6 +31,17 @@
 
 class StPxlDb;
 
+
+/*!
+ * This maker retrieves data from the PXL detector survey position measurements,
+ * pixel/channel status, and other run time information via the standard STAR
+ * database interface. A data structure of type StPxlDb is filled with the
+ * corresponding values.
+ *
+ * More information about the PXL software packages and organization can be
+ * found at
+ * https://www.star.bnl.gov/protected/heavy/qiuh/HFT/software/PXL_software.pdf
+ */
 class StPxlDbMaker : public StMaker
 {
 public:
@@ -41,12 +49,12 @@ public:
    Int_t  InitRun(Int_t runNumber);
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.9 2014/05/06 20:18:40 jeromel Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.10 2014/07/15 23:28:34 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
 private:
-   StPxlDb *mPxlDb;
+   StPxlDb *mPxlDb; ///< See StPxlDb for details on created data structure. The ownership is passed to the STAR framework via ToWhiteBoard()
 
    ClassDef(StPxlDbMaker, 0)  //StAF chain virtual base class for Makers
 };

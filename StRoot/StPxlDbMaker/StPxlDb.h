@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.h,v 1.4 2014/04/01 15:28:18 qiuh Exp $
+ * $Id: StPxlDb.h,v 1.5 2014/07/15 23:28:34 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.h,v $
+ * Revision 1.5  2014/07/15 23:28:34  smirnovd
+ * .msg
+ *
  * Revision 1.4  2014/04/01 15:28:18  qiuh
  * add single hot pixel masking
  *
@@ -45,6 +48,29 @@ class pxlSensorTps_st;
 class pxlControl_st;
 class StThinPlateSpline;
 
+
+/*!
+ * A convenience data container to hold information about the PXL position
+ * survey measurements, current channel/pixel status, and other online
+ * parameters saved in the STAR database.
+ *
+ * With the survey data the transformation to the global STAR coordinate system
+ * are represented as:
+ *
+ * <pre>
+ * GlobalXyz = TpcOnGlobal * IdsOnTpc * PxlOnIds * HalfOnPxl * SectorOnHalf * LadderOnSector * SensorOnLadder * SensorLocalXyz
+ *
+ * numbering :
+ * Id  = (sector-1)*40 + (ladder-1)*10 + sensor
+ * 1<= sector <= 10
+ * 1<= ladder <= 4
+ * 1<= sensor <= 10
+ * </pre>
+ *
+ * More information about the PXL software packages and organization can be
+ * found at
+ * https://www.star.bnl.gov/protected/heavy/qiuh/HFT/software/PXL_software.pdf
+ */
 class StPxlDb : public StObject
 {
 public:
@@ -78,8 +104,8 @@ public:
    const StThinPlateSpline *thinPlateSpline(Int_t sector, Int_t ladder, Int_t sensor) const ///< thin plate spline function to describe the sensor surface
    {return mThinPlateSpline[sector - 1][ladder - 1][sensor - 1];}
 
-   const pxlControl_st *pxlControl() ///< control parameters for raw data decoding and so on
-   {return mPxlControl;}
+   /*! Control parameters for raw data decoding and so on */
+   const pxlControl_st *pxlControl() {return mPxlControl;}
 
    void setGeoHMatrices(Survey_st **tables); ///< set geoHMatrix parameters with parameters from Survey_st tables
    void setSensorStatus(pxlSensorStatus_st *sensorStatus) {mSensorStatusTable = sensorStatus;}
@@ -89,12 +115,12 @@ public:
    void setPxlControl(pxlControl_st *pxlControl) {mPxlControl = pxlControl;}
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.4 2014/04/01 15:28:18 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.5 2014/07/15 23:28:34 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
 private:
-   //! geoHMatrices describing rotation + shift tranlations between different coordinate systems
+   //! geoHMatrices describing rotation + shift translations between different coordinate systems
    TGeoHMatrix *mGeoHMatrixTpcOnGlobal;
    TGeoHMatrix mGeoHMatrixIdsOnTpc;
    TGeoHMatrix mGeoHMatrixPstOnIds;
