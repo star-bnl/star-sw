@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.10 2014/03/27 22:46:46 smirnovd Exp $
+* $Id: StIstDbMaker.cxx,v 1.11 2014/07/15 23:17:51 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.11  2014/07/15 23:17:51  smirnovd
+* Improved doxygen documentation
+*
 * Revision 1.10  2014/03/27 22:46:46  smirnovd
 * Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
@@ -33,21 +36,6 @@
 * Revision 1.0 2013/11/04 16:15:30 Yaping
 * Initial version
 ****************************************************************************/
-/*
-  relation within STAR frame
-  IstOnGlobal = Tpc2Magnet * Ids2Tpc *    Ist2Ids     * Ladder2Ist * Sensor2Ladder * PS
-  with
-  Ids2Tpc = IstIdsOnTpc
-  Ist2Ids = IstIstOnPst * IstPstOnIds
-
-  Naming of roatation matrices in this maker :
-  positionGlobal  = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder * positionOnSensor
-
-  numbering
-  Id  = 1000 + (ladder-1)*6 + sensor
-  1<= ladder <= 24
-  1<= sensor <= 6
-*/
 
 #include <assert.h>
 #include "StIstUtil/StIstConsts.h"
