@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.15 2014/07/15 02:01:04 huangbc Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.16 2014/07/16 15:43:53 huangbc Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.16  2014/07/16 15:43:53  huangbc
+ * use mMtdGeom->SetLockBField();
+ *
  * Revision 1.15  2014/07/15 02:01:04  huangbc
  * Implement multi-tracks to 1 hit matching algo. Set neighbor module matching and 3 extra cells as default.
  *
@@ -466,7 +469,7 @@ Int_t StMtdMatchMaker::InitRun(int runnumber) {
 	
 	Float_t fScale = -1.;
 	if(mLockBField){
-		mMtdGeom->SetBFactor(1.);
+		mMtdGeom->SetLockBField(mLockBField);
 		LOG_INFO<<" Initializing locked mag.field for simulation! "<<endm;
 	}else if(StarMagField::Instance()){
 		//fScale = St_MagFactorC::instance()->ScaleFactor();
