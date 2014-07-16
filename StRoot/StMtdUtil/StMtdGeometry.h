@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.h,v 1.4 2014/07/10 20:45:13 huangbc Exp $
+ * $Id: StMtdGeometry.h,v 1.5 2014/07/16 15:31:01 huangbc Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.h,v $
+ * Revision 1.5  2014/07/16 15:31:01  huangbc
+ * Add an option to lock bfield to FF.
+ *
  * Revision 1.4  2014/07/10 20:45:13  huangbc
  * New geometry class for MTD, load geometry from geant geometry. Need gGeoManager.
  *
@@ -217,6 +220,7 @@ class StMtdGeometry : public TNamed{
   void   SetBFactor(Float_t val){mBFactor=val;}
   void   SetELossFlag(Bool_t val){mELossFlag=val;}
   void   SetCosmicFlag(Bool_t val){mCosmicFlag=val;}
+  void   SetLockBField(Bool_t val);
   void   DecodeCellId(Int_t id, Int_t &iBL, Int_t &iMod, Int_t &iCell);
   StThreeVectorD GetField(StThreeVectorD pos) const; /// tesla
   StThreeVectorD GetField(Double_t x, Double_t y, Double_t z) const;
@@ -231,6 +235,7 @@ class StMtdGeometry : public TNamed{
   Bool_t   mDebug;        //!Control message printing of this class
   Bool_t   mCosmicFlag;   //!Cosmic event flag
   Bool_t   mELossFlag;    //!Control energy loss flag
+  Bool_t   mLockBField;    //!Control mag field to FF 
   Int_t    mNExtraCells;  //!Control matching range in the module. 
   Int_t    mNValidBLs;
   Int_t    mMTTG2BL[mNBacklegs];
@@ -260,7 +265,7 @@ class StMtdGeometry : public TNamed{
 #endif
 
   const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.4 2014/07/10 20:45:13 huangbc Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.5 2014/07/16 15:31:01 huangbc Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StMtdGeometry,1)
 };
 
