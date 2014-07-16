@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.4 2014/07/10 20:45:13 huangbc Exp $
+ * $Id: StMtdGeometry.cxx,v 1.5 2014/07/16 15:31:01 huangbc Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.5  2014/07/16 15:31:01  huangbc
+ * Add an option to lock bfield to FF.
+ *
  * Revision 1.4  2014/07/10 20:45:13  huangbc
  * New geometry class for MTD, load geometry from geant geometry. Need gGeoManager.
  *
@@ -351,6 +354,7 @@ ClassImp(StMtdGeometry)
 	mNValidBLs = 0;
 	mStarBField = 0;
 	mBFactor = -1.;
+	mLockBField = 0;
 	mGeomTag = "y2014a";
 
 	fMagEloss = new TF1("f2","[0]*exp(-pow([1]/x,[2]))",0.,100);
@@ -592,9 +596,11 @@ void StMtdGeometry::Init(StMaker *maker){
 
 	if(!StarMagField::Instance()){
 		LOG_ERROR<<"StarMagField has not been initialized!"<<endm;
+		if(mLockBField){
+			new StarMagField ( StarMagField::kMapped, mBFactor);
+			mStarBField = StarMagField::Instance();
+		}
 		assert(StarMagField::Instance());
-		//new StarMagField ( StarMagField::kMapped, mBFactor);
-		//mStarBField = StarMagField::Instance();
 	}else{
 		Float_t  fScale = StarMagField::Instance()->GetFactor();
 		if(fabs(mBFactor-fScale)>0.01) LOG_ERROR<<"Inconsistent StarMagField scale factor! mBFactor = "<<mBFactor<<" fScale = "<<fScale<<" Please do SetBFactor()"<<endm;
@@ -1079,3 +1085,7 @@ Bool_t 	StMtdGeometry::IsMTTG(const TGeoVolume * vol) const {
 	return found;
 }
 
+void   StMtdGeometry::SetLockBField(Bool_t val){
+	mLockBField=val;
+	SetBFactor(1);
+}
