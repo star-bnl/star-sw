@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.h,v 1.6 2014/07/09 15:20:40 marr Exp $
+ * $Id: StMtdSimMaker.h,v 1.7 2014/07/16 20:09:11 marr Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMtdSimMaker.h,v $
- * Revision 1.6  2014/07/09 15:20:40  marr
- * Set the timing for MC hits according to time-of-flight and z posistion.
- * Ready for embedding test
+ * Revision 1.7  2014/07/16 20:09:11  marr
+ * Move the initialization of the GEANT-to-Backleg map using the database to InitRun()
  *
  * Revision 1.5  2014/01/20 18:01:05  geurts
  * bug update: changed default Maker name from TofSim to MtdSim in order to prevent name clashes with StBTofSimMaker [Bill LLope]
@@ -45,14 +44,12 @@ class TH2I;
 
 #include <vector>
 
-// For mVDrift
-const double vDrift = 56.;                              // ps/cm drifting velocity of electronic signal
-
 class StMtdSimMaker : public StMaker
 {
  private:
   Int_t mModuleChannel[5][24];
- 
+  
+
  protected:
   St_DataSet        *mGeantData;        //! geant table
   StEvent           *mEvent;            //!
@@ -157,7 +154,7 @@ class StMtdSimMaker : public StMaker
 //fg    void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.6 2014/07/09 15:20:40 marr Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.7 2014/07/16 20:09:11 marr Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StMtdSimMaker,1)
 };
