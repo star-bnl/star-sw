@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.48 2014/07/09 18:29:28 jwebb Exp $
+* $Id: gstar_part.g,v 1.49 2014/07/16 21:30:40 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.49  2014/07/16 21:30:40  jwebb
+* Added J/Psi --> mu+m- 100% branching ratio with geant ID 168.
+*
 * Revision 1.48  2014/07/09 18:29:28  jwebb
 * Added (pnXi-) "dibaryon" and it's antiparticle to gstar_part.g.  Required
 * modification of gdecay.F in order to accept arbitrary geant IDs for decay
@@ -326,6 +329,9 @@ MODULE gstar_part Is the STAR Particle Database
 * Heavy flavor studies -- July 2003 - May 2007, M.Potekhin
   Particle Jpsi       code=160 TrkTyp=4 mass=3.096  charge=0  tlife=7.48e-21,
                       pdg=443  bratio= { 1, }       mode= { 203, }
+
+  Particle Jpsi_mu    code=168 TrkTyp=4 mass=3.096  charge=0  tlife=7.48e-21,
+                      pdg=0    bratio= { 1, }       mode= { 0506, }
 
   Particle Upsilon    code=161 TrkTyp=4 mass=9.460  charge=0  tlife=1.254e-20,
                       pdg=553  bratio= { 1, }       mode= { 203, }
