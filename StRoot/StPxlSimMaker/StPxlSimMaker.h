@@ -1,11 +1,16 @@
 /*
- * $Id: StPxlSimMaker.h,v 1.5 2014/07/03 19:46:37 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.6 2014/07/17 01:47:43 mstftsm Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.6  2014/07/17 01:47:43  mstftsm
+ * Fix a bug in creating a new StPxlHitCollection.
+ * Random seed is set to default.
+ * DB geometry is set to default.
+ *
  * Revision 1.5  2014/07/03 19:46:37  mstftsm
  * Revereted the changes made for the pileup adder. That does not belong to the master branch.
  *
@@ -71,13 +76,13 @@ class StPxlSimMaker : public StMaker
   void useDIGMAPSSim() {SetAttr("useDIGMAPSSim",kTRUE);}
   void useIdealGeom() {mUseIdealGeom = kTRUE;}
   void useDbGeom() {mUseDbGeom = kTRUE;}
-  void useRandomSeed() {mUseRandomSeed = kTRUE;}
+  void useRandomSeed(Bool_t use = kTRUE) {mUseRandomSeed = use;}
 
   /*! \brief Documentation method. GetCVS can be called from the chain, providing a list
    *  of all maker versions in use.
   */
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.5 2014/07/03 19:46:37 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.6 2014/07/17 01:47:43 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
     StPxlISim* mPxlSimulator;
@@ -95,11 +100,16 @@ private:
 #endif
 
 /*
- * $Id: StPxlSimMaker.h,v 1.5 2014/07/03 19:46:37 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.6 2014/07/17 01:47:43 mstftsm Exp $
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.6  2014/07/17 01:47:43  mstftsm
+ * Fix a bug in creating a new StPxlHitCollection.
+ * Random seed is set to default.
+ * DB geometry is set to default.
+ *
  * Revision 1.5  2014/07/03 19:46:37  mstftsm
  * Revereted the changes made for the pileup adder. That does not belong to the master branch.
  *
