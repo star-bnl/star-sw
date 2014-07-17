@@ -1,6 +1,11 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.8  2014/07/17 01:47:43  mstftsm
+ * Fix a bug in creating a new StPxlHitCollection.
+ * Random seed is set to default.
+ * DB geometry is set to default.
+ *
  * Revision 1.7  2014/07/10 18:52:09  mstftsm
  * Check if StPxlHitCollection exists in StEvent and add simulated hits to it. Otherwise, create a new collection.
  *
@@ -42,7 +47,7 @@ ClassImp(StPxlSimMaker)
 
 using namespace std;
 
-StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(kFALSE), mUseDIGMAPSSim(kFALSE) , mUseIdealGeom(kTRUE), mUseDbGeom(kFALSE), mUseRandomSeed(kFALSE)
+StPxlSimMaker::StPxlSimMaker(const Char_t* name) : StMaker(name) , mPxlSimulator(0), mUseFastSim(kFALSE), mUseDIGMAPSSim(kFALSE) , mUseIdealGeom(kFALSE), mUseDbGeom(kTRUE), mUseRandomSeed(kTRUE)
 {
 }
 //____________________________________________________________
@@ -142,7 +147,8 @@ Int_t StPxlSimMaker::Make()
       bool newCollection = false;
       if (!pxlHitCol)
       {
-	 StPxlHitCollection *pxlHitCol = new StPxlHitCollection;
+	 LOG_INFO << "No existing StPxlHiCollection. Creating a new one..." <<endm;
+	 pxlHitCol = new StPxlHitCollection();
 	 newCollection = true;
       }
 
@@ -185,6 +191,11 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.8  2014/07/17 01:47:43  mstftsm
+ * Fix a bug in creating a new StPxlHitCollection.
+ * Random seed is set to default.
+ * DB geometry is set to default.
+ *
  * Revision 1.7  2014/07/10 18:52:09  mstftsm
  * Check if StPxlHitCollection exists in StEvent and add simulated hits to it. Otherwise, create a new collection.
  *
