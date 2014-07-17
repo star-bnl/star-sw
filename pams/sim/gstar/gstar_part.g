@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.49 2014/07/16 21:30:40 jwebb Exp $
+* $Id: gstar_part.g,v 1.50 2014/07/17 15:17:44 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.50  2014/07/17 15:17:44  jwebb
+* Added (Xi0Xi-) dibaryon with hacked decay modes... should be 4 body phase space, but G3 doesn't support easily.
+*
 * Revision 1.49  2014/07/16 21:30:40  jwebb
 * Added J/Psi --> mu+m- 100% branching ratio with geant ID 168.
 *
@@ -539,10 +542,7 @@ MODULE gstar_part Is the STAR Particle Database
                       trktyp = kGtNeut   mass  = 1.53180   ,
                       charge = 0         tlife = 0         ,
                       bratio = {1.,}     mode  = {3109,}
-
   
-
-
 
   ! omega(782) --> e+ e- 100%
   Particle omega  code=10150 TrkTyp=3 mass=.782   charge=0  tlife=7.79E-23,
@@ -768,6 +768,19 @@ Particle H_dibaryon               code      = 60001,
      uw = { 0, 61054, 08 }
      Call GSPART( %code, %title, %trktyp, %mass, %charge, %tlife, uw, nw )
 
+
+
+   PARTICLE Xi0_XiMinus "(Xi0Ximinus)" _
+                       code = 60006      pdg = 0             ,
+                       trktyp = kGtHadr  mass = 2.6346       ,
+                       charge = -1       tlife = 1.6378e-10  ,
+                       bratio = {0.5, 0.5}  mode = { 22 18 09, 23 18 07 }
+
+   PARTICLE AntiXi0_XiMinus _
+                       code = 60007      pdg = 0             ,
+                       trktyp = kGtHadr  mass = 2.6346       ,
+                       charge = +1       tlife = 1.6378e-10  ,
+                       bratio = {0.5, 0.5}  mode = { 30 26 08, 31 26 07 }
                         
 
 
