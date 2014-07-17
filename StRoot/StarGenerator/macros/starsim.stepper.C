@@ -22,6 +22,10 @@ StarKinematics *kinematics = 0;
 TF1 *ptDist  = 0;
 TF1 *etaDist = 0;
 
+Double_t _zslice  = 0;
+Int_t    _ntracks = 1;
+Int_t    rngSeed = 12345;
+
 // ----------------------------------------------------------------------------
 void geometry( TString tag, Bool_t agml=true )
 {
@@ -43,21 +47,20 @@ void trig( Int_t n=1 )
   //
   // Scan from zvertex 
   //
-  Double_t zvertex = -99.5;
-  for ( zvertex = -99.5; zvertex < 100.0; zvertex += 1.0 ) {
+  Double_t zvertex = _zslice;
 
-    // Clear the chain from the previous event
-    chain->Clear();
+  // Clear the chain from the previous event
+  chain->Clear();
 
-    primary->SetVertex( 0.0, 0.0, zvertex );
-    kinematics->Kine( 100, "pi-", 4.995, 5.005, -0.005, 0.005 );
+  primary->SetVertex( 0.0, 0.0, zvertex );
+  kinematics->Kine( _ntracks, "pi-", 4.995, 5.005, -0.005, 0.005 );
 
-    // Generate the event
-    chain->Make();
+  // Generate the event
+  chain->Make();
 
-    // Print the event
-    primary->event()->Print();
-  }
+  // Print the event
+  //primary->event()->Print();
+    
 }
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -97,16 +100,27 @@ void LoadLibraries( const Char_t *chopts = "y2014a geant gstar usexgeom agml " )
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
-void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
+//void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
+void starsim( Double_t zslice  = 0.0,
+	      Int_t    nevents = 100,
+	      Int_t    ntracks = 50,
+	      const Char_t *fzname = "stiscan_zslice.fz",                   // MC zebra file
+	      const Char_t *roname = "stiscan_zslice.track_history.root",   // Particle history file
+	      const Char_t *rcname = "stiscan_zslice.evgen_record.root"     // Event generator record
+	      )
 { 
 
   LoadLibraries();
 
+  _zslice  = zslice;
+  _ntracks = ntracks;
+
   //
   // Setup custom stepping
   //
-  AgUStep *step = AgUStep::Instance(); {
-    step->Init( "particle_history.root" );
+  AgUStep *step = AgUStep::Instance(); 
+  {
+    step->Init( roname );
   }
 
   // Setup RNG seed and map all ROOT TRandom here
@@ -120,7 +134,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   //  StarPrimaryMaker *
   primary = new StarPrimaryMaker();
   {
-    primary -> SetFileName( "kinematics.starsim.root");
+    primary -> SetFileName( rcname );
     chain -> AddBefore( "geant", primary );
   }
   primary->SetSigma( 0.0, 0.0, 0.0 );
@@ -139,16 +153,32 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   geometry("y2014a");
   command("gkine -4 0");
 
+  command( "DCAY 0" );
+  command( "ANNI 0" );
+  command( "BREM 0" );
+  command( "COMP 0" );
+  command( "HADR 0" );
+  command( "MUNU 0" );
+  command( "PAIR 0" );
+  command( "PFIS 0" );
+  command( "PHOT 0" );
+  command( "RAYL 0" );
+  command( "LOSS 2" );
+  command( "DRAY 0" );
+  command( "MULS 0" );
+  command( "STRA 0" );
+  command( "physi"  );
+
   //
   // Setup output file
   //
-  command("gfile o pythia6.starsim.fzd");
+  command(  Form("gfile o %s",fzname ) );
   
 
   //
   // Trigger on events
   //
-  trig();
+  for ( Int_t i=0;i<nevents;i++ )  trig();
 
   //
   // Finish up the stepper
