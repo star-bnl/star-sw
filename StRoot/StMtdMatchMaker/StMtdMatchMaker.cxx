@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.16 2014/07/16 15:43:53 huangbc Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.17 2014/07/18 15:52:00 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.17  2014/07/18 15:52:00  marr
+ * Initialize trgTime[2]
+ *
  * Revision 1.16  2014/07/16 15:43:53  huangbc
  * use mMtdGeom->SetLockBField();
  *
@@ -833,7 +836,7 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			}
 		}
 		StMuMtdHeader* mtdHeader=mMuDst->mtdHeader();
-		unsigned int trgTime[2];
+		unsigned int trgTime[2] = {0,0};
 		if(mtdHeader){
 			trgTime[0]=mtdHeader->triggerTime(1);
 			trgTime[1]=mtdHeader->triggerTime(2);
@@ -942,7 +945,7 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 		/// check for mtdCollection and fill local copy with ADC and TDC data
 		StMtdCollection *theMtd = mEvent->mtdCollection();
 		StMtdHeader* mtdHeader=theMtd->mtdHeader();
-		unsigned int trgTime[2];
+		unsigned int trgTime[2] = {0,0};
 		if(mtdHeader){
 			trgTime[0]=mtdHeader->triggerTime(0);
 			trgTime[1]=mtdHeader->triggerTime(1);
