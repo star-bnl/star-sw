@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.7 2014/07/16 20:09:10 marr Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.8 2014/07/18 15:52:48 marr Exp $
  *
  * Author: Frank Geurts
  *
@@ -258,6 +258,8 @@ Int_t StMtdSimMaker::FastCellResponse()
     mEvent->setMtdCollection(mMtdCollection);
     LOG_INFO << "... StMtdCollection Stored in StEvent! " << endm;
   }
+
+  return kStOK;
 }
 
 
