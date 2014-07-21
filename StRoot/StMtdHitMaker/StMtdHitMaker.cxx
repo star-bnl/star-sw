@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.16 2014/06/24 20:01:24 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.17 2014/07/21 20:17:04 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -920,9 +920,9 @@ void StMtdHitMaker::fillStEvent()
       if(mtdCollection->rawHitsPresent())
 	{
 	  StSPtrVecMtdRawHit& rawMtdVec = mtdCollection->mtdRawHits();
+	  LOG_INFO << rawMtdVec.size() << " MTD raw hits in event ..." << endm;
 	  if(Debug()) 
 	    {
-	      LOG_INFO << "MtdRawHitCollection: " << rawMtdVec.size() << " entries" << endm;
 	      for(size_t i=0;i<rawMtdVec.size();i++) 
 		{
 		  LOG_DEBUG << (*rawMtdVec[i]) << endm;
@@ -937,9 +937,9 @@ void StMtdHitMaker::fillStEvent()
       if(mtdCollection->hitsPresent())
 	{
 	  StSPtrVecMtdHit& mtdVec = mtdCollection->mtdHits();  
+	  LOG_INFO << mtdVec.size() << " MTD hits in event ..." << endm;
 	  if(Debug()) 
 	    {
-	      LOG_INFO << "MtdHitCollection: " << mtdVec.size() << " entries..." << endm;
 	      for(size_t i=0;i<mtdVec.size();i++)
 		{
 		  LOG_DEBUG << (*mtdVec[i]) << endm; 
@@ -981,8 +981,11 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.16 2014/06/24 20:01:24 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.17 2014/07/21 20:17:04 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.17  2014/07/21 20:17:04  marr
+// Add # of MTD hit information to the log file
+//
 // Revision 1.16  2014/06/24 20:01:24  marr
 // Able to process Run12 UU muDst where only the muMtdCollection is stored
 //
