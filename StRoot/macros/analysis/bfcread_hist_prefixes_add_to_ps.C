@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_prefixes_add_to_ps.C,v 3.4 2013/03/14 17:28:31 genevb Exp $
+// $Id: bfcread_hist_prefixes_add_to_ps.C,v 3.5 2014/07/22 20:37:52 genevb Exp $
 // $Log: bfcread_hist_prefixes_add_to_ps.C,v $
+// Revision 3.5  2014/07/22 20:37:52  genevb
+// Remove unnecessary library loads
+//
 // Revision 3.4  2013/03/14 17:28:31  genevb
 // StTpcDb.so now depends on StEvent.so
 //
@@ -89,12 +92,9 @@ void bfcread_hist_prefixes_add_to_ps(
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StIOMaker");
+    gSystem->Load("libglobal_Tables");
     gSystem->Load("StUtilities");
     gSystem->Load("StAnalysisUtilities");
-    gSystem->Load("libglobal_Tables");
-    gSystem->Load("libtpc_Tables");
-    gSystem->Load("libStDb_Tables.so");
-    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StEvent");
     gSystem->Load("StTpcDb");
     gSystem->Load("StPmdUtil");
