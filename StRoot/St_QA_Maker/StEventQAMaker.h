@@ -69,6 +69,7 @@ class StEventQAMaker : public StQAMakerBase {
   virtual void   MakeHistPMD();
   virtual void   MakeHistTOF();
   virtual void   MakeHistFMS();
+  virtual void   MakeHistMTD();
   
   virtual void   AllTriggers() { allTrigs = kTRUE; }
 
@@ -76,15 +77,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.17 2013/03/12 03:06:02 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.18 2014/07/22 20:39:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.17 2013/03/12 03:06:02 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.18 2014/07/22 20:39:28 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.18  2014/07/22 20:39:28  genevb
+// Add MTD to Offline QA
+//
 // Revision 2.17  2013/03/12 03:06:02  genevb
 // Add FMS/FPD histograms for Run 13+
 //
