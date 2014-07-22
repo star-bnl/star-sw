@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.40 2014/01/30 19:44:06 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.41 2014/07/22 20:39:28 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.41  2014/07/22 20:39:28  genevb
+// Add MTD to Offline QA
+//
 // Revision 2.40  2014/01/30 19:44:06  genevb
 // Additional TPC histogram for monitoring gas contamination
 //
@@ -256,6 +259,8 @@ Int_t StQAMakerBase::Make() {
   if (histsSet>=StQA_run8) MakeHistTOF(); 
   // histograms from FMS in StEvent
   if (histsSet>=StQA_run13) MakeHistFMS(); 
+  // histograms from MTD in StEvent
+  if (histsSet>=StQA_run12all) MakeHistMTD(); 
 
   eventCount++;
   return kStOk;

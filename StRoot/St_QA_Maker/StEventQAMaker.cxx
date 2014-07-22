@@ -2459,10 +2459,40 @@ void StEventQAMaker::MakeHistFMS() {
    
 
 }
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistMTD() {
+
+  StMtdCollection *mtdCollection = event->mtdCollection();
+  if(mtdCollection)
+    {
+      StSPtrVecMtdHit& mtdHits = mtdCollection->mtdHits();
+      Int_t nMtdHits = mtdHits.size();
+      hists->m_MtdNHits->Fill(nMtdHits);
+      Int_t nMthMtdHits = 0;
+      for(Int_t i=0; i<nMtdHits; i++)
+        {
+          StMtdHit *hit = mtdHits[i];
+          if(!hit) continue;
+          Int_t backleg = hit->backleg();
+          Int_t module  = hit->module();
+          Int_t channel = hit->cell();
+          hists->m_MtdHitMap->Fill(backleg,(module-1)*12+channel);
+          StTrack *gTrack = hit->associatedTrack();
+          if(!gTrack) continue;
+          nMthMtdHits++;
+          hists->m_MtdMatchHitMap->Fill(backleg,(module-1)*12+channel);
+        }
+      hists->m_MtdNMatchHits->Fill(nMthMtdHits);
+    }
+
+}
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.114 2014/03/17 14:06:18 fisyak Exp $
+// $Id: StEventQAMaker.cxx,v 2.115 2014/07/22 20:39:28 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.115  2014/07/22 20:39:28  genevb
+// Add MTD to Offline QA
+//
 // Revision 2.114  2014/03/17 14:06:18  fisyak
 // Add check on ssd_hits.size()
 //

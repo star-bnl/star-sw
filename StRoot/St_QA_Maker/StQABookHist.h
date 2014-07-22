@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.32 2012/03/05 03:42:32 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.33 2014/07/22 20:39:28 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.33  2014/07/22 20:39:28  genevb
+// Add MTD to Offline QA
+//
 // Revision 2.32  2012/03/05 03:42:32  genevb
 // Remove TPC XY dist, add TPC RPhi charge
 //
@@ -130,7 +133,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.32 2012/03/05 03:42:32 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.33 2014/07/22 20:39:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -707,6 +710,12 @@ class StQABookHist : public TObject {
   TH2F* m_tof_vtx_z;           //! vertex z from vpd vs verex z from TPC
   TH2F* m_tof_PID;             //! TOF PID:  1/beta vs p
 
+  TH1F *m_MtdNHits;            //!
+  TH2F *m_MtdHitMap;           //!
+  TH1F *m_MtdNMatchHits;       //!
+  TH2F *m_MtdMatchHitMap;      //!
+
+
   // ********************** Members For Internal Use *************************
  protected:
 
@@ -726,6 +735,7 @@ class StQABookHist : public TObject {
   virtual void   BookHistFPD();
   virtual void   BookHistPMD();
   virtual void   BookHistTOF();
+  virtual void   BookHistMTD();
 
   ClassDef(StQABookHist,0)
 };

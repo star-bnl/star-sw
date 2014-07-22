@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.21 2014/01/30 19:44:06 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.22 2014/07/22 20:39:28 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.22  2014/07/22 20:39:28  genevb
+// Add MTD to Offline QA
+//
 // Revision 2.21  2014/01/30 19:44:06  genevb
 // Additional TPC histogram for monitoring gas contamination
 //
@@ -121,7 +124,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.21 2014/01/30 19:44:06 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.22 2014/07/22 20:39:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -200,6 +203,7 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistPMD() {}
   virtual void MakeHistTOF() {}
   virtual void MakeHistFMS() {}
+  virtual void MakeHistMTD() {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
 };

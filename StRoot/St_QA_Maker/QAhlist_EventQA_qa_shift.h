@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.46 2014/01/30 19:44:06 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.47 2014/07/22 20:39:28 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.47  2014/07/22 20:39:28  genevb
+// Add MTD to Offline QA
+//
 // Revision 2.46  2014/01/30 19:44:06  genevb
 // Additional TPC histogram for monitoring gas contamination
 //
@@ -275,4 +278,8 @@
   ":fpd:QaFpdSums4",
   ":fpd:QaFpdSums5",
   ":fpd:QaFpdSums6",
-  ":fpd:QaFpdSums7"
+  ":fpd:QaFpdSums7",
+  ":mtd:QaMtdNHits",
+  ":mtd:QaMtdHitMap",
+  ":mtd:QaMtdNMatchHits",
+  ":mtd:QaMtdMatchHitMap"

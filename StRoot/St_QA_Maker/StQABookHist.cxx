@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.69 2013/03/12 03:06:02 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.70 2014/07/22 20:39:28 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.70  2014/07/22 20:39:28  genevb
+// Add MTD to Offline QA
+//
 // Revision 2.69  2013/03/12 03:06:02  genevb
 // Add FMS/FPD histograms for Run 13+
 //
@@ -758,6 +761,12 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pnt_sizeSSD = 0;
   m_pnt_eSSD = 0;
 
+// for MTD
+  m_MtdNHits = 0;
+  m_MtdHitMap = 0;
+  m_MtdNMatchHits = 0;
+  m_MtdMatchHitMap = 0;
+
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHist(Int_t histsSet){
@@ -785,6 +794,7 @@ void StQABookHist::BookHist(Int_t histsSet){
   if (histsSet<StQA_run12all) BookHistPMD();
   if (histsSet==StQA_MC) BookHistEval();
   if (histsSet>=StQA_run8) BookHistTOF();
+  if (histsSet>=StQA_run12all) BookHistMTD();
   
 }
 //_____________________________________________________________________________
@@ -2006,6 +2016,15 @@ void StQABookHist::BookHistTOF(){
   m_tof_vpd_hit =  QAH::H2F("QaTofHitvsVpdHit","TOF Hits vs Vpd Hits",50,0.,50.,100,0.,5000.);
   m_tof_vtx_z =  QAH::H2F("QaTofVpdZvsTpcZ","VPD vtxz vs TPC vtxz",100,-100.,100.,100,-100.,100.);
   m_tof_PID =  QAH::H2F("QaTofPID","TOF InvBeta vs p",100,0.,5.,100,0.,4.);
+
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistMTD(){
+
+  m_MtdNHits       = QAH::H1F("QaMtdNHits","Number of MTD hits per event;N",50,0,50);
+  m_MtdHitMap      = QAH::H2F("QaMtdHitMap","MTD: channel vs backleg of hits;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
+  m_MtdNMatchHits  = QAH::H1F("QaMtdNMatchHits","Number of matched MTD hits per event;N",20,0,20);
+  m_MtdMatchHitMap = QAH::H2F("QaMtdMatchHitMap","MTD: channel vs backleg of matched hits;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
 
 }
 //_____________________________________________________________________________
