@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdPidTraits.cxx,v 2.2 2014/05/29 16:58:05 ullrich Exp $
+ * $Id: StMtdPidTraits.cxx,v 2.3 2014/07/22 01:45:13 ullrich Exp $
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMtdPidTraits.cxx,v $
+ * Revision 2.3  2014/07/22 01:45:13  ullrich
+ * Added residuals (dz,dy) between matched track-hit pairs nd access functions (Rongrong Ma)
+ *
  * Revision 2.2  2014/05/29 16:58:05  ullrich
  * Added new member mExpTimeOfFlight and referring access methods.
  *
@@ -22,7 +25,7 @@
  ***************************************************************************/
 #include "StMtdPidTraits.h"
 
-static const char rcsid[] = "$Id: StMtdPidTraits.cxx,v 2.2 2014/05/29 16:58:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StMtdPidTraits.cxx,v 2.3 2014/07/22 01:45:13 ullrich Exp $";
 
 ClassImp(StMtdPidTraits)
 
@@ -41,6 +44,8 @@ StMtdPidTraits::StMtdPidTraits() : StTrackPidTraits(kMtdId)
       mSigmaMuon         = -999.; 
       mProbMuon          = -999.; 
       mExpTimeOfFlight   = -999.;
+      mDeltaY            = -999.;
+      mDeltaZ            = -999.;
 }
 
 StMtdPidTraits::~StMtdPidTraits() { /* noop */ }
