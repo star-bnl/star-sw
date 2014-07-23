@@ -497,7 +497,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    my $qrclocal = $dirbase . File::Basename::basename( $qrc );
 	    my @xpm = map ($dirbase . File::Basename::basename( $_), @xpmQT);
 	    my @dep = ($qrclocal,@xpm );
-	    my $out = "$dirbase". "qrc_". $stem . ".cxx"; # print "Qt4:  ut : $out ==> $qrclocal\n@xpmQT\n"; # if $param::debug ;
+	    my $out = "$dirbase". "qrc_". $stem . ".cxx"; 
+            # print "Qt4:  ut : $out ==> $qrclocal\n@xpmQT\n"; # if $param::debug ;
 	    Command $env [$out], @dep, qq(cd %1:d; $rcc %1:f -o %>:f );
 	    push @src, $out
 	}
@@ -509,7 +510,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     
     $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
     $SO_PKG_PLAIN = $SO_PKG;
-    if ( $#idlM > -1 and $PKG !~ "^St" ) { $PKG = "St_" . $PKG; @PlainObj = @src; $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};}
+    if ( $#idlM > -1 and $PKG !~ "^St" ) { 
+	$PKG      = "St_" . $PKG; 
+	@PlainObj = @src; 
+	$SO_PKG   = $PKG . "." . $env1->{SUFSOLIB};
+    }
     $SO_PKG_lib = "lib" . $SO_PKG;
     $SO_PKG_PLAIN_lib = "lib" . $SO_PKG_PLAIN;
   
@@ -527,7 +532,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "-=-=-=-=- Will now test $pkg\n" if ($param::debug);
     if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
 	# This make requires both ROOT Qt and QT libraries
-	if ( defined($env1->{Packages}->{QT}->{DIR})) {# && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
+	if ( defined($env1->{Packages}->{QT}->{DIR})) {
+             # && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
 	    #print "-=-=-=-=-=-=-=- QT is defined -=-=-=-=-=-=-=-=-=-=\n";
 	    $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{QT}->{INCDIR};
 	    $LIBPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{QT}->{LIBDIR};
@@ -573,6 +579,28 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
 	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+
+    } elsif ( $pkg =~ m/^Pythia8/ and $Dir =~ m/StarGenerator/ ){
+	# Append pythia 8 include path and define version
+	#print "***** DEBUG ****\n";
+	$CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/include"; 
+	$CPPPATH  .= $main::PATH_SEPARATOR . "#StRoot/StarGenerator/$pkg/include/Pythia8";
+	$CXXFLAGS .= " -DPythia8_version=\\\"$pkg\\\" ";
+	print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+	# Do not compile hepmc support, rootexamples
+	@src = ();
+	foreach my $s (@srcL) {
+	    next if ($s =~ m/example/ ||
+		     $s =~ m/hepmc/i      );
+	    #print "Including $s\n";
+	    push(@src,$s);
+	}
+	@srcL = @src;
+
+	#print "DEBUG ".join(" ",@srcL)."\n";
+
 
     } elsif ( $pkg =~ m/^StHbtMaker$/ ) {
 	$CPPPATH = "#" . $Dir;
@@ -640,19 +668,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     } elsif ( $pkg =~ m/^StJetFinder$/ ){
 	$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
 
-
-##ifndef ____MAC_____
-##    } elsif ( $pkg =~ m/^StDaqLib$/ ) {
-##	$CPPPATH = "#" . $Dir;
-##	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
-##	print "CPPPATH = $CPPPATH\n" if $param::debug;
-##else /* ____MAC_____ */
-#    } elsif ( $pkg =~ m/^StDaqLib$/ ) {
-#	$CPPPATH = "#" . $Dir;
-#	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
-#	print "CPPPATH = $CPPPATH\n" if $param::debug;
-##endif /* ____MAC_____ */
-    
     } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
 	$LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
 	$SO_PKG = "";
@@ -889,19 +904,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
       }
     }
-#    if ( $pkg =~ m/^StChain$/) {  
-#      if ($STAR_SYS =~ /gcc471/) { # hack for StRtsTable gcc471
-#	my $cxxflags = $env->{CXXFLAGS} . " -fpermissive"; print "cxxflags = $cxxflags\n";
-#	$envHack = $env->clone('CXXFLAGS' => $cxxflags); print "==> $envHack->{CXXFLAGS}\n";
-#	for ($i = 0; $i < $#src; $i++) {
-#	  if ($src[$i] =~ /StRtsTable\.cxx/) {
-#	    my @objfiles = Objects $envHack ($src[$i]);
-#	    $src[$i] = $objfiles[0];
-#	    last;
-#	  }
-#	}
-#      }
-#    }
+
     if ( $pkg =~ m/^StiMaker/) {  
       if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for StiMaker with gcc432
 	$DEBUG = "-g";
