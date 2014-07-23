@@ -31,7 +31,7 @@ use Cwd;
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.110 2012/11/13 14:57:21 fisyak Exp $ ';
+$CVS_id = '$Id: cons,v 1.111 2014/07/23 15:36:55 jeromel Exp $ ';
 $CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";
@@ -1236,30 +1236,30 @@ sub wanted {
   #  print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( (-r _ ) &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^inc$/ ||
-	/^doc/  ||
-	/^run$/ ||
-	/^tmp$/ ||
-	/^examples$/ ||
-	/^images$/ ||
-	/^local$/ ||
-	/^hold$/ ||
+       (/^CVS$/       ||
+	/^macros$/    ||
+	/^html$/      ||
+	/^idl$/       ||
+	/^exa$/       ||
+	/^inc$/       ||
+	/^doc/        ||
+	/^run$/       ||
+	/^tmp$/       ||
+	/^examples$/i ||
+	/^images$/    ||
+	/^local$/     ||
+	/^hold$/      ||
 	/^wrk$/)
      ) {$File::Find::prune = 1; return;}
   if ( /^\.\#/) {return;}
   if (
-      /^\w.*\.c$/       ||
-      /^\w.*\.cc$/      ||
-      /^\w.*\.cxx$/     ||
-      /^\w.*\.cpp$/     ||
-      /^\w.*\.g$/       ||
-      /^\w.*\.age$/     || #for STAR      /^\w.*\.f$/       ||
-      /^\w.*\.cdf$/     ||
+      /^\w.*\.c$/     ||
+      /^\w.*\.cc$/    ||
+      /^\w.*\.cxx$/   ||
+      /^\w.*\.cpp$/   ||
+      /^\w.*\.g$/     ||
+      /^\w.*\.age$/   || #for STAR      /^\w.*\.f$/       ||
+      /^\w.*\.cdf$/   ||
       /^\w.*\.F$/) {# print " $File::Find::name\n";
     push @main::search_files,  $File::Find::name;
   }
@@ -1269,18 +1269,18 @@ sub wanted_idlM {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( (-r _ ) &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^inc$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^images$/ ||
-	/^local$/ ||
-	/^hold$/ ||
+       (/^CVS$/       ||
+	/^macros$/    ||
+	/^html$/      ||
+	/^idl$/       ||
+	/^exa$/       ||
+	/^inc$/       ||
+	/^doc$/       ||
+	/^run$/       ||
+	/^examples$/i ||
+	/^images$/    ||
+	/^local$/     ||
+	/^hold$/      ||
 	/^wrk$/)
      ) {$File::Find::prune = 1; return;}
 #    print "=========>$_\n";
@@ -1300,25 +1300,25 @@ sub wanted_inc {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( (-r _ ) &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^images$/ ||
-	/^local$/ ||
-	/^hold$/ ||
+       (/^CVS$/       ||
+	/^macros$/    ||
+	/^html$/      ||
+	/^idl$/       ||
+	/^exa$/       ||
+	/^doc$/       ||
+	/^run$/       ||
+	/^examples$/i ||
+	/^images$/    ||
+	/^local$/     ||
+	/^hold$/      ||
 	/^wrk$/)
      ) {$File::Find::prune = 1; return;}
   if ( /^\.\#/) {return;}
   if ( /^\w.*\.h$/|| /^\w.*\.hh$/ ||
        /^\w.*\.inc$/  ||
-       /^\w.*\.hpp$/ ||
+       /^\w.*\.hpp$/  ||
        /^\w.*\.icpp$/ ||
-       /^\w.*\.icc$/ ||
+       /^\w.*\.icc$/  ||
        /^\w.*\.tpp$/) {# print " $File::Find::name\n";
       push @main::search_files,  $File::Find::name;
   }
@@ -1328,17 +1328,17 @@ sub wanted_ui {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( (-r _ ) &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^images$/ ||
-	/^local$/ ||
-	/^hold$/ ||
+       (/^CVS$/       ||
+	/^macros$/    ||
+	/^html$/      ||
+	/^idl$/       ||
+	/^exa$/       ||
+	/^doc$/       ||
+	/^run$/       ||
+	/^examples$/i ||
+	/^images$/    ||
+	/^local$/     ||
+	/^hold$/      ||
 	/^wrk$/)
      ) {$File::Find::prune = 1; return;}
   if ( /^\.\#/) {return;}
@@ -1352,17 +1352,17 @@ sub wanted_qrc {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( (-r _ ) &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^images$/ ||
-	/^local$/ ||
-	/^hold$/ ||
+       (/^CVS$/       ||
+	/^macros$/    ||
+	/^html$/      ||
+	/^idl$/       ||
+	/^exa$/       ||
+	/^doc$/       ||
+	/^run$/       ||
+	/^examples$/i ||
+	/^images$/    ||
+	/^local$/     ||
+	/^hold$/      ||
 	/^wrk$/)
      ) {$File::Find::prune = 1; return;}
   if ( /^\.\#/) {return;}
@@ -1375,17 +1375,17 @@ sub wanted_xpm {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( (-r _ ) &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^images$/ ||
-	/^local$/ ||
-	/^hold$/ ||
+       (/^CVS$/       ||
+	/^macros$/    ||
+	/^html$/      ||
+	/^idl$/       ||
+	/^exa$/       ||
+	/^doc$/       ||
+	/^run$/       ||
+	/^examples$/i ||
+	/^images$/    ||
+	/^local$/     ||
+	/^hold$/      ||
 	/^wrk$/)
      ) {$File::Find::prune = 1; return;}
   if ( /^\.\#/) {return;}
@@ -1398,13 +1398,13 @@ sub wanted_xml {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( (-r _ ) &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^images$/ ||
-	/^local$/ ||
+       (/^CVS$/       ||
+	/^macros$/    ||
+	/^doc$/       ||
+	/^run$/       ||
+	/^examples$/i ||
+	/^images$/    ||
+	/^local$/     ||
 	/^hold$/ )
      ) {$File::Find::prune = 1; return;}
   if ( /^\.\#/) {return;}
@@ -1418,17 +1418,17 @@ sub wanted_obj {
   #  print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( (-r _ ) &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^images$/ ||
-	/^local$/ ||
-	/^hold$/ ||
+       (/^CVS$/       ||
+	/^macros$/    ||
+	/^html$/      ||
+	/^idl$/       ||
+	/^exa$/       ||
+	/^doc$/       ||
+	/^run$/       ||
+	/^examples$/i ||
+	/^images$/    ||
+	/^local$/     ||
+	/^hold$/      ||
 	/^wrk$/)
      ) {$File::Find::prune = 1; return;}
   if ( /^\.\#/) {return;}
