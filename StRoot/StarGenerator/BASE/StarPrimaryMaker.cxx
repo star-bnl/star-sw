@@ -191,7 +191,7 @@ Int_t StarPrimaryMaker::Finish()
       StarGenerator *generator = 0; 
       StMaker *_maker = 0;
       
-      Int_t id = 0;
+      //Int_t id = 0;
       
       while ( (_maker=(StMaker *)Next()) )
 	{
