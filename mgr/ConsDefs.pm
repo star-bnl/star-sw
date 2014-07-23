@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.133 2013/08/07 18:47:09 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.134 2014/07/23 19:46:58 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -550,8 +550,20 @@
         if ($CXX_VERSION < 3) {
 	    $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
 	} else {
-            # ansi works only with gcc3.2 actually ... may be removed later ...
-	    $CXXFLAGS    .= " -ansi";
+	    # can do elsif () later but for now, enable if CXX11 is defined
+	    # AND version is al least 4.4 
+	    if ( $CXX_VERSION lt "4.4" || ! defined($ENV{CXX11}) ) {
+		# ansi works only with gcc3.2 actually ... may be removed later ...
+		$CXXFLAGS    .= " -ansi";
+	    } else {
+		# Starting from 4.4, c++0x has been implemented - feature metric
+		# is not even though - see https://gcc.gnu.org/gcc-4.4/cxx0x_status.html
+		# and related documents
+		#   SL5 we had  4.3.2 supporting a weak set of c++11
+		#   SL6 had gcc 4.4.7 with more advanced c++11 implementations
+		print "EXPERIMENTAL *** will use C++11 standards\n" unless ($param::quiet);
+		$CXXFLAGS    .= " -std=c++0x";
+	    }
 	}
 
         # -fpermissive ?
