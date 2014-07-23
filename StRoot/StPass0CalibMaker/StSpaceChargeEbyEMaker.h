@@ -41,6 +41,7 @@ public:
           void   DoPrePassmode() { PrePassmode = kTRUE; }
           void   DoNtuple() { doNtuple = kTRUE; DoGaps(); }
           void   DoGaps() { doGaps = kTRUE; }
+          void   DoSecGaps() { doSecGaps = kTRUE; DoGaps(); }
           void   DontReset() { doReset = kFALSE; }
           void   DoCalib() { Calibmode = kTRUE; DoQAmode(); DoNtuple(); }
           float  EvalCalib(TDirectory* hdir=0);
@@ -60,7 +61,7 @@ public:
             { reqEmcOrTofMatch = match; reqEmcMatch = kFALSE; reqTofMatch = kFALSE; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.17 2014/05/02 02:38:07 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.18 2014/07/23 17:58:46 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -90,6 +91,7 @@ protected:
   Bool_t doNtuple;
   Bool_t doReset;
   Bool_t doGaps;
+  Bool_t doSecGaps;
   UInt_t inGapRow;
   UInt_t vtxEmcMatch;
   UInt_t vtxTofMatch;
@@ -156,6 +158,10 @@ protected:
   TH2F* gapZhist;            //!
   TH2F* gapZhistneg;         //!
   TH2F* gapZhistpos;         //!
+  TH2F* gapZhistS[24];       //!
+  TH2F* gapZhistnegS[24];    //!
+  TH2F* gapZhistposS[24];    //!
+
 
   // QA hists and ntuple
   TH1I* cutshist;            //!
@@ -186,7 +192,7 @@ protected:
   void FillQAHists(float,float,float,int,StPhysicalHelixD&,int);
   void FillGapHists(StTrack*,StPhysicalHelixD&,int,int);
   void DetermineGaps();
-  void DetermineGapHelper(TH2F*,float&,float&,float&);
+  TString DetermineGapHelper(TH2F*,float&,float&,float&);
 
 
   ClassDef(StSpaceChargeEbyEMaker, 0)
@@ -195,8 +201,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.17 2014/05/02 02:38:07 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.18 2014/07/23 17:58:46 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.18  2014/07/23 17:58:46  genevb
+// Machinery for sector-by-sector Gaps (GridLeak) measurements
+//
 // Revision 1.17  2014/05/02 02:38:07  genevb
 // TrackInfo mode with pile-up tracks too
 //

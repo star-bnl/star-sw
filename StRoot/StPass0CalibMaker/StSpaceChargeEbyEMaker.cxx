@@ -76,7 +76,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     event(0),
     Calibmode(kFALSE), PrePassmode(kFALSE), PrePassdone(kFALSE),
     QAmode(kFALSE), TrackInfomode(0), Asymmode(kFALSE),
-    doNtuple(kFALSE), doReset(kTRUE), doGaps(kFALSE),
+    doNtuple(kFALSE), doReset(kTRUE), doGaps(kFALSE), doSecGaps(kFALSE),
     inGapRow(0),
     vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5), minTpcHits(25),
     reqEmcMatch(kFALSE), reqTofMatch(kFALSE), reqEmcOrTofMatch(kTRUE),
@@ -118,6 +118,11 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     schists[i] ->SetDirectory(0);
     schistsE[i]->SetDirectory(0);
     schistsW[i]->SetDirectory(0);
+  }
+  for (int i=0; i<24; i++) {
+    gapZhistS[i] = 0;
+    gapZhistnegS[i] = 0;
+    gapZhistposS[i] = 0;
   }
 }
 //_____________________________________________________________________________
@@ -166,6 +171,7 @@ Int_t StSpaceChargeEbyEMaker::Init() {
     case (11): DoNtuple(); DontReset(); break;
     case (12): DoNtuple(); DoQAmode(); break;
     case (13): DoNtuple(); DontReset(); DoQAmode(); break;
+    case (20): DoNtuple(); DontReset(); DoQAmode(); DoSecGaps(); break;
     case (50): DoTrackInfo(); break; // filter out pile-up tracks
     case (51): DoTrackInfo(2); break; // include pile-up tracks
     case (52): DoTrackInfo(3); break; // include pile-up tracks of any length
@@ -289,6 +295,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       gapZhist->Reset();
       gapZhistpos->Reset();
       gapZhistneg->Reset();
+      if (doSecGaps) for (int i=0; i<24; i++) {
+        gapZhistS[i]->Reset();
+        gapZhistposS[i]->Reset();
+        gapZhistnegS[i]->Reset();
+      }
     }
   } else {
     // Do not reset ntuple in calib mode
@@ -849,6 +860,7 @@ void StSpaceChargeEbyEMaker::FindSpaceCharge(TH1F* aschist, float& asc, float& a
 //_____________________________________________________________________________
 double StSpaceChargeEbyEMaker::FindPeak(TH1* hist,float& pkwidth) {
 
+  if (!hist) return -996.;
   pkwidth = 0.;
   if (hist->Integral() < 100.0) return -997.;
   double mn = hist->GetMean();
@@ -940,9 +952,15 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
     "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:ugl:zdcc:bbcc:vpdx:vpdw:vpde:zdcxnk:zdcwnk:zdcenk:const0:const1:sce:scw:usce");
 
   if (doGaps) {
-    gapZhist = new TH2F("Gaps","Gaps",GN,GL,GH,GZN,GZL,GZH);
-    gapZhistneg = new TH2F("Gapsneg","Gaps Neg",GN,GL,GH,GZN,GZL,GZH);
-    gapZhistpos = new TH2F("Gapspos","Gaps Pos",GN,GL,GH,GZN,GZL,GZH);
+    gapZhist = new TH2F("Gaps","Gaps",GZN,GZL,GZH,GN,GL,GH);
+    gapZhistneg = new TH2F("Gapsneg","Gaps Neg",GZN,GZL,GZH,GN,GL,GH);
+    gapZhistpos = new TH2F("Gapspos","Gaps Pos",GZN,GZL,GZH,GN,GL,GH);
+    if (doSecGaps) for (int i=0; i<24; i++) {
+      int j = i+1;
+      gapZhistS[i] = new TH2F(Form("Gaps%02d",j),Form("Gaps%02d",j),GZN,GZL,GZH,GN,GL,GH);
+      gapZhistnegS[i] = new TH2F(Form("Gapsneg%02d",j),Form("Gaps Neg%02d",j),GZN,GZL,GZH,GN,GL,GH);
+      gapZhistposS[i] = new TH2F(Form("Gapspos%02d",j),Form("Gaps Pos%02d",j),GZN,GZL,GZH,GN,GL,GH);
+    }
   }
 
 }
@@ -993,6 +1011,11 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
     gapZhist->Write();
     gapZhistneg->Write();
     gapZhistpos->Write();
+    if (doSecGaps) for (int i=0; i<24; i++) {
+      gapZhistS[i]->Write();
+      gapZhistnegS[i]->Write();
+      gapZhistposS[i]->Write();
+    }
   }
   if (doNtuple) ntup->Write();
   if (SCcorrection) {
@@ -1172,6 +1195,7 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
   float fsign = ( event->runInfo()->magneticField() < 0 ? -1 : 1 );
   StPtrVecHit hts = tri->detectorInfo()->hits(kTpcId);
   float gap = 0.; float zgap = 0.; int ct=0;
+  Int_t sector = -1;
   for (UInt_t ht=0; ht<hts.size(); ht++) {
     StTpcHit* hit = (StTpcHit*) hts[ht];
     UInt_t prow = hit->padrow();
@@ -1193,6 +1217,7 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
     Double_t residual = hh.geometricSignedDistance(hp.x(),hp.y());
 
     Int_t sec = hit->sector();
+    sector = ( sec == sector || sector < 0 ? sec : 0 ); // 0 if crossing sectors
     Double_t sector_angle = (TMath::Pi()/6.) * (sec < 13 ? 3 - sec : sec - 21);
     Double_t pathlen = hh.pathLength(hp.x(),hp.y());
     Double_t theta = TMath::ATan2(hh.cy(pathlen),hh.cx(pathlen)) - sector_angle;
@@ -1223,35 +1248,80 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
     ct++;
   }
 
+  sector = (doSecGaps ? sector - 1 : -1);
   float abs_zgap = TMath::Abs(zgap);
   if ((ct==2) && (abs_zgap<200.0) && (abs_zgap>10.0)) {
-     gapZhist->Fill(gap,zgap);
-     if (ch==1) gapZhistpos->Fill(gap,zgap);
-     else gapZhistneg->Fill(gap,zgap);
+     gapZhist->Fill(zgap,gap);
+     if (ch==1) gapZhistpos->Fill(zgap,gap);
+     else gapZhistneg->Fill(zgap,gap);
+     if (sector >= 0) {
+       gapZhistS[sector]->Fill(zgap,gap);
+       if (ch==1) gapZhistposS[sector]->Fill(zgap,gap);
+       else gapZhistnegS[sector]->Fill(zgap,gap);
+     }
+
      if (abs_zgap<150 && abs_zgap>25) { // Restrict the Z range further
        // normalize at z=100cm from ggrid
        float gap_scaled = (gap * 100.0) / (ZGGRID - abs_zgap);
        //float gap_scaled = (gap * 100.0) / (350.0 - abs_zgap);
        float z_beyond = ZGGRID+1.0;
-       gapZhist->Fill(gap_scaled,z_beyond);
-       if (ch==1) gapZhistpos->Fill(gap_scaled,z_beyond);
-       else gapZhistneg->Fill(gap_scaled,z_beyond);
+       gapZhist->Fill(z_beyond,gap_scaled);
+       if (ch==1) gapZhistpos->Fill(z_beyond,gap_scaled);
+       else gapZhistneg->Fill(z_beyond,gap_scaled);
+       if (sector >= 0) {
+         gapZhistS[sector]->Fill(z_beyond,gap_scaled);
+         if (ch==1) gapZhistposS[sector]->Fill(z_beyond,gap_scaled);
+         else gapZhistnegS[sector]->Fill(z_beyond,gap_scaled);
+       }
      }
    }
 }
 //_____________________________________________________________________________
 void StSpaceChargeEbyEMaker::DetermineGaps() {
-  DetermineGapHelper(gapZhistneg,gapZfitslopeneg,gapZfitinterceptneg,gapZdivslopeneg);
-  DetermineGapHelper(gapZhistpos,gapZfitslopepos,gapZfitinterceptpos,gapZdivslopepos);
-  DetermineGapHelper(gapZhist,gapZfitslope,gapZfitintercept,gapZdivslope);
+  TString GapStr = "Gap measurements: fit slope & intercept, div slope";
+
+  if (doSecGaps) {
+    float aslope, aintercept, adivslope;
+    GapStr += "\nneg (by sector):";
+    for (int i=0; i<24; i++) {
+      GapStr += Form("\n%2d : ",i+1);
+      GapStr += DetermineGapHelper(gapZhistnegS[i],aslope,aintercept,adivslope);
+    }
+    GapStr += "\npos (by sector):";
+    for (int i=0; i<24; i++) {
+      GapStr += Form("\n%2d : ",i+1);
+      GapStr += DetermineGapHelper(gapZhistposS[i],aslope,aintercept,adivslope);
+    }
+    GapStr += "\nall (by sector):";
+    for (int i=0; i<24; i++) {
+      GapStr += Form("\n%2d : ",i+1);
+      GapStr += DetermineGapHelper(gapZhistS[i],aslope,aintercept,adivslope);
+    }
+    GapStr += "\nAll sectors:";
+  }
+    
+  GapStr += "\nneg: ";
+  GapStr += DetermineGapHelper(gapZhistneg,gapZfitslopeneg,gapZfitinterceptneg,gapZdivslopeneg);
+  GapStr += "\npos: ";
+  GapStr += DetermineGapHelper(gapZhistpos,gapZfitslopepos,gapZfitinterceptpos,gapZdivslopepos);
+  GapStr += "\nall: ";
+  GapStr += DetermineGapHelper(gapZhist,gapZfitslope,gapZfitintercept,gapZdivslope);
+
+  LOG_INFO << GapStr << endm;
 }
 //_____________________________________________________________________________
-void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* gh,
+TString StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* gh,
       float& fitslope, float& fitintercept, float& divslope) {
 
+  TString result = "n/a";
+  if (gh->GetEntries() < 10) { // don't waste time fitting ~empty histograms
+    fitslope = 0; fitintercept = 0; divslope = 0;
+    egapZfitslope = 0; egapZfitintercept = 0; egapZdivslope = 0;
+    return result;
+  }
   ga1.SetParameters(gh->GetEntries()/(16.*2.*10.),0.,0.1);
   ga1.SetParLimits(0,0.001,10.0*gh->GetEntries()); // Loglikelihood only works with positive functions
-  gh->FitSlicesX(&ga1,1,0,20,"LB0Q"); // gapZhist bin contents are integers
+  gh->FitSlicesY(&ga1,1,0,20,"LB0Q"); // gapZhist bin contents are integers
   ga1.ReleaseParameter(0);
   const char* hn = gh->GetName();
   TH1D* GapsChi2 = (TH1D*) gDirectory->Get(Form("%s_chi2",hn));
@@ -1277,6 +1347,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* gh,
   delete GapsAmp;
   delete GapsMean;
   delete GapsRMS;
+
+  result = Form("%7.4f+/-%7.4f , %7.4f+/-%7.4f , %7.4f+/-%7.4f",
+                fitslope,egapZfitslope,fitintercept,egapZfitintercept,
+                divslope,egapZdivslope);
+  return result;
 }
 //_____________________________________________________________________________
 float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
@@ -1371,8 +1446,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.56 2014/06/26 22:06:26 fisyak Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.57 2014/07/23 17:58:46 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.57  2014/07/23 17:58:46  genevb
+// Machinery for sector-by-sector Gaps (GridLeak) measurements
+//
 // Revision 1.56  2014/06/26 22:06:26  fisyak
 // New Tpc Alignment, v632
 //
