@@ -6,11 +6,15 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.7 2014/07/10 20:50:35 huangbc Exp $
+ * $Id: StMtdMatchMaker.h,v 1.8 2014/07/24 02:53:04 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.8  2014/07/24 02:53:04  marr
+ * 1) Add log info of the matched track-hit pair
+ * 2) Set DeltaY and DeltaZ in PidTraits
+ *
  * Revision 1.7  2014/07/10 20:50:35  huangbc
  * Use new MTD geometry class. Load geometry volume from geant.
  * Choose closest one for multi-tracks which associated with same hit.
@@ -287,6 +291,7 @@ class StMtdMatchMaker: public StMaker
 		Int_t 			mNExtraCells; //! match with N extra cells 
 		Int_t 			ngTracks;
 
+		map<Int_t, Int_t> index2Primary;
 
 		///QA histograms
 		TH1D* mEventCounterHisto;
@@ -414,7 +419,7 @@ class StMtdMatchMaker: public StMaker
 		void fillTrackInfo(StMuTrack *t, float mField, UInt_t iNode);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.7 2014/07/10 20:50:35 huangbc Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.8 2014/07/24 02:53:04 marr Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 

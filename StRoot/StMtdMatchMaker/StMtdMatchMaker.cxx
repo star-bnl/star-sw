@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.17 2014/07/18 15:52:00 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.18 2014/07/24 02:53:04 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,10 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.18  2014/07/24 02:53:04  marr
+ * 1) Add log info of the matched track-hit pair
+ * 2) Set DeltaY and DeltaZ in PidTraits
+ *
  * Revision 1.17  2014/07/18 15:52:00  marr
  * Initialize trgTime[2]
  *
@@ -431,7 +435,7 @@ void StMtdMatchMaker::bookTree(){
 	mMtdEvt->Branch("gdca",&mMtdEvtData.gdca,"gdca[ngTrks]/F");
 	mMtdEvt->Branch("gtrackindex",&mMtdEvtData.gtrackindex,"gtrackindex[ngTrks]/I");//
 	mMtdEvt->Branch("gTrkMatchNum",&mMtdEvtData.gTrkMatchNum,"gTrkMatchNum[ngTrks]/I");
-	
+
 	mMtdEvt->Branch("gprojMtdBackLeg",&mMtdEvtData.gprojMtdBackLeg,"gprojMtdBackLeg[ngTrks][2]/b");
 	mMtdEvt->Branch("gprojMtdModule",&mMtdEvtData.gprojMtdModule,"gprojMtdModule[ngTrks][2]/b");
 	mMtdEvt->Branch("gprojMtdCell",&mMtdEvtData.gprojMtdCell,"gprojMtdCell[ngTrks][2]/b");
@@ -469,7 +473,7 @@ Int_t StMtdMatchMaker::InitRun(int runnumber) {
 	mMtdGeom->SetELossFlag(mELossFlag);
 	mMtdGeom->SetNExtraCells(mNExtraCells);
 	mMtdGeom->SetGeomTag(mGeomTag);
-	
+
 	Float_t fScale = -1.;
 	if(mLockBField){
 		mMtdGeom->SetLockBField(mLockBField);
@@ -477,7 +481,7 @@ Int_t StMtdMatchMaker::InitRun(int runnumber) {
 	}else if(StarMagField::Instance()){
 		//fScale = St_MagFactorC::instance()->ScaleFactor();
 		fScale = StarMagField::Instance()->GetFactor();
-	  	if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
+		if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
 		else{
 			mMtdGeom->SetBFactor(fScale);
 			LOG_INFO<<" Initializing mag.field from StarMagField! fScale = "<<fScale<<endm;
@@ -1078,6 +1082,18 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 	float mField = 0;
 	UInt_t Nnodes = 0;
 	if(mMuDstIn){
+
+		index2Primary.clear();
+		Int_t pNnodes = mMuDst->numberOfPrimaryTracks();
+		for(Int_t ii=0;ii<pNnodes;ii++){
+			StMuTrack *pTrack = mMuDst->primaryTracks(ii); 
+			if(!pTrack) continue;
+			Int_t index2Global = pTrack->index2Global();
+			StMuTrack *gTrack = mMuDst->globalTracks(index2Global);
+			if(!gTrack) continue;
+			index2Primary[index2Global] = ii;
+		}
+
 		Nnodes = mMuDst->numberOfGlobalTracks();
 		mField = mMuDst->event()->runInfo().magneticField();
 		for(UInt_t iNode=0;iNode<Nnodes;iNode++){
@@ -1090,13 +1106,20 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			StMuMtdPidTraits pidMtd;
 			theTrack->setMtdPidTraits(pidMtd);
 			theTrack->setIndex2MtdHit(-999);
+
 			bool isPrimary=kFALSE;
-			StMuTrack *thePrimaryTrack=(StMuTrack *)theTrack->primaryTrack();
-			if(thePrimaryTrack){
+			Int_t pIndex = -999;
+			map<Int_t, Int_t>::iterator it = index2Primary.find(iNode);
+			if(it!=index2Primary.end()){
+				pIndex = it->second;
+			}
+			if(pIndex>=0){
 				isPrimary=kTRUE;
+				StMuTrack *thePrimaryTrack= mMuDst->primaryTracks(pIndex);
 				thePrimaryTrack->setMtdPidTraits(pidMtd);
 				thePrimaryTrack->setIndex2MtdHit(-999);
 			}
+
 			if(!validTrack(theTrack)) continue;
 			const StMuBTofPidTraits tofpid = theTrack->btofPidTraits();
 			globalPos = tofpid.position();
@@ -1166,7 +1189,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 	StThreeVector<double> dcaPos  = helix.at(helix.pathLength(pVtx));
 	StThreeVector<double> dca     = dcaPos - pVtx;
 	//LOG_INFO<<"******************* B Field from data = "<<mField/10.<<" charge = "<<gq<<" **********************"<<endm;
-	
+
 	float mFieldFromGeom = mMtdGeom->GetFieldZ(100,100,0.);
 	if(fabs(mFieldFromGeom-mField/10.)>0.2){
 		LOG_WARN<<"Wrong magnetc field mField = "<<mField/10.<<" mFieldFromGeom = "<<mFieldFromGeom<<"  check the magF input!!!"<<endm;
@@ -1226,7 +1249,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 		}
 		//attention: only saved last matched hit
 		if(mSaveTree){
-			
+
 			mMtdEvtData.gprojMtdBackLeg[ngTracks][i] = iBL;	
 			mMtdEvtData.gprojMtdModule[ngTracks][i] = iMod;	
 			mMtdEvtData.gtrackindex[ngTracks]= (Int_t)iNode;//test Qian Yang
@@ -1268,7 +1291,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 				//if(stripPhiCen>2.*TMath::Pi()) stripPhiCen -= 2.*TMath::Pi();
 				//if(stripPhiCen<0.)    stripPhiCen += 2.*TMath::Pi();
 				stripPhiCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetCellPhiCenter(channel);
-				
+
 				double mLeTimeWest = daqIter->leadingEdgeTime.first;
 				double mLeTimeEast = daqIter->leadingEdgeTime.second;
 				StThreeVectorD modCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetNodePoint();
@@ -1276,7 +1299,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 
 				double daqphi = stripPhiCen;
 				double daqz   = stripZCen;
-				
+
 				//LOG_INFO<<"Test: strip phi center old = "<<stripPhiCen<<" new = "<<modCenPhi<<endm;
 				//LOG_INFO<<"Test: strip z center old = "<<stripZCen<<" new = "<<modCen.z()- (mLeTimeWest-mLeTimeEast)/2./vDrift*1000.<<endm;
 
@@ -1310,7 +1333,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 			}
 			double zsig = fZReso->Eval(p);
 			double phisig = fPhiReso->Eval(p);
-				
+
 			StThreeVectorD modCen = mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module)->GetNodePoint();
 			double ysig = phisig*modCen.perp();
 			//StThreeVector<double> hitPos;
@@ -1328,7 +1351,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 			if(daqIter->backleg==proIter->backleg){
 				if(daqIter->module==proIter->module) isMatch = true;
 			}
-			
+
 			if(mnNeighbors){
 				if(daqIter->backleg==proIter->backleg && daqIter->module!=proIter->module){
 					if(zdaq<0){
@@ -1425,26 +1448,26 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 						}
 						multiHitsCellsVec_temp.push_back(cellHit);
 					}
-					
-						cellHit_candidate.cell = erasedIter->cell;
-						cellHit_candidate.module = erasedIter->module;
-						cellHit_candidate.backleg = erasedIter->backleg;
-						cellHit_candidate.hitPosition = erasedIter->hitPosition;
-						cellHit_candidate.trackIdVec.push_back(erasedIter->trackIdVec.back());
-						cellHit_candidate.zhit = erasedIter->zhit;
-						cellHit_candidate.matchFlag = -999; 
-						cellHit_candidate.yhit = erasedIter->yhit;
-						cellHit_candidate.tot = erasedIter->tot;
-						cellHit_candidate.leadingEdgeTime = erasedIter->leadingEdgeTime;
-						cellHit_candidate.index2MtdHit = erasedIter->index2MtdHit;
-						cellHit_candidate.theta = erasedIter->theta;
-						cellHit_candidate.pathLength = erasedIter->pathLength;
-						multiHitsCellsVec_temp.push_back(cellHit_candidate);
-						if(Debug())
-						{
-							LOG_INFO<<"track Info: "<<cellHit_candidate.zhit<<" "<<cellHit_candidate.yhit<<endm;
-							LOG_INFO<<"hit Info: "<<cellHit_candidate.backleg<<" "<<cellHit_candidate.module<<" "<<cellHit_candidate.cell<<endm;
-						}
+
+					cellHit_candidate.cell = erasedIter->cell;
+					cellHit_candidate.module = erasedIter->module;
+					cellHit_candidate.backleg = erasedIter->backleg;
+					cellHit_candidate.hitPosition = erasedIter->hitPosition;
+					cellHit_candidate.trackIdVec.push_back(erasedIter->trackIdVec.back());
+					cellHit_candidate.zhit = erasedIter->zhit;
+					cellHit_candidate.matchFlag = -999; 
+					cellHit_candidate.yhit = erasedIter->yhit;
+					cellHit_candidate.tot = erasedIter->tot;
+					cellHit_candidate.leadingEdgeTime = erasedIter->leadingEdgeTime;
+					cellHit_candidate.index2MtdHit = erasedIter->index2MtdHit;
+					cellHit_candidate.theta = erasedIter->theta;
+					cellHit_candidate.pathLength = erasedIter->pathLength;
+					multiHitsCellsVec_temp.push_back(cellHit_candidate);
+					if(Debug())
+					{
+						LOG_INFO<<"track Info: "<<cellHit_candidate.zhit<<" "<<cellHit_candidate.yhit<<endm;
+						LOG_INFO<<"hit Info: "<<cellHit_candidate.backleg<<" "<<cellHit_candidate.module<<" "<<cellHit_candidate.cell<<endm;
+					}
 				}
 				//
 				nTracks++;
@@ -1517,7 +1540,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 				{	
 					int markflag = 0;
 					if(Debug()) LOG_INFO<<"trackId ="<<*trkIdIter<<endm;
-					
+
 					for(mtdCellHitVectorIter temIter=MutVec.begin();temIter != MutVec.end(); ++temIter)
 					{
 						idVector ID = temIter->trackIdVec;
@@ -1892,19 +1915,6 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 /// Take final matched MTD hits and update the track PID traits with MTD information
 void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t& nValidSingleHitCells,Int_t& nValidSinglePrimHitCells){
 
-	map<Int_t, Int_t> index2Primary;
-	if(mMuDstIn){
-		UInt_t pNnodes = mMuDst->numberOfPrimaryTracks();
-		for(size_t ii=0;ii<pNnodes;ii++){
-			StMuTrack *pTrack = mMuDst->primaryTracks(ii); 
-			if(!pTrack) continue;
-			Int_t index2Global = pTrack->index2Global();
-			StMuTrack *gTrack = mMuDst->globalTracks(index2Global);
-			if(!gTrack) continue;
-			index2Primary[index2Global] = ii;
-		}
-	}
-
 	for (size_t ii=0; ii < finalMatchedCellsVec.size(); ii++){
 		Int_t backleg = finalMatchedCellsVec[ii].backleg;
 		Int_t module = finalMatchedCellsVec[ii].module;
@@ -1915,8 +1925,14 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 
 		//Float_t ycenter = (cell-mMtdGeom->GetNCells()/2+0.5)*(mCellWidth+mCellGap);
 		Float_t ycenter = mMtdGeom->GetGeoModule(backleg,module)->GetCellLocalYCenter(cell);
+		Float_t yLocal = finalMatchedCellsVec[ii].yhit;
+		Float_t zLocal = finalMatchedCellsVec[ii].zhit;
+
+		Float_t LeTimeWest = finalMatchedCellsVec[ii].leadingEdgeTime.first;
+		Float_t LeTimeEast = finalMatchedCellsVec[ii].leadingEdgeTime.second;
+		Float_t fireZLocal = (LeTimeEast-LeTimeWest)/2./vDrift*1000.;
 		Float_t dy = finalMatchedCellsVec[ii].yhit - ycenter;
-		Float_t dz = finalMatchedCellsVec[ii].zhit;
+		Float_t dz = finalMatchedCellsVec[ii].zhit - fireZLocal;
 		if(mHisto) {
 			mTracksPerCellMatch3->Fill(finalMatchedCellsVec[ii].trackIdVec.size());
 			//      mDaqOccupancyMatch3->Fill((module-1)*mNCell+(cell-1));
@@ -1928,6 +1944,9 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 		// get track-id from cell hit vector
 		Int_t trackNode = finalMatchedCellsVec[ii].trackIdVec[0];
 		if(mMuDstIn){
+
+		        LOG_INFO<<"In StMuDst mode: mtd hit matched with track successfully : track nodeId:"<<finalMatchedCellsVec[ii].trackIdVec[0]<<"   mtd hitId:"<<finalMatchedCellsVec[ii].index2MtdHit<<endm;
+
 			StMuTrack *gTrack = mMuDst->globalTracks(trackNode);
 			if(!gTrack) {
 				LOG_WARN << "Wrong global track!" << endm;
@@ -1946,8 +1965,10 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 
 			StMuMtdPidTraits pidMtd = gTrack->mtdPidTraits();
 			pidMtd.setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
-			pidMtd.setYLocal(dy);
-			pidMtd.setZLocal(dz);
+			pidMtd.setYLocal(yLocal);
+			pidMtd.setZLocal(zLocal);
+			pidMtd.setDeltaY(dy);
+			pidMtd.setDeltaZ(dz);
 			pidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
 			pidMtd.setPosition(finalMatchedCellsVec[ii].hitPosition);
 			pidMtd.setPathLength(finalMatchedCellsVec[ii].pathLength);
@@ -1964,8 +1985,10 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 				pTrack->setIndex2MtdHit(finalMatchedCellsVec[ii].index2MtdHit);
 				StMuMtdPidTraits ppidMtd = pTrack->mtdPidTraits();
 				ppidMtd.setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
-				ppidMtd.setYLocal(dy);
-				ppidMtd.setZLocal(dz);
+				ppidMtd.setYLocal(yLocal);
+				ppidMtd.setZLocal(zLocal);
+				ppidMtd.setDeltaY(dy);
+				ppidMtd.setDeltaZ(dz);
 				ppidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
 				ppidMtd.setPosition(finalMatchedCellsVec[ii].hitPosition);
 				ppidMtd.setPathLength(finalMatchedCellsVec[ii].pathLength);
@@ -1973,6 +1996,9 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			}
 
 		}else{
+
+			LOG_INFO<<"In StEvent mode: mtd hit matched with track successfully : track nodeId:"<<finalMatchedCellsVec[ii].trackIdVec[0]<<"   mtd hitId:"<<finalMatchedCellsVec[ii].index2MtdHit<<endm;
+
 			// get track-id from cell hit vector
 			StSPtrVecTrackNode &nodes = mEvent->trackNodes();
 			StGlobalTrack *globalTrack = dynamic_cast<StGlobalTrack*>(nodes[trackNode]->track(global));
@@ -1997,8 +2023,10 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			StMtdPidTraits *pidMtd = new StMtdPidTraits();
 			pidMtd->setMtdHit(mtdHit);
 			pidMtd->setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
-			pidMtd->setYLocal(dy);
-			pidMtd->setZLocal(dz);
+			pidMtd->setYLocal(yLocal);
+			pidMtd->setZLocal(zLocal);
+			pidMtd->setDeltaY(dy);
+			pidMtd->setDeltaZ(dz);
 			pidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
 			pidMtd->setPosition(finalMatchedCellsVec[ii].hitPosition);
 			pidMtd->setPathLength(finalMatchedCellsVec[ii].pathLength);
@@ -2008,8 +2036,10 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 				StMtdPidTraits *ppidMtd = new StMtdPidTraits();
 				ppidMtd->setMtdHit(mtdHit);
 				ppidMtd->setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
-				ppidMtd->setYLocal(dy);
-				ppidMtd->setZLocal(dz);
+				ppidMtd->setYLocal(yLocal);
+				ppidMtd->setZLocal(zLocal);
+				ppidMtd->setDeltaY(dy);
+				ppidMtd->setDeltaZ(dz);
 				ppidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
 				ppidMtd->setPosition(finalMatchedCellsVec[ii].hitPosition);
 				ppidMtd->setPathLength(finalMatchedCellsVec[ii].pathLength);
