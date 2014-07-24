@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.5 2014/07/16 15:31:01 huangbc Exp $
+ * $Id: StMtdGeometry.cxx,v 1.6 2014/07/24 17:02:30 huangbc Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.6  2014/07/24 17:02:30  huangbc
+ * Add protection for reading magnetic field in case of track projection position is (nan,nan,nan).
+ *
  * Revision 1.5  2014/07/16 15:31:01  huangbc
  * Add an option to lock bfield to FF.
  *
@@ -194,10 +197,12 @@ Bool_t StMtdGeoNode::HelixCross(const StPhysicalHelixD helix, const Double_t pat
 	Float_t MaxPathLength = 1000.;
 
 	Bool_t ret = kFALSE;
-	pathL = 0;
+	pathL = -9999.;
+	tof   = -9999.;
 
-	pathL = helix.pathLength(fPoint, fNormal);
 	StThreeVectorD oh = helix.origin();
+	if(TMath::IsNaN(oh.x())||TMath::IsNaN(oh.y())||TMath::IsNaN(oh.z())||TMath::Abs(oh.perp())>450.||TMath::Abs(oh.z())>300.) return ret;
+	pathL = helix.pathLength(fPoint, fNormal);
 	double betaGam = helix.momentum(gMtdGeometry->GetFieldZ(oh)).mag()/muonMass;
 	double velocity = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light*1e-9;
 	tof   = pathL/velocity;
@@ -208,10 +213,7 @@ Bool_t StMtdGeoNode::HelixCross(const StPhysicalHelixD helix, const Double_t pat
 		//LOG_INFO<<"track cross point "<<cross.x()<<","<<cross.y()<<","<<cross.z()<<endm;
 		pathL += pathToMagOutR;
 		tof   += tofToMagOutR;
-	}else{
-		pathL = -9999.;
-		tof   = -9999.;
-	}
+	}	
 	return ret;
 }
 
@@ -603,7 +605,7 @@ void StMtdGeometry::Init(StMaker *maker){
 		assert(StarMagField::Instance());
 	}else{
 		Float_t  fScale = StarMagField::Instance()->GetFactor();
-		if(fabs(mBFactor-fScale)>0.01) LOG_ERROR<<"Inconsistent StarMagField scale factor! mBFactor = "<<mBFactor<<" fScale = "<<fScale<<" Please do SetBFactor()"<<endm;
+		if(TMath::Abs(mBFactor-fScale)>0.01) LOG_ERROR<<"Inconsistent StarMagField scale factor! mBFactor = "<<mBFactor<<" fScale = "<<fScale<<" Please do SetBFactor()"<<endm;
 		mStarBField = StarMagField::Instance();
 	}
 }
@@ -630,6 +632,8 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 	double rInnerEmc =  (sInnerEmc.first < 0 || sInnerEmc.second < 0) 
 		? max(sInnerEmc.first, sInnerEmc.second) : min(sInnerEmc.first, sInnerEmc.second); 
 	StThreeVectorD innerEmcPos = helix.at(rInnerEmc);
+		
+	if(TMath::IsNaN(innerEmcPos.x())||TMath::IsNaN(innerEmcPos.y())||TMath::IsNaN(innerEmcPos.z())||TMath::Abs(innerEmcPos.perp())>450.||TMath::Abs(innerEmcPos.z())>300.) return kFALSE;
 	Double_t bField = GetFieldZ(innerEmcPos);
 	Int_t charge = helix.charge(bField);
 	if(IsDebugOn()) LOG_INFO<<" charge = "<<charge<<" bField = "<<bField<<endm;
@@ -664,6 +668,7 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 	for( int i=0; i<nEmcStep; i++){
 		double EmcLayerRadius = mEmcInR+rEmcStep*(i+1);
 
+		if(TMath::IsNaN(EmcLayerPos.x())||TMath::IsNaN(EmcLayerPos.y())||TMath::IsNaN(EmcLayerPos.z())||TMath::Abs(EmcLayerPos.perp())>450.||TMath::Abs(EmcLayerPos.z())>300.) return kFALSE;
 		bField = GetFieldZ(EmcLayerPos);
 		StPhysicalHelixD helixInEmc(EmcLayerMom,EmcLayerPos,bField*tesla,charge);
 
@@ -679,7 +684,6 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 		tofEmcLayer[i]     = rEmcLayer/vEmc;
 
 		EmcLayerPos = helixInEmc.at(rEmcLayer);
-		bField = GetFieldZ(EmcLayerPos);
 		EmcLayerMom = helixInEmc.momentumAt(rEmcLayer,bField*tesla);
 		//EmcLayerMom = (sqrt(pow((sqrt(pow((abs(EmcLayerMom)),2)+pow(muonMass,2))-rEmcLayer*elossEmc),2)-pow(muonMass,2)))/(abs(EmcLayerMom))*EmcLayerMom;
 		EmcLayerMom = (EmcLayerMom.mag()-elossEmc)/EmcLayerMom.mag()*EmcLayerMom;
@@ -694,6 +698,7 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 	}
 
 	//4: coil 
+	if(TMath::IsNaN(EmcLayerPos.x())||TMath::IsNaN(EmcLayerPos.y())||TMath::IsNaN(EmcLayerPos.z())||TMath::Abs(EmcLayerPos.perp())>450.||TMath::Abs(EmcLayerPos.z())>300.) return kFALSE;
 	bField = GetFieldZ(EmcLayerPos);
 	const int nCoilStep = 5;
 	double rCoilStep = (mMagInR-mEmcOutR)/nCoilStep; //cm
@@ -711,6 +716,7 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 	for( int i=0; i<nCoilStep; i++){
 		double CoilLayerRadius = mEmcOutR+rCoilStep*(i+1);
 
+		if(TMath::IsNaN(CoilLayerPos.x())||TMath::IsNaN(CoilLayerPos.y())||TMath::IsNaN(CoilLayerPos.z())||TMath::Abs(CoilLayerPos.perp())>450.||TMath::Abs(CoilLayerPos.z())>300.) return kFALSE;
 		bField = GetFieldZ(CoilLayerPos);
 		StPhysicalHelixD helixInCoil(CoilLayerMom,CoilLayerPos,bField*tesla,charge);
 
@@ -726,7 +732,6 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 		tofCoilLayer[i]     = rCoilLayer/vCoil;
 
 		CoilLayerPos = helixInCoil.at(rCoilLayer);
-		//bField = GetFieldZ(CoilLayerPos);
 		CoilLayerMom = helixInCoil.momentumAt(rCoilLayer,bField*tesla);
 		if(IsDebugOn()){
 			LOG_INFO<<" to Coil Layer "<<i<<" bField = "<<bField<<endm;
@@ -767,6 +772,7 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 	for( int i=0; i<nMagStep; i++){
 
 		double MagLayerRadius = mMagInR+rStep*(i+1);
+		if(TMath::IsNaN(MagLayerPos.x())||TMath::IsNaN(MagLayerPos.y())||TMath::IsNaN(MagLayerPos.z())||TMath::Abs(MagLayerPos.perp())>450.||TMath::Abs(MagLayerPos.z())>300.) return kFALSE;
 		bField = GetFieldZ(MagLayerPos);
 		StPhysicalHelixD helixInMag(MagLayerMom,MagLayerPos,bField*tesla,charge);
 
@@ -822,6 +828,7 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 	pathL = pathL2MagOuter;
 	tof   = tof2MagOuter;
 	pos   = MagLayerPos;
+	if(TMath::IsNaN(MagLayerPos.x())||TMath::IsNaN(MagLayerPos.y())||TMath::IsNaN(MagLayerPos.z())||TMath::Abs(MagLayerPos.perp())>450.||TMath::Abs(MagLayerPos.z())>300.) return kFALSE;
 	bField = GetFieldZ(MagLayerPos);
 	//bField = 0.;
 	outHelix = StPhysicalHelixD(MagLayerMom,MagLayerPos,bField*tesla,charge);
@@ -833,17 +840,19 @@ Bool_t StMtdGeometry::ProjToMagOutR(const StPhysicalHelixD helix, const StThreeV
 }
 
 void StMtdGeometry::ProjToVertex(const StPhysicalHelixD helix, const StThreeVectorD vertex, Double_t &pathL, Double_t &tof, StThreeVectorD &dcaPos){
-	pathL  = 0.;
+	pathL  = -9999.;
+	tof = -9999.;
 	pathL  = TMath::Abs(helix.pathLength(vertex));
 	dcaPos = helix.at(helix.pathLength(vertex));
 
 	StThreeVectorD oh = helix.origin();
+	if(TMath::IsNaN(oh.x())||TMath::IsNaN(oh.y())||TMath::IsNaN(oh.z())||TMath::Abs(oh.perp())>450.||TMath::Abs(oh.z())>300.) return;
 	Double_t betaGam = helix.momentum(GetFieldZ(oh)).mag()/muonMass;
 	Double_t v  = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light*1e-9;
 	if(v!=0){
 		tof = pathL/v;
 	}else{
-		tof = -99999.;
+		tof = -9999.;
 	}
 }
 
