@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.104 2014/07/08 10:07:38 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.105 2014/07/24 06:58:32 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.105  2014/07/24 06:58:32  fisyak
+ * Add exact cast for CXX11
+ *
  * Revision 1.104  2014/07/08 10:07:38  fisyak
  * Add print out for new schema
  *
@@ -4516,7 +4519,7 @@ void StMagUtilities::BFieldTpc ( const Float_t xTpc[], Float_t BTpc[], Int_t Sec
     Double_t Tpc[3] =  {xTpc[0], xTpc[1], xTpc[2]};
     Double_t coorG[3];
     StTpcDb::instance()->Tpc2GlobalMatrix().LocalToMaster(Tpc,coorG);
-    Float_t xyzG[3] = {coorG[0], coorG[1], coorG[2]};
+    Float_t xyzG[3] = {(Float_t) coorG[0], (Float_t) coorG[1], (Float_t) coorG[2]};
     Float_t BG[3];
     BField( xyzG, BG) ; 
     Double_t    BGD[3] = {BG[0], BG[1], BG[2]};
