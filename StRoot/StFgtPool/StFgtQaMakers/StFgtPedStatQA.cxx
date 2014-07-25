@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtPedStatQA.cxx,v 1.3 2012/01/31 16:48:34 wwitzke Exp $
+ * $Id: StFgtPedStatQA.cxx,v 1.4 2014/07/25 18:46:00 xuanli Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedStatQA.cxx,v $
+ * Revision 1.4  2014/07/25 18:46:00  xuanli
+ * c++ 11 test
+ *
  * Revision 1.3  2012/01/31 16:48:34  wwitzke
  * Changed for cosmic test stand.
  *
@@ -401,7 +404,8 @@ Int_t StFgtPedStatQA::Finish(){
 
          TH1 *h2D[] = { hAlive, hPed2D, hRMS2D, hFrac2D };
          Float_t highCut[]={ kFgtNumChannels,                    mStatMkr->mMaxPed, mStatMkr->mMaxRMS, mStatMkr->mMaxFrac };
-         Float_t lowCut[] ={ kFgtNumChannels-mStatMkr->mMaxDead, mStatMkr->mMinPed, mStatMkr->mMinRMS, mStatMkr->mMinFrac };
+	 Float_t fMaxDead = kFgtNumChannels-mStatMkr->mMaxDead;
+         Float_t lowCut[] ={ fMaxDead, mStatMkr->mMinPed, mStatMkr->mMinRMS, mStatMkr->mMinFrac };
 
          for( Int_t i=0; i<4; ++i ){
             can1->cd(i+1);
