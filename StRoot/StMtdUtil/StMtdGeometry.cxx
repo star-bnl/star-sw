@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.6 2014/07/24 17:02:30 huangbc Exp $
+ * $Id: StMtdGeometry.cxx,v 1.7 2014/07/25 19:44:18 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.7  2014/07/25 19:44:18  marr
+ * Fix a minor inconsistency in using the fNExtraCells
+ *
  * Revision 1.6  2014/07/24 17:02:30  huangbc
  * Add protection for reading magnetic field in case of track projection position is (nan,nan,nan).
  *
@@ -230,16 +233,10 @@ Bool_t StMtdGeoNode::IsGlobalPointIn(StThreeVectorD &global){
 
 //_____________________________________________________________________________
 Bool_t StMtdGeoNode::IsLocalPointIn(const Double_t x, const Double_t y, const Double_t z){
-
-	//TBRIK *brik = dynamic_cast<TBRIK*> (GetShape());
-	//Double_t dx = brik->GetDx();
-	//Double_t dy = brik->GetDy();
-	//Double_t dz = brik->GetDz();
-	//Bool_t ret = -dx<x && x<dx && -dy<y && y<dy && -dz<z && z<dz;
 	TGeoBBox *brik = (TGeoBBox*)fVolume->GetShape();
 	Double_t dx = brik->GetDX();
 	Float_t nExtraCells = fNExtraCells>1.66?fNExtraCells-1.66:0;
-	Double_t dy = brik->GetDY()+nExtraCells*(fCellWidth+fCellGap)/2.;
+	Double_t dy = brik->GetDY()+nExtraCells*(fCellWidth+fCellGap);
 	Double_t dz = brik->GetDZ();
 	Bool_t ret = -dx<x && x<dx && -dy<y && y<dy && -dz<z && z<dz;
 
