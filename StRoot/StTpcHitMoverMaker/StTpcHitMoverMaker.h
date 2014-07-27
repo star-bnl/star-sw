@@ -26,7 +26,7 @@ class StTpcHitMover : public StMaker {
   static  void moveTpcHit(StTpcLocalCoordinate &coorL, StGlobalCoordinate &coorG);
   static  void moveTpcHit(StTpcLocalCoordinate &coorL, StTpcLocalCoordinate &coorLD);
   virtual const Char_t *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.10 2014/06/26 21:32:25 fisyak Exp $ built "__DATE__" "__TIME__;
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.11 2014/07/27 13:23:09 fisyak Exp $ built " __DATE__ " " __TIME__;
     return cvs;
   }
  protected:

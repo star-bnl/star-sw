@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.28 2014/06/27 14:27:11 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.29 2014/07/27 13:21:41 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.29  2014/07/27 13:21:41  fisyak
+ * Add cast for c++11 option
+ *
  * Revision 1.28  2014/06/27 14:27:11  fisyak
  * Add switch between new and old schema
  *
@@ -420,7 +423,7 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
 //________________________________________
 /// B field in Cartesian coordinates - 2D field (ie. Phi symmetric)
 void StarMagField::BField( const Double_t x[], Double_t B[] ) {
-  Float_t xx[3] = {x[0], x[1], x[2]};
+  Float_t xx[3] = {(Float_t) x[0], (Float_t) x[1], (Float_t) x[2]};
   Float_t bb[3];
   BField(xx,bb);
   B[0] = bb[0]; B[1] = bb[1]; B[2] = bb[2];
@@ -566,7 +569,7 @@ void StarMagField::B3DField( const Float_t x[], Float_t B[] )
   
 }
 void StarMagField::B3DField( const Double_t x[], Double_t B[] ) {
-  Float_t xx[3] = {x[0], x[1], x[2]};
+  Float_t xx[3] = {(Float_t) x[0], (Float_t) x[1], (Float_t) x[2]};
   Float_t bb[3];
   B3DField(xx,bb);
   B[0] = bb[0]; B[1] = bb[1]; B[2] = bb[2];
