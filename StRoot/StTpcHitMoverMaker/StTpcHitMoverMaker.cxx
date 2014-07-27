@@ -152,7 +152,7 @@ Int_t StTpcHitMover::Make() {
 //________________________________________________________________________________
 void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StTpcLocalCoordinate &coorLTD) {
   coorLTD = coorL;           // distortions
-  Float_t pos[3] = {coorLTD.position().x(), coorLTD.position().y(), coorLTD.position().z()};
+  Float_t pos[3] = {(Float_t) coorLTD.position().x(), (Float_t) coorLTD.position().y(), (Float_t) coorLTD.position().z()};
   if ( StMagUtilities::Instance() ) {
     Float_t posMoved[3];
     StMagUtilities::Instance()->UndoDistortion(pos,posMoved,coorL.fromSector());   // input pos[], returns posMoved[]
@@ -168,8 +168,11 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   moveTpcHit(coorL,coorLTD);
   transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
-// $Id: StTpcHitMoverMaker.cxx,v 1.26 2014/06/27 14:45:51 fisyak Exp $
+// $Id: StTpcHitMoverMaker.cxx,v 1.27 2014/07/27 13:23:09 fisyak Exp $
 // $Log: StTpcHitMoverMaker.cxx,v $
+// Revision 1.27  2014/07/27 13:23:09  fisyak
+// Add cast for c++11 option
+//
 // Revision 1.26  2014/06/27 14:45:51  fisyak
 // Add swith between new and old schema, clean up
 //

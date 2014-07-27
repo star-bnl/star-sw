@@ -2,8 +2,11 @@
 #define STAR_StTpcFastSimMaker
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StTpcFastSimMaker.h,v 1.1 2009/11/10 21:15:33 fisyak Exp $
+// $Id: StTpcFastSimMaker.h,v 1.2 2014/07/27 13:28:06 fisyak Exp $
 // $Log: StTpcFastSimMaker.h,v $
+// Revision 1.2  2014/07/27 13:28:06  fisyak
+// Add cast for c++11 option
+//
 // Revision 1.1  2009/11/10 21:15:33  fisyak
 // pams clean up
 //
@@ -25,7 +28,7 @@ class StTpcFastSimMaker : public StMaker {
   StMagUtilities*   mExB; //!
  public:
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcFastSimMaker.h,v 1.1 2009/11/10 21:15:33 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcFastSimMaker.h,v 1.2 2014/07/27 13:28:06 fisyak Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
    ClassDef(StTpcFastSimMaker,0)   // chain virtual base class for Makers
 };
 
