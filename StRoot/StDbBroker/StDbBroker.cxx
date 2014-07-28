@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.58 2011/11/28 17:03:07 dmitry Exp $
+ * $Id: StDbBroker.cxx,v 1.59 2014/07/28 14:58:27 dmitry Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.59  2014/07/28 14:58:27  dmitry
+ * fixed templated call to make it compliant with gcc 4.8.2
+ *
  * Revision 1.58  2011/11/28 17:03:07  dmitry
  * dbv override support in StDbLib,StDbBroker,St_db_Maker
  *
@@ -477,7 +480,7 @@ void StDbBroker::AddProdTimeOverride(UInt_t ptime, char* dbType, char* dbDomain)
   } else {
     //std::cout << "SPECIAL: StDbBroker - override was not set, no m_Tree! \n";
   }
-  m_prodTimeOverride.insert( std::make_pair<std::pair<char*,char*>, unsigned int>( std::make_pair<char*,char*>(dbType,dbDomain), ptime ) );
+  m_prodTimeOverride.insert( std::make_pair( std::make_pair(dbType,dbDomain), ptime ) );
 }
 
 //____________________________________________________________________________
