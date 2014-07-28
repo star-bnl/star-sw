@@ -377,7 +377,7 @@ bool StHyperCacheManager::processOutput(StDbBuffer* aBuff) {
 		for (picojson::object::const_iterator ait = attr.begin(); ait != attr.end(); ++ait) {
 			std::string aname = (*ait).first;
 			const std::string& avalue = ((*ait).second).get<std::string>();
-			encCols.insert(std::make_pair<std::string, const std::string>(aname, avalue));
+			encCols.insert(std::make_pair(aname, avalue));
 		}
 	}
 	//std::cout << "processOutput: binary attribute search complete" << std::endl;

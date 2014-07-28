@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.132 2013/07/18 14:00:32 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.133 2014/07/28 14:19:36 dmitry Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.133  2014/07/28 14:19:36  dmitry
+// fixed templated call to make it compliant with gcc 4.8.2
+//
 // Revision 1.132  2013/07/18 14:00:32  fisyak
 // expand no. of possible databases from 4 to 10
 //
@@ -1392,8 +1395,8 @@ void St_db_Maker::AddMaxEntryTimeOverride(Int_t idate,Int_t itime, char* dbType,
 
     TUnixTime ut;
     ut.SetGTime(idate,itime);
-    fMaxEntryTimeOverride.insert( std::make_pair<std::pair<std::string,std::string>,UInt_t>( std::make_pair<std::string,std::string>(mDbType,mDbDomain), ut.GetUTime() ) );
-} 
+    fMaxEntryTimeOverride.insert( std::make_pair( std::make_pair(mDbType,mDbDomain), ut.GetUTime() ) );
+}
 
 // Now very UGLY trick
 #define private public
