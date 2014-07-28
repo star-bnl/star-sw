@@ -114,18 +114,11 @@ void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
     
     StiOrderKey radius;
     string radstring;
+    StiPlacement *place=layer->getPlacement();
     
     if ( theRegion == StiPlacement::kMidRapidity ) {
-	radius.key = layer->getPlacement()->getLayerRadius();
+	radius.key = place->getLayerRadius();
 	radstring = "_radius";
-    }
-    else if ( theRegion==StiPlacement::kForwardRapidity) {
-	radius.key = layer->getPlacement()->getZcenter();
-	radstring = "_zcenter";
-    }
-    else if ( theRegion==StiPlacement::kBackwardRapidity ) {
-	//for backward, we have to sort by -1.*zCenter
-	radius.key = -1.* layer->getPlacement()->getZcenter();
     }
     else {
 	cout <<"StiDetectorBuiler::addToTree().  unkown region:\t"<<theRegion
@@ -133,23 +126,35 @@ void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 	abort();
     }
 
-    StiDetectorNode* radialnode = hangWhere(mregion, radius, radstring);
+    for (int it=0;it<10;it++) {
+      assert(it<9);
+      if (it) {	//modify radius key to avoid clash, as a result of bad StiDetectorContainer design(VP)
+         place->setLayerRadius(place->getLayerRadius()*1.001);
+	 radius.key = place->getLayerRadius();
+         cout << " StiDetectorTreeBuilder::addToTree() -W- " << layer->getName() << " changed radius by 1.001 to avoid clash "<< endl;
 
-    //Where do we hang in phi?
-    StiOrderKey refAngle;
-    refAngle.key = layer->getPlacement()->getLayerAngle();
-    string phistring = "_refAngle";
-    StiDetectorNode* phinode = hangWhere(radialnode, refAngle, phistring);
+      }
+      StiDetectorNode* radialnode = hangWhere(mregion, radius, radstring);
+      //Where do we hang in phi?
+      StiOrderKey refAngle;
+      refAngle.key = layer->getPlacement()->getLayerAngle();
+      string phistring = "_refAngle";
+      StiDetectorNode* phinode = hangWhere(radialnode, refAngle, phistring);
 
-    if (!phinode) cout << "StiDetectorTreeBuilder::addToTree() -E- phinode==0" << endl; 
-    //Maintain the relationship between these two.
-    //It's not so elegant to have the Detector know about the node that it's stored on, but
-    //it's fast way to get from the detector to the node, and it allows the project to be
-    //generally independent of the tree-node, ie, the tracker only has to know about
-    //StiDetector objects.
-    //So, we put the extra layer of coupling in StiDetector, not Tracke, SeedFinder, etc...
-    phinode->setData(layer);
-    layer->setTreeNode(phinode);
+      if (!phinode) cout << "StiDetectorTreeBuilder::addToTree() -E- phinode==0" << endl; 
+      assert(phinode);
+      //Maintain the relationship between these two.
+      //It's not so elegant to have the Detector know about the node that it's stored on, but
+      //it's fast way to get from the detector to the node, and it allows the project to be
+      //generally independent of the tree-node, ie, the tracker only has to know about
+      //StiDetector objects.
+      //So, we put the extra layer of coupling in StiDetector, not Tracke, SeedFinder, etc...
+      if (phinode->getData()) continue;
+      phinode->setData(layer);
+      layer->setTreeNode(phinode);
+      break;
+    }
+
 }
 
 // Starting with the given parent, use the ordering key of the given type
