@@ -179,7 +179,7 @@ Float_t StEEmcEnergyApportionerIU_t::smdSumAndLeakageWeightFunc( const StEEmcHit
    // Get eta & phi bins for this tower
    Short_t phiBin = 0, etaBin = 0;
    StEEmcGeoId_t::decodeTow( thisTowIdx, phiBin, etaBin );
-   Double_t xTower[2] = { phiBin, etaBin };
+   Double_t xTower[2] = { (Double_t) phiBin, (Double_t) etaBin };
 
    // Get eta & phi bins for the tower beneath the point, i.e. hit
    Int_t towIdx = hit.getTowerIdx();
@@ -234,8 +234,11 @@ void StEEmcEnergyApportionerIU_t::setWeightFunction( WeightFunction_t funcType )
 ClassImp( StEEmcEnergyApportionerIU_t );
 
 /*
- * $Id: StEEmcEnergyApportionerIU.cxx,v 1.1 2012/11/26 19:05:54 sgliske Exp $ 
+ * $Id: StEEmcEnergyApportionerIU.cxx,v 1.2 2014/07/28 19:54:52 skoby Exp $ 
  * $Log: StEEmcEnergyApportionerIU.cxx,v $
+ * Revision 1.2  2014/07/28 19:54:52  skoby
+ * explicit cast to satisfy C++11
+ *
  * Revision 1.1  2012/11/26 19:05:54  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcHitMaker to StRoot/StEEmcPool/StEEmcHitMaker
  *
