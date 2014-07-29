@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.148 2014/03/24 19:57:15 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.149 2014/07/29 17:51:29 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.149  2014/07/29 17:51:29  jwebb
+// Read in HCAL hits.
+//
 // Revision 1.148  2014/03/24 19:57:15  jwebb
 // Added code to support reading new MTD active layers.
 //
@@ -560,6 +563,7 @@
 #include "g2t/St_g2t_fsc_Module.h"
 #include "g2t/St_g2t_mtd_Module.h"
 #include "g2t/St_g2t_etr_Module.h"
+#include "g2t/St_g2t_hca_Module.h"
 
 #include "St_db_Maker/St_db_Maker.h"
 #include "TUnixTime.h"
@@ -1449,6 +1453,17 @@ Int_t St_geant_Maker::Make() {
       if ( Debug() > 1 ) g2t_etr_hit->Print(0,10);
     }
   
+  nhits = 0; nhit1=nhit2=0;
+  geant3 -> Gfnhit("HCAH","HCEL", nhit1);
+  geant3 -> Gfnhit("HCAH","HCES", nhit2);
+  nhits=nhit1+nhit2;
+  if ( nhits > 0 ) 
+     {
+        St_g2t_emc_hit *g2t_hca_hit = new St_g2t_emc_hit("g2t_hca_hit",nhits);
+        m_DataSet->Add(g2t_hca_hit);
+        iRes = g2t_hca( g2t_track, g2t_hca_hit);
+     } 
+
 
 
   //------------------------all bloody detectors done--------------------//
