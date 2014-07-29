@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.134 2014/07/23 19:46:58 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.135 2014/07/29 14:29:22 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -552,7 +552,7 @@
 	} else {
 	    # can do elsif () later but for now, enable if CXX11 is defined
 	    # AND version is al least 4.4 
-	    if ( $CXX_VERSION lt "4.4" || ! defined($ENV{CXX11}) ) {
+	    if ( $CXX_VERSION lt "4.4" ){   # || ! defined($ENV{CXX11}) ) {
 		# ansi works only with gcc3.2 actually ... may be removed later ...
 		$CXXFLAGS    .= " -ansi";
 	    } else {
@@ -561,7 +561,7 @@
 		# and related documents
 		#   SL5 we had  4.3.2 supporting a weak set of c++11
 		#   SL6 had gcc 4.4.7 with more advanced c++11 implementations
-		print "EXPERIMENTAL *** will use C++11 standards\n" unless ($param::quiet);
+		# print "EXPERIMENTAL *** will use C++11 standards\n" unless ($param::quiet);
 		$CXXFLAGS    .= " -std=c++0x";
 	    }
 	}
