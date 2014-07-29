@@ -283,7 +283,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
         {"ISRL", "PEEK CF 30 support block trapezoid sub-volume volume","HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1","",""},
         {"ISRO", "PEEK CF 30 support block top-right volume",		"HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1","",""},
         {"ISRC", "PEEK CF 30 support block trapezoid volume",		"HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1","",""},
-        {"ISRS", "PEEK CF 30 support block small box volume",		"HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1","",""}
+        {"ISRS", "PEEK CF 30 support block small box volume",		"HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1","",""},
 	{"ICCT", "Cooling line and cablings in transition area",        "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1","",""},
 	{"ICCA", "Copper cablings on PIT",        			"HALL_1/CAVE_1/TpcRefSys_1/IDSM_1","",""},
 	{"ICCL", "Al cooling lines on PIT",                         	"HALL_1/CAVE_1/TpcRefSys_1/IDSM_1","",""},
