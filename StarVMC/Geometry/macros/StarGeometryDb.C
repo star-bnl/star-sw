@@ -1536,8 +1536,10 @@ void dev15()
     geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
     geom.fpdmFlag = "FPDMof";  geom.fpdmStat = 0;
     geom.fgtdFlag = "FGTDof";  geom.fgtdStat = 0;
+    geom.hcalFlag = "HCALof";  geom.hcalStat = 0;    
     // ================================================
-    geom.tpceFlag = "TPCE31";  geom.tpceStat=1;
+    geom.magpFlag = "MAGPv1";  geom.magpStat = 1;
+    geom.tpceFlag = "TPCE31";  geom.tpceStat = 1;
     geom.btofFlag = "BTOFv8";  geom.btofStat = 1;
     geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
     geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
