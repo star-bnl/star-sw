@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.18 2014/07/24 02:53:04 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.19 2014/07/29 19:23:47 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.19  2014/07/29 19:23:47  marr
+ * Remove the dependency on "StarGenerator/StarLight/starlightconstants.h" as it is not needed anymore.
+ *
  * Revision 1.18  2014/07/24 02:53:04  marr
  * 1) Add log info of the matched track-hit pair
  * 2) Set DeltaY and DeltaZ in PidTraits
@@ -152,7 +155,6 @@
 #include "StBTofUtil/StBTofGeometry.h"
 #include "StBTofUtil/StBTofDaqMap.h"
 #include "StBTofUtil/StBTofHitCollection.h"
-#include "StarGenerator/StarLight/starlightconstants.h"
 #include "StMtdPidTraits.h"
 
 #include "StMtdUtil/StMtdGeometry.h"
