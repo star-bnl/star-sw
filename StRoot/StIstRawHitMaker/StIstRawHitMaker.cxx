@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.14 2014/04/15 06:47:00 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.15 2014/07/29 20:13:31 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.15  2014/07/29 20:13:31  ypwang
+* update the IST DB obtain method
+*
 * Revision 1.14  2014/04/15 06:47:00  ypwang
 * updates for collections clear due to Clear() function removed from StIstCollection
 *
@@ -60,25 +63,26 @@
 #include "StRoot/StIstUtil/StIstCollection.h"
 #include "StRoot/StIstUtil/StIstRawHitCollection.h"
 #include "StRoot/StIstUtil/StIstRawHit.h"
-#include "StRoot/StIstDbMaker/StIstDbMaker.h"
+#include "StRoot/StIstDbMaker/StIstDb.h"
 #include "StRoot/StIstUtil/StIstConsts.h"
 
-#include "TDataSet.h"
 #include "tables/St_istPedNoise_Table.h"
 #include "tables/St_istGain_Table.h"
 #include "tables/St_istMapping_Table.h"
 #include "tables/St_istControl_Table.h"
+#include "tables/St_istChipConfig_Table.h"
 
 #include <string.h>
 #include <time.h>
 
-StIstRawHitMaker::StIstRawHitMaker( const char* name ): StRTSBaseMaker( "ist", name ), mIsCaliMode(0), mDoCmnCorrection(0), mIstCollectionPtr(0), mIstDbMaker(0), mDataType(2){
+StIstRawHitMaker::StIstRawHitMaker( const char* name ): StRTSBaseMaker( "ist", name ), mIsCaliMode(0), mDoCmnCorrection(0), mIstCollectionPtr(0), mIstDb(0), mDataType(2){
    // set all vectors to zeros
    mCmnVec.resize( kIstNumApvs );
    mPedVec.resize( kIstNumElecIds );
    mRmsVec.resize( kIstNumElecIds );
    mGainVec.resize( kIstNumElecIds );
    mMappingVec.resize( kIstNumElecIds );
+   mConfigVec.resize( kIstNumApvs );
 };
 
 StIstRawHitMaker::~StIstRawHitMaker(){
@@ -88,6 +92,7 @@ StIstRawHitMaker::~StIstRawHitMaker(){
    mRmsVec.clear();
    mGainVec.clear();
    mMappingVec.clear();
+   mConfigVec.clear();
 };
 
 Int_t StIstRawHitMaker::Init(){
@@ -105,120 +110,107 @@ Int_t StIstRawHitMaker::Init(){
       ierr = kStWarn;
    }
 
-   mIstDbMaker = (StIstDbMaker*)GetMaker("istDb");
-   if(ierr || !mIstDbMaker) {
-      LOG_WARN << "Error getting IST Db maker handler" << endm;
-      ierr = kStWarn;
-   }
-
    return ierr;
 };
 
 Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    Int_t ierr = kStOk;
 
-   // IST control parameters
-   const TDataSet *dbControl = mIstDbMaker->GetControl();
-   St_istControl *istControl = 0;
-   istControl = (St_istControl *)dbControl->Find("istControl");
-   if(!istControl) {
-       LOG_ERROR << "Dataset does not contain IST control table!" << endm;
-       ierr = kStErr;
+   TObjectSet *istDbDataSet = (TObjectSet *)GetDataSet("ist_db");
+   if (istDbDataSet) {
+       mIstDb = (StIstDb *)istDbDataSet->GetObject();
+       assert(mIstDb);
    }
    else {
-        istControl_st *istControlTable = istControl->GetTable() ;
-        if (!istControlTable)  {
-            LOG_ERROR << "Pointer to IST control table is null" << endm;
-            ierr = kStErr;
-        }
-        else {
-   	    mHitCut  = istControlTable[0].kIstHitCutDefault;
-   	    mCmnCut  = istControlTable[0].kIstCMNCutDefault;
-   	    mChanMinRmsNoiseLevel = istControlTable[0].kIstChanMinRmsNoiseLevel;
-   	    mChanMaxRmsNoiseLevel = istControlTable[0].kIstChanMaxRmsNoiseLevel;
-   	    mApvMaxCmNoiseLevel   = istControlTable[0].kIstApvMaxCmNoiseLevel;
-   	    mALLdata = istControlTable[0].kIstAlldata;
-   	    mADCdata = istControlTable[0].kIstADCdata;
-   	    mZSdata  = istControlTable[0].kIstZSdata;
-   	    mDefaultTimeBin = istControlTable[0].kIstDefaultTimeBin;
-   	    mCurrentTimeBinNum = istControlTable[0].kIstCurrentTimeBinNum;
-    	}
+       LOG_ERROR << "InitRun : no istDb" << endm;
+       return kStErr;
+   }
+
+   // IST control parameters
+   const istControl_st *istControlTable = mIstDb->GetControl() ;
+   if (!istControlTable)  {
+       	LOG_ERROR << "Pointer to IST control table is null" << endm;
+       	ierr = kStErr;
+   }
+   else {
+       	mHitCut  = istControlTable[0].kIstHitCutDefault;
+       	mCmnCut  = istControlTable[0].kIstCMNCutDefault;
+       	mChanMinRmsNoiseLevel = istControlTable[0].kIstChanMinRmsNoiseLevel;
+       	mChanMaxRmsNoiseLevel = istControlTable[0].kIstChanMaxRmsNoiseLevel;
+       	mApvMaxCmNoiseLevel   = istControlTable[0].kIstApvMaxCmNoiseLevel;
+       	mALLdata = istControlTable[0].kIstAlldata;
+       	mADCdata = istControlTable[0].kIstADCdata;
+       	mZSdata  = istControlTable[0].kIstZSdata;
+       	mDefaultTimeBin = istControlTable[0].kIstDefaultTimeBin;
+       	mCurrentTimeBinNum = istControlTable[0].kIstCurrentTimeBinNum;
    }
 
    // IST pedestal/rms table
-   const TDataSet *dbPedNoise = mIstDbMaker->GetPedNoise();
-   St_istPedNoise *istPedNoise = 0;
-   istPedNoise = (St_istPedNoise *)dbPedNoise->Find("istPedNoise"); 
-   if(!istPedNoise) {
-        LOG_ERROR << "Dataset does not contain IST pedestal/noise table!" << endm;
-        ierr = kStErr;
+   const istPedNoise_st *gPN = mIstDb->GetPedNoise();
+   if( !gPN ) {
+	LOG_ERROR << "Pointer to IST pedestal/noise table is null" << endm;
+	    ierr = kStErr;
    }
    else {
-	istPedNoise_st *gPN = istPedNoise->GetTable();
-   	if( !gPN ) {
-	    LOG_ERROR << "Pointer to IST pedestal/noise table is null" << endm;
-	    ierr = kStErr;
-   	}
-	else {
-   	    for(int i=0; i<kIstNumApvs; i++) {
+   	for(int i=0; i<kIstNumApvs; i++) {
         	LOG_DEBUG<<Form(" Print entry %d : CM noise=%f ",i,(float)gPN[0].cmNoise[i]/100.)<<endm;
 		mCmnVec[i] = (float)gPN[0].cmNoise[i]/100.0;
-   	    }
-   	    for(int i=0; i<kIstNumElecIds; i++) {
+   	}
+   	for(int i=0; i<kIstNumElecIds; i++) {
         	LOG_DEBUG<<Form(" Print entry %d : pedestal=%f ",i,(float)gPN[0].pedestal[i])<<endm;
 		mPedVec[i] = (float)gPN[0].pedestal[i];
-   	    }
-   	    for(int i=0; i<kIstNumElecIds; i++) {
+   	}
+   	for(int i=0; i<kIstNumElecIds; i++) {
         	LOG_DEBUG<<Form(" Print entry %d : RMS noise=%f ",i,(float)gPN[0].rmsNoise[i]/100.)<<endm;
 		mRmsVec[i] = (float)gPN[0].rmsNoise[i]/100.;
-   	    }
-	}
+   	}
    }
 
    // IST gain table
-   const TDataSet *dbGain = mIstDbMaker->GetGain();
-   St_istGain *istGain = 0;
-   istGain = (St_istGain *)dbGain->Find("istGain");
-   if(!istGain) {
-        LOG_ERROR << "Dataset does not contain IST gain table!" << endm;
-        ierr = kStErr;
+   const istGain_st *gG = mIstDb->GetGain();
+   if( !gG ) {
+	LOG_WARN << "Pointer to IST gain table is null" << endm;
+        ierr = kStWarn;
    }
    else {
-   	istGain_st *gG = istGain->GetTable();
-   	if( !gG ) {
-	    LOG_WARN << "Pointer to IST gain table is null" << endm;
-            ierr = kStWarn;
-   	}
-	else {
-   	    for(int i=0; i<kIstNumElecIds; i++) {
+   	for(int i=0; i<kIstNumElecIds; i++) {
         	LOG_DEBUG<<Form(" Print entry %d : gain=%f ",i,(float)gG[0].gain[i])<<endm;
 		mGainVec[i] = (float)gG[0].gain[i];
-   	    }
-	}
+   	}
    }
 
    // IST mapping table
-   const TDataSet *dbMapping = mIstDbMaker->GetMapping();
-   St_istMapping *istMapping = 0;
-   istMapping = (St_istMapping *)dbMapping->Find("istMapping");
-   if(!istMapping) {
-        LOG_ERROR << "Dataset does not contain IST mapping table!" << endm;
+   const istMapping_st *gM = mIstDb->GetMapping();
+   if( !gM ) {
+       	LOG_ERROR << "Pointer to IST mapping table is null" << endm;
+	ierr = kStErr;
+   }
+   else {
+        for(int i=0; i<kIstNumElecIds; i++) {
+             	LOG_DEBUG<<Form(" Print entry %d : geoId=%d ",i,gM[0].mapping[i])<<endm;
+                mMappingVec[i] = gM[0].mapping[i];
+        }
+   }
+
+   // IST chip configuration status table
+   const istChipConfig_st *gCS = mIstDb->GetChipStatus();
+   if( !gCS ) {
+        LOG_ERROR << "Pointer to IST chip configuration table is null" << endm;
         ierr = kStErr;
    }
    else {
-        istMapping_st *gM = istMapping->GetTable();
-        if( !gM ) {
-            LOG_ERROR << "Pointer to IST mapping table is null" << endm;
-            ierr = kStErr;
-        }
-        else {
-            for(int i=0; i<kIstNumElecIds; i++) {
-                LOG_DEBUG<<Form(" Print entry %d : geoId=%d ",i,gM[0].mapping[i])<<endm;
-                mMappingVec[i] = gM[0].mapping[i];
-            }
-        }
+	while(gCS->run) {
+	     if(runnumber == gCS->run) {
+            	  for(int i=0; i<kIstNumApvs; i++) {
+                        LOG_DEBUG<<Form(" Print entry %d : status=%d ", i, gCS->s[i])<<endm;
+                        mConfigVec[i] = gCS->s[i];  /* 0 dead;  1 good; 2-9 reserved good status; 10 mis-configured */
+            	  }
+		  break;
+	     }
+	     gCS++;
+	}
    }
-   
+
    return ierr; 
 };
 
@@ -380,27 +372,34 @@ Int_t StIstRawHitMaker::Make() {
 			else continue;
 		    }
 		    else { //physics mode: pedestal subtracted + dynamical common mode correction
+			//skip dead chips and bad mis-configured chips
+			if(mConfigVec[apvId-1]<1 || mConfigVec[apvId-1]>9) { //1-9 good status code
+			    LOG_DEBUG<< "Skip: Dead/mis-configured APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
+                            continue;
+			}
+			//comment out by Yaping on Jul. 29, 2014. The dead and mis-configured chips can be masked out by the chip status table.
+			/*
 			//skip current APV channels marked as bad/dead (common mode noise set to 100.)
                 	if( cmNoisePerChip > 99.0) {
-                    	    LOG_DEBUG<< "Bad/dead behavior APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
+                    	    LOG_DEBUG<< "Skip: Bad/dead behavior APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
                     	    continue;
                 	}
 
 			//skip current APV channels behaviored noisy ...
 			if( cmNoisePerChip > mApvMaxCmNoiseLevel) {
-                            LOG_DEBUG<< "Noisy behavior APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
+                            LOG_DEBUG<< "Skip: Noisy behavior APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
                             continue;
                         }
-
+			*/
 			//skip current channel marked as bad/dead status
 			if(mRmsVec[elecId] > 99.0)  {
-                            LOG_DEBUG<<"Bad/dead behavior channel electronics index: " << elecId << endm;
+                            LOG_DEBUG<<"Skip: Bad/dead behavior channel electronics index: " << elecId << endm;
                             continue;
                         }
 
 			//skip current channel marked as suspicious status
 			if(mRmsVec[elecId]<mChanMinRmsNoiseLevel || mRmsVec[elecId]>mChanMaxRmsNoiseLevel)  {
-                            LOG_DEBUG<<"Noisy behavior channel electronics index: " << elecId << endm;
+                            LOG_DEBUG<<"Skip: Noisy behavior channel electronics index: " << elecId << endm;
                             continue;
                         }
 

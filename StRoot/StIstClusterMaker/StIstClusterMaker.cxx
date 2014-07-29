@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.11 2014/04/15 06:46:59 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.12 2014/07/29 20:13:31 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.12  2014/07/29 20:13:31  ypwang
+* update the IST DB obtain method
+*
 * Revision 1.11  2014/04/15 06:46:59  ypwang
 * updates for collections clear due to Clear() function removed from StIstCollection
 *
@@ -50,10 +53,10 @@
 #include "StIstSimpleClusterAlgo.h"
 #include "StIstScanClusterAlgo.h"
 
-#include "StRoot/StIstDbMaker/StIstDbMaker.h"
+#include "StRoot/StIstDbMaker/StIstDb.h"
 #include "tables/St_istControl_Table.h"
 
-StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mIstDbMaker(0), mTimeBin(-1), mSplitCluster(1)
+StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mIstDb(0), mTimeBin(-1), mSplitCluster(1)
 {
   /* nothing to do */
 };
@@ -165,12 +168,6 @@ Int_t StIstClusterMaker::Init()
   if( !ierr )
      ierr = mClusterAlgoPtr->Init();
 
-  mIstDbMaker = (StIstDbMaker*)GetMaker("istDb");
-  if(!mIstDbMaker) {
-      LOG_WARN << "Error getting IST Db maker handler" << endm;
-      ierr = kStWarn;
-  }
-
   return ierr;
 };
 
@@ -178,24 +175,25 @@ Int_t StIstClusterMaker::InitRun(Int_t runnumber)
 {
   Int_t ierr = kStOk;
 
+  TObjectSet *istDbDataSet = (TObjectSet *)GetDataSet("ist_db");
+   if (istDbDataSet) {
+       mIstDb = (StIstDb *)istDbDataSet->GetObject();
+       assert(mIstDb);
+   }
+   else {
+       LOG_ERROR << "InitRun : no istDb" << endm;
+       return kStErr;
+   }
+
   // control parameters
-  const TDataSet *dbControl = mIstDbMaker->GetControl();
-  St_istControl *istControl = 0;
-  istControl = (St_istControl *)dbControl->Find("istControl");
-  if(!istControl) {
-       LOG_ERROR << "Dataset does not contain IST control table!" << endm;
+  const istControl_st *istControlTable = mIstDb->GetControl() ;
+  if (!istControlTable)  {
+       LOG_ERROR << "Pointer to IST control table is null" << endm;
        ierr = kStErr;
   }
   else {
-       istControl_st *istControlTable = istControl->GetTable() ;
-       if (!istControlTable)  {
-            LOG_ERROR << "Pointer to IST control table is null" << endm;
-            ierr = kStErr;
-       }
-       else {
-	    mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
-  	    mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
-       }
+       mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
+       mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
   }
 
   return ierr;

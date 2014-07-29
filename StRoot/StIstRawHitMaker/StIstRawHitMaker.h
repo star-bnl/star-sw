@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.4 2014/02/15 19:55:25 ypwang Exp $
+* $Id: StIstRawHitMaker.h,v 1.5 2014/07/29 20:13:31 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -14,6 +14,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
+* Revision 1.5  2014/07/29 20:13:31  ypwang
+* update the IST DB obtain method
+*
 * Revision 1.4  2014/02/15 19:55:25  ypwang
 * remove virtual type declaration from member function
 *
@@ -40,11 +43,7 @@
 #include <assert.h>
 
 class StIstCollection;
-class StIstDbMaker;
-class St_istPedNoise;
-class St_istGain;
-class St_istMapping;
-class St_istControl;
+class StIstDb;
 
 class StIstRawHitMaker : public StRTSBaseMaker {
  public: 
@@ -71,7 +70,7 @@ class StIstRawHitMaker : public StRTSBaseMaker {
    UChar_t mALLdata, mADCdata, mZSdata, mDefaultTimeBin, mCurrentTimeBinNum;
 
    StIstCollection *mIstCollectionPtr;
-   StIstDbMaker *mIstDbMaker;
+   StIstDb *mIstDb;
 
    // common mode noise
    typedef std::vector< float > CmnVec_t; //APV chip geom. index, CM noise
@@ -88,6 +87,9 @@ class StIstRawHitMaker : public StRTSBaseMaker {
    // mapping
    typedef std::vector< int > MappingVec_t;//Channel elec. index, geometry ID
    MappingVec_t mMappingVec;
+   // chip configuration status
+   typedef std::vector< unsigned char > ConfigVec_t; //APV chip geom. index, configuration status
+   ConfigVec_t mConfigVec;
 
  private:
    Int_t mDataType; //!  0=all, 1=adc only, 2=zs only
@@ -103,7 +105,7 @@ inline void StIstRawHitMaker::setCmnCut(float cmnCut)			{ mCmnCut = cmnCut;     
 inline void StIstRawHitMaker::setDataType(int nDataType)		{ mDataType = nDataType;   };
 
 inline const char *StIstRawHitMaker::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.4 2014/02/15 19:55:25 ypwang Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.5 2014/07/29 20:13:31 ypwang Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 #endif
