@@ -40,14 +40,14 @@ void trig( Int_t n=1 )
     // Clear the chain from the previous event
     chain->Clear();
 
-    // Generate 1 muon in the FGT range
-    kinematics->Kine( 1, "mu-", 10.0, 50.0, 1.0, 2.0 );
+    // Generate 1 mu minus at high pT
+    kinematics->Kine( 1, "mu-", 10.0, 50.0, -2.0, 2.0 );
 
     // Generate 4 muons flat in pT and eta 
-    kinematics->Kine(4, "mu+", 0., 5., -0.8, +0.8 );
+    kinematics->Kine(4, "mu+", 0., 5., -2.0, +2.0 );
 
-    // Generate 4 muons according to a PT and ETA distribution
-    kinematics->Dist(4, "mu-", ptDist, etaDist );
+    // Generate 4 neutral pions according to a PT and ETA distribution
+    kinematics->Dist(4, "pi0", ptDist, etaDist );
 
     // Generate the event
     chain->Make();
@@ -116,7 +116,7 @@ void starsim( Int_t nevents=1, Int_t rngSeed=1234 )
   //
   geometry("y2012");
   command("gkine -4 0");
-  command("gfile o pythia6.starsim.fzd");
+  command("gfile o kinematics.starsim.fzd");
   
 
   //
