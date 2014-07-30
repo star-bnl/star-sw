@@ -126,51 +126,41 @@ void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 	abort();
     }
 
-    for (int it=0;it<10;it++) {
-      assert(it<9);
-      if (it) {	//modify radius key to avoid clash, as a result of bad StiDetectorContainer design(VP)
-         place->setLayerRadius(place->getLayerRadius()*1.001);
-	 radius.key = place->getLayerRadius();
-         cout << " StiDetectorTreeBuilder::addToTree() -W- " << layer->getName() << " changed radius by 1.001 to avoid clash "<< endl;
+    StiDetectorNode* radialnode = hangWhere(mregion, radius, radstring);
+    //Where do we hang in phi?
+    StiOrderKey refAngle;
+    refAngle.key = layer->getPlacement()->getLayerAngle();
+    string phistring = "_refAngle";
+    StiDetectorNode* phinode = hangWhere(radialnode, refAngle, phistring);
 
-      }
-      StiDetectorNode* radialnode = hangWhere(mregion, radius, radstring);
-      //Where do we hang in phi?
-      StiOrderKey refAngle;
-      refAngle.key = layer->getPlacement()->getLayerAngle();
-      string phistring = "_refAngle";
-      StiDetectorNode* phinode = hangWhere(radialnode, refAngle, phistring);
-
-      if (!phinode) cout << "StiDetectorTreeBuilder::addToTree() -E- phinode==0" << endl; 
-      assert(phinode);
-      //Maintain the relationship between these two.
-      //It's not so elegant to have the Detector know about the node that it's stored on, but
-      //it's fast way to get from the detector to the node, and it allows the project to be
-      //generally independent of the tree-node, ie, the tracker only has to know about
-      //StiDetector objects.
-      //So, we put the extra layer of coupling in StiDetector, not Tracke, SeedFinder, etc...
-      if (phinode->getData()) continue;
-      phinode->setData(layer);
-      layer->setTreeNode(phinode);
-      break;
-    }
+   assert(phinode);
+    //Maintain the relationship between these two.
+    //It's not so elegant to have the Detector know about the node that it's stored on, but
+    //it's fast way to get from the detector to the node, and it allows the project to be
+    //generally independent of the tree-node, ie, the tracker only has to know about
+    //StiDetector objects.
+    //So, we put the extra layer of coupling in StiDetector, not Tracke, SeedFinder, etc...
+    if (phinode->getData()) phinode = hangWhere(radialnode, refAngle, phistring,1);
+    assert(!phinode->getData()); 
+    phinode->setData(layer);
+    layer->setTreeNode(phinode);
 
 }
 
 // Starting with the given parent, use the ordering key of the given type
 // to determine where the new detector should be hung.
 StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, const StiOrderKey& order,
-						   string& keystring)
+						   string& keystring, int newOne)
 {
     SameOrderKey<StiDetector> mySameOrderKey;
     mySameOrderKey.morderKey = order; //order is of type const StiOrderKey&
     
     StiDetectorNodeVector::iterator where = find_if(parent->begin(), parent->end(), mySameOrderKey);
 
-    if (where == parent->end()) {
+    if (newOne || where == parent->end()) {
 	//cout <<"hangWhere().  Start new node"<<endl;
 	StiDetectorNode* temp = mnodefactory->getInstance();
-	char* tempname = new char[100];
+	char tempname[100];
 	sprintf(tempname,"_%f", order.key);
 	keystring.append(tempname);
 	string newname = parent->getName();
@@ -179,7 +169,6 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, cons
 	temp->setName(newname);
 	temp->setOrderKey(order);
 	parent->add(temp);
-	delete [] tempname; //fixing leak, MCBS.
 	return temp;
     }
     else {
