@@ -544,28 +544,30 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       }
    }
 
-   //StiElossCalculator for the support block inner thin tube volume
-   StiElossCalculator *elossCalculatorISRA = new StiElossCalculator(matISRA->getZ()/matISRA->getA(), matISRA->getIonization()*matISRA->getIonization(), matISRA->getA(), matISRA->getZ(), matISRA->getDensity());
+   if(matISRA) {
+      //StiElossCalculator for the support block inner thin tube volume
+      StiElossCalculator *elossCalculatorISRA = new StiElossCalculator(matISRA->getZ()/matISRA->getA(), matISRA->getIonization()*matISRA->getIonization(), matISRA->getA(), matISRA->getZ(), matISRA->getDensity());
 
-   //StiShape for the support block inner thin tube volume (as a whole for all 24 support blocks)
-   float halfDepth = 0.5*1.27;
-   float thickness = 0.15;
-   float outerRadius = 12.0753;
-   float openingAngle = 2*M_PI;
+      //StiShape for the support block inner thin tube volume (as a whole for all 24 support blocks)
+      float halfDepth = 0.5*1.27;
+      float thickness = 0.15;
+      float outerRadius = 12.0753;
+      float openingAngle = 2*M_PI;
 
-   //east support block inner thin tube volume
-   StiDetector *stiDetectorISRAeast = getDetectorFactory()->getInstance();
-   buildTubeVolume(*stiDetectorISRAeast, "ISRAeast", halfDepth, thickness, outerRadius, openingAngle, -34.19005+0.15875, matISRA, elossCalculatorISRA);
-   int layer = getNRows();
-   add(layer, 0, stiDetectorISRAeast);
-   LOG_DEBUG << "StiIstDetectorBuilder::build east support block thin tube volume " << stiDetectorISRAeast->getName() << " at layer " << layer << endm;
+      //east support block inner thin tube volume
+      StiDetector *stiDetectorISRAeast = getDetectorFactory()->getInstance();
+      buildTubeVolume(*stiDetectorISRAeast, "ISRAeast", halfDepth, thickness, outerRadius, openingAngle, -34.19005+0.15875, matISRA, elossCalculatorISRA);
+      int layer = getNRows();
+      add(layer, 0, stiDetectorISRAeast);
+      LOG_DEBUG << "StiIstDetectorBuilder::build east support block thin tube volume " << stiDetectorISRAeast->getName() << " at layer " << layer << endm;
 
-   //west support block inner thin tube volume
-   StiDetector *stiDetectorISRAwest = getDetectorFactory()->getInstance();
-   buildTubeVolume(*stiDetectorISRAwest, "ISRAwest", halfDepth, thickness, outerRadius, openingAngle, 24.68995+0.15875, matISRA, elossCalculatorISRA);
-   layer = getNRows();
-   add(layer, 0, stiDetectorISRAwest);
-   LOG_DEBUG << "StiIstDetectorBuilder::build west support block thin tube volume " << stiDetectorISRAwest->getName() << " at layer " << layer << endm;
+      //west support block inner thin tube volume
+      StiDetector *stiDetectorISRAwest = getDetectorFactory()->getInstance();
+      buildTubeVolume(*stiDetectorISRAwest, "ISRAwest", halfDepth, thickness, outerRadius, openingAngle, 24.68995+0.15875, matISRA, elossCalculatorISRA);
+      layer = getNRows();
+      add(layer, 0, stiDetectorISRAwest);
+      LOG_DEBUG << "StiIstDetectorBuilder::build west support block thin tube volume " << stiDetectorISRAwest->getName() << " at layer " << layer << endm;
+   }
 }
 
 void StiIstDetectorBuilder::buildPlanerVolume(StiDetector& detector, string detName, float halfDepth, float thickness, float halfWidth, float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat, StiElossCalculator *elossCalculator)
