@@ -12,12 +12,8 @@
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
-#ifdef Sti_DEBUG
-#  include "TRMatrix.h"
-#  include "TRVector.h"
-#  define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
-#  define PrPP(A,B) cout << "=== StiHit::" << (#A); PrP((B)); cout << endl;
-#endif
+#include "StiShape.h"
+#include "StiUtilities/StiDebug.h"
 
 
 //_____________________________________________________________________________
@@ -134,10 +130,11 @@ static unsigned int myCount=0;
 
 //_____________________________________________________________________________
 void StiHit::setGlobal(const StiDetector * detector,
-			      const StMeasuredPoint * stHit,
-			      float gx, float gy, float gz,
-			      float energy)
+		       const StMeasuredPoint * stHit,
+		       float gx, float gy, float gz,
+		       float energy)
 {
+StiDebug::Break(-46);
   if (detector)
     {
       StiPlacement * placement = detector->getPlacement();
@@ -150,21 +147,11 @@ void StiHit::setGlobal(const StiDetector * detector,
       if (dif > 180) dif-=360;
       if (dif <-180) dif+=360;
       if (fabs(dif) > 1.1*22) {
-         LOG_WARN <<
+         LOG_ERROR <<
            Form("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****"
            ,detector->getName().c_str(),myAngle,centerAngle,dif)
          << endm;
           assert( fabs(dif) <33 );     // 30 for sixangle
-      }
-      double normalAngle = placement->getNormalRefAngle()*togra;
-      dif = myAngle-normalAngle;
-      if (dif > 180) dif-=360;
-      if (dif <-180) dif+=360;
-      if (fabs(dif) > 1.1*30) {
-         LOG_WARN <<
-         Form("**** StiHit.%s wrong angle: hitAng=%f norAng=%g dif=%g ****"
-         ,detector->getName().c_str(),myAngle,normalAngle,dif)
-               << endm;
       }
 
       mx =  detector->_cos*gx + detector->_sin*gy;
@@ -192,24 +179,28 @@ void StiHit::setGlobal(const StiDetector * detector,
   _energy = energy;
   if (!stHit   ) return;
   if (!detector) return;
-  double pos = detector->getPlacement()->getNormalRadius();
-  double dif = mx-pos;
-  static Double_t scale = 0.05;
-  static Int_t counts = 0;
-  if (fabs(dif)<scale*pos) return; // increase by 2 due to large distortions
+  double deltaX = detector->getShape()->getThickness();
+  double deltaZ = detector->getShape()->getHalfDepth();
+  double deltaY = detector->getShape()->getHalfWidth(); 
+  double posX = detector->getPlacement()->getNormalRadius();
+  double posY = detector->getPlacement()->getNormalYoffset();
+  double posZ = detector->getPlacement()->getZcenter();
+
+  double difX = fabs(mx-posX)-deltaX/2;
+  double difY = fabs(my-posY)-deltaY;
+  double difZ = fabs(my-posZ)-deltaZ;
+
+  double accX = posX*0.05+1e-3;
+  double accY = deltaY*0.1+1e-3;
+  double accZ = deltaZ*0.1+1e-3;
+
+  if (difX<accX &&  difY<accY && difZ<accZ) return;
+  static int counts = 0; counts++; if (counts>100) return;
   LOG_WARN <<
-     Form("**** StiHit.%s too far: x=%f pos=%g dif=%g ****"
-          ,detector->getName().c_str(),mx,pos,dif)
+     Form("**** %d StiHit.%s Outside of detector: dX=%f dY=%g dZ=%g ****"
+          ,counts,detector->getName().c_str(),difX,difY,difZ)
   << endm;
-  counts++;
-  if (counts > 13) {
-    LOG_WARN <<
-      Form("**** StiHit.%s increase scale to %f ****"
-	   ,detector->getName().c_str(),scale);
-    scale *= 2;
-    counts = 0;
-  }
-  assert(fabs(dif)<0.30*pos);
+   assert(difX<10*accX && difY<10*accY && difZ<10*accZ );
 }
 
 
