@@ -14,7 +14,7 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 {
 public:
 
-   StiIstDetectorBuilder(bool active, const string &inputFile, bool buildIdealGeom=true);
+   StiIstDetectorBuilder(bool active, const string &inputFile, bool buildIdealGeom = true);
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
 
@@ -28,8 +28,8 @@ protected:
 private:
 
    void buildInactiveVolumes();
-   void buildPlanerVolume(StiDetector& detector, string detName, float halfDepth, float thickness, float halfWidth, float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat, StiElossCalculator *elossCalculator);
-   void buildTubeVolume(StiDetector& detector, string detName, float halfDepth, float thickness, float outerRadius, float openingAngle, float zCenter, StiMaterial *mat, StiElossCalculator *elossCalculator);
+   void buildPlanerVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float halfWidth, float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat, StiElossCalculator *elossCalculator);
+   void buildTubeVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float outerRadius, float openingAngle, float zCenter, StiMaterial *mat, StiElossCalculator *elossCalculator);
 };
 
 #endif
