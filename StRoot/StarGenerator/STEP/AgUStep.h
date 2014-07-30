@@ -81,8 +81,11 @@ public:
   Float_t dEstep; // energy lost in this step [GeV]
   Float_t adEstep; // accumulated energy lost by this point [GeV]
   Float_t step; // step size [cm]
+  UShort_t vnums[15]; // Volume numbers
+  UShort_t cnums[15]; // Copy numbers
   ClassDef(Step,1);
 };
+
 
 class AgUStep : public TNamed
 {
@@ -96,7 +99,10 @@ public:
   void Finish();
 
   /// Initialize stepping routine.  Opens TFile and creates TTree
-void Init( const Char_t *filename="" );
+  void Init( const Char_t *filename="" );
+
+  static Float_t rmin;// =   0.0;
+  static Float_t rmax;//= 200.0;
 
 private:
 protected:
