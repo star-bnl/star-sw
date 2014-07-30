@@ -3,7 +3,7 @@
 
 #include "Sti/StiDetectorBuilder.h"
 
-class StIstDbMaker;
+class StIstDb;
 class StiPlanarShape;
 class StiCylindricalShape;
 class StiMaterial;
@@ -22,8 +22,8 @@ protected:
 
    StiMaterial  *mSiMaterial;
    StiMaterial  *mHybridMaterial;
-   StIstDbMaker *mIstDb;
    bool          mBuildIdealGeom;
+   StIstDb      *mIstDb;
 
 private:
 
