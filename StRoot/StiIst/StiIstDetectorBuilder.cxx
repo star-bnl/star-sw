@@ -25,7 +25,7 @@
 #include "StEvent/StEnumerations.h"
 #include "StEvent/StEventTypes.h"
 #include "StDetectorDbMaker/StiIst1HitErrorCalculator.h"
-#include "StIstDbMaker/StIstDbMaker.h"
+#include "StIstDbMaker/StIstDb.h"
 #include "StIstUtil/StIstConsts.h"
 #include "StBFChain/StBFChain.h"
 
@@ -47,10 +47,18 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 
    SetCurrentDetectorBuilder(this);
 
-   // XXX:ds: Cannot rely on external maker! Must access DbMaker through
-   // source.GetDataSet("istDb")
-   if(!mBuildIdealGeom)
-      mIstDb = (StIstDbMaker*) source.GetMaker("istDb");
+   if(!mBuildIdealGeom) {
+        TObjectSet *istDbDataSet = (TObjectSet*) source.GetDataSet("ist_db");
+        if (!istDbDataSet) {
+            LOG_ERROR << "StiIstDetectorBuilder::buildDetectors: IST geometry was requested from "
+                         "DB but no StIstDb object found. Check for istDb option in BFC chain" << endm;
+            exit(EXIT_FAILURE);
+        }
+
+        mIstDb = (StIstDb*) istDbDataSet->GetObject();
+        assert(mIstDb);
+        LOG_INFO << "StiIstDetectorBuilder::buildDetectors: Will build IST geometry from DB tables" << endm;
+   }
 
    // Gas material must be defined. Here we use air properties
    _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
