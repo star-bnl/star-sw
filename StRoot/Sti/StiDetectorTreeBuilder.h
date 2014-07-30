@@ -88,7 +88,7 @@ protected:
 
     ///Decide where to hang the detector object on the tree.
     StiDetectorNode* hangWhere(StiDetectorNode* parent, const StiOrderKey& order,
-                         string& keystring);
+                         string& keystring,int newOne=0);
 
     ///Store a pointer to the root of the tree.
     StiDetectorNode* mroot;
