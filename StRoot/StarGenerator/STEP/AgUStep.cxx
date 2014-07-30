@@ -3,6 +3,10 @@
 #include "St_geant_Maker/St_geant_Maker.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
+#include "TGeoManager.h"
+
+Float_t AgUStep::rmin = 0.0;
+Float_t AgUStep::rmax = 50.0;
 
 extern "C" {
 
@@ -107,11 +111,12 @@ void  Track::Clear( const Option_t *opts ) {
   steps.Clear("");
 };
 // .................................................................. Step ................
-Step::Step() : TObject(), idStep(-1), x(0), y(0), z(0), dEstep(-1), adEstep(-1), step(-1),state(0) { }
+Step::Step() : TObject(), idStep(-1), x(0), y(0), z(0), dEstep(-1), adEstep(-1), step(-1),state(0) { Clear(); }
 void Step::Clear(Option_t *opts)
 {
   idStep=-1;
   x=0; y=0; z=0; dEstep=-1; adEstep=-1; step=-1; state=0;
+  for( Int_t i=0;i<15;i++ ) { vnums[i]=0; cnums[i]=0; }
 }
 
 
@@ -169,11 +174,14 @@ AgUStep::AgUStep() : TNamed("AgUStep","AgSTAR user stepping routine"),
 void AgUStep::operator()()
 {
 
+
+
   Double_t x = ctrak -> vect[0];
   Double_t y = ctrak -> vect[1];
   Double_t z = ctrak -> vect[2];
 
-  Double_t r = TMath::Sqrt(x*x+y*y);      if (r>50.0) return; // 50 cm limit
+  Double_t r = TMath::Sqrt(x*x+y*y);      
+  if (r > rmax) return; // track is exiting region of interest
 
   // Get current event
   idEvent = geant3->CurrentEvent();
@@ -206,7 +214,6 @@ void AgUStep::operator()()
       mTrack->idTruth = idTruth;
       
     }
-
   
   aDeStep += ctrak->destep;
   aStep   += ctrak->step;
@@ -214,7 +221,7 @@ void AgUStep::operator()()
   // Add a new step to the track
   assert(mTrack);
 
-  //  LOG_INFO << "     New Step " << x << " " << y << " " << z << " " << aDeStep << " " << endm;
+  if ( r < rmin ) return; // track has not entered region of interest
 
   Step *mStep = mTrack -> AddStep();
   mStep -> adEstep = aDeStep;
@@ -222,6 +229,29 @@ void AgUStep::operator()()
   mStep -> step = ctrak -> step;
   mStep -> state = ctrak->inwvol;
 
+  if (!gGeoManager) return; // step through before complete init?
+
+  // Print out current path...
+  //LOG_INFO << "N level = " << cvolu->nlevel << endm;
+  TString path = "";
+  for ( Int_t i=0;i<cvolu->nlevel;i++ )
+    {
+      path += "/"; 
+      Char_t buff[16];
+      memcpy( buff, &cvolu->names[i], sizeof(cvolu->names[i]) );
+      
+      TString volume; for ( Int_t ii=0;ii<4;ii++ ) volume += buff[ii];
+
+      path += volume; path += "_"; 
+      path += cvolu->number[i];
+
+      UShort_t volumeNumber = gGeoManager->FindVolumeFast(volume)->GetNumber();
+      UShort_t copyNumber   = cvolu->number[i];
+      mStep->vnums[i] = volumeNumber;
+      mStep->cnums[i] = copyNumber;
+
+    }
+  //  LOG_INFO << path.Data() << endm;
   
 }
 
