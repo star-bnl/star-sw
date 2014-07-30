@@ -30,9 +30,23 @@ Int_t    rngSeed = 12345;
 void geometry( TString tag, Bool_t agml=true )
 {
   TString cmd = "DETP GEOM "; cmd += tag; cmd+=" phys_off=1";
+
   if ( !geant_maker ) geant_maker = (St_geant_Maker *)chain->GetMaker("geant");
   geant_maker -> LoadGeometry(cmd);
-  //  if ( agml ) command("gexec $STAR_LIB/libxgeometry.so");
+
+  // make certain AgML loads
+  TString  path = "$STAR/StarDb/AgMLGeometry";
+  Char_t  *file = gSystem->Which( path.Data(), Form("Geometry.%s.C",tag.Data()), kReadPermission );
+  assert(file);
+
+  TString cmdL = Form(".L %s",file);
+  TString cmdX = Form("CreateTable()");
+  TString cmdU = Form(".U %s",file);
+  
+  gInterpreter -> ProcessLine( cmdL );
+  gInterpreter -> Calc       ( cmdX );
+  gInterpreter -> ProcessLine( cmdU );
+  
 }
 // ----------------------------------------------------------------------------
 void command( TString cmd )
@@ -53,7 +67,8 @@ void trig( Int_t n=1 )
   chain->Clear();
 
   primary->SetVertex( 0.0, 0.0, zvertex );
-  kinematics->Kine( _ntracks, "pi-", 4.995, 5.005, -0.005, 0.005 );
+  //  kinematics->Kine( _ntracks, "pi-", 4.995, 5.005, -0.005, 0.005 );
+  kinematics -> Kine( _ntracks, "pi-", 0.39995, 0.40005, -0.0005, 0.0005 );
 
   // Generate the event
   chain->Make();
@@ -94,7 +109,7 @@ void LoadLibraries( const Char_t *chopts = "y2014a geant gstar usexgeom agml " )
   gSystem->Load( "StarGeneratorStep.so" );
 
   gSystem->Load( "libMathMore.so"   );  
-  gSystem->Load( "xgeometry.so"     );
+  gSystem->Load( "xgeometry.so"     );  
 
 }
 // ----------------------------------------------------------------------------
@@ -163,7 +178,7 @@ void starsim( Double_t zslice  = 0.0,
   command( "PFIS 0" );
   command( "PHOT 0" );
   command( "RAYL 0" );
-  command( "LOSS 2" );
+  command( "LOSS 4" );
   command( "DRAY 0" );
   command( "MULS 0" );
   command( "STRA 0" );
