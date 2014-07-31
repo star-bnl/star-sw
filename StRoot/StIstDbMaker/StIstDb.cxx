@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.cxx,v 1.2 2014/07/31 18:29:51 ypwang Exp $
+* $Id: StIstDb.cxx,v 1.3 2014/07/31 22:40:52 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.3  2014/07/31 22:40:52  smirnovd
+* StIstDb: Removed unused header includes
+*
 * Revision 1.2  2014/07/31 18:29:51  ypwang
 * replace the LOG_INFO with LOG_DEBUG to slim the log file
 *
@@ -52,8 +55,6 @@
 #include "tables/St_istControl_Table.h"
 #include "tables/St_istChipConfig_Table.h"
 
-#include "TMath.h"
-#include "TVector3.h"
 
 using namespace StIstConsts;
 
