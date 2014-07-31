@@ -3,16 +3,21 @@
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
+
 call geometry  
+
 </Export>
 </Module>
 
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.35 2014/05/14 19:35:52 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.36 2014/07/31 18:35:18 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.36  2014/07/31 18:35:18  jwebb
+  Force recompilation of xgeometry to pickup y2014b definition.
+
   Revision 1.35  2014/05/14 19:35:52  jwebb
   Support for proposed FMS upgrade (dev15a), propsed HCAL upgrade (dev15b) and HCAL prototype (y2014b).
 
