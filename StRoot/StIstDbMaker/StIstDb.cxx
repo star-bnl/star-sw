@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.cxx,v 1.3 2014/07/31 22:40:52 smirnovd Exp $
+* $Id: StIstDb.cxx,v 1.4 2014/07/31 22:40:59 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.4  2014/07/31 22:40:59  smirnovd
+* StIstDb: Reduced the scope of the using namespace
+*
 * Revision 1.3  2014/07/31 22:40:52  smirnovd
 * StIstDb: Removed unused header includes
 *
@@ -56,8 +59,6 @@
 #include "tables/St_istChipConfig_Table.h"
 
 
-using namespace StIstConsts;
-
 THashList *StIstDb::mgRotList = 0;
 
 ClassImp(StIstDb)
@@ -73,6 +74,8 @@ StIstDb::StIstDb() : StObject()
 //_____________________________________________________________________________
 Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
 {
+   using namespace StIstConsts;
+
    SafeDelete(mgRotList);
    mgRotList = new THashList(kIstNumLadders * kIstNumSensorsPerLadder, 0);
    mgRotList->SetOwner(kFALSE);
