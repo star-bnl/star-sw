@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.h,v 1.2 2014/07/31 21:01:21 smirnovd Exp $
+* $Id: StIstDb.h,v 1.3 2014/07/31 21:01:29 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.h,v $
+* Revision 1.3  2014/07/31 21:01:29  smirnovd
+* Set class version to 1 as version 0 has a special meaning in root cint world
+*
 * Revision 1.2  2014/07/31 21:01:21  smirnovd
 * Made class getters const because we change nothing in the object
 *
@@ -55,7 +58,7 @@ public:
    void SetChipStatus(istChipConfig_st *chipStatus) {mIstChipStatus = chipStatus;}
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.2 2014/07/31 21:01:21 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.3 2014/07/31 21:01:29 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    static THashList 	*mgRotList;
@@ -65,7 +68,7 @@ private:
    istControl_st 	*mIstControl;
    istChipConfig_st 	*mIstChipStatus;
 
-   ClassDef(StIstDb, 0)
+   ClassDef(StIstDb, 1)
 };
 
 #endif

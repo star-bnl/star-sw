@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.13 2014/07/31 21:00:36 ypwang Exp $
+* $Id: StIstDbMaker.h,v 1.14 2014/07/31 21:01:29 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.14  2014/07/31 21:01:29  smirnovd
+* Set class version to 1 as version 0 has a special meaning in root cint world
+*
 * Revision 1.13  2014/07/31 21:00:36  ypwang
 * c++ format style improvements; virtual keyword added for destructor
 *
@@ -59,12 +62,12 @@ public:
    Int_t  InitRun(Int_t runNumber);
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.13 2014/07/31 21:00:36 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.14 2014/07/31 21:01:29 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    StIstDb *mIstDb;
 
-   ClassDef(StIstDbMaker, 0)
+   ClassDef(StIstDbMaker, 1)
 };
 
 #endif
