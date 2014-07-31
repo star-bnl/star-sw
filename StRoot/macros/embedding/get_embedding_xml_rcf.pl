@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.21 2013/01/09 21:36:06 huck Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.22 2014/07/31 14:07:19 zhux Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.22  2014/07/31 14:07:19  zhux
+# Add simulator option for bfcMixer_TpcOnly.C
+#
 # Revision 1.21  2013/01/09 21:36:06  huck
 # fix missing </job> for localStRoot=0
 #
@@ -747,6 +750,12 @@ sub get_bfcMixer {
 
     $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $vrcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $simulator, \"$fzdfile\");";
   }
+  elsif ( $bfcMixer =~ /.*TpcOnly.C/  ){
+    # bfcMixers with PYTHIA flag option (Tpc only) (X. Zhu)
+    printDebug("Starndard (without SVT/SSD) bfcMixer (Tpc only)");
+
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $vrcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $simulator, \"$fzdfile\");";
+  }
 	else {	
     # Other bfcMixers (TpcOnly or Tpx)
     printDebug("Starndard (without SVT/SSD) bfcMixer");
@@ -1048,7 +1057,7 @@ sub getLocalLibraryPath {
   #  print "Unknown OS : $chos. Set the sl44 path\n";
   #  return ".sl44_gcc346";
   #}
-  return ".sl53_gcc432";
+  return ".sl64_gcc447";
 }
 
 #----------------------------------------------------------------------------------------------------
