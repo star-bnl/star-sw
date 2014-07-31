@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.h,v 1.1 2014/07/29 19:50:25 ypwang Exp $
+* $Id: StIstDb.h,v 1.2 2014/07/31 21:01:21 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.h,v $
+* Revision 1.2  2014/07/31 21:01:21  smirnovd
+* Made class getters const because we change nothing in the object
+*
 * Revision 1.1  2014/07/29 19:50:25  ypwang
 * IST DB dataset in order to separate from IST Db maker
 *
@@ -37,12 +40,12 @@ class StIstDb : public StObject
 
 public:
    StIstDb();
-   THashList *GetRotations() 			{return mgRotList; }
-   const istPedNoise_st *GetPedNoise() 		{return mIstPedNoise;}
-   const istGain_st *GetGain()     		{return mIstGain;    }
-   const istMapping_st *GetMapping()  		{return mIstMapping; }
-   const istControl_st *GetControl()  		{return mIstControl; }
-   const istChipConfig_st *GetChipStatus() 	{return mIstChipStatus; }
+   THashList *GetRotations() const      	{return mgRotList; }
+   const istPedNoise_st *GetPedNoise() const 		{return mIstPedNoise;}
+   const istGain_st *GetGain() const     		{return mIstGain;    }
+   const istMapping_st *GetMapping() const  		{return mIstMapping; }
+   const istControl_st *GetControl() const  		{return mIstControl; }
+   const istChipConfig_st *GetChipStatus() const 	{return mIstChipStatus; }
 
    Int_t SetGeoHMatrices(Survey_st **tables);
    void SetPedNoise(istPedNoise_st *pedNoise) 	{mIstPedNoise = pedNoise;}
@@ -52,7 +55,7 @@ public:
    void SetChipStatus(istChipConfig_st *chipStatus) {mIstChipStatus = chipStatus;}
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.1 2014/07/29 19:50:25 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.2 2014/07/31 21:01:21 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    static THashList 	*mgRotList;
