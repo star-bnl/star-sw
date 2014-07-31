@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.13 2014/07/31 18:24:03 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.14 2014/07/31 21:00:36 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.14  2014/07/31 21:00:36  ypwang
+* c++ format style improvements; virtual keyword added for destructor
+*
 * Revision 1.13  2014/07/31 18:24:03  ypwang
 * add destructor and deallocate the mIstDb; c++ formatting style improvements and formatted with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
@@ -64,13 +67,12 @@ StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name)
 //_____________________________________________________________________________
 StIstDbMaker::~StIstDbMaker()
 {
-   if (mIstDb)
-      delete mIstDb;
+   if ( mIstDb ) { delete mIstDb; }
 }
 //_____________________________________________________________________________
 Int_t StIstDbMaker::InitRun(Int_t runNumber)
 {
-   if (!mIstDb) mIstDb = new StIstDb();
+   if ( !mIstDb ) { mIstDb = new StIstDb(); }
 
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Set geoHMatrices" << endm;
 
