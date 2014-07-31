@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.11 2014/07/29 19:50:25 ypwang Exp $
+* $Id: StIstDbMaker.h,v 1.12 2014/07/31 18:24:03 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,8 +9,14 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.12  2014/07/31 18:24:03  ypwang
+* add destructor and deallocate the mIstDb; c++ formatting style improvements and formatted with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.11  2014/07/29 19:50:25  ypwang
 * IST DB dataset in order to separate from IST Db maker
+*
+* Revision 1.10  2014/07/15 23:17:52  smirnovd
+* Improved doxygen documentation
 *
 * Revision 1.9  2014/03/27 22:46:55  smirnovd
 * Remove unnecessary protection
@@ -46,10 +52,11 @@ class StIstDbMaker : public StMaker
 
 public:
    StIstDbMaker(const char *name = "istDb");
+   ~StIstDbMaker();
    Int_t  InitRun(Int_t runNumber);
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.11 2014/07/29 19:50:25 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.12 2014/07/31 18:24:03 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    StIstDb *mIstDb;
