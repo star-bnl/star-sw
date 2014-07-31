@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.cxx,v 1.1 2014/07/29 19:50:25 ypwang Exp $
+* $Id: StIstDb.cxx,v 1.2 2014/07/31 18:29:51 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.2  2014/07/31 18:29:51  ypwang
+* replace the LOG_INFO with LOG_DEBUG to slim the log file
+*
 * Revision 1.1  2014/07/29 19:50:25  ypwang
 * IST DB dataset in order to separate from IST Db maker
 *
@@ -109,11 +112,11 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
    ist2Pst.SetRotation(&istOnPst->r00);
    ist2Pst.SetTranslation(&istOnPst->t0);
 
-   LOG_INFO << "ids2Tpc :" << endm;
+   LOG_DEBUG << "ids2Tpc :" << endm;
    ids2Tpc.Print();
-   LOG_INFO << "pst2Ids :" << endm;
+   LOG_DEBUG << "pst2Ids :" << endm;
    pst2Ids.Print();
-   LOG_INFO << "ist2Pst :" << endm;
+   LOG_DEBUG << "ist2Pst :" << endm;
    ist2Pst.Print();
 
    for (int i = 0; i < nSensors; i++, sensorsOnLadders++) {
@@ -155,7 +158,7 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
       //calculate sensor global position
       sensorGlobal = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder;
 
-      LOG_INFO << "sensorGlobal\tR" << id << endm;
+      LOG_DEBUG << "sensorGlobal\tR" << id << endm;
       sensorGlobal.Print();
 
       comb->SetRotation(sensorGlobal.GetRotationMatrix());
