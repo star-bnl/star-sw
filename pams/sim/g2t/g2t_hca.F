@@ -4,6 +4,7 @@
 #include "g2t_emc.inc"
 #include "genhit.h"
 #include "atlsim/gentit.inc"
++cde,gcunit.
 
       INTEGER   G2T_HCA,G2R_GET_HIT,Iprin/0/,Idigi,i,isys, khit
       logical   Local/.true./
@@ -31,9 +32,9 @@
             g2t_emc_hit(i).de            = 0   ! Use attenuated hcal value
             g2t_emc_hit(i).track_p       = trac
             g2t_emc_hit(i).volume_id     = volume
-            !g2t_emc_hit(i).x             = xx(1)  ! Not available in g2t_emc_hit
-            !g2t_emc_hit(i).y             = xx(2)
-            !g2t_emc_hit(i).z             = xx(3)
+            g2t_emc_hit(i).x             = xx(1) 
+            g2t_emc_hit(i).y             = xx(2)
+            g2t_emc_hit(i).z             = xx(3)
 
             do khit=1,15
                IF (chit(khit)=myhit) { 
@@ -42,6 +43,8 @@
                }
             enddo
 
+
+*        <W> i,trac,volume,hits(khit);( 'g2t_hca: ', I4, I4, I8, F8.4);
 *
 *                  add to track linked list 
 *
