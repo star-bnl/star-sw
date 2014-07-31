@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.59 2014/07/02 02:11:24 zchang Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.60 2014/07/31 19:52:17 zchang Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -463,8 +463,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   // Open connection to online database
 
   MYSQL mysql;
-  //  const char* host = "dbbak.starp.bnl.gov";
-  const char* host = "db04.star.bnl.gov";
+  const char* host = "dbbak.starp.bnl.gov";
   const char* user = "";
   const char* pass = "";
   //unsigned int port = 3400+GetDBTime().GetYear()%100-1;
@@ -875,6 +874,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.60  2014/07/31 19:52:17  zchang
+ * change database server back to dbbak.starp.bnl.gov
+ *
  * Revision 1.59  2014/07/02 02:11:24  zchang
  * Add conditions to read none-NULL onbits and offbits in database, compatible with early run9 trigger definitions.CVS: ----------------------------------------------------------------------
  *
