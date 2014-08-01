@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.cxx,v 1.4 2014/07/31 22:40:59 smirnovd Exp $
+* $Id: StIstDb.cxx,v 1.5 2014/08/01 22:25:48 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.5  2014/08/01 22:25:48  ypwang
+* Add several simple getters and data members for sub-level geometry matrices obtain; Add Print() function which print out all IST geometry matrices
+*
 * Revision 1.4  2014/07/31 22:40:59  smirnovd
 * StIstDb: Reduced the scope of the using namespace
 *
@@ -45,7 +48,6 @@
 */
 
 #include <assert.h>
-#include "StIstUtil/StIstConsts.h"
 #include "StIstDb.h"
 #include "StMessMgr.h"
 #include "StTpcDb/StTpcDb.h"
@@ -58,13 +60,13 @@
 #include "tables/St_istControl_Table.h"
 #include "tables/St_istChipConfig_Table.h"
 
-
 THashList *StIstDb::mgRotList = 0;
 
 ClassImp(StIstDb)
 //_____________________________________________________________________________
 StIstDb::StIstDb() : StObject()
 {
+   mGeoHMatrixTpcOnGlobal = NULL;
    mIstPedNoise = NULL;
    mIstGain	= NULL;
    mIstMapping  = NULL;
@@ -80,11 +82,9 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
    mgRotList = new THashList(kIstNumLadders * kIstNumSensorsPerLadder, 0);
    mgRotList->SetOwner(kFALSE);
 
-   TGeoHMatrix ids2Tpc, pst2Ids, ist2Pst, ladder2Ist, sensorGlobal;
-
    //get TPC positionement relative to STAR
    assert(gStTpcDb);
-   const TGeoHMatrix &tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
+   mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
 
    //obtain IST geomery tables
    Survey_st *idsOnTpc          = tables[0];
@@ -93,37 +93,19 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
    Survey_st *laddersOnIst      = tables[3];
    Survey_st *sensorsOnLadders  = tables[4];
 
-   //get the number of rows of each tables
-   int nIds                  = 1; // 1
-   int nPst                  = 1; // 1
-   int nIst                  = 1; // 1
-   int nLadders              = kIstNumLadders; //24
-   int nSensors              = kIstNumSensors; //144
+   mGeoHMatrixIdsOnTpc.SetName("idsOnTpc");
+   mGeoHMatrixIdsOnTpc.SetRotation(&idsOnTpc->r00);
+   mGeoHMatrixIdsOnTpc.SetTranslation(&idsOnTpc->t0);
 
-   LOG_DEBUG << " # of IDS     : " << nIds << endm;
-   LOG_DEBUG << " # of PST     : " << nPst << endm;
-   LOG_DEBUG << " # of IST     : " << nIst << endm;
-   LOG_DEBUG << " # of Ladders : " << nLadders << endm;
-   LOG_DEBUG << " # of Sensors : " << nSensors << endm;
+   mGeoHMatrixPstOnIds.SetName("pstOnIds");
+   mGeoHMatrixPstOnIds.SetRotation(&pstOnIds->r00);
+   mGeoHMatrixPstOnIds.SetTranslation(&pstOnIds->t0);
 
-   //setting rotation and translation
-   ids2Tpc.SetRotation(&idsOnTpc->r00);
-   ids2Tpc.SetTranslation(&idsOnTpc->t0);
+   mGeoHMatrixIstOnPst.SetName("istOnPst");
+   mGeoHMatrixIstOnPst.SetRotation(&istOnPst->r00);
+   mGeoHMatrixIstOnPst.SetTranslation(&istOnPst->t0);
 
-   pst2Ids.SetRotation(&pstOnIds->r00);
-   pst2Ids.SetTranslation(&pstOnIds->t0);
-
-   ist2Pst.SetRotation(&istOnPst->r00);
-   ist2Pst.SetTranslation(&istOnPst->t0);
-
-   LOG_DEBUG << "ids2Tpc :" << endm;
-   ids2Tpc.Print();
-   LOG_DEBUG << "pst2Ids :" << endm;
-   pst2Ids.Print();
-   LOG_DEBUG << "ist2Pst :" << endm;
-   ist2Pst.Print();
-
-   for (int i = 0; i < nSensors; i++, sensorsOnLadders++) {
+   for (int i = 0; i < kIstNumSensors; i++, sensorsOnLadders++) {
       int id = sensorsOnLadders->Id;
       TGeoHMatrix *comb = (TGeoHMatrix *) mgRotList->FindObject(Form("R%04i", id));
 
@@ -131,39 +113,44 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
 
       comb = new TGeoHMatrix(Form("R%04i", id));
       int ladder = ((id - 1000) - 1) / kIstNumSensorsPerLadder + 1; // 1 <= ladder <= 24
+      int sensor = ((id - 1000) - 1) % kIstNumSensorsPerLadder + 1; // 1 <= sensor <= 6
 
-      //setting rotation/translation for sensor geometry matrix
-      TGeoHMatrix sensor2Ladder;
-      sensor2Ladder.SetRotation(&sensorsOnLadders->r00);
-      sensor2Ladder.SetTranslation(&sensorsOnLadders->t0);
-      TGeoHMatrix *sensorLocal = (TGeoHMatrix *) mgRotList->FindObject(Form("sensorLocal%04i", id));
-
-      if (!sensorLocal) {
-         sensorLocal = new  TGeoHMatrix(Form("sensorLocal%04i", id));
-         sensorLocal->SetRotation(sensor2Ladder.GetRotationMatrix());
-         sensorLocal->SetTranslation(sensor2Ladder.GetTranslation());
-         mgRotList->Add(sensorLocal);
-      }
-
-      //seeting rotation/translation for ladder geometry matrix
       if (ladder <= 0 || ladder > kIstNumLadders) {
          cout << "Ladder has not been defined!" << endl;
          continue;
       }
 
-      for (int l = 0; l < nLadders; l++, laddersOnIst++) {
+      if (sensor <= 0 || sensor > kIstNumSensorsPerLadder) {
+         cout << "Sensor has not been defined!" << endl;
+         continue;
+      }
+
+      //setting rotation/translation for sensor geometry matrix
+      mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1].SetName(Form("sensorOnLadder%4i%4i", ladder, sensor));
+      mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1].SetRotation(&sensorsOnLadders->r00);
+      mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1].SetTranslation(&sensorsOnLadders->t0);
+
+      TGeoHMatrix *sensorLocal = (TGeoHMatrix *) mgRotList->FindObject(Form("sensorLocal%04i", id));
+
+      if (!sensorLocal) {
+         sensorLocal = new  TGeoHMatrix(Form("sensorLocal%04i", id));
+         sensorLocal->SetRotation(mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1].GetRotationMatrix());
+         sensorLocal->SetTranslation(mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1].GetTranslation());
+         mgRotList->Add(sensorLocal);
+      }
+
+      //seeting rotation/translation for ladder geometry matrix
+      for (int l = 0; l < kIstNumLadders; l++, laddersOnIst++) {
          if (ladder == laddersOnIst->Id) {
-            ladder2Ist.SetRotation(&laddersOnIst->r00);
-            ladder2Ist.SetTranslation(&laddersOnIst->t0);
+            mGeoHMatrixLadderOnIst[ladder - 1].SetName(Form("ladderOnIst%4i", ladder));
+            mGeoHMatrixLadderOnIst[ladder - 1].SetRotation(&laddersOnIst->r00);
+            mGeoHMatrixLadderOnIst[ladder - 1].SetTranslation(&laddersOnIst->t0);
             break;
          }
       }
 
       //calculate sensor global position
-      sensorGlobal = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder;
-
-      LOG_DEBUG << "sensorGlobal\tR" << id << endm;
-      sensorGlobal.Print();
+      TGeoHMatrix sensorGlobal = (*mGeoHMatrixTpcOnGlobal) * mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds * mGeoHMatrixIstOnPst * mGeoHMatrixLadderOnIst[ladder - 1] * mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1];
 
       comb->SetRotation(sensorGlobal.GetRotationMatrix());
       comb->SetTranslation(sensorGlobal.GetTranslation());
@@ -171,4 +158,27 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
    }
 
    return kStOk;
+}
+
+void StIstDb::Print() const
+{
+   mGeoHMatrixTpcOnGlobal->Print();
+   mGeoHMatrixIdsOnTpc.Print();
+   mGeoHMatrixPstOnIds.Print();
+   mGeoHMatrixIstOnPst.Print();
+
+   for (Int_t iL = 0; iL < kIstNumLadders; iL++) {
+      mGeoHMatrixLadderOnIst[iL].Print();
+   }
+
+   for (Int_t iL = 0; iL < kIstNumLadders; iL++) {
+      for (Int_t iS = 0; iS < kIstNumSensorsPerLadder; iS++) {
+         mGeoHMatrixSensorOnLadder[iL][iS].Print();
+      }
+   }
+
+   for (Int_t iS = 1; iS <= kIstNumSensors; iS++) {
+      TGeoHMatrix *sensorOnGlobal = (TGeoHMatrix *) mgRotList->FindObject(Form("R%04i", iS + 1000));
+      sensorOnGlobal->Print();
+   }
 }
