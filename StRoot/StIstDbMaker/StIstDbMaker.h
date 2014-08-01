@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.14 2014/07/31 21:01:29 smirnovd Exp $
+* $Id: StIstDbMaker.h,v 1.15 2014/08/01 22:15:04 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.15  2014/08/01 22:15:04  ypwang
+* mIstDb geometry matrices print out when Debug2 enabled
+*
 * Revision 1.14  2014/07/31 21:01:29  smirnovd
 * Set class version to 1 as version 0 has a special meaning in root cint world
 *
@@ -60,9 +63,10 @@ public:
    StIstDbMaker(const char *name = "istDb");
    virtual ~StIstDbMaker();
    Int_t  InitRun(Int_t runNumber);
+   
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.14 2014/07/31 21:01:29 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.15 2014/08/01 22:15:04 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    StIstDb *mIstDb;

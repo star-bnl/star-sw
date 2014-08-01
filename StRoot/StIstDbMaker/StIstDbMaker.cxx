@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.14 2014/07/31 21:00:36 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.15 2014/08/01 22:15:04 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.15  2014/08/01 22:15:04  ypwang
+* mIstDb geometry matrices print out when Debug2 enabled
+*
 * Revision 1.14  2014/07/31 21:00:36  ypwang
 * c++ format style improvements; virtual keyword added for destructor
 *
@@ -175,6 +178,10 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    else {
       LOG_ERROR << "StIstDbMaker: No input chip configuration data set!" << endm;
       return kStErr;
+   }
+
+   if ( GetDebug() >= 2) {
+      mIstDb->Print();
    }
 
    //write the data
