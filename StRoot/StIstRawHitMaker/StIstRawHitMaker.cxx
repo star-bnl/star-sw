@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.15 2014/07/29 20:13:31 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.16 2014/08/04 17:12:48 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.16  2014/08/04 17:12:48  ypwang
+* update chip status Db table obtain method due to the table is populated run-by-run
+*
 * Revision 1.15  2014/07/29 20:13:31  ypwang
 * update the IST DB obtain method
 *
@@ -82,7 +85,7 @@ StIstRawHitMaker::StIstRawHitMaker( const char* name ): StRTSBaseMaker( "ist", n
    mRmsVec.resize( kIstNumElecIds );
    mGainVec.resize( kIstNumElecIds );
    mMappingVec.resize( kIstNumElecIds );
-   mConfigVec.resize( kIstNumApvs );
+   mConfigVec.resize( kIstNumApvs, 1 );
 };
 
 StIstRawHitMaker::~StIstRawHitMaker(){
@@ -199,15 +202,11 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
         ierr = kStErr;
    }
    else {
-	while(gCS->run) {
-	     if(runnumber == gCS->run) {
-            	  for(int i=0; i<kIstNumApvs; i++) {
-                        LOG_DEBUG<<Form(" Print entry %d : status=%d ", i, gCS->s[i])<<endm;
-                        mConfigVec[i] = gCS->s[i];  /* 0 dead;  1 good; 2-9 reserved good status; 10 mis-configured */
-            	  }
-		  break;
-	     }
-	     gCS++;
+	if(runnumber == gCS[0].run) {
+	     for(int i=0; i<kIstNumApvs; i++) {
+                        LOG_DEBUG<<Form(" Print entry %d : status=%d ", i, gCS[0].s[i])<<endm;
+                        mConfigVec[i] = gCS[0].s[i];  /* 0 dead;  1 good; 2-9 reserved good status; 10 mis-configured */
+             }
 	}
    }
 
