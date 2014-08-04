@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.74 2014/05/14 20:01:23 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.75 2014/08/04 14:11:30 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.75  2014/08/04 14:11:30  jwebb
+* Updates to HCAL geometry and volume IDs (affects y2014b,dev15b).
+*
 * Revision 1.74  2014/05/14 20:01:23  jwebb
 * More support for HCAL.  Also note... last checkin of g2t_volume_id was to support FMS preshower.
 *
@@ -930,10 +933,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           hcal_tower = numbv(1)
           hcal_cell  = numbv(2)
 
- 	  if (cd=='HCEL') hcal_cell = hcal_cell +500
+ 	  if (cd=='HCEL') hcal_cell = hcal_cell +5000
  	  if (cd=='HCES') hcal_cell = hcal_cell +0
 
-          volume_id  =    hcal_cell  + 1000*  hcal_tower
+          volume_id  =    hcal_cell  + 10000 *  hcal_tower
 
  
 

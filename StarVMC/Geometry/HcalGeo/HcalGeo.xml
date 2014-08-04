@@ -107,7 +107,7 @@
       <var name="y"       value="0.0"       comment="y cdt from center of TPC"/>
       <var name="z"       value="778.5"     comment="z cdt from center of TPC"/>  <!-- 778.5 = (dis. from TPC + half of length of calorimeter) = 720 + (117/2)  -->
       <var name="dx"      value="60/2."     comment="HCMO width"/>
-      <var name="dy"      value="60/2."     comment="HCMO height"/>
+      <var name="dy"      value="(60+5)/2." comment="HCMO height + shild hight"/>
       <var name="dz"      value="117/2."    comment="HCMO length"/>
     </Fill>
 

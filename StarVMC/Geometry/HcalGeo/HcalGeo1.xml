@@ -24,7 +24,8 @@
       HCSX,     <!-- "" -->
       HCSY,     <!-- "" -->
       HFIB,     <!-- fibers for Short cell  -->  
-      HFIC      <!-- fibers for Long cell, bcoz of the limitation of STAR AgML -->  
+      HFIC,     <!-- fibers for Long cell, bcoz of the limitation of STAR AgML -->  
+      HACL      <!-- Aluminum suporting cells at bottom -->     
     </Content>
 
     <varlist type="int">
@@ -36,7 +37,8 @@
       q2i,q2j,
       q3i,q3j,
       q4i,q4j,
-      flag,flag1,flag2
+      flag,flag1,flag2,
+      flag3
     </varlist>
 
     <varlist type="int">
@@ -117,7 +119,7 @@
       <var name="x"       value="0.0"       comment="x cdt from center of TPC"/>
       <var name="y"       value="0.0"       comment="y cdt from center of TPC"/>
       <var name="z"       value="778.5"     comment="z cdt from center of TPC"/>  <!-- 778.5 = (dis. from TPC + half of length of calorimeter) = 720 + (117/2)  -->
-      <var name="dx"      value="20*10/2."  comment="HCMO width"/>
+      <var name="dx"      value="18*10/2."  comment="HCMO width"/>
       <var name="dy"      value="18*10/2."  comment="HCMO height"/>
       <var name="dz"      value="117/2."    comment="HCMO length"/>
     </Fill>
@@ -128,7 +130,7 @@
       <var name="dx"       value="10.0/2."                comment="towr width"/>
       <var name="dy"       value="10.0/2."                comment="towr height"/>
       <var name="dz"       value="117.0/2."               comment="towr length"/>
-      <var name="nTowerX"  value="20" 			  comment="no of tower in X dir"/>
+      <var name="nTowerX"  value="18" 			  comment="no of tower in X dir"/>
       <var name="nTowerY"  value="18" 			  comment="no of tower in Y dir"/>
     </Fill>
 
@@ -189,32 +191,43 @@
 
 
       mmi=0;
-      mmj=5;
+      mmj=4;
 
       nni=0;
-      nnj=12;
+      nnj=13;
 
-      ooi=15;
+      ooi=14;
       ooj=1;
 
-      ppi=15;
+      ppi=14;
       ppj=16;
 
-      q1i=9;q1j=8;
-      q2i=9;q2j=9;
-      q3i=10;q3j=8;
-      q4i=10;q4j=9;
+      q1i=8;q1j=8;
+      q2i=8;q2j=9;
+      q3i=9;q3j=8;
+      q4i=9;q4j=9;
 
       <For var="i" from="0" to="towr_nTowerX-1">
 	<For var="j" from="0" to="towr_nTowerY-1">
 
-	  flag1 = ( (i.eq.mmi) .and. (j.lt.mmj) ) .or. ( (i.eq.nni) .and. (j.gt.nnj) ) .or. ( (i.eq.ooi) .and. (j.lt.ooj) ) .or. ( (i.eq.ppi) .and. (j.gt.ppj) ) ; 
+	  <!--For strip all for corners  -->
+	  flag1 = ( (i.eq.mmi) .and. (j.lt.mmj) ) .or. ( (i.eq.nni) .and. (j.gt.nnj) ) .or. ( (i.eq.ooi) .and. (j.lt.ooj) ) .or. ( (i.eq.ppi) .and. (j.gt.ppj) ) ;  
+	  <!-- To remove center 4 towers --> 
 	  flag2 = ( (i.eq.q1i  ) .and. ( j.eq.q1j) ) .or. ( (i.eq.q2i  ) .and. ( j.eq.q2j) )  .or. ( (i.eq.q3i  ) .and. ( j.eq.q3j) )  .or. ( (i.eq.q4i  ) .and. ( j.eq.q4j) ); 
 	  flag = flag1 + flag2;
+
+	  <!-- For supporting blockes -->
+	  flag3 = ( (i.eq.mmi) .and. (j.lt.mmj) ) .or. ( (i.eq.ooi) .and. (j.lt.ooj) ) ; 
 
 	  <If expr="(flag.eq.0) ">
 	    <Create block="HTWR" />
 	    <Placement block="HTWR" x="-(((towr_nTowerX/2)*towr_dx*2)-towr_dx)+(i*towr_dx*2)" y="-(((towr_nTowerY/2)*towr_dy*2)-towr_dy)+(j*towr_dy*2)" z="0.0" />
+	  </If>
+
+
+	  <If expr="(flag3.eq.1) ">
+	    <Create block="HACL" />
+	    <Placement block="HACL" x="-(((towr_nTowerX/2)*towr_dx*2)-towr_dx)+(i*towr_dx*2)" y="-(((towr_nTowerY/2)*towr_dy*2)-towr_dy)+(j*towr_dy*2)" z="0.0" />
 	  </If>
 
 
@@ -386,6 +399,14 @@
       </Instrument>
       -->
 
+    </Volume>
+
+
+    <Volume name="HACL" comment=" Aluminum suporting cells">
+      <Material name="Aluminium" isvol="0"/>
+      <Medium name="standard" />
+      <Attribute seen="1" colo="2" />
+      <Shape type="Box" dx="towr_dx" dy="towr_dy" dz="towr_dz" />
     </Volume>
 
 
