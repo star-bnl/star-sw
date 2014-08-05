@@ -34,8 +34,7 @@ using namespace StIstConsts;
 
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFile, bool buildIdealGeom) :
-   StiDetectorBuilder("Ist", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mIstDb(0),
-   mBuildIdealGeom(buildIdealGeom)
+   StiDetectorBuilder("Ist", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
 { }
 
 
