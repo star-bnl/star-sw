@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.15 2014/08/01 22:15:04 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.16 2014/08/05 17:48:58 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.16  2014/08/05 17:48:58  ypwang
+* update Print() function to PrintGeoHMatrices()
+*
 * Revision 1.15  2014/08/01 22:15:04  ypwang
 * mIstDb geometry matrices print out when Debug2 enabled
 *
@@ -181,7 +184,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    }
 
    if ( GetDebug() >= 2) {
-      mIstDb->Print();
+      mIstDb->PrintGeoHMatrices();
    }
 
    //write the data
