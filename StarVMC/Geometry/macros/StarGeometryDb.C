@@ -27,6 +27,7 @@ void StarGeometryDb()
 
   geom.pixlFlag = "PIXLof";  geom.pixlStat = 0; // Default pixel detector is off
   geom.pxstFlag = "PXSTof";  geom.pxstStat = 0; // Default piston support is off
+  geom.psupFlag = "PSUPof";  geom.psupStat = 0; // Default supports off
 
   //
   // Setup STAR Geometries y2000 to present
@@ -42,11 +43,11 @@ void StarGeometryDb()
   y2007();   geom.Last(); setTitle("Year 2007 Production Geometry");  geom.select="y2007pro"; geom.fill();
   y2008();   geom.Last(); setTitle("Year 2008 Production Geometry");  geom.select="y2008pro"; geom.fill();
   y2009();   geom.Last(); setTitle("Year 2009 Production Geometry");  geom.select="y2009pro"; geom.fill();
-  y2010();   geom.Last(); setTitle("Year 2010 Production Geometry");  geom.select="y2010pro"; geom.fill();
-  y2011();   geom.Last(); setTitle("Year 2011 Production Geometry");  geom.select="y2011pro"; geom.fill();
-  y2012();   geom.Last(); setTitle("Year 2012 Production Geometry");  geom.select="y2012pro"; geom.fill();
-  y2013();   geom.Last(); setTitle("Year 2013 Production Geometry");  geom.select="y2013pro"; geom.fill();
-  y2014();   geom.Last(); setTitle("Year 2014 First Cut Geometry");   geom.select="y2014fst"; geom.fill();
+  y2010();   geom.Last(); setTitle("Year 2010 Production Geometry");  //geom.select="y2010pro"; geom.fill();
+  y2011();   geom.Last(); setTitle("Year 2011 Production Geometry");  //geom.select="y2011pro"; geom.fill();
+  y2012();   geom.Last(); setTitle("Year 2012 Production Geometry");  //geom.select="y2012pro"; geom.fill();
+  y2013();   geom.Last(); setTitle("Year 2013 Production Geometry");  //geom.select="y2013pro"; geom.fill();
+  y2014();   geom.Last(); setTitle("Year 2014 First Cut Geometry");   //geom.select="y2014pro"; geom.fill();
 
   // Setup upgrade geometries
   upgrade();
@@ -847,6 +848,13 @@ void y2010()
     geom.fill();
   }
 
+  geom.Use("select","y2010c");
+  geom.select="y2010x";
+  {
+    geom.tpceFlag="TPCE40"; geom.tpceStat=1;
+    geom.fill();
+  }
+
 }
 
 void y2011()
@@ -912,6 +920,12 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
     geom.caveFlag = "CAVE04"; geom.caveStat = 1;
     geom.pipeFlag = "PIPE12"; geom.pipeStat = 1;
     setTitle("Production geometry y2011a");
+    geom.fill();
+  }
+
+  geom.select="y2011x";
+  {
+    geom.tpceFlag="TPCE40"; geom.tpceStat=1;
     geom.fill();
   }
 
@@ -986,46 +1000,11 @@ void y2012()
     geom.fill();
   }
 
-
-}
-
-void y2014()
-{
-
-  geom.select = "y2014"; {
-    // ================================================
-    geom.caveFlag = "CAVE05";  geom.caveStat = 1;
-    // ================================================
-    geom.sconFlag = "SCONof";  geom.sconStat = 0;
-    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
-    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
-    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
-    geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
-    geom.fpdmFlag = "FPDMof";  geom.fpdmStat = 0;
-    geom.fgtdFlag = "FGTDof";  geom.fgtdStat = 0;
-    // ================================================
-    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
-    geom.btofFlag = "BTOFv8";  geom.btofStat = 1;
-    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
-    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
-    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
-    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
-    geom.mutdFlag = "MUTD13";  geom.mutdStat = 1;
-    geom.pipeFlag = "PIPEv3";  geom.pipeStat = 1;
-    geom.sisdFlag = "SISD85";  geom.sisdStat = 1;
-    // ================================================
-    geom.pixlFlag = "PIXL06";  geom.pixlStat = 1;
-    geom.istdFlag = "ISTD02";  geom.istdStat = 1;
-    // ================================================
-    geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
-    geom.idsmFlag = "IDSM14";  geom.idsmStat = 1;
-    // ================================================
-    //
-    setTitle("Upgrade studies with 6 complete FGT disks");
-    //
-    // ================================================
+  geom.select="y2012x";
+  {
+    geom.tpceFlag="TPCE40"; geom.tpceStat=1;
     geom.fill();
-  };
+  }
 
 }
 
@@ -1204,6 +1183,7 @@ void test()
     // ================================================
     geom.pixlFlag = "PIXLof";  geom.pixlFlag = 0;
     geom.pxstFlag = "PXSTof";  geom.pxstFlag = 0;
+
     geom.dtubFlag = "DTUBof";  geom.dtubFlag = 0;
     // ================================================
     geom.sisdFlag = "SISDof"; geom.sisdStat = 0;
@@ -1262,7 +1242,9 @@ void y2013()
     geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
     geom.fgtdFlag = "FGTD32";  geom.fgtdStat = 1;
     geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+    geom.psupFlag = "PSUP01";  geom.psupStat = 1;
     geom.pixlFlag = "PIXL02";  geom.pixlStat = 1; 
+    
     // ================================================ 
     //
     setTitle("Upgrade studies with 6 complete FGT disks");
@@ -1300,6 +1282,7 @@ void y2013()
     geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
     geom.pixlFlag = "PIXL05";  geom.pixlStat = 1; 
     geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.psupFlag = "PSUPof";  geom.psupStat = 0;
     // ================================================ 
     //
     setTitle("Y2013 baseline");
@@ -1345,7 +1328,64 @@ void y2013()
     geom.dtubStat = 0;
     geom.fill();
   };
+
+  // Setup y2013b
+  geom.Use( "select","y2013a");
+  geom.select = "y2013b"; {
+    setTitle("Y2013a first production geometry PIXL in");
+    geom.tpcRefSys = true; // set reference system for TPC
+    geom.caveFlag = "CAVE05";
+    geom.pipeFlag = "PIPEv3";
+    geom.psupFlag = "PSUP01"; geom.psupStat = 1;
+    geom.pixlFlag = "PIXL05"; geom.pixlStat = 1; 
+    geom.pxstFlag = "PXST01"; geom.pxstStat = 1; 
+    geom.dtubFlag = "DTUB01"; geom.dtubStat = 1;
+    geom.fill();
+  };
+  geom.select = "y2013_1b"; {
+    setTitle("Y2013a first production geometry PIXL in");
+    geom.tpcRefSys = true; // set reference system for TPC
+    geom.fill();
+  };
+  geom.select = "y2013_2b"; {
+    setTitle("Y2013a first production geometry PIXL out");
+    geom.tpcRefSys = true; // set reference system for TPC
+    geom.pixlStat = 0;
+    geom.dtubStat = 0;
+    geom.psupStat = 0;     // switch psup off
+    geom.fill();
+  };
   
+
+  //
+  // y2013_1c and 2c are defined to match the configuration used in
+  // the y2013 production.  The production was mistakenly launched 
+  // using the asymptotic geometry as defined in the SL14a library.
+  // That geometry uses the new model of the cave and the version3.1
+  // of the TPC.  Version3.1 of the TPC changes the 
+  //
+  geom.Use("select","y2013_1b"); // Inherit from 1b
+  geom.select = "y2013_1c"; {
+    geom.caveFlag = "CAVE05";
+    geom.tpceFlag = "TPCE31";
+    geom.tpcRefSys = true;
+    setTitle("Y2013_1c production geometry = y2013_1x in SL14a");
+    geom.fill();
+    geom.select("y2013c"); 
+    geom.fill();
+  };
+
+  geom.select = "y2013_2c"; {
+    geom.caveFlag = "CAVE05";
+    geom.tpceFlag = "TPCE31";
+    geom.tpcRefSys = true;
+    setTitle("Y2013_2c production geometry = y2013_2x in SL14a");
+    geom.pixlStat = 0;
+    geom.dtubStat = 0;
+    geom.psupStat = 0;     // switch psup off
+    geom.fill();
+  }
+  geom.Use("select","y2013_1c"); // restore pixel detector
     
     
 
@@ -1355,7 +1395,7 @@ void y2013()
   geom.select = "y2013_1x"; {
     // Inherits y2013 and
     geom.caveFlag = "CAVE05";
-    geom.tpceFlag = "TPCE31"; geom.tpceStat = 1;
+    geom.tpceFlag = "TPCE40"; geom.tpceStat = 1;
     geom.tpcRefSys = true; // Create TPC reference system
     setTitle("Asymptotic y2013");
     geom.fill();
@@ -1373,6 +1413,57 @@ void y2013()
   }
   geom.Use("select","y2013_1x");  // Restore asymptotic values  
 
+
+}
+
+void y2014()
+{
+
+  geom.select = "y2014"; {
+    geom.tpcRefSys = true; // set reference system for TPC
+    // ================================================
+    geom.caveFlag = "CAVE05";  geom.caveStat = 1;
+    // ================================================
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
+    geom.fpdmFlag = "FPDMof";  geom.fpdmStat = 0;
+    geom.fgtdFlag = "FGTDof";  geom.fgtdStat = 0;
+    // ================================================
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+    geom.btofFlag = "BTOFv8";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD13";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPEv3";  geom.pipeStat = 1;
+    geom.sisdFlag = "SISD85";  geom.sisdStat = 1;
+    // ================================================
+    geom.pixlFlag = "PIXL06";  geom.pixlStat = 1;
+    geom.istdFlag = "ISTD02";  geom.istdStat = 1;
+    // ================================================
+    geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.psupFlag = "PSUP01";  geom.psupStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.idsmFlag = "IDSM14";  geom.idsmStat = 1;
+    // ================================================
+    //
+    setTitle("Y2014 first cut geometry");
+    //
+    // ================================================
+    geom.fill();
+  };
+
+
+  geom.select="y2014x";
+  {
+    geom.tpceFlag="TPCE40"; geom.tpceStat=1;
+    geom.fill();
+  }
 
 }
 
