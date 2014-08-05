@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.cxx,v 1.6 2014/08/05 15:00:45 ypwang Exp $
+* $Id: StIstDb.cxx,v 1.7 2014/08/05 17:48:58 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.7  2014/08/05 17:48:58  ypwang
+* update Print() function to PrintGeoHMatrices()
+*
 * Revision 1.6  2014/08/05 15:00:45  ypwang
 * minor updates on the ladder/sensor ID check output log, using LOG_WARN instead of cout
 *
@@ -163,7 +166,7 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
    return kStOk;
 }
 
-void StIstDb::Print() const
+void StIstDb::PrintGeoHMatrices() const
 {
    mGeoHMatrixTpcOnGlobal->Print();
    mGeoHMatrixIdsOnTpc.Print();
