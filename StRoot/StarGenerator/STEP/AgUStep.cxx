@@ -111,7 +111,17 @@ void  Track::Clear( const Option_t *opts ) {
   steps.Clear("");
 };
 // .................................................................. Step ................
-Step::Step() : TObject(), idStep(-1), x(0), y(0), z(0), dEstep(-1), adEstep(-1), step(-1),state(0) { Clear(); }
+Step::Step() : TObject(), 
+	       idStep(-1), 
+	       x(0), y(0), z(0), r(0), 
+	       state(0), 
+	       dEstep(-1), 
+	       adEstep(-1), 
+	       step(-1) 
+{ 
+  Clear(); 
+}
+
 void Step::Clear(Option_t *opts)
 {
   idStep=-1;
@@ -178,7 +188,7 @@ void AgUStep::operator()()
 
   Double_t x = ctrak -> vect[0];
   Double_t y = ctrak -> vect[1];
-  Double_t z = ctrak -> vect[2];
+//Double_t z = ctrak -> vect[2];
 
   Double_t r = TMath::Sqrt(x*x+y*y);      
   if (r > rmax) return; // track is exiting region of interest
