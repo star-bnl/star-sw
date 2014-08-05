@@ -24,6 +24,11 @@ TF1 *etaDist = 0;
 
 Double_t _zslice  = 0;
 Int_t    _ntracks = 1;
+Double_t _pt  = 5.0; // GeV
+Double_t _eta = 0.0;
+const Char_t *_part = "pi-";
+
+
 Int_t    rngSeed = 12345;
 
 // ----------------------------------------------------------------------------
@@ -68,7 +73,8 @@ void trig( Int_t n=1 )
 
   primary->SetVertex( 0.0, 0.0, zvertex );
   //  kinematics->Kine( _ntracks, "pi-", 4.995, 5.005, -0.005, 0.005 );
-  kinematics -> Kine( _ntracks, "pi-", 0.39995, 0.40005, -0.0005, 0.0005 );
+  //  kinematics -> Kine( _ntracks, "pi-", 0.39995, 0.40005, -0.0005, 0.0005 );
+  kinematics -> Kine( _ntracks, _part, _pt - 0.005, _pt + 0.00t, _eta - 0.0005, _eta + 0.0005 );
 
   // Generate the event
   chain->Make();
