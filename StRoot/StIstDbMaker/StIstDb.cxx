@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.cxx,v 1.5 2014/08/01 22:25:48 ypwang Exp $
+* $Id: StIstDb.cxx,v 1.6 2014/08/05 15:00:45 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.6  2014/08/05 15:00:45  ypwang
+* minor updates on the ladder/sensor ID check output log, using LOG_WARN instead of cout
+*
 * Revision 1.5  2014/08/01 22:25:48  ypwang
 * Add several simple getters and data members for sub-level geometry matrices obtain; Add Print() function which print out all IST geometry matrices
 *
@@ -116,12 +119,12 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
       int sensor = ((id - 1000) - 1) % kIstNumSensorsPerLadder + 1; // 1 <= sensor <= 6
 
       if (ladder <= 0 || ladder > kIstNumLadders) {
-         cout << "Ladder has not been defined!" << endl;
+         LOG_WARN << "Ladder ID is out of range (1 - 24)!" << endm;
          continue;
       }
 
       if (sensor <= 0 || sensor > kIstNumSensorsPerLadder) {
-         cout << "Sensor has not been defined!" << endl;
+         LOG_WARN << "Sensor ID is out of range (1 - 6)!" << endm;
          continue;
       }
 
