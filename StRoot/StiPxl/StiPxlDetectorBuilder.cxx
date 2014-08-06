@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.72 2014/05/07 22:11:12 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.76 2014/07/07 19:57:17 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -77,6 +77,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
       if (!pxlDbDataSet) {
          LOG_ERROR << "StiPxlDetectorBuilder::buildDetectors: PXL geometry was requested from "
             "DB but no StPxlDb object found. Check for pxlDb option in BFC chain" << endm;
+         exit(EXIT_FAILURE);
       }
 
       mPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
@@ -181,15 +182,13 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
          TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-         char name[50];
-         sprintf(name, "Pixel/Sector_%d/Ladder_%d/Sensor_%d", iSector, iLadder, iSensor);
-         LOG_DEBUG << " weigh/daughters/Material/A/Z : " << sensorVol->Weight() << " "
-                   << sensorVol->GetNdaughters() << " " << sensorVol->GetMaterial()->GetName() << " "
-                   << sensorVol->GetMaterial()->GetA() << " " << sensorVol->GetMaterial()->GetZ() << endm
-                   << " DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
+         LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
+                   << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
+                   << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
+                   << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
          // Create new Sti shape based on the sensor geometry
-         StiShape *stiShape = new StiPlanarShape(name, 10*sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
+         StiShape *stiShape = new StiPlanarShape(geoPath.str().c_str(), 10*sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
 
          add(stiShape);
 
@@ -221,7 +220,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             continue;
          }
 
-         stiDetector->setName(name);
+         stiDetector->setName(geoPath.str().c_str());
          stiDetector->setIsOn(true);
          stiDetector->setIsActive(new StiPxlIsActiveFunctor);
          stiDetector->setIsContinuousMedium(false); // true for gases
@@ -281,102 +280,37 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
 {
    // Build average inactive volumes
    const VolumeMap_t pxlVolumes[] = {
-      {"DTUH1", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/DTUH_1", "", ""},
-      {"PSHA1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSHC1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSHE1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSHG1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSAL1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSAK1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSCL1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSCK1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSAB1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSAE1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
-      {"PSMD1", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_1", "", ""},
+      {"DTUH", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
 
-      {"DTUH2", "Dtube part of pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/DTUH_2", "", ""},
-      {"PSHA2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSHC2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSHE2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSHG2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSAL2", "Long tube in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSAK2", "Short tube in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSCL2", "Plane in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSCK2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSAB2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSAE2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
-      {"PSMD2", "Detail in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSUP_2", "", ""},
+      // Planar components of the pixel sector support .../PSUP_\d/...
+      {"PSHA", "Detail in half pixel support",     "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSHC", "Detail in half pixel support",     "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSHE", "Detail in half pixel support",     "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSHG", "Detail in half pixel support",     "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSAL", "Long tube in half pixel support",  "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSAK", "Short tube in half pixel support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSCL", "Plane in half pixel support",      "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSCK", "Detail in half pixel support",     "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSAB", "Detail in half pixel support",     "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSAE", "Detail in half pixel support",     "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
+      {"PSMD", "Detail in half pixel support",     "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
 
-      // The following are the largest planar components of the pixel sector support
-      {"PXRB01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXRB_1", "", ""},
-      {"PXTR01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTR_1", "", ""},
-      {"PXTM01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTM_1", "", ""},
-      {"PXTL01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXTL_1", "", ""},
-      {"PXLB01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXLB_1", "", ""},
-      {"PXIB01", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_1/PXIB_1", "", ""},
+      // The following are the largest planar components of the central pixel
+      // sector support .../PXLA_\d/...
+      {"PXRB", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      {"PXTR", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      {"PXTM", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      {"PXTL", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      {"PXLB", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      {"PXIB", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
 
-      {"PXRB02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXRB_1", "", ""},
-      {"PXTR02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXTR_1", "", ""},
-      {"PXTM02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXTM_1", "", ""},
-      {"PXTL02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXTL_1", "", ""},
-      {"PXLB02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXLB_1", "", ""},
-      {"PXIB02", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_2/PXIB_1", "", ""},
-
-      {"PXRB03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXRB_1", "", ""},
-      {"PXTR03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXTR_1", "", ""},
-      {"PXTM03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXTM_1", "", ""},
-      {"PXTL03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXTL_1", "", ""},
-      {"PXLB03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXLB_1", "", ""},
-      {"PXIB03", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_3/PXIB_1", "", ""},
-
-      {"PXRB04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXRB_1", "", ""},
-      {"PXTR04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXTR_1", "", ""},
-      {"PXTM04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXTM_1", "", ""},
-      {"PXTL04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXTL_1", "", ""},
-      {"PXLB04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXLB_1", "", ""},
-      {"PXIB04", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_4/PXIB_1", "", ""},
-
-      {"PXRB05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXRB_1", "", ""},
-      {"PXTR05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXTR_1", "", ""},
-      {"PXTM05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXTM_1", "", ""},
-      {"PXTL05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXTL_1", "", ""},
-      {"PXLB05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXLB_1", "", ""},
-      {"PXIB05", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_5/PXIB_1", "", ""},
-
-      {"PXRB06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXRB_1", "", ""},
-      {"PXTR06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXTR_1", "", ""},
-      {"PXTM06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXTM_1", "", ""},
-      {"PXTL06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXTL_1", "", ""},
-      {"PXLB06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXLB_1", "", ""},
-      {"PXIB06", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_6/PXIB_1", "", ""},
-
-      {"PXRB07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXRB_1", "", ""},
-      {"PXTR07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXTR_1", "", ""},
-      {"PXTM07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXTM_1", "", ""},
-      {"PXTL07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXTL_1", "", ""},
-      {"PXLB07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXLB_1", "", ""},
-      {"PXIB07", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_7/PXIB_1", "", ""},
-
-      {"PXRB08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXRB_1", "", ""},
-      {"PXTR08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXTR_1", "", ""},
-      {"PXTM08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXTM_1", "", ""},
-      {"PXTL08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXTL_1", "", ""},
-      {"PXLB08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXLB_1", "", ""},
-      {"PXIB08", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_8/PXIB_1", "", ""},
-
-      {"PXRB09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXRB_1", "", ""},
-      {"PXTR09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXTR_1", "", ""},
-      {"PXTM09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXTM_1", "", ""},
-      {"PXTL09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXTL_1", "", ""},
-      {"PXLB09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXLB_1", "", ""},
-      {"PXIB09", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_9/PXIB_1", "", ""},
-
-      {"PXRB10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXRB_1", "", ""},
-      {"PXTR10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXTR_1", "", ""},
-      {"PXTM10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXTM_1", "", ""},
-      {"PXTL10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXTL_1", "", ""},
-      {"PXLB10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXLB_1", "", ""},
-      {"PXIB10", "Pixel sector support", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_10/PXIB_1", "", ""},
+      // Inactive material close to silicon layers
+      { "DRIV", "Driver Board",         "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      { "GLUA", "Glu layer A",          "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      { "GLUB", "Glu layer B",          "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      { "GLUC", "Glu layer C",          "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      { "ALCA", "Aluminium cable",      "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
+      { "CFBK", "Carbon Fiber Backing", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1", "", ""},
 
       // These are the components of the pixel support tube (PSTM)
       { "APTS1", "Tube shell", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PSTM_1/APTS_1", "", ""},

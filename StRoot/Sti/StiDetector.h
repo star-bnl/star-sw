@@ -15,6 +15,11 @@ class StiShape;
 template<class T> class StiCompositeTreeNode;
 class StiHitErrorCalculator;
 class StiElossCalculator;
+class StiDetector;
+
+typedef std::vector<StiDetector*> StiDetVect;
+
+
 
 /*!
    StiDetector represents a detector for the purposes of ITTF tracking.
@@ -33,6 +38,7 @@ public:
     virtual ~StiDetector();
     void reset();
     void unset(){;}
+    int  splitIt(StiDetVect &vect,double thick=0.5,int nMax=20);
     
     // accessors
     bool isOn() const 			{ return on;}

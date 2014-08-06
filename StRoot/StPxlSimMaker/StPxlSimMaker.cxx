@@ -1,6 +1,12 @@
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.7  2014/07/10 18:52:09  mstftsm
+ * Check if StPxlHitCollection exists in StEvent and add simulated hits to it. Otherwise, create a new collection.
+ *
+ * Revision 1.6  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
+ *
  * Revision 1.4  2014/06/25 19:21:57  mstftsm
  * pxl DB DataSet has been change to pxl_db. Name changed in this code.
  *
@@ -131,16 +137,18 @@ Int_t StPxlSimMaker::Make()
    // call the requested simulator
    if (mUseFastSim)
    {
-      StPxlHitCollection *pxlHitCol = new StPxlHitCollection;
+      StPxlHitCollection *pxlHitCol = rcEvent->pxlHitCollection();
+
+      bool newCollection = false;
       if (!pxlHitCol)
       {
-         LOG_ERROR << "StPxlSimMaker -E- no PxlHitCollection in this StEvent!" << endm;
-         return kStErr;
+	 StPxlHitCollection *pxlHitCol = new StPxlHitCollection;
+	 newCollection = true;
       }
 
       mPxlSimulator->addPxlHits(*mcPxlHitCol, *pxlHitCol);
 
-      rcEvent->setPxlHitCollection(pxlHitCol);
+      if(newCollection) rcEvent->setPxlHitCollection(pxlHitCol);
       LOG_DEBUG << " size of hit collection : " << pxlHitCol->numberOfHits() << endm;
    }
    else if (mUseDIGMAPSSim)
@@ -177,6 +185,12 @@ Int_t StPxlSimMaker::Make()
 /*
  **********************************************************
  * $Log: StPxlSimMaker.cxx,v $
+ * Revision 1.7  2014/07/10 18:52:09  mstftsm
+ * Check if StPxlHitCollection exists in StEvent and add simulated hits to it. Otherwise, create a new collection.
+ *
+ * Revision 1.6  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
+ *
  * Revision 1.4  2014/06/25 19:21:57  mstftsm
  * pxl DB DataSet has been change to pxl_db. Name changed in this code.
  *

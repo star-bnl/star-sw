@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.5 2014/05/06 20:12:02 marr Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.6 2014/07/09 15:20:40 marr Exp $
  *
  * Author: Frank Geurts
  *
@@ -60,7 +60,7 @@ StMtdSimMaker::~StMtdSimMaker() {
 
 
 //_____________________________________________________________________________
-Int_t StMtdSimMaker::Init() {  
+Int_t StMtdSimMaker::Init() { 
   if(mBookHisto) bookHistograms();
   return StMaker::Init();
 }
@@ -241,91 +241,113 @@ Int_t StMtdSimMaker::FastCellResponse()
     sthit->setBackleg(ibackleg);
     sthit->setModule( imodule );
     sthit->setCell(   icell   );
-    sthit->setLeadingEdgeTime(pair<double,double>(tof, tof));
+    // Yi's modification
+    //sthit->setLeadingEdgeTime(pair<double,double>(tof, tof));
+    //sthit->setTrailingEdgeTime(pair<double,double>(tof, tof));
+    //(mLeTimeWest-mLeTimeEast)/2./vDrift*1000.;
+    //tof+dT1 and tof+dT2 as leadingTimeEast and west.
+    //dT1+dT2 = total drifting tim
+    double totalL = 87.;  // 87cm
+    double localZ = ghit.x[2];
+    if ( localZ > 0 && localZ > totalL/2. ) localZ = totalL/2.;
+    if ( localZ < 0 && localZ < -1*totalL/2. ) localZ = -1*totalL/2.;
+    double leading_w = (totalL/2. - localZ)/1000.*vDrift*2.;
+    double leading_e = (totalL/2. + localZ)/1000.*vDrift*2.; 
+    //if ( imodule == 4 || imodule == 5 ){
+    //    leading_w = (totalL/2. + localZ)/1000.*vDrift*2.;
+    //    leading_e = (totalL/2. - localZ)/1000.*vDrift*2.; 
+    //}
+    //ghit.x[2]/1000.*vDrift*2 + leadingE;
+    // leading_e + leading_w = totalT
+    double leadingW = tof + leading_w;
+    double leadingE = tof + leading_e;
+    sthit->setLeadingEdgeTime(pair<double,double>(leadingW, leadingE));
     sthit->setTrailingEdgeTime(pair<double,double>(tof, tof));
+
+
     sthit->setAssociatedTrack(NULL);		//done in StMtdMatchMaker
     sthit->setIdTruth(ghit.track_p, 100);
 
     LOG_INFO << "sthit " << sthit->tof() << " tof:" << tof << endm;
-  }
+    }
 
-  mMtdCollection= new StMtdCollection();
-  for (myIter=myMap.begin(); myIter!=myMap.end(); ++myIter) {
-    mMtdCollection->addHit((*myIter).second);
-  }
-  if (mEvent) {
-    mEvent->setMtdCollection(mMtdCollection);
-    LOG_INFO << "... StMtdCollection Stored in StEvent! " << endm;
-  }
+    mMtdCollection= new StMtdCollection();
+    for (myIter=myMap.begin(); myIter!=myMap.end(); ++myIter) {
+        mMtdCollection->addHit((*myIter).second);
+    }
+    if (mEvent) {
+        mEvent->setMtdCollection(mMtdCollection);
+        LOG_INFO << "... StMtdCollection Stored in StEvent! " << endm;
+    }
 }
 
 
 Int_t StMtdSimMaker::bookHistograms()
 {
-  //only done if Histogram setting is turned on
-  mBetaHist=new TH1F("mBetaHist","mBetaHist", 100, -2, 2);
-  mPathLHist=new TH1F("mPathLHist","mPathLHist", 100, -2, 500);//cm's
-  mTofHist=new TH1F("mTofHist","mTofHist", 1000, -10, 10000);
-  mRecMass=new TH1F("mRecMass","mRecMass", 1000, -2, 4);
+    //only done if Histogram setting is turned on
+    mBetaHist=new TH1F("mBetaHist","mBetaHist", 100, -2, 2);
+    mPathLHist=new TH1F("mPathLHist","mPathLHist", 100, -2, 500);//cm's
+    mTofHist=new TH1F("mTofHist","mTofHist", 1000, -10, 10000);
+    mRecMass=new TH1F("mRecMass","mRecMass", 1000, -2, 4);
 
-  mCellGeant  = new TH2F("CellGeant","CellGeant",192,0.,192.,120,1.,120.);
-  mNCellGeant = new TH2F("NCellGeant","NCellGeant",192,0.,192.,120,1.,120.);   
-  mDeGeant    = new TH1F("DeGeant","DeGeant",1000,0.,10.);      //! 10 keV
-  mTofGeant   = new TH1F("TofGeant","TofGeant",1000,0.,20.);    //! 20 ns
+    mCellGeant  = new TH2F("CellGeant","CellGeant",192,0.,192.,120,1.,120.);
+    mNCellGeant = new TH2F("NCellGeant","NCellGeant",192,0.,192.,120,1.,120.);   
+    mDeGeant    = new TH1F("DeGeant","DeGeant",1000,0.,10.);      //! 10 keV
+    mTofGeant   = new TH1F("TofGeant","TofGeant",1000,0.,20.);    //! 20 ns
 
-  mCellSeen   = new TH2F("CellSeen","CellSeen",192,0.,192.,120,1.,120.);
-  mNCellSeen  = new TH2F("NCellSeen","NCellSeen",192,0.,192.,120,1.,120.);
-  mDeSeen     = new TH1F("DeSeen","DeSeen",1000,0.,10.);        //! 10 kev
-  mT0Seen    = new TH1F("T0Seen","T0Seen",1000,0.,20.);      //! ns
-  mTofSeen    = new TH1F("TofSeen","TofSeen",1000,0.,20.);      //! 20 ns
+    mCellSeen   = new TH2F("CellSeen","CellSeen",192,0.,192.,120,1.,120.);
+    mNCellSeen  = new TH2F("NCellSeen","NCellSeen",192,0.,192.,120,1.,120.);
+    mDeSeen     = new TH1F("DeSeen","DeSeen",1000,0.,10.);        //! 10 kev
+    mT0Seen    = new TH1F("T0Seen","T0Seen",1000,0.,20.);      //! ns
+    mTofSeen    = new TH1F("TofSeen","TofSeen",1000,0.,20.);      //! 20 ns
 
-  mTofResSeen = new TH1F("TofResSeen","TofResSeen",1001,-500.,500.);//! ps
+    mTofResSeen = new TH1F("TofResSeen","TofResSeen",1001,-500.,500.);//! ps
 
-  mCellReco   = new TH2F("CellReco","CellReco",192,0.,192.,120,1.,120.);
-  mNCellReco  = new TH2F("NCellReco","NCellReco",192,0.,192.,120,1.,120.);
-  mADCReco    = new TH1F("ADCReco","ADCReco",4096,0.,4096.);
-  mTDCReco    = new TH1F("TDCReco","TDCReco",4096,0.,4096.);
-  mT0Reco   = new TH1F("T0Reco","T0Reco",1000,0.,20.);      //! ns
-  mTofResReco = new TH1F("TofResReco","TofResReco",1000,-300.,300.);//ps
-  mTACorr     = new TH2F("TACorr","TACorr",512,0.,4096.,512,0.,4096.);
+    mCellReco   = new TH2F("CellReco","CellReco",192,0.,192.,120,1.,120.);
+    mNCellReco  = new TH2F("NCellReco","NCellReco",192,0.,192.,120,1.,120.);
+    mADCReco    = new TH1F("ADCReco","ADCReco",4096,0.,4096.);
+    mTDCReco    = new TH1F("TDCReco","TDCReco",4096,0.,4096.);
+    mT0Reco   = new TH1F("T0Reco","T0Reco",1000,0.,20.);      //! ns
+    mTofResReco = new TH1F("TofResReco","TofResReco",1000,-300.,300.);//ps
+    mTACorr     = new TH2F("TACorr","TACorr",512,0.,4096.,512,0.,4096.);
 
-  mModHist     = new TH1F("ModuleHist","ModuleHist",201,-100,100);
-  QABacklegChannel = new TH2I("QABacklegChannel", "QABacklegChannel", 30, 1., 30., 120, 1., 120.); 
-  return kStOk;
+    mModHist     = new TH1F("ModuleHist","ModuleHist",201,-100,100);
+    QABacklegChannel = new TH2I("QABacklegChannel", "QABacklegChannel", 30, 1., 30., 120, 1., 120.); 
+    return kStOk;
 
 }
 
 //_____________________________________________________________________________
 Int_t StMtdSimMaker::writeHistograms()
 {
-  //only done if Histogram setting is turned on
+    //only done if Histogram setting is turned on
 
-  mBetaHist->Write();
-  mPathLHist->Write();
-  mTofHist->Write();
-  mRecMass->Write();
+    mBetaHist->Write();
+    mPathLHist->Write();
+    mTofHist->Write();
+    mRecMass->Write();
 
-  mCellGeant->Write();
-  mNCellGeant->Write();
-  mDeGeant->Write();   
-  mTofGeant->Write();
+    mCellGeant->Write();
+    mNCellGeant->Write();
+    mDeGeant->Write();   
+    mTofGeant->Write();
 
-  mCellSeen->Write();
-  mNCellSeen->Write();
-  mDeSeen->Write();
-  mT0Seen->Write();
-  mTofSeen->Write();
-  mTofResSeen->Write();
+    mCellSeen->Write();
+    mNCellSeen->Write();
+    mDeSeen->Write();
+    mT0Seen->Write();
+    mTofSeen->Write();
+    mTofResSeen->Write();
 
-  mCellReco->Write();
-  mNCellReco->Write();
-  mADCReco->Write();
-  mTDCReco->Write();
-  mT0Reco->Write();
-  mTofResReco->Write();
-  mTACorr->Write();
+    mCellReco->Write();
+    mNCellReco->Write();
+    mADCReco->Write();
+    mTDCReco->Write();
+    mT0Reco->Write();
+    mTofResReco->Write();
+    mTACorr->Write();
 
-  mModHist->Write();
-  QABacklegChannel->Write();
-  return kStOk;
+    mModHist->Write();
+    QABacklegChannel->Write();
+    return kStOk;
 }

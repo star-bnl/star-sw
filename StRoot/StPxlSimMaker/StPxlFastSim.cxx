@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.6  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
+ *
  * Revision 1.4  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
@@ -232,6 +235,9 @@ void StPxlFastSim::localToMatser(Double_t* local,Double_t* master,Int_t sector,I
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.6  2014/07/03 19:46:37  mstftsm
+ * Revereted the changes made for the pileup adder. That does not belong to the master branch.
+ *
  * Revision 1.4  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *

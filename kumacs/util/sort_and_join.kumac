@@ -1,0 +1,36 @@
+*--------------------------------------------------------------
+
+ macro newsort sort_name1 column1 sort_name2 column2 
+macro/global/import *
+   
+   newsort [sort_name1] [column1]
+   
+   if [sort_name2]<>' ' then
+     newsort [sort_name2] [column2]
+   endif
+   
+ return
+ 
+*---------------------------------------------------------------
+
+ macro do_sort sorter table
+macro/global/import *
+   
+   message doing sort [sorter] on table [table]
+   TOP/SORT_AGENT/SORT [sorter] [table]
+   
+ return
+
+*---------------------------------------------------------------
+ 
+ macro do_join joiner in_table1 in_table2 out_table
+macro/global/import *
+   
+   message Using join [joiner] on tables [in_table1] & [in_table2]_
+     to produce [out_table]
+   fastjoin [joiner] [in_table1] [in_table2] [out_table]
+   
+ return
+
+*----------------------------------------------------------------
+ 
