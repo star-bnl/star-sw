@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.16 2014/08/05 17:48:58 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.17 2014/08/06 18:44:21 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.17  2014/08/06 18:44:21  ypwang
+* replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
+*
 * Revision 1.16  2014/08/05 17:48:58  ypwang
 * update Print() function to PrintGeoHMatrices()
 *
@@ -125,14 +128,14 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    Survey_st *tables[5] = {st_idsOnTpc->GetTable(), st_pstOnIds->GetTable(), st_istOnPst->GetTable(),
                            st_istLadderOnIst->GetTable(), st_istSensorOnLadder->GetTable()
                           };
-   mIstDb->SetGeoHMatrices(tables);
+   mIstDb->setGeoHMatrices(tables);
 
 
    LOG_DEBUG << " StIstDbMaker::InitRun() --> Get IST Pedestal and Noise Table" << endm;
    St_istPedNoise *mPedNoise = (St_istPedNoise *)GetDataBase("Calibrations/ist/istPedNoise");
 
    if ( mPedNoise ) {
-      mIstDb->SetPedNoise(mPedNoise->GetTable());
+      mIstDb->setPedNoise(mPedNoise->GetTable());
    }
    else {
       LOG_ERROR << "StIstDbMaker: No input pedestal/noise data set!" << endm;
@@ -143,7 +146,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    St_istGain *mGain = (St_istGain *)GetDataBase("Calibrations/ist/istGain");
 
    if ( mGain ) {
-      mIstDb->SetGain(mGain->GetTable());
+      mIstDb->setGain(mGain->GetTable());
    }
    else {
       LOG_ERROR << "StIstDbMaker: No input gain data set!" << endm;
@@ -154,7 +157,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    St_istMapping *mMapping = (St_istMapping *)GetDataBase("Calibrations/ist/istMapping");
 
    if ( mMapping ) {
-      mIstDb->SetMapping(mMapping->GetTable());
+      mIstDb->setMapping(mMapping->GetTable());
    }
    else {
       LOG_ERROR << "StIstDbMaker: No input mapping data set!" << endm;
@@ -165,7 +168,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    St_istControl *mControl = (St_istControl *)GetDataBase("Calibrations/ist/istControl");
 
    if ( mControl ) {
-      mIstDb->SetControl(mControl->GetTable());
+      mIstDb->setControl(mControl->GetTable());
    }
    else {
       LOG_ERROR << "StIstDbMaker: No input control parameter data set!" << endm;
@@ -176,7 +179,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    St_istChipConfig *mChipConfig = (St_istChipConfig *)GetDataBase("Calibrations/ist/istChipConfig");
 
    if ( mChipConfig ) {
-      mIstDb->SetChipStatus(mChipConfig->GetTable());
+      mIstDb->setChipStatus(mChipConfig->GetTable());
    }
    else {
       LOG_ERROR << "StIstDbMaker: No input chip configuration data set!" << endm;
@@ -184,7 +187,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    }
 
    if ( GetDebug() >= 2) {
-      mIstDb->PrintGeoHMatrices();
+      mIstDb->printGeoHMatrices();
    }
 
    //write the data
