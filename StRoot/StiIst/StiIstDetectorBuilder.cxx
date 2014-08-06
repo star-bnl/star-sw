@@ -79,7 +79,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
    THashList *istRot = 0;
 
    if (!mBuildIdealGeom)
-      istRot = mIstDb->GetRotations();
+      istRot = mIstDb->getRotations();
 
    // Build the material map
    struct Material_t {

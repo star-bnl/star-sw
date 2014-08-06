@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.13 2014/07/29 20:13:31 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.14 2014/08/06 18:56:53 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.14  2014/08/06 18:56:53  ypwang
+* minor update due to coding style update of the StIstDb method
+*
 * Revision 1.13  2014/07/29 20:13:31  ypwang
 * update the IST DB obtain method
 *
@@ -93,10 +96,10 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
    }
 
    // geometry Db tables
-   listGeoMSensorOnGlobal = mIstDb->GetRotations();
+   listGeoMSensorOnGlobal = mIstDb->getRotations();
 
    // control parameters
-   const istControl_st *istControlTable = mIstDb->GetControl() ;
+   const istControl_st *istControlTable = mIstDb->getControl() ;
    if (!istControlTable)  {
        LOG_ERROR << "Pointer to IST control table is null" << endm;
        ierr = kStErr;

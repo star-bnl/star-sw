@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.16 2014/08/04 17:12:48 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.17 2014/08/06 18:56:53 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.17  2014/08/06 18:56:53  ypwang
+* minor update due to coding style update of the StIstDb method
+*
 * Revision 1.16  2014/08/04 17:12:48  ypwang
 * update chip status Db table obtain method due to the table is populated run-by-run
 *
@@ -130,7 +133,7 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    }
 
    // IST control parameters
-   const istControl_st *istControlTable = mIstDb->GetControl() ;
+   const istControl_st *istControlTable = mIstDb->getControl() ;
    if (!istControlTable)  {
        	LOG_ERROR << "Pointer to IST control table is null" << endm;
        	ierr = kStErr;
@@ -149,7 +152,7 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    }
 
    // IST pedestal/rms table
-   const istPedNoise_st *gPN = mIstDb->GetPedNoise();
+   const istPedNoise_st *gPN = mIstDb->getPedNoise();
    if( !gPN ) {
 	LOG_ERROR << "Pointer to IST pedestal/noise table is null" << endm;
 	    ierr = kStErr;
@@ -170,7 +173,7 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    }
 
    // IST gain table
-   const istGain_st *gG = mIstDb->GetGain();
+   const istGain_st *gG = mIstDb->getGain();
    if( !gG ) {
 	LOG_WARN << "Pointer to IST gain table is null" << endm;
         ierr = kStWarn;
@@ -183,7 +186,7 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    }
 
    // IST mapping table
-   const istMapping_st *gM = mIstDb->GetMapping();
+   const istMapping_st *gM = mIstDb->getMapping();
    if( !gM ) {
        	LOG_ERROR << "Pointer to IST mapping table is null" << endm;
 	ierr = kStErr;
@@ -196,7 +199,7 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
    }
 
    // IST chip configuration status table
-   const istChipConfig_st *gCS = mIstDb->GetChipStatus();
+   const istChipConfig_st *gCS = mIstDb->getChipStatus();
    if( !gCS ) {
         LOG_ERROR << "Pointer to IST chip configuration table is null" << endm;
         ierr = kStErr;
