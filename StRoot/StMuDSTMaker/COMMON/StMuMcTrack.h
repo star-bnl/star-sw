@@ -1,4 +1,4 @@
-// $Id: StMuMcTrack.h,v 1.3 2012/05/07 14:47:06 fisyak Exp $
+// $Id: StMuMcTrack.h,v 1.4 2014/08/06 19:19:07 perev Exp $
 #ifndef __StMuMcTrack_h__
 #define __StMuMcTrack_h__
 #include "tables/St_g2t_track_Table.h" 
@@ -8,6 +8,8 @@ class StMuMcTrack : public TObject {
   enum EHIT {ktpc, ksvt, kssd,
 	     kctb, keem, kemc, kesm, kftp, kgem, khpd, kist, kigt, kfst, 
 	     kfgt, kfpd, kmwc, kpgc, kpmd, ksmd, kpix, ktof, kvpd, ktot};
+  StMuMcTrack(const g2t_track_st &t);
+#if 0
   StMuMcTrack(const g2t_track_st &t) : TObject(), mGePid(t.ge_pid), mId(t.id), mIsShower(t.is_shower), mItrmdVertex(t.itrmd_vertex_p),
     mIdVx(t.start_vertex_p), mIdVxEnd(t.stop_vertex_p), mCharge(t.charge), mE(t.e), mEta(t. eta), mPxyz(t.p), mpT(t.pt), mPtot(t.ptot), 
     mRapidity(t.rapidity) {
@@ -34,6 +36,7 @@ class StMuMcTrack : public TObject {
     mHits[ktpc] = 0xff & t.n_tpc_hit;  /* Nhits in tpc */
     mHits[kvpd] = 0xff & t.n_vpd_hit;  /* Nhits in vpd */
   }
+#endif
   StMuMcTrack() {}
   virtual ~StMuMcTrack() {}
   Int_t                 GePid()        const {return mGePid;} /* GEANT particle id */	        
@@ -96,6 +99,9 @@ class StMuMcTrack : public TObject {
 ostream&              operator<<(ostream& os, StMuMcTrack const & v);
 #endif
 // $Log: StMuMcTrack.h,v $
+// Revision 1.4  2014/08/06 19:19:07  perev
+// Move constructor .h ==> .cxx
+//
 // Revision 1.3  2012/05/07 14:47:06  fisyak
 // Add handles for track to fast detector matching
 //
