@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.136 2014/08/06 11:22:01 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.137 2014/08/06 12:09:14 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -562,7 +562,7 @@
 		#   SL5 we had  4.3.2 supporting a weak set of c++11
 		#   SL6 had gcc 4.4.7 with more advanced c++11 implementations
 		# print "EXPERIMENTAL *** will use C++11 standards\n" unless ($param::quiet);
-		$CXXFLAGS    .= " -std=c++0x";
+		$CXXFLAGS    .= " -std=c++0x"; # -fpermissive";
 	    }
 	}
 
