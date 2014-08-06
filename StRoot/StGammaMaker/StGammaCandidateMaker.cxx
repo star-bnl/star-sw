@@ -955,7 +955,7 @@ TVector3 StGammaCandidateMaker::getEEmcClusterPosition(const StEEmcCluster& clus
     if(!mGammaRawMaker)
     {
         LOG_WARN << "MakeEndcap() - No StGammaRawMaker found!" << endm;
-        return kStWarn;
+        return TVector3(-999,-999,-999);
     }
     
     // Get cluster seed tower
