@@ -176,42 +176,6 @@ struct rtsMonGB {
 } ;
 
 
-struct rtsMonTCD_new {
-/* these MUST be present! */
-	unsigned int size ;		/* size in bytes of this message */
-	unsigned int node ;		/* RTS Node Id of this sender */
-	unsigned int task ;		/* RTS TaskId of the sender */
-	unsigned int version ;		/* version of this struct - see RTS_MON_VERSION */
-	unsigned int tim ;		/* current time in UNIX seconds */
-	unsigned int state ;		/* RC States */
-/* these should be present although one can use 0xffffffff to signify Not Applicable */
-	unsigned int tknIn ;		/* last announced token */
-	unsigned int tknOut ;		/* last released token */
-	unsigned int tknBad ;		/* last erroneus token */
-	unsigned int couEvtsIn ;	/* tokens currently in the system */
-	unsigned int couEvtsRun ;	/* events in this run */
-	unsigned int couEvtsAll ;	/* events since boot */
-	unsigned int couEvtsBad ;	/* rejected events because of errors in this run */
-	unsigned int busy ;		/* % of time the system was BUSY i.e. incapable of new events */
-	unsigned int evtsSec ;		/* input rate in events/second */
-	unsigned int kbSecEvb ;		/* rate in kB/sec to the EVB */
-	unsigned int kbSecAux ;		/* rate in kB/sec to the L3 system */
-
-	struct {
-		int clock ;
-		int deadtime ;
-	} tcd[32] ;
-
-	struct {
-		int sca_hz ;
-		int sca_dead ;
-		int l0_evts ;
-		int l0_hz ;
-		int abt ;
-	} l0[65] ;
-
-} ;
-
 struct rtsMonTCD {
 	int deadtime[32] ;
 	int clock[32] ;	// the clock of the TCD; or TCU for "Trigger"
@@ -450,10 +414,6 @@ struct rtsMonSC {
 
 	u_int phys_on ;
 	u_int phys_off ;
-
-	u_int tcu_clock ;
-	u_int zdc_corrected ;
-	u_int reserved[9] ;
 };
 
 struct rts2013_L4Mon {
