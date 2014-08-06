@@ -35,7 +35,7 @@ class StFgtPointMaker : public StMaker
   void setFakeData(float v){mFakeData=v;} //Create fake hits for FGT and TPC at eta=v (default=0, no fake hit and real data)
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtPointMaker.h,v 1.3 2013/04/25 11:52:31 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtPointMaker.h,v 1.4 2014/08/06 11:43:09 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  protected:
   StFgtIPointAlgo* mPointAlgoPtr;
@@ -49,8 +49,11 @@ class StFgtPointMaker : public StMaker
 #endif
 
 /*
- * $Id: StFgtPointMaker.h,v 1.3 2013/04/25 11:52:31 akio Exp $ 
+ * $Id: StFgtPointMaker.h,v 1.4 2014/08/06 11:43:09 jeromel Exp $ 
  * $Log: StFgtPointMaker.h,v $
+ * Revision 1.4  2014/08/06 11:43:09  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.3  2013/04/25 11:52:31  akio
  * *** empty log message ***
  *

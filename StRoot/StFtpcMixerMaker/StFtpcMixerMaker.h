@@ -96,7 +96,7 @@ class StFtpcMixerMaker : public StMaker {
     inline const Char_t   *getConfig2() {return mConfig2;}
 
     virtual const char *GetCVS() const
-      {static const char cvs[]="Tag $Name:  $ $Id: StFtpcMixerMaker.h,v 1.2 2003/09/10 19:47:17 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StFtpcMixerMaker.h,v 1.3 2014/08/06 11:43:17 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
  
     ClassDef(StFtpcMixerMaker,0) 
 };
@@ -105,9 +105,12 @@ class StFtpcMixerMaker : public StMaker {
 
  /***************************************************************************
  *
- * $Id: StFtpcMixerMaker.h,v 1.2 2003/09/10 19:47:17 perev Exp $
+ * $Id: StFtpcMixerMaker.h,v 1.3 2014/08/06 11:43:17 jeromel Exp $
  *
  * $Log: StFtpcMixerMaker.h,v $
+ * Revision 1.3  2014/08/06 11:43:17  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.2  2003/09/10 19:47:17  perev
  * ansi corrs
  *

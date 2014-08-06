@@ -100,7 +100,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t Make();
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.23 2009/01/26 15:14:13 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.24 2014/08/06 11:43:56 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
      return cvs;
    }
 
@@ -110,8 +110,11 @@ class St_trg_Maker : public StMaker {
 #endif
 
 
-// $Id: St_trg_Maker.h,v 1.23 2009/01/26 15:14:13 fisyak Exp $
+// $Id: St_trg_Maker.h,v 1.24 2014/08/06 11:43:56 jeromel Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.24  2014/08/06 11:43:56  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.23  2009/01/26 15:14:13  fisyak
 // Comment out mwc
 //

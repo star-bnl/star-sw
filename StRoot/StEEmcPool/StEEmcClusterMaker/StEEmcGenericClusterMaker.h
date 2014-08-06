@@ -228,7 +228,7 @@ public:
   Int_t maxClusterId() const { return mClusterId; }
 
   virtual const char* GetCVS() const
-	        {static const char cvs[]="Tag $Name:  $ $Id: StEEmcGenericClusterMaker.h,v 1.7 2010/08/26 22:49:25 ogrebeny Exp $ built "__DATE__" "__TIME__; return cvs;}
+	        {static const char cvs[]="Tag $Name:  $ $Id: StEEmcGenericClusterMaker.h,v 1.8 2014/08/06 11:42:59 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 protected:
 

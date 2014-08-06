@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBlankStEventMaker.h,v 1.1 2004/06/06 18:28:13 balewski Exp $
+ * $Id: StBlankStEventMaker.h,v 1.2 2014/08/06 11:42:58 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StBlankStEventMaker_hh
@@ -27,7 +27,7 @@ class StBlankStEventMaker : public StMaker {
     int Make();   ///< create a StEvent from the muDst and put it into the .data tree structure. Also time stamp gets written and set in StEvtHddr for database usage
     StEvent* event() { return  mStEvent; } ///< return pointer to StEvent, 0 if not created 
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StBlankStEventMaker.h,v 1.1 2004/06/06 18:28:13 balewski Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StBlankStEventMaker.h,v 1.2 2014/08/06 11:42:58 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
 	return cvs;
     }
   
@@ -44,6 +44,9 @@ class StBlankStEventMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StBlankStEventMaker.h,v $
+ * Revision 1.2  2014/08/06 11:42:58  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2004/06/06 18:28:13  balewski
  * trick to convert .fzd --> muDst
  *

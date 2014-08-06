@@ -1,4 +1,4 @@
-// $Id: StECalEnergyIter.h,v 1.7 2009/02/04 20:33:16 ogrebeny Exp $
+// $Id: StECalEnergyIter.h,v 1.8 2014/08/06 11:42:58 jeromel Exp $
 
 #ifndef STAR_StECalEnergyIter
 #define STAR_StECalEnergyIter
@@ -43,7 +43,7 @@ class StECalEnergyIter {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StECalEnergyIter.h,v 1.7 2009/02/04 20:33:16 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StECalEnergyIter.h,v 1.8 2014/08/06 11:42:58 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 

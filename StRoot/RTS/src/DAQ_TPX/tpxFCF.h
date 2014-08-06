@@ -121,7 +121,7 @@ public:
 	int fcf_style ;	// new for FY13!
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.16 2013/03/17 21:40:24 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.17 2014/08/06 11:42:51 jeromel Exp $: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
 	int sector ;	// counts from 1

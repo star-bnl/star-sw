@@ -23,7 +23,7 @@ class StFgtAVEfficiencyMaker : public StFgtQaMaker {
    Int_t Finish();
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtAVEfficiencyMaker.h,v 1.2 2012/04/10 13:21:53 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtAVEfficiencyMaker.h,v 1.3 2014/08/06 11:43:12 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
  protected:
 
    //   Double_t getRPhiRatio(StSPtrVecFgtHitConstIterator hitIterBegin, StSPtrVecFgtHitConstIterator hitIterEnd);

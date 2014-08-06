@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.17 2014/02/20 20:16:19 genevb Exp $
+// $Id: StHistUtil.h,v 2.18 2014/08/06 11:42:52 jeromel Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.18  2014/08/06 11:42:52  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 2.17  2014/02/20 20:16:19  genevb
 // Adjust dE/dx slope hist range, handle ROOT change for 2D polar plots
 //
@@ -205,7 +208,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.17 2014/02/20 20:16:19 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.18 2014/08/06 11:42:52 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };

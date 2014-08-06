@@ -1,4 +1,4 @@
-// $Id: StVMCMaker.h,v 1.8 2009/02/03 15:55:44 fisyak Exp $
+// $Id: StVMCMaker.h,v 1.9 2014/08/06 11:44:01 jeromel Exp $
 
 #ifndef STAR_StVMCMaker
 #define STAR_StVMCMaker
@@ -59,7 +59,7 @@ class StVMCMaker : public StMaker {
   TDataSet*                  fVolume;   //!
  public:
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.8 2009/02/03 15:55:44 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.9 2014/08/06 11:44:01 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -70,6 +70,9 @@ class StVMCMaker : public StMaker {
 
 
 // $Log: StVMCMaker.h,v $
+// Revision 1.9  2014/08/06 11:44:01  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.8  2009/02/03 15:55:44  fisyak
 // synchronize with .DEV2
 //

@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.12 2010/02/05 14:35:49 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.13 2014/08/06 11:43:56 jeromel Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -107,7 +107,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.12 2010/02/05 14:35:49 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.13 2014/08/06 11:43:56 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 

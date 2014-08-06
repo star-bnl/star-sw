@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StTofHitMaker.h,v 1.5 2009/06/09 19:45:35 jeromel Exp $
+ * $Id: StTofHitMaker.h,v 1.6 2014/08/06 11:43:47 jeromel Exp $
  * StTofHitMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -82,7 +82,7 @@ class StTofHitMaker:public StRTSBaseMaker
   /// cvs
   virtual const char *GetCVS() const
     {
-      static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+      static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
     }
   
   ClassDef(StTofHitMaker, 1)    ///StTofHitMaker - class to fille the StEvewnt from DAQ reader

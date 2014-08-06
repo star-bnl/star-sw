@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.h,v 1.9 2008/08/12 22:45:47 bouchet Exp $
+// $Id: StSsdDbMaker.h,v 1.10 2014/08/06 11:43:43 jeromel Exp $
 //
 // $Log: StSsdDbMaker.h,v $
+// Revision 1.10  2014/08/06 11:43:43  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.9  2008/08/12 22:45:47  bouchet
 // use of SsdLaddersOnSectors,SsdOnGlobal,SsdSectorsOnGlobal,SsdWafersOnLadders tables to calculate ssdWafersPositions;add Get methods to access the tables
 //
@@ -63,7 +66,7 @@ class StSsdDbMaker : public StMaker {
   virtual St_ssdDimensions     *GetssdDimensions(){return m_dimensions;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.9 2008/08/12 22:45:47 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.10 2014/08/06 11:43:43 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StSsdDbMaker,0)   //StAF chain virtual base class for Makers
 };
 // Global pointers:

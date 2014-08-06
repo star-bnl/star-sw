@@ -1,7 +1,7 @@
 #ifndef ST_TRIGGER_FILTER_MAKER_HH
 #define ST_TRIGGER_FILTER_MAKER_HH
 
-// $Id: StTriggerFilterMaker.h,v 1.1 2008/06/11 20:55:36 pibero Exp $
+// $Id: StTriggerFilterMaker.h,v 1.2 2014/08/06 11:43:18 jeromel Exp $
 
 /*****************************************************************************
  * @class StTriggerFilterMaker
@@ -31,7 +31,7 @@ public:
     void addTrigger(unsigned int trigId) { mGoodTriggers.push_back(trigId); }
     
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.1 2008/06/11 20:55:36 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.2 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
     
 private:
     vector<unsigned int> mGoodTriggers; //!
@@ -43,6 +43,9 @@ private:
 
 /*****************************************************************************
  * $Log: StTriggerFilterMaker.h,v $
+ * Revision 1.2  2014/08/06 11:43:18  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2008/06/11 20:55:36  pibero
  * Adam's maker to select events with specific trigger id's.
  *

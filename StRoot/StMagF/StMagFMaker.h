@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.h,v 1.7 2009/11/10 20:50:46 fisyak Exp $
+// $Id: StMagFMaker.h,v 1.8 2014/08/06 11:43:26 jeromel Exp $
 // $Log: StMagFMaker.h,v $
+// Revision 1.8  2014/08/06 11:43:26  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.7  2009/11/10 20:50:46  fisyak
 // Switch to TChair
 //
@@ -43,7 +46,7 @@ class StMagFMaker : public StMaker {
    virtual Int_t  InitRun(Int_t run);
    Int_t          Make() {return kStOK;}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.7 2009/11/10 20:50:46 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.8 2014/08/06 11:43:26 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(StMagFMaker,0)   //StAF chain virtual base class for Makers
 };

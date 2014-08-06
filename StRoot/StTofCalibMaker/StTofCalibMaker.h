@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.h,v 1.8 2008/09/03 22:30:43 dongx Exp $
+ * $Id: StTofCalibMaker.h,v 1.9 2014/08/06 11:43:46 jeromel Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.h,v $
+ * Revision 1.9  2014/08/06 11:43:46  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.8  2008/09/03 22:30:43  dongx
  * mTStart added, applicable for Run8
  *
@@ -286,7 +289,7 @@ private:
     Bool_t            mSlewingCorr;  //! switch for slewing correction since run 8
 
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.8 2008/09/03 22:30:43 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.9 2014/08/06 11:43:46 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StTofCalibMaker,5)
 };

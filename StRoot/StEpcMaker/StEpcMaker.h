@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.12 2007/01/22 19:13:50 kocolosk Exp $
+// $Id: StEpcMaker.h,v 1.13 2014/08/06 11:43:08 jeromel Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.13  2014/08/06 11:43:08  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.12  2007/01/22 19:13:50  kocolosk
 // use STAR logger for all output
 //
@@ -96,7 +99,7 @@ public:
     virtual const char *GetCVS() const
     {
         static const char cvs[]=
-            "Tag $Name:  $ $Id: StEpcMaker.h,v 1.12 2007/01/22 19:13:50 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+            "Tag $Name:  $ $Id: StEpcMaker.h,v 1.13 2014/08/06 11:43:08 jeromel Exp $ built " __DATE__ " " __TIME__ ;
         return cvs;
     }
 

@@ -109,7 +109,7 @@ class StSsdFastSimMaker : public StMaker {
    of all maker versions in use. */
  virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdFastSimMaker.h,v 1.3 2008/04/02 23:45:25 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdFastSimMaker.h,v 1.4 2014/08/06 11:43:43 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   ClassDef(StSsdFastSimMaker,0)   //StAF chain virtual base class for Makers

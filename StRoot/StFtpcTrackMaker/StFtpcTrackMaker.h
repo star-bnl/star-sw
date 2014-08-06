@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.24 2009/11/25 19:50:21 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.25 2014/08/06 11:43:17 jeromel Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.25  2014/08/06 11:43:17  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.24  2009/11/25 19:50:21  jcs
 // remove all references to StFtpcSoftwareMonitor
 //
@@ -158,7 +161,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.24 2009/11/25 19:50:21 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.25 2014/08/06 11:43:17 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 

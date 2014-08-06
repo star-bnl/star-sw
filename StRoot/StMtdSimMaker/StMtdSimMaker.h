@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.h,v 1.7 2014/07/16 20:09:11 marr Exp $
+ * $Id: StMtdSimMaker.h,v 1.8 2014/08/06 11:43:27 jeromel Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMtdSimMaker.h,v $
+ * Revision 1.8  2014/08/06 11:43:27  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.7  2014/07/16 20:09:11  marr
  * Move the initialization of the GEANT-to-Backleg map using the database to InitRun()
  *
@@ -154,7 +157,7 @@ class StMtdSimMaker : public StMaker
 //fg    void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.7 2014/07/16 20:09:11 marr Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.8 2014/08/06 11:43:27 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
     ClassDef(StMtdSimMaker,1)
 };

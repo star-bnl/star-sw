@@ -176,7 +176,7 @@ public:
     const St_particle* particleTable() const { return particleTabPtr; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.13 2012/11/24 03:13:20 pibero Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.14 2014/08/06 11:43:39 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
         return cvs;
     }
 

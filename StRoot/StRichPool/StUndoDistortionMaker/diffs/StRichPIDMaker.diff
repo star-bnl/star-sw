@@ -118,7 +118,7 @@ diff -urb StRoot_old/StRichPIDMaker/StRichPIDMaker.h StRoot/StRichPIDMaker/StRic
  #endif    
 -    virtual const char *GetCVS()
 +    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: StRichPIDMaker.diff,v 1.1 2002/11/19 18:50:41 dunlop Exp $ built "__DATE__" "__TIME__
+     {static const char cvs[]="Tag $Name:  $ $Id: StRichPIDMaker.diff,v 1.2 2014/08/06 11:43:36 jeromel Exp $ built " __DATE__ " " __TIME__
  	 ; return cvs;}  
    ClassDef(StRichPIDMaker,1)
 Only in StRoot/StRichPIDMaker: StRichTrack.cxx.flc

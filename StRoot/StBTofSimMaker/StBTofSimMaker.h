@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.4 2011/02/03 19:01:01 geurts Exp $
+ * $Id: StBTofSimMaker.h,v 1.5 2014/08/06 11:42:54 jeromel Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.5  2014/08/06 11:42:54  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.4  2011/02/03 19:01:01  geurts
  * Introduce option to switch writing simulated hits to StEvent. Default behavior is OFF.
  *
@@ -206,7 +209,7 @@ class StBTofSimMaker : public StMaker{
 		void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
 		virtual const char *GetCVS() const
-		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.4 2011/02/03 19:01:01 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.5 2014/08/06 11:42:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 		ClassDef(StBTofSimMaker,1)
 };

@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.18 2007/12/24 17:37:20 fisyak Exp $
+// $Id: StSvtSimulationMaker.h,v 1.19 2014/08/06 11:43:46 jeromel Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.19  2014/08/06 11:43:46  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.18  2007/12/24 17:37:20  fisyak
 // Add protection from missing geometry
 //
@@ -186,7 +189,7 @@ class StSvtSimulationMaker : public StMaker
     
     
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.18 2007/12/24 17:37:20 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.19 2014/08/06 11:43:46 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
     
 
   

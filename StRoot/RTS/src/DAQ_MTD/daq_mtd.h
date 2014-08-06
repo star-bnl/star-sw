@@ -46,7 +46,7 @@ public:
 	int get_token(char *buff, int buff_bytes) ;
 
 	virtual const char *GetCVS() const {	// Offline
-                static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+                static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
 	static const int MAX_SEC = 1 ;

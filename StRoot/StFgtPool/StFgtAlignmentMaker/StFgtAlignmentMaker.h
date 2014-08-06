@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtAlignmentMaker.h,v 1.6 2014/03/05 17:58:01 akio Exp $
+ * $Id: StFgtAlignmentMaker.h,v 1.7 2014/08/06 11:43:10 jeromel Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtAlignmentMaker.h,v $
+ * Revision 1.7  2014/08/06 11:43:10  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.6  2014/03/05 17:58:01  akio
  * New version
  *
@@ -101,7 +104,7 @@ public:
 	       float dzcut=0, float dcacut=0, float fgtrcut=0, float fgtpcut=0, float tpcrcut=0, float tpcpcut=0, float emcrcut=0, float emcpcut=0);
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtAlignmentMaker.h,v 1.6 2014/03/05 17:58:01 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtAlignmentMaker.h,v 1.7 2014/08/06 11:43:10 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   };
   

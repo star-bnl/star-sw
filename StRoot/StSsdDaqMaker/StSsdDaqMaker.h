@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.h,v 1.8 2008/04/16 20:06:30 fisyak Exp $
+// $Id: StSsdDaqMaker.h,v 1.9 2014/08/06 11:43:42 jeromel Exp $
 //
 // $Log: StSsdDaqMaker.h,v $
+// Revision 1.9  2014/08/06 11:43:42  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.8  2008/04/16 20:06:30  fisyak
 // rename maker to be compline with StSsdPointMaker expectations
 //
@@ -108,7 +111,7 @@ class StSsdDaqMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.8 2008/04/16 20:06:30 fisyak Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.9 2014/08/06 11:43:42 jeromel Exp $ built " __DATE__ " " __TIME__; 
     return cvs;
   }
 

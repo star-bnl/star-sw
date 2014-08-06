@@ -1,4 +1,4 @@
-// $Id: St_TLA_Maker.h,v 1.15 2003/09/10 19:47:43 perev Exp $
+// $Id: St_TLA_Maker.h,v 1.16 2014/08/06 11:43:53 jeromel Exp $
 
 #ifndef STAR_St_TLA_Maker
 #define STAR_St_TLA_Maker
@@ -50,7 +50,7 @@ class St_TLA_Maker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.15 2003/09/10 19:47:43 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.16 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -61,6 +61,9 @@ class St_TLA_Maker : public StMaker {
 
 
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.16  2014/08/06 11:43:53  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.15  2003/09/10 19:47:43  perev
 // ansi corrs
 //

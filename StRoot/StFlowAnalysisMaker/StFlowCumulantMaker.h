@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.h,v 1.7 2004/12/17 15:50:09 aihong Exp $
+// $Id: StFlowCumulantMaker.h,v 1.8 2014/08/06 11:43:14 jeromel Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -57,7 +57,7 @@ public:
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.7 2004/12/17 15:50:09 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.8 2014/08/06 11:43:14 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;}
 
 private:
@@ -170,6 +170,9 @@ private:
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.h,v $
+// Revision 1.8  2014/08/06 11:43:14  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.7  2004/12/17 15:50:09  aihong
 // check in v1{3} code
 //

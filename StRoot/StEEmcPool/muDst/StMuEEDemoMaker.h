@@ -1,4 +1,4 @@
-// $Id: StMuEEDemoMaker.h,v 1.2 2009/02/04 20:33:26 ogrebeny Exp $
+// $Id: StMuEEDemoMaker.h,v 1.3 2014/08/06 11:43:03 jeromel Exp $
 
 #ifndef STAR_StMuEEDemoMaker
 #define STAR_StMuEEDemoMaker
@@ -44,7 +44,7 @@ class StMuEEDemoMaker : public StMaker {
   
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuEEDemoMaker.h,v 1.2 2009/02/04 20:33:26 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuEEDemoMaker.h,v 1.3 2014/08/06 11:43:03 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -55,6 +55,9 @@ class StMuEEDemoMaker : public StMaker {
 
 
 // $Log: StMuEEDemoMaker.h,v $
+// Revision 1.3  2014/08/06 11:43:03  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.2  2009/02/04 20:33:26  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //

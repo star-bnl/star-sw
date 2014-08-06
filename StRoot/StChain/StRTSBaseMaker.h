@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.h,v 1.12 2010/02/01 01:46:59 fine Exp $
+ * $Id: StRTSBaseMaker.h,v 1.13 2014/08/06 11:42:55 jeromel Exp $
  * StRTSBaseMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -92,7 +92,7 @@ class StRTSBaseMaker : public StMaker
   // cvs
   virtual const char *GetCVS() const
     {
-      static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+      static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
     }
   
   ClassDef(StRTSBaseMaker, 1)    //StRTSBaseMaker - class to fille the StEvewnt from DAQ reader

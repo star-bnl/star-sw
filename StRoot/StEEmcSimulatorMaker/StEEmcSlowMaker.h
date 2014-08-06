@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 2.9 2010/09/07 22:24:52 stevens4 Exp $
+// $Id: StEEmcSlowMaker.h,v 2.10 2014/08/06 11:43:04 jeromel Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -318,7 +318,7 @@ public:
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.9 2010/09/07 22:24:52 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.10 2014/08/06 11:43:04 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -328,6 +328,9 @@ public:
 #endif
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 2.10  2014/08/06 11:43:04  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 2.9  2010/09/07 22:24:52  stevens4
 // give access to MIP dE/dx to other makers
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.h,v 1.10 2004/01/30 00:14:42 munhoz Exp $
+ * $Id: StSvtDaqMaker.h,v 1.11 2014/08/06 11:43:45 jeromel Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.h,v $
+ * Revision 1.11  2014/08/06 11:43:45  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.10  2004/01/30 00:14:42  munhoz
  * few corrections to pedestal reading and adding getDaqReader method
  *
@@ -104,7 +107,7 @@ class StSvtDaqMaker : public StMaker {
   virtual Int_t  Finish();
 
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDaqMaker.h,v 1.10 2004/01/30 00:14:42 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDaqMaker.h,v 1.11 2014/08/06 11:43:45 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StSvtDaqMaker,0)   //StAF chain virtual base class for Makers
 };

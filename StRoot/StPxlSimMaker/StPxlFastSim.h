@@ -1,11 +1,14 @@
 /*
- * $Id: StPxlFastSim.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $
+ * $Id: StPxlFastSim.h,v 1.4 2014/08/06 11:43:35 jeromel Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.4  2014/08/06 11:43:35  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.3  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *
@@ -71,7 +74,7 @@ class StPxlFastSim: public StPxlISim
   */
 
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.4 2014/08/06 11:43:35 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  private:
   //Routine to smear hit by resolution with gaussian, mean zero and width res.
@@ -91,13 +94,16 @@ class StPxlFastSim: public StPxlISim
 };
 #endif
 /*
- * $Id: StPxlFastSim.h,v 1.3 2014/03/13 17:00:19 mstftsm Exp $
+ * $Id: StPxlFastSim.h,v 1.4 2014/08/06 11:43:35 jeromel Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.4  2014/08/06 11:43:35  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.3  2014/03/13 17:00:19  mstftsm
  * StPxlSimMaker has a method to switch on random seed for StRandom generatos in simulators. Default is not a random seed.
  *

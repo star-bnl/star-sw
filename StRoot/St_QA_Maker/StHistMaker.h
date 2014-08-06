@@ -32,7 +32,7 @@ class StHistMaker : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistMaker.h,v 2.3 2003/09/19 22:58:11 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistMaker.h,v 2.4 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StHistMaker,0)
 };
@@ -40,8 +40,11 @@ class StHistMaker : public StMaker {
 #endif
 
 ///////////////////////////////////////////////////////////////////////////
-//! $Id: StHistMaker.h,v 2.3 2003/09/19 22:58:11 genevb Exp $
+//! $Id: StHistMaker.h,v 2.4 2014/08/06 11:43:53 jeromel Exp $
 //! $Log: StHistMaker.h,v $
+//! Revision 2.4  2014/08/06 11:43:53  jeromel
+//! Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//!
 //! Revision 2.3  2003/09/19 22:58:11  genevb
 //! Initialize pointers to zero, some doxygenization
 //!

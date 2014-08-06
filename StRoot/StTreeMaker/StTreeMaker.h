@@ -72,7 +72,7 @@ public:
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
 
   virtual const Char_t *GetCVS() const
-  {static const Char_t cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.18 2010/04/07 13:07:47 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const Char_t cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.19 2014/08/06 11:43:51 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    StTree        *fTree;	//!

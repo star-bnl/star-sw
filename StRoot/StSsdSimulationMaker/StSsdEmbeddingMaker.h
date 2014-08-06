@@ -70,7 +70,7 @@ class StSsdEmbeddingMaker : public StMaker
   TFile               *myfile;  //!
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSsdEmbeddingMaker.h,v 1.1 2008/05/07 23:19:16 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSsdEmbeddingMaker.h,v 1.2 2014/08/06 11:43:43 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StSsdEmbeddingMaker,1)
 };

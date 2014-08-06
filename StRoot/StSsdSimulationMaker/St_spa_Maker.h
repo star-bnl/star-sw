@@ -37,16 +37,19 @@ class St_spa_Maker : public StMaker {
   virtual Int_t  Finish();
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.14 2008/08/12 22:48:39 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.15 2014/08/06 11:43:43 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(St_spa_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
 
  /**************************************************************************
- * $Id: St_spa_Maker.h,v 1.14 2008/08/12 22:48:39 bouchet Exp $
+ * $Id: St_spa_Maker.h,v 1.15 2014/08/06 11:43:43 jeromel Exp $
  *
  * $Log: St_spa_Maker.h,v $
+ * Revision 1.15  2014/08/06 11:43:43  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.14  2008/08/12 22:48:39  bouchet
  * retrieve positions and dimensions tables using Get methods
  *

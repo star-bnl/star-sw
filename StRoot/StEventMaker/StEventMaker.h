@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.15 2009/11/23 16:37:08 fisyak Exp $
+ * $Id: StEventMaker.h,v 2.16 2014/08/06 11:43:08 jeromel Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
+ * Revision 2.16  2014/08/06 11:43:08  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 2.15  2009/11/23 16:37:08  fisyak
  * Clean up, fix problem with bunch crossing information in StEventInfo and StHddr
  *
@@ -81,7 +84,7 @@ public:
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.15 2009/11/23 16:37:08 fisyak Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.16 2014/08/06 11:43:08 jeromel Exp $ built " __DATE__ " " __TIME__ ;
 	return cvs;
     }
 

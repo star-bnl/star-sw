@@ -71,7 +71,7 @@ class StTofMuDstReader : public StMaker {
     typedef idVector::iterator idVectorIter;
 
   virtual const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTofMuDstReader.h,v 1.1 2007/05/17 18:03:28 dongx Exp $ built "__DATE__" "__TIME__; return cvs;}	
+  {static const char cvs[]="Tag $Name:  $ $Id: StTofMuDstReader.h,v 1.2 2014/08/06 11:43:47 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}	
     
   // the following is a ROOT macro  that is needed in all ROOT accessible code
   ClassDef(StTofMuDstReader, 1)

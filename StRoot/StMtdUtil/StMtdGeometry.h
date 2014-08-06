@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.h,v 1.5 2014/07/16 15:31:01 huangbc Exp $
+ * $Id: StMtdGeometry.h,v 1.6 2014/08/06 11:43:28 jeromel Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.h,v $
+ * Revision 1.6  2014/08/06 11:43:28  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.5  2014/07/16 15:31:01  huangbc
  * Add an option to lock bfield to FF.
  *
@@ -265,7 +268,7 @@ class StMtdGeometry : public TNamed{
 #endif
 
   const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.5 2014/07/16 15:31:01 huangbc Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdGeometry.h,v 1.6 2014/08/06 11:43:28 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StMtdGeometry,1)
 };
 

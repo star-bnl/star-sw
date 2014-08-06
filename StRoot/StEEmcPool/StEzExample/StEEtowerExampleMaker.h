@@ -1,4 +1,4 @@
-// $Id: StEEtowerExampleMaker.h,v 1.1 2004/06/06 04:54:10 balewski Exp $
+// $Id: StEEtowerExampleMaker.h,v 1.2 2014/08/06 11:43:01 jeromel Exp $
 
 #ifndef STAR_StEEtowerExampleMaker
 #define STAR_StEEtowerExampleMaker
@@ -40,7 +40,7 @@ class StEEtowerExampleMaker : public StMaker , public  EEtower{
   
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEtowerExampleMaker.h,v 1.1 2004/06/06 04:54:10 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEtowerExampleMaker.h,v 1.2 2014/08/06 11:43:01 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -51,6 +51,9 @@ class StEEtowerExampleMaker : public StMaker , public  EEtower{
 
 
 // $Log: StEEtowerExampleMaker.h,v $
+// Revision 1.2  2014/08/06 11:43:01  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2004/06/06 04:54:10  balewski
 // dual analyzis
 //

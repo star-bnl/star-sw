@@ -60,7 +60,7 @@ public:
   static StGammaFitter* instance();
 
   virtual const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StGammaFitter.h,v 1.6 2009/06/18 17:21:24 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StGammaFitter.h,v 1.7 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 
   /// \brief Fit transverse SMD profile to predetermined peak in u- and v-plane.

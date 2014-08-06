@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.h,v 1.6 2004/08/17 20:52:48 perev Exp $
+// $Id: StTagsMaker.h,v 1.7 2014/08/06 11:43:46 jeromel Exp $
 // $Log: StTagsMaker.h,v $
+// Revision 1.7  2014/08/06 11:43:46  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.6  2004/08/17 20:52:48  perev
 // Replace St_DataSet ==> TDataSet
 //
@@ -35,7 +38,7 @@ class StrangeTag_st;
 class TClass;
 class StTagsMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTagsMaker.h,v 1.6 2004/08/17 20:52:48 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTagsMaker.h,v 1.7 2014/08/06 11:43:46 jeromel Exp $";
  protected:
  public: 
                   StTagsMaker(const char *name="tags");
@@ -45,7 +48,7 @@ class StTagsMaker : public StMaker {
    virtual Int_t Make();
    static EDataSetPass  GetTags (TDataSet* ds);
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTagsMaker.h,v 1.6 2004/08/17 20:52:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTagsMaker.h,v 1.7 2014/08/06 11:43:46 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(StTagsMaker,0)   //StAF chain virtual base class for Makers
 };

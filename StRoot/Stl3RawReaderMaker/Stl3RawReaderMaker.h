@@ -1,7 +1,10 @@
 //
-//  $Id: Stl3RawReaderMaker.h,v 1.9 2002/05/16 02:39:25 struck Exp $
+//  $Id: Stl3RawReaderMaker.h,v 1.10 2014/08/06 11:44:00 jeromel Exp $
 //
 //  $Log: Stl3RawReaderMaker.h,v $
+//  Revision 1.10  2014/08/06 11:44:00  jeromel
+//  Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 //  Revision 1.9  2002/05/16 02:39:25  struck
 //  switch reco/embedding mode (m_Mode=0/1).
 //  Embedding mode skips L3 biased events (return kStErr).
@@ -89,7 +92,7 @@ class Stl3RawReaderMaker : public StMaker {
    Int_t checkL3Bias();
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.9 2002/05/16 02:39:25 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.10 2014/08/06 11:44:00 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(Stl3RawReaderMaker, 2)   //StAF chain virtual base class for Makers
 };

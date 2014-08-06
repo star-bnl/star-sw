@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.23 2013/03/14 01:45:43 akio Exp $
+ * $Id: StFgtA2CMaker.h,v 1.24 2014/08/06 11:43:09 jeromel Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -36,6 +36,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.24  2014/08/06 11:43:09  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.23  2013/03/14 01:45:43  akio
  * fix some kStFgtNumTimebins -> dynamic local mMaxTimeBin from StFgtCollection
  * Seed Type 3 & 4 changed, and 5 goone
@@ -179,7 +182,7 @@ class StFgtA2CMaker : public StMaker {
 
    // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.23 2013/03/14 01:45:43 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.24 2014/08/06 11:43:09 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  protected:
    Short_t checkValidPulse(StFgtStrip* pStrip, Float_t ped);

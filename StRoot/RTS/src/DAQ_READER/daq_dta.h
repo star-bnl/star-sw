@@ -144,7 +144,7 @@ public:
 	}
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.8 2014/02/24 11:43:53 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.9 2014/08/06 11:42:49 jeromel Exp $: built " __DATE__ " " __TIME__ ; 
 		return cvs;
 	}
 

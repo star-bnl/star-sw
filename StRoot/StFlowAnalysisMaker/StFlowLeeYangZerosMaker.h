@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.h,v 1.4 2007/02/06 19:00:49 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.h,v 1.5 2014/08/06 11:43:14 jeromel Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //
@@ -57,7 +57,7 @@ public:
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   static   void SetV1Mixed(Bool_t);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $  StFlowLeeYangZerosMaker.h, "__DATE__" "__TIME__ ;
+    "Tag $Name:  $  StFlowLeeYangZerosMaker.h, " __DATE__ " " __TIME__ ;
     return cvs;}
 
 private:

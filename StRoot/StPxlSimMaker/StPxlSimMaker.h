@@ -1,11 +1,14 @@
 /*
- * $Id: StPxlSimMaker.h,v 1.6 2014/07/17 01:47:43 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.7  2014/08/06 11:43:35  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.6  2014/07/17 01:47:43  mstftsm
  * Fix a bug in creating a new StPxlHitCollection.
  * Random seed is set to default.
@@ -82,7 +85,7 @@ class StPxlSimMaker : public StMaker
    *  of all maker versions in use.
   */
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.6 2014/07/17 01:47:43 mstftsm Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlSimMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
     StPxlISim* mPxlSimulator;
@@ -100,11 +103,14 @@ private:
 #endif
 
 /*
- * $Id: StPxlSimMaker.h,v 1.6 2014/07/17 01:47:43 mstftsm Exp $
+ * $Id: StPxlSimMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $
  *
  * 
  **********************************************************
  * $Log: StPxlSimMaker.h,v $
+ * Revision 1.7  2014/08/06 11:43:35  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.6  2014/07/17 01:47:43  mstftsm
  * Fix a bug in creating a new StPxlHitCollection.
  * Random seed is set to default.

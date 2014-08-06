@@ -44,7 +44,7 @@ public:
   virtual void Crop();// used to trim the kinks in which on daughter shares two parents
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.11 2008/04/03 19:58:35 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.12 2014/08/06 11:43:37 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
  private:

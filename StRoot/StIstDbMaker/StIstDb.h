@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.h,v 1.5 2014/08/05 17:48:58 ypwang Exp $
+* $Id: StIstDb.h,v 1.6 2014/08/06 11:43:22 jeromel Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.h,v $
+* Revision 1.6  2014/08/06 11:43:22  jeromel
+* Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+*
 * Revision 1.5  2014/08/05 17:48:58  ypwang
 * update Print() function to PrintGeoHMatrices()
 *
@@ -76,7 +79,7 @@ public:
    void PrintGeoHMatrices() const;
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.5 2014/08/05 17:48:58 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.6 2014/08/06 11:43:22 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    static THashList 	*mgRotList;

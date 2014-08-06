@@ -72,7 +72,7 @@ public:
 	int raw_to_adc_utility(int s, int r, char *rdobuff, int words, daq_sst_ped_t *ped, int mode) ;
 
 	const char *GetCVS() const {	// Offline
-                static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+                static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
 

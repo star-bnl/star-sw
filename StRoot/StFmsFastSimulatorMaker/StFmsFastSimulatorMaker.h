@@ -1,6 +1,9 @@
-// $Id: StFmsFastSimulatorMaker.h,v 1.1 2014/05/06 16:02:04 jeromel Exp $
+// $Id: StFmsFastSimulatorMaker.h,v 1.2 2014/08/06 11:43:15 jeromel Exp $
 //
 // $Log: StFmsFastSimulatorMaker.h,v $
+// Revision 1.2  2014/08/06 11:43:15  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2014/05/06 16:02:04  jeromel
 // First version of StFmsFastSimulatorMaker deliverred upon review
 //
@@ -117,7 +120,7 @@ class StFmsFastSimulatorMaker : public StMaker {
 };
 
 inline const char* StFmsFastSimulatorMaker::GetCVS() const {
-  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.1 2014/05/06 16:02:04 jeromel Exp $ built "__DATE__" "__TIME__;
+  static const char cvs[]="Tag $Name:  $ $Id: StFmsFastSimulatorMaker.h,v 1.2 2014/08/06 11:43:15 jeromel Exp $ built " __DATE__ " " __TIME__;
   return cvs;
 }
 

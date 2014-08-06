@@ -1,4 +1,4 @@
-// $Id: St2011WlumiMaker.h,v 1.2 2012/09/14 21:02:29 balewski Exp $
+// $Id: St2011WlumiMaker.h,v 1.3 2014/08/06 11:43:41 jeromel Exp $
 //
 //*-- Author :  Jan Balewski, MIT
 
@@ -49,7 +49,7 @@ class St2011WlumiMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WlumiMaker.h,v 1.2 2012/09/14 21:02:29 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WlumiMaker.h,v 1.3 2014/08/06 11:43:41 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -60,6 +60,9 @@ class St2011WlumiMaker : public StMaker {
 
 
 // $Log: St2011WlumiMaker.h,v $
+// Revision 1.3  2014/08/06 11:43:41  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.2  2012/09/14 21:02:29  balewski
 // *lumi-maker re-written to accumulate alternative rel lumi monitors,
 // * added spin sorting to Zs

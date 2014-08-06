@@ -1,4 +1,4 @@
-// $Id: StFgtSlowSimuMaker.h,v 1.2 2012/06/20 18:32:40 avossen Exp $
+// $Id: StFgtSlowSimuMaker.h,v 1.3 2014/08/06 11:43:13 jeromel Exp $
 
 
 /*!
@@ -229,7 +229,7 @@ class StFgtSlowSimuMaker : public StMaker {
 
  
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtSlowSimuMaker.h,v 1.2 2012/06/20 18:32:40 avossen Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtSlowSimuMaker.h,v 1.3 2014/08/06 11:43:13 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
  private:
@@ -242,6 +242,9 @@ class StFgtSlowSimuMaker : public StMaker {
 
 
 // $Log: StFgtSlowSimuMaker.h,v $
+// Revision 1.3  2014/08/06 11:43:13  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.2  2012/06/20 18:32:40  avossen
 // setting elec ids for strips now, implemented pulse shape over 7 timebins
 //

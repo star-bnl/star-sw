@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.43 2013/07/18 14:00:32 fisyak Exp $
+// $Id: St_db_Maker.h,v 1.44 2014/08/06 11:43:54 jeromel Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.44  2014/08/06 11:43:54  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.43  2013/07/18 14:00:32  fisyak
 // expand no. of possible databases from 4 to 10
 //
@@ -144,7 +147,7 @@ private:
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.43 2013/07/18 14:00:32 fisyak Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.44 2014/08/06 11:43:54 jeromel Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -198,7 +201,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.43 2013/07/18 14:00:32 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.44 2014/08/06 11:43:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };

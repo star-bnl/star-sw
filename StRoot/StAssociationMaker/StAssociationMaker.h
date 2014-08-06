@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.25 2011/04/01 19:40:07 perev Exp $
+ * $Id: StAssociationMaker.h,v 1.26 2014/08/06 11:42:52 jeromel Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.26  2014/08/06 11:42:52  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.25  2011/04/01 19:40:07  perev
  * const++
  *
@@ -540,7 +543,7 @@ private:
     bool              mEstTracksOn; //!
     bool              mDistanceAssoc; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.25 2011/04/01 19:40:07 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.26 2014/08/06 11:42:52 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker,0)
 

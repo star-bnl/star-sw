@@ -1,4 +1,4 @@
-// $Id: StEEmcFastMaker.h,v 1.14 2010/08/05 21:23:45 stevens4 Exp $
+// $Id: StEEmcFastMaker.h,v 1.15 2014/08/06 11:43:03 jeromel Exp $
 
 
 /* \class StEEmcFastMaker        
@@ -117,7 +117,7 @@ class StEEmcFastMaker : public StMaker {
   StEmcCollection * GetLocalEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.14 2010/08/05 21:23:45 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.15 2014/08/06 11:43:03 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
  private:
@@ -140,6 +140,9 @@ class StEEmcFastMaker : public StMaker {
 
 
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.15  2014/08/06 11:43:03  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.14  2010/08/05 21:23:45  stevens4
 // Update sampling fraction to 4.8%
 //

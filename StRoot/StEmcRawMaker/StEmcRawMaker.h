@@ -1,4 +1,4 @@
-// $Id: StEmcRawMaker.h,v 1.9 2009/02/04 21:05:42 kocolosk Exp $
+// $Id: StEmcRawMaker.h,v 1.10 2014/08/06 11:43:07 jeromel Exp $
 
 /*!\class StEmcRawMaker
 \author Alexandre A. P. Suaide
@@ -100,7 +100,7 @@ public:
 
     virtual const char *      GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.9 2009/02/04 21:05:42 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.10 2014/08/06 11:43:07 jeromel Exp $ built " __DATE__ " " __TIME__ ;
         return cvs;
     }
 
@@ -110,6 +110,9 @@ public:
 #endif
 
 // $Log: StEmcRawMaker.h,v $
+// Revision 1.10  2014/08/06 11:43:07  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.9  2009/02/04 21:05:42  kocolosk
 // Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
 //

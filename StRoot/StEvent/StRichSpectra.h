@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichSpectra.h,v 2.5 2003/09/02 17:58:05 perev Exp $
+ * $Id: StRichSpectra.h,v 2.6 2014/08/06 11:43:08 jeromel Exp $
  *
  * Author: Brian Lasiuk, Dec 14, 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: StRichSpectra.h,v $
+ * Revision 2.6  2014/08/06 11:43:08  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 2.5  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -134,7 +137,7 @@ protected:
     
     virtual const char *GetCVS() const	{
 	static const char cvs[]=
-	    "Tag $Name:  $ $Id $ built "__DATE__" "__TIME__ ;
+	    "Tag $Name:  $ $Id $ built " __DATE__ " " __TIME__ ;
 	return cvs;
     }
 private:

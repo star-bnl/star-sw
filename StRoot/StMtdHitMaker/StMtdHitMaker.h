@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.9 2014/05/29 15:31:53 marr Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.10 2014/08/06 11:43:27 jeromel Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -147,7 +147,7 @@ class StMtdHitMaker:public StRTSBaseMaker {
   TH3D *hxhyhz;
   /// cvs
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
   }
   
   ClassDef(StMtdHitMaker, 2)    ///StMtdHitMaker - class to fille the StEvent from DAQ reader

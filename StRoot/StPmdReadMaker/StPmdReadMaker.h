@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.h,v 1.7 2010/04/16 12:04:24 rashmi Exp $
+ *$Id: StPmdReadMaker.h,v 1.8 2014/08/06 11:43:33 jeromel Exp $
  *
  *  StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Pmd Data Reader to store hits in StEvent
  ***************************************************************************
  * $Log: StPmdReadMaker.h,v $
+ * Revision 1.8  2014/08/06 11:43:33  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.7  2010/04/16 12:04:24  rashmi
  * Modifcation for new DAQ
  *
@@ -90,7 +93,7 @@ class StPmdReadMaker : public StRTSBaseMaker {
   void bookHist();
   Int_t GetCalib(int,int,int,float&);  
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.7 2010/04/16 12:04:24 rashmi Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.8 2014/08/06 11:43:33 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
   

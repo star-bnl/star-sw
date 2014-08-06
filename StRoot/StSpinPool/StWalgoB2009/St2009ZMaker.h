@@ -1,5 +1,5 @@
 
-// $Id: St2009ZMaker.h,v 1.6 2011/09/14 14:23:21 stevens4 Exp $
+// $Id: St2009ZMaker.h,v 1.7 2014/08/06 11:43:41 jeromel Exp $
 
 #ifndef STAR_St2009ZMaker
 #define STAR_St2009ZMaker
@@ -69,7 +69,7 @@ class St2009ZMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009ZMaker.h,v 1.6 2011/09/14 14:23:21 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009ZMaker.h,v 1.7 2014/08/06 11:43:41 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -80,6 +80,9 @@ class St2009ZMaker : public StMaker {
 
 
 // $Log: St2009ZMaker.h,v $
+// Revision 1.7  2014/08/06 11:43:41  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.6  2011/09/14 14:23:21  stevens4
 // update used for cross section PRD paper
 //

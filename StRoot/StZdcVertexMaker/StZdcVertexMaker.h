@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.h,v 1.5 2004/01/14 22:57:29 fisyak Exp $
+ * $Id: StZdcVertexMaker.h,v 1.6 2014/08/06 11:43:52 jeromel Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.h,v $
+ * Revision 1.6  2014/08/06 11:43:52  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.5  2004/01/14 22:57:29  fisyak
  * Add declaration of InitRun
  *
@@ -42,7 +45,7 @@ public:
     Int_t Make();
     Int_t Finish();
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StZdcVertexMaker.h,v 1.5 2004/01/14 22:57:29 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StZdcVertexMaker.h,v 1.6 2014/08/06 11:43:52 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
 private:    
     float mEAP0;

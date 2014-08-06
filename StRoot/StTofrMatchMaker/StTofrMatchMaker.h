@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.16 2009/07/24 22:33:33 fine Exp $
+ * $Id: StTofrMatchMaker.h,v 1.17 2014/08/06 11:43:49 jeromel Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.17  2014/08/06 11:43:49  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.16  2009/07/24 22:33:33  fine
  * Make the code C++ compliant
  *
@@ -352,7 +355,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.16 2009/07/24 22:33:33 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.17 2014/08/06 11:43:49 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };

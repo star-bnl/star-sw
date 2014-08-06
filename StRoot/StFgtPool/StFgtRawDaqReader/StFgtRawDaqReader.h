@@ -68,15 +68,18 @@ inline void StFgtRawDaqReader::setFilename( std::string filename ){ mDaqFileName
 inline void StFgtRawDaqReader::cutShortEvents( Bool_t doIt ){ mCutShortEvents = doIt; };
 inline void StFgtRawDaqReader::setIsCosmic( Bool_t itIs ){ mIsCosmic = itIs; };
 inline const char *StFgtRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.6 2013/03/10 05:45:29 akio Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.7 2014/08/06 11:43:12 jeromel Exp $ built " __DATE__ " " __TIME__ ;
    return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFgtRawDaqReader.h,v 1.6 2013/03/10 05:45:29 akio Exp $
+ * $Id: StFgtRawDaqReader.h,v 1.7 2014/08/06 11:43:12 jeromel Exp $
  * $Log: StFgtRawDaqReader.h,v $
+ * Revision 1.7  2014/08/06 11:43:12  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.6  2013/03/10 05:45:29  akio
  * added option to limit timebins to feed rest of makers
  *

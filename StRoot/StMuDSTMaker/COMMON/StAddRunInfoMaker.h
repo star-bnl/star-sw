@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StAddRunInfoMaker.h,v 1.3 2004/05/02 04:10:13 perev Exp $
+ * $Id: StAddRunInfoMaker.h,v 1.4 2014/08/06 11:43:31 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StAddRunInfoMaker_hh
@@ -24,7 +24,7 @@ class StAddRunInfoMaker : public StMaker {
     
     int Make();   ///< add StRunInfo to StEvent
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StAddRunInfoMaker.h,v 1.3 2004/05/02 04:10:13 perev Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StAddRunInfoMaker.h,v 1.4 2014/08/06 11:43:31 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
 	return cvs;
     }
   
@@ -38,6 +38,9 @@ class StAddRunInfoMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StAddRunInfoMaker.h,v $
+ * Revision 1.4  2014/08/06 11:43:31  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.3  2004/05/02 04:10:13  perev
  * private => protected
  *

@@ -1,4 +1,4 @@
-// $Id: StHistCollectorMaker.h,v 2.3 2003/09/10 19:47:02 perev Exp $
+// $Id: StHistCollectorMaker.h,v 2.4 2014/08/06 11:42:52 jeromel Exp $
 
 #ifndef STAR_StHistCollectorMaker
 #define STAR_StHistCollectorMaker
@@ -18,7 +18,7 @@
 
 class StHistCollectorMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StHistCollectorMaker.h,v 2.3 2003/09/10 19:47:02 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: StHistCollectorMaker.h,v 2.4 2014/08/06 11:42:52 jeromel Exp $";
  
  protected:
   TDataSet *fMergedSet;
@@ -34,12 +34,15 @@ class StHistCollectorMaker : public StMaker {
 
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistCollectorMaker.h,v 2.3 2003/09/10 19:47:02 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistCollectorMaker.h,v 2.4 2014/08/06 11:42:52 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(StHistCollectorMaker,0)   //StAF chain virtual base class for Makers
 };
 
 // $Log: StHistCollectorMaker.h,v $
+// Revision 2.4  2014/08/06 11:42:52  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 2.3  2003/09/10 19:47:02  perev
 // ansi corrs
 //

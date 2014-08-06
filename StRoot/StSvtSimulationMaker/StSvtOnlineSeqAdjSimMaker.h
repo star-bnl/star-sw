@@ -119,7 +119,7 @@ private:
   void  FillRawData();
  public:
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtOnlineSeqAdjSimMaker.h,v 1.7 2010/04/15 18:37:32 baumgart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtOnlineSeqAdjSimMaker.h,v 1.8 2014/08/06 11:43:46 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
  
  ClassDef(StSvtOnlineSeqAdjSimMaker,1)
 };

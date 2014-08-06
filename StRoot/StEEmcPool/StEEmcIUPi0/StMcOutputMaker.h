@@ -1,4 +1,4 @@
-// $Id: StMcOutputMaker.h,v 1.1 2008/10/30 15:52:15 balewski Exp $
+// $Id: StMcOutputMaker.h,v 1.2 2014/08/06 11:43:00 jeromel Exp $
 
 #ifndef STAR_StMcOutputMaker
 #define STAR_StMcOutputMaker
@@ -44,7 +44,7 @@ class StMcOutputMaker : public StMaker {
    
    /// Displayed on session exit, leave it as-is please ...
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StMcOutputMaker.h,v 1.1 2008/10/30 15:52:15 balewski Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: StMcOutputMaker.h,v 1.2 2014/08/06 11:43:00 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
      return cvs;
    }
    vector <StMcTrack *> gTr;  
@@ -63,6 +63,9 @@ inline Float_t StMcOutputMaker::genZgg(){ return (float)zgg; }
 
 
 // $Log: StMcOutputMaker.h,v $
+// Revision 1.2  2014/08/06 11:43:00  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2008/10/30 15:52:15  balewski
 // oryginal version prepared by Weihong, IUCF, results shown on SPIN08
 //

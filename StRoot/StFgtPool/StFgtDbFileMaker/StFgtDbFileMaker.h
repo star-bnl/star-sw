@@ -40,7 +40,7 @@ class StFgtDbFileMaker : public StMaker {
   
  
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtDbFileMaker.h,v 1.2 2012/01/31 15:21:15 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtDbFileMaker.h,v 1.3 2014/08/06 11:43:11 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 

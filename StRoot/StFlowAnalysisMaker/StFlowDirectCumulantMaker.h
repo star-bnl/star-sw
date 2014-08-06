@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowDirectCumulantMaker.h,v 1.1 2010/03/08 16:54:45 posk Exp $
+// $Id: StFlowDirectCumulantMaker.h,v 1.2 2014/08/06 11:43:14 jeromel Exp $
 //
 // Authors: Dhevan Gangadharan, UCLA, Dec 2009
 //
@@ -62,7 +62,7 @@ class StFlowDirectCumulantMaker : public StMaker {
   Int_t    Make();
   Int_t    Finish();
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowDirectCumulantMaker.h,v 1.1 2010/03/08 16:54:45 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowDirectCumulantMaker.h,v 1.2 2014/08/06 11:43:14 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;}
 
 private:

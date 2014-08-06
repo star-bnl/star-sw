@@ -7,7 +7,7 @@
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
  \date   1999/07/29 , 2001-2011
- @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.53 2013/12/23 20:34:26 genevb Exp $
+ @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.54 2014/08/06 11:42:52 jeromel Exp $
 
  Class to control "BFC" chain
 
@@ -102,7 +102,7 @@ class StBFChain : public StChain {
                TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.53 2013/12/23 20:34:26 genevb Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.54 2014/08/06 11:42:52 jeromel Exp $ built " __DATE__ " " __TIME__ ;
        return cvs;
    }
    /// StBFChain control class

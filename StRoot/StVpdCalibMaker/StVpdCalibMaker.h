@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.h,v 1.6 2011/02/23 20:00:52 geurts Exp $
+ * $Id: StVpdCalibMaker.h,v 1.7 2014/08/06 11:43:52 jeromel Exp $
  *
  *******************************************************************/
 /*!
@@ -14,6 +14,9 @@
 /*****************************************************************
  *
  * $Log: StVpdCalibMaker.h,v $
+ * Revision 1.7  2014/08/06 11:43:52  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.6  2011/02/23 20:00:52  geurts
  * Change MaxBin for ToT arrays from 60 to 128 (in agreement with the IDL definition of vpdTotCorr)
  * Move the log message that informs the user about the start-timing mode outside the tube loop ... no need to see the same message 38 times.
@@ -166,7 +169,7 @@ private:
   Bool_t mForceTofStart;   //! flag indicating that a user overrides any dbase-based start timing default
 
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.6 2011/02/23 20:00:52 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.7 2014/08/06 11:43:52 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
   ClassDef(StVpdCalibMaker,1)
 };

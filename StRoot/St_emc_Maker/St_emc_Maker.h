@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.h,v 1.10 2003/09/10 19:47:46 perev Exp $
+// $Id: St_emc_Maker.h,v 1.11 2014/08/06 11:43:54 jeromel Exp $
 // $Log: St_emc_Maker.h,v $
+// Revision 1.11  2014/08/06 11:43:54  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.10  2003/09/10 19:47:46  perev
 // ansi corrs
 //
@@ -66,7 +69,7 @@ public:
   virtual void Set_mode (Int_t m = 0){m_mode = m;}; // *MENU*  
   St_DataSet     *getEmcCalib()   {return mEmcCalib;};
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_emc_Maker.h,v 1.10 2003/09/10 19:47:46 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_emc_Maker.h,v 1.11 2014/08/06 11:43:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(St_emc_Maker,0)   //Macro
 };

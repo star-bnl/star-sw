@@ -34,7 +34,7 @@ public:
   void AcceptTrigger(Int_t trig); // negative value accepts all triggers
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeDistMaker.h,v 1.4 2012/11/28 02:08:52 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeDistMaker.h,v 1.5 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
 
 protected:
@@ -73,8 +73,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.h,v 1.4 2012/11/28 02:08:52 genevb Exp $
+// $Id: StSpaceChargeDistMaker.h,v 1.5 2014/08/06 11:43:32 jeromel Exp $
 // $Log: StSpaceChargeDistMaker.h,v $
+// Revision 1.5  2014/08/06 11:43:32  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.4  2012/11/28 02:08:52  genevb
 // Remove de-smearing bias in z and treat z more differentially
 //

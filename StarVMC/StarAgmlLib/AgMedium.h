@@ -53,7 +53,7 @@ class AgMedium : public TNamed
 
  public:
   virtual const Char_t *GetCVS() const {
-    static const Char_t cvs[]="Tag  $Name:  $ $Id $ built "__DATE__" "__TIME__;
+    static const Char_t cvs[]="Tag  $Name:  $ $Id $ built " __DATE__ " " __TIME__;
     return cvs;
   }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.15 2014/08/01 22:15:04 ypwang Exp $
+* $Id: StIstDbMaker.h,v 1.16 2014/08/06 11:43:22 jeromel Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.16  2014/08/06 11:43:22  jeromel
+* Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+*
 * Revision 1.15  2014/08/01 22:15:04  ypwang
 * mIstDb geometry matrices print out when Debug2 enabled
 *
@@ -66,7 +69,7 @@ public:
    
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.15 2014/08/01 22:15:04 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.16 2014/08/06 11:43:22 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    StIstDb *mIstDb;

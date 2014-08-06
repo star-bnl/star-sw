@@ -1,4 +1,4 @@
-// $Id: St2009pubWanaMaker.h,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
+// $Id: St2009pubWanaMaker.h,v 1.3 2014/08/06 11:43:41 jeromel Exp $
 //*-- Author : Jan Balewski, MIT
 
 
@@ -55,7 +55,7 @@ class St2009pubWanaMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009pubWanaMaker.h,v 1.2 2010/01/21 17:54:31 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009pubWanaMaker.h,v 1.3 2014/08/06 11:43:41 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -66,6 +66,9 @@ class St2009pubWanaMaker : public StMaker {
 
 
 // $Log: St2009pubWanaMaker.h,v $
+// Revision 1.3  2014/08/06 11:43:41  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.2  2010/01/21 17:54:31  stevens4
 // add effic histos and charge seperated background plots
 //

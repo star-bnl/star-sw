@@ -174,7 +174,7 @@ class StV0FinderMaker : public StMaker {
   //end Betty
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.11 2008/03/05 04:20:18 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.12 2014/08/06 11:43:37 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
  protected:
   virtual Int_t Prepare();         //!
@@ -232,8 +232,11 @@ class StV0FinderMaker : public StMaker {
 #endif
 
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.h,v 1.11 2008/03/05 04:20:18 genevb Exp $
+// $Id: StV0FinderMaker.h,v 1.12 2014/08/06 11:43:37 jeromel Exp $
 // $Log: StV0FinderMaker.h,v $
+// Revision 1.12  2014/08/06 11:43:37  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.11  2008/03/05 04:20:18  genevb
 // Change to DB table of V0FinderParameters, reduce logger output, improve Bfield calc
 //

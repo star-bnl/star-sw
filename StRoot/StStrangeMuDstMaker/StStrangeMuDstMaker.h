@@ -159,7 +159,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.20 2009/09/02 19:39:44 genevb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.21 2014/08/06 11:43:44 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   //@}
@@ -342,8 +342,11 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.20 2009/09/02 19:39:44 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.21 2014/08/06 11:43:44 jeromel Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.21  2014/08/06 11:43:44  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 3.20  2009/09/02 19:39:44  genevb
 // Fixes to pointer and string conversions (RT ticket 1612), prep for 64-bit
 //

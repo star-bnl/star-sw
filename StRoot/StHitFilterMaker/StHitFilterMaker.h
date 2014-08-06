@@ -1,4 +1,4 @@
-// $Id: StHitFilterMaker.h,v 1.5 2013/05/07 18:37:43 jeromel Exp $
+// $Id: StHitFilterMaker.h,v 1.6 2014/08/06 11:43:21 jeromel Exp $
 
 #ifndef STAR_StHitFilterMaker
 #define STAR_StHitFilterMaker
@@ -74,7 +74,7 @@ class StHitFilterMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StHitFilterMaker.h,v 1.5 2013/05/07 18:37:43 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StHitFilterMaker.h,v 1.6 2014/08/06 11:43:21 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
     
@@ -86,6 +86,9 @@ class StHitFilterMaker : public StMaker {
 
 
 // $Log: StHitFilterMaker.h,v $
+// Revision 1.6  2014/08/06 11:43:21  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.5  2013/05/07 18:37:43  jeromel
 // Modified HitFilter takes a WestEta cut to keep hits in the FGT direction - requested Akio on behalf of the FGT effort
 //

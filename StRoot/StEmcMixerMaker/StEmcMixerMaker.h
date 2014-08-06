@@ -87,7 +87,7 @@ class StEmcMixerMaker : public StMaker
     void          setEmbedAll(Bool_t a)     { mEmbedAll = a; } ///< Set kTRUE to embedd all hits even if the first emcCollection has no hits
 	void          setPrint(Bool_t a)        { LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm; } ///< Obsolete function; users can control messages with logger config file.
     
-    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.5 2007/01/22 19:13:34 kocolosk Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.6 2014/08/06 11:43:05 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StEmcMixerMaker,0) 
 };

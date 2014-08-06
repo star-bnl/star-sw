@@ -1,4 +1,4 @@
-// $Id: StFgtClustFindMaker.h,v 1.1 2011/04/07 19:31:22 balewski Exp $
+// $Id: StFgtClustFindMaker.h,v 1.2 2014/08/06 11:42:57 jeromel Exp $
 
 
 /* \class StFgtClustFindMaker        
@@ -55,7 +55,7 @@ class StFgtClustFindMaker : public StMaker {
   void  saveHisto(TString fname);
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtClustFindMaker.h,v 1.1 2011/04/07 19:31:22 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtClustFindMaker.h,v 1.2 2014/08/06 11:42:57 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
 
     return cvs;
   }
@@ -68,6 +68,9 @@ class StFgtClustFindMaker : public StMaker {
 
 
 // $Log: StFgtClustFindMaker.h,v $
+// Revision 1.2  2014/08/06 11:42:57  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2011/04/07 19:31:22  balewski
 // start
 //

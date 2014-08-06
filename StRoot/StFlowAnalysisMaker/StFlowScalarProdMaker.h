@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.h,v 1.6 2003/09/10 19:47:15 perev Exp $
+// $Id: StFlowScalarProdMaker.h,v 1.7 2014/08/06 11:43:14 jeromel Exp $
 //
 // Authors: method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -42,7 +42,7 @@ public:
   Int_t    Finish();
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.6 2003/09/10 19:47:15 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowScalarProdMaker.h,v 1.7 2014/08/06 11:43:14 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;}
 
 private:
@@ -96,6 +96,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.h,v $
+// Revision 1.7  2014/08/06 11:43:14  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.6  2003/09/10 19:47:15  perev
 // ansi corrs
 //

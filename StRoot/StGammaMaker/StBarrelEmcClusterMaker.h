@@ -31,7 +31,7 @@ class StBarrelEmcClusterMaker: public StMaker
         ~StBarrelEmcClusterMaker() {};
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StBarrelEmcClusterMaker.h,v 1.5 2008/12/03 15:32:47 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StBarrelEmcClusterMaker.h,v 1.6 2014/08/06 11:43:17 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
         
         // Required Maker Methods
         int  Init();

@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.11 2012/09/13 21:00:04 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.12 2014/08/06 11:43:50 jeromel Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.12  2014/08/06 11:43:50  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.11  2012/09/13 21:00:04  fisyak
  * Corrections for iTpx, clean up
  *
@@ -74,7 +77,7 @@ class StTpcRTSHitMaker : public StMaker {
   UChar_t *mTpx_RowLen;
   // cvs
   virtual const char *GetCVS() const    {
-    static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
   }
   ClassDef(StTpcRTSHitMaker, 1)    //StTpcRTSHitMaker - class to fille the StEvewnt from DAQ reader
 };

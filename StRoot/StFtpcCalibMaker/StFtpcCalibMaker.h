@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.h,v 1.6 2009/10/14 15:59:55 jcs Exp $
+// $Id: StFtpcCalibMaker.h,v 1.7 2014/08/06 11:43:16 jeromel Exp $
 //
 // $Log: StFtpcCalibMaker.h,v $
+// Revision 1.7  2014/08/06 11:43:16  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.6  2009/10/14 15:59:55  jcs
 // changes to be able to vary the gas temperature in addition to varying t0 and
 // gas composition
@@ -139,7 +142,7 @@ class StFtpcCalibMaker : public StMaker
    Int_t Time() {return time;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.6 2009/10/14 15:59:55 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.7 2014/08/06 11:43:16 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
    ClassDef(StFtpcCalibMaker,1)   //StAF chain virtual base class for Makers

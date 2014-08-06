@@ -2,7 +2,7 @@
 #define STAR_MuEzSmdCalMaker
 
 /************************************************************
- * $Id: MuEzSmdCalMaker.h,v 1.3 2005/09/29 13:57:57 balewski Exp $
+ * $Id: MuEzSmdCalMaker.h,v 1.4 2014/08/06 11:43:01 jeromel Exp $
  ************************************************************
  Goal: wrap EEMC-Panitkin code to be used in the BFC
  *
@@ -60,7 +60,7 @@ class MuEzSmdCalMaker : public StMaker, public  EEsmdCal {
   void setEZtree(bool x=true){useEZtree=x;}
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: MuEzSmdCalMaker.h,v 1.3 2005/09/29 13:57:57 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: MuEzSmdCalMaker.h,v 1.4 2014/08/06 11:43:01 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -71,6 +71,9 @@ class MuEzSmdCalMaker : public StMaker, public  EEsmdCal {
 
 
 // $Log: MuEzSmdCalMaker.h,v $
+// Revision 1.4  2014/08/06 11:43:01  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.3  2005/09/29 13:57:57  balewski
 // after SMD gains were rescaled
 //

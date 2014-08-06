@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.55 2010/03/05 16:49:44 posk Exp $
+//  $Id: StFlowMaker.h,v 1.56 2014/08/06 11:43:15 jeromel Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -71,7 +71,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.55 2010/03/05 16:49:44 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.56 2014/08/06 11:43:15 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs; }
   
 protected:
@@ -195,6 +195,9 @@ inline Bool_t StFlowMaker::PhiWgtCalc() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.56  2014/08/06 11:43:15  jeromel
+//  Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 //  Revision 1.55  2010/03/05 16:49:44  posk
 //  Compatable with ROOT 5.22
 //

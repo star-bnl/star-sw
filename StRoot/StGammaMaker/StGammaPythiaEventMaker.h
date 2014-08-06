@@ -28,7 +28,7 @@ class StGammaPythiaEventMaker : public StMaker
         ~StGammaPythiaEventMaker() {}
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaPythiaEventMaker.h,v 1.3 2009/06/18 05:51:21 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaPythiaEventMaker.h,v 1.4 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
         
         void SetPythia(StGammaPythiaEvent* pythia) { mPythia = pythia; }
         

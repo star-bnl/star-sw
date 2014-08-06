@@ -1,10 +1,10 @@
-// $Id: StFeePedMaker.h,v 1.1 2005/01/11 22:14:32 balewski Exp $
+// $Id: StFeePedMaker.h,v 1.2 2014/08/06 11:43:03 jeromel Exp $
 
 #ifndef STAR_StFeePedMaker
 #define STAR_StFeePedMaker
 
 /************************************************************
- * $Id: StFeePedMaker.h,v 1.1 2005/01/11 22:14:32 balewski Exp $
+ * $Id: StFeePedMaker.h,v 1.2 2014/08/06 11:43:03 jeromel Exp $
  ************************************************************
  Goal: detects stale EEMC data
  *
@@ -43,7 +43,7 @@ class StFeePedMaker : public StMaker{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFeePedMaker.h,v 1.1 2005/01/11 22:14:32 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFeePedMaker.h,v 1.2 2014/08/06 11:43:03 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -54,6 +54,9 @@ class StFeePedMaker : public StMaker{
 
 
 // $Log: StFeePedMaker.h,v $
+// Revision 1.2  2014/08/06 11:43:03  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2005/01/11 22:14:32  balewski
 // start
 //

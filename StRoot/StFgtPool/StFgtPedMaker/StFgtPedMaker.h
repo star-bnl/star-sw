@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedMaker.h,v 1.1 2012/01/31 08:52:51 sgliske Exp $
+ * $Id: StFgtPedMaker.h,v 1.2 2014/08/06 11:43:11 jeromel Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedMaker.h,v $
+ * Revision 1.2  2014/08/06 11:43:11  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2012/01/31 08:52:51  sgliske
  * StFgtPedMaker moved to StFgtPool
  *
@@ -131,7 +134,7 @@ inline void StFgtPedMaker::setTimeBinMask( Short_t mask ){ mTimeBinMask = mask; 
 inline void StFgtPedMaker::setFgtDbMkrName( std::string& name ){ mDbMkrName = name; };
 inline void StFgtPedMaker::setIsCosmic(){ mDbMkrName = ""; };
 inline const char *StFgtPedMaker::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtPedMaker.h,v 1.1 2012/01/31 08:52:51 sgliske Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtPedMaker.h,v 1.2 2014/08/06 11:43:11 jeromel Exp $ built " __DATE__ " " __TIME__ ;
    return cvs;
 }
 

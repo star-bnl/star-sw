@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.h,v 1.11 2005/04/12 17:33:18 dongx Exp $ 
+ * $Id: StTofMaker.h,v 1.12 2014/08/06 11:43:47 jeromel Exp $ 
  * 
  * Author: Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.h,v $
+ * Revision 1.12  2014/08/06 11:43:47  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.11  2005/04/12 17:33:18  dongx
  * update for year 5 new data format. Store into TofRawData from now on.
  *
@@ -105,7 +108,7 @@ public:
   virtual Int_t Finish();
     
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.11 2005/04/12 17:33:18 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.12 2014/08/06 11:43:47 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StTofMaker,0)
 

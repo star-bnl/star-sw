@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.h,v 1.8 2003/09/10 19:47:44 perev Exp $
+// $Id: St_ctf_Maker.h,v 1.9 2014/08/06 11:43:54 jeromel Exp $
 // $Log: St_ctf_Maker.h,v $
+// Revision 1.9  2014/08/06 11:43:54  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.8  2003/09/10 19:47:44  perev
 // ansi corrs
 //
@@ -84,7 +87,7 @@ class St_ctf_Maker : public StMaker {
    virtual Int_t Init();
    virtual Int_t  Make();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_ctf_Maker.h,v 1.8 2003/09/10 19:47:44 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ctf_Maker.h,v 1.9 2014/08/06 11:43:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(St_ctf_Maker,0)   //StAF chain virtual base class for Makers
 };

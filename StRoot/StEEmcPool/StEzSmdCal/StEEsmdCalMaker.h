@@ -1,4 +1,4 @@
-// $Id: StEEsmdCalMaker.h,v 1.2 2004/07/27 21:59:47 balewski Exp $
+// $Id: StEEsmdCalMaker.h,v 1.3 2014/08/06 11:43:01 jeromel Exp $
 
 #ifndef STAR_StEEsmdCalMaker
 #define STAR_StEEsmdCalMaker
@@ -50,7 +50,7 @@ class StEEsmdCalMaker : public StMaker , public  EEsmdCal{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEsmdCalMaker.h,v 1.2 2004/07/27 21:59:47 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEsmdCalMaker.h,v 1.3 2014/08/06 11:43:01 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -61,6 +61,9 @@ class StEEsmdCalMaker : public StMaker , public  EEsmdCal{
 
 
 // $Log: StEEsmdCalMaker.h,v $
+// Revision 1.3  2014/08/06 11:43:01  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.2  2004/07/27 21:59:47  balewski
 // now runs on muDst as well
 //

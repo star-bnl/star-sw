@@ -162,7 +162,7 @@ class StarPrimaryMaker : public StMaker
   StarGenEvent *event() { return mPrimaryEvent; }
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.5 2013/10/01 14:05:17 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.6 2014/08/06 11:43:57 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  private:
  protected:

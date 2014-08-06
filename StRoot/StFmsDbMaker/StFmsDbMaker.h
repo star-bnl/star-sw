@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.h,v 1.3 2014/04/24 21:15:04 tpb Exp $
+ * $Id: StFmsDbMaker.h,v 1.4 2014/08/06 11:43:15 jeromel Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.h,v $
+ * Revision 1.4  2014/08/06 11:43:15  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.3  2014/04/24 21:15:04  tpb
  * Change default name to fmsDb to match BFC
  *
@@ -137,7 +140,7 @@ class StFmsDbMaker : public StMaker {
   Int_t                   mMaxGainCorrection;
 
 
-  virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag "__DATE__" "__TIME__ ; return cvs;}
+  virtual const Char_t *GetCVS() const {static const Char_t cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StFmsDbMaker,1)   //StAF chain virtual base class for Makers
 };
 

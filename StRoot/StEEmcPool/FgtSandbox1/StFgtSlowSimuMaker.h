@@ -1,4 +1,4 @@
-// $Id: StFgtSlowSimuMaker.h,v 1.2 2011/04/08 22:18:42 balewski Exp $
+// $Id: StFgtSlowSimuMaker.h,v 1.3 2014/08/06 11:42:57 jeromel Exp $
 
 
 /* \class StFgtSlowSimuMaker        
@@ -93,7 +93,7 @@ class StFgtSlowSimuMaker : public StMaker {
   void  forcePerpTracks(bool x=true) {par_forcePerp=x;}
   void  useOnlyDisk(int  x){par_useOnlyDisk=x;}
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtSlowSimuMaker.h,v 1.2 2011/04/08 22:18:42 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtSlowSimuMaker.h,v 1.3 2014/08/06 11:42:57 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
  private:
@@ -105,6 +105,9 @@ class StFgtSlowSimuMaker : public StMaker {
 
 
 // $Log: StFgtSlowSimuMaker.h,v $
+// Revision 1.3  2014/08/06 11:42:57  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.2  2011/04/08 22:18:42  balewski
 // added access to TGeo
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.22 2011/01/18 14:39:43 fisyak Exp $
+ * $Id: StTpcDbMaker.h,v 1.23 2014/08/06 11:43:50 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.23  2014/08/06 11:43:50  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.22  2011/01/18 14:39:43  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -102,7 +105,7 @@ class StTpcDbMaker : public StMaker {
   virtual void UseAnyDriftVelocity()         {m_Mode = m_Mode%1000000;}
   virtual StTpcDb* tpcDbInterface() const {return StTpcDb::instance();}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.22 2011/01/18 14:39:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.23 2014/08/06 11:43:50 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif

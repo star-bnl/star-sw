@@ -1,4 +1,4 @@
-// $Id: StEemcGammaFilterMaker.h,v 1.3 2010/08/09 21:51:22 seluzhen Exp $
+// $Id: StEemcGammaFilterMaker.h,v 1.4 2014/08/06 11:43:14 jeromel Exp $
 
 #ifndef STAR_StEemcGammaFilterMaker
 #define STAR_StEemcGammaFilterMaker
@@ -48,7 +48,7 @@ class StEemcGammaFilterMaker: public StMaker
     
     virtual const char *GetCVS() const
     {
-      static const char cvs[]="Tag $Name:  $ $Id: StEemcGammaFilterMaker.h,v 1.3 2010/08/09 21:51:22 seluzhen Exp $ built "__DATE__" "__TIME__ ; 
+      static const char cvs[]="Tag $Name:  $ $Id: StEemcGammaFilterMaker.h,v 1.4 2014/08/06 11:43:14 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
     }
     
@@ -86,6 +86,9 @@ class StEemcGammaFilterMaker: public StMaker
 #endif
 
 // $Log: StEemcGammaFilterMaker.h,v $
+// Revision 1.4  2014/08/06 11:43:14  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.3  2010/08/09 21:51:22  seluzhen
 // updated comment field
 //

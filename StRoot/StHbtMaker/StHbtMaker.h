@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMaker.h,v 1.8 2012/01/21 16:50:55 yyang Exp $
+ * $Id: StHbtMaker.h,v 1.9 2014/08/06 11:43:19 jeromel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.h,v $
+ * Revision 1.9  2014/08/06 11:43:19  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.8  2012/01/21 16:50:55  yyang
  * this is a test commit
  *
@@ -90,7 +93,7 @@ class StHbtMaker
 
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.8 2012/01/21 16:50:55 yyang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.9 2014/08/06 11:43:19 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 #ifdef __ROOT__
   ClassDef(StHbtMaker,0)
 #endif

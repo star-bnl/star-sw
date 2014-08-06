@@ -49,7 +49,7 @@ class StGammaCandidate: public TObject
         ~StGammaCandidate();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidate.h,v 1.15 2010/10/08 19:56:09 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidate.h,v 1.16 2014/08/06 11:43:17 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
 
         ////////////////////////////////////////////
         //               Accessors                //

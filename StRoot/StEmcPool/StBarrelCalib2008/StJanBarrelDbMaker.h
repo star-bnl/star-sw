@@ -1,4 +1,4 @@
-// $Id: StJanBarrelDbMaker.h,v 1.1 2008/11/24 23:06:37 balewski Exp $
+// $Id: StJanBarrelDbMaker.h,v 1.2 2014/08/06 11:43:06 jeromel Exp $
 
 #ifndef STAR_StJanBarrelDbMaker
 #define STAR_StJanBarrelDbMaker
@@ -83,7 +83,7 @@ class StJanBarrelDbMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StJanBarrelDbMaker.h,v 1.1 2008/11/24 23:06:37 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StJanBarrelDbMaker.h,v 1.2 2014/08/06 11:43:06 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -94,6 +94,9 @@ class StJanBarrelDbMaker : public StMaker {
 
 
 // $Log: StJanBarrelDbMaker.h,v $
+// Revision 1.2  2014/08/06 11:43:06  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2008/11/24 23:06:37  balewski
 // start
 //

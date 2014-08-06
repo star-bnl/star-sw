@@ -1,4 +1,4 @@
-// $Id: St2009pubMcMaker.h,v 1.4 2011/09/14 14:23:21 stevens4 Exp $
+// $Id: St2009pubMcMaker.h,v 1.5 2014/08/06 11:43:41 jeromel Exp $
 //
 //*-- Author :  Justin Stevens, IUCF
 
@@ -79,7 +79,7 @@ class St2009pubMcMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009pubMcMaker.h,v 1.4 2011/09/14 14:23:21 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009pubMcMaker.h,v 1.5 2014/08/06 11:43:41 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -90,6 +90,9 @@ class St2009pubMcMaker : public StMaker {
 
 
 // $Log: St2009pubMcMaker.h,v $
+// Revision 1.5  2014/08/06 11:43:41  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.4  2011/09/14 14:23:21  stevens4
 // update used for cross section PRD paper
 //

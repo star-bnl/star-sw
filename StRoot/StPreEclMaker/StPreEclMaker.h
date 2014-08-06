@@ -56,7 +56,7 @@ public:
     void SetClusterConditions(char*,Int_t, Float_t, Float_t, Float_t, Bool_t = kFALSE); ///< this is for background compatibility with the old finder
 
     virtual const char *GetCVS() const {
-      static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.20 2007/01/22 19:13:53 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
+      static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.21 2014/08/06 11:43:33 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
     }
 

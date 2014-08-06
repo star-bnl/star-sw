@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.h,v 1.8 2005/08/04 04:06:54 perev Exp $
+// $Id: StSvtClusterMaker.h,v 1.9 2014/08/06 11:43:45 jeromel Exp $
 // $Log: StSvtClusterMaker.h,v $
+// Revision 1.9  2014/08/06 11:43:45  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.8  2005/08/04 04:06:54  perev
 // clear of collection added
 //
@@ -65,7 +68,7 @@ class StSvtClusterMaker : public StMaker
   Int_t SetSvtCluster();
   Int_t SetHybridClusters();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.8 2005/08/04 04:06:54 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.9 2014/08/06 11:43:45 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
  protected:

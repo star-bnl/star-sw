@@ -38,7 +38,7 @@ class StGammaRawMaker: public StMaker
         ~StGammaRawMaker();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.8 2011/03/04 19:39:15 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.9 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.h,v 1.5 2004/12/07 23:10:23 posk Exp $
+// $Id: StFlowPhiWgtMaker.h,v 1.6 2014/08/06 11:43:14 jeromel Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
@@ -37,7 +37,7 @@ public:
   Int_t    Finish();
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.5 2004/12/07 23:10:23 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.6 2014/08/06 11:43:14 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;}
 
 private:
@@ -97,6 +97,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.h,v $
+// Revision 1.6  2014/08/06 11:43:14  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.5  2004/12/07 23:10:23  posk
 // Only odd and even phiWgt hists. If the old phiWgt file contains more than
 // two harmonics, only the first two are read. Now writes only the first two.

@@ -16,7 +16,7 @@ public:
   virtual Int_t Make();
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
   
   void setDebug(int v) {mDebug=v;}
   

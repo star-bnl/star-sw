@@ -4,11 +4,14 @@
  * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
  * \date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.8 2012/06/03 06:34:39 zhux Exp $
+ * $Id: StPrepEmbedMaker.h,v 1.9 2014/08/06 11:43:55 jeromel Exp $
  *
  *
  * -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.h,v $
+ * Revision 1.9  2014/08/06 11:43:55  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.8  2012/06/03 06:34:39  zhux
  * Added a switch to cut on the ranking of primary vertex
  *
@@ -86,7 +89,7 @@ class StPrepEmbedMaker : public StMaker {
   Int_t  InitRun(const int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.8 2012/06/03 06:34:39 zhux Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.9 2014/08/06 11:43:55 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   

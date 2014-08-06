@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StPidAmpMaker.h,v 1.10 2003/09/10 19:47:26 perev Exp $
+// $Id: StPidAmpMaker.h,v 1.11 2014/08/06 11:43:32 jeromel Exp $
 //
 // Authors: Aihong Tang
 //
@@ -39,7 +39,7 @@ public:
   Int_t    Finish();
   void     SetMultBinNumber(int val);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.10 2003/09/10 19:47:26 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.11 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;}
 
 private:
@@ -68,6 +68,9 @@ inline void StPidAmpMaker::SetMultBinNumber(int val) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StPidAmpMaker.h,v $
+// Revision 1.11  2014/08/06 11:43:32  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.10  2003/09/10 19:47:26  perev
 // ansi corrs
 //
