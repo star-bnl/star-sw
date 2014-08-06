@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.h,v 1.11 2009/11/10 12:30:48 jcs Exp $
+// $Id: StFtpcDriftMapMaker.h,v 1.12 2014/08/06 11:43:16 jeromel Exp $
 // $Log: StFtpcDriftMapMaker.h,v $
+// Revision 1.12  2014/08/06 11:43:16  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.11  2009/11/10 12:30:48  jcs
 // replace StMagUtilities with StarMagField
 //
@@ -67,7 +70,7 @@ class StFtpcDriftMapMaker : public StMaker {
  private:
    char*   fTableName;      // c-structure name that is same as table in database
    char*   fOutputFileName; // file name for output
-  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.11 2009/11/10 12:30:48 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.12 2014/08/06 11:43:16 jeromel Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
    St_db_Maker *mDbMaker;                         //!
    St_ftpcDimensions    *m_dimensions;    //!
@@ -89,7 +92,7 @@ class StFtpcDriftMapMaker : public StMaker {
 
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.11 2009/11/10 12:30:48 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.12 2014/08/06 11:43:16 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
   ClassDef(StFtpcDriftMapMaker,0)  
 };

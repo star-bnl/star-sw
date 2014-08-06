@@ -2,7 +2,7 @@
 #define STAR_StBarrelMonitorMaker
 
 /************************************************************
- * $Id: StBarrelMonitorMaker.h,v 1.2 2009/08/25 16:08:04 fine Exp $
+ * $Id: StBarrelMonitorMaker.h,v 1.3 2014/08/06 11:43:06 jeromel Exp $
  ************************************************************
  Goal: Unpack & monitor barrel events
  *
@@ -102,7 +102,7 @@ class StBarrelMonitorMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StBarrelMonitorMaker.h,v 1.2 2009/08/25 16:08:04 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StBarrelMonitorMaker.h,v 1.3 2014/08/06 11:43:06 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -113,6 +113,9 @@ class StBarrelMonitorMaker : public StMaker {
 
 
 // $Log: StBarrelMonitorMaker.h,v $
+// Revision 1.3  2014/08/06 11:43:06  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.2  2009/08/25 16:08:04  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //

@@ -28,7 +28,7 @@ class StEvtTrigDetSumsMaker : public StMaker {
   virtual Int_t  Make();
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEvtTrigDetSumsMaker.h,v 1.2 2012/10/15 17:38:34 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEvtTrigDetSumsMaker.h,v 1.3 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
   ClassDef(StEvtTrigDetSumsMaker,0)
 };
@@ -36,8 +36,11 @@ class StEvtTrigDetSumsMaker : public StMaker {
 #endif
 
 //_____________________________________________________________________________
-// $Id: StEvtTrigDetSumsMaker.h,v 1.2 2012/10/15 17:38:34 genevb Exp $
+// $Id: StEvtTrigDetSumsMaker.h,v 1.3 2014/08/06 11:43:32 jeromel Exp $
 // $Log: StEvtTrigDetSumsMaker.h,v $
+// Revision 1.3  2014/08/06 11:43:32  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.2  2012/10/15 17:38:34  genevb
 // Add CVS logging
 //

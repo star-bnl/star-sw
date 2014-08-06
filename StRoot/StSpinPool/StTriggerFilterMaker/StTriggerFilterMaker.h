@@ -1,7 +1,7 @@
 #ifndef ST_TRIGGER_FILTER_MAKER_HH
 #define ST_TRIGGER_FILTER_MAKER_HH
 
-// $Id: StTriggerFilterMaker.h,v 1.2 2008/07/31 18:02:14 mattheww Exp $
+// $Id: StTriggerFilterMaker.h,v 1.3 2014/08/06 11:43:40 jeromel Exp $
 
 /*****************************************************************************
  * @class StTriggerFilterMaker
@@ -33,7 +33,7 @@ public:
     const vector<unsigned int> getTriggers() const {return mGoodTriggers;}
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.2 2008/07/31 18:02:14 mattheww Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTriggerFilterMaker.h,v 1.3 2014/08/06 11:43:40 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
     
 private:
     vector<unsigned int> mGoodTriggers; //!
@@ -45,6 +45,9 @@ private:
 
 /*****************************************************************************
  * $Log: StTriggerFilterMaker.h,v $
+ * Revision 1.3  2014/08/06 11:43:40  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.2  2008/07/31 18:02:14  mattheww
  * Added method to get trigger list
  *

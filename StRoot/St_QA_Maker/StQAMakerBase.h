@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.22 2014/07/22 20:39:28 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.23 2014/08/06 11:43:53 jeromel Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.23  2014/08/06 11:43:53  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 2.22  2014/07/22 20:39:28  genevb
 // Add MTD to Offline QA
 //
@@ -124,7 +127,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.22 2014/07/22 20:39:28 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.23 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************

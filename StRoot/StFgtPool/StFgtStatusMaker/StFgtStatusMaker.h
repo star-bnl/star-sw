@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtStatusMaker.h,v 1.1 2012/01/31 08:59:43 sgliske Exp $
+ * $Id: StFgtStatusMaker.h,v 1.2 2014/08/06 11:43:13 jeromel Exp $
  * Author: C. K. Riley, Nov 2011 & S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtStatusMaker.h,v $
+ * Revision 1.2  2014/08/06 11:43:13  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2012/01/31 08:59:43  sgliske
  * moved StFgtStatus maker to StFgtPool
  *
@@ -132,7 +135,7 @@ inline void StFgtStatusMaker::setRmsRange( Float_t min, Float_t max ){  mMinRMS 
 inline void StFgtStatusMaker::setFracRange( Float_t min, Float_t max ){ mMinFrac = min; mMaxFrac = max; };
 inline void StFgtStatusMaker::setMaxDeadPerApv( Float_t max ){ mMaxDead = max; };
 inline const char *StFgtStatusMaker::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtStatusMaker.h,v 1.1 2012/01/31 08:59:43 sgliske Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtStatusMaker.h,v 1.2 2014/08/06 11:43:13 jeromel Exp $ built " __DATE__ " " __TIME__ ;
    return cvs;
 }
 

@@ -1,5 +1,8 @@
-// $Id: QAH.h,v 2.4 2007/03/13 18:44:07 genevb Exp $ 
+// $Id: QAH.h,v 2.5 2014/08/06 11:43:52 jeromel Exp $ 
 // $Log: QAH.h,v $
+// Revision 2.5  2014/08/06 11:43:52  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 2.4  2007/03/13 18:44:07  genevb
 // Added StMultiH2F support
 //
@@ -66,7 +69,7 @@ class QAH {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: QAH.h,v 2.4 2007/03/13 18:44:07 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: QAH.h,v 2.5 2014/08/06 11:43:52 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
  protected:

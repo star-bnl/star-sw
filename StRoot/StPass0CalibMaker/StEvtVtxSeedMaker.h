@@ -1,7 +1,7 @@
 /*!
  * \class StEvtVtxSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StEvtVtxSeedMaker.h,v 1.3 2012/08/17 22:57:33 genevb Exp $
+ * \version $Id: StEvtVtxSeedMaker.h,v 1.4 2014/08/06 11:43:32 jeromel Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -29,7 +29,7 @@ class StEvtVtxSeedMaker : public StVertexSeedMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StEvtVtxSeedMaker.h,v 1.3 2012/08/17 22:57:33 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StEvtVtxSeedMaker.h,v 1.4 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ;
      return cvs;
    }
 
@@ -46,8 +46,11 @@ class StEvtVtxSeedMaker : public StVertexSeedMaker {
 
 #endif
 
-// $Id: StEvtVtxSeedMaker.h,v 1.3 2012/08/17 22:57:33 genevb Exp $
+// $Id: StEvtVtxSeedMaker.h,v 1.4 2014/08/06 11:43:32 jeromel Exp $
 // $Log: StEvtVtxSeedMaker.h,v $
+// Revision 1.4  2014/08/06 11:43:32  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.3  2012/08/17 22:57:33  genevb
 // Add index of vertex within event to ntuple
 //

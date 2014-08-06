@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.h,v 1.7 2004/10/21 02:59:01 mvl Exp $
+ * $Id: StMuDst2StEventMaker.h,v 1.8 2014/08/06 11:43:31 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDst2StEventMaker_hh
@@ -27,7 +27,7 @@ class StMuDst2StEventMaker : public StMaker {
     int Make();   ///< create a StEvent from the muDst and put it into the .data tree structure. Also time stamp gets written and set in StEvtHddr for database usage
     StEvent* event() { return  mStEvent; } ///< return pointer to StEvent, 0 if not created 
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.7 2004/10/21 02:59:01 mvl Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.8 2014/08/06 11:43:31 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
 	return cvs;
     }
   
@@ -47,6 +47,9 @@ class StMuDst2StEventMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.h,v $
+ * Revision 1.8  2014/08/06 11:43:31  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.7  2004/10/21 02:59:01  mvl
  * Now get MuDst from GetInputDS, instead of StMuDSTMaker
  *

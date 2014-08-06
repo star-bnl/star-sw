@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.h,v 1.4 2003/09/10 19:47:38 perev Exp $
+ * $Id: StTofSimMaker.h,v 1.5 2014/08/06 11:43:49 jeromel Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.h,v $
+ * Revision 1.5  2014/08/06 11:43:49  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.4  2003/09/10 19:47:38  perev
  * ansi corrs
  *
@@ -74,7 +77,7 @@ class StTofSimMaker : public StMaker{
   virtual Int_t  Finish();
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofSimMaker.h,v 1.4 2003/09/10 19:47:38 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofSimMaker.h,v 1.5 2014/08/06 11:43:49 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StTofSimMaker,0)
 };

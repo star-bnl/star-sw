@@ -60,7 +60,7 @@
  *
  *    float range;           // range used in defining mass windows
  *
- * $Id: StStrangeTagsMaker.h,v 1.13 2012/12/13 20:28:39 fisyak Exp $
+ * $Id: StStrangeTagsMaker.h,v 1.14 2014/08/06 11:43:44 jeromel Exp $
  *
  */
 
@@ -100,7 +100,7 @@ private:
     Float_t         mMasska2;
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.13 2012/12/13 20:28:39 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.14 2014/08/06 11:43:44 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
     ClassDef(StStrangeTagsMaker,0)   // macro for rootcint
 };
@@ -110,6 +110,9 @@ private:
 /***************************************************************************
  *
  * $Log: StStrangeTagsMaker.h,v $
+ * Revision 1.14  2014/08/06 11:43:44  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.13  2012/12/13 20:28:39  fisyak
  * suppress warning
  *

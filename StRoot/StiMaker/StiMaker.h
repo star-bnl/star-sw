@@ -48,7 +48,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.32 2012/05/07 14:56:14 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.33 2014/08/06 11:43:59 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();

@@ -246,7 +246,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.99 2012/06/09 22:46:52 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.100 2014/08/06 11:42:55 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char *logInput,
                                     const StMaker *uppMk=0,
@@ -310,8 +310,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.99 2012/06/09 22:46:52 fisyak Exp $
+// $Id: StMaker.h,v 1.100 2014/08/06 11:42:55 jeromel Exp $
 // $Log: StMaker.h,v $
+// Revision 1.100  2014/08/06 11:42:55  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.99  2012/06/09 22:46:52  fisyak
 // Synchronize tag and geometry version for y2006h, thanks to Xianglei, bug #2374
 //

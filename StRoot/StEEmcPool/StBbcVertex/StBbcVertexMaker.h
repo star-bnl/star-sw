@@ -1,4 +1,4 @@
-// $Id: StBbcVertexMaker.h,v 1.1 2004/08/31 03:44:13 balewski Exp $
+// $Id: StBbcVertexMaker.h,v 1.2 2014/08/06 11:42:58 jeromel Exp $
 
 #ifndef STAR_StBbcVertexMaker
 #define STAR_StBbcVertexMaker
@@ -37,7 +37,7 @@ class StBbcVertexMaker : public StMaker, public  BbcVertex {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StBbcVertexMaker.h,v 1.1 2004/08/31 03:44:13 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StBbcVertexMaker.h,v 1.2 2014/08/06 11:42:58 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -48,6 +48,9 @@ class StBbcVertexMaker : public StMaker, public  BbcVertex {
 
 
 // $Log: StBbcVertexMaker.h,v $
+// Revision 1.2  2014/08/06 11:42:58  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2004/08/31 03:44:13  balewski
 // first
 //

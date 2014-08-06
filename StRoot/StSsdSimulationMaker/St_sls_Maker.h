@@ -88,7 +88,7 @@ class St_sls_Maker : public StMaker {
   ssdWafersPosition_st *positions;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.13 2008/08/12 22:48:38 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.14 2014/08/06 11:43:43 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 
@@ -97,9 +97,12 @@ class St_sls_Maker : public StMaker {
 #endif
 
  /**************************************************************************
- * $Id: St_sls_Maker.h,v 1.13 2008/08/12 22:48:38 bouchet Exp $
+ * $Id: St_sls_Maker.h,v 1.14 2014/08/06 11:43:43 jeromel Exp $
  *
  * $Log: St_sls_Maker.h,v $
+ * Revision 1.14  2014/08/06 11:43:43  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.13  2008/08/12 22:48:38  bouchet
  * retrieve positions and dimensions tables using Get methods
  *

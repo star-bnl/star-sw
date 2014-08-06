@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.32 2009/02/04 20:33:06 ogrebeny Exp $
+// $Id: StEEmcDbMaker.h,v 1.33 2014/08/06 11:42:56 jeromel Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -39,7 +39,7 @@ public:
     virtual Int_t InitRun (int runumber); ///< to access STAR-DB
   
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.32 2009/02/04 20:33:06 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.33 2014/08/06 11:42:56 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
         return cvs;
     }
   
@@ -49,6 +49,9 @@ public:
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.33  2014/08/06 11:42:56  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.32  2009/02/04 20:33:06  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //

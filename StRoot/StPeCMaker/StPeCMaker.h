@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.19 2013/12/27 16:45:16 ramdebbe Exp $
+// $Id: StPeCMaker.h,v 1.20 2014/08/06 11:43:32 jeromel Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.20  2014/08/06 11:43:32  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.19  2013/12/27 16:45:16  ramdebbe
 // added extrapolation of tracks to TOF, StBTofGeometry and St_geant_Maker with //!
 //
@@ -163,7 +166,7 @@ private:
 	Int_t triggerSim(StEvent*);
 
 	virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.19 2013/12/27 16:45:16 ramdebbe Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.20 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 	ClassDef(StPeCMaker,2)
 };

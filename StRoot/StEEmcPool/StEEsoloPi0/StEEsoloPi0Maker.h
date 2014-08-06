@@ -1,4 +1,4 @@
-// $Id: StEEsoloPi0Maker.h,v 1.6 2004/10/27 18:07:51 balewski Exp $
+// $Id: StEEsoloPi0Maker.h,v 1.7 2014/08/06 11:43:01 jeromel Exp $
 
 #ifndef STAR_StEEsoloPi0Maker
 #define STAR_StEEsoloPi0Maker
@@ -45,7 +45,7 @@ class StEEsoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEsoloPi0Maker.h,v 1.6 2004/10/27 18:07:51 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEsoloPi0Maker.h,v 1.7 2014/08/06 11:43:01 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -56,6 +56,9 @@ class StEEsoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
 
 // $Log: StEEsoloPi0Maker.h,v $
+// Revision 1.7  2014/08/06 11:43:01  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.6  2004/10/27 18:07:51  balewski
 // practical use of 'sim' flavor for M-C
 //

@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHitMaker.h,v 1.6 2014/04/05 05:20:08 qiuh Exp $
+ * $Id: StPxlRawHitMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $
  *
  * Author: Jan Rusnak, Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHitMaker.h,v $
+ * Revision 1.7  2014/08/06 11:43:35  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.6  2014/04/05 05:20:08  qiuh
  * add Jtag file version print-out and some more warnings for data format errors
  *
@@ -46,7 +49,7 @@ public:
    Int_t Finish();
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitMaker.h,v 1.6 2014/04/05 05:20:08 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHitMaker.h,v 1.7 2014/08/06 11:43:35 jeromel Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 

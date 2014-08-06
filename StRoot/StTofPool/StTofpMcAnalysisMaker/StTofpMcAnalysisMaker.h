@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StTofpMcAnalysisMaker.h,v 1.2 2011/04/03 15:52:57 fisyak Exp $
+ * $Id: StTofpMcAnalysisMaker.h,v 1.3 2014/08/06 11:43:47 jeromel Exp $
  * $Log: StTofpMcAnalysisMaker.h,v $
+ * Revision 1.3  2014/08/06 11:43:47  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.2  2011/04/03 15:52:57  fisyak
  * Fix effect of constness in StAssociationMaker
  *
@@ -111,7 +114,7 @@ private:
 
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMcAnalysisMaker.h,v 1.2 2011/04/03 15:52:57 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMcAnalysisMaker.h,v 1.3 2014/08/06 11:43:47 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}	
     
   ClassDef(StTofpMcAnalysisMaker,0)
 };

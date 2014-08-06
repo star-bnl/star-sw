@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.26 2007/07/12 20:10:35 fisyak Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.27 2014/08/06 11:43:46 jeromel Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.27  2014/08/06 11:43:46  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.26  2007/07/12 20:10:35  fisyak
 // Add forward declaration for ROOT 5.16
 //
@@ -144,7 +147,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.26 2007/07/12 20:10:35 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.27 2014/08/06 11:43:46 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
     

@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.h,v 1.6 2010/04/14 20:00:08 balewski Exp $
+// $Id: St2009pubSpinMaker.h,v 1.7 2014/08/06 11:43:41 jeromel Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -64,7 +64,7 @@ class St2009pubSpinMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009pubSpinMaker.h,v 1.6 2010/04/14 20:00:08 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009pubSpinMaker.h,v 1.7 2014/08/06 11:43:41 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -75,6 +75,9 @@ class St2009pubSpinMaker : public StMaker {
 
 
 // $Log: St2009pubSpinMaker.h,v $
+// Revision 1.7  2014/08/06 11:43:41  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.6  2010/04/14 20:00:08  balewski
 // added AL w/o endcap
 //

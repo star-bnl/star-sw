@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.54 2012/11/26 18:45:55 jwebb Exp $
+// $Id: St_geant_Maker.h,v 1.55 2014/08/06 11:43:54 jeromel Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.55  2014/08/06 11:43:54  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.54  2012/11/26 18:45:55  jwebb
 // Restoring to previous version of St_geant_Maker and adding in changes needed
 // for new generator framework (i.e. exposing TGiant3 instance).
@@ -229,7 +232,7 @@ protected:
    static Int_t      nlev; //!
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.54 2012/11/26 18:45:55 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.55 2014/08/06 11:43:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 

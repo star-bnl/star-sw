@@ -1,7 +1,7 @@
 #ifndef ST_CHARGED_PION_MAKER_HH
 #define ST_CHARGED_PION_MAKER_HH
 
-// $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $
+// $Id: StChargedPionMaker.h,v 1.12 2014/08/06 11:43:38 jeromel Exp $
 
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -40,7 +40,7 @@ public:
     void addTrigger(int trigId);
     
     const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.12 2014/08/06 11:43:38 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
     
 private:
     TFile *mFile;                           //!
@@ -82,14 +82,20 @@ addTrigger(int trigId) { mTriggers.push_back(trigId); }
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.h,v $
+ * Revision 1.12  2014/08/06 11:43:38  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.11  2012/11/09 03:31:34  perev
  * Cleanup
  *
  * Revision 1.10  2008/12/29 15:58:30  kocolosk
- * removed commented code and added $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $/$Log: StChargedPionMaker.h,v $
- * removed commented code and added $Id$/Revision 1.11  2012/11/09 03:31:34  perev
- * removed commented code and added $Id$/Cleanup
- * removed commented code and added $Id$/ as needed
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.12 2014/08/06 11:43:38 jeromel Exp $/$Log: StChargedPionMaker.h,v $
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $/Revision 1.12  2014/08/06 11:43:38  jeromel
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $/Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.11 2012/11/09 03:31:34 perev Exp $/
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.12 2014/08/06 11:43:38 jeromel Exp $/Revision 1.11  2012/11/09 03:31:34  perev
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.12 2014/08/06 11:43:38 jeromel Exp $/Cleanup
+ * removed commented code and added $Id: StChargedPionMaker.h,v 1.12 2014/08/06 11:43:38 jeromel Exp $/ as needed
  *
  *****************************************************************************/
 

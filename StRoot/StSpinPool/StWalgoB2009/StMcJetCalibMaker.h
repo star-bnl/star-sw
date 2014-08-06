@@ -1,4 +1,4 @@
-// $Id: StMcJetCalibMaker.h,v 1.1 2010/05/01 01:31:45 balewski Exp $
+// $Id: StMcJetCalibMaker.h,v 1.2 2014/08/06 11:43:41 jeromel Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // calibrates jets event by event using partonic 2->W/Z-> process
@@ -66,7 +66,7 @@ class StMcJetCalibMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMcJetCalibMaker.h,v 1.1 2010/05/01 01:31:45 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMcJetCalibMaker.h,v 1.2 2014/08/06 11:43:41 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -77,6 +77,9 @@ class StMcJetCalibMaker : public StMaker {
 
 
 // $Log: StMcJetCalibMaker.h,v $
+// Revision 1.2  2014/08/06 11:43:41  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2010/05/01 01:31:45  balewski
 // added W->JJ code & JES calibration
 //

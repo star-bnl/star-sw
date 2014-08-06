@@ -2,7 +2,7 @@
 #define StTpcAvClusterMaker_H
 /***************************************************************************
  *
- * $Id: StTpcAvClusterMaker.h,v 1.1 2012/09/13 21:00:04 fisyak Exp $
+ * $Id: StTpcAvClusterMaker.h,v 1.2 2014/08/06 11:43:50 jeromel Exp $
  ***************************************************************************/
 #include "TString.h"
 #include "StMaker.h"
@@ -22,7 +22,7 @@ class StTpcAvClusterMaker : public StMaker {
   Int_t    NoInnerPadRows;
  public:
   virtual const char *GetCVS() const    {
-    static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
   }
   ClassDef(StTpcAvClusterMaker, 1)    //StTpcAvClusterMaker - class to fille the StEvewnt from DAQ reader
 };

@@ -1,4 +1,4 @@
-// $Id: StMuLcp2TreeMaker.h,v 1.5 2009/12/02 16:35:58 fine Exp $
+// $Id: StMuLcp2TreeMaker.h,v 1.6 2014/08/06 11:42:58 jeromel Exp $
 
 #ifndef STAR_StMuLcp2TreeMaker
 #define STAR_StMuLcp2TreeMaker
@@ -83,7 +83,7 @@ class StMuLcp2TreeMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuLcp2TreeMaker.h,v 1.5 2009/12/02 16:35:58 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuLcp2TreeMaker.h,v 1.6 2014/08/06 11:42:58 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -94,6 +94,9 @@ class StMuLcp2TreeMaker : public StMaker {
 
 
 // $Log: StMuLcp2TreeMaker.h,v $
+// Revision 1.6  2014/08/06 11:42:58  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.5  2009/12/02 16:35:58  fine
 // Fix StMuTrack interface
 //

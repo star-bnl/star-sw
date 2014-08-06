@@ -54,7 +54,7 @@ class StBbcSimulationMaker : public StMaker {
 // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StBbcSimulationMaker.h,v 1.2 2003/09/10 19:47:03 perev Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: StBbcSimulationMaker.h,v 1.3 2014/08/06 11:42:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
      return cvs;
    }
 

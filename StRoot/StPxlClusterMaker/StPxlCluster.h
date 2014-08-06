@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlCluster.h,v 1.6 2014/02/27 00:44:25 smirnovd Exp $
+ * $Id: StPxlCluster.h,v 1.7 2014/08/06 11:43:34 jeromel Exp $
  *
  * Author: Qiu Hao, Jan 2013, according codes from Xiangming Sun
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlCluster.h,v $
+ * Revision 1.7  2014/08/06 11:43:34  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.6  2014/02/27 00:44:25  smirnovd
  * Minor corrections
  *
@@ -54,7 +57,7 @@ public:
    Float_t rowCenter() const {return mRowCenter;}       ///< average raw hit row
    Int_t idTruth() const {return mIdTruth;}             ///< for embedding, 0 as background, most frequent raw hit idTruth as idTruth of the cluster
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlCluster.h,v 1.6 2014/02/27 00:44:25 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlCluster.h,v 1.7 2014/08/06 11:43:34 jeromel Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 

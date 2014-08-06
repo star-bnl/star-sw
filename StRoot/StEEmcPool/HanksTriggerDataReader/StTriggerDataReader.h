@@ -12,7 +12,7 @@ public:
   void* GetTriggerData() {return mTrg;};
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag " __DATE__ " " __TIME__ ; return cvs;}
   
 protected:
   

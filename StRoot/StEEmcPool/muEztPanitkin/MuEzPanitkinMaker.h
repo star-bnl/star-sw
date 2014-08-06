@@ -2,7 +2,7 @@
 #define STAR_MuEzPanitkinMaker
 
 /************************************************************
- * $Id: MuEzPanitkinMaker.h,v 1.3 2009/12/03 22:35:03 ogrebeny Exp $
+ * $Id: MuEzPanitkinMaker.h,v 1.4 2014/08/06 11:43:03 jeromel Exp $
  ************************************************************
  Goal: wrap EEMC-Panitkin code to be used in the BFC
  *
@@ -57,7 +57,7 @@ class MuEzPanitkinMaker : public StMaker{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: MuEzPanitkinMaker.h,v 1.3 2009/12/03 22:35:03 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: MuEzPanitkinMaker.h,v 1.4 2014/08/06 11:43:03 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -68,6 +68,9 @@ class MuEzPanitkinMaker : public StMaker{
 
 
 // $Log: MuEzPanitkinMaker.h,v $
+// Revision 1.4  2014/08/06 11:43:03  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.3  2009/12/03 22:35:03  ogrebeny
 // Fixed compiler warnings, mostly char* -> const char*
 //

@@ -34,7 +34,7 @@ class StGammaScheduleMaker : public StMaker
         ~StGammaScheduleMaker() {}
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaScheduleMaker.h,v 1.2 2010/09/24 18:02:59 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaScheduleMaker.h,v 1.3 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
         
         Int_t Init();
         void Clear(Option_t *opts = "") { return StMaker::Clear(opts); }

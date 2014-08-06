@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.h,v 1.10 2004/07/02 01:51:09 perev Exp $
+ * $Id: StMuIOMaker.h,v 1.11 2014/08/06 11:43:31 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -67,7 +67,7 @@ class StMuIOMaker : public StMuDstMaker {
 
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
-    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.10 2004/07/02 01:51:09 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.11 2014/08/06 11:43:31 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -98,6 +98,9 @@ protected:
 /***************************************************************************
  *
  * $Log: StMuIOMaker.h,v $
+ * Revision 1.11  2014/08/06 11:43:31  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.10  2004/07/02 01:51:09  perev
  * Wei-Ming Zhang developments
  *

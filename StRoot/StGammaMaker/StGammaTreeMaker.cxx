@@ -82,7 +82,7 @@ Int_t StGammaTreeMaker::Init()
     // Create a tree if necessary
     if(!mGammaTree) 
     {
-        TString title = "Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.10 2008/12/03 15:39:18 betan Exp $ built "__DATE__" "__TIME__;
+        TString title = "Gamma TTree $Id: StGammaTreeMaker.cxx,v 1.11 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__;
         mGammaTree = new TTree("gammas", title);    
         mGammaTree->SetDirectory(mGammaFile);
     }

@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.20 2009/11/23 16:44:55 fisyak Exp $
+// $Id: StSvtHitMaker.h,v 1.21 2014/08/06 11:43:45 jeromel Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.21  2014/08/06 11:43:45  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.20  2009/11/23 16:44:55  fisyak
 // Remove references to tables
 //
@@ -108,7 +111,7 @@ class StSvtHitMaker : public StMaker
   double LaserTemperatureCorrection();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.20 2009/11/23 16:44:55 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.21 2014/08/06 11:43:45 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
  protected:

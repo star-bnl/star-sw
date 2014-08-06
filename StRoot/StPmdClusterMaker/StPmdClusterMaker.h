@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.12 2010/04/15 06:52:13 rashmi Exp $
+ * $Id: StPmdClusterMaker.h,v 1.13 2014/08/06 11:43:33 jeromel Exp $
  *
  * Author:
  *
@@ -14,6 +14,9 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
+ * Revision 1.13  2014/08/06 11:43:33  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.12  2010/04/15 06:52:13  rashmi
  * Clustering with option to turn calibration refineclustering on/off
  *
@@ -133,7 +136,7 @@ class StPmdClusterMaker: public StMaker{
   void SetOptRefineCluster(Bool_t a=kTRUE){mOptRefineCluster = a;}    // Default is on; Yes Refine Clustering
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.12 2010/04/15 06:52:13 rashmi Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.13 2014/08/06 11:43:33 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   

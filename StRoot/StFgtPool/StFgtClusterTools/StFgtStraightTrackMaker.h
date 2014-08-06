@@ -42,7 +42,7 @@ class StFgtStraightTrackMaker : public StMaker {
    void setMaxPhiDiff(Float_t pd);
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.6 2013/05/10 18:24:50 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.7 2014/08/06 11:43:10 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
  protected:
    Bool_t isCosmic;
 

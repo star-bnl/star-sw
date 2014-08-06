@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.14 2007/07/31 16:38:11 fisyak Exp $
+ * $Id: StSvtDbMaker.h,v 1.15 2014/08/06 11:43:45 jeromel Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.15  2014/08/06 11:43:45  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.14  2007/07/31 16:38:11  fisyak
  * Make request for SvtGeometry from GetRotations
  *
@@ -117,7 +120,7 @@ class StSvtDbMaker : public StMaker {
 				  const StMaker *dowMk=0) const ;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.14 2007/07/31 16:38:11 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.15 2014/08/06 11:43:45 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   ClassDef(StSvtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 

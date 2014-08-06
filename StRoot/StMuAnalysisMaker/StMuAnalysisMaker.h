@@ -5,10 +5,13 @@
  *
  * This is an example of a maker to perform analysis using MuDst.
  *
- * $Id: StMuAnalysisMaker.h,v 1.1 2004/08/10 16:09:11 perev Exp $
+ * $Id: StMuAnalysisMaker.h,v 1.2 2014/08/06 11:43:31 jeromel Exp $
  *
  * -------------------------------------------------------------------------
  * $Log: StMuAnalysisMaker.h,v $
+ * Revision 1.2  2014/08/06 11:43:31  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2004/08/10 16:09:11  perev
  * new GridCollector stuff
  *
@@ -43,7 +46,7 @@ public:
     Int_t  Finish();                 // called once at the end
 
     virtual const char *GetCVS() const {
-      static const char cvs[]="Tag $Name:  $ $Id: StMuAnalysisMaker.h,v 1.1 2004/08/10 16:09:11 perev Exp $ built "__DATE__" "__TIME__ ; 
+      static const char cvs[]="Tag $Name:  $ $Id: StMuAnalysisMaker.h,v 1.2 2014/08/06 11:43:31 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
       return cvs;
     }
 

@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdAnalysisMaker.h,v 1.1 2008/09/02 18:27:39 dongx Exp $
+ * $Id: StVpdAnalysisMaker.h,v 1.2 2014/08/06 11:43:48 jeromel Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdAnalysisMaker.h,v $
+ * Revision 1.2  2014/08/06 11:43:48  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2008/09/02 18:27:39  dongx
  * first release.
  * - Vpd analysis maker from MuDst to extract vz, Tstart, Tdiff etc.
@@ -141,7 +144,7 @@ private:
     Double_t          mVPDWestHitsCut;    
 
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StVpdAnalysisMaker.h,v 1.1 2008/09/02 18:27:39 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StVpdAnalysisMaker.h,v 1.2 2014/08/06 11:43:48 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StVpdAnalysisMaker,1)
 };

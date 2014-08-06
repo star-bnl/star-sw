@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlRawHit.h,v 1.3 2014/01/28 19:29:44 qiuh Exp $
+ * $Id: StPxlRawHit.h,v 1.4 2014/08/06 11:43:34 jeromel Exp $
  *
  * Author: Qiu Hao, Jan 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlRawHit.h,v $
+ * Revision 1.4  2014/08/06 11:43:34  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.3  2014/01/28 19:29:44  qiuh
  * *** empty log message ***
  *
@@ -52,7 +55,7 @@ public:
 
    void print(); ///< print all information
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHit.h,v 1.3 2014/01/28 19:29:44 qiuh Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlRawHit.h,v 1.4 2014/08/06 11:43:34 jeromel Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 

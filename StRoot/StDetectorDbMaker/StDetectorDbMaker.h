@@ -12,7 +12,7 @@ class StDetectorDbMaker : public StMaker {
   virtual Int_t  Make();
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StDetectorDbMaker.h,v 1.3 2007/07/12 19:23:13 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StDetectorDbMaker.h,v 1.4 2014/08/06 11:42:56 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
   ClassDef(StDetectorDbMaker,0)   //StAF chain virtual base class for Makers
 };

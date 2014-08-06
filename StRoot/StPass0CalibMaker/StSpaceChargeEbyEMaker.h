@@ -61,7 +61,7 @@ public:
             { reqEmcOrTofMatch = match; reqEmcMatch = kFALSE; reqTofMatch = kFALSE; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.18 2014/07/23 17:58:46 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.19 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
 
 protected:
@@ -201,8 +201,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.18 2014/07/23 17:58:46 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.19 2014/08/06 11:43:32 jeromel Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.19  2014/08/06 11:43:32  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.18  2014/07/23 17:58:46  genevb
 // Machinery for sector-by-sector Gaps (GridLeak) measurements
 //

@@ -1,4 +1,4 @@
-// $Id: StGeant2LcpTreeMaker.h,v 1.1 2004/01/06 17:25:26 balewski Exp $
+// $Id: StGeant2LcpTreeMaker.h,v 1.2 2014/08/06 11:42:58 jeromel Exp $
 
 #ifndef STAR_StGeant2LcpTreeMaker
 #define STAR_StGeant2LcpTreeMaker
@@ -65,7 +65,7 @@ class StGeant2LcpTreeMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StGeant2LcpTreeMaker.h,v 1.1 2004/01/06 17:25:26 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StGeant2LcpTreeMaker.h,v 1.2 2014/08/06 11:42:58 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -76,6 +76,9 @@ class StGeant2LcpTreeMaker : public StMaker {
 
 
 // $Log: StGeant2LcpTreeMaker.h,v $
+// Revision 1.2  2014/08/06 11:42:58  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2004/01/06 17:25:26  balewski
 // get LCP from Geant info
 //

@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlHitMaker.h,v 1.7 2014/02/07 22:56:39 smirnovd Exp $
+ * $Id: StPxlHitMaker.h,v 1.8 2014/08/06 11:43:34 jeromel Exp $
  *
  * Author: Qiu Hao, Jan 2013
  **************************************************************************/
@@ -32,7 +32,7 @@ public:
    Int_t InitRun(Int_t runnumber);
    Int_t Make();
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.7 2014/02/07 22:56:39 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlHitMaker.h,v 1.8 2014/08/06 11:43:34 jeromel Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
@@ -49,6 +49,9 @@ private:
 /***************************************************************************
  *
  * $Log: StPxlHitMaker.h,v $
+ * Revision 1.8  2014/08/06 11:43:34  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.7  2014/02/07 22:56:39  smirnovd
  * Moved CVS log list to the bottom of file
  *

@@ -9,7 +9,7 @@
  * HighPt related variables such as refMult are expected to be in the general
  * tags maker.
  *
- * $Id: StHighPtTagsMaker.h,v 1.1 2004/07/30 23:02:06 calderon Exp $
+ * $Id: StHighPtTagsMaker.h,v 1.2 2014/08/06 11:43:20 jeromel Exp $
  *
  */
 
@@ -54,7 +54,7 @@ private:
 //     Float_t         mMaxRawEtEEMCTower;
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHighPtTagsMaker.h,v 1.1 2004/07/30 23:02:06 calderon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHighPtTagsMaker.h,v 1.2 2014/08/06 11:43:20 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
     ClassDef(StHighPtTagsMaker,1)   // macro for rootcint
 };
@@ -64,6 +64,9 @@ private:
 /***************************************************************************
  *
  * $Log: StHighPtTagsMaker.h,v $
+ * Revision 1.2  2014/08/06 11:43:20  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2004/07/30 23:02:06  calderon
  * Revised entry after testing.  Commented out data members that are used
  * as local variables in fillTag().  Speeded up primary track loop.  Added

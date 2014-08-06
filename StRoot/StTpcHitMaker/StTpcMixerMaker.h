@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StTpcMixerMaker.h,v 1.1 2008/07/31 20:45:27 fisyak Exp $
+ * $Id: StTpcMixerMaker.h,v 1.2 2014/08/06 11:43:50 jeromel Exp $
  * $Log: StTpcMixerMaker.h,v $
+ * Revision 1.2  2014/08/06 11:43:50  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2008/07/31 20:45:27  fisyak
  * Add TpcMixer
  *
@@ -20,7 +23,7 @@ class StTpcMixerMaker : public StMaker {
   virtual Int_t Make();
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StTpcMixerMaker.h,v 1.1 2008/07/31 20:45:27 fisyak Exp $ built "__DATE__" "__TIME__; 
+      "Tag $Name:  $ $Id: StTpcMixerMaker.h,v 1.2 2014/08/06 11:43:50 jeromel Exp $ built " __DATE__ " " __TIME__; 
     return cvs;}
   ClassDef(StTpcMixerMaker, 0)  // 
 };

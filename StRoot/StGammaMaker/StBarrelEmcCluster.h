@@ -30,7 +30,7 @@ class StBarrelEmcCluster: public TObject
         ~StBarrelEmcCluster() {};
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StBarrelEmcCluster.h,v 1.5 2008/12/03 15:30:55 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StBarrelEmcCluster.h,v 1.6 2014/08/06 11:43:17 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
 
         float energy() const;
         const TVector3& position() const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtPedStatQA.h,v 1.1 2012/01/31 09:26:16 sgliske Exp $
+ * $Id: StFgtPedStatQA.h,v 1.2 2014/08/06 11:43:12 jeromel Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedStatQA.h,v $
+ * Revision 1.2  2014/08/06 11:43:12  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2012/01/31 09:26:16  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -98,7 +101,7 @@ inline void StFgtPedStatQA::setSaveRootFile( const Char_t* filename ){ mFilename
 inline void StFgtPedStatQA::setSavePdfFile( const Char_t* filename ){ mFilenamePdf = filename; };
 inline void StFgtPedStatQA::setTimeBin( Short_t bin ){ mTimeBin = bin; };
 inline const char *StFgtPedStatQA::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtPedStatQA.h,v 1.1 2012/01/31 09:26:16 sgliske Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtPedStatQA.h,v 1.2 2014/08/06 11:43:12 jeromel Exp $ built " __DATE__ " " __TIME__ ;
    return cvs;
 }
 

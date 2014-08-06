@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHltMaker.h,v 1.1 2011/02/01 18:23:57 xueliang Exp $
+ * $Id: StHltMaker.h,v 1.2 2014/08/06 11:43:21 jeromel Exp $
  *
  * Author: L. Xue, H. Qiu, A. Tang, Jan 2011
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHltMaker.h,v $
+ * Revision 1.2  2014/08/06 11:43:21  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2011/02/01 18:23:57  xueliang
  * *** empty log message ***
  *
@@ -105,7 +108,7 @@ class StHltMaker : public StRTSBaseMaker {
 
 		///< Displayed on session exit, leave it as-is please ...
 		virtual const char *GetCVS() const {
-			static const char cvs[]="Tag $Name:  $ $Id: StHltMaker.h,v 1.1 2011/02/01 18:23:57 xueliang Exp $ built "__DATE__" "__TIME__ ; 
+			static const char cvs[]="Tag $Name:  $ $Id: StHltMaker.h,v 1.2 2014/08/06 11:43:21 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
 			return cvs;
 		}
 

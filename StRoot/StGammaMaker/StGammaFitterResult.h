@@ -32,7 +32,7 @@ public:
   float prob;
 
   virtual const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StGammaFitterResult.h,v 1.6 2008/06/30 14:58:40 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StGammaFitterResult.h,v 1.7 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
   ClassDef(StGammaFitterResult,2);

@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRobustPedMaker.h,v 1.1 2012/01/31 08:52:51 sgliske Exp $
+ * $Id: StFgtRobustPedMaker.h,v 1.2 2014/08/06 11:43:11 jeromel Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRobustPedMaker.h,v $
+ * Revision 1.2  2014/08/06 11:43:11  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.1  2012/01/31 08:52:51  sgliske
  * StFgtPedMaker moved to StFgtPool
  *
@@ -84,7 +87,7 @@ inline void StFgtRobustPedMaker::setMaxAdc( Int_t val ){ mMaxAdc = val; };
 inline void StFgtRobustPedMaker::setNumSmooth( Int_t val ){ mNumSmooth = val; };
 
 inline const char *StFgtRobustPedMaker::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRobustPedMaker.h,v 1.1 2012/01/31 08:52:51 sgliske Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRobustPedMaker.h,v 1.2 2014/08/06 11:43:11 jeromel Exp $ built " __DATE__ " " __TIME__ ;
    return cvs;
 }
 

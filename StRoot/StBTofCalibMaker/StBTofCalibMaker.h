@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.7 2010/10/31 05:51:06 geurts Exp $
+ * $Id: StBTofCalibMaker.h,v 1.8 2014/08/06 11:42:53 jeromel Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.8  2014/08/06 11:42:53  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.7  2010/10/31 05:51:06  geurts
  * fixed array dimensions to accomodate cell-based calibrations
  *
@@ -229,7 +232,7 @@ private:
     TH1D*    hEventCounter;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.7 2010/10/31 05:51:06 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.8 2014/08/06 11:42:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,3)
 };

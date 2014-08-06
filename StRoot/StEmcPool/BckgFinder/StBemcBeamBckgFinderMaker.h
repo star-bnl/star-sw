@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StBemcBeamBckgFinderMaker.h,v 1.8 2006/06/27 15:41:30 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.h,v 1.9 2014/08/06 11:43:05 jeromel Exp $
  * \author Issam Qattan , IUCF, 2006 
  *********************************************************************
  * Description:
@@ -110,7 +110,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
   // Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.8 2006/06/27 15:41:30 qattan Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.9 2014/08/06 11:43:05 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 
@@ -121,6 +121,9 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.h,v $
+  Revision 1.9  2014/08/06 11:43:05  jeromel
+  Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+
   Revision 1.8  2006/06/27 15:41:30  qattan
   *** empty log message ***
 

@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.13 2007/07/12 20:06:50 fisyak Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.14 2014/08/06 11:43:45 jeromel Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.14  2014/08/06 11:43:45  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.13  2007/07/12 20:06:50  fisyak
 // Move initialization to IntRun from Init, empty GetSvtDriftCurve, clean up
 //
@@ -98,7 +101,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   void  printClusterInfo();
   void MakeHistograms(); // Tracking histograms
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.13 2007/07/12 20:06:50 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.14 2014/08/06 11:43:45 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
     
  protected:

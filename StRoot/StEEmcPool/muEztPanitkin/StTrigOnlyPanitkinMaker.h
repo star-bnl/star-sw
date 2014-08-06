@@ -2,7 +2,7 @@
 #define STAR_StTrigOnlyPanitkinMaker
 
 /************************************************************
- * $Id: StTrigOnlyPanitkinMaker.h,v 1.1 2005/06/17 17:41:13 balewski Exp $
+ * $Id: StTrigOnlyPanitkinMaker.h,v 1.2 2014/08/06 11:43:03 jeromel Exp $
  ************************************************************
  Goal: wrap EEMC-Panitkin code to be used in the BFC
  *
@@ -34,7 +34,7 @@ class StTrigOnlyPanitkinMaker : public StMaker{
   
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StTrigOnlyPanitkinMaker.h,v 1.1 2005/06/17 17:41:13 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StTrigOnlyPanitkinMaker.h,v 1.2 2014/08/06 11:43:03 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -45,6 +45,9 @@ class StTrigOnlyPanitkinMaker : public StMaker{
 
 
 // $Log: StTrigOnlyPanitkinMaker.h,v $
+// Revision 1.2  2014/08/06 11:43:03  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2005/06/17 17:41:13  balewski
 // *** empty log message ***
 //

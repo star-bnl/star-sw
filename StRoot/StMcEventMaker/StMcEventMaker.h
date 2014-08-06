@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.27 2013/03/25 23:51:22 perev Exp $
+ * $Id: StMcEventMaker.h,v 1.28 2014/08/06 11:43:26 jeromel Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.28  2014/08/06 11:43:26  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.27  2013/03/25 23:51:22  perev
  * Mustafa.Pxl corrs
  *
@@ -121,7 +124,7 @@ public:
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.27 2013/03/25 23:51:22 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.28 2014/08/06 11:43:26 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}	
     
 public:
 

@@ -22,7 +22,7 @@ class StFgtClusterPlotter : public StFgtQaMaker {
    Int_t Finish();
    //   Bool_t checkPulse(StFgtHit* pClus);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterPlotter.h,v 1.6 2012/03/20 17:57:21 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterPlotter.h,v 1.7 2014/08/06 11:43:12 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
  protected:
    ofstream* outTxtFile;
    ofstream* outTxtFileR;

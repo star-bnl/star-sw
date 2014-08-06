@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.h,v 1.14 2005/10/26 14:07:32 jcs Exp $
+// $Id: StFtpcSlowSimMaker.h,v 1.15 2014/08/06 11:43:17 jeromel Exp $
 // $Log: StFtpcSlowSimMaker.h,v $
+// Revision 1.15  2014/08/06 11:43:17  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.14  2005/10/26 14:07:32  jcs
 // Calculate  microsecondsPerTimebin from RHIC clock frequency if available,
 // otherwise use default from database
@@ -92,7 +95,7 @@ class TH2F;
 
 class StFtpcSlowSimMaker : public StMaker {
  private:
-  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.14 2005/10/26 14:07:32 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.15 2014/08/06 11:43:17 jeromel Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
@@ -133,7 +136,7 @@ class StFtpcSlowSimMaker : public StMaker {
   virtual Int_t  Make();
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.14 2005/10/26 14:07:32 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.15 2014/08/06 11:43:17 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
   ClassDef(StFtpcSlowSimMaker,0)   //StAF chain virtual base class for Makers
 };

@@ -12,10 +12,13 @@
  *  The pVPD ntuple and TOFp match TTree are used for calibration purposes.
  *  This maker is not supposed to run in regular BFC production chains.
  *
- * $Id: StTofpNtupleMaker.h,v 1.2 2004/04/01 19:19:00 dongx Exp $
+ * $Id: StTofpNtupleMaker.h,v 1.3 2014/08/06 11:43:48 jeromel Exp $
  */    
 /*  -------------------------------------------------------------------------
  * $Log: StTofpNtupleMaker.h,v $
+ * Revision 1.3  2014/08/06 11:43:48  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.2  2004/04/01 19:19:00  dongx
  * update for year4 run
  *
@@ -102,7 +105,7 @@ private:
   TNtuple *mHitPosTuple; //! Hit position data
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpNtupleMaker.h,v 1.2 2004/04/01 19:19:00 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpNtupleMaker.h,v 1.3 2014/08/06 11:43:48 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StTofpNtupleMaker,1)
 };

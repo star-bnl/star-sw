@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.20 2013/02/20 01:32:27 avossen Exp $
+//   $Id: StFgtClusterMaker.h,v 1.21 2014/08/06 11:43:09 jeromel Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.21  2014/08/06 11:43:09  jeromel
+//   Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 //   Revision 1.20  2013/02/20 01:32:27  avossen
 //   added n strips before and after cluster
 //
@@ -90,7 +93,7 @@ The simple cluster algorithm is the default one. The max cluster only selects on
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.20 2013/02/20 01:32:27 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.21 2014/08/06 11:43:09 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  protected:
   StFgtIClusterAlgo* mClusterAlgoPtr;

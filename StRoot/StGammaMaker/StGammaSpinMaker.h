@@ -28,7 +28,7 @@ class StGammaSpinMaker: public StMaker
         ~StGammaSpinMaker();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaSpinMaker.h,v 1.3 2008/12/03 15:36:16 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaSpinMaker.h,v 1.4 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init() { return StMaker::Init(); }

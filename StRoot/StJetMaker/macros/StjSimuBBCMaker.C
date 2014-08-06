@@ -30,7 +30,7 @@ public:
   virtual ~StjSimuBBCMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjSimuBBCMaker.C,v 1.2 2008/11/11 23:56:59 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjSimuBBCMaker.C,v 1.3 2014/08/06 11:43:24 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 private:
 

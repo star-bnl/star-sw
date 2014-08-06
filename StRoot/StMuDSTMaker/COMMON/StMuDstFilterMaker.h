@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.h,v 1.10 2011/04/08 01:25:50 fisyak Exp $
+ * $Id: StMuDstFilterMaker.h,v 1.11 2014/08/06 11:43:31 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstFilterMaker_hh
@@ -38,7 +38,7 @@ class StMuDstFilterMaker : public StMaker {
     int Make();   ///< Filters the muDst and writes the filtered version
     int Finish(); ///< Writes and closes the output file
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.10 2011/04/08 01:25:50 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.11 2014/08/06 11:43:31 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
 	return cvs;
     }
   
@@ -98,6 +98,9 @@ class StMuDstFilterMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.h,v $
+ * Revision 1.11  2014/08/06 11:43:31  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.10  2011/04/08 01:25:50  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *

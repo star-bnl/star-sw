@@ -101,7 +101,7 @@ public:
 	struct fps_evt_hdr_t meta_hdr ;
 
 	const char *GetCVS() const {
-		static const char cvs[] = "Tag $Name:  $Id built "__DATE__" "__TIME__ ; return cvs ;
+		static const char cvs[] = "Tag $Name:  $Id built " __DATE__ " " __TIME__ ; return cvs ;
 	}
 } ;
 

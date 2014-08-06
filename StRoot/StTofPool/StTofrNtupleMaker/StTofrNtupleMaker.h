@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.h,v 1.4 2008/05/06 18:42:09 dongx Exp $
+ * $Id: StTofrNtupleMaker.h,v 1.5 2014/08/06 11:43:48 jeromel Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.h,v $
+ * Revision 1.5  2014/08/06 11:43:48  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.4  2008/05/06 18:42:09  dongx
  * Updated for Run8 analysis
  *
@@ -118,7 +121,7 @@ private:
   TNtuple *mHitPosTuple; //! Hit position data
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofrNtupleMaker.h,v 1.4 2008/05/06 18:42:09 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofrNtupleMaker.h,v 1.5 2014/08/06 11:43:48 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StTofrNtupleMaker,2)
 };

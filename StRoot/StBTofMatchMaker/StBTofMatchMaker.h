@@ -6,11 +6,14 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.11 2012/05/07 14:11:16 fisyak Exp $
+ * $Id: StBTofMatchMaker.h,v 1.12 2014/08/06 11:42:53 jeromel Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.12  2014/08/06 11:42:53  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.11  2012/05/07 14:11:16  fisyak
  * Keep btofGeometry in const area for future use
  *
@@ -327,7 +330,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.11 2012/05/07 14:11:16 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.12 2014/08/06 11:42:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };

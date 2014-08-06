@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowReCentMaker.h,v 1.1 2009/11/24 19:29:16 posk Exp $
+// $Id: StFlowReCentMaker.h,v 1.2 2014/08/06 11:43:14 jeromel Exp $
 //
 // Authors: Art Poskanzer, Sep 2009
 //
@@ -37,7 +37,7 @@ public:
   Int_t    Finish();
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowReCentMaker.h,v 1.1 2009/11/24 19:29:16 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowReCentMaker.h,v 1.2 2014/08/06 11:43:14 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;}
 
 private:
@@ -80,6 +80,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowReCentMaker.h,v $
+// Revision 1.2  2014/08/06 11:43:14  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.1  2009/11/24 19:29:16  posk
 // Added reCenter to remove acceptance correlations as an option instead of phiWgt.
 //

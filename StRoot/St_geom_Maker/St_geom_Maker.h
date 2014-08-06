@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.h,v 1.8 2003/09/10 19:47:47 perev Exp $
+// $Id: St_geom_Maker.h,v 1.9 2014/08/06 11:43:55 jeromel Exp $
 // $Log: St_geom_Maker.h,v $
+// Revision 1.9  2014/08/06 11:43:55  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.8  2003/09/10 19:47:47  perev
 // ansi corrs
 //
@@ -78,7 +81,7 @@
 
 class St_geom_Maker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.8 2003/09/10 19:47:47 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.9 2014/08/06 11:43:55 jeromel Exp $";
  
  protected:
    virtual St_DataSet  *FindDataSet (const char* logInput,
@@ -93,7 +96,7 @@ class St_geom_Maker : public StMaker {
    virtual const Char_t *GetGeomFileName(){ return GetName();}
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_geom_Maker.h,v 1.8 2003/09/10 19:47:47 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_geom_Maker.h,v 1.9 2014/08/06 11:43:55 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(St_geom_Maker,0)   //StAF chain virtual base class for Makers
 };

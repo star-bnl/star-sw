@@ -48,7 +48,7 @@ class StEEmcMixerMaker : public  StMaker {
   StEmcCollection *getMixerEmcCollection() { return mMixerEmcCollection; }
   
   
-  virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcMixerMaker.h,v 1.3 2009/02/05 20:06:52 ogrebeny Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcMixerMaker.h,v 1.4 2014/08/06 11:43:04 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
   ClassDef(StEEmcMixerMaker,0) 
  };
@@ -56,8 +56,11 @@ class StEEmcMixerMaker : public  StMaker {
     
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.h,v 1.3 2009/02/05 20:06:52 ogrebeny Exp $
+// $Id: StEEmcMixerMaker.h,v 1.4 2014/08/06 11:43:04 jeromel Exp $
 // $Log: StEEmcMixerMaker.h,v $
+// Revision 1.4  2014/08/06 11:43:04  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.3  2009/02/05 20:06:52  ogrebeny
 // Changed StEEmcDbMaker -> StEEmcDb
 //

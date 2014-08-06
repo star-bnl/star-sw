@@ -114,7 +114,7 @@ public:
 	int get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt) ;
 
 	const char *GetCVS() const {	// Offline
-                static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+                static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
 

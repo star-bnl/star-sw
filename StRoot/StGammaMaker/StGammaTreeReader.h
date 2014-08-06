@@ -41,7 +41,7 @@ class StGammaTreeReader : public StMaker
   void Test();
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StGammaTreeReader.h,v 1.2 2008/03/07 18:02:25 jwebb Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StGammaTreeReader.h,v 1.3 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__ ;
     return cvs;
   }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRandyTopMapMaker.h,v 1.5 2003/09/10 19:47:19 perev Exp $
+ * $Id: StRandyTopMapMaker.h,v 1.6 2014/08/06 11:43:19 jeromel Exp $
  *
  * Author: Randy Wells, Ohio State
  ***************************************************************************
@@ -28,7 +28,7 @@ public:
     virtual Int_t  Finish();
     
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StRandyTopMapMaker.h,v 1.5 2003/09/10 19:47:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StRandyTopMapMaker.h,v 1.6 2014/08/06 11:43:19 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
     
 private:
     //    Bool_t drawinit;

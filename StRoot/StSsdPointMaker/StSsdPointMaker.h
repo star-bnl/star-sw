@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.36 2008/04/15 21:05:23 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.37 2014/08/06 11:43:43 jeromel Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.37  2014/08/06 11:43:43  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.36  2008/04/15 21:05:23  bouchet
 // remove latest change
 //
@@ -272,7 +275,7 @@ class StSsdPointMaker : public StMaker {
   Float_t ratioP[20][16];
   Float_t ratioN[20][16];
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.36 2008/04/15 21:05:23 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.37 2014/08/06 11:43:43 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
   ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
     };

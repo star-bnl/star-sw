@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimulatorMaker
 #define STAR_StEmcSimulatorMaker
 
-// $Id: StEmcSimulatorMaker.h,v 1.27 2008/11/17 21:35:21 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.28 2014/08/06 11:43:07 jeromel Exp $
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
@@ -134,7 +134,7 @@ public:
     StBemcTables*           getTables() { return mTables; }
 
     virtual const char*     GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.27 2008/11/17 21:35:21 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.28 2014/08/06 11:43:07 jeromel Exp $ built " __DATE__ " " __TIME__ ;
         return cvs;
     }
 
@@ -145,6 +145,9 @@ public:
 
 /*****************************************************************************
  * $Log: StEmcSimulatorMaker.h,v $
+ * Revision 1.28  2014/08/06 11:43:07  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.27  2008/11/17 21:35:21  kocolosk
  * store GEANT dE in MuDST raw hit energy data member
  *

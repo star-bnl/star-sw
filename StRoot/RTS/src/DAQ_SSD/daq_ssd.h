@@ -69,7 +69,7 @@ public:
 	}
 
 	const char *GetCVS() const {	// Offline
-                static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+                static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
 	}
 
 } ;

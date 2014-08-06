@@ -38,7 +38,7 @@ class StDAQMaker : public StIOInterFace {
   void SetBranch(const Char_t*,const Char_t*,const Char_t*, const Option_t*){};
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.13 2009/10/07 23:21:56 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.14 2014/08/06 11:42:55 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StDAQMaker, 0)   //
 };

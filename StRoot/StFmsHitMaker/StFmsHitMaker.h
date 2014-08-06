@@ -33,7 +33,7 @@ public:
   Int_t  Finish();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFmsHitMaker.h,v 1.1 2010/02/02 21:29:13 jgma Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFmsHitMaker.h,v 1.2 2014/08/06 11:43:15 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
   StFmsDbMaker*      mFmsDbMaker;    //! DB maker provides FMS geometry and calibration data

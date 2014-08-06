@@ -127,7 +127,7 @@ public:
   void setFloor( Float_t relative_yield, Float_t width ){ mFloorParams[0]=relative_yield; mFloorParams[1]=width; }
 
     virtual const char* GetCVS() const
-	        {static const char cvs[]="Tag $Name:  $ $Id: StMyClusterMaker.h,v 1.5 2010/08/26 22:49:25 ogrebeny Exp $ built "__DATE__" "__TIME__; return cvs;}
+	        {static const char cvs[]="Tag $Name:  $ $Id: StMyClusterMaker.h,v 1.6 2014/08/06 11:42:59 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 protected:
 

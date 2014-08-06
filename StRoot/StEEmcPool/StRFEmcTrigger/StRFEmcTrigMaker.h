@@ -1,6 +1,6 @@
 // *-- Author : Renee Fatemi
 // 
-// $Id: StRFEmcTrigMaker.h,v 1.4 2004/08/18 19:52:49 balewski Exp $
+// $Id: StRFEmcTrigMaker.h,v 1.5 2014/08/06 11:43:02 jeromel Exp $
 
 
 #ifndef STAR_StRFEmcTrigMaker
@@ -113,7 +113,7 @@ class StRFEmcTrigMaker : public StMaker {
   void requireBBC(){ activeBBC=true;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StRFEmcTrigMaker.h,v 1.4 2004/08/18 19:52:49 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StRFEmcTrigMaker.h,v 1.5 2014/08/06 11:43:02 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -124,6 +124,9 @@ class StRFEmcTrigMaker : public StMaker {
 
 
 // $Log: StRFEmcTrigMaker.h,v $
+// Revision 1.5  2014/08/06 11:43:02  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.4  2004/08/18 19:52:49  balewski
 // works for BBC
 //

@@ -1,5 +1,8 @@
-// $Id: St2eemcFeeRawMaker.h,v 1.4 2009/02/04 20:33:28 ogrebeny Exp $
+// $Id: St2eemcFeeRawMaker.h,v 1.5 2014/08/06 11:43:04 jeromel Exp $
 // $Log: St2eemcFeeRawMaker.h,v $
+// Revision 1.5  2014/08/06 11:43:04  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.4  2009/02/04 20:33:28  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //
@@ -41,7 +44,7 @@ class EEmcEventHeader;
 
 class St2eemcFeeRawMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: St2eemcFeeRawMaker.h,v 1.4 2009/02/04 20:33:28 ogrebeny Exp $";
+  // static Char_t  m_VersionCVS = "$Id: St2eemcFeeRawMaker.h,v 1.5 2014/08/06 11:43:04 jeromel Exp $";
   TTree *moutTTree; ///< output TTree
   StEEmcDb *meeDb; ///< to assess DB
   EEfeeRawEvent *meveTT; ///< output event
@@ -59,7 +62,7 @@ class St2eemcFeeRawMaker : public StMaker {
   virtual Int_t InitRun  (int runumber);///< to change time stamp in TTree
   virtual Int_t  Make();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2eemcFeeRawMaker.h,v 1.4 2009/02/04 20:33:28 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2eemcFeeRawMaker.h,v 1.5 2014/08/06 11:43:04 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   

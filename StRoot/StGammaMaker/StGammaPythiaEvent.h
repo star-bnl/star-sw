@@ -25,7 +25,7 @@ class StGammaPythiaEvent : public StPythiaEvent
         ~StGammaPythiaEvent() {}
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaPythiaEvent.h,v 1.5 2009/06/18 05:49:41 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaPythiaEvent.h,v 1.6 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
         
         void Clear(Option_t* option = "");
         

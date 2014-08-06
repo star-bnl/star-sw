@@ -30,7 +30,7 @@ class StGammaCandidateMaker: public StMaker
         ~StGammaCandidateMaker();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidateMaker.h,v 1.10 2009/06/17 06:21:45 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidateMaker.h,v 1.11 2014/08/06 11:43:17 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();

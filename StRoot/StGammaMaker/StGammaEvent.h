@@ -43,7 +43,7 @@ class StGammaEvent: public TObject
         ~StGammaEvent();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaEvent.h,v 1.15 2011/01/11 18:33:20 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaEvent.h,v 1.16 2014/08/06 11:43:18 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs; }
         
         void Clear(Option_t *opts= "");
         

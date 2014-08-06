@@ -1,5 +1,5 @@
 
-// $Id: St2011ZMaker.h,v 1.4 2012/08/21 17:40:09 stevens4 Exp $
+// $Id: St2011ZMaker.h,v 1.5 2014/08/06 11:43:41 jeromel Exp $
 
 #ifndef STAR_St2011ZMaker
 #define STAR_St2011ZMaker
@@ -63,7 +63,7 @@ class St2011ZMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011ZMaker.h,v 1.4 2012/08/21 17:40:09 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011ZMaker.h,v 1.5 2014/08/06 11:43:41 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -74,6 +74,9 @@ class St2011ZMaker : public StMaker {
 
 
 // $Log: St2011ZMaker.h,v $
+// Revision 1.5  2014/08/06 11:43:41  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.4  2012/08/21 17:40:09  stevens4
 // Revert to previous version
 //

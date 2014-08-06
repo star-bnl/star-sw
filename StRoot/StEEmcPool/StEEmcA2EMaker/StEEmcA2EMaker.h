@@ -132,7 +132,7 @@ public:
   void scale(Float_t s){ mScale=s; }
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StEEmcA2EMaker.h,v 1.7 2012/12/21 00:34:15 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StEEmcA2EMaker.h,v 1.8 2014/08/06 11:42:59 jeromel Exp $ built " __DATE__ " " __TIME__; return cvs;}
 
 protected:
   

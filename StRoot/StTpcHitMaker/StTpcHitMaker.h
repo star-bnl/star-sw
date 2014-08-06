@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.18 2014/06/26 21:31:42 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.19 2014/08/06 11:43:50 jeromel Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.19  2014/08/06 11:43:50  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.18  2014/06/26 21:31:42  fisyak
  * New Tpc Alignment, v632
  *
@@ -158,7 +161,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
 
   // cvs
   virtual const char *GetCVS() const    {
-    static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
   }
   ClassDef(StTpcHitMaker, 1)    //StTpcHitMaker - class to fille the StEvewnt from DAQ reader
 };

@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.19 2012/03/15 23:37:36 perev Exp $
+ * $Id: StMiniMcMaker.h,v 1.20 2014/08/06 11:43:27 jeromel Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,9 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.20  2014/08/06 11:43:27  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.19  2012/03/15 23:37:36  perev
  * Uncorrected globals added(Chris)
  *
@@ -95,6 +98,9 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.20  2014/08/06 11:43:27  jeromel
+ * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+ *
  * Revision 1.19  2012/03/15 23:37:36  perev
  * Uncorrected globals added(Chris)
  *
@@ -174,7 +180,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.19 2012/03/15 23:37:36 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.20 2014/08/06 11:43:27 jeromel Exp $ plus header comments for the macros
  *
  */
 
@@ -248,7 +254,7 @@ class StMiniMcMaker : public StMaker{
   Int_t Make();
   Int_t Finish();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.19 2012/03/15 23:37:36 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.20 2014/08/06 11:43:27 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   //---- SETS -------
 

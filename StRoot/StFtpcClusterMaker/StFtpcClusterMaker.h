@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.31 2009/08/04 08:37:28 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.32 2014/08/06 11:43:16 jeromel Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.32  2014/08/06 11:43:16  jeromel
+// Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
+//
 // Revision 1.31  2009/08/04 08:37:28  jcs
 // When the flaser option is included in the bfc, the 'perfect' gain table and
 // adjustAverageWest = adjustAverageEast = 0.0, will be used for cluster finding
@@ -151,7 +154,7 @@ class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
    Bool_t laserRun;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.31 2009/08/04 08:37:28 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.32 2014/08/06 11:43:16 jeromel Exp $";
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -218,7 +221,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.31 2009/08/04 08:37:28 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.32 2014/08/06 11:43:16 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker,0)   //StAF chain virtual base class for Makers
 };

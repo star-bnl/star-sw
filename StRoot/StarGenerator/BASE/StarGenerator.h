@@ -159,7 +159,7 @@ class StarGenerator : public StMaker
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.4 2014/02/18 23:30:26 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.5 2014/08/06 11:43:57 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
  private:

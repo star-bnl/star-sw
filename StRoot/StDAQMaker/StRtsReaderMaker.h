@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.h,v 1.9 2009/10/13 15:51:48 fine Exp $
+ * $Id: StRtsReaderMaker.h,v 1.10 2014/08/06 11:42:55 jeromel Exp $
  * StRtsReaderMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -47,7 +47,7 @@ class StRtsReaderMaker:public StMaker
   // cvs
   virtual const char *GetCVS() const
     {
-      static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+      static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
     }
   
   ClassDef(StRtsReaderMaker, 0)    //StRtsReaderMaker - class to fill the StEvent from DAQ reader
