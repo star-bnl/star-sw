@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.35 2013/03/25 23:33:04 perev Exp $
+ * $Id: StMcTrack.cc,v 2.36 2014/08/06 19:08:49 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.36  2014/08/06 19:08:49  perev
+ * Warnoff
+ *
  * Revision 2.35  2013/03/25 23:33:04  perev
  * Mustafa.Pxl corrs
  *
@@ -83,8 +86,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.35 2013/03/25 23:33:04 perev Exp $
+ * $Id: StMcTrack.cc,v 2.36 2014/08/06 19:08:49 perev Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.36  2014/08/06 19:08:49  perev
+ * Warnoff
+ *
  * Revision 2.35  2013/03/25 23:33:04  perev
  * Mustafa.Pxl corrs
  *
@@ -223,7 +229,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.35 2013/03/25 23:33:04 perev Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.36 2014/08/06 19:08:49 perev Exp $";
 
 ClassImp(StMcTrack);
 
@@ -405,7 +411,7 @@ void StMcTrack::Print(Option_t *option) const {
   Double_t y = rapidity();
   if (TMath::Abs(y) > 999.999) y = TMath::Sign(999.999, y);
     cout << 
-      Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3i%6i%3i%3i%6i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i",
+      Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3li%6li%3li%3li%6li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li%3li",
 	   Name.Data(),
 	   fourMomentum().x(), fourMomentum().y(), fourMomentum().z(), fourMomentum().t(), 
 	   pt(),

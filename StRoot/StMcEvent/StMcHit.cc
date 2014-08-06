@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.12 2011/10/17 00:24:00 fisyak Exp $
+ * $Id: StMcHit.cc,v 2.13 2014/08/06 19:07:34 perev Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.13  2014/08/06 19:07:34  perev
+ * Warnoff
+ *
  * Revision 2.12  2011/10/17 00:24:00  fisyak
  * Add time of flight for hits
  *
@@ -48,7 +51,7 @@
  **************************************************************************/
 #include "StMcHit.hh"
 #include "TString.h"
-static const Char_t rcsid[] = "$Id: StMcHit.cc,v 2.12 2011/10/17 00:24:00 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StMcHit.cc,v 2.13 2014/08/06 19:07:34 perev Exp $";
 ClassImp(StMcHit);
     
 int StMcHit::operator==(const StMcHit& h) const
@@ -60,7 +63,7 @@ int StMcHit::operator==(const StMcHit& h) const
 ostream& operator<<(ostream& os, const StMcHit& h)
 {
     if (h.parentTrack())
-      os << "Key, parent Key : " << Form("%5i/%5i",h.key(),h.parentTrack()->key()) << endl;
+      os << "Key, parent Key : " << Form("%5i/%5i",(int)h.key(),(int)h.parentTrack()->key()) << endl;
     else 
       os << "Key             : " << Form("%5i/undef",h.key()) << endl;
     os << "Position xyz    : " << Form("%8.2f%8.2f%8.2f",h.position().x(), h.position().y(), h.position().z()) << endl;
