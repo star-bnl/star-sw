@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.135 2014/07/29 14:29:22 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.136 2014/08/06 11:22:01 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -204,7 +204,7 @@
     $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
 
-    if ( $G77 eq "gfortran" ){
+    if ( $G77 =~ m/gfortran/ ){
 	# JL: For gfortran version <  4.3, -lg2c may still be needed for ensuring 
 	#   symbol resolve but this is a messy hack and should likely be avoided.
 	#   The below line was tried and would not work in those cases.
@@ -528,7 +528,7 @@
 	$CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
 	$CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
       
-	if ( $G77 eq "gfortran" ){
+	if ( $G77 =~ m/gfortran/ ){
 	  # TODO: Possible cleanup to do between GFORTRAN and CERNLIB_LINUX
 	  $CERNLIB_FPPFLAGS .= " -DCERNLIB_GFORTRAN";
 	}
@@ -617,7 +617,7 @@
 	    $FEXTEND = $G77EXTEND;
 	}
 
-	if ( $G77 eq "gfortran"){
+	if ( $G77 =~ m/gfortran/ ){
 #	  $LIBIFCPATH  = `$FC -print-file-name=libgfortranbegin.a`; chomp($LIBIFCPATH);
 #	  $FLIBS     =  $LIBFRTBEGIN;
 #	  $FLIBS    .= " -lgfortran";
