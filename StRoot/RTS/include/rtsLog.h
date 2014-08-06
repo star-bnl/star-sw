@@ -203,8 +203,8 @@ INLINE_HACK void rtsLogLevel(char *level)
                 else if((tonkoLogLevel>3) && (*yada == 'E')) ; \
                 else if((tonkoLogLevel>4) && (*yada == 'O')) ; \
                 else { \
-			logMsg(""SEV": " __FILE__ " [line %d]: "STRING"\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ;\
-			sbLOG(""SEV": " __FILE__ " [line %d]: "STRING"\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ;\
+			logMsg("" SEV ": " __FILE__ " [line %d]: " STRING "\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ;\
+			sbLOG("" SEV ": " __FILE__ " [line %d]: " STRING "\n",__LINE__,(unsigned int)A1,(unsigned int)A2,(unsigned int)A3,(unsigned int)A4,(unsigned int)A5) ;\
 		} \
 	} while(0) \
 
@@ -234,7 +234,7 @@ INLINE_HACK void rtsLogLevel(char *level)
                 else if((tonkoLogLevel>3) && (*yada == 'E')) ; \
                 else if((tonkoLogLevel>4) && (*yada == 'O')) ; \
                 else { \
-                        rtsLogUnix_v("COLOR"SEV": " __FILE__ " [line %d]: "STRING"\n" , __LINE__ , ##ARGS) ;\
+                        rtsLogUnix_v("COLOR" SEV ": " __FILE__ " [line %d]: " STRING "\n" , __LINE__ , ##ARGS) ;\
 		} \
 	} while(0) \
 
@@ -248,7 +248,7 @@ INLINE_HACK void rtsLogLevel(char *level)
                 else if((tonkoLogLevel>3) && (*yada == 'E')) ; \
                 else if((tonkoLogLevel>4) && (*yada == 'O')) ; \
                 else { \
-                        rtsLogUnix_v(""SEV": " __FILE__ " [line %d]: "STRING"\n" , __LINE__ , ##ARGS) ;\
+                        rtsLogUnix_v("" SEV ": " __FILE__ " [line %d]: " STRING "\n" , __LINE__ , ##ARGS) ;\
 		} \
 	} while(0) \
 
