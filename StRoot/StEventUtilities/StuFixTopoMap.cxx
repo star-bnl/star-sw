@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuFixTopoMap.cxx,v 1.5 2014/03/16 16:06:52 fisyak Exp $
+ * $Id: StuFixTopoMap.cxx,v 1.6 2014/08/06 19:03:02 perev Exp $
  *
  * Author: Thomas Ullrich, May 2000
  ***************************************************************************
@@ -116,7 +116,7 @@ bool StuFixTopoMap(StTrack* track)
     //
     // Different coding for FTPC and TPC/SVT/SSD tracks
     //
-    unsigned int i, k, s;
+    unsigned int i, k;
     if (info->numberOfReferencedPoints(kFtpcWestId) ||
         info->numberOfReferencedPoints(kFtpcEastId)) {
         
