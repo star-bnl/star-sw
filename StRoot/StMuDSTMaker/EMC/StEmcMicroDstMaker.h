@@ -57,6 +57,7 @@ class StEmcMicroDstMaker : public StMaker
     StEmcFilter      *mGFilter;
     
     StEmcMicroUtil   *mMicroUtil;
+		StEmcMicroDstMaker *mOldMaker;
     
     TChain           *mMicroEventChain;
     Int_t            mNMicroEvents;
@@ -71,7 +72,7 @@ class StEmcMicroDstMaker : public StMaker
     Bool_t           mDoSaveEmc;
     Bool_t           mDoSaveFpd;
     Bool_t           mDoSaveV0;
-    
+		    
     Int_t            initMicroEventFile();
   
   private:
@@ -86,7 +87,7 @@ class StEmcMicroDstMaker : public StMaker
             
     const char*        getOutputDir()          { return mEventDir.Data(); }  ///< Return output directory where micro DST's are being saved
     const char*        getCurrentFile()        { return mEventFile.Data(); } ///< Return currect .event.root file 
-    
+     
     StEmcFilter*       getPrimaryFilter()      { return mPFilter; }          ///< Return Event and primary tracks filter
     StEmcFilter*       getGlobalFilter()       { return mGFilter; }          ///< Return Global tracks filter
     StEmcMicroEvent*   getMicroEvent()         { return mMicroEvent; }       ///< Return current StEmcMicroEvent
@@ -101,6 +102,7 @@ class StEmcMicroDstMaker : public StMaker
     void               setSaveFpd(Bool_t a)       { mDoSaveFpd = a; }           ///< Save or don't FPD data. Default is kTRUE.
     void               setSaveV0(Bool_t a)        { mDoSaveV0 = a; }           ///< Save or don't V0. Default is kTRUE.
     void               setStart(Int_t a)          { mStart = a; }               ///< Set first event to be read.
+    void               setOldMaker(StEmcMicroDstMaker* a) { mOldMaker = a; }    ///< Set Old Maker.
     
     void               addMicroEventFile(char*);                             ///< Add EMC micro DST file to read
     

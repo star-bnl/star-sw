@@ -1,5 +1,8 @@
-// $Id: StXiController.cxx,v 3.4 2001/05/04 20:15:15 genevb Exp $
+// $Id: StXiController.cxx,v 3.5 2002/04/30 16:02:48 genevb Exp $
 // $Log: StXiController.cxx,v $
+// Revision 3.5  2002/04/30 16:02:48  genevb
+// Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+//
 // Revision 3.4  2001/05/04 20:15:15  genevb
 // Common interfaces and reorganization of components, add MC event info
 //
@@ -146,12 +149,36 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
       for(mcXiMapIter mcXiMapIt = mcXiBounds.first;
 		      mcXiMapIt != mcXiBounds.second; ++mcXiMapIt) {
         rcXiPartner = (*mcXiMapIt).second;
+        float x, y, z, delta, xd, yd, zd;
+        x = mcVert->position().x();
+        y = mcVert->position().y();
+        z = mcVert->position().z();
+        xd = x - rcXiPartner->position().x();
+        yd = y - rcXiPartner->position().y();
+        zd = z - rcXiPartner->position().z();
+        delta = xd*xd + yd*yd + zd*zd;
+
+        //Now loop over the bounds
+        for(mcXiMapIter mcXiMapIt = mcXiBounds.first;
+                        mcXiMapIt != mcXiBounds.second; ++mcXiMapIt) {
+          StXiVertex *temp = (*mcXiMapIt).second;
+          if (temp != rcXiPartner) {
+            xd = x - temp->position().x();
+            yd = y - temp->position().y();
+            zd = z - temp->position().z();
+            float delta2 = xd*xd + yd*yd + zd*zd;
+            if (delta2 < delta) { rcXiPartner = temp; delta = delta2; }
+          }
+        }
+        x = rcXiPartner->position().x();
+        y = rcXiPartner->position().y();
+        z = rcXiPartner->position().z();
         // stupid way
         for(Int_t i = 0; i <= GetN(); i++) {
           StXiMuDst* tmpXi = (StXiMuDst*) dataArray->At(i);
-          if( fabs(rcXiPartner->position().x()-tmpXi->decayVertexXiX()) < 0.00001 &&
-              fabs(rcXiPartner->position().y()-tmpXi->decayVertexXiY()) < 0.00001 &&
-              fabs(rcXiPartner->position().z()-tmpXi->decayVertexXiZ()) < 0.00001 )
+          if( fabs(x - tmpXi->decayVertexXiX()) < 0.00001 &&
+              fabs(y - tmpXi->decayVertexXiY()) < 0.00001 &&
+              fabs(z - tmpXi->decayVertexXiZ()) < 0.00001 )
           { indexRecoArray = i; break; }
         }
       }

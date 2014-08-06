@@ -104,7 +104,7 @@ TTree---
 In the above, <tt>e1</tt>, <tt>e2</tt>, etc. would be data members of the
 <tt>Event</tt> component class.<p>
 
-The eventual goal is to have each of the eleven components written to
+A possible goal is to have some components written to
 separate files. This would allow someone interested in looking at
 V0's to need only the Event and V0 files available to them, as TTrees
 support the ability to read only the tree branches requested without
@@ -158,15 +158,20 @@ a different number of these than reconstructed V0 vertices.<p>
 <dd>Monte Carlo storage class for Xi vertices, inheriting all functionality
 from the <b>StODMc</b> class which it shares with <b>StKinkMc</b>.<p>
 
-<dt>Kink Monte Carlo Information (<b>StKinkMc</b> )
+<dt>Kink Monte Carlo Information (<b>StKinkMc</b>)
 <dd>Monte Carlo storage class for Kink vertices, also inheriting all
 functionality from <b>StODMc</b>.<p>
 
-<dt>Monte Carlo Association Information (<b>StStrangeAssoc</b> )
+<dt>Monte Carlo Association Information (<b>StStrangeAssoc</b>)
 <dd>The <b>StStrangeAssoc</b> class links matching reconstructed and
 Monte Carlo vertices, and there exist only as many as the number of
 matches between the two sets. There will be an association component
 for each Monte Carlo component<p>
+
+<dt>Cut Information (<b>TCut</b>)
+<dd>Cuts are stored in a generic Root class called <b>TCut</b>. Each
+cut has a name and value (using the title data member of <b>TCut</b>).
+Usage of the cuts is discussed  <a href="cuts.html">here</a>.
 
 </dl>
 

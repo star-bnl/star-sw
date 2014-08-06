@@ -1,7 +1,10 @@
 /***********************************************************************
  *
- * $Id: StDecayMode.cc,v 3.1 2001/05/04 20:15:13 genevb Exp $
+ * $Id: StDecayMode.cc,v 3.2 2002/04/30 16:02:47 genevb Exp $
  * $Log: StDecayMode.cc,v $
+ * Revision 3.2  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.1  2001/05/04 20:15:13  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -30,30 +33,51 @@ StDecayMode::StDecayMode() {}
 StDecayMode::~StDecayMode() { mInstance=0; }
 
 /*
-11  K+ -> Mu Nu        5 4  (mu+)        |9
-    K+ -> Pi+ Pi0      8 7               |15
-    K+ -> Pi+ Pi+ Pi-  8 8 9             |25
-    K+ -> E Nu Pi0     2 4 7 (positron)  |13
-    K+ -> Mu Nu Pi0    5 4 7             |16 
-    K+ -> Pi+ Pi0 Pi0  8 7 7             |22 
+    Note: reassign Gamma Id to -1
+    Decay          Daughter Geant IDs    |sum / product (miss Nu)
+11  K+ -> Mu Nu        5 4  (mu+)        |9 / 20 (5 / 5)
+    K+ -> Pi+ Pi0      8 7               |15 / 56
+    K+ -> Pi+ Pi+ Pi-  8 8 9             |25 / 576
+    K+ -> E Nu Pi0     2 4 7 (positron)  |13 / 42 (9 / 14)
+    K+ -> Mu Nu Pi0    5 4 7             |16 / 140 (12 / 35)
+    K+ -> Pi+ Pi0 Pi0  8 7 7             |22 / 392
 
-12  K- -> Mu Nu        6 4   (mu-)       |10
-    K- -> Pi- Pi0      9 7               |16
-    K- -> Pi+ Pi- Pi-  8 9 9             |26
-    K- -> E Nu Pi0     3 4 7             |14
-    K- -> Mu Nu Pi0    6 4 7             |17
-    K- -> Pi- Pi0 Pi0  9 7 7             |23 
+12  K- -> Mu Nu        6 4   (mu-)       |10 / 24 (6 / 6)
+    K- -> Pi- Pi0      9 7               |16 / 63
+    K- -> Pi+ Pi- Pi-  8 9 9             |26 / 648
+    K- -> E Nu Pi0     3 4 7             |14 / 84 (10 / 21)
+    K- -> Mu Nu Pi0    6 4 7             |17 / 168 (13 / 42)
+    K- -> Pi- Pi0 Pi0  9 7 7             |23 / 441
 
-16  K0 -> Pi+ Pi-    8  9                |17 
-    K0 -> Pi0 Pi0    7  7                |14
+10  K0l -> Pi+ Pi- Pi0    8 9 7          |24 / 504
+    K0l -> Pi+ Mu- Nu     8 6 4          |18 / 192 (14 / 48)
+    K0l -> Pi- Mu+ Nu     9 5 4          |18 / 180 (14 / 45)
+    K0l -> Pi+ E Nu       8 3 4          |15 / 96 (11 / 24)
+    K0l -> Pi- E Nu       9 2 4          |15 / 72 (11 / 18)
+    K0l -> Pi- Pi+        9 8            |17 / 72
+
+16  K0s -> Pi+ Pi-    8  9               |17 
+    K0s -> Pi0 Pi0    7  7               |14
+
+ 8  Pi+ -> Mu+ Nu         5 4            |9 (5)
+    Pi+ -> Mu+ Nu Gamma   5 4 -1         |8 (4)
+    Pi+ -> E Nu           2 4            |6 (2)
+
+ 9  Pi- -> Mu- Nu         6 4            |10 (6)
+    Pi- -> Mu- Nu Gamma   6 4 -1         |9 (5)
+    Pi- -> E Nu           3 4            |7 (3)
+
+ 5  Mu+ -> E Nu Nu        2 4 4          |10 (2,6)
+    Mu+ -> E Nu Nu Gamma  2 4 4 -1       |9 (1,5)
+
+ 6  Mu- -> E Nu Nu        3 4 4          |11 (3,7)
+    Mu- -> E Nu Nu Gamma  3 4 4 -1       |10 (2,6)
 
 18  Lambda -> P Pi-  14 9                |23  
     Lambda -> N Pi0  13 7                |20
 
 26  AntiLambda -> AntiP Pi+  15 8        |23
     AntiLambda -> AntiN Pi0  25 7        |32
-
-
 
 23  Cascade     -> Lambda Pi-      18  9      |27  
 31  AntiCascade -> AntiLambda Pi+  26  8      |34
@@ -71,7 +95,8 @@ Int_t StDecayMode::Process(StMcVertex* mcVertex)
 {
   Int_t ID = 0;
   Int_t ID2 = 1;
-  if (!mcVertex->numberOfDaughters()) return kWrongDecay;
+  if (!mcVertex->numberOfDaughters()) return kWrongDecay;    // No daughters
+  if (mcVertex->geantProcess() != 5) return kWrongDecay; // Not a weak decay
   const StMcTrack* parent = mcVertex->parent();	
 
   if (parent) {
@@ -81,13 +106,19 @@ Int_t StDecayMode::Process(StMcVertex* mcVertex)
     for (StMcTrackIterator DTrackIt = Daughters.begin();
                            DTrackIt != Daughters.end(); DTrackIt++) {
       Int_t daughterId = (*DTrackIt)->geantId();
+      if (daughterId == 1) daughterId = -1;
       ID  += daughterId;
       ID2 *= daughterId;
     }
     
     switch (parentId) {
-      case (11) : return KPlusProcess(ID);
-      case (12) : return KMinusProcess(ID);
+      case ( 5) : return MuPlusProcess(ID);
+      case ( 6) : return MuMinusProcess(ID);
+      case ( 8) : return PiPlusProcess(ID);
+      case ( 9) : return PiMinusProcess(ID);
+      case (10) : return KLongProcess(ID,ID2);
+      case (11) : return KPlusProcess(ID2);
+      case (12) : return KMinusProcess(ID2);
       case (16) : return KShortProcess(ID);
       case (18) : return LambdaProcess(ID);
       case (26) : return AntiLambdaProcess(ID);
@@ -103,13 +134,16 @@ Int_t StDecayMode::Process(StMcVertex* mcVertex)
 Int_t StDecayMode::KPlusProcess(Int_t ID) 
 {
   switch (ID) {
-    case (9)  : return kKPlus2MuNu;
-    case (15) : return kKPlus2PiPlusPiZero;
-    case (25) : return kKPlus2PiPlusPiPlusPiMinus;
-    case (13) : return kKPlus2ENuPiZero;
-    case (16) : return kKPlus2MuNuPiZero;
-    case (22) : return kKPlus2PiPlusPiZeroPiZero;
-    default   : return kWrongDecay;
+    case (  5) :
+    case ( 20) : return kKPlus2MuNu;
+    case ( 56) : return kKPlus2PiPlusPiZero;
+    case (576) : return kKPlus2PiPlusPiPlusPiMinus;
+    case ( 14) :
+    case ( 42) : return kKPlus2ENuPiZero;
+    case ( 35) :
+    case (140) : return kKPlus2MuNuPiZero;
+    case (392) : return kKPlus2PiPlusPiZeroPiZero;
+    default    : return kWrongDecay;
   }
 }
 
@@ -117,23 +151,93 @@ Int_t StDecayMode::KPlusProcess(Int_t ID)
 Int_t StDecayMode::KMinusProcess(Int_t ID)  
 {
   switch (ID) {
-    case (10) : return kKMinus2MuNu;
-    case (16) : return kKMinus2PiMinusPiZero;
-    case (26) : return kKMinus2PiPlusPiMinusPiMinus;
-    case (14) : return kKMinus2ENuPiZero;
-    case (17) : return kKMinus2MuNuPiZero;
-    case (23) : return kKMinus2PiMinusPiZeroPiZero;
-    default   : return kWrongDecay;
+    case (  6) :
+    case ( 24) : return kKMinus2MuNu;
+    case ( 63) : return kKMinus2PiMinusPiZero;
+    case (648) : return kKMinus2PiPlusPiMinusPiMinus;
+    case ( 21) :
+    case ( 84) : return kKMinus2ENuPiZero;
+    case ( 42) :
+    case (168) : return kKMinus2MuNuPiZero;
+    case (441) : return kKMinus2PiMinusPiZeroPiZero;
+    default    : return kWrongDecay;
   }
 }
 
 //____________________________________________________________________
+Int_t StDecayMode::KLongProcess(Int_t ID, Int_t ID2)
+{
+  switch (ID2) {
+    case (504) : return kKLong2PiPlusPiZeroPiMinus;
+    case ( 48) :
+    case (192) : return kKLong2PiPlusMuNu;
+    case ( 45) :
+    case (180) : return kKLong2PiMinusMuNu;
+    case ( 24) :
+    case ( 96) : return kKLong2PiMinusENu;
+    case ( 18) :
+    case ( 72) : return ((ID==17) ? kKLong2PiPlusPiMinus : kKLong2PiPlusENu);
+    default    : return kWrongDecay;
+  }
+}
+//____________________________________________________________________
 Int_t StDecayMode::KShortProcess(Int_t ID)
 {
-  //  Int_t test =  kWrongDecay;
   switch (ID) {
     case (17) : return kKShort2PiPlusPiMinus;
     case (14) : return kKShort2PiZeroPiZero;
+    default   : return kWrongDecay;
+  }
+}
+//____________________________________________________________________
+Int_t StDecayMode::PiPlusProcess(Int_t ID)
+{
+  switch (ID) {
+    case (5) :
+    case (9) : return kPiPlus2MuNu;
+    case (4) :
+    case (8) : return kPiPlus2MuNuGamma;
+    case (2) :
+    case (6) : return kPiPlus2ENu;
+    default  : return kWrongDecay;
+  }
+}
+//____________________________________________________________________
+Int_t StDecayMode::PiMinusProcess(Int_t ID)
+{
+  switch (ID) {
+    case ( 6) :
+    case (10) : return kPiMinus2MuNu;
+    case ( 5) :
+    case ( 9) : return kPiMinus2MuNuGamma;
+    case ( 3) :
+    case ( 7) : return kPiMinus2ENu;
+    default   : return kWrongDecay;
+  }
+}
+//____________________________________________________________________
+Int_t StDecayMode::MuPlusProcess(Int_t ID)
+{
+  switch (ID) {
+    case ( 2) :
+    case ( 6) :
+    case (10) : return kMuPlus2ENuNu;
+    case ( 1) :
+    case ( 5) :
+    case ( 9) : return kMuPlus2ENuNuGamma;
+    default   : return kWrongDecay;
+  }
+}
+//____________________________________________________________________
+Int_t StDecayMode::MuMinusProcess(Int_t ID)
+{
+  switch (ID) {
+    case ( 3) :
+    case ( 7) :
+    case (11) : return kMuMinus2ENuNu;
+    case ( 2) :
+    case ( 6) :
+    case (10) : return kMuMinus2ENuNuGamma;
     default   : return kWrongDecay;
   }
 }
@@ -202,6 +306,11 @@ Int_t StDecayMode::ParentCharge(Int_t mode)
     case (kKPlus2ENuPiZero)              :
     case (kKPlus2MuNuPiZero)             :
     case (kKPlus2PiPlusPiZeroPiZero)     :
+    case (kPiPlus2MuNu)                  :
+    case (kPiPlus2MuNuGamma)             :
+    case (kPiPlus2ENu)                   :
+    case (kMuPlus2ENuNu)                 :
+    case (kMuPlus2ENuNuGamma)            :
     case (kAntiCascade2AntiLambdaPiPlus) :
     case (kAntiOmega2AntiLambdaKPlus)    :
     case (kAntiOmega2AntiCascadePiPlus)  : return  1;
@@ -211,6 +320,11 @@ Int_t StDecayMode::ParentCharge(Int_t mode)
     case (kKMinus2ENuPiZero)             :
     case (kKMinus2MuNuPiZero)            :
     case (kKMinus2PiMinusPiZeroPiZero)   :
+    case (kPiMinus2MuNu)                 :
+    case (kPiMinus2MuNuGamma)            :
+    case (kPiMinus2ENu)                  :
+    case (kMuMinus2ENuNu)                :
+    case (kMuMinus2ENuNuGamma)           :
     case (kCascade2LambdaPiMinus)        :
     case (kOmega2LambdaKMinus)           :
     case (kOmega2CascadePiMinus)         : return -1;

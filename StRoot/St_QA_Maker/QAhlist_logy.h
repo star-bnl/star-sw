@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.8 2002/04/03 21:13:11 lansdell Exp $
+// $Id: QAhlist_logy.h,v 2.9 2002/04/23 01:59:55 genevb Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.9  2002/04/23 01:59:55  genevb
+// Addition of BBC/FPD histos
+//
 // Revision 2.8  2002/04/03 21:13:11  lansdell
 // primary track first, last point residuals now use outerGeometry() for helix parameters
 //
@@ -288,4 +291,30 @@
  "EmcCat4_Point_Energy",
 
  "fcl_chargestepW",
- "fcl_chargestepE"
+ "fcl_chargestepE",
+
+ "QaBbcAdcES",
+ "QaBbcAdcEL",
+ "QaBbcAdcWS",
+ "QaBbcAdcWL",
+ "QaBbcTdcES",
+ "QaBbcTdcEL",
+ "QaBbcTdcWS",
+ "QaBbcTdcWL",
+ "QaFpdTop0",
+ "QaFpdTop1",
+ "QaFpdBottom0",
+ "QaFpdBottom1",
+ "QaFpdSouth0",
+ "QaFpdSouth1",
+ "QaFpdNorth0",
+ "QaFpdNorth1",
+ "QaFpdSums0",
+ "QaFpdSums1",
+ "QaFpdSums2",
+ "QaFpdSums3",
+ "QaFpdSums4",
+ "QaFpdSums5",
+ "QaFpdSums6",
+ "QaFpdSums7"
+

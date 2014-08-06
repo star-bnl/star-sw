@@ -36,8 +36,10 @@ class StBFChain : public StChain {
   TString             *fInFile;   //
   TString             *fFileOut;  //
   TString             *fXdfFile;  //
-  Int_t               FDate;      // floating timestamp date
+  Int_t               FDate;      // floating timestamp date (MaxDateTime)
   Int_t               FTime;      // floating timestamp time (unused)
+  Int_t               FDateS;     // floating timestamp date (DateTime)
+  Int_t               FTimeS;     // floating timestamp time (DateTime)
   
  public:
                        StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE);
@@ -81,10 +83,10 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
    virtual Char_t     *GetOptionString(const Char_t  *);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.25 2002/03/29 01:07:17 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.26 2002/05/18 01:01:27 jeromel Exp $ built "__DATE__" "__TIME__ ; 
        return cvs;
    }
    /// StBFChain control class
-   ClassDef(StBFChain, 2) 
+   ClassDef(StBFChain, 3) 
 };
 #endif

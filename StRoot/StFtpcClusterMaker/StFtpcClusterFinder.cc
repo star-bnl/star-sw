@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.33 2002/04/05 16:45:54 oldi Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.34 2002/04/22 09:53:45 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.34  2002/04/22 09:53:45  jcs
+// correct errors in calculation of cluster phi angle for ftpc east (Frank Simon)
+//
 // Revision 1.33  2002/04/05 16:45:54  oldi
 // Small code clean ups, to be sure that this part is recompiled. It relies
 // on StFtpcTracker/StFtpcPoint.* which were changed.
@@ -1878,8 +1881,8 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
    /* (not yet understood where and why pad numbers were inverted) */
    if (iRow >= 10) {
        Peak->Phi = mDb->radiansPerBoundary() / 2 
-         + (160.0 - Peak->PadPosition)* mDb->radiansPerPad()
-         + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+         + (159.5 - Peak->PadPosition)* mDb->radiansPerPad()
+         - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
          + mDb->radiansPerBoundary())+halfpi;
    }
 

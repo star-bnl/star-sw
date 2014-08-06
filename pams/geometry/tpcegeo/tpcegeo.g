@@ -426,9 +426,9 @@ endblock
 *------------------------------------------------------------------------------
 
 Block TPCM is the Central Membrane placed in TPC
-      material  Copper 
+      material  Mylar 
       Attribute TPCM  seen=1    Colo=4
-      Medium    dense_membrane  SteMax=1  " just to show that we define it "
+*     Medium    dense_membrane  SteMax=1  " just to show that we define it "
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpcg_MembTHK/2
 endblock
 *

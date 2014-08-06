@@ -1,5 +1,14 @@
-// $Id: StStrangeControllerBase.cxx,v 3.8 2001/11/06 19:45:03 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.11 2002/05/20 21:37:12 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.11  2002/05/20 21:37:12  genevb
+// Fixed problem with file names for branches
+//
+// Revision 3.10  2002/05/10 20:59:31  genevb
+// Fixed bug with branch status and changed cuts split level
+//
+// Revision 3.9  2002/04/30 16:02:47  genevb
+// Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+//
 // Revision 3.8  2001/11/06 19:45:03  genevb
 // Prepare for bug fix in Root 3.02/02
 //
@@ -59,6 +68,11 @@ TNamed(strTypeNames[type],"StStrangeController") {
     if (doMc) dstMaker->DoMc();
     dstMaker->Do(dstType);
   }
+
+  increment = 500;
+  max = 1000;
+  bsize=1024000;
+
   tree = 0;
   file = 0;
   selections = 0;
@@ -91,10 +105,6 @@ TNamed(strTypeNames[type],"StStrangeController") {
   entries = 0;
   mcEntries = 0;
   assocEntries = 0;
-
-  increment = 500;
-  max = 2000;
-  bsize=1024000;
 }
 //_____________________________________________________________________________
 StStrangeControllerBase::~StStrangeControllerBase() {
@@ -117,6 +127,9 @@ StStrangeControllerBase* StStrangeControllerBase::Instantiate(Int_t type){
 //_____________________________________________________________________________
 void StStrangeControllerBase::InitReadDst() {
   tree = masterMaker->GetTree();
+  TString statName;
+  (statName = GetName()) += ".*";
+  tree->SetBranchStatus(statName.Data(),1);
   tree->SetBranchAddress(GetName(),&dataArray);
   if (doMc) {
     if (!tree->GetBranch(mcName.Data())) {
@@ -124,6 +137,10 @@ void StStrangeControllerBase::InitReadDst() {
                         ": No MC data available, continuing without." << endm;
       doMc = kFALSE;
     } else {
+      (statName = mcName) += ".*";
+      tree->SetBranchStatus(statName.Data(),1);
+      (statName = assocName) += ".*";
+      tree->SetBranchStatus(statName.Data(),1);
       tree->SetBranchAddress(mcName.Data(),&mcArray);
       tree->SetBranchAddress(assocName.Data(),&assocArray);
     }
@@ -189,9 +206,8 @@ TBranch* StStrangeControllerBase::AssignBranch(const char* name,
   }
   // End of bug workaround.
 
-  static Int_t split=10;
+  static Int_t split=99;
   TBranch* branch = tree->Branch(name,address,bsize,split);
-  if (masterMaker->GetMode() == StrangeWrite) branch->SetFile(file);
   return branch;
 }
 //_____________________________________________________________________________

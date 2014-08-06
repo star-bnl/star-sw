@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.293 2002/03/29 01:07:16 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.295 2002/05/18 01:01:26 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -359,7 +359,8 @@ Bfc_st BFC1[] = {
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
                                                                      "Performs vertex seed finding",kFALSE},
-  {"dEdx"       ,"dEdx","globalChain","globT,tpcDb,TbUtil",          "StdEdxMaker","StdEdxMaker","",kFALSE},
+  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil",         "StdEdxMaker","StdEdxMaker","",kFALSE},
+  {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent,tpcDB"         ,"StEventMaker","StDetectorDbMaker,StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
@@ -849,7 +850,8 @@ StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
   fBFC = new Bfc_st[NoChainOptions1];
   memcpy (fBFC, &BFC1, sizeof (BFC1));
   NoChainOptions = NoChainOptions1;
-  FDate = FTime  = 0;
+  FDate  = FTime  = 0;
+  FDateS = FTimeS = 0;
 }
 
 // Hack onstructor. 
@@ -870,13 +872,15 @@ StBFChain::StBFChain(Int_t mode):
     (void) printf("StBFChain :: Special Constructor called using chain-setup 2\n");
     fBFC = new Bfc_st[NoChainOptions2];
     memcpy (fBFC, &BFC2, sizeof (BFC2));
-    FDate = FTime = 0;  
+    FDate  = FTime  = 0;  
+    FDateS = FTimeS = 0;  
     NoChainOptions= NoChainOptions2;
   } else {
     (void) printf("StBFChain :: Special Constructor called using chain-setup 1\n");
     fBFC = new Bfc_st[NoChainOptions1];
     memcpy (fBFC, &BFC1, sizeof (BFC1));
-    FDate = FTime = 0;      
+    FDate  = FTime  = 0;      
+    FDateS = FTimeS = 0;      
     NoChainOptions= NoChainOptions1;
   }
 }
@@ -1389,7 +1393,11 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	// messages NOW !!!
 	if( ! strncmp( string.Data() ,"dbv",3) && strlen(string.Data()) == 11){
 	  (void) sscanf(string.Data(),"dbv%d",&FDate);
-	  cout << " ... but still ill be considered as a dynamic timestamp " << FDate << endl;
+	  cout << " ... but still will be considered as a dynamic timestamp (MaxEntryTime)" << FDate << endl;
+	}
+	if( ! strncmp( string.Data() ,"sdt",3) && strlen(string.Data()) == 11){
+	  (void) sscanf(string.Data(),"sdt%d",&FDateS);
+	  cout << " ... but still will be considered as a dynamic timestamp (DateTime))" << FDateS << endl;
 	}
       }
     } else {
@@ -1684,7 +1692,7 @@ void StBFChain::SetDbOptions(){
   }
 
   if( ! Idate && FDate){
-    (void) printf("QAInfo: Switching to user chosen dynamic time-stamp %d %d\n",FDate,FTime);
+    (void) printf("QAInfo: Switching to user chosen dynamic time-stamp (MaxEntry) %d %d\n",FDate,FTime);
     (void) printf("QAInfo: Chain may crash if time-stamp is not validated by db interface\n");
     Idate = FDate;
     Itime = FTime;
@@ -1713,15 +1721,26 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y2001n"))db->SetDateTime("year2001"); // Year_2b ** db ** timestamp does not reflect
                                                              // svt shift. Small hack to make it work.
   }}}}}}}}}}}}}}}
+
+	// Startup date over-write
+	if (FDateS){
+	  (void) printf("QAInfo: Switching to user chosen dynamic time-stamp (Start) %d %d\n",FDateS,FTimeS);
+	  (void) printf("QAInfo: Chain may crash if time-stamp is not validated by db interface\n");
+	  db->SetDateTime(FDateS,FTimeS);
+	}
+
+	// Show date settings
 	gMessMgr->QAInfo() << db->GetName()
 			   << " Maker set time = "
 			   << db->GetDateTime().GetDate() << "."
 			   << db->GetDateTime().GetTime() << endm;
-      if (Idate) {
-	db->SetMaxEntryTime(Idate,Itime);
-	cout << "\tSet DataBase max entry time " << Idate << "/" << Itime
-	     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endl;
-      }
+
+	// MaxEntry over-write
+	if (Idate) {
+	  db->SetMaxEntryTime(Idate,Itime);
+	  cout << "\tSet DataBase max entry time " << Idate << "/" << Itime
+	       << " for St_db_Maker(\"" << db->GetName() <<"\")" << endl;
+	}
     }
   }
 }

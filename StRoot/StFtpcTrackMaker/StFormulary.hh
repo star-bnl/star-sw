@@ -1,5 +1,9 @@
-// $Id: StFormulary.hh,v 1.2 2000/07/18 21:22:15 oldi Exp $
+// $Id: StFormulary.hh,v 1.3 2002/04/09 16:10:11 oldi Exp $
 // $Log: StFormulary.hh,v $
+// Revision 1.3  2002/04/09 16:10:11  oldi
+// Method to get the magentic field factor moved to StFormulary. It works for
+// simulation as well, now.
+//
 // Revision 1.2  2000/07/18 21:22:15  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -39,6 +43,8 @@ class StFormulary
         static void  Sum(const Double_t *p1, const Double_t *p2, Double_t *P, Int_t n = 3);       // sum of two vectors
         static void  Diff(const Double_t *p1, const Double_t *p2, Double_t *P, Int_t n = 3);      // difference of two vectors
     static Double_t  Abs(const Double_t *p, Int_t dim = 3);                                       // length of a vector
+
+    static Double_t  GetMagneticFieldFactor();                                                    // returns magnetic field factor
 
     ClassDef(StFormulary,0)  // Mathematical formulary
 };    

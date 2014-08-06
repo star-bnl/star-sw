@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiI.hh,v 3.5 2002/02/10 15:29:09 genevb Exp $
+ * $Id: StXiI.hh,v 3.6 2002/04/30 16:02:48 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiI.hh,v $
+ * Revision 3.6  2002/04/30 16:02:48  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.5  2002/02/10 15:29:09  genevb
  * Additional functions for momenta of decay daughters in CM frame
  *
@@ -91,6 +94,14 @@ public:
   virtual Float_t mtXi();                   // Transverse mass assuming (anti)Xi
   virtual Float_t mtm0Omega();              // mt-m0 assuming (anti)Omega
   virtual Float_t mtm0Xi();                 // mt-m0 assuming (anti)Xi
+
+  // Energy and mass formulae for hypothetical masses
+  virtual Float_t eBachelorHyp(Float_t mass);  // Energy of bachelor
+  virtual Float_t massHypXi(Float_t massV0, Float_t massBachelor);
+  virtual Float_t eHypXi(Float_t mass);     // Energy of Xi assuming its mass
+  virtual Float_t rapHypXi(Float_t mass);
+  virtual Float_t mtHypXi(Float_t mass);
+  virtual Float_t mtm0HypXi(Float_t mass);
 
   // Cosines of decay and polarization angles for different particle hypotheses
   virtual Float_t decayCosThetaBachelorXi();    // xi    - bachelor
@@ -203,6 +214,14 @@ inline Float_t StXiI::eXi() {
   return sqrt(Ptot2Xi()+M_XI_2);
 }
 
+inline Float_t StXiI::eHypXi(Float_t mass) {
+  return sqrt(Ptot2Xi()+pow(mass,2));
+}
+
+inline Float_t StXiI::eBachelorHyp(Float_t mass) {
+  return sqrt(Ptot2Bachelor()+pow(mass,2));
+}
+
 inline Float_t StXiI::eBachelorPion() {
   return sqrt(Ptot2Bachelor()+M_PION_MINUS_2);
 }
@@ -211,12 +230,22 @@ inline Float_t StXiI::eBachelorKaon() {
   return sqrt(Ptot2Bachelor()+M_KAON_MINUS_2);
 }
 
+inline Float_t StXiI::massHypXi(Float_t massV0, Float_t massBachelor) {
+  return sqrt(pow(eHypV0(massV0)+eBachelorHyp(massBachelor),2)-Ptot2Xi());
+}
+
 inline Float_t StXiI::massOmega() {
   return sqrt(pow(eLambda()+eBachelorKaon(),2)-Ptot2Xi());
 }
 
 inline Float_t StXiI::massXi() {
   return sqrt(pow(eLambda()+eBachelorPion(),2)-Ptot2Xi());
+}
+
+inline Float_t StXiI::rapHypXi(Float_t mass) {
+  Float_t mMomXiZ = momXiZ();
+  Float_t eX = eHypXi(mass);
+  return 0.5*log((eX+mMomXiZ)/(eX-mMomXiZ));
 }
 
 inline Float_t StXiI::rapOmega() {
@@ -271,12 +300,20 @@ inline Float_t StXiI::pseudoRapBachelor() {
   return (-log(tan(thetaBachelor()/2.)));
 }
 
+inline Float_t StXiI::mtHypXi(Float_t mass) {
+  return sqrt(Pt2Xi() + pow(mass,2));
+}
+
 inline Float_t StXiI::mtOmega() {
   return sqrt(Pt2Xi() + M_OMEGA_2);
 }
 
 inline Float_t StXiI::mtXi() {
   return sqrt(Pt2Xi() + M_XI_2);
+}
+
+inline Float_t StXiI::mtm0HypXi(Float_t mass) {
+  return (mtHypXi(mass) - mass);
 }
 
 inline Float_t StXiI::mtm0Omega() {

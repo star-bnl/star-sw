@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0I.hh,v 3.5 2002/02/10 15:29:09 genevb Exp $
+ * $Id: StV0I.hh,v 3.6 2002/04/30 16:02:48 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -13,6 +13,9 @@
  ***********************************************************************
  *
  * $Log: StV0I.hh,v $
+ * Revision 3.6  2002/04/30 16:02:48  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.5  2002/02/10 15:29:09  genevb
  * Additional functions for momenta of decay daughters in CM frame
  *
@@ -117,6 +120,15 @@ public:
   virtual Float_t mtK0Short();            // Transverse mass assuming k-short
   virtual Float_t mtm0Lambda();           // mt-m0 assuming lambda
   virtual Float_t mtm0K0Short();          // mt-m0 assuming k-short
+
+  // Energy and mass formulae for hypothetical masses
+  virtual Float_t ePosHyp(Float_t mass);  // Energy of pos. daughter
+  virtual Float_t eNegHyp(Float_t mass);  // Energy of neg. daughter
+  virtual Float_t massHypV0(Float_t massPos, Float_t massNeg);
+  virtual Float_t eHypV0(Float_t mass);   // Energy of V0 assuming its mass
+  virtual Float_t rapHypV0(Float_t mass);
+  virtual Float_t mtHypV0(Float_t mass);
+  virtual Float_t mtm0HypV0(Float_t mass);
 
   // Cosines of decay and polarization angles for different particle hypotheses
   virtual Float_t decayCosThetaK0Short();       // k-short    - pos. daughter
@@ -295,12 +307,24 @@ inline Float_t StV0I::ptArmV0() {
   return sqrt(Ptot2Pos() - pow(MomPosAlongV0(),2));
 }
 
+inline Float_t StV0I::eHypV0(Float_t mass) {
+  return sqrt(Ptot2V0()+pow(mass,2));
+}
+
 inline Float_t StV0I::eLambda() {
   return sqrt(Ptot2V0()+M_LAMBDA_2);
 }
 
 inline Float_t StV0I::eK0Short() {
   return sqrt(Ptot2V0()+M_KAON_0_SHORT_2);
+}
+
+inline Float_t StV0I::ePosHyp(Float_t mass) {
+  return sqrt(Ptot2Pos()+pow(mass,2));
+}
+
+inline Float_t StV0I::eNegHyp(Float_t mass) {
+  return sqrt(Ptot2Neg()+pow(mass,2));
 }
 
 inline Float_t StV0I::ePosProton() {
@@ -319,6 +343,10 @@ inline Float_t StV0I::eNegPion() {
   return sqrt(Ptot2Neg()+M_PION_MINUS_2);
 }
 
+inline Float_t StV0I::massHypV0(Float_t massPos, Float_t massNeg) {
+  return sqrt(pow(ePosHyp(massPos)+eNegHyp(massNeg),2)-Ptot2V0());
+}
+
 inline Float_t StV0I::massLambda() {
   return sqrt(pow(ePosProton()+eNegPion(),2)-Ptot2V0());
 }
@@ -329,6 +357,12 @@ inline Float_t StV0I::massAntiLambda() {
 
 inline Float_t StV0I::massK0Short() {
   return sqrt(pow(ePosPion()+eNegPion(),2)-Ptot2V0());
+}
+
+inline Float_t StV0I::rapHypV0(Float_t mass) {
+  Float_t ehyp = eHypV0(mass);
+  Float_t mMomV0Z = momV0Z();
+  return 0.5*log((ehyp+mMomV0Z)/(ehyp-mMomV0Z));
 }
 
 inline Float_t StV0I::rapLambda() {
@@ -399,12 +433,20 @@ inline Float_t StV0I::pseudoRapNeg() {
   return (-log(tan(thetaNeg()/2.)));
 }
 
+inline Float_t StV0I::mtHypV0(Float_t mass) {
+  return sqrt(Ptot2V0()+pow(mass,2));
+}
+
 inline Float_t StV0I::mtLambda() {
   return sqrt(Ptot2V0()+M_LAMBDA_2);
 }
 
 inline Float_t StV0I::mtK0Short() {
   return sqrt(Ptot2V0()+M_KAON_0_SHORT_2);
+}
+
+inline Float_t StV0I::mtm0HypV0(Float_t mass) {
+  return (mtHypV0(mass)-mass);
 }
 
 inline Float_t StV0I::mtm0Lambda() {

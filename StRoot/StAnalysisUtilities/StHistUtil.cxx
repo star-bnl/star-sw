@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.10 2002/02/12 18:41:57 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.11 2002/04/23 01:59:54 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.11  2002/04/23 01:59:54  genevb
+// Addition of BBC/FPD histos
+//
 // Revision 2.10  2002/02/12 18:41:57  genevb
 // Additional FTPC histograms
 //
@@ -219,8 +222,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   graphPad->Divide(m_PadColumns,m_PadRows);
 
   Int_t padCount = 0;
-  const Char_t *firstHistName = m_FirstHistName.Data();
-  const Char_t *lastHistName  = m_LastHistName.Data();
 
 
   // Now find the histograms
@@ -240,16 +241,19 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   while ((obj = nextHist())) {
 
     if (obj->InheritsFrom("TH1")) { 
+      TH1* hobj = (TH1*) obj;
+      const char* oname = obj->GetName();
+      TString oName = oname;
       histReadCounter++;
       printf(" %d. Reading ... %s::%s; Title=\"%s\"\n",
-        histReadCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
-      if (! started && (strcmp("*",firstHistName)==0 ||
-                        strcmp(obj->GetName(),firstHistName)==0 ))
+        histReadCounter,obj->ClassName(),oname, obj->GetTitle());
+      if (!started && (m_FirstHistName.CompareTo("*")==0 ||
+                       m_FirstHistName.CompareTo(oName)==0))
         started = kTRUE;
 
 // Here is the actual loop over histograms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       if (started) {
-	if (strcmp(obj->GetName(),lastHistName)==0) started = kFALSE;
+	if (oName.CompareTo(m_LastHistName)==0) started = kFALSE;
 	histCounter++;
 
 //...........................................................................
@@ -257,14 +261,14 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
         // If there's no print list, then print all histograms in directory
         // If there is a print list, then only print if hist name is on list
-	if (!m_ListOfPrint || (m_ListOfPrint->FindObject(obj->GetName()))) {
+	if (!m_ListOfPrint || (m_ListOfPrint->FindObject(oname))) {
 
           // this histogram will actually be printed/drawn!!
           printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
-	    histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
+	    histCounter,obj->ClassName(),oname, obj->GetTitle());
 
           // Switch to a new page...............................
-	  if (CheckPSFile(obj->GetName())) {
+	  if (CheckPSFile(oname)) {
 	    padCount = numPads;
 	    Ipagenum = 0;
 	  }
@@ -295,49 +299,75 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
 // Set logY scale on if: there is a loglist, if the hist name is on the list, if it has entries
 //    and if the max entries in all bins is > 0
-          if (m_ListOfLogY && m_ListOfLogY->FindObject(obj->GetName()) &&
-	     ((TH1 *)obj)->GetEntries() && ((TH1 *)obj)->GetMaximum() ) {
+          if (m_ListOfLogY && m_ListOfLogY->FindObject(oname) &&
+	     hobj->GetEntries() && hobj->GetMaximum() ) {
 	    gPad->SetLogy(1);
-            cout << "       -- Will draw in logY scale: " << obj->GetName() <<endl;
+            cout << "       -- Will draw in logY scale: " << oname <<endl;
 	  }
 
 
 // Set logX scale on if: there is a loglist, if the hist name is on the list, if it has entries
 //    and if the max entries in all bins is > 0
-	  if (m_ListOfLogX && m_ListOfLogX->FindObject(obj->GetName()) &&
-	     ((TH1 *)obj)->GetEntries() && ((TH1 *)obj)->GetMaximum() ) {
+	  if (m_ListOfLogX && m_ListOfLogX->FindObject(oname) &&
+	     hobj->GetEntries() && hobj->GetMaximum() ) {
 	    gPad->SetLogx(1);
-            cout << "       -- Will draw in logX scale: " << obj->GetName() <<endl;
+            cout << "       -- Will draw in logX scale: " << oname <<endl;
 	  }
 
+// Limit x range for some histograms
+          if (oName.EndsWith("QaPointTpc") ||
+              oName.EndsWith("QaPointSvt") ||
+              oName.EndsWith("QaPointSsd") ||
+              oName.EndsWith("QaPointFtpc") ||
+              oName.EndsWith("QaRichTot") ||
+              oName.EndsWith("QaV0Vtx") ||
+              oName.EndsWith("QaXiVtxTot") ||
+              oName.EndsWith("trkGoodTTS")) {
+            Float_t mean = hobj->GetMean(1);
+            Float_t window = hobj->GetRMS(1);
+            Float_t bwid = hobj->GetBinWidth(1);
+            if (window < bwid) window = bwid;
+            hobj->SetAxisRange(mean-5*window,mean+5*window,"X");
+          }
+
+// Limit both x & y ranges together for some histograms
+          if (oName.EndsWith("trkGoodF")) {
+            Float_t mean1 = hobj->GetMean(1);
+            Float_t mean2 = hobj->GetMean(2);
+            Float_t window1 = hobj->GetRMS(1);
+            Float_t window2 = hobj->GetRMS(2);
+            Float_t bwid = hobj->GetBinWidth(1);
+            if (window1 < bwid) window1  = bwid;
+            if (window2 < bwid) window2  = bwid;
+            Float_t lo = TMath::Min(mean1-5*window1,mean2-5*window2);
+            Float_t hi = TMath::Max(mean1+5*window1,mean2+5*window2);
+            hobj->SetAxisRange(lo,hi,"X");
+            hobj->SetAxisRange(lo,hi,"Y");
+          }
 
           // check dimension of histogram
-          chkdim = ((TH1 *)obj)->GetDimension();
+          chkdim = hobj->GetDimension();
 
           // actually draw,print
           if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
             obj->Draw("box");
-	    if (!strcmp(obj->GetName(),"StEQaGtrkGoodF") ||
-		!strcmp(obj->GetName(),"StEQaPtrkGoodF") ||
-		!strcmp(obj->GetName(),"StELMQaGtrkGoodF") ||
-		!strcmp(obj->GetName(),"StELMQaPtrkGoodF") ||
-		!strcmp(obj->GetName(),"StEMMQaGtrkGoodF") ||
-		!strcmp(obj->GetName(),"StEMMQaPtrkGoodF") ||
-		!strcmp(obj->GetName(),"StEHMQaGtrkGoodF") ||
-		!strcmp(obj->GetName(),"StEHMQaPtrkGoodF")) {
+	    if (oName.EndsWith("trkGoodF")) {
               ruler.SetLineColor(46);
               ruler.SetLineWidth(2);
               ruler.DrawLineNDC(0.1,0.1,0.9,0.9);
 	    }
           } else {
-	    TH1F* tempHist = (TH1F*) obj;
-	    tempHist->SetLineWidth(2);
-	    tempHist->Draw();
-            if (!strcmp(obj->GetName(),"fcl_radialW") ||
-                !strcmp(obj->GetName(),"fcl_radialE")) {
+            if (oName.Contains("QaBbc") ||
+                (oName.Contains("QaFpd") && !oName.Contains("Sums"))) {
+              hobj->SetBarOffset();
+            }
+	    hobj->SetLineWidth(2);
+	    hobj->Draw();
+            if (!oName.CompareTo("fcl_radialW") ||
+                !oName.CompareTo("fcl_radialE")) {
               ruler.SetLineColor(46);
               ruler.SetLineWidth(2);
-              ruler.DrawLine(7.73,0.,7.73,tempHist->GetMaximum());
+              ruler.DrawLine(7.73,0.,7.73,hobj->GetMaximum());
             }
 	  }
 	  if (gPad) gPad->Update();

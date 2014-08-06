@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.29 2002/04/02 00:16:31 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.28 2002/02/12 22:50:35 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
- * Revision 1.29  2002/04/02 00:16:31  hardtke
- * New class that gets hit errors from database
- *
  * Revision 1.28  2002/02/12 22:50:35  hardtke
  * separate geometrical tpc rotation from field twist
  *
@@ -360,30 +357,6 @@ int type_of_call tpc_rdo_mask_(int *isect, int* irow){
   return (int)mask->isOn(*isect,RDO);
 } 
   
-int type_of_call tpc_hit_error_table_(int *i, int*j, int *k,float *val){
-  //The first index is inner(1), outer (2)
-  //The second index is x(1), z(2)
-  //The third index is the parameter type: intrinsic(1), drift(2), tan(3)
-  //To switch to a C-array, I subtract 1
-  float table[2][2][3];
-  table[0][0][0] = gStTpcDb->HitErrors()->Sig2IntrinsicInnerX();
-  table[0][1][0] = gStTpcDb->HitErrors()->Sig2IntrinsicInnerZ();
-  table[0][0][1] = gStTpcDb->HitErrors()->Sig2DriftInnerX();
-  table[0][1][1] = gStTpcDb->HitErrors()->Sig2DriftInnerZ();
-  table[0][0][2] = gStTpcDb->HitErrors()->Sig2TanInnerX();
-  table[0][1][2] = gStTpcDb->HitErrors()->Sig2TanInnerZ();
-
-  table[1][0][0] = gStTpcDb->HitErrors()->Sig2IntrinsicOuterX();
-  table[1][1][0] = gStTpcDb->HitErrors()->Sig2IntrinsicOuterZ();
-  table[1][0][1] = gStTpcDb->HitErrors()->Sig2DriftOuterX();
-  table[1][1][1] = gStTpcDb->HitErrors()->Sig2DriftOuterZ();
-  table[1][0][2] = gStTpcDb->HitErrors()->Sig2TanOuterX();
-  table[1][1][2] = gStTpcDb->HitErrors()->Sig2TanOuterZ();
-  *val = table[*i-1][*j-1][*k-1];
-  return 1;
-
-}
-
 //_____________________________________________________________________________
 StTpcDbMaker::StTpcDbMaker(const char *name):StMaker(name){
  m_TpcDb = 0;
@@ -402,20 +375,6 @@ Int_t StTpcDbMaker::Init(){
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
    m_TpcDb = 0;
-    float x[3] = {0,0,0};
-    float b[3];
-    gufld(x,b);
-    float gFactor = b[2]/4.980;
-    cout << "Magnetic Field = " << b[2] << endl;
-    if (fabs(gFactor)>0.8){
-      gMessMgr->Info() << "StTpcDbMaker::Using full field TPC hit errors" << endm;
-      SetFlavor("FullMagF","tpcHitErrors");
-    }
-    else {
-      gMessMgr->Info() << "StTpcDbMaker::Using half field TPC hit errors" << endm;
-      SetFlavor("HalfMagF","tpcHitErrors");
-    }
-
   // Set Table Flavors
    if (m_Mode==1){
      gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for database " << endm;
@@ -441,6 +400,11 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
  
 //
   if (m_Mode!=1){
+    float x[3] = {0,0,0};
+    float b[3];
+    gufld(x,b);
+    float gFactor = b[2]/4.980;
+    cout << "Magnetic Field = " << b[2] << endl;
    if (gFactor<-0.8) {
      gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
      SetFlavor("FullMagFNegative","tpcGlobalPosition");

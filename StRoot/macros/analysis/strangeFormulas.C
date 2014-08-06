@@ -1,51 +1,10 @@
-// $Id: strangeFormulas.C,v 3.4 2001/05/04 21:17:57 genevb Exp $
-// $Log: strangeFormulas.C,v $
-// Revision 3.4  2001/05/04 21:17:57  genevb
-// Catch ROOT definition of TTreeFormula class, add McEvent branch
-//
-// Revision 3.3  2000/08/28 16:24:33  genevb
-// Introduce findFormula(), handle executing on second tree
-//
-// Revision 3.2  2000/08/11 17:09:05  genevb
-// Introduce findFormulas(), findDefinition(),  and some new formulas.
-//
-// Revision 3.1  2000/08/10 01:21:10  genevb
-// Added number of dedx points
-//
-// Revision 3.0  2000/07/17 22:08:11  genevb
-// Updated for rev. 3, fixed bug in number of tpc hits
-//
-// Revision 2.0  2000/06/09 22:13:45  genevb
-// Updated for version 2 of Strangeness mico DST package
-//
-// Revision 1.7  2000/04/19 15:11:15  genevb
-// Streamlined adding TTreeFormulas
-//
-// Revision 1.6  2000/04/13 19:33:44  genevb
-// Removed redundant formulas
-//
-// Revision 1.5  2000/04/13 18:30:26  genevb
-// Better handling of backward compatibility
-//
-// Revision 1.4  2000/04/12 21:13:27  genevb
-// Added track topology map functions
-//
-// Revision 1.3  2000/04/11 17:55:39  genevb
-// Removed first parameter
-//
-// Revision 1.2  2000/04/07 16:22:48  genevb
-// Remove ambiguity on supplying just one parameter
-//
-// Revision 1.1  2000/04/07 16:14:53  genevb
-// Introduction of strangeFormulas.C
-//
-//
 //======================================================
 // owner:  Gene Van Buren, UCLA
 // what it does:  creates formulas for use with strangeness micro DST
 // usage: The parameter is either a pointer to a strangeness
 //          micro DST tree, a pointer to a TFile containing such
-//          a tree (tree name assumed to be "StrangeMuDst"), or
+//          a tree (tree name assumed to be either "StrangeMuDst"
+//          or "MuDst" (in the case of a common micro DST)), or
 //          the name of such a file. In the latter two cases, a
 //          pointer to the strangeness TTree is returned.
 //          See documentation for more information.
@@ -59,8 +18,8 @@
 //        .x strangeFormulas.C(myTreePtr);
 //          Returns the number of new formulas loaded into Root.
 //        .x strangeFormulas.C(myFilePtr);
-//          Returns a pointer to the tree named "StrangeMuDst" in the
-//          file pointed to by myFilePtr.
+//          Returns a pointer to the tree named either "StrangeMuDst"
+//          or "MuDst" in the file pointed to by myFilePtr.
 //======================================================
 //
 // Should be careful to optimize formulas for number of calls to
@@ -163,6 +122,7 @@ TTree* strangeFormulas(TFile* fptr) {
     gSystem->Load("libTreePlayer");
   }
   strangeTree = (TTree*) fptr->Get("StrangeMuDst");
+  if (!strangeTree) strangeTree = (TTree*) fptr->Get("MuDst");
   strangeFormulas(strangeTree);
   return strangeTree;
 }
@@ -206,12 +166,18 @@ Int_t strangeFormulas(TTree* tree) {
   // Event
   printf("Loading event formulas...\n");
   formulate("Event.run()", "Event.mRun");
-  formulate("Event.event()", "Event.mEvent");
+  formulate("Event.event()", "abs(Event.mEvent)");
   formulate("Event.globalTracks()", "Event.mGlobalTracks");
   formulate("Event.primaryTracks()", "Event.mPrimaryTracks");
+  formulate("Event.primaryNegTracks()", "Event.mPrimaryNegTracks");
+  formulate("Event.primaryCorrectedTracks()", "Event.mPrimaryCorrectedTracks");
   formulate("Event.primaryVertexX()", "Event.mPrimaryVertexX");
   formulate("Event.primaryVertexY()", "Event.mPrimaryVertexY");
   formulate("Event.primaryVertexZ()", "Event.mPrimaryVertexZ");
+  formulate("Event.magneticField()",  "Event.mMagneticField");
+  formulate("Event.l0TriggerWord()", "Event.mL0TriggerWord");
+  formulate("Event.unbiasedTrigger()", "(Event.mEvent>0)");
+
   
   // McEvent
   if (tree->GetBranch("McEvent")) {
@@ -221,6 +187,8 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("McEvent.event()", "McEvent.mEvent");
     formulate("McEvent.globalTracks()", "McEvent.mGlobalTracks");
     formulate("McEvent.primaryTracks()", "McEvent.mPrimaryTracks");
+    formulate("McEvent.primaryNegTracks()", "McEvent.mPrimaryNegTracks");
+    formulate("McEvent.primaryCorrectedTracks()", "McEvent.mPrimaryCorrectedTracks");
     formulate("McEvent.primaryVertexX()", "McEvent.mPrimaryVertexX");
     formulate("McEvent.primaryVertexY()", "McEvent.mPrimaryVertexY");
     formulate("McEvent.primaryVertexZ()", "McEvent.mPrimaryVertexZ");
@@ -864,3 +832,51 @@ Int_t strangeFormulas(TTree* tree) {
   return (finalFormulas-initialFormulas);
 
 }
+//______________________________________________________________________
+// $Id: strangeFormulas.C,v 3.6 2002/05/17 14:07:55 genevb Exp $
+// $Log: strangeFormulas.C,v $
+// Revision 3.6  2002/05/17 14:07:55  genevb
+// Added some new event functions
+//
+// Revision 3.5  2002/04/30 01:29:18  genevb
+// Updated macros for common micro DST
+//
+// Revision 3.4  2001/05/04 21:17:57  genevb
+// Catch ROOT definition of TTreeFormula class, add McEvent branch
+//
+// Revision 3.3  2000/08/28 16:24:33  genevb
+// Introduce findFormula(), handle executing on second tree
+//
+// Revision 3.2  2000/08/11 17:09:05  genevb
+// Introduce findFormulas(), findDefinition(),  and some new formulas.
+//
+// Revision 3.1  2000/08/10 01:21:10  genevb
+// Added number of dedx points
+//
+// Revision 3.0  2000/07/17 22:08:11  genevb
+// Updated for rev. 3, fixed bug in number of tpc hits
+//
+// Revision 2.0  2000/06/09 22:13:45  genevb
+// Updated for version 2 of Strangeness mico DST package
+//
+// Revision 1.7  2000/04/19 15:11:15  genevb
+// Streamlined adding TTreeFormulas
+//
+// Revision 1.6  2000/04/13 19:33:44  genevb
+// Removed redundant formulas
+//
+// Revision 1.5  2000/04/13 18:30:26  genevb
+// Better handling of backward compatibility
+//
+// Revision 1.4  2000/04/12 21:13:27  genevb
+// Added track topology map functions
+//
+// Revision 1.3  2000/04/11 17:55:39  genevb
+// Removed first parameter
+//
+// Revision 1.2  2000/04/07 16:22:48  genevb
+// Remove ambiguity on supplying just one parameter
+//
+// Revision 1.1  2000/04/07 16:14:53  genevb
+// Introduction of strangeFormulas.C
+//

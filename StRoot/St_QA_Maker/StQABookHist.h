@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.12 2002/02/12 18:42:00 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.13 2002/04/23 01:59:56 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.13  2002/04/23 01:59:56  genevb
+// Addition of BBC/FPD histos
+//
 // Revision 2.12  2002/02/12 18:42:00  genevb
 // Additional FTPC histograms
 //
@@ -67,7 +70,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.12 2002/02/12 18:42:00 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.13 2002/04/23 01:59:56 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -638,6 +641,16 @@ class StQABookHist : public TObject {
   TH1F *m_emc_points[4];       //! Emc Point multiplicity
   TH1F *m_emc_point_flag;      //! Point Flag spectra
 
+  // Hists for BBC
+  TH2F* m_bbc_adc[4];          //!
+  TH2F* m_bbc_tdc[4];          //!
+
+  // Hists for FPD
+  TH2F* m_fpd_top[2];         //!
+  TH2F* m_fpd_bottom[2];      //!
+  TH2F* m_fpd_south[2];       //!
+  TH2F* m_fpd_north[2];       //!
+  TH1F* m_fpd_sums[8];         //!
 
 // ********************** Members For Internal Use *************************
  protected:
@@ -653,6 +666,8 @@ class StQABookHist : public TObject {
   virtual void   BookHistRich();
   virtual void   BookHistEMC();
   virtual void   BookHistEval();
+  virtual void   BookHistBBC();
+  virtual void   BookHistFPD();
 
   ClassDef(StQABookHist,0)
 };

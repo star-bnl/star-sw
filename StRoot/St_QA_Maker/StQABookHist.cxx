@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.29 2002/02/12 18:41:59 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.30 2002/04/23 01:59:56 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.30  2002/04/23 01:59:56  genevb
+// Addition of BBC/FPD histos
+//
 // Revision 2.29  2002/02/12 18:41:59  genevb
 // Additional FTPC histograms
 //
@@ -110,6 +113,8 @@ ClassImp(StQABookHist)
   
 //_____________________________________________________________________________
 StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
+
+  int i = 0;
 
 //  - Set all the histogram booking constants
 
@@ -629,6 +634,21 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_geant_reco_pvtx_y=0;  //! prim vtx y, diff geant - reco
   m_geant_reco_pvtx_z=0;  //! prim vtx z, diff geant - reco
   m_geant_reco_vtx_z_z=0; //! prim vtx z, diff geant - reco vs reco z
+
+// for BBC
+  for (i=0; i<4; i++) {
+    m_bbc_adc[i] = 0;
+    m_bbc_tdc[i] = 0;
+  }
+
+// for FPD
+  for (i=0; i<2; i++) {
+    m_fpd_top[i] = 0;
+    m_fpd_bottom[i] = 0;
+    m_fpd_south[i] = 0;
+    m_fpd_north[i] = 0;
+  }
+  for (i=0; i<8; i++) m_fpd_sums[i] = 0;
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHist(Int_t histsSet){
@@ -643,6 +663,8 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistPoint();
   BookHistRich();
   BookHistEMC();
+  BookHistBBC();
+  BookHistFPD();
   BookHistGlob();
   BookHistPrim();
   BookHistDE();
@@ -1615,11 +1637,11 @@ void StQABookHist::BookHistVertex(){
   m_vtx_z_dist  = QAH::H1F("QaV0VtxZDist",
             "V0 Z distribution relative to primvtx",60,-30.,30.);
 
-  m_v0             = QAH::H1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",50,0.,2000.);
+  m_v0             = QAH::H1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",100,0.,2000.);
   m_ev0_lama_hist  = QAH::H1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.15);
   m_ev0_k0ma_hist  = QAH::H1F("QaV0K0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
 
-  m_xi_tot     = QAH::H1F("QaXiVtxTot", "dst_xi_vertex: tot # vertices",50,0.,4000.);
+  m_xi_tot     = QAH::H1F("QaXiVtxTot", "dst_xi_vertex: tot # vertices",100,0.,4000.);
   m_xi_ma_hist = QAH::H1F("QaXiaMass",  "dst_xi_vertex: Xi mass",50,1.2,1.4);
 
   m_kink_tot   = QAH::H1F("QaKinkTot",  "kinkVertex: # kinks ",25,0.,25.);
@@ -1810,7 +1832,6 @@ void StQABookHist::BookHistEMC(){
 
 }
 //_____________________________________________________________________________
-
 void StQABookHist::BookHistEval(){
 
 // these only get filled if the geant dataset is available!
@@ -1825,6 +1846,68 @@ void StQABookHist::BookHistEval(){
         " reco pvtx Z vs diff geant - reco Z", 100, -0.5,0.5,100,-50.,50.);
      m_geant_reco_vtx_z_z->SetXTitle("z vtx resolution (cm)");
      m_geant_reco_vtx_z_z->SetYTitle("z position of vtx (cm)");
+
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistBBC(){
+
+  Char_t ID[4];
+  Int_t i,j;
+
+  m_bbc_adc[0] = QAH::MH1F("QaBbcAdcES","BBC East Small ADC",100,0.5,400.5,8);
+  m_bbc_adc[1] = QAH::MH1F("QaBbcAdcEL","BBC East Large ADC",100,0.5,400.5,8);
+  m_bbc_adc[2] = QAH::MH1F("QaBbcAdcWS","BBC West Small ADC",100,0.5,400.5,8);
+  m_bbc_adc[3] = QAH::MH1F("QaBbcAdcWL","BBC West Large ADC",100,0.5,400.5,8);
+  m_bbc_tdc[0] = QAH::MH1F("QaBbcTdcES","BBC East Small TDC",100,0.5,750.5,8);
+  m_bbc_tdc[1] = QAH::MH1F("QaBbcTdcEL","BBC East Large TDC",100,0.5,2000.5,8);
+  m_bbc_tdc[2] = QAH::MH1F("QaBbcTdcWS","BBC West Small TDC",100,0.5,750.5,8);
+  m_bbc_tdc[3] = QAH::MH1F("QaBbcTdcWL","BBC West Large TDC",100,0.5,2000.5,8);
+  for (i=0; i<8; i++) {
+    sprintf(ID,"%d",i+1);
+    for (j=0; j<4; j++) {
+      m_bbc_adc[j]->Rebin(i,ID);
+      m_bbc_tdc[j]->Rebin(i,ID);
+    } 
+  } 
+
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistFPD(){
+
+  Char_t ID[4];
+  Int_t i,j;
+
+// Book ADC histograms
+  m_fpd_top[0] = QAH::MH1F("QaFpdTop0","FPD Top ADC 1-8" ,100,0.5,1500.5,8);
+  m_fpd_top[1] = QAH::MH1F("QaFpdTop1","FPD Top ADC 9-16",100,0.5,1500.5,8);
+  m_fpd_bottom[0] = QAH::MH1F("QaFpdBottom0","FPD Bottom ADC 1-8" ,100,0.5,1500.5,8);
+  m_fpd_bottom[1] = QAH::MH1F("QaFpdBottom1","FPD Bottom ADC 9-16",100,0.5,1500.5,8);
+  m_fpd_south[0] = QAH::MH1F("QaFpdSouth0","FPD South ADC 1-8" ,100,0.5,1500.5,8);
+  m_fpd_south[1] = QAH::MH1F("QaFpdSouth1","FPD South ADC 9-16",100,0.5,1500.5,8);
+  m_fpd_north[0] = QAH::MH1F("QaFpdNorth0","FPD North ADC 1-6" ,100,0.5,1500.5,6);
+  m_fpd_north[1] = QAH::MH1F("QaFpdNorth1","FPD North ADC 7-12",100,0.5,1500.5,6);
+  for (i=0; i<8; i++) {
+    for (j=0; j<2; j++) {
+      sprintf(ID,"%d",i+1+(8*j));
+      m_fpd_top[j]->Rebin(i,ID);
+      m_fpd_bottom[j]->Rebin(i,ID);
+      m_fpd_south[j]->Rebin(i,ID);
+      if (i<6) {
+        sprintf(ID,"%d",i+1+(6*j));
+        m_fpd_north[j]->Rebin(i,ID);
+      } 
+    } 
+  } 
+
+// Book ADC histograms: FPD SUM signals
+  m_fpd_sums[0] = QAH::H1F("QaFpdSums0","FPD SUM Top",100,0.5,2050.5);
+  m_fpd_sums[1] = QAH::H1F("QaFpdSums1","FPD SUM Bottom",100,0.5,2050.5);
+  m_fpd_sums[2] = QAH::H1F("QaFpdSums2","FPD SUM South",100,0.5,2050.5);
+  m_fpd_sums[3] = QAH::H1F("QaFpdSums3","FPD SUM North",100,0.5,2050.5);
+  m_fpd_sums[4] = QAH::H1F("QaFpdSums4","FPD SUM SmdX",100,0.5,6000.5);
+  m_fpd_sums[5] = QAH::H1F("QaFpdSums5","FPD SUM SmdY",100,0.5,6000.5);
+  m_fpd_sums[6] = QAH::H1F("QaFpdSums6","FPD SUM Pres1",100,0.5,1500.5);
+  m_fpd_sums[7] = QAH::H1F("QaFpdSums7","FPD SUM Pres2",100,0.5,1500.5);
 
 }
 //_____________________________________________________________________________

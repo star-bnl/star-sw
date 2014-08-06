@@ -8,7 +8,7 @@
 #define PF __PRETTY_FUNCTION__
 
 #define THROW(key,text) StMuException##key(text,__PRETTY_FUNCTION__)
-#define EXE(x) class StMuException##x : public StMuException { public: StMuException##x##(const char* m="", const char* in="???") : StMuException(k##x, m, in) { /* no-op */ } };
+#define EXE(x) class StMuException##x : public StMuException { public: StMuException##x (const char* m="", const char* in="???") : StMuException(k##x, m, in) { /* no-op */ } };
 		       
 
 enum StMuExceptionTypes {kUnknown=0, kNullPointer, kBadFlag, kBadValue, kEOF};

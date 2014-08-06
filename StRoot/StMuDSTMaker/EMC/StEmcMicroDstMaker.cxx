@@ -50,6 +50,8 @@ StEmcMicroDstMaker::StEmcMicroDstMaker(const Char_t *name) : StMaker(name)
   mDoSaveEmc = kTRUE;
   mDoSaveFpd = kTRUE;
   mDoSaveV0 = kTRUE;
+	
+	mOldMaker = NULL;
   
   mStart = 0;
  
@@ -93,7 +95,7 @@ Int_t StEmcMicroDstMaker::Make()
   
   if(!mDoRead)
   {
-    mStEvent=NULL;
+		mStEvent=NULL;
     mStEvent = (StEvent*) GetInputDS("StEvent");
     if(!mStEvent) return kStWarn;
     
@@ -112,7 +114,7 @@ Int_t StEmcMicroDstMaker::Make()
 	    return kStOK;
     }
     mAcc->Fill(1);
-    mAccEv++;
+    mAccEv++; 
     
     // at this point, the event has been accepted.
     StIOMaker* IO=(StIOMaker*)GetMaker("IOMaker");
@@ -134,7 +136,9 @@ Int_t StEmcMicroDstMaker::Make()
         mEventFile = f;
       }
     }
-    
+		
+    if(mOldMaker) mEventFile = mOldMaker->getCurrentFile();
+		
     // if the input event file has changed, close the Micro dst file and creates another one
     if(mEventFile!=mEventFileOld)
     {
@@ -151,14 +155,47 @@ Int_t StEmcMicroDstMaker::Make()
       mEventFileOld=mEventFile;
     }
     else cout <<"Filename being written: "<<mEventFile.Data()<<endl;
-    mMicroEvent= mMicroUtil->getMicroEvent(mStEvent);;
+		
+    mMicroEvent= mMicroUtil->getMicroEvent(mStEvent);
+		
+		if(mOldMaker)
+		{
+			// stuff that are not converted back in StEvent...
+			StEmcMicroEvent* old=mOldMaker->getMicroEvent();
+      mMicroEvent->setCTB(old->getCTB());
+      mMicroEvent->setZDCe(old->getZDCe());
+      mMicroEvent->setZDCw(old->getZDCw());
+      mMicroEvent->setZVertexZDC(old->getZVertexZDC());
+      mMicroEvent->setBBCe(old->getBBCe());
+      mMicroEvent->setBBCw(old->getBBCw());
+      mMicroEvent->setBBCNHits(old->getBBCNHits());
+			mMicroEvent->setZVertexBBC(old->getZVertexBBC());
+			mMicroEvent->setBunchCrossing7bit(old->getBunchCrossing7bit());
+      mMicroEvent->setBunchCrossing(old->getBunchCrossing());
+      mMicroEvent->setSpinBits(old->getSpinBits());
+			StFpdMicroCollection *fpd = new StFpdMicroCollection();
+			StFpdMicroCollection *oldfpd = old->getFpd();
+			if(oldfpd)
+			{
+				fpd->setToken(oldfpd->getToken());
+				fpd->setSumAdcNorth(oldfpd->getSumAdcNorth());
+				fpd->setSumAdcSouth(oldfpd->getSumAdcSouth());
+				fpd->setSumAdcTop(oldfpd->getSumAdcTop());
+				fpd->setSumAdcBottom(oldfpd->getSumAdcBottom());
+				fpd->setSumAdcPreShower1(oldfpd->getSumAdcPreShower1());
+				fpd->setSumAdcPreShower2(oldfpd->getSumAdcPreShower2());
+				fpd->setSumAdcSmdX(oldfpd->getSumAdcSmdX());
+				fpd->setSumAdcSmdY(	oldfpd->getSumAdcSmdY());
+				mMicroEvent->setFpd(fpd);
+			}						
+		}
     mEmcTree->Fill();
   }
   else //read Mode
   {  
     if(mMicroEventChain)
     {
-      if(mNMicroEvents>0)
+			if(mNMicroEvents>0)
       {
         if(mCurMicroEvent<mNMicroEvents)
         {
@@ -171,8 +208,12 @@ Int_t StEmcMicroDstMaker::Make()
           StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
           if(!hd) { hd = new StEvtHddr();  AddData(hd); }
           hd->SetGMTime(GMTTime);
-          //cout <<"Event date = "<<GetDate()<<"  Event time = "<<GetTime()<<endl;
-
+          mEventFile = strrchr(mMicroEventChain->GetFile()->GetName(),'/')+1;
+  				if(mEventFile.EndsWith(".emcEvent.root"))
+  				{
+    				Int_t size=mEventFile.Sizeof();
+    				mEventFile.Remove(size-15,14);
+  				}
           if(mDoCreateStEvent)
           {
             mStEvent = mMicroUtil->getStEvent(mMicroEvent);

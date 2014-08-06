@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.16 2002/04/08 15:37:59 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.17 2002/04/22 14:18:17 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.17  2002/04/22 14:18:17  oldi
+// Assume hit resolution to be 0.1mm if it is equal to 0.
+//
 // Revision 1.16  2002/04/08 15:37:59  oldi
 // Switch for magnetic field factor installed.
 // Minor corrections/improvements.
@@ -450,12 +453,11 @@ Double_t StFtpcTrack::CalcDca(StFtpcVertex *vertex)
   // call fit class
   MomentumFit();
 
-  TVector3 vertexPos = vertex->GetCoord();
-  StThreeVector<Double_t> rv(vertexPos.X(), vertexPos.Y(), vertexPos.Z());
+  StThreeVector<Double_t> rv(vertex->GetX(), vertex->GetY(), vertex->GetZ());
   StThreeVector<Double_t> nv(0,0,1);
   Double_t pl = pathLength(rv, nv);
-  Double_t xvert = x(pl) - vertexPos.X();
-  Double_t yvert = y(pl) - vertexPos.Y();
+  Double_t xvert = x(pl) - vertex->GetX();
+  Double_t yvert = y(pl) - vertex->GetY();
 
   return TMath::Sqrt(xvert * xvert + yvert * yvert);
 }
@@ -514,8 +516,8 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   StFtpcPoint *firstP = (StFtpcPoint *)mPoints->At(GetNumberOfPoints()-1);
   StFtpcPoint *lastP  = (StFtpcPoint *)mPoints->At(0);
 
-  StThreeVector<Double_t> vertexPos(vertex->GetCoord().X(), vertex->GetCoord().Y(), vertex->GetCoord().Z());
-  StThreeVector<Double_t> lastPoint(lastP->GetCoord().X(), lastP->GetCoord().Y(), lastP->GetCoord().Z());
+  StThreeVector<Double_t> vertexPos(vertex->GetX(), vertex->GetY(), vertex->GetZ());
+  StThreeVector<Double_t> lastPoint(lastP->GetX(), lastP->GetY(), lastP->GetZ());
   StThreeVector<Double_t> firstPoint;
   StThreeVector<Double_t> nv(0, 0, 1);
 
@@ -526,7 +528,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   mDca = TMath::Sqrt(xvert * xvert + yvert * yvert);
 
   if (id_start_vertex < 0 ) {    
-    firstPoint = StThreeVector<Double_t>(firstP->GetCoord().X(), firstP->GetCoord().Y(), firstP->GetCoord().Z());
+    firstPoint = StThreeVector<Double_t>(firstP->GetX(), firstP->GetY(), firstP->GetZ());
     
     if (mDca > max_Dca) {
       mFromMainVertex = (Bool_t)false;
@@ -540,7 +542,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
   else {
     
     if (mDca > max_Dca) {
-      firstPoint = StThreeVector<Double_t>(firstP->GetCoord().X(), firstP->GetCoord().Y(), firstP->GetCoord().Z());
+      firstPoint = StThreeVector<Double_t>(firstP->GetX(), firstP->GetY(), firstP->GetZ());
       mFromMainVertex = (Bool_t)false;
     }
     
@@ -666,23 +668,8 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
     zval[0] = vertex->GetZ() * centimeter;
     
     // use vertex error as weight (if it exists)
-    if (vertex->GetXerr() == 0.) {
-      // assume 0.01 cm resolution
-      xWeight[0] = 100.;
-    }
-    
-    else {
-      xWeight[0] = 1./(vertex->GetXerr() * centimeter);
-    }
-    
-    if (vertex->GetYerr() == 0.) {
-      // assume 0.01 cm resolution
-      yWeight[0] = 100.;
-    }
-    
-    else {
-      yWeight[0] = 1./(vertex->GetYerr() * centimeter);
-    }        
+    xWeight[0] = (vertex->GetXerr() == 0.) ? 100. : 1./(vertex->GetXerr() * centimeter);
+    yWeight[0] = (vertex->GetYerr() == 0.) ? 100. : 1./(vertex->GetYerr() * centimeter);
   }
 
   else {
@@ -695,14 +682,15 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   // these values will later be manipulated, mPoint array will not be touched   
   for(i = 0; i < GetNumberOfPoints(); i++) {
     backw_counter = GetNumberOfPoints() - 1 - i + mVertexPointOffset;
+    StFtpcPoint *point = (StFtpcPoint*)mPoints->At(i);
+
+    xval[backw_counter] = point->GetX() * centimeter;
+    yval[backw_counter] = point->GetY() * centimeter;
+    zval[backw_counter] = point->GetZ() * centimeter;
     
-    xval[backw_counter] = (((StFtpcPoint*)mPoints->At(i))->GetCoord()).X() * centimeter;
-    yval[backw_counter] = (((StFtpcPoint*)mPoints->At(i))->GetCoord()).Y() * centimeter;
-    zval[backw_counter] = (((StFtpcPoint*)mPoints->At(i))->GetCoord()).Z() * centimeter;
-    
-    // hit resolution taken from hit error
-    xWeight[backw_counter] = 1./((((StFtpcPoint*)mPoints->At(i))->GetError()).X() * centimeter);
-    yWeight[backw_counter] = 1./((((StFtpcPoint*)mPoints->At(i))->GetError()).Y() * centimeter);
+    // hit resolution taken from hit error (or set to 100)
+    xWeight[backw_counter] = (point->GetXerr() == 0.) ? 100. : 1./(point->GetXerr() * centimeter);
+    yWeight[backw_counter] = (point->GetYerr() == 0.) ? 100. : 1./(point->GetYerr() * centimeter);
   }
 
   /////////////////////////////////////////////////////////////////////
@@ -888,6 +876,7 @@ void StFtpcTrack::MomentumFit(StFtpcVertex *vertex)
   startY = mYCenter + mFitRadius * sin(startAngle);
   startHit.setX(startX);
   startHit.setY(startY);
+  
   setParameters(1/mFitRadius, dipAngle, startPhase, startHit, orientation);
   
   // set final momentum value

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.1 2002/04/01 22:42:29 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.5 2002/05/04 23:56:29 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -9,6 +9,7 @@
 #include "StMuException.hh"
 #include "StMuDebug.h"
 #include "StMuChainMaker.h"
+#include "StMuDbReader.h"
 
 #include "StMaker.h"
 #include "StChain.h"
@@ -24,12 +25,22 @@ ClassImp(StMuChainMaker)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   Constructor: The argument 'name' is the name of the TTrees be chained   
+*/
 StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
   DEBUGMESSAGE2("");
+  mChain = new TChain(mTreeName.c_str());
+  mDbReader = StMuDbReader::instance();
+  mFileCounter=0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/** 
+    Destructor: The TChain will not be deleted since it is passed to the 
+    outside.
+ */
 StMuChainMaker::~StMuChainMaker() {
   DEBUGMESSAGE2("");
   int n=0;
@@ -40,6 +51,10 @@ StMuChainMaker::~StMuChainMaker() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/** 
+    Returns a full filename, simply concats the three arguments 'dir', 
+    'fileName' and extention
+*/
 string StMuChainMaker::buildFileName(string dir, string fileName, string extention){
   DEBUGMESSAGE2("");
   fileName = dir + fileName + extention;
@@ -48,6 +63,10 @@ string StMuChainMaker::buildFileName(string dir, string fileName, string extenti
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   Return the input string's basename by stripping of all characters from 
+   the first '.' to the end and all characters after the last '/'.
+ */
 string StMuChainMaker::basename(string s){
   string name(s);
   size_t pos;
@@ -61,6 +80,11 @@ string StMuChainMaker::basename(string s){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   Return a inputs string's directory name by erasing the basename() and
+   all charcters after the last '/'. If the only remaining character is 
+   '/' and empty string "" will be returned.
+ */
 string StMuChainMaker::dirname(string s){
   string name(s);
   string base(basename(s));
@@ -75,18 +99,36 @@ string StMuChainMaker::dirname(string s){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain*  StMuChainMaker::make(string dir, string file, string filter, int maxFiles) {
+/**
+   Parses the input strings. Multiple sub-filters will be built our of 
+   'filter'. Here, ":" separates the individual filter strings (e.g.
+   "MuDst:st_physics_2:raw_0001" will accept only files which have all of 
+   the sub-strings "MuDst", "st_physics_2" and "raw_0001" in them.
+
+   If 'file' is empty, the directory 'dir' will be scanned for files.
+   If 'file' has a substring "MuDst.root" a single file will be opened.
+   If 'file' has a substring ".lis" the file will be expected to be a list.
+   In the case 'file' is not empty, 'dir' will be ignored, hence the filenames
+   provided have to be full filenames (including path)
+
+   A TChain will be built for files matching the sub filters (in all cases).
+   The chain will be returned.
+  
+   
+ */
+TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFiles) {
   DEBUGMESSAGE1("");
-  TChain* chain;
+  mSubFilters = subFilter(filter);
+
   if (file!="") {
-    if (file.find(".lis")!=string::npos) chain =  fromList(dir, file, maxFiles);
-    if (file.find(".MuDst.root")!=string::npos) chain = fromFile(dir,file, maxFiles);
+    if (file.find(".lis")!=string::npos) fromList(file, maxFiles);
+    if (file.find(".MuDst.root")!=string::npos) fromFile(file, maxFiles);
   }
   else {
-    chain = fromDir(dir,filter, maxFiles);
+    fromDir(dir, maxFiles);
   }
   DEBUGMESSAGE2("return");
-  return chain;
+  return mChain;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -110,16 +152,41 @@ string**  StMuChainMaker::subFilter(string filter) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromDir(string dir, string filter, int maxFiles) {
+void StMuChainMaker::add(string file) {
+  DEBUGMESSAGE3("");
+  /// if no entries in db, just add file
+  DEBUGVALUE1(file.c_str());
+
+  int entries = 0;
+
+  // read number of events in file from db
+  entries = mDbReader->entries(file.c_str());
+
+  // if I can not read the number of events from db, open file and read number.
+  if (entries==0) {
+    TFile f1(file.c_str());
+    TTree *tree = (TTree*)dynamic_cast<TTree*>(f1.Get("MuDst"));
+    if (tree) entries = (int)tree->GetEntries();
+    f1.Close();
+  } 
+
+  // add to chain if #events > 0
+  if (entries) {
+    mChain->Add( file.c_str(), entries );
+    mFileCounter++;
+  }
+    
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuChainMaker::fromDir(string dir, int maxFiles) {
   DEBUGMESSAGE2("");
-  TChain* chain = new TChain(mTreeName.c_str());
-  mSubFilters = subFilter(filter);
   DEBUGVALUE(gSystem);
 
   void *pDir = gSystem->OpenDirectory(dir.c_str());
   // now find the files that end in the specified extention
   const char* fileName(0);
-  int fileCount(0);
   while((fileName = gSystem->GetDirEntry(pDir))){
     bool good = true;
     string name(fileName);
@@ -129,50 +196,45 @@ TChain* StMuChainMaker::fromDir(string dir, string filter, int maxFiles) {
     if ( pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the chain
-      DEBUGVALUE(fileCount);
-      chain->Add(fullFile);
-      fileCount++;
-      delete fullFile;
+      cout << mFileCounter << endl;
+      add( fullFile );
+      delete []fullFile;
     }
-    if(fileCount >= maxFiles) break;
+    if(mFileCounter >= maxFiles) break;
   }   
-  DEBUGVALUE2(fileCount);
-  return chain;
+  DEBUGVALUE2(mFileCounter);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromList(string dir, string list, int maxFiles) {
+void StMuChainMaker::fromList(string list, int maxFiles) {
   DEBUGMESSAGE2("");
-  TChain* chain = new TChain(mTreeName.c_str());
   ifstream* inputStream = new ifstream;
   inputStream->open(list.c_str());
   if (!(inputStream)) {
     DEBUGMESSAGE("can not open list file");
-    return chain;
   }
   char* temp;
-  int fileCount=0;
   DEBUGVALUE(inputStream->good());
   for (;inputStream->good();) {
     temp = new char[200];
     inputStream->getline(temp,200);
-    DEBUGVALUE2(temp);
-    chain->Add(temp);
-    delete temp;
-    ++fileCount;
-    if (fileCount>maxFiles) break;
+    if ( pass(temp,mSubFilters) ) {
+      add(temp);
+    }
+    delete []temp;
+    if (mFileCounter>maxFiles) break;
   }   
   delete inputStream;
-  DEBUGVALUE2(fileCount);
-  return chain;
+  DEBUGVALUE2(mFileCounter);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromFile(string dir, string list, int maxFiles) {
+void StMuChainMaker::fromFile(string file, int maxFiles) {
   DEBUGMESSAGE2("");
-  return 0;
+  cout << mTreeName.c_str() << endl;
+  add( file );
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -189,6 +251,20 @@ bool StMuChainMaker::pass(string file, string**  filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.5  2002/05/04 23:56:29  laue
+ * some documentation added
+ *
+ * Revision 1.4  2002/04/17 21:04:15  laue
+ * minor updates
+ *
+ * Revision 1.3  2002/04/15 22:18:15  laue
+ * bug fix in reading of single file
+ *
+ * Revision 1.2  2002/04/11 14:19:30  laue
+ * - update for RH 7.2
+ * - decrease default arrays sizes
+ * - add data base readerfor number of events in a file
+ *
  * Revision 1.1  2002/04/01 22:42:29  laue
  * improved chain filter options
  *

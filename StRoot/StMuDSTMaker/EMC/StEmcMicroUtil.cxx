@@ -15,7 +15,7 @@ StEmcMicroUtil::StEmcMicroUtil()
 }
 StEmcMicroUtil::~StEmcMicroUtil()
 {
-	if(mV0Tracks) delete mV0Tracks;
+	//if(mV0Tracks) delete mV0Tracks;
 }
 void StEmcMicroUtil::clearGarbage()
 {

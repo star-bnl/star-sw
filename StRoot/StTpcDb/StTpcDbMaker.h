@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.15 2002/04/02 00:16:31 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.14 2002/02/05 22:21:08 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
- * Revision 1.15  2002/04/02 00:16:31  hardtke
- * New class that gets hit errors from database
- *
  * Revision 1.14  2002/02/05 22:21:08  hardtke
  * Move Init code to InitRun
  *
@@ -85,7 +82,6 @@
 #define tpc_sec24_to_sec12_ F77_NAME(tpc_sec24_to_sec12,TPC_SEC24_TO_SEC12)
 #define tpc_pad_time_offset_ F77_NAME(tpc_pad_time_offset,TPC_PAD_TIME_OFFSET)
 #define tpc_rdo_mask_ F77_NAME(tpc_rdo_mask,TPC_RDO_MASK)
-#define tpc_hit_error_table_ F77_NAME(tpc_hit_error_table,TPC_HIT_ERROR_TABLE)
 extern "C" {
 R__EXTERN int type_of_call numberOfPadsAtRow_(int *);
 }
@@ -143,9 +139,6 @@ extern "C" {
 extern "C" {
   R__EXTERN int type_of_call tpc_rdo_mask_(int*, int*);
 }
-extern "C" {
-  R__EXTERN int type_of_call tpc_hit_error_table_(int*, int*, int*, float*);
-}
 #endif
 class StTpcDb;
 class St_tpg_pad_plane;
@@ -179,7 +172,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.15 2002/04/02 00:16:31 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.14 2002/02/05 22:21:08 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,5 +1,8 @@
-// $Id: StKinkController.cxx,v 3.4 2000/12/18 21:35:17 genevb Exp $
+// $Id: StKinkController.cxx,v 3.5 2002/04/30 16:02:47 genevb Exp $
 // $Log: StKinkController.cxx,v $
+// Revision 3.5  2002/04/30 16:02:47  genevb
+// Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+//
 // Revision 3.4  2000/12/18 21:35:17  genevb
 // Introduced variable buffer-sizing
 //
@@ -110,29 +113,36 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
       indexRecoArray = -1;
 
       rcKinkPartner = (*mcKinkBounds.first).second;
-      float x, y, z, delta;
+      float x, y, z, delta, xd, yd, zd;
       x = mcVert->position().x();
       y = mcVert->position().y();
       z = mcVert->position().z();
-      delta = (x - rcKinkPartner->position().x())*(x - rcKinkPartner->position().x())+
-        (y - rcKinkPartner->position().y())*(y - rcKinkPartner->position().y())+
-        (z - rcKinkPartner->position().z())*(z - rcKinkPartner->position().z());
+      xd = x - rcKinkPartner->position().x();
+      yd = y - rcKinkPartner->position().y();
+      zd = z - rcKinkPartner->position().z();
+      delta = xd*xd + yd*yd + zd*zd;
 
       //Now loop over the bounds      
       for(mcKinkMapIter mcKinkMapIt = mcKinkBounds.first;
                       mcKinkMapIt != mcKinkBounds.second; ++mcKinkMapIt) {
         StKinkVertex *temp = (*mcKinkMapIt).second;
-        if ((x - temp->position().x())*(x - temp->position().x())+
-            (y - temp->position().y())*(y - temp->position().y())+
-            (z - temp->position().z())*(z - temp->position().z()) < delta)
-                rcKinkPartner = (*mcKinkMapIt).second;
+        if (temp != rcKinkPartner) {
+          xd = x - temp->position().x();
+          yd = y - temp->position().y();
+          zd = z - temp->position().z();
+          float delta2 = xd*xd + yd*yd + zd*zd;
+          if (delta2 < delta) { rcKinkPartner = temp; delta = delta2; }
+        }
       }
+      x = rcKinkPartner->position().x();
+      y = rcKinkPartner->position().y();
+      z = rcKinkPartner->position().z();
       // stupid way
       for(Int_t i = 0; i < GetN(); i++) {
         StKinkMuDst* tmpKink = (StKinkMuDst*) dataArray->At(i);
-        if( fabs(rcKinkPartner->position().x()-tmpKink->positionX()) < 0.00001 &&
-            fabs(rcKinkPartner->position().y()-tmpKink->positionY()) < 0.00001 &&
-            fabs(rcKinkPartner->position().z()-tmpKink->positionZ()) < 0.00001 )
+        if( fabs(x - tmpKink->positionX()) < 0.00001 &&
+            fabs(y - tmpKink->positionY()) < 0.00001 &&
+            fabs(z - tmpKink->positionZ()) < 0.00001 )
         { indexRecoArray = i; break; }
       }
       new((*assocArray)[assocEntries++]) 

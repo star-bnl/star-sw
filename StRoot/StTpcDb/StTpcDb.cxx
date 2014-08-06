@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.33 2002/04/02 00:16:30 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.32 2002/02/06 18:39:13 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
- * Revision 1.33  2002/04/02 00:16:30  hardtke
- * New class that gets hit errors from database
- *
  * Revision 1.32  2002/02/06 18:39:13  hardtke
  * Add tpc Field Cage structure
  *
@@ -108,7 +105,6 @@ ClassImp(StTpcSlowControlSimI)
 ClassImp(StTpcT0I)
 ClassImp(StTpcGlobalPositionI)
 ClassImp(StTpcFieldCageI)
-ClassImp(StTpcHitErrorsI)
 ClassImp(StTpcSectorPositionI)
 #endif
 //_____________________________________________________________________________
@@ -328,22 +324,6 @@ StTpcFieldCageI* StTpcDb::FieldCage(){
    }
   }
  return FC;
-}
-
-//_____________________________________________________________________________
-StTpcHitErrorsI* StTpcDb::HitErrors(){
-  if (!hitErrors){            // get hit errors from data base
-   const int dbIndex = kCalibration;
-   if (tpc[dbIndex]){
-    St_DataSet* tpd = tpc[dbIndex]->Find("tpcHitErrors");
-    if (!(tpd && tpd->HasData()) ){
-     gMessMgr->Message("StTpcDb::Error Finding Tpc Hit Error Info","E");
-     return 0;
-    }
-    hitErrors = new StRTpcHitErrors((St_tpcHitErrors*)tpd);
-   }
-  }
- return hitErrors;
 }
 
 //_____________________________________________________________________________

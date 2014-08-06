@@ -1,44 +1,37 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.1 2002/03/08 17:04:17 laue Exp $
+ * $Id: StMuArrays.h,v 1.3 2002/05/20 17:23:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
+/** 
+    @class StMuArrays 
+    Class holding the definitions of the TClonesArrays as static data members.
+    There are two sets of TClonesArrays. The 'arrays' for tracks and event information,
+    as well as the 'strangeArrays' holding the information that has been copied from the 
+    StStrangeMuDst (i.e. V0s, Kinks, etc.)
+*/
 #ifndef StMuArrays_hh
 #define StMuArrays_hh
 
-enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc};
+/// @enum strangeTypes enumeration to to index the strangeArrays
+enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
+/// enumeration to to index the arrays
 enum muDstTypes {muEvent=0, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject}; 
 
-/* #define __MAX_Events__ 1 */
-/* #define __MAX_Tracks__ 10000 */
-
-/* #define __MAX_StRichSpectra__ 100 */
-/* #define __MAX_StDetectorState__ 100 */
-/* #define __MAX_StL3AlgorithmInfo__ 100 */
-
-/* #define __MAX_StStrangeEvMuDst__ 1 */
-/* #define __MAX_StV0MuDst__ 10000 */
-/* #define __MAX_StV0Mc__ 10000 */
-/* #define __MAX_StXiMuDst__ 10000 */
-/* #define __MAX_StXiMc__ 10000 */
-/* #define __MAX_StKinkMuDst__ 100 */
-/* #define __MAX_StKinkMc__ 100 */
-/* #define __MAX_StStrangeAssoc__ 100 */
-
 #define __NARRAYS__ 9
-#define __NSTRANGEARRAYS__ 11
+#define __NSTRANGEARRAYS__ 12
 
 class StMuArrays {
  public:
-  static char* arrayNames[__NARRAYS__];
-  static char* arrayTypes[__NARRAYS__];
-  static int arraySizes[__NARRAYS__];
-  static int arrayCounters[__NARRAYS__];
-  
-  static char* strangeArrayNames[__NSTRANGEARRAYS__];
-  static char* strangeArrayTypes[__NSTRANGEARRAYS__];
-  static int strangeArrayCounters[__NSTRANGEARRAYS__];
-  static int strangeArraySizes[__NSTRANGEARRAYS__];
+    static char* arrayNames[__NARRAYS__]; ///< names of the TBranches in the TTree/File                        
+    static char* arrayTypes[__NARRAYS__]; ///< names of the classes, the TClonesArrays are arrays of this type 
+    static int arraySizes[__NARRAYS__];   ///< maximum sizes of the TClonesArrays                              
+    static int arrayCounters[__NARRAYS__];///< number of entries in current event, currently not used          
+    
+    static char* strangeArrayNames[__NSTRANGEARRAYS__]; ///< names of the TBranches in the TTree/File                        
+    static char* strangeArrayTypes[__NSTRANGEARRAYS__];	///< names of the classes, the TClonesArrays are arrays of this type 
+    static int strangeArraySizes[__NSTRANGEARRAYS__];	///< maximum sizes of the TClonesArrays 
+    static int strangeArrayCounters[__NSTRANGEARRAYS__];///< number of entries in current event, currently not used 
 };
 
 #endif
@@ -46,6 +39,12 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.3  2002/05/20 17:23:31  laue
+ * StStrangeCuts added
+ *
+ * Revision 1.2  2002/05/04 23:56:29  laue
+ * some documentation added
+ *
  * Revision 1.1  2002/03/08 17:04:17  laue
  * initial revision
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuL3Filter.cxx,v 1.2 2002/03/20 16:04:12 laue Exp $
+ * $Id: StMuL3Filter.cxx,v 1.3 2002/05/04 23:56:30 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -22,6 +22,9 @@ bool StMuL3Filter::accept( const StEvent* e) { cout << "StMuL3Filter::accept( co
 bool StMuL3Filter::accept( const StV0Vertex* v) { cout << "StMuL3Filter::accept(const StV0Vertex* v) not overwritten, returning true" << endl; return true;}
 bool StMuL3Filter::accept( const StXiVertex* x) { cout << "StMuL3Filter::accept(const StXiVertex* x) not overwritten, returning true" << endl; return true;}
 bool StMuL3Filter::accept( const StKinkVertex* k) { cout << "StMuL3Filter::accept(const StKinkVertex* k) not overwritten, returning true" << endl; return true;}
+bool StMuL3Filter::accept( const StV0MuDst* v) { cout << "StMuL3Filter::accept(const StV0MuDst* v) not overwritten, returning true" << endl; return true;}
+bool StMuL3Filter::accept( const StXiMuDst* x) { cout << "StMuL3Filter::accept(const StXiMuDst* x) not overwritten, returning true" << endl; return true;}
+bool StMuL3Filter::accept( const StKinkMuDst* k) { cout << "StMuL3Filter::accept(const StKinkMuDst* k) not overwritten, returning true" << endl; return true;}
  
 
 StMuL3Filter::StMuL3Filter()  {
@@ -107,6 +110,9 @@ bool StMuL3Filter::accept(const StTrack* track) {
 /***************************************************************************
  *
  * $Log: StMuL3Filter.cxx,v $
+ * Revision 1.3  2002/05/04 23:56:30  laue
+ * some documentation added
+ *
  * Revision 1.2  2002/03/20 16:04:12  laue
  * minor changes, mostly added access functions
  *

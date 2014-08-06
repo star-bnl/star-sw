@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeCuts.cc,v 3.1 2001/01/30 04:06:45 genevb Exp $
+ * $Id: StStrangeCuts.cc,v 3.3 2002/05/10 20:57:06 genevb Exp $
  *
  * Author: Gene Van Buren, UCLA, 26-May-2000
  *
@@ -11,6 +11,12 @@
  ***********************************************************************
  *
  * $Log: StStrangeCuts.cc,v $
+ * Revision 3.3  2002/05/10 20:57:06  genevb
+ * Minor update
+ *
+ * Revision 3.2  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.1  2001/01/30 04:06:45  genevb
  * Better handling of file switches
  *
@@ -28,12 +34,17 @@
 #include "TDataMember.h"
 #include "TDataType.h"
 #include "TString.h"
+#include "TClonesArray.h"
 #include "StStrangeCuts.hh"
 #include "StMessMgr.h"
 
+static const TCut unknownCut("NO or UNKNOWN cuts!","");
+
 ClassImp(StStrangeCuts)
 //_____________________________________________________________________________
-StStrangeCuts::StStrangeCuts() : cuts(0) {
+StStrangeCuts::StStrangeCuts() : TOrdCollection(0), update(kFALSE) {
+  SetOwner();
+  TCut::Class()->IgnoreTObjectStreamer();
 }
 //_____________________________________________________________________________
 StStrangeCuts::~StStrangeCuts() {
@@ -63,30 +74,74 @@ void StStrangeCuts::Fill(const char* prefix, TDataSet* cutSet) {
   }
 }
 //_____________________________________________________________________________
-void StStrangeCuts::Append(TOrdCollection* oldCuts) {
+void StStrangeCuts::Append(const TOrdCollection* oldCuts) {
   // Add any new cuts to any old cuts
   if (oldCuts) {
-    if (cuts) {
-      for (Int_t i=(oldCuts->GetSize() - 1); i>=0; i--) {
-        TObject* oldCut = oldCuts->At(i);
-        if (NewCut(oldCut)) cuts->AddFirst(oldCut);
-      }
-    } else cuts = oldCuts;
+    for (Int_t i=(oldCuts->GetSize() - 1); i>=0; i--) {
+      AddIfNew((TCut*) oldCuts->At(i), kTRUE);
+    }
   } else {
     gMessMgr->Warning() << "StStrangeCuts: no StrangeCuts to read in.\n "
                      << "   Creating new one." << endm;    
-    Assure();
   }
 }
 //_____________________________________________________________________________
-Bool_t StStrangeCuts::NewCut(TObject* aCut) {
-  for (Int_t i=0; i<(cuts->GetSize()); i++) {
-    TObject* bCut = cuts->At(i);
+void StStrangeCuts::Reset(const TSeqCollection* oldCuts) {
+  // Check to see if cuts need replaced
+  Int_t cutsSize;
+  if (oldCuts->IsA() == TClonesArray::Class()) {
+    cutsSize = ((TClonesArray*) oldCuts)->GetEntriesFast();
+  } else {
+    cutsSize = oldCuts->GetSize();
+  }
+  Bool_t reset = (cutsSize != GetSize());
+  Int_t i=0;
+  while ((!reset) && (i<cutsSize)) {
+    reset = NewCut((TCut*) oldCuts->At(i++));
+  }
+  if (reset) {
+    Clear();
+    for (i=0; i<cutsSize; i++) {
+      Add((TCut*) oldCuts->At(i));
+    }
+  }
+}
+//_____________________________________________________________________________
+Bool_t StStrangeCuts::NewCut(const TObject* aCut) {
+  for (Int_t i=0; i<GetSize(); i++) {
+    TObject* bCut = At(i);
     if (!(bCut->Compare(aCut))) {
       if (!(strcmp(bCut->GetTitle(),aCut->GetTitle())))
         return kFALSE;
     }
   }
   return kTRUE;
+}
+//_____________________________________________________________________________
+void StStrangeCuts::AddIfNew(TCut* aCut, Bool_t reverse) {
+  if (NewCut(aCut)) {
+    if (reverse) AddFirst(aCut);
+    else AddLast(aCut);
+    ForceUpdateArray();
+  } else {
+    delete aCut;
+    aCut = 0;
+  }
+}
+//_____________________________________________________________________________
+void StStrangeCuts::UpdateArray(TClonesArray* cutsArray) {
+  if (update) {
+    Int_t cutsSize = GetSize();
+    cutsArray->Expand(cutsSize);
+    for (Int_t i=0; i<cutsSize; i++) {
+      new((*cutsArray)[i]) TCut(* CutAt(i));
+    }
+    update = kFALSE;
+  }
+}
+//_____________________________________________________________________________
+void StStrangeCuts::UnknownCuts() {
+  Clear();
+  Add(unknownCut);
 }
 

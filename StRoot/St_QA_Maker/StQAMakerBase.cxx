@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.17 2002/03/11 20:59:58 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.18 2002/04/23 01:59:56 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.18  2002/04/23 01:59:56  genevb
+// Addition of BBC/FPD histos
+//
 // Revision 2.17  2002/03/11 20:59:58  genevb
 // Fixed bug with placement of trigger hists
 //
@@ -157,6 +160,10 @@ Int_t StQAMakerBase::Make(){
   MakeHistEMC();
   // histograms from geant and reco tables 
   if (histsSet==0) MakeHistEval();
+  // histograms from BBC in StEvent
+  MakeHistBBC();
+  // histograms from FPD in StEvent
+  MakeHistFPD();
 
   return kStOk;
 }

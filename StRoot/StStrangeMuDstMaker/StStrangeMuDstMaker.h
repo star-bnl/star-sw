@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 3.7 2001/09/14 21:39:02 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.8 2002/04/30 16:02:48 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.8  2002/04/30 16:02:48  genevb
+// Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+//
 // Revision 3.7  2001/09/14 21:39:02  genevb
 // Adjustments to not depend on order in which maker Clear() is called
 //
@@ -104,6 +107,7 @@ class StStrangeMuDstMaker : public StMaker {
   
   TClonesArray* GetEvClonesArray();
   TClonesArray* GetEvMcArray();
+  TClonesArray* GetCutsArray();
 
   TClonesArray* GetV0ClonesArray()   { return v0->GetDataArray(); }
   TClonesArray* GetV0McArray()       { return v0->GetMcArray(); }
@@ -205,7 +209,8 @@ class StStrangeMuDstMaker : public StMaker {
 
   StrangeEnum rw;
   TClonesArray* evClonesArray;   //!
-  TClonesArray* evMcArray;   //!
+  TClonesArray* evMcArray;       //!
+  TClonesArray* cutsArray;       //!
 
   StStrangeMuDstMaker* dstMaker; //!
   TObjArray subMakers;
@@ -244,6 +249,8 @@ inline TClonesArray* StStrangeMuDstMaker::GetEvClonesArray()
             { return evClonesArray; }
 inline TClonesArray* StStrangeMuDstMaker::GetEvMcArray()
             { return evMcArray; }
+inline TClonesArray* StStrangeMuDstMaker::GetCutsArray()
+            { return cutsArray; }
 inline StStrangeEvMuDst* StStrangeMuDstMaker::GetEvent()
             { return (evClonesArray ?
             (StStrangeEvMuDst*) (*evClonesArray)[0] : 0); }

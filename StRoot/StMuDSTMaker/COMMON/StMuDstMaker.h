@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.8 2002/04/01 22:42:30 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.12 2002/05/20 17:23:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -43,6 +43,7 @@ class StXiMc;
 class StKinkMuDst;
 class StKinkMc;
 class StStrangeAssoc;
+class StStrangeCuts;
 
 ///
 class StMuCut;
@@ -73,7 +74,14 @@ class StMuDstMaker : public StMaker {
   TTree* tree();
 
   void setSplit(int=99);
+  void setBufferSize(int=65536*4);
   void setCompression(int comp=9);
+
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.12 2002/05/20 17:23:31 laue Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+
 
 private:
   enum ioMode {ioRead, ioWrite};
@@ -128,7 +136,10 @@ private:
 
   void openRead();
   void read();
+  void setBranchAddresses();
   void closeRead();
+
+  void setBranchAddresses(TChain*);
 
   void clear(TClonesArray* t, int& counter);
   void clear();
@@ -204,12 +215,27 @@ inline void StMuDstMaker::setReadKinks(bool b) { mReadKinks=b;}
 
 inline void StMuDstMaker::setSplit(int split) { mSplit = split;}
 inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
+inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.12  2002/05/20 17:23:31  laue
+ * StStrangeCuts added
+ *
+ * Revision 1.11  2002/05/04 23:56:30  laue
+ * some documentation added
+ *
+ * Revision 1.10  2002/04/26 20:57:31  jeromel
+ * Added GetCVS()
+ *
+ * Revision 1.9  2002/04/11 14:19:30  laue
+ * - update for RH 7.2
+ * - decrease default arrays sizes
+ * - add data base readerfor number of events in a file
+ *
  * Revision 1.8  2002/04/01 22:42:30  laue
  * improved chain filter options
  *

@@ -45,20 +45,25 @@ class StEventQAMaker : public StQAMakerBase {
   virtual void   MakeHistRich();
   virtual void   MakeHistEMC();
   virtual void   MakeHistEval();
+  virtual void   MakeHistBBC();
+  virtual void   MakeHistFPD();
   
   //  virtual void   SetPntrToHistUtil(StHistUtil *m1);
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.6 2002/02/10 16:48:28 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.7 2002/04/23 01:59:56 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
     };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.6 2002/02/10 16:48:28 jeromel Exp $
+// $Id: StEventQAMaker.h,v 2.7 2002/04/23 01:59:56 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.7  2002/04/23 01:59:56  genevb
+// Addition of BBC/FPD histos
+//
 // Revision 2.6  2002/02/10 16:48:28  jeromel
 // Attempt to prevent re-creation of mHitHist.
 //

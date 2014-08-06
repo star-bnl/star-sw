@@ -324,7 +324,7 @@ void StEventQAMaker::MakeHistGlob() {
       // calculate the probability of a fit being correct
       // number of degrees of freedom = fitpoints-5 (5 params constrain track)
       Double_t ndf = 2*fTraits.numberOfFitPoints()-5;
-      Double_t probability = TMath::Prob(chisq0*ndf,ndf);
+      Double_t probability = TMath::Prob(chisq0*ndf,(int) ndf);
       hists->m_globtrk_fit_prob->Fill(probability);
 
       // now fill all TPC histograms ------------------------------------------------
@@ -834,7 +834,7 @@ void StEventQAMaker::MakeHistPrim() {
         const StThreeVectorF& firstPoint = detInfo->firstPoint();
 	const StThreeVectorF& lastPoint = detInfo->lastPoint();
 	const StThreeVectorF& origin = geom->origin();
-	const StThreeVectorF& outerOrigin = outerGeom->origin();
+	//const StThreeVectorF& outerOrigin = outerGeom->origin();
 
 	// need to find position on helix closest to first point on track since
 	// the primary vertex is used as the first point on helix for primary
@@ -1831,9 +1831,7 @@ void StEventQAMaker::MakeHistEMC() {
     gMessMgr->Info(" *** in StEventQAMaker - Finished filling EMC histograms ");
 
 }
-
 //_____________________________________________________________________________
-
 void StEventQAMaker::MakeHistEval() {
 
   // requires StMcEvent
@@ -1858,11 +1856,57 @@ void StEventQAMaker::MakeHistEval() {
     hists->m_geant_reco_pvtx_z->Fill(geantZ-recoZ);
     hists->m_geant_reco_vtx_z_z->Fill(geantZ-recoZ,recoZ);    
   }
+
+}
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistBBC() {
+
+ Int_t i;
+ StTriggerDetectorCollection* trig = event->triggerDetectorCollection();
+ if (!trig) return;
+ StBbcTriggerDetector& bbc = trig->bbc();
+
+ for (i=0; i<32; i++)
+ {
+  hists->m_bbc_adc[i/8]->Fill(bbc.adc(i),i%8);
+  hists->m_bbc_tdc[i/8]->Fill(bbc.tdc(i),i%8);
+ }
+
+}
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistFPD() {
+
+ Int_t i;
+ StFpdCollection* fpd = event->fpdCollection();
+ if (!fpd) return;
+ unsigned short* dfpd = fpd->adc();
+ if (!dfpd) return;
+
+ for (i=0; i<16; i++)
+ {
+  hists->m_fpd_top[i/8]->Fill((float) dfpd[i],i%8);
+  hists->m_fpd_bottom[i/8]->Fill((float) dfpd[i+16],i%8);
+  hists->m_fpd_south[i/8]->Fill((float) dfpd[i+32],i%8);
+  if (i<12) hists->m_fpd_north[i/6]->Fill((float) dfpd[i+48],i%6);
+ }
+
+ hists->m_fpd_sums[0]->Fill((float) fpd->sumAdcTop());
+ hists->m_fpd_sums[1]->Fill((float) fpd->sumAdcBottom());
+ hists->m_fpd_sums[2]->Fill((float) fpd->sumAdcSouth());
+ hists->m_fpd_sums[3]->Fill((float) fpd->sumAdcNorth());
+ hists->m_fpd_sums[4]->Fill((float) fpd->sumAdcSmdX());
+ hists->m_fpd_sums[5]->Fill((float) fpd->sumAdcSmdY());
+ hists->m_fpd_sums[6]->Fill((float) fpd->sumAdcPreShower1());
+ hists->m_fpd_sums[7]->Fill((float) fpd->sumAdcPreShower2());
+
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.36 2002/04/03 21:13:11 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.37 2002/04/23 01:59:55 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.37  2002/04/23 01:59:55  genevb
+// Addition of BBC/FPD histos
+//
 // Revision 2.36  2002/04/03 21:13:11  lansdell
 // primary track first, last point residuals now use outerGeometry() for helix parameters
 //

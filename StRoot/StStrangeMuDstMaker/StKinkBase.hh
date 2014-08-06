@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkBase.hh,v 3.1 2001/05/04 20:15:13 genevb Exp $
+ * $Id: StKinkBase.hh,v 3.2 2002/04/30 16:02:47 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 27-Apr-2001
  *
@@ -13,6 +13,9 @@
  ***********************************************************************
  *
  * $Log: StKinkBase.hh,v $
+ * Revision 3.2  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.1  2001/05/04 20:15:13  genevb
  * Common interfaces and reorganization of components, add MC event info
  *
@@ -33,6 +36,9 @@ public:
   virtual Float_t  parentMomentumX() const;
   virtual Float_t  parentMomentumY() const;
   virtual Float_t  parentMomentumZ() const;
+  virtual Float_t  parentPrimMomentumZ() const;
+  virtual Float_t  parentPrimMomentumX() const;
+  virtual Float_t  parentPrimMomentumY() const;
   virtual Float_t  daughterMomentumX() const;
   virtual Float_t  daughterMomentumY() const;
   virtual Float_t  daughterMomentumZ() const;
@@ -46,6 +52,9 @@ protected:
   Float_t  mParentMomentumX;
   Float_t  mParentMomentumY;
   Float_t  mParentMomentumZ;
+  Float_t  mParentPrimMomentumX;
+  Float_t  mParentPrimMomentumY;
+  Float_t  mParentPrimMomentumZ;
   Float_t  mDaughterMomentumX;
   Float_t  mDaughterMomentumY;
   Float_t  mDaughterMomentumZ;
@@ -54,7 +63,7 @@ protected:
   Float_t  mPositionZ;
 
 // Corresponding ClassImp presently in StKinkMuDst.cc
-ClassDef(StKinkBase,4)
+ClassDef(StKinkBase,5)
 };
 
 inline Int_t StKinkBase::geantIdParent() const
@@ -67,6 +76,12 @@ inline Float_t StKinkBase::parentMomentumY() const
              { return mParentMomentumY; }
 inline Float_t StKinkBase::parentMomentumZ() const
              { return mParentMomentumZ; }
+inline Float_t StKinkBase::parentPrimMomentumX() const
+             { return mParentPrimMomentumX; }
+inline Float_t StKinkBase::parentPrimMomentumY() const
+             { return mParentPrimMomentumY; }
+inline Float_t StKinkBase::parentPrimMomentumZ() const
+             { return mParentPrimMomentumZ; }
 inline Float_t StKinkBase::daughterMomentumX() const
              { return mDaughterMomentumX; }
 inline Float_t StKinkBase::daughterMomentumY() const

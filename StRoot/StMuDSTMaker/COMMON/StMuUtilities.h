@@ -30,13 +30,13 @@ inline unsigned int pack2UnsignedInt(T t, int scale) {
   return (unsigned int) (t*scale +0.5);
 }
 
-template<class T> 
-inline int pack2Int(T t, int scale) {
+template<class T, class U> 
+inline int pack2Int(T t, U scale) {
   return (int) (t*scale +0.5);
 }
 
-template<class T> 
-inline double unPack(T v, int scale) {
+template<class T, class U> 
+inline double unPack(T v, U scale) {
   return ((double)v)/scale;
 }
 
@@ -47,6 +47,9 @@ inline double unPack(T v, int scale) {
 /***********************************************************************
  *
  * $Log: StMuUtilities.h,v $
+ * Revision 1.2  2002/04/15 22:29:28  laue
+ * updates
+ *
  * Revision 1.1  2002/03/08 17:04:18  laue
  * initial revision
  *

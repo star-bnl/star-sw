@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.5 2002/04/01 22:42:30 laue Exp $
+ * $Id: StMuDst.h,v 1.6 2002/05/20 17:23:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -25,6 +25,7 @@ class StKinkMuDst;
 class StV0Mc;
 class StXiMc;
 class StKinkMc;
+class TCut;
 
 class StEvent;
 class StTrack;
@@ -88,6 +89,8 @@ public:
   static StXiMuDst* xis(int i) { return (StXiMuDst*)strangeArrays[smuXi]->UncheckedAt(i); }
   static TClonesArray* kinks() { return strangeArrays[smuKink]; }
   static StKinkMuDst* kinks(int i) { return (StKinkMuDst*)strangeArrays[smuKink]->UncheckedAt(i); }
+  static TClonesArray* strangeCuts() { return strangeArrays[smuCut]; }
+  static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
 
     ClassDef(StMuDst,1)
 };
@@ -97,6 +100,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.6  2002/05/20 17:23:31  laue
+ * StStrangeCuts added
+ *
  * Revision 1.5  2002/04/01 22:42:30  laue
  * improved chain filter options
  *

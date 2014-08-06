@@ -54,11 +54,8 @@ c--------------------------------------------------------------------------
 *  angle       = alpha (for localX resolution) or lambda (for Z resolution)
 *
 *
-      integer tpc_hit_error_table
-      integer iret,i,j,k
       integer ixz,io
       real dlen,angle
-      real errorval 
 
       real xval(2,2,7)          ! index1 = 1,2 for inner,outer sector
                                 ! index2 = 1,2 for x,z resolution
@@ -74,16 +71,72 @@ c--------------------------------------------------------------------------
 c===================initialize...=====================
       if (first) then
          first=.false.
-
-       do i=1,2
-        do j=1,2
-         do k=1,3
-          iret = tpc_hit_error_table(i,j,k,errorval)
-          xval(i,j,k) = errorval
-         enddo
-        enddo
-       enddo 
-
+c$$$c----------  Inner padrow X-resolution:------------
+c$$$         xval(1,1,1) =   0.27297E-03
+c$$$         xval(1,1,2) =   0.72269E-04
+c$$$         xval(1,1,3) =   0.21579E-01
+c$$$         xval(1,1,4) =   0.0
+c$$$         xval(1,1,5) =   0.0
+c$$$         xval(1,1,6) =   0.0
+c$$$         xval(1,1,7) =   200.0
+c$$$c----------  Outer padrow X-resolution:------------
+c$$$         xval(2,1,1) =   0.12063E-02
+c$$$         xval(2,1,2) =   0.42314E-04
+c$$$         xval(2,1,3) =   0.37258E-01
+c$$$         xval(2,1,4) =   0.11146E-01
+c$$$         xval(2,1,5) =   0.47545E-04
+c$$$         xval(2,1,6) =   0.15743E-01
+c$$$         xval(2,1,7) =   35.0
+c$$$c----------  Inner padrow Z-resolution:------------
+c$$$         xval(1,2,1) =   0.35521E-02
+c$$$         xval(1,2,2) =   0.15138E-03
+c$$$
+c$$$         xval(1,2,3) =   0.20967E-01
+c$$$         xval(1,2,4) =   0.0
+c$$$         xval(1,2,5) =   0.0
+c$$$         xval(1,2,6) =   0.0
+c$$$         xval(1,2,7) =   200.0
+c$$$c----------  Outer padrow Z-resolution:------------
+c$$$         xval(2,2,1) =   0.54256E-02
+c$$$         xval(2,2,2) =   0.80906E-04
+c$$$         xval(2,2,3) =   0.72093E-01
+c$$$         xval(2,2,4) =   0.11630E-01
+c$$$         xval(2,2,5) =   0.97988E-04
+c$$$         xval(2,2,6) =   0.31120E-01
+c$$$         xval(2,2,7) =   20.0
+c$$$      endif
+c----------  Inner sector X-resolution:------------
+         xval(1,1,1) =   1.68243E-03
+         xval(1,1,2) =   5.23272E-05
+         xval(1,1,3) =   5.75341E-02
+         xval(1,1,4) =   0.0
+         xval(1,1,5) =   0.0
+         xval(1,1,6) =   0.0
+         xval(1,1,7) =   0.0
+c----------  Outer sector X-resolution:------------
+         xval(2,1,1) =   2.02775E-04
+         xval(2,1,2) =   3.55219E-05
+         xval(2,1,3) =   6.45610E-02
+         xval(2,1,4) =   0.0
+         xval(2,1,5) =   0.0
+         xval(2,1,6) =   0.0
+         xval(2,1,7) =   0.0
+c----------  Inner sector Z-resolution:------------
+         xval(1,2,1) =   3.12735E-03
+         xval(1,2,2) =   1.51055E-04
+         xval(1,2,3) =   2.43806E-02
+         xval(1,2,4) =   0.0
+         xval(1,2,5) =   0.0
+         xval(1,2,6) =   0.0
+         xval(1,2,7) =   0.0
+c----------  Outer sector Z-resolution:------------
+         xval(2,2,1) =   8.15800E-03
+         xval(2,2,2) =   5.69582E-05
+         xval(2,2,3) =   4.48440E-02
+         xval(2,2,4) =   0.0
+         xval(2,2,5) =   0.0
+         xval(2,2,6) =   0.0
+         xval(2,2,7) =   0.0
       endif
 c=====================================================
 

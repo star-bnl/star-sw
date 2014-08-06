@@ -15,12 +15,17 @@
 
 ClassImp(StrangeMuDstPlayer)
 
+char empty = '\0';
+char slash = '/';
 void ParseFileName(Char_t *output, Char_t **file, Char_t **dir) {
-  char *c = "/";
-  *file = strrchr(output,*c);
-  (*file)++;
-  *dir = new char[strlen(output)+5];
-  strncpy(*dir,output,(strlen(output)-strlen(*file)));
+  if ((*file = strrchr(output,slash))) {
+    (*file)++;
+    *dir = new char[strlen(output)+5];
+    strncpy(*dir,output,(strlen(output)-strlen(*file)));
+  } else {
+    *file = output;
+    *dir = &empty;
+  }
 }
 
 StrangeMuDstPlayer::StrangeMuDstPlayer() {
@@ -268,7 +273,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
 
   // Loop over events
   {for( Int_t i=0; i<NEvents; i++ ) {
-    switch (istatus = chain.Make()) {
+    switch (istatus = chain.Make(i)) {
       case 0: break;
       case 2: { gMessMgr->Info("Last event from input."); break; }
       case 3: { gMessMgr->Error() << "Event " << i << " had error " <<

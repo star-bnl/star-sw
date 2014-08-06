@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkI.hh,v 3.2 2001/11/05 23:41:06 genevb Exp $
+ * $Id: StKinkI.hh,v 3.3 2002/04/30 16:02:47 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 27-Apr-2001
  *
@@ -13,6 +13,9 @@
  ***********************************************************************
  *
  * $Log: StKinkI.hh,v $
+ * Revision 3.3  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
  * Revision 3.2  2001/11/05 23:41:06  genevb
  * Add more dEdx, B field info, careful of changes to TTree unrolling
  *
@@ -35,9 +38,12 @@ public:
 
   virtual Int_t   geantIdParent() const=0;
   virtual Int_t   geantIdDaughter() const=0;
-  virtual Float_t parentMomentumX() const=0;
+  virtual Float_t parentMomentumX() const=0;     // Momenta at the decay vertex
   virtual Float_t parentMomentumY() const=0;
   virtual Float_t parentMomentumZ() const=0;
+  virtual Float_t parentPrimMomentumX() const=0; // Momenta at the origin
+  virtual Float_t parentPrimMomentumY() const=0;
+  virtual Float_t parentPrimMomentumZ() const=0;
   virtual Float_t daughterMomentumX() const=0;
   virtual Float_t daughterMomentumY() const=0;
   virtual Float_t daughterMomentumZ() const=0;

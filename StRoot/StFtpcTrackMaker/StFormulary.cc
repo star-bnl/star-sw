@@ -1,5 +1,9 @@
-// $Id: StFormulary.cc,v 1.2 2000/07/18 21:22:15 oldi Exp $
+// $Id: StFormulary.cc,v 1.3 2002/04/09 16:10:09 oldi Exp $
 // $Log: StFormulary.cc,v $
+// Revision 1.3  2002/04/09 16:10:09  oldi
+// Method to get the magentic field factor moved to StFormulary. It works for
+// simulation as well, now.
+//
 // Revision 1.2  2000/07/18 21:22:15  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -20,6 +24,12 @@
 
 #include "StFormulary.hh"
 #include "TMath.h"
+
+#include "StDetectorDbMaker/StDetectorDbMagnet.h"
+#ifndef gufld
+#define gufld gufld_
+extern "C" {void gufld(float *, float *);}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // StFormulary                                                               //
@@ -80,4 +90,25 @@ Double_t StFormulary::Dist_squared(const Double_t *p1, const Double_t *p2, Int_t
   delete[] minus;
 
   return dist_sq;
+}
+
+
+Double_t StFormulary::GetMagneticFieldFactor()
+{
+  // Returns magentc field factor (in units of the STAR standard field configuration).
+
+  StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
+  Double_t mag_fld_factor = magnet->getScaleFactor();
+  
+  if (mag_fld_factor == -9999) {
+    // This ugly stuff had to be introduced due to missing information for simulated events.
+    Float_t x[3] = {0., 0., 0.};
+    Float_t b[3];
+    gufld(x,b);
+    Float_t gFactor = b[2]/4.980;
+    // set mag_fld_factor to the arbitrary value of +/-99 or 0 (at least the sign is alright)
+    mag_fld_factor = (TMath::Abs(gFactor) > 0.2) ? (gFactor > 0.) ? +99 : -99 : 0.;
+  }
+  
+  return mag_fld_factor;
 }

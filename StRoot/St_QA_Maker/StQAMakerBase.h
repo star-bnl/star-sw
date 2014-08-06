@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.6 2002/01/26 03:04:07 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.7 2002/04/23 01:59:56 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.7  2002/04/23 01:59:56  genevb
+// Addition of BBC/FPD histos
+//
 // Revision 2.6  2002/01/26 03:04:07  genevb
 // Fixed some problems with fcl histos
 //
@@ -45,7 +48,7 @@ class StQAMakerBase : public StMaker {
   virtual Int_t  Make();
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.6 2002/01/26 03:04:07 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.7 2002/04/23 01:59:56 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -100,6 +103,8 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistRich() = 0;
   virtual void MakeHistEMC() {}
   virtual void MakeHistEval() = 0;
+  virtual void MakeHistBBC() {}
+  virtual void MakeHistFPD() {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
 };
