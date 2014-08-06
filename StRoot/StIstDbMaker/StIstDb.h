@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.h,v 1.6 2014/08/06 11:43:22 jeromel Exp $
+* $Id: StIstDb.h,v 1.7 2014/08/06 18:44:21 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.h,v $
+* Revision 1.7  2014/08/06 18:44:21  ypwang
+* replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
+*
 * Revision 1.6  2014/08/06 11:43:22  jeromel
 * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 *
@@ -55,31 +58,31 @@ class StIstDb : public StObject
 
 public:
    StIstDb();
-   THashList *GetRotations() const      	{return mgRotList; }
-   const TGeoHMatrix *GetGeoHMatrixTpcOnGlobal() const	{return mGeoHMatrixTpcOnGlobal; }
-   const TGeoHMatrix *GetGeoHMatrixIdsOnTpc() const     	{return &mGeoHMatrixIdsOnTpc; }
-   const TGeoHMatrix *GetGeoHMatrixPstOnIds() const     	{return &mGeoHMatrixPstOnIds; }
-   const TGeoHMatrix *GetGeoHMatrixIstOnPst() const     	{return &mGeoHMatrixIstOnPst; }
-   const TGeoHMatrix *GetGeoHMatrixLadderOnIst(Int_t ladder) const     {return &mGeoHMatrixLadderOnIst[ladder - 1]; }
-   const TGeoHMatrix *GetGeoHMatrixSensorOnLadder(Int_t ladder, Int_t sensor) const	{return &mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1]; }
+   THashList *getRotations() const      	{return mgRotList; }
+   const TGeoHMatrix *getGeoHMatrixTpcOnGlobal() const	{return mGeoHMatrixTpcOnGlobal; }
+   const TGeoHMatrix *getGeoHMatrixIdsOnTpc() const     	{return &mGeoHMatrixIdsOnTpc; }
+   const TGeoHMatrix *getGeoHMatrixPstOnIds() const     	{return &mGeoHMatrixPstOnIds; }
+   const TGeoHMatrix *getGeoHMatrixIstOnPst() const     	{return &mGeoHMatrixIstOnPst; }
+   const TGeoHMatrix *getGeoHMatrixLadderOnIst(Int_t ladder) const     {return &mGeoHMatrixLadderOnIst[ladder - 1]; }
+   const TGeoHMatrix *getGeoHMatrixSensorOnLadder(Int_t ladder, Int_t sensor) const	{return &mGeoHMatrixSensorOnLadder[ladder - 1][sensor - 1]; }
 
-   const istPedNoise_st *GetPedNoise() const 		{return mIstPedNoise;}
-   const istGain_st *GetGain() const     		{return mIstGain;    }
-   const istMapping_st *GetMapping() const  		{return mIstMapping; }
-   const istControl_st *GetControl() const  		{return mIstControl; }
-   const istChipConfig_st *GetChipStatus() const 	{return mIstChipStatus; }
+   const istPedNoise_st *getPedNoise() const 		{return mIstPedNoise;}
+   const istGain_st *getGain() const     		{return mIstGain;    }
+   const istMapping_st *getMapping() const  		{return mIstMapping; }
+   const istControl_st *getControl() const  		{return mIstControl; }
+   const istChipConfig_st *getChipStatus() const 	{return mIstChipStatus; }
 
-   Int_t SetGeoHMatrices(Survey_st **tables);
-   void SetPedNoise(istPedNoise_st *pedNoise) 	{mIstPedNoise = pedNoise;}
-   void SetGain(istGain_st *gain)		{mIstGain     = gain;}
-   void SetMapping(istMapping_st *mapping)    	{mIstMapping  = mapping;}
-   void SetControl(istControl_st *control)    	{mIstControl  = control;}
-   void SetChipStatus(istChipConfig_st *chipStatus) {mIstChipStatus = chipStatus;}
+   Int_t setGeoHMatrices(Survey_st **tables);
+   void setPedNoise(istPedNoise_st *pedNoise) 	{mIstPedNoise = pedNoise;}
+   void setGain(istGain_st *gain)		{mIstGain     = gain;}
+   void setMapping(istMapping_st *mapping)    	{mIstMapping  = mapping;}
+   void setControl(istControl_st *control)    	{mIstControl  = control;}
+   void setChipStatus(istChipConfig_st *chipStatus) {mIstChipStatus = chipStatus;}
 
-   void PrintGeoHMatrices() const;
+   void printGeoHMatrices() const;
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.6 2014/08/06 11:43:22 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.7 2014/08/06 18:44:21 ypwang Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    static THashList 	*mgRotList;

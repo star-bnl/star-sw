@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.cxx,v 1.7 2014/08/05 17:48:58 ypwang Exp $
+* $Id: StIstDb.cxx,v 1.8 2014/08/06 18:44:21 ypwang Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.8  2014/08/06 18:44:21  ypwang
+* replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
+*
 * Revision 1.7  2014/08/05 17:48:58  ypwang
 * update Print() function to PrintGeoHMatrices()
 *
@@ -80,7 +83,7 @@ StIstDb::StIstDb() : StObject()
    mIstChipStatus = NULL;
 }
 //_____________________________________________________________________________
-Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
+Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
 {
    using namespace StIstConsts;
 
@@ -89,8 +92,14 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
    mgRotList->SetOwner(kFALSE);
 
    //get TPC positionement relative to STAR
-   assert(gStTpcDb);
-   mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
+   if (gStTpcDb) {
+   	mGeoHMatrixTpcOnGlobal = (TGeoHMatrix *)&gStTpcDb->Tpc2GlobalMatrix();
+   }
+   else {
+	if (mGeoHMatrixTpcOnGlobal) delete mGeoHMatrixTpcOnGlobal;
+        mGeoHMatrixTpcOnGlobal = new TGeoHMatrix("tpcOnGlobal");
+        LOG_WARN << "No gStTpcDb, use null transformation for tpc on global" << endm;
+   }
 
    //obtain IST geomery tables
    Survey_st *idsOnTpc          = tables[0];
@@ -166,7 +175,7 @@ Int_t StIstDb::SetGeoHMatrices(Survey_st **tables)
    return kStOk;
 }
 
-void StIstDb::PrintGeoHMatrices() const
+void StIstDb::printGeoHMatrices() const
 {
    mGeoHMatrixTpcOnGlobal->Print();
    mGeoHMatrixIdsOnTpc.Print();
