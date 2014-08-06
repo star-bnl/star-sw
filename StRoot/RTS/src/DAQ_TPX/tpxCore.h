@@ -188,6 +188,4 @@ extern int tpx_fee_check ;
 extern struct tpx_odd_fee_t tpx_odd_fee[256] ;
 extern int tpx_odd_fee_count ;
 
-extern int *tpx_altro_to_row_override ;
-
 #endif

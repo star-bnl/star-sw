@@ -46,28 +46,11 @@ if ( ! -d $DIR ) then
 endif
 
 
-set progFileBase = inProgress
-set progFile = ${DIR}/${progFileBase}
-if (-e $progFile) then
-  set oldProg = `$CAT $progFile `
-  # delete if more than 48 hours old  
-  set progFiles = `$FIND $DIR -name $progFileBase -mtime +1 `
-  if ($#progFiles > 0) then
-    echo "tpcDriftVelocity: deleting in-progress file for old job from $oldProg "
-    $RM $progFile
-  else
-    echo "tpcDriftVelocity: exiting due to in-progress job from $oldProg "
-    exit
-  endif
-endif
-
-set startDate = `$DATEC `
-echo $startDate > $progFile
-
 # will use in post-fix
-set DATE=`echo $startDate | $SED "s/ /_/g" | $SED "s/://g"`
+set DATE=`$DATEC | $SED "s/ /_/g" | $SED "s/://g"`
 
-echo "tpcDriftVelocity: starting at $startDate"
+
+echo "Starting tpcDriftVelocity at `$DATEC`"
 
 set timeFile = $DIR/processingTime
 if (! -e $timeFile) then
@@ -139,7 +122,7 @@ EOF
             set oldMin = `echo $oldTime | $CUT -c 3-4 `
             set oldSec = `echo $oldTime | $CUT -c 5-6 `
             set oldBeginTime = "${oldYear}-${oldMonth}-${oldDay} ${oldHour}:${oldMin}:${oldSec}"
-            echo "tpcDriftVelocity: deactivating old DB entry with beginTime=${oldBeginTime}";
+            echo "Deactivating old DB entry with beginTime=${oldBeginTime}";
             $MYDB -e "UPDATE tpcDriftVelocity SET entryTime=entryTime,deactive=UNIX_TIMESTAMP(CURRENT_TIMESTAMP) WHERE beginTime='${oldBeginTime}' and deactive=0;"
             echo "UPDATE tpcDriftVelocity SET entryTime=entryTime,deactive=UNIX_TIMESTAMP(CURRENT_TIMESTAMP) WHERE beginTime='${oldBeginTime}' and deactive=0;"
 
@@ -178,31 +161,31 @@ $MV $tempfile $laserFiles
 
 
 if( -e $DIR/Load ) then
-    echo "tpcDriftVelocity: moving Load/ to LoadSavedOn$DATE/"
+    echo "Moving Load/ to LoadSavedOn$DATE/"
     $MV $DIR/Load $DIR/LoadSavedOn$DATE || exit
     $TAR -czf $DIR/LoadSavedOn$DATE.tar.gz $DIR/LoadSavedOn$DATE >&/dev/null &
 endif
-echo "tpcDriftVelocity: creating $DIR/Load"
+echo "Creating $DIR/Load"
 $MKDIR $DIR/Load        || exit
-echo "tpcDriftVelocity: creating $DIR/Load/Done"
+echo "Creating $DIR/Load/Done"
 $MKDIR $DIR/Load/Done   || exit
-echo "tpcDriftVelocity: creating $DIR/Load/Failed"
+echo "Creating $DIR/Load/Failed"
 $MKDIR $DIR/Load/Failed || exit
-echo "tpcDriftVelocity: creating $DIR/Load/Others"
+echo "Creating $DIR/Load/Others"
 $MKDIR $DIR/Load/Others || exit
 
 if( -e $DIR/Check ) then
-    echo "tpcDriftVelocity: moving Check/ to CheckSavedOn$DATE/"
+    echo "Moving Check/ to CheckSavedOn$DATE/"
     $MV $DIR/Check $DIR/CheckSavedOn$DATE || exit
     $TAR -czf $DIR/CheckSavedOn$DATE.tar.gz $DIR/CheckSavedOn$DATE >&/dev/null &
 endif
-echo "tpcDriftVelocity: creating $DIR/Check"
+echo "Creating $DIR/Check"
 $MKDIR $DIR/Check        || exit
-echo "tpcDriftVelocity: creating $DIR/Check/BadRun"
+echo "Creating $DIR/Check/BadRun"
 $MKDIR $DIR/Check/BadRun || exit
-echo "tpcDriftVelocity: creating $DIR/Check/VarSel"
+echo "Creating $DIR/Check/VarSel"
 $MKDIR $DIR/Check/VarSel || exit
-echo "tpcDriftVelocity: creating $DIR/Check/VarOth"
+echo "Creating $DIR/Check/VarOth"
 $MKDIR $DIR/Check/VarOth || exit
 
 
@@ -222,12 +205,12 @@ EOF
 if( -e $DIR/Load ) then
     $GZIP $DIR/Load/*.eps
     $MV $DIR/LaserPlots.*.root $DIR/Load
-    echo "tpcDriftVelocity: moving Load/ to Load$DATE/"
+    echo "Moving Load/ to Load$DATE/"
     $MV $DIR/Load $DIR/Load$DATE || exit
 endif
 
 if( -e $DIR/Check ) then
-    echo "tpcDriftVelocity: moving Check/ to Check$DATE/"
+    echo "Moving Check/ to Check$DATE/"
     $MV $DIR/Check $DIR/Check$DATE || exit
 endif
 
@@ -248,9 +231,7 @@ foreach run (`$LS -1`)
     endif
 end
 
-$RM $progFile
-
-echo "tpcDriftVelocity: $startDate done on `$DATEC `"
+echo "Done on `$DATEC `"
 
 
 
