@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.33 2014/04/03 22:03:46 perev Exp $
+ * $Id: StvNode.cxx,v 1.34 2014/08/07 16:53:10 perev Exp $
  *
  * /author Victor Perev
  */
@@ -131,7 +131,7 @@ static const char *hhh = "x y z r e ";
       if (!cal && val==-999 && err[0]==-999) continue;
       printf("\t%s=",ts.Data());
       if (cal)                  { printf("%s ",cal);}
-      if (abs(val+999)>1e-6)    { printf("%g",val);}
+      if (fabs(val+999)>1e-6)   { printf("%g",val);}
       if (err[0]>-999)          { printf("HH(%7.2g) ZZ(%7.2g)",err[0],err[1]);}
     } 
   }//end for i
@@ -145,7 +145,7 @@ static const char *hhh = "x y z r e ";
         if (hhh[i]=='r')        { val = hit->getRxy();}
         else if (hhh[i]=='e')   {err[0] = sqrt(mHrr[0]); err[1] = sqrt(mHrr[2]);}
       else                      {val = hit->x()[i];} 
-      if (abs(val+999)>1e-6)    {printf("\th%c=%g",hhh[i],val);}
+      if (fabs(val+999)>1e-6)   {printf("\th%c=%g",hhh[i],val);}
       if (err[0]>-999)          {printf("\thh=%7.2g zz=%7.2g",err[0],err[1]);}
       } else if (txt[i+1]=='[') {// now print by index
 
