@@ -166,13 +166,13 @@ void  StvDraw::Trak(const StvTrack *tk, int dir, EDraw3DStyle sty)
     const double *P = rNode->GetFP(dir).P;
     if (hit)    {// make connection to hit
       const float  *H = hit->x();
-      float con[6] = {H[0],H[1],H[2],P[0],P[1],P[2]};
+      float con[6] = {(float)H[0],(float)H[1],(float)H[2],(float)P[0],(float)P[1],(float)P[2]};
       Line (2,con);            
     }  	
     {// only short line to mark node
        const double *D = &rNode->GetFP(dir)._cosCA;
-       float con[6] = {P[0]         ,P[1]         ,P[2]
-                     ,P[0]-D[1]*0.1,P[1]+D[0]*0.1,P[2]};
+       float con[6] = {(float)P[0]         ,(float)P[1]        ,(float)P[2]
+                     ,float(P[0]-D[1]*0.1),float(P[1]+D[0]*0.1),(float)P[2]};
        Line (2,con);            
     }
     lNode = rNode;
