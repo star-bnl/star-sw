@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.119 2014/08/06 19:11:56 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.120 2014/08/07 19:00:01 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1633,6 +1633,7 @@ void StMuDstMaker::fillMC()
          track[i].rapidity=v.Eta();
        }
     }
+    if (track[i].pt<=0) continue;
     addType(mMCArrays[MCTrack], track[i], mctr);
   }   
   
@@ -1830,6 +1831,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.120  2014/08/07 19:00:01  perev
+ * Skip MC tracks pt<=0
+ *
  * Revision 1.119  2014/08/06 19:11:56  perev
  * Recover -ve pt
  *
