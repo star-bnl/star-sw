@@ -1,351 +1,3 @@
-// $Id: StiMaker.cxx,v 1.212 2014/04/24 18:15:02 perev Exp $
-/// \File StiMaker.cxx
-/// \author M.L. Miller 5/00
-/// \author C Pruneau 3/02
-// $Log: StiMaker.cxx,v $
-// Revision 1.212  2014/04/24 18:15:02  perev
-// Remove RnD as old approach
-//
-// Revision 1.211  2014/04/22 21:43:13  jeromel
-// Grompf! Inverted ssd <-> sst now corrected (thx DS)
-//
-// Revision 1.210  2014/04/10 23:39:23  jeromel
-// Backstep: remove default useXX as clash with older data (we need to reshape the options)
-//
-// Revision 1.209  2014/04/10 15:48:28  jeromel
-// Oops
-//
-// Revision 1.208  2014/04/10 15:28:55  jeromel
-// Merged my previous differences commited by Victor with Dmitri's (Victor OK)
-//
-// Revision 1.207  2014/04/09 23:52:20  perev
-// Ssd+Sst+Pxl
-//
-// Revision 1.206  2013/04/10 22:14:20  fisyak
-// Roll back to version 04/04/2013
-//
-// Revision 1.204  2012/06/13 20:21:09  fisyak
-// Check that vertex fitter exist before getting vertex postion
-//
-// Revision 1.203  2012/06/11 15:33:41  fisyak
-// std namespace
-//
-// Revision 1.202  2012/05/07 14:56:14  fisyak
-// Add StKFVertexMaker
-//
-// Revision 1.201  2012/02/25 01:48:55  perev
-// Limit on permutation installed
-//
-// Revision 1.200  2011/10/17 12:16:10  fisyak
-// Comment out request  DoAlignment for Track Finder
-//
-// Revision 1.199  2011/10/17 00:14:34  fisyak
-// Move handles for IdTruth to StEvent
-//
-// Revision 1.198  2011/04/05 22:49:16  fisyak
-// Add safety marging
-//
-// Revision 1.197  2011/04/05 22:26:30  fisyak
-// Remove alloc/free
-//
-// Revision 1.196  2011/04/04 19:13:41  fisyak
-// Move intialization of detectors in InitRun
-//
-// Revision 1.195  2011/04/04 15:18:52  fisyak
-// Add check that the corresponding Db maker has been instantiated before adding the detector
-//
-// Revision 1.194  2011/03/31 22:11:24  fisyak
-// Propagate IdTruth to StEvent
-//
-// Revision 1.193  2010/09/01 21:25:03  fisyak
-// Add comment
-//
-// Revision 1.192  2010/01/27 21:43:49  perev
-// Add _nPrimTracks for case of fiterr
-//
-// Revision 1.191  2009/10/18 22:47:29  perev
-// assert instead of skip
-//
-// Revision 1.190  2009/03/16 13:50:14  fisyak
-// Move out all Sti Chairs into StDetectorDb
-//
-// Revision 1.189  2009/01/26 22:00:47  fisyak
-// rename TMemStat => StMemStat
-//
-// Revision 1.188  2008/06/11 22:04:38  fisyak
-// Add dead material
-//
-// Revision 1.187  2008/04/08 14:22:15  fisyak
-// remove redundant includes
-//
-// Revision 1.186  2008/04/03 20:04:05  fisyak
-// Straighten out DB access via chairs
-//
-// Revision 1.185  2008/03/25 18:03:11  perev
-// remove field field from everythere
-//
-// Revision 1.184  2008/03/20 02:01:36  perev
-// setMinPrecHits(..) obsolete
-//
-// Revision 1.183  2008/02/07 18:26:17  perev
-// Remove setMCS() call
-//
-// Revision 1.182  2008/02/07 02:27:40  perev
-// Add minPrecHits
-//
-// Revision 1.181  2007/10/17 15:32:34  fisyak
-// rename Hft => Pxl
-//
-// Revision 1.180  2007/09/22 03:29:16  perev
-// Timer + Pulls without vertex
-//
-// Revision 1.179  2007/09/10 00:32:30  perev
-// Attribute useTreeSearch added
-//
-// Revision 1.178  2007/04/30 19:53:47  fisyak
-// add time of flight corrrection for Laser
-//
-// Revision 1.177  2007/04/28 17:56:19  perev
-// Redundant StChain.h removed
-//
-// Revision 1.176  2007/04/26 04:23:54  perev
-// Remove StBFChain dependency
-//
-// Revision 1.175  2007/04/17 05:11:45  perev
-// GetTFile()==>StMaker. Jerome request
-//
-// Revision 1.174  2007/03/21 17:51:17  fisyak
-// add option for EastOff and WestOff, FindDataSet for Sti Geometry
-//
-// Revision 1.173  2006/12/18 01:29:00  perev
-// +noTreeSearch flag & pulls
-//
-// Revision 1.172  2006/10/16 20:30:42  fisyak
-// Clean dependencies from Sti useless classes
-//
-// Revision 1.171  2006/10/15 05:10:10  fisyak
-// Add Hpd
-//
-// Revision 1.170  2006/10/09 15:51:28  fisyak
-// Remove Ftpc
-//
-// Revision 1.169  2006/08/01 03:51:00  perev
-// Return from Make() for too many hits
-//
-// Revision 1.168  2006/06/16 21:27:52  perev
-// Minimal errors of vertex 1 micron
-//
-// Revision 1.167  2006/05/31 03:59:04  fisyak
-// Add Victor's dca track parameters, clean up
-//
-// Revision 1.166  2006/04/14 22:51:26  perev
-// Option useFakeVertex added
-//
-// Revision 1.161  2006/02/14 18:53:58  perev
-// Sub makerFunctionality added.
-//
-// Revision 1.160  2006/02/08 20:56:39  fisyak
-// use kHftId and kIstId for StiDetector groups instead of hadr coded numbers 9999 and 9998
-//
-// Revision 1.159  2006/01/19 20:21:52  perev
-// Ist added
-//
-// Revision 1.158  2005/12/31 01:34:02  perev
-// Degug histos added
-//
-// Revision 1.157  2005/12/07 23:55:02  perev
-// control is changed using StMaker::SetAttr
-//
-// Revision 1.156  2005/11/22 23:15:27  fisyak
-// Clean up parameters setting
-//
-// Revision 1.155  2005/10/26 21:54:10  fisyak
-// Remove dead classes, gid rid off dependencies from StMcEvent and StiGui
-//
-// Revision 1.154  2005/10/06 20:38:46  fisyak
-// Clean up
-//
-// Revision 1.153  2005/09/28 21:46:36  fisyak
-// Persistent StMcEvent
-//
-// Revision 1.152  2005/08/09 15:23:18  perev
-// Add new factory for Node extention
-//
-// Revision 1.151  2005/08/04 04:03:19  perev
-// Cleanup
-//
-// Revision 1.150  2005/07/21 01:20:12  perev
-// clearmem is default now
-//
-// Revision 1.149  2005/07/20 17:33:25  perev
-// MultiVertex
-//
-// Revision 1.148  2005/02/25 17:41:01  perev
-// Time count added
-//
-// Revision 1.147  2005/01/25 17:23:48  pruneau
-// removed references to html package
-//
-// Revision 1.146  2005/01/21 03:13:37  pruneau
-// turned off StiHistograms
-//
-// Revision 1.145  2005/01/17 03:56:47  pruneau
-// change track container to vector
-//
-// Revision 1.144  2005/01/17 01:32:13  perev
-// parameters protected
-//
-// Revision 1.143  2004/08/04 21:06:17  pruneau
-// Added an "if" statement predicated on m_Mode to clear the memory used by the
-// factories at the end of StiMaker::Make().
-//
-// Revision 1.142  2004/04/15 00:43:22  pruneau
-// Added Ssd to the list of possible detectors...
-//
-// Revision 1.141  2004/03/26 15:30:06  andrewar
-// bug in field reset
-//
-// Revision 1.140  2004/03/26 14:52:43  calderon
-// Print out the magnetic field read from StEvent::eventSummary()
-//
-// Revision 1.139  2004/03/25 22:42:44  andrewar
-// temp mag field fix; cache filed value and reset if it goes to zero. This
-// protects against corrupt event headers...
-//
-// Revision 1.138  2004/02/24 01:59:46  jeromel
-// Commented out include of disappeared .h
-//
-// Revision 1.137  2004/02/21 18:28:31  pruneau
-// Updates to comply to changes in interfaces
-//
-// Revision 1.136  2004/02/19 22:18:07  pruneau
-// Modified call to StMcEventMaker structure
-//
-// Revision 1.135  2004/02/13 17:36:24  andrewar
-// Changed name of StMcEventMaker to StMcEvent... this allows me to run
-// simulation. It doesn't seem like this follows the Maker name scheme, though...
-//
-// Revision 1.134  2004/02/03 18:10:10  pruneau
-// Changed name of StMcEventMaker to McEvent in GetMaker call
-//
-// Revision 1.133  2004/01/30 21:47:23  pruneau
-// Changed organization so detector geometris are loaded and build in InitRun
-// rather than Make.
-// Added accesses to db
-//
-// Revision 1.132  2003/10/28 16:01:15  andrewar
-// Passing tracking parameter file to detector Builders.
-//
-// Revision 1.131  2003/09/02 17:59:59  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.130  2003/08/05 18:20:33  andrewar
-// Changed default parameters to apply eta filters.
-//
-// Revision 1.129  2003/07/30 20:12:31  pruneau
-// Added new histo group
-//
-// Revision 1.128  2003/06/10 18:47:28  andrewar
-// Changed StiResiduaCalc calls to conform to modified class.
-//
-// Revision 1.127  2003/05/07 03:06:34  pruneau
-// *** empty log message ***
-//
-// Revision 1.126  2003/05/06 16:48:10  mmiller
-// Incorporated StiPixel.  usePixel==false by default.
-//
-// Revision 1.125  2003/05/06 15:36:36  mmiller
-// Committing changes to turn on multiple regions (StiPlacement::StiRegion -> kMidRapidity, kForwardRapidity, etc).
-// Also added a point to StiToolkit for StiMaker.  This allows for the req. GetDataSet calls in the FTPC code.
-// Not so elegant...
-//
-// Revision 1.124  2003/04/30 15:39:33  pruneau
-// Integrating StiResidual in main stream Sti
-//
-// Revision 1.123  2003/04/29 18:48:50  pruneau
-// *** empty log message ***
-//
-// Revision 1.122  2003/04/13 02:16:13  pruneau
-// *** empty log message ***
-//
-// Revision 1.121  2003/04/11 18:56:14  pruneau
-// Pulling the B field from StEventSummary
-//
-// Revision 1.120  2003/04/11 16:51:57  pruneau
-// various fixes
-//
-// Revision 1.119  2003/04/10 14:53:06  pruneau
-// removing obsolete files and classes
-//
-// Revision 1.118  2003/04/10 12:10:09  pruneau
-// Changed StiMaker and Default Toolkit to accomodate the new Event Display
-//
-// Revision 1.117  2003/03/31 17:19:27  pruneau
-// various
-//
-// Revision 1.116  2003/03/17 17:44:49  pruneau
-// *** empty log message ***
-//
-// Revision 1.115  2003/03/13 18:59:42  pruneau
-// various updates
-//
-// Revision 1.114  2003/03/13 16:30:59  andrewar
-// Added plotting package
-//
-// Revision 1.113  2003/03/13 15:15:51  pruneau
-// various
-//
-// Revision 1.112  2003/03/12 17:58:04  pruneau
-// fixing stuff
-//
-// Revision 1.111  2003/02/25 14:21:06  pruneau
-// *** empty log message ***
-//
-// Revision 1.110  2003/01/24 06:12:28  pruneau
-// removing centralized io
-//
-// Revision 1.109  2003/01/22 20:06:26  andrewar
-// Changed includes to point to new libraries (StiTpc, StiSvt, etc)
-//
-// Revision 1.108  2002/12/19 19:29:42  pruneau
-// *** empty log message ***
-//
-// Revision 1.106  2002/10/04 01:54:48  pruneau
-// DefaultToolkit now uses the StiHitLoader scheme rahter than the StiHitFiller.
-//
-// Revision 1.105  2002/09/27 19:19:01  mmiller
-// Changed program flow to once again allow for track by track gui.
-//
-// Revision 1.104  2002/09/10 18:42:40  pruneau
-// Fixed bug in the call sequence of the association maker
-// introduced in the previous release.
-//
-// Revision 1.103  2002/09/05 21:27:10  pruneau
-// Fixed problem with StiRootSimpleTrackFilter::makeNewObject
-//
-// Revision 1.102  2002/09/05 05:47:30  pruneau
-// Adding Editable Parameters and dynamic StiOptionFrame
-//
-// Revision 1.101  2002/08/28 17:14:18  pruneau
-// Simplified the interface of StiKalmanTrackFinder and the calls
-// required in StiMaker.
-//
-// Revision 1.100  2002/08/23 18:16:50  pruneau
-// Added StiSimpleTrackFilter to StiMaker to enable simple and
-// fast track finding diagnostics.
-//
-// Revision 1.99  2002/08/19 19:32:59  pruneau
-// eliminated cout when unnecessary, made helix member of the EventFiller
-//
-// Revision 1.98  2002/06/26 23:05:31  pruneau
-// changed macro
-//
-// Revision 1.97  2002/06/18 18:08:34  pruneau
-// some cout statements removed/added
-//
-// Revision 1.96  2002/06/04 19:45:31  pruneau
-// including changes for inside out tracking
-//
 /*!
 
 \class StiMaker 
@@ -937,3 +589,355 @@ void StiMaker::fillVxFlags() {// set vertices IdTruth if any
   }
 }
 #endif
+
+
+
+
+// $Id: StiMaker.cxx,v 1.213 2014/08/08 16:41:23 jeromel Exp $
+// $Log: StiMaker.cxx,v $
+// Revision 1.213  2014/08/08 16:41:23  jeromel
+// No change - moved history at the bootom as getting very long
+//
+// Revision 1.212  2014/04/24 18:15:02  perev
+// Remove RnD as old approach
+//
+// Revision 1.211  2014/04/22 21:43:13  jeromel
+// Grompf! Inverted ssd <-> sst now corrected (thx DS)
+//
+// Revision 1.210  2014/04/10 23:39:23  jeromel
+// Backstep: remove default useXX as clash with older data (we need to reshape the options)
+//
+// Revision 1.209  2014/04/10 15:48:28  jeromel
+// Oops
+//
+// Revision 1.208  2014/04/10 15:28:55  jeromel
+// Merged my previous differences commited by Victor with Dmitri's (Victor OK)
+//
+// Revision 1.207  2014/04/09 23:52:20  perev
+// Ssd+Sst+Pxl
+//
+// Revision 1.206  2013/04/10 22:14:20  fisyak
+// Roll back to version 04/04/2013
+//
+// Revision 1.204  2012/06/13 20:21:09  fisyak
+// Check that vertex fitter exist before getting vertex postion
+//
+// Revision 1.203  2012/06/11 15:33:41  fisyak
+// std namespace
+//
+// Revision 1.202  2012/05/07 14:56:14  fisyak
+// Add StKFVertexMaker
+//
+// Revision 1.201  2012/02/25 01:48:55  perev
+// Limit on permutation installed
+//
+// Revision 1.200  2011/10/17 12:16:10  fisyak
+// Comment out request  DoAlignment for Track Finder
+//
+// Revision 1.199  2011/10/17 00:14:34  fisyak
+// Move handles for IdTruth to StEvent
+//
+// Revision 1.198  2011/04/05 22:49:16  fisyak
+// Add safety marging
+//
+// Revision 1.197  2011/04/05 22:26:30  fisyak
+// Remove alloc/free
+//
+// Revision 1.196  2011/04/04 19:13:41  fisyak
+// Move intialization of detectors in InitRun
+//
+// Revision 1.195  2011/04/04 15:18:52  fisyak
+// Add check that the corresponding Db maker has been instantiated before adding the detector
+//
+// Revision 1.194  2011/03/31 22:11:24  fisyak
+// Propagate IdTruth to StEvent
+//
+// Revision 1.193  2010/09/01 21:25:03  fisyak
+// Add comment
+//
+// Revision 1.192  2010/01/27 21:43:49  perev
+// Add _nPrimTracks for case of fiterr
+//
+// Revision 1.191  2009/10/18 22:47:29  perev
+// assert instead of skip
+//
+// Revision 1.190  2009/03/16 13:50:14  fisyak
+// Move out all Sti Chairs into StDetectorDb
+//
+// Revision 1.189  2009/01/26 22:00:47  fisyak
+// rename TMemStat => StMemStat
+//
+// Revision 1.188  2008/06/11 22:04:38  fisyak
+// Add dead material
+//
+// Revision 1.187  2008/04/08 14:22:15  fisyak
+// remove redundant includes
+//
+// Revision 1.186  2008/04/03 20:04:05  fisyak
+// Straighten out DB access via chairs
+//
+// Revision 1.185  2008/03/25 18:03:11  perev
+// remove field field from everythere
+//
+// Revision 1.184  2008/03/20 02:01:36  perev
+// setMinPrecHits(..) obsolete
+//
+// Revision 1.183  2008/02/07 18:26:17  perev
+// Remove setMCS() call
+//
+// Revision 1.182  2008/02/07 02:27:40  perev
+// Add minPrecHits
+//
+// Revision 1.181  2007/10/17 15:32:34  fisyak
+// rename Hft => Pxl
+//
+// Revision 1.180  2007/09/22 03:29:16  perev
+// Timer + Pulls without vertex
+//
+// Revision 1.179  2007/09/10 00:32:30  perev
+// Attribute useTreeSearch added
+//
+// Revision 1.178  2007/04/30 19:53:47  fisyak
+// add time of flight corrrection for Laser
+//
+// Revision 1.177  2007/04/28 17:56:19  perev
+// Redundant StChain.h removed
+//
+// Revision 1.176  2007/04/26 04:23:54  perev
+// Remove StBFChain dependency
+//
+// Revision 1.175  2007/04/17 05:11:45  perev
+// GetTFile()==>StMaker. Jerome request
+//
+// Revision 1.174  2007/03/21 17:51:17  fisyak
+// add option for EastOff and WestOff, FindDataSet for Sti Geometry
+//
+// Revision 1.173  2006/12/18 01:29:00  perev
+// +noTreeSearch flag & pulls
+//
+// Revision 1.172  2006/10/16 20:30:42  fisyak
+// Clean dependencies from Sti useless classes
+//
+// Revision 1.171  2006/10/15 05:10:10  fisyak
+// Add Hpd
+//
+// Revision 1.170  2006/10/09 15:51:28  fisyak
+// Remove Ftpc
+//
+// Revision 1.169  2006/08/01 03:51:00  perev
+// Return from Make() for too many hits
+//
+// Revision 1.168  2006/06/16 21:27:52  perev
+// Minimal errors of vertex 1 micron
+//
+// Revision 1.167  2006/05/31 03:59:04  fisyak
+// Add Victor's dca track parameters, clean up
+//
+// Revision 1.166  2006/04/14 22:51:26  perev
+// Option useFakeVertex added
+//
+// Revision 1.161  2006/02/14 18:53:58  perev
+// Sub makerFunctionality added.
+//
+// Revision 1.160  2006/02/08 20:56:39  fisyak
+// use kHftId and kIstId for StiDetector groups instead of hadr coded numbers 9999 and 9998
+//
+// Revision 1.159  2006/01/19 20:21:52  perev
+// Ist added
+//
+// Revision 1.158  2005/12/31 01:34:02  perev
+// Degug histos added
+//
+// Revision 1.157  2005/12/07 23:55:02  perev
+// control is changed using StMaker::SetAttr
+//
+// Revision 1.156  2005/11/22 23:15:27  fisyak
+// Clean up parameters setting
+//
+// Revision 1.155  2005/10/26 21:54:10  fisyak
+// Remove dead classes, gid rid off dependencies from StMcEvent and StiGui
+//
+// Revision 1.154  2005/10/06 20:38:46  fisyak
+// Clean up
+//
+// Revision 1.153  2005/09/28 21:46:36  fisyak
+// Persistent StMcEvent
+//
+// Revision 1.152  2005/08/09 15:23:18  perev
+// Add new factory for Node extention
+//
+// Revision 1.151  2005/08/04 04:03:19  perev
+// Cleanup
+//
+// Revision 1.150  2005/07/21 01:20:12  perev
+// clearmem is default now
+//
+// Revision 1.149  2005/07/20 17:33:25  perev
+// MultiVertex
+//
+// Revision 1.148  2005/02/25 17:41:01  perev
+// Time count added
+//
+// Revision 1.147  2005/01/25 17:23:48  pruneau
+// removed references to html package
+//
+// Revision 1.146  2005/01/21 03:13:37  pruneau
+// turned off StiHistograms
+//
+// Revision 1.145  2005/01/17 03:56:47  pruneau
+// change track container to vector
+//
+// Revision 1.144  2005/01/17 01:32:13  perev
+// parameters protected
+//
+// Revision 1.143  2004/08/04 21:06:17  pruneau
+// Added an "if" statement predicated on m_Mode to clear the memory used by the
+// factories at the end of StiMaker::Make().
+//
+// Revision 1.142  2004/04/15 00:43:22  pruneau
+// Added Ssd to the list of possible detectors...
+//
+// Revision 1.141  2004/03/26 15:30:06  andrewar
+// bug in field reset
+//
+// Revision 1.140  2004/03/26 14:52:43  calderon
+// Print out the magnetic field read from StEvent::eventSummary()
+//
+// Revision 1.139  2004/03/25 22:42:44  andrewar
+// temp mag field fix; cache filed value and reset if it goes to zero. This
+// protects against corrupt event headers...
+//
+// Revision 1.138  2004/02/24 01:59:46  jeromel
+// Commented out include of disappeared .h
+//
+// Revision 1.137  2004/02/21 18:28:31  pruneau
+// Updates to comply to changes in interfaces
+//
+// Revision 1.136  2004/02/19 22:18:07  pruneau
+// Modified call to StMcEventMaker structure
+//
+// Revision 1.135  2004/02/13 17:36:24  andrewar
+// Changed name of StMcEventMaker to StMcEvent... this allows me to run
+// simulation. It doesn't seem like this follows the Maker name scheme, though...
+//
+// Revision 1.134  2004/02/03 18:10:10  pruneau
+// Changed name of StMcEventMaker to McEvent in GetMaker call
+//
+// Revision 1.133  2004/01/30 21:47:23  pruneau
+// Changed organization so detector geometris are loaded and build in InitRun
+// rather than Make.
+// Added accesses to db
+//
+// Revision 1.132  2003/10/28 16:01:15  andrewar
+// Passing tracking parameter file to detector Builders.
+//
+// Revision 1.131  2003/09/02 17:59:59  perev
+// gcc 3.2 updates + WarnOff
+//
+// Revision 1.130  2003/08/05 18:20:33  andrewar
+// Changed default parameters to apply eta filters.
+//
+// Revision 1.129  2003/07/30 20:12:31  pruneau
+// Added new histo group
+//
+// Revision 1.128  2003/06/10 18:47:28  andrewar
+// Changed StiResiduaCalc calls to conform to modified class.
+//
+// Revision 1.127  2003/05/07 03:06:34  pruneau
+// *** empty log message ***
+//
+// Revision 1.126  2003/05/06 16:48:10  mmiller
+// Incorporated StiPixel.  usePixel==false by default.
+//
+// Revision 1.125  2003/05/06 15:36:36  mmiller
+// Committing changes to turn on multiple regions (StiPlacement::StiRegion -> kMidRapidity, kForwardRapidity, etc).
+// Also added a point to StiToolkit for StiMaker.  This allows for the req. GetDataSet calls in the FTPC code.
+// Not so elegant...
+//
+// Revision 1.124  2003/04/30 15:39:33  pruneau
+// Integrating StiResidual in main stream Sti
+//
+// Revision 1.123  2003/04/29 18:48:50  pruneau
+// *** empty log message ***
+//
+// Revision 1.122  2003/04/13 02:16:13  pruneau
+// *** empty log message ***
+//
+// Revision 1.121  2003/04/11 18:56:14  pruneau
+// Pulling the B field from StEventSummary
+//
+// Revision 1.120  2003/04/11 16:51:57  pruneau
+// various fixes
+//
+// Revision 1.119  2003/04/10 14:53:06  pruneau
+// removing obsolete files and classes
+//
+// Revision 1.118  2003/04/10 12:10:09  pruneau
+// Changed StiMaker and Default Toolkit to accomodate the new Event Display
+//
+// Revision 1.117  2003/03/31 17:19:27  pruneau
+// various
+//
+// Revision 1.116  2003/03/17 17:44:49  pruneau
+// *** empty log message ***
+//
+// Revision 1.115  2003/03/13 18:59:42  pruneau
+// various updates
+//
+// Revision 1.114  2003/03/13 16:30:59  andrewar
+// Added plotting package
+//
+// Revision 1.113  2003/03/13 15:15:51  pruneau
+// various
+//
+// Revision 1.112  2003/03/12 17:58:04  pruneau
+// fixing stuff
+//
+// Revision 1.111  2003/02/25 14:21:06  pruneau
+// *** empty log message ***
+//
+// Revision 1.110  2003/01/24 06:12:28  pruneau
+// removing centralized io
+//
+// Revision 1.109  2003/01/22 20:06:26  andrewar
+// Changed includes to point to new libraries (StiTpc, StiSvt, etc)
+//
+// Revision 1.108  2002/12/19 19:29:42  pruneau
+// *** empty log message ***
+//
+// Revision 1.106  2002/10/04 01:54:48  pruneau
+// DefaultToolkit now uses the StiHitLoader scheme rahter than the StiHitFiller.
+//
+// Revision 1.105  2002/09/27 19:19:01  mmiller
+// Changed program flow to once again allow for track by track gui.
+//
+// Revision 1.104  2002/09/10 18:42:40  pruneau
+// Fixed bug in the call sequence of the association maker
+// introduced in the previous release.
+//
+// Revision 1.103  2002/09/05 21:27:10  pruneau
+// Fixed problem with StiRootSimpleTrackFilter::makeNewObject
+//
+// Revision 1.102  2002/09/05 05:47:30  pruneau
+// Adding Editable Parameters and dynamic StiOptionFrame
+//
+// Revision 1.101  2002/08/28 17:14:18  pruneau
+// Simplified the interface of StiKalmanTrackFinder and the calls
+// required in StiMaker.
+//
+// Revision 1.100  2002/08/23 18:16:50  pruneau
+// Added StiSimpleTrackFilter to StiMaker to enable simple and
+// fast track finding diagnostics.
+//
+// Revision 1.99  2002/08/19 19:32:59  pruneau
+// eliminated cout when unnecessary, made helix member of the EventFiller
+//
+// Revision 1.98  2002/06/26 23:05:31  pruneau
+// changed macro
+//
+// Revision 1.97  2002/06/18 18:08:34  pruneau
+// some cout statements removed/added
+//
+// Revision 1.96  2002/06/04 19:45:31  pruneau
+// including changes for inside out tracking
+//
