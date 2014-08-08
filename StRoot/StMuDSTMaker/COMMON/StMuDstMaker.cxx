@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.120 2014/08/07 19:00:01 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.121 2014/08/08 15:46:31 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1624,7 +1624,7 @@ void StMuDstMaker::fillMC()
   g2t_track_st  *track = g2t_track->GetTable();
   UInt_t NT = g2t_track->GetNRows();
   for (UInt_t i = 0; i < NT; i++) {
-    if (track[i].pt<0) {
+    if (track[i].pt<=1e-3) {
        TVector3 v(track[i].p);
        float pt = v.Perp();
        if (pt>0.01) { // try to recover
@@ -1633,7 +1633,7 @@ void StMuDstMaker::fillMC()
          track[i].rapidity=v.Eta();
        }
     }
-    if (track[i].pt<=0) continue;
+    if (track[i].pt<=1e-3) track[i].pt = -999;
     addType(mMCArrays[MCTrack], track[i], mctr);
   }   
   
@@ -1831,6 +1831,11 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.121  2014/08/08 15:46:31  perev
+ * Remove the previous correction, which destroyed non official
+ * feature that idTruth is an index in array of tracks.
+ * Some applications use this (VP)
+ *
  * Revision 1.120  2014/08/07 19:00:01  perev
  * Skip MC tracks pt<=0
  *
