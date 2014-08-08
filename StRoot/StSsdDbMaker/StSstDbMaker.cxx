@@ -134,7 +134,10 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition(){
       TGeoHMatrix WLL;
       WLL.SetRotation(&SensorsOnLadders->r00);
       WLL.SetTranslation(&SensorsOnLadders->t0);
-      //cout << "WL\t"; WLL.Print();
+      if(Debug()){
+	cout << "WL\t"; 
+	WLL.Print();
+      }
       TGeoHMatrix *WL = (TGeoHMatrix *) fRotList->FindObject(Form("WL%04i",Id));
       if (! WL) 
 	{
@@ -152,38 +155,43 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition(){
       Int_t OSC    = 0;
       for (Int_t l = 0; l < NoLadders; l++, LaddersOnOsc++) 
 	{
-	  //cout << "LaddersOnOsc Id\t" << LaddersOnOsc->Id << endl;
 	  Ladder = LaddersOnOsc->Id%100;
 	  if (Ladder == ladder) 
 	    {
 	      OSC = LaddersOnOsc->Id/100;
 	      LS.SetRotation(&LaddersOnOsc->r00);
 	      LS.SetTranslation(&LaddersOnOsc->t0);
-	      //cout << "LS\t"; LS.Print();
+	      if(Debug()){
+		cout << "LS\t"; 
+		LS.Print();
+	      }
 	      break;
 	    }
 	}
       
-      if (OSC != 1) {cout << "Osc has not been defined" << endl; continue;}
+      if (OSC != 1){cout << "Osc has not been defined" << endl; continue;}
       OscOnGlobal = SsdOscOnGlobal->GetTable();
       Int_t osc = 0;
       for (Int_t s = 0; s <NoOsc; s++, OscOnGlobal++) 
 	{
-	  //cout << "OscOnGlobal Id\t" << OscOnGlobal->Id << endl;
 	  if (OscOnGlobal->Id != OSC) continue;
 	  osc = OSC;
 	  SG.SetRotation(&OscOnGlobal->r00);
 	  SG.SetTranslation(&OscOnGlobal->t0); 
-	  //cout << "OSC\t" << OSC << "\tSG\t"; //SG.Print();
 	  break;
 	}
-      if (! osc) {cout << "OSC\t" << OSC << " has not been found" << endl; continue;}
+      if (! osc){
+	cout << "OSC\t" << OSC << " has not been found" << endl; 
+	continue;
+      }
       
-      if (Debug()) 
-	{
-	  cout << "Tpc2Global "; //Tpc2Global.Print();
-	}
-      WG = Tpc2Global * SG * LS * WLL; //cout << "WG\t"; WG.Print();
+      if (Debug()){
+	cout << "Tpc2Global "; 
+	Tpc2Global.Print();
+      }
+
+      WG = Tpc2Global * SG * LS * WLL; 
+      if(Debug()){cout << "WG\t"; WG.Print();}
       
       row.id = Id;
       row.id_shape  = 2;
@@ -195,37 +203,13 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition(){
       row.driftDirection[0] = r[0]; row.normalDirection[0] = r[1]; row.transverseDirection[0] = r[2];
       row.driftDirection[1] = r[3]; row.normalDirection[1] = r[4]; row.transverseDirection[1] = r[5];
       row.driftDirection[2] = r[6]; row.normalDirection[2] = r[7]; row.transverseDirection[2] = r[8];
-      Double_t norm;
-      TVector3 d(row.driftDirection); norm = 1/d.Mag(); d *= norm;
-      TVector3 t(row.transverseDirection); norm = 1/t.Mag(); t *= norm;
-      TVector3 n(row.normalDirection);
-      TVector3 c = d.Cross(t);
-      if (c.Dot(n) < 0) c *= -1;
-      d.GetXYZ(row.driftDirection);
-      t.GetXYZ(row.transverseDirection);
-      c.GetXYZ(row.normalDirection);
-      
-      Double_t *wgtr = WG.GetTranslation();
-      memcpy(row.centerPosition,wgtr, 3*sizeof(Double_t));
-      
-      Double_t rot[9] = 
-	{
-	  row.driftDirection[0], row.normalDirection[0], row.transverseDirection[0],
-	  row.driftDirection[1], row.normalDirection[1], row.transverseDirection[1],
-	  row.driftDirection[2], row.normalDirection[2], row.transverseDirection[2]
-	};
-      
-      Double_t tr[3] = {
-	row.centerPosition[0],
-	row.centerPosition[1],
-	row.centerPosition[2]};
       
       comb->SetRotation(WG.GetRotationMatrix());
       comb->SetTranslation(WG.GetTranslation());
       
       fRotList->Add(comb);
       ssdwafer->AddAt(&row);
-      //comb->Print();
+      if(Debug()){comb->Print();}
     }
   return ssdwafer;
 }
