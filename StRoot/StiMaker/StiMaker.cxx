@@ -87,6 +87,7 @@ More detailed: 				<br>
 #include "StiTpc/StiTpcHitLoader.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiSsd/StiSsdDetectorGroup.h"
+#include "StiSsd/StiSstDetectorGroup.h"
 #include "StiPxl/StiPxlDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
@@ -120,6 +121,7 @@ More detailed: 				<br>
 #endif
 #include "StTpcDb/StTpcDb.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
+#include "StSsdDbMaker/StSstDbMaker.h"
 #include "StSvtDbMaker/StSvtDbMaker.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
@@ -279,9 +281,9 @@ Int_t StiMaker::InitDetectors()
     }
 
   // SSD or SST - they share the db and the kSsdId
-  if (IAttr("useSst") && gStSsdDbMaker){
+  if (IAttr("useSst") && gStSstDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
-    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSst"),SAttr("ssdInputFile")));
+    _toolkit->add(group = new StiSstDetectorGroup(IAttr("activeSst"),SAttr("ssdInputFile")));
     group->setGroupId(kSsdId);
 
   } else if ( IAttr("useSsd") && gStSsdDbMaker){
@@ -593,8 +595,11 @@ void StiMaker::fillVxFlags() {// set vertices IdTruth if any
 
 
 
-// $Id: StiMaker.cxx,v 1.213 2014/08/08 16:41:23 jeromel Exp $
+// $Id: StiMaker.cxx,v 1.214 2014/08/08 17:06:19 jeromel Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.214  2014/08/08 17:06:19  jeromel
+// No change - moved history at the bootom as getting very long
+//
 // Revision 1.213  2014/08/08 16:41:23  jeromel
 // No change - moved history at the bootom as getting very long
 //
