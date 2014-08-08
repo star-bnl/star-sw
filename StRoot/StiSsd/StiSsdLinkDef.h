@@ -4,4 +4,5 @@
 #pragma link off all functions;
 #pragma link C++ class StiSsdHitLoader;
 #pragma link C++ class StiSsdDetectorGroup;
+#pragma link C++ class StiSstDetectorGroup;
 #endif
