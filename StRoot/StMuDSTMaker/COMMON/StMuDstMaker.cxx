@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.121 2014/08/08 15:46:31 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.118 2013/12/04 19:56:32 jdb Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -9,7 +9,6 @@
 #include "Stsstream.h"
 #include "StChain.h"
 #include "THack.h"
-#include "TVector3.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StTrack.h"
 #include "StEvent/StTrackNode.h"
@@ -1610,8 +1609,7 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
 }
 #endif
 //-----------------------------------------------------------------------
-void StMuDstMaker::fillMC() 
-{
+void StMuDstMaker::fillMC() {
   St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");  if (!g2t_track)  return;
   St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex"); if (!g2t_vertex) return;
   StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
@@ -1623,19 +1621,7 @@ void StMuDstMaker::fillMC()
   for (UInt_t i = 0; i < NV; i++) addType(mMCArrays[MCVertex], vertex[i], mcvx);   
   g2t_track_st  *track = g2t_track->GetTable();
   UInt_t NT = g2t_track->GetNRows();
-  for (UInt_t i = 0; i < NT; i++) {
-    if (track[i].pt<=1e-3) {
-       TVector3 v(track[i].p);
-       float pt = v.Perp();
-       if (pt>0.01) { // try to recover
-         track[i].pt=pt;
-         track[i].eta=v.Eta();
-         track[i].rapidity=v.Eta();
-       }
-    }
-    if (track[i].pt<=1e-3) track[i].pt = -999;
-    addType(mMCArrays[MCTrack], track[i], mctr);
-  }   
+  for (UInt_t i = 0; i < NT; i++) addType(mMCArrays[MCTrack], track[i], mctr);   
   
 }
 //-----------------------------------------------------------------------
@@ -1831,17 +1817,6 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
- * Revision 1.121  2014/08/08 15:46:31  perev
- * Remove the previous correction, which destroyed non official
- * feature that idTruth is an index in array of tracks.
- * Some applications use this (VP)
- *
- * Revision 1.120  2014/08/07 19:00:01  perev
- * Skip MC tracks pt<=0
- *
- * Revision 1.119  2014/08/06 19:11:56  perev
- * Recover -ve pt
- *
  * Revision 1.118  2013/12/04 19:56:32  jdb
  * Added StMuMtdPidTraits.{cxx, h} added Mtd items to StMuMtdHit.h, StMuDst.{cxx,h}, StMuDstMaker.cxx, StMuTrack.{cxx,h}
  *

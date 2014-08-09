@@ -1,0 +1,42 @@
+lasertest.readme - 10 Feb 98  instructions for the test kumac 
+ for the laser data from Sept 1998.  -- WAL
+
+  There is a run_tpc_laser_chain.kumac now in  
+ /afs/rhic/star/packages/SL98a/packages/kumacs/tpc_laser_chain/ which
+ is useable to verify a version of Staf (SL97B and later)
+ that includes the TPC packages tcl, tfc, tpg and tpt.
+  It is rather noisy and it may be difficult to decide 
+ whether everything is running right.  I will work on
+ making it more intelligible but I want to release it now
+ to see if it serves any useful purpose.
+
+  the test involves copying the run_tpc_laser_chain.kumac file to a scratch
+ directory, getting to the staf prompt of a TPC version
+ (preferably with a HIGZ window open) and typing
+
+   exec run_tpc_laser_chain#run
+
+  When all is working, it will read a BEGIN_RUN record and 
+ ten event records from a small file in /afs/rhic/star/data,
+ Plot XY plots of the six separate laser patterns and the 
+ central membrane pattern, then the YZ plot for each event.
+ Each plot shows the event number, the hits and the straight
+ line tracks.  Also the label should read 46 or 47 tracks
+ found in each event (some events have some extra hits from 
+ interlopers not produced by the laser).  The output includes
+ an ntuple file called residuals.nt which should be about 1.2MB
+ and contains one ntuple (#200) with 12840 entries from events
+ numbered 5 through 14.  Just before finishing, the kumac plots from
+ this ntuple the residuals in the z (time) and xy (along padrow)
+ directions.
+ 
+  If all that is true you can be pretty sure your code has
+ passed a number of tests.
+
+  Note - don't worry if the points don't get plotted on the XY
+ plots for the first event (#5).  Maybe some KUIP/PAW/STAF 
+ expert can figure out why, but I haven't.
+ 
+  
+
+        

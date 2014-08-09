@@ -1,611 +1,8 @@
-/*!
-
-\class StiMaker
-
-\author M.L. Miller 5/00
-\author C Pruneau 3/02
-\author V Perev 2005
-
-A maker StiMaker is a steering maker for Sti package.
-<br>
-Main tasks:
-<ul>
-<li> Create StiHits;
-<li> Make tracks;
-<li> Make Primary vertices;
-<li> Make Primary tracks;
-<li> Save produced data into StEvent.
-</ul>
-More detailed: 				<br>
-<ul>
-<li>On Init:
-<ul>
-<li> Detectors initialization.
-     SetAttr("useTpc"  ,1) && SetAttr("activeTpc"  ,1) 	// default
-     SetAttr("useSvt",  1) && SetAttr("activeSvt"  ,0) 	// default
-     SetAttr("useSsd"  ,0) && SetAttr("activeSsd"  ,0)	// default Off
-
-     SetAttr("usePixel",0) && SetAttr("activePixel",0)	// default Off
-     SetAttr("useIst"  ,0) && SetAttr("activeIst"  ,0)	// default Off
-
-     SetAttr("useHpd"  ,0) && SetAttr("activeHpd"  ,0)	// default Off
-
-     SetAttr("useEventFiller"      ,kTRUE);		// default On
-     SetAttr("useTracker"          ,kTRUE);		// default On
-     SetAttr("useVertexFinder"     ,kTRUE);		// default On
-     SetAttr("makePulls"           ,kFALSE);		// default Off
-
-     SetAttr("noTreeSearch",kFALSE);	// treeSearch default ON
-</ul>
-
-<li>On InitRun:
-<ul>
- <li> Build detectors;
- <li> Init seed finder;
- <li> Init hit loader;
- <li> Init tracker;
- <li> Init StEvent filler;
- <li> Init vertex finder;
-</ul>
-<li>In Make:
-<ul>
- <li> Load hits;
- <li> Find seeds;
- <li> Create global tracks;
- <li> Save tracks into StEvent;
- <li> Find vertecies;
- <li> Create and assign primaries tracks;
- <li> Save primary tracks into StEvent;
-
-*/
-#include <Stiostream.h>
-#include <math.h>
-#include <string>
-#include "TSystem.h"
-#include "TTree.h"
-#if ROOT_VERSION_CODE < 331013
-#include "TCL.h"
-#else
-#include "TCernLib.h"
-#endif
-#include "TDataSet.h"
-#include "TDataSetIter.h"
-#include "StMessMgr.h"
-#include "StChainOpt.h"
-#include "SystemOfUnits.h"
-#include "StMemStat.h"
-#include "PhysicalConstants.h"
-#include "StDetectorId.h"
-#include "StEventTypes.h"
-#include "Sti/Base/EditableFilter.h"
-#include "Sti/StiKalmanTrackFinder.h"
-#include "Sti/StiTrackContainer.h"
-#include "Sti/StiDefaultTrackFilter.h"
-#include "Sti/StiMasterDetectorBuilder.h"
-#include "Sti/Star/StiStarDetectorGroup.h"
-#include "StiTpc/StiTpcDetectorGroup.h"
-#include "StiTpc/StiTpcHitLoader.h"
-#include "StiSvt/StiSvtDetectorGroup.h"
-#include "StiSsd/StiSsdDetectorGroup.h"
-#include "StiSsd/StiSstDetectorGroup.h"
-#include "StiPxl/StiPxlDetectorGroup.h"
-#include "Sti/StiKalmanTrackNode.h"
-#include "Sti/StiKalmanTrack.h"
-#include "Sti/StiHitLoader.h"
-#include "Sti/StiVertexFinder.h"
-#include "Sti/StiDetectorContainer.h"
-#include "StiMaker/StiStEventFiller.h"
-#include "StiDefaultToolkit.h"
-#include "StiMaker.h"
-#include "TFile.h"
-#include "TCanvas.h"
-#include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
-#include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
-
-#include "StiTpc/StiTpcDetectorBuilder.h"
-#include "StiSvt/StiSvtDetectorBuilder.h"
-#include "StDetectorDbMaker/StiHitErrorCalculator.h"
-// #include "StiRnD/Ist/StiIstDetectorGroup.h"
-// #include "StiRnD/Ist/StiIstDetectorGroup.h"
-#include "StiIst/StiIstDetectorGroup.h"
-
-#include "StiUtilities/StiDebug.h"
-#include "StiUtilities/StiPullEvent.h"
-#include "TDataSet.h"
-#include "TGeometry.h"
-#include "Sti/StiTimer.h"
-#include "StiDetectorVolume.h"
-#include "StarMagField.h"
-#if 0
-#include "StG2TrackVertexMap.h"
-#endif
-#include "StTpcDb/StTpcDb.h"
-#include "StSsdDbMaker/StSsdDbMaker.h"
-#include "StSsdDbMaker/StSstDbMaker.h"
-#include "StSvtDbMaker/StSvtDbMaker.h"
-/// Definion of minimal primary vertex errors.
-/// Typical case,vertex got from simulations with zero errors.
-/// But zero errors could to unpredicted problems
-/// Now minimal possible error is 1 micron
-static const float MIN_VTX_ERR2 = 1e-4*1e-4;
-enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
-ClassImp(StiMaker)
-
-//_____________________________________________________________________________
-StiMaker::StiMaker(const Char_t *name) :
-    StMaker(name),
-    fVolume(0),
-    _initialized(false),
-    _toolkit(0),
-    _hitLoader(0),
-    _seedFinder(0),
-    _tracker(0),
-    _fitter(0),
-    _eventFiller(0),
-    _trackContainer(0),
-    _vertexFinder(0),
-    _loaderTrackFilter(0),
-    _loaderHitFilter(0)
-
-{
-  memset(mTimg,0,sizeof(mTimg));
-  cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
-  mPullFile=0; mPullEvent=0;mPullTTree=0;
-  memset(mPullHits,0,sizeof(mPullHits));
-  mTotPrimTks[0]=mTotPrimTks[1]=0;
-  if (!StiToolkit::instance()) new StiDefaultToolkit;
-  _toolkit = StiToolkit::instance();
-  SetAttr("useTpc"		,kTRUE);
-  SetAttr("activeTpc"		,kTRUE);
-
-  SetAttr("useSvt"		,kTRUE);
-//SetAttr("activeSvt"		,kTRUE);
-  SetAttr("useSsd"		,kTRUE);
-
-  //SetAttr("usePixel"		,kTRUE);
-  //SetAttr("useSst"		,kTRUE);
-  //SetAttr("useIst"		,kTRUE);
-
-//SetAttr("activeSsd"		,kTRUE);
-//SetAttr("useAux"		,kTRUE); // Auxiliary info added to output for evaluation
-  SetAttr("useEventFiller"      ,kTRUE);
-  SetAttr("useTracker"          ,kTRUE);
-  SetAttr("useVertexFinder"     ,kTRUE);
-  SetAttr("Alignment"           ,kFALSE);
-  if (strstr(gSystem->Getenv("STAR"),".DEV"))
-     SetAttr("useAux",kTRUE); // Auxiliary info added to output for evaluation
-}
-
-//_____________________________________________________________________________
-StiMaker::~StiMaker()
-{
-  cout <<"StiMaker::~StiMaker() -I- Started/Done"<<endl;
-}
-
-//_____________________________________________________________________________
-void StiMaker::Clear(const char*)
-{
-  if (_tracker  ) _tracker->clear();
-  if (mPullEvent) mPullEvent->Clear();
-  StMaker::Clear();
-}
-
-//_____________________________________________________________________________
-Int_t StiMaker::Finish()
-{
-  StiDebug::Finish();
-//	Finish Pull
-  if (mPullTTree) {
-    if  (Debug()) mPullTTree->Print();
-    if (mPullFile) {
-      TFile *tfile = mPullTTree->GetCurrentFile(); //just in case we switched to a new file
-      tfile->Write();
-      tfile->Close();
-      mPullFile  = 0;
-      mPullTTree = 0;
-    }
-  }
-  StiTimer::Print();
-  StiTimer::Clear();
-
-static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd",0};
-  if (mTimg[0]) {
-    for (int i=0;timg[i];i++) {
-      Info("Timing","%s(%d) \tCpuTime = %6.2f seconds,\tPerEvent = %g seconds"
-      ,timg[i],mTimg[i]->Counter(),mTimg[i]->CpuTime()
-      ,mTimg[i]->CpuTime()/mTimg[i]->Counter());
-  } }
-  if (_tracker) _tracker->finish();
-
-  return StMaker::Finish();
-}
-
-//_____________________________________________________________________________
-Int_t StiMaker::Init()
-{
-
-  StiDebug::Init();
-  StiTimer::Init("StiTrackFinder::find() TIMING"
-	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
-  if (IAttr("Alignment")) SetAttr(".Privilege",kTRUE);
-  _loaderHitFilter = 0; // not using this yet.
-  mTotPrimTks[1] = IAttr("maxTotPrims");
-  if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
-
-
-  if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
-  if (IAttr("useTiming")) {
-    for (int it=0;it<(int)(sizeof(mTimg)/sizeof(mTimg[0]));it++){
-      mTimg[it]= new TStopwatch(); mTimg[it]->Stop();
-    } }
-
-  return StMaker::Init();
-}
-
-//_____________________________________________________________________________
-Int_t StiMaker::InitDetectors()
-{
-  StiDetectorGroup<StEvent> * group;
-  cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
-  _toolkit->add(new StiStarDetectorGroup(false,"none"));
-  if (IAttr("useTpc") && gStTpcDb)
-    {
-      cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"),SAttr("tpcInputFile")));
-      group->setGroupId(kTpcId);
-      StiTpcHitLoader* hitLoader = (StiTpcHitLoader*) group->hitLoader();
-      if (IAttr("activeSvt") || IAttr("activeSsd") || IAttr("skip1row")) {// skip 1 row
-	hitLoader->setMinRow(2);
-      }
-      if (IAttr("EastOff")) {
-	hitLoader->setMinSector(1);
-	hitLoader->setMaxSector(12);
-      }
-      if (IAttr("WestOff")) {
-	hitLoader->setMinSector(13);
-	hitLoader->setMaxSector(24);
-      }
-      cout << "StiMaker::InitDetectors() -I- use hits in sectors["
-	   << hitLoader->minSector() << "," << hitLoader->maxSector() << "] and rows["
-	   << hitLoader->minRow() << ",*]" << endl;
-      if (IAttr("laserIT")) {
-	StiKalmanTrackNode::SetLaser(1);
-	cout << "StiMaker::InitDetectors() -I- set laser time of flight correction" << endl;
-      }
-    }
-  if (IAttr("useSvt") && gStSvtDbMaker)
-    {
-    cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-    _toolkit->add(group = new StiSvtDetectorGroup(IAttr("activeSvt"),SAttr("svtInputFile")));
-    group->setGroupId(kSvtId);
-    }
-
-  // SSD or SST - they share the db and the kSsdId
-  if (IAttr("useSst") && gStSstDbMaker){
-    cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
-    _toolkit->add(group = new StiSstDetectorGroup(IAttr("activeSst"),SAttr("ssdInputFile")));
-    group->setGroupId(kSsdId);
-
-  } else if ( IAttr("useSsd") && gStSsdDbMaker){
-    cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
-    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
-    group->setGroupId(kSsdId);
-  }
-
-
-  if (IAttr("usePixel"))
-    {
-      cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
-      group->setGroupId(kPxlId);
-    }
- if (IAttr("useIst"))
-    {
-      cout<<"StiMaker::Init() -I- Adding detector group:Ist"<<endl;
-      _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst"),SAttr("istInputFile")));
-      group->setGroupId(kIstId);
-    }
-//  if (IAttr("useBTof"))
-//     {
-//       cout<<"StiMaker::Init() -I- Adding detector group:BTof"<<endl;
-//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof"),SAttr("BTofInputFile")));
-//       group->setGroupId(kBTofId);
-//     }
-  return kStOk;
-}
-
-//_____________________________________________________________________________
-Int_t StiMaker::InitRun(int run)
-{
-  if (!_initialized)    {
-      cout <<"StiMaker::InitRun() -I- Initialization Segment Started"<<endl;
-      InitDetectors();
-      // Load Detector related parameters
-      StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
-      masterBuilder->build(*this);
-      StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer();
-      detectorContainer->initialize();//build(masterBuilder);
-      detectorContainer->reset();
-       _seedFinder = _toolkit->getTrackSeedFinder();
-      _seedFinder->initialize();
-      _hitLoader  = _toolkit->getHitLoader();
-      _tracker=0;
-      if (IAttr("useTracker")) {
-
-        _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
-        if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
-        if ( IAttr("useTiming"    )) _tracker->setTiming();
-#if 0
-	if ( IAttr("Alignment"    )) _tracker->DoAlignment(kTRUE);
-#endif
-        _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
-
-//        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
-      }
-      _eventFiller=0;
-      if (IAttr("useEventFiller")) {
-        _eventFiller =  new StiStEventFiller();
-        _eventFiller->setUseAux(IAttr("useAux"));
-        InitPulls();
-      }
-      _trackContainer = _toolkit->getTrackContainer();
-      _vertexFinder   = 0;
-      if (GetTopChain()->GetMakerInheritsFrom("StGenericVertexMaker")) {
-	_vertexFinder   = _toolkit->getVertexFinder();
-      }
-      if (_tracker) {
-        _tracker->initialize();
-        _tracker->clear();
-      }
-      _initialized=true;
-      cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
-    }
-
-  return StMaker::InitRun(run);
-}
-
-//_____________________________________________________________________________
-Int_t StiMaker::Make()
-{
-  cout <<"StiMaker::Make() -I- Starting on new event"<<endl;
-  Int_t iAns=kStOK,iAnz=0;
-  if (! _tracker) return kStWarn;
-  StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
-  if (!event) return kStWarn;
-  eventIsFinished = false;
-  try {		// try new event
-
-    _tracker->clear();
-
-    if (mTimg[kHitTimg]) mTimg[kHitTimg]->Start(0);
-    _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
-    if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
-
-    _seedFinder->reset();
-    iAnz = MakeGlobalTracks(event);
-    if (iAnz) {MyClear(); return iAnz;}
-    if (_vertexFinder) {
-      iAnz = MakePrimaryTracks(event);
-      if (iAnz) {MyClear(); return iAnz;}
-    } else {
-      iAnz = StMaker::Make();
-    }
-    if (mPullTTree) {iAns = FillPulls();}
-    cout<< "StiMaker::Make() -I- Done"<<endl;
-    MyClear();
-    if (iAnz) return iAnz;
-    if (mTotPrimTks[1] && mTotPrimTks[0]>mTotPrimTks[1]) return kStStop;
-    if (IAttr("Alignment") &&  ! _tracker->getNTracks()) return kStErr;
-    return kStOK;
-  }
-  catch (runtime_error &rte) {
-    Error("Make","Catch exception %s",rte.what());
-    if (!strncmp(rte.what(),"FATAL::",6)) return kStFATAL;
-    MyClear();
-    return kStErr;
-  }
-}
-
-//_____________________________________________________________________________
-Int_t StiMaker::MakeGlobalTracks(StEvent   * event) {
-  if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
-  _tracker->findTracks();    // get the rest
-  if (mTimg[kGloTimg]) mTimg[kGloTimg]->Stop();
-  if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
-  if (_eventFiller)
-    _eventFiller->fillEvent(event, _trackContainer);
-  if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
-  return kStOK;
-}
-//_____________________________________________________________________________
-Int_t StiMaker::MakePrimaryTracks(StEvent   * event) {
-  if (! _vertexFinder) return kStWarn;
-  if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Start(0);
-  _vertexFinder->fit(event);
-  const std::vector<StiHit*> *vertexes = _vertexFinder->result();
-  if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Stop();
-  if (vertexes && vertexes->size())	  {
-    //Set minimal errors
-    for (size_t i=0;i<vertexes->size();i++) {
-      StiHit *vtx=(*vertexes)[i];
-      float vtxErr[6];
-      memcpy(vtxErr,vtx->errMtx(),sizeof(vtxErr));
-      if (vtxErr[0]>MIN_VTX_ERR2
-	  &&  vtxErr[2]>MIN_VTX_ERR2
-	  &&  vtxErr[5]>MIN_VTX_ERR2) continue;
-      memset(vtxErr,0,sizeof(vtxErr));
-      vtxErr[0]=MIN_VTX_ERR2;
-      vtxErr[2]=MIN_VTX_ERR2;
-      vtxErr[5]=MIN_VTX_ERR2;
-      vtx->setError(vtxErr);
-    }
-    if (mTimg[kPriTimg]) mTimg[kPriTimg]->Start(0);
-
-    _tracker->extendTracksToVertices(*vertexes);
-    mTotPrimTks[0]+=_tracker->getNPrims();
-    if (mTimg[kPriTimg]) mTimg[kPriTimg]->Stop();
-
-    //cout << "StiMaker::Make() -I- Primary Filling"<<endl;
-    if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
-    if (_eventFiller) {_eventFiller->fillEventPrimaries(); /* fillVxFlags(); */}
-    if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
-  }
-  return kStOK;
-}
-//_____________________________________________________________________________
-void StiMaker::MyClear()
-{
-//    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
-//      StMemStat::PrintMem("Before StiFactory clear()");
-      _toolkit->getHitFactory()->clear();
-      _toolkit->getTrackNodeFactory()->clear();
-      _toolkit->getTrackNodeExtFactory()->clear();
-      _toolkit->getTrackNodeInfFactory()->clear();
-      _toolkit->getTrackFactory()->clear();
-//      StMemStat::PrintMem("After  StiFactory clear()");
-}
-//_____________________________________________________________________________
-Int_t StiMaker::InitPulls()
-{
-  if (!IAttr("makePulls")) 	return 0;
-
-  const StChainOpt *bfc = GetChainOpt();
-  assert(bfc);
-  TFile *tfile  = GetTFile();
-  if (!tfile) {
-    TString ts  = bfc->GetFileIn();
-    ts= gSystem->BaseName(ts);
-    int ext = ts.Index(".");
-    if (ext>0) ts.Replace(ext,999,"");
-    ts +=".stipull.root";
-    tfile = mPullFile = new TFile(ts,"RECREATE","TTree Sti Pulls ROOT file");
-  }
-  tfile->cd();
-  mPullTTree = new TTree("StiPulls","TTree Sti pulls");
-  mPullTTree->SetAutoSave(100000000);  // autosave when 0.1 Gbyte written
-  mPullEvent = new StiPullEvent;
-  TBranch *branch = mPullTTree->Branch("event", mPullEvent->ClassName(),&mPullEvent, 16000,99);
-  branch->SetAutoDelete(kFALSE);
-  _eventFiller->setPullEvent(mPullEvent);
-  return 0;
-}
-//_____________________________________________________________________________
-Int_t StiMaker::FillPulls()
-{
-  StEvtHddr   *hddr = GetEvtHddr();
-  mPullEvent->mRun  = hddr->GetRunNumber();
-  mPullEvent->mEvt  = hddr->GetEventNumber();
-  mPullEvent->mDate = hddr->GetDateTime();	//DAQ time (GMT)
-  mPullEvent->mChi2 = 0;
-
-  memset(mPullEvent->mVtx,0,sizeof(mPullEvent->mVtx));
-  memset(mPullEvent->mEtx,0,sizeof(mPullEvent->mEtx));
-  if (_vertexFinder) {
-    StiHit *vertex   = _vertexFinder->getVertex(0);
-    if (vertex) {
-      mPullEvent->mVtx[0] = vertex->x_g();
-      mPullEvent->mVtx[1] = vertex->y_g();
-      mPullEvent->mVtx[2] = vertex->z_g();
-      TCL::ucopy(vertex->errMtx(),mPullEvent->mEtx,6);
-    }
-  }
-  mPullEvent->Finish();
-  mPullTTree->Fill();
-  for (int i=0; i<3; i++) {mPullHits[i]+=mPullEvent->mNHits[i];}
-  if (! IAttr(".Privilege")) return kStOK;
-
-  int k;for (k=2; k>=0; k--) {if (mPullHits[k]) break;}
-  if (k<0) return kStOK;
-  k = mPullHits[k]<<(k*3);
-  if (k>1000000) return kStSTOP;
-  return kStOK;
-}
-//_____________________________________________________________________________
-TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
-                                        const StMaker *dowMk) const
-{
-  TDataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk);
-
-  if (ds || strcmp(logInput,"STIGEOM")) return ds;
-
-//  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit->getDetectorBuilder(), kActive);
-  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit, TString(), 0);
-
-  if (fVolume) {
-     if (gGeometry) {
-        TList *listOfVolume = gGeometry->GetListOfNodes();
-
-        // Remove hall from the list of ROOT nodes to make it free of ROOT control
-        listOfVolume->Remove(fVolume);
-        listOfVolume->Remove(fVolume);
-     }
-     // Add "hall" into ".const" area of this maker
-     ((StiMaker *)this)->AddConst(fVolume);
-     if (Debug()) fVolume->ls(3);
-  }
-  return fVolume;
-}
-#if 0
-//_____________________________________________________________________________
-void StiMaker::fillVxFlags() {// set vertices IdTruth if any
-  StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
-  if (! event) return;
-  UInt_t NVx = event->numberOfPrimaryVertices();
-  if (! NVx) return;
-  struct vertexPing {
-    Int_t  Id;
-    Int_t nPings;
-  };
-  enum {NVxMax = 200};
-  for (UInt_t i = 0; i < NVx; i++) {
-    StPrimaryVertex  *vx = event->primaryVertex(i);
-    if (! vx) continue;
-    vertexPing candidates[NVxMax]; memset(candidates,0,sizeof(candidates));
-    UInt_t N = 0;
-    UInt_t Ntracks = vx->numberOfDaughters();
-    Int_t IdVx = 0;
-    for (UInt_t l = 0; l < Ntracks; l++) {
-      const StTrack *pTrack = vx->daughter(l);
-      if (! pTrack) continue;
-      Int_t IdTk = pTrack->idTruth();
-      if (IdTk <= 0) continue;
-      IdVx = pTrack->idParentVx();
-      if (IdVx <= 0) continue;
-      Int_t J = -1;
-      for (UInt_t j = 0; j < N; j++) if (candidates[j].Id == IdVx) {J = j; break;}
-      if (J < 0) {J = N; if (N < NVxMax-1) N++;}
-      candidates[J].Id = IdVx;
-      candidates[J].nPings++;
-    }
-    Int_t dominant = -1;
-    Int_t J = -1;
-    for (UInt_t j = 0; j < N; j++) if (candidates[j].nPings > dominant)
-      {dominant = candidates[j].nPings; J = j;}
-    if (J > -1) {
-      Int_t IdTruth = candidates[J].Id;
-      Int_t QA      = (100*dominant)/Ntracks;
-      vx->setIdTruth(IdTruth,QA);
-      Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(IdTruth);
-      vx->setIdParent(IdParentTk);
-    }
-  }
-}
-#endif
-
-
-
-
-// $Id: StiMaker.cxx,v 1.215 2014/08/08 17:07:50 jeromel Exp $
+// $Id: StiMaker.cxx,v 1.212 2014/04/24 18:15:02 perev Exp $
+/// \File StiMaker.cxx
+/// \author M.L. Miller 5/00
+/// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
-// Revision 1.215  2014/08/08 17:07:50  jeromel
-// oops - previous commits included Jonathan's changes (recalled the previous commit by mistake)
-//
-// Revision 1.214  2014/08/08 17:06:19  jeromel
-// No change - moved history at the bootom as getting very long
-//
-// Revision 1.213  2014/08/08 16:41:23  jeromel
-// No change - moved history at the bootom as getting very long
-//
 // Revision 1.212  2014/04/24 18:15:02  perev
 // Remove RnD as old approach
 //
@@ -949,3 +346,594 @@ void StiMaker::fillVxFlags() {// set vertices IdTruth if any
 // Revision 1.96  2002/06/04 19:45:31  pruneau
 // including changes for inside out tracking
 //
+/*!
+
+\class StiMaker 
+
+\author M.L. Miller 5/00
+\author C Pruneau 3/02
+\author V Perev 2005
+
+A maker StiMaker is a steering maker for Sti package.
+<br>
+Main tasks:				
+<ul>
+<li> Create StiHits;			
+<li> Make tracks;				
+<li> Make Primary vertices;		
+<li> Make Primary tracks;			
+<li> Save produced data into StEvent.	
+</ul>
+More detailed: 				<br>
+<ul>
+<li>On Init:				
+<ul>
+<li> Detectors initialization. 
+     SetAttr("useTpc"  ,1) && SetAttr("activeTpc"  ,1) 	// default
+     SetAttr("useSvt",  1) && SetAttr("activeSvt"  ,0) 	// default
+     SetAttr("useSsd"  ,0) && SetAttr("activeSsd"  ,0)	// default Off
+
+     SetAttr("usePixel",0) && SetAttr("activePixel",0)	// default Off
+     SetAttr("useIst"  ,0) && SetAttr("activeIst"  ,0)	// default Off
+
+     SetAttr("useHpd"  ,0) && SetAttr("activeHpd"  ,0)	// default Off
+
+     SetAttr("useEventFiller"      ,kTRUE);		// default On
+     SetAttr("useTracker"          ,kTRUE);		// default On
+     SetAttr("useVertexFinder"     ,kTRUE);		// default On
+     SetAttr("makePulls"           ,kFALSE);		// default Off
+
+     SetAttr("noTreeSearch",kFALSE);	// treeSearch default ON
+</ul>
+ 
+<li>On InitRun:				
+<ul>
+ <li> Build detectors;			
+ <li> Init seed finder;			
+ <li> Init hit loader;			
+ <li> Init tracker;  			
+ <li> Init StEvent filler;			 
+ <li> Init vertex finder;			 
+</ul>
+<li>In Make:				
+<ul>
+ <li> Load hits; 
+ <li> Find seeds; 
+ <li> Create global tracks; 
+ <li> Save tracks into StEvent;
+ <li> Find vertecies; 
+ <li> Create and assign primaries tracks; 
+ <li> Save primary tracks into StEvent;
+
+*/
+#include <Stiostream.h>
+#include <math.h>
+#include <string>
+#include "TSystem.h"
+#include "TTree.h"
+#if ROOT_VERSION_CODE < 331013
+#include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
+#include "TDataSet.h"
+#include "TDataSetIter.h"
+#include "StMessMgr.h"
+#include "StChainOpt.h"
+#include "SystemOfUnits.h"
+#include "StMemStat.h"
+#include "PhysicalConstants.h"
+#include "StDetectorId.h"
+#include "StEventTypes.h"
+#include "Sti/Base/EditableFilter.h"
+#include "Sti/StiKalmanTrackFinder.h"
+#include "Sti/StiTrackContainer.h"
+#include "Sti/StiDefaultTrackFilter.h"
+#include "Sti/StiMasterDetectorBuilder.h"
+#include "Sti/Star/StiStarDetectorGroup.h"
+#include "StiTpc/StiTpcDetectorGroup.h"
+#include "StiTpc/StiTpcHitLoader.h"
+#include "StiSvt/StiSvtDetectorGroup.h"
+#include "StiSsd/StiSsdDetectorGroup.h"
+#include "StiPxl/StiPxlDetectorGroup.h"
+#include "Sti/StiKalmanTrackNode.h"
+#include "Sti/StiKalmanTrack.h"
+#include "Sti/StiHitLoader.h"
+#include "Sti/StiVertexFinder.h"
+#include "Sti/StiDetectorContainer.h"
+#include "StiMaker/StiStEventFiller.h"
+#include "StiDefaultToolkit.h"
+#include "StiMaker.h"
+#include "TFile.h"
+#include "TCanvas.h"
+#include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
+
+#include "StiTpc/StiTpcDetectorBuilder.h"
+#include "StiSvt/StiSvtDetectorBuilder.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
+// #include "StiRnD/Ist/StiIstDetectorGroup.h"
+// #include "StiRnD/Ist/StiIstDetectorGroup.h"
+#include "StiIst/StiIstDetectorGroup.h"
+
+#include "StiUtilities/StiDebug.h"
+#include "StiUtilities/StiPullEvent.h"
+#include "TDataSet.h"
+#include "TGeometry.h"
+#include "Sti/StiTimer.h"
+#include "StiDetectorVolume.h"
+#include "StarMagField.h"
+#if 0
+#include "StG2TrackVertexMap.h"
+#endif
+#include "StTpcDb/StTpcDb.h"
+#include "StSsdDbMaker/StSsdDbMaker.h"
+#include "StSvtDbMaker/StSvtDbMaker.h"
+/// Definion of minimal primary vertex errors.
+/// Typical case,vertex got from simulations with zero errors.
+/// But zero errors could to unpredicted problems
+/// Now minimal possible error is 1 micron
+static const float MIN_VTX_ERR2 = 1e-4*1e-4;
+enum { kHitTimg,kGloTimg,kVtxTimg,kPriTimg,kFilTimg};
+ClassImp(StiMaker)
+  
+//_____________________________________________________________________________
+StiMaker::StiMaker(const Char_t *name) : 
+    StMaker(name),
+    fVolume(0),
+    _initialized(false),
+    _toolkit(0),
+    _hitLoader(0),
+    _seedFinder(0),
+    _tracker(0),
+    _fitter(0),
+    _eventFiller(0),
+    _trackContainer(0),
+    _vertexFinder(0),
+    _loaderTrackFilter(0),
+    _loaderHitFilter(0)
+
+{
+  memset(mTimg,0,sizeof(mTimg));
+  cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
+  mPullFile=0; mPullEvent=0;mPullTTree=0;
+  memset(mPullHits,0,sizeof(mPullHits));
+  mTotPrimTks[0]=mTotPrimTks[1]=0;
+  if (!StiToolkit::instance()) new StiDefaultToolkit;
+  _toolkit = StiToolkit::instance();
+  SetAttr("useTpc"		,kTRUE);
+  SetAttr("activeTpc"		,kTRUE);
+
+  SetAttr("useSvt"		,kTRUE); 
+//SetAttr("activeSvt"		,kTRUE);
+  SetAttr("useSsd"		,kTRUE); 
+
+  //SetAttr("usePixel"		,kTRUE); 
+  //SetAttr("useSst"		,kTRUE); 
+  //SetAttr("useIst"		,kTRUE); 
+
+//SetAttr("activeSsd"		,kTRUE);
+//SetAttr("useAux"		,kTRUE); // Auxiliary info added to output for evaluation
+  SetAttr("useEventFiller"      ,kTRUE);
+  SetAttr("useTracker"          ,kTRUE);
+  SetAttr("useVertexFinder"     ,kTRUE);
+  SetAttr("Alignment"           ,kFALSE);
+  if (strstr(gSystem->Getenv("STAR"),".DEV"))
+     SetAttr("useAux",kTRUE); // Auxiliary info added to output for evaluation
+}
+
+//_____________________________________________________________________________
+StiMaker::~StiMaker() 
+{
+  cout <<"StiMaker::~StiMaker() -I- Started/Done"<<endl;
+}
+
+//_____________________________________________________________________________
+void StiMaker::Clear(const char*)
+{
+  if (_tracker  ) _tracker->clear();
+  if (mPullEvent) mPullEvent->Clear();
+  StMaker::Clear();
+}
+
+//_____________________________________________________________________________
+Int_t StiMaker::Finish()
+{
+  StiDebug::Finish();
+//	Finish Pull
+  if (mPullTTree) {
+    if  (Debug()) mPullTTree->Print();
+    if (mPullFile) {
+      TFile *tfile = mPullTTree->GetCurrentFile(); //just in case we switched to a new file
+      tfile->Write();
+      tfile->Close();
+      mPullFile  = 0;
+      mPullTTree = 0;
+    }
+  }
+  StiTimer::Print();
+  StiTimer::Clear();
+
+static const char *timg[] = {"HitLoa","GlobFnd","VtxFnd","PriFnd","FilFnd",0};
+  if (mTimg[0]) {
+    for (int i=0;timg[i];i++) {
+      Info("Timing","%s(%d) \tCpuTime = %6.2f seconds,\tPerEvent = %g seconds"
+      ,timg[i],mTimg[i]->Counter(),mTimg[i]->CpuTime()
+      ,mTimg[i]->CpuTime()/mTimg[i]->Counter());    
+  } }
+  if (_tracker) _tracker->finish();
+
+  return StMaker::Finish();
+}
+
+//_____________________________________________________________________________
+Int_t StiMaker::Init()
+{
+
+  StiDebug::Init();
+  StiTimer::Init("StiTrackFinder::find() TIMING"
+	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
+  if (IAttr("Alignment")) SetAttr(".Privilege",kTRUE);
+  _loaderHitFilter = 0; // not using this yet.
+  mTotPrimTks[1] = IAttr("maxTotPrims");
+  if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
+  
+
+  if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
+  if (IAttr("useTiming")) {
+    for (int it=0;it<(int)(sizeof(mTimg)/sizeof(mTimg[0]));it++){
+      mTimg[it]= new TStopwatch(); mTimg[it]->Stop();
+    } }
+
+  return StMaker::Init();
+}
+
+//_____________________________________________________________________________
+Int_t StiMaker::InitDetectors()
+{
+  StiDetectorGroup<StEvent> * group;
+  cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
+  _toolkit->add(new StiStarDetectorGroup(false,"none"));
+  if (IAttr("useTpc") && gStTpcDb)
+    {
+      cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
+      _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"),SAttr("tpcInputFile")));
+      group->setGroupId(kTpcId);
+      StiTpcHitLoader* hitLoader = (StiTpcHitLoader*) group->hitLoader();
+      if (IAttr("activeSvt") || IAttr("activeSsd") || IAttr("skip1row")) {// skip 1 row 
+	hitLoader->setMinRow(2);
+      }
+      if (IAttr("EastOff")) {
+	hitLoader->setMinSector(1);
+	hitLoader->setMaxSector(12);
+      }
+      if (IAttr("WestOff")) {
+	hitLoader->setMinSector(13);
+	hitLoader->setMaxSector(24);
+      }
+      cout << "StiMaker::InitDetectors() -I- use hits in sectors[" 
+	   << hitLoader->minSector() << "," << hitLoader->maxSector() << "] and rows["
+	   << hitLoader->minRow() << ",*]" << endl;
+      if (IAttr("laserIT")) {
+	StiKalmanTrackNode::SetLaser(1);
+	cout << "StiMaker::InitDetectors() -I- set laser time of flight correction" << endl;
+      }
+    }
+  if (IAttr("useSvt") && gStSvtDbMaker)
+    {
+    cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
+    _toolkit->add(group = new StiSvtDetectorGroup(IAttr("activeSvt"),SAttr("svtInputFile")));
+    group->setGroupId(kSvtId);
+    }
+
+  // SSD or SST - they share the db and the kSsdId
+  if (IAttr("useSst") && gStSsdDbMaker){
+    cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
+    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSst"),SAttr("ssdInputFile")));
+    group->setGroupId(kSsdId);
+
+  } else if ( IAttr("useSsd") && gStSsdDbMaker){
+    cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
+    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
+    group->setGroupId(kSsdId);
+  }
+
+
+  if (IAttr("usePixel"))
+    {
+      cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
+      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
+      group->setGroupId(kPxlId);
+    }
+ if (IAttr("useIst"))
+    {
+      cout<<"StiMaker::Init() -I- Adding detector group:Ist"<<endl;  
+      _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst"),SAttr("istInputFile")));
+      group->setGroupId(kIstId);  
+    }
+//  if (IAttr("useBTof"))
+//     { 
+//       cout<<"StiMaker::Init() -I- Adding detector group:BTof"<<endl;  
+//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof"),SAttr("BTofInputFile")));
+//       group->setGroupId(kBTofId);  
+//     }
+  return kStOk;
+}
+
+//_____________________________________________________________________________
+Int_t StiMaker::InitRun(int run)
+{
+  if (!_initialized)    {
+      cout <<"StiMaker::InitRun() -I- Initialization Segment Started"<<endl;
+      InitDetectors();
+      // Load Detector related parameters
+      StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
+      masterBuilder->build(*this);
+      StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
+      detectorContainer->initialize();//build(masterBuilder);
+      detectorContainer->reset();
+       _seedFinder = _toolkit->getTrackSeedFinder();
+      _seedFinder->initialize();
+      _hitLoader  = _toolkit->getHitLoader();
+      _tracker=0;
+      if (IAttr("useTracker")) {
+
+        _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
+        if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
+        if ( IAttr("useTiming"    )) _tracker->setTiming();
+#if 0
+	if ( IAttr("Alignment"    )) _tracker->DoAlignment(kTRUE);
+#endif
+        _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
+
+//        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
+      }
+      _eventFiller=0;
+      if (IAttr("useEventFiller")) {
+        _eventFiller =  new StiStEventFiller();
+        _eventFiller->setUseAux(IAttr("useAux"));
+        InitPulls();
+      }
+      _trackContainer = _toolkit->getTrackContainer();
+      _vertexFinder   = 0;
+      if (GetTopChain()->GetMakerInheritsFrom("StGenericVertexMaker")) {
+	_vertexFinder   = _toolkit->getVertexFinder();
+      }
+      if (_tracker) {
+        _tracker->initialize();
+        _tracker->clear();
+      }
+      _initialized=true;
+      cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
+    }
+  
+  return StMaker::InitRun(run);
+}
+
+//_____________________________________________________________________________
+Int_t StiMaker::Make()
+{
+  cout <<"StiMaker::Make() -I- Starting on new event"<<endl;
+  Int_t iAns=kStOK,iAnz=0;
+  if (! _tracker) return kStWarn;
+  StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+  if (!event) return kStWarn;
+  eventIsFinished = false;
+  try {		// try new event
+    
+    _tracker->clear();
+    
+    if (mTimg[kHitTimg]) mTimg[kHitTimg]->Start(0);
+    _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
+    if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
+    
+    _seedFinder->reset();
+    iAnz = MakeGlobalTracks(event);
+    if (iAnz) {MyClear(); return iAnz;}
+    if (_vertexFinder) {
+      iAnz = MakePrimaryTracks(event);
+      if (iAnz) {MyClear(); return iAnz;}
+    } else {
+      iAnz = StMaker::Make();
+    }
+    if (mPullTTree) {iAns = FillPulls();}
+    cout<< "StiMaker::Make() -I- Done"<<endl;
+    MyClear();
+    if (iAnz) return iAnz;
+    if (mTotPrimTks[1] && mTotPrimTks[0]>mTotPrimTks[1]) return kStStop;
+    if (IAttr("Alignment") &&  ! _tracker->getNTracks()) return kStErr;
+    return kStOK;
+  }
+  catch (runtime_error &rte) {
+    Error("Make","Catch exception %s",rte.what());
+    if (!strncmp(rte.what(),"FATAL::",6)) return kStFATAL;
+    MyClear();
+    return kStErr;
+  }
+}
+
+//_____________________________________________________________________________
+Int_t StiMaker::MakeGlobalTracks(StEvent   * event) {
+  if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
+  _tracker->findTracks();    // get the rest
+  if (mTimg[kGloTimg]) mTimg[kGloTimg]->Stop();
+  if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
+  if (_eventFiller)
+    _eventFiller->fillEvent(event, _trackContainer);
+  if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
+  return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StiMaker::MakePrimaryTracks(StEvent   * event) {
+  if (! _vertexFinder) return kStWarn;
+  if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Start(0);
+  _vertexFinder->fit(event);
+  const std::vector<StiHit*> *vertexes = _vertexFinder->result();
+  if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Stop();
+  if (vertexes && vertexes->size())	  {
+    //Set minimal errors
+    for (size_t i=0;i<vertexes->size();i++) {
+      StiHit *vtx=(*vertexes)[i];
+      float vtxErr[6];
+      memcpy(vtxErr,vtx->errMtx(),sizeof(vtxErr));
+      if (vtxErr[0]>MIN_VTX_ERR2
+	  &&  vtxErr[2]>MIN_VTX_ERR2
+	  &&  vtxErr[5]>MIN_VTX_ERR2) continue;
+      memset(vtxErr,0,sizeof(vtxErr));
+      vtxErr[0]=MIN_VTX_ERR2;
+      vtxErr[2]=MIN_VTX_ERR2;
+      vtxErr[5]=MIN_VTX_ERR2;
+      vtx->setError(vtxErr);
+    }
+    if (mTimg[kPriTimg]) mTimg[kPriTimg]->Start(0);
+    
+    _tracker->extendTracksToVertices(*vertexes);
+    mTotPrimTks[0]+=_tracker->getNPrims();
+    if (mTimg[kPriTimg]) mTimg[kPriTimg]->Stop();
+    
+    //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
+    if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
+    if (_eventFiller) {_eventFiller->fillEventPrimaries(); /* fillVxFlags(); */}
+    if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
+  }
+  return kStOK;
+}
+//_____________________________________________________________________________
+void StiMaker::MyClear()
+{
+//    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
+//      StMemStat::PrintMem("Before StiFactory clear()");
+      _toolkit->getHitFactory()->clear();
+      _toolkit->getTrackNodeFactory()->clear();
+      _toolkit->getTrackNodeExtFactory()->clear();
+      _toolkit->getTrackNodeInfFactory()->clear();
+      _toolkit->getTrackFactory()->clear();
+//      StMemStat::PrintMem("After  StiFactory clear()");
+}
+//_____________________________________________________________________________
+Int_t StiMaker::InitPulls()
+{
+  if (!IAttr("makePulls")) 	return 0;
+  
+  const StChainOpt *bfc = GetChainOpt();
+  assert(bfc);
+  TFile *tfile  = GetTFile();
+  if (!tfile) {
+    TString ts  = bfc->GetFileIn();
+    ts= gSystem->BaseName(ts);
+    int ext = ts.Index(".");
+    if (ext>0) ts.Replace(ext,999,"");
+    ts +=".stipull.root";
+    tfile = mPullFile = new TFile(ts,"RECREATE","TTree Sti Pulls ROOT file");
+  }
+  tfile->cd();
+  mPullTTree = new TTree("StiPulls","TTree Sti pulls");
+  mPullTTree->SetAutoSave(100000000);  // autosave when 0.1 Gbyte written
+  mPullEvent = new StiPullEvent;
+  TBranch *branch = mPullTTree->Branch("event", mPullEvent->ClassName(),&mPullEvent, 16000,99);
+  branch->SetAutoDelete(kFALSE);
+  _eventFiller->setPullEvent(mPullEvent);
+  return 0;
+}
+//_____________________________________________________________________________
+Int_t StiMaker::FillPulls()
+{
+  StEvtHddr   *hddr = GetEvtHddr();
+  mPullEvent->mRun  = hddr->GetRunNumber();
+  mPullEvent->mEvt  = hddr->GetEventNumber();
+  mPullEvent->mDate = hddr->GetDateTime();	//DAQ time (GMT)
+  mPullEvent->mChi2 = 0;	
+    
+  memset(mPullEvent->mVtx,0,sizeof(mPullEvent->mVtx));
+  memset(mPullEvent->mEtx,0,sizeof(mPullEvent->mEtx));
+  if (_vertexFinder) {
+    StiHit *vertex   = _vertexFinder->getVertex(0);
+    if (vertex) {
+      mPullEvent->mVtx[0] = vertex->x_g();
+      mPullEvent->mVtx[1] = vertex->y_g();
+      mPullEvent->mVtx[2] = vertex->z_g();
+      TCL::ucopy(vertex->errMtx(),mPullEvent->mEtx,6);
+    }
+  }
+  mPullEvent->Finish();
+  mPullTTree->Fill();
+  for (int i=0; i<3; i++) {mPullHits[i]+=mPullEvent->mNHits[i];}
+  if (! IAttr(".Privilege")) return kStOK;
+
+  int k;for (k=2; k>=0; k--) {if (mPullHits[k]) break;}
+  if (k<0) return kStOK;
+  k = mPullHits[k]<<(k*3);
+  if (k>1000000) return kStSTOP;
+  return kStOK;  
+}  
+//_____________________________________________________________________________
+TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
+                                        const StMaker *dowMk) const 
+{
+  TDataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk);
+  
+  if (ds || strcmp(logInput,"STIGEOM")) return ds;
+  
+//  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit->getDetectorBuilder(), kActive);
+  if (!fVolume && _toolkit) ((StiMaker *)this)->fVolume = new StiDetectorVolume(*_toolkit, TString(), 0);
+  
+  if (fVolume) { 
+     if (gGeometry) {
+        TList *listOfVolume = gGeometry->GetListOfNodes();
+
+        // Remove hall from the list of ROOT nodes to make it free of ROOT control
+        listOfVolume->Remove(fVolume);
+        listOfVolume->Remove(fVolume);
+     }
+     // Add "hall" into ".const" area of this maker
+     ((StiMaker *)this)->AddConst(fVolume);
+     if (Debug()) fVolume->ls(3);
+  }
+  return fVolume;
+}
+#if 0
+//_____________________________________________________________________________
+void StiMaker::fillVxFlags() {// set vertices IdTruth if any
+  StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+  if (! event) return;
+  UInt_t NVx = event->numberOfPrimaryVertices();
+  if (! NVx) return;
+  struct vertexPing {
+    Int_t  Id;
+    Int_t nPings;
+  };
+  enum {NVxMax = 200};
+  for (UInt_t i = 0; i < NVx; i++) {
+    StPrimaryVertex  *vx = event->primaryVertex(i);
+    if (! vx) continue;
+    vertexPing candidates[NVxMax]; memset(candidates,0,sizeof(candidates));
+    UInt_t N = 0;
+    UInt_t Ntracks = vx->numberOfDaughters();
+    Int_t IdVx = 0;
+    for (UInt_t l = 0; l < Ntracks; l++) {
+      const StTrack *pTrack = vx->daughter(l);
+      if (! pTrack) continue;
+      Int_t IdTk = pTrack->idTruth();
+      if (IdTk <= 0) continue;
+      IdVx = pTrack->idParentVx();
+      if (IdVx <= 0) continue;
+      Int_t J = -1;
+      for (UInt_t j = 0; j < N; j++) if (candidates[j].Id == IdVx) {J = j; break;}
+      if (J < 0) {J = N; if (N < NVxMax-1) N++;}
+      candidates[J].Id = IdVx;
+      candidates[J].nPings++;
+    }
+    Int_t dominant = -1;
+    Int_t J = -1;
+    for (UInt_t j = 0; j < N; j++) if (candidates[j].nPings > dominant) 
+      {dominant = candidates[j].nPings; J = j;}
+    if (J > -1) {
+      Int_t IdTruth = candidates[J].Id;
+      Int_t QA      = (100*dominant)/Ntracks;
+      vx->setIdTruth(IdTruth,QA);
+      Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(IdTruth);
+      vx->setIdParent(IdParentTk);
+    }
+  }
+}
+#endif
