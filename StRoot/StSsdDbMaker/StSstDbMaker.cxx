@@ -204,7 +204,10 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition(){
       row.driftDirection[1] = r[3]; row.normalDirection[1] = r[4]; row.transverseDirection[1] = r[5];
       row.driftDirection[2] = r[6]; row.normalDirection[2] = r[7]; row.transverseDirection[2] = r[8];
       
+      Double_t *wgtr = WG.GetTranslation();
+      memcpy(row.centerPosition,wgtr, 3*sizeof(Double_t));
       comb->SetRotation(WG.GetRotationMatrix());
+
       comb->SetTranslation(WG.GetTranslation());
       
       fRotList->Add(comb);
