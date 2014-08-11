@@ -1018,7 +1018,9 @@ int fgtPed::to_cache(char *fname, u_int run, int dont_cache)
 		all_cou++ ;
 		// use just he lower bits of status!!!
 		if((ch_status[r][arm][apv][c] & 0x0E) || (ped->cou[arm][apv][c]==0)) {
-			use_ped = peds_from_cache ;
+			//use_ped = peds_from_cache ; Major bug before Aug 2014!!! All peds_from_cache were taken from RDO1
+			//FIXED in Aug 2014:
+			use_ped = peds_from_cache + r ;
 			non_cached_cou++ ;
 		}
 		else {
