@@ -23,6 +23,7 @@
 
 #include "tables/St_g2t_ssd_hit_Table.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
+#include "StSsdDbMaker/StSstDbMaker.h"
 #include "StSsdUtil/StSsdBarrel.hh"
 #include "StSsdHitCollection.h"
 #include "StEvent.h"
@@ -157,8 +158,6 @@ Int_t StSsdFastSimMaker::Make()
     LOG_WARN << "No StEvent on input, bye bye" << endm; return kStWarn;
     mCol =0;
   }
-  //StMcEvent* mevent = (StMcEvent*) GetInputDS("StMcEvent");
-  //if(!mevent){LOG_WARN << "No StMcEvent on input "<<endm; return kStWarn;}
   TDataSetIter geant(GetInputDS("geant"));
   if (! gGeoManager) GetDataBase("VmcGeometry");
   LOG_DEBUG << "Geometry Loaded" << endm;
@@ -170,14 +169,14 @@ Int_t StSsdFastSimMaker::Make()
   g2t_ssd_hit_st *g2t         = g2t_ssd_hit->GetTable();
 
   LOG_INFO<<"####      START OF SSD FAST SIM MAKER        ####"<<endm;
-  StSsdBarrel *mySsd =gStSsdDbMaker->GetSsd();
+  mySsd = StSsdBarrel::Instance();
   ssdDimensions_st *dimensions = m_dimensions->GetTable();
   setSsdParameters(dimensions);
   if(Debug()>1) printSsdParameters();
   Int_t inContainer = 0;
   Int_t goodHits    = 0;
   if(g2t_ssd_hit){
-    LOG_INFO<<Form("NumberOfRows = %d Size of g2t_ssd table=%d",g2t_ssd_hit->GetNRows(),g2t_ssd_hit->GetTableSize())<<endm;
+    LOG_INFO<<Form("NumberOfRows = %d Size of g2t_ssd table=%d",(int)g2t_ssd_hit->GetNRows(),(int)g2t_ssd_hit->GetTableSize())<<endm;
     Int_t minWaf      = mSsdLayer*1000;
     Int_t currWafId   = 0;
     Int_t currWafNumb = 0;
@@ -197,26 +196,17 @@ Int_t StSsdFastSimMaker::Make()
 	// now we get the position of this wafer    
 	Double_t xg[3] = {mHit->position().x(),mHit->position().y(),mHit->position().z()};
 	LOG_DEBUG <<Form("global position x=%f y=%f z=%f",xg[0],xg[1],xg[2])<<endm;
-	Double_t xl[3];
-	xl[0] =0.0;  
-        xl[1] =0.0;  
-        xl[2] =0.0;
+	Double_t xl[3]={0.,0.,0.};
 	mySsd->mLadders[currLadder]->mWafers[currWafNumb]->MasterToLocal(xg,xl);
 	LOG_DEBUG <<Form("local position x=%f y=%f z=%f",xl[0],xl[1],xl[2])<<endm;
 	LOG_DEBUG <<"will smear X"<<endm;
-	Double_t xlSmear[3];
-	xlSmear[0] =0.0; 
-        xlSmear[1] =0.0; 
-        xlSmear[2] =0.0;
+	Double_t xlSmear[3]={0.,0.,0.};
         xlSmear[0] = (distortHit(xl[0], mResXSsd));
 	LOG_DEBUG <<"will smear Y"<<endm;
 	xlSmear[1] = (distortHit(xl[1], mResZSsd));
 	xlSmear[2] = xl[2];
 	LOG_DEBUG <<Form("smeared local position x=%f y=%f z=%f",xlSmear[0],xlSmear[1],xlSmear[2])<<endm;
-	Double_t xgSmear[3];
-	xgSmear[0] =0.0;  
-        xgSmear[1] =0.0;  
-        xgSmear[2] =0.0;  
+	Double_t xgSmear[3]={0.,0.,0.};
 	mySsd->mLadders[currLadder]->mWafers[currWafNumb]->LocalToMaster(xlSmear,xgSmear);
 	LOG_DEBUG<< "After : global position are :"<<endm;
 	LOG_DEBUG <<Form("x=%f y=%f z=%f",xgSmear[0],xgSmear[1],xgSmear[2])<<endm;
@@ -247,10 +237,6 @@ Int_t StSsdFastSimMaker::Make()
 	mSmearedhit->setHardwarePosition(hw);
 	mSmearedhit->setLocalPosition(xlSmear[0],xlSmear[1]);
 	mSmearedhit->setIdTruth(g2t[i].track_p,100);
-	//Float_t p[3]      = {0,0,0};
-	//Int_t j =0 ;
-	//for (j = 0; j<3; j++) {p[j] = g2t[i].p[j];}
-	//mySsd->mLadders[currLadder]->mWafers[currWafNumb]->addHit(g2t[i].id, g2t[i].id, g2t[i].track_p, g2t[i].x, g2t[i].de, p);
 	inContainer+=mCol->addHit(mSmearedhit);
       }
     }
