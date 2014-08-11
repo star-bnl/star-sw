@@ -37,6 +37,7 @@ class StSsdHit;
 class StSsdHitCollection;
 class StSsdFastSimMaker : public StMaker {
  private :
+  StSsdBarrel           *mySsd;//!
   St_ssdDimensions      *m_dimensions;//!
   St_ssdWafersPosition  *m_positions; //!
   ssdConfiguration_st   *m_config;    //!
@@ -109,7 +110,7 @@ class StSsdFastSimMaker : public StMaker {
    of all maker versions in use. */
  virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdFastSimMaker.h,v 1.4 2014/08/06 11:43:43 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdFastSimMaker.h,v 1.5 2014/08/11 19:27:09 bouchet Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
   ClassDef(StSsdFastSimMaker,0)   //StAF chain virtual base class for Makers
