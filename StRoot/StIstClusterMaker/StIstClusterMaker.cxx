@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.13 2014/08/06 18:56:52 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.14 2014/08/12 23:04:53 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.14  2014/08/12 23:04:53  ypwang
+* remove the raw hit number cut per ladder before doing clustering, due to chip occupancy cut was added in raw hit maker which can do the bad column rejection; simplfy the code by removing the InitRun() function
+*
 * Revision 1.13  2014/08/06 18:56:52  ypwang
 * minor update due to coding style update of the StIstDb method
 *
@@ -56,10 +59,7 @@
 #include "StIstSimpleClusterAlgo.h"
 #include "StIstScanClusterAlgo.h"
 
-#include "StRoot/StIstDbMaker/StIstDb.h"
-#include "tables/St_istControl_Table.h"
-
-StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mIstDb(0), mTimeBin(-1), mSplitCluster(1)
+StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mTimeBin(-1), mSplitCluster(1)
 {
   /* nothing to do */
 };
@@ -98,24 +98,17 @@ Int_t StIstClusterMaker::Make()
        
            if( rawHitCollectionPtr && clusterCollectionPtr ){
 		UShort_t numRawHits = rawHitCollectionPtr->getNumRawHits();
-                if(numRawHits<mMinNumOfRawHits)   {
-                    LOG_WARN <<"no rawHits found in ladder " << (short) (ladderIdx+1) << "! " <<endl;
-                    continue;
-                }
-                if(numRawHits>mMaxNumOfRawHits)   { // set to 460 per ladder (~10% occupancy)
-                    LOG_WARN <<"too large number of raw hits found in ladder " << (short) (ladderIdx+1) << "! " <<endl;
-                    continue;
-                }
+		LOG_DEBUG << "Number of raw hits found in ladder " << (short) (ladderIdx+1) << ": " << numRawHits << endm;
 
-               // clustering and splitting
-	       mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
-	       mClusterAlgoPtr->setSplitFlag(mSplitCluster);
-               Int_t loc_ierr = mClusterAlgoPtr->doClustering(*mIstCollectionPtr, *rawHitCollectionPtr, *clusterCollectionPtr );
-               if(loc_ierr!=kStOk) {
-                   LOG_WARN <<"StClusterMaker::Make(): clustering for ladder " << (short) (ladderIdx+1) << " returned " << loc_ierr <<endm;
-                   if(loc_ierr>ierr)
+               	// clustering and splitting
+	       	mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
+	       	mClusterAlgoPtr->setSplitFlag(mSplitCluster);
+               	Int_t loc_ierr = mClusterAlgoPtr->doClustering(*mIstCollectionPtr, *rawHitCollectionPtr, *clusterCollectionPtr );
+               	if(loc_ierr!=kStOk) {
+                    LOG_WARN <<"StClusterMaker::Make(): clustering for ladder " << (short) (ladderIdx+1) << " returned " << loc_ierr <<endm;
+                    if(loc_ierr>ierr)
                        ierr=loc_ierr;
-               }
+               	}
            }           
       }
   }
@@ -170,34 +163,6 @@ Int_t StIstClusterMaker::Init()
 
   if( !ierr )
      ierr = mClusterAlgoPtr->Init();
-
-  return ierr;
-};
-
-Int_t StIstClusterMaker::InitRun(Int_t runnumber)
-{
-  Int_t ierr = kStOk;
-
-  TObjectSet *istDbDataSet = (TObjectSet *)GetDataSet("ist_db");
-   if (istDbDataSet) {
-       mIstDb = (StIstDb *)istDbDataSet->GetObject();
-       assert(mIstDb);
-   }
-   else {
-       LOG_ERROR << "InitRun : no istDb" << endm;
-       return kStErr;
-   }
-
-  // control parameters
-  const istControl_st *istControlTable = mIstDb->getControl() ;
-  if (!istControlTable)  {
-       LOG_ERROR << "Pointer to IST control table is null" << endm;
-       ierr = kStErr;
-  }
-  else {
-       mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
-       mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
-  }
 
   return ierr;
 };
