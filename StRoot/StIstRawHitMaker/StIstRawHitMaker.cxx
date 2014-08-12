@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.18 2014/08/12 17:39:17 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.19 2014/08/12 23:00:02 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.19  2014/08/12 23:00:02  ypwang
+* chip occupancy cut added to skip the chip with more than 20% channels fired; change the raw hit decision cut position in the code.
+*
 * Revision 1.18  2014/08/12 17:39:17  ypwang
 * clean several comment-out lines
 *
@@ -152,6 +155,8 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber) {
        	mZSdata  = istControlTable[0].kIstZSdata;
        	mDefaultTimeBin = istControlTable[0].kIstDefaultTimeBin;
        	mCurrentTimeBinNum = istControlTable[0].kIstCurrentTimeBinNum;
+	mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
+        mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
    }
 
    // IST pedestal/rms table
@@ -351,6 +356,35 @@ Int_t StIstRawHitMaker::Make() {
             	}
 	    }
 
+	    // raw hit decision and channel counter passed the hit decision
+	    Bool_t isPassRawHitCut[kIstNumApvChannels];
+	    Int_t nChanPassedCut = 0;
+	    for(int iChan=0; iChan<kIstNumApvChannels; iChan++) {
+		isPassRawHitCut[iChan] = kFALSE;
+	    }
+
+	    for(int iChan=0; iChan<kIstNumApvChannels; iChan++) {
+		Int_t elecId = (rdo-1)*kIstNumArmsPerRdo*kIstNumApvsPerArm*kIstNumApvChannels + arm*kIstNumApvsPerArm*kIstNumApvChannels + apv*kIstNumApvChannels + iChan;
+	    	for(int iTB=1; iTB<ntimebin-1; iTB++)    {
+		    // raw hit decision: the method is stolen from Gerrit's ARMdisplay.C
+		    if( (signalUnCorrected[iChan][iTB] > 0) && (signalUnCorrected[iChan][iTB] < kIstMaxAdc) &&
+                    	(signalCorrected[iChan][iTB-1] > mHitCut * mRmsVec[elecId])     &&
+                    	(signalCorrected[iChan][iTB]   > mHitCut * mRmsVec[elecId])     &&
+                    	(signalCorrected[iChan][iTB+1] > mHitCut * mRmsVec[elecId]) ) {
+
+		     	isPassRawHitCut[iChan] = kTRUE;
+		     	nChanPassedCut++;
+			iTB = 999;
+		    }
+	    	}
+	    }
+
+	    // skip the chip filling if the signal-channel number too large (20% chip occupancy was set) to exclude hot chip
+	    if( !mIsCaliMode && (nChanPassedCut>mMaxNumOfRawHits || nChanPassedCut<mMinNumOfRawHits) ) {
+		LOG_DEBUG<< "Skip: The APV chip could be hot with " << nChanPassedCut << " channels fired!!" << endm;
+                continue;
+	    }
+	
 	    // fill IST raw hits for current APV chip
 	    for(int iChan=0; iChan<kIstNumApvChannels; iChan++) {	
 		//mapping info.
@@ -389,37 +423,29 @@ Int_t StIstRawHitMaker::Make() {
                             continue;
                         }
 
-                    	for(int iTB=1; iTB<ntimebin-1; iTB++)    {
-                      	    // raw hit decision: the method is stolen from Gerrit's ARMdisplay.C
-                            if( (signalUnCorrected[iChan][iTB] > 0) && (signalUnCorrected[iChan][iTB] < kIstMaxAdc) && 
-                            	(signalCorrected[iChan][iTB-1] > mHitCut * mRmsVec[elecId])     &&
-                            	(signalCorrected[iChan][iTB]   > mHitCut * mRmsVec[elecId])     &&
-                            	(signalCorrected[iChan][iTB+1] > mHitCut * mRmsVec[elecId]) ) {
+			if( isPassRawHitCut[iChan] ) {
+			    UChar_t tempMaxTB = -1;
+			    Float_t tempMaxCharge = -999.0;
 
-                            	iTB = 999;
-			    	UChar_t tempMaxTB = -1;
-			    	Float_t tempMaxCharge = -999.0;
+			    StIstRawHit* rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
 
-			    	StIstRawHit* rawHitPtr = rawHitCollectionPtr->getRawHit( elecId );
+			    for(int iTBin=0; iTBin<ntimebin; iTBin++)      {
+				if( mDoCmnCorrection && dataFlag==mADCdata )
+                               	    signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
 
-			    	for(int iTBin=0; iTBin<ntimebin; iTBin++)      {
-				    if( mDoCmnCorrection && dataFlag==mADCdata )
-                               	    	signalCorrected[iChan][iTBin] -= commonModeNoise[iTBin];
+                                rawHitPtr->setCharge(signalCorrected[iChan][iTBin] * mGainVec[elecId], (unsigned char)iTBin );
+                              	rawHitPtr->setChargeErr(mRmsVec[elecId] * mGainVec[elecId], (unsigned char)iTBin);
 
-                                    rawHitPtr->setCharge(signalCorrected[iChan][iTBin] * mGainVec[elecId], (unsigned char)iTBin );
-                              	    rawHitPtr->setChargeErr(mRmsVec[elecId] * mGainVec[elecId], (unsigned char)iTBin);
-
-				    if(signalCorrected[iChan][iTBin] > tempMaxCharge) {
-				    	tempMaxCharge = signalCorrected[iChan][iTBin];
-				    	tempMaxTB = (unsigned char)iTBin;
-				    }
-			    	}
-                              	rawHitPtr->setChannelId( elecId );
-				rawHitPtr->setGeoId( geoId );
-				rawHitPtr->setMaxTimeBin( tempMaxTB );
-				rawHitPtr->setDefaultTimeBin( mDefaultTimeBin );
-                            }//end raw hit decision cut
-                    	}//end loop over time bins
+				if(signalCorrected[iChan][iTBin] > tempMaxCharge) {
+				    tempMaxCharge = signalCorrected[iChan][iTBin];
+				    tempMaxTB = (unsigned char)iTBin;
+				}
+			    }
+                            rawHitPtr->setChannelId( elecId );
+			    rawHitPtr->setGeoId( geoId );
+			    rawHitPtr->setMaxTimeBin( tempMaxTB );
+			    rawHitPtr->setDefaultTimeBin( mDefaultTimeBin );
+                    	}//end raw hit decision cut
 		    }//end filling hit info
 		}
 		else {
