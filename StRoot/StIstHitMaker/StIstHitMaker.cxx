@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.14 2014/08/06 18:56:53 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.15 2014/08/12 23:08:09 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.15  2014/08/12 23:08:09  ypwang
+* remove the cluster number cut per ladder, due to chip occupancy cut was added in raw hit maker which can do the bad column rejection
+*
 * Revision 1.14  2014/08/06 18:56:53  ypwang
 * minor update due to coding style update of the StIstDb method
 *
@@ -98,17 +101,6 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
    // geometry Db tables
    listGeoMSensorOnGlobal = mIstDb->getRotations();
 
-   // control parameters
-   const istControl_st *istControlTable = mIstDb->getControl() ;
-   if (!istControlTable)  {
-       LOG_ERROR << "Pointer to IST control table is null" << endm;
-       ierr = kStErr;
-   }
-   else {
-       mMinNumOfRawHits = istControlTable[0].kIstMinNumOfRawHits;
-       mMaxNumOfRawHits = istControlTable[0].kIstMaxNumOfRawHits;
-   }
-
    return ierr;
 };
 
@@ -159,14 +151,7 @@ Int_t StIstHitMaker::Make()
 
             if( clusterCollectionPtr ){
 		unsigned int numClusters = clusterCollectionPtr->getNumClusters();
-                if(numClusters<mMinNumOfRawHits)   { // Here mMinNumOfRawHits indicate minimum number of found clusters
-                    LOG_WARN <<"no cluster found in ladder " << ladderIdx+1 << "! " <<endl;
-                    continue;
-                }
-                if(numClusters>mMaxNumOfRawHits)   { // Here mMaxNumOfRawHits indicate maximum number of found clusters
-                    LOG_WARN <<"too large number of clusters found in ladder " << ladderIdx+1 << "! " <<endl;
-                    continue;
-                }
+		LOG_DEBUG << "Number of clusters found in ladder " << (int)(ladderIdx+1) << ": " << numClusters << endm; 
 
                 unsigned short idTruth = 0;
 		unsigned char  nRawHits = -1, nRawHitsZ = -1, nRawHitsRPhi = -1;
