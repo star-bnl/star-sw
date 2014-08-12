@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.h,v 1.6 2014/07/29 20:13:31 ypwang Exp $
+* $Id: StIstHitMaker.h,v 1.7 2014/08/12 23:08:09 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
+* Revision 1.7  2014/08/12 23:08:09  ypwang
+* remove the cluster number cut per ladder, due to chip occupancy cut was added in raw hit maker which can do the bad column rejection
+*
 * Revision 1.6  2014/07/29 20:13:31  ypwang
 * update the IST DB obtain method
 *
@@ -42,13 +45,11 @@ class StIstHitMaker : public StMaker
   Int_t Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.6 2014/07/29 20:13:31 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.7 2014/08/12 23:08:09 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   THashList *listGeoMSensorOnGlobal;
   StIstDb *mIstDb;
-
-  UShort_t mMinNumOfRawHits, mMaxNumOfRawHits;
 
  private:
   ClassDef(StIstHitMaker,1);
