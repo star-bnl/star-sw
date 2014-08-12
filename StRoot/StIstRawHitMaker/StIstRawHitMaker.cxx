@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.17 2014/08/06 18:56:53 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.18 2014/08/12 17:39:17 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.18  2014/08/12 17:39:17  ypwang
+* clean several comment-out lines
+*
 * Revision 1.17  2014/08/06 18:56:53  ypwang
 * minor update due to coding style update of the StIstDb method
 *
@@ -376,32 +379,13 @@ Int_t StIstRawHitMaker::Make() {
 		    else { //physics mode: pedestal subtracted + dynamical common mode correction
 			//skip dead chips and bad mis-configured chips
 			if(mConfigVec[apvId-1]<1 || mConfigVec[apvId-1]>9) { //1-9 good status code
-			    LOG_DEBUG<< "Skip: Dead/mis-configured APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
+			    LOG_DEBUG<< "Skip: Channel belongs to dead/bad/mis-configured APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
                             continue;
 			}
-			//comment out by Yaping on Jul. 29, 2014. The dead and mis-configured chips can be masked out by the chip status table.
-			/*
-			//skip current APV channels marked as bad/dead (common mode noise set to 100.)
-                	if( cmNoisePerChip > 99.0) {
-                    	    LOG_DEBUG<< "Skip: Bad/dead behavior APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
-                    	    continue;
-                	}
-
-			//skip current APV channels behaviored noisy ...
-			if( cmNoisePerChip > mApvMaxCmNoiseLevel) {
-                            LOG_DEBUG<< "Skip: Noisy behavior APV chip geometry index: " << apvId << " on ladder " << ladder << endm;
-                            continue;
-                        }
-			*/
-			//skip current channel marked as bad/dead status
-			if(mRmsVec[elecId] > 99.0)  {
-                            LOG_DEBUG<<"Skip: Bad/dead behavior channel electronics index: " << elecId << endm;
-                            continue;
-                        }
 
 			//skip current channel marked as suspicious status
-			if(mRmsVec[elecId]<mChanMinRmsNoiseLevel || mRmsVec[elecId]>mChanMaxRmsNoiseLevel)  {
-                            LOG_DEBUG<<"Skip: Noisy behavior channel electronics index: " << elecId << endm;
+			if(mRmsVec[elecId]<mChanMinRmsNoiseLevel || mRmsVec[elecId]>mChanMaxRmsNoiseLevel || mRmsVec[elecId] > 99.0)  {
+                            LOG_DEBUG<<"Skip: Noisy/hot/dead channel electronics index: " << elecId << endm;
                             continue;
                         }
 
