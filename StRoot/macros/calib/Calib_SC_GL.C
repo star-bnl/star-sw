@@ -138,6 +138,9 @@ Bool_t FORCE_g5_same  = kTRUE; // if g4_same, then g3_same and g5_same are equiv
 Bool_t NO_PLOTS       = kFALSE;
 double MAX_DEV        = 4.0;
 double REF_CONST1     = 0.318;
+double RUN_CORRELATE  = 0.70;  // Assume that RUN_CORRELATE fraction of variance
+                               // among results from same run/file is correlated
+                               // (lower values may help with failed fits)
 
 // Main routine:
 void Calib_SC_GL(const char* input=0, const char* cuts=0, int scaler=-1, int debug=0, const char* gcuts=0);
@@ -223,11 +226,15 @@ Double_t m_sc2[nMeasuresMax];
 Double_t m_usc[nMeasuresMax];
 Double_t m_ugl[nMeasuresMax];
 Double_t m_gapf[nMeasuresMax];
+Double_t m_runs[nMeasuresMax];
 Double_t m_L[nMeasuresMax];
 Double_t m_c1[nMeasuresMax];
 Int_t m_set[nMeasuresMax];
+Int_t m_runIdx[nMeasuresMax];
 Double_t devsSC[nMeasuresMax];
 Double_t devsGL[nMeasuresMax];
+Double_t maxvarSC[nMeasuresMax];
+Double_t maxvarGL[nMeasuresMax];
 Double_t devs_set[nfip];
 Double_t* devs;
 Bool_t outliers0[nMeasuresMax];
@@ -246,6 +253,7 @@ double STDDEV_GL = 0.035;
 // Data for each chain
 int glmode[nfip]; // mode of obtaining used GL
 double ugl[nfip]; // GL used
+
 
 // Plot data:
 double xgl[nMeasuresMax];
@@ -395,12 +403,22 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
     memcpy(&(m_gapf[nMeasures]),SCi[i]->GetV2(),nMeasuresI*sizeof(Double_t));
     memcpy(&(m_usc [nMeasures]),SCi[i]->GetV3(),nMeasuresI*sizeof(Double_t));
     memcpy(&(m_c1  [nMeasures]),SCi[i]->GetV4(),nMeasuresI*sizeof(Double_t));
+    SCi[i]->Draw("run",cut,"goff");
+    memcpy(&(m_runs[nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
+    // possibly improve to (event+run*1e-6) as a more unique ID
+    //   for the case of two files from the same run
     if (glmode[i] == 2) {
       SCi[i]->Draw("ugl",cut,"goff");
       memcpy(&(m_ugl[nMeasures]),SCi[i]->GetV1(),nMeasuresI*sizeof(Double_t));
       ugl[i] = m_ugl[nMeasures];
     } else for (k=0; k<nMeasuresI; k++) m_ugl[k+nMeasures] = ugl[i]; // if not in the ntuple
-    for (k=0; k<nMeasuresI; k++) m_set[k+nMeasures] = i;
+    for (k=0; k<nMeasuresI; k++) {
+      m_set[k+nMeasures] = i;
+      m_runIdx[k+nMeasures] = k+nMeasures;
+      for (j=0; j<k+nMeasures; j++) { // find identical input runs/files
+        if (m_runs[k+nMeasures] == m_runs[j]) { m_runIdx[k+nMeasures] = j; break; }
+      }
+    }
     nMeasures += nMeasuresI;
   }
   
@@ -597,7 +615,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   
   // Perform the fit
   printf("\nSpaceCharge & GridLeak fit results {scaler: %s}:\n",detbest);
-  status = minuit->ExecuteCommand("MIGRAD", arglist ,1);
+  status = minuit->ExecuteCommand("MINIMIZE", arglist, 1);
   if (status) {
     printf("Fit failed for sc+gl, err = %d\n",status);
     return;
@@ -610,7 +628,7 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   for (k=0;k<npar;k++) {
     if (ffix[k]) continue;
     for (i=0;i<npar;i++) if (i!=k && !ffix[i]) minuit->FixParameter(i);
-    status = minuit->ExecuteCommand("MIGRAD", arglist ,1);
+    status = minuit->ExecuteCommand("MINIMIZE", arglist, 1);
     if (status) {
       printf("Fit failed for sc+gl, err = %d\n",status);
       return;
@@ -1090,7 +1108,19 @@ void fnchGapf(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t ifla
     x[1] = m_usc[i] * m_ugl[i];
     x[2] = m_c1[i];
     devs[i] = m_gapf[i] - funcGapf(x,par);
-    chisq += devs[i]*devs[i];
+    maxvarGL[i] = devs[i]*devs[i];
+    int k = m_runIdx[i];
+    if (k!=i) {
+      if (maxvarGL[i]>maxvarGL[k]) {
+        for (int j=k;j<i;j++) {
+          if (m_runIdx[j]==k) maxvarGL[j] = maxvarGL[i];
+        }
+      } else maxvarGL[i] = maxvarGL[k];
+    }
+  }
+  for (int i=0;i<nMeasures;i++) {
+    if (outliers[i]) continue;
+    chisq += RUN_CORRELATE*maxvarGL[i] + (1.0-RUN_CORRELATE)*devs[i]*devs[i];
     nMeasuresI++;
   }
   CHISQ = (chisq/(STDDEV*STDDEV))/(nMeasuresI-npar); // chisq/dof
@@ -1112,8 +1142,20 @@ void fnchSC(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
     if (m_sc[i] == 0) { outliers[i]=kTRUE; devs[i] = 0; continue; }
     x[0] = m_L[i];
     x[1] = m_ugl[i];
-    devs[i] = m_sc[i] - funcSC(x,pars); // par
-    chisq += devs[i]*devs[i];
+    devs[i] = m_sc[i] - funcSC(x,pars);
+    maxvarSC[i] = devs[i]*devs[i];
+    int k = m_runIdx[i];
+    if (k!=i) {
+      if (maxvarSC[i]>maxvarSC[k]) {
+        for (int j=k;j<i;j++) {
+          if (m_runIdx[j]==k) maxvarSC[j] = maxvarSC[i];
+        }
+      } else maxvarSC[i] = maxvarSC[k];
+    }
+  }
+  for (int i=0;i<nMeasures;i++) {
+    if (outliers[i]) continue;
+    chisq += RUN_CORRELATE*maxvarSC[i] + (1.0-RUN_CORRELATE)*devs[i]*devs[i];
     nMeasuresI++;
   }
   CHISQ = (chisq/(STDDEV*STDDEV))/(nMeasuresI-npar); // chisq/dof
@@ -1123,7 +1165,8 @@ void fnchSC(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 void fnchSCGapf(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   //calculate chisquare
   gin = 0; iflag = 0;
-  double chisq = 0;
+  double chisqGL = 0;
+  double chisqSC = 0;
   Double_t x[3];
   nMeasuresI = 0;
   Double_t parGL[3];
@@ -1147,19 +1190,43 @@ void fnchSCGapf(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t if
     x[2] = m_c1[i];
     if (!outliersGL[i]) {
       devsGL[i] = m_gapf[i] - funcGapf(x,parGL);
-      chisq += TMath::Power(devsGL[i]/STDDEV_GL,2);
-      nMeasuresI++;
+      maxvarGL[i] = devsGL[i]*devsGL[i];
+      int k = m_runIdx[i];
+      if (k!=i) {
+        if (maxvarGL[i]>maxvarGL[k]) {
+          for (int j=k;j<i;j++) {
+            if (m_runIdx[j]==k) maxvarGL[j] = maxvarGL[i];
+          }
+        } else maxvarGL[i] = maxvarGL[k];
+      }
     }
     
     x[1] = m_ugl[i];
     x[2] = m_usc[i];
     if (!outliersSC[i]) {
       devsSC[i] = m_sc[i] - funcSC2(x,parSC);
-      chisq += TMath::Power(devsSC[i]/STDDEV_SC,2);
+      maxvarSC[i] = devsSC[i]*devsSC[i];
+      int k = m_runIdx[i];
+      if (k!=i) {
+        if (maxvarSC[i]>maxvarSC[k]) {
+          for (int j=k;j<i;j++) {
+            if (m_runIdx[j]==k) maxvarSC[j] = maxvarSC[i];
+          }
+        } else maxvarSC[i] = maxvarSC[k];
+      }
+    }
+  }
+  for (int i=0;i<nMeasures;i++) {
+    if (!outliersGL[i]) {
+      chisqGL += RUN_CORRELATE*maxvarGL[i] + (1.0-RUN_CORRELATE)*devsGL[i]*devsGL[i];
+      nMeasuresI++;
+    }
+    if (!outliersSC[i]) {
+      chisqSC += RUN_CORRELATE*maxvarSC[i] + (1.0-RUN_CORRELATE)*devsSC[i]*devsSC[i];
       nMeasuresI++;
     }
   }
-  CHISQ = chisq/(nMeasuresI-npar); // chisq/dof
+  CHISQ = ((chisqGL/(STDDEV_GL*STDDEV_GL))+(chisqSC/(STDDEV_SC*STDDEV_SC)))/(nMeasuresI-npar); // chisq/dof
   f = CHISQ;
 }
 
@@ -1387,7 +1454,7 @@ int FitWithOutlierRemoval(int debug) {
   while (1) {
     if (iter>1) memcpy(outliers2,outliers1,nBytes);
     if (iter>0) memcpy(outliers1,outliers,nBytes);
-    status = minuit->ExecuteCommand("MIGRAD", arglist ,1);
+    status = minuit->ExecuteCommand("MINIMIZE", arglist, 1);
     if (status) return status;
 
     // One more call to the fnch to get the deviations correct
@@ -1416,8 +1483,7 @@ int FitWithOutlierRemoval(int debug) {
     for (i=0; i<nMeasures; i++) {
       if (outliers[i]) continue;
       int ifi = m_set[i];
-      devs[i] -= devs_set[ifi];
-      VAR_singles[ifi] += devs[i]*devs[i];
+      VAR_singles[ifi] += (devs[i]-devs_set[ifi])*(devs[i]-devs_set[ifi]);
     }
     for (i=0; i<nfi; i++) {
       VAR_singles[i] = TMath::Sqrt(VAR_singles[i] / nSet[i]);
@@ -1460,7 +1526,7 @@ int FitWithOutlierRemoval(int debug) {
   // Constrain errors by fixing other parameters
   for (k=0;k<3;k++) {
     for (i=0;i<3;i++) if (i!=k) minuit->FixParameter(i);
-    status = minuit->ExecuteCommand("MIGRAD", arglist ,1);
+    status = minuit->ExecuteCommand("MINIMIZE", arglist, 1);
     if (status) return status;
     minuit->GetParameter(k,parName[k],fitPars[k],fitParErrs[k],temp1,temp2);
     printf("%s\t:\t%g\t+/- %g\n",parName[k],fitPars[k],fitParErrs[k]);
@@ -1703,8 +1769,11 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.3 2014/06/10 19:16:16 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.4 2014/08/12 18:59:02 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.4  2014/08/12 18:59:02  genevb
+// Introduce correlations between input datasets, MIGRAD=>MINIMIZE
+//
 // Revision 2.3  2014/06/10 19:16:16  genevb
 // Fix previous commit log: Introduce basic asymmetry, note of caution on 'guesses'
 //
