@@ -727,6 +727,7 @@ extern inline int rts2det(int ix)
 	case SST_ID :
 	case RPII_ID :
 	case GMT_ID :
+	case FPS_ID:
 		return ix ;
 	default :
 		return -1 ;
