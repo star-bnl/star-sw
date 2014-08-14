@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstHitMaker.cxx,v 1.15 2014/08/12 23:08:09 ypwang Exp $
+* $Id: StIstHitMaker.cxx,v 1.16 2014/08/14 00:49:10 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.16  2014/08/14 00:49:10  smirnovd
+* StIstHitMaker: Changed the logic in Make(). Don't create a new StEvent if it is not found in the chain, issue an error instead
+*
 * Revision 1.15  2014/08/12 23:08:09  ypwang
 * remove the cluster number cut per ladder, due to chip occupancy cut was added in raw hit maker which can do the bad column rejection
 *
@@ -109,18 +112,15 @@ Int_t StIstHitMaker::Make()
     Int_t ierr = kStOk;
 
     //obtain hit collection
-    StEvent* eventPtr=0;
-    eventPtr= (StEvent*)GetInputDS("StEvent");
+    StEvent* eventPtr = (StEvent*)GetDataSet("StEvent");
 
-    StIstHitCollection *istHitCollection = NULL;
-    //input ist hit collection
-    if(eventPtr) {
-       istHitCollection = eventPtr->istHitCollection();
-    } else {
-       eventPtr=new StEvent();
-       AddData(eventPtr); 
-       istHitCollection = eventPtr->istHitCollection();
+    if (!eventPtr) {
+       LOG_ERROR << "StIstHitMaker::Make(): No StEvent found in the chain. Cannot proceed" << endm;
+       return kStErr;
     }
+
+    // Get pointer to an existing StIstHitCollection if any
+    StIstHitCollection *istHitCollection = eventPtr->istHitCollection();
     
     //input clusters info.
     TObjectSet* istDataSet = (TObjectSet*)GetDataSet("istRawHitAndCluster");
