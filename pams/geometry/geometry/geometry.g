@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.278 2014/05/14 20:02:49 jwebb Exp $
+* $Id: geometry.g,v 1.279 2014/08/18 18:50:38 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.279  2014/08/18 18:50:38  jwebb
+* Updated y2014 tag w/ MTD y2014 configuration, not available for fast offline production.  Change required so that MTD match maker can run on all y2014 tags.  MTD does not participate in tracking and is outside of the acceptance of the tracker, so this modification does not affect the reproducability of the fast offline period.
+*
 * Revision 1.278  2014/05/14 20:02:49  jwebb
 * Support for FMS preshower in dev15a.  Support for HCAL test in y2014b.  Support for HCAL proposal in dev15b.
 *
@@ -2255,7 +2258,7 @@ REPLACE [exe y2014;] with ["Y2014 first cut geometry";
     exe FTPCof;      "no FTPC";
     exe SVTTof;      "No SVT";
     exe PHMDof;      "Photon mult detector off";
-    exe MUTD13;      "Muon telescope detector";
+    exe MUTD14;      "Muon telescope detector";
     exe CAVE05;      "Cave and tunnel";
     exe IDSM14;      "Inner detector support";
     exe SISD85;      "SSD version 7"
