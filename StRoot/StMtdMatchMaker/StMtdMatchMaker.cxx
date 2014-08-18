@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.19 2014/07/29 19:23:47 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.20 2014/08/18 17:44:45 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.20  2014/08/18 17:44:45  marr
+ * Add assert() statement to abort if the loaded geometry is wrong
+ *
  * Revision 1.19  2014/07/29 19:23:47  marr
  * Remove the dependency on "StarGenerator/StarLight/starlightconstants.h" as it is not needed anymore.
  *
@@ -1272,6 +1275,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 
 	for(unsigned int idaq=0;idaq<daqCellsHitVec.size();idaq++, daqIter++) {
 		mtdCellHitVectorIter proIter = allCellsHitVec.begin();
+		assert(mMtdGeom->GetGeoModule(daqIter->backleg,daqIter->module));
 		for(unsigned int ipro=0;ipro<allCellsHitVec.size();ipro++, proIter++) {
 
 			int daqIndex = (daqIter->module-1)*12 + (daqIter->cell);
