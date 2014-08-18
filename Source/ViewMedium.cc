@@ -129,13 +129,11 @@ void ViewMedium::PlotElectronVelocity(const char xaxis, const double e,
     title = "electric field [V/cm]";
     min = m_eMin;
     max = m_eMax;
-  }
-  if (xaxis == 'b') {
+  } else if (xaxis == 'b') {
     title = "magnetic field [T]";
     min = m_bMin;
     max = m_bMax;
-  }
-  if (xaxis == 'a') {
+  } else if (xaxis == 'a') {
     title = "magnetic field angle [rad]";
     min = m_aMin;
     max = m_aMax;
@@ -162,24 +160,22 @@ void ViewMedium::PlotHoleVelocity(const char xaxis, const double e,
     title = "electric field [V/cm]";
     min = m_eMin;
     max = m_eMax;
-  }
-  if (xaxis == 'b') {
+  } else if (xaxis == 'b') {
     title = "magnetic field [T]";
     min = m_bMin;
     max = m_bMax;
-  }
-  if (xaxis == 'a') {
+  } else if (xaxis == 'a') {
     title = "magnetic field angle [rad]";
     min = m_aMin;
     max = m_aMax;
   }
-  AddFunction(m_eMin, m_eMax, m_vMin, m_vMax, keep, title,
+  AddFunction(min, max, m_vMin, m_vMax, keep, title,
               "drift velocity [cm/ns]", 10, xaxis, e, b, a);
   keep = true;
-  AddFunction(m_eMin, m_eMax, m_vMin, m_vMax, keep, title,
+  AddFunction(min, max, m_vMin, m_vMax, keep, title,
               "drift velocity [cm/ns]", 25, xaxis, e, b, a);
   keep = true;
-  AddFunction(m_eMin, m_eMax, m_vMin, m_vMax, keep, title,
+  AddFunction(min, max, m_vMin, m_vMax, keep, title,
               "drift velocity [cm/ns]", 26, xaxis, e, b, a);
   m_canvas->Update();
 }
@@ -382,13 +378,6 @@ void ViewMedium::AddFunction(const double xmin, const double xmax,
 
   if (nEfields <= 0 || nBfields <= 0 || nBangles <= 0) {
     withGraph = false;
-  }
-  // withBfield variable doesn't make sense anymore; to be removed
-  bool withBfield = false;
-  if (nBfields > 1) {
-    withBfield = true;
-  } else if (nBfields == 1 && bfields[0] > 0.) {
-    withBfield = true;
   }
 
   if (withGraph) {

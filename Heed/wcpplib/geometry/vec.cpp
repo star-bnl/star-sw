@@ -34,7 +34,7 @@ macro_copy_body(absref_transmit)
 //absref_transmit* absref_transmit::copy(void) const
 //{return new absref_transmit(*this);}
 
-void absref_transmit::print(ostream& file, int l) const {
+void absref_transmit::print(std::ostream& file, int l) const {
   if (l > 0) {
     Ifile << "absref_transmit::print(l=" << l << ") qaref=" << qaref
           << " qaref_pointer=" << qaref_pointer
@@ -527,7 +527,7 @@ std::ostream& operator<<(std::ostream& file, const basis& b) {
   return file;
 }
 
-ostream& operator<<(ostream& file, const basisReg& b) {
+std::ostream& operator<<(std::ostream& file, const basisReg& b) {
   Ifile << "basisReg=" << ((basis&)b);
   return file;
 }
@@ -552,9 +552,9 @@ void point::up(const abssyscoor* fasc) {
   v.up(fasc);
 }
 
-void point::print(ostream& file, int /*l*/) const { file << (*this); }
+void point::print(std::ostream& file, int /*l*/) const { file << (*this); }
 
-ostream& operator<<(ostream& file, const point& p) {
+std::ostream& operator<<(std::ostream& file, const point& p) {
   Ifile << "point:\n";
   indn.n += 2;
   file << p.v;
@@ -562,14 +562,14 @@ ostream& operator<<(ostream& file, const point& p) {
   return file;
 }
 
-ostream& operator<<(ostream& file, const pointReg& b) {
+std::ostream& operator<<(std::ostream& file, const pointReg& b) {
   Ifile << "pointReg=" << ((point&)b);
   return file;
 }
 
 // **** system of coordinates ****
 
-void abssyscoor::print(ostream& file, int l) const {
+void abssyscoor::print(std::ostream& file, int l) const {
   if (l > 0) {
     Ifile << "abssyscoor::print(l=" << l << "): name=" << name << '\n';
     if (l > 1) {
@@ -592,7 +592,7 @@ void abssyscoor::print(ostream& file, int l) const {
   }
 }
 
-ostream& operator<<(ostream& file, const abssyscoor& f) {
+std::ostream& operator<<(std::ostream& file, const abssyscoor& f) {
   f.print(file, 2);
   return file;
 }
@@ -619,7 +619,7 @@ void fixsyscoor::get_components(ActivePtr<absref_transmit>& aref_tran) {
 void fixsyscoor::Ppiv(const point& fpiv) { piv = fpiv; }
 void fixsyscoor::Pbas(const basis& fbas) { bas = fbas; }
 
-void fixsyscoor::print(ostream& file, int l) const {
+void fixsyscoor::print(std::ostream& file, int l) const {
   if (l > 0) {
     Ifile << "fixsyscoor::print(l=" << l << ")\n";
     if (l > 1) {
@@ -630,7 +630,7 @@ void fixsyscoor::print(ostream& file, int l) const {
   }
 }
 
-ostream& operator<<(ostream& file, const fixsyscoor& f) {
+std::ostream& operator<<(std::ostream& file, const fixsyscoor& f) {
   Ifile << "fixsyscoor:\n";
   f.RegPassivePtr::print(file, 2);
   f.abssyscoor::print(file, 2);

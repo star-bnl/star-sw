@@ -220,7 +220,7 @@ void HeedPhoton::physics_after_new_speed(void) {
   }
 }
 
-void HeedPhoton::print(ostream& file, int l) const {
+void HeedPhoton::print(std::ostream& file, int l) const {
   if (l >= 0) {
     Ifile << "HeedPhoton (l=" << l << "): particle_number=" << particle_number
           << " energy=" << energy << "MeV\n";

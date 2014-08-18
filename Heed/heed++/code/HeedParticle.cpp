@@ -171,7 +171,7 @@ void HeedParticle::physics(void) {
   }
 }
 
-void HeedParticle::print(ostream& file, int l) const {
+void HeedParticle::print(std::ostream& file, int l) const {
   if (l >= 0) {
     Ifile << "HeedParticle (l=" << l << "): particle_number=" << particle_number
           << " type=";
