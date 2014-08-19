@@ -1,6 +1,9 @@
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.19 2014/03/14 13:11:20 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.20 2014/08/19 17:23:31 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.20  2014/08/19 17:23:31  fisyak
+// Activate CORRECT_RAFT_DIRECTION
+//
 // Revision 1.19  2014/03/14 13:11:20  fisyak
 // comment out gStTpcDb->ScaleY()
 //
@@ -28,7 +31,8 @@
 // Revision 1.10  2007/03/06 16:31:55  fisyak
 // Before Selection of good runs
 //
-#define CORRECT_LASER_POSITIONS
+//#define CORRECT_LASER_POSITIONS
+#define CORRECT_RAFT_DIRECTION
 #define __TRACKHITS__
 #ifndef __TRACKHITS__
 #define ADDPRIMTRACKHITS
@@ -45,7 +49,7 @@
 #include "TRMatrix.h"
 #include "TRSymMatrix.h"
 #include "StDetectorDbMaker/StDetectorDbClock.h"
-
+#define PrPP(A,B) if (Debug()) {LOG_INFO << "::StLaserAnalysisMaker" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 ClassImp(StLaserAnalysisMaker);
 static  LaserEvent             *event = 0;  //! Laser Event object
 static  const Int_t NS = 12;
@@ -80,29 +84,80 @@ Int_t StLaserAnalysisMaker::Init(){
     if (split)  bufsize /= 4;
     m_laser->Branch("event", "LaserEvent",&event, bufsize, split);
   }
+  return StMaker::Init();
+}
+//_____________________________________________________________________________
+Int_t StLaserAnalysisMaker::InitRun(Int_t run){
   const Int_t numSectors = 24;
-  Double_t beta = 0;
-  Double_t dBeta = 720./numSectors;
+  Double_t gamma = 0;
+  Double_t dGamma = 720./numSectors;
   Int_t sector = 0;
-  Int_t half   = 0;
   TGeoHMatrix TpcHalf[2];
   Double_t rotHalfs[18] = {
-    0, -1, 0, -1, 0, 0, 0, 0, -1,// sector  1-12
-    0,  1, 0, -1, 0, 0, 0, 0,  1 // sector 13-24
+    0,  1, 0, -1, 0, 0, 0, 0,  1, // sector 13-24
+    0, -1, 0, -1, 0, 0, 0, 0, -1  // sector  1-12
   };
-  for (half = 0; half <2; half++) TpcHalf[half].SetRotation(&rotHalfs[9*half]);
+  for (Int_t half = east; half <= west; half++) TpcHalf[half].SetRotation(&rotHalfs[9*half]);
   TGeoHMatrix RotSec[24];
   for (sector = 1; sector <= numSectors; sector++) {
-    if (sector > 12) beta = (numSectors-sector)*dBeta;
-    else             beta = sector*dBeta;
-    RotSec[sector-1].RotateZ(-beta);
+    if (sector > 12) gamma = (numSectors-sector)*dGamma;
+    else             gamma = sector*dGamma;
+    RotSec[sector-1].RotateZ(-gamma);
   }
+#ifdef CORRECT_RAFT_DIRECTION
+  Double_t zWheel     = (229.71+1.7780);
+  //                      East      West
+  Double_t ZWheel[2]  = {-zWheel, zWheel};
+  Double_t RDWheel[2] = { 190.5802, 190.5705};
+  StThreeVectorD xyzDSE(RDWheel[0], 0, ZWheel[0]);
+  StThreeVectorD xyzDSW(RDWheel[1], 0, ZWheel[1]);
+  TGeoHMatrix R;
+  StThreeVectorD xyzTE, xyzTW;
+  if (Debug()) {
+    cout << " TpcHalf(east) "; StTpcDb::instance()->TpcHalf(east).Print();
+    cout << " TpcHalf(west) "; StTpcDb::instance()->TpcHalf(west).Print();
+  }
+  for (sector = 1; sector <= 12; sector++) {
+    cout << "Sector " <<  sector << " ===========" << endl;
+    // S2R = Rot^-1 * Half * Rot
+    TGeoHMatrix ET = RotSec[sector+12-1].Inverse()*StTpcDb::instance()->TpcHalf(east)*RotSec[sector+12-1]; if (Debug()) ET.Print();
+    ET.LocalToMaster(xyzDSE.xyz(), xyzTE.xyz());                                                           PrPP(InitRun,xyzTE);
+    TGeoHMatrix EW = RotSec[sector   -1].Inverse()*StTpcDb::instance()->TpcHalf(west)*RotSec[sector   -1]; if (Debug()) EW.Print();
+    EW.LocalToMaster(xyzDSW.xyz(), xyzTW.xyz());                                                           PrPP(InitRun,xyzTW);
+    // Survey line direction
+    StThreeVectorD dif = (xyzTW - xyzTE)/2.; PrPP(InitRun,dif);
+    // Survey line center
+    StThreeVectorD sum = (xyzTW + xyzTE)/2.; PrPP(InitRun,sum);
+    StThreeVectorD unit = dif.unit();        PrPP(InitRun,unit);
+    Double_t alpha = - unit.y();
+    Double_t beta  =   unit.x();
+    StThreeVectorD tra = sum; tra.xyz()[0] -= 0.5*(RDWheel[0]+RDWheel[1]); PrPP(InitRun,tra);
+    // Transformation from survey line to raft
+    TGeoHMatrix S2R(Form("S2R_%i",sector));
+    S2R.RotateX(alpha*180/TMath::Pi()); 
+    S2R.RotateY(beta*180/TMath::Pi());
+    S2R.SetTranslation(tra.xyz());                 if (Debug()) {cout << "S2R "; S2R.Print();}
+    StThreeVectorD unitR;
+    S2R.MasterToLocalVect(unit.xyz(),unitR.xyz()); PrPP(InitRun,unitR);
+    if (Debug()) {cout << "RotSecO[" << sector-1 << "]:"; RotSec[sector-1].Print();}
+    R = RotSec[sector-1]*S2R;                      if (Debug()) {cout << "R:"; R.Print();}
+    RotSec[sector-1] = R;                          if (Debug()) {cout << "RotSecM[" << sector-1 << "]:"; RotSec[sector-1].Print();}
+    if (Debug()) {cout << "RotSecO[" << sector+12-1 << "]:"; RotSec[sector+12-1].Print();}
+    //    TGeoHMatrix R = RotSec[sector+12-1]*S2R.Inverse();     if (Debug()) {cout << "R:"; R.Print();}
+    TGeoHMatrix R = RotSec[sector+12-1]*S2R;     if (Debug()) {cout << "R:"; R.Print();}
+    RotSec[sector+12-1] = R;                       if (Debug()) {cout << "RotSecM[" << sector+12-1 << "]:"; RotSec[sector+12-1].Print();}
+  }    
+#endif /* CORRECT_RAFT_DIRECTION */
   memset (LaserBeams, 0, NS*NB*NM*sizeof(LaserRaft*));
   NoBeams = 0;
   memset(Traft, 0, 14*sizeof(TGeoHMatrix *));
   memset(Raft2Tpc, 0, 14*sizeof(TGeoHMatrix *));
   memset(Bundles2Tpc, 0,  14*6*sizeof(TGeoHMatrix *));
   memset(Mirrors2Tpc, 0,  14*6*7*sizeof(TGeoHMatrix *));
+  Double_t y0[12] = { 0.0373, -0.0104, -0.0081, -0.0092,  0.0000,  0.0492,  0.0008, -0.0123,  0.0281,  0.0210, -0.0102, -0.0627};
+  Double_t y1[12] = { 0.0088, -0.0033,  0.0000, -0.0045,  0.0000,  0.0079,  0.0006, -0.0013,  0.0068,  0.0052, -0.0033, -0.0168};
+  Double_t z0[12] = {-0.0414,  0.0363, -0.1394,  0.0508,  0.0000,  0.0241, -0.0331,  0.0689, -0.1474, -0.0469,  0.1104,  0.0203};
+  Double_t z1[12] = {-0.0002, -0.0001, -0.0089, -0.0002,  0.0000, -0.0000, -0.0002, -0.0000,  0.0003,  0.0031,  0.0007,  0.0002};
   for (Int_t i = 0; i < NoRaftPositions; i++) {
     if (! RaftPositions[i].Sector) continue;
     Int_t raft = RaftPositions[i].Raft;
@@ -110,7 +165,13 @@ Int_t StLaserAnalysisMaker::Init(){
     Traft[raft-1]->RotateX(RaftPositions[i].alpha*180/TMath::Pi());
     Traft[raft-1]->RotateY(RaftPositions[i].beta*180/TMath::Pi());
     Traft[raft-1]->RotateZ(RaftPositions[i].gamma*180/TMath::Pi());
-    Traft[raft-1]->SetTranslation(&RaftPositions[i].X);
+    StThreeVectorD xyzRaft(RaftPositions[i].X,RaftPositions[i].Y,RaftPositions[i].Z - 0.05465 + 0.1022-0.0530);
+    if (RaftPositions[i].Sector <= 12) xyzRaft.setY(xyzRaft.y() - 0.0480 - 0.0095 - 0.0028);
+    else                               xyzRaft.setY(xyzRaft.y() + 0.0328 + 0.0118 + 0.0032);
+    Int_t s = (RaftPositions[i].Sector-1)/2;
+    xyzRaft.setY(xyzRaft.y() + y0[s] + y1[s]);
+    xyzRaft.setZ(xyzRaft.z() + z0[s] + z1[s]);
+    Traft[raft-1]->SetTranslation(xyzRaft.xyz());
     if (Debug()) {
       RaftPositions[i].Print();
       Traft[raft-1]->Print();
@@ -120,8 +181,8 @@ Int_t StLaserAnalysisMaker::Init(){
     Int_t sector = Bundles[r][0].Sector;
     if (! sector) continue;
     Int_t raft = Bundles[r][0].Raft;
-    Int_t half = 0;
-    if (sector > 12) half = 1;
+    Int_t half = west;
+    if (sector > 12) half = east;
     Raft2Tpc[raft-1] = new TGeoHMatrix(Form("Raft%iToTpc",raft));
     *Raft2Tpc[raft-1] = RotSec[sector-1] * TpcHalf[half] * (*Traft[raft-1]);
     for (Int_t b = 0; b < 6; b++) {
@@ -174,10 +235,6 @@ Int_t StLaserAnalysisMaker::Init(){
       }
     }
   }
-  return StMaker::Init();
-}
-//_____________________________________________________________________________
-Int_t StLaserAnalysisMaker::InitRun(Int_t run){
   // average Z for membrane = -3.6 cm
   memset(Lasers, 0, NS*NB*NM*sizeof(LaserB *));
   const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
