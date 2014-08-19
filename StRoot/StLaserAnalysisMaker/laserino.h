@@ -1,5 +1,8 @@
-// $Id: laserino.h,v 1.2 2007/12/10 19:54:03 fisyak Exp $
+// $Id: laserino.h,v 1.3 2014/08/19 17:23:32 fisyak Exp $
 // $Log: laserino.h,v $
+// Revision 1.3  2014/08/19 17:23:32  fisyak
+// Activate CORRECT_RAFT_DIRECTION
+//
 // Revision 1.2  2007/12/10 19:54:03  fisyak
 // Add Id and Log, correct spelling error in README
 //
@@ -18,7 +21,7 @@ struct RaftPosition_t {
 };
 //_____________________________________________________________________________
 
-static const RaftPosition_t RaftPositions[] = {
+static const RaftPosition_t RaftPositions[] = {//       E/W     +/-Y             -X            +/-Z in TPC CS 
   { 1,14,       0.00001,       -0.00003,        0.00196,     -196.99729,       -2.49901,     -178.26058},
   { 2,16,      -0.00001,        0.00001,        0.00165,     -197.00143,       -2.49970,     -178.24974},
   { 3,18,      -0.00000,       -0.00002,        0.00039,     -196.99882,       -2.50018,     -178.21005},
