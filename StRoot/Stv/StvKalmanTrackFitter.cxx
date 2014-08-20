@@ -173,6 +173,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kLeft|kRite|kHit: // Left fits,now Hit, Rite fits
       {
 //		Fit it		
+static int nQQQQ=0; nQQQQ++;
+StvDebug::Break(nQQQQ);//???????????
         assert(node->mPE[lane].mHH>0);
         assert(node->mPE[lane].mZZ>0);
 	fitt->Set(node->mPP+lane,node->mPE+lane,node->mFP+lane,node->mFE+lane);
@@ -382,10 +384,13 @@ else
   StvFitErrs  &nowErrs = node->mPE[lane];
   const StvFitErrs  &preErrs =  preNode->mFE[lane];
 assert(preErrs.mHH>0);
+assert(preErrs.mZZ>0);
   nowErrs = preErrs*derFit;
 assert(nowErrs.mHH>0);
+assert(preErrs.mZZ>0);
   nowErrs.Add(el,pars,dS);
 assert(nowErrs.mHH>0);
+assert(preErrs.mZZ>0);
   innNode->SetDer(derFit,lane);
   } 
   return 0;
@@ -425,6 +430,10 @@ enum {kDeltaZ = 100};//??????
   if (!node) return 0;
   
   fitt->Update();
+  assert(err[1].mHH>0);
+  assert(err[1].mZZ>0);
+
+
   mXi2 = fitt->GetXi2();
   node->SetPre(par[0],err[0],0);
   node->SetFit(par[1],err[1],0);
