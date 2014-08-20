@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.9 2014/04/14 16:26:41 perev Exp $
+// $Id: StMCStepping.cxx,v 1.10 2014/08/20 02:31:58 perev Exp $
 //
 //
 // Class StMCStepping
@@ -61,6 +61,13 @@ const char *SteppingKazesC[] = {
   "Ignore",
   0};
 
+class MyAux 
+{
+public:
+float fLen,fP,fEdep;
+};
+
+static std::vector<MyAux> gAux;
 
 //_____________________________________________________________________________
 StMCStepping::StMCStepping(const char *name,const char *tit)
@@ -74,6 +81,20 @@ StMCStepping::StMCStepping(const char *name,const char *tit)
 //_____________________________________________________________________________
 void StMCStepping::Print(const Option_t*) const
 {
+  double lenTot = 0,eTot=0;
+  for (int i=0;i<(int)gAux.size();i++) {
+    MyAux &M = gAux[i];
+    eTot+=M.fEdep;
+    double T = sqrt(M.fP*M.fP+fMass*fMass)-fMass;
+    T = (fDir)? T+M.fEdep: T-M.fEdep;
+    printf("%6.3f eTot=%g T=%g dL=%g dE=%g dEdX=%g\n"
+          ,lenTot,eTot,T,M.fLen,M.fEdep,M.fEdep/(M.fLen+1e-11));
+    lenTot += M.fLen;
+  }
+  printf("   totLen=%g totE=%g\n",lenTot,eTot);
+  
+
+
 }		
 //_____________________________________________________________________________
 TString StMCStepping::CaseAsString(int kase)
@@ -99,7 +120,6 @@ TString StMCStepping::KazeAsString(int kase)
   }
   return ts;
 }
-		
 		
 		
 //_____________________________________________________________________________
@@ -153,6 +173,7 @@ static int nCall = 0; nCall++;
       fTrackNumber++; 
       fStartPosition = fCurrentPosition;
       fStartMomentum = fCurrentMomentum;
+      gAux.clear();
     case kENTERtrack:;
       {
       fEnterPosition = fCurrentPosition;
@@ -228,12 +249,13 @@ int StMCStepping::Fun()
   }
   return 0;
 }		
-
 //_____________________________________________________________________________
 void StMCStepping::RecovEloss()
 {
 // 	Update directly Geant3 common when we moving bacward the track
 //	and energy loss is negative
+
+
 static int nCall = 0; nCall++;
 static int debu = 0;
   enum {kX=0,kY,kZ,kDx,kDy,kDz,kP};
@@ -244,9 +266,6 @@ static Float_t &getot = gGctrak->getot;
 static Float_t &gekin = gGctrak->gekin;
 
 
-
-
-
   do {
 //    if (fEdep<kStMCSMinEabs) 				return;
 //    if (fEdep<kStMCSMinEref*fCurrentMomentum.E()) 	return;
@@ -255,7 +274,6 @@ static Float_t &gekin = gGctrak->gekin;
     double dL = fCurrentLength-fPrevLength;
     assert(dL>=0);
     if (dL<kStMCSMinDist) 				return;
-//??    assert(fabs(fPrevMomentum.E()-fCurrentMomentum.E()-fEdep)<=0.1*fEdep);
 
     double cL0 = fPrevMomentum.CosTheta();		//cos(Lambda0)
     double cL1 = fCurrentMomentum.CosTheta();		//cos(Lambda1)
@@ -288,6 +306,11 @@ static Float_t &gekin = gGctrak->gekin;
     vect[kDx] += -vect[kDy]*dA;
     vect[kDy] +=       vDx *dA;
 
+gAux.resize(gAux.size()+1);
+gAux.back().fLen=dL;
+gAux.back().fP=fCurrentMomentum.P();
+gAux.back().fEdep=fEdep;
+
     if (fDir) 		break; 		// if (Stv direction == Geant direction ) no need to update energy
 
     getot += dE; fEtot = getot;		// update energy
@@ -299,6 +322,7 @@ static Float_t &gekin = gGctrak->gekin;
   } while(0);
   myMC->TrackPosition(fCurrentPosition);
   myMC->TrackMomentum(fCurrentMomentum);
+  gAux.back().fP=fCurrentMomentum.P();
 
 ///???????????????????????????????????
     if (fEdep<kStMCSMinEabs) 				return;
@@ -307,6 +331,6 @@ static Float_t &gekin = gGctrak->gekin;
   double E0 = fPrevMomentum.E();
   double deltaE = E1-E0;
   assert(fDir == (deltaE<0));
-  assert(fabs(fEdep-fabs(deltaE))<kStMCSMinEabs+0.3*fEdep);
+  assert(fabs(fEdep-fabs(deltaE))<kStMCSMinEabs+0.01*fEdep);
 ///???????????????????????????????????
 }  
