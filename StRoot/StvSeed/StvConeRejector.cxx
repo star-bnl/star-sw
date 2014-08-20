@@ -46,15 +46,15 @@ void StvConeRejector::Reset(const float pos[3],const float dir[3]
 {
   Cop(mPos,pos);
   float nor = sqrt(Dot(mPos,mPos));
-  if (rad ) { mLen = rad;}	//rad is defined, use it
+  if (rad ) { mOutRad = rad;}	//rad is defined, use it
   else      { 			//rad is no defined, estimate it
-    mLen = nor/kDivLen;
-    if (mLen<kMinLen) mLen=kMinLen;
-    if (mLen>kMaxLen) mLen=kMaxLen;
+    mOutRad = nor/kDivLen;
+    if (mOutRad<kMinLen) mOutRad=kMinLen;
+    if (mOutRad>kMaxLen) mOutRad=kMaxLen;
   }
-  mLen2 = mLen*mLen;
-  mRad2 = mPos[0]*mPos[0]+mPos[1]*mPos[1];
-  mRad  = sqrt(mRad2);
+  mOutRad2 = mOutRad*mOutRad;
+  mRxy2 = mPos[0]*mPos[0]+mPos[1]*mPos[1];
+  mRxy  = sqrt(mRxy2);
 
   if (dir) { 	//Direction defined
     Cop(mDir,dir);
@@ -62,8 +62,10 @@ void StvConeRejector::Reset(const float pos[3],const float dir[3]
     Mul(mDir,-1./nor,mPos);
   }
   mThet = (theta) ? theta : kFstAng*M_PI/180;
-  mTan = tan(mThet);
+  mSin = sin(mThet);
+  mCos = cos(mThet);
   mErr = (err)? err : SEED_ERR(nor);
+  mTan2 = pow(mSin/mCos,2);
 }
 
 //_____________________________________________________________________________
@@ -73,37 +75,39 @@ void StvConeRejector::Prepare()
 ///	Parameters of brik are used for selection in multy key iterator
 ///	of hits
 
+  double along = mOutRad*mCos;
+  double ortho = mOutRad*mSin;
   for (int i=0;i<3;i++) {
-    float qwe = mLen*mDir[i];
-    float asd = mLen*mTan*sqrt(fabs(1-mDir[i]*mDir[i]));
+    mLim[0][i] = -mErr;
+    mLim[1][i] =  mErr;
+    float qwe = along*mDir[i];
+    float nor = sqrt(fabs(1-mDir[i]*mDir[i]));
+    float asd = ortho*nor;
     float lim = qwe - asd - mErr;
-    mLim[0][i] = (lim<0)? lim:-mErr;
+    if (mLim[0][i]>lim)	mLim[0][i] = lim;
     lim = qwe + asd + mErr;
-    mLim[1][i] = (lim>0)? lim: mErr;
-//		Move to global system 
+    if (mLim[1][i]<lim)	mLim[1][i] = lim;
+
+		// if spheric part of "cone" is important
+    if      (fabs(mDir[i])> mCos*nor) {mLim[1][i] =  mOutRad;} 
+    else if (fabs(mDir[i])<-mCos*nor) {mLim[0][i] = -mOutRad;}
+      
+      		// Move to global system 
     mLim[0][i]+= mPos[i];
     mLim[1][i]+= mPos[i];
-  }
-  for (int i=0;i<2;i++) {
-    if (mLim[0][i]< -mRad) mLim[0][i]=-mRad;
-    if (mLim[1][i]>  mRad) mLim[1][i]= mRad;
   }
 }   
 //_____________________________________________________________________________
 int StvConeRejector::Reject(const float x[3]) const
 {
   float xx[3];
-  if (x[0]*x[0]+x[1]*x[1]>mRad2 + 2*mRad*mErr) return 4;
   Sub(xx,x,mPos);
   float r2 = xx[0]*xx[0]+xx[1]*xx[1]+xx[2]*xx[2];
-  if (r2>mLen2)	return 1;
+  if (r2>mOutRad2)	return 1;
   float myX = Dot(xx,mDir);
   if (myX <0) 	return 2;
-  if (myX >mLen)return 2;
 
-
-  float myY = (r2-myX*myX);
-  myY = (myY>0)? sqrt(myY):0;
-  if (myY >myX*mTan+mErr) return 3;
+  float myY2 = (r2-myX*myX);
+  if (myY2 >myX*myX*mTan2) return 3;
   return 0;
 }

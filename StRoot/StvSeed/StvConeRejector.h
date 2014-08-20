@@ -25,14 +25,16 @@ public:
 char  mBeg[1];
 float mPos[3]; 		// start position 
 float mDir[3]; 		// track direction
-float mLen;		// cone length (height)
-float mLen2;		// mLen**2
-float mRad;		// Rxy    of 1st hit
-float mRad2;		// Rxy**2 of 1st hit
-float mThet;
-float mTan;
-float mErr;
-float mLim[2][3];
+float mOutRad;		// cone radius of limitation (similar to height)
+float mOutRad2;		// mOutRad**2
+float mRxy;		// Rxy    ofstart position
+float mRxy2;		// Rxy**2 
+float mThet;		// 1/2 of cone angle
+float mCos;		// cos(mThet)
+float mSin;		// sin(mThet)
+float mTan2;		// tan(mThet)**2
+float mErr;		// 3d accuracy to be inside of cone
+float mLim[2][3];  	// xyz min and xyz max of cube around the cone
 char  mEnd[1];
 };
 
