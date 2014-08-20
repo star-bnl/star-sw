@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.13 2014/04/01 02:49:54 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.14 2014/08/20 01:39:14 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -10,13 +10,18 @@
 #include "TGeoMaterial.h"
 #include "StvUtil/StvDebug.h"
 #include "StvELossTrak.h"
+
+//SUBROUTINE G3DRELX(A,Z,DENS,T,HMASS,DEDX)
+
 static double gsigma2(double ZoverA,double DENS,double CHARGE2
                      ,double AMASS ,double BET2,double STEP  );
-static double gdrelx (double A     ,double Z   ,double DENS ,double T,double HMASS);
+//static double gdrelx (double A     ,double Z   ,double DENS ,double T,double HMASS);
 
 static const double kPiMass=0.13956995;
 static const double kMinP = 0.01,kMinE = sqrt(kMinP*kMinP+kPiMass*kPiMass);
 static const double kMaxP = 1000,kMaxE = sqrt(kMaxP*kMaxP+kPiMass*kPiMass);
+static const double kMomTol=1e-2;
+
 ClassImp(StvELossTrak)
 
 //_____________________________________________________________________________
@@ -49,13 +54,15 @@ void StvELossTrak::Clear(const char*)
   memset(fMed,0,fEnd-fMed+1);
 }
 //_____________________________________________________________________________
-void StvELossTrak::Set(double A, double Z, double dens, double x0, double p)
+void StvELossTrak::Set(double A, double Z, double dens, double x0, double p,const TGeoMaterial *mate)
 {
   fdEdX=0;
   assert(p>0 || fP>0);
   if (p<=0) p = fP[1];
+  if (p<kMinP) p=kMinP;
   if (A<=0) x0 = 1e+11;
-  {// Normal, non update mode. Save material data
+  if (!Same(A,Z,dens,x0,p)) {
+  // Normal, non update mode. Save material data
     fMats.resize(fMats.size()+1);
     Aux &M = fMats.back();
     M.fLen=0;
@@ -64,9 +71,8 @@ void StvELossTrak::Set(double A, double Z, double dens, double x0, double p)
     M.fDens=dens;
     M.fX0=x0; 
     M.fP = p;
-  }
-  if (p<=0) return;
-
+    M.fMat = mate;
+  }  
   if (fP[0]<=0) fP[0] = p; 
   fP[1] = p;
   fdEdX=0;fdEdXErr2=0;
@@ -76,47 +82,90 @@ void StvELossTrak::Set(double A, double Z, double dens, double x0, double p)
   double T = fE-fM;
   if (A>0) {
     double charge2 = fCharge*fCharge;
-    fdEdX = gdrelx(A,Z,dens,T,fM) * dens*charge2;
+    if (!mate || !mate->IsMixture()) { 	//it is not mixture
+      fdEdX = gdrelx(A,Z,dens,T,fM)*dens*charge2;
+
+    } else {				//Mixture case
+
+      fdEdX = 0;
+      const TGeoMixture *mix = (const TGeoMixture*)mate;
+      int nMix 		= mix->GetNelements();
+      const double *wt  = mix->GetWmixt();
+      const double *zz  = mix->GetZmixt();
+      const double *aa  = mix->GetAmixt();
+      for (int iMix=0;iMix<nMix;iMix++) {
+        fdEdX+= gdrelx(aa[iMix],zz[iMix],dens*wt[iMix],T,fM)*dens*wt[iMix];
+      }
+      fdEdX*=charge2;
+    }
+
+    fMats.back().fdEdX =fdEdX; 
     double beta2 = p2/(p2+m2);
     fdEdXErr2 = gsigma2(Z/(A+1e-6),dens,charge2,fM ,beta2,1.);
   }
 }
 //_____________________________________________________________________________
-int StvELossTrak::Same(const TGeoMaterial *mate) const
+int StvELossTrak::Same(double A, double Z, double dens, double x0, double p) const
 {
-return 0;
-//   if (fMate == mate) 					return 1;
-//   if (!fMate       )	 				return 0;
-//   if (fabs(fA-mate->GetA())> 1e-3*fA) 			return 0;
-//   if (fabs(fZ-mate->GetZ())> 1e-3*fZ) 			return 0;
-//   if (fabs(fDens-mate->GetDensity())< 1e-6) 		return 1;
-//   if (fabs(fDens-mate->GetDensity())> 1e-3*fDens) 	return 0;
-  							return 1;
+static const double kAccu = 1e-2;
+  if (!fMats.size()) return 0;
+  const Aux &M = fMats.back();
+  
+
+  if (fabs(M.fA-A)> kAccu*M.fA) 		return 0;
+  if (fabs(M.fZ-Z)> kAccu*M.fZ) 		return 0;
+  if (fabs(M.fDens-dens)> 1e-5+kAccu*M.fDens) 	return 0;
+  if (fabs(M.fP-p)> 1e-3*M.fP) 			return 0;
+  						return 1;
 }
 //_____________________________________________________________________________
 void StvELossTrak::Set(const TGeoMaterial *mate,double p)
 {
-    Set(mate->GetA(),mate->GetZ(),mate->GetDensity(),mate->GetRadLen(),p);
-    fMats.back().fMat = mate;
+    Set(mate->GetA(),mate->GetZ(),mate->GetDensity(),mate->GetRadLen(),p,mate);
 }
 //______________________________________________________________________________
 //_____________________________________________________________________________
 void StvELossTrak::Add(double len)
 {
-assert(len>0 &&len <1000);
-  fMats.back().fLen+=len;
-assert(fMats.back().fLen>0 &&fMats.back().fLen <1000);
-  double addTheta2 = len/fMats.back().fX0*fFak;
-  fOrth2 += (fTheta2 + addTheta2/3)*len*len;
-  fTheta2 += addTheta2;
+// fMCS[0] = Thet2*L1*( L1*L1/3+L0*(L1+L0)   );
+// fMCS[1] = Thet2*L1*( -L1-2*L0);
+// fMCS[2] = Thet2*L1;
+// return fMCS[0]+L*(fMCS[1]+L*fMCS[2]); 
+static int nCall=0; nCall++;
 
-  double ELoss  = fdEdX *len;
-  fTotELoss += ELoss;
-  fTotELossErr2 += fdEdXErr2*len;
-  double dp = ELoss*fE/fP[1];
-  fP[1] = (fDir)? fP[1] - dp: fP[1] + dp;
 
-  fTotLen+=len;
+StvDebug::Break(nCall);
+  double myLen = len;
+  while (1) {
+    double dP = fP[1]*kMomTol;
+    double dE = dP*fP[1]/fE;
+    double dL = dE/(fdEdX+1e-11);
+    if (fDir && fP[1]-dP<kMinP) dL=myLen;
+
+    if (dL>myLen) dL=myLen;
+    Aux &aux = fMats.back();
+    aux.fLen+=dL;
+    double QQ = fFak/fMats.back().fX0;
+    double theta2  	= QQ*dL;
+    fMCS[2] += theta2;
+    fMCS[1] += theta2*(-2*fTotLen - dL);
+    fMCS[0] += theta2*(dL*dL/3+fTotLen*(fTotLen+dL));
+assert(fMCS[2]<100);
+    double ELoss  = fdEdX *dL;
+    fTotELoss += ELoss;
+    fTotELossErr2 += fdEdXErr2*dL;
+    dP = ELoss*fE/fP[1];
+    if (fDir) { fP[1]-=dP; if (fP[1]<kMinP) fP[1]=kMinP; fE-=ELoss;} else { fP[1]+=dP; fE+=ELoss;}
+
+    fP[1] = fP[0]; ///??????????????????????????????????????????????????????????????????
+
+    fTotLen+=dL;  myLen-=dL;
+    if (myLen<=1e-5) break;
+    const TGeoMaterial *mat = aux.fMat;
+    Set(aux.fA, aux.fZ, aux.fDens, aux.fX0, fP[1]);
+    fMats.back().fMat = mat;
+  }
+
 }
 //_____________________________________________________________________________
 const StvELossTrak::Aux &StvELossTrak::GetMate(int idx)
@@ -128,12 +177,12 @@ const StvELossTrak::Aux &StvELossTrak::GetMate(int idx)
 //_____________________________________________________________________________
 double StvELossTrak::GetTheta2() const 
 {
-  return fTheta2;
+  return fMCS[2];
 }
 //_____________________________________________________________________________
 double StvELossTrak::GetOrt2() const 
 {
-  return fOrth2;
+  return fMCS[0]+fTotLen*(fMCS[1]+fTotLen*fMCS[2]);
 }
 //_____________________________________________________________________________
 double StvELossTrak::PLoss(double p) const 
@@ -147,6 +196,7 @@ double StvELossTrak::dPLossdP0(double p) const
 {
   double ep = (fM/p)*(fM/p);
   ep = (ep<0.1)? (1+ep*0.5) : sqrt(1+ep);
+  if (fabs(fdLogEdLogP) <=0) Update();
   return fdLogEdLogP*fTotELoss*ep/(p*fTotLen);
 
 }
@@ -186,19 +236,37 @@ StvDebug::Break(nCall);
 
 
 }
-
 //_____________________________________________________________________________
-#if 0
-extern "C" void g3drelx_(float &A,float &Z    ,float &DENS
-                        ,float &T,float &HMASS,float &DEDX);
-double gdrelx(double A,double Z,double DENS,double T,double HMASS)
+void StvELossTrak::Update() const
 {
-   float dedx;
-   float a = A, z=Z,dens = DENS,t=T, hmass=HMASS;
-   g3drelx_(a,z,dens,t,hmass,dedx);
-   return dedx;
+   double dP = fP[0]*0.01;
+   StvELossTrak elt = *this;
+   elt.Update(fDir,fP[0]+dP);
+   fdLogEdLogP = elt.fdLogEdLogP;
 }
-#endif //1
+//_____________________________________________________________________________
+void StvELossTrak::Print(const char *opt) const
+{
+  printf("ELossTrak: dir=%d q=%d mass=%g p=%g %g totLen=%g totELoss=%g\n"
+        ,int(fDir),int(fCharge),fM,fP[0],fP[1],fTotLen,fTotELoss);
+  double totLen = 0,totE=0;
+  for (int i=0;i<(int)fMats.size();i++) {
+    const Aux &M = fMats[i];
+    double dE = M.fLen*M.fdEdX;
+    double T = sqrt(M.fP*M.fP+fM*fM)-fM;
+    printf("%6.3f totE=%g T=%g dL=%g dens=%g dE=%g dEdX=%g\n"
+          ,totLen,totE,T,M.fLen,M.fDens,dE,M.fdEdX);
+    totLen+=M.fLen; totE+=dE;
+  }
+}
+//_____________________________________________________________________________
+class AofZ_t {
+public:
+int mZ;
+double mA;
+char mName[8];
+char mTitle[20];
+};
 #if 1
 //______________________________________________________________________________
 //* Revision 1.1.1.1  1995/10/24 10:21:24  cernlib
@@ -210,7 +278,7 @@ double gdrelx(double A,double Z,double DENS,double T,double HMASS)
 //*-- Author :
 //______________________________________________________________________________
 //      SUBROUTINE GDRELX(A,Z,DENS,T,HMASS,dedx)
-double gdrelx(double A,double Z,double DENS,double T,double HMASS)
+double StvELossTrak::gdrelx(double A1,double Z1,double DENS1,double T1,double HMASS1)
 {
 //
 //    ******************************************************************
@@ -236,10 +304,15 @@ double gdrelx(double A,double Z,double DENS,double T,double HMASS)
 //#include "geant321/gconsp.inc"
 //#include "geant321/gccuts.inc"
 //#include "geant321/gcunit.inc"
+#define double float
+float A=A1,Z=Z1,DENS=DENS1,T=T1,HMASS=HMASS1;
+
+
+
 static const double  AMUKEV=931494.32,AMUKEV50=pow(AMUKEV,0.50),AMUKEV45=pow(AMUKEV,0.45);
 static const double  D=0.000153537,T1L=0.00001,T2L=0.002;
 static const double  AVO=0.60221367,EMPROT=0.9382723,EMASS=0.0005109990615;
-static const double  DCUTM=9999.;
+static const double  DCUTM=0.001;
 //DIMENSION B(6,92),C(6,92),CECOF[6]
 //*
 static const double B[93][6]={ 
@@ -339,6 +412,126 @@ static const double B[93][6]={
 
 static const double CECOF[7]={0.,0.42237,0.0304,-0.00038,3.858,-0.1668,0.00158};
 static       double C[6]={0};
+enum {kNAW=118};
+AofZ_t AW[kNAW]={
+{1,1.0079,	"H",	"Hydrogen"	},
+{2,4.0026,	"He",	"Helium"	},
+{3,6.941,	"Li",	"Lithium"	},
+{4,9.0122,	"Be",	"Beryllium"	},
+{5,10.811,	"B",	"Boron"		},
+{6,12.0107,	"C",	"Carbon"	},
+{7,14.0067,	"N",	"Nitrogen"	},
+{8,15.9994,	"O",	"Oxygen"	},
+{9,18.9984,	"F",	"Fluorine"	},
+{10,20.1797,	"Ne",	"Neon"		},
+{11,22.9897,	"Na",	"Sodium"	},
+{12,24.305,	"Mg",	"Magnesium"	},
+{13,26.9815,	"Al",	"Aluminum"	},
+{14,28.0855,	"Si",	"Silicon"	},
+{15,30.9738,	"P",	"Phosphorus"	},
+{16,32.065,	"S",	"Sulfur"	},
+{17,35.453,	"Cl",	"Chlorine"	},
+{18,39.948,	"Ar",	"Argon"		},
+{19,39.0983,	"K",	"Potassium"	},
+{20,40.078,	"Ca",	"Calcium"	},
+{21,44.9559,	"Sc",	"Scandium"	},
+{22,47.867,	"Ti",	"Titanium"	},
+{23,50.9415,	"V",	"Vanadium"	},
+{24,51.9961,	"Cr",	"Chromium"	},
+{25,54.938,	"Mn",	"Manganese"	},
+{26,55.845,	"Fe",	"Iron"		},
+{27,58.9332,	"Co",	"Cobalt"	},
+{28,58.6934,	"Ni",	"Nickel"	},
+{29,63.546,	"Cu",	"Copper"	},
+{30,65.39,	"Zn",	"Zinc"		},
+{31,69.723,	"Ga",	"Gallium"	},
+{32,72.64,	"Ge",	"Germanium"	},
+{33,74.9216,	"As",	"Arsenic"	},
+{34,78.96,	"Se",	"Selenium"	},
+{35,79.904,	"Br",	"Bromine"	},
+{36,83.8,	"Kr",	"Krypton"	},
+{37,85.4678,	"Rb",	"Rubidium"	},
+{38,87.62,	"Sr",	"Strontium"	},
+{39,88.9059,	"Y",	"Yttrium"	},
+{40,91.224,	"Zr",	"Zirconium"	},
+{41,92.9064,	"Nb",	"Niobium"	},
+{42,95.94,	"Mo",	"Molybdenum"	},
+{43,98,		"Tc",	"Technetium"	},
+{44,101.07,	"Ru",	"Ruthenium"	},
+{45,102.906,	"Rh",	"Rhodium"	},
+{46,106.42,	"Pd",	"Palladium"	},
+{47,107.868,	"Ag",	"Silver"	},
+{48,112.411,	"Cd",	"Cadmium"	},
+{49,114.818,	"In",	"Indium"	},
+{50,118.71,	"Sn",	"Tin"		},
+{51,121.76,	"Sb",	"Antimony"	},
+{52,127.6,	"Te",	"Tellurium"	},
+{53,126.904,	"I",	"Iodine"	},
+{54,131.293,	"Xe",	"Xenon"		},
+{55,132.905,	"Cs",	"Cesium"	},
+{56,137.327,	"Ba",	"Barium"	},
+{57,138.905,	"La",	"Lanthanum"	},
+{58,140.116,	"Ce",	"Cerium"	},
+{59,140.908,	"Pr",	"Praseodymium"	},
+{60,144.24,	"Nd",	"Neodymium"	},
+{61,145,	"Pm",	"Promethium"	},
+{62,150.36,	"Sm",	"Samarium"	},
+{63,151.964,	"Eu",	"Europium"	},
+{64,157.25,	"Gd",	"Gadolinium"	},
+{65,158.925,	"Tb",	"Terbium"	},
+{66,162.5,	"Dy",	"Dysprosium"	},
+{67,164.93,	"Ho",	"Holmium"	},
+{68,167.259,	"Er",	"Erbium"	},
+{69,168.934,	"Tm",	"Thulium"	},
+{70,173.04,	"Yb",	"Ytterbium"	},
+{71,174.967,	"Lu",	"Lutetium"	},
+{72,178.49,	"Hf",	"Hafnium"	},
+{73,180.948,	"Ta",	"Tantalum"	},
+{74,183.84,	"W",	"Tungsten"	},
+{75,186.207,	"Re",	"Rhenium"	},
+{76,190.23,	"Os",	"Osmium"	},
+{77,192.217,	"Ir",	"Iridium"	},
+{78,195.078,	"Pt",	"Platinum"	},
+{79,196.966,	"Au",	"Gold"		},
+{80,200.59,	"Hg",	"Mercury"	},
+{81,204.383,	"Tl",	"Thallium"	},
+{82,207.2,	"Pb",	"Lead"		},
+{83,208.98,	"Bi",	"Bismuth"	},
+{84,209,	"Po",	"Polonium"	},
+{85,210,	"At",	"Astatine"	},
+{86,222,	"Rn",	"Radon"		},
+{87,223,	"Fr",	"Francium"	},
+{88,226,	"Ra",	"Radium"	},
+{89,227,	"Ac",	"Actinium"	},
+{90,232.038,	"Th",	"Thorium"	},
+{91,231.036,	"Pa",	"Protactinium"	},
+{92,238.029,	"U",	"Uranium"	},
+{93,237,	"Np",	"Neptunium"	},
+{94,244,	"Pu",	"Plutonium"	},
+{95,243,	"Am",	"Americium"	},
+{96,247,	"Cm",	"Curium"	},
+{97,247,	"Bk",	"Berkelium"	},
+{98,251,	"Cf",	"Californium"	},
+{99,252,	"Es",	"Einsteinium"	},
+{100,257,	"Fm",	"Fermium"	},
+{101,258,	"Md",	"Mendelevium"	},
+{102,259,	"No",	"Nobelium"	},
+{103,262,	"Lr",	"Lawrencium"	},
+{104,261,	"Rf",	"Rutherfordium"	},
+{105,262,	"Db",	"Dubnium"	},
+{106,266,	"Sg",	"Seaborgium"	},
+{107,264,	"Bh",	"Bohrium"	},
+{108,277,	"Hs",	"Hassium"	},
+{109,268,	"Mt",	"Meitnerium"	},
+{110,0,		"Ds",	"Darmstadtium"	},
+{111,272,	"Rg",	"Roentgenium"	},
+{112,0,		"Uub",	"Ununbium"	},
+{113,0,		"Uut",	"Ununtrium"	},
+{114,0,		"Uuq",	"Ununquadium"	},
+{115,0,		"Uup",	"Ununpentium"	},
+{116,0,		"Uuh",	"Ununhexium"	},
+{117,0,		"Uus",	"Ununseptium"	},
+{118,0,		"Uuo",	"Ununoctium"	}};
 
 double poti,p,e,beta,bet2,tau,sl,sh,eta,eta2,b2g2,tmax,cc,x0,x1,xa,xm,delta;
 double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
@@ -352,14 +545,15 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*
 //*     Calculate coefficients C(I,J) if it has not been done already
 //*
-    double fac=AVO/A;
-    C[0]=fac*AMUKEV50*(B[iz][0]*wt0+B[iz+1][0]*wt1);
-    C[1]=fac*AMUKEV45*(B[iz][1]*wt0+B[iz+1][1]*wt1);
-    C[2]=fac*         (B[iz][2]*wt0+B[iz+1][2]*wt1)/AMUKEV;
-    C[3]=             (B[iz][3]*wt0+B[iz+1][3]*wt1)/AMUKEV;
-    C[4]=AMUKEV*      (B[iz][4]*wt0+B[iz+1][4]*wt1);
+    double fac0=AVO/AW[iz  ].mA;
+    double fac1=AVO/AW[iz+1].mA;
+    C[0]=AMUKEV50*(B[iz][0]*wt0*fac0+B[iz+1][0]*wt1*fac1);
+    C[1]=AMUKEV45*(B[iz][1]*wt0*fac0+B[iz+1][1]*wt1*fac1);
+    C[2]=         (B[iz][2]*wt0*fac0+B[iz+1][2]*wt1*fac1)/AMUKEV;
+    C[3]=         (B[iz][3]*wt0     +B[iz+1][3]*wt1     )/AMUKEV;
+    C[4]=AMUKEV*  (B[iz][4]*wt0     +B[iz+1][4]*wt1     );
 //*                     poti=16.E-9*Z**0.9
-    C[5]=             (B[iz][5]*wt0+B[iz+1][5]*wt1)*1.E-9;
+    C[5]=         (B[iz][5]*wt0+B[iz+1][5]*wt1)*1.E-9;
 //*
 //*     ----------------------------------------------------------------
   double hmass2 = HMASS*HMASS;
@@ -511,6 +705,8 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
   return dedx;
 }
 #endif //0
+//
+#undef double
 
 //*CMZ :  3.21/02 29/03/94  15.41.21  by  S.Giani
 //-- Author :
