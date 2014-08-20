@@ -39,14 +39,14 @@ static StTGeoProxy * const myProxy = StTGeoProxy::Inst();
   mHitPlane = myHitPlane;
 
   mHitMap  = mHitPlane->GetHitMap();
-  float xNode[3]={pars->_x,pars->_y,pars->_z};
+  float xNode[3]={(float)pars->_x,(float)pars->_y,(float)pars->_z};
   mOrg =  mHitPlane->GetOrg(xNode);
   mDir = &mHitPlane->GetDir(xNode);
 
 
   float tau =0,den=0;
   float const *ort =(*mDir)[0];
-  float mom[3]={pars->_cosCA,pars->_sinCA,pars->_tanl};
+  float mom[3]={(float)pars->_cosCA,(float)pars->_sinCA,(float)pars->_tanl};
 
   for (int j=0;j<3;j++) {tau+=(mOrg[j]-xNode[j])*ort[j];
                          den+= mom[j]           *ort[j];}
