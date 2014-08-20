@@ -26,6 +26,8 @@ static const    int gMyPiPdg =9999;
 
 enum {kNMany = 10};
 
+class StMCSAux {public: double Len,Dep,P;};
+static std::vector<StMCSAux> myInfo;		
 
 
 
@@ -275,13 +277,14 @@ void StvMCStepping::SetOpt(int opt)
   fNTarget = (fOpt&StvDiver::kTarg3D)? 3:2;
 }		
 //_____________________________________________________________________________
-void StvMCStepping::Print(const Option_t*) const
+void StvMCStepping::Print(const Option_t* opt) const
 {
+StMCStepping::Print(opt);
 }		
 //_____________________________________________________________________________
 int StvMCStepping::Fun()
 {
-static int nCall = 0;
+static int nCall = 0,iCall=0;
 nCall++;
 static       StTGeoProxy    *tgh      	= StTGeoProxy::Instance();
 static const StTGeoHitShape *hitShape 	= tgh->GetHitShape();
@@ -295,8 +298,13 @@ int meAgain = 0;
 mybreak(nCall);
   TString ts,modName;
   fKount++;
-  Case();
 
+double prevLen = fPrevLength;
+  Case();
+{
+  double deltaLen = fCurrentLength-prevLen;
+  if (deltaLen>0) {    StMCSAux aux; aux.Len=deltaLen; aux.Dep=fEdep; aux.P=fCurrentMomentum.P();myInfo.push_back(aux);}
+}
   if (fabs(fCurrentPosition.Z()) >Zmax) fKaze = kOUTtrack;
   if (fCurrentPosition.Pt()      >Rmax) fKaze = kOUTtrack;
 
@@ -316,6 +324,8 @@ SWITCH: int myKaze = fKaze;
 if (GetDebug()) {printf("%d - ",nCall); Print();}
   switch (fKaze) {
     case kNEWtrack:;
+myInfo.clear();
+         iCall = nCall;
          meAgain = (fPrevPath == tgh->GetPath());
 
 
@@ -325,12 +335,13 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
          if (fVolume==fHALLVolu) {fKaze=kENDEDtrack; break;}
          int outSide = hitShape->Outside(fCurrentPosition.Z(),fCurrentPosition.Perp());
          if (outSide && ((fOpt&(StvDiver::kTarg2D|StvDiver::kTarg3D))==0)) {fKaze=kENDEDtrack;  break;}
-         if (fKaze==kENDEDtrack) break;
          if ((fExit = BegVolume())) fKaze=kENDEDtrack;}
     break;
     
     case kCONTINUEtrack:
     case kIgnore:
+    
+
     break;
     
     case kOUTtrack:
@@ -369,8 +380,6 @@ int StvMCStepping::BegVolume()
 static int nCall=0; nCall++;
 
   fPrevMat = fMaterial;
-
-assert(StvToolkit::Alive(fELossTrak));
   fELossTrak->Set(fMaterial,fEnterMomentum.Vect().Mag());
   fTooManyLength = fCurrentLength;
   return (IsDca00(0));
@@ -396,13 +405,14 @@ StvDebug::Break(nCall);
 assert(nowRho*wasRho> -1./(200*200));
   fELossTrak->Add(dL);
 
+#if 0
 {//?????????????????
   double E0 = fStartMomentum.E();		
   double E1 = fCurrentMomentum.E();		
   double dE = fabs(E1-E0);
-//???assert(dE<kStMCSMinEabs || dE/E0<kStMCSMinEref ||fabs(dE-fELossTrak->ELoss())<0.3*dE+kStMCSMinEabs);
+assert(dE<kStMCSMinEabs || dE/E0<kStMCSMinEref ||fabs(dE-fELossTrak->ELoss())<0.3*dE+kStMCSMinEabs);
 }//?????????????????
-
+#endif
 
   if ((fOpt&StvDiver::kDoErrs)) { 	//Errors and derivatives requested
     fHelix->Set((2*wasRho+nowRho)/3);
