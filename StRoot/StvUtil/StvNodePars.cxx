@@ -506,7 +506,7 @@ void StvFitErrs::Add(const StvELossTrak *el,const StvNodePars &pa, double len)
   mHH+= el->GetOrt2() 			*fakLen;
   mZZ+= el->GetOrt2() 			*fakLen;
   mPP+= el->ELossErr2()	*fakNrj *fakLen;
-  assert(mHH>0);
+  if (mHH<=0 || mHH>1e2 || mZZ<=0 || mZZ>1e2) Recov();
 }
 //_____________________________________________________________________________
 double StvNodePars::diff(const StvNodePars &other) const 
@@ -698,6 +698,9 @@ static StvFitErrs myFitErrs;
   TCL::trasat(how[0],Arr(),myFitErrs.Arr(),5,5);
   myFitErrs.mHz = mHz;
   myFitErrs.Recov();
+  assert(mHH>0);
+  assert(mZZ>0);
+  
   return myFitErrs;
 }  
 //______________________________________________________________________________
@@ -748,6 +751,8 @@ mZP = (1/mHz)*emx->mCZ*cosL;
 mAP = (1/mHz)*emx->mAC*cosL + (1/mHz)*emx->mCZ*(-sinL*cosL*cosL*rho);
 mLP = (1/mHz)*emx->mCL;
 mPP = (1/mHz)*emx->mCC*(1/mHz);
+  assert(mHH>0);
+  assert(mZZ>0);
 
 
  Recov();
