@@ -17,7 +17,8 @@ static void Sumary();
 static void Reset();
 static const char *Env(const char *key);
 static        int  Inv(const char *key);
-static int& Flag(const char *key);
+static int    iFlag(const char *flagName, int    dflt=0);
+static double dFlag(const char *flagName, double dflt=0);
 private:
 static void Draw(int nH,TH1** H);
 public:
