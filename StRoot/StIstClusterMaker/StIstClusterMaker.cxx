@@ -1,50 +1,12 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.14 2014/08/12 23:04:53 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.15 2014/08/21 17:51:08 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
 * Description: 
 * See header file.
-****************************************************************************
-*
-* $Log: StIstClusterMaker.cxx,v $
-* Revision 1.14  2014/08/12 23:04:53  ypwang
-* remove the raw hit number cut per ladder before doing clustering, due to chip occupancy cut was added in raw hit maker which can do the bad column rejection; simplfy the code by removing the InitRun() function
-*
-* Revision 1.13  2014/08/06 18:56:52  ypwang
-* minor update due to coding style update of the StIstDb method
-*
-* Revision 1.12  2014/07/29 20:13:31  ypwang
-* update the IST DB obtain method
-*
-* Revision 1.11  2014/04/15 06:46:59  ypwang
-* updates for collections clear due to Clear() function removed from StIstCollection
-*
-* Revision 1.10  2014/03/25 03:06:52  ypwang
-* updates on Db table accessory method
-*
-* Revision 1.9  2014/03/24 15:55:07  ypwang
-* minor updates due to returned const pointers in StIstDbMaker
-*
-* Revision 1.8  2014/03/17 21:51:56  ypwang
-* minor update due to some IST constants moved to StEnumurations.h
-*
-* Revision 1.7  2014/02/16 21:42:54  ypwang
-* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
-*
-* Revision 1.6  2014/02/15 20:02:37  ypwang
-* Clear() member function added, and mIstCollectionPtr data member defined
-*
-* Revision 1.4  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstClusterMaker.cxx,v 1.0
-* Revision 1.0 2013/11/04 15:55:30 Yaping
-* Initial version
-****************************************************************************/
+***************************************************************************/
 
 #include "StIstClusterMaker.h"
 #include "StEvent.h"
@@ -168,3 +130,47 @@ Int_t StIstClusterMaker::Init()
 };
 
 ClassImp(StIstClusterMaker);
+
+
+/***************************************************************************
+*
+* $Log: StIstClusterMaker.cxx,v $
+* Revision 1.15  2014/08/21 17:51:08  smirnovd
+* Moved CVS history to the end of file
+*
+* Revision 1.14  2014/08/12 23:04:53  ypwang
+* remove the raw hit number cut per ladder before doing clustering, due to chip occupancy cut was added in raw hit maker which can do the bad column rejection; simplfy the code by removing the InitRun() function
+*
+* Revision 1.13  2014/08/06 18:56:52  ypwang
+* minor update due to coding style update of the StIstDb method
+*
+* Revision 1.12  2014/07/29 20:13:31  ypwang
+* update the IST DB obtain method
+*
+* Revision 1.11  2014/04/15 06:46:59  ypwang
+* updates for collections clear due to Clear() function removed from StIstCollection
+*
+* Revision 1.10  2014/03/25 03:06:52  ypwang
+* updates on Db table accessory method
+*
+* Revision 1.9  2014/03/24 15:55:07  ypwang
+* minor updates due to returned const pointers in StIstDbMaker
+*
+* Revision 1.8  2014/03/17 21:51:56  ypwang
+* minor update due to some IST constants moved to StEnumurations.h
+*
+* Revision 1.7  2014/02/16 21:42:54  ypwang
+* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
+*
+* Revision 1.6  2014/02/15 20:02:37  ypwang
+* Clear() member function added, and mIstCollectionPtr data member defined
+*
+* Revision 1.4  2014/02/08 03:34:16  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstClusterMaker.cxx,v 1.0
+* Revision 1.0 2013/11/04 15:55:30 Yaping
+* Initial version
+****************************************************************************/
