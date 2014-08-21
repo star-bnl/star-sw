@@ -119,7 +119,7 @@ static int nCall=0; nCall++;
     int nHits = mSel.Select();
     if (nHits < kMinHits) continue;
 {
-int myShow = StvDebug::Flag("StvKNShow");
+int myShow = StvDebug::iFlag("StvKNShow");
 if (myShow) mSel.Show();
 }
     fSeedHits.clear();
