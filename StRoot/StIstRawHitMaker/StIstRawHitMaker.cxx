@@ -1,68 +1,12 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.19 2014/08/12 23:00:02 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.20 2014/08/21 17:51:08 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
 * Description: 
 * See header file.
-****************************************************************************
-*
-* $Log: StIstRawHitMaker.cxx,v $
-* Revision 1.19  2014/08/12 23:00:02  ypwang
-* chip occupancy cut added to skip the chip with more than 20% channels fired; change the raw hit decision cut position in the code.
-*
-* Revision 1.18  2014/08/12 17:39:17  ypwang
-* clean several comment-out lines
-*
-* Revision 1.17  2014/08/06 18:56:53  ypwang
-* minor update due to coding style update of the StIstDb method
-*
-* Revision 1.16  2014/08/04 17:12:48  ypwang
-* update chip status Db table obtain method due to the table is populated run-by-run
-*
-* Revision 1.15  2014/07/29 20:13:31  ypwang
-* update the IST DB obtain method
-*
-* Revision 1.14  2014/04/15 06:47:00  ypwang
-* updates for collections clear due to Clear() function removed from StIstCollection
-*
-* Revision 1.13  2014/04/14 02:45:56  ypwang
-* update LOG_ERROR to LOG_WARN for the case when real time bin number does not equal to the value from DB
-*
-* Revision 1.12  2014/03/25 03:06:53  ypwang
-* updates on Db table accessory method
-*
-* Revision 1.11  2014/03/24 15:55:08  ypwang
-* minor updates due to returned const pointers in StIstDbMaker
-*
-* Revision 1.10  2014/03/18 02:45:19  ypwang
-* update raw hit decision algorithm: removed 1st time bin restriction cut
-*
-* Revision 1.9  2014/02/25 01:08:30  smirnovd
-* Explicit pointer type conversion
-*
-* Revision 1.8  2014/02/25 01:07:02  smirnovd
-* Minor pointer initialization and declaration fixes
-*
-* Revision 1.7  2014/02/19 06:26:14  ypwang
-* update raw hit decision cuts to be compatible to ZS and non-ZS data
-*
-* Revision 1.6  2014/02/18 07:57:09  ypwang
-* add setDefaultTimeBin() while filling raw hits information
-*
-* Revision 1.5  2014/02/15 19:55:25  ypwang
-* remove virtual type declaration from member function
-*
-* Revision 1.4  2014/02/08 03:34:17  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstRawHitMaker.cxx,v 1.0
-* Revision 1.0 2013/11/04 15:55:30 Yaping
-* Initial version
-****************************************************************************/
+***************************************************************************/
 
 #include "StIstRawHitMaker.h"
 
@@ -468,3 +412,65 @@ void StIstRawHitMaker::Clear( Option_t *opts )
 };
 
 ClassImp(StIstRawHitMaker);
+
+
+/***************************************************************************
+*
+* $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.20  2014/08/21 17:51:08  smirnovd
+* Moved CVS history to the end of file
+*
+* Revision 1.19  2014/08/12 23:00:02  ypwang
+* chip occupancy cut added to skip the chip with more than 20% channels fired; change the raw hit decision cut position in the code.
+*
+* Revision 1.18  2014/08/12 17:39:17  ypwang
+* clean several comment-out lines
+*
+* Revision 1.17  2014/08/06 18:56:53  ypwang
+* minor update due to coding style update of the StIstDb method
+*
+* Revision 1.16  2014/08/04 17:12:48  ypwang
+* update chip status Db table obtain method due to the table is populated run-by-run
+*
+* Revision 1.15  2014/07/29 20:13:31  ypwang
+* update the IST DB obtain method
+*
+* Revision 1.14  2014/04/15 06:47:00  ypwang
+* updates for collections clear due to Clear() function removed from StIstCollection
+*
+* Revision 1.13  2014/04/14 02:45:56  ypwang
+* update LOG_ERROR to LOG_WARN for the case when real time bin number does not equal to the value from DB
+*
+* Revision 1.12  2014/03/25 03:06:53  ypwang
+* updates on Db table accessory method
+*
+* Revision 1.11  2014/03/24 15:55:08  ypwang
+* minor updates due to returned const pointers in StIstDbMaker
+*
+* Revision 1.10  2014/03/18 02:45:19  ypwang
+* update raw hit decision algorithm: removed 1st time bin restriction cut
+*
+* Revision 1.9  2014/02/25 01:08:30  smirnovd
+* Explicit pointer type conversion
+*
+* Revision 1.8  2014/02/25 01:07:02  smirnovd
+* Minor pointer initialization and declaration fixes
+*
+* Revision 1.7  2014/02/19 06:26:14  ypwang
+* update raw hit decision cuts to be compatible to ZS and non-ZS data
+*
+* Revision 1.6  2014/02/18 07:57:09  ypwang
+* add setDefaultTimeBin() while filling raw hits information
+*
+* Revision 1.5  2014/02/15 19:55:25  ypwang
+* remove virtual type declaration from member function
+*
+* Revision 1.4  2014/02/08 03:34:17  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstRawHitMaker.cxx,v 1.0
+* Revision 1.0 2013/11/04 15:55:30 Yaping
+* Initial version
+****************************************************************************/
