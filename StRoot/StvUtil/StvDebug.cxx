@@ -23,10 +23,6 @@ typedef std::map<std::string, TCanvas*>   myCanMap_t;
 typedef myCanMap_t::const_iterator myCanIter_t;
 myCanMap_t myCanMap;
 
-typedef std::map<std::string, int>   myIntMap_t;
-myIntMap_t myIntMap;
-
-
 //______________________________________________________________________________ 
 int StvDebug::Break(int key)
 { static int kto=-2010;
@@ -192,8 +188,22 @@ int StvDebug::Inv(const char *key)
 {
   return atoi(Env(key));
 }
-//______________________________________________________________________________ 
-int &StvDebug::Flag(const char *key)
+//______________________________________________________________________________
+int  StvDebug::iFlag(const char *flagName,int dflt)
 {
-  return myIntMap[key];
+  const char *val = gSystem->Getenv(flagName);
+  if (!val) return dflt;
+  printf("\nStvDebug::iFlag: %s = %s\n\n",flagName,val);
+
+  return atoi(val);
+}
+
+//______________________________________________________________________________
+double StvDebug::dFlag(const char *flagName, double dflt)
+{
+  const char *val = gSystem->Getenv(flagName);
+  if (!val) return dflt;
+  printf("\nStvDebug::dFlag: %s = %s\n\n",flagName,val);
+
+  return atof(val);
 }
