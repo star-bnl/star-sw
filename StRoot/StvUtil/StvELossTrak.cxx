@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.14 2014/08/20 01:39:14 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.15 2014/08/21 02:17:42 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -10,6 +10,7 @@
 #include "TGeoMaterial.h"
 #include "StvUtil/StvDebug.h"
 #include "StvELossTrak.h"
+static int gNoEloss = 0;
 
 //SUBROUTINE G3DRELX(A,Z,DENS,T,HMASS,DEDX)
 
@@ -27,6 +28,7 @@ ClassImp(StvELossTrak)
 //_____________________________________________________________________________
 StvELossTrak::StvELossTrak()
 {
+  gNoEloss = StvDebug::iFlag("NOELOSS");
   memset(fBeg,0,fEnd-fBeg+1);
 }
 //______________________________________________________________________________
@@ -177,16 +179,19 @@ const StvELossTrak::Aux &StvELossTrak::GetMate(int idx)
 //_____________________________________________________________________________
 double StvELossTrak::GetTheta2() const 
 {
+  if (gNoEloss) return 0;
   return fMCS[2];
 }
 //_____________________________________________________________________________
 double StvELossTrak::GetOrt2() const 
 {
+  if (gNoEloss) return 0;
   return fMCS[0]+fTotLen*(fMCS[1]+fTotLen*fMCS[2]);
 }
 //_____________________________________________________________________________
 double StvELossTrak::PLoss(double p) const 
 {
+  if (gNoEloss) return 0;
   double ep = (fM/p)*(fM/p);
   ep = (ep<0.1)? (1+ep*0.5) : sqrt(1+ep);
   return fTotELoss*ep/fTotLen;
@@ -194,6 +199,7 @@ double StvELossTrak::PLoss(double p) const
 //_____________________________________________________________________________
 double StvELossTrak::dPLossdP0(double p) const 
 {
+  if (gNoEloss) return 0;
   double ep = (fM/p)*(fM/p);
   ep = (ep<0.1)? (1+ep*0.5) : sqrt(1+ep);
   if (fabs(fdLogEdLogP) <=0) Update();
@@ -563,6 +569,7 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
 //*     Calculate dE/dx
 //*     ---> for T .le. T1LIM (very low energy)
 //*
+  if (gNoEloss) return 0;
   if(T<=T1LIM) {
      tau=T/HMASS;
      dedx=C[0]*pow(tau,0.5);
