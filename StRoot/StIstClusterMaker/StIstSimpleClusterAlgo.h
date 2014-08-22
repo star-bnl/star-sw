@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.h,v 1.6 2014/08/22 15:50:00 smirnovd Exp $
+* $Id: StIstSimpleClusterAlgo.h,v 1.7 2014/08/22 15:55:15 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -24,27 +24,27 @@ class StIstCollection;
 class StIstRawHitCollection;
 class StIstClusterCollection;
 
-class StIstSimpleClusterAlgo :public StIstIClusterAlgo
+class StIstSimpleClusterAlgo : public StIstIClusterAlgo
 {
 
 public:
-    StIstSimpleClusterAlgo();
-    Int_t doClustering(const StIstCollection& istCollection, StIstRawHitCollection& rawHits, StIstClusterCollection& clusters );
-    Int_t Init();
+   StIstSimpleClusterAlgo();
+   Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
+   Int_t Init();
 
-    void setUsedTimeBin(unsigned char tb = -1);
-    void setSplitFlag( bool splitFlag = 1);
+   void setUsedTimeBin(unsigned char tb = -1);
+   void setSplitFlag( bool splitFlag = 1);
 
 protected:
-    Bool_t mSplitCluster;
-    UChar_t mTimeBin;
-    enum {kIstSimpleClusterAlgo=1};
+   Bool_t mSplitCluster;
+   UChar_t mTimeBin;
+   enum {kIstSimpleClusterAlgo = 1};
 
-    Int_t doSplitting(StIstClusterCollection& clusters, unsigned char numTimeBins);
-    Int_t splitCluster(int cSize, int clusterSizeList[], StIstRawHit *rawHitPtr[], StIstCluster *clusterIt, StIstClusterCollection& clusters, unsigned char numTimeBins);
+   Int_t doSplitting(StIstClusterCollection &clusters, unsigned char numTimeBins);
+   Int_t splitCluster(int cSize, int clusterSizeList[], StIstRawHit *rawHitPtr[], StIstCluster *clusterIt, StIstClusterCollection &clusters, unsigned char numTimeBins);
 
- private:
-  ClassDef(StIstSimpleClusterAlgo,1);
+private:
+   ClassDef(StIstSimpleClusterAlgo, 1);
 };
 
 inline void StIstSimpleClusterAlgo::setSplitFlag( bool splitFlag )      { mSplitCluster = splitFlag; };
@@ -55,6 +55,9 @@ inline void StIstSimpleClusterAlgo::setUsedTimeBin(unsigned char tb)    { mTimeB
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.h,v $
+* Revision 1.7  2014/08/22 15:55:15  smirnovd
+* Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.6  2014/08/22 15:50:00  smirnovd
 * Moved CVS history to the end of file
 *

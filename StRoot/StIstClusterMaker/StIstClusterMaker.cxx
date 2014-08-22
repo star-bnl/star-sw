@@ -1,10 +1,10 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.15 2014/08/21 17:51:08 smirnovd Exp $
+* $Id: StIstClusterMaker.cxx,v 1.16 2014/08/22 15:55:15 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
-* Description: 
+* Description:
 * See header file.
 ***************************************************************************/
 
@@ -21,112 +21,121 @@
 #include "StIstSimpleClusterAlgo.h"
 #include "StIstScanClusterAlgo.h"
 
-StIstClusterMaker::StIstClusterMaker( const char* name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mTimeBin(-1), mSplitCluster(1)
+StIstClusterMaker::StIstClusterMaker( const char *name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mTimeBin(-1), mSplitCluster(1)
 {
-  /* nothing to do */
+   /* nothing to do */
 };
 
 void StIstClusterMaker::Clear( Option_t *opts )
 {
-   if( mIstCollectionPtr ) {
-	for ( unsigned char i = 0; i < kIstNumLadders; ++i ) {
-	    mIstCollectionPtr->getRawHitCollection(i)->Clear( "" );
-	    mIstCollectionPtr->getClusterCollection(i)->Clear( "" );
-	}
+   if ( mIstCollectionPtr ) {
+      for ( unsigned char i = 0; i < kIstNumLadders; ++i ) {
+         mIstCollectionPtr->getRawHitCollection(i)->Clear( "" );
+         mIstCollectionPtr->getClusterCollection(i)->Clear( "" );
+      }
    }
 };
 
 Int_t StIstClusterMaker::Make()
 {
-  Int_t ierr = kStOk;
+   Int_t ierr = kStOk;
 
-  //input data
-  TObjectSet* istDataSet = (TObjectSet*)GetDataSet("istRawHitAndCluster");
-  if (! istDataSet) {
+   //input data
+   TObjectSet *istDataSet = (TObjectSet *)GetDataSet("istRawHitAndCluster");
+
+   if (! istDataSet) {
       LOG_WARN << "Make() - there is no istDataSet (raw hit and cluster) " << endm;
       ierr = kStWarn;
-  }
+   }
 
-  mIstCollectionPtr = (StIstCollection*)istDataSet->GetObject();
-  if(!mIstCollectionPtr) {
-      LOG_WARN << "Make() - no istCollection."<<endm;
+   mIstCollectionPtr = (StIstCollection *)istDataSet->GetObject();
+
+   if (!mIstCollectionPtr) {
+      LOG_WARN << "Make() - no istCollection." << endm;
       ierr = kStWarn;
-  }   
- 
-  if( !ierr ){
-      for( unsigned char ladderIdx=0; ladderIdx < kIstNumLadders; ++ladderIdx ){  
-           StIstRawHitCollection *rawHitCollectionPtr   = mIstCollectionPtr->getRawHitCollection( ladderIdx );
-           StIstClusterCollection *clusterCollectionPtr = mIstCollectionPtr->getClusterCollection( ladderIdx );
-       
-           if( rawHitCollectionPtr && clusterCollectionPtr ){
-		UShort_t numRawHits = rawHitCollectionPtr->getNumRawHits();
-		LOG_DEBUG << "Number of raw hits found in ladder " << (short) (ladderIdx+1) << ": " << numRawHits << endm;
+   }
 
-               	// clustering and splitting
-	       	mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
-	       	mClusterAlgoPtr->setSplitFlag(mSplitCluster);
-               	Int_t loc_ierr = mClusterAlgoPtr->doClustering(*mIstCollectionPtr, *rawHitCollectionPtr, *clusterCollectionPtr );
-               	if(loc_ierr!=kStOk) {
-                    LOG_WARN <<"StClusterMaker::Make(): clustering for ladder " << (short) (ladderIdx+1) << " returned " << loc_ierr <<endm;
-                    if(loc_ierr>ierr)
-                       ierr=loc_ierr;
-               	}
-           }           
+   if ( !ierr ) {
+      for ( unsigned char ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx ) {
+         StIstRawHitCollection *rawHitCollectionPtr   = mIstCollectionPtr->getRawHitCollection( ladderIdx );
+         StIstClusterCollection *clusterCollectionPtr = mIstCollectionPtr->getClusterCollection( ladderIdx );
+
+         if ( rawHitCollectionPtr && clusterCollectionPtr ) {
+            UShort_t numRawHits = rawHitCollectionPtr->getNumRawHits();
+            LOG_DEBUG << "Number of raw hits found in ladder " << (short) (ladderIdx + 1) << ": " << numRawHits << endm;
+
+            // clustering and splitting
+            mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
+            mClusterAlgoPtr->setSplitFlag(mSplitCluster);
+            Int_t loc_ierr = mClusterAlgoPtr->doClustering(*mIstCollectionPtr, *rawHitCollectionPtr, *clusterCollectionPtr );
+
+            if (loc_ierr != kStOk) {
+               LOG_WARN << "StClusterMaker::Make(): clustering for ladder " << (short) (ladderIdx + 1) << " returned " << loc_ierr << endm;
+
+               if (loc_ierr > ierr)
+                  ierr = loc_ierr;
+            }
+         }
       }
-  }
+   }
 
-  LOG_DEBUG << "End of ist-clust-maker, print all raw hits & clusters: " << endm;
-  LOG_DEBUG << "Total raw hits=" <<mIstCollectionPtr->getNumRawHits()<<", total Clusters=" <<  mIstCollectionPtr->getNumClusters() <<endm;
+   LOG_DEBUG << "End of ist-clust-maker, print all raw hits & clusters: " << endm;
+   LOG_DEBUG << "Total raw hits=" << mIstCollectionPtr->getNumRawHits() << ", total Clusters=" <<  mIstCollectionPtr->getNumClusters() << endm;
 
-  if(Debug()>2) {
-    static unsigned char nTimeBin = mIstCollectionPtr->getNumTimeBins();
-    Int_t rawHitIdx = 0, clusterIdx = 0;
-    for(unsigned char iLadder=0; iLadder < kIstNumLadders; iLadder++) {
-        LOG_DEBUG <<"Content: iLadder="<<(short) iLadder+1<< " # of : raw hits="<<mIstCollectionPtr->getNumRawHits(iLadder) <<"  clusters=" <<mIstCollectionPtr->getNumClusters( iLadder)<<endm;
-        // ..... print all raw hits ....
-        StIstRawHitCollection *rawHitPtr = mIstCollectionPtr->getRawHitCollection(iLadder);
-        vector<StIstRawHit*> &rawHitVec = rawHitPtr->getRawHitVec();
-        for( std::vector< StIstRawHit* >::iterator it=rawHitVec.begin();it!=rawHitVec.end();++it)    {
-	    unsigned char maxTb = (*it)->getMaxTimeBin();
-	    if( maxTb < 0 || maxTb >= nTimeBin)
-		maxTb = (*it)->getDefaultTimeBin();
+   if (Debug() > 2) {
+      static unsigned char nTimeBin = mIstCollectionPtr->getNumTimeBins();
+      Int_t rawHitIdx = 0, clusterIdx = 0;
 
-            LOG_DEBUG << "raw hit: Idx=" << rawHitIdx << " elecId=" << (*it)->getChannelId() << " Charge=" << (*it)->getCharge(maxTb) << " ChargeErr=" << (*it)->getChargeErr(maxTb) << " decode0: at ladder=" <<(short)(*it)->getLadder() << " sensor=" << (short)(*it)->getSensor() << " column=" <<(short)(*it)->getColumn() << " row=" << (short)(*it)->getRow() <<endm;
-	    ++rawHitIdx;
-        }
-    
-        // ..... print all 1D clusters  ....
-        StIstClusterCollection *clustPtr= mIstCollectionPtr->getClusterCollection(iLadder);
-        vector<StIstCluster*> &clustVec = clustPtr->getClusterVec();
-        for( std::vector< StIstCluster* >::iterator it=clustVec.begin();it!=clustVec.end();++it)    {
-            LOG_DEBUG << "cluster: Idx=" << clusterIdx << " totCharge=" << (*it)->getTotCharge() << " totChargeErr=" << (*it)->getTotChargeErr() << " meanColumn=" <<(*it)->getMeanColumn() << " meanRow= " << (*it)->getMeanRow() << " at ladder=" << (short)(*it)->getLadder() << " sensor=" << (short)(*it)->getSensor() << " clusterSize=" << (short)(*it)->getNRawHits() << " clusterSize(Z)=" << (short)(*it)->getNRawHitsZ() << " clusterSize(R-Phi)="<< (short)(*it)->getNRawHitsRPhi() << endm;
-	    ++clusterIdx;
-        }
-    }
-  }
-  return ierr;
+      for (unsigned char iLadder = 0; iLadder < kIstNumLadders; iLadder++) {
+         LOG_DEBUG << "Content: iLadder=" << (short) iLadder + 1 << " # of : raw hits=" << mIstCollectionPtr->getNumRawHits(iLadder) << "  clusters=" << mIstCollectionPtr->getNumClusters( iLadder) << endm;
+         // ..... print all raw hits ....
+         StIstRawHitCollection *rawHitPtr = mIstCollectionPtr->getRawHitCollection(iLadder);
+         vector<StIstRawHit *> &rawHitVec = rawHitPtr->getRawHitVec();
+
+         for ( std::vector< StIstRawHit * >::iterator it = rawHitVec.begin(); it != rawHitVec.end(); ++it)    {
+            unsigned char maxTb = (*it)->getMaxTimeBin();
+
+            if ( maxTb < 0 || maxTb >= nTimeBin)
+               maxTb = (*it)->getDefaultTimeBin();
+
+            LOG_DEBUG << "raw hit: Idx=" << rawHitIdx << " elecId=" << (*it)->getChannelId() << " Charge=" << (*it)->getCharge(maxTb) << " ChargeErr=" << (*it)->getChargeErr(maxTb) << " decode0: at ladder=" << (short)(*it)->getLadder() << " sensor=" << (short)(*it)->getSensor() << " column=" << (short)(*it)->getColumn() << " row=" << (short)(*it)->getRow() << endm;
+            ++rawHitIdx;
+         }
+
+         // ..... print all 1D clusters  ....
+         StIstClusterCollection *clustPtr = mIstCollectionPtr->getClusterCollection(iLadder);
+         vector<StIstCluster *> &clustVec = clustPtr->getClusterVec();
+
+         for ( std::vector< StIstCluster * >::iterator it = clustVec.begin(); it != clustVec.end(); ++it)    {
+            LOG_DEBUG << "cluster: Idx=" << clusterIdx << " totCharge=" << (*it)->getTotCharge() << " totChargeErr=" << (*it)->getTotChargeErr() << " meanColumn=" << (*it)->getMeanColumn() << " meanRow= " << (*it)->getMeanRow() << " at ladder=" << (short)(*it)->getLadder() << " sensor=" << (short)(*it)->getSensor() << " clusterSize=" << (short)(*it)->getNRawHits() << " clusterSize(Z)=" << (short)(*it)->getNRawHitsZ() << " clusterSize(R-Phi)=" << (short)(*it)->getNRawHitsRPhi() << endm;
+            ++clusterIdx;
+         }
+      }
+   }
+
+   return ierr;
 
 };
 
-Int_t StIstClusterMaker::setClusterAlgo(StIstIClusterAlgo* algo)
+Int_t StIstClusterMaker::setClusterAlgo(StIstIClusterAlgo *algo)
 {
-    mClusterAlgoPtr=algo;
-    return kStOk;
+   mClusterAlgoPtr = algo;
+   return kStOk;
 }
 
 Int_t StIstClusterMaker::Init()
 {
-  Int_t ierr = kStOk;
+   Int_t ierr = kStOk;
 
-  if( !mClusterAlgoPtr ){
-     LOG_INFO << "IST clustering algorithm: Scanning algorithm" << endm;
-     mClusterAlgoPtr=new StIstScanClusterAlgo();
-  }
+   if ( !mClusterAlgoPtr ) {
+      LOG_INFO << "IST clustering algorithm: Scanning algorithm" << endm;
+      mClusterAlgoPtr = new StIstScanClusterAlgo();
+   }
 
-  if( !ierr )
-     ierr = mClusterAlgoPtr->Init();
+   if ( !ierr )
+      ierr = mClusterAlgoPtr->Init();
 
-  return ierr;
+   return ierr;
 };
 
 ClassImp(StIstClusterMaker);
@@ -135,6 +144,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.16  2014/08/22 15:55:15  smirnovd
+* Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.15  2014/08/21 17:51:08  smirnovd
 * Moved CVS history to the end of file
 *

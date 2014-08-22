@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstIClusterAlgo.h,v 1.4 2014/08/22 15:50:00 smirnovd Exp $
+* $Id: StIstIClusterAlgo.h,v 1.5 2014/08/22 15:55:15 smirnovd Exp $
 * Author: Yaping Wang, March 2013
 ****************************************************************************
 * Description: Virtual class for clustering algorithm implementation.
@@ -16,26 +16,29 @@ class StIstCollection;
 
 class StIstIClusterAlgo
 {
- public:
-  virtual Int_t doClustering(const StIstCollection& istCollection, StIstRawHitCollection&, StIstClusterCollection& )=0;
-  virtual Int_t Init()=0;
+public:
+   virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &, StIstClusterCollection & ) = 0;
+   virtual Int_t Init() = 0;
 
-  virtual ~StIstIClusterAlgo()=0;
+   virtual ~StIstIClusterAlgo() = 0;
 
-  virtual void setUsedTimeBin(unsigned char tb)=0;
-  virtual void setSplitFlag( bool splitFlag)=0;
+   virtual void setUsedTimeBin(unsigned char tb) = 0;
+   virtual void setSplitFlag( bool splitFlag) = 0;
 
- protected:
+protected:
 
- private:
+private:
 
-  ClassDef( StIstIClusterAlgo, 1 );
+   ClassDef( StIstIClusterAlgo, 1 );
 };
 #endif
 
 
 /***************************************************************************
 * $Log: StIstIClusterAlgo.h,v $
+* Revision 1.5  2014/08/22 15:55:15  smirnovd
+* Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.4  2014/08/22 15:50:00  smirnovd
 * Moved CVS history to the end of file
 *
