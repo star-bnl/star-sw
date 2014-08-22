@@ -3,7 +3,7 @@
 #include "StiDetector.h"
 #include "StMaker.h"
 StiMasterDetectorBuilder::StiMasterDetectorBuilder(bool active)
-  : StiDetectorBuilder("MasterDetectorBuilder",active,"none")
+  : StiDetectorBuilder("MasterDetectorBuilder",active)
 {}
 
 StiMasterDetectorBuilder::~StiMasterDetectorBuilder()
@@ -38,7 +38,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
     LOG_INFO << "Create a clone of VmcGeometry for reconstruction" << endm;
     gGeoManagerSV->Clone("CloneGeom");
   } else {
-    LOG_INFO << "Could not get a pointer to gGeoManager (??)" << endm;
+    LOG_INFO << "Could not get a pointer to gGeoManager " << endm;
   }
 #else
   if ( chain ) {
