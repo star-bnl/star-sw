@@ -1,14 +1,14 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.7 2014/08/21 17:51:08 smirnovd Exp $
+* $Id: StIstRawHitMaker.h,v 1.8 2014/08/22 15:55:16 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
-* Description: 
+* Description:
 * Reads/un-pack a DAQ or SFS file; Accesses calibration DBs;
 * Marks out bad channels/chips; Creates and fills the IST containers.
-* Two working modes included: 
-* 1) calibration mode: save raw ADC value only 
+* Two working modes included:
+* 1) calibration mode: save raw ADC value only
 * 2) non-calibration (physics) mode: access calibration datasets, signal-like
 *    raw hit decision, full raw hit info., ...
 ***************************************************************************/
@@ -28,9 +28,10 @@
 class StIstCollection;
 class StIstDb;
 
-class StIstRawHitMaker : public StRTSBaseMaker {
- public: 
-   StIstRawHitMaker( const char* name = "ist_raw_hit" );
+class StIstRawHitMaker : public StRTSBaseMaker
+{
+public:
+   StIstRawHitMaker( const char *name = "ist_raw_hit" );
    ~StIstRawHitMaker();
    Int_t Init();
    Int_t InitRun(Int_t runNumber);
@@ -46,7 +47,7 @@ class StIstRawHitMaker : public StRTSBaseMaker {
    // Get CVS
    virtual const char *GetCVS() const;
 
- protected:
+protected:
    Bool_t mIsCaliMode, mDoCmnCorrection;
    //control paramters
    Float_t mHitCut, mCmnCut, mChanMinRmsNoiseLevel, mChanMaxRmsNoiseLevel, mApvMaxCmNoiseLevel;
@@ -75,10 +76,10 @@ class StIstRawHitMaker : public StRTSBaseMaker {
    typedef std::vector< unsigned char > ConfigVec_t; //APV chip geom. index, configuration status
    ConfigVec_t mConfigVec;
 
- private:
+private:
    Int_t mDataType; //!  0=all, 1=adc only, 2=zs only
 
-   ClassDef(StIstRawHitMaker,1);
+   ClassDef(StIstRawHitMaker, 1);
 };
 
 // inline functions
@@ -88,8 +89,9 @@ inline void StIstRawHitMaker::setCmnCorrection( bool doCmnCorrection )	{ mDoCmnC
 inline void StIstRawHitMaker::setCmnCut(float cmnCut)			{ mCmnCut = cmnCut;        };
 inline void StIstRawHitMaker::setDataType(int nDataType)		{ mDataType = nDataType;   };
 
-inline const char *StIstRawHitMaker::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.7 2014/08/21 17:51:08 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+inline const char *StIstRawHitMaker::GetCVS() const
+{
+   static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.8 2014/08/22 15:55:16 smirnovd Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 #endif
@@ -98,6 +100,9 @@ inline const char *StIstRawHitMaker::GetCVS() const {
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
+* Revision 1.8  2014/08/22 15:55:16  smirnovd
+* Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.7  2014/08/21 17:51:08  smirnovd
 * Moved CVS history to the end of file
 *

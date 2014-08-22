@@ -1,10 +1,10 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.h,v 1.8 2014/08/21 17:51:08 smirnovd Exp $
+* $Id: StIstClusterMaker.h,v 1.9 2014/08/22 15:55:15 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
-* Description: 
+* Description:
 * IST cluster maker by calling implemented algorithms.
 ***************************************************************************/
 
@@ -18,38 +18,41 @@ class StIstCollection;
 
 class StIstClusterMaker : public StMaker
 {
- public:
-  StIstClusterMaker( const char* name="ist_cluster");
-  Int_t Init();
-  Int_t Make();
-  void Clear( Option_t *opts = "" );
+public:
+   StIstClusterMaker( const char *name = "ist_cluster");
+   Int_t Init();
+   Int_t Make();
+   void Clear( Option_t *opts = "" );
 
-  Int_t setClusterAlgo(StIstIClusterAlgo*);
-  void setUsedTimeBin(unsigned char tb = -1);			//time bin to be used
-  void setClusterSplitFlag( bool splitFlag = 1);	//cluster splitting switch
+   Int_t setClusterAlgo(StIstIClusterAlgo *);
+   void setUsedTimeBin(unsigned char tb = -1);			//time bin to be used
+   void setClusterSplitFlag( bool splitFlag = 1);	//cluster splitting switch
 
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.8 2014/08/21 17:51:08 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   virtual const char *GetCVS() const
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.9 2014/08/22 15:55:15 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
- protected:
-  StIstCollection *mIstCollectionPtr;
-  StIstIClusterAlgo *mClusterAlgoPtr;
+protected:
+   StIstCollection *mIstCollectionPtr;
+   StIstIClusterAlgo *mClusterAlgoPtr;
 
-  UChar_t mTimeBin;
-  Bool_t mSplitCluster;
+   UChar_t mTimeBin;
+   Bool_t mSplitCluster;
 
- private:
-  ClassDef(StIstClusterMaker,1);
+private:
+   ClassDef(StIstClusterMaker, 1);
 };
 
-inline void StIstClusterMaker::setUsedTimeBin(unsigned char tb){ mTimeBin = tb; };
-inline void StIstClusterMaker::setClusterSplitFlag( bool splitFlag ){ mSplitCluster = splitFlag; };
+inline void StIstClusterMaker::setUsedTimeBin(unsigned char tb) { mTimeBin = tb; };
+inline void StIstClusterMaker::setClusterSplitFlag( bool splitFlag ) { mSplitCluster = splitFlag; };
 #endif
 
 
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.h,v $
+* Revision 1.9  2014/08/22 15:55:15  smirnovd
+* Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.8  2014/08/21 17:51:08  smirnovd
 * Moved CVS history to the end of file
 *
