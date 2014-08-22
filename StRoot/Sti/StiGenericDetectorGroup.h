@@ -1,25 +1,22 @@
 #ifndef STAR_StiGenericDetectorGroup_H_INCLUDED
 #define STAR_StiGenericDetectorGroup_H_INCLUDED
-// $Id: StiGenericDetectorGroup.h,v 2.1 2006/12/04 02:37:03 fine Exp $
+// $Id: StiGenericDetectorGroup.h,v 2.2 2014/08/22 16:28:36 perev Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include <stdexcept>
 #include "Sti/Base/Named.h"
 
 class StiDetectorBuilder;
-class StiElossCalculator;
 
 class StiGenericDetectorGroup  : public Named
 {
    protected:
       StiGenericDetectorGroup(const string & name);
       StiGenericDetectorGroup(const string & name,
-		   StiDetectorBuilder * detectorBuilder,
-		   StiElossCalculator * elossCalculator);
+		   StiDetectorBuilder * detectorBuilder);
       virtual ~StiGenericDetectorGroup();
 
       StiDetectorBuilder * _detectorBuilder;
-      StiElossCalculator * _elossCalculator; 
       /// Detector group identifier.
       int _groupId;
   public:
@@ -33,7 +30,6 @@ class StiGenericDetectorGroup  : public Named
     /// Get an energy loss calculator appropriate for this detector group
     /// An eloss calculator is used in the kalman propagation to determine
     /// the track energy loss.
-    StiElossCalculator * getElossCalculator();
     void setGroupId(int id);
     int  getGroupId() const;
 };

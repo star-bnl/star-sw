@@ -1,4 +1,4 @@
-// $Id: StiGenericDetectorGroup.cxx,v 2.2 2006/12/04 03:31:33 fine Exp $
+// $Id: StiGenericDetectorGroup.cxx,v 2.3 2014/08/22 16:29:14 perev Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include <stdexcept>
@@ -9,7 +9,6 @@
 StiGenericDetectorGroup::StiGenericDetectorGroup(const string & name)
   : Named(name),
      _detectorBuilder(0),
-     _elossCalculator(0),
      _groupId(-1)
 {
   
@@ -17,11 +16,9 @@ StiGenericDetectorGroup::StiGenericDetectorGroup(const string & name)
 
 //_____________________________________________________________________________
 StiGenericDetectorGroup::StiGenericDetectorGroup(const string & name,
-		   StiDetectorBuilder * detectorBuilder,
-		   StiElossCalculator * elossCalculator)
+		   StiDetectorBuilder * detectorBuilder)
     :  Named(name),
      _detectorBuilder(detectorBuilder),
-     _elossCalculator(elossCalculator),
      _groupId(-1)
 {
 }
@@ -43,17 +40,6 @@ StiDetectorBuilder *StiGenericDetectorGroup::getDetectorBuilder()
   return _detectorBuilder; 
 }
 
-//_____________________________________________________________________________
-StiElossCalculator *StiGenericDetectorGroup::getElossCalculator()
-{
-   if (_elossCalculator==0)
-   {
-      string message = "StiDetectorGroup::getElossCalculator() - ERROR - elossCalculator == 0 for detector:";
-      message += getName();
-      throw logic_error(message.c_str());
-   }
-   return _elossCalculator; 
-}
 
 //_____________________________________________________________________________
 void StiGenericDetectorGroup::setGroupId(int id)
