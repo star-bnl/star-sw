@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.h,v 1.9 2014/08/22 15:55:15 smirnovd Exp $
+* $Id: StIstClusterMaker.h,v 1.10 2014/08/22 21:27:19 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -25,11 +25,13 @@ public:
    void Clear( Option_t *opts = "" );
 
    Int_t setClusterAlgo(StIstIClusterAlgo *);
-   void setUsedTimeBin(unsigned char tb = -1);			//time bin to be used
-   void setClusterSplitFlag( bool splitFlag = 1);	//cluster splitting switch
+   /// time bin to be used
+   void setUsedTimeBin(unsigned char tb=-1) { mTimeBin = tb; }
+   /// cluster splitting switch
+   void setClusterSplitFlag(bool splitFlag=true) { mSplitCluster = splitFlag; }
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.9 2014/08/22 15:55:15 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.10 2014/08/22 21:27:19 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 protected:
    StIstCollection *mIstCollectionPtr;
@@ -42,14 +44,15 @@ private:
    ClassDef(StIstClusterMaker, 1);
 };
 
-inline void StIstClusterMaker::setUsedTimeBin(unsigned char tb) { mTimeBin = tb; };
-inline void StIstClusterMaker::setClusterSplitFlag( bool splitFlag ) { mSplitCluster = splitFlag; };
 #endif
 
 
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.h,v $
+* Revision 1.10  2014/08/22 21:27:19  smirnovd
+* Remove inline keyword and move the methods inside the definition. Let the compiler optimize the code as it should not be a problem with these one-liners
+*
 * Revision 1.9  2014/08/22 15:55:15  smirnovd
 * Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
