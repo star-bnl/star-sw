@@ -232,6 +232,7 @@ inline void StiCompositeTreeNode<T>::setOrderKey(const StiOrderKey& val)
 template <class T>
 inline void StiCompositeTreeNode<T>::setData(T* val) 
 {
+    assert(!mdata);
     mdata=val;
 }
 
