@@ -1,10 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.137 2014/06/03 16:48:38 genevb Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.138 2014/08/22 16:25:20 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.138  2014/08/22 16:25:20  perev
+ * Fix old bug double counting of density
+ * Fix ELoss bug. dEdX(density) ==> dEdX(density,material)
+ * Save calculated ELoss in StiNode for technical analisys
+ *
  * Revision 2.137  2014/06/03 16:48:38  genevb
  * Reduce visibility of inactive materials
  *
@@ -404,6 +409,7 @@
 #include <stdexcept>
 #include <math.h>
 #include <stdio.h>
+#include <assert.h>
 using namespace std;
 
 #include "StiHit.h"
@@ -420,6 +426,8 @@ using namespace std;
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StiTrackNodeHelper.h"
 #include "StiFactory.h"
+#include "StiUtilities/StiDebug.h"
+
 #include "TString.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -582,6 +590,7 @@ void StiKalmanTrackNode::get(double& alpha,
 //______________________________________________________________________________
 double StiKalmanTrackNode::getPt() const
 {
+  assert(!isnan(mFP.ptin()));
   return (fabs(mFP.ptin())<1e-3) ? 1e3: 1./fabs(mFP.ptin());
 }
 //______________________________________________________________________________
@@ -1360,10 +1369,12 @@ int StiKalmanTrackNode::isDca() const
  */
 void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const StiDetector * tDet)
 {  
+static const int keepElossBug = StiDebug::iFlag("keepElossBug");
+
   propagateCurv(previousNode);
   double pt = getPt();
 #if 1
-  if (pt>=1e3) {
+  if (pt>=1e2) {
     mPP() = mFP; mPE() = mFE;
     return;
   }
@@ -1382,6 +1393,15 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   double x0p =-1;
   double x0Gas=-1;
   double x0=-1;
+
+  if (pt > 0.350 && TMath::Abs(getHz()) < 1e-3) pt = 0.350;
+  double p2=(1.+mFP.tanl()*mFP.tanl())*pt*pt;
+  double m=StiKalmanTrackFinderParameters::instance()->massHypothesis();
+  double m2=m*m;
+  double e2=p2+m2;
+  double beta2=p2/e2;
+
+if (keepElossBug) {	//Old Eloss bug prezerved
   d1    = previousNode->getDensity();
   x0p   = previousNode->getX0();
   d3    = tDet->getMaterial()->getDensity();
@@ -1434,12 +1454,6 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 					dxEloss += d3*pL3;
 				}
     }
-  if (pt > 0.350 && TMath::Abs(getHz()) < 1e-3) pt = 0.350;
-  double p2=(1.+mFP.tanl()*mFP.tanl())*pt*pt;
-  double m=StiKalmanTrackFinderParameters::instance()->massHypothesis();
-  double m2=m*m;
-  double e2=p2+m2;
-  double beta2=p2/e2;
   //cout << " m2:"<<m2<<" p2:"<<p2<<" beta2:"<<beta2;
   double theta2=mcs2(relRadThickness,beta2,p2);
   //cout << " theta2:"<<theta2;
@@ -1452,21 +1466,71 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
  mFE._cTP += pti*tanl*cos2Li	*theta2;
  mFE._cTT += cos2Li*cos2Li	*theta2;
 
-#ifdef STI_ERROR_TEST
-  testError(mFE.A,1);
-#endif // STI_ERROR_TEST
   double dE=0;
   double sign = (mgP.dx>0)? 1:-1;
 
 //  const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
-  StiElossCalculator * calculator = tDet->getElossCalculator();
+  StiElossCalculator * calculator = tDet->getMaterial()->getElossCalculator();
+assert(calculator);
   double eloss = calculator->calculate(1.,m, beta2);
   dE = sign*dxEloss*eloss;
+
+//		save detLoss and gasLoss for investigation only
+  setELoss(2*sign*d3*eloss,sign*d2*eloss);
+
   if (TMath::Abs(dE)>0)
     {
       if (debug()) {
 	commentdEdx  = Form("%6.3g cm(%5.2f) %6.3g keV %6.3f GeV",mgP.dx,100*relRadThickness,1e6*dE,TMath::Sqrt(e2)-m); 
       }
+      double correction =1. + ::sqrt(e2)*dE/p2;
+if (fabs(correction-1)>1e-3) StiDebug::Count("NodeCorr",correction-1);
+      if (correction>1.1) correction = 1.1;
+      else if (correction<0.9) correction = 0.9;
+      mFP.curv() = mFP.curv()*correction;
+      mFP.ptin() = mFP.ptin()*correction;
+    }
+    mPP() = mFP; mPE() = mFE;
+
+} else { // ELoss bug fixed =====================================================================
+
+  const StiDetector 		*preDet = previousNode->getDetector();
+  const StiMaterial 		*preMat = preDet->getMaterial();
+  const StiElossCalculator	*preLos = preMat->getElossCalculator();
+  d1 =(preLos) ? preLos->calculate(1.,m, beta2):0;
+  x0p = preMat->getX0();
+
+  const StiMaterial 		*curMat = tDet->getMaterial();
+  const StiElossCalculator	*curLos = curMat->getElossCalculator();
+  d3 =(curLos) ? curLos->calculate(1.,m, beta2):0;
+  x0 = curMat->getX0();
+  double sign = (mgP.dx>0)? 1:-1;
+  const StiMaterial		*gasMat = (sign>0)? tDet->getGas() : preDet->getGas();
+  x0Gas = gasMat->getX0();
+  const StiElossCalculator	*gasLos = gasMat->getElossCalculator();
+  d2 =(gasLos) ? gasLos->calculate(1.,m, beta2):0;
+
+  pL2=pL2-pL1-pL3; if (pL2<0) pL2=0;
+  relRadThickness = pL1/x0p+pL2/x0Gas+pL3/x0;
+  dxEloss         =  d1*pL1+ d2*pL2  + d3*pL3;
+
+  //cout << " m2:"<<m2<<" p2:"<<p2<<" beta2:"<<beta2;
+  double theta2=mcs2(relRadThickness,beta2,p2);
+  //cout << " theta2:"<<theta2;
+  double pti = mFP.ptin(), tanl = mFP.tanl(); 
+  
+  double cos2Li = (1.+ tanl*tanl);  // 1/cos(lamda)**2
+ 
+  mFE._cEE += cos2Li 		*theta2;
+  mFE._cPP += tanl*tanl*pti*pti	*theta2;
+  mFE._cTP += pti*tanl*cos2Li	*theta2;
+  mFE._cTT += cos2Li*cos2Li	*theta2;
+
+  double dE = sign*dxEloss;
+//		save detLoss and gasLoss for investigation only
+  setELoss(2*sign*d3*pL3,sign*d2*pL2);
+  if (fabs(dE)>0)
+    {
       double correction =1. + ::sqrt(e2)*dE/p2;
       if (correction>1.1) correction = 1.1;
       else if (correction<0.9) correction = 0.9;
@@ -1474,6 +1538,8 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
       mFP.ptin() = mFP.ptin()*correction;
     }
     mPP() = mFP; mPE() = mFE;
+}
+
 
 }
 
