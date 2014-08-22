@@ -1,3 +1,8 @@
+// $Id: StiMaker.cxx,v 1.216 2014/08/22 15:56:30 perev Exp $
+/// \File StiMaker.cxx
+/// \author M.L. Miller 5/00
+/// \author C Pruneau 3/02
+//
 /*!
 
 \class StiMaker
@@ -247,11 +252,11 @@ Int_t StiMaker::InitDetectors()
 {
   StiDetectorGroup<StEvent> * group;
   cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
-  _toolkit->add(new StiStarDetectorGroup(false,"none"));
+  _toolkit->add(new StiStarDetectorGroup(false));
   if (IAttr("useTpc") && gStTpcDb)
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"),SAttr("tpcInputFile")));
+      _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc")));
       group->setGroupId(kTpcId);
       StiTpcHitLoader* hitLoader = (StiTpcHitLoader*) group->hitLoader();
       if (IAttr("activeSvt") || IAttr("activeSsd") || IAttr("skip1row")) {// skip 1 row
@@ -276,19 +281,19 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("useSvt") && gStSvtDbMaker)
     {
     cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-    _toolkit->add(group = new StiSvtDetectorGroup(IAttr("activeSvt"),SAttr("svtInputFile")));
+    _toolkit->add(group = new StiSvtDetectorGroup(IAttr("activeSvt")));
     group->setGroupId(kSvtId);
     }
 
   // SSD or SST - they share the db and the kSsdId
   if (IAttr("useSst") && gStSstDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
-    _toolkit->add(group = new StiSstDetectorGroup(IAttr("activeSst"),SAttr("ssdInputFile")));
+    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSst")));
     group->setGroupId(kSsdId);
 
   } else if ( IAttr("useSsd") && gStSsdDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
-    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
+    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd")));
     group->setGroupId(kSsdId);
   }
 
@@ -302,7 +307,7 @@ Int_t StiMaker::InitDetectors()
  if (IAttr("useIst"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:Ist"<<endl;
-      _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst"),SAttr("istInputFile")));
+      _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst")));
       group->setGroupId(kIstId);
     }
 //  if (IAttr("useBTof"))
@@ -545,58 +550,11 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   }
   return fVolume;
 }
-#if 0
-//_____________________________________________________________________________
-void StiMaker::fillVxFlags() {// set vertices IdTruth if any
-  StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
-  if (! event) return;
-  UInt_t NVx = event->numberOfPrimaryVertices();
-  if (! NVx) return;
-  struct vertexPing {
-    Int_t  Id;
-    Int_t nPings;
-  };
-  enum {NVxMax = 200};
-  for (UInt_t i = 0; i < NVx; i++) {
-    StPrimaryVertex  *vx = event->primaryVertex(i);
-    if (! vx) continue;
-    vertexPing candidates[NVxMax]; memset(candidates,0,sizeof(candidates));
-    UInt_t N = 0;
-    UInt_t Ntracks = vx->numberOfDaughters();
-    Int_t IdVx = 0;
-    for (UInt_t l = 0; l < Ntracks; l++) {
-      const StTrack *pTrack = vx->daughter(l);
-      if (! pTrack) continue;
-      Int_t IdTk = pTrack->idTruth();
-      if (IdTk <= 0) continue;
-      IdVx = pTrack->idParentVx();
-      if (IdVx <= 0) continue;
-      Int_t J = -1;
-      for (UInt_t j = 0; j < N; j++) if (candidates[j].Id == IdVx) {J = j; break;}
-      if (J < 0) {J = N; if (N < NVxMax-1) N++;}
-      candidates[J].Id = IdVx;
-      candidates[J].nPings++;
-    }
-    Int_t dominant = -1;
-    Int_t J = -1;
-    for (UInt_t j = 0; j < N; j++) if (candidates[j].nPings > dominant)
-      {dominant = candidates[j].nPings; J = j;}
-    if (J > -1) {
-      Int_t IdTruth = candidates[J].Id;
-      Int_t QA      = (100*dominant)/Ntracks;
-      vx->setIdTruth(IdTruth,QA);
-      Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(IdTruth);
-      vx->setIdParent(IdParentTk);
-    }
-  }
-}
-#endif
-
-
-
-
-// $Id: StiMaker.cxx,v 1.215 2014/08/08 17:07:50 jeromel Exp $
+// $Id: StiMaker.cxx,v 1.216 2014/08/22 15:56:30 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.216  2014/08/22 15:56:30  perev
+// Remove never used input file in StiXXXDetectorGroup
+//
 // Revision 1.215  2014/08/08 17:07:50  jeromel
 // oops - previous commits included Jonathan's changes (recalled the previous commit by mistake)
 //

@@ -4,11 +4,10 @@
 #include "Sti/Star/StiStarDetectorBuilder.h"
 #include "Sti/StiHitLoader.h"
 
-StiStarDetectorGroup::StiStarDetectorGroup(bool active, const string & inputFile)
+StiStarDetectorGroup::StiStarDetectorGroup(bool active)
   : StiDetectorGroup<StEvent>("STAR",
 			      0,
-			      new StiStarDetectorBuilder(active,inputFile),
-			      0)
+			      new StiStarDetectorBuilder(active))
 {}
 
 StiStarDetectorGroup::~StiStarDetectorGroup()

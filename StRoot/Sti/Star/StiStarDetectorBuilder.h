@@ -9,7 +9,7 @@ class VolumeMap_t;
 class StiStarDetectorBuilder : public StiDetectorBuilder
 {
  public:
-  StiStarDetectorBuilder(bool active, const string & inputFile) : StiDetectorBuilder("StarBuilder",active,inputFile), 
+  StiStarDetectorBuilder(bool active) : StiDetectorBuilder("StarBuilder",active), 
     _pipeMaterial(0), _vacuumMaterial(0), _beamPipeShape(0), _vacuumShape(0), _TpcRefSys(kFALSE) {}
   virtual ~StiStarDetectorBuilder() {}
   virtual void buildDetectors(StMaker&s);	
