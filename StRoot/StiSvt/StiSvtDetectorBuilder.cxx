@@ -16,7 +16,7 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiIsSvtActiveFunctor.h"
-#include "Sti/StiElossCalculator.h"
+//#include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StiSvtHitErrorCalculator.h"
 #include <stdio.h>
 #include "tables/St_HitError_Table.h"
@@ -101,9 +101,9 @@
     6     13       5     6
     6     15       5     7
  */
-static Int_t _debug = 0;
-StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, const string & inputFile)
-  : StiDetectorBuilder("Svt",active,inputFile), _siMat(0), _hybridMat(0){}
+//static Int_t _debug = 0;
+StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active)
+  : StiDetectorBuilder("Svt",active), _siMat(0), _hybridMat(0){}
 
 StiSvtDetectorBuilder::~StiSvtDetectorBuilder() {}
 
@@ -137,9 +137,9 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
     _hybridMat = add(new StiMaterial("Hybrid", 14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Shapes" << endl;
 
-  double ionization = _siMat->getIonization();
-  StiElossCalculator * siElossCalculator = 
-    new StiElossCalculator(_siMat->getZOverA(), ionization*ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
+//  double ionization = _siMat->getIonization();
+//   StiElossCalculator * siElossCalculator = 
+//     new StiElossCalculator(_siMat->getZOverA(), ionization*ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
   for (int layer=0;layer<nRows;layer++)    {
     cout << "  "<<layer<<"     "<<_config->getNumberOfLadders(1+layer/2)/2 << "   " 
 	 << _geometry->getBarrelRadius(layer+1) << endl;
@@ -209,7 +209,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
       pLadder->setHitErrorCalculator(StiSvtHitErrorCalculator::instance());
       pLadder->setKey(1,layer);
       pLadder->setKey(2,ladder);
-      pLadder->setElossCalculator(siElossCalculator);
+//      pLadder->setElossCalculator(siElossCalculator);
       add(layer,ladder,pLadder);
     } // for ladder
   } // for layer

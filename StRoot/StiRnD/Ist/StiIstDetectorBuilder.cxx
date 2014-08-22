@@ -1,9 +1,12 @@
 // 12/12/2012 : modification of the builder to take into account the new geometry path names
 // backward compatibility with upgr15 geometry is lost
 
-// $Id: StiIstDetectorBuilder.cxx,v 1.23 2012/12/18 20:52:32 bouchet Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.24 2014/08/22 17:49:18 perev Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.24  2014/08/22 17:49:18  perev
+// StiEloss calculator creates in material now
+//
 // Revision 1.23  2012/12/18 20:52:32  bouchet
 // update for DEV13 geometry
 //
@@ -63,7 +66,7 @@ using namespace std;
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiRnD/Ist/StiIstIsActiveFunctor.h" 
 #include "StiRnD/Ist/StiIstDetectorBuilder.h" 
-#include "Sti/StiElossCalculator.h"
+//#include "Sti/StiElossCalculator.h"
 #include "StiRnD/Ist/StiIstDetectorBuilder.h"
 #include "StDetectorDbMaker/StiIst1HitErrorCalculator.h"
 //#include "StSsdUtil/StSsdConfig.hh"
@@ -72,8 +75,8 @@ using namespace std;
 //#include "StSsdDbMaker/StSsdDbMaker.h"
 //#include "StSsdDbMaker/St_SsdDb_Reader.hh"
 
-StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFile)
-    : StiDetectorBuilder("Ist",active,inputFile), _siMat(0), _hybridMat(0)
+StiIstDetectorBuilder::StiIstDetectorBuilder(bool active)
+    : StiDetectorBuilder("Ist",active), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
     //_hitCalculator1.setName("ist1HitError");
@@ -96,7 +99,6 @@ void StiIstDetectorBuilder::buildDetectors(StMaker & source)
 {
     int nRows = 1 ;
     gMessMgr->Info() << "StiIstDetectorBuilder::buildDetectors() - I - Started "<<endm;
-    //load(_inputFile, source);
     
     setNRows(nRows);
     if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
@@ -175,7 +177,7 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   temp.Replace(0,q+1,"");
   TString num2=temp(0,2);
   if(!num2.IsDigit()) num2=temp(0,1);
-  int wafer=num2.Atoi();
+//  int wafer=num2.Atoi();
   q=temp.Index("_");
   temp.Replace(0,q+1,"");
   TString num3=temp(0,1);
@@ -198,12 +200,12 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
 					 matP->GetDensity(),
 					 matP->GetDensity()*matP->GetRadLen(),
 					 PotI));
-  Double_t ionization = matS->getIonization();
-  StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), 
-                                                               ionization*ionization, 
-                                                               matS->getA(), 
-                                                               matS->getZ(),
-                                                               matS->getDensity());
+//  Double_t ionization = matS->getIonization();
+//   StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), 
+//                                                                ionization*ionization, 
+//                                                                matS->getA(), 
+//                                                                matS->getZ(),
+//                                                                matS->getDensity());
   // Extract volume geometry for this node
   TGeoBBox *box = (TGeoBBox *) nodeP->GetShape();
   StiShape *sh  = new StiPlanarShape(nodeP->GetVolume()->GetName(), // Name
@@ -268,7 +270,7 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setPlacement(pPlacement); 
   pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
   pDetector->setMaterial(matS);
-  pDetector->setElossCalculator(ElossCalculator);
+//  pDetector->setElossCalculator(ElossCalculator);
   pDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
 
   // Adding detector, note that no keys are set in IST!

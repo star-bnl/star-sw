@@ -8,7 +8,7 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "Sti/StiElossCalculator.h"
+//#include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StiDefaultTrackingParameters.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
@@ -18,7 +18,8 @@
 
 StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 int StiDetectorBuilder::_debug = 0;
-StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const string & inputFile)
+//________________________________________________________________________________
+StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active)
   : Named(name+"Builder"),
     mThkSplit(0.5),
     mMaxSplit( 20),
@@ -26,22 +27,24 @@ StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const st
     _active(active),
     _detectorFactory( StiToolkit::instance()->getDetectorFactory() ),
     _trackingParameters(0),
-    _inputFile(inputFile),
     _gasMat(0)
 {
   cout << "StiDetectorBuilder::StiDetectorBuilder() - INFO - Instantiating builder named:"<<name<<endl;
   fCurrentDetectorBuilder = this;
 }
 
+//________________________________________________________________________________
 StiDetectorBuilder::~StiDetectorBuilder()
 {}
 
+//________________________________________________________________________________
 bool StiDetectorBuilder::hasMore() const 
 {
   //cout<<"StiDetectorBuilder::hasMore() - INFO - Started"<<endl;
   return mDetectorIterator != mDetectorMap.end();
 } // hasMore()
 
+//________________________________________________________________________________
 StiDetector * StiDetectorBuilder::next()
 {
   //cout<<"StiDetectorBuilder::hasMore() - INFO - Started"<<endl;
@@ -51,24 +54,28 @@ StiDetector * StiDetectorBuilder::next()
     return 0;
 } // next()
 
+//________________________________________________________________________________
 StiMaterial* StiDetectorBuilder::findMaterial(const string& szName) const
 {
   materialMap::const_iterator where = mMaterialMap.find(NameMapKey(szName));
   return (where!= mMaterialMap.end()) ? (*where).second : 0;
 } // findMaterial()
 
+//________________________________________________________________________________
 StiShape* StiDetectorBuilder::findShape(const string& szName) const
 {
   shapeMap::const_iterator where = mShapeMap.find(NameMapKey(szName));
   return (where!=mShapeMap.end()) ? (*where).second: 0;
 } // findShape()
 
+//________________________________________________________________________________
 StiDetector* StiDetectorBuilder::findDetector(const string& szName) const
 {
   detectorMap::const_iterator where = mDetectorMap.find(NameMapKey(szName));
   return (where!=mDetectorMap.end()) ? (*where).second: 0;
 } // findDetector()
 
+//________________________________________________________________________________
 StiMaterial * StiDetectorBuilder::add(StiMaterial *material)
 {  
   NameMapKey key(material->getName());
@@ -76,6 +83,7 @@ StiMaterial * StiDetectorBuilder::add(StiMaterial *material)
   return material;
 }
 
+//________________________________________________________________________________
 StiShape * StiDetectorBuilder::add(StiShape *shape)
 {
   NameMapKey key(shape->getName());
@@ -83,10 +91,17 @@ StiShape * StiDetectorBuilder::add(StiShape *shape)
 	return shape;
 }
 
+//________________________________________________________________________________
 StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *detector)
 {
   setNSectors(row,sector+1);
-  _detectors[row][sector] = detector;
+  if (_detectors[row][sector]) {
+    printf("***ERROR*** StiDetectorBuilder::add(%d,%d,""%s"") "
+          ,row,sector,detector->getName().c_str());
+    printf("  is replacing %s\n",_detectors[row][sector]->getName().c_str());
+//assert(!_detectors[row][sector]);
+
+}  _detectors[row][sector] = detector;
   if (_debug || sector == 0) {
     cout << "StiDetectorBuilder::add(" << row << "," << sector << ") detector ";
     if (detector) cout << detector->getName();
@@ -99,6 +114,7 @@ StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *de
 /*! Add the given detector to the list of detectors known to this builder.
     Complete the "build" of this detector. 
  */
+//________________________________________________________________________________
 StiDetector * StiDetectorBuilder::add(StiDetector *detector)
 {
   NameMapKey key(detector->getName());
@@ -112,6 +128,7 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   return detector;
 }
 
+//________________________________________________________________________________
 void StiDetectorBuilder::build(StMaker& source)
 {
   buildDetectors(source);
@@ -122,7 +139,8 @@ void StiDetectorBuilder::build(StMaker& source)
 void StiDetectorBuilder::buildDetectors(StMaker& source)
 {}
 //________________________________________________________________________________
-void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
+void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) 
+{
   if (debug()) {cout << "StiDetectorBuilder::AverageVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;}
   TGeoVolume   *volP   = nodeP->GetVolume();
   TGeoMaterial *matP   = volP->GetMaterial(); if (debug()) matP->Print("");
@@ -135,12 +153,12 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
 						matP->GetDensity(),
 						matP->GetDensity()*matP->GetRadLen(),
 						PotI));
-  Double_t ionization = matS->getIonization();
-  StiElossCalculator *ElossCalculator = 
-    new StiElossCalculator(matS->getZOverA(), ionization, matS->getA(), matS->getZ(),matS->getDensity());
+//  Double_t ionization = matS->getIonization();
+//   StiElossCalculator *ElossCalculator = 
+//     new StiElossCalculator(matS->getZOverA(), ionization, matS->getA(), matS->getZ(),matS->getDensity());
   StiShape     *sh     = findShape(volP->GetName());
   Double_t     *xyz    = hmat->GetTranslation();
-  Double_t     *rot    = hmat->GetRotationMatrix();
+//  Double_t     *rot    = hmat->GetRotationMatrix();
   Double_t      Phi    = 0;
   //  Double_t xc,yc,zc,rc,rn, nx,ny,nz,yOff;
   StiPlacement *pPlacement = 0;
@@ -219,8 +237,8 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
     TVector3 normVecPerp(-sin(euler_phi), cos(euler_phi), 0);
 
     double centerOrient     = centerVec.DeltaPhi(normVec);
-    double centerOrient2    = normVec.DeltaPhi(centerVec);
-    double centerOrientPerp = centerVec.DeltaPhi(normVecPerp);
+//    double centerOrient2    = normVec.DeltaPhi(centerVec);
+//    double centerOrientPerp = centerVec.DeltaPhi(normVecPerp);
 
     // First, select the normal vector closest to the central vector
     if ( fabs(centerVec.Dot(normVecPerp)) > fabs(centerVec.Dot(normVec)) )
@@ -268,23 +286,23 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setPlacement(pPlacement); 
   pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
   pDetector->setMaterial(matS);
-  pDetector->setElossCalculator(ElossCalculator);
 
-  if (mThkSplit>0 && mMaxSplit>1) {//	try to split
+  if (mThkSplit>0 && mMaxSplit>1) {//	try to split 
     StiDetVect dv;
     pDetector->splitIt(dv,mThkSplit,mMaxSplit);
     for (int i=0;i<(int)dv.size();i++) {
       int layer = getNRows();
-      add(layer,0,dv[i]);
+      add(layer,0,dv[i]); 
       cout << "StiDetectorBuilder::AverageVolume build detector " << dv[i]->getName() << " at layer " << layer << endl;
     } }
-  else {
+  else {  
    int layer = getNRows();
-  add(layer,0,pDetector); 
-  cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
-}
+   add(layer,0,pDetector); 
+   cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
+  }
 
 }
+
 ///Returns the number of sectors (or segments) in a the
 ///given row. Sector are expected to be azimuthally
 ///distributed.
@@ -305,5 +323,6 @@ StiDetector * StiDetectorBuilder::getDetector(UInt_t row, UInt_t sector) const
 void StiDetectorBuilder::setDetector(UInt_t row, UInt_t sector, StiDetector *detector)
 {
   setNSectors(row+1,sector+1);
+assert(!_detectors[row][sector]);
    _detectors[row][sector] = detector;
 }

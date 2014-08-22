@@ -20,7 +20,7 @@
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h"
 #include "StiTpcIsActiveFunctor.h"
-#include "Sti/StiElossCalculator.h"
+//#include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDbUtilities/StCoordinates.hh"
@@ -30,8 +30,8 @@
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 //#define TPC_IDEAL_GEOM
 
-StiTpcDetectorBuilder::StiTpcDetectorBuilder(Bool_t active, const string & inputFile)
-  : StiDetectorBuilder("Tpc",active,inputFile), _fcMaterial(0){}
+StiTpcDetectorBuilder::StiTpcDetectorBuilder(Bool_t active)
+  : StiDetectorBuilder("Tpc",active), _fcMaterial(0){}
 
 StiTpcDetectorBuilder::~StiTpcDetectorBuilder() {}
 
@@ -100,9 +100,9 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 				mat->GetDensity(),
 				mat->GetDensity()*mat->GetRadLen(),
 				PotI));
-  Double_t ionization = _gasMat->getIonization();
-  StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization,
-								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
+//  Double_t ionization = _gasMat->getIonization();
+//   StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization,
+// 								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   //Active TPC padrows
@@ -227,7 +227,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 	pDetector->setHitErrorCalculator(StiTpcInnerHitErrorCalculator::instance());
       else
 	pDetector->setHitErrorCalculator(StiTpcOuterHitErrorCalculator::instance());
-      pDetector->setElossCalculator(gasElossCalculator);
+//      pDetector->setElossCalculator(gasElossCalculator);
       pDetector->setKey(1,row);
       pDetector->setKey(2,sector);
       add(row,sector,pDetector); if (debug>1) cout << *pDetector << endl;

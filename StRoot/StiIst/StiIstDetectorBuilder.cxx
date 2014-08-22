@@ -15,7 +15,6 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "Sti/StiElossCalculator.h"
 #include "StiIst/StiIstIsActiveFunctor.h"
 #include "StiIst/StiIstDetectorBuilder.h"
 #include "TDataSetIter.h"
@@ -33,8 +32,8 @@ using namespace std;
 using namespace StIstConsts;
 
 
-StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string &inputFile, bool buildIdealGeom) :
-   StiDetectorBuilder("Ist", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
+StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
+   StiDetectorBuilder("Ist", active), mSiMaterial(0), mHybridMaterial(0), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
 { }
 
 
@@ -108,13 +107,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
                                       mat->GetDensity()*mat->GetRadLen(),
                                       PotI));
    }
-
-   double ionization = mSiMaterial->getIonization();
-
-   StiElossCalculator *ElossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
-         ionization * ionization,
-         mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
-
 
    for (int ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)
    {
@@ -207,7 +199,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
          if (!p->getGas()) LOG_INFO << "gas not there!" << endm;
 
          p->setMaterial(mSiMaterial);
-         p->setElossCalculator(ElossCalculator);
          p->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
 
          // Adding detector, note that no keys are set in IST!
@@ -338,7 +329,6 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             stiDetector->setIsOn(false);
 
             StiMaterial *matICFC                    = stiDetector->getMaterial();
-            StiElossCalculator *elossCalculatorICFC = stiDetector->getElossCalculator();
             StiPlacement *stiPlacementICFC          = stiDetector->getPlacement();
             StiPlanarShape *stiShapeICFC            = (StiPlanarShape *) stiDetector->getShape();
             stiShapeICFC->setThickness(0);
@@ -347,27 +337,26 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
             //construct carbon foam stave north side volume
             StiDetector *stiDetectorN = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorN, "ICFCn", 8.825 * 0.5, 0.5663, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFC, matICFC, elossCalculatorICFC);
+            buildPlanerVolume(*stiDetectorN, "ICFCn", 8.825 * 0.5, 0.5663, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFC, matICFC);
             add(row, sector, stiDetectorN);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC north side " << stiDetectorN->getName() << " at layer " << row << endm;
 
             //construct carbon foam stave bottom side volume
             StiDetector *stiDetectorB = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorB, "ICFCb", 8.825 * 0.5, 0.042775, 0.47625 * 0.5, -0.238125, -0.2617625, 0., stiPlacementICFC, matICFC, elossCalculatorICFC);
+            buildPlanerVolume(*stiDetectorB, "ICFCb", 8.825 * 0.5, 0.042775, 0.47625 * 0.5, -0.238125, -0.2617625, 0., stiPlacementICFC, matICFC);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
 
             //construct carbon foam stave south side volume
             StiDetector *stiDetectorS = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorS, "ICFCs", 8.825 * 0.5, 0.5663, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFC, matICFC, elossCalculatorICFC);
+            buildPlanerVolume(*stiDetectorS, "ICFCs", 8.825 * 0.5, 0.5663, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFC, matICFC);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC south side " << stiDetectorS->getName() << " at layer " << layer << endm;
 
             matICFC                 = NULL;
             stiPlacementICFC        = NULL;
-            elossCalculatorICFC     = NULL;
             stiShapeICFC            = NULL;
             stiDetector             = NULL;
          }
@@ -382,7 +371,6 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             stiDetector->setIsOn(false);
 
             StiMaterial *matICFD                    = stiDetector->getMaterial();
-            StiElossCalculator *elossCalculatorICFD = stiDetector->getElossCalculator();
             StiPlacement *stiPlacementICFD          = stiDetector->getPlacement();
             StiPlanarShape *stiShapeICFD            = (StiPlanarShape *) stiDetector->getShape();
             stiShapeICFD->setThickness(0);
@@ -391,27 +379,26 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
             //construct carbon foam north side volume
             StiDetector *stiDetectorN = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorN, "ICFDn", 47.055 * 0.5, 0.58, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFD, matICFD, elossCalculatorICFD);
+            buildPlanerVolume(*stiDetectorN, "ICFDn", 47.055 * 0.5, 0.58, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFD, matICFD);
             add(row, sector, stiDetectorN);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD north side " << stiDetectorN->getName() << " at layer " << row << endm;
 
             //construct carbon foam bottom side volume
             StiDetector *stiDetectorB = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorB, "ICFDb", 47.055 * 0.5, 0.049675, 0.47625 * 0.5, -0.238125, -0.2651625, 0., stiPlacementICFD, matICFD, elossCalculatorICFD);
+            buildPlanerVolume(*stiDetectorB, "ICFDb", 47.055 * 0.5, 0.049675, 0.47625 * 0.5, -0.238125, -0.2651625, 0., stiPlacementICFD, matICFD);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
 
             //construct carbon foam south side volume
             StiDetector *stiDetectorS = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorS, "ICFDs", 47.055 * 0.5, 0.58, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFD, matICFD, elossCalculatorICFD);
+            buildPlanerVolume(*stiDetectorS, "ICFDs", 47.055 * 0.5, 0.58, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFD, matICFD);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD south side " << stiDetectorS->getName() << " at layer " << layer << endm;
 
             matICFD                 = NULL;
             stiPlacementICFD        = NULL;
-            elossCalculatorICFD     = NULL;
             stiShapeICFD            = NULL;
             stiDetector             = NULL;
          }
@@ -427,7 +414,6 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             stiDetector->setIsOn(false);
 
             StiMaterial *matIECE                    = stiDetector->getMaterial();
-            StiElossCalculator *elossCalculatorIECE = stiDetector->getElossCalculator();
             StiPlacement *stiPlacementIECE          = stiDetector->getPlacement();
             StiPlanarShape *stiShapeIECE            = (StiPlanarShape *) stiDetector->getShape();
             stiShapeIECE->setThickness(0);
@@ -436,27 +422,26 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
             //construct east end-cap north side volume
             StiDetector *stiDetectorN = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorN, "IECEn", 2.25 * 0.5, 0.5413, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECE, matIECE, elossCalculatorIECE);
+            buildPlanerVolume(*stiDetectorN, "IECEn", 2.25 * 0.5, 0.5413, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECE, matIECE);
             add(row, sector, stiDetectorN);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE north side " << stiDetectorN->getName() << " at layer " << row << endm;
 
             //construct east end-cap bottom side volume
             StiDetector *stiDetectorB = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorB, "IECEb", 2.25 * 0.5, 0.0193, 0.5065 * 0.5, 1.5619, -0.261, 0., stiPlacementIECE, matIECE, elossCalculatorIECE);
+            buildPlanerVolume(*stiDetectorB, "IECEb", 2.25 * 0.5, 0.0193, 0.5065 * 0.5, 1.5619, -0.261, 0., stiPlacementIECE, matIECE);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
 
             //construct east end-cap south side volume
             StiDetector *stiDetectorS = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorS, "IECEs", 2.25 * 0.5, 0.5413, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECE, matIECE, elossCalculatorIECE);
+            buildPlanerVolume(*stiDetectorS, "IECEs", 2.25 * 0.5, 0.5413, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECE, matIECE);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE south side " << stiDetectorS->getName() << " at layer " << layer << endm;
 
             matIECE                 = NULL;
             stiPlacementIECE        = NULL;
-            elossCalculatorIECE     = NULL;
             stiShapeIECE            = NULL;
             stiDetector             = NULL;
          }
@@ -472,7 +457,6 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             stiDetector->setIsOn(false);
 
             StiMaterial *matIECW                    = stiDetector->getMaterial();
-            StiElossCalculator *elossCalculatorIECW = stiDetector->getElossCalculator();
             StiPlacement *stiPlacementIECW          = stiDetector->getPlacement();
             StiPlanarShape *stiShapeIECW            = (StiPlanarShape *) stiDetector->getShape();
             stiShapeIECW->setThickness(0);
@@ -481,27 +465,26 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
             //construct west end-cap north side volume
             StiDetector *stiDetectorN = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorN, "IECWn", 2.25 * 0.5, 0.555, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECW, matIECW, elossCalculatorIECW);
+            buildPlanerVolume(*stiDetectorN, "IECWn", 2.25 * 0.5, 0.555, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECW, matIECW);
             add(row, sector, stiDetectorN);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW north side " << stiDetectorN->getName() << " at layer " << row << endm;
 
             //construct west end-cap bottom side volume
             StiDetector *stiDetectorB = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorB, "IECWb", 2.25 * 0.5, 0.01925, 0.5065 * 0.5, 1.5619, -0.267875, 0., stiPlacementIECW, matIECW, elossCalculatorIECW);
+            buildPlanerVolume(*stiDetectorB, "IECWb", 2.25 * 0.5, 0.01925, 0.5065 * 0.5, 1.5619, -0.267875, 0., stiPlacementIECW, matIECW);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
 
             //construct west end-cap south side volume
             StiDetector *stiDetectorS = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorS, "IECWs", 2.25 * 0.5, 0.555, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECW, matIECW, elossCalculatorIECW);
+            buildPlanerVolume(*stiDetectorS, "IECWs", 2.25 * 0.5, 0.555, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECW, matIECW);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW south side " << stiDetectorS->getName() << " at layer " << layer << endm;
 
             matIECW                 = NULL;
             stiPlacementIECW        = NULL;
-            elossCalculatorIECW     = NULL;
             stiShapeIECW            = NULL;
             stiDetector             = NULL;
          }
@@ -515,14 +498,13 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             row = startRow + iICJS;
             stiDetector = getDetector(row, sector);
             StiMaterial *matICJS                    = stiDetector->getMaterial();
-            StiElossCalculator *elossCalculatorICJS = stiDetector->getElossCalculator();
             StiPlacement *stiPlacementICJS1         = stiDetector->getPlacement();
 
             stiDetector = getDetector(row + 1, sector);
             StiPlacement *stiPlacementICJS2         = stiDetector->getPlacement();
 
             StiDetector *stiDetectorICJR = getDetectorFactory()->getInstance();
-            buildPlanerVolume(*stiDetectorICJR, "ICJRn", 0.524188 * 0.5, 0.47625, 4.41625 * 0.5, stiPlacementICJS2->getNormalYoffset(), 0., 0.524188 * 0.5 + 6.35 * 0.5, stiPlacementICJS1, matICJS, elossCalculatorICJS);
+            buildPlanerVolume(*stiDetectorICJR, "ICJRn", 0.524188 * 0.5, 0.47625, 4.41625 * 0.5, stiPlacementICJS2->getNormalYoffset(), 0., 0.524188 * 0.5 + 6.35 * 0.5, stiPlacementICJS1, matICJS);
             int layer = getNRows();
             add(layer, sector, stiDetectorICJR);
             LOG_DEBUG << "StiIstDetectorBuilder::build west cooling loop volume " << stiDetectorICJR->getName() << " at layer " << layer << endm;
@@ -545,8 +527,6 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    }
 
    if (matISRA) {
-      //StiElossCalculator for the support block inner thin tube volume
-      StiElossCalculator *elossCalculatorISRA = new StiElossCalculator(matISRA->getZ() / matISRA->getA(), matISRA->getIonization()*matISRA->getIonization(), matISRA->getA(), matISRA->getZ(), matISRA->getDensity());
 
       //StiShape for the support block inner thin tube volume (as a whole for all 24 support blocks)
       float halfDepth = 0.5 * 1.27;
@@ -556,21 +536,21 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
       //east support block inner thin tube volume
       StiDetector *stiDetectorISRAeast = getDetectorFactory()->getInstance();
-      buildTubeVolume(*stiDetectorISRAeast, "ISRAeast", halfDepth, thickness, outerRadius, openingAngle, -34.19005 + 0.15875, matISRA, elossCalculatorISRA);
+      buildTubeVolume(*stiDetectorISRAeast, "ISRAeast", halfDepth, thickness, outerRadius, openingAngle, -34.19005 + 0.15875, matISRA);
       int layer = getNRows();
       add(layer, 0, stiDetectorISRAeast);
       LOG_DEBUG << "StiIstDetectorBuilder::build east support block thin tube volume " << stiDetectorISRAeast->getName() << " at layer " << layer << endm;
 
       //west support block inner thin tube volume
       StiDetector *stiDetectorISRAwest = getDetectorFactory()->getInstance();
-      buildTubeVolume(*stiDetectorISRAwest, "ISRAwest", halfDepth, thickness, outerRadius, openingAngle, 24.68995 + 0.15875, matISRA, elossCalculatorISRA);
+      buildTubeVolume(*stiDetectorISRAwest, "ISRAwest", halfDepth, thickness, outerRadius, openingAngle, 24.68995 + 0.15875, matISRA);
       layer = getNRows();
       add(layer, 0, stiDetectorISRAwest);
       LOG_DEBUG << "StiIstDetectorBuilder::build west support block thin tube volume " << stiDetectorISRAwest->getName() << " at layer " << layer << endm;
    }
 }
 
-void StiIstDetectorBuilder::buildPlanerVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float halfWidth, float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat, StiElossCalculator *elossCalculator)
+void StiIstDetectorBuilder::buildPlanerVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float halfWidth, float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat)
 {
    //planar shape definition
    string shapeName = detName + "_planar";
@@ -597,10 +577,9 @@ void StiIstDetectorBuilder::buildPlanerVolume(StiDetector &detector, string detN
    detector.setPlacement(stiPlacementN);
    detector.setGas(getGasMat()); // XXX:ds: Not sure what this does
    detector.setMaterial(mat);
-   detector.setElossCalculator(elossCalculator);
 }
 
-void StiIstDetectorBuilder::buildTubeVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float outerRadius, float openingAngle, float zCenter, StiMaterial *mat, StiElossCalculator *elossCalculator)
+void StiIstDetectorBuilder::buildTubeVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float outerRadius, float openingAngle, float zCenter, StiMaterial *mat)
 {
    //tube shape definition
    string shapeName = detName + "_tube";
@@ -625,5 +604,4 @@ void StiIstDetectorBuilder::buildTubeVolume(StiDetector &detector, string detNam
    detector.setPlacement(stiPlacementN);
    detector.setGas(getGasMat()); // XXX:ds: Not sure what this does
    detector.setMaterial(mat);
-   detector.setElossCalculator(elossCalculator);
 }

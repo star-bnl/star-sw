@@ -7,7 +7,6 @@
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
 template<class Event,class Detector> class StiHitLoader;
-class StiElossCalculator;
 
 template<class Event>
 class StiDetectorGroup : public StiGenericDetectorGroup
@@ -23,8 +22,7 @@ class StiDetectorGroup : public StiGenericDetectorGroup
   StiDetectorGroup(const string & name);
   StiDetectorGroup(const string & name,
 		   StiHitLoader<Event,StiDetectorBuilder> * hitLoader,
-		   StiDetectorBuilder * detectorBuilder,
-		   StiElossCalculator * elossCalculator);
+		   StiDetectorBuilder * detectorBuilder);
   ~StiDetectorGroup();
   StiHitLoader<Event,StiDetectorBuilder> * _hitLoader;
 };
@@ -33,9 +31,8 @@ class StiDetectorGroup : public StiGenericDetectorGroup
 template<class Event>
 StiDetectorGroup<Event>::StiDetectorGroup(const string & name,
 					  StiHitLoader<Event,StiDetectorBuilder> * hitLoader,
-					  StiDetectorBuilder * detectorBuilder,
-					  StiElossCalculator * elossCalculator)
-  :  StiGenericDetectorGroup(name,detectorBuilder,elossCalculator),
+					  StiDetectorBuilder * detectorBuilder)
+  :  StiGenericDetectorGroup(name,detectorBuilder),
     _hitLoader(hitLoader)
 {
   // If a loader was specified, make sure it uses the selected detector builder.
