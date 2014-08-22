@@ -16,7 +16,6 @@ using namespace std;
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiToolkit.h"
-#include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "StiSsd/StiSstDetectorBuilder.h"
@@ -24,8 +23,8 @@ using namespace std;
 #include "StDetectorDbMaker/StiSsdHitErrorCalculator.h"
 
 
-StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, const string &inputFile)
-   : StiDetectorBuilder("Ssd", active, inputFile), _siMat(0), _hybridMat(0)
+StiSstDetectorBuilder::StiSstDetectorBuilder(bool active)
+   : StiDetectorBuilder("Ssd", active), _siMat(0), _hybridMat(0)
 {
    // Hit error parameters : it is set to 20 microns, in both x and y coordinates
 }
@@ -94,9 +93,6 @@ void StiSstDetectorBuilder::useVMCGeometry()
                                       PotI));
    }
 
-   double ionization = _siMat->getIonization();
-
-   StiElossCalculator *siElossCalculator = new StiElossCalculator(_siMat->getZOverA(), ionization * ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
 
    cout << "StiSstDetectorBuilder::buildMaterials() - I - Done " << endl;
 
@@ -178,7 +174,6 @@ void StiSstDetectorBuilder::useVMCGeometry()
       pLadder->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());
       pLadder->setKey(1, 0);
       pLadder->setKey(2, iLadder - 1);
-      pLadder->setElossCalculator(siElossCalculator);
       add(layer, iLadder, pLadder);
    }
 }

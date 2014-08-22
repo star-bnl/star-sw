@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.36 2013/03/22 23:58:51 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.37 2014/08/22 17:52:18 perev Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.37  2014/08/22 17:52:18  perev
+// StiEloss calculator creates in material now
+//
 // Revision 1.36  2013/03/22 23:58:51  fisyak
 // Remove name[50]
 //
@@ -76,7 +79,6 @@ using namespace std;
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiToolkit.h"
-#include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
@@ -84,8 +86,8 @@ using namespace std;
 #include "StiSsd/StiSsdDetectorBuilder.h" 
 #include "StSsdUtil/StSsdBarrel.hh"
 #include "StDetectorDbMaker/StiSsdHitErrorCalculator.h"
-StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active, const string & inputFile)
-    : StiDetectorBuilder("Ssd",active,inputFile), _siMat(0), _hybridMat(0)
+StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active)
+    : StiDetectorBuilder("Ssd",active), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
 }
@@ -111,10 +113,6 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       _siMat      = add(new StiMaterial("SsdSi",14., 28.0855, 2.33, 21.82, 14.*12.*1e-9));
     if (! _hybridMat)
     _hybridMat  = add(new StiMaterial("SsdHyb",14., 28.0855, 2.33, 21.82, 14.*12.*1e-9));
-
-    double ionization = _siMat->getIonization();
-    //const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
-    StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(), ionization*ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
 
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildMaterials() - I - Done "<<endm;  
     cout << "StiSsdDetectorBuilder::buildMaterials() - I - Done "<<endl;  
@@ -178,7 +176,6 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       pLadder->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());
       pLadder->setKey(1,0);
       pLadder->setKey(2,ladder-1);
-      pLadder->setElossCalculator(siElossCalculator);
       add(layer,ladder,pLadder); 
     }
     useVMCGeometry();

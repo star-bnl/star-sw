@@ -11,10 +11,12 @@
 #include "StiMapUtilities.h"
 
 
+//______________________________________________________________________________
 StiDetector::StiDetector()
 {
   reset();
 }
+//______________________________________________________________________________
 void StiDetector::reset()
 {
   setName("");
@@ -22,9 +24,11 @@ void StiDetector::reset()
   _key1 = _key2 = -1;
 }
 
+//______________________________________________________________________________
 StiDetector::~StiDetector()
 {}
 
+//______________________________________________________________________________
 void StiDetector::copy(StiDetector &detector){
 
   on = detector.isOn();
@@ -36,12 +40,12 @@ void StiDetector::copy(StiDetector &detector){
   material = detector.getMaterial();
   shape = detector.getShape();
   placement = detector.getPlacement();
-  _elossCalculator = detector.getElossCalculator();
   _cos  = detector._cos;
   _sin  = detector._sin;
   setName(detector.getName());
 }
  
+//______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
     os << "StiDetector:" << endl
@@ -67,17 +71,17 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
   vect[0]=this;
   assert(shape);
   if (shape->getShapeCode()!=kPlanar) return 1;
-
+  
   float deltaX = shape->getThickness();
-  float halfZ  = shape->getHalfDepth();
-  float halfY  = shape->getHalfWidth();
+  float halfZ  = shape->getHalfDepth(); 
+  float halfY  = shape->getHalfWidth(); 
   int ny = deltaX/(halfY*2*dXdY)+0.5;
   int nz = deltaX/(halfZ*2*dXdY)+0.5;
   int nSplit = (ny>nz)? ny:nz;
   if (nSplit<=1) return 1;
   if (nSplit>nMax) nSplit=nMax;
 
-//		OK, we must split it.
+//		OK, we mast split it.
 
    vect.clear();
    float dX = deltaX/nSplit;
@@ -88,11 +92,11 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
      StiDetector *det = new StiDetector;
      det->copy(*this);
      TString ts(getName());
-     if (N) { ts+="_"; ts+=N;}
+     if (N) { ts+="_"; ts+=N;} 
      det->setName(ts.Data());
 //		Create shape
      ts = shape->getName();
-     if (N) { ts+="_"; ts+=N;}
+     if (N) { ts+="_"; ts+=N;} 
      StiShape *myShape = new StiPlanarShape(ts.Data(),halfZ,dX,halfY);
      det->setShape(myShape);
 //		Create placement
@@ -101,7 +105,7 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
      *place = *placement;
      float myRadius = placement->getNormalRadius()+xc;
      place->setNormalRep(placement->getNormalRefAngle()
-                        ,myRadius
+                        ,myRadius 
                         ,placement->getNormalYoffset());
      place->setLayerRadius(myRadius);
      det->setPlacement(place);
@@ -111,6 +115,6 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
    this->setName(vect[0]->getName());
    delete vect[0]; vect[0] = this;
    if (vect.size()>1) {
-     printf("StiDetector::splitIt %s is split into %d peices\n",getName().c_str(),vect.size());}
+     printf("StiDetector::splitIt %s is splitted into %d peaces\n",getName().c_str(),vect.size());}
    return vect.size();
 }

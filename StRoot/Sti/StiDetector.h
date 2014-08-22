@@ -9,6 +9,7 @@ using std::string;
 #include "Sti/StiPlacement.h"
 #include "StiIsActiveFunctor.h"
 #include "StDetectorDbMaker/StiTrackingParameters.h"
+#include "TString.h"
 
 class StiMaterial;
 class StiShape;
@@ -41,36 +42,31 @@ public:
     int  splitIt(StiDetVect &vect,double thick=0.5,int nMax=20);
     
     // accessors
-    bool isOn() const 			{ return on;}
+    bool isOn() const 				{ return on;}
     inline bool isActive(double dYlocal, double dZlocal) const {return (*isActiveFunctor)(dYlocal, dZlocal);}
-    inline bool isActive()                               const {return isActiveFunctor->isActive();}
-    bool isContinuousMedium() const 	{ return continuousMedium; }
-    bool isDiscreteScatterer() const 	{ return discreteScatterer; }
+    inline bool isActive()    const 		{ return isActiveFunctor->isActive();}
+    bool isContinuousMedium() const 		{ return continuousMedium; }
+    bool isDiscreteScatterer() const 		{ return discreteScatterer; }
 
-    StiMaterial* getGas() const 	{ return gas; }
-    StiMaterial* getMaterial() const 	{ return material; }
+    StiMaterial* getGas() const 		{ assert(gas); return gas; }
+    StiMaterial* getMaterial() const 		{ assert(material) ;return material; }
 
-    StiShape* getShape() const { return shape; }
-    StiPlacement* getPlacement() const 	{ return placement; }
+    StiShape* getShape() const 			{ return shape; }
+    StiPlacement* getPlacement() const 		{ return placement; }
 
     StiIsActiveFunctor* getIsActiveFunctor() {return isActiveFunctor;}
 
     // mutators
     void setIsOn(bool val) {on = val;}
-    void setIsActive(StiIsActiveFunctor *val){ isActiveFunctor = val; }
-    void setIsContinuousMedium(bool val) {continuousMedium = val;}
-    void setIsDiscreteScatterer(bool val) {discreteScatterer = val;}
+    void setIsActive(StiIsActiveFunctor *val)	{ isActiveFunctor = val; }
+    void setIsContinuousMedium(bool val) 	{continuousMedium = val;}
+    void setIsDiscreteScatterer(bool val) 	{discreteScatterer = val;}
 
-    void setGas(StiMaterial *val){ gas = val; }
-    void setMaterial(StiMaterial *val){ material = val; }
+    void setGas(StiMaterial *val)		{ gas = val; }
+    void setMaterial(StiMaterial *val)		{ material = val; }
 
-    void setShape(StiShape *val){ shape = val; }
-    void setPlacement(StiPlacement *val)
-      { 
-	placement = val; 
-	_cos = cos(val->getNormalRefAngle());
-	_sin = sin(val->getNormalRefAngle());
-      }
+    void setShape(StiShape *val)		{ shape = val; }
+    void setPlacement(StiPlacement *val);
 
     //action
     virtual void build(){}  //for now, build from SCL parsable ascii file
@@ -93,34 +89,8 @@ public:
 
     friend ostream& operator<<(ostream&os, const StiDetector & det);
 
-    void setKey(int index,int value)
-      {
-	switch (index)
-	  {
-	  case 1: _key1 = value; break;
-	  case 2: _key2 = value; break;
-	  }
-      }
-
-    int getKey(int index) const 
-      {
-	switch (index)
-	  {
-	  case 1: return _key1;
-	  case 2: return _key2;
-	  }
-	return -1;
-      }
-
-    void setElossCalculator(StiElossCalculator * calculator)
-      {
-	_elossCalculator = calculator;
-      }
-
-    StiElossCalculator * getElossCalculator() const
-      {
-	return _elossCalculator;
-      }
+    void setKey(int index,int value);
+    int getKey(int index) const; 
 
  protected:
     
@@ -166,7 +136,60 @@ public:
     const StiTrackingParameters * _pars;
     int _key1, _key2;
 
-    StiElossCalculator * _elossCalculator;
+//     StiElossCalculator * _elossCalculator;
     char mEnd[1];
 };
+
+
+
+
+inline void StiDetector::setPlacement(StiPlacement *val)
+{ 
+  placement = val; 
+  _cos = cos(val->getNormalRefAngle());
+  _sin = sin(val->getNormalRefAngle());
+}
+inline void StiDetector::setKey(int index,int value)
+{
+switch (index)
+  {
+  case 1: _key1 = value; break;
+  case 2: _key2 = value; break;
+  }
+}
+
+inline int StiDetector::getKey(int index) const 
+{
+switch (index)
+  {
+  case 1: return _key1;
+  case 2: return _key2;
+  }
+return -1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif

@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.76 2014/07/07 19:57:17 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.77 2014/08/22 17:44:48 perev Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -17,7 +17,7 @@
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "Sti/StiElossCalculator.h"
+//#include "Sti/StiElossCalculator.h"
 #include "StiPxlDetectorBuilder.h"
 #include "StiPxlIsActiveFunctor.h"
 #include "StiPxlHitErrorCalculator.h"
@@ -54,8 +54,8 @@ using namespace std;
    10     3                          1     29
    10     4                          0     9
  */
-StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, const string &inputFile, bool buildIdealGeom) :
-   StiDetectorBuilder("Pixel", active, inputFile), mSiMaterial(0), mHybridMaterial(0), mPxlDb(0),
+StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
+   StiDetectorBuilder("Pixel", active), mSiMaterial(0), mHybridMaterial(0), mPxlDb(0),
    mBuildIdealGeom(buildIdealGeom)
 { }
 
@@ -132,11 +132,11 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                                       PotI));
    }
 
-   double ionization = mSiMaterial->getIonization();
+//   double ionization = mSiMaterial->getIonization();
 
-   StiElossCalculator *elossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
-         ionization * ionization,
-         mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
+//    StiElossCalculator *elossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
+//          ionization * ionization,
+//          mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
 
    // Build active sti volumes for pixel sensors
    int iSensor =1 ;
@@ -230,7 +230,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          stiDetector->setPlacement(pPlacement);
          stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
          stiDetector->setMaterial(mSiMaterial);
-         stiDetector->setElossCalculator(elossCalculator);
+//         stiDetector->setElossCalculator(elossCalculator);
          stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 
          int stiRow    = 0;
