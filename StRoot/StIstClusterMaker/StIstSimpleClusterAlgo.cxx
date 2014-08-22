@@ -1,32 +1,12 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.cxx,v 1.6 2014/02/16 21:42:54 ypwang Exp $
+* $Id: StIstSimpleClusterAlgo.cxx,v 1.7 2014/08/22 15:50:00 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
 * Description:
 * See header file.
-****************************************************************************
-*
-* $Log: StIstSimpleClusterAlgo.cxx,v $
-* Revision 1.6  2014/02/16 21:42:54  ypwang
-* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
-*
-* Revision 1.5  2014/02/15 20:12:58  ypwang
-* update due to replace raw hit container type from std::map to std::vector, and minor bug corrected for the simple clustering algorithm
-*
-* Revision 1.4  2014/02/10 16:33:44  smirnovd
-* Trimmed trailing spaces, expanded tabs to eight spaces
-*
-* Revision 1.3  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstSimpleClusterAlgo.cxx,v 1.0
-* Revision 1.0 2013/11/04 15:55:30 Yaping
-* Initial version
-****************************************************************************/
+***************************************************************************/
 
 #include "StEvent.h"
 #include "StMessMgr.h"
@@ -822,3 +802,29 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection& istCollection,
   return kStOk;
 };
 ClassImp(StIstSimpleClusterAlgo);
+
+
+/***************************************************************************
+*
+* $Log: StIstSimpleClusterAlgo.cxx,v $
+* Revision 1.7  2014/08/22 15:50:00  smirnovd
+* Moved CVS history to the end of file
+*
+* Revision 1.6  2014/02/16 21:42:54  ypwang
+* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
+*
+* Revision 1.5  2014/02/15 20:12:58  ypwang
+* update due to replace raw hit container type from std::map to std::vector, and minor bug corrected for the simple clustering algorithm
+*
+* Revision 1.4  2014/02/10 16:33:44  smirnovd
+* Trimmed trailing spaces, expanded tabs to eight spaces
+*
+* Revision 1.3  2014/02/08 03:34:16  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstSimpleClusterAlgo.cxx,v 1.0
+* Revision 1.0 2013/11/04 15:55:30 Yaping
+* Initial version
+****************************************************************************/

@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.h,v 1.5 2014/02/16 21:42:54 ypwang Exp $
+* $Id: StIstSimpleClusterAlgo.h,v 1.6 2014/08/22 15:50:00 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -11,24 +11,7 @@
 * cluster will be filled into a ladder cluster collection.
 * 3) A case-by-case splitting algorithm can be enabled/disabled for the
 * found clusters (here only works for cases with cluster size <= 4).
-****************************************************************************
-*
-* $Log: StIstSimpleClusterAlgo.h,v $
-* Revision 1.5  2014/02/16 21:42:54  ypwang
-* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
-*
-* Revision 1.4  2014/02/10 16:33:44  smirnovd
-* Trimmed trailing spaces, expanded tabs to eight spaces
-*
-* Revision 1.3  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstSimpleClusterAlgo.h,v 1.0
-* Revision 1.0 2013/11/04 15:55:30 Yaping
-* Initial version
-****************************************************************************/
+***************************************************************************/
 
 #ifndef StIstSimpleClusterAlgo_hh
 #define StIstSimpleClusterAlgo_hh
@@ -67,3 +50,26 @@ protected:
 inline void StIstSimpleClusterAlgo::setSplitFlag( bool splitFlag )      { mSplitCluster = splitFlag; };
 inline void StIstSimpleClusterAlgo::setUsedTimeBin(unsigned char tb)    { mTimeBin = tb; };
 #endif
+
+
+/***************************************************************************
+*
+* $Log: StIstSimpleClusterAlgo.h,v $
+* Revision 1.6  2014/08/22 15:50:00  smirnovd
+* Moved CVS history to the end of file
+*
+* Revision 1.5  2014/02/16 21:42:54  ypwang
+* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
+*
+* Revision 1.4  2014/02/10 16:33:44  smirnovd
+* Trimmed trailing spaces, expanded tabs to eight spaces
+*
+* Revision 1.3  2014/02/08 03:34:16  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstSimpleClusterAlgo.h,v 1.0
+* Revision 1.0 2013/11/04 15:55:30 Yaping
+* Initial version
+****************************************************************************/
