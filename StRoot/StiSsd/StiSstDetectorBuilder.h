@@ -13,7 +13,7 @@ class StiSstDetectorBuilder : public StiDetectorBuilder
 
 public:
 
-   StiSstDetectorBuilder(bool active, const string &inputFile);
+   StiSstDetectorBuilder(bool active);
    virtual ~StiSstDetectorBuilder();
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();

@@ -12,7 +12,7 @@ class StiDetectorBuilder;
 class StiSvtDetectorGroup : public StiDetectorGroup<StEvent>
 {
   public:
-  StiSvtDetectorGroup(bool active, const string & inputFile);
+  StiSvtDetectorGroup(bool active);
   ~StiSvtDetectorGroup();
 };
 

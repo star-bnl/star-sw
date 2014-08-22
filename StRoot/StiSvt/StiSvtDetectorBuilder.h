@@ -9,7 +9,7 @@
 class StiSvtDetectorBuilder : public StiDetectorBuilder
 {
  public:
-	StiSvtDetectorBuilder(bool active, const string & inputFile);
+	StiSvtDetectorBuilder(bool active);
 	virtual ~StiSvtDetectorBuilder(); 
 
 	virtual void buildDetectors(StMaker& source);	

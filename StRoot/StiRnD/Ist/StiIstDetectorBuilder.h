@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.h,v 1.8 2009/03/16 13:51:00 fisyak Exp $
+// $Id: StiIstDetectorBuilder.h,v 1.9 2014/08/22 17:49:39 perev Exp $
 // 
 // $Log: StiIstDetectorBuilder.h,v $
+// Revision 1.9  2014/08/22 17:49:39  perev
+// Remove never used input file
+//
 // Revision 1.8  2009/03/16 13:51:00  fisyak
 // Move out all Sti Chairs into StDetectorDb
 //
@@ -50,7 +53,7 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
    //StSsdConfig*   mSsdConfig;    //!
    //StSsdGeometry* mSsdGeom;      //!
  public:
-        StiIstDetectorBuilder(bool active,const string & inputFile);
+        StiIstDetectorBuilder(bool active);
 	virtual ~StiIstDetectorBuilder(); 
 	virtual void buildDetectors(StMaker& source);
 	virtual void AverageVolume(TGeoPhysicalNode *nodeP);

@@ -10,7 +10,7 @@ class StiPxlDetectorBuilder : public StiDetectorBuilder
 {
 public:
 
-   StiPxlDetectorBuilder(bool active, const string &inputFile, bool buildIdealGeom=true);
+   StiPxlDetectorBuilder(bool active, bool buildIdealGeom=true);
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
 

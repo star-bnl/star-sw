@@ -11,7 +11,7 @@ class StEvent;
 class StiTpcDetectorGroup : public StiDetectorGroup<StEvent>
 {
   public:
-  StiTpcDetectorGroup(bool active, const string & inputFile);
+  StiTpcDetectorGroup(bool active);
   ~StiTpcDetectorGroup();
 };
 

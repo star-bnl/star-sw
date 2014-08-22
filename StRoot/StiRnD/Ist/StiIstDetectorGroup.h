@@ -12,7 +12,7 @@ class StMcEvent;
 class StiIstDetectorGroup : public StiDetectorGroup<StEvent>
 {
   public:
-    StiIstDetectorGroup(bool active, const string & inputFile);
+    StiIstDetectorGroup(bool active);
     ~StiIstDetectorGroup();
 };
 
