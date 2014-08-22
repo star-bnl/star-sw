@@ -39,7 +39,7 @@ public:
     float _halfDepth;  
     /// "thickness", always >= 0
     float _thickness;
-    /// size of the edge used in tracking
+    /// size of the edge used in tracking, deltaX local
     float _edgeWidth;  
 };
 //Non-members--------------------------

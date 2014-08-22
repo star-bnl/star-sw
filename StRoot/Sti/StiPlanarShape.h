@@ -16,14 +16,14 @@ class StiPlanarShape: public StiShape
   StiPlanarShape(const string &name, float halfDepth, float thickness, float halfWidth);
   
   // accessors
-  float getHalfWidth() const { return _halfWidth; };
+  float getHalfWidth() const { return _halfWidth; };	//deltaY
   StiShapeCode getShapeCode() const { return kPlanar; };
   
   // mutators
   void setHalfWidth(float val);
   
  protected:
-  /// Half extent in local x, always >= 0
+  /// Half extent in local y, always >= 0
   float _halfWidth;  
 };
 
