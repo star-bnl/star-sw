@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.h,v 1.5 2014/08/22 15:55:15 smirnovd Exp $
+* $Id: StIstScanClusterAlgo.h,v 1.6 2014/08/22 21:27:27 smirnovd Exp $
 *
 * Author: Yaping Wang, October 2013
 ****************************************************************************
@@ -26,7 +26,7 @@ class StIstScanClusterAlgo : public StIstIClusterAlgo
 
 public:
    StIstScanClusterAlgo();
-   Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
+   virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
    Int_t Init();
 
    void setUsedTimeBin(unsigned char tb = -1);
@@ -50,6 +50,9 @@ inline void StIstScanClusterAlgo::setUsedTimeBin(unsigned char tb)		{ mTimeBin =
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.h,v $
+* Revision 1.6  2014/08/22 21:27:27  smirnovd
+* Decalred methods virtual as that what they are. Makes the code better to understand
+*
 * Revision 1.5  2014/08/22 15:55:15  smirnovd
 * Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
