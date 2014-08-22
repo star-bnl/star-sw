@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.h,v 1.3 2014/02/08 03:34:16 ypwang Exp $
+* $Id: StIstScanClusterAlgo.h,v 1.4 2014/08/22 15:50:00 smirnovd Exp $
 *
 * Author: Yaping Wang, October 2013
 ****************************************************************************
@@ -10,18 +10,7 @@
 * 2) Does clustering in individual column.
 * 3) Does clustering in neighboring columns.
 * 4) Fill hit collections.
-****************************************************************************
-*
-* $Log: StIstScanClusterAlgo.h,v $
-* Revision 1.3  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstScanClusterAlgo.h,v 1.0
-* Revision 1.0 2013/11/04 15:55:30 Yaping
-* Initial version
-****************************************************************************/
+***************************************************************************/
 
 #ifndef StIstScanClusterAlgo_hh
 #define StIstScanClusterAlgo_hh
@@ -56,3 +45,20 @@ protected:
 inline void StIstScanClusterAlgo::setSplitFlag( bool splitFlag )		{ mSplitCluster = splitFlag; };
 inline void StIstScanClusterAlgo::setUsedTimeBin(unsigned char tb)		{ mTimeBin = tb; };
 #endif
+
+
+/***************************************************************************
+*
+* $Log: StIstScanClusterAlgo.h,v $
+* Revision 1.4  2014/08/22 15:50:00  smirnovd
+* Moved CVS history to the end of file
+*
+* Revision 1.3  2014/02/08 03:34:16  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstScanClusterAlgo.h,v 1.0
+* Revision 1.0 2013/11/04 15:55:30 Yaping
+* Initial version
+****************************************************************************/

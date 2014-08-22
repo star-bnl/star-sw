@@ -1,16 +1,9 @@
 /***************************************************************************
-* $Id: StIstIClusterAlgo.h,v 1.3 2014/02/08 03:34:16 ypwang Exp $
+* $Id: StIstIClusterAlgo.h,v 1.4 2014/08/22 15:50:00 smirnovd Exp $
 * Author: Yaping Wang, March 2013
 ****************************************************************************
 * Description: Virtual class for clustering algorithm implementation.
-****************************************************************************
-* $Log: StIstIClusterAlgo.h,v $
-* Revision 1.3  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-* Revision 1.0 2013/11/04 Yaping
-* Initial version
-****************************************************************************/
+***************************************************************************/
 
 
 #ifndef StIstIClusterAlgo_hh
@@ -39,3 +32,16 @@ class StIstIClusterAlgo
   ClassDef( StIstIClusterAlgo, 1 );
 };
 #endif
+
+
+/***************************************************************************
+* $Log: StIstIClusterAlgo.h,v $
+* Revision 1.4  2014/08/22 15:50:00  smirnovd
+* Moved CVS history to the end of file
+*
+* Revision 1.3  2014/02/08 03:34:16  ypwang
+* updating scripts
+*
+* Revision 1.0 2013/11/04 Yaping
+* Initial version
+****************************************************************************/

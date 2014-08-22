@@ -1,29 +1,12 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.cxx,v 1.5 2014/03/17 21:51:56 ypwang Exp $
+* $Id: StIstScanClusterAlgo.cxx,v 1.6 2014/08/22 15:50:00 smirnovd Exp $
 *
 * Author: Yaping Wang, October 2013
 ****************************************************************************
 * Description: 
 * See header file.
-****************************************************************************
-*
-* $Log: StIstScanClusterAlgo.cxx,v $
-* Revision 1.5  2014/03/17 21:51:56  ypwang
-* minor update due to some IST constants moved to StEnumurations.h
-*
-* Revision 1.4  2014/02/16 23:18:34  ypwang
-* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
-*
-* Revision 1.3  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstScanClusterAlgo.cxx,v 1.0
-* Revision 1.0 2013/11/04 15:55:30 Yaping
-* Initial version
-****************************************************************************/
+***************************************************************************/
 
 #include "StEvent.h"
 #include "StEvent/StEnumerations.h"
@@ -242,3 +225,26 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection& istCollection, S
     return kStOk;
 };
 ClassImp(StIstScanClusterAlgo);
+
+
+/***************************************************************************
+*
+* $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.6  2014/08/22 15:50:00  smirnovd
+* Moved CVS history to the end of file
+*
+* Revision 1.5  2014/03/17 21:51:56  ypwang
+* minor update due to some IST constants moved to StEnumurations.h
+*
+* Revision 1.4  2014/02/16 23:18:34  ypwang
+* getting number of time bins used in current event by StIstCollection::getNumTimeBins() function
+*
+* Revision 1.3  2014/02/08 03:34:16  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstScanClusterAlgo.cxx,v 1.0
+* Revision 1.0 2013/11/04 15:55:30 Yaping
+* Initial version
+****************************************************************************/
