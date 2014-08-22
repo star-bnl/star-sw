@@ -6,10 +6,8 @@
 #include "Sti/StiMaterial.h"
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetector.h"
-//#include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/Star/StiStarDetectorBuilder.h"
-#include "Sti/StiElossCalculator.h"
 #include "TMath.h"
 #include "TError.h"
 #include "TSystem.h"
@@ -22,10 +20,12 @@ void StiStarDetectorBuilder::buildDetectors(StMaker&s) {
 }
 //________________________________________________________________________________
 void StiStarDetectorBuilder::useVMCGeometry() {
-  if (gGeoManager->GetVolume("TpcRefSys")) _TpcRefSys = kTRUE;
+  _TpcRefSys = (gGeoManager->GetVolume("TpcRefSys"  )!=0) 
+            || (gGeoManager->GetVolume("TpcRefSys_1")!=0);
   TGeoVolume *pipc = gGeoManager->GetVolume("PIPC"); 
   if (!pipc) { //No volume (??)
     Warning("StiStarDetectorBuilder::useVMCGeometry","No PIPC volume\n");
+    assert(0);
     return;
   }
   //  setNSectors(0,0);
@@ -68,7 +68,6 @@ void StiStarDetectorBuilder::OldBeamPipe() {
   for (Int_t i = 1; i < 5; i += 2) {// loop over Be and Steel pipes
     MakePipe(i, &PipeVolumes[i],&PipeVolumes[i+1]);
   }
-#if 1
   Int_t NoExtraVols = sizeof(PipeVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1");
   TString path("");
@@ -80,7 +79,6 @@ void StiStarDetectorBuilder::OldBeamPipe() {
     if (! nodeT) continue;
     StiVMCToolKit::LoopOverNodes(nodeT, path, PipeVolumes[i].name, MakeAverageVolume);
   }
-#endif
 }
 //________________________________________________________________________________
 void StiStarDetectorBuilder::HftBeamPipe() {
@@ -193,7 +191,10 @@ void StiStarDetectorBuilder::HftBeamPipe() {
       } else {
 	gGeoManager->RestoreMasterVolume(); 
 	gGeoManager->CdTop();
-	if (! _TpcRefSys) pathT.ReplaceAll("/TpcRefSys_1","");
+	if (! _TpcRefSys) {
+	  pathT.ReplaceAll("/TpcRefSys_1","");
+	  pathT.ReplaceAll("/TpcRefSys",  "");
+        }
 	gGeoManager->cd(pathT); path = pathT;
 	TGeoNode *nodeT = gGeoManager->GetCurrentNode();
 	if (! nodeT) continue;
@@ -203,6 +204,7 @@ void StiStarDetectorBuilder::HftBeamPipe() {
     }
     if (! pipe->GetShape()->TestShapeBit(TGeoShape::kGeoPcon)) {
       Warning("StiStarDetectorBuilder::useVMCGeometry","Shape for %s volume is not recognized\n",PipeVolumes[i].name);
+      assert(0);
       continue;
     }
     TGeoPcon *pcon = (TGeoPcon*) pipe->GetShape();
@@ -216,9 +218,7 @@ void StiStarDetectorBuilder::HftBeamPipe() {
 					density*pipeMaterial->GetRadLen(),
 					PotI));
     Double_t ionization = _pipeMaterial->getIonization();
-    StiElossCalculator * pipeElossCalculator = new StiElossCalculator(_pipeMaterial->getZOverA(), ionization*ionization, _pipeMaterial->getA(), _pipeMaterial->getZ(), _pipeMaterial->getDensity());
     StiMaterial *_pipeMaterial2 = 0;
-    StiElossCalculator * pipeElossCalculator2 = 0;
     Double_t Rmax, Rmin, radius, dZ, Z;
     Int_t Nz = pcon->GetNz();
 #if 0
@@ -233,7 +233,6 @@ void StiStarDetectorBuilder::HftBeamPipe() {
       if (dZ <  1e-7) continue;
       Z   =           (pcon->GetZ(k) + pcon->GetZ(k+1))/2;
       _pipeMaterial2 = _pipeMaterial;
-      pipeElossCalculator2 = pipeElossCalculator;
       if (pcon->GetRmin(k) == pcon->GetRmin(k+1) &&
 	  pcon->GetRmax(k) == pcon->GetRmax(k+1)) {
 	Rmax = pcon->GetRmax(k);
@@ -253,9 +252,6 @@ void StiStarDetectorBuilder::HftBeamPipe() {
 					density*pipeMaterial->GetRadLen(),
 					PotI));
 	ionization = _pipeMaterial2->getIonization();
-	pipeElossCalculator2 = new StiElossCalculator(_pipeMaterial2->getZOverA(), 
-						      ionization*ionization, _pipeMaterial2->getA(), 
-						      _pipeMaterial2->getZ(), _pipeMaterial2->getDensity());
       }
       radius = (Rmin + Rmax)/2;
       _beamPipeShape = new StiCylindricalShape;
@@ -276,6 +272,7 @@ void StiStarDetectorBuilder::HftBeamPipe() {
       TString nameP = PipeVolumes[i].name; nameP += "#"; section++; nameP += section;
       nameP.ReplaceAll("HALL_1/CAVE_1/","");
       nameP.ReplaceAll("/TpcRefSys_1","");
+      nameP.ReplaceAll("/TpcRefSys","");
       nameP.ReplaceAll("/IDSM_1","");
       nameP.Resize(30); nameP.Strip();
       StiDetector *pipeVolume = _detectorFactory->getInstance();
@@ -288,7 +285,6 @@ void StiStarDetectorBuilder::HftBeamPipe() {
       pipeVolume->setPlacement(p);
       pipeVolume->setGas(_vacuumMaterial);
       pipeVolume->setMaterial(_pipeMaterial2);
-      pipeVolume->setElossCalculator(pipeElossCalculator2);
       Int_t layer = getNRows();
       add(layer,0,pipeVolume);
     }
@@ -317,8 +313,11 @@ void StiStarDetectorBuilder::NewSuppCone() {
   for (Int_t i = 0;  i < NVol; i++) {
     gGeoManager->RestoreMasterVolume(); 
     gGeoManager->CdTop();
-    if (! _TpcRefSys) pathT.ReplaceAll("/TpcRefSys_1","");
-    gGeoManager->cd(pathT); path = pathT;
+    if (! _TpcRefSys) {
+      pathT.ReplaceAll("/TpcRefSys_1","");
+      pathT.ReplaceAll("/TpcRefSys"  ,"");
+    }
+   gGeoManager->cd(pathT); path = pathT;
     TGeoNode *nodeT = gGeoManager->GetCurrentNode();
     if (! nodeT) continue;
     StiVMCToolKit::LoopOverNodes(nodeT, path, PipeVolumes[i].name, MakeAverageVolume);
@@ -331,7 +330,8 @@ void StiStarDetectorBuilder::MakePipe(Int_t iflag, const VolumeMap_t *ptube,cons
   TGeoVolume *pipe = gGeoManager->GetVolume(ptube->name);
   if (!pipe) { //No volume (??)
     Warning("StiStarDetectorBuilder::useVMCGeometry","No %s volume\n",ptube->name);
-    return;
+    assert(0);
+   return;
   }
   TGeoMaterial *pipeMaterial = pipe->GetMaterial();
   Double_t PotI = StiVMCToolKit::GetPotI(pipeMaterial);
@@ -341,10 +341,6 @@ void StiStarDetectorBuilder::MakePipe(Int_t iflag, const VolumeMap_t *ptube,cons
 				      pipeMaterial->GetDensity(),
 				      pipeMaterial->GetDensity()*pipeMaterial->GetRadLen(),
 				      PotI));
-  Double_t ionization = _pipeMaterial->getIonization();
-  StiElossCalculator * pipeElossCalculator = 
-    new StiElossCalculator(_pipeMaterial->getZOverA(), ionization*ionization, _pipeMaterial->getA(), 
-			   _pipeMaterial->getZ(), _pipeMaterial->getDensity());
   TGeoTube *pipeShape = (TGeoTube *) pipe->GetShape();
   Double_t Rmax = pipeShape->GetRmax();
   Double_t Rmin = pipeShape->GetRmin();
@@ -353,6 +349,7 @@ void StiStarDetectorBuilder::MakePipe(Int_t iflag, const VolumeMap_t *ptube,cons
     TGeoVolume *vac  = gGeoManager->GetVolume(pvacu->name);
     if (!vac) { //No volume (??)
       Warning("StiStarDetectorBuilder::useVMCGeometry","No %s volume\n",pvacu->name);
+      assert(0);
       return;
     }
     TGeoTube *vacShape = (TGeoTube *) vac->GetShape();
@@ -390,6 +387,7 @@ void StiStarDetectorBuilder::MakePipe(Int_t iflag, const VolumeMap_t *ptube,cons
     TString nameP = pathT.Data();
     nameP.ReplaceAll("HALL_1/CAVE_1/","");
     nameP.ReplaceAll("/TpcRefSys_1","");
+    nameP.ReplaceAll("/TpcRefSys","");
     nameP.ReplaceAll("/IDSM","");
     nameP.Resize(30); nameP.Strip();
     pipeVolume->setName(nameP.Data());
@@ -401,7 +399,6 @@ void StiStarDetectorBuilder::MakePipe(Int_t iflag, const VolumeMap_t *ptube,cons
     pipeVolume->setPlacement(p);
     pipeVolume->setGas(_vacuumMaterial);
     pipeVolume->setMaterial(_pipeMaterial);
-    pipeVolume->setElossCalculator(pipeElossCalculator);
     Int_t layer = getNRows();
     add(layer,0,pipeVolume);
   }
