@@ -1,10 +1,7 @@
 /***************************************************************************
-* $Id: StIstIClusterAlgo.h,v 1.5 2014/08/22 15:55:15 smirnovd Exp $
+* $Id: StIstIClusterAlgo.h,v 1.6 2014/08/22 21:32:45 smirnovd Exp $
 * Author: Yaping Wang, March 2013
-****************************************************************************
-* Description: Virtual class for clustering algorithm implementation.
 ***************************************************************************/
-
 
 #ifndef StIstIClusterAlgo_hh
 #define StIstIClusterAlgo_hh
@@ -14,6 +11,10 @@ class StIstRawHitCollection;
 class StIstClusterCollection;
 class StIstCollection;
 
+
+/**
+* Description: Virtual class for clustering algorithm implementation.
+*/
 class StIstIClusterAlgo
 {
 public:
@@ -36,6 +37,9 @@ private:
 
 /***************************************************************************
 * $Log: StIstIClusterAlgo.h,v $
+* Revision 1.6  2014/08/22 21:32:45  smirnovd
+* Moved doxygen comment to where it belongs
+*
 * Revision 1.5  2014/08/22 15:55:15  smirnovd
 * Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *

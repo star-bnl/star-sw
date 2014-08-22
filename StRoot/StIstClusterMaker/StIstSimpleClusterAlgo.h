@@ -1,16 +1,8 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.h,v 1.8 2014/08/22 21:27:27 smirnovd Exp $
+* $Id: StIstSimpleClusterAlgo.h,v 1.9 2014/08/22 21:32:45 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
-****************************************************************************
-* Description:
-* 1) Reads all raw hits per ladder (six sensors) and writes into a vector.
-* 2) Starts from the 1st raw hit, and loops the vector to look for
-* neighboring raw hits (in a sensor area) and do clustering. The found
-* cluster will be filled into a ladder cluster collection.
-* 3) A case-by-case splitting algorithm can be enabled/disabled for the
-* found clusters (here only works for cases with cluster size <= 4).
 ***************************************************************************/
 
 #ifndef StIstSimpleClusterAlgo_hh
@@ -24,6 +16,16 @@ class StIstCollection;
 class StIstRawHitCollection;
 class StIstClusterCollection;
 
+
+/**
+* Description:
+* 1) Reads all raw hits per ladder (six sensors) and writes into a vector.
+* 2) Starts from the 1st raw hit, and loops the vector to look for
+* neighboring raw hits (in a sensor area) and do clustering. The found
+* cluster will be filled into a ladder cluster collection.
+* 3) A case-by-case splitting algorithm can be enabled/disabled for the
+* found clusters (here only works for cases with cluster size <= 4).
+*/
 class StIstSimpleClusterAlgo : public StIstIClusterAlgo
 {
 
@@ -54,6 +56,9 @@ inline void StIstSimpleClusterAlgo::setUsedTimeBin(unsigned char tb)    { mTimeB
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.h,v $
+* Revision 1.9  2014/08/22 21:32:45  smirnovd
+* Moved doxygen comment to where it belongs
+*
 * Revision 1.8  2014/08/22 21:27:27  smirnovd
 * Decalred methods virtual as that what they are. Makes the code better to understand
 *
