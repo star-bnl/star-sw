@@ -4,12 +4,12 @@
 #include <assert.h>
 #include <math.h>
 #include "StiElossCalculator.h"
+#include "StiUtilities/StiDebug.h"
 #include "Stiostream.h"
 static double gsigma2(double ZoverA,double DENS,double CHARGE2
                      ,double AMASS ,double BET2,double STEP  );
 static double gdrelx (double A     ,double Z   ,double DENS ,double T,double HMASS);
 
-using namespace std;
 StiElossCalculator::StiElossCalculator(double zOverA, double ionization, double A, double Z, double Dens) 
     : _zOverA(zOverA), _ionization2(ionization*ionization), _A(A), _Z(Z), _Dens(Dens) 
 {
@@ -42,17 +42,27 @@ StiElossCalculator::~StiElossCalculator(){}
 double StiElossCalculator::calculate(double z2, double m, double beta2) const
 {
 static int nCall=0; nCall++;
+static int noEloss = StiDebug::iFlag("NOELOSS");
+if (noEloss) return 0;
+
   if (_A <=0.) return 0.;
   double beta21 = 1 - beta2; if (beta21 < 1.e-10) beta21 = 1.e-10; 
   double T = m*(1./::sqrt(beta21) - 1);
   double dedx = gdrelx(_A,_Z,_Dens,T,m)*z2*_Dens;
+assert(!isnan(dedx));
+assert(dedx>=0 && dedx<1e3);
   return dedx;
 }
 //______________________________________________________________________________
 double StiElossCalculator::calcError(double z2, double m, double beta2) const
 {
+static int noEloss = StiDebug::iFlag("NOELOSS");
+if (noEloss) return 0;
+
   if (_A<=0.) return 0.;
   double err2=gsigma2(_Z/_A,1.,z2,m ,beta2,1.);
+assert(!isnan(err2));
+assert(err2>=0 && err2<1e3);
   return err2;
 }
 
