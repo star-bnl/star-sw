@@ -43,7 +43,7 @@ class StiDetectorBuilder : public Named
 {
 public:
 
-  StiDetectorBuilder(const string & name,bool active, const string & inputFile);
+  StiDetectorBuilder(const string & name,bool active);
   virtual ~StiDetectorBuilder(); 
   detectorMap getDetectors(){ return mDetectorMap; }
   virtual StiMaterial * add(StiMaterial *material);
@@ -69,28 +69,28 @@ public:
   virtual void buildDetectors(StMaker&source);
 
   double nice(double angle) const;
-  void setGroupId(int id) { _groupId = id;}
-  int  getGroupId() const {return _groupId;}
+  void setGroupId(int id) 				{ _groupId = id;}
+  int  getGroupId() const 				{return _groupId;}
   void setTrackingParameters(const StiTrackingParameters & pars);
-  StiTrackingParameters *getTrackingParameters() { return  _trackingParameters;}
-  Factory<StiDetector>* getDetectorFactory() {return _detectorFactory;}
+  StiTrackingParameters *getTrackingParameters() 	{ return  _trackingParameters;}
+  Factory<StiDetector>* getDetectorFactory() 		{return _detectorFactory;}
   void SetCurrentDetectorBuilder(StiDetectorBuilder *m) {fCurrentDetectorBuilder = m;}
-  static StiDetectorBuilder *GetCurrentDetectorBuilder() {return fCurrentDetectorBuilder;}
-  static  void MakeAverageVolume(TGeoPhysicalNode *nodeP) {
-    if (fCurrentDetectorBuilder) fCurrentDetectorBuilder->AverageVolume(nodeP);
-  }
   virtual void AverageVolume(TGeoPhysicalNode *nodeP);
   virtual void useVMCGeometry() {}
-  void    setGasMat(StiMaterial    *m) {_gasMat = m;}
-  StiMaterial *getGasMat()   {return _gasMat;}
+  void    setGasMat(StiMaterial *m) 			{_gasMat = m;}
+  StiMaterial *getGasMat()   				{return _gasMat;}
   void setSplit(double relThick=0.5, int maxSplit=20)	{mThkSplit=relThick;mMaxSplit=maxSplit;}
 
-  static void setDebug(int m = 0) {_debug = m;}
+//		Static methodes
+  static void setDebug(int m = 0) 			{_debug = m;}
   static int  debug() {return _debug;}
+  static StiDetectorBuilder *GetCurrentDetectorBuilder(){return fCurrentDetectorBuilder;}
+  static  void MakeAverageVolume(TGeoPhysicalNode *nodeP) 
+              {if (fCurrentDetectorBuilder) fCurrentDetectorBuilder->AverageVolume(nodeP);}
+
  protected:
- 
   float               mThkSplit;	//wide/thickness/mThkSplit = nSplits
-  int                 mMaxSplit;	//max number of splittings allowed
+  int                 mMaxSplit;	//max number of splittings allowed 
   int                 _groupId;
   bool                _active;
   materialMap         mMaterialMap;
@@ -100,7 +100,6 @@ public:
   vector< vector<StiDetector*> > _detectors;
   Factory<StiDetector>*_detectorFactory;
   StiTrackingParameters *_trackingParameters;
-  string _inputFile;
   static StiDetectorBuilder* fCurrentDetectorBuilder;
   StiMaterial    * _gasMat; // Mother Volume material
   static   int     _debug;
