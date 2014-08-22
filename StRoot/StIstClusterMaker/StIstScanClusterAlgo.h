@@ -1,15 +1,8 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.h,v 1.6 2014/08/22 21:27:27 smirnovd Exp $
+* $Id: StIstScanClusterAlgo.h,v 1.7 2014/08/22 21:32:45 smirnovd Exp $
 *
 * Author: Yaping Wang, October 2013
-****************************************************************************
-* Description:
-* 1) Reads all raw hits per ladder (six sensors) and groups into vectors
-* (each vector is corresponding to a sensor column).
-* 2) Does clustering in individual column.
-* 3) Does clustering in neighboring columns.
-* 4) Fill hit collections.
 ***************************************************************************/
 
 #ifndef StIstScanClusterAlgo_hh
@@ -21,6 +14,15 @@ class StIstCollection;
 class StIstRawHitCollection;
 class StIstClusterCollection;
 
+
+/**
+* Description:
+* 1) Reads all raw hits per ladder (six sensors) and groups into vectors
+* (each vector is corresponding to a sensor column).
+* 2) Does clustering in individual column.
+* 3) Does clustering in neighboring columns.
+* 4) Fill hit collections.
+*/
 class StIstScanClusterAlgo : public StIstIClusterAlgo
 {
 
@@ -50,6 +52,9 @@ inline void StIstScanClusterAlgo::setUsedTimeBin(unsigned char tb)		{ mTimeBin =
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.h,v $
+* Revision 1.7  2014/08/22 21:32:45  smirnovd
+* Moved doxygen comment to where it belongs
+*
 * Revision 1.6  2014/08/22 21:27:27  smirnovd
 * Decalred methods virtual as that what they are. Makes the code better to understand
 *
