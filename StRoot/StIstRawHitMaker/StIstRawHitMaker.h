@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.8 2014/08/22 15:55:16 smirnovd Exp $
+* $Id: StIstRawHitMaker.h,v 1.9 2014/08/22 21:27:20 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -38,14 +38,19 @@ public:
    Int_t Make();
    void Clear( Option_t *opts = "" );
 
-   void setIsCalibrationMode( bool isCaliMode = 0);
-   void setHitCut( float hitCut = 5.0);
-   void setCmnCorrection(bool doCmnCorrection = 0);
-   void setCmnCut(float cmnCut = 3.0);
-   void setDataType(int nDataType = 0); // 0 - All data; 1 - non-ZS data; 2 - ZS data; 3 - ZS first data
+   void setIsCalibrationMode( bool isCaliMode=false )   { mIsCaliMode = isCaliMode;};
+   void setHitCut(float hitCut=5.)			{ mHitCut = hitCut;        };
+   void setCmnCorrection( bool doCmnCorrection=false )	{ mDoCmnCorrection = doCmnCorrection; };
+   void setCmnCut(float cmnCut=3.)			{ mCmnCut = cmnCut;        };
+   /// 0 - All data; 1 - non-ZS data; 2 - ZS data; 3 - ZS first data
+   void setDataType(int nDataType=0)		{ mDataType = nDataType;   };
 
    // Get CVS
-   virtual const char *GetCVS() const;
+   virtual const char *GetCVS() const
+   {
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.9 2014/08/22 21:27:20 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      return cvs;
+   }
 
 protected:
    Bool_t mIsCaliMode, mDoCmnCorrection;
@@ -82,24 +87,15 @@ private:
    ClassDef(StIstRawHitMaker, 1);
 };
 
-// inline functions
-inline void StIstRawHitMaker::setIsCalibrationMode( bool isCaliMode )   { mIsCaliMode = isCaliMode;};
-inline void StIstRawHitMaker::setHitCut(float hitCut)			{ mHitCut = hitCut;        };
-inline void StIstRawHitMaker::setCmnCorrection( bool doCmnCorrection )	{ mDoCmnCorrection = doCmnCorrection; };
-inline void StIstRawHitMaker::setCmnCut(float cmnCut)			{ mCmnCut = cmnCut;        };
-inline void StIstRawHitMaker::setDataType(int nDataType)		{ mDataType = nDataType;   };
-
-inline const char *StIstRawHitMaker::GetCVS() const
-{
-   static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.8 2014/08/22 15:55:16 smirnovd Exp $ built "__DATE__" "__TIME__ ;
-   return cvs;
-};
 #endif
 
 
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
+* Revision 1.9  2014/08/22 21:27:20  smirnovd
+* Remove inline keyword and move the methods inside the definition. Let the compiler optimize the code as it should not be a problem with these one-liners
+*
 * Revision 1.8  2014/08/22 15:55:16  smirnovd
 * Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
