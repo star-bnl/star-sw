@@ -97,22 +97,8 @@ class StiDetectorContainer : public Named, public Described
   ///Dereference current iterator and return a pointer to current StiDetector.
   StiDetector* operator*() const;
   StiDetector* getCurrentDetector() const;
-#if 0
-  ///Move to the next region. Ordered via StiPlacement::StiRhiion
-  bool moveToNextRegion();
-  ///Move to previous region.  Ordered via StiPlacement::StiRegion
-  bool moveToPreviousRegion();
-  ///Step out radially in STAR TPC global coordinates.
-  bool moveOut();
-#endif
   ///Step in radially in STAR TPC global coordinates.
   bool moveIn();
-#if 0
-  ///Step around in increasing phi.
-  void movePlusPhi();
-  ///Step around in decreasing phi.
-  void moveMinusPhi();
-#endif
   ///Set iterators to the detector nearest to the passed StiDetector pointer.
   void setToDetector(const StiDetector* layer);
   ///Set iterators to the first detector in the radial layer closest to the
@@ -178,10 +164,14 @@ class StiDetectorContainer : public Named, public Described
     }
 
 private:
+    /// to point to the position (or position closest to) that given by node.
+    void setToLeaf(StiDetectorNode* node);
     bool setPhi(const StiOrderKey& oldOrder);
     // Utility function for moveIn(), moveOut() functions
     bool setPhiIterator(double oldOrder, unsigned int oldNDaughters,
 			StiDetectorNodeVector::difference_type oldDistance);
+
+private:
     ///The root of the tree representation of the detector material.
     StiDetectorNode* mroot;
     ///An iterator over the leaves of the detector tree.
@@ -197,8 +187,6 @@ private:
     StiDetectorNodeVector::const_iterator mphi_it;
     ///This is an internal function that is used to set the internal iterator
     ///structure
-    /// to point to the position (or position closest to) that given by node.
-    void setToLeaf(StiDetectorNode* node);
     vector<StiDetector *> _sortedDetectors;
     vector<StiDetector *> _selectedDetectors;
     StiMasterDetectorBuilder * _masterDetectorBuilder;
