@@ -14,10 +14,12 @@ class StiNodePars {
   Double_t x()    const {return P[0];} 
   Double_t y()    const {return P[1];}//  local Y-coordinate of this track (reference plane)           		     
   Double_t z()    const {return P[2];}//  local Z-coordinate of this track (reference plane)			     
-  Double_t eta()  const {return P[3];}//  (signed curvature)*(local Xc of helix axis - X current point on track)
+  Double_t eta()  const {return P[3];}//  phi angle
+  Double_t phi()  const {return P[3];}//  phi angle again
   Double_t ptin() const {return P[4];}//  signed invert pt [sign = sign(-qB)]					     
   Double_t tanl() const {return P[5];}//  tangent of the track momentum dip angle
   Double_t curv() const {return P[6];}//  signed curvature [sign = sign(-qB)]					     
+  Double_t rxy()  const {return sqrt(P[0]*P[0]+P[1]*P[1]);}
   Double_t hz()   const {return P[7];}//  Z component magnetic field in units Pt(Gev) = Hz * RCurv(cm)                  
   Double_t &x()    {return P[0];}
   Double_t &y()    {return P[1];}
