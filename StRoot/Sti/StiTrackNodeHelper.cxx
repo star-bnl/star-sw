@@ -648,12 +648,14 @@ int StiTrackNodeHelper::save()
 //______________________________________________________________________________
 int StiTrackNodeHelper::propagateMCS()
 {  
+static int nCall = 0; nCall++;
+static const int keepElossBug = StiDebug::iFlag("keepElossBug");
   mMcs.reset();
   if (!mDetector) 			return 0;
   mMcs._ptinCorr =  0;
   if (fabs(mBestPars.ptin())<=1e-3)	return 0;
-  double pt     = 1./fabs(mBestPars.ptin());
-
+  double pt     = 1./(fabs(mBestPars.ptin())+1e-11);//???2
+assert(pt<1e3);
   double relRadThickness;
   // Half path length in previous node
   double pL1,pL2,pL3,d1,d2,d3,dxEloss,dx;
@@ -662,15 +664,22 @@ int StiTrackNodeHelper::propagateMCS()
   pL3=0.5*pathIn(mDetector,&mBestPars);
   // Gap path length
   pL2= fabs(dl);
-  double x0p =-1;
-  double x0Gas=-1;
-  double x0=-1;
+  double x0p = -1,x0Gas=-1,x0=-1;
+//  double x0p = 1e11,x0Gas=1e11,x0=1e11;
   dx = mBestPars.x() - mBestParentRotPars.x();
+  double tanl   = mBestPars.tanl();
+  double pti    = mBestPars.ptin(); 
+  double p2     = (1.+tanl*tanl)*pt*pt;
+  double m      = StiKalmanTrackFinderParameters::instance()->getMassHypothesis();
+  double m2     = m*m;
+  double e2     = p2+m2;
+  double beta2  = p2/e2;
+if (keepElossBug) {	//Old Eloss bug prezerved
+
   d1    = mParentNode->getDensity();
   x0p   = mParentNode->getX0();
   d3    = mDetector->getMaterial()->getDensity();
   x0    = mDetector->getMaterial()->getX0();
-
 
   if (pL2> (pL1+pL3)) {
 
@@ -699,6 +708,7 @@ int StiTrackNodeHelper::propagateMCS()
 	dxEloss += d3*pL3;
       }
     } else { //  pL2<=(pL1+pL3)
+      pL2 = 0;
       relRadThickness = 0.; 
       dxEloss = 0;
       if (x0p>0.) {
@@ -710,13 +720,6 @@ int StiTrackNodeHelper::propagateMCS()
 	dxEloss += d3*pL3;
       }
     }
-  double tanl   = mBestPars.tanl();
-  double pti    = mBestPars.ptin(); 
-  double p2     = (1.+tanl*tanl)*pt*pt;
-  double m      = StiKalmanTrackFinderParameters::instance()->getMassHypothesis();
-  double m2     = m*m;
-  double e2     = p2+m2;
-  double beta2  = p2/e2;
   double theta2 = StiKalmanTrackNode::mcs2(relRadThickness,beta2,p2);
   double cos2Li = (1.+ tanl*tanl);  // 1/cos(lamda)**2
   double f = mHitsErrFactor; 
@@ -729,12 +732,96 @@ int StiTrackNodeHelper::propagateMCS()
   double sign = (dx>0)? 1:-1;
 
 //  const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
-  StiElossCalculator * calculator = mDetector->getElossCalculator();
+  StiElossCalculator * calculator = mDetector->getMaterial()->getElossCalculator();
+assert(calculator);
   double eloss = calculator->calculate(1.,m, beta2);
   dE = sign*dxEloss*eloss;
+//		save detLoss and gasLoss for investigation only
+  mTargetNode->setELoss(2*sign*d3*eloss,sign*d2*eloss);
+
+
 
   mMcs._ptinCorr = ::sqrt(e2)*dE/p2;
+if (fabs(mMcs._ptinCorr)>1e-4) {
+  double dens = calculator->getDens();
+  StiDebug::Count("HelpCorr.new",mMcs._ptinCorr,-0.2,0.2);
+  StiDebug::Count("HelpDens:rxy.new",mBestPars.rxy(),dens
+                                    ,0,200,-0,3);
+  StiDebug::Count("Helpdens:z.new"  ,mBestPars.z()  ,dens
+                                    ,-200,200,0,3);
+  double phig = (mBestPars.phi()+mTargetNode->getAlpha())/M_PI*180;
+  StiDebug::Count("Helpdens:phi.new",phig,dens
+                                    ,-180,180,0,3);
+//   if (dens >2 && dens <3) {
+//   if (mBestPars.z()<-50 ) {
+//   if (mBestPars.rxy()<3,5) {
+// static int nQwe=0; nQwe++; if (nQwe>1000) exit(0);  
+//     printf("#### det=%s mat=%s r=%g d=%g\n",mDetector->getName().c_str()
+//           ,mDetector->getMaterial()->getName().c_str()
+// 	  ,mBestPars.rxy(),dens);
+// }}}
+// 
+
+
+}   
+
+
   if (fabs(mMcs._ptinCorr)>0.1) mMcs._ptinCorr = (dE<0)? -0.1:0.1;
+
+} else { // ELoss bug fixed =====================================================================
+
+
+  const StiMaterial 		*curMat = mDetector->getMaterial();
+  const StiElossCalculator	*curLos = curMat->getElossCalculator();
+  d3 =(curLos) ? curLos->calculate(1.,m, beta2):0;
+  x0 = curMat->getX0();
+  const StiMaterial		*curGas = mDetector->getGas();
+
+
+  const StiDetector 		*preDet = mParentNode->getDetector();
+  const StiMaterial *preMat = 0,*preGas=0;
+  const StiElossCalculator *preLos = 0;
+  if (preDet) {
+    preMat = preDet->getMaterial();
+    preGas = preDet->getGas();
+    if (preMat) {
+      preLos = preMat->getElossCalculator();
+      x0p    = preMat->getX0();
+      if (preLos) {
+        d1  = preLos->calculate(1.,m, beta2);
+  } } }
+
+  const StiMaterial		*gasMat = (dx>0)?curGas : preGas;
+  if (gasMat) {
+    x0Gas = gasMat->getX0();
+    const StiElossCalculator	*gasLos = gasMat->getElossCalculator();
+    if (gasLos) {
+      d2 = gasLos->calculate(1.,m, beta2);
+  } }
+
+
+  pL2=pL2-pL1-pL3; if (pL2<0) pL2=0;
+  relRadThickness = pL1/x0p+pL2/x0Gas+pL3/x0;
+
+  dxEloss         =  d1*pL1+ d2*pL2  + d3*pL3;
+
+  double theta2 = StiKalmanTrackNode::mcs2(relRadThickness,beta2,p2);
+  double cos2Li = (1.+ tanl*tanl);  // 1/cos(lamda)**2
+  double f = mHitsErrFactor; 
+  mMcs._cEE = cos2Li 		*theta2*f;
+  mMcs._cPP = tanl*tanl*pti*pti	*theta2*f;
+  mMcs._cTP = pti*tanl*cos2Li	*theta2*f;
+  mMcs._cTT = cos2Li*cos2Li	*theta2*f;
+
+  int sign = ( dx>=0)? 1:-1;
+  double dE = sign*dxEloss;
+//		save detLoss and gasLoss for investigation only
+  mTargetNode->setELoss(2*sign*d3*pL3,sign*d2*pL2);
+  mMcs._ptinCorr = ::sqrt(e2)*dE/p2;
+  if (fabs(mMcs._ptinCorr)>0.1) mMcs._ptinCorr = (dE<0)? -0.1:0.1;
+}
+
+
   return 0;
 }
 //______________________________________________________________________________
