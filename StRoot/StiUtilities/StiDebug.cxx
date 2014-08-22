@@ -1,19 +1,43 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <assert.h>
-#include "StiDebug.h"
-#include "TMath.h"
-#include "TROOT.h"
+#include <map>
+#include <string>
+#include "TClass.h"
+#include "TH1F.h"
+#include "TH2F.h"
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TSystem.h"
+#include "TString.h"
+
+#include "StiDebug.h"
+#include "TMath.h"
+#include "TROOT.h"
 #include "TObjArray.h"
-#include "TH1.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 static int myReady=0;
-TObjArray *StiDebug::mgHist=0;
 TObjArray *StiDebug::mgTally=0;
+
+
+int StiDebug::mgDebug=1; //0=no debug, 1=Normal, 2=count is on
+int StiDebug::mgRecov=1;
+int StiDebug::mgCheck=1;
+
+typedef std::map<std::string, TH1*>   myDebMap_t;
+typedef myDebMap_t::const_iterator myDebIter_t;
+static  myDebMap_t  myDebMap;
+
+typedef std::map<std::string, TCanvas*>   myCanMap_t;
+typedef myCanMap_t::const_iterator myCanIter_t;
+myCanMap_t myCanMap;
+
+typedef std::map<std::string, int>   myIntMap_t;
+myIntMap_t myIntMap;
+
+
 
 //______________________________________________________________________________
 void StiDebug::Init()
@@ -51,14 +75,6 @@ int  StiDebug::tally(const char *name,int val)
    return tally;
 }
 //______________________________________________________________________________
-void StiDebug::hist(const char *name,double val)
-{
-  if (!mgHist) return;
-  TH1 *hist = (TH1*)mgHist->FindObject(name);
-  if (!hist) return;
-  hist->Fill(val);
-}
-//______________________________________________________________________________
 void StiDebug::Finish()
 {
   printf("\n");
@@ -75,24 +91,6 @@ void StiDebug::Finish()
       }
       break;}
 
-      case 1:{		//Hist case
-      if (gROOT->IsBatch()) break;
-      if (!mgHist) 	break;
-      int nH = mgHist->GetLast()+1;
-      if (!nH) 		break;
-      int n = 0;
-      TCanvas *tc=0;
-      for (int iH=0;iH<nH;iH++) {
-        TH1 *th = (TH1*)mgHist->At(iH);
-	if (!th)	continue;
-        if((n%3)==0) {
-          tc = new TCanvas("C1","",600,800);
-          tc->Divide(1,3);
-        }
-        tc->cd((n%3)+1); th->Draw();
-        tc->Modified() ; tc->Update();
-        n++;
-      }}
     }//end case
   }//end kase loop
 
@@ -256,6 +254,88 @@ static const char* tit[] = {
   printf("\n");
     
 }    
+//______________________________________________________________________________ 
+void StiDebug::Count(const char *key,double val)
+{
+  if (mgDebug<2) return;
+  TH1 *&h = (TH1*&)myDebMap[key];
+  if (!h) { h = new TH1F(key,key,100,0.,0.);}
+  h->Fill(val);
+}
+//______________________________________________________________________________ 
+void StiDebug::Count(const char *key,double val,double left,double rite)
+{
+  if (mgDebug<2) return;
+  TH1 *&h = (TH1*&)myDebMap[key];
+  if (!h) { h = new TH1F(key,key,100,left,rite);}
+  h->Fill(val);
+}
+//______________________________________________________________________________ 
+void StiDebug::Count(const char *key,double valx, double valy
+                                    ,double leftx,double ritex
+				    ,double lefty,double ritey)
+{
+  if (mgDebug<2) return;
+  TH1 *&h = (TH1*&)myDebMap[key];
+  if (!h) { h = new TH2F(key,key,100,leftx,ritex,100,lefty,ritey);}
+  h->Fill(valx,valy);
+}
+//______________________________________________________________________________ 
+void StiDebug::Count(const char *key,double valx,double valy)
+{
+  if (mgDebug<2) return;
+  TH1 *&h = (TH1*&)myDebMap[key];
+  if (!h) { h = new TH2F(key,key,100,0.,0.,100,0,0);}
+  h->Fill(valx,valy);
+}
+//______________________________________________________________________________ 
+void StiDebug::Sumary()
+{
+  printf("StiDebug::Sumary()\n");
+  TH1 *H[4];
+  int nH = 0,n=0;
+  for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
+    TH1 *h = (*iter).second; n++;
+    if (h->IsA()->InheritsFrom("TH2")) continue;
 
+    int nEnt = h->GetEntries();
+    double mean = h->GetMean();
+    double rms  = h->GetRMS();
+    printf("TH1 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
+    if (rms<=0) continue;
+    if (nH==4) {Draw(nH,H);nH=0;}
+    H[nH++] = h;
+  }
+  if (nH) Draw(nH,H);
+
+  for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
+    TH1 *h = (*iter).second; n++;
+    if (!h->IsA()->InheritsFrom("TH2")) continue;
+    int nEnt = h->GetEntries();
+    double mean = h->GetMean();
+    double rms  = h->GetRMS();
+    printf("TH2 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
+    if (rms<=0) continue;
+    H[0]=h;Draw(1,H);
+  }
+
+  if (!n) return;
+  while(!gSystem->ProcessEvents()){}; 
+
+}
+
+//______________________________________________________________________________ 
+void StiDebug::Draw(int nH,TH1** H)
+{ 
+static int nCall=0; nCall++;
+
+  TString ts("C_"); ts += H[0]->GetName();
+  TCanvas *&C = myCanMap[ts.Data()];
+  if (!C) C = new TCanvas(ts.Data(),ts.Data(),600,800);
+  C->Clear();C->Divide(1,nH);
+  for (int i=0;i<nH;i++) { C->cd(i+1); H[i]->Draw(); }
+
+  C->Modified();C->Update();
+}
 
 

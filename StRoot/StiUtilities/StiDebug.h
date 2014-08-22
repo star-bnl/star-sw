@@ -18,17 +18,32 @@ class StiDebug
 public:
 static void   Break(int kase);
 static void   FpeOn();
+static  int Debug() {return mgDebug;};
+static void SetDebug(int idb) {mgDebug=idb;};
+static void Count(const char *key,double val);
+static void Count(const char *key,double val,double left,double rite);
+static void Count(const char *key,double valx,double valy);
+static void Count(const char *key,double valx, double valy
+                                 ,double leftx,double ritex
+				 ,double lefty,double ritey);
+static void Sumary();
 static void   show(StiKalmanTrack *kt);
 static void   Init();
 static void   Finish();
-static void   hist (const char *name,double val);
 static int    tally(const char *name,int val=1);
 static int    iFlag(const char *flagName, int    dflt=0);
 static double dFlag(const char *flagName, double dflt=0);
 private:
+static void Draw(int nH,TH1** H);
+private:
 
-static TObjArray *mgHist;
 static TObjArray *mgTally;
+static int mgDebug;
+static int mgRecov;
+static int mgCheck;
+#if 0
+ClassDef(StiDebug,0)
+#endif
 
 };
 
