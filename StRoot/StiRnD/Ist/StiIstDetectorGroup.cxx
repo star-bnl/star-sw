@@ -6,10 +6,10 @@
 #include "StiIstHitLoader.h"
 
 
-StiIstDetectorGroup::StiIstDetectorGroup(bool active, const string & inputFile)
+StiIstDetectorGroup::StiIstDetectorGroup(bool active)
     : StiDetectorGroup<StEvent>("Ist",
 					  active?new StiIstHitLoader():0,
-					  new StiIstDetectorBuilder(active,inputFile),0)
+					  new StiIstDetectorBuilder(active))
 {}
 
 StiIstDetectorGroup::~StiIstDetectorGroup()

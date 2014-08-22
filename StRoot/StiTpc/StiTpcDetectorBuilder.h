@@ -7,7 +7,7 @@ class StiTpcDetectorBuilder : public StiDetectorBuilder
 {
 
 public:
-    StiTpcDetectorBuilder(bool active, const string & inputFile);
+    StiTpcDetectorBuilder(bool active);
     virtual ~StiTpcDetectorBuilder(); 	
     virtual void buildDetectors(StMaker&s);
     /// returns the azimuthal angle [-pi, pi) for tpc sector [1-24]

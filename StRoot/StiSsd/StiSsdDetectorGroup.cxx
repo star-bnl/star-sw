@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorGroup.cxx,v 1.8 2006/10/09 15:47:59 fisyak Exp $
+// $Id: StiSsdDetectorGroup.cxx,v 1.9 2014/08/22 17:53:32 perev Exp $
 // 
 // $Log: StiSsdDetectorGroup.cxx,v $
+// Revision 1.9  2014/08/22 17:53:32  perev
+// Remove never used input file
+//
 // Revision 1.8  2006/10/09 15:47:59  fisyak
 // use Normal represantation, remove StiDedxCalculator
 //
@@ -13,14 +16,13 @@
 #include "StiSsd/StiSsdDetectorGroup.h"
 #include "StiSsd/StiSsdHitLoader.h"
 #include "StiSsd/StiSsdDetectorBuilder.h"
-#include "Sti/StiElossCalculator.h"
 #include "StEvent.h"
 #include <stdexcept>
 
-StiSsdDetectorGroup::StiSsdDetectorGroup(bool active, const string & inputFile)
+StiSsdDetectorGroup::StiSsdDetectorGroup(bool active)
   : StiDetectorGroup<StEvent>("SSD",
 			      active?new StiSsdHitLoader():0,
-			      new StiSsdDetectorBuilder(active,inputFile),0)
+			      new StiSsdDetectorBuilder(active))
 
 {}
 

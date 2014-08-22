@@ -1,9 +1,12 @@
 // 12/12/2012 : modification of the builder to take into account the new geometry path names
 // backward compatibility with upgr15 geometry is lost
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.31 2014/01/30 16:50:59 didenko Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.32 2014/08/22 17:47:53 perev Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.32  2014/08/22 17:47:53  perev
+ * Remove never used input file
+ *
  * Revision 1.31  2014/01/30 16:50:59  didenko
  * get back to previous revision
  *
@@ -99,7 +102,7 @@
 #include "Sti/StiToolkit.h"
 #include "StiPixelIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "Sti/StiElossCalculator.h"
+//#include "Sti/StiElossCalculator.h"
 #include "StiPixelDetectorBuilder.h" 
 #include "StiPixelIsActiveFunctor.h"
 #include "StDetectorDbMaker/StiPixelHitErrorCalculator.h"
@@ -108,9 +111,8 @@
 #include "StEvent.h"
 #include "StEventTypes.h"
 
-StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
-						 const string & inputFile)
-  : StiDetectorBuilder("Pixel",active,inputFile)
+StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active)
+  : StiDetectorBuilder("Pixel",active)
 {
 	//Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
         //returns average error once you actually want to do tracking, the results
@@ -145,13 +147,13 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
   //Instantiate energy loss detector for si material  
   //const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
   //double ionization = material->getIonization();
-  double ionization = _siMat->getIonization();
+//  double ionization = _siMat->getIonization();
 
-  StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(),
-								  ionization*ionization,
-								  _siMat->getA(),
-								  _siMat->getZ(),
-								  _siMat->getDensity());
+//   StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(),
+// 								  ionization*ionization,
+// 								  _siMat->getA(),
+// 								  _siMat->getZ(),
+// 								  _siMat->getDensity());
   StiPlanarShape *pShape;
   for (unsigned int row=0; row<nRows; row++) 
     {
@@ -191,7 +193,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
 	  pDetector->setHitErrorCalculator(StiPixelHitErrorCalculator::instance());
-	  pDetector->setElossCalculator(siElossCalculator);
+//	  pDetector->setElossCalculator(siElossCalculator);
 	  if (sector<18)
 	    {
 	      pDetector->setKey(1,1);
@@ -326,12 +328,12 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
 					 matP->GetDensity(),
 					 matP->GetDensity()*matP->GetRadLen(),
 					 PotI));
-  Double_t ionization = matS->getIonization();
-  StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), 
-							       ionization*ionization, 
-							       matS->getA(), 
-							       matS->getZ(),
-							       matS->getDensity());
+//  Double_t ionization = matS->getIonization();
+//   StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), 
+// 							       ionization*ionization, 
+// 							       matS->getA(), 
+// 							       matS->getZ(),
+// 							       matS->getDensity());
 
 // Extract volume geometry for this node
   TGeoBBox *box = (TGeoBBox *) nodeP->GetShape();
@@ -397,7 +399,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
   p->setGas(GetCurrentDetectorBuilder()->getGasMat());
   if(!p->getGas()) LOG_INFO <<"gas not there!"<<endm;
   p->setMaterial(matS);
-  p->setElossCalculator(ElossCalculator);
+//  p->setElossCalculator(ElossCalculator);
   p->setHitErrorCalculator(StiPixelHitErrorCalculator::instance());
   
   Int_t ROW    = 0;

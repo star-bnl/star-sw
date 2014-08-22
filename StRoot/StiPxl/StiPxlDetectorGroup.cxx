@@ -6,10 +6,10 @@
 #include "StiPxl/StiPxlHitLoader.h"
 
 
-StiPxlDetectorGroup::StiPxlDetectorGroup(bool active, const string &inputFile, bool buildIdealGeom)
+StiPxlDetectorGroup::StiPxlDetectorGroup(bool active,bool buildIdealGeom)
    : StiDetectorGroup<StEvent>("Pixel",
                                active ? new StiPxlHitLoader() : 0,
-                               new StiPxlDetectorBuilder(active, inputFile, buildIdealGeom), 0)
+                               new StiPxlDetectorBuilder(active,buildIdealGeom))
 {}
 
 StiPxlDetectorGroup::~StiPxlDetectorGroup()

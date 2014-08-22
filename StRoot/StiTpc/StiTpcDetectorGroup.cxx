@@ -4,10 +4,10 @@
 #include "StiTpcDetectorBuilder.h"
 #include "StiTpcHitLoader.h"
 
-StiTpcDetectorGroup::StiTpcDetectorGroup(bool active, const string & inputFile)
+StiTpcDetectorGroup::StiTpcDetectorGroup(bool active)
   : StiDetectorGroup<StEvent>("TPC",
 			      active?new StiTpcHitLoader():0,
-			      new StiTpcDetectorBuilder(active,inputFile),0)
+			      new StiTpcDetectorBuilder(active))
 {}
 
 StiTpcDetectorGroup::~StiTpcDetectorGroup()

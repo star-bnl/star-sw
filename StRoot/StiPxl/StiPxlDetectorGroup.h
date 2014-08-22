@@ -11,7 +11,7 @@ class StEvent;
 class StiPxlDetectorGroup : public StiDetectorGroup<StEvent>
 {
 public:
-   StiPxlDetectorGroup(bool active, const string &inputFile, bool buildIdealGeom=false);
+   StiPxlDetectorGroup(bool active, bool buildIdealGeom=false);
    ~StiPxlDetectorGroup();
 };
 

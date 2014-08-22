@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.h,v 1.13 2009/03/16 13:50:09 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.h,v 1.14 2014/08/22 17:51:47 perev Exp $
 // 
 // $Log: StiSsdDetectorBuilder.h,v $
+// Revision 1.14  2014/08/22 17:51:47  perev
+// Remove never used input file
+//
 // Revision 1.13  2009/03/16 13:50:09  fisyak
 // Move out all Sti Chairs into StDetectorDb
 //
@@ -37,7 +40,7 @@ class StiSsdDetectorBuilder : public StiDetectorBuilder
 {
 
  public:
-        StiSsdDetectorBuilder(bool active,const string & inputFile);
+        StiSsdDetectorBuilder(bool active);
 	virtual ~StiSsdDetectorBuilder(); 
 	virtual void buildDetectors(StMaker& source);
 	virtual void useVMCGeometry();		
