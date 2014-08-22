@@ -18,7 +18,7 @@
 #include "StiMaterial.h"
 class StiDetector;
 class StiMaterial;
-class StiElossCalculator;
+//class StiElossCalculator;
   
 typedef enum {
   kFailed = -1,         // could not find intersection
@@ -32,9 +32,14 @@ class StiNodeStat {
 public:	
   StiNodeStat(){reset();}
 void reset(){memset(this,0,sizeof(StiNodeStat));}
-  double dx, dy, dl0, dl;
-  double x1,y1,cosCA1,sinCA1;
-  double x2,y2,cosCA2,sinCA2;
+  double x1;		// local x position of current node
+  double y1;		// local y position of current node
+  double cosCA1,sinCA1;	// cos & sin of local pfi angle
+  double x2,y2;		// x & y of track in the next node but in current local
+  double cosCA2,sinCA2; // cos & sin in this point
+  double dx, dy;	// x2-x1 & y2-y1
+  double dl0;		// linear distance
+  double dl;		// curved distance
   double sumSin, sumCos;
 };
 
@@ -158,23 +163,25 @@ public:
   int    getContigNullCount() const 	{return contiguousNullCount;}
   //const char  &getHitCount () const 		{return hitCount;}
   //const char  &getNullCount()  const		{return nullCount;}
-  //const char  &getContigHitCount () const 		{return contiguousHitCount ;}
-  //const char  &getContigNullCount() const 		{return contiguousNullCount;}
-  int incHitCount () 		{return ++hitCount;}
-  int incNullCount() 		{return ++nullCount;}
-  int incContigHitCount () {return ++contiguousHitCount ;}
-  int incContigNullCount() {return ++contiguousNullCount;}
-  void setHitCount (char c=0)       { hitCount=c;}
-  void setNullCount(char c=0)       { nullCount=c;}
-  void setContigHitCount (char c=0) { contiguousHitCount=c ;}
-  void setContigNullCount(char c=0) { contiguousNullCount=c;}
+  //const char  &getContigHitCount () const 	{return contiguousHitCount ;}
+  //const char  &getContigNullCount() const 	{return contiguousNullCount;}
+  int incHitCount () 			{return ++hitCount;}
+  int incNullCount() 			{return ++nullCount;}
+  int incContigHitCount () 		{return ++contiguousHitCount ;}
+  int incContigNullCount() 		{return ++contiguousNullCount;}
+  void setHitCount (char c=0)      	{ hitCount=c;}
+  void setNullCount(char c=0)       	{ nullCount=c;}
+  void setContigHitCount (char c=0) 	{ contiguousHitCount=c ;}
+  void setContigNullCount(char c=0) 	{ contiguousNullCount=c;}
+  void setELoss(double detLoss,double gasLoss) 	{ mELoss[0]=(float)detLoss; mELoss[1]=(float)gasLoss;}
   double getTime() const;
 
   void   setHitCand(int nhits)		{mHitCand = nhits;}
   void   setIHitCand(int ihit)		{mIHitCand = ihit;}
   int    getHitCand()const		{return mHitCand;}
   int    getIHitCand()const		{return mIHitCand;}
-  static void Break(int kase);
+  double getELoss(int idx=0)const	{return mELoss[!!idx];}
+ static void Break(int kase);
   static void PrintStep();
   StThreeVector<double>getPoint() const;
   StThreeVector<double>getGlobalPoint() const;
@@ -292,6 +299,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   StiNodeErrs  mFE;
   StiNode2Pars mUnTouch;
   StiHitErrs   mHrr;
+  float mELoss[2];
   char hitCount;
   char nullCount;
   char contiguousHitCount;
