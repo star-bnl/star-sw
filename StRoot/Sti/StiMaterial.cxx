@@ -3,9 +3,11 @@
 //04/01
 
 //#include "StGetConfigValue.hh"
+#include <assert.h>
 #include <string.h>
 #include <stdexcept>
 #include "Sti/StiMaterial.h"
+#include "Sti/StiElossCalculator.h"
 
 StiMaterial::StiMaterial(){
 } // StiMaterial()
@@ -17,10 +19,14 @@ StiMaterial::StiMaterial(const string &name,
 			 double radLength,
 			 double ionization)
 {
+  _eloss = 0;
   set(name,z,a,density,radLength,ionization);
 }
 
-StiMaterial::~StiMaterial(){
+StiMaterial::~StiMaterial()
+{
+ delete _eloss; _eloss = 0;
+
 } // ~StiMaterial()
 
 /*! Set all material attributes.
@@ -47,11 +53,18 @@ void StiMaterial::set(const string& name,
   if (_density>0)
     _x0 = _radLength/density;
   else
-    _x0 = 0.;
+    _x0 = 1e11;
   if (_a>0)
     _zOverA = _z/_a;
   else
     _zOverA = 0.;
+
+assert(!_eloss);
+  _eloss = 0;
+  if (_z>0) 
+    _eloss = new StiElossCalculator(_zOverA, ionization,_a,_z,_density);
+
+
 }
 
 ostream& operator<<(ostream& os, const StiMaterial& m)
@@ -66,4 +79,9 @@ ostream& operator<<(ostream& os, const StiMaterial& m)
      << endl;
     
     return os;
+}
+StiElossCalculator *StiMaterial::getElossCalculator() const 
+{ if (_eloss) return _eloss;
+  assert(strstr(getName().c_str(),"Vac"));
+  return 0;
 }
