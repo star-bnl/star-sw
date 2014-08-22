@@ -263,8 +263,10 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
     nTTot++;
     if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Start(0);
     Int_t errType = Fit(track,rMin);
-    if (errType != kNoErrors) BFactory::Free(track);
+    if (errType != kNoErrors) {BFactory::Free(track);}
+    else                      {assert(track->getChi2()<1000);}
     if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Stop();
+    
   }
 }
 //______________________________________________________________________________
@@ -285,6 +287,7 @@ static int nCall=0;nCall++;
     if (extended<0 || track->getFlag()<=0) {
       track->reduce(); continue;
     } else {
+      assert(track->getChi2()<1e3);
       StiHit dcaHit; dcaHit.makeDca();
       StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
       if (extenDca) track->add(extenDca,kOutsideIn);
@@ -339,6 +342,7 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
       //    if (status) return -1;
     status = track->refit();
     if (status) return abs(status)*100 + kRefitOutFail;
+
   }
     //cout << " find track done" << endl;
   if ( trackExtended ) return kExtended;
