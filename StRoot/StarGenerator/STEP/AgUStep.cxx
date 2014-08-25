@@ -117,7 +117,10 @@ Step::Step() : TObject(),
 	       state(0), 
 	       dEstep(-1), 
 	       adEstep(-1), 
-	       step(-1) 
+	       step(-1) ,
+	       dens(0)  ,
+	       A(0), 
+	       Z(0)
 { 
   Clear(); 
 }
@@ -190,6 +193,10 @@ void AgUStep::operator()()
   Double_t y = ctrak -> vect[1];
 //Double_t z = ctrak -> vect[2];
 
+  Double_t _a = cmate->a;
+  Double_t _z = cmate->z;
+  Double_t _dens = cmate->dens;
+
   Double_t r = TMath::Sqrt(x*x+y*y);      
   if (r > rmax) return; // track is exiting region of interest
 
@@ -238,6 +245,10 @@ void AgUStep::operator()()
   mStep -> dEstep  = ctrak -> destep;
   mStep -> step = ctrak -> step;
   mStep -> state = ctrak->inwvol;
+
+  mStep -> A = _a;
+  mStep -> Z = _z;
+  mStep -> dens = _dens;
 
   if (!gGeoManager) return; // step through before complete init?
 

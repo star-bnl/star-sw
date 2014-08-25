@@ -81,6 +81,8 @@ public:
   Float_t dEstep; // energy lost in this step [GeV]
   Float_t adEstep; // accumulated energy lost by this point [GeV]
   Float_t step; // step size [cm]
+  Float_t dens; // density of material in this tracking step
+  Float_t A, Z; // A and Z of material in this tracking step
   UShort_t vnums[15]; // Volume numbers
   UShort_t cnums[15]; // Copy numbers
   ClassDef(Step,1);
