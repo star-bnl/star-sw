@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.8 2014/07/18 15:52:48 marr Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.9 2014/08/25 16:59:03 marr Exp $
  *
  * Author: Frank Geurts
  *
@@ -48,7 +48,63 @@ Int_t geant2backlegIDMap[30];
 ClassImp(StMtdSimMaker)
 
 //_____________________________________________________________________________
-StMtdSimMaker::StMtdSimMaker(const char *name):StMaker(name) {
+StMtdSimMaker::StMtdSimMaker(const char *name):StMaker(name),
+  mGeantData(0),
+  mEvent(0),
+  mMtdCollection(0),
+  mNMtdHits(0),
+  mMtdHitsFromGeant(0),
+
+  mBetaHist(0),
+  mPathLHist(0),
+  mTofHist(0),
+  mRecMass(0),
+
+  mCellGeant(0),
+  mVpdGeant(0),
+  mNCellGeant(0),
+  mNVpdGeant(0),
+  mDeGeant(0),
+  mTofGeant(0),
+
+  mCellSeen(0),
+  mVpdSeen(0), 
+  mNCellSeen(0), 
+  mNVpdSeen(0),
+  mDeSeen(0),
+  mT0Seen(0),
+  mTofSeen(0), 
+  mTofResSeen(0),
+  mVpdResSeen(0),
+
+  mCellReco(0),
+  mVpdReco(0),
+  mNCellReco(0), 
+  mNVpdReco(0), 
+  mTDCReco(0), 
+  mADCReco(0),
+  mT0Reco(0), 
+  mTofResReco(0),
+  mVpdResReco(0),
+  mTACorr(0), 
+  mModHist(0), 
+  QABacklegChannel(0),
+
+  /// TOFp histograms
+  mdE(0),
+  mdS(0),
+  mNumberOfPhotoelectrons(0),
+  mT(0), 
+  mTime(0), 
+  mTime1(0), 
+  mPMlength(0),
+  mAdc(0), 
+  mTdc(0),
+
+  starHall(0) {
+
+  memset(mModuleChannel,0,5*24*sizeof(Int_t));
+
   mBookHisto=kTRUE;
   mHistFile="mtdsim.root";
   mWriteStEvent=kTRUE;
