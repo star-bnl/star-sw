@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.17 2014/07/21 20:17:04 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.18 2014/08/25 17:06:20 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -186,15 +186,16 @@ StMtdCollection *StMtdHitMaker::GetMtdCollection()
       if(!mMtdCollection)
 	{
 	  mMtdCollection = new StMtdCollection();
-	  if ( GetNextRaw() ) 
+	  mStEvent->setMtdCollection(mMtdCollection);
+	}
+      if ( GetNextRaw() ) 
+	{
+	  /// Unpack MTD raw data from daq structure
+	  int errorType=UnpackMtdRawData(); 
+	  if(errorType>0) 
 	    {
-	      /// Unpack MTD raw data from daq structure
-	      int errorType=UnpackMtdRawData(); 
-	      if(errorType>0) 
-		{
-		  LOG_WARN<<"MTD_READER::Unpack MTD Data ERROR!"<<endm;
-		  return 0;
-		}
+	      LOG_WARN<<"MTD_READER::Unpack MTD Data ERROR!"<<endm;
+	      return 0;
 	    }
 	}
     }
@@ -902,11 +903,11 @@ void StMtdHitMaker::fillStEvent()
     {
       LOG_WARN << "No MtdCollection ... creating an empty one in StEvent" << endm;
       mMtdCollection = new StMtdCollection();
+      if(!mUseMuDst)
+	mStEvent->setMtdCollection(mMtdCollection);
     }
   
-  if(!mUseMuDst)
-    mStEvent->setMtdCollection(mMtdCollection);
-  else
+  if(mUseMuDst)
     {
       StMuDstMaker *mMuDstMaker = (StMuDstMaker *)GetMaker("MuDst");
       StMuDst* mMuDst=mMuDstMaker->muDst();
@@ -981,8 +982,11 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.17 2014/07/21 20:17:04 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.18 2014/08/25 17:06:20 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.18  2014/08/25 17:06:20  marr
+// Read in both MC hits and real hits during embedding
+//
 // Revision 1.17  2014/07/21 20:17:04  marr
 // Add # of MTD hit information to the log file
 //
