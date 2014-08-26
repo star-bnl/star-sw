@@ -2,13 +2,13 @@
 #include "Sti/Base/Factory.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiPlanarShape.h"
-#include "StiCylindricalShape.h"
+#include "Sti/StiCylindricalShape.h"
 #include "Sti/StiPlacement.h"
 #include "Sti/StiMaterial.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiNeverActiveFunctor.h"
-//#include "Sti/StiElossCalculator.h"
+#include "StiUtilities/StiDebug.h"
 #include "StDetectorDbMaker/StiDefaultTrackingParameters.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
@@ -99,7 +99,8 @@ StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *de
     printf("***ERROR*** StiDetectorBuilder::add(%d,%d,""%s"") "
           ,row,sector,detector->getName().c_str());
     printf("  is replacing %s\n",_detectors[row][sector]->getName().c_str());
-//assert(!_detectors[row][sector]);
+static int myAssert = StiDebug::iFlag("AssertDetectorBuilder");
+assert(!myAssert || !_detectors[row][sector]);
 
 }  _detectors[row][sector] = detector;
   if (_debug || sector == 0) {
