@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.6 2014/07/15 23:28:48 smirnovd Exp $
+ * $Id: StPxlDb.cxx,v 1.7 2014/08/27 16:52:14 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.7  2014/08/27 16:52:14  qiuh
+ * change pxlRowColumnStatus to pxlBadRowColumns to decrease DB szie
+ *
  * Revision 1.6  2014/07/15 23:28:48  smirnovd
  * Minor style changes
  *
@@ -44,6 +47,7 @@
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_pxlSensorStatus_Table.h"
 #include "tables/St_pxlRowColumnStatus_Table.h"
+#include "tables/St_pxlBadRowColumns_Table.h"
 #include "tables/St_pxlHotPixels_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
 #include "tables/St_pxlControl_Table.h"
@@ -203,4 +207,28 @@ void StPxlDb::setHotPixels(pxlHotPixels_st *hotPixelsTable)
     } 
     else break;
   }
+}
+//_____________________________________________________________________________
+void StPxlDb::setBadRowColumns(pxlBadRowColumns_st *badRowColumns)
+{
+    mRowColumnStatusTable = new pxlRowColumnStatus_st;
+    memset(mRowColumnStatusTable->rows, 1, 400000);
+    memset(mRowColumnStatusTable->cols, 1, 400000);
+    for(Int_t i=0; i<10000; i++){
+        if(badRowColumns->badRowColumns[i]){
+            int isRowOrColumn = badRowColumns->badRowColumns[i]/100000000;
+            int sensorId = badRowColumns->badRowColumns[i]/100000%1000;
+            int iSector = (sensorId - 1) / kNumberOfPxlSensorsPerLadder / kNumberOfPxlLaddersPerSector;
+            int iLadder = (sensorId - 1) / kNumberOfPxlSensorsPerLadder % kNumberOfPxlLaddersPerSector;
+            int iSensor = (sensorId - 1) % kNumberOfPxlSensorsPerLadder;
+            int rowOrColumn = badRowColumns->badRowColumns[i]/100%1000;
+            int status = badRowColumns->badRowColumns[i]%100;
+            if(isRowOrColumn==1 && iSector>=0 && iSector<10 && iLadder>=0 && iLadder<10 && iSensor>=0 && iSensor<10 && rowOrColumn>=0 && rowOrColumn<kNumberOfPxlColumnsOnSensor)
+                mRowColumnStatusTable->cols[kNumberOfPxlColumnsOnSensor * (iSector * (kNumberOfPxlSensorsPerLadder * kNumberOfPxlLaddersPerSector) + iLadder * kNumberOfPxlSensorsPerLadder + iSensor) + rowOrColumn] = status;
+            else if(isRowOrColumn==0 && iSector>=0 && iSector<10 && iLadder>=0 && iLadder<10 && iSensor>=0 && iSensor<10 && rowOrColumn>=0 && rowOrColumn<kNumberOfPxlRowsOnSensor)
+                mRowColumnStatusTable->rows[kNumberOfPxlRowsOnSensor * (iSector * (kNumberOfPxlSensorsPerLadder * kNumberOfPxlLaddersPerSector) + iLadder * kNumberOfPxlSensorsPerLadder + iSensor) + rowOrColumn] = status;
+            else { LOG_WARN<<"wrong bad row column "<<" [ "<<i<<" ]: "<<badRowColumns->badRowColumns[i]<<endm; }
+        }
+        else break;
+    }
 }
