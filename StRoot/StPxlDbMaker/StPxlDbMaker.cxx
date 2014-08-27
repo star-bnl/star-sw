@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.13 2014/05/07 22:19:19 smirnovd Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.14 2014/08/27 16:52:14 qiuh Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.14  2014/08/27 16:52:14  qiuh
+ * change pxlRowColumnStatus to pxlBadRowColumns to decrease DB szie
+ *
  * Revision 1.13  2014/05/07 22:19:19  smirnovd
  * Change the name of PXL DB dataset to avoid conflict with StPxlDbMaker's name
  *
@@ -37,6 +40,7 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_pxlSensorStatus_Table.h"
 #include "tables/St_pxlRowColumnStatus_Table.h"
+#include "tables/St_pxlBadRowColumns_Table.h"
 #include "tables/St_pxlHotPixels_Table.h"
 #include "tables/St_pxlControl_Table.h"
 #include "tables/St_pxlSensorTps_Table.h"
@@ -47,6 +51,7 @@ StPxlDbMaker::StPxlDbMaker(const char *name) :
    StMaker(name)
 {
    mPxlDb = 0;
+   readAllRowColumnStatus = 0;
 }
 //_____________________________________________________________________________
 Int_t StPxlDbMaker::InitRun(Int_t runNumber)
@@ -86,9 +91,18 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
    if (sensorStatus) mPxlDb->setSensorStatus(sensorStatus->GetTable());
    else {LOG_WARN << " no pxl sensor status table " << endm; return kStErr;}
 
-   St_pxlRowColumnStatus *rowColumnStatus = (St_pxlRowColumnStatus *)GetDataBase("Calibrations/pxl/pxlRowColumnStatus");
-   if (rowColumnStatus) mPxlDb->setRowColumnStatus(rowColumnStatus->GetTable());
-   else {LOG_WARN << " no pxl row column status table " << endm; return kStErr;}
+   if(readAllRowColumnStatus) // old method
+       {
+           St_pxlRowColumnStatus *rowColumnStatus = (St_pxlRowColumnStatus *)GetDataBase("Calibrations/pxl/pxlRowColumnStatus");
+           if (rowColumnStatus) mPxlDb->setRowColumnStatus(rowColumnStatus->GetTable());
+           else {LOG_WARN << " no pxl row column status table " << endm; return kStErr;}
+       }
+   else
+       {
+           St_pxlBadRowColumns *badRowColumns = (St_pxlBadRowColumns *)GetDataBase("Calibrations/pxl/pxlBadRowColumns");
+           if (badRowColumns) mPxlDb->setBadRowColumns(badRowColumns->GetTable());
+           else {LOG_WARN << " no pxl bad row columns table " << endm; return kStErr;}
+       }
 
    St_pxlHotPixels *hotPixels = (St_pxlHotPixels *)GetDataBase("Calibrations/pxl/pxlHotPixels");
    if (hotPixels) mPxlDb->setHotPixels(hotPixels->GetTable());

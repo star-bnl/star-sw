@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.h,v 1.7 2014/08/06 11:43:34 jeromel Exp $
+ * $Id: StPxlDb.h,v 1.8 2014/08/27 16:52:14 qiuh Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.h,v $
+ * Revision 1.8  2014/08/27 16:52:14  qiuh
+ * change pxlRowColumnStatus to pxlBadRowColumns to decrease DB szie
+ *
  * Revision 1.7  2014/08/06 11:43:34  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -49,6 +52,7 @@
 
 class pxlSensorStatus_st;
 class pxlRowColumnStatus_st;
+class pxlBadRowColumns_st;
 class pxlHotPixels_st;
 class Survey_st;
 class pxlSensorTps_st;
@@ -117,12 +121,13 @@ public:
    void setGeoHMatrices(Survey_st **tables); ///< set geoHMatrix parameters with parameters from Survey_st tables
    void setSensorStatus(pxlSensorStatus_st *sensorStatus) {mSensorStatusTable = sensorStatus;}
    void setRowColumnStatus(pxlRowColumnStatus_st *rowColumnStatus) {mRowColumnStatusTable = rowColumnStatus;}
+   void setBadRowColumns(pxlBadRowColumns_st *badRowColumns);
    void setHotPixels(pxlHotPixels_st *hotPixelsTable);
    void setThinPlateSpline(pxlSensorTps_st *pxlSensorTps); ///< create sensor thin plate spline functions and set their parameters
    void setPxlControl(pxlControl_st *pxlControl) {mPxlControl = pxlControl;}
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.7 2014/08/06 11:43:34 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.8 2014/08/27 16:52:14 qiuh Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 

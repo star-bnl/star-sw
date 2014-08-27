@@ -5,13 +5,16 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.h,v 1.12 2014/08/06 11:43:34 jeromel Exp $
+ * $Id: StPxlDbMaker.h,v 1.13 2014/08/27 16:52:14 qiuh Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  *
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.h,v $
+ * Revision 1.13  2014/08/27 16:52:14  qiuh
+ * change pxlRowColumnStatus to pxlBadRowColumns to decrease DB szie
+ *
  * Revision 1.12  2014/08/06 11:43:34  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -55,12 +58,13 @@ public:
    Int_t  InitRun(Int_t runNumber);
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.12 2014/08/06 11:43:34 jeromel Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDbMaker.h,v 1.13 2014/08/27 16:52:14 qiuh Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
 private:
    StPxlDb *mPxlDb; ///< See StPxlDb for details on created data structure. The ownership is passed to the STAR framework via ToWhiteBoard()
+   int readAllRowColumnStatus;
 
    ClassDef(StPxlDbMaker, 0)
 };
