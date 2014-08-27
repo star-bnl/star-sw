@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.138 2014/08/22 16:25:20 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.139 2014/08/27 01:33:59 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.139  2014/08/27 01:33:59  perev
+ * ::print bug fixed (printed local coordinates instead of global ones)
+ *         added print of rxy and direction of track, outside +ve, inside -ve
+ *
  * Revision 2.138  2014/08/22 16:25:20  perev
  * Fix old bug double counting of density
  * Fix ELoss bug. dEdX(density) ==> dEdX(density,material)
@@ -2169,52 +2173,50 @@ void StiKalmanTrackNode::PrintStep() {
 //________________________________________________________________________________
 int   StiKalmanTrackNode::print(const char *opt) const
 {
-static const char *txt = "xyzeptchXYZEPTCH";
+static const char *txt = "xyzeptchrXYZED";
+//locals  xyz, e=Psi,p=1/pt, c=curvature, h=mag field, r=rxy
+//global  XYZ, E=Psi D= direction +=outside
+
 static const char *hhh = "uvwUVW";
 static const char *HHH = "xyzXYZ";
   if (!opt || !opt[0]) opt = "2xh";
   StiHit *hit = getHit();
-  if (strchr(opt,'h') && !hit) 	return 0;
   TString ts;
   if (!isValid()) ts+="*";
   if (hit) {ts+=(getChi2()>1e3)? "h":"H";}
   printf("%p(%s)",(void*)this,ts.Data());
   if (strchr(opt,'2')) printf("\t%s=%g","ch2",getChi2());
-
+  double val;
   for (int i=0;txt[i];i++) {
     if (!strchr(opt,txt[i])) continue;
-    int j = i%8;
-    double val=0,err=0;
-    if (i<=8 || i>11) { //local coord
-      val = mFP[j];
-      int jj = idx66[j][j];
-      err=0;
-      if (j<6) {err = sqrt(fabs(mFE.A[jj])); if (mFE.A[jj]<0) err*= -1;}
-    } else {//global coordinate
-      switch (j) {
-        case 0: val = x_g(); 	break;
-        case 1: val = y_g(); 	break;
-        case 2: val = z_g(); 	break;
-        case 3: val = getPsi();	break;
-    } }
+    switch(i) {
+      case 0:;case 1:;case 2:; case 3:;case 4:;case 5:;case 6:;case 7:;
+      val = mFP[i]; break;
+      case  8: val = mFP.rxy(); break;
+      case  9: val = x_g(); 	break;
+      case 10: val = y_g(); 	break;
+      case 11: val = z_g();	break;
+      case 12: val = getPsi();	break;
+      case 13: val = mFP._cosCA*mFP[0]+mFP._sinCA*mFP[1];
+
+    }
     printf("\t%c=%g",txt[i],val);
-    if (err) printf("(%6.1g)",err);
   }//end for i
 
   for (int i=0;hit && hhh[i];i++) {
     if (!strchr(opt,hhh[i])) continue;
-    double val=0,err=0;
     switch(i) {
       case 0:val = hit->x(); 	break;
-      case 1:val = hit->y(); 	err = ::sqrt(getEyy());break;
-      case 2:val = hit->z(); 	err = ::sqrt(getEzz());break;
+      case 1:val = hit->y(); 	break;
+      case 2:val = hit->z(); 	break;
       case 3:val = hit->x_g(); 	break;
       case 4:val = hit->y_g(); 	break;
-      case 5:val = hit->z_g();	err = ::sqrt(getEzz());break;
+      case 5:val = hit->z_g();	break;
     }
     printf("\th%c=%g",HHH[i],val);
-    if (err) printf("(%6.1g)",err);
   }
+  if (isValid()) printf(" valid");
+  if (getDetector()) {printf(" %s",getDetector()->getName().c_str());}
   printf("\n");
   return 1;
 }    
