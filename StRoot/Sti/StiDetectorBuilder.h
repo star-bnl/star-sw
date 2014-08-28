@@ -50,6 +50,7 @@ public:
   virtual StiShape    * add(StiShape *shape);
   virtual StiDetector * add(StiDetector *detector);
   virtual StiDetector * add(UInt_t row, UInt_t sector, StiDetector *detector);
+  virtual        void   del(UInt_t row, UInt_t sector);
   virtual StiMaterial * findMaterial(const string& szName) const;
   virtual StiShape    * findShape(const string& szName) const;
   virtual StiDetector * findDetector(const string& szName) const;
