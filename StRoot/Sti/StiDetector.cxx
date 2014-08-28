@@ -8,6 +8,7 @@
 #include "StiPlacement.h"
 #include "StiDetectorContainer.h"
 #include "StiDetector.h"
+#include "Sti/StiToolkit.h"
 #include "StiMapUtilities.h"
 
 
@@ -89,7 +90,7 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
    for (float xc = -deltaX/2 +dX/2; xc<deltaX/2;xc+=dX) {
      N++;
 //		Create small part of  detector
-     StiDetector *det = new StiDetector;
+     StiDetector *det = StiToolkit::instance()->getDetectorFactory()->getInstance();
      det->copy(*this);
      TString ts(getName());
      if (N) { ts+="_"; ts+=N;} 
@@ -113,7 +114,9 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
    }
    this->copy(*vect[0]); 
    this->setName(vect[0]->getName());
-   delete vect[0]; vect[0] = this;
+//   delete vect[0];
+    StiToolkit::instance()->getDetectorFactory()->free(vect[0]);
+    vect[0] = this;
    if (vect.size()>1) {
      printf("StiDetector::splitIt %s is splitted into %d peaces\n",getName().c_str(),vect.size());}
    return vect.size();
