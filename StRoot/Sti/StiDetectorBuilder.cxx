@@ -96,13 +96,12 @@ StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *de
 {
   setNSectors(row,sector+1);
   if (_detectors[row][sector]) {
-    printf("***ERROR*** StiDetectorBuilder::add(%d,%d,""%s"") "
+    printf("***ERROR*** StiDetectorBuilder::add(%d,%d,\"%s\") "
           ,row,sector,detector->getName().c_str());
     printf("  is replacing %s\n",_detectors[row][sector]->getName().c_str());
-static int myAssert = StiDebug::iFlag("AssertDetectorBuilder");
-assert(!myAssert || !_detectors[row][sector]);
-
-}  _detectors[row][sector] = detector;
+    assert( !_detectors[row][sector]);
+  }  
+  _detectors[row][sector] = detector;
   if (_debug || sector == 0) {
     cout << "StiDetectorBuilder::add(" << row << "," << sector << ") detector ";
     if (detector) cout << detector->getName();
@@ -119,6 +118,11 @@ assert(!myAssert || !_detectors[row][sector]);
 StiDetector * StiDetectorBuilder::add(StiDetector *detector)
 {
   NameMapKey key(detector->getName());
+  StiDetector *old = findDetector(detector->getName());
+  if (old ) {
+    cout << "StiDetectorBuilder::add(" << detector << old << "existing with the same name " << detector->getName() <<endl;
+    assert(0);
+  }
   mDetectorMap.insert( detectorMapValType(key, detector) );
   //complete the building of this detector element
   // in the base class nothing is actually done
@@ -128,6 +132,29 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   detector->setTrackingParameters(StiDefaultTrackingParameters::instance());
   return detector;
 }
+//________________________________________________________________________________
+void StiDetectorBuilder::del(UInt_t row, UInt_t sector)
+{
+// * Completely removes previously added Sti detector/volume at a given row and
+// * sector. Returnstrue if removal was successful orfalse otherwise.
+//
+
+ assert(row < _detectors.size());
+ assert(sector < _detectors[row].size());
+
+ StiDetector* stiDetector = getDetector(row, sector);
+
+ assert(stiDetector);
+ cout << "StiDetectorBuilder::del(" << row << "," << sector << ") detector "  << stiDetector->getName() <<endl;
+
+ mDetectorMap.erase(stiDetector->getName());
+
+//delete stiDetector;
+ getDetectorFactory()->free(stiDetector);
+
+ _detectors[row][sector] = 0;
+}
+
 
 //________________________________________________________________________________
 void StiDetectorBuilder::build(StMaker& source)
