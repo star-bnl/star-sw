@@ -69,10 +69,10 @@
     <varlist type="float" comment=" negative Thickness of Carbon Fibre sector" > sectorThicknessNeg/-0.024/</varlist> 
     <varlist type="float" comment=" HalfThickness of Carbon Fibre sector" > sectorHalfThickness/0.012/</varlist> 
     <varlist type="float" comment=" Z offset for Sector" > sectorZOffset/-3.8105/</varlist> 
-    <varlist type="float" comment="  Half Length of Ladder CF backing" > backingLength/14.95/</varlist> 
+    <varlist type="float" comment="  Half Length of Ladder CF backing" > backingLength/15.325/</varlist> 
     <varlist type="float" comment="  Half Width of Ladder CF backing" > backingWidth/1.245/</varlist> 
     <varlist type="float" comment="  Thickness of Ladder CF backing" > backingThickness/0.0175/</varlist> 
-    <varlist type="float" comment=" Z Offset of CF backing" > backingZOffset/0.65/</varlist> 
+    <varlist type="float" comment=" Z Offset of CF backing" > backingZOffset/0.00/</varlist> 
     <varlist type="float" comment=" length of short Extrusion" > DoveTailExtrusionLength/0.05/</varlist> 
     <varlist type="float" comment=" Thickness of lip" > DoveTailExtrusionThickness/0.124/</varlist> 
     <varlist type="float" comment=" Thickness of lip Boxes" > DoveTailExtrusionThicknessBox/0.262/</varlist> 
