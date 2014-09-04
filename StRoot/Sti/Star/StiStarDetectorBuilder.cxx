@@ -29,7 +29,7 @@ void StiStarDetectorBuilder::useVMCGeometry() {
     return;
   }
   //  setNSectors(0,0);
-  _vacuumMaterial = add(new StiMaterial("Vaccum",0., 1., 0., 1e30, 0.)  );
+  _vacuumMaterial = add(new StiMaterial("Vacuum",0., 1., 0., 1e30, 0.)  );
   _gasMat = (add(new StiMaterial("Air",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9)));
   if (pipc->GetShape()->TestShapeBit(TGeoShape::kGeoTube)) {
     OldBeamPipe();
@@ -68,7 +68,7 @@ void StiStarDetectorBuilder::OldBeamPipe() {
   for (Int_t i = 1; i < 5; i += 2) {// loop over Be and Steel pipes
     MakePipe(i, &PipeVolumes[i],&PipeVolumes[i+1]);
   }
-#if 0
+#if 1
   Int_t NoExtraVols = sizeof(PipeVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1");
   TString path("");

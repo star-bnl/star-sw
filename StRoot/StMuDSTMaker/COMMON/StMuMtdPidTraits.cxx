@@ -2,7 +2,7 @@
 #include "StMuMtdPidTraits.h"
 #include "StMuMtdHit.h"
 
-static const char rcsid[] = "$Id: StMuMtdPidTraits.cxx,v 1.2 2014/05/31 01:10:40 jdb Exp $";
+static const char rcsid[] = "$Id: StMuMtdPidTraits.cxx,v 1.3 2014/07/22 19:04:00 jdb Exp $";
 
 ClassImp(StMuMtdPidTraits)
 
@@ -20,6 +20,8 @@ StMuMtdPidTraits::StMuMtdPidTraits()
       mSigmaMuon          = -999.; 
       mProbMuon           = -999.; 
       mExpTimeOfFlight    = -999.;
+      mDeltaY             = -999.;
+      mDeltaZ             = -999.;
 }
 
 StMuMtdPidTraits::~StMuMtdPidTraits() { /* noop */ }
@@ -30,6 +32,8 @@ void StMuMtdPidTraits::setMtdPidTraits(const StMtdPidTraits* pid)
       mMatchFlag        = pid->matchFlag();
       mYLocal           = pid->yLocal();
       mZLocal           = pid->zLocal();
+      mDeltaY           = pid->deltaY();
+      mDeltaZ           = pid->deltaZ();
       mThetaLocal       = pid->thetaLocal();
       mTimeOfFlight     = pid->timeOfFlight();
       mExpTimeOfFlight  = pid->expTimeOfFlight();
@@ -38,7 +42,7 @@ void StMuMtdPidTraits::setMtdPidTraits(const StMtdPidTraits* pid)
       mPosition         = pid->position();
 
       mSigmaMuon        = pid->sigmaMuon(); 
-      //mProbMuon      = pid->probMuon(); 
+      mProbMuon         = pid->probMuon(); 
 }
 
 StMtdPidTraits* StMuMtdPidTraits::createMtdPidTraits() const
@@ -47,13 +51,14 @@ StMtdPidTraits* StMuMtdPidTraits::createMtdPidTraits() const
    traits->setMatchFlag(mMatchFlag);
    traits->setYLocal(mYLocal);
    traits->setZLocal(mZLocal);
+   traits->setDeltaY(mDeltaY);
+   traits->setDeltaZ(mDeltaZ);
    traits->setThetaLocal(mThetaLocal);
    traits->setTimeOfFlight(mTimeOfFlight);
    traits->setExpTimeOfFlight(mExpTimeOfFlight);
    traits->setPathLength(mPathLength);
    traits->setBeta(mBeta);
    traits->setPosition(mPosition);
-
    traits->setSigmaMuon(mSigmaMuon);
    traits->setProbMuon(mProbMuon);
 

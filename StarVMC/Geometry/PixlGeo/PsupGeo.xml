@@ -104,7 +104,12 @@ For now (Dec 2013) I will add a Tube section from the Al into the position of th
 
 <varlist type="int">DEBUG /0/</varlist>
 
+<!--
 <varlist type="float" comment="east start of support mother vol"> zfirst/-260./ </varlist>
+-->
+
+<varlist type="float" comment="east start of support mother vol"> zfirst/-283./ </varlist>
+
 <varlist type="float" comment="east end of support mother vol">  zlast/-57.4/ </varlist>
 
    <varlist type="float" comment=" thk of the Dtube Al ext">DextThk/0.1/</varlist>
@@ -146,11 +151,13 @@ All Volumes are directly in IDSM to avoid overlap issues by defining a mastervol
    <Material name="air" /> 
    <Attribute for  = "PSUP" seen="0" />
  
+<!-- original 85deg + 190 -->
      <Shape    type = "Pcon"  
-               nz   = "3" phi1="85" dphi="190"
+               nz   = "3" phi1="84" dphi="192"
                zi   = "{zfirst, zlast-5, zlast}"
                rmn  = "{2.5, 2.5, 2.5}"
                rmx  = "{21.5, 21.5, 8.5}" />
+
 <!-- The phi size is picked such the structures for the MTB boards are included even when the cross the
      vertical lines. Since the PSUP is MANY this should work -->
 <!-- Now place all the components into the PSUP volume -->
@@ -194,11 +201,11 @@ All Volumes are directly in IDSM to avoid overlap issues by defining a mastervol
 <Create block="PSHG" />
   <Placement block="PSHG" x="-12.1121" y="7.87944" z="-75.345">
   <Rotation alphaz="12.5397" />
- </Placement>
+  </Placement>
 <Create block="PSHG" />
   <Placement block="PSHG" x="-12.1121" y="7.87944" z="-77.245">
   <Rotation alphaz="12.5397" />
- </Placement>
+  </Placement>
 
 <!-- hinge release air tube cylinder -->
 <Create block="PSHS" />
@@ -212,8 +219,8 @@ All Volumes are directly in IDSM to avoid overlap issues by defining a mastervol
  <Rotation alphay="25.8+90.0"/>
 </Placement>
 
-<Create block="PSHU" />
-<Placement block="PSHU" in="PSUP" x="2.69" z="-78.38" y="0">
+<Create block="PSHU" /> <!-- JCW place as many to avoid ovlp PSHG -->
+<Placement block="PSHU" in="PSUP" x="2.69" z="-78.38" y="0" konly="MANY">
  <Rotation alphay="25.8"/>
 </Placement>
 
@@ -226,8 +233,8 @@ It is fairly complicated and will be approximated -->
 <Placement block="PSHN" in="PSUP" x="0" y="0" z="-58.80" />
 <Create block="PSHO" />
 <Placement block="PSHO" in="PSUP" x="5.7" y="0" z="-61.6" />
-<Create block="PSHP" />
-<Placement block="PSHP" in="PSUP" x="0.0" y="0" z="0.0" />
+<Create block="PSHP" /> <!-- cables penetrate PSHP -->
+<Placement block="PSHP" in="PSUP" x="0.0" y="0" z="0.0" konly="MANY" />
 <Create block="PSHQ" />
 <Placement block="PSHQ" in="PSUP" x="0.0" y="0" z="0" />
 
@@ -250,11 +257,10 @@ It is fairly complicated and will be approximated -->
 <Rotation alphax="180."/>
 </Placement>
 
-<Create block="PSCC"/>
-<Placement block="PSCC" x="0" y="0" z="-120-4.0/2.0" />
-<Create block="PSHI"/>
-<Placement block="PSHI" x="-17.94" y="-(6.8-1.0/2)" z="-122.6" />
-<Placement block="PSHI" x="-17.94" y="+(6.8-1.0/2)" z="-122.6" />
+<!-- JCW PSHI overlaps PSCC, PSMD (union) -->
+<Create    block="PSCC"/>   <Placement block="PSCC" x="0" y="0" z="-120-4.0/2.0" />
+<Create    block="PSHI"/>   <Placement block="PSHI" x="-17.94" y="-(6.8-1.0/2)" z="-122.6" konly="MANY" />
+                            <Placement block="PSHI" x="-17.94" y="+(6.8-1.0/2)" z="-122.6" konly="MANY" />
 
 <!-- air hose approximation:approximated by 1mm Al solid tube rather than the corrugated tube 
   The half part of the airduct to the Dtube is approximated by a simple tube -->
@@ -295,8 +301,8 @@ It is fairly complicated and will be approximated -->
 <Create block="PSAB"/>
 <Placement block="PSAB" x="-13.9275-0.3-1.92/2" y="4.2" z="-135.38"/>
 <Placement block="PSAB" x="-13.9275-0.3-1.92/2" y="-4.2" z="-135.38"/>
-<Create block="PSAD" />
-<Placement block="PSAD" x="-15.9517" y="0" z="-126.47" >
+<Create block="PSAD" /> <!-- JCW switch to MANY ovlp with PSAF -->
+<Placement block="PSAD" x="-15.9517" y="0" z="-126.47" konly="MANY" >
  <Rotation alphay="90.0" />
 </Placement>
 <!-- BH arm hinge -->
@@ -485,11 +491,11 @@ It is fairly complicated and will be approximated -->
 <!-- MTB cable --> 
 
 <Create block="PSCR" />
- <Placement block="PSCR" x="-8.6" y="9.1425" z="-183.8" >
+ <Placement block="PSCR" x="-8.6" y="9.1425" z="-183.8" konly="MANY" >
 <Rotation alphay="50.6688" />
 <Rotation alphaz="42.4845" />
  </Placement>
- <Placement block="PSCR" x="-8.6" y="9.1425-4.6" z="-183.8" >
+ <Placement block="PSCR" x="-8.6" y="9.1425-4.6" z="-183.8" konly="MANY" >
 <Rotation alphay="50.6688" />
 <Rotation alphaz="42.4845" />
  </Placement>
@@ -761,11 +767,11 @@ It is fairly complicated and will be approximated -->
   <Placement block="PHHA" in="PSHL" x="0" z="0" y="(19.75-4.86)/2.0"/>
   <Placement block="PHHA" in="PSHL" x="0" z="0" y="-(19.75-4.86)/2.0"/>
 
-  <Create block="PHHB" />
+  <Create block="PHHB" /> <!-- JCW set many... composite with PHHA -->
   <Placement block="PHHB" in="PSHL" x="-(1.8-4.5)/2" y="0" z="0" />
 
-  <Create block="PHHC"/>
-  <Placement block="PHHC"  in="PSHL" x="-7.8" y="0" z="0" />
+  <Create block="PHHC"/> <!-- JCW set many... composite with PHHA -->
+  <Placement block="PHHC"  in="PSHL" x="-7.8" y="0" z="0" konly="MANY"/>
 
  </Volume>
 
@@ -1061,10 +1067,8 @@ in thickness; this may be off -->
      tl1="1.5" tl2="1.5"
      alp1="-17.0941" alp2="-17.0941" />
 
-
-<Create block="PSMI" />
-  <Placement block="PSMI" y="-0.1" x="-0.07333" z="0">
- </Placement>
+  <Create    block="PSMI" />
+  <Placement block="PSMI" y="-0.1" x="-0.07333" z="0" />
 
 </Volume>
 
