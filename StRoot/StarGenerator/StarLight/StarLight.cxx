@@ -76,9 +76,11 @@ Int_t StarLight::Init()
   A["p"]  =   1;    Z["p"]  =  1;
   A["n"]  =   1;    Z["n"]  =  0;
   A["d"]  =   2;    Z["d"]  =  1;
+  A["He3"] =  3;    Z["He3"] = 2;
   A["Au"] = 197;    Z["Au"] = 79;
   A["Cu"] =  64;    Z["Cu"] = 29;
   A["U"]  = 238;    Z["U"]  = 92;
+  
   
   A["proton"]   =1;    Z["proton"]   =1;
   A["neutron"]  =1;    Z["neutron"]  =0;
