@@ -5,6 +5,8 @@
 #include "TRMatrix.h"
 #include "TRVector.h"
 #include "StMessMgr.h"
+#include "StiUtilities/StiDebug.h"
+
 int StiTrackNode::mgFlag=0;
   static const int idx66[6][6] =
   {{ 0, 1, 3, 6,10,15},{ 1, 2, 4, 7,11,16},{ 3, 4, 5, 8,12,17}
@@ -17,15 +19,15 @@ static const double MAX2ERR[]={MAX1ERR[0]*MAX1ERR[0]
                               ,MAX1ERR[4]*MAX1ERR[4]
                               ,MAX1ERR[5]*MAX1ERR[5]};
 
-static const double MIN1ERR[]={1e-5,1e-5,1e-5,1e-7,0,1e-7};
+static const double MIN1ERR[]={1e-4,1e-4,1e-4,1e-4,1e-3,1e-4};
 static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[1]*MIN1ERR[1]
                               ,MIN1ERR[2]*MIN1ERR[2]
                               ,MIN1ERR[3]*MIN1ERR[3]
                               ,MIN1ERR[4]*MIN1ERR[4]
                               ,MIN1ERR[5]*MIN1ERR[5]};
-static const double recvCORRMAX  = 0.99;
-static const double chekCORRMAX  = 0.9999;
+static const double recvCORRMAX  = 0.90;
+static const double chekCORRMAX  = 0.99;
 static double MAXPARS[]={250,250,250,1.5,100,100};
 
 //______________________________________________________________________________
@@ -35,10 +37,12 @@ void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
 
   double g[NE];      memcpy(g,    G,sizeof( g));
   double fg[NP][NP]; memset(fg[0],0,sizeof(fg));
-//   double myF[6][6];  memcpy(myF[0],F[0],sizeof(fg));
-//   for (int i=0;i<NP;i++) {myF[i][i]+=1.;}
-//   double myG[NE];
-//   TCL::trasat(myF[0],G,myG,NP,NP);
+
+  double myF[6][6];  memcpy(myF[0],F[0],sizeof(fg));
+  for (int i=0;i<NP;i++) {myF[i][i]+=1.;}
+  double myG[NE];
+  TCL::trasat(myF[0],G,myG,NP,NP);
+
 //#define TEST_errPropag6
 #ifdef TEST_errPropag6
   TRSymMatrix rG(nF,G);    cout << "rG\t" << rG << endl;
@@ -223,6 +227,8 @@ StiNodeErrs &StiNodeErrs::merge(double wt,StiNodeErrs &other)
 {
    double wt0 = 1.-wt;
    for (int i=0;i<kNErrs;i++) {A[i] = wt0*A[i] + wt*other.A[i];}
+assert(sign()>0); ///??? 
+
    return *this;
 }
 //______________________________________________________________________________
@@ -234,6 +240,7 @@ void StiNodeErrs::get00(      double *a) const
 void StiNodeErrs::set00(const double *a) 
 {
    memcpy(A,a,6*sizeof(double));
+
 }
 //______________________________________________________________________________
 void StiNodeErrs::get10(double *a) const
@@ -277,45 +284,35 @@ void StiNodeErrs::zeroX()
 //______________________________________________________________________________
 void StiNodeErrs::recov() 
 {
-static int PRINT_IT=0;
+static int nCall = 0; nCall++;
+StiDebug::Break(nCall);
 
-  int i0=0; if (!_cXX) i0 = 1;
-  for (int i=i0;i<kNPars;i++) {
-    double maxDia = MAX2ERR[i];
-    double minDia = MIN2ERR[i];
-    int ld = idx66[i][i];
-    if (A[ld]<minDia) {
-if(PRINT_IT){
-      LOG_DEBUG << Form("StiNodeErrs::cut. Negative diagonal %g(%d)",A[ld],i)<<endm;
-      print();
-}
-       A[ld] = minDia;
-    }
-    if (A[ld]>maxDia) {
-if(PRINT_IT) {
-      LOG_DEBUG << Form("StiNodeErrs::cut. Too big  diagonal %g(%d)",A[ld],i)<<endm;
-      print();
-}
-       for (int j=0;j<kNPars;j++){ A[idx66[i][j]]=0;}
-       A[ld]=maxDia;
-    }
-  }
-  for (int i=i0;i<kNPars;i++) {
-    double &aii = A[idx66[i][i]];
-    for (int j=i+1;j<kNPars;j++) {
-      double &ajj = A[idx66[j][j]];
-      double &aij = A[idx66[i][j]];
-      if (aij*aij <= aii*ajj*recvCORRMAX) continue;
-      if (aij*aij > aii*ajj){
-        LOG_DEBUG << Form("StiNodeErrs::recov : Correlation too big %g[%d][%d]>%g"
-              ,aij,i,j,sqrt(aii*ajj))<< endm;}	  
-      double ab = sqrt(aii*ajj);
-      double t2 = (fabs(aij)/ab-recvCORRMAX)/(1+recvCORRMAX);
-      aii += aii*t2; ajj += ajj*t2;
-      if (aij<0) t2 = -t2; aij -= ab*t2;
-      
-    }//end j
-  }//end i
+assert(sign()>0); ///??? 
+  int i0=1,li0=1,isMod=0;
+  if (_cXX>0) {i0=0;li0=0;}
+
+   double dia[kNPars],fak[kNPars]={1,1,1,1,1,1},corrMax=1;;
+   for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+     double &aii = A[li+i];
+     if (aii < MIN2ERR[i]) aii = MIN2ERR[i];
+     if (aii > MAX2ERR[i]) { fak[i] = sqrt(MAX2ERR[i]/aii); aii = MAX2ERR[i]; isMod=2014;}
+     dia[i] = aii;
+     for (int j=i0;j<i;j++) {
+       double &aij = A[li+j];
+       if (isMod) aij*=fak[i]*fak[j];
+       if (aij*aij <=    dia[i]*dia[j]*chekCORRMAX) continue;
+       double qwe = aij*aij/(dia[i]*dia[j]);
+       if (corrMax<qwe) corrMax=qwe;
+   } } 
+   if (corrMax<=1) return;
+   corrMax = sqrt(corrMax/recvCORRMAX);
+   
+   for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+     for (int j=i0;j<i;j++) {
+       A[li+j]/=corrMax;
+   } } 
+
+assert(sign()>0); ///??? 
 
 }
 //______________________________________________________________________________
@@ -331,6 +328,7 @@ void StiNodeErrs::print() const
 //______________________________________________________________________________
 int StiNodeErrs::check(const char *pri) const
 {
+assert(sign()>0); ///??? 
   int i=-2008,j=2009,kase=0;
   double aii=-20091005,ajj=-20101005,aij=-20111005;
   int i0=0; if (!_cXX) i0 = 1;
@@ -364,6 +362,7 @@ RETN:
           break;
     case 3: LOG_DEBUG << Form("StiNodeErrs::check(%s) FAILED: Non Positive matrix",pri)<<endm;  
   }    
+assert(sign()>0); ///??? 
   return kase;
 }  
 //____________________________________________________________
