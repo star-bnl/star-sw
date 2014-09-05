@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.139 2014/08/27 01:33:59 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.140 2014/09/05 21:55:29 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.140  2014/09/05 21:55:29  perev
+ * bug #2903  fixed. x0,x0p,x0Gas initialised now tp 1e11 instead of -1
+ * Many asserts adde temporary. Some of them time consuming
+ *
  * Revision 2.139  2014/08/27 01:33:59  perev
  * ::print bug fixed (printed local coordinates instead of global ones)
  *         added print of rxy and direction of track, outside +ve, inside -ve
@@ -554,6 +558,7 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _alpha    = n->_alpha;
   mFP = n->mFP;
   mFE = n->mFE;
+assert(mFE.sign()>0);///???
   mFP.hz()=0;
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
@@ -1192,7 +1197,7 @@ void StiKalmanTrackNode::propagateError()
   static int nCall=0; nCall++;
   Break(nCall);
   assert(fDerivTestOn!=-10 || _state==kTNProEnd);
-  
+assert(mFE.sign()>0); ///??? 
   if (debug() & 1) 
     {
       LOG_DEBUG << "Prior Error:"
@@ -1203,7 +1208,17 @@ void StiKalmanTrackNode::propagateError()
       LOG_DEBUG << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endm;
     }
   propagateMtx();
+  mFE.recov();
   errPropag6(mFE.A,mMtx().A,kNPars);
+  assert(fabs(mFE._cXX)<1e-20);
+  assert(fabs(mFE._cYX)<1e-20);                   
+  assert(fabs(mFE._cZX)<1e-20);               
+  assert(fabs(mFE._cEX)<1e-20);           
+  assert(fabs(mFE._cPX)<1e-20);    
+  assert(fabs(mFE._cTX)<1e-20);
+
+
+assert(mFE.sign()>0); ///??? 
   int smallErr = !(mFE._cYY>1e-20 && mFE._cZZ>1e-20 && mFE._cEE>1e-20 && mFE._cTT>1.e-20);
   if (smallErr) {
     LOG_INFO << Form("***SmallErr: cYY=%g cZZ=%g cEE=%g cCC=%g cTT=%g"
@@ -1214,6 +1229,7 @@ void StiKalmanTrackNode::propagateError()
   assert(mFE._cYY*mFE._cZZ-mFE._cZY*mFE._cZY>0);
   mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
   mFE.recov();
+assert(mFE.sign()>0); ///??? 
   mFE.check("StiKalmanTrackNode::propagateError");
 
 #ifdef Sti_DEBUG
@@ -1394,9 +1410,7 @@ static const int keepElossBug = StiDebug::iFlag("keepElossBug");
   if (pL1<0) pL1=0;
   if (pL2<0) pL2=0;
   if (pL3<0) pL3=0;
-  double x0p =-1;
-  double x0Gas=-1;
-  double x0=-1;
+  double x0p =1e11,x0Gas=1e11,x0=1e11;
 
   if (pt > 0.350 && TMath::Abs(getHz()) < 1e-3) pt = 0.350;
   double p2=(1.+mFP.tanl()*mFP.tanl())*pt*pt;
@@ -1509,6 +1523,8 @@ if (fabs(correction-1)>1e-3) StiDebug::Count("NodeCorr",correction-1);
   d3 =(curLos) ? curLos->calculate(1.,m, beta2):0;
   x0 = curMat->getX0();
   double sign = (mgP.dx>0)? 1:-1;
+
+//		Gas of detector is placed UNDER of it
   const StiMaterial		*gasMat = (sign>0)? tDet->getGas() : preDet->getGas();
   x0Gas = gasMat->getX0();
   const StiElossCalculator	*gasLos = gasMat->getElossCalculator();
@@ -1529,6 +1545,11 @@ if (fabs(correction-1)>1e-3) StiDebug::Count("NodeCorr",correction-1);
   mFE._cPP += tanl*tanl*pti*pti	*theta2;
   mFE._cTP += pti*tanl*cos2Li	*theta2;
   mFE._cTT += cos2Li*cos2Li	*theta2;
+assert(mFE._cEE>0);
+assert(mFE._cPP>0);
+assert(mFE._cTT>0);
+
+assert(mFE.sign()>0); ///??? 
 
   double dE = sign*dxEloss;
 //		save detLoss and gasLoss for investigation only
@@ -1576,6 +1597,7 @@ static int nCall=0; nCall++;
 #ifdef STI_ERROR_TEST
   testError(mFE.A,0);
 #endif //STI_ERROR_TEST
+assert(mFE.sign()>0); ///??? 
   assert(mFE._cXX<1e-8);
   double r00,r01,r11;
   r00 = mHrr.hYY + mFE._cYY;
@@ -1691,6 +1713,7 @@ static int nCall=0; nCall++;
   mFE._cEY-=k20*c00+k21*c10;mFE._cEZ-=k20*c10+k21*c11;mFE._cEE-=k20*c20+k21*c21;
   mFE._cPY-=k30*c00+k31*c10;mFE._cPZ-=k30*c10+k31*c11;mFE._cPE-=k30*c20+k31*c21;mFE._cPP-=k30*c30+k31*c31;
   mFE._cTY-=k40*c00+k41*c10;mFE._cTZ-=k40*c10+k41*c11;mFE._cTE-=k40*c20+k41*c21;mFE._cTP-=k40*c30+k41*c31;mFE._cTT-=k40*c40+k41*c41;
+assert(mFE.sign()>0); ///??? 
 
   if (mFE._cYY >= mHrr.hYY || mFE._cZZ >= mHrr.hZZ) {
     LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g"
