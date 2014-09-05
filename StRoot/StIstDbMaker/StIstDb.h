@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDb.h,v 1.7 2014/08/06 18:44:21 ypwang Exp $
+* $Id: StIstDb.h,v 1.8 2014/09/05 17:36:54 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstDb.h,v $
+* Revision 1.8  2014/09/05 17:36:54  smirnovd
+* Slightly cleaned up (doxygen) comments
+*
 * Revision 1.7  2014/08/06 18:44:21  ypwang
 * replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
 *
@@ -82,10 +85,10 @@ public:
    void printGeoHMatrices() const;
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.7 2014/08/06 18:44:21 ypwang Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.8 2014/09/05 17:36:54 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
-   static THashList 	*mgRotList;
+   static THashList 	*mgRotList; ///< A list of TGeoHMatrix transormations for each IST sensor
    TGeoHMatrix *mGeoHMatrixTpcOnGlobal;
    TGeoHMatrix mGeoHMatrixIdsOnTpc;
    TGeoHMatrix mGeoHMatrixPstOnIds;

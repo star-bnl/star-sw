@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.h,v 1.6 2014/03/13 22:10:13 smirnovd Exp $
+* $Id: StIstRawHit.h,v 1.7 2014/09/05 17:36:55 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -50,20 +50,21 @@ public:
    void        setIdTruth(unsigned short idTruth);
 
 private:
-   //data member
-   Int_t       mChannelId;                 // channel Id, numbering from 0 to 110591
-   Int_t       mGeoId;                     // geometry Id, numbering from 1 to 110592
-   Float_t     mCharge[kIstNumTimeBins];   // pedestal non-subtracted ADC value saved in calibration mode;
-   // pedestal subtracted and/or CMN correction in physics mode
-   Float_t     mChargeErr[kIstNumTimeBins];// charge error in all time bins
-   UChar_t     mMaxTimeBin;                // the max ADC time bin index of the raw hit
-   UShort_t    mIdTruth;           	   // !< for embedding, 0 as background
+
+   Int_t       mChannelId;                 ///< channel Id, numbering from 0 to 110591
+   Int_t       mGeoId;                     ///< geometry Id, numbering from 1 to 110592
+   Float_t     mCharge[kIstNumTimeBins];   ///< pedestal non-subtracted ADC value saved in calibration mode;
+                                           ///< pedestal subtracted and/or CMN correction in physics mode
+   Float_t     mChargeErr[kIstNumTimeBins];///< charge error in all time bins
+   UChar_t     mMaxTimeBin;                ///< the max ADC time bin index of the raw hit
+   UShort_t    mIdTruth;           	   ///< for embedding, 0 as background
    static UChar_t mDefaultTimeBin;
 
    ClassDef(StIstRawHit, 1)
 };
 
-//Function for sorting the raw hits in the pad Id order.
+
+/*! Functor for sorting raw hits in ascending order by geometry id mGeoId, i.e. the pad Id order. */
 struct rawHitPtrLessThan {
    bool operator() (const StIstRawHit *rawHit1, const StIstRawHit *rawHit2) const;
 };
@@ -74,6 +75,9 @@ struct rawHitPtrLessThan {
 /***************************************************************************
 *
 * $Log: StIstRawHit.h,v $
+* Revision 1.7  2014/09/05 17:36:55  smirnovd
+* Slightly cleaned up (doxygen) comments
+*
 * Revision 1.6  2014/03/13 22:10:13  smirnovd
 * Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
 *

@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.8 2014/03/27 22:46:47 smirnovd Exp $
+* $Id: StIstRawHit.cxx,v 1.9 2014/09/05 17:36:55 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.9  2014/09/05 17:36:55  smirnovd
+* Slightly cleaned up (doxygen) comments
+*
 * Revision 1.8  2014/03/27 22:46:47  smirnovd
 * Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
@@ -41,7 +44,6 @@ using namespace StIstConsts;
 
 bool rawHitPtrLessThan::operator() (const StIstRawHit *rawHit1, const StIstRawHit *rawHit2) const
 {
-   //sort by geoId in ascending order
    if ( rawHit1 && rawHit2 )
       return (rawHit1->getGeoId() < rawHit2->getGeoId());
    else
@@ -82,7 +84,6 @@ StIstRawHit &StIstRawHit::operator=( const StIstRawHit &h)
    return *this;
 }
 
-//accessories
 int StIstRawHit::getChannelId() const  			{ return mChannelId;   	 };
 int StIstRawHit::getGeoId() const  			{ return mGeoId;   	 };
 unsigned char StIstRawHit::getMaxTimeBin() const  	{ return mMaxTimeBin;    };
