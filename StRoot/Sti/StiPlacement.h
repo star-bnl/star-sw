@@ -63,7 +63,7 @@ public:
     // mutators
     void setNormalRep(float refAngle_, float radius_, float xOffset_);
     //    void setCenterRep(float refAngle_, float radius_, float orientation_);
-    void setLayerRadius(float radius_){ if(radius_>=0) layerRadius = radius_; }
+    void setLayerRadius(float radius_);
     void setLayerAngle(float angle);
     void setZcenter(float val)        { zCenter = val; }
     void setRegion(StiRegion r)       { mRegion = r;}
