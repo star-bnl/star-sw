@@ -47,6 +47,7 @@ void StiPlacement::setLayerAngle(float layerAngle)
 }
 	
 	
+//______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiPlacement& p)
 {
    os << "StiPlacement:" << endl
@@ -61,4 +62,12 @@ ostream& operator<<(ostream& os, const StiPlacement& p)
       << "_layerAngle: " << p._layerAngle << " rad" << endl;
 
    return os;
+}
+//______________________________________________________________________________
+void StiPlacement::setLayerRadius(float radius_)
+{
+static const double kMinRad=0.1,kMaxRad=200;
+static const double kLogStep=(log(kMaxRad)-log(kMinRad))/1000;
+   int nStp = int(log(radius_+kMinRad)/kLogStep);
+   layerRadius = exp(nStp*kLogStep); 
 }
