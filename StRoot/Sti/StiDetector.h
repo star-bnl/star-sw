@@ -47,7 +47,7 @@ public:
     inline bool isActive()    const 		{ return isActiveFunctor->isActive();}
     bool isContinuousMedium() const 		{ return continuousMedium; }
     bool isDiscreteScatterer() const 		{ return discreteScatterer; }
-
+//		Gas is under detector
     StiMaterial* getGas() const 		{ assert(gas); return gas; }
     StiMaterial* getMaterial() const 		{ assert(material) ;return material; }
 
