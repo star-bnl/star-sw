@@ -227,8 +227,16 @@ int StiTrackNodeHelper::propagateMtx()
 //______________________________________________________________________________
 int StiTrackNodeHelper::propagateError()
 {
+static int nCall = 0; nCall++; StiDebug::Break(nCall);
   mPredErrs = mFitdParentErrs;
   StiTrackNode::errPropag6(mPredErrs.A,mMtx.A,kNPars);
+  assert(fabs(mPredErrs._cXX)<1e-20);
+  assert(fabs(mPredErrs._cYX)<1e-20);                   
+  assert(fabs(mPredErrs._cZX)<1e-20);               
+  assert(fabs(mPredErrs._cEX)<1e-20);           
+  assert(fabs(mPredErrs._cPX)<1e-20);    
+  assert(fabs(mPredErrs._cTX)<1e-20);
+
   mPredErrs.recov();
   mPredErrs._cEE+=mMcs._cEE;		//add err to <eta*eta> eta crossing angle//add err to <eta*eta> eta crossing angle
   mPredErrs._cPP+=mMcs._cPP;    	//add err to <curv*curv>		 //add err to <curv*curv>
@@ -355,6 +363,9 @@ StiDebug::Break(nCall);
 //______________________________________________________________________________
 int StiTrackNodeHelper::join()
 {
+static int nCall=0;nCall++;
+StiDebug::Break(nCall);
+
   enum {kOLdValid=1,kNewFitd=2,kJoiUnFit=4};
 //  if (!mParentNode) return 0;
 
@@ -391,7 +402,9 @@ if (!oldJoinPrim) {
       case kOLdValid:;				// Old valid & New UnFitd
       case kOLdValid|kNewFitd:;			// Old valid & New Fitd
 
-        chi2 = joinTwo(kNPars,mTargetNode->mPP().P,mTargetNode->mPE().A
+        mTargetNode->mPE().recov();
+        mFitdErrs.recov();
+	chi2 = joinTwo(kNPars,mTargetNode->mPP().P,mTargetNode->mPE().A
                       ,kNPars,mFitdPars.P         ,mFitdErrs.A
                              ,mJoinPars.P         ,mJoinErrs.A);
         mJoinPars.hz() = mTargetHz;
@@ -664,8 +677,7 @@ assert(pt<1e3);
   pL3=0.5*pathIn(mDetector,&mBestPars);
   // Gap path length
   pL2= fabs(dl);
-  double x0p = -1,x0Gas=-1,x0=-1;
-//  double x0p = 1e11,x0Gas=1e11,x0=1e11;
+  double x0p = 1e11,x0Gas=1e11,x0=1e11;
   dx = mBestPars.x() - mBestParentRotPars.x();
   double tanl   = mBestPars.tanl();
   double pti    = mBestPars.ptin(); 
@@ -790,7 +802,7 @@ if (fabs(mMcs._ptinCorr)>1e-4) {
       if (preLos) {
         d1  = preLos->calculate(1.,m, beta2);
   } } }
-
+//		Gas is UNDER detector
   const StiMaterial		*gasMat = (dx>0)?curGas : preGas;
   if (gasMat) {
     x0Gas = gasMat->getX0();
@@ -812,6 +824,10 @@ if (fabs(mMcs._ptinCorr)>1e-4) {
   mMcs._cPP = tanl*tanl*pti*pti	*theta2*f;
   mMcs._cTP = pti*tanl*cos2Li	*theta2*f;
   mMcs._cTT = cos2Li*cos2Li	*theta2*f;
+assert(mMcs._cPP>0);
+assert(mMcs._cTT>0);
+assert(mMcs._cEE>0);
+
 
   int sign = ( dx>=0)? 1:-1;
   double dE = sign*dxEloss;
