@@ -29,6 +29,31 @@
 #include "StIstUtil/StIstConsts.h"
 #include "StBFChain/StBFChain.h"
 
+
+void testPlanerVolume(StiDetector *det, const char* detName="", float halfDepth=0, float thickness=0, float halfWidth=0
+                        ,float yShift=0, float rShift=0, float zShift=0, StiPlacement *placement=0)
+{
+static TString myName;
+static double wasVolu = 0,nowVolu=0;
+
+if (det && det!=(StiDetector*)(-1)) { 
+  StiShape *stiShape= det->getShape();
+  myName = det->getName().c_str();
+  double wasDepth = stiShape->getHalfDepth();
+  double wasThick = stiShape->getThickness();
+  double wasWidth = stiShape->getHalfWidth();
+  wasVolu = wasDepth*wasThick*wasWidth*4;
+  nowVolu=0;
+}
+nowVolu += halfDepth*thickness*halfWidth*4;
+if (det!=(StiDetector*)(-1)) return; 
+  double fakt = nowVolu/wasVolu;
+  if (fabs(fakt-1)<0.01) return;
+  printf("***** %s => %s fakt =%g %g %g\n",myName.Data(),detName,fakt,wasVolu,nowVolu);
+
+}
+
+
 using namespace std;
 using namespace StIstConsts;
 
@@ -338,6 +363,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorN = getDetectorFactory()->getInstance();
             ts = dir; ts +="ICFCn";
             buildPlanerVolume(*stiDetectorN, ts.Data(), 8.825 * 0.5, 0.5663, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFC, matICFC);
+             testPlanerVolume(stiDetector,   ts.Data(), 8.825 * 0.5, 0.5663, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFC);
             del(row, sector);
             add(row, sector, stiDetectorN);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC north side " << stiDetectorN->getName() << " at layer " << row << endm;
@@ -346,6 +372,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorB = getDetectorFactory()->getInstance();
             ts = dir; ts +="ICFCb.";
             buildPlanerVolume(*stiDetectorB, ts.Data(), 8.825 * 0.5, 0.042775, 0.47625 * 0.5, -0.238125, -0.2617625, 0., stiPlacementICFC, matICFC);
+             testPlanerVolume(0,             ts.Data(), 8.825 * 0.5, 0.042775, 0.47625 * 0.5, -0.238125, -0.2617625, 0., stiPlacementICFC );
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
@@ -354,6 +381,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorS = getDetectorFactory()->getInstance();
             ts = dir;; ts += "ICFCs";
             buildPlanerVolume(*stiDetectorS, ts.Data(), 8.825 * 0.5, 0.5663, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFC, matICFC);
+            testPlanerVolume((StiDetector*)(-1),    ts.Data(), 8.825 * 0.5, 0.5663, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFC);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC south side " << stiDetectorS->getName() << " at layer " << layer << endm;
@@ -380,6 +408,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorN = getDetectorFactory()->getInstance();
             ts = dir; ts+="ICFDn"; 
             buildPlanerVolume(*stiDetectorN, ts.Data(), 47.055 * 0.5, 0.58, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFD, matICFD);
+             testPlanerVolume( stiDetector,  ts.Data(), 47.055 * 0.5, 0.58, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFD);
             del(row, sector);
             add(row, sector, stiDetectorN);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD north side " << stiDetectorN->getName() << " at layer " << row << endm;
@@ -388,6 +417,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorB = getDetectorFactory()->getInstance();
             ts = dir; ts+="ICFDb";
             buildPlanerVolume(*stiDetectorB, ts.Data(), 47.055 * 0.5, 0.049675, 0.47625 * 0.5, -0.238125, -0.2651625, 0., stiPlacementICFD, matICFD);
+             testPlanerVolume( 0          ,  ts.Data(), 47.055 * 0.5, 0.049675, 0.47625 * 0.5, -0.238125, -0.2651625, 0., stiPlacementICFD);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
@@ -396,6 +426,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorS = getDetectorFactory()->getInstance();
             ts=dir;ts+="ICFDs"; 
             buildPlanerVolume(*stiDetectorS, ts.Data(), 47.055 * 0.5, 0.58, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFD, matICFD);
+             testPlanerVolume( (StiDetector*)(-1),  ts.Data(), 47.055 * 0.5, 0.58, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFD);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD south side " << stiDetectorS->getName() << " at layer " << layer << endm;
@@ -424,6 +455,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorN = getDetectorFactory()->getInstance();
             ts = dir; ts +="IECEn";
             buildPlanerVolume(*stiDetectorN, ts.Data(), 2.25 * 0.5, 0.5413, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECE, matIECE);
+             testPlanerVolume( stiDetector,  ts.Data(), 2.25 * 0.5, 0.5413, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECE);
             del(row, sector);
             add(row, sector, stiDetectorN);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE north side " << stiDetectorN->getName() << " at layer " << row << endm;
@@ -432,6 +464,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorB = getDetectorFactory()->getInstance();
             ts = dir; ts +="IECEb";
             buildPlanerVolume(*stiDetectorB, ts.Data(), 2.25 * 0.5, 0.0193, 0.5065 * 0.5, 1.5619, -0.261, 0., stiPlacementIECE, matIECE);
+             testPlanerVolume( 0          ,  ts.Data(), 2.25 * 0.5, 0.0193, 0.5065 * 0.5, 1.5619, -0.261, 0., stiPlacementIECE);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
@@ -440,6 +473,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorS = getDetectorFactory()->getInstance();
             ts = dir; ts +="IECEs"; //ts+=iIECE;
             buildPlanerVolume(*stiDetectorS, ts.Data(), 2.25 * 0.5, 0.5413, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECE, matIECE);
+             testPlanerVolume((StiDetector*)(-1),  ts.Data(), 2.25 * 0.5, 0.5413, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECE);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE south side " << stiDetectorS->getName() << " at layer " << layer << endm;
@@ -468,6 +502,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorN = getDetectorFactory()->getInstance();
             ts = dir; ts +="IECWn"; //ts+=iIECW;
             buildPlanerVolume(*stiDetectorN, ts.Data(), 2.25 * 0.5, 0.555, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECW, matIECW);
+             testPlanerVolume( stiDetector,  ts.Data(), 2.25 * 0.5, 0.555, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECW);
             del(row, sector);
             add(row, sector, stiDetectorN);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW north side " << stiDetectorN->getName() << " at layer " << row << endm;
@@ -477,6 +512,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
             ts = dir; ts +="IECWb"; //ts+=iIECW;
             buildPlanerVolume(*stiDetectorB, ts.Data(), 2.25 * 0.5, 0.01925, 0.5065 * 0.5, 1.5619, -0.267875, 0., stiPlacementIECW, matIECW);
+             testPlanerVolume( 0          ,  ts.Data(), 2.25 * 0.5, 0.01925, 0.5065 * 0.5, 1.5619, -0.267875, 0., stiPlacementIECW);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
@@ -485,6 +521,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorS = getDetectorFactory()->getInstance();
             ts = dir; ts +="IECWs"; //ts+=iIECW;
             buildPlanerVolume(*stiDetectorS, ts.Data(), 2.25 * 0.5, 0.555, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECW, matIECW);
+             testPlanerVolume((StiDetector*)(-1),  ts.Data(), 2.25 * 0.5, 0.555, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECW);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW south side " << stiDetectorS->getName() << " at layer " << layer << endm;
@@ -515,6 +552,8 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             StiDetector *stiDetectorICJR = getDetectorFactory()->getInstance();
             ts = dir; ts +="ICJRn."; ts+=iICJS ;
             buildPlanerVolume(*stiDetectorICJR, ts.Data(), 0.524188 * 0.5, 0.47625, 4.41625 * 0.5, stiPlacementICJS2->getNormalYoffset(), 0., 0.524188 * 0.5 + 6.35 * 0.5, stiPlacementICJS1, matICJS);
+             testPlanerVolume( stiDetector,     ts.Data(), 0.524188 * 0.5, 0.47625, 4.41625 * 0.5, stiPlacementICJS2->getNormalYoffset(), 0., 0.524188 * 0.5 + 6.35 * 0.5, stiPlacementICJS1);
+             testPlanerVolume( (StiDetector*)(-1));
             int layer = getNRows();
             add(layer, sector, stiDetectorICJR);
             LOG_DEBUG << "StiIstDetectorBuilder::build west cooling loop volume " << stiDetectorICJR->getName() << " at layer " << layer << endm;
@@ -587,7 +626,6 @@ void StiIstDetectorBuilder::buildPlanerVolume(StiDetector &detector, string detN
    detector.setGas(getGasMat()); // XXX:ds: Not sure what this does
    detector.setMaterial(mat);
 }
-
 void StiIstDetectorBuilder::buildTubeVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float outerRadius, float openingAngle, float zCenter, StiMaterial *mat)
 {
    //tube shape definition
