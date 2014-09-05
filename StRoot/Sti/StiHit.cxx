@@ -151,7 +151,7 @@ StiDebug::Break(-46);
            Form("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****"
            ,detector->getName().c_str(),myAngle,centerAngle,dif)
          << endm;
-          assert( fabs(dif) <33 );     // 30 for sixangle
+          assert( fabs(dif) <55 );     // 30 for sixangle
       }
 
       mx =  detector->_cos*gx + detector->_sin*gy;
