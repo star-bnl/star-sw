@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.23 2014/09/07 07:30:03 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.24 2014/09/07 07:40:51 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -31,7 +31,7 @@
 #include <string.h>
 #include <time.h>
 
-StIstRawHitMaker::StIstRawHitMaker( const char *name ): StRTSBaseMaker( "ist", name ), mIsCaliMode(0), mDoCmnCorrection(0), mIstCollectionPtr(0), mIstDb(0), mDataType(2)
+StIstRawHitMaker::StIstRawHitMaker( const char *name ): StRTSBaseMaker( "ist", name ), mIsCaliMode(0), mDoCmnCorrection(0), mIstCollectionPtr(0), mDataType(2)
 {
    // set all vectors to zeros
    mCmnVec.resize( kIstNumApvs );
@@ -81,6 +81,7 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber)
    Int_t ierr = kStOk;
 
    TObjectSet *istDbDataSet = (TObjectSet *)GetDataSet("ist_db");
+   StIstDb *mIstDb = NULL;
 
    if (istDbDataSet) {
       mIstDb = (StIstDb *)istDbDataSet->GetObject();
@@ -459,6 +460,9 @@ ClassImp(StIstRawHitMaker);
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.24  2014/09/07 07:40:51  ypwang
+* the mIstDb was declared as a local variable in InitRun() in stead of as a data member
+*
 * Revision 1.23  2014/09/07 07:30:03  ypwang
 * the object mIstCollectionPtr was killed in the destructor
 *

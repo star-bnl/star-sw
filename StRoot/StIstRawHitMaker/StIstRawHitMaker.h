@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.11 2014/09/07 07:14:48 ypwang Exp $
+* $Id: StIstRawHitMaker.h,v 1.12 2014/09/07 07:40:51 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -26,7 +26,6 @@
 #include <assert.h>
 
 class StIstCollection;
-class StIstDb;
 
 class StIstRawHitMaker : public StRTSBaseMaker
 {
@@ -47,7 +46,7 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.11 2014/09/07 07:14:48 ypwang Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.12 2014/09/07 07:40:51 ypwang Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -59,7 +58,6 @@ protected:
    UShort_t mMinNumOfRawHits, mMaxNumOfRawHits;
 
    StIstCollection *mIstCollectionPtr;
-   StIstDb *mIstDb;
 
    // common mode noise
    std::vector< float > mCmnVec; //APV chip geom. index, CM noise
@@ -86,6 +84,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
+* Revision 1.12  2014/09/07 07:40:51  ypwang
+* the mIstDb was declared as a local variable in InitRun() in stead of as a data member
+*
 * Revision 1.11  2014/09/07 07:14:48  ypwang
 * update definition method for the calibration vectors (remove the multiple typedefs)
 *
