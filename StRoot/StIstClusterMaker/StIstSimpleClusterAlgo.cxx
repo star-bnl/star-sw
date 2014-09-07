@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.cxx,v 1.9 2014/09/07 11:41:36 ypwang Exp $
+* $Id: StIstSimpleClusterAlgo.cxx,v 1.10 2014/09/07 13:54:45 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -23,7 +23,7 @@
 #include <iterator>
 #include <vector>
 
-StIstSimpleClusterAlgo::StIstSimpleClusterAlgo(): mSplitCluster(1), mTimeBin(-1)
+StIstSimpleClusterAlgo::StIstSimpleClusterAlgo()
 {
    //nothing else to do....
 };
@@ -844,6 +844,9 @@ ClassImp(StIstSimpleClusterAlgo);
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.cxx,v $
+* Revision 1.10  2014/09/07 13:54:45  ypwang
+* move setUsedTimeBin() and setSplitFlag() setters from inherited classes to their base class StIstIClusterAlgo.h
+*
 * Revision 1.9  2014/09/07 11:41:36  ypwang
 * ClassDef version updated from 1 to 0, and remove Init() function
 *
