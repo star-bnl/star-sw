@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.h,v 1.10 2014/08/22 21:27:19 smirnovd Exp $
+* $Id: StIstClusterMaker.h,v 1.11 2014/09/07 08:15:18 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -20,6 +20,7 @@ class StIstClusterMaker : public StMaker
 {
 public:
    StIstClusterMaker( const char *name = "ist_cluster");
+   ~StIstClusterMaker();
    Int_t Init();
    Int_t Make();
    void Clear( Option_t *opts = "" );
@@ -31,7 +32,7 @@ public:
    void setClusterSplitFlag(bool splitFlag=true) { mSplitCluster = splitFlag; }
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.10 2014/08/22 21:27:19 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.11 2014/09/07 08:15:18 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 protected:
    StIstCollection *mIstCollectionPtr;
@@ -50,6 +51,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.h,v $
+* Revision 1.11  2014/09/07 08:15:18  ypwang
+* destructor was added for the mIstCollectionPtr and mClusterAlgoPtr objects killing
+*
 * Revision 1.10  2014/08/22 21:27:19  smirnovd
 * Remove inline keyword and move the methods inside the definition. Let the compiler optimize the code as it should not be a problem with these one-liners
 *

@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.16 2014/08/22 15:55:15 smirnovd Exp $
+* $Id: StIstClusterMaker.cxx,v 1.17 2014/09/07 08:15:18 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -24,6 +24,17 @@
 StIstClusterMaker::StIstClusterMaker( const char *name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mTimeBin(-1), mSplitCluster(1)
 {
    /* nothing to do */
+};
+
+StIstClusterMaker::~StIstClusterMaker()
+{
+   if (mIstCollectionPtr) {
+      delete mIstCollectionPtr;
+   }
+
+   if (mClusterAlgoPtr) {
+      delete mClusterAlgoPtr;
+   }
 };
 
 void StIstClusterMaker::Clear( Option_t *opts )
@@ -144,6 +155,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.17  2014/09/07 08:15:18  ypwang
+* destructor was added for the mIstCollectionPtr and mClusterAlgoPtr objects killing
+*
 * Revision 1.16  2014/08/22 15:55:15  smirnovd
 * Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
