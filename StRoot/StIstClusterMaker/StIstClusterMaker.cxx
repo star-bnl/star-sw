@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.18 2014/09/07 11:31:29 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.19 2014/09/07 11:34:42 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -131,7 +131,6 @@ Int_t StIstClusterMaker::Make()
 void StIstClusterMaker::setClusterAlgo(StIstIClusterAlgo *algo)
 {
    mClusterAlgoPtr = algo;
-   return kStOk;
 }
 
 Int_t StIstClusterMaker::Init()
@@ -155,6 +154,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.19  2014/09/07 11:34:42  ypwang
+* update the setClusterAlgo() returning void instead of Int_t type
+*
 * Revision 1.18  2014/09/07 11:31:29  ypwang
 * update the setClusterAlgo() returning void instead of Int_t type
 *
