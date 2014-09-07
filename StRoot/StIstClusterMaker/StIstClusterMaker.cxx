@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.19 2014/09/07 11:34:42 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.20 2014/09/07 11:44:52 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -142,9 +142,6 @@ Int_t StIstClusterMaker::Init()
       mClusterAlgoPtr = new StIstScanClusterAlgo();
    }
 
-   if ( !ierr )
-      ierr = mClusterAlgoPtr->Init();
-
    return ierr;
 };
 
@@ -154,6 +151,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.20  2014/09/07 11:44:52  ypwang
+* remove Init() function for clustering algorithms
+*
 * Revision 1.19  2014/09/07 11:34:42  ypwang
 * update the setClusterAlgo() returning void instead of Int_t type
 *
