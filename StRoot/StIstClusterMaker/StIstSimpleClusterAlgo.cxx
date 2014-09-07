@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.cxx,v 1.8 2014/08/22 15:55:15 smirnovd Exp $
+* $Id: StIstSimpleClusterAlgo.cxx,v 1.9 2014/09/07 11:41:36 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -26,11 +26,6 @@
 StIstSimpleClusterAlgo::StIstSimpleClusterAlgo(): mSplitCluster(1), mTimeBin(-1)
 {
    //nothing else to do....
-};
-
-Int_t StIstSimpleClusterAlgo::Init()
-{
-   return kStOk;
 };
 
 Int_t StIstSimpleClusterAlgo::splitCluster(int cSize, int clusterSizeList[], StIstRawHit *rawHitPtr[], StIstCluster *clusterIt, StIstClusterCollection &clusters, unsigned char numTimeBins)
@@ -849,6 +844,9 @@ ClassImp(StIstSimpleClusterAlgo);
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.cxx,v $
+* Revision 1.9  2014/09/07 11:41:36  ypwang
+* ClassDef version updated from 1 to 0, and remove Init() function
+*
 * Revision 1.8  2014/08/22 15:55:15  smirnovd
 * Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *

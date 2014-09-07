@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.cxx,v 1.7 2014/08/22 15:55:15 smirnovd Exp $
+* $Id: StIstScanClusterAlgo.cxx,v 1.8 2014/09/07 11:41:36 ypwang Exp $
 *
 * Author: Yaping Wang, October 2013
 ****************************************************************************
@@ -28,11 +28,6 @@
 StIstScanClusterAlgo::StIstScanClusterAlgo(): mSplitCluster(1), mTimeBin(-1)
 {
    //nothing to do....
-};
-
-Int_t StIstScanClusterAlgo::Init()
-{
-   return kStOk;
 };
 
 Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHitsOriginal, StIstClusterCollection &clusters )
@@ -254,6 +249,9 @@ ClassImp(StIstScanClusterAlgo);
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.8  2014/09/07 11:41:36  ypwang
+* ClassDef version updated from 1 to 0, and remove Init() function
+*
 * Revision 1.7  2014/08/22 15:55:15  smirnovd
 * Fixed style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
