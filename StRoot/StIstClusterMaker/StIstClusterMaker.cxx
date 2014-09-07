@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.17 2014/09/07 08:15:18 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.18 2014/09/07 11:31:29 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -128,7 +128,7 @@ Int_t StIstClusterMaker::Make()
 
 };
 
-Int_t StIstClusterMaker::setClusterAlgo(StIstIClusterAlgo *algo)
+void StIstClusterMaker::setClusterAlgo(StIstIClusterAlgo *algo)
 {
    mClusterAlgoPtr = algo;
    return kStOk;
@@ -155,6 +155,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.18  2014/09/07 11:31:29  ypwang
+* update the setClusterAlgo() returning void instead of Int_t type
+*
 * Revision 1.17  2014/09/07 08:15:18  ypwang
 * destructor was added for the mIstCollectionPtr and mClusterAlgoPtr objects killing
 *

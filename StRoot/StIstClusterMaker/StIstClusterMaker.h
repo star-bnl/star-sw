@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.h,v 1.11 2014/09/07 08:15:18 ypwang Exp $
+* $Id: StIstClusterMaker.h,v 1.12 2014/09/07 11:31:29 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -25,14 +25,14 @@ public:
    Int_t Make();
    void Clear( Option_t *opts = "" );
 
-   Int_t setClusterAlgo(StIstIClusterAlgo *);
+   void setClusterAlgo(StIstIClusterAlgo *);
    /// time bin to be used
    void setUsedTimeBin(unsigned char tb=-1) { mTimeBin = tb; }
    /// cluster splitting switch
    void setClusterSplitFlag(bool splitFlag=true) { mSplitCluster = splitFlag; }
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.11 2014/09/07 08:15:18 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstClusterMaker.h,v 1.12 2014/09/07 11:31:29 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 protected:
    StIstCollection *mIstCollectionPtr;
@@ -42,7 +42,7 @@ protected:
    Bool_t mSplitCluster;
 
 private:
-   ClassDef(StIstClusterMaker, 1);
+   ClassDef(StIstClusterMaker, 0);
 };
 
 #endif
@@ -51,6 +51,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.h,v $
+* Revision 1.12  2014/09/07 11:31:29  ypwang
+* update the setClusterAlgo() returning void instead of Int_t type
+*
 * Revision 1.11  2014/09/07 08:15:18  ypwang
 * destructor was added for the mIstCollectionPtr and mClusterAlgoPtr objects killing
 *
