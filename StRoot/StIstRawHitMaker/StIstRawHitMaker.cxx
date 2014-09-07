@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.24 2014/09/07 07:40:51 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.25 2014/09/07 08:02:18 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -57,6 +57,8 @@ StIstRawHitMaker::~StIstRawHitMaker()
    }
 };
 
+/* Init(): prepare the IST raw hit collection 
+ * in the dataset m_DataSet (data member of StMaker) */
 Int_t StIstRawHitMaker::Init()
 {
    LOG_INFO << "Initializing StIstRawHitMaker ..." << endm;
@@ -76,6 +78,8 @@ Int_t StIstRawHitMaker::Init()
    return ierr;
 };
 
+/* InitRun(): access IST calibration DB and retrieve the 
+ * calibration information from Db tables */ 
 Int_t StIstRawHitMaker::InitRun(Int_t runnumber)
 {
    Int_t ierr = kStOk;
@@ -185,6 +189,11 @@ Int_t StIstRawHitMaker::InitRun(Int_t runnumber)
    return ierr;
 };
 
+/* Make(): main functional part of the raw hit maker, which contains the below three functions:
+ * (1) un-pack the IST raw ADC data (ZS or non-ZS) from daq data via daq reader;
+ * (2) pedestal subtraction for the non-ZS data and dynamical common-mode noise calculation;
+ * (3) raw hit decision and ADC-to-dE/dx translation, then written to corresponding collection in physics mode; 
+ *     While in offline calibrarion mode, ADC information was directly saved without any raw hit processing. */
 Int_t StIstRawHitMaker::Make()
 {
    Int_t ierr = kStOk;
@@ -460,6 +469,9 @@ ClassImp(StIstRawHitMaker);
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.25  2014/09/07 08:02:18  ypwang
+* doxygen comments were added for its main member functions
+*
 * Revision 1.24  2014/09/07 07:40:51  ypwang
 * the mIstDb was declared as a local variable in InitRun() in stead of as a data member
 *
