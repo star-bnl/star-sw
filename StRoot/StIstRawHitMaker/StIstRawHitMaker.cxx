@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.22 2014/09/07 06:55:51 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.23 2014/09/07 07:30:03 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -51,6 +51,10 @@ StIstRawHitMaker::~StIstRawHitMaker()
    mGainVec.clear();
    mMappingVec.clear();
    mConfigVec.clear();
+
+   if (mIstCollectionPtr) {
+      delete mIstCollectionPtr;
+   }
 };
 
 Int_t StIstRawHitMaker::Init()
@@ -455,6 +459,9 @@ ClassImp(StIstRawHitMaker);
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.23  2014/09/07 07:30:03  ypwang
+* the object mIstCollectionPtr was killed in the destructor
+*
 * Revision 1.22  2014/09/07 06:55:51  ypwang
 * remove an unnecessary ierr cut in Make() function, and formatted with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
