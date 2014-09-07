@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.h,v 1.10 2014/08/22 21:38:20 smirnovd Exp $
+* $Id: StIstSimpleClusterAlgo.h,v 1.11 2014/09/07 11:41:36 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ***************************************************************************/
@@ -32,7 +32,6 @@ class StIstSimpleClusterAlgo : public StIstIClusterAlgo
 public:
    StIstSimpleClusterAlgo();
    virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
-   Int_t Init();
 
    void setUsedTimeBin(unsigned char tb = -1);
    void setSplitFlag( bool splitFlag = 1);
@@ -46,7 +45,7 @@ protected:
    Int_t splitCluster(int cSize, int clusterSizeList[], StIstRawHit *rawHitPtr[], StIstCluster *clusterIt, StIstClusterCollection &clusters, unsigned char numTimeBins);
 
 private:
-   ClassDef(StIstSimpleClusterAlgo, 1);
+   ClassDef(StIstSimpleClusterAlgo, 0);
 };
 
 inline void StIstSimpleClusterAlgo::setSplitFlag( bool splitFlag )      { mSplitCluster = splitFlag; };
@@ -57,6 +56,9 @@ inline void StIstSimpleClusterAlgo::setUsedTimeBin(unsigned char tb)    { mTimeB
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.h,v $
+* Revision 1.11  2014/09/07 11:41:36  ypwang
+* ClassDef version updated from 1 to 0, and remove Init() function
+*
 * Revision 1.10  2014/08/22 21:38:20  smirnovd
 * Restored declaration removed by mistake
 *

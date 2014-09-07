@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstIClusterAlgo.h,v 1.6 2014/08/22 21:32:45 smirnovd Exp $
+* $Id: StIstIClusterAlgo.h,v 1.7 2014/09/07 11:41:36 ypwang Exp $
 * Author: Yaping Wang, March 2013
 ***************************************************************************/
 
@@ -19,7 +19,6 @@ class StIstIClusterAlgo
 {
 public:
    virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &, StIstClusterCollection & ) = 0;
-   virtual Int_t Init() = 0;
 
    virtual ~StIstIClusterAlgo() = 0;
 
@@ -30,13 +29,16 @@ protected:
 
 private:
 
-   ClassDef( StIstIClusterAlgo, 1 );
+   ClassDef( StIstIClusterAlgo, 0 );
 };
 #endif
 
 
 /***************************************************************************
 * $Log: StIstIClusterAlgo.h,v $
+* Revision 1.7  2014/09/07 11:41:36  ypwang
+* ClassDef version updated from 1 to 0, and remove Init() function
+*
 * Revision 1.6  2014/08/22 21:32:45  smirnovd
 * Moved doxygen comment to where it belongs
 *

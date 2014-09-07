@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.h,v 1.7 2014/08/22 21:32:45 smirnovd Exp $
+* $Id: StIstScanClusterAlgo.h,v 1.8 2014/09/07 11:41:36 ypwang Exp $
 *
 * Author: Yaping Wang, October 2013
 ***************************************************************************/
@@ -29,7 +29,6 @@ class StIstScanClusterAlgo : public StIstIClusterAlgo
 public:
    StIstScanClusterAlgo();
    virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
-   Int_t Init();
 
    void setUsedTimeBin(unsigned char tb = -1);
    void setSplitFlag( bool splitFlag = 1);
@@ -41,7 +40,7 @@ protected:
    enum {kIstScanClusterAlgo = 2};
 
 private:
-   ClassDef(StIstScanClusterAlgo, 1);
+   ClassDef(StIstScanClusterAlgo, 0);
 };
 
 inline void StIstScanClusterAlgo::setSplitFlag( bool splitFlag )		{ mSplitCluster = splitFlag; };
@@ -52,6 +51,9 @@ inline void StIstScanClusterAlgo::setUsedTimeBin(unsigned char tb)		{ mTimeBin =
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.h,v $
+* Revision 1.8  2014/09/07 11:41:36  ypwang
+* ClassDef version updated from 1 to 0, and remove Init() function
+*
 * Revision 1.7  2014/08/22 21:32:45  smirnovd
 * Moved doxygen comment to where it belongs
 *
