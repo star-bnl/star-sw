@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstSimpleClusterAlgo.h,v 1.11 2014/09/07 11:41:36 ypwang Exp $
+* $Id: StIstSimpleClusterAlgo.h,v 1.12 2014/09/07 13:54:45 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ***************************************************************************/
@@ -33,12 +33,7 @@ public:
    StIstSimpleClusterAlgo();
    virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
 
-   void setUsedTimeBin(unsigned char tb = -1);
-   void setSplitFlag( bool splitFlag = 1);
-
 protected:
-   Bool_t mSplitCluster;
-   UChar_t mTimeBin;
    enum {kIstSimpleClusterAlgo = 1};
 
    Int_t doSplitting(StIstClusterCollection &clusters, unsigned char numTimeBins);
@@ -48,14 +43,15 @@ private:
    ClassDef(StIstSimpleClusterAlgo, 0);
 };
 
-inline void StIstSimpleClusterAlgo::setSplitFlag( bool splitFlag )      { mSplitCluster = splitFlag; };
-inline void StIstSimpleClusterAlgo::setUsedTimeBin(unsigned char tb)    { mTimeBin = tb; };
 #endif
 
 
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.h,v $
+* Revision 1.12  2014/09/07 13:54:45  ypwang
+* move setUsedTimeBin() and setSplitFlag() setters from inherited classes to their base class StIstIClusterAlgo.h
+*
 * Revision 1.11  2014/09/07 11:41:36  ypwang
 * ClassDef version updated from 1 to 0, and remove Init() function
 *
