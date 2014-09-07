@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.10 2014/09/07 06:55:51 ypwang Exp $
+* $Id: StIstRawHitMaker.h,v 1.11 2014/09/07 07:14:48 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -47,7 +47,7 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.10 2014/09/07 06:55:51 ypwang Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.11 2014/09/07 07:14:48 ypwang Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -62,23 +62,17 @@ protected:
    StIstDb *mIstDb;
 
    // common mode noise
-   typedef std::vector< float > CmnVec_t; //APV chip geom. index, CM noise
-   CmnVec_t mCmnVec;
+   std::vector< float > mCmnVec; //APV chip geom. index, CM noise
    // pedestal
-   typedef std::vector< float > PedVec_t; //Channel elec. index, pedestal
-   PedVec_t mPedVec;
+   std::vector< float > mPedVec; //Channel elec. index, pedestal
    // RMS noise
-   typedef std::vector< float > RmsVec_t; //Channel elec. index, RMS noise
-   RmsVec_t mRmsVec;
+   std::vector< float > mRmsVec; //Channel elec. index, RMS noise
    // gain
-   typedef std::vector< float > GainVec_t;//Channel elec. index, gain
-   GainVec_t mGainVec;
+   std::vector< float > mGainVec; //Channel elec. index, gain
    // mapping
-   typedef std::vector< int > MappingVec_t;//Channel elec. index, geometry ID
-   MappingVec_t mMappingVec;
+   std::vector< int > mMappingVec; //Channel elec. index, geometry ID
    // chip configuration status
-   typedef std::vector< unsigned char > ConfigVec_t; //APV chip geom. index, configuration status
-   ConfigVec_t mConfigVec;
+   std::vector< unsigned char > mConfigVec; //APV chip geom. index, configuration status
 
 private:
    Int_t mDataType; //!  0=all, 1=adc only, 2=zs only
@@ -92,6 +86,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
+* Revision 1.11  2014/09/07 07:14:48  ypwang
+* update definition method for the calibration vectors (remove the multiple typedefs)
+*
 * Revision 1.10  2014/09/07 06:55:51  ypwang
 * remove an unnecessary ierr cut in Make() function, and formatted with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
