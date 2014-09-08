@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.h,v 1.8 2014/09/08 19:06:57 smirnovd Exp $
+* $Id: StIstRawHit.h,v 1.9 2014/09/08 19:07:05 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -37,7 +37,7 @@ public:
    unsigned char     getArm()        const; //!< 0-5
    unsigned char     getApv()        const; //!< 0-23
    unsigned char     getChannel()    const; //!< 0-127
-   unsigned char     getDefaultTimeBin()       	 const;
+   static unsigned char  getDefaultTimeBin();
    unsigned short    getIdTruth()    const; //!< for embedding, 0 as background
 
    //modifiers
@@ -46,7 +46,7 @@ public:
    void        setCharge(float charge, unsigned char tb = -1) ;
    void	setChargeErr(float chargeErr, unsigned char tb = -1) ;
    void        setMaxTimeBin(unsigned char tb) ;
-   void        setDefaultTimeBin( unsigned char tb )  ;
+   static void setDefaultTimeBin( unsigned char tb );
    void        setIdTruth(unsigned short idTruth);
 
    using StObject::Print;
@@ -78,6 +78,9 @@ struct rawHitPtrLessThan {
 /***************************************************************************
 *
 * $Log: StIstRawHit.h,v $
+* Revision 1.9  2014/09/08 19:07:05  smirnovd
+* StIstRawHit: Made methods accessing static data member static
+*
 * Revision 1.8  2014/09/08 19:06:57  smirnovd
 * Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
 *
