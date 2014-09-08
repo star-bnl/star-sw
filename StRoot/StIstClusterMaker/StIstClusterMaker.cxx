@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.20 2014/09/07 11:44:52 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.21 2014/09/08 14:45:17 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -28,13 +28,8 @@ StIstClusterMaker::StIstClusterMaker( const char *name ) : StMaker(name), mIstCo
 
 StIstClusterMaker::~StIstClusterMaker()
 {
-   if (mIstCollectionPtr) {
-      delete mIstCollectionPtr;
-   }
-
-   if (mClusterAlgoPtr) {
-      delete mClusterAlgoPtr;
-   }
+   delete mIstCollectionPtr;
+   delete mClusterAlgoPtr;
 };
 
 void StIstClusterMaker::Clear( Option_t *opts )
@@ -151,6 +146,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.21  2014/09/08 14:45:17  smirnovd
+* StIstClusterMaker: No need to check for a null pointer before deleting the object
+*
 * Revision 1.20  2014/09/07 11:44:52  ypwang
 * remove Init() function for clustering algorithms
 *
