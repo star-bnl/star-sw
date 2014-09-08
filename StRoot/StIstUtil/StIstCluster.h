@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.h,v 1.9 2014/03/27 22:46:47 smirnovd Exp $
+* $Id: StIstCluster.h,v 1.10 2014/09/08 19:06:57 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -55,6 +55,8 @@ public:
    void        setNRawHitsZ(unsigned char nRawHitsZ);
    void        setIdTruth(unsigned short idTruth);
 
+   virtual void Print(Option_t *opt = "") const;
+
 protected:
    Int_t       mKey;                    	///< Cluster unique label
    UChar_t     mLadderId;               	///< Ladder id the cluster belongs to
@@ -80,6 +82,9 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstCluster.h,v $
+* Revision 1.10  2014/09/08 19:06:57  smirnovd
+* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
+*
 * Revision 1.9  2014/03/27 22:46:47  smirnovd
 * Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *

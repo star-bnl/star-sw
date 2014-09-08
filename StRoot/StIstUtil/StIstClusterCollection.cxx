@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterCollection.cxx,v 1.6 2014/03/27 22:46:47 smirnovd Exp $
+* $Id: StIstClusterCollection.cxx,v 1.7 2014/09/08 19:06:57 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -10,6 +10,8 @@
 
 #include "StIstCluster.h"
 #include "StIstClusterCollection.h"
+#include "StRoot/St_base/StMessMgr.h"
+
 
 //constructors
 StIstClusterCollection::StIstClusterCollection( unsigned char ladder ) : StObject(), mLadder( ladder )
@@ -37,6 +39,19 @@ void StIstClusterCollection::Clear( Option_t *opt )
 
    mClusterVec.clear();
 }
+
+
+void StIstClusterCollection::Print(Option_t *opt) const
+{
+   int clusterIdx = 0;
+
+   for (std::vector<StIstCluster*>::const_iterator it = mClusterVec.begin(); it != mClusterVec.end(); ++it, ++clusterIdx)
+   {
+      LOG_DEBUG << "cluster: Idx=" << clusterIdx << endm;
+      (*it)->Print();
+   }
+}
+
 
 vector<StIstCluster *> &StIstClusterCollection::getClusterVec()
 {
@@ -69,6 +84,9 @@ ClassImp(StIstClusterCollection);
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.cxx,v $
+* Revision 1.7  2014/09/08 19:06:57  smirnovd
+* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
+*
 * Revision 1.6  2014/03/27 22:46:47  smirnovd
 * Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
