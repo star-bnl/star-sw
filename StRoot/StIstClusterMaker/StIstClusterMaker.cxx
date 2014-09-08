@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.21 2014/09/08 14:45:17 smirnovd Exp $
+* $Id: StIstClusterMaker.cxx,v 1.22 2014/09/08 19:29:31 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -89,33 +89,16 @@ Int_t StIstClusterMaker::Make()
    LOG_DEBUG << "Total raw hits=" << mIstCollectionPtr->getNumRawHits() << ", total Clusters=" <<  mIstCollectionPtr->getNumClusters() << endm;
 
    if (Debug() > 2) {
-      static unsigned char nTimeBin = mIstCollectionPtr->getNumTimeBins();
-      Int_t rawHitIdx = 0, clusterIdx = 0;
-
       for (unsigned char iLadder = 0; iLadder < kIstNumLadders; iLadder++) {
          LOG_DEBUG << "Content: iLadder=" << (short) iLadder + 1 << " # of : raw hits=" << mIstCollectionPtr->getNumRawHits(iLadder) << "  clusters=" << mIstCollectionPtr->getNumClusters( iLadder) << endm;
          // ..... print all raw hits ....
          StIstRawHitCollection *rawHitPtr = mIstCollectionPtr->getRawHitCollection(iLadder);
-         vector<StIstRawHit *> &rawHitVec = rawHitPtr->getRawHitVec();
-
-         for ( std::vector< StIstRawHit * >::iterator it = rawHitVec.begin(); it != rawHitVec.end(); ++it)    {
-            unsigned char maxTb = (*it)->getMaxTimeBin();
-
-            if ( maxTb < 0 || maxTb >= nTimeBin)
-               maxTb = (*it)->getDefaultTimeBin();
-
-            LOG_DEBUG << "raw hit: Idx=" << rawHitIdx << " elecId=" << (*it)->getChannelId() << " Charge=" << (*it)->getCharge(maxTb) << " ChargeErr=" << (*it)->getChargeErr(maxTb) << " decode0: at ladder=" << (short)(*it)->getLadder() << " sensor=" << (short)(*it)->getSensor() << " column=" << (short)(*it)->getColumn() << " row=" << (short)(*it)->getRow() << endm;
-            ++rawHitIdx;
-         }
+         size_t nTimeBins = mIstCollectionPtr->getNumTimeBins();
+         rawHitPtr->Print(nTimeBins);
 
          // ..... print all 1D clusters  ....
          StIstClusterCollection *clustPtr = mIstCollectionPtr->getClusterCollection(iLadder);
-         vector<StIstCluster *> &clustVec = clustPtr->getClusterVec();
-
-         for ( std::vector< StIstCluster * >::iterator it = clustVec.begin(); it != clustVec.end(); ++it)    {
-            LOG_DEBUG << "cluster: Idx=" << clusterIdx << " totCharge=" << (*it)->getTotCharge() << " totChargeErr=" << (*it)->getTotChargeErr() << " meanColumn=" << (*it)->getMeanColumn() << " meanRow= " << (*it)->getMeanRow() << " at ladder=" << (short)(*it)->getLadder() << " sensor=" << (short)(*it)->getSensor() << " clusterSize=" << (short)(*it)->getNRawHits() << " clusterSize(Z)=" << (short)(*it)->getNRawHitsZ() << " clusterSize(R-Phi)=" << (short)(*it)->getNRawHitsRPhi() << endm;
-            ++clusterIdx;
-         }
+         clustPtr->Print();
       }
    }
 
@@ -146,6 +129,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.22  2014/09/08 19:29:31  smirnovd
+* StIstClusterMaker: Use Print() methods of respective collections for debugging
+*
 * Revision 1.21  2014/09/08 14:45:17  smirnovd
 * StIstClusterMaker: No need to check for a null pointer before deleting the object
 *
