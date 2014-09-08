@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.10 2014/09/08 19:06:57 smirnovd Exp $
+* $Id: StIstRawHit.cxx,v 1.11 2014/09/08 19:07:05 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.11  2014/09/08 19:07:05  smirnovd
+* StIstRawHit: Made methods accessing static data member static
+*
 * Revision 1.10  2014/09/08 19:06:57  smirnovd
 * Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
 *
@@ -91,7 +94,7 @@ StIstRawHit &StIstRawHit::operator=( const StIstRawHit &h)
 int StIstRawHit::getChannelId() const  			{ return mChannelId;   	 };
 int StIstRawHit::getGeoId() const  			{ return mGeoId;   	 };
 unsigned char StIstRawHit::getMaxTimeBin() const  	{ return mMaxTimeBin;    };
-unsigned char StIstRawHit::getDefaultTimeBin() const  	{ return mDefaultTimeBin;};
+unsigned char StIstRawHit::getDefaultTimeBin()  	{ return mDefaultTimeBin;};
 unsigned short StIstRawHit::getIdTruth() const  	{ return mIdTruth; 	 };
 
 unsigned char StIstRawHit::getLadder() const
