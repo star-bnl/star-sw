@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstIClusterAlgo.h,v 1.8 2014/09/07 13:54:45 ypwang Exp $
+* $Id: StIstIClusterAlgo.h,v 1.9 2014/09/08 19:29:40 smirnovd Exp $
 * Author: Yaping Wang, March 2013
 ***************************************************************************/
 
@@ -13,7 +13,7 @@ class StIstCollection;
 
 
 /**
-* Description: Virtual class for clustering algorithm implementation.
+* Abstract interface class for clustering algorithm implementation.
 */
 class StIstIClusterAlgo
 {
@@ -41,6 +41,9 @@ inline void StIstIClusterAlgo::setUsedTimeBin(unsigned char tb)    { mTimeBin = 
 
 /***************************************************************************
 * $Log: StIstIClusterAlgo.h,v $
+* Revision 1.9  2014/09/08 19:29:40  smirnovd
+* Corrected syntax of comments so they can be recognized by doxygen
+*
 * Revision 1.8  2014/09/07 13:54:45  ypwang
 * move setUsedTimeBin() and setSplitFlag() setters from inherited classes to their base class StIstIClusterAlgo.h
 *
