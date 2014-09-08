@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.9 2014/09/05 17:36:55 smirnovd Exp $
+* $Id: StIstRawHit.cxx,v 1.10 2014/09/08 19:06:57 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.10  2014/09/08 19:06:57  smirnovd
+* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
+*
 * Revision 1.9  2014/09/05 17:36:55  smirnovd
 * Slightly cleaned up (doxygen) comments
 *
@@ -38,6 +41,7 @@
 ****************************************************************************/
 
 #include "StIstRawHit.h"
+#include "StRoot/St_base/StMessMgr.h"
 
 using namespace StIstConsts;
 
@@ -177,6 +181,17 @@ void StIstRawHit::setMaxTimeBin(unsigned char tb)
 {
    mMaxTimeBin = ((tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb);
 };
+
+
+void StIstRawHit::Print(int nTimeBins) const
+{
+   // The usage of nTimeBins is a bit crazy here but I took it directly from the
+   // former debug output at the end of StIstClusterMaker::Make()
+   LOG_DEBUG << " elecId=" << getChannelId()
+             << " Charge=" << getCharge(nTimeBins) << " ChargeErr=" << getChargeErr(nTimeBins)
+             << " decode0: at ladder=" << (short) getLadder() << " sensor=" << (short) getSensor()
+             << " column=" << (short) getColumn() << " row=" << (short) getRow() << endm;
+}
 
 unsigned char StIstRawHit::mDefaultTimeBin = 2;
 

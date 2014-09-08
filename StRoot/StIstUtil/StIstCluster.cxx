@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.10 2014/03/27 22:46:47 smirnovd Exp $
+* $Id: StIstCluster.cxx,v 1.11 2014/09/08 19:06:57 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -10,6 +10,7 @@
 
 #include "StIstConsts.h"
 #include "StIstCluster.h"
+#include "StRoot/St_base/StMessMgr.h"
 
 
 StIstCluster::StIstCluster(int key, unsigned char ladder, unsigned char sensor,
@@ -111,6 +112,18 @@ void StIstCluster::setIdTruth(unsigned short idTruth)
    mIdTruth = idTruth;
 };
 
+
+void StIstCluster::Print(Option_t *opt) const
+{
+   LOG_DEBUG << " totCharge=" << getTotCharge() << " totChargeErr=" << getTotChargeErr()
+             << " meanColumn=" << getMeanColumn() << " meanRow= " << getMeanRow()
+             << " at ladder=" << (short) getLadder() << " sensor=" << (short) getSensor()
+             << " clusterSize=" << (short) getNRawHits()
+             << " clusterSize(Z)=" << (short) getNRawHitsZ()
+             << " clusterSize(R-Phi)=" << (short) getNRawHitsRPhi() << endm;
+}
+
+
 ClassImp(StIstCluster);
 
 
@@ -118,6 +131,9 @@ ClassImp(StIstCluster);
 *
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.11  2014/09/08 19:06:57  smirnovd
+* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
+*
 * Revision 1.10  2014/03/27 22:46:47  smirnovd
 * Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *

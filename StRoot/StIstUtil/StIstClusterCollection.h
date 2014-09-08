@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterCollection.h,v 1.4 2014/02/13 02:35:49 smirnovd Exp $
+* $Id: StIstClusterCollection.h,v 1.5 2014/09/08 19:06:57 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -36,6 +36,8 @@ public:
 
    //Clear
    void Clear( Option_t *opt = "" );
+   virtual void Print(Option_t *opt = "") const;
+
 
 protected:
    //data members
@@ -52,6 +54,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.h,v $
+* Revision 1.5  2014/09/08 19:06:57  smirnovd
+* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
+*
 * Revision 1.4  2014/02/13 02:35:49  smirnovd
 * Moved CVS log to the bottom of the file
 *

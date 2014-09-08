@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.h,v 1.7 2014/09/05 17:36:55 smirnovd Exp $
+* $Id: StIstRawHit.h,v 1.8 2014/09/08 19:06:57 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -49,6 +49,9 @@ public:
    void        setDefaultTimeBin( unsigned char tb )  ;
    void        setIdTruth(unsigned short idTruth);
 
+   using StObject::Print;
+   void Print(int nTimeBins) const;
+
 private:
 
    Int_t       mChannelId;                 ///< channel Id, numbering from 0 to 110591
@@ -75,6 +78,9 @@ struct rawHitPtrLessThan {
 /***************************************************************************
 *
 * $Log: StIstRawHit.h,v $
+* Revision 1.8  2014/09/08 19:06:57  smirnovd
+* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
+*
 * Revision 1.7  2014/09/05 17:36:55  smirnovd
 * Slightly cleaned up (doxygen) comments
 *

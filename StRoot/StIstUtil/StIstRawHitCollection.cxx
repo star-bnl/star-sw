@@ -1,11 +1,12 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.14 2014/03/27 22:46:47 smirnovd Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.15 2014/09/08 19:06:57 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
 
 #include "StIstRawHit.h"
 #include "StIstRawHitCollection.h"
+#include "StRoot/St_base/StMessMgr.h"
 #include <cmath>
 #include <iostream>
 
@@ -68,6 +69,20 @@ void StIstRawHitCollection::Clear( Option_t *opt )
       mRawHitElecIdVec[i] = 0;
 };
 
+
+void StIstRawHitCollection::Print(int nTimeBins) const
+{
+   // The usage of nTimeBins is a bit crazy here but I took it directly from the
+   // former debug output at the end of StIstClusterMaker::Make()
+   int rawHitIdx = 0;
+
+   for (std::vector<StIstRawHit*>::const_iterator it = mRawHitVec.begin(); it != mRawHitVec.end(); ++it, ++rawHitIdx)
+   {
+      LOG_DEBUG << "raw hit: Idx=" << rawHitIdx << endm;
+      (*it)->Print(nTimeBins);
+   }
+}
+
 StIstRawHit *StIstRawHitCollection::getRawHit( int elecId )
 {
    StIstRawHit *&rawHitPtr = mRawHitElecIdVec[elecId];
@@ -85,6 +100,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.15  2014/09/08 19:06:57  smirnovd
+* Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
+*
 * Revision 1.14  2014/03/27 22:46:47  smirnovd
 * Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
