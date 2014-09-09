@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.23 2014/09/09 05:42:38 ypwang Exp $
+* $Id: StIstClusterMaker.cxx,v 1.24 2014/09/09 15:50:09 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -61,26 +61,30 @@ Int_t StIstClusterMaker::Make()
       ierr = kStWarn;
    }
 
-   if ( !ierr ) {
+   if (ierr == kStOk) {
       for ( unsigned char ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx ) {
          StIstRawHitCollection *rawHitCollectionPtr   = mIstCollectionPtr->getRawHitCollection( ladderIdx );
          StIstClusterCollection *clusterCollectionPtr = mIstCollectionPtr->getClusterCollection( ladderIdx );
 
-         if ( rawHitCollectionPtr && clusterCollectionPtr ) {
-            Int_t numRawHits = rawHitCollectionPtr->getNumRawHits();
-            LOG_DEBUG << "Number of raw hits found in ladder " << (short) (ladderIdx + 1) << ": " << numRawHits << endm;
+         if ( !rawHitCollectionPtr || !clusterCollectionPtr ) {
+            LOG_WARN << "StClusterMaker::Make(): No valid StIstRawHitCollection or StIstClusterCollection found for ladder "
+                     << (short) (ladderIdx + 1) << endm;
+            continue;
+         }
 
-            // clustering and splitting
-            mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
-            mClusterAlgoPtr->setSplitFlag(mSplitCluster);
-            Int_t loc_ierr = mClusterAlgoPtr->doClustering(*mIstCollectionPtr, *rawHitCollectionPtr, *clusterCollectionPtr );
+         Int_t numRawHits = rawHitCollectionPtr->getNumRawHits();
+         LOG_DEBUG << "Number of raw hits found in ladder " << (short) (ladderIdx + 1) << ": " << numRawHits << endm;
 
-            if (loc_ierr != kStOk) {
-               LOG_WARN << "StClusterMaker::Make(): clustering for ladder " << (short) (ladderIdx + 1) << " returned " << loc_ierr << endm;
+         // clustering and splitting
+         mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
+         mClusterAlgoPtr->setSplitFlag(mSplitCluster);
+         Int_t loc_ierr = mClusterAlgoPtr->doClustering(*mIstCollectionPtr, *rawHitCollectionPtr, *clusterCollectionPtr );
 
-               if (loc_ierr > ierr)
-                  ierr = loc_ierr;
-            }
+         if (loc_ierr != kStOk) {
+            LOG_WARN << "StClusterMaker::Make(): clustering for ladder " << (short) (ladderIdx + 1) << " returned " << loc_ierr << endm;
+
+            if (loc_ierr > ierr)
+               ierr = loc_ierr;
          }
       }
    }
@@ -129,6 +133,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.24  2014/09/09 15:50:09  smirnovd
+* StIstClusterMaker: Refactored conditional statements and added a formal warning for missing collections. Adjusted white space indentation
+*
 * Revision 1.23  2014/09/09 05:42:38  ypwang
 * minor update the data type for temporary variable numRawHits from UShort_t to Int_t
 *
