@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterMaker.cxx,v 1.22 2014/09/08 19:29:31 smirnovd Exp $
+* $Id: StIstClusterMaker.cxx,v 1.23 2014/09/09 05:42:38 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -67,7 +67,7 @@ Int_t StIstClusterMaker::Make()
          StIstClusterCollection *clusterCollectionPtr = mIstCollectionPtr->getClusterCollection( ladderIdx );
 
          if ( rawHitCollectionPtr && clusterCollectionPtr ) {
-            UShort_t numRawHits = rawHitCollectionPtr->getNumRawHits();
+            Int_t numRawHits = rawHitCollectionPtr->getNumRawHits();
             LOG_DEBUG << "Number of raw hits found in ladder " << (short) (ladderIdx + 1) << ": " << numRawHits << endm;
 
             // clustering and splitting
@@ -129,6 +129,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.23  2014/09/09 05:42:38  ypwang
+* minor update the data type for temporary variable numRawHits from UShort_t to Int_t
+*
 * Revision 1.22  2014/09/08 19:29:31  smirnovd
 * StIstClusterMaker: Use Print() methods of respective collections for debugging
 *
