@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstScanClusterAlgo.cxx,v 1.9 2014/09/07 13:54:45 ypwang Exp $
+* $Id: StIstScanClusterAlgo.cxx,v 1.10 2014/09/09 07:34:07 ypwang Exp $
 *
 * Author: Yaping Wang, October 2013
 ****************************************************************************
@@ -35,15 +35,15 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
    StIstCluster *newCluster = 0;
    StIstRawHit *rawHitTemp = 0;
    StIstRawHit *rawHitMaxAdcTemp = 0;
-   unsigned char clusterType = kIstScanClusterAlgo;
-   unsigned char maxTb = -1, usedTb = -1;
-   unsigned char ladder = 0, sensor = 0;
-   float meanRow = 0., meanColumn = 0.;
-   float totCharge = 0., totChargeErr = 0.;
-   unsigned char clusterSize = 0, clusterSizeRPhi = 0, clusterSizeZ = 0;
+   Int_t clusterType = kIstScanClusterAlgo;
+   Int_t maxTb = -1, usedTb = -1;
+   Int_t ladder = 0, sensor = 0;
+   Float_t meanRow = 0., meanColumn = 0.;
+   Float_t totCharge = 0., totChargeErr = 0.;
+   Int_t clusterSize = 0, clusterSizeRPhi = 0, clusterSizeZ = 0;
 
    //get number of time bin used in this event
-   static unsigned char nTimeBins = istCollection.getNumTimeBins();
+   Int_t nTimeBins = istCollection.getNumTimeBins();
 
    //sort raw hits in increasing order by geometry ID
    rawHitsOriginal.sortByGeoId();
@@ -111,7 +111,7 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
                            (rawHitTemp->getCharge(rawHitTemp->getMaxTimeBin()) < rawHitNext->getCharge(rawHitNext->getMaxTimeBin())) ) {
                         float weightBack = rawHitNext->getCharge(rawHitNext->getMaxTimeBin()) / ((*rawHitsToMergePtr)->getCharge((*rawHitsToMergePtr)->getMaxTimeBin()) + rawHitNext->getCharge(rawHitNext->getMaxTimeBin()));
 
-                        for (unsigned char iTB = 0; iTB < nTimeBins; iTB++) {
+                        for (int iTB = 0; iTB < nTimeBins; iTB++) {
                            rawHitTempBack->setCharge(weightBack * rawHitTemp->getCharge(iTB), iTB);
                            rawHitTemp->setCharge((1.0 - weightBack) * rawHitTemp->getCharge(iTB), iTB);
                         }
@@ -141,8 +141,8 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
             ladder      	= rawHitMaxAdcTemp->getLadder();
             sensor      	= rawHitMaxAdcTemp->getSensor(); // = sensorIdx + 1
             meanColumn      	= (float)rawHitMaxAdcTemp->getColumn(); // = columnIdx + 1
-            clusterSize 	= (unsigned char)nToMerge;
-            clusterSizeRPhi 	= (unsigned char)nToMerge;
+            clusterSize 	= nToMerge;
+            clusterSizeRPhi 	= nToMerge;
             clusterSizeZ 	= 1;
 
             float tempCharge[nToMerge], tempChargeErr[nToMerge], tempRow[nToMerge];
@@ -249,6 +249,9 @@ ClassImp(StIstScanClusterAlgo);
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.10  2014/09/09 07:34:07  ypwang
+* data type was updated from UChar_t to Int_t for several varibales, and the nTimeBins was corrected as a non-static varible
+*
 * Revision 1.9  2014/09/07 13:54:45  ypwang
 * move setUsedTimeBin() and setSplitFlag() setters from inherited classes to their base class StIstIClusterAlgo.h
 *
