@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.12 2014/09/09 08:23:46 ypwang Exp $
+* $Id: StIstCluster.cxx,v 1.13 2014/09/09 08:33:28 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -17,15 +17,16 @@ StIstCluster::StIstCluster(int key, int ladder, int sensor,
                            float meanRow, float meanColumn, float totCharge, float totChargeErr,
            		   int clusteringType):
    mKey(key),
-   mLadderId(ladder),
-   mSensorId(sensor),
    mMeanRow(meanRow),
    mMeanColumn(meanColumn),
    mTotCharge(totCharge),
    mTotChargeErr(totChargeErr),
+   mIdTruth(0),
+   mLadderId(ladder),
+   mSensorId(sensor),
    mClusteringType(clusteringType),
    mMaxTimeBin(3), mNRawHits(1), mNRawHitsRPhi(1),
-   mNRawHitsZ(1), mIdTruth(0), mRawHitVec()
+   mNRawHitsZ(1), mRawHitVec()
 {
 }
 
@@ -131,6 +132,9 @@ ClassImp(StIstCluster);
 *
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.13  2014/09/09 08:33:28  ypwang
+* minor update the data member initialization order
+*
 * Revision 1.12  2014/09/09 08:23:46  ypwang
 * all unsgined char was updated to int type as Victor P. suggested
 *
