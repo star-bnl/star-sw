@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.cxx,v 1.11 2014/09/08 19:07:05 smirnovd Exp $
+* $Id: StIstRawHit.cxx,v 1.12 2014/09/09 08:23:46 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -9,6 +9,9 @@
 ****************************************************************************
 *
 * $Log: StIstRawHit.cxx,v $
+* Revision 1.12  2014/09/09 08:23:46  ypwang
+* all unsgined char was updated to int type as Victor P. suggested
+*
 * Revision 1.11  2014/09/08 19:07:05  smirnovd
 * StIstRawHit: Made methods accessing static data member static
 *
@@ -61,7 +64,7 @@ bool rawHitPtrLessThan::operator() (const StIstRawHit *rawHit1, const StIstRawHi
 StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), mChargeErr(), mMaxTimeBin(3),
    mIdTruth(0)
 {
-   for ( unsigned char i = 0; i < kIstNumTimeBins; ++i )	{
+   for ( int i = 0; i < kIstNumTimeBins; ++i )	{
       mCharge[i] = -999.;
       mChargeErr[i] = 0.;
    }
@@ -70,7 +73,7 @@ StIstRawHit::StIstRawHit() : StObject(), mChannelId(-1), mGeoId(-1), mCharge(), 
 StIstRawHit::StIstRawHit(const StIstRawHit &h) : StObject(), mChannelId(h.mChannelId), mGeoId(h.mGeoId), mCharge(),
    mChargeErr(), mMaxTimeBin(h.mMaxTimeBin), mIdTruth(h.mIdTruth)
 {
-   for ( unsigned char i = 0; i < kIstNumTimeBins; ++i )	{
+   for ( int i = 0; i < kIstNumTimeBins; ++i )	{
       mCharge[i] = h.mCharge[i];
       mChargeErr[i] = h.mChargeErr[i];
    }
@@ -83,7 +86,7 @@ StIstRawHit &StIstRawHit::operator=( const StIstRawHit &h)
    mMaxTimeBin = h.mMaxTimeBin;
    mIdTruth    = h.mIdTruth;
 
-   for ( unsigned char i = 0; i < kIstNumTimeBins; ++i )	{
+   for ( int i = 0; i < kIstNumTimeBins; ++i )	{
       mCharge[i]     = h.mCharge[i];
       mChargeErr[i]  = h.mChargeErr[i];
    }
@@ -109,13 +112,13 @@ unsigned char StIstRawHit::getSensor() const
 
 unsigned char StIstRawHit::getRow() const
 {
-   short pad = ((mGeoId - 1) % (kIstNumSensorsPerLadder * kIstNumPadsPerSensor)) % kIstNumPadsPerSensor;
+   int pad = ((mGeoId - 1) % (kIstNumSensorsPerLadder * kIstNumPadsPerSensor)) % kIstNumPadsPerSensor;
    return 1 + pad % kIstNumRowsPerSensor;
 };
 
 unsigned char StIstRawHit::getColumn() const
 {
-   short pad = ((mGeoId - 1) % (kIstNumSensorsPerLadder * kIstNumPadsPerSensor)) % kIstNumPadsPerSensor;
+   int pad = ((mGeoId - 1) % (kIstNumSensorsPerLadder * kIstNumPadsPerSensor)) % kIstNumPadsPerSensor;
    return 1 + pad / kIstNumRowsPerSensor;
 };
 
@@ -139,12 +142,12 @@ unsigned char StIstRawHit::getChannel() const
    return ((mChannelId % (kIstNumArmsPerRdo * kIstNumChanPerArm)) % kIstNumChanPerArm) % kIstNumApvChannels;
 };
 
-float StIstRawHit::getCharge( unsigned char tb ) const
+float StIstRawHit::getCharge( int tb ) const
 {
    return mCharge[ (tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb ];
 };
 
-float StIstRawHit::getChargeErr( unsigned char tb ) const
+float StIstRawHit::getChargeErr( int tb ) const
 {
    return mChargeErr[ (tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb ];
 };
@@ -160,7 +163,7 @@ void StIstRawHit::setGeoId(int rGeoId)
    mGeoId = rGeoId;
 };
 
-void StIstRawHit::setDefaultTimeBin( unsigned char tb )
+void StIstRawHit::setDefaultTimeBin( int tb )
 {
    mDefaultTimeBin = tb;
 };
@@ -170,17 +173,17 @@ void StIstRawHit::setIdTruth(unsigned short idTruth)
    mIdTruth = idTruth;
 };
 
-void StIstRawHit::setCharge( float charge, unsigned char tb )
+void StIstRawHit::setCharge( float charge, int tb )
 {
    mCharge[ (tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb ] = charge;
 };
 
-void StIstRawHit::setChargeErr(float rChargeErr, unsigned char tb)
+void StIstRawHit::setChargeErr(float rChargeErr, int tb)
 {
    mChargeErr[ (tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb ] = rChargeErr;
 };
 
-void StIstRawHit::setMaxTimeBin(unsigned char tb)
+void StIstRawHit::setMaxTimeBin(int tb)
 {
    mMaxTimeBin = ((tb < 0 || tb >= kIstNumTimeBins) ? mDefaultTimeBin : tb);
 };

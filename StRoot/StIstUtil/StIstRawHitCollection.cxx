@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstRawHitCollection.cxx,v 1.15 2014/09/08 19:06:57 smirnovd Exp $
+* $Id: StIstRawHitCollection.cxx,v 1.16 2014/09/09 08:23:46 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************/
@@ -11,7 +11,7 @@
 #include <iostream>
 
 
-StIstRawHitCollection::StIstRawHitCollection( unsigned char ladder ) : StObject(), mLadder(ladder), mRawHitVec(), mRawHitElecIdVec(kIstNumElecIds)
+StIstRawHitCollection::StIstRawHitCollection( int ladder ) : StObject(), mLadder(ladder), mRawHitVec(), mRawHitElecIdVec(kIstNumElecIds)
 {
 }
 
@@ -50,7 +50,7 @@ size_t StIstRawHitCollection::getNumRawHits() const
    return mRawHitVec.size();
 };
 
-void StIstRawHitCollection::setLadder( unsigned char ladder )
+void StIstRawHitCollection::setLadder( int ladder )
 {
    mLadder = ladder;
 };
@@ -100,6 +100,9 @@ ClassImp(StIstRawHitCollection);
 
 /***************************************************************************
 * $Log: StIstRawHitCollection.cxx,v $
+* Revision 1.16  2014/09/09 08:23:46  ypwang
+* all unsgined char was updated to int type as Victor P. suggested
+*
 * Revision 1.15  2014/09/08 19:06:57  smirnovd
 * Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
 *

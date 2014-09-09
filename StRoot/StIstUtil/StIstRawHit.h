@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHit.h,v 1.9 2014/09/08 19:07:05 smirnovd Exp $
+* $Id: StIstRawHit.h,v 1.10 2014/09/09 08:23:46 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -30,8 +30,8 @@ public:
    unsigned char     getSensor()     const; //!< 1-6
    unsigned char     getRow()        const; //!< 1-64
    unsigned char     getColumn()     const; //!< 1-12
-   float     	      getCharge(unsigned char tb = 0) 	 const;
-   float             getChargeErr(unsigned char tb = 0) const;
+   float     	      getCharge(int tb = 0) 	 const;
+   float             getChargeErr(int tb = 0) const;
    unsigned char     getMaxTimeBin() const;
    unsigned char     getRdo()        const; //!< 1-6
    unsigned char     getArm()        const; //!< 0-5
@@ -43,10 +43,10 @@ public:
    //modifiers
    void        setChannelId(int rChannelId) ;
    void	setGeoId(int rChannelId);
-   void        setCharge(float charge, unsigned char tb = -1) ;
-   void	setChargeErr(float chargeErr, unsigned char tb = -1) ;
-   void        setMaxTimeBin(unsigned char tb) ;
-   static void setDefaultTimeBin( unsigned char tb );
+   void        setCharge(float charge, int tb = -1) ;
+   void	setChargeErr(float chargeErr, int tb = -1) ;
+   void        setMaxTimeBin(int tb) ;
+   static void setDefaultTimeBin( int tb );
    void        setIdTruth(unsigned short idTruth);
 
    using StObject::Print;
@@ -78,6 +78,9 @@ struct rawHitPtrLessThan {
 /***************************************************************************
 *
 * $Log: StIstRawHit.h,v $
+* Revision 1.10  2014/09/09 08:23:46  ypwang
+* all unsgined char was updated to int type as Victor P. suggested
+*
 * Revision 1.9  2014/09/08 19:07:05  smirnovd
 * StIstRawHit: Made methods accessing static data member static
 *

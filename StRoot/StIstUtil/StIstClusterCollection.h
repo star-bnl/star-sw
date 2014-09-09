@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterCollection.h,v 1.5 2014/09/08 19:06:57 smirnovd Exp $
+* $Id: StIstClusterCollection.h,v 1.6 2014/09/09 08:23:46 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -19,7 +19,7 @@ class StIstClusterCollection : public StObject
 {
 public:
    //constructors
-   StIstClusterCollection(unsigned char ladder = 0);
+   StIstClusterCollection(int ladder = 0);
 
    //deconstructor
    ~StIstClusterCollection();
@@ -32,7 +32,7 @@ public:
 
    //modify/access the ladder
    unsigned char getLadder() const;
-   void setLadder( unsigned char ladder );
+   void setLadder( int ladder );
 
    //Clear
    void Clear( Option_t *opt = "" );
@@ -54,6 +54,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.h,v $
+* Revision 1.6  2014/09/09 08:23:46  ypwang
+* all unsgined char was updated to int type as Victor P. suggested
+*
 * Revision 1.5  2014/09/08 19:06:57  smirnovd
 * Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
 *

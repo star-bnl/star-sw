@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstClusterCollection.cxx,v 1.7 2014/09/08 19:06:57 smirnovd Exp $
+* $Id: StIstClusterCollection.cxx,v 1.8 2014/09/09 08:23:46 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -14,7 +14,7 @@
 
 
 //constructors
-StIstClusterCollection::StIstClusterCollection( unsigned char ladder ) : StObject(), mLadder( ladder )
+StIstClusterCollection::StIstClusterCollection( int ladder ) : StObject(), mLadder( ladder )
 {
    /* nothing to do */
 };
@@ -68,7 +68,7 @@ size_t StIstClusterCollection::getNumClusters() const
    return mClusterVec.size();
 };
 
-void StIstClusterCollection::setLadder( unsigned char ladder )
+void StIstClusterCollection::setLadder( int ladder )
 {
    mLadder = ladder;
 };
@@ -84,6 +84,9 @@ ClassImp(StIstClusterCollection);
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.cxx,v $
+* Revision 1.8  2014/09/09 08:23:46  ypwang
+* all unsgined char was updated to int type as Victor P. suggested
+*
 * Revision 1.7  2014/09/08 19:06:57  smirnovd
 * Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
 *
