@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.20 2014/08/18 17:44:45 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.21 2014/09/09 14:00:39 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.21  2014/09/09 14:00:39  marr
+ * Fill the expected time-of-flight calculated via track extrapolation
+ *
  * Revision 1.20  2014/08/18 17:44:45  marr
  * Add assert() statement to abort if the loaded geometry is wrong
  *
@@ -1246,6 +1249,7 @@ bool StMtdMatchMaker::matchTrack2Mtd(mtdCellHitVector daqCellsHitVec,const StPhy
 		cellHit.yhit	=	ol.y();
 		cellHit.theta	=	ol.theta();
 		cellHit.pathLength = pathVec[i];
+		cellHit.expTof2MTD = tofVec[i];
 		allCellsHitVec.push_back(cellHit);
 		nCells++;
 
@@ -1392,6 +1396,7 @@ void StMtdMatchMaker::matchMtdHits(mtdCellHitVector& daqCellsHitVec,mtdCellHitVe
 				cellHit.index2MtdHit = daqIter->index2MtdHit;
 				cellHit.theta = proIter->theta;
 				cellHit.pathLength = proIter->pathLength;
+				cellHit.expTof2MTD = proIter->expTof2MTD;
 				matchHitCellsVec.push_back(cellHit);
 			}
 		} 
@@ -1447,6 +1452,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 						cellHit.index2MtdHit = tempIter->index2MtdHit;
 						cellHit.theta = tempIter->theta;
 						cellHit.pathLength = tempIter->pathLength;
+						cellHit.expTof2MTD = tempIter->expTof2MTD;
 						if(Debug())
 						{
 							LOG_INFO<<"track Info: "<<cellHit.zhit<<" "<<cellHit.yhit<<endm;
@@ -1468,6 +1474,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 					cellHit_candidate.index2MtdHit = erasedIter->index2MtdHit;
 					cellHit_candidate.theta = erasedIter->theta;
 					cellHit_candidate.pathLength = erasedIter->pathLength;
+					cellHit_candidate.expTof2MTD = erasedIter->expTof2MTD;
 					multiHitsCellsVec_temp.push_back(cellHit_candidate);
 					if(Debug())
 					{
@@ -1497,6 +1504,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 		cellHit.index2MtdHit = tempIter->index2MtdHit;
 		cellHit.theta = tempIter->theta;
 		cellHit.pathLength = tempIter->pathLength;
+		cellHit.expTof2MTD = tempIter->expTof2MTD;
 
 		if(mHisto) {
 			//Float_t ycenter = (tempIter->cell-mMtdGeom->GetNCells()/2+0.5)*(mCellWidth+mCellGap);
@@ -1599,6 +1607,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 		vector<pairD> vtdc; 
 		vector<Double_t> vtheta;
 		vector<Double_t> vpathLength;
+		vector<Double_t> vexpTof2MTD;
 		vector<Int_t> vindex2MtdHit;
 
 		mtdCellHitVectorIter temp_Iter=tempVec_2Trck.begin();
@@ -1621,6 +1630,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 				vindex2MtdHit.push_back(erased_Iter->index2MtdHit);
 				vtheta.push_back(erased_Iter->theta);
 				vpathLength.push_back(erased_Iter->pathLength);
+				vexpTof2MTD.push_back(erased_Iter->expTof2MTD);
 				if(Debug())
 				{
 					LOG_INFO<<"ntracks ="<<ntracks<<endm;
@@ -1701,6 +1711,7 @@ void StMtdMatchMaker::sortSingleAndMultiHits(mtdCellHitVector& matchHitCellsVec,
 				Cellhit.index2MtdHit = vindex2MtdHit[thiscandidate];
 				Cellhit.theta = vtheta[thiscandidate];
 				Cellhit.pathLength = vpathLength[thiscandidate];
+				Cellhit.expTof2MTD = vexpTof2MTD[thiscandidate];
 				singleHitCellsVec.push_back(Cellhit);
 				if(Debug())
 				{
@@ -1743,6 +1754,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 		vector<pairD> vtdc; 
 		vector<Double_t> vtheta;
 		vector<Double_t> vpathLength;
+		vector<Double_t> vexpTof2MTD;
 		vector<Int_t> vindex2MtdHit;
 		vector<Int_t> vflag;
 		Int_t thisMatchFlag_tem(0);
@@ -1764,6 +1776,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 				vtheta.push_back(erasedIter->theta);
 				vflag.push_back(erasedIter->matchFlag);
 				vpathLength.push_back(erasedIter->pathLength);
+				vexpTof2MTD.push_back(erasedIter->expTof2MTD);
 				if(Debug())
 				{
 					LOG_INFO<<"flag 1 ::"<<" "<<nCells<<" "<<erasedIter->matchFlag<<endm;
@@ -1789,6 +1802,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 			cellHit.index2MtdHit = vindex2MtdHit[0];
 			cellHit.theta = vtheta[0];
 			cellHit.pathLength = vpathLength[0];
+			cellHit.expTof2MTD = vexpTof2MTD[0];
 
 			if(Debug())
 			{
@@ -1900,6 +1914,7 @@ void StMtdMatchMaker::finalMatchedMtdHits(mtdCellHitVector& singleHitCellsVec,mt
 				cellHit.index2MtdHit = vindex2MtdHit[thiscandidate];
 				cellHit.theta = vtheta[thiscandidate];
 				cellHit.pathLength = vpathLength[thiscandidate];
+				cellHit.expTof2MTD = vexpTof2MTD[thiscandidate];
 
 				finalMatchedCellsVec.push_back(cellHit);
 
@@ -1978,6 +1993,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			pidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
 			pidMtd.setPosition(finalMatchedCellsVec[ii].hitPosition);
 			pidMtd.setPathLength(finalMatchedCellsVec[ii].pathLength);
+			pidMtd.setExpTimeOfFlight(finalMatchedCellsVec[ii].expTof2MTD);
 			gTrack->setMtdPidTraits(pidMtd);
 
 			Int_t pNode = -999;
@@ -1998,6 +2014,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 				ppidMtd.setThetaLocal(finalMatchedCellsVec[ii].theta);
 				ppidMtd.setPosition(finalMatchedCellsVec[ii].hitPosition);
 				ppidMtd.setPathLength(finalMatchedCellsVec[ii].pathLength);
+				ppidMtd.setExpTimeOfFlight(finalMatchedCellsVec[ii].expTof2MTD);
 				pTrack->setMtdPidTraits(ppidMtd);
 			}
 
@@ -2036,6 +2053,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			pidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
 			pidMtd->setPosition(finalMatchedCellsVec[ii].hitPosition);
 			pidMtd->setPathLength(finalMatchedCellsVec[ii].pathLength);
+			pidMtd->setExpTimeOfFlight(finalMatchedCellsVec[ii].expTof2MTD);
 			globalTrack->addPidTraits(pidMtd);
 
 			if(primaryTrack){
@@ -2049,6 +2067,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 				ppidMtd->setThetaLocal(finalMatchedCellsVec[ii].theta);
 				ppidMtd->setPosition(finalMatchedCellsVec[ii].hitPosition);
 				ppidMtd->setPathLength(finalMatchedCellsVec[ii].pathLength);
+				ppidMtd->setExpTimeOfFlight(finalMatchedCellsVec[ii].expTof2MTD);
 				primaryTrack->addPidTraits(ppidMtd);
 			}
 		}

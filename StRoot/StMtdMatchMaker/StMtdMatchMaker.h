@@ -6,11 +6,14 @@
  *
  * The MTD MatchMaker matches STAR tracks to the MTD MRPCs.
  * 
- * $Id: StMtdMatchMaker.h,v 1.9 2014/08/06 11:43:27 jeromel Exp $
+ * $Id: StMtdMatchMaker.h,v 1.10 2014/09/09 14:00:39 marr Exp $
  */
 /*****************************************************************
  *
  * $Log: StMtdMatchMaker.h,v $
+ * Revision 1.10  2014/09/09 14:00:39  marr
+ * Fill the expected time-of-flight calculated via track extrapolation
+ *
  * Revision 1.9  2014/08/06 11:43:27  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -375,6 +378,7 @@ class StMtdMatchMaker: public StMaker
 			Int_t index2MtdHit;
 			Double_t theta;
 			Double_t pathLength;
+			Double_t expTof2MTD;
 		};
 		MtdEvtData  mMtdEvtData;
 
@@ -422,7 +426,7 @@ class StMtdMatchMaker: public StMaker
 		void fillTrackInfo(StMuTrack *t, float mField, UInt_t iNode);
 
 		virtual const char *GetCVS() const
-	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.9 2014/08/06 11:43:27 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+	 		{static const char cvs[]="Tag $Name:  $ $Id: StMtdMatchMaker.h,v 1.10 2014/09/09 14:00:39 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 		ClassDef(StMtdMatchMaker,2)
 };
 
