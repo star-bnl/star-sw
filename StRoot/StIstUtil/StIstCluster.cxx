@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCluster.cxx,v 1.11 2014/09/08 19:06:57 smirnovd Exp $
+* $Id: StIstCluster.cxx,v 1.12 2014/09/09 08:23:46 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -13,9 +13,9 @@
 #include "StRoot/St_base/StMessMgr.h"
 
 
-StIstCluster::StIstCluster(int key, unsigned char ladder, unsigned char sensor,
-                           float meanRow, float meanColumn, float totCharge, float totChargeErr, unsigned
-                           char clusteringType):
+StIstCluster::StIstCluster(int key, int ladder, int sensor,
+                           float meanRow, float meanColumn, float totCharge, float totChargeErr,
+           		   int clusteringType):
    mKey(key),
    mLadderId(ladder),
    mSensorId(sensor),
@@ -52,12 +52,12 @@ unsigned char    StIstCluster::getNRawHitsZ() const     	{    return mNRawHitsZ;
 unsigned short   StIstCluster::getIdTruth() const       	{    return mIdTruth;       };
 
 //modifiers
-void StIstCluster::setLadder(unsigned char ladder)
+void StIstCluster::setLadder(int ladder)
 {
    mLadderId = ladder;
 };
 
-void StIstCluster::setSensor(unsigned char sensor)
+void StIstCluster::setSensor(int sensor)
 {
    mSensorId = sensor;
 };
@@ -82,27 +82,27 @@ void StIstCluster::setTotChargeErr(float totChargeErr)
    mTotChargeErr = totChargeErr;
 };
 
-void StIstCluster::setMaxTimeBin(unsigned char tb)
+void StIstCluster::setMaxTimeBin(int tb)
 {
    mMaxTimeBin = tb;
 };
 
-void StIstCluster::setClusteringType(unsigned char clusteringType)
+void StIstCluster::setClusteringType(int clusteringType)
 {
    mClusteringType = clusteringType;
 };
 
-void StIstCluster::setNRawHits(unsigned char nRawHits)
+void StIstCluster::setNRawHits(int nRawHits)
 {
    mNRawHits = nRawHits;
 };
 
-void StIstCluster::setNRawHitsRPhi(unsigned char nRawHitsRPhi)
+void StIstCluster::setNRawHitsRPhi(int nRawHitsRPhi)
 {
    mNRawHitsRPhi = nRawHitsRPhi;
 };
 
-void StIstCluster::setNRawHitsZ(unsigned char nRawHitsZ)
+void StIstCluster::setNRawHitsZ(int nRawHitsZ)
 {
    mNRawHitsZ = nRawHitsZ;
 };
@@ -131,6 +131,9 @@ ClassImp(StIstCluster);
 *
 *
 * $Log: StIstCluster.cxx,v $
+* Revision 1.12  2014/09/09 08:23:46  ypwang
+* all unsgined char was updated to int type as Victor P. suggested
+*
 * Revision 1.11  2014/09/08 19:06:57  smirnovd
 * Added Print() methods to print out properties of StIstCluster and StIstRawHit objects and their respective collections
 *

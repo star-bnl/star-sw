@@ -1,5 +1,5 @@
 /***************************************************************************
-* $Id: StIstCollection.h,v 1.7 2014/03/27 22:47:02 smirnovd Exp $
+* $Id: StIstCollection.h,v 1.8 2014/09/09 08:23:46 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -30,17 +30,17 @@ public:
    ~StIstCollection();
 
    size_t getNumRawHits() const;                   // overall
-   size_t getNumRawHits( unsigned char ladder) const;      // per ladder
+   size_t getNumRawHits( int ladder) const;      // per ladder
    size_t getNumClusters() const;                  // overall
-   size_t getNumClusters( unsigned char ladder ) const;    // per ladder
+   size_t getNumClusters( int ladder ) const;    // per ladder
    size_t getNumTimeBins() const;
    void setNumTimeBins(size_t nTimebin);
 
-   StIstRawHitCollection *getRawHitCollection( unsigned char ladder );
-   const StIstRawHitCollection *getRawHitCollection( unsigned char ladder ) const;
+   StIstRawHitCollection *getRawHitCollection( int ladder );
+   const StIstRawHitCollection *getRawHitCollection( int ladder ) const;
 
-   StIstClusterCollection *getClusterCollection( unsigned char ladder );
-   const StIstClusterCollection *getClusterCollection( unsigned char ladder ) const;
+   StIstClusterCollection *getClusterCollection( int ladder );
+   const StIstClusterCollection *getClusterCollection( int ladder ) const;
 
 protected:
    StIstRawHitCollection mRawHitCollection[kIstNumLadders];
@@ -57,6 +57,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstCollection.h,v $
+* Revision 1.8  2014/09/09 08:23:46  ypwang
+* all unsgined char was updated to int type as Victor P. suggested
+*
 * Revision 1.7  2014/03/27 22:47:02  smirnovd
 * Remove unnecessary Clear() method. Use destructor instead
 *

@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstCollection.cxx,v 1.7 2014/03/27 22:47:02 smirnovd Exp $
+* $Id: StIstCollection.cxx,v 1.8 2014/09/09 08:23:46 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -15,7 +15,7 @@
 StIstCollection::StIstCollection() : StObject()
 {
    // set the ladder field for some of the collections
-   for ( unsigned char i = 0; i < kIstNumLadders; ++i ) {
+   for ( int i = 0; i < kIstNumLadders; ++i ) {
       mRawHitCollection[i].setLadder( i );
       mClusterCollection[i].setLadder( i );
    }
@@ -26,7 +26,7 @@ StIstCollection::StIstCollection() : StObject()
 //deconstructor
 StIstCollection::~StIstCollection()
 {
-   for ( unsigned char i = 0; i < kIstNumLadders; ++i ) {
+   for ( int i = 0; i < kIstNumLadders; ++i ) {
       mRawHitCollection[i].Clear("");
       mClusterCollection[i].Clear("");
    }
@@ -42,24 +42,24 @@ void StIstCollection::setNumTimeBins(size_t nTimeBins)
    mNumTimeBins = nTimeBins;
 };
 
-StIstRawHitCollection *StIstCollection::getRawHitCollection( unsigned char ladder )
+StIstRawHitCollection *StIstCollection::getRawHitCollection( int ladder )
 {
-   return (ladder < kIstNumLadders ? &mRawHitCollection[ladder] : 0 );
+   return ((ladder >= 0 && ladder < kIstNumLadders) ? &mRawHitCollection[ladder] : 0 );
 };
 
-const StIstRawHitCollection *StIstCollection::getRawHitCollection( unsigned char ladder ) const
+const StIstRawHitCollection *StIstCollection::getRawHitCollection(int ladder ) const
 {
-   return (ladder < kIstNumLadders ? &mRawHitCollection[ladder] : 0  );
+   return ((ladder >= 0 && ladder < kIstNumLadders) ? &mRawHitCollection[ladder] : 0  );
 };
 
-StIstClusterCollection *StIstCollection::getClusterCollection( unsigned char ladder )
+StIstClusterCollection *StIstCollection::getClusterCollection( int ladder )
 {
-   return (ladder < kIstNumLadders ? &mClusterCollection[ladder] : 0 );
+   return ((ladder >= 0 && ladder < kIstNumLadders) ? &mClusterCollection[ladder] : 0 );
 };
 
-const StIstClusterCollection *StIstCollection::getClusterCollection( unsigned char ladder ) const
+const StIstClusterCollection *StIstCollection::getClusterCollection( int ladder ) const
 {
-   return (ladder < kIstNumLadders ? &mClusterCollection[ladder] : 0 );
+   return ((ladder >= 0 && ladder < kIstNumLadders) ? &mClusterCollection[ladder] : 0 );
 };
 
 //sum of all the raw hits over all ladders
@@ -74,9 +74,9 @@ size_t StIstCollection::getNumRawHits() const
 };
 
 //number of raw hits on one ladder
-size_t StIstCollection::getNumRawHits( unsigned char ladder ) const
+size_t StIstCollection::getNumRawHits( int ladder ) const
 {
-   return (ladder < kIstNumLadders ? mRawHitCollection[ladder].getNumRawHits() : 0 );
+   return ((ladder >= 0 && ladder < kIstNumLadders) ? mRawHitCollection[ladder].getNumRawHits() : 0 );
 };
 
 //sum of all the clusters over all ladders
@@ -91,9 +91,9 @@ size_t StIstCollection::getNumClusters() const
 };
 
 //number of clusters on one ladder
-size_t StIstCollection::getNumClusters( unsigned char ladder ) const
+size_t StIstCollection::getNumClusters( int ladder ) const
 {
-   return (ladder < kIstNumLadders ? mClusterCollection[ladder].getNumClusters() : 0 );
+   return ((ladder >= 0 && ladder < kIstNumLadders) ? mClusterCollection[ladder].getNumClusters() : 0 );
 };
 
 
@@ -103,6 +103,9 @@ ClassImp(StIstCollection);
 /***************************************************************************
 *
 * $Log: StIstCollection.cxx,v $
+* Revision 1.8  2014/09/09 08:23:46  ypwang
+* all unsgined char was updated to int type as Victor P. suggested
+*
 * Revision 1.7  2014/03/27 22:47:02  smirnovd
 * Remove unnecessary Clear() method. Use destructor instead
 *
