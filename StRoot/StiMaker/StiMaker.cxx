@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.216 2014/08/22 15:56:30 perev Exp $
+// $Id: StiMaker.cxx,v 1.217 2014/09/10 15:52:12 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -288,7 +288,7 @@ Int_t StiMaker::InitDetectors()
   // SSD or SST - they share the db and the kSsdId
   if (IAttr("useSst") && gStSstDbMaker){
     cout<<"StiMaker::Init() -I- Adding detector group:Sst (ssd)"<<endl;
-    _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSst")));
+    _toolkit->add(group = new StiSstDetectorGroup(IAttr("activeSst")));
     group->setGroupId(kSsdId);
 
   } else if ( IAttr("useSsd") && gStSsdDbMaker){
@@ -550,8 +550,11 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   }
   return fVolume;
 }
-// $Id: StiMaker.cxx,v 1.216 2014/08/22 15:56:30 perev Exp $
+// $Id: StiMaker.cxx,v 1.217 2014/09/10 15:52:12 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.217  2014/09/10 15:52:12  perev
+// Fix typo, StiSsdDetectorGroup ==> StiSsdDetectorGroup
+//
 // Revision 1.216  2014/08/22 15:56:30  perev
 // Remove never used input file in StiXXXDetectorGroup
 //
