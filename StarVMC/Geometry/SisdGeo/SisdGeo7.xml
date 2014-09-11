@@ -429,7 +429,7 @@
            <!-- <var name="rmin" value="21.8" comment=" mother rmin " />-->
            <!-- new rmin to accomodate the new radius -->
             <var name="rmin" value="21." comment=" mother rmin " />
-            <var name="rmax" value="32." comment=" mother rmax " />
+            <var name="rmax" value="28.5" comment=" mother rmax " />
             <var name="SOutRInn" value="29.5" comment=" outer shield cylinder, inner radius " />
             <var name="SOutROut" value="29.52" comment=" outer shield cylinder, outer radius " />
             <var name="SOutLen" value="65.4" comment=" outer shield cylinder, half length " />
@@ -536,7 +536,7 @@
             <Component name="H" a="1" z="1" w="8*1.0/100." />
         </Mixture>
         
-
+    <Info format="JB SSD SFPA_version = {5.2i}">SFPA_version</Info>
 
     <!-- Create the SSD mother volume and place it w/in the IDSM, flagging it as overlapping -->
         <Create    block="SFMO" />
@@ -826,11 +826,11 @@
             <Attribute for="SFLM" seen="1" colo="6" />
             <Shape type="BOX" dz="SFPA_smLen/2" dx="SFPA_dmWid/2" dy="(SFPA_dmThk+SFPA_gpThk+SFPA_smThk)/2" />
             <Create block="SFDM" />
-            <Placement y="-(SFPA_smThk+SFPA_gpThk)/2" block="SFDM"  >
+            <Placement y="-(SFPA_smThk+SFPA_gpThk)/2" block="SFDM" konly="'MANY'" >
             </Placement>
             
             <Create block="SFSM" />
-            <Placement y="(SFPA_dmThk+SFPA_gpThk)/2" block="SFSM"  >
+            <Placement y="(SFPA_dmThk+SFPA_gpThk)/2" block="SFSM" konly="'MANY'" >
             </Placement>
             
         </Block>
@@ -842,7 +842,7 @@
             wafpckLen=SFPA_wpLen/(SFPA_nssd*1.) 
             <Do var="iwaf" from="1" to="SFPA_nssd"  >
                 <Create block="SFSW" />
-                <Placement z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFSW"  >
+                <Placement z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFSW" konly="'MANY'" >
                 </Placement>
                 
             </Do>
