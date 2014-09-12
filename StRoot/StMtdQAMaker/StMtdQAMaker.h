@@ -310,7 +310,8 @@ class StMtdQAMaker : public StMaker {
   TH2F             *mhTofMthTrkLocalz;                         // Projected z in TOF local coordinate for tracks matched to TOF hits
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
+    static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; 
+    return cvs;
   }
   
   ClassDef(StMtdQAMaker, 1)
