@@ -1841,8 +1841,8 @@
 
     yp = -(ladderhalfthickness -glucthickness - backingThickness/2.0)
     <Create block="CFBK" />
-    <Placement block="CFBK" x="0.0" y="yp" z="backingZOffset">
-    </Placement>
+    <Placement block="CFBK" x="0.0" y="yp" z="backingZOffset" />
+
 
     yp = -(ladderhalfthickness -glucthickness/2.0)
     <Create block="GLUC" />
