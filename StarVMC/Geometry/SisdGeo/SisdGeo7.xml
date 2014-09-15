@@ -1,6 +1,5 @@
 <Document file="StarVMC/Geometry/SisdGeo/SisdGeo7.xml">
 
-
   <Module name="SISDGEO7" comment="  is the Silicon Strip Detector with TUP modifications "  >
     <Author name="Bouchet and Potekhin"  />
     <Created date=" 1 Feb 07 "  />
@@ -186,9 +185,6 @@
       <var name="SFEB_Py" />
     </Structure>
         
-
-
-
         <Structure name="SFPB"  >
             <var name="Hhight" />
             <var name="Khight" />
@@ -228,8 +224,6 @@
             <var name="LadderRadius(20)" />
         </Structure>
         
-
-
         <varlist type="INTEGER"  >
             ilad,iwaf,jwaf,nc
         </varlist>
@@ -242,15 +236,12 @@
             essai,hight,lng,leng,yoffset
         </varlist>
         
-
         <Fill name="SSDP" comment="Silicon Strips"  >
             <var name="Version" value="1" comment=" Version " />
             <var name="Config" value="1" comment=" There are a few configuraions possible " />
             <var name="Placement" value="1" comment=" 0=cave, 1=idsm " />
         </Fill>
         
-
-
         <Fill name="SFJP" comment="Different Dimension parameters"  >
             <var name="Version" value="1" comment=" new version information  " />
             <var name="AlphaZ" value="54" comment=" Alpha of the SFLA and other parts " />
@@ -408,10 +399,7 @@
         <Fill name="SFJP" comment="Different Dimension parameters"  >
             <var name="Version" value="2" comment=" Version  " />
             <var name="SSRS_Rmin" value="23.3" comment=" Width of the side of the small rib (outside structure) " />
-        </Fill>
-        
-
-
+        </Fill>        
 
         <Fill name="SFPB" comment="Some SSD Shell dimensions"  >
             <var name="Hhight" value="(0.02/tan(54*pi/180)+0.02/(2*tan(pi/5))+0.2)*sin(pi/5)" comment=" haut 1 " />
@@ -420,9 +408,7 @@
             <var name="Kbase" value="0.02/sin(63*pi/180)" comment=" bas 2 " />
             <var name="Fsize" value="0.6/cos(15*pi/180)+0.02*tan(15*pi/180)" comment=" lenght of the side kapton film " />
             <var name="Zcoor" value="5.18462095393834410" comment=" z coord " />
-        </Fill>
-        
-
+        </Fill>        
 
         <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="1" comment=" geometry version " />
@@ -527,22 +513,18 @@
             <Component name="O" a="16" z="8" w="0.6*2*16./60. + 0.4*4*16./174." />
             <Component name="C" a="12" z="6" w="0.4*8*12./174." />
             <Component name="H" a="1" z="1" w="0.4*14*1./174." />
-        </Mixture>
-        
+        </Mixture>       
 
         <Mixture name="DELRIN" dens="1.2"  >
             <Component name="O" a="16" z="8" w="2*16./100." />
             <Component name="C" a="12" z="6" w="5*12./100." />
             <Component name="H" a="1" z="1" w="8*1.0/100." />
-        </Mixture>
-        
-    <Info format="JB SSD SFPA_version = {5.2i}">SFPA_version</Info>
+        </Mixture>        
 
     <!-- Create the SSD mother volume and place it w/in the IDSM, flagging it as overlapping -->
         <Create    block="SFMO" />
         <Placement block="SFMO" in="IDSM" konly="'MANY'"         if="SSDP_placement==1" />
         <Placement block="SFMO" in="CAVE" konly="'ONLY'"         if="SSDP_placement==0" /> 
-
 
 	<Block name="SFMO" comment="is the mother of all Silicon Strip Detector volumes"  >
 
@@ -581,7 +563,6 @@
 	    
 	  </Do>
             
-
             <Create block="SSST" />
 <!--
             <Placement y="0." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-SFJP_SSST_Width/2.-SFJP_SSST_Pz" block="SSST"  >
@@ -856,112 +837,103 @@
             <Shape type="BOX" dz="SFJP_SFSW_Dz" dx="SFPA_dmWid/2" dy="SFJP_SFSW_Dy" />
 
             <Create block="SFSL" />
-            <Placement block="SFSL"  >
+            <Placement block="SFSL" konly="'MANY'"  >
             </Placement>
             
             <Create block="SFRA" />
-            <Placement y="SFJP_SFRA_Py" x="0.0" z="SFJP_SFRA_Pz" block="SFRA"  >
+            <Placement y="SFJP_SFRA_Py" x="0.0" z="SFJP_SFRA_Pz" block="SFRA" konly="'MANY'"   >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py" x="0.0" z="-SFJP_SFRA_Pz" block="SFRA"  >
+            <Placement y="SFJP_SFRA_Py" x="0.0" z="-SFJP_SFRA_Pz" block="SFRA" konly="'MANY'"   >
             </Placement>
             
             <Create block="SFRS" />
-            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS"  >
+            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS" konly="'MANY'"   >
             </Placement>
             
-            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS"  >
+            <Placement y="SFJP_SFRS_Py" x="SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS" konly="'MANY'"   >
             </Placement>
             
-            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS"  >
+            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="SFJP_SFRA_Pz" block="SFRS" konly="'MANY'"   >
             </Placement>
             
-            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS"  >
+            <Placement y="SFJP_SFRS_Py" x="-SFJP_SFRS_Px" z="-SFJP_SFRA_Pz" block="SFRS" konly="'MANY'"   >
             </Placement>
             
-
             <Create block="SFFX" />
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="SFJP_SFRA_Pz" block="SFFX"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="SFJP_SFRA_Pz" block="SFFX" konly="'MANY'"   >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="-SFJP_SFRA_Pz" block="SFFX"  >
-            </Placement>
-            
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz" x="0.0" z="-SFJP_SFRA_Pz" block="SFFX" konly="'MANY'"   >
+            </Placement>           
 
             <Create block="SFPI" />
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI" konly="'MANY'"   >
                 <Rotation alphax="90" />
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="SFJP_SFPI_Pz" block="SFPI" konly="'MANY'"   >
                 <Rotation alphax="90" />
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI" konly="'MANY'"   >
                 <Rotation alphax="90" />
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFPI_Py1-SFJP_SFPI_Py2" x="-SFJP_SFPI_Px" z="-SFJP_SFPI_Pz" block="SFPI" konly="'MANY'"   >
                 <Rotation alphax="90" />
             </Placement>
             
-
             <Create block="SFAA" />
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"   >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"   >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"   >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="SFJP_SFAA_Pz1+SFJP_SFAA_Pz2-SFJP_SFAA_Pz3-SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="-SFJP_SFAA_Px1-SFJP_SFAA_Dx-SFJP_SFAA_Px2-SFJP_SFAA_Px3-SFJP_SFAA_Px2-SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA"  >
+            <Placement y="SFJP_SFRA_Py+SFJP_SFRA_Dy+SFJP_SFFX_Dyz*2+SFJP_SFAA_Dy" x="+SFJP_SFAA_Px1+SFJP_SFAA_Dx+SFJP_SFAA_Px2+SFJP_SFAA_Px3+SFJP_SFAA_Px2+SFJP_SFAA_Px3" z="-SFJP_SFAA_Pz1-SFJP_SFAA_Pz2+SFJP_SFAA_Pz3+SFJP_SFAA_Dz" block="SFAA" konly="'MANY'"  >
             </Placement>
             
-
-        </Block>
-        
-
+        </Block>       
 
         <Block name="SFRA" comment="is the hybrid stiffneer"  >
             <Material name="Carbon" />
             <Attribute for="SFRA" seen="2" colo="1" />
             <Shape type="BOX" dz="SFJP_SFRA_Dz" dx="SFJP_SFRA_Dx" dy="SFJP_SFRA_Dy" />
-        </Block>
-        
-
+        </Block>        
 
         <Block name="SFRS" comment="two supports of the hybrid stiffneer (piece of it)"  >
             <Material name="Carbon" />
             <Attribute for="SFRS" seen="2" colo="1" />
             <Shape type="BOX" dz="SFJP_SFRA_Dz" dx="SFJP_SFRS_Dx" dy="SFJP_SFRS_Dy" />
-        </Block>
-        
+        </Block>        
 
         <Block name="SFFX" comment="is the flex"  >
             <Material name="Copper" />
@@ -974,9 +946,7 @@
             <Material name="Silicon" />
             <Attribute for="SFAA" seen="1" colo="41" />
             <Shape type="BOX" dz="SFJP_SFAA_Dz" dx="SFJP_SFAA_Dx" dy="SFJP_SFAA_Dy" />
-        </Block>
-        
-
+        </Block>        
 
         <Block name="SFPI" comment="are the pions"  >
             <Material name="Aluminium" />
@@ -987,17 +957,13 @@
             <Placement y="0." x="0." z="-SFJP_SFPI_Pz/2.0+SFJP_SFPJ_Dz" block="SFPJ"  >
             </Placement>
             
-        </Block>
-        
-
+        </Block>     
 
         <Block name="SFPJ" comment="is the base of the pions"  >
             <Material name="Aluminium" />
             <Attribute for="SFPJ" seen="2" colo="33" />
             <Shape type="TUBE" rmax="SFJP_SFPJ_Dy" rmin="SFJP_SFPJ_Dx1+SFJP_SFPJ_Dx2" dz="SFJP_SFPJ_Dz" />
-        </Block>
-        
-
+        </Block>       
 
         <Block name="SFSL" comment="is the Silicon of the strip detector"  >
             <Material name="Silicon" />
@@ -1006,12 +972,10 @@
 
             <Create block="SFSD" />
             <Placement block="SFSD"  >
-            </Placement>
-            
+            </Placement>            
 
         </Block>
         
-
         <Block name="SFSD" comment="is the strip detector"  >
             <Material name="Silicon" />
             <Material name="Sensitive" isvol="1" />
@@ -1044,162 +1008,144 @@
 
             <Create block="SFLT" />
             hight = SFJP_SFSM_Ll*tan(54*pi/180)-SFPB_Hhight/tan(pi/5)-0.02 
-            <Placement y="hight+yoffset" x="-(SFPB_Hhight-SFPB_Khight)" z="0.0" block="SFLT"  >
+            <Placement y="hight+yoffset" x="-(SFPB_Hhight-SFPB_Khight)" z="0.0" block="SFLT" konly="'MANY'"  >
                 <Rotation alphaz="-90-36" />
             </Placement>
             
-            <Placement y="hight+yoffset" x="(SFPB_Hhight-SFPB_Khight)" z="0" block="SFLT"  >
+            <Placement y="hight+yoffset" x="(SFPB_Hhight-SFPB_Khight)" z="0" block="SFLT" konly="'MANY'" >
                 <Rotation alphay="180." />
                 <Rotation alphaz="90.+36." />
-            </Placement>
-            
+            </Placement>            
 
             <Create block="SFLU" />
-            <Placement y="0.+yoffset" x="0.-(SFJP_SFSM_Ll-(SFJP_SFLU_bl1+SFJP_SFLU_h1/2*1/tan(pi/5)))" z="0." block="SFLU"  >
+            <Placement y="0.+yoffset" x="0.-(SFJP_SFSM_Ll-(SFJP_SFLU_bl1+SFJP_SFLU_h1/2*1/tan(pi/5)))" z="0." block="SFLU" konly="'MANY'" >
             </Placement>
             
             essai = 180 
             essai = essai + 27 + 27 
-            <Placement y="cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset" x="-cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)-(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0" block="SFLU"  >
+            <Placement y="cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset" x="-cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)-(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0" block="SFLU" konly="'MANY'" >
                 <Rotation alphay="180" />
                 <Rotation alphaz="essai" />
             </Placement>
             
-            <Placement y="0.+yoffset" x="0.+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0." block="SFLU"  >
+            <Placement y="0.+yoffset" x="0.+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0." block="SFLU" konly="'MANY'" >
                 <Rotation alphay="180." />
             </Placement>
             
             <Placement y="cos(27*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+yoffset" x="cos(63*pi/180)*2*(SFPB_Hbase-SFPB_Kbase)+(SFJP_SFSM_Ll-(0.2+0.01/tan(pi/5)))" z="0" block="SFLU"  >
                 <Rotation alphaz="-essai" />
-            </Placement>
-            
-
-
+            </Placement>            
 
             <Create block="SFFK" />
-            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="SFJP_SFFK_Px/2+SFJP_SFFK_Dxe" z="0.0" block="SFFK"  >
+            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="SFJP_SFFK_Px/2+SFJP_SFFK_Dxe" z="0.0" block="SFFK" konly="'MANY'" >
             </Placement>
             
-            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="-SFJP_SFFK_Px/2-SFJP_SFFK_Dxe" z="0.0" block="SFFK"  >
+            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy+yoffset" x="-SFJP_SFFK_Px/2-SFJP_SFFK_Dxe" z="0.0" block="SFFK" konly="'MANY'" >
             </Placement>
             
-
             <Create block="SFFL" />
-            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)" z="0" block="SFFL"  >
+            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)" z="0" block="SFFL" konly="'MANY'" >
                 <Rotation alphaz="15" />
             </Placement>
             
-            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset" x="SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)" z="0" block="SFFL"  >
+            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset" x="SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)" z="0" block="SFFL" konly="'MANY'" >
                 <Rotation alphaz="-15" />
             </Placement>
             
-
             <Create block="SFKK" />
-            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Py2+yoffset-SFJP_SFKK_Dy/2." x="0." z="0." block="SFKK"  >
-            </Placement>
-            
+            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Py2+yoffset-SFJP_SFKK_Dy/2." x="0." z="0." block="SFKK" konly="'MANY'" >
+            </Placement>           
 
             <Create block="SFKL" />
-            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)+0.005" z="0" block="SFKL"  >
+            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021" x="-SFJP_SFKL_Px-SFPB_Fsize*cos(15*pi/180)+0.005" z="0" block="SFKL" konly="'MANY'" >
                 <Rotation alphaz="15" />
             </Placement>
             
-            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021" x="+SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)-0.005" z="0" block="SFKL"  >
+            <Placement y="-SFJP_SFFK_Py1-SFJP_SFFK_Py2-SFJP_SFFK_Dy-SFPB_Fsize*cos(75*pi/180)+yoffset-0.021" x="+SFJP_SFKL_Px+SFPB_Fsize*cos(15*pi/180)-0.005" z="0" block="SFKL" konly="'MANY'" >
                 <Rotation alphaz="-15" />
-            </Placement>
-            
-
+            </Placement>            
 
             <Create block="SAPP" />
-            <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2." block="SAPP"  >
+            <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2." block="SAPP" konly="'MANY'" >
                 <Rotation alphay="180." />
             </Placement>
             
-            <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2.)" block="SAPP"  >
+            <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz/2.)" block="SAPP" konly="'MANY'" >
             </Placement>
             
-
             <Create block="SFAM" />
-            <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)-SFJP_SFAM_Dz/2." block="SFAM"  >
+            <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="-(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)-SFJP_SFAM_Dz/2." block="SFAM" konly="'MANY'" >
             </Placement>
             
-            <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="+(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)+SFJP_SFAM_Dz/2." block="SFAM"  >
+            <Placement y="-SFJP_SAPP_Py1-(SFJP_SAPP_Py2+SFJP_SAPP_Py3)/2.+yoffset" x="0." z="+(SFJP_SFFK_Dz/2+SFJP_SAPP_Dz)+SFJP_SFAM_Dz/2." block="SFAM" konly="'MANY'" >
                 <Rotation alphay="180." />
             </Placement>
             
-
             <Create block="SFCO" />
-            <Placement y="SFJP_SFCO_Py" x="-SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCO"  >
+            <Placement y="SFJP_SFCO_Py" x="-SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCO" konly="'MANY'" >
                 <Rotation alphaz="+SFJP_AlphaZ" />
             </Placement>
             
-            <Placement y="SFJP_SFCO_Py" x="+SFJP_SFCO_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCO"  >
+            <Placement y="SFJP_SFCO_Py" x="+SFJP_SFCO_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCO" konly="'MANY'" >
                 <Rotation alphaz="-SFJP_AlphaZ" />
-            </Placement>
-            
+            </Placement>           
 
             <Create block="SFCM" />
-            <Placement y="SFJP_SFCO_Py" x="+SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCM"  >
+            <Placement y="SFJP_SFCO_Py" x="+SFJP_SFCO_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFCO_Dz/2." block="SFCM" konly="'MANY'" >
                 <Rotation alphaz="-SFJP_AlphaZ" />
             </Placement>
             
-            <Placement y="SFJP_SFCO_Py" x="-SFJP_SFCO_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCM"  >
+            <Placement y="SFJP_SFCO_Py" x="-SFJP_SFCO_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFCO_Dz/2." block="SFCM" konly="'MANY'" >
                 <Rotation alphay="180" />
                 <Rotation alphaz="+SFJP_AlphaZ" />
             </Placement>
-            
-
+           
             <Create block="SFKF" />
-            <Placement y="SFJP_SFKF_Py" x="-SFJP_SFKF_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKF"  >
+            <Placement y="SFJP_SFKF_Py" x="-SFJP_SFKF_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKF" konly="'MANY'" >
                 <Rotation alphaz="+SFJP_AlphaZ" />
             </Placement>
             
-            <Placement y="SFJP_SFKF_Py" x="+SFJP_SFKF_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKF"  >
+            <Placement y="SFJP_SFKF_Py" x="+SFJP_SFKF_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKF" konly="'MANY'" >
                 <Rotation alphaz="-SFJP_AlphaZ" />
             </Placement>
             
             <Create block="SFKS" />
-            <Placement y="SFJP_SFKS_Py" x="+SFJP_SFKS_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKS"  >
+            <Placement y="SFJP_SFKS_Py" x="+SFJP_SFKS_Px" z="-(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))-SFJP_SFKF_Dz/2-0.2" block="SFKS" konly="'MANY'" >
                 <Rotation alphaz="-SFJP_AlphaZ" />
             </Placement>
             
-            <Placement y="SFJP_SFKS_Py" x="-SFJP_SFKS_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKS"  >
+            <Placement y="SFJP_SFKS_Py" x="-SFJP_SFKS_Px" z="+(SFJP_SFFK_Dz/2-(SFJP_SFKF_Dz-SFJP_SFCS_Dz))+SFJP_SFKF_Dz/2+0.2" block="SFKS" konly="'MANY'" >
                 <Rotation alphaz="+SFJP_AlphaZ" />
-            </Placement>
-            
+            </Placement>            
 
             <Create block="SFPR" />
-            <Placement y="+SFJP_SFPR_Py" x="0" z="-SFJP_SFLU_Dz" block="SFPR"  >
+            <Placement y="+SFJP_SFPR_Py" x="0" z="-SFJP_SFLU_Dz" block="SFPR" konly="'MANY'" >
             </Placement>
             
-            <Placement y="+SFJP_SFPR_Py" x="0" z="+SFJP_SFLU_Dz-3.7" block="SFPR"  >
-            </Placement>
-            
+            <Placement y="+SFJP_SFPR_Py" x="0" z="+SFJP_SFLU_Dz-3.7" block="SFPR" konly="'MANY'" >
+            </Placement>           
 
             <Create block="SFPB" />
-            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2" x="0" z="-SFJP_SFLU_Dz-SFJP_SFPBDz/2." block="SFPB"  >
+            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2" x="0" z="-SFJP_SFLU_Dz-SFJP_SFPBDz/2." block="SFPB" konly="'MANY'" >
             </Placement>
             
-            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2" x="0" z="+SFJP_SFLU_Dz+SFJP_SFPBDz/2." block="SFPB"  >
-            </Placement>
-            
+            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2" x="0" z="+SFJP_SFLU_Dz+SFJP_SFPBDz/2." block="SFPB" konly="'MANY'" >
+            </Placement>       
 
             <Create block="SSBS" />
-            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz+SFJP_SSBS_Dx/2." block="SSBS"  >
+            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz+SFJP_SSBS_Dx/2." block="SSBS" konly="'MANY'" >
             </Placement>
             
-            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz-SFJP_SSBS_Dx/2." block="SSBS"  >
-            </Placement>
-            
+            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz-SFJP_SSBS_Dx/2." block="SSBS" konly="'MANY'" >
+            </Placement>            
 
             <Create block="SSBB" />
-            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz/2." block="SSBB"  >
+            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="-SFJP_SFLU_Dz-SFJP_SFPBDz-0.2+SFJP_SSBB_Dz/2." block="SSBB" konly="'MANY'" >
             </Placement>
             
-            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz/2." block="SSBB"  >
+            <Placement y="+SFJP_SFPR_Py-SFJP_SFPB_Py+SFJP_SFPB_Py2-0.8/2.-SFJP_SSBS_Dy/2." x="0." z="+SFJP_SFLU_Dz+SFJP_SFPBDz+0.2-SFJP_SSBB_Dz/2." block="SSBB" konly="'MANY'" >
             </Placement>
             
-
             <Create block="SFLA" />
             <Create block="SFLB" />
             <Create block="SFLC" />
@@ -1208,38 +1154,38 @@
             wafpckLen=SFPA_wpLen/(SFPA_nssd*1.) 
             <Do var="iwaf" from="1" to="8"  >
                 <Do var="jwaf" from="1" to="iwaf"  >
-                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFLA"  >
+                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+iwaf*wafpckLen" block="SFLA" konly="'MANY'" >
                         <Rotation alphaz="-SFJP_AlphaZ" />
                     </Placement>
                     
-                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-iwaf*wafpckLen" block="SFLA"  >
+                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-iwaf*wafpckLen" block="SFLA" konly="'MANY'" >
                         <Rotation alphaz="+SFJP_AlphaZ" />
                     </Placement>
                     
 
-                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC"  >
+                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2.+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >
                         <Rotation alphaz="-SFJP_AlphaZ" />
                     </Placement>
                     
-                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2.-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC"  >
+                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2.-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >
                         <Rotation alphaz="+SFJP_AlphaZ" />
                     </Placement>
                     
 
-                    <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA"  >
+                    <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'">
                         <Rotation alphaz="-SFJP_AlphaZ" />
                     </Placement>
                     
-                    <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA"  >
+                    <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'" >
                         <Rotation alphaz="+SFJP_AlphaZ" />
                     </Placement>
                     
 
-                    <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC"  >
+                    <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLC_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+8.5*SFJP_SFLC_Dz-iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >
                         <Rotation alphaz="-SFJP_AlphaZ" />
                     </Placement>
                     
-                    <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC"  >
+                    <Placement y="-SFJP_SFLC_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLC_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-8.5*SFJP_SFLC_Dz+iwaf*SFJP_SFLC_Dz" block="SFLC" konly="'MANY'" >
                         <Rotation alphaz="+SFJP_AlphaZ" />
                     </Placement>
                     
@@ -1247,50 +1193,44 @@
                 
 
                 <Do var="jwaf" from="1" to="8"  >
-                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA"  >
+                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*jwaf" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'" >
                         <Rotation alphaz="-SFJP_AlphaZ" />
                     </Placement>
                     
-                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA"  >
+                    <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*jwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*jwaf" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen" block="SFLA" konly="'MANY'" >
                         <Rotation alphaz="+SFJP_AlphaZ" />
                     </Placement>
                     
                 </Do>
                 
 
-                <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*iwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz/2." block="SFLB"  >
+                <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf" x="+SFJP_SFLA_Px+SFJP_FLEX_Di*iwaf" z="-(SFPA_wpLen+wafpckLen)/2+16*wafpckLen+wafpckLen/2.+SFJP_SFLB_Dz/2." block="SFLB" konly="'MANY'" >
                     <Rotation alphaz="-SFJP_AlphaZ" />
                 </Placement>
                 
-                <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*iwaf" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz/2." block="SFLB"  >
+                <Placement y="SFJP_SFLA_Py+SFJP_FLEX_Di*iwaf" x="-SFJP_SFLA_Px-SFJP_FLEX_Di*iwaf" z="+(SFPA_wpLen+wafpckLen)/2-16*wafpckLen-wafpckLen/2.-SFJP_SFLB_Dz/2." block="SFLB" konly="'MANY'" >
                     <Rotation alphaz="+SFJP_AlphaZ" />
                 </Placement>
                 
-
-                <Placement y="-SFJP_SFES_Py" x="-SFJP_SFES_Px" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFES"  >
+                <Placement y="-SFJP_SFES_Py" x="-SFJP_SFES_Px" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFES" konly="'MANY'" >
                     <Rotation alphaz="57.66" />
                 </Placement>
                 
-                <Placement y="-SFJP_SFES_Py" x="+SFJP_SFES_Px" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFES"  >
+                <Placement y="-SFJP_SFES_Py" x="+SFJP_SFES_Px" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFES" konly="'MANY'" >
                     <Rotation alphaz="-57.66" />
-                </Placement>
-                
+                </Placement>                
 
-                <Placement y="-SFJP_SFEB_Py" x="-SFJP_SFEB_Px" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFEB"  >
+                <Placement y="-SFJP_SFEB_Py" x="-SFJP_SFEB_Px" z="-(SFPA_wpLen+wafpckLen)/2+(iwaf+8)*wafpckLen+wafpckLen/2.-SFJP_SFEB_Dz/2.-SFJP_SFES_Pz/2." block="SFEB" konly="'MANY'" >
                     <Rotation alphaz="55.35" />
                 </Placement>
                 
-                <Placement y="-SFJP_SFEB_Py" x="+SFJP_SFEB_Px" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFEB"  >
+                <Placement y="-SFJP_SFEB_Py" x="+SFJP_SFEB_Px" z="+(SFPA_wpLen+wafpckLen)/2-(iwaf+8)*wafpckLen-wafpckLen/2.+SFJP_SFEB_Dz/2.+SFJP_SFES_Pz/2." block="SFEB" konly="'MANY'" >
                     <Rotation alphaz="-55.35" />
-                </Placement>
-                
+                </Placement>               
 
             </Do>
-            
-
-        </Block>
-        
-
+           
+        </Block>        
 
         <Block name="SFLT" comment="is (half) the top corner of the triangular ladder skeleton"  >
             <Material name="Carbon" />
@@ -1298,23 +1238,17 @@
             <Shape type="TRAP" tl2="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(pi/5)" phi="0" alp2="(pi/2-atan(2*tan(pi/5)))*360/(2*pi)" h2="SFJP_SFLU_h1" h1="SFJP_SFLU_h1" bl1="SFJP_SFLU_bl1" tl1="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(pi/5)" alp1="(pi/2-atan(2*tan(pi/5)))*360/(2*pi)" dz="SFJP_SFLU_Dz" thet="0" bl2="SFJP_SFLU_bl1" />
         </Block>
         
-
-
         <Block name="SFLU" comment="is (half) the side corner of the triangular ladder skeleton"  >
             <Material name="Carbon" />
             <Attribute for="SFLU" seen="1" colo="1" />
             <Shape type="TRAP" tl2="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(27*2*pi/360)" phi="0" alp2="(pi/2-atan(2*tan(27*2*pi/360)))*360/(2*pi)" h2="SFJP_SFLU_h1" h1="SFJP_SFLU_h1" bl1="SFJP_SFLU_bl1" tl1="SFJP_SFLU_bl1-SFJP_SFLU_h1/tan(27*2*pi/360)" alp1="(pi/2-atan(2*tan(27*2*pi/360)))*360/(2*pi)" dz="SFJP_SFLU_Dz" thet="0" bl2="SFJP_SFLU_bl1" />
         </Block>
         
-
-
         <Block name="SFFK" comment="horizontal part of the ladder skeleton carbon base"  >
             <Material name="Carbon" />
             <Attribute for="SFFK" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFK_Dxe" dy="SFJP_SFFK_Dy" />
-        </Block>
-        
-
+        </Block>       
 
         <Block name="SFFL" comment="titled part of the ladder skeleton carbon base"  >
             <Material name="Carbon" />
@@ -1322,23 +1256,17 @@
             <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFL_Dx/cos(15*pi/180)" dy="SFJP_SFFK_Dy" />
         </Block>
         
-
-
         <Block name="SFKK" comment="horizontal part of the kapton film under the ladder base"  >
             <Material name="Mylar" />
             <Attribute for="SFKK" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFK_Dxz/2." dy="SFJP_SFKK_Dy/2." />
-        </Block>
-        
-
+        </Block>        
 
         <Block name="SFKL" comment="titled part of the kpaton film under the ladder base"  >
             <Material name="Mylar" />
             <Attribute for="SFKL" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFFK_Dz/2" dx="SFJP_SFFL_Dx/cos(15*pi/180)" dy="SFJP_SFKK_Dy/2." />
-        </Block>
-        
-
+        </Block>        
 
         <Block name="SFLA" comment="is the long part of the bus cable linking the modules to the connection board"  >
             <Material name="Mylar" />
@@ -1346,35 +1274,29 @@
             <Shape type="BOX" dz="SFJP_SFLA_Dz/2." dx="SFJP_SFLA_Dx/2." dy="SFJP_SFLA_Dy/2." />
         </Block>
         
-
         <Block name="SFLB" comment="is the part of the long bus cable on the connection board"  >
             <Material name="Mylar" />
             <Attribute for="SFLB" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFLB_Dz/2." dx="SFJP_SFLA_Dx/2." dy="SFJP_SFLA_Dy/2." />
         </Block>
         
-
         <Block name="SFLC" comment="is the part of the long bus cable on the connection board up to the connector"  >
             <Material name="Mylar" />
             <Attribute for="SFLC" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFLC_Dz/2." dx="SFJP_SFLA_Dx/2." dy="SFJP_SFLA_Dy/2." />
-        </Block>
-        
+        </Block>        
 
         <Block name="SFEB" comment="is the big bus elbow"  >
             <Material name="Mylar" />
             <Attribute for="SFEB" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFEB_Dz/2." dx="SFJP_SFEB_Dx/2." dy="SFJP_SFLA_Dy/2." />
-        </Block>
-        
+        </Block>       
 
         <Block name="SFES" comment="is the small bus elbow"  >
             <Material name="Mylar" />
             <Attribute for="SFES" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SFEB_Dz/2." dx="SFJP_SFES_Dx/2." dy="SFJP_SFLA_Dy/2." />
-        </Block>
-        
-
+        </Block>       
 
         <Block name="SFAM" comment="is the mother volume of the adc board"  >
             <Material name="Air" />
@@ -1382,10 +1304,9 @@
             <Shape type="BOX" dz="SFJP_SFAM_Dz/2" dx="SFJP_SFAM_Dxe/2." dy="SFJP_SFAM_Dy/2." />
 
             <Create block="SFAB" />
-            <Placement y="0." x="0." z="SFJP_SFAM_DZs/2" block="SFAB"  >
+            <Placement y="0." x="0." z="SFJP_SFAM_DZs/2" block="SFAB" >
             </Placement>
             
-
             <Create block="SFAS" />
             <Placement y="0." x="(SFJP_SFAM_Dxe-SFJP_SFAM_Dxz)/2." z="(-SFJP_SFAM_Dz+SFJP_SFAM_DZs)/2" block="SFAS"  >
             </Placement>
@@ -1393,8 +1314,7 @@
             <Placement y="0." x="(-SFJP_SFAM_Dxe+SFJP_SFAM_Dxz)/2." z="(-SFJP_SFAM_Dz+SFJP_SFAM_DZs)/2" block="SFAS"  >
             </Placement>
             
-        </Block>
-        
+        </Block>       
 
         <Block name="SFAB" comment="is the big volume of the adc board"  >
             <Material name="G10" />
@@ -1416,7 +1336,6 @@
             <Placement y="0." x="0." z="(-SFJP_SAPP_Dz+SFJP_SAPP_Dy)/2." block="SAPC"  >
             </Placement>
             
-
             <Create block="SAPS" />
             <Placement y="0" x="SFJP_SAPP_Dxe/2.+SFJP_SAPP_Dxz/2" z="0." block="SAPS"  >
             </Placement>
@@ -1424,7 +1343,6 @@
             <Placement y="0" x="-(SFJP_SAPP_Dxe/2.+SFJP_SAPP_Dxz/2)" z="0." block="SAPS"  >
             </Placement>
             
-
             <Create block="SAPT" />
             <Placement y="(SFJP_SAPP_Dy+SFJP_SAPP_Dxz)/2." x="0." z="0." block="SAPT"  >
             </Placement>
@@ -1434,13 +1352,11 @@
             
         </Block>
         
-
         <Block name="SAPC" comment="is the core (Epoxy) of the adc board appendice"  >
             <Material name="Carbon" />
             <Attribute for="SAPC" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SAPP_Dy/2." dx="SFJP_SAPP_Dxe/2." dy="SFJP_SAPP_Dy/2." />
-        </Block>
-        
+        </Block>       
 
         <Block name="SAPS" comment="is the side shell (Carbon) of the adc board appendice"  >
             <Material name="Carbon" />
@@ -1448,21 +1364,17 @@
             <Shape type="BOX" dz="SFJP_SAPP_Dz/2." dx="SFJP_SAPP_Dxz/2." dy="(SFJP_SAPP_Dy+2*SFJP_SAPP_Dxz)/2." />
         </Block>
         
-
         <Block name="SAPT" comment="is the top-bottom shell (Carbon) of the adc board appendice"  >
             <Material name="Carbon" />
             <Attribute for="SAPT" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SAPP_Dz/2." dx="SFJP_SAPP_Dxe/2." dy="SFJP_SAPP_Dxz/2." />
-        </Block>
-        
-
+        </Block>        
 
         <Block name="SFCO" comment="is the connection board (rectangular with Hirose connectors)"  >
             <Material name="G10" />
             <Attribute for="SFCO" seen="1" colo="30" />
             <Shape type="BOX" dz="SFJP_SFCO_Dz/2" dx="SFJP_SFCO_Dx/2." dy="SFJP_SFCO_Dy/2." />
-        </Block>
-        
+        </Block>        
 
         <Block name="SFCM" comment="is the mother volume of the second connection board"  >
             <Material name="Air" />
@@ -1477,8 +1389,7 @@
             <Placement y="0" x="-1.5" z="-SFJP_SFCO_Dz/2+SFJP_SFCS_Dz/2" block="SFCS"  >
             </Placement>
             
-        </Block>
-        
+        </Block>       
 
         <Block name="SFCB" comment="is the big part of the second connection board"  >
             <Material name="G10" />
@@ -1486,41 +1397,35 @@
             <Shape type="BOX" dz="SFJP_SFCO_Dz/2" dx="SFJP_SFCB_Dx/2." dy="SFJP_SFCO_Dy/2." />
         </Block>
         
-
         <Block name="SFCS" comment="is the big part of the second connection board"  >
             <Material name="G10" />
             <Attribute for="SFCS" seen="1" colo="30" />
             <Shape type="BOX" dz="SFJP_SFCS_Dz/2" dx="(SFJP_SFCM_Dx-SFJP_SFCB_Dx)/2." dy="SFJP_SFCO_Dy/2." />
         </Block>
         
-
         <Block name="SFKF" comment="is the first part of the kapton flex circuit"  >
             <Material name="G10" />
             <Attribute for="SFKF" seen="1" colo="30" />
             <Shape type="BOX" dz="SFJP_SFKF_Dz/2" dx="SFJP_SFKF_Dx/2." dy="SFJP_SFKF_Dy/2." />
         </Block>
         
-
         <Block name="SFKS" comment="is the second part of the kapton flex circuit"  >
             <Material name="G10" />
             <Attribute for="SFKS" seen="1" colo="30" />
             <Shape type="BOX" dz="SFJP_SFKF_Dz/2" dx="SFJP_SFKS_Dx/2." dy="SFJP_SFKF_Dy/2." />
         </Block>
         
-
         <Block name="SFPR" comment="is the ladder end inside mechanical part (prism with g10 with half density)"  >
             <Material name="G5" />
             <Attribute for="SFPR" seen="1" colo="4" />
             <Shape type="PGON" zi="{0,3.7}" rmn="{0,0}" rmx="{3.48,3.48}"  nz="2" npdiv="1" phi1="-126" dphi="72" />
-        </Block>
-        
+        </Block>       
 
         <Block name="SFPB" comment="is the ladder end outside mechanical part (rectangle with g10)"  >
             <Material name="G10" />
             <Attribute for="SFPB" seen="1" colo="4" />
             <Shape type="BOX" dz="SFJP_SFPBDz/2." dx="SFJP_SFPB_Dx/2." dy="SFJP_SFPB_Dy/2." />
-        </Block>
-        
+        </Block>        
 
         <Block name="SSBS" comment="is the small part of the aluminium plate linking the ladder to the sector"  >
             <Material name="Aluminium" />
@@ -1528,21 +1433,18 @@
             <Shape type="BOX" dz="SFJP_SSBS_Dx/2." dx="SFJP_SSBS_Dx/2." dy="SFJP_SSBS_Dy/2." />
         </Block>
         
-
         <Block name="SSBB" comment="is the Big part of the aluminium plate linking the ladder to the sector"  >
             <Material name="Aluminium" />
             <Attribute for="SSBB" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SSBB_Dz/2." dx="SFJP_SSBB_Dx/2." dy="SFJP_SSBS_Dy/2." />
         </Block>
         
-
         <Block name="SSST" comment="is the top of the small sector"  >
             <Material name="Aluminium" />
             <Attribute for="SSST" seen="1" colo="1" />
             <Shape type="TUBS" rmin="SFJP_SSST_Rmin" rmax="SFJP_SSST_Rmax" dz="SFJP_SSST_Width/2." phi2="(180.-SFJP_AlphaZH)" phi1="SFJP_AlphaZH" />
         </Block>
-        
-
+       
         <Block name="SSSS" comment="is the side of the small sector"  >
             <Material name="Aluminium" />
             <Attribute for="SSSS" seen="1" colo="1" />
@@ -1557,14 +1459,12 @@
                     <Material name="Carbon" />
                 </Else>
                 
-            </If>
-            
+            </If>           
 
             <Attribute for="SSRT" seen="1" colo="1" />
             <Shape type="TUBS" rmin="SFJP_SSST_Rmin" rmax="SFJP_SSST_Rmax" dz="SFJP_SSST_Width/2." phi2="+SFJP_AlphaZH" phi1="-SFJP_AlphaZH" />
         </Block>
         
-
         <Block name="SSRS" comment="is the side of the small rib"  >
             <If expr="ConfigB.le.5"  >
                 <Material name="Aluminium" />
@@ -1576,8 +1476,7 @@
             
             <Attribute for="SSRS" seen="1" colo="1" />
             <Shape type="TUBS" rmin="SFJP_SSRS_Rmin" rmax="SFJP_SSST_Rmin" dz="SFJP_SSSS_Width/2." phi2="+SFJP_AlphaZH" phi1="-SFJP_AlphaZH" />
-        </Block>
-        
+        </Block>        
 
         <Block name="SSLB" comment="is the linking (sector to the cone) box"  >
             <Material name="Air" />
@@ -1604,14 +1503,10 @@
             </Placement>
             
             <Placement y="-(SFJP_SSCR_Wd+SFJP_SSCR_Vl)/2" x="0" z="SFJP_SSLB_Dz/2.-SFJP_SSCR_ThD-SFJP_SSCR_ThA/2." block="SBFV"  >
-            </Placement>
-            
+            </Placement>          
 
         </Block>
         
-
-
-
         <Block name="SBCH" comment="is the horizontal branch of the DELRIN cross"  >
             <Material name="Delrin" />
             <Attribute for="SBCH" seen="1" colo="2" />
@@ -1636,21 +1531,18 @@
             <Shape type="BOX" dz="SFJP_SSCR_ThA/2." dx="SFJP_SSCR_Wd/2." dy="SFJP_SSCR_Vl/2." />
         </Block>
         
-
         <Block name="SSLT" comment="is the linking (sector to the cone) tube"  >
             <Material name="Aluminium" />
             <Attribute for="SSLT" seen="1" colo="1" />
             <Shape type="TUBE" rmax="SFJP_SSLT_Rmax" rmin="0." dz="SFJP_SSLT_Dz/2." />
         </Block>
         
-
         <Block name="SCMP" comment="is the mounting plate inserted in the cones."  >
             <Material name="Aluminium" />
             <Attribute for="SCMP" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SCMP_Dz/2" dx="SFJP_SCMP_Dx/2." dy="SFJP_SCMP_Dy/2." />
         </Block>
         
-
         <Block name="SCVM" comment="is the mother volume of the V-shape piece"  >
             <Material name="Air" />
             <Attribute for="SCVM" seen="0" colo="6" />
@@ -1680,8 +1572,7 @@
             <Material name="Aluminium" />
             <Attribute for="SCVS" seen="1" colo="1" />
             <Shape type="BOX" dz="SFJP_SCVM_Dz/2" dx="SFJP_SCVS_Dx/2." dy="SFJP_SCVS_Dy/2." />
-        </Block>
-        
+        </Block>        
 
 <!-- Material weights have been corrected to account for the Natoms=(int) vs Natoms=(float)
      difference between AgSTAR and ROOT.
@@ -1701,6 +1592,5 @@
 
     </Module>
     
-
 </Document>
 
