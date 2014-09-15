@@ -67,7 +67,7 @@ ostream& operator<<(ostream& os, const StiPlacement& p)
 void StiPlacement::setLayerRadius(float radius_)
 {
 static const double kMinRad=0.1,kMaxRad=200;
-static const double kLogStep=(log(kMaxRad)-log(kMinRad))*1e-3;
+static const double kLogStep=(log(kMaxRad)-log(kMinRad))/1000;
    int nStp = int(log(radius_+kMinRad)/kLogStep);
    layerRadius = exp(nStp*kLogStep)-kMinRad; 
 }
