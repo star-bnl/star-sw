@@ -63,9 +63,11 @@ StMtdQAMaker::StMtdQAMaker(const Char_t *name) :
   mTriggerIDs(0),
   mMaxVtxZ(150.), mMinTrkPt(1.), mMaxTrkPt(1e4), mMinTrkPhi(0.), mMaxTrkPhi(2*pi), mMinTrkEta(-0.8), mMaxTrkEta(0.8),
   mMinNHitsFit(15), mMinNHitsDedx(10), mMinFitHitsFraction(0.52), mMaxDca(3.), mMinNsigmaPi(-1.), mMaxNsigmaPi(3.),
-  mTrigTimeCut(kFALSE), mFillTree(kFALSE), fOutTreeFile(0), mOutTreeFileName(""), mTrigTime{-1.,-1.}, mQATree(0)
+  mTrigTimeCut(kFALSE), mFillTree(kFALSE), fOutTreeFile(0), mOutTreeFileName(""), mQATree(0)
 {
   // default constructor
+  mTrigTime[0] = -1;
+  mTrigTime[1] = -1;
 }
  
 //_____________________________________________________________________________
@@ -156,7 +158,7 @@ Int_t StMtdQAMaker::Make()
   if (mPrintCpu)    timer.start();
 
   // reset the structure
-  mMtdData = {0};
+  memset(&mMtdData, 0, sizeof(mMtdData));
 
   // Check the availability of input data
   Int_t iret;
@@ -1740,8 +1742,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.1 2014/09/12 17:13:13 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.2 2014/09/16 23:48:58 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.2  2014/09/16 23:48:58  marr
+//// Minor fix such that it compiles under SL5.3, gcc 4.3.2 (rplay17)
+////
 //// Revision 1.1  2014/09/12 17:13:13  marr
 //// Add StMtdQAMaker class for MTD QA analysis
 ////
