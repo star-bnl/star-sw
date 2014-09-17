@@ -1,13 +1,3 @@
-/***************************************************************************
-*
-* $Id: StIstScanClusterAlgo.cxx,v 1.10 2014/09/09 07:34:07 ypwang Exp $
-*
-* Author: Yaping Wang, October 2013
-****************************************************************************
-* Description:
-* See header file.
-***************************************************************************/
-
 #include "StEvent.h"
 #include "StEvent/StEnumerations.h"
 #include "StMessMgr.h"
@@ -25,10 +15,6 @@
 #include <vector>
 #include <algorithm>
 
-StIstScanClusterAlgo::StIstScanClusterAlgo()
-{
-   //nothing to do....
-};
 
 Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHitsOriginal, StIstClusterCollection &clusters )
 {
@@ -52,7 +38,6 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
    std::vector<StIstRawHit *>  rawHitsVec[kIstNumSensorsPerLadder][kIstNumColumnsPerSensor];
    std::vector<StIstCluster *> clustersVec[kIstNumSensorsPerLadder][kIstNumColumnsPerSensor];
    std::vector<StIstRawHit *>  rawHitsToMerge;
-   std::vector<StIstRawHit *>::iterator rawHitIt;
 
    for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++) {
       for (int columnIdx = 0; columnIdx < kIstNumColumnsPerSensor; columnIdx++) {
@@ -80,10 +65,13 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
    //do clustering
    int clusterLabel = 0;
 
-   for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++) {
+   for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
+   {
       //step 1: do clustering for each column
-      for (int columnIdx = 0; columnIdx < kIstNumColumnsPerSensor; columnIdx++) {
-         while ( !rawHitsVec[sensorIdx][columnIdx].empty() ) {
+      for (int columnIdx = 0; columnIdx < kIstNumColumnsPerSensor; columnIdx++)
+      {
+         while ( !rawHitsVec[sensorIdx][columnIdx].empty() )
+         {
             rawHitTemp 	     = rawHitsVec[sensorIdx][columnIdx].back();
             rawHitsVec[sensorIdx][columnIdx].pop_back();
             rawHitsToMerge.push_back(rawHitTemp);
@@ -108,7 +96,8 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 
                      if ( (rawHitTemp->getRow() == rawHitNext->getRow() + 1) &&
                            (rawHitTemp->getCharge(rawHitTemp->getMaxTimeBin()) < (*rawHitsToMergePtr)->getCharge((*rawHitsToMergePtr)->getMaxTimeBin())) &&
-                           (rawHitTemp->getCharge(rawHitTemp->getMaxTimeBin()) < rawHitNext->getCharge(rawHitNext->getMaxTimeBin())) ) {
+                           (rawHitTemp->getCharge(rawHitTemp->getMaxTimeBin()) < rawHitNext->getCharge(rawHitNext->getMaxTimeBin())) )
+                     {
                         float weightBack = rawHitNext->getCharge(rawHitNext->getMaxTimeBin()) / ((*rawHitsToMergePtr)->getCharge((*rawHitsToMergePtr)->getMaxTimeBin()) + rawHitNext->getCharge(rawHitNext->getMaxTimeBin()));
 
                         for (int iTB = 0; iTB < nTimeBins; iTB++) {
@@ -133,10 +122,10 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
             //used time bin index (raw hits with maximum ADC holds the time-bin priority)
             maxTb       = rawHitMaxAdcTemp->getMaxTimeBin();
 
-            if (maxTb < 0 || maxTb >= nTimeBins)               	maxTb   = rawHitMaxAdcTemp->getDefaultTimeBin();
+            if (maxTb < 0 || maxTb >= nTimeBins)         maxTb  = rawHitMaxAdcTemp->getDefaultTimeBin();
 
-            if (mTimeBin >= 0 && mTimeBin < nTimeBins)       		usedTb  = mTimeBin;
-            else                                                usedTb  = maxTb;
+            if (mTimeBin >= 0 && mTimeBin < nTimeBins)   usedTb = mTimeBin;
+            else                                         usedTb = maxTb;
 
             ladder      	= rawHitMaxAdcTemp->getLadder();
             sensor      	= rawHitMaxAdcTemp->getSensor(); // = sensorIdx + 1
@@ -196,13 +185,13 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
                   float rowDistance = (*clusterIt1)->getMeanRow() - (*clusterIt2)->getMeanRow();
 
                   if (TMath::Abs(rowDistance) < 0.5) { //here 0.5 means the distance between two clusters' weighted centers in row direction smaller than 0.5
-                     totCharge = (*clusterIt1)->getTotCharge() + (*clusterIt2)->getTotCharge();
-                     totChargeErr = sqrt(((*clusterIt1)->getTotChargeErr() * (*clusterIt1)->getTotChargeErr() * (*clusterIt1)->getNRawHits() + (*clusterIt2)->getTotChargeErr() * (*clusterIt2)->getTotChargeErr() * (*clusterIt2)->getNRawHits()) / ((*clusterIt1)->getNRawHits() + (*clusterIt2)->getNRawHits()));
-                     clusterSize = (*clusterIt1)->getNRawHits() + (*clusterIt2)->getNRawHits();
+                     totCharge       = (*clusterIt1)->getTotCharge() + (*clusterIt2)->getTotCharge();
+                     totChargeErr    = sqrt(((*clusterIt1)->getTotChargeErr() * (*clusterIt1)->getTotChargeErr() * (*clusterIt1)->getNRawHits() + (*clusterIt2)->getTotChargeErr() * (*clusterIt2)->getTotChargeErr() * (*clusterIt2)->getNRawHits()) / ((*clusterIt1)->getNRawHits() + (*clusterIt2)->getNRawHits()));
+                     clusterSize     = (*clusterIt1)->getNRawHits() + (*clusterIt2)->getNRawHits();
                      clusterSizeRPhi = (*clusterIt1)->getNRawHitsRPhi() + (*clusterIt2)->getNRawHitsRPhi() - 1;
-                     clusterSizeZ = (*clusterIt1)->getNRawHitsZ() + (*clusterIt2)->getNRawHitsZ();
-                     meanRow = (*clusterIt1)->getMeanRow() * (*clusterIt1)->getTotCharge() / totCharge + (*clusterIt2)->getMeanRow() * (*clusterIt2)->getTotCharge() / totCharge;
-                     meanColumn = (*clusterIt1)->getMeanColumn() * (*clusterIt1)->getTotCharge() / totCharge + (*clusterIt2)->getMeanColumn() * (*clusterIt2)->getTotCharge() / totCharge;
+                     clusterSizeZ    = (*clusterIt1)->getNRawHitsZ() + (*clusterIt2)->getNRawHitsZ();
+                     meanRow         = (*clusterIt1)->getMeanRow() * (*clusterIt1)->getTotCharge() / totCharge + (*clusterIt2)->getMeanRow() * (*clusterIt2)->getTotCharge() / totCharge;
+                     meanColumn      = (*clusterIt1)->getMeanColumn() * (*clusterIt1)->getTotCharge() / totCharge + (*clusterIt2)->getMeanColumn() * (*clusterIt2)->getTotCharge() / totCharge;
 
                      (*clusterIt2)->setMeanRow(meanRow);
                      (*clusterIt2)->setMeanColumn(meanColumn);
@@ -249,6 +238,51 @@ ClassImp(StIstScanClusterAlgo);
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.11  2014/09/17 20:33:32  smirnovd
+* Squashed commit of the following:
+*
+* commit 72dc19a6663ea31c719c1a61f6d2b4752dd766aa
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:34:42 2014 -0400
+*
+*     Minor code refactoring, clean up
+*
+* commit e083a10a9fb60b7dcce692ef8043b9227c12768b
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:18:16 2014 -0400
+*
+*     Removed pointless comments
+*
+* commit 88d51857362c91c954704cec4a31a0b0fa7fccc5
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:17:26 2014 -0400
+*
+*     Updated description in doxygen comments
+*
+* commit eb09527489179fc7dab6aa7f23fd132b25185bb1
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Tue Sep 9 15:15:56 2014 -0400
+*
+*     StIstScanClusterAlgo: Removed unused variable
+*
+* commit 1a8df63533c71a0e2ba4d8275ebf89f4e3004765
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Fri Aug 22 16:04:47 2014 -0400
+*
+*     Neatened headers: Removed unused, spelled paths in includes explicitly as it slightly helps in identifying dependencies
+*
+* commit 972e8ed41403bd680ade5ecc509f8bca004e86ee
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:34:20 2014 -0400
+*
+*     Minor stylistic changes
+*
+* commit 57daf5a1e0b3246fd12f1dd1c2ca089b62930c83
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Tue Sep 16 16:29:14 2014 -0400
+*
+*     Improved doxygen comments
+*
 * Revision 1.10  2014/09/09 07:34:07  ypwang
 * data type was updated from UChar_t to Int_t for several varibales, and the nTimeBins was corrected as a non-static varible
 *

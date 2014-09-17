@@ -1,13 +1,3 @@
-/***************************************************************************
-*
-* $Id: StIstClusterMaker.cxx,v 1.24 2014/09/09 15:50:09 smirnovd Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description:
-* See header file.
-***************************************************************************/
-
 #include "StIstClusterMaker.h"
 #include "StEvent.h"
 #include "StEvent/StEnumerations.h"
@@ -17,11 +7,10 @@
 #include "StRoot/StIstUtil/StIstCluster.h"
 #include "StRoot/StIstUtil/StIstClusterCollection.h"
 #include "StRoot/StIstUtil/StIstConsts.h"
-#include "StIstIClusterAlgo.h"
-#include "StIstSimpleClusterAlgo.h"
-#include "StIstScanClusterAlgo.h"
+#include "StRoot/StIstClusterMaker/StIstIClusterAlgo.h"
+#include "StRoot/StIstClusterMaker/StIstScanClusterAlgo.h"
 
-StIstClusterMaker::StIstClusterMaker( const char *name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mTimeBin(-1), mSplitCluster(1)
+StIstClusterMaker::StIstClusterMaker( const char *name ) : StMaker(name), mIstCollectionPtr(0), mClusterAlgoPtr(0), mTimeBin(-1), mSplitCluster(true)
 {
    /* nothing to do */
 };
@@ -89,12 +78,17 @@ Int_t StIstClusterMaker::Make()
       }
    }
 
-   LOG_DEBUG << "End of ist-clust-maker, print all raw hits & clusters: " << endm;
-   LOG_DEBUG << "Total raw hits=" << mIstCollectionPtr->getNumRawHits() << ", total Clusters=" <<  mIstCollectionPtr->getNumClusters() << endm;
+   LOG_DEBUG << "End of StIstClusterMaker, print all raw hits & clusters: " << endm
+             << "Total raw hits=" << mIstCollectionPtr->getNumRawHits()
+             << ", total Clusters=" <<  mIstCollectionPtr->getNumClusters() << endm;
 
    if (Debug() > 2) {
-      for (unsigned char iLadder = 0; iLadder < kIstNumLadders; iLadder++) {
-         LOG_DEBUG << "Content: iLadder=" << (short) iLadder + 1 << " # of : raw hits=" << mIstCollectionPtr->getNumRawHits(iLadder) << "  clusters=" << mIstCollectionPtr->getNumClusters( iLadder) << endm;
+      for (unsigned char iLadder = 0; iLadder < kIstNumLadders; iLadder++)
+      {
+         LOG_DEBUG << "Content: iLadder=" << (short) iLadder + 1
+                   << " # of : raw hits=" << mIstCollectionPtr->getNumRawHits(iLadder)
+                   << "  clusters=" << mIstCollectionPtr->getNumClusters( iLadder) << endm;
+
          // ..... print all raw hits ....
          StIstRawHitCollection *rawHitPtr = mIstCollectionPtr->getRawHitCollection(iLadder);
          size_t nTimeBins = mIstCollectionPtr->getNumTimeBins();
@@ -107,8 +101,7 @@ Int_t StIstClusterMaker::Make()
    }
 
    return ierr;
-
-};
+}
 
 void StIstClusterMaker::setClusterAlgo(StIstIClusterAlgo *algo)
 {
@@ -133,6 +126,51 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.25  2014/09/17 20:33:31  smirnovd
+* Squashed commit of the following:
+*
+* commit 72dc19a6663ea31c719c1a61f6d2b4752dd766aa
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:34:42 2014 -0400
+*
+*     Minor code refactoring, clean up
+*
+* commit e083a10a9fb60b7dcce692ef8043b9227c12768b
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:18:16 2014 -0400
+*
+*     Removed pointless comments
+*
+* commit 88d51857362c91c954704cec4a31a0b0fa7fccc5
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:17:26 2014 -0400
+*
+*     Updated description in doxygen comments
+*
+* commit eb09527489179fc7dab6aa7f23fd132b25185bb1
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Tue Sep 9 15:15:56 2014 -0400
+*
+*     StIstScanClusterAlgo: Removed unused variable
+*
+* commit 1a8df63533c71a0e2ba4d8275ebf89f4e3004765
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Fri Aug 22 16:04:47 2014 -0400
+*
+*     Neatened headers: Removed unused, spelled paths in includes explicitly as it slightly helps in identifying dependencies
+*
+* commit 972e8ed41403bd680ade5ecc509f8bca004e86ee
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:34:20 2014 -0400
+*
+*     Minor stylistic changes
+*
+* commit 57daf5a1e0b3246fd12f1dd1c2ca089b62930c83
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Tue Sep 16 16:29:14 2014 -0400
+*
+*     Improved doxygen comments
+*
 * Revision 1.24  2014/09/09 15:50:09  smirnovd
 * StIstClusterMaker: Refactored conditional statements and added a formal warning for missing collections. Adjusted white space indentation
 *
