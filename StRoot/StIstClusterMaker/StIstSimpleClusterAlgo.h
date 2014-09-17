@@ -28,12 +28,10 @@ class StIstClusterCollection;
 class StIstSimpleClusterAlgo : public StIstIClusterAlgo
 {
 
-public:
-   virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
-
 protected:
    enum {kIstSimpleClusterAlgo = 1};
 
+   virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
    Int_t doSplitting(StIstClusterCollection &clusters, unsigned char numTimeBins);
    Int_t splitCluster(int cSize, int clusterSizeList[], StIstRawHit *rawHitPtr[], StIstCluster *clusterIt, StIstClusterCollection &clusters, unsigned char numTimeBins);
 
@@ -46,6 +44,9 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.h,v $
+* Revision 1.14  2014/09/17 20:36:20  smirnovd
+* Simplified public interface by reducing the number of unnecessarily required parameters
+*
 * Revision 1.13  2014/09/17 20:33:32  smirnovd
 * Squashed commit of the following:
 *
