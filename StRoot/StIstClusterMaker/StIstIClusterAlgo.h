@@ -2,10 +2,10 @@
 #define StIstIClusterAlgo_hh
 
 #include "Stypes.h"
+#include "StRoot/StIstUtil/StIstCollection.h"
 
 class StIstRawHitCollection;
 class StIstClusterCollection;
-class StIstCollection;
 
 
 /**
@@ -17,7 +17,7 @@ class StIstCollection;
 class StIstIClusterAlgo
 {
 public:
-   virtual Int_t doClustering(const StIstCollection &, StIstRawHitCollection &, StIstClusterCollection &) = 0;
+   void doClustering(StIstCollection &stIstCollection);
 
    virtual ~StIstIClusterAlgo() = 0;
 
@@ -25,6 +25,9 @@ public:
    void setSplitFlag( bool splitFlag = true)  { mSplitCluster = splitFlag; }
 
 protected:
+
+   virtual Int_t doClustering(const StIstCollection &, StIstRawHitCollection &, StIstClusterCollection &) = 0;
+
    Bool_t mSplitCluster;
    UChar_t mTimeBin;
 
@@ -36,6 +39,9 @@ protected:
 
 /***************************************************************************
 * $Log: StIstIClusterAlgo.h,v $
+* Revision 1.11  2014/09/17 20:36:20  smirnovd
+* Simplified public interface by reducing the number of unnecessarily required parameters
+*
 * Revision 1.10  2014/09/17 20:33:32  smirnovd
 * Squashed commit of the following:
 *

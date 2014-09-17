@@ -26,12 +26,10 @@ class StIstClusterCollection;
 class StIstScanClusterAlgo : public StIstIClusterAlgo
 {
 
-public:
-   virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
-
 protected:
    enum {kIstScanClusterAlgo = 2};
 
+   virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
    ClassDef(StIstScanClusterAlgo, 0);
 };
 
@@ -41,6 +39,9 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.h,v $
+* Revision 1.11  2014/09/17 20:36:20  smirnovd
+* Simplified public interface by reducing the number of unnecessarily required parameters
+*
 * Revision 1.10  2014/09/17 20:33:32  smirnovd
 * Squashed commit of the following:
 *
