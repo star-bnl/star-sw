@@ -20,8 +20,8 @@ class StIstClusterCollection;
  * 3) Does clustering in neighboring columns.
  * 4) Fill hit collections.
  *
- * \author Yaping Wang
- * \date March 2013
+ * \author Yaping Wang \date March 2013
+ * \author Dmitri Smirnov
  */
 class StIstScanClusterAlgo : public StIstIClusterAlgo
 {
@@ -30,7 +30,6 @@ protected:
    enum {kIstScanClusterAlgo = 2};
 
    virtual Int_t doClustering(const StIstCollection &istCollection, StIstRawHitCollection &rawHits, StIstClusterCollection &clusters );
-   ClassDef(StIstScanClusterAlgo, 0);
 };
 
 #endif
@@ -39,6 +38,27 @@ protected:
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.h,v $
+* Revision 1.12  2014/09/17 20:39:45  smirnovd
+* Squashed commit of the following:
+*
+* commit 37d3d404a31c9b152811232af55d37177162269d
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 16:11:22 2014 -0400
+*
+*     Added an author to reflect on contributions
+*
+* commit 6ceacb443d2d35bc21295b81a3d25b7433d40260
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 16:09:48 2014 -0400
+*
+*     [Minor] Reversed the logic and saved one level of intentation
+*
+* commit 4bc24031445ecce9f19b940697d13cc8a755aaf1
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 16:06:42 2014 -0400
+*
+*     Do not use standard ROOT's dictionary macroses since the classes are transient by design
+*
 * Revision 1.11  2014/09/17 20:36:20  smirnovd
 * Simplified public interface by reducing the number of unnecessarily required parameters
 *
