@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.12 2014/09/07 07:40:51 ypwang Exp $
+* $Id: StIstRawHitMaker.h,v 1.13 2014/09/17 20:33:32 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -46,12 +46,13 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.12 2014/09/07 07:40:51 ypwang Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.13 2014/09/17 20:33:32 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
 protected:
-   Bool_t mIsCaliMode, mDoCmnCorrection;
+   Bool_t mIsCaliMode;
+   Bool_t mDoCmnCorrection;
    //control paramters
    Float_t mHitCut, mCmnCut, mChanMinRmsNoiseLevel, mChanMaxRmsNoiseLevel, mApvMaxCmNoiseLevel;
    UChar_t mALLdata, mADCdata, mZSdata, mDefaultTimeBin, mCurrentTimeBinNum;
@@ -84,6 +85,51 @@ private:
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
+* Revision 1.13  2014/09/17 20:33:32  smirnovd
+* Squashed commit of the following:
+*
+* commit 72dc19a6663ea31c719c1a61f6d2b4752dd766aa
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:34:42 2014 -0400
+*
+*     Minor code refactoring, clean up
+*
+* commit e083a10a9fb60b7dcce692ef8043b9227c12768b
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:18:16 2014 -0400
+*
+*     Removed pointless comments
+*
+* commit 88d51857362c91c954704cec4a31a0b0fa7fccc5
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:17:26 2014 -0400
+*
+*     Updated description in doxygen comments
+*
+* commit eb09527489179fc7dab6aa7f23fd132b25185bb1
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Tue Sep 9 15:15:56 2014 -0400
+*
+*     StIstScanClusterAlgo: Removed unused variable
+*
+* commit 1a8df63533c71a0e2ba4d8275ebf89f4e3004765
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Fri Aug 22 16:04:47 2014 -0400
+*
+*     Neatened headers: Removed unused, spelled paths in includes explicitly as it slightly helps in identifying dependencies
+*
+* commit 972e8ed41403bd680ade5ecc509f8bca004e86ee
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Wed Sep 17 12:34:20 2014 -0400
+*
+*     Minor stylistic changes
+*
+* commit 57daf5a1e0b3246fd12f1dd1c2ca089b62930c83
+* Author: Dmitri Smirnov <d.s@plexoos.com>
+* Date:   Tue Sep 16 16:29:14 2014 -0400
+*
+*     Improved doxygen comments
+*
 * Revision 1.12  2014/09/07 07:40:51  ypwang
 * the mIstDb was declared as a local variable in InitRun() in stead of as a data member
 *
