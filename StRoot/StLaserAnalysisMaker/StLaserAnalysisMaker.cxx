@@ -1,6 +1,9 @@
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.20 2014/08/19 17:23:31 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.21 2014/09/17 19:11:49 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.21  2014/09/17 19:11:49  fisyak
+// Fix bug in Fit logic, bug #2901
+//
 // Revision 1.20  2014/08/19 17:23:31  fisyak
 // Activate CORRECT_RAFT_DIRECTION
 //
@@ -80,8 +83,12 @@ Int_t StLaserAnalysisMaker::Init(){
     m_laser = new TTree("laser","Tpc laser track tree");
     m_laser->SetAutoSave(100000000); //Save every 100 MB
     Int_t bufsize= 64000;
-    Int_t split = 99;
+    //    Int_t split = 99;
+    Int_t split  = -2;       // by default, split Event in sub branches << old style
     if (split)  bufsize /= 4;
+    Int_t branchStyle = 1; //new style by default
+    if (split < 0) {branchStyle = 0; split = -1-split;}
+    TTree::SetBranchStyle(branchStyle);
     m_laser->Branch("event", "LaserEvent",&event, bufsize, split);
   }
   return StMaker::Init();
@@ -118,7 +125,9 @@ Int_t StLaserAnalysisMaker::InitRun(Int_t run){
     cout << " TpcHalf(west) "; StTpcDb::instance()->TpcHalf(west).Print();
   }
   for (sector = 1; sector <= 12; sector++) {
-    cout << "Sector " <<  sector << " ===========" << endl;
+    if (Debug()) {
+      cout << "Sector " <<  sector << " ===========" << endl;
+    }
     // S2R = Rot^-1 * Half * Rot
     TGeoHMatrix ET = RotSec[sector+12-1].Inverse()*StTpcDb::instance()->TpcHalf(east)*RotSec[sector+12-1]; if (Debug()) ET.Print();
     ET.LocalToMaster(xyzDSE.xyz(), xyzTE.xyz());                                                           PrPP(InitRun,xyzTE);
@@ -427,7 +436,7 @@ Int_t StLaserAnalysisMaker::Make(){
 	TRSymMatrix S(A,TRArray::kATxA);        if (Debug()) cout << "S: " << S << endl;
 	TRVector    B(A,TRArray::kATxB,Y);      if (Debug()) cout << "B: " << B << endl;
 	TRSymMatrix SInv(S,TRArray::kInvertedA);if (Debug()) cout << "SInv: " << SInv << endl;
-	if (! SInv.IsValid()) {ok = kFALSE; break;}
+	if (! SInv.IsValid()) {break;}
 	TRVector    X(SInv,TRArray::kSxA,B);    if (Debug()) cout << "X: " << X << endl;
 	TRVector    R(Y);               
 	R -= TRVector(A,TRArray::kAxB,X);       if (Debug()) cout << "R: " << R << endl;
