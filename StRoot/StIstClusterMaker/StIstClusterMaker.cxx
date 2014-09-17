@@ -51,31 +51,9 @@ Int_t StIstClusterMaker::Make()
    }
 
    if (ierr == kStOk) {
-      for ( unsigned char ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx ) {
-         StIstRawHitCollection *rawHitCollectionPtr   = mIstCollectionPtr->getRawHitCollection( ladderIdx );
-         StIstClusterCollection *clusterCollectionPtr = mIstCollectionPtr->getClusterCollection( ladderIdx );
-
-         if ( !rawHitCollectionPtr || !clusterCollectionPtr ) {
-            LOG_WARN << "StClusterMaker::Make(): No valid StIstRawHitCollection or StIstClusterCollection found for ladder "
-                     << (short) (ladderIdx + 1) << endm;
-            continue;
-         }
-
-         Int_t numRawHits = rawHitCollectionPtr->getNumRawHits();
-         LOG_DEBUG << "Number of raw hits found in ladder " << (short) (ladderIdx + 1) << ": " << numRawHits << endm;
-
-         // clustering and splitting
-         mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
-         mClusterAlgoPtr->setSplitFlag(mSplitCluster);
-         Int_t loc_ierr = mClusterAlgoPtr->doClustering(*mIstCollectionPtr, *rawHitCollectionPtr, *clusterCollectionPtr );
-
-         if (loc_ierr != kStOk) {
-            LOG_WARN << "StClusterMaker::Make(): clustering for ladder " << (short) (ladderIdx + 1) << " returned " << loc_ierr << endm;
-
-            if (loc_ierr > ierr)
-               ierr = loc_ierr;
-         }
-      }
+      mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
+      mClusterAlgoPtr->setSplitFlag(mSplitCluster);
+      mClusterAlgoPtr->doClustering(*mIstCollectionPtr);
    }
 
    LOG_DEBUG << "End of StIstClusterMaker, print all raw hits & clusters: " << endm
@@ -126,6 +104,10 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.26  2014/09/17 20:36:26  smirnovd
+* StIstClusterMaker: Use the updated public interface of StIstIClusterAlgo. The
+* previous functionality has been moved to the base class
+*
 * Revision 1.25  2014/09/17 20:33:31  smirnovd
 * Squashed commit of the following:
 *
