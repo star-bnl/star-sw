@@ -21,11 +21,15 @@ public:
   Named(name),_halfDepth(halfDepth),_thickness(thickness),_edgeWidth(edge) {}
   
     // accessors
-    float getHalfDepth() const { return _halfDepth; } 
-    virtual float getHalfWidth() const=0;
-    float getThickness() const { return _thickness; }
-    virtual StiShapeCode getShapeCode() const = 0;
-    float getEdgeWidth() const { return _edgeWidth; }
+    float getHalfDepth() const { return _halfDepth; } //Z direction
+virtual float getHalfWidth() const=0;
+        float getThickness() const { return _thickness; }
+virtual StiShapeCode getShapeCode() const = 0;
+        float getEdgeWidth() const { return _edgeWidth; }
+virtual float getOpeningAngle() const =0; 
+virtual float getOuterRadius() const {return -999;}
+
+    virtual double getVolume() const = 0;
 
     // mutators
     void setHalfDepth(float val) {if(val >= 0.) _halfDepth = val; }
