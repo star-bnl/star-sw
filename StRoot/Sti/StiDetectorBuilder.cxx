@@ -21,7 +21,7 @@ int StiDetectorBuilder::_debug = 0;
 //________________________________________________________________________________
 StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active)
   : Named(name+"Builder"),
-    mThkSplit(0.5),
+    mThkSplit(0.2),
     mMaxSplit( 20),
     _groupId(-1),
     _active(active),
@@ -198,14 +198,8 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     Double_t delta=fabs(xyz[0])+fabs(xyz[1]);
     if (delta>0.1*Rmin) 				break;
     Double_t dZ   = shapeC->GetDz();
-    Double_t radius = (Rmin + Rmax)/2;
     Double_t dPhi = 2*TMath::Pi();
     Double_t dR   = Rmax - Rmin;
-    dR = TMath::Min(0.2*dZ, dR);
-    if (dR < 0.1) dR = 0.1;
-    int Nr = (int) ((Rmax - Rmin)/dR);
-    if (Nr <= 0) Nr = 1;
-    dR = (Rmax - Rmin)/Nr;
 
     if (shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg)) {
       TGeoTubeSeg *shapeS = (TGeoTubeSeg *) shapeP;
@@ -220,25 +214,19 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
       Phi = atan2(gloV[1],gloV[0]);
     }
     
-    for (Int_t ir = 0; ir < Nr; ir++) {
-      TString Name(nodeP->GetName());
-      if (ir) {Name += "__";Name += ir;}
-      sh     = findShape(Name.Data());
-      if (! sh) {// I assume that the shape name is unique
-	sh = new StiCylindricalShape(Name.Data(),   // Name
-				     dZ,              // halfDepth
-				     dR,              // thickness
-				     Rmin + (ir+1)*dR,// outerRadius
-				     dPhi);           // openingAngle
-	add(sh);
-      }
-      pPlacement = new StiPlacement;
-      pPlacement->setZcenter(xyz[2]);
-      pPlacement->setLayerRadius(Rmin + (ir+0.5)*dR);
-      pPlacement->setLayerAngle(Phi);
-      pPlacement->setRegion(StiPlacement::kMidRapidity);
-      pPlacement->setNormalRep(Phi,radius, 0); 
-    }
+    TString Name(nodeP->GetName());
+    sh = new StiCylindricalShape(Name.Data(),   // Name
+				   dZ,     	// halfDepth
+				   dR,         	// thickness
+				   Rmax,	// outerRadius
+				   dPhi);    	// openingAngle
+    add(sh);
+    pPlacement = new StiPlacement;
+    pPlacement->setZcenter(xyz[2]);
+    pPlacement->setLayerRadius((Rmin+Rmax)*0.5);
+    pPlacement->setLayerAngle(Phi);
+    pPlacement->setRegion(StiPlacement::kMidRapidity);
+    pPlacement->setNormalRep(Phi,0.5*(Rmin+Rmax), 0); 
   } while(0);
 
   if (!pPlacement)  {// BBox
@@ -306,10 +294,7 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
   nameP.ReplaceAll("HALL_1/CAVE_1/","");
   nameP.Strip(); // GVB: Do not truncate the name: it needs to be unique
   pDetector->setName(nameP.Data());
-  pDetector->setIsOn(false);
   pDetector->setIsActive(new StiNeverActiveFunctor);
-  pDetector->setIsContinuousMedium(false);
-  pDetector->setIsDiscreteScatterer(true);
   pDetector->setShape(sh);
   pDetector->setPlacement(pPlacement); 
   pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
