@@ -641,14 +641,8 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection &istCollection,
    std::vector<StIstRawHit *> rawHits;
    rawHits.reserve( rawHitsOriginal.getRawHitVec().size() );
 
-   for ( std::vector< StIstRawHit * >::iterator rawHitIt = rawHitsOriginal.getRawHitVec().begin(); rawHitIt != rawHitsOriginal.getRawHitVec().end(); ++rawHitIt) {
-      int channelId = (*rawHitIt)->getChannelId();
-
-      if ( channelId < 0 && channelId >= kIstNumElecIds) {
-         rawHitsOriginal.getRawHitVec().erase( rawHitIt );
-         continue;
-      }
-
+   for ( std::vector< StIstRawHit * >::iterator rawHitIt = rawHitsOriginal.getRawHitVec().begin(); rawHitIt != rawHitsOriginal.getRawHitVec().end(); ++rawHitIt) 
+   {
       rawHits.push_back( new StIstRawHit( *(*rawHitIt)) );
    }
 
@@ -828,6 +822,9 @@ Int_t StIstSimpleClusterAlgo::doClustering(const StIstCollection &istCollection,
 /***************************************************************************
 *
 * $Log: StIstSimpleClusterAlgo.cxx,v $
+* Revision 1.13  2014/09/18 06:27:25  ypwang
+* remove unneccessary check for raw hit electroincis ID check
+*
 * Revision 1.12  2014/09/17 20:39:45  smirnovd
 * Squashed commit of the following:
 *
