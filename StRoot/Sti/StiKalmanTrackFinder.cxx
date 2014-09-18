@@ -586,7 +586,16 @@ static  const double ref1a  = 110.*degToRad;
        StiDetector * detector = (*sector)->getData();
        double angle  = detector->getPlacement()->getNormalRefAngle();
        double radius = detector->getPlacement()->getNormalRadius();
-       assert(radius>0 && radius<1000);
+static int myRadius = 0;
+if (myRadius) {
+static int nKount = 0; nKount++;
+
+       double layRadius = detector->getPlacement()->getLayerRadius();
+       double cntRadius = detector->getPlacement()->getCenterRadius();
+       double leaRudius = sqrt(xg*xg+yg*yg);
+       printf("###RADIUSES### %d  Node=%g N=%g L=%g C=%g Det=%p\n",nKount,leaRudius,radius,layRadius,cntRadius,detector);
+}
+      assert(radius>0 && radius<1000);
        if (radius < qa.rmin) {gLevelOfFind--;return;}
        double diff = radius-leadRadius;if (!direction) diff = -diff;
        if (diff<-1e-6 && debug()>3) {
