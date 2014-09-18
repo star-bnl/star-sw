@@ -112,54 +112,98 @@ void StiHitContino::print(const char* tit) const
 int StiHitContino::getNHits() const
 { int n=0; for(int i=0;i<kMaxSize;i++) {if (mHits[i]) n++;}; return n;}	
 //______________________________________________________________________________
-
-#include "TComplex.h"
-const TComplex Im(0,1);
-//______________________________________________________________________________
-int StiTrackNode::cylCross(double r, const double dx[4],double Rho,double out[4])
+int StiTrackNode::cylCross(const double Xp[2],const double Dp[2], const double Rho
+                          ,const double r    ,int dir,            double out[2][3])
 {
-//  dx[0] == cosCA; dx[1] == sinCA;dx[2] == _x; dx[3]==_y
+//Circles crossing
+//==========================================================
 
-  TComplex d(dx[0],dx[1]),n(-dx[1],dx[0]),x(dx[2],dx[3]);
-  TComplex res[2];
-  TComplex xd = x/d;
-  double R2 = x.Re()*x.Re()+x.Im()*x.Im();
+// Rho -curvature
+// r - cyl radius
+//L - distance between centers
+//d - distance of crossing line d<r
+// X0,Y0 start track with R
+// Dx,Dy direction of it
+// Nx,Ny = -Dy,Dx
+// Cx,Cy = direction to center
+/// 
+// 
+// r**2-d**2 == R**2-(L-d)**2
+// r**2 == R**2- L**2 +2*L*d 
+// 
+// r**2 +L**2-R**2=  2*L*d
+// 
+// d = (r**2 +L**2-R**2)/(2*L)
+// 
+// L**2 = (X0+N*R)**2 = X0**2+R**2 +2*(X0*N)*R
+// L**2-R**2 = X0**2+ 2*(X0*N)*R
+// 
+// 
+// d = (r**2 +X0**2+ 2*(X0*N)*R)/(2*sqrt(X0**2+R**2 +2*(X0*N)*R)
+// d = (r**2 +X0**2+ 2*(X0*N)*R)/(2*sqrt(X0**2+R**2 +2*(X0*N)*R)
+// 
+// 
+static int nCall=0;nCall++;
+StiDebug::Break(nCall);
 
-  if (R2*Rho*Rho< 1e-4) {// Low curvature approx
-    double a = (1.+xd.Im()*Rho);
-    double b = xd.Re();
-    double c = (R2-r*r);
-    double dis = b*b - a*c;
-    if (dis<0.) 		return 1;
-    dis = sqrt(dis);
-    double L[2];
-    if (b<0) {a=-a;b=-b;c=-c;}
-    L[0] = -c/(dis+b);
-    L[1] = -(b+(dis))/a;
-    res[0] = x+L[0]*(1.+Im*(0.5*L[0]*Rho))*d;
-    res[1] = x+L[1]*(1.+Im*(0.5*L[1]*Rho))*d;
 
-  } else {	//General case
+int sRho = (Rho<0) ? -1:1;
+double aRho = fabs(Rho),aR = 1./(aRho+1e-11), rr=r*r,d=0;
+TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
+TVector3 C,Cd,Cn,N;
+double XX,XN,L;
+N[0] = -D[1]; N[1] = D[0];
+XX = X*X; XN = X*N;
 
-    TComplex Q = Rho*x+n;
-    double a1Q = ((x.Re()*n.Re()+x.Im()*n.Im())*2 + R2*Rho);
-    double aQ = a1Q*Rho+1;
-    double q = TComplex::Log(Q).Im();
- //       cos(Al-q) = ((Rho*r)**2 +Q**2-1)/(2*Q*r*Rho)
-    double mycos = (r*r*Rho+a1Q)/(2*aQ*r);
-    if (fabs(mycos)>1) 		return 1;
-    double ang = acos(mycos);
-    res[0] = r*TComplex::Exp(Im*(q+ang));
-    res[1] = r*TComplex::Exp(Im*(q-ang));
-  }
-  if (res[0].Re() < res[1].Re()) {//swap
-    xd = res[0]; res[0]=res[1]; res[1]=xd;}
-  out[0] = res[0].Re();
-  out[1] = res[0].Im();
-  out[2] = res[1].Re();
-  out[3] = res[1].Im();
-  return 0;
+double LLmRR = XX*aRho+2*XN*sRho;
+double LL = LLmRR*aRho+1; L = sqrt(LL);
+d = (rr*aRho+LLmRR)/(2*L);
+
+double p = ((r-d)*(r+d));
+if (p<=0) return 0;
+p = sqrt(p);
+
+C = X*aRho+N*sRho;
+Cd = C.Unit(); Cn[0] = -Cd[1];   Cn[1] = Cd[0];
+
+TVector3 Out[2];
+for (int ix = 0;ix<2; ix++) {
+  Out[ix] = Cd*d + Cn*p; p = -p;
 }
+
+for (int ix = 0;ix<2; ix++) {
+  double len = (X-Out[ix]).Mag();
+  if (len > 0.1*r) len = 2*r*asin(0.5*len*aRho);
+  
+
+  double tst = (X-Out[ix])*D;
+  if (dir) tst = -tst;
+  if (tst<0) len = M_PI*2*aR-len;
+  out[ix][2] = len; 
+  out[ix][0] = Out[ix][0];
+  out[ix][1] = Out[ix][1];
+}
+  if (out[0][2]>out[1][2]) { 	//wrong order
+    for (int j=0;j<3;j++)  { 
+      double t=out[0][j]; 
+      out[0][j] = out[1][j]; 
+      out[1][j] = t; 
+  } }
+
+
+
+  for (int i=0;i<2;i++) {
+//  printf("x=%g y=%g len=%g\n",out[i][0],out[i][1],out[i][2]);
+  double dif = (Out[i]*aRho-C).Mag()-1.;
+//  printf("SolAcc=%g\n",dif);
+  assert(fabs(dif)<1e3);
+  dif = (Out[i]).Mag()/r-1;
+//  printf("SolAcc=%g\n",dif);
+  assert(fabs(dif)<1e3);
+  }
+  return 2;
+}
+
 
 //______________________________________________________________________________
  
@@ -287,7 +331,8 @@ void StiNodeErrs::recov()
 static int nCall = 0; nCall++;
 StiDebug::Break(nCall);
 
-assert(sign()>0); ///??? 
+  double s = sign(); ///??? 
+  if (s<0) printf("##################### StiNodeErrs::recov() sign=%g\n",s);
   int i0=1,li0=1,isMod=0;
   if (_cXX>0) {i0=0;li0=0;}
 
@@ -422,7 +467,7 @@ L42:
          if (j != i__) b[kpiv] = sum * r__;
          else {
             if (sum<ans) ans = sum;
-            if (sum<0.) goto RETN;
+            if (sum<=0.) goto RETN;
             dc = sqrt(sum);
             b[kpiv] = dc;
             if (r__ > 0.)  r__ = (double)1. / dc;
@@ -443,6 +488,8 @@ int StiNodePars::check(const char *pri) const
 
   int ierr=0;
 //?? temp test
+  assert(fabs(_cosCA) <=1 && fabs(_sinCA)<=1);
+
   double tmp = (fabs(curv())<1e-6)? 0: curv()-ptin()*hz();
 //		1km for 1GeV is a zero field
 //  assert(fabs(_hz)<1e-5 || fabs(tmp)<= 1e-3*fabs(_curv));
@@ -464,6 +511,14 @@ StiNodePars &StiNodePars::merge(double wt,StiNodePars &other)
    for (int i=0;i<kNPars+1;i++) {P[i] = wt0*P[i] + wt*other.P[i];}
    ready();
    return *this;
+}
+//______________________________________________________________________________
+StiNodePars &StiNodePars::operator=(const StiNodePars &fr)
+{
+  assert(fabs(fr._sinCA)<=1);
+  assert(fabs(fr._cosCA)<=1);
+  memcpy (this,&fr,sizeof(fr));
+  return *this;
 }
 //______________________________________________________________________________
 void StiNodePars::print() const
