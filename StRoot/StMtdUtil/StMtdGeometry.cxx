@@ -1,8 +1,12 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.7 2014/07/25 19:44:18 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.8 2014/09/18 21:59:08 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.8  2014/09/18 21:59:08  marr
+ * 1. Disable retrieving table geant2backlegID for year 2012 ana before
+ * 2. The default geometry tag is set to yYYYYa
+ *
  * Revision 1.7  2014/07/25 19:44:18  marr
  * Fix a minor inconsistency in using the fNExtraCells
  *
@@ -53,7 +57,7 @@ const char* StMtdGeometry::modulePref   = "MTRA";
 //#endif
 
 // ___________________________________________________________________________
-	StMtdGeoNode::StMtdGeoNode(TGeoVolume *vol, TGeoHMatrix *mat, StThreeVectorD point, Int_t nExtraCells)
+StMtdGeoNode::StMtdGeoNode(TGeoVolume *vol, TGeoHMatrix *mat, StThreeVectorD point, Int_t nExtraCells)
 : fPoint(point)
 {
 
@@ -168,9 +172,6 @@ void StMtdGeoNode::MasterToLocal(const Double_t* master, Double_t* local)
 	test[1] = fRotMRS[1]*x + fRotMRS[4]*y + fRotMRS[7]*z;
 	test[2] = fRotMRS[2]*x + fRotMRS[5]*y + fRotMRS[8]*z;
 
-	//LOG_INFO<<"master ("<<master[0]<<","<<master[1]<<","<<master[2]<<")"<<endm;
-	//LOG_INFO<<"local ("<<local[0]<<","<<local[1]<<","<<local[2]<<")"<<endm;
-	//LOG_INFO<<"test ("<<test[0]<<","<<test[1]<<","<<test[2]<<")"<<endm;
 	return;
 
 }
@@ -209,11 +210,11 @@ Bool_t StMtdGeoNode::HelixCross(const StPhysicalHelixD helix, const Double_t pat
 	double betaGam = helix.momentum(gMtdGeometry->GetFieldZ(oh)).mag()/muonMass;
 	double velocity = sqrt(betaGam*betaGam/(1+betaGam*betaGam))*c_light*1e-9;
 	tof   = pathL/velocity;
-	//LOG_INFO<<"StMtdGeoNode::HelixCross() pathL = "<<pathL<<" point ("<<fPoint.x()<<","<<fPoint.y()<<","<<fPoint.z()<<") normal("<<fNormal.x()<<","<<fNormal.y()<<","<<fNormal.z()<<")  radius = "<<fPoint.perp()<<endm;
+	LOG_DEBUG<<"StMtdGeoNode::HelixCross() pathL = "<<pathL<<" point ("<<fPoint.x()<<","<<fPoint.y()<<","<<fPoint.z()<<") normal("<<fNormal.x()<<","<<fNormal.y()<<","<<fNormal.z()<<")  radius = "<<fPoint.perp()<<endm;
 	if(pathL>0 && pathL<MaxPathLength){
 		cross = helix.at(pathL);
 		ret = IsGlobalPointIn(cross);
-		//LOG_INFO<<"track cross point "<<cross.x()<<","<<cross.y()<<","<<cross.z()<<endm;
+		LOG_DEBUG<<"track cross point "<<cross.x()<<","<<cross.y()<<","<<cross.z()<<endm;
 		pathL += pathToMagOutR;
 		tof   += tofToMagOutR;
 	}	
@@ -338,8 +339,8 @@ StMtdGeometry* gMtdGeometry = 0;
 ClassImp(StMtdGeometry)
 #endif
 
-	// ___________________________________________________________________________
-	StMtdGeometry::StMtdGeometry(const char* name, const char* title)
+// ___________________________________________________________________________
+StMtdGeometry::StMtdGeometry(const char* name, const char* title)
 : TNamed(name,title)
 {
 	//
@@ -354,7 +355,7 @@ ClassImp(StMtdGeometry)
 	mStarBField = 0;
 	mBFactor = -1.;
 	mLockBField = 0;
-	mGeomTag = "y2014a";
+	mGeomTag = "";
 
 	fMagEloss = new TF1("f2","[0]*exp(-pow([1]/x,[2]))",0.,100);
 	fMagEloss->SetParameters(1.38147e+00,6.08655e-02,5.03337e-01);
@@ -388,93 +389,104 @@ void StMtdGeometry::Init(StMaker *maker){
 
 	if(maker->Debug()) DebugOn();
 
-	//Run14
-	//const Int_t map2BL[30]={
-	//	1,30,29,28,27,26,25,24,22,21,20,19,18,17,16,15,14,13,12,11,10,8,7,6,5,4,3,2,0,0
-	//};
-
-	//Int_t runnumber = maker->GetRunNumber();
 	Int_t mYear = maker->GetDateTime().GetYear();
 	if(IsDebugOn()){ 
-		//LOG_INFO<<"Input runnumber "<<runnumber<<endm;
 		LOG_INFO<<"Input data from year "<<mYear<<endm;
 	}
 
-	Int_t geant2backlegIDMap[30]; 
 	// Load geant2backlegID Map 
 	// Extract MTD maps from database
-	LOG_INFO << "Retrieving geant2backlegID table from database ..." << endm;
+	if(mYear<=2012)
+	  {
+	    LOG_WARN<<"No geant2backlegID table for 2012 and before"<<endm;
+	  }
+	else
+	  {
+	    LOG_INFO << "Retrieving geant2backlegID table from database ..." << endm;
 
-	TDataSet *dataset = maker->GetDataBase("Geometry/mtd/mtdGeant2BacklegIDMap");
-	St_mtdGeant2BacklegIDMap *mtdGeant2BacklegIDMap = static_cast<St_mtdGeant2BacklegIDMap*>(dataset->Find("mtdGeant2BacklegIDMap"));
-	if ( !mtdGeant2BacklegIDMap ){
+	    TDataSet *dataset = maker->GetDataBase("Geometry/mtd/mtdGeant2BacklegIDMap");
+	    St_mtdGeant2BacklegIDMap *mtdGeant2BacklegIDMap = static_cast<St_mtdGeant2BacklegIDMap*>(dataset->Find("mtdGeant2BacklegIDMap"));
+	    if ( !mtdGeant2BacklegIDMap )
+	      {
 		LOG_ERROR << "No mtdGeant2BacklegIDMap found in database" << endm;
 		return; 
-	}
+	      }
 	
-	for ( Int_t i = 0; i < 30; i++ ){
-		geant2backlegIDMap[i] = 0;
-	}
-
-	mtdGeant2BacklegIDMap_st *mGeant2BLTable = static_cast<mtdGeant2BacklegIDMap_st*>(mtdGeant2BacklegIDMap->GetTable());
-	if(mGeant2BLTable){ 
-		for ( Int_t i = 0; i < 30; i++ ){
-			geant2backlegIDMap[i] = (Int_t)mGeant2BLTable->geant2backlegID[i];
-		}
-	}else{
+	    mtdGeant2BacklegIDMap_st *mGeant2BLTable = static_cast<mtdGeant2BacklegIDMap_st*>(mtdGeant2BacklegIDMap->GetTable());
+	    if(mGeant2BLTable)
+	      { 
+		for ( Int_t i = 0; i < 30; i++ )
+		  {
+		    mMTTG2BL[i] = (Int_t)mGeant2BLTable->geant2backlegID[i];
+		    if(mMTTG2BL[i]>30 || mMTTG2BL[i]<0) LOG_ERROR<<" Wrong map! check database! "<<endm;
+		  }
+	      }
+	    else
+	      {
 		LOG_ERROR << "No geant2backlegIDMap table found in database" << endm;
-	}
+	      }
+	  }
 
-	//mYear==2012 map does not work, load nothing
-	if(mYear<2012){
-		LOG_ERROR<<"No MTD geometry before year 2012! Loading default geometry!"<<endm;
-	}
+	for(int i=0;i<30;++i)
+	  { 
+	    for(int j=0;j<5;++j)
+	      {
+		if(i<11||i>19) mMTRA2Mod[i][j] = j+1;
+		else
+		  {
+		    if(j==3||j==4) mMTRA2Mod[i][j] = 0;
+		    else mMTRA2Mod[i][j] = j+2;
+		  }
+	      }
+	  }
 
-	for(int i=0;i<30;++i){ 
-		mMTTG2BL[i] = geant2backlegIDMap[i];
-		if(geant2backlegIDMap[i]>30||geant2backlegIDMap<0) LOG_ERROR<<" Wrong map! check database! "<<endm;
-		for(int j=0;j<5;++j){
-			if(i<11||i>19) mMTRA2Mod[i][j] = j+1;
-			else{
-				if(j==3||j==4) mMTRA2Mod[i][j] = 0;
-				else mMTRA2Mod[i][j] = j+2;
-			}
-		}
-	}
+	// Load geometry
+	if(IsDebugOn())
+	  {
+	    Info("Init","testing access to TGeoManager");
+	  }
+	
+	if (gGeoManager) 
+	  { // Geom already there
+	    if(IsDebugOn())
+	      {
+		Info("Load","TGeoManager(%s,%s) is already there",gGeoManager->GetName(),gGeoManager->GetTitle());
+	      }
+	  }
+	else 
+	  {
+	    if(mGeomTag.Length()==0)
+	      {
+		mGeomTag = Form("y%da",mYear);
+		if(mYear<2012)
+		  mGeomTag = "y2014a";
+		LOG_INFO << "Load default geometry " << mGeomTag.Data() << " for year " << mYear << endm;
+	      }
+	    else
+	      {
+		LOG_INFO << "Load input geometry " << mGeomTag.Data() << " for year " << mYear << endm;
+	      }
 
-
-	if(IsDebugOn()){
-		Info("Init","testing access to TGeoManager");
-	}
-
-	if (gGeoManager) { // Geom already there
-		if(IsDebugOn()){
-			Info("Load","TGeoManager(%s,%s) is already there",gGeoManager->GetName(),gGeoManager->GetTitle());
-		}
-	} else {
-		TString ts = Form("$STAR/StarVMC/Geometry/macros/loadStarGeometry.C(\"%s\",1)",mGeomTag.Data());
-		if(IsDebugOn()){
-			Warning("Init","add  TGeoManager");
-			Info("Init","WILL execute macro=%s=\n",ts.Data()); 
-		}
-		Int_t ierr=0;
-		gROOT->Macro(ts.Data(),&ierr);
-		assert(!ierr);
-	}
+	    TString ts = Form("$STAR/StarVMC/Geometry/macros/loadStarGeometry.C(\"%s\",1)",mGeomTag.Data());
+	    if(IsDebugOn())
+	      {
+		Warning("Init","add  TGeoManager");
+		Info("Init","WILL execute macro=%s=\n",ts.Data()); 
+	      }
+	    Int_t ierr=0;
+	    gROOT->Macro(ts.Data(),&ierr);
+	    assert(!ierr);
+	  }
 	assert(gGeoManager);
-	//gGeoManager->GetCache()->BuildIdArray();
-
-	TGeoVolume *mMtdGeom = gGeoManager->FindVolumeFast("MUTD");
-	const char *elementName = mMtdGeom->GetName();
-
 	Int_t mGeoYear = 0;
-	//TGeoVolume *mMtdBL = gGeoManager->FindVolumeFast(backlegPref[0]);
 	if(gGeoManager->CheckPath("/HALL_1/CAVE_1/MUTD_1/MTMT_1")){
 		LOG_INFO<<"found y2012 geometry"<<endm;
 	   	mGeoYear=2012;
 	}
-	//LOG_INFO<<"mGeoYear="<<mGeoYear<<endm;
 
+	// intialize backleg/module geometry
+	TGeoVolume *mMtdGeom = gGeoManager->FindVolumeFast("MUTD");
+	const char *elementName = mMtdGeom->GetName();
 	if(elementName){
 		if(IsDebugOn()) LOG_INFO <<" found detector:"<<elementName<<endm;
 		TGeoIterator next(mMtdGeom);
@@ -482,8 +494,6 @@ void StMtdGeometry::Init(StMaker *maker){
 		TGeoNode   *node = 0;
 		TGeoVolume *blVol = 0;
 		TGeoVolume *modVol = 0;
-		//Int_t iBL  = 0;
-		//Int_t iMod = 0;
 		Int_t ibackleg = 0;
 		Int_t imodule = 0;
 		Double_t minR = 999.;
@@ -517,30 +527,52 @@ void StMtdGeometry::Init(StMaker *maker){
 				if(IsDebugOn()) LOG_INFO<<"Node name = "<<node->GetName()<<" iMTTG="<<iMTTG<<endm;
 				if(iMTTG>0){ 
 					Int_t iBL = 0;
-					if(mGeoYear==2012){
-						if(!strcmp(blVol->GetName(), backlegPref[0])){ 
-							iBL = 26;
-						}else if(!strcmp(blVol->GetName(), backlegPref[1])){
-							if(iMTTG==1) iBL = 27;
-							else if(iMTTG==2) iBL = 28;
-							else{ 
-								LOG_ERROR<<"Wrong BL id, this is not Y2012 geometry!"<<endm;
-								iBL = 0;
-							}
-						}
-					}else{
-						iBL = mMTTG2BL[iMTTG-1];
-					}
+					if(mGeoYear==2012)
+					  {
+					    if(!strcmp(blVol->GetName(), backlegPref[0]))
+					      { 
+						iBL = 26;
+					      }
+					    else if(!strcmp(blVol->GetName(), backlegPref[1]))
+					      {
+						if(iMTTG==1) iBL = 27;
+						else if(iMTTG==2) iBL = 28;
+						else
+						  { 
+						    LOG_ERROR<<"Wrong BL id, this is not Y2012 geometry!"<<endm;
+						    iBL = 0;
+						    continue;
+						  }
+					      }
+					    else
+					      {
+						LOG_ERROR<<"Wrong BL id, this is not Y2012 geometry!"<<endm;
+						iBL = 0;
+						continue;
+					      }
+					  }
+					else
+					  {
+					    iBL = mMTTG2BL[iMTTG-1];
+					  }
 					Double_t op[3];
 					Double_t local[3] = {0,0,0};
 					gGeoManager->LocalToMaster(local,op);
-					//LOG_INFO<<"point: x,y,z "<<op[0]<<","<<op[1]<<","<<op[2]<<endm;
-					//LOG_INFO<<"matrix: "<<endm;
-					//gGeoManager->GetCurrentMatrix()->Print();
 					++mNValidBLs;
-					mMtdGeoBackleg[iBL-1] = new StMtdGeoBackleg(iMTTG, iBL, blVol, gGeoManager->GetCurrentMatrix(), StThreeVectorD(op[0],op[1],op[2]), mNExtraCells);
-					//TGeoBBox *brik = (TGeoBBox*)blVol->GetShape();
-					//LOG_INFO<<"Backleg TBox Dx="<<brik->GetDX()<<" Dy="<<brik->GetDY()<<" Dz="<<brik->GetDZ()<<endm;
+					TGeoHMatrix *mat = gGeoManager->GetCurrentMatrix();
+					StThreeVectorD point(op[0],op[1],op[2]);
+					if(mGeoYear==2012)
+					  {
+					    Double_t *trans = mat->GetTranslation();
+					    Double_t *rot   = mat->GetRotationMatrix();
+					    trans[0] = -1*trans[0];
+					    rot[0] = -1*rot[0];
+					    rot[4] = -1*rot[4];
+					    mat->SetTranslation(trans);
+					    mat->SetRotation(rot);
+					    point.setX(-1*op[0]);
+					  }
+					mMtdGeoBackleg[iBL-1] = new StMtdGeoBackleg(iMTTG, iBL, blVol, mat, point, mNExtraCells);
 					if(IsDebugOn()) LOG_INFO<<"iMTTG="<<iMTTG<<" iBL="<<iBL<<endm;
 					imodule = 0;   // clear for this backleg
 					ibackleg = iBL;
@@ -550,32 +582,38 @@ void StMtdGeometry::Init(StMaker *maker){
 			if(IsMTRA(detVol)){
 				modVol = (TGeoVolume *)detVol;
 				Int_t iMTRA = node->GetNumber();
-				//if(IsDebugOn()) LOG_INFO<<"Node name = "<<node->GetName()<<" iMTRA="<<iMTRA<<endm;
 				if(iMTRA>0){
 					Int_t iMod = mMTRA2Mod[ibackleg-1][iMTRA-1];
 					if(mGeoYear==2012&&ibackleg==26){
 						iMod = iMTRA+1;
 					}
-					if(IsDebugOn()) LOG_INFO<<"iMTRA="<<iMTRA<<" iMod="<<iMod<<endm;
 					Double_t op[3];
 					Double_t local[3] = {0,0,0};
 					gGeoManager->LocalToMaster(local,op);
-					//LOG_INFO<<"point: x,y,z "<<op[0]<<","<<op[1]<<","<<op[2]<<endm;
-					//LOG_INFO<<"matrix: "<<endm;
-					//gGeoManager->GetCurrentMatrix()->Print();
 					++imodule;
 					double R = sqrt(op[0]*op[0]+op[1]*op[1]);
 					if(R<minR) minR = R;
 					if(R>maxR) maxR = R;
 
-					mMtdGeoModule[ibackleg-1][iMod-1] = new StMtdGeoModule(iMTRA, iMod, modVol, gGeoManager->GetCurrentMatrix(), StThreeVectorD(op[0],op[1],op[2]), mNExtraCells);
-					//mMtdGeoModule[mNValidBLs-1][imodule-1]->PrintNormal();
-					//TGeoBBox *brik = (TGeoBBox*)modVol->GetShape();
-					//LOG_INFO<<"TBox Dx="<<brik->GetDX()<<" Dy="<<brik->GetDY()<<" Dz="<<brik->GetDZ()<<endm;
+					TGeoHMatrix *mat = gGeoManager->GetCurrentMatrix();
+					StThreeVectorD point(op[0],op[1],op[2]);
+					if(mGeoYear==2012)
+					  {
+					    Double_t *trans = mat->GetTranslation();
+					    Double_t *rot   = mat->GetRotationMatrix();
+					    trans[0] = -1*trans[0];
+					    rot[0] = -1*rot[0];
+					    rot[4] = -1*rot[4];
+					    mat->SetTranslation(trans);
+					    mat->SetRotation(rot);
+					    point.setX(-1*op[0]);
+					  }
+
+					mMtdGeoModule[ibackleg-1][iMod-1] = new StMtdGeoModule(iMTRA, iMod, modVol, mat, point, mNExtraCells);
+					if(IsDebugOn()) LOG_INFO<<"iMTRA="<<iMTRA<<" iMod="<<iMod<<endm;
 				}
 			}
 		}
-		//LOG_INFO<<"module R min = "<<minR<<" max = "<<maxR<<endm;
 	}
 
 	if(IsDebugOn()){
@@ -587,12 +625,7 @@ void StMtdGeometry::Init(StMaker *maker){
 		}
 	}
 
-	//Float_t scale = bField/0.5;
-	//if (scale > 0.8)       mBFactor = 1.0; //"FF"
-	//else if (scale > 0.2)  mBFactor = 0.5; //"HF"
-	//else if (scale > -0.8) mBFactor = -0.5;//"RHF"
-	//else                   mBFactor = -1.0;//"RFF"
-
+	// Get magnetic field map
 	if(!StarMagField::Instance()){
 		LOG_ERROR<<"StarMagField has not been initialized!"<<endm;
 		if(mLockBField){
@@ -894,13 +927,6 @@ Bool_t StMtdGeometry::ProjToBLModVect(const StPhysicalHelixD helix, IntVec &blVe
 void StMtdGeometry::RemoveDuplicate(IntVec &vec){
 
 	sort(vec.begin(),vec.end());
-	//if(IsDebugOn()){
-	//	LOG_INFO<<"Input vector"<<endm;
-	//	for(IntVec::iterator tmpIter = vec.begin();tmpIter<vec.end();++tmpIter){
-	//		LOG_INFO<<" id "<<*tmpIter<<endm;
-	//	}
-	//}
-
 	Int_t tmpid = 0;
 	for(IntVec::iterator tmpIter = vec.begin();tmpIter<vec.end();++tmpIter){
 		if(tmpIter==vec.begin()){
@@ -914,12 +940,6 @@ void StMtdGeometry::RemoveDuplicate(IntVec &vec){
 			tmpid=*tmpIter;
 		}
 	}
-	//if(IsDebugOn()){
-	//	LOG_INFO<<"Output vector"<<endm;
-	//	for(IntVec::iterator tmpIter = vec.begin();tmpIter<vec.end();++tmpIter){
-	//		LOG_INFO<<" id "<<*tmpIter<<endm;
-	//	}
-	//}
 }
 
 Int_t StMtdGeometry::FindBLId(Double_t phi){
