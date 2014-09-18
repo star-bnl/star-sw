@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.21 2014/09/09 14:00:39 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.22 2014/09/18 22:03:01 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.22  2014/09/18 22:03:01  marr
+ * Do not set default geometry tag
+ *
  * Revision 1.21  2014/09/09 14:00:39  marr
  * Fill the expected time-of-flight calculated via track extrapolation
  *
@@ -195,7 +198,7 @@ StMtdMatchMaker::StMtdMatchMaker(const Char_t *name): StMaker(name)
 	mEvent = NULL;
 	mMuDst = NULL;
 	mMtdEvt = NULL;
-	mGeomTag = "y2014a";
+	mGeomTag = "";
 
 	fZReso = new TF1("fZReso","sqrt([0]/x/x+[1])",0,100);
 	fZReso->SetParameters(148.7,1.654); //cm
@@ -480,7 +483,8 @@ Int_t StMtdMatchMaker::InitRun(int runnumber) {
 	mMtdGeom->SetCosmicFlag(mCosmicFlag);
 	mMtdGeom->SetELossFlag(mELossFlag);
 	mMtdGeom->SetNExtraCells(mNExtraCells);
-	mMtdGeom->SetGeomTag(mGeomTag);
+	if(mGeomTag.Length()>0)
+	  mMtdGeom->SetGeomTag(mGeomTag);
 
 	Float_t fScale = -1.;
 	if(mLockBField){
