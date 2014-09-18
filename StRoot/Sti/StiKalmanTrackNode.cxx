@@ -1,10 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.140 2014/09/05 21:55:29 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.141 2014/09/18 18:45:00 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.141  2014/09/18 18:45:00  perev
+ * Debug++
+ * Using new cylCross method
+ * More checks for out of region
+ *
  * Revision 2.140  2014/09/05 21:55:29  perev
  * bug #2903  fixed. x0,x0p,x0Gas initialised now tp 1e11 instead of -1
  * Many asserts adde temporary. Some of them time consuming
@@ -521,7 +526,7 @@ static int myCount=0;
   _ext=0; _inf=0;
   mId = ++myCount; 
   mHz = 999;
-  Break(mId);
+  StiDebug::Break(mId);
 }
 //______________________________________________________________________________
 void StiKalmanTrackNode::unset()
@@ -620,6 +625,7 @@ double StiKalmanTrackNode::getHz() const
 {
   
 static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
+//??   if (mHz && mHz<999) return mHz;
    if (mHz<999) return mHz;
    if (! _laser) {
      double h[3];
@@ -628,6 +634,7 @@ static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
      if (fabs(h[2]) < ZEROHZ) h[2]=0;
      mHz = h[2];
    } else mHz = 0;
+   assert(mHz);
    return mHz;
 }
 //______________________________________________________________________________
@@ -885,7 +892,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 				  const StiDetector * tDet,int dir)
 {
 static int nCall=0; nCall++;
-Break(nCall);
+StiDebug::Break(nCall);
   int position = 0;
   setState(pNode);
   setDetector(tDet);
@@ -912,20 +919,22 @@ Break(nCall);
   case kDisk:  							
   case kCylindrical: endVal = nNormalRadius;
     {
-      double xy[4];
-      position = cylCross(endVal,&mFP._cosCA,mFP.curv(),xy);
-      if (position) 			return -11;
-      dAlpha = atan2(xy[1],xy[0]);
+      double xy[2][3];
+      position = cylCross(mFP.P,&(mFP._cosCA), mFP.curv(),endVal,dir,xy);
+
+      if (!position) 			return -11;
+      dAlpha = atan2(xy[0][1],xy[0][0]);
       position = rotate(dAlpha);
       if (position) 			return -11;
     }
    					break;
   default: assert(0);
   }
-
+   
   position = propagate(endVal,shapeCode,dir); 
 
   if (position>kEdgeZplus || position<0) return position;
+  assert(mFP.x() > 0.);
   propagateError();
   if (debug() & 8) { PrintpT("E");}
 
@@ -950,7 +959,7 @@ Break(nCall);
 bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit * vertex,int dir)
 {
 static int nCall=0; nCall++;
-Break(nCall);
+StiDebug::Break(nCall);
   
   setState(parentNode);
   TCircle tc(&mFP.x(),&mFP._cosCA,mFP.curv());
@@ -1016,8 +1025,9 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
 //______________________________________________________________________________
 int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
 {
-  static int nCalls=0;
-  nCalls++;
+static int nCall=0; nCall++;
+StiDebug::StiDebug::Break(nCall);  
+
   assert(fDerivTestOn!=-10 || _state==kTNRotEnd ||_state>=kTNReady);
   _state = kTNProBeg;
 //  numeDeriv(xk,1,option,dir);
@@ -1063,8 +1073,9 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
       double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
       mgP.dl = atan2(sind,cosd)/rho;
     }
-
+    if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	return -5;
     mFP.z() += mgP.dl*mFP.tanl();
+    if (fabs(mFP.z()) > kMaxZ) 				return -6;
     mFP.y() = mgP.y2;
     mFP.eta() = nice(mFP.eta()+rho*mgP.dl);  					/*VP*/
     mFP.x()       = mgP.x2;
@@ -1195,7 +1206,7 @@ void StiKalmanTrackNode::propagateMtx()
 void StiKalmanTrackNode::propagateError()
 {  
   static int nCall=0; nCall++;
-  Break(nCall);
+  StiDebug::Break(nCall);
   assert(fDerivTestOn!=-10 || _state==kTNProEnd);
 assert(mFE.sign()>0); ///??? 
   if (debug() & 1) 
@@ -1210,28 +1221,8 @@ assert(mFE.sign()>0); ///???
   propagateMtx();
   mFE.recov();
   errPropag6(mFE.A,mMtx().A,kNPars);
-  assert(fabs(mFE._cXX)<1e-20);
-  assert(fabs(mFE._cYX)<1e-20);                   
-  assert(fabs(mFE._cZX)<1e-20);               
-  assert(fabs(mFE._cEX)<1e-20);           
-  assert(fabs(mFE._cPX)<1e-20);    
-  assert(fabs(mFE._cTX)<1e-20);
-
-
-assert(mFE.sign()>0); ///??? 
-  int smallErr = !(mFE._cYY>1e-20 && mFE._cZZ>1e-20 && mFE._cEE>1e-20 && mFE._cTT>1.e-20);
-  if (smallErr) {
-    LOG_INFO << Form("***SmallErr: cYY=%g cZZ=%g cEE=%g cCC=%g cTT=%g"
-          ,mFE._cYY,mFE._cZZ,mFE._cEE,mFE._cPP,mFE._cTT) << endm;
-    assert(mFE._cYY>0 && mFE._cZZ>0 && mFE._cEE>0 && mFE._cPP>=0 && mFE._cTT>0);
-  }
-  assert(fabs(mFE._cXX)<1.e-6);
-  assert(mFE._cYY*mFE._cZZ-mFE._cZY*mFE._cZY>0);
-  mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
   mFE.recov();
-assert(mFE.sign()>0); ///??? 
-  mFE.check("StiKalmanTrackNode::propagateError");
-
+  mFE._cXX = mFE._cYX= mFE._cZX = mFE._cEX = mFE._cPX = mFE._cTX = 0;
 #ifdef Sti_DEBUG
   if (debug() & 4) {
     PrPP(propagateError,C);
@@ -1290,14 +1281,15 @@ inline double StiKalmanTrackNode::length(const StThreeVector<double>& delta, dou
 {
   
   double m = delta.perp();
-  double as = 0.5*m*curv;
-  if (TMath::Abs(as) > 1) {
+  double as = 0.5*m*fabs(curv);
+  if (as >= 1) {
+    if (as > 1.1)
     cout << "StiKalmanTrackNode::length m = " << m << " curv = " << curv << " as = " << as << " illegal. reset to 1" << endl;
-    as = 1;
+    as = 0.99;
   }
   double lxy=0;
   if (fabs(as)<0.01) { lxy = m*(1.+as*as/24);}
-  else               { lxy = 2.*asin(as)/curv;}
+  else               { lxy = 2.*asin(as)/fabs(curv);}
   return sqrt(lxy*lxy+delta.z()*delta.z());
 }
 
@@ -1700,6 +1692,7 @@ assert(mFE.sign()>0); ///???
   mFP.tanl()  = tanl;
   mFP._sinCA = sinCA;
   mFP._cosCA = ::sqrt((1.-mFP._sinCA)*(1.+mFP._sinCA)); 
+  assert(!_detector || mFP.x() > 0.);
   mFP.hz() = getHz();
 
 // update error matrix
@@ -1899,7 +1892,7 @@ int StiKalmanTrackNode::locate()
   const StiShape     *sh    = tDet->getShape();
   double kNStd = (tDet->isActive() ? 5 : 0 ); // GVB: avoid seeing too much inactive material
 
-  if (fabs(mFP.z())>kMaxZ || fabs(mFP.y())> kMaxR) return -1;
+  if (fabs(mFP.z())>kMaxZ || mFP.rxy()> kMaxR) return -1;
   
 #ifndef DO_TPCCATRACKER // insensible region on a detector plane
   edge  = 2.;
