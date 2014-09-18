@@ -49,16 +49,8 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
    rawHitsToMerge.reserve(kIstNumRowsPerSensor);
 
    for (std::vector< StIstRawHit * >::iterator rawHitPtr = rawHitsOriginal.getRawHitVec().begin(); rawHitPtr != rawHitsOriginal.getRawHitVec().end(); ++rawHitPtr) {
-      int channelId   = (*rawHitPtr)->getChannelId();
       int sensorIndex = (int)(*rawHitPtr)->getSensor();
       int columnIndex = (int)(*rawHitPtr)->getColumn();
-
-      if ( channelId < 0 || channelId >= kIstNumElecIds) {
-         rawHitsOriginal.getRawHitVec().erase( rawHitPtr );
-         --rawHitPtr;
-         continue;
-      }
-
       rawHitsVec[sensorIndex - 1][columnIndex - 1].push_back( new StIstRawHit( *(*rawHitPtr)) );
    }
 
@@ -237,6 +229,9 @@ Int_t StIstScanClusterAlgo::doClustering(const StIstCollection &istCollection, S
 /***************************************************************************
 *
 * $Log: StIstScanClusterAlgo.cxx,v $
+* Revision 1.13  2014/09/18 06:27:25  ypwang
+* remove unneccessary check for raw hit electroincis ID check
+*
 * Revision 1.12  2014/09/17 20:39:45  smirnovd
 * Squashed commit of the following:
 *
