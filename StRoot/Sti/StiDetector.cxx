@@ -5,6 +5,7 @@
 #include "StiMaterial.h"
 #include "StiShape.h"
 #include "StiPlanarShape.h"
+#include "StiCylindricalShape.h"
 #include "StiPlacement.h"
 #include "StiDetectorContainer.h"
 #include "StiDetector.h"
@@ -32,10 +33,7 @@ StiDetector::~StiDetector()
 //______________________________________________________________________________
 void StiDetector::copy(StiDetector &detector){
 
-  on = detector.isOn();
   isActiveFunctor = detector.isActiveFunctor;
-  continuousMedium = detector.isContinuousMedium();
-  discreteScatterer = detector.isDiscreteScatterer();
 
   gas = detector.getGas();
   material = detector.getMaterial();
@@ -71,11 +69,14 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
   vect.resize(1);
   vect[0]=this;
   assert(shape);
-  if (shape->getShapeCode()!=kPlanar) return 1;
+  int iShape = shape->getShapeCode();
   
   float deltaX = shape->getThickness();
   float halfZ  = shape->getHalfDepth(); 
   float halfY  = shape->getHalfWidth(); 
+  float angle  = shape->getOpeningAngle(); 
+  float nRadius = placement->getNormalRadius();
+  if (iShape == kCylindrical)  nRadius = shape->getOuterRadius()-deltaX/2;
   int ny = deltaX/(halfY*2*dXdY)+0.5;
   int nz = deltaX/(halfZ*2*dXdY)+0.5;
   int nSplit = (ny>nz)? ny:nz;
@@ -98,16 +99,22 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
 //		Create shape
      ts = shape->getName();
      if (N) { ts+="_"; ts+=N;} 
-     StiShape *myShape = new StiPlanarShape(ts.Data(),halfZ,dX,halfY);
-     det->setShape(myShape);
-//		Create placement
+     StiShape *myShape =0;
+     float myRadius = nRadius+xc;
+assert(myRadius>1e-2 && myRadius < 1e3);
+     if (iShape==kPlanar) 	{//Planar shape
+       myShape = new StiPlanarShape(ts.Data(),halfZ,dX,halfY);
 
+     } else if (iShape==kCylindrical) {//Cylinder shape
+       myShape = new StiCylindricalShape(ts.Data(),halfZ,dX,myRadius+dX/2,angle);
+
+     } else { assert(0 && "Wrong shape type");}
+
+//		Create placement
      StiPlacement *place = new StiPlacement;
      *place = *placement;
-     float myRadius = placement->getNormalRadius()+xc;
-     place->setNormalRep(placement->getNormalRefAngle()
-                        ,myRadius 
-                        ,placement->getNormalYoffset());
+     place->setNormalRep(placement->getNormalRefAngle(),myRadius,placement->getNormalYoffset());
+     det->setShape(myShape);
      place->setLayerRadius(myRadius);
      det->setPlacement(place);
      vect.push_back(det);
@@ -120,4 +127,14 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
    if (vect.size()>1) {
      printf("StiDetector::splitIt %s is splitted into %d peaces\n",getName().c_str(),vect.size());}
    return vect.size();
+}
+//______________________________________________________________________________
+double StiDetector::getVolume() const
+{
+return shape->getVolume();
+}
+//______________________________________________________________________________
+    double StiDetector::getWeight() const
+{
+return shape->getVolume()*material->getDensity();
 }
