@@ -230,12 +230,6 @@ int StiTrackNodeHelper::propagateError()
 static int nCall = 0; nCall++; StiDebug::Break(nCall);
   mPredErrs = mFitdParentErrs;
   StiTrackNode::errPropag6(mPredErrs.A,mMtx.A,kNPars);
-  assert(fabs(mPredErrs._cXX)<1e-20);
-  assert(fabs(mPredErrs._cYX)<1e-20);                   
-  assert(fabs(mPredErrs._cZX)<1e-20);               
-  assert(fabs(mPredErrs._cEX)<1e-20);           
-  assert(fabs(mPredErrs._cPX)<1e-20);    
-  assert(fabs(mPredErrs._cTX)<1e-20);
 
   mPredErrs.recov();
   mPredErrs._cEE+=mMcs._cEE;		//add err to <eta*eta> eta crossing angle//add err to <eta*eta> eta crossing angle
@@ -662,6 +656,7 @@ int StiTrackNodeHelper::save()
 int StiTrackNodeHelper::propagateMCS()
 {  
 static int nCall = 0; nCall++;
+StiDebug::Break(nCall);
 static const int keepElossBug = StiDebug::iFlag("keepElossBug");
   mMcs.reset();
   if (!mDetector) 			return 0;
@@ -973,7 +968,6 @@ int StiTrackNodeHelper::updateNode()
 {
 static int nCall=0; nCall++;
   mState = StiTrackNode::kTNFitBeg;
-  assert(mPredErrs._cXX<1e-8);
   double r00,r01,r11;
   StiDebug::Break(mTargetNode->mId);
   if (!mDetector)	{ //Primary vertex
@@ -1038,6 +1032,7 @@ static int nCall=0; nCall++;
       assert(fabs(mFitdPars.y()-mHitPars[1])>1e-10 ||  fabs(mHitPars[0])<4);
 //??    cutStep(&mFitdPars,&mPredPars);
 //??    cutStep(&mFitdPars,&mBestPars);
+    assert(mFitdPars.x()>0);
     if (mFitdPars.check()) return -11;
   // update error matrix
     double c00=mPredErrs._cYY;                       
@@ -1152,7 +1147,7 @@ double StiTrackNodeHelper::pathIn(const StiDetector *det,StiNodePars *pars)
   if (!det) return 0.; 
   double thickness = det->getShape()->getThickness();
   double t = pars->tanl();
-  double c = pars->_cosCA;
+  double c = fabs(pars->_cosCA);
   return (thickness*::sqrt(1.+t*t)) / c;
 }
 //______________________________________________________________________________
