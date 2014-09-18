@@ -152,7 +152,9 @@ virtual double z()    const	=0;
 protected:   
 static void mult6(double Rot[kNPars][kNPars],const double Pro[kNPars][kNPars]); 
 static void errPropag6(double G[21],const double F[6][6],int nF);
-static int  cylCross(double r, const double dx[4],double Rho,double out[4]);
+static  int cylCross(const double Xp[2],const double Dp[2], const double Rho, const double r
+                    ,         int dir,        double out[2][3]);
+
 static double  sinX(double x);  // (sin(x)-x)/x**3
 
   StiTrackNode()			{reset();}    
