@@ -1136,7 +1136,8 @@ int StiTrackNodeHelper::nudge()
     pars->eta()   +=               deltaE;
     pars->_cosCA -= pars->_sinCA *deltaE;
     pars->_sinCA += pars->_cosCA *deltaE;
-    if (pars->_cosCA>=1.) pars->ready();
+    if (fabs(pars->_cosCA)>=1.
+      ||fabs(pars->_sinCA)>=1.) pars->ready();
     if (pars->check()) return 1;
   }
   return 0;
