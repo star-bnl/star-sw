@@ -8,6 +8,7 @@ const Int_t    gMtdNBacklegs             = 30;   // Total number of backlegs
 const Int_t    gMtdNModules              = 5;    // Total number of MTD modules per backleg
 const Int_t    gMtdNCells                = 12;   // Total number of MTD cells per module.
 const Int_t    gMtdNChannels             = 24;   // Total number of MTD channels per module. One cell has two channels.
+const Int_t    gMtdNModulesAll           = 150;  // Total number of MTD modules
 
 const Double_t gMtdCellLength            = 87.0; // Length of a MTD cell (cm)
 const Double_t gMtdCellWidth             = 3.8;  // Width of a MTD cell (cm)
