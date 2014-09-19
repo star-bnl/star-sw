@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.18 2014/08/25 17:06:20 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.19 2014/09/19 17:49:33 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -33,6 +33,8 @@
 #include "tables/St_mtdTrayToTdigMap_Table.h"
 #include "tables/St_mtdTrayIdMap_Table.h"
 #include "tables/St_mtdTdigIdMap_Table.h"
+#include "tables/St_mtdTriggerTimeCut_Table.h"
+
 ClassImp(StMtdHitMaker);
 
 //_____________________________________________________________
@@ -45,7 +47,7 @@ StMtdHitMaker::StMtdHitMaker(const char *name):StRTSBaseMaker("mtd",name),
   for(int i=0;i<24;i++) mtdStrip[i] = mStripMap[i];
   mUseMuDst = 0;
   mSwapBacklegInRun13 = kFALSE;
-  mTriggerWndSelection = kFALSE;
+  mTriggerWndSelection = kTRUE;
   hxhyhz=new TH3D("hxhyhz","hxhyhz",10,19.5,29.5,10,-0.5,9.5,30,-0.5,29.5);
   LOG_DEBUG << "StMtdHitMaker::ctor"  << endm;
 }
@@ -75,10 +77,10 @@ Int_t StMtdHitMaker::Init()
   memset(mTrayId,0,sizeof(mTrayId));
   memset(mTdigId,0,sizeof(mTdigId));
   
-  for(Int_t i=0;i<mNALLTRAY;i++)
+  for(Int_t i=0;i<gMtdNModulesAll;i++)
     {
-      mTriggerTimeWindow[i][0] = 2600;
-      mTriggerTimeWindow[i][1] = 2900;
+      mTriggerTimeWindow[i][0] = 0;
+      mTriggerTimeWindow[i][1] = 9999;
     }
   return kStOK;
 }
@@ -102,9 +104,9 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber)
       return kStErr;
     }
   mtdTrayToTdigMap_st *mTrayToTdigTable = static_cast<mtdTrayToTdigMap_st*>(mtdTrayToTdigMap->GetTable());
-  for(Int_t i=0; i<30; i++)
+  for(Int_t i=0; i<gMtdNBacklegs; i++)
     {
-      for(Int_t j=0; j<5; j++)
+      for(Int_t j=0; j<gMtdNModules; j++)
 	mTray2TdigMap[i][j] = (Int_t)(mTrayToTdigTable->tdigId[i*5+j]);
     }
   
@@ -117,11 +119,12 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber)
       return kStErr;
     }
   mtdTrayIdMap_st *mtdTrayIdTable = static_cast<mtdTrayIdMap_st*>(mtdTrayIdMap->GetTable());
-  for(Int_t i=0; i<30; i++)
+  for(Int_t i=0; i<gMtdNBacklegs; i++)
     {
-      for(Int_t j=0; j<5; j++)
+      for(Int_t j=0; j<gMtdNModules; j++)
 	mTrayId[i][j] = (Int_t)(mtdTrayIdTable->trayId[i*5+j]);
     }
+
   LOG_INFO << "Retrieving mtdTdigIdMap table from database ..." << endm;
   dataset = GetDataBase("Geometry/mtd/mtdTdigIdMap");
   St_mtdTdigIdMap *mtdTdigIdMap = static_cast<St_mtdTdigIdMap*>(dataset->Find("mtdTdigIdMap"));
@@ -131,9 +134,25 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber)
       return kStErr;
     }
   mtdTdigIdMap_st *mtdTdigIdTable = static_cast<mtdTdigIdMap_st*>(mtdTdigIdMap->GetTable());
-  for(Int_t i=0; i<mNALLTRAY; i++)
+  for(Int_t i=0; i<gMtdNModulesAll; i++)
     {
       mTdigId[i] = (Int_t)(mtdTdigIdTable->tdigBoardId[i]);
+    }
+
+  LOG_INFO << "Retrieving mtdTriggerTimeCut table from database ..." << endm;
+  dataset = GetDataBase("Calibrations/mtd/mtdTriggerTimeCut");
+  St_mtdTriggerTimeCut *mtdTriggerTimeCut = static_cast<St_mtdTriggerTimeCut*>(dataset->Find("mtdTriggerTimeCut"));
+  if(!mtdTriggerTimeCut)
+    {
+      LOG_ERROR << "No mtdTriggerTimeCut table found in database" << endm;
+      return kStErr;
+    }
+  mtdTriggerTimeCut_st *mtdTriggerTimeTable = static_cast<mtdTriggerTimeCut_st*>(mtdTriggerTimeCut->GetTable());
+  for(Int_t i=0; i<gMtdNModulesAll; i++)
+    {
+      mTriggerTimeWindow[i][0] = mtdTriggerTimeTable->minTriggerTime[i];
+      mTriggerTimeWindow[i][1] = mtdTriggerTimeTable->maxTriggerTime[i];
+      LOG_DEBUG << "(" << i/5 << "," << i%5 << "): " << mTriggerTimeWindow[i][0] << " - " << mTriggerTimeWindow[i][1] << endm;
     }
   
   /// INL Table provided by TOF
@@ -568,7 +587,7 @@ void StMtdHitMaker::fillMtdRawHitCollection()
  */
 void StMtdHitMaker::fillMtdSingleHits() 
 {
-  for(int i=0;i<mNALLTRAY;i++) mSingleHitVec[i].clear();
+  for(int i=0;i<gMtdNModulesAll;i++) mSingleHitVec[i].clear();
   for(UInt_t i=0;i<MtdLeadingHits.size();i++)
     {
       unsigned char  ifiber    = MtdLeadingHits[i].fiberid;
@@ -577,7 +596,7 @@ void StMtdHitMaker::fillMtdSingleHits()
       unsigned int   tdc    = MtdLeadingHits[i].tdc;
       int itray = (chn-1)/24+1;
       int ichan = (chn-1)%24;
-      if (ibackleg>mNBACKLEG || itray<=0 || itray>mNTRAY || ichan<0 || ichan>=mNCHAN || ifiber>mNFIBER ) 
+      if (ibackleg>gMtdNBacklegs || itray<=0 || itray>gMtdNModules || ichan<0 || ichan>=gMtdNChannels || ifiber>mNFIBER ) 
 	{
 	  LOG_FATAL << " StMtdHitMaker::fillMtdSingleHits() "
 		    << ": ibackleg=" << ibackleg 
@@ -588,7 +607,7 @@ void StMtdHitMaker::fillMtdSingleHits()
 	  continue;
 	}
       bool iexist = kFALSE;
-      int igtray = (ibackleg-1)*mNTRAY+itray;
+      int igtray = (ibackleg-1)*gMtdNModules+itray;
       for(size_t ii=0; ii<mSingleHitVec[igtray-1].size(); ii++) 
 	{
 	  if(ibackleg==mSingleHitVec[igtray-1][ii].backleg&&itray==mSingleHitVec[igtray-1][ii].tray && ichan==mSingleHitVec[igtray-1][ii].channel) {
@@ -639,7 +658,7 @@ void StMtdHitMaker::fillMtdSingleHits()
   //debug
   if(Debug())
     {
-      for(int i=0;i<mNALLTRAY;i++)
+      for(int i=0;i<gMtdNModulesAll;i++)
 	{
 	  for(size_t m=0;m<mSingleHitVec[i].size();m++)
 	    {
@@ -665,7 +684,7 @@ void StMtdHitMaker::fillMtdSingleHits()
 IntVec StMtdHitMaker::GetValidTrays() 
 {
   IntVec gTrayVec;
-  for(int i=0;i<mNALLTRAY;i++)
+  for(int i=0;i<gMtdNModulesAll;i++)
     {
       if(mSingleHitVec[i].size()>0)
 	{
@@ -677,27 +696,30 @@ IntVec StMtdHitMaker::GetValidTrays()
 
 
 //____________________________________________
-IntVec StMtdHitMaker::GetValidChannel(int backleg, int tray) 
+IntVec StMtdHitMaker::GetValidChannel(int backleg, int tray, int &fiber) 
 {
   IntVec chanVec;
-  int igtray = (backleg-1)*mNTRAY+tray;
+  int igtray = (backleg-1)*gMtdNModules+tray;
+  if(igtray>gMtdNModulesAll) return chanVec;
+
   for(size_t i=0 ; i<mSingleHitVec[igtray-1].size() ; i++) 
     {
-      LOG_DEBUG<<" GetValidChannel() backleg "<<mSingleHitVec[igtray-1][i].backleg 
-	       << " tray "<<mSingleHitVec[igtray-1][i].tray <<endm;
       if( mSingleHitVec[igtray-1][i].tray == tray
 	  && mSingleHitVec[igtray-1][i].backleg == backleg )
-	chanVec.push_back(mSingleHitVec[igtray-1][i].channel);
+	{
+	  chanVec.push_back(mSingleHitVec[igtray-1][i].channel);
+	  fiber = mSingleHitVec[igtray-1][i].fiberId;
+	}
     }
   return chanVec;
 }
 
 
 //____________________________________________
-UIntVec StMtdHitMaker::GetLeadingTdc(int backleg, int tray, int channel, bool triggerevent)
+UIntVec StMtdHitMaker::GetLeadingTdc(int backleg, int tray, int channel)
 {
   UIntVec leTdc;
-  int igtray = (backleg-1)*mNTRAY+tray;
+  int igtray = (backleg-1)*gMtdNModules+tray;
   for(size_t i=0 ; i<mSingleHitVec[igtray-1].size() ; i++) 
     {
       if(mSingleHitVec[igtray-1][i].backleg!=backleg) continue;
@@ -705,23 +727,7 @@ UIntVec StMtdHitMaker::GetLeadingTdc(int backleg, int tray, int channel, bool tr
       if(mSingleHitVec[igtray-1][i].channel!=channel) continue;
       for(size_t j=0; j<mSingleHitVec[igtray-1][i].leadingEdgeTime.size(); j++) 
 	{
-	  int fiberId = mSingleHitVec[igtray-1][i].fiberId;
-	  float trgTime = 25.*(mTriggerTimeStamp[fiberId] & 0xfff);
-	  float timeDiff = mSingleHitVec[igtray-1][i].leadingEdgeTime[j]*25./1024 - trgTime;
-	  while(timeDiff<0) timeDiff += 51200;
-	  if(igtray<=mNALLTRAY)
-	    {  //trays, keep all hits
-	      if(triggerevent)
-		{ 
-		  LOG_DEBUG << " backleg "<<backleg<<" tray "<<tray<<" index " << igtray-1 << " trigger window "<< mTriggerTimeWindow[igtray-1][0] <<" "<<mTriggerTimeWindow[igtray-1][1]<<endm;
-		  if(timeDiff>=mTriggerTimeWindow[igtray-1][0]&&timeDiff<=mTriggerTimeWindow[igtray-1][1])
-		    leTdc.push_back(mSingleHitVec[igtray-1][i].leadingEdgeTime[j]);   
-		}
-	      else 
-		{
-		  leTdc.push_back(mSingleHitVec[igtray-1][i].leadingEdgeTime[j]);
-		}
-	    }
+	  leTdc.push_back(mSingleHitVec[igtray-1][i].leadingEdgeTime[j]);
 	}
     }
   return leTdc;
@@ -729,10 +735,10 @@ UIntVec StMtdHitMaker::GetLeadingTdc(int backleg, int tray, int channel, bool tr
 
 
 //____________________________________________
-UIntVec StMtdHitMaker::GetTrailingTdc(int backleg, int tray, int channel, bool triggerevent)
+UIntVec StMtdHitMaker::GetTrailingTdc(int backleg, int tray, int channel)
 {
   UIntVec teTdc;
-  int igtray = (backleg-1)*mNTRAY+tray;
+  int igtray = (backleg-1)*gMtdNModules+tray;
   for(size_t i=0 ; i<mSingleHitVec[igtray-1].size() ; i++) 
     {
       if(mSingleHitVec[igtray-1][i].backleg!=backleg) continue;
@@ -740,22 +746,7 @@ UIntVec StMtdHitMaker::GetTrailingTdc(int backleg, int tray, int channel, bool t
       if(mSingleHitVec[igtray-1][i].channel!=channel) continue;
       for(size_t j=0; j<mSingleHitVec[igtray-1][i].trailingEdgeTime.size(); j++) 
 	{
-	  int fiberId = mSingleHitVec[igtray-1][i].fiberId;
-	  float trgTime = 25.*(mTriggerTimeStamp[fiberId] & 0xfff);
-	  float timeDiff = mSingleHitVec[igtray-1][i].trailingEdgeTime[j]*25./1024 - trgTime;
-	  while(timeDiff<0) timeDiff += 51200;
-	  if(igtray<=mNALLTRAY)
-	    {  //trays, keep all hits
-	      if(triggerevent)
-		{ 
-		  if(timeDiff>=mTriggerTimeWindow[igtray-1][0]&&timeDiff<=mTriggerTimeWindow[igtray-1][1]+40)
-		    teTdc.push_back(mSingleHitVec[igtray-1][i].trailingEdgeTime[j]);   
-		}
-	      else 
-		{
-		  teTdc.push_back(mSingleHitVec[igtray-1][i].trailingEdgeTime[j]);
-		}
-	    }
+	  teTdc.push_back(mSingleHitVec[igtray-1][i].trailingEdgeTime[j]);
 	}
     }
   return teTdc;
@@ -791,15 +782,16 @@ void StMtdHitMaker::fillMtdHitCollection()
   for(size_t i=0;i<validtray.size();i++)
     {
       int igtray = validtray[i];
-      int backleg = (igtray-1)/mNTRAY+1;
-      int tray = (igtray-1)%mNTRAY+1;
-      IntVec validchan = GetValidChannel(backleg,tray);
+      int backleg = (igtray-1)/gMtdNModules+1;
+      int tray = (igtray-1)%gMtdNModules+1;
+      int fiber = -1;
+      IntVec validchan = GetValidChannel(backleg,tray,fiber);
       LOG_DEBUG << "fired backleg " << backleg << " tray " << tray << endm;
       LOG_DEBUG <<" total channels "<<validchan.size() <<endm;
       for(size_t iv=0;iv<validchan.size();iv++)
 	{
-	  UIntVec leTdc = GetLeadingTdc(backleg, tray, validchan[iv], mTriggerWndSelection);
-	  UIntVec teTdc = GetTrailingTdc(backleg, tray, validchan[iv], mTriggerWndSelection);
+	  UIntVec leTdc = GetLeadingTdc(backleg, tray, validchan[iv]);
+	  UIntVec teTdc = GetTrailingTdc(backleg, tray, validchan[iv]);
 	  
 	  LOG_DEBUG <<" leTdc.size():"<<leTdc.size()<<" teTdc.size():"<<teTdc.size()<<endl;
 	  if(!leTdc.size() || !teTdc.size()) continue;
@@ -818,6 +810,7 @@ void StMtdHitMaker::fillMtdHitCollection()
 	  double tetime = tmptdc_f*VHRBIN2PS / 1000.;
 	  
 	  MTDOneSideHit tmpHit;
+	  tmpHit.fiberId  = fiber;
 	  tmpHit.backleg  = backleg;
 	  tmpHit.tray	  = tray;
 	  tmpHit.channel  = channel;
@@ -833,20 +826,23 @@ void StMtdHitMaker::fillMtdHitCollection()
   for(int i=0;i<nHits;i++)
     {
       int iBackLeg = mOneSideHits[i].backleg;
-      int iTray	 = mOneSideHits[i].tray;
-      int iCell	 = mOneSideHits[i].channel;
+      int iTray	   = mOneSideHits[i].tray;
+      int iCell	   = mOneSideHits[i].channel;
+      int iFiber   = mOneSideHits[i].fiberId;
       float iLeadingEdgeTime  = mOneSideHits[i].leadingEdgeTime;
       float iTrailingEdgeTime = mOneSideHits[i].trailingEdgeTime;
       for(int j=i+1;j<nHits;j++)
 	{
 	  int jBackLeg = mOneSideHits[j].backleg;
-	  int jTray	 = mOneSideHits[j].tray;
-	  int jCell	 = mOneSideHits[j].channel;
+	  int jTray    = mOneSideHits[j].tray;
+	  int jCell    = mOneSideHits[j].channel;
+	  int jFiber   = mOneSideHits[j].fiberId; 
 	  float jLeadingEdgeTime  = mOneSideHits[j].leadingEdgeTime;
 	  float jTrailingEdgeTime = mOneSideHits[j].trailingEdgeTime;
 	  if(abs(iCell-jCell)!=12) continue;
 	  if(iBackLeg != jBackLeg) continue;
-	  if(iTray  != jTray) continue;
+	  if(iTray  != jTray)      continue;
+	  if(iFiber != jFiber)     continue;
 	  UChar_t mBackLeg = iBackLeg;
 	  UChar_t mModule  = iTray;
 	  UChar_t mCell    = 99;
@@ -869,6 +865,16 @@ void StMtdHitMaker::fillMtdHitCollection()
 	      mTrailingEdgeTime.first  = jTrailingEdgeTime;//west 
 	      mTrailingEdgeTime.second = iTrailingEdgeTime;//east 
 	    }
+
+	  if(mTriggerWndSelection)
+	    {
+	      // trigger time window cuts
+	      float timeDiff = mLeadingEdgeTime.first - 25.*(mTriggerTimeStamp[iFiber] & 0xfff);
+	      while(timeDiff<0) timeDiff += 51200;
+	      int igtray = (iBackLeg-1)*gMtdNModules+iTray;
+	      if(timeDiff<mTriggerTimeWindow[igtray-1][0] || timeDiff>mTriggerTimeWindow[igtray-1][1]) continue;
+	    }
+
 	  StMtdHit* aHit= new StMtdHit();
 	  aHit->setBackleg(mBackLeg);
 	  aHit->setModule(mModule);
@@ -982,8 +988,12 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.18 2014/08/25 17:06:20 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.19 2014/09/19 17:49:33 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.19  2014/09/19 17:49:33  marr
+// 1) Use the constants from StMtdUtil/StMtdConstants.h
+// 2) Apply trigger time window cuts
+//
 // Revision 1.18  2014/08/25 17:06:20  marr
 // Read in both MC hits and real hits during embedding
 //

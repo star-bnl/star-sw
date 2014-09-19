@@ -3,13 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.10 2014/08/06 11:43:27 jeromel Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.11 2014/09/19 17:49:33 marr Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
  ***************************************************************************/
 #include "StRTSBaseMaker.h"
 #include "TH3D.h"
+#include "StMtdUtil/StMtdConstants.h"
 struct mtd_t;
 
 class StEvent;
@@ -45,6 +46,7 @@ struct MTDSingleHit{
 };
 
 struct MTDOneSideHit{
+        Int_t           fiberId;
 	Int_t           backleg; // 1-30
 	Int_t           tray;  // 1-5
 	Int_t           channel; // 0-23
@@ -88,31 +90,27 @@ class StMtdHitMaker:public StRTSBaseMaker {
   void fillMtdSingleHits();
   void fillStEvent();     //! ship collection to StEvent and check
   IntVec  GetValidTrays();
-  IntVec  GetValidChannel(int backleg, int tray);
-  UIntVec GetLeadingTdc(int backleg, int tray, int channel, bool triggerevent);
-  UIntVec GetTrailingTdc(int backleg, int tray, int channel, bool triggerevent);
+  IntVec  GetValidChannel(int backleg, int tray, int &fiber);
+  UIntVec GetLeadingTdc(int backleg, int tray, int channel);
+  UIntVec GetTrailingTdc(int backleg, int tray, int channel);
   ///----------------------------------------------------
   vector<MtdRawHit> MtdLeadingHits;
   vector<MtdRawHit> MtdTrailingHits;
   
-  static const Int_t nTHUB    = 2;
-  static const Int_t mNTRAY    = 5;
-  static const Int_t mNBACKLEG = 30;
-  static const Int_t mNCHAN    = 24;
+  static const Int_t nTHUB     = 2;
   static const Int_t mNFIBER   = 1;
-  static const Int_t mNALLTRAY = 150; 
-  Int_t                   mYear;                             //! RHIC run year
-  Int_t                   mNValidTrays;                      //! number of valid MTD trays
-  UInt_t           	  mTriggerTimeStamp[2];              //! Trigger Time in 4 fibers
-  StMtdCollection*        mMtdCollection;                    //! pointer to StMtdCollection
-  Int_t                   mTray2TdigMap[mNBACKLEG][mNTRAY];  //! map TDIG-Id to MTD tray
-  Int_t                   mTrayId[mNBACKLEG][mNTRAY];        //! map MTD trayIDs
-  Int_t                   mTdigId[mNALLTRAY];                //! map TDIG Ids on MTD TrayIds
-  StBTofINLCorr*          mINLCorr;                          //! pointer to INL correction class
-  Int_t 		  mtdStrip[mNCHAN];		     //! strip channel to glabal tdc chan
-  Int_t                   mTriggerTimeWindow[mNALLTRAY][2];  //! trigger time window cut
+  Int_t                   mYear;                                       //! RHIC run year
+  Int_t                   mNValidTrays;                                //! number of valid MTD trays
+  UInt_t           	  mTriggerTimeStamp[nTHUB];                    //! Trigger Time in 4 fibers
+  StMtdCollection*        mMtdCollection;                              //! pointer to StMtdCollection
+  Int_t                   mTray2TdigMap[gMtdNBacklegs][gMtdNModules];  //! map TDIG-Id to MTD tray
+  Int_t                   mTrayId[gMtdNBacklegs][gMtdNModules];        //! map MTD trayIDs
+  Int_t                   mTdigId[gMtdNModulesAll];                    //! map TDIG Ids on MTD TrayIds
+  StBTofINLCorr*          mINLCorr;                                    //! pointer to INL correction class
+  Int_t 		  mtdStrip[gMtdNChannels];		       //! strip channel to glabal tdc chan
+  Double_t                mTriggerTimeWindow[gMtdNModulesAll][2];      //! trigger time window cut
 
-  mtdSingleHitVector mSingleHitVec[mNALLTRAY];
+  mtdSingleHitVector mSingleHitVec[gMtdNModulesAll];
   Bool_t mSwapBacklegInRun13;             // Flag to swap backlegs 25 and 26 in run 13 when running in afterburner mode on muDst
 
  protected:
