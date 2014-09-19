@@ -256,10 +256,10 @@ class StMtdQAMaker : public StMaker {
   TH1F             *mhVertexZ;                                 // Distribution of vertex z
   TH2F             *mhVtxZvsVpdVz;                             // Correlation between z of vertices reconstructed using tracks and VPD
   TH1F             *mhVtxZDiff;                                // Difference between z of vertices reconstructed using tracks and VPD
-  TH1F             *mhTrkDca;                                  // Track dca distribution
   TH1F             *mhTofStartTime;                            // Distribution of start time from BTOF
   TH2F             *mhVpdQTadc;                                // Distribution of ADC per VPD QT channel
   TH2F             *mhVpdQTtac;                                // Distribution of TAC per VPD QT channel
+
   TH2F             *mhMtdQTadc;                                // Distribution of ADC per MTD QT channel
   TH2F             *mhMtdQTAllTac;                             // Distribution of TAC per MTD QT channel
   TH2F             *mhMtdQTBestTac;                            // Distribution of earliest TAC per MTD QT channel
@@ -272,6 +272,7 @@ class StMtdQAMaker : public StMaker {
   TH2F             *mhMtdQTJ2J3Diff;                           // Distribution of TAC difference between J3-J2 per MTD QT position
   TH2F             *mhMixMtdTacSumvsMxqMtdTacSum[kNQTboard][2];// Correlation between MT001 vs MT101
   TH1F             *mhMtdTriggerTime[2];                       // Distribution of MTD trigger time from THUB
+
   TH1F             *mhMtdNRawHits;                             // Number of MTD raw hits per event
   TH2F             *mhMtdRawHitMap;                            // Hit map of MTD raw hits
   TH2F             *mhMtdRawHitLeTime;                         // Leading time distribution of MTD raw hits
@@ -283,6 +284,7 @@ class StMtdQAMaker : public StMaker {
   TH1F             *mhMtdRawHitTrNWest;                        // Number of MTD raw hits with trailing-edge on west
   TH2F             *mhMtdRawHitLeNDiff;                        // Difference of the number of MTD raw hits with leading-edge on east and west
   TH2F             *mhMtdRawHitTrNDiff;                        // Difference of the number of MTD raw hits with trailing-edge on east and west
+
   TH1F             *mhMtdNHits;                                // Number of MTD hits per event
   TH2F             *mhMtdHitMap;                               // Hit map of MTD hits
   TH2F             *mhMtdHitLeTimeWest;                        // Leading time distribution of MTD hits on west
@@ -291,21 +293,26 @@ class StMtdQAMaker : public StMaker {
   TH2F             *mhMtdHitTotWest;                           // Time-Over-Threshold distribution of MTD hits on west
   TH2F             *mhMtdHitTotEast;                           // Time-Over-Threshold distribution of MTD hits on east
   TH2F             *mhMtdHitTrigTimeWest;                      // Difference between the leading time of MTD hits on west and trigger time from THUB
+
   TH1F             *mhMtdNMatchHits;                           // Number of MTD hits with matched tracks per event
   TH2F             *mhMtdMatchHitMap;                          // Hit map of MTD hits with matched tracks
   TH2F             *mhMtdMatchPhi;                             // Correlation between MTD hit phi and projected phi of matched tracks
-  TH2F             *mhMtdMatchZ;                               // Correlation between MTD hit z and projected z of matched tracks
-  TH2F             *mhMtdMatchChanDz;                          // Difference between MTD hit z and projected z of matched tracks
+  TH2F             *mhMtdMatchDzVsChan;                        // dz vs global channel id
+  TH2F             *mhMtdMatchDyVsChan;                        // dy vs global channel id
+  TH2F             *mhMtdMatchLocalyVsChan;                    // Projected y of matched tracks in local coordinates vs global channel id
+  TH2F             *mhMtdMatchLocalzVsChan;                    // Projected z of matched tracks in local coordinates vs global channel id
+  TH2F             *mhMtdMatchDzVsPt;                          // dz vs track pt
+  TH2F             *mhMtdMatchDyVsPt;                          // dy vs track pt
   TH1F             *mhMtdMatchTrkPt;                           // pt distribution of matched tracks to MTD hits
   TH2F             *mhMtdMatchTrkPhiEta;                       // phi vs eta of matched tracks at primary vertex
-  TH2F             *mhMtdMatchTrkProjLocalyz;                  // Projected y vs z in MTD local coordinate for matched tracks
   TH2F             *mhMtdMatchTrkDedx;                         // de/dx distribution of matched tracks to MTD hits
-  TH2F             *mhMtdTrackProjMap;                         // Hit map of tracks that can be projected to MTD radius
-  TH2F             *mhMtdTrackMthMap;                          // Hit map of MTD hits matched to the tracks that can be projected to MTD radius
+
+  TH1F             *mhTrkPt;                                   // pt distribution of all good tracks
+  TH2F             *mhTrkDca;                                  // Track dca distribution
   TH2F             *mhTrkPhiEta;                               // phi vs eta of all good tracks at primary vertex
+  TH2F             *mhMtdTrackProjMap;                         // Hit map of tracks that can be projected to MTD radius
   TH2F             *mhTrkProjPhiZAtMtd;                        // phi vs z of all good tracks at MTD after being projected to MTD radius
   TH2F             *mhTrkPhiVsMtdPhi;                          // Random correlation projected phi of tracks and phi of MTD hits
-  TH1F             *mhPhiDiffTrkVsMtd;                         // Difference of projected phi of tracks and phi of MTD hits
   TH2F             *mhTofMthTrkLocaly;                         // Projected y in TOF local coordinate for tracks matched to TOF hits
   TH2F             *mhTofMthTrkLocalz;                         // Projected z in TOF local coordinate for tracks matched to TOF hits
 

@@ -377,7 +377,7 @@ Int_t StMtdQAMaker::processStEvent()
       THelixTrack    thelix      =  globalTrack->dcaGeometry()->thelix();
       const Double_t *pos        = thelix.Pos();
       StThreeVectorF dcaGlobal   = StThreeVectorF(pos[0],pos[1],pos[2]) - priVertex->position(); 
-      mhTrkDca->Fill(dcaGlobal.mag());
+      mhTrkDca->Fill( globalTrack->geometry()->momentum().perp(), dcaGlobal.mag());
     }
 
   // MTD hits
@@ -684,7 +684,7 @@ Int_t StMtdQAMaker::processMuDst()
       StMuTrack* gTrack = mMuDst->globalTracks(i);
       if(!gTrack) continue;
       globalIndex[gTrack->id()] = i;
-      mhTrkDca->Fill(gTrack->dca().mag());
+      mhTrkDca->Fill(gTrack->pt(), gTrack->dcaGlobal().mag());
     }
 
   // MTD hits
@@ -1038,12 +1038,15 @@ void StMtdQAMaker::fillHistos()
 	{
 	  mhMtdMatchHitMap         ->Fill(backleg,lChan);
 	  mhMtdMatchPhi            ->Fill(mMtdData.mtdMatchTrkProjPhi[i],mMtdData.mtdHitPhi[i]);
-	  mhMtdMatchZ              ->Fill(mMtdData.mtdMatchTrkProjZ[i],mMtdData.mtdHitZ[i]);
-	  mhMtdMatchChanDz         ->Fill(gChan,mMtdData.mtdMatchTrkProjZ[i]-mMtdData.mtdHitZ[i]);
 	  mhMtdMatchTrkPt          ->Fill(mMtdData.mtdMatchTrkPt[i]);
+	  mhMtdMatchDzVsPt         ->Fill(mMtdData.mtdMatchTrkPt[i],mMtdData.mtdMatchTrkDeltaz[i]);
+	  mhMtdMatchDyVsPt         ->Fill(mMtdData.mtdMatchTrkPt[i],mMtdData.mtdMatchTrkDeltay[i]);
 	  mhMtdMatchTrkPhiEta      ->Fill(mMtdData.mtdMatchTrkEta[i],mMtdData.mtdMatchTrkPhi[i]);
-	  mhMtdMatchTrkProjLocalyz ->Fill(mMtdData.mtdMatchTrkLocaly[i],mMtdData.mtdMatchTrkLocalz[i]);
 	  mhMtdMatchTrkDedx        ->Fill(mMtdData.mtdMatchTrkPt[i],mMtdData.mtdMatchTrkDedx[i]);
+	  mhMtdMatchDzVsChan       ->Fill(gChan,mMtdData.mtdMatchTrkDeltaz[i]);
+	  mhMtdMatchDyVsChan       ->Fill(gChan,mMtdData.mtdMatchTrkDeltay[i]);
+	  mhMtdMatchLocalyVsChan   ->Fill(gChan,mMtdData.mtdMatchTrkLocaly[i]);
+	  mhMtdMatchLocalzVsChan   ->Fill(gChan,mMtdData.mtdMatchTrkLocalz[i]);
 
 	  Int_t qt = mModuleToQT[backleg-1][module-1];
 	  Int_t pos = mModuleToQTPos[backleg-1][module-1];
@@ -1098,15 +1101,7 @@ void StMtdQAMaker::fillHistos()
 	  if(backleg<1 || backleg>30) continue;
 	  if(!mMtdData.isGoodMtdHit[j]) continue;
 	  mhTrkPhiVsMtdPhi->Fill(mMtdData.mtdHitPhi[j],mMtdData.trkProjPhi[i]);
-	  mhPhiDiffTrkVsMtd->Fill(mMtdData.mtdHitPhi[j]-mMtdData.trkProjPhi[i]);
 	}
-
-      if(!mMtdData.isTrkMtdMatched[i]) continue;
-      backleg = mMtdData.trkMthBackleg[i];
-      module  = mMtdData.trkMthModule[i];
-      cell    = mMtdData.trkMthChannel[i];
-      if(backleg>=1 && backleg<=30 && module>=1 && module<=5 && cell>=0 && cell<=11)
-	mhMtdTrackMthMap->Fill(backleg, (module-1)*12+cell);
     }
 }
 
@@ -1174,9 +1169,6 @@ void StMtdQAMaker::bookHistos()
 
   mhVtxZDiff = new TH1F("hVtxZDiff","Track vz - VPD vz; #Deltavz (cm)",201,-201,201);
   AddHist(mhVtxZDiff);
-
-  mhTrkDca = new TH1F("hTrkDca","Dca of tracks;dca (cm)",100,0,20);
-  AddHist(mhTrkDca);
 
   // TOF histograms
   mhTofStartTime = new TH1F("hTofStartTime","Start time from TOF; t_{start}",40,0,2e5);
@@ -1254,6 +1246,7 @@ void StMtdQAMaker::bookHistos()
   mhMtdTriggerTime[1] = new TH1F("hMtdTriggerTime1","MTD: trigger time 1;t",120,0,1.2e5);
   AddHist(mhMtdTriggerTime[1]);
 
+  // ===== raw hits
   mhMtdNRawHits = new TH1F("hMtdNRawHits","Number of raw MTD hits per event;N",100,0,100);
   AddHist(mhMtdNRawHits);
 
@@ -1287,6 +1280,7 @@ void StMtdQAMaker::bookHistos()
   mhMtdRawHitTrNWest = new TH1F("hMtdRawHitTrNWest","MTD: number of trailing raw hit (west);channel;N_{trailing,west}",1801,-0.5,1800.5);
   AddHist(mhMtdRawHitTrNWest);
 
+  // ===== hits
   mhMtdNHits = new TH1F("hMtdNHits","Number of MTD hits per event;N",100,0,100);
   AddHist(mhMtdNHits);
 
@@ -1311,6 +1305,7 @@ void StMtdQAMaker::bookHistos()
   mhMtdHitTrigTimeWest = new TH2F("hMtdHitTrigTimeWest","MTD: trigger time of hit (west);channel;tdc-t_{trigger} (ns)",1801,-0.5,1800.5,450,2400,3300);
   AddHist(mhMtdHitTrigTimeWest);
 
+  // ===== matched hits
   mhMtdNMatchHits = new TH1F("mhMtdNMatchHits","Number of matched MTD hits per event;N",100,0,100);
   AddHist(mhMtdNMatchHits);
 
@@ -1320,41 +1315,51 @@ void StMtdQAMaker::bookHistos()
   mhMtdMatchPhi = new TH2F("hMtdMatchPhi","MTD: hit #varphi vs projected #varphi;#varphi_{proj};#varphi_{hit}",90,0,2*pi,90,0,2*pi);
   AddHist(mhMtdMatchPhi);
 
-  mhMtdMatchZ = new TH2F("hMtdMatchZ","MTD: hit z vs projected z;z_{proj};z_{hit}",200,-200,200,200,-200,200);
-  AddHist(mhMtdMatchZ);
+  mhMtdMatchDzVsChan = new TH2F("hMtdMatchDzVsChan","MTD: #Deltaz distribution;channel;#Deltaz = z_{proj}-z_{hit} (cm)",1801,-0.5,1800.5,201,-201,201);
+  AddHist(mhMtdMatchDzVsChan);
 
-  mhMtdMatchChanDz = new TH2F("hMtdMatchChanDz","MTD: difference in z;channel;#Deltaz = z_{proj}-z_{hit}",1801,-0.5,1800.5,201,-201,201);
-  AddHist(mhMtdMatchChanDz);
+  mhMtdMatchDyVsChan = new TH2F("hMtdMatchDyVsChan","MTD: #Deltay distribution;channel;#Deltay = y_{proj}-y_{hit} (cm)",1801,-0.5,1800.5,101,-101,101);
+  AddHist(mhMtdMatchDyVsChan);
 
-  mhMtdMatchTrkPt = new TH1F("hMtdMatchTrkPt","MTD: p_{T} of matched global tracks;p_{T} (GeV/c)",500,0,50);
+  mhMtdMatchLocalyVsChan = new TH2F("hMtdMatchLocalyVsChan","MTD: local y of matched tracks;channel;y (cm)",1801,-0.5,1800.5,100,-50.5,49.5);
+  AddHist(mhMtdMatchLocalyVsChan);
+
+  mhMtdMatchLocalzVsChan = new TH2F("hMtdMatchLocalzVsChan","MTD: local z of matched tracks;channel;z (cm)",1801,-0.5,1800.5,100,-50.5,49.5);
+  AddHist(mhMtdMatchLocalzVsChan);
+
+  mhMtdMatchDzVsPt = new TH2F("hMtdMatchDzVsPt","MTD: #Deltaz distribution;p_{T} (GeV/c);#Deltaz = z_{proj}-z_{hit} (cm)",100,0,20,201,-201,201);
+  AddHist(mhMtdMatchDzVsPt);
+
+  mhMtdMatchDyVsPt = new TH2F("hMtdMatchDyVsPt","MTD: #Deltay distribution;p_{T} (GeV/c);#Deltay = y_{proj}-y_{hit} (cm)",100,0,20,101,-101,101);
+  AddHist(mhMtdMatchDyVsPt);
+
+  mhMtdMatchTrkPt = new TH1F("hMtdMatchTrkPt","MTD: p_{T} of matched global tracks;p_{T} (GeV/c)",100,0,20);
   AddHist(mhMtdMatchTrkPt);
 
   mhMtdMatchTrkPhiEta = new TH2F("hMtdMatchTrkPhiEta","MTD: #varphi vs #eta of matched global tracks;#eta;#varphi",12,-1.2,1.2,360,0,2*pi);
   AddHist(mhMtdMatchTrkPhiEta);
 
-  mhMtdMatchTrkProjLocalyz = new TH2F("hMtdMatchTrkProjLocalyz","MTD: projected local z vs y of matched global tracks;y;z",101,-101,101,101,-101,101);
-  AddHist(mhMtdMatchTrkProjLocalyz);
-
-  mhMtdMatchTrkDedx = new TH2F("hMtdMatchTrkDedx","MTD: dE/dx of matched global tracks;p_{T} (GeV);dE/dx",500,0,10,200,0,20);
+  mhMtdMatchTrkDedx = new TH2F("hMtdMatchTrkDedx","MTD: dE/dx of matched global tracks;p_{T} (GeV);dE/dx",100,0,20,200,0,20);
   AddHist(mhMtdMatchTrkDedx);
 
-  mhMtdTrackProjMap = new TH2F("hMtdTrackProjMap","MTD: channel vs backleg of projected tracks;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
-  AddHist(mhMtdTrackProjMap);
+  // ====== projection
+  mhTrkPt = new TH1F("hTrkPt","p_{T} of global tracks;p_{T} (GeV/c)",100,0,20);
+  AddHist(mhTrkPt);
 
-  mhMtdTrackMthMap = new TH2F("hMtdTrackMthMap","MTD: channel vs backleg of matched tracks;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
-  AddHist(mhMtdTrackMthMap);
+  mhTrkDca = new TH2F("hTrkDca","Dca vs p_{T} of global tracks;p_{T} (GeV/c);dca (cm)",100,0,20,100,0,50);
+  AddHist(mhTrkDca);
 
   mhTrkPhiEta = new TH2F("hTrkPhiEta","#varphi vs #eta of global tracks at primary vertex;#eta;#varphi",50,-1,1,30,0,2*pi);
   AddHist(mhTrkPhiEta);
+
+  mhMtdTrackProjMap = new TH2F("hMtdTrackProjMap","MTD: channel vs backleg of projected tracks;backleg;channel",30,0.5,30.5,60,-0.5,59.5);
+  AddHist(mhMtdTrackProjMap);
 
   mhTrkProjPhiZAtMtd = new TH2F("hTrkProjPhiZAtMtd","#varphi vs z of global tracks at MTD radius;z;#varphi",50,-300,300,30,0,2*pi);
   AddHist(mhTrkProjPhiZAtMtd);
 
   mhTrkPhiVsMtdPhi = new TH2F("hTrkPhiVsMtdPhi","Projected track #varphi vs MTD hit #varphi;#varphi_{hit};#varphi_{proj}",90,0,2*pi,90,0,2*pi);
   AddHist(mhTrkPhiVsMtdPhi);
-
-  mhPhiDiffTrkVsMtd = new TH1F("hPhiDiffTrkVsMtd","Difference of projected track #varphi and MTD hit #varphi;#Delta#varphi",180,-2*pi,2*pi);
-  AddHist(mhPhiDiffTrkVsMtd);
 
   mhTofMthTrkLocaly = new TH2F("hTofMthTrkLocaly","TOF match: local y vs tray;tray;local y (cm)",120,0.5,120.5,100,-5,5);
   AddHist(mhTofMthTrkLocaly);
@@ -1742,8 +1747,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.2 2014/09/16 23:48:58 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.3 2014/09/19 18:34:55 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.3  2014/09/19 18:34:55  marr
+//// Add histograms for LocalY, LocalZ, DeltaY, DeltaZ
+////
 //// Revision 1.2  2014/09/16 23:48:58  marr
 //// Minor fix such that it compiles under SL5.3, gcc 4.3.2 (rplay17)
 ////
