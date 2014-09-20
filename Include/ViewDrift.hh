@@ -27,7 +27,7 @@ class ViewDrift {
   void SetArea(double xmin, double ymin, double zmin, double xmax, double ymax,
                double zmax);
   void Clear();
-  void Plot(const bool twod, const bool axis);
+  void Plot(const bool twod = false, const bool axis = true);
 
   void SetClusterMarkerSize(const double size);
   void SetCollisionMarkerSize(const double size);
