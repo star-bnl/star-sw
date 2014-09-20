@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.27 2014/09/17 20:33:32 smirnovd Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.28 2014/09/20 08:14:19 ypwang Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -209,7 +209,7 @@ Int_t StIstRawHitMaker::Make()
 
    StRtsTable *rts_tbl = 0;
    UChar_t dataFlag = mALLdata;
-   static Int_t ntimebin = mCurrentTimeBinNum;
+   Int_t ntimebin = mCurrentTimeBinNum;
 
    while (1) { //loops over input raw data
       if (dataFlag == mALLdata) {
@@ -260,11 +260,11 @@ Int_t StIstRawHitMaker::Make()
       mIstCollectionPtr->setNumTimeBins(ntimebin);
 
       // arrays to store ADC information per APV chip (128 channels over all time bins)
-      Int_t signalUnCorrected[kIstNumApvChannels][ntimebin];    //signal w/o pedestal subtracted
-      Float_t signalCorrected[kIstNumApvChannels][ntimebin];    //signal w/ pedestal subtracted
+      Int_t signalUnCorrected[kIstNumApvChannels][kIstNumTimeBins];    //signal w/o pedestal subtracted
+      Float_t signalCorrected[kIstNumApvChannels][kIstNumTimeBins];    //signal w/ pedestal subtracted
 
       for (int l = 0; l < kIstNumApvChannels; l++)    {
-         for (int m = 0; m < ntimebin; m++)    {
+	 for (int m = 0; m < kIstNumTimeBins; m++)    {
             signalUnCorrected[l][m]  = 0;
             signalCorrected[l][m]    = 0.;
          }
@@ -272,10 +272,11 @@ Int_t StIstRawHitMaker::Make()
 
       // arrays to calculate dynamical common mode noise contribution to the APV chip in current event
       Float_t cmNoisePerChip = 0.;                              //common mode noise of the APV chip
-      Float_t sumAdcPerEvent[ntimebin];
-      Int_t counterAdcPerEvent[ntimebin];
+      Float_t sumAdcPerEvent[kIstNumTimeBins];
+      Int_t counterAdcPerEvent[kIstNumTimeBins];
 
-      for (int n = 0; n < ntimebin; n++)  {
+      //for (int n = 0; n < ntimebin; n++)  {
+      for (int n = 0; n < kIstNumTimeBins; n++)  {
          sumAdcPerEvent[n]     = 0.;
          counterAdcPerEvent[n] = 0 ;
       }
@@ -346,9 +347,9 @@ Int_t StIstRawHitMaker::Make()
       } // end current APV loops
 
       // calculate the dynamical common mode noise for the current chip in this event
-      Float_t commonModeNoise[ntimebin];
+      Float_t commonModeNoise[kIstNumTimeBins];
 
-      for (int tbIdx = 0; tbIdx < ntimebin; tbIdx++)
+      for (int tbIdx = 0; tbIdx < kIstNumTimeBins; tbIdx++)
          commonModeNoise[tbIdx] = 0.;
 
       if ( !mIsCaliMode && dataFlag == mADCdata ) {
@@ -478,6 +479,9 @@ ClassImp(StIstRawHitMaker);
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.28  2014/09/20 08:14:19  ypwang
+* update variable ntimebin from static to normal integer and related temporary array definitions
+*
 * Revision 1.27  2014/09/17 20:33:32  smirnovd
 * Squashed commit of the following:
 *
