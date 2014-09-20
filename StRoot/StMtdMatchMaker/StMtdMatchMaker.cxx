@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.22 2014/09/18 22:03:01 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.23 2014/09/20 04:25:20 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.23  2014/09/20 04:25:20  marr
+ * Assign matching information to all the primary tracks
+ *
  * Revision 1.22  2014/09/18 22:03:01  marr
  * Do not set default geometry tag
  *
@@ -69,20 +72,20 @@
  *
  * Revision 1.5  2013/11/19 00:17:16  geurts
  * include protection against zero triggerIdCollection() pointers. This is relevant when using simulated data as input.
- *
- * Revision 1.4  2013/04/25 14:52:13  geurts
- * Minor adjustments that address SL44 compiler warnings
- *
- * Revision 1.3  2013/04/18 21:01:10  geurts
- * Bugfix (RT#2575): protection against events that have tracks, but no vertex.
- *  - Warning messages
- *  - Consistently reset variables that depend on a vertex to -9999.
- *
- *
- *
- *******************************************************************/
-#include <iostream>//.h>
-#include <fstream>//.h>
+*
+* Revision 1.4  2013/04/25 14:52:13  geurts
+* Minor adjustments that address SL44 compiler warnings
+*
+* Revision 1.3  2013/04/18 21:01:10  geurts
+* Bugfix (RT#2575): protection against events that have tracks, but no vertex.
+*  - Warning messages
+*  - Consistently reset variables that depend on a vertex to -9999.
+*
+*
+*
+*******************************************************************/
+#include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -153,7 +156,7 @@
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StDetectorDbMaker/St_MagFactorC.h"
-#include "tables/St_vertexSeed_Table.h" //
+#include "tables/St_vertexSeed_Table.h" 
 
 #include "StBTofPidTraits.h"
 #include "StBTofCollection.h"
@@ -255,8 +258,6 @@ void StMtdMatchMaker::bookHistograms(){
 
 	// histogram not created, memory location invalid
 	//	AddHist(mHitsGlobalInEvent);    
-
-
 
 	// occupancy
 	for(int i=0;i<mNBacklegs;i++) {
@@ -484,7 +485,7 @@ Int_t StMtdMatchMaker::InitRun(int runnumber) {
 	mMtdGeom->SetELossFlag(mELossFlag);
 	mMtdGeom->SetNExtraCells(mNExtraCells);
 	if(mGeomTag.Length()>0)
-	  mMtdGeom->SetGeomTag(mGeomTag);
+		mMtdGeom->SetGeomTag(mGeomTag);
 
 	Float_t fScale = -1.;
 	if(mLockBField){
@@ -1096,13 +1097,11 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 	if(mMuDstIn){
 
 		index2Primary.clear();
-		Int_t pNnodes = mMuDst->numberOfPrimaryTracks();
-		for(Int_t ii=0;ii<pNnodes;ii++){
-			StMuTrack *pTrack = mMuDst->primaryTracks(ii); 
+		for(Int_t ii=0;ii<(Int_t)mMuDst->array(muPrimary)->GetEntries();ii++){
+			StMuTrack *pTrack = (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(ii); 
 			if(!pTrack) continue;
 			Int_t index2Global = pTrack->index2Global();
-			StMuTrack *gTrack = mMuDst->globalTracks(index2Global);
-			if(!gTrack) continue;
+			if(index2Global<0) continue;
 			index2Primary[index2Global] = ii;
 		}
 
@@ -1127,9 +1126,11 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			}
 			if(pIndex>=0){
 				isPrimary=kTRUE;
-				StMuTrack *thePrimaryTrack= mMuDst->primaryTracks(pIndex);
-				thePrimaryTrack->setMtdPidTraits(pidMtd);
-				thePrimaryTrack->setIndex2MtdHit(-999);
+				StMuTrack *thePrimaryTrack= (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(pIndex);
+				if(thePrimaryTrack){
+					thePrimaryTrack->setMtdPidTraits(pidMtd);
+					thePrimaryTrack->setIndex2MtdHit(-999);
+				}
 			}
 
 			if(!validTrack(theTrack)) continue;
@@ -1970,7 +1971,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 		Int_t trackNode = finalMatchedCellsVec[ii].trackIdVec[0];
 		if(mMuDstIn){
 
-		        LOG_INFO<<"In StMuDst mode: mtd hit matched with track successfully : track nodeId:"<<finalMatchedCellsVec[ii].trackIdVec[0]<<"   mtd hitId:"<<finalMatchedCellsVec[ii].index2MtdHit<<endm;
+			LOG_INFO<<"In StMuDst mode: mtd hit matched with track successfully : track nodeId:"<<finalMatchedCellsVec[ii].trackIdVec[0]<<"   mtd hitId:"<<finalMatchedCellsVec[ii].index2MtdHit<<endm;
 
 			StMuTrack *gTrack = mMuDst->globalTracks(trackNode);
 			if(!gTrack) {
@@ -2000,14 +2001,14 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 			pidMtd.setExpTimeOfFlight(finalMatchedCellsVec[ii].expTof2MTD);
 			gTrack->setMtdPidTraits(pidMtd);
 
-			Int_t pNode = -999;
+			Int_t pIndex = -999;
 			map<Int_t, Int_t>::iterator it = index2Primary.find(trackNode);
 			if(it!=index2Primary.end()){
-				pNode = it->second;
+				pIndex = it->second;
 			}
-			StMuTrack *pTrack = mMuDst->primaryTracks(pNode);
-			if(pTrack && pNode>-1){
-				mtdHit->setIndex2Primary(pNode);
+			StMuTrack *pTrack = (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(pIndex);
+			if(pTrack && pIndex>-1){
+				mtdHit->setIndex2Primary(pIndex);
 				pTrack->setIndex2MtdHit(finalMatchedCellsVec[ii].index2MtdHit);
 				StMuMtdPidTraits ppidMtd = pTrack->mtdPidTraits();
 				ppidMtd.setMatchFlag(finalMatchedCellsVec[ii].matchFlag);
