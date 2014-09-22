@@ -67,11 +67,13 @@ ostream& operator<<(ostream& os, const StiDetector& d)
 int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
 {
 static int nCall=0; nCall++;
+
+
+  double startWeight = getWeight();
   vect.resize(1);
   vect[0]=this;
   assert(shape);
   int iShape = shape->getShapeCode();
-  
   float deltaX = shape->getThickness();
   float halfZ  = shape->getHalfDepth(); 
   float halfY  = shape->getHalfWidth(); 
@@ -94,18 +96,19 @@ static int nCall=0; nCall++;
 
    vect.clear();
    float dX = deltaX/nSplit;
-   int N = -1;
-   for (float xc = -deltaX/2 +dX/2; xc<deltaX/2;xc+=dX) {
-     N++;
+   double sumWeight = 0;
+   for (int iSplit=0; iSplit<nSplit; iSplit++) 
+   {
+     float xc = -deltaX/2 +dX/2+iSplit*dX;  
 //		Create small part of  detector
      StiDetector *det = StiToolkit::instance()->getDetectorFactory()->getInstance();
      det->copy(*this);
      TString ts(getName());
-     if (N) { ts+="_"; ts+=N;} 
+     if (iSplit) { ts+="_"; ts+=iSplit;} 
      det->setName(ts.Data());
 //		Create shape
      ts = shape->getName();
-     if (N) { ts+="_"; ts+=N;} 
+     if (iSplit) { ts+="_"; ts+=iSplit;} 
      StiShape *myShape =0;
      float myRadius = nRadius+xc;
 assert(myRadius>1e-2 && myRadius < 1e3);
@@ -124,6 +127,7 @@ assert(myRadius>1e-2 && myRadius < 1e3);
      det->setShape(myShape);
      place->setLayerRadius(myRadius);
      det->setPlacement(place);
+     sumWeight += det->getWeight();
      vect.push_back(det);
    }
    this->copy(*vect[0]); 
@@ -133,6 +137,9 @@ assert(myRadius>1e-2 && myRadius < 1e3);
     vect[0] = this;
    if (vect.size()>1) {
      printf("StiDetector::splitIt %s is splitted into %d peaces\n",getName().c_str(),vect.size());}
+   assert(fabs(startWeight-sumWeight)<1e-3*startWeight);
+
+
    return vect.size();
 }
 //______________________________________________________________________________
