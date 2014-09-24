@@ -21,7 +21,7 @@
 
     --> 
     <Content  >
-      SFMO,SFLM,SFDM,SFSW,SFSD,SFSL,SFSM,SFLT,SFLU,SFFK,SFFL,SFKK,SFKL,SFRA,SFRS,SFFX,SFPI,SFPJ,SFAA,SFAM,SFAB,SFAS,SAPP,SAPC,SAPS,SAPT,SFLA,SFLB,SFLC,SFES,SFEB,SFCO,SFCM,SFCB,SFCS,SFKF,SFKS,SSBS,SSBB,SFPR,SFPB,SSST,SSSS,SSRS,SSRT,SSLB,SBCH,SBCV,SBFH,SBFV,SSLT,SCMP,SCVM,SCVB,SCVS,SOSK
+      SFMO,SFLM,SFDM,SFSW,SFSD,SFSL,SFSM,SFLT,SFLU,SFFK,SFFL,SFKK,SFKL,SFRA,SFRS,SFFX,SFPI,SFPJ,SFAA,SFAM,SFAB,SFAS,SAPP,SAPC,SAPS,SAPT,SFLA,SFLB,SFLC,SFES,SFEB,SFCO,SFCM,SFCB,SFCS,SFKF,SFKS,SSBS,SSBB,SFPR,SFPB,SSST,SSSS,SSRS,SSRT,SSLB,SBCH,SBCV,SBFH,SBFV,SSLT,SCMP,SCVM,SCVB,SCVS,SOSK,SFPK
     </Content>
     
     <Structure name="SSDP"  >
@@ -949,16 +949,24 @@
         </Block>        
 
         <Block name="SFPI" comment="are the pions"  >
-            <Material name="Aluminium" />
+            <Material name="air" />
             <Attribute for="SFPI" seen="2" colo="33" />
-            <Shape type="TUBE" rmax="SFJP_SFPI_Rmax/2." rmin="SFJP_SFPI_Rmin/2." dz="SFJP_SFPI_Pz/2.0" />
+            <Shape type="TUBE" rmax="SFJP_SFPJ_Dy" rmin="SFJP_SFPI_Rmin/2." dz="SFJP_SFPI_Pz/2.0+SFJP_SFPJ_Dz" />
+            <Create block="SFPK" />
+            <Placement y="0." x="0." z="0" block="SFPK"  >
+            </Placement>
 
             <Create block="SFPJ" />
             <Placement y="0." x="0." z="-SFJP_SFPI_Pz/2.0+SFJP_SFPJ_Dz" block="SFPJ"  >
             </Placement>
-            
         </Block>     
 
+        <Block name="SFPK" comment="is the small radius cylinder of the pions"  >
+            <Material name="Aluminium" />
+            <Attribute for="SFPJ" seen="2" colo="33" />
+            <Shape type="TUBE" rmax="SFJP_SFPI_Rmax/2." rmin="SFJP_SFPI_Rmin/2." dz="SFJP_SFPI_Pz/2.0" />
+        </Block> 
+      
         <Block name="SFPJ" comment="is the base of the pions"  >
             <Material name="Aluminium" />
             <Attribute for="SFPJ" seen="2" colo="33" />
