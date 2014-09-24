@@ -1,8 +1,11 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.8 2014/09/18 21:59:08 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.9 2014/09/24 18:14:47 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.9  2014/09/24 18:14:47  marr
+ * Flip localY for cells in modules 4 and 5
+ *
  * Revision 1.8  2014/09/18 21:59:08  marr
  * 1. Disable retrieving table geant2backlegID for year 2012 ana before
  * 2. The default geometry tag is set to yYYYYa
@@ -324,7 +327,10 @@ Float_t StMtdGeoModule::GetCellZCenter(Int_t iCell){
 
 //_____________________________________________________________________________
 Float_t StMtdGeoModule::GetCellLocalYCenter(Int_t iCell){
-	return (iCell-mCells/2+0.5)*(fCellWidth+fCellGap);
+  if(mModuleIndex>0&&mModuleIndex<4)
+    return (iCell-mCells/2+0.5)*(fCellWidth+fCellGap);
+  else
+    return -1*(iCell-mCells/2+0.5)*(fCellWidth+fCellGap);
 }
 
 //----------------------------------------------------//
