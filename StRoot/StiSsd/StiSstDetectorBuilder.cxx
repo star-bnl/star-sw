@@ -109,7 +109,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
    Double_t width = TMath::Abs(wafer1->x(2) - wafer2->x(2)) / 2. + 2;
    StiPlanarShape *ladderShape = new StiPlanarShape("SsdLadder",
          width,
-         0.34, // increas by a factor ~10 2*dimensions->waferHalfThickness,
+         2*dimensions->waferHalfThickness,
          dimensions->waferHalfLength );
    add(ladderShape);
 
