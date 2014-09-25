@@ -505,26 +505,18 @@
          anglePIT_C=(360.0/24)*(nCableSet-1)-11.279
          anglePIT_T=(360.0/24)*(nCableSet-1)-4.045
 
-        <Create block="ICCA"/>
-        <Placement in="IDSM" x="24.3728*sin(anglePIT_A*raddeg)" y="24.3728*cos(anglePIT_A*raddeg)" z="-231.9392+0.5*170.18" block="ICCA" konly="'ONLY'">
-        </Placement>
+        <Create    block="ICCA"/>
+        <Placement block="ICCA" konly="'ONLY'" in="IDSM" x="24.3728*sin(anglePIT_A*raddeg)" y="24.3728*cos(anglePIT_A*raddeg)" z="-231.9392+0.5*170.18" />
+        <Placement block="ICCA" konly="'ONLY'" in="IDSM" x="24.3728*sin(anglePIT_B*raddeg)" y="24.3728*cos(anglePIT_B*raddeg)" z="-231.9392+0.5*170.18" />
+        <Placement block="ICCA" konly="'ONLY'" in="IDSM" x="24.3728*sin(anglePIT_C*raddeg)" y="24.3728*cos(anglePIT_C*raddeg)" z="-231.9392+0.5*170.18" />
 
-        <Placement in="IDSM" x="24.3728*sin(anglePIT_B*raddeg)" y="24.3728*cos(anglePIT_B*raddeg)" z="-231.9392+0.5*170.18" block="ICCA" konly="'ONLY'">
-        </Placement>
+        <Create    block="ICCL"/>
+        <Placement block="ICCL" konly="'ONLY'" in="IDSM" x="24.3855*sin(anglePIT_T*raddeg)" y="24.3855*cos(anglePIT_T*raddeg)" z="-231.9392+0.5*170.18" />
 
-        <Placement in="IDSM" x="24.3728*sin(anglePIT_C*raddeg)" y="24.3728*cos(anglePIT_C*raddeg)" z="-231.9392+0.5*170.18" block="ICCA" konly="'ONLY'">
-        </Placement>
+	<Create    block="ICLP"/>
+	<Placement block="ICLP" konly="'ONLY'" in="IDSM" x="24.3855*sin(anglePIT_T*raddeg)" y="24.3855*cos(anglePIT_T*raddeg)" z="-231.9392+0.5*170.18" />
 
-        <Create block="ICCL"/>
-        <Placement in="IDSM" x="24.3855*sin(anglePIT_T*raddeg)" y="24.3855*cos(anglePIT_T*raddeg)" z="-231.9392+0.5*170.18" block="ICCL" konly="'ONLY'">
-        </Placement>
-
-	<Create block="ICLP"/>
-	<Placement in="IDSM" x="24.3855*sin(anglePIT_T*raddeg)" y="24.3855*cos(anglePIT_T*raddeg)" z="-231.9392+0.5*170.18" block="ICLP" konly="'ONLY'">
-	</Placement>
  </Do>
-
-
 
   <Create    block="IBMO"/>
   <Placement block="IBMO" in="IDSM" konly="'MANY'"/>
@@ -578,8 +570,8 @@
    <!-- Place west side cooling loops -->
    <Do var="nCTJ" from="1" to="12">
       bangle=(360.0/12.0)*(nCTJ-1)+5.73
-      <Create block="IBCJ"/> 
-      <Placement in="IBMO" x="xctjpos(nCTJ)" y="yctjpos(nCTJ)" z="zpos+35.5965+0.5*11.4588" block="IBCJ" konly="'MANY'">
+      <Create    block="IBCJ"/> 
+      <Placement block="IBCJ" konly="'MANY'" in="IBMO" x="xctjpos(nCTJ)" y="yctjpos(nCTJ)" z="zpos+35.5965+0.5*11.4588" >
       <Rotation alphaz="-1.0*bangle"/>
       </Placement>
    </Do> 
@@ -599,23 +591,23 @@
 	angle_C=(360.0/24)*(nCableSet-1)+tilt_C
 	angle_T=(360.0/24)*(nCableSet-1)+tilt_T
 
-   	<Create block="ISCA"/>
-   	<Placement in="IBMO" x="radius_A*sin(angle_A*raddeg)" y="radius_A*cos(angle_A*raddeg)" z="-34.7832-0.5*18.2616" block="ISCA" konly="'ONLY'">
+   	<Create     block="ISCA"/>
+   	<Placement  block="ISCA" konly="'ONLY'" in="IBMO" x="radius_A*sin(angle_A*raddeg)" y="radius_A*cos(angle_A*raddeg)" z="-34.7832-0.5*18.2616">
    	<Rotation alphaz="-1.0*angle_A"/>
    	</Placement>
 
-   	<Create block="ISCB"/>
-   	<Placement in="IBMO" x="radius_B*sin(angle_B*raddeg)" y="radius_B*cos(angle_B*raddeg)" z="-32.1233-0.5*20.9215" block="ISCB" konly="'ONLY'">
+   	<Create    block="ISCB"/>
+   	<Placement block="ISCB" konly="'ONLY'" in="IBMO" x="radius_B*sin(angle_B*raddeg)" y="radius_B*cos(angle_B*raddeg)" z="-32.1233-0.5*20.9215" >
    	<Rotation alphaz="-1.0*angle_B"/>
    	</Placement>
 
    	<Create block="ISCC"/>
-   	<Placement in="IBMO" x="radius_C*sin(angle_C*raddeg)" y="radius_C*cos(angle_C*raddeg)" z="-29.203-0.5*23.8418" block="ISCC" konly="'ONLY'">
+   	<Placement block="ISCC" konly="'ONLY'" in="IBMO" x="radius_C*sin(angle_C*raddeg)" y="radius_C*cos(angle_C*raddeg)" z="-29.203-0.5*23.8418" >
    	<Rotation alphaz="-1.0*angle_C"/>
    	</Placement>
-
+<!-- NOTE: ISCT can be simplified into a polycone, with coolant inside. -->
    	<Create block="ISCT"/>
-   	<Placement in="IBMO" x="radius_T*sin(angle_T*raddeg)" y="radius_T*cos(angle_T*raddeg)" z="-44.5806-0.5*8.4642" block="ISCT" konly="'ONLY'">
+   	<Placement block="ISCT" konly="'ONLY'" in="IBMO" x="radius_T*sin(angle_T*raddeg)" y="radius_T*cos(angle_T*raddeg)" z="-44.5806-0.5*8.4642" >
    	<Rotation alphaz="-1.0*angle_T"/>
    	</Placement>
 
@@ -641,7 +633,7 @@
      </Do>
 
    
-  
+  <!-- NOTE: ICJS, ICJA, ICJU can be merged into a polycone.  ICLN should be contained inside. -->
 
      <Create    block="ICJS" />
      <Placement block="ICJS" in="IBCJ"  x="2.88855-0.5*1.8331" y="0.0" z="-5.7294+2.722875+0.1778+0.5*6.35"/>
@@ -711,7 +703,7 @@
  <Shape type="TUBE" rmin="0" rmax="0.5*cableDiameter" dz="0.5*23.8418"/>
  </Volume>
 
-
+<!-- NOTE: ISCT polycone -->
  <Volume name="ISCT" comment="IST short cooling tube in transition cone ">
  <Material name="Air" />
  <Attribute for="ISCT" seen="0" colo="6"/>
@@ -762,25 +754,32 @@
  <Shape type="BOX" dx="Ladder_Width/2.0" dy="Ladder_Thk/2.0" dz="Ladder_Length/2.0"/>
     <!-- placement of sub-volumes -->
      <Create    block="ILCC"  />
-     <Placement in="IBAM" x="HalfLadWdt-0.15-HalfCombWdt" y="-HalfLadThk+2.4244+2*HalfSkinThk+HalfCombThk" z="HalfLadLen-HalfCombLen-2*HalfEndcapMomLen-OutsideTubeWestLen" block="ILCC">
-     </Placement>
-     
-     <Create    block="IBCF"  />
-     <Placement in="IBAM" x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt" y="HalfFoamThk+2.4244-HalfLadThk+2*HalfSkinThk" z="HalfLadLen-HalfFoamLen-2*HalfEndcapMomLen-OutsideTubeWestLen" block="IBCF">
-     </Placement>
+     <Placement block="ILCC" in="IBAM" x="HalfLadWdt-0.15-HalfCombWdt" y="-HalfLadThk+2.4244+2*HalfSkinThk+HalfCombThk" z="HalfLadLen-HalfCombLen-2*HalfEndcapMomLen-OutsideTubeWestLen"/>
 
+     <!-- Carbon foam assembly.  Could reorganize grooves to remove many/only subtraction. -->
+     <Create    block="IBCF"  />
+     <Placement block="IBCF" in="IBAM" konly="MANY" 
+		x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt" 
+		y="HalfFoamThk+2.4244-HalfLadThk+2*HalfSkinThk" 
+		z="HalfLadLen-HalfFoamLen-2*HalfEndcapMomLen-OutsideTubeWestLen" />
+
+
+<!-- NOTE: Reorganize... box within a box -->
      <Create    block="ILST"  />
      <Placement in="IBAM" x="HalfLadWdt-HalfSkinWdt-0.15" y="-HalfLadThk+2*HalfCombThk+2.4244+3*HalfSkinThk-HalfThkAirInHbd" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILST">
      </Placement>
      
+<!-- NOTE: Reorganize... box within a box -->
      <Create    block="ILSB"  />
      <Placement in="IBAM" x="HalfLadWdt-HalfSkinWdt-0.15" y="-HalfLadThk+2.4244+HalfSkinThk+HalfThkAirInHbd" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILSB">
      </Placement>
      
+<!-- NOTE: Reorganize... box within a box -->
      <Create    block="IBHT"  />
      <Placement in="IBAM" x="HalfLadWdt-HalfHbdWdtTB-0.15" y="-HalfLadThk+4*HalfSkinThk+2*HalfCombThk+2.4244+HalfHbdThkTB-HalfThkAirInHbd" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHT">
      </Placement>
      
+<!-- NOTE: Reorganize... box within a box -->
      <Create    block="IBHB"  />
      <Placement in="IBAM" x="HalfLadWdt-HalfHbdWdtTB-0.15" y="-HalfLadThk+2.4244-HalfHbdThkTB+HalfThkAirInHbd" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHB">
      </Placement>
@@ -789,13 +788,20 @@
      <Placement in="IBAM" x="-HalfLadWdt+DistFoamToLadder" y="-HalfLadThk+HalfFoamThk+2.4244+2*HalfSkinThk" z="HalfLadLen-HalfHbdArcLen-OutsideTubeWestLen-1.75" block="IBHC">
      </Placement>
 
+<!-- NOTE: Tube with hole in it... -->
      <!-- placement of tube -->
      <Create    block="IBAT"  />
-     <Placement block="IBAT"  x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax" y="HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin" z="HalfTubeLen-HalfLadLen" >
+     <Placement block="IBAT"  konly="MANY"
+		x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax" 
+		y="HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin" 
+		z="HalfTubeLen-HalfLadLen" >
      </Placement>
  
-     <Create    block="IBCW"  />
-     <Placement block="IBCW"  x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax" y="HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin" z="LiquidInTubeLen-HalfLadLen" >
+     <Create    block="IBCW"  /> <!-- Cooling liquid located in a tube somewhere... -->
+     <Placement block="IBCW"  
+		x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax" 
+		y="HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin" 
+		z="LiquidInTubeLen-HalfLadLen" >
      </Placement>
          
      <!-- placement of transit board-->
@@ -819,13 +825,20 @@
      <Placement in="IBAM" x="-HalfLadWdt+DistFoamToLadder+0.2581+0.5*0.1625" y="2.4244-2*HalfHbdThkTB-HalfLadThk-0.5*0.06" z="-HalfLadLen+OutsideTubeEastLen+21.0235+0.5*0.1625" block="IBTS">
      </Placement>
      
-     <Create    block="IECW"  />
-     <Placement in="IBAM" x="HalfLadWdt-HalfEndcapMomWdt-0.15" y="HalfEndcapMomThk+2.4244-HalfLadThk" z="HalfLadLen-OutsideTubeWestLen-HalfEndcapMomLen" block="IECW">
-     </Placement>
+     <Create    block="IECW"  /> <!-- overlaping with cooling liquid IBCW -->
+     <Placement block="IECW" in="IBAM" konly="MANY"
+		x="HalfLadWdt-HalfEndcapMomWdt-0.15" 
+		y="HalfEndcapMomThk+2.4244-HalfLadThk" 
+		z="HalfLadLen-OutsideTubeWestLen-HalfEndcapMomLen" />
+
      
-     <Create    block="IECE"  />
-     <Placement in="IBAM" x="HalfLadWdt-HalfEndcapMomWdt-0.15" y="HalfEndcapMomThk+2.4244-HalfLadThk" z="-HalfLadLen+OutsideTubeEastLen+HalfEndcapMomLen" block="IECE">
-     </Placement>
+     <Create    block="IECE"  /> <!-- overlaping with cooling liquid IBCW -->
+     <Placement block="IECE" in="IBAM" konly="MANY" 
+		x="HalfLadWdt-HalfEndcapMomWdt-0.15" 
+		y="HalfEndcapMomThk+2.4244-HalfLadThk" 
+		z="-HalfLadLen+OutsideTubeEastLen+HalfEndcapMomLen" />
+
+   
   
   <!-- taking care of the silicon sensor numbering in a ladder -->
   <Do var="nu" from="1" to="nUnit">
@@ -837,16 +850,20 @@
 
   <!-- Create screw mother volume ISCM       November 8 2012 Yaping -->
      <Do var="nsc" from="1" to="2">
-         <Create block="ISCM"/>
-         <Placement in="IBAM" x="HalfLadWdt-HalfEndcapMomWdt-0.15" y="-HalfLadThk+2.4244+2*HalfEndcapMomThk-0.2845" z="-HalfLadLen+OutsideTubeEastLen+0.75+(1.5+HalfCombLen)*(2*nsc-2)" block="ISCM">
-         </Placement>
+         <Create    block="ISCM"/>
+         <Placement block="ISCM" in="IBAM" konly="MANY"
+		    x="HalfLadWdt-HalfEndcapMomWdt-0.15" 
+		    y="-HalfLadThk+2.4244+2*HalfEndcapMomThk-0.2845" 
+		    z="-HalfLadLen+OutsideTubeEastLen+0.75+(1.5+HalfCombLen)*(2*nsc-2)" />
      </Do>
 
   <!-- Create support ring mother volume       October 1 2012 Yaping -->
      <Do var="ns" from="1" to="2">
-        <Create block="IBSR"/>
-         <Placement in="IBAM" x="HalfLadWdt-1.0*HalfSRMomWdt" y="HalfSRMomThk-1.0*HalfLadThk" z="-HalfLadLen+9.9143+HalfSRMomLen+58.88*(ns-1)" block="IBSR">
-         </Placement>
+        <Create    block="IBSR"/>
+        <Placement block="IBSR" in="IBAM" konly="MANY"
+		   x="HalfLadWdt-1.0*HalfSRMomWdt" 
+		   y="HalfSRMomThk-1.0*HalfLadThk" 
+		   z="-HalfLadLen+9.9143+HalfSRMomLen+58.88*(ns-1)" />
      </Do>
  </Volume>
 
@@ -879,14 +896,14 @@
         <Material name="Air"  />
         <Attribute for="IBCF" seen="0" colo="1"  />
         <Shape type="BOX" dx="HalfFoamWdt" dy="HalfFoamThk" dz="HalfFoamLen"/>
-        <Create block="ICFC"/>
-        <Placement block="ICFC" x="0.0" y="0.0" z="-HalfFoamLen+HalfFoamLenConnect"/>
-        <Create block="ICFD"/>
-        <Placement block="ICFD" x="0.0" y="0.0" z="HalfFoamLenConnect"/>
-        <Create block="ICFB"/>
-        <Placement block="ICFB" x="TubeRmax" y="HalfFoamThk-0.2922/2.0" z="0.0"/>
-        <Create block="ICFA"/>
-        <Placement block="ICFA" x="TubeRmax" y="HalfFoamThk-0.2922" z="0.0"/>
+        <Create    block="ICFC"/><!-- foam -->
+        <Placement block="ICFC" konly="MANY" x="0.0" y="0.0" z="-HalfFoamLen+HalfFoamLenConnect"/>
+        <Create    block="ICFD"/><!-- foam -->
+        <Placement block="ICFD" konly="MANY" x="0.0" y="0.0" z="HalfFoamLenConnect"/>
+        <Create    block="ICFB"/><!-- groove in ICFC and D -->
+        <Placement block="ICFB" konly="ONLY" x="TubeRmax" y="HalfFoamThk-0.2922/2.0" z="0.0"/>
+        <Create    block="ICFA"/><!-- groove in ICFC and D -->
+        <Placement block="ICFA" konly="ONLY" x="TubeRmax" y="HalfFoamThk-0.2922" z="0.0"/>
     </Volume>
     
     <Volume name="ICFC" comment="is the IST carbon foam BOX volume on east side">
@@ -918,11 +935,11 @@
         <Attribute for="IBAT" seen="0" colo="1"/>
         <Material name="Air"/>
         <Shape type="TUBE" rmin="0" rmax="TubeConeOuterRmax" dz="HalfTubeLen"/>
-        <Create block="ICTC"/>
+        <Create    block="ICTC"/>
 	<Placement block="ICTC" x="0.0" y="0.0" z="0.0"/>
-	<Create block="ICTE"/>
+	<Create    block="ICTE"/>
 	<Placement block="ICTE" x="0.0" y="0.0" z="-HalfTubeLen+HalfTubeConeLen"/>
-	<Create block="ICTW"/>
+	<Create    block="ICTW"/>
 	<Placement block="ICTW" x="0.0" y="0.0" z="HalfTubeLen-HalfTubeConeLen"/>
     </Volume>
 
@@ -1100,29 +1117,29 @@
         <Material name="PEEKCF30"  />
         <Attribute for="IECW" seen="1" colo="3"  />
         <Shape type="BOX" dx="HalfEndcapMomWdt" dy="HalfEndcapMomThk" dz="HalfEndcapMomLen"/>
-        <Create block="ICWT"/>
+        <Create    block="ICWT"/><!-- foam -->
         <Placement block="ICWT" x="0.0" y="HalfEndcapMomThk-0.0275/2.0" z="-HalfEndcapMomLen+ConnectEndcapSkinLen/2.0"/>
-        <Create block="ICWB"/>
+        <Create    block="ICWB"/><!-- foam -->
         <Placement block="ICWB" x="0.0" y="-HalfEndcapMomThk+0.0275/2.0" z="-HalfEndcapMomLen+ConnectEndcapSkinLen/2.0"/>
-        <Create block="IABW"/>
+        <Create    block="IABW"/><!-- groove -->
         <Placement block="IABW" x="-HalfEndcapMomWdt+1.23485+0.5065/2.0" y="HalfEndcapMomThk-0.31/2.0" z="0.0"/>
-        <Create block="IAAW"/>
+        <Create    block="IAAW"/><!-- groove -->
         <Placement block="IAAW" x="-HalfEndcapMomWdt+1.23485+0.5065/2.0" y="HalfEndcapMomThk-0.31" z="0.0"/>
-        <Create block="IESB"/>
+        <Create    block="IESB"/><!-- groove -->
         <Placement block="IESB" x="0.0" y="0.0" z="HalfEndcapMomLen-0.6-0.3/2.0"/>
-        <Create block="IESA"/>
+        <Create    block="IESA"/><!-- groove -->
         <Placement block="IESA" x="0.0" y="0.0" z="HalfEndcapMomLen-0.6-0.3">
             <Rotation alphax="90.0"/>
         </Placement>
-        <Create block="IESC"/>
+        <Create    block="IESC"/><!-- groove -->
         <Placement block="IESC" x="0.0" y="0.0" z="HalfEndcapMomLen-0.6">
             <Rotation alphax="90.0"/>
         </Placement>
-        <Create    block="ITNW"  />
+        <Create    block="ITNW"  /><!-- groove -->
         <Placement block="ITNW"  x="-HalfEndcapMomWdt+0.55" y="0.0" z="HalfEndcapMomLen-0.5" >
             <Rotation alphax="90.0"/>
         </Placement>        
-        <Create    block="ITSW"  />
+        <Create    block="ITSW"  /><!-- groove -->
         <Placement block="ITSW"  x="HalfEndcapMomWdt-0.55" y="0.0" z="HalfEndcapMomLen-0.5" >
             <Rotation alphax="90.0"/>
         </Placement>
@@ -1187,13 +1204,14 @@
         <Material name="Aluminium"  />
         <Attribute for="IECE" seen="1" colo="4"  />
         <Shape type="BOX" dx="HalfEndcapMomWdt" dy="HalfEndcapMomThk" dz="HalfEndcapMomLen"/>
-        <Create block="ICET"/>
+	<!-- The following are all air carved out of an Al box -->
+        <Create    block="ICET"/>
         <Placement block="ICET" x="0.0" y="HalfEndcapMomThk-0.03435/2.0" z="HalfEndcapMomLen-ConnectEndcapSkinLen/2.0"/>
-        <Create block="ICEB"/>
+        <Create    block="ICEB"/>
         <Placement block="ICEB" x="0.0" y="-HalfEndcapMomThk+0.03435/2.0" z="HalfEndcapMomLen-ConnectEndcapSkinLen/2.0"/>
-        <Create block="IABE"/>
+        <Create    block="IABE"/>
         <Placement block="IABE" x="-HalfEndcapMomWdt+1.23485+0.5065/2.0" y="HalfEndcapMomThk-0.3031/2.0" z="0.0"/>
-        <Create block="IAAE"/>
+        <Create    block="IAAE"/>
         <Placement block="IAAE" x="-HalfEndcapMomWdt+1.23485+0.5065/2.0" y="HalfEndcapMomThk-0.3031" z="0.0"/>
         <Create    block="IESE"  />
         <Placement block="IESE"  x="0.0" y="0.0" z="-HalfEndcapMomLen+0.75" >
@@ -1261,6 +1279,8 @@
         <Shape type="TUBE" rmin="0.0" rmax="0.3/2.0" dz="HalfEndcapMomThk" />
     </Volume>
    
+    <!-- NOTE: can be reduced to a polycone -->
+
     <!-- volumes to screws and washers -->
     <Volume name="ISCM" comment="mother of the screw assembly"  >
         <Material name="Air"  />
@@ -1313,15 +1333,23 @@
         <Material name="Air" />
         <Attribute for="IBSR" seen="0" colo="1"/>
         <Shape type="BOX" dx="HalfSRMomWdt" dy="HalfSRMomThk" dz="HalfSRMomLen" />
-        <Create block="ISRR"/>
+        <Create    block="ISRR"/>
         <Placement block="ISRR" x="HalfSRMomWdt-0.15-0.5*0.207" y="HalfSRMomThk-0.7148-0.3-0.5*1.3553" z="-HalfSRMomLen+0.5*0.9525"/>
-        <Create block="ISRB"/>
-        <Placement block="ISRB" x="0.0" y="HalfSRMomThk-0.7148-0.5*0.3" z="-HalfSRMomLen+0.5*0.9525"/>
-        <Create block="IRBA"/>
-        <Placement block="IRBA" x="HalfSRMomWdt-0.15-0.5*0.3" y="HalfSRMomThk-0.7148" z="-HalfSRMomLen+0.5*0.9525"/>
-        <Create block="ISRL"/>
-        <Placement block="ISRL" x="-HalfSRMomWdt+0.5*0.7452+0.23755" y="HalfSRMomThk-0.7148-0.3-0.1105-0.88655" z="-HalfSRMomLen+0.5*0.9525">
-        <Rotation alphaz="-75.0"/>
+        <Create    block="ISRB"/> <!-- IRBA is a hole w/in ISRB -->
+        <Placement block="ISRB" konly="MANY"
+		   x="0.0" y="HalfSRMomThk-0.7148-0.5*0.3" 
+		   z="-HalfSRMomLen+0.5*0.9525"/>
+        <Create    block="IRBA"/> <!-- Hole in ISRB -->
+        <Placement block="IRBA" 
+		   x="HalfSRMomWdt-0.15-0.5*0.3" 
+		   y="HalfSRMomThk-0.7148" 
+		   z="-HalfSRMomLen+0.5*0.9525"/>
+        <Create    block="ISRL"/> <!-- Air hole ISRH -->
+        <Placement block="ISRL" konly="MANY"
+		   x="-HalfSRMomWdt+0.5*0.7452+0.23755" 
+		   y="HalfSRMomThk-0.7148-0.3-0.1105-0.88655" 
+		   z="-HalfSRMomLen+0.5*0.9525">
+          <Rotation alphaz="-75.0"/>
         </Placement> 
         <Create block="ISRC"/>
         <Placement block="ISRC" x="-HalfSRMomWdt+0.3652" y="HalfSRMomThk-0.7148-0.3-0.5*0.1105" z="-HalfSRMomLen+0.5*0.9525"/>
@@ -1334,11 +1362,11 @@
         <Placement block="IROA" x="HalfSRMomWdt-0.15" y="HalfSRMomThk-0.1-0.5*0.2" z="-HalfSRMomLen+0.5*0.9525">
         <Rotation alphaz="90.0"/>
         </Placement>
-        <Create block="ISRS"/>
+        <Create    block="ISRS"/>
         <Placement block="ISRS" x="HalfSRMomWdt-0.15-0.5*0.3116" y="HalfSRMomThk-0.5*0.1" z="-HalfSRMomLen+0.5*0.9525"/>
-        <Create block="ISRH"/>
+        <Create    block="ISRH"/>
         <Placement block="ISRH" x="-HalfSRMomWdt+0.3572" y="HalfSRMomThk-0.7148-0.5*1.2438" z="-HalfSRMomLen+0.47625">
-        <Rotation alphax="90.0"/>
+          <Rotation alphax="90.0"/>
         </Placement>
     </Volume>
     
@@ -1405,7 +1433,7 @@
     </Volume>
 
     <Volume name="ISRH" comment="is the air hole for screwing stave ">
-        <Material name="Air" />
+        <Material  name="Air" />
         <Attribute for="ISRH" seen="0" colo="1"/>
         <Shape type="TUBE" rmin="0.0" rmax="0.5*0.3454" dz="0.5*1.2438" />
     </Volume>
