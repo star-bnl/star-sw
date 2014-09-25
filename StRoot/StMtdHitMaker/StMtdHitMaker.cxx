@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.19 2014/09/19 17:49:33 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.20 2014/09/25 14:36:25 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -927,7 +927,12 @@ void StMtdHitMaker::fillStEvent()
       if(mtdCollection->rawHitsPresent())
 	{
 	  StSPtrVecMtdRawHit& rawMtdVec = mtdCollection->mtdRawHits();
-	  LOG_INFO << rawMtdVec.size() << " MTD raw hits in event ..." << endm;
+
+	  if(!mUseMuDst || Debug())
+	    {
+	      LOG_INFO << rawMtdVec.size() << " MTD raw hits in event ..." << endm;
+	    }
+
 	  if(Debug()) 
 	    {
 	      for(size_t i=0;i<rawMtdVec.size();i++) 
@@ -944,7 +949,12 @@ void StMtdHitMaker::fillStEvent()
       if(mtdCollection->hitsPresent())
 	{
 	  StSPtrVecMtdHit& mtdVec = mtdCollection->mtdHits();  
-	  LOG_INFO << mtdVec.size() << " MTD hits in event ..." << endm;
+
+	  if(!mUseMuDst || Debug())
+	    {
+	      LOG_INFO << mtdVec.size() << " MTD hits in event ..." << endm;
+	    }
+
 	  if(Debug()) 
 	    {
 	      for(size_t i=0;i<mtdVec.size();i++)
@@ -988,8 +998,11 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.19 2014/09/19 17:49:33 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.20 2014/09/25 14:36:25 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.20  2014/09/25 14:36:25  marr
+// Do not automatically print out hit information to log file when running on muDst
+//
 // Revision 1.19  2014/09/19 17:49:33  marr
 // 1) Use the constants from StMtdUtil/StMtdConstants.h
 // 2) Apply trigger time window cuts
