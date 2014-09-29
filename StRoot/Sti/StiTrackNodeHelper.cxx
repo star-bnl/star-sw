@@ -744,7 +744,7 @@ assert(calculator);
   double eloss = calculator->calculate(1.,m, beta2);
   dE = sign*dxEloss*eloss;
 //		save detLoss and gasLoss for investigation only
-  mTargetNode->setELoss(2*sign*d3*eloss,sign*d2*eloss);
+//  mTargetNode->setELoss(2*sign*d3*eloss,sign*d2*eloss);
 
 
 
@@ -786,7 +786,7 @@ if (fabs(mMcs._ptinCorr)>1e-4) {
 
 
   const StiDetector 		*preDet = mParentNode->getDetector();
-  const StiMaterial *preMat = 0,*preGas=0;
+  const StiMaterial *preMat = curGas,*preGas=curGas;
   const StiElossCalculator *preLos = 0;
   if (preDet) {
     preMat = preDet->getMaterial();
@@ -827,7 +827,16 @@ assert(mMcs._cEE>0);
   int sign = ( dx>=0)? 1:-1;
   double dE = sign*dxEloss;
 //		save detLoss and gasLoss for investigation only
-  mTargetNode->setELoss(2*sign*d3*pL3,sign*d2*pL2);
+  StiELoss *el = mTargetNode->getELoss();
+  el[0].mELoss = 2*d3*pL3;
+  el[0].mLen   = 2*pL3;
+  el[0].mDens  = curMat->getDensity();
+  el[0].mX0    = x0;
+  el[1].mELoss = 2*d2*pL2;
+  el[1].mLen   = 2*pL2;
+  el[1].mDens  = gasMat->getDensity();
+  el[1].mX0    = x0Gas;
+
   mMcs._ptinCorr = ::sqrt(e2)*dE/p2;
   if (fabs(mMcs._ptinCorr)>0.1) mMcs._ptinCorr = (dE<0)? -0.1:0.1;
 }
@@ -1136,8 +1145,8 @@ int StiTrackNodeHelper::nudge()
     pars->eta()   +=               deltaE;
     pars->_cosCA -= pars->_sinCA *deltaE;
     pars->_sinCA += pars->_cosCA *deltaE;
-    if (fabs(pars->_cosCA)>=1.
-      ||fabs(pars->_sinCA)>=1.) pars->ready();
+    if (fabs(pars->_cosCA)>=0.99
+      ||fabs(pars->_sinCA)>=0.99) pars->ready();
     if (pars->check()) return 1;
   }
   return 0;

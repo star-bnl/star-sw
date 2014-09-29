@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.126 2014/07/09 00:15:45 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.126 2014/07/09 00:15:45 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.127 2014/09/29 21:44:55 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.127 2014/09/29 21:44:55 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.127  2014/09/29 21:44:55  perev
+ * Check cos>=1 replaced to cos>=.99
+ *
  * Revision 2.126  2014/07/09 00:15:45  perev
  * Fix wrong Xi2 for 5hits track
  *
@@ -1759,6 +1762,8 @@ double Xi2=0;
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
     P._sinCA = cirl.Dir()[1]/cirl.GetCos();
+    if (fabs(P._cosCA)>0.99 || fabs(P._sinCA)>0.99) P.ready();
+
     targetNode->fitPars() = P;
     int ians = targetNode->nudge();
     if(ians) {nNode--; targetNode->setInvalid();continue;}
