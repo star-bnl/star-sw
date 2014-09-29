@@ -135,9 +135,9 @@ assert(myRadius>1e-2 && myRadius < 1e3);
 //   delete vect[0];
     StiToolkit::instance()->getDetectorFactory()->free(vect[0]);
     vect[0] = this;
-   if (vect.size()>1) {
-     printf("StiDetector::splitIt %s is splitted into %d peaces\n",getName().c_str(),vect.size());}
-   assert(fabs(startWeight-sumWeight)<1e-3*startWeight);
+//    if (vect.size()>1) {
+//      printf("StiDetector::splitIt %s is splitted into %d peaces\n",getName().c_str(),vect.size());}
+//    assert(fabs(startWeight-sumWeight)<1e-3*startWeight);
 
 
    return vect.size();
