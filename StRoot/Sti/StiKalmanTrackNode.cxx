@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.141 2014/09/18 18:45:00 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.142 2014/09/30 15:44:51 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.142  2014/09/30 15:44:51  perev
+ * Added StELoss class to keep ELoss info
+ *
  * Revision 2.141  2014/09/18 18:45:00  perev
  * Debug++
  * Using new cylCross method
@@ -1383,14 +1386,13 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 {  
 static const int keepElossBug = StiDebug::iFlag("keepElossBug");
 
+static int nCall=0; nCall++;
   propagateCurv(previousNode);
   double pt = getPt();
-#if 1
   if (pt>=1e2) {
     mPP() = mFP; mPE() = mFE;
     return;
   }
-#endif
   double relRadThickness;
   // Half path length in previous node
   double pL1,pL2,pL3,d1,d2,d3,dxEloss=0;
@@ -1486,7 +1488,7 @@ assert(calculator);
   dE = sign*dxEloss*eloss;
 
 //		save detLoss and gasLoss for investigation only
-  setELoss(2*sign*d3*eloss,sign*d2*eloss);
+//  setELoss(2*sign*d3*eloss,sign*d2*eloss);
 
   if (TMath::Abs(dE)>0)
     {
@@ -1545,8 +1547,17 @@ assert(mFE.sign()>0); ///???
 
   double dE = sign*dxEloss;
 //		save detLoss and gasLoss for investigation only
-  setELoss(2*sign*d3*pL3,sign*d2*pL2);
-  if (fabs(dE)>0)
+  
+  mELoss[0].mELoss = 2*d3*pL3;
+  mELoss[0].mLen   = 2*pL3;
+  mELoss[0].mDens  = curMat->getDensity();
+  mELoss[0].mX0    = x0;
+  mELoss[1].mELoss = 2*d2*pL2;
+  mELoss[1].mLen   = 2*pL2;
+  mELoss[1].mDens  = gasMat->getDensity();
+  mELoss[1].mX0    = x0Gas;
+ 
+ if (fabs(dE)>0)
     {
       double correction =1. + ::sqrt(e2)*dE/p2;
       if (correction>1.1) correction = 1.1;
