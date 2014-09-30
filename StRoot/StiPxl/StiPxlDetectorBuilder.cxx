@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.77 2014/08/22 17:44:48 perev Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78 2014/09/30 17:20:16 perev Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -222,7 +222,8 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
          stiDetector->setName(geoPath.str().c_str());
          stiDetector->setIsOn(true);
-         stiDetector->setIsActive(new StiPxlIsActiveFunctor);
+         if (_active) { stiDetector->setIsActive(new StiPxlIsActiveFunctor);}
+         else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
          stiDetector->setIsContinuousMedium(false); // true for gases
          stiDetector->setIsDiscreteScatterer(true); // true for anything other than gas
          stiDetector->setGroupId(kPxlId);
