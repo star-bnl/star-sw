@@ -41,4 +41,12 @@ class StiNodePars {
   Double_t _sinCA;
   Double_t P[8]; // array of parameters. see below
 };
+
+class StiELoss 
+{
+public:
+float mELoss,mLen,mDens,mX0;
+};
+
+
 #endif
