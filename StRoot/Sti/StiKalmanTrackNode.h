@@ -173,14 +173,14 @@ public:
   void setNullCount(char c=0)       	{ nullCount=c;}
   void setContigHitCount (char c=0) 	{ contiguousHitCount=c ;}
   void setContigNullCount(char c=0) 	{ contiguousNullCount=c;}
-  void setELoss(double detLoss,double gasLoss) 	{ mELoss[0]=(float)detLoss; mELoss[1]=(float)gasLoss;}
   double getTime() const;
 
   void   setHitCand(int nhits)		{mHitCand = nhits;}
   void   setIHitCand(int ihit)		{mIHitCand = ihit;}
   int    getHitCand()const		{return mHitCand;}
   int    getIHitCand()const		{return mIHitCand;}
-  double getELoss(int idx=0)const	{return mELoss[!!idx];}
+      StiELoss *getELoss()  		{return mELoss;}
+const StiELoss *getELoss()const		{return mELoss;}
  static void Break(int kase);
   static void PrintStep();
   StThreeVector<double>getPoint() const;
@@ -299,7 +299,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   StiNodeErrs  mFE;
   StiNode2Pars mUnTouch;
   StiHitErrs   mHrr;
-  float mELoss[2];
+  StiELoss mELoss[2];
   char hitCount;
   char nullCount;
   char contiguousHitCount;
