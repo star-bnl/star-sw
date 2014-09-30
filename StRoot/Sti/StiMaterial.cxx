@@ -23,6 +23,16 @@ StiMaterial::StiMaterial(const string &name,
   set(name,z,a,density,radLength,ionization);
 }
 
+StiMaterial::StiMaterial(const string &name,
+			 double z,
+			 double a,
+			 double density,
+			 double X0)
+{
+  _eloss = 0;
+  set(name,z,a,density,X0);
+}
+
 StiMaterial::~StiMaterial()
 {
  delete _eloss; _eloss = 0;
@@ -41,41 +51,50 @@ void StiMaterial::set(const string& name,
 		      double z,
 		      double a,
 		      double density,
-		      double radLength,
+		      double radLength,//X0*density
 		      double ionization)
 {
   setName(name);
   _density = density;
-  _radLength = radLength;
   _a = a;
   _z = z;
   _ionization = ionization;
-  if (_density>0)
-    _x0 = _radLength/density;
-  else
-    _x0 = 1e11;
-  if (_a>0)
-    _zOverA = _z/_a;
-  else
-    _zOverA = 0.;
-
-assert(!_eloss);
-  _eloss = 0;
-  if (_z>0) 
+  _x0 = (_density>0)? radLength/density : 1e11;
+  _zOverA = (_a>0)? _z/_a : 0;
+  delete _eloss; _eloss = 0;
+  if (z>0) 
     _eloss = new StiElossCalculator(_zOverA, ionization,_a,_z,_density);
-
+  assert(_x0>0);
 
 }
 
+void StiMaterial::set(const string& name,
+		      double z,
+		      double a,
+		      double density,
+		      double X0)
+{
+  setName(name);
+  _density = density;
+  _a = a;
+  _z = z;
+  _x0 = X0;
+  _zOverA = (_a>0)? _z/_a : 0;
+  delete _eloss; _eloss = 0;
+  if (z>0) 
+    _eloss = new StiElossCalculator(_zOverA, getIonization(),_a,_z,_density);
+  assert(_x0>0);
+
+
+}
 ostream& operator<<(ostream& os, const StiMaterial& m)
 {
   os << "StiMaterial:" << endl
-     << "Name:"<< m.getName()
-     << " Density:"<< m.getDensity()<< " g/cm^3"
-     << " RadLength:"<<m.getRadLength()
-     << " EffZ: "<<m.getZ()
-     << " EffA: "<<m.getA()
-     << " EffIoniz: "<<m.getIonization()
+     << "Name:"		<< m.getName()
+     << " Density:"	<< m.getDensity()<< " g/cm^3"
+     << " X0:"		<<m.getX0()
+     << " Z: "		<<m.getZ()
+     << " A: "		<<m.getA()
      << endl;
     
     return os;
