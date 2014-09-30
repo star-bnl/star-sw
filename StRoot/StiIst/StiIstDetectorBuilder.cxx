@@ -214,8 +214,8 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
          p->setName(name);
          p->setIsOn(kTRUE);
-         p->setIsActive(new StiIstIsActiveFunctor);
-
+         if (_active) {  p->setIsActive(new StiIstIsActiveFunctor);}
+         else         {  p->setIsActive(new StiNeverActiveFunctor);}
          p->setIsContinuousMedium(false);
          p->setIsDiscreteScatterer(true);
          p->setShape(sh);
@@ -264,7 +264,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       {"IHTH", "Top Kapton hybrid west box volume",                   "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
       {"IHBC", "Bottom Kapton hybrid east volume",                    "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
       {"IHBH", "Bottom Kapton hybrid west volume",                    "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
-      //{"IBHC", "North Kapton hybrid edge tub volume",                       "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1","",""},
+      //{"IBHC", "North Kapton hybrid edge tub volume",               "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1","",""},
       {"ICFC", "carbon foam east box volume",                         "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""}, //carbon foam
       {"ICFD", "carbon foam west box volume",                         "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
       {"ICCU", "CFRPMix honeycomb east box volume",                   "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""}, //carbon honeycomb
@@ -298,14 +298,14 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       {"ICLN", "west cooling loop right liquid volume",               "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
       {"ISRR", "PEEK CF 30 support block south side sub-volume",      "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""}, //support block
       {"ISRB", "PEEK CF 30 support block north side sub-volume",      "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
-      {"ISRL", "PEEK CF 30 support block trapezoid sub-volume volume", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
+      {"ISRL", "PEEK CF 30 support block trapezoid sub-volume volume","HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
       {"ISRO", "PEEK CF 30 support block top-right volume",           "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
       {"ISRC", "PEEK CF 30 support block trapezoid volume",           "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
       {"ISRS", "PEEK CF 30 support block small box volume",           "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1", "", ""},
-      {"ICCT", "Cooling line and cablings in transition area",        "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
-      {"ICCA", "Copper cablings on PIT",                              "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
-      {"ICCL", "Al cooling lines on PIT",                             "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""},
-      {"ICLP", "Liquid coolant on PIT",                               "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""}
+      {"ICCT", "Cooling line and cablings in transition area",        "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1"       , "", ""},
+      {"ICCA", "Copper cablings on PIT",                              "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1"       , "", ""},
+      {"ICCL", "Al cooling lines on PIT",                             "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1"       , "", ""},
+      {"ICLP", "Liquid coolant on PIT",                               "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1"       , "", ""}
    };
 
    // Build the volume map and loop over all found volumes
@@ -315,6 +315,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
    // material for support block inner thin tube volume (ISRA)
    StiMaterial *matISRA = NULL;
+   double gWt,sWt,gWtTot=0,sWtTot=0,dWtTot=0,sWtYF=0;
 
    for (Int_t i = 0; i < nVolumes; i++) {
 
@@ -330,16 +331,19 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       LOG_DEBUG << "Current node : " << i << "/" << nVolumes << " path is : " << volumes[i].name << endm;
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
 
-      StiVMCToolKit::LoopOverNodes(geoNode, volumes[i].path, volumes[i].name, MakeAverageVolume);
-
+      TGeoPhysicalNode *gnode = StiVMCToolKit::LoopOverNodes(geoNode, volumes[i].path, volumes[i].name, MakeAverageVolume);
+      if (gnode){};
+      TGeoVolume *gvolu = gGeoManager->FindVolumeFast(volumes[i].name);
+      assert(gvolu);
+//      gWt = gvolu->Weight(0.01,"a"); gWtTot+=gWt; sWt = 0;
       // Access last added volume
       int row = getNRows() - 1;
       int sector = 0;
 
       // Make Sti detector active, i.e. use it in tracking
       StiDetector *stiDetector = getDetector(row, sector);
-      stiDetector->setIsOn(true);
-
+//      sWtYF = stiDetector->getWeight();
+      
       // Retrieve material, placement, energy loss information of carbon foam stave for re-definitions.
       // The loaded carbon foam volumes (ICFC and ICFD) are disabled in tracking and removed by zero volume.
       // The new carbon foam stave will consist of three simple box volumes to avoid overlap when place
@@ -353,6 +357,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
          for (int iICFC = 0; iICFC < kIstNumLadders; iICFC++) {
             row = startRow + iICFC;
             stiDetector = getDetector(row, sector);
+            assert(strstr(stiDetector->getName().c_str(),"/ICFC_"));
 //		prepare "directory"
             dir = stiDetector->getName().c_str();idx = dir.Last('/'); assert(idx>=0); dir.Remove(idx+1,999);
 
@@ -366,6 +371,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume(stiDetector,   ts.Data(), 8.825 * 0.5, 0.5663, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFC);
             del(row, sector);
             add(row, sector, stiDetectorN);
+//            sWt+=stiDetectorN->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC north side " << stiDetectorN->getName() << " at layer " << row << endm;
 
             //construct carbon foam stave bottom side volume
@@ -375,6 +381,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume(0,             ts.Data(), 8.825 * 0.5, 0.042775, 0.47625 * 0.5, -0.238125, -0.2617625, 0., stiPlacementICFC );
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
+//            sWt+=stiDetectorB->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
 
             //construct carbon foam stave south side volume
@@ -384,12 +391,14 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             testPlanerVolume((StiDetector*)(-1),    ts.Data(), 8.825 * 0.5, 0.5663, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFC);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
+//            sWt+=stiDetectorS->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC south side " << stiDetectorS->getName() << " at layer " << layer << endm;
 
             matICFC                 = NULL;
             stiPlacementICFC        = NULL;
             stiDetector             = NULL;
          }
+
       }
 
       if (string(volumes[i].name) == string("ICFD")) {
@@ -398,6 +407,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
          for (int iICFD = 0; iICFD < kIstNumLadders; iICFD++) {
             row = startRow + iICFD;
             stiDetector = getDetector(row, sector);
+            assert(strstr(stiDetector->getName().c_str(),"/ICFD_"));
 //		prepare "directory"
             dir = stiDetector->getName().c_str();idx = dir.Last('/'); assert(idx>=0); dir.Remove(idx+1,999);
 
@@ -411,6 +421,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume( stiDetector,  ts.Data(), 47.055 * 0.5, 0.58, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFD);
             del(row, sector);
             add(row, sector, stiDetectorN);
+//            sWt+=stiDetectorN->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD north side " << stiDetectorN->getName() << " at layer " << row << endm;
 
             //construct carbon foam bottom side volume
@@ -420,6 +431,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume( 0          ,  ts.Data(), 47.055 * 0.5, 0.049675, 0.47625 * 0.5, -0.238125, -0.2651625, 0., stiPlacementICFD);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
+//            sWt+=stiDetectorB->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
 
             //construct carbon foam south side volume
@@ -429,6 +441,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume( (StiDetector*)(-1),  ts.Data(), 47.055 * 0.5, 0.58, 0.77375 * 0.5, -0.863125, 0., 0., stiPlacementICFD);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
+//            sWt+=stiDetectorS->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD south side " << stiDetectorS->getName() << " at layer " << layer << endm;
 
             matICFD                 = NULL;
@@ -444,6 +457,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
          for (int iIECE = 0; iIECE < kIstNumLadders; iIECE++) {
             row = startRow + iIECE;
             stiDetector = getDetector(row, sector);
+            assert(strstr(stiDetector->getName().c_str(),"/IECE_"));
 //		prepare "directory"
             dir = stiDetector->getName().c_str();idx = dir.Last('/'); assert(idx>=0); dir.Remove(idx+1,999);
 
@@ -458,6 +472,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume( stiDetector,  ts.Data(), 2.25 * 0.5, 0.5413, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECE);
             del(row, sector);
             add(row, sector, stiDetectorN);
+//            sWt+=stiDetectorN->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE north side " << stiDetectorN->getName() << " at layer " << row << endm;
 
             //construct east end-cap bottom side volume
@@ -467,6 +482,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume( 0          ,  ts.Data(), 2.25 * 0.5, 0.0193, 0.5065 * 0.5, 1.5619, -0.261, 0., stiPlacementIECE);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
+//            sWt+=stiDetectorB->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
 
             //construct east end-cap south side volume
@@ -476,6 +492,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume((StiDetector*)(-1),  ts.Data(), 2.25 * 0.5, 0.5413, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECE);
             layer = getNRows();
             add(layer, sector, stiDetectorS);
+//            sWt+=stiDetectorS->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE south side " << stiDetectorS->getName() << " at layer " << layer << endm;
 
             matIECE                 = NULL;
@@ -491,6 +508,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
          for (int iIECW = 0; iIECW < kIstNumLadders; iIECW++) {
             row = startRow + iIECW;
             stiDetector = getDetector(row, sector);
+            assert(strstr(stiDetector->getName().c_str(),"/IECW_"));
 //		prepare "directory"
             dir = stiDetector->getName().c_str();idx = dir.Last('/'); assert(idx>=0); dir.Remove(idx+1,999);
 
@@ -505,6 +523,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume( stiDetector,  ts.Data(), 2.25 * 0.5, 0.555, 1.23485 * 0.5, 2.4326, 0., 0., stiPlacementIECW);
             del(row, sector);
             add(row, sector, stiDetectorN);
+//            sWt+=stiDetectorN->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW north side " << stiDetectorN->getName() << " at layer " << row << endm;
 
             //construct west end-cap bottom side volume
@@ -515,6 +534,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume( 0          ,  ts.Data(), 2.25 * 0.5, 0.01925, 0.5065 * 0.5, 1.5619, -0.267875, 0., stiPlacementIECW);
             int layer = getNRows();
             add(layer, sector, stiDetectorB);
+//            sWt+=stiDetectorB->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW bottom side " << stiDetectorB->getName() << " at layer " << layer << endm;
 
             //construct west end-cap south side volume
@@ -523,6 +543,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             buildPlanerVolume(*stiDetectorS, ts.Data(), 2.25 * 0.5, 0.555, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECW, matIECW);
              testPlanerVolume((StiDetector*)(-1),  ts.Data(), 2.25 * 0.5, 0.555, 4.35865 * 0.5, -0.870675, 0., 0., stiPlacementIECW);
             layer = getNRows();
+//            sWt+=stiDetectorS->getWeight();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW south side " << stiDetectorS->getName() << " at layer " << layer << endm;
 
@@ -539,6 +560,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
          for (int iICJS = 0; iICJS < kIstNumLadders;iICJS += 2) {
             row = startRow + iICJS;
             stiDetector = getDetector(row, sector);
+            assert(strstr(stiDetector->getName().c_str(),"/ICJS_"));
 //		prepare "directory"
             dir = stiDetector->getName().c_str();idx = dir.Last('/'); assert(idx>=0); dir.Remove(idx+1,999);
 
@@ -556,6 +578,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
              testPlanerVolume( (StiDetector*)(-1));
             int layer = getNRows();
             add(layer, sector, stiDetectorICJR);
+//            sWt+=stiDetectorICJR->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build west cooling loop volume " << stiDetectorICJR->getName() << " at layer " << layer << endm;
 
          }
@@ -563,15 +586,23 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
       //resize the dimenssion of cooling/cabling in transition area
       if (string(volumes[i].name) == string("ICCT")) {
+         assert(strstr(stiDetector->getName().c_str(),"/ICCT_"));
          StiCylindricalShape *stiShape = (StiCylindricalShape *) stiDetector->getShape();
          stiShape->setOuterRadius(20.28725);
       }
 
       // retrieve material, energy loss information for support block tube ring re-definition
       if (string(volumes[i].name) == string("ISRR")) {
+         assert(strstr(stiDetector->getName().c_str(),"/ISRR_"));
          if (!matISRA)
             matISRA = stiDetector->getMaterial();
       }
+//      if (sWt<=0) sWt = sWtYF; sWt*=1e-3;sWtTot+=sWt;dWtTot+=fabs(sWt-gWt);
+//       if (fabs(sWt-gWt)> 1e-2*gWt) {
+//         printf("StiIstDetectorBuilder::buildInactiveVolumes(%s)geoWeight=%g stiWeight=%g diff=%g(%d%%)\n"
+//               ,volumes[i].name ,gWt,sWt,sWt-gWt,int(fabs(sWt-gWt)/gWt*100));
+//       }
+      sWt = 0;
    }
 
    if (matISRA) {
@@ -587,6 +618,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       buildTubeVolume(*stiDetectorISRAeast, "ISRAeast", halfDepth, thickness, outerRadius, openingAngle, -34.19005 + 0.15875, matISRA);
       int layer = getNRows();
       add(layer, 0, stiDetectorISRAeast);
+//      sWt =stiDetectorISRAeast->getWeight()*1e-3;
       LOG_DEBUG << "StiIstDetectorBuilder::build east support block thin tube volume " << stiDetectorISRAeast->getName() << " at layer " << layer << endm;
 
       //west support block inner thin tube volume
@@ -594,8 +626,15 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       buildTubeVolume(*stiDetectorISRAwest, "ISRAwest", halfDepth, thickness, outerRadius, openingAngle, 24.68995 + 0.15875, matISRA);
       layer = getNRows();
       add(layer, 0, stiDetectorISRAwest);
+//      sWt+=stiDetectorISRAwest->getWeight()*1e-3;
+      sWtTot +=sWt;
       LOG_DEBUG << "StiIstDetectorBuilder::build west support block thin tube volume " << stiDetectorISRAwest->getName() << " at layer " << layer << endm;
    }
+//    printf("StiIstDetectorBuilder::buildInactiveVolumes(IST ) geoWeight=%g stiWeight=%g diff=%g(%d%%)\n"
+//             ,gWtTot,sWtTot,sWtTot-gWtTot,int(fabs(sWtTot-gWtTot)/gWtTot*100));
+
+
+
 }
 
 void StiIstDetectorBuilder::buildPlanerVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float halfWidth, float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat)
