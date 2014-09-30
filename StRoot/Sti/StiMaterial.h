@@ -22,24 +22,28 @@ public:
 		double z,
 		double a,
 		double density,
-		double radLength,
-		double ionization);
+		double X0);
     virtual ~StiMaterial();
+    StiMaterial(const string &name,
+		double z,
+		double a,
+		double density,
+		double X0xDensity,
+		double ionization);
     
     /// Get the material density in grams/cubic centimeter
     double getDensity() const 		{ return _density; }
-    /// Get the radiation length in g/cm^2
-    double getRadLength() const 	{ return _radLength; }
     /// Get the radiation length in centimeter
     double getX0() const 		{ return _x0; }
     /// Get the effective atomic mass of the material
     double getA() const 		{ return _a;}
     /// Get the effective atomic number of the material
     double getZ() const 		{ return _z;}
-    /// Get the effectice ionization potential of the material
-    double getIonization() const 	{ return _ionization;}
     /// Get Z over A ratio
-    double getZOverA() const			{ return _zOverA;}
+    double getZOverA() const		{ return _zOverA;}
+    /// Dummy method
+    double getIonization() const	{ return -999;}
+
     /// Get Eloss calculator 
     StiElossCalculator *getElossCalculator() const;
 
@@ -47,8 +51,13 @@ public:
 	     double z,
 	     double a,
 	     double density,
-	     double radLength,
+	     double radLength,// X0*density (for compatibility)
 	     double ionization);
+    void set(const string& name,
+	     double z,
+	     double a,
+	     double density,
+	     double X0);// X0
     
 protected:
     
@@ -58,8 +67,6 @@ protected:
     double _a;
     /// g/cm^3
     double _density;
-    /// radiation length in g/cm^2
-    double _radLength;
     /// Effective ionization (in eV)
     double _ionization;
     /// zOverA
