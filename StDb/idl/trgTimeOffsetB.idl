@@ -1,0 +1,15 @@
+/*    trgTimeOffsetB.idl
+*
+*  Table: trgTimeOffsetB
+*
+*       description: //  trigger offset common to all detector-level clock modules
+*/ 
+
+
+struct trgTimeOffsetB { 
+
+   float  offset;       /*   standard trigger offset in micro-seconds  */
+   float  laserOffset;  /*   laser trigger offset in micro-seconds  */
+   float  laserOffsetW; /*   laser extra trigger offset for West laser */
+
+ };  
