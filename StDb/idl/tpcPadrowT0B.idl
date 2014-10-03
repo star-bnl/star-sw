@@ -1,0 +1,13 @@
+/*    tpcPadrowT0B.idl
+*
+*  Table: tpcPadrowT0B
+*
+*       description: T0s by padrow, applied after cluster-finding
+*/ 
+
+
+struct tpcPadrowT0B { 
+
+   float  T0[100];   /*  T0s per padrow */
+
+ };  
