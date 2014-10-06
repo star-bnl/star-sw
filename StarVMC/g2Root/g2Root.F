@@ -1,3 +1,4 @@
+#define  __TPCREFSYS__
 *CMZ :  2.22/00 08/04/99  18.41.30  by  Rene Brun
 *CMZ :  2.21/05 08/02/99  12.19.15  by  Rene Brun
 *CMZ :  2.00/11 22/08/98  15.25.26  by  Rene Brun
@@ -923,6 +924,13 @@ C
 199        format(2x,a,'->SetFillStyle(',a,');')
       endif
       endif
+#ifdef __TPCREFSYS__
+      if (pname .eq. 'CAVE') then
+         write(51,201) 
+ 201     format(2x,'TGeoVolumeAssembly *TpcRefSys ',
+     &        ' = new TGeoVolumeAssembly("TpcRefSys");')
+      endif
+#endif /*  __TPCREFSYS__ */
       end
 
 *_______________________________________________________________________
@@ -959,8 +967,9 @@ C
 
       dimension qjv(1000)
       character*20 cnode,cname,mname,anode,mother,pname, rname,ptrname
+      character*20 motherS
       character*20 gname
-      integer nmother
+      integer nmother, nmotherS
       character*256 line, rline, sline
       character*128 creals, rreals
       character*20 astring,astring1
@@ -991,6 +1000,7 @@ C
          write(51,510)mother(1:nmother)
 *         write(51,510)
 510      format('gGeoManager->SetTopVolume(',a,');')
+         
       endif
 *-  Generate subnodes of this node (if any)
 **      print 2346, iq(jvolum+ivo), nin
@@ -1138,13 +1148,39 @@ C
 
             call ptname(cname, pname)
             np = lenocc(pname)
+#ifdef __TPCREFSYS__
+            if (mother(1:nmother) .eq. 'CAVE' .and. (
+     +           pname(1:np) .eq. 'IDSM' .or.
+     +           pname(1:np) .eq. 'SVTT' .or.
+     +           pname(1:np) .eq. 'SCON' .or.
+     +           pname(1:np) .eq. 'SFMO' .or.
+     +           pname(1:np) .eq. 'TPCE' .or.
+     +           pname(1:np) .eq. 'FTPC' .or.
+     +           pname(1:np) .eq. 'FTMO' .or.
+     +           pname(1:np) .eq. 'FSMO' .or.
+     +           pname(1:np) .eq. 'BTOF' .or.
+     +           pname(1:np) .eq. 'PXMO' .or.
+     +           pname(1:np) .eq. 'IGMO' .or.
+     +           pname(1:np) .eq. 'FGMO' .or.
+     +           pname(1:np) .eq. 'BTOF' .or.
+     +           pname(1:np) .eq. 'IDSM')) then
+               nmotherS = 9
+               motherS(1:nmothers) = 'TpcRefSys'
+            else 
+               nmotherS = nmother
+               motherS(1:nmothers) = mother(1:nmother)
+            endif
+#else /*!  __TPCREFSYS__ */ 
+               nmotherS = nmother
+               motherS(1:nmothers) = mother(1:nmother)
+#endif /*  __TPCREFSYS__ */
             if (imany.eq.1) then
                if (imulti.eq.0) then
-               write(line,3000)cblank(1:nlevel),mother(1:nmother),
+               write(line,3000)cblank(1:nlevel),motherS(1:nmotherS),
      +               pname(1:np), astring(1:nci), matrixs(1:ncmats)
  3000          format(a,a,'->AddNode(',a,',',a,',',a,');')
                else
-               write(line,3002)cblank(1:nlevel),mother(1:nmother),
+               write(line,3002)cblank(1:nlevel),motherS(1:nmotherS),
      +               pname(1:np), astring1(1:nci1),astring(1:nci), 
      +               matrixs(1:ncmats)
  3002          format(a,a,'->AddNode(',a,'->GetVolume(',a,'),',a
@@ -1152,19 +1188,27 @@ C
                endif
             else
                if (imulti.eq.0) then
-               write(line,3001)cblank(1:nlevel),mother(1:nmother),
+               write(line,3001)cblank(1:nlevel),motherS(1:nmotherS),
      +               pname(1:np), astring(1:nci), matrixs(1:ncmats)
  3001          format(a,a,'->AddNodeOverlap(',a,',',a,',',a,');')
                else
-               write(line,3003)cblank(1:nlevel),mother(1:nmother),
+               write(line,3003)cblank(1:nlevel),motherS(1:nmotherS),
      +               pname(1:np), astring1(1:nci1), astring(1:nci), 
      +               matrixs(1:ncmats)
  3003          format(a,a,'->AddNodeOverlap(',a,'->GetVolume(',a,'),',a
      +                ,',',a,');')
                endif
             endif 
+            
             nch = lenocc(line)
             if (iposp.eq.0) write(51,'(a)')line(1:nch)
+#ifdef __TPCREFSYS__
+            if (mothers(1:nmothers) .eq. 'HALL' .and. 
+     +           pname(1:np) .eq. 'CAVE') then
+               write(51,3013)
+ 3013          format(2x,'CAVE->AddNode(TpcRefSys,1);')
+            endif
+#endif /*  __TPCREFSYS__ */
             npar=q(jv+5)
             if(ninvom.ne.0) then
                call node2(ivom,nuser,iposp)
