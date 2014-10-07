@@ -385,7 +385,6 @@ inline void StiCompositeTreeNode<T>::setParent(StiCompositeTreeNode* val)
 
 //For now, include some typdefs that will make for easy user includes
 #include "StiDetector.h"
-typedef StiDetector data_t;
 
 #ifndef __CINT__
 typedef StiCompositeTreeNode<StiDetector> StiDetectorNode;
