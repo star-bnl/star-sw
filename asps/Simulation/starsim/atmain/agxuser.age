@@ -1,5 +1,8 @@
-* $Id: agxuser.age,v 1.6 2012/07/19 21:33:14 jwebb Exp $
+* $Id: agxuser.age,v 1.7 2014/10/07 18:27:43 jwebb Exp $
 * $Log: agxuser.age,v $
+* Revision 1.7  2014/10/07 18:27:43  jwebb
+* Added warning when user invokes GEXE in such a way that inconsistent library may be linked/compiled.  Propose to deprecate feature by next library release.
+*
 * Revision 1.6  2012/07/19 21:33:14  jwebb
 * Added KUIP interface to configuration parameters of the filters.
 *
@@ -502,7 +505,10 @@
         if (Ierr!=0 & Idebug>0) print *,' GEXEC: CSFILE return Ierr=',Ierr
      }
      else
-     { call AfNAME(mname,'.makefile')
+     { 
+       <W> stringL; ('Warning: linking potentially inconsistent ', A20);
+       <W> '$STAR_LIB/'//trim(stringL)//'.so'; ('Use GEXE ',A32);
+       call AfNAME(mname,'.makefile')
        If LENOCC(Mname)==0 | Mname='makefile'
        { * old fashion - rely on existing gnu-makefile
          Prin1  'make '//stringL(1:L)//'.sl';  ('gexec: ',a)
