@@ -20,7 +20,7 @@
 #include <linux/types.h>
 //#include <sys/io.h>
 #include <sys/mman.h>
-#include <asm/page.h>
+//#include <asm/page.h>
 #include <sys/ioctl.h>
 #include <linux/pci.h>
 
