@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.h,v 1.8 2014/08/27 16:52:14 qiuh Exp $
+ * $Id: StPxlDb.h,v 1.9 2014/10/07 19:25:28 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.h,v $
+ * Revision 1.9  2014/10/07 19:25:28  smirnovd
+ * StPxlDbMaker/: Collected all debugging print statements into a single Print() which is called only when Debug2 option is specified
+ *
  * Revision 1.8  2014/08/27 16:52:14  qiuh
  * change pxlRowColumnStatus to pxlBadRowColumns to decrease DB szie
  *
@@ -126,8 +129,9 @@ public:
    void setThinPlateSpline(pxlSensorTps_st *pxlSensorTps); ///< create sensor thin plate spline functions and set their parameters
    void setPxlControl(pxlControl_st *pxlControl) {mPxlControl = pxlControl;}
 
+   virtual void Print(Option_t *opt = "") const;
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.8 2014/08/27 16:52:14 qiuh Exp $ built " __DATE__ " " __TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StPxlDb.h,v 1.9 2014/10/07 19:25:28 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
