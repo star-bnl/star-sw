@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.14 2014/08/27 16:52:14 qiuh Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.15 2014/10/07 19:25:28 smirnovd Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.15  2014/10/07 19:25:28  smirnovd
+ * StPxlDbMaker/: Collected all debugging print statements into a single Print() which is called only when Debug2 option is specified
+ *
  * Revision 1.14  2014/08/27 16:52:14  qiuh
  * change pxlRowColumnStatus to pxlBadRowColumns to decrease DB szie
  *
@@ -135,6 +138,9 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
       LOG_WARN << "ERROR: dataset does not contain tps table" << endm;
       return kStErr;
    }
+
+   if ( GetDebug() >= 2)
+      mPxlDb->Print();
 
    // finally write the data
    ToWhiteBoard("pxl_db", mPxlDb);

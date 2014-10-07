@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDb.cxx,v 1.7 2014/08/27 16:52:14 qiuh Exp $
+ * $Id: StPxlDb.cxx,v 1.8 2014/10/07 19:25:28 smirnovd Exp $
  *
  * Author: Qiu Hao, Jan 2014
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDb.cxx,v $
+ * Revision 1.8  2014/10/07 19:25:28  smirnovd
+ * StPxlDbMaker/: Collected all debugging print statements into a single Print() which is called only when Debug2 option is specified
+ *
  * Revision 1.7  2014/08/27 16:52:14  qiuh
  * change pxlRowColumnStatus to pxlBadRowColumns to decrease DB szie
  *
@@ -95,29 +98,19 @@ void StPxlDb::setGeoHMatrices(Survey_st **tables)
    mGeoHMatrixPxlOnPst.SetRotation(&PxlOnPst->r00);
    mGeoHMatrixPxlOnPst.SetTranslation(&PxlOnPst->t0);
 
-   mGeoHMatrixTpcOnGlobal->Print();
-   mGeoHMatrixIdsOnTpc.Print();
-   mGeoHMatrixPstOnIds.Print();
-   mGeoHMatrixPxlOnPst.Print();
-
-   LOG_INFO << "geoHMatrix pxl half on pxl: " << endm;
    for (Int_t t = 0; t < 2; t++, HalfOnPxl++) {
       mGeoHMatrixHalfOnPxl[HalfOnPxl->Id - 1].SetName(Form("halfOnPxl%03i", HalfOnPxl->Id));
       mGeoHMatrixHalfOnPxl[HalfOnPxl->Id - 1].SetRotation(&HalfOnPxl->r00);
       mGeoHMatrixHalfOnPxl[HalfOnPxl->Id - 1].SetTranslation(&HalfOnPxl->t0);
-      mGeoHMatrixHalfOnPxl[HalfOnPxl->Id - 1].Print();
    }
 
-   LOG_INFO << "geoHMatrix pxl sector on half: " << endm;
    for (int i = 0; i < kNumberOfPxlSectors; i++) {
       mGeoHMatrixSectorOnHalf[SectorsOnHalf->Id - 1].SetName(Form("sectorOnHalf%03i", SectorsOnHalf->Id));
       mGeoHMatrixSectorOnHalf[SectorsOnHalf->Id - 1].SetRotation(&SectorsOnHalf->r00);
       mGeoHMatrixSectorOnHalf[SectorsOnHalf->Id - 1].SetTranslation(&SectorsOnHalf->t0);
-      mGeoHMatrixSectorOnHalf[SectorsOnHalf->Id - 1].Print();
       SectorsOnHalf++;
    }
 
-   LOG_INFO << "geoHMatrix pxl ladder on sector: " << endm;
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++) {
          int iSector = (LaddersOnSectors->Id - 1) / kNumberOfPxlLaddersPerSector;
@@ -125,11 +118,9 @@ void StPxlDb::setGeoHMatrices(Survey_st **tables)
          mGeoHMatrixLadderOnSector[iSector][iLadder].SetName(Form("ladderOnSector%03i%03i", iSector + 1, iLadder + 1));
          mGeoHMatrixLadderOnSector[iSector][iLadder].SetRotation(&LaddersOnSectors->r00);
          mGeoHMatrixLadderOnSector[iSector][iLadder].SetTranslation(&LaddersOnSectors->t0);
-         mGeoHMatrixLadderOnSector[iSector][iLadder].Print();
          LaddersOnSectors++;
       }
 
-   LOG_INFO << "geoHMatrix pxl sensor on ladder: " << endm;
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
          for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
@@ -139,11 +130,9 @@ void StPxlDb::setGeoHMatrices(Survey_st **tables)
             mGeoHMatrixSensorOnLadder[i][j][k].SetName(Form("sensorOnLadder%03i%03i%03i", iSector + 1, iLadder + 1, iSensor + 1));
             mGeoHMatrixSensorOnLadder[iSector][iLadder][iSensor].SetRotation(&SensorsOnLadders->r00);
             mGeoHMatrixSensorOnLadder[iSector][iLadder][iSensor].SetTranslation(&SensorsOnLadders->t0);
-            mGeoHMatrixSensorOnLadder[iSector][iLadder][iSensor].Print();
             SensorsOnLadders++;
          }
 
-   LOG_INFO << "geoHMatrix pxl sensor on global: " << endm;
    for (int i = 0; i < kNumberOfPxlSectors; i++)
       for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
          for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
@@ -151,7 +140,6 @@ void StPxlDb::setGeoHMatrices(Survey_st **tables)
             mGeoHMatrixSensorOnGlobal[i][j][k] = (*mGeoHMatrixTpcOnGlobal) * mGeoHMatrixIdsOnTpc * mGeoHMatrixPstOnIds
                                                  * mGeoHMatrixPxlOnPst * mGeoHMatrixHalfOnPxl[i / 5] * mGeoHMatrixSectorOnHalf[i]
                                                  * mGeoHMatrixLadderOnSector[i][j] * mGeoHMatrixSensorOnLadder[i][j][k];
-            mGeoHMatrixSensorOnGlobal[i][j][k].Print();
          }
 
 }
@@ -231,4 +219,45 @@ void StPxlDb::setBadRowColumns(pxlBadRowColumns_st *badRowColumns)
         }
         else break;
     }
+}
+
+
+void StPxlDb::Print(Option_t *opt) const
+{
+   LOG_DEBUG << "Print all StPxlDb matrices:" << endm;
+
+   mGeoHMatrixTpcOnGlobal->Print();
+   mGeoHMatrixIdsOnTpc.Print();
+   mGeoHMatrixPstOnIds.Print();
+   mGeoHMatrixPxlOnPst.Print();
+
+   LOG_DEBUG << "geoHMatrix pxl half on pxl: " << endm;
+   for (int i = 0; i < 2; i++) {
+      mGeoHMatrixHalfOnPxl[i].Print();
+   }
+
+   LOG_DEBUG << "geoHMatrix pxl sector on half: " << endm;
+   for (int i = 0; i < kNumberOfPxlSectors; i++) {
+      mGeoHMatrixSectorOnHalf[i].Print();
+   }
+
+   LOG_DEBUG << "geoHMatrix pxl ladder on sector: " << endm;
+   for (int i = 0; i < kNumberOfPxlSectors; i++)
+      for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++) {
+         mGeoHMatrixLadderOnSector[i][j].Print();
+      }
+
+   LOG_DEBUG << "geoHMatrix pxl sensor on ladder: " << endm;
+   for (int i = 0; i < kNumberOfPxlSectors; i++)
+      for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
+         for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
+            mGeoHMatrixSensorOnLadder[i][j][k].Print();
+         }
+
+   LOG_DEBUG << "geoHMatrix pxl sensor on global: " << endm;
+   for (int i = 0; i < kNumberOfPxlSectors; i++)
+      for (int j = 0; j < kNumberOfPxlLaddersPerSector; j++)
+         for (int k = 0; k < kNumberOfPxlSensorsPerLadder; k++) {
+            mGeoHMatrixSensorOnGlobal[i][j][k].Print();
+         }
 }
