@@ -331,8 +331,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       LOG_DEBUG << "Current node : " << i << "/" << nVolumes << " path is : " << volumes[i].name << endm;
       LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
 
-      TGeoPhysicalNode *gnode = StiVMCToolKit::LoopOverNodes(geoNode, volumes[i].path, volumes[i].name, MakeAverageVolume);
-      if (gnode){};
+      StiVMCToolKit::LoopOverNodes(geoNode, volumes[i].path, volumes[i].name, MakeAverageVolume);
       TGeoVolume *gvolu = gGeoManager->FindVolumeFast(volumes[i].name);
       assert(gvolu);
 //      gWt = gvolu->Weight(0.01,"a"); gWtTot+=gWt; sWt = 0;
