@@ -48,6 +48,9 @@ namespace StiVMCToolKit {
   TGeoPhysicalNode *Alignment(const TGeoNode *nodeT,const Char_t *pathT, TGeoVolume *volT, 
         		      TGeoShape *newshape, TGeoMedium* newmed);
   TGeoPhysicalNode *LoopOverNodes(const TGeoNode *nodeT, const Char_t *pathT, const Char_t *name = 0, void ( *callback)(TGeoPhysicalNode *nodeP)=0);
+
+               int  LoopOverNodes(const TGeoNode *nodeT, const char *pathT,const char *name,int (*callBack)(const char*));
+	       
   void              TestVMC4Reconstruction();
   void              GetVMC4Reconstruction(const Char_t *pathT=0, const Char_t *nameT=0);
   Double_t          GetShapeVolume(TGeoShape *shape);
