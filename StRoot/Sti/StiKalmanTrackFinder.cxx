@@ -521,7 +521,6 @@ void StiKalmanTrackFinder::find(StiKalmanTrack * track, int direction
 {
 static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
-static int nFoundInDetLoop=0; 
 
 static const double degToRad = 3.1415927/180.;
 static const double radToDeg = 180./3.1415927;
@@ -658,8 +657,6 @@ static int activeNonActiveLoop = StiDebug::iFlag("activeNonActiveLoop");
       }
 
       foundInDetLoop = 1;		//activeNonActive
-
-nFoundInDetLoop++; StiDebug::Break(nFoundInDetLoop);
 
       if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
       assert(testNode.isValid());
