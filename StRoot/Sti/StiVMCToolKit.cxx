@@ -11,6 +11,7 @@
 #include "TSystem.h"
 #include "TMath.h"
 #include "TFile.h"
+#include "StiDetectorBuilder.h"
 #else
 #define BIT(n)       (1 << (n))
 #endif
@@ -863,8 +864,41 @@ TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *
   return nodeP;
 }
 //________________________________________________________________________________
+int StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const char *pathT
+                                 ,const char *name,int (*callBack)(const char*))
+{
+  int nTot=0;
+  TGeoVolume *volT = nodeT->GetVolume(); 
+  const char *nameT = volT->GetName();
+  if (nameT && name && ! strncmp(nameT,name,4)) {
+    int iErr = callBack(pathT);
+    nTot+= 1+iErr*1000;
+    return nTot;
+  }
+  Int_t nd = volT->GetNdaughters();
+  for (Int_t id = 0; id < nd; id++) {
+    TGeoNode *node = volT->GetNode(id);
+    assert (node);
+    TString path = pathT;
+    if (path != "") path += "/";
+    path += node->GetName();
+    if (! name && Debug()) {
+      cout << path;
+      TGeoVolume *vol = node->GetVolume(); 
+      const TGeoMedium   *med = vol->GetMedium(); 
+      if (med->GetParam(0)) {cout << "\t===================" << endl; continue;}
+      else                  cout << endl;
+    }
+    nTot += LoopOverNodes(node, path, name,callBack);
+  }
+  return nTot;
+}
+//________________________________________________________________________________
 TGeoPhysicalNode *StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const Char_t *pathT, 
 					       const Char_t *name,void ( *callback)(TGeoPhysicalNode *)){
+//  if (callback == &StiVMCToolKit::MakeAverageVolume) {};
+
+
   TGeoVolume *volT = nodeT->GetVolume(); 
   const Char_t *nameT = volT->GetName();
   TGeoPhysicalNode *nodeP = 0;
