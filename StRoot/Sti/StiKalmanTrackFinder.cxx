@@ -521,6 +521,7 @@ void StiKalmanTrackFinder::find(StiKalmanTrack * track, int direction
 {
 static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
+static int nFoundInDetLoop=0; 
 
 static const double degToRad = 3.1415927/180.;
 static const double radToDeg = 180./3.1415927;
@@ -541,7 +542,7 @@ static  const double ref1a  = 110.*degToRad;
 
   assert(leadNode->isValid());
   const StiDetector *leadDet = leadNode->getDetector();
-  leadRadius = leadDet->getPlacement()->getNormalRadius();
+  leadRadius = leadDet->getPlacement()->getLayerRadius();
   assert(leadRadius>0 && leadRadius<1000);
   if (leadRadius < qa.rmin) {gLevelOfFind--;return;}
   leadAngle  = leadDet->getPlacement()->getNormalRefAngle();
@@ -585,7 +586,7 @@ static  const double ref1a  = 110.*degToRad;
     {
        StiDetector * detector = (*sector)->getData();
        double angle  = detector->getPlacement()->getNormalRefAngle();
-       double radius = detector->getPlacement()->getNormalRadius();
+       double radius = detector->getPlacement()->getLayerRadius();
 static int myRadius = 0;
 if (myRadius) {
 static int nKount = 0; nKount++;
@@ -623,9 +624,21 @@ static int nKount = 0; nKount++;
     if (debug() > 2 && nDets==0) cout << "no detector of interest on this layer"<<endl;
     if (!nDets) continue;
     if (nDets>1) sort(detectors.begin(),detectors.end(),CloserAngle(projAngle) );
+
+//		There is additional loop. 1st loop for active only, second for non active
+    int foundInDetLoop = 0;
+static int activeNonActiveLoop = StiDebug::iFlag("activeNonActiveLoop");
+    if (!activeNonActiveLoop) foundInDetLoop = 1;
+//		
+    for (int nowActive=0; nowActive>=0; nowActive--) { //Additional activeNonActive loop
+
+
     for (vector<StiDetector*>::const_iterator d=detectors.begin();d!=detectors.end();++d)
     {
       tDet = *d;
+
+      if ((tDet->isActive() != nowActive) && ! foundInDetLoop ) continue;
+
       if (debug() > 2) {
 	cout << endl<< "target det:"<< *tDet;
 	cout << endl<< "lead angle:" << projAngle*radToDeg 
@@ -643,6 +656,11 @@ static int nKount = 0; nKount++;
 	if (debug() >= 1) StiKalmanTrackNode::PrintStep();
 	continue; // will try the next available volume on this layer
       }
+
+      foundInDetLoop = 1;		//activeNonActive
+
+nFoundInDetLoop++; StiDebug::Break(nFoundInDetLoop);
+
       if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
       assert(testNode.isValid());
       testNode.setDetector(tDet);
@@ -694,6 +712,14 @@ static int nKount = 0; nKount++;
         stiHit = hitCont.getHit(jHit);
 	StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
 	*node = testNode;
+        node->nudge();
+{
+if (node->getHit()==0) {
+    double rN = node->getDetector()->getPlacement()->getNormalRadius();
+    assert(node->getRxy()>=rN*0.999);
+}
+}
+
         status = 0;
         do {//fake do
           if (!stiHit) break;
@@ -720,6 +746,10 @@ static int nKount = 0; nKount++;
       }
       qa = qaBest; gLevelOfFind--; return;
     }//End Detectors
+
+    if (foundInDetLoop) break;		//activeNonActive
+    } //End of activeNonActive loop;
+
   }while(0);
   if(!direction){++rlayer;}else{++layer;}}
 //end layers
