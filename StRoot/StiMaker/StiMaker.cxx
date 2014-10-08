@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.217 2014/09/10 15:52:12 perev Exp $
+// $Id: StiMaker.cxx,v 1.218 2014/10/08 01:29:28 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -301,7 +301,7 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("usePixel"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
+      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel")));
       group->setGroupId(kPxlId);
     }
  if (IAttr("useIst"))
@@ -313,7 +313,7 @@ Int_t StiMaker::InitDetectors()
 //  if (IAttr("useBTof"))
 //     {
 //       cout<<"StiMaker::Init() -I- Adding detector group:BTof"<<endl;
-//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof"),SAttr("BTofInputFile")));
+//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof")));
 //       group->setGroupId(kBTofId);
 //     }
   return kStOk;
@@ -550,8 +550,11 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   }
   return fVolume;
 }
-// $Id: StiMaker.cxx,v 1.217 2014/09/10 15:52:12 perev Exp $
+// $Id: StiMaker.cxx,v 1.218 2014/10/08 01:29:28 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.218  2014/10/08 01:29:28  perev
+// Remove redundant inputFile
+//
 // Revision 1.217  2014/09/10 15:52:12  perev
 // Fix typo, StiSsdDetectorGroup ==> StiSsdDetectorGroup
 //
