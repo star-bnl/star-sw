@@ -148,11 +148,18 @@ StiDebug::Break(nCall);
 
 
 int sRho = (Rho<0) ? -1:1;
-double aRho = fabs(Rho),aR = 1./(aRho+1e-11), rr=r*r,d=0;
-TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
-TVector3 C,Cd,Cn,N;
+double aRho = fabs(Rho), rr=r*r,d=0;
+
+TVector3 D(Dp); D[2]=0.; D.SetMag(1.);	//Direction
+TVector3 N(-D[1],D[0],0.);		//Ort to direction
+TVector3 X(Xp); X[2]=0.;
+TVector3 C,Cd,Cn;
+int inSide = X.Perp()<r;
+//assert( inSide == dir);
+//if ( inSide != dir) return 0;
+
+
 double XX,XN,L;
-N[0] = -D[1]; N[1] = D[0];
 XX = X*X; XN = X*N;
 
 double LLmRR = XX*aRho+2*XN*sRho;
@@ -171,36 +178,39 @@ for (int ix = 0;ix<2; ix++) {
   Out[ix] = Cd*d + Cn*p; p = -p;
 }
 
+//		Calculate distance
 for (int ix = 0;ix<2; ix++) {
-  double len = (X-Out[ix]).Mag();
+  double len = (Out[ix]-X).Mag();
   if (len > 0.1*r) len = 2*r*asin(0.5*len*aRho);
-  
-
-  double tst = (X-Out[ix])*D;
-  if (dir) tst = -tst;
-  if (tst<0) len = M_PI*2*aR-len;
+  if ((Out[ix]-X).Dot(D)<0) len*=-1.;
   out[ix][2] = len; 
   out[ix][0] = Out[ix][0];
   out[ix][1] = Out[ix][1];
 }
-  if (out[0][2]>out[1][2]) { 	//wrong order
-    for (int j=0;j<3;j++)  { 
-      double t=out[0][j]; 
-      out[0][j] = out[1][j]; 
-      out[1][j] = t; 
-  } }
 
-
-
-  for (int i=0;i<2;i++) {
-//  printf("x=%g y=%g len=%g\n",out[i][0],out[i][1],out[i][2]);
-  double dif = (Out[i]*aRho-C).Mag()-1.;
-//  printf("SolAcc=%g\n",dif);
-  assert(fabs(dif)<1e3);
-  dif = (Out[i]).Mag()/r-1;
-//  printf("SolAcc=%g\n",dif);
-  assert(fabs(dif)<1e3);
+  int kase = 0;
+  if ((out[0][2]>0) == inSide) kase+=1;
+  if ((out[1][2]>0) == inSide) kase+=2;
+  if (fabs(out[0][2])<=fabs(out[1][2])) kase+=4;
+  switch (kase) {
+    case 0: return 0; 						//Everything is wrong
+    case 1: break;	      					//1st is the only good
+    case 2: memcpy(out[0],out[1],3*sizeof(out[0][0]));break;	//2nd is only good
+    case 3: memcpy(out[0],out[1],3*sizeof(out[0][0]));break;	//2nd is better
+    case 4: return 0; 						//Everything is wrong
+    case 5: break;						//1st is the only good 
+    case 6: memcpy(out[0],out[1],3*sizeof(out[0][0]));break;	//2nd is the only good 
+    case 7: break;						//1st is better
+    default: assert(0);
   }
+
+  for (int jk=0;jk<2;jk++) {
+    assert(fabs(Out[jk].Perp()-r)<1e-3*r);
+    TVector3 dif = (Out[jk]-X)*Rho;
+    double qwe = dif.Perp2()-2*dif.Dot(N);
+    assert( fabs(qwe) <1.e-4);
+  }
+
   return 2;
 }
 
@@ -271,7 +281,7 @@ StiNodeErrs &StiNodeErrs::merge(double wt,StiNodeErrs &other)
 {
    double wt0 = 1.-wt;
    for (int i=0;i<kNErrs;i++) {A[i] = wt0*A[i] + wt*other.A[i];}
-assert(sign()>0); ///??? 
+//assert(sign()>0); ///??? 
 
    return *this;
 }
@@ -331,8 +341,8 @@ void StiNodeErrs::recov()
 static int nCall = 0; nCall++;
 StiDebug::Break(nCall);
 
-  double s = sign(); ///??? 
-  if (s<0) printf("##################### StiNodeErrs::recov() sign=%g\n",s);
+//  double s = sign(); ///??? 
+//  if (s<0) printf("##################### StiNodeErrs::recov() sign=%g\n",s);
   int i0=1,li0=1,isMod=0;
   if (_cXX>0) {i0=0;li0=0;}
 
@@ -357,7 +367,7 @@ StiDebug::Break(nCall);
        A[li+j]/=corrMax;
    } } 
 
-assert(sign()>0); ///??? 
+//assert(sign()>0); ///??? 
 
 }
 //______________________________________________________________________________
@@ -373,7 +383,7 @@ void StiNodeErrs::print() const
 //______________________________________________________________________________
 int StiNodeErrs::check(const char *pri) const
 {
-assert(sign()>0); ///??? 
+//assert(sign()>0); ///??? 
   int i=-2008,j=2009,kase=0;
   double aii=-20091005,ajj=-20101005,aij=-20111005;
   int i0=0; if (!_cXX) i0 = 1;
@@ -407,7 +417,7 @@ RETN:
           break;
     case 3: LOG_DEBUG << Form("StiNodeErrs::check(%s) FAILED: Non Positive matrix",pri)<<endm;  
   }    
-assert(sign()>0); ///??? 
+//assert(sign()>0); ///??? 
   return kase;
 }  
 //____________________________________________________________
@@ -517,6 +527,7 @@ StiNodePars &StiNodePars::operator=(const StiNodePars &fr)
 {
   assert(fabs(fr._sinCA)<=1);
   assert(fabs(fr._cosCA)<=1);
+  assert(fabs(fr.hz())>0);
   memcpy (this,&fr,sizeof(fr));
   return *this;
 }
