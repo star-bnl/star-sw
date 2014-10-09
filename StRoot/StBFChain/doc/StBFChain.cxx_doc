@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.131 2014/08/08 17:11:20 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.132 2014/10/09 21:54:44 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1416,8 +1416,9 @@ Bfc_st BFC[] = {
    , "Bichsel method used for dEdx",kFALSE},
   {"btofMatch" ,"","","db,BTofUtil,vpdCalib,btofCalib","StBTofMatchMaker","StBTofMatchMaker"
    , "TPC-BTOF track matching",kFALSE},
-  {"btofCalib" ,"","","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker", "BTOF calibration",kFALSE},
-  {"mtdMatch" ,"","","db,MtdUtil","StMtdMatchMaker","StMtdMatchMaker" ,"TPC-MTD track matching",kFALSE},
+  {"btofCalib","","","db,BTofUtil", "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
+  {"mtdMatch" ,"","","db,MtdUtil", "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
+  {"mtdCalib" ,"","","db", "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed" ,"","globT,MuDSTDeps","StVertexSeedMaker"
    , "StPass0CalibMaker", "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
@@ -2924,8 +2925,9 @@ Bfc_st BFC[] = {
    , "Bichsel method used for dEdx",kFALSE},
   {"btofMatch" ,"","","db,BTofUtil,vpdCalib,btofCalib","StBTofMatchMaker","StBTofMatchMaker"
    , "TPC-BTOF track matching",kFALSE},
-  {"btofCalib" ,"","","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker", "BTOF calibration",kFALSE},
-  {"mtdMatch" ,"","","db,MtdUtil","StMtdMatchMaker","StMtdMatchMaker" ,"TPC-MTD track matching",kFALSE},
+  {"btofCalib","","","db,BTofUtil", "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
+  {"mtdMatch" ,"","","db,MtdUtil", "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
+  {"mtdCalib" ,"","","db", "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed" ,"","globT,MuDSTDeps","StVertexSeedMaker"
    , "StPass0CalibMaker", "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
@@ -3624,6 +3626,8 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("SpcChgCal") ||
 	   GetOption("SpcChgCalG"))   mk->SetMode(2);
       if ( GetOption("SCScalerCal") ) mk->SetMode(4);
+      if ( GetOption("EastOff"))      mk->SetAttr("EastOff",kTRUE);
+      if ( GetOption("WestOff"))      mk->SetAttr("WestOff",kTRUE);
     }
     if (maker == "StEventQAMaker" && GetOption("QAalltrigs"))
       ProcessLine(Form("((StEventQAMaker *) %p)->AllTriggers();",mk));
