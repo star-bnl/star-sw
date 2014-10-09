@@ -1562,8 +1562,11 @@ Bfc_st BFC[] = { // standard chains
   // second wave of BTOF options needed after Sti
   {"btofMatch" ,"","","db,BTofUtil,vpdCalib,btofCalib","StBTofMatchMaker","StBTofMatchMaker"
    ,                                                                      "TPC-BTOF track matching",kFALSE},
-  {"btofCalib"  ,"","","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker",      "BTOF calibration",kFALSE},
-  {"mtdMatch" ,"","","db,MtdUtil","StMtdMatchMaker","StMtdMatchMaker"     ,"TPC-MTD track matching",kFALSE},
+  {"btofCalib","","","db,BTofUtil",        "StBTofCalibMaker","StBTofCalibMaker","BTOF calibration",kFALSE},
+
+  {"mtdMatch" ,"","","db,MtdUtil",     "StMtdMatchMaker","StMtdMatchMaker","TPC-MTD track matching",kFALSE},
+  {"mtdCalib" ,"","","db",                    "StMtdCalibMaker","StMtdCalibMaker","MTD calibration",kFALSE},
+
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
