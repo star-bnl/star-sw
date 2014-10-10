@@ -865,7 +865,7 @@ TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *
 }
 //________________________________________________________________________________
 int StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const char *pathT
-                                 ,const char *name,int (*callBack)(const char*))
+                                 ,const char *name,int (*callBack)(const char*),int fst)
 {
   int nTot=0;
   TGeoVolume *volT = nodeT->GetVolume(); 
@@ -889,8 +889,16 @@ int StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const char *pathT
       if (med->GetParam(0)) {cout << "\t===================" << endl; continue;}
       else                  cout << endl;
     }
-    nTot += LoopOverNodes(node, path, name,callBack);
+    nTot += LoopOverNodes(node, path, name,callBack,0);
   }
+  if (fst) {
+    Info("LoopOverNodes","%d Volumes was averaged",nTot%1000);
+    int nt = nTot/1000;
+    if (nt%100) Error("LoopOverNodes","%d Volumes are sensitive",nt%100);
+    nt/=100;
+    if (nt%100) Error("LoopOverNodes","%d Volumes are MANY",nt%100);
+  }  
+
   return nTot;
 }
 //________________________________________________________________________________
