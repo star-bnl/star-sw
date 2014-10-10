@@ -45,7 +45,7 @@ inline float StiCylindricalShape::getHalfWidth() const
 inline double StiCylindricalShape::getVolume() const
 {
   double rmax = _outerRadius,rmin=rmax-getThickness();
-  return _openingAngle*(rmax-rmin)*(rmax+rmin)*getHalfDepth();
+  return _openingAngle*(getThickness())*(rmax+rmin)*getHalfDepth();
 }
 
 
