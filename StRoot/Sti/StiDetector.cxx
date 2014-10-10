@@ -2,6 +2,7 @@
 #include "Stiostream.h"
 #include <string>
 #include <map>
+#include "TError.h"
 #include "StiMaterial.h"
 #include "StiShape.h"
 #include "StiPlanarShape.h"
@@ -82,8 +83,8 @@ static int nCall=0; nCall++;
   if (iShape == kCylindrical)  nRadius = shape->getOuterRadius()-deltaX/2;
 
   if (nRadius < deltaX/2) {		// non splitable
-    printf("StiDetector::splitIt %s Non splitable Rnormal < thickness/2 %g %g\n"
-          ,getName().c_str(),nRadius,deltaX/2);
+    Warning("splitIt","%s Non splitable Rnormal < thickness/2 %g %g\n"
+           ,getName().c_str(),nRadius,deltaX/2);
     return 1;
   }
   int ny = deltaX/(halfY*2*dXdY)+0.5;
