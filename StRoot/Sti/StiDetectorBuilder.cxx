@@ -15,6 +15,7 @@
 #include "StThreeVectorD.hh"
 #include "TMath.h"
 #include "TVector3.h"
+#include "TGeoCone.h"
 
 StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 
@@ -100,20 +101,17 @@ StiShape * StiDetectorBuilder::add(StiShape *shape)
 //________________________________________________________________________________
 StiDetector * StiDetectorBuilder::add(UInt_t row, UInt_t sector, StiDetector *detector)
 {
+  assert(detector);
   setNSectors(row,sector+1);
   if (_detectors[row][sector]) {
-    printf("***ERROR*** StiDetectorBuilder::add(%d,%d,\"%s\") "
-          ,row,sector,detector->getName().c_str());
-    printf("  is replacing %s\n",_detectors[row][sector]->getName().c_str());
-    assert( !_detectors[row][sector]);
+  Error("StiDetectorBuilder::add()","%s(%d,%d) == %s"
+       ,getName().c_str(),row,sector,detector->getName().c_str());
+
+  Error("StiDetectorBuilder::add()","is replacing by %s"
+       ,detector->getName().c_str());
+//    assert( !_detectors[row][sector]);
   }  
   _detectors[row][sector] = detector;
-  if (_debug ) {
-    cout << "StiDetectorBuilder::add(" << row << "," << sector << ") detector ";
-    if (detector) cout << detector->getName();
-    else          cout << " NULL ??";
-    cout <<endl;
-  }
   return add(detector);
 }
 
@@ -126,8 +124,8 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   NameMapKey key(detector->getName());
   StiDetector *old = findDetector(detector->getName());
   if (old ) {
-    cout << "StiDetectorBuilder::add(" << detector << old << "existing with the same name " << detector->getName() <<endl;
-    assert(0);
+  Error("StiDetectorBuilder::add()","Clash of the name %s",detector->getName().c_str());
+//    assert(0);
   }
   mDetectorMap.insert( detectorMapValType(key, detector) );
   //complete the building of this detector element
@@ -177,14 +175,6 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
 {
   if (debug()) {cout << "StiDetectorBuilder::AverageVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;}
   TGeoVolume   *volP   = nodeP->GetVolume();
-  TGeoVolume   *volM   = gGeoManager->FindVolumeFast(volP->GetName());
-
-//  double wtP = volP->Weight(0.01,"a");
-//  double wtM = volM->Weight(0.01,"a");
-  StiAuxMat aux;
-  AveMate(volM,aux);
-//  assert(fabs(wtP-wtM)<1e-2*wtM);
-
 
   TGeoMaterial *matP   = volP->GetMaterial(); if (debug()) matP->Print("");
   TGeoShape    *shapeP = nodeP->GetShape();   if (debug()) {cout << "New Shape\t"; StiVMCToolKit::PrintShape(shapeP);}
@@ -315,16 +305,6 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
   pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
   pDetector->setMaterial(matS);
  
-//   double sWt = pDetector->getWeight()*1e-3;
-//   double gWt = volP->Weight(0.01,"a"),aWt=gWt;
-//   if (fabs(gWt-sWt)>0.1*gWt)  gWt = volP->Weight(0.01,"");
-//   if (fabs(gWt-sWt)>0.1*gWt) {		//Weights are different
-//     printf("\nStiDetectorBuilder::AverageVolume(WrongWeight) *************************\n");
-//     printf("TGeo Aweight = %g kg name=%s\n",aWt,volP->GetName());
-//     printf("TGeo Rweight = %g kg name=%s\n",gWt,volP->GetName());
-//     printf("Sti   weight = %g kg name=%s\n",sWt,pDetector->getName().c_str());
-//     printf("Sti   Volume = %g li \n",pDetector->getVolume()*1e-3);
-//}
   if (mThkSplit>0 && mMaxSplit>1) {//	try to split 
     StiDetVect dv;
     pDetector->splitIt(dv,mThkSplit,mMaxSplit);
@@ -357,13 +337,13 @@ static int nCall=0; nCall++;
   StiShape *shapeS = 0; StiPlacement *placeS=new StiPlacement;
 
   StiAuxMat aux;
-  AveMate(volu,aux);
+  int iAns =  AveMate(volu,aux);
+//  assert(iAns<1000);
   TVector3 local,global;
   double zMin,zMax,rMin,rMax,phiMin,phiMax;
   shapeG->GetAxisRange(3,zMin,zMax);
   local[2] = 0.5*(zMin+zMax);
   gGeoManager->LocalToMaster(&local[0],&global[0]);
-
   do {//only once
     if (!shapeG->IsCylType())		break;
     double zLoc[3]={0,0,1},zGlo[3];
@@ -387,6 +367,7 @@ static int nCall=0; nCall++;
     double dPhi = phiMax-phiMin; 
     if (dPhi<  0) dPhi+=360;
     if (dPhi>360) dPhi-=360;
+
     dPhi*=TMath::DegToRad();
     double phi = (phiMax+phiMin)/2*TMath::DegToRad();
 
@@ -402,6 +383,8 @@ static int nCall=0; nCall++;
     placeS->setLayerAngle(phi);
     placeS->setRegion(StiPlacement::kMidRapidity);
     placeS->setNormalRep(phi,(rMin+rMax)/2, 0); 
+    
+
   } while(0);
 
 
@@ -457,15 +440,18 @@ static int nCall=0; nCall++;
     for (int i=0;i<8;i++) {
       for (int j=0;j<3;j++) {
         double dot = gorner[i].Dot(eig[j]);
-        if (miMax[j][0]>dot) miMax[j][0]=dot;
-        if (miMax[j][1]<dot) miMax[j][1]=dot;
+        if (miMax[0][j]>dot) miMax[0][j]=dot;
+        if (miMax[1][j]<dot) miMax[1][j]=dot;
     } }
 
+    double dZ = (miMax[1][2]-miMax[0][2]); assert(fabs(dZ)<1e3);
+    double dY = (miMax[1][1]-miMax[0][1]); assert(fabs(dY)<1e3);
+    double dX = (miMax[1][0]-miMax[0][0]); assert(fabs(dX)<1e3);
 
     shapeS = new StiPlanarShape(volu->GetName(), 
-                           (miMax[2][1]-miMax[2][0])/2,		//dZ/2
-			   (miMax[0][1]-miMax[0][0]),		//thickness(dX)
-                           (miMax[1][1]-miMax[1][0])/2);	//dY/2
+                           dZ/2,	//dZ/2
+			   dX,		//thickness(dX)
+                           dY/2);	//dY/2
 
     placeS->setZcenter(global[2]);
     placeS->setLayerRadius(global.Perp());
@@ -478,6 +464,9 @@ static int nCall=0; nCall++;
  
   double gVolu = shapeG->Capacity();
   double sVolu = shapeS->getVolume();
+  assert(sVolu > 0.99*gVolu);
+  assert(sVolu <  1e3 *gVolu);
+
   TGeoMaterial *mateP = volu->GetMaterial();
   StiMaterial *mateS = new StiMaterial(mateP->GetName(),
 					      aux.Z,
@@ -512,7 +501,7 @@ static int nCall=0; nCall++;
    add(layer,0,pDetector); 
    cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
   }
-  return 0;
+  return iAns;
 
 }
 
@@ -573,23 +562,38 @@ static void eigen2(double G[3], double lam[2], double eig[2])
 assert(!_detectors[row][sector]);
    _detectors[row][sector] = detector;
 }
+//_____________________________________________________________________________
+
+static int IsSensitive(const TGeoVolume *volu)
+{
+  const TGeoMedium *tm = volu->GetMedium();
+  if (!tm) return 0;
+  return (tm->GetParam(0)>0.);
+}
+
+
 
 //_____________________________________________________________________________
-void StiDetectorBuilder::AveMate(TGeoVolume *vol,StiAuxMat &aux) 
+int StiDetectorBuilder::AveMate(TGeoVolume *vol,StiAuxMat &aux) 
 {
 // Analytical computation of the average material.
    double capacity = vol->Capacity();
    double capaOnly = capacity;
    int nd = vol->GetNdaughters();
-   TGeoVolume *daughter;
+   TGeoVolume *daughterV;
+   TGeoNode   *daughterN;
    double sumA=0,sumZ=0,sumX0=0,sumWt=0;
-
+   int iAns = 0;
    for (int i=0; i<nd; i++) {
-      daughter = vol->GetNode(i)->GetVolume();
-      double dauCapa = daughter->Capacity();
+      daughterN = vol->GetNode(i);
+      daughterV = daughterN->GetVolume();
+      iAns++;
+      if (IsSensitive(daughterV)) 	iAns+=1000;
+      if (daughterN->IsOverlapping()) 	iAns+=100000;
+      double dauCapa = daughterV->Capacity();
       capaOnly -= dauCapa;
       StiAuxMat dauMat;
-      AveMate(daughter,dauMat);
+      iAns+=AveMate(daughterV,dauMat);
       if (dauMat.Z<=0) continue;
       sumWt += dauMat.Wt;
       sumA  += dauMat.Wt/dauMat.A;
@@ -612,5 +616,6 @@ void StiDetectorBuilder::AveMate(TGeoVolume *vol,StiAuxMat &aux)
    aux.A    = aux.Wt/(wtOnly/Aonly+sumA);
    aux.Z  = (wtOnly*(Zonly/Aonly)+sumZ)/aux.Wt *aux.A;
    aux.X0 = capacity/(capaOnly/X0only+sumX0); 
+   return iAns;
 }
 
