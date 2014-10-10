@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.143 2014/10/08 00:57:51 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.144 2014/10/10 21:34:36 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.144  2014/10/10 21:34:36  perev
+ * check for cos>1 adde
+ *
  * Revision 2.143  2014/10/08 00:57:51  perev
  * Assert added for tubes Rxy == Rnormal (bug #2915)
  * Check for Hz, Hz==>fabs(Hz) to account negative Hz
@@ -1097,7 +1100,8 @@ StiDebug::StiDebug::Break(nCall);
   mFP.hz()      = getHz();
   if (fabs(mFP.hz()) > 1e-10) 	{ mFP.curv() = mFP.hz()*mFP.ptin();}
   else 				{ mFP.curv() = 1e-6 ;}
-
+  if (fabs(mFP._cosCA)>0.999) mFP.ready();
+  if (fabs(mFP._sinCA)>0.999) mFP.ready();
   mPP() = mFP;
   _state = kTNProEnd;
   return ians;
