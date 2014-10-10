@@ -59,11 +59,6 @@ void StiDetectorContainer::initialize()
     {
     string name = (*bIter)->getName();
     //cout << "Detector:"<< name<<endl;
-//     if(name.find("Tpc")==name.npos)
-//       {
-//       cout <<"StiDetectorContainer::initialize() -I- Skipping group: "<<name<<endl;
-//       continue;
-//       }
     int nRows = (*bIter)->getNRows();
     for (int row=0;row<nRows;row++)
       {
@@ -71,7 +66,11 @@ void StiDetectorContainer::initialize()
       for (int sector=0; sector<nSectors; sector++)
         {
         StiDetector* detector = (*bIter)->getDetector(row,sector);
-        if (!detector) throw runtime_error("StiDetectorContainer::build() -F- detector==0 ");
+//        if (!detector) throw runtime_error("StiDetectorContainer::build() -F- detector==0 ");
+        if (!detector){ 
+          Warning("StiDetectorContainer::initialize() %s(%d,%d)=0",name.c_str(),row,sector);
+          continue;
+	}
         if (detector->isActive()) 
 	  add(detector);
 //        else 
@@ -332,12 +331,6 @@ StiDetectorContainer::build(StiDetectorBuilder * builder)
   return;
 }
 
-/*
- void StiDetectorContainer::print() const
- {
-   RecursiveStreamNode<StiDetector> myStreamer;
-   myStreamer( mroot );
- }*/
 
 //We assume that the node is a leaf in phi
 void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)
