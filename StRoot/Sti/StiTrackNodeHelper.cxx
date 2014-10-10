@@ -666,7 +666,7 @@ static const int keepElossBug = StiDebug::iFlag("keepElossBug");
 assert(pt<1e3);
   double relRadThickness;
   // Half path length in previous node
-  double pL1,pL2,pL3,d1,d2,d3,dxEloss,dx;
+  double pL1,pL2,pL3,d1=0,d2=0,d3=0,dxEloss,dx;
   pL1=0.5*pathIn(mParentNode->getDetector(),&mBestParentPars);
   // Half path length in this node
   pL3=0.5*pathIn(mDetector,&mBestPars);
@@ -802,9 +802,8 @@ if (fabs(mMcs._ptinCorr)>1e-4) {
   if (gasMat) {
     x0Gas = gasMat->getX0();
     const StiElossCalculator	*gasLos = gasMat->getElossCalculator();
-    if (gasLos) {
-      d2 = gasLos->calculate(1.,m, beta2);
-  } }
+    d2 = (gasLos)? gasLos->calculate(1.,m, beta2):0 ;
+  } 
 
 
   pL2=pL2-pL1-pL3; if (pL2<0) pL2=0;
