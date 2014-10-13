@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.h,v 1.10 2014/10/13 22:28:11 smirnovd Exp $ */
+/* $Id: StIstHitMaker.h,v 1.11 2014/10/13 22:28:18 smirnovd Exp $ */
 
 #ifndef StIstHitMaker_hh
 #define StIstHitMaker_hh
@@ -23,14 +23,14 @@ public:
    Int_t Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.10 2014/10/13 22:28:11 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.11 2014/10/13 22:28:18 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 protected:
    THashList *listGeoMSensorOnGlobal;
    StIstDb *mIstDb;
 
 private:
-   ClassDef(StIstHitMaker, 1);
+   ClassDef(StIstHitMaker, 0);
 };
 #endif
 
@@ -38,6 +38,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
+* Revision 1.11  2014/10/13 22:28:18  smirnovd
+* Do not use automatic ROOT I/O as this is a StMaker. Makers are not persistent
+*
 * Revision 1.10  2014/10/13 22:28:11  smirnovd
 * Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
 *
