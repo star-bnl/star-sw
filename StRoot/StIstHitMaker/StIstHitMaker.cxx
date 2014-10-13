@@ -1,59 +1,4 @@
-/***************************************************************************
-*
-* $Id: StIstHitMaker.cxx,v 1.16 2014/08/14 00:49:10 smirnovd Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description: 
-* See header file.
-****************************************************************************
-*
-* $Log: StIstHitMaker.cxx,v $
-* Revision 1.16  2014/08/14 00:49:10  smirnovd
-* StIstHitMaker: Changed the logic in Make(). Don't create a new StEvent if it is not found in the chain, issue an error instead
-*
-* Revision 1.15  2014/08/12 23:08:09  ypwang
-* remove the cluster number cut per ladder, due to chip occupancy cut was added in raw hit maker which can do the bad column rejection
-*
-* Revision 1.14  2014/08/06 18:56:53  ypwang
-* minor update due to coding style update of the StIstDb method
-*
-* Revision 1.13  2014/07/29 20:13:31  ypwang
-* update the IST DB obtain method
-*
-* Revision 1.12  2014/06/27 21:31:40  ypwang
-* remove data member istHitCollection and related Clear() function
-*
-* Revision 1.11  2014/03/25 03:06:53  ypwang
-* updates on Db table accessory method
-*
-* Revision 1.10  2014/03/24 15:55:08  ypwang
-* minor updates due to returned const pointers in StIstDbMaker
-*
-* Revision 1.9  2014/03/18 02:30:25  ypwang
-* minor typo error correction
-*
-* Revision 1.8  2014/03/17 21:41:49  ypwang
-* update to process hit from cluster collection or existed hit collection
-*
-* Revision 1.7  2014/02/26 01:39:27  ypwang
-* minor updates on hit local position setting: meanColumn/meanRow transform to local position here
-*
-* Revision 1.6  2014/02/25 17:10:55  ypwang
-* minor update due to mClusteringType moved to StIstHitCollection
-*
-* Revision 1.5  2014/02/14 14:47:20  ypwang
-* update due to removal of getNumLadders() member function from StIstCollection
-*
-* Revision 1.4  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstHitMaker.cxx,v 1.0
-* Revision 1.0 2013/11/04 16:05:30 Yaping
-* Initial version
-****************************************************************************/
+/* $Id: StIstHitMaker.cxx,v 1.17 2014/10/13 22:21:56 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
@@ -215,3 +160,56 @@ Int_t StIstHitMaker::Make()
     return ierr;
 };
 ClassImp(StIstHitMaker);
+
+
+/***************************************************************************
+*
+* $Log: StIstHitMaker.cxx,v $
+* Revision 1.17  2014/10/13 22:21:56  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
+* Revision 1.16  2014/08/14 00:49:10  smirnovd
+* StIstHitMaker: Changed the logic in Make(). Don't create a new StEvent if it is not found in the chain, issue an error instead
+*
+* Revision 1.15  2014/08/12 23:08:09  ypwang
+* remove the cluster number cut per ladder, due to chip occupancy cut was added in raw hit maker which can do the bad column rejection
+*
+* Revision 1.14  2014/08/06 18:56:53  ypwang
+* minor update due to coding style update of the StIstDb method
+*
+* Revision 1.13  2014/07/29 20:13:31  ypwang
+* update the IST DB obtain method
+*
+* Revision 1.12  2014/06/27 21:31:40  ypwang
+* remove data member istHitCollection and related Clear() function
+*
+* Revision 1.11  2014/03/25 03:06:53  ypwang
+* updates on Db table accessory method
+*
+* Revision 1.10  2014/03/24 15:55:08  ypwang
+* minor updates due to returned const pointers in StIstDbMaker
+*
+* Revision 1.9  2014/03/18 02:30:25  ypwang
+* minor typo error correction
+*
+* Revision 1.8  2014/03/17 21:41:49  ypwang
+* update to process hit from cluster collection or existed hit collection
+*
+* Revision 1.7  2014/02/26 01:39:27  ypwang
+* minor updates on hit local position setting: meanColumn/meanRow transform to local position here
+*
+* Revision 1.6  2014/02/25 17:10:55  ypwang
+* minor update due to mClusteringType moved to StIstHitCollection
+*
+* Revision 1.5  2014/02/14 14:47:20  ypwang
+* update due to removal of getNumLadders() member function from StIstCollection
+*
+* Revision 1.4  2014/02/08 03:34:16  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstHitMaker.cxx,v 1.0
+* Revision 1.0 2013/11/04 16:05:30 Yaping
+* Initial version
+****************************************************************************/
