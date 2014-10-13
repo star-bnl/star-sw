@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.h,v 1.13 2014/10/13 22:32:57 smirnovd Exp $ */
+/* $Id: StIstHitMaker.h,v 1.14 2014/10/13 22:33:04 smirnovd Exp $ */
 
 #ifndef StIstHitMaker_hh
 #define StIstHitMaker_hh
@@ -17,26 +17,30 @@ class THashList;
 class StIstHitMaker : public StMaker
 {
 public:
+
    StIstHitMaker( const char *name = "ist_hit" );
    Int_t InitRun(Int_t runnumber);
    Int_t Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.13 2014/10/13 22:32:57 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.14 2014/10/13 22:33:04 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 protected:
 
    THashList *mSensorTransforms; ///< A list of TGeo transformations for each IST sensor
 
-private:
    ClassDef(StIstHitMaker, 0);
 };
+
 #endif
 
 
 /***************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
+* Revision 1.14  2014/10/13 22:33:04  smirnovd
+* Minor adjustments to the code and comments
+*
 * Revision 1.13  2014/10/13 22:32:57  smirnovd
 * StIstHitMaker: Renamed data member to more meaningful name conforming with STAR style
 *

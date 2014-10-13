@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.cxx,v 1.21 2014/10/13 22:32:57 smirnovd Exp $ */
+/* $Id: StIstHitMaker.cxx,v 1.22 2014/10/13 22:33:04 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
@@ -21,17 +21,17 @@
 #include "StRoot/StIstDbMaker/StIstDb.h"
 #include "tables/St_istControl_Table.h"
 
+ClassImp(StIstHitMaker);
+
+
 StIstHitMaker::StIstHitMaker( const char *name ) : StMaker(name), mSensorTransforms(0)
 {
-   /* no op */
-};
+}
 
 
 Int_t StIstHitMaker::InitRun(Int_t runnumber)
 {
-   Int_t ierr = kStOk;
-
-   TObjectSet *istDbDataSet = (TObjectSet *)GetDataSet("ist_db");
+   TObjectSet *istDbDataSet = (TObjectSet*) GetDataSet("ist_db");
    StIstDb    *istDb = 0;
 
    if (istDbDataSet) {
@@ -46,15 +46,16 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
    // geometry Db tables
    mSensorTransforms = istDb->getRotations();
 
-   return ierr;
-};
+   return kStOk;
+}
+
 
 Int_t StIstHitMaker::Make()
 {
    Int_t ierr = kStOk;
 
    //obtain hit collection
-   StEvent *eventPtr = (StEvent *)GetDataSet("StEvent");
+   StEvent *eventPtr = (StEvent*) GetDataSet("StEvent");
 
    if (!eventPtr) {
       LOG_ERROR << "StIstHitMaker::Make(): No StEvent found in the chain. Cannot proceed" << endm;
@@ -65,11 +66,11 @@ Int_t StIstHitMaker::Make()
    StIstHitCollection *istHitCollection = eventPtr->istHitCollection();
 
    //input clusters info.
-   TObjectSet *istDataSet = (TObjectSet *)GetDataSet("istRawHitAndCluster");
+   TObjectSet *istDataSet = (TObjectSet*) GetDataSet("istRawHitAndCluster");
    StIstCollection *istCollectionPtr = 0;
 
    if (istDataSet) {
-      istCollectionPtr = (StIstCollection *)istDataSet->GetObject();
+      istCollectionPtr = (StIstCollection*) istDataSet->GetObject();
    }
 
    if ( !istCollectionPtr && !istHitCollection ) {
@@ -105,19 +106,20 @@ Int_t StIstHitMaker::Make()
             unsigned char  maxTb = -1;
             int	 key = -1;
 
-            for (std::vector< StIstCluster * >::iterator clusterIter = clusterCollectionPtr->getClusterVec().begin(); clusterIter != clusterCollectionPtr->getClusterVec().end(); ++clusterIter)   {
-               idTruth 	= (*clusterIter)->getIdTruth();
-               key		= (*clusterIter)->getKey();
-               ladder  	= (*clusterIter)->getLadder();
-               sensor  	= (*clusterIter)->getSensor();
-               meanRow 	= (*clusterIter)->getMeanRow();
-               meanColumn 	= (*clusterIter)->getMeanColumn();
-               maxTb 	= (*clusterIter)->getMaxTimeBin();
-               charge      = (*clusterIter)->getTotCharge();
-               chargeErr	= (*clusterIter)->getTotChargeErr();
-               nRawHits 	= (*clusterIter)->getNRawHits();
-               nRawHitsZ 	= (*clusterIter)->getNRawHitsZ();
-               nRawHitsRPhi = (*clusterIter)->getNRawHitsRPhi();
+            for (std::vector< StIstCluster * >::iterator clusterIter = clusterCollectionPtr->getClusterVec().begin(); clusterIter != clusterCollectionPtr->getClusterVec().end(); ++clusterIter)
+            {
+               idTruth         = (*clusterIter)->getIdTruth();
+               key             = (*clusterIter)->getKey();
+               ladder          = (*clusterIter)->getLadder();
+               sensor          = (*clusterIter)->getSensor();
+               meanRow         = (*clusterIter)->getMeanRow();
+               meanColumn      = (*clusterIter)->getMeanColumn();
+               maxTb           = (*clusterIter)->getMaxTimeBin();
+               charge          = (*clusterIter)->getTotCharge();
+               chargeErr       = (*clusterIter)->getTotChargeErr();
+               nRawHits        = (*clusterIter)->getNRawHits();
+               nRawHitsZ       = (*clusterIter)->getNRawHitsZ();
+               nRawHitsRPhi    = (*clusterIter)->getNRawHitsRPhi();
                nClusteringType = (*clusterIter)->getClusteringType();
 
                StIstHit *newHit = new StIstHit(ladder, sensor, charge, chargeErr, maxTb, nRawHits, nRawHitsZ, nRawHitsRPhi);
@@ -137,10 +139,12 @@ Int_t StIstHitMaker::Make()
          //set global position
          StIstLadderHitCollection *ladderHitCollection = istHitCollection->ladder(ladderIdx);
 
-         for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++) {
+         for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
+         {
             StIstSensorHitCollection *sensorHitCollection = ladderHitCollection->sensor(sensorIdx);
 
-            for (int idx = 0; idx < (int)sensorHitCollection->hits().size(); idx++ ) {
+            for (int idx = 0; idx < (int) sensorHitCollection->hits().size(); idx++ )
+            {
                StIstHit *newHit = sensorHitCollection->hits()[idx];
                double local[3];
                double global[3];
@@ -161,13 +165,15 @@ Int_t StIstHitMaker::Make()
    } //ierr
 
    return ierr;
-};
-ClassImp(StIstHitMaker);
+}
 
 
 /***************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.22  2014/10/13 22:33:04  smirnovd
+* Minor adjustments to the code and comments
+*
 * Revision 1.21  2014/10/13 22:32:57  smirnovd
 * StIstHitMaker: Renamed data member to more meaningful name conforming with STAR style
 *
