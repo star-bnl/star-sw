@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.cxx,v 1.19 2014/10/13 22:28:11 smirnovd Exp $ */
+/* $Id: StIstHitMaker.cxx,v 1.20 2014/10/13 22:28:24 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
@@ -21,7 +21,7 @@
 #include "StRoot/StIstDbMaker/StIstDb.h"
 #include "tables/St_istControl_Table.h"
 
-StIstHitMaker::StIstHitMaker( const char *name ) : StMaker(name), listGeoMSensorOnGlobal(0), mIstDb(0)
+StIstHitMaker::StIstHitMaker( const char *name ) : StMaker(name), listGeoMSensorOnGlobal(0)
 {
    /* no op */
 };
@@ -32,10 +32,11 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
    Int_t ierr = kStOk;
 
    TObjectSet *istDbDataSet = (TObjectSet *)GetDataSet("ist_db");
+   StIstDb    *istDb = 0;
 
    if (istDbDataSet) {
-      mIstDb = (StIstDb *)istDbDataSet->GetObject();
-      assert(mIstDb);
+      istDb = (StIstDb*) istDbDataSet->GetObject();
+      assert(istDb);
    }
    else {
       LOG_ERROR << "InitRun : no istDb" << endm;
@@ -43,7 +44,7 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
    }
 
    // geometry Db tables
-   listGeoMSensorOnGlobal = mIstDb->getRotations();
+   listGeoMSensorOnGlobal = istDb->getRotations();
 
    return ierr;
 };
@@ -148,7 +149,7 @@ Int_t StIstHitMaker::Make()
                local[2] = newHit->localPosition(2);
 
                int sensorId = 1000 + ((int)newHit->getLadder() - 1) * kIstNumSensorsPerLadder + (int)newHit->getSensor();
-               TGeoHMatrix *geoMSensorOnGlobal = (TGeoHMatrix *)listGeoMSensorOnGlobal->FindObject(Form("R%04i", sensorId));
+               TGeoHMatrix *geoMSensorOnGlobal = (TGeoHMatrix *) mSensorTransforms->FindObject(Form("R%04i", sensorId));
                geoMSensorOnGlobal->LocalToMaster(local, global);
                StThreeVectorF vecGlobal(global);
                newHit->setPosition(vecGlobal); //set global position
@@ -167,6 +168,9 @@ ClassImp(StIstHitMaker);
 /***************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.20  2014/10/13 22:28:24  smirnovd
+* StIstHitMaker: Use local pointer to StIstDb. No need to have a data member
+*
 * Revision 1.19  2014/10/13 22:28:11  smirnovd
 * Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
 *
