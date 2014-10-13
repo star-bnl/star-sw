@@ -1,11 +1,10 @@
-/* $Id: StIstHitMaker.h,v 1.11 2014/10/13 22:28:18 smirnovd Exp $ */
+/* $Id: StIstHitMaker.h,v 1.12 2014/10/13 22:28:24 smirnovd Exp $ */
 
 #ifndef StIstHitMaker_hh
 #define StIstHitMaker_hh
 
 #include "StMaker.h"
 
-class StIstDb;
 class THashList;
 
 
@@ -23,11 +22,10 @@ public:
    Int_t Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.11 2014/10/13 22:28:18 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.12 2014/10/13 22:28:24 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 protected:
    THashList *listGeoMSensorOnGlobal;
-   StIstDb *mIstDb;
 
 private:
    ClassDef(StIstHitMaker, 0);
@@ -38,6 +36,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
+* Revision 1.12  2014/10/13 22:28:24  smirnovd
+* StIstHitMaker: Use local pointer to StIstDb. No need to have a data member
+*
 * Revision 1.11  2014/10/13 22:28:18  smirnovd
 * Do not use automatic ROOT I/O as this is a StMaker. Makers are not persistent
 *
