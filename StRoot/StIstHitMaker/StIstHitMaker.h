@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.h,v 1.8 2014/10/13 22:21:56 smirnovd Exp $ */
+/* $Id: StIstHitMaker.h,v 1.9 2014/10/13 22:28:03 smirnovd Exp $ */
 
 #ifndef StIstHitMaker_hh
 #define StIstHitMaker_hh
@@ -17,21 +17,21 @@ class THashList;
  */
 class StIstHitMaker : public StMaker
 {
- public:
-  StIstHitMaker( const char* name="ist_hit" );
-  Int_t Init();
-  Int_t InitRun(Int_t runnumber);
-  Int_t Make();
+public:
+   StIstHitMaker( const char *name = "ist_hit" );
+   Int_t Init();
+   Int_t InitRun(Int_t runnumber);
+   Int_t Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.8 2014/10/13 22:21:56 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.9 2014/10/13 22:28:03 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
- protected:
-  THashList *listGeoMSensorOnGlobal;
-  StIstDb *mIstDb;
+protected:
+   THashList *listGeoMSensorOnGlobal;
+   StIstDb *mIstDb;
 
- private:
-  ClassDef(StIstHitMaker,1);
+private:
+   ClassDef(StIstHitMaker, 1);
 };
 #endif
 
@@ -39,6 +39,9 @@ class StIstHitMaker : public StMaker
 /***************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
+* Revision 1.9  2014/10/13 22:28:03  smirnovd
+* StIstHitMaker: Corrected style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
 * Revision 1.8  2014/10/13 22:21:56  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *
