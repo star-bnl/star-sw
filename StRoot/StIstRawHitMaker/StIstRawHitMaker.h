@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.h,v 1.13 2014/09/17 20:33:32 smirnovd Exp $
+* $Id: StIstRawHitMaker.h,v 1.14 2014/10/13 22:33:05 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -46,7 +46,7 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.13 2014/09/17 20:33:32 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.14 2014/10/13 22:33:05 smirnovd Exp $ built "__DATE__" "__TIME__ ;
       return cvs;
    }
 
@@ -60,21 +60,15 @@ protected:
 
    StIstCollection *mIstCollectionPtr;
 
-   // common mode noise
-   std::vector< float > mCmnVec; //APV chip geom. index, CM noise
-   // pedestal
-   std::vector< float > mPedVec; //Channel elec. index, pedestal
-   // RMS noise
-   std::vector< float > mRmsVec; //Channel elec. index, RMS noise
-   // gain
-   std::vector< float > mGainVec; //Channel elec. index, gain
-   // mapping
-   std::vector< int > mMappingVec; //Channel elec. index, geometry ID
-   // chip configuration status
-   std::vector< unsigned char > mConfigVec; //APV chip geom. index, configuration status
+   std::vector< float > mCmnVec; ///< APV chip geom. index, common mode (CM) noise
+   std::vector< float > mPedVec; ///< Channel elec. index, pedestal
+   std::vector< float > mRmsVec; ///< Channel elec. index, RMS noise
+   std::vector< float > mGainVec; ///< Channel elec. index, gain
+   std::vector< int > mMappingVec; ///< Channel elec. index to geometry ID mapping
+   std::vector< unsigned char > mConfigVec; ///< APV chip configuration status indexed by geom. id
 
 private:
-   Int_t mDataType; //!  0=all, 1=adc only, 2=zs only
+   Int_t mDataType; ///<  0=all, 1=adc only, 2=zs only
 
    ClassDef(StIstRawHitMaker, 0);
 };
@@ -85,6 +79,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.h,v $
+* Revision 1.14  2014/10/13 22:33:05  smirnovd
+* Minor adjustments to the code and comments
+*
 * Revision 1.13  2014/09/17 20:33:32  smirnovd
 * Squashed commit of the following:
 *
