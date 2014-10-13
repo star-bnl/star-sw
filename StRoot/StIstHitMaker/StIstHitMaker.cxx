@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.cxx,v 1.20 2014/10/13 22:28:24 smirnovd Exp $ */
+/* $Id: StIstHitMaker.cxx,v 1.21 2014/10/13 22:32:57 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
@@ -21,7 +21,7 @@
 #include "StRoot/StIstDbMaker/StIstDb.h"
 #include "tables/St_istControl_Table.h"
 
-StIstHitMaker::StIstHitMaker( const char *name ) : StMaker(name), listGeoMSensorOnGlobal(0)
+StIstHitMaker::StIstHitMaker( const char *name ) : StMaker(name), mSensorTransforms(0)
 {
    /* no op */
 };
@@ -44,7 +44,7 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
    }
 
    // geometry Db tables
-   listGeoMSensorOnGlobal = istDb->getRotations();
+   mSensorTransforms = istDb->getRotations();
 
    return ierr;
 };
@@ -168,6 +168,9 @@ ClassImp(StIstHitMaker);
 /***************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.21  2014/10/13 22:32:57  smirnovd
+* StIstHitMaker: Renamed data member to more meaningful name conforming with STAR style
+*
 * Revision 1.20  2014/10/13 22:28:24  smirnovd
 * StIstHitMaker: Use local pointer to StIstDb. No need to have a data member
 *
