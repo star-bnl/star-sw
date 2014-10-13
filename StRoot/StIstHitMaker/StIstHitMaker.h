@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.h,v 1.9 2014/10/13 22:28:03 smirnovd Exp $ */
+/* $Id: StIstHitMaker.h,v 1.10 2014/10/13 22:28:11 smirnovd Exp $ */
 
 #ifndef StIstHitMaker_hh
 #define StIstHitMaker_hh
@@ -19,12 +19,11 @@ class StIstHitMaker : public StMaker
 {
 public:
    StIstHitMaker( const char *name = "ist_hit" );
-   Int_t Init();
    Int_t InitRun(Int_t runnumber);
    Int_t Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.9 2014/10/13 22:28:03 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.10 2014/10/13 22:28:11 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 protected:
    THashList *listGeoMSensorOnGlobal;
@@ -39,6 +38,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstHitMaker.h,v $
+* Revision 1.10  2014/10/13 22:28:11  smirnovd
+* Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
+*
 * Revision 1.9  2014/10/13 22:28:03  smirnovd
 * StIstHitMaker: Corrected style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *

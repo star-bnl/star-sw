@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.cxx,v 1.18 2014/10/13 22:28:03 smirnovd Exp $ */
+/* $Id: StIstHitMaker.cxx,v 1.19 2014/10/13 22:28:11 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
@@ -26,12 +26,6 @@ StIstHitMaker::StIstHitMaker( const char *name ) : StMaker(name), listGeoMSensor
    /* no op */
 };
 
-Int_t StIstHitMaker::Init()
-{
-   Int_t ierr = kStOk;
-
-   return ierr;
-};
 
 Int_t StIstHitMaker::InitRun(Int_t runnumber)
 {
@@ -173,6 +167,9 @@ ClassImp(StIstHitMaker);
 /***************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.19  2014/10/13 22:28:11  smirnovd
+* Removed pointless methods. ::Init() and ::Finish() do not do much. Data members initialized in constructor
+*
 * Revision 1.18  2014/10/13 22:28:03  smirnovd
 * StIstHitMaker: Corrected style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
 *
