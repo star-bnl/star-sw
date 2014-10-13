@@ -1,14 +1,47 @@
+/* $Id: StIstHitMaker.h,v 1.8 2014/10/13 22:21:56 smirnovd Exp $ */
+
+#ifndef StIstHitMaker_hh
+#define StIstHitMaker_hh
+
+#include "StMaker.h"
+
+class StIstDb;
+class THashList;
+
+
+/**
+ * Calculates hit global position, and writes IST hits to StIstHitCollection.
+ *
+ * \author: Yaping Wang
+ * \date March 2013
+ */
+class StIstHitMaker : public StMaker
+{
+ public:
+  StIstHitMaker( const char* name="ist_hit" );
+  Int_t Init();
+  Int_t InitRun(Int_t runnumber);
+  Int_t Make();
+
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.8 2014/10/13 22:21:56 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
+ protected:
+  THashList *listGeoMSensorOnGlobal;
+  StIstDb *mIstDb;
+
+ private:
+  ClassDef(StIstHitMaker,1);
+};
+#endif
+
+
 /***************************************************************************
 *
-* $Id: StIstHitMaker.h,v 1.7 2014/08/12 23:08:09 ypwang Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description: 
-* Calculates hit global position, and writes IST hits to StIstHitCollection.
-****************************************************************************
-*
 * $Log: StIstHitMaker.h,v $
+* Revision 1.8  2014/10/13 22:21:56  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
 * Revision 1.7  2014/08/12 23:08:09  ypwang
 * remove the cluster number cut per ladder, due to chip occupancy cut was added in raw hit maker which can do the bad column rejection
 *
@@ -27,31 +60,3 @@
 * Revision 1.0 2013/11/04 16:05:30 Yaping
 * Initial version
 ****************************************************************************/
-
-#ifndef StIstHitMaker_hh
-#define StIstHitMaker_hh
-
-#include "StMaker.h"
-
-class StIstDb;
-class THashList;
-
-class StIstHitMaker : public StMaker
-{
- public:
-  StIstHitMaker( const char* name="ist_hit" );
-  Int_t Init();
-  Int_t InitRun(Int_t runnumber);
-  Int_t Make();
-
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.7 2014/08/12 23:08:09 ypwang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
- protected:
-  THashList *listGeoMSensorOnGlobal;
-  StIstDb *mIstDb;
-
- private:
-  ClassDef(StIstHitMaker,1);
-};
-#endif
