@@ -325,7 +325,8 @@ static void eigen2(double G[3], double lam[2], double eig[2]);
 int StiDetectorBuilder::AverageVolume(const char *fullPath) 
 {
 static int nCall=0; nCall++;
-
+int botOho =(strstr(fullPath,"PXRB") || strstr(fullPath,"PXLB"));
+if (botOho) StiDebug::Break(-1946);   
   gGeoManager->cd(fullPath);
   TGeoNode* node = gGeoManager->GetCurrentNode();
   assert(node);
@@ -414,24 +415,25 @@ static int nCall=0; nCall++;
 
     TVector3 eig[3]; eig[2][2]=1;
     double lam[2];
-    eigen2(G, lam,&(eig[1][0]));
+    eigen2(G, lam,&(eig[1][0]));	// lam[0] related to Y, and lam[1] to X
 
     if (fabs(lam[0]-lam[1]) <= 0.1*(lam[0]+lam[1])) {// no special direction
       eig[1][0] = global[1]; eig[1][1] = -global[0]; eig[1].SetMag(1.);
     }
 
     eig[0][0] = -eig[1][1];eig[0][1] = eig[1][0];
-    if ( eig[0].Dot(global)<0) {eig[0]*=-1.; eig[1]*=-1.;} 
 
     double offset,rNorm;
-    TVector3 dca;
-    for (int jk=0;jk<10;jk++) {
+    TVector3 dca,swp;
+    for (int jk=0;jk<2;jk++) {
+      if ( eig[0].Dot(global)<0) {eig[0]*=-1.; eig[1]*=-1.;} 
       offset = global.Dot(eig[1]);
       dca  = global-eig[1]*offset;
       rNorm  = dca.Perp();
-      if (rNorm > 0.1*global.Perp()) break;
-      double ang = (offset<0) ? 0.1:-0.1;
-      eig[1].RotateZ(ang);
+      if (rNorm*rNorm > lam[1]/4) break;
+      assert(!jk);
+      swp   = eig[0]; eig[0]=eig[1]; eig[1]=swp;
+      swp[0]= lam[0]; lam[0]=lam[1]; lam[1]=swp[0];
     }
 
 
@@ -517,9 +519,11 @@ static void eigen2(double G[3], double lam[2], double eig[2])
     lam[1] = 0.5*(spur-dis);
   }
   if (!eig) return;
-  double g[4]={G[0]-G[2]-dis,2*G[1],G[2]-G[0]-dis,3e33};
+  double g[3]={G[0]-G[2]-dis,2*G[1],G[2]-G[0]-dis};
   int kase =0;
-  for (int i=1;i<4;i++) { if (fabs(g[i])> 1.001*fabs(g[kase])) kase = i;}
+  for (int i=1;i<3;i++) { if (fabs(g[i])> 1.001*fabs(g[kase])) kase = i;}
+  if (fabs(g[kase])<1e-11) kase = 3;
+
   switch(kase) {
     case 0: eig[0] = g[1]/g[0]; eig[1]=-1; break;
     case 1: eig[1] = g[0]/g[1]; eig[0]=-1; break;
@@ -534,6 +538,12 @@ static void eigen2(double G[3], double lam[2], double eig[2])
   else {
     eig[0]=1;eig[1]=0;
   }
+  double lam0=0;
+  if (fabs(eig[0])>=fabs(eig[1])) 	{lam0 = G[0] + G[1]*eig[1]/eig[0];}
+  else 					{lam0 = G[2] + G[1]*eig[0]/eig[1];}
+  assert (fabs(lam[0]-lam0)<=1e-6*fabs(lam[0]+lam0));
+
+
 
 }
 ///Returns the number of sectors (or segments) in a the
