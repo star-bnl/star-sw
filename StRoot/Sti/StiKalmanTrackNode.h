@@ -207,6 +207,7 @@ const StiELoss *getELoss()const		{return mELoss;}
   /// -3  : invalid eloss data for this node.
   double  evaluateDedx();
   
+  int  inside() const;
   int  locate();
   int  propagate(double x,int option,int dir);
   void propagateMtx();
