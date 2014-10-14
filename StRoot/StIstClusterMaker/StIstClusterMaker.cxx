@@ -31,20 +31,27 @@ void StIstClusterMaker::Clear( Option_t *opts )
    }
 };
 
+
+/**
+ * Takes the StIstRawHitCollection from StIstCollection that is normally created
+ * by the StIstRawHitMaker and passes it to the clustering algorithm to build
+ * clusters. The clusters are then put in the StIstClusterCollection of the same
+ * StIstCollection.
+ */
 Int_t StIstClusterMaker::Make()
 {
    //input data
-   TObjectSet *istDataSet = (TObjectSet *)GetDataSet("istRawHitAndCluster");
+   TObjectSet *istDataSet = (TObjectSet*) GetDataSet("istRawHitAndCluster");
 
-   if (! istDataSet) {
-      LOG_WARN << "Make() - there is no istDataSet (raw hit and cluster) " << endm;
+   if (!istDataSet) {
+      LOG_WARN << "Make() - istRawHitAndCluster dataset not found. No IST clusters will be built" << endm;
       return kStWarn;
    }
 
-   mIstCollectionPtr = (StIstCollection *)istDataSet->GetObject();
+   mIstCollectionPtr = (StIstCollection*) istDataSet->GetObject();
 
    if (!mIstCollectionPtr) {
-      LOG_WARN << "Make() - no istCollection." << endm;
+      LOG_WARN << "Make() - StIstCollection not found. No IST clusters will be built" << endm;
       return kStWarn;
    }
 
@@ -52,23 +59,25 @@ Int_t StIstClusterMaker::Make()
    mClusterAlgoPtr->setSplitFlag(mSplitCluster);
    mClusterAlgoPtr->doClustering(*mIstCollectionPtr);
 
-   LOG_DEBUG << "End of StIstClusterMaker, print all raw hits & clusters: " << endm
-             << "Total raw hits=" << mIstCollectionPtr->getNumRawHits()
-             << ", total Clusters=" <<  mIstCollectionPtr->getNumClusters() << endm;
 
    if (Debug() >= 2) {
+
+      LOG_DEBUG << "End of StIstClusterMaker::Make()" << endm
+                << "Total raw hits: " << mIstCollectionPtr->getNumRawHits()
+                << ", total clusters: " <<  mIstCollectionPtr->getNumClusters() << endm;
+
       for (unsigned char iLadder = 0; iLadder < kIstNumLadders; iLadder++)
       {
          LOG_DEBUG << "Content: iLadder=" << (short) iLadder + 1
                    << " # of : raw hits=" << mIstCollectionPtr->getNumRawHits(iLadder)
                    << "  clusters=" << mIstCollectionPtr->getNumClusters( iLadder) << endm;
 
-         // ..... print all raw hits ....
+         // Print all raw hits
          StIstRawHitCollection *rawHitPtr = mIstCollectionPtr->getRawHitCollection(iLadder);
          size_t nTimeBins = mIstCollectionPtr->getNumTimeBins();
          rawHitPtr->Print(nTimeBins);
 
-         // ..... print all 1D clusters  ....
+         // Print all 1D clusters
          StIstClusterCollection *clustPtr = mIstCollectionPtr->getClusterCollection(iLadder);
          clustPtr->Print();
       }
@@ -84,14 +93,12 @@ void StIstClusterMaker::setClusterAlgo(StIstIClusterAlgo *algo)
 
 Int_t StIstClusterMaker::Init()
 {
-   Int_t ierr = kStOk;
-
    if ( !mClusterAlgoPtr ) {
       LOG_INFO << "IST clustering algorithm: Scanning algorithm" << endm;
       mClusterAlgoPtr = new StIstScanClusterAlgo();
    }
 
-   return ierr;
+   return kStOk;
 };
 
 ClassImp(StIstClusterMaker);
@@ -100,6 +107,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.29  2014/10/14 21:06:40  smirnovd
+* Updated debug and log messages, added doxygen comments. Also other minor whitespace and style changes
+*
 * Revision 1.28  2014/10/14 21:06:02  smirnovd
 * Maximum debug level is 2 AFAIK
 *
