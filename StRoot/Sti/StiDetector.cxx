@@ -153,3 +153,22 @@ return shape->getVolume();
 {
 return shape->getVolume()*material->getDensity();
 }
+//______________________________________________________________________________
+int StiDetector::insideL(const double xl[3]) const 
+{
+double rN = placement->getNormalRadius();
+double thick = shape->getThickness();
+if (shape->getShapeCode()==1) { //Planar
+  if (fabs(xl[0]-rN)>thick/2) 			return 0;
+  double y = xl[1]-placement->getNormalYoffset();
+  if (fabs(y)>shape->getHalfWidth()) 		return 0;
+ } else {
+  double rxy = sqrt(xl[0]*xl[0]+xl[1]*xl[1]);
+  if (fabs(rxy-rN)>thick/2) 			return 0;
+    double ang = atan2(xl[1],xl[0]);
+    if (fabs(ang)>shape->getOpeningAngle()/2)	return 0;
+  } 
+  double z = xl[2]-placement->getZcenter();  
+  if (fabs(z)>shape->getHalfDepth())		return 0;
+  return 1;
+}
