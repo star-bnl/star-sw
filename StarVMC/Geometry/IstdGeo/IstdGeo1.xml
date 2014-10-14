@@ -301,8 +301,11 @@
     <varlist type="float" comment=" Inner radius of IST support ring" > ModuleInnerRadius/11.9253/</varlist>
     <!-- readout cable diameter -->
     <varlist type="float" comment=" mass weighted of readout cable diameter" > cableDiameter/0.372/</varlist>
-    <!-- IST detector parameters -->
-    <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.84/</varlist>
+    <!-- IST detector parameters 
+	 JCW :: Reduced inner radius to 11.0 to coincide with PXMO outer radius
+	 <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.84/</varlist>  
+    -->
+    <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.00/</varlist> 
     <varlist type="float" comment=" Outer radius of mother volume whole detector" > IBMOOuterRadius/18.5/</varlist>
     <varlist type="int"   comment=" Number of ladders" > nLadder/24/</varlist>
     <varlist type="int"   comment=" Number of silicon sensor per ladder" > nUnit/6/</varlist>
@@ -519,7 +522,7 @@
  </Do>
 
   <Create    block="IBMO"/>
-  <Placement block="IBMO" in="IDSM" konly="'MANY'"/>
+  <Placement block="IBMO" in="IDSM" konly="ONLY"/>
 
 
   <!-- IBMO volume declaration -->
