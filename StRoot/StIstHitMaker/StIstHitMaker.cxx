@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.cxx,v 1.23 2014/10/14 21:05:54 smirnovd Exp $ */
+/* $Id: StIstHitMaker.cxx,v 1.24 2014/10/14 21:06:22 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
@@ -87,10 +87,8 @@ Int_t StIstHitMaker::Make()
 
    for (unsigned char ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)   {
       //add new hits from clusters
-      StIstClusterCollection *clusterCollectionPtr = 0;
 
-      if ( istCollectionPtr)
-         clusterCollectionPtr = istCollectionPtr->getClusterCollection(ladderIdx );
+      StIstClusterCollection *clusterCollectionPtr = istCollectionPtr->getClusterCollection(ladderIdx );
 
       if ( clusterCollectionPtr ) {
          unsigned int numClusters = clusterCollectionPtr->getNumClusters();
@@ -167,6 +165,9 @@ Int_t StIstHitMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.24  2014/10/14 21:06:22  smirnovd
+* StIstHitMaker: No need to check for valid pointer to StIstCollection for each ladder as it has been already verified at the begining of this Make()
+*
 * Revision 1.23  2014/10/14 21:05:54  smirnovd
 * Don't wait until the end of routine to return error codes. Leads to somewhat cleaner code and eliminates if statements
 *
