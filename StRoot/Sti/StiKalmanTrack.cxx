@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.127 2014/09/29 21:44:55 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.127 2014/09/29 21:44:55 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.128 2014/10/14 02:27:12 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.128 2014/10/14 02:27:12 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.128  2014/10/14 02:27:12  perev
+ * nudge() & inside() added
+ *
  * Revision 2.127  2014/09/29 21:44:55  perev
  * Check cos>=1 replaced to cos>=.99
  *
@@ -1604,6 +1607,8 @@ static int nCall=0;nCall++;
     status = sTNH.makeFit(0);
     if (status) {restIsWrong = 2005; targetNode->setInvalid();}
     if (!targetNode->isValid()) 	continue;
+    targetNode->nudge();
+    assert(targetNode->inside());
     pNode = targetNode;
   }//end for of nodes
 
