@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.28 2014/09/20 08:14:19 ypwang Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.29 2014/10/14 21:06:08 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -52,9 +52,7 @@ StIstRawHitMaker::~StIstRawHitMaker()
    mMappingVec.clear();
    mConfigVec.clear();
 
-   if (mIstCollectionPtr) {
-      delete mIstCollectionPtr;
-   }
+   delete mIstCollectionPtr; mIstCollectionPtr = 0;
 };
 
 
@@ -479,6 +477,9 @@ ClassImp(StIstRawHitMaker);
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.29  2014/10/14 21:06:08  smirnovd
+* StIstRawHitMaker: Do not protect for possible double delete. This maker is solely responsible for the StIstCollection
+*
 * Revision 1.28  2014/09/20 08:14:19  ypwang
 * update variable ntimebin from static to normal integer and related temporary array definitions
 *
