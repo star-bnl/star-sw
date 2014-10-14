@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.144 2014/10/10 21:34:36 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.145 2014/10/14 02:29:50 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.145  2014/10/14 02:29:50  perev
+ * Method inside() added
+ * Method locate() rewritten, accounting of any errors and edges removed
+ *
  * Revision 2.144  2014/10/10 21:34:36  perev
  * check for cos>1 adde
  *
@@ -949,13 +953,9 @@ StiDebug::Break(nCall);
 
   if (position>kEdgeZplus || position<0) return position;
   assert(mFP.x() > 0.);
-  assert((shapeCode==kPlanar) || fabs(mFP.rxy()-nNormalRadius)<1e-3*nNormalRadius);
+  nudge();
+  assert(tDet->insideL(mFP.P));
   propagateError();
-
-  if (pNode->getHit()==0) {
-    double rN = tDet->getPlacement()->getNormalRadius();
-    assert(mFP.rxy()>=rN*(1-1e-3));
-  }
 
   if (debug() & 8) { PrintpT("E");}
 
@@ -1759,6 +1759,8 @@ static int nCall=0; nCall++;
 #endif
   if (debug() & 8) PrintpT("U");
   _state = kTNFitEnd;
+
+  nudge();
   return 0; 
 }
 
@@ -1910,12 +1912,6 @@ int StiKalmanTrackNode::locate()
 
   if (fabs(mFP.z())>kMaxZ || mFP.rxy()> kMaxR) return -1;
   
-#ifndef DO_TPCCATRACKER // insensible region on a detector plane
-  edge  = 2.;
-  if (mFP.x()<50.)      edge  = 0.3;
-#else /* DO_TPCCATRACKER */
-  edge = 0.;
-#endif /* !DO_TPCCATRACKER */
   
   //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
   Int_t shapeCode  = sh->getShapeCode();
@@ -1923,52 +1919,17 @@ int StiKalmanTrackNode::locate()
   case kDisk:
   case kCylindrical: // cylinder
     yOff    = nice(_alpha - place->getLayerAngle());
-    yAbsOff = fabs(yOff);
-    yAbsOff -=kNStd*sqrt((mFE._cXX+mFE._cYY)/(mFP.x()*mFP.x()+mFP.y()*mFP.y()));
-    if (yAbsOff<0) yAbsOff=0;
-    detHW = ((StiCylindricalShape *) sh)->getOpeningAngle()/2.;
-    innerY = outerY = detHW;
+    if (fabs(yOff)>sh->getOpeningAngle()/2) return -1;
     break;
   case kPlanar: 
   default:
     yOff = mFP.y() - place->getNormalYoffset();
-    yAbsOff = fabs(yOff) - kNStd*sqrt(mFE._cYY);
-    if (yAbsOff<0) yAbsOff=0;
-    detHW = sh->getHalfWidth();
-    innerY = detHW - edge;
-    //outerY = innerY + 2*edge;
-    //outerZ = innerZ + 2*edge;
-    outerY = innerY + edge;
+    if (fabs(yOff)> sh->getHalfWidth()) return -1;
     break;
   }
   zOff = mFP.z() - place->getZcenter();
-  zAbsOff = fabs(zOff);
-  detHD = sh->getHalfDepth();
-  innerZ = detHD - edge;
-  outerZ = innerZ + edge;
-  if (yAbsOff<innerY && zAbsOff<innerZ)
-    position = kHit; 
-  else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
-    // outside detector to positive or negative y (phi)
-    // if the track is essentially tangent to the plane, terminate it.
-      position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
-  else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
-    // outside detector to positive or negative z (west or east)
-    position = zOff>0 ? kMissZplus : kMissZminus;
-  else if ((yAbsOff-innerY)>(zAbsOff-innerZ))
-    // positive or negative phi edge
-    position = yOff>0 ? kEdgePhiPlus : kEdgePhiMinus;
-  else
-    // positive or negative z edge
-    position = zOff>0 ? kEdgeZplus : kEdgeZminus;
-  if (debug()&8) {
-    comment += ::Form("R %8.3f y/z %8.3f/%8.3f", 
-		      mFP.x(), mFP.y(), mFP.z());
-    if (position>kEdgeZplus || position<0)  
-      comment += ::Form(" missed %2d y0/z0 %8.3f/%8.3f dY/dZ %8.3f/%8.3f",
-			position, yOff, zOff, detHW, detHD);
-  }
-  return position;
+  if (fabs(zOff)>sh->getHalfDepth()) return -1;
+  return 0;
  }
 //______________________________________________________________________________
 void StiKalmanTrackNode::initialize(StiHit *h)
@@ -2382,3 +2343,11 @@ static const double surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
   return time;
 }
 
+//________________________________________________________________________________
+int StiKalmanTrackNode::inside() const 
+{
+const StiDetector *det = getDetector();
+if (!det) return 1;
+return det->insideL(mFP.P);
+
+}
