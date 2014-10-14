@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.cxx,v 1.25 2014/10/14 21:06:29 smirnovd Exp $ */
+/* $Id: StIstHitMaker.cxx,v 1.26 2014/10/14 21:06:34 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
@@ -60,21 +60,23 @@ Int_t StIstHitMaker::Make()
       return kStErr;
    }
 
-   // Get pointer to an existing StIstHitCollection if any
-   StIstHitCollection *istHitCollection = eventPtr->istHitCollection();
-
    //input clusters info.
    TObjectSet *istDataSet = (TObjectSet*) GetDataSet("istRawHitAndCluster");
-   StIstCollection *istCollectionPtr = 0;
 
-   if (istDataSet) {
-      istCollectionPtr = (StIstCollection*) istDataSet->GetObject();
-   }
-
-   if ( !istCollectionPtr && !istHitCollection ) {
-      LOG_WARN << " StIstHitMaker::Make() - no istCollection nor istHitCollection to work on " << endm;
+   if (!istDataSet) {
+      LOG_WARN << "Make() - istRawHitAndCluster dataset not found. No IST hits will be available for tracking" << endm;
       return kStWarn;
    }
+
+   StIstCollection *istCollectionPtr = (StIstCollection*) istDataSet->GetObject();
+
+   if ( !istCollectionPtr ) {
+      LOG_WARN << "Make() - StIstCollection not found. No IST hits will be available for tracking" << endm;
+      return kStWarn;
+   }
+
+   // Get pointer to an existing StIstHitCollection if any
+   StIstHitCollection *istHitCollection = eventPtr->istHitCollection();
 
    //if no ist hit collection, create one
    if (!istHitCollection) {
@@ -165,6 +167,9 @@ Int_t StIstHitMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.26  2014/10/14 21:06:34  smirnovd
+* StIstHitMaker: Arranged checks for required containers and objects in a more logical way. Added corresponding log messages
+*
 * Revision 1.25  2014/10/14 21:06:29  smirnovd
 * StIstHitMaker: No point to proceed with cluster-to-tracking-hit conversion if there are no cluster container for this ladder
 *
