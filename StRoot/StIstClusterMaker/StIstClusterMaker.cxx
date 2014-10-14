@@ -56,7 +56,7 @@ Int_t StIstClusterMaker::Make()
              << "Total raw hits=" << mIstCollectionPtr->getNumRawHits()
              << ", total Clusters=" <<  mIstCollectionPtr->getNumClusters() << endm;
 
-   if (Debug() > 2) {
+   if (Debug() >= 2) {
       for (unsigned char iLadder = 0; iLadder < kIstNumLadders; iLadder++)
       {
          LOG_DEBUG << "Content: iLadder=" << (short) iLadder + 1
@@ -100,6 +100,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.28  2014/10/14 21:06:02  smirnovd
+* Maximum debug level is 2 AFAIK
+*
 * Revision 1.27  2014/10/14 21:05:54  smirnovd
 * Don't wait until the end of routine to return error codes. Leads to somewhat cleaner code and eliminates if statements
 *
