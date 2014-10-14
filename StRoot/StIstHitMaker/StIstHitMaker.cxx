@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.cxx,v 1.26 2014/10/14 21:06:34 smirnovd Exp $ */
+/* $Id: StIstHitMaker.cxx,v 1.27 2014/10/14 21:06:40 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
@@ -50,13 +50,18 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
 }
 
 
+/**
+ * Takes the StIstClusterCollection from StIstCollection that is normally
+ * created by the StIstClusterMaker and fills StEvent's StIstHitCollection which
+ * is used in tracking.
+ */
 Int_t StIstHitMaker::Make()
 {
-   //obtain hit collection
+   // Obtain hit collection
    StEvent *eventPtr = (StEvent*) GetDataSet("StEvent");
 
    if (!eventPtr) {
-      LOG_ERROR << "StIstHitMaker::Make(): No StEvent found in the chain. Cannot proceed" << endm;
+      LOG_ERROR << "Make() - No StEvent found in the chain. Cannot proceed" << endm;
       return kStErr;
    }
 
@@ -78,16 +83,17 @@ Int_t StIstHitMaker::Make()
    // Get pointer to an existing StIstHitCollection if any
    StIstHitCollection *istHitCollection = eventPtr->istHitCollection();
 
-   //if no ist hit collection, create one
+   // If no ist hit collection, create one
    if (!istHitCollection) {
       istHitCollection = new StIstHitCollection();
       eventPtr->setIstHitCollection(istHitCollection);
-      LOG_DEBUG << "StIstHitMaker::Make() has added a non existing StIstHitCollection()" << endm;
+      LOG_DEBUG << "Make() - Added new StIstHitCollection to this StEvent" << endm;
    }
 
    unsigned char  nClusteringType = -1;
 
-   for (unsigned char ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)   {
+   for (unsigned char ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)
+   {
       //add new hits from clusters
 
       StIstClusterCollection *clusterCollectionPtr = istCollectionPtr->getClusterCollection(ladderIdx );
@@ -95,7 +101,7 @@ Int_t StIstHitMaker::Make()
       if ( !clusterCollectionPtr ) continue;
 
       unsigned int numClusters = clusterCollectionPtr->getNumClusters();
-      LOG_DEBUG << "Number of clusters found in ladder " << (int)(ladderIdx + 1) << ": " << numClusters << endm;
+      LOG_DEBUG << "Make() - Number of clusters found in ladder " << (int)(ladderIdx + 1) << ": " << numClusters << endm;
 
       unsigned short idTruth = 0;
       unsigned char  nRawHits = -1, nRawHitsZ = -1, nRawHitsRPhi = -1;
@@ -167,6 +173,9 @@ Int_t StIstHitMaker::Make()
 /***************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.27  2014/10/14 21:06:40  smirnovd
+* Updated debug and log messages, added doxygen comments. Also other minor whitespace and style changes
+*
 * Revision 1.26  2014/10/14 21:06:34  smirnovd
 * StIstHitMaker: Arranged checks for required containers and objects in a more logical way. Added corresponding log messages
 *
