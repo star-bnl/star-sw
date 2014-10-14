@@ -1,4 +1,4 @@
-/* $Id: StIstHitMaker.cxx,v 1.22 2014/10/13 22:33:04 smirnovd Exp $ */
+/* $Id: StIstHitMaker.cxx,v 1.23 2014/10/14 21:05:54 smirnovd Exp $ */
 
 #include "Stypes.h"
 #include "TNamed.h"
@@ -52,8 +52,6 @@ Int_t StIstHitMaker::InitRun(Int_t runnumber)
 
 Int_t StIstHitMaker::Make()
 {
-   Int_t ierr = kStOk;
-
    //obtain hit collection
    StEvent *eventPtr = (StEvent*) GetDataSet("StEvent");
 
@@ -75,7 +73,7 @@ Int_t StIstHitMaker::Make()
 
    if ( !istCollectionPtr && !istHitCollection ) {
       LOG_WARN << " StIstHitMaker::Make() - no istCollection nor istHitCollection to work on " << endm;
-      ierr = kStWarn;
+      return kStWarn;
    }
 
    //if no ist hit collection, create one
@@ -85,92 +83,93 @@ Int_t StIstHitMaker::Make()
       LOG_DEBUG << "StIstHitMaker::Make() has added a non existing StIstHitCollection()" << endm;
    }
 
-   if (!ierr)   {
-      unsigned char  nClusteringType = -1;
+   unsigned char  nClusteringType = -1;
 
-      for (unsigned char ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)   {
-         //add new hits from clusters
-         StIstClusterCollection *clusterCollectionPtr = 0;
+   for (unsigned char ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)   {
+      //add new hits from clusters
+      StIstClusterCollection *clusterCollectionPtr = 0;
 
-         if ( istCollectionPtr)
-            clusterCollectionPtr = istCollectionPtr->getClusterCollection(ladderIdx );
+      if ( istCollectionPtr)
+         clusterCollectionPtr = istCollectionPtr->getClusterCollection(ladderIdx );
 
-         if ( clusterCollectionPtr ) {
-            unsigned int numClusters = clusterCollectionPtr->getNumClusters();
-            LOG_DEBUG << "Number of clusters found in ladder " << (int)(ladderIdx + 1) << ": " << numClusters << endm;
+      if ( clusterCollectionPtr ) {
+         unsigned int numClusters = clusterCollectionPtr->getNumClusters();
+         LOG_DEBUG << "Number of clusters found in ladder " << (int)(ladderIdx + 1) << ": " << numClusters << endm;
 
-            unsigned short idTruth = 0;
-            unsigned char  nRawHits = -1, nRawHitsZ = -1, nRawHitsRPhi = -1;
-            unsigned char  ladder = -1, sensor = -1;
-            float  meanRow = 0., meanColumn = 0., charge = 0., chargeErr = 0.;
-            unsigned char  maxTb = -1;
-            int	 key = -1;
+         unsigned short idTruth = 0;
+         unsigned char  nRawHits = -1, nRawHitsZ = -1, nRawHitsRPhi = -1;
+         unsigned char  ladder = -1, sensor = -1;
+         float  meanRow = 0., meanColumn = 0., charge = 0., chargeErr = 0.;
+         unsigned char  maxTb = -1;
+         int	 key = -1;
 
-            for (std::vector< StIstCluster * >::iterator clusterIter = clusterCollectionPtr->getClusterVec().begin(); clusterIter != clusterCollectionPtr->getClusterVec().end(); ++clusterIter)
-            {
-               idTruth         = (*clusterIter)->getIdTruth();
-               key             = (*clusterIter)->getKey();
-               ladder          = (*clusterIter)->getLadder();
-               sensor          = (*clusterIter)->getSensor();
-               meanRow         = (*clusterIter)->getMeanRow();
-               meanColumn      = (*clusterIter)->getMeanColumn();
-               maxTb           = (*clusterIter)->getMaxTimeBin();
-               charge          = (*clusterIter)->getTotCharge();
-               chargeErr       = (*clusterIter)->getTotChargeErr();
-               nRawHits        = (*clusterIter)->getNRawHits();
-               nRawHitsZ       = (*clusterIter)->getNRawHitsZ();
-               nRawHitsRPhi    = (*clusterIter)->getNRawHitsRPhi();
-               nClusteringType = (*clusterIter)->getClusteringType();
-
-               StIstHit *newHit = new StIstHit(ladder, sensor, charge, chargeErr, maxTb, nRawHits, nRawHitsZ, nRawHitsRPhi);
-               newHit->setId(key);
-               newHit->setIdTruth(idTruth);
-
-               double local[3];
-               local[0] = 0.5 * kIstSensorActiveSizeRPhi - (meanRow - 0.5) * kIstPadPitchRow; //unit: cm
-               local[1] = 0.;
-               local[2] = (meanColumn - 0.5) * kIstPadPitchColumn - 0.5 * kIstSensorActiveSizeZ; //unit: cm
-               newHit->setLocalPosition(local[0], local[1], local[2]); //set local position on sensor
-
-               istHitCollection->addHit(newHit);
-            } //cluster loop over
-         } //end clusterCollectionPtr
-
-         //set global position
-         StIstLadderHitCollection *ladderHitCollection = istHitCollection->ladder(ladderIdx);
-
-         for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
+         for (std::vector< StIstCluster * >::iterator clusterIter = clusterCollectionPtr->getClusterVec().begin(); clusterIter != clusterCollectionPtr->getClusterVec().end(); ++clusterIter)
          {
-            StIstSensorHitCollection *sensorHitCollection = ladderHitCollection->sensor(sensorIdx);
+            idTruth         = (*clusterIter)->getIdTruth();
+            key             = (*clusterIter)->getKey();
+            ladder          = (*clusterIter)->getLadder();
+            sensor          = (*clusterIter)->getSensor();
+            meanRow         = (*clusterIter)->getMeanRow();
+            meanColumn      = (*clusterIter)->getMeanColumn();
+            maxTb           = (*clusterIter)->getMaxTimeBin();
+            charge          = (*clusterIter)->getTotCharge();
+            chargeErr       = (*clusterIter)->getTotChargeErr();
+            nRawHits        = (*clusterIter)->getNRawHits();
+            nRawHitsZ       = (*clusterIter)->getNRawHitsZ();
+            nRawHitsRPhi    = (*clusterIter)->getNRawHitsRPhi();
+            nClusteringType = (*clusterIter)->getClusteringType();
 
-            for (int idx = 0; idx < (int) sensorHitCollection->hits().size(); idx++ )
-            {
-               StIstHit *newHit = sensorHitCollection->hits()[idx];
-               double local[3];
-               double global[3];
-               local[0] = newHit->localPosition(0);
-               local[1] = newHit->localPosition(1);
-               local[2] = newHit->localPosition(2);
+            StIstHit *newHit = new StIstHit(ladder, sensor, charge, chargeErr, maxTb, nRawHits, nRawHitsZ, nRawHitsRPhi);
+            newHit->setId(key);
+            newHit->setIdTruth(idTruth);
 
-               int sensorId = 1000 + ((int)newHit->getLadder() - 1) * kIstNumSensorsPerLadder + (int)newHit->getSensor();
-               TGeoHMatrix *geoMSensorOnGlobal = (TGeoHMatrix *) mSensorTransforms->FindObject(Form("R%04i", sensorId));
-               geoMSensorOnGlobal->LocalToMaster(local, global);
-               StThreeVectorF vecGlobal(global);
-               newHit->setPosition(vecGlobal); //set global position
-            }//end sensor hit collection
-         }//end ladder hit collection
-      } //ladder loop over
+            double local[3];
+            local[0] = 0.5 * kIstSensorActiveSizeRPhi - (meanRow - 0.5) * kIstPadPitchRow; //unit: cm
+            local[1] = 0.;
+            local[2] = (meanColumn - 0.5) * kIstPadPitchColumn - 0.5 * kIstSensorActiveSizeZ; //unit: cm
+            newHit->setLocalPosition(local[0], local[1], local[2]); //set local position on sensor
 
-      istHitCollection->setClusteringType(nClusteringType);
-   } //ierr
+            istHitCollection->addHit(newHit);
+         } //cluster loop over
+      } //end clusterCollectionPtr
 
-   return ierr;
+      //set global position
+      StIstLadderHitCollection *ladderHitCollection = istHitCollection->ladder(ladderIdx);
+
+      for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
+      {
+         StIstSensorHitCollection *sensorHitCollection = ladderHitCollection->sensor(sensorIdx);
+
+         for (int idx = 0; idx < (int) sensorHitCollection->hits().size(); idx++ )
+         {
+            StIstHit *newHit = sensorHitCollection->hits()[idx];
+            double local[3];
+            double global[3];
+            local[0] = newHit->localPosition(0);
+            local[1] = newHit->localPosition(1);
+            local[2] = newHit->localPosition(2);
+
+            int sensorId = 1000 + ((int)newHit->getLadder() - 1) * kIstNumSensorsPerLadder + (int)newHit->getSensor();
+            TGeoHMatrix *geoMSensorOnGlobal = (TGeoHMatrix *) mSensorTransforms->FindObject(Form("R%04i", sensorId));
+            geoMSensorOnGlobal->LocalToMaster(local, global);
+            StThreeVectorF vecGlobal(global);
+            newHit->setPosition(vecGlobal); //set global position
+         }//end sensor hit collection
+      }//end ladder hit collection
+   } //ladder loop over
+
+   istHitCollection->setClusteringType(nClusteringType);
+
+   return kStOk;
 }
 
 
 /***************************************************************************
 *
 * $Log: StIstHitMaker.cxx,v $
+* Revision 1.23  2014/10/14 21:05:54  smirnovd
+* Don't wait until the end of routine to return error codes. Leads to somewhat cleaner code and eliminates if statements
+*
 * Revision 1.22  2014/10/13 22:33:04  smirnovd
 * Minor adjustments to the code and comments
 *

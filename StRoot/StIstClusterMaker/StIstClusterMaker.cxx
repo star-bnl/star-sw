@@ -33,28 +33,24 @@ void StIstClusterMaker::Clear( Option_t *opts )
 
 Int_t StIstClusterMaker::Make()
 {
-   Int_t ierr = kStOk;
-
    //input data
    TObjectSet *istDataSet = (TObjectSet *)GetDataSet("istRawHitAndCluster");
 
    if (! istDataSet) {
       LOG_WARN << "Make() - there is no istDataSet (raw hit and cluster) " << endm;
-      ierr = kStWarn;
+      return kStWarn;
    }
 
    mIstCollectionPtr = (StIstCollection *)istDataSet->GetObject();
 
    if (!mIstCollectionPtr) {
       LOG_WARN << "Make() - no istCollection." << endm;
-      ierr = kStWarn;
+      return kStWarn;
    }
 
-   if (ierr == kStOk) {
-      mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
-      mClusterAlgoPtr->setSplitFlag(mSplitCluster);
-      mClusterAlgoPtr->doClustering(*mIstCollectionPtr);
-   }
+   mClusterAlgoPtr->setUsedTimeBin(mTimeBin);
+   mClusterAlgoPtr->setSplitFlag(mSplitCluster);
+   mClusterAlgoPtr->doClustering(*mIstCollectionPtr);
 
    LOG_DEBUG << "End of StIstClusterMaker, print all raw hits & clusters: " << endm
              << "Total raw hits=" << mIstCollectionPtr->getNumRawHits()
@@ -78,7 +74,7 @@ Int_t StIstClusterMaker::Make()
       }
    }
 
-   return ierr;
+   return kStOk;
 }
 
 void StIstClusterMaker::setClusterAlgo(StIstIClusterAlgo *algo)
@@ -104,6 +100,9 @@ ClassImp(StIstClusterMaker);
 /***************************************************************************
 *
 * $Log: StIstClusterMaker.cxx,v $
+* Revision 1.27  2014/10/14 21:05:54  smirnovd
+* Don't wait until the end of routine to return error codes. Leads to somewhat cleaner code and eliminates if statements
+*
 * Revision 1.26  2014/09/17 20:36:26  smirnovd
 * StIstClusterMaker: Use the updated public interface of StIstIClusterAlgo. The
 * previous functionality has been moved to the base class
