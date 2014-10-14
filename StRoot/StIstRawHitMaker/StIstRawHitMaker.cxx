@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstRawHitMaker.cxx,v 1.29 2014/10/14 21:06:08 smirnovd Exp $
+* $Id: StIstRawHitMaker.cxx,v 1.30 2014/10/14 21:06:15 smirnovd Exp $
 *
 * Author: Yaping Wang, March 2013
 ****************************************************************************
@@ -44,14 +44,6 @@ StIstRawHitMaker::StIstRawHitMaker( const char *name ): StRTSBaseMaker( "ist", n
 
 StIstRawHitMaker::~StIstRawHitMaker()
 {
-   // clear vectors
-   mCmnVec.clear();
-   mPedVec.clear();
-   mRmsVec.clear();
-   mGainVec.clear();
-   mMappingVec.clear();
-   mConfigVec.clear();
-
    delete mIstCollectionPtr; mIstCollectionPtr = 0;
 };
 
@@ -477,6 +469,9 @@ ClassImp(StIstRawHitMaker);
 /***************************************************************************
 *
 * $Log: StIstRawHitMaker.cxx,v $
+* Revision 1.30  2014/10/14 21:06:15  smirnovd
+* No need to empty vectors in destructor as they will be destructed anyway
+*
 * Revision 1.29  2014/10/14 21:06:08  smirnovd
 * StIstRawHitMaker: Do not protect for possible double delete. This maker is solely responsible for the StIstCollection
 *
