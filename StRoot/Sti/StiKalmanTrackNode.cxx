@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.145 2014/10/14 02:29:50 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.146 2014/10/16 22:28:45 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.146  2014/10/16 22:28:45  perev
+ * Method nudge() rewritten. For complicated cases THelixTrack used.
+ * Check for kFarFromBeam putted back (Xin found). It was removed by mistake
+ *
  * Revision 2.145  2014/10/14 02:29:50  perev
  * Method inside() added
  * Method locate() rewritten, accounting of any errors and edges removed
@@ -1095,8 +1099,10 @@ StiDebug::StiDebug::Break(nCall);
   mFP._cosCA   = mgP.cosCA2;
   ians = locate();
   if (ians) 					return ians;
-  if (fabs(mFP.eta())>kMaxEta) 			return kEnded;
-  if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
+  if (mFP.x()> kFarFromBeam) {
+    if (fabs(mFP.eta())>kMaxEta) 			return kEnded;
+    if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
+  }
   mFP.hz()      = getHz();
   if (fabs(mFP.hz()) > 1e-10) 	{ mFP.curv() = mFP.hz()*mFP.ptin();}
   else 				{ mFP.curv() = 1e-6 ;}
@@ -1110,55 +1116,72 @@ StiDebug::StiDebug::Break(nCall);
 //______________________________________________________________________________
 int StiKalmanTrackNode::nudge(StiHit *hitp)
 {
+  enum { kTooFar = 33};
+
   StiHit *hit = hitp;
-  double deltaX = 0;
+  double deltaX = 0,rN=0,sCA2,cCA2,deltaY,deltaL;
+  int kase = 0,shapeCode=0;		// 0=shift accounting deltaX, 1=use THelixTrack
   if (hit) { deltaX = hit->x()-mFP.x();}
-  else     { if (_detector) deltaX = _detector->getPlacement()->getNormalRadius()-mFP.x();}
-  if(fabs(deltaX)>5)		return -1;
-  if (fabs(deltaX) <1.e-3) 	return  0;
-  double deltaS = mFP.curv()*(deltaX);
-  double sCA2 = mFP._sinCA + deltaS;
-  if (fabs(sCA2)>0.99) 		return -2;
-  double cCA2,deltaY,deltaL,sind;
-  if (fabs(deltaS) < 1e-3 && fabs(mFP.eta())<1) { //Small angle approx
-    cCA2= mFP._cosCA - mFP._sinCA/mFP._cosCA*deltaS;
-    if (cCA2> 1) cCA2= 1;
-    if (cCA2<-1) cCA2=-1;
-    deltaY = deltaX*(mFP._sinCA+sCA2)/(mFP._cosCA+cCA2);
-    deltaL = deltaX*mFP._cosCA + deltaY*mFP._sinCA;
-    sind = deltaL*mFP.curv();
-    deltaL = deltaL*(1.+sind*sind/6);
-  } else {
+  else if (_detector) {
+    rN = _detector->getPlacement()->getNormalRadius();
+    shapeCode = _detector->getShape()->getShapeCode();
+    if (shapeCode==1) 	{
+      deltaX = rN-mFP.x();}
+    else						{
+      double t = 0.5*(rN*rN-mFP.rxy2())/(mFP.x()*mFP._cosCA+mFP.y()*mFP._sinCA);
+      deltaX = mFP._cosCA*t;
+      if (fabs(t) > 0.1*rN || fabs(t*mFP.curv()) > 0.1) kase = 1;
+
+  } }  
+  else { assert(0 && "Wrong Node");}
+
+
+  if(fabs(deltaX)>kTooFar)	kase = 1;
+  if (fabs(deltaX) <1.e-5) 	return  0;
+
+  switch(kase) {
+
+
+  case 0: {// easy way
+    double deltaS = mFP.curv()*(deltaX);
+    sCA2 = mFP._sinCA + deltaS;
+    if (fabs(sCA2)>0.99) 		return -2;
     cCA2= sqrt((1.-sCA2)*(1.+sCA2));
     if (mFP._cosCA <0) cCA2 = -cCA2;
     deltaY = deltaX*(mFP._sinCA+sCA2)/(mFP._cosCA+cCA2);
     deltaL = deltaX*mFP._cosCA + deltaY*mFP._sinCA;
-    sind = deltaL*mFP.curv();
+    double sind = deltaL*mFP.curv();
     deltaL = asin(sind)/mFP.curv();
-  }
-  double deltaZ = mFP.tanl()*(deltaL);
-  mFP._sinCA    = mgP.sinCA2 = sCA2;
-  mFP._cosCA    = mgP.cosCA2 = cCA2;
-  mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
-  mgP.sumCos   = mgP.cosCA1+mgP.cosCA2;
-  mFP.x()   += deltaX;
-  mFP.y()   += deltaY;
-  mFP.z()   += deltaZ;
-  mFP.eta() += deltaL*mFP.curv();
-  mgP.dx   += deltaX;
-  mgP.dy   += deltaY;
-  mgP.dl0  += deltaL;
-  mgP.dl   += deltaL;
+    double deltaZ = mFP.tanl()*(deltaL);
+    mFP._sinCA = sCA2;
+    mFP._cosCA = cCA2;
+    mFP.x()   += deltaX;
+    mFP.y()   += deltaY;
+    mFP.z()   += deltaZ;
+    mFP.eta() += deltaL*mFP.curv();
+    break;}
 
+  case 1: {// hard way, use THelixTrack
+ 
+    THelixTrack hlx(mFP.P,&mFP._cosCA,mFP.curv()); 
+    double surf[7]={0};
+    int nSurf=0;
+    switch(shapeCode) {
+      case 0:;case 1:
+        surf[0]=mFP.x()+deltaX;surf[1]=-1;nSurf=4;break;
+      case 2: 
+        surf[0]=rN*rN;         surf[4]=-1;nSurf=7;break;
+      default: assert(0 && "Wrong shape code"); 
+    }//end switch
 
-//  assert(fabs(mFP._sinCA) <  1.);
-  if (fabs(mFP._sinCA)>=1) {
-    LOG_DEBUG << Form("StiKalmanTrackNode::nudge WRONG WRONG WRONG sinCA=%g",mFP._sinCA)
-    << endm;          
-    mFP.print();
-    return -13;
+    deltaL = hlx.Path(999.,surf,nSurf,0,0,1);
+    if (fabs(deltaL) >=999) 		return -2;
+    mFP.phi() += deltaL*mFP.curv();
+    memcpy(mFP.P,hlx.Pos(),3*sizeof(mFP.P[0]));
+    mFP.ready();
+    break;}
   }
-  assert(fabs(mFP._cosCA) <= 1.);
+
   mPP() = mFP;
   return 0;
 }
