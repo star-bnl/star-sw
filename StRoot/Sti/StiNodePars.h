@@ -27,6 +27,7 @@ class StiNodePars {
   Double_t &y()    	{return P[kY];}
   Double_t &z()    	{return P[kZ];}
   Double_t &eta()  	{return P[kPhi];} 
+  Double_t &phi()  	{return P[kPhi];} 
   Double_t &ptin() 	{return P[kPtin];}
   Double_t &tanl() 	{return P[kTan];}
   Double_t &curv() 	{return P[kCurv];}
