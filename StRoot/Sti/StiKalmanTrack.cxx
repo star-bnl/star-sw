@@ -1,11 +1,17 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.128 2014/10/14 02:27:12 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.128 2014/10/14 02:27:12 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.129 2014/10/16 22:20:25 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.129 2014/10/16 22:20:25 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.129  2014/10/16 22:20:25  perev
+ * In method refitL() added additional loop to test nodes for inside/outside.
+ * This is temporary, for debugging
+ * call of nudge() added to move node position onto detector plane.
+ * If failed, node defined as invalid
+ *
  * Revision 2.128  2014/10/14 02:27:12  perev
  * nudge() & inside() added
  *
@@ -1587,15 +1593,24 @@ int StiKalmanTrack::refit()
 int StiKalmanTrack::refitL() 
 {
 static int nCall=0;nCall++;
-  StiDebug::Break(nCall);
-
   StiKTNIterator source;
   StiKalmanTrackNode *pNode = 0,*targetNode;
   int iNode=0, status = 0,isStarted=0,restIsWrong=0;
+  StiDebug::Break(nCall);
+
+  for (source=begin();source!=end();source++) {
+    iNode++;
+    targetNode = &(*source);
+    if (!targetNode->isValid()) 	continue;
+    targetNode->nudge();
+assert(targetNode->inside());
+  }//end for of nodes
+
+  pNode = 0; iNode=0;isStarted=0;restIsWrong=0;
   for (source=rbegin();source!=rend();source++) {
     iNode++;
     targetNode = &(*source);
-    if (restIsWrong) { targetNode->setInvalid(); continue;}
+    if (restIsWrong) 		{ targetNode->setInvalid(); continue;}
 
     if (!isStarted) {
       if (!targetNode->getHit()) 	targetNode->setInvalid();		
@@ -1603,11 +1618,12 @@ static int nCall=0;nCall++;
       if (!targetNode->isValid()) 	continue;
     }
     isStarted++;
+    if (targetNode->nudge()) 	{restIsWrong = 2014; targetNode->setInvalid(); continue;}
+assert(targetNode->inside());
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(0);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
-    if (!targetNode->isValid()) 	continue;
-    targetNode->nudge();
+    if (status) 		{restIsWrong = 2005; targetNode->setInvalid();continue;}
+    if (targetNode->nudge()) 	{restIsWrong = 2014; targetNode->setInvalid();continue;};
     assert(targetNode->inside());
     pNode = targetNode;
   }//end for of nodes
@@ -1623,10 +1639,14 @@ static int nCall=0;nCall++;
       if (!targetNode->isValid()) 	continue;
     }
     isStarted++;
+
+    if (targetNode->nudge()) 	{restIsWrong = 2014; targetNode->setInvalid(); continue;};
+assert(targetNode->inside());
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
-    if (!targetNode->isValid()) 	continue;
+    if (status) {restIsWrong = 2005; targetNode->setInvalid();continue;}
+    if (targetNode->nudge()) 	{restIsWrong = 2014; targetNode->setInvalid();continue;};
+assert(targetNode->inside());
     pNode = targetNode;
   }//end for of nodes
   return 0;
@@ -1755,6 +1775,7 @@ double Xi2=0;
     cirl = circ;
     double alfa = targetNode->getAlpha();
     cirl.Rot(-alfa);
+
     StiNodePars P = targetNode->fitPars();
     P.x()  =  cirl.Pos()[0];
     P.y()  =  cirl.Pos()[1];
