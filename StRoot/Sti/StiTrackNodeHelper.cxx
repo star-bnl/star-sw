@@ -141,7 +141,21 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     double cosd = cosCA2*rotPars._cosCA+sinCA2*rotPars._sinCA;
     dl = atan2(sind,cosd)/rho;
   }
-
+  if (mDetector && mDetector->getShape()->getShapeCode()>1) { // non planar shape
+    double rN = mDetector->getPlacement()->getNormalRadius();
+    for (int it=0;it<100;it++) {
+       double dif = rN*rN-x2*x2-y2*y2;
+       if (fabs(dif)<rN*1e-3) break;
+       if (it>=99) return 2;
+       double t = - 0.5*dif/(x2*cosCA2+y2*sinCA2);
+       if (fabs(t)>1.0) t/=fabs(t);
+       double ang = t*rotPars.curv();
+       if (fabs(ang)>0.1) { t*=0.1/fabs(ang); ang*= 0.1/fabs(ang);}
+       x2 += cosCA2*t; y2+=sinCA2*t; dl+=t;
+       double c = cosCA2;
+       cosCA2 = c*cos(ang)-sinCA2*sin(ang);
+       sinCA2 = c*sin(ang)+sinCA2*cos(ang);
+  } }
   proPars.x() = x2;
   proPars.y() = y2;
   proPars.z() = rotPars.z() + dl*rotPars.tanl();
