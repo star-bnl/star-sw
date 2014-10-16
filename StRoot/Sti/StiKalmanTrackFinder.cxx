@@ -649,7 +649,7 @@ static int activeNonActiveLoop = StiDebug::iFlag("activeNonActiveLoop");
       position = testNode.propagate(leadNode,tDet,direction);
       if (position == kEnded) { gLevelOfFind--; return;}
       if (debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
-      if (position<0 || position>kEdgeZplus) { 
+      if (position<0) { 
 	// not reaching this detector layer - stop track
 	if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
 	if (debug() >= 1) StiKalmanTrackNode::PrintStep();
@@ -657,10 +657,9 @@ static int activeNonActiveLoop = StiDebug::iFlag("activeNonActiveLoop");
       }
 
       foundInDetLoop = 1;		//activeNonActive
-
-      if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
       assert(testNode.isValid());
       testNode.setDetector(tDet);
+assert(testNode.inside());
       int active = tDet->isActive(testNode.getY(),testNode.getZ());
 
       if (debug() > 2) cout << " vol active:" << active<<endl;
@@ -710,12 +709,7 @@ static int activeNonActiveLoop = StiDebug::iFlag("activeNonActiveLoop");
 	StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
 	*node = testNode;
         node->nudge();
-{
-if (node->getHit()==0) {
-    double rN = node->getDetector()->getPlacement()->getNormalRadius();
-    assert(node->getRxy()>=rN*0.999);
-}
-}
+assert(node->inside());
 
         status = 0;
         do {//fake do
@@ -725,6 +719,9 @@ if (node->getHit()==0) {
           node->setHit(stiHit);
           status = node->updateNode();
           if (status)  break;
+          node->nudge();
+assert(node->inside());
+
           node->setChi2(hitCont.getChi2(jHit));
           if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
 	  if (debug() > 0) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
