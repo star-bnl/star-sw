@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.218 2014/10/08 01:29:28 perev Exp $
+// $Id: StiMaker.cxx,v 1.219 2014/10/16 22:39:59 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -30,7 +30,6 @@ More detailed: 				<br>
      SetAttr("useSvt",  1) && SetAttr("activeSvt"  ,0) 	// default
      SetAttr("useSsd"  ,0) && SetAttr("activeSsd"  ,0)	// default Off
 
-     SetAttr("usePixel",0) && SetAttr("activePixel",0)	// default Off
      SetAttr("useIst"  ,0) && SetAttr("activeIst"  ,0)	// default Off
 
      SetAttr("useHpd"  ,0) && SetAttr("activeHpd"  ,0)	// default Off
@@ -163,11 +162,10 @@ StiMaker::StiMaker(const Char_t *name) :
   SetAttr("useTpc"		,kTRUE);
   SetAttr("activeTpc"		,kTRUE);
 
-  SetAttr("useSvt"		,kTRUE);
+//SetAttr("useSvt"		,kTRUE);
 //SetAttr("activeSvt"		,kTRUE);
-  SetAttr("useSsd"		,kTRUE);
+//SetAttr("useSsd"		,kTRUE);
 
-  //SetAttr("usePixel"		,kTRUE);
   //SetAttr("useSst"		,kTRUE);
   //SetAttr("useIst"		,kTRUE);
 
@@ -550,8 +548,11 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   }
   return fVolume;
 }
-// $Id: StiMaker.cxx,v 1.218 2014/10/08 01:29:28 perev Exp $
+// $Id: StiMaker.cxx,v 1.219 2014/10/16 22:39:59 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.219  2014/10/16 22:39:59  perev
+// Only Tpc is default now
+//
 // Revision 1.218  2014/10/08 01:29:28  perev
 // Remove redundant inputFile
 //
