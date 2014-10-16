@@ -11,6 +11,7 @@
 #include "StiDetectorContainer.h"
 #include "StiDetector.h"
 #include "Sti/StiToolkit.h"
+#include "StiUtilities/StiDebug.h"
 #include "StiMapUtilities.h"
 
 
@@ -156,19 +157,29 @@ return shape->getVolume()*material->getDensity();
 //______________________________________________________________________________
 int StiDetector::insideL(const double xl[3]) const 
 {
+static const int insideAssert = StiDebug::iFlag("insideAssert");
+if (!insideAssert) return 1;
+
+static int nCall = 0; nCall++;
+static const double fakt = 1.9;
 double rN = placement->getNormalRadius();
 double thick = shape->getThickness();
-if (shape->getShapeCode()==1) { //Planar
-  if (fabs(xl[0]-rN)>thick/2) 			return 0;
-  double y = xl[1]-placement->getNormalYoffset();
-  if (fabs(y)>shape->getHalfWidth()) 		return 0;
+do {
+ if (shape->getShapeCode()==1) { //Planar
+  if (fabs(xl[0]-rN)>thick/2) 				break;
+//   double y = xl[1]-placement->getNormalYoffset();
+//   double dy = shape->getHalfWidth()*fakt;
+//   if (fabs(y)>dy) 					break;
  } else {
   double rxy = sqrt(xl[0]*xl[0]+xl[1]*xl[1]);
-  if (fabs(rxy-rN)>thick/2) 			return 0;
-    double ang = atan2(xl[1],xl[0]);
-    if (fabs(ang)>shape->getOpeningAngle()/2)	return 0;
+  if (fabs(rxy-rN)>thick/2) 				break;
+//     double ang = atan2(xl[1],xl[0]);
+//     if (fabs(ang)>shape->getOpeningAngle()/2*fakt)	break;
   } 
   double z = xl[2]-placement->getZcenter();  
-  if (fabs(z)>shape->getHalfDepth())		return 0;
+  if (fabs(z)>shape->getHalfDepth()*fakt)		break;
   return 1;
+} while(0);
+  return 0;
+
 }
