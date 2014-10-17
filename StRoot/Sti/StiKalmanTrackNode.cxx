@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.146 2014/10/16 22:28:45 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.147 2014/10/17 19:47:27 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.147  2014/10/17 19:47:27  perev
+ * Method nudge rewritten. Logic was too complicated, as a result wrong assert happened.
+ * Now numerous cases checked carefully.
+ *
  * Revision 2.146  2014/10/16 22:28:45  perev
  * Method nudge() rewritten. For complicated cases THelixTrack used.
  * Check for kFarFromBeam putted back (Xin found). It was removed by mistake
@@ -1120,28 +1124,32 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
 
   StiHit *hit = hitp;
   double deltaX = 0,rN=0,sCA2,cCA2,deltaY,deltaL;
-  int kase = 0,shapeCode=0;		// 0=shift accounting deltaX, 1=use THelixTrack
-  if (hit) { deltaX = hit->x()-mFP.x();}
-  else if (_detector) {
-    rN = _detector->getPlacement()->getNormalRadius();
-    shapeCode = _detector->getShape()->getShapeCode();
-    if (shapeCode==1) 	{
-      deltaX = rN-mFP.x();}
-    else						{
-      double t = 0.5*(rN*rN-mFP.rxy2())/(mFP.x()*mFP._cosCA+mFP.y()*mFP._sinCA);
-      deltaX = mFP._cosCA*t;
-      if (fabs(t) > 0.1*rN || fabs(t*mFP.curv()) > 0.1) kase = 1;
+  int kase = 0,kaze = 0,shapeCode=0;		// 0=shift accounting deltaX, 1=use THelixTrack
 
-  } }  
-  else { assert(0 && "Wrong Node");}
-
-
-  if(fabs(deltaX)>kTooFar)	kase = 1;
-  if (fabs(deltaX) <1.e-5) 	return  0;
+  do {
+   if ( hit) 			{kase = 1; break;}
+   if ( !_detector && _hit)	{kase = 1; hit = _hit; break;}
+   assert(_detector);
+   shapeCode =_detector->getShape()->getShapeCode();
+   rN = _detector->getPlacement()->getNormalRadius();
+   if ( shapeCode ==1) 		{kase = 2; break;}
+   kase = 3;
+  } while(0);
 
   switch(kase) {
+    case 1: { deltaX = hit->x()-mFP.x(); break;}
+    case 2: { deltaX = rN-mFP.x()      ; break;}
+    case 3: {
+      double t = 0.5*(rN*rN-mFP.rxy2())/(mFP.x()*mFP._cosCA+mFP.y()*mFP._sinCA);
+      deltaX = mFP._cosCA*t;
+      if (fabs(t) > 0.1*rN || fabs(t*mFP.curv()) > 0.1) kaze = 1; break;}
+    default: { assert(0 && "Wrong Node");}
+  }//end switch
+  
+  if (fabs(deltaX)>kTooFar)	kaze = 1;
+  if (fabs(deltaX) <1.e-5) 	return  0;
 
-
+  switch(kaze) {
   case 0: {// easy way
     double deltaS = mFP.curv()*(deltaX);
     sCA2 = mFP._sinCA + deltaS;
@@ -1170,7 +1178,7 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
       case 0:;case 1:
         surf[0]=mFP.x()+deltaX;surf[1]=-1;nSurf=4;break;
       case 2: 
-        surf[0]=rN*rN;         surf[4]=-1;nSurf=7;break;
+        surf[0]=rN*rN; surf[4]=-1; surf[5]=-1; nSurf=7;break;
       default: assert(0 && "Wrong shape code"); 
     }//end switch
 
