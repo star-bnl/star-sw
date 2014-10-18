@@ -397,6 +397,11 @@ if (botOho) StiDebug::Break(-1946);
     gGeoManager->LocalToMaster(box->GetOrigin(),&global[0]);
     double D[3] = {box->GetDX(),box->GetDY(),box->GetDZ()};
 
+    double axiL[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
+    double axiG[3][3];
+    for (int i=0;i<3;i++) { gGeoManager->LocalToMasterVect(axiL[i],axiG[i]);}
+    
+
     double corner[3];
     TVector3 gorner[8];
     for (int msk=0;msk<8;msk++) {
@@ -412,7 +417,8 @@ if (botOho) StiDebug::Break(-1946);
       G[1]+=gorner[i][0]*gorner[i][1];
       G[2]+=gorner[i][1]*gorner[i][1];
     }
-
+    for (int i=0;i<3;i++) {G[i]/=8.;}
+  
     TVector3 eig[3]; eig[2][2]=1;
     double lam[2];
     eigen2(G, lam,&(eig[1][0]));	// lam[0] related to Y, and lam[1] to X
