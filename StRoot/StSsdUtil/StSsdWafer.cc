@@ -1,10 +1,10 @@
 
 
-// $Id: StSsdWafer.cc,v 1.14 2014/10/18 18:27:08 bouchet Exp $
+// $Id: StSsdWafer.cc,v 1.15 2014/10/18 19:31:56 smirnovd Exp $
 //
 // $Log: StSsdWafer.cc,v $
-// Revision 1.14  2014/10/18 18:27:08  bouchet
-// 1st commit
+// Revision 1.15  2014/10/18 19:31:56  smirnovd
+// Revert "1st commit" asked by Jonathan
 //
 // Revision 1.13  2009/10/29 18:36:00  fine
 // Char_t *xyz type to be const
@@ -120,15 +120,15 @@ The wafer initialisation. The geom info is taken from the method arguments. The 
 Only the WafersPosition are used at the moment. This part should be updated to take into account
 the relative position of the ladders, sectors and barrel.
  */
-void StSsdWafer::init(Int_t rId, Double_t *rD, Double_t *rN, Double_t *rT, Double_t *rX)
+void StSsdWafer::init(Int_t rId, Double_t *rD, Double_t *rT, Double_t *rN, Double_t *rX)
 {
   if (rId != mId) cout<<" Can not initialize wafer number : "<<mId<<" with "<<rId<<"\n";
   else {
     SetName(Form("R%04i",rId));
     Double_t rot[9] = {
-      rD[0],  rN[0], rT[0],
-      rD[1],  rN[1], rT[1],
-      rD[2],  rN[2], rT[2]
+      rD[0],  rT[0], rN[0],
+      rD[1],  rT[1], rN[1],
+      rD[2],  rT[2], rN[2]
     };
     SetRotation(rot);
     SetTranslation(rX);
@@ -265,16 +265,6 @@ Does the cluster finding in two steps for both sides :
 - a cluster splitting  
  */
 void StSsdWafer::doClusterisation(Int_t *NClusterPerSide, StSsdClusterControl *clusterControl)
-{
-  Int_t iSide = 0;
-  doFindCluster(clusterControl, iSide);
-  NClusterPerSide[0] = doClusterSplitting(clusterControl, iSide); 
-  iSide = 1;
-  doFindCluster(clusterControl, iSide); 
-  NClusterPerSide[1] = doClusterSplitting(clusterControl, iSide);
-}
-//________________________________________________________________________________
-void StSsdWafer::doClusterisation(Int_t *NClusterPerSide, StSsdClusterControl *clusterControl, Int_t *correctFactorP, Int_t *correctFactorN)
 {
   Int_t iSide = 0;
   doFindCluster(clusterControl, iSide);
@@ -2525,8 +2515,7 @@ Int_t StSsdWafer::convertUFrameToLocal(ssdDimensions_st *dimensions)
     {
       //      printf("posU(0)=%f posU(1)=%f\n",currentPoint->getPositionU(0),currentPoint->getPositionU(1));
       currentPoint->setXl(currentPoint->getPositionU(0)/2.+currentPoint->getPositionU(1)/2.-dimensions[0].waferHalfActLength+dimensions[0].waferHalfActWidth*tan(dimensions[0].stereoAngle),0);
-      currentPoint->setXl((currentPoint->getPositionU(1)-currentPoint->getPositionU(0))/(2*tan(dimensions[0].stereoAngle)),2);
-      currentPoint->setXl(0.0,1);
+      currentPoint->setXl((currentPoint->getPositionU(1)-currentPoint->getPositionU(0))/(2*tan(dimensions[0].stereoAngle)),1);
       currentPoint = mPoint->next(currentPoint);
     }
   return 1;
@@ -2537,7 +2526,7 @@ Int_t StSsdWafer::convertLocalToGlobal() {
   Double_t xg[3];
   while(currentPoint) {
     // sign (-) of B[0] : temporarily fixed - order of strip readout has to be reversed 
-    Double_t  xl[3] = {currentPoint->getXl(0), currentPoint->getXl(1), currentPoint->getXl(2)};
+    Double_t  xl[3] = {-currentPoint->getXl(0), currentPoint->getXl(1), currentPoint->getXl(2)};
     LocalToMaster(xl,xg);
     currentPoint->setXg(xg[0],0);
     currentPoint->setXg(xg[1],1);
@@ -2555,7 +2544,7 @@ Int_t StSsdWafer::convertGlobalToLocal() {
     Double_t xg[3] = {temp->getXg(0), temp->getXg(1), temp->getXg(2)};
     Double_t xl[3];
     MasterToLocal(xg,xl);
-    temp->setXl( xl[0], 0);
+    temp->setXl(-xl[0], 0);
     temp->setXl( xl[1], 1);
     temp->setXl( xl[2], 2);
     temp = mPoint->next(temp);

@@ -1,8 +1,8 @@
-// $Id: StSsdBarrel.hh,v 1.12 2014/10/18 18:27:08 bouchet Exp $
+// $Id: StSsdBarrel.hh,v 1.13 2014/10/18 19:31:56 smirnovd Exp $
 //
 // $Log: StSsdBarrel.hh,v $
-// Revision 1.12  2014/10/18 18:27:08  bouchet
-// 1st commit
+// Revision 1.13  2014/10/18 19:31:56  smirnovd
+// Revert "1st commit" asked by Jonathan
 //
 // Revision 1.11  2012/06/11 14:58:24  fisyak
 // std namespace
@@ -119,7 +119,6 @@ class StSsdBarrel
   Int_t writeNewNoiseToFile3(St_ssdPedStrip *pedStrip, char myLabel[]);
   void  doSideClusterisation(Int_t *numberOfCluster);   
   void  doSideClusterisation(Int_t *numberOfCluster,Int_t WafStatus[20][16]);
-  void  doSideClusterisation(Int_t *numberOfCluster,Int_t WafStatus[20][16],Int_t correctFactor[1920][2]);
   Int_t doClusterMatching(Float_t CalibArray[320]);
   void  doDaqSimulation(slsCtrl_st* ctrl); //
   void  convertDigitToAnalog(StSsdDynamicControl *dynamicControl);

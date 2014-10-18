@@ -1,8 +1,8 @@
-// $Id: StSsdBarrel.cc,v 1.17 2014/10/18 18:27:07 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.18 2014/10/18 19:31:56 smirnovd Exp $
 //
 // $Log: StSsdBarrel.cc,v $
-// Revision 1.17  2014/10/18 18:27:07  bouchet
-// 1st commit
+// Revision 1.18  2014/10/18 19:31:56  smirnovd
+// Revert "1st commit" asked by Jonathan
 //
 // Revision 1.16  2009/11/09 22:33:03  bouchet
 // bug 1679 : declaration of size and initialization of arrays
@@ -665,7 +665,7 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 	    currentSsdHit->setIdTruth(pSpt->getNMchit(0));// need to check first = most probable!
 
 	    currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
-	    currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1),pSpt->getXl(2));
+	    currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1));
 	    //looking for the correct clusters...
 	    Int_t Id_P_Side = pSpt->getIdClusterP();
 	    Int_t Id_N_Side = pSpt->getIdClusterN();
@@ -834,7 +834,7 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
  	      +  268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1)
  	      + 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1);
   	    currentSsdHit->setHardwarePosition(hw);
-	    currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1),pSpt->getXl(2));
+	    currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1));
   	    inContainer += ssdHitColl->addHit(currentSsdHit);
 	  }// Container condition
 
@@ -1006,7 +1006,7 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 	      +  268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1)
 	      + 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1);
 	    currentSsdHit->setHardwarePosition(hw);
-	    currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1),pSpt->getXl(2));
+	    currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1));
 	    inContainer += ssdHitColl->addHit(currentSsdHit);
 	  }// Container condition
 	  
@@ -1313,29 +1313,6 @@ void StSsdBarrel::doSideClusterisation(Int_t *barrelNumbOfCluster,Int_t WafStatu
 	mLadders[iLad]->mWafers[iWaf]->doClusterisation(wafNumbOfCluster, mClusterControl);
 	barrelNumbOfCluster[0] += wafNumbOfCluster[0];
 	barrelNumbOfCluster[1] += wafNumbOfCluster[1];
-	}
-      }
-  //  delete[] wafNumbOfCluster;
-}
-//________________________________________________________________________________
-void StSsdBarrel::doSideClusterisation(Int_t *barrelNumbOfCluster,Int_t WafStatus[20][16],Int_t correctFactor[1920][2]){
-  //  Int_t *wafNumbOfCluster = new int[2];
-  Int_t wafNumbOfCluster[2];
-  wafNumbOfCluster[0] = 0;
-  wafNumbOfCluster[1] = 0;
-  Int_t correctFactorP[6],correctFactorN[6]; // we fill the correction factors for the 6 chips of a given wafer in 1 go
-  for (Int_t iLad = 0 ; iLad < mNLadder; iLad++)
-    for (Int_t iWaf = 0 ; iWaf < mNWaferPerLadder; iWaf++)
-      {
-	if(WafStatus[iLad][iWaf]!=0){
-	  for(int iChip=0;iChip<6;++iChip){
-	    correctFactorP[iChip] = correctFactor[iLad*96+iWaf*6+iChip][0];
-	    correctFactorN[iChip] = correctFactor[iLad*96+iWaf*6+iChip][1];
-	  }
-	  //mLadders[iLad]->mWafers[iWaf]->doClusterisation(wafNumbOfCluster, mClusterControl);
-	  mLadders[iLad]->mWafers[iWaf]->doClusterisation(wafNumbOfCluster, mClusterControl,correctFactorP,correctFactorN);
-	  barrelNumbOfCluster[0] += wafNumbOfCluster[0];
-	  barrelNumbOfCluster[1] += wafNumbOfCluster[1];
 	}
       }
   //  delete[] wafNumbOfCluster;
