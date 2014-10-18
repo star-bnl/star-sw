@@ -1,6 +1,9 @@
-// $Id: StSsdLadder.cc,v 1.3 2008/01/11 10:40:38 bouchet Exp $
+// $Id: StSsdLadder.cc,v 1.4 2014/10/18 18:27:08 bouchet Exp $
 //
 // $Log: StSsdLadder.cc,v $
+// Revision 1.4  2014/10/18 18:27:08  bouchet
+// 1st commit
+//
 // Revision 1.3  2008/01/11 10:40:38  bouchet
 // Use of the wafer configuration table
 //
@@ -62,7 +65,7 @@ void StSsdLadder::initWafers(St_ssdWafersPosition *Position)
       iWaf = idWaferToWafer(idWafer);
       if ((idWafer > mSsdLayer*1000)&&
 	  (mLadderNumb == idWafer%100-1)){
-	mWafers[iWaf]->init(idWafer, position[i].driftDirection, position[i].transverseDirection, position[i].normalDirection, position[i].centerPosition);}
+	mWafers[iWaf]->init(idWafer, position[i].driftDirection, position[i].normalDirection, position[i].transverseDirection, position[i].centerPosition);}
     }
 }
 
@@ -80,7 +83,7 @@ void StSsdLadder::initWafers(St_ssdWafersPosition *Position,Int_t WafStatus[20][
           (mLadderNumb == idWafer%100-1)){
 	if(WafStatus[mLadderNumb][iWaf]!=0){
 	  printf("Ladder %d Wafer %d  status %d\n",mLadderNumb,iWaf,WafStatus[mLadderNumb][iWaf]); 
-	  mWafers[iWaf]->init(idWafer, position[i].driftDirection, position[i].transverseDirection, position[i].normalDirection, position[i].centerPosition);
+	  mWafers[iWaf]->init(idWafer, position[i].driftDirection, position[i].normalDirection, position[i].transverseDirection, position[i].centerPosition);
 	}
       } 
     } 
