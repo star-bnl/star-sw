@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.hh,v 1.5 2009/02/23 21:10:40 bouchet Exp $
+// $Id: StSsdWafer.hh,v 1.6 2014/10/18 18:27:08 bouchet Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.6  2014/10/18 18:27:08  bouchet
+// 1st commit
+//
 // Revision 1.5  2009/02/23 21:10:40  bouchet
 // increase NSaturationSignal to reflect the energy increase of the GEANT hit
 //
@@ -76,14 +79,14 @@ class StSsdWafer: public TGeoHMatrix {
   StSsdWafer(const StSsdWafer & originalWafer);
   StSsdWafer& operator=(const StSsdWafer originalWafer);
 
-  void              init(Int_t rId, Double_t *rD, Double_t *rT, Double_t *rN, Double_t *rX);
+  void              init(Int_t rId, Double_t *rD, Double_t *rN, Double_t *rT, Double_t *rX);
 
   void setID(Int_t i){mId = i;}
   void setDriftDirection(Double_t x1, Double_t x2, Double_t x3)      
   {Double_t *r = GetRotationMatrix();  r[0] = x1; r[3] = x2; r[6] = x3;}
-  void setTransverseDirection(Double_t x1, Double_t x2, Double_t x3) 
+  void setNormalDirection(Double_t x1, Double_t x2, Double_t x3) 
   {Double_t *r = GetRotationMatrix();  r[1] = x1; r[4] = x2; r[7] = x3;}
-  void setNormalDirection(Double_t x1, Double_t x2, Double_t x3)     
+  void setTransverseDirection(Double_t x1, Double_t x2, Double_t x3)     
   {Double_t *r = GetRotationMatrix();  r[2] = x1; r[5] = x2; r[8] = x3;}
   void setCenterPosition(Double_t x1, Double_t x2, Double_t x3)  {Double_t *t = GetTranslation(); t[0] = x1; t[1] = x2; t[2] = x3;}
   StSsdClusterList* getClusterP() { return mClusterP; } //!< Returns the P-side cluster list attached to this wafer
@@ -98,8 +101,8 @@ class StSsdWafer: public TGeoHMatrix {
   Int_t             getIdWafer()  { return mId; } 
   Int_t             getId()       {return getIdWafer();}
   Double_t d(Int_t i){Double_t *r = GetRotationMatrix(); return r[3*i];  }
-  Double_t t(Int_t i){Double_t *r = GetRotationMatrix(); return r[3*i+1];}
-  Double_t n(Int_t i){Double_t *r = GetRotationMatrix(); return r[3*i+2];}
+  Double_t n(Int_t i){Double_t *r = GetRotationMatrix(); return r[3*i+1];}
+  Double_t t(Int_t i){Double_t *r = GetRotationMatrix(); return r[3*i+2];}
   Double_t x(Int_t i){Double_t *t = GetTranslation();    return t[i];    }
 
   void              addCluster(StSsdCluster *ptr, Int_t iSide); //!< Attaches the ptr cluster on the iSide of the wafer
@@ -124,6 +127,7 @@ class StSsdWafer: public TGeoHMatrix {
   void              sortStrip();  //?
 
   void              doClusterisation(Int_t *numberOfCluster, StSsdClusterControl *clusterControl);
+  void              doClusterisation(Int_t *numberOfCluster, StSsdClusterControl *clusterControl,Int_t *correctFactorP,Int_t *correctFactorN);
   Int_t             doClusterSplitting(StSsdClusterControl *clusterControl, Int_t iSide);
   Int_t             doFindCluster(StSsdClusterControl *clusterControl, Int_t iSide);      //!< Does the cluster finding
   Int_t             doFindPackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl); 
