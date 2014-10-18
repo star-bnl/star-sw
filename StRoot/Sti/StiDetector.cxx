@@ -71,7 +71,6 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
 static int nCall=0; nCall++;
 
 
-  double startWeight = getWeight();
   vect.resize(1);
   vect[0]=this;
   assert(shape);
@@ -161,7 +160,7 @@ static const int insideAssert = StiDebug::iFlag("insideAssert");
 if (!insideAssert) return 1;
 
 static int nCall = 0; nCall++;
-static const double fakt = 1.9;
+//static const double fakt = 1.9;
 double rN = placement->getNormalRadius();
 double thick = shape->getThickness();
 do {
@@ -176,8 +175,8 @@ do {
 //     double ang = atan2(xl[1],xl[0]);
 //     if (fabs(ang)>shape->getOpeningAngle()/2*fakt)	break;
   } 
-  double z = xl[2]-placement->getZcenter();  
-  if (fabs(z)>shape->getHalfDepth()*fakt)		break;
+//   double z = xl[2]-placement->getZcenter();  
+//   if (fabs(z)>shape->getHalfDepth()*fakt)		break;
   return 1;
 } while(0);
   return 0;
