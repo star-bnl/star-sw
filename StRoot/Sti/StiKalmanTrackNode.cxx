@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.147 2014/10/17 19:47:27 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148 2014/10/18 03:00:03 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148  2014/10/18 03:00:03  perev
+ * Linear approximation in nudge if shift < 0.01/curvature
+ * xyz was not updated in cyl case + THelix
+ *
  * Revision 2.147  2014/10/17 19:47:27  perev
  * Method nudge rewritten. Logic was too complicated, as a result wrong assert happened.
  * Now numerous cases checked carefully.
@@ -1142,7 +1146,7 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
     case 3: {
       double t = 0.5*(rN*rN-mFP.rxy2())/(mFP.x()*mFP._cosCA+mFP.y()*mFP._sinCA);
       deltaX = mFP._cosCA*t;
-      if (fabs(t) > 0.1*rN || fabs(t*mFP.curv()) > 0.1) kaze = 1; break;}
+      if (fabs(t) > 0.1*rN || fabs(t*mFP.curv()) > 0.01) kaze = 1; break;}
     default: { assert(0 && "Wrong Node");}
   }//end switch
   
@@ -1182,10 +1186,11 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
       default: assert(0 && "Wrong shape code"); 
     }//end switch
 
-    deltaL = hlx.Path(999.,surf,nSurf,0,0,1);
+    double x[3];
+    deltaL = hlx.Path(999.,surf,nSurf,x,0,1);
     if (fabs(deltaL) >=999) 		return -2;
     mFP.phi() += deltaL*mFP.curv();
-    memcpy(mFP.P,hlx.Pos(),3*sizeof(mFP.P[0]));
+    memcpy(mFP.P,x,sizeof(x));
     mFP.ready();
     break;}
   }
