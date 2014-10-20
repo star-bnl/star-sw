@@ -1248,7 +1248,7 @@ Bfc_st BFC[] = { // standard chains
   {"eemcDb"      ,"eeDb" ,"","db,EEmcUtil",      "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db",                  "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
-  {"pxlDb"       ,"pxlDb","","tpcDb",               "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
+  {"pxlDb"       ,"pxlDb","","tpcDb PxlUtil",       "StPxlDbMaker","StPxlDbMaker","Load PxlDbMaker",kFALSE},
   {"istDb"       ,"istDb","","tpcDb",               "StIstDbMaker","StIstDbMaker","Load IstDbMaker",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1368,9 +1368,9 @@ Bfc_st BFC[] = { // standard chains
 
   {"pxlFastSim"  ,"","","StMcEvent,StEvent"
    ,                                           "StPxlSimMaker","StPxlSimMaker","FastPixelSimulator",kFALSE},
-  {"pxlRaw"      ,"","","pxlUtil,pxlDb",  "StPxlRawHitMaker","StPxlRawHitMaker","Pxl Raw Hit Maker",kFALSE},
-  {"pxlCluster"  ,"","","pxlUtil",      "StPxlClusterMaker","StPxlClusterMaker","Pxl Cluster Maker",kFALSE},
-  {"pxlHit"      ,"","","pxlUtil,event,pxlDb",      "StPxlHitMaker","StPxlHitMaker","Pxl Hit Maker",kFALSE},
+  {"pxlRaw"      ,"","","pxlDb",    "StPxlRawHitMaker", "StPxlRawHitMaker", "Run PXL raw hit maker",kFALSE},
+  {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "Run PXL cluster maker",kFALSE},
+  {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker", "Run PXL hit maker",kFALSE},
   //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},
 
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
