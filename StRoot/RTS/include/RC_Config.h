@@ -695,9 +695,12 @@ void writeRCCNF(char *fn, STAR_CFG *cfg);   // write rc def file...
 bool node_inrun(int node, STAR_CFG *cfg);
 bool system_inrun(int sys, STAR_CFG *cfg);
 void maskDetectorsInRun(STAR_CFG *cfg);
+bool system_inrun(int sys, SimpleXmlDoc *xml);
+void maskDetectorsInRun(SimpleXmlDoc *xml);
 
 
 bool cfgBuildPS(TrgPS *ps, RC_Config *rccfg);
+bool cfgBuildPS(TrgPS *ps, SimpleXmlDoc *xml);
 
 
 

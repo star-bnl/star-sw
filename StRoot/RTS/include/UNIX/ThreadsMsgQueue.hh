@@ -19,7 +19,7 @@ public:
   thrMsgQueue(int s) ; // number of elements of type T deep
   ~thrMsgQueue() ;
   int send(T* a, int prio = 0 ) ;  // 0 = low  prio != 0 == high  
-  int receive(T* a) ;              // Blocking  
+    int receive(T*, int block=1) ;              // Blocking  
 #ifndef sun
   int peek(T* a);           
 #endif
@@ -124,22 +124,32 @@ template <class T> int thrMsgQueue<T>::send(T* a, int prio = 0)
   return(0) ; // send it !!!
 };
 //-----------------------------------------------------
-template <class T> int thrMsgQueue<T>::receive(T* a)
+template <class T> int thrMsgQueue<T>::receive(T* a, int block)
 {
   int iret ;
 
  l1:
   errno = 0 ;
+
+  if(block) {
 #ifdef sun
-  iret = sema_wait(&occupied);
+      iret = sema_wait(&occupied);
 #else
-  iret = sem_wait(&occupied);
+      iret = sem_wait(&occupied);
 #endif
+  }
+  else {
+      iret = sem_trywait(&occupied);
+      if(iret < 0) {
+	  return -1;
+      }
+  }
+      
 
   if(iret) 
   { 
     if(errno == EINTR) goto l1;
-    return(-1);
+    return(-10);
   }
 
 #ifdef sun
@@ -158,7 +168,7 @@ template <class T> int thrMsgQueue<T>::receive(T* a)
 
   if(iret) 
   { 
-    return(-2) ;
+    return(-20) ;
   }
 
 #ifdef sun
