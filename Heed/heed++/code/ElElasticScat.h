@@ -3,6 +3,7 @@
 #include "wcpplib/util/String.h"
 #include "wcpplib/safetl/AbsArr.h"
 #include "wcpplib/safetl/AbsPtr.h"
+#include "HeedGlobals.h"
 
 /*
 Definition of elastic scattering for low-energy delta-electron.
@@ -30,7 +31,6 @@ class ElElasticScatDataStruct {
   double A[4];  // in -1.0 then the combination is not valid
   double C[7];
   double B;
-  //double D[2];  // not necessary - it is quality of fit
   double CS(double theta);  // return -1 if not valid
 };
 
@@ -42,8 +42,6 @@ class ElElasticScatData {
   ElElasticScatData(void) : Z(0) { ; }
   ElElasticScatData(long fZ, long qe) : Z(fZ), data(qe) { ; }
 };
-
-const double low_cut_angle_deg = 20.0;  // degrees
 
 // The following class presentes the data for any atom.
 // One object contains all data and presents them by request.

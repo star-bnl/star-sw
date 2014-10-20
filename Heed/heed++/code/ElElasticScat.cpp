@@ -23,15 +23,13 @@ namespace Heed {
 double ElElasticScatDataStruct::CS(double theta) {
   if (A[0] == -1.0) return -1.0;
   double s = 0.0;
-  double ctheta = cos(theta);
+  const double ctheta = cos(theta);
   for (long n = 0; n < 4; ++n) {
     s += A[n] / (pow(1.0 - ctheta + 2.0 * B, double(n + 1)));
   }
   for (long n = 0; n < 7; ++n) {
     s += C[n] * polleg(n, ctheta);
   }
-  //mcout << "ElElasticScatDataStruct::CS: theta=" << theta << " s=" << s <<
-  //'\n';
   return s;
 }
 
@@ -479,8 +477,7 @@ void ElElasticScat::fill_hist_low_scat(const String& file_name,
       //        (name, quan[qquan-1], 0.0, quan[qquan-1]);
       sigma_hist.ac(za - 1, ne).init();
       // run events
-      //long qev = 10000;
-      long qev = 100000;  // working value
+      long qev = 100000;
       long nev;
       long ncs;
       for (nev = 0; nev < qev; nev++) {

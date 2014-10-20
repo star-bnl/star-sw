@@ -40,8 +40,7 @@ PairProd::PairProd(const String& file_name, double fwa, double ffactorFano)
   }
   DynLinArr<double> xx(q);
   DynLinArr<double> yy(q);
-  long n;
-  for (n = 0; n < q; n++) {
+  for (long n = 0; n < q; n++) {
     file >> xx[n] >> yy[n];
   }
   pran = PointsRan(xx, yy, I_table, J_table);
@@ -53,30 +52,23 @@ PairProd::PairProd(const String& file_name, double fwa, double ffactorFano)
 
 double PairProd::get_eloss(void) const {
   mfunname("double PairProd::get_eloss(void) const");
-  //mcout<<"PairProd::get_eloss started\n";
-  double e_loss = k * pran.ran(SRANLUX()) + s;  // working wariant
-  //double e_loss = pran.ran(SRANLUX()); // for debug
-  //mcout<<"PairProd::get_eloss finished\n";
+  const double e_loss = k * pran.ran(SRANLUX()) + s;
   return e_loss;
 }
 
 #ifdef USE_GET_ELOSS_CUT
 
-double PairProd::get_eloss(double e_cur) const {
+double PairProd::get_eloss(const double e_cur) const {
   mfunname("double PairProd::get_eloss(double ecur) const");
-  //mcout<<"PairProd::get_eloss started\n";
   double e_loss = k * pran.ran(SRANLUX()) + s;
   if (e_cur - e_loss < w_cut_ratio * wa) e_loss = 1.0e20;  // to stop tracing
-
-  //mcout<<"PairProd::get_eloss finished\n";
   return e_loss;
 }
 
 #else
 
-double PairProd::get_eloss(double e_cur) const {
+double PairProd::get_eloss(const double e_cur) const {
   mfunname("double PairProd::get_eloss(double ecur) const");
-  //mcout<<"PairProd::get_eloss started\n";
   double e_loss = k * pran.ran(SRANLUX()) + s;
   double c;
   if (e_cur <= V_ratio * wa) {
@@ -85,26 +77,22 @@ double PairProd::get_eloss(double e_cur) const {
     //c = 1.0 / (1.0 - V_ratio * wa / e_cur);
     c = 1.0 / (1.0 - pow(V_ratio * wa / e_cur, 2.0));
   }
-  e_loss = e_loss * c;
-
-  //mcout<<"PairProd::get_eloss finished\n";
-  return e_loss;
+  return e_loss * c;
 }
 
 #endif
 
 void PairProd::print(std::ostream& file, int l) const {
-  if (l > 0) {
-    Ifile << "PairProd:\n";
-    indn.n += 2;
-    Ifile << "wa=" << wa << " factorFano=" << factorFano << '\n';
-    Ifile << "wa_table=" << wa_table << " factorFano_table=" << factorFano_table
-          << '\n';
-    Ifile << " I_table=" << I_table << " J_table=" << J_table << " k=" << k
-          << " s=" << s << '\n';
-    pran.print(file);
-    indn.n -= 2;
-  }
+  if (l <= 0) return;
+  Ifile << "PairProd:\n";
+  indn.n += 2;
+  Ifile << "wa=" << wa << " factorFano=" << factorFano << '\n';
+  Ifile << "wa_table=" << wa_table << " factorFano_table=" << factorFano_table
+        << '\n';
+  Ifile << " I_table=" << I_table << " J_table=" << J_table << " k=" << k
+        << " s=" << s << '\n';
+  pran.print(file);
+  indn.n -= 2;
 }
 
 }

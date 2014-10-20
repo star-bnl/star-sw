@@ -24,8 +24,6 @@ class PairProd : public RegPassivePtr {
   PairProd(const String& file_name, double fwa, double ffactorFano = 0.19);
   double get_eloss(void) const;         // in eV
   double get_eloss(double ecur) const;  // in eV assuming V = wa / 2.0
-                                        // ecur is also in eV
-  // No it can be different, see PairProd.c
 
   virtual void print(std::ostream& file, int l) const;
 

@@ -92,7 +92,11 @@ class ViewDrift {
   std::vector<driftLine> m_driftLines;
 
   unsigned int m_nTracks;
-  std::vector<TPointSet3D> m_tracks;
+  struct track {
+    std::vector<marker> vect;
+  };
+  std::vector<track> m_tracks;
+
   unsigned int m_nExcMarkers;
   std::vector<marker> m_excMarkers;
   TPointSet3D* m_excPlot;

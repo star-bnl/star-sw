@@ -13,8 +13,8 @@ namespace Garfield {
 double AvalancheMC::c1 = ElectronMass / (SpeedOfLight * SpeedOfLight);
 
 AvalancheMC::AvalancheMC()
-    : sensor(0),
-      nDrift(0),
+    : m_sensor(NULL),
+      m_nDrift(0),
       stepModel(2),
       tMc(0.02),
       dMc(0.001),
@@ -22,73 +22,73 @@ AvalancheMC::AvalancheMC()
       hasTimeWindow(false),
       tMin(0.),
       tMax(0.),
-      nElectrons(0),
-      nHoles(0),
-      nIons(0),
-      nEndpointsElectrons(0),
-      nEndpointsHoles(0),
-      nEndpointsIons(0),
-      usePlotting(false),
-      viewer(0),
-      useSignal(false),
-      useInducedCharge(false),
-      useEquilibration(true),
-      useDiffusion(true),
-      useAttachment(false),
-      useBfield(false),
-      useIons(true),
-      withElectrons(true),
-      withHoles(true),
-      scaleElectronSignal(1.),
-      scaleHoleSignal(1.),
-      scaleIonSignal(1.),
-      debug(false) {
+      m_nElectrons(0),
+      m_nHoles(0),
+      m_nIons(0),
+      m_nEndpointsElectrons(0),
+      m_nEndpointsHoles(0),
+      m_nEndpointsIons(0),
+      m_usePlotting(false),
+      m_viewer(NULL),
+      m_useSignal(false),
+      m_useInducedCharge(false),
+      m_useEquilibration(true),
+      m_useDiffusion(true),
+      m_useAttachment(false),
+      m_useBfield(false),
+      m_useIons(true),
+      m_withElectrons(true),
+      m_withHoles(true),
+      m_scaleElectronSignal(1.),
+      m_scaleHoleSignal(1.),
+      m_scaleIonSignal(1.),
+      m_debug(false) {
 
-  className = "AvalancheMC";
+  m_className = "AvalancheMC";
 
-  drift.reserve(10000);
+  m_drift.reserve(10000);
 }
 
 void AvalancheMC::SetSensor(Sensor* s) {
 
-  if (s == 0) {
-    std::cerr << className << "::SetSensor:\n";
+  if (!s) {
+    std::cerr << m_className << "::SetSensor:\n";
     std::cerr << "    Sensor pointer is null.\n";
     return;
   }
 
-  sensor = s;
+  m_sensor = s;
 }
 
 void AvalancheMC::EnablePlotting(ViewDrift* view) {
 
-  if (view == 0) {
-    std::cerr << className << "::EnablePlotting:\n";
+  if (!view) {
+    std::cerr << m_className << "::EnablePlotting:\n";
     std::cerr << "    Viewer pointer is null.\n";
     return;
   }
 
-  usePlotting = true;
-  viewer = view;
+  m_usePlotting = true;
+  m_viewer = view;
 }
 
 void AvalancheMC::DisablePlotting() {
 
-  viewer = 0;
-  usePlotting = false;
+  m_viewer = NULL;
+  m_usePlotting = false;
 }
 
 void AvalancheMC::SetTimeSteps(const double d) {
 
   stepModel = 0;
   if (d < Small) {
-    std::cerr << className << "::SetTimeSteps:\n";
+    std::cerr << m_className << "::SetTimeSteps:\n";
     std::cerr << "    Specified step size is too small.\n";
     std::cerr << "    Using default (20 ps) instead.\n";
     tMc = 0.02;
   } else {
-    if (debug) {
-      std::cout << className << "::SetTimeSteps:\n";
+    if (m_debug) {
+      std::cout << m_className << "::SetTimeSteps:\n";
       std::cout << "    Step size set to " << d << " ns.\n";
     }
     tMc = d;
@@ -99,13 +99,13 @@ void AvalancheMC::SetDistanceSteps(const double d) {
 
   stepModel = 1;
   if (d < Small) {
-    std::cerr << className << "::SetDistanceSteps:\n";
+    std::cerr << m_className << "::SetDistanceSteps:\n";
     std::cerr << "    Specified step size is too small.\n";
     std::cerr << "    Using default (10 um) instead.\n";
     dMc = 0.001;
   } else {
-    if (debug) {
-      std::cout << className << "::SetDistanceSteps:\n";
+    if (m_debug) {
+      std::cout << m_className << "::SetDistanceSteps:\n";
       std::cout << "    Step size set to " << d << " cm.\n";
     }
     dMc = d;
@@ -116,13 +116,13 @@ void AvalancheMC::SetCollisionSteps(const int n) {
 
   stepModel = 2;
   if (n < 1) {
-    std::cerr << className << "::SetCollisionSteps:\n";
+    std::cerr << m_className << "::SetCollisionSteps:\n";
     std::cerr << "    Number of collisions to be skipped set to "
               << " default value (100).\n";
     nMc = 100;
   } else {
-    if (debug) {
-      std::cout << className << "::SetCollisionSteps:\n";
+    if (m_debug) {
+      std::cout << m_className << "::SetCollisionSteps:\n";
       std::cout << "    Number of collisions to be skipped set to " << n
                 << ".\n";
     }
@@ -133,7 +133,7 @@ void AvalancheMC::SetCollisionSteps(const int n) {
 void AvalancheMC::SetTimeWindow(const double t0, const double t1) {
 
   if (fabs(t1 - t0) < Small) {
-    std::cerr << className << "::SetTimeWindow:\n";
+    std::cerr << m_className << "::SetTimeWindow:\n";
     std::cerr << "    Time interval must be greater than zero.\n";
     return;
   }
@@ -145,105 +145,106 @@ void AvalancheMC::SetTimeWindow(const double t0, const double t1) {
 
 void AvalancheMC::UnsetTimeWindow() { hasTimeWindow = false; }
 
-void AvalancheMC::GetDriftLinePoint(const int i, double& x, double& y,
+void AvalancheMC::GetDriftLinePoint(const unsigned int i, double& x, double& y,
                                     double& z, double& t) {
 
-  if (i < 0 || i >= nDrift) {
-    std::cerr << className << "::GetDriftLinePoint:\n";
+  if (i >= m_nDrift) {
+    std::cerr << m_className << "::GetDriftLinePoint:\n";
     std::cerr << "    Index is outside the range.\n";
     return;
   }
 
-  x = drift[i].x;
-  y = drift[i].y;
-  z = drift[i].z;
-  t = drift[i].t;
+  x = m_drift[i].x;
+  y = m_drift[i].y;
+  z = m_drift[i].z;
+  t = m_drift[i].t;
 }
 
-void AvalancheMC::GetHoleEndpoint(const int i, double& x0, double& y0,
+void AvalancheMC::GetHoleEndpoint(const unsigned int i, double& x0, double& y0,
                                   double& z0, double& t0, double& x1,
                                   double& y1, double& z1, double& t1,
                                   int& status) const {
 
-  if (i < 0 || i >= nEndpointsHoles) {
-    std::cerr << className << "::GetHoleEndpoint:\n";
+  if (i >= m_nEndpointsHoles) {
+    std::cerr << m_className << "::GetHoleEndpoint:\n";
     std::cerr << "    Endpoint " << i << " does not exist.\n";
     return;
   }
 
-  x0 = endpointsHoles[i].x0;
-  x1 = endpointsHoles[i].x1;
-  y0 = endpointsHoles[i].y0;
-  y1 = endpointsHoles[i].y1;
-  z0 = endpointsHoles[i].z0;
-  z1 = endpointsHoles[i].z1;
-  t0 = endpointsHoles[i].t0;
-  t1 = endpointsHoles[i].t1;
-  status = endpointsHoles[i].status;
+  x0 = m_endpointsHoles[i].x0;
+  x1 = m_endpointsHoles[i].x1;
+  y0 = m_endpointsHoles[i].y0;
+  y1 = m_endpointsHoles[i].y1;
+  z0 = m_endpointsHoles[i].z0;
+  z1 = m_endpointsHoles[i].z1;
+  t0 = m_endpointsHoles[i].t0;
+  t1 = m_endpointsHoles[i].t1;
+  status = m_endpointsHoles[i].status;
 }
 
-void AvalancheMC::GetIonEndpoint(const int i, double& x0, double& y0,
+void AvalancheMC::GetIonEndpoint(const unsigned int i, double& x0, double& y0,
                                  double& z0, double& t0, double& x1, double& y1,
                                  double& z1, double& t1, int& status) const {
 
-  if (i < 0 || i >= nEndpointsIons) {
-    std::cerr << className << "::GetIonEndpoint:\n";
+  if (i >= m_nEndpointsIons) {
+    std::cerr << m_className << "::GetIonEndpoint:\n";
     std::cerr << "    Endpoint " << i << " does not exist.\n";
     return;
   }
 
-  x0 = endpointsIons[i].x0;
-  x1 = endpointsIons[i].x1;
-  y0 = endpointsIons[i].y0;
-  y1 = endpointsIons[i].y1;
-  z0 = endpointsIons[i].z0;
-  z1 = endpointsIons[i].z1;
-  t0 = endpointsIons[i].t0;
-  t1 = endpointsIons[i].t1;
-  status = endpointsIons[i].status;
+  x0 = m_endpointsIons[i].x0;
+  x1 = m_endpointsIons[i].x1;
+  y0 = m_endpointsIons[i].y0;
+  y1 = m_endpointsIons[i].y1;
+  z0 = m_endpointsIons[i].z0;
+  z1 = m_endpointsIons[i].z1;
+  t0 = m_endpointsIons[i].t0;
+  t1 = m_endpointsIons[i].t1;
+  status = m_endpointsIons[i].status;
 }
 
-void AvalancheMC::GetElectronEndpoint(const int i, double& x0, double& y0,
+void AvalancheMC::GetElectronEndpoint(const unsigned int i, 
+                                      double& x0, double& y0,
                                       double& z0, double& t0, double& x1,
                                       double& y1, double& z1, double& t1,
                                       int& status) const {
 
-  if (i < 0 || i >= nEndpointsElectrons) {
-    std::cerr << className << "::GetElectronEndpoint:\n";
+  if (i >= m_nEndpointsElectrons) {
+    std::cerr << m_className << "::GetElectronEndpoint:\n";
     std::cerr << "    Endpoint " << i << " does not exist.\n";
     return;
   }
 
-  x0 = endpointsElectrons[i].x0;
-  x1 = endpointsElectrons[i].x1;
-  y0 = endpointsElectrons[i].y0;
-  y1 = endpointsElectrons[i].y1;
-  z0 = endpointsElectrons[i].z0;
-  z1 = endpointsElectrons[i].z1;
-  t0 = endpointsElectrons[i].t0;
-  t1 = endpointsElectrons[i].t1;
-  status = endpointsElectrons[i].status;
+  x0 = m_endpointsElectrons[i].x0;
+  x1 = m_endpointsElectrons[i].x1;
+  y0 = m_endpointsElectrons[i].y0;
+  y1 = m_endpointsElectrons[i].y1;
+  z0 = m_endpointsElectrons[i].z0;
+  z1 = m_endpointsElectrons[i].z1;
+  t0 = m_endpointsElectrons[i].t0;
+  t1 = m_endpointsElectrons[i].t1;
+  status = m_endpointsElectrons[i].status;
 }
 
 bool AvalancheMC::DriftElectron(const double x0, const double y0,
                                 const double z0, const double t0) {
 
-  if (sensor == 0) {
-    std::cerr << className << "::DriftElectron:\n";
+  if (!m_sensor) {
+    std::cerr << m_className << "::DriftElectron:\n";
     std::cerr << "    Sensor is not defined.\n";
     return false;
   }
 
-  endpointsElectrons.clear();
-  endpointsHoles.clear();
-  endpointsIons.clear();
-  nEndpointsElectrons = 0;
-  nEndpointsHoles = 0;
-  nEndpointsIons = 0;
+  m_endpointsElectrons.clear();
+  m_endpointsHoles.clear();
+  m_endpointsIons.clear();
+  m_nEndpointsElectrons = 0;
+  m_nEndpointsHoles = 0;
+  m_nEndpointsIons = 0;
 
-  nElectrons = 1;
-  nHoles = 0;
-  nIons = 0;
+  m_nElectrons = 1;
+  m_nHoles = 0;
+  m_nIons = 0;
 
   if (!DriftLine(x0, y0, z0, t0, -1)) return false;
 
@@ -253,22 +254,22 @@ bool AvalancheMC::DriftElectron(const double x0, const double y0,
 bool AvalancheMC::DriftHole(const double x0, const double y0, const double z0,
                             const double t0) {
 
-  if (sensor == 0) {
-    std::cerr << className << "::DriftHole:\n";
+  if (!m_sensor) {
+    std::cerr << m_className << "::DriftHole:\n";
     std::cerr << "    Sensor is not defined.\n";
     return false;
   }
 
-  endpointsElectrons.clear();
-  endpointsHoles.clear();
-  endpointsIons.clear();
-  nEndpointsElectrons = 0;
-  nEndpointsHoles = 0;
-  nEndpointsIons = 0;
+  m_endpointsElectrons.clear();
+  m_endpointsHoles.clear();
+  m_endpointsIons.clear();
+  m_nEndpointsElectrons = 0;
+  m_nEndpointsHoles = 0;
+  m_nEndpointsIons = 0;
 
-  nElectrons = 0;
-  nHoles = 1;
-  nIons = 0;
+  m_nElectrons = 0;
+  m_nHoles = 1;
+  m_nIons = 0;
 
   if (!DriftLine(x0, y0, z0, t0, 1)) return false;
 
@@ -278,30 +279,31 @@ bool AvalancheMC::DriftHole(const double x0, const double y0, const double z0,
 bool AvalancheMC::DriftIon(const double x0, const double y0, const double z0,
                            const double t0) {
 
-  if (sensor == 0) {
-    std::cerr << className << "::DriftIon:\n";
+  if (!m_sensor) {
+    std::cerr << m_className << "::DriftIon:\n";
     std::cerr << "    Sensor is not defined.\n";
     return false;
   }
 
-  endpointsElectrons.clear();
-  endpointsHoles.clear();
-  endpointsIons.clear();
-  nEndpointsElectrons = 0;
-  nEndpointsHoles = 0;
-  nEndpointsIons = 0;
+  m_endpointsElectrons.clear();
+  m_endpointsHoles.clear();
+  m_endpointsIons.clear();
+  m_nEndpointsElectrons = 0;
+  m_nEndpointsHoles = 0;
+  m_nEndpointsIons = 0;
 
-  nElectrons = 0;
-  nHoles = 0;
-  nIons = 1;
+  m_nElectrons = 0;
+  m_nHoles = 0;
+  m_nIons = 1;
 
   if (!DriftLine(x0, y0, z0, t0, 2)) return false;
 
   return true;
 }
 
-bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
-                            const double t0, const int type, const bool aval) {
+bool AvalancheMC::DriftLine(const double& x0, const double& y0, 
+                            const double& z0, const double& t0,
+                            const int& type, const bool& aval) {
 
   // Current position
   double x = x0, y = y0, z = z0;
@@ -327,7 +329,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   double tau = 0.;
 
   // Reset the drift line.
-  drift.clear();
+  m_drift.clear();
   // Add the starting point to the drift line.
   driftPoint point;
   point.x = x0;
@@ -337,8 +339,8 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   point.ne = 0;
   point.nh = 0;
   point.ni = 0;
-  drift.push_back(point);
-  nDrift = 1;
+  m_drift.push_back(point);
+  m_nDrift = 1;
 
   bool ok = true;
   bool trapped = false;
@@ -346,7 +348,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   int abortReason = 0;
 
   if (hasTimeWindow && (t0 < tMin || t0 > tMax)) {
-    std::cerr << className << "::DriftLine:\n";
+    std::cerr << m_className << "::DriftLine:\n";
     std::cerr << "    Starting time " << t0 << " is outside the specified\n";
     std::cerr << "    time window (" << tMin << ", " << tMax << ").\n";
     ok = false;
@@ -354,10 +356,10 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   }
 
   // Get the electric field at the starting point.
-  sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
+  m_sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
   // Make sure the starting point is inside a drift medium.
   if (status != 0) {
-    std::cerr << className << "::DriftLine:\n";
+    std::cerr << m_className << "::DriftLine:\n";
     std::cerr << "    No drift medium at initial position (" << x << ", " << y
               << ", " << z << ").\n";
     ok = false;
@@ -366,7 +368,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
 
   double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) {
-    std::cerr << className << "::DriftLine:\n";
+    std::cerr << m_className << "::DriftLine:\n";
     std::cerr << "    Electric field at initial position is too small:\n";
     std::cerr << "      ex = " << ex << " V/cm\n";
     std::cerr << "      ey = " << ey << " V/cm\n";
@@ -375,8 +377,8 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     abortReason = StatusCalculationAbandoned;
   }
 
-  if (useBfield) {
-    sensor->MagneticField(x, y, z, bx, by, bz, status);
+  if (m_useBfield) {
+    m_sensor->MagneticField(x, y, z, bx, by, bz, status);
     bx *= Tesla2Internal;
     by *= Tesla2Internal;
     bz *= Tesla2Internal;
@@ -388,7 +390,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     if (type < 0) {
       if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) ||
           !medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
-        std::cerr << className << "::DriftLine:\n";
+        std::cerr << m_className << "::DriftLine:\n";
         std::cerr << "    Error calculating electron"
                   << " velocity or diffusion\n";
         std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
@@ -399,7 +401,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     } else if (type == 1) {
       if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) ||
           !medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
-        std::cerr << className << "::DriftLine:\n";
+        std::cerr << m_className << "::DriftLine:\n";
         std::cerr << "    Error calculating hole"
                   << " velocity or diffusion\n";
         std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
@@ -410,7 +412,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     } else if (type == 2) {
       if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) ||
           !medium->IonDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
-        std::cerr << className << "::DriftLine:\n";
+        std::cerr << m_className << "::DriftLine:\n";
         std::cerr << "    Error calculating ion"
                   << " velocity or diffusion\n";
         std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n";
@@ -419,7 +421,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         break;
       }
     } else {
-      std::cerr << className << "::DriftLine:\n";
+      std::cerr << m_className << "::DriftLine:\n";
       std::cerr << "    Unknown drift line type (" << type << ").\n";
       std::cerr << "    Program bug!\n";
       ok = false;
@@ -428,7 +430,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     }
     v = sqrt(vx * vx + vy * vy + vz * vz);
     if (v < Small) {
-      std::cerr << className << "::DriftLine:\n";
+      std::cerr << m_className << "::DriftLine:\n";
       std::cerr << "    Drift velocity at (" << x << ", " << y << ", " << z
                 << ") is too small:\n";
       std::cerr << "      vx = " << vx << " cm/ns\n";
@@ -455,13 +457,13 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         delta = -nMc * tau * log(RndmUniformPos());
         break;
       default:
-        std::cerr << className << "::DriftLine:\n";
+        std::cerr << m_className << "::DriftLine:\n";
         std::cerr << "    Unknown stepping model.\n";
         return false;
     }
 
     // Draw a random diffusion direction in the particle frame.
-    if (useDiffusion) {
+    if (m_useDiffusion) {
       d = sqrt(v * delta);
       dx = d * RndmGaussian(0., dl);
       dy = d * RndmGaussian(0., dt);
@@ -490,7 +492,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     z += delta * vz + stheta * dx + ctheta * dz;
 
     // Compute the electric field at the new point.
-    sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
+    m_sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
 
     // Check if the new position is inside a drift medium.
     if (status != 0) {
@@ -512,7 +514,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         y = point.y + dy * d;
         z = point.z + dz * d;
         // Check if the mid-point is inside the drift medium.
-        sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
+        m_sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
         if (status == 0) {
           point.x = x;
           point.y = y;
@@ -524,11 +526,11 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       point.x += dx * d;
       point.y += dy * d;
       point.z += dz * d;
-      drift.push_back(point);
-      ++nDrift;
+      m_drift.push_back(point);
+      ++m_nDrift;
       abortReason = StatusLeftDriftMedium;
-      if (debug) {
-        std::cout << className << "::DriftLine:\n";
+      if (m_debug) {
+        std::cout << m_className << "::DriftLine:\n";
         std::cout << "    Particle left the drift medium.\n";
         std::cout << "    At " << point.x << ", " << point.y << ", " << point.z
                   << "\n";
@@ -537,7 +539,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     }
 
     // Check if the new position is inside the drift area.
-    if (!sensor->IsInArea(x, y, z)) {
+    if (!m_sensor->IsInArea(x, y, z)) {
       // Try to terminate the drift line
       // close to the boundary.
       dx = x - point.x;
@@ -556,7 +558,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         y = point.y + dy * d;
         z = point.z + dz * d;
         // Check if the mid-point is inside the drift area.
-        if (sensor->IsInArea(x, y, z)) {
+        if (m_sensor->IsInArea(x, y, z)) {
           point.x = x;
           point.y = y;
           point.z = z;
@@ -567,11 +569,11 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       point.x += dx * d;
       point.y += dy * d;
       point.z += dz * d;
-      drift.push_back(point);
-      ++nDrift;
+      m_drift.push_back(point);
+      ++m_nDrift;
       abortReason = StatusLeftDriftArea;
-      if (debug) {
-        std::cout << className << "::DriftLine:\n";
+      if (m_debug) {
+        std::cout << m_className << "::DriftLine:\n";
         std::cout << "    Particle left the drift area.\n";
         std::cout << "    At " << point.x << ", " << point.y << ", " << point.z
                   << "\n";
@@ -581,8 +583,8 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
 
     // Check if the particle has crossed a wire.
     double xCross = point.x, yCross = point.y, zCross = point.z;
-    if (sensor->IsWireCrossed(point.x, point.y, point.z, x, y, z, xCross,
-                              yCross, zCross)) {
+    if (m_sensor->IsWireCrossed(point.x, point.y, point.z, x, y, z, xCross,
+                                yCross, zCross)) {
       delta *=
           sqrt(pow(xCross - point.x, 2) + pow(yCross - point.y, 2) +
                pow(zCross - point.z, 2)) /
@@ -591,11 +593,11 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       point.y = yCross;
       point.z = zCross;
       point.t += delta;
-      drift.push_back(point);
-      ++nDrift;
+      m_drift.push_back(point);
+      ++m_nDrift;
       abortReason = StatusLeftDriftMedium;
-      if (debug) {
-        std::cout << className << "::DriftLine:\n";
+      if (m_debug) {
+        std::cout << m_className << "::DriftLine:\n";
         std::cout << "    Particle hit a wire.\n";
         std::cout << "    At " << xCross << ", " << yCross << ", " << zCross
                   << "\n";
@@ -605,7 +607,7 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
 
     e = sqrt(ex * ex + ey * ey + ez * ez);
     if (e < Small) {
-      std::cerr << className << "::DriftLine:\n";
+      std::cerr << m_className << "::DriftLine:\n";
       std::cerr << "    Electric field at (" << x << ", " << y << ", " << z
                 << ") is too small:\n";
       std::cerr << "      ex = " << ex << " V/cm\n";
@@ -620,8 +622,8 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     point.y = y;
     point.z = z;
     point.t += delta;
-    drift.push_back(point);
-    ++nDrift;
+    m_drift.push_back(point);
+    ++m_nDrift;
 
     // Check if the time is still within the specified interval.
     if (hasTimeWindow && point.t > tMax) {
@@ -629,8 +631,8 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       break;
     }
 
-    if (useBfield) {
-      sensor->MagneticField(x, y, z, bx, by, bz, status);
+    if (m_useBfield) {
+      m_sensor->MagneticField(x, y, z, bx, by, bz, status);
       bx *= Tesla2Internal;
       by *= Tesla2Internal;
       bz *= Tesla2Internal;
@@ -638,10 +640,10 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   }
 
   // Compute Townsend and attachment coefficients for each drift step.
-  int nElectronsOld = nElectrons;
-  int nHolesOld = nHoles;
-  int nIonsOld = nIons;
-  if ((type == -1 || type == 1) && (aval || useAttachment)) {
+  unsigned int nElectronsOld = m_nElectrons;
+  unsigned int nHolesOld = m_nHoles;
+  unsigned int nIonsOld = m_nIons;
+  if ((type == -1 || type == 1) && (aval || m_useAttachment)) {
 
     // Compute Townsend and attachment coefficient
     validAlphaEta = ComputeAlphaEta(type);
@@ -653,18 +655,18 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     // Set initial number of electrons/ions.
     int ne = 1, ni = 0;
     // Loop over the drift line.
-    for (int i = 0; i < nDrift - 1; ++i) {
-      drift[i].ne = 0;
-      drift[i].nh = 0;
-      drift[i].ni = 0;
+    for (unsigned int i = 0; i < m_nDrift - 1; ++i) {
+      m_drift[i].ne = 0;
+      m_drift[i].nh = 0;
+      m_drift[i].ni = 0;
       // Only attempt avalanche calculation if alpha and eta are valid.
       if (validAlphaEta) {
         // Compute the number of subdivisions.
-        int nDiv = int((drift[i].alpha + drift[i].eta) / probth);
+        int nDiv = int((m_drift[i].alpha + m_drift[i].eta) / probth);
         if (nDiv < 1) nDiv = 1;
         // Probabilities for gain and loss.
-        const double alpha = std::max(drift[i].alpha / nDiv, 0.);
-        const double eta = std::max(drift[i].eta / nDiv, 0.);
+        const double alpha = std::max(m_drift[i].alpha / nDiv, 0.);
+        const double eta = std::max(m_drift[i].eta / nDiv, 0.);
         // Set initial number of electrons/ions.
         int neInit = ne, niInit = ni;
         // Loop over the subdivisions.
@@ -693,16 +695,16 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
           if (ne <= 0) {
             trapped = true;
             if (type == -1) {
-              --nElectrons;
+              --m_nElectrons;
             } else if (type == 1) {
-              --nHoles;
+              --m_nHoles;
             } else {
-              --nIons;
+              --m_nIons;
             }
-            nDrift = i + 2;
-            drift[nDrift - 1].x = 0.5 * (drift[i].x + drift[i + 1].x);
-            drift[nDrift - 1].y = 0.5 * (drift[i].y + drift[i + 1].y);
-            drift[nDrift - 1].z = 0.5 * (drift[i].z + drift[i + 1].z);
+            m_nDrift = i + 2;
+            m_drift[m_nDrift - 1].x = 0.5 * (m_drift[i].x + m_drift[i + 1].x);
+            m_drift[m_nDrift - 1].y = 0.5 * (m_drift[i].y + m_drift[i + 1].y);
+            m_drift[m_nDrift - 1].z = 0.5 * (m_drift[i].z + m_drift[i + 1].z);
             break;
           }
         }
@@ -710,38 +712,38 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         // add the new electrons to the table.
         if (ne - neInit >= 1) {
           if (type == -1) {
-            drift[i].ne = ne - neInit;
-            nElectrons += ne - neInit;
+            m_drift[i].ne = ne - neInit;
+            m_nElectrons += ne - neInit;
           } else if (type == 1) {
-            drift[i].nh = ne - neInit;
-            nHoles += ne - neInit;
+            m_drift[i].nh = ne - neInit;
+            m_nHoles += ne - neInit;
           } else {
-            drift[i].ni = ne - neInit;
-            nIons += ne - neInit;
+            m_drift[i].ni = ne - neInit;
+            m_nIons += ne - neInit;
           }
         }
         if (ni - niInit >= 1) {
           if (type == -1) {
-            if (useIons) {
-              drift[i].ni = ni - niInit;
-              nIons += ni - niInit;
+            if (m_useIons) {
+              m_drift[i].ni = ni - niInit;
+              m_nIons += ni - niInit;
             } else {
-              drift[i].nh = ni - niInit;
-              nHoles += ni - niInit;
+              m_drift[i].nh = ni - niInit;
+              m_nHoles += ni - niInit;
             }
           } else {
-            drift[i].ne = ni - niInit;
-            nElectrons += ni - niInit;
+            m_drift[i].ne = ni - niInit;
+            m_nElectrons += ni - niInit;
           }
         }
         // If trapped, exit the loop over the drift line.
         if (trapped) {
           abortReason = StatusAttached;
-          if (debug) {
-            std::cout << className << "::DriftLine:\n";
+          if (m_debug) {
+            std::cout << m_className << "::DriftLine:\n";
             std::cout << "    Particle attached.\n";
-            std::cout << "    At " << drift[nDrift - 1].x << ", "
-                      << drift[nDrift - 1].y << ", " << drift[nDrift - 1].z
+            std::cout << "    At " << m_drift[m_nDrift - 1].x << ", "
+                      << m_drift[m_nDrift - 1].y << ", " << m_drift[m_nDrift - 1].z
                       << "\n";
           }
           break;
@@ -758,16 +760,16 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   endPoint.t0 = t0;
   endPoint.status = abortReason;
 
-  endPoint.x1 = drift[nDrift - 1].x;
-  endPoint.y1 = drift[nDrift - 1].y;
-  endPoint.z1 = drift[nDrift - 1].z;
-  endPoint.t1 = drift[nDrift - 1].t;
+  endPoint.x1 = m_drift[m_nDrift - 1].x;
+  endPoint.y1 = m_drift[m_nDrift - 1].y;
+  endPoint.z1 = m_drift[m_nDrift - 1].z;
+  endPoint.t1 = m_drift[m_nDrift - 1].t;
 
-  if (debug) {
-    const int nNewElectrons = nElectrons - nElectronsOld;
-    const int nNewHoles = nHoles - nHolesOld;
-    const int nNewIons = nIons - nIonsOld;
-    std::cout << className << "::DriftLine:\n";
+  if (m_debug) {
+    const int nNewElectrons = m_nElectrons - nElectronsOld;
+    const int nNewHoles = m_nHoles - nHolesOld;
+    const int nNewIons = m_nIons - nIonsOld;
+    std::cout << m_className << "::DriftLine:\n";
     std::cout << "    Produced\n"
               << "      " << nNewElectrons << " electrons,\n"
               << "      " << nNewHoles << " holes, and\n"
@@ -780,49 +782,49 @@ bool AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   }
 
   if (type == -1) {
-    endpointsElectrons.push_back(endPoint);
-    ++nEndpointsElectrons;
+    m_endpointsElectrons.push_back(endPoint);
+    ++m_nEndpointsElectrons;
   } else if (type == 1) {
-    endpointsHoles.push_back(endPoint);
-    ++nEndpointsHoles;
+    m_endpointsHoles.push_back(endPoint);
+    ++m_nEndpointsHoles;
   } else if (type == 2) {
-    endpointsIons.push_back(endPoint);
-    ++nEndpointsIons;
+    m_endpointsIons.push_back(endPoint);
+    ++m_nEndpointsIons;
   }
 
   // Compute the induced signals if requested.
-  if (useSignal) {
+  if (m_useSignal) {
     if (type == 2) {
-      ComputeSignal(1. * scaleIonSignal);
+      ComputeSignal(1. * m_scaleIonSignal);
     } else if (type == 1) {
-      ComputeSignal(1. * scaleHoleSignal);
+      ComputeSignal(1. * m_scaleHoleSignal);
     } else if (type < 0) {
-      ComputeSignal(-1. * scaleElectronSignal);
+      ComputeSignal(-1. * m_scaleElectronSignal);
     }
   }
-  if (useInducedCharge) {
+  if (m_useInducedCharge) {
     if (type == 2) {
-      ComputeInducedCharge(1. * scaleIonSignal);
+      ComputeInducedCharge(1. * m_scaleIonSignal);
     } else if (type == 1) {
-      ComputeInducedCharge(1. * scaleHoleSignal);
+      ComputeInducedCharge(1. * m_scaleHoleSignal);
     } else if (type < 0) {
-      ComputeInducedCharge(-1. * scaleElectronSignal);
+      ComputeInducedCharge(-1. * m_scaleElectronSignal);
     }
   }
 
   // Plot the drift line if requested.
-  if (usePlotting && nDrift > 0) {
+  if (m_usePlotting && m_nDrift > 0) {
     int jL;
     if (type < 0) {
-      viewer->NewElectronDriftLine(nDrift, jL, drift[0].x, drift[0].y,
-                                   drift[0].z);
+      m_viewer->NewElectronDriftLine(m_nDrift, jL, m_drift[0].x, m_drift[0].y,
+                                   m_drift[0].z);
     } else if (type == 1) {
-      viewer->NewHoleDriftLine(nDrift, jL, drift[0].x, drift[0].y, drift[0].z);
+      m_viewer->NewHoleDriftLine(m_nDrift, jL, m_drift[0].x, m_drift[0].y, m_drift[0].z);
     } else {
-      viewer->NewIonDriftLine(nDrift, jL, drift[0].x, drift[0].y, drift[0].z);
+      m_viewer->NewIonDriftLine(m_nDrift, jL, m_drift[0].x, m_drift[0].y, m_drift[0].z);
     }
-    for (int iP = 0; iP < nDrift; ++iP) {
-      viewer->SetDriftLinePoint(jL, iP, drift[iP].x, drift[iP].y, drift[iP].z);
+    for (unsigned int iP = 0; iP < m_nDrift; ++iP) {
+      m_viewer->SetDriftLinePoint(jL, iP, m_drift[iP].x, m_drift[iP].y, m_drift[iP].z);
     }
   }
 
@@ -836,7 +838,7 @@ bool AvalancheMC::AvalancheElectron(const double x0, const double y0,
                                     const bool holes) {
 
   // Initialise the avalanche table
-  aval.clear();
+  m_aval.clear();
   avalPoint point;
   point.x = x0;
   point.y = y0;
@@ -845,20 +847,20 @@ bool AvalancheMC::AvalancheElectron(const double x0, const double y0,
   point.ne = 1;
   point.nh = 0;
   point.ni = 0;
-  aval.push_back(point);
+  m_aval.push_back(point);
 
-  endpointsElectrons.clear();
-  endpointsHoles.clear();
-  endpointsIons.clear();
-  nEndpointsElectrons = 0;
-  nEndpointsHoles = 0;
-  nEndpointsIons = 0;
+  m_endpointsElectrons.clear();
+  m_endpointsHoles.clear();
+  m_endpointsIons.clear();
+  m_nEndpointsElectrons = 0;
+  m_nEndpointsHoles = 0;
+  m_nEndpointsIons = 0;
 
-  nElectrons = 1;
-  nHoles = 0;
-  nIons = 0;
+  m_nElectrons = 1;
+  m_nHoles = 0;
+  m_nIons = 0;
 
-  withHoles = holes;
+  m_withHoles = holes;
   return Avalanche();
 }
 
@@ -867,7 +869,7 @@ bool AvalancheMC::AvalancheHole(const double x0, const double y0,
                                 const bool electrons) {
 
   // Initialise the avalanche table
-  aval.clear();
+  m_aval.clear();
   avalPoint point;
   point.x = x0;
   point.y = y0;
@@ -876,20 +878,20 @@ bool AvalancheMC::AvalancheHole(const double x0, const double y0,
   point.ne = 0;
   point.nh = 1;
   point.ni = 0;
-  aval.push_back(point);
+  m_aval.push_back(point);
 
-  endpointsElectrons.clear();
-  endpointsHoles.clear();
-  endpointsIons.clear();
-  nEndpointsElectrons = 0;
-  nEndpointsHoles = 0;
-  nEndpointsIons = 0;
+  m_endpointsElectrons.clear();
+  m_endpointsHoles.clear();
+  m_endpointsIons.clear();
+  m_nEndpointsElectrons = 0;
+  m_nEndpointsHoles = 0;
+  m_nEndpointsIons = 0;
 
-  nElectrons = 0;
-  nHoles = 1;
-  nIons = 0;
+  m_nElectrons = 0;
+  m_nHoles = 1;
+  m_nIons = 0;
 
-  withElectrons = electrons;
+  m_withElectrons = electrons;
   return Avalanche();
 }
 
@@ -897,7 +899,7 @@ bool AvalancheMC::AvalancheElectronHole(const double x0, const double y0,
                                         const double z0, const double t0) {
 
   // Initialise the avalanche table
-  aval.clear();
+  m_aval.clear();
   avalPoint point;
   point.x = x0;
   point.y = y0;
@@ -906,105 +908,105 @@ bool AvalancheMC::AvalancheElectronHole(const double x0, const double y0,
   point.ne = 1;
   point.nh = 1;
   point.ni = 0;
-  aval.push_back(point);
+  m_aval.push_back(point);
 
-  endpointsElectrons.clear();
-  endpointsHoles.clear();
-  endpointsIons.clear();
-  nEndpointsElectrons = 0;
-  nEndpointsHoles = 0;
-  nEndpointsIons = 0;
+  m_endpointsElectrons.clear();
+  m_endpointsHoles.clear();
+  m_endpointsIons.clear();
+  m_nEndpointsElectrons = 0;
+  m_nEndpointsHoles = 0;
+  m_nEndpointsIons = 0;
 
-  nElectrons = 1;
-  nHoles = 1;
-  nIons = 0;
+  m_nElectrons = 1;
+  m_nHoles = 1;
+  m_nIons = 0;
 
-  withElectrons = withHoles = true;
+  m_withElectrons = m_withHoles = true;
   return Avalanche();
 }
 
 bool AvalancheMC::Avalanche() {
 
   // Make sure that the sensor is defined
-  if (sensor == 0) {
-    std::cerr << className << "::Avalanche:\n";
+  if (!m_sensor) {
+    std::cerr << m_className << "::Avalanche:\n";
     std::cerr << "    Sensor is not defined.\n";
     return false;
   }
 
   avalPoint point;
 
-  if (!withHoles && !withElectrons) {
-    std::cerr << className << "::Avalanche:\n";
+  if (!m_withHoles && !m_withElectrons) {
+    std::cerr << m_className << "::Avalanche:\n";
     std::cerr << "    Neither electron nor hole/ion component"
               << " are activated.\n";
   }
 
-  int nAval = aval.size();
+  int nAval = m_aval.size();
   while (nAval > 0) {
     for (int iAval = nAval; iAval--;) {
-      if (withElectrons) {
+      if (m_withElectrons) {
         // Loop over the electrons at this location.
-        for (int iE = aval[iAval].ne; iE--;) {
+        for (int iE = m_aval[iAval].ne; iE--;) {
           // Compute an electron drift line.
-          if (!DriftLine(aval[iAval].x, aval[iAval].y, aval[iAval].z,
-                         aval[iAval].t, -1, true)) {
+          if (!DriftLine(m_aval[iAval].x, m_aval[iAval].y, m_aval[iAval].z,
+                         m_aval[iAval].t, -1, true)) {
             continue;
           }
           // Loop over the drift line.
-          for (int iDrift = 0; iDrift < nDrift - 2; ++iDrift) {
-            if (drift[iDrift].ne > 0 || drift[iDrift].nh > 0 ||
-                drift[iDrift].ni > 0) {
+          for (unsigned int iDrift = 0; iDrift < m_nDrift - 2; ++iDrift) {
+            if (m_drift[iDrift].ne > 0 || m_drift[iDrift].nh > 0 ||
+                m_drift[iDrift].ni > 0) {
               // Add the point to the table.
-              point.x = drift[iDrift + 1].x;
-              point.y = drift[iDrift + 1].y;
-              point.z = drift[iDrift + 1].z;
-              point.t = drift[iDrift + 1].t;
-              point.ne = drift[iDrift].ne;
-              point.nh = drift[iDrift].nh;
-              point.ni = drift[iDrift].ni;
-              aval.push_back(point);
+              point.x = m_drift[iDrift + 1].x;
+              point.y = m_drift[iDrift + 1].y;
+              point.z = m_drift[iDrift + 1].z;
+              point.t = m_drift[iDrift + 1].t;
+              point.ne = m_drift[iDrift].ne;
+              point.nh = m_drift[iDrift].nh;
+              point.ni = m_drift[iDrift].ni;
+              m_aval.push_back(point);
             }
           }
         }
       }
 
-      if (withHoles) {
+      if (m_withHoles) {
         // Loop over the ions at this location.
-        for (int iI = 0; iI < aval[iAval].ni; ++iI) {
+        for (int iI = 0; iI < m_aval[iAval].ni; ++iI) {
           // Compute an ion drift line.
-          DriftLine(aval[iAval].x, aval[iAval].y, aval[iAval].z, aval[iAval].t,
+          DriftLine(m_aval[iAval].x, m_aval[iAval].y, m_aval[iAval].z, m_aval[iAval].t,
                     2, false);
           continue;
         }
 
         // Loop over the holes at this location.
-        for (int iH = 0; iH < aval[iAval].nh; ++iH) {
+        for (int iH = 0; iH < m_aval[iAval].nh; ++iH) {
           // Compute a hole drift line.
-          if (!DriftLine(aval[iAval].x, aval[iAval].y, aval[iAval].z,
-                         aval[iAval].t, +1, true))
+          if (!DriftLine(m_aval[iAval].x, m_aval[iAval].y, m_aval[iAval].z,
+                         m_aval[iAval].t, +1, true))
             continue;
           // Loop over the drift line.
-          for (int iDrift = 0; iDrift < nDrift - 1; ++iDrift) {
-            if (drift[iDrift].ne > 0 || drift[iDrift].nh > 0 ||
-                drift[iDrift].ni > 0) {
+          for (unsigned int iDrift = 0; iDrift < m_nDrift - 1; ++iDrift) {
+            if (m_drift[iDrift].ne > 0 || m_drift[iDrift].nh > 0 ||
+                m_drift[iDrift].ni > 0) {
               // Add the point to the table.
-              point.x = drift[iDrift + 1].x;
-              point.y = drift[iDrift + 1].y;
-              point.z = drift[iDrift + 1].z;
-              point.t = drift[iDrift + 1].t;
-              point.ne = drift[iDrift].ne;
-              point.nh = drift[iDrift].nh;
-              point.ni = drift[iDrift].ni;
-              aval.push_back(point);
+              point.x = m_drift[iDrift + 1].x;
+              point.y = m_drift[iDrift + 1].y;
+              point.z = m_drift[iDrift + 1].z;
+              point.t = m_drift[iDrift + 1].t;
+              point.ne = m_drift[iDrift].ne;
+              point.nh = m_drift[iDrift].nh;
+              point.ni = m_drift[iDrift].ni;
+              m_aval.push_back(point);
             }
           }
         }
       }
       // Remove the avalanche point.
-      aval.erase(aval.begin() + iAval);
+      m_aval.erase(m_aval.begin() + iAval);
     }
-    nAval = aval.size();
+    nAval = m_aval.size();
   }
   return true;
 }
@@ -1042,36 +1044,37 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
   double scale = 1.;
 
   // Loop a first time over the drift line.
-  for (int i = nDrift - 1; i--;) {
+  for (int i = m_nDrift - 1; i--;) {
     // Compute the step length.
-    delx = drift[i + 1].x - drift[i].x;
-    dely = drift[i + 1].y - drift[i].y;
-    delz = drift[i + 1].z - drift[i].z;
+    delx = m_drift[i + 1].x - m_drift[i].x;
+    dely = m_drift[i + 1].y - m_drift[i].y;
+    delz = m_drift[i + 1].z - m_drift[i].z;
     del = sqrt(delx * delx + dely * dely + delz * delz);
     // Compute the integrated drift velocity,
     // Townsend coefficient and attachment coefficient.
     vdx = 0., vdy = 0., vdz = 0., vd = 0.;
-    drift[i].alpha = 0.;
-    drift[i].eta = 0.;
+    m_drift[i].alpha = 0.;
+    m_drift[i].eta = 0.;
     for (int j = 6; j--;) {
-      x = drift[i].x + 0.5 * (1. + tg[j]) * delx;
-      y = drift[i].y + 0.5 * (1. + tg[j]) * dely;
-      z = drift[i].z + 0.5 * (1. + tg[j]) * delz;
-      sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
+      x = m_drift[i].x + 0.5 * (1. + tg[j]) * delx;
+      y = m_drift[i].y + 0.5 * (1. + tg[j]) * dely;
+      z = m_drift[i].z + 0.5 * (1. + tg[j]) * delz;
+      m_sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
       // Make sure that we are in a drift medium.
       if (status != 0) {
         // Check if this point is the last but one.
-        if (i < nDrift - 2) {
-          std::cerr << className << "::ComputeAlphaEta:\n";
+        const int lastButOne = m_nDrift - 2;
+        if (i < lastButOne) {
+          std::cerr << m_className << "::ComputeAlphaEta:\n";
           std::cerr << "    Got status value " << status << " at segment "
-                    << j + 1 << "/6, drift point " << i + 1 << "/" << nDrift
+                    << j + 1 << "/6, drift point " << i + 1 << "/" << m_nDrift
                     << ".\n";
           return false;
         }
         continue;
       }
-      if (useBfield) {
-        sensor->MagneticField(x, y, z, bx, by, bz, status);
+      if (m_useBfield) {
+        m_sensor->MagneticField(x, y, z, bx, by, bz, status);
         bx *= Tesla2Internal;
         by *= Tesla2Internal;
         bz *= Tesla2Internal;
@@ -1088,12 +1091,12 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
       vdx += wg[j] * vx;
       vdy += wg[j] * vy;
       vdz += wg[j] * vz;
-      drift[i].alpha += wg[j] * alpha;
-      drift[i].eta += wg[j] * eta;
+      m_drift[i].alpha += wg[j] * alpha;
+      m_drift[i].eta += wg[j] * eta;
     }
     // Compute the scaling factor for the projected length.
     scale = 1.;
-    if (useEquilibration) {
+    if (m_useEquilibration) {
       vd = sqrt(vdx * vdx + vdy * vdy + vdz * vdz);
       if (vd * del <= 0.) {
         scale = 0.;
@@ -1101,47 +1104,47 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
         scale = (delx * vdx + dely * vdy + delz * vdz) / (vd * del);
       }
     }
-    drift[i].alpha *= del * scale / 2.;
-    drift[i].eta *= del * scale / 2.;
+    m_drift[i].alpha *= del * scale / 2.;
+    m_drift[i].eta *= del * scale / 2.;
   }
 
   // Skip equilibration if projection has not been requested.
-  if (!useEquilibration) return true;
+  if (!m_useEquilibration) return true;
 
   double sub1 = 0., sub2 = 0.;
   bool try1 = false, try2 = false, done = false;
   // Try to alpha-equilibrate the returning parts.
-  for (int i = 0; i < nDrift - 1; ++i) {
-    if (drift[i].alpha < 0.) {
+  for (unsigned int i = 0; i < m_nDrift - 1; ++i) {
+    if (m_drift[i].alpha < 0.) {
       // Targets for subtracting
-      sub1 = sub2 = -drift[i].alpha / 2.;
+      sub1 = sub2 = -m_drift[i].alpha / 2.;
       try1 = try2 = false;
       // Try to subtract half in earlier points.
-      for (int j = 0; j < i - 1; ++j) {
-        if (drift[i - j].alpha > sub1) {
-          drift[i - j].alpha -= sub1;
-          drift[i].alpha += sub1;
+      for (unsigned int j = 0; j < i - 1; ++j) {
+        if (m_drift[i - j].alpha > sub1) {
+          m_drift[i - j].alpha -= sub1;
+          m_drift[i].alpha += sub1;
           sub1 = 0.;
           try1 = true;
           break;
-        } else if (drift[i - j].alpha > 0.) {
-          drift[i].alpha += drift[i - j].alpha;
-          sub1 -= drift[i - j].alpha;
-          drift[i - j].alpha = 0.;
+        } else if (m_drift[i - j].alpha > 0.) {
+          m_drift[i].alpha += m_drift[i - j].alpha;
+          sub1 -= m_drift[i - j].alpha;
+          m_drift[i - j].alpha = 0.;
         }
       }
       // Try to subtract the other half in later points.
-      for (int j = 0; j < nDrift - i - 1; ++j) {
-        if (drift[i + j].alpha > sub2) {
-          drift[i + j].alpha -= sub2;
-          drift[i].alpha += sub2;
+      for (unsigned int j = 0; j < m_nDrift - i - 1; ++j) {
+        if (m_drift[i + j].alpha > sub2) {
+          m_drift[i + j].alpha -= sub2;
+          m_drift[i].alpha += sub2;
           sub2 = 0.;
           try2 = true;
           break;
-        } else if (drift[i + j].alpha > 0.) {
-          drift[i].alpha += drift[i + j].alpha;
-          sub2 -= drift[i + j].alpha;
-          drift[i + j].alpha = 0.;
+        } else if (m_drift[i + j].alpha > 0.) {
+          m_drift[i].alpha += m_drift[i + j].alpha;
+          sub2 -= m_drift[i + j].alpha;
+          m_drift[i + j].alpha = 0.;
         }
       }
 
@@ -1150,41 +1153,41 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
       if (try1 && try2) {
         done = true;
       } else if (try1) {
-        sub1 = -drift[i].alpha;
-        for (int j = 0; j < i - 1; ++j) {
-          if (drift[i - j].alpha > sub1) {
-            drift[i - j].alpha -= sub1;
-            drift[i].alpha += sub1;
+        sub1 = -m_drift[i].alpha;
+        for (unsigned int j = 0; j < i - 1; ++j) {
+          if (m_drift[i - j].alpha > sub1) {
+            m_drift[i - j].alpha -= sub1;
+            m_drift[i].alpha += sub1;
             sub1 = 0.;
             done = true;
             break;
-          } else if (drift[i - j].alpha > 0.) {
-            drift[i].alpha += drift[i - j].alpha;
-            sub1 -= drift[i - j].alpha;
-            drift[i - j].alpha = 0.;
+          } else if (m_drift[i - j].alpha > 0.) {
+            m_drift[i].alpha += m_drift[i - j].alpha;
+            sub1 -= m_drift[i - j].alpha;
+            m_drift[i - j].alpha = 0.;
           }
         }
       } else if (try2) {
         // Try upper side again.
-        sub2 = -drift[i].alpha;
-        for (int j = 0; j < nDrift - i - 1; ++j) {
-          if (drift[i + j].alpha > sub2) {
-            drift[i + j].alpha -= sub2;
-            drift[i].alpha += sub2;
+        sub2 = -m_drift[i].alpha;
+        for (unsigned int j = 0; j < m_nDrift - i - 1; ++j) {
+          if (m_drift[i + j].alpha > sub2) {
+            m_drift[i + j].alpha -= sub2;
+            m_drift[i].alpha += sub2;
             sub2 = 0.;
             done = true;
             break;
-          } else if (drift[i + j].alpha > 0.) {
-            drift[i].alpha += drift[i + j].alpha;
-            sub2 -= drift[i + j].alpha;
-            drift[i + j].alpha = 0.;
+          } else if (m_drift[i + j].alpha > 0.) {
+            m_drift[i].alpha += m_drift[i + j].alpha;
+            sub2 -= m_drift[i + j].alpha;
+            m_drift[i + j].alpha = 0.;
           }
         }
       }
       // See whether we succeeded.
       if (!done) {
-        if (debug) {
-          std::cerr << className << "::ComputeAlphaEta:\n";
+        if (m_debug) {
+          std::cerr << m_className << "::ComputeAlphaEta:\n";
           std::cerr << "    Unable to even out backwards alpha steps.\n";
           std::cerr << "    Calculation is probably inaccurate.\n";
         }
@@ -1194,39 +1197,39 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
   }
 
   // Try to eta-equilibrate the returning parts.
-  for (int i = 0; i < nDrift - 1; ++i) {
-    if (drift[i].eta < 0.) {
+  for (unsigned int i = 0; i < m_nDrift - 1; ++i) {
+    if (m_drift[i].eta < 0.) {
       // Targets for subtracting
-      sub1 = -drift[i].eta / 2.;
-      sub2 = -drift[i].eta / 2.;
+      sub1 = -m_drift[i].eta / 2.;
+      sub2 = -m_drift[i].eta / 2.;
       try1 = false;
       try2 = false;
       // Try to subtract half in earlier points.
-      for (int j = 0; j < i - 1; ++j) {
-        if (drift[i - j].eta > sub1) {
-          drift[i - j].eta -= sub1;
-          drift[i].eta += sub1;
+      for (unsigned int j = 0; j < i - 1; ++j) {
+        if (m_drift[i - j].eta > sub1) {
+          m_drift[i - j].eta -= sub1;
+          m_drift[i].eta += sub1;
           sub1 = 0.;
           try1 = true;
           break;
-        } else if (drift[i - j].eta > 0.) {
-          drift[i].eta += drift[i - j].eta;
-          sub1 -= drift[i - j].eta;
-          drift[i - j].eta = 0.;
+        } else if (m_drift[i - j].eta > 0.) {
+          m_drift[i].eta += m_drift[i - j].eta;
+          sub1 -= m_drift[i - j].eta;
+          m_drift[i - j].eta = 0.;
         }
       }
       // Try to subtract the other half in later points.
-      for (int j = 0; j < nDrift - i - 1; ++j) {
-        if (drift[i + j].eta > sub2) {
-          drift[i + j].eta -= sub2;
-          drift[i].eta += sub2;
+      for (unsigned int j = 0; j < m_nDrift - i - 1; ++j) {
+        if (m_drift[i + j].eta > sub2) {
+          m_drift[i + j].eta -= sub2;
+          m_drift[i].eta += sub2;
           sub2 = 0.;
           try2 = true;
           break;
-        } else if (drift[i + j].eta > 0.) {
-          drift[i].eta += drift[i + j].eta;
-          sub2 -= drift[i + j].eta;
-          drift[i + j].eta = 0.;
+        } else if (m_drift[i + j].eta > 0.) {
+          m_drift[i].eta += m_drift[i + j].eta;
+          sub2 -= m_drift[i + j].eta;
+          m_drift[i + j].eta = 0.;
         }
       }
       done = false;
@@ -1234,40 +1237,40 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
         done = true;
       } else if (try1) {
         // Try lower side again.
-        sub1 = -drift[i].eta;
-        for (int j = 0; j < i - 1; ++j) {
-          if (drift[i - j].eta > sub1) {
-            drift[i - j].eta -= sub1;
-            drift[i].eta += sub1;
+        sub1 = -m_drift[i].eta;
+        for (unsigned int j = 0; j < i - 1; ++j) {
+          if (m_drift[i - j].eta > sub1) {
+            m_drift[i - j].eta -= sub1;
+            m_drift[i].eta += sub1;
             sub1 = 0.;
             done = true;
             break;
-          } else if (drift[i - j].eta > 0.) {
-            drift[i].eta += drift[i - j].eta;
-            sub1 -= drift[i - j].eta;
-            drift[i - j].eta = 0.;
+          } else if (m_drift[i - j].eta > 0.) {
+            m_drift[i].eta += m_drift[i - j].eta;
+            sub1 -= m_drift[i - j].eta;
+            m_drift[i - j].eta = 0.;
           }
         }
       } else if (try2) {
         // Try upper side again.
-        sub2 = -drift[i].eta;
-        for (int j = 0; j < nDrift - i - 1; ++j) {
-          if (drift[i + j].eta > sub2) {
-            drift[i + j].eta -= sub2;
-            drift[i].eta += sub2;
+        sub2 = -m_drift[i].eta;
+        for (unsigned int j = 0; j < m_nDrift - i - 1; ++j) {
+          if (m_drift[i + j].eta > sub2) {
+            m_drift[i + j].eta -= sub2;
+            m_drift[i].eta += sub2;
             sub2 = 0.;
             done = true;
             break;
-          } else if (drift[i + j].eta > 0.) {
-            drift[i].eta += drift[i + j].eta;
-            sub2 -= drift[i + j].eta;
-            drift[i + j].eta = 0.;
+          } else if (m_drift[i + j].eta > 0.) {
+            m_drift[i].eta += m_drift[i + j].eta;
+            sub2 -= m_drift[i + j].eta;
+            m_drift[i + j].eta = 0.;
           }
         }
       }
       if (!done) {
-        if (debug) {
-          std::cerr << className << "::ComputeAlphaEta:\n";
+        if (m_debug) {
+          std::cerr << m_className << "::ComputeAlphaEta:\n";
           std::cerr << "    Unable to even out backwards eta steps.\n";
           std::cerr << "    Calculation is probably inaccurate.\n";
         }
@@ -1282,24 +1285,24 @@ bool AvalancheMC::ComputeAlphaEta(const int type) {
 
 void AvalancheMC::ComputeSignal(const double q) {
 
-  if (nDrift < 2) return;
+  if (m_nDrift < 2) return;
   double dt, dx, dy, dz;
-  for (int i = 0; i < nDrift - 1; ++i) {
-    dt = drift[i + 1].t - drift[i].t;
-    dx = drift[i + 1].x - drift[i].x;
-    dy = drift[i + 1].y - drift[i].y;
-    dz = drift[i + 1].z - drift[i].z;
-    sensor->AddSignal(q, drift[i].t, dt, drift[i].x + 0.5 * dx,
-                      drift[i].y + 0.5 * dy, drift[i].z + 0.5 * dz, dx / dt,
-                      dy / dt, dz / dt);
+  for (unsigned int i = 0; i < m_nDrift - 1; ++i) {
+    dt = m_drift[i + 1].t - m_drift[i].t;
+    dx = m_drift[i + 1].x - m_drift[i].x;
+    dy = m_drift[i + 1].y - m_drift[i].y;
+    dz = m_drift[i + 1].z - m_drift[i].z;
+    m_sensor->AddSignal(q, m_drift[i].t, dt, m_drift[i].x + 0.5 * dx,
+                        m_drift[i].y + 0.5 * dy, m_drift[i].z + 0.5 * dz, 
+                        dx / dt, dy / dt, dz / dt);
   }
 }
 
 void AvalancheMC::ComputeInducedCharge(const double q) {
 
-  if (nDrift < 2) return;
-  sensor->AddInducedCharge(q, drift[0].x, drift[0].y, drift[0].z,
-                           drift[nDrift - 1].x, drift[nDrift - 1].y,
-                           drift[nDrift - 1].z);
+  if (m_nDrift < 2) return;
+  m_sensor->AddInducedCharge(q, m_drift[0].x, m_drift[0].y, m_drift[0].z,
+                             m_drift[m_nDrift - 1].x, m_drift[m_nDrift - 1].y,
+                             m_drift[m_nDrift - 1].z);
 }
 }

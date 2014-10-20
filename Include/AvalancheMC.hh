@@ -24,31 +24,31 @@ class AvalancheMC {
   void DisablePlotting();
 
   // Switch on/off calculation of induced currents (default: disabled)
-  void EnableSignalCalculation() { useSignal = true; }
-  void DisableSignalCalculation() { useSignal = false; }
+  void EnableSignalCalculation() { m_useSignal = true; }
+  void DisableSignalCalculation() { m_useSignal = false; }
 
   // Switch on/off calculation of induced charge (default: disabled)
-  void EnableInducedChargeCalculation() { useInducedCharge = true; }
-  void DisableInducedChargeCalculation() { useInducedCharge = false; }
+  void EnableInducedChargeCalculation() { m_useInducedCharge = true; }
+  void DisableInducedChargeCalculation() { m_useInducedCharge = false; }
 
   // Switch on/off equilibration of multiplication and attachment
   // over the drift line (default: enabled)
-  void EnableProjectedPathIntegration() { useEquilibration = true; }
-  void DisableProjectedPathIntegration() { useEquilibration = false; }
+  void EnableProjectedPathIntegration() { m_useEquilibration = true; }
+  void DisableProjectedPathIntegration() { m_useEquilibration = false; }
 
   // Switch on/off diffusion (default: enabled)
-  void EnableDiffusion() { useDiffusion = true; }
-  void DisableDiffusion() { useDiffusion = false; }
+  void EnableDiffusion() { m_useDiffusion = true; }
+  void DisableDiffusion() { m_useDiffusion = false; }
 
   // Switch on/off attachment (and multiplication) for
   // drift line calculation (default: enabled)
   // For avalanches the flag is ignored
-  void EnableAttachment() { useAttachment = true; }
-  void DisableAttachment() { useAttachment = false; }
+  void EnableAttachment() { m_useAttachment = true; }
+  void DisableAttachment() { m_useAttachment = false; }
 
   // Enable/disable magnetic field in stepping algorithm.
-  void EnableMagneticField() { useBfield = true; }
-  void DisableMagneticField() { useBfield = false; }
+  void EnableMagneticField() { m_useBfield = true; }
+  void DisableMagneticField() { m_useBfield = false; }
 
   // Stepping model
   // Fixed time step (default 20 ps)
@@ -63,37 +63,48 @@ class AvalancheMC {
   void UnsetTimeWindow();
 
   // Treat positive charge carriers as holes or ions (default: ions)
-  void SetHoles() { useIons = false; }
-  void SetIons() { useIons = true; }
+  void SetHoles() { m_useIons = false; }
+  void SetIons() { m_useIons = true; }
 
   void SetElectronSignalScalingFactor(const double scale) {
-    scaleElectronSignal = scale;
+    m_scaleElectronSignal = scale;
   }
   void SetHoleSignalScalingFactor(const double scale) {
-    scaleHoleSignal = scale;
+    m_scaleHoleSignal = scale;
   }
-  void SetIonSignalScalingFactor(const double scale) { scaleIonSignal = scale; }
+  void SetIonSignalScalingFactor(const double scale) { 
+    m_scaleIonSignal = scale; 
+  }
 
   void GetAvalancheSize(int& ne, int& ni) const {
-    ne = nElectrons;
-    ni = nIons;
+    ne = m_nElectrons;
+    ni = m_nIons;
   }
 
-  int GetNumberOfDriftLinePoints() const { return nDrift; }
-  void GetDriftLinePoint(const int i, double& x, double& y, double& z,
+  unsigned int GetNumberOfDriftLinePoints() const { return m_nDrift; }
+  void GetDriftLinePoint(const unsigned int i, double& x, double& y, double& z,
                          double& t);
 
-  int GetNumberOfElectronEndpoints() const { return nEndpointsElectrons; }
-  int GetNumberOfHoleEndpoints() const { return nEndpointsHoles; }
-  int GetNumberOfIonEndpoints() const { return nEndpointsIons; }
+  unsigned int GetNumberOfElectronEndpoints() const { 
+    return m_nEndpointsElectrons; 
+  }
+  unsigned int GetNumberOfHoleEndpoints() const { 
+    return m_nEndpointsHoles; 
+  }
+  unsigned int GetNumberOfIonEndpoints() const { 
+    return m_nEndpointsIons; 
+  }
 
-  void GetElectronEndpoint(const int i, double& x0, double& y0, double& z0,
+  void GetElectronEndpoint(const unsigned int i, 
+                           double& x0, double& y0, double& z0,
                            double& t0, double& x1, double& y1, double& z1,
                            double& t1, int& status) const;
-  void GetHoleEndpoint(const int i, double& x0, double& y0, double& z0,
+  void GetHoleEndpoint(const unsigned int i, 
+                       double& x0, double& y0, double& z0,
                        double& t0, double& x1, double& y1, double& z1,
                        double& t1, int& status) const;
-  void GetIonEndpoint(const int i, double& x0, double& y0, double& z0,
+  void GetIonEndpoint(const unsigned int i, 
+                      double& x0, double& y0, double& z0,
                       double& t0, double& x1, double& y1, double& z1,
                       double& t1, int& status) const;
 
@@ -111,18 +122,18 @@ class AvalancheMC {
                              const double t0);
 
   // Switch on/off debugging messages
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  private:
-  std::string className;
+  std::string m_className;
 
   // Numerical prefactors
   static double c1;
 
-  Sensor* sensor;
+  Sensor* m_sensor;
 
-  int nDrift;
+  unsigned int m_nDrift;
   struct driftPoint {
     // Position
     double x, y, z, t;
@@ -131,13 +142,13 @@ class AvalancheMC {
     // Number of secondaries produced at this point
     int ne, nh, ni;
   };
-  std::vector<driftPoint> drift;
+  std::vector<driftPoint> m_drift;
 
   struct avalPoint {
     double x, y, z, t;
     int ne, nh, ni;
   };
-  std::vector<avalPoint> aval;
+  std::vector<avalPoint> m_aval;
 
   // Step size model
   int stepModel;
@@ -153,42 +164,44 @@ class AvalancheMC {
   double tMin, tMax;
 
   // Number of electrons, holes and ions produced
-  int nElectrons, nHoles, nIons;
+  unsigned int m_nElectrons;
+  unsigned int m_nHoles;
+  unsigned int m_nIons;
 
   // Number of endpoints (including captured electrons)
-  int nEndpointsElectrons;
-  int nEndpointsHoles;
-  int nEndpointsIons;
+  unsigned int m_nEndpointsElectrons;
+  unsigned int m_nEndpointsHoles;
+  unsigned int m_nEndpointsIons;
   struct endpoint {
     double x0, y0, z0, t0;
     double x1, y1, z1, t1;
     int status;
   };
-  std::vector<endpoint> endpointsElectrons;
-  std::vector<endpoint> endpointsHoles;
-  std::vector<endpoint> endpointsIons;
+  std::vector<endpoint> m_endpointsElectrons;
+  std::vector<endpoint> m_endpointsHoles;
+  std::vector<endpoint> m_endpointsIons;
 
-  bool usePlotting;
-  ViewDrift* viewer;
+  bool m_usePlotting;
+  ViewDrift* m_viewer;
 
-  bool useSignal;
-  bool useInducedCharge;
-  bool useEquilibration;
-  bool useDiffusion;
-  bool useAttachment;
-  bool useBfield;
-  bool useIons;
-  bool withElectrons;
-  bool withHoles;
-  double scaleElectronSignal;
-  double scaleHoleSignal;
-  double scaleIonSignal;
+  bool m_useSignal;
+  bool m_useInducedCharge;
+  bool m_useEquilibration;
+  bool m_useDiffusion;
+  bool m_useAttachment;
+  bool m_useBfield;
+  bool m_useIons;
+  bool m_withElectrons;
+  bool m_withHoles;
+  double m_scaleElectronSignal;
+  double m_scaleHoleSignal;
+  double m_scaleIonSignal;
 
-  bool debug;
+  bool m_debug;
 
   // Compute a drift line with starting point (x0, y0, z0)
-  bool DriftLine(const double x0, const double y0, const double z0,
-                 const double t0, const int type, const bool aval = false);
+  bool DriftLine(const double& x0, const double& y0, const double& z0,
+                 const double& t0, const int& type, const bool& aval = false);
   bool Avalanche();
   // Compute effective multiplication and ionisation
   // for the current drift line
@@ -197,13 +210,6 @@ class AvalancheMC {
   void ComputeSignal(const double q);
   void ComputeInducedCharge(const double q);
 
-  double Min(const double x1, const double x2) const {
-    return x1 > x2 ? x2 : x1;
-  }
-
-  double Max(const double x1, const double x2) const {
-    return x1 < x2 ? x2 : x1;
-  }
 };
 }
 
