@@ -56,7 +56,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.68 2014/07/27 13:26:26 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.69 2014/10/21 15:33:48 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -120,8 +120,6 @@ Int_t StTpcRSMaker::Finish() {
     for (Int_t sec = 0; sec < NoOfSectors; sec++) {
       if (mShaperResponses[io][sec] && !mShaperResponses[io][sec]->TestBit(kNotDeleted)) {SafeDelete(mShaperResponses[io][sec]);}
     }
-    SafeDelete(mChargeFraction[io]);
-    SafeDelete(mPadResponseFunction[io]);
     SafeDelete(mChargeFraction[io]);
     SafeDelete(mPadResponseFunction[io]);
     SafeDelete(mPolya[io]);
@@ -334,26 +332,26 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
     //                             w       h         s      a       l   i
     //  Double_t paramsI[6] = {0.2850, 0.2000,  0.4000, 0.0010, 1.1500, 0};
     //  Double_t paramsO[6] = {0.6200, 0.4000,  0.4000, 0.0010, 1.1500, 0};
+    Double_t xmaxP =  4.5;//4.5*gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();// 4.5 
+    Double_t xminP = -xmaxP; 
+    Double_t params[6];
+    if (! io) {
+      params[0] = gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();                     // w = width of pad       
+      params[1] = gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
+      params[2] = gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                         // s = wire spacing       
+      params[3] = St_TpcResponseSimulatorC::instance()->K3IP();
+      params[4] = 0;
+      params[5] = gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch();
+    } else {    
+      params[0] = gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth();                    // w = width of pad       
+      params[1] = gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation();// h = Anode-Cathode gap   
+      params[2] = gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                        // s = wire spacing       
+      params[3] = St_TpcResponseSimulatorC::instance()->K3OP();
+      params[4] = 0;
+      params[5] = gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
+    }
     if (! mPadResponseFunction[io]) { 
-      Double_t xmaxP =  4.5;//4.5*gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();// 4.5 
-      Double_t xminP = -xmaxP; 
       mPadResponseFunction[io] = new TF1F(io == 0 ? "PadResponseFunctionInner" : "PadResponseFunctionOuter",StTpcRSMaker::PadResponseFunc,xminP,xmaxP,6); 
-      Double_t params[6];
-      if (! io) {
-	params[0] = gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();                     // w = width of pad       
-	params[1] = gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
-	params[2] = gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                         // s = wire spacing       
-	params[3] = St_TpcResponseSimulatorC::instance()->K3IP();
-	params[4] = 0;
-	params[5] = gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch();
-      } else {    
-	params[0] = gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth();                    // w = width of pad       
-	params[1] = gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation();// h = Anode-Cathode gap   
-	params[2] = gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                        // s = wire spacing       
-	params[3] = St_TpcResponseSimulatorC::instance()->K3OP();
-	params[4] = 0;
-	params[5] = gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
-      }
       mPadResponseFunction[io]->SetParameters(params);
       mPadResponseFunction[io]->SetParNames("PadWidth","Anode-Cathode gap","wire spacing","K3OP","CrossTalk","PadPitch");
       mPadResponseFunction[io]->SetTitle(mPadResponseFunction[io]->GetName());
@@ -370,11 +368,10 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
       mPadResponseFunction[io]->Save(xminP,xmaxP,0,0,0,0);
     }
     if (! mChargeFraction[io]) {
-      Double_t xmaxP = 2.5;//5*gStTpcDb->PadPlaneGeometry()->innerSectorPadLength(); // 1.42
-      Double_t xminP = - xmaxP;
+      xmaxP = 2.5;//5*gStTpcDb->PadPlaneGeometry()->innerSectorPadLength(); // 1.42
+      xminP = - xmaxP;
       mChargeFraction[io] = new TF1F(io == 0 ? "ChargeFractionInner" : "ChargeFractionOuter",
 				     StTpcRSMaker::PadResponseFunc,xminP,xmaxP,6);
-      Double_t params[6];
       if (! io) {
 	params[0] = gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
 	params[3] = St_TpcResponseSimulatorC::instance()->K3IR();
@@ -399,7 +396,6 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
 	if (r > 1e-2) break;
       }
       mChargeFraction[io]->SetRange(-x,x);
-      
       mChargeFraction[io]->Save(xminP,xmaxP,0,0,0,0);
     }
     //  TF1F *func = new TF1F("funcP","x*sqrt(x)/exp(2.5*x)",0,10);
@@ -1439,7 +1435,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
 	NoTB = 0;
 	Int_t ADCsum = 0;
 	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	  if (ADCs[i] && ! mAltro->ADCkeep[i]) ADCs[i] = 0;
+	  if (ADCs[i] && ! mAltro->ADCkeep[i]) {ADCs[i] = 0;}
 	  if (ADCs[i]) {
 	    NoTB++;
 	    ADCsum += ADCs[i];
@@ -1449,7 +1445,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
 		       << "\tAdc/TrackId = " << ADCs[i] << " /\t" << IDTs[i] << endm;
 	    }
 #endif
-	  }
+	  } else {IDTs[i] = 0;}
 	}
 #ifdef __DEBUG__
 	if (ADCsum > AdcCut) {
@@ -1676,8 +1672,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.68 2014/07/27 13:26:26 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.69 2014/10/21 15:33:48 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.69  2014/10/21 15:33:48  fisyak
+// Clean up, fix bug found by gcc482
+//
 // Revision 1.68  2014/07/27 13:26:26  fisyak
 // Add cast for c++11 option
 //
