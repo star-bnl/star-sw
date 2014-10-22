@@ -14,8 +14,10 @@
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
 #include "TMath.h"
+#include "TMatrixD.h"
 #include "TVector3.h"
 #include "TGeoCone.h"
+#include "TRandom.h"
 
 StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 
@@ -326,6 +328,9 @@ int StiDetectorBuilder::AverageVolume(const char *fullPath)
 {
 static int nCall=0; nCall++;
 int botOho =(strstr(fullPath,"PXRB") || strstr(fullPath,"PXLB"));
+static const double kToRad = TMath::DegToRad();
+TVector3 swp;
+
 if (botOho) StiDebug::Break(-1946);   
   gGeoManager->cd(fullPath);
   TGeoNode* node = gGeoManager->GetCurrentNode();
@@ -345,6 +350,15 @@ if (botOho) StiDebug::Break(-1946);
   shapeG->GetAxisRange(3,zMin,zMax);
   local[2] = 0.5*(zMin+zMax);
   gGeoManager->LocalToMaster(&local[0],&global[0]);
+
+    double axiL[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
+    double axiG[3][3];
+    for (int i=0;i<3;i++) { gGeoManager->LocalToMasterVect(axiL[i],axiG[i]);}
+    double det = axiG[0][0]*axiG[1][1]-axiG[1][0]*axiG[0][1];
+    assert(fabs(det)>0.99 && fabs(det)<1.01);
+  
+
+
   do {//only once
     if (!shapeG->IsCylType())		break;
     double zLoc[3]={0,0,1},zGlo[3];
@@ -358,19 +372,31 @@ if (botOho) StiDebug::Break(-1946);
     rMin = sqrt(par[0]);
     rMax = sqrt(par[1]);
     if (fabs(global[0]) > rMax*1e-3) 	break;
-    
-
     if (fabs(global[1]) > rMax*1e-3) 	break;
-//    shapeG->GetAxisRange(2,phiMin,phiMax);
+    if (fabs(axiG[2][0])>      1e-2) 	break;
+    if (fabs(axiG[2][1])>      1e-2) 	break;
     phiMin = par[2];
     phiMax = par[3];
 
-    double dPhi = phiMax-phiMin; 
-    if (dPhi<  0) dPhi+=360;
-    if (dPhi>360) dPhi-=360;
 
-    dPhi*=TMath::DegToRad();
-    double phi = (phiMax+phiMin)/2*TMath::DegToRad();
+    double dPhi = phiMax-phiMin; 
+    if (dPhi < 359) { // Check more carefully
+      double limL[2][3] = {{cos(phiMin*kToRad),sin(phiMin*kToRad),0}
+                          ,{cos(phiMax*kToRad),sin(phiMax*kToRad),0}};
+      TVector3 limG[2];
+      for (int i=0;i<2;i++) { gGeoManager->LocalToMasterVect(limL[i],&limG[i][0]);}
+      if (det<0) { swp = limG[0]; limG[0]=limG[1];limG[1]=swp;}		// reflection 
+      phiMin = limG[0].Phi()/kToRad;
+      phiMax = limG[1].Phi()/kToRad;
+      dPhi = phiMax-phiMin; 
+
+   }
+
+    if (dPhi<    0) dPhi+=360;
+    if (dPhi>  360) dPhi =360;
+
+    dPhi*=kToRad;
+    double phi = (phiMax+phiMin)/2*kToRad;
 
 
     shapeS = new StiCylindricalShape(node->GetName(),   	// Name
@@ -397,11 +423,6 @@ if (botOho) StiDebug::Break(-1946);
     gGeoManager->LocalToMaster(box->GetOrigin(),&global[0]);
     double D[3] = {box->GetDX(),box->GetDY(),box->GetDZ()};
 
-    double axiL[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
-    double axiG[3][3];
-    for (int i=0;i<3;i++) { gGeoManager->LocalToMasterVect(axiL[i],axiG[i]);}
-    
-
     double corner[3];
     TVector3 gorner[8];
     for (int msk=0;msk<8;msk++) {
@@ -427,15 +448,13 @@ if (botOho) StiDebug::Break(-1946);
       eig[1][0] = global[1]; eig[1][1] = -global[0]; eig[1].SetMag(1.);
     }
 
-    eig[0][0] = -eig[1][1];eig[0][1] = eig[1][0];
+    eig[0][0] = eig[1][1];eig[0][1] = -eig[1][0];
 
     double offset,rNorm;
-    TVector3 dca,swp;
     for (int jk=0;jk<2;jk++) {
-      if ( eig[0].Dot(global)<0) {eig[0]*=-1.; eig[1]*=-1.;} 
+      rNorm = eig[0].Dot(global);
+      if ( rNorm<0) {eig[0]*=-1.; eig[1]*=-1.;rNorm*=-1;} 
       offset = global.Dot(eig[1]);
-      dca  = global-eig[1]*offset;
-      rNorm  = dca.Perp();
       if (rNorm*rNorm > lam[1]/4) break;
       assert(!jk);
       swp   = eig[0]; eig[0]=eig[1]; eig[1]=swp;
@@ -465,7 +484,18 @@ if (botOho) StiDebug::Break(-1946);
     placeS->setLayerRadius(global.Perp());
     placeS->setLayerAngle(global.Phi());
     placeS->setRegion(StiPlacement::kMidRapidity);
-    placeS->setNormalRep(dca.Phi(),rNorm, offset); 
+    placeS->setNormalRep(eig[0].Phi(),rNorm, offset); 
+
+if (botOho) {
+
+printf ("@@@@ %s dX=%g(%g) dY=%g(%g) dZ=%g(%g) Phi=%g Rn=%g Off=%g\n"
+       ,shapeS->getName().c_str(),dX,D[0],dY,D[1],dZ,D[2]
+       ,eig[0].Phi()/3.1415*180,rNorm, offset);
+}
+
+
+
+
   }
 
   assert(placeS);
@@ -495,6 +525,9 @@ if (botOho) StiDebug::Break(-1946);
   pDetector->setPlacement(placeS); 
   pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
   pDetector->setMaterial(mateS);
+
+
+  assert(Diff(fullPath,pDetector)==0);
 
   if (mThkSplit>0 && mMaxSplit>1) {//	try to split 
     StiDetVect dv;
@@ -634,4 +667,39 @@ int StiDetectorBuilder::AveMate(TGeoVolume *vol,StiAuxMat &aux)
    aux.X0 = capacity/(capaOnly/X0only+sumX0); 
    return iAns;
 }
+//_____________________________________________________________________________
+int StiDetectorBuilder::Diff(const char *path, const StiDetector *sVolu) const
+{
+static int nCall=0; nCall++;
+   enum {kNin = 10000,kNout = 1000000};
+   gGeoManager->cd(path);
+   TGeoVolume *gVolu = gGeoManager->GetCurrentVolume();
 
+   double gCapa = gVolu->Capacity();
+   double sCapa = sVolu->getVolume();
+   assert(sCapa>=gCapa*0.999);
+   double gWeit = gVolu->WeightA()*1000;
+   double sWeit = sVolu->getWeight();
+   assert(fabs(sWeit-gWeit)<1.2e-3*sCapa);	//1.2e-3 air density(Geant ignores gas weight
+
+   const TGeoShape *gShape = gVolu->GetShape();
+   ((TGeoShape*)gShape)->ComputeBBox();
+   const TGeoBBox *bbox =    (const TGeoBBox*)gShape;
+   double D[3] = {bbox->GetDX(),bbox->GetDY(),bbox->GetDZ()};
+   const double *orig =  bbox->GetOrigin();
+   double lX[3],gX[3];   
+   int Nin = 0;
+   for (int ir = 0; ir<=kNout; ir++) {
+     for (int j=0;j<3;j++) {lX[j] = orig[j]+(gRandom->Rndm()-0.5)*2*D[j];}
+     if (!gVolu->Contains(lX)) continue;
+     Nin++; if (Nin>kNin) break;
+     gGeoManager->LocalToMaster(lX, gX);
+     if (sVolu->inside(gX,1)) continue;
+     assert(0);
+   }
+     
+   return 0;
+   
+
+
+}
