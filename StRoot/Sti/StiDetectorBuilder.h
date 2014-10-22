@@ -77,8 +77,9 @@ public:
   StiTrackingParameters *getTrackingParameters() 	{ return  _trackingParameters;}
   Factory<StiDetector>* getDetectorFactory() 		{return _detectorFactory;}
   void SetCurrentDetectorBuilder(StiDetectorBuilder *m) {fCurrentDetectorBuilder = m;}
-  virtual void AverageVolume(TGeoPhysicalNode *nodeP);
-  virtual  int AverageVolume(const char *fullPath); 
+  void AverageVolume(TGeoPhysicalNode *nodeP);
+   int AverageVolume(const char *fullPath); 
+   int Diff(const char *path, const StiDetector *sVolu) const;
 
   virtual void useVMCGeometry() {}
   void    setGasMat(StiMaterial *m) 			{_gasMat = m;}
