@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <assert.h>
+#include <arpa/inet.h>
 
 #include <rtsLog.h>
 #include <rtsSystems.h>
@@ -111,15 +112,19 @@ daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)
 	for(int i=min_sec;i<=max_sec;i++) {
 		daq_dta *sec_dta ;
 
+		LOG(DBG,"Before sec %d",i) ;
 		sec_dta = handle_raw(i, -1) ;	// rdo is ignored...
+		LOG(DBG,"After raw") ;
 		if(sec_dta == 0) continue ;
 
+		LOG(DBG,"Before ite") ;
 		int ret = sec_dta->iterate() ;
+		LOG(DBG,"After it %d",ret) ;
 		if(ret == 0) continue ;
 
 
 		found_some = 1 ;
-		LOG(NOTE,"pp2pp adc: sector %d, words %d",i,sec_dta->ncontent) ;
+		LOG(DBG,"pp2pp adc: sector %d, words %d",i,sec_dta->ncontent) ;
 
 		// extract modules
 		ret = decode(i,(char *)sec_dta->Void, sec_dta->ncontent) ;
@@ -127,6 +132,7 @@ daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)
 			LOG(ERR,"pp2pp_decode failed for sector %d",i) ;
 			continue ;
 		}		
+		LOG(DBG,"After decode %d",ret) ;
 	}
 
 	adc->rewind() ;
@@ -273,7 +279,7 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 
 	}
 	// get count
-	trg_cou = d[words-1] ;
+	trg_cou = ntohl(d[words-1]) ;
 	// move to start
 	trg_dta = &(d[words-1-trg_cou]) ;
 
@@ -378,9 +384,14 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 		LOG(DBG,"pp2pp data: %2d: 0x%08X",i,b2h32(d32[i])) ;
 	}
 
-	int trg_cou = b2h32(d32[words-1]) ;
+	//2014 note:	for compatibility reasons the trg_cou word in the payload
+	//		(last word) is maintained in BIG_ENDIAN!
+	int trg_cou = b2h32(d32[words-1]) ;	//thr trigger count
+//	int trg_cou = (d32[words-1]) ;	//thr trigger count
+//	LOG(WARN,"Using unswapped!!!") ;
 	int trg_ix = words - 1 - trg_cou ;
 
+	LOG(DBG,"words %d, trg_cou %d",words,trg_cou) ;
 	for(int i=0;i<trg_cou;i++) {
 		LOG(NOTE,"pp2pp: trg %d/%d: 0x%08X",i+1,trg_cou,b2h32(d32[trg_ix+i])) ;
 	}
