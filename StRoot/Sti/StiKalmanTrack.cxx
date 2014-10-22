@@ -1,11 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.129 2014/10/16 22:20:25 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.129 2014/10/16 22:20:25 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.130 2014/10/22 18:33:09 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.130 2014/10/22 18:33:09 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.130  2014/10/22 18:33:09  perev
+ * In refitL check for inside() lead to stop tracking
+ * which is wrong. When track after refit missed volume,
+ * it should not lead to stop tracking. Now this is fixed
+ *
  * Revision 2.129  2014/10/16 22:20:25  perev
  * In method refitL() added additional loop to test nodes for inside/outside.
  * This is temporary, for debugging
@@ -1602,7 +1607,7 @@ static int nCall=0;nCall++;
     iNode++;
     targetNode = &(*source);
     if (!targetNode->isValid()) 	continue;
-    targetNode->nudge();
+    if(targetNode->nudge()) 		continue;
 assert(targetNode->inside());
   }//end for of nodes
 
@@ -1613,17 +1618,16 @@ assert(targetNode->inside());
     if (restIsWrong) 		{ targetNode->setInvalid(); continue;}
 
     if (!isStarted) {
-      if (!targetNode->getHit()) 	targetNode->setInvalid();		
-      if ( targetNode->getChi2()>1000) 	targetNode->setInvalid();
-      if (!targetNode->isValid()) 	continue;
+      if (!targetNode->getHit()) 	continue;		
+      if ( targetNode->getChi2()>1000) 	continue;;
     }
     isStarted++;
-    if (targetNode->nudge()) 	{restIsWrong = 2014; targetNode->setInvalid(); continue;}
+    if (targetNode->nudge()) 		continue;
 assert(targetNode->inside());
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(0);
-    if (status) 		{restIsWrong = 2005; targetNode->setInvalid();continue;}
-    if (targetNode->nudge()) 	{restIsWrong = 2014; targetNode->setInvalid();continue;};
+    if (status) 		{ restIsWrong = 2005; targetNode->setInvalid();continue;}
+    if (targetNode->nudge()) 	{ continue;};
     assert(targetNode->inside());
     pNode = targetNode;
   }//end for of nodes
@@ -1634,18 +1638,17 @@ assert(targetNode->inside());
     targetNode = &(*source);
     if (restIsWrong) { targetNode->setInvalid(); continue;}
     if (!isStarted) {
-      if (!targetNode->getHit()) 	targetNode->setInvalid();		
-      if ( targetNode->getChi2()>1000) 	targetNode->setInvalid();
-      if (!targetNode->isValid()) 	continue;
+      if (!targetNode->getHit()) 	continue;;		
+      if ( targetNode->getChi2()>1000) 	continue;
     }
     isStarted++;
 
-    if (targetNode->nudge()) 	{restIsWrong = 2014; targetNode->setInvalid(); continue;};
+    if (targetNode->nudge()) 	{continue;};
 assert(targetNode->inside());
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
     if (status) {restIsWrong = 2005; targetNode->setInvalid();continue;}
-    if (targetNode->nudge()) 	{restIsWrong = 2014; targetNode->setInvalid();continue;};
+    if (targetNode->nudge()) 	{continue;};
 assert(targetNode->inside());
     pNode = targetNode;
   }//end for of nodes
