@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.130 2014/10/22 18:33:09 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.130 2014/10/22 18:33:09 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131 2014/10/22 20:41:59 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131 2014/10/22 20:41:59 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.131  2014/10/22 20:41:59  perev
+ * Remove any influence of nudge() to refit.
+ *
  * Revision 2.130  2014/10/22 18:33:09  perev
  * In refitL check for inside() lead to stop tracking
  * which is wrong. When track after refit missed volume,
@@ -1603,13 +1606,6 @@ static int nCall=0;nCall++;
   int iNode=0, status = 0,isStarted=0,restIsWrong=0;
   StiDebug::Break(nCall);
 
-  for (source=begin();source!=end();source++) {
-    iNode++;
-    targetNode = &(*source);
-    if (!targetNode->isValid()) 	continue;
-    if(targetNode->nudge()) 		continue;
-assert(targetNode->inside());
-  }//end for of nodes
 
   pNode = 0; iNode=0;isStarted=0;restIsWrong=0;
   for (source=rbegin();source!=rend();source++) {
@@ -1622,13 +1618,10 @@ assert(targetNode->inside());
       if ( targetNode->getChi2()>1000) 	continue;;
     }
     isStarted++;
-    if (targetNode->nudge()) 		continue;
-assert(targetNode->inside());
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(0);
     if (status) 		{ restIsWrong = 2005; targetNode->setInvalid();continue;}
-    if (targetNode->nudge()) 	{ continue;};
-    assert(targetNode->inside());
+    targetNode->nudge();
     pNode = targetNode;
   }//end for of nodes
 
@@ -1643,13 +1636,10 @@ assert(targetNode->inside());
     }
     isStarted++;
 
-    if (targetNode->nudge()) 	{continue;};
-assert(targetNode->inside());
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
     if (status) {restIsWrong = 2005; targetNode->setInvalid();continue;}
-    if (targetNode->nudge()) 	{continue;};
-assert(targetNode->inside());
+    targetNode->nudge();
     pNode = targetNode;
   }//end for of nodes
   return 0;
