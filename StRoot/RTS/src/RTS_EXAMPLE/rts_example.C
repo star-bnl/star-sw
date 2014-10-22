@@ -1090,6 +1090,12 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print)
 
 			if(do_print) {
 				printf("PP2PP: RAW: sector %d, RDO %d, bytes %d\n",dd->sec,dd->rdo,dd->ncontent) ;
+
+				u_int *d32 = (u_int *)dd->Void ;
+				for(int i=0;i<16;i++) {
+					printf("   %2d: 0x%08X\n",i,d32[i]) ;
+
+				}
 			}
 
 		}
@@ -1104,10 +1110,10 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print)
 			pp2pp_t *d = (pp2pp_t *) dd->Void ;
 
 			if(do_print) {
-				printf("PP2PP: sector %d, seq %d, chain %d, SVX %d:\n",dd->sec,d->seq_id,d->chain_id,d->svx_id) ;
+				printf("PP2PP: sector %d, seq %d, chain %c, SVX %d:\n",dd->sec,d->seq_id,'A'+d->chain_id,d->svx_id) ;
 				for(int c=0;c<PP2PP_SVX_CH;c++) {
 					// print only found channels via the "trace" array
-					if(d->trace[c]) printf("   %3d: %3d [0x%02X], trace %d\n",c,d->adc[c],d->adc[c],d->trace[c]) ;
+					if(d->trace[c]) printf("   ch %3d: ADC %3d [0x%02X], trace %d\n",c,d->adc[c],d->adc[c],d->trace[c]) ;
 				}
 			}
 
