@@ -354,8 +354,6 @@ if (botOho) StiDebug::Break(-1946);
     double axiL[3][3] = {{1,0,0},{0,1,0},{0,0,1}};
     double axiG[3][3];
     for (int i=0;i<3;i++) { gGeoManager->LocalToMasterVect(axiL[i],axiG[i]);}
-    double det = axiG[0][0]*axiG[1][1]-axiG[1][0]*axiG[0][1];
-    assert(fabs(det)>0.99 && fabs(det)<1.01);
   
 
 
@@ -375,6 +373,9 @@ if (botOho) StiDebug::Break(-1946);
     if (fabs(global[1]) > rMax*1e-3) 	break;
     if (fabs(axiG[2][0])>      1e-2) 	break;
     if (fabs(axiG[2][1])>      1e-2) 	break;
+
+    double det = axiG[0][0]*axiG[1][1]-axiG[1][0]*axiG[0][1];
+    assert(fabs(det)>0.99 && fabs(det)<1.01);
     phiMin = par[2];
     phiMax = par[3];
 
@@ -680,7 +681,7 @@ static int nCall=0; nCall++;
    assert(sCapa>=gCapa*0.999);
    double gWeit = gVolu->WeightA()*1000;
    double sWeit = sVolu->getWeight();
-   assert(fabs(sWeit-gWeit)<1.2e-3*sCapa);	//1.2e-3 air density(Geant ignores gas weight
+//??????????????????????????   assert(fabs(sWeit-gWeit)<1.2e-3*sCapa);	//1.2e-3 air density(Geant ignores gas weight
 
    const TGeoShape *gShape = gVolu->GetShape();
    ((TGeoShape*)gShape)->ComputeBBox();
