@@ -61,7 +61,7 @@ public:
             { reqEmcOrTofMatch = match; reqEmcMatch = kFALSE; reqTofMatch = kFALSE; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.19 2014/08/06 11:43:32 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.20 2014/10/23 21:07:23 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
   
 
 protected:
@@ -73,6 +73,8 @@ protected:
   int lasttime;
   float sc;
   float esc;
+  float scS[24];
+  float escS[24];
   float scE;
   float escE;
   float scW;
@@ -80,6 +82,7 @@ protected:
   float lastsc;
   float lastEWRatio;
   int oldevt;
+  int firstEvent;
   StRunInfo* runinfo;
   Bool_t did_auto;
   Bool_t Calibmode;
@@ -115,6 +118,7 @@ protected:
   float FakeAutoSpaceCharge();
 
   TH1F* schist;
+  TH1F* schistS[24];
   TH1F* schistE;
   TH1F* schistW;
   TH1F* schists[SCHN];
@@ -124,6 +128,7 @@ protected:
   float ntrks[SCHN];
   float ntrksE[SCHN];
   float ntrksW[SCHN];
+  float ntrksS[24];
   int evts[SCHN];
   float evtstbin[SCHN];
   float evtsnow;
@@ -186,6 +191,16 @@ protected:
   float gapZfitinterceptwest;
   float gapZdivslopewest;
 
+  float gapZfitslopeS[24];
+  float gapZfitinterceptS[24];
+  float gapZdivslopeS[24];
+  float gapZfitslopenegS[24];
+  float gapZfitinterceptnegS[24];
+  float gapZdivslopenegS[24];
+  float gapZfitslopeposS[24];
+  float gapZfitinterceptposS[24];
+  float gapZdivslopeposS[24];
+
 
   void InitQAHists();
   void WriteQAHists();
@@ -201,8 +216,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.19 2014/08/06 11:43:32 jeromel Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.20 2014/10/23 21:07:23 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.20  2014/10/23 21:07:23  genevb
+// Add GridLeak-by-sector codes, East/WestOff handling, and some code reformatting
+//
 // Revision 1.19  2014/08/06 11:43:32  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
