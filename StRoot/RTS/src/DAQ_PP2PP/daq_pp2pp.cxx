@@ -270,7 +270,7 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 	u_int *d = (u_int *)addr ;
 	int t_cou = 0 ;
 	u_int datum ;
-	int trg_cou ;
+	u_int trg_cou ;
 	u_int *trg_dta ;
 
 
@@ -280,10 +280,17 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 	}
 	// get count
 	trg_cou = ntohl(d[words-1]) ;
+
+	if(trg_cou>10) {	
+		LOG(ERR,"trg_cou 0x%08X, words %d",trg_cou,words) ;
+		return -1 ;
+	}
+
 	// move to start
 	trg_dta = &(d[words-1-trg_cou]) ;
 
-	for(int i=0;i<trg_cou;i++) {
+
+	for(u_int i=0;i<trg_cou;i++) {
 		datum = trg_dta[i] ;
 		
 		if((datum & 0xFF000000) == 0xEE000000) {	// prompt
@@ -306,6 +313,8 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 
 	if(t_cou == 0) {	// no prompt contrib! invent token 4097
 
+		LOG(NOTE,"No prompt trigger, trg_cou %d",trg_cou) ;
+
 		trgs[t_cou].t = 4097 ;
 		trgs[t_cou].daq = 0 ;
 		trgs[t_cou].trg = 5 ;
@@ -321,7 +330,7 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 
 	}
 
-	for(int i=0;i<trg_cou;i++) {
+	for(u_int i=0;i<trg_cou;i++) {
 		datum = trg_dta[i] ;
 		
 		if((datum & 0xFF000000) != 0xEE000000) {	// FIFO!
