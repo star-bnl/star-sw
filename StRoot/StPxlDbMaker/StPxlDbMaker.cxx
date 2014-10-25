@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPxlDbMaker.cxx,v 1.15 2014/10/07 19:25:28 smirnovd Exp $
+ * $Id: StPxlDbMaker.cxx,v 1.16 2014/10/25 00:51:11 qiuh Exp $
  *
  * Author: J. Bouchet, M. Lomnitz, May 2013
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StPxlDbMaker.cxx,v $
+ * Revision 1.16  2014/10/25 00:51:11  qiuh
+ * replace ToWhiteBoard with ToWhiteConst to fix a chain crush
+ *
  * Revision 1.15  2014/10/07 19:25:28  smirnovd
  * StPxlDbMaker/: Collected all debugging print statements into a single Print() which is called only when Debug2 option is specified
  *
@@ -143,7 +146,7 @@ Int_t StPxlDbMaker::InitRun(Int_t runNumber)
       mPxlDb->Print();
 
    // finally write the data
-   ToWhiteBoard("pxl_db", mPxlDb);
+   ToWhiteConst("pxl_db", mPxlDb);
 
    return kStOK;
 }
