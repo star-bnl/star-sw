@@ -7,6 +7,7 @@
 #include "TRefArray.h"
 #include "TGiant3.h"
 
+
 // // class AgUTrackStep : public TObject
 // {
 // public:
@@ -105,6 +106,8 @@ public:
 
   static Float_t rmin;// =   0.0;
   static Float_t rmax;//= 200.0;
+  static Float_t zmax;//= 200.0;
+  static Int_t   verbose;// = 0;
 
 private:
 protected:
