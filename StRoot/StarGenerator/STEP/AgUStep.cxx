@@ -6,7 +6,9 @@
 #include "TGeoManager.h"
 
 Float_t AgUStep::rmin = 0.0;
-Float_t AgUStep::rmax = 50.0;
+Float_t AgUStep::rmax = 200.0;
+Float_t AgUStep::zmax = 200.0;
+Int_t   AgUStep::verbose = 0;
 
 extern "C" {
 
@@ -42,6 +44,7 @@ Event::Event() :
   Clear(); 
 }
 //
+
 Track *Event::AddTrack() {
 
   TLorentzVector p, x;
@@ -77,6 +80,7 @@ void  Event::Clear( const Option_t *opts ) {
 };
 // .................................................................. Track ...............
 Track::Track() : TObject(), idTruth(-1), eta(0), phi(0), nSteps(0), steps() { Clear(); } 
+
 
 Step *Track::AddStep() {
 
@@ -186,19 +190,20 @@ AgUStep::AgUStep() : TNamed("AgUStep","AgSTAR user stepping routine"),
 // Take a step through the G3 geometry
 void AgUStep::operator()()
 {
-
-
-
   Double_t x = ctrak -> vect[0];
   Double_t y = ctrak -> vect[1];
-//Double_t z = ctrak -> vect[2];
+  Double_t z = ctrak -> vect[2];
 
   Double_t _a = cmate->a;
   Double_t _z = cmate->z;
   Double_t _dens = cmate->dens;
 
   Double_t r = TMath::Sqrt(x*x+y*y);      
-  if (r > rmax) return; // track is exiting region of interest
+  if (r > rmax || TMath::Abs(z)>zmax ) 
+    {
+      ctrak->istop = 2; // stop the track
+      return; // track is exiting region of interest
+    }
 
   // Get current event
   idEvent = geant3->CurrentEvent();
@@ -255,6 +260,7 @@ void AgUStep::operator()()
   // Print out current path...
   //LOG_INFO << "N level = " << cvolu->nlevel << endm;
   TString path = "";
+  TString leaf = "";
   for ( Int_t i=0;i<cvolu->nlevel;i++ )
     {
       path += "/"; 
@@ -270,9 +276,24 @@ void AgUStep::operator()()
       UShort_t copyNumber   = cvolu->number[i];
       mStep->vnums[i] = volumeNumber;
       mStep->cnums[i] = copyNumber;
+      leaf = volume;
 
     }
   //  LOG_INFO << path.Data() << endm;
+
+  if ( verbose ) {
+    LOG_INFO << Form("[AgUStep] %8.4f %8.4f %8.4f %8.4f %4s %4i %8.4f %8.4f",
+		     mStep->x,
+		     mStep->y,
+		     mStep->z,
+		     mStep->r,
+		     leaf.Data(),
+		     mStep->idTruth,
+		     aStep,
+		     mStep->step ) 
+	     << endm;
+		     
+  }
   
 }
 
