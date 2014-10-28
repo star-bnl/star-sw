@@ -103,6 +103,7 @@ void ppBuilder::event(daqReader *rdr)
         }
       }
     }
+    delete trgd;
   }
 }
 
