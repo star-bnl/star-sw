@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.78 2014/09/30 17:20:16 perev Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.1 2014/10/29 17:06:48 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -159,7 +159,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          TGeoMatrix* sensorMatrix = 0;
 
          if (mBuildIdealGeom) {
-            sensorMatrix = gGeoManager->GetCurrentMatrix();
+            sensorMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
          } else {
             sensorMatrix = (TGeoMatrix*) mPxlDb->geoHMatrixSensorOnGlobal(iSector, iLadder, iSensor);
          }
