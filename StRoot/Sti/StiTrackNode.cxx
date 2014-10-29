@@ -154,10 +154,7 @@ TVector3 D(Dp); D[2]=0.; D.SetMag(1.);	//Direction
 TVector3 N(-D[1],D[0],0.);		//Ort to direction
 TVector3 X(Xp); X[2]=0.;
 TVector3 C,Cd,Cn;
-int inSide = X.Perp()<r;
-//assert( inSide == dir);
-//if ( inSide != dir) return 0;
-
+int inside = X.Perp()<r;
 
 double XX,XN,L;
 XX = X*X; XN = X*N;
@@ -182,27 +179,36 @@ for (int ix = 0;ix<2; ix++) {
 for (int ix = 0;ix<2; ix++) {
   double len = (Out[ix]-X).Mag();
   if (len > 0.1*r) len = 2*r*asin(0.5*len*aRho);
-  if ((Out[ix]-X).Dot(D)<0) len*=-1.;
   out[ix][2] = len; 
   out[ix][0] = Out[ix][0];
   out[ix][1] = Out[ix][1];
 }
-
-  int kase = 0;
-  if ((out[0][2]>0) == inSide) kase+=1;
-  if ((out[1][2]>0) == inSide) kase+=2;
-  if (fabs(out[0][2])<=fabs(out[1][2])) kase+=4;
+//  Moving ==(2*dir-1)*(cosCA*x+sinCA*y)  - =movingIn, + =movingOut
+//  Inside ==start point inside of cylinder
+//
+//Outside & movingOut := Biggest  length 
+//Outside & movingIn  := Smallest length
+//Inside  & movingOut := Smallest length
+//Inside  & movingIn  := Biggest  length
+  int isShort = (out[0][2]<out[1][2]) ? 0:1;
+  int movingIn = (2*dir-1)*(Dp[0]*Xp[0]+Dp[1]*Xp[1])<0;
+  int kase = inside + 2*movingIn;
+  int which = -1;
   switch (kase) {
-    case 0: return 0; 						//Everything is wrong
-    case 1: break;	      					//1st is the only good
-    case 2: memcpy(out[0],out[1],3*sizeof(out[0][0]));break;	//2nd is only good
-    case 3: memcpy(out[0],out[1],3*sizeof(out[0][0]));break;	//2nd is better
-    case 4: return 0; 						//Everything is wrong
-    case 5: break;						//1st is the only good 
-    case 6: memcpy(out[0],out[1],3*sizeof(out[0][0]));break;	//2nd is the only good 
-    case 7: break;						//1st is better
+    case 0: which = 1-isShort; break;	//Outside & movingOut ==> long
+    case 1: which = isShort;   break;	//Inside  & movingOut ==> short  					
+    case 2: which = isShort;   break;	//Outside & movingIn  ==> short
+    case 3: which = 1-isShort; break;	//Inside & movingIn   ==> long
     default: assert(0);
   }
+
+  if (which) { //swap solutions
+    for (int j=0;j<3;j++) {
+      double swp = out[0][j];
+      out[0][j] = out[1][j];
+      out[1][j] = swp;
+  } }
+
 
   for (int jk=0;jk<2;jk++) {
     assert(fabs(Out[jk].Perp()-r)<1e-3*r);
