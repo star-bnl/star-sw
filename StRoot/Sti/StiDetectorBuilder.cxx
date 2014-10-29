@@ -23,7 +23,10 @@ StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 
 class StiAuxMat {
 public: 
+StiAuxMat()	{reset();}
+void reset() 	{memset(this,0,sizeof(*this));}
 double A,Z,X0,Dens,Wt;
+int num,many,sens,extr;
 };
 
 int StiDetectorBuilder::_debug = 0;
@@ -344,7 +347,8 @@ if (botOho) StiDebug::Break(-1946);
 
   StiAuxMat aux;
   int iAns =  AveMate(volu,aux);
-//  assert(iAns<1000);
+  if (iAns) { aux.reset(); AveMateR(volu,aux);}
+
   TVector3 local,global;
   double zMin,zMax,rMin,rMax,phiMin,phiMax;
   shapeG->GetAxisRange(3,zMin,zMax);
@@ -528,7 +532,7 @@ printf ("@@@@ %s dX=%g(%g) dY=%g(%g) dZ=%g(%g) Phi=%g Rn=%g Off=%g\n"
   pDetector->setMaterial(mateS);
 
 
-  assert(Diff(fullPath,pDetector)==0);
+  assert(Diff(fullPath,pDetector,iAns)==0);
 
   if (mThkSplit>0 && mMaxSplit>1) {//	try to split 
     StiDetVect dv;
@@ -543,6 +547,9 @@ printf ("@@@@ %s dX=%g(%g) dY=%g(%g) dZ=%g(%g) Phi=%g Rn=%g Off=%g\n"
    add(layer,0,pDetector); 
    cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
   }
+  iAns = aux.num +1000*(aux.sens+100*aux.many);
+
+
   return iAns;
 
 }
@@ -627,23 +634,28 @@ static int IsSensitive(const TGeoVolume *volu)
 int StiDetectorBuilder::AveMate(TGeoVolume *vol,StiAuxMat &aux) 
 {
 // Analytical computation of the average material.
+   aux.num++;
    double capacity = vol->Capacity();
    double capaOnly = capacity;
    int nd = vol->GetNdaughters();
    TGeoVolume *daughterV;
    TGeoNode   *daughterN;
    double sumA=0,sumZ=0,sumX0=0,sumWt=0;
-   int iAns = 0;
    for (int i=0; i<nd; i++) {
       daughterN = vol->GetNode(i);
       daughterV = daughterN->GetVolume();
-      iAns++;
-      if (IsSensitive(daughterV)) 	iAns+=1000;
-      if (daughterN->IsOverlapping()) 	iAns+=100000;
+      aux.num++;
+      if (IsSensitive(daughterV)) 	{aux.sens++;	      }
+      if (daughterN->IsOverlapping()) 	{aux.many++; return 1;}
       double dauCapa = daughterV->Capacity();
       capaOnly -= dauCapa;
+      if (capaOnly<-1e-3) {aux.extr = 1; return 1;}
       StiAuxMat dauMat;
-      iAns+=AveMate(daughterV,dauMat);
+      int iAns=AveMate(daughterV,dauMat);
+      aux.num+=dauMat.num;
+      aux.sens+=dauMat.sens;
+      aux.many+=dauMat.many;
+      if (iAns) return  iAns;
       if (dauMat.Z<=0) continue;
       sumWt += dauMat.Wt;
       sumA  += dauMat.Wt/dauMat.A;
@@ -666,10 +678,10 @@ int StiDetectorBuilder::AveMate(TGeoVolume *vol,StiAuxMat &aux)
    aux.A    = aux.Wt/(wtOnly/Aonly+sumA);
    aux.Z  = (wtOnly*(Zonly/Aonly)+sumZ)/aux.Wt *aux.A;
    aux.X0 = capacity/(capaOnly/X0only+sumX0); 
-   return iAns;
+   return 0;
 }
 //_____________________________________________________________________________
-int StiDetectorBuilder::Diff(const char *path, const StiDetector *sVolu) const
+int StiDetectorBuilder::Diff(const char *path, const StiDetector *sVolu,int mode) const
 {
 static int nCall=0; nCall++;
    enum {kNin = 10000,kNout = 1000000};
@@ -679,9 +691,9 @@ static int nCall=0; nCall++;
    double gCapa = gVolu->Capacity();
    double sCapa = sVolu->getVolume();
    assert(sCapa>=gCapa*0.999);
-   double gWeit = gVolu->WeightA()*1000;
+   double gWeit = (mode==0) ? gVolu->WeightA()*1000 : gVolu->Weight(0.01,"")*1000;
    double sWeit = sVolu->getWeight();
-//??????????????????????????   assert(fabs(sWeit-gWeit)<1.2e-3*sCapa);	//1.2e-3 air density(Geant ignores gas weight
+ assert(fabs(sWeit-gWeit)<1.9e-3*sCapa+1e-1*sWeit);	//1.2e-3 air density(Geant ignores gas weight
 
    const TGeoShape *gShape = gVolu->GetShape();
    ((TGeoShape*)gShape)->ComputeBBox();
@@ -700,7 +712,64 @@ static int nCall=0; nCall++;
    }
      
    return 0;
-   
+}
+//_____________________________________________________________________________
+int StiDetectorBuilder::AveMateR(TGeoVolume *gVolu,StiAuxMat &aux)
+{ 
+// <A> = sum(Di*Vi)/sum(Di*Vi/Ai)
+// Or
+// 1/<A> = sum(Di*Vi/Ai)/sum(Di*Vi);
+// ==========================================
+// <Z>   = sum(Zi     *Di*Vi/Ai)/sum(Di*Vi/Ai)
+// <Z/A> = sum((Zi/Ai)*Di*Vi/Ai)/sum(Di*Vi/Ai)
 
+   enum {kStep = 1000, kNin = 1000000,kNout = 100000000};
+   TGeoVolume *top = gGeoManager->GetTopVolume();
+   TString path(gGeoManager->GetPath());
+   gGeoManager->SetTopVolume(gVolu);
 
+   const TGeoShape *gShape = gVolu->GetShape();
+    ((TGeoShape*)gShape)->ComputeBBox();
+   const TGeoBBox *bbox =    (const TGeoBBox*)gShape;
+   double D[3] = {bbox->GetDX(),bbox->GetDY(),bbox->GetDZ()};
+   const double *orig =  bbox->GetOrigin();
+   double gX[3],sumZ=0,sumX=0,sumD=0,sumNa=0;   
+   int Nin = 0;
+
+   double sumDD = 0;
+   for (int ir = 0; ir<=kNout; ir++) {
+     for (int j=0;j<3;j++) {gX[j] = orig[j]+(gRandom->Rndm()-0.5)*2*D[j];}
+     if (!gVolu->Contains(gX)) continue;
+     Nin++; if (Nin>kNin) break;
+     const TGeoNode *gotNode = gGeoManager->FindNode(gX[0],gX[1],gX[2]);
+     if (!gotNode) continue;
+     const TGeoVolume *gotVolu = gotNode->GetVolume();
+     if (IsSensitive(gotVolu)   ) 	aux.sens++;
+     if (gotNode->IsOverlapping())	aux.many++;
+     const TGeoMaterial *gotMate = gotVolu->GetMaterial();
+     double Ai = gotMate->GetA();
+     double Zi = gotMate->GetZ();
+     if (Zi<=0) continue;
+     double Di = gotMate->GetDensity();
+     double X0i = gotMate->GetRadLen();
+     double Na = Di/Ai; sumNa += Na;
+     sumD += Di;
+     sumZ += (Zi/Ai)*Na;
+     sumX += 1./X0i;
+     sumDD += Di*Di;
+     if (Nin<kStep || (Nin%100)!=99) continue;
+       double ave2 = pow(sumD/Nin,2);
+       double sig2 = sumDD/Nin-ave2;
+       if (sig2< 1e-4*ave2) break;
+     
+  }
+  gGeoManager->SetTopVolume(top);
+  gGeoManager->cd(path);
+  
+  aux.A = sumD/sumNa;
+  aux.Z = sumZ/sumNa * aux.A;
+  aux.X0 = Nin/sumX;
+  aux.Dens = sumD/Nin;
+  aux.Wt = aux.Dens*gVolu->Capacity();
+  return 0;
 }

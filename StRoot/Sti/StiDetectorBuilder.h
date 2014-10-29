@@ -79,7 +79,7 @@ public:
   void SetCurrentDetectorBuilder(StiDetectorBuilder *m) {fCurrentDetectorBuilder = m;}
   void AverageVolume(TGeoPhysicalNode *nodeP);
    int AverageVolume(const char *fullPath); 
-   int Diff(const char *path, const StiDetector *sVolu) const;
+   int Diff(const char *path, const StiDetector *sVolu,int mode) const;
 
   virtual void useVMCGeometry() {}
   void    setGasMat(StiMaterial *m) 			{_gasMat = m;}
@@ -95,7 +95,8 @@ public:
   static  int MakeAverageVolume(const char *path) 
               { return fCurrentDetectorBuilder->AverageVolume(path);}
 
-  static int AveMate(TGeoVolume *vol,StiAuxMat &mat);
+  static int AveMate (TGeoVolume *vol,StiAuxMat &mat);
+  static int AveMateR(TGeoVolume *vol,StiAuxMat &mat);
 
  protected:
   float               mThkSplit;	//wide/thickness/mThkSplit = nSplits
