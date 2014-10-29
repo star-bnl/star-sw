@@ -1,10 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148 2014/10/18 03:00:03 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148.2.1 2014/10/29 19:27:05 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148.2.1  2014/10/29 19:27:05  perev
+ * Method propagate(double xk, ...) rewritten to account cases which was ommitted
+ * in prevuius version as non important. It happened they are important.
+ *
+ * Part of non used code (under #if ) was removed
+ *
  * Revision 2.148  2014/10/18 03:00:03  perev
  * Linear approximation in nudge if shift < 0.01/curvature
  * xyz was not updated in cyl case + THelix
@@ -1069,6 +1075,7 @@ StiDebug::StiDebug::Break(nCall);
   mgP.x2 = xk;
 
   mgP.dx=mgP.x2-mgP.x1;  
+  if (fabs(mgP.dx) < 1e-5) return 0;
 
   double dsin = mFP.curv()*mgP.dx;
   mgP.sinCA2=mgP.sinCA1 + dsin; 
@@ -1081,32 +1088,39 @@ StiDebug::StiDebug::Break(nCall);
     mgP.cosCA2   = ::sqrt((1.-mgP.sinCA2)*(1.+mgP.sinCA2));
 //	Check what sign of cosCA2 must be
     if (mgP.cosCA1<0) mgP.cosCA2 = -mgP.cosCA2;
+    if (((2*dir-1)*mgP.cosCA1<0) != (mgP.dx<0)) mgP.cosCA2 = -mgP.cosCA2;
   }
-  int ians = 0;
-  mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
-  mgP.sumCos   = mgP.cosCA1+mgP.cosCA2;
-  mgP.dy = mgP.dx*(mgP.sumSin/mgP.sumCos);
-  mgP.y2 = mgP.y1+mgP.dy;
-  mgP.dl0 = mgP.cosCA1*mgP.dx+mgP.sinCA1*mgP.dy;
-  double sind = mgP.dl0*rho;
+  int ians = -1;
+  for (int iCos=0;iCos<2;iCos++) {
+    if (iCos) mgP.cosCA2 = -mgP.cosCA2;
+    mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
+    mgP.sumCos   = mgP.cosCA1+mgP.cosCA2;
+    if (fabs(mgP.sumCos)<1e-5) continue;
+    mgP.dy = mgP.dx*(mgP.sumSin/mgP.sumCos);
+    mgP.y2 = mgP.y1+mgP.dy;
+    mgP.dl0 = mgP.cosCA1*mgP.dx+mgP.sinCA1*mgP.dy;
+    double sind = mgP.dl0*rho;
 
-  if (fabs(dsin) < 0.02 ) { //tiny angle
-    mgP.dl = mgP.dl0*(1.+sind*sind/6);
+    if (fabs(dsin) < 0.02 ) { //tiny angle
+      mgP.dl = mgP.dl0*(1.+sind*sind/6);
 
-  } else {
-    double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
-    mgP.dl = atan2(sind,cosd)/rho;
-  }
-  if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	return -5;
-  mFP.z() += mgP.dl*mFP.tanl();
-  if (fabs(mFP.z()) > kMaxZ) 			return -6;
-  mFP.y() = mgP.y2;
-  mFP.eta() = nice(mFP.eta()+rho*mgP.dl);  					/*VP*/
-  mFP.x()      = mgP.x2;
-  mFP._sinCA   = mgP.sinCA2;
-  mFP._cosCA   = mgP.cosCA2;
-  ians = locate();
+    } else {
+      double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
+      mgP.dl = atan2(sind,cosd)/rho;
+    }
+    if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	continue;
+    mFP.z() += mgP.dl*mFP.tanl();
+    if (fabs(mFP.z()) > kMaxZ) 				continue;
+    mFP.y() = mgP.y2;
+    mFP.eta() = nice(mFP.eta()+rho*mgP.dl);  					/*VP*/
+    mFP.x()      = mgP.x2;
+    mFP._sinCA   = mgP.sinCA2;
+    mFP._cosCA   = mgP.cosCA2;
+    ians = locate();
+    if (!ians) break;
+  }  
   if (ians) 					return ians;
+
   if (mFP.x()> kFarFromBeam) {
     if (fabs(mFP.eta())>kMaxEta) 			return kEnded;
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
@@ -1638,23 +1652,11 @@ int StiKalmanTrackNode::updateNode()
 static int nCall=0; nCall++;
   assert(fDerivTestOn!=-10 || _state>=kTNReady);
   _state = kTNFitBeg;
-#ifdef STI_ERROR_TEST
-  testError(mFE.A,0);
-#endif //STI_ERROR_TEST
 //assert(mFE.sign()>0); ///??? 
-  assert(mFE._cXX<1e-8);
   double r00,r01,r11;
   r00 = mHrr.hYY + mFE._cYY;
   r01 = mHrr.hZY + mFE._cZY;
   r11 = mHrr.hZZ + mFE._cZZ;
-#ifdef Sti_DEBUG
-  TRSymMatrix V(2,mHrr.hYY,
-		  mHrr.hZY, mHrr.hZZ);  
-  TRSymMatrix R1(2,r00,
-		   r01, r11);
-  static const TRMatrix H(2,5, 1., 0., 0., 0., 0.,
-			       0., 1., 0., 0., 0.);
-#endif
   _det=r00*r11 - r01*r01;
   if (!finite(_det) || _det<(r00*r11)*1.e-5) {
     LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** zero determinant %g",_det)
@@ -1674,42 +1676,6 @@ static int nCall=0; nCall++;
   double dp3  = k30*dyt + k31*dzt;
   double dp2  = k20*dyt + k21*dzt;
   double dp4  = k40*dyt + k41*dzt;
-#ifdef Sti_DEBUG
-  double dp0  = k00*dyt + k01*dz;
-  double dp1  = k10*dyt + k11*dz;
-  if (debug() & 4) {
-    PrPP(updateNode,R1);
-    PrPP(updateNode,V);
-  }
-  TRSymMatrix C(kNPars,mFE.A);  
-  TRSymMatrix R(H,TRArray::kAxSxAT,C);
-  R += V;
-  TRSymMatrix G(R,TRArray::kInverted); 
-  if (debug() & 4) {
-    PrPP(updateNode,C);
-    PrPP(updateNode,R);
-    PrPP(updateNode,G);
-  }
-  // K = C * HT * G
-  TRMatrix T(C,TRArray::kSxAT,H); 
-  TRMatrix K(T,TRArray::kAxS,G);  
-  TRMatrix K1(5,2,
-	      k00, k01,
-	      k10, k11,
-	      k20, k21,
-	      k30, k31,
-	      k40, k41);   
-  if (debug() & 4) {
-    PrPP(updateNode,T);
-    PrPP(updateNode,K1);
-    PrPP(updateNode,K);
-    K1.Verify(K);
-  }
-  TRVector dR(2,dyt, dzt);
-  TRVector dP1(5, dp0, dp1, dp2, dp3, dp4);
-  TRVector dP(K,TRArray::kAxB,dR);
-  if (debug() & 4) dP1.Verify(dP);//,1e-7,2);
-#endif
   double eta  = nice(mFP.eta() + dp2);
   if (fabs(eta)>kMaxEta) return -14;
   double pti  = mFP.ptin() + dp3;
@@ -1767,36 +1733,9 @@ static int nCall=0; nCall++;
   }
   if (mFE.check()) return -14;
 
-#ifdef Sti_DEBUG
-  TRSymMatrix W(H,TRArray::kATxSxA,G); 
-  TRSymMatrix C0(C);
-  C0 -= TRSymMatrix(C,TRArray::kRxSxR,W);
-  TRSymMatrix C1(kNPars,mFE.A);  
-  if (debug() & 4) {
-    PrPP(updateNode,W); 
-    PrPP(updateNode,C0);
-    PrPP(updateNode,C1);
-    C1.Verify(C0);
-  }
-  //   update of the covariance matrix:
-  //    C_k = (I - K_k * H_k) * C^k-1_k * (I - K_k * H_k)T + K_k * V_k * KT_k
-  // P* C^k-1_k * PT
-  TRMatrix A(K,TRArray::kAxB,H);
-  TRMatrix P(TRArray::kUnit,kNPars);
-  P -= A;
-  TRSymMatrix C2(P,TRArray::kAxSxAT,C); 
-  TRSymMatrix Y(K,TRArray::kAxSxAT,V);  
-  C2 += Y;  
-  if (debug() & 4) {
-    PrPP(updateNode,C2); PrPP(updateNode,Y); PrPP(updateNode,C2);
-    C2.Verify(C0);
-    C2.Verify(C1);
-  }
-#endif
   if (debug() & 8) PrintpT("U");
   _state = kTNFitEnd;
 
-  nudge();
   return 0; 
 }
 
@@ -1937,14 +1876,12 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 //______________________________________________________________________________
 int StiKalmanTrackNode::locate()
 {
-  int position=0;
-  double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
+  double yOff, zOff;
   //fast way out for projections going out of fiducial volume
   const StiDetector *tDet = getDetector();
   if (!tDet) return 0;
   const StiPlacement *place = tDet->getPlacement();
   const StiShape     *sh    = tDet->getShape();
-  double kNStd = (tDet->isActive() ? 5 : 0 ); // GVB: avoid seeing too much inactive material
 
   if (fabs(mFP.z())>kMaxZ || mFP.rxy()> kMaxR) return -1;
   
