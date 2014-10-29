@@ -896,7 +896,7 @@ int StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const char *pathT
     int nt = nTot/1000;
     if (nt%100) Error("LoopOverNodes","%d Volumes are sensitive",nt%100);
     nt/=100;
-    if (nt%100) Error("LoopOverNodes","%d Volumes are MANY",nt%100);
+    if (nt%100) Warning("LoopOverNodes","%d Volumes are MANY",nt%100);
   }  
 
   return nTot;
