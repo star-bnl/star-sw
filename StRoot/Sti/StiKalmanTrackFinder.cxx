@@ -708,8 +708,6 @@ assert(testNode.inside());
         stiHit = hitCont.getHit(jHit);
 	StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
 	*node = testNode;
-        node->nudge();
-assert(node->inside());
 
         status = 0;
         do {//fake do
@@ -717,10 +715,10 @@ assert(node->inside());
           node->setIHitCand(jHit);
           assert(node->getHitCand());
           node->setHit(stiHit);
+          node->nudge(stiHit);
           status = node->updateNode();
           if (status)  break;
           node->nudge();
-assert(node->inside());
 
           node->setChi2(hitCont.getChi2(jHit));
           if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
