@@ -194,7 +194,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double dr = r2-r1;
   double dy = y2-y1;
   double dz = z2-z1;
-  if (fabs(dr) <1.e-4) return false; //// || dy==0. || dz==0.);
+  assert (fabs(dr) >1.e-3); //// || dy==0. || dz==0.);
 //    throw logic_error("StiLocalTrackSeedFinder::extrapolate() -E- Seed aborted because dr==0 ");
   //Now look for a hit in the next layer in:
   _detectorContainer->setToDetector( hit2->detector());
@@ -213,7 +213,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   
   //Temp hack by Mike
 //VP  if (r3<=60.) { return false; }
-//  if (r3<=25.) { return false; } //VP avoid SVT from seed
+  if (r3<=25.) { return false; } //VP avoid SVT from seed
     
   //First, r-y plane
   //double m_ry = dr/dy;

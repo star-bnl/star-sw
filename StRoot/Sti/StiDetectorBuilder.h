@@ -39,7 +39,6 @@ typedef detectorMap::value_type detectorMapValType;
   \author Ben Norman (Kent State University) Aug 1, 2001
   \author Claude Pruneau (Wayne State University) Oct 16, 2002
 */
-class StiAuxMat;
 class StiDetectorBuilder : public Named
 {
 public:
@@ -77,10 +76,7 @@ public:
   StiTrackingParameters *getTrackingParameters() 	{ return  _trackingParameters;}
   Factory<StiDetector>* getDetectorFactory() 		{return _detectorFactory;}
   void SetCurrentDetectorBuilder(StiDetectorBuilder *m) {fCurrentDetectorBuilder = m;}
-  void AverageVolume(TGeoPhysicalNode *nodeP);
-   int AverageVolume(const char *fullPath); 
-   int Diff(const char *path, const StiDetector *sVolu) const;
-
+  virtual void AverageVolume(TGeoPhysicalNode *nodeP);
   virtual void useVMCGeometry() {}
   void    setGasMat(StiMaterial *m) 			{_gasMat = m;}
   StiMaterial *getGasMat()   				{return _gasMat;}
@@ -90,12 +86,8 @@ public:
   static void setDebug(int m = 0) 			{_debug = m;}
   static int  debug() {return _debug;}
   static StiDetectorBuilder *GetCurrentDetectorBuilder(){return fCurrentDetectorBuilder;}
-//   static  void MakeAverageVolume(TGeoPhysicalNode *nodeP) 
-//               {if (fCurrentDetectorBuilder) fCurrentDetectorBuilder->AverageVolume(nodeP);}
-  static  int MakeAverageVolume(const char *path) 
-              { return fCurrentDetectorBuilder->AverageVolume(path);}
-
-  static int AveMate(TGeoVolume *vol,StiAuxMat &mat);
+  static  void MakeAverageVolume(TGeoPhysicalNode *nodeP) 
+              {if (fCurrentDetectorBuilder) fCurrentDetectorBuilder->AverageVolume(nodeP);}
 
  protected:
   float               mThkSplit;	//wide/thickness/mThkSplit = nSplits

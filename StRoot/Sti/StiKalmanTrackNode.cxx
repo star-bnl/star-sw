@@ -1,38 +1,12 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148 2014/10/18 03:00:03 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.149 2014/10/30 15:03:54 jeromel Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
- * Revision 2.148  2014/10/18 03:00:03  perev
- * Linear approximation in nudge if shift < 0.01/curvature
- * xyz was not updated in cyl case + THelix
- *
- * Revision 2.147  2014/10/17 19:47:27  perev
- * Method nudge rewritten. Logic was too complicated, as a result wrong assert happened.
- * Now numerous cases checked carefully.
- *
- * Revision 2.146  2014/10/16 22:28:45  perev
- * Method nudge() rewritten. For complicated cases THelixTrack used.
- * Check for kFarFromBeam putted back (Xin found). It was removed by mistake
- *
- * Revision 2.145  2014/10/14 02:29:50  perev
- * Method inside() added
- * Method locate() rewritten, accounting of any errors and edges removed
- *
- * Revision 2.144  2014/10/10 21:34:36  perev
- * check for cos>1 adde
- *
- * Revision 2.143  2014/10/08 00:57:51  perev
- * Assert added for tubes Rxy == Rnormal (bug #2915)
- * Check for Hz, Hz==>fabs(Hz) to account negative Hz
- *
- * In Propagate to volume added distinguishig for planar and cyl shapes.
- * Planar approach sometimes does not work for cyl shape. (bug #2915)
- * Old, over complicated, and often wrong logic removed
- *
- * In nudge(...) now if hit is provided, nudge to hit. If not, nudge to detector plane
+ * Revision 2.149  2014/10/30 15:03:54  jeromel
+ * Reverted to Oct 2nd
  *
  * Revision 2.142  2014/09/30 15:44:51  perev
  * Added StELoss class to keep ELoss info
@@ -595,7 +569,8 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * n)
   _alpha    = n->_alpha;
   mFP = n->mFP;
   mFE = n->mFE;
-//assert(mFE.sign()>0);///???
+assert(mFE.sign()>0);///???
+  mFP.hz()=0;
   nullCount = n->nullCount;
   contiguousHitCount = n->contiguousHitCount;
   contiguousNullCount = n->contiguousNullCount;
@@ -656,7 +631,8 @@ double StiKalmanTrackNode::getHz() const
 {
   
 static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
-   if (fabs(mHz)<999) return mHz;
+//??   if (mHz && mHz<999) return mHz;
+   if (mHz<999) return mHz;
    if (! _laser) {
      double h[3];
      StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
@@ -965,10 +941,7 @@ StiDebug::Break(nCall);
 
   if (position>kEdgeZplus || position<0) return position;
   assert(mFP.x() > 0.);
-  nudge();
-  assert(tDet->insideL(mFP.P));
   propagateError();
-
   if (debug() & 8) { PrintpT("E");}
 
   // Multiple scattering
@@ -1002,7 +975,7 @@ StiDebug::Break(nCall);
   vertex->rotate(ang);
   rotate(ang);
   if (debug()) ResetComment(::Form("Vtx:%8.3f %8.3f %8.3f",vertex->x(),vertex->y(),vertex->z()));
-  if (propagate(vertex->x(),1,dir))    return false; // track does not reach vertex "plane"
+  if (propagate(vertex->x(),kPlanar,dir))    return false; // track does not reach vertex "plane"
   propagateError();
   if (debug() & 8) { PrintpT("V");}
   setHit(vertex);
@@ -1069,53 +1042,63 @@ StiDebug::StiDebug::Break(nCall);
   mgP.x2 = xk;
 
   mgP.dx=mgP.x2-mgP.x1;  
+  double test = (dir)? mgP.dx:-mgP.dx;  
+//   	if track is coming back stop tracking
+//VP  if (test<0) return -3; //Unfortunatelly correct order not garanteed
 
   double dsin = mFP.curv()*mgP.dx;
   mgP.sinCA2=mgP.sinCA1 + dsin; 
 //	Orientation is bad. Fit is non reliable
   if (fabs(mgP.sinCA2)>kMaxSinEta) 				return -4;
-
-  if (option>1) { 	//cyl case
-    mgP.cosCA2 = mgP.y1*rho + mgP.cosCA1;}
-  else          { 	//planar case
-    mgP.cosCA2   = ::sqrt((1.-mgP.sinCA2)*(1.+mgP.sinCA2));
+  mgP.cosCA2   = ::sqrt((1.-mgP.sinCA2)*(1.+mgP.sinCA2));
 //	Check what sign of cosCA2 must be
-    if (mgP.cosCA1<0) mgP.cosCA2 = -mgP.cosCA2;
-  }
+  test = (2*dir-1)*mgP.dx*mgP.cosCA1;
+  if (test<0) mgP.cosCA2 = -mgP.cosCA2;
+
+  int nIt = (mgP.cosCA2 <0)? 2:1;
   int ians = 0;
-  mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
-  mgP.sumCos   = mgP.cosCA1+mgP.cosCA2;
-  mgP.dy = mgP.dx*(mgP.sumSin/mgP.sumCos);
-  mgP.y2 = mgP.y1+mgP.dy;
-  mgP.dl0 = mgP.cosCA1*mgP.dx+mgP.sinCA1*mgP.dy;
-  double sind = mgP.dl0*rho;
+  StiNodePars save = mFP;
+  for (int iIt=0; iIt<nIt; iIt++) {//try 2 cases, +ve and -ve cosCA
+    ians = -1;
+    mFP = save;
+    mgP.cosCA2 = (!iIt)? fabs(mgP.cosCA2):-fabs(mgP.cosCA2);
+    mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
+    mgP.sumCos   = mgP.cosCA1+mgP.cosCA2;
+    if (fabs(mgP.sumCos)<1e-6) continue;
+    mgP.dy = mgP.dx*(mgP.sumSin/mgP.sumCos);
+    mgP.y2 = mgP.y1+mgP.dy;
 
-  if (fabs(dsin) < 0.02 ) { //tiny angle
-    mgP.dl = mgP.dl0*(1.+sind*sind/6);
 
-  } else {
-    double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
-    mgP.dl = atan2(sind,cosd)/rho;
+    mgP.dl0 = mgP.cosCA1*mgP.dx+mgP.sinCA1*mgP.dy;
+    double sind = mgP.dl0*rho;
+  
+    if (fabs(dsin) < 0.02 ) { //tiny angle
+      mgP.dl = mgP.dl0*(1.+sind*sind/6);
+      
+    } else {
+      double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
+      mgP.dl = atan2(sind,cosd)/rho;
+    }
+    if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	return -5;
+    mFP.z() += mgP.dl*mFP.tanl();
+    if (fabs(mFP.z()) > kMaxZ) 				return -6;
+    mFP.y() = mgP.y2;
+    mFP.eta() = nice(mFP.eta()+rho*mgP.dl);  					/*VP*/
+    mFP.x()       = mgP.x2;
+    mFP._sinCA   = mgP.sinCA2;
+    mFP._cosCA   = mgP.cosCA2;
+    ians = locate();
+    if (ians<=kEdgeZplus && ians>=0) break;
   }
-  if (mgP.y2*mgP.y2+mgP.x2*mgP.x2>kMaxR*kMaxR)	return -5;
-  mFP.z() += mgP.dl*mFP.tanl();
-  if (fabs(mFP.z()) > kMaxZ) 			return -6;
-  mFP.y() = mgP.y2;
-  mFP.eta() = nice(mFP.eta()+rho*mgP.dl);  					/*VP*/
-  mFP.x()      = mgP.x2;
-  mFP._sinCA   = mgP.sinCA2;
-  mFP._cosCA   = mgP.cosCA2;
-  ians = locate();
-  if (ians) 					return ians;
+  if (ians>kEdgeZplus || ians<0) 		return ians;
   if (mFP.x()> kFarFromBeam) {
-    if (fabs(mFP.eta())>kMaxEta) 			return kEnded;
+    if (fabs(mFP.eta())>kMaxEta) 		return kEnded;
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
   }
   mFP.hz()      = getHz();
   if (fabs(mFP.hz()) > 1e-10) 	{ mFP.curv() = mFP.hz()*mFP.ptin();}
   else 				{ mFP.curv() = 1e-6 ;}
-  if (fabs(mFP._cosCA)>0.999) mFP.ready();
-  if (fabs(mFP._sinCA)>0.999) mFP.ready();
+
   mPP() = mFP;
   _state = kTNProEnd;
   return ians;
@@ -1124,77 +1107,56 @@ StiDebug::StiDebug::Break(nCall);
 //______________________________________________________________________________
 int StiKalmanTrackNode::nudge(StiHit *hitp)
 {
-  enum { kTooFar = 33};
-
   StiHit *hit = hitp;
-  double deltaX = 0,rN=0,sCA2,cCA2,deltaY,deltaL;
-  int kase = 0,kaze = 0,shapeCode=0;		// 0=shift accounting deltaX, 1=use THelixTrack
-
-  do {
-   if ( hit) 			{kase = 1; break;}
-   if ( !_detector && _hit)	{kase = 1; hit = _hit; break;}
-   assert(_detector);
-   shapeCode =_detector->getShape()->getShapeCode();
-   rN = _detector->getPlacement()->getNormalRadius();
-   if ( shapeCode ==1) 		{kase = 2; break;}
-   kase = 3;
-  } while(0);
-
-  switch(kase) {
-    case 1: { deltaX = hit->x()-mFP.x(); break;}
-    case 2: { deltaX = rN-mFP.x()      ; break;}
-    case 3: {
-      double t = 0.5*(rN*rN-mFP.rxy2())/(mFP.x()*mFP._cosCA+mFP.y()*mFP._sinCA);
-      deltaX = mFP._cosCA*t;
-      if (fabs(t) > 0.1*rN || fabs(t*mFP.curv()) > 0.01) kaze = 1; break;}
-    default: { assert(0 && "Wrong Node");}
-  }//end switch
-  
-  if (fabs(deltaX)>kTooFar)	kaze = 1;
-  if (fabs(deltaX) <1.e-5) 	return  0;
-
-  switch(kaze) {
-  case 0: {// easy way
-    double deltaS = mFP.curv()*(deltaX);
-    sCA2 = mFP._sinCA + deltaS;
-    if (fabs(sCA2)>0.99) 		return -2;
+  if (!hit) hit = getHit();
+  double deltaX = 0;
+  if (hit) { deltaX = hit->x()-mFP.x();}
+  else     { if (_detector) deltaX = _detector->getPlacement()->getNormalRadius()-mFP.x();}
+  if(fabs(deltaX)>5)		return -1;
+  if (fabs(deltaX) <1.e-3) 	return  0;
+  double deltaS = mFP.curv()*(deltaX);
+  double sCA2 = mFP._sinCA + deltaS;
+  if (fabs(sCA2)>0.99) 		return -2;
+  double cCA2,deltaY,deltaL,sind;
+  if (fabs(deltaS) < 1e-3 && fabs(mFP.eta())<1) { //Small angle approx
+    cCA2= mFP._cosCA - mFP._sinCA/mFP._cosCA*deltaS;
+    if (cCA2> 1) cCA2= 1;
+    if (cCA2<-1) cCA2=-1;
+    deltaY = deltaX*(mFP._sinCA+sCA2)/(mFP._cosCA+cCA2);
+    deltaL = deltaX*mFP._cosCA + deltaY*mFP._sinCA;
+    sind = deltaL*mFP.curv();
+    deltaL = deltaL*(1.+sind*sind/6);
+  } else {
     cCA2= sqrt((1.-sCA2)*(1.+sCA2));
     if (mFP._cosCA <0) cCA2 = -cCA2;
     deltaY = deltaX*(mFP._sinCA+sCA2)/(mFP._cosCA+cCA2);
     deltaL = deltaX*mFP._cosCA + deltaY*mFP._sinCA;
-    double sind = deltaL*mFP.curv();
+    sind = deltaL*mFP.curv();
     deltaL = asin(sind)/mFP.curv();
-    double deltaZ = mFP.tanl()*(deltaL);
-    mFP._sinCA = sCA2;
-    mFP._cosCA = cCA2;
-    mFP.x()   += deltaX;
-    mFP.y()   += deltaY;
-    mFP.z()   += deltaZ;
-    mFP.eta() += deltaL*mFP.curv();
-    break;}
-
-  case 1: {// hard way, use THelixTrack
- 
-    THelixTrack hlx(mFP.P,&mFP._cosCA,mFP.curv()); 
-    double surf[7]={0};
-    int nSurf=0;
-    switch(shapeCode) {
-      case 0:;case 1:
-        surf[0]=mFP.x()+deltaX;surf[1]=-1;nSurf=4;break;
-      case 2: 
-        surf[0]=rN*rN; surf[4]=-1; surf[5]=-1; nSurf=7;break;
-      default: assert(0 && "Wrong shape code"); 
-    }//end switch
-
-    double x[3];
-    deltaL = hlx.Path(999.,surf,nSurf,x,0,1);
-    if (fabs(deltaL) >=999) 		return -2;
-    mFP.phi() += deltaL*mFP.curv();
-    memcpy(mFP.P,x,sizeof(x));
-    mFP.ready();
-    break;}
   }
+  double deltaZ = mFP.tanl()*(deltaL);
+  mFP._sinCA    = mgP.sinCA2 = sCA2;
+  mFP._cosCA    = mgP.cosCA2 = cCA2;
+  mgP.sumSin   = mgP.sinCA1+mgP.sinCA2;
+  mgP.sumCos   = mgP.cosCA1+mgP.cosCA2;
+  mFP.x()   += deltaX;
+  mFP.y()   += deltaY;
+  mFP.z()   += deltaZ;
+  mFP.eta() += deltaL*mFP.curv();
+  mgP.dx   += deltaX;
+  mgP.dy   += deltaY;
+  mgP.dl0  += deltaL;
+  mgP.dl   += deltaL;
 
+
+//  assert(fabs(mFP._sinCA) <  1.);
+  if (fabs(mFP._sinCA)>=1) {
+    LOG_DEBUG << Form("StiKalmanTrackNode::nudge WRONG WRONG WRONG sinCA=%g",mFP._sinCA)
+    << endm;          
+    mFP.print();
+    return -13;
+  }
+  assert(fabs(mFP._cosCA) <= 1.);
   mPP() = mFP;
   return 0;
 }
@@ -1251,8 +1213,8 @@ void StiKalmanTrackNode::propagateError()
 {  
   static int nCall=0; nCall++;
   StiDebug::Break(nCall);
-//  assert(fDerivTestOn!=-10 || _state==kTNProEnd);
-//assert(mFE.sign()>0); ///??? 
+  assert(fDerivTestOn!=-10 || _state==kTNProEnd);
+assert(mFE.sign()>0); ///??? 
   if (debug() & 1) 
     {
       LOG_DEBUG << "Prior Error:"
@@ -1584,7 +1546,7 @@ assert(mFE._cEE>0);
 assert(mFE._cPP>0);
 assert(mFE._cTT>0);
 
-//assert(mFE.sign()>0); ///??? 
+assert(mFE.sign()>0); ///??? 
 
   double dE = sign*dxEloss;
 //		save detLoss and gasLoss for investigation only
@@ -1641,7 +1603,7 @@ static int nCall=0; nCall++;
 #ifdef STI_ERROR_TEST
   testError(mFE.A,0);
 #endif //STI_ERROR_TEST
-//assert(mFE.sign()>0); ///??? 
+assert(mFE.sign()>0); ///??? 
   assert(mFE._cXX<1e-8);
   double r00,r01,r11;
   r00 = mHrr.hYY + mFE._cYY;
@@ -1758,7 +1720,7 @@ static int nCall=0; nCall++;
   mFE._cEY-=k20*c00+k21*c10;mFE._cEZ-=k20*c10+k21*c11;mFE._cEE-=k20*c20+k21*c21;
   mFE._cPY-=k30*c00+k31*c10;mFE._cPZ-=k30*c10+k31*c11;mFE._cPE-=k30*c20+k31*c21;mFE._cPP-=k30*c30+k31*c31;
   mFE._cTY-=k40*c00+k41*c10;mFE._cTZ-=k40*c10+k41*c11;mFE._cTE-=k40*c20+k41*c21;mFE._cTP-=k40*c30+k41*c31;mFE._cTT-=k40*c40+k41*c41;
-//assert(mFE.sign()>0); ///??? 
+assert(mFE.sign()>0); ///??? 
 
   if (mFE._cYY >= mHrr.hYY || mFE._cZZ >= mHrr.hZZ) {
     LOG_DEBUG << Form("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g"
@@ -1795,8 +1757,6 @@ static int nCall=0; nCall++;
 #endif
   if (debug() & 8) PrintpT("U");
   _state = kTNFitEnd;
-
-  nudge();
   return 0; 
 }
 
@@ -1937,7 +1897,7 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 //______________________________________________________________________________
 int StiKalmanTrackNode::locate()
 {
-  int position=0;
+  int position;
   double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
   //fast way out for projections going out of fiducial volume
   const StiDetector *tDet = getDetector();
@@ -1948,6 +1908,12 @@ int StiKalmanTrackNode::locate()
 
   if (fabs(mFP.z())>kMaxZ || mFP.rxy()> kMaxR) return -1;
   
+#ifndef DO_TPCCATRACKER // insensible region on a detector plane
+  edge  = 2.;
+  if (mFP.x()<50.)      edge  = 0.3;
+#else /* DO_TPCCATRACKER */
+  edge = 0.;
+#endif /* !DO_TPCCATRACKER */
   
   //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
   Int_t shapeCode  = sh->getShapeCode();
@@ -1955,17 +1921,52 @@ int StiKalmanTrackNode::locate()
   case kDisk:
   case kCylindrical: // cylinder
     yOff    = nice(_alpha - place->getLayerAngle());
-    if (fabs(yOff)>sh->getOpeningAngle()/2) return -1;
+    yAbsOff = fabs(yOff);
+    yAbsOff -=kNStd*sqrt((mFE._cXX+mFE._cYY)/(mFP.x()*mFP.x()+mFP.y()*mFP.y()));
+    if (yAbsOff<0) yAbsOff=0;
+    detHW = ((StiCylindricalShape *) sh)->getOpeningAngle()/2.;
+    innerY = outerY = detHW;
     break;
   case kPlanar: 
   default:
     yOff = mFP.y() - place->getNormalYoffset();
-    if (fabs(yOff)> sh->getHalfWidth()) return -1;
+    yAbsOff = fabs(yOff) - kNStd*sqrt(mFE._cYY);
+    if (yAbsOff<0) yAbsOff=0;
+    detHW = sh->getHalfWidth();
+    innerY = detHW - edge;
+    //outerY = innerY + 2*edge;
+    //outerZ = innerZ + 2*edge;
+    outerY = innerY + edge;
     break;
   }
   zOff = mFP.z() - place->getZcenter();
-  if (fabs(zOff)>sh->getHalfDepth()) return -1;
-  return 0;
+  zAbsOff = fabs(zOff);
+  detHD = sh->getHalfDepth();
+  innerZ = detHD - edge;
+  outerZ = innerZ + edge;
+  if (yAbsOff<innerY && zAbsOff<innerZ)
+    position = kHit; 
+  else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
+    // outside detector to positive or negative y (phi)
+    // if the track is essentially tangent to the plane, terminate it.
+      position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
+  else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
+    // outside detector to positive or negative z (west or east)
+    position = zOff>0 ? kMissZplus : kMissZminus;
+  else if ((yAbsOff-innerY)>(zAbsOff-innerZ))
+    // positive or negative phi edge
+    position = yOff>0 ? kEdgePhiPlus : kEdgePhiMinus;
+  else
+    // positive or negative z edge
+    position = zOff>0 ? kEdgeZplus : kEdgeZminus;
+  if (debug()&8) {
+    comment += ::Form("R %8.3f y/z %8.3f/%8.3f", 
+		      mFP.x(), mFP.y(), mFP.z());
+    if (position>kEdgeZplus || position<0)  
+      comment += ::Form(" missed %2d y0/z0 %8.3f/%8.3f dY/dZ %8.3f/%8.3f",
+			position, yOff, zOff, detHW, detHD);
+  }
+  return position;
  }
 //______________________________________________________________________________
 void StiKalmanTrackNode::initialize(StiHit *h)
@@ -2379,11 +2380,3 @@ static const double surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
   return time;
 }
 
-//________________________________________________________________________________
-int StiKalmanTrackNode::inside() const 
-{
-const StiDetector *det = getDetector();
-if (!det) return 1;
-return det->insideL(mFP.P);
-
-}

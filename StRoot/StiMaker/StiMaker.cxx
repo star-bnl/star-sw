@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.219 2014/10/16 22:39:59 perev Exp $
+// $Id: StiMaker.cxx,v 1.220 2014/10/30 15:03:55 jeromel Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -30,6 +30,7 @@ More detailed: 				<br>
      SetAttr("useSvt",  1) && SetAttr("activeSvt"  ,0) 	// default
      SetAttr("useSsd"  ,0) && SetAttr("activeSsd"  ,0)	// default Off
 
+     SetAttr("usePixel",0) && SetAttr("activePixel",0)	// default Off
      SetAttr("useIst"  ,0) && SetAttr("activeIst"  ,0)	// default Off
 
      SetAttr("useHpd"  ,0) && SetAttr("activeHpd"  ,0)	// default Off
@@ -162,10 +163,11 @@ StiMaker::StiMaker(const Char_t *name) :
   SetAttr("useTpc"		,kTRUE);
   SetAttr("activeTpc"		,kTRUE);
 
-//SetAttr("useSvt"		,kTRUE);
+  SetAttr("useSvt"		,kTRUE);
 //SetAttr("activeSvt"		,kTRUE);
-//SetAttr("useSsd"		,kTRUE);
+  SetAttr("useSsd"		,kTRUE);
 
+  //SetAttr("usePixel"		,kTRUE);
   //SetAttr("useSst"		,kTRUE);
   //SetAttr("useIst"		,kTRUE);
 
@@ -299,7 +301,7 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("usePixel"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel")));
+      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
       group->setGroupId(kPxlId);
     }
  if (IAttr("useIst"))
@@ -311,7 +313,7 @@ Int_t StiMaker::InitDetectors()
 //  if (IAttr("useBTof"))
 //     {
 //       cout<<"StiMaker::Init() -I- Adding detector group:BTof"<<endl;
-//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof")));
+//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof"),SAttr("BTofInputFile")));
 //       group->setGroupId(kBTofId);
 //     }
   return kStOk;
@@ -548,13 +550,10 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   }
   return fVolume;
 }
-// $Id: StiMaker.cxx,v 1.219 2014/10/16 22:39:59 perev Exp $
+// $Id: StiMaker.cxx,v 1.220 2014/10/30 15:03:55 jeromel Exp $
 // $Log: StiMaker.cxx,v $
-// Revision 1.219  2014/10/16 22:39:59  perev
-// Only Tpc is default now
-//
-// Revision 1.218  2014/10/08 01:29:28  perev
-// Remove redundant inputFile
+// Revision 1.220  2014/10/30 15:03:55  jeromel
+// Reverted to Oct 2nd
 //
 // Revision 1.217  2014/09/10 15:52:12  perev
 // Fix typo, StiSsdDetectorGroup ==> StiSsdDetectorGroup
