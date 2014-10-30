@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.1 2014/10/29 17:06:48 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.2 2014/10/30 22:08:04 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -139,7 +139,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 //          mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
 
    // Build active sti volumes for pixel sensors
-   int iSensor =1 ;
+   int iSensor = 5;
 
    for (int iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
    {
