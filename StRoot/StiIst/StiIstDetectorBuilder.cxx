@@ -134,18 +134,18 @@ void StiIstDetectorBuilder::useVMCGeometry()
                                       PotI));
    }
 
-   for (int ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx)
+   for (int iLadder = 1; iLadder < kIstNumLadders; ++iLadder)
    {
-      for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)
+      for (int iSensor = 1; iSensor < kIstNumSensorsPerLadder; iSensor++)
       {
-         unsigned int matIst = 1000 + (ladderIdx) * kIstNumSensorsPerLadder + (sensorIdx + 1);
-         LOG_DEBUG << "ladderIdx/sensorIdx/matIst : " << ladderIdx << " " << sensorIdx << " " << matIst << endm;
+         unsigned int matIst = 1000 + (iLadder) * kIstNumSensorsPerLadder + iSensor;
+         LOG_DEBUG << "iLadder/iSensor/matIst : " << iLadder << " " << iSensor << " " << matIst << endm;
 
          char name[50];
-         sprintf(name, "Ist/Ladder_%d/Sensor_%d", ladderIdx + 1, sensorIdx + 1);
+         sprintf(name, "Ist/Ladder_%d/Sensor_%d", iLadder, iSensor);
 
          TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-         Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", ladderIdx + 1, sensorIdx + 1);
+         Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", iLadder, iSensor);
          gGeoManager->cd(Path); // retrieve info of IBSS volume
 
          TGeoHMatrix *combI = 0;
@@ -162,7 +162,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
             continue;
          }
 
-         if (sensorIdx != 0) continue;
+         if (iSensor != 1) continue;
 
          TGeoNode *nodeT = gGeoManager->GetCurrentNode();
          // Extract volume geometry for this node
@@ -228,7 +228,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
          p->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
 
          // Adding detector, note that no keys are set in IST!
-         add(ROW, ladderIdx + 1, p);
+         add(ROW, iLadder, p);
 
          // Whole bunch of debugging information
          Float_t rad2deg = 180.0 / 3.1415927;
@@ -242,9 +242,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
                    << "===>NEW:IST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
                    << "===>NEW:IST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
                    << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                   << "===>NEW:IST:pDetector:Ladder             = " << ladderIdx + 1                              << endm
-                   << "===>NEW:IST:pDetector:Sensor             = " << sensorIdx + 1                              << endm
-                   << "===>NEW:IST:pDetector:row/ladder (ITTF)  = " << ROW << " / " << ladderIdx + 1              << endm
+                   << "===>NEW:IST:pDetector:Ladder             = " << iLadder                                    << endm
+                   << "===>NEW:IST:pDetector:Sensor             = " << iSensor                                    << endm
+                   << "===>NEW:IST:pDetector:row/ladder (ITTF)  = " << ROW << " / " << iLadder                    << endm
                    << "===>NEW:IST:pDetector:Active?            = " << p->isActive()                              << endm;
       }
    }
