@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.2 2014/10/30 22:08:04 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.3 2014/10/30 22:08:11 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -169,14 +169,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             continue;
          }
 
-         // Convert origin (0, 0, 0) of the sensor geobox to coordinates in the global coordinate system
-         double sensorXyzLocal[3]  = {};
-         double sensorXyzGlobal[3] = {};
-
-         sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
-
-         TVector3 sensorVec(sensorXyzGlobal);
-
          // Build global rotation for the sensor
          TGeoRotation sensorRot(*sensorMatrix);
 
@@ -187,90 +179,115 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                    << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
                    << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
-         // Create new Sti shape based on the sensor geometry
-         StiShape *stiShape = new StiPlanarShape(geoPath.str().c_str(), 10*sensorBBox->GetDZ(), sensorBBox->GetDY(), sensorBBox->GetDX());
+         // Split the ladder in two halves
+         for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++) {
+            // Convert center of the half sensor geobox to coordinates in the global coordinate system
+            double sensorXyzLocal[3]  = {};
+            double sensorXyzGlobal[3] = {};
 
-         add(stiShape);
+            // Shift the halves by a quater width
+            if ((iLadderHalf == 1 && iLadder != 1) || (iLadderHalf == 2 && iLadder == 1))
+               sensorXyzLocal[0] = -sensorBBox->GetDX()/2;
+            else
+               sensorXyzLocal[0] =  sensorBBox->GetDX()/2;
 
-         Double_t phi  = sensorVec.Phi();
-         Double_t phiD = sensorRot.GetPhiRotation()/180*M_PI;
-         Double_t r    = sensorVec.Perp();
-         double normVecMag = fabs(r*sin(phi - phiD));
+            sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
 
-         TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
+            TVector3 sensorVec(sensorXyzGlobal);
 
-         if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
-         else                            normVec *=  normVecMag;
+            // Create new Sti shape based on the sensor geometry
+            string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_OUT" : "_INN") );
+            double sensorLength = kNumberOfPxlSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
+            StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
-         // Volume positioning
-         StiPlacement *pPlacement = new StiPlacement();
+            add(stiShape);
 
-         pPlacement->setZcenter(0);
-         pPlacement->setLayerRadius(r);
-         pPlacement->setLayerAngle(phi);
-         pPlacement->setRegion(StiPlacement::kMidRapidity);
-         double centerOrient = sensorVec.Phi() - normVec.Phi();
-         pPlacement->setNormalRep(normVec.Phi(), normVecMag, r*sin(centerOrient));
+            Double_t phi  = sensorVec.Phi();
+            Double_t phiD = sensorRot.GetPhiRotation() / 180 * M_PI;
+            Double_t r    = sensorVec.Perp(); // Ignore the z component if any
+            double normVecMag = fabs(r * sin(phi - phiD));
+            TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
 
-         // Build final detector object
-         StiDetector *stiDetector = getDetectorFactory()->getInstance();
+            if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
+            else                            normVec *=  normVecMag;
 
-         if ( !stiDetector ) {
-            Warning("useVMCGeometry()", "Failed to create a valid Sti detector. Skipping to next pixel sensor volume");
-            continue;
+            // Volume positioning
+            StiPlacement *pPlacement = new StiPlacement();
+
+            pPlacement->setZcenter(0);
+            pPlacement->setLayerRadius(r);
+            pPlacement->setLayerAngle(phi);
+            pPlacement->setRegion(StiPlacement::kMidRapidity);
+
+            double centerOrient = sensorVec.Phi() - normVec.Phi();
+            pPlacement->setNormalRep(normVec.Phi(), normVecMag, r * sin(centerOrient));
+
+            // Build final detector object
+            StiDetector *stiDetector = getDetectorFactory()->getInstance();
+
+            if ( !stiDetector ) {
+               Warning("useVMCGeometry()", "Failed to create a valid Sti detector. Skipping to next pixel sensor volume");
+               continue;
+            }
+
+            stiDetector->setName(halfLadderName.c_str());
+            stiDetector->setIsOn(true);
+
+            if (_active) { stiDetector->setIsActive(new StiPxlIsActiveFunctor);}
+            else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
+
+            stiDetector->setIsContinuousMedium(false); // true for gases
+            stiDetector->setIsDiscreteScatterer(true); // true for anything other than gas
+            stiDetector->setGroupId(kPxlId);
+            stiDetector->setShape(stiShape);
+            stiDetector->setPlacement(pPlacement);
+            stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
+            stiDetector->setMaterial(mSiMaterial);
+            //         stiDetector->setElossCalculator(elossCalculator);
+            stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
+
+            int stiRow    = 0;
+            int stiSensor = 0;
+
+            // Add created sti pixel detector to the system
+            // The numbering is:
+            // ladder = 0-1- ...9 for inner layer
+            // stiRow = 0 for inner layer inner half ladder, 1 for outer half ladder
+            // ladder = 0-1-2 for sector 0 of outer layer, then 3-4-5 for the second sector until 29 for the last sectro
+            // stiRow = 2 for outer layer inner half ladder, 3 for outer half ladder
+            // ladder=1 is the inner ladder
+            if (iLadder == 1) {
+               stiRow = 0 ;
+               stiRow += 1 - (iLadderHalf - 1);
+               stiSensor = (iSector - 1);
+            } else {
+               stiRow = 2;
+               stiRow += 1 - (iLadderHalf - 1);
+               stiSensor = (iSector - 1) * (kNumberOfPxlLaddersPerSector - 1) + (iLadder - 1);
+            }
+
+            stiDetector->setKey(1, stiRow);
+            stiDetector->setKey(2, stiSensor);
+            add(stiRow, stiSensor, stiDetector);
+
+            // Whole bunch of debugging information
+            Float_t rad2deg = 180.0 / 3.1415927;
+            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Name             = " << stiDetector->getName()                     << endm
+                      << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
+                      << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
+                      << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
+                      << "===>NEW:PIXEL:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
+                      << "===>NEW:PIXEL:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
+                      << "===>NEW:PIXEL:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
+                      << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
+                      << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
+                      << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
+                      << "===>NEW:PIXEL:stiDetector:sector           = " << iSector                                    << endm
+                      << "===>NEW:PIXEL:stiDetector:Ladder           = " << iLadder                                    << endm
+                      << "===>NEW:PIXEL:stiDetector:sensor           = " << iSensor                                    << endm
+                      << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor       << endm
+                      << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
          }
-
-         stiDetector->setName(geoPath.str().c_str());
-         stiDetector->setIsOn(true);
-         if (_active) { stiDetector->setIsActive(new StiPxlIsActiveFunctor);}
-         else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
-         stiDetector->setIsContinuousMedium(false); // true for gases
-         stiDetector->setIsDiscreteScatterer(true); // true for anything other than gas
-         stiDetector->setGroupId(kPxlId);
-         stiDetector->setShape(stiShape);
-         stiDetector->setPlacement(pPlacement);
-         stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
-         stiDetector->setMaterial(mSiMaterial);
-//         stiDetector->setElossCalculator(elossCalculator);
-         stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
-
-         int stiRow    = 0;
-         int stiSensor = 0;
-
-         // Add created sti pixel detector to the system
-         // The numbering is:
-         // ladder = 0-1- ...9 for inner layer --> stiRow =0
-         // ladder = 0-1-2 for sector 0 of outer layer, then 3-4-5 for the second sector until 29 for the last sectro
-         // ladder=1 is the inner ladder
-         if (iLadder == 1) {
-            stiRow = 0 ;
-            stiSensor = (iSector-1);
-         } else {
-            stiRow = 1;
-            stiSensor = (iSector-1) * (kNumberOfPxlLaddersPerSector-1) + (iLadder-1);
-         }
-
-         stiDetector->setKey(1, stiRow);
-         stiDetector->setKey(2, stiSensor);
-         add(stiRow, stiSensor, stiDetector);
-
-         // Whole bunch of debugging information
-         Float_t rad2deg = 180.0 / 3.1415927;
-         LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Name             = " << stiDetector->getName()                     << endm
-                   << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
-                   << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
-                   << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
-                   << "===>NEW:PIXEL:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
-                   << "===>NEW:PIXEL:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
-                   << "===>NEW:PIXEL:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
-                   << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
-                   << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
-                   << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                   << "===>NEW:PIXEL:stiDetector:sector           = " << iSector                                    << endm
-                   << "===>NEW:PIXEL:stiDetector:Ladder           = " << iLadder                                    << endm
-                   << "===>NEW:PIXEL:stiDetector:sensor           = " << iSensor                                    << endm
-                   << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor       << endm
-                   << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
       }
    }
 }
