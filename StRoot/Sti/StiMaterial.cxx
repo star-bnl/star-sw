@@ -75,7 +75,6 @@ void StiMaterial::set(const string& name,
 		      double X0)
 {
   setName(name);
-  _ionization = 1946;	//arbitrary
   _density = density;
   _a = a;
   _z = z;

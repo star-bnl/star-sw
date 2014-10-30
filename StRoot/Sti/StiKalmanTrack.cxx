@@ -1,27 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.131 2014/10/22 20:41:59 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.131 2014/10/22 20:41:59 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.132 2014/10/30 15:03:54 jeromel Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.132 2014/10/30 15:03:54 jeromel Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.131  2014/10/22 20:41:59  perev
- * Remove any influence of nudge() to refit.
- *
- * Revision 2.130  2014/10/22 18:33:09  perev
- * In refitL check for inside() lead to stop tracking
- * which is wrong. When track after refit missed volume,
- * it should not lead to stop tracking. Now this is fixed
- *
- * Revision 2.129  2014/10/16 22:20:25  perev
- * In method refitL() added additional loop to test nodes for inside/outside.
- * This is temporary, for debugging
- * call of nudge() added to move node position onto detector plane.
- * If failed, node defined as invalid
- *
- * Revision 2.128  2014/10/14 02:27:12  perev
- * nudge() & inside() added
+ * Revision 2.132  2014/10/30 15:03:54  jeromel
+ * Reverted to Oct 2nd
  *
  * Revision 2.127  2014/09/29 21:44:55  perev
  * Check cos>=1 replaced to cos>=.99
@@ -1601,27 +1587,26 @@ int StiKalmanTrack::refit()
 int StiKalmanTrack::refitL() 
 {
 static int nCall=0;nCall++;
+  StiDebug::Break(nCall);
+
   StiKTNIterator source;
   StiKalmanTrackNode *pNode = 0,*targetNode;
   int iNode=0, status = 0,isStarted=0,restIsWrong=0;
-  StiDebug::Break(nCall);
-
-
-  pNode = 0; iNode=0;isStarted=0;restIsWrong=0;
   for (source=rbegin();source!=rend();source++) {
     iNode++;
     targetNode = &(*source);
-    if (restIsWrong) 		{ targetNode->setInvalid(); continue;}
+    if (restIsWrong) { targetNode->setInvalid(); continue;}
 
     if (!isStarted) {
-      if (!targetNode->getHit()) 	continue;		
-      if ( targetNode->getChi2()>1000) 	continue;;
+      if (!targetNode->getHit()) 	targetNode->setInvalid();		
+      if ( targetNode->getChi2()>1000) 	targetNode->setInvalid();
+      if (!targetNode->isValid()) 	continue;
     }
     isStarted++;
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(0);
-    if (status) 		{ restIsWrong = 2005; targetNode->setInvalid();continue;}
-    targetNode->nudge();
+    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
+    if (!targetNode->isValid()) 	continue;
     pNode = targetNode;
   }//end for of nodes
 
@@ -1631,15 +1616,15 @@ static int nCall=0;nCall++;
     targetNode = &(*source);
     if (restIsWrong) { targetNode->setInvalid(); continue;}
     if (!isStarted) {
-      if (!targetNode->getHit()) 	continue;;		
-      if ( targetNode->getChi2()>1000) 	continue;
+      if (!targetNode->getHit()) 	targetNode->setInvalid();		
+      if ( targetNode->getChi2()>1000) 	targetNode->setInvalid();
+      if (!targetNode->isValid()) 	continue;
     }
     isStarted++;
-
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();continue;}
-    targetNode->nudge();
+    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
+    if (!targetNode->isValid()) 	continue;
     pNode = targetNode;
   }//end for of nodes
   return 0;
@@ -1768,7 +1753,6 @@ double Xi2=0;
     cirl = circ;
     double alfa = targetNode->getAlpha();
     cirl.Rot(-alfa);
-
     StiNodePars P = targetNode->fitPars();
     P.x()  =  cirl.Pos()[0];
     P.y()  =  cirl.Pos()[1];

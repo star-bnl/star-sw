@@ -2,8 +2,6 @@
 #include "Stiostream.h"
 #include <string>
 #include <map>
-#include "TError.h"
-#include "TVector3.h"
 #include "StiMaterial.h"
 #include "StiShape.h"
 #include "StiPlanarShape.h"
@@ -12,7 +10,6 @@
 #include "StiDetectorContainer.h"
 #include "StiDetector.h"
 #include "Sti/StiToolkit.h"
-#include "StiUtilities/StiDebug.h"
 #include "StiMapUtilities.h"
 
 
@@ -72,6 +69,7 @@ int StiDetector::splitIt(StiDetVect &vect,double dXdY,int nMax)
 static int nCall=0; nCall++;
 
 
+  double startWeight = getWeight();
   vect.resize(1);
   vect[0]=this;
   assert(shape);
@@ -84,8 +82,8 @@ static int nCall=0; nCall++;
   if (iShape == kCylindrical)  nRadius = shape->getOuterRadius()-deltaX/2;
 
   if (nRadius < deltaX/2) {		// non splitable
-    Warning("splitIt","%s Non splitable Rnormal < thickness/2 %g %g\n"
-           ,getName().c_str(),nRadius,deltaX/2);
+    printf("StiDetector::splitIt %s Non splitable Rnormal < thickness/2 %g %g\n"
+          ,getName().c_str(),nRadius,deltaX/2);
     return 1;
   }
   int ny = deltaX/(halfY*2*dXdY)+0.5;
@@ -153,47 +151,4 @@ return shape->getVolume();
     double StiDetector::getWeight() const
 {
 return shape->getVolume()*material->getDensity();
-}
-//______________________________________________________________________________
-int StiDetector::insideL(const double xl[3],int mode) const 
-{
-static const int insideAssert = StiDebug::iFlag("insideAssert");
-if (!insideAssert) return 1;
-
-static int nCall = 0; nCall++;
-static const double fakt = 1.;
-
-double rN = placement->getNormalRadius();
-double thick = shape->getThickness();
-do {
- if (shape->getShapeCode()==1) { //Planar
-  if (fabs(xl[0]-rN)>thick/2) 				break;
-  if (!mode) return 1;
-  double y = xl[1]-placement->getNormalYoffset();
-  double dy = shape->getHalfWidth()*fakt;
-  if (fabs(y)>dy) 					break;
- } else {
-  double rxy = sqrt(xl[0]*xl[0]+xl[1]*xl[1]);
-  if (fabs(rxy-rN)>thick/2) 				break;
-  if (!mode) return 1;
-  double ang = atan2(xl[1],xl[0]);
-  if (ang<-M_PI) ang +=M_PI*2;
-  if (ang> M_PI) ang -=M_PI*2;
-  if (fabs(ang)>shape->getOpeningAngle()/2*fakt)	break;
- } 
-  if (!mode) return 1;
-  double z = xl[2]-placement->getZcenter();  
-  if (fabs(z)>shape->getHalfDepth()*fakt)		break;
-  return 1;
-} while(0);
-  return 0;
-
-}
-//______________________________________________________________________________
-int StiDetector::inside(const double xl[3],int mode) const 
-{
-  TVector3 xg(xl);
-  double alfa = getPlacement()->getNormalRefAngle();
-  xg.RotateZ(-alfa);
-  return insideL(&xg[0],mode);
 }

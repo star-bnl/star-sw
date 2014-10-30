@@ -141,21 +141,7 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     double cosd = cosCA2*rotPars._cosCA+sinCA2*rotPars._sinCA;
     dl = atan2(sind,cosd)/rho;
   }
-  if (mDetector && mDetector->getShape()->getShapeCode()>1) { // non planar shape
-    double rN = mDetector->getPlacement()->getNormalRadius();
-    for (int it=0;it<100;it++) {
-       double dif = rN*rN-x2*x2-y2*y2;
-       if (fabs(dif)<rN*1e-3) break;
-       if (it>=99) return 2;
-       double t = - 0.5*dif/(x2*cosCA2+y2*sinCA2);
-       if (fabs(t)>1.0) t/=fabs(t);
-       double ang = t*rotPars.curv();
-       if (fabs(ang)>0.1) { t*=0.1/fabs(ang); ang*= 0.1/fabs(ang);}
-       x2 += cosCA2*t; y2+=sinCA2*t; dl+=t;
-       double c = cosCA2;
-       cosCA2 = c*cos(ang)-sinCA2*sin(ang);
-       sinCA2 = c*sin(ang)+sinCA2*cos(ang);
-  } }
+
   proPars.x() = x2;
   proPars.y() = y2;
   proPars.z() = rotPars.z() + dl*rotPars.tanl();
@@ -680,7 +666,7 @@ static const int keepElossBug = StiDebug::iFlag("keepElossBug");
 assert(pt<1e3);
   double relRadThickness;
   // Half path length in previous node
-  double pL1,pL2,pL3,d1=0,d2=0,d3=0,dxEloss,dx;
+  double pL1,pL2,pL3,d1,d2,d3,dxEloss,dx;
   pL1=0.5*pathIn(mParentNode->getDetector(),&mBestParentPars);
   // Half path length in this node
   pL3=0.5*pathIn(mDetector,&mBestPars);
@@ -816,8 +802,9 @@ if (fabs(mMcs._ptinCorr)>1e-4) {
   if (gasMat) {
     x0Gas = gasMat->getX0();
     const StiElossCalculator	*gasLos = gasMat->getElossCalculator();
-    d2 = (gasLos)? gasLos->calculate(1.,m, beta2):0 ;
-  } 
+    if (gasLos) {
+      d2 = gasLos->calculate(1.,m, beta2);
+  } }
 
 
   pL2=pL2-pL1-pL3; if (pL2<0) pL2=0;
