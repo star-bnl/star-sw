@@ -1,0 +1,14 @@
+/*    fpsConstant.idl
+*
+*  Table: fpsConstant
+*
+*       description: //  FPS constants
+*/ 
+
+struct fpsConstant { 
+  octet nQuad;        /*  4 */
+  octet nLayer;       /*  3 */
+  octet maxSlat;      /* 21 */
+  octet maxQTaddr;    /*  8 */
+  octet maxQTch;      /* 32 */
+};  
