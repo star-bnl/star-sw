@@ -305,7 +305,11 @@
 	 JCW :: Reduced inner radius to 11.0 to coincide with PXMO outer radius
 	 <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.84/</varlist>  
     -->
+    <!-- 
+	 JCW :: Original value was better as we can flag IBMO as ONLY
     <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.00/</varlist> 
+    -->
+    <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.84/</varlist>  
     <varlist type="float" comment=" Outer radius of mother volume whole detector" > IBMOOuterRadius/18.5/</varlist>
     <varlist type="int"   comment=" Number of ladders" > nLadder/24/</varlist>
     <varlist type="int"   comment=" Number of silicon sensor per ladder" > nUnit/6/</varlist>
