@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.45 2013/09/11 17:40:06 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.46 2014/10/31 16:11:59 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.46  2014/10/31 16:11:59  dmitry
+ * adding FPS to the database domain list
+ *
  * Revision 1.45  2013/09/11 17:40:06  dmitry
  * new database support: IST
  *
@@ -418,6 +421,7 @@ addDbDomain(dbFgt,"fgt");
 addDbDomain(dbPxl,"pxl"); 
 addDbDomain(dbMtd,"mtd"); 
 addDbDomain(dbIst,"ist"); 
+addDbDomain(dbFps,"fps"); 
 
 }
 
