@@ -29,32 +29,51 @@ static double EmxSign(int n,const double *e);
 
 // Complex numbers
 const TComplex Im(0,1);
+//______________________________________________________________________________ 
+static int Break(int key)
+{ static int kto=-2010;
+  if (kto != key) return 0;
+  printf ("BOT OHO %d\n",key);
+  return 1;
+}
 //_____________________________________________________________________________
 static void eigen2(double G[3], double lam[2], double eig[2])
 {
   double spur = G[0]+G[2];
-  double det  = G[0]*G[2]-G[1]*G[1];
-  double dis  = spur*spur-4*det;
-  if (dis<0) dis = 0;
+//double det  = G[0]*G[2]-G[1]*G[1];
+  double dis  = (G[0]-G[2])*(G[0]-G[2])+4*G[1]*G[1];
   dis = sqrt(dis);
   if (lam) {
     lam[0] = 0.5*(spur+dis);
     lam[1] = 0.5*(spur-dis);
   }
-  if (eig) {
-    eig[1]=G[0]-G[2]-dis;
-    eig[0]=G[2]-G[0]-dis;
-    if (fabs(eig[1])>fabs(eig[0]))	{eig[0]=  -2*G[1];}
-    else               			{eig[1]=  -2*G[1];}
-    double nor = sqrt(eig[0]*eig[0]+eig[1]*eig[1]);
-    if (nor>1e-11) {
-      if(eig[0]<0) nor = -nor;
-      eig[0]/=nor;eig[1]/=nor;}
-      else {
-      eig[0]=1;eig[1]=0;
-    }
+  if (!eig) return;
+  double g[3]={G[0]-G[2]-dis,2*G[1],G[2]-G[0]-dis};
+  int kase =0;
+  for (int i=1;i<3;i++) { if (fabs(g[i])> 1.001*fabs(g[kase])) kase = i;}
+  if (fabs(g[kase])<1e-11) kase = 3;
 
+  switch(kase) {
+    case 0: eig[0] = g[1]/g[0]; eig[1]=-1; break;
+    case 1: eig[1] = g[0]/g[1]; eig[0]=-1; break;
+    case 2: eig[1] = g[1]/g[2]; eig[0]=-1; break;
+    case 3: eig[0] = 1        ; eig[1]= 0; 
   }
+  double nor = sqrt(eig[0]*eig[0]+eig[1]*eig[1]);
+  if (nor>1e-11) {
+    int j=(fabs(eig[0])>fabs(eig[1]))? 0:1;
+    if(eig[j]<0) nor = -nor;
+    eig[0]/=nor;eig[1]/=nor;}
+  else {
+    eig[0]=1;eig[1]=0;
+  }
+  double lam0=0;
+  if (fabs(eig[0])>=fabs(eig[1])) 	{lam0 = G[0] + G[1]*eig[1]/eig[0];}
+  else 					{lam0 = G[2] + G[1]*eig[0]/eig[1];}
+  assert (fabs(lam[0]-lam0)<=1e-6*fabs(lam[0]+lam0));
+
+
+
 }
 //_____________________________________________________________________________
 inline static double dot(const TComplex &a,const TComplex &b)
@@ -685,8 +704,9 @@ double THelixTrack::Path(double x,double y) const
    double ar[2]={x,y};
    return ht.Path(ar)/fCosL;
 }
+#if 0
 //_____________________________________________________________________________
-double THelixTrack::Step(const double *point,double *xyz, double *dir) const
+double THelixTrack::Path(const double *point,double *xyz, double *dir) const
 {
 
     static int nCount=0; nCount++;
@@ -784,6 +804,139 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
     step[0]+=ss;
     return (xyz) ? Step(step[0],xyz,dir) : step[0];
 }
+#endif
+#if 1
+#define myRSin(len) ((fabs(aRho*len)<0.1)? len*(1.-(aRho*len)*(aRho*len)/6):aR*sin(aRho*len))
+#define myDot(len) (myRSin(len)*(1-vY*aRho)+tan2L*len-aZ*aTanL)
+
+//_____________________________________________________________________________
+double THelixTrack::Path(const double *v,double *xyzp, double *dirp) const
+{
+//txy/cosL =   (Vx*Dx+Vy*Dy+Vz*Dz)/(1+cosL*(Vx*Dy-Vy*Dx)*Rho)
+static const double kAngAcc=1e-4*3.14/180;
+
+   static int nCall=0; nCall++;
+   Break(nCall);
+   THelixTrack hlx(this);
+   double aRho = fabs(fRho),aR = 1./(aRho+1e-11);
+   double peri = 2*M_PI*aR;
+   double lxy = 0,lxyTot=0,aZ=0,vY;
+   double tanL = fP[2]/fCosL, aTanL = fabs(tanL)
+               , tan2L = tanL*tanL, cos2L = fCosL*fCosL;
+   double vtx[3],dir[3],len[3]={0},val[3],est=0;
+   int isSmall=0;
+   
+//		calculate lxy to dca without accounting Z
+   for (int j=0;j<3;j++) {vtx[j]=v[j]-hlx.fX[j]; dir[j]=hlx.fP[j]/fCosL;}
+   double rSin = (vtx[0]*dir[0]+vtx[1]*dir[1]);   
+   double mySin = rSin*fRho;   
+   double myCos = (vtx[0]*dir[1]-vtx[1]*dir[0])*fRho+1;   
+   if (fabs(mySin)<0.1*fabs(myCos)) { //small angle approx
+     double rTan  = rSin/myCos;
+     double myTan = mySin/myCos;
+     lxy = rTan*(1.-myTan*myTan/3);
+   } else {
+     lxy = atan2(mySin,myCos)/fRho;
+   }
+   hlx.Move(lxy/fCosL); lxyTot+= lxy;
+   for (int j=0;j<3;j++) {vtx[j]=v[j]-hlx.fX[j]; dir[j]=hlx.fP[j]/fCosL;}
+
+//		Account wrong side of circle
+   vY     = -vtx[0]*dir[1]+vtx[1]*dir[0]; 
+   if (fRho<0) vY = -vY;
+   if (vY >aR) { //Wrong point was selected
+     lxy = (lxyTot<0)? aR*M_PI:-aR*M_PI;
+     hlx.Move(lxy/fCosL);
+     lxyTot+=lxy; vY = (2*aR-vY);
+     for (int j=0;j<3;j++) {vtx[j]=v[j]-hlx.fX[j]; dir[j]=hlx.fP[j]/fCosL;}
+   }
+
+   int converge = 0;
+   double myBeg = 0,myEnd = 1e11;
+   for (int iTurn = 0; iTurn<10; iTurn++) {
+     aZ = fabs(vtx[2]);
+
+   for (int iBeg=0;iBeg<3;iBeg++)  {	//
+     int k = (myBeg+1e-4)/peri;
+     if (k) {	
+       if (vtx[2]*dir[2]<0) k=-k;
+       hlx.Move(k*peri/fCosL); lxyTot +=k*peri;
+       vtx[2] = v[2]-hlx.fX[2]; aZ = fabs(vtx[2]);
+     }
+     myBeg = aZ*aTanL/(1-vY*aRho+tan2L);
+     isSmall = 0;
+     if (fabs(myBeg*aRho) < 0.1) {
+       isSmall = 1;
+       myEnd = myBeg*1.2;
+       myBeg = myBeg*0.8;}
+     else 		{
+       myBeg = (aZ*aTanL-(aR-vY))/tan2L;
+       myEnd = (aZ*aTanL+(aR-vY))/tan2L;}
+     if (myBeg <  peri) 	break;	//probably there is solution
+   };
+   if (myBeg > peri) 	myBeg = 0; 
+   
+   val[0]=myDot(0);len[0]=0;
+   converge = 0;
+   for (int i=1;i <=4;i++) {
+    len[2] = 0.5*M_PI*aR*i;
+    if (len[2]>myEnd) len[2]=myEnd;
+    val[2] = myDot(len[2]);
+    if (val[0]*val[2]<=0) {converge=i; break;}
+    if (len[2]>=myEnd) break;
+    len[0] = len[2]; val[0]=val[2];
+   }
+   if (!converge) { myBeg = peri; continue; } //goto next turn
+
+   if (isSmall) {
+     len[1] = 0.5*(len[0]+len[2]);
+     val[1] = 0.5*(val[0]+val[2]);}
+   else 	{
+     int jk = (fabs(val[0])<fabs(val[2]))? 0:2;
+     len[1]=len[jk];val[1]=val[jk];
+   }
+   int sgnV = (val[0]<val[2])? 1:-1,igor=0;
+   double preVal = 1e11;
+   for (int it=0;it<26;it++) {
+     len[1]-= val[1]*cos2L;
+     if (len[1]<len[0] || len[1]>len[2] || fabs(val[1])> 0.6*preVal) {
+       if ((igor^=1)) {len[1] = (len[0]*val[2]-len[2]*val[0])/(val[2]-val[0]);}
+       else           {len[1] = (len[0]+len[2])/2                            ;}
+     }
+     preVal = fabs(val[1]);
+     val[1] = myDot(len[1]);
+     int jk = (val[1]*sgnV<=0)? 0:2;
+     val[jk] = val[1]; len[jk]=len[1];
+     est = fabs(val[1]*cos2L*fRho);
+     if (est<kAngAcc) {converge = it+1; break;}
+   }// end iters
+assert(converge);
+//   if (fRho*dir[2]*vtx[2]<0) len[1]=-len[1];
+   if (dir[2]*vtx[2]<0) len[1]=-len[1];
+   len[1] = (len[1]+lxyTot)/fCosL;
+   break;
+  }
+
+// double myX[3],myD[3];
+// Eval(len[1],myX,myD);
+// double qwe = 0; for(int j=0;j<3;j++){qwe+=(myX[j]-v[j])*myD[j];}
+// assert(fabs(qwe*fRho*fCosL)<1e-4);
+// double asd[3]; 
+// TCL::vsub(fX,v,asd,3);
+// double dist1 = TCL::vdot(asd,asd,3);
+// TCL::vsub(myX,v,asd,3);
+// double dist2 = TCL::vdot(asd,asd,3);
+// assert(dist1>=0.9*dist2);
+
+
+   assert(converge);
+
+   if (xyzp) memcpy(xyzp,hlx.Pos(),3*sizeof(xyzp[0]));
+   if (dirp) memcpy(dirp,hlx.Dir(),3*sizeof(dirp[0]));
+
+   return len[1];
+}
+#endif
 //_____________________________________________________________________________
 double THelixTrack::Dca(const double *point,double *dcaErr) const
 {
@@ -1666,59 +1819,6 @@ void TCircle::Backward()
 }
 
 //______________________________________________________________________________
-void TCircle::Test2() 
-{
-// double xyz[4][3]= {{-39.530250549316406, -165.19537353515625, 184.05630493164062}
-//                   ,{-37.718906402587891, -167.19537353515625, 186.41175842285156}
-// 		  ,{-35.468486785888672, -169.19537353515625, 189.05546569824219}
-//                   ,{-33.657142639160156, -171.19537353515625, 191.347900390625}};
-// double x[4],y[4];
-// for (int i=0;i<4;i++) { x[i]=xyz[i][0];  y[i]=xyz[i][1]; }
-// 
-// 
-// 
-// TCircle TC;
-// double qa0 = TC.Approx(4,xyz[0],3);
-// double qa1 = TC.Resid (4,xyz[0],3);
-// printf("Approx qa0 = %g qa1=%g\n",qa0,qa1);
-// TC.Print();
-// 
-
-}
-//______________________________________________________________________________
-void TCircle::Test3() 
-{
-// enum {nPnts=4};
-// double xyz[nPnts][3] = 
-// {{80.815544128417969, 159.77731323242188, 129.11553955078125}
-// ,{82.239913940429688, 161.25840759277344, 131.24034118652344}
-// ,{84.462181091308594, 162.28025817871094, 133.59538269042969}
-// ,{86.321846008300781, 163.51133728027344, 135.19621276855469}};
-// 
-// double err[nPnts][4] = 
-// {{0.0010703595155359307, 0.00061836299089800776, 0.00035723771589107141,0.0032088035791992191}
-// ,{0.0010505530116463389, 0.00060692047199979574, 0.00035062719848397145,0.0031350950603759769}
-// ,{0.0010286003088986414, 0.00059423806134026682, 0.00034330037672605356,0.0030533996126220703}
-// ,{0.0010136781863030494, 0.00058561716272119912, 0.00033831985920934062,0.0029978674575439454}};
-// 
-// 
-// double res;
-// TCircle circ;
-// res=circ.Approx(nPnts,xyz[0],3);
-// printf("res = %g \n",res);
-// circ.Print();
-// res=circ.Resid (nPnts,xyz[0],3);
-// printf("res = %g \n",res);
-// circ.Print();
-// 
-// circ.Show(nPnts,xyz[0],3);
-// res = circ.Fit(nPnts,xyz[0],3,err[0],4);
-// printf("res = %g \n",res);
-// circ.Print();
-// circ.Show(nPnts,xyz[0],3);
-
-}
-//______________________________________________________________________________
 void TCircle::TestMtx() 
 {
   double Dir[8],X[8]={0},Rho[2],step,F[3][3],Del[3],Dif[3]={0};
@@ -1914,11 +2014,14 @@ static int nCall=0; nCall++;
 
 //		Loop over points,fill orientation 
     double *mm = &fXgravity; memset(mm,0,sizeof(*mm)*5);
+    fNuse = 0;
     for (int i=0; i<fN; i++) {
+      if (aux[i].wt<0) continue;
+      fNuse++;
       double x=aux[i].x, y=aux[i].y;
       fXgravity+=x; fYgravity+=y;fXx+=x*x;fYy+=y*y;fXy+=x*y;}
 
-    for (int j=0;j<5;j++) {mm[j]/=fN;}
+    for (int j=0;j<5;j++) {mm[j]/=fNuse;}
     fXx-=fXgravity*fXgravity;fYy-=fYgravity*fYgravity;fXy-=fXgravity*fYgravity;
 
     double eigVal[2]={0};
@@ -1930,38 +2033,49 @@ static int nCall=0; nCall++;
     enum {kIter=1,kFast=2,kWeit=4,kErr=8};
     const double *exy=0;
     int wasErrs = 0;
+//		iter=0, calculation of aproximate track parameters only, with wt=1. 
+//			params will be used it iter 1
+//		iter=0, calculation of track params when wt is known. No iter=1
+//		iter=1, calculation of track params.wt is calculated from approximate params
+
     for (int iter=0;iter<2;iter++) {// one or two iters
       fWtot = 0;
       memset(&fXgravity,0,sizeof(double)*(nAVERs+2));
       for (int i=0; i<fN; i++) {//Loop over points,fill wt and center of gravity
-        if (aux[i].wt<0) { if(!i) fNuse--; continue;}
+        if (aux[i].wt<0)  continue;
         int kase = iter;
-        if (fastTrak)  kase|=2;
-	if (aux[i].wt >0) 		kase+=4;	//weight defined
-        if (aux[i].exy[0]>0 || aux[i].exy[2]>0) {wasErrs++;kase+=8;}	//error matrix defined
+        if (fastTrak)  			{kase|=kFast;          }
+        if      (aux[i].exy[0]>0)	{kase|=kErr ;wasErrs=1;}	//error matrix defined
+        if      (aux[i].exy[2]>0)	{kase|=kErr ;wasErrs=1;}	//error matrix defined
+        else if (aux[i].wt    >0)	{kase|=kWeit;          }
+
         switch (kase) {
+//			iter=0,no or not yet errs/weight. wt=1
           case 0:; 
 	  case kErr:;
 	  case kFast:;
-
+	  case kIter:;
+	  case kIter|kFast:;
 	    wt = 1; break;		//assign Weight =1
 
+//			weight is provided by user 
           case kWeit:;
-	  case kWeit|kErr:;
 	  case kWeit|kFast:;
-	  case kWeit|kIter:;
+          case kWeit      |kIter:;
+	  case kWeit|kFast|kIter:;
 	   wt = aux[i].wt; break;
 
-          case kIter|kWeit|kErr:; 
-          case kIter|kFast|kWeit|kErr:; 
+//		calc normal vector
+          case kIter|kErr:; 
+          case kIter|kErr|kFast:; 
 	   {				// slow error, calculate normal
             fNor[0] = fXCenter - aux[i].x;
             fNor[1] = fYCenter - aux[i].y;
             tmp = sqrt(fNor[0]*fNor[0]+fNor[1]*fNor[1]);
             fNor[0]/=tmp; fNor[1]/=tmp;
 	   }
-          case kFast|kErr:;
-          case kFast|kErr|kWeit:;
+//		and calculate wt
+          case       kFast|kErr:;
 	   {				// fast errors
             exy = aux[i].exy;
             wt = (fNor[0]*fNor[0]*exy[0]
@@ -1971,7 +2085,9 @@ static int nCall=0; nCall++;
             wt = 1/wt; 
 	    break;
 	   }
-            default: assert(0);
+
+
+          default: assert(0);
 	}//end switch
         aux[i].wt = wt;
         if (wt<0) continue;
@@ -3666,7 +3782,7 @@ double EmxSign(int n,const double *e)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.75 2014/06/02 18:28:22 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.75.2.1 2014/11/01 02:19:56 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3682,8 +3798,14 @@ double EmxSign(int n,const double *e)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
- * Revision 1.75  2014/06/02 18:28:22  perev
- * Chec XX and YY for non zero error matrix
+ * Revision 1.75.2.1  2014/11/01 02:19:56  perev
+ * It is rewritten version of THelixTrack
+ * Main algorithm not changed. Changed only selection of coordinate system.
+ * Old approach, based on few points was not stable enough.
+ * New aproach is based on construction of 2d matrix of <Xi*Xj> and calulation
+ * of eigen vectors. New coordinate system is based on these vectors.
+ * It is more stable because not a few points is used but all of them.
+ * 2D eigen vectors is not too hard to evaluate. So performace is not suffered
  *
  * Revision 1.74  2013/06/10 15:50:10  perev
  * fabs(eigen) + TComplex &x added

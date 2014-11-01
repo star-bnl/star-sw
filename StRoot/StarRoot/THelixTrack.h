@@ -98,8 +98,6 @@ void   SetStrait(int strait=1) 		{SetBit(1,strait) ;}
 int    IsStrait()  			{return TestBit(1);}
 
 //	static funs
-static void Test2();
-static void Test3();
 static void Test4();
 static void TestMtx();
 
@@ -259,9 +257,9 @@ THelixTrack &operator=(const THelixTrack &from);
                    {return Step(stmax,surf,nsurf,x,dir,nearest);}
 
 ///		Distance to nearest point to given space point
-        double Step(const double point[3],double *xyz=0, double *dir=0) const;
-        double Path(const double point[3],double *xyz=0, double *dir=0) const 
-	           {return Step(point,xyz,dir);}
+        double Path(const double point[3],double *xyz=0, double *dir=0) const;
+        double Step(const double point[3],double *xyz=0, double *dir=0) const 
+	           {return Path(point,xyz,dir);}
 ///		DCA to given space point (with error matrix)
         double Dca(const double point[3],double *dcaErr=0) const;
 
