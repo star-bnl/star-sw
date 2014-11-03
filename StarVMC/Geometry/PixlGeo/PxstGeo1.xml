@@ -24,6 +24,10 @@ Fv June 8, 2013
 2) Beam Collar support rings are AL, Present representation is has too much material.
 3) Add the MSC/OSC Al support ring (MTPH)
 
+FV September 23, 2014
+Change inner radius of PSTM to 2.27 to avoid extrusion of beam collar rings.
+LFBK was misplaced in z by 0.05 cm
+
 -->
      <Module name="PxstGeo1" comment="Geometry for Pixel Support Tube actually all of MSC ">
 
@@ -74,7 +78,7 @@ Fv June 8, 2013
 -->
 
      <varlist type="float" comment="max Diameter of PSTM volume">                  maxRadPSTM/45.5/</varlist>
-     <varlist type="float" comment="min Diameter of PSTM volume">                  minRadPSTM/2.3/</varlist>
+     <varlist type="float" comment="min Diameter of PSTM volume">                  minRadPSTM/2.27/</varlist>
      <varlist type="float" comment="totZ of PSTM volume">                          maxZPSTM/500/</varlist>    
      <varlist type="float" comment="WidthRingTP">                                  WidthRingTP/.6/ </varlist>
      <varlist type="float" comment="WidthInnerRingTP">                             WidthInnerRingTP/2.6/ </varlist>
@@ -325,7 +329,7 @@ Fv June 8, 2013
 
      <Use struct="SFBK" select="version" value="1.0"/>
      <Create    block="LFBK" /> 
-     <Placement block="LFBK" x="0" y="0" z="-PSTS_dz/2. + SFBB_dz/2. + SFBK_dz/2."> 
+     <Placement block="LFBK" x="0" y="0" z="-PSTS_dz/2. + SFBB_dz  + SFBK_dz/2."> 
      </Placement>
 
      <!-- placement flange base and flange backer on the right -->
@@ -341,7 +345,7 @@ Fv June 8, 2013
 
      <Use struct="SFBK" select="version" value="1.0"/>
      <Create    block="RFKK" /> 
-     <Placement block="RFKK" x="0" y="0" z="PSTS_dz/2. - SFBB_dz/2. - SFBK_dz/2."> 
+     <Placement block="RFKK" x="0" y="0" z="PSTS_dz/2. - SFBB_dz - SFBK_dz/2."> 
      </Placement>
 
      <Use struct="BPPC" select="version" value="1.0"/>
