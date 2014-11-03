@@ -52,6 +52,11 @@ Feburary 2014 FV
    The sensitive area was not placed correctly in z within PXSI.
    The final matrices are now in good agreement with the SW model
 
+September 2014 FV
+   The was a clear mistake in BHSH bullhorn coming from the generating macro
+   Did not line up properly with the corner.
+   Dovetail extension was move by 50 microns, clear a small extrusion
+   Some overlaps still there are by design (e.g. tooling pin)
 
 
 -->
@@ -92,8 +97,8 @@ Feburary 2014 FV
     <varlist type="float" comment=" Thickness of lip Boxes" > DoveTailExtrusionThicknessBox/0.262/</varlist> 
     <varlist type="float" comment=" Thickness of lip" > DoveTailExtrusionThicknessNeg/-0.124/</varlist> 
     <varlist type="float" comment=" Thickness of lip" > DoveTailExtrusionHalfThickness/0.062/</varlist> 
-    <varlist type="float" comment=" Extrusion is position just outside the end of the sector beam" > DoveTailExtrusionZOffset/-21.4105/</varlist> 
-    <varlist type="float" comment=" Extrusion is position just outside the end of the sector beam" > DoveTailShapeOffset/-22.3605/</varlist> 
+    <varlist type="float" comment=" Extrusion is position just outside the end of the sector beam" > DoveTailExtrusionZOffset/-21.410/</varlist> 
+    <varlist type="float" comment=" Extrusion is position just outside the end of the sector beam" > DoveTailShapeOffset/-22.360/</varlist> 
     <varlist type="float" comment=" length of Dovetail inside sector beam" > DoveTailLength/0.5/</varlist> 
     <varlist type="float" comment=" Thickness of Dovetail" > DoveTailThickness/0.1/</varlist> 
     <varlist type="float" comment=" Half Thickness of Dovetail" > DoveTailHalfThickness/0.05/</varlist> 
@@ -128,7 +133,9 @@ Feburary 2014 FV
      <varlist type="float" comment="LADR half thickness"> ladderhalfthickness/0.05225/ </varlist>
 
 <!-- BullHorn dimensions -->
-<varlist type="float" comment=" length of Bullhorn inside sector beam" > BullHornLength/0.325/</varlist>
+<varlist type="float" comment=" length of Bullhorn inps
+
+side sector beam" > BullHornLength/0.325/</varlist>
 <varlist type="float" comment=" Thickness of Bullhorn" > BullHornThickness/0.1/</varlist>
 <varlist type="float" comment=" Half Thickness of Bullhorn" > BullHornHalfThickness/0.05/</varlist>
 <varlist type="float" comment=" BullHorn is just inside end of sector beam" > BullHornZOffset/13.425/</varlist>
@@ -136,7 +143,7 @@ Feburary 2014 FV
 <!-- Cable parameters -->
    <varlist type="float" comment="Radius DTube Cable">RadCable/0.165/ </varlist>
  <varlist type="float" comment="Length DTube Cable Long">LengthCaL/5.1576/ </varlist>
-<varlist type="float" comment="Long cable position"> PosCabl/-20.6862/ </varlist>
+<varlist type="float" comment="Long cable position"> PosCabl/-20.6812/ </varlist>
 
   
     <Structure name="SENP" >
@@ -890,8 +897,8 @@ Feburary 2014 FV
 <!-- BullHorn  Sector Right upper side --> 
 
 <Create block="BHSH" />
-  <Placement block="BHSH" x="-1.08495" y="2.876" z="BullHornZOffset">
-  <Rotation alphaz="357.305" />
+<Placement block="BHSH" x="-1.08117" y="2.90281" z="BullHornZOffset">
+  <Rotation alphaz="355.437" />
  </Placement>
 <!--  -->  
 
@@ -1539,7 +1546,7 @@ Feburary 2014 FV
 <Volume name="BHSH" comment="BullHorn  Sector Right upper side"  >
   <Attribute for="BHSH" seen="1" colo="920" />
   <Material name="Aluminium" />
-  <Shape type="BOX" dx="0.828428" dy="BullHornHalfThickness" dz="BullHornLength" />
+  <Shape type="BOX" dx="0.827988" dy="BullHornHalfThickness" dz="BullHornLength" />
 </Volume>
 
 <Volume name="PTOB" comment=""  >
