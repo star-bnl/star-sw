@@ -1,10 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.149 2014/10/30 15:03:54 jeromel Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.150 2014/11/03 20:53:08 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.150  2014/11/03 20:53:08  perev
+ * For the zero field defined minimum non zero field eqaal 1GeV radius 1km
+ * Such notation was before, but because zero field is not used too often
+ * it was disappeared. Now fixed again
+ *
  * Revision 2.149  2014/10/30 15:03:54  jeromel
  * Reverted to Oct 2nd
  *
@@ -626,20 +631,18 @@ void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)
   <p>
   Field is calcualated via StarMagField class and cashed. 
 */
-//______________________________________________________________________________
 double StiKalmanTrackNode::getHz() const
 {
   
 static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
-//??   if (mHz && mHz<999) return mHz;
-   if (mHz<999) return mHz;
+   if (fabs(mHz)<999) return mHz;
    if (! _laser) {
      double h[3];
      StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
      h[2] = EC*h[2];
-     if (fabs(h[2]) < ZEROHZ) h[2]=0;
+     if (fabs(h[2]) < ZEROHZ) h[2]=ZEROHZ;
      mHz = h[2];
-   } else mHz = 0;
+   } else mHz = ZEROHZ;
    assert(mHz);
    return mHz;
 }
