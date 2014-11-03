@@ -9,6 +9,8 @@
   </CDE>
  
 <!--
+    November 3 2014 Flemming
+    Changed the IBMO to PCON to avoi the small overlap with an MSC ring.
  November 1, 2014, Flemming
    In view of the several overlap overlap I decided to rewrite the master volumens and positioning of
    the IBAM. With this lastest change the use tubs for the IBAM and having no extrusions I think in fact the master IBMO 
@@ -530,14 +532,18 @@
  </Do>
 
   <Create    block="IBMO"/>
-  <Placement block="IBMO" in="IDSM" konly="MANY"/>
+  <Placement block="IBMO" in="IDSM" konly="ONLY"/>
 
 
   <!-- IBMO volume declaration -->
   <Volume name="IBMO" comment="Main volume of IST detector">
   <Material name="Air"/>
-  <Attribute for="IBMO" seen="0" colo="1"/>  
-  <Shape type="TUBE" rmin="IBMOInnerRadius" rmax="IBMOOuterRadius" dz="12.957+Ladder_Length/2.0" />
+  <Attribute for="IBMO" seen="0" colo="1"/>
+  <Shape type="PCON" nz="4" phi1="0" dphi="360"
+	 zi="{-12.957-Ladder_Length/2.0, -4.5 -Ladder_Length/2.0,
+              -4.5-Ladder_Length/2.0,    Ladder_Length/2.0}"
+	 rmn="{ IBMOInnerRadius+0.2, IBMOInnerRadius+0.2, IBMOInnerRadius, IBMOInnerRadius}"
+	 rmx="{ IBMOOuterRadius,     IBMOOuterRadius,     IBMOOuterRadius, IBMOOuterRadius}" />
 
    <Do var="nl" from="1" to="nLadder">
      <!-- quick way to rotate ladder-->
