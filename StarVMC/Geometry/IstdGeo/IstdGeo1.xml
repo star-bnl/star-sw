@@ -9,7 +9,14 @@
   </CDE>
  
 <!--
- 
+ November 1, 2014, Flemming
+   In view of the several overlap overlap I decided to rewrite the master volumens and positioning of
+   the IBAM. With this lastest change the use tubs for the IBAM and having no extrusions I think in fact the master IBMO 
+  can be removed. We will see. It need a review since there are many changes
+  The IBAM was made a TUBS shape and position exclusively out side the MCS. A routine to calculate peoprer rotation
+  was introduced. 
+  The stepping through the IST is now done quite properly
+
  December 14, 2013 Flemming
   1)There is no need for the ICCM volume. The cables, cooling in questions are
   directly in IDSM. 
@@ -23,7 +30,7 @@
  2) 72 cables and 24 cooling lines on PIT are added (location according to SW drawings)
 
  December 7, 2013 Yaping
- 1) cooling loops between two ladders and joints are added in the west side
+` 1) cooling loops between two ladders and joints are added in the west side
  2) three short cables (section A/B/C) are added from t-board to transition area
  3) short cooling tube and joint are added from stave east side to transition area 
 
@@ -57,7 +64,7 @@
  update material definitions
  
  December 9, 2012 Yaping
- update Endcap modules (right and left side) and a ittle update for the thread hole spacers
+ update Endcap modules (right and left side) and a little update for the thread hole spacers
  
  November 7, 2012 Yaping
  Screws, thread holes for screw and thermal sensor to be added.
@@ -92,7 +99,7 @@
 -->
     <!-- Local variables -->
     <varlist type="float"  >
-        aangle,raddeg,Ladder_Thk,Ladder_Width,Ladder_Length,xpos,ypos,zpos,ModuleRadius,tubeAngle,xtubeArc,ytubeArc,ztubeArc
+        aangle,raddeg,Ladder_Thk,Ladder_Width,Ladder_Length,x, y, xp, yp, xpos,ypos,zpos,xlocal, ylocal, ModuleRadius,tubeAngle,xtubeArc,ytubeArc,ztubeArc
     </varlist>
     
     <varlist type="float"  >
@@ -303,13 +310,10 @@
     <varlist type="float" comment=" mass weighted of readout cable diameter" > cableDiameter/0.372/</varlist>
     <!-- IST detector parameters 
 	 JCW :: Reduced inner radius to 11.0 to coincide with PXMO outer radius
-	 <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.84/</varlist>  
-    -->
-    <!-- 
-	 JCW :: Original value was better as we can flag IBMO as ONLY
-    <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.00/</varlist> 
-    -->
-    <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.84/</varlist>  
+
+  <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.00/</varlist>   
+  -->
+    <varlist type="float" comment=" Inner radius of mother volume whole detector" > IBMOInnerRadius/11.84/</varlist>    
     <varlist type="float" comment=" Outer radius of mother volume whole detector" > IBMOOuterRadius/18.5/</varlist>
     <varlist type="int"   comment=" Number of ladders" > nLadder/24/</varlist>
     <varlist type="int"   comment=" Number of silicon sensor per ladder" > nUnit/6/</varlist>
@@ -526,14 +530,14 @@
  </Do>
 
   <Create    block="IBMO"/>
-  <Placement block="IBMO" in="IDSM" konly="ONLY"/>
+  <Placement block="IBMO" in="IDSM" konly="MANY"/>
 
 
   <!-- IBMO volume declaration -->
   <Volume name="IBMO" comment="Main volume of IST detector">
   <Material name="Air"/>
   <Attribute for="IBMO" seen="0" colo="1"/>  
-  <Shape type="TUBE" rmin="IBMOInnerRadius" rmax="IBMOOuterRadius" dz="20.0+Ladder_Length/2.0" />
+  <Shape type="TUBE" rmin="IBMOInnerRadius" rmax="IBMOOuterRadius" dz="12.957+Ladder_Length/2.0" />
 
    <Do var="nl" from="1" to="nLadder">
      <!-- quick way to rotate ladder-->
@@ -545,9 +549,9 @@
      <Info format="shift in Z ={6.4f}"> PARO_DZ*PARO_mult </Info>
      </If>
 
-     xpos=ModuleRadius*sin(aangle*raddeg) + (PARO_DX*PARO_mult)*PARO_lad(nl) 
-     ypos=ModuleRadius*cos(aangle*raddeg) + (PARO_DY*PARO_mult)*PARO_lad(nl)
-     zpos=0.0                             + (PARO_DZ*PARO_mult)*PARO_lad(nl)
+     xpos=0.0 + (PARO_DX*PARO_mult)*PARO_lad(nl) 
+     ypos=0.0 + (PARO_DY*PARO_mult)*PARO_lad(nl)
+     zpos=0.0 + (PARO_DZ*PARO_mult)*PARO_lad(nl)
 
      <If expr="debug==1"  >
      <Info format="aangle={8.5f}"> aangle </Info>
@@ -567,7 +571,7 @@
         <Info format="rot along Z ={6.4f}"> PARA_DG*PARA_mult </Info>
         </If>
 
-        <Rotation alphaz="-1*aangle-(Tilt + PARA_DG*PARA_mult*PARA_lad(nl))"/>
+        <Rotation alphaz="(-1*aangle)-1*(PARA_DG*PARA_mult*PARA_lad(nl))"/>
         <Rotation alphax="-1*(PARA_DA*PARA_mult)*PARA_lad(nl)"/>
         <Rotation alphay="-1*(PARA_DB*PARA_mult)*PARA_lad(nl)"/>
      </Placement>
@@ -757,100 +761,179 @@
  <!-- IST ladder volumes (each including six silicon sensors, cooling and support materials) -->
  <Volume name="IBAM" comment="IST ladder">
  <Material name="Air" />
- <Attribute for="IBAM" seen="0" colo="6"/>
- <Shape type="BOX" dx="Ladder_Width/2.0" dy="Ladder_Thk/2.0" dz="Ladder_Length/2.0"/>
-    <!-- placement of sub-volumes -->
-     <Create    block="ILCC"  />
-     <Placement block="ILCC" in="IBAM" x="HalfLadWdt-0.15-HalfCombWdt" y="-HalfLadThk+2.4244+2*HalfSkinThk+HalfCombThk" z="HalfLadLen-HalfCombLen-2*HalfEndcapMomLen-OutsideTubeWestLen"/>
-
-     <!-- Carbon foam assembly.  Could reorganize grooves to remove many/only subtraction. -->
-     <Create    block="IBCF"  />
-     <Placement block="IBCF" in="IBAM" konly="MANY" 
-		x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt" 
-		y="HalfFoamThk+2.4244-HalfLadThk+2*HalfSkinThk" 
-		z="HalfLadLen-HalfFoamLen-2*HalfEndcapMomLen-OutsideTubeWestLen" />
-
+ <Attribute for="IBAM" seen="1" colo="6"/>
+ <Shape type="TUBS" rmin="11.84" rmax="17.5" phi1="-18+90" phi2="18+90"  dz="Ladder_Length/2.0"/>
+ 
+   <!-- placement of sub-volumes -->
+   <Create    block="ILCC"  />
+   x= HalfLadWdt-0.15-HalfCombWdt
+   y=-HalfLadThk+2.4244+2*HalfSkinThk+HalfCombThk
+   <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+   <Placement block="ILCC" in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfCombLen-2*HalfEndcapMomLen-OutsideTubeWestLen">
+     <Rotation alphaz="-1.0*Tilt"/>
+   </Placement>
+   <!-- Carbon foam assembly.  Could reorganize grooves to remove many/only subtraction. -->
+   <Create    block="IBCF"  />
+   x=-HalfLadWdt+DistFoamToLadder+HalfFoamWdt
+   y=HalfFoamThk+2.4244-HalfLadThk+2*HalfSkinThk
+   <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+   <Placement block="IBCF" in="IBAM" konly="MANY" 
+	      x="xp" 
+	      y="yp"
+	      z="HalfLadLen-HalfFoamLen-2*HalfEndcapMomLen-OutsideTubeWestLen" >
+     <Rotation alphaz="-1.0*Tilt"/>
+     
+   </Placement>
 
 <!-- NOTE: Reorganize... box within a box -->
      <Create    block="ILST"  />
-     <Placement in="IBAM" x="HalfLadWdt-HalfSkinWdt-0.15" y="-HalfLadThk+2*HalfCombThk+2.4244+3*HalfSkinThk-HalfThkAirInHbd" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILST">
+     x=HalfLadWdt-HalfSkinWdt-0.15
+     y=-HalfLadThk+2*HalfCombThk+2.4244+3*HalfSkinThk-HalfThkAirInHbd
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILST">
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
      
 <!-- NOTE: Reorganize... box within a box -->
      <Create    block="ILSB"  />
-     <Placement in="IBAM" x="HalfLadWdt-HalfSkinWdt-0.15" y="-HalfLadThk+2.4244+HalfSkinThk+HalfThkAirInHbd" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILSB">
+     x=HalfLadWdt-HalfSkinWdt-0.15
+     y=-HalfLadThk+2.4244+HalfSkinThk+HalfThkAirInHbd
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfSkinLen-OutsideTubeWestLen-1.75" block="ILSB">
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
      
 <!-- NOTE: Reorganize... box within a box -->
      <Create    block="IBHT"  />
-     <Placement in="IBAM" x="HalfLadWdt-HalfHbdWdtTB-0.15" y="-HalfLadThk+4*HalfSkinThk+2*HalfCombThk+2.4244+HalfHbdThkTB-HalfThkAirInHbd" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHT">
+     x=HalfLadWdt-HalfHbdWdtTB-0.15
+     y=-HalfLadThk+4*HalfSkinThk+2*HalfCombThk+2.4244+HalfHbdThkTB-HalfThkAirInHbd
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHT">
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
      
 <!-- NOTE: Reorganize... box within a box -->
      <Create    block="IBHB"  />
-     <Placement in="IBAM" x="HalfLadWdt-HalfHbdWdtTB-0.15" y="-HalfLadThk+2.4244-HalfHbdThkTB+HalfThkAirInHbd" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHB">
+     x=HalfLadWdt-HalfHbdWdtTB-0.15
+     y=-HalfLadThk+2.4244-HalfHbdThkTB+HalfThkAirInHbd
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfHbdLenTB-OutsideTubeWestLen-1.75" block="IBHB">
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
      
      <Create    block="IBHC"  />
-     <Placement in="IBAM" x="-HalfLadWdt+DistFoamToLadder" y="-HalfLadThk+HalfFoamThk+2.4244+2*HalfSkinThk" z="HalfLadLen-HalfHbdArcLen-OutsideTubeWestLen-1.75" block="IBHC">
+     x=-HalfLadWdt+DistFoamToLadder
+     y=-HalfLadThk+HalfFoamThk+2.4244+2*HalfSkinThk
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement in="IBAM" x="xp" y="yp" z="HalfLadLen-HalfHbdArcLen-OutsideTubeWestLen-1.75" block="IBHC">
+         <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
 
 <!-- NOTE: Tube with hole in it... -->
      <!-- placement of tube -->
      <Create    block="IBAT"  />
+     x=-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax
+     y=HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IBAT"  konly="MANY"
-		x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax" 
-		y="HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin" 
+		x="xp" 
+		y="yp"
 		z="HalfTubeLen-HalfLadLen" >
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
  
      <Create    block="IBCW"  /> <!-- Cooling liquid located in a tube somewhere... -->
+     x=-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax
+     y=HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IBCW"  
-		x="-HalfLadWdt+DistFoamToLadder+HalfFoamWdt+TubeRmax" 
-		y="HalfLadThk-2*HalfTBoardThk-2*HalfTBslotThk-2*HalfHbdThkTB-2*HalfSkinThk-DistTubeTopSkin" 
+		x="xp"
+		y="yp"
 		z="LiquidInTubeLen-HalfLadLen" >
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
          
      <!-- placement of transit board-->
      <Create    block="IBRB"  />
-     <Placement block="IBRB"  x="-HalfLadWdt+HalfTBoardWdt" y="HalfLadThk-HalfTBoardThk" z="-HalfLadLen+OutsideTubeEastLen-OutsideTBoardLen+HalfTBoardLen" >
+     x=-HalfLadWdt+HalfTBoardWdt
+     y=HalfLadThk-HalfTBoardThk
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement block="IBRB"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen-OutsideTBoardLen+HalfTBoardLen" >
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
      
      <Create    block="IRSA"  />
-     <Placement block="IRSA"  x="-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+5*HalfTBslotWdt+2*TBSlotGapSize" y="HalfLadThk-2*HalfTBoardThk-HalfTBslotThk" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+HalfTBslotLen" >
+     x=-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+5*HalfTBslotWdt+2*TBSlotGapSize
+     y=HalfLadThk-2*HalfTBoardThk-HalfTBslotThk
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement block="IRSA"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+HalfTBslotLen" >
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
      
      <Create    block="IRSB"  />
-     <Placement block="IRSB"  x="-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+3*HalfTBslotWdt+TBSlotGapSize" y="HalfLadThk-2*HalfTBoardThk-HalfTBslotThk" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+3*HalfTBslotLen-OverlapSlotsLen" >
+     x=-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+3*HalfTBslotWdt+TBSlotGapSize
+     y=HalfLadThk-2*HalfTBoardThk-HalfTBslotThk
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement block="IRSB"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+3*HalfTBslotLen-OverlapSlotsLen" >
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
      
      <Create    block="IRSC"  />
-     <Placement block="IRSC"  x="-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+HalfTBslotWdt" y="HalfLadThk-2*HalfTBoardThk-HalfTBslotThk" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+5*HalfTBslotLen-2*OverlapSlotsLen" >
+     x=-HalfLadWdt+DistFoamToLadder+DistSlotCtoFoam+HalfTBslotWdt
+     y=HalfLadThk-2*HalfTBoardThk-HalfTBslotThk
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement block="IRSC"  x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+1.75+0.03+5*HalfTBslotLen-2*OverlapSlotsLen" >
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
      
      <Create    block="IBTS"  />
-     <Placement in="IBAM" x="-HalfLadWdt+DistFoamToLadder+0.2581+0.5*0.1625" y="2.4244-2*HalfHbdThkTB-HalfLadThk-0.5*0.06" z="-HalfLadLen+OutsideTubeEastLen+21.0235+0.5*0.1625" block="IBTS">
+     x=-HalfLadWdt+DistFoamToLadder+0.2581+0.5*0.1625
+     y=2.4244-2*HalfHbdThkTB-HalfLadThk-0.5*0.06
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+     <Placement in="IBAM" x="xp" y="yp" z="-HalfLadLen+OutsideTubeEastLen+21.0235+0.5*0.1625" block="IBTS">
+       <Rotation alphaz="-1.0*Tilt"/>
      </Placement>
      
-     <Create    block="IECW"  /> <!-- overlaping with cooling liquid IBCW -->
+     <Create    block="IECW"  />  <!-- overlaping with cooling liquid IBCW -->
+     x=HalfLadWdt-HalfEndcapMomWdt-0.15
+     y=HalfEndcapMomThk+2.4244-HalfLadThk
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IECW" in="IBAM" konly="MANY"
-		x="HalfLadWdt-HalfEndcapMomWdt-0.15" 
-		y="HalfEndcapMomThk+2.4244-HalfLadThk" 
-		z="HalfLadLen-OutsideTubeWestLen-HalfEndcapMomLen" />
+		x="xp"
+		y="yp"
+		z="HalfLadLen-OutsideTubeWestLen-HalfEndcapMomLen" >
 
+       <Rotation alphaz="-1.0*Tilt"/>
+     </Placement>
      
      <Create    block="IECE"  /> <!-- overlaping with cooling liquid IBCW -->
+     x=HalfLadWdt-HalfEndcapMomWdt-0.15
+     y=HalfEndcapMomThk+2.4244-HalfLadThk
+     <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
      <Placement block="IECE" in="IBAM" konly="MANY" 
-		x="HalfLadWdt-HalfEndcapMomWdt-0.15" 
-		y="HalfEndcapMomThk+2.4244-HalfLadThk" 
-		z="-HalfLadLen+OutsideTubeEastLen+HalfEndcapMomLen" />
+		x="xp" 
+		y="yp"
+		z="-HalfLadLen+OutsideTubeEastLen+HalfEndcapMomLen" >
+       <Rotation alphaz="-1.0*Tilt"/>
+     </Placement>
 
    
   
   <!-- taking care of the silicon sensor numbering in a ladder -->
   <Do var="nu" from="1" to="nUnit">
        <Create block="IBLM"/>
-       <Placement in="IBAM" x="HalfLadWdt-HalfSenMomWdt-DistSensorToLadder-0.15" y="2.4244-2*HalfHbdThkTB-HalfSenMomThk-HalfLadThk" z="-1.0*HalfLadLen+DistLadderToIBLM+HalfSenMomLen*(2*nu-1)" block="IBLM">
+
+       x=HalfLadWdt-HalfSenMomWdt-DistSensorToLadder-0.15
+       y=2.4244-2*HalfHbdThkTB-HalfSenMomThk-HalfLadThk
+       <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
+       <If expr="debug==1"  >
+	 <Info format="xl {7.4f}"> x  </Info>
+	 <Info format="yl {7.4f}"> y  </Info>
+	 <Info format="xp {7.4f}"> xpos  </Info>
+	 <Info format="yp {7.4f}"> ypos  </Info>
+       </If>
+       <Placement in="IBAM" x="xp" y="yp" z="-1.0*HalfLadLen+DistLadderToIBLM+HalfSenMomLen*(2*nu-1)" konly="ONLY" block="IBLM">
+         <Rotation alphaz="-1.0*Tilt"/>
        </Placement>
   </Do>
   <!-- end loop over sensors-->
@@ -858,19 +941,30 @@
   <!-- Create screw mother volume ISCM       November 8 2012 Yaping -->
      <Do var="nsc" from="1" to="2">
          <Create    block="ISCM"/>
+	 x=HalfLadWdt-HalfEndcapMomWdt-0.15
+	 y=-HalfLadThk+2.4244+2*HalfEndcapMomThk-0.2845
+	 <Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
          <Placement block="ISCM" in="IBAM" konly="MANY"
-		    x="HalfLadWdt-HalfEndcapMomWdt-0.15" 
-		    y="-HalfLadThk+2.4244+2*HalfEndcapMomThk-0.2845" 
-		    z="-HalfLadLen+OutsideTubeEastLen+0.75+(1.5+HalfCombLen)*(2*nsc-2)" />
+		    x="xp"
+		    y="yp"
+		    z="-HalfLadLen+OutsideTubeEastLen+0.75+(1.5+HalfCombLen)*(2*nsc-2)" >
+           <Rotation alphaz="-1.0*Tilt"/>
+	 </Placement>
      </Do>
 
   <!-- Create support ring mother volume       October 1 2012 Yaping -->
      <Do var="ns" from="1" to="2">
         <Create    block="IBSR"/>
+	x=HalfLadWdt-1.0*HalfSRMomWdt
+	y=HalfSRMomThk-1.0*HalfLadThk
+	<Call routine="trans_to_ibam"  expr="x,y,Tilt,xp,yp"/>
         <Placement block="IBSR" in="IBAM" konly="MANY"
-		   x="HalfLadWdt-1.0*HalfSRMomWdt" 
-		   y="HalfSRMomThk-1.0*HalfLadThk" 
-		   z="-HalfLadLen+9.9143+HalfSRMomLen+58.88*(ns-1)" />
+		   x="xp"
+		   y="yp"
+		   z="-HalfLadLen+9.9143+HalfSRMomLen+58.88*(ns-1)" >
+           <Rotation alphaz="-1.0*Tilt"/>
+	 </Placement>
+	 
      </Do>
  </Volume>
 
@@ -1561,4 +1655,25 @@
  </Volume>
 
 </Module>
+
+<Subroutine name="trans_to_ibam" 
+	    args="['x', 'y','tilt', 'xpos', 'ypos']" >
+  <Arguement type="real" intent="in" name="x" />
+  <Arguement type="real" intent="in" name="y" />
+  <Arguement type="real" intent="in" name="tilt" />
+  <Arguement type="real" intent="inout" name="xpos" />
+  <Arguement type="real" intent="inout" name="ypos" />
+
+  <varlist type="double" >
+    sint, cost, degrad
+    radius/13.9254/
+  </varlist>
+  degrad=3.1415926/180.0
+  sint=sin(degrad*tilt)
+  cost=cos(degrad*tilt)
+  xpos = 0.0       +  cost*x +sint*y
+  ypos = radius    -  sint*x +cost*y
+  return
+</Subroutine>
+    
 </Document>
