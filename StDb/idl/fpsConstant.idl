@@ -6,9 +6,9 @@
 */ 
 
 struct fpsConstant { 
-  octet nQuad;        /*  4 */
-  octet nLayer;       /*  3 */
-  octet maxSlat;      /* 21 */
-  octet maxQTaddr;    /*  8 */
-  octet maxQTch;      /* 32 */
+  unsigned short nQuad;        /*  4 */
+  unsigned short nLayer;       /*  3 */
+  unsigned short maxSlat;      /* 21 */
+  unsigned short maxQTaddr;    /*  8 */
+  unsigned short maxQTch;      /* 32 */
 };  

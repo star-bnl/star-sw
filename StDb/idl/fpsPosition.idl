@@ -6,7 +6,7 @@
 */ 
 
 struct fpsPosition {
-  octet slatid;       /* 0-251: slat Id = (quad-1)*nLayer*maxSlat + (layer-1)*maxSlat + (slat-1)*/
+  unsigned short slatid; /* 0-251: slat Id = (quad-1)*nLayer*maxSlat + (layer-1)*maxSlat + (slat-1)*/
   float xwidth;       /* x width (cm) */
   float ywidth;       /* y width (cm) */
   float zwidth;       /* z width/thickness (cm) */

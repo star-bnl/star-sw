@@ -6,8 +6,8 @@
 */ 
 
 struct fpsSlatId { 
-  octet slatid;       /* 0-251: slat Id = (quad-1)*nLayer*maxSlat + (layer-1)*maxSlat + (Slat-1)*/
-  octet quad;         /* 1-4,  0 for none-exsistant slat */
-  octet layer;        /* 1-3,  0 for none-exsistant slat */
-  octet slat;         /* 1-21, 0 for none-exsistant slat */
+  unsigned short slatid;       /* 0-251: slat Id = (quad-1)*nLayer*maxSlat + (layer-1)*maxSlat + (Slat-1)*/
+  unsigned short quad;         /* 1-4,  0 for none-exsistant slat */
+  unsigned short layer;        /* 1-3,  0 for none-exsistant slat */
+  unsigned short slat;         /* 1-21, 0 for none-exsistant slat */
 };  
