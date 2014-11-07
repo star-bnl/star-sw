@@ -22,7 +22,7 @@
 // File and Version Information:
 // $Rev::                             $: revision of last commit
 // $Author: jwebb $: author of last commit
-// $Date: 2012/11/27 22:27:32 $: date of last commit
+// $Date: 2014/11/07 18:44:19 $: date of last commit
 //
 // Description:
 //    Added incoherent t2-> pt2 selection.  Following pp selection scheme
@@ -61,7 +61,7 @@ Gammaavectormeson::Gammaavectormeson(inputParameters& input,beamBeamSystem& bbsy
 	_VMpidtest=input.prodParticleType();
 	_VMptmax=input.maxPtInterference();
 	_VMdpt=input.ptBinWidthInterference();
-	_randy.SetSeed(input.randomSeed());
+	//_randy.SetSeed(input.randomSeed());
 	_VMCoherence=input.coherentProduction();
 	_VMCoherenceFactor=input.coherentProduction();//probably not needed
 
