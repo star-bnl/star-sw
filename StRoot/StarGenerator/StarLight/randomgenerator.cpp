@@ -22,7 +22,7 @@
 // File and Version Information:
 // $Rev::                             $: revision of last commit
 // $Author: jwebb $: author of last commit
-// $Date: 2012/11/27 22:27:33 $: date of last commit
+// $Date: 2014/11/07 18:44:19 $: date of last commit
 //
 // Description:
 //
@@ -36,7 +36,7 @@
 #include <cmath>
 
 #include "randomgenerator.h"
-
+#include "StarGenerator/UTIL/StarRandom.h"
 
 using namespace std;
 
@@ -111,7 +111,8 @@ void randomGenerator::SetSeed(unsigned int seed)
 double randomGenerator::Rndom(int)
 {
 
-  return rndm_(1.0f); // Use STARSIM random number generator
+  //return rndm_(1.0f); // Use STARSIM random number generator
+  return StarRandom::Instance().flat();
 
 #if 0 
 //  Machine independent random number generator.
