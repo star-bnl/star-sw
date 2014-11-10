@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.150 2014/11/03 20:53:08 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.151 2014/11/10 21:48:03 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.151  2014/11/10 21:48:03  perev
+ * Zero field accounting using isZeroH(0 methot
+ *
  * Revision 2.150  2014/11/03 20:53:08  perev
  * For the zero field defined minimum non zero field eqaal 1GeV radius 1km
  * Such notation was before, but because zero field is not used too often
@@ -1703,6 +1706,8 @@ assert(mFE.sign()>0); ///???
   // only when the track should be aborted so we don't care...
   mFP.y()  = p0;
   mFP.z()  = p1;
+  mFP.hz() = getHz();
+  if (mFP.isZeroH()) { mFP.ready(); pti = mFP.ptin(); cur = mFP.curv();}
   mFP.eta()   = eta;
   mFP.ptin()  = pti;
   mFP.curv()  = cur;
@@ -1710,7 +1715,6 @@ assert(mFE.sign()>0); ///???
   mFP._sinCA = sinCA;
   mFP._cosCA = ::sqrt((1.-mFP._sinCA)*(1.+mFP._sinCA)); 
   assert(!_detector || mFP.x() > 0.);
-  mFP.hz() = getHz();
 
 // update error matrix
   double c00=mFE._cYY;                       
