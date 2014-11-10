@@ -1,7 +1,0 @@
-<StarDataBase> TkEEmcDb
-<StDbTable> eemcDbPMTname  <comment>  *    EEMC Tower and PMT names </comment>
-  <dbString> name <length> 960 </length> <comment>   tower name   </comment> </dbString> 
-  <dbString> tubeName <length> 960 </length> <comment>   PMT  name   </comment> </dbString> 
-  <dbString> comment <length> 160 </length> </dbString>
-</StDbTable> 
-</StarDataBase>
