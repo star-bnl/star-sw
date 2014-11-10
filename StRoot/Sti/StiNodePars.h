@@ -5,8 +5,8 @@ class StiNodePars {
  public:	
   enum {kX=0,kY=1,kZ=2,kPhi=3,kPtin=4,kTan=5,kCurv=6,kHz=7};
   void reset(){memset(this,0,sizeof(StiNodePars));_cosCA=1;}
-  void ready(){_cosCA=cos(eta());_sinCA=sin(eta()); curv() = hz()*ptin();
-    if (fabs(curv()) < 1e-9) curv()=1e-9;}
+  void ready();
+   int isZeroH() const { return fabs(P[kHz]) <= 2e-6;}
   StiNodePars &merge(Double_t wt,StiNodePars &other);
   StiNodePars &operator=(const StiNodePars& fr);
     /// accessors
@@ -47,6 +47,13 @@ class StiELoss
 public:
 float mELoss,mLen,mDens,mX0;
 };
+
+inline void StiNodePars::ready()
+{
+_cosCA=cos(P[kPhi]);_sinCA=sin(P[kPhi]); 
+if (fabs(P[kHz])<=2e-6) {P[kHz] = 2e-6; P[kPtin]=1./0.350;}
+P[kCurv]  = P[kHz]*P[kPtin];
+}
 
 
 #endif
