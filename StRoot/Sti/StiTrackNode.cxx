@@ -26,8 +26,8 @@ static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[3]*MIN1ERR[3]
                               ,MIN1ERR[4]*MIN1ERR[4]
                               ,MIN1ERR[5]*MIN1ERR[5]};
-static const double recvCORRMAX  = 0.90;
-static const double chekCORRMAX  = 0.99;
+static const double recvCORRMAX  = 0.99;
+static const double chekCORRMAX  = 0.999;
 static double MAXPARS[]={250,250,250,1.5,100,100};
 
 //______________________________________________________________________________
@@ -337,6 +337,7 @@ StiDebug::Break(nCall);
   if (_cXX>0) {i0=0;li0=0;}
 
    double dia[kNPars],fak[kNPars]={1,1,1,1,1,1},corrMax=1;;
+   int isTouched[kNPars]={0};
    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
      double &aii = A[li+i];
      if (aii < MIN2ERR[i]) aii = MIN2ERR[i];
@@ -347,13 +348,16 @@ StiDebug::Break(nCall);
        if (isMod) aij*=fak[i]*fak[j];
        if (aij*aij <=    dia[i]*dia[j]*chekCORRMAX) continue;
        double qwe = aij*aij/(dia[i]*dia[j]);
-       if (corrMax<qwe) corrMax=qwe;
+       if (corrMax>=qwe) continue;
+       corrMax=qwe; isTouched[i]=1; isTouched[j]=1;
    } } 
    if (corrMax<=1) return;
    corrMax = sqrt(corrMax/recvCORRMAX);
    
    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+       if (!isTouched[i]) continue;
      for (int j=i0;j<i;j++) {
+       if (!isTouched[j]) continue;
        A[li+j]/=corrMax;
    } } 
 
