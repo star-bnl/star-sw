@@ -1,11 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.132 2014/10/30 15:03:54 jeromel Exp $
- * $Id: StiKalmanTrack.cxx,v 2.132 2014/10/30 15:03:54 jeromel Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.133 2014/11/10 21:45:09 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.133 2014/11/10 21:45:09 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.133  2014/11/10 21:45:09  perev
+ * In approx more carefully accounted case mag field == 0
+ * To deside that field == 0 method isZeroH() is used
+ *
  * Revision 2.132  2014/10/30 15:03:54  jeromel
  * Reverted to Oct 2nd
  *
@@ -1696,12 +1700,10 @@ double Xi2=0;
   StiKTNIterator source;
   StiKalmanTrackNode *targetNode;
   nNode=0;
-  double hz=0; 
   THelixFitter circ;
   THelixTrack  cirl;
   for (source=rbegin();(targetNode=source());++source) {
     iNode++;
-    if (!hz) hz = targetNode->getHz();
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
@@ -1759,9 +1761,14 @@ double Xi2=0;
     P.z()  =  cirl.Pos()[2];
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
+    StiNodePars PP(P);
     double hh = P.hz();
-    hh = (fabs(hh)<1e-10)? 0:1./hh;
-    P.ptin() = (hh)? curv*hh:1e-3;
+
+{
+    if (P.isZeroH()) 	{ P.ready(); hh =1e-11;} else {hh = 1./hh;}
+    P.ptin() = curv*hh; 
+}
+
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
     P._sinCA = cirl.Dir()[1]/cirl.GetCos();
