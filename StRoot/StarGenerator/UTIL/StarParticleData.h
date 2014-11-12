@@ -30,6 +30,8 @@ class StarParticleData : public TObjectSet
   TParticlePDG *GetParticle( const Char_t *name ) ;
   /// Get a particle by PDG ID
   TParticlePDG *GetParticle( const Int_t   id   );
+  /// Get a particle by G3 ID
+  TParticlePDG *GetParticleG3( const Int_t id );
 
   /// Add a particle to the database
   void          AddParticle( const Char_t *name,  TParticlePDG *particle ); 
@@ -80,9 +82,10 @@ class StarParticleData : public TObjectSet
   // Singleton instance of this class
   static StarParticleData sInstance; 
 
-  TObjArray                           mParticleList;    // my particles
-  std::map< TString, TParticlePDG* >  mParticleNameMap; // particle aliases
-  std::map< Int_t,   TParticlePDG* >  mParticleIdMap;   // map by PDG id
+  TObjArray                           mParticleList;      // my particles
+  std::map< TString, TParticlePDG* >  mParticleNameMap;   // particle aliases
+  std::map< Int_t,   TParticlePDG* >  mParticleIdMap;     // map by PDG id
+  std::map< Int_t,   TParticlePDG* >  mParticleG3IdMap;   // map by G3 id
 
   ClassDef( StarParticleData, 1 );
 

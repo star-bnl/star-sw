@@ -5,6 +5,7 @@ ClassImp(StarParticleData);
 #include "TCollection.h"
 #include "THashList.h"
 #include "assert.h"
+#include <iostream>
 
 using namespace std;
 
@@ -68,6 +69,8 @@ StarParticleData::StarParticleData( const Char_t *name, TDataSet *parent ) :
   G3TrackingCode G3ID;
 
   TParticlePDG *particle = 0;
+
+  Int_t g3new = 100;
   while(  (particle=(TParticlePDG *)Next())  )
     {
 
@@ -93,8 +96,9 @@ StarParticleData::StarParticleData( const Char_t *name, TDataSet *parent ) :
       mParticleList. Add( myparticle );   
       mParticleNameMap[ name ] = myparticle;
       mParticleIdMap[ code ]   = myparticle; 
+      mParticleG3IdMap[ g3id ] = myparticle;
 
-     }
+    }
 	
 
  
@@ -153,6 +157,10 @@ TParticlePDG *StarParticleData::GetParticle( const Int_t id )
 {
   return mParticleIdMap[id];
 }
+TParticlePDG *StarParticleData::GetParticleG3( const Int_t id )
+{
+  return mParticleG3IdMap[id];
+}
 // ---------------------------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------------------------
@@ -164,6 +172,8 @@ void StarParticleData::AddParticle( const Char_t *name, TParticlePDG *particle )
   mParticleNameMap[ name ] = particle;
   if ( mParticleIdMap[ code ] ) {    Warning( "AddParticle()", Form("Overwriting entry %i",code) );  }
   mParticleIdMap[code]     = particle;
+  G3TrackingCode G3ID; 
+  mParticleG3IdMap[ G3ID(code) ] = particle;
   return;
 }
 // ---------------------------------------------------------------------------------------------
