@@ -509,12 +509,20 @@ Int_t StMtdQAMaker::processStEvent()
 	  mMtdData.trkProjChannel[goodTrack]  = cell;
 
 	  backleg = -1, module = -1, cell = -1;
+	  StMtdPidTraits* mtdpid = 0;
 	  for(UInt_t it=0; it<traits.size(); it++)
 	    {
 	      if (traits[it]->detector() == kMtdId)
 		{
-		  StMtdPidTraits* mtdpid = dynamic_cast<StMtdPidTraits*>(traits[it]);
-		  StMtdHit* hit          = mtdpid->mtdHit();
+		  mtdpid = dynamic_cast<StMtdPidTraits*>(traits[it]);
+		  break;
+		}
+	    }
+	  if(mtdpid)
+	    {
+	      StMtdHit* hit          = mtdpid->mtdHit();
+	      if(hit)
+		{
 		  backleg                = hit->backleg();
 		  module                 = hit->module();
 		  cell                   = hit->cell();
@@ -524,7 +532,6 @@ Int_t StMtdQAMaker::processStEvent()
 		  mMtdData.isGoodMthMtdHit[goodTrack] = kTRUE;
 		  if(mTrigTimeCut && !isMtdHitInTrigWin(hit))
 		    mMtdData.isGoodMthMtdHit[goodTrack] = kFALSE;
-		  break;
 		}
 	    }
 	  mMtdData.trkMthBackleg[goodTrack] = backleg;
@@ -794,11 +801,14 @@ Int_t StMtdQAMaker::processMuDst()
 	    {
 	      mMtdData.isTrkMtdMatched[goodTrack] = kTRUE;
 	      StMuMtdHit *hit = mMuDst->mtdHit(iMtd);
-	      mMtdData.isGoodMthMtdHit[goodTrack] = mMtdData.isGoodMtdHit[iMtd];
-	      backleg = hit->backleg();
-	      module  = hit->module();
-	      cell = hit->cell();
-	      LOG_DEBUG << "Track " << i << " is matched to MTD hit " << iMtd << endm;
+	      if(hit)
+		{
+		  mMtdData.isGoodMthMtdHit[goodTrack] = mMtdData.isGoodMtdHit[iMtd];
+		  backleg = hit->backleg();
+		  module  = hit->module();
+		  cell = hit->cell();
+		  LOG_DEBUG << "Track " << i << " is matched to MTD hit " << iMtd << endm;
+		}
 	    }
 	  mMtdData.trkMthBackleg[goodTrack] = backleg;
 	  mMtdData.trkMthModule[goodTrack]  = module;
@@ -1747,8 +1757,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.3 2014/09/19 18:34:55 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.4 2014/11/12 17:50:11 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.4  2014/11/12 17:50:11  marr
+//// Check the validity of the matched MTD hit
+////
 //// Revision 1.3  2014/09/19 18:34:55  marr
 //// Add histograms for LocalY, LocalZ, DeltaY, DeltaZ
 ////
