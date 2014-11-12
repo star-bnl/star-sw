@@ -711,7 +711,7 @@ Int_t StMtdQAMaker::processMuDst()
       mMtdData.mtdHitLeTimeEast[i] = hit->leadingEdgeTime().second;
       mMtdData.mtdHitTotWest[i]    = hit->tot().first;
       mMtdData.mtdHitTotEast[i]    = hit->tot().second;
-      Int_t tHub = getMtdHitTHUB(backleg-1);
+      Int_t tHub = getMtdHitTHUB(backleg);
       Double_t tDiff = mMtdData.mtdHitLeTimeWest[i] - mMtdData.mtdTriggerTime[tHub-1];
       while(tDiff<0) tDiff += 51200;
       mMtdData.mtdHitTrigTimeWest[i] = tDiff;
@@ -1757,8 +1757,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.4 2014/11/12 17:50:11 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.5 2014/11/12 18:11:01 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.5  2014/11/12 18:11:01  marr
+//// Minor bug fix
+////
 //// Revision 1.4  2014/11/12 17:50:11  marr
 //// Check the validity of the matched MTD hit
 ////
