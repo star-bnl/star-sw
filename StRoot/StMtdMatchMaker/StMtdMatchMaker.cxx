@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StMtdMatchMaker.cxx,v 1.23 2014/09/20 04:25:20 marr Exp $
+ * $Id: StMtdMatchMaker.cxx,v 1.24 2014/11/12 22:27:23 marr Exp $
  * Author: Bingchu Huang
  *****************************************************************
  *
@@ -9,6 +9,9 @@
  *****************************************************************
  *
  * $Log: StMtdMatchMaker.cxx,v $
+ * Revision 1.24  2014/11/12 22:27:23  marr
+ * Clean up the matching information when running on StEvent in afterburner mode
+ *
  * Revision 1.23  2014/09/20 04:25:20  marr
  * Assign matching information to all the primary tracks
  *
@@ -1057,6 +1060,10 @@ Bool_t StMtdMatchMaker::readMtdHits(mtdCellHitVector& daqCellsHitVec,idVector& v
 			StMtdHit* aHit = mtdHits[i];
 			if(!aHit) continue;
 			if(aHit->backleg()<=0||aHit->backleg()>mNBacklegs) continue;   // barrel BackLeg hits
+
+			//clean up any association done before
+			aHit->setAssociatedTrack(0);
+
 			int backlegId = aHit->backleg();
 			int moduleId = aHit->module();
 			int cellId = aHit->cell();
@@ -1152,13 +1159,38 @@ void StMtdMatchMaker::project2Mtd(mtdCellHitVector daqCellsHitVec,mtdCellHitVect
 			StSPtrVecTrackNode& nodes=mEvent->trackNodes();
 			StGlobalTrack *theTrack = dynamic_cast<StGlobalTrack*>(nodes[iNode]->track(global));
 			if(!theTrack) continue;
+
+			//clean up any association done before
+			StSPtrVecTrackPidTraits& traits = theTrack->pidTraits();
+			for (StSPtrVecTrackPidTraitsIterator it = traits.begin(); it != traits.end(); it++)
+			  {
+			    if( (*it)->detector() == kMtdId )
+			      {
+				traits.erase(it);
+				break;
+			      }
+			  }
+
+
 			bool isPrimary =kFALSE;
 			StPrimaryTrack *pTrack =dynamic_cast<StPrimaryTrack*>(theTrack->node()->track(primary));
-			if(pTrack) isPrimary = kTRUE;
+			if(pTrack) 
+			  {
+			    isPrimary = kTRUE;
+			    //clean up any association done before
+			    StSPtrVecTrackPidTraits& ptraits = pTrack->pidTraits();
+			    for (StSPtrVecTrackPidTraitsIterator it = ptraits.begin(); it != ptraits.end(); it++)
+			      {
+			    	if( (*it)->detector() == kMtdId )
+			    	  {
+			    	    ptraits.erase(it);
+			    	    break;
+			    	  }
+			      }
+			  }
 			if(!validTrack(theTrack)) continue;
 
 			StThreeVectorD globalPos(-999,-999,-999);
-			StSPtrVecTrackPidTraits& traits = theTrack->pidTraits();
 			for (unsigned int it=0;it<traits.size();it++){
 				if (traits[it]->detector() == kTofId) {
 					StBTofPidTraits* tofpid = dynamic_cast<StBTofPidTraits*>(traits[it]);
@@ -1959,6 +1991,7 @@ void StMtdMatchMaker::fillPidTraits(mtdCellHitVector& finalMatchedCellsVec,Int_t
 		Float_t fireZLocal = (LeTimeEast-LeTimeWest)/2./vDrift*1000.;
 		Float_t dy = finalMatchedCellsVec[ii].yhit - ycenter;
 		Float_t dz = finalMatchedCellsVec[ii].zhit - fireZLocal;
+
 		if(mHisto) {
 			mTracksPerCellMatch3->Fill(finalMatchedCellsVec[ii].trackIdVec.size());
 			//      mDaqOccupancyMatch3->Fill((module-1)*mNCell+(cell-1));
