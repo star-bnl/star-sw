@@ -410,26 +410,37 @@ void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &ve
   int nVertex =         vertices.size();  
   if (!nVertex || !nTracks) return;
 
+StiDebug::tally("PrimA.GloTraks",nTracks);
+
   for (int iTrack=0;iTrack<nTracks;iTrack++)		{
     StiKalmanTrack * track = (StiKalmanTrack*)(*_trackContainer)[iTrack];  
-StiDebug::tally("Tracks");
 
     StiKalmanTrackNode *bestNode=0;  
     int bestVertex=0;
-    StThreeVectorD nearBeam;
-    track->getNearBeam(&nearBeam);
-    if (nearBeam.perp2()>RMAX2d*RMAX2d) 		continue;
+    const StiKalmanTrackNode *dcaNode = track->getLastNode();
+    if (!dcaNode->isDca()) 		continue;
+    StiDebug::tally("PrimB:HaveDca2Node"); 
+
+    if (fabs(dcaNode->y())>RMAX2d) 	continue;
+    StiDebug::tally("PrimC:GoodDca2Node");	
+    int good3D =0;
+    for (int iVertex=0;iVertex<nVertex;iVertex++) {
+      StiHit *vertex = vertices[iVertex];
+      if (fabs(track->getDca(vertex)) < DMAX3d) good3D++ ; 	
+    }
+    if (!good3D) continue;
+    StiDebug::tally("PrimD:GoodDca3"); 	
+
+
     for (int iVertex=0;iVertex<nVertex;iVertex++) {
       StiHit *vertex = vertices[iVertex];
       if (fabs(track->getDca(vertex)) > DMAX3d)    	continue;
-StiDebug::tally("PrimCandidates");
       if (mTimg[kPrimTimg]) mTimg[kPrimTimg]->Start(0);
 
       extended = (StiKalmanTrackNode*)track->extendToVertex(vertex);
       if (mTimg[kPrimTimg]) mTimg[kPrimTimg]->Stop();
 
       if (!extended) 					continue;
-StiDebug::tally("PrimExtended");
       if (!bestNode) {bestNode=extended;bestVertex=iVertex+1;continue;}
       if (bestNode->getChi2()+log(bestNode->getDeterm())
          <extended->getChi2()+log(extended->getDeterm()))continue;
@@ -440,7 +451,7 @@ StiDebug::tally("PrimExtended");
     if(!bestNode) 			continue;
     track->add(bestNode,kOutsideIn);
     track->setPrimary(bestVertex);
-StiDebug::tally("PrimAdded");
+StiDebug::tally("PrimE:Fitted");
     int         ifail = 0;
 static int REFIT=2005;
     bestNode->setUntouched();
@@ -450,9 +461,12 @@ if (REFIT) {
 }
     track->reduce();
 // something is wrong. It is not a primary
-    if (ifail) { track->removeLastNode(); track->setPrimary(0); continue;}
+    if (ifail) { 
+      track->removeLastNode(); 
+      track->setPrimary(0); 
+      continue;}
     goodCount++;
-StiDebug::tally("PrimRefited");
+StiDebug::tally("PrimG:Refited");
     if (track->getCharge()>0) plus++; else minus++;
 
   }//End track loop 
