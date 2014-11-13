@@ -97,6 +97,7 @@ public:
 
   static int AveMate (TGeoVolume *vol,StiAuxMat &mat);
   static int AveMateR(TGeoVolume *vol,StiAuxMat &mat);
+  void SaveGeometry(std::string fileName="sti2rootgeo.root") const;
 
  protected:
   float               mThkSplit;	//wide/thickness/mThkSplit = nSplits

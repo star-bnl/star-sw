@@ -9,6 +9,7 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiUtilities/StiDebug.h"
+#include "StiMaker/StiDetectorVolume.h"
 #include "StDetectorDbMaker/StiDefaultTrackingParameters.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
@@ -775,4 +776,23 @@ int StiDetectorBuilder::AveMateR(TGeoVolume *gVolu,StiAuxMat &aux)
   aux.Dens = sumD/Nin;
   aux.Wt = aux.Dens*gVolu->Capacity();
   return 0;
+}
+
+
+/*!
+ * Save Sti geometry created by this builder into a root file. The Sti volumes
+ * are converted into drawable root objects with the help of
+ * StiMaker/StiDetectorBuilder.  Note: The StiDetectorVolume object is created
+ * on the heap in order to avoid disturbance in the current BFC library linking
+ * order.
+ *
+ * \author Dmitri Smirnov
+ */
+void StiDetectorBuilder::SaveGeometry(std::string fileName) const
+{
+   TFile fileTmp(fileName.c_str(), "RECREATE");
+   StiDetectorVolume *stiDetVol = new StiDetectorVolume(*this);
+   stiDetVol->Write();
+   fileTmp.Close();
+   delete stiDetVol;
 }
