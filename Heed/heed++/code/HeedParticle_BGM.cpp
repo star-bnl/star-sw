@@ -1,4 +1,5 @@
 #include <iomanip>
+#include <iostream>
 #include "heed++/code/ParticleBank.h"
 #include "heed++/code/HeedParticle_BGM.h"
 #include "heed++/code/HeedCluster.h"
@@ -121,7 +122,7 @@ void HeedParticle_BGM::physics(void) {
           mcerr << "ERROR in void HeedParticle_BGM::physics(void)\n";
           mcerr << "betta*gamma is outside range of Cross Section table\n";
 
-          streamsize old_prec = mcerr.precision(15);
+          std::streamsize old_prec = mcerr.precision(15);
           Iprint2n(mcerr, curr_gamma_1, bg);
           mcerr.precision(old_prec);
           Iprint2n(mcerr, n1, n2);
@@ -306,12 +307,12 @@ void HeedParticle_BGM::physics(void) {
   }
 }
 
-void HeedParticle_BGM::print(ostream& file, int l) const {
+void HeedParticle_BGM::print(std::ostream& file, int l) const {
   if (l >= 0) {
     Ifile << "HeedParticle_BGM (l=" << l
           << "): particle_number=" << particle_number << " type=";
     print_notation(file);
-    file << endl;
+    file << std::endl;
     if (l == 1) return;
     //file<<'\n';
     mparticle::print(file, l - 1);
@@ -322,8 +323,8 @@ void HeedParticle_BGM::print(ostream& file, int l) const {
       Ifile << "   nt  natom nshell transferred_energy\n";
 
       for (nt = 0; nt < qtransfer; nt++) {
-        Ifile << setw(3) << nt << ' ' << setw(3) << natom[nt] << ' ' << setw(3)
-              << nshell[nt] << ' ' << setw(12) << transferred_energy[nt]
+        Ifile << std::setw(3) << nt << ' ' << std::setw(3) << natom[nt] << ' ' << std::setw(3)
+              << nshell[nt] << ' ' << std::setw(12) << transferred_energy[nt]
               << '\n';
       }
     }
