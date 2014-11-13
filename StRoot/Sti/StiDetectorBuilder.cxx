@@ -26,7 +26,7 @@ public:
 StiAuxMat()	{reset();}
 void reset() 	{memset(this,0,sizeof(*this));}
 double A,Z,X0,Dens,Wt;
-int num,many,sens,extr;
+int numb,many,sens,extr;
 };
 
 int StiDetectorBuilder::_debug = 0;
@@ -547,7 +547,10 @@ printf ("@@@@ %s dX=%g(%g) dY=%g(%g) dZ=%g(%g) Phi=%g Rn=%g Off=%g\n"
    add(layer,0,pDetector); 
    cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
   }
-  iAns = aux.num +1000*(aux.sens+100*aux.many);
+  if (aux.numb>999) aux.numb=999;
+  if (aux.sens> 99) aux.sens= 99;
+  if (aux.many> 99) aux.many= 99;
+  iAns = aux.numb +1000*(aux.sens+100*aux.many);
 
 
   return iAns;
@@ -634,7 +637,7 @@ static int IsSensitive(const TGeoVolume *volu)
 int StiDetectorBuilder::AveMate(TGeoVolume *vol,StiAuxMat &aux) 
 {
 // Analytical computation of the average material.
-   aux.num++;
+   aux.numb++;
    double capacity = vol->Capacity();
    double capaOnly = capacity;
    int nd = vol->GetNdaughters();
@@ -644,7 +647,7 @@ int StiDetectorBuilder::AveMate(TGeoVolume *vol,StiAuxMat &aux)
    for (int i=0; i<nd; i++) {
       daughterN = vol->GetNode(i);
       daughterV = daughterN->GetVolume();
-      aux.num++;
+      aux.numb++;
       if (IsSensitive(daughterV)) 	{aux.sens++;	      }
       if (daughterN->IsOverlapping()) 	{aux.many++; return 1;}
       double dauCapa = daughterV->Capacity();
@@ -652,7 +655,7 @@ int StiDetectorBuilder::AveMate(TGeoVolume *vol,StiAuxMat &aux)
       if (capaOnly<-1e-3) {aux.extr = 1; return 1;}
       StiAuxMat dauMat;
       int iAns=AveMate(daughterV,dauMat);
-      aux.num+=dauMat.num;
+      aux.numb+=dauMat.numb;
       aux.sens+=dauMat.sens;
       aux.many+=dauMat.many;
       if (iAns) return  iAns;
