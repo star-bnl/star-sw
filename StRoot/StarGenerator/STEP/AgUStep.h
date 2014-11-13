@@ -81,11 +81,16 @@ public:
   Int_t state; // Tracking state (inwvol)
   Float_t dEstep; // energy lost in this step [GeV]
   Float_t adEstep; // accumulated energy lost by this point [GeV]
+  Int_t   nStep; // accumulated number of steps to this point
   Float_t step; // step size [cm]
   Float_t dens; // density of material in this tracking step
   Float_t A, Z; // A and Z of material in this tracking step
   UShort_t vnums[15]; // Volume numbers
   UShort_t cnums[15]; // Copy numbers
+  
+  TString path();
+  TString volume();
+
   ClassDef(Step,1);
 };
 
@@ -140,6 +145,7 @@ protected:
   Int_t   idEvent;  // current event number
   Int_t   idTruth;  // current track number
   Float_t aDeStep;  // accumulated energy loss
+  Int_t   nStep;    // accumulated number of steps
   Float_t aStep;    // accumulated path length
 
   Float_t vect0[7]; // previous step

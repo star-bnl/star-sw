@@ -4,6 +4,7 @@
 #include "TMath.h"
 #include "TLorentzVector.h"
 #include "TGeoManager.h"
+#include "TGeoManager.h"
 
 Float_t AgUStep::rmin = 0.0;
 Float_t AgUStep::rmax = 200.0;
@@ -121,6 +122,7 @@ Step::Step() : TObject(),
 	       state(0), 
 	       dEstep(-1), 
 	       adEstep(-1), 
+	       nStep(-1) ,
 	       step(-1) ,
 	       dens(0)  ,
 	       A(0), 
@@ -132,11 +134,36 @@ Step::Step() : TObject(),
 void Step::Clear(Option_t *opts)
 {
   idStep=-1;
-  x=0; y=0; z=0; dEstep=-1; adEstep=-1; step=-1; state=0;
+  x=0; y=0; z=0; dEstep=-1; adEstep=-1; step=-1; state=0; nStep=-1;
   for( Int_t i=0;i<15;i++ ) { vnums[i]=0; cnums[i]=0; }
 }
 
+TString Step::path()
+{
+  TString _path = "";
+  if ( gGeoManager ) for ( Int_t i=0;i<15;i++ ) {
+      Int_t vid = vnums[i]; if (0==vid) break;
+      Int_t cid = cnums[i];
+      TGeoVolume *vol = gGeoManager->GetVolume(vid);   if (0==vol) {_path=""; break; }
+      TString name = vol->GetName();
+      _path += Form("/%s_%i",name.Data(),cid);
+    }
+  return _path;
+}
 
+TString Step::volume()
+{
+  TString _volume = "";
+  if ( gGeoManager ) for ( Int_t i=0;i<15;i++ ) {
+
+      Int_t id = vnums[i]; if (0==id) break;
+      TGeoVolume *vol = gGeoManager->GetVolume(id);
+      if ( vol ) _volume = vol->GetName();
+    }
+
+
+  return _volume;
+}
 
 // .....................................................................................
 #define agcstep agcstep_
@@ -217,6 +244,7 @@ void AgUStep::operator()()
       mEvent -> Clear("C"); // clear old event
       aDeStep = 0;          // clear sums etc...
       aStep   = 0;
+      nStep   = 0;
       idTruth = 0;
       //      LOG_INFO << "New Event " << idEvent << endm;
       mEvent -> idEvent = idEvent; // and set the event number
@@ -228,6 +256,7 @@ void AgUStep::operator()()
     {
       aDeStep = 0;
       aStep   = 0;
+      nStep   = 0;
       idTruth++;
       //      LOG_INFO << "  New Track " << idTruth << endm;
 
@@ -239,6 +268,7 @@ void AgUStep::operator()()
   
   aDeStep += ctrak->destep;
   aStep   += ctrak->step;
+  nStep   ++;
 
   // Add a new step to the track
   assert(mTrack);
@@ -247,6 +277,7 @@ void AgUStep::operator()()
 
   Step *mStep = mTrack -> AddStep();
   mStep -> adEstep = aDeStep;
+  mStep -> nStep  = nStep;
   mStep -> dEstep  = ctrak -> destep;
   mStep -> step = ctrak -> step;
   mStep -> state = ctrak->inwvol;
