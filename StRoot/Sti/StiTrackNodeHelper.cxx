@@ -135,10 +135,10 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   y2 = rotPars.y()+dy;
   dl0 = rotPars._cosCA*dx+rotPars._sinCA*dy;
   sind = dl0*rho;
-  if (fabs(dsin) < 0.02 && rotPars._cosCA >0) { //tiny angle
+  double cosd = cosCA2*rotPars._cosCA+sinCA2*rotPars._sinCA;
+  if (fabs(dsin) < 0.02 && cosd>0) { //tiny angle
     dl = dl0*(1.+sind*sind/6);
   } else {
-    double cosd = cosCA2*rotPars._cosCA+sinCA2*rotPars._sinCA;
     dl = atan2(sind,cosd)/rho;
   }
   if (mDetector && mDetector->getShape()->getShapeCode()>1) { // non planar shape
