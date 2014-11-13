@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.131 2014/10/22 20:41:59 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.131 2014/10/22 20:41:59 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.1 2014/11/13 19:23:28 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.1 2014/11/13 19:23:28 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.131.2.1  2014/11/13 19:23:28  perev
+ * Remove getNearBeam() and use dcaNode instead
+ *
  * Revision 2.131  2014/10/22 20:41:59  perev
  * Remove any influence of nudge() to refit.
  *
@@ -645,7 +648,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
   StiKalmanTrackNode * inner = getInnerMostNode();
 
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
-  inner->propagate(0.,0,kOutsideIn);
+  inner->propagate(0.,0,-1);
   double p[3];
   inner->getMomentum(p,0);
   StThreeVector<double> p3(p[0],p[1],p[2]);
@@ -978,38 +981,6 @@ double StiKalmanTrack::getTrackRadLength() const
     cout <<"StiKalmanTrack::getTrackRadLength() -W- Total Rad Length Error: "<<totalR;
   return totalR;
 }
-//_____________________________________________________________________________
-double StiKalmanTrack::getNearBeam(StThreeVectorD *pnt,StThreeVectorD *dir) const
-{
-  StiKalmanTrackNode * inNode = lastNode;
-  StThreeVectorD in(inNode->x_g(),inNode->y_g(),inNode->z_g());
-
-  StPhysicalHelixD hlx(fabs(inNode->getCurvature()),
-		            inNode->getDipAngle(),
-		            inNode->getPhase(),
-		            in,
-		            inNode->getHelicity());
-  double per = hlx.period();
-  double len = hlx.pathLength(0.,0.);
-//  StHelix can return negative length if -ve path is shorter then +ve one
-//  period ia added in this case;
-  if (fabs(len) > fabs(len+per)) len+=per;
-  if (fabs(len) > fabs(len-per)) len-=per;
-
-  hlx.moveOrigin(len);
-  if (pnt) (*pnt) = hlx.at(0);
-
-  if (dir) {
-    double phase = hlx.phase();
-    double dip   = hlx.dipAngle();
-    int h        = hlx.h();
-
-    (*dir)[0]= -sin(phase)*cos(dip)*h;	
-    (*dir)[1]=  cos(phase)*cos(dip)*h;
-    (*dir)[2]=             sin(dip)*h;}
-
-  return fabs(len);
-}
 
 //_____________________________________________________________________________
 /*! Return the inner most hit associated with this track.
@@ -1205,11 +1176,7 @@ static int nCall=0; nCall++;
 		
   StiHit localVertex = *vertex;
   sNode = getInnerMostNode();
-  if (sNode->isDca()) {//it is fake node. Remove it
-    removeLastNode();
-    sNode = getInnerMostNode();
-  }
-
+  assert(!(sNode->isDca() && dcaHit));
 
   localVertex.rotate(sNode->getAlpha());
   tNode = trackNodeFactory->getInstance();
@@ -1218,7 +1185,7 @@ static int nCall=0; nCall++;
   //     << " " <<  localVertex.y() << " " << localVertex.z() << endl;
   //cout << "SKT::extendToVertex() -I- sNode->getX():"<<sNode->getX()<<endl;
   //cout << "SKT::extendToVertex() -I-0 tNode->getX():"<< tNode->getX()<<endl;
-  if (tNode->propagate(sNode, &localVertex,kOutsideIn))
+  if (tNode->propagate(sNode, &localVertex,-1))
     { 
       //cout << " on vertex plane:";
       double dy=0,dz=0,d=0;
@@ -1226,6 +1193,9 @@ static int nCall=0; nCall++;
         tNode->setChi2(0); 
 	tNode->setHit(0);
 	tNode->setDetector(0);
+        assert(fabs(tNode->x())<1e-6);
+//        assert(fabs(tNode->y())<  50);
+
         return tNode;
       } else {			//Normal vertex 
 	tNode->setChi2(3e33);
@@ -1236,26 +1206,6 @@ static int nCall=0; nCall++;
 	_vChi2= chi2; _dca = d;
       }
 
-#ifdef Sti_DEBUG      
-	int npoints[2] = {0,0};
-	vector<StMeasuredPoint*> hitVec = stHits();
-	for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end();++point) {
-	  StHit * hit = dynamic_cast<StHit *>(*point);
-	  if (hit) {
-	    StDetectorId detId = hit->detector();
-	    if (detId == kTpcId) ++npoints[0];
-	    if (detId == kSvtId) ++npoints[1];
-	  }
-	}
-	cout << "StiKalmanTrack::extendToVertex: localVertex: " << localVertex << endl;
-	cout << "StiKalmanTrack::extendToVertex: chi2 @ vtx: " << chi2 
-	     << " dx:"<< dx
-	     << " dy:"<< dy
-	     << " dz:"<< dz
-	     << " d: "<< d
-	     << " dca: " << _dca << " npoints tpc/svt: " << npoints[0] << "/" << npoints[1] << endl;
-	cout << "StiKalmanTrack::extendToVertex: TrackBefore:" << *this << endl;
-#endif
 
 //    if (chi2<StiKalmanTrackFinderParameters::instance()->maxChi2Vertex  && d<4.)
 //    if (                             d<4.)
@@ -1268,10 +1218,6 @@ static int nCall=0; nCall++;
 	  tNode->setDetector(0);
           trackExtended = (tNode->updateNode()==0);
           
-#ifdef Sti_DEBUG      
-cout << "StiKalmanTrack::extendToVertex: TrackAfter:" << *this << endl;
-#endif
-if (debug()) cout << "extendToVertex:: " << StiKalmanTrackNode::Comment() << endl;
 
 	  if (trackExtended) return tNode;
           trackNodeFactory->free(tNode);             
@@ -1611,6 +1557,7 @@ static int nCall=0;nCall++;
   for (source=rbegin();source!=rend();source++) {
     iNode++;
     targetNode = &(*source);
+    if (targetNode->isDca()) 		continue;
     if (restIsWrong) 		{ targetNode->setInvalid(); continue;}
 
     if (!isStarted) {
@@ -1629,6 +1576,7 @@ static int nCall=0;nCall++;
   for (source=begin();source!=end();source++) {
     iNode++;
     targetNode = &(*source);
+    if (targetNode->isDca()) 		continue;
     if (restIsWrong) { targetNode->setInvalid(); continue;}
     if (!isStarted) {
       if (!targetNode->getHit()) 	continue;;		
