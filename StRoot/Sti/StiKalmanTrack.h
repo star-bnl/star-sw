@@ -172,14 +172,6 @@ class StiKalmanTrack : public StiTrack
      the track.
     */
    double getTrackLength() const;
-   /*!
-     Returns the track length (in centimeters) from the first point to beam line
-     (x=y=0).  
-     pnt is the nearest point to beam and dir direction of tracl in this point
-     The main vertex is included in the calculation if associated with 
-     the track.
-    */
-   double getNearBeam(StThreeVectorD *pnt=0,StThreeVectorD *dir=0) const;
   
    /*!
      Returns the maximum number of points that can possibly be on the track given
