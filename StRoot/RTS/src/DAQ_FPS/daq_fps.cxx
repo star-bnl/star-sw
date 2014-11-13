@@ -108,7 +108,7 @@ daq_dta *daq_fps::handle_adc()
 	int tb_cou = hdr->pre_post_cou ;
 	int qt_cou = hdr->qt_cou ;
 
-	LOG(TERR,"tb %d, qt %d, hdr ver 0x%08X",tb_cou,qt_cou,hdr->ver) ;
+	//LOG(TERR,"tb %d, qt %d, hdr ver 0x%08X",tb_cou,qt_cou,hdr->ver) ;
 
 	memcpy(&meta_hdr,hdr,sizeof(meta_hdr)) ;
 	adc->meta = (void *) &meta_hdr ;
@@ -120,13 +120,13 @@ daq_dta *daq_fps::handle_adc()
 	for(int tb=0;tb<tb_cou;tb++) {
 		int rel_xing = *d32++ ;
 
-		LOG(TERR,"Rel xing %d",rel_xing) ;
+		//LOG(TERR,"Rel xing %d",rel_xing) ;
 		
 		for(int q=0;q<qt_cou;q++) {
 			int qt = *d32++ ;
 			int chs = *d32++ ;
 	
-			LOG(TERR,"qt %d, chs %d",qt,chs) ;
+			//LOG(TERR,"qt %d, chs %d",qt,chs) ;
 
 			if(chs==0) continue ;
 
