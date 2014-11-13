@@ -6,20 +6,24 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 ########################################################
 
 PROJECT( Garfield CXX Fortran)
-SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
-SET( ${PROJECT_NAME}_MINOR_VERSION 2 )
-SET( ${PROJECT_NAME}_PATCH_VERSION 0 )
-SET( ${PROJECT_NAME}_VERSION
-  ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_VERSION} )
-SET( ${PROJECT_NAME}_SOVERSION ${${PROJECT_NAME}_VERSION} )
 
 ### DEPENDENCIES #######################################
-
 SET( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake )
 INCLUDE( MacroCheckPackageLibs )
-INCLUDE( MacroCheckPackageVersion )
 INCLUDE( MacroRootDict )
 INCLUDE( FindROOT )
+
+# If you cannot create symbolic links turn FALSE the library version
+SET(BUILD_WITH_VERSION_NUMBER TRUE)
+IF(BUILD_WITH_VERSION_NUMBER)
+    SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
+    SET( ${PROJECT_NAME}_MINOR_VERSION 2 )
+    SET( ${PROJECT_NAME}_PATCH_VERSION 0 )
+    SET( ${PROJECT_NAME}_VERSION
+    ${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}.${${PROJECT_NAME}_PATCH_VERSION} )
+    SET( ${PROJECT_NAME}_SOVERSION ${${PROJECT_NAME}_VERSION} )
+    INCLUDE( MacroCheckPackageVersion )
+ENDIF(BUILD_WITH_VERSION_NUMBER)
 
 ## Add root libs ##
 FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom )
@@ -59,7 +63,7 @@ SET_SOURCE_FILES_PROPERTIES( ${heed_sources} PROPERTIES LANGUAGE CXX)
 ## Flags to pass to the compiler #######################
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual -fno-common -pg " )
 
-# Add common flags (gfortran and g++)
+# Add common flags for gfortran and g++
 ADD_DEFINITIONS( "-c" )
 # Allow to use debug symbols
 IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
@@ -101,11 +105,11 @@ ADD_LIBRARY( ${PROJECT_NAME} SHARED
     ${garfield_sources} 
     ${magboltz_sources}
     ${heed_sources} )
-
-SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
-    VERSION ${${PROJECT_NAME}_VERSION}
-    SOVERSION ${${PROJECT_NAME}_SOVERSION} )
-
+IF(BUILD_WITH_VERSION_NUMBER)
+    SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
+        VERSION ${${PROJECT_NAME}_VERSION}
+        SOVERSION ${${PROJECT_NAME}_SOVERSION} )
+ENDIF(BUILD_WITH_VERSION_NUMBER)
 ## EXPORT PACKAGE INFORMATION ##########################
 export(PACKAGE ${PROJECT_NAME})
 
