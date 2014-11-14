@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <map>
+
+#include "TVector3.h"
+
 using namespace std;
 #include <stdexcept>
 #include "StMessMgr.h"
@@ -9,6 +12,7 @@ using namespace std;
 #include "tables/St_ssdConfiguration_Table.h"
 #include "tables/St_ssdWafersPosition_Table.h"
 
+#include "StEvent/StEnumerations.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
@@ -20,6 +24,9 @@ using namespace std;
 #include "Sti/StiIsActiveFunctor.h"
 #include "StiSsd/StiSstDetectorBuilder.h"
 #include "StSsdUtil/StSsdBarrel.hh"
+#include "Sti/StiNeverActiveFunctor.h"
+#include "StiSsd/StiSsdIsActiveFunctor.h"
+#include "StSsdUtil/StSstConsts.h"
 #include "StDetectorDbMaker/StiSsdHitErrorCalculator.h"
 
 
@@ -74,84 +81,110 @@ void StiSstDetectorBuilder::useVMCGeometry()
    StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetDensity()*geoMat->GetRadLen()))
                                  : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
 
-   ssdDimensions_st *dimensions = mySsd->getDimensions();
-   Int_t NL = mySsd->getNumberOfLadders();
-   Int_t NW = mySsd->getNWaferPerLadder();
+   // Build active sti volumes for SST sensors
+   int iSensor = floor(kSstNumSensorsPerLadder/2);
 
-   // use 1 ladder to get the dimension
-   StSsdLadder *ladder = mySsd->getLadder(0);
-   assert(ladder);
-   StSsdWafer *wafer1 = ladder->getWafer(0);
-   StSsdWafer *wafer2 = ladder->getWafer(NW - 1);
-   assert(wafer1 && wafer2);
-   Double_t width = TMath::Abs(wafer1->x(2) - wafer2->x(2)) / 2. + 2;
-   StiPlanarShape *ladderShape = new StiPlanarShape("SsdLadder",
-         width,
-         2*dimensions->waferHalfThickness,
-         dimensions->waferHalfLength );
-   add(ladderShape);
+   for (int iLadder = 1; iLadder <= kSstNumLadders; ++iLadder)
+   {
+      ostringstream geoPath;
+      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_" << iLadder << "/SFSW_" << iSensor << "/SFSL_1/SFSD_1";
 
-   Int_t layer = 0;
-   setNSectors(layer, NL);
+      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
-   /*! Placement of Ssd Modules is currently done by reading the geom.C table.
-     Ladders are placed according to the coordinates of its first module number
-     int idwafer = 7*1000+wafer*100+ladder;
-     ----> ladder # 1  ===> module 7101
-     ----> ladder # 20 ===> module 7120
-   */
-   for (Int_t iLadder = 0; iLadder < NL; iLadder++) {
-      ladder = mySsd->getLadder(iLadder);
+      if (!isAvail) {
+         Warning("useVMCGeometry()", "Cannot find path to SFSD (SST sensitive) node. Skipping to next ladder...");
+         continue;
+      }
 
-      if (! ladder) continue;
+      TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
+      TGeoMatrix* sensorMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
 
-      wafer1 = ladder->getWafer(0);
-      wafer2 = ladder->getWafer(NW - 1);
+      if (!sensorMatrix) {
+         Warning("useVMCGeometry()", "Could not get SST sensor position matrix. Skipping to next ladder...");
+         continue;
+      }
 
-      if (! wafer1 || ! wafer2) continue;
+      // Build global rotation for the sensor
+      TGeoRotation sensorRot(*sensorMatrix);
 
-      StThreeVectorD centerVector1(wafer1->x(0), wafer1->x(1), wafer1->x(2));
-      StThreeVectorD normalVector1(wafer1->n(0), wafer1->n(1), wafer1->n(2));
-      StThreeVectorD centerVector2(wafer2->x(0), wafer2->x(1), wafer2->x(2));
-      StThreeVectorD normalVector2(wafer2->n(0), wafer2->n(1), wafer2->n(2));
-      StThreeVectorD centerVector = centerVector1 + centerVector2; centerVector *= 0.5;
-      StThreeVectorD normalVector = normalVector1 + normalVector2; normalVector *= 0.5;
-      Double_t prod = centerVector * normalVector;
+      TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-      if (prod < 0) normalVector *= -1;
+      LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
+                << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
+                << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
+                << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
-      double phi  = centerVector.phi();
-      double phiD = normalVector.phi();
-      double r = centerVector.perp();
-      cout << "Det Id = " << wafer1->getId() << "\tcv\t:" << centerVector << "\tphi:\t" << phi << "\tr:\t" << r << "\tz:\t" << centerVector.z() << endl;
-      StiPlacement *pPlacement = new StiPlacement;
-      pPlacement->setZcenter(centerVector.z());
-      // centerVector.z can be different than with this definition
-      // issue ?
-      pPlacement->setLayerRadius(r);  //this is only used for ordering in detector container...
-      pPlacement->setLayerAngle(phi); //this is only used for ordering in detector container...
+      // Convert center of the sensor geobox to coordinates in the global coordinate system
+      double sensorXyzLocal[3]  = {};
+      double sensorXyzGlobal[3] = {};
+
+      sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
+
+      TVector3 sensorVec(sensorXyzGlobal);
+
+      // XXX:ds: Need to verify the constant for sensor spacing
+      double sensorLength = kSstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
+      StiShape *stiShape = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX());
+
+      add(stiShape);
+
+      Double_t phi  = sensorVec.Phi();
+      Double_t phiD = sensorRot.GetPhiRotation() / 180 * M_PI;
+      Double_t r    = sensorVec.Perp(); // Ignore the z component if any
+      double normVecMag = fabs(r * sin(phi - phiD));
+      TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
+
+      if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
+      else                            normVec *=  normVecMag;
+
+      // Volume positioning
+      StiPlacement *pPlacement = new StiPlacement();
+
+      pPlacement->setZcenter(0);
+      pPlacement->setLayerRadius(r);
+      pPlacement->setLayerAngle(phi);
       pPlacement->setRegion(StiPlacement::kMidRapidity);
-      //pPlacement->setNormalRep(phi, r, 0.);  //but we have to use this to fix ladders 20 and 12
-      pPlacement->setNormalRep(phiD, r * TMath::Cos(phi - phiD), r * TMath::Sin(phi - phiD));
 
-      //Build final detector object
-      StiDetector *pLadder = _detectorFactory->getInstance();
-      pLadder->setName(Form("Ssd/Layer_%d/Ladder_%d/Wafers", layer, iLadder));
-      pLadder->setIsOn(kTRUE);
-      pLadder->setIsActive(new StiIsActiveFunctor(_active));
-      pLadder->setIsContinuousMedium(false);
-      pLadder->setIsDiscreteScatterer(true);
-      pLadder->setGas(GetCurrentDetectorBuilder()->getGasMat());
+      double centerOrient = sensorVec.Phi() - normVec.Phi();
+      pPlacement->setNormalRep(normVec.Phi(), normVecMag, r * sin(centerOrient));
 
-      if (!pLadder->getGas()) LOG_INFO << "gas not there!" << endm;
+      // Build final detector object
+      StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
-      pLadder->setMaterial(silicon);
-      pLadder->setShape(ladderShape);
-      pLadder->setPlacement(pPlacement);
-      pLadder->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());
-      pLadder->setKey(1, 0);
-      pLadder->setKey(2, iLadder - 1);
-      add(layer, iLadder, pLadder);
+      stiDetector->setName(geoPath.str().c_str());
+      stiDetector->setIsOn(true);
+
+      if (_active) { stiDetector->setIsActive(new StiSsdIsActiveFunctor);}
+      else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
+
+      stiDetector->setIsContinuousMedium(false); // true for gases
+      stiDetector->setIsDiscreteScatterer(true); // true for anything other than gas
+      stiDetector->setGroupId(kSsdId);
+      stiDetector->setShape(stiShape);
+      stiDetector->setPlacement(pPlacement);
+      stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
+      stiDetector->setMaterial(silicon);
+      stiDetector->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());
+
+      stiDetector->setKey(1, 0);
+      stiDetector->setKey(2, iLadder-1);
+      add(0, iLadder, stiDetector);
+
+      // Whole bunch of debugging information
+      Float_t rad2deg = 180.0 / 3.1415927;
+      LOG_DEBUG << "===>NEW:SST:stiDetector:Name             = " << stiDetector->getName()                     << endm
+                << "===>NEW:SST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
+                << "===>NEW:SST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
+                << "===>NEW:SST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
+                << "===>NEW:SST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
+                << "===>NEW:SST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
+                << "===>NEW:SST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
+                << "===>NEW:SST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
+                << "===>NEW:SST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
+                << "===>NEW:SST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
+                << "===>NEW:SST:stiDetector:Ladder           = " << iLadder                                    << endm
+                << "===>NEW:SST:stiDetector:sensor           = " << iSensor                                    << endm
+                << "===>NEW:SST:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
    }
 }
 
