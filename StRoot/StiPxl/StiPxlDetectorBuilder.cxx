@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.5 2014/11/14 13:15:59 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.6 2014/11/14 13:16:18 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -87,7 +87,10 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
    }
 
    // Gas material must be defined. Here we use air properties
-   _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
+   const TGeoMaterial* geoMat = gGeoManager->GetMaterial("AIR");
+
+   _gasMat = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetDensity()*geoMat->GetRadLen()))
+                    : add(new StiMaterial("AIR", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
 
    if (StiVMCToolKit::GetVMC()) {
       useVMCGeometry();
@@ -110,7 +113,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    mSiMaterial     = add(new StiMaterial("PixelSi",  14., 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
 
    Material_t map[] = {
-      {"AIR", &_gasMat},
       {"SILICON", &mSiMaterial}
    };
 
