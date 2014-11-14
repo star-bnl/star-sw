@@ -18,15 +18,12 @@ public:
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
    void         setSiMat(StiMaterial     *m) {_siMat = m;}
-   void         setHybridMat(StiMaterial *m) {_hybridMat = m;}
    StiMaterial *getSiMat()    {return _siMat;}
-   StiMaterial *getHybridMat() {return _hybridMat;}
 
 protected:
 
    StSsdBarrel *mySsd;
    StiMaterial *_siMat;
-   StiMaterial *_hybridMat;
    ssdWafersPosition_st *ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers);
 
 private:

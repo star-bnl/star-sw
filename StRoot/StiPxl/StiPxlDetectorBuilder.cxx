@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.4 2014/11/14 13:15:49 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.5 2014/11/14 13:15:59 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -55,7 +55,7 @@ using namespace std;
    10     4                          0     9
  */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
-   StiDetectorBuilder("Pixel", active), mSiMaterial(0), mHybridMaterial(0), mPxlDb(0),
+   StiDetectorBuilder("Pixel", active), mSiMaterial(0), mPxlDb(0),
    mBuildIdealGeom(buildIdealGeom)
 { }
 
@@ -108,12 +108,10 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    };
 
    mSiMaterial     = add(new StiMaterial("PixelSi",  14., 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
-   mHybridMaterial = add(new StiMaterial("PixelHyb", 14., 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
 
    Material_t map[] = {
       {"AIR", &_gasMat},
-      {"SILICON", &mSiMaterial},
-      {"SILICON", &mHybridMaterial}
+      {"SILICON", &mSiMaterial}
    };
 
    Int_t M = sizeof(map) / sizeof(Material_t);

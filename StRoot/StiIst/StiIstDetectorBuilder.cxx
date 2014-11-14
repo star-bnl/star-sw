@@ -59,7 +59,7 @@ using namespace StIstConsts;
 
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
-   StiDetectorBuilder("Ist", active), mSiMaterial(0), mHybridMaterial(0), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
+   StiDetectorBuilder("Ist", active), mSiMaterial(0), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
 { }
 
 
@@ -114,8 +114,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
    Material_t map[] = {
       {"AIR",     &_gasMat},
-      {"SILICON", &mSiMaterial},
-      {"SILICON", &mHybridMaterial}
+      {"SILICON", &mSiMaterial}
    };
 
    Int_t M = sizeof(map) / sizeof(Material_t);
