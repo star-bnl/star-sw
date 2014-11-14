@@ -8,6 +8,8 @@
 class StSsdBarrel;
 class ssdWafersPosition_st;
 class St_ssdWafersPosition;
+class StiDetector;
+
 class StiSstDetectorBuilder : public StiDetectorBuilder
 {
 
@@ -26,5 +28,6 @@ protected:
 private:
 
    void buildInactiveVolumes();
+   void segmentSFMOVolume(StiDetector* stiSFMO);
 };
 #endif

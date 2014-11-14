@@ -240,6 +240,48 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
 }
 
 
+/**
+ * Manually modify the SST mother volume by splitting it into three tubes.
+ */
+void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
+{
+   StiCylindricalShape* stiSFMOShape = (StiCylindricalShape*) stiSFMO->getShape();
+
+   stiSFMOShape->setThickness(0.75*stiSFMOShape->getThickness());
+
+   // Copy original shape (before its depth is modified) to a new one for the end SFMO tubes
+   StiCylindricalShape* stiSFMOEndShape = new StiCylindricalShape(*stiSFMOShape);
+   stiSFMOEndShape->setName(stiSFMOEndShape->getName() + "_end");
+   stiSFMOEndShape->setHalfDepth(8.25); // 8.25 cm = (50.5-34)/2 cm
+
+   add(stiSFMOEndShape);
+
+   stiSFMOShape->setHalfDepth(34); // 34 cm
+
+   // Create a shalow copy for end tube 1
+   StiDetector* stiSFMOEnd = new StiDetector(*stiSFMO);
+
+   StiPlacement* stiSFMOEndPlacement = new StiPlacement(*stiSFMOEnd->getPlacement());
+   stiSFMOEndPlacement->setZcenter(stiSFMOShape->getHalfDepth() + stiSFMOEndShape->getHalfDepth());
+
+   stiSFMOEnd->setShape(stiSFMOEndShape);
+   stiSFMOEnd->setPlacement(stiSFMOEndPlacement);
+
+   add(getNRows(), 0, stiSFMOEnd);
+
+   // Create a shalow copy for end tube 2
+   StiDetector* stiSFMOEnd2 = new StiDetector(*stiSFMOEnd);
+
+   stiSFMOEndPlacement = new StiPlacement(*stiSFMOEnd2->getPlacement());
+   stiSFMOEndPlacement->setZcenter(-stiSFMOShape->getHalfDepth() - stiSFMOEndShape->getHalfDepth());
+
+   stiSFMOEnd2->setShape(stiSFMOEndShape);
+   stiSFMOEnd2->setPlacement(stiSFMOEndPlacement);
+
+   add(getNRows(), 0, stiSFMOEnd2);
+}
+
+
 ssdWafersPosition_st *StiSstDetectorBuilder::ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers)
 {
    Int_t N = wafers->GetNRows();
