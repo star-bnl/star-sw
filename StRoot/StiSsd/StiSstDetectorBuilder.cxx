@@ -24,7 +24,7 @@ using namespace std;
 
 
 StiSstDetectorBuilder::StiSstDetectorBuilder(bool active)
-   : StiDetectorBuilder("Ssd", active), _siMat(0)
+   : StiDetectorBuilder("Ssd", active)
 {
    // Hit error parameters : it is set to 20 microns, in both x and y coordinates
 }
@@ -68,32 +68,11 @@ void StiSstDetectorBuilder::useVMCGeometry()
 {
    cout << "StiSstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
 
-   //build the material
-   struct Material_t {
-      const Char_t *name;
-      StiMaterial    **p;
-   };
+   // Define silicon material used in manual construction of sensitive layers in this builder
+   const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
 
-   Material_t map[] = {
-      {"SILICON", &_siMat}
-   };
-
-   Int_t M = sizeof(map) / sizeof(Material_t);
-
-   for (Int_t i = 0; i < M; i++) {
-      const TGeoMaterial *mat =  gGeoManager->GetMaterial(map[i].name);
-
-      if (! mat) continue;
-
-      *map[i].p = add(new StiMaterial(mat->GetName(),
-                                      mat->GetZ(),
-                                      mat->GetA(),
-                                      mat->GetDensity(),
-                                      mat->GetDensity()*mat->GetRadLen() ));
-   }
-
-
-   cout << "StiSstDetectorBuilder::buildMaterials() - I - Done " << endl;
+   StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetDensity()*geoMat->GetRadLen()))
+                                 : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
 
    ssdDimensions_st *dimensions = mySsd->getDimensions();
    Int_t NL = mySsd->getNumberOfLadders();
@@ -166,7 +145,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
       if (!pLadder->getGas()) LOG_INFO << "gas not there!" << endm;
 
-      pLadder->setMaterial(_siMat);
+      pLadder->setMaterial(silicon);
       pLadder->setShape(ladderShape);
       pLadder->setPlacement(pPlacement);
       pLadder->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());

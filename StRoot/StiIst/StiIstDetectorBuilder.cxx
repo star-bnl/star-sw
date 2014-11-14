@@ -59,7 +59,7 @@ using namespace StIstConsts;
 
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
-   StiDetectorBuilder("Ist", active), mSiMaterial(0), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
+   StiDetectorBuilder("Ist", active), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
 { }
 
 
@@ -102,36 +102,18 @@ void StiIstDetectorBuilder::useVMCGeometry()
 {
    cout << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
 
+   // Define silicon material used in manual construction of sensitive layers in this builder
+   const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
+
+   StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetDensity()*geoMat->GetRadLen()))
+                                 : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
+
    unsigned int ROW = 1;
 
    THashList *istRot = 0;
 
    if (!mBuildIdealGeom)
       istRot = mIstDb->getRotations();
-
-   // Build the material map
-   struct Material_t {
-      const Char_t *name;
-      StiMaterial    **p;
-   };
-
-   Material_t map[] = {
-      {"SILICON", &mSiMaterial}
-   };
-
-   Int_t M = sizeof(map) / sizeof(Material_t);
-
-   for (Int_t i = 0; i < M; i++) {
-      const TGeoMaterial *mat =  gGeoManager->GetMaterial(map[i].name);
-
-      if (! mat) continue;
-
-      *map[i].p = add(new StiMaterial(mat->GetName(),
-                                      mat->GetZ(),
-                                      mat->GetA(),
-                                      mat->GetDensity(),
-                                      mat->GetDensity()*mat->GetRadLen() ));
-   }
 
    int iSensor = 3;
 
@@ -221,7 +203,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       if (!p->getGas()) LOG_INFO << "gas not there!" << endm;
 
-      p->setMaterial(mSiMaterial);
+      p->setMaterial(silicon);
       p->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
 
       // Adding detector, note that no keys are set in IST!
