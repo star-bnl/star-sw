@@ -255,6 +255,17 @@ void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
 
    stiSFMOShape->setHalfDepth(34); // 34 cm
 
+   // Redefine the material of the central tube
+   StiMaterial* stiSFMOMaterial = stiSFMO->getMaterial();
+   // The parameters provided by Jason W.: name, z, a, density, X0
+   stiSFMOMaterial->set(stiSFMOMaterial->getName(), 7.33, 14.67, 0.0688, 29433);
+
+   // Define the material for the end tubes by creating a shalow copy from the original SFMO material
+   StiMaterial* stiSFMOEndMaterial = new StiMaterial(*stiSFMOMaterial);
+   stiSFMOEndMaterial->set(stiSFMOMaterial->getName() + "_end", 7.64, 15.30, 0.299, 24549);
+
+   add(stiSFMOEndMaterial);
+
    // Create a shalow copy for end tube 1
    StiDetector* stiSFMOEnd = new StiDetector(*stiSFMO);
 
@@ -263,6 +274,7 @@ void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
 
    stiSFMOEnd->setShape(stiSFMOEndShape);
    stiSFMOEnd->setPlacement(stiSFMOEndPlacement);
+   stiSFMOEnd->setMaterial(stiSFMOEndMaterial);
 
    add(getNRows(), 0, stiSFMOEnd);
 
@@ -274,6 +286,7 @@ void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
 
    stiSFMOEnd2->setShape(stiSFMOEndShape);
    stiSFMOEnd2->setPlacement(stiSFMOEndPlacement);
+   stiSFMOEnd2->setMaterial(stiSFMOEndMaterial);
 
    add(getNRows(), 0, stiSFMOEnd2);
 }
