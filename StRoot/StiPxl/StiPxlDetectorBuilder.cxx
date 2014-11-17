@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.81 2014/11/17 20:37:32 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.82 2014/11/17 20:37:41 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -123,13 +123,11 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
       if (! mat) continue;
 
-      Double_t PotI = StiVMCToolKit::GetPotI(mat);
       *map[i].p = add(new StiMaterial(mat->GetName(),
                                       mat->GetZ(),
                                       mat->GetA(),
                                       mat->GetDensity(),
-                                      mat->GetDensity()*mat->GetRadLen(),
-                                      PotI));
+                                      mat->GetDensity()*mat->GetRadLen()));
    }
 
 //   double ionization = mSiMaterial->getIonization();

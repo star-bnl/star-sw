@@ -125,13 +125,11 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       if (! mat) continue;
 
-      Double_t PotI = StiVMCToolKit::GetPotI(mat);
       *map[i].p = add(new StiMaterial(mat->GetName(),
                                       mat->GetZ(),
                                       mat->GetA(),
                                       mat->GetDensity(),
-                                      mat->GetDensity()*mat->GetRadLen(),
-                                      PotI));
+                                      mat->GetDensity()*mat->GetRadLen() ));
    }
 
    int iSensor = 3;
