@@ -30,8 +30,8 @@ using namespace std;
 #include "StDetectorDbMaker/StiSsdHitErrorCalculator.h"
 
 
-StiSstDetectorBuilder::StiSstDetectorBuilder(bool active)
-   : StiDetectorBuilder("Ssd", active)
+StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
+   : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom)
 {
    // Hit error parameters : it is set to 20 microns, in both x and y coordinates
 }
