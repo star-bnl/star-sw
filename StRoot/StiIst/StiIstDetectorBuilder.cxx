@@ -153,7 +153,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
          if (!mBuildIdealGeom)
             combI = (TGeoHMatrix *) istRot->FindObject(Form("R%04i", matIst));
          else
-            combI = gGeoManager->GetCurrentMatrix();
+            combI = gGeoManager->MakePhysicalNode(Path.Data())->GetMatrix();
 
          if (combI) {
             combI->Print();
