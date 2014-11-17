@@ -18,18 +18,20 @@ public:
     
     // con/destructor
     StiMaterial();
+//	New interface, no ionization and X0 in cm
     StiMaterial(const string &name,
 		double z,
 		double a,
-		double density,
-		double X0);
+		double density,		// g/cm**3  (Geant3 units)
+		double X0);		// cm
     virtual ~StiMaterial();
+//	Old, still working interface, 
     StiMaterial(const string &name,
 		double z,
 		double a,
-		double density,
-		double X0xDensity,
-		double ionization);
+		double density,		// g/cm**3  (Geant3 units)
+		double X0xDensity,	// cm/density
+		double ionization);	// not used
     
     /// Get the material density in grams/cubic centimeter
     double getDensity() const 		{ return _density; }
