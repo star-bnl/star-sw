@@ -134,119 +134,116 @@ void StiIstDetectorBuilder::useVMCGeometry()
                                       PotI));
    }
 
+   int iSensor = 3;
+
    for (int iLadder = 1; iLadder < kIstNumLadders; ++iLadder)
    {
-      for (int iSensor = 1; iSensor < kIstNumSensorsPerLadder; iSensor++)
-      {
-         unsigned int matIst = 1000 + (iLadder) * kIstNumSensorsPerLadder + iSensor;
-         LOG_DEBUG << "iLadder/iSensor/matIst : " << iLadder << " " << iSensor << " " << matIst << endm;
+      unsigned int matIst = 1000 + (iLadder) * kIstNumSensorsPerLadder + iSensor;
+      LOG_DEBUG << "iLadder/iSensor/matIst : " << iLadder << " " << iSensor << " " << matIst << endm;
 
-         char name[50];
-         sprintf(name, "Ist/Ladder_%d/Sensor_%d", iLadder, iSensor);
+      char name[50];
+      sprintf(name, "Ist/Ladder_%d/Sensor_%d", iLadder, iSensor);
 
-         TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-         Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", iLadder, iSensor);
-         gGeoManager->cd(Path); // retrieve info of IBSS volume
+      TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
+      Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", iLadder, iSensor);
+      gGeoManager->cd(Path); // retrieve info of IBSS volume
 
-         TGeoHMatrix *combI = 0;
+      TGeoHMatrix *combI = 0;
 
-         if (!mBuildIdealGeom)
-            combI = (TGeoHMatrix *) istRot->FindObject(Form("R%04i", matIst));
-         else
-            combI = gGeoManager->MakePhysicalNode(Path.Data())->GetMatrix();
+      if (!mBuildIdealGeom)
+         combI = (TGeoHMatrix *) istRot->FindObject(Form("R%04i", matIst));
+      else
+         combI = gGeoManager->MakePhysicalNode(Path.Data())->GetMatrix();
 
-         if (combI) {
-            combI->Print();
-         } else {
-            Error("useVMCGeometry()", "Could not find TGeoHMatrix for sensor %d in database", matIst);
-            continue;
-         }
-
-         if (iSensor != 1) continue;
-
-         TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-         // Extract volume geometry for this node
-         TGeoBBox *box = (TGeoBBox *) nodeT->GetVolume()->GetShape();
-         LOG_DEBUG << " DZ/DY/DX : " << box->GetDZ()
-                   << " " << box->GetDY()
-                   << " " << box->GetDX()
-                   << " " << endm;
-
-         //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
-         StiShape *sh  = new StiPlanarShape(name,
-                                            kIstNumSensorsPerLadder * (box->GetDZ() + 0.10), // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
-                                            2 * box->GetDY(),              // thickness
-                                            box->GetDX());                 // halfWidth
-         add(sh);
-
-         Double_t     *xyz    = combI->GetTranslation();
-         Double_t     *rot    = combI->GetRotationMatrix();
-         StThreeVectorD centerVector(xyz[0], xyz[1], xyz[2]);
-         StThreeVectorD normalVector(rot[1], rot[4], rot[7]);
-
-         Double_t prod = centerVector * normalVector;
-
-         if (prod < 0) normalVector *= -1;
-
-         // Normalize normal vector, just in case....
-         normalVector /= normalVector.magnitude();
-
-         // Volume positioning
-         StiPlacement *pPlacement = new StiPlacement;
-         Double_t phi  = centerVector.phi();
-         Double_t phiD = normalVector.phi();
-         Double_t r    = centerVector.perp();
-         pPlacement->setZcenter(0);
-         pPlacement->setLayerRadius(r);
-
-         pPlacement->setLayerAngle(phi);
-         pPlacement->setRegion(StiPlacement::kMidRapidity);
-         pPlacement->setNormalRep(phiD, r * TMath::Cos(phi - phiD), r * TMath::Sin(phi - phiD));
-         assert(pPlacement);
-
-         //Build final detector object
-         StiDetector *p = getDetectorFactory()->getInstance();
-
-         if ( !p ) {
-            LOG_INFO << "StiIstDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
-            return;
-         }
-
-         p->setName(name);
-         p->setIsOn(kTRUE);
-         if (_active) {  p->setIsActive(new StiIstIsActiveFunctor);}
-         else         {  p->setIsActive(new StiNeverActiveFunctor);}
-         p->setIsContinuousMedium(false);
-         p->setIsDiscreteScatterer(true);
-         p->setShape(sh);
-         p->setPlacement(pPlacement);
-         p->setGas(GetCurrentDetectorBuilder()->getGasMat());
-
-         if (!p->getGas()) LOG_INFO << "gas not there!" << endm;
-
-         p->setMaterial(mSiMaterial);
-         p->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
-
-         // Adding detector, note that no keys are set in IST!
-         add(ROW, iLadder, p);
-
-         // Whole bunch of debugging information
-         Float_t rad2deg = 180.0 / 3.1415927;
-         LOG_DEBUG << "===>NEW:IST:pDetector:Name               = " << p->getName()                               << endm
-                   << "===>NEW:IST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
-                   << "===>NEW:IST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
-                   << "===>NEW:IST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
-                   << "===>NEW:IST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
-                   << "===>NEW:IST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
-                   << "===>NEW:IST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
-                   << "===>NEW:IST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
-                   << "===>NEW:IST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
-                   << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                   << "===>NEW:IST:pDetector:Ladder             = " << iLadder                                    << endm
-                   << "===>NEW:IST:pDetector:Sensor             = " << iSensor                                    << endm
-                   << "===>NEW:IST:pDetector:row/ladder (ITTF)  = " << ROW << " / " << iLadder                    << endm
-                   << "===>NEW:IST:pDetector:Active?            = " << p->isActive()                              << endm;
+      if (combI) {
+         combI->Print();
+      } else {
+         Error("useVMCGeometry()", "Could not find TGeoHMatrix for sensor %d in database", matIst);
+         continue;
       }
+
+      TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+      // Extract volume geometry for this node
+      TGeoBBox *box = (TGeoBBox *) nodeT->GetVolume()->GetShape();
+      LOG_DEBUG << " DZ/DY/DX : " << box->GetDZ()
+                << " " << box->GetDY()
+                << " " << box->GetDX()
+                << " " << endm;
+
+      //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
+      StiShape *sh  = new StiPlanarShape(name,
+                                         kIstNumSensorsPerLadder * (box->GetDZ() + 0.10), // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
+                                         2 * box->GetDY(),              // thickness
+                                         box->GetDX());                 // halfWidth
+      add(sh);
+
+      Double_t     *xyz    = combI->GetTranslation();
+      Double_t     *rot    = combI->GetRotationMatrix();
+      StThreeVectorD centerVector(xyz[0], xyz[1], xyz[2]);
+      StThreeVectorD normalVector(rot[1], rot[4], rot[7]);
+
+      Double_t prod = centerVector * normalVector;
+
+      if (prod < 0) normalVector *= -1;
+
+      // Normalize normal vector, just in case....
+      normalVector /= normalVector.magnitude();
+
+      // Volume positioning
+      StiPlacement *pPlacement = new StiPlacement;
+      Double_t phi  = centerVector.phi();
+      Double_t phiD = normalVector.phi();
+      Double_t r    = centerVector.perp();
+      pPlacement->setZcenter(0);
+      pPlacement->setLayerRadius(r);
+
+      pPlacement->setLayerAngle(phi);
+      pPlacement->setRegion(StiPlacement::kMidRapidity);
+      pPlacement->setNormalRep(phiD, r * TMath::Cos(phi - phiD), r * TMath::Sin(phi - phiD));
+      assert(pPlacement);
+
+      //Build final detector object
+      StiDetector *p = getDetectorFactory()->getInstance();
+
+      if ( !p ) {
+         LOG_INFO << "StiIstDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
+         return;
+      }
+
+      p->setName(name);
+      p->setIsOn(kTRUE);
+      if (_active) {  p->setIsActive(new StiIstIsActiveFunctor);}
+      else         {  p->setIsActive(new StiNeverActiveFunctor);}
+      p->setIsContinuousMedium(false);
+      p->setIsDiscreteScatterer(true);
+      p->setShape(sh);
+      p->setPlacement(pPlacement);
+      p->setGas(GetCurrentDetectorBuilder()->getGasMat());
+
+      if (!p->getGas()) LOG_INFO << "gas not there!" << endm;
+
+      p->setMaterial(mSiMaterial);
+      p->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
+
+      // Adding detector, note that no keys are set in IST!
+      add(ROW, iLadder, p);
+
+      // Whole bunch of debugging information
+      Float_t rad2deg = 180.0 / 3.1415927;
+      LOG_DEBUG << "===>NEW:IST:pDetector:Name               = " << p->getName()                               << endm
+                << "===>NEW:IST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
+                << "===>NEW:IST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
+                << "===>NEW:IST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
+                << "===>NEW:IST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
+                << "===>NEW:IST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
+                << "===>NEW:IST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
+                << "===>NEW:IST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
+                << "===>NEW:IST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
+                << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
+                << "===>NEW:IST:pDetector:Ladder             = " << iLadder                                    << endm
+                << "===>NEW:IST:pDetector:Sensor             = " << iSensor                                    << endm
+                << "===>NEW:IST:pDetector:row/ladder (ITTF)  = " << ROW << " / " << iLadder                    << endm
+                << "===>NEW:IST:pDetector:Active?            = " << p->isActive()                              << endm;
    }
 }
 
