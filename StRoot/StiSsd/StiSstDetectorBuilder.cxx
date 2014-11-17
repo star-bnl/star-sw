@@ -24,7 +24,7 @@ using namespace std;
 
 
 StiSstDetectorBuilder::StiSstDetectorBuilder(bool active)
-   : StiDetectorBuilder("Ssd", active), _siMat(0), _hybridMat(0)
+   : StiDetectorBuilder("Ssd", active), _siMat(0)
 {
    // Hit error parameters : it is set to 20 microns, in both x and y coordinates
 }
@@ -73,8 +73,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
    Material_t map[] = {
       {"AIR", &_gasMat},
-      {"SILICON", &_siMat},
-      {"SILICON", &_hybridMat}
+      {"SILICON", &_siMat}
    };
 
    Int_t M = sizeof(map) / sizeof(Material_t);

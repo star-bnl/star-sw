@@ -17,7 +17,6 @@ public:
 protected:
 
    StiMaterial *mSiMaterial;
-   StiMaterial *mHybridMaterial;
    StPxlDb     *mPxlDb;
    bool         mBuildIdealGeom;
 
