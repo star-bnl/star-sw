@@ -198,8 +198,7 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
 {
    // Build average inactive volumes
    const VolumeMap_t volumes[] = {
-      {"SFLM", "the mother of the ladder support volume", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1", "", ""},
-      {"SFDM", "the mother of the detector volume", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1", "", ""}
+      {"SFMO", "Mother of the SST detector", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""}
    };
 
    // Build the volume map and loop over all found volumes
@@ -231,11 +230,9 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
       StiDetector *stiDetector = getDetector(row, sector);
       stiDetector->setIsOn(true);
 
-      // Modify dimensions of the mother volume
-      if (string(volumes[i].name) == string("SFMO1")) {
-         StiCylindricalShape *stiShape = (StiCylindricalShape *) stiDetector->getShape();
-         stiShape->setThickness(stiShape->getThickness()/2);
-      }
+      // Manually modify dimensions of the mother volume
+      if (string(volumes[i].name) == string("SFMO"))
+         segmentSFMOVolume(stiDetector);
    }
 }
 
