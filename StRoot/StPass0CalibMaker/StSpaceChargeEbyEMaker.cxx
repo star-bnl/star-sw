@@ -1376,11 +1376,25 @@ TString StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* gh,
   GapsMean->SetBinContent(8,0); GapsMean->SetBinError(8,0);
   GapsMean->SetBinContent(9,0); GapsMean->SetBinError(9,0);
 
+  ln1.SetRange(-150.,150.);
   GapsMean->Fit(&ln1,"R0Q");
   fitslope = ln1.GetParameter(1);
-  egapZfitslope = TMath::Abs(ln1.GetParError(1));
   fitintercept = ln1.GetParameter(0);
+
+  // remaining variables save the last histogram fit: "Gaps" for now
+
+  egapZfitslope = TMath::Abs(ln1.GetParError(1));
   egapZfitintercept = TMath::Abs(ln1.GetParError(0));
+
+  ln1.SetRange(-150.,0.);
+  GapsMean->Fit(&ln1,"R0Q");
+  gapZfitslopeeast = ln1.GetParameter(1);
+  gapZfitintercepteast = ln1.GetParameter(0);
+
+  ln1.SetRange(0.,150.);
+  GapsMean->Fit(&ln1,"R0Q");
+  gapZfitslopewest = ln1.GetParameter(1);
+  gapZfitinterceptwest = ln1.GetParameter(0);
 
   delete GapsChi2;
   delete GapsAmp;
@@ -1485,8 +1499,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.58 2014/10/23 21:07:23 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.59 2014/11/17 20:49:09 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.59  2014/11/17 20:49:09  genevb
+// Store east and west gapf in the ntuple
+//
 // Revision 1.58  2014/10/23 21:07:23  genevb
 // Add GridLeak-by-sector codes, East/WestOff handling, and some code reformatting
 //
