@@ -225,5 +225,5 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition(){
 TGeoHMatrix* StSstDbMaker::getHMatrixSensorOnGlobal(int ladder, int sensor)
 {
    int id = 7000 + 100*(sensor) + (ladder);
-   return (TGeoHMatrix*) fRotList->FindObject(Form("WL%04i", id));
+   return (TGeoHMatrix*) fRotList->FindObject(Form("R%04i", id));
 }
