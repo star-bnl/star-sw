@@ -51,7 +51,10 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
    SetCurrentDetectorBuilder(this);
 
    // Gas material must be defined. Here we use air properties
-   _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
+   const TGeoMaterial* geoMat = gGeoManager->GetMaterial("AIR");
+
+   _gasMat = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetDensity()*geoMat->GetRadLen()))
+                    : add(new StiMaterial("AIR", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
 
    if (StiVMCToolKit::GetVMC()) {
       useVMCGeometry();
@@ -72,7 +75,6 @@ void StiSstDetectorBuilder::useVMCGeometry()
    };
 
    Material_t map[] = {
-      {"AIR", &_gasMat},
       {"SILICON", &_siMat}
    };
 
@@ -164,7 +166,6 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
       if (!pLadder->getGas()) LOG_INFO << "gas not there!" << endm;
 
-      //pLadder->setGas(_gasMat);
       pLadder->setMaterial(_siMat);
       pLadder->setShape(ladderShape);
       pLadder->setPlacement(pPlacement);
