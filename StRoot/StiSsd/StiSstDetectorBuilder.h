@@ -3,8 +3,8 @@
 
 #include "Sti/StiDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
+#include "StSsdDbMaker/StSstDbMaker.h"
 
-class StSsdBarrel;
 class ssdWafersPosition_st;
 class St_ssdWafersPosition;
 class StiDetector;
@@ -21,8 +21,8 @@ public:
 
 protected:
 
-   StSsdBarrel *mySsd;
    bool          mBuildIdealGeom;
+   StSstDbMaker *mSstDb;
    ssdWafersPosition_st *ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers);
 
 private:
