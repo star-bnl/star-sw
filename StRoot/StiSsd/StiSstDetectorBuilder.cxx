@@ -18,7 +18,6 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiToolkit.h"
 #include "StiSsd/StiSstDetectorBuilder.h"
-#include "StSsdUtil/StSsdBarrel.hh"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiSsd/StiSsdIsActiveFunctor.h"
 #include "StSsdUtil/StSstConsts.h"
@@ -26,7 +25,7 @@
 
 
 StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
-   : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom)
+   : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom), mSstDb(0)
 {
 }
 
@@ -40,12 +39,19 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 {
    LOG_INFO << "StiSstDetectorBuilder::buildDetectors() - I - Started " << endm;
    //StSsdBarrel *mySsd = StSsdBarrel::Instance();
-   mySsd = StSsdBarrel::Instance();
 
-   if (! mySsd) {// no active SSD
-      gMessMgr->Info() << "StiSstDetectorBuilder::buildDetectors() - I - there is no SSD barrel - take whatever exist in GEANT" << endm;
-      StiVMCToolKit::GetVMC();
-      return;
+   if (!mBuildIdealGeom) {
+
+      if (!gStSstDbMaker) {
+         LOG_ERROR << "StiSstDetectorBuilder::buildDetectors: SST geometry was requested from "
+            "DB but no StSstDb object found. Check for sstDb option in BFC chain" << endm;
+         exit(EXIT_FAILURE);
+      }
+
+      mSstDb = (StSstDbMaker*) gStSstDbMaker;
+      assert(mSstDb);
+
+      LOG_INFO << "StiSstDetectorBuilder::buildDetectors: Will build SST geometry from DB tables" << endm;
    }
 
    setNRows(1);
