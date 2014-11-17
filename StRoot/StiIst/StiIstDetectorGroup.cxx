@@ -5,10 +5,10 @@
 #include "StiIstHitLoader.h"
 
 
-StiIstDetectorGroup::StiIstDetectorGroup(bool active)
+StiIstDetectorGroup::StiIstDetectorGroup(bool active, bool buildIdealGeom)
    : StiDetectorGroup<StEvent>("Ist",
                                active ? new StiIstHitLoader() : 0,
-                               new StiIstDetectorBuilder(active))
+                               new StiIstDetectorBuilder(active, buildIdealGeom))
 {}
 
 StiIstDetectorGroup::~StiIstDetectorGroup()
