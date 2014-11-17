@@ -86,7 +86,10 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
    }
 
    // Gas material must be defined. Here we use air properties
-   _gasMat = add(new StiMaterial("PixelAir", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
+   const TGeoMaterial* geoMat = gGeoManager->GetMaterial("AIR");
+
+   _gasMat = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetDensity()*geoMat->GetRadLen()))
+                    : add(new StiMaterial("AIR", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
 
    if (StiVMCToolKit::GetVMC()) {
       useVMCGeometry();
@@ -113,7 +116,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
    };
 
    Material_t map[] = {
-      {"AIR",     &_gasMat},
       {"SILICON", &mSiMaterial}
    };
 
