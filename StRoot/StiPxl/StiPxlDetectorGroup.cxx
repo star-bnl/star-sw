@@ -1,9 +1,7 @@
-#include <stdexcept>
-
-#include "StEvent/StEvent.h"
 #include "StiPxl/StiPxlDetectorGroup.h"
 #include "StiPxl/StiPxlDetectorBuilder.h"
 #include "StiPxl/StiPxlHitLoader.h"
+#include "StEvent/StEvent.h"
 
 
 StiPxlDetectorGroup::StiPxlDetectorGroup(bool active,bool buildIdealGeom)
@@ -12,6 +10,6 @@ StiPxlDetectorGroup::StiPxlDetectorGroup(bool active,bool buildIdealGeom)
                                new StiPxlDetectorBuilder(active,buildIdealGeom))
 {}
 
+
 StiPxlDetectorGroup::~StiPxlDetectorGroup()
 {}
-

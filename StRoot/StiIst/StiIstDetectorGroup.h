@@ -4,12 +4,14 @@
 #include "Sti/StiDetectorGroup.h"
 
 class StEvent;
-class StMcEvent;
 
-/*! Convenience class defining the TPC detector group
-  <p>
-  \author Claude A Pruneau, Wayne State University
-*/
+
+/*!
+ * Convenience class defining the IST detector group.
+ *
+ * \author Claude A Pruneau, Wayne State University
+ * \author Dmitri Smirnov, BNL
+ */
 class StiIstDetectorGroup : public StiDetectorGroup<StEvent>
 {
 public:

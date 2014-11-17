@@ -3,7 +3,6 @@
 
 #include "Sti/StiDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
-#include "StThreeVector.hh"
 
 class StSsdBarrel;
 class ssdWafersPosition_st;

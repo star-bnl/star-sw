@@ -1,8 +1,8 @@
 #include "StiSsd/StiSstDetectorGroup.h"
 #include "StiSsd/StiSsdHitLoader.h"
 #include "StiSsd/StiSstDetectorBuilder.h"
-#include "StEvent.h"
-#include <stdexcept>
+#include "StEvent/StEvent.h"
+
 
 StiSstDetectorGroup::StiSstDetectorGroup(bool active, bool buildIdealGeom)
   : StiDetectorGroup<StEvent>("SSD",
@@ -11,7 +11,6 @@ StiSstDetectorGroup::StiSstDetectorGroup(bool active, bool buildIdealGeom)
 
 {}
 
+
 StiSstDetectorGroup::~StiSstDetectorGroup()
 {}
-
-

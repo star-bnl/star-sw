@@ -16,8 +16,8 @@ public:
 
 protected:
 
-   StPxlDb     *mPxlDb;
    bool         mBuildIdealGeom;
+   StPxlDb     *mPxlDb;
 
 private:
 

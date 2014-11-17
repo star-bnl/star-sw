@@ -1,7 +1,8 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.86 2014/11/17 20:38:36 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.87 2014/11/17 20:47:47 smirnovd Exp $ */
 
-#include <stdio.h>
-#include <stdexcept>
+#include <assert.h>
+#include <sstream>
+#include <string>
 
 #include "TDataSetIter.h"
 #include "THashList.h"
@@ -17,10 +18,9 @@
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiNeverActiveFunctor.h"
-//#include "Sti/StiElossCalculator.h"
-#include "StiPxlDetectorBuilder.h"
-#include "StiPxlIsActiveFunctor.h"
-#include "StiPxlHitErrorCalculator.h"
+#include "StiPxl/StiPxlDetectorBuilder.h"
+#include "StiPxl/StiPxlIsActiveFunctor.h"
+#include "StiPxl/StiPxlHitErrorCalculator.h"
 #include "tables/St_HitError_Table.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
@@ -29,7 +29,6 @@
 #include "StPxlUtil/StPxlConstants.h"
 #include "StBFChain/StBFChain.h"
 
-using namespace std;
 
 
 /**
@@ -55,8 +54,7 @@ using namespace std;
    10     4                          0     9
  */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
-   StiDetectorBuilder("Pixel", active), mPxlDb(0),
-   mBuildIdealGeom(buildIdealGeom)
+   StiDetectorBuilder("Pixel", active), mBuildIdealGeom(buildIdealGeom), mPxlDb(0)
 { }
 
 
@@ -110,12 +108,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetRadLen()))
                                  : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 9.36) );
 
-//   double ionization = mSiMaterial->getIonization();
-
-//    StiElossCalculator *elossCalculator = new StiElossCalculator(mSiMaterial->getZOverA(),
-//          ionization * ionization,
-//          mSiMaterial->getA(), mSiMaterial->getZ(), mSiMaterial->getDensity());
-
    // Build active sti volumes for pixel sensors
    int iSensor = 5;
 
@@ -123,7 +115,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    {
       for (int iLadder = 1; iLadder <= kNumberOfPxlLaddersPerSector; ++iLadder)
       {
-         ostringstream geoPath;
+         std::ostringstream geoPath;
          geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/PXMO_1/PXLA_" << iSector << "/LADR_" << iLadder << "/PXSI_1/PLAC_1";
 
          bool isAvail = gGeoManager->cd(geoPath.str().c_str());
@@ -174,7 +166,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             TVector3 sensorVec(sensorXyzGlobal);
 
             // Create new Sti shape based on the sensor geometry
-            string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_OUT" : "_INN") );
+            std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_OUT" : "_INN") );
             double sensorLength = kNumberOfPxlSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
             StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
@@ -221,7 +213,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             stiDetector->setPlacement(pPlacement);
             stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
             stiDetector->setMaterial(silicon);
-            //         stiDetector->setElossCalculator(elossCalculator);
             stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 
             int stiRow    = 0;
