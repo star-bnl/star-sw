@@ -102,7 +102,13 @@ void StiSstDetectorBuilder::useVMCGeometry()
       }
 
       TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-      TGeoMatrix* sensorMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
+      TGeoMatrix* sensorMatrix = 0;
+
+      if (mBuildIdealGeom) {
+         sensorMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
+      } else {
+         sensorMatrix = (TGeoMatrix*) mSstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+      }
 
       if (!sensorMatrix) {
          Warning("useVMCGeometry()", "Could not get SST sensor position matrix. Skipping to next ladder...");
