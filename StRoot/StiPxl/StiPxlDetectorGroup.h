@@ -1,13 +1,17 @@
-#ifndef StiPxlDetectorGroup_H_INCLUDED
-#define StiPxlDetectorGroup_H_INCLUDED
+#ifndef StiPxlDetectorGroup_h
+#define StiPxlDetectorGroup_h
 
 #include "Sti/StiDetectorGroup.h"
+
 class StEvent;
 
-/*! Convenience class defining the TPC detector group
-  <p>
-  \author Claude A Pruneau, Wayne State University
-*/
+
+/*!
+ * Convenience class defining the PXL detector group.
+ *
+ * \author Claude A Pruneau, Wayne State University
+ * \author Dmitri Smirnov, BNL
+ */
 class StiPxlDetectorGroup : public StiDetectorGroup<StEvent>
 {
 public:
@@ -16,4 +20,3 @@ public:
 };
 
 #endif
-
