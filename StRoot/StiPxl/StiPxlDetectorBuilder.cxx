@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.85 2014/11/17 20:38:03 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.86 2014/11/17 20:38:36 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -89,8 +89,8 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
    // Gas material must be defined. Here we use air properties
    const TGeoMaterial* geoMat = gGeoManager->GetMaterial("AIR");
 
-   _gasMat = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetDensity()*geoMat->GetRadLen()))
-                    : add(new StiMaterial("AIR", 7.3, 14.61, 0.001205, 30420.*0.001205, 7.3 * 12.e-9));
+   _gasMat = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetRadLen()))
+                    : add(new StiMaterial("AIR", 7.3, 14.61, 0.001205, 30420.));
 
    if (StiVMCToolKit::GetVMC()) {
       useVMCGeometry();
@@ -107,8 +107,8 @@ void StiPxlDetectorBuilder::useVMCGeometry()
    // Define silicon material used in manual construction of sensitive layers in this builder
    const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
 
-   StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetDensity()*geoMat->GetRadLen()))
-                                 : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
+   StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetRadLen()))
+                                 : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 9.36) );
 
 //   double ionization = mSiMaterial->getIonization();
 
