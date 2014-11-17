@@ -38,8 +38,10 @@ class StSstDbMaker : public StMaker {
   virtual St_ssdWafersPosition *GetssdWafersPos(){return m_positions;}
   virtual St_ssdDimensions     *GetssdDimensions(){return m_dimensions;}
 
+  static TGeoHMatrix* getHMatrixSensorOnGlobal(int ladder, int sensor);
+
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSstDbMaker.h,v 1.1 2014/08/07 21:28:42 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSstDbMaker.h,v 1.1.2.1 2014/11/17 20:21:58 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSstDbMaker,0)   //StAF chain virtual base class for Makers
 };
 // Global pointers:
