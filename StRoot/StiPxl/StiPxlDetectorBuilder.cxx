@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.84 2014/11/17 20:37:57 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.85 2014/11/17 20:38:03 smirnovd Exp $ */
 
 #include <stdio.h>
 #include <stdexcept>
@@ -55,7 +55,7 @@ using namespace std;
    10     4                          0     9
  */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
-   StiDetectorBuilder("Pixel", active), mSiMaterial(0), mPxlDb(0),
+   StiDetectorBuilder("Pixel", active), mPxlDb(0),
    mBuildIdealGeom(buildIdealGeom)
 { }
 
@@ -104,31 +104,11 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 {
    LOG_INFO << "StiPxlDetectorBuilder::useVMCGeometry() -I- Use VMC geometry" << endm;
 
-   // Get Materials
-   struct Material_t {
-      const Char_t *name;
-      StiMaterial    **p;
-   };
+   // Define silicon material used in manual construction of sensitive layers in this builder
+   const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
 
-   mSiMaterial     = add(new StiMaterial("PixelSi",  14., 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
-
-   Material_t map[] = {
-      {"SILICON", &mSiMaterial}
-   };
-
-   Int_t M = sizeof(map) / sizeof(Material_t);
-
-   for (Int_t i = 0; i < M; i++) {
-      const TGeoMaterial *mat =  gGeoManager->GetMaterial(map[i].name);
-
-      if (! mat) continue;
-
-      *map[i].p = add(new StiMaterial(mat->GetName(),
-                                      mat->GetZ(),
-                                      mat->GetA(),
-                                      mat->GetDensity(),
-                                      mat->GetDensity()*mat->GetRadLen()));
-   }
+   StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetDensity()*geoMat->GetRadLen()))
+                                 : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 21.82, 14.*12.*1e-9) );
 
 //   double ionization = mSiMaterial->getIonization();
 
@@ -240,7 +220,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             stiDetector->setShape(stiShape);
             stiDetector->setPlacement(pPlacement);
             stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
-            stiDetector->setMaterial(mSiMaterial);
+            stiDetector->setMaterial(silicon);
             //         stiDetector->setElossCalculator(elossCalculator);
             stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 

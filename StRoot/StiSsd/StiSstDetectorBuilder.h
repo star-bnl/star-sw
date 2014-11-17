@@ -17,13 +17,10 @@ public:
    virtual ~StiSstDetectorBuilder();
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
-   void         setSiMat(StiMaterial     *m) {_siMat = m;}
-   StiMaterial *getSiMat()    {return _siMat;}
 
 protected:
 
    StSsdBarrel *mySsd;
-   StiMaterial *_siMat;
    ssdWafersPosition_st *ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers);
 
 private:
