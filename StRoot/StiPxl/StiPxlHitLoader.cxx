@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.8 2014/06/05 14:28:18 genevb Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.9 2014/11/17 20:37:32 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.9  2014/11/17 20:37:32  smirnovd
+ * Split PXL sensitive layers in two halves. The change should help to avoid track backward steps in Sti due to ill ordered volumes in r and phi - inspired by Hao Qiu
+ *
  * Revision 1.8  2014/06/05 14:28:18  genevb
  * Error about missing hit collection => warning
  *
@@ -169,11 +172,19 @@ void StiPxlHitLoader::loadHits(StEvent *source,
                int stiSensor = 0;
 
                if (pxlHit->ladder() == 1) {
-                  stiRow = 0 ;
-                  stiSensor = (pxlHit->sector()-1);
+                  stiRow = 0;
+
+                  if (pxlHit->meanRow() < kNumberOfPxlRowsOnSensor / 2)
+                     stiRow += 1;
+
+                  stiSensor = (pxlHit->sector() - 1);
                } else {
-                  stiRow = 1;
-                  stiSensor = (pxlHit->sector()-1) * (kNumberOfPxlLaddersPerSector-1) + (pxlHit->ladder()-1);
+                  stiRow = 2;
+
+                  if (pxlHit->meanRow() >= kNumberOfPxlRowsOnSensor / 2)
+                     stiRow += 1;
+
+                  stiSensor = (pxlHit->sector() - 1) * (kNumberOfPxlLaddersPerSector - 1) + (pxlHit->ladder() - 1);
                }
 
                LOG_DEBUG << " hit sector : " << (int) pxlHit->sector()
