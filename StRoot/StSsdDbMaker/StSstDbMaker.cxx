@@ -216,3 +216,14 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition(){
     }
   return ssdwafer;
 }
+
+
+/**
+ * Returns TGeoHMatrix with complete set of transformation from the sensor local
+ * coordinated system to the global one.
+ */
+TGeoHMatrix* StSstDbMaker::getHMatrixSensorOnGlobal(int ladder, int sensor)
+{
+   int id = 7000 + 100*(sensor) + (ladder);
+   return (TGeoHMatrix*) fRotList->FindObject(Form("WL%04i", id));
+}
