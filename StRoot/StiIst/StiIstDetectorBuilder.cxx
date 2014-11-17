@@ -1,7 +1,6 @@
-#include <stdio.h>
-#include <map>
-#include <exception>
-#include <stdexcept>
+#include <assert.h>
+#include <sstream>
+#include <string>
 
 #include "StMessMgr.h"
 #include "StThreeVectorD.hh"
@@ -54,7 +53,6 @@ if (det!=(StiDetector*)(-1)) return;
 }
 
 
-using namespace std;
 using namespace StIstConsts;
 
 
@@ -100,7 +98,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 
 void StiIstDetectorBuilder::useVMCGeometry()
 {
-   cout << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
+   LOG_INFO << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endm;
 
    // Define silicon material used in manual construction of sensitive layers in this builder
    const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
@@ -325,20 +323,20 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       // Detailed information can be found at:
       // https://drupal.star.bnl.gov/STAR/blog/ypwang/ist-sti-geometry
       TString ts,dir;int idx;
-      if (string(volumes[i].name) == string("ICFC")) {
+      if (std::string(volumes[i].name) == std::string("ICFC")) {
          int startRow = getNRows() - kIstNumLadders;
 
          for (int iICFC = 0; iICFC < kIstNumLadders; iICFC++) {
             row = startRow + iICFC;
             stiDetector = getDetector(row, sector);
             assert(strstr(stiDetector->getName().c_str(),"/ICFC_"));
-//		prepare "directory"
+            //	prepare "directory"
             dir = stiDetector->getName().c_str();idx = dir.Last('/'); assert(idx>=0); dir.Remove(idx+1,999);
 
             StiMaterial *matICFC                    = stiDetector->getMaterial();
             StiPlacement *stiPlacementICFC          = stiDetector->getPlacement();
 
-            //construct carbon foam stave north side volume
+            // Construct carbon foam stave north side volume
             StiDetector *stiDetectorN = getDetectorFactory()->getInstance();
             ts = dir; ts +="ICFCn";
             buildPlanerVolume(*stiDetectorN, ts.Data(), 8.825 * 0.5, 0.5663, 1.25 * 0.5, 0.625, 0., 0., stiPlacementICFC, matICFC);
@@ -347,7 +345,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             add(row, sector, stiDetectorN);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC north side " << stiDetectorN->getName() << " at layer " << row << endm;
 
-            //construct carbon foam stave bottom side volume
+            // Construct carbon foam stave bottom side volume
             StiDetector *stiDetectorB = getDetectorFactory()->getInstance();
             ts = dir; ts +="ICFCb.";
             buildPlanerVolume(*stiDetectorB, ts.Data(), 8.825 * 0.5, 0.042775, 0.47625 * 0.5, -0.238125, -0.2617625, 0., stiPlacementICFC, matICFC);
@@ -368,7 +366,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
       }
 
-      if (string(volumes[i].name) == string("ICFD")) {
+      if (std::string(volumes[i].name) == std::string("ICFD")) {
          int startRow = getNRows() - kIstNumLadders;
 
          for (int iICFD = 0; iICFD < kIstNumLadders; iICFD++) {
@@ -411,7 +409,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       }
 
       // Retrieve info. of east aluminum end-cap volume
-      if (string(volumes[i].name) == string("IECE")) {
+      if (std::string(volumes[i].name) == std::string("IECE")) {
          int startRow = getNRows() - kIstNumLadders;
 
          for (int iIECE = 0; iIECE < kIstNumLadders; iIECE++) {
@@ -455,7 +453,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       }
 
       // Modify dimensions of west carbon end-cap volume
-      if (string(volumes[i].name) == string("IECW")) {
+      if (std::string(volumes[i].name) == std::string("IECW")) {
          int startRow = getNRows() - kIstNumLadders;
 
          for (int iIECW = 0; iIECW < kIstNumLadders; iIECW++) {
@@ -500,7 +498,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       }
 
       // Modify/Simplify west cooling loop (ICJR) to a box shape with same volume, and retrieve placement/material information from ICJS volume
-      if (string(volumes[i].name) == string("ICJS")) {
+      if (std::string(volumes[i].name) == std::string("ICJS")) {
          int startRow = getNRows() - kIstNumLadders;
 
          for (int iICJS = 0; iICJS < kIstNumLadders;iICJS += 2) {
@@ -530,14 +528,14 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       }
 
       //resize the dimenssion of cooling/cabling in transition area
-      if (string(volumes[i].name) == string("ICCT")) {
+      if (std::string(volumes[i].name) == std::string("ICCT")) {
          assert(strstr(stiDetector->getName().c_str(),"/ICCT_"));
          StiCylindricalShape *stiShape = (StiCylindricalShape *) stiDetector->getShape();
          stiShape->setOuterRadius(20.28725);
       }
 
       // retrieve material, energy loss information for support block tube ring re-definition
-      if (string(volumes[i].name) == string("ISRR")) {
+      if (std::string(volumes[i].name) == std::string("ISRR")) {
          assert(strstr(stiDetector->getName().c_str(),"/ISRR_"));
          if (!matISRA)
             matISRA = stiDetector->getMaterial();
@@ -571,10 +569,11 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 
 }
 
-void StiIstDetectorBuilder::buildPlanerVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float halfWidth, float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat)
+
+void StiIstDetectorBuilder::buildPlanerVolume(StiDetector &detector, std::string detName, float halfDepth, float thickness, float halfWidth, float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat)
 {
    //planar shape definition
-   string shapeName = detName + "_planar";
+   std::string shapeName = detName + "_planar";
    StiPlanarShape *stiShapeN = new StiPlanarShape(shapeName.data(), halfDepth, thickness, halfWidth);
    add(stiShapeN);
 
@@ -596,13 +595,15 @@ void StiIstDetectorBuilder::buildPlanerVolume(StiDetector &detector, string detN
    detector.setIsDiscreteScatterer(true); // true for anything other than gas
    detector.setShape(stiShapeN);
    detector.setPlacement(stiPlacementN);
-   detector.setGas(getGasMat()); // XXX:ds: Not sure what this does
+   detector.setGas(getGasMat());
    detector.setMaterial(mat);
 }
-void StiIstDetectorBuilder::buildTubeVolume(StiDetector &detector, string detName, float halfDepth, float thickness, float outerRadius, float openingAngle, float zCenter, StiMaterial *mat)
+
+
+void StiIstDetectorBuilder::buildTubeVolume(StiDetector &detector, std::string detName, float halfDepth, float thickness, float outerRadius, float openingAngle, float zCenter, StiMaterial *mat)
 {
    //tube shape definition
-   string shapeName = detName + "_tube";
+   std::string shapeName = detName + "_tube";
    StiShape *stiShapeN = new StiCylindricalShape(shapeName.data(), halfDepth, thickness, outerRadius, openingAngle);
    add(stiShapeN);
 
@@ -622,6 +623,6 @@ void StiIstDetectorBuilder::buildTubeVolume(StiDetector &detector, string detNam
    detector.setIsDiscreteScatterer(true); // true for anything other than gas
    detector.setShape(stiShapeN);
    detector.setPlacement(stiPlacementN);
-   detector.setGas(getGasMat()); // XXX:ds: Not sure what this does
+   detector.setGas(getGasMat());
    detector.setMaterial(mat);
 }

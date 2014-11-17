@@ -1,8 +1,7 @@
-
-#include "StEvent.h"
-#include "StiIstDetectorGroup.h"
-#include "StiIstDetectorBuilder.h"
-#include "StiIstHitLoader.h"
+#include "StiIst/StiIstDetectorGroup.h"
+#include "StiIst/StiIstDetectorBuilder.h"
+#include "StiIst/StiIstHitLoader.h"
+#include "StEvent/StEvent.h"
 
 
 StiIstDetectorGroup::StiIstDetectorGroup(bool active, bool buildIdealGeom)
@@ -10,6 +9,7 @@ StiIstDetectorGroup::StiIstDetectorGroup(bool active, bool buildIdealGeom)
                                active ? new StiIstHitLoader() : 0,
                                new StiIstDetectorBuilder(active, buildIdealGeom))
 {}
+
 
 StiIstDetectorGroup::~StiIstDetectorGroup()
 {}

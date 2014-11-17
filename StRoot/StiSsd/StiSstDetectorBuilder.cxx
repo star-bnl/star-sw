@@ -1,13 +1,10 @@
-#include <stdio.h>
 #include <assert.h>
-#include <map>
+#include <sstream>
+#include <string>
 
 #include "TVector3.h"
 
-using namespace std;
-#include <stdexcept>
 #include "StMessMgr.h"
-#include "StThreeVectorD.hh"
 #include "tables/St_ssdDimensions_Table.h"
 #include "tables/St_ssdConfiguration_Table.h"
 #include "tables/St_ssdWafersPosition_Table.h"
@@ -20,8 +17,6 @@ using namespace std;
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiToolkit.h"
-#include "StDetectorDbMaker/StiHitErrorCalculator.h"
-#include "Sti/StiIsActiveFunctor.h"
 #include "StiSsd/StiSstDetectorBuilder.h"
 #include "StSsdUtil/StSsdBarrel.hh"
 #include "Sti/StiNeverActiveFunctor.h"
@@ -33,8 +28,8 @@ using namespace std;
 StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
    : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom)
 {
-   // Hit error parameters : it is set to 20 microns, in both x and y coordinates
 }
+
 
 StiSstDetectorBuilder::~StiSstDetectorBuilder()
 {}
@@ -43,7 +38,7 @@ StiSstDetectorBuilder::~StiSstDetectorBuilder()
 /** Build the SST detector components. */
 void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 {
-   gMessMgr->Info() << "StiSstDetectorBuilder::buildDetectors() - I - Started " << endm;
+   LOG_INFO << "StiSstDetectorBuilder::buildDetectors() - I - Started " << endm;
    //StSsdBarrel *mySsd = StSsdBarrel::Instance();
    mySsd = StSsdBarrel::Instance();
 
@@ -70,10 +65,14 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 }
 
 
-/** Builds the sensors of the SST detector. */
+/**
+ * Builds the sensors of the SST detector.
+ *
+ * \author Dmitri Smirnov, BNL
+ */
 void StiSstDetectorBuilder::useVMCGeometry()
 {
-   cout << "StiSstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
+   LOG_INFO << "StiSstDetectorBuilder::useVMCGeometry() -I- Use VMC geometry" << endm;
 
    // Define silicon material used in manual construction of sensitive layers in this builder
    const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
@@ -86,7 +85,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
    for (int iLadder = 1; iLadder <= kSstNumLadders; ++iLadder)
    {
-      ostringstream geoPath;
+      std::ostringstream geoPath;
       geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/SFMO_1/SFLM_" << iLadder << "/SFSW_" << iSensor << "/SFSL_1/SFSD_1";
 
       bool isAvail = gGeoManager->cd(geoPath.str().c_str());
@@ -191,8 +190,10 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
 /**
  * Creates a crude approximation of the SST detector. The geometry is modeled with a single tube
- * using the dimensions and other physical properties of the IST mother volume defined in the ROOT
+ * using the dimensions and other physical properties of the SST mother volume defined in the ROOT
  * TGeo geometry.
+ *
+ * \author Dmitri Smirnov
  */
 void StiSstDetectorBuilder::buildInactiveVolumes()
 {
@@ -231,7 +232,7 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
       stiDetector->setIsOn(true);
 
       // Manually modify dimensions of the mother volume
-      if (string(volumes[i].name) == string("SFMO"))
+      if (std::string(volumes[i].name) == std::string("SFMO"))
          segmentSFMOVolume(stiDetector);
    }
 }
@@ -239,11 +240,14 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
 
 /**
  * Manually modify the SST mother volume by splitting it into three tubes.
+ *
+ * \author Dmitri Smirnov
  */
 void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
 {
    StiCylindricalShape* stiSFMOShape = (StiCylindricalShape*) stiSFMO->getShape();
 
+   // Reduce the thickness of the tube to avoid overlapping with the sensitive layers
    stiSFMOShape->setThickness(0.75*stiSFMOShape->getThickness());
 
    // Copy original shape (before its depth is modified) to a new one for the end SFMO tubes
