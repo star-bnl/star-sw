@@ -20,7 +20,6 @@ public:
 protected:
 
    StiMaterial  *mSiMaterial;
-   StiMaterial  *mHybridMaterial;
    bool          mBuildIdealGeom;
    StIstDb      *mIstDb;
 
