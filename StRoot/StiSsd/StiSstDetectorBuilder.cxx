@@ -313,6 +313,7 @@ void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
    StiPlacement* stiSFMOEndPlacement = new StiPlacement(*stiSFMOEnd->getPlacement());
    stiSFMOEndPlacement->setZcenter(stiSFMOShape->getHalfDepth() + stiSFMOEndShape->getHalfDepth());
 
+   stiSFMOEnd->setName(stiSFMO->getName() + "_end1");
    stiSFMOEnd->setShape(stiSFMOEndShape);
    stiSFMOEnd->setPlacement(stiSFMOEndPlacement);
    stiSFMOEnd->setMaterial(stiSFMOEndMaterial);
@@ -325,6 +326,7 @@ void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
    stiSFMOEndPlacement = new StiPlacement(*stiSFMOEnd2->getPlacement());
    stiSFMOEndPlacement->setZcenter(-stiSFMOShape->getHalfDepth() - stiSFMOEndShape->getHalfDepth());
 
+   stiSFMOEnd2->setName(stiSFMO->getName() + "_end2");
    stiSFMOEnd2->setShape(stiSFMOEndShape);
    stiSFMOEnd2->setPlacement(stiSFMOEndPlacement);
    stiSFMOEnd2->setMaterial(stiSFMOEndMaterial);
