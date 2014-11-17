@@ -253,7 +253,32 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
 /**
  * Manually modify the SST mother volume by splitting it into three tubes.
  *
- * \author Dmitri Smirnov
+ * The original SFMO volume has the following dimensions:
+ *
+ * Inner radius: 22.0 cm
+ * Outer radius: 27.0 cm
+ * Z edges at -50.5 +50.5 cm
+ *
+ * In Sti we split it into three tubes
+ *
+ * Inner radius: 23.25 cm
+ * Outer radius: 27.0 cm
+ * Z edges at -50.5, -34.0, +34.0, and +50.5 cm
+ *
+ * Note: The thickness is scaled by 0.75 leaving the outter radius the same.
+ * This is done to avoid an overlap of the cylinders with the sensitive layers.
+ *
+ * The following material properties are calculated for the case when the inner
+ * radius is 22 cm:
+ *
+ * Cylinder 0: Z=7.63150  A=15.2791  density=0.291833  X0=24675.4  weight=3706.24
+ * Cylinder 1: Z=7.32555  A=14.6629  density=0.064873  X0=29477.9  weight=3395.38
+ * Cylinder 2: Z=7.63471  A=15.2856  density=0.293828  X0=24633.0  weight=3731.59
+ *
+ * Note: The density is recalculated for the case when the inner radius is
+ * increased.
+ *
+ * \author Dmitri Smirnov, BNL
  */
 void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
 {
@@ -273,12 +298,12 @@ void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
 
    // Redefine the material of the central tube
    StiMaterial* stiSFMOMaterial = stiSFMO->getMaterial();
-   // The parameters provided by Jason W.: name, z, a, density, X0
-   stiSFMOMaterial->set(stiSFMOMaterial->getName(), 7.33, 14.67, 0.0688, 29433);
+   // The parameters provided by Jason W.: name, Z, A, density, X0
+   stiSFMOMaterial->set(stiSFMOMaterial->getName(), 7.33, 14.66, 0.0843, 29480);
 
    // Define the material for the end tubes by creating a shalow copy from the original SFMO material
    StiMaterial* stiSFMOEndMaterial = new StiMaterial(*stiSFMOMaterial);
-   stiSFMOEndMaterial->set(stiSFMOMaterial->getName() + "_end", 7.64, 15.30, 0.299, 24549);
+   stiSFMOEndMaterial->set(stiSFMOMaterial->getName() + "_end", 7.63, 15.29, 0.380, 24650);
 
    add(stiSFMOEndMaterial);
 
