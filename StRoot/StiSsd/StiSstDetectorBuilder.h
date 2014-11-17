@@ -15,7 +15,7 @@ class StiSstDetectorBuilder : public StiDetectorBuilder
 
 public:
 
-   StiSstDetectorBuilder(bool active);
+   StiSstDetectorBuilder(bool active, bool buildIdealGeom=true);
    virtual ~StiSstDetectorBuilder();
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
@@ -23,6 +23,7 @@ public:
 protected:
 
    StSsdBarrel *mySsd;
+   bool          mBuildIdealGeom;
    ssdWafersPosition_st *ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers);
 
 private:

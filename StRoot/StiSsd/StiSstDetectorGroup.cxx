@@ -4,10 +4,10 @@
 #include "StEvent.h"
 #include <stdexcept>
 
-StiSstDetectorGroup::StiSstDetectorGroup(bool active)
+StiSstDetectorGroup::StiSstDetectorGroup(bool active, bool buildIdealGeom)
   : StiDetectorGroup<StEvent>("SSD",
 			      active?new StiSsdHitLoader():0,
-			      new StiSstDetectorBuilder(active))
+			      new StiSstDetectorBuilder(active, buildIdealGeom))
 
 {}
 

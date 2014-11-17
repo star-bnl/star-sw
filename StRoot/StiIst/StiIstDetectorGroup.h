@@ -13,7 +13,7 @@ class StMcEvent;
 class StiIstDetectorGroup : public StiDetectorGroup<StEvent>
 {
 public:
-   StiIstDetectorGroup(bool active);
+   StiIstDetectorGroup(bool active, bool buildIdealGeom=false);
    ~StiIstDetectorGroup();
 };
 
