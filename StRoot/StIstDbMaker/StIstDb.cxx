@@ -1,4 +1,4 @@
-/* $Id: StIstDb.cxx,v 1.10 2014/11/18 23:10:20 smirnovd Exp $ */
+/* $Id: StIstDb.cxx,v 1.11 2014/11/18 23:11:57 smirnovd Exp $ */
 
 #include <assert.h>
 #include "StIstDb.h"
@@ -125,6 +125,17 @@ Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
 }
 
 
+/**
+ * Returns TGeoHMatrix with complete set of transformations from the sensor
+ * local coordinate system to the global one.
+ */
+const TGeoHMatrix* StIstDb::getHMatrixSensorOnGlobal(int ladder, int sensor)
+{
+   int id = 1000 + ladder*kIstNumSensorsPerLadder + sensor;
+   return mgRotList ? (const TGeoHMatrix*) mgRotList->FindObject(Form("R%04i", id)) : 0;
+}
+
+
 void StIstDb::Print(Option_t *opt) const
 {
    mGeoHMatrixTpcOnGlobal->Print();
@@ -152,6 +163,9 @@ void StIstDb::Print(Option_t *opt) const
 /***************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.11  2014/11/18 23:11:57  smirnovd
+* StIstDb: Added method to access transformation matrix for a given IST ladder/sensor pair
+*
 * Revision 1.10  2014/11/18 23:10:20  smirnovd
 * Renamed printGeoHMatrices to customary Print as that what users of ROOT framework normaly expect
 *
