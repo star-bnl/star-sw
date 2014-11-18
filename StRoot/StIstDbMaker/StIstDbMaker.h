@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.h,v 1.19 2014/11/18 23:11:35 smirnovd Exp $ */
+/* $Id: StIstDbMaker.h,v 1.20 2014/11/18 23:11:50 smirnovd Exp $ */
 
 #ifndef StIstDbMaker_hh
 #define StIstDbMaker_hh
@@ -21,14 +21,14 @@ public:
    Int_t  InitRun(Int_t runNumber);
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.19 2014/11/18 23:11:35 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.20 2014/11/18 23:11:50 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    /// See StIstDb for details on created data structure. The ownership is passed to the STAR
    /// framework via ToWhiteBoard()
    StIstDb *mIstDb;
 
-   ClassDef(StIstDbMaker, 1)
+   ClassDef(StIstDbMaker, 0)
 };
 
 #endif
@@ -37,6 +37,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.20  2014/11/18 23:11:50  smirnovd
+* Set class version to 0 in order to avoid IO dictionary generation by ROOT's CINT. STAR makers are not persistent
+*
 * Revision 1.19  2014/11/18 23:11:35  smirnovd
 * [Minor] Coding style clean-up. Removed unconstructive comments
 *
