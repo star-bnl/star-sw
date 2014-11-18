@@ -1,13 +1,3 @@
-/***************************************************************************
-* $Id: StIstCollection.h,v 1.8 2014/09/09 08:23:46 ypwang Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description:
-* A data collection for StIstRawHitCollection and StIstClusterCollection
-* classes, and not written into StEvent.
-****************************************************************************/
-
 #ifndef StIstCollection_hh
 #define StIstCollection_hh
 
@@ -20,6 +10,13 @@
 using namespace StIstConsts;
 
 
+/**
+ * A data collection for StIstRawHitCollection and StIstClusterCollection
+ * classes, and not written into StEvent.
+ *
+ * \author Yaping Wang
+ * \date March 2013
+ */
 class StIstCollection : public StObject
 {
 public:
@@ -57,6 +54,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstCollection.h,v $
+* Revision 1.9  2014/11/18 23:08:38  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
 * Revision 1.8  2014/09/09 08:23:46  ypwang
 * all unsgined char was updated to int type as Victor P. suggested
 *

@@ -1,60 +1,4 @@
-/***************************************************************************
-*
-* $Id: StIstDb.cxx,v 1.8 2014/08/06 18:44:21 ypwang Exp $
-*
-* Author: Yaping Wang, June 2013
-****************************************************************************
-* Description:
-* See header file.
-****************************************************************************
-*
-* $Log: StIstDb.cxx,v $
-* Revision 1.8  2014/08/06 18:44:21  ypwang
-* replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
-*
-* Revision 1.7  2014/08/05 17:48:58  ypwang
-* update Print() function to PrintGeoHMatrices()
-*
-* Revision 1.6  2014/08/05 15:00:45  ypwang
-* minor updates on the ladder/sensor ID check output log, using LOG_WARN instead of cout
-*
-* Revision 1.5  2014/08/01 22:25:48  ypwang
-* Add several simple getters and data members for sub-level geometry matrices obtain; Add Print() function which print out all IST geometry matrices
-*
-* Revision 1.4  2014/07/31 22:40:59  smirnovd
-* StIstDb: Reduced the scope of the using namespace
-*
-* Revision 1.3  2014/07/31 22:40:52  smirnovd
-* StIstDb: Removed unused header includes
-*
-* Revision 1.2  2014/07/31 18:29:51  ypwang
-* replace the LOG_INFO with LOG_DEBUG to slim the log file
-*
-* Revision 1.1  2014/07/29 19:50:25  ypwang
-* IST DB dataset in order to separate from IST Db maker
-*
-*
-*
-****************************************************************************
-* StIstDb.cxx,v 1.0
-* Revision 1.0 2014/7/28 16:15:30 Yaping
-* Initial version
-****************************************************************************/
-/*
-  relation within STAR frame
-  IstOnGlobal = Tpc2Magnet * Ids2Tpc *    Ist2Ids     * Ladder2Ist * Sensor2Ladder * PS
-  with
-  Ids2Tpc = IstIdsOnTpc
-  Ist2Ids = IstIstOnPst * IstPstOnIds
-
-  Naming of roatation matrices in this maker :
-  positionGlobal  = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder * positionOnSensor
-
-  numbering
-  Id  = 1000 + (ladder-1)*6 + sensor
-  1<= ladder <= 24
-  1<= sensor <= 6
-*/
+/* $Id: StIstDb.cxx,v 1.9 2014/11/18 23:08:37 smirnovd Exp $ */
 
 #include <assert.h>
 #include "StIstDb.h"
@@ -72,7 +16,12 @@
 THashList *StIstDb::mgRotList = 0;
 
 ClassImp(StIstDb)
-//_____________________________________________________________________________
+
+
+/**
+ * \author Yaping Wang
+ * \date June 2013
+ */
 StIstDb::StIstDb() : StObject()
 {
    mGeoHMatrixTpcOnGlobal = NULL;
@@ -197,3 +146,42 @@ void StIstDb::printGeoHMatrices() const
       sensorOnGlobal->Print();
    }
 }
+
+
+/***************************************************************************
+*
+* $Log: StIstDb.cxx,v $
+* Revision 1.9  2014/11/18 23:08:37  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
+* Revision 1.8  2014/08/06 18:44:21  ypwang
+* replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
+*
+* Revision 1.7  2014/08/05 17:48:58  ypwang
+* update Print() function to PrintGeoHMatrices()
+*
+* Revision 1.6  2014/08/05 15:00:45  ypwang
+* minor updates on the ladder/sensor ID check output log, using LOG_WARN instead of cout
+*
+* Revision 1.5  2014/08/01 22:25:48  ypwang
+* Add several simple getters and data members for sub-level geometry matrices obtain; Add Print() function which print out all IST geometry matrices
+*
+* Revision 1.4  2014/07/31 22:40:59  smirnovd
+* StIstDb: Reduced the scope of the using namespace
+*
+* Revision 1.3  2014/07/31 22:40:52  smirnovd
+* StIstDb: Removed unused header includes
+*
+* Revision 1.2  2014/07/31 18:29:51  ypwang
+* replace the LOG_INFO with LOG_DEBUG to slim the log file
+*
+* Revision 1.1  2014/07/29 19:50:25  ypwang
+* IST DB dataset in order to separate from IST Db maker
+*
+*
+*
+****************************************************************************
+* StIstDb.cxx,v 1.0
+* Revision 1.0 2014/7/28 16:15:30 Yaping
+* Initial version
+****************************************************************************/

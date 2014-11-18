@@ -1,62 +1,4 @@
-/***************************************************************************
-*
-* $Id: StIstDbMaker.cxx,v 1.18 2014/11/18 19:43:24 genevb Exp $
-*
-* Author: Yaping Wang, June 2013
-****************************************************************************
-* Description:
-* See header file.
-****************************************************************************
-*
-* $Log: StIstDbMaker.cxx,v $
-* Revision 1.18  2014/11/18 19:43:24  genevb
-* STAR Logger messages need endm, not endl
-*
-* Revision 1.17  2014/08/06 18:44:21  ypwang
-* replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
-*
-* Revision 1.16  2014/08/05 17:48:58  ypwang
-* update Print() function to PrintGeoHMatrices()
-*
-* Revision 1.15  2014/08/01 22:15:04  ypwang
-* mIstDb geometry matrices print out when Debug2 enabled
-*
-* Revision 1.14  2014/07/31 21:00:36  ypwang
-* c++ format style improvements; virtual keyword added for destructor
-*
-* Revision 1.13  2014/07/31 18:24:03  ypwang
-* add destructor and deallocate the mIstDb; c++ formatting style improvements and formatted with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
-*
-* Revision 1.12  2014/07/29 19:50:25  ypwang
-* IST DB dataset in order to separate from IST Db maker
-*
-* Revision 1.11  2014/07/15 23:17:51  smirnovd
-* Improved doxygen documentation
-*
-* Revision 1.10  2014/03/27 22:46:46  smirnovd
-* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
-*
-* Revision 1.9  2014/03/27 22:46:38  smirnovd
-* Renamed static data member according to mixed star/root convention
-*
-* Revision 1.8  2014/03/25 03:01:57  ypwang
-* get rid of GetIstPedNoise(), GetIstGain(), GetIstMapping() and GetIstControl() functions; use TDataSet instead of Db table structure
-*
-* Revision 1.7  2014/03/24 15:49:48  ypwang
-* checks added and const pointers returned for GetIstPedNoise, GetIstGain, GetIstMapping and GetIstControl functions
-*
-* Revision 1.6  2014/03/13 22:10:12  smirnovd
-* Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
-*
-* Revision 1.5  2014/02/08 03:34:16  ypwang
-* updating scripts
-*
-*
-****************************************************************************
-* StIstDbMaker.cxx,v 1.0
-* Revision 1.0 2013/11/04 16:15:30 Yaping
-* Initial version
-****************************************************************************/
+/* $Id: StIstDbMaker.cxx,v 1.19 2014/11/18 23:08:37 smirnovd Exp $ */
 
 #include "StIstDbMaker.h"
 #include "StIstDb.h"
@@ -71,7 +13,12 @@
 #include "tables/St_istChipConfig_Table.h"
 
 ClassImp(StIstDbMaker)
-//_____________________________________________________________________________
+
+
+/**
+ * \author Yaping Wang
+ * \date June 2013
+ */
 StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name)
 {
    mIstDb = NULL;
@@ -198,3 +145,59 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 
    return kStOK;
 }
+
+
+/***************************************************************************
+*
+* $Log: StIstDbMaker.cxx,v $
+* Revision 1.19  2014/11/18 23:08:37  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
+* Revision 1.18  2014/11/18 19:43:24  genevb
+* STAR Logger messages need endm, not endl
+*
+* Revision 1.17  2014/08/06 18:44:21  ypwang
+* replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
+*
+* Revision 1.16  2014/08/05 17:48:58  ypwang
+* update Print() function to PrintGeoHMatrices()
+*
+* Revision 1.15  2014/08/01 22:15:04  ypwang
+* mIstDb geometry matrices print out when Debug2 enabled
+*
+* Revision 1.14  2014/07/31 21:00:36  ypwang
+* c++ format style improvements; virtual keyword added for destructor
+*
+* Revision 1.13  2014/07/31 18:24:03  ypwang
+* add destructor and deallocate the mIstDb; c++ formatting style improvements and formatted with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
+* Revision 1.12  2014/07/29 19:50:25  ypwang
+* IST DB dataset in order to separate from IST Db maker
+*
+* Revision 1.11  2014/07/15 23:17:51  smirnovd
+* Improved doxygen documentation
+*
+* Revision 1.10  2014/03/27 22:46:46  smirnovd
+* Updated broken style with astyle -s3 -p -H -A3 -k3 -O -o -y -Y -f
+*
+* Revision 1.9  2014/03/27 22:46:38  smirnovd
+* Renamed static data member according to mixed star/root convention
+*
+* Revision 1.8  2014/03/25 03:01:57  ypwang
+* get rid of GetIstPedNoise(), GetIstGain(), GetIstMapping() and GetIstControl() functions; use TDataSet instead of Db table structure
+*
+* Revision 1.7  2014/03/24 15:49:48  ypwang
+* checks added and const pointers returned for GetIstPedNoise, GetIstGain, GetIstMapping and GetIstControl functions
+*
+* Revision 1.6  2014/03/13 22:10:12  smirnovd
+* Move some constants from StIstUtil/StIstConsts.h to StEvent/StEnumerations.h to avoid external dependance of StEvent on StIstUtil
+*
+* Revision 1.5  2014/02/08 03:34:16  ypwang
+* updating scripts
+*
+*
+****************************************************************************
+* StIstDbMaker.cxx,v 1.0
+* Revision 1.0 2013/11/04 16:15:30 Yaping
+* Initial version
+****************************************************************************/
