@@ -3,13 +3,10 @@
 #include "StRoot/St_base/StMessMgr.h"
 
 
-//constructors
 StIstClusterCollection::StIstClusterCollection( int ladder ) : StObject(), mLadder( ladder )
 {
-   /* nothing to do */
-};
+}
 
-//deconstructor
 StIstClusterCollection::~StIstClusterCollection()
 {
    Clear("");
@@ -74,6 +71,9 @@ ClassImp(StIstClusterCollection);
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.cxx,v $
+* Revision 1.10  2014/11/18 23:11:36  smirnovd
+* [Minor] Coding style clean-up. Removed unconstructive comments
+*
 * Revision 1.9  2014/11/18 23:08:37  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *

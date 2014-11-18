@@ -15,10 +15,8 @@
 class StIstClusterCollection : public StObject
 {
 public:
-   //constructors
-   StIstClusterCollection(int ladder = 0);
 
-   //deconstructor
+   StIstClusterCollection(int ladder = 0);
    ~StIstClusterCollection();
 
    vector<StIstCluster *> &getClusterVec();
@@ -31,17 +29,14 @@ public:
    unsigned char getLadder() const;
    void setLadder( int ladder );
 
-   //Clear
    void Clear( Option_t *opt = "" );
    virtual void Print(Option_t *opt = "") const;
 
-
 protected:
-   //data members
+
    unsigned char mLadder;
    std::vector<StIstCluster *> mClusterVec;
 
-private:
    ClassDef(StIstClusterCollection, 1);
 };
 
@@ -51,6 +46,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.h,v $
+* Revision 1.8  2014/11/18 23:11:36  smirnovd
+* [Minor] Coding style clean-up. Removed unconstructive comments
+*
 * Revision 1.7  2014/11/18 23:08:38  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *

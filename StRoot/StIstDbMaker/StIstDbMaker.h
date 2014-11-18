@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.h,v 1.18 2014/11/18 23:10:27 smirnovd Exp $ */
+/* $Id: StIstDbMaker.h,v 1.19 2014/11/18 23:11:35 smirnovd Exp $ */
 
 #ifndef StIstDbMaker_hh
 #define StIstDbMaker_hh
@@ -16,14 +16,12 @@ class StIstDb;
  */
 class StIstDbMaker : public StMaker
 {
-
 public:
    StIstDbMaker(const char *name = "istDb");
    Int_t  InitRun(Int_t runNumber);
 
-
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.18 2014/11/18 23:10:27 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.19 2014/11/18 23:11:35 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    /// See StIstDb for details on created data structure. The ownership is passed to the STAR
@@ -39,6 +37,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.19  2014/11/18 23:11:35  smirnovd
+* [Minor] Coding style clean-up. Removed unconstructive comments
+*
 * Revision 1.18  2014/11/18 23:10:27  smirnovd
 * Do not destruct StIstDb object as the ownership is passed to the framework
 *

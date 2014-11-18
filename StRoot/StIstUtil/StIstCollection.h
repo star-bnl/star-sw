@@ -20,10 +20,7 @@ using namespace StIstConsts;
 class StIstCollection : public StObject
 {
 public:
-   //constructors
    StIstCollection();
-
-   //deconstructor
    ~StIstCollection();
 
    size_t getNumRawHits() const;                   // overall
@@ -44,7 +41,6 @@ protected:
    StIstClusterCollection mClusterCollection[kIstNumLadders];
    size_t mNumTimeBins;
 
-private:
    ClassDef(StIstCollection, 1);
 };
 
@@ -54,6 +50,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstCollection.h,v $
+* Revision 1.10  2014/11/18 23:11:36  smirnovd
+* [Minor] Coding style clean-up. Removed unconstructive comments
+*
 * Revision 1.9  2014/11/18 23:08:38  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *
