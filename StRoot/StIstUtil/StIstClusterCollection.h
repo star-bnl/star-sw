@@ -1,20 +1,17 @@
-/***************************************************************************
-*
-* $Id: StIstClusterCollection.h,v 1.6 2014/09/09 08:23:46 ypwang Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description:
-* A collection of StIstCluster classes, and basically is a wrapper for a
-* clusters vector. One instance corresponds to one ladder.
-****************************************************************************/
-
 #ifndef StIstClusterCollection_hh
 #define StIstClusterCollection_hh
 
 #include "StObject.h"
 #include "StIstCluster.h"
 
+
+/**
+ * A collection of StIstCluster objects which is basically a wrapper for
+ * a clusters vector. One instance corresponds to one ladder.
+ *
+ * \author Yaping Wang
+ * \date March 2013
+ */
 class StIstClusterCollection : public StObject
 {
 public:
@@ -54,6 +51,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.h,v $
+* Revision 1.7  2014/11/18 23:08:38  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
 * Revision 1.6  2014/09/09 08:23:46  ypwang
 * all unsgined char was updated to int type as Victor P. suggested
 *

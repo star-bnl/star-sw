@@ -1,13 +1,3 @@
-/***************************************************************************
-*
-* $Id: StIstClusterCollection.cxx,v 1.8 2014/09/09 08:23:46 ypwang Exp $
-*
-* Author: Yaping Wang, March 2013
-****************************************************************************
-* Description:
-* See header file.
-****************************************************************************/
-
 #include "StIstCluster.h"
 #include "StIstClusterCollection.h"
 #include "StRoot/St_base/StMessMgr.h"
@@ -84,6 +74,9 @@ ClassImp(StIstClusterCollection);
 /***************************************************************************
 *
 * $Log: StIstClusterCollection.cxx,v $
+* Revision 1.9  2014/11/18 23:08:37  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
 * Revision 1.8  2014/09/09 08:23:46  ypwang
 * all unsgined char was updated to int type as Victor P. suggested
 *
