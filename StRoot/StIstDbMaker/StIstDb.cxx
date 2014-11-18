@@ -1,4 +1,4 @@
-/* $Id: StIstDb.cxx,v 1.9 2014/11/18 23:08:37 smirnovd Exp $ */
+/* $Id: StIstDb.cxx,v 1.10 2014/11/18 23:10:20 smirnovd Exp $ */
 
 #include <assert.h>
 #include "StIstDb.h"
@@ -124,7 +124,8 @@ Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
    return kStOk;
 }
 
-void StIstDb::printGeoHMatrices() const
+
+void StIstDb::Print(Option_t *opt) const
 {
    mGeoHMatrixTpcOnGlobal->Print();
    mGeoHMatrixIdsOnTpc.Print();
@@ -151,6 +152,9 @@ void StIstDb::printGeoHMatrices() const
 /***************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.10  2014/11/18 23:10:20  smirnovd
+* Renamed printGeoHMatrices to customary Print as that what users of ROOT framework normaly expect
+*
 * Revision 1.9  2014/11/18 23:08:37  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *
