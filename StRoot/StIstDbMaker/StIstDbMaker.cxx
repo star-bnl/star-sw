@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.19 2014/11/18 23:08:37 smirnovd Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.20 2014/11/18 23:10:20 smirnovd Exp $ */
 
 #include "StIstDbMaker.h"
 #include "StIstDb.h"
@@ -136,9 +136,8 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
       return kStErr;
    }
 
-   if ( GetDebug() >= 2) {
-      mIstDb->printGeoHMatrices();
-   }
+   if ( GetDebug() >= 2)
+      mIstDb->Print();
 
    //write the data
    ToWhiteBoard("ist_db", mIstDb);
@@ -150,6 +149,9 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.20  2014/11/18 23:10:20  smirnovd
+* Renamed printGeoHMatrices to customary Print as that what users of ROOT framework normaly expect
+*
 * Revision 1.19  2014/11/18 23:08:37  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *

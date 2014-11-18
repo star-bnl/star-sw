@@ -1,4 +1,4 @@
-/* $Id: StIstDb.h,v 1.9 2014/11/18 23:08:37 smirnovd Exp $ */
+/* $Id: StIstDb.h,v 1.10 2014/11/18 23:10:20 smirnovd Exp $ */
 
 #ifndef StIstDb_hh
 #define StIstDb_hh
@@ -64,10 +64,10 @@ public:
    void setControl(istControl_st *control)    	{mIstControl  = control;}
    void setChipStatus(istChipConfig_st *chipStatus) {mIstChipStatus = chipStatus;}
 
-   void printGeoHMatrices() const;
+   virtual void Print(Option_t *opt = "") const;
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.9 2014/11/18 23:08:37 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDb.h,v 1.10 2014/11/18 23:10:20 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    static THashList 	*mgRotList; ///< A list of TGeoHMatrix transormations for each IST sensor
@@ -93,6 +93,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstDb.h,v $
+* Revision 1.10  2014/11/18 23:10:20  smirnovd
+* Renamed printGeoHMatrices to customary Print as that what users of ROOT framework normaly expect
+*
 * Revision 1.9  2014/11/18 23:08:37  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *
