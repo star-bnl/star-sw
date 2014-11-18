@@ -1,8 +1,8 @@
-/* $Id: StIstDbMaker.cxx,v 1.21 2014/11/18 23:10:27 smirnovd Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.22 2014/11/18 23:11:35 smirnovd Exp $ */
 
-#include "StIstDbMaker.h"
-#include "StIstDb.h"
-#include "StMessMgr.h"
+#include "StIstDbMaker/StIstDbMaker.h"
+#include "StIstDbMaker/StIstDb.h"
+#include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
 
 #include "tables/St_Survey_Table.h"
@@ -19,9 +19,8 @@ ClassImp(StIstDbMaker)
  * \author Yaping Wang
  * \date June 2013
  */
-StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name)
+StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mIstDb(0)
 {
-   mIstDb = NULL;
 }
 
 
@@ -145,6 +144,9 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.22  2014/11/18 23:11:35  smirnovd
+* [Minor] Coding style clean-up. Removed unconstructive comments
+*
 * Revision 1.21  2014/11/18 23:10:27  smirnovd
 * Do not destruct StIstDb object as the ownership is passed to the framework
 *
