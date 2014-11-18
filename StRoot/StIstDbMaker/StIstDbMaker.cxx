@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.20 2014/11/18 23:10:20 smirnovd Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.21 2014/11/18 23:10:27 smirnovd Exp $ */
 
 #include "StIstDbMaker.h"
 #include "StIstDb.h"
@@ -23,12 +23,8 @@ StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name)
 {
    mIstDb = NULL;
 }
-//_____________________________________________________________________________
-StIstDbMaker::~StIstDbMaker()
-{
-   if ( mIstDb ) { delete mIstDb; }
-}
-//_____________________________________________________________________________
+
+
 Int_t StIstDbMaker::InitRun(Int_t runNumber)
 {
    if ( !mIstDb ) { mIstDb = new StIstDb(); }
@@ -149,6 +145,9 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.21  2014/11/18 23:10:27  smirnovd
+* Do not destruct StIstDb object as the ownership is passed to the framework
+*
 * Revision 1.20  2014/11/18 23:10:20  smirnovd
 * Renamed printGeoHMatrices to customary Print as that what users of ROOT framework normaly expect
 *

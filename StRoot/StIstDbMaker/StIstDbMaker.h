@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.h,v 1.17 2014/11/18 23:08:37 smirnovd Exp $ */
+/* $Id: StIstDbMaker.h,v 1.18 2014/11/18 23:10:27 smirnovd Exp $ */
 
 #ifndef StIstDbMaker_hh
 #define StIstDbMaker_hh
@@ -19,14 +19,15 @@ class StIstDbMaker : public StMaker
 
 public:
    StIstDbMaker(const char *name = "istDb");
-   virtual ~StIstDbMaker();
    Int_t  InitRun(Int_t runNumber);
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.17 2014/11/18 23:08:37 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.18 2014/11/18 23:10:27 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
+   /// See StIstDb for details on created data structure. The ownership is passed to the STAR
+   /// framework via ToWhiteBoard()
    StIstDb *mIstDb;
 
    ClassDef(StIstDbMaker, 1)
@@ -38,6 +39,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.18  2014/11/18 23:10:27  smirnovd
+* Do not destruct StIstDb object as the ownership is passed to the framework
+*
 * Revision 1.17  2014/11/18 23:08:37  smirnovd
 * Moved CVS log to the end of file and updated doxygen-style comments
 *
