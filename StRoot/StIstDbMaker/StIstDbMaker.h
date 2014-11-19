@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.h,v 1.20 2014/11/18 23:11:50 smirnovd Exp $ */
+/* $Id: StIstDbMaker.h,v 1.21 2014/11/19 04:17:34 genevb Exp $ */
 
 #ifndef StIstDbMaker_hh
 #define StIstDbMaker_hh
@@ -19,9 +19,10 @@ class StIstDbMaker : public StMaker
 public:
    StIstDbMaker(const char *name = "istDb");
    Int_t  InitRun(Int_t runNumber);
+   Int_t  Make();
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.20 2014/11/18 23:11:50 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.21 2014/11/19 04:17:34 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    /// See StIstDb for details on created data structure. The ownership is passed to the STAR
@@ -37,6 +38,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.21  2014/11/19 04:17:34  genevb
+* Return fatal if database tables are not found
+*
 * Revision 1.20  2014/11/18 23:11:50  smirnovd
 * Set class version to 0 in order to avoid IO dictionary generation by ROOT's CINT. STAR makers are not persistent
 *

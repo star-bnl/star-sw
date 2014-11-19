@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.23 2014/11/18 23:11:44 smirnovd Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.24 2014/11/19 04:17:31 genevb Exp $ */
 
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstDbMaker/StIstDb.h"
@@ -144,9 +144,18 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
 }
 
 
+Int_t StIstDbMaker::Make()
+{
+   return (GetDataSet("ist_db") ? kStOK : kStFatal);
+}
+
+
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.24  2014/11/19 04:17:31  genevb
+* Return fatal if database tables are not found
+*
 * Revision 1.23  2014/11/18 23:11:44  smirnovd
 * [Style] Changes in comments and user feedback only
 *
