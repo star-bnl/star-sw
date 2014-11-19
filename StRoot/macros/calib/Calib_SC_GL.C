@@ -818,6 +818,8 @@ void Calib_SC_GL(const char* input, const char* cuts, int scaler, int debug, con
   double glpS[12];
   double eglpS[12];
   double scpS, sopS, escpS, esopS, GLOS, eGLOS;
+  scpS = 0;
+  sopS = 0;
   if (BY_SECTOR) {
 
     // Try again with one unified full 3D fit
@@ -1722,9 +1724,11 @@ int Init(const char* input) {
         continue;
       } else {
         TString corrStr = corrKey->ReadObj()->GetTitle();
-        corrStr += ":";
         corrKey = fileI->GetFile()->GetKey("GLcorrection");
-        corrStr += corrKey->ReadObj()->GetTitle();
+        (corrStr += ":") += corrKey->ReadObj()->GetTitle();
+        corrKey = fileI->GetFile()->GetKey("SCEWRatio");
+        if (corrKey)
+         (corrStr += ":") += corrKey->ReadObj()->GetTitle();
         TObject* existing = SCGLcombos.FindObject(corrStr.Data());
         if (existing) {
           k = SCGLcombos.IndexOf(existing);
@@ -1760,6 +1764,13 @@ int Init(const char* input) {
       printf("  used sc = %s\n",corrStr.Data());
       corrStr = SCGLcombos.At(i)->GetName();
       corrStr.Remove(0,corrStr.First(':')+1);
+      if (corrStr.CountChar(':')) {
+        corrStr.Remove(0,corrStr.First(':')+1);
+        printf("  used ewratio = %s\n",corrStr.Data());
+        corrStr = SCGLcombos.At(i)->GetName();
+        corrStr.Remove(0,corrStr.First(':')+1);
+        corrStr.Remove(corrStr.First(':'));
+      }
       ugl[i] = corrStr.Atof();
       glmode[i] = 1;
       printf("  used GL = %g\n",ugl[i]);
@@ -1802,6 +1813,11 @@ int Init(const char* input) {
           TString corrStr = corrKey->ReadObj()->GetTitle();
           if (corrStr.Length()) allZeros = kFALSE;
           printf("  used sc = %s\n",corrStr.Data());
+          corrKey = SCi[i]->GetFile()->GetKey("SCEWRatio");
+          if (corrKey) {
+            corrStr = corrKey->ReadObj()->GetTitle();
+            printf("  used ewratio = %s\n",corrStr.Data());
+          }
           corrKey = SCi[i]->GetFile()->GetKey("GLcorrection");
           corrStr = corrKey->ReadObj()->GetTitle();
           ugl[i] = corrStr.Atof();
@@ -2247,9 +2263,9 @@ void PrintResult(double scp, double escp, double sop, double esop,
            pcadets[0].Data(),lsop,lesop);
     for (int n=1;n<pcaN;n++) printf("+(%6.4g*(%s))",pcacoef[n]*scp,pcadets[n].Data());
   }
-  printf(")\n  with GL = %5.2f +/- %5.2f\n",glp,eglp);
-  if (EW_ASYMMETRY) printf("  and EWratio = %5.3f +/-%5.3f\n",ewp,eewp);
-  printf("\n");
+  printf(")\n");
+  if (EW_ASYMMETRY) printf("  with EWratio = %5.3f +/-%5.3f\n",ewp,eewp);
+  printf("  with GL = %5.2f +/- %5.2f\n\n",glp,eglp);
 }
 
 void PrintResult(double scp, double escp, double sop, double esop,
@@ -2273,8 +2289,11 @@ void PrintResult(double scp, double escp, double sop, double esop,
 }
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 2.5 2014/11/19 19:19:56 genevb Exp $
+// $Id: Calib_SC_GL.C,v 2.6 2014/11/19 22:11:53 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 2.6  2014/11/19 22:11:53  genevb
+// Print used ewratio from input files
+//
 // Revision 2.5  2014/11/19 19:19:56  genevb
 // Introduce EW asymmetry, and GL by sector
 //
