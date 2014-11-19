@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.h,v 1.21 2014/11/19 04:17:34 genevb Exp $ */
+/* $Id: StIstDbMaker.h,v 1.22 2014/11/19 18:29:47 genevb Exp $ */
 
 #ifndef StIstDbMaker_hh
 #define StIstDbMaker_hh
@@ -22,12 +22,13 @@ public:
    Int_t  Make();
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.21 2014/11/19 04:17:34 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.22 2014/11/19 18:29:47 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 private:
    /// See StIstDb for details on created data structure. The ownership is passed to the STAR
    /// framework via ToWhiteBoard()
    StIstDb *mIstDb;
+   Int_t mReady;
 
    ClassDef(StIstDbMaker, 0)
 };
@@ -38,6 +39,9 @@ private:
 /***************************************************************************
 *
 * $Log: StIstDbMaker.h,v $
+* Revision 1.22  2014/11/19 18:29:47  genevb
+* Use flags to indicate DbMaker readiness
+*
 * Revision 1.21  2014/11/19 04:17:34  genevb
 * Return fatal if database tables are not found
 *
