@@ -1,4 +1,4 @@
-/* $Id: StIstDbMaker.cxx,v 1.24 2014/11/19 04:17:31 genevb Exp $ */
+/* $Id: StIstDbMaker.cxx,v 1.25 2014/11/19 18:29:47 genevb Exp $ */
 
 #include "StIstDbMaker/StIstDbMaker.h"
 #include "StIstDbMaker/StIstDb.h"
@@ -19,13 +19,15 @@ ClassImp(StIstDbMaker)
  * \author Yaping Wang
  * \date June 2013
  */
-StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mIstDb(0)
+StIstDbMaker::StIstDbMaker(const char *name) : StMaker(name), mIstDb(0), mReady(kStErr)
 {
 }
 
 
 Int_t StIstDbMaker::InitRun(Int_t runNumber)
 {
+   mReady = kStFatal;
+
    if ( !mIstDb ) { mIstDb = new StIstDb(); }
 
    LOG_DEBUG << "StIstDbMaker::InitRun() - Access data from database" << endm;
@@ -140,19 +142,24 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    // Write the data
    ToWhiteBoard("ist_db", mIstDb);
 
+   mReady = kStOK;
+
    return kStOK;
 }
 
 
 Int_t StIstDbMaker::Make()
 {
-   return (GetDataSet("ist_db") ? kStOK : kStFatal);
+   return mReady;
 }
 
 
 /***************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.25  2014/11/19 18:29:47  genevb
+* Use flags to indicate DbMaker readiness
+*
 * Revision 1.24  2014/11/19 04:17:31  genevb
 * Return fatal if database tables are not found
 *
