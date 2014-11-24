@@ -1,4 +1,4 @@
-// $Id: storetofTOffset.C,v 1.1 2010/12/14 19:27:28 geurts Exp $
+// $Id: storetofTOffset.C,v 1.2 2014/11/24 22:18:54 geurts Exp $
 // macro to upload tofTOffset tables to database
 //
 // based on http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
@@ -6,6 +6,9 @@
 // Xin Dong, 06/04/2008 
 // ---
 // $Log: storetofTOffset.C,v $
+// Revision 1.2  2014/11/24 22:18:54  geurts
+// Add striciter protection against non-existing files (bail out), and reduce excessive std output
+//
 // Revision 1.1  2010/12/14 19:27:28  geurts
 // *** empty log message ***
 //
@@ -70,6 +73,10 @@ void storetofTOffset(const Bool_t mTest = 1)
 
   ifstream inData;
   inData.open("input/t0_4DB.dat");
+  if (!inData.is_open()){
+    cerr <<" unable to open input/t0_4DB.dat; bailing out ..." << endl;
+    exit(-1);
+  }
 
   for (Int_t i=0;i<mNTray;i++) {
     for (Int_t j=0;j<mNModule;j++) {

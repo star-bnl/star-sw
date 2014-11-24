@@ -1,4 +1,4 @@
-// $Id: storevpdTotCorr.C,v 1.1 2010/12/14 19:27:28 geurts Exp $
+// $Id: storevpdTotCorr.C,v 1.2 2014/11/24 22:18:54 geurts Exp $
 // macro to upload tofr5 INL tables to database
 //
 // based on http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
@@ -6,6 +6,9 @@
 // Xin Dong, 02/18/2005 
 // ---
 // $Log: storevpdTotCorr.C,v $
+// Revision 1.2  2014/11/24 22:18:54  geurts
+// Add striciter protection against non-existing files (bail out), and reduce excessive std output
+//
 // Revision 1.1  2010/12/14 19:27:28  geurts
 // *** empty log message ***
 //
@@ -76,7 +79,12 @@ void storevpdTotCorr(const Bool_t mTest = 1)
   Double_t YS[mNVPD*2][128];
   ifstream infile;
 
-  infile.open("input/pvpdCali_4DB.dat");
+  infile.open("input/vpdCali_4DB.dat");
+  if (!infile.is_open()){
+    cerr <<" unable to open input/vpdCali_4DB.dat; bailing out ..." << endl;
+    exit(-1);
+  }
+
   for(int i=0;i<mNVPD*2;i++) {
     int tubeId, nbins;
     infile>>tubeId;
