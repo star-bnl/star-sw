@@ -1,10 +1,13 @@
-// $Id: storetofTotbCorr.C,v 1.3 2011/06/01 00:44:31 geurts Exp $
+// $Id: storetofTotbCorr.C,v 1.4 2014/11/24 22:18:54 geurts Exp $
 // macro to upload tofr5 INL tables to database
 // based on http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
 //
 // Xin Dong, 02/18/2005 
 // ---
 // $Log: storetofTotbCorr.C,v $
+// Revision 1.4  2014/11/24 22:18:54  geurts
+// Add striciter protection against non-existing files (bail out), and reduce excessive std output
+//
 // Revision 1.3  2011/06/01 00:44:31  geurts
 // bug fix in boardId calculation
 //
@@ -87,6 +90,11 @@ void storetofTotbCorr(const Bool_t mTest = 1)
   Double_t Y[mNTray][mNMODULE][mNCELL][60];
 
   infile.open("input/totCali_4DB.dat");
+  if (!infile.is_open()){
+    cerr <<" unable to open input/totCali_4DB.dat; bailing out ..." << endl;
+    exit(-1);
+  }
+
   int calibSize;
   infile >> calibSize;
   cout << "reading in " << calibSize << " calibration records ... " << endl;
@@ -97,7 +105,7 @@ void storetofTotbCorr(const Bool_t mTest = 1)
       int tray, board, nnn;
       infile >> tray >> board;
       infile >> nnn;
-      cout << " tray = " << tray << " board = " << board << endl;
+      //cout << " tray = " << tray << " board = " << board << endl;
       for(int k=0;k<60;k++) {
 	if(nnn>0&&k<nnn+1) {
 	  infile >> X[tray-1][board-1][0][k];
@@ -122,7 +130,7 @@ void storetofTotbCorr(const Bool_t mTest = 1)
       int tray, module, cell, nnn;
       infile >> tray >> module >> cell;
       infile >> nnn;
-      cout << " tray = " << tray << " module = " << module << " cell = " << cell << endl;
+      //cout << " tray = " << tray << " module = " << module << " cell = " << cell << endl;
       for(int k=0;k<60;k++) {
 	if(nnn>0&&k<nnn+1) {
 	  infile >> X[tray-1][module-1][cell-1][k];
@@ -141,7 +149,9 @@ void storetofTotbCorr(const Bool_t mTest = 1)
     } //module
     } //tray
   break;
-} // switch
+  default:  // DON'T KNOW -- BAIL OUT
+    cerr<< "Unknown calib-size " << calibSize << "; bailing out ... " << endl;
+    exit(-2);} // switch
 
   infile.close();
 
@@ -204,7 +214,7 @@ case 23040:
 
 
 // Store records in test file
- cout << "Storing records in totCorr_test.dat ... " << endl;
+ cout << "Storing records in totCorr_test.dat (this may take a long time) ... " << endl;
 //  int nRow = mNTray * mNTDIG;
 //  int nRow = calibSize;
  int nRow = 23040;
@@ -213,12 +223,10 @@ case 23040:
   for(int i=0;i<nRow;i++) {
     outData << setw(6) << totcorr[i].trayId << setw(6) << totcorr[i].moduleId << setw(6) << totcorr[i].cellId << setw(6) << totcorr[i].tdcId << endl;
     for(int j=0;j<60;j++) {
-      if(totcorr[i].tot[j]>1.e-4)
         outData << setw(15) << totcorr[i].tot[j];
     }
     outData << endl;
     for(int j=0;j<60;j++) {
-      if(totcorr[i].tot[j]>1.e-4) 
         outData << setw(15) << totcorr[i].corr[j];
     }
     outData << endl;
