@@ -337,10 +337,6 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             add(layer, sector, stiDetectorS);
 //            sWt+=stiDetectorS->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFC south side " << stiDetectorS->getName() << " at layer " << layer << endm;
-
-            matICFC                 = NULL;
-            stiPlacementICFC        = NULL;
-            stiDetector             = NULL;
          }
 
       }
@@ -384,10 +380,6 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             add(layer, sector, stiDetectorS);
 //            sWt+=stiDetectorS->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for ICFD south side " << stiDetectorS->getName() << " at layer " << layer << endm;
-
-            matICFD                 = NULL;
-            stiPlacementICFD        = NULL;
-            stiDetector             = NULL;
          }
       }
 
@@ -432,10 +424,6 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
             add(layer, sector, stiDetectorS);
 //            sWt+=stiDetectorS->getWeight();
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECE south side " << stiDetectorS->getName() << " at layer " << layer << endm;
-
-            matIECE                 = NULL;
-            stiPlacementIECE        = NULL;
-            stiDetector             = NULL;
          }
       }
 
@@ -481,10 +469,6 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
 //            sWt+=stiDetectorS->getWeight();
             add(layer, sector, stiDetectorS);
             LOG_DEBUG << "StiIstDetectorBuilder::build planar volume for IECW south side " << stiDetectorS->getName() << " at layer " << layer << endm;
-
-            matIECW                 = NULL;
-            stiPlacementIECW        = NULL;
-            stiDetector             = NULL;
          }
       }
 
