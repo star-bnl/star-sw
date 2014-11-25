@@ -84,11 +84,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
    unsigned int ROW = 1;
 
-   THashList *istRot = 0;
-
-   if (!mBuildIdealGeom)
-      istRot = mIstDb->getRotations();
-
    int iSensor = 3;
 
    for (int iLadder = 1; iLadder < kIstNumLadders; ++iLadder)
@@ -106,7 +101,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
       TGeoHMatrix *combI = 0;
 
       if (!mBuildIdealGeom)
-         combI = (TGeoHMatrix *) istRot->FindObject(Form("R%04i", matIst));
+         combI = (TGeoHMatrix *) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
       else
          combI = gGeoManager->MakePhysicalNode(Path.Data())->GetMatrix();
 
