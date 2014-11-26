@@ -3,7 +3,8 @@ void makeAPlots(const Char_t *tag = "Anodes") {
   gInterpreter->ProcessLine(".L Chain.C");
   TChain *theChain = Chain();
   TString macro(".L ");
-  macro += gSystem->Which(gROOT->GetMacroPath(),"T.C");
+  const Char_t *T = gSystem->Which(gROOT->GetMacroPath(),"T.C");
+  macro += T; delete [] T;
   macro += "+";
   gInterpreter->ProcessLine(macro);
   //  gInterpreter->ProcessLine(".L T.C+");
