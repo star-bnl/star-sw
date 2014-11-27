@@ -1,0 +1,14 @@
+*** Begin of history file: Mon Oct 15 15:54:16 2012
+macro drawCut cut=X
+gra/opt grid
+satt * seen 1
+dcut cave [cut] 1 0 0 1 1
+next
+for/file 67 cave_cut[cut].ps
+meta 67 -114
+title_g 'CAVE '//[cut]//' cut'
+null -2000 2000 0 1000
+dcut cave x 1 0 0 1 1
+atitle 'Z (cm)' 'R (cm)'
+close 67
+

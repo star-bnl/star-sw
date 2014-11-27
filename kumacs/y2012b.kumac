@@ -1,0 +1,44 @@
+*  starsim -w 1 -b y2012b.kumac
+DETP geom y2012b field=-5  hadr_off=1
+gexec $STAR_LIB/geometry.so
+gclos all
+grap/opt grid
+graphics/set *                   | Reset picture dimensions
+graphics/set hwid 6              | Width of histogram lines
+graphics/set fwid 6              | Width of fit lines
+graphics/set bwid 6              | Width of box lines
+graphics/set pwid 6              | Width of picture lines
+satt * seen 1
+************  Y ************
+*next
+*for/file 67 y2012b_y.ps
+*meta 67 -114
+*title_g 'STAR Wide Angle Hall (y2012b)  y-cut'
+*null -2000 2000 -1500 1500
+*atitle 'Z (cm)' 'X (cm)'
+*dcut hall y 0 0 0 1 1
+*close 67
+************  X ************
+*next
+*for/file 67 y2012b_x.ps
+*meta 67 -114
+*title_g 'STAR Wide Angle Hall (y2012b)  x-cut'
+*null -2000 2000 -1500 1500
+*atitle 'Z (cm)' 'Y (cm)'
+*dcut hall x 0 0 0 1 1
+*close 67
+************  Z ************
+next
+*for/file 67 y2012b_z.ps
+*meta 67 -114
+title_g 'STAR Wide Angle Hall (y2012b)  z-cut'
+null -1600 1600 -1600 1600
+atitle 'X (cm)' 'Y (cm)'
+dcut hall z 20 0 0 1 1
+*close 67
+*null -1000 1000 -1000 1000   
+*dcut hall z 0 0 0 1 1
+*null -30 30 260 300   
+*dcut mcse x -10 0 0 1 1
+*null 0 500 -10 10 
+*dcut hall x 0 0 0 1 1

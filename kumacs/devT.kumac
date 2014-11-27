@@ -1,0 +1,12 @@
+*  starsim -w 1 -b devT.kumac
+DETP geom devT 
+* field=-5  hadr_off=1
+*DETP geom field=-5
+*DETP geom hadr_off=1
+gexec $STAR_LIB/xgeometry.so
+*gexec $STAR_LIB/geometry.so
+gclos all
+gra/opt grid
+null -50 50 50 200
+satt * seen 1
+dcut tpce z 10 0 0 1 1

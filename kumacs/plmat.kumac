@@ -1,0 +1,16 @@
+macro plmat partid=6
+*make geometry
+plmat 38 [partid] LOSS -1
+opt logx
+id = 380011 + 100*[partid]
+nx = $HINFO([id],'XBINS')
+*vec/crea x([nx])
+*vec/crea y([nx])
+*hi/get/ABSCISSA [id] x
+*hi/get/cont     [id] y
+*vec/wr x,y plmat[partid].dat '4g12.5'
+*vec/wr y pl6mat[partid].dat '5(g12.5,1H,)'
+*sigma y = y/0.0015607
+*hi/put/cont     [id] y
+hi/pl [id]
+return

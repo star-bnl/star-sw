@@ -1,0 +1,3 @@
+*  starsim -w 1 -b upgr13.kumac
+detp geom upgr13
+gexec $STAR_LIB/geometry.so

@@ -1,0 +1,19 @@
+MACRO hijing nfle=1 infile=hijing382.nt outfile=hijing382.fz
+
+GEANT/CONTROL/RNDM 11[nfle]54917 12789[nfle]13
+GEANT/CONTROL/RNDM
+detp geom UPGR15
+make geometry
+make gstar
+MODE PIPE SIMU 2      |Save secondary tracks
+MODE PIXL SIMU 2
+MODE SVTT SIMU 2    MODE TPCE SIMU 2
+
+gclose all
+swit 2 3
+vsig  0.01  20.0
+gkine -1 0 0 100 -6.3 6.3 0 6.28 -5.0 5.0
+gfile o [outfile]
+user/input user [infile]
+trig 50
+return

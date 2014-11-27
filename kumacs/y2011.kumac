@@ -1,0 +1,4 @@
+*  starsim -w 1 -b y2011.kumac
+DETP geom y2011b  field=-5  hadr_off=1
+gexec $STAR_LIB/geometry.so
+gclos all

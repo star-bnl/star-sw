@@ -1,0 +1,3 @@
+*  starsim -w 1 -b y2008.kumac
+detp geom y2008 field=-2.5
+gexec $STAR_LIB/geometry.so

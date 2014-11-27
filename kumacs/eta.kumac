@@ -1,0 +1,11 @@
+*** Begin of history file: Tue Nov 14 15:17:32 2006
+detp geom y2005x
+gexec $STAR_LIB/geometry.so
+opt grid
+null 0 350 0 250
+dcut hall x 0 0 0 1 1
+do i = 1, 12
+ eta = 0.1*[i]
+ tan = 	1/sinh([eta]
+ fun/plo [tan]*x 0 350 s
+enddo

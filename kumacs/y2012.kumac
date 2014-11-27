@@ -1,0 +1,11 @@
+*  starsim -w 1 -b y2012.kumac
+DETP geom y2012a  field=-5  hadr_off=1
+gexec $STAR_LIB/geometry.so
+gclos all
+  grap/opt grid
+  graphics/set *                   | Reset picture dimensions
+  graphics/set hwid 6              | Width of histogram lines
+  graphics/set fwid 6              | Width of fit lines
+  graphics/set bwid 6              | Width of box lines
+  graphics/set pwid 6              | Width of picture lines
+  satt * seen 1

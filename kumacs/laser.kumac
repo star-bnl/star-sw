@@ -1,0 +1,9 @@
+gexec $STAR_LIB/geometry.so
+gexec $STAR_LIB/gstar.so 
+gvert     50      0       0.0
+gkine 1  171   1000.     1000. 0.     0.   0. 0.  10.   10.
+debug on
+swit 1 2
+swit 2 2
+trig 
+gprint hits
