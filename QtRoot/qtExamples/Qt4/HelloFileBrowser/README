@@ -1,0 +1,42 @@
+
+"HelloFileBrowser" is another small Qt4 application built with Qt4 designer. 
+It shows how to use two custom widgets:
+
+   1. "TQtObjectViewFrame" derived from QTreeView widget to represent the TFile structure
+       (see: http://doc.trolltech.com/4.3/qtreeview.html )
+       
+   2. "TQtWidget" derived from QWidget to represent the embedded TCanvas
+
+The GUI of the example "promotes" the standard Qt4 widgets to the custom TQtObjectViewFrame and TQtWidget
+(see:http://doc.trolltech.com/4.3/designer-using-custom-widgets.html#promoting-widgets )
+
+To  build the and run the test application do
+
+   1. "Un-tar" the archive
+       tar -xzvf HelloFileBrowser.tar.gz
+
+   2  Invoke:
+      qmake
+      make
+
+   3. Usage:
+      Usage: HelloFileBrowser  [-h | [ -style=[windows | platinum | cgi | kde ]
+
+        The application creates an instance of the widget and populates it with
+        the objects read from the ROOT file . It pops up the "Open File Dialog" as
+        needed
+        (see:http://doc.trolltech.com/4.3/qfiledialog.html#getOpenFileName )
+        
+    4. To change the GUI invoke the Qt4 designer:
+       
+    
+    
+    One can define the custom look and feel of the GUI application.
+    The number of the available different styles is defined by 
+    your local Qt installation.
+
+    You can check the style available by running "qtconfig" utility
+
+
+  Valeri Fine (fine@bnl.gov)
+                     02.01.2008

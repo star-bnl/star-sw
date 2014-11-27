@@ -1,0 +1,72 @@
+This directory contains a Qt project 
+from http://www-aix.gsi.de/~go4/download/readmeQtv32.txt
+originally designed by Mohammad Al-Turany
+
+*****************************************************************************/
+**
+** Copyright (C) 2004 by Valeri Fine. BNL.  All rights reserved.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+*****************************************************************************/
+
+To  build and run the application do 
+
+   1. Download and unpack the Qt project directory:
+      "http://root.bnl.gov/QtRoot/downloads/qtRootProject.tar.gz"
+      For example use "wget"
+      "wget http://root.bnl.gov/QtRoot/downloads/qtRootProject.tar.gz"
+     
+   2. "Un-tar" the archive
+       tar -xzvf qtRootProject.tar.gz
+      
+   3. To create the your platform makefile:
+      "rm -rf .rootrc"  -- Unix ONLY
+      "qmake tqrootexample.pro"
+      
+   4. To build the application type:
+      Unix:
+         "make"
+      Windows ( no Cygwin!!! ):
+         "nmake"    
+      
+      
+   5. To start the example
+      "tqrootexample [-style=windows | platinum | motif ]"
+      
+     One can define the custom look and feel of the GUI application.
+     The number of the available different styles is defined by 
+     your local Qt installation.
+     
+     You can check the style available by running "qtconfig" utility
+     
+     See: "http://doc.trolltech.com/3.3/qapplication.html#QApplication" 
+     for details and other command mode parameters.
+
+To change the design with the Qt designer do
+
+  1. Start Qt "designer" 
+     with no parameter 
+     
+  2. Add the "Custom Qt Widget"
+     description to your designer 
+     from $ROOTSYS/qt/inc/TQtWidget.cw
+     
+     Follow the Qt designer menu:
+     "Tool" -> "Custom" -> "Edit Custom Widgets" -> "Load Description"
+     
+  3. Close Qt "Designer"
+  4. start designer over with the project file:
+  
+     "designer tqrootexample.pro&"
+
+Note: The steps 1-3 are to be done at once per user account.
+      Qt designer will keep the new custom widget definition 
+      with Qt designer resource file.
+
+The project was adapted for the regular ROOT with Qt layer
+(see http://root.bnl.gov ) by Nikolay Kuzmin
+
+  Valeri Fine (fine@bnl.gov)
+                      28.07.2004

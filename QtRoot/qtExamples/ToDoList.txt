@@ -1,0 +1,16 @@
+
+Windows: January 8, 2006
+
+
+1. HelloCanvas  - TCanvas wrong size 
+2. HelloWord    - hang
+3. OpenGL       - wrong cursor
+4  GeomBrowser  - the depth "5" to perform the "rootgeom example"
+5. HelloCint    - Doesn't work yet without "QtGui"
+
+Unix:
+ 
+ 5. GeomBrowser - crash while typing "enter" from the keyboard
+
+
+Valeri Fine (fine@bnl.gov)

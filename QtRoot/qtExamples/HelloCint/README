@@ -1,0 +1,31 @@
+*****************************************************************************/
+**
+** Copyright (C) 2005 by Valeri Fine. BNL.  All rights reserved.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+*****************************************************************************/
+
+This example demonstrates the Qt-based ROOT shared library build
+
+It uses the  Qt project automatically
+
+   1. to create RootCint dictionary,
+   2. to compile  the new cusewr class
+   3. to create the ROOT shared library.
+
+
+One can then use the regular ROOT seesion and execute the RootCint.C macro.
+
+To  build it from the Qt project file do
+
+   1.> qmake
+   2.> make
+
+To start the application do:
+            
+   > root.exe HelloCint.C
+
+  Valeri Fine (fine@bnl.gov)
+  http://root.bnl.gov

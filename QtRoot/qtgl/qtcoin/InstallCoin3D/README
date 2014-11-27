@@ -1,0 +1,22 @@
+This folder contains information how to install
+Coin3D to be used as ROOT OpenGL viewer
+
+1. Download: http://www.coin3d.org/Coin/about.php
+    The source code is available from 
+    http://www.coin3d.org/Coin/dl_src.php
+
+    One has to download and install 4 different things:
+
+    1. Coin3D
+    2. SmallChange
+    3. SoQt
+    4. simage
+    5. SoGuiExamples 
+
+    See: checkOut.sh script.
+
+2. Install http://www.coin3d.org/Coin/building.php 
+   Under Windows one MUST not install Coin into the default directory 
+   because Fons skips ones.
+
+   See: installCoin3D.sh

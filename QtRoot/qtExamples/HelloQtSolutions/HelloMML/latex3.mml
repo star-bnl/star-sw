@@ -1,0 +1,293 @@
+<math display = 'block'>
+  <mrow>
+    <mtable rowalign='center'>
+      <mtr>
+        <mtd>
+          <mrow>
+            <mfrac>
+              <mi>2s</mi>
+              <mrow>
+                <mi>&pi;</mi>
+                <msup>
+                  <mi>&alpha;</mi>
+                  <mi>2</mi>
+                </msup>
+              </mrow>
+            </mfrac>
+            <mfrac>
+              <mrow>
+                <mo>d</mo>
+                <mi>&sigma;</mi>
+              </mrow>
+              <mrow>
+                <mo>d</mo>
+                <mi>cos</mi>
+                <mi>&theta;</mi>
+              </mrow>
+            </mfrac>
+            <mfenced open = '(' close = ')'>
+              <mrow>
+                <msup>
+                  <mi>e</mi>
+                  <mo>&plus;</mo>
+                </msup>
+                <msup>
+                  <mi>e</mi>
+                  <mo>&minus;</mo>
+                </msup>
+                <mo>&rarr;</mo>
+                <ci>
+                  <mi>f</mi>
+                  <mover accent="true">
+                    <mi>f</mi>
+                    <mo>&macr;</mo>
+                  </mover>
+                </ci>
+              </mrow>
+            </mfenced>
+            <mo>=</mo>
+            <msup>
+              <mfenced open = '&verbar;' close = '&verbar;'>
+                <mfrac>
+                  <mi>1</mi>
+                  <mrow>
+                    <mi>1</mi>
+                    <mo>&minus;</mo>
+                    <mi>&Delta;</mi>
+                    <mi>&alpha;</mi>
+                  </mrow>
+                </mfrac>
+              </mfenced>
+              <mi>2</mi>
+            </msup>
+            <mfenced open = '(' close = ')'>
+              <mrow>
+                <mi>1</mi>
+                <mo>&plus;</mo>
+                <msup>
+                  <mi>cos</mi>
+                  <mi>2</mi>
+                </msup>
+                <mi>&theta;</mi>
+              </mrow>
+            </mfenced>
+          </mrow>
+        </mtd>
+      </mtr>
+      <mtr>
+        <mtd>
+          <mrow>
+            <mo>&plus;</mo>
+            <mi>4</mi>
+            <mo>&hairsp;</mo>
+            <mi>Re</mi>
+            <mfenced open = '{' close = '}'>
+              <mrow>
+                <mfrac>
+                  <mi>2</mi>
+                  <mrow>
+                    <mi>1</mi>
+                    <mo>&minus;</mo>
+                    <mi>&Delta;</mi>
+                    <mi>&alpha;</mi>
+                  </mrow>
+                </mfrac>
+                <mi>&chi;</mi>
+                <mfenced open = '(' close = ')'>
+                  <mi>x</mi>
+                </mfenced>
+                <mfenced open = '[' close = ']'>
+                  <mrow>
+                    <msubsup>
+                      <mover  accent="true">
+                        <mi>g</mi>
+                        <mo stretchy='false'>&circ;</mo>
+                      </mover>
+                      <mi>v</mi>
+                      <mi>e</mi>
+                    </msubsup>
+                    <msubsup>
+                      <mrow>
+                        <mo>&hairsp;</mo>
+                        <mover   accent="true">
+                          <mi>g</mi>
+                          <mo stretchy='false'>&circ;</mo>
+                        </mover>
+                      </mrow>
+                      <mi>v</mi>
+                      <mi>f</mi>
+                    </msubsup>
+                    <mfenced open = '(' close = ')'>
+                      <mrow>
+                        <mi>1</mi>
+                        <mo>&plus;</mo>
+                        <msup>
+                          <mi>cos</mi>
+                          <mi>2</mi>
+                        </msup>
+                        <mi>&theta;</mi>
+                      </mrow>
+                    </mfenced>
+                    <mo>&plus;</mo>
+                    <mi>2</mi>
+                    <msubsup>
+							  <mover   accent="true">
+								  <mi>g</mi>
+								  <mo stretchy='false'>&circ;</mo>
+							  </mover>
+							  <mi>a</mi>
+                      <mi>e</mi>
+                    </msubsup>
+                    <msubsup>
+                      <mrow>
+                        <mo>&hairsp;</mo>
+								 <mover   accent="true">
+									 <mi>g</mi>
+									 <mo stretchy='false'>&circ;</mo>
+								 </mover>
+							 </mrow>
+                      <mi>a</mi>
+                      <mi>f</mi>
+                    </msubsup>
+                    <mi>cos</mi>
+                    <mi>&theta;</mi>
+                  </mrow>
+                </mfenced>
+              </mrow>
+            </mfenced>
+          </mrow>
+        </mtd>
+      </mtr>
+      <mtr>
+        <mtd>
+          <mrow>
+            <mo>&plus;</mo>
+            <mi>16</mi>
+            <msup>
+              <mfenced open = '&verbar;' close = '&verbar;'>
+                <mrow>
+                  <mi>&chi;</mi>
+                  <mo stretchy='false'>(</mo>
+                  <mi>s</mi>
+                  <mo stretchy='false'>)</mo>
+                </mrow>
+              </mfenced>
+              <mi>2</mi>
+            </msup>
+            <mfenced open = '[' close = ']'>
+              <mrow>
+                <mfenced open = '(' close = ')'>
+                  <mrow>
+                    <msubsup>
+                      <mover>
+                        <mi>g</mi>
+                        <mo stretchy='true'>&circ;</mo>
+                      </mover>
+                      <mi>a</mi>
+                      <msup>
+                        <mi>e</mi>
+                        <mi>2</mi>
+                      </msup>
+                    </msubsup>
+                    <mo>&plus;</mo>
+                    <msubsup>
+                      <mover>
+                        <mi>g</mi>
+                        <mo stretchy='true'>&circ;</mo>
+                      </mover>
+                      <mi>v</mi>
+                      <msup>
+                        <mi>e</mi>
+                        <mi>2</mi>
+                      </msup>
+                    </msubsup>
+                  </mrow>
+                </mfenced>
+                <mfenced open = '(' close = ')'>
+                  <mrow>
+                    <msubsup>
+                      <mover>
+                        <mi>g</mi>
+                        <mo stretchy='true'>&circ;</mo>
+                      </mover>
+                      <mi>a</mi>
+                      <msup>
+                        <mi>f</mi>
+                        <mi>2</mi>
+                      </msup>
+                    </msubsup>
+                    <mo>&plus;</mo>
+                    <msubsup>
+                      <mover>
+                        <mi>g</mi>
+                        <mo stretchy='true'>&circ;</mo>
+                      </mover>
+                      <mi>v</mi>
+                      <msup>
+                        <mi>f</mi>
+                        <mi>2</mi>
+                      </msup>
+                    </msubsup>
+                  </mrow>
+                </mfenced>
+                <mfenced open = '(' close = ')'>
+                  <mrow>
+                    <mi>1</mi>
+                    <mo>&plus;</mo>
+                    <msup>
+                      <mi>cos</mi>
+                      <mi>2</mi>
+                    </msup>
+                    <mi>&theta;</mi>
+                  </mrow>
+                </mfenced>
+                <mo>&plus;</mo>
+                <mi>8</mi>
+                <msubsup>
+                  <mover>
+                    <mi>g</mi>
+                    <mo>&circ;</mo>
+                  </mover>
+                  <mi>v</mi>
+                  <mi>e</mi>
+                </msubsup>
+                <msubsup>
+                  <mrow>
+                    <mo>&hairsp;</mo>
+                    <mover>
+                      <mi>g</mi>
+                      <mo>&circ;</mo>
+                    </mover>
+                  </mrow>
+                  <mi>v</mi>
+                  <mi>f</mi>
+                </msubsup>
+                <msubsup>
+                  <mover>
+                    <mi>g</mi>
+                    <mo>&circ;</mo>
+                  </mover>
+                  <mi>a</mi>
+                  <mi>e</mi>
+                </msubsup>
+                <msubsup>
+                  <mrow>
+                    <mo>&hairsp;</mo>
+                    <mover>
+                      <mi>g</mi>
+                      <mo>&circ;</mo>
+                    </mover>
+                  </mrow>
+                  <mi>a</mi>
+                  <mi>f</mi>
+                </msubsup>
+                <mi>cos</mi>
+                <mi>&theta;</mi>
+              </mrow>
+            </mfenced>
+          </mrow>
+        </mtd>
+      </mtr>
+    </mtable>
+  </mrow>
+</math>

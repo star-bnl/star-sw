@@ -1,0 +1,106 @@
+*****************************************************************************/
+**
+** Copyright (C) 2005 by Valeri Fine. BNL.  All rights reserved.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+*****************************************************************************/
+
+This "qtExample" package contains several simple Qt projects to create 
+the various working ROOT-based and Qt-based applications described by
+
+  "User's Guide v4.04"                        http://root.cern.ch/root/doc/RootDoc.html
+  "24. Writing a Graphical User Interface"    ftp://root.cern.ch/root/doc/chapter24.pdf
+   "Qt-ROOT implementation of TVirtualX interface" p. 361
+
+To  build it from the Qt project file do
+
+   1. Download and unpack the Qt project directory:
+        "http://root.bnl.gov/QtRoot/downloads/qtRootExamples.tar.gz
+        
+      For example use "wget"
+        "wget http://root.bnl.gov/QtRoot/downloads/qtRootExamples.tar.gz"
+
+   2. "Un-tar" the archive
+       tar -xzvf qtRootExamples.tar.gz
+       cd qtRoot/qtExamples
+
+   3. To create your platform makefile with TrollTech project utility:
+     (Attention: one needs very "Q"make rather "G"make)
+     
+      "qmake"
+      
+     or 
+     
+      "qmake "CONFIG+=debug"
+      
+      to create the applications with the built-in debug information
+
+   4. To build the application
+      "make"
+
+It should create you several separate directories with the working example in.
+Each directory contains its own README. Please read it FIRST.
+
+
+1. HelloWord     - Qt-based ROOT application  (see p.362)
+2. HelloCanvas   - ROOT-based Qt-application  (see p.362)
+3. HelloCint(*)  - ROOT-based shared library  (see p.363)
+4. ex1           - the simple ROOT-based Qt-application built automatically 
+                   with the qt "designer" (see: p.364)
+5. QtGBrowser(*) - "Advanced version of the Qt application built with the Qt "designer"
+                   (see: http://root.bnl.gov/QtRoot/QtRoot.html#designer )
+                   
+6. CustomWidgets(*) - TQtFloatSpinBox:
+                          To input the float point values
+                         (The QSpinBox works with the integers only)
+
+                    - TQtColorSelectButton
+                          To select the ROOT color from 
+                          the color box dialog
+
+                    - TQtPatternSelectButton
+                          To select the ROOT hatch style from the 
+                         "select style dialog"
+
+7. HelloLife        - the example made of the the original Qt "life" example and
+                      ROOT "hsimple.C" tutorial to demonstrate the off-screen TPad rendering
+
+8. HelloPixmap      - the example shows how to use the special ROOT object of TQtPixmapBox class.
+                      Since TQtPixmapBox subclasses TObject it can drawn onto the TCanvas as 
+                      any other TObject does. On the other hand the interiour of the box can be 
+                      painted using Qt QPainter class and QPixmap methods as well.
+
+9. HelloZoomer      - the simple (non-ROOT) example for the widget zoomming the pixmap objects.
+
+10.CustomCanvasMenu - the same as "ex1". In addition, it demonstrates how one can customize 
+                      the automatically generated ROOT Context Menu.
+                      
+11.macros           - The set of the simple ROOT macros
+
+
+Be kind :) please. 
+It is the first public presentation, and huge amount of the unfold yet bugs and typos
+are to be anticipated :( and tolerated :)
+
+You prompt bug reports will be appreciated a lot.
+
+  My best regards.
+
+  Valeri Fine (fine@bnl.gov)
+  http://root.bnl.gov
+-----  
+  (*) This example needs files:
+  
+         rootcint.pri
+         rootlibs.pri 
+         rootcintrules.pri
+         
+      to be present in  your "$ROOTSYS/include" directory
+      If your ROOT installation lacks these files you can find it here and
+      either:
+
+        1. update your installation
+      or
+        2. edit "qmake" project files to point to your local custom directory

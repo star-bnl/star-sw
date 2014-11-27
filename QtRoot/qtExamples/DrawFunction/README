@@ -1,0 +1,21 @@
+************* Draw Function *********************
+* Author: Stefano Carrazza
+* Date: 12/03/09
+*************************************************
+
+Description: Example that shows how to create a Qt4 application + ROOT TF2 functions in openGL.
+This example is based on HelloOpenGL.
+
+To compile on Windows:
+   cd DrawFunction
+   qmake
+   nmake release #if you built QtRoot in release mode
+
+To compile on Linux:
+   cd DrawFunction
+   qmake 
+   make release
+
+Enjoy,
+
+Stefano Carrazza, 12/03/09

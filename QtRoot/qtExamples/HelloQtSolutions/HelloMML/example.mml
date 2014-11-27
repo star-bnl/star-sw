@@ -1,0 +1,29 @@
+<math>    
+   <munder>
+    	<mn>lim</mn>
+	   <mrow>
+	      <mi>n</mi>
+	      <mo>&RightArrow;</mo>
+    	   <mn>&infin;</mn>
+	   </mrow>
+   </munder>
+   <munderover>
+    	<mo>&Sum;</mo>
+	   <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow>
+	   <mi>n</mi>
+   </munderover>
+    
+   <mi>f</mi>
+   <mfenced>
+      <msub>
+         <mi>c</mi>
+         <mi>i</mi>
+      </msub>
+   </mfenced>
+   
+   <mi>&Delta;</mi>
+   <msub>
+      <mi>x</mi>
+      <mi>i</mi>
+   </msub>
+</math>

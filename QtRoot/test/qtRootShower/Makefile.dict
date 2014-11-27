@@ -1,0 +1,12 @@
+# Makefile to create RootShower RootCint dicitonary
+
+SrcSuf        = cxx
+
+.SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf)
+
+all:            RootShowerDict.$(SrcSuf) $(PROGRAMS)
+
+RootShowerDict.$(SrcSuf): MyParticle.h MyDetector.h MyEvent.h ShowerMain.h RSLinkDef.h
+		@echo "Generating dictionary $@..."
+		@rootcint -f $@ -c $**
+

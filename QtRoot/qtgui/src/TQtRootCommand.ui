@@ -1,0 +1,107 @@
+<ui version="4.0" >
+ <class>TQtRootCommand</class>
+ <widget class="QFrame" name="TQtRootCommand" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>473</width>
+    <height>335</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>ROOT Command Console</string>
+  </property>
+  <property name="frameShape" >
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="frameShadow" >
+   <enum>QFrame::Raised</enum>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" >
+     <item>
+      <widget class="QLabel" name="fLabel" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>110</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="font" >
+        <font>
+         <family>Courier</family>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text" >
+        <string>Command :</string>
+       </property>
+       <property name="alignment" >
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="fComboCmd" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Ignored" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font" >
+        <font>
+         <family>Courier</family>
+        </font>
+       </property>
+       <property name="toolTip" >
+        <string>enter the arbitrary ROOT command here</string>
+       </property>
+       <property name="editable" >
+        <bool>true</bool>
+       </property>
+       <property name="insertPolicy" >
+        <enum>QComboBox::InsertAtTop</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QPlainTextEdit" name="fStatus" >
+     <property name="font" >
+      <font>
+       <family>Courier</family>
+      </font>
+     </property>
+     <property name="toolTip" >
+      <string>Output widget to display the  ROOT stdout contents</string>
+     </property>
+     <property name="tabChangesFocus" >
+      <bool>true</bool>
+     </property>
+     <property name="undoRedoEnabled" >
+      <bool>false</bool>
+     </property>
+     <property name="readOnly" >
+      <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags" >
+      <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

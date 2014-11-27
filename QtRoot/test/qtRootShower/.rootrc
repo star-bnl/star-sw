@@ -1,0 +1,22 @@
+ # .rootrc:$Name:  $:$Id: .rootrc,v 1.3 2013/08/30 16:00:31 perev Exp $
+# Author: Valeri Fine 10/10/2003
+
+# The custom ROOT env to turn on the Qt-edition of ROOT gui
+#  see: http://root.bnl.gov
+#
+# One has to define only the custom parameters.
+# All others are to be picked from the standard place, namely
+#        $ROOTSYS/etc/system.rootrc
+#
+
+Unix.*.Root.DynamicPath:    .:$(ROOTSYS)/lib
+Unix.*.Root.MacroPath:      .:$(ROOTSYS)/macros:$(ROOTSYS)/tutorials
+WinNT.*.Root.DynamicPath:   .;$(ROOTSYS)/bin;$(PATH)
+WinNT.*.Root.MacroPath:     .;$(ROOTSYS)/macros:$(ROOTSYS)/tutorials
+
+# GUI specific settings
+Gui.Backend:               qt
+Gui.Factory:               qtgui
+
+Plugin.TGuiFactory:        qtgui  TQtGUIFactory    QtRootGui  "TQtGUIFactory()"
+Plugin.TVirtualViewer3D:   ogl    TQtRootViewer3D  RQTGL      "TQtRootViewer3D(TVirtualPad*)"

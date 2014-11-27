@@ -1,0 +1,48 @@
+*****************************************************************************/
+**
+** Copyright (C) 2006 by Valeri Fine. BNL.  All rights reserved.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+*****************************************************************************/
+
+This example demonstrates the Qt project file to compile and run qtgsi exampe
+as 
+  - The Qt-based ROOT shared library build
+  - ROOT-base Qt application
+
+The Qt "example1" project contains two sub-projects:
+
+   - dll - to create Qt-based ROOT shared library
+   - exe - to create Qt application.
+           = It contains the ROOT macro to run "example1"
+             as Qt-based application
+           = Stand-alone code to run "example1" as 
+             ROOT-based  Qt appliciation
+           
+ Consult ROOT Manual on 
+"Qt-based ROOT application" vs "ROOT-based Qt application" definitions
+
+No effort was done to change / debug / alternate the original 
+"root/qtgsi/test/example1". It is used "as is" directly.
+
+
+To  build it from the Qt project file do
+
+   > cd qtRoot/qtExample/qtgsi/example1
+   > qmake
+   > make
+
+To start the Qt application do:
+            
+   > cd exe
+   > QtGsiTest [-style stylecode] [mode]
+   
+To start the ROOT application do
+   
+   > cd exe
+   > root Example1.CC
+
+  Valeri Fine (fine@bnl.gov)
+  http://root.bnl.gov

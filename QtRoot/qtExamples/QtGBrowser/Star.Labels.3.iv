@@ -1,0 +1,83 @@
+#Inventor V2.1 ascii
+Separator {
+ 
+  PerspectiveCamera {
+    position 0.51357138 -31.684162 21.588818
+    orientation 0.99972957 0.022505505 0.0059014717  0.752437
+#    nearDistance 25.536015
+    nearDistance 5.0
+    farDistance 52.890335
+    focalDistance 30.257206
+
+  }
+
+Separator {
+   TransformSeparator {
+      Translation {
+          translation  0 19.119431 0 =
+              InterpolateVec3f {
+                   input0  0 -40 0
+                   input1  0  40 0
+                   alpha = OneShot {
+                             duration 10
+                             flags HOLD_FINAL
+                             trigger = ElapsedTime { }.timeOut # anything to trigger
+                             timeIn = ElapsedTime {
+                                speed .2
+                             }.timeOut
+                           }.ramp
+              }.output
+      }
+Separator {
+     renderCaching ON
+     Font {  
+        name "Arial"
+        size 2
+     }
+     ProfileCoordinate2 {
+       point [ 0 0,
+               0.05 0.05,
+               0.25 0.05,
+               0.3 0 ]
+     }
+     LinearProfile {
+       index [ 0, 1, 2, 3 ]
+     }
+     Complexity {
+       type OBJECT_SPACE
+       value 1
+     }
+     ShapeHints {
+       creaseAngle 1.5 
+       shapeType SOLID
+       vertexOrdering COUNTERCLOCKWISE
+     }       
+     Material {
+       diffuseColor 0.6 0.6 0.8
+       specularColor 1 1 1
+       shininess 0.8
+      }
+     Text3 {
+    string [
+       "The Solenoid Tracker At Rhic",
+       "(STAR) experiment, one of", 
+       "the largest experiment at the", 
+       "Relativistic Heavy Ion Collider"
+       "at the Brookhaven National",
+       "Laboratory, was designed", 
+       "to study what the universe may",
+       "have looked like in the first ",
+       "few moments after its creation . . . ",
+       "",
+       "and its signature:",
+       "",
+       "The Quark Gluon Plasma (QGP)"
+    ]
+    spacing 1.5 
+    parts ALL
+     justification CENTER
+  }
+  } # end of the text3 definition
+ }
+}
+}

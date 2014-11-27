@@ -1,0 +1,200 @@
+// @(#)root/ged:$Name:  $:$Id: TQtH1Editor.h.proto,v 1.3 2013/08/30 16:00:10 perev Exp $
+// Author: Valeri Fine 15/-7/2006
+
+/*************************************************************************
+ * This source is based on TH1Editor , a ROOT GUI toolkit.            *
+ * Author: Carsten Hof 16/07/04                                          *
+ * Copyright (C) 1995-2004, Rene Brun and Fons Rademakers.               *
+ * All rights reserved.                                                  *
+ *                                                                       *
+ * For the licensing terms see $ROOTSYS/LICENSE.                         *
+ * For the list of contributors see $ROOTSYS/README/CREDITS.             *
+ *************************************************************************/
+
+#ifndef ROOT_TQtH1Editor
+#define ROOT_TQtH1Editor
+
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+//  TQtH1Editor                                                           //
+//                                                                      //
+//  Editor changing histogram attributes (Type, Coords, Error, Style)   //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
+
+#ifndef ROOT_TQtGedAttFrame
+#include "TQtGedAttFrame.h"
+#endif
+
+#ifndef ROOT_TH1
+#include "TH1.h"
+#endif
+
+
+class QComboBox;
+class QNumberEntry;
+class QCheckBox;
+class QButtonGroup;
+class QHButtonGroup;
+class TString;
+class QRadioButton;
+class QDoubleHSlider;
+class QHSlider;
+class QLineEdit;
+class QNumberEntryField;
+class QTab;
+class TPad;
+class QMainFrame;
+class QTextButton;
+
+class QHButtonGroup;
+      
+class TQtH1Editor : public TQtGedAttFrame<TH1> {
+#ifndef __CINT__
+   Q_OBJECT
+#endif
+
+protected:
+   Bool_t               fSameOpt;         // flag for option "same"
+   QTab               *fTab;             // Pointer to the Tab Parent
+   QCompositeFrame    *fBin;             // Contains the Binning Widgets
+   QCompositeFrame    *fBinContainer;    // Container for fBin
+   Int_t                fTitlePrec;      // font precision level
+   QLineEdit          *fTitle;           // histogram title input field
+   QHButtonGroup       *fDimGroup;        // Radiobuttongroup to change 2D <-> 3D-Plot
+   QRadioButton       *fDim;             // 2D-Plot RadioButton
+   QRadioButton       *fDim0;            // 3D-Plot RadioButton
+   QComboBox	         *fTypeCombo;       // histogram type combo box
+   QComboBox 	        *fCoordsCombo;     // Coordinate System combo box
+   QComboBox 	        *fErrorCombo;      // Error combo box
+   QCheckBox       *fHistOnOff;       // Draw a simple histogram with default options
+   QCheckBox       *fAddMarker;       // Draw a Marker on top of each bin
+   QCheckBox       *fAddB;            // Draw a Bar Chart
+   QCheckBox       *fAddBar;          // Bar Option
+   QCheckBox       *fAdd;             // Activate more Options
+   QCheckBox       *fMakeHBar;        // Draw Horizontal Bar Chart
+   QCheckBox       *fAddSimple;       // Draw a simple histogram  (==HIST draw option)
+   QNumberEntry       *fBarWidth;        // Change the Bar Width
+   QNumberEntry       *fBarOffset;       // Change the Bar Offset
+   QComboBox          *fAddCombo;        // Add Lines, Bars, Fill
+   QComboBox          *fPercentCombo;    // Percentage of the Bar which is drawn in a different color
+   QCompositeFrame    *f3;               // Contains Histogram Type
+   QCompositeFrame    *f4;               // Contains Histogram Coordinate Type
+   QCompositeFrame    *f6;               // Contains the Add-ComboBox (Style)
+   QCompositeFrame    *f7;               // Contains the Marker OnOff CheckBox
+   QCompositeFrame    *f8;               // Contains the Bar Chart CheckBox
+   QCompositeFrame    *f9;               // Contains the Bar Option CheckBox
+   QCompositeFrame    *f10;              // Contains the Bar Option Title
+   QCompositeFrame    *f11;              // Contains the Bar Width/Offset NumberEntries
+   QCompositeFrame    *f12;              // Contains fPercentCombo, fMakeHBar
+   QCompositeFrame    *f15;              // Contains outer line CheckBox
+   QCompositeFrame    *fBinCont;         // Contains the Rebin Widgets for case 1
+   QCompositeFrame    *fBinCont1;        // Contains the Rebin Widgets for case 2
+   QHSlider           *fBinSlider;       // Slider to set rebinning integer value
+   QHSlider           *fBinSlider1;      // Slider to set rebinning integer value for ntuple histogram
+   QNumberEntryField  *fBinNumberEntry;  // Label which shows the rebinned bin number
+   QNumberEntryField  *fBinNumberEntry1; // Label which shows the rebinned bin number for ntuple histogram
+   QHSlider           *fBinOffsetSld;    // Add an offset to the origin of the histogram
+   QNumberEntryField  *fOffsetNumberEntry;// Shows the offset to the origin of the histogram
+   QDoubleHSlider     *fSlider;          // Slider to set x-axis range
+   QNumberEntryField  *fSldMin;          // Contains the minimum value of the x-Axis
+   QNumberEntryField  *fSldMax;          // Contains the maximum value of the x-Axis
+   QCheckBox       *fDelaydraw;       // Delayed drawing of the new axis range
+   QTextButton        *fApply;           // Apply-Button to accept the rebinned histogram
+   QTextButton        *fCancel;          // Cancel-Button to reprobate the rebinned histogram
+   QLabel             *fNameLabel;       // selected object name on the Binning tab
+
+   static  QComboBox *BuildHistTypeComboBox(QFrame *parent, Int_t id);       // builts the Type ComboBox
+   static  QComboBox *BuildHistCoordsComboBox(QFrame *parent, Int_t id);     // builts the Coordinate ComboBox
+   static  QComboBox *BuildHistErrorComboBox(QFrame *parent, Int_t id);      // builts the Error ComboBox
+   static  QComboBox *BuildHistAddComboBox(QFrame *parent, Int_t id);        // builts the Add ComboBox
+   static  QComboBox *BuildPercentComboBox(QFrame *parent, Int_t id);        // builts the ComboBox for setting the Bar options bar1,..., bar4
+
+   virtual void ConnectSignals2Slots();   // connect the signals to the slots
+           virtual void BuildView(QWidget  *editorPanel);
+
+private:
+   Bool_t               fMake;            // Veto Variable
+   Bool_t               fMakeB;           // avoid execution of Bar Slots
+   Int_t                fPx1old,          // save the coordinates of the "virtual box" in delay draw mode (2D Plot)
+                        fPy1old,
+                        fPx2old,
+                        fPy2old;
+   Float_t              fP1NDCold[3],     // save the coordinates of the "virtual box" in delay draw mode
+                        fP2NDCold[3],
+                        fP3NDCold[3],
+                        fP4NDCold[3];
+   Float_t              fP1old[3],        // save the coordinates of the "virtual box" in delay draw mode (3D plot)
+                        fP2old[3],
+                        fP3old[3],
+                        fP4old[3],
+                        fP5old[3],
+                        fP6old[3],
+                        fP7old[3],
+                        fP8old[3];
+   TH1                 *fBinHist;         // Cloned histogram for rebin
+   Double_t             fOldOffset;       // save the old offset of the histogram
+
+// private methods:
+   TString              GetHistTypeLabel();       // Get the Histogram Type = String which contains the Histogram Draw Option
+   TString              GetHistCoordsLabel();     // Get the histogram coordinate system (CYL, SPH, PSR, ..)
+   TString              GetHistErrorLabel();      // Get the histogram Error type (E1, .., E4)
+   TString              GetHistAddLabel();        // Get the histogram addon (smooth line, simple line, ..)
+   void ChangeErrorCombo(Int_t i);
+   void CreateBinTab();                           // Creates the Bin Tab (part of the constructor)
+
+
+public:
+   TQtH1Editor(QMainWindow *mainWidget, TCanvas *canvas, Int_t id=0,
+              Int_t width = EditorDefaultWidth(), Int_t height = 30,
+              UInt_t options = 0, // kChildFrame,
+              Pixel_t back = 0);
+   TQtH1Editor(TCanvas *canvas, QWidget *parent=0, Int_t id=0,
+              Int_t width = EditorDefaultWidth(), Int_t height = 30,
+              UInt_t options = 0, // kChildFrame,
+              Pixel_t back = 0);
+   
+   virtual ~TQtH1Editor();
+   
+public slots:
+   virtual void DoTitle(const char *text);
+   virtual void DoAddMarker(Bool_t on);
+   virtual void DoAddBar(Bool_t);
+   virtual void DoAddB(Bool_t);
+   virtual void DoAddSimple(Bool_t on);
+   virtual void DoHistSimple();
+   virtual void DoHistComplex();
+   virtual void DoHistChanges();
+   virtual void DoHistView();
+   virtual void DoBarOffset();
+   virtual void DoBarWidth();
+   virtual void DoPercent();
+   virtual void DoHBar(Bool_t on);
+   virtual void DoSliderMoved();
+   virtual void DoSliderPressed();
+   virtual void DoSliderReleased();
+   virtual void DoAxisRange();
+   virtual void DoBinMoved(Int_t number);
+   virtual void DoBinReleased();
+   virtual void DoBinPressed();
+   virtual void DoBinLabel();
+   virtual void DoBinReleased1();
+   virtual void DoBinMoved1();
+   virtual void DoBinLabel1();
+   virtual void DoOffsetMoved(Int_t num);
+   virtual void DoOffsetReleased();
+   virtual void DoOffsetPressed();
+   virtual void DoBinOffset();
+   virtual void DoApply();
+   virtual void DoCancel();
+   virtual void PaintBox3D(Float_t *p1, Float_t *p2,Float_t *p3, Float_t *p4);
+   Int_t* Dividers(Int_t n);
+
+#ifndef Q_MOC_RUN
+//MOC_SKIP_BEGIN
+   ClassDef(TQtH1Editor,0)  // TH1 editor
+//MOC_SKIP_END
+#endif
+};
+
+#endif

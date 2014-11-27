@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>Valeri Fine</author>
+ <class>CustomWidgets</class>
+ <widget class="QFrame" name="CustomWidgets">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>542</width>
+    <height>401</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>542</width>
+    <height>401</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="toolTip">
+   <string>Enter any ROOT command or select from the drop down list and hit RETURN</string>
+  </property>
+  <property name="whatsThis">
+   <string>The combox to enter the ROOT command</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Raised</enum>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QFrame" name="frame_5">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>31</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::WinPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>158</width>
+              <height>14</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="TQtMarkerSelectButton" name="frame">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>101</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>101</width>
+              <height>31</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>178</width>
+              <height>18</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="frame_2">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="TQtPatternSelectButton" name="frame_3">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>65</y>
+          <width>247</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+       <widget class="TQtFloatSpinBox" name="doubleSpinBox">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>146</y>
+          <width>247</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="TQtColorSelectButton" name="frame_4">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>227</y>
+          <width>247</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+       </widget>
+       <widget class="TQtFontComboBox" name="comboBox">
+        <property name="geometry">
+         <rect>
+          <x>263</x>
+          <y>65</y>
+          <width>247</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Select font  by ROOT font Id</string>
+        </property>
+       </widget>
+       <widget class="TQtLineWidthComboBox" name="comboBox_2">
+        <property name="geometry">
+         <rect>
+          <x>263</x>
+          <y>146</y>
+          <width>247</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="toolTip">
+         <string>Select ROOT line style</string>
+        </property>
+       </widget>
+       <widget class="TQtLineStyleComboBox" name="comboBox_3">
+        <property name="geometry">
+         <rect>
+          <x>263</x>
+          <y>227</y>
+          <width>247</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="TQtFloatSlider" name="horizontalSlider">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="TQtRootCommandCombo" name="comboBox_4">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="9"/>
+ <customwidgets>
+  <customwidget>
+   <class>TQtMarkerSelectButton</class>
+   <extends>QFrame</extends>
+   <header>TQtMarkerSelectButton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TQtPatternSelectButton</class>
+   <extends>QFrame</extends>
+   <header>TQtPatternSelectButton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TQtFloatSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>TQtFloatSpinBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TQtColorSelectButton</class>
+   <extends>QFrame</extends>
+   <header>TQtColorSelectButton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TQtFontComboBox</class>
+   <extends>QComboBox</extends>
+   <header>TQtStyleComboBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TQtFloatSlider</class>
+   <extends>QSlider</extends>
+   <header>TQtFloatSlider.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TQtLineWidthComboBox</class>
+   <extends>QComboBox</extends>
+   <header>TQtStyleComboBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TQtLineStyleComboBox</class>
+   <extends>QComboBox</extends>
+   <header>TQtStyleComboBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TQtRootCommandCombo</class>
+   <extends>QComboBox</extends>
+   <header>TQtRootCommandCombo.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+ <designerdata>
+  <property name="gridDeltaX">
+   <number>10</number>
+  </property>
+  <property name="gridDeltaY">
+   <number>10</number>
+  </property>
+  <property name="gridSnapX">
+   <bool>true</bool>
+  </property>
+  <property name="gridSnapY">
+   <bool>true</bool>
+  </property>
+  <property name="gridVisible">
+   <bool>true</bool>
+  </property>
+ </designerdata>
+</ui>

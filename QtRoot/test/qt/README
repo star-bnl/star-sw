@@ -1,0 +1,21 @@
+The xform program demonstrates rotation/shearing of text and pixmaps.
+To build this example do
+
+UNIX:
+
+           cd $ROOTSYS/test/qt
+           qmake xform.pro
+           make
+           root xform.CC
+Windows:
+
+           cd %ROOTSYS%/test/qt
+           qmake xform.pro
+           nmake
+           root xform.CC
+           
+           
+Attention. Please, make sure you did get the "test/qt" directory under $ROOTSYS directory. 
+---------  The test can not have worked properly if you locate it elsewhere.
+           
+

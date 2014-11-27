@@ -1,0 +1,153 @@
+Log for qt3to4 on Fri Jul 31 14:06:19 2009. Number of log entries: 147
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GButtonFrame.cxx at line 24 column 54: QVButtonGroup -> Q3VButtonGroup
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GTitleFrame.cxx at line 30 column 34: QHBox -> Q3HBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GTitleFrame.cxx at line 39 column 37: QFrame -> Q3Frame
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GTitleFrame.cxx at line 39 column 53: QFrame -> Q3Frame
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GTitleFrame.cxx: Added the following include directives:
+	#include <Q3Frame> 
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyEvent.cxx at line 22 column 19: qlistview.h -> q3listview.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyEvent.cxx at line 99 column 31: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyEvent.cxx at line 265 column 35: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyEvent.cxx at line 285 column 35: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyEvent.cxx at line 326 column 35: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyEvent.cxx at line 345 column 34: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyEvent.cxx at line 746 column 35: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 30 column 18: qtoolbar.h -> q3toolbar.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 31 column 20: qpopupmenu.h -> q3popupmenu.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 32 column 15: qvbox.h -> q3vbox.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 34 column 16: qframe.h -> q3frame.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 35 column 15: qhbox.h -> q3hbox.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 37 column 20: qvaluelist.h -> q3valuelist.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 38 column 19: qlistview.h -> q3listview.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 40 column 22: qtextbrowser.h -> q3textbrowser.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 46 column 21: qfiledialog.h -> q3filedialog.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 175 column 13: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 176 column 13: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 177 column 13: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 199 column 67: QMainWindow -> Q3MainWindow
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 243 column 27: QToolBar -> Q3ToolBar
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 254 column 39: QIconSet -> QIcon
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 262 column 9: QVBox -> Q3VBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 262 column 28: QVBox -> Q3VBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 268 column 9: QHBox -> Q3HBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 268 column 28: QHBox -> Q3HBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 277 column 33: QVBox -> Q3VBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 286 column 35: QListView -> Q3ListView
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 289 column 68: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 289 column 112: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 290 column 38: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 311 column 19: QTextBrowser -> Q3TextBrowser
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 311 column 49: QTextBrowser -> Q3TextBrowser
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 312 column 39: QTextEdit -> Q3TextEdit
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 362 column 31: IO_ReadOnly -> QIODevice::ReadOnly
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 363 column 19: QTextStream -> Q3TextStream
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 424 column 30: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 426 column 81: CTRL -> Qt::CTRL
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 426 column 87: Key_O -> Qt::Key_O
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 432 column 85: CTRL -> Qt::CTRL
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 432 column 91: Key_A -> Qt::Key_A
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 435 column 81: CTRL -> Qt::CTRL
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 435 column 87: Key_X -> Qt::Key_X
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 437 column 30: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 457 column 33: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 464 column 30: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 470 column 30: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 553 column 48: QFileDialog -> Q3FileDialog
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 586 column 40: QFileDialog -> Q3FileDialog
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 697 column 26: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 710 column 38: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 894 column 40: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 897 column 45: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 963 column 35: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx at line 1130 column 16: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.cxx: Added the following include directives:
+	#include <Q3TextStream> 	#include <QLabel> 	#include <QPixmap> 
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RSAbout.cxx at line 23 column 94: QMessageBox -> Qt
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RSAbout.cxx at line 24 column 56: QMessageBox -> Qt
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RSMsgBox.cxx
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/ShowerMain.cxx
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GShowerPad.cxx at line 16 column 65: WFlags -> Qt::WFlags
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GShowerPad.cxx at line 17 column 5: QVBox -> Q3VBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GShowerPad.cxx at line 30 column 16: QHButtonGroup -> Q3HButtonGroup
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GShowerPad.cxx at line 30 column 44: QHButtonGroup -> Q3HButtonGroup
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyDetector.cxx
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyParticle.cxx
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RSHelptext.cxx
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 18 column 15: qhbox.h -> q3hbox.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 19 column 23: qvbuttongroup.h -> q3buttongroup.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 22 column 20: qvgroupbox.h -> q3vgroupbox.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 23 column 18: qlistbox.h -> q3listbox.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 24 column 16: qtable.h -> q3table.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 85 column 38: QTabDialog -> Q3TabDialog
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 94 column 9: QHBox -> Q3HBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 94 column 25: QHBox -> Q3HBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 99 column 30: QVButtonGroup -> Q3VButtonGroup
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 121 column 17: QVGroupBox -> Q3VGroupBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 121 column 49: QVGroupBox -> Q3VGroupBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 125 column 38: QTable -> Q3Table
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 140 column 18: QHBox -> Q3HBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 144 column 30: QListBox -> Q3ListBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 144 column 45: QVGroupBox -> Q3VGroupBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 149 column 17: QVGroupBox -> Q3VGroupBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 149 column 45: QVGroupBox -> Q3VGroupBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 153 column 37: QTable -> Q3Table
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.cxx at line 191 column 15: QListBoxItem -> Q3ListBoxItem
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/constants.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GButtonFrame.h at line 24 column 23: qvbuttongroup.h -> q3buttongroup.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GButtonFrame.h at line 29 column 40: QVButtonGroup -> Q3VButtonGroup
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GShowerPad.h at line 22 column 15: qvbox.h -> q3vbox.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GShowerPad.h at line 27 column 31: QVBox -> Q3VBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GShowerPad.h at line 30 column 65: WFlags -> Qt::WFlags
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GTitleFrame.h at line 26 column 18: qhbox.h -> q3hbox.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GTitleFrame.h at line 30 column 31: QHBox -> Q3HBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/GTitleFrame.h: Added the following include directives:
+	#include <QLabel> 
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyDetector.h
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyEvent.h
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/MyParticle.h
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/ParticlesDef.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 25 column 21: qmainwindow.h -> q3mainwindow.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 26 column 18: qintdict.h -> q3intdict.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 27 column 20: qptrvector.h -> q3ptrvector.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 38 column 16: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 43 column 19: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 47 column 15: QTextEdit -> Q3TextEdit
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 58 column 14: QToolBar -> Q3ToolBar
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 60 column 11: QVBox -> Q3VBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 61 column 15: QListView -> Q3ListView
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 66 column 20: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 67 column 20: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 68 column 20: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 69 column 20: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 96 column 36: QMainWindow -> Q3MainWindow
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 124 column 14: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 125 column 14: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 126 column 14: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 127 column 14: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 128 column 14: QPopupMenu -> Q3PopupMenu
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 132 column 12: QToolBar -> Q3ToolBar
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 138 column 9: QVBox -> Q3VBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 140 column 13: QListView -> Q3ListView
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 145 column 13: QTextEdit -> Q3TextEdit
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 158 column 12: QIntDict -> Q3IntDict
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 160 column 14: QPtrVector -> Q3PtrVector
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 188 column 46: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h at line 197 column 51: QListViewItem -> Q3ListViewItem
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RootShower.h: Added the following include directives:
+	#include <QPixmap> 	#include <Q3PopupMenu> 
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RSAbout.h
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RSHelpText.h
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RSLinkDef.h
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RSMsgBox.h
+No changes made to file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/RSVersion.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.h at line 19 column 20: qtabdialog.h -> q3tabdialog.h
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.h at line 21 column 12: QTable -> Q3Table
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.h at line 22 column 14: QListBox -> Q3ListBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.h at line 23 column 19: QVButtonGroup -> Q3VButtonGroup
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.h at line 26 column 40: QTabDialog -> Q3TabDialog
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.h at line 30 column 10: QTable -> Q3Table
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.h at line 31 column 10: QTable -> Q3Table
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.h at line 32 column 12: QListBox -> Q3ListBox
+In file E:/cygwin/home/fine/work/ROOT/5.24/root/test/qtRootShower/SettingsDlg.h at line 33 column 17: QVButtonGroup -> Q3VButtonGroup
+In file RootShower.pro: Added entry QT +=  qt3support 
+

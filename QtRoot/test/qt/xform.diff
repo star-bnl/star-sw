@@ -1,0 +1,364 @@
+--- xform.cpp.original	Sun Mar 31 03:44:01 2002
++++ xform.cpp	Tue Apr 16 21:26:15 2002
+@@ -1,5 +1,5 @@
+ /****************************************************************************
+-** $Id: xform.diff,v 1.3 2013/08/30 16:00:30 perev Exp $
++** $Id: xform.diff,v 1.3 2013/08/30 16:00:30 perev Exp $
+ **
+ ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
+ **
+@@ -24,6 +24,8 @@
+ #include <qlayout.h>
+ #include <qvbox.h>
+ #include <qwidgetstack.h>
++#include <qtooltip.h> 
++#include <qmessagebox.h>
+ 
+ #include <qpainter.h>
+ #include <qpixmap.h>
+@@ -31,10 +33,16 @@
+ 
+ #include <stdlib.h>
+ 
++#include "TROOT.h"
++#include "TPad.h"
++#include "TQt.h"
++#include "TSystem.h"
++#include "TCanvas.h"
++#include "TQtEmbeddedWidget.h"
+ 
+ class ModeNames {
+ public:
+-  enum Mode { Text, Image, Picture };
++  enum Mode { Text, Image, Picture, RootCanvas, RootPad };
+ };
+ 
+ 
+@@ -59,6 +67,7 @@
+   void fontSelected( const QFont & );
+   void changeMode(int);
+   void timerEvent(QTimerEvent*);
++  void execRoot();
+ private:
+   Mode mode;
+   QSlider	 *rotS;		       // Rotation angle scroll bar
+@@ -70,10 +79,14 @@
+   QCheckBox	 *mirror;	       // Checkbox for mirror image on/of
+   QWidgetStack* optionals;
+   QLineEdit	 *textEd;	       // Inp[ut field for xForm text
++  QLineEdit	 *rootCommand;	   // Inp[ut field for ROOT command
++
+   QPushButton  *fpb;		       // Select font push button
+   QRadioButton *rb_txt;	       // Radio button for text
+   QRadioButton *rb_img;	       // Radio button for image
+   QRadioButton *rb_pic;	       // Radio button for picture
++  QRadioButton *rb_can;	       // Radio button for TCanvas
++  QRadioButton *rb_pad;	       // Radio button for TPad
+   QFont currentFont;
+ };
+ 
+@@ -98,6 +111,7 @@
+   void setPixmap( QPixmap );
+   void setPicture( const QPicture& );
+   void setMode( int );
++  void updatePad(QPixmap*);
+ private:
+   QSizePolicy sizePolicy() const;
+   QSize sizeHint() const;
+@@ -130,17 +144,35 @@
+   rb_txt = new QRadioButton( this, "text" );
+   rb_img = new QRadioButton( this, "image" );
+   rb_pic = new QRadioButton( this, "picture" );
++
++  rb_can = new QRadioButton( this, "canvas" );
++  QToolTip::add(rb_can,"Select \"canvas\" to activate \"Embedded\" canvas");
++
++  rb_pad = new QRadioButton( this, "pad" );
++  QToolTip::add(rb_pad,"Select and click any ROOT tool button from the ROOT ToolBar to activate ROOT");
++
+   optionals = new QWidgetStack(this);
+   QVBox* optionals_text = new QVBox(optionals);
+   optionals_text->setSpacing(6);
++
+   QVBox* optionals_other = new QVBox(optionals);
+   optionals_other->setSpacing(6);
++
++  QVBox* optionals_root = new QVBox(optionals);
++  optionals_root->setSpacing(6);
++  
+   optionals->addWidget(optionals_text,0);
+   optionals->addWidget(optionals_other,1);
++  optionals->addWidget(optionals_root,2);
+   fpb		= new QPushButton( optionals_text, "text" );
+   textEd	= new QLineEdit( optionals_text, "text" );
+   textEd->setFocus();
++ 
+   
++  rootCommand	= new QLineEdit( optionals_root, "rootCommand" );
++  rootCommand->setFocus();
++  QToolTip::add(rootCommand,"Type any ROOT (C++ statement) command here");
++
+   rotLCD->display( "  0'" );
+   
+   rotS->setRange( -180, 180 );
+@@ -161,10 +193,18 @@
+   bg->insert(rb_txt,0);
+   bg->insert(rb_img,1);
+   bg->insert(rb_pic,2);
++  
++  bg->insert(rb_can,3);
++  bg->insert(rb_pad,4);
++  
+   rb_txt->setText( tr("Text") );
+   rb_img->setText( tr("Image") );
+   rb_img->setChecked(TRUE);
+   rb_pic->setText( tr("Picture") );
++  
++  rb_can->setText( tr("TCanvas") );
++  rb_pad->setText( tr("gPad - current TPad") );
++  
+   connect( bg, SIGNAL(clicked(int)), SLOT(changeMode(int)) );
+   
+   fpb->setText( tr("Select font...") );
+@@ -173,6 +213,9 @@
+   textEd->setText( "Troll" );
+   connect( textEd, SIGNAL(textChanged(const QString&)),
+     SLOT(newTxt(const QString&)) );
++
++  rootCommand->setText("gROOT->Macro(\"qzdemo.CC(gPad)\");");
++  connect(rootCommand,SIGNAL(returnPressed ()), SLOT( execRoot()) );
+   
+   magLCD = new QLCDNumber( 4,optionals_other, "magLCD" );
+   magLCD->display( "100" );
+@@ -185,6 +228,8 @@
+   
+   optionals_text->adjustSize();
+   optionals_other->adjustSize();
++  optionals_root->adjustSize();
++
+   changeMode(Image);
+   
+   startTimer(20); // start an initial animation
+@@ -212,6 +257,17 @@
+   emit newMatrix( matrix() );
+ }
+ 
++/*
++    Called whenever the user hits "return" key 
++    to complete ROOT command
++*/
++void XFormControl::execRoot()
++{
++  // rootCanvas->GetCanvas()->cd();
++  gROOT->ProcessLine(rootCommand->text());
++  rootCommand->clear();
++}
++
+ void XFormControl::newTxt(const QString& s)
+ {
+   emit newText(s);
+@@ -281,12 +337,17 @@
+   if ( mode == Text ) {
+     optionals->raiseWidget(0);
+     rb_txt->setChecked(TRUE);
++  } else if (mode == RootCanvas) {
++    optionals->raiseWidget(2);
++    rb_can->setChecked(TRUE); 
+   } else {
+     optionals->raiseWidget(1);
+-    if ( mode == Image )
+-      rb_img->setChecked(TRUE);
+-    else
+-      rb_pic->setChecked(TRUE);
++    switch (mode) {
++    case Image:      rb_img->setChecked(TRUE); break;
++    case RootPad:    rb_pad->setChecked(TRUE); break;
++    case Picture:
++    default:  rb_pic->setChecked(TRUE);
++    };
+   }
+   qApp->flushX();
+ }
+@@ -357,10 +418,26 @@
+ void ShowXForm::setMode( int mode )
+ {
+   m = (Mode)mode;
++  if ( m == RootPad ) {
++    connect(((TQt *)gVirtualX)->Emitter(),SIGNAL(padPainted(QPixmap*)), SLOT(updatePad(QPixmap*))); 
++  } else {
++    disconnect(((TQt *)gVirtualX)->Emitter(),SIGNAL(padPainted(QPixmap*)), this,SLOT(updatePad(QPixmap*))); 
++  }
++}
++
++void ShowXForm::updatePad( QPixmap *pixPad )
++{
++  if ( m == RootPad) {
++    if ( pixPad == (QPixmap *)gPad->GetPixmapID()) showIt();
++  }
+ }
+ 
+ void ShowXForm::showIt()
+ {
++  if (mode() == RootCanvas) {
++    return;
++  }
++  QPixmap rootPm;
+   QPainter p;
+   QRect r;	  // rectangle covering new text/pixmap in virtual coordinates
+   QWMatrix um;  // copy user specified transform
+@@ -379,6 +456,14 @@
+   case Image:
+     r = pix.rect();
+     break;
++  case RootCanvas:
++        break;
++  case RootPad:
++    if (gPad) {
++      rootPm = *(QPixmap *)gPad->GetPixmapID();
++      r = rootPm.rect();
++    }
++    break;
+   case Picture:
+     // ### need QPicture::boundingRect()
+     r = QRect(0,0,1000,1000);
+@@ -415,6 +500,11 @@
+     //bitBlt( &pm, pm.width()/2 - rotated.width()/2,
+     //pm.height()/2 - rotated.height()/2, &rotated );
+     break;
++  case RootCanvas:
++    break;
++  case RootPad:
++    p.drawPixmap( -rootPm.width()/2, -rootPm.height()/2, rootPm );
++    break;
+   case Picture:
+     // ### need QPicture::boundingRect()
+     p.scale(0.25,0.25);
+@@ -422,7 +512,6 @@
+     p.drawPicture( picture );
+   }
+   p.end();
+-  
+   int xpos = width()/2  - pw/2;
+   int ypos = height()/2 - ph/2;
+   bitBlt( this, xpos, ypos,			// copy pixmap to widget
+@@ -432,8 +521,8 @@
+ 
+ 
+ /*
+-Grand unifying widget, putting ShowXForm and XFormControl
+-together.
++    Grand unifying widget, putting ShowXForm and XFormControl
++    together.
+ */
+ 
+ class XFormCenter : public QHBox, public ModeNames
+@@ -445,31 +534,58 @@
+   void setFont( const QFont &f ) { sx->setFont( f ); }
+   void newMode( int );
+ private:
+-  ShowXForm	*sx;
+-  XFormControl *xc;
++  QWidgetStack      *wStack;
++  ShowXForm	        *sx;
++  XFormControl      *xc;
++  TQtEmbeddedWidget *rt; // ROOT embedded TCanvas
++
+ };
+ 
+ void XFormCenter::newMode( int m )
+ {
+   static bool first_i = TRUE;
+   static bool first_p = TRUE;
+-  
++  static bool first_r = TRUE;
+   if ( sx->mode() == m )
+     return;
+-  if ( m == Image && first_i ) {
++  if ( m == Image && first_i) {
+     first_i = FALSE;
+     QPixmap pm;
+-    if ( pm.load( "image.any" ) )
++    QString fileName(gSystem->Getenv("ROOTSYS"));
++    fileName += "/test/qt/image.any";
++    if ( pm.load( fileName ) )
+       sx->setPixmap( pm );
++    wStack->raiseWidget(0);
++    return;
++  }  
++  if ( m == RootCanvas && first_r ) {
++    first_r = FALSE;
++    rt = new TQtEmbeddedWidget(wStack,"EmbeddedCanvas");
++    wStack->addWidget(rt,1);
++    setStretchFactor(rt,1);
++    wStack->raiseWidget(1);
++    rt->adjustSize();
++    sx->setMode(m);
++    rt->GetCanvas()->Resize();
+     return;
+   }
+   if ( m == Picture && first_p ) {
+     first_p = FALSE;
+     QPicture p;
+-    if (p.load( "picture.any" ))
++    QString fileName(gSystem->Getenv("ROOTSYS"));
++    fileName += "/test/qt/picture.any";
++    if (p.load( fileName ))
+       sx->setPicture( p );
++    wStack->raiseWidget(0);
+     return;
+   }
++  if (m == RootCanvas) {
++    rt->GetCanvas()->cd();
++    wStack->raiseWidget(1);
++
++  } else {
++    wStack->raiseWidget(0);
++  }
+   sx->setMode(m);
+ }
+ 
+@@ -479,8 +595,14 @@
+   QFont f( "Charter", 36, QFont::Bold );
+   
+   xc = new XFormControl( f, this );
+-  sx = new ShowXForm( f, this );
++
++  wStack = new QWidgetStack(this);
++     sx  = new ShowXForm( f, wStack );
++  wStack->addWidget(sx,0);
++
++
+   setStretchFactor(sx,1);
++
+   xc->setFrameStyle( QFrame::Panel | QFrame::Raised );
+   xc->setLineWidth( 2 );
+   connect( xc, SIGNAL(newText(const QString&)), sx,
+@@ -495,17 +617,20 @@
+   sx->setMatrix(xc->matrix());
+ }
+ 
+-
+-int main( int argc, char **argv )
+-{
+-  QApplication a( argc, argv );
+-  
++int start()
++{  
+   XFormCenter *xfc = new XFormCenter;
+-  
+-  a.setMainWidget( xfc );
+   xfc->setCaption("Qt Example - XForm");
+   xfc->show();
+-  return a.exec();
++  return 0;
+ }
++
++class mainClass 
++{
++public:
++  mainClass(){ start();}
++};
++
++mainClass  __mainProgram__;
+ 
+ #include "xform.moc"		      // include metadata generated by the moc

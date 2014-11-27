@@ -1,0 +1,135 @@
+<HTML>
+   <TITLE>How to install Qt version of ROOT on UNIX.</TITLE>
+   <BODY>
+<p>
+  To install ROOT with Qt-layer one has to 
+<ul>
+   <li> <a href="ftp://ftp.trolltech.com/qt/source">install Qt</a>. Version 3.3 or above built with no XFT support is <b> recommended</b> 
+   <br>
+   I build my own Qt version with the following configure parameters:
+       <code><b><small>
+<pre>
+       ./configure  -thread -no-xft -qt-gif  -no-exceptions -dlopen-opengl
+</pre>
+</small></b></code>
+I.e. one is required to build the Qt version with the "thread" support and with no "exceptions".
+One should turn off the Qt "xft" support to get the proper ROOT fonts scaling (especially for TLatex  class)
+<P>
+Generally you are free to select the remaining Qt options like the types of the different image formats provided etc.
+You can check the installation parameters of your Qt system by looking up the file
+       <code><b><small>
+<pre>
+       more $QTDIR/config.status
+</pre>
+</small></b></code>
+
+<small>
+   It is <b> NOT recommended</b> to build Qt with the "xft" fonts support. 
+   That may cause some mismatch between the ROOT generated postscript file and the Qt generated screen image of TCanvas/TPad. 
+   "xft" Qt feature may significantly penalize the ROOT rendering performance 
+   especially when one communicates the X-client from the remote X-server.
+</small>
+<p>
+<blockquote>
+      <P>To add the Qt-layer to your existent X11-version of ROOT you need 3 components:
+         <ul>
+            <li>
+               The source code of the original ROOT from the <a href="http://root.cern.ch">ROOT 
+                  Web site</a>
+            <li>
+               The source of the Qt-layer from the <a href="http://root.bnl.gov">BNL Web site</a>
+            <li>
+              Qt libraries <a href="http://www.trolltech.com">version 3.2 or higher</a> built with no XFT support.
+              <br>  Read <a href="http://www.ciac.org/ciac/bulletins/o-201.shtml"> O-201: Qt Package Vulnerabilities"<a/> 
+               <a href="http://www.ciac.org/ciac/index.html">CIAC</a> bulletin also.
+         </ul>
+      <p>and a few simple (for those familiar with the plain ROOT installation process) 
+         steps :
+         <ol>
+            <li>
+               Install Qt (<a href="ftp://ftp.trolltech.com/qt/source">version 3.2 </a>
+                  and higher built with no XFT support)
+            <li> 
+            <bold><small>
+               Note: Skip this step if you want to add the "Qt layer" and "Qt extension" to your existent ROOT installation.
+            </small> </bold> 
+            <br>
+               Take the <a href="http://root.cern.ch/root/CVS.html">fresh ROOT</a> version 
+               <b><code>
+                     <pre>   
+           cvs -d :pserver:cvs@root.cern.ch:/user/cvs login
+           cvs -z3 -d :pserver:cvs@root.cern.ch:/user/cvs co root
+           </pre>
+                  </code></b>                  
+            <li>
+               Login BNL CVS server. 
+               <br>Make sure you know the anonymous <b><a href="QtRoot.html#source">username/password</a></b> combination. 
+                              <b><code>
+                     <pre>   
+           cvs -d :pserver:cvsuser@cvs.bnl.gov:/data01/CVS login
+           </pre>
+                  </code></b>
+            <li>               
+               Download the <a href="QtRoot.html#source">Qt-layer</a> from either CVS repository
+                              <b><code>
+                     <pre>   
+           cvs -d :pserver:cvsuser@cvs.bnl.gov:/data01/CVS co -d qtRoot root
+           </pre>
+                  </code></b>
+                  or the <a href="http://root.bnl.gov/QtRoot/downloads/qtFullRoot.tar.gz">tar-ball</a>
+                   <b><code><pre>                     
+           wget http://root.bnl.gov/QtRoot/downloads/qtFullRoot.tar.gz
+           </pre>
+                  </code></b>
+
+        
+      <P>
+      <li>
+         Check that you have installed and set your local Qt packages properly.
+         <br>
+         <b>Make sure <code>QTDIR</code> env variable is provided</b>
+      <P>
+      <li>
+         <b>Option.</b> If you want Coin3D viewer support then  <b>make sure</b> <code>IVROOT</code> env variable is provided</b>
+      <P>
+      <li>
+      Now you are ready to install ROOT with the Qt-layer.
+      <P>To adjust the brand new ROOT version do: <b><code>
+               <pre>   
+          cvs -d :pserver:cvsuser@cvs.bnl.gov:/data01/CVS co -d qtRoot root
+          cd qtRoot
+          # define where you want to install the Qt components
+          
+          export QTROOTSYSDIR=`pwd`/qtrootsys
+          
+          # you may want to add Qt components into your ROOT installation
+          # directly. In this case replace "qtrootsys" directory 
+          # name with $ROOTSYS
+          # -- For example:
+          # -- export QTROOTSYSDIR=$ROOTSYS
+
+          qmake          # Do not mess QMAKE with GMAKE. 
+                         # At this point you need QMAKE
+          
+          # use &gt qmake "CONFIG+=debug" # if you want to install the Qt components
+                                      # with the debug information attached
+          make install 
+          
+          # Note:  Please disregard the warning messages:
+          #       "WARNING: Failure to find: ${QMAKE_TARGET}Dict.cxx"
+
+          ls  ${QTROOTSYSDIR}
+          
+          # clean the redundant files
+          
+           make distclean
+           
+         </pre>
+            </code></b>
+      <P>
+            <a name=turnQtOn><br>
+               Make sure </a><b><code>Gui.Backend</code></b> resource <a href="QtRoot.html#switch">selects "qt"</a>
+            interface. Edit $ROOTSYS/etc/system.rootrc file as needed or just copy the custom <a href="root/root.diff/config/unix.rootrc"><code><b>".rootrc"</b></code> </a>
+            file in to your working or home directory.
+   </BODY>
+</HTML>

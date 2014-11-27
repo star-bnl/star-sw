@@ -1,0 +1,40 @@
+<math display = 'block'>
+  <mrow>
+    <mi>F</mi>
+    <mo stretchy='false'>(</mo>
+    <mi>t</mi>
+    <mo stretchy='false'>)</mo>
+    <mo>=</mo>
+    <mrow>
+      <munderover>
+        <mo>&sum;</mo>
+        <mrow>
+          <mi>i</mi>
+          <mo>=</mo>
+          <mi>&infin;</mi>
+        </mrow>
+        <mi>&infin;</mi>
+      </munderover>
+      <mrow>
+        <mi>A</mi>
+        <mo stretchy='false'>(</mo>
+        <mi>i</mi>
+        <mo stretchy='false'>)</mo>
+        <mi>cos</mi>
+        <mo lspace='0px' rspace='0px'>&num;</mo>
+        <mo stretchy='false'>[</mo>
+        <mo stretchy='false'>]</mo>
+        <mfenced open = '{' close = '}'>
+          <mfrac>
+            <mi>i</mi>
+            <mrow>
+              <mi>t</mi>
+              <mo>+</mo>
+              <mi>i</mi>
+            </mrow>
+          </mfrac>
+        </mfenced>
+      </mrow>
+    </mrow>
+  </mrow>
+</math>

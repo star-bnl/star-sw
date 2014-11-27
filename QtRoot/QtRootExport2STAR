@@ -1,0 +1,45 @@
+#!/usr/local/bin/tcsh
+cd $SCRATCH
+setenv STARDEPLOY $SCRATCH/StarDeploy
+# --
+echo "----------- 1. Clean up $STARDEPLOY "
+#
+rm -rf $STARDEPLOY 
+mkdir -p $STARDEPLOY
+ls $STARDEPLOY
+cd $STARDEPLOY
+# --
+# Define the merging modules"
+#
+# setenv f " root/MyModules.mk root/MyRules.mk root/qt root/qtetc root/qtExamples root/qtged root/qtgl root/qtgui root/qtimage root/qtroot root/qtRoot.pro root/qtthread root/qtx3d  root/README.html root/test"
+setenv f " root/qtgl "
+echo "-----------  2. Define the merging modules $f"
+# --
+echo "-----------  3. Export QtRoot CVS"
+#
+cvs -d :pserver:cvsuser@cvs.bnl.gov:/data01/CVS export -d qtExport  -r HEAD $f
+# cvs -d :pserver:cvsuser@cvs.bnl.gov:/data01/CVS co -d qtExport  -r HEAD $f
+cd qtExport/root
+# --
+echo "------------ 4. Wipe out the CVS "
+#
+rm -rf `find . -name CVS`
+# --
+echo "------------ 5. Prepare the clean tar file"
+#
+tar -czvf $SCRATCH/StarDeploy/qtExport/qtExport.tar.gz *
+cd $STARDEPLOY
+# --
+echo " ----------- 6. Check out the STAR QtRoot package from the STAR CVS HEAD"
+#
+cvs  -d $CVSROOT co QtRoot
+cd QtRoot
+# --
+echo "------------ 7. Replace the old stuff with a new one "
+tar -xzvf $STARDEPLOY/qtExport/qtExport.tar.gz
+# --
+echo "------------- 8. produce the diff to see the result"
+#
+rm -rf ../root.`date +%d.%m.%Y`.diff
+cvs diff -u >../root.`date +%d.%m.%Y`.diff
+# rm -rf $STARDEPLOY/qtExport

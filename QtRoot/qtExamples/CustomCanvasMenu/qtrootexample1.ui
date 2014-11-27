@@ -1,0 +1,257 @@
+<ui version="4.0" >
+ <author>Mohammad Al-Turany</author>
+ <comment>This is an Example for using Qt-ROOT interface
+Drag and drop the histograms from the ListView to the Pads or the
+Canvases to draw them there, you can also use the slider between
+the different widget to resize them.</comment>
+ <class>qtrootexample1</class>
+ <widget class="QWidget" name="qtrootexample1" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>530</width>
+    <height>503</height>
+   </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle" >
+   <string comment="Qt inside" >ROOT (Qt inside)</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="Q3Frame" name="frame3" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" >
+      <property name="spacing" >
+       <number>40</number>
+      </property>
+      <property name="margin" >
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="Q3Frame" name="frame5" >
+        <property name="frameShape" >
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow" >
+         <enum>QFrame::Raised</enum>
+        </property>
+        <property name="lineWidth" >
+         <number>0</number>
+        </property>
+        <layout class="QVBoxLayout" >
+         <item>
+          <widget class="QLabel" name="TextLabel2" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize" >
+            <size>
+             <width>400</width>
+             <height>80</height>
+            </size>
+           </property>
+           <property name="text" >
+            <string>&lt;font size="-1">This is an Example (borrowed from GO4 project) for using ROOT with Qt layer. &lt;br>&#xd;
+Click the histograms from the ListView to draw them onto the 1d or 2d canvases on the right pane. &#xd;
+You can also use the slider between the different widget to resize them.&lt;/font></string>
+           </property>
+           <property name="alignment" >
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="wordWrap" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="textLabel3" >
+           <property name="text" >
+            <string>&lt;tt>&lt;p align="center">&lt;b>http://root.bnl.gov&lt;/b>&lt;/p>&lt;/tt></string>
+           </property>
+           <property name="wordWrap" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="pixmapLabel2" >
+        <property name="pixmap" >
+         <pixmap>BnlLogo.png</pixmap>
+        </property>
+        <property name="scaledContents" >
+         <bool>false</bool>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap" >
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QSplitter" name="splitter4" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="Q3ListView" name="ListView1" >
+      <property name="minimumSize" >
+       <size>
+        <width>150</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="maximumSize" >
+       <size>
+        <width>250</width>
+        <height>32000</height>
+       </size>
+      </property>
+      <property name="toolTip" >
+       <string>Click  the histogram to display it</string>
+      </property>
+      <property name="whatsThis" >
+       <string>THis is a list of the histogram object from the ROTO file</string>
+      </property>
+      <column>
+       <property name="text" >
+        <string>Name </string>
+       </property>
+       <property name="clickable" >
+        <bool>true</bool>
+       </property>
+       <property name="resizable" >
+        <bool>true</bool>
+       </property>
+      </column>
+      <column>
+       <property name="text" >
+        <string>Type</string>
+       </property>
+       <property name="clickable" >
+        <bool>true</bool>
+       </property>
+       <property name="resizable" >
+        <bool>true</bool>
+       </property>
+      </column>
+     </widget>
+     <widget class="Q3Frame" name="frame4" >
+      <property name="frameShape" >
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow" >
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" >
+       <item>
+        <widget class="QSplitter" name="splitter4" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <widget class="TQtWidget" native="1" name="tQtWidget1" >
+          <property name="toolTip" >
+           <string>This is the ROOT TCanvas to display 1D histograms</string>
+          </property>
+         </widget>
+         <widget class="TQtWidget" native="1" name="tQtWidget2" >
+          <property name="toolTip" >
+           <string>This is the ROOT TCanvas to display 2D histograms</string>
+          </property>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="comboBox1" >
+     <property name="toolTip" >
+      <string>Type any ROOT (C++ statement) command here</string>
+     </property>
+     <property name="editable" >
+      <bool>true</bool>
+     </property>
+     <property name="insertPolicy" >
+      <enum>QComboBox::InsertAtTop</enum>
+     </property>
+     <property name="autoCompletion" >
+      <bool>true</bool>
+     </property>
+     <property name="duplicatesEnabled" >
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <customwidgets>
+  <customwidget>
+   <class>Q3Frame</class>
+   <extends>QFrame</extends>
+   <header>Qt3Support/Q3Frame</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Q3ListView</class>
+   <extends>Q3Frame</extends>
+   <header>q3listview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TQtWidget</class>
+   <extends>QWidget</extends>
+   <header>TQtWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <includes>
+  <include location="local" >TQtWidget.h</include>
+ </includes>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>ListView1</sender>
+   <signal>mouseButtonPressed(int,Q3ListViewItem*,QPoint,int)</signal>
+   <receiver>qtrootexample1</receiver>
+   <slot>ListView1_mouseButtonPressed(int,Q3ListViewItem*,QPoint,int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

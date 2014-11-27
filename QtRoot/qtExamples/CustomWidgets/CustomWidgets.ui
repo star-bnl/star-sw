@@ -1,0 +1,463 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>RootCustomWidget</class>
+<widget class="QWidget">
+    <property name="name">
+        <cstring>RootCustomWidget</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>444</width>
+            <height>275</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>QtROOT Custom Widgets</string>
+    </property>
+    <hbox>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <widget class="QLayoutWidget">
+            <property name="name">
+                <cstring>layout4</cstring>
+            </property>
+            <vbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
+                <widget class="QFrame">
+                    <property name="name">
+                        <cstring>frame5_2</cstring>
+                    </property>
+                    <property name="frameShape">
+                        <enum>StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Raised</enum>
+                    </property>
+                    <hbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QFrame">
+                            <property name="name">
+                                <cstring>frame3</cstring>
+                            </property>
+                            <property name="frameShape">
+                                <enum>StyledPanel</enum>
+                            </property>
+                            <property name="frameShadow">
+                                <enum>Raised</enum>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="TQtColorSelectButton">
+                                    <property name="name">
+                                        <cstring>tQtColorSelectButton2</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>0</width>
+                                            <height>32</height>
+                                        </size>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>To select the custom ROOT color click arrow</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>The button to select the ROOT color</string>
+                                    </property>
+                                </widget>
+                                <spacer>
+                                    <property name="name">
+                                        <cstring>spacer1</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Vertical</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Expanding</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>20</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="TQtFloatSpinBox">
+                                    <property name="name">
+                                        <cstring>tQtFloatSpinBox1</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>0</width>
+                                            <height>32</height>
+                                        </size>
+                                    </property>
+                                    <property name="Value" stdset="0">
+                                        <string>11.4</string>
+                                    </property>
+                                    <property name="maxValue" stdset="0">
+                                        <string>+38.3</string>
+                                    </property>
+                                    <property name="minValue" stdset="0">
+                                        <string>-12</string>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>The spin box to enter the floating point numbers</string>
+                                    </property>
+                                </widget>
+                                <spacer>
+                                    <property name="name">
+                                        <cstring>spacer4</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Vertical</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Expanding</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>30</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="TQtPatternSelectButton">
+                                    <property name="name">
+                                        <cstring>tQtPatternSelectButton1</cstring>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>0</width>
+                                            <height>32</height>
+                                        </size>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>To select the ROOT hatch pattern click arrow</string>
+                                    </property>
+                                    <property name="whatsThis" stdset="0">
+                                        <string>ROOT fill style selector</string>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                        <widget class="QFrame">
+                            <property name="name">
+                                <cstring>frame5</cstring>
+                            </property>
+                            <property name="frameShape">
+                                <enum>StyledPanel</enum>
+                            </property>
+                            <property name="frameShadow">
+                                <enum>Raised</enum>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="TQtLineWidthComboBox">
+                                    <property name="name">
+                                        <cstring>tQtLineWidthComboBox1</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>1</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>0</width>
+                                            <height>32</height>
+                                        </size>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>Select the ROOT Line Width</string>
+                                    </property>
+                                </widget>
+                                <spacer>
+                                    <property name="name">
+                                        <cstring>spacer6</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Vertical</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Expanding</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>59</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="TQtLineStyleComboBox">
+                                    <property name="name">
+                                        <cstring>tQtLineStyleComboBox1</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>1</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>0</width>
+                                            <height>32</height>
+                                        </size>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>Select the ROOT Line Style</string>
+                                    </property>
+                                </widget>
+                                <spacer>
+                                    <property name="name">
+                                        <cstring>spacer7</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Vertical</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Expanding</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>59</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="TQtFontComboBox">
+                                    <property name="name">
+                                        <cstring>tQtFontComboBox1</cstring>
+                                    </property>
+                                    <property name="sizePolicy">
+                                        <sizepolicy>
+                                            <hsizetype>1</hsizetype>
+                                            <vsizetype>0</vsizetype>
+                                            <horstretch>0</horstretch>
+                                            <verstretch>0</verstretch>
+                                        </sizepolicy>
+                                    </property>
+                                    <property name="minimumSize">
+                                        <size>
+                                            <width>0</width>
+                                            <height>32</height>
+                                        </size>
+                                    </property>
+                                    <property name="toolTip" stdset="0">
+                                        <string>Select the ROOT Font to be used within TPad objects</string>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                    </hbox>
+                </widget>
+                <widget class="TQtFloatSlider">
+                    <property name="name">
+                        <cstring>tQtFloatSlider1</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>0</width>
+                            <height>16</height>
+                        </size>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Slider to manage the double floating point numbers</string>
+                    </property>
+                </widget>
+            </vbox>
+        </widget>
+    </hbox>
+</widget>
+<customwidgets>
+    <customwidget>
+        <class>TQtFloatSlider</class>
+        <header location="local">TQtFloatSlider.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>-1</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>7</hordata>
+            <verdata>0</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image0</pixmap>
+        <signal>ValueChanged(double)</signal>
+        <signal>SliderMoved(double)</signal>
+        <slot access="public" specifier="">SetMinValue(double)</slot>
+        <slot access="public" specifier="">SetMaxValue(double)</slot>
+        <slot access="public" specifier="">SetValue(double)</slot>
+        <property type="Bool">tracking</property>
+    </customwidget>
+    <customwidget>
+        <class>TQtPatternSelectButton</class>
+        <header location="local">TQtPatternSelectButton.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>24</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>1</hordata>
+            <verdata>0</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image1</pixmap>
+        <signal>brushSelected(const TQtBrush &amp;)</signal>
+        <slot access="public" specifier="">SetBrush(unsigned int)</slot>
+        <slot access="public" specifier="">SetBrush(const TQtBrush&amp;)</slot>
+        <slot access="public" specifier="">SetStyle(Style_t)</slot>
+    </customwidget>
+    <customwidget>
+        <class>TQtColorSelectButton</class>
+        <header location="local">TQtColorSelectButton.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>24</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>1</hordata>
+            <verdata>0</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image1</pixmap>
+        <signal>colorSelected(const QColor&amp;)</signal>
+        <signal>destroyed(QObject*)</signal>
+        <slot access="protected" specifier="">languageChange()</slot>
+        <slot access="public" specifier="">PopupDialog()</slot>
+        <property type="Color">fColor</property>
+    </customwidget>
+    <customwidget>
+        <class>TQtFloatSpinBox</class>
+        <header location="local">TQtFloatSpinBox.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>24</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>1</hordata>
+            <verdata>0</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image2</pixmap>
+        <signal>valueChanged(const QString&amp;)</signal>
+        <slot access="public" specifier="">SetMinValue(float)</slot>
+        <slot access="public" specifier="">SetMinValue(const QString&amp;)</slot>
+        <slot access="public" specifier="">SetMaxValue(float)</slot>
+        <slot access="public" specifier="">SetMaxValue(const QString&amp;)</slot>
+        <slot access="public" specifier="">SetValue(float)</slot>
+        <slot access="public" specifier="">SetValue(const QString&amp;)</slot>
+        <slot access="public" specifier="">SetDigit(int)</slot>
+        <property type="String">minValue</property>
+        <property type="String">maxValue</property>
+        <property type="String">Value</property>
+        <property type="ButtonSymbols">buttonSymbols</property>
+        <property type="String">prefix</property>
+        <property type="String">suffix</property>
+    </customwidget>
+    <customwidget>
+        <class>TQtFontComboBox</class>
+        <header location="local">TQtStyleComboBox.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>-1</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image3</pixmap>
+    </customwidget>
+    <customwidget>
+        <class>TQtLineStyleComboBox</class>
+        <header location="local">TQtStyleComboBox.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>-1</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image3</pixmap>
+    </customwidget>
+    <customwidget>
+        <class>TQtLineWidthComboBox</class>
+        <header location="local">TQtStyleComboBox.h</header>
+        <sizehint>
+            <width>-1</width>
+            <height>-1</height>
+        </sizehint>
+        <container>0</container>
+        <sizepolicy>
+            <hordata>5</hordata>
+            <verdata>5</verdata>
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+        </sizepolicy>
+        <pixmap>image3</pixmap>
+    </customwidget>
+</customwidgets>
+<images>
+    <image name="image0">
+        <data format="PNG" length="502">89504e470d0a1a0a0000000d4948445200000016000000160806000000c4b46c3b000001bd49444154789cbd95b16eda5014863f12536a06a47440f5803a2345caeeb153d732754a5f80850760e8d491a9cf40a53e409098715a2b62ea50cb88a1522b85c415d00a5fec7bed0e86108225e3b6f4489625eb9ceffefefdfbde8265591ca28e0e4205b4870f4cd38cb3862ccb2a64f514ee5b619a66dc6c369152329d4e0982002104aeebe2ba6e2ef88e62a5142fce8f39318e91312cc25bae3ebabc799da531033c9fcf3979aa21821f2cd5353331e4b19e0f9a0af67d9f65088b70c25c0cb9f90ede243f38351591022563224972a97f0456113c3f7bcfe508ce5f7ee6cbb7fc600d7623b65618afefd1ee60562c8fd21ad6602521267983bc75f7f15aad16f57a9d5eaf870a1360146e2b6fb7db54ab552a950aa552691ba46994cb65fafd3e9d4e67031e0c06082112a55102966ab5c00a3c1a8df03c0f5dd729168b5b605dd7a9d56a1886b1add8b66d6cdba6d16810c995252b2bd68abbddeede56a4a742c1878b579c1ad07977cab3277bf336e0b47f3e52895af51739d660b3a198a619fbbecfeca7c76436647603fe0282e5ee60ee4d683c1e73f5c9e1910ebfa6892dd75fff50f1fd721c07e76d7ed0c33ad809f27fc0fb1c39fbf6fd060182d5869bca71b40000000049454e44ae426082</data>
+    </image>
+    <image name="image1">
+        <data format="XPM.GZ" length="1280">789c75d24b6fa25018c6f1bd9f82c8ce4c6ce56e26b368eba5dadaba9c64320b388252112b2a6a9bf9eec3ff059d48a6ef73bcfcf208e79870d3d27e4e275aeba6b1ddf9bb58696ae1675a6bb65fad4ebf7efff86c340d432b9665699de6b746b3ad294dbf95813368283332143c42b343e04868588e69c050e859a1e9c14818dab619c203b464602eb4091c0b5dc7b65cb81746043e41db700d5b367a13ba6ed7961f2fa1e378a1e3c02d741d02d742cff75c39d53bf42c0257c280c005ec9a04ee842e818150066e84330213e89b044e851e8173a122f0150606812f4297c0895011f80c5587405d681298092d021f850e813da10cbc87b35b023f841681a9d02170200c081c0a15817d6144600c4383c007a14de09db04ba012ca401f461e8127a18c3c93ff1d6974ff3241f9a1578d9a85e51de66aa1e402553571f8b69449e2559c144512574d1a2dd73241fa9ea6413b48d3aad964995ecdb678ad747d5735ed7d9e1f0e87fd21cff952bc1dcfcd492657ffe6ba3970c6727dd49abbe28ce5ba2f9bd3b97928ce58ae5eade9f70783620d87c3c75a33188d9fca7d9eeb4db5cfd372526b7ae526e3e5fae5bac97bd9795e6bd764e53ea3309ad71afdf27fa6b5bb4d2eff27b96e8ef364b3295631c1b9f9ea39f8a2f9f3bdf117251c4f40</data>
+    </image>
+    <image name="image2">
+        <data format="PNG" length="605">89504e470d0a1a0a0000000d4948445200000016000000160806000000c4b46c3b0000022449444154789ccd943d8bea4014869f48dc45dbd88bb0c6bf2081fc0c6dfd3dfe8814692cacb7d462611102162ab8b0606b3729fc221f7ecc2d640663b22e72b9705f3864e69d9937e7cc39670c40f6fb7d2e970b4208f6fb3dcf62b3d9b0582cf8fafad29c0970b95ce8743a341a8da74515269309aeebea7909400841a3d1e07c3e3f654110e8b1699a991f9500f6fb3de7f399d3e9a4ed16b7bc5a0b8200c7710882000029655e58218aa28cd86eb763b7db65d6a228623a9deab05dd7d59e170a2b4fa228d2760fc5398e93e15dd7cd4559ba3d341e8fb12c0bcbb2188fc74829f9fefe36dedfdf33bc1082300c09c310210442889c13991bef76bb7a53ad56d3e36eb74b18864829351fc731afafaf002449429aa6c5c2524a7cdfa756ab01e0fb3e499200b05eafb12c4b1f52fce170b88a9826c7e3b1583849127abd1eabd58a72b94cbd5e67b55a01d7fbbfe5d55d97cb65bdfe30799ee7f1f6f646bd5e67381cf2f1f181e33872341a69def33c5dbb711c6b535114de71bbdd66b95ceaf966b3310079cfb75a2dee311c0e8b3d8ee398e3f198b16ab52a67b3598e1f0c061991c160f073b9dd77d723b36d1bdff7816b926ddbfe397940ae64140cc3c8b5ac6ddb789e47b3d9244dd3c70da2a032acbe52ca5cd6a594d8b65de888f678bbdd6684e05a7ea6691672a7d349bf66aa39d49b92119ecfe77c7e7e52a9543242699af2f2f2f2a357b7d14ea7d30c6700b278fbdfa1f4fb96ff4d78329918ff42f80f3effcb44bb7727b50000000049454e44ae426082</data>
+    </image>
+    <image name="image3">
+        <data format="PNG" length="988">89504e470d0a1a0a0000000d4948445200000016000000160806000000c4b46c3b000003a349444154789ccd955d4c9b5518c77fe7bc2fed5b5a3e6ad752441c4358a626e82e26498d330abb309105bc305e6ed16b17e3ad31d9e59265deb345bdd2b02bb3cd0bf7a1c440a3896d700e90e29041da0242a17ddbd2aff71c2f8a899de047a289cfd53927e7f9e59fffffe439221a8df25f94f9f0412c16d3e9741adbb6ff162097cbb1b0b0403c1e67727252ec0bce151fe8be811247068a549d2242088404d30429eb6b3468adeb0d42e028c5f2cf2ef415834824a2a3d1a86800c76231dd3750626dfb16197b919ab38bdba370aa161b2983cc6619b48b470e35f1e891325e5f8d6a558310983e08868dfdad48a7d3f40e14c9d88b54750ecbe361e95e13776ee499ff7e1728eeddf4d273d4e2d4580b832f1a285d000d9647ee0fb66d9b8a53a4e614b03c1ebefd0a26c6d70189b7c5a4b73f847409d22b159613bb5cbe50606d25c06b675c68ca28a5f707d72d13b83db074cf64627c0d500c8d74303c62e00f094ccba1546c63fa668589f15fb8fe699a8e702fc3631652161ac00dfa8504a76a71fb9a0dd4187a35c4eb6f35d11e2e605a39b6372cee5c2f726ab49933e78280c9679f6c626f490c4334801b149b266c240d123f94696d6d65f8b489923b988681bdd3c64797f2cccd64d85aaff0e63b41a66e7a49cc6649ccfb311e7ab80d8aa5146c6d95519438fc84853f28304d8342d6cff8059bb9990c8143cd0cbed082b7adc4b1679aebc1af5611f280f0ea1e83502e40215d0ac372d8def0f3f10779e6676c40e1769b747637615a450c57bd5d69136934821b7702fc41017849ae5629ef3633fd6585b9990cededcd84c3eda4923b5c7c2fc5fd193fc9fb252492aec75d48a10e56ac1574f5d438dce7e1c14f45a6bea870fa0d2fd92d3fcf3def23dce5e6e2fb3552cb3b9c7f7b854ab1405bc0cd53c735e96423b851b1d6787d0eaf8cfa00b87a7983e95b25ce9e0b70e26587de67b3bc7bbe8740a89dfcce36955a8da1d100ddfd35347ff28e11826a15064f1aa456fd5c9b48f2e1a53453b7bd1c7bdac27009924b6bd8990aec85f5ddd705122321cca603c2cbe572384a81d0d4449eb1b316a1ce7e6e5c5d2771374be2ee36a000893f603134fa18df4cdad8c50a95b2229f3dc0e385850596975d183e8142a2a831342a397132cce28f15d657141a4967b78b278f6bba8f2a5e1ae9a05a06d3b4998d97f707c7e371f4158360d8c0ed916847200c852125c6ded894d2209d52a4521a3e5798a6249f83d97889cd35a7d1d5dfff209148a431817f58bfcde23f80ffcd927f7de57f06fe15435d868c1867ee490000000049454e44ae426082</data>
+    </image>
+</images>
+<includes>
+    <include location="local" impldecl="in implementation">CustomWidgets.ui.h</include>
+</includes>
+<functions>
+    <function access="private" specifier="non virtual">init()</function>
+</functions>
+  <slots>
+    <slot access="public" specifier="virtual">SliderValue(double)</slot>
+  </slots>
+  <layoutdefaults spacing="6" margin="11"/>
+<includehints>
+    <includehint>TQtColorSelectButton.h</includehint>
+    <includehint>TQtFloatSpinBox.h</includehint>
+    <includehint>TQtPatternSelectButton.h</includehint>
+    <includehint>TQtStyleComboBox.h</includehint>
+    <includehint>TQtStyleComboBox.h</includehint>
+    <includehint>TQtStyleComboBox.h</includehint>
+    <includehint>TQtFloatSlider.h</includehint>
+</includehints>
+</UI>

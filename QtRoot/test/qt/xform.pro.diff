@@ -1,0 +1,14 @@
+1,2c1,2
+< TEMPLATE	= lib
+< CONFIG		+= qt warn_on release dll
+---
+> TEMPLATE	= app
+> CONFIG		+= qt warn_on release
+6,9c6,7
+< INCLUDEPATH = %ROOTSYS%/include
+< win32:LIBS        = C:\cygwin\home\fine\root\lib\libCore.lib C:\cygwin\home\fine\root\lib\libQt.lib
+< # DEPENDPATH=../../include
+< # REQUIRES=full-config
+---
+> DEPENDPATH=../../include
+> REQUIRES=full-config

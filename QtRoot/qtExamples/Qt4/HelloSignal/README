@@ -1,0 +1,27 @@
+
+"HelloSignal" is another small Qt4-based project to create the shared library to be loaded into the
+existing ROOT session
+
+   The shared library contains the Qt UI created with the Qt4 designer and
+RootCint dictionary to communicate with the UI from the ROOT macro/command
+prompt.
+
+To  build and run the  application do
+
+   1. "Un-tar" the archive
+       tar -xzvf HelloSignal.tar.gz
+
+   2  Invoke:
+
+      qmake
+      make
+
+   3. Usage:
+      3.1. start root session
+      3.2. Load the libHelloSignal.so shared library
+
+   4. To change the GUI invoke the Qt4 designer:
+
+
+  Valeri Fine (fine@bnl.gov)
+                     19.03.2008

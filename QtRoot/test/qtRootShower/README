@@ -1,0 +1,51 @@
+                RootShower (Qt-based edition)
+
+This directory contains Qt-based edition of the original RootShower
+code written by Bertrand Bellenot (Bertrand.Bellenot@alcan.com) and 
+it is available from:
+
+      ftp://root.cern.ch/root/RootShower.tar.gz
+
+The goal of this example is to show how Qt-based ROOT can be used to build 
+the complex GUI. 
+I tried to preserve the original design and code replacing the ROOT gui classes 
+with some from Qt GUI equivalents if possible.
+
+To run this example one needs to install the ROOT Qt-based version  from 
+http://root.bnl.gov and invoke the example as follows:
+
+              root RootShower.CC
+
+The source code of the Qt-based version is available from the 
+CVS repository (see: http://root.bnl.gov/QtRoot/QtRoot.html#source )
+
+To retrieve the source code of the example alone do:
+
+ cvs -d :pserver:fine@cvs.bnl.gov:/data01/CVS co root/test/qtRootShower
+
+To re-compile (one is required to install Qt package first) the example from the scratch:
+
+1. Make RootCint dictionary:
+
+   Windows:
+      nmake -f Makefile.dict
+
+
+2. Build the main Makefile with "qmake" utility
+
+      qmake RootShower.pro
+
+3. Compile and build the share (DLL) library:
+
+    [n]make
+
+4. run the example:
+
+    root RootShower.CC
+
+5.  Enjoy.
+
+Attention. Please, make sure you did get the "test/qtRootShower" directory under $ROOTSYS directory. 
+---------  The test can not have worked properly if you locate it elsewhere.
+
+    Valeri Fine (fine@bnl.gov)

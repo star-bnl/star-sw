@@ -1,0 +1,48 @@
+09-Feb-2003   Valeri Fine <fine@bnl.gov>
+    *  New method to back ROOT TG (gui) classes
+    
+06-Mar-2005   Valeri Fine <fine@bnl.gov>
+TGQt:
+
+  * comments clean up
+  * 2 news protected static methods:
+
+      static Int_t   RegisterWid(QPaintDevice *wid);
+      static void    UnRegisterWid(QPaintDevice *wid);
+
+    to resolved the potential 64-bits platform problems
+  * Some extra fixes to facilitate the 64-bits platfroms
+
+  *  TQtWidget
+     - new Qt signal: 
+       RootEventProcessed(TObject *selected, unsigned int event,TCanvas *canvas)
+       where 
+               "selected" -  is a TObject has been selected by the current TPad
+               "event"    - ROOT event processed by TCanvas.
+
+       This Qt signal allows forward the "ROOT signal" to Qt "slot".
+ 
+       By default TQtWidget emits no "RootEventProcessed" for the performance reason
+       An user-code can activate the signal emitting with a bunch of the new methods.
+       See next point
+
+  * A bunch of the methods to facilitate the new Qt Signal:
+
+      void     EnableSignalEvents  (UInt_t f);
+      void     DisableSignalEvents (UInt_t f);
+      Bool_t   IsSignalEventEnabled(UInt_t f) const;
+
+    where "f" is logical combination of the bits:
+  
+       kMousePressEvent       = BIT(0), // emit signal as soon as TCanvas processed mousePressEvent       QMouseEvent
+       kMouseMoveEvent        = BIT(1), // emit signal as soon as TCanvas processed mouseMoveEvent        QMouseEvent
+       kMouseReleaseEvent     = BIT(2), // emit signal as soon as TCanvas processed mouseReleaseEvent     QMouseEvent
+       kMouseDoubleClickEvent = BIT(3), // emit signal as soon as TCanvas processed mouseDoubleClickEvent QMouseEvent
+       kKeyPressEvent         = BIT(4), // emit signal as soon as TCanvas processed keyPressEvent         QKeyEvent
+       kEnterEvent            = BIT(5), // emit signal as soon as TCanvas processed enterEvent            QEvent
+       kLeaveEvent            = BIT(6)  // emit signal as soon as TCanvas processed leaveEvent            QEvent
+
+  *  TQtApplication
+
+     A special DISPLAY env varaible value QT_BATCH to use Qt layer with "non-gui" mode 
+    (in case when no X11  connection is provdied)

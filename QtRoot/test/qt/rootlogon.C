@@ -1,0 +1,7 @@
+{
+   printf("\nWelcome to the ROOT tutorials\n\n");
+   printf("\nType \".x demos.C\" to get a toolbar from which to execute the demos\n");
+   printf("\nType \".x demoshelp.C\" to see the help window\n\n");
+   printf("\n\nType \".x xform.CC\" to see the combined Qt/Root demo\n\n");
+}
+

@@ -1,0 +1,99 @@
+? .moc
+? EPSInterface.cpp
+? Mac.diff
+? Makefile
+? VRenderInterface.cpp
+? VRenderInterface.h
+? libQGLViewer.2.0.0.dylib
+? libQGLViewer.prl
+Index: VRender/Primitive.h
+===================================================================
+RCS file: /data01/CVS/root/qtgl/qglviewer/QGLViewer/VRender/Primitive.h,v
+retrieving revision 1.1
+diff -u -r1.1 Primitive.h
+--- VRender/Primitive.h	31 Jul 2005 05:05:52 -0000	1.1
++++ VRender/Primitive.h	2 Aug 2005 23:53:50 -0000
+@@ -103,7 +103,11 @@
+ #ifdef WIN32
+ # include <windows.h>
+ #endif
++#ifndef __APPLE__
+ #include <GL/gl.h>
++#else
++#include <gl.h>
++#endif
+ 
+ namespace vrender
+ {
+Index: VRender/Types.h
+===================================================================
+RCS file: /data01/CVS/root/qtgl/qglviewer/QGLViewer/VRender/Types.h,v
+retrieving revision 1.1
+diff -u -r1.1 Types.h
+--- VRender/Types.h	31 Jul 2005 05:05:52 -0000	1.1
++++ VRender/Types.h	2 Aug 2005 23:53:50 -0000
+@@ -50,7 +50,11 @@
+ #ifdef WIN32
+ # include <windows.h>
+ #endif
++#ifndef __APPLE__
+ #include <GL/gl.h>
++#else
++#include <gl.h>
++#endif
+ 
+ namespace vrender
+ {
+Index: VRender/VRender.cpp
+===================================================================
+RCS file: /data01/CVS/root/qtgl/qglviewer/QGLViewer/VRender/VRender.cpp,v
+retrieving revision 1.1
+diff -u -r1.1 VRender.cpp
+--- VRender/VRender.cpp	31 Jul 2005 05:05:52 -0000	1.1
++++ VRender/VRender.cpp	2 Aug 2005 23:53:50 -0000
+@@ -47,7 +47,12 @@
+ #ifdef WIN32
+ # include <windows.h>
+ #endif
++#ifndef __APPLE__
+ #include <GL/gl.h>
++#else
++#include <gl.h>
++#endif
++
+ #include <stdio.h>
+ #include <vector>
+ #include "VRender.h"
+@@ -106,7 +111,7 @@
+ 			LINE_EGALITY_EPS 	= 2.0/(1 << depth_bits) ;
+ 		}
+ #endif
+-		vparams.size() = max(returned,vparams.size()) ;
++		vparams.size() = max((int)returned,vparams.size()) ;
+ #ifdef _VRENDER_DEBUG
+ 		cout << "Size = " << vparams.size() << ", returned=" << returned << endl ;
+ #endif
+Index: VRender/VisibilityOptimizer.cpp
+===================================================================
+RCS file: /data01/CVS/root/qtgl/qglviewer/QGLViewer/VRender/VisibilityOptimizer.cpp,v
+retrieving revision 1.1
+diff -u -r1.1 VisibilityOptimizer.cpp
+--- VRender/VisibilityOptimizer.cpp	31 Jul 2005 05:05:52 -0000	1.1
++++ VRender/VisibilityOptimizer.cpp	2 Aug 2005 23:53:50 -0000
+@@ -56,8 +56,14 @@
+ #ifdef WIN32
+ # include <windows.h>
+ #endif
+-#include <GL/gl.h>
+-#include <GL/glx.h>
++#ifndef __APPLE__
++#  include <GL/gl.h>
++#  include <GL/glx.h>
++#else
++#  include <gl.h>
++#  include <glx.h>
++#endif
++
+ #include "../qglviewer.h"
+ #endif
+ 

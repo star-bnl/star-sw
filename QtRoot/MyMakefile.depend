@@ -1,0 +1,97 @@
+# -*- mode: makefile -*-
+#
+# The custom Makefile with  Qt layer dependencies
+
+QTINCDIR        ?= $(QTDIR)/include
+QTSYSTEMLIB      = $(QTLIBDIR) $(QTLIB)
+ifeq (yes,$(WINRTDEBUG))
+QTSYSTEMLIB      += $(shell cygpath -m  $(QTDIR)/lib/QtXmld4.lib  $(QTDIR)/lib/QtWebKitd4.lib $(QTDIR)/lib/QtNetworkd4.lib )
+QTOpenGLLIB      += $(shell cygpath -m  $(QTDIR)/lib/QtOpenGL4.lib ) opengl32.lib glu32.lib 
+else
+QTSYSTEMLIB      += $(shell cygpath -m $(QTDIR)/lib/QtXmlt4.lib $(QTDIR)/lib/QtNetwork4.lib)
+QTOpenGLLIB      += $(shell cygpath -m  $(QTDIR)/lib/QtOpenGL4d.lib ) opengl32.lib glu32.lib 
+endif
+
+ifeq ($(PLATFORM),win32)
+QTINCDIR            := $(foreach includefile,$(QTINCDIR), $(shell cygpath -m "$(includefile)" ) )
+# GDKLIBS             :=
+
+#TABLELIBDEP         = $(TREELIB) $(GPADLIB) $(G3DLIB) $(GRAFLIB) $(HISTLIB) $(GEOMLIB)
+#TABLELIBEXTRA       = lib/libTree.lib lib/libGpad.lib \
+#                      lib/libGraf3d.lib lib/libGraf.lib lib/libHist.lib lib/libGeom.lib
+
+# QTSYSTEMLIB         = $(QTLIBDIR ) $(QTLIB)            
+
+# GQTLIBDEP	        = $(GPADLIB) $(RINTLIB) $(GRAFLIB)
+GQTLIBEXTRA         = $(QTSYSTEMLIB) lib/libGpad.lib lib/libRint.lib lib/libGraf.lib
+
+GQTCOMMONLIB        = $(GQTLIBEXTRA) lib/libGQt.lib
+
+# QTROOTLIBDEP        = $(GQTLIB) $(GUILIB)
+QTROOTLIBEXTRA      = $(GQTCOMMONLIB) lib/libGui.lib
+
+QTGUILIBDEPM        = $(GRAFLIB) $(GPADLIB) $(GQTLIB) $(GUILIB) $(TABLELIB)  $(IOLIB)
+QTGUILIBDEP         = $(QTGUILIBDEPM)
+QTGUILIBEXTRA       = $(GQTCOMMONLIB) lib/libGraf.lib  lib/libGui.lib lib/libTable.lib lib/libRint.lib  lib/libRIO.lib lib/libHist.lib
+
+# GLLIBEXTRA         += opengl32.lib glu32.lib 
+# $(GLLIBEXTRA) $(GQTCOMMONLIB) $(OPENIVLIBDIR) $(OPENIVLIB)
+
+QTGLLIBDEPM         = $(GQTLIB) $(GPADLIB) $(G3DLIB) $(QTGUILIB) $(TABLELIB) $(GEOMLIB) $(MATRIXLIB)
+QTGLLIBDEP          = $(QTGLLIBDEPM)
+QTGLLIBEXTRA        = $(QTSYSTEMLIB) $(QTOpenGLLIB) lib/libQtRootGui.lib $(GQTCOMMONLIB) $(OPENIVLIBDIR) $(OPENIVLIB) \
+                      lib/libTable.lib lib/libMathCore.lib lib/libGraf3d.lib  lib/libMatrix.lib lib/libGeom.lib 
+
+QTCOIN3DLIBDEPM     = $(QTGLLIB)
+QTCOIN3DLIBDEP      = $(QTCOIN3DLIBDEPM)
+
+COIN3DLIBDIR        := /LIBPATH:$(IVROOT)/lib
+COIN3DLIB           :=  SmallChange1.lib  coin3.lib  simage1.lib  soqt1.lib
+
+QTCOIN3DLIBEXTRA    = $(QTSYSTEMLIB) $(QTOpenGLLIB)  lib/libQtRootGui.lib  lib/libRQTGL.lib $(GQTCOMMONLIB) $(COIN3DLIBDIR) $(COIN3DLIB) \
+                      lib/libTable.lib lib/libGraf3d.lib  lib/libMatrix.lib lib/libGeom.lib
+
+QTIMAGELIBDEPM      = $(GQTLIB)
+QTIMAGELIBDEP       = $(QTIMAGELIBDEPM)
+QTIMAGELIBEXTRA     = $(GQTCOMMONLIB) lib/libGraf.lib
+
+QTGEDLIBDEPM        = $(QTGUILIB)  $(HISTLIB)
+QTGEDLIBDEP         = $(QTGEDLIBDEPM)
+QTGEDLIBEXTRA       = $(GQTCOMMONLIB) lib/libQtRootGui.lib lib/libGraf.lib lib/libHist.lib 
+
+else
+
+#TABLELIBDEP         = $(TREELIB) $(GPADLIB) $(G3DLIB) $(GRAFLIB) $(HISTLIB) $(GEOMLIB)
+#TABLELIBEXTRA       = -Llib  -lTree -lGpad -lGraf3d -lGraf -lHist -lGeom
+
+GLLIBDEP            = $(GPADLIB) $(G3DLIB) $(GUILIB)
+GLLIBEXTRA         := -Llib -lGpad -lGraf3d -lGui $(GLLIBEXTRA)
+ 
+# QTSYSTEMLIB         = $(QTLIBDIR) $(QTLIB)            
+
+GQTLIBDEP	        = $(GPADLIB) $(RINTLIB)
+GQTLIBEXTRA         = -Llib -lGpad -lRint $(QTSYSTEMLIB)
+
+GQTCOMMONLIB        = $(GQTLIBEXTRA) -lGQt
+
+QTROOTLIBDEP        = $(GQTLIB) $(GUILIB)
+QTROOTLIBEXTRA      = $(GQTCOMMONLIB) -lGui
+
+QTGUILIBDEP         = $(GRAFLIB) $(GPADLIB) $(GQTLIB) $(GUILIB) $(TABLELIB) $(GRAFLIB) $(IOLIB) $(HISTLIB)
+QTGUILIBEXTRA       = $(GQTCOMMONLIB) -lGraf  -lGui -lRint  -lTable -lRIO -lHist
+
+QTGLLIBDEP          = $(GQTLIB) $(GPADLIB) $(G3DLIB) $(QTGUILIB) 
+QTGLLIBEXTRA        = $(GLLIBEXTRA) -lQtRootGui $(GQTCOMMONLIB) $(OPENIVLIBDIR) $(OPENIVLIB) 
+
+QTIMAGELIBDEP       = $(GQTLIB)
+QTIMAGELIBEXTRA     = $(GQTCOMMONLIB) -Llib -lGraf
+
+QTGEDLIBDEP        = $(QTGUILIB)  $(HISTLIB) 
+QTGEDLIBEXTRA      = $(GQTCOMMONLIB) -lQtRootGui -lGraf -lHist
+
+QTX3DLIBDEP         = $(GQTLIB)
+# QTX3DLIBEXTRA     = $(GQTCOMMONLIB) -Llib -lGraf
+
+endif
+
+

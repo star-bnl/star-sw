@@ -1,0 +1,82 @@
+<ui version="4.0" >
+ <class>HelloSignal</class>
+ <widget class="QWidget" name="HelloSignal" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>349</width>
+    <height>75</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="QFrame" name="frame" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" >
+      <item>
+       <layout class="QHBoxLayout" >
+        <item>
+         <widget class="QLabel" name="label" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text" >
+           <string>root[]:</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox" >
+          <property name="font" >
+           <font>
+            <family>Courier</family>
+           </font>
+          </property>
+          <property name="whatsThis" >
+           <string>USe this field to enter the ROO command</string>
+          </property>
+          <property name="editable" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButton" >
+          <property name="toolTip" >
+           <string>Terminate the ROOT session</string>
+          </property>
+          <property name="whatsThis" >
+           <string>THis button allow you to terminate your ROOT session</string>
+          </property>
+          <property name="text" >
+           <string>quit</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>comboBox</tabstop>
+ </tabstops>
+ <resources/>
+</ui>

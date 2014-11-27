@@ -1,0 +1,216 @@
+#Inventor V2.1 ascii
+    DEF ShapesNode Separator {
+           ShapeHints {
+#               vertexOrdering CLOCKWISE
+               vertexOrdering COUNTERCLOCKWISE
+               shapeType SOLID
+           }
+      DEF TObjectSet Group {
+        TransformSeparator {
+          Group {
+            Group {
+              Material {
+                diffuseColor 0 0 1
+                shininess 0.9
+               }
+#    ---  face normal binding 
+               Group {
+               NormalBinding {
+                 value PER_FACE
+               }
+               Normal {
+                 vector [  -1  0  0,
+                            0  1  0,
+                            1  0  0,
+                            0 -1  0,
+                        ]
+               }
+               Coordinate3 {
+                 point [ 
+                       # 0
+                        -20 -30 -40,
+                       # 1
+                        -20  30 -40,
+                       # 2
+                         20  30 -40,
+                       # 3
+                         20 -30 -40,
+
+                       # 0
+                        -20 -30 -40,
+
+                       # 4
+                        -20 -30  40,
+                       # 5
+                        -20  30  40,
+                       # 6
+                         20  30  40,
+                       # 7
+                         20 -30  40,
+                       # 4
+                        -20 -30  40
+]
+
+              }
+               QuadMesh {
+                  verticesPerRow 5
+                  verticesPerColumn 2
+              }
+# ------  Top 
+              Normal {
+                 vector [  0  0  1   ]
+                }
+              Coordinate3 {
+                point [ 
+                       # 4
+                        -20 -30  40,
+                       # 5
+                        -20  30  40,
+                       # 7
+                         20 -30  40,
+                       # 6
+                         20  30  40,
+                   ]
+               }
+               QuadMesh {
+                  verticesPerRow 2
+                  verticesPerColumn 2
+              }
+# ------  Bottom 
+              Normal {
+                 vector [  0  0   -1   ]
+                }
+              Coordinate3 {
+                point [ 
+                       # 1
+                        -20  30 -40,
+                       # 0
+                        -20 -30 -40,
+                       # 2
+                         20  30 -40,
+                       # 3
+                         20 -30 -40
+                   ]
+               }
+               QuadMesh {
+                  verticesPerRow 2
+                  verticesPerColumn 2
+              }
+              }
+#    ---  vertex normal binding 
+              Material {
+                diffuseColor 1 0 0
+                shininess 0.9
+               }
+
+             Translation {
+                 translation 50 50 50
+             }
+               Group {
+               NormalBinding {
+                 value PER_VERTEX
+               }
+               Normal {
+                 vector [  
+                           -1  0  0,
+                            0  1  0,
+                            1  0  0,
+                            0 -1  0,
+                           -1  0  0,
+
+                           -1  0  0,
+                            0  1  0,
+                            1  0  0,
+                            0 -1  0,
+                           -1  0  0
+                        ]
+               }
+               Coordinate3 {
+                 point [ 
+                       # 0
+                        -20 -30 -40,
+                       # 1
+                        -20  30 -40,
+                       # 2
+                         20  30 -40,
+                       # 3
+                         20 -30 -40,
+
+                       # 0
+                        -20 -30 -40,
+
+                       # 4
+                        -20 -30  40,
+                       # 5
+                        -20  30  40,
+                       # 6
+                         20  30  40,
+                       # 7
+                         20 -30  40,
+                       # 4
+                        -20 -30  40
+]
+
+              }
+               QuadMesh {
+                  verticesPerRow 5
+                  verticesPerColumn 2
+              }
+# ------  Top 
+              Normal {
+                 vector [  
+                           0  0  1,
+                           0  0  1,
+                           0  0  1,   
+                           0  0  1   
+                        ]
+                }
+              Coordinate3 {
+                point [ 
+                       # 4
+                        -20 -30  40,
+                       # 5
+                        -20  30  40,
+                       # 7
+                         20 -30  40,
+                       # 6
+                         20  30  40,
+                   ]
+               }
+               QuadMesh {
+                  verticesPerRow 2
+                  verticesPerColumn 2
+              }
+# ------  Bottom 
+              Normal {
+                 vector [  
+                         0  0   -1,   
+                         0  0   -1,   
+                         0  0   -1,   
+                         0  0   -1   
+                         ]
+                }
+              Coordinate3 {
+                point [ 
+                       # 1
+                        -20  30 -40,
+                       # 0
+                        -20 -30 -40,
+                       # 2
+                         20  30 -40,
+                       # 3
+                         20 -30 -40
+                   ]
+               }
+               QuadMesh {
+                  verticesPerRow 2
+                  verticesPerColumn 2
+              }
+              }
+
+            }
+          }
+        }
+      }
+    }
+

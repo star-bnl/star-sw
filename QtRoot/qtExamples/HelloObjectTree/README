@@ -1,0 +1,39 @@
+
+TQtObjectViewFrame is a subclass of QTreeView widget.
+(see: http://doc.trolltech.com/4.3/qtreeview.html )
+The class objects emits
+
+   Activated(TObject*) 
+
+Qt signal. That can be used to incorporate the widget into the more complex 
+GUI application.
+
+The widget can be used with the Qt designer by promoting the Qt4 QTreeView
+class (see:http://doc.trolltech.com/4.3/designer-using-custom-widgets.html#promoting-widgets )
+
+To  build the and run the test application do
+
+   1. "Un-tar" the archive
+       tar -xzvf HelloObjectTree.tar.gz
+
+   2  Invoke:
+      qmake
+      make
+
+   3. Usage:
+      Usage: HelloObjectTree [-h | [ [-style=[windows | platinum | cgi | kde ] | [myRootfile.root]]
+
+        The application creates an instance of the widget and populates it with
+        the objects read from the ROOT file . It pops up the "Open File Dialog" as
+        needed
+        (see:http://doc.trolltech.com/4.3/qfiledialog.html#getOpenFileName )
+
+    One can define the custom look and feel of the GUI application.
+    The number of the available different styles is defined by 
+    your local Qt installation.
+
+    You can check the style available by running "qtconfig" utility
+
+
+  Valeri Fine (fine@bnl.gov)
+                     28.12.2007

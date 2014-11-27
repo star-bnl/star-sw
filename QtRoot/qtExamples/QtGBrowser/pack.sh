@@ -1,0 +1,3 @@
+tar -czvf ../qtGeomProject.tar.gz  arrow_left.xpm GeomBrowser.ui.h QtGBrowserGeoDrawHelper.h  rootrc.win32 arrow_right.xpm LICENSE.QPL QtGBrowserInspect.h snapshot.xpm CVS main.cpp QtGBrowserObjectListItem.h  starcomplete.root GeomBrowser.CC r2iv_1.C view3d.xpm GeomBrowserExtensions.pro  QExGeoDrawHelper.cxx  README Win32GeomBrowser.pro GeomBrowser.pro QExGeoDrawHelper.h rootrcqt wirebox.xpm GeomBrowser.ui QExObjectListItem.h   rootrcqtgui
+mv ~/root.www/QtRoot/downloads/qtGeomProject.tar.gz ~/root.www/QtRoot/downloads/qtGeomProject.tar.gz.tar.gz.bak
+cp ../qtGeomProject.tar.gz ~/root.www/QtRoot/downloads/

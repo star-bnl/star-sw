@@ -1,0 +1,22 @@
+*****************************************************************************/
+**
+** Copyright (C) 2007 by Valeri Fine. BNL.  All rights reserved.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+*****************************************************************************/
+
+This example demonstrates the capability to create the Python script using 
+PyQt and PyROOT
+
+To use it you need the ROOT build with PyROOT support  
+and you should install PyQt also.
+
+To see how it works just start the python as follows:
+
+ > python HelloPython.py
+  
+
+  Valeri Fine (fine@bnl.gov)
+  http://root.bnl.gov

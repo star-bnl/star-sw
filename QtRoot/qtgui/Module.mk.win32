@@ -1,0 +1,93 @@
+# $Id: Module.mk.win32,v 1.4 2013/08/30 16:00:19 perev Exp $
+# Module.mk for qtgui module
+# Copyright (c) 2001 Valeri Fine
+#
+# Author: Valeri Fine, 21/10/2001
+
+MOC          := build/win/moc.sh
+
+MODDIR       := qtgui
+MODDIRS      := $(MODDIR)/src
+MODDIRI      := $(MODDIR)/inc
+
+ROOTQTGUIDIR     := $(MODDIR)
+ROOTQTGUIDIRS    := $(ROOTQTGUIDIR)/src
+ROOTQTGUIDIRI    := $(ROOTQTGUIDIR)/inc
+
+##### libQtGui #####
+QTGUIL       := $(MODDIRI)/LinkDef.h
+QTGUIDS      := $(MODDIRS)/G__QtGUI.cxx
+QTGUIDO      := $(QTGUIDS:.cxx=.o)
+QTGUIDH      := $(QTGUIDS:.cxx=.h)
+
+
+// QTH1      := $(MODDIRI)/TQtGuiFactoryThread.h $(MODDIRI)/TQtGuiFactory.h
+QTGUIH1        := $(MODDIRI)/TQtGuiFactoryThread.h $(MODDIRI)/TQtGuiFactory.h $(MODDIRI)/TBrowserCustom.h $(MODDIRI)/TQtColorSelect.h \
+                  $(MODDIRI)/TQtPatternSelect.h    $(MODDIRI)/TQtBatchGuiDecorator.h
+QTGUIH       := $(filter-out $(MODDIRI)/LinkDef%,$(wildcard $(MODDIRI)/*.h))
+
+QTGUIMOC     := $(subst $(MODDIRI)/,$(MODDIRS)/moc_,$(patsubst %.h,%.cxx,$(QTGUIH)))
+QTGUIMOCO    := $(QTGUIMOC:.cxx=.o)
+
+QTGUIS       := $(filter-out $(MODDIRS)/moc_%,$(filter-out $(MODDIRS)/G__%,$(wildcard $(MODDIRS)/*.cxx)))
+QTGUIO       := $(QTGUIS:.cxx=.o)
+
+QTGUIDEP     := $(QTGUIO:.o=.d) $(QTGUIDO:.o=.d)
+
+QTGUICXXFLAGS:= -DQT_DLL -DQT_THREAD_SUPPORT -I. -I$(QTINCDIR)
+#  QTGUICXXFLAGS:= -DQT_THREAD_SUPPORT -I. -I$(QTINCDIR)
+
+QTGUILIB     := $(LPATH)/libQtGui.$(SOEXT)
+
+QTGUIOBJEXTRA := $(QTGUIMOCO)
+ 
+# used in the main Makefile
+ALLHDRS     += $(patsubst $(MODDIRI)/%.h,include/%.h,$(QTGUIH))
+ALLLIBS     += $(QTGUILIB)
+
+# include all dependency files
+INCLUDEFILES += $(QTGUIDEP)
+
+##### local rules #####
+include/%.h:    $(ROOTQTGUIDIRI)/%.h
+		cp $< $@
+
+####  Copy the QMAKE include file into ROOTSYS header file directory
+include/rootcint.pri:    $(ROOTQTGUIDIRI)/rootcint.pri
+		cp $< $@
+
+$(QTGUILIB):    $(QTGUIO) $(QTGUIDO) $(QTGUIMOCO) $(MAINLIBS) $(QTGUILIBDEP)
+		@$(MAKELIB) $(PLATFORM) $(LD) "$(LDFLAGS)" \
+		   "$(SOFLAGS)" libQtGui.$(SOEXT) $@ "$(QTGUIMOCO) $(QTGUIO)" \
+		   "$(QTGUILIBEXTRA)" "$(QTGUIDO)"
+
+# linux =		   "$(SOFLAGS)" libGQt.$(SOEXT) $@ "$(QTGUIO) $(QTGUIDO)" \
+# linux =		   "$(QTGUILIBEXTRA)" "$(QTGUIMOCO)"
+
+
+$(QTGUIDS):     $(QTGUIH1) $(QTGUIL) $(ROOTCINTTMP) include/rootcint.pri
+		@echo "Generating dictionary $@..."
+		$(ROOTCINTTMP) -f $@ -c $(QTGUIH1) $(QTGUIL)
+
+$(QTGUIDO): $(QTGUIDS)
+		$(CXX) $(NOOPT) $(CXXFLAGS) $(QTGUICXXFLAGS) -o $@ -c $<
+
+all-qtgui:      $(QTGUILIB) $(QTGUIMOC) include/rootcint.pri
+
+clean-qtgui:
+		@rm -f $(QTGUIO) $(QTGUIDO) $(QTGUIMOC) $(QTGUIMOCO)
+
+clean::         clean-qtgui
+
+distclean-qtgui: clean-qtgui
+		@rm -f $(QTGUIDEP) $(QTGUIDS) $(QTGUIDH) $(QTGUILIB) include/rootcint.pri
+
+distclean::     distclean-qtgui
+
+##### extra rules ######
+$(sort $(QTGUIMOCO) $(QTGUIO)): %.o: %.cxx
+	$(CXX) $(OPT) $(CXXFLAGS) $(QTGUICXXFLAGS) -o $@ -c $<
+
+
+$(QTGUIMOC) : $(MODDIRS)/moc_%.cxx: $(MODDIRI)/%.h
+	$(MOC) $< -o $@

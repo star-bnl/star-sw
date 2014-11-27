@@ -1,0 +1,13 @@
+# User level Makefile for ROOT System
+#
+# Author: Valeri Fine 22/8/2003
+
+##### Allow local dependency #####
+
+-include MyMakefile.depend
+
+ifneq ($(QTDIR),)
+MODULES      += qt qtroot 
+EXTRA_CXXFLAGS  += -DR__QT
+EXTRA_CFLAGS    += -DR__QT
+endif

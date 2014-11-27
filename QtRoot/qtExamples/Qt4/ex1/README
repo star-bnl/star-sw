@@ -1,0 +1,43 @@
+This directory contains a Qt project 
+from http://www-aix.gsi.de/~go4/download/readmeQtv32.txt
+originally designed by Mohammad Al-Turany
+
+*****************************************************************************/
+**
+** Copyright (C) 2007 by Valeri Fine. BNL.  All rights reserved.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+*****************************************************************************/
+
+To  build and run the application do 
+
+      
+   1. To build the application type:
+      Unix:
+         "make"
+      Windows ( no Cygwin!!! ):
+         "nmake"    
+      
+      
+   2. To start the example
+      "tqrootexample [-style=windows | platinum | motif ]"
+      
+     One can define the custom look and feel of the GUI application.
+     The number of the available different styles is defined by 
+     your local Qt installation.
+     
+     You can check the style available by running "qtconfig" utility
+     
+     See: "http://doc.trolltech.com/3.3/qapplication.html#QApplication" 
+     for details and other command mode parameters.
+
+To change the design with the Qt designer do
+
+  1. Start Qt "designer" 
+     "designer ex1.ui&"
+
+
+  Valeri Fine (fine@bnl.gov)
+                      18.12.2007

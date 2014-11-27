@@ -1,0 +1,21 @@
+<!DOCTYPE RCC><RCC version="1.0">
+ <qresource>
+   <file>icons/Alice.xpm</file>
+   <file>icons/about.xpm</file>
+   <file>icons/browser.xpm</file>
+   <file>icons/cern.xpm</file>
+   <file>icons/help.xpm</file>
+   <file>icons/infos.xpm</file>
+   <file>icons/left.xpm</file>
+   <file>icons/license.xpm</file>
+   <file>icons/manual.xpm</file>
+   <file>icons/mclogo01.xpm</file>
+   <file>icons/open.xpm</file>
+   <file>icons/quit.xpm</file>
+   <file>icons/right.xpm</file>
+   <file>icons/save.xpm</file>
+   <file>icons/saveas.xpm</file>
+   <file>icons/settings.xpm</file>
+   <file>icons/view3d.xpm</file>
+  </qresource>
+</RCC>

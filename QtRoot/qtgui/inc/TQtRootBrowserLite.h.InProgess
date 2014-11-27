@@ -1,0 +1,173 @@
+// @(#)root/gui:$Id: TQtRootBrowserLite.h.InProgess,v 1.1 2013/08/30 16:00:22 perev Exp $
+// Author: Fons Rademakers   27/02/98
+
+/*************************************************************************
+ * Copyright (C) 1995-2000, Rene Brun and Fons Rademakers.               *
+ * All rights reserved.                                                  *
+ *                                                                       *
+ * For the licensing terms see $ROOTSYS/LICENSE.                         *
+ * For the list of contributors see $ROOTSYS/README/CREDITS.             *
+ *************************************************************************/
+
+
+#ifndef ROOT_TQtRootBrowserLite
+#define ROOT_TQtRootBrowserLite
+
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+// TQtRootBrowserLite                                                     //
+//                                                                      //
+// This class creates a ROOT object browser (looking like Windows       //
+// Explorer). The widgets used are the new native ROOT GUI widgets.     //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
+
+#ifndef ROOT_TBrowserImp
+#include "TBrowserImp.h"
+#endif
+#include <QMainWindow>
+
+class QMenuBar;
+class QMenu;
+class QLayoutHints;
+class QStatusBar;
+class QHorizontal3DLine;
+class QToolBar;
+class QButton;
+class QFSComboBox;
+class QLabel;
+class QListView;
+class TRootIconBox;
+class QCanvas;
+class QListTree;
+class QListTreeItem;
+class QFileItem;
+class TList;
+class QFileContainer;
+class QComboBox;
+class QTextEdit;
+
+class TQtRootBrowserLite : public QMainWindow, public TBrowserImp {
+
+friend class TRootIconBox;
+
+private:
+   QMenuBar           *fMenuBar;
+   QToolBar           *fToolBar;
+   QHorizontal3DLine  *fToolBarSep;
+   QVerticalFrame     *fV1;
+   QVerticalFrame     *fV2;
+   QLabel             *fLbl1;
+   QLabel             *fLbl2;
+   QHorizontalFrame   *fHf;
+   QCompositeFrame    *fTreeHdr;
+   QCompositeFrame    *fListHdr;
+
+   QLayoutHints       *fMenuBarLayout;
+   QLayoutHints       *fMenuBarItemLayout;
+   QLayoutHints       *fMenuBarHelpLayout;
+   QLayoutHints       *fComboLayout;
+   QLayoutHints       *fBarLayout;
+   QComboBox          *fDrawOption;         // drawing option entry
+   QLayoutHints       *fExpandLayout;       //
+   Bool_t               fBrowseTextFile;     //
+   TString              fTextFileName;
+
+   TList               *fWidgets;
+   TList               *fHistory;            // history of browsing
+   TObject             *fHistoryCursor;      // current hsitory position
+   const QPicture     *fIconPic;            // icon picture
+
+   void  CreateBrowser(const char *name);
+   void  ListTreeHighlight(QListTreeItem *item);
+   void  DeleteListTreeItem(QListTreeItem *item);
+   void  HighlightListLevel();
+   void  AddToHistory(QListTreeItem *item);
+   void  IconBoxAction(TObject *obj);
+   void  Chdir(QListTreeItem *item);
+   void  DisplayDirectory();
+   void  DisplayTotal(Int_t total, Int_t selected);
+   void  SetViewMode(Int_t new_mode, Bool_t force = kFALSE);
+   void  ToSystemDirectory(const char *dirname);
+   void  UpdateDrawOption();
+   void  Search();
+   void  BrowseTextFile(const char *file);
+   void  HideTextEdit();
+   void  ShowMacroButtons(Bool_t show = kTRUE);
+
+   Bool_t  HistoryBackward();
+   Bool_t  HistoryForward();
+   void    ClearHistory();
+
+protected:
+   QMenu         *fFileMenu;
+   QMenu         *fViewMenu;
+   QMenu         *fOptionMenu;
+   QMenu         *fHelpMenu;
+   QMenu         *fSortMenu;
+   QListView          *fListView;
+   TRootIconBox        *fIconBox;
+   QCanvas            *fTreeView;
+   QListTree          *fLt;
+   QButton            *fToolBarButton[7];  // same size as gToolBarData[]
+   QFSComboBox        *fFSComboBox;
+   QStatusBar         *fStatusBar;
+   QListTreeItem      *fListLevel;         // current QListTree level
+   Bool_t               fTreeLock;          // true when we want to lock QListTree
+   Int_t                fViewMode;          // current IconBox view mode
+   Int_t                fSortMode;          // current IconBox sort mode
+   QTextEdit          *fTextEdit;          // contents of browsed text file
+
+public:
+   TQtRootBrowserLite(TBrowser *b = 0, const char *title = "ROOT Browser", UInt_t width = 800, UInt_t height = 500);
+   TQtRootBrowserLite(TBrowser *b, const char *title, Int_t x, Int_t y, UInt_t width, UInt_t height);
+   virtual ~TQtRootBrowserLite();
+
+   virtual void Add(TObject *obj, const char *name = 0, Int_t check = -1);
+   virtual void AddToBox(TObject *obj, const char *name);
+   virtual void AddToTree(TObject *obj, const char *name, Int_t check = -1);
+
+   virtual void AddCheckBox(TObject *obj, Bool_t check = kFALSE);
+   virtual void CheckObjectItem(TObject *obj, Bool_t check = kFALSE);
+   virtual void RemoveCheckBox(TObject *obj);
+
+   virtual void BrowseObj(TObject *obj);             //*SIGNAL*
+   virtual void ExecuteDefaultAction(TObject *obj);  //*SIGNAL*
+   virtual void DoubleClicked(TObject *obj);         //*SIGNAL*
+   virtual void Checked(TObject *obj, Bool_t check); //*SIGNAL*
+   virtual void Iconify() { }
+   virtual void RecursiveRemove(TObject *obj);
+   virtual void Refresh(Bool_t force = kFALSE);
+   virtual void ResizeBrowser() { }
+   virtual void ShowToolBar(Bool_t show = kTRUE);
+   virtual void ShowStatusBar(Bool_t show = kTRUE);
+   virtual void Show() { MapRaised(); }
+   virtual void SetDefaults(const char *iconStyle = 0, const char *sortBy = 0);
+   virtual Bool_t HandleKey(Event_t *event);
+   virtual void SetStatusText(const char *txt, Int_t col);
+
+   QListTree      *GetListTree()  const { return fLt; }
+   QFileContainer *GetIconBox()   const;
+   QStatusBar     *GetStatusBar() const { return fStatusBar; }
+   QMenuBar       *GetMenuBar()   const { return  fMenuBar; }
+   QToolBar       *GetToolBar()   const { return fToolBar; }
+   void             SetDrawOption(Option_t *option="");
+   Option_t        *GetDrawOption() const;
+   void             SetSortMode(Int_t new_mode);
+
+   // overridden from QMainFrame
+   void     CloseWindow();
+   Bool_t   ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);
+   void     ReallyDelete();
+
+   // auxilary (a la privae) methods
+   void     ExecMacro();
+   void     InterruptMacro();
+
+   static TBrowserImp *NewBrowser(TBrowser *b = 0, const char *title = "ROOT Browser", UInt_t width = 800, UInt_t height = 500, Option_t *opt="");
+   static TBrowserImp *NewBrowser(TBrowser *b, const char *title, Int_t x, Int_t y, UInt_t width, UInt_t height, Option_t *opt="");
+
+   ClassDef(TQtRootBrowserLite,0)  //ROOT native GUI version of browser
+};
+
+#endif

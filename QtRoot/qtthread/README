@@ -1,0 +1,10 @@
+To initiate QT-based ROOT-thread load first
+void InitQtThreades() 
+{ 
+// This macro must be a part of ROOT Logon script or TGQt ctor
+   if (gEnv->GetValue("Root.UseThreads", 0)) 
+  {
+  // (see:TROOT::InitThreads()
+    gSystem->Load("libQtThread")
+  }
+}

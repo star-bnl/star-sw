@@ -1,0 +1,38 @@
+This directory contains the slightly modified version of
+$ROOTSYS/tutorials/h1draw.C macro
+
+The macro h1draw_zoom.C contains a few extra lines of the code to create
+the zooming widget and connect it with the TCanvas objects:
+(see: http://root.bnl.gov/QtRoot/pictures/ZoomPad.png )
+
+   // Create the Pad zoomer widget
+   TQtZoomPadWidget *zoomer = new TQtZoomPadWidget();
+
+      c1 = new TCanvas("c1","Histogram Drawing Options",200,10,700,900);
+      c1->Connect("Selected(TVirtualPad *, TObject *, int )"
+              ,  "TQtZoomPadWidget",zoomer
+              ,"Selected(TVirtualPad *, TObject *, int )");
+
+    To use this macro:
+
+    1. run $ROOTSYS)/tutorials/hsimple.C 
+       to create the "hsimple.root" file at once
+
+       > root.exe -q -b -l $ROOTSYS/tutorials/hsimple.C
+
+    2. Start h1draw_zoom.C macro to create the 3 TPad's "c1" TCanvas
+       and connect the TCanvas""Selected" ROOT signal to the 
+       TQtZoomPadWidget::Selected ROOT slot
+
+       > root.exe h1draw_zoom.C
+       
+
+    4. Click over any TPad with the middle mouse button to popup the zoomer widget;
+    
+  Note: One can use the separate macro ConnectZoomPad.C to connect to
+  ====  the already existent "c1" TCanvas
+
+
+
+   Valeri Fine (fine@bnl.gov)
+   http://root.bnl.gov                                   March 20,2006

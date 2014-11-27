@@ -1,0 +1,30 @@
+This directory contains a Qt project 
+
+*****************************************************************************/
+**
+** Copyright (C) 2009 by Valeri Fine. BNL.  All rights reserved.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+*****************************************************************************/
+The example shows how the QGLViewer can be used to render ROOT TF2 class objects
+http://artis.imag.fr/Members/Gilles.Debunne/QGLViewer/examples/simpleViewer.html 
+
+
+   1. To create the your platform makefile:
+      "qmake"
+      
+   2. To build the application type:
+      Unix:
+         "make"
+      Windows ( no Cygwin!!! ):
+         "nmake"    
+      
+      
+   3. To start the example
+      root.exe HelloOpenGL.C
+
+
+  Valeri Fine (fine@bnl.gov)
+                      2.04.2009

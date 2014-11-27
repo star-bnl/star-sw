@@ -1,0 +1,42 @@
+<math display = 'block'>
+  <mrow>
+    <mi>C</mi>
+    <mo stretchy='false'>(</mo>
+    <mi>x</mi>
+    <mo stretchy='false'>)</mo>
+    <mo>=</mo>
+    <mi>d</mi>
+    <msqrt>
+      <mfrac>
+        <mi>2</mi>
+        <mrow>
+          <mi>&lambda;</mi>
+          <mi>D</mi>
+        </mrow>
+      </mfrac>
+    </msqrt>
+    <mrow>
+      <munderover>
+        <mo>&int;</mo>
+        <mi>0</mi>
+        <mi>x</mi>
+      </munderover>
+      <mrow>
+        <mi>cos</mi>
+        <mo stretchy='false'>(</mo>
+			<mrow>
+            <mfrac>
+              <mi>&pi;</mi>
+              <mi>2</mi>
+            </mfrac>
+            <msup>
+              <mi>t</mi>
+              <mi>2</mi>
+            </msup>
+			</mrow>
+			<mo stretchy='false'>)</mo>
+			<mi>dt</mi>
+      </mrow>
+    </mrow>
+  </mrow>
+</math>

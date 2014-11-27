@@ -1,0 +1,24 @@
+29-Oct-2003  Valeri  Fine <fine@bnl.gov>
+
+    * New OpenGL "engine" has been introduced(and included into the repository)
+      http://www-imagis.imag.fr/Membres/Gilles.Debunne/CODE/QGLViewer
+
+      Key features:
+      http://www-imagis.imag.fr/Membres/Gilles.Debunne/CODE/QGLViewer/features.html
+   
+
+15-Aug-2003   Valeri Fine <fine@bnl.gov>
+    * It seems to me should go back to the Coin3D 1.02
+      unless the crash problem will be understood
+      (Just to remember - compile Coin3D with VC7) 
+      
+15-Aug-2003   Valeri Fine <fine@bnl.gov>
+    *  Install Coin3D 2.1. 
+       Change "SoGLRenderAction::beginTraversal"
+               "SoNode::GLRenderS"
+       To suppress the wrning during rendering.
+       To see the warning one has to  
+       set envvar COIN_GLERROR_DEBUGGING=1 
+
+09-Feb-2003   Valeri Fine <fine@bnl.gov>
+    *  Change in lighting parameters

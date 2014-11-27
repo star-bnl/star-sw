@@ -1,0 +1,2 @@
+qmake -spec macx-g++ CONFIG+=debug
+make -j2 

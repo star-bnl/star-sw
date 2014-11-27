@@ -1,0 +1,34 @@
+This directory contains a Qt project 
+
+*****************************************************************************/
+**
+** Copyright (C) 2007 by Valeri Fine. BNL.  All rights reserved.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+*****************************************************************************/
+The example shows the interactive Qt application that combines the the example:
+http://artis.imag.fr/Members/Gilles.Debunne/QGLViewer/examples/animation.html 
+and the ROOT TCanvas with 2D histogram to represent the particles "speed vs position".
+
+
+   1. To create the your platform makefile:
+      "rm -rf .rootrc"  -- Unix ONLY
+      "qmake"
+      Attention. One may require to change the  HelloGLViewer.pro
+      ---------  to edit the QGLViewer  installation directory
+      
+   2. To build the application type:
+      Unix:
+         "make"
+      Windows ( no Cygwin!!! ):
+         "nmake"    
+      
+      
+   3. To start the example
+      " HelloGLViewer"
+      
+  
+  Valeri Fine (fine@bnl.gov)
+                      07.09.2007

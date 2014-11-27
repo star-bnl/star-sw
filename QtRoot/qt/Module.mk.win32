@@ -1,0 +1,107 @@
+# $Id: Module.mk.win32,v 1.3 2013/08/30 15:59:48 perev Exp $
+# Module.mk for qt module
+# Copyright (c) 2001 Valeri Fine
+#
+# Author: Valeri Fine, 21/10/2001
+
+MOC          := build/win/moc.sh
+
+MODDIR       := qt
+MODDIRS      := $(MODDIR)/src
+MODDIRI      := $(MODDIR)/inc
+
+GQTDIR     := $(MODDIR)
+GQTDIRS    := $(GQTDIR)/src
+GQTDIRI    := $(GQTDIR)/inc
+
+##### libQt #####
+GQTL       := $(GQTDIRI)/LinkDef.h
+GQTDS      := $(GQTDIRS)/G__GQt.cxx
+GQTDO      := $(GQTDS:.cxx=.o)
+GQTDH      := $(GQTDS:.cxx=.h)
+
+GQTH1          := $(GQTDIRI)/TGQt.h $(GQTDIRI)/TQtThread.h $(GQTDIRI)/TQtApplication.h \
+                  $(GQTDIRI)/TQtBrush.h $(GQTDIRI)/TQMimeTypes.h $(GQTDIRI)/TQtClientFilter.h\
+                  $(GQTDIRI)/TQtClientWidget.h $(GQTDIRI)/TQtWidget.h $(GQTDIRI)/TQtMarker.h \
+                  $(GQTDIRI)/TQtTimer.h
+
+
+GQTH       := $(filter-out $(MODDIRI)/LinkDef%,$(wildcard $(MODDIRI)/*.h))
+
+GQTMOC     := $(subst $(GQTDIRI)/,$(GQTDIRS)/moc_,$(patsubst %.h,%.cxx,$(GQTH)))
+GQTMOCO    := $(GQTMOC:.cxx=.o)
+
+GQTS       := $(filter-out $(GQTDIRS)/moc_%,$(filter-out $(GQTDIRS)/G__%,$(wildcard $(GQTDIRS)/*.cxx)))
+GQTO       := $(GQTS:.cxx=.o)
+
+GQTDEP     := $(GQTO:.o=.d) $(GQTDO:.o=.d)
+
+GQTCXXFLAGS:= -DQT_DLL -DQT_THREAD_SUPPORT -I. -I$(QTINCDIR)
+
+GQTLIB     := $(LPATH)/libGQt.$(SOEXT)
+
+QTLIBEXTRA := $(QTDIR)/lib/qt-mt*.lib lib/libGraf.lib lib/libGpad.lib lib/libGui.lib 
+#   shell32.lib Ws2_32.lib Imm32.lib Winmm.lib
+
+GQTOBJEXTRA := $(GQTMOCO)
+ 
+# Qt project header files
+
+QCUSTOMWIDGETS += $(GQTDIRI)/TQtWidget.cw
+QMAKERULES     += $(GQTDIRI)/rootcint.pri $(GQTDIRI)/rootcintrule.pri $(GQTDIRI)/rootlibs.pri
+
+# used in the main Makefile
+ALLHDRS     += $(patsubst $(GQTDIRI)/%.h,include/%.h,$(GQTH))
+ALLHDRS     += $(patsubst $(MODDIRI)/%.cw,include/%.cw,$(QCUSTOMWIDGETS))
+ALLHDRS     += $(patsubst $(MODDIRI)/%.pri,include/%.pri,$(QMAKERULES))
+
+ALLLIBS     += $(GQTLIB)
+
+# include all dependency files
+INCLUDEFILES += $(GQTDEP)
+
+##### local rules #####
+include/%.h:    $(GQTDIRI)/%.h
+		cp $< $@
+
+include/%.cw:    $(GQTDIRI)/%.cw
+		cp $< $@
+      
+include/%.pri:    $(GQTDIRI)/%.pri
+		cp $< $@
+
+$(GQTLIB):    $(GQTO) $(GQTDO) $(GQTMOCO) $(MAINLIBS) $(GQTLIBDEP)
+		@$(MAKELIB) $(PLATFORM) $(LD) "$(LDFLAGS)" \
+		   "$(SOFLAGS)" libGQt.$(SOEXT) $@ "$(GQTMOCO) $(GQTO)" \
+		   "$(GQTLIBEXTRA)" "$(GQTDO)"
+
+# linux =		   "$(SOFLAGS)" libGQt.$(SOEXT) $@ "$(GQTO) $(GQTDO)" \
+# linux =		   "$(GQTLIBEXTRA)" "$(GQTMOCO)"
+
+
+$(GQTDS):  $(GQTH1) $(GQTL) $(ROOTCINTTMP)
+#		@echo "Generating dictionary $@..."
+		$(ROOTCINTTMP) -f $@ -c $(GQTH1) $(GQTL)
+
+$(GQTDO): $(GQTDS)
+		$(CXX) $(NOOPT) $(CXXFLAGS) $(GQTCXXFLAGS) -o $@ -c $<
+
+all-qt:      $(GQTLIB) $(GQTMOC)
+
+clean-qt:
+		rm -f $(GQTO) $(GQTDO) $(GQTMOCO) $(GQTMOC) 
+
+clean::         clean-qt
+
+distclean-qt: clean-qt
+		@rm -f $(GQTDEP) $(GQTDS) $(GQTDH) $(GQTLIB)
+
+distclean::     distclean-qt
+
+##### extra rules ######
+$(sort $(GQTMOCO) $(GQTO)): %.o: %.cxx
+	$(CXX) $(OPT) $(CXXFLAGS) $(GQTCXXFLAGS) -o $@ -c $<
+
+
+$(GQTMOC) : $(GQTDIRS)/moc_%.cxx: $(GQTDIRI)/%.h
+	$(MOC) $< -o $@

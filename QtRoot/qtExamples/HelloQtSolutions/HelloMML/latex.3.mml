@@ -1,0 +1,54 @@
+<math display = 'block'>
+  <mrow>
+    <mi>&reals;</mi>
+    <mo>=</mo>
+    <msup>
+      <mfenced open = '&verbar;' close = '&verbar;'>
+        <mi>A</mi>
+      </mfenced>
+      <mn>2</mn>
+    </msup>
+    <mo>=</mo>
+    <mfrac>
+      <mn>1</mn>
+      <mn>2</mn>
+    </mfrac>
+    <mfenced open = '(' close = ')'>
+      <mrow>
+        <msup>
+          <mfenced open = '[' close = ']'>
+            <mrow>
+              <mfrac>
+                <mn>1</mn>
+                <mn>2</mn>
+              </mfrac>
+              <mo>+</mo>
+              <mi>C</mi>
+              <mo stretchy='false'>(</mo>
+              <mi>V</mi>
+              <mo stretchy='false'>)</mo>
+            </mrow>
+          </mfenced>
+          <mn>2</mn>
+        </msup>
+        <mo>+</mo>
+        <msup>
+          <mfenced open = '[' close = ']'>
+            <mrow>
+              <mfrac>
+                <mn>1</mn>
+                <mn>2</mn>
+              </mfrac>
+              <mo>+</mo>
+              <mi>S</mi>
+              <mo stretchy='false'>(</mo>
+              <mi>V</mi>
+              <mo stretchy='false'>)</mo>
+            </mrow>
+          </mfenced>
+          <mn>2</mn>
+        </msup>
+      </mrow>
+    </mfenced>
+  </mrow>
+</math>

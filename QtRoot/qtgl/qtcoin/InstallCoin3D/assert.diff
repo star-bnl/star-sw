@@ -1,0 +1,22 @@
+Index: tidbits.c
+===================================================================
+--- tidbits.c	(revision 4291)
++++ tidbits.c	(working copy)
+@@ -916,7 +916,7 @@
+ coin_hton_float(float value)
+ {
+   // see http://www.dmh2000.com/cpp/dswap.shtml for an explanation why this function was a bad idea
+-  assert(0 && "don't use this function. It might trigger incorrect results in some cases");
++  // assert(0 && "don't use this function. It might trigger incorrect results in some cases");
+   union f32 {
+       float f32;
+       uint32_t u32;
+@@ -951,7 +951,7 @@
+ coin_hton_double(double value)
+ {
+   // see http://www.dmh2000.com/cpp/dswap.shtml for an explanation why this function was a bad idea
+-  assert(0 && "don't use this function. It might trigger incorrect results in some cases");
++  // assert(0 && "don't use this function. It might trigger incorrect results in some cases");
+   union d64 {
+       double d64;
+       uint64_t u64;

@@ -1,0 +1,35 @@
+*****************************************************************************/
+**
+** Copyright (C) 2009 by Valeri Fine. BNL.  All rights reserved.
+**
+** This file may be distributed under the terms of the Q Public License
+** as defined by Trolltech AS of Norway and appearing in the file
+** LICENSE.QPL included in the packaging of this file.
+*****************************************************************************/
+
+The Dancing Hist is to demonstrate the painting onto the arbitary 
+Qt widget  (QWidget) a few pixmaps generated off-screen with TEmbeddedPad class 
+using the simple Qt 2D coordinate transformation (see HelloLife example also).
+
+To  build it from the Qt project file do
+
+   1.> qmake
+   2.> make
+
+To start the application do:
+
+   3.  "HelloDancingHist  [-style=windows | platinum | motif ]"
+
+     One can define the custom look and feel of the GUI application.
+     The number of the available different styles is defined by 
+     your local Qt installation.
+     You can check the style available by running "qtconfig" utility
+     See: "http://doc.trolltech.com/3.3/qapplication.html#QApplication" 
+     for details and other command mode parameters.
+
+   4. Compare the widget with the pattern:
+      http://root.cern.ch/phpBB2/download.php?id=4095
+   
+
+  Valeri Fine (fine@bnl.gov)
+  http://root.bnl.gov

@@ -1,0 +1,274 @@
+? Coin2.4.5.diff
+? glue/gl.c.new
+Index: actions/SoGLRenderAction.cpp
+===================================================================
+RCS file: /export/cvsroot/Coin-2/src/actions/SoGLRenderAction.cpp,v
+retrieving revision 1.23
+diff -u -u -w -b -r1.23 SoGLRenderAction.cpp
+--- actions/SoGLRenderAction.cpp	29 Apr 2006 13:04:46 -0000	1.23
++++ actions/SoGLRenderAction.cpp	5 Nov 2006 23:53:23 -0000
+@@ -952,7 +952,7 @@
+   if (COIN_GLBBOX) {
+     THIS->bboxaction->apply(node);
+   }
+-  int err_before_init = glGetError();
++  int err_before_init = cc_glue_glGetError();
+ 
+   if (THIS->needglinit) {
+     THIS->needglinit = FALSE;
+@@ -972,7 +972,7 @@
+     }
+   }
+ 
+-  int err_after_init = glGetError();
++  int err_after_init = cc_glue_glGetError();
+ 
+   if (COIN_DEBUG && ((err_before_init != GL_NO_ERROR) || (err_after_init != GL_NO_ERROR))) {
+     int err = (err_before_init != GL_NO_ERROR) ? err_before_init : err_after_init;
+@@ -1756,11 +1756,11 @@
+   
+ 
+   // Clear all errors before traversal, just in case.
+-  GLenum glerror = glGetError();
++  GLenum glerror = cc_glue_glGetError();
+   while (glerror) {
+     SoDebugError::postWarning("renderOneBlendLayer", 
+                               "glError() = %d\n", glerror);
+-    glerror = glGetError();
++    glerror = cc_glue_glGetError();
+   }
+ 
+   // Do the rendering
+@@ -1861,7 +1861,7 @@
+     // FIXME: Maybe a wrapper for catching fragment program errors
+     // should be a part of GLUE... (20031204 handegar)
+     GLint errorPos;    
+-    GLenum err = glGetError();
++    GLenum err = cc_glue_glGetError();
+     if (err) {
+       glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
+       SoDebugError::postWarning("initSortedLayersBlendRendering",
+Index: caches/SoGLCacheList.cpp
+===================================================================
+RCS file: /export/cvsroot/Coin-2/src/caches/SoGLCacheList.cpp,v
+retrieving revision 1.13
+diff -u -u -w -b -r1.13 SoGLCacheList.cpp
+--- caches/SoGLCacheList.cpp	29 Apr 2006 13:04:48 -0000	1.13
++++ caches/SoGLCacheList.cpp	5 Nov 2006 23:53:23 -0000
+@@ -196,7 +196,7 @@
+ 
+         static SbBool chkglerr = sogl_glerror_debugging();
+         if (chkglerr) {
+-          GLenum err = glGetError();
++          GLenum err = cc_glue_glGetError();
+           if (err != GL_NO_ERROR) {
+             SoDebugError::post("SoGLCacheList::call",
+                                "An OpenGL error (%s) was detected after a "
+Index: elements/GL/SoGLClipPlaneElement.cpp
+===================================================================
+RCS file: /export/cvsroot/Coin-2/src/elements/GL/SoGLClipPlaneElement.cpp,v
+retrieving revision 1.6
+diff -u -u -w -b -r1.6 SoGLClipPlaneElement.cpp
+--- elements/GL/SoGLClipPlaneElement.cpp	29 Apr 2006 13:04:52 -0000	1.6
++++ elements/GL/SoGLClipPlaneElement.cpp	5 Nov 2006 23:53:23 -0000
+@@ -35,7 +35,7 @@
+ #include <config.h>
+ #endif // HAVE_CONFIG_H
+ 
+-#include <Inventor/system/gl.h>
++#include <Inventor/C/glue/gl.h>
+ #include <Inventor/errors/SoDebugError.h>
+ 
+ // *************************************************************************
+@@ -115,7 +115,7 @@
+   GLint val;
+   glGetIntegerv(GL_MAX_CLIP_PLANES, &val);
+ 
+-  assert(glGetError() == GL_NO_ERROR &&
++  assert(cc_glue_glGetError()  == GL_NO_ERROR &&
+          "GL error when calling glGetInteger() -- no current GL context?");
+ 
+   return (int)val;
+Index: elements/GL/SoGLDisplayList.cpp
+===================================================================
+RCS file: /export/cvsroot/Coin-2/src/elements/GL/SoGLDisplayList.cpp,v
+retrieving revision 1.13
+diff -u -u -w -b -r1.13 SoGLDisplayList.cpp
+--- elements/GL/SoGLDisplayList.cpp	29 Apr 2006 13:04:52 -0000	1.13
++++ elements/GL/SoGLDisplayList.cpp	5 Nov 2006 23:53:24 -0000
+@@ -228,7 +228,7 @@
+ {
+   if (this->type == DISPLAY_LIST) {
+     glEndList();
+-    if (glGetError() == GL_OUT_OF_MEMORY) {
++    if (cc_glue_glGetError() == GL_OUT_OF_MEMORY) {
+       SoDebugError::post("SoGLDisplayList::close",
+                          "Not enough memory resources available on system "
+                          "to store full display list. Expect flaws in "
+Index: elements/GL/SoGLLightIdElement.cpp
+===================================================================
+RCS file: /export/cvsroot/Coin-2/src/elements/GL/SoGLLightIdElement.cpp,v
+retrieving revision 1.9
+diff -u -u -w -b -r1.9 SoGLLightIdElement.cpp
+--- elements/GL/SoGLLightIdElement.cpp	29 Apr 2006 13:04:52 -0000	1.9
++++ elements/GL/SoGLLightIdElement.cpp	5 Nov 2006 23:53:24 -0000
+@@ -177,7 +177,7 @@
+   GLint val;
+   glGetIntegerv(GL_MAX_LIGHTS, &val);
+ 
+-  assert(glGetError() == GL_NO_ERROR &&
++  assert(cc_glue_glGetError() == GL_NO_ERROR &&
+          "GL error when calling glGetInteger() -- no current GL context?");
+ 
+   return (int32_t)val;
+Index: elements/GL/SoGLModelMatrixElement.cpp
+===================================================================
+RCS file: /export/cvsroot/Coin-2/src/elements/GL/SoGLModelMatrixElement.cpp,v
+retrieving revision 1.5
+diff -u -u -w -b -r1.5 SoGLModelMatrixElement.cpp
+--- elements/GL/SoGLModelMatrixElement.cpp	29 Apr 2006 13:04:52 -0000	1.5
++++ elements/GL/SoGLModelMatrixElement.cpp	5 Nov 2006 23:53:24 -0000
+@@ -38,7 +38,7 @@
+ #include <config.h>
+ #endif // HAVE_CONFIG_H
+ 
+-#include <Inventor/system/gl.h>
++#include <Inventor/C/glue/gl.h>
+ 
+ #if COIN_DEBUG
+ #include <Inventor/errors/SoDebugError.h>
+@@ -95,7 +95,7 @@
+   
+   if (!this->stackoverflow) {
+     glPushMatrix();
+-    if (glGetError() == GL_STACK_OVERFLOW) {
++    if (cc_glue_glGetError() == GL_STACK_OVERFLOW) {
+       this->stackoverflow = TRUE;
+     }
+   }
+Index: glue/gl.c
+===================================================================
+RCS file: /export/cvsroot/Coin-2/src/glue/gl.c,v
+retrieving revision 1.66
+diff -u -u -w -b -r1.66 gl.c
+--- glue/gl.c	29 Apr 2006 13:04:58 -0000	1.66
++++ glue/gl.c	5 Nov 2006 23:53:26 -0000
+@@ -355,6 +355,33 @@
+   const char * val = coin_getenv(txt);
+   return val ? atoi(val) : 0;
+ }
++/* Look up the GL error as soon as  env COIN_CHECK_GL_ERROR is defined    */
++static inline GLenum
++glglue_geterror() {
++   GLenum glerr = GL_NO_ERROR;
++   static int GLErrorOn = -1;
++   if (GLErrorOn  == -1 ) {
++#ifdef COIN_DEBUG
++      GLErrorOn = glglue_resolve_envvar("COIN_NO_CHECK_GL_ERROR") ? 0 : 1;
++      cc_debugerror_postwarning("glglue_geterror"
++                               ,"set env.variable COIN_NO_CHECK_GL_ERROR=1 to disable gl error checking");
++#else
++      GLErrorOn = glglue_resolve_envvar("COIN_CHECK_GL_ERROR");
++      cc_debugerror_postwarning("glglue_geterror"
++                               ,"set env.variable COIN_CHECK_GL_ERROR=1 to enable gl error checking");
++#endif
++      cc_debugerror_postwarning("glglue_geterror",
++                                  "glGetError has been set %d", GLErrorOn );
++   }
++   if (GLErrorOn) glerr = glGetError();
++   return glerr;
++}
++
++/* An external interface to look up the GL error  */
++GLenum
++cc_glue_glGetError() {
++  return glglue_geterror();
++}
+ 
+ /* Returns whether or not COIN_GLGLUE_SILENCE_DRIVER_WARNINGS is set
+    to a value > 0. If so, all known driver bugs will just be silently
+@@ -2085,7 +2112,7 @@
+      * current OpenGL context. */
+     gi->versionstr = (const char *)glGetString(GL_VERSION);
+     assert(gi->versionstr && "could not call glGetString() -- no current GL context?");
+-    assert(glGetError() == GL_NO_ERROR && "GL error when calling glGetString() -- no current GL context?");
++    assert(glglue_geterror() == GL_NO_ERROR && "GL error when calling glGetString() -- no current GL context?");
+ 
+     glglue_set_glVersion(gi);
+     glxglue_init(gi);
+@@ -4136,7 +4163,7 @@
+ 
+     const GLubyte * str = glGetString(GL_VERSION);
+     assert(str && "could not call glGetString() -- no current GL context?");
+-    assert(glGetError() == GL_NO_ERROR && "GL error when calling glGetString() -- no current GL context?");
++    assert(glglue_geterror() == GL_NO_ERROR && "GL error when calling glGetString() -- no current GL context?");
+ 
+     (void)fprintf(stdout, "glGetString(GL_VERSION)=='%s'\n", str);
+     (void)fprintf(stdout, "glGetString(GL_VENDOR)=='%s'\n", glGetString(GL_VENDOR));
+@@ -4753,12 +4780,12 @@
+ coin_catch_gl_errors(cc_string * str)
+ {
+   unsigned int errs = 0;
+-  GLenum glerr = glGetError();
++  GLenum glerr = glglue_geterror();
+   while (glerr != GL_NO_ERROR) {
+     if (errs > 0) { cc_string_append_char(str, ' '); }
+     cc_string_append_text(str, coin_glerror_string(glerr));
+     errs++;
+-    glerr = glGetError();
++    glerr = glglue_geterror();
+   }
+   return errs;
+ }
+Index: shapenodes/soshape_bumprender.cpp
+===================================================================
+RCS file: /export/cvsroot/Coin-2/src/shapenodes/soshape_bumprender.cpp,v
+retrieving revision 1.25
+diff -u -u -w -b -r1.25 soshape_bumprender.cpp
+--- shapenodes/soshape_bumprender.cpp	29 Apr 2006 13:05:18 -0000	1.25
++++ shapenodes/soshape_bumprender.cpp	5 Nov 2006 23:53:27 -0000
+@@ -287,7 +287,7 @@
+                               (GLsizei)strlen(diffusebumpdirlightvpprogram),
+                               diffusebumpdirlightvpprogram);
+     GLint errorPos;
+-    GLenum err = glGetError();
++    GLenum err = cc_glue_glGetError();
+ 
+     if (err != GL_NO_ERROR) {
+       glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
+@@ -302,7 +302,7 @@
+     cc_glglue_glProgramString(glue, GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
+                               (GLsizei)strlen(normalrenderingvpprogram),
+                               normalrenderingvpprogram);
+-    err = glGetError();
++    err = cc_glue_glGetError();
+ 
+     if (err != GL_NO_ERROR) {
+       glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
+@@ -343,7 +343,7 @@
+     // FIXME: Maybe a wrapper for catching fragment program errors
+     // should be a part of GLUE... (20031204 handegar)
+     GLint errorPos;
+-    GLenum err = glGetError();
++    GLenum err = cc_glue_glGetError();
+     if (err != GL_NO_ERROR) {
+       glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
+       SoDebugError::postWarning("soshape_bumpspecrender::initPrograms",
+@@ -357,7 +357,7 @@
+     cc_glglue_glProgramString(glue, GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
+                               (GLsizei)strlen(directionallightvpprogram), directionallightvpprogram);
+ 
+-    err = glGetError();
++    err = cc_glue_glGetError();
+     if (err != GL_NO_ERROR) {
+       glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
+       SoDebugError::postWarning("soshape_bumpspecrender::initPrograms",
+@@ -372,7 +372,7 @@
+     cc_glglue_glProgramString(glue, GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB,
+                               (GLsizei)strlen(pointlightvpprogram), pointlightvpprogram);
+ 
+-    err = glGetError();
++    err = cc_glue_glGetError();
+     if (err != GL_NO_ERROR) {
+       glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
+       SoDebugError::postWarning("soshape_bumpspecrender::initPrograms",

@@ -1,0 +1,96 @@
+// @(#)root/ged:$Name:  $:$Id: README,v 1.4 2013/08/30 16:00:10 perev Exp $
+// Author:Valeri Fine   13/06/06
+    To create the user custom Qt-based editor one needs 3 steps:
+    ------------------------------------------------------------
+ 1. Subclass the template class  TQtGedAttFrame (defined by TQtGedAttFrames.h header file) 
+    with the "target" ROOT class name
+    
+    #include "TQtGedAttFrames.h"
+    class MyCustomEditorClass: public TQtGedAttFrame<ROOT Class> 
+#ifndef __CINT__
+   Q_OBJECT
+#endif
+    {
+      protected:
+        void BuildView(QWidget  *editorPanel); = 0;   // Method to build the Qt GUI to edit the ROOT object
+                                                      // with editroPanel as a parent widget
+                                
+        void ChangeView() = 0;  // Method to change the GUI view according 
+                                // to the current state of the model *TObject)
+                                
+        void ConnectSignals2Slots(); // to commect Qt widget signl with 
+                                    // your ediotr class Qt slots. 
+                                    // It is assumed each slot is to set the appropropriated 
+                                    // model parameter based on the GUI widgetth at emnitted 
+                                    // the signal.
+                                    
+     // Create custom constructors to initialize the base class ctors:
+     
+//        TQtGedAttInterface(QMainWindow *mainWidget, const QString &label, TCanvas *canvas, Int_t id,
+//                Int_t width = TQtGedAttInterfaceB::EditorDefaultWidth(), Int_t height = 70,
+//                UInt_t option= 0, /* = kChildFrame, */
+//                Pixel_t back = 0  /* = GetDefaultFrameBackground()*/ );
+//        TQtGedAttInterface(const QString &label, QWidget *parent, TCanvas *canvas, Int_t id,
+//                Int_t width = TQtGedAttInterfaceB::EditorDefaultWidth(), Int_t height = 70,
+//                UInt_t option= 0, /* = kChildFrame, */
+//                Pixel_t back = 0  /* = GetDefaultFrameBackground()*/ );
+        
+   
+    with the mandatory implementation of the protected ChangeView() and ConnectSignals2Slots  
+    abstract  interfaces.
+
+    For example, to create the  class editor for TArrow class do
+
+   class TQtArrowEditor : public TQtGedAttFrame<TArrow> {
+#ifndef __CINT__
+   Q_OBJECT
+#endif
+   protected:
+     void BuildView(QWidget  *editorPanel);
+     void ChangeView();
+     void ConnectSignals2Slots();
+  public:
+        TQtArrowEditor(QMainWindow *mainWidget, TCanvas *canvas, Int_t id=0,
+               Int_t width = TQtGedAttInterfaceB::EditorDefaultWidth(), Int_t height = 30,
+               UInt_t options = 0, // kChildFrame,
+		       Pixel_t back = 0)
+		     : TQtGedAttFrame<TArrow>(p, "Arrow", canvas, id, width, height, options, back) {}
+		     
+        TQtArrowEditor(TCanvas *canvas, QWidget *parent=0, Int_t id=0,
+               Int_t width = TQtGedAttInterfaceB::EditorDefaultWidth(), Int_t height = 30,
+               UInt_t options = 0, // kChildFrame,
+		       Pixel_t back = 0)
+		     : TQtGedAttFrame<TArrow>("Arrow", p, canvas, id, width, height, options, back){}
+
+      // other methods
+      //   . . .
+     public slots:
+      // The bunch of the custom Qt slots (if any) 
+      // to change theTObject object  selected by TCanvas
+   }
+
+   see qtged/inc/TQtArrowEditor.h
+   
+   Pay your attention if the class you are building the editor for is derived from another class 
+   ( or classes) and some of those classes are in possesion of the "object editor", all those editors 
+   will be present and available to edit one's subclass too. 
+   This means one has to implement the editor code for the missing components only.
+
+ 2. Within your "MyCustomEditorClass" provide the "global factory" to register the new class editor automatically 
+
+    something like this: 
+    // Register the GED factory interfaces:
+    static TQtGedFactory<MyCustomEditorClass>   the_arbitrary_name_here;
+
+    See, for exmaple, the  last statement of TQtArrowEditor.cxx for TArrow editor:
+    // Register the GED factory interfaces:
+    static TQtGedFactory<TQtArrowEditor>   gQtArrowEditor;
+
+
+ 3. Create your share library
+
+ 4. The further explanation will be provided soon :)
+
+
+     fine@bnl.gov  13.06.2006
+

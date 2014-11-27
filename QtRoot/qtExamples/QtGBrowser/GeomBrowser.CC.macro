@@ -1,0 +1,18 @@
+{
+    TString rootEnv    = gSystem->Getenv("ROOTSYS");
+    TString geomBrowserPath  = rootEnv + "/test/QtGBrowser";
+//  TString geomBrowserDLL   = geomBrowserPath + "/Win32GeomBrowser";
+    TString geomBrowserDLL   = "Win32GeomBrowser";
+    TString geomBrowserMacro = TROOT::GetMacroPath();
+//  geomBrowserMacro + = ":";
+//  geomBrowserMacro + = geomBrowserPath;
+//   TROOT::SetMacroPath(geomBrowserMacro.Data());
+//  TString rootTutorials = rootEnv + "/tutorials";
+  //  Go to ROOT tutorials directory
+  // gSystem->ChangeDirectory(rootTutorials.Data());
+  
+//    gSystem->ChangeDirectory(geomBrowserPath.Data());
+    gQt->LoadQt(geomBrowserDLL);
+    gSystem->ChangeDirectory(geomBrowserPath.Data());
+  //  Load GeomBrowser using the GUI thread
+}
