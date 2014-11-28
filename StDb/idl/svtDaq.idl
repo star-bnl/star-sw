@@ -1,0 +1,20 @@
+/*
+ * Description: electronic signal characteristics 
+ */
+
+struct svtDaq {
+
+  //  type varnam;    //Units : Comments
+
+  long clearedTimeBins;       /* ?? */
+  long savedBlackAnodes[4];   /* ?? */  
+  long pixelsBefore;          /* ?? */
+  long pixelsAfter;           /* ?? */
+  long pedOffset;             /* ?? */
+  long seqLo;                 /* ?? */
+  long seqHi;                 /* ?? */
+  long threshLo;              /* ?? */
+  long threshHi;              /* ?? */
+};
+
+

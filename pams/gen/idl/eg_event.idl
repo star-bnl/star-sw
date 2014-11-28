@@ -1,0 +1,30 @@
+/* eg_event.idl - Event Generator event table */
+
+struct eg_event {	   /*VENUS     Description                           */
+   long   n_event;         /*nrevt     eg event number                       */
+   float  b_impact;        /*bimevt    actual impact parameter               */
+   float  phi_impact;      /*phievt    reaction plane                        */
+/* long   event_type;                  trigger, minbias bkgd, cosmic, etc.   */
+/* long   polarization_evt[10];        to be defined                         */
+/* long   n_part_prot_east;            number of participant protons         */
+/* long   n_part_neut_east;            number of participant neutrons        */
+/* long   n_part_prot_west;            number of participant protons         */
+/* long   n_part_neut_west;            number of participant neutrons        */
+   long   n_track;         /*nptls     # tracks                              */
+   long   n_vertex;        /*ivtxs     # vertices                            */
+/* long   n_fs_track;                  # final state tracks                  */
+/* long   n_not_fs_track;              # non-final state tracks              */
+/* long   n_primary_vertex;            # primary vertices                    */
+/* long   n_fs_vertex;                 # non-final state vertices            */
+/* struct eg_vertex_t   *p_first_primary_vertex; ptr to ll of primary verts  */
+/* struct eg_vertex_t   *p_first_fs_vertex;      ptr to ll of fin. state vert*/
+};
+
+/* Latest revision - $Date: 1997/01/08 21:15:08 $ */
+/*
+
+05dec96 - cetull
+	This table is derived from VENUS and GSTAR internal structures and
+	variables.
+
+*/

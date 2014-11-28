@@ -1,0 +1,16 @@
+Authors:      Alexander Khodinov & PEC STAR group
+  
+Date:         June 2000
+ 
+Maker Name:   StPCollTagMaker
+
+Files:        StPCollTagMaker.cxx
+              StPCollTagMaker.h
+              PCollTag.idl
+
+Description:  Our Maker stores values useful for preselection of peripheral events.
+
+
+
+
+

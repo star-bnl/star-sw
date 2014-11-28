@@ -1,0 +1,115 @@
+#!/bin/csh 
+
+set run=$1
+set type=$2
+set skip=$3
+
+set anadir=/ldaphome/akio/fgt
+set dir=$run
+@ dir /= 1000
+
+echo makeplot $run $type  anadir=$anadir yearday=$dir
+
+stardev
+cd $anadir
+
+if ( "$type" == "pedestal" ) then
+  set ped=1
+  echo This is pedestal run
+else
+  set ped=0
+  echo This is physics run
+endif
+
+ls -l ped.txt
+ls -l status.txt
+
+if ( ! -e $dir ) then 
+    mkdir $dir
+endif
+if ( ! -e www/$dir ) then 
+    mkdir www/$dir
+endif
+if ( ! -e $dir/ped ) then 
+    mkdir $dir/ped
+endif
+if ( ! -e $dir/status ) then 
+    mkdir $dir/status
+endif
+if ( ! -e $dir/log ) then 
+    mkdir $dir/log
+endif
+if ( ! -e $dir/condor ) then 
+    mkdir $dir/condor
+endif
+if ( -e $dir/log/$run.log ) then 
+    \rm $dir/log/$run.log
+endif
+
+if ( "$skip" == "skip" ) then
+  echo skipping runqa.C
+else
+  echo root4star -b -q runqa.C"($run,$ped)"
+  root4star -b -q runqa.C"($run,$ped)" > $dir/log/$run.log
+endif
+
+if ( "$type" == "pedestal" ) then
+  if ( -e $dir/ped/ped.$run.txt ) then	    
+    echo found $dir/ped/ped.$run.txt
+    pwd
+    if ( -e "ped.txt" ) then
+      echo \rm ped.txt
+      \rm ped.txt
+    endif
+    echo \cp $dir/ped/ped.$run.txt ped/ped.$run.txt
+    \cp $dir/ped/ped.$run.txt ped/ped.$run.txt
+    echo ln -s ped/ped.$run.txt ped.txt
+    ln -s ped/ped.$run.txt ped.txt
+  endif
+  echo status
+  if ( -e $dir/status/status.$run.txt ) then	
+    if ( -e "status.txt" ) then
+      echo \rm status.txt	
+      \rm status.txt	
+    endif
+    echo \cp $dir/status/status.$run.txt status/status.ped.$run.txt
+    \cp $dir/status/status.$run.txt status/status.ped.$run.txt
+    echo ln -s status/status.ped.$run.txt status.txt
+    ln -s status/status.ped.$run.txt status.txt
+  endif
+  echo root -b -q makepedplot.C"($run)"
+  root -b -q makepedplot.C"($run)"
+  \mv $dir/*${run}*.png www/$dir/	
+  \rm www/$dir/*${run}*.tiny.png
+  ./maketiny.pl www/$dir
+else
+  echo root -b -q makeqaplot.C"($run,0,1)"
+  root -b -q makeqaplot.C"($run,0,1)"
+  \mv $dir/*${run}*.pdf www/$dir/	
+  \mv $dir/*${run}.evtdump.txt www/$dir/ 
+  \mv $dir/*${run}*.png www/$dir/ 
+  \rm www/$dir/*${run}*.tiny.png
+  ./maketiny.pl www/$dir
+
+  if ( -e $dir/status/status.$run.txt ) then
+    \cp $dir/status/status.$run.txt status/status.phys.$run.txt
+    echo root -b -q makepedplot.C"($run,1)"
+    root -b -q makepedplot.C"($run,1)"
+    \mv $dir/*${run}*.png www/$dir/ 
+    \rm www/$dir/*${run}*.tiny.png
+    ./maketiny.pl www/$dir
+    set st=`ls -l status.txt | grep ped | wc -l`
+    if ( $st == 1 ) then
+
+      echo status file was from pedAsPhys run. Replace with Phys one
+      echo \rm status.txt
+      \rm status.txt
+      echo ln -s status/status.phys.$run.txt
+      ln -s status/status.phys.$run.txt status.txt
+    endif
+  endif
+
+  echo root -b -q resid.C"($run,0,-1,2)"
+  root -b -q resid.C"($run,0,-1,2)"
+  \mv $dir/*${run}*.pdf www/$dir/	
+endif

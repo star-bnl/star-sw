@@ -1,0 +1,57 @@
+How to install HepMC on your laptop (Linux/Mac OSX) and link to Pythia
+
+Note 1: Comes with no guarantee; this is what worked for me.
+Note 2: refers to HepMC 2.04.02 and Pythia 8.125 as of June 2009,
+        but should work also for later versions.
+
+1) Create a directory where you want to do the installation, e.g.
+     mkdir hepmc
+and move to it
+     cd hepmc
+
+2) Open
+     http://lcgapp.cern.ch/project/simu/HepMC/download 
+in a browser, scroll down to "HepMC 2.04.02" and 
+click on "source" rightmost on the line below.
+
+3) In the pop-up menu pick "Save to file" and then the above hepmc directory.
+You should now have a file "HepMC-2.04.02.tar.gz" in that directory.
+
+4) Unpack with
+    tar -xzf HepMC-2.04.02.tar.gz
+
+5) Create two new subdirectories
+    mkdir build install
+and move to build
+    cd build
+  
+6) Configure the compilation with
+    ../HepMC-2.04.02/configure -prefix=mypath/hepmc/install -with-momentum=GEV -with-length=MM
+all on one line, where "mypath" is the absolute path to the hepmc directory 
+(use pwd if in doubt)  
+
+7) Compile and install with
+     make
+     make check
+     make install
+which takes a minute or two and an amount of output. 
+
+8) Now move to your pythia8125 (or later) directory and configure with
+     ./configure --with-hepmc=mypath/hepmc/install --with-hepmcversion=2.04.02
+   (Re)compile with "make" (or "gmake") as usual.
+
+9) Move to the examples subdirectory and do
+     source config.sh
+     source config.csh
+Only one of them will work, depending on which shell you use, but the other
+should be harmless
+
+10) You should now be able to make and run e.g. main32 to produce HepMC 
+output files (you can ignore compilation warnings about variables being 
+shadowed; this is harmless)
+
+NOTE: HepMC 2.04 allows you to set the units of the event record,
+i.e. to ensure that the Pythia default choice of GeV and mm (with c = 1)
+is propagated to the HepMC event record. This feature is not available
+in 2.03. The two test programs main31 and main32 therefore come with
+the Units code commented out, but with instructions how to restore it.  

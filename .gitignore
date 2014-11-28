@@ -1,0 +1,47 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Dictionary source files
+G__*.cxx
+G__*.h
+
+# Other Stuff
+*.d
+CVS 
+.consign* 
+ir.out 
+*.bck 
+*.HOLD*  
+*.hold* 
+*.tgz 
+i686* 
+i386*  
+hold 
+*.d 
+*PACKAGE 
+*.log .svn* 
+.svn/* 
+*~
+ build 
+test* 
+.#* 
+.s* 
+.x*
+CVS
+Entries
+Root
+Repository
+.svn
+.sl*
+.misc

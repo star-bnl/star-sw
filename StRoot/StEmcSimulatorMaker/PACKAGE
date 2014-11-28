@@ -1,0 +1,5 @@
+# $Id $
+# package StEmcSimulatorMaker
+# author: 
+Library:libStEmcSimulatorMaker.so:LIBS +=   -lemc_Tables  -lsim_Tables  -lStChain  -lStDb_Tables    -l_StEvent  -lStMcEvent
+#Library:libStEmcSimulatorMaker.so:LIBS +=   -lemc_Tables  -lsim_Tables  -lStChain  -lStDb_Tables  -lStEmcUtil  -lStEvent  -lStMcEvent

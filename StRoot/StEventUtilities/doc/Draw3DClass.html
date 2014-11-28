@@ -1,0 +1,391 @@
+<html>
+<title>
+StuDraw3DEvent C++ class
+</title>
+<body>
+STAR offline framework provides two C++ classes:
+<ol>
+<li> StuDraw3DEvent (from StEventUtilities package)
+  <br>
+    to visualize the components of the StEvent.
+    <br>
+    Try macro <bold><code>StRoot/macros/graphics/Plot3Dtracks.C</code></bold>
+<li>   StuDraw3DMuEvent   (from StMuDSTMaker package) 
+  <br>
+    to visualize the components of the StMuEvent.
+    <br>
+    Try macro <bold><code>StRoot/macros/mudst/Plot3Dtracks.C</code></bold>
+</ol>
+The classes 
+<a href=" html/StuDraw3DEvent.html">StuDraw3DEvent</a>
+provides the <b>simple</b> way to visualize the StEvent / StMuEvent primitives in 3D quickly against of the STAR detector geometry.
+<p>
+The classes are "self-sufficient" and ready-to-use "on demand".
+<p>
+Compare its usage with the other components of STAR offline. For example, 
+<ul>
+<li> The STAR <a href="http://www.star.bnl.gov/public/comp/vis/OnLineEventDisplay.html">
+ONLINE EventDisplay</a> is the stand-alone application. 
+To use it one has to provide the file in the special DAQ format and 
+launch that application.
+
+<li>STAR <a href="http://www.rhic.bnl.gov/~fine/EventDisplay">
+offline EventDisplay</a> is the instance of the STAR StMaker class. 
+As such it can be used from within the STAR production chain only. 
+<br>
+It can not be used  from the non-"chain" applications easily.
+</ul>
+The<bold><code> StuDraw3DEvent / StuDraw3DMuEvent </code></bold> classes  can be used directly from any C++ application, 
+from the ROOT Cint interpreter and even from the gdb UNIX debugger break point 
+as needed. 
+It can be used to customize the STAR applications mentioned above also. 
+On the other hands it is backed by the same well-known poweful 
+3D engine; and it shares with the full-fledged STAR 3D applications the powerfull
+and flexible GUI interface.
+
+The GUI interface is described <a href="http://www.star.bnl.gov/public/comp/vis">"STAR visualization and plotting" </a>
+by <a href="http://www.rhic.bnl.gov/~fine/EventDisplay">"Offline Event Display"</a> and 
+<a href="http://www.star.bnl.gov/public/comp/vis/STAR_GeometryBrowser.12.06.2006.ppt">"Star Geometry Browser"</a>
+links.
+<P>
+<hr>
+The base <a href="html/StDraw3D.html">StDraw3D</a> class is a controller connecting the arbitrary "model" object to the arbitrary ROOT 3D class "view" object to implement the so-called   "Model / View" paradigm.
+In our case, the "Model" is an arbitrary object and the "View" is an instance of some ROOT 3D class. 
+To render views the <a href="html/StDraw3D.html">StDraw3D</a>
+instantiates the
+<a href="http://root.cern.ch/root/html/TCanvas.html">TCanvas</a>
+and <a href="http://root.cern.ch/root/html/TVirtualViewer3D.html">TVirtualViewer3D</a>
+to allow the user select interactively the "view"  instance  and invoke the model methods like: 
+
+<ul>
+  <li><a href="http://root.cern.ch/root/html/TObject.html#TObject:Inspect">TObject::Inspect()</a>
+        to inspect the model data-member values;
+  <li>  <a href="http://root.cern.ch/root/html/TObject.html#TObject:GetObjectInfo">
+   TObject::GetObjectInfo</a>  to label the view with the current model information;
+  <li>	<a href="http://root.cern.ch/root/html/TVirtualPadEditor.html">
+  TVirtualPadEditor</a> to set the model attributes.
+</ul>
+<P>
+For example, <a href="html/StuDraw3DEvent.html">StuDraw3DEvent</a> class applies: 
+<ul>
+  <li>	"Model" -  StTrack , "View" -  
+  <a href="http://root.cern.ch/root/html/TPolyLine3D.html">TPolyLine3D</a>
+  <li>	"Model" StHitCollection, "View" - 
+  <a href="http://root.cern.ch/root/html/TPolyMarker3D.html">TPolyMarker3D</a>
+</ul>
+
+<hr>
+<P>
+<h2>To see how it works, you  need two things to do</h2>
+<OL>
+<li>Create the custom ".rootrc" file to turn the Qt-layer on 
+<code><bold><pre>
+    stardev	
+    ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
+</pre></bold></code>
+<li> Execute the ROOT macros
+<code><bold><pre>	
+  > root.exe Draw3D.C
+</pre></bold></code>
+You should get the picture 
+<br><center>
+<img src="examples/Draw3DClassFirst.png">. </center>
+One is advised to switch from the "perspective"  view to the "parallel" one 
+<br><center>
+<img src="examples/Draw3DClass.png"></center>
+The <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/StRoot/macros/graphics/Draw3D.C?rev=HEAD">
+<code><bold>Draw3D.C</bold></code></a> macro is 3 lines long:
+
+
+<code><bold><pre>	
+void Draw3D()
+{
+   gROOT->Macro("Load.C");
+   gEventDisplay->Draw3DTest();
+}
+</pre></bold></code>Another ROOT session:
+<code><bold><pre>	
+root[0] gROOT->Macro("Load.C");
+root[1] gEventDisplay->ShowTest();
+</pre></bold></code>
+is to produce two separate windows;
+<table>
+<tr>
+<th>Event over detector geometry
+<th>Event with no detector geometry
+</tr>
+<tr>
+<td><img src="examples/EventDisplayWGeom.png">
+<td><img src="examples/EventDisplayWOGeom.png">
+</tr></table>
+<p>
+The  StDraw3D::Draw3DTest should give you a clue how the class can be used
+<hr>
+<code><bold><pre> 
+ void StDraw3D::Draw3DTest(){
+
+   float xyz[] = { 189.195,       27.951,       123.966
+                 ,187.195,       28.6187,       122.89
+                 ,181.195       ,30.6788       ,119.556
+                 ,179.195       ,31.3387       ,118.454
+                 ,177.195       ,32.0065       ,117.328
+                 ,175.195       ,32.6132       ,116.26
+                 ,173.195       ,33.2385       ,115.146
+                 ,171.195       ,33.8552       ,114.016
+                 ,169.195       ,34.3924       ,112.964
+         };
+
+   int sizeXYZ = sizeof(xyz)/sizeof(float)/3;
+   fprintf(stderr," %d %p\n", sizeXYZ,xyz);
+   // Draw the 3D polymarkers
+   Draw3D(sizeXYZ,xyz);
+   SetComment("The hits from the TPC sector");
+
+   // Draw the 3D polyline
+   Line(sizeXYZ,xyz,kPrimaryTrack);
+   SetComment("The recontstructed track");
+}
+</pre></bold></code>
+<hr>
+
+To draw the components (tracks, hits etc) of the StEvent,
+<P><center>
+<img src="examples/StEventTpcTracks.png"></center>
+<br><P>use the ROOT session like
+<code><bold><pre> 
+ root.exe   # or "root4star", do  NOT use just "root". "root" is a shell script that  can screw the environment
+   root[0] .x Load.C
+   root[1] .x bfc.C(0,"doevents","st_physics_6048025_raw_1020002.event.root"); 
+   root[2]  // One can use any other chain parameters instead of "doevents" above
+   root[3] chain->MakeEvent();                 // to read the next event
+   root[4] StEvent *event = (StEvent *)chain->GetDataSet("StEvent");   // Access the StEvent pointer
+   root[5] gEventDisplay->SetBkColor(kWhite);  // Change the backgorund color
+   root[6] gEventDisplay->Tracks(event);       // Draw the tracks
+</pre></bold></code>
+Replacing the last statement with
+<code><bold><pre> 
+   root[5] gEventDisplay->Tracks(event,primary);  // to draw the tracks
+</pre></bold></code>
+should produce another picture:
+<P><center>
+<img src="examples/StEventTpcPrimaryTracks.png"  width=66%></center>
+<br>
+<P>
+Invocation of the 
+<code><bold><pre> 
+root.exe [6]  gEventDisplay->Clear();                    // Clear the previous picture
+root.exe [7]  gEventDisplay->Hits(event,kUsedHitsTracks);// Draw tracks and its his
+</pre></bold></code>
+will show the image:
+<P><center>
+<img src="examples/StEventTpcTracksHits.png"  width=66%></center>
+<br>
+<P>
+To hide the detector geometry components and 
+improve the "display" response time one can change 
+the Coin widget  attributes from 
+<code><bold>"As Is"</bold></code> to
+<code><bold>"Points"</bold></code> to do that 
+
+<p>
+
+<ol>
+   <li> Click with the "right mouse button" over 
+        the OpenGL widget working area;
+   <li> Select from the Coint "Context menu" 
+   <br><code><bold>
+      "Draw Styles> -> "Still darwstyle" -> "Points"
+    </bold></code><br>
+       or
+   <br><code><bold>
+      "Draw Styles> -> "Animating drawstyle" -> "Points"
+    </bold></code><br>
+ to get the low resolution picture (see below)
+   <li> To  restore the original view you can always use 
+        the same menu and select <code><bold>"As Is"</bold></code> 
+        position there.
+</ol>
+<p> 
+<center>
+
+<table width=100%>
+   <TITLE> How to change the widget view to hide the detector geometry
+   </TITLE>
+   <COLGROUP>
+      <COL width="20%">
+      <COL width="40%">
+      <COL width="40%">
+   <THEAD>
+     <tr>
+     <th> Original "as is" view
+     <th> Coin3D "Context menu"
+     <th>"Points" view
+<TBODY>
+<tr>
+   <td>
+   <center>
+        <img src="examples/EventGeometryAsIs.png" width=100%>
+   </center>
+
+   <td>
+   <center>
+        <img src="examples/EventGeometryCoinMenu.png" width=100%>
+   </center>
+
+   <td>
+   <center>
+       <img src="examples/EventGeometryPoints.png"  width=100%>
+   </center>
+</TBODY>
+</table>
+</center>
+<p>
+The macro below shows how one can navigate the StEvent structure read
+from the root files to find and draw the track 
+providing the eventNumber and trackId. You can pick this macro from 
+<code><bold>$STAR/StRoot/macros/graphics/Plot3Dtracks.C</bold></code>. Try:
+<code><bold><pre>root.exe Plot3Dtracks.C
+</pre></bold></code><hr><code><bold><pre>void Plot3Dtracks(int eventNumber=22394, int trackId=425, const char *file="st_physics_8112087_raw_1020015.event.root"){
+ // This example shows how to use Draw3D class to draw  the 
+ // track if one knows the track "event number" and "track id".
+ 
+  gROOT->Macro("Load.C");
+  gROOT->LoadMacro("bfc.C");
+  bfc(0,"in,StEvent",file); 
+  StEvent *event = 0;
+  gEventDisplay->SetBkColor(kWhite);
+  printf(" Look up the file %s to find the track %d from the event %d \n"
+       , file,trackId,eventNumber);
+  bool trackWasFound = false;
+  bool eventWasFound = false;
+
+  while (!eventWasFound && !chain->MakeEvent() ) {
+     // Access the StEvent pointer
+     event  =  (StEvent *)chain->GetDataSet("StEvent");
+     // ------------------ select event  -----------------------
+     if (chain->GetEventNumber() == eventNumber) { eventWasFound = true; break; }
+     // --------------------------------------------------------
+  }
+  if (eventWasFound) {
+     const StSPtrVecTrackNode& theNodes = event->trackNodes();
+     StTrack *track = 0; int sz = theNodes.size();
+     for (unsigned int i=0; i&ltsz; i++) {
+        // --------------------- select tracks  -------------------------//
+        track = theNodes[i]->track(global);                              //
+        if  (track->key() == trackId) { trackWasFound  = true;  break; } //
+        // --------------------------------------------------------------//
+      }
+      //-----------------Draw the track ---------------//
+      if (trackWasFound) gEventDisplay->Track(*track); //
+      //-----------------------------------------------//
+  }
+}
+</pre></bold></code>
+<hr>
+<p>
+Here you are the 
+<a href=" html/StuDraw3DEvent.html">StuDraw3DEvent</a>
+(see <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/StRoot/StEventUtilities/StuDraw3DEvent.h?rev=HEAD">
+STAR CVS<a> also) class API including the methods from the base
+<a href=" html/StDraw3D.html">StDraw3D</a>
+(see 
+ <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/StRoot/StarRoot/StDraw3D.h?rev=HEAD">
+STAR CVS</a> also)
+class. 
+<br>
+The definitions of  the ROOT color and marker style attributes are provided by 
+the <a href="http://root.cern.ch/root/html/TAttMarker.html">TAttMarker</a> C++ class documentation. 
+
+<hr>
+<h3><a href=" html/StuDraw3DEvent.html">StuDraw3DEvent</a>
+C++ class API </h3>
+<hr>
+<code><bold><pre>
+enum EDraw3DStyle {kVtx,kPrimaryTrack,kGlobalTrack,kUsedHit,kUnusedHit,kTrackBegin,kTrackEnd,kUser};
+
+class StuDraw3DEvent : public StDraw3D {
+
+     StuDraw3DEvent(TVirtualPad *pad = 0); // "by default" (pad=0) the new viewer is to be created automatically
+
+               // Draw StEvent "StTrack" object with the ROOT color, style, size attributes
+     virtual TObject *Track(const StTrack &track
+                  ,  Color_t col
+                  ,  Style_t sty= Style_t(-1)
+                  ,  Size_t siz = Size_t (-1));
+               // Draw StEvent "StTrack" object with the predefined attrbutes
+
+     virtual TObject *Track(const StTrack &track, EDraw3DStyle sty=kPrimaryTrack);
+
+               // Draw StEvent "StMeasuredPoint" object  (like StHit, StVertex) with the ROOT color, style, size attributes
+     virtual TObject *Hit(const StMeasuredPoint &hit
+                  ,  Color_t col
+                  ,  Style_t sty= Style_t(-1)
+                  ,  Size_t siz = Size_t (-1));
+
+               // Draw StEvent "StMeasuredPoint" object  (like StHit, StVertex) with the predefined attrbutes
+               // This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+
+     virtual TObject *Hit(const StMeasuredPoint &hit, EDraw3DStyle sty=kUsedHit);
+
+               // Draw StEvent "StMeasuredPoint" object  (like StHit, StVertex) with the ROOT color, style, size attributes
+               // This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+
+     virtual TObject *Vertex(const StMeasuredPoint &hit
+                  ,  Color_t col
+                  ,  Style_t sty= Style_t(-1)
+                  ,  Size_t siz = Size_t (-1));
+
+               // Draw StEvent "StMeasuredPoint" object  (like StHit, StVertex) with the predefined attributes
+               // This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
+
+     virtual TObject *Vertex(const StMeasuredPoint &hit, EDraw3DStyle sty=kVtx);
+     virtual TObject *TrackInOut(const StTrack &track, Bool_t in
+                  ,  Color_t col= Color_t(-1)
+                  ,  Style_t sty= Style_t(-1)
+                  ,  Size_t siz = Size_t (-1));
+     virtual TObject *TrackInOut(const StTrack &track, EDraw3DStyle sty=kUsedHit, Bool_t in=kTRUE);
+
+               // Draw the array of the float coordinates with ROOT TPolyMarker3D class and the predefined attributes
+
+     virtual TObject *Points(int n, const float *xyz,  EDraw3DStyle sty);
+
+               // Draw the array of the float coordinates with ROOT TPolyMarker3D class and the ROOT color, style, size attributes
+
+     virtual TObject *Points(int n, const float *xyz
+         ,  Color_t col= Color_t(-1)
+         ,  Style_t sty= Style_t(-1)
+         ,  Size_t siz = Size_t (-1));
+
+               // Draw ONE 3D marker with ROOT TPolyMarker3D class and the ROOT color, style, size attributes
+     virtual TObject *Point(float x, float y, float z
+         ,  Color_t col= Color_t(-1)
+         ,  Style_t sty= Style_t(-1)
+         ,  Size_t siz = Size_t (-1));
+
+               // Draw ONE 3D marker with ROOT TPolyMarker3D class and the predefined attrbutes
+
+     virtual TObject *Point(float x, float y, float z,  EDraw3DStyle sty);
+
+               // Draw the array of the float coordinates with ROOT TPolyLine3D class and the ROOT color, style, size attributes
+
+     virtual TObject *Line(int n,  const float *xyz
+         ,  Color_t col= Color_t(-1)
+         ,  Style_t sty= Style_t(-1)
+         ,  Size_t siz = Size_t (-1));
+
+               // Draw the array of the float coordinates with ROOT TPolyLine3D class and the predefined attributes
+
+     virtual TObject *Line(int n,  const float *xyz,  EDraw3DStyle sty);
+   
+               // Draw the test example
+     void Draw3DTest();
+};
+</pre></bold></code><hr>
+To report the bug use <a href="http://www.star.bnl.gov/rt2">STAR Bug report</a> facility
+<hr>
+<P> Valeri Fine 
+<br>
+(fine  at bnl dot gov )
+
+</body>
+</html>

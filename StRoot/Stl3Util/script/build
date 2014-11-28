@@ -1,0 +1,97 @@
+#!/usr/bin/make -f
+
+include script/Makefile.common
+
+
+################################################################
+# Configuration options
+################################################################
+
+# To use online histogramming, uncomment this
+#CXXFLAGS += -DGL3ONLINE
+
+# Flags for debugging
+#CXXFLAGS += -g
+#LDFLAGS  += -g
+
+
+
+
+#CXXFLAGS += -I/L3/include/scl
+
+CXXFLAGS += -I..
+
+
+# Build all targets with script/build all
+all:	base gl3 ftf
+
+
+################################################################
+# Base library
+################################################################
+
+BAS_LIB = build/$(ARCH)/libL3Base.a
+
+BAS_SRC = $(wildcard base/*.cxx)
+BAS_INC = $(wildcard base/*.h)
+
+BAS_OBJ	 = $(addprefix build/$(ARCH)/, $(BAS_SRC:.cxx=.o))
+
+base:		$(BAS_LIB)
+$(BAS_LIB):	$(BAS_OBJ)
+
+################################################################
+# Global L3
+################################################################
+
+GL3_LIB = build/$(ARCH)/libGL3.a
+
+GL3_SRC	= $(wildcard gl3/*.cxx)
+GL3_INC = $(wildcard gl3/*.h)
+
+ALG_SRC	= $(wildcard gl3/algorithms/*.cxx)
+ALG_INC = $(wildcard gl3/algorithms/*.h)
+
+GL3_OBJ	 = $(addprefix build/$(ARCH)/, $(GL3_SRC:.cxx=.o))
+GL3_OBJ += $(addprefix build/$(ARCH)/, $(ALG_SRC:.cxx=.o))
+
+gl3:		$(GL3_LIB)
+$(GL3_LIB):	$(GL3_OBJ)
+
+
+
+################################################################
+# Pablo's ftf-Tracker
+################################################################
+
+FTF_LIB = build/$(ARCH)/libFtf.a
+
+FTF_SRC	= $(wildcard ftf/*.cxx)
+FTF_INC = $(wildcard ftf/*.h)
+
+FTF_OBJ	 = $(addprefix build/$(ARCH)/, $(FTF_SRC:.cxx=.o))
+
+ftf:		$(FTF_LIB)
+$(FTF_LIB):	$(FTF_OBJ)
+
+
+
+
+
+#CXXFLAGS += -I/RTS/include/L3 -I/RTS/include/TRG
+
+
+#install-libs: $(ARCH)/$(LIB)
+#install-includes: $(INCS)
+
+#build/$(ARCH)/%.a:
+#	ar -rs $@ $^
+
+#$(ARCH)/%.o:	modules/%.cxx modules/%.h
+#	$(CXX) -I. $(CXXFLAGS) -c -o $@ $<
+
+gl3InstantiateAlgorithm.cxx: modules
+	./make_gl3InstantiateAlgorithm $(MODULES)
+
+clean::
+	rm -f gl3InstantiateAlgorithms.cxx

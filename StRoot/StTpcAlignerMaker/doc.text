@@ -1,0 +1,917 @@
+Calculations used in TpcAlignerDraw.C
+=====================================
+0.Definitions
+--------------
+a. Rotations
+------------
+                            (1  0          0)
+          RotateX(alpha) =  (0  1     -alpha)
+                            (0  alpha      1)  
+
+                            (1       0  beta)
+          RotateY(beta) =   (0       1     0)
+                            (-beta   0     1)
+
+                            (1     -gamma     0)
+          RotateZ(gamma) =  (gamma      1     0)
+                            (0          0     1)
+
+                            (1     -gamma   beta)
+          Rx*Ry*Rz     =    (gamma      1 -alpha)
+                            (-beta  alpha      1)
+
+
+   (alpha,beta,gamma) => (a,b,g)
+
+                            (1  -g  b   x)
+          Rx*Ry*Rz     =    (g   1 -a   y)
+                            (-b  a  1   z)
+			    ( 0  0  0   1 )
+================================================================================
+ca = cos(alpha), sa = sin(alpha)
+cb = cos(beta) , sb = sin(beta)
+cg = cos(gamma), sg = sin(gamma)
+
+
+
+                            (1   0     0)
+ Rx=       RotateX(alpha) = (0  ca   -sa)
+                            (0  sa    ca)  
+
+                            ( cb  0  sb)
+ Ry=      RotateY(beta) =   (  0  1   0)
+                            (-sb  0  cb)
+
+                            (cg  -sg     0)
+ Rz=      RotateZ(gamma) =  (sg   cg     0)
+                            ( 0    0     1)
+
+
+            (cg  -sg     0) ( cb  0  sb) (1   0    0)
+Rz*Ry*Rx => (sg   cg     0)*(  0  1   0)*(0  ca  -sa) => 
+	    ( 0    0     1) (-sb  0  cb) (0  sa   ca)
+	    
+
+   (cg  -sg     0) ( cb   sb*sa   sb*ca)    (cg*cb  cg*sb*sa-sg*ca cg*sb*ca+sg*sa)
+=> (sg    1     0)*(  0      ca  -sa   ) => (sg*cb  sg*sb*sa   +ca sg*sb*ca   -sa)
+   ( 0    0     1) (-sb   cb*sa   cb*ca)    (  -sb     cb*sa          cb*ca      )
+================================================================================
+1. Outer to Inner sector alignment
+----------------------------------
+
+     rO (xO,yO,ZO), nO (nxO, nyO, nzO); in Outer Coordinate System
+     rI (xI,yI,zI), nI (nxI, nyI, nzI); in Inner -"-
+     Outer segment in Inner coordinate system
+                               (     1 -gamma  beta )(nxO)    (nxOP)     (         nxO - gamma*nyO + beta *nzO)   (nxI)
+     nO' =      R*nO = 	       ( gamma      1 -alpha)(nyO) => (nyOP)  =  (   gamma*nxO +       nyO - alpha*nzO) = (nyI)
+                               ( -beta  alpha     1 )(nzO)    (nzOP)     ( - beta *nxO + alpha*nyO +       nzO) = (nzI)
+			       
+                                 (dx)   (     1 -gamma  beta )(xO)     (         nxO - gamma*nyO + beta *nzO)   (xI)
+       rO' = dr + R*rO + nO'*s = (dy) + ( gamma      1 -alpha)(yO) + s*(   gamma*nxO +       nyO - alpha*nzO) = (yI)
+                                 (dz)   ( -beta  alpha     1 )(zO)     ( - beta *nxO + alpha*nyO +       nzO) = (zI)
+
+
+           (xO - xI)   (dX)      (nxO - nxI)   (nX)
+     dr =  (yO - yI) = (dY); n = (nyO - nyI) = (nY)
+           (zO - zI) = (dZ)      (nzO - nzI)   (nZ)
+
+dx          xO -gamma*xO  beta *xO     (         nxO - gamma*nyO + beta *nzO) = (xI)
+dy +  gamma*yO        yO -alpha*yO + s*(   gamma*nxO +       nyO - alpha*nzO) = (yI) =>
+dz    -beta*zO  alpha*zO        zO     ( - beta *nxO + alpha*nyO +       nzO) = (zI)
+
+dx             -gamma*xO  beta *xO     (         nxO - gamma*nyO + beta *nzO) = (xI-xO)
+dy +  gamma*yO           -alpha*yO + s*(   gamma*nxO +       nyO - alpha*nzO) = (yI-yO)
+dz    -beta*zO  alpha*zO               ( - beta *nxO + alpha*nyO +       nzO) = (zI-zO)
+
+
+
+dy +  gamma*yO           -alpha*yO + s*(   gamma*nxO +       nyO - alpha*nzO) = (yI-yO) = 0
+s = -(dy +  gamma*yO           -alpha*yO)/(   gamma*nxO +       nyO - alpha*nzO) => (-dy - gamma*yO + alpha*yO)/nyO
+
+(xI-xO) = dx             -gamma*xO  beta *xO   (         nxO - gamma*nyO + beta *nzO)
+(yI-yO) = dy +  gamma*yO           -alpha*yO + (   gamma*nxO +       nyO - alpha*nzO)*(-dy - gamma*yO + alpha*yO)/nyO =>
+(zI-zO) = dz    -beta*zO  alpha*zO             ( - beta *nxO + alpha*nyO +       nzO)
+
+(xI-xO) = dx             -gamma*xO +beta *xO   (         nxO*(-dy - gamma*yO + alpha*yO)/nyO - gamma*nyO*(-dy - gamma*yO + alpha*yO)/nyO + beta *nzO*(-dy - gamma*yO + alpha*yO)/nyO)
+(yI-yO) = dy +  gamma*yO           -alpha*yO + (   gamma*nxO*(-dy - gamma*yO + alpha*yO)/nyO +       nyO*(-dy - gamma*yO + alpha*yO)/nyO - alpha*nzO*(-dy - gamma*yO + alpha*yO)/nyO) =>
+(zI-zO) = dz    -beta*zO  alpha*zO             ( - beta *nxO*(-dy - gamma*yO + alpha*yO)/nyO + alpha*nyO*(-dy - gamma*yO + alpha*yO)/nyO +       nzO*(-dy - gamma*yO + alpha*yO)/nyO)
+
+(xI-xO) = dx             -gamma*xO +beta *xO   (nxO*(-dy - gamma*yO + alpha*yO)/nyO)
+(yI-yO) = dy +  gamma*yO           -alpha*yO + (    (-dy - gamma*yO + alpha*yO)    ) =>
+(zI-zO) = dz    -beta*zO  alpha*zO             (nzO*(-dy - gamma*yO + alpha*yO)/nyO)
+
+(xI-xO) = dx             -gamma*xO +beta *xO   (nxO/nyO*(-dy - gamma*yO + alpha*yO))
+(yI-yO) = dy +  gamma*yO           -alpha*yO + (        (-dy - gamma*yO + alpha*yO)) =>
+(zI-zO) = dz    -beta*zO  alpha*zO             (nzO/nyO*(-dy - gamma*yO + alpha*yO))
+
+			       tX = nxO/nyO; tZ = nzO/nyO;
+
+
+  (xI-xO) = dx             -gamma*xO +beta *xO   (tX*(-dy - gamma*yO + alpha*yO))
+  (yI-yO) = dy +  gamma*yO           -alpha*yO + (   (-dy - gamma*yO + alpha*yO)) =>
+  (zI-zO) = dz    -beta*zO  alpha*zO             (tZ*(-dy - gamma*yO + alpha*yO))
+
+  (xI-xO) = dx - tX*dy -gamma*(xO +tX*yO) + beta*xO + alpha*(   tX*yO)
+  (yI-yO) = 0
+  (zI-zO) = dz - tZ*dy -gamma*(    tZ*yO) - beta*zO + alpha*(zO+tZ*yO)
+================================================================================
+  -dX = dx - tX*dy -gamma*(xO +tX*yO) + beta*xO + alpha*(   tX*yO)
+  -dZ = dz - tZ*dy -gamma*(    tZ*yO) - beta*zO + alpha*(zO+tZ*yO)
+================================================================================    
+                               (     1 -gamma  beta )(nxO)    (nxOP)     (         nxO - gamma*nyO + beta *nzO)   
+     nOP =      R*nO = 	       ( gamma      1 -alpha)(nyO) => (nyOP)  =  (   gamma*nxO +       nyO - alpha*nzO) => 
+                               ( -beta  alpha     1 )(nzO)    (nzOP)     ( - beta *nxO + alpha*nyO +       nzO) 
+
+(nxI)   (         nxO - gamma*nyO + beta *nzO) 
+(nyI) = (   gamma*nxO +       nyO - alpha*nzO)    
+(nzI)	( - beta *nxO + alpha*nyO +       nzO)
+
+================================================================================
+  -dX = dx - tX*dy -gamma*(xO +tX*yO) + beta*xO + alpha*(   tX*yO)
+  -dZ = dz - tZ*dy -gamma*(    tZ*yO) - beta*zO + alpha*(zO+tZ*yO)
+(nxI-nxO)   (-nX)   (             - gamma*nyO + beta *nzO) 
+(nyI-nyO) = (-nY) = (   gamma*nxO             - alpha*nzO)    
+(nzI-nZO)   (-nZ)   ( - beta *nxO + alpha*nyO            )
+--------------------------------------------------------------------------------
+  dX = -dx + tX*dy     - alpha*(   tX*yO) - beta*xO    + gamma*(xO +tX*yO)
+  dZ =       tZ*dy -dz - alpha*(zO+tZ*yO) + beta*zO    + gamma*(    tZ*yO)
+  nX =                                    - beta *nzO  + gamma*nyO        
+  nY =                 + alpha*nzO	               - gamma*nxO        
+  nZ =                 - alpha*nyO        + beta *nxO                     
+
+
+================================================================================    
+  dX/dx = -1; dX/dy = tX; dX/dz =  0; dX/alpha = -     tX*yO;  dX/dbeta = - xO; dX/dgamma = xO + tX*yO; 
+  dZ/dx =  0; dZ/dy = tZ; dZ/dz = -1; dZ/alpha = -(zO+tZ*yO);  dZ/dbeta =   zO; dZ/dgamma =      tZ*yO;
+  dnX/dalpha =   0; dnX/dbeta = -nzO; dnX/dgamma =  nyO;
+  dnY/dalpha = nzO; dnY/dbeta =    0; dnY/dgamma = -nxO;
+  dnZ/dalpha =-nyO; dnZ/dbeta =  nxO; dnZ/dgamma = 0;
+
+================================================================================
+2. Sector to Sector alignment
+----------------------------
+a. Definitions
+---------------
+"W" coordinate system where track has been created
+"S" -"-               where track has been compared    
+
+                            (  1  -gS  bS  xS)
+          RS           =    ( gS    1 -aS  yS)
+                            (-bS   aS   1  zS)
+			    (  0    0   0  1 )
+
+                            (  1 -gW  bW  xW)
+          RW           =    ( gW   1 -aW  yW)
+                            (-bW  aW   1  zW)
+			    (  0   0   0  1 )
+
+                            (  1  gS -bS  -xS)
+          RS^-1        =    (-gS   1  aS  -yS)
+                            ( bS -aS   1  -zS)
+     rS (xS,yS,ZS), nS (nxS, nyS, nzS); Track in its Sector Coordinate System
+     rP (xP,yP,zP), nP (nxP, nyP, nzP); Predicted track at y = yS from other sector the above sector coordinate system
+     rW (xW,yW,zW), nW (nxW, nyW, nzW); Predicted track in its sector coordinate system
+     
+     rP = RS^-1 * TPC2S * W2TPC * RW * rW
+     nP = RS^-1 * TPC2S * W2TPC * RW * nW
+
+   Rotation:                       Inverse rotation:
+    rW11  rW12  rW13   tWx              rS11  rS21  rS31   -tSx
+    rW21  rW22  rW23   tWy              rS12  rS22  rS32   -tSy
+    rW31  rW32  rW33   tWz              rS13  rS23  rS33   -tSz
+       0     0     0     1                 0    0    0        1
+
+                 (r11  r12  r13   tx)              (xW)       (nxW) 
+TPC2S * W2TPC =  (r21  r22  r23   ty);        rW = (yW); nW = (nyW);
+		 (r31  r32  r33   tz) 	           (zW)       (nzW) 
+		 (  0    0    0    1)WS            ( 1)       (  0) 
+
+
+
+                               (  1  gS -bS -xS)  (r11  r12  r13   tx) (  1 -gW  bW xW)                             (r11  r12  r13   tx)   (rS11  rS21  rS31   -tSx) (rW11  rW12  rW13   tWx)
+  RS^-1 * TPC2S * W2TPC * RW = (-gS   1  aS -yS)  (r21  r22  r23   ty) ( gW   1 -aW yW);    TPC2S * W2TPC => w2s =  (r21  r22  r23   ty) = (rS12  rS22  rS32   -tSy)*(rW21  rW22  rW23   tWy)
+			       ( bS -aS   1 -zS)  (r31  r32  r33   tz) (-bW  aW   1 zW)				    (r31  r32  r33   tz)   (rS13  rS23  rS33   -tSz) (rW31  rW32  rW33   tWz)
+			       (  0   0   0   1)  (  0    0    0    1) (  0   0   0  1)				    (  0    0    0    1)   (   0    0    0        1) (   0     0     0     1)
+
+                                    (  1  gS -bS  -xS)  (r11  r12  r13   tx) (  1 -gW  bW  xW)
+W2S =  RS^-1 * TPC2S * W2TPC * RW = (-gS   1  aS  -yS)  (r21  r22  r23   ty) ( gW   1 -aW  yW) =>
+		         	    ( bS -aS   1  -zS)  (r31  r32  r33   tz) (-bW  aW   1  zW)
+			            (  0   0   0   1 )  (  0    0    0    1) (  0   0   0  1 )
+  (( r11   +r21*gS-r31*bS) ( r12   +r22*gS-r32*bS) ( r13   +r23*gS-r33*bS) ( tx   +ty*gS-tz*bS-xS))  (  1 -gW  bW  xW)
+=>((-r11*gS+r21   +r31*aS) (-r12*gS+r22   +r32*aS) (-r13*gS+r23   +r33*aS) (-tx*gS+ty   +tz*aS-yS))  ( gW   1 -aW  yW) =>
+  (( r11*bS-r21*aS+r31   ) ( r12*bS-r22*aS+r32   ) ( r13*bS-r23*aS+r33   ) ( tx*bS-tz*aS+tz   -zS))  (-bW  aW   1  zW)
+  (                     0) (                    0) (                    0) (                    1))  (  0   0   0   1)
+
+  ((( r11   +r21*gS-r31*bS) ( r12   +r22*gS-r32*bS) ( r13   +r23*gS-r33*bS) ( tx   +ty*gS-tz*bS-xS))  (  1 -gW  bW  xW)
+=>(((-r11*gS+r21   +r31*aS) (-r12*gS+r22   +r32*aS) (-r13*gS+r23   +r33*aS) (-tx*gS+ty   +tz*aS-yS))  ( gW   1 -aW  yW) =>
+  ((( r11*bS-r21*aS+r31   ) ( r12*bS-r22*aS+r32   ) ( r13*bS-r23*aS+r33   ) ( tx*bS-tz*aS+tz   -zS))  (-bW  aW   1  zW)
+  (((                    0) (                    0) (                    0) (                    1))  (  0   0   0   1)
+
+
+  (( ( r11   +r21*gS-r31*bS)   +( r12   +r22*gS-r32*bS)*gW-( r13   +r23*gS-r33*bS)*bW) 
+   (-( r11   +r21*gS-r31*bS)*gW+( r12   +r22*gS-r32*bS)   +( r13   +r23*gS-r33*bS)*aW) 
+   ( ( r11   +r21*gS-r31*bS)*bW-( r12   +r22*gS-r32*bS)*aW+( r13   +r23*gS-r33*bS)   ) 
+   ( ( r11   +r21*gS-r31*bS)*xW+( r12   +r22*gS-r32*bS)*yW+( r13   +r23*gS-r33*bS)*zW+( tx   +ty*gS-tz*bS-xS)))
+                                                                                                              
+=>(( (-r11*gS+r21   +r31*aS)   +(-r12*gS+r22   +r32*aS)*gW-(-r13*gS+r23   +r33*aS)*bW) 
+   (-(-r11*gS+r21   +r31*aS)*gW+(-r12*gS+r22   +r32*aS)   +(-r13*gS+r23   +r33*aS)*aW) 
+   ( (-r11*gS+r21   +r31*aS)*bW-(-r12*gS+r22   +r32*aS)*aW+(-r13*gS+r23   +r33*aS)   ) 
+   ( (-r11*gS+r21   +r31*aS)*xW+(-r12*gS+r22   +r32*aS)*yW+(-r13*gS+r23   +r33*aS)*zW+(-tx*gS+ty   +tz*aS-yS))) =>
+
+  (( ( r11*bS-r21*aS+r31   )   +( r12*bS-r22*aS+r32   )*gW-( r13*bS-r23*aS+r33   )*bW) 
+   (-( r11*bS-r21*aS+r31   )*gW+( r12*bS-r22*aS+r32   )   +( r13*bS-r23*aS+r33   )*aW) 
+   ( ( r11*bS-r21*aS+r31   )*bW-( r12*bS-r22*aS+r32   )*aW+( r13*bS-r23*aS+r33   )   ) 
+   ( ( r11*bS-r21*aS+r31   )*xW+( r12*bS-r22*aS+r32   )*yW+( r13*bS-r23*aS+r33   )*zW+( tx*bS-tz*aS+tz   -zS)))
+  ((( 0)                    ( 0)                   ( 0)                      ( 1)
+
+
+
+  (( r11   +r21*gS-r31*bS+r12*gW-r13*bW)    (-r11*gW+r12   +r22*gS-r32*bS+r13*aW)   ( r11*bW-r12*aW+r13   +r23*gS-r33*bS)    ( r11*xW+r12*yW+r13*zW+tx   +ty*gS-tz*bS-xS))
+=>((-r11*gS+r21   +r31*aS+r22*gW-r23*bW)    (-r21*gW-r12*gS+r22   +r32*aS+r23*aW)   ( r21*bW-r22*aW-r13*gS+r23   +r33*aS)    ( r21*xW+r22*yW+r23*zW-tx*gS+ty   +tz*aS-yS))
+  (( r11*bS-r21*aS+r31   +r32*gW-r33*bW)    (-r31*gW+r12*bS-r22*aS+r32   +r33*aW)   ( r31*bW-r32*aW+r13*bS-r23*aS+r33   )    ( r31*xW+r32*yW+r33*zW+tx*bS-tz*aS+tz   -zS))
+  (((                                 0)    (                                  0)   (                                  0)    (                                         1))
+
+  (( r11       -r31*bS+r21*gS-r13*bW+r12*gW)    (r12       -r32*bS+r22*gS+r13*aW-r11*gW)   (r13       -r33*bS       -r12*aW+r11*bW   +r23*gS)    (tx      -tz*bS+ty*gS-xS+r11*xW+r12*yW+r13*zW))
+=>(( r21+r31*aS       -r11*gS-r23*bW+r22*gW)    (r22+r32*aS       -r12*gS+r23*aW-r21*gW)   (r23+r33*aS       -r13*gS       +r21*bW-r22*aW   )    (ty+tz*aS      -tx*gS-yS+r21*xW+r22*yW+r23*zW))
+  ((+r31-r21*aS+r11*bS       -r33*bW+r32*gW)    (r32-r22*aS+r12*bS       +r33*aW-r31*gW)   (r33-r23*aS+r13*bS       -r32*aW+r31*bW          )    (tz-tz*aS+tx*bS      -zS+r31*xW+r32*yW+r33*zW))
+  (((                                     0)    (                                     0)   (                                               0)    (                                           1))
+================================================================================================================================================================
+	W2S == W = w2s + H = V + H
+  V                   +  H     
+  (r11  r12  r13   tx) ((       -r31*bS+r21*gS-r13*bW+r12*gW)    (       -r32*bS+r22*gS+r13*aW-r11*gW)   (       -r33*bS       -r12*aW+r11*bW   +r23*gS)    (      -tz*bS+ty*gS-xS+r11*xW+r12*yW+r13*zW))
+=>(r21  r22  r23   ty)+((+r31*aS       -r11*gS-r23*bW+r22*gW)    ( r32*aS       -r12*gS+r23*aW-r21*gW)   ( r33*aS       -r13*gS       +r21*bW-r22*aW   )    (+tz*aS      -tx*gS-yS+r21*xW+r22*yW+r23*zW))
+  (r31  r32  r33   tz) ((-r21*aS+r11*bS       -r33*bW+r32*gW)    (-r22*aS+r12*bS       +r33*aW-r31*gW)   (-r23*aS+r13*bS       -r32*aW+r31*bW          )    (-tz*aS+tx*bS      -zS+r31*xW+r32*yW+r33*zW))
+  (  0    0    0    1) ((                                  0)    (                                  0)   (                                            0)    (                                         1))
+
+
+
+================================================================================================================================================================ Checked
+  ((r11       -r31*bS+r21*gS-r13*bW+r12*gW) (r12       -r32*bS+r22*gS+r13*aW-r11*gW) (r13       -r33*bS+r23*gS-r12*aW+r11*bW) (tx      -tz*bS+ty*gS-xS+r11*xW+r12*yW+r13*zW)
+=>((r21+r31*aS       -r11*gS-r23*bW+r22*gW) (r22+r32*aS       -r12*gS+r23*aW-r21*gW) (r23+r33*aS       -r13*gS-r22*aW+r21*bW) (ty+tz*aS      -tx*gS-yS+r21*xW+r22*yW+r23*zW) =>
+  ((r31-r21*aS+r11*bS       -r33*bW+r32*gW) (r32-r22*aS+r12*bS       +r33*aW-r31*gW) (r33-r23*aS+r13*bS       -r32*aW+r31*bW) (tz-tz*aS+tx*bS-zS      +r31*xW+r32*yW+r33*zW)
+  ((                                     0) (                                     0) (                                     0) (                                           1)
+================================================================================================================================================================
+b. Ignore  s
+-------------
+nP = W2S *nW; nU = w2s * nW;         nP = (w2s + H) *nW = nU + H*nW;
+rP = W2S *rW + s*nP; s => yP == yS;  rP = (w2s + H) *rW = rU + H*rW;   ignore s;
+rP  
+dr = rP - rS;
+dn = nP - nS; 
+
+                ((r11       -r31*bS+r21*gS-r13*bW+r12*gW) (r12       -r32*bS+r22*gS+r13*aW-r11*gW) (r13       -r33*bS+r23*gS-r12*aW+r11*bW) (nxW)
+nP = W2S *nW = >((r21+r31*aS       -r11*gS-r23*bW+r22*gW) (r22+r32*aS       -r12*gS+r23*aW-r21*gW) (r23+r33*aS       -r13*gS-r22*aW+r21*bW) (nyW)
+	        ((r31-r21*aS+r11*bS       -r33*bW+r32*gW) (r32-r22*aS+r12*bS       +r33*aW-r31*gW) (r33-r23*aS+r13*bS       -r32*aW+r31*bW) (nzW)
+
+rP = W2S *rW + s*nP = 
+
+   ((r11       -r31*bS+r21*gS-r13*bW+r12*gW) (r12       -r32*bS+r22*gS+r13*aW-r11*gW) (r13       -r33*bS+r23*gS-r12*aW+r11*bW) (tx-xS+r11*xW+r12*yW+r13*zW      -tz*bS+ty*gS)) (XW)
+=> ((r21+r31*aS       -r11*gS-r23*bW+r22*gW) (r22+r32*aS       -r12*gS+r23*aW-r21*gW) (r23+r33*aS       -r13*gS-r22*aW+r21*bW) (ty-yS+r21*xW+r22*yW+r23*zW+tz*aS      -tx*gS)) (YW)
+   ((r31-r21*aS+r11*bS       -r33*bW+r32*gW) (r32-r22*aS+r12*bS       +r33*aW-r31*gW) (r33-r23*aS+r13*bS       -r32*aW+r31*bW) (tz-zS+r31*xW+r32*yW+r33*zW-tz*aS+tx*bS      )) (ZW)
+   ((                                     0) (                                     0) (                                     0) (                                           1)) ( 1)
+
+                 (       -r31*bS+r21*gS-r13*bW+r12*gW) (       -r32*bS+r22*gS+r13*aW-r11*gW) (       -r33*bS+r23*gS-r12*aW+r11*bW) (-xS+r11*xW+r12*yW+r13*zW      -tz*bS+ty*gS))
+W2S - w2s = H =  (+r31*aS       -r11*gS-r23*bW+r22*gW) (+r32*aS       -r12*gS+r23*aW-r21*gW) (+r33*aS       -r13*gS-r22*aW+r21*bW) (-yS+r21*xW+r22*yW+r23*zW+tz*aS      -tx*gS))
+		 (-r21*aS+r11*bS       -r33*bW+r32*gW) (-r22*aS+r12*bS       +r33*aW-r31*gW) (-r23*aS+r13*bS       -r32*aW+r31*bW) (-zS+r31*xW+r32*yW+r33*zW-tz*aS+tx*bS      ))
+		 (                                  0) (                                  0) (                                  0) (                                         1))
+
+
+   dR = rU - rS + H*rW;
+   dn = nU - nS + H*nW;
+
+
+        (       -r31*bS+r21*gS-r13*bW+r12*gW) (       -r32*bS+r22*gS+r13*aW-r11*gW) (       -r33*bS+r23*gS-r12*aW+r11*bW) (-xS+r11*xW+r12*yW+r13*zW      -tz*bS+ty*gS)) (XW)
+ H*rW = (+r31*aS       -r11*gS-r23*bW+r22*gW) (+r32*aS       -r12*gS+r23*aW-r21*gW) (+r33*aS       -r13*gS-r22*aW+r21*bW) (-yS+r21*xW+r22*yW+r23*zW+tz*aS      -tx*gS)) (YW) =>
+        (-r21*aS+r11*bS       -r33*bW+r32*gW) (-r22*aS+r12*bS       +r33*aW-r31*gW) (-r23*aS+r13*bS       -r32*aW+r31*bW) (-zS+r31*xW+r32*yW+r33*zW-tz*aS+tx*bS      )) (ZW) 
+	(                                  0) (                                  0) (                                  0) (                                         1)) ( 1)
+
+    (       -r31*bS+r21*gS-r13*bW+r12*gW)*XW +(       -r32*bS+r22*gS+r13*aW-r11*gW)*XW +(       -r33*bS+r23*gS-r12*aW+r11*bW)*XW +(-xS+r11*xW+r12*yW+r13*zW      -tz*bS+ty*gS))
+=>  (+r31*aS       -r11*gS-r23*bW+r22*gW)*YW +(+r32*aS       -r12*gS+r23*aW-r21*gW)*YW +(+r33*aS       -r13*gS-r22*aW+r21*bW)*YW +(-yS+r21*xW+r22*yW+r23*zW+tz*aS      -tx*gS))
+    (-r21*aS+r11*bS       -r33*bW+r32*gW)*ZW +(-r22*aS+r12*bS       +r33*aW-r31*gW)*ZW +(-r23*aS+r13*bS       -r32*aW+r31*bW)*ZW +(-zS+r31*xW+r32*yW+r33*zW-tz*aS+tx*bS      ))
+
+    (          -r31*XW*bS+r21*XW*gS-r13*XW*bW+r12*XW*gW           -r32*XW*bS+r22*XW*gS+r13*XW*aW-r11*XW*gW        -r33*XW*bS+r23*XW*gS-r12*XW*aW+r11*XW*bW-xS+r11*xW+r12*yW+r13*zW      -tz*bS+ty*gS)
+=>  (+r31*YW*aS          -r11*YW*gS-r23*YW*bW+r22*YW*gW +r32*YW*aS          -r12*YW*gS+r23*YW*aW-r21*YW*gW +r33*aS          -r13*YW*gS-r22*YW*aW+r21*YW*bW-yS+r21*xW+r22*yW+r23*zW+tz*aS      -tx*gS)
+    (-r21*ZW*aS+r11*ZW*bS          -r33*ZW*bW+r32*ZW*gW -r22*ZW*aS+r12*ZW*bS          +r33*ZW*aW-r31*ZW*gW -r23*aS+r13*ZW*bS          -r32*ZW*aW+r31*ZW*bW-zS+r31*xW+r32*yW+r33*zW-tz*aS+tx*bS      )
+
+
+        (       -r31*bS+r21*gS-r13*bW+r12*gW) (       -r32*bS+r22*gS+r13*aW-r11*gW) (       -r33*bS+r23*gS-r12*aW+r11*bW) *(nxW)
+ H*nW = (+r31*aS       -r11*gS-r23*bW+r22*gW) (+r32*aS       -r12*gS+r23*aW-r21*gW) (+r33*aS       -r13*gS-r22*aW+r21*bW) *(nyW) =>
+	(-r21*aS+r11*bS       -r33*bW+r32*gW) (-r22*aS+r12*bS       +r33*aW-r31*gW) (-r23*aS+r13*bS       -r32*aW+r31*bW) *(nzW)
+
+(       -r31*bS+r21*gS-r13*bW+r12*gW)*nxW +(       -r32*bS+r22*gS+r13*aW-r11*gW)*nxW + (       -r33*bS+r23*gS-r12*aW+r11*bW)*nxW 
+(+r31*aS       -r11*gS-r23*bW+r22*gW)*nyW +(+r32*aS       -r12*gS+r23*aW-r21*gW)*nyW + (+r33*aS       -r13*gS-r22*aW+r21*bW)*nyW 
+(-r21*aS+r11*bS       -r33*bW+r32*gW)*nzW +(-r22*aS+r12*bS       +r33*aW-r31*gW)*nzW + (-r23*aS+r13*bS       -r32*aW+r31*bW)*nzW
+
+       (            -r31*XW*bS +r21*XW*gS -r13*XW*bW +r12*XW*gW            -r32*XW*bS +r22*XW*gS +r13*XW*aW -r11*XW*gW             -r33*XW*bS +r23*XW*gS -r12*XW*aW +r11*XW*bW-xS+r11*xW+r12*yW+r13*zW      -tz*bS+ty*gS)
+H*rW = ( +r31*YW*aS            -r11*YW*gS -r23*YW*bW +r22*YW*gW +r32*YW*aS            -r12*YW*gS +r23*YW*aW -r21*YW*gW     +r33*aS            -r13*YW*gS -r22*YW*aW +r21*YW*bW-yS+r21*xW+r22*yW+r23*zW+tz*aS      -tx*gS)
+       ( -r21*ZW*aS +r11*ZW*bS            -r33*ZW*bW +r32*ZW*gW -r22*ZW*aS +r12*ZW*bS            +r33*ZW*aW -r31*ZW*gW     -r23*aS +r13*ZW*bS            -r32*ZW*aW +r31*ZW*bW-zS+r31*xW+r32*yW+r33*zW-tz*aS+tx*bS      )=>
+       (           -r31*nxW*bS+r21*nxW*gS-r13*nxW*bW+r12*nxW*gW           -r32*nxW*bS+r22*nxW*gS+r13*nxW*aW-r11*nxW*gW            -r33*nxW*bS+r23*nxW*gS-r12*nxW*aW+r11*nxW*bW                                          )
+H*nW = (+r31*nyW*aS           -r11*nyW*gS-r23*nyW*bW+r22*nyW*gW+r32*nyW*aS           -r12*nyW*gS+r23*nyW*aW-r21*nyW*gW +r33*nyW*aS           -r13*nyW*gS-r22*nyW*aW+r21*nyW*bW                                          )
+       (-r21*nzW*aS+r11*nzW*bS           -r33*nzW*bW+r32*nzW*gW-r22*nzW*aS+r12*nzW*bS           +r33*nzW*aW-r31*nzW*gW -r23*nzW*aS+r13*nzW*bS           -r32*nzW*aW+r31*nzW*bW                                          )
+
+
+       (                                         -r31*XW*bS -r32*XW*bS -r33*XW*bS-tz*bS +r21*XW*gS +r22*XW*gS +r23*XW*gS+ty*gS-xS        -r12*XW*aW +r13*XW*aW -r13*XW*bW +r11*XW*bW +r12*XW*gW -r11*XW*gW+r11*xW+r12*yW+r13*zW)
+H*rW = ( +r31*YW*aS +r32*YW*aS     +r33*aS+tz*aS                                        -r11*YW*gS -r12*YW*gS -r13*YW*gS-tx*gS   -yS     -r22*YW*aW +r23*YW*aW -r23*YW*bW +r21*YW*bW +r22*YW*gW -r21*YW*gW+r21*xW+r22*yW+r23*zW)
+       ( -r21*ZW*aS -r22*ZW*aS     -r23*aS-tz*aS +r11*ZW*bS +r12*ZW*bS +r13*ZW*bS+tx*bS                                             -zS  -r32*ZW*aW +r33*ZW*aW -r33*ZW*bW +r31*ZW*bW +r32*ZW*gW -r31*ZW*gW+r31*xW+r32*yW+r33*zW)=>
+       (                                        -r31*nxW*bS-r32*nxW*bS-r33*nxW*bS       +r21*nxW*gS+r22*nxW*gS+r23*nxW*gS               -r12*nxW*aW+r13*nxW*aW-r13*nxW*bW+r11*nxW*bW+r12*nxW*gW-r11*nxW*gW                     )
+       (+r31*nyW*aS+r32*nyW*aS+r33*nyW*aS                                               -r11*nyW*gS-r12*nyW*gS-r13*nyW*gS               -r22*nyW*aW+r23*nyW*aW-r23*nyW*bW+r21*nyW*bW+r22*nyW*gW-r21*nyW*gW                     )
+H*nW = (-r21*nzW*aS-r22*nzW*aS-r23*nzW*aS       +r11*nzW*bS+r12*nzW*bS+r13*nzW*bS                                                       -r32*nzW*aW+r33*nzW*aW-r33*nzW*bW+r31*nzW*bW+r32*nzW*gW-r31*nzW*gW                     )
+       (-r21*nzW*aS-r22*nzW*aS-r23*nzW*aS       +r11*nzW*bS+r12*nzW*bS+r13*nzW*bS                                                       +r33*nzW*aW+r32*nzW*aW+r31*nzW*bW-r33*nzW*bW-r31*nzW*gW+r32*nzW*gW                                        )
+
+================================================================================================================================================================
+================================================================================================================================================================
+
+       (                                 (-r31*XW -r32*XW -r33*XW-tz)*bS +( r21*XW +r22*XW +r23*XW+ty)*gS-xS       (-r12*XW +r13*XW )*aW +(-r13*XW +r11*XW )*bW  +(  r12*XW -r11*XW)*gW+r11*xW+r12*yW+r13*zW)
+H*rW = ( (+r31*YW +r32*YW  +r33+tz)*aS                                    (-r11*YW -r12*YW -r13*YW-tx)*gS   -yS   +(-r22*YW +r23*YW )*aW +(-r23*YW +r21*YW )*bW  +(  r22*YW -r21*YW)*gW+r21*xW+r22*yW+r23*zW)
+       ( (-r21*ZW -r22*ZW  -r23-tz)*aS + ( r11*ZW +r12*ZW +r13*ZW+tx)*bS                                       -zS+(-r32*ZW +r33*ZW )*aW +(-r33*ZW +r31*ZW )*bW  +(  r32*ZW -r31*ZW)*gW+r31*xW+r32*yW+r33*zW)=>
+       (                                 (-r31*nxW-r32*nxW-r33*nxW  )*bS  +( r21*nxW+r22*nxW+r23*nxW )*gS         +(-r12*nxW+r13*nxW)*aW +(-r13*nxW+r11*nxW)*bW + ( r12*nxW-r11*nxW)*gW                     )
+H*nW = ( (+r31*nyW+r32*nyW+r33*nyW)*aS                                    +(-r11*nyW-r12*nyW-r13*nyW )*gS         +(-r22*nyW+r23*nyW)*aW +(-r23*nyW+r21*nyW)*bW + ( r22*nyW-r21*nyW)*gW                     )
+       ( (-r21*nzW-r22*nzW-r23*nzW)*aS  +(r11*nzW+r12*nzW+r13*nzW   )*bS                                          +(-r32*nzW+r33*nzW)*aW +(-r33*nzW+r31*nzW)*bW + ( r32*nzW-r31*nzW)*gW                     )
+
+
+
+                            alphaS                          betaS                      gammaS   xS yS zS            alphaW              betaW             gammaW   xW  yW  zW
+( dX) (                          0   (-r31*XW -r32*XW -r33*XW-tz) ( r21*XW +r22*XW +r23*XW+ty)  -1       (-r12*XW +r13*XW ) (-r13*XW +r11*XW ) (  r12*XW -r11*XW) r11 r12 r13)
+( dY) ( (+r31*YW +r32*YW  +r33+tz)                             0  (-r11*YW -r12*YW -r13*YW-tx)     -1    (-r22*YW +r23*YW ) (-r23*YW +r21*YW ) (  r22*YW -r21*YW) r21 r22 r23)
+( dZ) ( (-r21*ZW -r22*ZW  -r23-tz)   ( r11*ZW +r12*ZW +r13*ZW+tx)                           0         -1 (-r32*ZW +r33*ZW ) (-r33*ZW +r31*ZW ) (  r32*ZW -r31*ZW) r31 r32 r33)
+(dnX) (                          0   (-r31*nxW-r32*nxW-r33*nxW  ) ( r21*nxW+r22*nxW+r23*nxW  )           (-r12*nxW+r13*nxW) (-r13*nxW+r11*nxW) ( r12*nxW-r11*nxW)   0   0   0)
+(dnY) ( (+r31*nyW+r32*nyW+r33*nyW)                             0  (-r11*nyW-r12*nyW-r13*nyW  )           (-r22*nyW+r23*nyW) (-r23*nyW+r21*nyW) ( r22*nyW-r21*nyW)   0   0   0)
+(dnZ) ( (-r21*nzW-r22*nzW-r23*nzW)   (r11*nzW+r12*nzW+r13*nzW   )                                        (-r32*nzW+r33*nzW) (-r33*nzW+r31*nzW) ( r32*nzW-r31*nzW)   0   0   0)
+
+
+
+Inner To Outer
+r12 = r13 = r21 = r23 = r32 = r32 = tx = ty = tz = 0;
+r11 = r22 = r33 = 1
+
+     alphaS betaS gammaS   xS yS zS alphaW betaW gammaW xW yW zW
+( dX) (   0   -XW     XW   -1  0  0      0    XW    -XW  1  0  0)
+( dY) (   1     0    -YW    0 -1  0    -YW     0     YW  0  1  0)
+( dZ) ( -ZW    ZW      0    0  0 -1     ZW   -ZW      0  0  0  1)
+(dnX) (   0  -nxW    nxW    0  0  0      0   nxW   -nxW  0  0  0)
+(dnY) ( nyW     0   -nyW    0  0  0   -nyW     0    nyW  0  0  0)
+(dnZ) (-nzW   nzW      0    0  0  0    nzW  -nzW      0  0  0  0)
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+c. Acoount for s
+
+nP = W *nW;  nU = V * nW;          nP = (V + H) *nW = nU + H*nW;
+rP = W *rW + s*nP; s => yP == yS;  rP = (V + H) *rW = rU + H*rW + s*nP;   account s ==>  yP = yS 
+dR = rP - rS = rU - rS + H*rW + s*nP;
+dn = nP - nS = nU - nS + H*nW;
+
+     (r11  r12  r13   tx)       ((       -r31*bS+r21*gS-r13*bW+r12*gW)    (       -r32*bS+r22*gS+r13*aW-r11*gW)   (       -r33*bS       -r12*aW+r11*bW   +r23*gS)    (      -tz*bS+ty*gS-xS+r11*xW+r12*yW+r13*zW))
+V =  (r21  r22  r23   ty);  H = ((+r31*aS       -r11*gS-r23*bW+r22*gW)    ( r32*aS       -r12*gS+r23*aW-r21*gW)   ( r33*aS       -r13*gS       +r21*bW-r22*aW   )    (+tz*aS      -tx*gS-yS+r21*xW+r22*yW+r23*zW))
+     (r31  r32  r33   tz)	((-r21*aS+r11*bS       -r33*bW+r32*gW)    (-r22*aS+r12*bS       +r33*aW-r31*gW)   (-r23*aS+r13*bS       -r32*aW+r31*bW          )    (-tz*aS+tx*bS      -zS+r31*xW+r32*yW+r33*zW))
+     (  0    0    0    1)	((                                  0)    (                                  0)   (                                            0)    (                                         1))
+
+rP =  rU + H*rW + s*nP = rU + H*rW + s*(nU + H*nW) => rP' =  rU + H*rW + s*nU;
+
+           ((       -r31*bS+r21*gS-r13*bW+r12*gW)    (       -r32*bS+r22*gS+r13*aW-r11*gW)   (       -r33*bS       -r12*aW+r11*bW   +r23*gS)   (XW)
+rP' = rU + ((+r31*aS       -r11*gS-r23*bW+r22*gW)    ( r32*aS       -r12*gS+r23*aW-r21*gW)   ( r33*aS       -r13*gS       +r21*bW-r22*aW   ) * (YW) + s*nU =>
+	   ((-r21*aS+r11*bS       -r33*bW+r32*gW)    (-r22*aS+r12*bS       +r33*aW-r31*gW)   (-r23*aS+r13*bS       -r32*aW+r31*bW          )   (ZW)
+
+
+dR = H*rW + s*nP;
+dn = H*nW;
+
+     ((       -r31*bS+r21*gS-r13*bW+r12*gW)    (       -r32*bS+r22*gS+r13*aW-r11*gW)   (       -r33*bS       -r12*aW+r11*bW   +r23*gS)    (      -tz*bS+ty*gS-xS+r11*xW+r12*yW+r13*zW)) (XW)   (nxW)
+dR = ((+r31*aS       -r11*gS-r23*bW+r22*gW)    ( r32*aS       -r12*gS+r23*aW-r21*gW)   ( r33*aS       -r13*gS       +r21*bW-r22*aW   )    (+tz*aS      -tx*gS-yS+r21*xW+r22*yW+r23*zW))*(YW)+s*(nyW)=> 
+     ((-r21*aS+r11*bS       -r33*bW+r32*gW)    (-r22*aS+r12*bS       +r33*aW-r31*gW)   (-r23*aS+r13*bS       -r32*aW+r31*bW          )    (-tz*aS+tx*bS      -zS+r31*xW+r32*yW+r33*zW))	(ZW)   (nzW)
+     ((                                  0)    (                                  0)   (                                            0)    (                                         1)) ( 1)   (  0)
+
+  ((       -r31*bS+r21*gS-r13*bW+r12*gW)*XW+(       -r32*bS+r22*gS+r13*aW-r11*gW)*YW+(       -r33*bS       -r12*aW+r11*bW   +r23*gS)*ZW+(      -tz*bS+ty*gS-xS+r11*xW+r12*yW+r13*zW))   (nxW)
+=>((+r31*aS       -r11*gS-r23*bW+r22*gW)*XW+( r32*aS       -r12*gS+r23*aW-r21*gW)*YW+( r33*aS       -r13*gS       +r21*bW-r22*aW   )*ZW+(+tz*aS      -tx*gS-yS+r21*xW+r22*yW+r23*zW))+s*(nyW)
+  ((-r21*aS+r11*bS       -r33*bW+r32*gW)*XW+(-r22*aS+r12*bS       +r33*aW-r31*gW)*YW+(-r23*aS+r13*bS       -r32*aW+r31*bW          )*ZW+(-tz*aS+tx*bS      -zS+r31*xW+r32*yW+r33*zW))   (nzW)
+
+
+dY =  ((+r31*aS-r11*gS-r23*bW+r22*gW)*XW+( r32*aS-r12*gS+r23*aW-r21*gW)*YW+( r33*aS-r13*gS+r21*bW-r22*aW)*ZW+(tz*aS-tx*gS-yS+r21*xW+r22*yW+r23*zW))+s*(nyW) = 0;
+s = -(((+r31*aS-r11*gS-r23*bW+r22*gW)*XW+( r32*aS-r12*gS+r23*aW-r21*gW)*YW+( r33*aS-r13*gS+r21*bW-r22*aW)*ZW+(tz*aS-tx*gS-yS+r21*xW+r22*yW+r23*zW)))/nyW
+
+lx = nxW/nyW;
+lz = nzW/nyW;
+
+  ((       -r31*bS+r21*gS-r13*bW+r12*gW)*XW+(       -r32*bS+r22*gS+r13*aW-r11*gW)*YW+(       -r33*bS       -r12*aW+r11*bW   +r23*gS)*ZW+(      -tz*bS+ty*gS-xS+r11*xW+r12*yW+r13*zW))
+=>((+r31*aS       -r11*gS-r23*bW+r22*gW)*XW+( r32*aS       -r12*gS+r23*aW-r21*gW)*YW+( r33*aS       -r13*gS       +r21*bW-r22*aW   )*ZW+(+tz*aS      -tx*gS-yS+r21*xW+r22*yW+r23*zW))-
+  ((-r21*aS+r11*bS       -r33*bW+r32*gW)*XW+(-r22*aS+r12*bS       +r33*aW-r31*gW)*YW+(-r23*aS+r13*bS       -r32*aW+r31*bW          )*ZW+(-tz*aS+tx*bS      -zS+r31*xW+r32*yW+r33*zW))
+
+                                                                                                                                                (lx)
+-(((+r31*aS-r11*gS-r23*bW+r22*gW)*XW+( r32*aS-r12*gS+r23*aW-r21*gW)*YW+( r33*aS-r13*gS+r21*bW-r22*aW)*ZW+(tz*aS-tx*gS-yS+r21*xW+r22*yW+r23*zW)))( 1)
+                                                                                                                                                (lz)
+            ((       -r31*bS+r21*gS-r13*bW+r12*gW)    (       -r32*bS+r22*gS+r13*aW-r11*gW)   (       -r33*bS       -r12*aW+r11*bW   +r23*gS)) (nxW)
+dn = H*nW = ((+r31*aS       -r11*gS-r23*bW+r22*gW)    ( r32*aS       -r12*gS+r23*aW-r21*gW)   ( r33*aS       -r13*gS       +r21*bW-r22*aW   ))*(nyW) =>
+	    ((-r21*aS+r11*bS       -r33*bW+r32*gW)    (-r22*aS+r12*bS       +r33*aW-r31*gW)   (-r23*aS+r13*bS       -r32*aW+r31*bW          )) (nzW)
+
+   ((       -r31*bS+r21*gS-r13*bW+r12*gW)*nxW+(       -r32*bS+r22*gS+r13*aW-r11*gW)*nyW+(       -r33*bS       -r12*aW+r11*bW   +r23*gS)*nzW)
+=> ((+r31*aS       -r11*gS-r23*bW+r22*gW)*nxW+( r32*aS       -r12*gS+r23*aW-r21*gW)*nyW+( r33*aS       -r13*gS       +r21*bW-r22*aW   )*nzW)
+   ((-r21*aS+r11*bS       -r33*bW+r32*gW)*nxW+(-r22*aS+r12*bS       +r33*aW-r31*gW)*nyW+(-r23*aS+r13*bS       -r32*aW+r31*bW          )*nzW)
+
+
+
+s = -(((+r31*aS-r11*gS-r23*bW+r22*gW)*XW+( r32*aS-r12*gS+r23*aW-r21*gW)*YW+( r33*aS-r13*gS+r21*bW-r22*aW)*ZW+(tz*aS-tx*gS-yS+r21*xW+r22*yW+r23*zW)))/nyW
+ds/d(                             aS  bS                        gS xS yS zS             aW               bW              gW   xW  yW  zW)
+s = -1/nyW*((r31*XW+r32*YW+r33*ZW+tz)  0 (-r11*XW-r12*YW-r13*ZW-tx) 0 -1  0 (r23*YW-r22*ZW) (-r23*XW+r21*ZW) (r22*XW-r21*YW) r21 r22 r23)
+
+
+    ((       -r31*bS+r21*gS-r13*bW+r12*gW)*XW+(       -r32*bS+r22*gS+r13*aW-r11*gW)*YW+(       -r33*bS       -r12*aW+r11*bW   +r23*gS)*ZW+(      -tz*bS+ty*gS-xS+r11*xW+r12*yW+r13*zW))   (nxW)
+dR=>((+r31*aS       -r11*gS-r23*bW+r22*gW)*XW+( r32*aS       -r12*gS+r23*aW-r21*gW)*YW+( r33*aS       -r13*gS       +r21*bW-r22*aW   )*ZW+(+tz*aS      -tx*gS-yS+r21*xW+r22*yW+r23*zW))+s*(nyW)
+    ((-r21*aS+r11*bS       -r33*bW+r32*gW)*XW+(-r22*aS+r12*bS       +r33*aW-r31*gW)*YW+(-r23*aS+r13*bS       -r32*aW+r31*bW          )*ZW+(-tz*aS+tx*bS      -zS+r31*xW+r32*yW+r33*zW))   (nzW)
+
+    ((       -r31*bS+r21*gS-r13*bW+r12*gW)*nxW+(       -r32*bS+r22*gS+r13*aW-r11*gW)*nyW+(       -r33*bS       -r12*aW+r11*bW   +r23*gS)*nzW)
+dn=>((+r31*aS       -r11*gS-r23*bW+r22*gW)*nxW+( r32*aS       -r12*gS+r23*aW-r21*gW)*nyW+( r33*aS       -r13*gS       +r21*bW-r22*aW   )*nzW)    
+    ((-r21*aS+r11*bS       -r33*bW+r32*gW)*nxW+(-r22*aS+r12*bS       +r33*aW-r31*gW)*nyW+(-r23*aS+r13*bS       -r32*aW+r31*bW          )*nzW)
+
+                               aS                         bS                         gS xS yS zS                aW                 bW                gW  xW  yW  zW  
+(dX)  (                         0 (-r31*XW-r32*YW-r33*ZW-tz) ( r21*XW+r22*YW+r23*ZW+ty) -1  0  0 (r13*YW -r12*ZW ) (-r13*XW +r11*ZW ) (r12*XW -r11*YW ) r11 r12 r13)
+(dY)  (( r31*XW+r32*YW+r33*ZW+tz)                          0 (-r11*XW-r12*YW-r13*ZW-tx)  0 -1  0 (r23*YW -r22*ZW ) (-r23*XW +r21*ZW ) (r22*XW -r21*YW )	r21 r22 r23)
+(dZ) =((-r21*XW-r22*YW-r23*ZW-tz) ( r11*XW+r12*YW+r13*ZW+tx)                          0  0  0 -1 (r33*YW -r32*ZW ) (-r33*XW +r31*ZW ) (r32*XW -r31*YW )	r31 r32 r33) -
+(dnX) (                         0 (-r31*nxW-r32*nyW-r33*nzW) ( r21*nxW+r22*nyW+r23*nzW)  0  0  0 (r13*nyW-r12*nzW) (-r13*nxW+r11*nzW) (r12*nxW-r11*nyW)   0   0   0)
+(dnY) (( r31*nxW+r32*nyW+r33*nzW)                          0 (-r11*nxW-r12*nyW-r13*nzW)  0  0  0 (r23*nyW-r22*nzW) (-r23*nxW+r21*nzW) (r22*nxW-r21*nyW)   0   0   0)
+(dnZ) ((-r21*nxW-r22*nyW-r23*nzW) ( r11*nxW+r12*nyW+r13*nzW)                          0  0  0  0 (r33*nyW-r32*nzW) (-r33*nxW+r31*nzW) (r32*nxW-r31*nyW)   0   0   0)
+
+-
+
+                                aS bS                           gS xS  yS zS                 aW                  bW                 gW     xW     yW     zW  
+(dX) ((r31*XW+r32*YW+r33*ZW+tz)*lx  0 (-r11*XW-r12*YW-r13*ZW-tx)*lx 0 -lx  0 (r23*YW-r22*ZW)*lx (-r23*XW+r21*ZW)*lx (r22*XW-r21*YW)*lx r21*lx r22*lx r23*lx)
+(dY) ((r31*XW+r32*YW+r33*ZW+tz)     0 (-r11*XW-r12*YW-r13*ZW-tx)    0  -1  0 (r23*YW-r22*ZW)    (-r23*XW+r21*ZW)    (r22*XW-r21*YW)    r21    r22    r23   )
+(dZ) ((r31*XW+r32*YW+r33*ZW+tz)*lz  0 (-r11*XW-r12*YW-r13*ZW-tx)*lz 0 -lz  0 (r23*YW-r22*ZW)*lz (-r23*XW+r21*ZW)*lz (r22*XW-r21*YW)*lz r21*lz r22*lz r23*lz)
+(dnX)(                           0  0                             0 0   0  0                  0                   0                  0      0      0      0)
+(dnY)(                           0  0                             0 0   0  0                  0                   0                  0      0      0      0)
+(dnZ)(                           0  0                             0 0   0  0                  0                   0                  0      0      0      0)
+
+r11=r22=r33=1; tx,ty,tz,r12,r21,r31,r13,r32,r23=0
+
+
+
+          aS   bS   gS xS yS zS   aW   bW   gW  xW yW zW)  
+(dX)  (    0  -ZW   YW -1  0  0    0   ZW  -YW   1  0  0)
+(dY)  (   ZW    0  -XW  0 -1  0  -ZW    0   XW	 0  1  0) +
+(dZ) =(  -YW   XW    0  0  0 -1   YW  -XW    0	 0  0  1)
+(dnX) (    0 -nzW  nyW  0  0  0    0  nzW -nyW   0  0  0)
+(dnY) (  nzW    0 -nxW  0  0  0 -nzW    0  nxW   0  0  0)
+(dnZ) ( -nyW   nxW   0  0  0  0  nyW -nxW    0   0  0  0)
+
++
+
+         aS  bS      gS xS  yS zS     aW  bW     gW  xW    yW zW  
+(dX) (-ZW*lx  0  +XW*lx  0 +lx  0 +ZW*lx   0  -XW*lx  0   -lx  0) 
+(dY) (-ZW     0  +XW     0  +1  0 +ZW      0  -XW     0    -1  0) =
+(dZ) (-ZW*lz  0  +XW*lz  0 +lz  0 +ZW*lz   0  -XW*lz  0   -lz  0)
+
+
+                                                                 
+                aS   bS         gS xS yS zS         aW   bW         gW  xW  yW zW)  
+(dX)  (     -ZW*lx  -ZW   YW+XW*lx -1 lx  0      ZW*lx   ZW  -YW-XW*lx   1 -lx  0)
+(dY)  (    0          0       0     0  0  0          0    0          0   0   0  0) 
+(dZ) =(  -YW-ZW*lz   XW      XW*lz  0 lz -1   YW+ZW*lz  -XW    0-XW*lz	 0 -lz  1)
+(dnX) (    0       -nzW  nyW        0  0  0    0        nzW -nyW         0   0  0)
+(dnY) (  nzW          0 -nxW        0  0  0 -nzW          0  nxW         0   0  0)
+(dnZ) ( -nyW        nxW    0        0  0  0  nyW       -nxW    0         0   0  0)
+
+
+ZW<=>YW   
+
+                  xS yS zS         aS   bS         gS
+(dX)            ( -1 lx  0     -ZW*lx  -ZW   YW+XW*lx
+(dZ) =          (  0 lz -1  -YW-ZW*lz   XW      XW*lz
+(dnX)           (  0  0  0    0       -nzW  nyW      
+(dnY)           (  0  0  0  nzW          0 -nxW      
+(dnZ)           (  0  0  0 -nyW        nxW    0      
+
+//                 0    1    2            3     4           5
+//                dx   dy   dz        alpha  beta       gamma
+/* dX 0*/	-1.,  lX,  0.,     -lX*YW ,   -XW, XW + lX*YW,
+/* dZ 1*/         0.,  lZ, -1.,-(ZW+lZ*YW),    ZW,      lZ*YW,
+/* nX 2*/         0.,  0.,  0.,        0.0,  -nzW,        nyW,
+/* nY 3*/         0.,  0.,  0.,        nzW,   0.0,       -nxW,
+/* nZ 4*/         0.,  0.,  0.,       -nyW,   nxW,        0.0);  PrPP(A);
+================================================================================
+================================================================================
+================================================================================
+
+                            (1  -g  b   x)
+          Rx*Ry*Rz     =    (g   1 -a   y)
+                            (-b  a  1   z)
+			    ( 0  0  0   1 )
+
+
+a. Definitions
+---------------
+"W" coordinate system where track has been created
+"S" -"-               where track has been compared    
+
+                            (  1  -gS  bS  xS)
+          RS           =    ( gS    1 -aS  yS)
+                            (-bS   aS   1  zS)
+			    (  0    0   0  1 )
+
+                            (  1 -gW  bW  xW)
+          RW           =    ( gW   1 -aW  yW)
+                            (-bW  aW   1  zW)
+			    (  0   0   0  1 )
+
+                            (  1  gS -bS  -xS)
+          RS^-1        =    (-gS   1  aS  -yS)
+                            ( bS -aS   1  -zS)
+     rS (XS,YS,ZS), nS (nxS, nyS, nzS); Track in its Sector Coordinate System
+     rP (xP,yP,zP), nP (nxP, nyP, nzP); Predicted track at y = yS from other sector the above sector coordinate system
+     rW (XW,YW,ZW), nW (nxW, nyW, nzW); Predicted track in its sector coordinate system
+     
+     rP = RS^-1 * TPC2S * W2TPC * RW * rW
+     nP = RS^-1 * TPC2S * W2TPC * RW * nW
+
+                       (r11  r12  r13   tx)   (rS11  rS21  rS31   -tSx)     (rW11  rW12  rW13   tWx)
+w2s = TPC2S * W2TPC =  (r21  r22  r23   ty) = (rS12  rS22  rS32   -tSy)    *(rW21  rW22  rW23   tWy) = S2TPC^-1 * W2TPC 
+		       (r31  r32  r33   tz)   (rS13  rS23  rS33   -tSz)     (rW31  rW32  rW33   tWz)
+		       (  0    0    0    1)   (   0    0    0        1)     (   0     0     0     1)
+
+RP = RS^-1 * w2s * RW * rW
+
+
+(a11  a12  a13   a14) (b11  b12  b13   b14) (a11*b11+a12*b21+a13*b31+a14*b41 a11*b12+a12*b22+a13*b32+a14*b42 a11*b13+a12*b23+a13*b33+a14*b43  a11*b14+a12*b24+a13*b34+a14*b44)  
+(a21  a22  a23   a24)*(b21  b22  b23   b24)=(a21*b11+a22*b21+a23*b31+a24*b41 a21*b12+a22*b22+a23*b32+a24*b42 a21*b13+a22*b23+a23*b33+a24*b43  a21*b14+a22*b24+a23*b34+a24*b44)  
+(a31  a32  a33   a34) (b31  b32  b33   b34) (a31*b11+a32*b21+a33*b31+a34*b41 a31*b12+a32*b22+a33*b32+a34*b42 a31*b13+a32*b23+a33*b33+a34*b43  a31*b14+a32*b24+a33*b34+a34*b44)  
+(a41  a42  a43   a44) (b41  b42  b43   b44) (a41*b11+a42*b21+a43*b31+a44*b41 a41*b12+a42*b22+a43*b32+a44*b42 a41*b13+a42*b23+a43*b33+a44*b43  a41*b14+a42*b24+a43*b34+a44*b44)  
+
+
+
+                         (  1  gS -bS  -xS)   (r11  r12  r13   tx)   (  1 -gW  bW  xW) 
+W2S = RS^-1 * w2s * RW = (-gS   1  aS  -yS) * (r21  r22  r23   ty) * ( gW   1 -aW  yW) =
+			 ( bS -aS   1  -zS)   (r31  r32  r33   tz)   (-bW  aW   1  zW)
+                         (  0   0   0    1)   (  0    0    0    1)   (  0   0   0  1 )
+
+  (( r11   +r21*gS-r31*bS) ( r12   +r22*gS-r32*bS) ( r13   +r23*gS-r33*bS) ( tx   +ty*gS-tz*bS-xS)) (  1 -gW  bW  xW)
+= ((-r11*gS+r21   +r31*aS) (-r12*gS+r22   +r32*aS) (-r13*gS+r23   +r33*aS) (-tx*gS+ty   +tz*aS-yS))*( gW   1 -aW  yW)=>
+  (( r11*bS-r21*aS+r31   ) ( r12*bS-r22*aS+r32   ) ( r13*bS-r23*aS+r33   ) ( tx*bS-ty*aS+tz   -zS)) (-bW  aW   1  zW)
+  ((                    0) (                    0) (                    0) (                    1)) (  0   0   0  1 )
+
+  (( r11   +r21*gS-r31*bS)+( r12   +r22*gS-r32*bS)*gW-( r13   +r23*gS-r33*bS)*bW 
+	 -( r11   +r21*gS-r31*bS)*gW+( r12   +r22*gS-r32*bS)+( r13   +r23*gS-r33*bS)*aW 
+		    ( r11   +r21*gS-r31*bS)*bW-( r12   +r22*gS-r32*bS)*aW+( r13   +r23*gS-r33*bS)
+			     ( r11   +r21*gS-r31*bS)*xW+( r12   +r22*gS-r32*bS)*yW+( r13   +r23*gS-r33*bS)*zW+( tx   +ty*gS-tz*bS-xS))
+
+=>((-r11*gS+r21   +r31*aS)+(-r12*gS+r22   +r32*aS)*gW-(-r13*gS+r23   +r33*aS)*bW
+          -(-r11*gS+r21   +r31*aS)*gW+(-r12*gS+r22   +r32*aS)+(-r13*gS+r23   +r33*aS)*aW
+	            ((-r11*gS+r21   +r31*aS)*bW-(-r12*gS+r22   +r32*aS)*aW+(-r13*gS+r23   +r33*aS)
+		             ((-r11*gS+r21   +r31*aS)*xW+(-r12*gS+r22   +r32*aS)*yW+(-r13*gS+r23   +r33*aS)*zW+(-tx*gS+ty   +tz*aS-yS))
+  (( r11*bS-r21*aS+r31   )+( r12*bS-r22*aS+r32   )*gw-( r13*bS-r23*aS+r33   )*bW 
+	  -( r11*bS-r21*aS+r31   )*gW+( r12*bS-r22*aS+r32   )+( r13*bS-r23*aS+r33   )*aW
+		    ( r11*bS-r21*aS+r31   )*bW-( r12*bS-r22*aS+r32   )*aW+( r13*bS-r23*aS+r33   )
+			     ( r11*bS-r21*aS+r31   )*xW+( r12*bS-r22*aS+r32   )*yW+ ( r13*bS-r23*aS+r33   )*zW+( tx*bS-ty*aS+tz   -zS))
+
+
+   (( r11   +r21*gS-r31*bS+r12*gW-r13*bW) (-r11*gW+r12   +r22*gS-r32*bS+r13*aW)	( r11*bW-r12*aW+r13   +r23*gS-r33*bS)	( r11*xW+r12*yW+r13*zW+( tx   +ty*gS-tz*bS-xS))
+=> ((-r11*gS+r21   +r31*aS+r22*gW-r23*bW) (-r21*gW-r12*gS+r22   +r32*aS+r23*aW)	( r21*bW-r22*aW-r13*gS+r23   +r33*aS)   ( r21*xW+r22*yW+r23*zW+(-tx*gS+ty   +tz*aS-yS))
+   (( r11*bS-r21*aS+r31   +r32*gW-r33*bW) (-r31*gW+r12*bS-r22*aS+r32   +r33*aW) ( r31*bW-r32*aW+r13*bS-r23*aS+r33   )   ( r31*xW+r32*yW+r33*zW+( tx*bS-ty*aS+tz   -zS))
+
+
+
+                ((        r21*gS-r31*bS+r12*gW-r13*bW) (-r11*gW       +r22*gS-r32*bS+r13*aW) ( r11*bW-r12*aW       +r23*gS-r33*bS)   ( r11*xW+r12*yW+r13*zW+(      +ty*gS-tz*bS-xS))
+H = W2S - w2s = ((-r11*gS       +r31*aS+r22*gW-r23*bW) (-r21*gW-r12*gS       +r32*aS+r23*aW) ( r21*bW-r22*aW-r13*gS       +r33*aS)   ( r21*xW+r22*yW+r23*zW+(-tx*gS      +tz*aS-yS))=>
+		(( r11*bS-r21*aS       +r32*gW-r33*bW) (-r31*gW+r12*bS-r22*aS       +r33*aW) ( r31*bW-r32*aW+r13*bS-r23*aS       )   ( r31*xW+r32*yW+r33*zW+( tx*bS-ty*aS      -zS))
+                (                                    0                                     0                                     0                                                0)
+CHECKED
+((       -r31*bS+r21*gS-r13*bW+r12*gW) (       -r32*bS+r22*gS+r13*aW-r11*gW) (       -r33*bS+r23*gS-r12*aW+r11*bW)   (-xS      -tz*bS+ty*gS+r11*xW+r12*yW+r13*zW))
+((+r31*aS       -r11*gS-r23*bW+r22*gW) (+r32*aS       -r12*gS+r23*aW-r21*gW) (+r33*aS       -r13*gS-r22*aW+r21*bW)   (-yS+tz*aS      -tx*gS+r21*xW+r22*yW+r23*zW))
+((-r21*aS+r11*bS       -r33*bW+r32*gW) (-r22*aS+r12*bS       +r33*aW-r31*gW) (-r23*aS+r13*bS       -r32*aW+r31*bW)   (-zS-ty*aS+tx*bS      +r31*xW+r32*yW+r33*zW))
+(                                    0                                     0                                     0                                              0)
+
+        ((       -r31*bS+r21*gS-r13*bW+r12*gW) (       -r32*bS+r22*gS+r13*aW-r11*gW) (       -r33*bS+r23*gS-r12*aW+r11*bW)   (-xS      -tz*bS+ty*gS+r11*xW+r12*yW+r13*zW))   (XW)
+ H*rW =	((+r31*aS       -r11*gS-r23*bW+r22*gW) (+r32*aS       -r12*gS+r23*aW-r21*gW) (+r33*aS       -r13*gS-r22*aW+r21*bW)   (-yS+tz*aS      -tx*gS+r21*xW+r22*yW+r23*zW)) * (YW) =
+	((-r21*aS+r11*bS       -r33*bW+r32*gW) (-r22*aS+r12*bS       +r33*aW-r31*gW) (-r23*aS+r13*bS       -r32*aW+r31*bW)   (-zS-ty*aS+tx*bS      +r31*xW+r32*yW+r33*zW))   (ZW)
+
+   ((       -r31*bS+r21*gS-r13*bW+r12*gW)*XW+(       -r32*bS+r22*gS+r13*aW-r11*gW)*YW+(       -r33*bS+r23*gS-r12*aW+r11*bW)*ZW+(-xS      -tz*bS+ty*gS+r11*xW+r12*yW+r13*zW))     (nxU)
+=> ((+r31*aS       -r11*gS-r23*bW+r22*gW)*XW+(+r32*aS       -r12*gS+r23*aW-r21*gW)*YW+(+r33*aS       -r13*gS-r22*aW+r21*bW)*ZW+(-yS+tz*aS      -tx*gS+r21*xW+r22*yW+r23*zW)) + s*(nyU)
+   ((-r21*aS+r11*bS       -r33*bW+r32*gW)*XW+(-r22*aS+r12*bS       +r33*aW-r31*gW)*YW+(-r23*aS+r13*bS       -r32*aW+r31*bW)*ZW+(-zS-ty*aS+tx*bS      +r31*xW+r32*yW+r33*zW))     (nzU)
+
+
+((+r31*aS       -r11*gS-r23*bW+r22*gW)*XW+(+r32*aS       -r12*gS+r23*aW-r21*gW)*YW+(+r33*aS       -r13*gS-r22*aW+r21*bW)*ZW+(-yS+tz*aS      -tx*gS+r21*xW+r22*yW+r23*zW) + s*nyU = 0;
+
+ds /    d (xS, yS,zS,                     aS,bS,                      gS, xW, yW, zW,           aW,            bW,           gW) =
+= -1/nyU *( 0, -1, 0,r31*XW+r32*YW+r33*ZW+tz, 0,-r11*XW-r12*YW-r13*ZW-tx,r21,r22,r23,r23*YW-r22*ZW,-r23*XW+r21*ZW,r22*XW-r21*YW)
+
+
+   dR = rU - rS + H*rW + s*nU;        
+   dn = nU - nS + H*nW;
+lx = nxU/nyU; lz = nzU/nyU;
+       
+d(H*rW)/d(xS,yS,zS,                           aS,                      bS,                           gS,     xW,     yW,     zW,                 aW,                  bW,             gW) =
+dX        -1, 0, 0,                            0,-r31*XW-r32*YW-r33*ZW-tz,      r21*XW+r22*YW+r23*ZW+ty,    r11,    r12,    r13,      r13*YW-r12*ZW,      -r13*XW+r11*ZW,     r12*XW-r11*YW
+dY         0,-1, 0,      r31*XW+r32*YW+r33*ZW+tz,                       0,     -r11*XW-r12*YW-r13*ZW-tx,    r21,    r22,    r23,      r23*YW-r22*ZW,      -r23*XW+r21*ZW,     r22*XW-r21*YW
+dZ         0, 0,-1,     -r21*XW+r22*YW-r23*ZW-ty,+r11*XW+r12*YW+r13*ZW+tx,                            0,    r31,    r32,    r33,      r33*YW-r32*ZW,      -r33*XW+r31*ZW,     r32*XW-r31*YW
+
+dX         0, lx,0,-(r31*XW+r32*YW+r33*ZW+tz)*lx,                       0,(+r11*XW+r12*YW+r13*ZW+tx)*lx,-r21*lx,-r22*lx,-r23*lx,-(r23*YW-r22*ZW)*lx,-(-r23*XW+r21*ZW)*lx,(r22*XW-r21*YW)*lx)
+dY         0,  1,0,-(r31*XW+r32*YW+r33*ZW+tz)   ,                       0,(+r11*XW+r12*YW+r13*ZW+tx)   ,-r21   ,-r22   ,-r23   ,-(r23*YW-r22*ZW)   ,-(-r23*XW+r21*ZW)   ,(r22*XW-r21*YW)   )       
+dZ         0, lz,0,-(r31*XW+r32*YW+r33*ZW+tz)*lz,                       0,(+r11*XW+r12*YW+r13*ZW+tx)*lz,-r21*lz,-r22*lz,-r23*lz,-(r23*YW-r22*ZW)*lz,-(-r23*XW+r21*ZW)*lz,(r22*XW-r21*YW)*lz)       
+
+  S==W
+
+
+d(H*rW)/d(xS,yS,zS,     aS,  bS,      gS,   xW,   yW,   zW,     aW,      bW,      gW) =
+dX        -1, 0, 0,      0, -ZW,      YW,    1,    0,    0,      0,      ZW,     -YW
+dZ         0, 0,-1,     YW,  XW,       0,    0,    0,    1,     YW,     -XW,       0
+
+dX         0, lx,0, -ZW*lx,   0,   XW*lx,    0,  -lx,    0,  ZW*lx,       0,   XW*lx)
+dZ         0, lz,0, -ZW*lz,   0,   XW*lz,    0,  -lz,    0,  ZW*lz,       0,   XW*lz)       
+d(H*nW)/           
+dnX        0, 0, 0,,     0,-nzW,     nyW,    0,    0,    0,      0,     nzW,    -nyW
+dnY        0, 0, 0,,   nzW,   0,    -nxW,    0,    0,    0,   -nzW,       0,     nxW
+dnZ        0, 0, 0,,   nyW, nxW,       0,    0,    0,    0,    nyW,    -nxW,       0
+=======================
+
+d(H*rW)/d(xS,yS,zS,      aS,  bS,      gS,   xW,   yW,   zW,      aW,      bW,      gW) =
+dX        -1,lx, 0,  -ZW*lx, -ZW,YW+XW*lx,    1,  -lx,    0,   ZW*lx,      ZW,     XW*lx-YW
+dZ         0,lz,-1,YW-ZW*lz,  XW,   XW*lz,    0,  -lz,    1,YW+ZW*lz,     -XW,     XW*lz  
+d(H*nW)/           
+dnX        0, 0, 0,,     0,-nzW,     nyW,    0,    0,    0,      0,     nzW,    -nyW
+dnY        0, 0, 0,,   nzW,   0,    -nxW,    0,    0,    0,   -nzW,       0,     nxW
+dnZ        0, 0, 0,,   nyW, nxW,       0,    0,    0,    0,    nyW,    -nxW,       0
+//                 0    1    2            3     4           5
+//                dx   dy   dz        alpha  beta       gamma
+/* dX 0*/	-1.,  lX,  0.,     -lX*YW ,   -XW, XW + lX*YW,
+/* dZ 1*/         0.,  lZ, -1.,-(ZW+lZ*YW),    ZW,      lZ*YW,
+/* nX 2*/         0.,  0.,  0.,        0.0,  -nzW,        nyW,
+/* nY 3*/         0.,  0.,  0.,        nzW,   0.0,       -nxW,
+/* nZ 4*/         0.,  0.,  0.,       -nyW,   nxW,        0.0);  PrPP(A);
+================================================================================
+check with maxima;
+  (alpha,beta,gamma) => (a,b,g)
+
+                            (1  0  0)
+          RotateX(alpha) =  (0  1 -a); Rx: matrix([1,0,0,0],[0,1,-a,0],[0,a,1,0],[0,0,0,1]);
+                            (0  a  1)  
+%i1) Rx: matrix([1,0,0,0],[0,1,-a,0],[0,a,1,0],[0,0,0,1]);
+                               [ 1  0   0   0 ]
+                               [              ]
+                               [ 0  1  - a  0 ]
+(%o1)                          [              ]
+                               [ 0  a   1   0 ]
+                               [              ]
+                               [ 0  0   0   1 ]
+
+                            (1  0  b)
+          RotateY(beta) =   (0  1  0);  Ry: matrix([1,0,b,0],[0,1,0,0],[-b,0,1,0],[0,0,0,1]);
+                            (-b 0  1)
+
+(%i2)  Ry: matrix([1,0,b,0],[0,1,0,0],[-b,0,1,0],[0,0,0,1]);
+                               [  1   0  b  0 ]
+                               [              ]
+                               [  0   1  0  0 ]
+(%o2)                          [              ]
+                               [ - b  0  1  0 ]
+                               [              ]
+                               [  0   0  0  1 ]
+
+                            (1     -gamma     0)
+          RotateZ(gamma) =  (gamma      1     0)
+                            (0          0     1)
+
+        Rz: matrix([1,-g,0,0],[g,1,0,0],[0,0,1,0],[0,0,0,1]);
+
+(%i3) Rz: matrix([1,-g,0,0],[g,1,0,0],[0,0,1,0],[0,0,0,1]);
+                               [ 1  - g  0  0 ]
+                               [              ]
+                               [ g   1   0  0 ]
+(%o3)                          [              ]
+                               [ 0   0   1  0 ]
+                               [              ]
+                               [ 0   0   0  1 ]
+
+
+(%i5) Ryx: Ry.Rx;
+                             [  1   a b   b   0 ]
+                             [                  ]
+                             [  0    1   - a  0 ]
+(%o5)                        [                  ]
+                             [ - b   a    1   0 ]
+                             [                  ]
+                             [  0    0    0   1 ]
+
+
+(%i7) (%i6) Rzyx: Rz.Ryx;
+                        [  1    a b - g   a g + b  0 ]
+                        [                            ]
+                        [  g   a b g + 1  b g - a  0 ]
+(%o6)                   [                            ]
+                        [ - b      a         1     0 ]
+                        [                            ]
+                        [  0       0         0     1 ]
+
+
+                            (1     -gamma   beta)
+          Rx*Ry*Rz     =    (gamma      1 -alpha)
+                            (-beta  alpha      1)
+R: matrix([1,-g,b,0],[g,1,-a,0],[-b,a,1,0],[0,0,0,1]);
+
+
+(%i7) R: matrix([1,-g,b,0],[g,1,-a,0],[-b,a,1,0],[0,0,0,1]);
+                             [  1   - g   b   0 ]
+                             [                  ]
+                             [  g    1   - a  0 ]
+(%o7)                        [                  ]
+                             [ - b   a    1   0 ]
+                             [                  ]
+                             [  0    0    0   1 ]
+
+
+
+                       (r11  r12  r13   tx)
+w2s = TPC2S * W2TPC =  (r21  r22  r23   ty)
+		       (r31  r32  r33   tz)
+		       (  0    0    0    1)
+
+
+w2s : matrix([r11,r12,r13, tx],[r21,r22,r23, ty],[r31,r32,r33, tz],[0,0,0,1]);
+
+(%i9) (%i8) w2s : matrix([r11,r12,r13, tx],[r21,r22,r23, ty],[r31,r32,r33, tz],[0,0,0,1]);
+                             [ r11  r12  r13  tx ]
+                             [                   ]
+                             [ r21  r22  r23  ty ]
+(%o8)                        [                   ]
+                             [ r31  r32  r33  tz ]
+                             [                   ]
+                             [  0    0    0   1  ]
+
+
+                            (  1  -gS  bS  xS)
+          RS           =    ( gS    1 -aS  yS)
+                            (-bS   aS   1  zS)
+			    (  0    0   0  1 )
+RS: matrix([1,-gS,bS,xS],[gS,1,-aS,yS],[-bS,aS,1,zS],[0,0,0,1]);
+(%i10) RS: matrix([1,-gS,bS,xS],[gS,1,-aS,yS],[-bS,aS,1,zS],[0,0,0,1]);
+                           [  1    - gS   bS   xS ]
+                           [                      ]
+                           [  gS    1    - aS  yS ]
+(%o10)                     [                      ]
+                           [ - bS   aS    1    zS ]
+                           [                      ]
+                           [  0     0     0    1  ]
+                            (  1 -gW  bW  xW)
+          RW           =    ( gW   1 -aW  yW)
+                            (-bW  aW   1  zW)
+			    (  0   0   0  1 )
+RW: matrix([1,-gW,bW,xW],[gW,1,-aW,yW],[-bW,aW,1,zW],[0,0,0,1]);
+(%i11) RW: matrix([1,-gW,bW,xW],[gW,1,-aW,yW],[-bW,aW,1,zW],[0,0,0,1]);
+                           [  1    - gW   bW   xW ]
+                           [                      ]
+                           [  gW    1    - aW  yW ]
+(%o11)                     [                      ]
+                           [ - bW   aW    1    zW ]
+                           [                      ]
+                           [  0     0     0    1  ]
+
+
+
+                            (  1  gS -bS  -xS)
+          RS^-1        =    (-gS   1  aS  -yS)
+                            ( bS -aS   1  -zS)
+RST: matrix([1,gS,-bS,-xS],[-gS,1,aS,-yS],[bS,-aS,1,-zS],[0,0,0,1]);
+(%i12) RST: matrix([1,gS,-bS,-xS],[-gS,1,aS,-yS],[bS,-aS,1,-zS],[0,0,0,1]);
+                          [  1     gS   - bS  - xS ]
+                          [                        ]
+                          [ - gS   1     aS   - yS ]
+(%o12)                    [                        ]
+                          [  bS   - aS   1    - zS ]
+                          [                        ]
+                          [  0     0     0     1   ]
+W2S : RST.w2s.RW;
+(%i13) W2S : RST.w2s.RW;
+(%o13) matrix([- bS (r32 gW - r33 bW + r31) + gS (r22 gW - r23 bW + r21) + r12 gW - r13 bW + r11, 
+	       - bS (- r31 gW + r33 aW + r32) + gS (- r21 gW + r23 aW + r22) - r11 gW + r13 aW + r12, 
+	       (r21 bW - r22 aW + r23) gS - bS (r31 bW - r32 aW + r33) + r11 bW - r12 aW + r13, 
+	       - bS (r33 zW + r32 yW + r31 xW + tz) + gS (r23 zW + r22 yW + r21 xW + ty) + r13 zW + r12 yW + r11 xW - xS + tx], 
+	       [aS (r32 gW - r33 bW + r31) - gS (r12 gW - r13 bW + r11) + r22 gW - r23 bW + r21,
+	        aS (- r31 gW + r33 aW + r32) - gS (- r11 gW + r13 aW + r12) - r21 gW + r23 aW + r22,
+		 - (r11 bW - r12 aW + r13) gS + aS (r31 bW - r32 aW + r33) + r21 bW - r22 aW + r23, 
+		 aS (r33 zW + r32 yW + r31 xW + tz) - gS (r13 zW + r12 yW + r11 xW + tx) + r23 zW + r22 yW - yS + r21 xW + ty], 
+	       [- aS (r22 gW - r23 bW + r21) + bS (r12 gW - r13 bW + r11) + r32 gW - r33 bW + r31,
+	        - aS (- r21 gW + r23 aW + r22) + bS (- r11 gW + r13 aW + r12) - r31 gW + r33 aW + r32, 
+		- aS (r21 bW - r22 aW + r23) + bS (r11 bW - r12 aW + r13) + r31 bW - r32 aW + r33, 
+		- aS (r23 zW + r22 yW + r21 xW + ty) + bS (r13 zW + r12 yW + r11 xW + tx) + r33 zW - zS + r32 yW + r31 xW + tz], 
+		[0, 0, 0, 1])
+(%i14) w1: RST.w2s;
+                [  r21 gS - r31 bS + r11  ]         [  r22 gS - r32 bS + r12  ]
+                [                         ]         [                         ]
+                [ - r11 gS + r31 aS + r21 ]         [ - r12 gS + r32 aS + r22 ]
+(%o14)  Col 1 = [                         ] Col 2 = [                         ]
+                [  r11 bS - r21 aS + r31  ]         [  r12 bS - r22 aS + r32  ]
+                [                         ]         [                         ]
+                [            0            ]         [            0            ]
+              [  r23 gS - r33 bS + r13  ]         [ - xS + ty gS - tz bS + tx ]
+              [                         ]         [                           ]
+              [ - r13 gS + r33 aS + r23 ]         [ - yS - tx gS + tz aS + ty ]
+      Col 3 = [                         ] Col 4 = [                           ]
+              [  r13 bS - r23 aS + r33  ]         [ - zS + tx bS - ty aS + tz ]
+              [                         ]         [                           ]
+              [            0            ]         [             1             ]
+
+(%i15) w2: w1.RW;
+(%o15) matrix([(r22 gS - r32 bS + r12) gW - bW (r23 gS - r33 bS + r13) + r21 gS - r31 bS + r11,
+	     - (r21 gS - r31 bS + r11) gW + aW (r23 gS - r33 bS + r13) + r22 gS - r32 bS + r12, 
+	     - aW (r22 gS - r32 bS + r12) + bW (r21 gS - r31 bS + r11) + r23 gS - r33 bS + r13, 
+	     (r23 gS - r33 bS + r13) zW + (r22 gS - r32 bS + r12) yW + (r21 gS - r31 bS + r11) xW - xS + ty gS - tz bS + tx], 
+	     [(- r12 gS + r32 aS + r22) gW - bW (- r13 gS + r33 aS + r23) - r11 gS + r31 aS + r21, 
+	    - (- r11 gS + r31 aS + r21) gW + aW (- r13 gS + r33 aS + r23) - r12 gS + r32 aS + r22, 
+	    - aW (- r12 gS + r32 aS + r22) + bW (- r11 gS + r31 aS + r21) - r13 gS + r33 aS + r23, 
+	    (- r13 gS + r33 aS + r23) zW + (- r12 gS + r32 aS + r22) yW - yS + (- r11 gS + r31 aS + r21) xW - tx gS + tz aS + ty],
+	     [(r12 bS - r22 aS + r32) gW - (r13 bS - r23 aS + r33) bW + r11 bS - r21 aS + r31, 
+	     - (r11 bS - r21 aS + r31) gW + aW (r13 bS - r23 aS + r33) + r12 bS - r22 aS + r32, 
+	     (r11 bS - r21 aS + r31) bW - aW (r12 bS - r22 aS + r32) + r13 bS - r23 aS + r33, 
+	     (r13 bS - r23 aS + r33) zW - zS + (r12 bS - r22 aS + r32) yW + (r11 bS - r21 aS + r31) xW + tx bS - ty aS + tz], 
+	     [0, 0, 0, 1])
+=>
+(%o15) matrix(
+%[(r22*gS-r32*bS+r12)*gW-bW*(r23*gS-r33*bS+r13)+r21*gS-r31*bS+r11,
+-(r21*gS-r31*bS+r11)*gW+aW*(r23*gS-r33*bS+r13)+r22*gS-r32*bS+r12, 
+-aW*(r22*gS-r32*bS+r12)+bW*(r21*gS-r31*bS+r11)+r23*gS-r33*bS+r13, 
+(r23*gS-r33*bS+r13)*zW+(r22*gS-r32*bS+r12)*yW+(r21*gS-r31*bS+r11)*xW-xS+ty*gS-tz*bS+tx], 
+[(-r12*gS+r32*aS+r22)*gW-bW*(-r13*gS+r33*aS+r23)-r11*gS+r31*aS+r21, 
+-(-r11*gS+r31*aS+r21)*gW+aW*(-r13*gS+r33*aS+r23)-r12*gS+r32*aS+r22, 
+-aW*(-r12*gS+r32*aS+r22)+bW*(-r11*gS+r31*aS+r21)-r13*gS+r33*aS+r23, 
+(-r13*gS+r33*aS+r23)*zW+(-r12*gS+r32*aS+r22)*yW-yS+(-r11*gS+r31*aS+r21)*xW-tx*gS+tz*aS+ty],
+[(r12*bS-r22*aS+r32)*gW-(r13*bS-r23*aS+r33)*bW+r11*bS-r21*aS+r31, 
+-(r11*bS-r21*aS+r31)*gW+aW*(r13*bS-r23*aS+r33)+r12*bS-r22*aS+r32, 
+  (r11*bS-r21*aS+r31)*bW-aW*(r12*bS-r22*aS+r32)+r13*bS-r23*aS+r33, 
+  (r13*bS-r23*aS+r33)*zW-zS+(r12*bS-r22*aS+r32)*yW+(r11*bS-r21*aS+r31)*xW+tx*bS-ty*aS+tz], 
+  [0, 0, 0, 1])
+
+
+(%o15) matrix(
+ [r12*gW-bW*r13+r21*gS-r31*bS+r11,-r11*gW+aW*r13+r22*gS-r32*bS+r12, -aW*r12+bW*r11+r23*gS-r33*bS+r13,r13*zW+r12*yW+r11*xW-xS+ty*gS-tz*bS+tx], 
+ [r22*gW-bW*r23-r11*gS+r31*aS+r21,-r21*gW+aW*r23-r12*gS+r32*aS+r22, -aW*r22+bW*r21-r13*gS+r33*aS+r23,r23*zW+r22*yW-yS+r21*xW-tx*gS+tz*aS+ty],
+ [r32*gW-r33*bW+r11*bS-r21*aS+r31,-r31*gW+aW*r33+r12*bS-r22*aS+r32,  r31*bW-aW*r32+r13*bS-r23*aS+r33,r33*zW-zS+r32*yW+r31*xW+tx*bS-ty*aS+tz], 
+ [0, 0, 0, 1]);
+
+(%i16) A:  matrix(
+ [r12*gW-bW*r13+r21*gS-r31*bS+r11,-r11*gW+aW*r13+r22*gS-r32*bS+r12, -aW*r12+bW*r11+r23*gS-r33*bS+r13,r13*zW+r12*yW+r11*xW-xS+ty*gS-tz*bS+tx], 
+ [r22*gW-bW*r23-r11*gS+r31*aS+r21,-r21*gW+aW*r23-r12*gS+r32*aS+r22, -aW*r22+bW*r21-r13*gS+r33*aS+r23,r23*zW+r22*yW-yS+r21*xW-tx*gS+tz*aS+ty],
+ [r32*gW-r33*bW+r11*bS-r21*aS+r31,-r31*gW+aW*r33+r12*bS-r22*aS+r32,  r31*bW-aW*r32+r13*bS-r23*aS+r33,r33*zW-zS+r32*yW+r31*xW+tx*bS-ty*aS+tz], 
+ [0, 0, 0, 1]);
+                [ r12 gW + r21 gS - r13 bW - r31 bS + r11 ]
+                [                                         ]
+                [ r22 gW - r11 gS - r23 bW + r31 aS + r21 ]
+(%o16)  Col 1 = [                                         ]
+                [ r32 gW - r33 bW + r11 bS - r21 aS + r31 ]
+                [                                         ]
+                [                    0                    ]
+         [ - r11 gW + r22 gS - r32 bS + r13 aW + r12 ]
+         [                                           ]
+         [ - r21 gW - r12 gS + r23 aW + r32 aS + r22 ]
+ Col 2 = [                                           ]
+         [ - r31 gW + r12 bS + r33 aW - r22 aS + r32 ]
+         [                                           ]
+         [                     0                     ]
+         [  r23 gS + r11 bW - r33 bS - r12 aW + r13  ]
+         [                                           ]
+         [ - r13 gS + r21 bW - r22 aW + r33 aS + r23 ]
+ Col 3 = [                                           ]
+         [  r31 bW + r13 bS - r32 aW - r23 aS + r33  ]
+         [                                           ]
+         [                     0                     ]
+         [ r13 zW + r12 yW + r11 xW - xS + ty gS - tz bS + tx ]
+         [                                                    ]
+         [ r23 zW + r22 yW - yS + r21 xW - tx gS + tz aS + ty ]
+ Col 4 = [                                                    ]
+         [ r33 zW - zS + r32 yW + r31 xW + tx bS - ty aS + tz ]
+         [                                                    ]
+         [                         1                          ]
+
+
+
+
+(%i17) H: A-w2s;
+                [ r12 gW + r21 gS - r13 bW - r31 bS ]
+                [                                   ]
+                [ r22 gW - r11 gS - r23 bW + r31 aS ]
+(%o17)  Col 1 = [                                   ]
+                [ r32 gW - r33 bW + r11 bS - r21 aS ]
+                [                                   ]
+                [                 0                 ]
+         [ - r11 gW + r22 gS - r32 bS + r13 aW ]
+         [                                     ]
+         [ - r21 gW - r12 gS + r23 aW + r32 aS ]
+ Col 2 = [                                     ]
+         [ - r31 gW + r12 bS + r33 aW - r22 aS ]
+         [                                     ]
+         [                  0                  ]
+         [  r23 gS + r11 bW - r33 bS - r12 aW  ]
+         [                                     ]
+         [ - r13 gS + r21 bW - r22 aW + r33 aS ]
+ Col 3 = [                                     ]
+         [  r31 bW + r13 bS - r32 aW - r23 aS  ]
+         [                                     ]
+         [                  0                  ]
+         [ r13 zW + r12 yW + r11 xW - xS + ty gS - tz bS ]
+         [                                               ]
+         [ r23 zW + r22 yW - yS + r21 xW - tx gS + tz aS ]
+ Col 4 = [                                               ]
+         [ r33 zW - zS + r32 yW + r31 xW + tx bS - ty aS ]
+         [                                               ]
+         [                       0                       ]
+
+ r11  r12  r13  tx
+                  
+ r21  r22  r23  ty
+                  
+ r31  r32  r33  tz
+                  
+  0    0    0   1 

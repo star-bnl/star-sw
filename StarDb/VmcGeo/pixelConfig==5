@@ -1,0 +1,35 @@
+TGeoVolume *pixel() {
+TGeoVolume *PXMO = gGeoManager->MakeTube("PXMO",GetMed("PIXL_AIR"),2.4,8.3,10); PXMO->SetTitle("the mother of the pixel detector volumes");
+  PXMO->SetLineColor(6);
+TGeoVolume *PSEC = gGeoManager->MakeTubs("PSEC",GetMed("PIXL_AIR"),2.4,8.3,10,-11,122); PSEC->SetTitle("a group of ladders");
+  PSEC->SetLineColor(5);
+TGeoVolume *PLMO = gGeoManager->MakeBox("PLMO",GetMed("PIXL_AIR"),1,0.1200000E-01,10); PLMO->SetTitle("the mother of the silicon ladder");
+  PLMO->SetLineColor(4);
+TGeoVolume *PLAC = gGeoManager->MakeBox("PLAC",GetMed("PIXL_SENSITIVE"),1,0.6000000E-02,10); PLAC->SetTitle("the active layer of the ladder");
+  PLAC->SetLineColor(4);
+TGeoVolume *PLPS = gGeoManager->MakeBox("PLPS",GetMed("PIXL_SILICON"),1,0.6000000E-02,10); PLPS->SetTitle("the passive layer of the ladder");
+  PLPS->SetLineColor(2);
+   PXMO->AddNodeOverlap(PSEC,1,gGeoIdentity);
+    rot = new TGeoRotation("next",90,-3,90,87,0,0);
+    PSEC->AddNode(PLMO,1,new TGeoCombiTrans(-0.4341205,2.462019,0,rot));
+     PLMO->AddNode(PLAC,1,new TGeoTranslation(0,-0.6000000E-02,0));
+     PLMO->AddNode(PLPS,1,new TGeoTranslation(0,0.6000000E-02,0));
+    rot = new TGeoRotation("next",90,-43,90,47,0,0);
+    PSEC->AddNode(PLMO,2,new TGeoCombiTrans(1.25,2.165064,0,rot));
+    rot = new TGeoRotation("next",90,-83,90,7,0,0);
+    PSEC->AddNode(PLMO,3,new TGeoCombiTrans(2.349231,0.8550503,0,rot));
+    PSEC->AddNode(PLMO,4,new TGeoCombiTrans(-1.682324,6.278518,0,GetRot("R015")));
+    PSEC->AddNode(PLMO,5,new TGeoTranslation(-0.3278354E-06,7.5,0));
+    rot = new TGeoRotation("next",90,-15,90,75,0,0);
+    PSEC->AddNode(PLMO,6,new TGeoCombiTrans(1.682324,6.278518,0,rot));
+    rot = new TGeoRotation("next",90,-30,90,60,0,0);
+    PSEC->AddNode(PLMO,7,new TGeoCombiTrans(3.75,6.495191,0,rot));
+    PSEC->AddNode(PLMO,8,new TGeoCombiTrans(4.596194,4.596194,0,GetRot("045D")));
+    rot = new TGeoRotation("next",90,-60,90,30,0,0);
+    PSEC->AddNode(PLMO,9,new TGeoCombiTrans(6.495191,3.75,0,rot));
+    PSEC->AddNode(PLMO,10,new TGeoCombiTrans(6.278518,1.682324,0,GetRot("075N")));
+    PSEC->AddNode(PLMO,11,new TGeoCombiTrans(7.5,0,0,GetRot("090N")));
+   PXMO->AddNodeOverlap(PSEC,2,GetRot("R120"));
+   PXMO->AddNodeOverlap(PSEC,3,GetRot("R240"));
+  return PXMO;
+}

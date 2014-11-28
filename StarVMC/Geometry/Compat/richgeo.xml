@@ -1,0 +1,5 @@
+<Document name="richgeo.xml">
+<Export language="Mortran">
+<Import file="pams/geometry/richgeo/richgeo.g" verbatim="true" />
+</Export>
+</Document>

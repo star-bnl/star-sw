@@ -1,0 +1,17 @@
+root4star -b 'bfc.C(1,"fzin PPMDC4  TRS -ppLPprojectA -ppSpinConf -MWC -PreVtx -SVT -AlignSectors -ExB -OBmap -OClock -ftpc -svt_daq  -QA -fcl -dEdX -SpinTag ","mc_eve.fzd")'
+
+root4star -b 'bfc.C(1,"fzin PPMDC4  TRS -ppLPprojectA -ppSpinConf -MWC -PreVtx -SVT -AlignSectors -ExB -OBmap -OClock -ftpc -svt_daq  -QA -fcl -dEdX -SpinTag Cy2a -svt -ftpc -glow -glowtag -flowanlaysis -ftp -Fglobal -Fprimary","mc_eve20.fzd")'
+
+root4star -b 'bfc.C(1,"fzin Cy2a -svt -ftpc -fpt -Fglobal -Fprimary -glow -glowtag -flowanlaysis -dst","mc_eve20.fzd")'
+
+root4star -b 'bfc.C(1,"fzin Cy2a pp -svt -ftpc -fpt -Fglobal -Fprimary -dst -fcl -ppLPprojectA -ppSpinConf -MWC -PreVtx -SVT -AlignSectors -ExB -OBmap -OClock -ftpc -svt_daq  -QA  -dEdX -dEdxY2", "mc_eve20.fzd")' <<== crash in QAMaker
+
+works !!! lmv
+root4star -b 'macros/bfc.C(1,"fzin Cy2a  -ftpc -fpt -Fglobal -Fprimary  -fcl -dedx -flowtag -flow -EventQA -QA -pp -dEdxY2 ","mc_eve20.fzd")'
+
+works better!!! ppLMV
+root4star -b 'macros/bfc.C(1,"fzin Cy2a  -ftpc -fpt -Fglobal -Fprimary  -fcl -dedx -flowtag -flow -EventQA -QA -pp -dEdxY2 -VtxOffSet -l0 -trg -PreVtx -ppLPfind1 pp","minb200-10k.fzd")'
+
+
+
+

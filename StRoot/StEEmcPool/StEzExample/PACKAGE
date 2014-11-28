@@ -1,0 +1,5 @@
+# $Id $
+# package StEzExample
+# author: 
+Library:libStEzExample.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -l_StEEmcUtil  -l_StMuDSTMaker
+#Library:libStEzExample.so:LIBS +=   -lStChain  -lStEEmcDbMaker  -lStEEmcUtil  -lStMuDSTMaker

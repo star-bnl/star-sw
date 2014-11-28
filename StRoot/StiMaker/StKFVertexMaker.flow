@@ -1,0 +1,135 @@
+ Flow diagram:
+ ==============
+StKFVertexMaker::Make 
+	KFParticle::SetField(bField); set mag.field 
+	MakeParticles:  convert dca tracks into KFParticle, 
+	     Create TObjSet's for tracks ("KFTracks") and vertices ("KFVertices") with TObjArray (fParticles and vertices)
+     		AddBeamTrack(); if any
+      		 for each good glob. track (kg = track.key())
+          		Fill TrackNodeMap[kg] = node (global tracks)
+          		AddTrackAt(gTrack);
+            		AddTrackAt(dca, kg)
+
+	StKFVertex::ResetTotalNoVertices(); => fTotalNoVertices = 0; reset vertex counter
+	Fit()
+		  PrimaryVertices(); 
+			For 2 passes {
+				PrimaryVertexSeeds();
+				fgcVertices->DoTrack2VertexAssociation
+				AnnelingFcn(TMath::Exp(-TempLog))
+					 fgcVertices->Fit();
+						for each vertex vtx
+							vtx->CheckBeamConstraint();
+							vtx->Fit()
+								ResetParticles();
+								CheckBeamConstraint();
+								KFVertex::SetVtxGuess
+								KFVertex::ConstructPrimaryVertex
+								KFVertex::SetVtxGuess
+								KFVertex::ConstructPrimaryVertex
+								Assign MC								
+						UpdateStVertexTrackAssociation
+							StKFVertex::UpdateVertex2TrackChi2()
+						UpdateWeights()
+				fgcVertices->SetParents(Int_t *)
+			}
+//			fgcVertices->MergeDuplicatedVertices();
+			fgcVertices->CleanDuplicatedVertices();
+//			fgcVertices->MergeDuplicatedVertices();		
+			fgcVertices->Fit()  //  anneling T -> 1 
+			fgcVertices->UniqueTracks2VertexAssociation();
+			fgcVertices->SetParents();
+		  SecondaryVertices();
+			Foreach track without parent try to combine into vertex, TempLog = 0
+			vtx->Fit();
+
+			SecondaryVertices->UpdateWeights()
+			SecondaryVertices->UniqueTracks2VertexAssociation()
+			SecondaryVertices->SetParents();
+
+		  fgcVertices->Fit()
+		  
+	ReFitToVertex();
+	MakeV0()
+
+--------------------------------------------------------------------------------
+KFTracks:
+   kg =  gTrack->key(); 
+   TObjArray *fParticles; // == KFTracks
+   fParticles[kg], kg = 0 -> beam line, kg > 0 kg == gTrack->key();
+
+   TObjArray KFVertices; // KFVertices
+
+   StKFVerticesCollection *fgcVertices;  // current vertex collection
+
+   KFTracks
+
+
+
+  
+   [  StKFVerticesCollection ]
+           |
+            -> [ StKFVertex >
+                  |
+                  -> [KFTrack >
+    [ Track >
+      ->StTrackGeometry inner/outer
+      ->StTrackTopologyMap
+      ->StTrackFitTraits
+      ->StTrackDetectorInfo
+      ->StTrackNode
+      ->	
+
+
+    [ TrackNode >
+       ||
+       | -> [OwnedTracks]
+       |->  [ReferencedTracks]
+                [Track>
+	           -> [Vertex]R
+                   -> [TrackNode]R
+                   -> [TrackDetectorInfo]
+                   -> [FitTraits>
+	           -> [TrackTopologyMap]
+                   -> [endVertex]R
+                   -> [inner/outer Geometry]
+ 
+                 [GlobalTrack : Track]
+                   -> [dcaGeometry]
+                 [PrimaryTrack: Track] 
+                 [TrackMassFit: Track]
+                   -> [KFParticle]
+
+    [ Vertex] 
+       |-> [parent Track]
+    [ PrimaryVertex: Vertex]
+       |-> [daughter Track >        
+    [ V0Vertex: Vertex ]
+       |-> [daughter Track[2] >        
+    [ XiVertex: Vertex ]
+       ||-> [daughter Track]        
+       |->  [V0Vertex]
+    [ KinkVertex: Vertex ]
+       |-> [daughter Track]        
+    [ CalibrationVertex : Vertex]
+================================================================================
+    [ TrackNode >
+       ||
+       | -> [OwnedTracks]
+	 
+       |->  [ReferencedTracks]
+                [Track>
+	           -> [Vertex]R
+                   -> [TrackNode]R
+                   -> [TrackDetectorInfo]
+                   -> [FitTraits>
+	           -> [TrackTopologyMap]
+                   -> [endVertex]R
+                   -> [inner/outer Geometry]
+ 
+                 [GlobalTrack : Track]
+                   -> [dcaGeometry]
+                 [PrimaryTrack: Track] 
+                 [TrackMassFit: Track]
+                   -> [KFParticle]
+    

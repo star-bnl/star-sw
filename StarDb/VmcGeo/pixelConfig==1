@@ -1,0 +1,30 @@
+TGeoVolume *pixel() {
+TGeoVolume *PXMO = gGeoManager->MakeTube("PXMO",GetMed("PIXL_AIR"),1.45,5.65,8); PXMO->SetTitle("the mother of the pixel detector volumes");
+  PXMO->SetLineColor(6);
+TGeoVolume *PSEC = gGeoManager->MakeTubs("PSEC",GetMed("PIXL_AIR"),1.45,5.65,8,-11,118); PSEC->SetTitle("a group of ladders");
+  PSEC->SetLineColor(5);
+TGeoVolume *PLMO = gGeoManager->MakeBox("PLMO",GetMed("PIXL_AIR"),1,0.6000000E-02,8); PLMO->SetTitle("the mother of the silicon ladder");
+  PLMO->SetLineColor(4);
+TGeoVolume *PLAC = gGeoManager->MakeBox("PLAC",GetMed("PIXL_SENSITIVE"),1,0.1000000E-02,8); PLAC->SetTitle("the active layer of the ladder");
+  PLAC->SetLineColor(4);
+TGeoVolume *PLPS = gGeoManager->MakeBox("PLPS",GetMed("PIXL_SILICON"),1,0.5000000E-02,8); PLPS->SetTitle("the passive layer of the ladder");
+  PLPS->SetLineColor(2);
+    PXMO->AddNodeOverlap(PSEC,1,gGeoIdentity);
+     rot = new TGeoRotation("next",90,-89.28,90,0.7200012,0,0);
+     PSEC->AddNode(PLMO,1,new TGeoCombiTrans(5.294,0,0,rot));
+      PLMO->AddNode(PLAC,1,new TGeoTranslation(0,-0.5000000E-02,0));
+      PLMO->AddNode(PLPS,1,new TGeoTranslation(0,0.9999999E-03,0));
+     rot = new TGeoRotation("next",90,-68.03999,90,21.96001,0,0);
+     PSEC->AddNode(PLMO,2,new TGeoCombiTrans(4.560899,1.684413,0,rot));
+     rot = new TGeoRotation("next",90,-44.39,90,45.61,0,0);
+     PSEC->AddNode(PLMO,3,new TGeoCombiTrans(3.231164,2.97329,0,rot));
+     rot = new TGeoRotation("next",90,9.360001,90,99.36,0,0);
+     PSEC->AddNode(PLMO,4,new TGeoCombiTrans(0.290392,1.568342,0,rot));
+    PXMO->AddNodeOverlap(PSEC,2,GetRot("R060"));
+    PXMO->AddNodeOverlap(PSEC,3,GetRot("R120"));
+    PXMO->AddNodeOverlap(PSEC,4,GetRot("R180"));
+    PXMO->AddNodeOverlap(PSEC,5,GetRot("R240"));
+    rot = new TGeoRotation("next",90,300,90,390,0,0);
+    PXMO->AddNodeOverlap(PSEC,6,rot);
+  return PXMO;
+}

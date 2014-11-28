@@ -1,0 +1,54 @@
+! File: main52.ccmnd
+! This file contains commands to be read in for a Pythia8 run. 
+! Lines not beginning with a letter or digit are comments.
+! Names are case-insensitive  -  but spellings-sensitive!
+! The changes here are illustrative, not always physics-motivated.
+
+! 1) Settings that could be used in a main program, if desired.
+# Beams and collision energy are set up in the fillHepRup() method. 
+Main:numberOfEvents = 100          ! number of events to generate
+Main:numberToList = 1              ! number of events to print
+Main:timesToShow = 20              ! show how far along run is this many times
+Main:timesAllowErrors = 10         ! abort run after this many flawed events
+Main:showChangedSettings = on      ! print changed flags/modes/parameters
+#Main:showAllSettings = on          ! print all flags/modes/parameters
+Main:showChangedParticleData = on  ! print changed particle and decay data
+#Main:showAllParticleData = on      ! print all particle and decay data
+
+! 2) Settings for the hard-process generation.
+#For Pythia6 processes this has to be done in the fillHepRup() method.
+
+! 3) Switch off some key components of the simulation, for comparisons.
+#PartonLevel:MI = off               ! no multiple interactions
+#PartonLevel:ISR = off              ! no initial-state radiation 
+#PartonLevel:FSRinProcess = off     ! no final-state radiation
+#PartonLevel:FSRinResonances = off  ! no FSR in resonance decays 
+#HadronLevel:Hadronize = off        ! no hadronization
+#HadronLevel:Decay = off            ! no decays
+#BeamRemnants:allowJunction = off   ! debug only: do not allow junctions 
+#TimeShower:QEDshowerByQ = off      ! no photon radiation off quarks
+#TimeShower:QEDshowerByL = off      ! no photon radiation off leptons   
+
+! 4) Modify defaults for some key parameters.
+BeamRemnants:primordialKThard = 2. ! modify primordial kT for hard processes
+MultipleInteractions:bProfile = 3  ! impact parameter profile
+MultipleInteractions:expPow = 1.3  ! profile exp( - b^expPow)
+MultipleInteractions:pT0Ref = 2.5  ! dampening of pT -> 0 divergence
+#SpaceShower:samePTasMI = false     ! set pT0Ref separately or not
+#SpaceShower:pT0Ref = 3.0           ! dampening of pT -> 0 divergence
+
+! 5) Modify particle data properties.
+111:mayDecay = off                  ! switch off pi0 decays
+310:0:bRatio = 0.6895               ! BR(K0_short -> pi+ pi-)
+310:1:bRatio = 0.3105               ! BR(K0_short -> pi0 pi0) 
+
+! 6) Completely replace or add new particle. (Here update omega.)
+223:new =  omega  void  3  0  0  0.78259  0.00849  0.68 0.90  0.0  
+223:addChannel = 1 0.8924000    1      211     -211      111    
+223:addChannel = 1 0.0892800    0       22      111          
+223:addChannel = 1 0.0170000    3      211     -211          
+223:addChannel = 1 0.0004900    0      221       22          
+223:addChannel = 1 0.0000700    0      111      111       22 
+223:addChannel = 1 0.0005900    0      111       11      -11  
+223:addChannel = 1 0.0001000    0      111       13      -13 
+223:addChannel = 1 0.0000700    0       11      -11          

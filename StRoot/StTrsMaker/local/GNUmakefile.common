@@ -1,0 +1,75 @@
+############################################################################
+#
+# $Id: GNUmakefile.common,v 1.2 1998/11/12 23:04:54 lasiuk Exp $
+#
+# Author: Thomas Ullrich, Mar 25 1998
+# --------------------------------------------------------------------------
+# These are Makefiles that are supplied for the building of
+# shared libraries away from BNL.
+# For installation
+# TYPE:
+#   gmake 
+# to build an archived library in order to test example program!
+#
+# --------------------------------------------------------------------------
+#
+# $Log: GNUmakefile.common,v $
+# Revision 1.2  1998/11/12 23:04:54  lasiuk
+# automate the makefiles
+#
+# Revision 1.1  1998/11/12 22:48:09  lasiuk
+# Standalone Makefiles
+#
+############################################################################
+
+sources := $(wildcard src/*.cc)
+objects := $(patsubst src/%.cc,$(STAR_SYS)/%.o,$(sources))
+dependencies := $(patsubst src/%.cc,$(STAR_SYS)/%.d,$(sources))
+
+ifneq ($(MAKESHLIB),)
+#
+# Make shared library.
+#
+$(STAR_SYS)/lib$(name).$(SHEXT): $(objects)
+	$(LD) $(LDFLAGS) -o $(STAR_SYS)/lib$(name).$(SHEXT) $(objects)
+endif
+
+# Make library.
+$(STAR_SYS)/lib$(name).a:	$(STAR_SYS)/obj.last
+	@echo Creating/replacing object files in $(STAR_SYS)/lib$(name).a
+	@/bin/rm -f $(STAR_SYS)/lib$(name).a
+	$(AR) $(STAR_SYS)/lib$(name).a $(STAR_SYS)/*.o
+	@if [ -f /usr/bin/ranlib -o -f /bin/ranlib ] ; then ranlib $(STAR_SYS)/lib$(name).a ; fi
+
+#
+# Touch the versioning file
+#
+$(STAR_SYS)/obj.last: $(objects)
+	@touch $@
+
+#
+# Make the .o files.
+#
+$(STAR_SYS)/%.o: src/%.cc
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c -o $(STAR_SYS)/$(*F).o src/$*.cc
+
+#
+# Make the .d file(s) and include it(them).
+#
+$(STAR_SYS)/%.d: src/%.cc
+	@if [ ! -d $(STAR_SYS) ] ; then mkdir $(STAR_SYS) ;fi
+	@echo Making dependency file $@...
+	@$(ECHO) $(STAR_SYS)/\\c >/tmp/$(USER)_$(STAR_SYS).d
+	@g++ -w -MM $(CPPFLAGS) $< >>/tmp/$(USER)_$(STAR_SYS).d
+	@sed 's!$(STAR_SYS)/$*.o!& $@!' /tmp/$(USER)_$(STAR_SYS).d >$@
+	@rm /tmp/$(USER)_$(STAR_SYS).d
+-include $(dependencies)
+
+lib: $(STAR_SYS)/lib$(name).$(SHEXT)
+
+clean:
+	-rm -f $(STAR_SYS)/lib$(name).sl
+	-rm -f $(objects)
+	-rm -f $(dependencies)
+	@rm -rf $(STAR_SYS)/*
+	@rm -rf $(STAR_SYS)

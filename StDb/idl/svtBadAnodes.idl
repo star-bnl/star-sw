@@ -1,0 +1,14 @@
+/*    svtBadAnodes.idl
+*
+*  Table: svtBadAnodes
+*
+*       description: //  SVT bad anodes
+*/ 
+
+
+struct svtBadAnodes { 
+
+   long  ID;   /*   */
+   long  isBadAnode[240];   /*   */
+
+ };  

@@ -1,0 +1,5 @@
+# $Id $
+# package StTofUtil
+# author: 
+Library:libStTofUtil.so:LIBS +=   -l_StEvent
+#Library:libStTofUtil.so:LIBS +=   -lStEvent

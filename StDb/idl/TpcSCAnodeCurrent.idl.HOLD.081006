@@ -1,0 +1,13 @@
+//:Description: Slow Control sum of Anode currents
+//:Synonyms::::
+//:Source:
+//:Update:
+//:Update frequncy:
+//:Reminder:
+//:Recall frequency:
+//:Size of Data:
+//:Pointer to data:  TpcSCAnodeCurrent.time:
+struct TpcSCAnodeCurrent {
+  float SUM_CURR_0; /* sum of anode currents outer */
+  float SUM_CURR_1; /* sum of anode currents inner */
+};

@@ -1,0 +1,5 @@
+# $Id $
+# package StPmdCalibrationMaker
+# author: 
+Library:libStPmdCalibrationMaker.so:LIBS +=   -lStChain  -lStDbLib  -lStPmdUtil
+#Library:libStPmdCalibrationMaker.so:LIBS +=   -lStChain  -lStDbLib  -lStPmdUtil

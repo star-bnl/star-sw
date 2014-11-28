@@ -1,0 +1,86 @@
+HOWTO Generate EEMC Timing Curve Plots				11/27/2007
+--------------------------------------------------------------------------
+
+If you're reading this, you must be interested in making timing curves for
+the endcap.  This file will tell you how to do it.
+
+0. Log into rcas...
+
+And setup a working directory and cd into it
+
+$ mkdir timimg
+$ cd timing
+
+You'll need about 22MB / run to store the output files.
+
+1. The Data
+
+You should have a list of runs, each of which has a relative TCD phase delay.
+If you don't have this, wait for beam, go comandeer the RTS system and take
+your data!  If you need to know how to do this,  you'll have to look
+elsewhere.
+
+This HOWTO describes how to generate timing curves based on the output
+of the L2ped algorithm.  The output will be a number of histogram files
+which needs to be copied somewhere where you can read them.  Once this
+is done, simply create a "list" file for each histogram:
+
+$ /star/institutions/iucf/balewski/2008-L2-tmp/day327/run8327013.l2ped.hist.root > 8327013.list 
+
+It's important that your list file is in the <run number>.list format. 
+
+2. Creating the timing files
+
+Start by checking out the macros and scripts which will drive the analysis.
+From an rcas terminal type
+
+$ cvs co StRoot/StEEmcPool/StEEmcTimingMaker/macros
+$ ln -s StRoot/StEEmcPool/StEEmcTimingMaker/macros/* .
+
+There should be a perl script called makeL2TimingFiles.pl.  Edit the file
+and put a comma-separated list of runs in the @runs array.  Put the
+corresponding tower and mapmt TCD phases in @tower_delays and @mapmt_delays.
+Set the number of events in each run in the @nevents array, to normalize
+the runs.  
+
+Now run the script (be sure it's the "L2" script)
+
+$ makeL2TimingFiles.pl 
+
+3. Creating the timing plots
+
+$ ls *.log
+$ ls timing_files/*.root
+
+You should see a root file for each of the runs you analysed.  If not,
+consult the corresponding logfile and try to figure out why your job
+died.
+
+You may want to edit plotEEmcTiming.C and skip plotting of the mapmts.
+Level 2 only has tower information, and these are all going to be 
+empty plots. 
+
+$ root4star
+root.exe [0] .x plotEEmcL2Timimg.C
+
+-------------------------------------------------------------------------------
+
+If you don't like where the legends are output on the plots:
+    Find the line which looks like this 
+    TLegend *legend=new TLegend(0.125,0.6,0.325,0.85);
+    and play around with the numbers until it's where you want it.
+    THe numbers are x1, x2, y1 and y2 in "fractions of the axis". 
+
+If you want to create an ascii file containting the names of tubes, 
+the computed pedestals, integrals and slopes
+    Uncomment the line
+    timing->dumpAsciiFile(dtfile);
+    in runEEmcTiming.C 
+
+If you want to create a PDF file with ADC spectra for all detectors
+    Uncomment the line
+    timing->dumpPDF( psfile );
+    in runEEmcTiming.C 
+
+
+ 

@@ -1,0 +1,14 @@
+/*    ftpcEField.idl
+*
+*  Table: ftpcEField
+*
+*       description: //    FTPC electric field
+*/ 
+
+
+struct ftpcEField { 
+
+
+   float  e[1101];               /*   electric field for each bin  */
+
+ };  

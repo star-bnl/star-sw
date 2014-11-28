@@ -1,0 +1,134 @@
+#!/usr/bin/env perl
+
+# Not so simple script ... to stat the files on the commandline
+# Return 1 on failure, 0 otherwese
+#
+# Written J. Lauret 2009 / disabled 200911
+#
+
+use POSIX qw(:signal_h :errno_h :sys_wait_h);
+
+$TIMEOUT=10;
+$self   ="chkread";
+
+# return true if no argument
+exit 1 if $#ARGV == -1;
+
+# connect our handlers
+$SIG{'CHLD'} = \&REAPER ;
+$SIG{'ALRM'} = 'sighandler';
+$SIG{'USR1'} = 'sighandler';
+$SIG{'USR2'} = 'sighandler';
+
+$child_alive = 0;
+
+$DEBUG = 0||$ENV{DECHO}||$ENV{chkread_debug};
+
+if( $PID = fork() ) {
+    # parent process
+    $child_alive = 1;
+    sleep($TIMEOUT);
+
+    if ($child_alive){
+	# that's too bad - kill
+	print "$self :: Lookup of ".join(" ",@ARGV)." is hanging\n";
+	kill 9,$PID;
+	&SafeReaper(); # see func for explaination
+	print "$self :: parent exiting with failure\n"       if ($DEBUG);
+	exit 1;
+    } else {
+	# &SafeReaper(); # see func for explaination
+	print "$self :: Parent leaving with success\n"       if ($DEBUG);
+	exit 0;
+    }
+
+} elsif ( defined($PID) ){
+    ## child
+    $ppid = getppid();
+
+    print "$self :: I am in child\n"                         if ($DEBUG);
+
+    my($sig)=14;
+    # do something
+    foreach $filename (@ARGV){
+	print "$self :: Checking $filename\n"                if ($DEBUG);
+	if ( ! -r $filename){
+	    print "$self :: File or directory $filename is not readable\n";
+	    $sig = 10;
+	    last;
+	}
+    }
+
+    print "$self :: ".($sig==10?"FAIL":"OK")." - sending signal $sig to my parent $ppid\n"  if ($DEBUG);
+    # send wake signal
+    kill $sig,$ppid;
+    exit 0;
+
+} elsif ($! == EAGAIN ) {
+    ## oops!
+    sleep 2;
+    redo FORK;
+
+} else {
+    ## can't fork, not  a good sign
+    print "$self :: Cannot fork - leaving with error\n"  if ($DEBUG);
+    exit 1;
+}
+
+
+# handle other signals / parent
+sub sighandler
+{
+    my ($sig) = @_;
+    if ($sig eq 'ALRM') {
+        # do nothing, just child waking us, all ok
+	print "$self :: - Received signal ALRM\n"   if ($DEBUG);
+        $child_alive = 0;
+	&SafeReaper(); # see func for explaination
+	exit 0;
+    } elsif ($sig eq 'USR1') {
+	print "$self :: - Received signal USR1\n"   if ($DEBUG);
+	$child_alive = 0;
+	exit 1;
+    } else {
+	print "$self :: - Sighandler : Caught SIG: $sig, shutting down\n" if ($DEBUG);
+        exit 1;
+    }
+}
+
+
+# Handles CHLD signals.
+sub REAPER
+{
+    my $pid;
+
+    $pid = waitpid(-1,&WNOHANG);
+
+    if ($pid == -1){
+	# no child anymore ignore it
+    } elsif ( WIFEXITED($?) ){
+	print "$self :: + Reaper - process $pid exited\n"      if ($DEBUG);
+	$child_alive = 0;
+    } elsif ( $pid == 0 )  {
+	print "$self :: + Reaper - NULL pid from child handler\n" if ($DEBUG);
+    } else {
+	print "$self :: + Reaper - [$?] alarm on $pid\n"       if ($DEBUG);
+    }
+    # system may send up a wake up signal and we need to double
+    # trap if we reach this point
+    # JL 2009 change -> use SafeReaper now - see below why
+    $SIG{'CHLD'} = \&SafeReaper;
+}
+
+# This was introduced to cope for a bug in system issue i.e. a
+# random timing of the parent/child dying/exiting relationship.
+# Pitty this is yet another bug. Basically, you cannot count anymore
+# that a child is really dead ... and need to check constantly.
+#
+# What the signal handler does (although obvious)
+#  Wait for the child to go away (else we might get perl seg faulting
+#  on exit)
+sub SafeReaper
+{
+    while (waitpid(-1, WNOHANG) != -1) {};
+}

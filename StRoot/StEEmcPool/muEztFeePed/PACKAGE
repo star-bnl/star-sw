@@ -1,0 +1,5 @@
+# $Id $
+# package muEztFeePed
+# author: 
+Library:libStEEmcPoolmuEztFeePed.so:LIBS +=   -lStChain  -l_StMuDSTMaker
+#Library:libStEEmcPoolmuEztFeePed.so:LIBS +=   -lStChain  -lStMuDSTMaker

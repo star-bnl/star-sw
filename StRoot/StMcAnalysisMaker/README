@@ -1,0 +1,30 @@
+README File for example analysis using StMcEvent and StAssociationMaker
+Time-stamp:<99/07/13 16:52 calderon>
+
+Contact: Mike Lisa, Manuel Calderon de la Barca Sanchez
+
+Look for DOCUMENTATION under
+StRoot/StAssociationMaker/doc
+
+Modification History
+====================
+
+07/13/99 Original version. Authors: Mike Lisa, Manuel Calderon de la Barca Sanchez
+07/28/99 SL99f version.
+
+Description
+===========
+Uses StMcEvent and StAssociationMaker and
+does some simple analyses.  It has several
+examples and its use is meant to be as a "user
+guide" to illustrate the functionality of the
+packages.
+
+To be done
+==========
+Tested and ran through 56 events of a test file.
+
+
+Tests done
+----------
+Compiles on sun4x_56, hp_ux102 i386_redhat51.

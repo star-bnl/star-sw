@@ -1,0 +1,73 @@
+Package St_Db is providing access to params mysql database server.
+
+Exchange with Database in STAR is agreed to be by C-structures.
+In ROOT based framework this extended to be an exchange by arrays
+of C-structures, e.g., St_Tables.
+Access to database in STAR is agreed to be layered:
+
+   1. User layer (e.g., St_db_Maker package) formulates request, e.g.,
+      structure name.
+
+   2. St_Db package layer (manages database exchange protocol) uses
+      structure name to provide structure description for the protocol. 
+      This description is required by the protocol to provide backward
+      compatibility (ability to read new structures by the old code).
+      For user convenience this protocol is hidden from the top-level.
+
+   3. Low-level C-routine layer uses mysql C-API routines to store/fetch data.
+
+To fetch structure from the database:
+
+User layer (e.g., St_db_Maker package):
+   1. creates St_Db class instance, provides St_Table pointer to St_Db. 
+
+St_Db package layer:
+   2. Uses St_Table methods to extract structure description
+      (types, names and dimensions of structure variables,
+       sizeOfStructureExpectedByUser)
+      from the ROOT CINT dictionary.
+   3. Calls low-level C-routine DbUse
+
+DbUse: low-level C-routine level uses mysql C-API routines to fetch
+      information from the database
+   4. Queries database by St_Table name+structure name to find how many
+      structures there are in the database.
+   5. Allocates memory: numberOfStructuresFound*sizeOfStructureExpectedByUser.
+   6. Queries database by St_Table name+structure name to retrive all data
+      members
+   7. Checks that the expected number of variables is the same as fetched from
+      the database.
+   8. Fills the allocated memory by converting each data member value to the
+      type expected by user.
+   9. Returns pointer to the allocated memory and the number of structures
+      found.
+St_Db package layer:
+  10. Returns pointer to the allocated memory and the number of structures
+      found.
+User layer (e.g., St_db_Maker package):
+  11. Adopts number of structures found via the St_Table class Adopt method.
+
+
+To store structure in the database:
+
+User layer (e.g., St_db_Maker package):
+   1. creates St_Table filled with data, e.g., by loadin .C macro.
+   1. creates St_Db class instance, provides St_Table pointer to St_Db. 
+
+St_Db package layer:
+   2. Uses St_Table methods to extract structure description
+      from the ROOT CINT dictionary (types, names, dimensions and values
+      of structure variables)
+   3. Calls low-level C-routine DbFill for each structure, providing
+      St_Table row index if there is is an array of structures.
+
+DbFill: low-level C-routine level uses mysql C-API routines to fetch
+      information from the database
+   4. Queries database by St_Table name+structure name to find the next version
+      number to assign in case there is such structure in the database.
+
+   6. Stores structure data in the database plus the time of entry. 
+
+
+
+

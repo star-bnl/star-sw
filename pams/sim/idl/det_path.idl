@@ -1,0 +1,5 @@
+struct det_path  {             /* path to the detector element  */
+  char      VName[16];         /* Volume of branching           */
+  long      Ncopy;             /* number of branchings          */
+  long      Nb;                /* number of bit needed          */     
+};

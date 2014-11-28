@@ -1,0 +1,201 @@
+Staging of results:
+/star/data04/sim/balewski/LcpRun2/
+
+maxEta1.0/tree - TTRee for maxEta=1.0
+         /default-H  - histos for default sorting of LCP
+         /nPrim5_20-H  - histos for LCP cut nPrim in [5,20]
+         /zVert50-H    - histos for LCP cut |zVert|<50 cm
+         /pT1_3-H      - histos for LCP cut pT in [1,3] GeV/c
+
+maxEta1.4/tree - TTRee for maxEta=1.4
+         /default-H - all histos for default sorting of LCP
+                                           
+
+
+Processing:
+
+Task1.tcl
+=========
+Action: select polarized RHIC fills &\n localize muDst using the file Catalog
+OUTPUT: outVer1/master.lis <-- FILL:{run-list}
+        outVer1/run/R*.lis <-- muDst for every run
+NEEDS: fill2run.tcl, getFill.tcl
+
+
+Task2.tcl
+=========
+Action: loop over FILL/RUN, accumulate LCP-tree & some bXing histo,
+     optional  correction for bXing 
+INPUT:  FILL/Run selection, list fo muDst for every run
+OUTPUT: R*.tree.root, /star/data04/sim/balewski/LcpRun2/setEta10
+NEEDS: masterFill.tcl, 'rdMuDst2LcpTree.C(muDstList, wrkDir,bXoff=0,nEve=0)',
+       getBXoff.tcl,
+       StRoot/StEEmcPool
+
+Task3.tcl
+=========
+Action: loop over TTree's and project LCP to histos (phi vs. bXing), save histo
+
+INPUT: /star/data04/sim/balewski/LcpRun2/setEta10/tree  directory with TTree's
+OUTPUT: R*.hist.root , ...wrk.../XXX-H
+        #of lcp in the pro*.log file
+        QA plots *pre.ps with bXing vs. phi 
+NEEDS: 'proLcpTree.C
+(it was former rdLcpTree.C) 
+
+
+Info4.tcl 
+=========
+JOB: loop FILL/run and append '-L' to those for which scaler info exits
+INPUT:  FILL/Run selection
+OUTPUT: modified run sel
+NEEDS: masterFill.tcl 
+
+
+
+Task5.tcl 
+=========
+JOB: loop FILL, sum bXings, add runs in fill , normaize with Lum or AutoLum
+INPUT:  FILL/Run selection, directory with R*.hist.root  
+OUTPUT:   F*.hist.root 
+NEEDS: addRuns.C,  masterFill.tcl 
+
+addRuns.C : sums bXings & do L-normalization --> phi vs ++,+-,-+,--:
+
+steps:
+- input runL, fill
+- open scalL hist
+
+- loop over runL or skip if NULL
+  - base on run# decide pol & bXing pattern
+  - find scal Hist
+    -loop over bXing
+       sum  ++,+-,-+,or -- --> Lum0-3 (or set them to -1)
+    - calculate relLum0-3
+  - open inpLCP-hist.root
+  - open outFill.hist
+  - loop over hist in run
+    - if first -> create out hist
+    - loop over bXing
+       - add yiled to ++,+-,-+,or -- with W=1/relLum0-3
+  - if relLum0-3 not exist use cut=Pt1 to renoramlize all histos
+
+  - save Fill-histo
+  
+
+Task5B.tcl - the same .tcl 
+=========
+JOB: loop FILL, form ratio, fit raw asy
+INPUT:  FILL, directory with F*.hist.root 
+OUTPUT:   rF*.hist.root + logfile with coef 
+NEEDS: doRato.C, masterFill.tcl 
+
+doRatio.C:
+ loop over LCP cuts:
+{ All, Pt1,2,3,4,5,6,L,M,H,  Qpos,neg, EtaF,B,C,S }
+ - create & calculate 3 ratios r1,r2,r3
+ - fit a0+a1*cos(phi)+a2*cos(2phi)
+ - save histo +log file
+
+
+
+evalFills.C - just one job
+==========
+JOB: loop fillL, calc FOM for P & PQ observables using nLCP
+INPUT:  fillL, directory with rF*.hist.root 
+OUTPUT:   eval.hist.root
+NEEDS: getPol.C,
+
+evalFills.C:
+  -input: fillL, cutL, polVsFill.dat
+ 
+  - cretate 1D Histo: N(P), N*P^2(P), ..Q, ..PQ x2 (Lum & noLum)
+     
+  - loop over fillL
+    - get nEve from cut=All
+    - fill histo
+   - save trees & fit
+
+
+addFills.C - just one job
+==========
+JOB: loop fillL, average fit amplitudes using pol or not
+INPUT:  fillL, directory with rF*.hist.root 
+OUTPUT:   asy.hist.root + logfile with coef 
+NEEDS: getPol.C,
+
+addFills.C:
+  -input: fillL, cutL, polVsFill.dat
+   params: limits on P|Q and  P*Q
+  - cretate Tgraph's for cutL x (a1/P, -b2/Q, c0/PQ, c2/PQ  +
+				 a0, a2, b0, b2, c0, c2 }
+            histos  for cutL x  3 chi2 
+  - loop over fillL
+     - chi2 to 3 histos 
+     - logic of Lum & Pol (add points vs. fill to TGraph's):
+       action depends on:  L=? Lum exist;  P,Q=? pol reasonable
+
+       * L=good --> phys: a1, b1, c0, c2
+                   instr: a0, a2, b0, b2, c1
+       * L=bad  --> phys: drop c0
+
+       * P  ok -> phys:  a1/P
+       * Q  ok -> phys: -b1/Q
+       * PQ ok -> phys: c0/PQ, c2/PQ
+   - fit pol0 to TTree's
+   - save trees & fit
+
+
+Task6.tcl 
+=========
+JOB: convert log from addFill.C in to a web page
+INPUT:  log
+OUTPUT:   stdout
+NEEDS: nothing
+
+
+
+endPlot.C
+=========
+JOB: plots finaly asy vs pT, eta & charge
+INPUT:   asy.hist.root
+OUTPUT:   .ps .gif  endVer1.hist.root
+NEEDS: nothing
+
+Action:
+   for { a1:P, -b1:Q, c0:PQ, c2:PQ} 
+	
+     - extract average for each LCP cut 
+       to 4 TGraphs  Pt16,  PtLMH, EtaBF , Qpn
+           swap x--> -x  for -b1:Eta
+     * exceptions:
+        - add a1:P & -b1:Q --> 'A_n' *Pt16,*ptLMH, *Eta *Qpn  
+
+        - copy c0:PQ --> As, use only |eta| for Eta
+        - copy c2:PQ --> Ad, -//-
+     - fit the average
+     - plot on 4 panels : Pt16, PtLMH, EtaBF, Qpn
+
+
+   A_s - the same except combining data
+   A_d - the same
+
+
+
+viewSelection.C
+=========
+JOB: compare final values vs. event selectionplots finaly asy vs pT,
+      eta & charge
+INPUT:   endVer1.hist.root
+OUTPUT:   .ps .gif  
+NEEDS: nothing
+
+Action:
+open .hits.root for every LCP selection, get mean A_s, A_n, A_d and plot it
+abgainst selection #.
+
+
+======== AUXIALIARY LINES ============
+To strip Task1-log --> FILL {RUN} list
+
+cat prodP02ge.lis7 | grep FILL | grep tot | sed -e 's/FILL=//g' | sed -e 's/://g' | sed -e 's/total//g' | sed -e 's/runs//g' | sed -e "s/='//g" | sed -e "s/'//g" | nl

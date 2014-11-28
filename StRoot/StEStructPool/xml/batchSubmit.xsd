@@ -1,0 +1,1270 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:annotation>
+    <xs:documentation>
+You should replace this text with the reason you are running this job.
+This is only for your later information when you wonder what the
+hell is in this directory.
+    </xs:documentation>
+</xs:annotation>
+
+<xs:element name='jobDescription'>
+    <xs:complexType>
+        <xs:all minOccurs='1' maxOccurs='1'>
+            <xs:element name='jobType'>
+                <xs:complexType>
+                    <xs:choice>
+                        <xs:element name='Data'>
+                            <xs:complexType>
+                                <xs:attribute URL='dataDefault.xml'/>
+                                <xs:attribute Comment='Analyze production data'/>
+                            </xs:complexType>
+                        </xs:element>
+                        <xs:element name='GEANT'>
+                            <xs:complexType>
+                                <xs:attribute URL='geantDefault.xml'/>
+                                <xs:attribute Comment='Analyze data from Monte Carlo -> GEANT -> production files'/>
+                            </xs:complexType>
+                        </xs:element>
+                        <xs:element name='Hijing'>
+                            <xs:complexType>
+                                <xs:all>
+                                    <xs:element ref='hijingParams'/>
+                                </xs:all>
+                                <xs:attribute URL='hijingDefault.xml'/>
+                                <xs:attribute Comment='Generate and analyze Hijing directly'/>
+                            </xs:complexType>
+                        </xs:element>
+                        <xs:element name='Pythia'>
+                            <xs:complexType>
+                                <xs:all>
+                                    <xs:element ref='pythiaInit'/>
+                                </xs:all>
+                                <xs:attribute URL='pythiaDefault.xml'/>
+                                <xs:attribute Comment='Generate and analyze Pythia directly'/>
+                            </xs:complexType>
+                        </xs:element>
+                        <xs:element name='Therminator'>
+                            <xs:complexType>
+                                <xs:all>
+                                    <xs:element ref='therminatorParams'/>
+                                </xs:all>
+                                <xs:attribute URL='therminatorDefault.xml'/>
+                                <xs:attribute Comment='Generate and analyze Therminator directly'/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:choice>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='standardElements'>
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element ref='jobControl'/>
+                        <xs:element ref='starSubmit'/>
+                        <xs:element ref='eventCuts'/>
+                        <xs:element ref='trackCuts'/>
+                        <xs:element ref='pairCuts' minOccurs='0'/>
+                        <xs:element ref='doEStructMacro'/>
+                    </xs:all>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+</xs:element>
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- This is for items that span files used in batch jobs -->
+<!-- and a few things didn't fit other places.  -->
+<xs:element name='jobControl'>
+    <xs:complexType>
+        <xs:all>
+            <xs:element name='jobName'>
+                <xs:complexType>
+                    <xs:attribute name='id' type='xs:string'/>
+                    <xs:attribute name='widget' type='widgetTypes'/>
+                    <xs:attribute Comment='For interaction with batch system'/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='outputDir'>
+                <xs:complexType>
+                    <xs:attribute name='id' type='xs:string'/>
+                    <xs:attribute name='widget' type='widgetTypes'/>
+                    <xs:attribute Comment='Directory you want all ouput to end up in.'/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='starLibVersion'>
+                <xs:complexType>
+                    <xs:attribute name='id' type='xs:string'/>
+                    <xs:attribute name='widget' type='widgetTypes'/>
+                    <xs:attribute Comment='Version of STAR library to use when running job.'/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='localDir'>
+                <xs:complexType>
+                    <xs:attribute name='id' type='xs:string'/>
+                    <xs:attribute name='widget' type='widgetTypes'/>
+                    <xs:attribute Comment='Local directory where you have done "co StRoot/..." and compiled.'/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='eventsPerJob'>
+                <xs:restriction base='xs:integer'/>
+                <xs:complexType>
+                    <xs:attribute name='id' type='xs:string'/>
+                    <xs:attribute name='widget' type='widgetTypes'/>
+                    <xs:attribute Comment='Passed as argument to doEStruct.C as number of events to analyze'/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='jobPurpose'>
+                <xs:complexType>
+                    <xs:attribute name='widget' type='widgetTypes'/>
+                    <xs:attribute Comment='For you to remember why you ran this job'/>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+</xs:element>
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- Here we define a schema for the file that is passed to star-submit. -->
+<xs:element name='starSubmit'>
+    <xs:complexType>
+        <xs:attribute name='simulateSubmission' type='xs:boolean' default='false'
+                Comment='If true create files but do not submit jobs'/>
+        <xs:attribute name='name' type='xs:string'
+                Comment='job name for underlying batch system'/>
+        <xs:attribute name='mail' type='xs:boolean' default='false'
+                Comment='If true then output can be returned by mail'/>
+        <xs:attribute name='nProcesses' type='xs:integer'
+                Comment='Number of processes to dispatch (only if no input present)'/>
+        <xs:attribute name='maxFilesPerProcess' type='xs:integer'
+                Comment='Maximum number of data files per job.'/>
+        <xs:attribute name='minFilesPerProcess' type='xs:integer'
+                Comment='Minimum number of data files per job.'/>
+        <xs:attribute name='filesPerHour' type='xs:integer'
+                Comment='Used to determine batch queue'/>
+        <xs:attribute name='fileListSyntax' default='paths' type='pathType'
+                Comment='paths, rootd or xrootd'/>
+        <xs:attribute name='minStorageSpace' type='xs:integer'
+                Comment='Used when deciding if node has sufficient resources to run job'/>
+        <xs:attribute name='maxStorageSpace' type='xs:integer'
+                Comment='Used when deciding if node has sufficient resources to run job'/>
+        <xs:attribute name='minMemory' type='xs:integer'
+                Comment='Used when deciding if node has sufficient resources to run job'/>
+        <xs:attribute name='maxMemory' type='xs:integer'
+                Comment='Used when deciding if node has sufficient resources to run job'/>
+        <xs:attribute name='inputOrder' type='xs:integer'
+                Comment='? Only if all input is from the file catalog'/>
+        <xs:attribute name='minWallTime' type='xs:integer'
+                Comment='unused at present'/>
+        <xs:attribute name='maxWallTime' type='xs:integer'
+                Comment='Job is cancelled after this amount of time'/>
+        <xs:all>
+            <xs:element name='command' type='xs:string'>
+                <xs:complexType mixed='true'>
+                    <xs:sequence>
+                        <xs:element name='refer'   minOccurs='0' maxOccurs='unbounded'>
+                            <xs:complexType>
+                                <xs:attribute name='refersTo' type='xs:string'/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='stdout' minOccurs='0' maxOccurs='1'>
+                <xs:complexType>
+                    <xs:attribute name='URL' type='xs:string'
+                            Comment='output location for normal output. stdout and stderr cannot be the same (if both are specified)'/>
+                    <xs:attribute name='discard' type='xs:boolean'
+                            Comment='if true output is discarded'/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='stdin' minOccurs='0' maxOccurs='1'>
+                <xs:complexType>
+                    <xs:attribute name='URL' type='xs:string'
+                            Comment='input specification.'/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='stderr' minOccurs='0' maxOccurs='1'>
+                <xs:complexType>
+                    <xs:attribute name='URL' type='xs:string'
+                            Comment='output location for errors. stdout and stderr cannot be the same (if both are specified)'/>
+                    <xs:attribute name='discard' type='xs:boolean'
+                            Comment='if true errors are discarded'/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='input' minOccurs='0' maxOccurs='unbounded'>
+                <xs:complexType>
+                    <!-- nFiles, singleCopy and preferStorage only apply when input -->
+                    <!-- is from a catalog query. I don't know how to enforce this -->
+                    <!-- through shemas yet. -->
+                    <xs:attribute name='URL' type='xs:string'
+                            Comment='Data source. Often a file catalog query.'/>
+                    <!-- Note that nFiles should be an integer OR the string 'all' -->
+                    <!-- Not sure how to do this right off, so make it a string. -->
+                    <xs:attribute name='nFiles' type='xs:string' default='100'
+                            Comment='An integer or all. Number of files to be returned by catalog query'/>
+                    <xs:attribute name='singleCopy' type='xs:boolean' default='true'
+                            Comment='If false the catalog query may return more than one copy of a data file'/>
+                    <xs:attribute name='preferStorage' type='xs:string'
+                            Comment='NFS or local. local should be faster but job may have to wait for specific machine.'/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name='output' minOccurs='0' maxOccurs='unbounded'>
+                <xs:complexType>
+                    <xs:attribute name='fromScratch' type='xs:string'
+                            Comment='File specifying the (temporary) job output storage.'/>
+                    <xs:attribute name='toURL' type='xs:string'
+                            Comment='Final output location. (outputDir automatically inserted)'/>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+</xs:element>
+
+<xs:simpleType name='pathType'>
+    <xs:restriction base='xs:string'>
+        <xs:enumeration value='paths'/>
+        <xs:enumeration value='rootd'/>
+        <xs:enumeration value='xrootd'/>
+    </xs:restriction>
+</xs:simpleType>
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- Here we define a schema for event cuts. -->
+<!-- Allow one trigger selection and any number of event cuts. -->
+<!-- Note that trigger selection and trigger cut are redundant, -->
+<!-- but they are allowed by the code that read the cuts file and I'm -->
+<!-- currently too lazy to figure out how to enforce a choice of only one. -->
+<xs:element name='eventCuts'>
+    <xs:complexType>
+        <xs:all>
+            <xs:element ref='triggerTag' minOccurs='0' maxOccurs='1'/>
+            <xs:element ref='eventCut' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:all>
+    </xs:complexType>
+</xs:element>
+
+<!-- triggerTag is an ascii string specifying a data set. -->
+<xs:element name='triggerTag'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='CuCu22GeVProductionMinBiasP05if'  Comment='tag for 2005, 22GeV CuCu minimum bias trigger'/>
+            <xs:enumeration value='CuCu62GeVProductionMinBias2005'  Comment='tag for 2005, 62GeV CuCu minimum bias trigger'/>
+            <xs:enumeration value='CuCu62GeVProductionMinBias2007ic' Comment='tag for 2005, 62GeV CuCu minimum bias trigger (2007ic production)'/>
+            <xs:enumeration value='CuCu200GeVProductionMinBias2005' Comment='tag for 2005, 200GeV CuCu minimum bias trigger'/>
+            <xs:enumeration value='CuCu200GeVProductionMinBias2007ic' Comment='tag for 2005, 200GeV CuCu minimum bias trigger (2007ic production)'/>
+            <xs:enumeration value='2007ProductionMinBias' Comment='tag for 2007, 200GeV AuAu minimum bias produced for PMD'/>
+            <xs:enumeration value='2007LowLuminosity' Comment='tag for 2007, 200GeV AuAu minimum bias Low Luminosity trigger set'/>
+            <xs:enumeration value='AuAu200GeVMinBias2011' Comment='tag for 2011, 200GeV AuAu minimum bias trigger . Should have pileup suppression'/>
+            <xs:enumeration value='AuAu200GeVMinBias2010' Comment='tag for 2010, 200GeV AuAu minimum bias trigger which I am supposed to QA'/>
+            <xs:enumeration value='AuAu200GeVProductionMinBias2004'  Comment='tag for 2004, 200GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu200GeVProductionMinBiasA2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger for early in run'/>
+            <xs:enumeration value='AuAu200GeVProductionMinBiasB2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger for late in run'/>
+            <xs:enumeration value='AuAu200GeVProductionLow2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger low luminosity sample'/>
+            <xs:enumeration value='AuAu200GeVProductionMid2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger mid luminosity sample'/>
+            <xs:enumeration value='AuAu200GeVProductionHigh2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger high luminosity sample'/>
+            <xs:enumeration value='AuAu200GeVMinBias2001' Comment='tag for 2001, 200GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu200GeVCentral2001' Comment='tag for 2001, 200GeV AuAu central trigger'/>
+            <xs:enumeration value='AuAu62GeVMinBias2010'  Comment='tag for 2010, 62GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu62GeVMinBias2004'  Comment='tag for 2004, 62GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu39GeVMinBias2010'  Comment='tag for 2010, 39GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu27GeVMinBias2011'  Comment='tag for 2011, 27GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu19GeVMinBias2011'  Comment='tag for 2011, 19.6GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu11GeVMinBias2010'  Comment='tag for 2010, 11GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu7GeVMinBias2010'   Comment='tag for 2010,  7.7GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='dAu200GeVMinBias2003' Comment='tag for 2003, 200GeV dAu minimum bias trigger'/>
+            <xs:enumeration value='ppMinBias' Comment='tag for 2001, 200GeV pp minimum bias trigger'/>
+            <xs:enumeration value='ppProductionMinBias2005' Comment='tag for 2005, 200GeV pp minimum bias trigger'/>
+            <xs:enumeration value='pp400MinBias2005' Comment='tag for 2005, 400GeV pp minimum bias trigger'/>
+            <xs:enumeration value='pp2006MinBias2006' Comment='tag for 2006, 200GeV pp minimum bias trigger'/>
+            <xs:enumeration value='pp2pp_VPDMB_2009' Comment='tag for 2009, 200GeV minimum bias trigger during pp2pp running'/>
+            <xs:enumeration value='ppProductionMB622006' Comment='tag for 2006, 62GeV pp minimum bias trigger'/>
+            <xs:enumeration value='production2009_200GeV_Single' Comment='tag for 2009, 200GeV pp VPD trigger'/>
+        </xs:restriction>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+
+<!-- An event cut has a name and two decimal values. -->
+<xs:element name='eventCut'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element name='cutName' type='eventCutNames'/>
+            <xs:element ref='Value'/>
+            <xs:element ref='Value'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+
+<!-- The event cut name is restricted to valid cut names. -->
+<xs:simpleType name='eventCutNames'>
+    <xs:restriction base='xs:string'>
+        <xs:enumeration value='triggerWord'>
+            <xs:Comment>min, max trigger words</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='primaryVertexZ'>
+            <xs:Comment>min, max Z vertex position</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='primaryVPDVertex'>
+            <xs:Comment>min, max distance between primary and VPD vertex positions</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='primaryVertexRadius'>
+            <xs:Comment>min, max radius for primary vertex position</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='centrality'>
+            <xs:Comment>min, max reference multiplicity</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='pileup'>
+            <xs:Comment>Exclude events with predicted pileup vertex between min and max distances.</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='singleSideVertex'>
+            <xs:Comment>Exclude events with vertex on only one side of TPC. Match pileup finder within min and max distances.</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='goodToFFraction'>
+            <xs:Comment>Mean s=nToF/ndEdx ratio, limit on |nToF-s*ndEdx|</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='goodPrimaryFraction'>
+            <xs:Comment>Require nGlobal/a - nPrimary less than b,  a and b are min and max cut values</xs:Comment>
+        </xs:enumeration>
+    </xs:restriction>
+</xs:simpleType>
+
+<!-- Each value is an un-restricted decimal number but we associate -->
+<!-- a widget. This is a suggestions to a gui about how to present an -->
+<!-- edit field for this value. -->
+<xs:element name='Value'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+    </xs:complexType>
+</xs:element>
+<xs:simpleType name='widgetTypes'>
+    <xs:restriction base='xs:string'>
+        <xs:enumeration value='none'/>
+        <xs:enumeration value='entry'/>
+        <xs:enumeration value='text'/>
+        <xs:enumeration value='combobox'/>
+    </xs:restriction>
+</xs:simpleType>
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- Track cuts are almost the same as the event cuts. -->
+<xs:element name='trackCuts'>
+    <xs:complexType>
+        <xs:all>
+            <xs:element ref='hijingFragment' minOccurs='0' maxOccurs='unbounded'/>
+            <xs:element ref='trackCut' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:all>
+    </xs:complexType>
+</xs:element>
+<!-- hijingFragment is an ascii string specifying source of fragmentation. -->
+<xs:element name='hijingFragment'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='projectileString'  Comment='Require track came from fragmentation of a projectile string'/>
+            <xs:enumeration value='targetString'  Comment='Require track came from fragmentation of a target string'/>
+            <xs:enumeration value='softSea' Comment='Require track came from fragmentation of a soft sea quark'/>
+            <xs:enumeration value='hardScatter' Comment='Require track came from fragmentation of a hard scattered parton'/>
+        </xs:restriction>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+
+<!-- A track cut has a name and two decimal values. -->
+<xs:element name='trackCut'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element name='cutName' type='trackCutNames'/>
+            <xs:element ref='Value' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+
+<!-- Track cut name is restricted to valid cut names. -->
+<xs:simpleType name='trackCutNames'>
+    <xs:restriction base='xs:string'>
+        <xs:enumeration value='Flag'>
+            <xs:Comment>min, max values for Flag</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Charge'>
+            <xs:Comment>min, max values for Charge</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='NFitPoints'>
+            <xs:Comment>min, max values for number of fit points on track</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='NFitPerNMax'>
+            <xs:Comment>min, max values for ratio of fits points to maximum possible points on track</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='GlobalDCA'>
+            <xs:Comment>min, max values for distance of closest approach of global track</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Chi2'>
+            <xs:Comment>min, max values for chi^2 fit of track</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='dPtByPt'>
+            <xs:Comment>min, max values for sigma of determination of sign of charge</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Yt'>
+            <xs:Comment>min, max values for transverse rapidity</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Pt'>
+            <xs:Comment>min, max values for transverse momentum</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Phi'>
+            <xs:Comment>min, max values for phi</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Eta'>
+            <xs:Comment>min, max values for eta</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='NTOFEMass'>
+            <xs:Comment>min, max values for distance of mas we reject as electrons (can be &lt;0)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='NSigmaElectron'>
+            <xs:Comment>min, max values for distance from dE/dx electon expectation</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='NSigmaPion'>
+            <xs:Comment>min, max values for distance from dE/dx pion expectation</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='NSigmaKaon'>
+            <xs:Comment>min, max values for distance from dE/dx Kaon expectation</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='NSigmaProton'>
+            <xs:Comment>min, max values for distance from dE/dx proton expectation</xs:Comment>
+        </xs:enumeration>
+    </xs:restriction>
+</xs:simpleType>
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- Track pair cuts are the same as the track cuts, in form. -->
+<xs:element name='pairCuts'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='pairCut' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<!-- A pair cut has a name and two decimal values. -->
+<xs:element name='pairCut'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element name='cutName' type='pairCutNames'/>
+            <xs:element ref='Value' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+
+<!-- Pair cut name is restricted to valid cut names. -->
+<xs:simpleType name='pairCutNames'>
+    <xs:restriction base='xs:string'>
+        <xs:enumeration value='DeltaPhi'>
+            <xs:Comment>min, max: Cut on phi separation</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='DeltaEta'>
+            <xs:Comment>min, max: Cut on Eta separation</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='GoodDeltaZDeltaXY'>
+            <xs:Comment>dZ, dXY: Pairs with larger separation on either variable never get cut</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='DeltaMt'>
+            <xs:Comment>min, max: Cut in transvers mass difference</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='qInv'>
+            <xs:Comment>min, max: Cut on difference in momentum</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='EntranceSep'>
+            <xs:Comment>min, max: Cut on separation distance at entrance to the TPC</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='ExitSep'>
+            <xs:Comment>min, max: Cut on separation distance at exit of the TPC</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Quality'>
+            <xs:Comment>min, max: HBT group split track cut</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='MidTpcSepLikeSign'>
+            <xs:Comment>min, max: Cut on separation distance at middle the TPC</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='MidTpcSepUnlikeSign'>
+            <xs:Comment>min, max: Cut on separation distance at middle of the TPC</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='HBT'>
+            <xs:Comment>min, max: Minimize HBT effect? (Michaels cut)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Coulomb'>
+            <xs:Comment>min, max: Minimize Coulomb effect? (Michaels cut)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Merging'>
+            <xs:Comment>max avg XY sep, max avg Z sep  (Michaels cut)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Merging2'>
+            <xs:Comment>mid TPC Z, XY separations (Usually 5cm)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Crossing'>
+            <xs:Comment>Look in StEStructPairCuts.h for details (Michaels cut)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Crossing2'>
+            <xs:Comment>Mid, Exit TPC Z separations for tracks that crossed in phi (usually 5cm)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='LUT'>
+            <xs:Comment>Use Look Up Table to see if pair may have interacted. dXY, dZ parameters (usually 5cm each)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='pionOtherMass'>
+            <xs:Comment>Assume both tracks pions. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='pionpionMass'>
+            <xs:Comment>Both tracks identified as pions. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='pionKaonMass'>
+            <xs:Comment>One track a pion, the other a Kaon. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='pionprotonMass'>
+            <xs:Comment>One track a pion, the other a proton. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='KaonOtherMass'>
+            <xs:Comment>One identified Kaon. Assume pion mass for other. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='KaonKaonMass'>
+            <xs:Comment>Both tracks identified as Kaons. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='KaonprotonMass'>
+            <xs:Comment>One track a Kaon, the other a proton. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='protonOtherMass'>
+            <xs:Comment>One identified proton. Assume pion mass for other. If m1 less than m2 then exclude range. If m2 less thanm1 keep range</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='protonprotonMass'>
+            <xs:Comment>Both tracks identified as protons. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='OtherOtherMass'>
+            <xs:Comment>Neither track identified Assume masses are 0. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
+        </xs:enumeration>
+    </xs:restriction>
+</xs:simpleType>
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- doEStruct macro is mostly text.  -->
+<!-- We modify this text for different types of analysis. -->
+<!-- One way of doing this is using elements as variables. -->
+<xs:element name='doEStructMacro'>
+    <xs:complexType>
+        <xs:all>
+            <xs:element ref='analysisType'/>
+            <xs:element ref='libraries' minOccurs='0'/>
+            <xs:element ref='centralities'/>
+            <xs:element ref='keepZBuffers' minOccurs='0'/>
+            <xs:element ref='useImpactParameter' minOccurs='0'/>
+            <xs:element ref='useAllTracks' minOccurs='0'/>
+            <xs:element ref='ptCuts' minOccurs='0'/>
+            <xs:element ref='ptCentralities' minOccurs='0'/>
+            <xs:element ref='cutMode' minOccurs='0'/>
+            <xs:element ref='analysisMode' minOccurs='0'/>
+            <xs:element ref='useGlobalTracks' minOccurs='0'/>
+            <xs:element ref='sortEvents' minOccurs='0'/>
+            <xs:element ref='declareAnalysis'/>
+            <xs:element ref='declareReader'/>
+            <xs:element ref='allocateAnalysis'/>
+            <xs:element ref='weightsFile' minOccurs='0'/>
+            <xs:element ref='pairCutsWrite' minOccurs='0'/>
+            <xs:element ref='preLoop' minOccurs='0'/>
+            <xs:element ref='preEvent' minOccurs='0'/>
+            <xs:element ref='postEvent' minOccurs='0'/>
+            <xs:element ref='postLoop' minOccurs='0'/>
+            <xs:element ref='main'/>
+        </xs:all>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='analysisType'>
+    <xs:complexType>
+        <xs:restriction base='analysisTypeNames'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>fluctuation or correlation</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:simpleType name='analysisTypeNames'>
+    <xs:restriction base='xs:string'>
+        <xs:enumeration value='StEStructEmpty' Comment='Template for setting up event loop in EStruct context.'/>
+        <xs:enumeration value='StEStructFluctuation' Comment='Fill histograms for fluctuation analysis.'/>
+        <xs:enumeration value='StEStructCorrelation' Comment='Fill histograms for correlation analysis.'/>
+    </xs:restriction>
+</xs:simpleType>
+<xs:element name='libraries'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>Libraries beyond standard required libraries</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='centralities'>
+    <xs:complexType>
+        <xs:restriction base='decimalList'>
+            <xs:minLength value='2'/>
+        </xs:restriction>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>Centrality cuts. (normally cut on number of track)</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='keepZBuffers'>
+    <xs:complexType>
+        <xs:restriction base='integerList'>
+            <xs:minLength value='0'/>
+        </xs:restriction>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='typedef2' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>Keep histograms for individual z-buffers (ignored if not the same length as the number of centrality bins.)</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='useImpactParameter'>
+    <xs:complexType>
+        <xs:restriction base='xs:boolean'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>true to use impact parameter for centrality determination</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='useAllTracks'>
+    <xs:complexType>
+        <xs:restriction base='xs:boolean'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>true to use all Pythia tracks for centrality determination</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='ptCuts'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimalList'>
+            <xs:minLength value='2'/>
+        </xs:restriction>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='typedef2' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>pt slices</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='ptCentralities'>
+    <xs:complexType>
+        <xs:restriction base='decimalList'>
+            <xs:minLength value='2'/>
+        </xs:restriction>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='typedef2' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>Centrality cuts for each pt slice</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='cutMode'>
+    <xs:complexType>
+        <xs:restriction base='cutModeDef'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string'>Used by 2pt correlation code to define its cut space</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:simpleType name='cutModeDef'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='0' Comment='Alternate mode. (should put purpose of mode here)'/>
+            <xs:enumeration value='1' Comment='Alternate mode (should put purpose of mode here)'/>
+            <xs:enumeration value='2' Comment='Alternate mode (should put purpose of mode here)'/>
+            <xs:enumeration value='3' Comment='Cuts in Yt-Yt and eta_Delta phi_Delta space. Default mode'/>
+            <xs:enumeration value='4' Comment='Alternate mode (should put purpose of mode here)'/>
+            <xs:enumeration value='5' Comment='Cuts in dEdx and phi_Delta spaces.'/>
+            <xs:enumeration value='8' Comment='Yt-Yt cuts. Examining soft-hard LS pair cuts.'/>
+            <xs:enumeration value='9' Comment='Pt-Pt cuts. Mostly for CMS proton ridge.'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+<xs:element name='analysisMode'>
+    <xs:complexType>
+        <xs:restriction base='xs:integer'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>Used by 2pt correlation code as flag for switching options. Look in init method of StEStruct2ptCorrelations for bit meanings.</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='useGlobalTracks'>
+    <xs:complexType>
+        <xs:restriction base='xs:boolean'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>Used to switch MuDstReader from primary to global tracks</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='sortEvents'>
+    <xs:complexType>
+        <xs:restriction base='xs:boolean'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>Sort events by multiplicity/z vertex position. Affects miced events</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='declareAnalysis'>
+    <xs:complexType>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>Declare analysis object</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='declareReader'>
+    <xs:complexType mixed='true'>
+        <xs:attribute name='id' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>Reader depends on type of analysis</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='allocateAnalysis'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>Declare FluctAnal or 2ptCorrelation</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='weightsFile'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>If a file is given we do a reaction plane analysis</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='pairCutsWrite'>
+    <xs:complexType>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>Write pair cut information.</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='preLoop'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>Code just before event loop</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='preEvent'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>Code inside event loop, just before Make</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='postEvent'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>Code inside event loop, just after Make</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='postLoop'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>Code just after event loop</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='main'>
+    <xs:complexType mixed='true'>
+        <xs:sequence>
+            <xs:element name='variable' maxOccurs='unbounded'>
+                <xs:complexType>
+                    <xs:attribute name='refersTo' type='xs:string'/>
+                    <xs:attribute name='stringInLine' type='xs:string'/>
+                    <xs:attribute name='procInLine' type='xs:string'/>
+                    <xs:attribute name='inLine' type='xs:string'/>
+                    <xs:attribute name='listOf' type='xs:string'/>
+                    <xs:attribute name='sumOf' type='xs:string'/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>This is the macro for all EStruct analysis. Display is after substitutions.</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:simpleType name='integerList'>
+    <xs:list itemType='xs:integer'/>
+</xs:simpleType>
+<xs:simpleType name='decimalList'>
+    <xs:list itemType='xs:decimal'/>
+</xs:simpleType>
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- All Hijing parameters need to exist in the file and in the proper order. -->
+<!-- There must be a better way than defining a different element for -->
+<!-- all the parameters, but I haven't found it and want to get on with -->
+<!-- the rest of the project. -->
+<xs:element name='hijingParams'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='hEnergy'/>
+            <xs:element ref='hProjectile'/>
+            <xs:element ref='hTarget'/>
+            <xs:element ref='hImpact'/>
+            <xs:element ref='hQuench'/>
+            <xs:element ref='hHardScattering'/>
+            <xs:element ref='hMaxJets'/>
+            <xs:element ref='hIHPR2_11_12'/>
+            <xs:element ref='hIHPR2_21_18'/>
+            <xs:element ref='hBProduction'/>
+            <xs:element ref='hIStat'/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:element>
+
+<!-- Hijing parameters has at least one value and it may be char, int or float. -->
+<xs:element name='hEnergy'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='charValue'/>
+            <xs:element ref='floatValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hProjectile'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='charValue'/>
+            <xs:element ref='intValue'/>
+            <xs:element ref='intValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hTarget'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='charValue'/>
+            <xs:element ref='intValue'/>
+            <xs:element ref='intValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hImpact'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='floatValue'/>
+            <xs:element ref='floatValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hQuench'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='intValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hHardScattering'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='intValue'/>
+            <xs:element ref='floatValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hMaxJets'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='intValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hIHPR2_11_12'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='intValue'/>
+            <xs:element ref='intValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hIHPR2_21_18'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='intValue'/>
+            <xs:element ref='intValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hBProduction'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='floatValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+<xs:element name='hIStat'>
+    <xs:complexType>
+        <xs:sequence>
+            <xs:element ref='intValue'/>
+        </xs:sequence>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
+    </xs:complexType>
+</xs:element>
+
+<xs:complexType name='charValue'>
+    <xs:restriction base='xs:string'/>
+    <xs:attribute name='widget' type='widgetTypes'/>
+</xs:complexType>
+<xs:complexType name='intValue'>
+    <xs:restriction base='xs:integer'/>
+    <xs:attribute name='widget' type='widgetTypes'/>
+</xs:complexType>
+<xs:complexType name='floatValue'>
+    <xs:restriction base='xs:decimal'/>
+    <xs:attribute name='widget' type='widgetTypes'/>
+</xs:complexType>
+
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- Here we define a schema for initialization of Pythia. -->
+<xs:element name='pythiaInit'>
+    <xs:complexType>
+        <xs:all>
+            <xs:element ref='pyFrame'/>
+            <xs:element ref='pyBeam'/>
+            <xs:element ref='pyTarget'/>
+            <xs:element ref='pyEnergy'/>
+            <xs:element ref='pyTune'/>
+        </xs:all>
+    </xs:complexType>
+</xs:element>
+
+<!-- We only allow Frame to be CMS or FIXT. -->
+<!-- To include 3MOM, 4MOM and 5MOM we need to add an interface to P (which -->
+<!-- I think is a variable in a common block.) If this is useful we can do -->
+<!-- it, but I will wait till it is requested by someone who will test it. -->
+<xs:element name='pyFrame'>
+    <xs:complexType>
+        <xs:restriction base='pyKinematicFrame'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Kinematic reference frame of interaction</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:simpleType name='pyKinematicFrame'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='CMS'  Comment='Collision takes place in center of mass system'/>
+            <xs:enumeration value='FIXT' Comment='Collision happens in lab frame, target at rest'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+
+
+<!-- pyBeam and pyTarget are restricted to the types of particles -->
+<!-- Pythia knows about.. -->
+<xs:element name='pyBeam'>
+    <xs:restriction base='particleType'/>
+    <xs:attribute name='id' type='xs:string' use='required'/>
+    <xs:attribute name='typedef' type='xs:string' default=''/>
+    <xs:attribute name='widget' type='widgetTypes'/>
+    <xs:attribute name='Comment' type='xs:string' use='required'>Particle type of beam</xs:attribute>
+</xs:element>
+<xs:element name='pyTarget'>
+    <xs:restriction base='particleType'/>
+    <xs:attribute name='id' type='xs:string' use='required'/>
+    <xs:attribute name='typedef' type='xs:string' default=''/>
+    <xs:attribute name='widget' type='widgetTypes'/>
+    <xs:attribute name='Comment' type='xs:string' use='required'>Particle type of target</xs:attribute>
+</xs:element>
+
+<!-- Energy is a float. -->
+<xs:element name='pyEnergy'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Center of mass or beam energy</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<!-- The event cut name is restricted to valid cut names. -->
+<!-- We omit a number of gamma from e, mu tau which look for -->
+<!-- kinematic limits in array CKIN. If these are of interest we -->
+<!-- can include an interface to this array. -->
+<!-- Also pomerons and reggeons are not included in this particle -->
+<!-- list since the documentation says the distribution functions -->
+<!-- for these are not included and they will not work. -->
+<xs:simpleType name='particleType'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='e-'        Comment='electron'/>
+            <xs:enumeration value='e+'        Comment='positron'/>
+            <xs:enumeration value='nu_e'      Comment='electron neutrino'/>
+            <xs:enumeration value='nu_ebar'   Comment='anti-electron neutrino'/>
+            <xs:enumeration value='mu-'       Comment='muon'/>
+            <xs:enumeration value='mu+'       Comment='positive muon'/>
+            <xs:enumeration value='nu_mu'     Comment='muon neutrino'/>
+            <xs:enumeration value='nu_mubar'  Comment='anti-muon neutrino'/>
+            <xs:enumeration value='tau-'      Comment='tau'/>
+            <xs:enumeration value='tau+'      Comment='positive tau'/>
+            <xs:enumeration value='nu_tau'    Comment='tau neutrino'/>
+            <xs:enumeration value='nu_taubar' Comment='anti-tau neutrino'/>
+            <xs:enumeration value='gamma'     Comment='gamma'/>
+            <xs:enumeration value='pi0'       Comment='neutral pion'/>
+            <xs:enumeration value='pi+'       Comment='positive pion'/>
+            <xs:enumeration value='pi-'       Comment='negative pion'/>
+            <xs:enumeration value='n0'        Comment='neutron'/>
+            <xs:enumeration value='nbar0'     Comment='anti neutron'/>
+            <xs:enumeration value='p'         Comment='proton'/>
+            <xs:enumeration value='pbar-'     Comment='anti-proton'/>
+            <xs:enumeration value='K+'        Comment='positive Kaon'/>
+            <xs:enumeration value='K-'        Comment='negative Kaon'/>
+            <xs:enumeration value='KS0'       Comment='neutral K short'/>
+            <xs:enumeration value='KL0'       Comment='neutral K long'/>
+            <xs:enumeration value='Lambda0'   Comment='Lambd'/>
+            <xs:enumeration value='Sigma-'    Comment='negative Sigma'/>
+            <xs:enumeration value='Sigma0'    Comment='neutral Sigma'/>
+            <xs:enumeration value='Sigma+'    Comment='positive Sigma'/>
+            <xs:enumeration value='Xi-'       Comment='negative cascade'/>
+            <xs:enumeration value='Xi0'       Comment='neutral cascade'/>
+            <xs:enumeration value='Omega-'    Comment='Omega baryon'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+
+<!-- We only allow tune to be 1, 2 or 3. -->
+<!-- Doing this as enumeration instead of restricted integer will cause -->
+<!-- a combobox to appear in the gui. -->
+<xs:element name='pyTune'>
+    <xs:complexType>
+        <xs:restriction base='pyTuneDef'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Way of selecting group of pythia parameters</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:simpleType name='pyTuneDef'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='0' Comment='Default tune. (should put purpose of tune here)'/>
+            <xs:enumeration value='1' Comment='Alternate tune 1 (should put purpose of tune here)'/>
+            <xs:enumeration value='2' Comment='Alternate tune 2 (should put purpose of tune here)'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+
+
+<!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+<!-- Here we define a schema for initialization of Therminator. -->
+<xs:element name='therminatorParams'>
+    <xs:complexType>
+        <xs:all>
+            <xs:element ref='thRandomize'/>
+            <xs:element ref='thTableType'/>
+            <xs:element ref='thOutputFile'/>
+            <xs:element ref='thModel'/>
+            <xs:element ref='thBWVt'/>
+            <xs:element ref='thTau'/>
+            <xs:element ref='thRhoMax'/>
+            <xs:element ref='thTemperature'/>
+            <xs:element ref='thMiuI'/>
+            <xs:element ref='thMiuS'/>
+            <xs:element ref='thMiuB'/>
+            <xs:element ref='thAlphaRange'/>
+            <xs:element ref='thRapidityRange'/>
+            <xs:element ref='thNumberOfIntegrateSamples'/>
+        </xs:all>
+    </xs:complexType>
+</xs:element>
+
+
+<xs:element name='thRandomize'>
+    <xs:complexType>
+        <xs:restriction base='xs:integer'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Start each event with a new random seed taken from current time</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thTableType'>
+    <xs:complexType>
+        <xs:restriction base='thTableTypeBase'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Type of input tables (only SHARE available)</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:simpleType name='thTableTypeBase'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='SHARE' Comment='Only table type available'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+
+<xs:element name='thOutputFile'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>File name (if we are saving events)</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thModel'>
+    <xs:complexType>
+        <xs:restriction base='thModelBase'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>The model of freeze-out to use</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:simpleType name='thModelBase'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='SingleFreezeOut' Comment='Freeze out at single time'/>
+            <xs:enumeration value='BlastWaveVT'     Comment='Blast wave parameterization'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+
+<xs:element name='thBWVt'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Radial flow velocity. Only used in BlastWave model</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thTau'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>proper time at freeze-out [fm]</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thRhoMax'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>maximum transverse radius [fm]</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thTemperature'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Temperature [GeV]</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thMiuI'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Chemical potential for Isospin [GeV]</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thMiuS'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Chemical potential for Strangeness [GeV]</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thMiuB'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Chemical potential for Baryon [GeV]</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thAlphaRange'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Range of integration for z-variable</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thRapidityRange'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Range of integration for z-variable</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:element name='thNumberOfIntegrateSamples'>
+    <xs:complexType>
+        <xs:restriction base='xs:integer'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Number of samples used in multiplicity and max. integrand determination</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+
+
+</xs:schema>

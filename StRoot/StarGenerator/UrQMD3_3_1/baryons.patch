@@ -1,0 +1,100 @@
+diff -wu ./anndec.f ../urqmd-3.3p1+gcc+bary//anndec.f
+--- ./anndec.f	2010-03-09 16:24:59.000000000 +0100
++++ ../urqmd-3.3p1+gcc+bary//anndec.f	2012-02-08 11:00:06.834835905 +0100
+@@ -79,11 +79,7 @@
+ C       if second particle is antibaryon and first particle is strange
+ C       switch antibaryon to baryon
+ C
+-      if(iabs(i2).le.maxbar)then
+-         if(i2.lt.0)then 
+-           if(strit(i1).ne.0)i1=-i1 ! get corresponding anti-branch
+-         end if
+-      end if 
++
+ C
+ C
+ C     Check if both particles are mesons 
+@@ -186,7 +182,7 @@
+ 
+ 
+ C####C##1#########2#########3#########4#########5#########6#########7##
+-       subroutine anndex(io,m1,i1,iz1,m2,i2,iz2,sqrts,sig,gam,
++       subroutine anndex(io,m1,i1,iiz1,m2,i2,iiz2,sqrts,sig,gam,
+      &            maxbr,mini,maxi,btype,branch)
+ c
+ cinput io     : 0: annihilation; 1: decay
+@@ -239,7 +235,7 @@
+       integer icnt,is
+ 
+ 
+-      integer io,i,j,i1,i2,iz1,iz2,itag,ii1,ii2
++      integer io,i,j,i1,i2,iz1,iz2,itag,ii1,ii2,iiz1,iiz2
+       integer itn1,itnz1
+       real*8 m1,m2,prob(0:100),sum,sig,gam,cgk2
+       real*8 sigi(minnuc:maxmes),mmax,mmin,br,mmi1,mmi2,ppcm,gt
+@@ -250,6 +246,10 @@
+       real*8 mminit,widit,fbrancx,ranf,fcgk,fwidth
+       real*8 fprwdt
+       integer jit,isoit,strit,chrmit
++
++      iz1=iiz1
++      iz2=iiz2
++
+       if(io.eq.1)then
+ C
+ C
+@@ -455,6 +455,13 @@
+ C
+             ii1=i1
+             ii2=i2
++
++         if(iabs(i2).le.99.and.i2.lt.0) then
++            iz2=-1*iz2
++            iz1=-1*iz1
++            if(strit(i1).ne.0) ii1=-1*i1
++         endif
++
+ c  for strange - nonstrange meson-meson scattering: strip sign
+          is=iabs(strit(i1)+strit(i2))
+          if(is.ne.0.and.iabs(i1).ge.minmes.and.iabs(i2).ge.minmes) then
+@@ -515,8 +522,9 @@
+ c...  find outgoing resonance      
+  108     call getbran(sigi,minnuc,maxmes,sig,mini,maxi,itn1)
+ 
++         itnz1=iiz1+iiz2
++
+          if(sig.ge.1d-10)then
+-            itnz1=iz1+iz2
+             gam=fwidth(itn1,itnz1,sqrts)
+          end if
+          
+diff -wu ./iso.f ../urqmd-3.3p1+gcc+bary//iso.f
+--- ./iso.f	2010-03-09 16:25:03.000000000 +0100
++++ ../urqmd-3.3p1+gcc+bary//iso.f	2012-02-08 11:00:06.844835692 +0100
+@@ -412,10 +412,8 @@
+       if(strit(i).eq.0)then
+ c... this is now for particle+antiparticle (except nonstrange mesons)
+          i12=i1*i2
+-         i12a=iabs(i12)
+-         nombbb=i12a.lt.maxbar**2.or.i12a.gt.minmes**2
+ c... the charge conjugated states have the same weight
+-         if(i12.lt.0.and.nombbb)then
++         if(i12.lt.0.and.min(iabs(i1),iabs(i2)).gt.maxbar)then
+ c... for example anti-K* + K 
+             if(i1.ne.-i2)c=c*5d-1
+          end if
+diff -wu ./make22.f ../urqmd-3.3p1+gcc+bary//make22.f
+--- ./make22.f	2010-03-09 16:25:03.000000000 +0100
++++ ../urqmd-3.3p1+gcc+bary//make22.f	2012-02-08 11:00:06.844835692 +0100
+@@ -2407,9 +2407,9 @@
+         call anndec(0,m1,i1,iz1,m2,i2,iz2,e,sigmb,gam)
+         if (sigmb.gt.1d-8) then
+ c meltpoint for resonant meson absorption moved to higher energies
+-          meltpoint=max(1.7d0, m1+m2+.2d0)
++          meltpoint=max(2.18d0, m1+m2+.2d0)
+         else
+-          meltpoint=1.7d0
++          meltpoint=2.18d0
+         endif
+         call aqm(pimeson,nucleon,dum,nnphi)
+         call aqm(i1,i2,dum,bbphi)

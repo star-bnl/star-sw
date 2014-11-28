@@ -1,0 +1,19 @@
+# L2adc2energy algo parameters
+# first int[], next float[], ignores lines starting w/ #, one param per line
+# it is modified jet-finder setup, will evlove w/ time
+INTS  # needs it as key-word 
+ 22  /* cutTag, whatever value, not used for anything  */
+ 3  /* useBtow 1=East, 2=West, 3=E+W*/
+ 1  /* useEndcap   */
+ 8  /* threshold for ADC-ped */
+ 5  /* min phi dist J1-J2 in L2phiBins */ 
+# some text
+FLOATS  # needs it as key-word 
+8.0  /* oneJetThr , slideing  */
+3.6  /* diJet1thr , higher */
+3.3  /* diJet2thr , lower */
+0.01 // rndAccProb
+0    // debug level
+#nothing more
+
+

@@ -1,0 +1,49 @@
+<html>
+<head><title>FTPC Fast Simulator</title></head>
+<body bgcolor=white>
+
+
+<!-- make some space using <pre>-tag   -->
+<pre>
+
+
+
+
+</pre>
+
+<h2>  StFtpcFastSimu - FTPC Fast Simulator </h2><BR>
+calling parameters:<BR>
+<TABLE cellspacing=2 cellpadding=0 border=0 align="center" valign="middle" width="90%">
+<TR>
+<TD><b>FFS_AM(</b></TD> <TR>
+<TD><b>g2t_ftp_hit_h, g2t_ftp_hit,</b></TD> <TD> geant FTPC hit points (input data)</TD><TR>
+<TD><b>g2t_track_h, g2t_track,</b></TD> <TD> geant tracks (input data)</TD><TR>
+<TD><b>g2t_vertex_h, g2t_vertex,</b></TD> <TD> geant vertex information (input data)</TD><TR>
+<TD><b>fspar_h, fspar,</b></TD> <TD> FFS pad structure parameters (parameters)</TD><TR>
+<TD><b>gaspar_h, gaspar,</b></TD> <TD> FFS gas parameters (parameters)</TD><TR>
+<TD><b>gepoint_h, gepoint,</b></TD> <TD> geant information to the ftpc hits (output data)</TD><TR>
+<TD><b>fppoint_h, fppoint)</b></TD> <TD> ftpc hit points (output data)</TD><TR>
+</TABLE>
+
+<p>
+The FTPC fast simulator is implemented in C++
+(as a part of StFtpcClusterMaker).
+
+<p>
+It was converted from Fortran (pam/ffs) to C++ by Holm H&uuml;mmler and is supported by 
+<a href=mailto:jcs@mppmu.mpg.de>Janet Seyboth</a> and 
+<a href=mailto:hummler@mppmu.mpg.de>Holm H&uuml;mmler</a>.
+
+<p>
+StFtpcFastSimu simply takes the hit points registered by geant and turns them into 
+FTPC points. Some cuts are applied to remove points that are outside the
+sensitive volume of the FTPC sectors and to account for the loss of hits 
+due to cluster merging. Some of the geant information is kept in the gepoint 
+table to be used in efficiency studies. 
+
+<p>
+<i>
+This page was updated by <a href=mailto:hummler@mppmu.mpg.de> Holm H&uuml;mmler</a> on October 29, 1999
+</i>
+
+</html>

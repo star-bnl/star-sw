@@ -1,0 +1,38 @@
+#!/bin/bash
+
+export EMCONLINE_PED_DIR=${0%/*}
+if [[ -f ./.emconline_ped.cfg.sh ]]
+then
+    source ./.emconline_ped.cfg.sh
+elif [[ -f ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh ]]
+then
+    source ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh
+else
+    echo "EMC Online environment is not configured, please run configure.emconline_ped"
+    exit 1
+fi
+
+export STATUS=""
+if [[ -f ${EMCONLINE_PED_RUNSTATUS_FILE} ]] ; then export STATUS=`cat ${EMCONLINE_PED_RUNSTATUS_FILE}` ; fi
+export STATUS=`echo ${STATUS}`
+if [[ "${STATUS}" != "" ]]
+then
+    echo "Another instance is already running (see ${EMCONLINE_PED_RUNSTATUS_FILE}), exit this now..."
+    exit
+fi
+
+export LOG_TIMESTAMP_DIR=${EMCONLINE_PED_LOGS_DIR}/log_`date -u +%Y.%m.%d`
+export LOG_TIMESTAMP=${LOG_TIMESTAMP_DIR}/log_`date -u +%Y.%m.%d_%H.%M.%S.txt`
+
+${EMCONLINE_PED_UPDATE} "$@" &> ${EMCONLINE_PED_LOG_FILE}
+
+echo "Saving log" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
+update_desktop_icon_ped
+
+mkdir -p ${EMCONLINE_PED_LOGS_DIR}
+mkdir -p ${LOG_TIMESTAMP_DIR}
+cp -f ${EMCONLINE_PED_LOG_FILE} ${LOG_TIMESTAMP}
+gzip ${LOG_TIMESTAMP}
+
+echo "" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
+update_desktop_icon_ped

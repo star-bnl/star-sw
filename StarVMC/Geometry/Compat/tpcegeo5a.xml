@@ -1,0 +1,10 @@
+<Document name="tpcegeo5a.xml">
+<Export language="Mortran">
+<Import file="pams/geometry/tpcegeo/tpcegeo5.g" verbatim="true" /></Export>
+<Module name="TPCEGEO5a" comment="Dummy module calling TPCEGEO5a">
+<CDE>AGECOM,GCUNIT</CDE>
+<Export language="Mortran">
+Call TpceGeo5
+</Export>
+</Module>
+</Document>

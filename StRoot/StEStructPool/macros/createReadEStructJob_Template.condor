@@ -1,0 +1,14 @@
+Universe       = vanilla
+Notification        = never
+Executable     = /direct/star+data01/pwg/prindle/Data/auau200/2011/StEStructEventTest/scriptsReadEStruct/schedReadEStructJob_JOBNUMBER.csh
+Output         = /star/data01/pwg/prindle/Data/auau200/2011/StEStructEventTest/logsReadEStruct/ReadEStructJob_JOBNUMBER.log
+Error          = /star/data01/pwg/prindle/Data/auau200/2011/StEStructEventTest/logsReadEStruct/ReadEStructJob_JOBNUMBER.err
+Requirements   = (CPU_Type != "crs") && (CPU_Experiment == "star")
+Log            = /direct/star+data01/pwg/prindle/Data/auau200/2011/StEStructEventTest/scriptsReadEStruct/schedReadEStructJob_JOBNUMBER.condor.log
+Initialdir     = /direct/star+data01/pwg/prindle/Data/auau200/2011/StEStructEventTest/scriptsReadEStruct
++Experiment     = "star"
++Job_Type       = "long"
+kill_sig        = SIGINT
+PeriodicRemove  = (NumJobStarts >=1 && JobStatus==1) || (JobStatus == 2 && (CurrentTime - JobCurrentStartDate > (54000)) && ((RemoteUserCpu+RemoteSysCpu)/(CurrentTime-JobCurrentStartDate) < 0.10)) || (((CurrentTime - EnteredCurrentStatus) > (2*24*3600)) && JobStatus == 5) || (JobRunCount >= 1 && JobStatus == 1)
+Priority        = +12
+Queue

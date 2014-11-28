@@ -1,0 +1,32 @@
+#!/usr/bin/make -f
+
+all: 	foreign/daqFormats.h \
+	foreign/TRG/trgStructures.h \
+	foreign/SECTOR/sector.h \
+	foreign/L3/L3Formats.h \
+	foreign/L3/L3Algorithms.h \
+	foreign/RC_Config.h
+
+# general rules for files in foreign/
+
+foreign/%: /RTS/include/%
+	mkdir -p $(dir $@)
+	cp -f $^ $@
+
+foreign/%: /RTS/include/L3/%
+	mkdir -p $(dir $@)
+	cp -f $^ $@
+
+foreign/%:
+	mkdir -p $(dir $@)
+	cp -f $^ $@
+
+# special rules doing conversions on the fly
+
+foreign/daqFormats.h: /RTS/include/daqFormats.h
+	cat $^ | sed -e 's/#include <\(.*\)>/#include "\1"/' | sed -e 's/#pragma.*//' > $@
+
+
+# Cleanup
+clean:
+	rm -rf foreign/*

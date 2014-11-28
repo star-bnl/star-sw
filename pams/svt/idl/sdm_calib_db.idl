@@ -1,0 +1,16 @@
+/*   sdm_calib_db_st.idl
+ *   Module: sdm
+ *   Output for reconstruction software 
+ *   Table of strip noise
+ */
+struct sdm_calib_db{
+long id_strip;
+long n_pedestal;
+long n_sigma;
+};
+ 
+ 
+ 
+ 
+ 
+

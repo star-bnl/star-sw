@@ -1,0 +1,12 @@
+/*tofzCalib.idl
+*
+*Table: tofzCalib
+*
+*	description: // TOF z calibration parameters
+*
+*/
+
+struct tofzCalib{
+	float z[11];		/*hit position z */
+	float zcorr[11]; 	/*z correction*/
+};

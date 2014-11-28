@@ -1,0 +1,26 @@
+ 
+
+
+
+C************************************************************************
+      FUNCTION GAMMA(XX)
+      REAL GAMMAGAMMLN,XX
+      INTEGER J
+      REAL SER,STP,TMP,X,Y,COF(6)
+      SAVE COF,STP
+      DATA COF,STP/76.18009172947146E0,-86.50532032941677E0,
+     & 24.01409824083091E0,-1.231739572450155E0,.1208650973866179E-2,
+     & -.5395239384953E-5,2.5066282746310005E0/
+      X=XX
+      Y=X
+      TMP=X+5.5E0
+      TMP=(X+0.5E0)*LOG(TMP)-TMP
+      SER=1.000000000190015E0
+      DO J=1,6
+         Y=Y+1.E0
+         SER=SER+COF(J)/Y
+      ENDDO
+      GAMMLN=TMP+LOG(STP*SER/X)
+      GAMMA = EXP(GAMMLN)
+      RETURN
+      END

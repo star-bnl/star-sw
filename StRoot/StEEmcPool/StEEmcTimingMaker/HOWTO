@@ -1,0 +1,81 @@
+HOWTO Generate EEMC Timing Curve Plots				03/29/2007
+--------------------------------------------------------------------------
+
+If you're reading this, you must be interested in making timing curves for
+the endcap.  This file will tell you how to do it.
+
+0. Log into rcas...
+
+And setup a working directory and cd into it
+
+$ mkdir timimg
+$ cd timing
+
+You'll need about 22MB / run to store the output files.
+
+1. The Data
+
+You should have a list of runs, each of which has a relative TCD phase delay.
+If you don't have this, wait for beam, go comandeer the RTS system and take
+your data!  Once the daq files have migrated to HPSS, we'll need to get them
+converted to MuDst's.  You can either check them out of HPSS and do it 
+yourself, or get Jan to request a fast offline production of the data.
+
+The MuDst's should show up on /star/data09/reco/ (or whatever the current
+directory for fast offline is).  Once this happens, create a file list
+for every run you generated.  e.g.
+
+$ ls /star/data09/reco/EEMCtcdScan/FullField/dev/2007/081/8081035/*.MuDst.root > 8081035.list
+
+The name and location  of the file is important -- <run number>.list in your
+working directory.  Don't prefix it with an "R", and don't put it in a 
+subdirectory.
+
+2. Creating the timing files
+
+Start by checking out the macros and scripts which will drive the analysis.
+From an rcas terminal type
+
+$ cvs co StRoot/StEEmcPool/StEEmcTimingMaker/macros
+$ ln -s StRoot/StEEmcPool/StEEmcTimingMaker/macros/* .
+
+There should be a perl script called makeTimingFiles.pl.  Edit the file
+and put a comma-separated list of runs in the @runs array.  Put the
+corresponding tower and mapmt TCD phases in @tower_delays and @mapmt_delays.
+Set the number of events you want to analysis ($nevents) and run the code.
+
+Now run the script and wait for the batch jobs to complete.
+
+3. Creating the timing plots
+
+$ ls *.log
+$ ls timing_files/*.root
+
+You should see a root file for each of the runs you analysed.  If not,
+consult the corresponding logfile and try to figure out why your job
+died.
+
+$ root4star
+root.exe [0] .x plotEEmcTimimg.C
+
+-------------------------------------------------------------------------------
+
+If you don't like where the legends are output on the plots:
+    Find the line which looks like this 
+    TLegend *legend=new TLegend(0.125,0.6,0.325,0.85);
+    and play around with the numbers until it's where you want it.
+    THe numbers are x1, x2, y1 and y2 in "fractions of the axis". 
+
+If you want to create an ascii file containting the names of tubes, 
+the computed pedestals, integrals and slopes
+    Uncomment the line
+    timing->dumpAsciiFile(dtfile);
+    in runEEmcTiming.C 
+
+If you want to create a PDF file with ADC spectra for all detectors
+    Uncomment the line
+    timing->dumpPDF( psfile );
+    in runEEmcTiming.C 
+
+
+ 

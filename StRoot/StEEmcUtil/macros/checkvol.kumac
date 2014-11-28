@@ -1,0 +1,112 @@
+macro checkvol half=0
+
+* trace on
+
+  gdrop 
+  debug on
+*  gdebug 5
+  switch 2 3
+   
+   make cavegeo
+   make ecalgeo
+*   make gstar
+   make g2t    
+   gclose all
+*ls	 mode ECAL SIMU 5
+
+ gr/del 1; dopen  1 
+* dcut ECAL z -15  10. 10.  .04 .04 
+* dcut ECAL z -11.5  10. 10.  .04 .04 
+* 1-st plane
+next; dcut ECAL z -11.516  10. 10.  .04 .04
+* 2-nd plane
+*next; dcut ECAL z -10.  10. 10.  .04 .04
+*next; dcut ECAL z -10.301  10. 10.  .04 .04
+* 3-rd plane
+*next; dcut ECAL z -9.086  10. 10.  .04 .04
+ daxis 0 0 40 40 
+*   dcut cave x -10 10 10 0.03 0.03
+   dclose 1; next; dshow 1   
+
+
+*   user/phasespace 1 8 10.0 10.0 1 2 0 6.283
+
+*   dio/newfilestream outunit output w
+*   dio/stream/putevent outunit Run
+
+
+   dphi = $sigma(pi)/6
+   dphi = $sigma(pi)/30
+   degrad = 180./$sigma(pi)
+   global/cr degrad [degrad]
+   phi0 = -$sigma(pi)/12
+*   phi0 = 0.
+*	 mess phi = [dphi]
+*  stopm
+* Eta rapidities
+   vect/create EtaBin(13) r 2.0 1.9008 1.8065 1.7168 1.6317 1.5507 1.4738 _
+              1.4007 1.3312 1.2651 1.2023 1.1427 1.086
+
+	 mess half = [half]
+   if [half]=0 then
+  	 do j = 1,12
+*		 eta = .5*[etabin([j]+1)]+[etabin]([j]))
+ 	 eta = $sigma(.5*(etabin([j])+etabin([j]+1)))
+ 	 mess eta = [eta]
+*  nextl
+  	 do i = 1, 10
+			phi = [phi0] + ([i]-.5)*[dphi]
+			phiga = [degrad]*[phi] 
+*	  	phi1 = [degrad]*([phi0] + ([i]-1.)*[dphi])
+*		  phi2 = [degrad]*([phi0] + ([i])*[dphi])
+*     message '#--#  run_gstar : '  [phi1] < phi < [phi2]
+    	message '#--#  run_gstar : '   phi = [phiga] eta = [eta]
+*nextl
+    	user/phasespace 1 6 5.0 5.0 [eta] [eta] [phi] [phi]
+*     user/phasespace 1 6 5.0 5.0 1.084 1.084 [phi] [phi]
+*     user/phasespace 1 6 5.0 5.0 2.01 2.01 [phi] [phi]
+*     next; dshow 1
+    	trig 1
+			gprint hits
+    	nextl 
+   		ls /dui/Event;
+    	for/call g2t
+    	mess  'Event/g2t_eem_hit'
+    	table/print Event/g2t_eem_hit 20
+    	mess  'Event/g2t_esm_hit'
+    	table/print Event/g2t_esm_hit 20
+			wait
+			wait
+*
+*     dio/stream/putevent outunit Event
+  	 enddo
+ 	 enddo
+   else
+  	 do i = 1, 2
+			phi = -[dphi]/2 + ([i]-1)*$sigma(pi)
+			phiga = [degrad]*[phi] 
+*		  phi1 = [degrad]*([phi0] + ([i]-1.)*[dphi])
+*	  	phi2 = [degrad]*([phi0] + ([i])*[dphi])
+*     message '#--#  run_gstar : '  [phi1] < phi < [phi2]
+    	message '#--#  run_gstar : '   phi = [phiga]
+
+    	user/phasespace 1 6 5.0 5.0 1.51 1.52 [phi] [phi]
+*     next; dshow 1
+    	trig 1
+			gprint hits
+    	nextl 
+   		ls /dui/Event;
+    	for/call g2t
+    	mess  'Event/g2t_eem_hit'
+    	table/print Event/g2t_eem_hit 20
+    	mess  'Event/g2t_esm_hit'
+    	table/print Event/g2t_esm_hit 20
+*
+*     dio/stream/putevent outunit Event
+  	 enddo
+	 endif
+
+* dio/stream/close outunit
+ return
+
+endkumac

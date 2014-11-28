@@ -1,0 +1,58 @@
+SUBROUTINE pushTrack( pdg, qcharge, mass, px, py, pz, e )
+
+* ... HEPEVT common block for pythia 6.1 and upper
+      Integer    NMXHEP,NEVHEP,NHEP,ISTHEP,IDHEP,JMOHEP,JDAHEP
+      DOUBLE PRECISION PHEP,VHEP
+      PARAMETER (NMXHEP=4000)
+      COMMON/HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
+     >JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+
+#include "geant321/gcflag.inc"
+#include "geant321/gckine.inc"
+
+      Integer          LMXHEP,NBytesPw,IRunNum
+      character*8                      cEVGEN
+      Common /HEPEVTD/ LMXHEP,NBytesPw,IRunNum,cEVGEN
+
+      REAL    px, py, pz, e, mass
+      INTEGER pdg, qcharge
+
+
+      !== Add track to the HEPEVT common block
+      NHEP += 1
+
+      PHEP(1, nhep ) = px
+      PHEP(2, nhep ) = py
+      PHEP(3, nhep ) = pz
+      PHEP(4, nhep ) = e
+      PHEP(5, nhep ) = mass
+
+      VHEP(1, nhep ) = 0.0
+      VHEP(2, nhep ) = 0.0
+      VHEP(3, nhep ) = 0.0
+      VHEP(4, nhep ) = 0.0
+
+      JMOHEP(1, nhep ) = 0
+      JMOHEP(2, nhep ) = 0
+      JDAHEP(1, nhep ) = 0
+      JDAHEP(1, nhep ) = 0
+
+      IDHEP(nhep)    = pdg
+      ISTHEP(nhep)   = 1
+
+      RETURN
+
+ENTRY pushTrackReset
+
+      NHEP=0  ! Reset track count to zero
+      RETURN
+
+ENTRY initHepevtd
+
+      lmxhep   = nmxhep
+      nbytespw = 8
+      irunnum  = idrun
+      cEvGen   = 'starlite'
+
+RETURN
+END

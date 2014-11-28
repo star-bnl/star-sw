@@ -1,0 +1,439 @@
+#!/bin/csh
+
+#
+# Determine STAR_SYS and STAR_HOST_SYS variables.
+# History at the end of this script
+#
+setenv STAR_SYS ""
+source $GROUP_DIR/unix_programs.csh
+if ( $?self ) then
+    set STAR_SYS_pself=${self}
+endif
+set self="STAR_SYS"
+
+#
+# Get it through the AFS fs sysname command which may
+# be set by the administrator.
+#
+if (-e /usr/arla/bin/fs) then
+    if ( $?DECHO ) echo "$self :: Using /usr/arla/bin/fs"
+  setenv STAR_SYS `/usr/arla/bin/fs sysname | $AWK -F\' '{print $2}'`
+else
+  if (-e /usr/afsws/bin/fs)  then
+    if ( $?DECHO ) echo "$self :: Using /usr/afsws/bin/fs"
+    setenv STAR_SYS `/usr/afsws/bin/fs sysname | $AWK -F\' '{print $2}'`
+  else
+    if ( -e /usr/bin/fs ) then
+	if ( $?DECHO ) echo "$self :: Using /usr/bin/fs"
+	setenv STAR_SYS `/usr/bin/fs sysname | $AWK -F\' '{print $2}'`
+    else
+	# attempt some cygwin stuff
+	if ( -e /cygdrive/c/PROGRA~1/IBM/AFS/Client/Program/fs) then
+	    if ( $?DECHO ) echo "$self :: Using cygwin AFS client IBM/AFS/Client/Program/fs"
+	    setenv STAR_SYS `/cygdrive/c/PROGRA~1/IBM/AFS/Client/Program/fs sysname | $AWK -F\' '{print $2}'`
+	else
+	    # no /bin/sys anywhere (Linux, Solaris, Digital)
+	    if (-e /bin/sys) then
+		if ( $?DECHO ) echo "$self :: Using /bin/sys"
+		setenv STAR_SYS `/bin/sys`
+	    else
+		if ( $?DECHO ) echo "$self :: Will use /usr/bin/sys if found"
+		if (-e /usr/bin/sys) setenv STAR_SYS `/usr/bin/sys`
+	    endif
+	endif
+      endif
+    endif
+  endif
+endif
+
+if ( $?DECHO ) echo "$self :: STAR_SYS is now $STAR_SYS"
+
+#
+# Sort it out otherwise via uname command
+#
+if ( "${STAR_SYS}" == "") then
+    # selection using uname -sr
+    set mach_os = `uname -sr | sed -e 's/ //g' -e 's/\.//g' -e 's/(.*//'`
+
+    switch ($mach_os)
+     case "Linux222":
+	setenv STAR_SYS i386_redhat51
+	breaksw
+     case "Linux*":
+	#setnenv STAR_SYS i386_redhat61
+	# Creating a sys name like <architecture>_<sysname><sysversion>
+	set sysname = `uname -s | tr '[A-Z]' '[a-z]'`
+	set architecture =  `uname -m | sed -e 's/_//g'`
+	set sysversion = `uname -r | $AWK -F- '{print $1}' | sed -e 's/\.//g'`
+	setenv STAR_SYS ${architecture}_${sysname}${sysversion}
+	breaksw
+
+     case "OSF1V32":
+     case "OSF1V40":
+	setenv STAR_SYS alpha_osf32c
+	breaksw
+     case "OSF1*":
+	setenv STAR_SYS osf1
+	breaksw
+
+     case "SunOS54"
+        setenv STAR_SYS sun4x_54
+	breaksw
+     case "SunOS551"
+        setenv STAR_SYS sun4x_55
+	breaksw
+     case "SunOS5*":
+	switch ("`uname -p`")
+	    case "*86":
+		setenv STAR_SYS sunx86_55
+		breaksw
+	    default:
+		setenv STAR_SYS sun4x_55
+		breaksw
+	endsw
+	breaksw
+
+     case "CYGWIN*":
+	setenv STAR_SYS "$mach_os"
+	breaksw
+
+     default:
+	setenv STAR_SYS unknown
+	breaksw
+    endsw
+endif
+
+# Solaris 4 hack
+if ("${STAR_SYS}" == "sun4x_56") then
+    if ($STAR_LEVEL  == "old") then
+	if ($?USE_CC4  == 1 && $?USE_CC5  == 1) unsetenv USE_CC5
+	if ($?USE_CC5  == 0 && "${STAR_SYS}" == "sun4x_56") setenv USE_CC4 "YES"
+    else
+	if ($?USE_CC4  == 1 && $?USE_CC5  == 1) unsetenv USE_CC4
+	if ($?USE_CC4  == 0 && "${STAR_SYS}" == "sun4x_56") setenv USE_CC5 "YES"
+    endif
+    if ($?USE_CC5  == 1) setenv STAR_HOST_SYS sun4x_56_CC5
+endif
+
+
+# All default value
+setenv STAR_HOST_SYS $STAR_SYS
+
+# Initially did not think of 64 bit architecture
+# The thought of it and switched all to 64 but we need a way to support
+# both -m32 and -m64 ... So, will rely on USE_64BITS variable. 
+# Default no.
+if ( ! $?USE_64BITS ) then
+    setenv USE_64BITS 0
+endif
+
+
+# Linux hacks
+if ("${STAR_SYS}" == "i386_linux22" || "${STAR_SYS}" == "i386_linux2") then
+    # Old scheme pre 2003 and pre kernel 2.4
+    set redhat = "6.1";
+    setenv STAR_SYS i386_redhat61
+    if (-f /etc/redhat-release) set redhat = `$AWK '{print $5}' /etc/redhat-release`
+    if ("$redhat" == "6.0") setenv STAR_SYS "i386_redhat60"
+    if ("$redhat" == "6.1") setenv STAR_SYS "i386_redhat61"
+    if ("$redhat" == "6.2") setenv STAR_SYS "i386_redhat61"
+
+    # This is part of the old scheme
+    if ("$STAR_SYS" == "i386_linux61"|| "$STAR_SYS" == "i386_linux6") setenv STAR_SYS "i386_redhat61"
+    if ("$STAR_SYS" == "i386_linux22"|| "$STAR_SYS" == "i386_redhat50" || \
+	"$STAR_SYS" == "i386_linux2" || "$STAR_SYS" == "i386_linux3") setenv STAR_SYS "i386_redhat51"
+
+    #
+    # Compiler hacks : for egcs.
+    # Env variables have to be defined prior to this script.
+    #
+    if ($?EGCS_ON  == 1 && "${STAR_SYS}" == "i386_redhat51") setenv STAR_HOST_SYS i386_redhat51egcs
+    if ($?EGCS_ON  == 1 && "${STAR_SYS}" == "i386_redhat60") setenv STAR_HOST_SYS i386_redhat61egcs
+    if ($?EGCS_ON  == 1 && "${STAR_SYS}" == "i386_redhat61") setenv STAR_HOST_SYS i386_redhat61egcs
+    if ($?USE_EGCS == 1 && "${STAR_SYS}" == "i386_redhat51") setenv STAR_HOST_SYS i386_redhat51egcs
+    if ($?USE_EGCS == 1 && "${STAR_SYS}" == "i386_redhat60") setenv STAR_HOST_SYS i386_redhat61egcs
+    if ($?USE_EGCS == 1 && "${STAR_SYS}" == "i386_redhat61") setenv STAR_HOST_SYS i386_redhat61egcs
+    if ($?USE_KCC  == 1 && "${STAR_SYS}" == "i386_redhat60") setenv STAR_HOST_SYS i386_redhat60kcc
+else
+    #
+    # Upper version of Linux drastic change in scheme J.Lauret 2003.
+    # Will need to find a more permanent solution for the above ...
+    # (maybe drop of support) as it is a bit messy in its branching.
+    #
+    # Also, BEWARE of non RedHat releases
+    #
+    setenv STAR_HOST_SYS $STAR_SYS
+    set redhat = ""
+
+    if (-f /etc/redhat-release) then
+	set rhflavor = `$AWK '{print $1 $2}' /etc/redhat-release | sed "s/[a-z]//g" | $AWK '{print tolower($1)}'`
+	set redhat   = `$AWK '{for (i=1;i<=NF;i++) if ($i == "release" || $i == "Release") print $(i+1)}' /etc/redhat-release`
+	set rhmajor  = `echo $redhat | sed "s/\..*//"`
+	set redhat   = `echo $redhat | sed "s/\.//g"`
+    else
+	# will try this combination to first order
+	# - on linux, would lead to something like .linux_i686
+	# - on MAC, would lead to .power_macintosh
+	# - on Solaris, would be .sunos_sun4u
+	#
+	# Note that only partial enabling is made (there is a lack
+	# of conistency ; should all go through STARCMPL
+	switch ($STAR_SYS)
+	    case "*darwin*"
+		set rhflavor = ""
+		set rhmajor  = `uname -s | tr '[A-Z]' '[a-z]'`
+		set redhat   = `uname -m | tr '[A-Z]' '[a-z]' | sed "s/ /_/g"`
+		breaksw
+	    case "*linux*"
+                set rhflavor = `uname -s | tr '[A-Z]' '[a-z]'`
+                set redhat = `uname -r | $AWK -F- '{print $1}' | sed -e 's/\.//g'`
+		set rhmajor = 0
+	    default:
+        endsw
+    endif
+
+    if ( "$redhat" != "") then
+	# Note:
+	#    always assume the compiler is in the path
+	#    STARCMPL can be defined outside (see 'setup' for example)
+	#
+	if ( ! $?STARCMPL) setenv STARCMPL "gcc"
+	set vers = ""
+	switch ($STARCMPL)
+	 case "icc":
+	    #set vers = `which icc | sed 's/.*compiler//i;s/\/.*//'`
+	    #set vers = `icc -V -dryrun > & /tmp/icc_version; \
+	    #awk '{ if (NR==1) print $8 }' /tmp/icc_version | awk -F\. '{print $1$2}'; \
+	    #rm  /tmp/icc_version;`
+	    set test=`which icc | $GREP "not found"`
+	    if ( "$test" == "") then
+		set vers =  `icc -v >&/tmp/icc_version$$ ; $AWK '{print $2}' /tmp/icc_version$$ | sed "s/\.//" && rm  /tmp/icc_version$$;`
+	    endif
+	    breaksw
+
+	 default:
+	    setenv STARCMPL "gcc"
+	    set test=`which gcc | $GREP "not found"`
+	    if ( "$test" == "") then
+		set vers = `gcc -dumpversion | $AWK -F. '{print $1$2$3}'`
+	    endif
+       endsw
+       setenv xSTARCMPL "$STARCMPL$vers"
+#       echo "$STARCMPL = > $STARCMPL => $vers"
+       # The below was made to exclude 7.2 Redhat using i386_linux24
+       # and other un-predicted flavor of it. The introduction of
+       # SL and RHE lead to simply it. There may be a need to also
+       # exclude 70, 71.
+       #if ($redhat == 73 || $rhmajor >= 8 || "$rhflavor" == "sl") then
+       if ($redhat != 72) then
+	if ("$vers" != "" ) then
+	    switch ($STAR_SYS)
+		case "*darwin*": 
+		    setenv STAR_HOST_SYS ${STAR_SYS}_${xSTARCMPL}
+		    breaksw
+		case "x86*":
+		case "amd64*":
+		    if ($USE_64BITS == 1) then
+                       setenv STAR_HOST_SYS $rhflavor${redhat}_x8664_${xSTARCMPL}
+		    else
+                       setenv STAR_HOST_SYS $rhflavor${redhat}_${xSTARCMPL}
+		    endif
+		    breaksw
+		default:
+		    setenv STAR_HOST_SYS $rhflavor${redhat}_${xSTARCMPL}
+	    endsw
+	endif
+#	echo "STAR_HOST_SYS => $STAR_HOST_SYS"
+    endif
+   endif
+endif
+
+# restore if previously defined
+if ( $?STAR_SYS_pself ) then
+    set self=$STAR_SYS_pself
+    unset STAR_SYS_pself
+endif
+
+
+#  $Log: STAR_SYS,v $
+#  Revision 1.1.1.1  2013/08/22 01:27:48  fisyak
+#  Freeze
+#
+#  Revision 1.55  2013/02/15 22:34:46  jeromel
+#  Added GREP to unix_programs.csh to support Unbuntu (and other flavors)
+#
+#  Revision 1.54  2012/03/22 22:07:48  jeromel
+#  Better debuggin in DECHO mode
+#
+#  Revision 1.53  2012/02/15 20:47:34  jeromel
+#  Patch for nodes without a gcc or icc compiler (nx nodes example)
+#
+#  Revision 1.52  2011/11/29 18:40:47  jeromel
+#  Define self
+#
+#  Revision 1.51  2011/11/29 18:33:28  jeromel
+#  Added DECHo debugging statements + support for /usr/bin/fs
+#
+#  Revision 1.50  2010/12/11 00:27:50  jeromel
+#  Added amd64
+#
+#  Revision 1.49  2009/10/21 02:44:57  jeromel
+#  More adjustements for 32/64 support
+#
+#  Revision 1.48  2009/10/20 15:12:06  jeromel
+#  Define USE_64BITS to be FALSE by default, allow switch and different STAR_HOST_SYS
+#
+#  Revision 1.47  2009/06/29 14:16:38  jeromel
+#  Move definition/detection into other file we source
+#
+#  Revision 1.46  2009/06/29 13:33:05  jeromel
+#  Better support for other linux flavor, reshape awk (detect)
+#
+#  Revision 1.45  2009/02/06 17:15:54  jeromel
+#  simplified icc version check + save /tmp file
+#
+#  Revision 1.44  2006/10/25 00:23:29  jeromel
+#  Working fine on Linux / Solaris - Forgot to document IRIX and AIX target drop
+#
+#  Revision 1.43  2006/10/25 00:10:28  jeromel
+#  Reshaped for Mac OS / TBC on other OS
+#
+#  Revision 1.42  2005/02/02 00:11:21  jeromel
+#  Some 64 bit support. Probably need arch in STAR_HOST_SYS
+#
+#  Revision 1.41  2004/12/14 20:50:13  jeromel
+#  Few more fully specified path execs
+#
+#  Revision 1.40  2004/11/26 19:28:36  jeromel
+#  Missed a few rm/chmod/mkdir and one awk adjusted
+#
+#  Revision 1.39  2004/11/25 23:29:42  jeromel
+#  AFS collapse made some path invisible (including /opt/star). A dropit
+#  side effect left sessions without a defined PATH exhibiting further
+#  "assumed existing"  program in our scripts. Changed all (most?) of
+#  the Uglix program with path-specified refs.
+#
+#  Revision 1.38  2004/09/14 21:35:06  fisyak
+#  Add sl302
+#
+#  Revision 1.37  2004/06/24 12:55:36  jeromel
+#  Modulo a few logic change, RHE/SL consolidated support
+#
+#  Revision 1.36  2004/06/09 01:43:29  jeromel
+#  Support for Scientific Linux along with RedHat
+#
+#  Revision 1.35  2003/12/12 17:24:27  fisyak
+#  Adjust to icc 8.0
+#
+#  Revision 1.34  2003/11/05 01:23:22  jeromel
+#  switch statement treatment for STARCMPL. Implemented icc
+#
+#  Revision 1.33  2003/06/28 00:01:49  jeromel
+#  cygwin + one more sed pattern
+#
+#  Revision 1.32  2003/06/16 23:59:25  jeromel
+#  new scheme (need more testing) for STAR_SYS and STAR_HOST_SYS
+#
+#  Revision 1.31  2002/08/14 02:23:25  jeromel
+#  Beuh !! There is not /bin/sys but a /usr/bin/sys ... Corrected.
+#
+#  Revision 1.30  2002/06/04 23:09:14  jeromel
+#  Previous commit was a mistake (2 commits in 1). Undone.
+#
+#  Revision 1.28  2001/02/05 16:37:27  fisyak
+#  Move redefinition of STAR_SYS after uname
+#
+#  Revision 1.27  2001/01/04 02:05:07  fisyak
+#  Set STAF_LEVEL = STAR_LEVEL if STAF_LEVEL is not defined
+#
+#  Revision 1.26  2000/11/02 20:37:50  fisyak
+#  Adjust order of shared libraries for NODEBUG mode
+#
+#  Revision 1.25  2000/03/21 02:03:21  fisyak
+#  Change default for Linux to i386_redhat61 (LBL request)
+#
+#  Revision 1.24  2000/03/08 16:06:51  fisyak
+#  Leave CC4 as default only for old
+#
+#  Revision 1.23  2000/02/24 00:24:38  fisyak
+#  Keep CC4 default for old/pro and new(for time being)
+#
+#  Revision 1.21  2000/02/15 23:36:29  fisyak
+#  Set CC5 default for Solaris
+#
+#  Revision 1.20  2000/01/26 17:29:05  fisyak
+#  Add arla afs
+#
+#  Revision 1.19  2000/01/21 23:01:26  fisyak
+#  Add RedHat 6.1
+#
+#  Revision 1.18  1999/11/04 15:36:45  fisyak
+#  Add check for /bin/sys for Purdue
+#
+#  Revision 1.17  1999/10/08 18:12:29  fisyak
+#  Take out TEXINPUTS from the list of environment variable, add Linux egcs platform
+#
+#  Revision 1.16  1999/09/26 21:51:36  fisyak
+#  Add non pgf platform for Linux
+#
+#  Revision 1.15  1999/09/14 17:02:36  fisyak
+#  Add redHat 6.0
+#
+#  Revision 1.14  1999/04/13 20:54:33  fisyak
+#  Set all Linuxes to redhat51
+#
+#  Revision 1.13  1999/03/09 02:03:54  fisyak
+#  Add root 2.21.06 for SL99d
+#
+#  Revision 1.12  1999/03/03 23:45:34  wenaus
+#  Add CC5C for compatiblity mode
+#
+#  Revision 1.11  1999/03/03 23:06:11  fisyak
+#  Add CC5 for Sun
+#
+#  Revision 1.10  1999/01/20 02:18:30  fisyak
+#  account fs sysname core dump for rcas/rcrs
+#
+#  Revision 1.9  1999/01/08 20:57:47  fisyak
+#  add i386_linux3
+#
+#  Revision 1.8  1999/01/08 20:08:27  fisyak
+#  Remove call to fs fro rc[as/rs]
+#
+#  Revision 1.7  1998/12/01 01:55:56  fisyak
+#  Merge with NT
+#
+#  Revision 1.6  1998/09/10 22:47:00  fisyak
+#  Protection for no sys
+#
+#  Revision 1.5  1998/09/10 02:00:24  fisyak
+#  Add protection for undefined STAR_SYS
+#
+#  Revision 1.4  1998/06/12 13:12:18  fisyak
+#  Fix Linux version
+#
+#  Revision 1.3  1998/04/24 17:09:08  fisyak
+#  Add cray
+#
+#  Revision 1.2  1998/03/23 02:29:14  fisyak
+#  Fix group start-up
+#
+#  Revision 1.1  1998/03/09 14:29:33  fisyak
+#  Switch STAR varibales
+#
+#  Revision 1.1.1.1  1998/03/09 13:38:24  fisyak
+#  Group environment
+#
+#  Revision 1.2  1998/02/10 00:06:09  fisyak
+#  SL98a second version
+#
+#  Revision 1.1  1998/01/31 23:32:52  fisyak
+#  New Environment variables
+#
+#  Revision 1.2  1998/01/30 12:42:15  fisyak
+#  Save changes before moving to SL97b
+#
+#  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
+#
+#             Last modification $Date: 2013/08/22 01:27:48 $
+#

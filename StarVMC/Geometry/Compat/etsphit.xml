@@ -1,0 +1,5 @@
+<Document file="StarVMC/Compat/etsphit.xml">
+<Export language="Mortran">
+<Import file="pams/geometry/calbgeo/etsphit.g" verbatim="true" />
+</Export>
+</Document>

@@ -1,0 +1,87 @@
+            
+
+                     EMC Pre ClusterMaker
+                     
+                      (StEmcPreEclMaker)
+                    ---------------------
+                    
+Maintained by ::Subhasis Chattopadhyay (WSU)
+Proposed On :: 05/04/00
+--------------------------------------------
+Rewriten by:: Alexandre A. P. Suaide on 08/24/2000 (See bottom for details)
+
+
+
+     This Maker replaces StEclmaker present now in the repository.
+
+     Some of the main changes made on the existing makers are,
+
+
+     (a) Because of the conflict in class name with StEmcCluster 
+   and StEmcClusterCollection currently used in StEvent, the class names
+   (and Maker name) are changed as StEmcPreCluster and StEmcPreClusterCollection   etc.
+
+     (b) After some detailed evaluation, some cleanup and initialization
+   bugs are fixed.
+
+
+Just to remind (initial version only),
+--------------
+
+     This Maker is to take StEmcHitCollection from "emc" and perform clustering
+   for each module in each subdetectors in EMC.
+
+     These clusters are then stored as StEmcPreCluster objects in 
+   StEmcPreClusterCollection.
+
+     These classes are quite similar to StEmcCluster and StEmcClusterCollection
+   being used in StEvent, only part missing is the connection of pointers 
+   of Rawhits generating the clusters. As soon as writing in StEvent is made
+   for StEmcRawHits and StEmcClusters, we can make those connections. 
+
+
+New Modifications (08/24/2000) by A. A. P. Suaide
+-----------------
+     
+     This Maker is now modified to take the emc hits from StEvent object
+   and should run after St_emc_Maker and StEventMaker. If there is no emc
+   hits in StEvent this maker creates a new StEmcCollection and fill it with
+   emc hits taken from St_emc_Maker. The clusters are stored in the StEvent
+   object but the old storage format (StEmcPreCluster) is kept for background
+   compatibility.
+
+
+Modifications (09/08/2000) by A. A. P. Suaide
+-------------
+
+     A very small correction was made on StPreEclMaker::fillStEvent() method.
+     
+     If there is no emcCollection on StEvent creates a new one.
+     
+     Now it is possible to apply the shower max detector profiles to improve
+   the cluster finder. The default option is NOT to apply the profile. To set
+   the cluster conditions (energySeed, threshold, cluster size, aplly or not
+   the profile) call the method:
+   
+     StPreEclMaker::SetClusterConditions(char *cdet,  
+                                         Int_t mSizeMax,  
+                                         Float_t mEnergySeed,  
+                                         Float_t mEnergyAdd,
+                                         Float_t mEnergyThresholdAll,
+                                         Bool_t  kCheckClustersOk)
+   The default cluster settings are:
+    
+     SetClusterConditions("bemc",4,0.1,0.001,0.02,kFALSE);
+     SetClusterConditions("bprs",4,0.1,0.001,0.2,kFALSE);
+     SetClusterConditions("bsmde",5,0.08,0.001,0.001,kFALSE);
+     SetClusterConditions("bsmdp",5,0.08,0.001,0.001,kFALSE);
+   
+Modifications (06/02/2001) by Aleksei Pavlinov
+-------------
+
+   Changed the algorithm of finding of EMC's collection in StPreEclMaker.
+   
+    
+   
+   
+            

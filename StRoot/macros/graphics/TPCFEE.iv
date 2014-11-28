@@ -1,0 +1,5274 @@
+#Inventor V2.1 ascii
+
+
+DEF ShapesNode Separator {
+
+  DEF WiredShapes Separator {
+
+  }
+  DEF ClippingShapes Separator {
+
+    DEF RawShapes Separator {
+
+    }
+    DEF SolidShapes Separator {
+
+      DEF TObjectSet Group {
+
+        DEF TPCE(AIR) Separator {
+
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 105.0019
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 0.25881904 0.96592581 6.1230318e-17 0
+                0.96592581 -0.25881907 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          DEF TPGV(TPCE_P10)+0 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -105.0019
+
+            }
+            DEF reflection MatrixTransform {
+              matrix -0.25881904 0.96592581 6.1230318e-17 0
+                -0.96592581 -0.25881904 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TPGV(TPCE_P10)+0
+        }
+        DEF Position Separator {
+
+          DEF TPCM(MYLAR) Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF TIFC(ALUMINIUM) Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF TOFC(ALUMINIUM) Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF TSWH(AIR)+1 Group {
+
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix 1 -4.3711385e-08 6.1230318e-17 0
+                    6.1230318e-17 1 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              DEF TSAW(AIR) Group {
+
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TSAS(AIR) Group {
+
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TALS(ALUMINIUM) Group {
+
+                        DEF CoinShapeNode Separator {
+
+                          DEF Transparent_Shape Group {
+
+                            LightModel {
+                              model BASE_COLOR
+
+                            }
+                            DrawStyle {
+                              style LINES
+
+                            }
+                            BaseColor {
+                              rgb 0.5 0.5 1
+
+                            }
+                          }
+                          NormalBinding {
+                            value PER_FACE
+
+                          }
+                          Separator {
+
+                            NormalBinding {
+                              value OVERALL
+
+                            }
+                            Normal {
+                              vector -0 0 1
+
+                            }
+                            Coordinate3 {
+                              point [ 51.326782 -13.75283 211.0325,
+                                  120.8542 -32.382458 211.0325,
+                                  51.326782 13.75283 211.0325,
+                                  120.8542 32.382458 211.0325 ]
+
+                            }
+                            QuadMesh {
+                              verticesPerColumn 2
+                              verticesPerRow 2
+
+                            }
+                          }
+                          NormalBinding {
+                            value PER_FACE
+
+                          }
+                          Separator {
+
+                            NormalBinding {
+                              value OVERALL
+
+                            }
+                            Normal {
+                              vector 0 0 -1
+
+                            }
+                            Coordinate3 {
+                              point [ 51.326782 13.75283 210.08,
+                                  120.8542 32.382458 210.08,
+                                  51.326782 -13.75283 210.08,
+                                  120.8542 -32.382458 210.08 ]
+
+                            }
+                            QuadMesh {
+                              verticesPerColumn 2
+                              verticesPerRow 2
+
+                            }
+                          }
+                          NormalBinding {
+                            value PER_FACE
+
+                          }
+                          Coordinate3 {
+                            point [ 120.8542 -32.382458 210.08,
+                                120.8542 32.382458 210.08,
+                                120.8542 32.382458 211.0325,
+                                120.8542 -32.382458 211.0325,
+                                51.326782 -13.75283 210.08,
+                                51.326782 -13.75283 211.0325,
+                                51.326782 13.75283 211.0325,
+                                51.326782 13.75283 210.08 ]
+
+                          }
+                          Normal {
+                            vector [ 1 0 0,
+                                -1 0 0 ]
+
+                          }
+                          FaceSet {
+                            numVertices [ 4, 4 ]
+
+                          }
+                          Separator {
+
+                            NormalBinding {
+                              value OVERALL
+
+                            }
+                            Normal {
+                              vector -0.2588166 -0.96592647 0
+
+                            }
+                            Coordinate3 {
+                              point [ 120.8542 -32.382458 211.0325,
+                                  51.326782 -13.75283 211.0325,
+                                  120.8542 -32.382458 210.08,
+                                  51.326782 -13.75283 210.08 ]
+
+                            }
+                            QuadMesh {
+                              verticesPerColumn 2
+                              verticesPerRow 2
+
+                            }
+                          }
+                          Separator {
+
+                            NormalBinding {
+                              value OVERALL
+
+                            }
+                            Normal {
+                              vector -0.2588166 0.96592647 0
+
+                            }
+                            Coordinate3 {
+                              point [ 51.326782 13.75283 211.0325,
+                                  120.8542 32.382458 211.0325,
+                                  51.326782 13.75283 210.08,
+                                  120.8542 32.382458 210.08 ]
+
+                            }
+                            QuadMesh {
+                              verticesPerColumn 2
+                              verticesPerRow 2
+
+                            }
+                          }
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 115.80467 -20.193014 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          DEF THOL(AIR)+2 Group {
+
+                          }
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 115.80467 -12.115814 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 115.80467 -4.0386143 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 115.80467 4.0385857 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 115.80467 12.115786 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 115.80467 20.192987 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 111.80417 -19.121132 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 111.80417 -9.5605736 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 111.80417 -1.4090821e-05 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 111.80417 9.560545 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 111.80417 19.121105 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 107.80367 -18.049253 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 107.80367 -9.0246344 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 107.80367 -1.3915954e-05 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 107.80367 9.0246058 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 107.80367 18.049227 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 103.80316 -16.977373 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 103.80316 16.977346 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 99.802658 -15.905494 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 99.802658 -7.9527535 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 99.802658 -1.3566219e-05 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 99.802658 7.9527268 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 99.802658 15.905467 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 95.802155 -14.833613 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 95.802155 -4.9479332 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 95.802155 4.9479065 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 95.802155 14.833587 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 91.801651 -13.761734 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 91.801651 -4.5897932 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 91.801651 4.5897665 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 91.801651 13.761707 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 87.801147 -12.688582 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 87.801147 -4.3548427 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 87.801147 4.3548169 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 87.801147 12.688556 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 83.800644 -12.001513 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 83.800644 -4.0005131 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 83.800644 4.0004873 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 83.800644 12.001489 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 79.80014 -10.546092 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 79.80014 -1.2691881e-05 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 79.80014 10.546067 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 75.799637 -9.4742126 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 75.799637 -1.2517014e-05 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 75.799637 9.4741879 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 71.799133 -8.4023323 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 71.799133 -1.2342146e-05 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 71.799133 8.4023075 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 67.79863 -7.8105125 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 67.79863 -1.2167278e-05 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 67.79863 7.8104877 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 63.79813 -6.2573018 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 63.79813 6.257278 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 59.79763 -5.1854219 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 59.79763 5.1853981 210.55624
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THOL(AIR)+2
+                        }
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TSGT(TPCE_G10) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 86.090485 -21.26437 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            -8.6592747e-17 8.6592747e-17 -1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIB(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 86.090485 -22.188055 209.04709
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            -8.6592747e-17 8.6592747e-17 -1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TWIR(TPCE_G10) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 86.090485 21.264343 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            -8.6592747e-17 8.6592747e-17 -1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI1(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 86.090485 22.188028 209.04709
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            -8.6592747e-17 8.6592747e-17 -1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TWI1(TPCE_G10) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 118.9873 -1.4584023e-05 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI2(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 109.55501 -1.4171725e-05 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI3(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 93.553009 -1.3472255e-05 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI4(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 77.551003 -1.2772785e-05 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI5(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 61.549007 -1.2073316e-05 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI6(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 53.133984 -1.1705483e-05 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI7(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 111.39015 -14.338314 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI8(ALUMINIUM)+3 Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 111.39015 14.338285 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      USE TRI8(ALUMINIUM)+3
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 95.388153 -9.8933134 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      USE TRI8(ALUMINIUM)+3
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 95.388153 9.8932867 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      USE TRI8(ALUMINIUM)+3
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 56.134991 -1.1836662e-05 214.65625
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI9(ALUMINIUM) Group {
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWAS(AIR) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 121.58217 -1.5105658e-05 223.995
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TBRW(ALUMINIUM)+4 Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 123.01271 -31.061174 218.92999
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        -8.6592747e-17 8.6592747e-17 -1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWRB(ALUMINIUM) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 123.01271 -32.486176 223.995
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        -8.6592747e-17 8.6592747e-17 -1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWR1(ALUMINIUM) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TSA1(AIR) Group {
+
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TAL1(ALUMINIUM) Group {
+
+                        DEF CoinShapeNode Separator {
+
+                          DEF Transparent_Shape Group {
+
+                            LightModel {
+                              model BASE_COLOR
+
+                            }
+                            DrawStyle {
+                              style LINES
+
+                            }
+                            BaseColor {
+                              rgb 0.5 0.5 1
+
+                            }
+                          }
+                          NormalBinding {
+                            value PER_FACE
+
+                          }
+                          Separator {
+
+                            NormalBinding {
+                              value OVERALL
+
+                            }
+                            Normal {
+                              vector -0 0 1
+
+                            }
+                            Coordinate3 {
+                              point [ 121.15338 -32.462467 211.4389,
+                                  192.66708 -51.624222 211.4389,
+                                  121.15338 32.462467 211.4389,
+                                  192.66708 51.624222 211.4389 ]
+
+                            }
+                            QuadMesh {
+                              verticesPerColumn 2
+                              verticesPerRow 2
+
+                            }
+                          }
+                          NormalBinding {
+                            value PER_FACE
+
+                          }
+                          Separator {
+
+                            NormalBinding {
+                              value OVERALL
+
+                            }
+                            Normal {
+                              vector 0 0 -1
+
+                            }
+                            Coordinate3 {
+                              point [ 121.15338 32.462467 210.4864,
+                                  192.66708 51.624222 210.4864,
+                                  121.15338 -32.462467 210.4864,
+                                  192.66708 -51.624222 210.4864 ]
+
+                            }
+                            QuadMesh {
+                              verticesPerColumn 2
+                              verticesPerRow 2
+
+                            }
+                          }
+                          NormalBinding {
+                            value PER_FACE
+
+                          }
+                          Coordinate3 {
+                            point [ 192.66708 -51.624222 210.4864,
+                                192.66708 51.624222 210.4864,
+                                192.66708 51.624222 211.4389,
+                                192.66708 -51.624222 211.4389,
+                                121.15338 -32.462467 210.4864,
+                                121.15338 -32.462467 211.4389,
+                                121.15338 32.462467 211.4389,
+                                121.15338 32.462467 210.4864 ]
+
+                          }
+                          Normal {
+                            vector [ 1 0 0,
+                                -1 0 0 ]
+
+                          }
+                          FaceSet {
+                            numVertices [ 4, 4 ]
+
+                          }
+                          Separator {
+
+                            NormalBinding {
+                              value OVERALL
+
+                            }
+                            Normal {
+                              vector -0.25881547 -0.96592677 0
+
+                            }
+                            Coordinate3 {
+                              point [ 192.66708 -51.624222 211.4389,
+                                  121.15338 -32.462467 211.4389,
+                                  192.66708 -51.624222 210.4864,
+                                  121.15338 -32.462467 210.4864 ]
+
+                            }
+                            QuadMesh {
+                              verticesPerColumn 2
+                              verticesPerRow 2
+
+                            }
+                          }
+                          Separator {
+
+                            NormalBinding {
+                              value OVERALL
+
+                            }
+                            Normal {
+                              vector -0.25881547 0.96592677 0
+
+                            }
+                            Coordinate3 {
+                              point [ 121.15338 32.462467 211.4389,
+                                  192.66708 51.624222 211.4389,
+                                  121.15338 32.462467 210.4864,
+                                  192.66708 51.624222 210.4864 ]
+
+                            }
+                            QuadMesh {
+                              verticesPerColumn 2
+                              verticesPerRow 2
+
+                            }
+                          }
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 187.61755 -38.163517 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          DEF THO1(AIR)+5 Group {
+
+                          }
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 187.61755 -29.479256 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 187.61755 -20.769596 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 187.61755 -10.718817 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 187.61755 -1.7422493e-05 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 187.61755 10.718782 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 187.61755 20.769562 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 187.61755 29.479221 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 187.61755 38.163479 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 183.61705 -38.163517 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 183.61705 -29.479256 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 183.61705 -20.769596 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 183.61705 -10.718817 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 183.61705 -1.7247627e-05 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 183.61705 10.718782 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 183.61705 20.769562 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 183.61705 29.479221 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 183.61705 38.163479 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 179.61655 -36.177235 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 179.61655 -28.138138 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 179.61655 -16.078217 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 179.61655 -8.0391169 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 179.61655 -1.7072758e-05 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 179.61655 8.0390825 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 179.61655 16.078182 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 179.61655 28.138103 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 179.61655 36.177204 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 175.61604 -36.177235 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 175.61604 -28.138138 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 175.61604 -16.078217 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 175.61604 -8.0391169 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 175.61604 -1.6897891e-05 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 175.61604 8.0390825 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 175.61604 16.078182 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 175.61604 28.138103 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 175.61604 36.177204 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 171.61555 -34.168095 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 171.61555 -25.458437 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 171.61555 -16.078217 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 171.61555 -8.0391169 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 171.61555 -1.6723025e-05 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 171.61555 8.0390825 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 171.61555 16.078182 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 171.61555 25.458403 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 171.61555 34.168064 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 167.61505 -34.168095 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 167.61505 -25.458437 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 167.61505 -16.078217 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 167.61505 -8.0391159 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 167.61505 8.0390835 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 167.61505 16.078182 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 167.61505 25.458403 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 167.61505 34.168064 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 163.61455 -32.156414 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 163.61455 -24.117317 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 163.61455 -16.078217 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 163.61455 -5.359416 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 163.61455 5.3593836 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 163.61455 16.078182 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 163.61455 24.117283 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 163.61455 32.156384 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 159.61404 -32.156414 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 159.61404 -24.117315 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 159.61404 -16.078215 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 159.61404 -5.359416 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 159.61404 5.3593836 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 159.61404 16.078184 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 159.61404 24.117285 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 159.61404 32.156384 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 155.61354 -30.149815 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 155.61354 -21.437614 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 155.61354 -13.398517 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 155.61354 -5.359416 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 155.61354 5.3593836 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 155.61354 13.398484 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 155.61354 21.437584 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 155.61354 30.149784 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 151.61305 -30.149815 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 151.61305 -21.437614 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 151.61305 -13.398517 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 151.61305 -5.3594155 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 151.61305 5.3593841 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 151.61305 13.398484 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 151.61305 21.437584 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 151.61305 30.149784 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 147.61255 -28.138136 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 147.61255 -19.428476 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 147.61255 -10.718815 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 147.61255 -1.5673821e-05 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 147.61255 10.718784 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 147.61255 19.428446 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 147.61255 28.138105 210.96263
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 143.61205 -28.138136 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 143.61205 -19.428476 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 143.61205 -10.718815 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 143.61205 -1.5498952e-05 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 143.61205 10.718784 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 143.61205 19.428446 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 143.61205 28.138105 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 139.61154 -25.455896 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 139.61154 -17.419334 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 139.61154 -8.7096748 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 139.61154 -1.5324085e-05 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 139.61154 8.7096443 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 139.61154 17.419304 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 139.61154 25.455866 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 135.61105 -25.455896 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 135.61105 -17.419334 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 135.61105 -8.7096748 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 135.61105 -1.5149219e-05 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 135.61105 8.7096443 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 135.61105 17.419304 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 135.61105 25.455866 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 131.61055 -24.117315 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 131.61055 -16.078215 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 131.61055 -8.039115 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 131.61055 -1.4974351e-05 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 131.61055 8.0390844 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 131.61055 16.078184 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 131.61055 24.117285 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 127.61005 -24.117315 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 127.61005 -16.078215 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 127.61005 -8.039115 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 127.61005 8.0390844 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 127.61005 16.078184 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                        DEF Position Separator {
+
+                          DEF VolumeTransformation Group {
+
+                            Translation {
+                              translation 127.61005 24.117285 210.96265
+
+                            }
+                            DEF straight MatrixTransform {
+                              matrix 1 -4.3711385e-08 6.1230318e-17 0
+                                6.1230318e-17 1 6.1230318e-17 0
+                                -4.3711392e-08 -4.3711392e-08 1 0
+                                0 0 0 1
+
+                            }
+                          }
+                          USE THO1(AIR)+5
+                        }
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TSG1(TPCE_G10) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 156.91022 -40.240078 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            -8.6592747e-17 8.6592747e-17 -1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRI0(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 156.91022 -41.163761 209.45349
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            -8.6592747e-17 8.6592747e-17 -1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TWI2(TPCE_G10) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 156.91022 40.240047 214.85944
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            -8.6592747e-17 8.6592747e-17 -1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIa(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 156.91022 41.163731 209.45348
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            -8.6592747e-17 8.6592747e-17 -1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TWI3(TPCE_G10) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 190.3455 -1.7712071e-05 214.85944
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIb(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 181.36787 -1.7319646e-05 214.85944
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIc(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 173.36942 -1.6970023e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRId(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 165.36841 -1.6620288e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIe(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 157.36742 -1.6270555e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIf(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 149.36896 -1.592093e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIg(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 141.36795 -1.5571195e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIh(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 133.36949 -1.5221572e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIi(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 123.85339 -1.4805609e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            1 -4.3711385e-08 6.1230318e-17 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIj(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 177.36865 21.907482 214.85944
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIk(ALUMINIUM)+6 Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 177.36865 -21.907516 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      USE TRIk(ALUMINIUM)+6
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 161.36792 -1.6445421e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIl(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 153.36819 -1.6095742e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIm(ALUMINIUM) Group {
+
+                      }
+                    }
+                    DEF Position Separator {
+
+                      DEF VolumeTransformation Group {
+
+                        Translation {
+                          translation 127.84247 -1.4979977e-05 214.85945
+
+                        }
+                        DEF straight MatrixTransform {
+                          matrix 1 -4.3711385e-08 6.1230318e-17 0
+                            6.1230318e-17 1 6.1230318e-17 0
+                            -4.3711392e-08 -4.3711392e-08 1 0
+                            0 0 0 1
+
+                        }
+                      }
+                      DEF TRIn(ALUMINIUM) Group {
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWA1(AIR) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 123.01271 31.061144 218.92999
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        -8.6592747e-17 8.6592747e-17 -1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWR2(ALUMINIUM) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 123.01271 32.486145 223.995
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        -8.6592747e-17 8.6592747e-17 -1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWR3(ALUMINIUM) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 180.62433 -48.398167 223.995
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 0.96592587 -0.25881889 6.1230318e-17 0
+                        0.25881904 0.96592581 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  USE TBRW(ALUMINIUM)+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 138.45135 -37.09795 223.995
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 0.96592587 -0.25881889 6.1230318e-17 0
+                        0.25881904 0.96592581 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  USE TBRW(ALUMINIUM)+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 105.82401 -28.355476 223.995
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 0.96592587 -0.25881889 6.1230318e-17 0
+                        0.25881904 0.96592581 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  USE TBRW(ALUMINIUM)+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 66.428612 -17.799509 223.995
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 0.96592587 -0.25881889 6.1230318e-17 0
+                        0.25881904 0.96592581 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  USE TBRW(ALUMINIUM)+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 180.62433 48.398129 223.99498
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 0.96592581 0.25881904 6.1230318e-17 0
+                        -0.25881904 0.96592581 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  USE TBRW(ALUMINIUM)+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 138.45135 37.097919 223.99498
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 0.96592581 0.25881904 6.1230318e-17 0
+                        -0.25881904 0.96592581 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  USE TBRW(ALUMINIUM)+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 105.82401 28.355446 223.995
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 0.96592581 0.25881904 6.1230318e-17 0
+                        -0.25881904 0.96592581 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  USE TBRW(ALUMINIUM)+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 66.428612 17.799482 223.995
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 0.96592581 0.25881904 6.1230318e-17 0
+                        -0.25881904 0.96592581 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  USE TBRW(ALUMINIUM)+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWBT(ALUMINIUM) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWRI(AIR) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWTR(ALUMINIUM) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TWMR(ALUMINIUM) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    DEF straight MatrixTransform {
+                      matrix 1 -4.3711385e-08 6.1230318e-17 0
+                        6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TRDO(AIR) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 189.7406 -1.9153482e-05 248.43999
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TC1O(TPCE_WATER_PIPE) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 173.7406 -1.84541e-05 248.44
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TC11(TPCE_WATER_PIPE) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 157.7406 -1.7754719e-05 248.44
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TC12(TPCE_WATER_PIPE) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 141.7406 -1.7055336e-05 248.44
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TC13(TPCE_WATER_PIPE) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 125.04061 -1.6325357e-05 248.44
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TC14(TPCE_WATER_PIPE) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 110.04061 -1.5669686e-05 248.44
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TC15(TPCE_WATER_PIPE) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 106.54061 -1.5516696e-05 248.44
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TC16(TPCE_WATER_PIPE) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 92.040611 -1.488288e-05 248.44
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        -4.3711392e-08 -4.3711392e-08 1 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TC17(TPCE_WATER_PIPE) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 123.9431 -30.960474 262.71002
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        -8.6592747e-17 8.6592747e-17 -1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TCAB(TPCE_CABLES) Group {
+
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 123.9431 30.96044 262.71002
+
+                    }
+                    DEF straight MatrixTransform {
+                      matrix 6.1230318e-17 1 6.1230318e-17 0
+                        1 -4.3711385e-08 6.1230318e-17 0
+                        -8.6592747e-17 8.6592747e-17 -1 0
+                        0 0 0 1
+
+                    }
+                  }
+                  DEF TCA1(TPCE_CABLES) Group {
+
+                  }
+                }
+              }
+            }
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix 1 0 6.1230318e-17 0
+                6.1230318e-17 1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix 0.86602539 0.5 6.1230318e-17 0
+                -0.50000012 0.86602533 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix 0.86602539 0.5 6.1230318e-17 0
+                -0.50000012 0.86602533 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix 0.49999994 0.86602545 6.1230318e-17 0
+                -0.86602539 0.5 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix 0.49999994 0.86602545 6.1230318e-17 0
+                -0.86602539 0.5 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix 6.1230318e-17 1 6.1230318e-17 0
+                -1 -1.2246064e-16 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix 6.1230318e-17 1 6.1230318e-17 0
+                -1 -1.2246064e-16 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix -0.50000012 0.86602533 6.1230318e-17 0
+                -0.86602539 -0.5 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix -0.50000012 0.86602533 6.1230318e-17 0
+                -0.86602539 -0.5 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix -0.86602539 0.5 6.1230318e-17 0
+                -0.49999988 -0.86602545 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix -0.86602539 0.5 6.1230318e-17 0
+                -0.49999988 -0.86602545 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix -1 -1.2246064e-16 6.1230318e-17 0
+                6.1230318e-17 -1 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix -0.86602539 -0.5 6.1230318e-17 0
+                0.49999988 -0.86602545 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix -0.86602539 -0.5 6.1230318e-17 0
+                0.49999988 -0.86602545 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix -0.49999988 -0.86602545 6.1230318e-17 0
+                0.86602533 -0.50000012 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix -0.49999988 -0.86602545 6.1230318e-17 0
+                0.86602533 -0.50000012 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix 6.1230318e-17 -1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix 6.1230318e-17 -1 6.1230318e-17 0
+                1 0 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix 0.49999988 -0.86602545 6.1230318e-17 0
+                0.86602539 0.5 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix 0.49999988 -0.86602545 6.1230318e-17 0
+                0.86602539 0.5 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF straight MatrixTransform {
+              matrix 0.86602533 -0.50000012 6.1230318e-17 0
+                0.49999994 0.86602545 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            DEF reflection MatrixTransform {
+              matrix 0.86602533 -0.50000012 6.1230318e-17 0
+                0.49999994 0.86602545 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TSWH(AIR)+1
+        }
+      }
+    }
+  }
+}

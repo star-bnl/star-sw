@@ -1,0 +1,199 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<!-- 
+      Template by Torre Wenaus.
+      This page is MAINTAINED IN RAW HTML. Do NOT corrupt it
+      by editing it with a WYSIWYG HTML editor.
+ -->
+<head>
+<title>StStrangeMuDstPlayer: the Player</title>
+<!-- Changed by: Peter Graham Jones, 13-Dec-2000 -->
+<meta name="Author" content="Peter G Jones">
+<meta name="Description" content="Prepared for the STAR computing and software w
+ebsite.">
+<meta name="KeyWords" content="STAR RHIC computing software documentation StStra
+ngeMuDstMaker">
+<meta name="Generator" content="HomeSite 2.5">
+<meta http-equiv="Reply-to" content="p.g.jones@bham.ac.uk (Peter G. Jones)">
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+        <tr bgcolor="#ffdc9f">
+        <td align=left> <font size="-1">
+        <a href="/STAR/">STAR</a>
+        &nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+        &nbsp; <a href="/STAR/html/comp_l/root/documentation.html">Documentation
+</a> 
+        </td>
+        <td align=right> <font size="-1">
+        &nbsp;  <!-- top right corner  --> </font></td>
+        </tr>
+        <tr bgcolor="#ffdc9f"><td align=center colspan=2><font size="+2"> <b>
+        StStrangeMuDstMaker: the Player
+        </b></font></td></tr>
+        <tr bgcolor="#ffdc9f">
+        <td><font size="-1">Offline Software using ROOT in STAR</font></td>
+        <td align="right"><a href="/STAR/html/ofl_l/prodinfo.html">
+        <font size="2" face="verdana,arial,helvetica,sans-serif">Maintained</fon
+t>
+        </a> 
+         <font size="-1">
+         by <a href="mailto:p.g.jones@bham.ac.uk">Peter G. Jones</a>
+         </font> </td> 
+        </tr>
+
+        <tr><td align=right> 
+        <td align=right> <font size="-1"> 
+            Last modified Tue Dec 12 04:59:19 2000
+          </FONT></TD></TR>
+
+
+</TABLE>
+
+
+<center>
+<a href="index.html">StStrangeMuDstMaker</a>
+<p>
+<HR width=60%>
+
+<h1>The Player</h1>
+<a href="#description">Description</a><br>
+<a href="#modes">Modes of operation</a><br>
+<a href="#options">Run-time options</a><br>
+<a href="#cuts">Applying cuts</a><br>
+<a href="#example">Example usage</a><br>
+</center>
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="description"><h2>Overview of the Player</h2></a>
+The StStrangeMuDstPlayer is basically a compiled version of the
+macro $STAR/StRoot/macros/analysis/makeStrangeMuDst.C. On one
+level, it simply improves performance by putting as much processing
+as possible into compiled code. On another, it provides added
+functionality, such as enabling the user to Filter (select candidates)
+from an existing MuDst, or simultaneously Make and Filter a new
+MuDst, applying stricter selection cuts while creating the MuDst.
+These and other options, such as providing a simple switch to select
+whether or not to write all branches to a single file or multiple files,
+hide almost all of the inner workings of the StStrangeMuDstMaker.
+The macros required to run the player are extremely simple by comparison,
+since the event loop is now part of the compiled code.
+
+<a name="modes"><h2>Player modes</h2></a>
+StStrangeMuDstPlayer comprises three modes of operation and several
+selectable options. The three modes of operation are provided by 
+the following member functions.</p>
+
+<pre>
+  Make(const Int_t NEvents, StFile *input, Char_t *output);
+  Filter(const Int_t NEvents, StFile *input, Char_t *output);
+  Play(const Int_t NEvents, StFile *input, Char_t *output);
+</pre>
+
+Make() creates a new MuDst, Filter() creates a new MuDst from an existing
+MuDst and Play() combines the previous two steps to create a new MuDst
+from a subset of the candidates stored on the original DST. Each mode
+requires the same three input arguments, which are self explanatory.
+
+<a name="options"><h2>Run-time options</h2></a>
+Before invoking Make(), Filter() or Play() any of the following options
+may be selected.
+
+<pre>
+  void DoFileSplit(Bool_t val = kTRUE); // write branches to separate files
+  void DoMC(Bool_t val = kTRUE);        // process MC information
+  void DoT0Abort(Bool_t val = kTRUE);   // abort events with a T0 jitter
+  void DoTopMapFix(Bool_t val = kTRUE); // apply fix to the topology map
+  void DoReadDST(Bool_t val = kTRUE);   // read .dst.root files
+</pre>
+
+By default, all options are off. The default input format is .event.root
+files. 
+
+<a name="cuts"><h2>Applying cuts</h2></a>
+Additionally, in Filter() or Play() mode the following cuts can
+be defined.
+
+<pre>
+  void SetEvPrimTracks(unsigned int);
+  void SetEvPrimVertexZ(Float_t);
+  void SetV0DecayLength(Float_t);
+  void SetV0DcaDaughtersToPrimVertex(Float_t);
+  void SetV0DcaToPrimVertex(Float_t);
+  void SetXiDcaDaughters(Float_t);
+  void SetXiDcaV0Daughters(Float_t);
+  void SetXiDcaToPrimVertex(Float_t);
+  void SetXiDcaV0ToPrimVertex(Float_t);
+  void SetXiDcaBachelorToPrimVertex(Float_t);
+</pre>
+
+Candidates are selected if:
+
+<pre>
+  EvPrimTracks > cut                 The following affect all events
+ |EvPrimVertexZ| < cut
+  V0DecayLength > cut                The following affect V0 candidates only
+  V0DcaDaughterstoPrimVertex > cut
+  V0DcaToPrimVertex < cut
+  XiDcaDaughters < cut               The following affect Xi candidates only
+  XiDcaV0Daughters < cut
+  XiDcaToPrimVertex < cut
+  XiDcaV0ToPrimVertex > cut
+  XiDcaBachelorToPrimVertex > cut
+</pre>
+
+By default, cuts are made. Here is a list of their values.
+
+<pre>
+  evPrimTracks = 0;
+  evPrimVertexZ = 100.;
+  v0DecayLength = 2.0;
+  v0DcaDaughtersToPrimVertex = 0.7;
+  v0DcaToPrimVertex = 0.8;
+  xiDcaDaughters = 0.7;
+  xiDcaV0Daughters = 0.7;
+  xiDcaToPrimVertex = 0.7;
+  xiDcaV0ToPrimVertex = 0.;
+  xiDcaBachelorToPrimVertex = 0.;
+</pre>
+
+These cuts have been applied to all our common MuDsts.
+
+Clearly, not all possible cuts are implemented at this level. If you
+would like to see something added, please let me know.
+
+<a name="example"><h2>Example usage</h2></a>
+Below is an example of creating a MuDst, while filtering out candidates
+which do not pass the default cuts outlined above. In addition events
+which exhibit T0 jitter are aborted and the output is split across
+several files - one for each branch (i.e. V0, Xi and Kink). Note that
+the player processes all branches by default. This is not currently
+switchable.
+
+<pre>
+  // Set output file
+  Char_t *output = "evMuDst_P00hi_1244_T0Abort.root";
+
+  // Set input file(s)
+  StFile *input = new StFile();
+  input->AddFile("/star/rcf/data03/reco/P00hi/2000/08/*1244*.dst.root");
+
+  // Set number of events to analyse
+  const Int_t Nevents = 1000000;
+  
+  // Create player
+  StrangeMuDstPlayer player;
+  player.DoT0Abort();                 // Filter out T0 jitter events
+  player.DoFileSplit();               // Save branches to the separate files
+  player.DoReadDST();                 // Setup to read .dst.root files
+  player.Play(Nevents,input,output);
+</pre>
+
+</BODY>
+</HTML>

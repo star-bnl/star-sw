@@ -1,0 +1,5 @@
+# $Id $
+# package StiMaker
+# author: 
+Library:libStiMaker.so:LIBS +=   -lStChain  -l_StEvent  -l_StEventUtilities  -lStiFtpc  -lStiGui -lGui  -lStiPixel  -lStChain -lSti -lStSsdDbMaker -lStSsdUtil -lStiSsd  -lStiSvt  -lStiTpc  -l_StMcEventMaker  -lStMcEvent  -lGui
+#Library:libStiMaker.so:LIBS +=   -lStChain  -lStEvent  -lStEventUtilities  -lStiFtpc  -lStiGui  -lStiPixel  -lSti  -lStiSsd  -lStiSvt  -lStiTpc  -lStMcEventMaker  -lStMcEvent  -lGui

@@ -1,0 +1,236 @@
+<html>
+<head>
+<title>Main-Program Settings</title>
+<link rel="stylesheet" type="text/css" href="pythia.css"/>
+<link rel="shortcut icon" href="pythia32.gif"/>
+</head>
+<body>
+
+<h2>Main-Program Settings</h2>
+
+<h3>Introduction</h3>
+
+The main program is up to the user to write. However, 
+<a href="SampleMainPrograms.html" target="page">sample main programs</a> 
+are provided. In one such class of programs, key settings of the run 
+are read in from a "cards file". These commands may be of two types<br/>
+(a) instructions directly to <code>Pythia</code>, like which 
+processes to generate, and<br/>
+(b) instructions to the main program for what it should do, 
+like how many events to generate, i.e. how many times 
+<code>pythia.next()</code> should be called.<br/>
+In principle these two kinds could be kept completely separate. 
+However, to make life simpler, a number of useful main-program 
+settings are defined on this page, so that they are recognized by 
+the <code>Settings</code> machinery. They can thus be put among 
+the other cards without distinction. It is up to you to decide which 
+ones, if any, you actually want to use when you write your main program.
+For convenience, some in the second section below can also be interpreted 
+directly by <code>Pythia</code>, while the subsequent ones really have 
+to be used in your main program. 
+
+<p/>
+Once you have used the <code>pythia.readFile(fileName)</code> method to
+read in the cards file, you can interrogate the <code>Settings</code>
+database to make the values available in your main program. A slight
+complication is that you need to use a different  <code>Settings</code>
+method for each of the four possible return types that you want to 
+extract. To save some typing the same method names are found directly 
+in the <code>Pythia</code> class, and just send on to the
+<code>Settings</code> ones to do the job, e.g.
+<pre>
+  bool   showCS = pythia.flag("Main:showChangedSettings");
+  int    nEvent = pythia.mode("Main:numberOfEvents");
+  double spare1 = pythia.parm("Main:spareParm1");
+  string file   = pythia.word("Main:allSettingsFile"); 
+</pre>
+
+<h3>Run settings</h3>
+
+Here settings related to how many events to generate and whether
+to print some information on data used in run. These variables 
+can be set in an input "cards" file, and thereafter read out an used 
+in the user-written main program. Usage is purely optional, but may help
+you reduce the need to recompile your main program. 
+
+<p/><code>mode&nbsp; </code><strong> Main:numberOfEvents &nbsp;</strong> 
+ (<code>default = <strong>1000</strong></code>; <code>minimum = 0</code>)<br/>
+The number of events to be generated.
+  
+
+<p/><code>mode&nbsp; </code><strong> Main:numberToList &nbsp;</strong> 
+ (<code>default = <strong>2</strong></code>; <code>minimum = 0</code>)<br/>
+The number of events to list.
+  
+
+<p/><code>mode&nbsp; </code><strong> Main:timesToShow &nbsp;</strong> 
+ (<code>default = <strong>50</strong></code>; <code>minimum = 0</code>)<br/>
+Print the number of events generated so far, this many times, 
+i.e. once every <code>numberOfEvents/numberToShow</code> events.
+  
+
+<p/><code>mode&nbsp; </code><strong> Main:timesAllowErrors &nbsp;</strong> 
+ (<code>default = <strong>10</strong></code>)<br/>
+Allow this many times that <code>pythia.next()</code> returns false, 
+i.e. that an event is flawed, before aborting the run.
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:showChangedSettings &nbsp;</strong> 
+ (<code>default = <strong>on</strong></code>)<br/>
+Print a list of the changed flag/mode/parameter/word settings.
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:showAllSettings &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Print a list of all flag/mode/parameter/word settings.
+Warning: this will be a long list.
+  
+
+<p/><code>mode&nbsp; </code><strong> Main:showOneParticleData &nbsp;</strong> 
+ (<code>default = <strong>0</strong></code>; <code>minimum = 0</code>)<br/>
+Print particle and decay data for the particle with this particular 
+identity code. Default means that no particle is printed.
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:showChangedParticleData &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Print a list of particle and decay data for those particles 
+that were changed (one way or another).
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:showChangedResonanceData &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+In the previous listing also include the resonances that are 
+initialized at the beginning of a run and thus get new particle
+data, even if these may well agree with the default ones. 
+Warning: this will be a rather long list.
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:showAllParticleData &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Print a list of all particle and decay data.
+Warning: this will be a long list.
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:writeChangedSettings &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Write a file with the changed flag/mode/parameter/word settings, in
+a format appropriate to be read in at the beginning of a new  
+run, using the <code>pythia.readFile(fileName)</code> method. 
+  
+
+<p/><code>word&nbsp; </code><strong> Main:changedSettingsFile &nbsp;</strong> 
+ (<code>default = <strong>currentSettings.cmnd</strong></code>)<br/>
+The name of the file to which the changed flag/mode/parameter/word
+settings are written if <code>Main:writeChangedSettings</code>
+is on. 
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:writeAllSettings &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Write a file with all flag/mode/parameter/word settings, in
+a format appropriate to be read in at the beginning of a new  
+run, using the <code>pythia.readFile(fileName)</code> method. 
+  
+
+<p/><code>word&nbsp; </code><strong> Main:allSettingsFile &nbsp;</strong> 
+ (<code>default = <strong>allSettings.cmnd</strong></code>)<br/>
+The name of the file to which a flag/mode/parameter/word 
+settings are written if <code>Main:writeAllSettings</code>
+is on. 
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:showAllStatistics &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Print all available statistics or only the minimal set at the end 
+of the run.
+  
+
+<h3>Subruns</h3>
+
+You can use <a href="ProgramFlow.html" target="page">subruns</a> to carry out
+several tasks in the same run. In that case you will need repeated
+instances of the first setting below in your command file, and could
+additionally use the second and third as well.
+
+<p/><code>mode&nbsp; </code><strong> Main:subrun &nbsp;</strong> 
+ (<code>default = <strong>-999</strong></code>; <code>minimum = 0</code>)<br/>
+The number of the current subrun, a non-negative integer, put as
+first line in a section of lines to be read for this particular subrun.
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:LHEFskipInit &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+If you read several Les Houches Event Files that you want to see 
+considered as one single combined event sample you can set this flag
+<code>on</code> after the first subrun to skip (most of) the  
+(re-)initialization step.
+  
+
+<p/><code>mode&nbsp; </code><strong> Main:numberOfSubruns &nbsp;</strong> 
+ (<code>default = <strong>0</strong></code>)<br/>
+The number of subruns you intend to use in your current run.  
+Unlike the two settings above, <code>Pythia</code> itself will not
+intepret this number, but you could e.g. have a loop in your main
+program to loop over subruns from 0 through 
+<code>numberOfSubruns - 1</code>. 
+  
+
+<h3>Spares</h3>
+
+For currently unforeseen purposes, a few dummy settings are made 
+available here. The user can set the desired value in a "cards file"
+and then use that value in the main program as desired.
+
+<p/><code>flag&nbsp; </code><strong> Main:spareFlag1 &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:spareFlag2 &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+  
+
+<p/><code>flag&nbsp; </code><strong> Main:spareFlag3 &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+  
+
+<p/><code>mode&nbsp; </code><strong> Main:spareMode1 &nbsp;</strong> 
+ (<code>default = <strong>0</strong></code>)<br/>
+  
+
+<p/><code>mode&nbsp; </code><strong> Main:spareMode2 &nbsp;</strong> 
+ (<code>default = <strong>0</strong></code>)<br/>
+  
+
+<p/><code>mode&nbsp; </code><strong> Main:spareMode3 &nbsp;</strong> 
+ (<code>default = <strong>0</strong></code>)<br/>
+  
+
+<p/><code>parm&nbsp; </code><strong> Main:spareParm1 &nbsp;</strong> 
+ (<code>default = <strong>0.</strong></code>)<br/>
+  
+
+<p/><code>parm&nbsp; </code><strong> Main:spareParm2 &nbsp;</strong> 
+ (<code>default = <strong>0.</strong></code>)<br/>
+  
+
+<p/><code>parm&nbsp; </code><strong> Main:spareParm3 &nbsp;</strong> 
+ (<code>default = <strong>0.</strong></code>)<br/>
+  
+
+<p/><code>word&nbsp; </code><strong> Main:spareWord1 &nbsp;</strong> 
+ (<code>default = <strong>void</strong></code>)<br/>
+  
+
+<p/><code>word&nbsp; </code><strong> Main:spareWord2 &nbsp;</strong> 
+ (<code>default = <strong>void</strong></code>)<br/>
+  
+
+<p/><code>word&nbsp; </code><strong> Main:spareWord3 &nbsp;</strong> 
+ (<code>default = <strong>void</strong></code>)<br/>
+  
+
+</body>
+</html>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->

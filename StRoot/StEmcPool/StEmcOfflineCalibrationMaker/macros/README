@@ -1,0 +1,50 @@
+README for BTOW gain calibration code contained in StRoot/StEmcPool/StEmcOfflineCalibration/
+last updated 17 January 2014
+
+You need the following files to perform the gain calibrations (as of the 2009 and 2011 calibrations): 
+StEmcOfflineCalibrationEvent.cxx
+StEmcOfflineCalibrationEvent.h
+StEmcOfflineCalibrationMaker.cxx
+StEmcOfflineCalibrationMaker.h
+StEmcOfflineCalibrationElectronAnalyzer.cxx
+StEmcOfflineCalibrationElectronAnalyzer.h
+macros/bemcCalibMacro.C
+macros/btow_mapping.20030401.0.txt
+macros/CalibrationHelperFunctions.cxx
+macros/CalibrationHelperFunctions.h
+macros/electron_drawfits.C
+macros/electron_histogram_maker.C
+macros/electron_master.C
+macros/electron_master_alt.C
+macros/electron_tree_maker.C
+macros/geant_fits.root
+macros/mip_histogram_fitter.C
+macros/mip_histogram_maker.C
+macros/SubmitCalibJobs.pl
+macros/runMIPjobs.sh
+macros/runElecJobs.sh
+macros/runFinalElecJobs.sh
+
+The following files are outdated and can be removed from your working directory: 
+macros/all2006runs.xml
+macros/electron_ntuple_maker.C
+macros/geant_func.root
+macros/log4j.xml
+macros/mip_ring_draw.C
+macros/mip_ring_fitter.C
+
+The codes should be run in this order:
+1) SubmitCalibJobs.pl which executes bemcCalibMacro.C
+2) runMIPjobs.sh which executes mip_histogram_maker.C
+3) mip_histogram_fitter.C
+4) runElecJobs.sh which executes electron_tree_maker.C
+5) runFinalElecJobs.sh which executs electron_master_alt.C
+6) electron_drawfits.C
+-- OR --
+5) electron_master.C
+
+Detailed instructions for running the code to produce the gain calibrations are located here:
+https://drupal.star.bnl.gov/STAR/subsys/bemc/calibrations/btow-calibration-procedure/4-relative-gain-calibration-with-mips
+https://drupal.star.bnl.gov/STAR/subsys/bemc/calibrations/btow-calibration-procedure/5-absolute-gain-calibration-with-electrons
+
+

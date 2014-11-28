@@ -1,0 +1,65 @@
+#
+# General Purpose STAR cshrc file.
+# Also valid for tcsh
+#
+
+# The default STAR_LEVEL and CERN_LEVEL are named 'pro' i.e.
+# stable production mode versions.
+# You can overwrite the defaults by setting the following 
+# environment variables (un-comment the lines below) ...
+
+# if ($?STAR_LEVEL == 0) setenv STAR_LEVEL dev
+# if ($?CERN_LEVEL == 0) setenv CERN_LEVEL new
+
+# By default, the STAR login displays information the first 
+# time you log-in. However, you may over-write this (and have
+# no messages at all) by uncommenting the next line
+
+# setenv  SILENT 1
+setenv GROUP_DIR /afs/rhic.bnl.gov/rhstar/group
+if ( -r  $GROUP_DIR/star_cshrc.csh ) then
+        source $GROUP_DIR/star_cshrc.csh 
+endif
+
+
+# How can you change your prompt:
+#================================
+# Definition		 	# Result	# Comment
+#-------------------------------------------------------------------
+# set prompt="$HOST "	 	# plus1         # 
+# set prompt='\! > '	 	# 3 >		# 3 means the third 
+#			 	# 		# you executed
+# set prompt='\! %~ %# '	# 3 ~/public >	# 
+# set prompt="[$HOST] > "	# [plus1] > 	#
+# set prompt='R; '		# R;		# for VM hackers!
+#
+
+# Default aliases
+# ===============
+# Some default aliases are defined. You may remove
+# them by commenting this out.
+alias cls   'clear'             # clear screen
+alias ls    'ls -F'             # show '@' after a linked file 
+                                # '/' after a dir
+
+
+# Changing the shell behaviour:
+#==============================
+# Normally, redirecting command output to a file, for example
+#
+#      /bin/ls > file.list
+#
+# will OVERWRITE any existing file.list. As the default you can't overwrite
+# existing files. If you dislike it uncomment the following line:
+#
+# unset noclobber
+
+
+# By default you need to type "logout" to logout from a standard Unix
+# system. If you prefer to logout with a simple "CTRL-D" you should
+#
+# unset ignoreeof
+
+
+
+

@@ -1,0 +1,29 @@
+# Format
+#
+# trigger_name	date0	time0	dateF	timeF	NotUsed	trigger_ID 
+#
+# name 		 -- specifies the name of the trigger
+# date0 .. timeF -- specifies the allowed range of times
+# Algo/slot 	 -- specifies the clas name of the algorithm and which slot it occupies in the generic maker
+# ID 		 -- specifies the trigger ID 
+#
+ped-algo:   20060101  1  20060731        1	algoPed.setup2	-112233	# dummy trigger ID for L2ped-algo, for testing
+## L2gammaAlgo, bemc-http-mb-l2gamma
+btow_gamma:   20060406  162847  20060508 205917 l2gamma_bemc.setup1  127611 #  L2gammaAlgo, ppTrans
+btow_gamma:   20060510  164714  20060513 175248 l2gamma_bemc.setup2       6 # L2gammaAlgo, ppLong
+btow_gamma:   20060513 175249   20060515 204500 l2gamma_bemc.setup3       6 # L2gammaAlgo,  ppLong
+btow_gamma:   20060515 204501   20060607 194011 l2gamma_bemc.setup4  137611 # L2gammaAlgo,  ppLong
+# L2gammaAlgo, eemc-http-mb-l2gamma
+etow_gamma:   20060406  162847  20060508 205917 l2gamma_eemc.setup1  127641 #  L2gammaAlgo, ppTrans
+etow_gamma:   20060510  164714  20060513 175248 l2gamma_bemc.setup2       5 # L2gammaAlgo, ppLong
+etow_gamma:   20060513 175249   20060515 204500 l2gamma_bemc.setup3       5 # L2gammaAlgo,  ppLong
+etow_gamma:   20060515 204501   20060607 194011 l2gamma_bemc.setup4  137641 # L2gammaAlgo,  ppLong
+#
+# L2JET >> eemc-jp0-etot-mb-L2jet << algos are listed below, bemc-L2jet trigger IDs are added in software 
+jet06-algo:	 20060406 162847  20060509 175010  algoJet.setup_ppTrans	127622	# ppTrans period
+jet06-algo:	 20060512 164434  20060605 141410  algoJet.setup_ppLong2	137622 	# ppLong2 period
+jet06-algo:	 20060607 221358  20060620  45120  algoJet.setup_pp62gev	147651 	# pp 62 GeV  period
+upsilon:	 20060331 160228  20060509  171607 algoUpsilon.setup1	       137601	# L2upslion
+upsilon:	 20060513 184600  20060605  114917 algoUpsilon.setup1	       137603	# L2upslion
+EndOfFile 
+#

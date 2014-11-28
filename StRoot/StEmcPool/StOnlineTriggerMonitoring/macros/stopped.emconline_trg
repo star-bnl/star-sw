@@ -1,0 +1,23 @@
+#!/bin/bash
+
+export EMCONLINE_TRG_DIR=${0%/*}
+if [[ -f ./.emconline_trg.cfg.sh ]]
+then
+    source ./.emconline_trg.cfg.sh
+elif [[ -f ${EMCONLINE_TRG_DIR}/.emconline_trg.cfg.sh ]]
+then
+    source ${EMCONLINE_TRG_DIR}/.emconline_trg.cfg.sh
+else
+    echo "EMC Online environment is not configured, please run configure.emconline_trg"
+    exit 1
+fi
+
+if [[ "${EMCONLINE_TRG_EPICS_CHANNEL}" != "" ]]
+then
+    if [[ -f ${EPICS_CAPUT_CMD} ]]
+    then
+	#${EPICS_CAPUT_CMD} ${EMCONLINE_TRG_EPICS_CHANNEL} 0
+    else
+	echo "Cannot find EPICS command \"caput\"!"
+    fi
+fi

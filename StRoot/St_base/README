@@ -1,0 +1,20 @@
+The base idea of the collection of classes of this package can be found
+on the Web page:
+
+  http://sol.star.bnl.gov/~fine/Publications/STARJuly99Meeting/index.htm
+
+A short description of the base classes are available via
+
+  http://www.star.bnl.gov/STAR/html/comp_l/train/root/Star2C++tut.html
+
+Full up-to-date "sofware guide" is available via
+
+  http://duvall.star.bnl.gov/cgi-bin/prod/swguide.pl?ver=dev&pkg=St_base&detail=2
+
+STILL UNDER CONSTRUCTION !
+
+$Id: README,v 1.2 1999/09/30 03:46:26 fine Exp $
+$Log: README,v $
+Revision 1.2  1999/09/30 03:46:26  fine
+HTML links has been included
+

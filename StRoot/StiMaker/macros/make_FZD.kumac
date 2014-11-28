@@ -1,0 +1,10 @@
+*macro simple N=1  
+ 
+detp geometry year_1h split_off field=0.249116 
+make gstar 
+make geometry
+mode RICH simu 2 
+user/input auto /afs/rhic.bnl.gov/star/users/mmiller/code/mevsim/evgen.5.nt 
+GFILE o mevsim_5.fzd 
+trig 100 
+ 

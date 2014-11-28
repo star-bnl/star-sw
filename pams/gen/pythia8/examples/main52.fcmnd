@@ -1,0 +1,16 @@
+! File: main52.fcmnd
+! This file contains commands to be sent on to Pythia6. 
+! Lines not beginning with a letter are comments.
+! Names are case-insensitive  -  but spellings-sensitive!
+! The changes here are illustrative, not always physics-motivated.
+!
+! Select processes.
+msel     = 0         ! open up to freely mix processes
+msub(14) = 1         ! q qbar -> g gamma
+msub(29) = 1         ! q g -> q gamma
+!
+! Phase space cuts.
+ckin(3) = 20.        ! pTmin
+!
+! Speed up initialization: multiple interactions only in C++ code. 
+mstp(81)=0

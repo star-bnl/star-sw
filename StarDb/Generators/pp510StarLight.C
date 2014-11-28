@@ -1,0 +1,39 @@
+TDataSet *CreateTable() {
+  if (!gROOT->GetClass("St_geant_Maker")) return 0;
+  StBFChain *chain = (StBFChain *) StMaker::GetChain();
+  St_geant_Maker *geantMk = chain->GetMaker("geant");
+#if 0
+  gSystem->Load( "libVMC.so");
+#endif
+  gSystem->Load( "StarGeneratorUtil" );
+  gSystem->Load( "StarGeneratorEvent" );
+  gSystem->Load( "StarGeneratorBase" );
+  gSystem->Load( "libMathMore"   );  
+  gSystem->Load( "libStarLight");
+  // Setup RNG seed and map all ROOT TRandom here
+  Int_t rngSeed=1234;
+  StarRandom::seed( rngSeed );
+  StarRandom::capture();
+  StarPrimaryMaker *primary = new StarPrimaryMaker();
+  primary -> SetFileName( "starlight.starsim.root");
+  chain -> AddBefore( "geant", primary );
+  //
+  // Setup an event generator
+  //
+  StarLight *starlight = new StarLight("STARlight");
+  starlight->SetTitle("StarLight 1.383");
+
+  // Setup collision frame, energy and beam species
+  starlight->SetFrame("CMS",510.0);
+  starlight->SetBlue("proton");
+  starlight->SetYell("proton");  
+  primary -> AddGenerator(starlight);
+  
+  //
+  // Initialize primary event generator and all sub makers
+  //
+  primary -> Init();
+  geantMk->Do("gkine -4 0");
+  TDataSet *tableSet = new TDataSet("StarLight");
+  return (TDataSet *)tableSet;
+}

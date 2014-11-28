@@ -1,0 +1,280 @@
+#!/bin/sh
+#
+# Configuration script, to be run before making examples
+#
+# Author: M. Kirsanov
+
+#
+# User-changeable part -------------------------------
+#
+
+#LCG platform. Can be needed if external libraries are specified
+if [ x$MYLCGPLATFORM = x ]; then
+  export MYLCGPLATFORM=slc4_ia32_gcc34
+fi
+
+# Defaults
+export COMPMODE=OPT
+
+# check arguments
+
+for arg in $* ; do
+  if [ "x$arg" = "x--enable-debug" ] ; then
+    COMPMODE=DBG
+  elif [ "x$arg" = "x--enable-shared" ] ; then
+    SHAREDLIBS=yes
+  elif [ "x$arg" = "x--help" ] ; then
+    echo "Usage: ./configure [options] , where options are:"
+    echo "--help                   : prints this help"
+    echo "--enable-debug           : turns on debugging flags and turns off optimization"
+    echo "--enable-shared          : use shared library (not yet implemented) (default no)"
+    echo "--with-lhapdf=lhapdfpath : path to LHAPDF libraries (must be version 5.3 or higher)"
+    echo "--with-lhapdfversion=v   : LHAPDF version (simplified alternative when using CERN AFS MCGenerators, e.g. =5.3.0)"
+    echo "--with-lhapdflibname=n   : lhapdf library name line (default is -lLHAPDF)"
+    echo "--with-lhapdfsets=path   : path to LHAPDF data (default is lhapdfpath/../PDFsets, CERN AFS default is lhapdfpath/../../../share/PDFsets)"
+    echo "--with-pythia6=path      : path to pythia6 libraries"
+    echo "--with-pythia6version=v  : pythia6 version (simplified alternative when using CERN AFS MCGenerators, e.g. =413)"
+    echo "--with-pythia6libname=n  : pythia6 library name line (default is GENSER standard: -lpythia6 -lpythia6_dummy -lpythia6_pdfdummy)"
+    exit
+  elif [ x`echo x${arg} | grep "="` != x ] ; then
+    option=`echo ${arg} | awk -F = '{print $1}'`
+    value=`echo ${arg} | awk -F = '{print $2}'`
+    if [ "x${option}" = "x--with-pythia6version" ] ; then
+      PYTHIA6VERSION=${value}
+    elif [ "x${option}" = "x--with-pythia6" ] ; then
+      PYTHIA6LOCATION=${value}
+    elif [ "x${option}" = "x--with-pythia6libname" ] ; then
+      PYTHIA6LIBNAME=${value}
+    elif [ "x${option}" = "x--with-lhapdfversion" ] ; then
+      LHAPDFVERSION=${value}
+    elif [ "x${option}" = "x--with-lhapdf" ] ; then
+      LHAPDFLOCATION=${value}
+    elif [ "x${option}" = "x--with-lhapdflibname" ] ; then
+      LHAPDFLIBNAME=${value}
+    elif [ "x${option}" = "x--with-lhapdfsets" ] ; then
+      LHAPDFSETSLOCATION=${value}
+    else
+      echo "${arg}: wrong option. Ignored." >&2
+    fi
+  else
+    echo "${arg}: wrong option. Ignored." >&2
+  fi
+done
+
+echo compilation mode is $COMPMODE
+
+
+# PYTHIA6 and LHAPDF locations
+# The default values here correspond to CERN AFS (but you may want to change
+# the version and/or platform).
+
+if [ x${PYTHIA6VERSION} = x ]; then
+  export PYTHIA6VERSION=413
+else
+  if [ x${PYTHIA6LOCATION} = x ]; then
+    export PYTHIA6LOCATION=/afs/cern.ch/sw/lcg/external/MCGenerators/pythia6/${PYTHIA6VERSION}/${MYLCGPLATFORM}/lib/archive
+  fi
+fi
+if [ x${PYTHIA6LOCATION} = x ]; then
+  export PYTHIA6LOCATION=/afs/cern.ch/sw/lcg/external/MCGenerators/pythia6/${PYTHIA6VERSION}/${MYLCGPLATFORM}/lib/archive
+fi
+if [ x${PYTHIA6LIBNAME} = x ]; then
+  export PYTHIA6LIBNAME="-lpythia6 -lpythia6_dummy -lpythia6_pdfdummy"
+fi
+
+if [ x${LHAPDFLOCATION} != x ]; then
+  if [ x${LHAPDFSETSLOCATION} = x ]; then
+    export LHAPDFSETSLOCATION=${LHAPDFLOCATION}/../PDFsets
+  fi
+fi
+if [ x${LHAPDFVERSION} = x ]; then
+  export LHAPDFVERSION=5.3.1
+else
+  if [ x${LHAPDFLOCATION} = x ]; then
+    export LHAPDFLOCATION=/afs/cern.ch/sw/lcg/external/MCGenerators/lhapdf/${LHAPDFVERSION}/${MYLCGPLATFORM}/lib/archive
+    if [ x${LHAPDFSETSLOCATION} = x ]; then
+      export LHAPDFSETSLOCATION=/afs/cern.ch/sw/lcg/external/MCGenerators/lhapdf/${LHAPDFVERSION}/share/PDFsets
+    fi
+  fi
+fi
+if [ x${LHAPDFLOCATION} = x ]; then
+  export LHAPDFLOCATION=/afs/cern.ch/sw/lcg/external/MCGenerators/lhapdf/${LHAPDFVERSION}/${MYLCGPLATFORM}/lib/archive
+fi
+if [ x${LHAPDFLIBNAME} = x ]; then
+  export LHAPDFLIBNAME="-lLHAPDF"
+fi
+if [ x${LHAPDFSETSLOCATION} = x ]; then
+  export LHAPDFSETSLOCATION=/afs/cern.ch/sw/lcg/external/MCGenerators/lhapdf/${LHAPDFVERSION}/share/PDFsets
+fi
+
+#
+# User-changeable part, experts  -----------------------------
+#
+
+# export FFLAGS_OPT="-O2 -Wuninitialized"
+# -Wuninitialized outputs many irrelevant warnings and therefore obscurs 
+export FFLAGS_OPT="-O2"
+export FFLAGS_DBG=-g
+export CFLAGS_OPT=-O2
+export CFLAGS_DBG=-g
+export CXXFLAGS_OPT="-O2 -ansi -pedantic -W -Wall"
+export CXXFLAGS_DBG="-g -ansi -pedantic -W -Wall"
+#
+# Find platform.
+#
+export ARCH="`uname`"
+export theGcc=`g++ --version | head -n 1 | awk '{print$3}' | awk -F . '{print $1}'`
+if [ ${theGcc} = 4 ]; then
+  export ARCH=${ARCH}-gcc4
+fi
+echo Platform is $ARCH
+
+#default platform settings:
+export FC=g77
+export CC=gcc
+export FFLAGS="${FFLAGS_OPT}"
+export CFLAGS="${CFLAGS_OPT}"
+export CXXFLAGS="${CXXFLAGS_OPT}"
+export FLIBS="-lfrtbegin -lg2c"
+if [ ${COMPMODE} = OPT ]; then
+  export FFLAGS="${FFLAGS_OPT}"
+  export CFLAGS="${CFLAGS_OPT}"
+  export CXXFLAGS="${CXXFLAGS_OPT}"
+fi
+if [ ${COMPMODE} = DBG ]; then
+  export FFLAGS="${FFLAGS_DBG}"
+  export CFLAGS="${CFLAGS_DBG}"
+  export CXXFLAGS="${CXXFLAGS_DBG}"
+fi
+if [ $ARCH = Linux ]; then
+  export FC=g77
+  export FFLAGS="${FFLAGS_OPT} -Wno-globals"
+  export CFLAGS="${CFLAGS_OPT}"
+  export CXXFLAGS="${CXXFLAGS_OPT}"
+  export FLIBS="-lfrtbegin -lg2c"
+  if [ ${COMPMODE} = OPT ]; then
+    export FFLAGS="${FFLAGS_OPT}"
+    export CFLAGS="${CFLAGS_OPT}"
+    export CXXFLAGS="${CXXFLAGS_OPT}"
+  fi
+  if [ ${COMPMODE} = DBG ]; then
+    export FFLAGS="${FFLAGS_DBG} -Wno-globals"
+    export CFLAGS="${CFLAGS_DBG}"
+    export CXXFLAGS="${CXXFLAGS_DBG}"
+  fi
+fi
+# Linux platform with gcc4: new Fortran90 compiler.
+if [ $ARCH = Linux-gcc4 ]; then
+  export FC=gfortran
+  export FFLAGS="${FFLAGS_OPT}"
+  export CFLAGS="${CFLAGS_OPT}"
+  export CXXFLAGS="${CXXFLAGS_OPT}"
+  export FLIBS="-lgfortran -lgfortranbegin"
+  if [ ${COMPMODE} = OPT ]; then
+    export FFLAGS="${FFLAGS_OPT}"
+    export CFLAGS="${CFLAGS_OPT}"
+    export CXXFLAGS="${CXXFLAGS_OPT}"
+  fi
+  if [ ${COMPMODE} = DBG ]; then
+    export FFLAGS="${FFLAGS_DBG}"
+    export CFLAGS="${CFLAGS_DBG}"
+    export CXXFLAGS="${CXXFLAGS_DBG}"
+  fi
+fi
+
+#Platform & opt/dbg - independent flags and variables:
+
+
+#
+# End of the user-changeable part ---------------------------
+#
+# Checks
+#
+if [ $?PYTHIA6LOCATION ]; then
+  if [ x${PYTHIA6LOCATION} != x ]; then
+    if [ ! -d ${PYTHIA6LOCATION} ]; then
+      echo WARNING in PYTHIA6LOCATION: directory ${PYTHIA6LOCATION} does not exist
+      echo ...so you cannot run main programs that use Pythia 6 
+    fi
+  fi
+fi
+if [ $?LHAPDFLOCATION ]; then
+  if [ x${LHAPDFLOCATION} != x ]; then
+    if [ ! -d ${LHAPDFLOCATION} ]; then
+      echo WARNING in LHAPDFLOCATION: directory ${LHAPDFLOCATION} does not exist
+      echo ...so you cannot run main programs that use LHAPDF 
+    fi
+    if [ ! -d ${LHAPDFSETSLOCATION} ]; then
+      echo WARNING in LHAPDFSETSLOCATION: directory ${LHAPDFSETSLOCATION} does not exist
+      echo ...so you cannot run main programs that use LHAPDF 
+    fi
+  fi
+fi
+
+rm -f config.mk
+
+echo SHELL = /bin/sh > config.mk
+echo ARCH = ${ARCH} >> config.mk
+echo FC = ${FC} >> config.mk
+echo CC = ${CC} >> config.mk
+echo FFLAGS = ${FFLAGS} >> config.mk
+echo CFLAGS = ${CFLAGS} >> config.mk
+echo CXXFLAGS = ${CXXFLAGS} >> config.mk
+echo FLIBS = ${FLIBS} >> config.mk
+#
+if [ x${PYTHIA6VERSION} != x ]; then
+  echo PYTHIA6VERSION = ${PYTHIA6VERSION} >> config.mk
+fi
+if [ x${PYTHIA6LOCATION} != x ]; then
+  echo PYTHIA6LOCATION = ${PYTHIA6LOCATION} >> config.mk
+fi
+if [ "x${PYTHIA6LIBNAME}" != "x" ]; then
+  echo "PYTHIA6LIBNAME = ${PYTHIA6LIBNAME}" >> config.mk
+fi
+if [ x${LHAPDFVERSION} != x ]; then
+  echo LHAPDFVERSION = ${LHAPDFVERSION} >> config.mk
+fi
+if [ x${LHAPDFLOCATION} != x ]; then
+  echo LHAPDFLOCATION = ${LHAPDFLOCATION} >> config.mk
+fi
+if [ "x${LHAPDFLIBNAME}" != "x" ]; then
+  echo "LHAPDFLIBNAME = ${LHAPDFLIBNAME}" >> config.mk
+fi
+#
+#
+# For the moment we take archive libraries of lhapdf, so actions with
+# LD_LIBRARY_PATH are not needed, this is for the future.
+# Setting LHAPATH is always needed
+if [ x${LHAPDFLOCATION} != x ]; then
+  if [ ! -e config.csh ]; then
+    echo "#!/bin/csh" > config.csh
+    echo 'if( ! $?LD_LIBRARY_PATH ) then' >> config.csh
+    echo "  setenv LD_LIBRARY_PATH ${LHAPDFLOCATION}" >> config.csh
+    echo "else" >> config.csh
+    echo "  setenv LD_LIBRARY_PATH" '${LD_LIBRARY_PATH}'":${LHAPDFLOCATION}" >> config.csh
+    echo "endif" >> config.csh
+    echo "setenv LHAPATH ${LHAPDFSETSLOCATION}" >> config.csh
+    echo "#!/bin/sh" > config.sh
+    echo 'if [ ! $?LD_LIBRARY_PATH ]; then' >> config.sh
+    echo "  export LD_LIBRARY_PATH=${LHAPDFLOCATION}" >> config.sh
+    echo fi >> config.sh
+    echo 'if [ $?LD_LIBRARY_PATH ]; then' >> config.sh
+    echo "  export LD_LIBRARY_PATH="'${LD_LIBRARY_PATH}'":${LHAPDFLOCATION}" >> config.sh
+    echo fi >> config.sh
+    echo "export LHAPATH=${LHAPDFSETSLOCATION}" >> config.sh
+  else
+    echo 'if( ! $?LD_LIBRARY_PATH ) then' >> config.csh
+    echo "  setenv LD_LIBRARY_PATH ${LHAPDFLOCATION}" >> config.csh
+    echo "else" >> config.csh
+    echo "  setenv LD_LIBRARY_PATH" '${LD_LIBRARY_PATH}'":${LHAPDFLOCATION}" >> config.csh
+    echo "endif" >> config.csh
+    echo "setenv LHAPATH ${LHAPDFSETSLOCATION}" >> config.csh
+    echo 'if [ ! $?LD_LIBRARY_PATH ]; then' >> config.sh
+    echo "  export LD_LIBRARY_PATH=${LHAPDFLOCATION}" >> config.sh
+    echo fi >> config.sh
+    echo 'if [ $?LD_LIBRARY_PATH ]; then' >> config.sh
+    echo "  export LD_LIBRARY_PATH="'${LD_LIBRARY_PATH}'":${LHAPDFLOCATION}" >> config.sh
+    echo fi >> config.sh
+    echo "export LHAPATH=${LHAPDFSETSLOCATION}" >> config.sh
+  fi
+fi

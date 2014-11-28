@@ -1,0 +1,136 @@
+<html>
+<head>
+<title>Phase Space Cuts</title>
+<link rel="stylesheet" type="text/css" href="pythia.css"/>
+<link rel="shortcut icon" href="pythia32.gif"/>
+</head>
+<body>
+
+<h2>Phase Space Cuts</h2>
+
+<code>PhaseSpace</code> is base class for all hard-process phase-space 
+generators, either generic <i>2 -> 1</i> or <i>2 -> 2</i> ones, 
+or specialized ones like for elastic and diffractive scattering.
+
+<p/>
+In it, it is possible to constrain the kinematics of most processes.
+(Exceptions are "soft physics", i.e. minimum bias, elastic and 
+diffractive processes. The Coulomb singularity for elastic scatterings,
+if simulated, is <a href="TotalCrossSections.html" target="page">handled separately</a>.) 
+These constraints apply in the rest frame of the hard subprocess, and 
+topologies normally would be changed e.g. by subsequent showering 
+activity. The cross section of a process is adjusted to only 
+correspond to the allowed phase space.
+
+<p/>
+The more particles in the final state, the more cuts could be applied.
+Here we have tried to remain with the useful minimum, however. More
+generic possibilities could be handled by the 
+<a href="UserHooks.html" target="page">user hooks</a> facility. 
+
+<h3>Cuts in all processes</h3>
+
+<p/><code>parm&nbsp; </code><strong> PhaseSpace:mHatMin &nbsp;</strong> 
+ (<code>default = <strong>4.</strong></code>; <code>minimum = 0.</code>)<br/>
+The minimum invariant mass.
+  
+
+<p/><code>parm&nbsp; </code><strong> PhaseSpace:mHatMax &nbsp;</strong> 
+ (<code>default = <strong>-1.</strong></code>)<br/>
+The maximum invariant mass.
+A value below <code>mHatMin</code> means there is no upper limit.
+  
+
+<h3>Cuts in <i>2 -> 1</i> processes</h3>
+
+When a resonance <code>id</code> is produced, the 
+<a href="ParticleDataScheme.html" target="page"><code>mMin(id)</code>and 
+<code>mMax(id)</code></a> methods restrict the allowed mass range
+of this resonance. Therefore the allowed range is chosen to be the 
+overlap of this range and the <code>mHatMin</code> to 
+<code>mHatMax</code> range above. Most resonances by default have no 
+upper mass limit, so effects mainly concern the lower limit. 
+Should there be no overlap between the two ranges then the process 
+will be switched off.
+
+<h3>Cuts in <i>2 -> 2</i> processes</h3>
+
+<p/><code>parm&nbsp; </code><strong> PhaseSpace:pTHatMin &nbsp;</strong> 
+ (<code>default = <strong>0.</strong></code>; <code>minimum = 0.</code>)<br/>
+The minimum invariant <i>pT</i>.
+  
+
+<p/><code>parm&nbsp; </code><strong> PhaseSpace:pTHatMax &nbsp;</strong> 
+ (<code>default = <strong>-1.</strong></code>)<br/>
+The maximum invariant <i>pT</i>.
+A value below <code>pTHatMin</code> means there is no upper limit.
+  
+
+<p/><code>parm&nbsp; </code><strong> PhaseSpace:pTHatMinDiverge &nbsp;</strong> 
+ (<code>default = <strong>1.</strong></code>; <code>minimum = 0.5</code>)<br/>
+Extra <i>pT</i> cut to avoid the divergences of some processes 
+in the limit <i>pT -> 0</i>. Specifically, if either or both
+produced particles have a mass below <code>pTHatMinDiverge</code> 
+then <i>pT</i> is limited from below by the larger of 
+<code>pTHatMin</code> and <code>pTHatMinDiverge</code>.
+  
+
+<p/><code>flag&nbsp; </code><strong> PhaseSpace:useBreitWigners &nbsp;</strong> 
+ (<code>default = <strong>on</strong></code>)<br/>
+Allows masses to be selected according to Breit-Wigner shapes in 
+<i>2 -> 2</i> processes, whenever particles have been declared 
+with a nonvanishing width above the threshold below. In those cases 
+also the limits below will be used for the mass selection. For 
+<i>2 -> 1</i> processes the Breit-Wigner shape is part of the 
+cross section itself, and therefore always included.
+  
+
+<p/><code>parm&nbsp; </code><strong> PhaseSpace:minWidthBreitWigners &nbsp;</strong> 
+ (<code>default = <strong>0.01</strong></code>; <code>minimum = 1e-6</code>)<br/>
+The minimum width a resonance must have for the mass to be dynamically
+selected according to a Breit-Wigner shape, within the limits set below.
+Only applies when <code>useBreitWigners</code> is on; else the nominal
+mass value is always used.
+  
+
+<p/>
+For a particle with a Breit-Wigner shape selected, according to the 
+rules above and to the rules of the particle species itself, the 
+<a href="ParticleDataScheme.html" target="page"><code>mMin(id)</code>
+and <code>mMax(id)</code></a> methods restrict the allowed mass range
+of the particle, just like for the <i>2 -> 1 </i> processes.   
+
+<h3>Cuts in <i>2 -> 3</i> processes</h3>
+
+Currently no further cuts have been introduced for <i>2 -> 3</i>
+processes than those already available for <i>2 -> 2</i> ones.
+A <i>2 -> 3</i> process in principle would allow to define a
+separate <i>pT</i> range for each of the three particles (with some
+correlations), but for now all three are restricted exactly the
+same way by <code>pTHatMin</code> and <code>pTHatMax</code>.  
+As above, Breit-Wigner mass ranges can be restricted.
+
+<h3>Documentation</h3>
+
+<p/><code>flag&nbsp; </code><strong> PhaseSpace:showSearch &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Possibility to print information on the search for phase-space 
+coefficients that (in a multichannel approach) provides an analytical 
+upper envelope of the differential cross section, and the 
+corresponding upper estimate of the cross section. Of interest 
+for crosschecks by expert users only. 
+  
+
+<p/><code>flag&nbsp; </code><strong> PhaseSpace:showViolation &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Possibility to print information whenever the assumed maximum 
+differential cross section of a process is violated, i.e. when 
+the initial maximization procedure did not find the true maximum.
+Also, should negative cross sections occur, print whenever a more
+negative value is encountered.
+  
+
+</body>
+</html>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->

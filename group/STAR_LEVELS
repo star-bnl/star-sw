@@ -1,0 +1,105 @@
+#!/usr/bin/env perl
+#
+# STAR_LEVELS - Perl script to display STAR levels as string.
+# Usage: STAR_LEVELS
+#
+# T. Wenaus, J. Lauret
+#
+
+$VERSION = $ENV{STAR_LEVEL};
+if ( ! defined($VERSION) ){ $VERSION ="";}
+
+if ($ARGV[0] eq "-g"){
+    # Guesstimator
+    $DEBUG = $ENV{STAR_LEVELS_DEBUG};
+
+    if ( -d "include"){
+	print "There is a possibility of guessing ..\n" if ($DEBUG);
+	$version = "";
+
+	foreach $inc (("include","include/tables")){
+	    if ( -d $inc){
+		if ( opendir(DIR,$inc) ){
+		    print "Scanning $inc/ ...\n" if ($DEBUG);
+		    while ( defined($file = readdir(DIR)) ){
+			if ( -l "$inc/$file"){ next;}
+			# This is a fix format defined in RootCint, stic and ConstructTable
+			# If the format changes, the guesstimator will stop working
+			if ( defined($ver = &Found("$inc/$file")) ){
+			    print "\t\tFound version [$ver]\n" if ($DEBUG);
+			    if ( $ver ne "(unspecified)"){
+				$version = $ver;
+				last;
+			    }
+			}
+		    }
+		    close(DIR);
+		}
+	    }
+	    last if ( $version ne "");
+	}
+
+	if ($version ne "" && $version !~ /unspecified/){
+	    if ( lc($version) ne lc($VERSION) ){
+		if ($version ne "adev" || lc($VERSION) ne "dev") {
+		    print "Missmatching STAR environment (now in ".$VERSION.")\n";
+		}
+		print "$version was the previous version this code was compiled with !!!\n";
+	    } else {
+		print "$version was the version this code was previously compiled in. All is OK.\n";
+	    }
+	} else {
+	    print STDERR "Could not guess the library version you compiled your code in\n";
+	}
+    } else {
+	print STDERR "Cannot guess the version (missing include/)\n";
+    }
+} else {
+    # some Uglix print to STDERR
+    open(STDERR,">/dev/null");
+    chomp($pgmf = `which root4star`);
+    close(STDERR);
+    # some to STDOUT
+    if ($pgmf =~ /no root4star in/i){ $pgmf = "";}
+
+    if ( $pgmf ne "" ){
+	$createTime = (stat($pgmf))[10];
+	($cmin,$chr,$cdy,$cmo,$cyr) = (localtime($createTime))[1,2,3,4,5];
+	$cmo = $cmo +1;
+	$year = $cyr - 100;
+	if ( $cyr > 99 ) {$year = sprintf("%2.2d", $cyr - 100 )}
+	$pgmf =~ s,/afs/rhic/star/packages/,,g;
+	$pgmf =~ s,/afs/rhic\.bnl\.gov/star/packages/,,g;
+	$pgmf =~ s,/bin/root4star,,g;
+    } else {
+	$pgmf = "unknown";
+	$cmo  = $cdy = $year = $chr = $cmin = "?";
+    }
+    my $debug = "_debug";
+    if ($ENV{NODEBUG}) {$debug = "_opt";}
+    chomp($host = `/bin/hostname`);
+    print "$host;CERN-$ENV{CERN_LEVEL};STAR-$VERSION;root4star-$cmo/$cdy/$year-$chr:$cmin-$pgmf;root-$ENV{ROOT_LEVEL},$ENV{STAR_HOST_SYS}$debug\n";
+}
+
+
+#
+# Subroutine to find the version from a file
+#
+sub Found
+{
+    my($file)=@_;
+    my($ver)=undef;
+
+    if ( open(FF,$file) ){
+	print "\tReading $file\n" if ($DEBUG);
+	while( defined($line = <FF>) ){
+	    if ( $line =~ m/(This was generated for version )(.*)/){
+		$ver = $2;
+		last;
+	    }
+	}
+	close(FF);
+    }
+    if ( defined($ver) ){  $ver =~ s/\'//g;}
+    $ver;
+}

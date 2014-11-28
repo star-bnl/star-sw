@@ -1,0 +1,73 @@
+## Author: M. Mustafa
+#
+# The following are the "old" MC PXL hit structures:
+
+StMcEvent/StMcPixelHit.hh
+StMcEvent/StMcPixelHit.cc
+StMcEvent/StMcPixelLayerHitCollection.hh
+StMcEvent/StMcPixelLayerHitCollection.cc
+StMcEvent/StMcPixelHitCollection.hh
+StMcEvent/StMcPixelHitCollection.cc
+
+# The new structures have some moficiations as prescribed below, 
+# and the names have been changed. 
+# So, I moved the old revision comments to the end of the files 
+# and new containers will be regarded as new codes in CVS.
+# All Id Log and ClassDef versions have been reset.
+
+# ------------------------------------------------------------------------------
+
+# Below are the comments to accompany the commits to these codes:
+
+# ---------------- StMcPixelHit
+
+* Name changed to StMcPxlHit to comply with the TLA convention, and code was refactored accordingly.
+* Added idTruth member variable and modified constructor accordingly.
+* Changed layer to sector to reflect PXL geometry
+* Added sensor function
+* Modified sector() ladder() and sensor() to reflect y2013 conventions
+* Increased the version to 1; this is a new name which means a new container as far as ROOT is concerned. 
+
+# ----------------- StMcPixelLayerHitCollection
+
+* Changed the name to StMcPxlSectorCollection and refactored the code accordingly.
+
+
+# ----------------- StMcPixelHitCollection
+
+* Name changed to StMcPxlHitCollection to comply with the TLA convention, and code was refactored accordingly.
+
+
+# ------------------------------------------------------------------------------
+
+# The following codes have been modified to use the new containers
+
+# ----------------- StMcContainers
+
+* Changed to use StMcPxlHit and StMcPxlHitCollection
+
+
+# ----------------- StMcHitIter.cxx
+
+* Changed to use StMcPxlHitCollection 
+
+
+# ----------------- StMcEvent
+
+* Changed to use StMcPxlHitCollection 
+
+# ----------------- StMcEventTypes.hh
+
+* Changed to use StMcPxlHit, StMcPxlSectorHitCollection and StMcPxlHitCollection 
+
+# ----------------- StMcEventLinkDef.h
+
+* Changed to use StMcPxlHit, StMcPxlSectorHitCollection and StMcPxlHitCollection 
+
+# ----------------- StMcTrack
+
+* Changed to use StMcPxlHit
+
+# ----------------- StMcEventMaker
+
+* Changed to use StMcPxlHit

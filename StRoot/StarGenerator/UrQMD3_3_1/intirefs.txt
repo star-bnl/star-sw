@@ -1,0 +1,214 @@
+1fluid.F:c    The initial fluid distributions are specified as two nuclei      *
+1fluid.F:c    Optionally, one can initialize a single nucleus.                 *
+1fluid.F:c           -  single nucleus initialization option,                  *
+1fluid.F:c           -  read initial conditions from a table, write final      *
+1fluid.F:c initialization
+1fluid.F:c.. init flags etc.
+addpart.F:c     initialize new slot
+boxprg.F:c different initialisations
+boxprg.F:c init
+boxprg.F:c init the variables
+cascinit.F:         write(6,*)'***(E): Mass ',A,' exceeds initialization limit!'
+cascinit.F:c end of fast init if statement
+cascinit.F:c         write(6,*)'*** warning: initialisation corrupt '
+cascinit.F:c effective masses for initial energy corr. (CTOption(11).eq.0)
+cascinit.F:c This subroutine read in a nucleus which has been initialized
+cascinit.F:c and momentum space to yield a new initial state.
+cascinit.F:c initialize the other quantum numbers
+cascinit.F:c     Performs very fast initialisation of nuclei
+ChangeLog:Nucleus initialization for cascade mode had an unphysical peak on the outer
+ChangeLog:Includes new FAST Woods-Saxin initialisation (Switch on 
+coload.F:c     initially tmin is set to the time-interval until the end of the timestep
+coms.inc:c     ecm      : initial projectile-hadron target-hadron c.m. energy 
+GNUmakefile:      getmass.f getspin.f hepnam.f hepchg.f hepcmp.f init.f input.f iso.f \
+gnuranf.f:c Call with idum a negative integer to initialize; thereafter, do
+init.F:c $Id: intirefs.txt,v 1.1 2012/11/29 20:57:03 jwebb Exp $
+init.F:c This subroutine calls initialization procedures for uqmd
+init.F:c enter here. an exception is the subroutine {\tt init}. {\tt init} should NOT
+init.F:c     do not initialize projectile and target if old event is read in
+init.F:c initialize nuclei (projectile and target) and store them
+init.F:c initialize normal projectile
+init.F:c            write(6,*)'illegal EOS in init.'
+init.F:c initialize normal target
+init.F:c               write(6,*)'illegal EOS in init.'
+init.F:      subroutine init
+init.F:c     This subroutine calls initialization procedures for different
+init.F:c initialize normal projectile
+init.F:c initialize normal target
+init.F:c set unique ID-tag counter (is not initialized with getnucleus calls)
+init.F:c initialize special PRO/TAR combinations
+input.F:c initialize counters
+input.F:      CTPStrg(30)=' radius offset for initialisation  '
+input.F:      CTPStrg(41)=' distance of initialisation'
+input.F:      CTPStrg(46)=' maximal number of rejections for initialisation'
+input.F:      CTPStrg(66)=' Rapidity cut for initial state set to'
+input.F:      CTOStrng(4)=' no initial conf. output '
+input.F:      CTOStrng(11)=' mass reduction for cascade initialisation' 
+input.F:      CTOStrng(24)=' Wood-Saxon initialization'
+input.F:c initialize arrays for special PRO/TAR combinations
+intranf.f:c Call with idum a negative integer to initialize; thereafter, do
+make22.F:c initialize inew, pnew, xnew ... arrays from pythia common blocks
+pythia6409.F:C  S   PYINIT   to administer the initialization procedure           *
+pythia6409.F:C  S   PYUPIN   to provide initialization needed for LHA input       *
+pythia6409.F:C  S   PYINRE   to initialize treatment of resonances                *
+pythia6409.F:C  S   PYINKI   to initialize kinematics of incoming particles       *
+pythia6409.F:C  S   PYSSPA   to simulate initial state spacelike showers          *
+pythia6409.F:C  S   PYPTIS   to do pT-ordered initial state spacelike showers     *
+pythia6409.F:C  S   PYMSIN   to initialize the supersymmetry simulation           *
+pythia6409.F:C  S   PYRADK   to generate initial state photon radiation           *
+pythia6409.F:C  S   UPINIT   dummy routine to initialize user processes           *
+pythia6409.F:C...PYDATR, with initial values for the random number generator.
+pythia6409.F:C...Check a few variables to see they have been sensibly initialized.
+pythia6409.F:C...Common initial values. Loop over initiating conditions.
+pythia6409.F:C...Call user process initialization routine.
+pythia6409.F:C...Formats for initialization information.
+pythia6409.F: 5100 FORMAT('1',18('*'),1X,'PYINIT: initialization of PYTHIA ',
+pythia6409.F: 5600 FORMAT(/1X,22('*'),1X,'PYINIT: initialization completed',1X,
+pythia6409.F:C...Showering of initial state partons (optional).
+pythia6409.F:C...Intertwined initial state showers and multiple interactions.
+pythia6409.F:C...User process initialization commonblock.
+pythia6409.F:C...Combine the two old-style Pythia initialization and event files
+pythia6409.F:C...User process initialization commonblock.
+pythia6409.F:C...Rewind initialization and event files. 
+pythia6409.F:C...Read first line of initialization info and get number of processes.
+pythia6409.F:C...Copy initialization lines, omitting trailing blanks. 
+pythia6409.F:C...User process initialization commonblock.
+pythia6409.F:C...Store initial energy. Default frame.
+pythia6409.F:C...Special user process initialization; convert to normal input.
+pythia6409.F:C...Identify free initialization.
+pythia6409.F:            CHINIT(LOFFS+1:76)='PYTHIA will be initialized for a '//
+pythia6409.F:            CHINIT(LOFFS+1:76)='PYTHIA will be initialized for an '//
+pythia6409.F:          CHINIT(LOFFS+1:76)='PYTHIA will be initialized for '//
+pythia6409.F:          CHINIT(LOFFS+1:76)='PYTHIA will be initialized for '//
+pythia6409.F:          CHINIT(LOFFS+1:76)='PYTHIA will be initialized for '//
+pythia6409.F:          CHINIT(LOFFS+1:76)='PYTHIA will be initialized for '//
+pythia6409.F:          CHINIT(LOFFS+1:76)='PYTHIA will be initialized for '//
+pythia6409.F:C...Formats for initialization and error information.
+pythia6409.F:C...User process initialization commonblock.
+pythia6409.F:C...Set initial flavour state.
+pythia6409.F:C...User process initialization commonblock.
+pythia6409.F:C...User process initialization commonblock.
+pythia6409.F:C...Q2 and W values and photon flux weight factors for initialization.
+pythia6409.F:C...User process initialization and event commonblocks.
+pythia6409.F:C...Reassign QCD process. Partons before initial state radiation.
+pythia6409.F:C...Handles intertwined pT-ordered spacelike initial-state parton
+pythia6409.F:C...interaction initiators, with no previous evolution. Check the input
+pythia6409.F:C...Loop over current shower initiators.
+pythia6409.F:C...Set up shat, initiator x values, and x remaining in BR.
+pythia6409.F:C...Set up shat, initiator x values, and x remaining in BR.
+pythia6409.F:C...Calculate initial parton distribution weights.
+pythia6409.F:C...Boost hard scattering partons to frame of shower initiators.
+pythia6409.F:C...Generates pT-ordered spacelike initial-state parton showers and
+pythia6409.F:C...         interaction initiators at PT2NOW.
+pythia6409.F:C...MODE=-1: Initialize initial state showers from scratch, i.e.
+pythia6409.F:C...starting from the hardest interaction initiators.
+pythia6409.F:C...Calculate initial parton distribution weights.
+pythia6409.F:C...Generates maximum ME weight in some initial-state showers.
+pythia6409.F:C...Calculates actual ME weight in some initial-state showers.
+pythia6409.F:C...Hard reset: hard interaction initiators motherless by definition.
+pythia6409.F:C...Zero initial valence and companion content.
+pythia6409.F:C...Set up colour line tags starting from hard interaction initiators.
+pythia6409.F:            CALL PYERRM(29,'(PYPTMI:) top in initial state!')
+pythia6409.F:C...Get PDFs at X(rescaled) and PT2 of the current initiator.
+pythia6409.F:C...Define longitudinal boost from initiator rest frame to cm frame.
+pythia6409.F:C...Define initial one, two or three objects for subprocess.
+pythia6409.F:C...Check if initial resonance has been moved (in resonance + jet).
+pythia6409.F:C...Set decay vertex for initial resonances
+pythia6409.F: 5000 FORMAT(/1X,'****** PYMULT: initialization of multiple inter',
+pythia6409.F:C...Define initial partons.
+pythia6409.F:C...Kinematics construction for initial partons.
+pythia6409.F:C...Copy shower initiator and all outgoing partons.
+pythia6409.F:C...Iterate change of initiator momentum to get energy right.
+pythia6409.F:C...Save data for hardest initeraction, to be restored.
+pythia6409.F:C...Zero initial valence and companion content.
+pythia6409.F:C...Get PDFs at X and Q2 of the parton shower initiator for the
+pythia6409.F:C...Showering of initial state partons (optional).
+pythia6409.F:C...Get PDFs at X and Q2 of the parton shower initiator for the
+pythia6409.F: 5000 FORMAT(/1X,'****** PYMIGN: initialization of multiple inter',
+pythia6409.F:C...Set up initial v-v-j-v configuration. Otherwise set up
+pythia6409.F:C...Mesons: set up initial q-qbar topology
+pythia6409.F:C...Now both sides have been prepared in an initial vvjv (baryonic) or
+pythia6409.F:C...Create colour line tags starting from initiators.
+pythia6409.F:C...End assignment of kT values to initiators and remnants.
+pythia6409.F:C...First set up the initiators and their daughters correctly.
+pythia6409.F:C...Transverse 12 system initiator velocity:
+pythia6409.F:C...Boost to overall initiator system rest frame
+pythia6409.F:C...Now boost initiators + daughters back to LAB system
+pythia6409.F:C...Define initial partons.
+pythia6409.F:C...Find suitable set of masses for initialization of 2 -> 2 processes.
+pythia6409.F:C...Loop over initial flavours
+pythia6409.F:C...interaction initiator.
+pythia6409.F:C...evolved homogeneously from an initial scale P2 to Q2.
+pythia6409.F:C...Set up the Higgs couplings - needed here since initialization
+pythia6409.F:C...Rotate shower initiating partons to be along z axis.
+pythia6409.F:C...Set up copy of shower initiating partons as on mass shell.
+pythia6409.F:C...(Always the case for MSTJ(19)=2 due to initialization above)
+pythia6409.F:C...Set initial Phad.
+pythia6409.F:C...Junction strings: initialize flavour, momentum and starting pos.
+pythia6409.F:C...Junction strings: find initial transverse directions.
+pythia6409.F:C...Begin initialization: sum up energy, set starting position.
+pythia6409.F:C...Closed string: random initial breakup flavour, pT and vertex.
+pythia6409.F:C...Find initial transverse directions (i.e. spacelike four-vectors).
+pythia6409.F:C...Store positions of shower initiating partons.
+pythia6409.F:C...Special cutoff masses for initial partons (may be a heavy quark,
+pythia6409.F:C...gamma*/Z0: assume e+e- initial state if unknown.
+pythia6409.F:C...Find if interference with initial state partons.
+pythia6409.F:C...Boost interfering initial partons to rest frame
+pythia6409.F:C...Define imagined single initiator of shower for parton system.
+pythia6409.F:C...Select side for interference with initial state partons.
+pythia6409.F:C...with initial state partons.
+pythia6409.F:C...Accepted branch. Construct four-momentum for initial partons.
+pythia6409.F:C...Azimuthal anisotropy due to interference with initial state partons.
+pythia6409.F:C...Set information on imagined shower initiator.
+pythia6409.F:C...Delete trivial shower, else connect initiators.
+pythia6409.F:C...gamma*/Z0: assume e+e- initial state if unknown.
+pythia6409.F:C...Parton-by-parton maximum scale from initial conditions.
+pythia6409.F:C...Find and order initial axes with highest thrust (major).
+pythia6409.F:C...Save good axis. Try new initial axis until a number of tries agree.
+pythia6409.F:C...Find initiator cell: the one with highest pT of not yet used ones.
+pythia6409.F:C...Sum up unused cells within required distance of initiator.
+pythia6409.F:C...Divide particles into two initial clusters by hemisphere.
+pythia6409.F:C...Reset statistics on initial parton state.
+pythia6409.F:C...Identify and order flavour content of initial state.
+pythia6409.F:C...Count number of partons in initial state.
+pythia6409.F:C...Write statistics on initial parton state.
+pythia6409.F:C...Copy statistics on initial parton state into /PYJETS/.
+pythia6409.F: 5000 FORMAT(///20X,'Event statistics - initial state'/
+pythia6409.F:C...Add initial e+e- to event record (documentation only).
+pythia6409.F:C...Radiative photon (in initial state).
+pythia6409.F:C...Calculates total cross-section, including initial state
+pythia6409.F:C...Generates initial state photon radiation.
+pythia6409.F:C...Check that input is sensible. Find initial address in memory.
+pythia6409.F:C...Find initial address in memory. Increase number of entries.
+pythia6409.F:C...Find initial address in memory. Multiply all contents bins.
+pythia6409.F:C...Find initial addresses in memory, and histogram size.
+pythia6409.F:C...Find initial address in memory; skip if empty histogram.
+pythia6409.F:C...User process initialization commonblock.
+pythia6409.F:C...Read first line of initialization info.
+pythia6409.F:C...Error exit: give up if initalization does not work.
+pythia6409.F:  130 WRITE(*,*) ' Failed to read LHEF initialization information.'
+pythia6409.F:C...Old example: handles a simple Pythia 6.4 initialization file.
+pythia6409.F:C...User process initialization commonblock.
+RunFunction.F:c     numerical/technical initialisation
+RunFunction.F:c     initialize random number generator
+RunFunction.F:c     initialisation of physics quantities 
+RunFunction.F:      call init
+RunFunction.F:c for CTOption(4)=1 : output of initialization configuration
+RunFunction.F:c set initial conditions for MD propagation-step
+scatter.F:c     initialize some arrays (definitions are listed in newpart.f)
+scatter.F:chp no elastic scattering of initial pp pn and nn
+uhmerge.F:      call inithydro
+uhmerge.F:c  This program initializes the hydrodynamic fields using urqmd output.
+uhmerge.F:c.. initialization of variables 
+uhmerge.F:c..   initial baryon number on the hydro grid 
+uhmerge.F:      subroutine inithydro
+uhmerge.F:c     This subroutine calls initialization procedures for different
+uhmerge.F:c.. initialize urqmd with hydro output
+urqmd.F:c the initialization, the propagation (including the real part of the 
+urqmd.F:c     numerical/technical initialisation
+urqmd.F:c     initialize random number generator
+urqmd.F:c     initialisation of physics quantities 
+urqmd.F:      call init
+urqmd.F:c for CTOption(4)=1 : output of initialization configuration
+urqmd.F:c set initial conditions for MD propagation-step
+Binary file urqmd.x86_64 matches

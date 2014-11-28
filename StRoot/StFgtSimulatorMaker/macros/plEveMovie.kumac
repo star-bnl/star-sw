@@ -1,0 +1,13 @@
+********* ALL plots ***********
+macro all  nevent=10  core=starEve
+   do i = 1,[nevent]
+   for/file 90 [core]_[i].ps
+   meta 90 -111
+   mess PostScript file opened  (meta 99 -111)
+    nex;dcut CAVE x 0.0 2.5 5.0 0.055 0.055
+     trig 1
+  meta 0
+  close 90
+  mess PS closed	
+ enddo
+return

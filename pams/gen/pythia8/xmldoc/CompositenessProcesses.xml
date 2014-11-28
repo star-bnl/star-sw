@@ -1,0 +1,150 @@
+<chapter name="Compositeness Processes">
+
+<h2>Compositeness Processes</h2>
+
+Compositeness scenarios may give rise to sharp resonances of excited 
+quarks and leptons. An excited copy of the first generation is 
+implemented, consisting of spin 1/2 particles.
+
+<p/>  
+The current implementation contains gauge interaction production
+by quark-gluon fusion or lepton-photon fusion and contact interaction 
+production by quark-quark or quark-antiquark scattering. In additions 
+to the compositness scale and couplings listed below, you are expected 
+to change the excited-fermion masses in accordance with what is desired.
+See <ref>Bau90</ref> for conventions.
+
+<p/>
+A non-trivial angular dependence is included in the decay for the
+<ei>2 -> 1</ei> processes, but has not been included for the 
+<ei>2 -> 2</ei> ones.
+
+<h3>Production processes</h3>
+
+A few different production processes have been implemented, which normally 
+would not overlap and therefore could be run together.
+
+<flag name="ExcitedFermion:all" default="off">
+Common switch for the group of implemented processes that produce an
+excited fermion.
+</flag>
+
+<flag name="ExcitedFermion:dg2dStar" default="off">
+Scatterings <ei>d g -> d^*</ei>. 
+Code 4001.
+</flag>
+
+<flag name="ExcitedFermion:ug2uStar" default="off">
+Scatterings <ei>u g -> u^*</ei>. 
+Code 4002.
+</flag>
+
+<flag name="ExcitedFermion:sg2sStar" default="off">
+Scatterings <ei>s g -> s^*</ei>. 
+Code 4003.
+</flag>
+
+<flag name="ExcitedFermion:cg2cStar" default="off">
+Scatterings <ei>c g -> c^*</ei>. 
+Code 4004.
+</flag>
+
+<flag name="ExcitedFermion:bg2bStar" default="off">
+Scatterings <ei>b g -> b^*</ei>. 
+Code 4005.
+</flag>
+
+<flag name="ExcitedFermion:egm2eStar" default="off">
+Scatterings <ei>e gamma -> e^*</ei>. 
+Code 4011.
+</flag>
+
+<flag name="ExcitedFermion:mugm2muStar" default="off">
+Scatterings <ei>mu gamma -> mu^*</ei>. 
+Code 4013.
+</flag>
+
+<flag name="ExcitedFermion:taugm2tauStar" default="off">
+Scatterings <ei>tau gamma -> tau^*</ei>. 
+Code 4015.
+</flag>
+
+<flag name="ExcitedFermion:qq2dStarq" default="off">
+Scatterings <ei>q q(bar) -> d^* q(bar)</ei>. 
+Code 4021.
+</flag>
+
+<flag name="ExcitedFermion:qq2uStarq" default="off">
+Scatterings <ei>q q(bar) -> u^* q(bar)</ei>. 
+Code 4022.
+</flag>
+
+<flag name="ExcitedFermion:qq2sStarq" default="off">
+Scatterings <ei>q q(bar) -> s^* q(bar)</ei>. 
+Code 4023.
+</flag>
+
+<flag name="ExcitedFermion:qq2cStarq" default="off">
+Scatterings <ei>q q(bar) -> c^* q(bar)</ei>. 
+Code 4024.
+</flag>
+
+<flag name="ExcitedFermion:qq2bStarq" default="off">
+Scatterings <ei>q q(bar) -> b^* q(bar)</ei>. 
+Code 4025.
+</flag>
+
+<flag name="ExcitedFermion:qqbar2eStare" default="off">
+Scatterings <ei>q qbar -> e^*+- e^-+</ei>. 
+Code 4031.
+</flag>
+
+<flag name="ExcitedFermion:qqbar2nueStarnue" default="off">
+Scatterings <ei>q qbar -> nu_e^* nu_ebar</ei>. 
+Code 4032.
+</flag>
+
+<flag name="ExcitedFermion:qqbar2muStarmu" default="off">
+Scatterings <ei>q qbar -> mu^*+- mu^-+</ei>. 
+Code 4033.
+</flag>
+
+<flag name="ExcitedFermion:qqbar2numuStarnumu" default="off">
+Scatterings <ei>q qbar -> nu_mu^* nu_mubar</ei>. 
+Code 4034.
+</flag>
+
+<flag name="ExcitedFermion:qqbar2tauStartau" default="off">
+Scatterings <ei>q qbar -> tau^*+- tau^-+</ei>. 
+Code 4035.
+</flag>
+
+<flag name="ExcitedFermion:qqbar2nutauStarnutau" default="off">
+Scatterings <ei>q qbar -> nu_tau^* nu_taubar</ei>. 
+Code 4036.
+</flag>
+
+<h3>Parameters</h3>
+
+The basic couplings of the model are
+
+<parm name="ExcitedFermion:Lambda" default="1000." min="100.">
+compositeness scale <ei>Lambda</ei> in GeV.
+</parm>
+
+<parm name="ExcitedFermion:coupF" default="1.0" min="0.0">
+strength <ei>f</ei> of the <ei>SU(2)</ei> coupling.
+</parm>
+
+<parm name="ExcitedFermion:coupFprime" default="1.0" min="0.0">
+strength <ei>f'</ei> of the <ei>U(1)</ei> coupling.
+</parm>
+
+<parm name="ExcitedFermion:coupFcol" default="1.0" min="0.0">
+strength <ei>f_c</ei> of the <ei>SU(3)</ei> coupling.
+</parm>
+
+</chapter>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->
+

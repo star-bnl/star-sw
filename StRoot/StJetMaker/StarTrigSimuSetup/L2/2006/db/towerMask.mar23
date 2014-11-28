@@ -1,0 +1,37 @@
+# B+EEMC tower mask list, ver mar23
+# Replace stat & fatal masks for channels already initialized from the DB 
+#     format : { geographical_name hexStat hexFatal ,  anythingElse}
+#     lines starting with '#' are ignored
+#     empty lines are not permitted
+#
+#  ...............ETOW......................
+#
+06TA03 0xf0 0xf0
+07TC05 0xe0 0xe0
+#	
+#.................BTOW......................
+01te16 0xf0 0xf0
+03ti37 0xf0 0xf0
+03ti38 0xf0 0xf0
+03ti39 0xf0 0xf0
+03ti40 0xf0 0xf0
+03tj01 0xf0 0xf0
+03tj02 0xf0 0xf0
+05ta36 0xe0 0xe1
+05tb39 0xe0 0xe0
+09ta32 0xf0 0xf0
+09tf04 0xf0 0xf0
+09ti33 0xf0 0xf0
+09ti34 0xf0 0xf0
+09ti35 0xf0 0xf0
+09ti36 0xf0 0xf0
+11te25 0xf0 0xf0
+11tf25 0xf0 0xf0
+12tc37 0xf0 0xf0
+#
+# beam bckg causes one-jet hot spot for iphiL2=5, ietaL2=0
+# take 4, one hot tower id=533
+03tg33 0xf0 0xf0
+# new hot tower BTOW id=2916, cr=5, ch=127, location 09te05, march23
+09te05 0xf0 0xf0
+#

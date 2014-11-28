@@ -1,0 +1,201 @@
+*
+* owner Oleg Rogachevsky
+*-----------------------------------------------------*
+macro veer n=1 id=gamma en=5. geo=1 wri=1
+
+debug on
+**  gsflag geom 0
+**  mode cave geom 1
+**  mode pipe geom 1
+**  mode calb geom 1
+**  mode mfld geom 1
+**  LOSS 1; DRAY 1; RAYL 1;
+**  CUTS .001 .001 .001 .001 .001 .001 .001 .001 .001 .001 1.e-4
+**  DETP TRAC DCAY 210 210 0.1 0.01
+
+** From bfc_util#bfc_g2t_b4_load
+**  detp g2tmain gttc.rdir=0
+** From  load_libraries#run 	  
+
+* Eta rapidities
+   vect/create EtaBin(13) r 2.0 1.9008 1.8065 1.7168 1.6317 1.5507 1.4738 _
+              1.4007 1.3312 1.2651 1.2023 1.1427 1.086
+
+  global/cr wri [wri]
+  global/cr etabin [etabin]
+  degrad = 180./$sigma(pi)
+  global/cr degrad [degrad]
+  global/cr n [n]
+  global/cr id [id]
+  global/cr gid 1
+  global/cr eta1 [eta]
+  eta2=[eta]+[deta]
+  global/cr eta2 [eta2]
+  phi2=[phi]+[dphi]
+  global/cr phi1 [phi]
+  global/cr phi2 [phi2]
+
+  case [id] in 
+    (gamma) gid=1;
+    (e-)    gid=3;
+    (mu+)   gid=5;
+    (mu-)   gid=6;
+    (pi0)   gid=7;
+    (pi-)   gid=9;
+    (p)     gid=14;
+    (pbar)  gid=15;
+  endcase 
+**
+**  detp geometry bemc_only debug_on field_off help split_off
+ detp geometry  year_2a field_off help split_off
+ make geometry
+ nex;dcut ECAL z 5.57  10. 10.  .036 .036 
+ gclose all
+  RNDM 11 2001
+  make gstar
+  make g2t 
+   if [wri] = 1 then
+**  Name of output file
+**  output=/star/[id]_[en]_[eta]_[n].xdf
+    filename=[id]_[en]_geom[geo]_[n]
+    dir=/star/data22/MC/rogach/v5/
+*    dir=/star/data22/MC/rogach/post/
+    output=[dir][filename].fzd
+*    output=[filename].fzd
+  message ' open file to write to filename = '[output]
+    gfile  o [output]
+    global/cr output [output]
+	 endif	
+
+
+*  dio/newfilestream xdfout [output] w
+**  Save geometry
+*  cd /dui; dio/stream/putevent xdfout Run
+**
+*  alias/cr _kine 'exec eemc#kine'
+*stopm
+ if [geo] = 1 then
+	 phi0 = $sigma(pi)*13/12
+	 nphi=20
+ elseif [geo]=2 then
+	 phi0 = $sigma(pi)*11/12
+	 nphi=30
+ elseif [geo]=3 then
+	 phi0 = $sigma(pi)*11/12
+	 nphi=60
+ endif
+* exe geom phi0=[phi0] nphi=[nphi]  
+ exe module phi0=[phi0] nphi=4
+
+**
+return
+
+*-----------------------------------------------------*
+macro mkpt en=1. eta=1.5
+
+ te=$sigma(2.* atan(exp(-[eta])))
+ pt=$sigma([en]*sin([te]))
+*mess 'pt = '[pt]
+
+return [pt]
+
+*-----------------------------------------------------*
+macro geom  phi0=0 nphi=4
+
+ global/import *
+ debug on
+
+ dphi = $sigma(pi)/30
+
+  	 do j = 1,12
+ 	 eta = $sigma(.5*(etabin([j])+etabin([j]+1)))
+   exec eemc#mkpt [en] [eta]
+   global/cr pt [@]
+   eta1=[eta]
+   eta2=[eta]
+*  nextl
+  	 do i = 1,[nphi]
+			phi = [phi0] + ([i]-.5)*[dphi]
+			phiga = [degrad]*[phi]
+			phi1 = [phi]
+			phi2 = [phi]
+    	message '#--#  run_gstar : '   phi = [phiga] eta = [eta] pt = [pt]
+*nextl
+      phase 1 [gid]  [pt]  [pt] [eta1] [eta2] [phi1] [phi2]
+			trig 1
+
+*    	nextl 
+			gprint hits
+*   		ls 
+    	for/call g2t
+    	mess  'Event/g2t_eem_hit'
+    	table/print g2t_eem_hit 20
+    	mess  'Event/g2t_esm_hit'
+    	table/print g2t_esm_hit 20
+*
+*     dio/stream/putevent outunit Event
+  	 enddo
+ 	 enddo
+return
+
+*-----------------------------------------------------*
+macro module  phi0=0 nphi=4
+
+ global/import *
+ debug on
+
+ dphi = $sigma(pi)/6
+ mess phi0 =[phi0] dphi= [dphi]
+
+  	 do j = 1,12
+ 	 eta = $sigma(.5*(etabin([j])+etabin([j]+1)))
+* 	 eta = $sigma(.5*(etabin(1)+etabin(13)))
+   exec eemc#mkpt [en] [eta]
+   global/cr pt [@]
+   eta1=[eta]
+   eta2=[eta]
+*  nextl
+  	 do i = 1,[nphi]
+			phi = [phi0] + ([i]-.5)*[dphi]
+			phiga = [degrad]*[phi]
+			phi1 = [phi]
+			phi2 = [phi]
+    	message '#--#  run_gstar : '   phi = [phiga] eta = [eta] pt = [pt]
+      if [wri] = 1 then
+      	phase 1 [gid]  [pt]  [pt] [eta1] [eta2] [phi1] [phi2]
+				trig [n]
+				gprint hits ecal
+    	nextl 
+*   			ls 
+    		for/call g2t
+    		mess  'Event/g2t_eem_hit'
+    		table/print g2t_eem_hit 20
+    		mess  'Event/g2t_esm_hit'
+    		table/print g2t_esm_hit 20
+*
+*     dio/stream/putevent outunit Event
+			endif	
+  	 enddo
+ 	 enddo
+	
+return
+*-----------------------------------------------------*
+macro kine
+  global/import *
+  debug on
+*  swit 2 3
+*  swit 4 3
+  do i=1,[n]
+    phase 1 [gid]  [pt]  [pt] [eta1] [eta2] [phi1] [phi2]
+    trig 1
+*    for/call g2t
+*    cd /dui; dio/stream/putevent xdfout Event ! Save Event
+
+  enddo
+
+*  cd /dui  
+*  dio/stream/close xdfout
+
+*  mess  J O B   E N D E D
+    
+return

@@ -1,0 +1,1493 @@
+\documentclass[12pt,a4paper]{article}
+
+%packages
+\usepackage{epsfig}
+\usepackage{relsize}
+
+%define page size
+\setlength{\textheight}{233mm}
+\setlength{\topmargin}{14mm}
+\setlength{\headheight}{0mm}
+\setlength{\headsep}{0mm}
+\setlength{\footskip}{10mm}
+\setlength{\textwidth}{160mm}
+\setlength{\oddsidemargin}{0mm}
+\setlength{\evensidemargin}{0mm}
+\setlength{\parindent}{0mm}
+\setlength{\parskip}{0.35\baselineskip}
+
+%define math alphabets for teletype, roman, overline
+\newcommand{\ttt}[1]{\texttt{#1}}
+\newcommand{\tbl}[1]{{\color{blue}\texttt{#1}}}
+\newcommand{\trd}[1]{{\color{red}\texttt{#1}}}
+\newcommand{\tol}[1]{{\color{olive}\texttt{#1}}}
+\newcommand{\mrm}[1]{\mathrm{#1}}
+\newcommand{\mbf}[1]{\mathbf{#1}}
+\newcommand{\br}[1]{\overline{#1}}
+ 
+%some frequent math symbols
+\newcommand{\gtrsim}{\raisebox{-2mm}%
+{\hspace{1mm}$\stackrel{>}{\sim}$\hspace{1mm}}}
+\newcommand{\lessim}{\raisebox{-2mm}%
+{\hspace{1mm}$\stackrel{<}{\sim}$\hspace{1mm}}}
+
+%shorthands
+\newcommand{\as}{\alpha_{\mathrm{s}}}
+\newcommand{\aem}{\alpha_{\mathrm{em}}}
+\newcommand{\kT}{k_{\perp}}
+\newcommand{\pT}{p_{\perp}}
+\newcommand{\pTs}{p^2_{\perp}}
+\newcommand{\pTe}{\p_{\perp\mrm{evol}}}
+\newcommand{\pTse}{\p^2_{\perp\mrm{evol}}}
+\newcommand{\pTmin}{p_{\perp\mathrm{min}}}
+\newcommand{\pTsmim}{p^2_{\perp\mathrm{min}}}
+\newcommand{\pTmax}{p_{\perp\mathrm{max}}}
+\newcommand{\pTsmax}{p^2_{\perp\mathrm{max}}}
+\newcommand{\pTL}{p_{\perp\mathrm{L}}}
+\newcommand{\pTD}{p_{\perp\mathrm{D}}}
+\newcommand{\pTA}{p_{\perp\mathrm{A}}}
+\newcommand{\pTsL}{p^2_{\perp\mathrm{L}}}
+\newcommand{\pTsD}{p^2_{\perp\mathrm{D}}}
+\newcommand{\pTsA}{p^2_{\perp\mathrm{A}}}
+\newcommand{\pTo}{p_{\perp 0}}
+\newcommand{\shat}{\hat{s}}
+  
+%roman names for particles in math mode
+\renewcommand{\a}{{\mathrm a}}
+\renewcommand{\b}{{\mathrm b}}
+\renewcommand{\c}{{\mathrm c}}
+\renewcommand{\d}{{\mathrm d}}
+\newcommand{\e}{{\mathrm e}}
+\newcommand{\f}{{\mathrm f}}
+\newcommand{\g}{{\mathrm g}}
+\newcommand{\hrm}{{\mathrm h}}
+\newcommand{\lrm}{{\mathrm l}}
+\newcommand{\n}{{\mathrm n}}
+\newcommand{\p}{{\mathrm p}}
+\newcommand{\q}{{\mathrm q}}
+\newcommand{\s}{{\mathrm s}}
+\renewcommand{\t}{{\mathrm t}}
+\renewcommand{\u}{{\mathrm u}}
+\newcommand{\A}{{\mathrm A}}
+\newcommand{\B}{{\mathrm B}}
+\newcommand{\D}{{\mathrm D}}
+\newcommand{\F}{{\mathrm F}}
+\renewcommand{\H}{{\mathrm H}}
+\newcommand{\J}{{\mathrm J}}
+\newcommand{\K}{{\mathrm K}}
+\renewcommand{\L}{{\mathrm L}}
+\newcommand{\Q}{{\mathrm Q}}
+\newcommand{\R}{{\mathrm R}}
+\newcommand{\T}{{\mathrm T}}
+\newcommand{\W}{{\mathrm W}}
+\newcommand{\Z}{{\mathrm Z}}
+\newcommand{\bbar}{\overline{\mathrm b}}
+\newcommand{\cbar}{\overline{\mathrm c}}
+\newcommand{\dbar}{\overline{\mathrm d}}
+\newcommand{\fbar}{\overline{\mathrm f}}
+\newcommand{\pbar}{\overline{\mathrm p}}
+\newcommand{\qbar}{\overline{\mathrm q}}
+\newcommand{\rbar}{\overline{\mathrm{r}}}
+\newcommand{\sbar}{\overline{\mathrm s}}
+\newcommand{\tbar}{\overline{\mathrm t}}
+\newcommand{\ubar}{\overline{\mathrm u}}
+\newcommand{\Bbar}{\overline{\mathrm B}}
+\newcommand{\Fbar}{\overline{\mathrm F}}
+\newcommand{\Qbar}{\overline{\mathrm Q}}
+\newcommand{\tms}{\ensuremath{t_{\textnormal{\tiny MS}}}}
+\newcommand{\Oas}[1]{\ensuremath{\mathcal{O}\left(\as^{#1}\right)}}
+
+%new list environments to replace itemize and enumerate
+\newenvironment{Itemize}{\begin{list}{$\bullet$}%
+{\setlength{\topsep}{0.4mm}\setlength{\partopsep}{0.4mm}%
+\setlength{\itemsep}{0.4mm}\setlength{\parsep}{0.4mm}}}%
+{\end{list}}
+\newcounter{enumct}
+\newenvironment{Enumerate}{\begin{list}{\arabic{enumct}.}%
+{\usecounter{enumct}\setlength{\topsep}{0.4mm}%
+\setlength{\partopsep}{0.4mm}\setlength{\itemsep}{0.4mm}%
+\setlength{\parsep}{0.4mm}}}{\end{list}}
+
+\begin{document}
+ 
+%set sloppy attitude to line breaks
+\sloppy
+
+\begin{flushright}
+For tutorials\\
+at Summer Schools\\
+or self-study\\
+January 2014
+\end{flushright}
+
+\vspace{-28mm}
+\includegraphics[width=40mm]{lejon2.eps}%
+\hspace{30mm}%
+\raisebox{4mm}[0mm][0mm]{\includegraphics[width=20mm]{pythiapicture.eps}}
+
+\begin{center}
+{\LARGE\bf PYTHIA 8 Worksheet}\\[10mm]
+{\large Torbj\"orn Sj\"ostrand}\\[1mm]
+Department of Astronomy and Theoretical Physics, Lund University\\[4mm]
+{\large Peter Skands}\\[1mm]
+Theoretical Physics, CERN\\[4mm]
+{\large Stefan Prestel}\\[1mm]
+Theory group, DESY
+\end{center}
+
+\vspace*{5mm}
+
+\section{Introduction}
+
+The \textsc{Pythia}~8.1 program is a standard tool for the generation of
+high-energy collisions (specifically, it focuses on centre-of-mass
+energies greater than about 10 GeV), comprising a coherent set of
+physics models for the evolution from a few-body high-energy (``hard'')
+scattering process to a complex multihadronic final state. The
+particles are produced in vacuum. Simulation of the interaction of the
+produced particles with detector material is not included in
+\textsc{Pythia} but can, if needed, be done by interfacing to external 
+detector-simulation codes.
+
+The \textsc{Pythia}~8.1 code package contains a library of hard
+interactions and models for initial- and final-state parton showers,
+multiple parton-parton interactions, beam remnants, string
+fragmentation and particle decays. It also has a set of utilities and
+interfaces to external programs.
+
+The objective of this exercise is to teach you the basics of how to
+use the \textsc{Pythia}~8.1 event generator to study various physics
+aspects.  As you become more familiar you will better understand the
+tools at your disposal, and can develop your own style to use
+them. Within this first exercise it is not possible to describe the
+physics models used in the program; for this we refer to the
+\textsc{Pythia}~8.1 brief introduction \cite{pythiaeight}, to the full
+\textsc{Pythia}~6.4 physics description \cite{pythiasix}, and to all
+the further references found in them.
+
+\textsc{Pythia}~8 is, by today's standards, a small package.
+It is completely self-contained, and is therefore easy to install for
+standalone usage, e.g. if you want to have it on your own laptop,
+or if you want to explore physics or debug code without any danger 
+of destructive interference between different libraries. Section 2 
+describes the installation procedure, which is what we will need for 
+this introductory session. It does presuppose a working Unix-style
+environment with C++ compilers and the like; check Appendix~D if in doubt.
+
+When you use \textsc{Pythia} you are expected to write the main program
+yourself, for maximal flexibility and power. Several examples of such
+main programs are included with the code, to illustrate common tasks
+and help getting started. Section 3 gives you a simple step-by-step 
+recipe how to write a minimal main program, that can then gradually 
+be expanded in different directions, e.g.\ as in Section 4.
+
+In Section 5 you will see how the parameters of a run can be read in 
+from a file, so that the main program can be kept fixed. Many of the 
+provided main programs therefore allow you to create executables that 
+can be used for different physics studies without recompilation,
+but potentially at the cost of some flexibility.  
+
+The final three sections provide suggestions for optional further studies,
+and can be addressed in any order. Section 6 deals with the important 
+topic of merging of external matrix-element input of different orders,
+introducing the {\smaller CKKW-L} scheme as a suitable starting point.
+Section 7 describes how you can explore various physics aspects of the
+Standard Model Higgs production and decay. Section 8, finally, collects
+suggestions for a few diverse studies.    
+
+While \textsc{Pythia} can be run standalone, it can also be interfaced 
+with a set of other libraries. One example is \textsc{HepMC}, which 
+is the standard format used by experimentalists to store generated 
+events. Since the \textsc{HepMC} library location is 
+installation-dependent it is not possible to give a fool-proof linking 
+procedure, but some hints are provided for the interested in Appendix~C. 
+Further main programs included with the \textsc{Pythia} code provide 
+examples of linking, e.g., to \textsc{AlpGen}, \textsc{MadGraph}, 
+\textsc{PowHeg}, \textsc{FastJet}, \textsc{ProMC}, \textsc{Root},
+and the Les Houches Accords LHEF, LHAPDF and SLHA.
+
+Appendix~A contains a brief summary of the event-record structure, 
+and Appendix~B some notes on simple histogramming and jet finding.
+Appendices C and D have already been mentioned.
+
+\section{Installation \label{sec:installation}}
+
+Denoting a generic \textsc{Pythia}~8 version \texttt{pythia81xx}
+(at the time of writing \texttt{xx} = 83), here is how to install 
+\textsc{Pythia}~8 on a Linux/Unix/MacOSX system as a standalone package
+(assuming you have standard Unix-family tools installed, see Appendix~D). 
+
+\begin{Enumerate}
+\item In a browser, go to\\
+\hspace*{10mm}\texttt{http://home.thep.lu.se/$\sim$torbjorn/Pythia.html}
+\item Download the (current) program package\\
+\hspace*{10mm}\texttt{pythia81xx.tgz}\\
+to a directory of your choice (e.g. by right-clicking on the link).
+\item In a terminal window, \texttt{cd} to where \texttt{pythia81xx.tgz} 
+was downloaded, and type\\
+\hspace*{10mm}\texttt{tar xvfz pythia81xx.tgz}\\
+This will create a new (sub)directory \texttt{pythia81xx} where all
+the \textsc{Pythia} source files are now ready and unpacked.
+\item Move to this directory (\texttt{cd pythia81xx}) and do a
+\texttt{make}. This will take $\sim$3 minutes
+(computer-dependent). The \textsc{Pythia}~8 libraries are now
+compiled and ready for physics. 
+\item For test runs, \texttt{cd} to the \texttt{examples/} subdirectory. 
+An \texttt{ls} reveals a list of programs, \texttt{mainNN}, with
+\texttt{NN} from \texttt{01} through \texttt{28} (and beyond). These 
+example programs each illustrate an aspect of \textsc{Pythia}~8. 
+For a list of what they do, see the ``Sample Main Programs'' page 
+in the online manual (point 6 below).\\ 
+Initially only use one or two of them to check that the installation
+ works. Once you have worked your way though the introductory exercises 
+in the next sections you can return and study the programs and their 
+output in more detail.\\
+To execute one of the test programs, do\\
+\hspace*{10mm}\texttt{make mainNN}\\
+\hspace*{10mm}\texttt{./mainNN.exe}\\
+The output is now just written to the terminal, \texttt{stdout}. 
+To save the output to a file instead, do 
+\texttt{./mainNN.exe >  mainNN.out}, after which you can study the 
+test output at leisure by opening \texttt{mainNN.out}. See Appendix~A 
+for an explanation of the event record that is listed in several of 
+the runs.
+\item If you use a web browser to open the file\\
+\hspace*{10mm}\texttt{pythia81xx/htmldoc/Welcome.html}\\
+you will gain access to the online manual, where all available methods 
+and parameters are described. Use the left-column index to navigate among 
+the topics, which are then displayed in the larger right-hand field. 
+\end{Enumerate}
+
+\section{A ``Hello World'' program}
+
+We will now generate a single $\g \g \to \t \tbar$ event at the LHC,
+using \textsc{Pythia} standalone.
+
+Open a new file \texttt{mymain.cc} in the \texttt{examples} subdirectory 
+with a text editor, e.g.\ Emacs. Then type the following lines 
+(here with explanatory comments added):
+\begin{verbatim}
+     // Headers and Namespaces.
+     #include "Pythia8/Pythia.h" // Include Pythia headers.
+     using namespace Pythia8;    // Let Pythia8:: be implicit.
+
+     int main() {                // Begin main program.
+
+       // Set up generation.
+       Pythia pythia;            // Declare Pythia object
+       pythia.readString("Top:gg2ttbar = on"); // Switch on process.
+       pythia.readString("Beams:eCM = 8000."); // 8 TeV CM energy.      
+       pythia.init(); // Initialize; incoming pp beams is default.
+
+       // Generate event(s).
+       pythia.next(); // Generate an(other) event. Fill event record.
+
+       return 0;
+     }                // End main program with error-free return.
+\end{verbatim}
+
+Next you need to edit the \texttt{Makefile} (the one in the \texttt{examples} 
+subdirectory) so it knows what to do with \texttt{mymain.cc}.
+The lines\\
+\hspace*{10mm}\texttt{\# Create an executable for one of the normal test 
+programs}\\
+\hspace*{10mm}\texttt{main00  main01 main02 main03 ... main09 main10 
+main10}~\verb+\+ \\
+and the four next enumerate the main programs that do not need any 
+external libraries. Edit the last of these lines to include also 
+\texttt{mymain}:\\
+\hspace*{10mm}\texttt{main80 mymain:}~\verb+\+
+
+Now it should work as before with the other examples:\\
+\hspace*{10mm}\texttt{make mymain}\\
+\hspace*{10mm}\texttt{./mymain.exe > mymain.out}\\
+whereafter you can study \texttt{mymain.out}, especially the 
+example of a complete event record (preceded by initialization information,
+and by kinematical-variable and hard-process listing for the same event). 
+At this point you need to turn to Appendix~A for a brief overview of the 
+information stored in the event record. 
+
+An important part of the event record is that many copies of the same
+particle may exist, but only those with a positive status code are still
+present in the final state. To exemplify, consider a top quark
+produced in the hard interaction, initially with positive status code. When
+later a shower branching $\t \to \t \g$ occurs, the new $\t$ and $\g$ are
+added at the bottom of the then-current event record, but the old $\t$ is
+not removed. It is marked as decayed, however, by negating its status code.
+At any stage of the shower there is thus only one ``current'' copy of the
+top. After the shower, when the final top decays, $\t \to \b \W^+$, also
+that copy receives a negative status code. When you understand the basic
+principles, see if you can find several copies of the top quarks, and check
+the status codes to figure out why each new copy has been added. Also note
+how the mother/daughter indices tie together the various copies.
+
+\section{A first realistic analysis}
+
+We will now gradually expand the skeleton \texttt{mymain} program from
+above, towards what would be needed for a more realistic analysis setup.
+\begin{Itemize}
+\item Often, we wish to mix several processes together. 
+To add the process $\q \qbar \to \t \tbar$ to the above example, 
+just include a second \texttt{pythia.readString} call\\
+\hspace*{10mm}\texttt{pythia.readString("Top:qqbar2ttbar = on");}
+\item Now we wish to generate more than one event. To do this, introduce a
+loop around \texttt{pythia.next()}, so the
+code now reads\\
+\hspace*{10mm}\texttt{for (int iEvent = 0; iEvent < 5; ++iEvent) \{ }\\
+\hspace*{10mm}\texttt{~~pythia.next(); }\\
+\hspace*{10mm}\texttt{\} }\\
+Hereafter, we will call this the \textit{event loop}. The program will
+now generate 5 events; each call to \texttt{pythia.next()} 
+resets the event record and fills it with a new event. To list
+more of the events, you also need to add\\
+\hspace*{10mm}\texttt{pythia.readString("Next:numberShowEvent = 5");}\\
+along with the other \texttt{pythia.readString} commands. 
+
+\item To obtain statistics on the number of events generated of the 
+different kinds, and the estimated cross sections, add a \\
+\hspace*{10mm}\texttt{pythia.stat();}\\
+just before the end of the program.
+\item During the run you may receive problem messages. These come in
+three kinds:
+\begin{Itemize}
+\item a \textit{warning} is a minor problem that is automatically fixed by 
+the program, at least approximately;
+\item an \textit{error} is a bigger problem, that is normally still 
+automatically fixed by the program, by backing up and trying again;
+\item an \textit{abort} is such a major problem that the current
+ event could not be completed; in such a rare case \texttt{pythia.next()} 
+is \texttt{false} and the event should be skipped.  
+\end{Itemize}
+Thus the user need only be on the lookout for aborts. During event
+generation, a problem message is printed only the first time it occurs
+(except for a few special cases). 
+The above-mentioned \texttt{pythia.stat()} will then tell you how many
+times each problem was encountered over the entire run.
+\item Studying the event listing for a few events
+at the beginning of each run is useful to make sure you are generating the
+right kind of events, at the right energies, etc. For real analyses,
+however, you need automated access to the event record. The Pythia event
+record provides many utilities to make this as simple and efficient as
+possible. To access all the particles in the event record, insert the
+following loop after \texttt{pythia.next()} (but fully enclosed by the
+event loop) \\
+\hspace*{10mm}\texttt{for (int i = 0; i < pythia.event.size(); ++i) \{ }\\
+\hspace*{10mm}\texttt{~~cout << "i = " << i << ", id = " }\\
+\hspace*{10mm}\texttt{~~~~~~~<< pythia.event[i].id() << endl; }\\ 
+\hspace*{10mm}\texttt{\} }\\
+which we will call the \textit{particle loop}. Inside this loop, you
+can access the properties of each particle \texttt{pythia.event[i]}. For
+instance, the method \texttt{id()} returns the PDG identity code of a
+particle (see Appendix~A.1). The \texttt{cout} statement, therefore, will
+give a list of the PDG code of every particle in the event record.
+\item As mentioned above, the event listing contains all partons and
+particles, traced through a number of intermediate steps. Eventually, the
+top will decay ($\t \to \W \b$), and by implication it is the last top copy
+in the event record that defines the definitive top production kinematics,
+just before the decay. You can obtain the location of this final top 
+e.g.\ by a line just before the particle loop \\
+\hspace*{10mm}\texttt{int iTop = 0;} \\
+and a line inside the particle loop \\
+\hspace*{10mm}\texttt{if (pythia.event[i].id() == 6) iTop = i;} \\ 
+The value of \texttt{iTop} will be set every time a top is found in the
+event record. When the particle loop is complete, \texttt{iTop}
+will now point to the final top in the event record (which can be accessed
+as \texttt{pythia.event[iTop]}).
+\item In addition to the particle properties in the event listing,  
+there are also methods that return many derived quantities for a 
+particle, such as transverse momentum, \texttt{pythia.event[iTop].pT()},
+and pseudorapidity, \texttt{pythia.event[iTop].eta()}. Use these methods
+to print out the values for the final top found above. 
+\item We now want to generate more events, say 1000, to view the shape
+of these distributions. Inside \textsc{Pythia} is a very simple
+histogramming class, see Appendix~B.1, that can be used for rapid 
+check/debug purposes. To book the histograms, insert before the 
+event loop \\
+\hspace*{10mm}\texttt{Hist pT("top transverse momentum", 100, 0., 200.);}\\
+\hspace*{10mm}\texttt{Hist eta("top pseudorapidity", 100, -5., 5.);}\\
+where the last three arguments are the number of bins, the lower edge and
+the upper edge of the histogram, respectively. Now we want to fill the
+histograms in each event, so before the end of the event loop
+insert \\
+\hspace*{10mm}\texttt{pT.fill( pythia.event[iTop].pT() );}\\
+\hspace*{10mm}\texttt{eta.fill( pythia.event[iTop].eta() );}\\
+Finally, to write out the histograms, after the event loop we need
+a line like\\
+\hspace*{10mm}\texttt{cout << pT << eta;}\\
+Do you understand why the $\eta$ distribution looks the way it does?
+Propose and study a related but alternative measure and compare.
+\item As a final standalone exercise, consider plotting the charged 
+multiplicity of events. You then need to have a counter set to zero
+for each new event. Inside the particle loop this counter should
+be incremented whenever the particle \texttt{isCharged()} and
+\texttt{isFinal()}. For the histogram, note that it can be treacherous to
+have bin limits at integers, where roundoff errors decide whichever way
+they go. In this particular case only even numbers are possible, so 100
+bins from $-1$ to 399 would still be acceptable.
+\end{Itemize}
+
+\section{Input files}
+
+With the \texttt{mymain.cc} structure developed above it is necessary to
+recompile the main program for each minor change, e.g. if you want to
+rerun with more statistics. This is not time-consuming for a simple 
+standalone run, but may become so for more realistic applications.
+Therefore, parameters can be put in special input ``card'' files
+that are read by the main program. 
+
+We will now create such a file, with the same settings used in the
+\texttt{mymain} example program. Open a new file, \texttt{mymain.cmnd}, and
+input the following
+\begin{verbatim}
+     ! t tbar production at the LHC
+     Beams:idA = 2212     ! first incoming beam is a 2212, i.e. a proton.  
+     Beams:idB = 2212     ! second beam is also a proton. 
+     Beams:eCM = 8000.    ! the cm energy of collisions. 
+     Top:gg2ttbar = on    ! switch on the process g g -> t tbar.  
+     Top:qqbar2ttbar = on ! switch on the process q qbar -> t tbar.  
+\end{verbatim}
+
+The \texttt{mymain.cmnd} file can contain one command per line,
+of the type\\
+\hspace*{10mm}\texttt{variable = value}\\
+All variable names are case-insensitive (the mixing of cases has been
+chosen purely to improve readability) and non-alphanumeric characters
+(such as !, \# or \$) will be interpreted as the start of a comment. All
+valid variables are listed in the online manual (see Section 2, point 6,
+above). Cut-and-paste of variable names can be used to avoid spelling
+mistakes.
+
+The final step is to modify our program to use this input file. The name of
+this input file can be hardcoded in the main program, but for more
+flexibility, it can also be provided as a command-line argument. To do
+this, replace the \texttt{int main() \{} line by \\
+\hspace*{10mm} \texttt{int main(int argc, char* argv[]) \{}\\
+and replace all \texttt{pythia.readString(...)} commands with the single
+command\\
+\hspace*{10mm}\texttt{pythia.readFile(argv[1]);} 
+
+The executable \texttt{mymain.exe} is then run with a command line like\\
+\hspace*{10mm}\texttt{./mymain.exe mymain.cmnd > mymain.out}\\
+and should give the same output as before.
+
+In addition to all the internal \texttt{Pythia} variables there exist a
+few defined in the database but not actually used. These are intended to 
+be useful in the main program, and thus begin with \texttt{Main:}.
+The most basic of those is \texttt{Main:numberOfEvents}, which you can 
+use to specify how many events you want to generate. To make this have
+any effect, you need to read it in the main program, after
+the \texttt{pythia.readFile(...)} command, by a line like\\
+\hspace*{10mm}\texttt{int nEvent = pythia.mode("Main:numberOfEvents");}\\
+and set up the event loop like\\
+\hspace*{10mm}\texttt{for (int iEvent = 0; iEvent < nEvent; ++iEvent) \{ }
+
+You are now free to play with further options in the input file, such as:
+\begin{Itemize}
+\item \texttt{6:m0 = 175.}\\  
+change the top mass, which by default is 171 GeV.
+\item \texttt{PartonLevel:FSR = off}\\  
+switch off final-state radiation.
+\item \texttt{PartonLevel:ISR = off}\\  
+switch off initial-state radiation.
+\item \texttt{PartonLevel:MPI = off}\\
+switch off multiparton interactions.  
+\item \texttt{Tune:pp = 3} (or other values between 1 and 13) \\
+different combined tunes, in particular to radiation and multiparton 
+interactions parameters. In part this reflects that no generator 
+is perfect, and also not all data is perfect, so different emphasis 
+will result in different optima. In addition, detailed tuning of 
+\texttt{Pythia}~8 is still in its infancy.  
+\item \texttt{Random:setSeed = on}\\
+\texttt{Random:seed = 123456789}\\
+all runs by default use the same random-number sequence, for reproducibility,
+but you can pick any number between 1 and 900,000,000 to obtain a unique
+sequence.
+\end{Itemize}
+For instance, check the importance of FSR, ISR and MPI on the charged 
+multiplicity of events by switching off one component at a time.
+
+The usage of further \texttt{Main:} variables is illustrated e.g.\ in
+\texttt{main03.cc}, and the possibility to use command-line input
+files in \texttt{main16.cc} and \texttt{main42.cc}. 
+
+The online manual also exists in an interactive variant, where you
+semi-automatically can construct a file with all the command lines you
+wish to have. This requires that somebody installs the 
+\texttt{pythia81xx/phpdoc} directory in a webserver. If you lack a local
+installation you can use the one at\\
+\hspace*{10mm}\texttt{http://home.thep.lu.se/$\sim$%
+torbjorn/pythia81php/Welcome.php}\\
+This is not a commercial-quality product, however, and requires some
+user discipline. Full instructions are provided on the ``Save Settings''
+page.
+
+You have now completed the core part of the worksheet --- congratulations! 
+From now on you should be able to take off in different directions, 
+depending on your interests. The following three sections contain 
+examples of further possible studies, and can be addressed in any order.  
+
+\section{CKKW-L merging}
+
+The main programs we have constructed and studied in the previous sections 
+have one common drawback: all start from the \textsc{Pythia}~8 internal
+library of lowest-order processes, and then add higher-order corrections
+entirely by the internal parton-shower machinery. This will give
+reliable results for soft and collinear configurations, but less so for 
+multiple hard, well-separated jets. To model the latter similarly well 
+we need to include external input from higher-order calculations, 
+at least at tree level, but where feasible also at one-loop level. 
+A number of different external programs can provide such input, using 
+the LHA/LHEF standard format \cite{leshouchesaccord,leshoucheseventfiles} 
+to transfer information, usually as LHE files. The hard-process events 
+stored in these files will be accepted or rejected in such a way that 
+doublecounting between different parton multiplicities is removed, 
+resulting in a smooth transition between the multiplicities, and 
+between the external input and the internal handling of parton showers. 
+These two tasks usually go hand in hand.
+
+Many different schemes have been proposed for matrix element + parton 
+shower merging (MEPS), and a comprehensive selection of such schemes 
+is available with the \textsc{Pythia}~8 distribution, including
+\begin{Itemize}
+\item tree-level merging: {\smaller MLM} jet matching \cite{mlm} 
+(\textsc{MadGraph}- 
+or \textsc{AlpGen}-style), {\smaller CKKW-L} merging \cite{ckkwl}, and 
+unitarised {\smaller ME}+{\smaller PS} merging ({\smaller UMEPS})
+\cite{umeps}; and
+\item next-to-leading order merging: \textsc{NL$^3$} merging and
+unitarised NLO+PS merging \mbox{({\smaller UNLOPS})} \cite{unlops}.
+\end{Itemize}
+The setup of such merging schemes is documented in the online manual,
+heading ``Link to Other Programs'', page ``Matching and Merging'' with
+further subpages, and is illustrated in several of the example main 
+programs.
+
+Here we will experiment with the {\smaller CKKW-L} scheme, which was 
+the first merging scheme available in \textsc{Pythia}~8, and also
+is among the simpler to work with. We will take the \texttt{main80}
+example main program as a starting point for our studies. In its
+general structure it closely resembles the main program(s) we already
+constructed step by step, so we will only need to comment on aspects
+that are new for the merging game. The process $\W^+ + \leq 2$~jets 
+will be taken as an example. It uses the LHE files\\
+\hspace*{10mm}\texttt{w+\_production\_lhc\_0.lhe} for $\W^+ + 0$ partons\\
+\hspace*{10mm}\texttt{w+\_production\_lhc\_1.lhe} for $\W^+ + 1$ parton\\
+\hspace*{10mm}\texttt{w+\_production\_lhc\_2.lhe} for $\W^+ + 2$ partons\\
+in the \texttt{examples} directory to produce a result that simultaneously 
+describes $\W^+ + 0,1,2$ jet observables with leading-order matrix 
+elements, while also including arbitrarily many shower emissions.
+Jets are here defined by a clustering procedure on the partons thus 
+generated. (We omit other effects from consideration, such as MPIs or 
+hadronization.)  
+
+Say we want to study a one-jet observable, e.g. the transverse 
+momentum of the jet $j$ in events with \emph{exactly} one jet. In this case, 
+we want to take ``hard'' jets from the $\p\p \to \W j$ matrix element 
+(ME), while ``soft'' jets should be modelled by parton-shower (PS) 
+emissions off the $\p\p \to \W$ states. In order to smoothly merge these 
+two samples, we have to know in which measure ``hard'' is defined, and 
+which value of this measure separates the hard and soft regions. In 
+\texttt{main80.cmnd}, these definitions are\\ 
+\hspace*{10mm}\texttt{Merging:doKTMerging = on}\\
+\hspace*{10mm}\texttt{Merging:ktType~~~~~~= 2}\\
+\hspace*{10mm}\texttt{Merging:TMS~~~~~~~~~= 30.}\\
+This will enable the merging procedure, with the merging scale defined by 
+the minimal longitudinally invariant $k_\perp$ separation between partons
+(there are many other possibilities, by \texttt{ktType} value or by your
+own choice of merging procedure), with a merging scale $\tms = 30$~GeV. 
+Such a definition fixes what we mean when we talk about ``hard'' 
+and ``soft'' jets:
+\vspace*{2mm}\\
+\hspace*{8mm}
+\begin{tabular}{l l}
+Hard jets:  & $\min\{$Any relative $k_{\perp}$ between sets of 
+partons$\} > \tms$\\
+Soft jets:  & $\min\{$Any relative $k_{\perp}$ between sets of 
+partons$\} < \tms$
+\end{tabular}\vspace*{2mm}\\
+Thus, in order for the merging prescription to work, we need to remove
+phase space regions with $\min\{$Any $k_{\perp}\} < \tms$
+from the W+1-parton matrix element calculation. Otherwise, there would
+be an overlap between the ``soft jet'' and ``hard jet'' samples. 
+ 
+This requirement means that the merging-scale definition should be 
+implemented as a \emph{cut in the matrix element generator}. 
+Alternatively, it is possible to enforce the cut in \textsc{Pythia}~8 
+internally, assuming that the ME is calculated with more inclusive 
+(i.e.\ loose) cuts. This is illustrated in Figure~\ref{fig:pythia-tms-cut}, 
+in which the triangle depicts the whole phase space, with soft or 
+collinear divergences located on the edges. The yellow area symbolises 
+the phase-space region used for the generation of the LHEF events, 
+while the green area represents the phase space after \textsc{Pythia}~8 
+has enforced the merging-scale cut on the input events. In order to 
+correctly apply the merging-scale cut, the green area has to be fully 
+contained inside the yellow one, i.e.\ the cut in the ME generator has 
+to be more inclusive than the $\tms$-cut. For optimal efficiency, the 
+yellow and green areas should be identical. This can be the case in 
+\textsc{MadGraph}~5 \cite{madgraphfive}, when using the generation cuts 
+\texttt{ktdurham} (corresponding to \texttt{Merging:doKTMerging = on}) 
+and \texttt{ptpythia} (corresponding to 
+\texttt{Merging:doPTLundMerging = on}).
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{ps33.eps}
+\includegraphics[width=0.4\textwidth]{ps44.eps}
+\caption{Schematic illustration of how the phase space covered by the 
+external matrix-element generator, yellow region, has to enclose the 
+region passing the \textsc{Pythia}~8 cuts, green region.
+\label{fig:pythia-tms-cut}}
+\end{figure}
+
+After the merging-scale definition, we define the underlying process.
+To tell \textsc{Pythia}~8 that we want to merge additional jets
+in W-boson production, we specify which is the core process, using
+\textsc{MadGraph} notation, where the final state is defined by the 
+$\W^+$ decay products rather than by the $\W^+$ itself:\\
+\hspace*{10mm}\texttt{Merging:Process~~~~~~~~~= pp>e+ve}\\
+in \texttt{main80.cmnd}. Finally, the setting\\
+\hspace*{10mm}\texttt{Merging:nJetMax~~~~~~~~~= 2}\\
+tells the program to include the pre-generated ME events for up to two 
+additional jets.
+
+In \texttt{main80.cc}, the input file \texttt{main80.cmnd} is read early on
+by the \texttt{pythia.readFile(\dots)} command. This gives access to the 
+number of events to be read from each LHE file, and the number of LHE files
+to be processed. The \textit{subrun loop} then handles each LHE file,
+one at a time. Specifically, the\\
+\hspace*{10mm}\texttt{pythia.readFile("main80.cmnd", iMerge);}\\  
+uses the \texttt{iMerge} argument when reading the \texttt{main80.cmnd} 
+file, so that only those commands following the respective 
+\texttt{Main:subrun = iMerge} label are read. (Plus that everything 
+before the first \texttt{Main:subrun} is re-read, but that does not 
+matter since it stays the same.) Thus the proper LHE file is picked up for
+each jet multiplicity. The\\
+\hspace*{10mm}\texttt{Beams:frameType~~~~~~~~~= 4}\\
+also informs \textsc{Pythia} that beam parameters should be read from the
+header section of the LHE file, and not set by the user.    
+
+Then we enter the event loop. The already-discussed difference in 
+phase-space coverage can lead to a fair fraction of all input events 
+being rejected. Thus the number of produced events can be lower than 
+the requested \texttt{Main:numberOfEvents} one if the file is not
+large enough. (When no further events can be read the
+\texttt{pythia.next()} command will return \texttt{false}, so that
+the event loop can be exited at the end of the LHE file.)
+Those events that survive come with a weight\\
+\hspace*{10mm}\texttt{double weight = pythia.info.mergingWeight();}\\
+which contains Sudakov factors (to remove the double counting between 
+samples of different multiplicity), $\as$ ratios (to incorporate the
+$\as$ running not available in matrix element generators), and 
+ratios of parton distributions (to include variable factorization scales). 
+This weight \textit{must} be used when filling histogram bins, as is e.g.\ 
+done by\\
+\hspace*{10mm}\texttt{pTWnow.fill( pTW, weight);}\\
+for the $p_{\perp}$ of the $\W$\ boson. The sum of weights also goes into
+the calculation of the total generated cross section. 
+
+After the event loop, the contribution to the $p_{\perp}$ of the 
+$\W$ boson from this particular multiplicity is normalised by\\
+\hspace*{10mm}\texttt{pTWnow *= 1e9*pythia.info.sigmaGen()/%
+(2.*pythia.info.nAccepted());}\\
+where the ratio of the two \texttt{pythia.info} numbers is the weight per 
+event, the \texttt{1e9} is for conversion from mb to pb, and the \texttt{2.}
+compensates for the bin width to give cross section per GeV.
+This number and more detailed statistics are printed to the terminal. 
+As a final step, the contribution of the current subrun is added to 
+the total histogram\\
+\hspace*{10mm}\texttt{pTWsum += pTWnow;}\\
+and the subrun loop begins over with the next LHE file. The complete 
+histogram, combining all multiplicities, is printed after the sub-run 
+loop has concluded. 
+
+You can compile and run \texttt{main80.cc} by issuing the commands\\
+\hspace*{10mm}\texttt{make main80}\\
+\hspace*{10mm}\texttt{./main80.exe}\\
+When you run the program, note that some warning messages are issued 
+routinely as part of the merging machinery, in the steps where a 
+clustering history is found and where it is decided whether an event
+fails the merging scale cuts. Warnings from the SLHA interface also
+are irrelevant. So no reason to worry about any of that.
+
+After the first run with the main program as is, you can try different 
+variations.
+\begin{Itemize}
+\item Convince yourself that the variation of the ``merging weight'' 
+is moderate.
+ \item Check in which $p_\perp$ regions which jet multiplicity
+contributes most.
+\item Study how the individual contributions and the sum changes when
+you run with a maximum of 1 or 0 jets, instead of the default 2.
+\item Compare the $p_\perp$ spectrum of the $\W$ with what you get 
+from running the internal \textsc{Pythia} production process, by 
+straightforward modifications of your \texttt{mymain} program.
+\item A major limitation is the size of the event files that come with 
+the standard \textsc{Pythia} distribution, for space reasons. If you 
+have a decent Internet connection you can download larger files, 
+with 100\,000 events for each multiplicity up to $\W + 4$~partons. 
+Do this from the \textsc{Pythia} home page, in the ``Tutorials'' section of 
+it, files \texttt{wp\_tree\_0.lhe.gz} through \texttt{wp\_tree\_4.lhe.gz}.
+You should \texttt{gunzip} them after downloading. (It is also possible 
+to configure \textsc{Pythia} so that it can read \texttt{gzip}ped files,
+see the \texttt{README} in the \textsc{Pythia} main directory, but this 
+is less trivial.) With these files you can repeat the exercise above, 
+and in particular check how much is gained by including the further 
+$\W + 3$ and $\W + 4$ samples. To run through all events in the files
+takes a while, so check with a fraction of the sample to begin with,
+and be prepared to do something else while you wait for the full run to 
+complete.  
+\item Alternatively, if you are already a \textsc{MadGraph} user,
+you could generate your own LHE files and merge them. This would
+take some time, however, in particular for the higher multiplicities,
+so may not be an option.
+\item Use a jet finder to analyze the final state, and plot the 
+$\pT$ spectra for the first, second, and third hardest jets,
+combining separate contributions similarly to what is done in
+\texttt{main80.cc} for the $\W$ $\pT$ spectrum. Instructions how 
+to use the built-in \texttt{SlowJet} jet finder can be found in 
+Appendix~B.2.
+\item Check the variation of merged predictions with $\tms$. You can 
+do this by using an ``inclusive'' event sample, and having 
+\textsc{Pythia} enforce a stronger $\tms$ cut. In which phase-space 
+region is the $\tms$ variation most visible?
+\item Switch between ``wimpy'' and ``power'' showers by choosing 
+values for \texttt{TimeShower:pTmaxMatch} and 
+\texttt{SpaceShower:pTmaxMatch}. Are the effects more visible in 
+merged or non-merged predictions?
+\end{Itemize}
+
+Once you have familiarised yourself with the example, you can experiment
+with more advanced settings in \texttt{main80.cmnd}. Alternatively, 
+try to use the example main program \texttt{main85.cc}, which is intended 
+as a general ``{\smaller CKKW-L} blackbox''. This program produces 
+\textsc{HepMC} events that can directly be processed by standard plotting 
+tools. You can also download the dedicated merging tutorial from the
+\textsc{Pythia} home page to learn more.
+
+\section{Some studies of Higgs production}
+
+The discovery of the Higgs boson has been the main accomplishment
+of the LHC to date. Generators have been part of that story, right from 
+the early days when the ATLAS and CMS detectors were designed in such a
+way as to permit that discovery. This section offers exercises 
+intended to explore the physics of Higgs production from various aspects,
+with \textsc{Pythia} as guide.
+
+\subsection{Production kinematics}
+
+The dominant production channel is $\g\g\to\H^0$. To study the 
+kinematics distribution of the Higgs, the existing top production
+program could easily be modified. Instead of switching on top
+production, use\\  
+\hspace*{10mm}\texttt{HiggsSM:gg2H = on}\\
+And instead of looking for the last top copy before decay, look
+for the last Higgs copy \texttt{iH}, ie. the last particle with 
+\texttt{id() == 25}. Once found the \texttt{pythia.event[iH]}
+methods can be used to extract and histogram Higgs kinematics 
+distributions, like for the top. In addition to the transverse
+momentum \texttt{pT()} you can compare the distributions for 
+true rapidity \texttt{y()} and for pseudorapidity \texttt{eta()}.
+
+\subsection{Production processes}
+
+While $\g\g \to \H^0$ is the main Higgs production channel,
+it is not the only one. Do a run with \texttt{HiggsSM:all = on} 
+to check which are implemented and their relative importance.
+Also figure out how you could generate one of the less frequent 
+processes on its own, either from the online manual or by making 
+some deductions from the output with all processes.
+
+In order to get decent cross-section statistics faster, you can use 
+\texttt{PartonLevel:all = off} to switch off everything except the 
+hard-process generation itself. One price to pay is that the 
+kinematics distributions for the Higgs are not meaningful.
+
+If instead complete events are generated you can study how the
+transverse-momentum distribution varies between processes.
+What are the reasons behind the significant differences? 
+
+\subsection{Decay channels}
+
+Also the decay channels and branching ratios in the Higgs
+decay are of interest. Here no ready-made statistics routines
+exist, so you have to do it yourself. You already have the location
+\texttt{iH} of the decaying Higgs. Since the standard decay modes
+are two-body, their locations are stored in\\  
+\hspace*{10mm}\texttt{int iDau1 = pythia.event[iH].daughter1();}\\
+\hspace*{10mm}\texttt{int iDau2 = pythia.event[iH].daughter2();}\\
+and from that you can get the identities of the daughters.
+Introduce counters for all the decay modes you come to think of,
+that you use to derive and print branching ratios. Print the 
+daughter identities in the leftover decays, where you did not yet 
+have any counters, and iterate until you catch it all.
+ 
+In this case, \texttt{PartonLevel:all = off} cannot be used, since 
+then one does not get to the decays, at least not with the 
+information in \texttt{pythia.event}. But you can combine\\
+\hspace*{10mm}\texttt{PartonLevel:ISR = off} to switch off 
+initial-state radiation,\\
+\hspace*{10mm}\texttt{PartonLevel:FSR = off} to switch off 
+final-state radiation,\\
+\hspace*{10mm}\texttt{PartonLevel:MPI = off} to switch off 
+multiparton interactions, and\\
+\hspace*{10mm}\texttt{HadronLevel:all = off} to switch off 
+hadronization and decays,\\
+to get almost the same net time saving.
+
+\subsection{Mass distribution}
+
+By now the Higgs mass is pretty well pinned down, but you can 
+check what the branching ratios would have been with another mass,
+e.g.\ by \texttt{25:m0 = 150.} for a 150 GeV Higgs.
+
+On a related note, the Higgs mass is generated according to a 
+Breit-Wigner distribution, convoluted with parton densities.
+Can you resolve this shape for the default Higgs mass?
+How does it change had the Higgs been heavier, say at 400 GeV? 
+
+\subsection{Associated jets}
+\label{sec:Hjets}
+
+Let's return to the different production channels, which 
+give different event characteristics. Well-known is that the 
+$\q \q \to \q \q \H^0$ processes give rise to jets at large
+rapidities, that can be used for tagging purposes. This can be
+studied as follows.
+
+The two relevant processes are \texttt{HiggsSM:ff2Hff(t:ZZ)} and
+\texttt{HiggsSM:ff2Hff(t:WW)} for $\Z^0 \Z^0$ and $\W^+ \W^-$
+fusion ($\f$ here denotes a fermion; the same processes also exist
+e.g. at $\e^+ \e^-$ colliders), that are to be compared with
+the standard $\g\g \to \H^0$ one.
+
+Find jets using the \texttt{SlowJet} class, see Appendix~B.2,
+e.g.\ using the anti-$k_{\perp}$ algorithm with $R = 0.7$, 
+$p_{\perp\mathrm{min}} = 30$~GeV and $\eta_{\mathrm{max}} = 5$.
+
+One problem is that also the Higgs decay products can give jets, which
+we are not interested in here. To avoid this, we can switch off Higgs 
+decays by \texttt{25:mayDecay = off}. This still leaves the Higgs itself
+in the event record. A call 
+\texttt{pythia.event[iH].statusNeg()} will negate its status code, 
+and since \texttt{slowJet.analyze(...)} only considers the final 
+particles, i.e. those with positive status, the Higgs is thus
+eliminated. 
+
+Now study the $\pT$ and rapidity spectrum of the hardest jets,
+and compare those distributions for the two processes. Also study
+how many jets are produced in the two cases.
+
+\subsection{Underlying event}
+
+Several mechanisms contribute to the overall particle production in
+Higgs events. This can be studied e.g.\ by histogramming the charged 
+particle distribution.    
+
+You then need to have a counter set to zero for each new event. Inside 
+the particle loop this counter should be incremented whenever 
+the particle \texttt{isFinal()} and \texttt{isCharged()}. For the histogram, 
+note that it can be treacherous to have bin limits at integers, where 
+roundoff errors decide whichever way they go. In this particular case 
+only even numbers are possible, so 100 bins from $-1$ to 399 would still 
+be acceptable, for instance.
+
+Once you have the distribution down for normal events, study what happens 
+if you remove ISR, FSR and MPI one by one or all together. Also study 
+the contribution of the Higgs decay itself to the multiplicity, e.g.\ by 
+setting the Higgs stable. Reflect on why different combinations give 
+the pattern they do, e.g.\ why ISR on/off makes a bigger difference
+when MPI is on than off. 
+
+\subsection{Decay properties}
+
+The decay mode $\H^0 \to \Z^0 \Z^0 \to \ell^+ \ell^- \ell'^+ \ell'^-$,
+$\ell, \ell' = \e, \mu$, is called the gold-plated one, since it stands
+out so well from backgrounds. It also offers angular correlations that
+probe the spin of a Higgs candidate.
+
+For now consider a simpler, but still interesting, pair of distributions:
+the mass spectra of the two $\Z^0$ decay products. Plot them for the 
+lighter and the heavier of the two separately, and compare shapes and 
+average values. To improve statistics, you can use \texttt{25:onMode = off}
+to switch off all decay channels, and then \texttt{25:onIfMatch = 23 23}
+to switch back on the decay to $\Z^0 \Z^0$ (and nothing else). Further, 
+neither ISR, FSR, MPI nor hadronization affect the mass distributions, 
+so this allows some speedup.
+
+How can one qualitatively understand why the two masses tend to be
+so far apart, rather than roughly comparable? 
+
+\subsection{Comparison with $\Z^0$ production}
+
+One of the key reference processes at hadron colliders is $\Z^0$ production.
+To lowest order it only involves one process, $\q\qbar \to \gamma^*/\Z^0$,
+accessible with \texttt{WeakSingleBoson:ffbar2gmZ = on}. One complication
+is that the process involves $\gamma^*/\Z^0$ interference, and so a 
+significiant enhancement at low masses, even if the combined particle
+always is classified with code 23, however. 
+
+Compare the two processes $\g\g \to \H^0$ and $\q\qbar \to \gamma^*/\Z^0$,
+with respect to the $\pT$ distribution of the boson and the total charged
+multiplicity of the events. So as to remove the dependence on the difference
+in mass, you can set a specific mass range in the $\gamma^*/\Z^0$ 
+generation with \texttt{PhaseSpace:mHatMin = 124} and 
+\texttt{PhaseSpace:mHatMax = 126}, to agree with the $\H^0$ mass
+to $\pm$ 1 GeV.
+
+Can you explain what is driving the differences in the $\pT$ and 
+$n_{\mrm{chg}}$ distributions between the two processes? 
+
+\section{Further studies}
+
+If you have time left, you should take the opportunity to try 
+a few other processes or options. Below are given some examples, 
+but feel free to pick something else that you would be more
+interested in.  
+
+\begin{Itemize}
+\item One popular misconception is that the energy and momentum of a 
+$\B$ meson has to be smaller than that of its mother $\b$ quark, and 
+similarly for charm. The fallacy is twofold. Firstly, if the $\b$ 
+quark is surrounded by nearby colour-connected gluons, the $\B$ meson 
+may also pick up some of the momentum of these gluons. Secondly, the
+concept of smaller momentum is not Lorentz-frame-independent:
+if the other end of the $\b$ colour force field is a parton with a
+higher momentum (such as a beam remnant) the ``drag'' of the 
+hadronization process may imply an acceleration in the lab frame
+(but a deceleration in the beam rest frame).\\
+To study this, simulate $\b$ production, e.g.\ the process
+\texttt{HardQCD:gg2bbbar}. Identify $\B / \B^*$ mesons that
+come directly from the hadronization, for simplicity those with
+status code $-83$ or $-84$. In the former case the mother $\b$
+quark is in the \texttt{mother1()} position, in the latter in
+\texttt{mother2()} (study a few event listings to see how it works).
+Plot the ratio of $\B$ to $\b$ energy to see what it looks like.       
+
+\item One of the characteristics of multiparton-interactions (MPI) models
+is that they lead to strong long-range correlations, as observed in
+data. That is, if many hadrons are produced in one rapidity range
+of an event, then most likely this is an event where many MPI's
+occurred (and the impact parameter between the two colliding protons
+was small), and then one may expect a larger activity also at other
+rapidities.\\
+To study this, select two symmetrically located, one unit wide bins 
+in rapidity (or pseudorapidity), with a variable central separation 
+$\Delta y$: $\left[ \Delta y/2, \Delta y/2 + 1 \right]$ and 
+$\left[ - \Delta y/2 - 1, - \Delta y/2 \right]$.
+For each event you may find $n_F$ and $n_B$, the charged multiplicity 
+in the ``forward'' and ``backward'' rapidity bins. Suitable averages 
+over a sample of events then gives the forward--backward correlation 
+coefficient
+\[
+\rho_{FB}(\Delta y) = \frac{\langle n_F \, n_B \rangle 
+- \langle n_F \rangle \langle n_B \rangle}%
+{\sqrt{(\langle n_F^2 \rangle - \langle n_F \rangle^2)
+(\langle n_B^2 \rangle - \langle n_B \rangle^2)}} 
+= \frac{\langle n_F \, n_B \rangle - \langle n_F \rangle^2}%
+{\langle n_F^2 \rangle - \langle n_F \rangle^2} ~,
+\]
+where the last equality holds for symmetric distributions such as
+in $\p\p$ and $\pbar\p$.\\
+Compare how $\rho_{FB}(\Delta y)$ changes for increasing
+$\Delta y = 0, 1, 2, 3, \ldots$, with and without MPI switched on
+(\texttt{PartonLevel:MPI = on/off}) for minimum-bias events
+(\texttt{SoftQCD:minBias = on}).
+
+\item $\Z^0$ production to lowest order only involves one process,
+which is accessible with \texttt{WeakSingleBoson:ffbar2gmZ = on}. 
+The problem here is that the process is $\f \fbar \to \gamma^*/\Z^0$ 
+with full $\gamma^*/\Z^0$ interference and so a signficiant enhancement 
+at low masses. The combined particle is always classified with code 23,
+however. So generate events and study the $\gamma^*/\Z^0$ mass and
+$\pT$ distributions. Then restrict to a more ``$\Z^0$-like''  
+mass range with \texttt{PhaseSpace:mHatMin = 75.} and 
+\texttt{PhaseSpace:mHatMax = 120.}
+
+\item Use a jet clustering algorithm, e.g.\ one of the \texttt{SlowJet}
+options described in Appendix~B.2, to study the number of jets found in 
+association with the $\Z^0$ above. You can switch off $\Z^0$ decay with 
+\texttt{23:mayDecay = no}, and negate its status code by
+\texttt{pythia.event[iZ].statusNeg()}, so that it will not be included
+in the jet finding. Here \texttt{iZ} is the last copy of the $\Z^0$,
+cf.\ how the last top copy was found above.
+Again check the importance of FSR/ISR/MPI. 
+\end{Itemize}
+
+Note that the \textsc{Pythia} homepage contains two further tutorials,
+in addition to older editions of the current one. These share some
+of the introductory material, but then put the emphasis on two 
+specific areas:
+\begin{Itemize}
+\item a merging tutorial, showing the step-by-step construction of 
+a relevant main program, and more details on possible merging 
+approaches than found in Section~6 of the current manual; and
+\item a BSM tutorial, describing how you can input events from
+Beyond-the-Standard-model scenarios into \textsc{Pythia}.
+\end{Itemize}
+ 
+
+\appendix
+\section{The Event Record}
+
+The event record is set up to store every step in the evolution from 
+an initial low-multiplicity partonic process to a final high-multiplicity
+hadronic state, in the order that new particles are generated. The record
+is a vector of particles, that expands to fit the needs of the current 
+event (plus some additional pieces of information not discussed here). 
+Thus \texttt{event[i]} is the \texttt{i}'th particle of the current 
+event, and you may study its properties by using various 
+\texttt{event[i].method()} possibilities.
+
+The \texttt{event.list()} listing provides the main properties of 
+each particles, by column:
+\begin{Itemize}
+\item \texttt{no}, the index number of the particle (\texttt{i}
+above);
+\item \texttt{id}, the PDG particle identity code 
+(method \texttt{id()});
+\item \texttt{name}, a plaintext rendering of the particle name 
+(method \texttt{name()}), within brackets for initial or intermediate 
+particles and without for final-state ones;
+\item \texttt{status}, the reason why a new particle was added to 
+the event record (method \texttt{status()});
+\item \texttt{mothers} and \texttt{daughters}, documentation on
+the event history (methods \texttt{mother1()}, \texttt{mother2()}, 
+\texttt{daughter1()} and \texttt{daughter2()});
+\item \texttt{colours}, the colour flow of the process (methods 
+\texttt{col()} and \texttt{acol()});
+\item \texttt{p\_x}, \texttt{p\_y}, \texttt{p\_z} and \texttt{e}, 
+the components of the momentum four-vector $(p_x, p_y, p_z, E)$,
+in units of GeV with $c = 1$ (methods \texttt{px()}, \texttt{py()}, 
+\texttt{pz()} and \texttt{e()});
+\item \texttt{m}, the mass, in units as above (method \texttt{m()}).
+\end{Itemize}
+For a complete description of these and other particle properties 
+(such as production and decay vertices, rapidity, $p_\perp$, etc), 
+open the program's online documentation in a browser (see Section 2,
+point 6, above), scroll down to the ``Study Output'' section, and follow
+the ``Particle Properties'' link in the left-hand-side menu.  For brief
+summaries on the less trivial of the ones above, read on.
+
+\subsection{Identity codes}
+
+A complete specification of the PDG codes is found in the
+Review of Particle Physics \cite{rpp}. An online listing is 
+available from\\
+\hspace*{10mm}\texttt{http://pdg.lbl.gov/2012/reviews/%
+rpp2012-rev-monte-carlo-numbering.pdf}
+
+A short summary of the most common \texttt{id} codes would be\\[2mm] 
+\begin{tabular}{|cc|cc|cc|cc|cc|cc|cc|}
+\hline
+1 & $\d$ & 11 & $\e^-$      & 21  & $\g$ & 211 & $\pi^+$ 
+& 111 & $\pi^0$ & 213 & $\rho^+$ & 2112 & $\n$ \\
+2 & $\u$ & 12 & $\nu_{\e}$   & 22 & $\gamma$ & 311 & $\K^0$
+& 221 & $\eta$ & 313 & $\K^{*0}$ & 2212 & $\p$  \\
+3 & $\s$ & 13 & $\mu^-$     & 23 & $\Z^0$  & 321 & $\K^+$
+& 331 & $\eta'$ & 323 & $\K^{*+}$ & 3122 & $\Lambda^0$ \\
+4 & $\c$ & 14 & $\nu_{\mu}$  & 24 & $\W^+$ & 411 & $\D^+$
+& 130 & $\K^0_{\mrm{L}}$ & 113 & $\rho^0$ & 3112 & $\Sigma^-$ \\
+5 & $\b$ & 15 & $\tau^-$    & 25 & $\H^0$ & 421 & $\D^0$
+& 310 & $\K^0_{\mrm{S}}$ & 223 & $\omega$ & 3212 & $\Sigma^0$  \\
+6 & $\t$ & 16 & $\nu_{\tau}$ &  &  & 431 & $\D_{\s}^+$
+& & & 333 & $\phi$ & 3222 & $\Sigma^+$ \\
+\hline
+\end{tabular}\\[2mm]
+Antiparticles to the above, where existing as separate entities, 
+are given with a negative sign.\\
+Note that simple meson and baryon codes are constructed from 
+the constituent (anti)quark codes, with a final spin-state-counting digit 
+$2 s + 1$ ($\K^0_{\mrm{L}}$ and $\K^0_{\mrm{S}}$ being exceptions), and with
+a set of further rules to make the codes unambiguous.  
+
+\subsection{Status codes}
+
+When a new particle is added to the event record, it is assigned 
+a positive status code that describes why it has been added,
+as follows (see the online manual for the meaning of each specific
+code):\\[2mm]  
+\begin{tabular}{|c|l|}
+\hline
+code range & explanation \\
+\hline
+11 -- 19 & beam particles\\
+21 -- 29 & particles of the hardest subprocess\\
+31 -- 39 & particles of subsequent subprocesses in multiparton interactions\\
+41 -- 49 & particles produced by initial-state-showers\\
+51 -- 59 & particles produced by final-state-showers\\
+61 -- 69 & particles produced by beam-remnant treatment\\
+71 -- 79 & partons in preparation of hadronization process\\
+81 -- 89 & primary hadrons produced by hadronization process\\
+91 -- 99 & particles produced in decay process, or by Bose-Einstein effects\\ 
+\hline
+\end{tabular}\\[2mm]
+Whenever a particle is allowed to branch or decay further its status 
+code is negated (but it is \textit{never} removed from the event record), 
+such that only particles in the final state remain with positive codes. The
+\texttt{isFinal()} method returns \texttt{true/false} for
+positive/negative status codes.
+
+\subsection{History information}
+
+The two mother and two daughter indices of each particle provide 
+information on the history relationship between the different entries 
+in the event record. The detailed rules depend on the particular physics 
+step being described, as defined by the status code. As an example, 
+in a $2 \to 2$ process $a b \to c d$, the locations of $a$ and $b$
+would set the mothers of $c$ and $d$, with the reverse relationship
+for daughters. When the two mother or daughter indices are not
+consecutive they define a range between the first and last entry,
+such as a string system consisting of several partons fragment into
+several hadrons.
+
+There are also several special cases. One such is when ``the same''
+particle appears as a second copy, e.g. because its momentum has 
+been shifted by it taking a recoil in the dipole picture of parton
+showers. Then the original has both daughter indices pointing to the
+same particle, which in its turn has both mother pointers referring
+back to the original. Another special case is the description of 
+ISR by backwards evolution, where the mother is constructed at a 
+later stage than the daughter, and therefore appears below it in the 
+event listing. 
+
+If you get confused by the different special-case storage options, the 
+two \texttt{motherList()} and \texttt{daughterList()} methods 
+return a \texttt{vector} of all mother or daughter indices of 
+a particle.
+
+\subsection{Colour flow information}
+
+The colour flow information is based on the Les Houches Accord
+convention \cite{leshouchesaccord}. In it, the number of colours
+is assumed infinite, so that each new colour line can be assigned
+a new separate colour. These colours are given consecutive labels:
+101, 102, 103, \ldots . A gluon has both a colour and an anticolour
+label, an (anti)quark only (anti)colour. 
+
+While colours are traced consistently through hard processes and 
+parton showers, the subsequent beam-remnant-handling step often 
+involves a drastic change of colour labels. Firstly, previously 
+unrelated colours and anticolours taken from the beams may at this
+stage be associated with each other, and be relabelled accordingly. 
+Secondly, it appears that the close space--time overlap of many 
+colour fields leads to reconnections, i.e. a swapping of colour labels, 
+that tends to reduce the total length of field lines.
+
+\section{Some facilities}
+
+The \textsc{Pythia} package contains some facilities that are 
+not part of the core generation mission, but are useful
+for standalone running, notably at summer schools. Here we give
+some brief info on histograms and jet finding.
+
+\subsection{Histograms}
+
+For real-life applications you may want to use sophisticated 
+histogramming programs like ROOT, which however take much time to
+install and learn. Within the time at our disposal, we therefore 
+stick with the very primitive \texttt{Hist} class. Here is a 
+simple overview of what is involved. 
+
+As a first step you need to declare a histogram, with name, title, 
+number of bins and $x$ range (from, to), like\\
+\hspace*{10mm}\texttt{Hist pTH("Higgs transverse momentum", 100, 0., 200.);}\\
+Once declared, its contents can be added by repeated calls to fill,\\
+\hspace*{10mm}\texttt{pTH.fill( 22.7, 1.);}\\ 
+where the first argument is the $x$ value and the second the weight. 
+Since the weight defaults to 1 the last argument could have been omitted 
+in this case.
+
+A set of overloaded operators have been defined, so that histograms can be 
+added, subtracted, divided or multiplied by each other. Then the contents 
+are modified accordingly bin by bin. Thus the relative deviation between 
+two histograms \texttt{data} and \texttt{theory} can be found as\\
+\hspace*{10mm}\texttt{diff = (data - theory) / (data + theory);}\\
+assuming that \texttt{diff}, \texttt{data} and \texttt{theory} have been 
+booked with the same number of bins and $x$ range. 
+
+Also overloaded operations with double real numbers are available. Again 
+these four operations are defined bin by bin, i.e.\ the corresponding 
+amount is added to, subtracted from, multiplied by or divided by each bin. 
+The double number can come before or after the histograms, with obvious 
+results. Thus the inverse of a histogram result is given by 
+\texttt{1./result}. The two kind of operations can be combined, e.g.\\
+\hspace*{10mm}\texttt{allpT = ZpT + 2. * WpT}
+
+A histogram can be printed by making use of the overloaded 
+\texttt{<<} operator, e.g.\\
+\hspace*{10mm}\texttt{cout << ZpT;}\\
+The printout format is inspired by the old HBOOK one. To understand 
+how to read it, consider the simplified example
+\begin{verbatim}                                   
+        3.50*10^ 2  9                     
+        3.00*10^ 2  X   7               
+        2.50*10^ 2  X  1X               
+        2.00*10^ 2  X6 XX                
+        1.50*10^ 2  XX5XX                 
+        1.00*10^ 2  XXXXX                
+        0.50*10^ 2  XXXXX        
+
+          Contents 
+            *10^ 2  31122
+            *10^ 1  47208
+            *10^ 0  79373
+
+          Low edge  -- 
+            *10^ 1  10001 
+            *10^ 0  05050
+\end{verbatim}
+The key feature is that the \texttt{Contents} and \texttt{Low edge} 
+have to be read vertically. For instance, the first bin has the 
+contents $3 * 10^2 + 4 * 10^1 + 7 * 10^0 = 347$. Correspondingly, 
+the other bins have contents 179, 123, 207 and 283. The first bin 
+stretches from $-(1 * 10^1 + 0 * 10^0) = -10$ to the beginning 
+of the second bin, at $-(0 * 10^1 + 5 * 10^0) = -5$.
+
+The visual representation above the contents give a simple impression 
+of the shape. An \texttt{X} means that the contents are filled up to 
+this level, a digit in the topmost row the fraction to which the last 
+level is filled. So the \texttt{9} of the first column indicates this 
+bin is filled 9/10 of the way from $3.00*10^2 = 300$ to 
+$3.50*10^2 = 350$, i.e. somewhere close to 345, or more precisely 
+in the range 342.5 to 347.5.
+
+The printout also provides some other information, such as the number 
+of entries, i.e. how many times the histogram has been filled, the total 
+weight inside the histogram, the total weight in underflow and overflow, 
+and the mean value and root-mean-square width (disregarding underflow 
+and overflow). The mean and width assumes that all the contents is in 
+the middle of the respective bin. This is especially relevant when you 
+plot a integer quantity, such as a multiplicity. Then it makes sense 
+to book with limits that are half-integers, e.g.\\
+\hspace*{10mm}\texttt{Hist multMPI( "number of multiparton interactions", % 
+20, -0.5, 19.5);}\\
+so that the bins are centered at 0, 1, 2, ..., respectively. This also 
+avoids ambiguities which bin gets to be filled if entries are exactly 
+at the border between two bins. Also note that the \texttt{fill( xValue)} 
+method automatically performs a cast to double precision where necessary, 
+i.e. \texttt{xValue} can be an integer.
+
+Histogram values can also be output to a file\\
+\hspace*{10mm}\texttt{pTH.table("filename");}\\ 
+which produces a two-column table, where the first column gives the 
+center of each bin and the second one the corresponding bin content.
+This may be used for plotting e.g. with Gnuplot.
+
+\subsection{Jet finding}
+
+The \texttt{SlowJet} class offer jet finding by the $\kT$,
+Cambridge/Aachen and anti-$\kT$ algorithms. By default it is now 
+a front end to the FJcore subset, extracted from the FastJet package 
+\cite{fastjet} and distributed as part of the \textsc{Pythia} package, 
+and is therefore 
+no longer slow. It is good enough for basic jet studies, but does not 
+allow for jet pruning or other more sophisticated applications. 
+(An interface to the full FastJet package is available for such uses.)
+
+You set up \texttt{SlowJet} initially with\\
+\hspace*{10mm}\texttt{SlowJet slowJet( pow, radius, pTjetMin, etaMax);}\\
+where \texttt{pow = -1} for anti-$\kT$ (recommended), \texttt{pow = 0} 
+for Cambridge/Aachen, \texttt{pow = 1} for $\kT$,  while \texttt{radius} 
+is the $R$ parameter, \texttt{pTjetMin} the minimum $\pT$ of jets, and 
+\texttt{etaMax} the maximum pseudorapidity of the detector coverage. 
+
+Inside the event loop, you can analyze an event by a call\\
+\hspace*{10mm}\texttt{slowJet.analyze( pythia.event );}\\
+The jets found can be listed by \texttt{slowJet.list();}, but this 
+is only feasible for a few events. Instead you can use the following
+methods:\\
+\hspace*{10mm}\texttt{slowJet.sizeJet()} gives the number of jets found,\\
+\hspace*{10mm}\texttt{slowJet.pT(i)} gives the $\pT$ for the 
+\texttt{i}'th jet, and\\
+\hspace*{10mm}\texttt{slowJet.y(i)} gives the rapidity for the 
+\texttt{i}'th jet.\\
+The jets are ordered in falling $\pT$. 
+
+\section{Interface to HepMC}
+
+The standard \textsc{HepMC} event-record format is frequently used 
+in the MCnet school training sessions, notably since it is required
+for comparisons with experimental data analyses implemented in the  
+Rivet package. Then a ready-made installation is used. However, 
+for the ambitious, here is described how to set up the \textsc{Pythia} 
+interface, assuming you already know where \textsc{HepMC} is installed.
+A similar procedure is required for interfacing to other external 
+libraries, so the points below may be of more general usefulness.\\
+\textit{Note:} the interface to \textsc{HepMC} version 1 is no longer 
+supported; you must use version 2. Preferably 2.04 or later.
+
+To begin with, you need to go back to the installation procedure 
+of section 2 and insert/redo some steps.
+\begin{Enumerate}
+\item Move back to the main \texttt{pythia81xx} directory 
+(\texttt{cd ..} if you are in \texttt{examples}).
+\item Remove the currently compiled version with\\
+\hspace*{10mm}\texttt{make clean}
+\item Configure the program in preparation for the compilation:\\
+\hspace*{10mm}\texttt{./configure --with-hepmc=path}\\
+where the directory-tree \texttt{path} would depend on your local 
+installation. 
+\item Should \texttt{configure} not recognise the version number 
+you can supply that with an optional argument, like\\
+\hspace*{10mm}\texttt{./configure --with-hepmc=path %
+--with-hepmcversion=2.06.07}
+\item Recompile the program, now including the \textsc{HepMC} interface, 
+with \texttt{make} as before, and move back to the \texttt{examples} 
+subdirectory. 
+\item Do either of\\
+\hspace*{10mm}\texttt{source config.csh}\\
+\hspace*{10mm}\texttt{source config.sh}\\
+the former when you use the csh or tcsh shells, otherwise the latter.
+(Use \texttt{echo \$SHELL} if uncertain. Or do both; the wrong one will 
+have no effect.)  
+\item You can now also use the \texttt{main41.cc} and \texttt{main42.cc}
+examples to produce \textsc{HepMC} event files. The latter may be most useful;
+it presents a slight generalisation of the command-line-driven main program
+you constructed in Section 5. After you have built the executable you can 
+run it with\\ 
+\hspace*{10mm}\texttt{./main42.exe infile hepmcfile > main42.out}\\
+where \texttt{infile} is an input ``card'' file (e.g. \texttt{mymain.cmnd})
+and \texttt{hepmcfile} is your chosen name for the output file with 
+\textsc{HepMC} events.
+\end{Enumerate}
+
+Note that the above procedure is based on the assumption that you will
+be running your main programs from the \texttt{examples} subdirectory.
+If not you will have to create your own scripts and/or makefiles to handle
+the linking. If you have no experience with such tasks then it is better
+to use any existing instructions for your local installation. If you do
+have such experience then a short summary of what you need to know
+to get going is provided.
+
+Before you run a \textsc{Pythia} program the \texttt{PYTHIA8DATA} 
+environment variable needs to be set to point to the \texttt{xmldoc} 
+subdirectory where all settings and particle data are stored. If you 
+use the csh or tcsh shells this means a line like\\
+\hspace*{10mm}\texttt{setenv PYTHIA8DATA /path/pythia81xx/xmldoc}\\
+or else\\   
+\hspace*{10mm}\texttt{export PYTHIA8DATA=/path/pythia81xx/xmldoc}\\
+where the correct \texttt{path} has to be found by you. 
+Similarly, to use \textsc{HepMC}, you also have to set or append its
+location to the \texttt{LD\_LIBRARY\_PATH} (the 
+\texttt{DYLD\_LIBRARY\_PATH} on Mac OSX); the \texttt{config.csh} 
+and \texttt{config.sh} files generated above well illustrate the code
+needed to achieve this. Finally, the necessary linking stage can
+be understood from the relevant parts of the \texttt{examples/Makefile}. 
+
+\section{Preparations before starting the tutorial}
+
+Normally, you will run this tutorial on your own (laptop or desktop)
+computer. It is therefore important to make sure that you will be able 
+to extract, compile, and run the code. 
+
+\textsc{Pythia} is not a particularly demanding package by modern 
+standards, but some basic facilities such as emacs (or an equivalent 
+editor), gcc (g++), make, and tar must be available on your system. 
+Below, we give some very basic instructions for standard installations 
+on Linux, Mac OS X, and Windows platforms, respectively. 
+
+In the context of summer schools, students are strongly recommended 
+to make sure that the above-mentioned facilities have been properly 
+installed before traveling to the school, especially if the school 
+is in a location which is likely to offer limited bandwidth.
+
+\subsection{Linux (Ubuntu)}
+
+The default tutorial instructions are intended for Linux (or other 
+Unix-based) platforms, so this should be the easiest type of system 
+to work with. The presence of the required development tools should be
+automatic on most Linux distributions. 
+
+Nonetheless, it seems that at least default installations of 
+Ubuntu 12 do not include the full set of tools. These can be obtained
+by installing the ``build-essential'' package, by opening a terminal
+window and typing\\
+\hspace*{10mm}\texttt{sudo apt-get install build-essential}
+
+\subsection{Max OS X}
+
+Mac OS X does not include code development tools by default, but they
+can relatively easily be obtained by installing Apple's Xcode package,
+which is free of charge from the App Store; just type ``xcode'' in the 
+search field to find it. Once Xcode is installed, launch the application,
+and then click your way from Xcode $>$ Preferences $>$ Downloads $>$
+Components $>$ Command Line Tools. Note that downloading and installing
+Xcode and the Command Line Tools can take quite some time, and if you
+don't already have an Apple ID it will take even longer, so this 
+should be done well before starting the tutorial.
+
+With Xcode installed, you will also be able to use MacPorts 
+(\texttt{www.macports.org}), a convenient package management system 
+for Macs, which makes it very easy to install and maintain compiler 
+suites, \LaTeX, \textsc{Root}, and many other packages. Emacs is not
+part of the Xcode Command Line Tools, so is another useful example. 
+
+\subsection{Windows}
+
+For Windows users, the simplest solution is to run the tutorial on a
+Virtual Machine (VM). We recommend downloading VirtualBox (free from
+Oracle, \texttt{www.virtualbox.org}) and installing either an Ubuntu 
+or CernVM (Scientific Linux, \texttt{cernvm.cern.ch}) Virtual Machine. 
+If you install an Ubuntu VM, please see the instructions above for 
+Ubuntu systems. Verify that you are able to use the VM before 
+starting the tutorial.
+
+If you want to work natively under Windows, you are pretty much on your
+own. If you have Win32/nmake installed, we do include a Makefile.msc,
+so that the command\\
+\hspace*{10mm}\texttt{nmake -f Makefile.msc CFG="Win32 Release"}\\
+should be enough to compile the \textsc{Pythia} library (but no
+guarantees), under Step 4 in section \ref{sec:installation}. 
+Thereafter you have to figure out how to do the test runs. 
+
+\begin{thebibliography}{99}
+
+\bibitem{pythiaeight}
+T. Sj\"ostrand, S. Mrenna and P. Skands,
+Comput. Phys. Comm. {\bf 178} (2008) 852 [arXiv:0710.3820] 
+
+\bibitem{pythiasix}
+T. Sj\"ostrand, S. Mrenna and P. Skands, 
+JHEP {\bf 05} (2006) 026 [hep-ph/0603175]
+
+\bibitem{leshouchesaccord}
+E. Boos et al., in the Proceedings of the Workshop on Physics at TeV 
+Colliders, Les Houches, France, 21 May - 1 Jun 2001 [hep-ph/0109068]
+
+\bibitem{leshoucheseventfiles}
+J. Alwall et al., 
+Comput. Phys. Commun. {\bf 176} (2007) 300 [hep-ph/0609017]
+
+\bibitem{mlm}
+M.L. Mangano, M. Moretti, F. Piccinini and M. Treccani,
+JHEP {\bf 01} (2007) 013
+
+\bibitem{ckkwl}
+L. L\"{o}nnblad and S. Prestel, JHEP {\bf 03} (2012) 019
+[arxiv:1109.4829 [hep-ph]]
+
+\bibitem{umeps}
+L. L\"{o}nnblad and S. Prestel, JHEP {\bf 02} (2013) 094 
+[arxiv:1211.4827 [hep-ph]]
+
+\bibitem{unlops}
+L. L\"{o}nnblad and S. Prestel, JHEP {\bf 03} (2013) 166
+[arxiv:1211.7278 [hep-ph]]
+
+\bibitem{madgraphfive}
+J. Alwall et al., 
+JHEP {\bf 06} (2011) 128, [arXiv:1106.0522 [hep-ph]]
+
+\bibitem{rpp}
+Particle Data Group, C. Amsler et al., 
+Physics Letters {\bf B667} (2008) 1
+
+\bibitem{fastjet}
+M. Cacciari, G.P. Salam and G. Soyez, Eur. Phys. J. C72 (2012) 1896\\
+{}[arXiv:1111.6097 [hep-ph]] 
+
+\end{thebibliography}
+
+\end{document}
+
+

@@ -1,0 +1,32 @@
+TGeoVolume *mutd() {
+TGeoVolume *MUTD = gGeoManager->MakeTube("MUTD",GetMed("MUTD_STANDARD"),365.25,435,250); MUTD->SetTitle("the muon detector mother");
+  MUTD->SetVisibility(0);
+TGeoVolume *MUSC = gGeoManager->MakeTubs("MUSC",GetMed("MUTD_STANDARD"),365.25,435,250,-5,5); MUSC->SetTitle("a sector of MUON Trigger Barrel Scintillators");
+  MUSC->SetVisibility(0);
+TGeoVolume *MTRA = gGeoManager->MakeBox("MTRA",GetMed("MUTD_STANDARD"),5.5,10.795,250); MTRA->SetTitle("one full tray plus supporting structure for CTB/TOF");
+  MTRA->SetLineColor(2);
+TGeoVolume *MXTR = gGeoManager->MakeBox("MXTR",GetMed("MUTD_ALUMINIUM"),4.445,10.795,120.81); MXTR->SetTitle("a Main TRay covering box for CTB or TOF");
+  MXTR->SetLineColor(2);
+TGeoVolume *MMTC = gGeoManager->MakeBox("MMTC",GetMed("MUTD_AIR"),4.315,10.665,120.68); MMTC->SetTitle("the Main Tray Cavity filled with the details for CTB");
+  MMTC->SetLineColor(5);
+TGeoVolume *MPMT = gGeoManager->MakeBox("MPMT",GetMed("MUTD_ALUMINIUM"),1.56,28.6,250); MPMT->SetTitle("a Main TRay covering box for PMT");
+  MPMT->SetLineColor(3);
+TGeoVolume *MMRP = gGeoManager->MakeBox("MMRP",GetMed("MUTD_SENSITIVE"),1.25,28.6,105.41); MMRP->SetTitle("a Main TRay covering box for MRPC");
+  MMRP->SetLineColor(3);
+TGeoVolumeMulti *MXSA = gGeoManager->MakeVolumeMulti("MXSA", GetMed("MUTD_SENSITIVE")); MXSA->SetTitle("the active trigger scintillator SLAB for ctb");
+ MXSA->AddVolume(gGeoManager->MakeBox("MXSA",GetMed("MUTD_SENSITIVE"),0.5,10.5,56.25));
+  MXSA->SetLineColor(3);
+ MXSA->AddVolume(gGeoManager->MakeBox("MXSA",GetMed("MUTD_SENSITIVE"),0.5,10.5,65));
+
+   rot = new TGeoRotation("next",90,18,90,108,0,0);
+   MUTD->AddNode(MUSC,1,rot);
+    MUSC->AddNode(MTRA,1,new TGeoTranslation(395.593,0,0));
+     MTRA->AddNode(MXTR,1,new TGeoTranslation(1.055,0,2.190002));
+      MXTR->AddNode(MMTC,1,gGeoIdentity);
+       MMTC->AddNode(MXSA->GetVolume(0),1,new TGeoTranslation(1.395,0,64.3));
+       MMTC->AddNode(MXSA->GetVolume(1),2,new TGeoTranslation(-1.775,0,-55.29));
+    MUSC->AddNode(MPMT,1,new TGeoTranslation(367.31,0,0));
+    MUSC->AddNode(MMRP,1,new TGeoTranslation(404.85,0,0));
+    MUSC->AddNode(MTRA,2,new TGeoTranslation(425.593,0,0));
+  return MUTD;
+}

@@ -1,0 +1,160 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<!-- 
+      Template by Torre Wenaus.
+      This page is MAINTAINED IN RAW HTML. Do NOT corrupt it
+      by editing it with a WYSIWYG HTML editor.
+ -->
+<head>
+<title>StStrangeMuDstMaker: the Cuts</title>
+<meta name="Author" content="Gene Van Buren">
+<meta name="Description" content="Prepared for the STAR computing and software website.">
+<meta name="KeyWords" content="STAR RHIC computing software documentation StStrangeMuDstMaker">
+<meta name="Generator" content="HomeSite 2.5">
+<meta http-equiv="Reply-to" content="gene@bnl.gov (Gene Van Buren)">
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+        <tr bgcolor="#ffdc9f">
+        <td align=left> <font size="-1">
+        <a href="/STAR/">STAR</a>
+        &nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+        &nbsp; <a href="/STAR/html/comp_l/root/documentation.html">Documentation</a> 
+        </td>
+        <td align=right> <font size="-1">
+        &nbsp;  <!-- top right corner  --> </font></td>
+        </tr>
+        <tr bgcolor="#ffdc9f"><td align=center colspan=2><font size="+2"> <b>
+        StStrangeMuDstMaker: the Cuts
+        </b></font></td></tr>
+        <tr bgcolor="#ffdc9f">
+        <td><font size="-1">Offline Software using ROOT in STAR</font></td>
+        <td align="right"><a href="/STAR/html/ofl_l/prodinfo.html">
+        <font size="2" face="verdana,arial,helvetica,sans-serif">Maintained</font>
+        </a> 
+         <font size="-1">
+         by <a href="mailto:gene@bnl.gov">G. Van Buren</a>
+         </font> </td> 
+        </tr>
+
+	<tr><td align=right> 
+	<td align=right> <font size="-1"> 
+            Last modified Tue Apr 11 15:30:19 2000
+          </FONT></TD></TR>
+
+
+</TABLE>
+
+
+<center>
+<a href="index.html">StStrangeMuDstMaker</a>
+<p>
+<HR width=60%>
+
+<h1>The Cuts</h1>
+<a href="#what">What are the cuts?</a><br>
+<a href="#content">How are the cuts filled?</a><br>
+</center>
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="what"><h2>What are the cuts</h2></a>
+The cuts are instances of the TCut class. This class has a name, and a
+title, and can be used in selections for TTree::Draw() or TTree::Scan().
+These cuts are kept in two locations. On file, they are stored in a
+branch of the micro-DST tree called StrangeCuts. However, when running
+the <a href="maker.html">maker</a>, they are also stored in a
+TOrdCollection class in memory. You may find that in old micro-DST files,
+it was a TOrdCollection named StrangeCuts which was stored on file along
+with the micro-DST; in more recent files this is no longer true.
+One can easily view the cuts by running the listStrangeCuts.C macro on
+a micro-DST file like this:
+<pre>
+  root4star -b -q 'listStrangeCuts.C("myMuDst.root")'
+</pre>
+For an older file with the TOrdCollection in the file, one could do
+the following in Root to see the cuts:
+<pre>
+  TFile file1("evMuDst.root");
+  cuts = (TOrdCollection*) file1.Get("StrangeCuts");
+  cuts->Print();
+</pre>
+<p>
+
+It is important to note that the cuts stored in the branch on file are
+currently only there at the beginning of a file, and at any subsequent
+point in the file at which it was determined that the cuts had changed.
+For example, when filtering many micro-DSTs into one, the cuts from the
+first micro-DST file read will go into the first event in the new micro-DST.
+Each of the subsequent micro-DSTs' cuts are examined to see if they are
+any different from current set of cuts, and if so, are again written at
+the appropriate event into the new micro-DST. For events imbetween, no
+cuts are written to the file. It is not meant for the user to access
+the cuts directly from the file for each event. Instead, please use
+either the listStrangeCuts.C macro described above, or the StStrangeCuts
+class via the maker described below.
+<p>
+
+When using the StStrangeMuDstMaker, the cuts are managed via a class called <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStStrangeCuts.html">
+<b>StStrangeCuts</b></a>. Access to this class is obtained from the maker with
+a call to the member function Cuts():
+<pre>
+  StStrangeCuts& cuts = dstMaker->Cuts();
+</pre>
+This class inherits from TOrdCollection and keeps in memory what the
+current set of cuts associated with the data being read/written are.
+Thus, for all subsequent events in a micro-DST with cuts the same as
+the first (in which case the cuts are stored on file only with the first
+event), one can access the cuts during any event via this class.
+The following functionality is provided by the StStrangeCuts class in
+addition to what is provided by the TOrdCollection class from which it
+inherits:
+<dl>
+<dt><tt>List()</tt>
+<dd>Lists the cuts (simply a call to the TOrdCollection::Print() function).
+
+<dt><tt>TCut* GetCut(char* name)</tt>
+<dd>Get a pointer to the individual cut with the name specified.
+
+<dt><tt>const char* GetValue(char* name)</tt>
+<dd>Get the value string of the individual cut with the name specified.
+
+<dt><tt>Add(char* name, char* value)</tt> and <tt>Add(TCut& cut)</tt>
+<dd>Add a new cut with the name and value specified.
+
+</dl>
+<p>
+
+<hr width=10% align=left>
+<a name="creating"><h2>How are the cuts filled?</h2></a>
+There are two methods for filling the cuts:
+<dl>
+<dt>From run control parameters
+<dd>When a micro-DST is created from a STAR DST, the run control parameters
+used in finding vertices during DST production are automatically read and
+cuts are created for each parameter. If multiple copies of each parameter
+exist (multiple rows in the parameter tables), an colon and index number
+are appended to the cut name (e.g. "dcaV0:2" for the third dcaV0 parameter).
+
+<dt>By adding individual cuts
+<dd>Use of the function call
+<tt>dstMaker->Cuts().Add("cut name","cut value")</tt> allows the user to
+append any additional cuts made after the run control parameter cuts are
+filled. This is particularly applicable when creating a sub-micro-DST
+where additional cuts are made to filter the micro-DST to a smaller subset.
+In this case, the addition should be made to the cuts associated with the
+maker controlling the new micro-DST, not the old one. The Add() function
+may be called at any point after instantiation of the new maker, but the
+new cuts will always be appended to the end of the list of existing cuts.
+
+</dl>
+<P>
+
+</BODY>
+</HTML>

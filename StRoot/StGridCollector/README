@@ -1,0 +1,77 @@
+This directory contains the definition of StGridCollector.  It is the
+user level interface to the Grid Collector Service designed for user
+to select events by tag values.  If necessary, the file containing the
+selected events will be retrieved from their permanent homes over the
+Grid in a stream into local disk cache.  The underlying software performs
+all file retrieval and disk cache management tasks.
+
+Contact Information:
+
+John Wu		<John.Wu@nersc.gov>
+Wei-Ming Zhang	<zhang@hpacq.kent.edu>
+Jerome Lauret	<jeromel@bnl.gov>
+
+
+
+Usage:
+
+(1) add /star/data10/gc/lib into your LD_LIBRARY_PATH
+
+in csh and varients, do
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/star/data10/gc/lib
+
+in sh and varients, do
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/star/data10/gc/lib
+
+
+(2) Inside your analysis code, instead of create an object of StFile
+with a list of file names as arguments, do one of the following
+
+gSystem->Load("StGridCollector");
+StGridCollector *gc = StGridCollector::Create(select-statement);
+if (gc != 0) pass gc as <StFileI*> to StIOMaker
+
+or
+
+gSystem->Load("StGridCollector");
+StGridCollector *gc = StGridCollector::Create();
+int ierr = gc->Init(select-statement);
+if (ierr != 0) Init has failed
+else pass gc as <StFileI*> to StIOMaker
+
+
+The select-statement is a string with a syntax that mimics a SQL select
+statment
+
+SELECT branch-to-use FROM * WHERE conditions
+
+The keywords "SELECT", "FROM" and "WHERE" are not case sensetive.  For
+example, you may use either "select", "Select" or "SELECT" for the
+keyword "SELECT."
+
+Two branchs may be selected, event or MuDst.  If the select keyword is
+not present, event branch is assumed.
+
+The FROM clause is mostly retained for comparison with SQL select
+statment.  We anticipate the it would be used more in the future.
+For the moment, we suggest users to NOT specify it, which is
+equivalent to specifying "FROM *", i.e., the condition specified in
+WHERE clause applies to all events currently known to the Grid
+Collector.
+
+The WHERE clause is *mandatory*, though the key word "WHERE" may be
+omitted if the two preceding clauses are omitted.
+
+The conditions are a list of simple range conditioned joined together by
+logical operators such as "AND", "OR", "XOR", and "!" (for NOT).  The
+range conditions are specified as "mProdTime > 20030405" or "20030400 <
+mProdTime < 20030500".  The comparison operators allowed are >, >=, <,
+<=, =, !=.  For attribute with string values, currently, only '='
+operator is allowed and the string constant must be quoted, for example,
+trigger = 'dAuMinBias'.
+
+The names of the attributes of events are essentially the names of the
+tags in *tags.root files.  The difference is that when there are
+multiple values in a tag, say avg_trkL_tpc, the individual values are
+identified as avg_trkL_tpc[i], where the value of i starts from 0.
+

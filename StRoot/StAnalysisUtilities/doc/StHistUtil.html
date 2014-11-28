@@ -1,0 +1,454 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>StHistUtil Class</title>
+<!-- Changed by: Kathleen R. Turner, 29-Feb-2000 -->
+<!-- Changed by: Curtis Lansdell, 26-Jul-2000 -->
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+  <tr bgcolor="#ffdc9f">
+    <td align=left> <font size="-1">
+	<a href="/STAR/">STAR</a>
+	&nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+    </td>
+    <td align=right> <font size="-1">
+	&nbsp;  <!-- top right corner  --> </font>
+    </td>
+  </tr>
+  <tr bgcolor="#ffdc9f">
+    <td align=center colspan=2><font size="+2"> <b>
+        StHistUtil Class
+	</b></font>
+    </td>
+  </tr>
+  <tr bgcolor="#ffdc9f">
+    <td align=left> <font size="-1">
+	<!-- lower left text --> &nbsp; 
+    </td>
+    <td align=right> <font size="-1"> 
+      <a href="/STAR/html/ofl_l/prodinfo.html">Maintained </a> 
+          by <a href="mailto:kathy@bnl.gov">K. Turner </a> 
+            </font>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2 align=right> <font size="-1"> 
+         <script language="JavaScript">
+         <!-- Hide script from old browsers
+         document.write("Last modified "+ document.lastModified)
+         // end of script -->
+         </script>
+         </font>
+    </td>
+  </tr>
+</table>
+
+<p>
+<!-- Content -->
+
+<h3>
+  
+
+<font  size ="+1" color="red"> Described in this Document:  
+<font  size ="+1" color="blue">
+  <ul>
+   <li>
+      Go To: <a href="#doc1"> General Description </a>
+          of StHistUtil class
+
+   <li>
+      Go To: <a href="#doc2"> Methods  </a> 
+            -  descriptions of methods currently available
+   <li>
+      Go To: <a href="#doc3"> Standard Maker Directory Names  </a> 
+           used in STAR - use as input dirName to methods
+   <li>
+      Go To: <a href="#doc4">  Print Lists </a>
+          - default print lists of histograms currently available
+
+   <li>
+      Go To: <a href="#doc5"> Library Macros </a> 
+         that use the StHistUtil methods - you can run these or
+         use as examples 
+
+  </ul>
+<font  size ="+1" color="black"> 
+
+
+
+
+<p>
+<a name="doc1">
+<hr>
+<font  size ="+1" color="green"> StHistUtil Class - general description
+<font  size ="+1" color="black"> 
+              <ul>
+                <li> provides utility methods to find,list,
+                     print,draw, etc. histograms
+                <li> works for standard STAR directory structures
+                <li> NOTE! Methods in this class can be used to 
+                     access histograms created by ANY Maker
+              </ul>
+  
+
+<p>
+<a name="doc2">
+<hr>
+<font  size ="+1" color="green">StHistUtil - description of available methods 
+<font  size ="+1" color="black"> 
+
+ <ol>
+
+  <li> virtual void    
+    <font  size ="+1" color="red">SetPntrToMaker
+      <font  size ="+1" color="black">(StMaker *m1);<br>
+       &nbsp - must input the pointer to a Maker (and cast as type StMaker) so that you can
+                use the StHistUtil methods <br>
+       &nbsp - do this FIRST!!   
+   <p>
+  <li> virtual TList*  
+    <font  size ="+1" color="red">FindHists<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
+     &nbsp - looks for histograms from the Maker "dirName" which it takes as input <br>
+     &nbsp - searches first under the Maker and if they're not there, looks under the histogram
+             directory <br>
+     &nbsp - returns pointer to list of histograms <br>
+     &nbsp - you don't need to call this explicitly, since ListHists & DrawHists call it for you
+   <p>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">ListHists<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
+     &nbsp - finds histograms (using FindHist method) for given input Maker "dirName" and then lists the titles 
+
+   <p>
+  <li> virtual Int_t  
+    <font  size ="+1" color="red">DrawHists<font  size ="+1" color="black">(Char_t *dirName="QA"); <br>
+
+     &nbsp -  creates output postscript file (if you have set a filename) <br>
+     &nbsp -  sets the global title to be written at top of output pages<br>
+     &nbsp -  sets papersize <br>
+     &nbsp -  set all statistics options on <br>
+     &nbsp -  creates histogram canvas<br>
+     &nbsp -  writes title at top of canvas & date,time at bottom<br>
+     &nbsp -  create a pad on the canvas and divide it into subpads if requested<br>
+     &nbsp -  find the pointer <br>
+     &nbsp -  finds histograms (using FindHist method) for given input Maker directory "dirName" <br>
+     &nbsp -  loop over histograms (they are in order booked) and 
+     <ol>
+        <li> if there's no print list, then print all histograms in directory
+        <li> if there is a print list, then only print if hist name is on list
+        <li> set logY scale OFF
+        <li> if there is a list of LogY=ON and this histogram name is on it, then
+             set logY scale ON
+        <li> if it's a 2D histogram, set it to print as a "box" plot
+        <li> draw all histograms to screen 
+        <li> send all histograms to postscript file 
+     </ol>
+     &nbsp - close postscript file
+   <p>
+  <li> virtual Int_t  
+    <font  size ="+1" color="red">Overlay1D<font  size ="+1" color="black">
+          (Char_t *dirName,Char_t *inHist1,Char_t *inHist2); <br>
+
+     &nbsp -  input a histogram directory name and the NAMES of 2 1dim 
+              histograms that you want overlaid <br>
+     &nbsp -  loops over directory, finds the histograms and makes copies of them
+     &nbsp -  creates histogram canvas<br>
+     &nbsp -  combines titles of histograms<br>
+     &nbsp -  draws the 2 histograms with different line style/color <br>
+     &nbsp -  draws the legend <br>
+   <p>
+  <li> virtual Int_t  
+    <font  size ="+1" color="red">Overlay2D<font  size ="+1" color="black">
+          (Char_t *dirName,Char_t *inHist1,Char_t *inHist2); <br>
+
+     &nbsp -  input a histogram directory name and the NAMES of 2 2dim 
+              histograms that you want overlaid <br>
+     &nbsp -  loops over directory, finds the histograms and makes copies of them
+     &nbsp -  creates histogram canvas<br>
+     &nbsp -  combines titles of histograms<br>
+     &nbsp -  draws the 2 histograms with different line style/color <br>
+     &nbsp -  draws the legend <br>
+   <p>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetDefaultLogYList<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
+     &nbsp -  creates a default list of histograms (using AddToLogYList), for given input
+              Maker "dirName", that should be
+              drawn in logX scale <br>
+     &nbsp - call this method *before* DrawHists <br>
+     &nbsp - list names currently available for Maker Directory Names:
+        <ol>
+          <li> "QA" (goes with St_QA_Maker histograms)
+          <li> "EventQA" (goes with StEventQAMaker histograms)
+        </ol>
+   <p>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">AddToLogYList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
+     &nbsp -  adds "HistName" histogram name to list of those that
+           will be drawn in logY scale <br>
+     &nbsp - creates list if there isn't one already <br>
+     &nbsp - call this method *before* DrawHists <br>
+   <p>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">RemoveFromLogYList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
+     &nbsp -   removes "HistName" histogram name to list of those that
+           will be drawn in logY scale <br>
+     &nbsp - first checks if there is a list <br>
+     &nbsp - call this method *before* DrawHists <br>
+   <p>
+   <li> virtual Int_t   
+    <font  size ="+1" color="red">ExamineLogYList();<font  size ="+1" color="black"><br>
+     &nbsp - prints out list of histograms that will be drawn in logY scale  <br>
+   <p>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetDefaultLogXList<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
+     &nbsp -  creates a default list of histograms (using AddToLogXList), for given input
+              Maker "dirName", that should be
+              drawn in logX scale <br>
+     &nbsp - call this method *before* DrawHists <br>
+     &nbsp - list names currently available for Maker Directory Names:
+        <ol>
+          <li> "QA" (goes with St_QA_Maker histograms)
+          <li> "EventQA" (goes with StEventQAMaker histograms)
+        </ol>
+   <p>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">AddToLogXList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
+     &nbsp -  adds "HistName" histogram name to list of those that
+           will be drawn in logX scale <br>
+     &nbsp - creates list if there isn't one already <br>
+     &nbsp - call this method *before* DrawHists <br>
+   <p>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">RemoveFromLogXList<font  size ="+1" color="black">
+      (const Char_t *HistName="");<br>
+     &nbsp -   removes "HistName" histogram name to list of those that
+           will be drawn in logX scale <br>
+     &nbsp - first checks if there is a list <br>
+     &nbsp - call this method *before* DrawHists <br>
+   <p>
+   <li> virtual Int_t   
+    <font  size ="+1" color="red">ExamineLogXList();<font  size ="+1" color="black"><br>
+     &nbsp - prints out list of histograms that will be drawn in logX scale  <br>
+   <p>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetDefaultPrintList<font  size ="+1" color="black">
+      (Char_t *dirName="QA",Char_t *analType);<br>
+     &nbsp -  creates a default list of histogram names (using AddToPrintList), for given input
+              analType, to be
+              drawn,printed  <br>
+     &nbsp - this list will be a subset of the histogram names for the given Maker <br>
+     &nbsp - call this method *before* DrawHists <br>
+     &nbsp - analType names currently available: 
+        <ol>
+          <li> "Cosmic" (goes with St_QA_Maker histograms)
+          <li> "TestQATable" (goes with StQAMaker histograms)
+          <li> "Ftpc" (goes with StQAMaker histograms)
+        </ol>
+   <p>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">AddToPrintList<font  size ="+1" color="black">
+        (const Char_t *HistName="");<br>
+     &nbsp -  adds "HistName" histogram name to list of those that
+           will be drawn,printed <br>
+     &nbsp - creates list if there isn't one already <br>
+     &nbsp - call this method *before* DrawHists <br>
+   <p>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">RemoveFromPrintList<font  size ="+1" color="black">
+       (const Char_t *HistName="");<br>
+     &nbsp -   removes "HistName" histogram name to list of those that
+           will be drawn,printed <br>
+     &nbsp - first checks if there is a list <br>
+     &nbsp - call this method *before* DrawHists <br>
+   <p>
+   <li> virtual Int_t   
+    <font  size ="+1" color="red">ExaminePrintList();<font  size ="+1" color="black"><br>
+     &nbsp - prints out list of histograms names that will be drawn,printed  <br>
+   <p>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetHistsNamesDraw<font  size ="+1" color="black">(const Char_t *firstName="*", 
+    const Char_t *lastName="*");<br>
+      &nbsp - sets first and last histogram names to be drawn,printed <br>
+      &nbsp - default is to draw,print them all <br>
+      &nbsp - DrawHists uses these names and only draws,prints the ones between the list  <br>
+   <p>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetZones<font  size ="+1" color="black">(Int_t columns=2, Int_t rows=3);   <br>
+       &nbsp - zone setting for drawing,printing histograms <br>
+       &nbsp - default is 2 columns by 3 rows <br>
+       &nbsp - these settings are used by DrawHists method
+   <p>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetPaperSize<font  size ="+1" color="black">(Int_t width=20, Int_t height=24); 
+     // A4 is 20,26  US letter is 20,24<br>
+       &nbsp - set paper size to draw,print histograms to <br>
+       &nbsp - default is US size <br>
+       &nbsp - these settings are used by DrawHists method
+   <p>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetPostScriptFile<font  size ="+1" color="black">
+    (const Char_t *psFileName="");<br>
+       &nbsp - set output postscript file name to which histograms will be  printed <br>
+       &nbsp - this filename is  used by DrawHists method
+   <p>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetGlobalTitle<font  size ="+1" color="black">
+   (const Char_t *globalTitle="");<br>
+       &nbsp - set character string which gets written as a title on top of each output page <br>
+       &nbsp - this string is  used by DrawHists method
+ </ol>
+
+
+
+
+<p>
+
+<a name="doc3">
+<hr>
+ <font  size ="+1" color="green">
+ Standard Maker Directory Names - for setting dirName in methods<br>
+
+<p>
+ <font  size ="+1" color="blue">
+ Standard Maker Directory Names in bfc: <br>
+ &nbsp (use these as input Maker dirName to StHistUtil methods shown above) <br>
+ &nbsp NOTE: ones that have histograms are *'d <br>
+ <a href="http://www.star.bnl.gov/STAR/html/comp_l/train/tut/bfc_maker_names.html">
+ bfc Maker directory names tutorial </a>
+
+ <p>
+ <font  size ="+1" color="blue">
+ Standard Maker Directory Names in doEvents: <br>
+ &nbsp (use these as input Maker dirName to StHistUtil methods shown above) <br>
+ <a href="//www.star.bnl.gov/STAR/html/comp_l/train/tut/doEvents_maker_names.html"> 
+     doEvents Maker directory names tutorial </a>
+
+<p>
+
+
+<a name="doc4">
+<hr> 
+<font  size ="+1" color="green">
+  Print Lists <br>
+ &nbsp - default print lists of histograms currently available in method SetDefaultPrintList<br>
+
+<p>
+<font  size ="+1" color="blue">
+For histograms from any Maker  with any dirName, default printlist analType = 
+<font  size ="+1" color="black">  
+   <ul>
+    <li> "" or "All"  - sets all histograms in directory to be printed
+   </ul>
+
+<p>
+<font  size ="+1" color="blue">
+For histograms from St_QA_Maker with dirName="QA", default printlist analType = 
+<font  size ="+1" color="black">  
+   <ul>
+    <li> Cosmic - creates list of histograms of interest to cosmic ray analysis 
+    <li> Ftpc - creates list of histograms of FTPC quantities plus few others of interest  
+    <li> TestQATable - creates short list of histograms just to test code
+   </ul>
+
+<p>
+<font  size ="+1" color="blue">
+For histograms from St_QA_Maker with dirName="QA" or "EventQA", default printlist analType = 
+<font  size ="+1" color="black">  
+   <ul>
+    <li> year1 - creates all histograms except for SVT and FTPC 
+    <li> qa_shift - creates subset of year1 histograms for the QA shifts  
+   </ul>
+
+<p>
+<font  size ="+1" color="blue">
+For histograms from StFlowTagMaker with dirName="FlowTag", default printlist analType = 
+<font  size ="+1" color="black">  
+   <ul>
+    <li> MDC3 - creates list of histograms of interest for MDC3
+   </ul>
+
+<p>
+<a name="doc5">
+<hr>
+<font  size ="+1" color="green">
+  Library macros that use the code are (**)
+<font  size ="+1" color="black">
+   <ul>
+    <li>  <font  size ="+1" color="red">bfcread_hist_list.C  <font  size ="+1" color="black"> <br>
+           &nbsp  - reads .hist.root file produced from bfc.C or other chain<br>
+           &nbsp  - lists all histograms it
+                   finds under given Maker subdirectory for given top
+                   level directory  <br>
+           &nbsp - uses SetPntrToMaker, ListHists methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_hist_to_ps.C <font  size ="+1" color="black">  <br>
+          &nbsp   - reads .hist.root file produced from bfc.C  or other chain<br>
+          &nbsp   -  lists,draws,prints to output ps file histograms for given: Maker
+                    subdirectory name, top level directory name, print list<br>
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists,
+                     SetDefaultPrintList,ExaminePrintList, DrawHists  methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_QAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the St_QA_Maker for nevents to book & fill QA 
+                    dst-table histograms <br>
+          &nbsp   -  lists,draws,prints histograms from "QA" subdirectory from
+                   given print list   <br>                  
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,
+                  SetDefaultPrintList,ExaminePrintList,DrawHists methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_EventQAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the StEventMaker (to fill StEvent data structure)
+                    and StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   -  lists,draws,prints histograms from "EventQA" subdirectory from given print list <br>                 
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,
+                   SetDefaultPrintList,ExaminePrintList,DrawHists methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_QA_outhistfile.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the St_QA_Maker for nevents to book & fill QA 
+                    dst-table histograms <br>
+          &nbsp   - writes histograms to output *.hist.root with given top level and Maker
+                     subdirectory   <br>                  
+          &nbsp   - one can then use bfcread_hist* macros (above) to view the histograms <br>
+          &nbsp  - uses SetPntrToMaker, ListHists methods from StHistUtil
+
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_EventQA_outhistfile.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the StEventMaker (to fill StEvent data structure)
+                    and StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   - writes histograms to output *.hist.root with given top level and Maker
+                     subdirectory   <br>                  
+          &nbsp   - one can then use bfcread_hist* macros (above) to view the histograms <br>
+          &nbsp  - uses SetPntrToMaker, ListHists methods from StHistUtil
+
+   </ul>
+
+<p>
+ <font  size ="+1" color="red">
+ ** NOTE!  
+<font  size ="+1" color="black">
+By looking at the bfcread_dst_QAHist.C or bfcread_hist_to_ps macros, 
+   one can see how to use the StHistUtil
+    methods to find histograms after any Maker is used, and list or print & draw them.
+
+
+</h3>
+
+<!-- Footer -->
+</body>
+</html>

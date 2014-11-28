@@ -1,0 +1,199 @@
+<chapter name="Main-Program Settings">
+
+<h2>Main-Program Settings</h2>
+
+<h3>Introduction</h3>
+
+The main program is up to the user to write. However, 
+<aloc href="SampleMainPrograms">sample main programs</aloc> 
+are provided. In one such class of programs, key settings of the run 
+are read in from a "cards file". These commands may be of two types<br/>
+(a) instructions directly to <code>Pythia</code>, like which 
+processes to generate, and<br/>
+(b) instructions to the main program for what it should do, 
+like how many events to generate, i.e. how many times 
+<code>pythia.next()</code> should be called.<br/>
+In principle these two kinds could be kept completely separate. 
+However, to make life simpler, a number of useful main-program 
+settings are defined on this page, so that they are recognized by 
+the <code>Settings</code> machinery. They can thus be put among 
+the other cards without distinction. It is up to you to decide which 
+ones, if any, you actually want to use when you write your main program.
+For convenience, some in the second section below can also be interpreted 
+directly by <code>Pythia</code>, while the subsequent ones really have 
+to be used in your main program. 
+
+<p/>
+Once you have used the <code>pythia.readFile(fileName)</code> method to
+read in the cards file, you can interrogate the <code>Settings</code>
+database to make the values available in your main program. A slight
+complication is that you need to use a different  <code>Settings</code>
+method for each of the four possible return types that you want to 
+extract. To save some typing the same method names are found directly 
+in the <code>Pythia</code> class, and just send on to the
+<code>Settings</code> ones to do the job, e.g.
+<pre>
+  bool   showCS = pythia.flag("Main:showChangedSettings");
+  int    nEvent = pythia.mode("Main:numberOfEvents");
+  double spare1 = pythia.parm("Main:spareParm1");
+  string file   = pythia.word("Main:allSettingsFile"); 
+</pre>
+
+<h3>Run settings</h3>
+
+Here settings related to how many events to generate and whether
+to print some information on data used in run. These variables 
+can be set in an input "cards" file, and thereafter read out an used 
+in the user-written main program. Usage is purely optional, but may help
+you reduce the need to recompile your main program. 
+
+<modeopen name="Main:numberOfEvents" default="1000" min="0">
+The number of events to be generated.
+</modeopen>
+
+<modeopen name="Main:numberToList" default="2" min="0">
+The number of events to list.
+</modeopen>
+
+<modeopen name="Main:timesToShow" default="50" min="0">
+Print the number of events generated so far, this many times, 
+i.e. once every <code>numberOfEvents/numberToShow</code> events.
+</modeopen>
+
+<modeopen name="Main:timesAllowErrors" default="10" min = "0">
+Allow this many times that <code>pythia.next()</code> returns false, 
+i.e. that an event is flawed, before aborting the run.
+</modeopen>
+
+<flag name="Main:showChangedSettings" default="on">
+Print a list of the changed flag/mode/parameter/word settings.
+</flag>
+
+<flag name="Main:showAllSettings" default="off">
+Print a list of all flag/mode/parameter/word settings.
+Warning: this will be a long list.
+</flag>
+
+<modeopen name="Main:showOneParticleData" default="0" min="0">
+Print particle and decay data for the particle with this particular 
+identity code. Default means that no particle is printed.
+</flag>
+
+<flag name="Main:showChangedParticleData" default="off">
+Print a list of particle and decay data for those particles 
+that were changed (one way or another).
+</flag>
+
+<flag name="Main:showChangedResonanceData" default="off">
+In the previous listing also include the resonances that are 
+initialized at the beginning of a run and thus get new particle
+data, even if these may well agree with the default ones. 
+Warning: this will be a rather long list.
+</flag>
+
+<flag name="Main:showAllParticleData" default="off">
+Print a list of all particle and decay data.
+Warning: this will be a long list.
+</flag>
+
+<flag name="Main:writeChangedSettings" default="off">
+Write a file with the changed flag/mode/parameter/word settings, in
+a format appropriate to be read in at the beginning of a new  
+run, using the <code>pythia.readFile(fileName)</code> method. 
+</flag>
+
+<word name="Main:changedSettingsFile" default="currentSettings.cmnd">
+The name of the file to which the changed flag/mode/parameter/word
+settings are written if <code>Main:writeChangedSettings</code>
+is on. 
+</word>
+
+<flag name="Main:writeAllSettings" default="off">
+Write a file with all flag/mode/parameter/word settings, in
+a format appropriate to be read in at the beginning of a new  
+run, using the <code>pythia.readFile(fileName)</code> method. 
+</flag>
+
+<word name="Main:allSettingsFile" default="allSettings.cmnd">
+The name of the file to which a flag/mode/parameter/word 
+settings are written if <code>Main:writeAllSettings</code>
+is on. 
+</word>
+
+<flag name="Main:showAllStatistics" default="off">
+Print all available statistics or only the minimal set at the end 
+of the run.
+</flag>
+
+<h3>Subruns</h3>
+
+You can use <aloc href="ProgramFlow">subruns</aloc> to carry out
+several tasks in the same run. In that case you will need repeated
+instances of the first setting below in your command file, and could
+additionally use the second and third as well.
+
+<modeopen name="Main:subrun" default="-999", min="0">
+The number of the current subrun, a non-negative integer, put as
+first line in a section of lines to be read for this particular subrun.
+</modeopen>
+
+<flag name="Main:LHEFskipInit" default="off">
+If you read several Les Houches Event Files that you want to see 
+considered as one single combined event sample you can set this flag
+<code>on</code> after the first subrun to skip (most of) the  
+(re-)initialization step.
+</flag>
+
+<modeopen name="Main:numberOfSubruns" default="0", min = "0">
+The number of subruns you intend to use in your current run.  
+Unlike the two settings above, <code>Pythia</code> itself will not
+intepret this number, but you could e.g. have a loop in your main
+program to loop over subruns from 0 through 
+<code>numberOfSubruns - 1</code>. 
+</flag>
+
+<h3>Spares</h3>
+
+For currently unforeseen purposes, a few dummy settings are made 
+available here. The user can set the desired value in a "cards file"
+and then use that value in the main program as desired.
+
+<flag name="Main:spareFlag1" default="off">
+</flag>
+
+<flag name="Main:spareFlag2" default="off">
+</flag>
+
+<flag name="Main:spareFlag3" default="off">
+</flag>
+
+<modeopen name="Main:spareMode1" default="0">
+</modeopen>
+
+<modeopen name="Main:spareMode2" default="0">
+</modeopen>
+
+<modeopen name="Main:spareMode3" default="0">
+</modeopen>
+
+<parm name="Main:spareParm1" default="0.">
+</parm>
+
+<parm name="Main:spareParm2" default="0.">
+</parm>
+
+<parm name="Main:spareParm3" default="0.">
+</parm>
+
+<word name="Main:spareWord1" default="void">
+</word>
+
+<word name="Main:spareWord2" default="void">
+</word>
+
+<word name="Main:spareWord3" default="void">
+</word>
+
+</chapter>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->

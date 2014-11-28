@@ -1,0 +1,5 @@
+<Document file="StarVMC/Geometry/Compat/wallgeo.xml">
+<Export language="Mortran">
+<Import file="pams/geometry/wallgeo/wallgeo.g" verbatim="true" />
+</Export>
+</Document>

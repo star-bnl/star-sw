@@ -1,0 +1,16 @@
+/*    ftpcInnerCathode.idl
+*
+*  Table: ftpcInnerCathode
+*
+*       description: //    FTPC inner cathode offsets
+*/ 
+
+
+struct ftpcInnerCathode { 
+
+     float offsetCathodeWest;        /* inner cathode offset in cm west */
+     float offsetCathodeEast;        /* inner cathode offset in cm east */
+     float angleOffsetWest;          /* angle offset of inner cathode displ. in radians west */
+     float angleOffsetEast;          /* angle offset of inner cathode displ. in radians east */
+
+ };  

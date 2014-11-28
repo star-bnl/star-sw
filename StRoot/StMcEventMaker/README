@@ -1,0 +1,33 @@
+README File for Filler of StMcEvent.
+Time-stamp:<99/06/28 16:20 calderon>
+
+Contact: Mike Lisa, Manuel Calderon de la Barca S.
+
+For DOCUMENTATION StMcEvent please look under that
+package.
+
+Modification History
+====================
+
+06/28/99 Original version. Authors: Mike Lisa, Manuel Calderon de la Barca Sanchez
+
+Description
+===========
+Fills the StMcEvent objects.
+Presently, it only uses .geant.root files.
+The tree is filled starting from the vertex table.
+After that, tracks are filled and the proper
+relationship between tracks and their vertices is
+established.  Then, hits are filled and set to point
+to their appropriate track.
+
+To be done
+==========
+The g2t_event table was not being filled at the time
+of the writing, so it has been discarded.  If necessary,
+then the reading should be modified to take this table
+into account.
+
+Tests done
+----------
+Compiles on hp_ux102, sun4x_56 and i386_redhat51.

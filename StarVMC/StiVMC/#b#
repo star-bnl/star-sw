@@ -1,0 +1,14 @@
+StiVMCMaker:INFO  - === StiKalmanTrack::Smooth  C =     Semi Positive DefinedSymMatrix Size     [5,5]
++0.002431904:
+-0.0002769441:  +3.489212e-05:
++6.500468e-05:  -6.48209e-06:   +2.663178e-05:
++0.003969685:   -0.000603724:   +8.298387e-05:  +0.01745569:
+-0.00146508:    +0.0001144907:  -0.001392598:   -0.001507007:   +0.1027879:
+
+StiVMCMaker:INFO  - === StiKalmanTrack::Smooth  k->R() =        Semi Positive DefinedSymMatrix Size     [2,2]
++0.002299195:
+        +0:     +0.03323133:
+
+StiVMCMaker:INFO  - === StiKalmanTrack::Smooth  k->R() =        Semi Positive DefinedSymMatrix Size     [2,2]
+-0.01515649:
++0.001507007:   -0.06955662:

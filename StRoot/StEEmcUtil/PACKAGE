@@ -1,0 +1,5 @@
+# $Id $
+# package StEEmcUtil
+# author: 
+Library:libStEEmcUtil.so:LIBS +=   -lsim_Tables  -lStChain  -lStEEmcDbMaker  -lStEvent  -lPhysics
+#Library:libStEEmcUtil.so:LIBS +=   -lsim_Tables  -lStChain  -lStEEmcDbMaker  -lStEvent  -lPhysics

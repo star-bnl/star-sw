@@ -1,0 +1,16 @@
+/*    richvoltages.idl
+*
+*  Table: richvoltages
+*
+*       description:
+*/ 
+
+
+struct richvoltages { 
+
+   unsigned long  runNumber;   /*   */
+   unsigned long  startStatusTime;   /*   */
+   unsigned long  endStatusTime;   /*   */
+   unsigned long  status;   /*   */
+
+ };  

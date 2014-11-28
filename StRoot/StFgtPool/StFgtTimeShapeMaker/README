@@ -1,0 +1,23 @@
+StFgtTimeShapeMaker Note
+
+Feb 14, 2012
+
+Author: Len K Eun
+
+The basic functionality of the class is to read in daq files of the raw FGT data in multiple time bins, perform a fit to characterize the pulse shape, and produce a TTree that contiains the original adc distribution along with the mapping information and the fit results. To use this class,
+
+copy macros/timeShape.C to a directory with .sl libraries
+
+starver eval
+
+cons
+
+root4star -b -q 'timeShape.C("input daq file name","output tree name, without .root surfix",Nevent,-1,0)'
+
+When running this script, one can choose the minimum ADC over pedestal for the fitting and plotting, type of pedestal to be used, and number of time bins in the data.
+
+This will generate the output TTree in the same directory.
+
+A template to read in this TTree can also be found in macros/readTree.C for convenience.
+
+Refer to the inline comments for the description of the variables. 

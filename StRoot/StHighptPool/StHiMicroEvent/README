@@ -1,0 +1,17 @@
+This directory contains the Highpt uDST format developed by Bum Choi for
+inclusive spectra analysis.  
+
+The first committed version has been updated for Year 2 analysis, including
+year 2 definition of centrality.
+
+J.L. Klay (LBNL)
+02-Apr-2002
+
+-------------------------------
+31-May-2002 JLK (LBNL)
+
+Updated the StHiMicroEvent Class to save the zdc vertex Z position.  This may be
+useful in evaluating the vertex finding efficiency for low multiplicity events.
+
+Also changed the way centrality is determined by using uncorrectedNumberOfPrimaries(*stEvent)
+

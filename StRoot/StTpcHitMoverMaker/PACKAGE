@@ -1,0 +1,5 @@
+# $Id $
+# package StTpcHitMoverMaker
+# author:
+Library:libStTpcHitMoverMaker.so:LIBS +=   -lStChain  -lStDbUtilities  -l_StEvent  -l_StTpcDb  -ltpc_Tables
+#Library:libStTpcHitMoverMaker.so:LIBS +=   -lStChain  -lStDbUtilities  -lStEvent  -lStTpcDb  -ltpc_Tables

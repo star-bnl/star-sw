@@ -1,0 +1,11 @@
+/*    tpcDriftVelocityCorrection.idl
+*
+*  Table: tpcDriftVelocityCorrection
+*
+*       description:
+*/ 
+
+
+struct tpcDriftVelocityCorrection { 
+  double  correction; /* correction to drift velcity from SSD */
+};  

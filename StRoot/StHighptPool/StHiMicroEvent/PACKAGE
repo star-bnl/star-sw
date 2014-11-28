@@ -1,0 +1,4 @@
+# $Id $
+# package StHiMicroEvent
+# author: 
+#Library:libStHiMicroEvent.so:LIBS += 

@@ -1,0 +1,181 @@
+<html>
+<head>
+<title>Compositeness Processes</title>
+<link rel="stylesheet" type="text/css" href="pythia.css"/>
+<link rel="shortcut icon" href="pythia32.gif"/>
+</head>
+<body>
+
+<h2>Compositeness Processes</h2>
+
+Compositeness scenarios may give rise to sharp resonances of excited 
+quarks and leptons. An excited copy of the first generation is 
+implemented, consisting of spin 1/2 particles.
+
+<p/>  
+The current implementation contains gauge interaction production
+by quark-gluon fusion or lepton-photon fusion and contact interaction 
+production by quark-quark or quark-antiquark scattering. In additions 
+to the compositness scale and couplings listed below, you are expected 
+to change the excited-fermion masses in accordance with what is desired.
+See [<a href="Bibliography.html" target="page">Bau90</a>] for conventions.
+
+<p/>
+A non-trivial angular dependence is included in the decay for the
+<i>2 -> 1</i> processes, but has not been included for the 
+<i>2 -> 2</i> ones.
+
+<h3>Production processes</h3>
+
+A few different production processes have been implemented, which normally 
+would not overlap and therefore could be run together.
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:all &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Common switch for the group of implemented processes that produce an
+excited fermion.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:dg2dStar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>d g -> d^*</i>. 
+Code 4001.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:ug2uStar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>u g -> u^*</i>. 
+Code 4002.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:sg2sStar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>s g -> s^*</i>. 
+Code 4003.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:cg2cStar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>c g -> c^*</i>. 
+Code 4004.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:bg2bStar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>b g -> b^*</i>. 
+Code 4005.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:egm2eStar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>e gamma -> e^*</i>. 
+Code 4011.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:mugm2muStar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>mu gamma -> mu^*</i>. 
+Code 4013.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:taugm2tauStar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>tau gamma -> tau^*</i>. 
+Code 4015.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qq2dStarq &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q q(bar) -> d^* q(bar)</i>. 
+Code 4021.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qq2uStarq &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q q(bar) -> u^* q(bar)</i>. 
+Code 4022.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qq2sStarq &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q q(bar) -> s^* q(bar)</i>. 
+Code 4023.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qq2cStarq &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q q(bar) -> c^* q(bar)</i>. 
+Code 4024.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qq2bStarq &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q q(bar) -> b^* q(bar)</i>. 
+Code 4025.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qqbar2eStare &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> e^*+- e^-+</i>. 
+Code 4031.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qqbar2nueStarnue &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> nu_e^* nu_ebar</i>. 
+Code 4032.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qqbar2muStarmu &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> mu^*+- mu^-+</i>. 
+Code 4033.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qqbar2numuStarnumu &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> nu_mu^* nu_mubar</i>. 
+Code 4034.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qqbar2tauStartau &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> tau^*+- tau^-+</i>. 
+Code 4035.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExcitedFermion:qqbar2nutauStarnutau &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> nu_tau^* nu_taubar</i>. 
+Code 4036.
+  
+
+<h3>Parameters</h3>
+
+The basic couplings of the model are
+
+<p/><code>parm&nbsp; </code><strong> ExcitedFermion:Lambda &nbsp;</strong> 
+ (<code>default = <strong>1000.</strong></code>; <code>minimum = 100.</code>)<br/>
+compositeness scale <i>Lambda</i> in GeV.
+  
+
+<p/><code>parm&nbsp; </code><strong> ExcitedFermion:coupF &nbsp;</strong> 
+ (<code>default = <strong>1.0</strong></code>; <code>minimum = 0.0</code>)<br/>
+strength <i>f</i> of the <i>SU(2)</i> coupling.
+  
+
+<p/><code>parm&nbsp; </code><strong> ExcitedFermion:coupFprime &nbsp;</strong> 
+ (<code>default = <strong>1.0</strong></code>; <code>minimum = 0.0</code>)<br/>
+strength <i>f'</i> of the <i>U(1)</i> coupling.
+  
+
+<p/><code>parm&nbsp; </code><strong> ExcitedFermion:coupFcol &nbsp;</strong> 
+ (<code>default = <strong>1.0</strong></code>; <code>minimum = 0.0</code>)<br/>
+strength <i>f_c</i> of the <i>SU(3)</i> coupling.
+  
+
+</body>
+</html>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->
+

@@ -1,0 +1,153 @@
+#!/bin/bash
+
+cd /star/u/relyea/star/2005
+
+#change the following to your own environment
+  outDir=/star/data05/scratch/$USER/2005
+  outDirlog=$outDir/log
+
+# #############################################################################
+# loop over the list of files
+date=`date '+%j'`
+counter=0
+while [ $counter -lt 1 ]
+do
+  day=`expr $date - $counter`
+  partlist=`ls /star/data0{8,9}/reco/*/*Field/dev/2005/$day/*MuDst.root | awk 'BEGIN{FS="_"}{print $(NF-2)}' | sort | uniq`
+#  partlist=`ls /star/data05/scratch/eemcdb/muDst/2005/121/*MuDst.root | awk 'BEGIN{FS="_"}{print $(NF-2)}' | sort | uniq`
+  fulllist=`echo $partlist $fulllist`
+  counter=`expr $counter + 1`
+done
+#runlist=`echo $fulllist`
+runlist=`ezonline | awk '{print $1}' | uniq | grep -v runNumber`
+rm filesfor*
+mv $outDir/*.root $outDir/DONE/
+for line in $runlist ; do
+  day=`echo $line | cut -c2-4`
+  difference=`expr $date - $day`
+  if [ $difference -lt 4 ]
+  then
+    if [ $difference -gt -1 ]
+    then
+    mudstlist=`ls /star/data0{8,9}/reco/*/*Field/dev/2005/*/*$line*MuDst.root`
+#    mudstlist=`ls /star/data05/scratch/eemcdb/muDst/2005/121/*$line*MuDst.root`
+    for muline in $mudstlist ; do
+      echo $muline | awk 'BEGIN{FS="/st_"}{print $1"::st_"$2}' >> filesfor$line
+#      echo $muline | awk 'BEGIN{FS="/st_"}{print $1"::st_"$2}'
+    done
+    fi
+  fi
+done
+ls filesfor* > CurrentQAfilelist
+rm shortlists*
+bigfilelist=`ls filesfor*`
+ngflfiles=0;
+niters=0;
+previters=0;
+ntwenties=0;
+for bigline in $bigfilelist ; do
+  filelist=`cat $bigline`
+  ngflfiles=`expr 0`
+  for line in $filelist ; do 
+
+    ngflfiles=`expr $ngflfiles + 1`
+    ntwenties=`expr $ngflfiles / 20`
+    niters=`expr $ntwenties + $previters + 1`
+    echo "$line" >> shortlists$niters
+    echo $ngflfiles,$ntwenties,$niters,$previters
+  done
+  previters=`expr $niters`
+done
+
+#next line just makes the code below pretty - it does not add an iteration!
+niters=`expr $niters + 1`
+
+queue=star_cas_big                 
+for (( iteration = 1 ; iteration < $niters ; iteration++ )) ; do
+#for (( iteration = 1 ; iteration < 3 ; iteration++ )) ; do
+  log=log.$iteration
+  blog=blog.$iteration
+  rm $outDirlog/$log.gz
+  rm $outDirlog/$blog
+  bsub -R "linux" -q $queue  -J CSM$USER$run -o $outDirlog/$blog   << EOF
+    ./StRoot/StEmcPool/CSMStatusUtils/scripts/submitOneRunBatch shortlists$iteration $outDir
+EOF
+done
+sleep 30
+bjobsrunning=`bjobs | head -1 | cut -c1-1`
+echo $bjobsrunning
+while [ $bjobsrunning ]
+do
+  sleep 600
+#  sleep 3
+  echo "still sleeping..."
+  bjobsrunning=`bjobs | grep CSMrelyea | head -1 | cut -c1-1`
+  bjobssuspended=`bjobs | grep CSMrelyea | grep -v SSUSP | grep -v JOBID | head -1 | cut -c1-1`
+  echo $bjobsrunning " is running and " $bjobssuspended " is suspended"
+  if [ -z $bjobssuspended ]
+  then
+    echo "I should not be here"
+    bjobsrunning=`bjobs | grep BANANA`
+  fi
+done
+sleep 30
+./code/scripts/analysis1
+rm $outDir/6*.root
+rm `ls -ltr 2005/*.root | awk '{if($5<10000)print $9}'`
+sleep 30
+./code/scripts/analysis2
+./code/scripts/analysis3
+mv shortlists* tmp/.
+mv filesfor* tmp/.
+website=/afs/rhic/star/doc_protected/www/spin/relyea/QA/
+htmlfile=$website/htmlfile.html
+cp $outDir/status/short* $website/
+cp $outDir/status/run*.txt $website/.
+cp $outDir/*.eps $website/.
+abbreviatedlist=`ls -r $website/short* | awk 'BEGIN{FS="run"}{print $2}' | cut -c1-7 | sort -r | uniq`
+echo "<html><head><title>Calorimeter Tower Status Update</title></head><body>" > $htmlfile
+for line in $abbreviatedlist ; do
+  runnumber=`echo $line`
+  cd $website
+  bemcfullstatus=`ls run$runnumber*bemc*.txt`
+  eemcfullstatus=`ls run$runnumber*eemc*.txt`
+  if [ $bemcfullstatus ]
+  then
+    cat $bemcfullstatus | awk '{if($2!=1)print$0}' > badchannels$runnumber-bemc.bad
+  fi
+  if [ $eemcfullstatus ]
+  then
+    cat $eemcfullstatus | awk '{if($2!=1)print$0}' > badchannels$runnumber-eemc.bad
+    cat $eemcfullstatus | awk '{if($2!=1){sec = ($1-1)/60 + 1; subb= (($1-1)%60)/12; eta= ((($1-1)%60)%12) + 1; printf("%02iT%c%02i %i\n",sec,subb+65,eta,$2)}}' > badchannels$runnumber-eemc2.bad
+  fi
+  bemcbad=`ls badchannels$runnumber*bemc.bad`
+  eemcbad=`ls badchannels$runnumber*eemc.bad`
+  eemcbadtoo=`ls badchannels$runnumber*eemc2.bad`
+  bemcHotTowers=`ls run$runnumber*bemc_hotTowers.eps`
+  eemcHotTowers=`ls run$runnumber*eemc_hotTowers.eps`
+  bemcchanchange=`tail -1 short*bemc*$line*`
+  eemcchanchange=`tail -1 short*eemc*$line*`
+  bemcshort=`ls short*bemc*$line*`
+  eemcshort=`ls short*eemc*$line*`
+  cd -
+  echo "Run $runnumber: <a href=\""$bemcshort"\">$bemcchanchange</a> in the BEMC and <a href=\""$eemcshort"\">$eemcchanchange</a> in the EEMC<br>" >> $htmlfile
+  echo "Bad channels for this run: <a href=\""$bemcbad"\">BEMC</a> and <a href=\""$eemcbad"\">EEMC</a> or <a href=\""$eemcbadtoo"\">EEMC notation</a><br>" >> $htmlfile
+  echo "Hot Tower Plots: <a href=\""$bemcHotTowers"\">BEMC</a> and <a href=\""$eemcHotTowers"\">EEMC</a><br>" >> $htmlfile
+done
+echo "<br><br>" >> $htmlfile
+echo "<div class=\"header\">Status Codes</div>" >> $htmlfile
+echo "(codes are backward compatible with prior status tables)" >> $htmlfile
+echo "<ul>" >> $htmlfile
+echo "<li> 0 == channel does not exist </li>" >> $htmlfile
+echo "<li> 1 == channel is good </li>" >> $htmlfile
+echo "<li> 2 == channel is either hot or cold (see bit 16) </li>" >> $htmlfile
+echo "<li> 4 == channel has a weird pedestal (see bit 32)</li>" >> $htmlfile
+echo "<li> 8 == channel has a stuck bit (see bits 64 and 128) </li>" >> $htmlfile
+echo "<li> 16 == if off, hot tower (10x as many hits as others); if on, " >> $htmlfile
+echo "cold tower (40x fewer hits than others) </li>" >> $htmlfile
+echo "<li> 32 == if off, pedestal mean is out of bounds; if on," >> $htmlfile
+echo "pedestal width is too large/small</li>" >> $htmlfile
+echo "<li> 64 == bit stuck on</li>" >> $htmlfile
+echo "<li> 128 == bit stuck off</li>" >> $htmlfile
+echo "</ul>" >> $htmlfile
+echo "<br><br></body></html>" >> $htmlfile

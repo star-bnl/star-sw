@@ -1,0 +1,12 @@
+/* svtRms.h
+ *
+ * Table: svtRms
+ *
+ * description: //  SVT RMS
+ */ 
+
+struct svtRms { 
+  long   ID;
+  float  rms[240][128];   /* ??  */
+};  
+

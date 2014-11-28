@@ -1,0 +1,166 @@
+1,2c1,2
+< //p+p pion cross section:
+< double bemc_escale_pp_pion(double *x,double *par){
+---
+> //d+Au yield:
+> double bemc_escale_dau_pion(double *x,double *par){
+4c4
+<   return p[0]+p[1]*x[0];
+---
+>   return 1.25*(p[0]+p[1]*x[0]);
+6,7c6,7
+< double bemc_spread_pp_pion(double *x,double *par){
+<   return (double)0.024;
+---
+> double bemc_spread_dau_pion(double *x,double *par){
+>   return (double)0.035;
+9c9
+< double bsmd_escale_pp_pion(double *x,double *par){
+---
+> double bsmd_escale_dau_pion(double *x,double *par){
+13c13
+< double bsmd_spread_pp_pion(double *x,double *par){
+---
+> double bsmd_spread_dau_pion(double *x,double *par){
+17,18c17,18
+< double material_pp_pion(double *x,double *par){
+<   return (double)0.018;
+---
+> double material_dau_pion(double *x,double *par){
+>   return (double)0.026;
+20c20
+< double yield_extract_pp_pion(double *x,double *par){ 
+---
+> double yield_extract_dau_pion(double *x,double *par){ 
+22c22
+<   /*if(x[0]>=4.) */return (double)0.071;
+---
+>   if(x[0]>=4.) return (double)0.071;
+24,25c24,26
+< double error_xsec_pp_pion(double *x,double *par){
+<   return (double)sqrt(0.069*0.069+0.092*0.092);
+---
+> double beambg_dau_pion(double *x,double *par){
+>   if(x[0]<5.) return (double)0.0;
+>   if(x[0]>=5.) return (double)0.007*(x[0]-5.);
+27c28,31
+< double prescale_pp_pion(double *x,double *par){
+---
+> double error_norm_dau_pion(double *x,double *par){
+>   return (double)0.01;
+> }
+> double prescale_dau_pion(double *x,double *par){
+29c33
+<   /*if(x[0]>=4.) */return (double)0.05;
+---
+>   if(x[0]>=4.) return (double)0.05;
+31c35
+< double total_sys_pp_pion(double *x,double *par){
+---
+> double total_sys_dau_pion(double *x,double *par){
+33,40c37,45
+<   ret=bemc_escale_pp_pion(x,par)*bemc_escale_pp_pion(x,par);
+<   ret+=bemc_spread_pp_pion(x,par)*bemc_spread_pp_pion(x,par);
+<   ret+=bsmd_escale_pp_pion(x,par)*bsmd_escale_pp_pion(x,par);
+<   ret+=bsmd_spread_pp_pion(x,par)*bsmd_spread_pp_pion(x,par);
+<   ret+=material_pp_pion(x,par)*material_pp_pion(x,par);
+<   ret+=yield_extract_pp_pion(x,par)*yield_extract_pp_pion(x,par);
+<   ret+=error_xsec_pp_pion(x,par)*error_xsec_pp_pion(x,par);
+<   ret+=prescale_pp_pion(x,par)*prescale_pp_pion(x,par);
+---
+>   ret=bemc_escale_dau_pion(x,par)*bemc_escale_dau_pion(x,par);
+>   ret+=bemc_spread_dau_pion(x,par)*bemc_spread_dau_pion(x,par);
+>   ret+=bsmd_escale_dau_pion(x,par)*bsmd_escale_dau_pion(x,par);
+>   ret+=bsmd_spread_dau_pion(x,par)*bsmd_spread_dau_pion(x,par);
+>   ret+=material_dau_pion(x,par)*material_dau_pion(x,par);
+>   ret+=yield_extract_dau_pion(x,par)*yield_extract_dau_pion(x,par);
+>   ret+=beambg_dau_pion(x,par)*beambg_dau_pion(x,par);
+>   ret+=error_norm_dau_pion(x,par)*error_norm_dau_pion(x,par);
+>   ret+=prescale_dau_pion(x,par)*prescale_dau_pion(x,par);
+43,44c48,49
+< void set_sys_pp_pion(TGraphErrors *g){
+<   TF1 *sys=new TF1("sys",&total_sys_pp_pion,1.,15.,1);
+---
+> void set_sys_dau_pion(TGraphErrors *g){
+>   TF1 *sys=new TF1("sys",&total_sys_dau_pion,1.,15.,1);
+54c59
+< void plotErrors_pp_pion(){
+---
+> void plotErrors_dau_pion(){
+56c61
+<   TF1 *error_up=new TF1("error_up",&total_sys_pp_pion,1.,15.,1);
+---
+>   TF1 *error_up=new TF1("error_up",&total_sys_dau_pion,1.,15.,1);
+58c63
+<   TF1 *error_down=new TF1("error_down",&total_sys_pp_pion,1.,15.,1);
+---
+>   TF1 *error_down=new TF1("error_down",&total_sys_dau_pion,1.,15.,1);
+69,70c74,75
+<   test->SaveAs("systotal_pp_pions.eps");
+<   test->SaveAs("systotal_pp_pions.root");
+---
+>   test->SaveAs("systotal_dau_pions.eps");
+>   test->SaveAs("systotal_dau_pions.root");
+73,74c78,79
+< //p+p double ratio:
+< double bemc_escale_pp_ratio(double *x,double *par){
+---
+> //d+Au double ratio:
+> double bemc_escale_dau_ratio(double *x,double *par){
+77c82
+< double bemc_spread_pp_ratio(double *x,double *par){
+---
+> double bemc_spread_dau_ratio(double *x,double *par){
+80c85
+< double bsmd_escale_pp_ratio(double *x,double *par){
+---
+> double bsmd_escale_dau_ratio(double *x,double *par){
+83c88
+< double bsmd_spread_pp_ratio(double *x,double *par){
+---
+> double bsmd_spread_dau_ratio(double *x,double *par){
+86,87c91,92
+< double yield_extract_pp_ratio(double *x,double *par){
+<   return yield_extract_pp_pion(x,par);
+---
+> double yield_extract_dau_ratio(double *x,double *par){
+>   return yield_extract_dau_pion(x,par);
+89c94
+< double eta_over_pi_pp(double *x,double *par){
+---
+> double eta_over_pi_dau(double *x,double *par){
+92c97
+< double fit_pion_pp(double *x,double *par){
+---
+> double fit_pion_dau(double *x,double *par){
+95c100,104
+< double total_sys_pp_ratio(double *x,double *par){
+---
+> double beambg_dau_pion(double *x,double *par){
+>   if(x[0]<5.) return (double)0.0;
+>   if(x[0]>=5.) return 0.01+0.004*(x[0]-5.);
+> }
+> double total_sys_dau_ratio(double *x,double *par){
+97,103c106,113
+<   ret=bemc_escale_pp_ratio(x,par)*bemc_escale_pp_ratio(x,par);
+<   ret+=bemc_spread_pp_ratio(x,par)*bemc_spread_pp_ratio(x,par);
+<   ret+=bsmd_escale_pp_ratio(x,par)*bsmd_escale_pp_ratio(x,par);
+<   ret+=bsmd_spread_pp_ratio(x,par)*bsmd_spread_pp_ratio(x,par);
+<   ret+=yield_extract_pp_ratio(x,par)*yield_extract_pp_ratio(x,par);
+<   ret+=eta_over_pi_pp(x,par)*eta_over_pi_pp(x,par);
+<   ret+=fit_pion_pp(x,par)*fit_pion_pp(x,par);
+---
+>   ret=bemc_escale_dau_ratio(x,par)*bemc_escale_dau_ratio(x,par);
+>   ret+=bemc_spread_dau_ratio(x,par)*bemc_spread_dau_ratio(x,par);
+>   ret+=bsmd_escale_dau_ratio(x,par)*bsmd_escale_dau_ratio(x,par);
+>   ret+=bsmd_spread_dau_ratio(x,par)*bsmd_spread_dau_ratio(x,par);
+>   ret+=yield_extract_dau_ratio(x,par)*yield_extract_dau_ratio(x,par);
+>   ret+=eta_over_pi_dau(x,par)*eta_over_pi_dau(x,par);
+>   ret+=fit_pion_dau(x,par)*fit_pion_dau(x,par);
+>   ret+=beambg_dau_pion(x,par)*beambg_dau_pion(x,par);
+106,107c116,117
+< void set_sys_pp_ratio(TGraphErrors *g){
+<   TF1 *sys=new TF1("sys",&total_sys_pp_ratio,1.,15.,1);
+---
+> void set_sys_dau_ratio(TGraphErrors *g){
+>   TF1 *sys=new TF1("sys",&total_sys_dau_ratio,1.,15.,1);

@@ -1,0 +1,30 @@
+! main22.cmnd
+! This file contains commands to be read in for a Pythia8 run. 
+! Lines not beginning with a letter or digit are comments.
+
+! 1) Settings that could be used in a main program, if desired.
+Main:numberOfEvents = 50000        ! number of events to generate
+Main:numberToList = 2              ! number of events to print
+Main:timesToShow = 20              ! show how far along run is
+Main:showChangedSettings = on      ! print changed flags/modes/parameters
+Main:showAllSettings = off         ! print all flags/modes/parameters
+#Main:showChangedParticleData = on  ! print changed particle and decay data
+#Main:showAllParticleData = on      ! print all particle and decay data
+
+! 2) Beam parameter settings. Values below agree with default ones.
+Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
+Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
+Beams:eCM = 14000.                 ! CM energy of collision
+
+! 3) Settings for SUSY and the hard-process generation
+SUSY = on
+SUSY:SusyLesHouchesFile = main22.spc
+SUSY:qqbar2chi0chi0 = on
+
+! 4) Settings for the event generation process in the Pythia8 library.
+PartonLevel:MI = off               ! no multiple interactions
+PartonLevel:ISR = off              ! no initial-state radiation 
+PartonLevel:FSR = off              ! no final-state radiation
+HadronLevel:Hadronize = off        ! no hadronization
+#SpaceShower:pT0Ref = 2.0           ! dampening of pT -> 0 divergence
+#MultipleInteractions:pTmin = 3.0   ! lower pT cutoff for interactions  

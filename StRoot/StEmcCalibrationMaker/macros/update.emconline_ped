@@ -1,0 +1,206 @@
+#!/bin/bash
+
+export EMCONLINE_PED_DIR=${0%/*}
+if [[ -f ./.emconline_ped.cfg.sh ]]
+then
+    source ./.emconline_ped.cfg.sh
+elif [[ -f ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh ]]
+then
+    source ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh
+else
+    echo "EMC Online environment is not configured, please run configure.emconline_ped"
+    exit 1
+fi
+
+cd ${EMCONLINE_PED_DIR}
+
+export STATUS=""
+if [[ -f ${EMCONLINE_PED_RUNSTATUS_FILE} ]] ; then export STATUS=`cat ${EMCONLINE_PED_RUNSTATUS_FILE}` ; fi
+export STATUS=`echo ${STATUS}`
+if [[ "${STATUS}" != "" ]]
+then
+    echo "Another instance is already running (see ${EMCONLINE_PED_RUNSTATUS_FILE}), exit this now..."
+    exit
+fi
+
+if [[ "${SCP}" == "" ]] ; then export SCP=scp ; fi
+
+export FILE=${1}
+export MODE=${2}
+export DAY=${3}
+export year=${4}
+export RUNID=${5}
+
+export DIFF_OPTIONS='-bBN'
+
+if [[ "${FILE}" == "" ]]
+then
+    if [[ "${MODE}" == "" ]]
+    then
+	if [[ -f ${EMCONLINE_PED_RUNMODE_FILE} ]] ; then export MODE=`cat ${EMCONLINE_PED_RUNMODE_FILE}` ; fi
+	export MODE=`echo ${MODE}`
+    fi
+    export FILELIST=${EMCONLINE_PED_FILELIST_FILE}
+    export LIST=true
+
+    if [[ "${MODE}" == "RUN" ]]
+    then
+	if [[ "${DAY}" == "" ]]
+	then
+	    if [[ "${EMCONLINE_PED_LASTDAYONLY}" == "true" ]]
+	    then
+    		# find last day number
+    		export DAY=`date -u +%-j`
+    		export DAY=$(( ${DAY} - 1 ))
+    		if (( ${DAY} < 100 ))
+    	        then
+		    if (( ${DAY} < 10 ))
+		    then
+			export DAY=00${DAY}
+		    else
+			export DAY=0${DAY}
+		    fi
+		fi
+	    else
+		export DAY='???'
+	    fi
+	fi
+
+	if [[ "${year}" == "" ]]
+	then
+	    # find STAR year number
+    	    export year=`date -u +%-y`
+    	    export year=$(( ${year} + 1 ))
+	fi
+
+        # sets the run prefix
+        export RUNPREFIX=${year}${DAY}${RUNID}
+        echo "Run prefix is ${RUNPREFIX}"
+
+        # create file list
+        rm -f ${FILELIST}
+        ls -1d ${EVP_DIR}/*/${RUNPREFIX}* > ${FILELIST}
+
+	# Drop files marked as DELETE
+	rm -f ${FILELIST}.tmp
+	grep -v "DELETE" ${FILELIST} > ${FILELIST}.tmp
+	mv -f ${FILELIST}.tmp ${FILELIST}
+
+	if [[ "${EMCONLINE_PED_USEVETOFILE}" == "true" ]]
+	then
+	    echo "Excluding runs from veto file"
+	    touch ${EMCONLINE_PED_FILELIST_VETO_FILE}
+	    rm -f ${FILELIST}.tmp
+	    grep -v -f ${EMCONLINE_PED_FILELIST_VETO_FILE} ${FILELIST} > ${FILELIST}.tmp
+	    mv -f ${FILELIST}.tmp ${FILELIST}
+	fi
+
+	if [[ -f ${FILELIST} ]] ; then cat ${FILELIST} ; fi
+    fi
+else
+    export MODE=RUN
+    export FILELIST=${FILE}
+    export LIST=false
+fi
+
+export DATE=`date -u`
+export DATE_LOCAL=`date`
+rm -f ${EMCONLINE_PED_LASTRUN_FILE}
+echo "LAST TIME IT WAS EXECUTED = ${DATE} (${DATE_LOCAL})" > ${EMCONLINE_PED_LASTRUN_FILE}
+echo "FILE LIST = ${FILELIST}" >> ${EMCONLINE_PED_LASTRUN_FILE}
+echo "IS LIST = ${LIST}" >> ${EMCONLINE_PED_LASTRUN_FILE}
+echo "RUN MODE = ${MODE} " >> ${EMCONLINE_PED_LASTRUN_FILE}
+
+if [[ -f ${EMCONLINE_PED_LASTRUN_FILE} ]] ; then cat ${EMCONLINE_PED_LASTRUN_FILE} ; fi
+
+if [[ "${MODE}" != "RUN" ]]
+then
+    echo "Monitoring is disabled, exit now"
+    exit
+fi
+
+echo "Running" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
+update_desktop_icon_ped
+     
+mkdir -p ${EMCONLINE_PED_BACKUP_DIR}
+mkdir -p ${EMCONLINE_PED_TABLES_DIR}
+mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bemc
+mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bprs
+mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bsmde
+mkdir -p ${EMCONLINE_PED_TABLES_DIR}/y3bsmdp
+mkdir -p ${EMCONLINE_PED_LASTTABLES_DIR}
+mkdir -p ${EMCONLINE_PED_TEMP_DIR}
+
+if [[ "${EMCONLINE_PED_COMPARELASTTABLEDB}" == "true" ]]
+then
+    rm -f ${EMCONLINE_PED_TEMP_DIR}/${CRATE_PEDESTAL_FILES_MASK}.timestamp
+    cp ${EMCONLINE_PED_LASTTABLES_DIR}/${CRATE_PEDESTAL_FILES_MASK}.timestamp ${EMCONLINE_PED_TEMP_DIR}
+fi
+
+starver ${EMCONLINE_PED_STARVER}
+
+if [[ ( "${EMCONLINE_PED_TABLEPERRUN}" == "true" ) && ( "${LIST}" == "true" ) ]]
+then
+	for FILE in `cat ${FILELIST}`
+	do
+	    rm -f ${FILELIST}.tmp
+	    echo ${FILE} > ${FILELIST}.tmp
+	    echo "Running over ${FILE}" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
+	    update_desktop_icon_ped
+	    if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}.tmp\",${LIST}\))
+	    then
+		if [[ "${EMCONLINE_PED_USEVETOFILE}" == "true" ]]
+		then
+		    touch ${EMCONLINE_PED_FILELIST_VETO_FILE}
+		    echo ${FILE} >> ${EMCONLINE_PED_FILELIST_VETO_FILE}
+		fi
+	    fi
+	    rm -f ${FILELIST}.tmp
+	done
+else
+	if (root4star -b -q ${EMCONLINE_PED_SCRIPT}\(\"${FILELIST}\",${LIST}\))
+	then
+	    if [[ "$LIST" == "true" ]]
+	    then
+		if [[ "${EMCONLINE_PED_USEVETOFILE}" == "true" ]]
+		then
+		    touch ${EMCONLINE_PED_FILELIST_VETO_FILE}
+	    	    grep -v -f ${EMCONLINE_PED_FILELIST_VETO_FILE} ${FILELIST} >> ${EMCONLINE_PED_FILELIST_VETO_FILE}
+		fi
+	    fi
+	fi
+fi
+
+if [[ "${EMCONLINE_PED_COMPARELASTTABLEDB}" == "true" ]]
+then
+    export SAVE_ANY_FILES=false
+    export SAVE_ALL_FILES=true
+    for file in ${CRATE_PEDESTAL_FILES}
+    do
+	export DIFF=`diff ${DIFF_OPTIONS} ${EMCONLINE_PED_LASTTABLES_DIR}/${file}.timestamp ${EMCONLINE_PED_TEMP_DIR}/${file}.timestamp`
+	export DIFF=`echo ${DIFF}`
+	if [[ "${DIFF}" == "" ]]
+	then
+	    export SAVE_ALL_FILES=false
+	else
+	    export SAVE_ANY_FILES=true
+	fi
+    done
+    
+    if [[ ( "${SAVE_ANY_FILES}" == "true" ) && ( "${EMCONLINE_PED_DELIVERPEDFILES}" == "true" ) ]]
+    then
+	echo "Delivering new crate pedestal files"
+	echo "Delivering new crate pedestal files" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
+	update_desktop_icon_ped
+
+	${SCP} "${EMCONLINE_PED_LASTTABLES_DIR}/${CRATE_PEDESTAL_FILES_MASK}" ${EMCONLINE_SLOWCTRL_PEDMON_DIR}
+	${SCP} "${EMCONLINE_PED_LASTTABLES_DIR}/${CRATE_PEDESTAL_FILES_MASK}.timestamp" ${EMCONLINE_SLOWCTRL_PEDMON_DIR}
+    else
+	echo "No updated timestamps found"
+    fi
+
+    rm -f ${EMCONLINE_PED_TEMP_DIR}/${CRATE_PEDESTAL_FILES_MASK}.timestamp
+fi
+
+echo "" >| ${EMCONLINE_PED_RUNSTATUS_FILE}
+update_desktop_icon_ped

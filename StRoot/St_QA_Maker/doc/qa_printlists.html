@@ -1,0 +1,109 @@
+<BASE HREF="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/St_QA_Maker/doc/">
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>StRoot/St_QA_Maker printlists</title>
+<!-- Changed by: Curtis Lansdell, 02-May-2001 -->
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+  <tr bgcolor="#ffdc9f">
+    <td align=left> <font size="-1">
+        <a href="/STAR/">STAR</a>
+        &nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+    </td>
+    <td align=right> <font size="-1">
+        &nbsp;  <!-- top right corner  --> </font>
+    </td>
+  </tr>
+  <tr bgcolor="#ffdc9f">
+    <td align=center colspan=2><font size="+2"> <b>
+        StRoot/St_QA_Maker printlists
+        </b></font>
+    </td>
+  </tr>
+  <tr bgcolor="#ffdc9f">
+    <td align=left> <font size="-1">
+        <!-- lower left text --> &nbsp; 
+    </td>
+    <td align=right> <font size="-1"> 
+      <a href="/STAR/html/ofl_l/prodinfo.html">Maintained </a> 
+          by <a href="mailto:gene@bnl.gov">Gene Van Buren </a> 
+            </font>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2 align=right> <font size="-1"> 
+         <script language="JavaScript">
+         <!-- Hide script from old browsers
+         document.write("Last modified "+ document.lastModified)
+         // end of script -->
+         </script>
+         </font>
+    </td>
+  </tr>
+</TABLE>
+
+<FONT size ="+1" color="black">
+
+<P>
+<FONT size ="+1" color="red">Described in this Document: </FONT>
+<FONT size ="+1" color="blue">
+  <UL>
+    <LI>The printlists of St_QA_Maker & StEventQAMaker
+  </UL>
+</FONT>
+
+<HR>
+
+<H3>
+<P>
+<FONT size ="+1" color="blue">Macro Options (e.g., bfcread_hist_to_ps.C)</FONT>
+  <UL>
+    <LI><FONT size ="+1" color="green">MakerHistDir</FONT>
+      <UL>
+        <LI>QA
+            <br>&nbsp; &nbsp; <font size="">table DST-based QA histograms
+                </font>
+        <LI>EventQA
+            <br>&nbsp; &nbsp; <font size="">StEvent-based QA histograms
+                </font>
+      </UL>
+    <BR>
+    <LI><FONT size ="+1" color="green">PrintList</FONT>
+      <UL>
+          <LI>(no option, i.e., PrintList="")
+              <br>&nbsp; &nbsp; <font size="">if no option is specified,
+                  then all QA histograms will be printed by default</font>
+          <LI>qa_shift
+              <br>&nbsp; &nbsp; <font size="">year 2000 run QA shift
+                  histograms set</font>
+        <LI>year1
+            <br>&nbsp; &nbsp; <font size="">all histograms except FTPC
+                and SVT</font>
+        <LI><font color="darkblue">Cosmic</font>
+            <br>&nbsp; &nbsp; <font size="">small subset of relevant
+                QA histograms for cosmic data</font>
+        <LI><font color="darkblue">Ftpc</font>
+            <br>&nbsp; &nbsp; <font size="">FTPC-only histograms</font>
+        <LI><font color="darkblue">MDC3</font>
+            <br>&nbsp; &nbsp; <font size="">various flow histograms
+                examined during MDC3</font>
+        <LI><font color="darkblue">TestQATable</font>
+            <br>&nbsp; &nbsp; <font size="">example of a printlist</font>
+        </font>
+      </UL>
+  </UL>
+
+<p>
+<font size="">
+The <font color="darkblue">darkblue</font> printlist options are only
+available with the MakerHistDir="QA" option at the moment.
+</font>
+</H3>
+
+</BODY>
+</HTML>

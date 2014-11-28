@@ -1,0 +1,115 @@
+<chapter name="Total Cross Sections">
+
+<h2>Total Cross Sections</h2>
+
+The <code>SigmaTotal</code> class returns the total, elastic, diffractive 
+and nondiffractive cross sections in hadronic collisions, and also the
+slopes of the <ei>d(sigma)/dt</ei> distributions. The parametrizations 
+used are from <ref>Sch97</ref> which borrows some of the total cross 
+sections from <ref>Don92</ref>.
+
+<p/>
+The allowed combinations of incoming particles are <ei>p + p</ei>, 
+<ei>pbar + p</ei>, <ei>pi+ + p</ei>, <ei>pi- + p</ei>, 
+<ei>pi0/rho0 + p</ei>, <ei>phi + p</ei>, <ei>J/psi + p</ei>, 
+<ei>rho + rho</ei>, <ei>rho + phi</ei>, <ei>rho + J/psi</ei>, 
+<ei>phi + phi</ei>, <ei>phi + J/psi</ei>, <ei>J/psi + J/psi</ei>.   
+The strong emphasis on vector mesons is related to the description
+of <ei>gamma + p</ei> and <ei>gamma + gamma</ei> interactions in a 
+Vector Dominance Model framework (which will not be available for some 
+time to come, so this is a bit of overkill).
+
+<h3>Variables</h3>
+
+If the internally implemented cross section parametrizations are not 
+satisfactory, it is possible to override the cross section values 
+with  
+
+<flag name="SigmaTotal:setOwn" default="no">
+Allow a user to set own cross sections by hand; yes/no = true/false.
+</flag>
+
+<p/>
+When <code>SigmaTotal:setOwn = yes</code>, the user is expected to set 
+values for the corresponding cross sections:
+
+<parm name="SigmaTotal:sigmaTot" default="80." min="0.">
+Total cross section in mb.
+</parm>
+
+<parm name="SigmaTotal:sigmaEl" default="20." min="0.">
+Elastic cross section in mb.
+</parm>
+
+<parm name="SigmaTotal:sigmaXB" default="8." min="0.">
+Single Diffractive cross section <ei>A + B -> X + B</ei> in mb.
+</parm>
+
+<parm name="SigmaTotal:sigmaAX" default="8." min="0.">
+Single Diffractive cross section <ei>A + B -> A + X</ei> in mb.
+</parm>
+
+<parm name="SigmaTotal:sigmaXX" default="4." min="0.">
+Double Diffractive cross section <ei>A + B -> X_1 + X_2</ei> in mb.
+</parm>
+
+<p/>
+Note that the total cross section subtracted by the elastic and various 
+diffractive ones gives the inelastic nondiffractive cross section, 
+which therefore is not set separately. If this cross section evaluates 
+to be negative the internal parametrizations are used instead of the 
+ones here. However, since the nondiffractive inelastic cross section 
+is what makes up the minimum-bias event class, and plays a major role 
+in the description of multiple interactions, it is important that a 
+consistent set is used. 
+
+<p/>
+In the above option the <ei>t</ei> slopes are based on the internal
+parametrizations. In addition there is no Coulomb-term contribution
+to the elastic (or total) cross section, which of course becomes 
+infinite if this contribution is included. If you have switched on
+<code>SigmaTotal:setOwn</code> you can further switch on a machinery 
+to include the Coulomb term, including interference with the conventional
+strong-interaction Pomeron one <ref>Ber87</ref>. Then the elastic cross 
+section is no longer taken from <code>SigmaTotal:sigmaEl</code> but 
+derived from the parameters below and <code>SigmaTotal:sigmaTot</code>, 
+using the optical theorem. The machinery is only intended to be used for
+<ei>p p</ei> and <ei>pbar p</ei> collisions. The description of 
+diffractive events, and especially their slopes, remains unchanged. 
+
+<flag name="SigmaElastic:setOwn" default="no">
+Allow a user to set parameters for the normalization and shape of the
+elastic cross section the by hand; yes/no = true/false.
+</flag>
+
+<parm name="SigmaElastic:bSlope" default="18." min="0.">
+the slope <ei>b</ei> of the strong-interaction term <ei>exp(bt)</ei>,
+in units of GeV^-2. 
+</parm>
+
+<parm name="SigmaElastic:rho" default="0.13" min="-1." max="1.">
+the ratio of the real to the imaginary parts of the nuclear scattering
+amplitude.
+</parm>
+
+<parm name="SigmaElastic:lambda" default="0.71" min="0.1" max="2.">
+the main parameter of the electric form factor
+<ei>G(t) = lambda^2 / (lambda + |t|)^2</ei>, in units of GeV^2.
+</parm>
+
+<parm name="SigmaElastic:tAbsMin" default="5e-5" min="1e-10">
+since the Coulomb contribution is infinite a lower limit on 
+<ei>|t|</ei> must be set to regularize the divergence, 
+in units of GeV^2.
+</parm>
+
+<parm name="SigmaElastic:phaseConst" default="0.577">
+The Coulomb term is taken to contain a phase factor 
+<ei>exp(+- i alpha phi(t))</ei>, with + for <ei>p p</ei> and - for 
+<ei>pbar p</ei>, where <ei>phi(t) = - phaseConst - ln(-B t/2)</ei>.
+This constant is model dependent <ref>Cah82</ref>.
+</parm>
+
+</chapter>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->

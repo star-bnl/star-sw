@@ -1,0 +1,211 @@
+C    STAR_FILTER initialization     
+
+      SUBROUTINE STAR_FILTER_INIT
+      INCLUDE 'star_filter.inc'
+
+      integer Istat
+      inpPythiaEvent = 0
+      nOK=0
+
+C--- secondary params
+      GRID_ETA_BINWD=(GRID_ETA_HIGH - GRID_ETA_LOW)/NGRID_ETA_BINS
+      GRID_PHI_BINWD= 360./NGRID_PHI_BINS
+      write(*,*)"Star_filer Eta-grid:", GRID_ETA_LOW,GRID_ETA_HIGH,NGRID_ETA_BINS,
+     &     GRID_ETA_BINWD
+ 
+      write(*,*)"Star_filer phi-grid (deg):",NGRID_PHI_BINS,  GRID_PHI_BINWD
+      write(*,*)"Star_filer cell, clust ET thresh/GeV",SEED_ET_THRESH,CLUSTER_ET_THRESH
+ 
+
+C---   book histograms 
+      CALL HROPEN(2,'PYHBOOK', 'star_filter.hbook', 'N', 1024, Istat)
+      CALL HBOOK1(10,'Event counter',5,0.5,5.5,0.) !1=input,
+      CALL HBOOK1(11,'PT(GeV) of sel stabil part', 50, 0., 50., 0.)
+
+      CALL HBOOK1(20, 'Particle ID K(I,1) of sel stabil part', 2500, 0., 2500., 0.)
+
+      CALL HBOOK2(50,'ETA vs PHI(deg) of sel stabil part',100, -20., 380., 20, -0.1, 2.5, 0.)
+
+      CALL HBOOK2(51,'seed cell location ETA-bin vs PHI-bin',
+     &     NGRID_PHI_BINS,0.5,NGRID_PHI_BINS+0.5, 
+     &     NGRID_ETA_BINS,0.5,NGRID_ETA_BINS+0.5,0.)
+      CALL HBOOK1(52,'seed cell ET (GeV)', 50, 0., 80., 0.)
+      CALL HBOOK1(53,'cluster ET (GeV)', 50, 0., 80., 0.)
+      CALL HBOOK1(54,'seed/cluster  ET ratio ', 50, 0., 1.1, 0.)
+ 
+      write(*,*) 'end of STAR_FILTER_INIT'
+      return      
+      
+ 
+      END
+
+C*********************************************************************
+C...STAR_FILTER decision to select event is made here 
+ 
+      subroutine  STAR_FILTER_DECISION( resp)
+      INCLUDE 'star_filter.inc'
+      integer  resp
+
+C...PYTHIA Commonblock.
+      integer n,npad,k
+      double precision p,v
+      COMMON/PYJETS/N,NPAD,K(4000,5),P(4000,5),V(4000,5)
+
+C... Local arrays 
+      real ET_GRID(NGRID_PHI_BINS, NGRID_ETA_BINS) 
+      real CLUSTER_ET, seed_et 
+ 
+      integer iphi,ieta,i,iphi1,ieta1,iphi2
+      real r_px, r_py, r_pz, r_eta, r_pt, r_phi
+      real ATAN2D
+
+c... auxil variables
+      integer nseed
+
+C...  event filtering
+      CALL HF1(10, 1.,1.)
+
+      nseed=0
+      CLUSTER_ET = 0.0 
+      resp = 0
+      inpPythiaEvent=inpPythiaEvent+1
+
+cx - disabled, JB      
+      IF(MOD( inpPythiaEvent, 1000000) .EQ. -1 ) then
+c     random accept
+         resp=1
+         CALL HF1(10, 4.,1. )
+           CALL STAR_FILTER_FINISH
+           WRITE(6,*) "JAN save2 hist******** EVENT # gen= ",
+     &         inpPythiaEvent , "acc=",nOK
+      endif
+cx-end 
+      IF(MOD( inpPythiaEvent, 1000) .EQ. 0 )
+     &     WRITE(6,*) "JAN******** gen = ",  inpPythiaEvent, " nAcc=",nOK
+
+C... clear eta-phi energy grid, make it faster (later)
+      DO IPHI = 1,NGRID_PHI_BINS
+         DO IETA = 1,NGRID_ETA_BINS 
+            ET_GRID(IPHI,IETA)=0.0
+         ENDDO
+      ENDDO
+ 
+
+C... build array of R_ENE(60,12) with selected particles 
+      DO I=9,N                  ! skip initial partons and 2:2 collision
+         IF(K(I,1) .NE. 1) GOTO 555 ! default unstable particles
+C...  reject the default unstable, neutrion, muon ... more can be added  
+         IF(ABS(K(I,2)) .EQ. 12 .OR. ABS(K(I,2)) .EQ. 13 .OR.
+     &        ABS(K(I,2)) .EQ. 14 .OR. ABS(K(I,2)) .EQ. 15 .OR.  
+     &        ABS(K(I,2)) .EQ. 16)                         GOTO 555  
+C...  reject other unstable: Sigam+/-, Lambda0, Omega-, Cascade0/-, Ks
+         IF(ABS(K(I,2)) .EQ. 3112 .OR. ABS(K(I,2)) .EQ. 3222 .OR. 
+     &        ABS(K(I,2)) .EQ. 3122 .OR. ABS(K(I,2)) .EQ. 3334 .OR.    
+     &        ABS(K(I,2)) .EQ. 3312 .OR. ABS(K(I,2)) .EQ. 3322 .OR.
+     &        ABS(K(I,2)) .EQ. 310)                          GOTO 555  
+         
+         R_PZ=P(I,3)
+C     x... reject backwards
+C     x  (may be not good for BEMC,jan)         IF ( R_PZ .LT. 0. ) GOTO 555       
+         
+         R_PX=P(I,1)
+         R_PY=P(I,2)
+         R_PT=SQRT(R_PX**2 + R_PY**2)
+C...      R_ETA = -LOG(TAN(0.5*ATAN2(R_PT,R_PZ)))
+          R_ETA = LOG((SQRT(R_PT**2 + R_PZ**2) + R_PZ)/R_PT)
+
+         
+C...  reject particle out of EEMC eta range
+         IF ( R_ETA .LT. GRID_ETA_LOW )  GOTO 555
+         IF ( R_ETA .GT. GRID_ETA_HIGH)  GOTO 555
+                                                           
+         R_PHI = ATAN2D(R_PY,R_PX)
+         if (R_PHI<0 ) then
+            R_phi=360+R_PHI
+         endif ! now R_phi is in range [0.,360.)
+
+
+C...  HF1 requires REAL input !
+         CALL HF1(11,R_PT,1.0)
+cx         IF(ABS(K(I,2)) .GE. 2500) WRITE (6,*) "PID = ", K(I,2)
+         CALL HF1(20, FLOAT(ABS(K(I,2))),1.0)         
+         CALL HF2(50, R_PHI, R_ETA,1.0) 
+         
+         IPHI = INT(R_PHI/GRID_PHI_BINWD) + 1
+         IETA = INT((R_ETA-GRID_ETA_LOW)/GRID_ETA_BINWD) +1
+
+         ET_GRID(IPHI, IETA) = ET_GRID(IPHI, IETA) + R_PT
+
+ 555      CONTINUE 
+        ENDDO    
+ 
+C... look for seed over energy threshold 
+        DO IPHI = 1, NGRID_PHI_BINS ! loop over phi
+           DO IETA = 1, NGRID_ETA_BINS ! loop over eta
+              seed_ET = ET_GRID(IPHI,IETA)
+cx              if(seed_ene.gt.0) then
+cx                 print *, seed_ene,IPHI,IETA
+cx              endif
+              IF(seed_et .GT. SEED_ET_THRESH) THEN ! seed found
+                 nseed=nseed+1
+cx                 print *, 'SS', seed_et,IPHI, IETA ,  inpPythiaEvent
+                 CALL HF2(51, IPHI*1., IETA*1., 1.0)
+                 CALL HF1(52, seed_et,1.)
+C... look for cluster of 2 cells over energy threshold
+C... phi wrap-up is included
+              DO IPHI1 = IPHI-1, IPHI+1 
+                 iphi2=mod(iphi1,NGRID_PHI_BINS)
+                 if(iphi2 .eq. 0) iphi2 = NGRID_PHI_BINS ! now phi wraps up
+cx                 print *,  " iphi2=",iphi2
+                 DO IETA1 = IETA-1, IETA+1
+                    IF(IETA1 .EQ. IETA .and. IPHI2 .EQ. IPHI) goto 610
+                    if(IETA1.le.0) goto 610
+                    if(IETA1.gt.NGRID_ETA_BINS) goto 610
+                    CLUSTER_ET = seed_et+ET_GRID(IPHI2,IETA1)
+c     x                    print *, " ieta1=",ieta1," clET=",cluster_ET
+                    IF (CLUSTER_ET .GT. CLUSTER_ET_THRESH) GOTO 700
+ 610                continue
+                 ENDDO
+              ENDDO              
+            ENDIF ! seed found
+          ENDDO   ! loop over eta
+        ENDDO     ! loop over phi
+        GOTO 710
+
+ 700    CONTINUE
+
+C... do something when an event of interest is found
+cx        WRITE(6,*) " Number of calls of PYEVNT_ORG = ",inpPythiaEvent 
+cx        WRITE(6,*) " Found a cluster with ET  = ", CLUSTER_ET 
+        CALL HF1(53, cluster_et,1.)
+        CALL HF1(54, seed_et/cluster_et,1.)
+        resp = 1
+        nOK=nOK+1
+        CALL HF1(10, 3.,1. )
+      IF(MOD(nOK, 500) .EQ. 1 ) THEN
+           CALL STAR_FILTER_FINISH
+           WRITE(6,*) "JAN save1  hist******** EVENT # gen= ",
+     &         inpPythiaEvent , "acc=",nOK
+        ENDIF
+
+
+ 710    CONTINUE
+      if( nseed.gt.0) then
+         CALL HF1(10, 2.,1.)
+      endif
+cx       print *, 'respIN=',resp
+
+        return 
+        
+      END
+
+C======================================
+C======================================
+C======================================
+C... finish and call HROUT
+      SUBROUTINE STAR_FILTER_FINISH
+      integer icycle
+      CALL HCDIR('//PYHBOOK',' ')
+      CALL HROUT(0,ICYCLE,' ')
+      
+      END

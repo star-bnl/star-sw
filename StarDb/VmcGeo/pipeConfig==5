@@ -1,0 +1,11 @@
+TGeoVolume *pipe() {
+TGeoVolume *PIPE = gGeoManager->MakeTube("PIPE",GetMed("PIPE_STANDARD"),0,2.025,100); PIPE->SetTitle("the STAR beam pipe mother volume");
+  PIPE->SetVisibility(0);
+TGeoVolume *PIPC = gGeoManager->MakeTube("PIPC",GetMed("PIPE_BERILLIUM"),1.975,2.025,100); PIPC->SetTitle("the Central Beam PIPe Volume");
+  PIPC->SetLineColor(6);
+TGeoVolume *PVAC = gGeoManager->MakeTube("PVAC",GetMed("PIPE_PVACUUM"),0,1.975,100); PVAC->SetTitle("the Vacuum Volume of Be section of pipe");
+  PVAC->SetLineColor(5);
+   PIPE->AddNode(PIPC,1,gGeoIdentity);
+   PIPE->AddNode(PVAC,1,gGeoIdentity);
+  return PIPE;
+}

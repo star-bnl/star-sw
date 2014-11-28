@@ -1,0 +1,13 @@
+/*    RunConfig.idl
+*
+*  Table: RunConfig
+*
+*       description: //  List of of detector in RUN
+*/ 
+
+
+struct RunConfig { 
+  char detector[23];
+  unsigned long  runFirst;   
+  unsigned long  runLast;   
+ };  

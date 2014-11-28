@@ -1,0 +1,26 @@
+
+Package: St_db_Maker
+Responsible: Victor Perevoztchikov (perev@bnl.gov)
+
+Purpose: Maker to access DB data.
+
+1) Provides common interface for all kind STAR DB
+   Selects needed DB, opens it, etc... 
+
+2) Provides transparent acces to data stored in DB. 
+   All selection by time stamp, version etc provided here
+   hidden from user makers
+
+3) User maker acces DB data via StMaker class. It does not
+   know anything about existence of St_db_Maker(s)
+
+4) Currently supports CintDB and provisional MySQL DBs
+
+   
+5) Breaks dependency from real DB classes, which could be modified without
+   touching user maker code. Only St_db_Maker must be modified to coop
+   with changes in DB classes
+
+
+
+

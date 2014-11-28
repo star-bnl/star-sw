@@ -1,0 +1,5 @@
+# $Id $
+# package StBFChain
+# author: 
+Library:libStBFChain.so:LIBS +=   -lStChain  -lStChallenger  -lSt_db_Maker  -lStIOMaker  -lStTreeMaker -lStarMagField
+#Library:libStBFChain.so:LIBS +=   -lStChain  -lStChallenger  -lSt_db_Maker  -lStIOMaker  -lStTreeMaker 

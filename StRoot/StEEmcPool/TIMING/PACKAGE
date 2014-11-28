@@ -1,0 +1,5 @@
+# $Id $
+# package TIMING
+# author: 
+Library:libStEEmcPoolTIMING.so:LIBS +=   -lStChain  -l_StMuDSTMaker
+#Library:libStEEmcPoolTIMING.so:LIBS +=   -lStChain  -lStMuDSTMaker

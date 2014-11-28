@@ -1,0 +1,39 @@
+<html>
+
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+		<meta name="generator" content="Adobe GoLive 4">
+		<title>StEvent HTML Online Info</title>
+	</head>
+
+	<body bgcolor="white">
+		<h2><font color="#00008b">StEvent Online Info
+		<hr noshade>
+		</font></h2>
+		<p><font color="red">The StEvent documentation changes frequently.</font></p>
+                 
+                <p>The most <b>easy way</b> to get a print ready manual is is to pick up the
+                PS version of the manual from a dedicated STAR computing 
+                <a href="http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html">web page</a>.
+                At the moment pdf format is unfortunately not supported.
+                
+		<p>In order to manually create an <b>up-to-date</b> version do the following:</p>
+		<ul>
+			<p><code>mkdir wrk</code><br>
+			<code>cd wrk</code><br>
+			<code>cvs co StRoot/StEvent</code><br>
+			<code>cd StRoot/StEvent/doc/tex</code><br>
+			<code>make</code><br>
+			</p>
+		</ul>
+		<p>This creates a PS file <code>StEvent.ps</code> which you can print easily. This requires that you have a complete version of LaTeX installed on your system.</p>
+		<p>Optionally you can also create directly a pdf file <code>StEvent.pdf</code>:</p>
+		<p><code>make pdf</code></p>
+		<p>This requires that you have the <code>dvipdf</code> program installed on you system.</p>
+		<p>For question please send a mail to: <a href="mailto:thomas.ullrich@yale.edu">thomas.ullrich@yale.edu</a>.</p>
+		<p>
+		<hr noshade>
+		<i>This file was last updated: <csobj w="205" h="20" t="DateTime" format="LongDate" locale="00000409" region="0">Wednesday, December 01, 1999</csobj> by tu</i>
+	</body>
+
+</html>

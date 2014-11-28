@@ -1,0 +1,15 @@
+/*    svtRmsAnode.h
+*
+*  Table: svtRmsAnode
+*
+*       description: //  SVT RMS
+*/ 
+
+
+struct svtRmsAnode { 
+
+  long ID;
+
+  octet  rms[240];   /*Rms at anode level   */
+
+ };  

@@ -1,0 +1,20 @@
+MACRO loadlibs
+
+*gexec $STAR_LIB/geometry.so
+*gexec $STAR_LIB/libpythia_6410t.so
+*gexec $STAR_LIB/bpythia.so
+ gexec $ROOTSYS/lib/libCint.so
+ gexec $ROOTSYS/lib/libCore.so
+ gexec $ROOTSYS/lib/libMathCore.so
+ gexec $ROOTSYS/lib/libMatrix.so
+ gexec $ROOTSYS/lib/libPhysics.so
+
+ LOCAL = $FEXIST('.'//$STAR_HOST_SYS)
+
+ IF [LOCAL]=1 THEN
+ gexec .$STAR_HOST_SYS/lib/StMCFilter.so
+ ELSE
+ gexec $STAR_LIB/StMCFilter.so
+ ENDIF
+
+RETURN

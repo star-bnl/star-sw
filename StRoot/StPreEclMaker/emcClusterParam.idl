@@ -1,0 +1,14 @@
+/*
+*********************************************************
+* Table:       emcClusterParam.idl
+* Description: define parametres for EMC cluster finder
+* Author     : Aleksei Pavlinov, WSU
+*********************************************************
+*/
+  struct  emcClusterParam{
+    short detector;        /* detector number => see StEmcUtil/emcInternalDef.h */
+    float energySeed;      /* seed energy for cluster */
+    float energyAdd;       /* */
+    float energyThreshold; /* energy threshold for cluster */
+    short sizeMax;         /* max cluster size */ 
+  };                                                                            

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+export EMCONLINE_PED_DIR=${0%/*}
+if [[ -f ./.emconline_ped.cfg.sh ]]
+then
+    source ./.emconline_ped.cfg.sh
+elif [[ -f ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh ]]
+then
+    source ${EMCONLINE_PED_DIR}/.emconline_ped.cfg.sh
+else
+    echo "EMC Online environment is not configured, please run configure.emconline_ped"
+    exit 1
+fi
+
+cd ${EMCONLINE_PED_DIR}
+
+export RUNMODE=${1}
+
+if [[ "${RUNMODE}" != "" ]]
+then
+    if [[ ( "${RUNMODE}" == "RUN" ) || ( "${RUNMODE}" == "STOP" ) ]]
+    then
+        echo ${RUNMODE} >| ${EMCONLINE_PED_RUNMODE_FILE}
+	update_desktop_icon_ped
+    else
+	echo "Cannot recognize run mode: ${RUNMODE}, should be RUN or STOP"
+    fi
+fi
+
+echo "EMC Online pedestal monitoring status:"
+if [[ -f ${EMCONLINE_PED_RUNMODE_FILE} ]] ; then cat ${EMCONLINE_PED_RUNMODE_FILE} ; fi
+if [[ -f ${EMCONLINE_PED_RUNSTATUS_FILE} ]] ; then cat ${EMCONLINE_PED_RUNSTATUS_FILE} ; fi
+echo "Last run:"
+if [[ -f ${EMCONLINE_PED_LASTRUN_FILE} ]] ; then cat ${EMCONLINE_PED_LASTRUN_FILE} ; fi

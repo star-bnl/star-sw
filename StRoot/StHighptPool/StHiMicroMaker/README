@@ -1,0 +1,23 @@
+This directory contains the Highpt uDST Maker developed by Bum Choi.  It creates
+highpt uDSTs (StHiMicroEvent) from StEvent for inclusive spectra analysis.  
+
+The first committed version has been updated for Year 2 analysis, including
+year 2 definition of centrality.
+
+J.L. Klay (LBNL)
+02-Apr-2002
+
+-----------------------------
+31-MAY-2002	JLK (LBNL)
+
+Added new members to StHiMicroEvent to save zdc vertex info which is now filled here.  
+
+Also changed the way centrality is determined - it now uses the standard 
+uncorrectedNumberOfPrimaries(*stEvent) function from StuRefMult.h in StEventUtilities.
+
+Finally, added a boolean selection for the user to decide whether to write out
+event information for events which have no primary vertex.  
+These might be useful in assessing the vertex finding efficiency for low multiplicity
+events using the zdcvertex information.
+
+

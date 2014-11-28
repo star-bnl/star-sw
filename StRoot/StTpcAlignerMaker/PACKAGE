@@ -1,0 +1,5 @@
+# $Id $
+# package StTpcAlignerMaker
+# author: 
+Library:libStTpcAlignerMaker.so:LIBS +=   -lStBFChain  -lStChain  -lStDbUtilities  -l_StEvent  -l_StTpcDb
+#Library:libStTpcAlignerMaker.so:LIBS +=   -lStBFChain  -lStChain  -lStDbUtilities  -lStEvent  -lStTpcDb

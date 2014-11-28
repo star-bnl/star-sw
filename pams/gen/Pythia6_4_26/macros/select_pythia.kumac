@@ -1,0 +1,27 @@
+*************************************************************
+** Macro to select a specific pythia library 
+**
+** usage:
+**
+** exec select_pythia 
+**
+**      loads default libray 6.4.10t
+**
+** exec select_pythia library=libpythia_6422.so
+**
+**      loads library version 6.4.22
+**
+** exec select_pythia library=libpythia_6422.so path=./
+**
+**      loads a locally compiled version of the pythia library 
+**
+*************************************************************
+
+MACRO select_pythia library=libPythia6_4_26.so path=.$STAR_HOST_SYS/lib
+
+   MESSAGE Loading  [path]/[library]
+
+   GExec [path]/[library]
+   GExec [path]/bpythia.so
+
+Return

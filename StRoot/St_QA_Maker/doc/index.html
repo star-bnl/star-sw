@@ -1,0 +1,335 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>StRoot/St_QA_Maker classes</title>
+<!-- Changed by: Kathleen R. Turner, 14-Feb-2000 -->
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+  <tr bgcolor="#ffdc9f">
+    <td align=left> <font size="-1">
+	<a href="/STAR/">STAR</a>
+	&nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+    </td>
+    <td align=right> <font size="-1">
+	&nbsp;  <!-- top right corner  --> </font>
+    </td>
+  </tr>
+  <tr bgcolor="#ffdc9f">
+    <td align=center colspan=2><font size="+2"> <b>
+        StRoot/St_QA_Maker classes
+	</b></font>
+    </td>
+  </tr>
+  <tr bgcolor="#ffdc9f">
+    <td align=left> <font size="-1">
+	<!-- lower left text --> &nbsp; 
+    </td>
+    <td align=right> <font size="-1"> 
+      <a href="/STAR/html/ofl_l/prodinfo.html">Maintained </a> 
+          by <a href="mailto:kathy@bnl.gov">K. Turner </a> 
+            </font>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2 align=right> <font size="-1"> 
+         <script language="JavaScript">
+         <!-- Hide script from old browsers
+         document.write("Last modified "+ document.lastModified)
+         // end of script -->
+         </script>
+         </font>
+    </td>
+  </tr>
+</table>
+
+<p>
+<!-- Content -->
+
+
+<font  size ="+1" color="red"> Described in this Document:  <font  size ="+1" color="black"> 
+<font  size ="+1" color="blue">
+  <ul>
+   <li>      
+      The classes in the St_QA_Maker directory -  <a href="#doc1"> Go </A> 
+   <li>
+      Methods in these classes -  <a href="#doc2"> Go </A> 
+      <ul>
+        <li> St_QA_Maker - description of methods -  <a href="#doc2a"> Go </A> 
+        <li> StEventQAMaker - description of methods -  <a href="#doc2b"> Go </A> 
+        <li> StQABookHist - description of methods -  <a href="#doc2c"> Go </A> 
+      </ul>
+   <li>
+     Library macros that use the code in St_QA_Maker -  <a href="#doc4"> Go </A> 
+   <li>
+     List of histograms produced by St_QA_Maker -  <a href="qa_histograms.html"> Go </A>
+   <li>
+     Macro options MakerHistDir and PrintList -  <a href="qa_printlists.html"> Go </A>
+  </ul>
+<font  size ="+1" color="black"> 
+
+
+<hr>
+
+<h3>
+  
+<p>
+<a name="doc1">
+<font  size ="+1" color="blue"> The classes in the St_QA_Maker directory are: <font  size ="+1" color="black"> 
+    <ul>
+      <li> <font  size ="+1" color="red"> St_QA_Maker <font  size ="+1" color="black"> 
+             <ul>
+               <li> ! Important note (13jan00) - to use St_QA_Maker class, you must also
+                    load the 
+                      tls,St_tpc,St_svt,St_global libraries, since the function pams/global/egr/prop_one_track.c
+                    is needed and the other libraries are needed to load St_global!
+               <li>
+                 books (using StQABookHist methods) and fills histograms (using separate filling
+                  methods) from dst Table data structures
+               <li>
+                 inherits from StQABookHist
+              </ul>
+      <li> <font  size ="+1" color="red"> StEventQAMaker <font  size ="+1" color="black"> 
+             <ul>
+               <li>
+                 books (using StQABookHist methods) and contains filling methods for
+                  histograms from StEvent data structures
+                <li>
+                 inherits from StQABookHist
+             </ul>
+      <li> <font  size ="+1" color="red"> StQABookHist <font  size ="+1" color="black">
+              <ul>
+               <li> contains methods for booking histograms for St_QA_Maker & StEventQAMaker classes
+                    and also method (Init) to call booking methods
+               <li> contains method (Make) to call all filling methods
+               <li> inherits from St_Maker
+               <li> this is an abstract class 
+              </ul>
+    </ul>
+  
+<hr>
+<p>
+<a name="doc2">
+<font  size ="+1" color="blue"> Methods in these classes:<font  size ="+1" color="black"> 
+   <ul>
+<a name="doc2a">
+      <li><font  size ="+1" color="green">  St_QA_Maker - methods  <font  size ="+1" color="black"> 
+         <ul>
+            <li> Init - runs the ::Init method from StQABookHist class
+
+             <li>Make - runs the ::Make method from StQABookHist class
+
+             <li> Fills histograms from DST Table data structures using methods:
+  <h4>
+  <pre>
+    MakeHistEvSum();  - table event_summary
+    MakeHistGlob();   - table globtrk
+    MakeHistPrim();   - table dst_dedx
+    MakeHistDE();     - table primtrk
+    MakeHistGen();    - table particle
+    MakeHistPID();    - table primtrk & dst_dedx
+    MakeHistVertex(); - table dst_vertex
+    MakeHistPoint();  - table point
+    MakeHistRich();   - table g2t_rch_hit
+    MakeHistEval();   - uses table dst_vertex & g2t_vertex 
+                      (g2t_vertex not on dst & only exists for simulated data)
+  </pre>
+   </h4>
+
+            <li>Finish -  doesn't do much of anything...
+
+         </ul>
+
+ <p>
+
+<a name="doc2b">
+      <li><font  size ="+1" color="green">  StEventQAMaker - methods  <font  size ="+1" color="black"> 
+         <ul>
+            <li> Init - runs the ::Init method from StQABookHist class
+
+             <li>Make - runs the ::Make method from StQABookHist class
+
+             <li> Fills histograms from StEvent data structures using methods:
+  <h4>
+  <pre>
+    MakeHistEvSum();  
+    MakeHistGlob();   
+    MakeHistPrim();   
+    MakeHistDE();     
+    MakeHistPID();    
+    MakeHistVertex(); 
+    MakeHistPoint();  
+    MakeHistRich();   
+  </pre>
+   </h4>
+    Note - MakeHistGen and MakeHistEval require StMcEvent, which is not loaded by this maker.<br><br>
+
+            <li>Finish -  doesn't do much of anything...
+
+         </ul>
+
+ <p>
+<a name="doc2c">
+      <li> <font  size ="+1" color="green"> StQABookHist - methods <font  size ="+1" color="black"> 
+
+         <ul>
+
+  <li> NameIt
+  <li> TitleIt
+  <li> QAH1F
+  <li> QAH2F
+
+  <li> Init - calls all histogram booking methods
+
+  <li> histogram booking methods:
+  <h4>
+  <pre>
+    BookHistEvSum();  
+    BookHistGlob();   
+    BookHistPrim();   
+    BookHistDE();     
+    BookHistGen();    
+    BookHistPID();    
+    BookHistVertex(); 
+    BookHistPoint();  
+    BookHistRich();   
+    BookHistEval();     
+  </pre>
+   </h4>
+
+  <li> Make - calls all histogram filling methods MakeHist* from St_QA_Maker class (see above)
+
+   </ul>
+
+ </ul>
+
+<hr>
+<p>
+<a name="doc4">
+<font  size ="+1" color="blue">
+  Library macros that use the code are (**)
+<font  size ="+1" color="black">
+   <ul>
+
+    <li> <font  size ="+1" color="red"> bfc.C <font  size ="+1" color="black"> <br>
+          &nbsp  - St_QA_Maker class runs during production to book & fill QA_Maker histograms
+            from dst tables
+
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_QAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the St_QA_Maker for nevents to book & fill QA 
+                    dst-table histograms <br>
+          &nbsp   -  lists,draws,prints histograms from "QA" subdirectory from
+                   given print list   <br>                  
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,
+                  SetDefaultPrintList,ExaminePrintList,DrawHists methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_EventQAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the StEventMaker (to fill StEvent data structure)
+                    and StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   -  lists,draws,prints histograms from "EventQA" subdirectory from given print list <br>                 
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,
+                   SetDefaultPrintList,ExaminePrintList,DrawHists methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_event_QAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .event.root file produced from bfc.C <br>
+          &nbsp   - creates chain and runs StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   -  lists,draws,prints histograms from "EventQA" subdirectory from given print list <br>                 
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,
+                   SetDefaultPrintList,ExaminePrintList,DrawHists methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_QA_outhistfile.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the St_QA_Maker for nevents to book & fill QA 
+                    dst-table histograms <br>
+          &nbsp   - writes histograms to output *.hist.root with given top level and Maker
+                     subdirectory   <br>                  
+          &nbsp   - one can then use bfcread_hist* macros (above) to view the histograms
+          &nbsp  - uses SetPntrToMaker, ListHists methods from StHistUtil
+
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_EventQA_outhistfile.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the StEventMaker (to fill StEvent data structure)
+                    and StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   - writes histograms to output *.hist.root with given top level and Maker
+                     subdirectory   <br>                  
+          &nbsp   - one can then use bfcread_hist* macros (above) to view the histograms
+          &nbsp  - uses SetPntrToMaker, ListHists methods from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_event_QA_outhistfile.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .event.root file produced from bfc.C <br>
+          &nbsp   - creates chain and runs StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   - writes histograms to output *.hist.root with given top level and Maker
+                     subdirectory   <br>                  
+          &nbsp   - one can then use bfcread_hist* macros (above) to view the histograms
+          &nbsp  - uses SetPntrToMaker, ListHists methods from StHistUtil
+
+   </ul>
+
+Reminder!  In order to get your histograms in "correct" place, you
+   must book them in ::Init method of your macro  OR
+   you must use the AddHist method to put them in the right place!!!
+
+
+<p>
+<font  size ="+1" color="blue">
+  Library macros that print,list histograms created from these classes:
+<font  size ="+1" color="black">
+<ul>
+
+    <li>  <font  size ="+1" color="red">bfcread_hist_list_all.C  <font  size ="+1" color="black"> <br>
+          &nbsp  - reads .hist.root file produced from bfc.C or other chain <br>
+          &nbsp  - lists all histograms (from all Makers) it
+                   finds under all subdirectories for given top level
+                   directory<br>
+          &nbsp  - shows how to do this in macro - not using utilities
+
+    <li>  <font  size ="+1" color="red">bfcread_hist_list.C  <font  size ="+1" color="black"> <br>
+           &nbsp  - reads .hist.root file produced from bfc.C or other chain<br>
+           &nbsp  - lists all histograms it
+                   finds under given Maker subdirectory for given top
+                   level directory  <br>
+           &nbsp - uses SetPntrToMaker, ListHists methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_hist_to_ps.C <font  size ="+1" color="black">  <br>
+          &nbsp   - reads .hist.root file produced from bfc.C  or other chain<br>
+          &nbsp   -  lists,draws,prints to output ps file histograms for given: Maker
+                    subdirectory name, top level directory name, print list<br>
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists,
+                     SetDefaultPrintList,ExaminePrintList, DrawHists  methods
+                  from StHistUtil
+
+ </ul>
+
+
+<p>
+ <font  size ="+1" color="red">
+ ** NOTE!  
+<font  size ="+1" color="black">
+By looking at the bfcread_dst_QAHist.C macro, one can see how to use the StHistUtil
+    methods to find histograms after any Maker is used, and list or print & draw them.
+
+
+</h3>
+
+<!-- Footer -->
+</body>
+</html>

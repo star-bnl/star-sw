@@ -1,0 +1,894 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>StAssociationMaker Guide</title>
+  </head>
+
+  <body bgcolor="#ffffff" text="#000000">
+    <table border="0" width ="100%" cellpadding="10">
+      <tr bgcolor="darkblue">
+	<td align="center" valign="top">
+					<h1>
+	    <font color="lightgreen">StAssociationMaker</h1>
+				</td>
+    </table>
+    <center>
+      <h1>A Class for <font color="red">StMcEvent-StEvent</font> Object Association</h1>
+    </center>
+    <p>
+    <h2></h2>
+
+    <p>Since more people look at the web page first, I've put more work in updating this page than on updating the LaTeX manual.  Please contact me with suggestions or corrections.
+		<p>The current <b>StAssociationMaker</b> User's Guide &amp; Reference Manual is somewhat outdated (although still contains useful information). Gene made a nice page where the PS documentation can be obtained. Click <a href="http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html">here</a> to get to Gene's page. The overall idea has remained the same, but more associations have been added and the names of the relevant multimaps have changed because of this new diversity. For help regarding multimaps, which are the crux of <b>StAssociationMaker</b>, I have
+      added a more detailed description in the <a href="#QuickGlance">Quick Glance</a> section. There are maps for <a href="#Tracks">Tracks</a>, <a href="#Vertices">Vertices</a> and
+      <a href="#Hits">Hits</a>. For quick reference, look at the brief
+      <a href="#classDescription">class description</a> below.  This gives a list of
+      the most relevant multimap type definitions (or "What was the name of the map
+      between TPC Hits?")
+      , and the methods
+      to <a href="#Getting">get the maps</a> from the <i>StAssociationMaker</i> class
+      (or "How do I get the maps
+      once I have a pointer to the Association Maker?").
+
+    </p>
+		<h3>Maybe you only need StMiniMcMaker?</h3>
+		<p>For many analyses, specially those that need only single particle matches, the <b>StMiniMcEvent</b> and <b>StMiniMcMaker</b> packages are probably what you need.  This has been developed for analyses of single particle spectra by the Spectra and High-pt working groups (Bum Choi and Manuel Calderon de la Barca as code developers).  This package is run after StAssociationMaker to store the information of the matched tracks into a TTree for later analysis of efficiency, acceptance, weak decay backgrounds, ghost tracks, split tracks and merged tracks.  It has primary and global track matches for efficiency calculations.  The documentation for <b>StMiniMcMaker</b> is <a href="http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/StMiniMcMaker/doc/">here</a>. StMiniMcMaker runs in all standard simulation productions, the output is stored in xxx.minimc.root files, and are indexed by the File Catalog, so using them is the easiest way to get started doing efficiency calculations.</p>
+		<h2> Description </h2>
+		<p>
+      The <b>StAssociationMaker</b> package provides the functionality to
+      analyze Monte Carlo
+      data contained in <b>StMcEvent</b> and reconstructed data contained
+      in <b>StEvent</b>.
+      It relates the
+      objects from the 2 packages according to user defined criteria.  The relationship is
+      established through a <i>multimap</i>.  For a better understanding of the workings of the
+      Maker,
+      I'll very briefly discuss the idea behind a <i>multimap</i>.
+    </p>
+    <a name="QuickGlance"></a>
+    <h2>Quick glance at Multimaps</h2>
+    <h3>STL Containers</h3>
+    <p>
+      A <a href="http://www.sgi.com/Technology/STL/Multimap.html"><i>multimap</i></a> is
+      a type of C++
+      <a href="http://www.sgi.com/Technology/STL/stl_introduction.html">Standard
+	Template Library</a>
+      associative container.
+      The STL provides several containers with different features.  Examples
+      are lists, vectors, and associative arrays.  In general, one can
+      add and remove objects from a container.  The C++ standard library
+      containers were designed to meet 2 criteria: to provide as much freedom
+      as possible in the design of individual containers and at the same
+      time to provide a common interface to users.  This allows to make
+      each container as efficient as possible for its intended use but
+      still enable users to write code that is independent of the
+      particular container being used.
+      The standard library defines two kinds of containers: sequences and
+      associative containers.  A key idea for the standard containers is that
+      they should be logically interchangeable wherever reasonable.  Users can
+      then choose between them depending on efficiency concerns and the
+      need for specialized operations.  For example, if lookup based on
+      a key is common, a <b>map</b> can be used.  If general list operations
+      dominate, a <b>list</b> can be used.  If many additions and removals of
+      elements occur at the ends of the container, a <b>deque</b> (double-ended
+      queue), a <b>stack</b>, or a <b>queue</b> should be considered.
+      These are
+      illustrated in the figure below.
+      
+      <img src="./conthier.gif" align=left>
+      <br clear=center>
+      <h3>Multimap Introduction</h3>
+      The crucial idea for
+      <a href="http://www.sgi.com/Technology/STL/Map.html"><i>maps</i></a> (and indeed,
+      for all types of
+      associative containers) is to gain information based on a "key".  To illustrate
+      the concept
+      in a more familiar context, one can think of a phonebook.  The idea of a phonebook is
+      that it
+      contains people's phone numbers.  In other words, it is an associative
+      container between a
+      character string (a person's name) and an integer (the person's phone number).
+      To use a
+      phonebook,
+      one looks up a person's name and reads off the associated phone number.  The character
+      string representing the name is the "key", and the phone number is the key's
+      associated "value".  
+    </p>
+    <p>
+      A <i>map</i> is nothing else than a sequence of (key, value) pairs that provides for
+      fast retrieval
+      of the value based on the key.  
+      There is one main difference between the
+      <i>map</i> and the
+      <i>multimap</i>:in a <i>map</i>,
+      keys are UNIQUE.  This means that if a phonebook were a <i>map</i>,
+      then each person would only
+      be able to have one phone number. Note that the phone number could be shared between
+      people
+      (only the keys
+      are unique).  A <i>multimap</i>, on the other hand,
+      allows multiple keys.  This means that if a phonebook were a <i>multimap</i>, then everyone
+      could have
+      as many phone numbers as they pleased.
+      
+      One thing that help to picture the map and the multimap is the following.
+      Recall the definition is that they are "associative containers of
+      pairs of
+      objects".  You can always think of a vector as an array.  So if you have
+      a <code>vector< int></code> then you can picture it like this:
+    <p>
+      <table height=3 align=center border=4>
+	<tr align=center >
+	  <th bgcolor=lightseagreen>Vector: </th><td align=center> 1 </td><td> 2 </td><td> 5 </td><td> 17 </td><td> 20 </td><td> 25 </td>
+	</tr>
+      </table>
+
+    So the first element is 1, the second is 2 and so on.  Now, a map is a
+    container of PAIRS of objects.  The 2 objects can be anything, (i.e. the
+    PAIR class is also a template.)  So a phonebook would be, for example, 
+    a
+    
+    <br> <code>map< string,int, less< string> ></code>.
+    <br>
+    I would picture it like this:
+    <p>
+      <table align=center border=2 cellspacing=4>
+	<caption align=bottom>Example phonebook as map</caption>
+	<tr>
+	  <th bgcolor=lightseagreen>Map: </th>
+	  <td>("Brian",2034322043)</td>
+	  <td>("Manuel",6313448342)</td>
+	  <td>("Thomas",2034325829)</td>
+	  
+	</tr>
+    </table>
+    
+    Now, the 'key' here would be the <tt>string</tt>, and the 'value' the
+    <tt>int</tt> representing the phone
+    number.  Since it is a map, keys are unique.  This means that there
+    will only be one entry for each string.  
+    If I say:
+    <p>
+    
+    <code>
+      phonebook["Manuel"] = 2034325637;
+    </code>
+    <p>
+    the entry for "Manuel" will be overwritten.
+    
+    Note that I can say 
+    <p>
+    <code>
+      phonebook["Thomas"] = phonebook["Manuel"];
+    </code>
+    <p>
+    and I'll overwrite Thomas's phone number with mine.  The 'values' 
+    can be repeated.
+
+    By the way, a map
+    supports indexing. Since there is one entry for each key (and only one)
+    it is unambiguous which entry one wants so we can use the key as an index.
+    A multimap doesn't support indexing,
+    because there is still the ambiguity of having multiple entries.
+    If we made the phonebook a
+    <p>
+    <code>
+      multimap< string, int, less< string> > 
+    </code>
+    <p>
+      then we could have
+    <p>
+      <table border=0 >
+	<caption align=bottom>Example phonebook as a multimap</caption>
+	<tr>
+	  <td>
+	    <table border=4>
+	      <th bgcolor=lightseagreen>Multimap: </th>
+	      <tr><td>("Brian",2034322043)</td></tr>
+	      <tr><td>("Manuel",6313448342)</td></tr>
+	      <tr><td>("Manuel",2034325637)</td></tr>
+	      <tr><td>("Thomas",2034325829)</td></tr>
+	    </table>
+	  </td>
+	
+	  <td>
+	    <table border=0>
+	      <th><font color=white>.</font></th>
+	      <tr><td rowspan=1><font color=white>.</font></td></tr>
+	      <tr><td>&lt;-- phonebook.lower_bound("Manuel");</td></tr>
+	      <tr><td rowspan=1><font color=white>.</font></td></tr>
+	      <tr><td>&lt;-- phonebook.upper_bound("Manuel");</td></tr>
+	      
+	    </table>
+	  </td>
+	</tr>
+      </table>
+      <br>
+    <p>
+    <p>
+      Since you don't know a priori how many entries there are,
+      that is why you need the 2 iterators, lower_bound and upper_bound,
+      to loop over all the entries of a particular key in the multimap.  
+    
+    You can think of them as the equivalent to
+    <p>
+    <code>
+      vector.begin();
+    </code>
+    <p>
+      and
+    <p>
+      <code>
+      vector.end();
+    </code>
+    <p>
+    (Remember that upper_bound will point to the first element greater than
+    the key it takes as argument. )   The comparison is also
+    important, so that the entries in the multimap are ordered.
+      You'll
+      find more discussion on iterators in the next section.
+
+    <p>
+      It is important to stress that every entry in the multimap is a key-value pair,
+      regardless of whether the key has appeared before.  This means that there is some
+      redundancy.  If you loop over a sequence of entries using lower_bound and
+      upper_bound, ALL of the entries in that sequence will have the same key:
+    <p>
+      <table border=0 >
+	<caption align=bottom>Multiple entries for a key.</caption>
+	<tr>
+	  <td>
+	    <table border=4>
+	      <th bgcolor=lightseagreen>Multimap: </th>
+	      <tr><td>("Manuel",631...)</td></tr>
+	      <tr><td>("Manuel",203...)</td></tr>
+	      <tr><td>("Manuel",212...)</td></tr>
+	    </table>
+	  </td>
+	
+	  <td>
+	    <table border=0>
+	      <th><font color=white>.</font></th>
+	      <tr><td>&lt;-- First entry</td></tr>
+	      <tr><td>&lt;-- Second entry, same key, different value</td></tr>
+	      <tr><td>&lt;-- Third entry, etc.</td></tr>
+	      
+	    </table>
+	  </td>
+	</tr>
+      </table>
+      <br>
+    <h2>Multimap Usage</h2>
+    <p>
+      Now that we have an idea of what a multimap is supposed to do, we can get around to how
+      does it do it.  This section deals with what can one do with multimaps and specific
+      features of them that will probably be commonly used for analysis purposes, and
+      examples of these are found in <b>StMcAnalysisMaker</b>.  For a more complete reference
+      there is a nice guide for the STL
+      (
+      <a href="http://www.sgi.com/Technology/STL/stl_introduction.html">Standard Template Library</a>
+      )
+      on the web given by SGI.
+      Look in the <a href="http://www.sgi.com/Technology/STL/Multimap.html">multimap</a> page
+      for more information.  And of course, pick up your favorite C++ guide and look for
+      the section on multimaps.
+      
+    <h3>Instantiation</h3>
+    <p>
+      You probably won't need this, unless you want to use a multimap in your code.  But for
+      completeness, I'll discuss it briefly.  To instantiate a multimap, you basically need 3
+      things: The "thing" you'll use as a 'key', the "thing" you'll use as a 'value' and
+      normally a means to compare the keys, so that the multimap can be ordered according
+      to this comparison.  Because one doesn't know a priori what these things are going to
+      be, the concept of Templates is relevant here.  One can have a multimap between
+      integers and strings or strings and integers or really between any class and any
+      other class.  So the Template concept takes care of this nicely.  If templates
+      were not around, one would have to write code for any combination of classes
+      that one could think of.  Clearly, this would quickly become unmanageable.
+      There is also a so called "allocator".  All STL containers,
+      <i>vector, list, set, queue, bitset, map, multimap,</i> and so on,
+      have an <i>allocator</i> defined for them.  Allocators manage memory allocation for a
+      container, but one can define allocators for specialized applications.  In most
+      cases, the default allocator is sufficient.  In StMcEvent and StAssociationMaker
+      there was never a need for a specialized allocator, so I just mention it here for
+      completeness.  I also mention it because, although in most cases one doesn't even
+      see the allocator specification when one instantiates a container, one has to
+      put it in when using compilers like SUN CC 4.2 that don't support Template Default
+      Arguments.
+    <p>
+      To clarify the above, let me show an example of the invocations
+      used in <b>StAssociationMaker</b>.  The first multimap used is the one that
+      takes a pointer to a reconstructed Tpc Hit as the key (<code>StTpcHit*</code>)
+      and the 'value' is a pointer to the associated 
+      Monte Carlo Tpc Hit (<code>StMcTpcHit*</code>).
+      For the comparison of the reconstructed Tpc Hits,
+      one is free to choose.  Note that this comparison is NOT the comparison
+      used in the code to actually associate a reconstructed hit to a Monte Carlo
+      hit.  This is only the comparison to order the entries in the map according
+      to some criterion.  In the case of the phonebook, this "comparison" is just
+      alphabetical order.  If the 'key' is something fairly common,
+      like an <code>int</code>, and the compiler supports default template
+      arguments, one can also omit the specification of the comparison
+      and by default it will take a 'less' type comparison for the keys.  In
+      other words, if the 'key' in the multimap was an <code>int</code>, then
+      the default would be that
+      an entry whose key is 1 would be placed before an entry whose key is 2, and so on.
+      For more exotic types, one has to supply one's
+      own "alphabetical order" so the container is ordered.
+      For example, for the tpc hit multimaps, the "alphabetical order" is
+      based on the x, y, and z positions.
+      The instantiation of such a beast would be the following:
+      <br>
+      <br>
+      <code>
+	multimap< const StTpcHit*, const StMcTpcHit*, compTpcHit>
+      </code>
+
+      <br>
+      <br>
+      For the case of compilers with no Template default arguments, there would be
+      and additional argument giving the allocator, in this case to a <i>pair</i> of
+      <code>const StTpcHit*</code> and <code>const StMcTpcHit*</code>.  In case
+      you're wondering, <i>pair</i> is also a template class.
+
+    <p>
+      The above definition then specifies what will be the 'key' in the multimap,
+      what will be the 'value' and what is the comparison used for the keys.  (I
+      won't go into the details of how one defines the comparison, because this would
+      mean getting to nuts-and-bolts type C++, and the intention is more to give a picture
+      of multimaps).  The same is done for the other multimaps.
+    <p>
+      Needless to say, if
+      one had to write this definition every time one wanted to instantiate
+      a multimap it would get cumbersome pretty soon. So we use type definitions,
+      or <code>typedef</code>'s.  In this way, we avoid having to write the same
+      big definition over and over and avoid caring whether we have to use
+      allocators or not.  We do it once and give it a name, and then call this name
+      every time.  For the above case the typedef is <code>rcTpcHitMapType</code>.
+      These are the types that one would then use for convenience in code
+      downstream of <b>StAssociationMaker</b>.
+      All the type definitions for the multimaps, multimap iterators
+      etc. are given in the
+      <a href="#classDescription">class description</a> below.
+
+    <h3>Common Usage of Multimaps</h3>
+    <p>
+      Ok, so you have the maps.  How do you use them once you have them?  (I won't
+      go into detail of how one actually FILLS them, because this task is probably
+      not as common as using them in downstream code once they are already filled
+      in <b>StAssociationMaker</b>.)  One typically asks questions like
+      "Has this monte carlo track been found?", "How many tracks were associated
+      to it?", "I want to look closely at the associated tracks and see some of their
+      properties."  I will discuss now some of the methods (member functions)
+      that multimaps provide that allow one to do these kinds of things.
+    <h4> Find</h4>
+    <p>
+      The <code>find</code> method is used to find a particular 'key' in the multimap.
+      It takes as argument the key we want to find and returns an iterator that points
+      to the specified key.  If the key is not found, then an iterator that points to
+      the end of the multimap (the "one after the last" element) is returned.
+    <p>
+      <code>
+	iterator find(const key_type& k);
+      </code>
+    <p>
+
+      To use this in code (using <b>StEvent</b> & <b>StMcEvent</b>)
+      one would then do something like this:
+    <p>
+      
+      <code>
+    <pre>
+        StEvent* rEvent = 0;
+	rEvent = (StEvent*) GetInputDS("StEvent");
+
+	StMcEvent* mEvent = 0;
+	mEvent = ((StMcEventMaker*) gStChain->Maker("MCEvent"))->currentMcEvent();
+
+	StAssociationMaker* assoc = 0;
+	assoc = (StAssociationMaker*) gStChain->Maker("Associations");
+
+	rcTrackMapType* theTrackMap = 0;
+	theTrackMap = assoc->rcTrackMap();
+	
+	StSPtrVecTrackNode& rcTrackNodes = rEvent->trackNodes();
+	StTrackNode*        firstTrackNode = *(rcTrackNodes.begin());
+	StGlobalTrack*      firstTrack = dynamic_cast< StGlobalTrack*>(firstTrackNode->track(global));
+
+	if (firstTrack){
+	  rcTrackMapIter recTrkIterator = theTrackMap->find(firstTrack);
+	  if (recTrkIterator != theTrackMap->end()) {
+	     cout << "The First Track was found!" << endl;
+	  }
+	}
+
+    </pre>
+  </code>
+    <h4>Count</h4>
+    <p>
+      The <code>count</code> method returns the number of entries in the map that
+      have the same key.  So if you want to find out how many reconstructed
+      tracks were associated with a particular monte carlo track (or vice versa),
+      this method does
+      just that.
+
+    <p>
+      <code>
+	size_type count(const key_type& k) const;
+      </code>
+    <p>
+      In <b>StMcAnalysisMaker</b> this is used in one of the examples, counting the
+      number of MC Tpc Hits associated with the first hit of Sector 1, Padrow 1:
+    <p>
+      <code>
+    <pre>
+    rcTpcHitMapType* theHitMap = 0;
+    theHitMap = assoc->rcTpcHitMap();
+
+    // Example: look at hits associated with 1st REC hit in Tpc Hit collection.
+
+    StTpcHit*     firstHit;
+    firstHit = *( rEvent->tpcHitCollection()->sector(1)->padrow(1)->hits().begin() );
+    cout << "Assigned First Hit " << endl;
+    cout << "This hit has " <<  theHitMap->count(firstHit) << " MC Hits associated with it."<< endl;
+
+    </pre>
+  </code>
+    <h4>Equal_range</h4>
+    <p>
+      The more elaborate task of actually getting ALL the associated elements of a
+      particular key is done through the <code>equal_range</code> method.  One reason
+      could be that we are looking for a particular one, but it's not necessarily the
+      first one, so we have to look at all of the associated elements to figure out
+      which one is the one we really want.
+      As an example, let's take our familiar phonebook.
+      Let's say you want to call Thomas Ullrich because <b>StEvent</b> is not working.
+      You know that it is a Tuesday so he happens to be in Brookhaven for the Sofi
+      meeting, so you want to call him there.  So, for example,
+      you would query the phonebook to get the list of all of Thomas's phone numbers,
+      and then from the area code figure out which one is the one you want.
+
+    <p>
+      In another context, you might want to fill a histogram of the momentum resolution
+      of an event.  So you would need, for example, for each Track, find all its partners,
+      and loop over them to either subtract their momenta directly and fill the histogram,
+      or apply some cuts to weed unwanted tracks and then subtract the momenta and fill the
+      histogram.  In all cases, you need to find out what are the associated tracks for
+      your track of interest so you can loop over them.
+    <p>
+      The way this can be done with the multimaps is via the <code>equal_range</code>
+      method, and the fact (this is important!) that the elements in the multimap
+      ARE ALREADY ORDERED.  So all of the elements with the same key are already
+      placed next to each other!  (Now isn't that convenient...)  So you don't need
+      a method to build you a list of elements that have the key you want so you can
+      loop over them, the list already exists inside the multimap.  If you know
+      your iterators, you're already thinking "Hmm, the only thing
+      I need to know is where that list begins and where that list ends."  If you want
+      to know where is the first element in the multimap with a particular key, there is
+      a method to do this: <code>lower_bound</code>.
+    <p>
+      <code>
+	iterator lower_bound(const key_type& k);
+      </code>
+    <p>
+      This method is similar to
+      <code>find</code> except for one thing.  The <code>lower_bound</code>
+      method returns an iterator to the first element in the multimap with the key
+      EQUAL TO OR GREATER THAN <code>k</code>.  This means that if the object you're
+      looking for is not in the multimap, you will still get an iterator to some element in
+      the multimap, namely the first entry with a key greater than <code>k</code>
+      (whereas in <code>find</code> you get an iterator to the end of the multimap).
+    <p>
+      So you have the first element in the multimap with a particular key, what about
+      the last element with that same key (or should we say, the "next to last element")?
+      That is what <code>upper_bound</code> is for.
+    <p>
+      <code>
+	iterator upper_bound(const key_type& k);
+      </code>
+    <p>
+      This method returns an iterator to the first element in the multimap with the
+      key greater than <code>k</code>.
+    <p>
+      Why is this "greater than k" stuff useful?
+      Recall that for example, when looping over a <code>vector</code> using iterators,
+      one uses the <code>begin()</code> and <code>end()</code> methods.  The <code>end()
+      </code> method returns an iterator to the "one after the last" element.  The same
+      idea is applied for <code>lower_bound(key)</code> and <code> upper_bound(key)</code>.
+      The difference is that we talk here about the one after the last element of those
+      with the requested key, not of the whole multimap.  Incidentally, multimaps
+      also have a <code>begin()</code> and an <code>end()</code> method like all
+      STL containers.
+    <p>
+      To illustrate the ideas, think again of the phonebook.
+      For simplicity, assume the names are just one letter
+      long.  So the keys are just 'A', 'B', 'C', and so on.  Assume there are 5 phones under
+      'A', 0 under 'B', and 3 under 'C'.
+      A call to <code>phonebook.lower_bound("A");</code> would return an
+      iterator to the first element of the map with key = 'A'.  A call to
+      <code>phonebook.upper_bound("A");</code> would return an iterator to the
+      first element in the multimap with key greater than 'A'.  Since there are no
+      elements with 'B' as the key, then the iterator points to the first element
+      with 'C' as the key. <br>
+      Now, what happens if we do <code>phonebook.lower_bound("B");</code> and
+      <code>phonebook.upper_bound("B");</code>?  In this case, BOTH methods
+      return an iterator to the first element with key greater than 'B', which
+      happens to be the first element with key='C' in our example.  The advantage
+      of this is that when looping using iterators, this automatically guarantees
+      that if the element is not found, the loop will NOT be executed.  One needs
+      no further <code>if</code> statements to check if the element was found or
+      not.  Nice trick, isn't it?
+
+    <p>
+      So now we understand what <code>lower_bound</code> and <code>upper_bound</code>
+      do.  But wait!  Isn't it a pain in the neck to always be typing
+      two lines, using two methods, every time you want to loop over elements
+      with a common key?  Yes, it is a pain.  Normally one wants both bounds, right?
+      Well, this is the purpose of the <code>equal_range</code> method, the punchline
+      of this section.
+    <p>
+      <code>
+	pair< iterator, iterator> equal_range(const key_type& k);
+      </code>
+      
+    <p>
+      The <code>equal_range</code> method returns both the upper and lower bound in
+      one go.  But wait a minute!  How can it return 2 things?  That is why the return
+      type is <code>pair< iterator, iterator> </code>, so again the <code>pair</code>
+      template class creeps up on us.  (Recall that a multimap is an associative
+      container of PAIRs of objects.)
+      The lower bound is stored as the <code>first</code> data
+      member of the pair, and the upper bound is stored as the <code>second</code>
+      data member of the pair.  In your code, you will probably be using <code>first
+      </code> and <code> second </code> in two typical cases:
+    <ul>
+      <li> When retrieving the lower and upper bounds after using <code>equal_range</code>.
+      <li> When retrieving the associated object of a given key object in the multimap.
+    </ul>
+    <p>
+      To illustrate, here is the code in <b>StMcAnalysisMaker</b> that
+      loops over the associated hits of the first reconstructed TPC hit
+      in Sector 1 and Padrow 1 and prints out the position of those hits:
+
+    <p>
+      <code>
+    <pre>
+    StTpcHit*     firstHit;
+    firstHit = *( rEvent->tpcHitCollection()->sector(1)->padrow(1)->hits().begin() );
+
+    cout << "Position of First Rec. Hit and Associated (if any) MC Hit:" << endl;
+
+    // To get the associated hits of the first hit we use equal_range(key), which returns
+    // 2 iterators, the lower bound and upper bound, so that then we can loop over them.
+    
+    pair< rcTpcHitMapIter,rcTpcHitMapIter> hitBounds = theHitMap->equal_range(firstHit);
+
+    // use the bounds, defined by the iterators, to loop over the elements in the
+    // multimap that have (firstHit) as key.
+
+    for (rcTpcHitMapIter it=hitBounds.first; it!=hitBounds.second; ++it) {
+
+    // Now dereference the iterator to get the pair, then call "first" to get
+    // the StTpcHit* and "second" to get the StMcTpcHit*, both StHit and
+    // StMcHit (which StTpcHit and StMcTpcHit inherit from, respectively)
+    // have a "position()" member function that returns an StThreeVectorF&.
+    // We can write the StThreeVector directly to standard output because it has
+    // an &quot;operator&lt;&lt;&quot; defined.
+
+	cout << "[" << (*it).first->position() << ", " << (*it).second->position() << "]" << endl;
+    }
+
+    </pre>
+  </code>
+  </p>
+    
+    <p>
+      This concludes the "Quick Tour" of multimaps.  Now that you are familiar
+      with the engine, let's see what is under the hood of <b>StAssociationMaker</b>.
+    
+    <hr>
+    <h2> Multimaps Implemented in the Package </h2>
+    <p>
+      The following multimaps are now implemented in <b>StAssociatonMaker</b>:
+    </p>
+    <ul>
+      <li> TPC Hits</li>
+      <li> SVT Hits</li>
+      <li> FTPC Hits</li>
+      <li> Tracks  (using all the previous hit multimaps)</li>
+      <li> Kink Vertices </li>
+      <li> V0 Vertices </li>
+      <li> Xi Vertices </li>
+      
+    </ul>
+    <p>
+      The association is made based on criteria given by the user.  These criteria are
+      established at runtime, and the user controls them at the macro level.
+    </p>
+    <p>
+      For the
+      Hit multimaps, the criterion is spatial proximity.  That is, if 2 hits are closer
+      in space than a certain distance cut, they are associated.
+      Note that all associations are done in GLOBAL coordinates.
+      The user specifies the
+      desired distance cut at the macro level.  This can be seen in the example macro
+      <pre>$STAR/StRoot/macros/examples/StAssociator.C </pre>
+    <p>
+      
+      For the Track multimap, the criterion is based on the number of hits
+      the tracks share in common.
+      This means that to build the Track Multimap, the Hit Multimaps are used.
+      
+      The user specifies
+      the minimum number of hits the tracks must share in order to be associated.
+    </p>
+    
+    The defaults are:
+    <pre>
+    TPC Cuts
+    X Cut    : 5 mm
+    Y Cut    : 5 mm
+    Z Cut    : 2 mm
+    Required TPC Hits for Associating Tracks : 3
+    SVT Cuts
+    X Cut    : 1 mm
+    Y Cut    : 1 mm
+    Z Cut    : 1 mm
+    Required SVT Hits for Associating Tracks : 1
+    FTPC Cuts
+    R Cut    : 3 mm
+    Phi Cut  : 5 degrees
+    Required FTPC Hits for Associating Tracks : 3
+    </pre>
+    
+    <hr>
+    <h2> Running the Code</h2>
+    <p>
+    The macro to use is:
+    </p>
+    <p>
+      <font face="courier">$STAR/StRoot/macros/examples/<b>StAssociator.C</b></font>
+    </p>
+    <p>
+       The code compiles and runs on Linux, Solaris and HP.
+      Make sure that you are in one of the libraries that has the new <b>StEvent</b>
+      and the new <b>StMcEvent</b> (at least SL99j).
+      For this example, we'll assume the "dev" version.  Please note that as time goes by,
+      libraries are moved and what once was "dev" becomes "new" and so on.  Keep this in mind
+      when you try to run this and make sure you understand which libraries have what.
+      The libraries
+      should be built, and the macros are in the macro search path. There is a very important
+      thing to keep in mind when using <b>StAssociationMaker</b> or any code that uses
+      <b>StEvent</b>
+      is that these packages RELY ON THE NEW DST TABLES.  This means that to use them you
+      have to make
+      sure that the *.dst.root file you want to use can actually be read by  <b>StEvent</b>.
+      Moreover,
+      most of the new dst files are NOT produced with their *.geant.root file.  So before
+      running
+      <b>StAssociationMaker</b>, make sure that
+    <ul>
+      <li> You are using a dst.root file that can be read by the new <b>StEvent</b>.
+      <li> The geant.root file from the dst.root file you want to use was written out.
+      <li> Both files are in the same directory.  
+    </ul>
+    The macros <tt>StAssociator.C</tt> and <tt>StMcEventReadMacro.C</tt>
+    point to a default file in the directory <tt>/afs/rhic.bnl.gov/star/data/samples/</tt>.
+    This was done because the test files are being moved every week and it was necessary
+    to have an area where files could be kept so that the macros wouldn't need to be changed
+    every time a new file came around.
+    An example invocation using the default file is : 
+    <pre>
+  > mkdir workdir
+  > cd workdir
+  > klog
+  > root4star
+  root4star[0] .x StAssociator.C
+    </pre>
+    The macro can be invoked with 2 arguments, the number of events to process and the
+    name of the file to be used.  So, if one wants to process say 3 events from her/his own
+    file, one would do:
+    <pre>
+  root4star[0] .x StAssociator.C(3,"mydir/myfile.geant.root")
+    </pre>
+	  
+    </p>
+    <p>
+      This will run a chain where all the needed packages are loaded and run.  After
+      StAssociationMaker is called, a user would normally have their own analysis package.
+      With this in mind, an example analysis package is also provided:
+      <b>StMcAnalysisMaker</b>.
+      This Maker illustrates the use of <b>StAssociationMaker</b>
+      to do simple histogramming and creation of an Ntuple.  The Maker already takes care of
+      getting the pointers to <b>StEvent</b>, <b>StMcEvent</b>, and <b>StAssociationMaker</b>.
+      Instead of starting from scratch a user would create her own analysis maker following the
+      examples illustrated in this maker.  These are:
+    </p>
+    <ul>
+      <li> Print the primary vertex position from StEvent and from StMcEvent to the screen.</li>
+      <li> Print the position of the first reconstructed TPC Hit in the multimap, and then print
+	the position of the associated MC TPC hit for comparison.</li>
+      <li> 2-D Histogram of X position difference vs. Y position difference of all TPC hits
+	in the multimap. </li>
+      <li> Print the magnitude of the momentum of the first reconstructed track in the multimap, and
+	then print the magnitude of the momentum of any associated MC Tracks for comparison.</li>
+      <li> 1-D Histogram of the momentum resolution: (p - p<sub>MC</sub>)/p</li>
+      <li> Ntuple containing the following information for each track pair:
+	<ul>
+	  <li> Reconstructed momentum (components and magnitude)
+	  <li> Monte Carlo momentum (components and magnitude)
+	  <li> Number of common TPC Hits
+	  <li> mean of the hit position difference in each spatial direction
+	</ul>
+      <li> Two 2-D Histograms: X vs. Y position of the hits from a Reconstructed track, and
+	from its associated Monte Carlo track.
+	
+    </ul>
+
+    <hr>
+    <a name="classDescription"></a>
+    <h2> Brief Class Description</h2>
+    <b>StAssociationMaker</b> defines several type definitions to simplify the declaration of the several
+    multimaps and their value_types, iterators, etc.
+    Also,
+    for every type of association, 2 multimaps are provided.  One takes the reconstructed object
+    as "key" and the other takes the Monte Carlo object as "key".  The naming convention
+    to distinguish the 2 cases is to add the prefixes "rc" and "mc".  To illustrate a typical
+    type
+    definition of these maps, the multimap for Tpc Hits that takes the reconstructed object
+    (<i>StTpcHit</i>)
+    as key is defined as:
+    <pre>
+ typedef multimap< const StTpcHit*, const StMcTpcHit*, compTpcHit> rcTpcHitMapType;
+    </pre>
+    The most commonly used of these type definitions
+    will be the multimaps themselves and their iterators.  These are
+    listed below.
+    
+    <a name="Hits"></a>
+    <h3>Hits</h3>
+    
+    <p> <i>Tpc Hits</i> </p>
+    <pre>
+    rcTpcHitMapType     
+    rcTpcHitMapIter 
+
+    mcTpcHitMapType  
+    mcTpcHitMapIter   
+    </pre>
+    <p> <i>Svt Hits</i> </p>
+    <pre>
+    rcSvtHitMapType    
+    rcSvtHitMapIter     
+
+    mcSvtHitMapType   
+    mcSvtHitMapIter   
+    </pre>
+    <p> <i>Ftpc Hits</i> </p>
+    <pre>
+    rcFtpcHitMapType    
+    rcFtpcHitMapIter    
+
+    mcFtpcHitMapType  
+    mcFtpcHitMapIter  
+    </pre>
+    <a name="Tracks"></a>
+    <h3>Tracks</h3>
+
+    The tracks are built based on the Hit map associations. The reconstructed object used is
+    <i>StGlobalTrack</i> because it is the more general type of track in <b>StEvent</b>.  The track
+    multimap differs from the Hit and Vertex multimap in that one not just wants to find out
+    which tracks are associated, but there is other information that the association can give.
+    For example, one would want to easily find out how many TPC, SVT and FTPC hits do the tracks
+    have in common.  This information then really belongs in another class, in this case
+    <i>StTrackPairInfo</i>.  The track maps are then between a pointer to a track and a pointer to an
+    <i>StTrackPairInfo</i>.  The "get" methods of this class are:
+
+    <h4>StTrackPairInfo</h4>
+    <pre>
+    StMcTrack* partnerMcTrack() const;
+    StGlobalTrack* partnerTrack() const;
+
+    unsigned int commonTpcHits() const;
+    unsigned int commonSvtHits() const;
+    unsigned int commonFtpcHits() const;
+
+    float percentOfPairedTpcHits() const;
+    float percentOfPairedSvtHits() const;
+    float percentOfPairedFtpcHits() const;
+    </pre>
+    <p>
+      The "percent" method really returns the ratio between the number of common hits and the total number of
+      hits the <i>StGlobalTrack</i> has.
+
+    <p>
+      The relevant multimap type definitions for tracks are:
+    <pre>
+    rcTrackMapType
+    rcTrackMapIter
+    rcTrackMapConstIter
+
+    mcTrackMapType
+    mcTrackMapIter
+    mcTrackMapConstIter
+
+    </pre>
+    
+    <a name="Vertices"></a>
+    <h3>Vertices</h3>
+    The vertices are associated depending on the association between the parent and daughter tracks
+    of each vertex.  Like the hits, this is more a Yes/No type of association.  The type definitions are:
+    
+    <p> <i>Kinks</i> </p>
+    <pre>
+    rcKinkMapType
+    rcKinkMapIter
+    rcKinkMapConstIter
+
+    mcKinkMapType
+    mcKinkMapIter
+    mcKinkMapConstIter
+
+    </pre>
+    <p> <i>V0s</i> </p>
+    <pre>
+    rcV0MapType
+    rcV0MapIter
+    rcV0MapConstIter
+
+    mcV0MapType
+    mcV0MapIter
+    mcV0MapConstIter
+
+    </pre>
+    <p> <i>Xis</i> </p>
+    <pre>
+    rcXiMapType
+    rcXiMapIter
+    rcXiMapConstIter
+
+    mcXiMapType
+    mcXiMapIter
+    mcXiMapConstIter
+
+    </pre>
+    <a name="Getting"></a>
+    <h3>Getting the Maps</h3>
+    
+    <p>
+      The multimaps are accessed via the <i>StAssociationMaker</i> class.  The methods to get them, and their
+      return types, are:
+    <pre>
+    rcTpcHitMapType*  rcTpcHitMap()  
+    mcTpcHitMapType*  mcTpcHitMap()
+
+    rcSvtHitMapType*  rcSvtHitMap()  
+    mcSvtHitMapType*  mcSvtHitMap()  
+
+    rcFtpcHitMapType* rcFtpcHitMap() 
+    mcFtpcHitMapType* mcFtpcHitMap() 
+
+    rcTrackMapType*   rcTrackMap()   
+    mcTrackMapType*   mcTrackMap()   
+
+    rcKinkMapType*    rcKinkMap()    
+    mcKinkMapType*    mcKinkMap()    
+
+    rcV0MapType*      rcV0Map()      
+    mcV0MapType*      mcV0Map()      
+
+    rcXiMapType*      rcXiMap()      
+    mcXiMapType*      mcXiMap()      
+
+    </pre>
+
+    This are the basic types and methods needed to access the multimaps in <b>StAssociationMaker</b>.
+    Please look at <b>StMcAnalysisMaker</b> since it is really a working example of how to use
+    <b>StAssociationMaker</b>.
+    <hr>
+    <b>StAssociationMaker</b> is a work in progress.  For questions, contact
+    
+		<address>Manuel Calder&oacute;n de la Barca S&aacute;nchez, mcalderon at ucdavis.edu</address>
+		<address>Last Modified: <csobj format="LongDate" h="20" locale="00000409" region="0" t="DateTime" w="137">Friday, July 21, 2006</csobj><csobj format="LongTime" h="20" locale="00000409" region="0" t="DateTime" w="77">3:31:10 PM</csobj></address>
+	</body>
+</html>

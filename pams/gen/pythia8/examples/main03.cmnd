@@ -1,0 +1,28 @@
+! main03.cmnd.
+! This file contains commands to be read in for a Pythia8 run. 
+! Lines not beginning with a letter or digit are comments.
+
+! 1) Settings used in the main program.
+Main:numberOfEvents = 1000         ! number of events to generate
+Main:numberToList = 1              ! number of events to print
+Main:timesToShow = 20              ! show how far along run is
+Main:showChangedSettings = on      ! print changed flags/modes/parameters
+Main:showChangedParticleData = on  ! print changed particle and decay data
+
+! 2) Beam parameter settings. Values below agree with default ones.
+Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
+Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
+Beams:eCM = 14000.                 ! CM energy of collision
+
+! 3) Settings for the hard-process generation.
+HardQCD:all = on                   ! switch on all QCD jet + jet processes
+PromptPhoton:all = on              ! swich on gamma + jet and gamma + gamma 
+PhaseSpace:pTHatMin = 50.          ! minimal pT sacale in process 
+
+! 4) Settings for the event generation process in the Pythia8 library.
+#PartonLevel:MI = off               ! no multiple interactions
+#PartonLevel:ISR = off              ! no initial-state radiation 
+#PartonLevel:FSR = off              ! no final-state radiation
+#HadronLevel:Hadronize = off        ! no hadronization
+SpaceShower:pT0Ref = 2.0           ! dampening of pT -> 0 divergence
+MultipleInteractions:pTmin = 3.0   ! lower pT cutoff for interactions  

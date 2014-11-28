@@ -1,0 +1,5 @@
+# $Id $
+# package StTreeMaker
+# author: 
+Library:libStTreeMaker.so:LIBS +=   -lStChain
+#Library:libStTreeMaker.so:LIBS +=   -lStChain

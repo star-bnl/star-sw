@@ -1,0 +1,5 @@
+# $Id $
+# package StStrangeMuDstMaker
+# author: 
+Library:libStStrangeMuDstMaker.so:LIBS +=   -lStAssociationMaker  -lStChain  -l_StEventMaker  -l_StMuDSTMaker -l_StEvent  -lStFlowMaker -lStHbtMaker  -lStIOMaker  -lStMcEventMaker  -lStMcEvent  -lPhysics
+#Library:libStStrangeMuDstMaker.so:LIBS +=   -lStAssociationMaker  -lStChain  -lStEventMaker  -lStEvent  -lStHbtMaker  -lStIOMaker  -lStMcEventMaker  -lStMcEvent  -lPhysics

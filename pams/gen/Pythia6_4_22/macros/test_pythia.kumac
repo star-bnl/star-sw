@@ -1,0 +1,21 @@
+*
+* Macro to test pythia.  To run, ensure that this macro as well
+* as select_pythia.kumac are in starsim's search path.  Then: 
+*
+* $ # To run with a specified pythia tune:
+* $ starsim -w 0 -b test_pythia.kumac tune=320
+*
+* $ # To run with a non-default pythia library:
+* $ starsim -w 0 -b test_pythia.kumac library=libpythia_6410t.so
+*
+* $ # To run with a locally compiled version of pythia: 
+* $ starsim -w 0 -b test_pythia.kumac library=libpythia_7890.so path=.sl765_gcc888/lib
+*
+MACRO test_pythia library=libPythia6_4_22.so path=$STAR_LIB tune=100  
+
+   exec select_pythia library=[library] path=[path]  
+
+   TUNE [tune] 
+   Call PySTAR(0,'MEH')
+
+RETURN

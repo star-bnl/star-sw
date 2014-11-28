@@ -1,0 +1,87 @@
+<html>
+<head>
+<title>Extra-Dimensional Processes</title>
+<link rel="stylesheet" type="text/css" href="pythia.css"/>
+<link rel="shortcut icon" href="pythia32.gif"/>
+</head>
+<body>
+
+<h2>Extra-Dimensional Processes</h2>
+
+Scenarios with extra dimensions allow a multitude of processes.
+Currently the only ones implemented involve the production of an 
+excited graviton state <i>G^*</i> within a Randall-Sundrum scenario.
+This state is assigned PDG code 5000039. Decays into fermion, gluon
+and photon pairs are handled with the correct angular distributions,
+while other decay channels currently are handled isotropically.
+
+<h3>Production processes</h3>
+
+There are two lowest-order processes that together normally should be 
+sufficient for a simulation of <i>G^*</i> production. 
+
+<p/><code>flag&nbsp; </code><strong> ExtraDimensionsG*:all &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Common switch for the group of lowest-order <i>G^*</i> production
+processes, i.e. the two ones below.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExtraDimensionsG*:gg2G* &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>g g -> G^*</i>. 
+Code 5001.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExtraDimensionsG*:ffbar2G* &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>f fbar -> G^*</i>. 
+Code 5002.
+  
+
+<p/>
+In addition there are three first-order processes included. These are of
+less interest, but can be used for dedicated studies of the high-<i>pT</i> 
+tail of <i>G^*</i> producton. As usual, it would be doublecounting to
+include the lowest-order and first-order processes simultaneously.
+Therefore the latter ones are not included with the 
+<code>ExtraDimensionsG*:all = on</code> option. In this set of processes
+all decay angles are assumed istropic.
+
+<p/><code>flag&nbsp; </code><strong> ExtraDimensionsG*:gg2G*g &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>g g -> G^* g</i>. 
+Code 5003.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExtraDimensionsG*:qg2G*q &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q g -> G^* q</i>. 
+Code 5004.
+  
+
+<p/><code>flag&nbsp; </code><strong> ExtraDimensionsG*:qqbar2G*g &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> G^* g</i>. 
+Code 5005.
+  
+
+
+<h3>Parameters</h3>
+
+In the above scenario the main free parameter is the <i>G^*</i> mass,
+which is set as usual. In addition there is one further parameter.
+
+<p/><code>parm&nbsp; </code><strong> ExtraDimensionsG*:kappaMG &nbsp;</strong> 
+ (<code>default = <strong>0.054</strong></code>; <code>minimum = 0.0</code>)<br/>
+dimensionless coupling, which enters quadratically in all partial
+widths of the <i>G^*</i>. Is 
+<i>kappa m_G* = sqrt(2) x_1 k / Mbar_Pl</i>,
+where <i>x_1 = 3.83</i> is the first zero of the <i>J_1</i> Bessel 
+function and <i>Mbar_Pl</i> is the modified Planck mass.
+  
+
+</body>
+</html>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->
+

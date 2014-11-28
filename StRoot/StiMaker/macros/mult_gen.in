@@ -1,0 +1,149 @@
+    1.0         ! Starting event number 
+ 130.           ! Energy NN CM 
+  100.           ! STOPPING  EVENT NUMBER
+Y               ! NO DECAY FILE
+N               ! PIO DECAY
+Y               ! ETA DECAY
+Y               ! ETA' DECAY
+Y               ! RHO DECAY
+Y               ! OMEGA DECAY
+Y               ! KSTAR DECAY
+Y               ! PHI DECAY
+Y               ! DELTA DECAY
+Y               ! JPSI DECAY
+   7      ! Number of PID types 
+   1      ! Distribution Model 
+   4      ! Reaction Plane Control 
+    0.0  0.0      ! Reaction Plane Angle mean and std dev 
+   1.00    0.00    ! Multiplicity scaling factor mean & std.dev.
+     0.01   3.50   ! pt min/max (GeV/c) 
+    -4.50   4.50   ! pseudorapidity min/max 
+     0.00 360.00   ! azimuthal angle min/max (degrees) 
+     3.00      ! # of std.dev. for Multiplicity variation 
+     0.00      ! # of std.dev. for Temperature variation 
+     0.00      ! # of std.dev. for Rapidity sigma var. 
+     0.00      ! # of std.dev. for expansion velocity var. 
+     0.00      ! # of std.dev. for reaction plane angle 
+     0.00      ! # of std.dev. for anisotropic flow coeff 
+     0.00      ! # of std.dev. for Multiplicity scale factor
+   25      ! # of integration mesh pts for param var. 
+   60      ! # of pt,y scan pts for finding max val of dN/dp 
+   8      ! pi+ 
+   10  1   ! Mean multiplicity and variance control
+     0.20   0.00   ! Mean Temp (GeV) and std dev.
+     2.20   0.00   ! Mean Rapidity sigma and std. dev.
+     0.00   0.00   ! Mean expansion velocity (fraction of c) and std.dev.
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=1
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=1
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=2
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=2
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=3
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=3
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=4
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=4
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=5
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=5
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=6
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=6
+   9      ! pi- 
+   10  1   ! Mean multiplicity and variance control
+     0.20   0.00   ! Mean Temp (GeV) and std dev.
+     2.20   0.00   ! Mean Rapidity sigma and std. dev.
+     0.00   0.00   ! Mean expansion velocity (fraction of c) and std.dev.
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=1
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=1
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=2
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=2
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=3
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=3
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=4
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=4
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=5
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=5
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=6
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=6
+   7      ! pi0 
+   10  1   ! Mean multiplicity and variance control
+     0.20   0.00   ! Mean Temp (GeV) and std dev.
+     2.20   0.00   ! Mean Rapidity sigma and std. dev.
+     0.00   0.00   ! Mean expansion velocity (fraction of c) and std.dev.
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=1
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=1
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=2
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=2
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=3
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=3
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=4
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=4
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=5
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=5
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=6
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=6
+   11      ! K+ 
+   10  1   ! Mean multiplicity and variance control
+     0.25   0.00   ! Mean Temp (GeV) and std dev.
+     2.20   0.00   ! Mean Rapidity sigma and std. dev.
+     0.00   0.00   ! Mean expansion velocity (fraction of c) and std.dev.
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=1
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=1
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=2
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=2
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=3
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=3
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=4
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=4
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=5
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=5
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=6
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=6
+   12      ! K- 
+   10  1   ! Mean multiplicity and variance control
+     0.25   0.00   ! Mean Temp (GeV) and std dev.
+     2.20   0.00   ! Mean Rapidity sigma and std. dev.
+     0.00   0.00   ! Mean expansion velocity (fraction of c) and std.dev.
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=1
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=1
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=2
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=2
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=3
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=3
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=4
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=4
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=5
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=5
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=6
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=6
+   14      ! proton 
+   10  1   ! Mean multiplicity and variance control
+     0.30   0.00   ! Mean Temp (GeV) and std dev.
+     2.20   0.00   ! Mean Rapidity sigma and std. dev.
+     0.00   0.00   ! Mean expansion velocity (fraction of c) and std.dev.
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=1
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=1
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=2
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=2
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=3
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=3
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=4
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=4
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=5
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=5
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=6
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=6
+   15      ! anti_proton 
+   10  1   ! Mean multiplicity and variance control
+     0.30   0.00   ! Mean Temp (GeV) and std dev.
+     2.20   0.00   ! Mean Rapidity sigma and std. dev.
+     0.00   0.00   ! Mean expansion velocity (fraction of c) and std.dev.
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=1
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=1
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=2
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=2
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=3
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=3
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=4
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=4
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=5
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=5
+  0.0   0.0   0.0   0.0 ! Mean anisotropic flow coeffs.,          for n=6
+  0.0   0.0   0.0   0.0 ! Std. Dev. for anisotropic flow coeffs., for n=6

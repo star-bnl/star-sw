@@ -1,0 +1,67 @@
+Time-stamp: <>
+Maker:		StFlowAnalysisMaker
+Files:		StFlowAnalysisMaker.cxx
+		StFlowAnalysisMaker.h
+		StFlowCumulantMaker.cxx
+		StFlowCumulantMaker.h
+		plot.C
+		plotCen.C
+		plotMinBias.C
+		plotCumulant.C
+		minBias.C	
+Authors:	Art Poskanzer and Raimond Snellings
+		with lots of help from Glenn Cooper 
+Date:		Dec 1999
+Description:
+
+Makes histograms for the flow analysis. It reads the event and
+particle quantities from StFlowEvent. It removes autocorrelations of
+each particle with respect to the event plane and for each harmonic
+makes a 2D histogram of the number flow, v, vs. y and p_t.
+
+In Finish, it calculates the event plane resolution from the
+correlation of sub-event event planes. It then corrects the v
+histograms for the event plane resolution. For the doubly-integrated v
+values the error on the event plane resolution is folded in to the
+error. It calculates the PhiWgts needed to make the event plane
+isotropic in the lab and outputs them as flowPhiWgtNew.hist.root . To
+use these PhiWgts in the next analysis you have to copy this root file
+to flowPhiWgt.hist.root . If the file flowPhiWgt.hist.root is missing
+the PhiWgts are set to 1.0 .
+
+The CumulantMaker performs the new and old cumulant analysis.
+
+The AnalysisMaker outputs to flow.hist.root and the CumulantMaker to
+flow.cumulant.root .
+
+The macro doFlowEvents.C in StRoot/macros/analysis runs these
+programs. Many of the parameters, flags, cuts, and selections can be
+set from this macro without recompiling the code. If you instantiate
+the CumulantMaker you must first instantiate the AnalysisMaker.
+
+The macro plot.C is for plotting the histograms and their
+projections. It reads flow.hist.root or an anaXX.root file. It asks
+for a run number which will be printed at the bottom left of the
+plot. It presents you with a menu of possible plots. If you know the
+plot number you want you can invoke the macro with that number as an
+argument. If you execute the macro with all three arguments (plot
+number, selection number, harmonics number) for a graph that has
+multiple harmonics and selections, it will plot only the histogram for
+that selection and harmonic. After it has been loaded and executed
+once, it can be rerun simply with plot().
+
+The macro plotCumulant.C does the same for the cumulant histograms by
+reading flow.cumulant.root or an anaXX.root file.
+
+The macro plotCen.C reads a set of histogram files for different
+centralities and plots one histogram from each file on the same
+page. The interface is similar to plot.C.
+
+The macro plotMinBias.C reads a set of histogram files for different
+centralities and combines the histograms them with yield weights so
+as to obtain a minimum bias histogram. The interface is similar to
+plot.C.
+
+The macro minBias.C reads a set of histogram files for different
+centralities and outputs another root file with the yield weighted
+combination of the histograms.

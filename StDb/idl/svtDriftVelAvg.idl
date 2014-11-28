@@ -1,0 +1,14 @@
+/*    svtDriftVelAvg.idl
+*
+*  Table: svtDriftVelAvg
+*
+*       description: //  Drift Velocity values
+*/ 
+
+
+struct svtDriftVelAvg { 
+
+   long  ID;   /*   */
+   double  averageDriftVelocity;   /*   cm/s : from hits distribution edges  */
+
+ };  

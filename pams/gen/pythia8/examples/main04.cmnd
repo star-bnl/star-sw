@@ -1,0 +1,39 @@
+! main04.cmnd.
+! This file contains commands to be read in for a Pythia8 run. 
+! Lines not beginning with a letter or digit are comments.
+
+! 1) Settings that could be used in a main program, if desired.
+Main:numberOfEvents = 1000         ! number of events to generate
+Main:numberToList = 1              ! number of events to print
+Main:timesToShow = 20              ! show how far along run is
+Main:timesAllowErrors = 3          ! how many aborts before run stops
+Main:showChangedSettings = on      ! print changed flags/modes/parameters
+Main:showAllSettings = off         ! print all flags/modes/parameters
+
+! 2) Beam parameter settings. Values below agree with default ones.
+Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
+Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
+Beams:eCM = 14000.                 ! CM energy of collision
+
+! 3) Settings for the hard-process generation.
+! Example 1: QCD production; must set pTmin. 
+#HardQCD:all = on                   !  switch on all QCD jet + jet processes
+#PhaseSpace:pTHatMin = 20.          ! minimal pT sacale in process 
+! Example 2: t-tbar production.  
+Top:gg2ttbar = on                  ! g g -> t tbar
+Top:qqbar2ttbar = on               ! q qbar -> t tbar
+! Example 3: Z0 production; should set mMin.
+#WeakSingleBoson:ffbar2gmZ = on     ! q qbar -> gamma*/Z0
+#PhaseSpace:mHatMin = 50.            
+! Example 4: gauge boson pair production; set pTmin. Not yet complete.
+#WeakDoubleBoson:ffbar2ZW           ! q qbar -> Z0 W+- 
+#WeakDoubleBoson:ffbar2WW           ! q qbar -> W+ W-
+
+! 4) Settings for the event generation process in the Pythia8 library.
+#PartonLevel:MI = off               ! no multiple interactions
+#PartonLevel:ISR = off              ! no initial-state radiation 
+#PartonLevel:FSR = off              ! no final-state radiation
+#HadronLevel:Hadronize = off        ! no hadronization
+#HadronLevel:Decay = off            ! no decays
+SpaceShower:pT0Ref = 2.0           ! dampening of pT -> 0 divergence
+MultipleInteractions:pTmin = 3.0   ! lower pT cutoff for interactions  

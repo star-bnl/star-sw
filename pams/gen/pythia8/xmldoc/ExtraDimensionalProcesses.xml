@@ -1,0 +1,73 @@
+<chapter name="Extra-Dimensional Processes">
+
+<h2>Extra-Dimensional Processes</h2>
+
+Scenarios with extra dimensions allow a multitude of processes.
+Currently the only ones implemented involve the production of an 
+excited graviton state <ei>G^*</ei> within a Randall-Sundrum scenario.
+This state is assigned PDG code 5000039. Decays into fermion, gluon
+and photon pairs are handled with the correct angular distributions,
+while other decay channels currently are handled isotropically.
+
+<h3>Production processes</h3>
+
+There are two lowest-order processes that together normally should be 
+sufficient for a simulation of <ei>G^*</ei> production. 
+
+<flag name="ExtraDimensionsG*:all" default="off">
+Common switch for the group of lowest-order <ei>G^*</ei> production
+processes, i.e. the two ones below.
+</flag>
+
+<flag name="ExtraDimensionsG*:gg2G*" default="off">
+Scatterings <ei>g g -> G^*</ei>. 
+Code 5001.
+</flag>
+
+<flag name="ExtraDimensionsG*:ffbar2G*" default="off">
+Scatterings <ei>f fbar -> G^*</ei>. 
+Code 5002.
+</flag>
+
+<p/>
+In addition there are three first-order processes included. These are of
+less interest, but can be used for dedicated studies of the high-<ei>pT</ei> 
+tail of <ei>G^*</ei> producton. As usual, it would be doublecounting to
+include the lowest-order and first-order processes simultaneously.
+Therefore the latter ones are not included with the 
+<code>ExtraDimensionsG*:all = on</code> option. In this set of processes
+all decay angles are assumed istropic.
+
+<flag name="ExtraDimensionsG*:gg2G*g" default="off">
+Scatterings <ei>g g -> G^* g</ei>. 
+Code 5003.
+</flag>
+
+<flag name="ExtraDimensionsG*:qg2G*q" default="off">
+Scatterings <ei>q g -> G^* q</ei>. 
+Code 5004.
+</flag>
+
+<flag name="ExtraDimensionsG*:qqbar2G*g" default="off">
+Scatterings <ei>q qbar -> G^* g</ei>. 
+Code 5005.
+</flag>
+
+
+<h3>Parameters</h3>
+
+In the above scenario the main free parameter is the <ei>G^*</ei> mass,
+which is set as usual. In addition there is one further parameter.
+
+<parm name="ExtraDimensionsG*:kappaMG" default="0.054" min="0.0">
+dimensionless coupling, which enters quadratically in all partial
+widths of the <ei>G^*</ei>. Is 
+<ei>kappa m_G* = sqrt(2) x_1 k / Mbar_Pl</ei>,
+where <ei>x_1 = 3.83</ei> is the first zero of the <ei>J_1</ei> Bessel 
+function and <ei>Mbar_Pl</ei> is the modified Planck mass.
+</parm>
+
+</chapter>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->
+

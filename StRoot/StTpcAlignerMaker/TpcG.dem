@@ -1,0 +1,124 @@
+stardisp: true$
+/* ============= rotation ============= */
+/* disp("R:"); */
+/* rotation from Sector to TPC */
+/* 
+R:   matix([r00, r01, r02, t0],
+           [r10, r11, r12, t1],
+           [r20, r21, r22, t2],
+           [  0,   0,   0,  1]); trigsimp(%);ratsimp(%);radcan(%);tex(%);
+RI:  matix([r00, r10, r20, -t0],
+           [r01, r11, r21, -t1],
+           [r02, r12, r22, -t2],
+           [  0,   0,   0,  1]); trigsimp(%);ratsimp(%);radcan(%);tex(%);
+disp("dR:");
+dR:  matrix([     1,-gamma,   beta, x_0],
+            [ gamma,      1,-alpha, y_0],
+            [ -beta, alpha,      1, z_0],
+            [     0,     0,      0,  1]); /* rotation from  => Global */
+
+        ( 1 -g  b x0)^-1    ( 1  g -b   -x0 - g*y0 + b*z0)
+R^-1 =  ( g  1 -a y0)     = (-g  1  a  g*x0 -   y0 - a*z0)
+        (-b  a  1 z0)	    ( b -a  1 -b*x0 + a*y0 -   z0)
+        ( 0  0  0  1)	    ( 0  0  0                   1)
+
+
+dRI: matrix([     1, gamma,  0,      -x0 - gamma*y0],
+            [ -gamma,     1, 0, gamma*x0 -       y0],
+            [     0,      0, 1,                 -z0],
+            [     0,      0, 0,                   1])$ /* rotation from  => Global */
+
+dRI: matrix([     1, gamma,  -beta,      -x0 - gamma*y0 +  beta*z0],
+            [ -gamma,     1, alpha, gamma*x0 -       y0 - alpha*z0],
+            [  beta, -alpha,     1, -beta*x0 + alpha*y0        -z0],
+            [     0,      0,     0,                              1])$ 
+
+*/
+dR: matrix([     1, -gamma,  beta, x0],
+           [  gamma,     1,-alpha, y0],
+            [ -beta, alpha,     1, z0],
+            [     0,     0,     0,  1])$ /* rotation from  => Global */
+
+X:   matrix([xT],   /* xS */
+            [yT],
+            [zT],
+            [1])$
+N:   matrix([1],   /* pS */
+            [tY],
+            [tZ],
+            [0])$
+
+V:  matrix([xV],    
+           [yV],
+           [zV],
+           [1 ])$
+globalsolve: true$
+Delta : V - dR.(X + s*N)$ 
+/* F: Delta[1]; */
+F: transpose(Delta).Delta$
+dFds : diff(F,s);/* ratsimp; */
+eq: dFds=0;
+sol :solve(eq,s);
+/* sol :solve(F,s); */
+SS : sol[1];
+deltaS: subst(SS, Delta);
+dX: deltaS[1]$ 
+dY: deltaS[2]$
+dZ: deltaS[3]$
+
+dXdx0    : diff(dX,x0)$
+dXdy0    : diff(dX,y0)$
+dXdz0    : diff(dX,z0)$
+dXdalpha : diff(dX,alpha)$
+dXdbeta  : diff(dX,beta)$
+dXdgamma : diff(dX,gamma)$
+
+dYdx0    : diff(dY,x0)$
+dYdy0    : diff(dY,y0)$
+dYdz0    : diff(dY,z0)$
+dYdalpha : diff(dY,alpha)$
+dYdbeta  : diff(dY,beta)$
+dYdgamma : diff(dY,gamma)$
+
+dZdx0    : diff(dZ,x0)$
+dZdy0    : diff(dZ,y0)$
+dZdz0    : diff(dZ,z0)$
+dZdalpha : diff(dZ,alpha)$
+dZdbeta  : diff(dZ,beta)$
+dZdgamma : diff(dZ,gamma)$
+
+dXdP : matrix([dXdx0, dXdy0, dXdz0, dXdalpha, dXdbeta, dXdgamma], 
+              [dYdx0, dYdy0, dYdz0, dYdalpha, dYdbeta, dYdgamma],
+              [dZdx0, dZdy0, dZdz0, dZdalpha, dZdbeta, dZdgamma])$
+/*
+trigsimp(%);ratsimp(%);radcan(%);tex(%);
+subst([alpha=0, beta=0, gamma=0, x0=0, y0=0, z0=0], (nX**2+nY**2+nZ**2)*dXdP); 
+*/
+display2d:false;
+algebraic : true;
+/* subst([alpha=0, beta=0, gamma=0, x0=0, y0=0, z0=0,nX**2+nY**2+nZ**2=1,(nZ*(zT - zV) + nY*(yT - yV) + nX*(xT - xV)) = D], dXdP); */
+
+subst([alpha=0, beta=0, gamma=0, x0=0, y0=0, z0=0], dXdP*(1+tY*tY+tZ*tZ));
+
+/* ratsimp(%); */
+fullratsimp (%);
+/*
+(%o40) matrix([[-tZ^2-tY^2],[tY],[tZ],[tZ*yV-tY*zV],
+               [(1-tZ^2)*zV+(-tY^2-1)*zT-tY*tZ*yV+tY*tZ*yT-2*tZ*xV+tZ*xT],
+               [tY*tZ*zV-tY*tZ*zT+(tY^2-1)*yV+(tZ^2+1)*yT+2*tY*xV-tY*xT]],
+              [[tY],[-tZ^2-1],[tY*tZ],
+               [(tZ^2-tY^2)*zV+(tY^2+1)*zT+2*tY*tZ*yV-tY*tZ*yT+tZ*xV-tZ*xT],
+               [tY*zV-tY*tZ*xV],
+               [-tZ*zV+tZ*zT-2*tY*yV+tY*yT+(tY^2-1)*xV+(-tZ^2-tY^2)*xT]],
+              [[tZ],[tY*tZ],[-tY^2-1],
+               [-2*tY*tZ*zV+tY*tZ*zT+(tZ^2-tY^2)*yV+(-tZ^2-1)*yT-tY*xV+tY*xT],
+               [2*tZ*zV-tZ*zT+tY*yV-tY*yT+(1-tZ^2)*xV+(tZ^2+tY^2)*xT],
+               [tY*tZ*xV-tZ*yV]])                                               
+================================================================================
+
+[[-tZ^2-tY^2],[     tY],[     tZ],[                                                 tZ*yV-tY*zV], [(1-tZ^2)*zV+(-tY^2-1)*zT-tY*tZ*yV+tY*tZ*yT-2*tZ*xV+tZ*xT], [tY*tZ*zV-tY*tZ*zT+(tY^2-1)*yV+(tZ^2+1)*yT+2*tY*xV-tY*xT]],      
+[[        tY],[-tZ^2-1],[  tY*tZ],[  (tZ^2-tY^2)*zV+(tY^2+1)*zT+2*tY*tZ*yV-tY*tZ*yT+tZ*xV-tZ*xT], [                                          tY*zV-tY*tZ*xV], [ -tZ*zV+tZ*zT-2*tY*yV+tY*yT+(tY^2-1)*xV+(-tZ^2-tY^2)*xT]],       
+[[        tZ],[  tY*tZ],[-tY^2-1],[-2*tY*tZ*zV+tY*tZ*zT+(tZ^2-tY^2)*yV+(-tZ^2-1)*yT-tY*xV+tY*xT], [    2*tZ*zV-tZ*zT+tY*yV-tY*yT+(1-tZ^2)*xV+(tZ^2+tY^2)*xT], [                                         tY*tZ*xV-tZ*yV]]
+
+
+*/

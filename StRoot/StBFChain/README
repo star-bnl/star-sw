@@ -1,0 +1,100 @@
+<pre>
+-*- mode:outline -*-
+Time-stamp: <99/11/15 14:02:55 fisyak>
+
+* Package: StBFChain
+
+* Purpose:
+Control chain
+
+* History:
+  Originated with bfc.C macros which codes are moved to StBFChain.cxx
+* Status:
+  Supports list of flags which define and manage STAR Big Full Chain.
+Available option can be obtained by running
+    root4star  bfc.C
+and they are the following:
+        Possible Chain Options are: 
+       Key         :Name        :Chain :Opts         :Maker :Libs :Comment
+  1:[-]SD97        :            :      :db           : : :Turn on 1997 test parameters
+  2:[-]SD98        :            :      :db           : : :Turn on 1998 test parameters
+  3:[-]Y1a         :            :      :db           : : :Turn on Year 1a parameters
+  4:[-]Y1b         :            :      :db           : : :Year 1b parameters
+  5:[-]Y1c         :            :      :db           : : :Turn on Year 1c parameters
+  6:[-]ES99        :            :      :db           : : :Turn on 1999 engineering run simulation parameters
+  7:[-]ER99        :            :      :db           : : :Turn on 1999 engineering run real data parameters
+  8:[-]Y1d         :            :      :db           : : :Turn on Year 1d parameters
+  9:[-]Y1e         :            :      :db           : : :Turn on Year 1e parameters
+ 10:[-]Y2a         :            :      :db           : : :Turn on Year 2a parameters
+ 11:[-]doEvents    :            :      :xin,event,analysis,FiledOn : : :
+ 12:[-]Kalman      :            :      :geant        : : :
+ 13:[-]dst         :            :      :global,dst,qa,event,analysis : : :
+ 14:[-]Cy1a        :            :      :y1a,tpc,ftpc,l0,l3t,dst,tree : : :Turn on chain y1a
+ 15:[-]Cy1b        :            :      :y1b,ftpc,l0,l3t,ems,emc,rich,dst,tree : : :Turn on chain y1b
+ 16:[-]Cy1c        :            :      :y1c,tpc,ftpc,l0,l3t,dst,tree : : :Turn on chain y1c
+ 17:[-]Cy1d        :            :      :y1d,tpc,global,dst,qa,event,analysis,tree : : :Turn on chain y1d
+ 18:[-]cy1e        :            :      :y1e,tpc,dst,tree : : :Turn on chain y1e
+ 19:[-]Cy2a        :            :      :y2a,tpc,svt,ftpc,l0,l3t,ems,emc,rich,dst,tree , : : :Turn on chain y2a
+ 20:[-]Eval        :            :      :             : : :Turn on evaluation switch for different makers
+ 21:[-]off         :            :      :             : : :Turn off default chain
+ 22:[-]db          :            :      :tables       :St_db_Maker :StDbLib,StDbBroker,St_db_Maker :
+ 23:[-]calib       :            :      :tables       :St_db_Maker :StDbLib,StDbBroker,St_db_Maker :
+ 24:[-]xin         :            :      :             :StIOMaker :StIOMaker :Read [XDF|DAQ|ROOT] input file
+ 25:[-]gstar       :            :      :tables,geant : : :gstar for 10 muon track with pT = 10 GeV in |eta|<1
+ 26:[-]tdaq        :            :      :er99,xin,tpc_daq : : :
+ 27:[-]fzin        :            :      :geant        : : :read gstar fz-file
+ 28:[-]util        :            :      :             : :StAnalysisUtilities :Load StAnalysisUtilities
+ 29:[-]tables      :            :      :             : :St_Tables :Load Star Tables
+ 30:[-]tls         :            :      :             : :libtls :
+ 31:[-]SCL         :            :      :             : :StarClassLibrary :Load StarClassLibrary
+ 32:[-]FieldOn     :            :      :-FieldOff,-HalfField,-ReverseField :StMagFC :StMagF :Nominal field
+ 33:[-]FieldOff    :            :      :-FieldOn,-HalfField,-ReverseField :StMagFC :StMagF :No Field option
+ 34:[-]HalfField   :            :      :-FieldOn,-FieldOff,-ReverseField :StMagFC :StMagF :Half Field option
+ 35:[-]ReverseField:            :      :-FieldOn,-FieldOff,-HalfField :StMagFC :StMagF :Reverse Field option
+ 36:[-]NoEvent     :            :      :-event,-analysis : : :Switch Off StEvent and StAnalysis Makers
+ 37:[-]geant       :geant       :      :tables       :St_geant_Maker :geometry,St_g2r,St_geant_Maker :initailize geant
+ 38:[-]tpc         :tpc         :      :tables,tls,db,-tss,-trs,tcl,tpt :StMaker :StChain :
+ 39:[-]tss         :tpc_raw     :tpc   :tls,-trs     :St_tss_Maker :St_tpc,St_tss_Maker :
+ 40:[-]Trs         :            :tpc   :scl,-tss,tpc_daq :StTrsMaker :StTrsMaker :
+ 41:[-]miniDAQ     :tpc_raw     :tpc   :xin,FieldOff,SD97,Eval :StMinidaqMaker :StMinidaqMaker :
+ 42:[-]tpc_daq     :tpc_raw     :tpc   :             :St_tpcdaq_Maker :St_tpcdaq_Maker :
+ 43:[-]tfs         :            :      :tpc,-trs,-tss : : :use tfs       (no St_[tss_ and no Trs]Maker)
+ 44:[-]tcl         :tpc_hits    :tpc   :tables,tls   :St_tcl_Maker :St_tpc,St_tcl_Maker :
+ 45:[-]tpt         :tpc_tracks  :tpc   :tables,tls   :St_tpt_Maker :St_tpc,St_tpt_Maker :
+ 46:[-]laser       :tpc_tracks  :tpc   :tdaq,tpc,-tpt :StLaserEventMaker :StLaserEvent,StLaserEventMaker :
+ 47:[-]svt         :svt         :      :tables,srs,stk :StMaker :StChain :
+ 48:[-]srs         :svt_hits    :svt   :tls          :St_srs_Maker :St_svt,St_srs_Maker :
+ 49:[-]stk         :svt_tracks  :svt   :tls          :St_stk_Maker :St_svt,St_stk_Maker :
+ 50:[-]Ftpc        :ftpc        :      :tables,-fss,fcl,fpt :StMaker :StChain :
+ 51:[-]fss         :ftpc_raw    :ftpc  :SCL          :St_fss_Maker :St_ftpc,St_fss_Maker :
+ 52:[-]Fcl         :ftpc_hits   :ftpc  :SCL          :StFtpcClusterMaker :St_ftpc,StFtpcClusterMaker :
+ 53:[-]fpt         :ftpc_tracks :ftpc  :SCL          :St_fpt_Maker :St_ftpc,St_fpt_Maker :
+ 54:[-]emc         :emc         :      :geant,tables,ems,emh :StMaker :StChain :
+ 55:[-]ems         :emc_raw     :emc   :geant,tables :St_ems_Maker :St_emc,St_ems_Maker :
+ 56:[-]emh         :emc_hits    :emc   :geant,tables :St_emc_Maker :St_emc,St_emc_Maker :
+ 57:[-]l0          :l0          :      :tables,ctf,mwc,trg :StMaker :StChain :
+ 58:[-]ctf         :ctf         :l0    :tables       :St_ctf_Maker :St_ctf,St_ctf_Maker :
+ 59:[-]mwc         :mwc         :l0    :tables       :St_mwc_Maker :St_mwc,St_mwc_Maker :
+ 60:[-]trg         :trg         :l0    :tables       :St_trg_Maker :St_trg,St_trg_Maker :
+ 61:[-]l3t         :l3Tracks    :      :tables       :St_l3t_Maker :St_l3,St_l3t_Maker :
+ 62:[-]rich        :rch         :      :tables       :StRchMaker :StRchMaker :
+ 63:[-]global      :global      :      :tables,Match,primary,v0,xi,kink,dst :StMaker :StChain :
+ 64:[-]Match       :match       :global:SCL,tables,tls :StMatchMaker :St_svt,St_global,St_dst_Maker :
+ 65:[-]Primary     :primary     :global:SCL,tables,tls :StPrimaryMaker :St_svt,St_global,St_dst_Maker :
+ 66:[-]V0          :v0          :global:SCL,tables,tls :StV0Maker :St_svt,St_global,St_dst_Maker :
+ 67:[-]Xi          :xi          :global:SCL,tables,tls :StXiMaker :St_svt,St_global,St_dst_Maker :
+ 68:[-]Kink        :kink        :global:SCL,tables,tls :StKinkMaker :St_svt,St_global,St_dst_Maker :
+ 69:[-]dst         :dst         :global:SCL,tables,tls :St_dst_Maker :St_svt,St_global,St_dst_Maker :
+ 70:[-]Event       :StEventMaker:      :tables,SCL   :StEventMaker :St_Tables,StEvent,StEventMaker :
+ 71:[-]analysis    :analysis    :      :SCL          :StAnalysisMaker :StEvent,StAnalysisMaker :
+ 72:[-]QA          :QA          :      :tables,SCL   :St_QA_Maker :St_Tables,St_QA_Maker :
+ 73:[-]QAC         :CosmicsQA   :tables:             :StQACosmicMaker :St_Tables,StQACosmicMaker :
+ 74:[-]AllEvent    :            :      :             : : :Write whole event to StTree
+ 75:[-]St_geom     :            :      :             :St_geom_Maker :St_geom_Maker :
+ 76:[-]Display     :EventDisplay:      :St_geom      :StEventDisplayMaker :StEventDisplayMaker :
+ 77:[-]MakeDoc     :            :      :             : : :Make HTML documentation for the given Chain
+ 78:[-]Debug       :            :      :             : : :Set debug flag
+ 79:[-]Higz        :            :      :             : : :Pop Higz window
+ 80:[-]xout        :            :      :             : :xdf2root :Write dst to XDF file
+ 81:[-]Tree        :            :      :             :StTreeMaker :StTreeMaker :
+</pre>

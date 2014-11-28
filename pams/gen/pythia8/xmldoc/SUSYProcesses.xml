@@ -1,0 +1,37 @@
+<chapter name="SUSY Processes">
+
+<h2>SUSY Processes</h2>
+
+The implementation of SUSY processes is barely begun, so this page
+is more a placeholder than a repository of useful processes.
+
+<p/>
+Here is collected processes involving supersymmetric particle 
+production, with the exception of the (extended) Higgs sector.
+Since the number of separate but closely related processes is so big,
+there will not be switches for each separate process but only for a
+reasonable set of subgroups.
+
+<br/><note>Important note:</note> 
+In order to simulate SUSY processes it is required to read in the 
+couplings and masses relevant for the scenario to be studied. This 
+is done with the help of the SUSY Les Houches Accord (SLHA). The 
+reading of a relevant SLHA file <b>must</b> be set up, as described 
+on <aloc href="SUSYLesHouchesAccord">this page</aloc>.
+
+<flag name="SUSY:all" default="off">
+Common switch for production of supersymmetric particles, i.e. 
+particles with R-parity -1. 
+</flag>
+
+<flag name="SUSY:qqbar2chi0chi0" default="off">
+Pair production of neutralinos by quark-antiquark annihilation. With
+four neutralino species this gives ten separate processes, codes 
+1201 - 1210. Neutralino decays have not yet been implemented.
+</flag>
+
+
+</chapter>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->
+

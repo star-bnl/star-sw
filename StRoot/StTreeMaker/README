@@ -1,0 +1,16 @@
+
+Package: StTree Maker
+Responsible: Victor Perevoztchikov (perev@bnl.gov)
+
+Purpose: Main STAR I/O Maker to  read/write ROOT based STAR data .
+
+1) Inherited from StIOInterface class;
+ 
+2) Creates, writes and reads STAR data components(branches);
+
+3) Open/close of numerous input and output files;
+
+4) Provides common user interface for all ROOT based I/O data.
+   User maker access data via StMaker class. It does not
+   know anything about existence of StTreeMaker(s)
+

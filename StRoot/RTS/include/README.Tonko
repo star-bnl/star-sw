@@ -1,0 +1,9 @@
+daqFormats.h		All DAQ data file formats
+daqModes.h		Run types, Gain modes etc.
+ethLib.h		Include file for the ethLib package	(common with Jeff)
+rtsLog.h		For the RTS "LOG" facility
+rtsMonitor.h		For RTS MON facility
+rtsSystems.h		Misc. System & Node IDs as well as Trigger Bits (!?)
+
+MVME/ppcIOLib.h		Assembler stuff for the PowerPC Motorola Boards
+

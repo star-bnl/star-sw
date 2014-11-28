@@ -1,0 +1,5 @@
+<Document file="StarVMC/Geometry/Compat/fhcmgeo.xml">
+<Export language="Mortran">
+<Import file="pams/geometry/fhcmgeo/fhcmgeo.g" verbatim="true" />
+</Export>
+</Document>

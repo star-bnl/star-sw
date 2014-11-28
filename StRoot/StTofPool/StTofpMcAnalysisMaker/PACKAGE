@@ -1,0 +1,5 @@
+# $Id $
+# package StTofpMcAnalysisMaker
+# author: 
+Library:libStTofpMcAnalysisMaker.so:LIBS +=   -lStAssociationMaker  -lStChain  -l_StEvent  -lStMcEventMaker  -lStMcEvent  -lStTofUtil
+#Library:libStTofpMcAnalysisMaker.so:LIBS +=   -lStAssociationMaker  -lStChain  -lStEvent  -lStMcEventMaker  -lStMcEvent  -lStTofUtil

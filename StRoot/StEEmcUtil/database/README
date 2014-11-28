@@ -1,0 +1,351 @@
+
+Summary of  EEMC calib+conf data at BNL DB
+------------------------------------------------------
+
+
+Assumptions: * only tower related info
+             * only data relevant to PMT calibration &  HV
+             *                       and pedestals
+============================================================================
+
+1) database structure (VerA) (cstructs)
+
+		eemcDB +-> sector01 +->eemcBoxTconf[5]   // tower PMT box
+		       |            +->eemcPMTconf[60]   // all components of PM 
+		       |            +->eemcADCconf[1000] // tower+smd+pre/post  
+		       |            +->eemcPMTcal[60]    // gain+HV 
+		       |            +->eemcPMTped[1000]  // pedestal, as for ADCconf
+		       +-> sector02 ....
+                       .
+                       .   .... 
+                       .  
+		       +-> sector12
+		       +-> misc     for eg. laser splitter boxes 
+                       |            (similar structure as any sector)  
+                       |
+                       +-> QA       +->eemcPMTchar         // QA data (Sasha), 720+spare
+                                    +->eemcCWchar          // 
+
+* sectorXX - database directory node indexed by secIdx12 (1-12)
+
+* eemcPMTchar and eemcCWchar indexed by qaIdx1000 (1-1000)
+
+* saved node/config definitions in 
+	cstructs/emcNodes.VerA
+	cstructs/TestScheme_emc_VerA_Config.VerA  
+
+
+
+
+================================================================================
+
+
+
+DB table content
+----------------
+const EEMCDbMaxName=16;
+
+struct eemcDbBoxconf {                /* the same will be used for SMD & Pre */
+  char name[EEMCDbMaxBoxName];        /*    PMT ID  sector/box/tower */
+  int  barcode[EEMCDbMaxBox];         /*    box barcode  */
+  int  hvBranch[EEMCDbMaxBox];        /*    branch+ID  of HVsys controller */
+};eemcDbBoxconf:  
+input data:
+  STRIDER\BALEWSKI\EEMC-db\input_info\PMTBox_assembly_pamrevised.xls
+
+struct eemcDbPMTconf {
+   char name[EEMCDbMaxPmtName];      /*    PMT ID  sector/box/tower */
+   int  barcode[EEMCDbMaxPmt];       /*    PMT  shield barcode  */
+   int  sn[EEMCDbMaxPmt];            /*    pmt serial number  */
+   int  baseBarcode[EEMCDbMaxPmt];   /*    cw base barcode  */
+   int  baseSN[EEMCDbMaxPmt];        /*    cw base serial number  */
+   int  baseAddress[EEMCDbMaxPmt];   /*    cw base programmable id  */
+};
+input data:
+  STRIDER\BALEWSKI\EEMC-db\input_info\PMTBox_assembly_pamrevised.xls
+
+
+struct eemcDbADCconf {
+  char  name[EEMCDbMaxAdcName];  /*  sector/subsector/tower of strip/pre/post/tower */
+  int   slot[EEMCDbMaxAdc];       /* slot  */
+  int   channel[EEMCDbMaxAdc];    /* channel */
+};
+dummy input : db/conf/iucf-2002-sec6D/sec06_adc.conf
+
+
+struct eemcDbPMTcal {
+  char name[EEMCDbMaxPmtName];    /*    PMT ID  sector/box/tower */
+  float gain[EEMCDbMaxPmt];       /* pmt effective gain of the tower */
+  float hv[EEMCDbMaxPmt];         /* pmt actual HV (V), dac=HV/HVmax*1023 */
+};
+dummy initialization
+
+
+struct eemcDbPMTped {
+  char  name[EEMCDbMaxAdcName];  /*  sector/subsector/tower of strip/pre/post/tower */
+  float ped[EEMCDbMaxAdc];       /* pedestal in ADC chan */
+  float sig[EEMCDbMaxAdc];       /* width of pedestal in ADC chan */
+};
+
+
+
+eemcPMTchar:
+  long  pmtSN;         /*    pmt serial number  */
+  float speRes;        /*    single p. e.  resolution  (ch?)  */
+  float nomHV;         /*  HV (V) at gain 2x10^5  */
+  float darkC;         /*  dark current, (pA)    */
+input data:
+  STRIDER\BALEWSKI\EEMC-db\input_info\PMT_characterization.mdb
+
+eemcDbCWchar:
+   long  baseSN;        /*    cw base serial number , 'SER' from Dubna */
+   long  baseAddress;   /*    cw base programmable id , 'ADDR' from Dubna */
+   float HVmax ;        /*    cw HV (V) for dac=1023, 'K1280' from Dubna */
+   float dummy ;        /* ALWAYS 8-byte align! */ 
+input data:
+  STRIDER\BALEWSKI\EEMC-db\input_info\Dunin_PMTcell_QA.xls
+
+=========================================================================
+                     T O O L S   A N D   P R O G A M S
+=========================================================================
+
+Stored in CVS
+
+cvs co offline/EEpromis/dbase
+
+1)--------------------------------------------------------
+
+.hh & scripts defining EEMC related tables in DB are in:
+dbase/cstructs/
+
+*.hh define all c-structs stored in DB at :
+onlsun1.starp.bnl.gov:3310:TestScheme_emc_Ver3
+
+Makefile has th following targets:
+
+all:	     # convert .hh tables -->.xml
+build:	     # load c-struct + relations to empty DB
+               if 'make build' fails execute: 
+               source db.csh
+
+mrproper:    # erase all data & c-struct & relations from DB
+rebuild:     # = mrproper + build
+
+tables:	     # convert .hh tables -->.xml
+load:	     # load _all_ .xml c-structs to DB
+getidl:      # extract .idl's of c-structs and store them in StRoot/StDb/idl
+defindex:    # defines index-tables in DB
+getnode:     #get list of nodes from DB
+defnode:     #send (update)  list of nodes at DB
+getconfig:   #get configuration  from DB
+defconfig:   #send (update)  configuration to DB
+
+Note1, the following files are used to define nodes and configuration:
+ emcNodes.xml
+ TestScheme_emc_Ver0_Config.xml
+
+Note2, the same .hh files are generic for both DB initialization (via .xml) and
+compilation of regular C programs. Never ever change .xml files before
+loading to DB.
+
+Note3, to remove definition of a c-struct from db execute
+ dbremove "c-struct_name'
+
+Note4, to create new DB for the first time use:
+  mysql -h robinson.star.bnl.gov --port 3306  Calibrations_eemc </afs/rhic.bnl.gov/star/users/porter/public/scripts/BaseTables.sql
+   make mrproper does _not_ remove BaseTables
+
+2)--------------------------------------------------------
+standalone c-programs for I/O of data with DB  are in:
+  dbase/src
+
+These programs require StRoot/StDbLib library to build executable
+
+#The ./getTowers ./setTowers  may be used to test I/O to the whole tree
+#with dummy/real I/O data.
+
+
+To load/read/( erase ??)  real data to DB use the eemcDb program (src/eemcDb.cc)
+with the following generic name and syntax: 
+
+2a) eemcDb utility 
+    i)  src/eemcDb --path <pathToTable> [--get|--set] --time <timestamp> 
+
+	>eemcDb --help
+	usage: eemcDb --path <path> [EXTRA_OPTIONS]
+	 -p|--path <path> : full path to the table
+	 -t|--time <time> : sets query time        (default: now)
+	 -f|--file <file> : set file name for I/O  (default: stdin/stdout)
+	 -g|--get         : get data from table    (default)
+	 -s|--set         : set data to table
+	 -T|--tree        : print config tree
+	 -v|--verbose     : set verbose mode
+	 -h|--help        : this short help
+	 supported time formats (cf. man date):
+	  %Y-%m-%d %H:%M:%S     e.g.: 2002-11-12 15:37:29
+	  %Y-%m-%d              e.g.: 2002-11-12
+	  %s                    e.g.: 1037133449
+
+       DB records the GMT unix time. 
+
+  ii) eemcDb needs a preprocessed data as a input. We use perl scripts to accomplish this.
+    The scripts are in perl directory.
+    
+   * eemcDbPMTconf/eemcDbBoxconf
+     - convert an MS Excel file (PMTBox_assembly_pamrevised.xls) to a tab delimited text format
+     - run 
+         ./digestPmtConf.pl PMTBox_assembly_pamrevised.txt
+     - ( see also mkpmtbox shell script )
+     - you should get something a number of files 
+	sector-XX-boxt.conf
+        sector-XX-pmt.conf
+        where XX is a sector number
+   * eemcDbADCconf
+     - "doctor" IUCF created text files
+	./doctorAdcConf.pl -s 6 ../../db/iucf-2002-sec6A/sec06_adc.conf > tmpfile
+     -  convert the doctored tmpfile for eemcDb input
+        ./digestAdcConf.pl -s 6  tmpfile > sector-6A-adc.conf
+     
+   * eemcDbPMTchar
+     - convert an MS Access file to a tab delimited format
+     - run perl script
+	./digestPmtChar.pl PMT_parameters.txt > qa-pmt.char
+
+  iii) eemcDb loads only above generated input data, here's an example
+  (shell script src/load)
+      * if some input files do not exist do first:
+        cd ../perl
+        mkAll
+        cd -
+      
+
+Example:
+#!/bin/bash
+VER=VerD
+# define initial calibration of elements
+TM="2002-12-15 06:00:01"
+DATADIR=../perl
+JDATADIR=/afs/rhic.bnl.gov/star/users/balewski/dbase/perl
+OM="$USER"
+./eemcDb -s -p ${VER}/sector06/eemcADCconf -f $DATADIR/sector-6B-adc.conf -c "$COM" -t 2002-08-09 || exit
+./eemcDb -s -p ${VER}/sector06/eemcADCconf -f $DATADIR/sector-6A-adc.conf -c "$COM" -t 2002-08-22 || exit
+
+
+2b) mkHVDB utility
+
+
+The input (output)  data files for the setDb (getDb) is in .xml format. ???WRONG,JB
+The input data from the source should be converted to the .xml format first. ???
+
+
+
+
+3)--------------------------------------------------------
+scheme of the data analysis utilizing STAR DB under root4star in directory :
+dbase/ana
+
+3.a) to access new DB tables in root4star one need to:
+ 
+3.a.1) the ~/dbServers.xml must contain new DB
+3.a.2) to access 'other' DB in root4star one need to define its name and
+       version with setenv:
+
+       >setenv TestScheme_emc Ver0
+
+3.a.3) to make a new DB table 'eemcDbBoxconf' be visible in root4star one
+       need to add its definition to StDb
+
+       >cd dbase
+       >cvs co StRoot/StDb
+       >cd cstructs
+       >make getidl  (check new .idl were sotred at ... /StDb)
+       >cons +StDb
+      
+     new .idl should show up in  ../StRoot/StDb/idl ready for use
+
+3.b) construct root4star chain with St_db_Maker instantiated
+
+3.c) add our SteemcDbMaker with the following general scheme :
+
+    SteemcDbMaker::Init() { mydb = (St_db_Maker*)GetMaker("StarDb");}
+
+    SteemcDbMaker::Make(){
+       TDataSet *C=mydb->GetDataBase("TestScheme/emc/sector01/config")
+       St_eemcDbBoxconf *T=(St_eemcDbBoxconf *) C->Find("eemcBoxTconf")
+       eemcDbBoxconf_st *t=(eemcDbBoxconf_st *) T->GetArray()   
+       xx=t->barcode;
+    }
+
+4)------------------ USE CASES --------------------------------------
+
+Available tools for data analysis utilizing STAR DB under root4star in directory :
+StRoot/SteemcDbMaker/
+
+ 4.a) functions called once per job  [ before SteemcDbMaker::Init()]
+
+  SteemcDbMaker::setSectors(int sec1, sec2) //limits DB request to [sec1,sec2] 
+
+ 4.b) functions called once DAQ-run  
+
+  SteemcDbMaker::sSteemcDbMaker::InitRun  (int runumber) {
+    reloadDb(); // query STAR DB for new values
+    optimizeDb(); // build local fast lookup tables
+  }
+
+ 
+ 4.b) functions called for every event  [in  SteemcDbMaker::Make()]
+
+
+   /*  Lets define a unique 'name' for any active element in EEMC
+         name="ssTann" for towers, ss=sector 01-12, a=subsector='A' -'E'
+				    nn=tower in eta =01-12
+              "ssxkkk"  for SMD  x='U' or 'V' plain orientation,
+				 kkk=001-288 strip ID
+              "ssPann"  for Pres1
+              "ssQann"  for Pres2
+              "ssRann"  for Post
+              "ssLann"  for LED pixel
+  */
+
+  // my suggestion is to crash code (assert) if illegal operation is requested
+  // once it runs we can add nice error handling, JB
+
+  void   SteemcDbMaker::chan2detector(int slot, int chan, char *name)
+  void   SteemcDbMaker::detector2chan( char *name, int slot, int chan)
+  float  SteemcDbMaker::getGain(char *name) 
+  float  SteemcDbMaker::getHV(char *name) // actual HV in volts 
+  float  SteemcDbMaker::getNomHV(char *name) //  HV in volts for gain 2x10^5
+  float  SteemcDbMaker::getMaxHV(char *name) //max HV in volts delivered by CW
+  int    SteemcDbMaker::getDacHV(char *name) //DAC  in CW equiv. to actual HV
+
+
+  void dumpTowerGain(FILE *fd) // fd = output file name
+ /* format
+  name  gain  HV(V)  dacHV  CWcellID  HVsysBranch
+
+  output will be used to :
+  - update values in DB
+  - update HV by slow control
+
+ */  
+
+
+
+--------------------------------- not implemented, perhaps not needed? ----
+? SteemcDbMaker::useNode(int sector, char *node, char *fname) 
+  /* replace DB record for specified node by the ascii file given by 'fname' 
+    where [node]   is  full node name, e.g.: config/eemcBoxTconf, ... (see #2)
+          [sector] is EEMC sector number: 1-12
+  */
+
+  /* Action is as follows:
+     - each new event gets values stored in DB 
+       (or input ascii file if useNode() was initialized) - is it doable?
+?    - setXXX() replace given value only for actual event - 
+          how does  T->GetArray() work ???
+     - getXXX() returns current value, i.e. the one set by setXXX() if called 
+   */
+
+
+? void  SteemcDbMaker::setGain(char *name, float gain) 
+? void  SteemcDbMaker::setHV(char *name, float hv) // new HV in volts 

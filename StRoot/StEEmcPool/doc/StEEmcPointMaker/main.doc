@@ -1,0 +1,14 @@
+/**
+
+\mainpage StEEmcPointMaker - Produces points 
+\author Jason C. Webb         
+\date    created 2005
+\version 1.0
+
+
+\section eepts_clusters Cluster-based point maker StEEmcPointMaker
+
+\section eepts_fits Fit-based point maker StEEmcPointFitMaker 
+
+*/
+

@@ -1,0 +1,17 @@
+StPeCMaker
+
+Description:
+Example Maker for reading DSTs for peripheral collisions. It is
+to be called from script doEvents.C (add one line to doEvents.C 
+to call StPeCMaker). It takes information from the DST and fills 
+a set of histograms. The dst information is transferred through
+StEvent into StPeCEvent. An example of how to use StPeCEvent
+is in the StPeCMaker member function StPeCMaker::ExampleAnalysis.  
+
+Author:
+Joakim Nystrand, Lawrence Berkeley National Laboratory
+
+README File Updated:
+9/27/99:  JN  First version
+3/24/00:  JN  New version with StPeCEvent
+

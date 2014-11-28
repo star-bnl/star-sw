@@ -1,0 +1,5 @@
+# $Id $
+# package St_srs_Maker
+# author: 
+Library:libSt_srs_Maker.so:LIBS +=   -lsim_Tables  -lStChain  -lStDbUtilities  -lStSvtClassLibrary  -l_StSvtClusterMaker  -l_St_svt  -lsvt_Tables
+#Library:libSt_srs_Maker.so:LIBS +=   -lsim_Tables  -lStChain  -lStDbUtilities  -lStSvtClassLibrary  -lStSvtClusterMaker  -lSt_svt  -lsvt_Tables

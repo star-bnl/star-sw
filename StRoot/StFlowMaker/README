@@ -1,0 +1,112 @@
+Maker:		StFlowMaker
+Files:		StFlowMaker.cxx
+		StFlowMaker.h
+		StFlowEvent.cxx
+		StFlowEvent.h
+		StFlowTrackCollection.cxx
+		StFlowTrackCollection.h
+		StFlowTrack.cxx
+		StFlowTrack.h
+		StFlowCutEvent.cxx
+		StFlowCutEvent.h
+		StFlowCutTrack.cxx
+		StFlowCutTrack.h
+		StFlowPicoEvent.h
+		StFlowPicoEvent.cxx
+		StFlowSelection.h
+		StFlowSelection.cxx
+		StFlowConstants.h
+		StFlowConstants.cxx
+Authors		Raimond Snellings, Art Poskanzer, and Sergei Voloshin
+		with lots of help from Glenn Cooper 
+Date:		Dec 1999
+Description:
+
+** StFlowMaker: 
+
+StFlowMaker creates StFlowEvent from StEvent or from StFlowPicoEvent
+after event and track cuts. StFlowEvent contains a track collection
+(StFlowTrackCollection) which contains tracks (StFlowTrack).
+
+In Init, StFlowMaker reads the PhiWgt values for the TPCs and FTPCs from
+flowPhiWgt.hist.root . These are used for making the event plane
+isotropic in the lab.
+
+In Make, it stores in StFlowEvent the PhiWgt values, the RunID, the
+EventID, the CTB signal, the ZDC east and west signals, the beam
+energy, the beam mass for East and West, the trigger word, the
+original track multiplicities for negative and positive particles, the
+multiplicity within |eta| < 0.75, the centrality bin, and the primary
+vertex position. In each StFlowTrack it stores phi, global phi, eta,
+global eta, p_t, global p_t, charge, dE/dx, deviant pid for each
+particle, pid, dca, global dca, chi2, fit points, and max
+points. StFlowTrack can also calculate total p and rapidity.
+
+In Finish, it prints the lists of cuts and selections.
+
+** StFlowEvent:
+
+StFlowEvent contains member functions which return PhiWeight, Mult,
+MeanPt, Q (the event plane vector), Psi (the event plane angle), and q
+(=Q/sqrt(Mult)). It contains the functions which make the random
+sub-events, the eta separated sub-events, and set the pid values.  It
+also contains the function which sets the flags for each track saying
+whether it is used in the event plane determined for each harmonic,
+each selection, and each subevent. StFlowEvent is used in the flow
+analysis by StFlowTagMaker and StFlowAnalysisMaker.
+
+It now supports the StFlowCumulantMaker by calculating the generating
+functions for the old and new cumulant methods, and a Q vector
+normalized by the sum of the squares of the weights.
+
+** Cut Classes:
+
+The StFlowCutEvent and StFlowCutTrack classes have all functions and
+data members static. Therefore, there is no need to instantiate. Just
+use StuCutEvent::func(); or StuCutTrack::func(); . The reason for
+making them static was to keep count of the number of events and
+tracks removed by each cut. Call the PrintCutList functions in Finish
+to print these counters.
+
+Right now the event cuts are on centrality, multiplicity and primary
+vertex position. The track cuts are on chi2, dca, pt, eta, fit points,
+and the ratio of fit point to max points. These can be applied to TPC
+tracks, FTPC tracks, or global tracks. It is set up so that other cuts
+can be easily added. If lo >= hi on a cut, the cut is not applied.
+
+In CheckEvent and CheckTrack the calling argument is a pointer to the
+event or track.
+
+CutTrack also stores the number of tracks with positive and negative
+pseudorapidity. In CheckEvent::CheckEtaSymmetry these counters are
+used to calculate (Pos - Neg) / (Pos + Neg). A cut is put on this
+ratio after correcting for an acceptance effect and normalizing with
+the square root of the multiplicity. The purpose is to eliminate
+beam-gas background where most of the particles would go one way or
+the other.
+
+Before run 4 trigger words were used to describe the triggers. After 
+run 4 multiple triggers could be satisfied by one event and a trigger
+collection is used. The scheme for selecting triggers therefore changed
+with the user being forced to make a choice as to which triggers to look
+for.
+
+** StFlowPicoEvent:
+
+This is a persistent sub-set of StFlowEvent which can be written out
+to disk.
+
+** Selection Class:
+
+The StFlowSelection class is used to select events and tracks from
+StFlowEvent which have already passed the above cuts. If one calls the
+Select() member function with a pointer to StFlowTrack it selects
+tracks for the event plane determination which have the indicated
+harmonic, selection, subevent, and PID. The SelectPart() member
+function selects tracks for correlating with the event plane which
+have the indicated pid, pt, total p, rapidity, eta, fit points, ratio
+of fit points to max points, chi2, global dca, and dca.
+
+** Constants:
+
+StFlowConstants contains constants which are used in more than one file.

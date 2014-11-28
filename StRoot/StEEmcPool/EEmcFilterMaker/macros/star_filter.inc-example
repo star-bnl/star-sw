@@ -1,0 +1,27 @@
+      IMPLICIT none ! forces to initialize every variable
+cjan, use       IMPLICIT REAL(R)
+
+
+C... Common block of HBOOK  WMZ
+      double precision HMEMOR
+      COMMON/PAWC/HMEMOR(500000)
+
+      integer inpPythiaEvent,nOK
+      REAL GRID_ETA_BINWD,GRID_PHI_BINWD
+      COMMON/STAR_FILTER/ inpPythiaEvent,GRID_ETA_BINWD,GRID_PHI_BINWD,nOK
+
+
+cx - names are too generic     IEVENT, ILOOP, SEL_EVT
+
+C...  parameters of eta-phi grid
+      integer NGRID_PHI_BINS, NGRID_ETA_BINS
+      real GRID_ETA_LOW, GRID_ETA_HIGH
+C...  values below are optomized for the Endcap
+      PARAMETER(NGRID_PHI_BINS = 40, NGRID_ETA_BINS = 10)
+      PARAMETER(GRID_ETA_LOW=0.8, GRID_ETA_HIGH=2.2) ! eta units
+
+
+C...  two thresholds 
+      real SEED_ET_THRESH ,CLUSTER_ET_THRESH
+      PARAMETER(SEED_ET_THRESH = 10.0)
+      PARAMETER(CLUSTER_ET_THRESH = 20.0)

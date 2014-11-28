@@ -1,0 +1,24 @@
+void ibem(TGeoVolume *CAVE, TGeoVolume *VPDD) {
+TGeoVolume *IBEM = gGeoManager->MakeBox("IBEM",GetMed("VPDD_AIR"),3.81,5.08,147.447); IBEM->SetTitle("the IBeam structure beneath the Bell reducer cone");
+  IBEM->SetVisibility(0);
+  IBEM->SetLineColor(2);
+TGeoVolume *IBEV = gGeoManager->MakeBox("IBEV",GetMed("VPDD_ALUMINIUM"),0.2159,4.3434,136.017); IBEV->SetTitle("a vertical IBeam plate");
+  IBEV->SetLineColor(2);
+  IBEV->SetFillStyle(6);
+TGeoVolume *IBEW = gGeoManager->MakeTrap("IBEW",GetMed("VPDD_ALUMINIUM"),0.2159,0,0,11.43,2.22445,4.15485,4.826859,11.43,2.22445,4.15485,4.826859); IBEW->SetTitle("the first part of the IBeam plate");
+  IBEW->SetLineColor(2);
+  IBEW->SetFillStyle(6);
+TGeoVolumeMulti *IBEH = gGeoManager->MakeVolumeMulti("IBEH", GetMed("VPDD_ALUMINIUM")); IBEH->SetTitle("a horizontal IBeam plate");
+ IBEH->AddVolume(gGeoManager->MakeBox("IBEH",GetMed("VPDD_ALUMINIUM"),3.81,0.3683,147.447));
+  IBEH->SetLineColor(2);
+  IBEH->SetFillStyle(6);
+ IBEH->AddVolume(gGeoManager->MakeBox("IBEH",GetMed("VPDD_ALUMINIUM"),3.81,0.3683,136.017));
+
+   VPDD->AddNode(IBEM,1,new TGeoTranslation(0,-16.51,530.477));
+    IBEM->AddNode(IBEH->GetVolume(0),1,new TGeoTranslation(0,4.7117,0));
+    IBEM->AddNode(IBEH->GetVolume(1),2,new TGeoTranslation(0,-4.7117,11.43));
+    IBEM->AddNode(IBEV,1,new TGeoTranslation(0,0,11.43));
+    IBEM->AddNode(IBEW,1,new TGeoCombiTrans(0,1.15375,-136.017,GetRot("C023")));
+  CAVE->AddNode(IBEM,1,new TGeoTranslation(0,-16.51,530.477));
+  CAVE->AddNode(IBEM,2,new TGeoCombiTrans(0,-16.51,-530.477,GetRot("180R")));
+}

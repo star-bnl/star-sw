@@ -1,0 +1,191 @@
+<chapter name="Standard-Model Parameters">
+
+<h2>Standard-Model Parameters</h2>
+
+<h3>The strong coupling</h3> 
+
+The <code>AlphaStrong</code> class is used to provide a first- or 
+second-order running <ei>alpha_strong</ei> (or, trivially, a 
+zeroth-order fixed one). Formulae are the standard ones found in 
+<ref>Yao06</ref>. The second-order expression used, eq. (9.5),
+may be somewhat different in other approaches (with differences
+formally of higher order), so do not necessarily expect perfect
+agreement, especially not at small <ei>Q^2</ei> scales. The starting 
+<ei>alpha_strong</ei> value is defined at the <ei>M_Z</ei> mass scale.
+The <ei>Lambda</ei> values are matched at the <ei>b</ei> and <ei>c</ei> 
+flavour thresholds, such that <ei>alpha_strong</ei> is continuous.
+For second-order matching an approximate iterative method is used.
+ 
+<p/>
+Since we allow <ei>alpha_strong</ei> to vary separately for 
+hard processes, timelike showers, spacelike showers and  multiple 
+interactions, the relevant values can be set in each of these classes. 
+The default behaviour is everywhere first-order running.
+ 
+<p/>
+The <ei>alpha_strong</ei> calculation is initialized by 
+<code>init( value, order)</code>, where <code>value</code> 
+is the <ei>alpha_strong</ei> value at <ei>M_Z</ei> and <code>order</code> 
+is the order of the running, 0, 1 or 2.   Thereafter the value can be 
+calculated by <code>alphaS(scale2)</code>, where 
+<code>scale2</code> is the <ei>Q^2</ei> scale in GeV^2. 
+
+<p/>
+For applications inside shower programs, a second-order <code>alpha_s</code> 
+value can be obtained as the product of the two functions 
+<code>alphaS1Ord(scale2)</code> and <code>alphaS2OrdCorr(scale2)</code>, 
+where the first gives a simple first-order running (but with the 
+second-order <ei>Lambda</ei>) and the second the correction factor, 
+below unity, for the second-order terms. This allows a compact handling 
+of evolution equations.
+
+<h3>The electromagnetic coupling</h3> 
+
+<p/>
+The <code>AlphaEM</code> class is used to generate a running
+<ei>alpha_em</ei>. The input <code>StandardModel:alphaEMmZ</code>
+value at the <ei>M_Z</ei> mass is matched to a low-energy behaviour
+with running starting at the electron mass threshold. The matching
+is done by fitting an effective running coefficient in the region
+betweeen the light-quark treshold and the charm/tau threshold. This
+procedure is approximate, but good enough for our purposes. 
+
+<p/>
+Since we allow <ei>alpha_em</ei> to vary separately for 
+hard processes, timelike showers, spacelike showers and  multiple 
+interactions, the choice between using a fixed or a running 
+<ei>alpha_em</ei> can be made in each of these classes. 
+The default behaviour is everywhere first-order running.
+The actual values assumed at zero momentum transfer and 
+at <ei>M_Z</ei> are only set here, however. 
+
+<parm name="StandardModel:alphaEM0" default="0.00729735"
+min="0.0072973" max="0.0072974">
+The <ei>alpha_em</ei> value at vanishing momentum transfer
+(and also below <ei>m_e</ei>). 
+</parm>
+
+<parm name="StandardModel:alphaEMmZ" default="0.00781751"
+min="0.00780" max="0.00783">
+The <ei>alpha_em</ei> value at the <ei>M_Z</ei> mass scale. 
+Default is taken from <ref>Yao06</ref>.
+</parm>
+
+<p/>
+The <ei>alpha_em</ei> calculation is initialized by 
+<code>init(order)</code>, where <code>order</code> is the order of 
+the running, 0 or 1, with -1 a special option to use the fix value
+provided at <ei>M_Z</ei>.   Thereafter the value can be 
+calculated by <code>alphaEM(scale2)</code>, where 
+<code>scale2</code> is the <ei>Q^2</ei> scale in GeV^2. 
+
+<h3>The electroweak couplings</h3> 
+
+There are two degrees of freedom that can be set, related to the 
+electroweak mixing angle:
+
+<parm name="StandardModel:sin2thetaW" default="0.2312" 
+min="0.225" max="0.240">
+The weak mixing angle, as used in all <ei>Z^0</ei> and <ei>W^+-</ei>
+masses and couplings, except for the vector couplings of fermions
+to the <ei>Z^0</ei>, see below. Default is the MSbar value from
+<ref>Yao06</ref>.
+</parm>
+
+<parm name="StandardModel:sin2thetaWbar" default="0.2315" min="0.225" max="0.240">
+The weak mixing angle, as used to derive the vector couplings of fermions
+to the <ei>Z^0</ei>, in the relation 
+<ei>v_f = a_f - 4 e_f sin^2(theta_W)bar</ei>. Default is the
+effective-angle value from <ref>Yao06</ref>.
+</parm>
+
+<p/>
+These and various couplings can be read out from the static 
+<code>CoupEW</code> class:<br/>
+<code>CoupEW::sin2thetaW()</code> gives the weak mixing angle set above.<br/>
+<code>CoupEW::cos2thetaW()</code> gives 1 minus it.<br/>
+<code>CoupEW::sin2thetaWbar()</code> gives the weak mixing angle as used
+in fermion couplings.<br/>
+<code>CoupEW::ef(idAbs)</code> gives the electrical charge. Note that this 
+and subsequent routines should be called with a positive 
+<code>idAbs</code>.<br/>
+<code>CoupEW::vf(idAbs)</code> gives the vector coupling to 
+<ei>Z^0</ei>.<br/>
+<code>CoupEW::af(idAbs)</code> gives the axial vector coupling.<br/>
+<code>CoupEW::t3f(idAbs)</code> gives the weak isospin of lefthanded quarks, 
+i.e. <ei>a_f/2</ei>.<br/> 
+<code>CoupEW::lf(idAbs)</code> gives the lefthanded coupling, i.e.
+<ei>(v_f + a_f/2)/2</ei> (other definitions may differ by a factor 
+of 2).<br/> 
+<code>CoupEW::rf(idAbs)</code> gives the righthanded coupling, i.e.
+<ei>(v_f - a_f/2)/2</ei> (with comment as above).<br/> 
+<code>CoupEW::ef2(idAbs)</code> gives <ei>e_f^2</ei>.<br/>
+<code>CoupEW::vf2(idAbs)</code> gives <ei>v_f^2</ei>.<br/>
+<code>CoupEW::af2(idAbs)</code> gives <ei>a_f^2</ei>.
+
+<h3>The quark weak-mixing matrix</h3>
+
+The absolute values of the Cabibbo-Kobayashi-Maskawa matrix elements are 
+set by the following nine real values taken from <ref>Yao06</ref> - 
+currently the CP-violating phase is not taken into account in this 
+parametrization. It is up to the user to pick a consistent unitary 
+set of new values whenever changes are made.  
+
+<parm name="StandardModel:Vud" default="0.97383" min="0.973" max="0.975">
+The <ei>V_ud</ei> CKM matrix element.
+</parm>
+
+<parm name="StandardModel:Vus" default="0.2272" min="0.224" max="0.230">
+The <ei>V_us</ei> CKM matrix element.
+</parm>
+
+<parm name="StandardModel:Vub" default="0.00396" min="0.0037" max="0.0042">
+The <ei>V_ub</ei> CKM matrix element.
+</parm>
+
+<parm name="StandardModel:Vcd" default="0.2271" min="0.224" max="0.230">
+The <ei>V_cd</ei> CKM matrix element.
+</parm>
+
+<parm name="StandardModel:Vcs" default="0.97296" min="0.972" max="0.974">
+The <ei>V_cs</ei> CKM matrix element.
+</parm>
+
+<parm name="StandardModel:Vcb" default="0.04221" min="0.0418" max="0.0426">
+The <ei>V_cb</ei> CKM matrix element.
+</parm>
+
+<parm name="StandardModel:Vtd" default="0.00814" min="0.006" max="0.010">
+The <ei>V_td</ei> CKM matrix element.
+</parm>
+
+<parm name="StandardModel:Vts" default="0.04161" min="0.039" max="0.043">
+The <ei>V_ts</ei> CKM matrix element.
+</parm>
+
+<parm name="StandardModel:Vtb" default="0.9991" min="0.99907" max="0.9992">
+The <ei>V_tb</ei> CKM matrix element.
+</parm>
+
+<p/>
+These couplings can be read back out in a few alternative forms:<br/>
+<code>VCKM::Vgen(genU, genD)</code> gives the CKM mixing element for
+up-type generation index <code>genU</code> (1, 2 or 3) and
+down-type generation index <code>genD</code>.<br/>
+<code>VCKM::V2gen(genU, genD)</code> gives the square of the above.<br/>
+<code>VCKM::Vid(id1, id2)</code> gives the CKM mixing element between
+two quark flavours <code>id1</code> and <code>id2</code>. The sign of 
+the flavours is irrelevant, since the process may be either of the type
+<ei>q qbar' -> W</ei> or <ei>q g -> W q'</ei>. Flavour combinations 
+with no CKM mixing (e.g. <ei>u u</ei>) are given a vanishing value.<br/>
+<code>VCKM::V2id(id1, id2)</code> gives the square of the above.<br/>
+<code>VCKM::V2sum(id)</code> gives the sum of squares that a given
+flavour can couple to, excluding the top quark. Is close to unity
+for the first two generations.<br/>
+<code>VCKM::V2pick(id)</code> picks a CKM partner quark (with the same 
+sign as <code>id</code>) according to the respective squared elements,
+again excluding the top quark from the list of possibilities.
+
+</chapter>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->

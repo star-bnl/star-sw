@@ -1,0 +1,6 @@
+(custom-set-variables 
+ '(font-lock-support-mode (quote fast-lock-mode))
+ '(font-lock-verbose 0)
+ '(global-font-lock-mode t nil (font-lock))
+ '(font-lock-global-modes t))
+(custom-set-faces)

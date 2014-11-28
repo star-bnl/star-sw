@@ -1,0 +1,13 @@
+/*    y1Mult.idl
+*
+*  Table: y1Mult
+*
+*       description:
+*/ 
+
+
+struct y1Mult { 
+
+   double  mult;   /*   */
+
+ };  

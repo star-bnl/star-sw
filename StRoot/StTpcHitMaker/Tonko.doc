@@ -1,0 +1,134 @@
+Tonko, 04/27/12
+
+OK, I am done with the iTPX cluster finder changes.
+
+I will show the example code at the end of the email and I hope it is
+obvious how to run it. Note that all the current codes which use the
+current TPC don't need any change as the defaults will take care of it.
+In essence only the call to "tpx->put("adc_sim")" needs to be
+expanded if desired.
+
+Naturally, you need to cvs-update StRoot/RTS/src/DAQ_TPX.
+
+Caveats:
+
+1) The maximum allowed number of rows per whole sector is 255.
+2) The maximum allowed number of pads per (any) row is 255.
+3) I didn't implement the gain/t0 correction since this is a simulation
+so the gains default to 1.0 and the T0 to 0.0.
+
+              -- Tonko
+
+Example code:
+
+        daq_tpx *tpx = new daq_tpx() ;     // usual....
+
+        u_char tpx_rowlen[256] ;        // just allocate the absolute
+maximum of 255 rows...
+
+        tpx_rowlen[0] = 0 ;     // Always for the dummy row "0"! Note
+that rows count from 1.
+
+        // we shall assume 120 rows in this example
+        for(int i=1;i<=120;i++) {       // Again: note that rows count
+from 1..row_count
+                tpx_rowlen[i] = i*2 ;   // set-up some dummy count for this test
+        }
+
+        for(int evt=0;evt<10;evt++) {    // some events....
+
+                // note the numbers: "0,rowcount,0" and then the
+pointer to the rowlen array!
+                daq_dta *sim_dta =
+tpx->put("adc_sim",0,120,0,tpx_rowlen) ;     // clear & start event
+
+                // for the current TPC the above call would simply be:
+                //daq_dta *sim_dta = tpx->put("adc_sim") ;
+
+                for(int s=1;s<=24;s++) {        // loop over sectors
+                for(int r=1;r<=120;r++) {       // loop over allowed rows
+                for(int p=1;p<=tpx_rowlen[r];p++) {     // loop over
+allowed pads...
+
+
+                daq_sim_adc_tb *sim_d = (daq_sim_adc_tb *)
+sim_dta->request(512) ;
+
+                // put some dummies, for this example....
+                int i = 0 ;
+                for(int t=(r+12);t<=(r+21);t++) {
+                        sim_d[i].adc = 10+evt+r ;
+                        sim_d[i].tb = t+p+s ;
+                        sim_d[i].track_id = 0xFFFF ;
+                        i++ ;
+                }
+
+                sim_dta->finalize(i,s,r,p) ;
+                }}}
+
+
+                // and now run the cluster finder, as usual...
+
+                daq_dta *dd = tpx->get("cld_sim") ;
+
+                // proceed as usual....
+
+================================================================================
+Tonko, 11/15/2012
+
+https://docs.google.com/document/d/1kqs2Moj1MSeSYNmVFIo8E0ATDz05mDc38OrhM86PHXg/edit
+
+TPC Cluster Finder (FCF) Flags
+
+Tonko Ljubicic
+Nov 15, 2012.
+
+Introduction
+This document describes the miscellaneous flags of the Fast Cluster Finder data.
+The canonical source & description of these flags resides in
+$CVS/StRoot/RTS/src/DAQ_TPX/tpxFCF_flags.h
+
+As of this writing the file contains the following:
+
+// flag definitions - NEVER CHANGE
+#define FCF_ONEPAD              1
+#define FCF_DOUBLE_PAD          2       // offline: merged
+#define FCF_MERGED              2
+#define FCF_DOUBLE_T            4
+#define FCF_FALLING             8       // offline: charge too big!
+#define FCF_BIG_CHARGE          8
+#define FCF_ROW_EDGE            16      // 0x10 touched end of row
+#define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
+#define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad
+#define FCF_IN_DOUBLE           128     // 0x80 one should use the floating point in the union
+#define FCF_CHOPPED             256     // 0x100 cluster is chopped from its neighbour: OFFLINE use only
+#define FCF_SANITY              512     // 0x200 cluster extents not sane
+
+PLEASE NOTE that flag values greater than 8 bits (i.e. 0x100 etc) are not used by the cluster finder itself but were added by Offline for its convenience. This document does not describe them and has no knowledge about their use or meaning.
+
+The flag variable is a bit mask of any of the above combinations.
+Description
+
+
+ONEPAD	    The cluster is only 1 pad wide. Depends on the user code if it wishes to use such clusters due to loss of precision in the pad coordinate.
+MERGED	    The cluster was deconvoluted. This implies loss of precision, especially in the charge. Typically should not be used for dE/dx calculation.
+DOUBLE_T    Internal FCF use. Should not be observed in Offline. Contact Tonko if ever seen in data & discard.
+BIG_CHARGE  The maximum charge (in ADC counts) a cluster can normally have is 32767. For clusters with charge larger than that a larger quantization 
+            is employed so there is a loss of precision in the charge value. Depends on the user code if it wishes to use such clusters for dE/dx.
+ROW_EDGE    The cluster touches a row edge (pad=1 or the last pad). Should be discarded.
+BROKEN_EDGE The cluster touches the edge of an RDO (or Mezzanine card on the pre-DAQ1000 electronics). In DAQ1000 times this can exclusively happen on row 8. 
+	    Such a cluster will be merged in the DAQ Reader code automatically and the bit will be cleared for successful merges and thus won't be seen in Offline. 
+            However, the flag will remain for clusters where the merge was not successful. Should be discarded.
+DEAD_EDGE   The cluster touches a pad which was killed in the bad pad file. Should be discarded.
+IN_DOUBLE   Internal FCF use. Should not be observed in Offline. Contact Tonko if ever seen in data & discard.
+	
+===========================
+General Advice about usage
+===========================
+
+Flags (as a number)	Use 	
+               0x00	coordinates & dE/dx
+FCF_ONEPAD     0x01     coordinates & dE/dx
+FCF_MERGED     0x02	coordinates, no dE/dx
+FCF_BIG_CHARGE 0x08     coordinates, unknown dE/dx
+other values (i.e. 0x03, 0x0A etc)	discard

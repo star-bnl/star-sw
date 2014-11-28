@@ -1,0 +1,5 @@
+# $Id $
+# package StTpcMcAnalysisMaker
+# author: 
+Library:libStTpcMcAnalysisMaker.so:LIBS +=   -lStAssociationMaker  -lStBFChain  -lStChain  -lStDbUtilities  -l_StEvent  -l_StMagF  -lStMcEventMaker  -lStMcEvent -lStRTSClientFCF  -lStRTSClientFCFMaker  -l_StTpcDb
+#Library:libStTpcMcAnalysisMaker.so:LIBS +=   -lStAssociationMaker  -lStBFChain  -lStChain  -lStDbUtilities  -lStEvent  -lStMagF  -lStMcEventMaker  -lStMcEvent  -lStRTSClientFCFMaker  -lStTpcDb

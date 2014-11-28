@@ -1,0 +1,10 @@
+SHELL = /bin/sh
+ARCH = Linux
+MYLCGPLATFORM = slc4_ia32_gcc34
+SHAREDLIBS = no
+FC = g77
+CC = gcc
+FFLAGS = -O2
+CFLAGS = -O2
+CXXFLAGS = -O2 -ansi -pedantic -W -Wall -Wshadow
+FLIBS = -lfrtbegin -lg2c

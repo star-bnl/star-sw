@@ -1,0 +1,5 @@
+# $Id $
+# package StEpcMaker
+# author: 
+Library:libStEpcMaker.so:LIBS +=   -lStChain    -l_StEvent
+#Library:libStEpcMaker.so:LIBS +=   -lStChain  -lStEmcUtil  -lStEvent

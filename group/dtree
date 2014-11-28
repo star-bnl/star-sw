@@ -1,0 +1,21 @@
+#!/bin/sh
+if [ $# -eq 2 ]; then
+if [ "$1" = "-o" -a -d "$2" ]; then
+(cd $2; pwd)
+find $2 -type d -exec ls -ld {} \; | awk '{printf("%s \t(%s)\n",$9,$3)}' | \
+/bin/sort -f | sed -e "s,^$1,," -e "/^$/d" -e \
+"s,[^/]*/\([^/]*\)$,\'-----\1," -e "s,[^/]*/, |     ,g"
+else
+echo "Usage: dtree [-o] directory"
+echo "         where -o lists ownership"
+fi
+elif [ $# -eq 1 -a -d "$1" ]; then
+(cd $1; pwd)
+find $1 -type d -exec ls -ld {} \; | awk '{printf("%s\n",$9)}' | 
+/bin/sort -f | sed -e "s,^$1,," -e "/^$/d" -e \
+"s,[^/]*/\([^/]*\)$,\'-----\1," -e "s,[^/]*/, |     ,g"
+else
+echo "Usage: dtree [-o] directory"
+echo "         where -o lists ownership"
+fi
+exit

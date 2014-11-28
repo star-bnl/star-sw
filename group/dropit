@@ -1,0 +1,56 @@
+#!/bin/csh -f
+
+#
+# dropit.pl is dangerous because usage abuse of such statement
+#  setenv XXX `dropit -p XXX ...`
+#
+# would lead to destroying variable XXX shall the internal test
+# /usr/bin/env perl fail.
+#
+# If you modify the .pl script, please modify the csh as well !!
+# chs script is "safe" i.e. all Uglix program are specified
+# with full path but since there is a need for many back-ticked
+# commands to accomplish the same than one line of perl, it is
+# also slower.
+#
+#
+
+#
+# Doing `which` under Solaris has some intteresting 
+# side effects
+#
+
+set PTEST=""
+foreach perl (/usr/bin/perl /usr/local/bin/perl) # $OPTSTAR/bin/perl )
+    if ( -x $perl ) then
+	set PTEST=$perl
+	# take the first found - it is only for dropit
+	break
+    endif
+end
+
+# Echo here will break this script
+# if ( $?DECHO ) echo "dropit :: PTEST is [$PTEST]"
+if ( $?DECHO && $?DUMPENV ) then
+    /usr/bin/test -e /tmp/dropit.$USER && /bin/rm -f /tmp/dropit.$USER
+    printenv              >&/tmp/dropit.ENV.$USER
+    echo "PTEST=[$PTEST]" >&/tmp/dropit.$USER
+endif
+
+if ("$PTEST" != "") then
+    $PTEST $0.pl $*
+else
+    $0.csh $*
+endif
+
+
+
+
+# For debugging only 
+#switch ($STAR_SYS)
+#    case "sun*":
+#	echo "dropit :: PTEST=[$PTEST]" >/tmp/dropit_$$.tmp
+#	breaksw
+#    default:
+#endsw
+

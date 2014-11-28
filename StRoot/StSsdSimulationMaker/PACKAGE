@@ -1,0 +1,5 @@
+# $Id $
+# package StSsdSimulationMaker
+# author: 
+Library:libStSsdSimulationMaker.so:LIBS +=   -lsim_Tables  -lStChain  -l_St_svt -lsvt_Tables
+#Library:libStSsdSimulationMaker.so:LIBS +=   -lsim_Tables  -lStChain  -lSt_svt  -lsvt  -lsvt_Tables

@@ -1,0 +1,12 @@
+/*	zdcsmdPed.idl
+ *
+ *	Table: zdcsmdPed
+ *
+ *	description: *	//:	Table which contains pedestal information for zdcsmd ADCs
+ */
+
+struct zdcsmdPed {
+	long RunID;                  /*  runID */
+	float ZdcsmdPedestal[32];    /* ADC pedestal of zdcsmd */
+};
+

@@ -1,0 +1,27 @@
+*
+* $Id: rzclxx.inc,v 1.1.1.1 2009/02/18 20:32:36 fisyak Exp $
+*
+* $Log: rzclxx.inc,v $
+* Revision 1.1.1.1  2009/02/18 20:32:36  fisyak
+*
+*
+* Revision 1.1.1.1  2002/06/16 15:18:50  hristov
+* Separate distribution  of Geant3
+*
+* Revision 1.1.1.1  1999/05/18 15:55:27  fca
+* AliRoot sources
+*
+* Revision 1.1.1.1  1996/03/06 10:46:55  mclareni
+* Zebra
+*
+*
+#ifndef CERNLIB_ZEBRA_RZCLXX_INC
+#define CERNLIB_ZEBRA_RZCLXX_INC
+*
+*
+* rzclxx.inc
+*
+      COMMON /RZCL/  LTOP,LRZ0,LCDIR,LRIN,LROUT,LFREE,LUSED,LPURG
+     +,              LTEMP,LCORD,LFROM
+
+#endif

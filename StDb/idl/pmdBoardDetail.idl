@@ -1,0 +1,11 @@
+/*    pmdReadBoard.idl
+*
+*  Table: pmdReadBoard
+*
+* description: //  pmd Board Detail
+   */
+
+
+struct pmdBoardDetail { 
+   long  StatusBoard;  /*Board Number */
+ };  

@@ -1,0 +1,5 @@
+# $Id $
+# package StSvtCalibMaker
+# author: 
+Library:libStSvtCalibMaker.so:LIBS +=   -lStChain  -l_StEvent  -lStSvtClassLibrary  -l_StSvtClusterMaker
+#Library:libStSvtCalibMaker.so:LIBS +=   -lStChain  -lStEvent  -lStSvtClassLibrary  -lStSvtClusterMaker

@@ -1,0 +1,45 @@
+** Macro to calculate material budget
+
+macro RadLen   ntrig=4000   rmax=55.  emin=1.5  edel=0.5 core='test1' zVer=0
+ emax=[emin]+[edel]
+ rmin=0.
+ phimin=-3.1416
+ phimax=+3.1416 
+ vzmin=[zVer]
+ vzmax=[zVer]
+gdrop all
+detp geom y2012
+* use private local geometry
+gexec .$STAR_LIB/libStarMagFieldNoDict.so
+gexec .$STAR_HOST_SYS/lib/xgeometry.so
+* use official geometry
+*gexe $STAR_LIB/libStarMagFieldNoDict.so
+*gexe $STAR_LIB/xgeometry.so
+*               ! Finalize GEANT data structures 
+gclose all
+
+debug off
+*debug on 
+gclos all
+Call HERMES(0)
+*       Particle Emin-max  EtaMin-max     PhiMin-max          ZVertexMin-Max
+gkine 1   48        10 10 [emin] [emax]    [phimin] [phimax]  [vzmin] [vzmax]
+* 3001,3003,3005,3007 +1 for HBOOK1
+* 4001,4003,4005,4007 +1 for HBOOK1
+1D  3000 'Number of geantinos vs rapidity' 400 [emin] [emax]
+2D  3001 'Material in rad.len vs rapidity' 400 [emin] [emax] 50 [rmin] [rmax]
+2D  3003 'Material in abs.len vs rapidity' 400 [emin] [emax] 50 [rmin] [rmax]
+1D  4000 'Number of geantinos vs phi'      360  [phimin] [phimax]
+2D  4001 'Material in rad.len vs phi'      360  [phimin] [phimax]  50 [rmin] [rmax]
+2D  4003 'Material in abs.len vs phi'      360  [phimin] [phimax]  50 [rmin] [rmax]
+trig [ntrig]
+zone   2 2
+option nsta
+option nbox
+call agpmater([rmin],[rmax])
+hi/file 1 radlen_fgt_[core].rz ! N
+hrout *
+
+close 1
+quit
+return

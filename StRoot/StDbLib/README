@@ -1,0 +1,123 @@
+
+Package: StDbLib
+Author: R. Jeff Porter (porter@bnl.gov)
+
+Purpose: General Database API (Application Programming Interface) 
+         To provide access to Database to all STAR codes ( Online, Offline,
+         & StandAlone)
+
+
+The package, StDbLib, is a general (framework independent) interface to 
+the database that provides data in the form of c-structs to the 
+user code based on a simplified query. To sum up the functionality of 
+this API with the classes that perform these functions,
+
+1)  Database API
+
+    Manages Access to Servers & DataBases 
+      - class StDbManager
+      - class StDbServer
+
+    Decodes "Key" definitions into complex navigations & Queries
+      - class StDbConfigNode 
+      - class mysqlAccessor 
+
+    Handles low level Query of the Database (e.g. SQL)
+      - class mysqlAccessor
+      - class MysqlDb
+
+    Extracts & Loads Data from the underlying Database structure (Db Buffer)
+      - class StDbBuffer
+      - class StDbTable
+
+    Can provide user codes directly with Database data
+            (but usually this is done via the framework infrastructure)
+      - class StDbConfigNode
+      - class StDbTable
+      - class TableIter
+
+2) Not Database API
+
+    StDbMaker :: Offline Chain's connection to the Database API
+
+    OnlServer :: Online's connection to the Database API
+
+
+Primary class description:
+
+StDbManager:   Singleton class which is the primary contact between the user
+               codes and the DB-API. It has the methods to find database
+               servers (whether mysql or other RDBs), initiate connections
+               to these databases, initiate query by Key-string to identify
+               list of tables associated with the Key, and provide a layer
+               for Reading/Writing to the database over the real worker objects
+               that can have dependencies not needed in the user codes.
+
+StDbServer:    Class that contains all the relevant information about the
+               server associated with each database & contains a pointer
+               to the Abstract base class "tableQuery".  The implementation
+               of the tableQuery methods are done specific to the database 
+               storage structure and so the StDbServer class (& by in turn
+               the StDbManager class) are independent of database details.
+               StDbServers are constructed and owned by the StDbManager.
+
+StDbConfigNode: Tree structure based on the Document-Object-Model that,
+                - builds itself from the database query
+                - contains the list of data-tables associated with the query
+                StDbConfigNode is construction is initiated by 
+                the StDbManager but ownership is transferred to the 
+                requestor
+
+StDbTable:      Table class for holding 
+                - the c-struct from the database as
+                - the descriptor interface (e.g. schema+memory allocation)
+                - location of the data row in the database needed for
+                  updates both to-&-from database
+                StDbTable in connected to the StDbConfigNode container class
+                and is owned by this class/structure. It can be disassociated
+                from the StDbConfigNode.
+
+StDbTableDescriptor & StTableDescriptorI
+                StDbTableDescriptor implements abstract Iface StTableDescriptor
+                This class is built via query to a database with a
+                tableName and schemaID. The schemaID is used to construct
+                the specific memory layout of the c-struct.
+
+StDbFactoryI & StDb[type]Factory:
+                These classes are used to do the construction of the specific
+                StDbTable class using the tableName of the request given by
+                the query to the database and the schemaID associated with
+                this table.  The schemaID is precompiled with the StDb[]Factory
+                classes reflecting the schema at the time of complilation. 
+                This association with schemaID and table can be dynamically
+                overridded via an input text file.
+
+StDbBuffer & StDbBufferI.h:
+                StDbBuffer implements the abstract Iface StDbBufferI.     
+                Class that buffers the data in & out of the Mysql database.
+                It handles differences between binary & ascii data storage
+                as well as byte swapping for different architectures.
+
+MysqlDb:        Class to handle the SQL syntax needed in MySQL's C-API.
+                The result of the query is used to fill the StDbBuffer
+                class &/or it reads the StDbBuffer class to form write
+                SQL queries.
+
+
+tableAcceptor, typeAcceptor, StDbXmlReader, StDbXmlWriter:
+                StDbXmlReader & StDbXmlWriter implement the Interface,
+                tableAcceptor : typeAcceptor.
+                typeAcceptor is the original "buffer" interface for 
+                extracting c-struct elements from the db. tableAcceptor
+                combines this c-struct-element buffering with the differing
+                I/O content of the StDbTable class. i.e. handles the file
+                stream & the db-address of the particular data row.
+                StDbXmlReader/Writer implement these in order to read
+                and write the db-data into an XML (ASCII) format.
+
+
+
+
+
+
+

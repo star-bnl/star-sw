@@ -1,0 +1,2 @@
+to run performance you need
+cons EXTRA_CPPFLAGS='-DDO_TPCCATRACKER_EFF_PERFORMANCE -USTAR_STANDALONE -DKFPARTICLE -IStRoot/KFParticle' +TPCCA +KFParticle

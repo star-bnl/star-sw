@@ -1,0 +1,5 @@
+# $Id $
+# package StMcAnalysisMaker
+# author: 
+Library:libStMcAnalysisMaker.so:LIBS +=   -lStAssociationMaker  -lStBFChain  -lStChain    -l_StEvent  -lStMcEventMaker  -lStMcEvent
+#Library:libStMcAnalysisMaker.so:LIBS +=   -lStAssociationMaker  -lStBFChain  -lStChain  -lStEvent  -lStMcEventMaker  -lStMcEvent

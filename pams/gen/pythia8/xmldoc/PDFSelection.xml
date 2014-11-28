@@ -1,0 +1,219 @@
+<chapter name="PDF Selection">
+
+<h2>PDF Selection</h2>
+
+This page contains three subsections. The first deals with how to 
+pick  the parton distribution set for protons, including from LHAPDF, 
+to be used for all proton and antiproton beams. The second is a special
+option that allows a separate PDF set to be used for the hard process
+only, while the first choice would still apply to everything else.
+The third gives the possibility to switch off the lepton 
+"parton density". 
+
+<h3>Parton densities for protons</h3>
+
+The selection of parton densities is made once and then is propagated 
+through the program. It is essential to make an informed choice, 
+for several reasons: 
+<note>Warning 1:</note> the choice of PDF set affects a number of
+properties of events. A change of PDF therefore requires a complete 
+retuning e.g.  of the multiple-interactions model for minimum-bias and 
+underlying events.
+<note>Warning 2:</note> People often underestimate the differences 
+between different sets on the market. The sets for the same order are 
+constructed to behave more or less similarly at large <ei>x</ei> and 
+<ei>Q^2</ei>, while the multiple interactions are dominated by the 
+behaviour in the region of small <ei>x</ei> and <ei>Q^2</ei>. A good 
+PDF parametrization ought to be sensible down to <ei>x = 10^-6</ei> 
+(<ei>x = 10^-7</ei>) and <ei>Q^2 = 1</ei> GeV^2 for Tevatron (LHC) 
+applications. Unfortunately there are distributions on the market that 
+completely derail in that region. The <code>main41.cc</code> and 
+<code>main42.cc</code> programs in the <code>examples</code> 
+subdirectory provide some examples of absolutely minimal sanity checks 
+before a new PDF set is put in production.
+<note>Warning 3:</note> NLO and LO sets tend to have quite different
+behaviours, e.g. NLO ones have less gluons at small x, which then is 
+compensated by positive corrections in the NLO matrix elements.
+Therefore do not blindly assume that an NLO tune has to be better than 
+an LO one when combined with the LO matrix elements in PYTHIA. There are 
+explicit examples where such thinking can lead you down the wrong alley.
+
+<p/>
+The simplest option is to pick one 
+of the few distributions available internally:
+
+<modepick name="PDF:pSet" default="2" min="1" max="2">
+Parton densities to be used for proton beams (and, by implication,
+antiproton ones):
+<option value="1">GRV 94 L;</option>
+<option value="2">CTEQ 5 L.</option>
+</modepick> 
+
+<p/>
+Obviously this choice is mainly intended to get going, and if you link to
+the <a href="http://projects.hepforge.org/lhapdf/" target="page">LHAPDF 
+library</a> <ref>Wha05</ref> you get access to a much wider selection.
+<note>Warning:</note> owing to previous problems with the behaviour of PDF's
+beyond the <ei>x</ei> and <ei>Q^2</ei> boundaries of a set, you should
+only use LHAPDF <b>version 5.3.0 or later</b>.
+
+<flag name="PDF:useLHAPDF" default="off">
+If off then the choice of proton PDF is based on <code>pPDFset</code>
+above. If on then it is instead based on the choice of 
+<code>LHAPDFset</code> and <code>LHAPDFmember</code> below.
+<note>Note:</note> in order for this option to work you must have 
+compiled PYTHIA appropriately and have set the <code>LHAPATH</code> 
+environment variable to provide the data-files directory of your local 
+LHAPDF installation. See the README file in the <code>examples</code> 
+directory for further instructions. 
+</flag>
+
+<word name="PDF:LHAPDFset" default="MRST2004FF4lo.LHgrid">
+Name of proton PDF set from LHAPDF to be used. You have to choose 
+from the 
+<a href="http://projects.hepforge.org/lhapdf/pdfsets" target="page">
+list of available sets</a>. Examples of some recent ones would be 
+cteq61.LHpdf, cteq61.LHgrid, cteq6l.LHpdf, cteq6ll.LHpdf, 
+MRST2004nlo.LHpdf, MRST2004nlo.LHgrid, MRST2004nnlo.LHgrid and 
+MRST2004FF3lo.LHgrid. If you pick a LHpdf set it will require some 
+calculation the first time it is called. 
+<note>Technical note:</note> if you provide a name beginning with a 
+slash (/) it is assumed you want to provide the full file path and then
+<code>initPDFsetM(name)</code> is called, else the correct path is assumed 
+already set and <code>initPDFsetByNameM(name)</code> is called.
+</word> 
+
+<modeopen name="PDF:LHAPDFmember" default="0" min="0">
+Further choice of a specific member from the set picked above. Member 0
+should normally correspond to the central value, with higher values
+corresponding to different error PDF's somewhat off in different 
+directions. You have to check from set to set which options are open.
+<note>Note:</note> you can only use one member in a run, so if you
+want to sweep over many members you either have to do many separate
+runs or, as a simplification, save the 
+<aloc href="EventInformation">pdf weights</aloc> at the hard scattering
+and do an offline reweighting of events.
+</modeopen>   
+
+<flag name="PDF:extrapolateLHAPDF" default="off">
+Parton densities have a guaranteed range of validity in <ei>x</ei>
+and <ei>Q^2</ei>, and what should be done beyond that range usually is 
+not explained by the authors of PDF sets. Nevertheless these boundaries
+very often are exceeded, e.g. minimum-bias studies at LHC may sample
+<ei>x</ei> values down to <ei>10^-8</ei>, while many PDF sets stop
+already at <ei>10^-5</ei>. The default behaviour is then that the 
+PDF's are frozen at the boundary, i.e. <ei>xf(x,Q^2)</ei> is fixed at
+its value at <ei>x_min</ei> for all values <ei>x &lt; x_min</ei>,
+and so on. This is a conservative approach. Alternatively, if you
+switch on extrapolation, then parametrizations will be extended beyond
+the boundaries, by some prescription. In some cases this will provide a
+more realistic answer, in others complete rubbish. Another problem is 
+that some of the PDF-set codes will write a warning message anytime the
+limits are exceeded, thus swamping your output file. Therefore you should 
+study a set seriously before you run it with this switch on.
+</flag>
+
+<p/> 
+If you want to use PDF's not found in LHAPDF, or you want to interface
+LHAPDF another way, you have full freedom to use the more generic 
+<aloc href="PartonDistributions">interface options</aloc>.
+
+<h3>Parton densities for protons in the hard process</h3>
+
+The above options provides a PDF set that will be used everywhere:
+for the hard process, the parton showers and the multiple interactions
+alike. As already mentioned, therefore a change of PDF should be
+accompanied by a <b>complete</b> retuning of the whole MI framework,
+and maybe more. There are cases where one may want to explore 
+different PDF options for the hard process, but would not want to touch 
+the rest. If several different sets are to be compared, a simple
+reweighting based on the <aloc href="EventInformation">originally 
+used</aloc> flavour, <ei>x</ei>, <ei>Q^2</ei> and PDF values may offer the 
+best route. The options in this section allow a choice of the PDF set
+for the hard process alone, while the choice made in the previous section
+would still be used for everything else. The hardest interaction
+of the minimum-bias process is part of the multiple-interactions
+framework and so does not count as a hard process here. 
+
+<p/>
+Of course it is inconsistent to use different PDF's in different parts 
+of an event, but if the <ei>x</ei> and <ei>Q^2</ei> ranges mainly accessed 
+by the components are rather different then the contradiction would not be
+too glaring. Furthermore, since standard PDF's are one-particle-inclusive
+we anyway have to 'invent' our own PDF modifications to handle configurations
+where more than one parton is kicked out of the proton <ref>Sjo04</ref>. 
+
+<p/>
+The PDF choices that can be made are the same as above, so we do not 
+repeat the detailed discussion.
+
+<flag name="PDF:useHard" default="off">
+If on then select a separate PDF set for the hard process, using the 
+variables below. If off then use the same PDF set for everything,
+as already chosen above.   
+</flag>
+
+<modepick name="PDF:pHardSet" default="2" min="1" max="2">
+Parton densities to be used for proton beams (and, by implication,
+antiproton ones):
+<option value="1">GRV 94 L;</option>
+<option value="2">CTEQ 5 L.</option>
+</modepick> 
+
+<flag name="PDF:useHardLHAPDF" default="off">
+If off then the choice of proton PDF is based on <code>hardpPDFset</code>
+above. If on then it is instead based on the choice of 
+<code>hardLHAPDFset</code> and <code>hardLHAPDFmember</code> below.
+</flag>
+
+<word name="PDF:hardLHAPDFset" default="MRST2004FF4lo.LHgrid">
+Name of proton PDF set from LHAPDF to be used. 
+</word> 
+
+<modeopen name="PDF:hardLHAPDFmember" default="0" min="0">
+Further choice of a specific member from the set picked above. 
+</modeopen>   
+
+<p/>
+Note that there is no separate equivalent of the 
+<code>PDF:extrapolateLHAPDF</code> flag specifically for the hard
+PDF. Since LHAPDF only has one global flag for extrapolation or not,
+the choice for the normal PDF's also applies to the hard ones.
+
+<h3>Parton densities for leptons</h3>
+
+For electrons/leptons there is no need to choose between different 
+parametrizations, since only one implementation is available, and 
+should be rather uncontroversial (apart from some technical details).
+However, insofar as e.g. <ei>e^+ e^-</ei> data often are corrected 
+back to a world without any initial-state photon radiation, it is 
+useful to have a corresponding option available here.
+
+<flag name="PDF:lepton" default="on">
+Use parton densities for lepton beams or not. If off the colliding
+leptons carry the full beam energy, if on part of the energy is 
+radiated away by initial-state photons. In the latter case the
+initial-state showers will generate the angles and energies of the
+set of photons that go with the collision. In addition one collinear
+photon per beam carries any leftover amount of energy not described
+by shower emissions. If the initial-state showers are switched off 
+these collinear photons will carry the full radiated energy.  
+</flag> 
+
+<h3>Incoming parton selection</h3>
+
+There is one useful degree of freedom to restrict the set of incoming 
+quark flavours for hard processes. It does not change the PDF's as such, 
+only which quarks are allowed to contribute to the hard-process cross 
+sections. Note that separate but similarly named modes are available 
+for multiple interactions and spacelike showers.
+
+<modeopen name="PDFinProcess:nQuarkIn" default="5" min="0" max="5">
+Number of allowed incoming quark flavours in the beams; a change 
+to 4 would thus exclude <ei>b</ei> and <ei>bbar</ei> as incoming 
+partons, etc.
+</modeopen>
+
+</chapter>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->

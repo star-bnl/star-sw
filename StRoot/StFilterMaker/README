@@ -1,0 +1,20 @@
+
+This directory is a placeholder for all FilterMakers.
+
+Each FilterMaker must use either default parameters or parameters
+from DB. Selection of them is based on DateTime provided by bfc.
+
+Ex: If you wish to change static parameters of a given filter
+    to create a new one, consider using a DB approach instead
+    of replicating codes.
+
+
+Unresolved:
+  - It is not clear now how to do it in the case of several filters, 
+    where different filters would be needed at different place in
+    the chain but we would see such a case at a later time when the
+    issue will arise. 
+  - Combination such as XOR would not be supported at this time
+    and if needed, special logic would need to be implemented.
+
+

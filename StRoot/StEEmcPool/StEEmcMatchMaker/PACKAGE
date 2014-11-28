@@ -1,0 +1,5 @@
+# $Id $
+# package StEEmcMatchMaker
+# author: 
+Library:libStEEmcMatchMaker.so:LIBS +=   -lStChain
+#Library:libStEEmcMatchMaker.so:LIBS +=   -lStChain

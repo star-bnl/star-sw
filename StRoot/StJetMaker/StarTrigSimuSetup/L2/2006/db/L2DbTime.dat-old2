@@ -1,0 +1,49 @@
+# L2EmcDbConfig2006.dat
+#
+# $Revision$
+#
+# Year  	2006	7				# valid for this year
+# Start time  	060407 	003530				# valid starting on this date
+# End 	time	060605 	141500				# valid ending on this date
+#
+# string-tag 	date0(YYMMDD) time0(HHMMSS) dateF(YYMMDD) timeF(YYMMDD) pedFile maskFile
+#
+ppTrans1.0:	20060407	003530	20060410	174715	run7093104.l2ped.out	towerMask.mar23	# run=7097007	initial setup
+ppTrans1.1:	20060410	174715	20060428	095200	run7093104.l2ped.out	towerMask.apr10	# run=7100047	changed mask
+ppTrans1.2:	20060428	095200	20060505	091900	run7118002.l2ped.out	towerMask.apr10	# run=7118033	 new peds
+ppTrans1.3:	20060505	091900	20060512	154700	run7118002.l2ped.out	towerMask.may5	# run=7125040	 changed mask
+ppLong2.0:	20060512	154700	20060520	022200	run7132018.l2ped.out	towerMask.may5	# run=7132053	 new peds
+ppLong2.1:	20060520	022200	20060526	165700	run7139043.l2ped.out	towerMask.may5	# run=7140001	 new peds
+ppLong2.2:	20060526	165700	20060526	235800	run7139043.l2ped.out	towerMask.may26	# run=7146075	 changed mask
+ppLong2.3:	20060526	235800	20060601	223400	run7146077.l2ped.out	towerMask.may26	# run=7146085	 new peds
+ppLong2.4:	20060601	223400	20060603	164530	run7150008.l2ped.out	towerMask.may26	# run=7152047	 new peds
+ppLong2.5:	20060603	164530	20060605	141500	run7154053.l2ped.out	towerMask.may26	# run=7154064	 new peds, run 7156040 last in ppLong2
+#
+EndOfFile
+#
+ppLong1.0 	not yet implemented
+pp62Long1.0 	not yet implemented
+pp22Trans1.0 	you're wasting your time...
+#
+#
+# Format--
+#
+# Everything following a "#" is considered a comment
+#
+# Tag should be of the form
+#
+# <periodType>.<subPeriod>
+#
+# where periodType is (eg) ppLong1, ppTrans1, ppLong2, pp62GeV1, ... and subPeriod
+# starts at zero and is incremented once for each line in the file (i.e. each time
+# the L2 run configuration changes).
+#
+# date0 .. timeF specifiy the initial date and time, and final data and time that
+# the run period is valid for
+#
+# pedFile specifies the name of the pedestal file used by the L2 db
+#
+# maskFile specifies the name of the mask file used by the L2 db
+# 
+#
+

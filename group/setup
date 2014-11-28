@@ -1,0 +1,586 @@
+#!/bin/csh -f
+
+# Help
+if ($#argv == 0 || $#argv > 3) then
+    cat <<EOF
+
+ Usage is:
+   % setup 'Package' {version}
+
+ where packages stands for one of
+   debug|DEBUG                      switch the environment to the debug version of 
+                                    the STAR software
+   nodebug|NODEBUG                  switch the environment to the nodebug (optimized) 
+                                    of the STAR software
+   64bits|64b|32bits|32b            Switch to 64 or 64 bits env
+
+   gprof|GRPOF                      enables/disables gprof profiling environment
+   nogprof|NOGPROF                  non-optimized version will be implied when enabled
+
+
+   Grid|OSG                         Setup Grid environment
+   root|ROOT     {version}          load or change root version
+   cern|CERN     {version} {InstallRoot} 
+                                    Re-define CERN related ENV variables
+
+   parasoft|PARASOFT|insure|ISURE   load the Insure++ toolkit environment
+   gcc           {version}          set environment to use gcc (or alternative version)
+   icc|ifc|ifort {version}          set environment to use Intel compilers
+   PGI|pgi                          set PGI path for using its compiler
+
+   alt|noalt                        adds/remove OPTSTAR/alt from path
+
+EOF
+    exit 0
+endif
+
+set pkg = $1; shift;
+set version  = 0;
+set location = 0;
+if ( $#argv > 0 ) set version  = $1
+if ( $#argv > 1 ) set location = $2
+setenv oldSTAR_HOST_SYS $STAR_HOST_SYS
+
+source $GROUP_DIR/unix_programs.csh
+
+switch ($pkg)
+    case "64bits":
+    case "64b":
+      setenv USE_64BITS 1
+      unsetenv OPTSTAR
+      unsetenv XOPTSTAR
+      if (-x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS opt`
+        setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS opt /usr/lib`
+      endif
+      source $GROUP_DIR/STAR_SYS
+      setenv CERN /cern64
+#      setenv CERN /afs/rhic.bnl.gov/.asis/x8664_sl5/cern64
+#      setenv CERN /afs/rhic.bnl.gov/star/packages/.DEV2/misc/sl53_x8664_gcc451
+      unsetenv CERN_ROOT
+      unsetenv OPTSTAR
+      unsetenv QTDIR
+      source $GROUP_DIR/group_env.csh
+      setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS /usr/lib /opt/star/lib opt/star/qt4/lib`
+      setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/usr/lib64:/usr/lib64/mysql
+#      setenv ValeryOptStar /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+#      setenv LD_LIBRARY_PATH $ValeryOptStar/lib:$OPTSTAR/lib:$LD_LIBRARY_PATH
+#      setenv PATH $ValeryOptStar/bin:$OPTSTAR/bin:$PATH
+#      setenv QTDIR $ValeryOptStar/Qt4
+#      if ($?QTDIR) setenv QTDIR $OPTSTAR/qt4
+#      setenv PATH $QTDIR/bin:$PATH
+#      setenv LD_LIBRARY_PATH $QTDIR/lib:$LD_LIBRARY_PATH
+     breaksw
+
+    case "32bits":
+    case "32b":
+      setenv USE_64BITS 0
+      unsetenv OPTSTAR
+      unsetenv XOPTSTAR
+      if (-x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS opt`
+        setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS opt /usr/lib64`
+      endif
+#      setenv OPTSTAR /afs/rhic.bnl.gov/star/packages/.DEV2/misc/opt/star/$STAR_HOST_SYS
+      source $GROUP_DIR/STAR_SYS
+      setenv CERN /cern
+      unsetenv CERN_ROOT
+      unsetenv OPTSTAR
+      unsetenv QTDIR
+      source $GROUP_DIR/group_env.csh 
+      source $GROUP_DIR/group_env.csh
+      setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $oldSTAR_HOST_SYS lib64 lib`
+#      setenv ValeryOptStar /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+#      setenv LD_LIBRARY_PATH $ValeryOptStar/lib:$OPTSTAR/lib:$LD_LIBRARY_PATH
+#      setenv PATH $ValeryOptStar/bin:$OPTSTAR/bin:$PATH
+#      setenv QTDIR $ValeryOptStar/Qt4
+#      setenv PATH $QTDIR/bin:$PATH
+#      setenv LD_LIBRARY_PATH $ValeryOptStar/Qt4/lib:$LD_LIBRARY_PATH
+#      if ($?QTDIR) setenv QTDIR $OPTSTAR/qt4
+#      setenv PATH $QTDIR/bin:$PATH
+#      setenv LD_LIBRARY_PATH $QTDIR/lib:$LD_LIBRARY_PATH
+      breaksw
+
+
+    case "PGI":
+    case "pgi":
+      # PGI compiler - this may be used
+      if ( ! $?PGI) then
+        # should be defined but does not hurt for now to protect
+        if ( ! $?USE_64BITS ) then
+	   setenv USE_64BITS 0
+	endif
+	if ( $USE_64BITS == 1 ) then
+	   set x="/usr/pgi64 /usr/pgi"
+	else
+	   set x="/usr/pgi"
+	endif
+
+	foreach d ($x)
+	    if ( -d $d ) then
+		#echo "Setting PGI to $d"
+		setenv PGI $d
+		break
+	    endif
+	end
+      endif
+      if ( $?PGI ) then
+	if ( ! -d $PGI/linux86/bin && -e $PGI/linux86 ) then
+	    set version=`ls  $PGI/linux86/ | tail -1`
+	    setenv PGI_V linux86/$version
+	else
+	    setenv PGI_V linux86
+	endif
+	setenv PATH `${GROUP_DIR}/dropit -p $PGI/$PGI_V/bin -p $PATH`
+	if ( -d $PGI/$PGI_V/man) then
+	    setenv MANPATH `${GROUP_DIR}/dropit -p ${MANPATH} -p ${PGI}/${PGI_V}/man`
+	else
+	    setenv MANPATH `${GROUP_DIR}/dropit -p ${MANPATH} -p ${PGI}/man`
+	    #alias  pgman 'man -M $PGI/man'
+	endif
+	setenv PGILIB  ${PGI}/${PGI_V}/lib
+	setenv LM_LICENSE_FILE $PGI/license.dat
+      endif
+      breaksw
+
+
+
+    case "OSG":
+    case "Grid":
+	# Support for OSG - Try to locate things from OSG including Worker Node
+	if ( ! $?OSG ) then 
+	    if ( -e /opt ) then
+		set LOSG=`ls -d /opt/* | $GREP OSG | tail -1`
+		if ( "$LOSG" != "") setenv OSG $LOSG
+	    endif
+	endif
+	if ( $?OSG ) then
+	    if ( -e $OSG/setup.csh ) then
+		# there will alos be a java version coming along but
+		# it may be defined prior from /usr/java
+		source $OSG/setup.csh
+		setenv SAVED_PATH `echo $PATH | sed "s/:/ /g"`
+	    endif
+	else
+	    # Unfortunately, the WN package loads the whole blabla with
+	    # java, python and even perl all ...
+	    if ( $?WNOSG ) then
+		if ( -e $WNOSG/setup.csh ) then
+		    setenv GSAVED_PATH   $PATH
+		    setenv GSAVED_LDPATH $LD_LIBRARY_PATH
+		    # trash the path
+		    setenv PATH  /bin:/usr/bin
+		    # trash LD
+		    unsetenv LD_LIBRARY_PATH
+		    # load definitions
+		    source $WNOSG/setup.csh
+		    # redefine path and ld path
+		    setenv PATH             ${GSAVED_PATH}:${PATH}
+		    setenv LD_LIBRARY_PATH  ${GSAVED_LDPATH}:${LD_LIBRARY_PATH}
+	        endif
+	    endif
+        endif
+	breaksw
+
+
+
+    # Root setup
+    case "root":
+    case "ROOT":
+	if (-f $GROUP_DIR/rootenv.csh) then
+	    if ( -x $GROUP_DIR/dropit) then
+		setenv MANPATH         `$GROUP_DIR/dropit -p ${MANPATH} ROOT`
+		setenv PATH            `$GROUP_DIR/dropit -p ${PATH} ROOT`
+		setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p ${LD_LIBRARY_PATH} ROOT`
+	    endif
+	    if ($version != 0) setenv ROOT_LEVEL $version
+	    source $GROUP_DIR/rootenv.csh
+	endif
+	breaksw
+
+    # CERN in case of alternate CERN_ROOT
+    case "CERN":
+    case "cern":
+#    echo "CERN in case of alternate CERN_ROOT"
+	if ( $location != 0 ) then
+	    # use the specified location, no double check
+	    setenv CERN $location
+        else
+	    # try to determine the location according to pre-2010 logic
+	    if ( ! $?USE_64BITS ) then
+		# this is also defined in STAR_SYS but ensuring
+		# a default value is needed for the test below
+		setenv USE_64BITS 0
+	    endif
+	    if ( ! $?CERN ) then
+		# Define one value - some of the path below are historical
+		if ( $USE_64BITS == 1) then
+		    set x="/cern64 /cern ${AFS_RHIC}/asis/@sys/cern64 ${AFS_RHIC}/asis/@sys/cern /usr/local/cern64 /usr/local/cern /common/star/cern64 /common/star/cern"
+		else
+		    set x="/cern ${AFS_RHIC}/asis/@sys/cern /usr/local/cern /common/star/cern"
+		endif
+            else
+		# Either it was set before by the search above or there is an 
+		# external definition. In all cases, if it ends by 64, set as-is
+		# otherwise append
+		set test=`echo $CERN | $GREP 64`
+		if ( "$test" != "") then
+		    # strip it
+		    setenv CERN `echo ${CERN} | sed "s/64//"`
+		endif
+		if ( $USE_64BITS == 1 ) then
+		    set x="${CERN}64 ${CERN}"
+                else
+		    set x="${CERN}"
+		endif
+		unset test
+	    endif
+
+	    # NOW we have "x" defined as a search path or a unique path
+	    # In case of a unique path set by a site, this will redefine to itself
+	    # But this odditiy is needed to deal with the 64 bits convention
+	    # ${CERN} ${CERN}64
+	    foreach d ($x)
+		if ( -e $d ) then
+		    setenv CERN $d
+		    break
+		endif
+	    end
+	    unset x d
+	    if ( ! $?CERN ) then
+		# this can happen only when the full search path finds nothing
+		if ( $?DECHO ) echo "Could not find a valid path for defining CERN, default to /cern"
+		setenv CERN /cern
+	    endif
+        endif
+	
+	if ( $version != 0 ) then
+	    # if specified, use specific version
+	    if ( -e $CERN/$version ) then
+		setenv CERN_LEVEL $version 
+	    endif
+	else
+	    # define to pro if not defined
+	    if ( ! $?CERN_LEVEL ) then
+		setenv CERN_LEVEL pro
+	    endif
+	endif
+
+	# Finally, check of existence of this path and revert to 
+	# pro if not found
+	if ( ! -e $CERN/$CERN_LEVEL ) then
+	    if ( $?DECHO ) echo "$self :: $CERN/$CERN_LEVEL not found, switch to pro"
+		setenv CERN_LEVEL pro
+		setenv CERN_ROOT "$CERN/$CERN_LEVEL"
+	    endif
+	    # << ?? if I fix this endif bock, all goes to hell
+	    #    there is a missing if/endif sequence somewhere
+	    setenv CERN_ROOT $CERN/$CERN_LEVEL
+	endif
+	breaksw
+
+    # Parasoft/Isure++ software
+    case "insure":
+    case "INSURE":
+    case "parasoft":
+    case "PARASOFT":
+	if (-f $GROUP_DIR/parasoftenv.csh) source $GROUP_DIR/parasoftenv.csh
+	breaksw
+	
+
+    # use of the Intel compiler
+    case "icc":
+    case "ifc":
+    case "ifort":
+	unsetenv GPROF  # don't know about -qp ; perhaps later
+	if ( -f $GROUP_DIR/intelcc.csh  )  source $GROUP_DIR/intelcc.csh $version
+	if ( $?optstar )  setenv  OPTSTAR  $optstar
+	if ( $?xoptstar ) setenv XOPTSTAR  $xoptstar
+	if ( $?STARCMPL && -x $GROUP_DIR/dropit ) then
+	    setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS`
+	    setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $STAR_HOST_SYS`
+	    unsetenv QTDIR
+	endif 
+	setenv STARCMPL "icc"; starver $STAR_LEVEL
+	breaksw
+
+    case "gcc451":
+      if ( -x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4`
+      endif
+      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc451/bin:$PATH
+      if (! $USE_64BITS) then
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc451/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+      else
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc451/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+    # special Valery version of opt/star for gcc45 64bits
+#	setenv PREFIX /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+#	setenv OPTSTAR $PREFIX
+#	setenv IVROOT /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+      endif
+#      setenv IVROOT $OPTSTAR
+      setenv STARCMPL "gcc"; starver $STAR_LEVEL
+      breaksw
+    case "gcc452":
+      if ( -x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4`
+      endif
+      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc452/bin:$PATH
+      if (! $USE_64BITS) then
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc452/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+      else
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc452/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+    # special Valery version of opt/star for gcc45 64bits
+#	setenv PREFIX /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+#	setenv OPTSTAR $PREFIX
+#	setenv IVROOT /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+      endif
+#      setenv IVROOT $OPTSTAR
+      setenv STARCMPL "gcc"; starver $STAR_LEVEL
+      breaksw
+    case "gcc45*":
+      if ( -x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4`
+      endif
+      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc45/bin:$PATH
+      if (! $USE_64BITS) then
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc45/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+      else
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc45/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+    # special Valery version of opt/star for gcc45 64bits
+#	setenv PREFIX /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+#	setenv OPTSTAR $PREFIX
+#	setenv IVROOT /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+      endif
+#      setenv IVROOT $OPTSTAR
+      setenv STARCMPL "gcc"; starver $STAR_LEVEL
+      breaksw
+    case "gcc44*":
+      if ( -x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4`
+      endif
+      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc44/bin:$PATH
+      if (! $USE_64BITS) then
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc44/lib:$LD_LIBRARY_PATH
+      else
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc44/lib64:$LD_LIBRARY_PATH
+      endif
+      setenv STARCMPL "gcc"; starver $STAR_LEVEL
+      breaksw
+    case "gcc471":
+      if ( -x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4`
+      endif
+      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc471/bin:$PATH
+      if (! $USE_64BITS) then
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc471/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+      else
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc471/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+    # special Valery version of opt/star for gcc45 64bits
+#	setenv PREFIX /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+#	setenv OPTSTAR $PREFIX
+#	setenv IVROOT /afs/rhic.bnl.gov/star/users/fine/data08/STAR/OPTSTAR/.$STAR_HOST_SYS
+      endif
+#      setenv IVROOT $OPTSTAR
+      setenv STARCMPL "gcc"; starver $STAR_LEVEL
+      breaksw
+    case "gcc482":
+      if ( -x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 opt`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4 opt`
+	setenv OPTSTAR $STAR/.misc/opt/${STAR_HOST_SYS}
+	setenv XOPTSTAR $STAR/.misc/opt/${STAR_HOST_SYS}
+	setenv PATH             ${PATH}:${XOPTSTAR}/bin
+	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:${XOPTSTAR}/lib
+      endif
+      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc482/bin:$PATH
+      if (! $USE_64BITS) then
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc482/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+	setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+#	setenv OPTSTAR $PREFIX
+#	setenv IVROOT /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+      else
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc482/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+    # special Valery version of opt/star for gcc45 64bits
+#	setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+#	setenv OPTSTAR $PREFIX
+#	setenv IVROOT /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+      endif
+#      setenv QTDIR /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/.sl64_gcc482/opt/qt
+#      setenv IVROOT $OPTSTAR      
+      setenv STARCMPL "gcc"; 
+      starver $STAR_LEVEL
+#      setenv PATH ${QTDIR}/bin:${PATH}
+#      setenv LD_LIBRARY_PATH ${QTDIR}/lib:${LD_LIBRARY_PATH}
+      breaksw
+    case "gcc492":
+      if ( -x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 opt`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4 opt`
+	setenv OPTSTAR $STAR/.misc/opt/${STAR_HOST_SYS}
+	setenv XOPTSTAR $STAR/.misc/opt/${STAR_HOST_SYS}
+	setenv PATH             ${PATH}:${XOPTSTAR}/bin
+	setenv LD_LIBRARY_PATH  ${LD_LIBRARY_PATH}:${XOPTSTAR}/lib
+      endif
+      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/bin:$PATH
+      if (! $USE_64BITS) then
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib:/usr/lib/mysql:$LD_LIBRARY_PATH
+	setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+#	setenv OPTSTAR $PREFIX
+#	setenv IVROOT /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+      else
+	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl6/gcc492/lib64:/usr/lib64/mysql:$LD_LIBRARY_PATH
+    # special Valery version of opt/star for gcc45 64bits
+#	setenv PREFIX /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+#	setenv OPTSTAR $PREFIX
+#	setenv IVROOT /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/opt/$STAR_HOST_SYS
+      endif
+#      setenv QTDIR /afs/rhic.bnl.gov/star/packages/.DEV2/.misc/.sl64_gcc492/opt/qt
+#      setenv IVROOT $OPTSTAR      
+      setenv STARCMPL "gcc"; 
+      starver $STAR_LEVEL
+#      setenv PATH ${QTDIR}/bin:${PATH}
+#      setenv LD_LIBRARY_PATH ${QTDIR}/lib:${LD_LIBRARY_PATH}
+      breaksw
+    # Alternative or restore of gcc version
+    case "gcc":
+      unsetenv QTDIR
+      unsetenv OPTSTAR
+      unsetenv XOPTSTAR
+      if ( -x $GROUP_DIR/dropit ) then
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 intel`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $OPTSTAR/alt $STAR_HOST_SYS gcc4 intel`
+      endif
+
+#      if ( $version != 0 ) then
+#        set TEST=`ls -ld $OPTSTAR/alt/lib/gcc-lib/*/$version/`
+#        if ("$TEST" == "") then
+#	  set TEST=`test -d /opt/gcc/$version && echo "/opt/gcc/$version"`
+#	  if ( "$TEST" == "") then
+#	    if ( $?DECHO ) echo "There are no alternate installation of gcc with version $version in $OPTSTAR/alt nor /opt/gcc/"
+#	  else
+#	    set BP=/opt/gcc/$version
+#	  endif
+#        else
+#	  set BP=$OPTSTAR/alt
+#        endif
+#	  
+#	if ( "$TEST" != "") then
+#	  setenv PATH ${BP}/bin:$PATH
+#	  if ( $?USE_64BITS ) then
+#	    if ( $USE_64BITS == 1 ) then
+#		setenv LD_LIBRARY_PATH ${BP}/lib64:${BP}/lib:$LD_LIBRARY_PATH
+#	    else
+#		setenv LD_LIBRARY_PATH ${BP}/lib:${BP}/lib64:$LD_LIBRARY_PATH		
+#	    endif
+#	  else
+#	    setenv LD_LIBRARY_PATH ${BP}/lib:$LD_LIBRARY_PATH
+#          endif
+#        endif
+#      endif
+#      if ( $?optstar )  setenv  OPTSTAR  $optstar
+#      if ( $?xoptstar ) setenv XOPTSTAR $xoptstar
+#      if ( $?STARCMPL && -x $GROUP_DIR/dropit ) then
+#	setenv PATH            `$GROUP_DIR/dropit $STAR_HOST_SYS`
+#	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $STAR_HOST_SYS`
+#      endif 
+      setenv STARCMPL "gcc"; starver $STAR_LEVEL
+      breaksw
+    # debug / nodebug
+    case "nodebug":
+    case "NODEBUG":
+	unsetenv GPROF
+	setenv NODEBUG yes
+	starver $STAR_LEVEL
+	breaksw
+    case "debug":
+    case "DEBUG":
+	unsetenv NODEBUG
+	if ( -x $GROUP_DIR/dropit ) then
+	    setenv PATH            `$GROUP_DIR/dropit BIN`
+	    setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH LIB`
+	endif
+	starver $STAR_LEVEL
+	breaksw
+
+
+    # grpof / nogrpof
+    case "gprof":
+    case "GPROF":
+	setenv GPROF "yes"
+	unsetenv NODEBUG
+	starver $STAR_LEVEL
+	breaksw
+
+    case "nogprof":
+    case "NOGPROF":
+	unsetenv GPROF       
+	if ( -x $GROUP_DIR/dropit ) then
+	    setenv PATH            `$GROUP_DIR/dropit GBIN`
+	    setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH GLIB`
+	endif
+	starver $STAR_LEVEL
+	breaksw
+
+
+
+    #
+    # kind of obsolete but may re-add later
+    #
+    case "g4":
+    case "G4":
+         #=====#
+	if (-f $GROUP_DIR/g4env.csh) source $GROUP_DIR/G4env.csh
+	breaksw
+
+    case "cc4":
+    case "CC4":
+         #=====#
+	if ($?USE_CC5 != 0) unsetenv USE_CC5
+        if ( -x $GROUP_DIR/dropit) then
+          setenv PATH `$GROUP_DIR/dropit WS5.0`
+          setenv PATH `$GROUP_DIR/dropit .sun4x_56_CC5`
+          setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH 5.0`
+          setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH .sun4x_56_CC5`
+        endif
+	setenv USE_CC4; starver $STAR_LEVEL
+	breaksw
+    case "cc5":
+    case "CC5":
+         #=====#
+	if ($?USE_CC4 != 0) unsetenv USE_CC4
+        if ( -x $GROUP_DIR/dropit) then
+          setenv PATH `$GROUP_DIR/dropit SUNWspro`
+          setenv PATH `$GROUP_DIR/dropit .sun4x_56`
+          setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH SUNWspro`
+          setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH .sun4x_56`
+        endif
+	starver $STAR_LEVEL
+	breaksw
+
+    case "Dsv":
+    case "dsv":
+    case "DSV":
+	if (-r $AFS_RHIC/star/packages/Dsv/Dsvenv.csh) source $AFS_RHIC/star/packages/Dsv/Dsvenv.csh
+      breaksw
+    case "KCC":
+    case "kcc":
+      setenv USE_KCC;  starver $STAR_LEVEL
+      breaksw
+    default:
+	if ( $?DECHO ) echo "Setup for [$pkg] is not defined"
+      breaksw
+endsw
+#if ("$oldSTAR_HOST_SYS" != "$STAR_HOST_SYS" &&  -x $GROUP_DIR/dropit ) then
+#        echo "$oldSTAR_HOST_SYS => $STAR_HOST_SYS"
+#	setenv PATH            `$GROUP_DIR/dropit \.$oldSTAR_HOST_SYS/bin $oldSTAR_HOST_SYS/bin opt`
+#	showpath $LD_LIBRARY_PATH
+#        setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH \.$oldSTAR_HOST_SYS/lib $oldSTAR_HOST_SYS/lib opt lib`
+#	echo "----------------"
+#	showpath $LD_LIBRARY_PATH
+#endif

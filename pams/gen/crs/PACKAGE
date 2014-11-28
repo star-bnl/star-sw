@@ -1,0 +1,5 @@
+# $Id $
+# package crs
+# author: 
+#Library:libcrs.so:LIBS += 
+#Library:libSt_crs.so:LIBS += 

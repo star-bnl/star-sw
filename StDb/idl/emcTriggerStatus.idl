@@ -1,0 +1,15 @@
+/*    emcTriggerStatus.idl
+*
+*  Table: emcTriggerStatus
+*
+*       description: //   status of the BEMC trigger
+*/ 
+
+
+struct emcTriggerStatus { 
+
+   octet  PatchStatus[300];   /*   */
+   octet  HighTowerStatus[300];   /*   */
+   octet  TowerStatus[30][160];   /*   */
+
+ };  

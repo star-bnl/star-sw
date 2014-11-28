@@ -1,0 +1,202 @@
+*  macros showing FGT geometry
+*  s[n] X=[xx] - are side views (Z-Y plane) at given X, 1 cm is default
+*  d Z=[zz] - are disk end views  (X-Y plane) at given Z
+*  q Z=[zz] - are quadrant end views  (X-Y plane) at given Z
+*  c Z=[zz] - cone (Z-Y plane)  at given Z
+
+*******   SIDE VIEWS *******************
+* X-slices: 4.=inner R
+
+macro s0 x=1.
+echo side view full STAR
+nex; dcut cave x [x] 10. 10 0.03 0.03
+ text 1 0.5  'Fig s0.   side view full STAR ' 0.3
+daxis 0 0 0 70
+return  
+
+macro s1 x=1.
+echo side view top-right of STAR 
+nex;dcut CAVE x [x] 2.0 15.0 0.06 0.06
+text  1 2.5  'Fig s1.   side view top-right STAR ' 0.3
+daxis 0 0 0 40
+return  
+
+macro s2 x=1.
+echo side view 6 FGT disks and IFC
+nex; dcut cave x [x] 1. 10 0.1 0.1
+text  1.5 4.4  'Fig s2.   X='[x]' side view 6 FGT disks and IFC ' 0.3
+ daxis 0 0 0 20
+return  
+
+macro s3 x=1.
+echo side view 6 FGT disks
+ nex;dcut CAVE x [x] -8. 10.0 0.2 0.2
+text  1.5 1.1  'Fig s3. X='[x]'  side view 6 FGT disks ' 0.3
+ daxis 0 0 70 20
+return  
+
+macro s4 x=1.
+echo side view 3 FGT disks
+ nex;dcut CAVE x 1. -14. 3.5 0.35 0.35
+text  0.5 1.0  'Fig s4. X='[x]'  side view firts  3 FGT disks ' 0.4
+ daxis 0 20 70 10
+return  
+
+
+macro s8
+ nex;dcut CAVE x 1. -70. 10.0 1.2 0.2
+ daxis 0 0 72 1
+ echo side view  FGT disks 1 and WSC,  Z:Y=6:1  
+ text 1 1.3  'Fig s8.   Side view  FGT disks 1 and WSC,  aspect ratio Z/Y is 6/1 ' 0.3
+return  
+
+
+macro s9
+ nex;dcut CAVE x 15. -293. 10.0 3. 0.2
+ text 1 1.3  'Fig s9.   Side view  FGT disks 1 exploded in Z ,  aspect ratio Z/Y is 15/1 ' 0.3
+
+return  
+
+
+*******   END VIEWS of FGT *******************
+* Z slices:  69.5= frame,  70=GEM sensitive, 73= APV boards
+
+
+macro d  z=70.
+echo disk end view   at z=[z]
+nex;dcut CAVE z [z] 10. 10.0 0.2 0.2
+ text 3 0.5  'Fig d. Z='[z]'.  FGT  disk view' 0.4
+daxis 0 0 0 26
+return  
+
+
+macro q  z=70.
+echo FGT quadrant view   at z=[z]
+ nex;dcut CAVE z [z] 0.7 4.5 0.4 0.4
+ text 1 0.5  ' Fig e. Z='[z]'.  FGT  quadrant view ' 0.4
+daxis 0 0 0 15
+return  
+
+*******   CONE side views  *******************
+*   c1 = Z~70 cm, c2= Z~210cm
+
+
+macro c1  
+echo cone end view   at 1st disk
+nex; dcut cave x 1 -20. -2 0.5 0.5
+ text 3 0.5  ' Fig c1. STAR Cone view at 1st FGT disk' 0.4
+daxis 0 10 60 10
+return  
+
+macro c2  
+echo cone end view   at  the end
+nex; dcut cave x 1 -99. -2 0.5 0.5
+ text 3 0.5  ' Fig c2. STAR Cone view at the end of WSC' 0.4
+daxis 0 10 200 10
+return  
+
+********* ALL plots ***********
+macro all
+   for/file 90 fgtAll.ps
+   meta 90 -111
+   mess PostScript file opened  (meta 99 -111)
+mess ----- STAR  side views
+ exe plFgtGallery#s0
+   exe plFgtGallery#eve2    
+   exe plFgtGallery#eve3       	
+ exe plFgtGallery#s1
+   exe plFgtGallery#eve1 +30    
+   exe plFgtGallery#eve2 -30    
+ exe plFgtGallery#s2
+   exe plFgtGallery#eve2    
+ exe plFgtGallery#s3
+   exe plFgtGallery#eve2    
+ mess ----- STAR  cone 
+ exe plFgtGallery#s4
+   exe plFgtGallery#eve1    
+ exe plFgtGallery#c1
+ mess -----  disk side exploded
+ exe plFgtGallery#s8
+ exe plFgtGallery#s9
+ mess ----- disk 1  x-section at different depths
+ exe plFgtGallery#q z=69.5
+ exe plFgtGallery#q z=70.
+ exe plFgtGallery#q z=73.
+ mess ---- disks 2,5,6, and downstream 
+ exe plFgtGallery#d z=80
+ exe plFgtGallery#d z=110
+ exe plFgtGallery#d z=120
+ exe plFgtGallery#d z=130
+ mess ---- FGT cables
+ exe plFgtGallery#s2 x=6
+ exe plFgtGallery#s2 x=16.1
+    meta 0
+
+close 90
+  mess PS closed	
+return
+
+
+********* 6 disk plots ***********
+macro 6d
+   for/file 90 dr.ps
+   meta 90 -111
+   mess PostScript file opened  (meta 99 -111)
+** side views
+ exe plFgtGallery#s1
+ exe plFgtGallery#d z=70.
+ exe plFgtGallery#d z=80.
+ exe plFgtGallery#d z=90.
+ exe plFgtGallery#d z=100.
+ exe plFgtGallery#d z=110.
+ exe plFgtGallery#d z=120.
+   meta 0
+
+
+close 90
+  mess PS closed	
+
+return
+
+
+macro eve1 z0=0
+* 'nominal ' pi+ at eta [1,2], up
+  debug on
+  pt=1
+  gkine  1 45  [pt]  [pt]   0.5 0.5  1.5708  1.5708  [z0] [z0]   ;trig
+  gkine  1 45  [pt]  [pt]   1.0 1.0  1.5708  1.5708  [z0] [z0]   ;trig
+  gkine  1 45  [pt]  [pt]   1.5 1.5  1.5708  1.5708  [z0] [z0]   ;trig
+  gkine  1 45  [pt]  [pt]   2.0 2.0  1.5708  1.5708  [z0] [z0]   ;trig
+  mess zVertex= [z0] cm
+return
+
+
+macro eve2 z0=0
+* 'nominal ' pi+ at eta [1,2], down
+  debug on
+  pt=50
+  gkine  1 45  [pt]  [pt]   0.5 0.5  -1.5708  -1.5708  [z0] [z0]   ;trig
+  gkine  1 45  [pt]  [pt]   1.0 1.0  -1.5708  -1.5708  [z0] [z0]   ;trig
+  gkine  1 45  [pt]  [pt]   1.5 1.5  -1.5708  -1.5708  [z0] [z0]   ;trig
+  gkine  1 45  [pt]  [pt]   2.0 2.0  -1.5708  -1.5708  [z0] [z0]   ;trig
+  mess zVertex= [z0] cm
+return
+
+macro eve3 z0=0
+* 'nominal ' pi+ at eta [1,2], down
+  debug on
+  pt=50
+  gkine  1 45  [pt]  [pt]   2.0 2.0  1.5708  1.5708  [z0] [z0]   ;trig
+  gkine  1 45  [pt]  [pt]   2.5 2.5  1.5708  1.5708  [z0] [z0]   ;trig
+  gkine  1 45  [pt]  [pt]   3.0 3.0  1.5708  1.5708  [z0] [z0]   ;trig
+  gkine  1 45  [pt]  [pt]   3.5 3.5  1.5708  1.5708  [z0] [z0]   ;trig
+  mess zVertex= [z0] cm
+
+
+macro eve4
+* low pT track to see it curves in FGT
+  debug on
+  pt=0.6
+  gkine  1 45  [pt]  [pt]    1.7  1.9   -1.7 1.2  0. 0.   ;trig
+  mess pT=[pt]
+return

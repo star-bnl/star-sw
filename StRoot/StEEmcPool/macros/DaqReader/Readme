@@ -1,0 +1,23 @@
+The general daq reader for all STAR subsystems can be found in StRoot/RTS/src/RTS_EXAMPLE/rts_example.C, however for EMC purposes not all of the functionality provided there are necessary.  
+
+The macro emchist.C uses the relevant pieces of the general daq reader to retrieve raw ADC information on a crate/channel level from the daq files and store them in ROOT histograms.  These histograms are useful for many QA and other tasks including timing scans, pedstals, status tables, relative gains (from slopes), etc.
+
+If one is interested in only events from a specific trigger to increment the raw ADC histograms, then this can be specified in the emchist.C macro by using 
+
+int trigID[2]={A,B};
+
+where A is the "DAQ trigger ID" for events to be incremented in the histograms and B is another trigger which is only implemented as a counter.
+
+The macro is compiled using the compile.sh script by executing
+
+./compile.sh emchist.C
+
+which produces an executable emchist* which reads the daq file by executing
+
+./emchist /star/data03/daq/2012/100/13100049w_js/st_W_13100049_raw_1340001.daq
+
+for the daq file of interest.
+
+To process all the daq files for a given run which are stored on some NFS disk space there is a script provided (submitAll.sh) which loops over a given runList to do this.  Once histogram files have been produced for each daqfile in a run it is useful to hadd them together which can be done simply with the following script
+
+addFiles.sh 

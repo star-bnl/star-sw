@@ -1,0 +1,109 @@
+#!/bin/bash
+
+    export CONFIGURE_EMCONLINE_PED='yes'
+    export SRC_PATH=''
+    export DST_PATH=''
+    export SRC_PATH_DEFAULT=${0%/macros/*}
+    export DST_PATH_DEFAULT='.'
+        
+    export OPTIONS=$@
+        
+    for OPT in $OPTIONS ;
+    do
+        if [[ "$OPT" == "emconline_ped" ]] ; then export CONFIGURE_EMCONLINE_PED='yes' ;
+        elif [[ "$OPT" == "all" ]]
+        then
+            export CONFIGURE_EMCONLINE_PED='yes'
+        elif [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH=$OPT ;
+        elif [[ "$DST_PATH" == "" ]] ; then export DST_PATH=$OPT ;
+        else echo "Skipping unknown option $OPT" ; fi
+    done
+
+    if [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH=$SRC_PATH_DEFAULT ; fi
+    if [[ "$DST_PATH" == "" ]] ; then export DST_PATH=$DST_PATH_DEFAULT ; fi
+
+    pushd $SRC_PATH > /dev/null
+    export SRC_PATH=`pwd`
+    popd > /dev/null
+
+    pushd $DST_PATH > /dev/null
+    export DST_PATH=`pwd`
+    popd > /dev/null
+
+    echo "Code directory:            $SRC_PATH"
+    echo "Working directory:         $DST_PATH"
+
+    if [[ "${CONFIGURE_EMCONLINE_PED}" != "no" ]]    
+    then
+	echo "Configuring the EMC Online pedestal monitoring"
+
+        chmod a+x $SRC_PATH/macros/configure.emconline_ped
+        chmod a+x $SRC_PATH/macros/.emconline_ped.cfg.sh
+        chmod a+x $SRC_PATH/macros/job.emconline_ped
+        chmod a+x $SRC_PATH/macros/status.emconline_ped
+        chmod a+x $SRC_PATH/macros/update.emconline_ped
+
+	export CFG_FILE=$DST_PATH/.emconline_ped.cfg.sh
+	rm -f $CFG_FILE
+	echo "export EMCONLINE_PED_DIR=$DST_PATH" > $CFG_FILE
+    	cat $SRC_PATH/macros/.emconline_ped.cfg.sh >> $CFG_FILE
+	chmod a+x $CFG_FILE
+
+        ln -sf $SRC_PATH/macros/job.emconline_ped $DST_PATH
+        ln -sf $SRC_PATH/macros/status.emconline_ped $DST_PATH
+        ln -sf $SRC_PATH/macros/update.emconline_ped $DST_PATH
+
+        ln -sf $SRC_PATH/macros/transformBackupHistoToDBTable $DST_PATH
+
+        ln -sf $SRC_PATH/macros/*.C $DST_PATH
+
+	export CRONTAB_FILE=$DST_PATH/crontab.emconline_ped
+	rm -f $CRONTAB_FILE
+	echo "00 3 * * * csh -c \"bash $DST_PATH/job.emconline_ped\"" >> $CRONTAB_FILE
+
+	ln -sf $SRC_PATH/macros/README.emconline_ped $DST_PATH
+
+	touch $DST_PATH/README
+	echo "`date`: EMC Online pedestal monitoring installed, see README.emconline_ped" >> $DST_PATH/README
+	echo "" >> $DST_PATH/README
+
+	touch $DST_PATH/LAST_TIME_RUN.emconline_ped
+
+	touch $DST_PATH/runlist.emconline_ped.txt
+
+	touch $DST_PATH/runlist_veto.emconline_ped.txt
+
+	$DST_PATH/status.emconline_ped STOP &> /dev/null
+
+        source $DST_PATH/.emconline_ped.cfg.sh
+	update_desktop_icon_ped
+
+	### The rest is for backward compatibility only, otherwise can be safely skipped
+	#
+	export JOBFILE=$DST_PATH/job
+	rm -f $JOBFILE
+        echo "" > $JOBFILE
+        #echo "csh -c \"bash $DST_PATH/job.emconline_ped\"" > $JOBFILE
+	chmod a+x $JOBFILE
+
+	export STARTFILE=$DST_PATH/startOnlinePed
+	rm -f $STARTFILE
+	echo './status.emconline_ped RUN' > $STARTFILE
+        chmod a+x $STARTFILE
+
+	export STOPFILE=$DST_PATH/stopOnlinePed
+	rm -f $STOPFILE
+	echo './status.emconline_ped STOP' > $STOPFILE
+        chmod a+x $STOPFILE
+
+        ln -sf $DST_PATH/update.emconline_ped $DST_PATH/updateOnlinePed
+
+        ln -sf $DST_PATH/RUNMODE.emconline_ped $DST_PATH/RUNMODE
+
+        ln -sf $DST_PATH/LAST_TIME_RUN.emconline_ped $DST_PATH/LAST_TIME_RUN
+
+        ln -sf $DST_PATH/runlist.emconline_ped.txt $DST_PATH/runlist.txt
+	#
+	###
+
+    fi

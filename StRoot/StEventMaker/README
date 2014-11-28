@@ -1,0 +1,20 @@
+-*- mode:outline -*-
+Time-stamp: <99/11/04 14:02:55 ullrich>
+
+* Package: StEventMaker
+
+* Purpose:
+Create and fill persistent StEvent (STAR OO data model)
+from DST tables.
+
+* History:
+Originally by Torre Wenaus (StEventReaderMaker) for the
+first version of StEvent (transient) and then updated by
+Yuri Fisyak (persistent version).
+Latest version is a complete re-write to deal with the
+revised version of StEvent.
+
+* Status:
+compiles on all platforms but functionality not fully
+tested. Many checks missing.
+

@@ -1,0 +1,13 @@
+/*    emcStatus.idl
+*
+*  Table: emcStatus
+*
+*       description: //   which emc towers are up and running
+*/ 
+
+
+struct emcStatus { 
+
+   octet  Status[4800];   /*   */
+
+ };  

@@ -1,0 +1,5 @@
+# $Id $
+# package StiSsd
+# author: 
+Library:libStiSsd.so:LIBS +=   -l_StEvent  -lStiGui -lGui  -lStChain -lSti -lStSsdUtil -lStSsdDbMaker  -lStSsdUtil
+#Library:libStiSsd.so:LIBS +=   -lStEvent  -lStiGui  -lSti  -lStSsdDbMaker  -lStSsdUtil

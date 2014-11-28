@@ -1,0 +1,44 @@
+<body TEXT="#00004A" BGCOLOR="#FFFFFF" LINK="#088D00"
+VLINK="#088888" ALINK="#08DEB5" TYPE="FADEIN">
+<html>
+<head><title>FTPC Cluster Finder Maker</title></head>
+<body bgcolor=white>
+
+
+<!-- make some space using <pre>-tag   -->
+<pre>
+
+
+
+
+</pre>
+
+<h2>  StFtpcClusterMaker </h2>
+
+<p> 
+StFtpcClusterMaker replaces St_fcl_Maker in the FTPC production chain.
+It includes the functionality of both fcl and ffs, so StRoot/St_fcl_Maker,
+pams/ftpc/fcl and pams/ftpc/ffs (one of FTPCs last fortran modules) become
+obsolete. The change became necessary to prepare the transition from a table 
+based raw data format to raw data reader classes.
+
+<p> 
+If raw data (fcl_ftpcndx, fcl_ftpcsqndx and fcl_ftpcadc) is found,
+StFtpcClusterMaker loads it as input tables and the parameter tables
+(fcl_ampslope, fcl_ampoff, fcl_timeoff, fcl_padtrans, fcl_det and
+fcl_zrow) and initializes the output table (fcl_fppoint) for
+<a href="StFtpcClusterFinder.html"> StFtpcClusterFinder </a>.
+
+<p> 
+If no raw data (from the daq or the slow simulator) is found, StFtpcClusterMaker
+then loads g2t_vertex, g2t_track and g2t_ftp_hit as input tables and the 
+parameter tables (ffs_fspar and ffs_gaspar) and initializes the output tables
+(fcl_fppoint and ffs_gepoint) for the FTPC fast simulator
+<a href="StFtpcFastSimu.html">StFtpcFastSimu</a>.
+
+
+<p> 
+<i> This page was updated by <a href=mailto:hummler@mppmu.mpg.de> Holm
+H&uuml;mmler</a> on October 29, 1999 </i>
+
+</html>

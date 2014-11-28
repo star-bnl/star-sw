@@ -1,0 +1,12 @@
+//:Description: 
+//:Synonyms::::
+//:Source:
+//:Update:
+//:Update frequncy:
+//:Reminder:
+//:Recall frequency:
+//:Size of Data:
+//:Pointer to data:  MagFactor.time:
+struct MagFactor {
+  float ScaleFactor;
+};

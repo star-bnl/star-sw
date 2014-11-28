@@ -1,0 +1,388 @@
+/* ======================================================================== */
+/*  file: Matrix.dem  */
+/*  Tpc Alignemnet problems */
+
+/* ------------------------------------
+subscrmap:true$
+                         (  1  gS -bS  -xS)   (r11  r12  r13   tx)   (  1 -gW  bW  xW) 
+W2S = RS^-1 * w2s * RW = (-gS   1  aS  -yS) * (r21  r22  r23   ty) * ( gW   1 -aW  yW) =
+			 ( bS -aS   1  -zS)   (r31  r32  r33   tz)   (-bW  aW   1  zW)
+                         (  0   0   0    1)   (  0    0    0    1)   (  0   0   0  1 )
+
+  (alpha,beta,gamma) => (a,b,g)
+
+                            (1  0  0)
+          RotateX(alpha) =  (0  1 -a); Rx: matrix([1,0,0,0],[0,1,-a,0],[0,a,1,0],[0,0,0,1]);
+                            (0  a  1)  
+Rx: matrix([1,0,0,0],[0,1,-a,0],[0,a,1,0],[0,0,0,1])$
+Ry: matrix([1,0,b,0],[0,1,0,0],[-b,0,1,0],[0,0,0,1])$
+Rz: matrix([1,-g,0,0],[g,1,0,0],[0,0,1,0],[0,0,0,1])$
+Ryx: Ry.Rx;
+Rzyx: Rz.Ryx;
+r11 : 1; r12 : 0; r13 : 0; tx  : 0;
+r21 : 0; r22 : 1; r23 : 0; ty  : 0;
+r31 : 0; r32 : 0; r33 : 1; tz  : 0;
+------------------------------------ */
+
+w2s : matrix([r11,r12,r13, tx],[r21,r22,r23, ty],[r31,r32,r33, tz],[0,0,0,1]);
+RW: matrix([1,-gW,bW,xW],[gW,1,-aW,yW],[-bW,aW,1,zW],[0,0,0,1]);
+
+/* ------------------------------------
+RS: matrix([1,-gS,bS,xS],[gS,1,-aS,yS],[-bS,aS,1,zS],[0,0,0,1]);
+------------------------------------ */
+
+RST: matrix([1,gS,-bS,-xS],[-gS,1,aS,-yS],[bS,-aS,1,-zS],[0,0,0,1]);
+W2S : RST.w2s.RW;
+
+/* ------------------------------------
+(%o51) matrix(
+[- bS (r32 gW - r33 bW + r31) + gS (r22 gW - r23 bW + r21) + r12 gW - r13 bW + r11,
+ - bS (- r31 gW + r33 aW + r32) + gS (- r21 gW + r23 aW + r22) - r11 gW + r13 aW + r12, 
+ (r21 bW - r22 aW + r23) gS - bS (r31 bW - r32 aW + r33) + r11 bW - r12 aW + r13,
+ - bS (r33 zW + r32 yW + r31 xW + tz) + gS (r23 zW + r22 yW + r21 xW + ty) + r13 zW + r12 yW + r11 xW - xS + tx], 
+[aS (r32 gW - r33 bW + r31) - gS (r12 gW - r13 bW + r11) + r22 gW - r23 bW + r21,
+ aS (- r31 gW + r33 aW + r32) - gS (- r11 gW + r13 aW + r12) - r21 gW + r23 aW + r22,
+ - (r11 bW - r12 aW + r13) gS + aS (r31 bW - r32 aW + r33) + r21 bW - r22 aW + r23,
+ aS (r33 zW + r32 yW + r31 xW + tz) - gS (r13 zW + r12 yW + r11 xW + tx) + r23 zW + r22 yW - yS + r21 xW + ty], 
+[- aS (r22 gW - r23 bW + r21) + bS (r12 gW - r13 bW + r11) + r32 gW - r33 bW + r31,
+ - aS (- r21 gW + r23 aW + r22) + bS (- r11 gW + r13 aW + r12) - r31 gW + r33 aW + r32,
+ - aS (r21 bW - r22 aW + r23) + bS (r11 bW - r12 aW + r13) + r31 bW - r32 aW + r33,
+ - aS (r23 zW + r22 yW + r21 xW + ty) + bS (r13 zW + r12 yW + r11 xW + tx) + r33 zW - zS + r32 yW + r31 xW + tz], 
+[0, 0, 0, 1])
+
+ w1: RST.w2s;
+ W2SP: w1.RW;
+
+(%i61)                          W2SP : w1 . RW
+(%o61) matrix(
+[(r22 gS - r32 bS + r12) gW - bW (r23 gS - r33 bS + r13) + r21 gS - r31 bS + r11,
+ - (r21 gS - r31 bS + r11) gW + aW (r23 gS - r33 bS + r13) + r22 gS - r32 bS + r12,
+ - aW (r22 gS - r32 bS + r12) + bW (r21 gS - r31 bS + r11) + r23 gS - r33 bS + r13, 
+(r23 gS - r33 bS + r13) zW + (r22 gS - r32 bS + r12) yW + (r21 gS - r31 bS + r11) xW - xS + ty gS - tz bS + tx], 
+[(- r12 gS + r32 aS + r22) gW - bW (- r13 gS + r33 aS + r23) - r11 gS + r31 aS + r21,
+ - (- r11 gS + r31 aS + r21) gW + aW (- r13 gS + r33 aS + r23) - r12 gS + r32 aS + r22,
+ - aW (- r12 gS + r32 aS + r22) + bW (- r11 gS + r31 aS + r21) - r13 gS + r33 aS + r23,
+ (- r13 gS + r33 aS + r23) zW + (- r12 gS + r32 aS + r22) yW - yS + (- r11 gS + r31 aS + r21) xW - tx gS + tz aS + ty], 
+[(r12 bS - r22 aS + r32) gW - (r13 bS - r23 aS + r33) bW + r11 bS - r21 aS + r31,
+ - (r11 bS - r21 aS + r31) gW + aW (r13 bS - r23 aS + r33) + r12 bS - r22 aS + r32, 
+(r11 bS - r21 aS + r31) bW - aW (r12 bS - r22 aS + r32) + r13 bS - r23 aS + r33, 
+(r13 bS - r23 aS + r33) zW - zS + (r12 bS - r22 aS + r32) yW + (r11 bS - r21 aS + r31) xW + tx bS - ty aS + tz],
+ [0, 0, 0, 1])
+Z : W2S - W2SP;
+%o70) matrix(
+[0,
+
+ - bS (- r31 gW + r33 aW + r32) + gS (- r21 gW + r23 aW + r22) + (r21 gS - r31 bS + r11) gW - r11 gW - aW (r23 gS - r33 bS + r13) - r22 gS + r32 bS + r13 aW, 
+aW (r22 gS - r32 bS + r12) - bW (r21 gS - r31 bS + r11) + (r21 bW - r22 aW + r23) gS - r23 gS - bS (r31 bW - r32 aW + r33) + r11 bW + r33 bS - r12 aW,
+ - bS (r33 zW + r32 yW + r31 xW + tz) + gS (r23 zW + r22 yW + r21 xW + ty) - (r23 gS - r33 bS + r13) zW + r13 zW - (r22 gS - r32 bS + r12) yW + r12 yW - (r21 gS - r31 bS + r11) xW + r11 xW - ty gS + tz bS], 
+[aS (r32 gW - r33 bW + r31) - gS (r12 gW - r13 bW + r11) - (- r12 gS + r32 aS + r22) gW + r22 gW + bW (- r13 gS + r33 aS + r23) + r11 gS - r23 bW - r31 aS,
+ aS (- r31 gW + r33 aW + r32) - gS (- r11 gW + r13 aW + r12) + (- r11 gS + r31 aS + r21) gW - r21 gW - aW (- r13 gS + r33 aS + r23) + r12 gS + r23 aW - r32 aS, 
+aW (- r12 gS + r32 aS + r22) - bW (- r11 gS + r31 aS + r21) - (r11 bW - r12 aW + r13) gS + r13 gS + aS (r31 bW - r32 aW + r33) + r21 bW - r22 aW - r33 aS,
+ aS (r33 zW + r32 yW + r31 xW + tz) - gS (r13 zW + r12 yW + r11 xW + tx) - (- r13 gS + r33 aS + r23) zW + r23 zW - (- r12 gS + r32 aS + r22) yW + r22 yW - (- r11 gS + r31 aS + r21) xW + r21 xW + tx gS - tz aS], 
+[- aS (r22 gW - r23 bW + r21) + bS (r12 gW - r13 bW + r11) - (r12 bS - r22 aS + r32) gW + r32 gW + (r13 bS - r23 aS + r33) bW - r33 bW - r11 bS + r21 aS, 
+- aS (- r21 gW + r23 aW + r22) + bS (- r11 gW + r13 aW + r12) + (r11 bS - r21 aS + r31) gW - r31 gW - aW (r13 bS - r23 aS + r33) - r12 bS + r33 aW + r22 aS,
+ - aS (r21 bW - r22 aW + r23) + bS (r11 bW - r12 aW + r13) - (r11 bS - r21 aS + r31) bW + r31 bW + aW (r12 bS - r22 aS + r32) - r13 bS - r32 aW + r23 aS,
+ - aS (r23 zW + r22 yW + r21 xW + ty) + bS (r13 zW + r12 yW + r11 xW + tx) - (r13 bS - r23 aS + r33) zW + r33 zW - (r12 bS - r22 aS + r32) yW + r32 yW - (r11 bS - r21 aS + r31) xW + r31 xW
+ - tx bS + ty aS], [0, 0, 0, 0])
+------------------------------------ */
+A: W2S - w2s;
+/* ------------------------------------
+(%o52) matrix([- bS (r32 gW - r33 bW + r31) + gS (r22 gW - r23 bW + r21)
+ + r12 gW - r13 bW, - bS (- r31 gW + r33 aW + r32)
+ + gS (- r21 gW + r23 aW + r22) - r11 gW + r13 aW, 
+(r21 bW - r22 aW + r23) gS - bS (r31 bW - r32 aW + r33) + r11 bW - r12 aW, 
+- bS (r33 zW + r32 yW + r31 xW + tz) + gS (r23 zW + r22 yW + r21 xW + ty)
+ + r13 zW + r12 yW + r11 xW - xS], [aS (r32 gW - r33 bW + r31)
+ - gS (r12 gW - r13 bW + r11) + r22 gW - r23 bW, 
+aS (- r31 gW + r33 aW + r32) - gS (- r11 gW + r13 aW + r12) - r21 gW + r23 aW, 
+- (r11 bW - r12 aW + r13) gS + aS (r31 bW - r32 aW + r33) + r21 bW - r22 aW, 
+aS (r33 zW + r32 yW + r31 xW + tz) - gS (r13 zW + r12 yW + r11 xW + tx)
+ + r23 zW + r22 yW - yS + r21 xW], [- aS (r22 gW - r23 bW + r21)
+ + bS (r12 gW - r13 bW + r11) + r32 gW - r33 bW, 
+- aS (- r21 gW + r23 aW + r22) + bS (- r11 gW + r13 aW + r12) - r31 gW
+ + r33 aW, - aS (r21 bW - r22 aW + r23) + bS (r11 bW - r12 aW + r13) + r31 bW
+ - r32 aW, - aS (r23 zW + r22 yW + r21 xW + ty)
+ + bS (r13 zW + r12 yW + r11 xW + tx) + r33 zW - zS + r32 yW + r31 xW], 
+[0, 0, 0, 0])
+
+(%o52) matrix(
+[-r31*bS+r21*gS-r13*bW+r12*gW,       -r32*bS+r22*gS+r13*aW-r11*gW,       -r33*bS+r23*gS-r12*aW+r11*bW,      -tz*bS +ty*gS-xS+r11*xW+r12*yW+r13*zW], 
+[+r31*aS-r11*gS-r23*bW+r22*gW,+r32*aS       -r12*gS+r23*aW-r21*gW,+r33*aS       -r13*gS-r22*aW+r21*bW,+tz*aS       -tx*gS-yS+r21*xW+r22*yW+r23*zW], 
+[-r21*aS+r11*bS-r33*bW+r32*gW,-r22*aS+r12*bS       +r33*aW-r31*gW,-r23*aS+r13*bS       -r32*aW+r31*bW,-ty*aS+tx*bS       -zS+r31*xW+r32*yW+r33*zW], 
+[0, 0, 0, 0])
+CHECKED
+------------------------------------ */
+H:  matrix(
+ [-r31*bS+r21*gS-r13*bW+r12*gW,       -r32*bS+r22*gS+r13*aW-r11*gW,        -r33*bS+r23*gS-r12*aW+r11*bW,      -tz*bS+ty*gS-xS+r11*xW+r12*yW+r13*zW], 
+ [+r31*aS-r11*gS-r23*bW+r22*gW,+r32*aS       -r12*gS+r23*aW-r21*gW, +r33*aS       -r13*gS-r22*aW+r21*bW,+tz*aS      -tx*gS-yS+r21*xW+r22*yW+r23*zW],
+ [-r21*aS+r11*bS-r33*bW+r32*gW,-r22*aS+r12*bS       +r33*aW-r31*gW, -r23*aS+r13*bS       -r32*aW+r31*bW,-ty*aS+tx*bS      -zS+r31*xW+r32*yW+r33*zW], 
+ [0, 0, 0, 1]);
+/* ------------------------------------ B = A - H; ------------------------------------ */
+rW: matrix([XW,0,0,0],[YW,0,0,0],[ZW,0,0,0],[1,0,0,0]);
+/* ------------------------------------
+
+nP = W *nW;  nU = V * nW;          nP = (V + H) *nW = nU + H*nW;
+rP = W *rW + s*nP; s => yP == yS;  rP = (V + H) *rW = rU + H*rW + s*nP;   account s ==>  yP = yS 
+dR = rP - rS = rU - rS + H*rW + s*nP;
+dn = nP - nS = nU - nS + H*nW;
+lx = nxU/nyU; lz = nzU/nyU; 
+------------------------------------ */
+nU: matrix([lx,0,0,0],[1,0,0,0],[lz,0,0,0],[0,0,0,0]);
+nW: matrix([nxW,0,0,0],[nyW,0,0,0],[nzW,0,0,0],[0,0,0,0]);
+nV: s*nU;
+dR1: H.rW;
+dR : dR1 + nV;
+/*
+globalsolve: true$
+eq: dR[2][1];
+solve([eq,ZZZ=0],[s,ZZZ]);
+[[%]];
+s;
+*/
+/* ------------------------------------
+(%o227) matrix([lx (- (- r13 gS + r21 bW - r22 aW + r33 aS) ZW - r23 zW
+ - (- r21 gW - r12 gS + r23 aW + r32 aS) YW - r22 yW + yS
+ - (r22 gW - r11 gS - r23 bW + r31 aS) XW - r21 xW + tx gS - tz aS)
+ + (r23 gS + r11 bW - r33 bS - r12 aW) ZW + r13 zW
+ + (- r11 gW + r22 gS - r32 bS + r13 aW) YW + r12 yW
+ + (r12 gW + r21 gS - r13 bW - r31 bS) XW + r11 xW - xS + ty gS - tz bS, 0, 0, 
+0], [0, 0, 0, 0], [lz (- (- r13 gS + r21 bW - r22 aW + r33 aS) ZW - r23 zW
+ - (- r21 gW - r12 gS + r23 aW + r32 aS) YW - r22 yW + yS
+ - (r22 gW - r11 gS - r23 bW + r31 aS) XW - r21 xW + tx gS - tz aS)
+ + (r31 bW + r13 bS - r32 aW - r23 aS) ZW + r33 zW - zS
+ + (- r31 gW + r12 bS + r33 aW - r22 aS) YW + r32 yW
+ + (r32 gW - r33 bW + r11 bS - r21 aS) XW + r31 xW + tx bS - ty aS, 0, 0, 0], 
+[1, 0, 0, 0])
+
+(%o206) matrix(
+[( r23*gS+r11*bW-r33*bS-r12*aW)*ZW+r13*zW+(-r11*gW+r22*gS-r32*bS+r13*aW)*YW+r12*yW+(r12*gW+r21*gS-r13*bW-r31*bS)*XW+r11*xW-xS+ty*gS-tz*bS+lx*s, 0, 0, 0], 
+[(-r13*gS+r21*bW-r22*aW+r33*aS)*ZW+r23*zW+(-r21*gW-r12*gS+r23*aW+r32*aS)*YW+r22*yW-yS+(r22*gW-r11*gS-r23*bW+r31*aS)*XW+r21*xW-tx*gS+tz*aS+s, 0, 0, 0], 
+[( r31*bW+r13*bS-r32*aW-r23*aS)*ZW+r33*zW-zS+(-r31*gW+r12*bS+r33*aW-r22*aS)*YW+r32*yW+(r32*gW-r33*bW+r11*bS-r21*aS)*XW+r31*xW+tx*bS-ty*aS+lz*s, 0, 0, 0], 
+[1, 0, 0, 0])
+
+------------------------------------ */
+S: -((-r13*gS+r21*bW-r22*aW+r33*aS)*ZW+r23*zW+(-r21*gW-r12*gS+r23*aW+r32*aS)*YW+r22*yW-yS+(r22*gW-r11*gS-r23*bW+r31*aS)*XW+r21*xW-tx*gS+tz*aS);
+nVS: S*nU;
+dRS: dR1 + nVS;
+dn: H.nW;
+/* ------------------------------------
+(%i227)                         dRS : nVS + dR1
+(%o227) matrix(
+[lx*(-(-r13*gS+r21*bW-r22*aW+r33*aS)*ZW-r23*zW-(-r21*gW-r12*gS+r23*aW+r32*aS)*YW-r22*yW+yS-(r22*gW-r11*gS-r23*bW+r31*aS)*XW-r21*xW+tx*gS-tz*aS)+(r23*gS+r11*bW-r33*bS-r12*aW)*ZW+r13*zW+(-r11*gW+r22*gS-r32*bS+r13*aW)*YW+r12*yW+(r12*gW+r21*gS-r13*bW-r31*bS)*XW+r11*xW-xS+ty*gS-tz*bS, 0, 0, 0], 
+[0, 0, 0, 0], 
+[lz*(-(-r13*gS+r21*bW-r22*aW+r33*aS)*ZW-r23*zW-(-r21*gW-r12*gS+r23*aW+r32*aS)*YW-r22*yW+yS-(r22*gW-r11*gS-r23*bW+r31*aS)*XW-r21*xW+tx*gS-tz*aS)+(r31*bW+r13*bS-r32*aW-r23*aS)*ZW+r33*zW-zS+(-r31*gW+r12*bS+r33*aW-r22*aS)*YW+r32*yW+(r32*gW-r33*bW+r11*bS-r21*aS)*XW+r31*xW+tx*bS-ty*aS, 0, 0, 0], 
+[1, 0, 0, 0])
+_
+(%i228)                           dn : H . nW
+(%o228) matrix([(r23 gS + r11 bW - r33 bS - r12 aW) ZW + r13 zW
+ + (- r11 gW + r22 gS - r32 bS + r13 aW) YW + r12 yW
+ + (r12 gW + r21 gS - r13 bW - r31 bS) XW + r11 xW - xS + ty gS - tz bS, 0, 0, 
+0], [(- r13 gS + r21 bW - r22 aW + r33 aS) ZW + r23 zW
+ + (- r21 gW - r12 gS + r23 aW + r32 aS) YW + r22 yW - yS
+ + (r22 gW - r11 gS - r23 bW + r31 aS) XW + r21 xW - tx gS + tz aS, 0, 0, 0], 
+[(r31 bW + r13 bS - r32 aW - r23 aS) ZW + r33 zW - zS
+ + (- r31 gW + r12 bS + r33 aW - r22 aS) YW + r32 yW
+ + (r32 gW - r33 bW + r11 bS - r21 aS) XW + r31 xW + tx bS - ty aS, 0, 0, 0], 
+[1, 0, 0, 0])
+(%o230) matrix(
+[(r23*gS+r11*bW-r33*bS-r12*aW)*nzW+(-r11*gW+r22*gS-r32*bS+r13*aW)*nyW+(r12*gW+r21*gS-r13*bW-r31*bS)*nxW],
+[(-r13*gS+r21*bW-r22*aW+r33*aS)*nzW+(-r21*gW-r12*gS+r23*aW+r32*aS)*nyW+(r22*gW-r11*gS-r23*bW+r31*aS)*nxW],
+[(r31*bW+r13*bS-r32*aW-r23*aS)*nzW+(-r31*gW+r12*bS+r33*aW-r22*aS)*nyW+(r32*gW-r33*bW+r11*bS-r21*aS)*nxW])
+
+
+dX [r13*lx*ZW*gS-r21*lx*ZW*bW+r22*lx*ZW*aW-r33*lx*ZW*aS-r23*lx*zW+r21*lx*YW*gW+r12*lx*YW*gS-r23*lx*YW*aW-r32*lx*YW*aS-r22*lx*yW+lx*yS-r22*lx*XW*gW+r11*lx*XW*gS+r23*lx*XW*bW-r31*lx*XW*aS-r21*lx*xW+tx*lx*gS-tz*lx*aS+r23*ZW*gS+r11*ZW*bW-r33*ZW*bS-r12*ZW*aW+r13*zW-r11*YW*gW+r22*YW*gS-r32*YW*bS+r13*YW*aW+r12*yW+r12*XW*gW+r21*XW*gS-r13*XW*bW-r31*XW*bS+r11*xW-xS+ty*gS-tz*bS], 
+dZ [r13*lz*ZW*gS-r21*lz*ZW*bW+r22*lz*ZW*aW-r33*lz*ZW*aS-r23*lz*zW+r21*lz*YW*gW+r12*lz*YW*gS-r23*lz*YW*aW-r32*lz*YW*aS-r22*lz*yW+lz*yS-r22*lz*XW*gW+r11*lz*XW*gS+r23*lz*XW*bW-r31*lz*XW*aS-r21*lz*xW+tx*lz*gS-tz*lz*aS
++r31*ZW*bW+r13*ZW*bS-r32*ZW*aW-r23*ZW*aS+r33*zW-zS-r31*YW*gW+r12*YW*bS+r33*YW*aW-r22*YW*aS+r32*yW+r32*XW*gW-r33*XW*bW+r11*XW*bS-r21*XW*aS+r31*xW+tx*bS-ty*aS], 
+dnX[ r23*nzW*gS+r11*nzW*bW-r33*nzW*bS-r12*nzW*aW-r11*nyW*gW+r22*nyW*gS-r32*nyW*bS+r13*nyW*aW+r12*nxW*gW+r21*nxW*gS-r13*nxW*bW-r31*nxW*bS],
+dnY[-r13*nzW*gS+r21*nzW*bW-r22*nzW*aW+r33*nzW*aS-r21*nyW*gW-r12*nyW*gS+r23*nyW*aW+r32*nyW*aS+r22*nxW*gW-r11*nxW*gS-r23*nxW*bW+r31*nxW*aS],
+dnZ[ r31*nzW*bW+r13*nzW*bS-r32*nzW*aW-r23*nzW*aS-r31*nyW*gW+r12*nyW*bS+r33*nyW*aW-r22*nyW*aS+r32*nxW*gW-r33*nxW*bW+r11*nxW*bS-r21*nxW*aS])
+
+dX [r13*lx*ZW*gS-r21*lx*ZW*bW+r22*lx*ZW*aW-r33*lx*ZW*aS-r23*lx*zW+r21*lx*YW*gW+r12*lx*YW*gS-r23*lx*YW*aW-r32*lx*YW*aS-r22*lx*yW+lx*yS-r22*lx*XW*gW+r11*lx*XW*gS+r23*lx*XW*bW-r31*lx*XW*aS-r21*lx*xW+tx*lx*gS-tz*lx*aS+r23*ZW*gS+r11*ZW*bW-r33*ZW*bS-r12*ZW*aW+r13*zW-r11*YW*gW+r22*YW*gS-r32*YW*bS+r13*YW*aW+r12*yW+r12*XW*gW+r21*XW*gS-r13*XW*bW-r31*XW*bS+r11*xW-xS+ty*gS-tz*bS], 
+dZ [r13*lz*ZW*gS-r21*lz*ZW*bW+r22*lz*ZW*aW-r33*lz*ZW*aS-r23*lz*zW+r21*lz*YW*gW+r12*lz*YW*gS-r23*lz*YW*aW-r32*lz*YW*aS-r22*lz*yW+lz*yS-r22*lz*XW*gW+r11*lz*XW*gS+r23*lz*XW*bW-r31*lz*XW*aS-r21*lz*xW+tx*lz*gS-tz*lz*aS
++r31*ZW*bW+r13*ZW*bS-r32*ZW*aW-r23*ZW*aS+r33*zW-zS-r31*YW*gW+r12*YW*bS+r33*YW*aW-r22*YW*aS+r32*yW+r32*XW*gW-r33*XW*bW+r11*XW*bS-r21*XW*aS+r31*xW+tx*bS-ty*aS], 
+dnX[ r23*nzW*gS+r11*nzW*bW-r33*nzW*bS-r12*nzW*aW-r11*nyW*gW+r22*nyW*gS-r32*nyW*bS+r13*nyW*aW+r12*nxW*gW+r21*nxW*gS-r13*nxW*bW-r31*nxW*bS],
+dnY[-r13*nzW*gS+r21*nzW*bW-r22*nzW*aW+r33*nzW*aS-r21*nyW*gW-r12*nyW*gS+r23*nyW*aW+r32*nyW*aS+r22*nxW*gW-r11*nxW*gS-r23*nxW*bW+r31*nxW*aS],
+dnZ[ r31*nzW*bW+r13*nzW*bS-r32*nzW*aW-r23*nzW*aS-r31*nyW*gW+r12*nyW*bS+r33*nyW*aW-r22*nyW*aS+r32*nxW*gW-r33*nxW*bW+r11*nxW*bS-r21*nxW*aS])
+----------------------
+dX [-xS+lx*yS   +(-r33*lx*ZW-r32*lx*YW-r31*lx*XW-tz*lx)*aS
+                +(-r33*ZW-r32*YW-r31*XW-tz)*bS+( r13*lx*ZW+r12*lx*YW+r11*lx*XW+tx*lx+r23*ZW+r22*YWr12*XW*gW+r21*XW+ty  ?)*gS
++(-r21*lx+r11)*xW +(-r22*lx+r12)*yW +(-r23*lx+r13)*zW
++( r22*lx*ZW-r23*lx*YW-r12*ZW+r13*YW)*aW+(-r21*lx*ZW+r23*lx*XW+r11*ZW-r13*XW)*bW+(r21*lx*YW-r22*lx*XW-r11*YW)*gW] 
+dZ [   +lz*yS-zS+(-r33*lz*ZW-r32*lz*YW-r31*lz*XW-tz*lz-r23*ZW-r22*YW-r21*XW-ty)*aS
+                +( r13*ZW+r12*YW+r11*XW+tx)*bS+(r13*lz*ZW+r12*lz*YW+r11*lz*XW+tx*lz)*gS
++(-r21*lz+r31)*xW+(-r22*lz+r32)*yW+(-r23*lz+r33)*zW
++( r22*lz*ZW-r23*lz*YW-r32*ZW+r33*YW)*aW
++(-r33*XW-r21*lz*ZW+r23*lz*XW+r31*ZW)*bW
++( r21*lz*YW-r22*lz*XW-r31*YW+r32*XW)*gW], 
+
+dnX[(-r33*nzW-r32*nyW-r31*nxW)*bS+( r23*nzW+r22*nyW+r21*nxW)*gS+(-r12*nzW+r13*nyW)*aW+(r11*nzW-r13*nxW)*bW+(-r11*nyW+r12*nxW)*gW],
+dnY[(+r33*nzW+r31*nxW+r32*nyW)*aS+(-r13*nzW-r12*nyW-r11*nxW)*gS+(-r22*nzW+r23*nyW)*aW+(r21*nzW-r23*nxW)*bW+(-r21*nyW+r22*nxW)*gW],
+dnZ[(-r23*nzW-r21*nxW-r22*nyW)*aS+( r13*nzW+r12*nyW+r11*nxW)*bS+(-r32*nzW+r33*nyW)*aW+(r31*nzW-r33*nxW)*bW+(-r31*nyW+r32*nxW)*gW])
+
+
+    xS,yS,zS,                                  aS,                      bS,                                 gS,
+dX [-1,lx, 0,-r33*lx*ZW-r32*lx*YW-r31*lx*XW-tz*lx,-r33*ZW-r32*YW-r31*XW-tz,r13*lx*ZW+r12*lx*YW+r11*lx*XW+tx*lx,
+dZ [ 0,lz,-1,-r33*lz*ZW-r32*lz*YW-r31*lz*XW-tz*lz,-r23*ZW-r22*YW-r21*XW-ty,r13*lz*ZW+r12*lz*YW+r11*lz*XW+tx*lz,
+                                              
+dnX[ 0, 0, 0,                                   0,-r33*nzW-r32*nyW-r31*nxW,            r23*nzW+r22*nyW+r21*nxW,
+dnY[ 0, 0, 0,            +r33*nzW+r31*nxW+r32*nyW,                       0,           -r13*nzW-r12*nyW-r11*nxW,
+dnZ[ 0, 0, 0,            -r23*nzW-r21*nxW-r22*nyW, r13*nzW+r12*nyW+r11*nxW,                                  0,
+
+             xW,         yW,         zW,aW,bW,gW
+dX [-r21*lx+r11,-r22*lx+r12,-r23*lx+r13, r22*lx*ZW-r23*lx*YW-r12*ZW+r13*YW,-r21*lx*ZW+r23*lx*XW+r11*ZW-r13*XW, r21*lx*YW-r22*lx*XW-r11*YW
+dZ [-r21*lz+r31,-r22*lz+r32,-r23*lz+r33, r22*lz*ZW-r23*lz*YW-r32*ZW+r33*YW,-r33*XW-r21*lz*ZW+r23*lz*XW+r31*ZW, r21*lz*YW-r22*lz*XW-r31*YW+r32*XW
+    
+dnX[          0,          0,          0,                  -r12*nzW+r13*nyW,                   r11*nzW-r13*nxW,-r11*nyW+r12*nxW
+dnY[          0,          0,          0,                  -r22*nzW+r23*nyW,                   r21*nzW-r23*nxW,-r21*nyW+r22*nxW
+dnZ[          0,          0,          0,                  -r32*nzW+r33*nyW,                   r31*nzW-r33*nxW,-r31*nyW+r32*nxW
+
+
+
+Inner/Outer
+    xS,yS,zS,    aS,  bS,   gS,
+dX [-1,lx, 0,-lx*ZW, -ZW,lx*XW,
+dZ [ 0,lz,-1,-lz*ZW, -YW,lz*XW,
+                                              
+dnX[ 0, 0, 0,     0,-nzW,  nyW,
+dnY[ 0, 0, 0,  +nzW,   0, -nxW,
+dnZ[ 0, 0, 0,  -nyW,   0,    0,
+
+    xW, yW,zW,    aW,    bW,     gW
+dX [ 1,-lx, 0, lx*ZW,    ZW,-lx*XW-YW
+dZ [ 0,-lz, 1, lz*ZW+YW,-XW,-lz*XW
+    
+dnX[          0,          0,          0,                  -r12*nzW+r13*nyW,                   nzW-r13*nxW,-nyW+r12*nxW
+dnY[          0,          0,          0,                  -nzW+r23*nyW,                   r21*nzW-r23*nxW,-r21*nyW+nxW
+dnZ[          0,          0,          0,                  -r32*nzW+nyW,                   r31*nzW-nxW,-r31*nyW+r32*nxW
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+nP = W *nW;  nU = V * nW;          nP = (V + H) *nW = nU + H*nW;
+rP = W *rW + s*nP; s => yP == yS;  rP = (V + H) *rW = rU + H*rW + s*nP;   account s ==>  yP = yS 
+dR = rP - rS = rU - rS + H*rW + s*nP;
+dn = nP - nS = nU - nS + H*nW;
+lx = nxU/nyU; lz = nzU/nyU; 
+
+
+
+RotX : matrix([1,0,0,0],[0, cos(a), -sin(a), 0], [0, sin(a), cos(a), 0], [0,0,0,1]);
+RotY : matrix([cos(b),0,sin(b),0],[0, 1, 0, 0], [-sin(b), 0, cos(b), 0], [0,0,0,1]);
+RotZ : matrix([cos(g),-sin(g), 0, 0],[sin(g), cos(g), 0, 0], [0,0,0,0],[0,0,0,1]);
+------------------------------------ */
+dX : dRS[1][1];
+dXdxS : diff(dRS[1][1],xS),ratsimp;
+dXdyS : diff(dRS[1][1],yS),ratsimp;
+dXdzS : diff(dRS[1][1],zS),ratsimp;
+dXdaS : diff(dRS[1][1],aS),ratsimp;
+dXdbS : diff(dRS[1][1],bS),ratsimp;
+dXdgS : diff(dRS[1][1],gS),ratsimp;
+dXdxW : diff(dRS[1][1],xW),ratsimp;
+dXdyW : diff(dRS[1][1],yW),ratsimp;
+dXdzW : diff(dRS[1][1],zW),ratsimp;
+dXdaW : diff(dRS[1][1],aW),ratsimp;
+dXdbW : diff(dRS[1][1],bW),ratsimp;
+dXdgW : diff(dRS[1][1],gW),ratsimp;
+dZ : dRS[3][1];
+dZdxS : diff(dRS[3][1],xS),ratsimp;
+dZdyS : diff(dRS[3][1],yS),ratsimp;
+dZdzS : diff(dRS[3][1],zS),ratsimp;
+dZdaS : diff(dRS[3][1],aS),ratsimp;
+dZdbS : diff(dRS[3][1],bS),ratsimp;
+dZdgS : diff(dRS[3][1],gS),ratsimp;
+dZdxW : diff(dRS[3][1],xW),ratsimp;
+dZdyW : diff(dRS[3][1],yW),ratsimp;
+dZdzW : diff(dRS[3][1],zW),ratsimp;
+dZdaW : diff(dRS[3][1],aW),ratsimp;
+dZdbW : diff(dRS[3][1],bW),ratsimp;
+dZdgW : diff(dRS[3][1],gW),ratsimp;
+dnX : dn[1][1];
+dnXdxS : diff(dn[1][1],xS),ratsimp;
+dnXdyS : diff(dn[1][1],yS),ratsimp;
+dnXdzS : diff(dn[1][1],zS),ratsimp;
+dnXdaS : diff(dn[1][1],aS),ratsimp;
+dnXdbS : diff(dn[1][1],bS),ratsimp;
+dnXdgS : diff(dn[1][1],gS),ratsimp;
+dnXdxW : diff(dn[1][1],xW),ratsimp;
+dnXdyW : diff(dn[1][1],yW),ratsimp;
+dnXdzW : diff(dn[1][1],zW),ratsimp;
+dnXdaW : diff(dn[1][1],aW),ratsimp;
+dnXdbW : diff(dn[1][1],bW),ratsimp;
+dnXdgW : diff(dn[1][1],gW),ratsimp;
+dnY : dn[2][1];
+dnYdxS : diff(dn[2][1],xS),ratsimp;
+dnYdyS : diff(dn[2][1],yS),ratsimp;
+dnYdzS : diff(dn[2][1],zS),ratsimp;
+dnYdaS : diff(dn[2][1],aS),ratsimp;
+dnYdbS : diff(dn[2][1],bS),ratsimp;
+dnYdgS : diff(dn[2][1],gS),ratsimp;
+dnYdxW : diff(dn[2][1],xW),ratsimp;
+dnYdyW : diff(dn[2][1],yW),ratsimp;
+dnYdzW : diff(dn[2][1],zW),ratsimp;
+dnYdaW : diff(dn[2][1],aW),ratsimp;
+dnYdbW : diff(dn[2][1],bW),ratsimp;
+dnYdgW : diff(dn[2][1],gW),ratsimp;
+dnZ : dn[3][1];
+dnZdxS : diff(dn[3][1],xS),ratsimp;
+dnZdyS : diff(dn[3][1],yS),ratsimp;
+dnZdzS : diff(dn[3][1],zS),ratsimp;
+dnZdaS : diff(dn[3][1],aS),ratsimp;
+dnZdbS : diff(dn[3][1],bS),ratsimp;
+dnZdgS : diff(dn[3][1],gS),ratsimp;
+dnZdxW : diff(dn[3][1],xW),ratsimp;
+dnZdyW : diff(dn[3][1],yW),ratsimp;
+dnZdzW : diff(dn[3][1],zW),ratsimp;
+dnZdaW : diff(dn[3][1],aW),ratsimp;
+dnZdbW : diff(dn[3][1],bW),ratsimp;
+dnZdgW : diff(dn[3][1],gW),ratsimp;
+
+stardisp: true$
+dRn : matrix(
+	[ dXdxS, dXdyS, dXdzS, dXdaS, dXdbS, dXdgS, dXdxW, dXdyW, dXdzW, dXdaW, dXdbW, dXdgW],
+	[ dZdxS, dZdyS, dZdzS, dZdaS, dZdbS, dZdgS, dZdxW, dZdyW, dZdzW, dZdaW, dZdbW, dZdgW],
+	[dnXdxS,dnXdyS,dnXdzS,dnXdaS,dnXdbS,dnXdgS,dnXdxW,dnXdyW,dnXdzW,dnXdaW,dnXdbW,dnXdgW],
+	[dnYdxS,dnYdyS,dnYdzS,dnYdaS,dnYdbS,dnYdgS,dnYdxW,dnYdyW,dnYdzW,dnYdaW,dnYdbW,dnYdgW],
+	[dnZdxS,dnZdyS,dnZdzS,dnZdaS,dnZdbS,dnZdgS,dnZdxW,dnZdyW,dnZdzW,dnZdaW,dnZdbW,dnZdgW]);
+/*===================================
+	dRn;
+(%o199) matrix(
+[-1,lx,0,-lx*r33*ZW-lx*r32*YW-lx*r31*XW-lx*tz,-r33*ZW-r32*YW-r31*XW-tz,(r23+lx*r13)*ZW+(r22+lx*r12)*YW+(r21+lx*r11)*XW+ty+lx*tx,r11-lx*r21,r12-lx*r22,r13-lx*r23,(lx*r22-r12)*ZW+(r13-lx*r23)*YW,(r11-lx*r21)*ZW+(lx*r23-r13)*XW,(lx*r21-r11)*YW+(r12-lx*r22)*XW],
+[0,lz,-1,(-lz*r33-r23)*ZW+(-lz*r32-r22)*YW+(-lz*r31-r21)*XW-lz*tz-ty,r13*ZW+r12*YW+r11*XW+tx,lz*r13*ZW+lz*r12*YW+lz*r11*XW+lz*tx,r31-lz*r21,r32-lz*r22,r33-lz*r23,(lz*r22-r32)*ZW+(r33-lz*r23)*YW,(r31-lz*r21)*ZW+(lz*r23-r33)*XW,(lz*r21-r31)*YW+(r32-lz*r22)*XW],[0,0,0,0,-r33*nzW-r32*nyW-r31*nxW,r23*nzW+r22*nyW+r21*nxW,0,0,0,r13*nyW-r12*nzW,r11*nzW-r13*nxW,r12*nxW-r11*nyW],
+[0,0,0,r33*nzW+r32*nyW+r31*nxW,0,-r13*nzW-r12*nyW-r11*nxW,0,0,0,r23*nyW-r22*nzW,r21*nzW-r23*nxW,r22*nxW-r21*nyW],
+[0,0,0,-r23*nzW-r22*nyW-r21*nxW,r13*nzW+r12*nyW+r11*nxW,0,0,0,0,r33*nyW-r32*nzW,r31*nzW-r33*nxW,r32*nxW-r31*nyW])
+
+
+
+
+=================================== */
+/*==============================
+    xS yS zS         aS  bS      gS xW  yW zW      aW   bW        gW
+dX [-1,lx ,0,-lx*ZW   , -ZW,YW+lx*XW,1,-lx,0,lx*ZW   ,  ZW,-YW-lx*XW],
+dZ [ 0,lz,-1,-lz*ZW-YW,  XW,   lz*XW,0,-lz,1,lz*ZW+YW, -XW,   -lz*XW],
+dnX[ 0, 0, 0,        0,-nzW,     nyW,0,  0,0,       0, nzW,     -nyW],
+dnY[ 0, 0, 0,      nzW,   0,    -nxW,0,  0,0,    -nzW,   0,      nxW],
+dnZ[ 0, 0, 0,     -nyW, nxW,       0,0,  0,0,     nyW,-nxW,        0])
+    TRMatrix A(5,6,
+	       //                 0    1    2                    3         4                   5
+	       //                dx   dy   dz                alpha      beta               gamma
+	       /* dX 0*/	-1.,  tX,  0.,         -tX*rO.Y() ,  -rO.X(), rO.X() + tX*rO.Y(),
+	       /* dZ 1*/         0.,  tZ, -1., -(rO.Z()+tZ*rO.Y()),   rO.Z(),          tZ*rO.Y(),
+	       /* nX 2*/         0.,  0.,  0.,                 0.0,  -nO.Z(),             nO.Y(),
+	       /* nY 3*/         0.,  0.,  0.,              nO.Z(),      0.0,            -nO.X(),
+	       /* nZ 4*/         0.,  0.,  0.,             -nO.Y(),   nO.X(),                0.0);  PrPP(A);
+    [   xS][ yS ][  zS ][     aS       ] [ bS    ][ gS         ][ xW][ yW   ][ zW][   aW       ][    bW ][       gW     ]
+dX  [ - 1 ][ lx ][  0  ][   - lx ZW    ] [ - ZW  ][ YW + lx XW ][ 1 ][ - lx ][ 0 ][   lx ZW    ][  ZW   ][ - YW - lx XW ]
+dZ  [  0  ][ lz ][ - 1 ][ - lz ZW - YW ] [  XW   ][   lz XW    ][ 0 ][ - lz ][ 1 ][ lz ZW + YW ][ - XW  ][   - lz XW    ]
+dnX [  0  ][ 0  ][  0  ][      0       ] [ - nzW ][    nyW     ][ 0 ][  0   ][ 0 ][     0      ][  nzW  ][    - nyW     ]
+dnY [  0  ][ 0  ][  0  ][     nzW      ] [   0   ][   - nxW    ][ 0 ][  0   ][ 0 ][   - nzW    ][   0   ][     nxW      ]
+dnZ [  0  ][ 0  ][  0  ][    - nyW     ] [  nxW  ][     0      ][ 0 ][  0   ][ 0 ][    nyW     ][ - nxW ][      0       ]
+
+
+
+
+
+
+
+
+
+
+================================*/

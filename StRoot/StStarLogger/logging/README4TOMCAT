@@ -1,0 +1,52 @@
+
+This is the README descibing the  UCM components of STAR fc3.star.bnl.gov Tomcat server.
+
+
+UCM Tomcat server: fc3.star.bnl.gov
+
+
+1. username: "ucmportal"
+
+2. Setting environment Tomcat server  environment
+
+   >  source ~ucmportal/local/setup.csh
+    
+3.  Starting  /stopping  Tomcat server:
+
+    The standard Tomcat shell scripts  are to be used:
+    
+     $CATALINA_HOME/bin/startup.sh
+     $CATALINA_HOME/bin/shutdown.sh
+     
+4. Deplyoing the new version of UCM  portal
+
+   4.1. start   Netbean IDE:
+   
+        >  netbeans&
+             
+   4.2. Use the netbeans IDE SVN update facility to update the portal source from 
+        the Leve's SVN repository.
+        
+   4.3. Restart the Tomcat server if needed
+   
+5. Deploy the new version of UCM library and executable (if needed)
+
+   5.1. Goto $CATALINA/share/lib 
+   
+    > cd $CATALINA/share/lib 
+    
+   5.2.  Invoke:
+    
+    > ./deploy.sh # to downlaod the tar ball (see $STAR/StRoot/logging/REAME )
+    
+    or do it "by hand":
+    
+    > rm -rf ucmdist.tar.gz
+    > wget http://www.rhic.bnl.gov/~fine/tmp/ucmdist.tar.gz
+    > tar -xzvf ucmdist.tar.gz"
+    
+    
+    5.3. Restart the Tomcat server (see 3 above)
+    
+Valeri Fine
+( $Id: README4TOMCAT,v 1.2 2010/10/05 14:44:11 fine Exp $ )

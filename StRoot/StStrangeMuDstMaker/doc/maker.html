@@ -1,0 +1,604 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<!-- 
+      Template by Torre Wenaus.
+      This page is MAINTAINED IN RAW HTML. Do NOT corrupt it
+      by editing it with a WYSIWYG HTML editor.
+ -->
+<head>
+<title>StStrangeMuDstMaker: the Maker</title>
+<meta name="Author" content="Gene Van Buren">
+<meta name="Description" content="Prepared for the STAR computing and software website.">
+<meta name="KeyWords" content="STAR RHIC computing software documentation StStrangeMuDstMaker">
+<meta name="Generator" content="HomeSite 2.5">
+<meta http-equiv="Reply-to" content="gene@bnl.gov (Gene Van Buren)">
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+        <tr bgcolor="#ffdc9f">
+        <td align=left> <font size="-1">
+        <a href="/STAR/">STAR</a>
+        &nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+        &nbsp; <a href="/STAR/html/comp_l/root/documentation.html">Documentation</a> 
+        </td>
+        <td align=right> <font size="-1">
+        &nbsp;  <!-- top right corner  --> </font></td>
+        </tr>
+        <tr bgcolor="#ffdc9f"><td align=center colspan=2><font size="+2"> <b>
+        StStrangeMuDstMaker: the Maker
+        </b></font></td></tr>
+        <tr bgcolor="#ffdc9f">
+        <td><font size="-1">Offline Software using ROOT in STAR</font></td>
+        <td align="right"><a href="/STAR/html/ofl_l/prodinfo.html">
+        <font size="2" face="verdana,arial,helvetica,sans-serif">Maintained</font>
+        </a> 
+         <font size="-1">
+         by <a href="mailto:gene@bnl.gov">G. Van Buren</a>
+         </font> </td> 
+        </tr>
+
+	<tr><td align=right> 
+	<td align=right> <font size="-1"> 
+            Last modified Tue Apr 11 15:30:19 2000
+          </FONT></TD></TR>
+
+
+</TABLE>
+
+
+<center>
+<a href="index.html">StStrangeMuDstMaker</a>
+<p>
+<HR width=60%>
+
+<h1>The Maker</h1>
+<a href="#code">The Code</a><br>
+<a href="#content">Specifying Content</a><br>
+<a href="#creating">Creating</a><br>
+<a href="#reading">Reading</a><br>
+<a href="#filtering">Filtering</a><br>
+<a href="#tools">Tools</a><br>
+<a href="#buffer">Buffer Sizes</a><br>
+<a href="#adding">Adding Content</a><br>
+</center>
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="code"><h2>The Code</h2></a>
+The self-documented code can be viewed through doxygen <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStStrangeMuDstMaker.html">
+here</a>.
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="content"><h2>Specifying Content for Micro-DSTs</h2></a>
+After instantiating a StStrangeMuDstMaker, the user should tell
+the maker which components they want to work with. No components
+are turned on by default. Component content is controlled via
+the <tt>Do*()</tt> member functions:
+<ul>
+<li><tt>DoV0()</tt>
+<li><tt>DoXi()</tt>
+<li><tt>DoKink()</tt>
+<li><tt>DoMc()</tt>
+</ul>
+For example, calling the <tt>DoV0()</tt> member function will cause V0
+components to be created/read for the micro-DST associated with this maker.
+In read mode, the user need not turn on components they will not be using
+even if they are on the micro-DST on file. Here is a brief example:
+<pre>
+  StStrangeMuDstMaker strangeDst();
+  strangeDst.DoV0();
+</pre>
+<p>
+
+Note that <tt>DoMc()</tt> turns on processing of the Monte Carlo data
+and association branches for each of the content types turned on by any
+of the first three <tt>Do*()</tt> member functions.
+<p>
+
+<hr width=10% align=left>
+<a name="creating"><h2>Creating Micro-DSTs</h2></a>
+Create mode is the default mode for the StStrangeMuDstMaker maker.
+The maker and supporting code libraries must be loaded, and the maker
+should be used in a standard STAR chain which provides an StEvent structure
+from which the micro-DST can be made. Currently, persistent StEvent is
+not supported, so a standard DST should be read in, and StEventMaker should
+be used to build the StEvent before the StStrangeMuDstMaker. The user
+need not do anything during the event loop of the chain as the filling of
+the micro-DST from StEvent is done automatically. A good
+example is provided in the macro:<br>
+<tt>$STAR/StRoot/macros/analysis/makeStrangeMuDst.C</tt>,<br>
+where something like the following is used:
+<pre>
+  StStrangeMuDstMaker strangeDst();
+  strangeDst.DoV0();     // Selects V0 vertices for micro-DST
+  strangeDst.DoXi();     // Selects Xi vertices for micro-DST
+  strangeDst.DoMc();     // Selects MC info for both V0 and Xi for micro-DST
+  strangeDst.SetWrite(); // Sets "write" mode (using default filenames)
+</pre>
+
+<h3>Creating on File</h3>
+The above macro demonstrates creating a micro-DST from StEvent and saving
+it to a file. Saving to file is specified with the <tt>SetWrite()</tt>
+member function of the maker. This member function should be called after
+the maker is instantiated, but before the <tt>Init()</tt> member function
+of the chain is called. <tt>SetWrite()</tt> takes up to four paramters,
+but only the first is important at present. These four parameters are
+the filenames associated with the four component branches of the micro-DST
+(described in the section on
+<a href="microDST.html#structure">Structure of the Micro-DST</a>).
+Each filename has a default, and not entering parameters leads to the
+use of the default values. The root of the TTree itself is kept in the
+<tt>Event</tt> component file, which defaults to "evMuDst.root".
+
+<h3>Creating in Memory</h3>
+This is the default creation mode for the maker. If no <tt>Set*()</tt>
+member functions are called, a micro-DST is created, and stored in memory.
+It is not written to file. It can be accessed via the maker's
+<tt>GetTree()</tt> member function. See the <a href="#tools">Tools from
+StStrangeMuDstMaker</a> section below. A word of caution: the amount of
+memory that the micro-DST uses as it grows from event to event is
+not limited. It is possible to use all the available memory on the
+machine, leading to a crash and loss of data. This option is thus good
+for relatively small micro-DSTs; larger ones should either be written
+to disk (see Creating on File above), or erased after each event
+(see Persistence in Memory below).
+
+<h4>Persistence in Memory</h4>
+When creating a micro-DST, it may be that the user does not want to retain
+information from event to event. For example, the HBT maker might wish to
+use the strangeness micro-DST and its interface, but might need it only on
+an event-by-event basis. There is no need in this case to let the micro-DST
+grow, consuming more and more memory as each event progresses. The
+<tt>SetNoKeep()</tt> member function implements this functionality, causing
+the micro-DST to be erased after each event. Usage is as follows:
+<pre>
+  StStrangeMuDstMaker strangeDst();
+  strangeDst.DoV0();
+  strangeDst.SetNoKeep();
+</pre>
+
+
+<hr width=10% align=left>
+<a name="reading"><h2>Reading Micro-DSTs</h2></a>
+Read mode is set by using the <tt>SetRead()</tt> member function. As with
+the other <tt>Set*()</tt> member functions, this should be called
+between the instantiation of the maker and the <tt>Init()</tt> member
+function of the chain. Also, as with the <tt>SetWrite()</tt> member function,
+up to four parameters can be entered specifying the files on which the
+micro-DST is located. The user should, in general, need only specify
+one file: that of the event component branch, where the root of the
+TTree used in the micro-DST resides. This file defaults to "evMuDst.root"
+if no parameters are given to <tt>SetRead()</tt>.<p>
+
+If the user is interested in reading in several micro-DSTs, the use of
+the StFile class is employed. StFile can take as an argument in its
+constructor an array of file names, any of which may also include wild
+cards (as in <tt>"ev*Dst.root"</tt>). Passing <tt>SetRead()</tt> a pointer
+to the StFile class then teaches StStrangeMuDstMaker what files to read.
+Here is an example:
+<pre>
+  char* files[3];
+  files[0] = "/bigfiles/run471.evMuDst.root";
+  files[1] = "/bigfiles/run475.evMuDst.root";
+  files[2] = "/oldfiles/run*.evMuDst.root";
+  StFiles* flist = new StFile(files);
+  StStrangeMuDstMaker strangeDst();
+  strangeDst.SetRead(flist);
+</pre>
+<p>
+
+Access to the micro-DST is then available inside the event loop.
+Member functions outlined in the section below on
+<a href="#tools">Tools from StStrangeMuDstMaker</a> allow the user to
+find out how many V0's, Xi's, or Kink's, as well as their respective
+Monte Carlo counterparts, are in the given event and access individual
+instances of the micro-DST component classes. The user can then loop over
+all vertices from an event, and can call member functions from the
+micro-DST component classes. A good example is provided in:<br>
+<tt>$STAR/StRoot/macros/analysis/readStrangeMuDst.C</tt>,<br>
+with an event loop looking something like this:
+<pre>
+  Int_t Nevents = 10;
+  // Loop over events
+  for( Int_t i=0; i &lt; Nevents; i++ ) {
+    if( chain.Make(i) ) break;
+    // Loop over V0 vertices
+    for( Int_t j=0; j &lt; strangeDst.GetNV0(); j++ ) {
+      StV0MuDst *v0m = strangeDst.GetV0(j);
+      hist->Fill(v0m->massLambda());
+    }
+    if( i != Nevents) chain.Clear();
+  }
+  chain.Finish();
+</pre>
+<p>
+
+Additionally, the user need not examine every event in the micro-DST.
+If the user specifies an integer parameter in the <tt>Make()</tt> member
+function call for the chain, then the event associated with that integer
+is read from the micro-DST. For example, if the event loop runs from
+<tt>i = 5...9</tt>, and the chain is run with <tt>chain.Make(i)</tt>,
+then the 6th through 10th events on the file will be read in (the first
+event on file is event zero). This allows the user to skip events or
+read in only a portion of the events on the micro-DST. If no parameter is
+given to <tt>Make()</tt>, the micro-DST file is read from the beginning.<p>
+
+<h4>Monte Carlo Data</h4>
+Monte Carlo data is accessed similarly using functions with "Mc" in their
+names. Associations between Monte Carlo and reconstructed data can be
+accessed via functions with "Assoc" in their names. Examining associated
+vertices may look something like this:
+<pre>
+  Int_t Nevents = 10;
+  // Loop over events
+  for( Int_t i=0; i &lt; Nevents; i++ ) {
+    if( chain.Make(i) ) break;
+    // Loop over V0 vertices
+    for( Int_t j=0; j &lt; strangeDst.GetNV0Assoc(); j++ ) {
+      StStrangeAssoc* v0a = strangeDst.GetV0Assoc(j);
+      StV0MuDst* v0m = strangeDst.GetV0(v0a->indexRecoArray());
+      StV0Mc* v0mc = strangeDst.GetV0Mc(v0a->indexMcArray());
+      hist->Fill(v0m->ptV0() - v0mc->ptV0());
+    }
+    if( i != Nevents) chain.Clear();
+  }
+  chain.Finish();
+</pre>
+<p>
+
+Code can be written that works identically for reconstructed and Monte Carlo
+data using the <tt>Get*I()</tt> functions and interface classes:
+<pre>
+  Bool_t MC = kTRUE; // kFALSE for reconstructed data
+  Int_t Nevents = 10;
+  // Loop over events
+  for( Int_t i=0; i &lt; Nevents; i++ ) {
+    if( chain.Make(i) ) break;
+    // Loop over V0 vertices
+    for( Int_t j=0; j &lt; strangeDst.GetNV0I(MC); j++ ) {
+      StV0I *v0i = strangeDst.GetV0I(j,MC);
+      hist->Fill(v0i->pseudoRapV0());
+    }
+    if( i != Nevents) chain.Clear();
+  }
+  chain.Finish();
+</pre>
+<p>
+
+<hr width=10% align=left>
+<a name="filtering"><h2>Filtering Micro-DSTs</h2></a>
+There are certainly times when only a portion of a micro-DST is of interest
+to a user. One then may wish to create a sub-micro-DST (or nano-DST) containing
+only that portion which is of interest. This allows greater portability
+for that portion of the micro-DST, and also improves access speed. To do
+this, two makers are needed: one to create the new sub-micro-DST,
+and one to read an already existing micro-DST. The maker for the new
+data must be instantiated before the maker for the existing data.
+After both have been instantiated, the maker for the new data must be told
+that it will be a subset of the old - this is done via the <tt>SubDst()</tt>
+member function, and should be implemented in the following style:
+<pre>
+  StStrangeMuDstMaker strangeNewDst("strangeNewMuDst");
+  strangeNewDst.DoV0();
+  strangeNewDst.SetWrite("newEvMuDst.root");
+
+  StStrangeMuDstMaker strangeOldDst("strangeOldMuDst");
+  strangeOldDst.SetRead("oldEvMuDst.root");
+
+  strangeNewDst.SubDst(strangeOldDst);
+</pre>
+The filenames used above are up to the user, and different combinations
+of strangeness micro-DST components other than simply the V0 components
+can be used. Note that <tt>DoV0()</tt> need not be called for the old
+micro-DST maker, as the new one knows to at least try to make sure
+that the reading of the V0's is turned on.<p>
+
+If one is filtering the micro-DST, new or additional cuts are probably
+also being used. If this is the case, one should consider adding cuts
+information to the strangeness cuts list stored with the micro-DST.
+More information on how to do this is available for
+<a href="cuts.html">the cuts</a>.<p>
+
+The selection process for what goes into the sub-micro-DST can be viewed
+under two paradigms. The first paradigm encompasses a user who wants to
+take only those vertices which satisfy some criteria, and the second
+paradigm is for those who want to keep events which satisfy a criteria.
+Both selection processes are done during the event loop, between the
+<tt>Make()</tt> and <tt>Clear()</tt> member function calls of the chain.
+The event for the old micro-DST is read in during <tt>Make()</tt>, selections
+are made, and the new sub-micro-DST is written during <tt>Clear()</tt>.
+Selections are made via the <tt>Select*()</tt> member functions:
+
+<dl>
+<dt>Vertex Selection Paradigm:
+<dd>In this model, only certain vertices from within an event are selected
+to go on the sub-micro-DST. The vertices are selected with the following
+six member functions:
+<ul>
+<li><tt>SelectV0(j)</tt>
+<li><tt>SelectXi(j)</tt>
+<li><tt>SelectKink(j)</tt>
+<li><tt>UnselectV0(j)</tt>
+<li><tt>UnselectXi(j)</tt>
+<li><tt>UnselectKink(j)</tt>
+</ul>
+In these calls, <tt>j</tt> specifies the index of the vertex within that
+event to be selected. For example, one might like to select only those
+cascades with a transverse momentum above 500 Mev/c. This would be done
+in a loop as follows:
+<pre>
+  // Loop over events
+  for( Int_t i=0; i &lt; Nevents; i++ ) {
+    if( chain.Make(i) ) break;
+    // Loop over Xi vertices
+    for( Int_t j=0; j &lt; strangeOldDst.GetNXi(); j++ ) {
+      StXiMuDst *xim = strangeDst.GetXi(j);
+      if (xim->ptXi() > 0.5) strangeNewDst.SelectXi(j);
+    }
+    if( i != Nevents) chain.Clear();
+  }
+  chain.Finish();
+</pre>
+The user can also specify that all of a specific vertex type can be
+selected for a particular event by setting the input parameter
+<tt>j</tt> to be a negative number. Thus, <tt>SelectV0(-1)</tt> would
+select all V0 candidates in the event, but would select no other vertex
+types for copying.
+<p>
+
+Similarly, one can unselect a specific vertex that one has already selected
+using the <tt>Unselect*()</tt> member functions. This is particularly useful
+if there are only a few vertices one would not wish to select, in which case
+one would use <tt>Select*(-1)</tt> followed by a few specific uses of
+<tt>Unselect*(j)</tt>. Again, a negative input unselects the entire event.
+<p>
+
+One note of caution: <tt>Select*(j)</tt> does not check to see if a vertex
+has already been selected, so selecting one twice results in two copies.
+<p>
+
+<dt>Event Selection Paradigm:
+<dd>If one wishes to select events as a whole for a sub-micro-DST, this can
+be done with the <tt>SelectEvent()</tt> member function. This essentially
+copies the entire event from the old micro-DST to the new sub-micro-DST,
+but is only true to the extent that what micro-DST components are turned
+on for the new maker (via the <tt>Do*()</tt> member functions, see
+<a href="#content">Specifying Content for Micro-DSTs</a>). Here is an
+example where the user takes all events which have more than 10 Kinks:
+<pre>
+  // Loop over events
+  for( Int_t i=0; i &lt; Nevents; i++ ) {
+    if( chain.Make(i) ) break;
+    if (strangeOldDst.GetNKink() > 10) strangeNewDst.SelectEvent();
+    if( i != Nevents) chain.Clear();
+  }
+  chain.Finish();
+</pre>
+This is really the equivalent of using the vertex selection paradigm
+with input parameter <tt>j = -1</tt> for all active components.
+<p>
+It is important to understand that an event which has not been selected
+will still have its event branch data copied to the filtered micro-DST,
+even if none of the secondary vertex data is copied.
+UnselectEvent() will restore any event in which any selections have
+already been made to this same state of copying the event branch only.
+If you truly want to eliminate an event entirely from the filtered
+micro-DST, then use AbortEvent(). Here is an example:
+<pre>
+    StStrangeEvMuDst* ev = strageOlDst.GetEvent();
+    if (fabs(ev->primaryVertexZ())<100.) {
+      strangeNewDst.SelectEvent();
+    } else {
+      strangeNewDst.AbortEvent();
+    }
+</pre>
+</dl>
+
+Both paradigms are shown in the following macro, with the vertex selection
+paradigm scheme run by default, and an event selection example commented
+out:<br>
+<tt>$STAR/StRoot/macros/analysis/filterStrangeMuDst.C</tt>.<p>
+
+
+<hr width=10% align=left>
+<a name="tools"><h2>Tools from StStrangeMuDstMaker</h2></a>
+
+<ul>
+<li>Getting a particular event from file:
+<br><tt>chain.Make(i)</tt>
+<br>- Use the input parameter <tt>i</tt> of <tt>Make()</tt> to specify the
+index of the event read in (event indices start at zero). This is useful
+only in the read mode (see <a href="#reading">Reading Micro-DSTs</a>)<p>
+
+<li>Getting the number of vertices for an event:
+<br><tt>Int_t GetNV0()</tt>
+<br><tt>Int_t GetNXi()</tt>
+<br><tt>Int_t GetNKink()</tt>
+<br>- Returns an integer with the number of that particular vertex type.
+<br>- Append "Mc" or "Assoc" to the function name for Monte Carlo vertices
+or associations between MC and reconstructed data.<p>
+
+<li>Getting a pointer to a particular vertex:
+<br><tt>StV0MuDst* GetV0(j)</tt>
+<br><tt>StXiMuDst* GetXi(j)</tt>
+<br><tt>StKinkMuDst* GetKink(j)</tt>
+<br>- Use the input parameter <tt>j</tt> to specify the index of the vertex
+from that event, with indices starting at zero for each event.
+<br>- Append "Mc" or "Assoc" to the function name for Monte Carlo vertices
+or associations between MC and reconstructed data.<p>
+<p>
+
+<li>Getting a pointer to the event information:
+<br><tt>StStrangeEvMuDst* GetEvent()</tt>
+<br><tt>StStrangeEvMuDst* GetMcEvent()</tt>
+<p>
+
+<li>Getting a pointer to the TTree used for the micro-DST:
+<br><tt>TTree* GetTree()</tt>
+<p>
+
+<li>Getting access to the cuts on the micro-DST:
+<br><tt>StStrangeCuts& Cuts()</tt>
+<br>- See <a href="cuts.html">documentation for StrangeCuts</a>
+<p>
+
+<li>Getting a pointer to the
+<a href="http://root.cern.ch/root/html/TClonesArray">TClonesArray</a>
+used for collecting instances of the component classes of the micro-DST:
+<br><tt>TClonesArray* GetEvClonesArray()</tt>
+<br><tt>TClonesArray* GetV0ClonesArray()</tt>
+<br><tt>TClonesArray* GetXiClonesArray()</tt>
+<br><tt>TClonesArray* GetKinkClonesArray()</tt>
+<br>- From the TClonesArray, one can get a vertex with index <tt>j</tt> via
+the <tt>operator[]</tt>, like <tt>(*(maker.GetV0ClonesArray()))[j]</tt>, but
+this is more simply done with the <tt>Get*(j)</tt> member functions
+described above.<p>
+
+<li>Treating MC and reconstructed data the same (interfaces):
+<br><tt>Get*I(Bool_t MC)</tt>
+<br>- Switch easily back and forth between Monte Carlo and reconstructed data
+via input boolean <tt>MC</tt>.
+<br>- Return types are usable for Monte Carlo and reconstructed data
+(i.e. <tt>StV0I</tt> is usable for both <tt>StV0MuDst</tt> and <tt>StV0Mc</tt>
+data classes).
+</ul>
+
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="buffer"><h2>Buffer Sizes</h2></a>
+The maker allocates a certain amount of buffer memory for each variable
+stored. Optimally, one would like this buffer to be as large as possible,
+reducing the time spent for I/O, and consequently reducing the number of
+keys Root uses in its files (thereby reducing the file size). However,
+with limited memory available on computers running the job, making this
+buffer large makes the executable very large, and may lead to significant
+virtual memory paging (disk swapping), thereby reducing the performance.
+If other users are running jobs, the amount of available memory may be
+very limited.
+Default values of the buffer sizes have been chosen which accomodate the
+usage of about 200 MB of memory for running with all branches activated.
+But in some situations, the user may wish to changes these limits. To do
+this, the following functions are provided:
+
+<ul>
+<li><tt>SetV0BufferSize(b)</tt>
+<li><tt>SetXiBufferSize(b)</tt>
+<li><tt>SetKinkBufferSize(b)</tt>
+</ul>
+
+where <tt>b</tt> is the buffer size in bytes for each of the variables
+associated with the particular branch. The default values are 1024000
+(1 MB) for the V0 and Xi branches, and 128000 (128 KB) for the Kink branch.
+The event branch currently uses 64 KB per variable. The total memory used
+is then a function of which branches are activated, as well as how many
+variables are in each branch. The above functions must be called between
+the instantiation of the maker, and the call to <tt>Init()</tt>.
+
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="adding"><h2>Adding Content</h2></a>
+You might wish to add more information to your
+own MuDsts. This is done quite
+simply using the <a href="#filtering">filtering</a> code.
+An example is provided here:
+<p>
+
+Let's say I want to add a branch which contains a
+little bit of information that describes an event. In
+my example, I've made a new class called "StA"
+with two values that describe the event. This is
+what its header file looks like:
+<pre>
+#ifndef StA_hh
+#define StA_hh
+#include "TObject.h"
+class StA : public TObject {
+  public:
+   StA() {}
+   virtual ~StA() {}
+   Int_t value1;
+   Float_t value2;
+   ClassDef(StA,1)
+};
+#endif
+</pre>
+
+Now I must modify the filterStrangeMuDst.C macro
+to include the new information. Here are 3 steps:
+<p>
+
+<ol>
+<li>Load the library for the new class:
+<pre>
+  gSystem->Load("myNewLibrary");
+</pre>
+<p>
+
+<li>Assign a new branch (I called mine "ABranch")
+for the new MuDst <b>after</b> the <tt>chain.Init()</tt>
+call, but before the event loop:
+<pre>
+   StA::Class()->IgnoreTObjectStreamer(); // Don't store extra stuff
+   TTree* tree = strangeNewDst.GetTree();
+   TClonesArray* AArray = new TClonesArray("StA",1);
+   tree->Branch("ABranch",&AArray,64000,99);
+   StA* Ainstance = new((*AArray)[0]) StA();
+</pre>
+
+<li>Fill the data in the new branch during the
+event loop. Here is a simple example where
+I count Lambda candidates and their mean pt:
+<pre>
+     Int_t totalLams = 0;
+     Float_t totalLamPt = 0.;
+     for( Int_t j = 0; j &lt; strangeOldDst.GetNV0(); j++ ) {
+       StV0MuDst *v0m = strangeOldDst.GetV0(j);
+       Float_t ml = v0m->massLambda();
+       if ((ml &gt; 1.11) && (ml &lt; 1.12)) {
+         totalLams++;
+         totalLamPt += v0m->ptV0();
+       }
+     }
+     Ainstance->value1 = totalLams;
+     Ainstance->value2 = totalLamPt/totalLams;
+</pre>
+</ol>
+
+That's all there is to it. Your output MuDst will
+contain the new branch with the new data. Simply
+opening the new file in Root will allow you to do
+things like making histograms with the new data
+using <tt>TTree::Draw()</tt>. Reading the actual
+class back will require adding code like this
+after the <tt>chain.Init()</tt> of readStrangeMuDst.C:
+<pre>
+   TTree* tree = strangeNewDst.GetTree();
+   TClonesArray* AArray = new TClonesArray("StA",0);
+   tree->SetBranchStatus("ABranch.*",1);
+   tree->SetBranchAddress("ABranch",&AArray);
+</pre>
+and using the following code during the event loop:
+<pre>
+     StA* Ainstance = (StA*) (AArray->At(0));
+</pre>
+
+
+
+<P>
+</BODY>
+</HTML>

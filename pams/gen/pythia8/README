@@ -1,0 +1,128 @@
+
+   BASIC INSTALLATION
+
+1) Once you have unpacked your tarball into a new (sub)directory,
+   the first step is to run the "configure" script. If you accept the 
+   default compiler options, and plan to run PYTHIA 8 standalone, you 
+   only have to type "./configure". This will create the file config.mk. 
+   Actually, running this script by hand is optional since "make" will 
+   run "configure" anyway, but possible errors in the paths will be 
+   less clearly visible.
+
+2) Type "gmake" or "make". This will create an archive library. 
+   On Linux systems gmake and make are usually equivalent. For others, 
+   in case of doubt, use gmake. This applies below as well.
+
+3) The library should now be ready for use. To study some examples,
+   go to the "examples" subdirectory. The README file in that 
+   subdirectory contain further instructions how executables can 
+   be built and run.
+    
+4) At any time, typing "gmake clean" will remove all temporary files
+   (including the compiled PYTHIA 8 library) except any output files 
+   you may have created during your test runs. (If you do it in the 
+   main directory it will apply to all subdirectories, if in examples 
+   then only for that subdirectory.) 
+
+----------------------------------------------------------------------
+
+   ADVANCED INSTALLATION
+
+1) If you want to set various compilation options, or prepare the 
+   linking to the HepMC external library then the "configure" script 
+   will have to do more work. There are two different ways to 
+   accomplish this.
+
+1.1)  You can use command-line arguments to set up the desired library 
+     links. The possible options are:
+     --help : prints a brief summary of the options described here.
+     --enable-debug : turns on debugging flags and turns off optimization.
+         (This makes program execution much slower. If you later want to 
+         switch optimization back on you have to rerun configure without
+         this option, since default is to allow optimization.)
+     --enable-shared : turns on shared-library creation,
+         in addition to the archive libraries always built.
+     --lcgplatform=name : allows you to specify the platform assumed for
+         compilation, which also affects the assumed location of the 
+         libraries below; default is slc4_ia32_gcc34 while other supported
+         values for name include slc4_amd64_gcc34 and slc3_ia32_gcc323
+         (deprecated). 
+     --with-hepmc=path : the path to your local copy of the HepMC library.
+         Please note that HepMC version 1 is no more supported. If the path
+         does not contain the version number you will be warned about it.    
+     --with-hepmcversion=v : a simpler alternative to the above, valid 
+         if you are using the CERN AFS LCG external area. See the HepMC
+         WEB site for the information about the versions currently
+         "in production"
+
+1.2) If you want to use the external HepMC from some different location, 
+     or it is more convenient to put the paths directly into the script,
+     then you have to edit the "configure" file by hand before you run 
+     it. Search in the "configure" file for
+       HEPMCLOCATION
+     and provide the paths where you have the respective libraries
+     installed on your local platform.
+
+   Information on the selected paths is stored in the files config.mk,
+   examples/config.sh and examples/config.csh when you run "./configure".
+
+2) If you want to change the version of HepMC, you have to
+   rerun the script "configure" with relevant options, then type "make" 
+   to recompile the library hepmcinterface. If you tried already to run 
+   examples with previous versions, pay attention to the environment 
+   variable LD_LIBRARY_PATH (see README in examples).
+
+3) If you have two CPUs or cores on your computer then using the -j2 
+   option on make/gmake may speed up compilation.
+
+4) Necessary data are automatically loaded when you use the default 
+   PYTHIA installation directory structure and run the main programs in 
+   the examples subdirectory. However, in the general case, you must 
+   provide the path to the .xml files, originally stored in the xmldoc 
+   directory, where default settings and particle data are found. This 
+   can be done in two ways.
+
+4.1) You can set the environment variable PYTHIA8DATA to contain the 
+     location of the xmldoc directory. In the csh and tcsh shells this 
+     could e.g. be
+       setenv PYTHIA8DATA /home/myname/pythia81xx/xmldoc
+     while in other shells it could be
+       export PYTHIA8DATA=/home/myname/pythia81xx/xmldoc
+     where xx is the subversion number.
+     Recall that environment variables set locally are only defined in 
+     the current instance of the shell. The above lines should go into 
+     your .cshrc and .bashrc files, respectively, if you want a more 
+     permanent assignment.
+
+4.2) You can provide the path as argument to the Pythia constructor in 
+     your main program, e.g.
+       Pythia pythia("/home/myname/pythia81xx/xmldoc");
+     where again xx is the subversion number.
+
+   When PYTHIA8DATA is set it takes precedence, else the path in the 
+   constructor is used, else one defaults to the ../xmldoc directory.
+
+----------------------------------------------------------------------
+
+   FOR WINDOWS USERS
+
+The Makefile.msc file is intended for use on Win32/NMAKE systems with 
+the  Microsoft Visual C/C++ compiler. This alternative installation
+is not the development platform, however, and therefore not as well 
+tested. Not all parts of the above installation procedure are the same,
+so some experimentation may be required.    
+
+----------------------------------------------------------------------
+
+   LEARN MORE
+
+To learn more about the current program:
+
+A) A brief self-contained introduction is found in the 
+   htmldoc/pythia8100.pdf file.
+
+B) Details can be found by opening a web browser on the 
+   htmldoc/Welcome.html file, and then navigating among the pages 
+   in the index there.   
+
+----------------------------------------------------------------------

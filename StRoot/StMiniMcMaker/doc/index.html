@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>StMiniMcMaker</title>
+  </head>
+
+  <body bgcolor="#ffffff" text="#000000">
+    <table border="0" width ="100%" cellpadding="10">
+      <tr bgcolor="darkblue">
+	<td align="center" valign="top">
+	  <h1><font color="lightgreen">StMiniMcMaker</h1>
+	</td>
+    </table>
+
+    <h2> Purpose of StMiniMcMaker </h2>
+    <p>
+      StMiniMcMaker is meant to be a package that fills the classes in StMiniMcEvent.  These are classes to store
+      basic information about the simulated and reconstructed tracks for both embedding and fully simulated events (e.g.
+      Hijing + GEANT + TRS).  The trees in the output file are then used to make the histograms needed for efficiencies.
+      There are two main advantages to storing the pairwise information.  First, when revisiting an efficiency calculation
+      with various sets of cuts (e.g. fit Points >=10 vs. fit Points >= 25), one does not need to run StMcEvent, StEvent, and
+      StAssociationMaker again, but one simply uses the Trees and changes a cut to make a plot.  Second, once the track
+      association is done, the geant.root files and the event.root files need not remain on disk.  This is of special importance
+      as these files have the TPC hits in them, and take up a lot of disk space.  One can therefore reduce the needed disk space
+      for the same amount of statistics using these trees.
+
+    <p>
+      Since several people have made the request for having a mini dst for the Embedding and Simulation data, it is hoped that
+      this package will be useful to people.  This has already been used for the h- paper and for the high-pt paper.  The
+      algorithms to calculate efficiencies, backgrounds, acceptance, etc. have been incorporated from the code that has
+      already been used for the pion, kaon and proton analyses in the spectra group.
+      
+    <p>
+      The macros that are used to run StMiniMcMaker are in the StMiniMcMaker directory: StMiniEmbed.C and StMiniHijing.C.  The
+      perl script submit.pl, also in the StMiniMcMaker directory is used to submit jobs.  Since most of the embedding data
+      can be found in PDSF, this script is designed to work in the PDSF LSF queue, with some options like the data vault
+      resource usage specification.  Running the script without any arguments returns with a screen output detailing the
+      usage and options.  Please look at the macros for more information, should be straightforward.
+    <p>
+    <h2> Contents of the Tree </h2>
+      As usual, the tree has eventwise information at the top level, and several branches for each event.  First of all,
+    we save all the thrown Monte Carlo tracks in their own trackwise branch.  This guarantees all the original MC information
+    is available.  The other branches are pairwise, each entry representing a pair of tracks: one MC and one Reconstructed.
+    For the reconstructed tracks, important information like the global track parameters, the primary track parameters (if
+    available) the nubmer of fit points, etc. is stored.  For the monte carlo tracks, the GEANT ID, four momentum,
+    number of MC tpc hits, etc. is stored.  In addition, some pairwise information, e.g. the number of common hits between the
+    tracks found by the association maker, is also stored.  There are several pairwise branches which are used for
+    different purposes:
+    
+		<ul>
+			<li>MC Tracks
+				<ul>
+					<li>Holds all Monte Carlo tracks in the event.  Uses class <code>StTinyMcTrack</code>.
+				</ul>
+			<li>Matched Pairs 
+				<ul>
+					<li>Holds MC track to Primary Track matches.  Uses class <code>StMiniMcPair</code>, which inherits from <code>StTinyMcTrack</code> and from <code>StTinyRcTrack</code>, and adds additional information (see below).
+				</ul>
+			<li>Merged Pairs
+				<ul>
+					<li>Holds MC track to Primary Track match when the Primary Track has already been matched.  This happens when two close MC tracks get merged into one single reconstructed track.  The one entered in the Matched Pairs array will be the one that has the most common hits to the MC track. Uses class <code>StMiniMcPair.</code>
+				</ul>
+			<li>Split pairs
+				<ul>
+					<li>Holds MC to Primary Track match when MC track has already been matched.  This happens when a single MC track is reconstructed as two (or more) separate tracks, a.k.a. split tracks.  The one entered in the Matched Pair array will be the one that has the most common hits to the MC track. Uses class <code>StMiniMcPair.</code>
+				</ul>
+			<li>Contamination pairs (weak decay products, secondary tracks)
+				<ul>
+					<li>Holds MC tracks that are not daughters of the primary vertex that are matched to reconstructed Primary Tracks.  This happens when a MC that can come from a decay or from a secondary interaction is deemed by the tracking software to come from the reconstructed primary vertex. Uses class <code>StContamPair.</code>
+				</ul>
+			<li>Ghost tracks
+				<ul>
+					<li>Holds Primary tracks that are not matched to any MC track, i.e. they do not have enough hits in common with any MC track, where &quot;enough&quot; is defined in StAssociationMaker via the StMcParameterDB class, and is user specific.  Default values are = [3 TPC hits or 1 SVT hit or 1 FTPC] hit in common. Uses class <code>StMiniMcPair</code>, although it only stores the <code>StTinyRcTrack</code> part of the class.
+				</ul>
+			<li>Matched Globals (MC track to Global Track)
+				<ul>
+					<li>Same as Matched Pairs, but using Global tracks instead of Primary tracks. Uses class <code>StMiniMcPair.</code>
+				</ul>
+			
+		</ul>
+		<p>Strictly speaking, these are not created as <code>TBranch</code> objects in the <code>TTree</code> that is saved in the output file.  The <code>TTree</code> that is saved only has one <code>TBranch</code> which stores the <code>StMiniMcEvent</code> class.  The <code>StMiniMcEvent</code> is the class that saves all the above arrays as <code>TClonesArray</code> objects, which can then be visible when the minimc.root file is opened.
+		<p>The StMiniMcPair class is the one used in most of the arrays.  This class inherits from <code>StTinyMcTrack</code> (which holds the MC track information) and from <code>StTinyRcTrack</code> (which holds the Reco track information) plus some additional information about the match. The additional information is:</p>
+		<ul>
+			<li>The number of hits in common.
+				<ul>
+					<li>The function commonHits() returns the TPC or FTPC common hits (the detectors cover different phase space, so it should be obvious which one you are using by looking at the eta of the track).  There is also the function commonHitsSvt(), which returns exactly that.
+				</ul>
+			
+			<li>Number of hits in common with the dominant contributor track.
+			<li>The key to the dominant contributor track (&quot;dominatrack&quot;).
+				<ul>
+					<li>The &quot;dominant contributor&quot; algorithm in the StAssociationMaker checks the reco hits of each track and figures out which MC tracks contributed to each hit.  It loops over all hits and finds the MC track that contributes the most (using &quot;quality&quot; definition, below) to all the hits of the track.  Such track is called the &quot;dominant contributor&quot;.  This algorithm and the original algorithm based on matching of reco and MC hits in a fixed space volume were found to give essentially identical results.
+				</ul>
+			<li>The average quality of  the reco hits of the track.
+				<ul>
+					<li>&quot;quality&quot; is defined as the ratio of  the reco hit energy deposition that comes from the dominant contributor track, i.e. a hit that only comes from one track has 100% quality, but a reco hit that comes from two merged MC hits will have less than this.
+				</ul>
+			
+		</ul>
+		<p>
+      The information in the Matched Pairs branch is the one used to extract the reconstruction efficiency, when comparing
+      the matched tracks to the accepted tracks.  We normally define accepted tracks directly from the MC track branch
+      as the ratio of the tracks with 10 or more TPC hits to all tracks, and we define efficiency as the ratio of the
+      MC tracks that were matched (where we test the reconstructed matched track for the quality cuts we're interested in,
+      for example fit points&ge;23 and global DCA&lt;1 cm) to the accepted tracks.
+    </p>
+		<p>
+      With this information, all the corrections needed to produce corrected spectra should be readily obtained without
+      the need to rerun the association maker every time, and saving the disk space used by the hits in the geant.root and
+      event.root files.
+    <hr>
+		<address>Manuel Calderon de la Barca Sanchez</address>
+		<address>Last modified: <csobj format="LongDate" h="20" locale="00000409" region="0" t="DateTime" w="137">Friday, July 21, 2006</csobj><csobj format="ShortTime" h="20" locale="00000409" region="0" t="DateTime" w="64">03:08 PM</csobj></address>
+	</body>
+</html>

@@ -1,0 +1,5 @@
+# $Id $
+# package StHiMicroMaker
+# author: 
+Library:libStHiMicroMaker.so:LIBS +=   -lStChain     -l_StEvent  -lStHiMicroEvent
+#Library:libStHiMicroMaker.so:LIBS +=   -lStChain  -lStEvent  -lStHiMicroEvent

@@ -1,0 +1,188 @@
+<html>
+<head>
+<title>QCD Processes</title>
+<link rel="stylesheet" type="text/css" href="pythia.css"/>
+<link rel="shortcut icon" href="pythia32.gif"/>
+</head>
+<body>
+
+<h2>QCD Processes</h2>
+
+This section is subdivided into soft and hard QCD processes, with
+open charm and bottom production set aside as a special part of the
+latter. 
+
+<h3>Soft QCD processes</h3>
+
+As a rule, the processes in this class should not be mixed with
+the simulation of other processes. All by themselves, they are
+intended to represent the total cross section of hadron collisions,
+with the exception of the "rare processes" that one wishes to study
+separately. In particular, jet physics at all scales occurs as part 
+of the minimum-bias description. 
+
+<p/>
+We here use the "minimum bias" expression as a shorthand for 
+inelastic, nondiffractive events. Strictly speaking, "minimum bias" 
+represents an experimental procedure of accepting "everything", with 
+some non-universal cuts to exclude elastic and diffractive topologies. 
+In practice, the experimental mimimum-bias sample may then contain
+some contamination of what is in PYTHIA classified as diffractive,
+especially (high-mass) double diffractive. 
+
+<p/>
+Some options to modify these cross sections, and especially to include
+Coulomb corrections to the elastic cross section, are found on the
+<a href="TotalCrossSections.html" target="page">Total Cross Sections</a> page.  
+
+<p/><code>flag&nbsp; </code><strong> SoftQCD:all &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Common switch for the group of all soft QCD processes, 
+as listed separately in the following.
+  
+
+<p/><code>flag&nbsp; </code><strong> SoftQCD:minBias &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Minimum-bias events, based on an eikonalized description of all the 
+hard QCD processes, so includes them in combinationation with 
+low-<i>pT</i> events. Code 101.<br/>
+Since the current description is handled by the multiple-interactions 
+machinery as part of the parton-level processing, no hard process at 
+all is defined at the process-level part of the event generation.
+Fortunately, in this case a special
+<a href="EventInformation.html" target="page"><code>codeSub()</code></a> 
+method provides information on the first, i.e. hardest, subprocess 
+selected by the multiple-interactions machinery.
+
+  
+
+<p/><code>flag&nbsp; </code><strong> SoftQCD:elastic &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Elastic scattering <i>A B -> A B</i>.
+Code 102.
+  
+
+<p/><code>flag&nbsp; </code><strong> SoftQCD:singleDiffractive &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Single diffractive scattering <i>A B -> X B</i> and 
+<i>A B -> A X</i>. 
+Codes 103 and 104.
+  
+
+<p/><code>flag&nbsp; </code><strong> SoftQCD:doubleDiffractive &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Double diffractive scattering <i>A B -> X_1 X_2</i>.
+Code 105.
+  
+
+<h3>Hard QCD processes</h3>
+
+This group contains the processes for QCD jet production above
+some minimum <i>pT</i> threshold. The <i>pT_min</i> cut cannot be put 
+too low, or else unreasonably large jet cross sections will be obtained.
+An eikonalized description, intended to be valid at all <i>pT</i>,
+is included as part of the multiple-interactions framework, e.g. in 
+<code>SoftQCD:minBias</code> above.
+  
+<p/><code>flag&nbsp; </code><strong> HardQCD:all &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Common switch for the group of all hard QCD processes, 
+as listed separately in the following.
+  
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:gg2gg &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>g g -> g g</i>.
+Code 111.
+  
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:gg2qqbar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>g g -> q qbar</i>, where <i>q</i> by default
+is a light quark (<i>u, d, s</i>) (see below).
+Code 112.
+  
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:qg2qg &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q g -> q g</i> and <i>qbar g -> qbar g</i>.
+Code 113.
+  
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:qq2qq &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q q' -> q q'</i>, <i>q qbar' -> q qbar'</i>, 
+<i>qbar qbar' -> qbar qbar'</i>, where <i>q'</i> and <i>q</i> 
+may agree, but the outgoing flavours equals the incoming ones 
+Code 114.
+  
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:qqbar2gg &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> g g</i>. 
+Code 115.
+  
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:qqbar2qqbarNew &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> q' qbar'</i>, where <i>q'</i> 
+by default is a light quark (<i>u, d, s</i>) (see below). 
+Code 116.
+  
+
+<p/><code>mode&nbsp; </code><strong> HardQCD:nQuarkNew &nbsp;</strong> 
+ (<code>default = <strong>3</strong></code>; <code>minimum = 0</code>; <code>maximum = 5</code>)<br/>
+Number of allowed outgoing new quark flavours in the above 
+<i>g g -> q qbar</i> and <i>q qbar -> q' qbar'</i> processes, 
+where quarks are treated as massless in the matrix-element expressions 
+(but correctly in the phase space). It is thus assumed that <i>c cbar</i> 
+and <i>b bbar</i> are added separately with masses taken into account,
+using the processes below. A change to 4 would also include <i>c cbar</i> 
+in the massless approximation, etc. In order to avoid doublecounting
+the processes below should then not be used simultaneously.
+  
+
+<h3>Hard QCD processes: heavy-flavour subset</h3>
+
+These processes form a natural part of the above class, but can
+also be generated separately. Formally the heavy-quark mass makes
+these matrix elements finite in the <i>pT -> 0</i> limit, but at
+high energies one may still question the validity of the expressions
+at low <i>pT</i> values, like for the other hard-QCD processes.
+Also as above, an eikonalized description, intended to be valid at all 
+<i>pT</i>, is included as part of the multiple-interactions framework. 
+<br/>Note that the processes below only represent the "tip of the iceberg"
+of charm and bottom production at high energies, where flavour excitation
+and shower branchings provide major additional sources. All these sources
+come together in the descriptions offered by <code>SoftQCD:minBias</code>
+and <code>HardQCD:all</code>.
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:gg2ccbar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>g g -> c cbar</i>. 
+Code 121.
+  
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:qqbar2ccbar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> c cbar</i>. 
+Code 122.
+  
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:gg2bbbar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>g g -> b bbar</i>. 
+Code 123.
+  
+
+<p/><code>flag&nbsp; </code><strong> HardQCD:qqbar2bbbar &nbsp;</strong> 
+ (<code>default = <strong>off</strong></code>)<br/>
+Scatterings <i>q qbar -> b bbar</i>. 
+Code 124.
+  
+
+</body>
+</html>
+
+<!-- Copyright (C) 2008 Torbjorn Sjostrand -->
+

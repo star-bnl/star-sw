@@ -1,0 +1,68 @@
+#!/opt/rhic/bin/perl
+# GetFDID, adapted by T. Wenaus from the BaBar script of the same name.
+# Uses an FDID allocation file rather than deriving range from UID
+
+while (@ARGV && $ARGV[0] =~ m/^-/) {
+  $arg = shift(@ARGV);
+
+  &usage(0), 		next if ($arg eq '-h');
+  $short = 1, 		next if ($arg eq '-s');
+
+  &usage(1, qq/$0(ERROR): unknown option "$arg"\n/);
+}
+
+#chop($domain = `domainname`);
+#die "FATAL: GetFDID can only be run at BNL.\n"
+#    if ($domain !~ /rhic.bnl.gov/);
+
+$user = $ARGV[0];
+if ($user =~ /^\d+$/) {
+  $uid = $user;
+  $user = getpwuid($uid);
+} elsif ($user) {
+  $uid = getpwnam($user);
+  die "FATAL: $user is not a valid user.\n" if !$uid;
+} else {
+  $uid = $>;
+  $user = getpwuid($uid);
+}
+
+## Look up the user in the FDID allocation file
+$fdid = 0;
+open(FDIDFILE,"/afs/rhic.bnl.gov/star/db/starFDID") or die "FATAL: Can't open FDID list file $!\n";
+while ($line=<FDIDFILE>) {
+    ($ufdid, $uname) = split(" ",$line);
+    if ( $user ne "" && $uname eq $user ) { $fdid = $ufdid; }
+}
+
+if ( $fdid != 0 ) {
+    if ($short) {
+        print "$fdid\n";
+    } else {
+        printf("%d %d is the FDID range allocated to $user\n",$fdid,$fdid+4);
+    } endif
+} else {
+    die "FATAL: User $user has no FDID allocation\n";
+}
+
+
+######################################################################
+
+sub usage {
+  local($exit, $message) = @_;
+
+  print STDERR $message if defined $message;
+  print STDERR <<INLINE_LITERAL_TEXT;
+usage: GetFDID [options] [<user>]
+Prints out the range of five Objectivity Federated Database ID numbers
+assigned to <user> (defaults to current user) for use in development.
+
+Options are from among:
+  -h       Prints this message.
+  -s	   Prints only the first number of the range.
+
+INLINE_LITERAL_TEXT
+
+    exit($exit) if defined $exit;
+}
+

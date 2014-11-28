@@ -1,0 +1,5 @@
+<Document file="StarVMC/Geometry/TpceGeo/TpceGeo.xml">
+<Export language="Mortran"> 
+<Import file="pams/geometry/tpcegeo/tpcegeo.g" verbatim="true" />
+</Export>
+</Document>

@@ -1,0 +1,13 @@
+/*    ftpcPadrowZ.idl
+*
+*  Table: ftpcPadrowZ
+*
+*       description: //    FTPC detector padrow Z positions
+*/ 
+
+
+struct ftpcPadrowZ { 
+
+   float  z[20];   /*   z-postion of padrow  */
+
+ };  

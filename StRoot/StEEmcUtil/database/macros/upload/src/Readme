@@ -1,0 +1,19 @@
+The script eemcDb utility contained in this directory is used for all uploads of EEMC tables to the DB.  In order to compile the script from scratch you need to checkout StRoot/StDbLib/ and make the libraries there, then checkout this directory and make the eemcDb executible (see command line below).
+
+mkdir yourDirectory
+cd yourDirectory
+
+cvs co StRoot/StDbLib/
+cd StRoot/StDbLib/
+make
+
+cd ../../
+cvs co StRoot/StEEmcUtil/database/macros/upload/src/
+cd StRoot/StEEmcUtil/database/macros/upload/src/
+make
+
+Then the eemcDb executible is ready to use.  It can be tested with a simple read command: 
+
+eemcDb -r -p Ver2004d/ -T
+
+For more details on how to use the eemcDb utility see StRoot/StEEmcUtil/database/README

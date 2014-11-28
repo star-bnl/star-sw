@@ -1,0 +1,51 @@
+macro shoot 
+  glo/import *
+
+  if [geom_init].ne.0 then
+	exec init
+  endif
+
+
+* trace on
+* Eta rapidities
+*  vect/create EtaBin(13) r 2.0 1.9008 1.8065 1.7168 1.6317 1.5507 1.4738 _
+*              1.4007 1.3312 1.2651 1.2023 1.1427 1.086
+
+* at 12:00
+*  gkine  1   6 50.0 50.01  1.75 1.751   4.711 4.712  -0.5 0.5
+* at 6:00 
+*  gkine  1   6 50.0 50.01  1.75 1.751   1.570 1.571  -0.5 0.5
+* at 9:00 
+*  gkine  1   6 50.0 50.01  1.75 1.751   3.142 3.143  -0.5 0.5
+* at 3:00 
+  gkine  1   6 50.0 50.01  1.75 1.751   0.000 0.001  -0.5 0.5
+  gr/del 1; dopen  1 
+  next;
+  satt *    seen  1 
+  dcut hall  x 0.0  2.5 10.0  .04 .04
+  daxis 0.0 0.0 0.0 10.0  
+  dclose 1; next; dshow 1   
+
+  gfile    o d.fzd
+
+  trig 1
+  gprint hits ecal 
+return
+
+macro init
+  glo/create geom_init 0
+  gdrop 
+  debug on
+  switch 2 3
+
+  detp  geom year2003 debug_on split_off help 
+
+  make cavegeo
+  make ecalgeo
+  make g2t  
+  gclose all
+return 
+
+endkumac
+
+

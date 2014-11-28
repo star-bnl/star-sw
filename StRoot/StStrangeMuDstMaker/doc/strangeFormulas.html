@@ -1,0 +1,583 @@
+<!doctype html public "-//W3C//DTD HTML 3.2//EN">
+<html>
+<!-- 
+      Template by Torre Wenaus.
+      This page is MAINTAINED IN RAW HTML. Do NOT corrupt it
+      by editing it with a WYSIWYG HTML editor.
+ -->
+<head>
+<title>strangeFormulas.C Documentation</title>
+<meta name="Author" content="Gene Van Buren">
+<meta name="Description" content="Prepared for the STAR computing and software website.">
+<meta name="KeyWords" content="STAR RHIC computing software documentation StStrangeMuDstMaker">
+<meta name="Generator" content="HomeSite 2.5">
+<meta http-equiv="Reply-to" content="gene@bnl.gov (Gene Van Buren)">
+</head>
+<body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
+<basefont face="verdana,arial,helvetica,sans-serif">
+
+<!-- Header material -->
+<table border=0   cellpadding=5 cellspacing=0 width="100%">
+        <tr bgcolor="#ffdc9f">
+        <td align=left> <font size="-1">
+        <a href="/STAR/">STAR</a>
+        &nbsp; <a href="/STAR/html/star_computing.html">Computing</a> 
+        &nbsp; <a href="/STAR/html/comp_l/root/documentation.html">Documentation</a> 
+        </td>
+        <td align=right> <font size="-1">
+        &nbsp;  <!-- top right corner  --> </font></td>
+        </tr>
+        <tr bgcolor="#ffdc9f"><td align=center colspan=2><font size="+2"> <b>
+        strangeFormulas.C Documentation
+        </b></font></td></tr>
+        <tr bgcolor="#ffdc9f">
+        <td><font size="-1">Offline Software using ROOT in STAR</font></td>
+        <td align="right"><a href="/STAR/html/ofl_l/prodinfo.html">
+        <font size="2" face="verdana,arial,helvetica,sans-serif">Maintained</font>
+        </a> 
+         <font size="-1">
+         by <a href="mailto:gene@bnl.gov">G. Van Buren</a>
+         </font> </td> 
+        </tr>
+
+	<tr><td align=right> 
+	<td align=right> <font size="-1"> 
+            Last modified Tue Apr 11 15:30:19 2000
+          </FONT></TD></TR>
+
+
+</TABLE>
+
+<P>
+
+<center>
+<a href="index.html">StStrangeMuDstMaker</a>
+<p>
+<HR width=60%>
+
+<h1>The Formulas Macro</h1>
+<a href="#intro">Introduction</a><br>
+<a href="#loading">Loading</a><br>
+<a href="#using">Using</a><br>
+<a href="#technical">Technical</a><br>
+<a href="#formulas">Formulas</a><br>
+</center>
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="intro"><h2>Introduction</h2></a>
+
+The Root macro strangeFormulas.C is intended to improve ease-of-use for
+users of the strangeness physics working group micro-DST created by the
+<a href="index.html">StStrangeMuDstMaker</a> package. This micro-DST
+is in the form of a
+<a href=http://root.cern.ch/root/html/TTree">TTree</a>,
+which allows it much flexibility and efficient
+performance characteristics. To take advantage of these characteristics,
+it is best to treat the micro-DST as a TTree, and not as instances of
+the component classes that make up the TTree. However, doing so prevents
+the direct use of member functions associated with the component classes
+when calling the <tt>Draw()</tt> and <tt>Scan()</tt> member functions
+of TTree.<p>
+
+But strangeFormulas.C provides a way to use most of those member functions.
+This is done via the
+<a href="http://root.cern.ch/root/html/TTreeFormula">TTreeFormula</a> Root
+class. These formulas allow a simple mapping of a formula name to a
+collection of arithmetic calculations on data members of the TTree.
+Additionally, TTreeFormula can take as arguments other formulas.
+TTreeFormula is just a special case of
+<a href="http://root.cern.ch/root/html/TFormula">TFormula</a>
+which allows the usage of data members of a particular TTree, and are
+thus tied to a particular TTree.<p>
+
+To see which formulas are provided, go to the <a href="#formulas">Formulas</a>
+section below, or look at the macro itself, which is located in:<br>
+<tt>$STAR/StRoot/macros/analysis/strangeFormulas.C</tt><br>
+Some examples include:
+<ul>
+<li><tt>Event.primaryVertexX()</tt>
+<li><tt>V0.massLambda()</tt>
+<li><tt>V0.ptArmV0()</tt>
+<li><tt>Xi.rapOmega()</tt>
+</ul>
+As with using the data members of the TTree, these functions begin with
+a component name, such as <tt>Event</tt> or <tt>V0</tt>. The
+<a href="#formulas">Formulas</a> section also describes how to find
+a specific formula for which you might be looking.<p>
+
+
+<hr width=10% align=left>
+<a name="loading"><h2>Loading the Formulas</h2></a>
+To use these functions provided by strangeFormulas.C, one need only have
+either a pointer to a strangeness micro-DST TTree (in memory or on file,
+it doesn't matter), or simply know file which contains the root of such
+a TTree. It is unnecessary to load any STAR libraries into Root, and even
+unnecessary to use <tt>root4star</tt> (i.e. one can run generic Root).
+The user has three possible forms for loading the functions:
+<pre>
+1.  TTree* strangeFormulas(const char* fname=0);
+2.  TTree* strangeFormulas(TFile* fptr);
+3.  Int_t strangeFormulas(TTree* tree);
+</pre>
+
+<ol>
+<li>The first form allows the user to enter a filename with the root of the
+TTree for the strangeness micro-DST. It loads the functions, and then returns
+a pointer to the TTree. Example usage would be as follows:
+<pre>
+  .L strangeFormulas.C;
+  myTree = strangeFormulas("myDst.root");
+</pre>
+If no filename is entered (e.g. <tt>myTree = strangeFormulas();</tt>),
+the default filename of "evMuDst.root" is used. The name of the TTree
+inside the file should be "StrangeMuDst" and this is the default name
+as given when constructed by the StStrangeMuDstMaker package.<p>
+
+<li>The second form is useful if the user has already opened the file
+containing the TTree:
+<pre>
+  TFile file1("myDst.root");
+  ...
+  .L strangeFormulas.C;
+  myTree = strangeFormulas(file1);
+</pre>
+The file should again contain a TTree with the name "StrangeMuDst".<p>
+
+<li>The last form is for a TTree which is in memory, or one on file
+for which the user has a pointer. An example of this case is if the
+micro-DST was just created via a chain, and the user still has access
+to the maker which created it:
+<pre>
+  myTree = strangeDstMaker.GetTree();
+  .x strangeFormulas.C(myTree);
+</pre>
+The last line is an abreviated version of:
+<pre>
+  .L strangeFormulas.C;
+  strangeFormulas(myTree);
+</pre>
+This shortcut is not very useful for the first two forms for loading the
+formulas because the user needs to get the returned TTree pointer. In this
+case the return value is unimportant.<p>
+
+The user can always get a pointer a TTree on file via something like:
+<pre>
+  TFile file1("myDst.root");
+  myTree = (TTree*) file1.Get("StrangeMuDst");
+  .x strangeFormulas.C(myTree);
+</pre>
+</ol>
+<p>
+
+<hr width=10% align=left>
+<a name="using"><h2>Using the Formulas</h2></a>
+Once the formulas have been loaded, usage is simply like the usage of
+data members of the TTree. For example, the strangeness micro-DST TTree
+contains a data member <tt>Event.mPrimaryVertexX</tt>, and there is a
+TTreeFormula provided named <tt>Event.primaryVertexX()</tt> which simply
+maps to the same data member. The following two lines would then give
+identical results:
+<pre>
+  myTree.Scan("Event.mPrimaryVertexX");
+  myTree.Scan("Event.primaryVertexX()");
+</pre>
+More complicated formulas would be of the mass and rapidity of a V0 under the
+assumption that the decay was that of a lambda (postive daughter is a
+proton, and negative daughter is a pion). Such formulas are provided, allowing
+the user to make a phase space plot like:
+<pre>
+  myTree.Draw("V0.ptV0():V0.rapLambda()","abs(V0.massLambda()-mLambda)<0.05");
+</pre>
+As with any call to <tt>Scan()</tt> or <tt>Draw()</tt>, the second parameter
+is a selection criteria. This example also shows the use of a formula with
+the name "mLambda". This is available because the macro also loads some
+useful mass formulas:
+<pre>
+  TFormula("mLambda","1.11563");
+  TFormula("mAntiLambda","1.11563");
+  TFormula("mK0Short","0.497671");
+  TFormula("mProton","0.938272");
+  TFormula("mAntiProton","0.938272");
+  TFormula("mPiPlus","0.139568");
+  TFormula("mPiMinus","0.139568");
+  TFormula("mKaonMinus","0.493646");
+  TFormula("mXiMinus","1.32133");
+  TFormula("mOmegaMinus","1.67243");
+</pre>
+
+Some notes on improving performance:
+<ul>
+<li>If you only want to see the a subset of the events in the TTree, use
+the fourth and fifth parameters of <tt>Scan()</tt> and <tt>Draw()</tt>,
+which are the number of entries, and first entry respectively. For example,
+one could look at the V0 candidates in only the first 10 events in the TTree
+with the following:
+<pre>
+  myTree.Draw("V0.massK0Short()","","",10);
+</pre>
+<p>
+
+<li>Selection criteria formulas are carried out first to determine a
+list of entries which satisfy the criteria. The drawn or scanned formulas
+are carried out only for those entries. If the drawn or scanned formula
+is complex (takes a lot of calculations), trimming the list of entries
+on which to perform the calculation with a simple criteria can improve
+the speed.
+
+<li>When using <tt>Draw()</tt> to make a histogram, the histogram
+borders must be determined first. This means some portion of the
+calculations are done to get an estimate of the minima and maxima for
+each coordinate. The <tt>SetEstimate()</tt> member function of TTree
+allows the user to specify the number of entries to examine for the borders,
+which is by default something like 10,000. If the user wants to make sure
+all entries are within the borders, they can enter:
+<pre>
+  myTree.SetEstimate(myTree.GetEntries());
+</pre>
+However, setting a smaller number for the estimate calculations reduces
+the number of redundant calculations that must be made.<p>
+
+An alternative approach is to use this TTree to fill an already existing
+histogram. This can be done either with the <tt>Project()</tt> or
+<tt>Draw()</tt> member functions of TTree, and avoids any redundant
+calculations to find maxima and minima:
+<pre>
+  TH1F h1("myHist","pt distribution",50,0.,5.);
+  myTree.Draw("Xi.ptXi()>>myHist");
+  ...or...
+  myTree.Project("myHist","Xi.ptXi()");
+</pre>
+<p>
+
+<li>Of course nothing beats having a smaller micro-DST. See the documentation
+on <a href="maker.html#filtering">Filtering Micro-DSTs</a> for information
+on how the user can trim a micro-DST down to size.
+</ul>
+<p>
+
+
+<hr width=10% align=left>
+<a name="technical"><h2>Technical Issues</h2></a>
+<ul>
+<li>TTreeFormulas do not automatically register themselves in the list of
+formulas known to Root like TFormulas do. Therefore, the list of formulas
+known to Root must be told manually about the TTreeFormulas with lines like:
+<pre>
+  f1 = new TTreeFormula("this","that+the_other",tree);
+  gROOT->GetListOfFunctions()->Add(f1);
+</pre>
+<p>
+
+<li>In using TFormulas, one should be careful to optimize the formulas
+for the number of calls to other formulas. TTreeFormula/TFormula is not
+smart enough to save values to repeat them, and calculates the full thing
+twice, but has a limit of 100 values one can calculate (the limit is
+actually 50 values for Root 2.24/04 and earlier versions).<p>
+
+For example, "a()+a()+a()" repeats everything necessary to find
+"a()" three times. If "a()" requires 20 values to calculate, then
+"a()+a()+a()" will fail (for Root 2.24/04), needing 60 values. However,
+this failure <b>does not</b> get reported to the user! A false value is
+returned which is the result of the incomplete calculation using only the
+first 50 values. <b>BE WARNED!</b> In the above example, it is much better
+to write something like "3*a()", which actually still only requires
+20 values.<p>
+
+Complicated formulas in the macro have the number of values used in their
+calculations documented above them. The user should take note of these
+values if they decide to add more complicated formulas using these formulas.
+<p>
+</ul>
+
+
+<hr width=10% align=left>
+<a name="formulas"><h2>Available Formulas</h2></a>
+In addition to the listing below, the macro provides two functions
+to help you find a specific formula. The first of these is the
+<tt>findFormulas()</tt> function, which takes up to three strings
+as arguments, and returns all formulas whose names contain the
+strings (case-insensitive):
+<pre>
+  findFormulas("lambda","V0");
+    V0.eLambda()
+    V0.massLambda()
+    V0.massAntiLambda()
+    V0.rapLambda()
+    V0.cTauLambda()
+</pre>
+The second helpful function is <tt>findDefinition()</tt>. This function
+takes the name of a formula and returns its definition:
+<pre>
+  findDefinition("V0.massLambda()");
+    Name       : V0.massLambda()
+    # of Codes : 12
+    Definition : sqrt(sq(V0.ePosProton()+V0.eNegPion())-V0.Ptot2V0())
+</pre>
+Here is an overview of the formulas provided:<p>
+
+<ul>
+<li>Particle Mass Formulas
+<pre>
+mLambda
+mAntiLambda
+mK0Short
+mProton
+mAntiProton
+mPiPlus
+mPiMinus
+mKaonMinus
+mXiMinus (only loaded for Xi's)
+mOmegaMinus (only loaded for Xi's)
+</pre>
+<p>
+
+<li>Event Formulas
+<pre>
+Event.run()
+Event.event()
+Event.globalTracks()
+Event.primaryTracks()
+Event.primaryVertexX()
+Event.primaryVertexY()
+Event.primaryVertexZ()
+</pre>
+<p>
+
+<li>V0 Formulas (only loaded if V0 branch present in micro-DST)
+<pre>
+-- decay parameters --
+V0.decayLengthV0()
+V0.decayVertexV0X()
+V0.decayVertexV0Y()
+V0.decayVertexV0Z()
+V0.dcaV0Daughters()
+V0.dcaV0ToPrimVertex()
+V0.dcaPosToPrimVertex()
+V0.dcaNegToPrimVertex()
+V0.cTauLambda()
+V0.cTauK0Short()
+
+-- geometry parameters --
+V0.radtV0()
+V0.radV0()
+V0.phiV0()
+
+-- momentum --
+V0.momPosX()
+V0.momPosY()
+V0.momPosZ()
+V0.ptPos()
+V0.Ptot2Pos()
+V0.ptotPos()
+V0.momNegX()
+V0.momNegY()
+V0.momNegZ()
+V0.ptNeg()
+V0.Ptot2Neg()
+V0.ptotNeg()
+V0.momV0X()
+V0.momV0Y()
+V0.momV0Z()
+V0.Pt2V0()
+V0.ptV0()
+V0.Ptot2V0()
+V0.ptotV0()
+V0.thetaV0()
+V0.pseudoRapV0()
+V0.psiV0()
+V0.MomPosAlongV0()
+V0.MomNegAlongV0()
+V0.alphaV0()
+V0.ptArmV0()
+
+-- energy --
+V0.eLambda()
+V0.eK0Short()
+V0.ePosProton()
+V0.eNegAntiProton()
+V0.ePosPion()
+V0.eNegPion()
+
+-- mass --
+V0.massLambda()
+V0.massAntiLambda()
+V0.massK0Short()
+
+-- rapidity --
+V0.rapLambda()
+V0.rapK0Short()
+
+-- topology maps --
+* = <b>Pos</b> or <b>Neg</b>
+V0.topologyMap*.data(i), i=0...1
+V0.topologyMap*.bit(i), i=0...63
+V0.topologyMap*.ftpcFormat()
+V0.topologyMap*.primaryVertexUsed()
+V0.topologyMap*.turnAroundFlag()
+V0.topologyMap*.hasHitInSvtLayer(i), i=1...6
+V0.topologyMap*.numOfSvtHits()
+V0.topologyMap*.hasHitInSsd()
+V0.topologyMap*.hasHitInTpcRow(i), i=1...45
+V0.topologyMap*.numOfTpcHits()
+V0.topologyMap*.hasHitInMwpc()
+V0.topologyMap*.hasHitInCtb()
+V0.topologyMap*.hasHitInTofPatch()
+V0.topologyMap*.hasHitInRich()
+V0.topologyMap*.hasHitInBarrelEmc()
+V0.topologyMap*.hasHitInEndcapEmc()
+
+-- track quality --
+V0.chi2V0()
+V0.clV0()
+V0.chi2Pos()
+V0.clPos()
+V0.dedxPos()
+V0.numDedxPos()
+V0.chi2Neg()
+V0.clNeg()
+V0.dedxNeg()
+V0.numDedxNeg()
+</pre>
+<p>
+
+<li>Xi Formulas (only loaded if Xi branch present in micro-DST)
+<pre>
+-- V0 formulas --
+Just as for V0 above, but with <b>Xi.</b> replacing <b>V0.</b> --
+
+-- decay parameters --
+Xi.decayLengthXi()
+Xi.decayVertexXiX()
+Xi.decayVertexXiY()
+Xi.decayVertexXiZ()
+Xi.dcaXiDaughters()
+Xi.dcaXiToPrimVertex()
+Xi.dcaBachelorToPrimVertex()
+Xi.cTauXi()
+Xi.cTauOmega()
+
+-- geometry parameters --
+Xi.radtXi()
+Xi.radXi()
+Xi.phiXi()
+
+-- momentum --
+Xi.momBachelorX()
+Xi.momBachelorY()
+Xi.momBachelorZ()
+Xi.ptBachelor()
+Xi.Ptot2Bachelor()
+Xi.ptotBachelor()
+Xi.momXiX()
+Xi.momXiY()
+Xi.momXiZ()
+Xi.Pt2Xi()
+Xi.ptXi()
+Xi.Ptot2Xi()
+Xi.ptotXi()
+Xi.thetaXi()
+Xi.pseudoRapXi()
+Xi.psiXi()
+Xi.MomBachelorAlongXi()
+Xi.MomV0AlongXi()
+Xi.alphaXi()
+Xi.ptArmXi()
+
+-- energy --
+Xi.eXi()
+Xi.eOmega()
+Xi.eBachelorPion()
+Xi.eBachelorKaon()
+
+-- mass --
+Xi.massXi()
+Xi.massOmega()
+
+-- rapidity --
+Xi.rapXi()
+Xi.rapOmega()
+
+-- misc --
+Xi.charge()
+Xi.keyBachelor()
+
+-- topology maps --
+* = <b>Pos</b> or <b>Neg</b> (for V0 daughters) or <b>Bachelor</b>
+Otherwise, just as for V0 above, but with <b>Xi.</b> replacing <b>V0.</b>
+
+-- track quality --
+Xi.chi2Xi()
+Xi.clXi()
+Xi.chi2Bachelor()
+Xi.clBachelor()
+Xi.dedxBachelor()
+Xi.numDedxBachelor()
+</pre>
+<p>
+
+<li>Kink Formulas (only loaded if Kink branch present in micro-DST)
+<pre>
+-- None at present --
+</pre>
+<p>
+
+<li>V0Mc Formulas (only loaded if V0Mc branch present in micro-DST)
+<pre>
+V0Mc.decayMode()
+V0Mc.positiveCommonTpcHits()
+V0Mc.positiveSimTpcHits()
+V0Mc.negativeCommonTpcHits()
+V0Mc.negativeSimTpcHits()
+V0Mc.geantIdParent()
+V0Mc.geantIdPositive()
+V0Mc.geantIdNegative()
+V0Mc.parentMomentumX()
+V0Mc.parentMomentumY()
+V0Mc.parentMomentumZ()
+V0Mc.positiveMomentumX()
+V0Mc.positiveMomentumY()
+V0Mc.positiveMomentumZ()
+V0Mc.negativeMomentumX()
+V0Mc.negativeMomentumY()
+V0Mc.negativeMomentumZ()
+V0Mc.positionX()
+V0Mc.positionY()
+V0Mc.positionZ()
+</pre>
+<p>
+
+<li>XiMc Formulas (only loaded if XiMc branch present in micro-DST)
+<pre>
+XiMc.decayMode()
+XiMc.commonTpcHits()
+XiMc.simTpcHits()
+XiMc.geantIdParent()
+XiMc.geantIdDaughter()
+XiMc.parentMomentumX()
+XiMc.parentMomentumY()
+XiMc.parentMomentumZ()
+XiMc.daughterMomentumX()
+XiMc.daughterMomentumY()
+XiMc.daughterMomentumZ()
+XiMc.positionX()
+XiMc.positionY()
+XiMc.positionZ()
+</pre>
+<p>
+
+<li>KinkMc Formulas (only loaded if KinkMc branch present in micro-DST)
+<pre>
+Identical to XiMc Formulas with <b>KinkMc.</b> replacing <b>XiMc.</b>
+</pre>
+<p>
+
+
+</ul>
+
+<P>
+
+</BODY>
+</HTML>

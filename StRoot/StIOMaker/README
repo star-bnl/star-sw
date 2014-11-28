@@ -1,0 +1,22 @@
+
+Package: StIOMaker
+Responsible: Victor Perevoztchikov (perev@bnl.gov)
+
+Purpose: Main STAR I/O Maker to  read/write any STAR data .
+
+1) Inherited from StIOInterface class;
+ 
+2) Reads all the STAR data : .xdf,.root,.daq
+   On the reading selects automatically by type of input file according
+   I/O maker, loads it (if not loaded) and does call
+
+3) Allows to read obsolete formats, i.e .mdc2 data by calling
+   according obsolete I/O maker. 
+   
+4) User maker access data via StMaker class. It does not
+   know anything about existence of StIOMaker(s)
+
+
+5) It is not equipped yet for writing data but it will be in the nearest future.
+
+

@@ -1,0 +1,5 @@
+# $Id $
+# package StECalEnergyIter
+# author: 
+Library:libStECalEnergyIter.so:LIBS +=   -lStEEmcDbMaker  -l_StMuDSTMaker
+#Library:libStECalEnergyIter.so:LIBS +=   -lStEEmcDbMaker  -lStMuDSTMaker

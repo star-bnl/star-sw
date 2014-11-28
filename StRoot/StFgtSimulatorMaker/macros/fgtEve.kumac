@@ -1,0 +1,66 @@
+macro aa
+debug  on
+switch 2 3
+switch 2 2
+detp geom y2012
+*detp geom y2012a field=-50.0
+*detp geom dev13
+
+gstat time size mult stak
+*               ! Load the geometry according to the tag
+* use private local geometry
+*gexec .$STAR_LIB/libStarMagFieldNoDict.so
+*gexec .$STAR_HOST_SYS/lib/xgeometry.so
+* use official geometry
+gexe $STAR_LIB/libStarMagFieldNoDict.so
+gexe $STAR_LIB/xgeometry.so
+gclose all
+* side view
+*nex;dcut CAVE x 1. .5 15.0 0.065 0.065
+
+* FGT end-view
+ nex;dcut CAVE z 120. 10. 10.0 0.2 0.2
+
+* laser muon in FGT
+pt=5
+gkine 1 2  [pt] [pt] 1.6  2.1   -1.7 1.2  0. 0.
+gfile   o positronEta1621PhiAB_pt[pt].fzd
+trig 100
+gprint hits fgtd
+dhits
+quit
+return
+
+macro xxx
+   Positron         2
+   Electron         3
+    K0short         16
+    Pi0              7
+   Pi+              8
+   Pi-              9
+
+   Mu+              5
+   Mu-              6
+   geantino	  45
+
+-- reasonable Kshort decay in to e+e- in the fgt, quad B
+ gkine  1 16 2. 2.    1.6  1.7   -1.74 -0.35  0. 0.
+
+
+*M-C:  root4star -b -q  StRoot/StFgtSimulator/macros/bfc.C'(20,"MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFPPVnoCTB,logger,EventQA,-dstout,tags,Tree,EvOut,analysis,dEdxY2,IdTruth,useInTracker,hitfilt,tpcDB,TpcHitMover,TpxClu,McAna,fzin,y2012,tpcrs,geant,geantout,beamLine,eemcDb,McEvOut,bigbig,emcY2,EEfs,bbcSim,ctf,CMuDST,agml,SDT20120309","fgtEveGen/muonEta2PhiAB_pt20.fzd")' >& LogMu_pt20 &
+
+* DAQ-2011 chain:"pp2011a btof mtddat fmsdat VFPPVnoCTB beamline evout BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D -hitfilt"
+
+* DAQ-2012-fast-offline  root4star -b -q offline/StFgtDevel/macros/bfc.C'(10,"pp2012a,mtdDat,btof,fmsDat,VFPPVnoCTB,beamline,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,-hitfilt","/star/data03/daq/2012/076/13076015p_jb/st_physics_13076015_raw_1020001.daq")' >&L1 &
+
+
+root4star -b -q makeFgtPedAndStat.C'("/star/data03/daq/2012/033/13033051p/st_physics_13033051_raw_1010001.daq","st_physics_13033051",200)' 
+
+return
+
+
+
+
+
+
+

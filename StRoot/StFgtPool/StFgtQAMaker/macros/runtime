@@ -1,0 +1,12 @@
+#!/bin/csh
+
+set run=$1
+
+set dbserver=onldb.starp.bnl.gov
+set dbport=3501
+
+mysql --skip-column-names -h $dbserver --port=$dbport <<END
+connect RunLog;
+select startRunTime from runDescriptor where runNumber=$run
+END
+
