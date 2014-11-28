@@ -30,7 +30,8 @@ i386*
 hold 
 *.d 
 *PACKAGE 
-*.log .svn* 
+*.log 
+.svn* 
 .svn/* 
 *~
  build 
@@ -45,3 +46,4 @@ Repository
 .svn
 .sl*
 .misc
+*.BAK
