@@ -32,7 +32,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
   LOG_INFO << "We are StiMasterDetectorBuilder::build() and will clone the geometry if exists" << endm;
   if ( chain ){
     TDatime t = chain->StMaker::GetDBTime();
-    LOG_INFO << "Timestanp check - Date/Time from chain is " << t.GetDate() << "/" << t.GetTime() << endm;
+    LOG_INFO << "Timestamp check - Date/Time from chain is " << t.GetDate() << "/" << t.GetTime() << endm;
   }
 
 #if 1
@@ -54,10 +54,8 @@ void StiMasterDetectorBuilder::build(StMaker&source)
   vector<StiDetectorBuilder*>::iterator iter;
   UInt_t nRows=0;
   for (iter=begin();       iter!=end();       iter++)    {
-    if (debug()) {
-      LOG_INFO << "StiMasterDetectorBuilder::build() -I- Calling Group Builder named:" << (*iter)->getName()<<endm;
-    }
-      if (!*iter) {LOG_INFO <<"   pointer is corrupted!!!!!!!!!!!!!!!!!!!"<<endm;}
+    LOG_INFO << "StiMasterDetectorBuilder::build() -I- Calling Group Builder named:" << (*iter)->getName()<<endm;
+    if (!*iter) {LOG_INFO <<"   pointer is corrupted!!!!!!!!!!!!!!!!!!!"<<endm;}
     (*iter)->build(source);
     nRows+=(*iter)->getNRows();
   }
@@ -71,7 +69,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
       for (UInt_t sector=0;sector<nSectors;sector++)	    {
 	StiDetector *detector = (*iter)->getDetector(i,sector);
 	if (detector) {
-	  if (! sector && debug()) {
+	  if (! sector) {
 	    LOG_INFO << "StiMasterDetectorBuilder::build() -I- row:"<<row << "\t" << *detector << endm;
 	  }
 	  setDetector(row,sector,detector);

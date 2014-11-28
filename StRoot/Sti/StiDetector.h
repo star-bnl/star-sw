@@ -39,14 +39,15 @@ public:
     virtual ~StiDetector();
     void reset();
     void unset(){;}
-    int  splitIt(StiDetVect &vect,double thick=0.2,int nMax=20);
+    int  splitIt(StiDetVect &vect,double thick=0.5,int nMax=20);
     
     // accessors
-    bool isOn() const 				{ return true;}
+    bool isOn() const 				{ return on;}
     inline bool isActive(double dYlocal, double dZlocal) const {return (*isActiveFunctor)(dYlocal, dZlocal);}
     inline bool isActive()    const 		{ return isActiveFunctor->isActive();}
-    bool isDiscreteScatterer() const 		{ return 0; }
-//		Gas is under detector
+    bool isContinuousMedium() const 		{ return continuousMedium; }
+    bool isDiscreteScatterer() const 		{ return discreteScatterer; }
+
     StiMaterial* getGas() const 		{ assert(gas); return gas; }
     StiMaterial* getMaterial() const 		{ assert(material) ;return material; }
 
@@ -56,10 +57,10 @@ public:
     StiIsActiveFunctor* getIsActiveFunctor() {return isActiveFunctor;}
 
     // mutators
-    void setIsOn(bool ) {;}
+    void setIsOn(bool val) {on = val;}
     void setIsActive(StiIsActiveFunctor *val)	{ isActiveFunctor = val; }
-    void setIsContinuousMedium(bool ) 		{;}
-    void setIsDiscreteScatterer(bool) 	        {;}
+    void setIsContinuousMedium(bool val) 	{continuousMedium = val;}
+    void setIsDiscreteScatterer(bool val) 	{discreteScatterer = val;}
 
     void setGas(StiMaterial *val)		{ gas = val; }
     void setMaterial(StiMaterial *val)		{ material = val; }
@@ -91,18 +92,25 @@ public:
     void setKey(int index,int value);
     int getKey(int index) const; 
 
-    double getVolume() const;
-    double getWeight() const;
-
-
  protected:
     
     char mBeg[1];
-   
+
+    /// Toggle switch determining whether this detector is to be added to the detector tree.
+    /// The detector is added if the switch is "true"
+    bool on;    
     /// Functor used to calculate whether the posistion reached by a track is 
     /// to be considered within the active area of the detector, and
     /// is thus susceptible of providing hit information.
- StiIsActiveFunctor *isActiveFunctor; 
+    StiIsActiveFunctor *isActiveFunctor; 
+    /// Toggle switch determining whether this detector contains a continuous 
+    /// medium (e.g. gas). If true, scatterer information is provided 
+    /// by the gas material.
+    bool continuousMedium;  
+    /// Toggle switch determining whether the detector contains a discrete
+    /// thin scatterer (e.g. a Si wafer). If true, scatter information provided
+    /// by the material.
+    bool discreteScatterer;   // is this a discrete scatterer?    (yes => scatterer given by "material" below)
 
     /// Hit Error Calculator for this detector
     const StiHitErrorCalculator * _hitErrorCalculator;
@@ -128,6 +136,7 @@ public:
     const StiTrackingParameters * _pars;
     int _key1, _key2;
 
+//     StiElossCalculator * _elossCalculator;
     char mEnd[1];
 };
 ostream& operator<<(ostream& os, const StiDetector& m);

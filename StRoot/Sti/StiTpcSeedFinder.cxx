@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.cxx,v 1.1.1.1 2013/08/13 22:20:29 fisyak Exp $
+// $Id: StiTpcSeedFinder.cxx,v 1.2 2014/08/01 16:38:08 fisyak Exp $
 #ifdef DO_TPCCATRACKER
 #include "StiTpcSeedFinder.h"
 #include "StiToolkit.h"
@@ -101,6 +101,9 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
 }
 #endif /* DO_TPCCATRACKER */
 // $Log: StiTpcSeedFinder.cxx,v $
+// Revision 1.2  2014/08/01 16:38:08  fisyak
+// Freeze version with signle precision KFParticle
+//
 // Revision 1.1.1.1  2013/08/13 22:20:29  fisyak
 // Save m version
 //

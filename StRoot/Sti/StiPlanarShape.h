@@ -16,12 +16,9 @@ class StiPlanarShape: public StiShape
   StiPlanarShape(const string &name, float halfDepth, float thickness, float halfWidth = 0);
   
   // accessors
-virtual  float getHalfWidth() 	const { return _halfWidth;}	//deltaY
-virtual  float getOpeningAngle()const { return 999       ;} 
-  StiShapeCode getShapeCode() 	const { return kPlanar   ;}
-double getVolume() 	const;
-
-
+  float getHalfWidth() const { return _halfWidth; };	//deltaY
+  StiShapeCode getShapeCode() const { return kPlanar; };
+  
   // mutators
   void setHalfWidth(float val);
   

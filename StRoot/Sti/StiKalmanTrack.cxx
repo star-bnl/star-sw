@@ -1,20 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.133 2014/11/10 21:45:09 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.133 2014/11/10 21:45:09 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 1.3 2014/08/01 16:38:07 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 1.3 2014/08/01 16:38:07 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.133  2014/11/10 21:45:09  perev
- * In approx more carefully accounted case mag field == 0
- * To deside that field == 0 method isZeroH() is used
- *
- * Revision 2.132  2014/10/30 15:03:54  jeromel
- * Reverted to Oct 2nd
- *
- * Revision 2.127  2014/09/29 21:44:55  perev
- * Check cos>=1 replaced to cos>=.99
+ * Revision 1.3  2014/08/01 16:38:07  fisyak
+ * Freeze version with signle precision KFParticle
  *
  * Revision 2.126  2014/07/09 00:15:45  perev
  * Fix wrong Xi2 for 5hits track
@@ -437,7 +430,7 @@
 #include "TCernLib.h"
 #endif
 #include "StMessMgr.h"
-std::ostream& operator<<(std::ostream&, const StiHit&);
+ostream& operator<<(ostream&, const StiHit&);
 Factory<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
 int StiKalmanTrack::mgMaxRefiter = 100;
 int StiKalmanTrack::_debug = 0;
@@ -1394,7 +1387,7 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
   return dca;
 }
 //_____________________________________________________________________________
-std::ostream& operator<<(std::ostream& os, const StiKalmanTrack& track)
+ostream& operator<<(ostream& os, const StiKalmanTrack& track)
 {
   try 
     {
@@ -1712,10 +1705,12 @@ double Xi2=0;
   StiKTNIterator source;
   StiKalmanTrackNode *targetNode;
   nNode=0;
+  double hz=0; 
   THelixFitter circ;
   THelixTrack  cirl;
   for (source=rbegin();(targetNode=source());++source) {
     iNode++;
+    if (!hz) hz = targetNode->getHz();
     if (!targetNode->isValid()) 	continue;
     const StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
@@ -1773,19 +1768,12 @@ double Xi2=0;
     P.z()  =  cirl.Pos()[2];
     P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P.curv() = curv;
-    StiNodePars PP(P);
     double hh = P.hz();
-
-{
-    if (P.isZeroH()) 	{ P.ready(); hh =1e-11;} else {hh = 1./hh;}
-    P.ptin() = curv*hh; 
-}
-
+    hh = (fabs(hh)<1e-10)? 0:1./hh;
+    P.ptin() = (hh)? curv*hh:1e-3;
     P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
     P._sinCA = cirl.Dir()[1]/cirl.GetCos();
-    if (fabs(P._cosCA)>0.99 || fabs(P._sinCA)>0.99) P.ready();
-
     targetNode->fitPars() = P;
     int ians = targetNode->nudge();
     if(ians) {nNode--; targetNode->setInvalid();continue;}

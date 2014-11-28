@@ -7,6 +7,8 @@
 #include "StiTrack.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
+#include "TRSymMatrix.h"
+#include "TRVector.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -229,10 +231,8 @@ int StiTrackNodeHelper::propagateMtx()
 //______________________________________________________________________________
 int StiTrackNodeHelper::propagateError()
 {
-static int nCall = 0; nCall++; StiDebug::Break(nCall);
   mPredErrs = mFitdParentErrs;
   StiTrackNode::errPropag6(mPredErrs.A,mMtx.A,kNPars);
-
   mPredErrs.recov();
   mPredErrs._cEE+=mMcs._cEE;		//add err to <eta*eta> eta crossing angle//add err to <eta*eta> eta crossing angle
   mPredErrs._cPP+=mMcs._cPP;    	//add err to <curv*curv>		 //add err to <curv*curv>
@@ -359,9 +359,6 @@ StiDebug::Break(nCall);
 //______________________________________________________________________________
 int StiTrackNodeHelper::join()
 {
-static int nCall=0;nCall++;
-StiDebug::Break(nCall);
-
   enum {kOLdValid=1,kNewFitd=2,kJoiUnFit=4};
 //  if (!mParentNode) return 0;
 
@@ -398,9 +395,7 @@ if (!oldJoinPrim) {
       case kOLdValid:;				// Old valid & New UnFitd
       case kOLdValid|kNewFitd:;			// Old valid & New Fitd
 
-        mTargetNode->mPE().recov();
-        mFitdErrs.recov();
-	chi2 = joinTwo(kNPars,mTargetNode->mPP().P,mTargetNode->mPE().A
+        chi2 = joinTwo(kNPars,mTargetNode->mPP().P,mTargetNode->mPE().A
                       ,kNPars,mFitdPars.P         ,mFitdErrs.A
                              ,mJoinPars.P         ,mJoinErrs.A);
         mJoinPars.hz() = mTargetHz;
@@ -489,7 +484,7 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
     p=fabs(e1[i]);q=fabs(e2[i]);choice += (p-q)/(p+q+1e-10);
   }}
   if ( choice >0) {t = p2; p2 = p1; p1 = t; t = e2; e2 = e1; e1 = t;}
-
+#if 0  
   do {//empty loop
 //  	Join errors
     TCL::vadd(e1,e2,sumE,nE1);
@@ -512,6 +507,35 @@ double StiTrackNodeHelper::joinTwo(int nP1,const double *P1,const double *E1
     TCL::tras(sumEIsubP,e1   ,PJ       ,1,nP2);
     TCL::vadd(PJ       ,p1   ,PJ         ,nP2);
   }
+#else
+  TRSymMatrix EE1(nP1,e1);
+  TRSymMatrix EE2(nP1,e2);
+  TRVector    PP1(nP1,p1);
+  TRVector    PP2(nP1,p2);
+  TRVector SubP(PP2);
+  SubP -= PP1;
+  //  	Join errors
+  TRSymMatrix SumE(EE1);
+  SumE += EE2;
+  int negati = SumE[2]<0;
+  if (negati) SumE *= -1.;
+  int ign0re = SumE[0]<=0;
+  if (ign0re) SumE[0] = 1;
+  TRSymMatrix SumEI(SumE,TRArray::kInvertedA);
+  if (! SumEI.IsValid()) return chi2;
+  if (ign0re) {SumE[0]  = 0; SumEI[0] = 0;}
+  if (negati) {SumE *= -1.; SumEI *= -1.;}
+  chi2 = SumEI.Product(SubP);
+  if (!EJ) return chi2;
+  TRSymMatrix E1sumEIe1(EE1,TRArray::kRxSxR,SumEI);
+  TCL::vsub(EE1.GetArray(),E1sumEIe1.GetArray(),EJ,nE1);
+  //  	Join params
+  if (PJ) {
+    TCL::tras(SubP.GetArray(),SumEI.GetArray(),sumEIsubP,1,nP1);
+    TCL::tras(sumEIsubP,EE1.GetArray()  ,PJ       ,1,nP2);
+    TCL::vadd(PJ       ,PP1.GetArray()  ,PJ         ,nP2);
+  }
+#endif
   return chi2;
 }
 #if 0
@@ -658,7 +682,6 @@ int StiTrackNodeHelper::save()
 int StiTrackNodeHelper::propagateMCS()
 {  
 static int nCall = 0; nCall++;
-StiDebug::Break(nCall);
 static const int keepElossBug = StiDebug::iFlag("keepElossBug");
   mMcs.reset();
   if (!mDetector) 			return 0;
@@ -674,7 +697,8 @@ assert(pt<1e3);
   pL3=0.5*pathIn(mDetector,&mBestPars);
   // Gap path length
   pL2= fabs(dl);
-  double x0p = 1e11,x0Gas=1e11,x0=1e11;
+  double x0p = -1,x0Gas=-1,x0=-1;
+//  double x0p = 1e11,x0Gas=1e11,x0=1e11;
   dx = mBestPars.x() - mBestParentRotPars.x();
   double tanl   = mBestPars.tanl();
   double pti    = mBestPars.ptin(); 
@@ -747,7 +771,7 @@ assert(calculator);
   double eloss = calculator->calculate(1.,m, beta2);
   dE = sign*dxEloss*eloss;
 //		save detLoss and gasLoss for investigation only
-//  mTargetNode->setELoss(2*sign*d3*eloss,sign*d2*eloss);
+  mTargetNode->setELoss(2*sign*d3*eloss,sign*d2*eloss);
 
 
 
@@ -789,7 +813,7 @@ if (fabs(mMcs._ptinCorr)>1e-4) {
 
 
   const StiDetector 		*preDet = mParentNode->getDetector();
-  const StiMaterial *preMat = curGas,*preGas=curGas;
+  const StiMaterial *preMat = 0,*preGas=0;
   const StiElossCalculator *preLos = 0;
   if (preDet) {
     preMat = preDet->getMaterial();
@@ -800,7 +824,7 @@ if (fabs(mMcs._ptinCorr)>1e-4) {
       if (preLos) {
         d1  = preLos->calculate(1.,m, beta2);
   } } }
-//		Gas is UNDER detector
+
   const StiMaterial		*gasMat = (dx>0)?curGas : preGas;
   if (gasMat) {
     x0Gas = gasMat->getX0();
@@ -822,24 +846,11 @@ if (fabs(mMcs._ptinCorr)>1e-4) {
   mMcs._cPP = tanl*tanl*pti*pti	*theta2*f;
   mMcs._cTP = pti*tanl*cos2Li	*theta2*f;
   mMcs._cTT = cos2Li*cos2Li	*theta2*f;
-assert(mMcs._cPP>0);
-assert(mMcs._cTT>0);
-assert(mMcs._cEE>0);
-
 
   int sign = ( dx>=0)? 1:-1;
   double dE = sign*dxEloss;
 //		save detLoss and gasLoss for investigation only
-  StiELoss *el = mTargetNode->getELoss();
-  el[0].mELoss = 2*d3*pL3;
-  el[0].mLen   = 2*pL3;
-  el[0].mDens  = curMat->getDensity();
-  el[0].mX0    = x0;
-  el[1].mELoss = 2*d2*pL2;
-  el[1].mLen   = 2*pL2;
-  el[1].mDens  = gasMat->getDensity();
-  el[1].mX0    = x0Gas;
-
+  mTargetNode->setELoss(2*sign*d3*pL3,sign*d2*pL2);
   mMcs._ptinCorr = ::sqrt(e2)*dE/p2;
   if (fabs(mMcs._ptinCorr)>0.1) mMcs._ptinCorr = (dE<0)? -0.1:0.1;
 }
@@ -980,6 +991,7 @@ int StiTrackNodeHelper::updateNode()
 {
 static int nCall=0; nCall++;
   mState = StiTrackNode::kTNFitBeg;
+  assert(mPredErrs._cXX<1e-8);
   double r00,r01,r11;
   StiDebug::Break(mTargetNode->mId);
   if (!mDetector)	{ //Primary vertex
@@ -1044,7 +1056,6 @@ static int nCall=0; nCall++;
       assert(fabs(mFitdPars.y()-mHitPars[1])>1e-10 ||  fabs(mHitPars[0])<4);
 //??    cutStep(&mFitdPars,&mPredPars);
 //??    cutStep(&mFitdPars,&mBestPars);
-    assert(mFitdPars.x()>0);
     if (mFitdPars.check()) return -11;
   // update error matrix
     double c00=mPredErrs._cYY;                       
@@ -1148,8 +1159,7 @@ int StiTrackNodeHelper::nudge()
     pars->eta()   +=               deltaE;
     pars->_cosCA -= pars->_sinCA *deltaE;
     pars->_sinCA += pars->_cosCA *deltaE;
-    if (fabs(pars->_cosCA)>=0.99
-      ||fabs(pars->_sinCA)>=0.99) pars->ready();
+    if (pars->_cosCA>=1.) pars->ready();
     if (pars->check()) return 1;
   }
   return 0;
@@ -1160,7 +1170,7 @@ double StiTrackNodeHelper::pathIn(const StiDetector *det,StiNodePars *pars)
   if (!det) return 0.; 
   double thickness = det->getShape()->getThickness();
   double t = pars->tanl();
-  double c = fabs(pars->_cosCA);
+  double c = pars->_cosCA;
   return (thickness*::sqrt(1.+t*t)) / c;
 }
 //______________________________________________________________________________

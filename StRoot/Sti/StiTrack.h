@@ -139,7 +139,7 @@ public:
   static StiTrackFinder * trackFinder;
   static StiTrackFitter * trackFitter;
 
-  friend std::ostream& operator<<(std::ostream& os, const StiTrack& track);
+  friend ostream& operator<<(ostream& os, const StiTrack& track);
 protected:
   int             mId;
   int             mIdDb;

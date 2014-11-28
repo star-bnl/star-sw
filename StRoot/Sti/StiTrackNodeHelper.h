@@ -43,7 +43,6 @@ int mTally;
 
 class StiTrackNodeHelper
 { 
-  friend class StiTrackNode;
 public:
 
       StiTrackNodeHelper(){}    
@@ -54,7 +53,6 @@ public:
   StiKalmanTrackNode *getFlipFlop() 	const 	{return mFlipFlopNode;}
   StiKalmanTrackNode *getVertexNode()	const 	{return mVertexNode;}
   int                 getUsed()     	const	{return mUsed;}
-
 static int isCutStep()				{return mgCutStep;}
 private:
   void reset();

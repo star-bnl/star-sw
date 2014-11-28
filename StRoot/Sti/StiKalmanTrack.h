@@ -305,7 +305,7 @@ class StiKalmanTrack : public StiTrack
   } TRefitStatus;
 
 protected:
-  friend std::ostream& operator<<(std::ostream& os, const StiKalmanTrack& track);
+  friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 protected:
     
   static int mgMaxRefiter;		//max number of refit iteratins allowed

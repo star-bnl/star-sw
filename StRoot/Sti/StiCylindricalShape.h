@@ -25,7 +25,6 @@ public:
     float getOpeningAngle() const { return _openingAngle; } 
     float getHalfWidth() const;
     StiShapeCode getShapeCode() const { return kCylindrical; };
-  virtual double getVolume() const;
 
     // mutators
     void setOuterRadius(float val) {if (val >= 0.) _outerRadius = val; }
@@ -42,11 +41,4 @@ inline float StiCylindricalShape::getHalfWidth() const
 {
   return _outerRadius*sin(_openingAngle/2.);
 }
-inline double StiCylindricalShape::getVolume() const
-{
-  double rmax = _outerRadius,rmin=rmax-getThickness();
-  return _openingAngle*(rmax-rmin)*(rmax+rmin)*getHalfDepth();
-}
-
-
 #endif
