@@ -274,6 +274,9 @@ if (! -r "$ROOSYS/include/TPythia6.h") {
 if ($STAR_HOST_SYS =~ /darwin/ or (env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} >= 8))) {
   push @items, "St_geom_Maker";
 }
+#if (! -r "StarVMC/minicern/lnxgs/rdmin.F") {
+#  push @item, "minicern";
+#}
 if ($STAR_HOST_SYS =~ /darwin/) {
 #  push @items, "GeoTestMaker"; # if no QT |StStarLogger
   push @items, "Pythia6"; # problem with pythia6_common_address.c

@@ -602,7 +602,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       push @srcC, $s;
     }
     @src = @srcC;
-    push @src, "lnxgs/rdmin.F"  if $STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/;
+#   print "$#src @src\n";
+    if ($#src >= 0) {
+      push @src, "lnxgs/rdmin.F"  if $STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/;
+    }
     if ($FC eq 'g77') {
       $LIBS .= " -lg2c";
     }
