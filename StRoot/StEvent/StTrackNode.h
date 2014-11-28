@@ -81,6 +81,6 @@ private:
     StSPtrVecTrackABC  mOwnedTracks;
     StPtrVecTrackABC   mReferencedTracks;
 
-    ClassDef(StTrackNode,1)
+    ClassDef(StTrackNode,2)
 };
 #endif
