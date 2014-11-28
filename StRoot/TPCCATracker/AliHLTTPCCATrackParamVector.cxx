@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCATrackParamVector.cxx,v 1.2 2013/09/08 18:54:20 fisyak Exp $
+// $Id: AliHLTTPCCATrackParamVector.cxx,v 1.3 2014/08/26 12:52:08 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -210,11 +210,8 @@ sfloat_m AliHLTTPCCATrackParamVector::TransportToX( const sfloat_v &x, AliHLTTPC
   fC[12]( mask ) = c42 + dxBz * c44;
   fC[13]( mask ) = c43;
   fC[14]( mask ) = c44;
-#ifndef __APPLE__
+
   debugKF() << mask << "\n" << *this << std::endl;
-#else
-  gMessMgr->Debug() << mask << "\n" << *this << endm;
-#endif
   return mask;
 }
 

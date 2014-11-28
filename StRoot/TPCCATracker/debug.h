@@ -41,7 +41,6 @@ template<typename T> inline void prepareForDebugOutput( const typename T::Mask k
   if ( x8 ) ( *x8 )( k ) = T( 0 );
   if ( x9 ) ( *x9 )( k ) = T( 0 );
 }
-#ifndef __APPLE__
 #if DEBUG_MESSAGES & 1
 inline std::ostream &debugS() { return std::cerr; }
 #else
@@ -76,7 +75,5 @@ inline AliHLTTPCCANoDebugStream &debugKF() { return AliHLTTPCCANoDebugStreamInst
 inline AliHLTTPCCANoDebugStream &debugTS() { return AliHLTTPCCANoDebugStreamInst; }
 inline AliHLTTPCCANoDebugStream &debugWO() { return AliHLTTPCCANoDebugStreamInst; }
 #endif
-#else /* __APPLE__ */
-#include "StMessMgr.h" 
-#endif
+
 #endif // DEBUG_H

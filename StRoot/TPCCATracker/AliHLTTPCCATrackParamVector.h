@@ -219,11 +219,9 @@ inline sfloat_m AliHLTTPCCATrackParamVector::TransportToX( const sfloat_v &x, co
   //* linearisation of trajectory t0 is also transported to X=x,
   //* returns 1 if OK
   //*
-#ifndef __APPLE__
+
   debugKF() << "Start TransportToX(" << x << ", " << _mask << ")\n" << *this << std::endl;
-#else
-  gMessMgr->Debug() << "Start TransportToX(" << x << ", " << _mask << ")\n" << *this << endm;
-#endif
+
   const sfloat_v &ey = sinPhi0;
   const sfloat_v &dx = x - X();
   const sfloat_v &exi = sfloat_v( Vc::One ) * CAMath::RSqrt( sfloat_v( Vc::One ) - ey * ey ); // RSqrt
@@ -291,11 +289,8 @@ inline sfloat_m AliHLTTPCCATrackParamVector::TransportToX( const sfloat_v &x, co
   //fC[11]( mask ) += dS * c43;
   //fC[13]( mask ) = c43;
   //fC[14]( mask ) = c44;
-#ifndef __APPLE__
+
   debugKF() << mask << "\n" << *this << std::endl;
-#else
-  gMessMgr->Debug() << mask << "\n" << *this << endm;
-#endif
   return mask;
 }
 
@@ -304,22 +299,13 @@ inline sfloat_m AliHLTTPCCATrackParamVector::TransportToX( const sfloat_v &x, co
 inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, const sfloat_v &dy, const sfloat_v &dz,
     sfloat_v err2Y, sfloat_v err2Z, const float maxSinPhi )
 {
-#ifndef __APPLE__
-  debugKF() 
-#else
-  gMessMgr->Debug()  
-#endif
-    << "Kalman filter( " << mask
+  debugKF() << "Kalman filter( " << mask
     << "\n  " << dy
     << "\n  " << dz
     << "\n  " << err2Y
     << "\n  " << err2Z
-    << "\n):" 
-#ifndef __APPLE__
-    << std::endl;
-#else
-  << endm;
-#endif
+    << "\n):" << std::endl;
+
   assert( err2Y > 0.f || !mask );
   assert( err2Z > 0.f || !mask );
   VALGRIND_CHECK_VALUE_IS_DEFINED( mask );
@@ -368,13 +354,8 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
   const sfloat_v &mS2 = sfloat_v( Vc::One ) / err2Z;
   //const sfloat_v &mS0 = CAMath::Reciprocal( err2Y );
   //const sfloat_v &mS2 = CAMath::Reciprocal( err2Z );
-#ifndef __APPLE__
   debugKF() << "delta(mS0): " << CAMath::Abs( sfloat_v( Vc::One ) / err2Y - mS0 ) << std::endl;
   debugKF() << "delta(mS2): " << CAMath::Abs( sfloat_v( Vc::One ) / err2Z - mS2 ) << std::endl;
-#else
-  gMessMgr->Debug() << "delta(mS0): " << CAMath::Abs( sfloat_v( Vc::One ) / err2Y - mS0 ) << endm;
-  gMessMgr->Debug() << "delta(mS2): " << CAMath::Abs( sfloat_v( Vc::One ) / err2Z - mS2 ) << endm;
-#endif
   assert( mS0 > 0.f || !mask );
   assert( mS2 > 0.f || !mask );
 
@@ -386,7 +367,7 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
 
   const sfloat_v &k11 = c11 * mS2;
   const sfloat_v &k31 = c31 * mS2;
-#ifndef __APPLE__
+
   debugKF() << "delta(k00): " << ( c00 / err2Y - k00 ) << std::endl;
   debugKF() << "delta(k20): " << ( c20 / err2Y - k20 ) << std::endl;
   debugKF() << "delta(k40): " << ( c40 / err2Y - k40 ) << std::endl;
@@ -396,17 +377,7 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
 
   const sfloat_v &sinPhi = fP[2] + k20 * z0  ;
   debugKF() << "delta(sinPhi): " << ( z0 * c20 / err2Y + fP[2] - sinPhi ) << std::endl;
-#else
-  gMessMgr->Debug() << "delta(k00): " << ( c00 / err2Y - k00 ) << endm;
-  gMessMgr->Debug() << "delta(k20): " << ( c20 / err2Y - k20 ) << endm;
-  gMessMgr->Debug() << "delta(k40): " << ( c40 / err2Y - k40 ) << endm;
 
-  gMessMgr->Debug() << "delta(k11): " << ( c11 / err2Z - k11 ) << endm;
-  gMessMgr->Debug() << "delta(k31): " << ( c31 / err2Z - k31 ) << endm;
-
-  const sfloat_v &sinPhi = fP[2] + k20 * z0  ;
-  gMessMgr->Debug() << "delta(sinPhi): " << ( z0 * c20 / err2Y + fP[2] - sinPhi ) << endm;
-#endif
   assert( maxSinPhi > 0.f );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( sinPhi, mask );
   const sfloat_m &success = mask && err2Y >= 1.e-8f && err2Z >= 1.e-8f && CAMath::Abs( sinPhi ) < maxSinPhi;
@@ -446,22 +417,12 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
 inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const sfloat_v &y, const sfloat_v &z,
     sfloat_v err2Y, sfloat_v err2Z, const float maxSinPhi )
 {
-#ifndef __APPLE__
-  debugKF() 
-#else
-   gMessMgr->Debug() 
-#endif
-    << "Kalman filter( " << mask
+  debugKF() << "Kalman filter( " << mask
     << "\n  " << y
     << "\n  " << z
     << "\n  " << err2Y
     << "\n  " << err2Z
-    << "\n):" 
-#ifndef __APPLE__
-    << std::endl;
-#else
-  << endm;
-#endif
+    << "\n):" << std::endl;
 
   assert( err2Y > 0.f || !mask );
   assert( err2Z > 0.f || !mask );
@@ -511,13 +472,8 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
   const sfloat_v &mS2 = sfloat_v( Vc::One ) / err2Z;
   //const sfloat_v &mS0 = CAMath::Reciprocal( err2Y );
   //const sfloat_v &mS2 = CAMath::Reciprocal( err2Z );
-#ifndef __APPLE__
   debugKF() << "delta(mS0): " << CAMath::Abs( sfloat_v( Vc::One ) / err2Y - mS0 ) << std::endl;
   debugKF() << "delta(mS2): " << CAMath::Abs( sfloat_v( Vc::One ) / err2Z - mS2 ) << std::endl;
-#else
-  gMessMgr->Debug() << "delta(mS0): " << CAMath::Abs( sfloat_v( Vc::One ) / err2Y - mS0 ) << endm;
-  gMessMgr->Debug() << "delta(mS2): " << CAMath::Abs( sfloat_v( Vc::One ) / err2Z - mS2 ) << endm;
-#endif
   assert( mS0 > 0.f || !mask );
   assert( mS2 > 0.f || !mask );
 
@@ -530,7 +486,6 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
   const sfloat_v &k11 = c11 * mS2;
   const sfloat_v &k31 = c31 * mS2;
 
-#ifndef __APPLE__
   debugKF() << "delta(k00): " << ( c00 / err2Y - k00 ) << std::endl;
   debugKF() << "delta(k20): " << ( c20 / err2Y - k20 ) << std::endl;
   debugKF() << "delta(k40): " << ( c40 / err2Y - k40 ) << std::endl;
@@ -540,17 +495,7 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
 
   const sfloat_v &sinPhi = fP[2] + k20 * z0  ;
   debugKF() << "delta(sinPhi): " << ( z0 * c20 / err2Y + fP[2] - sinPhi ) << std::endl;
-#else
-  gMessMgr->Debug() << "delta(k00): " << ( c00 / err2Y - k00 ) << endm;
-  gMessMgr->Debug() << "delta(k20): " << ( c20 / err2Y - k20 ) << endm;
-  gMessMgr->Debug() << "delta(k40): " << ( c40 / err2Y - k40 ) << endm;
 
-  gMessMgr->Debug() << "delta(k11): " << ( c11 / err2Z - k11 ) << endm;
-  gMessMgr->Debug() << "delta(k31): " << ( c31 / err2Z - k31 ) << endm;
-
-  const sfloat_v &sinPhi = fP[2] + k20 * z0  ;
-  gMessMgr->Debug() << "delta(sinPhi): " << ( z0 * c20 / err2Y + fP[2] - sinPhi ) << endm;
-#endif
   assert( maxSinPhi > 0.f );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( sinPhi, mask );
   const sfloat_m &success = mask && err2Y >= 1.e-8f && err2Z >= 1.e-8f && CAMath::Abs( sinPhi ) < maxSinPhi;
