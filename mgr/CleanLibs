@@ -1,5 +1,5 @@
-###!/usr/bin/env perl
-#!/opt/star/sl53_gcc451/bin/perl
+#!/usr/bin/env perl
+#####!/opt/star/sl53_gcc451/bin/perl
 ######!/opt/star/bin/perl
 #
 # 2009 - J.Lauret - added detection of dead links

@@ -392,9 +392,12 @@ sub parse_with_clause {
     }
     \%data;
 }
+$command =~ s/"/\"/g;
+#print "command: $command\n";
 
-my @output = qx/LANG=C 2>&1 $command/;
-
+my @output = qx/LANG=C 2>&1 $command/; 
+#my @output = qx'LANG=C 2>&1 $command'; 
+#print "output : @output\n===============\n";
 # main parser
 for (@output){
     # things like "In file included from ..."

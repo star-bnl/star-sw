@@ -1,9 +1,13 @@
 #! /bin/sh 
 # Purpose: change the title in an vt or xterm - @G.Alves
 if [ $# -eq 0 ]; then
+ r=`root-config --version`;
  t=""
  d=""
  v=""
+# if test ! "x$ROOT_LEVEL" = "x"; then
+#  r=$ROOT_LEVEL
+# fi
  if test ! "x$STAR_HOST_SYS" = "x"; then
   t=$STAR_HOST_SYS
  fi
@@ -15,7 +19,7 @@ if [ $# -eq 0 ]; then
  else 
   d=debug
  fi
- TNAME=`hostname -s`_${v}_${t}_${d}
+ TNAME=`hostname -s`_${r}_${v}_${t}_${d}
 else
  TNAME=$1
 fi

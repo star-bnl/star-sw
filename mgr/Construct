@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.181 2013/01/21 22:53:39 jeromel Exp $
+# $Id: Construct,v 1.6 2014/10/06 14:15:07 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -148,7 +148,8 @@ Ignore qw(
 
 if ( !$param::quiet ) {
   my @list = qw (STAR_SYS ROOTSYS br 
-		 CXX DEBUG CXXFLAGS EXTRA_CXXFLAGS 
+		 CERNLIB_FPPFLAGS CERNLIB_CPPFLAGS br
+		 CXX DEBUG CXXFLAGS EXTRA_CXXFLAGS br
 		 CPPFLAGS EXTRA_CPPFLAGS br 
 		 CPPPATH EXTRA_CPPPATH br
 		 CC DEBUG CFLAGS EXTRA_CFLAGS br
@@ -157,8 +158,7 @@ if ( !$param::quiet ) {
 		 F77LD F77LDFLAGS br
 		 CERNLIBS br 
 		 FLIBS CLIBS SYSLIBS LIBG2C br
-		 LD LDFLAGS EXTRA_LDFLAGS LIBPATH LIBS Libraries br
-		 SO SOFLAGS br 
+		 LD LDFLAGS EXTRA_LDFLAGS LIBPATH LIBS Libraries SO SOFLAGS br 
 		 LIBG2C LIBSTDC br
 		 ROOTLIBS br
 		);
@@ -202,43 +202,45 @@ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
     Install $env $INCLUDE, @incT;
   }
 }
-foreach my $dir (qw(StRoot/Vc/include/Vc StRoot/Vc/common  StRoot/Vc/scalar StRoot/Vc/sse StRoot/Vc/include/Vc/internal
-		    StRoot/TBB/include/tbb StRoot/TBB/include/tbb/machine)) {
-#		    StRoot/Vc/avx
-#		    StRoot/Vc/include/Vc/common  StRoot/Vc/include/Vc/scalar StRoot/Vc/include/Vc/sse
-  next if ! -r $dir;
-  my $installdir = $INCLUDE;
-  if ($dir =~ /Vc/) {
-    $installdir = $INCLUDE . "/Vc";
-    if ($dir =~ /internal$/) {$installdir .= "/internal";}
-    if ($dir =~ /common$/) {$installdir .= "/common";}
-    if ($dir =~ /scalar$/) {$installdir .= "/scalar";}
-    if ($dir =~ /sse$/)    {$installdir .= "/sse";}
-    if ($dir =~ /avx$/)    {$installdir .= "/avx";}
-    if ($dir =~ /mic$/)    {$installdir .= "/mic";}
-  }
-  if ($dir =~ /tbb/) {
-    $installdir .= "/tbb";
-    if ($dir =~ /machine$/) {$installdir .= "/machine";}
-  }
-  print "$dir => $installdir\n" if ($param::debug);
-  opendir( DIR, $dir ) or die "Can't open $dir\n";
-  my @incs = readdir DIR; print "incs = @incs\n" if ($param::debug);
-  closedir DIR;
-  my @incT = (); 
-  foreach my $inc(@incs) {
-    my $file = $dir . "/" . $inc;
-    next if ! -f $file;
-    next if $file =~ /\.consign/;
-    push @incT, $dir . "/" . $inc;
-    print "+++ add $inc from $dir\n" if ($param::debug);
-  }  
-  print "\n" if ($param::debug);
-  print "$dir => $installdir @incT\n" if ($param::debug);
-  if ( $#incT > -1 && !$param::rflag ) {
-    Install $env $installdir, @incT;
-  }
-}
+#if (-r "StRoot/Vc/include/Vc/Vc") {
+#foreach my $dir (qw( StRoot/Vc/avx
+#  StRoot/Vc/common StRoot/Vc/include/Vc StRoot/Vc/include/Vc/internal StRoot/Vc/scalar StRoot/Vc/src StRoot/Vc/sse
+# 		     StRoot/TBB/include/tbb StRoot/TBB/include/tbb/machine)) {
+#  next if ! -r $dir;
+#  my $installdir = $INCLUDE;
+#  if ($dir =~ /Vc/) {
+#      $installdir = $INCLUDE;
+#      if ($dir =~ /avx$/)    {$installdir .= "/avx";}
+#      if ($dir =~ /include/)  {$installdir .= "/Vc";}
+#      if ($dir =~ /internal$/) {$installdir .= "/internal";} # Vc/intertal
+#      if ($dir =~ /common$/) {$installdir .= "/common";}
+#      if ($dir =~ /scalar$/) {$installdir .= "/scalar";}
+#      if ($dir =~ /src$/)    {$installdir .= "/src";}
+#      if ($dir =~ /sse$/)    {$installdir .= "/sse";}
+#  }
+#  if ($dir =~ /tbb/) {
+#    $installdir .= "/tbb";
+#    if ($dir =~ /machine$/) {$installdir .= "/machine";}
+#  }
+#  print "$dir => $installdir\n" if ($param::debug);
+#  opendir( DIR, $dir ) or die "Can't open $dir\n";
+#  my @incs = readdir DIR; print "incs = @incs\n" if ($param::debug);
+#  closedir DIR;
+#  my @incT = (); 
+#  foreach my $inc(@incs) {
+#    my $file = $dir . "/" . $inc;
+#    next if ! -f $file;
+#    next if $file =~ /\.consign/;
+#    push @incT, $dir . "/" . $inc;
+#    print "+++ add $inc from $dir\n" if ($param::debug);
+#  }  
+#  print "\n" if ($param::debug);
+#  print "$dir => $installdir @incT\n" if ($param::debug);
+#  if ( $#incT > -1 && !$param::rflag ) {
+#    Install $env $installdir, @incT;
+#  }
+#}
+#}
 my @excludeDirList = qw(\. \.\. macros CVS html doc inc idl local run wrk example include kumac.*);
 #my  $excludeDirList = "^(\.|\.\.|macros|CVS|html|doc|inc|idl|local|run|wrk|example|include|kumac.*)\$";
 my  $excludeDirList = join ("|", @excludeDirList);
@@ -253,34 +255,53 @@ my  $excludeDirList = join ("|", @excludeDirList);
 #
 #my  @items = qw(StFgtClusterTools StFgtPool); #   StHbtMaker StBTofPool StFgtPool
 my  @items = qw(); #StFgtClusterTools StFgtPool); #   StHbtMaker StBTofPool StFgtPool
-if ($USE_64BITS and $USE_64BITS != "0"){
-  push @items, "gstar";
-  push @items, "control";
-  push @items, "St_geant_Maker";
-}
+#if ($USE_64BITS and $USE_64BITS != "0"){
+#  push @items, "gstar";
+#  push @items, "control";
+#  push @items, "St_geant_Maker";
+#}
 #print "CXX MAJOR = $env->{CXX_MAJOR} CXX MINOR =  $env->{CXX_MINOR}\n";
 #if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
 #    $items .= "|Vc|TBB|TPCCATracker";
 #}
-if ($STAR_HOST_SYS =~ /x86_darwin/ or $STAR_HOST_SYS =~ /sl53_gcc471/ or $STAR_HOST_SYS =~ /sl64_gcc447/) {
-  push @items, "St_geom_Maker";
+#if ($STAR_HOST_SYS =~ /sl64_gcc482/) {
+#  push @items, "St_geom_Maker";
+#  push @items, "GeoTestMaker";
+#}
+if (! -r "$ROOSYS/include/TPythia6.h") {
   push @items, "StEStructPool"; # pyhtia
 }
-if ($STAR_HOST_SYS =~ /x86_darwin/) {
-  push @items, "GeoTestMaker"; # if no QT |StStarLogger
+if ($STAR_HOST_SYS =~ /darwin/ or (env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} >= 8))) {
+  push @items, "St_geom_Maker";
+}
+if ($STAR_HOST_SYS =~ /darwin/) {
+#  push @items, "GeoTestMaker"; # if no QT |StStarLogger
   push @items, "Pythia6"; # problem with pythia6_common_address.c
   push @items, "StarLight"; # problem with capital and low case letter in file names
   push @items, "UrQMD3_3_1"; # -"-
+  push @items, "StEmbeddingUtilities";
+  push @items, "StEEmcIUPi0";
+  push @items, "StHLTCAMaker";
+  push @items, "StMaxStripPi0";
+#  push @items, "TPCCATracker";
 #ifdef ____MAC_____
-  push @items, "StEStructPool";
-  push @items, "StMCFilter";
-  push @items, "StTriggerUtilities";
+#  push @items, "StEStructPool";
+#  push @items, "StMCFilter";
+#  push @items, "StTriggerUtilities";
 #  push @items, "StSpinPool";
 #  push @items, "StFmsTriggerMaker"; # bswap_64
 #  push @items, "StWalgo2011";       # uint
 #  push @items, "StWalgo2009";       # uint
 #  push @items, "StWalgoB2009";      # uint
 #endif /* ____MAC_____ */
+  push @items, "StarGenerator";
+  push @items, "StJetMaker";
+}
+      my $libv = $env->{ENV}->{ROOTSYS} . "/lib/libVc.a";
+if (! -r $libv) {
+  push @items, "StHLTCAMaker";
+  push @items, "KFParticle";
+  push @items, "TPCCATracker";
 }
 #$items .= "StBTofPool|StTriggerUtilities|StFgtPool|StPeCMaker";
 #$items .= "StBTofPool|StFgtPool|StPeCMaker";
@@ -371,14 +392,14 @@ my @sysdirlist = qw(asps/Simulation/agetof
 		    asps/staf/sdd
 		    StDb
 		   );# print "sysdirlist = @sysdirlist\n";
-if ($STAR_HOST_SYS !~ /sl64/) {
-  push @sysdirlist, "StarDb/AgiGeometry";  
-}
-if ($STAR_HOST_SYS !~ /x86_darwin/) {
+#if ($STAR_HOST_SYS !~ /sl64/) {
+if (-r "StarDb/AgiGeometry" ) {push @sysdirlist, "StarDb/AgiGeometry";}
+if (-r "StarDb/AgMLGeometry") {push @sysdirlist, "StarDb/AgMLGeometry";}
+#}
+if ($STAR_HOST_SYS !~ /darwin/) {
   push @sysdirlist, "asps/DAQBrowser";
-  push @sysdirlist, "StarDb/AgMLGeometry";
 }
-if (!($USE_64BITS and $USE_64BITS != "0") && $STAR_HOST_SYS !~ /x86_darwin/){
+if (!($USE_64BITS and $USE_64BITS != "0") && $STAR_HOST_SYS !~ /darwin/){
   push @sysdirlist, "asps/Simulation/geant321";
   push @sysdirlist, "asps/Simulation/gcalor";
   push @sysdirlist, "asps/rexe";
@@ -406,7 +427,7 @@ foreach $dir(@sysdirlist , @subdirs ) {
 @packages = sortu(@packages);
 #print "======= STAR_HOST_SYS = $STAR_HOST_SYS $param::include\n";
 my $qtRoot = "QtRoot";
-if (($STAR_HOST_SYS !~ /x86_darwin/ and $STAR_HOST_SYS !~ /sl53_gcc471/) or
+if (($STAR_HOST_SYS !~ /darwin/) || # and $STAR_HOST_SYS !~ /sl53_gcc471/ and $STAR_HOST_SYS !~ /gcc482/) ||
     ($param::include and $qtRoot =~ /$param::include/)) {# no qt on mac
 #  print "check $qtRoot\n";
   if (-d $qtRoot or -l $qtRoot) {
