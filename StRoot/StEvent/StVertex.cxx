@@ -72,7 +72,6 @@
 #include "StVertex.h"
 #include "StTrack.h"
 #include "StG2TrackVertexMap.h"
-#include "StPrimaryTrack.h"
 #include "TString.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
@@ -107,23 +106,19 @@ StVertex::operator!=(const StVertex& v) const
     return !(v == *this);
 }
 
-StTrack*               StVertex::parent()         {return dynamic_cast<      StTrack*>        (parentABC());}
-const StTrack*         StVertex::parent()   const {return dynamic_cast<const StTrack*>        (parentABC());}
-StTrackMassFit*        StVertex::parentMF()       {return dynamic_cast<      StTrackMassFit *>(parentABC());}
-const StTrackMassFit*  StVertex::parentMF() const {return dynamic_cast<const StTrackMassFit *>(parentABC());}
 StMatrixF
 StVertex::covariantMatrix() const
 {
-   const StTrackMassFit *mKFVertex = parentMF();
-   StMatrixF m(3,3);
-   if (! mKFVertex) {
-     m(1,1) = mCovariantMatrix[0];
-     m(1,2) = m(2,1) = mCovariantMatrix[1];
-     m(2,2) = mCovariantMatrix[2];
-     m(1,3) = m(3,1) = mCovariantMatrix[3];
-     m(2,3) = m(3,2) = mCovariantMatrix[4];
-     m(3,3) = mCovariantMatrix[5];
-   } else {
+  const StTrackMassFit *mKFVertex = parentMF();
+  StMatrixF m(3,3);
+  if (! mKFVertex) {
+    m(1,1) = mCovariantMatrix[0];
+    m(1,2) = m(2,1) = mCovariantMatrix[1];
+    m(2,2) = mCovariantMatrix[2];
+    m(1,3) = m(3,1) = mCovariantMatrix[3];
+    m(2,3) = m(3,2) = mCovariantMatrix[4];
+    m(3,3) = mCovariantMatrix[5];
+  } else {
      KFParticle *kf = (KFParticle *) mKFVertex->kfParticle();
      m(1,1) = kf->Covariance(0);
      m(1,2) = m(2,1) = kf->Covariance(1);
@@ -131,8 +126,8 @@ StVertex::covariantMatrix() const
      m(1,3) = m(3,1) = kf->Covariance(3);
      m(2,3) = m(3,2) = kf->Covariance(4);
      m(3,3) = kf->Covariance(5);
-   }
-   return m;
+  }
+  return m;
 }
 
 StThreeVectorF
@@ -147,8 +142,7 @@ StVertex::positionError() const
   }
 }
 
-void StVertex::setCovariantMatrix(float val[6]) { copy(val, val+6, mCovariantMatrix); }
-void StVertex::setParent(StTrackABC* val) { 
+void StVertex::setParent(StTrack* val) { 
   mParent = val; 
   StTrackMassFit *mKFVertex = parentMF();
   if (mKFVertex) {
@@ -161,6 +155,39 @@ void StVertex::setParent(StTrackABC* val) {
     mCovariantMatrix[5] = mKFVertex->kfParticle()->Covariance(5);
   }
 }
+void StVertex::setCovariantMatrix(float val[6]) { copy(val, val+6, mCovariantMatrix); }
+
+void StVertex::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+    
+    if (R__b.IsReading()) {
+        UInt_t R__s, R__c;
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v > 1) {
+            Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+            return;
+        }
+        //====process old versions before automatic schema evolution
+        StMeasuredPoint::Streamer(R__b);
+        R__b >> (Int_t&)mType;
+        R__b >> mFlag;
+        Int_t dumy;
+        if (gFile && gFile->GetVersion() < 30000) {R__b >> dumy;}
+        R__b.ReadFastArray(mCovariantMatrix,6);
+        R__b >> mChiSquared;
+        R__b >> mProbChiSquared;
+        //     R__b >> mParent;
+        R__b >> (StTrack*&)mParent;
+        
+        R__b.CheckByteCount(R__s, R__c, Class());
+        //====end of old versions
+        
+    } 
+    else {
+        Class()->WriteBuffer(R__b,this);
+    }
+} 
 //________________________________________________________________________________
 void StVertex::setIdTruth() { // match with IdTruth
     typedef std::map< Int_t,Float_t>  myMap_t;
@@ -171,7 +198,7 @@ void StVertex::setIdTruth() { // match with IdTruth
     Int_t IdVx = 0;
     Int_t qa = 0;
     for (UInt_t l = 0; l < Ntracks; l++) {
-      const StTrack *pTrack = dynamic_cast<const StTrack *>(daughter(l));
+        const StTrack *pTrack = daughter(l);
         if (! pTrack) continue;
         Int_t IdTk = pTrack->idTruth();
         if (IdTk <= 0) continue;
@@ -207,76 +234,45 @@ const StTrackMassFit* StVertex::massFit(UInt_t i) const {
     return i < mMassFits.size() ? mMassFits[i] : 0;
 }
 //______________________________________________________________________________
-void StVertex::addMassFit(StTrackMassFit* t) {
-  if (t) {
-    mMassFits.push_back(t);
-    t->setVertex(this);
-  }
+StPtrVecTrackMassFit StVertex::massFits(StTrackFilter& filter) {
+    StPtrVecTrackMassFit vec;
+    for (UInt_t i=0; i<mMassFits.size(); i++)
+        if (filter(mMassFits[i])) vec.push_back(mMassFits[i]);
+    return vec;
 }
 //______________________________________________________________________________
-void StVertex::removeMassFit(StTrackMassFit * t) {
-    StTrackMassFit* p = dynamic_cast<StTrackMassFit*>(t);
+void StVertex::addMassFit(StTrackMassFit* p) {
+  mMassFits.push_back(p);
+  p->setVertex(this);
+}
+//______________________________________________________________________________
+void StVertex::removeMassFit(StTrackMassFit* p) {
     if (!p) return;
     StSPtrVecTrackMassFitIterator iter;
     if (p->type() == massFitAtVx) {
         for (iter=mMassFits.begin(); iter != mMassFits.end(); iter++)
-            if (*iter == t) {
+            if (*iter == p) {
                 mMassFits.erase(iter);
                 p->setVertex(0);
             }
     }
 }
 //________________________________________________________________________________
-void StVertex::Print(Option_t *option) const {
-  std::cout << *this << std::endl; 
-  if (TString(option).Contains("f",TString::kIgnoreCase)) {
-    if (parentMF()) std::cout << "Parent:" << *parentMF() << std::endl; 
-    UInt_t No = numberOfDaughters();
-    for (UInt_t i = 0; i < No; i++) {
-      const StPrimaryTrack *pTrack = (const StPrimaryTrack *) daughter(i);
-      std::cout << Form("%4i:",i);
-      if (pTrack) pTrack->Print();
-      else        std::cout << std::endl;
-    }
-    No = numberOfMassFits();
-    for (UInt_t i = 0; i < No; i++) {
-      const StTrackMassFit *mf = (const StTrackMassFit *) massFit(i);
-      if (mf) {std::cout << Form("%4i:",i) << *mf << std::endl;}
-    }
-  }
-}
-//________________________________________________________________________________
 std::ostream&  operator<<(std::ostream& os,  const StVertex& v) {
-  const StTrackMassFit *mF = dynamic_cast<const StTrackMassFit *>(v.parent());
-  if (mF && mF->kfParticle()) {
-    os << *mF->kfParticle();
-  } else {
-    const Float_t *xyz = v.position().xyz();
-    const Float_t *dxyz = v.positionError().xyz();
-    for (Int_t i = 0; i < 3; i++)     {
-      if (dxyz[i] <= 9.999) os << Form("%8.3f+/-%5.3f,",xyz[i],dxyz[i]);
-      else 	                os << Form("%8.3f+/-9.999,",xyz[i]);
+    const StTrackMassFit *mF = dynamic_cast<const StTrackMassFit *>(v.parent());
+    if (mF && mF->kfParticle()) {
+        os << *mF->kfParticle();
+    } 
+    else {
+        const Float_t *xyz = v.position().xyz();
+        const Float_t *dxyz = v.positionError().xyz();
+        for (Int_t i = 0; i < 3; i++)     {
+	  if (dxyz[i] <= 9.999) os << Form("%8.3f+/-%5.3f,",xyz[i],dxyz[i]);
+	  else 	                os << Form("%8.3f+/-9.999,",xyz[i]);
+	}
+        os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared());
+	if (v.idTruth())  os << Form(" IdT: %5i Q:%3i", v.idTruth(), v.qaTruth());
     }
-    UInt_t nGoodTpcTracks = 0, nTpcTracks = 0;
-    UInt_t nDaughters = v.numberOfDaughters();
-    for (UInt_t i=0; i < nDaughters; i++) {
-      StPrimaryTrack* pTrack = (StPrimaryTrack*) v.daughter(i);
-      if (! pTrack) continue;
-      Int_t good = (pTrack->flag() > 0 && pTrack->fitTraits().numberOfFitPoints() >=  StVertex::NoFitPointCutForGoodTrack()) ? 1 : 0;
-      if (pTrack->fitTraits().numberOfFitPoints(kTpcId)) {
-	nTpcTracks++; nGoodTpcTracks+=good;
-      } 
-    }
-    os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared());
-#if 0
-    os << " Rank: "      << Form("%8.1f",v.ranking());
-    os << Form(" U/T/G: %4i,%4i,%4i", v.numTracksUsedInFinder(),nDaughters,v.numberOfGoodTracks());
-    if (nTpcTracks != nDaughters || nGoodTpcTracks != v.numberOfGoodTracks()) {
-      os << Form(" TPC:%4i,%4i",nTpcTracks,nGoodTpcTracks);
-    }
-#endif
-    if (v.idTruth())  os << Form(" IdT: %5i Q:%3i", v.idTruth(), v.qaTruth());
-  }
-  return os;
+    return os;
 }
 

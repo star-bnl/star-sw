@@ -56,8 +56,8 @@
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 #endif
-#include "StTrack.h"
-#include "StDedxPidTraits.h"
+
+class StDedxPidTraits;
 
 class StTpcDedxPidAlgorithm : public StPidAlgorithm {
 public:
@@ -71,7 +71,7 @@ public:
 
 private:
     const StDedxPidTraits*        mTraits;       //!
-    const StTrack*             mTrack;        //!
+    const StTrack*                mTrack;        //!
     StDedxMethod                  mDedxMethod;   //!
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
     vector<StParticleDefinition*,

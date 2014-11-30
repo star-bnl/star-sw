@@ -47,7 +47,7 @@
 #include "StContainers.h"
 #include "StEnumerations.h"
 #include "Stiostream.h"
-class StTrackABC;
+class StTrack;
 class StTrackNode;
 std::ostream&  operator<<(std::ostream& os,  const StTrackNode& t);
 class StTrackNode : public StObject {
@@ -55,32 +55,26 @@ public:
     StTrackNode();
     virtual ~StTrackNode();
 
-    void           addTrack(StTrackABC*);
-    void           removeTrack(StTrackABC*);
+    void           addTrack(StTrack*);
+    void           removeTrack(StTrack*);
 
-    unsigned int      entries() const;
-    StTrackABC*       trackABC(unsigned int);
-    const StTrackABC* trackABC(unsigned int) const;
-    StTrack*          track(unsigned int);
-    const StTrack*    track(unsigned int) const;
+    unsigned int   entries() const;
+    StTrack*       track(unsigned int);
+    const StTrack* track(unsigned int) const;
 
-    unsigned int      entries(StTrackType) const;
-    StTrackABC*       trackABC(StTrackType, unsigned int = 0);
-    const StTrackABC* trackABC(StTrackType, unsigned int = 0) const;
-    StTrack*          track(StTrackType type, unsigned int i = 0) 
-      {(type == global || type == primary) ? (StTrack *) trackABC(type,i) : 0;}
-    const StTrack*    track(StTrackType type , unsigned int i = 0) const
-      {(type == global || type == primary) ? (const StTrack *) trackABC(type,i) : 0;}
-    virtual void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
-    const StSPtrVecTrackABC& ownedTracks() const {return *&mOwnedTracks;}
-    const StPtrVecTrackABC&  referencedTracks() const {return *&mReferencedTracks;}
+    unsigned int   entries(StTrackType) const;
+    StTrack*       track(StTrackType, unsigned int = 0);
+    const StTrack* track(StTrackType, unsigned int = 0) const;
+    void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
+    const StSPtrVecTrack& ownedTracks() const {return *&mOwnedTracks;}
+    const StPtrVecTrack&  referencedTracks() const {return *&mReferencedTracks;}
 private:
     StTrackNode(const StTrackNode&);
     StTrackNode& operator=(const StTrackNode&);
     
-    StSPtrVecTrackABC  mOwnedTracks;
-    StPtrVecTrackABC   mReferencedTracks;
+    StSPtrVecTrack  mOwnedTracks;
+    StPtrVecTrack   mReferencedTracks;
 
-    ClassDef(StTrackNode,2)
+    ClassDef(StTrackNode,1)
 };
 #endif

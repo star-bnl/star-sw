@@ -29,12 +29,12 @@
 #ifndef StTrackMassFit_hh
 #define StTrackMassFit_hh
 
-#include "StTrackABC.h"
+#include "StTrack.h"
 #include "KFParticle/KFParticle.h"
 
 class StTrackMassFit;
 std::ostream&  operator<<(std::ostream& os,  const StTrackMassFit& t);
-class StTrackMassFit : public StTrackABC {
+class StTrackMassFit : public StTrack {
 public:
   StTrackMassFit(int key = 0, KFParticle *particle = 0)  : mKFParticle((particle) ? new KFParticle(*particle) : 0) {setKey(key);}
     StTrackMassFit(const StTrackMassFit&);

@@ -165,30 +165,33 @@
  **************************************************************************/
 #ifndef StTrack_hh
 #define StTrack_hh
-#include "StEnumerations.h"
+#include "StObject.h"
 #include "StContainers.h"
-#include "StTrackABC.h"
+#include "StEnumerations.h"
 #include "StTrackTopologyMap.h"
 #include "StFunctional.h"
 #include "StTrackFitTraits.h"
-#include "StTrackAttr.h"
-#include "StTrackDefinitions.h"
 class StTrack;
 std::ostream&  operator<<(std::ostream& os,  const StTrack& t);
 
 class StParticleDefinition;
+class StVertex;
 class StTrackGeometry;
 class StTrackDetectorInfo;
 class StTrackPidTraits;
+class StTrackNode;
 
-class StTrack : public StTrackABC, public StTrackAttr {
+class StTrack : public StObject {
 public:
     StTrack();
     StTrack(const StTrack&);
     StTrack & operator=(const StTrack&);
     virtual ~StTrack();
 
+    virtual StTrackType            type() const = 0;
+    virtual Int_t                  key() const { return mKey; }
     Short_t                        flag() const;
+    UInt_t                         flagExtension() const { return mFlagExtension; }
     UShort_t                       encodedMethod() const;
     bool                           finderMethod(StTrackFinderMethod) const;
     StTrackFittingMethod           fittingMethod() const;
@@ -209,7 +212,52 @@ public:
     StSPtrVecTrackPidTraits&       pidTraits();
     StPtrVecTrackPidTraits         pidTraits(StDetectorId) const;
     const StParticleDefinition*    pidTraits(StPidAlgorithm&) const;
+    StTrackNode*                   node();
+    const StTrackNode*             node() const;
+    const StVertex*                vertex() const;
+    virtual const StVertex*        endVertex() const {return mEndVertex;}
     UShort_t                       seedQuality() const {return mSeedQuality;}
+    Bool_t       isCtbMatched()            const {return testBit(kCtbMatched);}   
+    Bool_t       isToFMatched()  	   const {return testBit(kToFMatched);}   
+    Bool_t       isBToFMatched()  	   const {return testBit(kToFMatched);}   
+    Bool_t       isBemcMatched() 	   const {return testBit(kBemcMatched);}  
+    Bool_t       isEemcMatched() 	   const {return testBit(kEemcMatched);}  
+
+    Bool_t       isCtbNotMatched()         const {return testBit(kCtbNotMatched);}   
+    Bool_t       isToFNotMatched()  	   const {return testBit(kToFNotMatched);}   
+    Bool_t       isBToFNotMatched()  	   const {return testBit(kToFNotMatched);}   
+    Bool_t       isBemcNotMatched() 	   const {return testBit(kBemcNotMatched);}  
+    Bool_t       isEemcNotMatched() 	   const {return testBit(kEemcNotMatched);}  
+
+    Bool_t       isDecayTrack()  	   const {return testBit(kDecayTrack);}   
+    Bool_t       isPromptTrack() 	   const {return testBit(kPromptTrack);}       
+    Bool_t       isPostXTrack()            const {return testBit(kPostXTrack);} 
+    Bool_t       isMembraneCrossingTrack() const {return testBit(kXMembrane);} 
+    Bool_t       isShortTrack2EMC()        const {return testBit(kShortTrack2EMC);}
+    Bool_t       isRejected()              const {return testBit(kRejectedTrack);}
+    Bool_t       isWestTpcOnly()           const {return testBit(kWestTpcOnlyTrack);}
+    Bool_t       isEastTpcOnly()           const {return testBit(kEastTpcOnlyTrack);}
+
+    virtual void setCtbMatched()           {setBit(kCtbMatched);}   
+    virtual void setToFMatched()  	   {setBit(kToFMatched);}   
+    virtual void setBToFMatched()  	   {setBit(kToFMatched);}   
+    virtual void setBemcMatched() 	   {setBit(kBemcMatched);}  
+    virtual void setEemcMatched() 	   {setBit(kEemcMatched);}  
+
+    virtual void setCtbNotMatched()        {setBit(kCtbNotMatched);}   
+    virtual void setToFNotMatched()  	   {setBit(kToFNotMatched);}   
+    virtual void setBToFNotMatched()  	   {setBit(kToFNotMatched);}   
+    virtual void setBemcNotMatched() 	   {setBit(kBemcNotMatched);}  
+    virtual void setEemcNotMatched() 	   {setBit(kEemcNotMatched);}  
+    virtual void setDecayTrack()  	   {setBit(kDecayTrack);}   
+    virtual void setPromptTrack() 	   {setBit(kPromptTrack);}       
+    virtual void setPostCrossingTrack()    {setBit(kPostXTrack);} 
+    virtual void setMembraneCrossingTrack(){setBit(kXMembrane);} 
+    virtual void setShortTrack2EMC()       {reSetBit(kRejectedTrack); setBit(kShortTrack2EMC);}
+    virtual void setRejected()             {setBit(kRejectedTrack);}
+    virtual void setWestTpcOnly()          {setBit(kWestTpcOnlyTrack);}
+    virtual void setEastTpcOnly()          {setBit(kEastTpcOnlyTrack);}
+    virtual void setFlagExtension(UInt_t i){mFlagExtension = i;}
     void         setFlag(Short_t);
     void         setKey(Int_t val) { mKey = val; }
     void         setEncodedMethod(UShort_t);
@@ -221,6 +269,8 @@ public:
     void         setFitTraits(const StTrackFitTraits&);
     void         addPidTraits(StTrackPidTraits*);
     void         setDetectorInfo(StTrackDetectorInfo*);
+    void         setNode(StTrackNode*);
+    void         setEndVertex(StVertex *v = 0) {mEndVertex = v;}
     Int_t        bad() const;
     void         setNumberOfPossiblePoints(unsigned char, StDetectorId);
     void         setSeedQuality(UShort_t qa) 		{mSeedQuality = qa;}
@@ -230,11 +280,20 @@ public:
     void         setIdTruth(Int_t idtru,Int_t qatru=0) 	{mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
     void         setIdTruth(); 				//setting on hits info
     void         setIdParentVx(Int_t id) {mIdParentVx = id;}
-    virtual void Print(Option_t *option="") const {std::cout << option << (*this) << std::endl; }
+    void         setVertex(StVertex* /* val */);
+   //----- bit manipulation
+    void         setBit(UInt_t f, Bool_t set) {(set) ? setBit(f) : reSetBit(f);}
+    void         setBit(UInt_t f) { mFlagExtension |= f; }
+    void         reSetBit(UInt_t f) { mFlagExtension &= ~(f); }
+    Bool_t       testBit(UInt_t f) const { return (Bool_t) ((mFlagExtension & f) != 0); }
+    Int_t        testBits(UInt_t f) const { return (Int_t) (mFlagExtension & f); }
+    void         invertBit(UInt_t f) { mFlagExtension ^= f; }
+    void Print(Option_t *option="") const {std::cout << option << (*this) << std::endl; }
     
 protected:
     void         setNumberOfPossiblePoints(UShort_t); // obsolete
     Char_t                  mBeg[1]; //!
+    Int_t                   mKey;
     Short_t                 mFlag;
     UInt_t                  mFlagExtension; // bit wise fast detector matching status
     UShort_t                mEncodedMethod;
@@ -253,19 +312,26 @@ protected:
     UShort_t                mIdTruth; // MC track id 
     UShort_t                mQuality; // quality of this information (percentage of hits coming from the above MC track)
     Int_t                   mIdParentVx; // MC Parent vertex Id
+    StVertex               *mEndVertex;
     Char_t                  mEnd[1]; //!
     StTrackTopologyMap      mTopologyMap;
     StTrackFitTraits        mFitTraits;
     
 //  StTrackDetectorInfo         *mDetectorInfo;         //$LINK
+//  StTrackNode                 *mNode;                 //$LINK
+//  StTrackVertex               *mVertex;                 //$LINK
 #ifdef __CINT__
     StObjLink                    mDetectorInfo;         
+    StObjLink      	         mNode;                 	
+    StObjLink      	         mVertex;                 	
 #else
     StLink<StTrackDetectorInfo>  mDetectorInfo;         
+    StLink<StTrackNode>          mNode;                 	
+    StLink<StVertex>             mVertex;                 	
 #endif //__CINT__
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
     
-    ClassDef(StTrack,1)
+    ClassDef(StTrack,10)
 };
 #endif

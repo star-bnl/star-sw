@@ -14,7 +14,7 @@
  * Add numberOfSigma() for kLikelihoodFitId method
  *
  * Revision 2.29  2012/05/07 14:42:58  fisyak
- * Add handilings for TrackFit to Fast Detectors Matching
+ * Add handilings for Track to Fast Detectors Matching
  *
  * Revision 2.28  2010/11/15 22:11:45  fisyak
  * Restore proper nSigma
@@ -115,9 +115,11 @@
 #include <cmath>
 #include <float.h>
 #include "StTpcDedxPidAlgorithm.h"
+#include "StTrack.h"
 #include "StGlobalTrack.h"
 #include "StParticleTypes.hh"
 #include "StEnumerations.h"
+#include "StDedxPidTraits.h"
 #include "StTrackNode.h"
 #include "StTrackGeometry.h"
 #if 0

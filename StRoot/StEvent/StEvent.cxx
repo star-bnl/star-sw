@@ -1533,14 +1533,8 @@ void StEvent::setIdTruth() {
     if (!node) continue;
     UInt_t notr = node->entries();
     for (UInt_t t = 0; t < notr; t++) {
-      StTrackABC *trackABC = node->track(t);
-      if (! trackABC) continue;
-      if (trackABC->type() == global || trackABC->type() == primary) {
-	StTrack * track = (StTrack *) trackABC;
-	if (track) {
-	  track->setIdTruth();
-	}
-      }
+      StTrack *track = node->track(t);
+      track->setIdTruth();
     }
   }
   // loop over all type of vertices

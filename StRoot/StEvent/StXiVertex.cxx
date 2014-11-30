@@ -156,8 +156,8 @@ StXiVertex::setDcaBachelorToPrimaryVertex(float val)
 double
 StXiVertex::chargeOfBachelor()
 {
-  StTrack* b = dynamic_cast<StTrack *>(bachelor());
-  return b ? b->geometry()->charge() : 0;
+    StTrack* b = bachelor();
+    return b ? b->geometry()->charge() : 0;
 }
 
 void

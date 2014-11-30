@@ -77,7 +77,7 @@ StTrackNode::StTrackNode() { /* noop */ }
 StTrackNode::~StTrackNode() { /* noop */ }
 
 void
-StTrackNode::addTrack(StTrackABC* track)
+StTrackNode::addTrack(StTrack* track)
 {
     if (track) {
         switch (track->type()) {
@@ -103,10 +103,10 @@ StTrackNode::addTrack(StTrackABC* track)
 }
 
 void
-StTrackNode::removeTrack(StTrackABC* track)
+StTrackNode::removeTrack(StTrack* track)
 {
-    StPtrVecTrackABCIterator  iter;
-    StSPtrVecTrackABCIterator iterS;
+    StPtrVecTrackIterator  iter;
+    StSPtrVecTrackIterator iterS;
     if (track) {
       UInt_t i, N;
         switch (track->type()) {
@@ -140,8 +140,8 @@ StTrackNode::entries() const
     return mReferencedTracks.size() + mOwnedTracks.size();
 }
 
-const StTrackABC*
-StTrackNode::trackABC(unsigned int i) const
+const StTrack*
+StTrackNode::track(unsigned int i) const
 {
     if (i < mOwnedTracks.size())
         return mOwnedTracks[i];
@@ -154,56 +154,19 @@ StTrackNode::trackABC(unsigned int i) const
     }
 }
 
-StTrackABC*
-StTrackNode::trackABC(unsigned int i)
+StTrack*
+StTrackNode::track(unsigned int i)
 {
     if (i < mOwnedTracks.size())
         return mOwnedTracks[i];
     else {
         i -= mOwnedTracks.size();
         if (i < mReferencedTracks.size())
-	  return mReferencedTracks[i];
+            return mReferencedTracks[i];
         else
-	  return 0;
+            return 0;
     }
 }
-const StTrack*
-StTrackNode::track(unsigned int i) const
-{
-  if (i < mOwnedTracks.size())
-    if (mOwnedTracks[i]->type() == global || mOwnedTracks[i]->type() == primary)
-      return (StTrack*) mOwnedTracks[i];
-    else 
-      return 0;
-    else {
-        i -= mOwnedTracks.size();
-        if (i < mReferencedTracks.size())
-    if (mReferencedTracks[i]->type() == global || mReferencedTracks[i]->type() == primary)
-      return (StTrack *)mReferencedTracks[i];
-    else return 0;
-    else
-      return 0;
-    }
-}
-StTrack*
-StTrackNode::track(unsigned int i)
-{
-  if (i < mOwnedTracks.size())
-    if (mOwnedTracks[i]->type() == global || mOwnedTracks[i]->type() == primary)
-      return (StTrack*) mOwnedTracks[i];
-    else 
-      return 0;
-    else {
-        i -= mOwnedTracks.size();
-        if (i < mReferencedTracks.size())
-	  if (mReferencedTracks[i]->type() == global || mReferencedTracks[i]->type() == primary)
-	    return (StTrack *)mReferencedTracks[i];
-	  else return 0;
-	else
-	  return 0;
-    }
-}
-
 
 unsigned int
 StTrackNode::entries(StTrackType type) const
@@ -237,12 +200,12 @@ StTrackNode::entries(StTrackType type) const
     }
 }
 
-const StTrackABC*
-StTrackNode::trackABC(StTrackType type, unsigned int i) const
+const StTrack*
+StTrackNode::track(StTrackType type, unsigned int i) const
 {
     int          j;
     unsigned int k;
-    const StTrackABC* t = 0;
+    const StTrack* t = 0;
     UInt_t nR = mReferencedTracks.size();
     UInt_t nO = mOwnedTracks.size();
     switch (type) {
@@ -275,12 +238,12 @@ StTrackNode::trackABC(StTrackType type, unsigned int i) const
     }
 }
 
-StTrackABC*
-StTrackNode::trackABC(StTrackType type, unsigned int i)
+StTrack*
+StTrackNode::track(StTrackType type, unsigned int i)
 {
     int          j;
     unsigned int k;
-    StTrackABC* t = 0;
+    StTrack* t = 0;
     UInt_t nR = mReferencedTracks.size();
     UInt_t nO = mOwnedTracks.size();
     switch (type) {
@@ -314,7 +277,7 @@ StTrackNode::trackABC(StTrackType type, unsigned int i)
 }
 //________________________________________________________________________________
 std::ostream&  operator<<(std::ostream& os,  const StTrackNode& node) {
-  const StTrackABC *track;
+  const StTrack *track;
   UInt_t nR = node.referencedTracks().size();
   UInt_t nO = node.ownedTracks().size();
   os << "Track node : ";
@@ -329,8 +292,6 @@ std::ostream&  operator<<(std::ostream& os,  const StTrackNode& node) {
       os << *((const StGlobalTrack*) track);
     } else if (track->type() == massFitAtVx || track->type() == massFit) {
       os << *((const StTrackMassFit*) track);
-    } else if (! track) {
-      os << "missing track for entry " << k; 
     } else {
       os << *track;
     }

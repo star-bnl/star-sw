@@ -44,6 +44,6 @@ public:
     StTrackType     type() const;
     const StVertex* vertex() const;
 
-    ClassDef(StTptTrack,2)
+    ClassDef(StTptTrack,1)
 };
 #endif

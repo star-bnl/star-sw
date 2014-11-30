@@ -62,11 +62,11 @@ class StGlobalTrack : public StTrack {
   StDcaGeometry* dcaGeometry()  {return mDcaGeometry;}
   void setDcaGeometry(StDcaGeometry* dca) {mDcaGeometry=dca;}
   
-  virtual void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
+  void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
  protected:
   StDcaGeometry *mDcaGeometry;
   
-  ClassDef(StGlobalTrack,4)
+  ClassDef(StGlobalTrack,2)
 };
 
 #endif

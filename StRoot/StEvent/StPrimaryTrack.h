@@ -68,8 +68,8 @@ public:
     ~StPrimaryTrack() {/* noop */}
     
     StTrackType type() const {return primary; }
-    virtual void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
+    void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
     
-    ClassDef(StPrimaryTrack,4)
+    ClassDef(StPrimaryTrack,3)
 };
 #endif

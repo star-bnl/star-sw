@@ -149,7 +149,6 @@ class StTofCell;
 class StTofData;
 class StTofRawData;
 class StTrack;
-class StTrackABC;
 class StTrackNode;
 class StTrackFitTraits;
 class StTrackPidTraits;
@@ -209,7 +208,6 @@ StCollectionDef(TofCell)
 StCollectionDef(TofData)
 StCollectionDef(TofRawData)
 StCollectionDef(Track)
-StCollectionDef(TrackABC)
 StCollectionDef(TrackNode)
 StCollectionDef(TrackFitTraits)
 StCollectionDef(TrackPidTraits)

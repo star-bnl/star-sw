@@ -79,7 +79,6 @@
 class StTrack;
 class StTrackFilter;
 class StVertex;
-#include "KFParticle/KFVertex.h"
 std::ostream&  operator<<(std::ostream& os,  const StVertex& v);
 
 class StVertex : public StMeasuredPoint {
@@ -97,12 +96,10 @@ public:
     Float_t                probChiSquared() const { return mProbChiSquared; }
     StMatrixF              covariantMatrix() const;  // overwrite inherited
     StThreeVectorF         positionError() const;    // overwrite inherited
-    StTrackABC*            parentABC()        { return mParent; }
-    const StTrackABC*      parentABC() const  { return mParent; }
-    StTrack*               parent();
-    const StTrack*         parent() const;
-    StTrackMassFit*        parentMF();
-    const StTrackMassFit*  parentMF() const;
+    StTrack*               parent()        { return mParent; }
+    const StTrack*         parent() const  { return mParent; }
+    StTrackMassFit*        parentMF()        { return dynamic_cast<StTrackMassFit*>(parent()); }
+    const StTrackMassFit*  parentMF() const  { return dynamic_cast<const StTrackMassFit*>(parent()); }
     virtual UInt_t         numberOfDaughters()    const {NotImplemented("numberOfDaughters"); return 0;}
     virtual UInt_t         numberOfGoodTracks()   const {NotImplemented("numberOfGoodTracks"); return 0;}
     virtual StTrack*       daughter(UInt_t)       {NotImplemented("daughter"); return 0;}
@@ -110,6 +107,7 @@ public:
     virtual UInt_t         numberOfMassFits()    const {return mMassFits.size();}
     virtual StTrackMassFit       *massFit(UInt_t);
     virtual const StTrackMassFit *massFit(UInt_t) const;
+    virtual StPtrVecTrackMassFit  massFits(StTrackFilter&);
     //?    virtual const StPtrVecTrackMassFit&  massFits() const  {return *&mMassFits;}
 
     virtual void setKey(Int_t key) {mKey = key;}
@@ -117,7 +115,7 @@ public:
     virtual void setCovariantMatrix(Float_t[6]);
     virtual void setChiSquared(Float_t val) { mChiSquared = val; }
     virtual void setProbChiSquared(Float_t val) { mProbChiSquared = val; }
-    virtual void setParent(StTrackABC*);
+    virtual void setParent(StTrack*);
     virtual void addDaughter(StTrack*) {NotImplemented("addDaughter");}
     virtual void addMassFit(StTrackMassFit*);
     virtual void removeMassFit(StTrackMassFit*);
@@ -127,7 +125,6 @@ public:
     void          setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
     void          setIdParent(Int_t id) {mIdParent = id;}
     void          setIdTruth(); 				//setting on track info
-    //    virtual void setPosition(const StThreeVectorF&) {NotImplemented("setPosition");}
 
     virtual void setPrimaryVtx()      {SETBIT(mFlag,kPrimaryVtxId);} 
     virtual void setV0Vtx()           {SETBIT(mFlag,kV0VtxId);}	   
@@ -135,13 +132,14 @@ public:
     virtual void setKinkVertex()      {SETBIT(mFlag,kKinkVtxId);}    
     virtual void setBeamConstrained() {SETBIT(mFlag,kBEAMConstrVtxId);}
     virtual void setRejected()        {SETBIT(mFlag,kRejectedVtxId);}
+    
     Bool_t        isPrimaryVtx()      const {return TESTBIT(mFlag,kPrimaryVtxId);} 
     Bool_t        isV0Vtx()           const {return TESTBIT(mFlag,kV0VtxId);}	   
     Bool_t        isXiVtx()           const {return TESTBIT(mFlag,kXiVtxId);}	   
     Bool_t        isKinkVertex()      const {return TESTBIT(mFlag,kKinkVtxId);}    
     Bool_t        isBeamConstrained() const {return TESTBIT(mFlag,kBEAMConstrVtxId);}
     Bool_t        isRejected()        const {return TESTBIT(mFlag,kRejectedVtxId);}
-    virtual void  Print(Option_t *option="")   const;
+    virtual  void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
     static void   SetNoFitPointCutForGoodTrack(UInt_t val) {fgNoFitPointCutForGoodTrack = val;}
     static UInt_t NoFitPointCutForGoodTrack() {return fgNoFitPointCutForGoodTrack;}
 
@@ -159,11 +157,11 @@ protected:
     Int_t         mIdParent;// Id of MC parent track
     Char_t        mEnd[1]; //!
     static        UInt_t fgNoFitPointCutForGoodTrack;
-    //  StTrackABC*  mParent;           	//$LINK
+    //  StTrack*  mParent;           	//$LINK
 #ifdef __CINT__
     StObjLink     mParent;            
 #else
-    StLink<StTrackABC> mParent;            
+    StLink<StTrack> mParent;            
 #endif //__CINT__
 protected:
     StSPtrVecTrackMassFit    mMassFits;

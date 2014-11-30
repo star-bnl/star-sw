@@ -403,7 +403,6 @@ Int_t StKFVertexMaker::Make() {
   
 #ifdef  __MakeV0__
   // Loop for V0
-  TIter next(fgcVertices->Vertices());
   UInt_t NoPV = pEvent->numberOfPrimaryVertices();
   for (Int_t ipv = 0; ipv < NoPV; ipv++) {
     StPrimaryVertex *V0 = pEvent->primaryVertex(ipv);
@@ -416,7 +415,6 @@ Int_t StKFVertexMaker::Make() {
     MakeV0(V0);
   }
 #endif /* __MakeV0__ */
-  next.Reset();
   SafeDelete(fgcVertices);
   return kStOK;
 }

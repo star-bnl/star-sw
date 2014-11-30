@@ -164,13 +164,25 @@
 ClassImp(StTrack)
 
 static const char rcsid[] = "$Id: StTrack.cxx,v 1.2 2014/01/14 14:48:24 fisyak Exp $";
-//________________________________________________________________________________
-StTrack::StTrack() : StTrackABC()
+
+StTrack::StTrack()
 {
     memset(mBeg, 0, mEnd-mBeg+1);
-    mDetectorInfo = 0;
 }
+
 //________________________________________________________________________________
+
+const StVertex*  StTrack::vertex() const{ return mVertex; }
+
+//________________________________________________________________________________
+
+void StTrack::setVertex(StVertex* val) {
+    StVertex *p = dynamic_cast<StVertex*>(val);
+    if (p) mVertex = p;
+}
+
+//________________________________________________________________________________
+
 StTrack::StTrack(const StTrack& track) {
     for (Int_t bit = 14; bit < 23; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
     memcpy (mBeg, track.mBeg, mEnd-mBeg+1);
@@ -186,8 +198,9 @@ StTrack::StTrack(const StTrack& track) {
         mOuterGeometry = 0;
     mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
     mPidTraitsVec = track.mPidTraitsVec;
+    mNode = 0;                                 // do not assume any context here
 }
-//________________________________________________________________________________
+
 StTrack&
 StTrack::operator=(const StTrack& track) {
     if (this != &track) {
@@ -210,25 +223,26 @@ StTrack::operator=(const StTrack& track) {
     }
     return *this;
 }
-//________________________________________________________________________________
+
 StTrack::~StTrack()
 {
     delete mGeometry;
     delete mOuterGeometry;
 }
-//________________________________________________________________________________
+
 Short_t
 StTrack::flag() const { return mFlag; }
-//________________________________________________________________________________
+
+
 UShort_t
 StTrack::encodedMethod() const { return mEncodedMethod; }
-//________________________________________________________________________________
+
 bool
 StTrack::finderMethod(StTrackFinderMethod bit) const
 {
     return mEncodedMethod & (1<<bit);
 }
-//________________________________________________________________________________
+
 StTrackFittingMethod
 StTrack::fittingMethod() const
 {
@@ -261,13 +275,13 @@ StTrack::fittingMethod() const
             break;
     }
 }
-//________________________________________________________________________________
+
 float
 StTrack::impactParameter() const { return mImpactParameter; }
-//________________________________________________________________________________
+
 float
 StTrack::length() const { return mLength; }
-//________________________________________________________________________________
+
 UShort_t
 StTrack::numberOfPossiblePoints() const
 {
@@ -282,7 +296,7 @@ StTrack::numberOfPossiblePoints() const
     if (type() == primary || type() == estPrimary) result++;
     return result;
 }
-//________________________________________________________________________________
+
 UShort_t
 StTrack::numberOfPossiblePoints(StDetectorId det) const
 {
@@ -312,40 +326,40 @@ StTrack::numberOfPossiblePoints(StDetectorId det) const
             return 0;
     }  
 }
-//________________________________________________________________________________
+
 const StTrackTopologyMap&
 StTrack::topologyMap() const { return mTopologyMap; }
-//________________________________________________________________________________
+
 const StTrackGeometry*
 StTrack::geometry() const { return mGeometry; }
-//________________________________________________________________________________
+
 StTrackGeometry*
 StTrack::geometry() { return mGeometry; }
-//________________________________________________________________________________
+
 const StTrackGeometry*
 StTrack::outerGeometry() const { return mOuterGeometry; }
-//________________________________________________________________________________
+
 StTrackGeometry*
 StTrack::outerGeometry() { return mOuterGeometry; }
-//________________________________________________________________________________
+
 StTrackFitTraits&
 StTrack::fitTraits() { return mFitTraits; }
-//________________________________________________________________________________
+
 const StTrackFitTraits&
 StTrack::fitTraits() const { return mFitTraits; }
-//________________________________________________________________________________
+
 StTrackDetectorInfo*
 StTrack::detectorInfo() { return mDetectorInfo; }
-//________________________________________________________________________________
+
 const StTrackDetectorInfo*
 StTrack::detectorInfo() const { return mDetectorInfo; }
-//________________________________________________________________________________
+
 const StSPtrVecTrackPidTraits&
 StTrack::pidTraits() const { return mPidTraitsVec; }
-//________________________________________________________________________________
+
 StSPtrVecTrackPidTraits&
 StTrack::pidTraits() { return mPidTraitsVec; }
-//________________________________________________________________________________
+
 StPtrVecTrackPidTraits
 StTrack::pidTraits(StDetectorId det) const
 {
@@ -355,51 +369,59 @@ StTrack::pidTraits(StDetectorId det) const
             vec.push_back(mPidTraitsVec[i]);
     return vec;
 }
-//________________________________________________________________________________
+
 const StParticleDefinition*
 StTrack::pidTraits(StPidAlgorithm& pid) const
 {
     return pid(*this, mPidTraitsVec);
 }
-//________________________________________________________________________________
+
+const StTrackNode*
+StTrack::node() const { return mNode; }
+
+StTrackNode*
+StTrack::node() { return mNode; }
+
 void
 StTrack::setFlag(Short_t val) { mFlag = val; }
-//________________________________________________________________________________
+
+
 void
 StTrack::setEncodedMethod(UShort_t val) { mEncodedMethod = val; }
-//________________________________________________________________________________
+
 void
 StTrack::setImpactParameter(Float_t val) { mImpactParameter = val; }
-//________________________________________________________________________________
+
 void
 StTrack::setLength(Float_t val) { mLength = val; }
-//________________________________________________________________________________
+
 void
 StTrack::setTopologyMap(const StTrackTopologyMap& val) { mTopologyMap = val; }
-//________________________________________________________________________________
+
 void
 StTrack::setGeometry(StTrackGeometry* val)
 {
     if (mGeometry) delete mGeometry;
     mGeometry = val;
 }
-//________________________________________________________________________________
+
 void
 StTrack::setOuterGeometry(StTrackGeometry* val)
 {
     if (mOuterGeometry) delete mOuterGeometry;
     mOuterGeometry = val;
 }
-//________________________________________________________________________________
+
 void
 StTrack::setFitTraits(const StTrackFitTraits& val) { mFitTraits = val; }
-//________________________________________________________________________________
+
 void
 StTrack::addPidTraits(StTrackPidTraits* val) { mPidTraitsVec.push_back(val); }
-//________________________________________________________________________________
+
 void
 StTrack::setDetectorInfo(StTrackDetectorInfo* val) { mDetectorInfo = val; }
-//________________________________________________________________________________
+
+
 void
 StTrack::setNumberOfPossiblePoints(unsigned char val, StDetectorId det)
 {
@@ -429,7 +451,10 @@ StTrack::setNumberOfPossiblePoints(unsigned char val, StDetectorId det)
             break;
     }
 }
-//________________________________________________________________________________
+
+void
+StTrack::setNode(StTrackNode* val) { mNode = val; }
+
 #include "StHelixModel.h"
 Int_t StTrack::bad() const
 {
@@ -469,7 +494,54 @@ Int_t StTrack::bad() const
     if (sqrt(qwe)>kStarMaxTrackRangeR)		 return   63;
     return 0;
 }
+
+void StTrack::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+    
+    if (R__b.IsReading()) {
+        UInt_t R__s, R__c;
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v > 1) {
+            Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+            return;
+        }
+        //====process old versions before automatic schema evolution
+        StObject::Streamer(R__b);
+        R__b >> mKey;
+        R__b >> mFlag;
+        
+        //     R__b >> mEncodedMethod;
+        UChar_t oldEncodedMethod;
+        R__b >> oldEncodedMethod;
+        mEncodedMethod=oldEncodedMethod;
+        
+        R__b >> mImpactParameter;
+        R__b >> mLength;
+        R__b >> mSeedQuality;
+        mTopologyMap.Streamer(R__b);
+        mFitTraits.Streamer(R__b);
+        R__b >> mGeometry;
+        
+        //     R__b >> mDetectorInfo;
+        R__b >> (StTrackDetectorInfo*&)mDetectorInfo;
+        
+        //     R__b >> mNode;
+        R__b >> (StTrackNode*&)mNode;
+        
+        
+        mPidTraitsVec.Streamer(R__b);
+        
+        R__b.CheckByteCount(R__s, R__c, Class());
+        //====end of old versions
+        
+    } else {
+        Class()->WriteBuffer(R__b,this);
+    }
+} 
+
 //________________________________________________________________________________
+
 void StTrack::setIdTruth() // match with IdTruth
 {
     
@@ -502,41 +574,51 @@ void StTrack::setIdTruth() // match with IdTruth
     Int_t IdVx = StG2TrackVertexMap::instance()->IdVertex(tkBest);
     setIdParentVx(IdVx);
 }
+
 //________________________________________________________________________________
+
 std::ostream&  operator<<(std::ostream& os,  const StTrack& track) {
-  os << *((const StTrackABC *) &track);
-  os << Form(" %4i",track.flag());
-  if (track.isPostXTrack())                         os << "C";
-  else if (track.isPromptTrack())                   os << "P";
-  else                                              os << " ";
-  if (track.isCtbMatched() || track.isToFMatched()) os << "T";
-  else                                              os << " ";
-  if (track.isBemcMatched() || track.isEemcMatched()) {
-    if (track.isBemcMatched())                      os << "b";
-    else                                            os << "e";
-    UInt_t fext = track.flagExtension() & 07;
-    switch (fext) {
-    case 0:    os << " "; break;
-    case 1:    os << "M"; break;
-    case 2:    os << "H"; break;
-    case 3:    os << "E"; break;
-    case 4:    os << "T"; break;
-    case 5:    os << "W"; break;
-    case 6:    os << "Z"; break;
-    default:   os << "?"; break;
-    }
-  }  else                                           os << "  ";
-  if (track.isMembraneCrossingTrack())              os << "X";
-  else if (track.isWestTpcOnly())                   os << "W";
-  else if (track.isEastTpcOnly())                   os << "E";
-  else                                              os << " ";
-  if (track.isShortTrack2EMC())                     os << "S";
-  else                                              os << " ";
-  if (track.isRejected())                           os << "R";
-  else                                              os << " ";
-  Double_t length = track.length();
-  if (length > 9999.) length = 9999.;
-  os << Form(" NP %2d L %8.3f", track.numberOfPossiblePoints(),length);
-  os << Form(" IdT: %4i Q:%3i", track.idTruth(), track.qaTruth());
-  return os;
+    os << Form("%4i ",track.key());
+    if      (track.type() == global )                 os << "global";
+    else if (track.type() == primary)                 os << "primary";
+    else if (track.type() == massFit)                {os << "massFit"; return os;}
+    else if (track.type() == massFitAtVx)            {os << "fitf@Vx"; return os;}
+    else if (track.type() == tpt)                     os << "tpt    ";
+    else if (track.type() == estGlobal)               os << "estGlob";
+    else if (track.type() == estPrimary)              os << "estPrim";
+    else                                             {os << "???????"; return os;}
+    os << Form(" %4i",track.flag());
+    if (track.isPostXTrack())                         os << "C";
+    else if (track.isPromptTrack())                   os << "P";
+    else                                              os << " ";
+    if (track.isCtbMatched() || track.isToFMatched()) os << "T";
+    else                                              os << " ";
+    if (track.isBemcMatched() || track.isEemcMatched()) {
+      if (track.isBemcMatched())                      os << "b";
+      else                                            os << "e";
+      UInt_t fext = track.flagExtension() & 07;
+      switch (fext) {
+      case 0:    os << " "; break;
+      case 1:    os << "M"; break;
+      case 2:    os << "H"; break;
+      case 3:    os << "E"; break;
+      case 4:    os << "T"; break;
+      case 5:    os << "W"; break;
+      case 6:    os << "Z"; break;
+      default:   os << "?"; break;
+      }
+    }  else                                           os << "  ";
+    if (track.isMembraneCrossingTrack())              os << "X";
+    else if (track.isWestTpcOnly())                   os << "W";
+    else if (track.isEastTpcOnly())                   os << "E";
+    else                                              os << " ";
+    if (track.isShortTrack2EMC())                     os << "S";
+    else                                              os << " ";
+    if (track.isRejected())                           os << "R";
+    else                                              os << " ";
+    Double_t length = track.length();
+    if (length > 9999.) length = 9999.;
+    os << Form(" NP %2d L %8.3f", track.numberOfPossiblePoints(),length);
+    os << Form(" IdT: %4i Q:%3i", track.idTruth(), track.qaTruth());
+    return os;
 }

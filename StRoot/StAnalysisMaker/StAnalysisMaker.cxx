@@ -182,7 +182,7 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
       node = trackNode[i]; if (!node) continue;
       UInt_t nentries = node->entries();
       for (UInt_t j = 0; j < nentries; j++) {
-	StTrackABC *track = node->track(j);
+	StTrack *track = node->track(j);
 	if (! track) continue;
 	if (track->type() == global) {
 	  StGlobalTrack* gTrack = (StGlobalTrack* ) track;

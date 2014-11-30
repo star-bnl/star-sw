@@ -108,7 +108,7 @@ StPrimaryVertex::numberOfDaughters() const
 UInt_t StPrimaryVertex::numberOfGoodTracks() const {
   UInt_t no = 0;
   for (UInt_t i=0; i<mDaughters.size(); i++) {
-    const StTrack *track = dynamic_cast<const StTrack *>(daughter(i));
+    const StTrack *track = daughter(i);
     if (track && track->flag() >= 0 && track->fitTraits().numberOfFitPoints() >=  NoFitPointCutForGoodTrack()) no++;
   }  
   return no;
@@ -180,7 +180,7 @@ void StPrimaryVertex::setTrackNumbers() {
   UInt_t nDaughters = numberOfDaughters();
   UShort_t n_trk_vtx = 0;
   for (UInt_t i = 0; i < nDaughters; i++) {
-    StPrimaryTrack* pTrack =  dynamic_cast<StPrimaryTrack*>(daughter(i));
+    StPrimaryTrack* pTrack = (StPrimaryTrack*) daughter(i);
     if (! pTrack) continue;
     n_trk_vtx++;
     StThreeVectorD g3 = pTrack->geometry()->momentum();
@@ -188,10 +188,8 @@ void StPrimaryVertex::setTrackNumbers() {
     mSumOfTrackPt   += g3.perp();
     if (! pTrack->flagExtension()) { // check consitency with global track
       const StTrackNode* node = pTrack->node();
-      if (node) {
-	const StGlobalTrack *gTrack = dynamic_cast<const StGlobalTrack*>(node->track(global));
-	if (gTrack) pTrack->setFlagExtension(gTrack->flagExtension());
-      }
+      const StTrack *gTrack = node->track(global);
+      if (gTrack) pTrack->setFlagExtension(gTrack->flagExtension());
     }
     if (pTrack->isCtbMatched()    )        mNumMatchesWithCTB++;    
     if (pTrack->isCtbNotMatched() ) 	   mNumNotMatchesWithCTB++; 
@@ -212,11 +210,6 @@ void StPrimaryVertex::setTrackNumbers() {
   if (n_trk_vtx > 0) mMeanDip /= n_trk_vtx;
 }
 //________________________________________________________________________________
-void StPrimaryVertex::Print(Option_t *option) const {
-  std::cout << option << *this << ":";
-  StVertex::Print(option);
-}
-//________________________________________________________________________________
 std::ostream&  operator<<(std::ostream& os,  const StPrimaryVertex& v) {
   UInt_t nGoodTpcTracks = 0, nTpcTracks = 0;
   UInt_t nDaughters = v.numberOfDaughters();
@@ -231,52 +224,34 @@ std::ostream&  operator<<(std::ostream& os,  const StPrimaryVertex& v) {
   const Char_t *beam = (v.isBeamConstrained()) ? "B" : " ";
   //  os << Form("%2s:C/P/X/T/E %i/%i/%i/%i/%i: %8.3f,%8.3f,%8.3f",
   os << Form("%1s:",beam);
-  if (v.numPostXTracks() < 10)         os << Form("%i/",v.numPostXTracks());
-  else                                 os <<       "*/";
+  if (v.numPostXTracks() < 10) os << Form("%i/",v.numPostXTracks());
+  else                                os <<       "*/";
   if (v.numTracksWithPromptHit() < 10) os << Form("%i/",v.numTracksWithPromptHit());
-  else                                 os <<       "*/";
+  else                                os <<       "*/";
   if (v.numTracksCrossingCentralMembrane() < 10) os << Form("%i/",v.numTracksCrossingCentralMembrane());
-  else                                 os <<       "*/";
+  else                                os <<       "*/";
   if ((v.numMatchesWithCTB()+v.numMatchesWithBTOF()) < 10) os << Form("%i/",(v.numMatchesWithCTB()+v.numMatchesWithBTOF()));
-  else                                 os <<       "*/";
+  else                                os <<       "*/";
   if ((v.numMatchesWithBEMC()+v.numMatchesWithEEMC()) < 10) os << Form("%i/",(v.numMatchesWithBEMC()+v.numMatchesWithEEMC()));
-  else                                 os <<       "*/";
-  if (v.numTracksTpcWestOnly() < 10)   os << Form("%i/",v.numTracksTpcWestOnly());
-  else                                 os <<       "*/";
-  if (v.numTracksTpcEastOnly() < 10)   os << Form("%i",v.numTracksTpcEastOnly());
-  else                                 os <<       "*";
-#if 0
-  os << *((const StVertex *) &v);
-#else
-  const StTrackMassFit *mF = dynamic_cast<const StTrackMassFit *>(v.parent());
-  if (mF && mF->kfParticle()) {
-    os << *mF->kfParticle();
-  } else {
-    const Float_t *xyz = v.position().xyz();
-    const Float_t *dxyz = v.positionError().xyz();
-    for (Int_t i = 0; i < 3; i++)     {
-      if (dxyz[i] <= 9.999) os << Form("%8.3f+/-%5.3f,",xyz[i],dxyz[i]);
-      else 	                os << Form("%8.3f+/-9.999,",xyz[i]);
-    }
-    UInt_t nGoodTpcTracks = 0, nTpcTracks = 0;
-    UInt_t nDaughters = v.numberOfDaughters();
-    for (UInt_t i=0; i < nDaughters; i++) {
-      StPrimaryTrack* pTrack = (StPrimaryTrack*) v.daughter(i);
-      if (! pTrack) continue;
-      Int_t good = (pTrack->flag() > 0 && pTrack->fitTraits().numberOfFitPoints() >=  StVertex::NoFitPointCutForGoodTrack()) ? 1 : 0;
-      if (pTrack->fitTraits().numberOfFitPoints(kTpcId)) {
-	nTpcTracks++; nGoodTpcTracks+=good;
-      } 
-    }
-    os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared());
-    os << " Rank: "      << Form("%8.1f",v.ranking());
-    os << Form(" U/T/G: %4i,%4i,%4i", v.numTracksUsedInFinder(),nDaughters,v.numberOfGoodTracks());
-    if (nTpcTracks != nDaughters || nGoodTpcTracks != v.numberOfGoodTracks()) {
-      os << Form(" TPC:%4i,%4i",nTpcTracks,nGoodTpcTracks);
-    }
-    if (v.idTruth())  os << Form(" IdT: %5i Q:%3i", v.idTruth(), v.qaTruth());
+  else                                os <<       "*/";
+  if (v.numTracksTpcWestOnly() < 10) os << Form("%i/",v.numTracksTpcWestOnly());
+  else                                os <<       "*/";
+  if (v.numTracksTpcEastOnly() < 10) os << Form("%i",v.numTracksTpcEastOnly());
+  else                                os <<       "*";
+  const Float_t *xyz = v.position().xyz();
+  const Float_t *dxyz = v.positionError().xyz();
+  for (Int_t i = 0; i < 3; i++)     {
+    if (dxyz[i] <= 9.999) os << Form("%8.3f+/-%5.3f,",xyz[i],dxyz[i]);
+    else                  os << Form("%8.3f+/-9.999,",xyz[i],dxyz[i]);
   }
-#endif
+  os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared())
+     << " Rank: "      << Form("%8.1f",v.ranking())
+    << Form(" U/T/G: %4i,%4i,%4i", v.numTracksUsedInFinder(),nDaughters,v.numberOfGoodTracks());
+  if (nTpcTracks != nDaughters || nGoodTpcTracks != v.numberOfGoodTracks()) {
+    os << Form(" TPC:%4i,%4i",nTpcTracks,nGoodTpcTracks);
+  }
+  if (v.idTruth())
+    os << Form(" IdT: %5i Q: %4i", v.idTruth(), v.qaTruth());
   return os;
 }
 

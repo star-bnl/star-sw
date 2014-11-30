@@ -520,7 +520,7 @@ int StFtpcTrackToStEvent::GetHighestTrackKey(StSPtrVecTrackNode& trNodeVec) {
   // allways the same as the size of the StSPtrVecTrackNode (tpt leaves holes
   // in there).
 
-  StTrackABC *globTrack;
+  StTrack *globTrack;
   Int_t highestKey = 0;
   Int_t currentKey = 0;
 

@@ -130,7 +130,7 @@ public:
     void setNumPostXTracks(UShort_t p)              {mNumPostXTracks = p;}
     void setNumTracksTpcWestOnly(UShort_t val) {mNumTracksTpcWestOnly = val;}
     void setNumTracksTpcEastOnly(UShort_t val) {mNumTracksTpcEastOnly = val;}
-    virtual void Print(Option_t *option="") const;
+    void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
 private:
     void init();
 protected:

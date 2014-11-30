@@ -130,7 +130,7 @@ bool StEventScavenger::removeTpcHitsNotOnTracks(StEvent* evt)
             StTrackNode* node = nodes[i];
             for (unsigned int j = 0; j < node->entries(); j++) {   // loop tracks in node
                 if (node->track(j)->isZombie()) {
-		  StTrack* track = (StTrack *) node->track(j);
+                    StTrack* track = node->track(j);
                     StTrackDetectorInfo* info = track->detectorInfo();
                     if (info) {
                         StPtrVecHit& hitList = info->hits();
@@ -265,23 +265,21 @@ bool StEventScavenger::remove(StTrack* track)
     //   track is using it.
     //
     StTrackNode* node = track->node();
-    StTrack *tf = dynamic_cast<StTrack *>(track);
-    if (! tf) return false;
-    StTrackDetectorInfo* info = tf->detectorInfo();
+    StTrackDetectorInfo* info = track->detectorInfo();
     unsigned int nTimesUsed  = 0;
     unsigned int nZombies = 0;
     StTrack *someTrack;
     if (node) {
-      unsigned int i;
-      for (i=0; i<node->entries(); i++) {
-	someTrack = dynamic_cast<StTrack *>(node->track(i));
-	if (! someTrack) continue;
-	if (someTrack->isZombie()) nZombies++;
-	if (someTrack != track && !someTrack->isZombie() &&
-	    someTrack->detectorInfo() == info) nTimesUsed++;
-      }
-      if (node->entries() == nZombies) node->makeZombie();
+        unsigned int i;
+        for (i=0; i<node->entries(); i++) {
+            someTrack = node->track(i);
+            if (someTrack->isZombie()) nZombies++;
+            if (someTrack != track && !someTrack->isZombie() &&
+                someTrack->detectorInfo() == info) nTimesUsed++;
+        }
+        if (node->entries() == nZombies) node->makeZombie();
     }
     if (info && nTimesUsed < 1) info->makeZombie();
+
     return true;
 }

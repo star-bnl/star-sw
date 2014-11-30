@@ -64,6 +64,30 @@ ClassImp(StPrimaryTrack)
 
 static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 1.1.1.1 2013/07/23 14:13:30 fisyak Exp $";
 
+void StPrimaryTrack::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+    
+    if (R__b.IsReading()) {
+        UInt_t R__s, R__c;
+        Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+        if (R__v > 1) {
+            Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+            return;
+        }
+        //====process old versions before automatic schema evolution
+        StTrack::Streamer(R__b);
+        
+        //     R__b >> mVertex;
+        R__b >> (StPrimaryVertex*&)mVertex;
+        
+        R__b.CheckByteCount(R__s, R__c, Class());
+        //====end of old versions
+        
+    } else {
+        Class()->WriteBuffer(R__b,this);
+    }
+} 
 //________________________________________________________________________________
 std::ostream&  operator<<(std::ostream& os,  const StPrimaryTrack& track) {
     os << *((StTrack *) &track);

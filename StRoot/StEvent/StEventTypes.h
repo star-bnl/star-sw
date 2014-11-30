@@ -175,7 +175,6 @@
 #include "StFtpcSectorHitCollection.h"
 #include "StFunctional.h"
 #include "StGlobalTrack.h"
-#include "StTrack.h"
 #include "StTrackMassFit.h"
 #include "StHelixModel.h"
 #include "StHit.h"

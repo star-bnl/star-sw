@@ -26,7 +26,7 @@ ClassImp(StTrackMassFit)
 
 static const char rcsid[] = "$Id: StTrackMassFit.cxx,v 1.1.1.1 2013/07/23 14:13:30 fisyak Exp $";
 //________________________________________________________________________________
-StTrackMassFit::StTrackMassFit(const StTrackMassFit& track) : StTrackABC(track) {
+StTrackMassFit::StTrackMassFit(const StTrackMassFit& track) : StTrack(track) {
     mKFParticle=0;
     if (track.mKFParticle) mKFParticle = new KFParticle(*(track.mKFParticle));
 }
@@ -35,14 +35,14 @@ StTrackMassFit& StTrackMassFit::operator=(const StTrackMassFit& track)
 {
     if (this != &track) {
         delete mKFParticle; mKFParticle=0;
-        static_cast<StTrackABC&>(*this) = track;
+        static_cast<StTrack&>(*this) = track;
         if (track.mKFParticle) mKFParticle = new KFParticle(*(track.mKFParticle));
     }
     return *this;
 }
 //________________________________________________________________________________
 std::ostream&  operator<<(std::ostream& os,  const StTrackMassFit& track) {
-    os << *((StTrackABC *) &track);
+    os << *((StTrack *) &track);
     const KFParticle* kfParticle    = track.kfParticle();
     if (kfParticle) os << " " << *kfParticle;
     return os;

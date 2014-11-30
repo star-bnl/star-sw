@@ -46,7 +46,6 @@
 #ifndef StV0Vertex_hh
 #define StV0Vertex_hh
 #include "StVertex.h"
-#include "StTrack.h"
 #include "StContainers.h"
 
 
