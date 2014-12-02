@@ -21,12 +21,10 @@ public:
 
 protected:
 
+   virtual void buildInactiveVolumes();
+   virtual void segmentSFMOVolume(StiDetector* stiSFMO);
+
    bool          mBuildIdealGeom;
    StSstDbMaker *mSstDb;
-
-private:
-
-   void buildInactiveVolumes();
-   void segmentSFMOVolume(StiDetector* stiSFMO);
 };
 #endif
