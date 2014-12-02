@@ -23,7 +23,6 @@ protected:
 
    bool          mBuildIdealGeom;
    StSstDbMaker *mSstDb;
-   ssdWafersPosition_st *ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers);
 
 private:
 
