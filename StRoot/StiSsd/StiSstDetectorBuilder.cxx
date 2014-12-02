@@ -206,42 +206,4 @@ void StiSstDetectorBuilder::useVMCGeometry()
  */
 void StiSstDetectorBuilder::buildInactiveVolumes()
 {
-   // Build average inactive volumes
-   const VolumeMap_t volumes[] = {
-      {"SFMO", "Mother of the SST detector", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""}
-   };
-
-   // Build the volume map and loop over all found volumes
-   Int_t nVolumes = sizeof(volumes) / sizeof(VolumeMap_t);
-   gGeoManager->RestoreMasterVolume();
-   gGeoManager->CdTop();
-
-   for (Int_t i = 0; i < nVolumes; i++) {
-
-      if ( !gGeoManager->cd(volumes[i].path) ) {
-         Warning("buildInactiveVolumes()", "Cannot find path to %s node. Skipping to next node...", volumes[i].name);
-         continue;
-      }
-
-      TGeoNode *geoNode = gGeoManager->GetCurrentNode();
-
-      if (!geoNode) continue;
-
-      LOG_DEBUG << "Current node : " << i << "/" << nVolumes << " path is : " << volumes[i].name << endm;
-      LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
-
-      StiVMCToolKit::LoopOverNodes(geoNode, volumes[i].path, volumes[i].name, MakeAverageVolume);
-
-      // Access last added volume
-      int row = getNRows() - 1;
-      int sector = 0;
-
-      // Make Sti detector active, i.e. use it in tracking. XXX:ds: Not sure it has any effect but should not hurt
-      StiDetector *stiDetector = getDetector(row, sector);
-      stiDetector->setIsOn(true);
-
-      // Manually modify dimensions of the mother volume
-      if (std::string(volumes[i].name) == std::string("SFMO"))
-         segmentSFMOVolume(stiDetector);
-   }
 }
