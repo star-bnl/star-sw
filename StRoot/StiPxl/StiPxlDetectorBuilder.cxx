@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.87 2014/11/17 20:47:47 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.88 2014/12/02 23:25:53 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -201,13 +201,10 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             }
 
             stiDetector->setName(halfLadderName.c_str());
-            stiDetector->setIsOn(true);
 
             if (_active) { stiDetector->setIsActive(new StiPxlIsActiveFunctor);}
             else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
-            stiDetector->setIsContinuousMedium(false); // true for gases
-            stiDetector->setIsDiscreteScatterer(true); // true for anything other than gas
             stiDetector->setGroupId(kPxlId);
             stiDetector->setShape(stiShape);
             stiDetector->setPlacement(pPlacement);
@@ -330,6 +327,5 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
 
       // Make Sti detector active, i.e. use it in tracking
       StiDetector *stiDetector = getDetector(row, sector);
-      stiDetector->setIsOn(true);
    }
 }
