@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.37 2014/08/22 17:52:18 perev Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.38 2014/12/02 23:25:54 smirnovd Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.38  2014/12/02 23:25:54  smirnovd
+// StiXxxDetectorBuilder: Removed deprecated calls to dummy methods
+//
 // Revision 1.37  2014/08/22 17:52:18  perev
 // StiEloss calculator creates in material now
 //
@@ -165,10 +168,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD)); 
       StiDetector *pLadder = _detectorFactory->getInstance();
       pLadder->setName(Form("Ssd/Layer_%d/Ladder_%d/Wafers", layer, ladder));
-      pLadder->setIsOn(true);
       pLadder->setIsActive(new StiIsActiveFunctor(_active));
-      pLadder->setIsContinuousMedium(true);
-      pLadder->setIsDiscreteScatterer(true);
       pLadder->setGas(_gasMat);
       pLadder->setMaterial(_siMat);
       pLadder->setShape(ladderShape);

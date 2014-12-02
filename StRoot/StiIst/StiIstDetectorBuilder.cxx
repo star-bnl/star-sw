@@ -161,11 +161,8 @@ void StiIstDetectorBuilder::useVMCGeometry()
       }
 
       p->setName(name);
-      p->setIsOn(kTRUE);
       if (_active) {  p->setIsActive(new StiIstIsActiveFunctor);}
       else         {  p->setIsActive(new StiNeverActiveFunctor);}
-      p->setIsContinuousMedium(false);
-      p->setIsDiscreteScatterer(true);
       p->setShape(sh);
       p->setPlacement(pPlacement);
       p->setGas(GetCurrentDetectorBuilder()->getGasMat());
@@ -546,10 +543,7 @@ void StiIstDetectorBuilder::buildPlanerVolume(StiDetector &detector, std::string
 
    //detector definition
    detector.setName(detName.data());
-   detector.setIsOn(true);
    detector.setIsActive(new StiNeverActiveFunctor());
-   detector.setIsContinuousMedium(false); // true for gases
-   detector.setIsDiscreteScatterer(true); // true for anything other than gas
    detector.setShape(stiShapeN);
    detector.setPlacement(stiPlacementN);
    detector.setGas(getGasMat());
@@ -574,10 +568,7 @@ void StiIstDetectorBuilder::buildTubeVolume(StiDetector &detector, std::string d
 
    //detector definition
    detector.setName(detName.data());
-   detector.setIsOn(true);
    detector.setIsActive(new StiNeverActiveFunctor());
-   detector.setIsContinuousMedium(false); // true for gases
-   detector.setIsDiscreteScatterer(true); // true for anything other than gas
    detector.setShape(stiShapeN);
    detector.setPlacement(stiPlacementN);
    detector.setGas(getGasMat());
