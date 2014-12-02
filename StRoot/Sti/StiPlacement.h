@@ -48,6 +48,10 @@ public:
     // constructors
     StiPlacement();
 
+/// this constructor defines ALL the variables in StiPlacement class. 
+/// Some of them directly, others indirectly, some by default.
+/// This setting could be changed by additional setters if needed
+    StiPlacement(float  normRefAngle,float  normRadius,float normYOffset,float centralZ); 
     // accessors
     float getNormalRefAngle()	const { return normalRefAngle;   }
     float getNormalRadius() 	const { return normalRadius;     }
@@ -56,7 +60,7 @@ public:
     float getCenterRadius() 	const { return centerRadius;     }
     float getCenterOrientation()const { return centerOrientation;}
     float getLayerRadius() 	const { return layerRadius;      }
-    float getLayerAngle() 	const { return _layerAngle;      }
+    float getLayerAngle() 	const { return layerAngle;       }
     float getZcenter() 		const { return zCenter;          }
     StiRegion getRegion() 	const { return mRegion;          }
 
@@ -82,7 +86,7 @@ protected:
 
     // independent radius for ordering
     float layerRadius;
-    float _layerAngle;
+    float layerAngle;
 
     float zCenter;
     StiRegion mRegion; // backward, midrapidity, forwrad, default to kUndefined
