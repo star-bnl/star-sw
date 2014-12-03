@@ -207,3 +207,16 @@ void StiSstDetectorBuilder::useVMCGeometry()
 void StiSstDetectorBuilder::buildInactiveVolumes()
 {
 }
+
+
+void StiSstDetectorBuilder::setDetectorProperties(StiDetector* detector, std::string name, StiIsActiveFunctor* activeFunctor, StiShape* shape, StiPlacement* placement, StiMaterial* gas, StiMaterial* material)
+{
+   if (!detector) return;
+
+   detector->setName(name.c_str());
+   detector->setIsActive(activeFunctor);
+   detector->setShape(shape);
+   detector->setPlacement(placement);
+   detector->setGas(gas);
+   detector->setMaterial(material);
+}
