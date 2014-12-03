@@ -206,6 +206,85 @@ void StiSstDetectorBuilder::useVMCGeometry()
  */
 void StiSstDetectorBuilder::buildInactiveVolumes()
 {
+   // StiCylindricalShape(const string &name, float halfDepth_, float thickness_, float outerRadius_, float openingAngle_)
+   StiCylindricalShape* sfmoCntrInnShape = new StiCylindricalShape("SFMO_CNTR_INN", fabs(34.25+34.25)/2., 23.5-22.2, 23.5, 2*M_PI);
+   StiCylindricalShape* sfmoCntrMidShape = new StiCylindricalShape("SFMO_CNTR_MID", fabs(34.25+34.25)/2., 25.8-23.5, 25.8, 2*M_PI);
+   StiCylindricalShape* sfmoCntrOutShape = new StiCylindricalShape("SFMO_CNTR_OUT", fabs(34.25+34.25)/2., 27.0-25.8, 27.0, 2*M_PI);
+
+   StiCylindricalShape* sfmoLeftInnShape = new StiCylindricalShape("SFMO_LEFT_INN", fabs(51.50-34.25)/2., 23.5-22.2, 23.5, 2*M_PI);
+   StiCylindricalShape* sfmoLeftMidShape = new StiCylindricalShape("SFMO_LEFT_MID", fabs(49.50-34.25)/2., 25.0-23.5, 25.0, 2*M_PI);
+   StiCylindricalShape* sfmoLeftOutShape = new StiCylindricalShape("SFMO_LEFT_OUT", fabs(49.50-34.25)/2., 26.5-25.0, 26.5, 2*M_PI);
+
+   StiCylindricalShape* sfmoRghtInnShape = new StiCylindricalShape("SFMO_RGHT_INN", fabs(51.50-34.25)/2., 23.5-22.2, 23.5, 2*M_PI);
+   StiCylindricalShape* sfmoRghtMidShape = new StiCylindricalShape("SFMO_RGHT_MID", fabs(49.50-34.25)/2., 25.0-23.5, 25.0, 2*M_PI);
+   StiCylindricalShape* sfmoRghtOutShape = new StiCylindricalShape("SFMO_RGHT_OUT", fabs(49.50-34.25)/2., 26.5-25.0, 26.5, 2*M_PI);
+
+   // StiPlacement(float normRefAngle, float normRadius, float normYOffset, float centralZ, StiRegion region)
+   StiPlacement* sfmoCntrInnPlacement = new StiPlacement(0, (23.5+22.2)/2., 0, (-34.25+34.25)/2.);
+   StiPlacement* sfmoCntrMidPlacement = new StiPlacement(0, (25.8+23.5)/2., 0, (-34.25+34.25)/2.);
+   StiPlacement* sfmoCntrOutPlacement = new StiPlacement(0, (27.0+25.8)/2., 0, (-34.25+34.25)/2.);
+
+   StiPlacement* sfmoLeftInnPlacement = new StiPlacement(0, (23.5+22.2)/2., 0, (-51.50-34.25)/2.);
+   StiPlacement* sfmoLeftMidPlacement = new StiPlacement(0, (25.0+23.5)/2., 0, (-49.50-34.25)/2.);
+   StiPlacement* sfmoLeftOutPlacement = new StiPlacement(0, (26.5+25.0)/2., 0, (-49.50-34.25)/2.);
+
+   StiPlacement* sfmoRghtInnPlacement = new StiPlacement(0, (23.5+22.2)/2., 0, (+51.50+34.25)/2.);
+   StiPlacement* sfmoRghtMidPlacement = new StiPlacement(0, (25.0+23.5)/2., 0, (+49.50+34.25)/2.);
+   StiPlacement* sfmoRghtOutPlacement = new StiPlacement(0, (26.5+25.0)/2., 0, (+49.50+34.25)/2.);
+
+   // StiMaterial(const string &name, double z, double a, double density, double X0)
+   StiMaterial* sfmoCntrInnMaterial = new StiMaterial("SFMO_CNTR_INN", 7.38471, 14.7875, 0.1777280, 28128.1);
+   StiMaterial* sfmoCntrMidMaterial = new StiMaterial("SFMO_CNTR_MID", 7.29364, 14.5971, 0.0147153, 30146.9);
+   StiMaterial* sfmoCntrOutMaterial = new StiMaterial("SFMO_CNTR_OUT", 7.27831, 14.5655, 0.0372666, 29681.4);
+
+   StiMaterial* sfmoLeftInnMaterial = new StiMaterial("SFMO_LEFT_INN", 7.90551, 15.8598, 0.5131150, 21711.5);
+   StiMaterial* sfmoLeftMidMaterial = new StiMaterial("SFMO_LEFT_MID", 7.67447, 15.3544, 0.3013760, 23510.2);
+   StiMaterial* sfmoLeftOutMaterial = new StiMaterial("SFMO_LEFT_OUT", 7.52669, 15.0602, 0.2235500, 25904.3);
+
+   StiMaterial* sfmoRghtInnMaterial = new StiMaterial("SFMO_RGHT_INN", 7.92641, 15.9019, 0.5298270, 21402.6);
+   StiMaterial* sfmoRghtMidMaterial = new StiMaterial("SFMO_RGHT_MID", 7.66531, 15.3361, 0.2953080, 23582.3);
+   StiMaterial* sfmoRghtOutMaterial = new StiMaterial("SFMO_RGHT_OUT", 7.53069, 15.0682, 0.2273420, 25831.5);
+
+   // Define a prefix for detector name for consistency with automatic TGeo to Sti conversion
+   std::string pfx("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/");
+
+   StiDetector* stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_CNTR_INN", new StiNeverActiveFunctor, sfmoCntrInnShape, sfmoCntrInnPlacement, getGasMat(), sfmoCntrInnMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_CNTR_MID", new StiNeverActiveFunctor, sfmoCntrMidShape, sfmoCntrMidPlacement, getGasMat(), sfmoCntrMidMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_CNTR_OUT", new StiNeverActiveFunctor, sfmoCntrOutShape, sfmoCntrOutPlacement, getGasMat(), sfmoCntrOutMaterial);
+   add(getNRows(), 0, stiDetector);
+
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_LEFT_INN", new StiNeverActiveFunctor, sfmoLeftInnShape, sfmoLeftInnPlacement, getGasMat(), sfmoLeftInnMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_LEFT_MID", new StiNeverActiveFunctor, sfmoLeftMidShape, sfmoLeftMidPlacement, getGasMat(), sfmoLeftMidMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_LEFT_OUT", new StiNeverActiveFunctor, sfmoLeftOutShape, sfmoLeftOutPlacement, getGasMat(), sfmoLeftOutMaterial);
+   add(getNRows(), 0, stiDetector);
+
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_RGHT_INN", new StiNeverActiveFunctor, sfmoRghtInnShape, sfmoRghtInnPlacement, getGasMat(), sfmoRghtInnMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_RGHT_MID", new StiNeverActiveFunctor, sfmoRghtMidShape, sfmoRghtMidPlacement, getGasMat(), sfmoRghtMidMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_RGHT_OUT", new StiNeverActiveFunctor, sfmoRghtOutShape, sfmoRghtOutPlacement, getGasMat(), sfmoRghtOutMaterial);
+   add(getNRows(), 0, stiDetector);
 }
 
 
