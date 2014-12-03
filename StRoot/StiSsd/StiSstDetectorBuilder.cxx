@@ -207,7 +207,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
 void StiSstDetectorBuilder::buildInactiveVolumes()
 {
    // StiCylindricalShape(const string &name, float halfDepth_, float thickness_, float outerRadius_, float openingAngle_)
-   StiCylindricalShape* sfmoCntrInnShape = new StiCylindricalShape("SFMO_CNTR_INN", fabs(34.25+34.25)/2., 23.5-22.2, 23.5, 2*M_PI);
+   StiCylindricalShape* sfmoCntrInnShape = new StiCylindricalShape("SFMO_CNTR_INN", fabs(34.25+34.25)/2., 23.5-23.2, 23.5, 2*M_PI);
    StiCylindricalShape* sfmoCntrMidShape = new StiCylindricalShape("SFMO_CNTR_MID", fabs(34.25+34.25)/2., 25.8-23.5, 25.8, 2*M_PI);
    StiCylindricalShape* sfmoCntrOutShape = new StiCylindricalShape("SFMO_CNTR_OUT", fabs(34.25+34.25)/2., 27.0-25.8, 27.0, 2*M_PI);
 
@@ -220,7 +220,7 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
    StiCylindricalShape* sfmoRghtOutShape = new StiCylindricalShape("SFMO_RGHT_OUT", fabs(49.50-34.25)/2., 26.5-25.0, 26.5, 2*M_PI);
 
    // StiPlacement(float normRefAngle, float normRadius, float normYOffset, float centralZ, StiRegion region)
-   StiPlacement* sfmoCntrInnPlacement = new StiPlacement(0, (23.5+22.2)/2., 0, (-34.25+34.25)/2.);
+   StiPlacement* sfmoCntrInnPlacement = new StiPlacement(0, (23.5+23.2)/2., 0, (-34.25+34.25)/2.);
    StiPlacement* sfmoCntrMidPlacement = new StiPlacement(0, (25.8+23.5)/2., 0, (-34.25+34.25)/2.);
    StiPlacement* sfmoCntrOutPlacement = new StiPlacement(0, (27.0+25.8)/2., 0, (-34.25+34.25)/2.);
 
@@ -233,7 +233,7 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
    StiPlacement* sfmoRghtOutPlacement = new StiPlacement(0, (26.5+25.0)/2., 0, (+49.50+34.25)/2.);
 
    // StiMaterial(const string &name, double z, double a, double density, double X0)
-   StiMaterial* sfmoCntrInnMaterial = new StiMaterial("SFMO_CNTR_INN", 7.38471, 14.7875, 0.1777280, 28128.1);
+   StiMaterial* sfmoCntrInnMaterial = new StiMaterial("SFMO_CNTR_INN", 7.38471, 14.7875, 0.7536000, 28128.1);
    StiMaterial* sfmoCntrMidMaterial = new StiMaterial("SFMO_CNTR_MID", 7.29364, 14.5971, 0.0147153, 30146.9);
    StiMaterial* sfmoCntrOutMaterial = new StiMaterial("SFMO_CNTR_OUT", 7.27831, 14.5655, 0.0372666, 29681.4);
 
