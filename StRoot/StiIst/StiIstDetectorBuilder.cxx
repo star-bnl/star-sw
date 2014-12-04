@@ -34,7 +34,9 @@ using namespace StIstConsts;
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
    StiDetectorBuilder("Ist", active), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
-{ }
+{
+   setGroupId(kIstId);
+}
 
 
 void StiIstDetectorBuilder::buildDetectors(StMaker &source)

@@ -27,6 +27,7 @@
 StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
    : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom), mSstDb(0)
 {
+   setGroupId(kSsdId);
 }
 
 
@@ -167,7 +168,6 @@ void StiSstDetectorBuilder::useVMCGeometry()
       if (_active) { stiDetector->setIsActive(new StiSsdIsActiveFunctor);}
       else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
-      stiDetector->setGroupId(kSsdId);
       stiDetector->setShape(stiShape);
       stiDetector->setPlacement(pPlacement);
       stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
