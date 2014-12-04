@@ -43,8 +43,6 @@ void StiIstDetectorBuilder::buildDetectors(StMaker &source)
 {
    LOG_INFO << "StiIstDetectorBuilder::buildDetectors() -I- Started " << endm;
 
-   setNRows(1);
-
    SetCurrentDetectorBuilder(this);
 
    if (!mBuildIdealGeom) {
