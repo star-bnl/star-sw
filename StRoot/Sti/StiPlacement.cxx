@@ -22,6 +22,9 @@ StiPlacement::StiPlacement(float  normRefAngle,float  normRadius,float normYOffs
 {
   setNormalRep(normRefAngle,normRadius,normYOffset);
   zCenter = centralZ;
+  setLayerRadius(centerRadius);
+  layerAngle = centerRefAngle;
+  mRegion = kMidRapidity;
 
 }
 //______________________________________________________________________________
@@ -29,8 +32,9 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_, float yOffset_)
 {
 
   if (radius_ < 0) {
-    radius_ = -radius_;
+    radius_   *= -1;
     refAngle_ += M_PI;
+    yOffset_  *=-1.;
   }
   while(refAngle_ <  -M_PI){ refAngle_ += 2.*M_PI; }
   while(refAngle_ >=  M_PI){ refAngle_ -= 2.*M_PI; }
@@ -45,9 +49,6 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_, float yOffset_)
   centerRefAngle = normalRefAngle + centerOrientation;
   while(centerRefAngle <  -M_PI){ centerRefAngle += 2.*M_PI; }
   while(centerRefAngle >=  M_PI){ centerRefAngle -= 2.*M_PI; }
-  setLayerRadius(centerRadius);
-  layerAngle = centerRefAngle;
-  mRegion = kMidRapidity;
 
 }// setNormalRep()
 
