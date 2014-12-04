@@ -55,8 +55,6 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
       LOG_INFO << "StiSstDetectorBuilder::buildDetectors: Will build SST geometry from DB tables" << endm;
    }
 
-   setNRows(1);
-
    SetCurrentDetectorBuilder(this);
 
    // Gas material must be defined. Here we use air properties
