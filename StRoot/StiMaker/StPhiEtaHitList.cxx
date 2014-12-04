@@ -519,7 +519,7 @@ void StEemcHitList::build ( StEmcDetector*det, Float_t adcMin){
     //printf("ETOW sector=%d nHit=%d\n",mod,module->numberOfHits());
     StSPtrVecEmcRawHit&     rawHit=  module->hits();
     Int_t sec=mod; // range 1-12
-    for(UInt_t k=0;k<rawHit.size();k++){ // over cesctors
+    for(UInt_t k=0;k<rawHit.size();k++){ // over sectors
       if (rawHit[k]->energy() <= 0) continue;
       StEmcRawHit *h=rawHit[k];
       Char_t sub='A'+h->sub()-1;// range A-E

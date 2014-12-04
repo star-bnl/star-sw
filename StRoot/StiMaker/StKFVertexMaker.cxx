@@ -484,7 +484,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     particles[0] = mfs[0]->kfParticle();
     particles[1] = mfs[1]->kfParticle();
   }
-  Int_t ip = 0, in = 1;
+  //  Int_t ip = 0, in = 1;
   //  PrPP(MakeV0,particles[0]);
   //  PrPP(MakeV0,particles[1]);
   KFParticle pos, neg;
@@ -502,6 +502,7 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
 			    ((KFParticle *) particles[k])->CovarianceMatrix(), 
 			    particles[k]->Q(), 
 			    TDatabasePDG::Instance()->GetParticle(pdgD[k][l])->Mass());
+      vDaughters[k]->SetPDG(pdgD[k][l]);
       vDaughters[k]->SetID(particles[k]->GetID());
       vDaughters[k]->SetParentID(particles[k]->GetParentID());
     }
@@ -509,7 +510,11 @@ Bool_t StKFVertexMaker::MakeV0(StPrimaryVertex *Vtx) {
     PrPP(MakeV0,neg);
     // 2c-Fit => Global V0 tracks
     KFParticle V0(V);
-    V0.Construct((const KFParticle **) vDaughters,NoTracks,0,TDatabasePDG::Instance()->GetParticle(pdgV0[l])->Mass(),0);
+    if (pdgV0[l] != 22) {
+      V0.Construct((const KFParticle **) vDaughters,NoTracks,0,TDatabasePDG::Instance()->GetParticle(pdgV0[l])->Mass(),0);
+    } else {
+      V0.ConstructGamma(*vDaughters[0],*vDaughters[1]);
+    }
     PrPP(MakeV0,V0);
     Double_t prob = TMath::Prob(V0.GetChi2(),V0.GetNDF());
     if (prob < probCut) continue;
@@ -799,13 +804,6 @@ void StKFVertexMaker::ReFitToVertex() {
     StiHit *Vertex = StiToolkit::instance()->getHitFactory()->getInstance();
     Vertex->setGlobal(0, 0, V->Vertex().X(), V->Vertex().Y(), V->Vertex().Z(), 0);
     Vertex->setError(cov);
-    // copy Point fit as MassFit
-    StTrackMassFit *pf = new StTrackMassFit(V->Vertex().GetID(),&V->Vertex());
-    primV->setParent(pf);
-    StTrackNode *nodepf = new StTrackNode;
-    nodepf->addTrack(pf);
-    StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
-    trNodeVec.push_back(nodepf);
     
     TArrayI indexT(NoTracks); Int_t *indexes = indexT.GetArray();
     TArrayI IdT(NoTracks);    Int_t *Ids     = IdT.GetArray();
@@ -865,6 +863,13 @@ void StKFVertexMaker::ReFitToVertex() {
       SafeDelete(primV);
       delete fgcVertices->Vertices()->Remove(V);
     } else {
+      // copy Point fit as MassFit
+      StTrackMassFit *pf = new StTrackMassFit(V->Vertex().GetID(),&V->Vertex());
+      primV->setParent(pf);
+      StTrackNode *nodepf = new StTrackNode;
+      nodepf->addTrack(pf);
+      StSPtrVecTrackNode& trNodeVec = pEvent->trackNodes(); 
+      trNodeVec.push_back(nodepf);
       for (UInt_t i = 0; i < NoTracks; i++) {
 	StPrimaryTrack *t = pTracks[i];
 	if (! t) continue;
