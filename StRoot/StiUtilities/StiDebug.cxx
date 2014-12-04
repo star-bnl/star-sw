@@ -19,7 +19,9 @@
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 static int myReady=0;
-TObjArray *StiDebug::mgTally=0;
+typedef std::map<std::string, int>   myTallyMap_t;
+typedef myTallyMap_t::const_iterator myTallyIter_t;
+static  myTallyMap_t  mgTally;
 
 
 int StiDebug::mgDebug=1; //0=no debug, 1=Normal, 2=count is on
@@ -34,8 +36,6 @@ typedef std::map<std::string, TCanvas*>   myCanMap_t;
 typedef myCanMap_t::const_iterator myCanIter_t;
 myCanMap_t myCanMap;
 
-typedef std::map<std::string, int>   myIntMap_t;
-myIntMap_t myIntMap;
 
 
 
@@ -64,36 +64,15 @@ double StiDebug::dFlag(const char *flagName, double dflt)
   return atof(val);
 }
 //______________________________________________________________________________
-int  StiDebug::tally(const char *name,int val)
+void StiDebug::tally(const char *name,int val)
 {
-   if (!mgTally) mgTally = new TObjArray();
-   TObject *to = mgTally->FindObject(name);
-   if (!to) mgTally->Add((to=new TNamed(name,"")));
-   int tally = to->GetUniqueID();
-   tally +=val;
-   to->SetUniqueID(tally);
-   return tally;
+  if (mgDebug<2) return;
+   mgTally[name] += val;
 }
 //______________________________________________________________________________
 void StiDebug::Finish()
 {
-  printf("\n");
-  for (int kase=0;kase<2;kase++) {
-    switch(kase) {
-      case 0:{		//Tally case
-      if (!mgTally) 	break; 
-      int nT = mgTally->GetLast()+1;
-      if (!nT) 		break;
-      for (int iT=0;iT<nT;iT++) {
-        TObject *to = mgTally->At(iT);
-        if (!to) 	continue;
-	printf("StiDebug::Tally %s=%d\n",to->GetName(),to->GetUniqueID());
-      }
-      break;}
-
-    }//end case
-  }//end kase loop
-
+  Sumary();
 }
 //______________________________________________________________________________
 void StiDebug::Break(int kase)
@@ -292,8 +271,19 @@ void StiDebug::Count(const char *key,double valx,double valy)
 void StiDebug::Sumary()
 {
   printf("StiDebug::Sumary()\n");
-  TH1 *H[4];
+
   int nH = 0,n=0;
+  for (myTallyIter_t iter = mgTally.begin();iter != mgTally.end();++iter) {
+    int nn = (*iter).second; n++;
+    const char *kto = (*iter).first.c_str();
+    printf("%3d - Tally.%s = %d\n",n,kto,nn);
+  }
+
+
+
+
+  TH1 *H[4];
+  nH = 0;n=0;
   for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
     TH1 *h = (*iter).second; n++;
     if (h->IsA()->InheritsFrom("TH2")) continue;

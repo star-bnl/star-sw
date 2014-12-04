@@ -30,14 +30,13 @@ static void Sumary();
 static void   show(StiKalmanTrack *kt);
 static void   Init();
 static void   Finish();
-static int    tally(const char *name,int val=1);
+static void    tally(const char *name,int val=1);
 static int    iFlag(const char *flagName, int    dflt=0);
 static double dFlag(const char *flagName, double dflt=0);
 private:
 static void Draw(int nH,TH1** H);
 private:
 
-static TObjArray *mgTally;
 static int mgDebug;
 static int mgRecov;
 static int mgCheck;
