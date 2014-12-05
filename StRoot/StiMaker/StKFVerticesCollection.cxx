@@ -110,7 +110,7 @@ void StKFVerticesCollection::DoTrack2VertexAssociation(const TObjArray &particle
     if (StKFVertex::Debug()) vtx->PrintW("DoTrack2VertexAssociation ");
     //    vtx->PrintW();
   }
-  if (! fVertices.IsEmpty()) UpdateWeights();
+  if (! IsEmpty()) UpdateWeights();
   return;
 }
 //________________________________________________________________________________

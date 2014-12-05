@@ -176,14 +176,18 @@ Bool_t StKFVertex::Fit() {
 }
 //________________________________________________________________________________
 void StKFVertex::AddTrack(const StKFTrack *track) {
-  TIter next2(&Tracks());
-  StKFTrack*  t1 = 0;
-  Bool_t beam = kFALSE;
-  while ((t1 = (StKFTrack *) next2())) {
-    Int_t k1 = t1->K();  // protect from multiple copies of beam track
-    if (! k1) {beam = kTRUE; continue;}
+  if (! track) return;
+  Int_t k = track->K();
+  if (! k) { // beam, check that we have already 
+    TIter next2(&Tracks());
+    StKFTrack*  t1 = 0;
+    Bool_t beam = kFALSE;
+    while ((t1 = (StKFTrack *) next2())) {
+      Int_t k1 = t1->K();  // protect from multiple copies of beam track
+      if (! k1) {return;}
+    }
   }
-  if (! beam) fKFTracks.AddLast((TObject *)track);
+  fKFTracks.AddLast((TObject *)track);
 }
 //________________________________________________________________________________
 void StKFVertex::UpdateVertex2TrackChi2() {
