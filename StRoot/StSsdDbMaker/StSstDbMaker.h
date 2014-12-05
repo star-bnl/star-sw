@@ -20,6 +20,7 @@ class StSstDbMaker : public StMaker {
   ssdConfiguration_st   *m_config;//!
   slsCtrl_st            *m_ctrl;//!
   Int_t                   mode;//!
+  EReturnCodes           mReady; ///< Status code returned by Make(). It is !kStOk if failed to access DB tables
   static THashList *fRotList;
 
  public: 
@@ -41,7 +42,7 @@ class StSstDbMaker : public StMaker {
   static const TGeoHMatrix* getHMatrixSensorOnGlobal(int ladder, int sensor);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSstDbMaker.h,v 1.3 2014/11/18 23:13:26 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSstDbMaker.h,v 1.4 2014/12/05 16:43:13 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSstDbMaker,0)   //StAF chain virtual base class for Makers
 };
 // Global pointers:
