@@ -20,8 +20,8 @@ THashList *StSstDbMaker::fRotList = 0;
 ClassImp(StSstDbMaker)
 //_____________________________________________________________________________
 StSstDbMaker::StSstDbMaker(const char *name) : 
-  StMaker(name), mySsd(0),m_dimensions(0),m_positions(0),m_config(0),m_ctrl(0){
-  gStSstDbMaker = this;mode=0;
+  StMaker(name), mySsd(0),m_dimensions(0),m_positions(0),m_config(0),m_ctrl(0), mode(0){
+  gStSstDbMaker = this;
 }
 //_____________________________________________________________________________
 StSstDbMaker::~StSstDbMaker() {SafeDelete(mySsd); gStSstDbMaker = 0;}
