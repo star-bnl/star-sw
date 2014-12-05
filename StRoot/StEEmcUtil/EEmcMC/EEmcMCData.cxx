@@ -1,4 +1,4 @@
-// $Id: EEmcMCData.cxx,v 1.4 2010/06/17 19:44:31 fine Exp $
+// $Id: EEmcMCData.cxx,v 1.18 2010/08/26 22:48:54 ogrebeny Exp $
 
 #include "StEventTypes.h"
 
@@ -84,123 +84,6 @@ EEmcMCData::readEventFromChain(const StMaker *myMk)
   return  mLastHit;
   
 }
-//-------------------------------------------------------------------------
-// deal with GEANT volume ID mess
-//-------------------------------------------------------------------------
-int 
-EEmcMCData::unpackEmcGeantHits(int ivid, EEmcMCHit &mchit)
-{
-    int err=0;
-
-    Short_t sec   = 0;
-    Short_t ssec  = 0;
-      // Short_t half  = ivid/kEEmcTowerHalfId;
-    ivid %= kEEmcTowerHalfId;
-    Short_t phi   = ivid/kEEmcTowerPhiId;  ivid %= kEEmcTowerPhiId;
-    Short_t eta   = ivid/kEEmcTowerEtaId;  ivid %= kEEmcTowerEtaId;
-    Short_t depth = ivid/kEEmcTowerDepId;  ivid %= kEEmcTowerDepId;  
-      //printf("Tw hit->volume_id=%d hit->de=%g phi=%d\n",hit->volume_id,hit->de,phi);
-
-    if(!ivid==0)                                    {  return (err=1); };
-       
-    ssec = (phi-1)%5 + 1; // sub-sector
-      
-    sec  = (phi-1)/5 + 1;
-
-         if( !( 0<sec   && sec<=kEEmcNumSectors   )) { err=2; }
-    else if(!( 0<ssec  && ssec<=kEEmcNumSubSectors)) { err=3; }
-    else if(!( 0<eta   && eta<=kEEmcNumEtas))        { err=4; }
-    else if(!( 0<depth && depth<=kEEmcNumDepths))    { err=5; }
-    if (!err) {
-      switch(depth) {
-        case kPreShower1Depth:
-          mchit.detector = kEEmcMCPreShower1Id; 
-          break; 
-        case kPreShower2Depth: 
-          mchit.detector = kEEmcMCPreShower2Id; 
-          break;
-        case kTower1Depth:    
-        case kTower2Depth:    
-          mchit.detector = kEEmcMCTowerId;     
-          break;
-        case kPostShowerDepth:
-          mchit.detector = kEEmcMCPostShowerId; 
-          break;
-        default:
-          LOG_WARN << "readEventFromChain: unknown depth " << depth << endm;
-          err=7;
-          break;
-       }
-    }
-    if (!err) {
-      mchit.sector      = sec;
-      mchit.tower.ssec  = ssec;
-      mchit.tower.eta   = eta;
-    }
-    return err;
-}
-
-//-------------------------------------------------------------------------
-// Return  EEmcMCHit from  g2t_emc_hit_st
-//-------------------------------------------------------------------------
-int 
-EEmcMCData::unpackSmdGeantHits(int ivid, EEmcMCHit &mchit)
-{
-     int err=0;
-     Short_t det   = 0;
-     Short_t sec   = 0;
-     Short_t half  = ivid/kEEmcSmdHalfId; ivid %= kEEmcSmdHalfId;
-     Short_t phi   = ivid/kEEmcSmdPhiId;  ivid %= kEEmcSmdPhiId;
-     Short_t plane = ivid/kEEmcSmdPlaneId;ivid %= kEEmcSmdPlaneId;
-     Short_t strip = ivid/kEEmcSmdStripId;ivid %= kEEmcSmdStripId;  
-
-     if(ivid)                        { return (err=10); }
-
-      switch(phi) { /* FIXME ONE DAY */
-      case 1: case 4:case 7: case 10:
-         switch(plane) {
-            case 1:  det = kEEmcMCSmdVStripId; break; 
-            case 3:  det = kEEmcMCSmdUStripId; break; 
-            default: det = kUnknownId;         break; 
-         }
-         break;
-      case 2:  case 5:  case 8: case 11:
-         switch(plane) {
-            case 2:  det = kEEmcMCSmdVStripId; break;
-            case 1:  det = kEEmcMCSmdUStripId; break;
-            default: det = kUnknownId;         break;
-         }
-         break;
-      case 3:  case 6: case 9: case 12:
-        switch(plane) {
-           case 3:  det = kEEmcMCSmdVStripId; break;
-           case 2:  det = kEEmcMCSmdUStripId; break;
-           default: det = kUnknownId;         break;
-        }
-        break;
-      default:
-        det = kUnknownId;         
-        break;
-      }
-      if(det!=kEEmcMCSmdVStripId && det!=kEEmcMCSmdUStripId ) { 
-          LOG_WARN << "readEventFromChain:  unknown smd layer " << det << half<<"-"<<phi<<"-"<<plane<<"-"<<strip<< endm;
-          return 99;
-      }
-
-      sec = phi;
-
-      if(! ( 0<sec   && sec  <=kEEmcNumSectors ))     { err=12; }
-      else if(!( 0<strip && strip<=kEEmcNumStrips  )) { err=13; }
-
-      if (!err) {
-         // printf("Smd hit->volume_id=%d hit->de=%g sec=%d  U/V=%d, strip=%d\n",hit->volume_id,hit->de,sec, det,strip );
-         // fill in
-         mchit.detector = det;
-         mchit.sector   = sec;
-         mchit.strip    = strip;
-      }
-      return err;
-}
 
 
 //-------------------------------------------------------------------------
@@ -219,9 +102,9 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
       Warning("readEventFromChain","no tower hits (%d)",nhits);
       goto skipTower;
     }
+
     g2t_emc_hit_st *hit  = emc_hit->GetTable();
     for(Int_t ihit=0; ihit<nhits; ihit++,hit++) {
-
 
       Int_t   ivid  = hit->volume_id;
       Short_t sec   = 0;
@@ -234,15 +117,47 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
       //printf("Tw hit->volume_id=%d hit->de=%g phi=%d\n",hit->volume_id,hit->de,phi);
 
       if(!ivid==0){err=1; goto crash;};
-     if ( (err=unpackEmcGeantHits(hit->volume_id, mHit[mLastHit]) ) ) goto crash;
+       
+      ssec = (phi-1)%5 + 1; // sub-sector
+      
+      sec  = (phi-1)/5 + 1;
+
+      if(!( 0<sec   && sec<=kEEmcNumSectors   )){err=2; goto crash;};
+      if(!( 0<ssec  && ssec<=kEEmcNumSubSectors)){err=3; goto crash;};
+      if(!( 0<eta   && eta<=kEEmcNumEtas)){err=4; goto crash;};
+      if(!( 0<depth && depth<=kEEmcNumDepths)){err=5; goto crash;};
+      
+      switch(depth) {
+      case kPreShower1Depth:
+	mHit[mLastHit].detector = kEEmcMCPreShower1Id; 
+	break; 
+      case kPreShower2Depth: 
+	mHit[mLastHit].detector = kEEmcMCPreShower2Id; 
+	break;
+      case kTower1Depth:    
+      case kTower2Depth:    
+	mHit[mLastHit].detector = kEEmcMCTowerId;     
+	break;
+      case kPostShowerDepth:
+	mHit[mLastHit].detector = kEEmcMCPostShowerId; 
+	break;
+      default:
+	Warning("readEventFromChain","unknown depth %d",depth);
+	goto crash;
+	break;
+      }
+      
+      mHit[mLastHit].sector      = sec;
+      mHit[mLastHit].tower.ssec  = ssec;
+      mHit[mLastHit].tower.eta   = eta;
       mHit[mLastHit].de          = hit->de;
       mHit[mLastHit].track_p     = hit->track_p;
       mLastHit++;
       // printf("depth=%d nH=%d\n",depth,mLastHit);
 
       if ((mLastHit >= mSize) && !expandMemory()) {
-         LOG_ERROR << "failed expandMemory() for tower tails" << endm;
-         goto crash;
+	LOG_ERROR << "failed expandMemory() for tower tails" << endm;
+	goto crash;
       }
     } // end of tower hits
   } 
@@ -251,7 +166,7 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
 
   // get smd data
   if( smd_hit != NULL ) {
-    Int_t nhits  = smd_hit->GetNRows();
+    Int_t nhits         = smd_hit->GetNRows();
 
     if(nhits<=0) { 
       Warning("readEventFromChain","no smd hits (%d)",nhits);
@@ -261,15 +176,74 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
 
     for(Int_t ihit=0; ihit<nhits ; ihit++,hit++) { 
       //printf("Smd hit->volume_id=%d hit->de=%g\n",hit->volume_id,hit->de);
-       
-      if ( ( err=unpackSmdGeantHits(hit->volume_id, mHit[mLastHit])) ) goto crash;
-      mHit[mLastHit].de      = hit->de;
-      mHit[mLastHit].track_p = hit->track_p;
+
+      Int_t   ivid  = hit->volume_id;
+      Short_t det   = 0;
+      Short_t sec   = 0;
+      Short_t half  = ivid/kEEmcSmdHalfId; ivid %= kEEmcSmdHalfId;
+      Short_t phi   = ivid/kEEmcSmdPhiId;  ivid %= kEEmcSmdPhiId;
+      Short_t plane = ivid/kEEmcSmdPlaneId;ivid %= kEEmcSmdPlaneId;
+      Short_t strip = ivid/kEEmcSmdStripId;ivid %= kEEmcSmdStripId;  
+      
+      if(!ivid==0){err=10; goto crash;};
+
+      switch(phi) { /* FIXME ONE DAY */
+      case 1:
+      case 4:
+      case 7:
+      case 10:
+	switch(plane) {
+	case 1:  det = kEEmcMCSmdVStripId; break; 
+	case 3:  det = kEEmcMCSmdUStripId; break; 
+	default: det = kUnknownId;         break;
+	}
+	break;
+      case 2:
+      case 5:
+      case 8:
+      case 11:
+	switch(plane) {
+	case 2:  det = kEEmcMCSmdVStripId; break;
+	case 1:  det = kEEmcMCSmdUStripId; break;
+	default: det = kUnknownId;         break;
+	}
+	break;
+      case 3:
+      case 6:
+      case 9:
+      case 12:
+	switch(plane) {
+	case 3:  det = kEEmcMCSmdVStripId; break;
+	case 2:  det = kEEmcMCSmdUStripId; break;
+	default: det = kUnknownId;         break;
+	}
+	break;
+      default:
+	det = kUnknownId;         
+	break;
+      }
+      if(det!=kEEmcMCSmdVStripId && det!=kEEmcMCSmdUStripId ) { 
+	Warning("readEventFromChain","unknown smd layer %d %d-%d-%d-%d",det,half,phi,plane,strip);
+	goto crash;
+      }
+
+      sec = phi;
+
+      if(! ( 0<sec   && sec  <=kEEmcNumSectors )){err=12; goto crash;};
+      if(!( 0<strip && strip<=kEEmcNumStrips  )){err=13; goto crash;};
+
+      // printf("Smd hit->volume_id=%d hit->de=%g sec=%d  U/V=%d, strip=%d\n",hit->volume_id,hit->de,sec, det,strip );
+      // fill in
+      mHit[mLastHit].detector = det;
+      mHit[mLastHit].sector   = sec;
+      mHit[mLastHit].strip    = strip;
+      mHit[mLastHit].de       = hit->de;
+      mHit[mLastHit].track_p     = hit->track_p;
 
       mLastHit++;
       if ((mLastHit >= mSize) && !expandMemory()) {
-        LOG_ERROR << "failed expandMemory() for SMD strips" << endm;
-        goto crash;
+	LOG_ERROR << "failed expandMemory() for SMD strips" << endm;
+	goto crash;
       }
     }
   }
@@ -449,14 +423,6 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 // $Log: EEmcMCData.cxx,v $
 // Revision 1.18  2010/08/26 22:48:54  ogrebeny
 // Improved constness
-// Revision 1.4  2010/06/17 19:44:31  fine
-// fix esmd unpacking
-//
-// Revision 1.3  2010/06/16 20:55:54  fine
-// Adjust unpoacker interface
-//
-// Revision 1.2  2010/06/16 18:25:02  fine
-// introduce the new static methods
 //
 // Revision 1.17  2009/04/29 22:22:51  ogrebeny
 // Bug fixed - missing {}, thanks to Pibero.

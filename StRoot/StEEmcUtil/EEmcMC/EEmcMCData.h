@@ -111,10 +111,7 @@ protected:
   Int_t             mSize;     // size of the above array
   Int_t             mLastHit;  // last hit index
   Float_t           mEthr;     // energy threshold
-public:
-  static  int unpackEmcGeantHits(int volumeid, EEmcMCHit &mchit);
-  static  int unpackSmdGeantHits(int volumeid, EEmcMCHit &mchit);
- 
+  
 private:
   //Float_t          *mDE; // temporary array
   Int_t             expandMemory();
