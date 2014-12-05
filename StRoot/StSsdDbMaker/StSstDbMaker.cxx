@@ -27,13 +27,8 @@ StSstDbMaker::StSstDbMaker(const char *name) :
 }
 //_____________________________________________________________________________
 StSstDbMaker::~StSstDbMaker() {SafeDelete(mySsd); gStSstDbMaker = 0;}
-//_____________________________________________________________________________
-Int_t StSstDbMaker::Init()
-{
-   LOG_DEBUG << "Init - Start - " << endm;
-   LOG_DEBUG << "StSstDbMaker::Init() - Done - " << endm;
-   return StMaker::Init();
-}
+
+
 //_____________________________________________________________________________
 Int_t StSstDbMaker::InitRun(Int_t runNumber)
 {
@@ -77,16 +72,8 @@ Int_t StSstDbMaker::Make()
 {
    return mReady;
 }
-//_____________________________________________________________________________
-void StSstDbMaker::Clear(const char *)
-{
-   StMaker::Clear();
-}
-//_____________________________________________________________________________
-Int_t StSstDbMaker::Finish()
-{
-   return kStOK;
-}
+
+
 //_____________________________________________________________________________
 St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
 {
