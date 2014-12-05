@@ -102,9 +102,10 @@ class StMessage;
 #ifndef ClassMessVec
 class messVec;
 #endif
-
+#ifndef __CINT__
 #include <Stsstream.h>
 #include <Stiostream.h>
+#endif
 #include "Riosfwd.h"
 class StMessMgr : public ostrstream {
    friend ostream& operator<<(ostream& ,StMessage*);
