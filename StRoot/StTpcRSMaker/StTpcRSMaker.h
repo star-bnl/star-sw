@@ -20,10 +20,6 @@ using namespace units;
 #include "TH1.h"
 #include "TTree.h"
 #include "PAI.h"
-// g2t tables
-#include "tables/St_g2t_tpc_hit_Table.h"
-#include "tables/St_g2t_track_Table.h"
-#include "tables/St_g2t_vertex_Table.h" 
 #include "StTpcDb/StTpcDb.h"
 #include "StdEdxY2Maker/StTpcdEdxCorrection.h" 
 #include "StMagF.h"

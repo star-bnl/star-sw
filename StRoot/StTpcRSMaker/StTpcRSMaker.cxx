@@ -49,6 +49,10 @@
 #include "TRVector.h"
 #include "StBichsel/Bichsel.h"
 #include "TArrayI.h"
+// g2t tables
+#include "tables/St_g2t_tpc_hit_Table.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h" 
 //#define ElectronHack
 //#define Old_dNdx_Table
 #define __DEBUG__
@@ -712,7 +716,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	transform(   BLT,   TrackSegmentHits[nSegHits].BLS); PrPP(Make,TrackSegmentHits[nSegHits].BLS);   
 	Double_t tof = 0;
 	if (gver) tof = gver[id3-1].ge_tof;
-	if (! TESTBIT(m_Mode, kNoToflight)) tof += tpc_hit->tof;
+	//	if (! TESTBIT(m_Mode, kNoToflight)) 
+	tof += tpc_hit->tof;
 	Double_t driftLength = TrackSegmentHits[nSegHits].coorLS.position().z() + tof*gStTpcDb->DriftVelocity(sector); 
 	// Ignore hits outside of drift region with off ser margin
 	if (driftLength > 250. || driftLength < -1.0) {continue;}
