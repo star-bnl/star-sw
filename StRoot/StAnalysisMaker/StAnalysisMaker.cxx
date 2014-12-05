@@ -605,7 +605,8 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   UInt_t promptTracks = 0; // tracks with prompt hits
   UInt_t crossMembrane = 0;
   UInt_t nToFMatched   = 0;
-  UInt_t nEmcMatched   = 0;
+  UInt_t nBEmcMatched   = 0;
+  UInt_t nEEmcMatched   = 0;
   UInt_t nWestTpcOnly = 0;
   UInt_t nEastTpcOnly = 0;
   StGlobalTrack* gTrack = 0;
@@ -624,12 +625,11 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     if (gTrack->isPromptTrack())                       promptTracks++;
     if (gTrack->isMembraneCrossingTrack())             crossMembrane++;
     if (gTrack->isToFMatched())                        nToFMatched++;
-    if (gTrack->isBemcMatched() || 
-	gTrack->isEemcMatched() )                      nEmcMatched++;
+    if (gTrack->isBemcMatched())                       nBEmcMatched++;
+    if (gTrack->isEemcMatched() )                      nEEmcMatched++;
     if (gTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
     if (gTrack->isWestTpcOnly())                        nWestTpcOnly++;
     if (gTrack->isEastTpcOnly())                        nEastTpcOnly++;
-    
     nGoodTracks++;
   }
   LOG_QA << "# track nodes:   \t"
@@ -641,7 +641,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   if (nBeamBackTracks || nShortTrackForEEmc) {LOG_QA << endm;}
   LOG_QA  << "post (C)rossing tracks :" << pcTracks << ": (P)rompt:" << promptTracks 
 	  << ": (X) membrane :" << crossMembrane
-	  << "(T)of/ctb matches:" << nToFMatched << " :(E)mc matches: " << nEmcMatched
+	  << "(T)of/ctb matches:" << nToFMatched << " :Emc matches(B/E): " << nBEmcMatched << "/" << nEEmcMatched
 	  << " :Only W:" << nWestTpcOnly << " E:" << nEastTpcOnly;
   if (event->btofCollection()) {
     if (event->btofCollection()->tofHeader() && event->btofCollection()->tofHeader()->vpdVz() > -250){
@@ -710,7 +710,7 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     for (Int_t iv0=0;iv0<nv0;iv0++) {
       StV0Vertex *v0Vertex = v0Vertices[iv0];
       if (! v0Vertex) continue;
-#if 0
+#if 1
       Int_t key = v0Vertex->key();
       if (key <= 0) key = iv0;
       LOG_QA << Form("#V[%3i]",key) << *v0Vertex << endm;
@@ -989,7 +989,10 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	    const StEmcModule* module = detector->module(j);
 	    if(module) {
 	      const StSPtrVecEmcRawHit& rawHit=module->hits();
-	      Adcs[d-d1] += rawHit.size();
+	      for(UInt_t k=0;k<rawHit.size();k++) { //loop on hits in modules
+		if (rawHit[k]->energy() <= 0.1) continue;
+		Adcs[d-d1]++;
+	      }
 	    }
 	  }
 	  const StEmcClusterCollection *cl = detector->cluster();
