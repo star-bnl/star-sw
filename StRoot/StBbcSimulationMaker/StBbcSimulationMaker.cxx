@@ -10,6 +10,8 @@ Here are
 #endif
 #include "StBbcSimulationMaker.h"
 #include "g2t/St_g2t_bbc_Module.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h" 
 #include "TDataSetIter.h"
 #include "TRandom.h"
 #include <vector>
@@ -326,17 +328,29 @@ Int_t StBbcSimulationMaker::Make()
  StEvent* event = (StEvent*)GetInputDS("StEvent");
  assert(event);
  St_g2t_ctf_hit* g2t_bbc_hit = (St_g2t_ctf_hit*)ds->Find("g2t_bbc_hit");
-
  if (g2t_bbc_hit) 
    {
+     St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track"); //  if (!g2t_track)    return kStWarn;
+     g2t_track_st *track = 0;
+     if (g2t_track) track = g2t_track->GetTable();
+     St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
+     g2t_vertex_st     *gver = 0;
+     if (g2t_ver) gver = g2t_ver->GetTable();
+     
      short nBBChits = g2t_bbc_hit->GetNRows();
      BbcTOF TOFdata;
      BbcDE DEdata;
      g2t_ctf_hit_st *bbc_hit = g2t_bbc_hit->GetTable();
      for (short iBBChit=0; iBBChit<nBBChits; iBBChit++)
      {
+       Int_t Id         = bbc_hit[iBBChit].track_p;
+       Int_t id3 = 0;
+       if (track)  id3        = track[Id-1].start_vertex_p;
+       Double_t tof = 0;
+       if (gver) tof = gver[id3-1].ge_tof;
+       if (TMath::Abs(tof) > 50e-9) continue; // 50 ns cut
        float De = bbc_hit[iBBChit].de;
-       float TOF = bbc_hit[iBBChit].tof;
+       float TOF = tof + bbc_hit[iBBChit].tof;
        short Vid =  bbc_hit[iBBChit].volume_id;
 
        short PMTid = Geant2PMT[Vid];
