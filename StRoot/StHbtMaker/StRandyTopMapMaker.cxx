@@ -100,7 +100,7 @@ StRandyTopMapMaker::Make()
     // For speed we try to remove the turnAround flag
     //    bool turnAround;
     for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
-      rTrack = (StTrack *) mEvent->trackNodes()[icount]->track(global);
+      rTrack = mEvent->trackNodes()[icount]->track(global);
       // Changed code
       // This checks bits that should not be set
       temp1 = rTrack->topologyMap().data(1) & mask2;

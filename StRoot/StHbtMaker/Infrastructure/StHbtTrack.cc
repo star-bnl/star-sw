@@ -169,12 +169,12 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   mDCAxy = DCAxyz.perp();
   mDCAz = DCAxyz.z();
 
-  mHelixGlobal = ((StTrack *)ST->node()->track(global))->geometry()->helix();
+  mHelixGlobal = ST->node()->track(global)->geometry()->helix();
   double pathlengthGlobal = mHelixGlobal.pathLength(PrimaryVertex);
   StHbtThreeVector  DCAxyzGlobal = mHelixGlobal.at(pathlengthGlobal)-PrimaryVertex;
   mDCAxyGlobal = DCAxyzGlobal.perp();
   mDCAzGlobal = DCAxyzGlobal.z();
-  mPGlobal = ((StTrack *)ST->node()->track(global))->geometry()->momentum();
+  mPGlobal = ST->node()->track(global)->geometry()->momentum();
   mPtGlobal = mPGlobal.perp();
 
   mMap[0] = ST->topologyMap().data(0);
@@ -224,7 +224,7 @@ StHbtTrack::StHbtTrack(const StEvent* EV, const StTrack* ST) {
   mPt = mP.perp();
 
   if(dynamic_cast<const StPrimaryTrack*>(ST)){
-    mHelixGlobal = ((StTrack *)ST->node()->track(global))->geometry()->helix();
+    mHelixGlobal = ST->node()->track(global)->geometry()->helix();
   }
   else{
     mHelixGlobal = mHelix;

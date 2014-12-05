@@ -87,7 +87,7 @@ StHbtKink::StHbtKink( const StKinkVertex& SKV, StHbtThreeVector PrimaryVertex )
   mDaughter = *HbtTrk;                         // invoke copy ctr of StHbtTrack
   delete HbtTrk;                               // get rid of the NEW HbtTrack - we are done with that
   // Parent
-  StTrk = (StTrack *)SKV.parent();
+  StTrk = SKV.parent();
   HbtTrk = new StHbtTrack(StTrk,PrimaryVertex); // generate NEW HbtTrack from StTrack
   mParent = *HbtTrk;                           // invoke copy ctr of StHbtTrack
   delete HbtTrk;                               // get rid of the NEW HbtTrack - we are done with that

@@ -428,7 +428,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
   // loop over all the tracks, accept only global
   for (unsigned int icount=0; icount<(unsigned int)mult; icount++){
-    cTrack = (StTrack *)rEvent->trackNodes()[icount]->track(mTrackType);
+    cTrack = rEvent->trackNodes()[icount]->track(mTrackType);
     if (cTrack) {
       iTracks++;
       if (cTrack->flag()>=0) iGoodTracks++;
@@ -486,9 +486,9 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
       cout << " track# " << icount;
       cout << "  -1- ";
 #endif
-      gTrack = (StTrack *)rEvent->trackNodes()[icount]->track(global);
-      pTrack = (StTrack *)rEvent->trackNodes()[icount]->track(primary);
-      cTrack = (StTrack *) rEvent->trackNodes()[icount]->track(mTrackType);
+      gTrack = rEvent->trackNodes()[icount]->track(global);
+      pTrack = rEvent->trackNodes()[icount]->track(primary);
+      cTrack = rEvent->trackNodes()[icount]->track(mTrackType);
       
       // don't make a hbtTrack if not a primary track
       if (!cTrack)            { iWrongTrackType++; continue; }

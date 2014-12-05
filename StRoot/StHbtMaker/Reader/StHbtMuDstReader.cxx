@@ -494,20 +494,20 @@ void StHbtMuDstReader::addTrackNode(const StEvent* ev, const StTrackNode* node, 
   /// do global track
   int index2Global =-1;
   if (gTCA) {
-    tr= (StTrack *)node->track(global);
+    tr= node->track(global);
     if (tr ) index2Global = addTrack(gTCA, ev, tr, cut, -1, l3);
   }
   /// do primary track track
   int index;
   if (pTCA) {
-    tr = (StTrack *)node->track(primary);
+    tr = node->track(primary);
     if (tr) index = addTrack(pTCA, ev, tr, cut, index2Global, l3);
   }
   /// all other tracks
   if (oTCA) {
     size_t nEntries = node->entries();
     for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
-      tr = (StTrack *)node->track(j);
+      tr = node->track(j);
       if (tr && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
 	index = addTrack(oTCA, ev, tr, cut, index2Global, l3);
       }
