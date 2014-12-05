@@ -48,7 +48,6 @@ Int_t StSstDbMaker::InitRun(Int_t runNumber)
       return kStFatal;
    }
 
-   LOG_DEBUG << " geometry loaded " << endm;
    St_ssdConfiguration *configTable = (St_ssdConfiguration *) GetInputDB("Geometry/ssd/ssdConfiguration");
 
    if (!configTable) {
@@ -64,7 +63,7 @@ Int_t StSstDbMaker::InitRun(Int_t runNumber)
    if (Debug()) mySsd->SetDebug(Debug());
 
    mySsd->initLadders(m_positions);
-   LOG_DEBUG << " StSsdBarrel built " << endm;
+
    return kStOK;
 }
 //_____________________________________________________________________________
@@ -121,9 +120,10 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
    Int_t NoLadders = SsdLaddersOnOsc->GetNRows();
    Int_t NoSensors = SsdSensorsOnLadders->GetNRows();
 
-   LOG_DEBUG << " # of Osc : " << NoOsc << endm;
-   LOG_DEBUG << " # of Ladders : " << NoLadders << endm;
-   LOG_DEBUG << " # of Sensors : " << NoSensors << endm;
+   LOG_DEBUG << "CalculateWafersPosition:\n"
+             << "   Number of Osc:     " << NoOsc << "\n"
+             << "   Number of Ladders: " << NoLadders << "\n"
+             << "   Number of Sensors: " << NoSensors << endm;
 
    St_ssdWafersPosition *ssdwafer = new St_ssdWafersPosition("ssdWafersPosition", NoSensors);
    AddConst(ssdwafer);
@@ -148,8 +148,8 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
       WLL.SetRotation(&SensorsOnLadders->r00);
       WLL.SetTranslation(&SensorsOnLadders->t0);
 
-      if (Debug()) {
-         cout << "WL\t";
+      if (Debug() >= 2) {
+         LOG_DEBUG << "CalculateWafersPosition: WL" << endm;
          WLL.Print();
       }
 
@@ -179,8 +179,8 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
             LS.SetRotation(&LaddersOnOsc->r00);
             LS.SetTranslation(&LaddersOnOsc->t0);
 
-            if (Debug()) {
-               cout << "LS\t";
+            if (Debug() >= 2) {
+               LOG_DEBUG << "CalculateWafersPosition: LS" << endm;
                LS.Print();
             }
 
@@ -207,14 +207,17 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
          continue;
       }
 
-      if (Debug()) {
-         cout << "Tpc2Global ";
+      if (Debug() >= 2) {
+         LOG_DEBUG << "CalculateWafersPosition: Tpc2Global" << endm;
          Tpc2Global.Print();
       }
 
       WG = Tpc2Global * SG * LS * WLL;
 
-      if (Debug()) {cout << "WG\t"; WG.Print();}
+      if (Debug() >= 2) {
+         LOG_DEBUG << "CalculateWafersPosition: WG" << endm;
+         WG.Print();
+      }
 
       row.id = Id;
       row.id_shape  = 2;
@@ -236,7 +239,10 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
       fRotList->Add(comb);
       ssdwafer->AddAt(&row);
 
-      if (Debug()) {comb->Print();}
+      if (Debug() >= 1) {
+         LOG_DEBUG << "CalculateWafersPosition: R" << endm;
+         comb->Print();
+      }
    }
 
    // Set the return code for Make() to kStOk since we managed to get to the end of this routine
