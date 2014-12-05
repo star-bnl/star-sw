@@ -33,18 +33,25 @@ StSstDbMaker::~StSstDbMaker() {SafeDelete(mySsd); gStSstDbMaker = 0;}
 Int_t StSstDbMaker::InitRun(Int_t runNumber)
 {
    mode = m_Mode;
-   m_ctrl          = ((St_slsCtrl *) GetInputDB("Geometry/ssd/slsCtrl"))->GetTable();
+   m_ctrl = ((St_slsCtrl *) GetInputDB("Geometry/ssd/slsCtrl"))->GetTable();
 
    if (!m_ctrl) {
       LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/ssd/slsCtrl' table" << endm;
+      mReady = kStFatal;
       return kStFatal;
    }
 
-   m_dimensions    =  (St_ssdDimensions *) GetInputDB("Geometry/ssd/ssdDimensions");
-   m_positions     =  CalculateWafersPosition();
+   m_dimensions = (St_ssdDimensions *) GetInputDB("Geometry/ssd/ssdDimensions");
 
-   if ((!m_dimensions) || (!m_positions)) {
+   if (!m_dimensions) {
       LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/ssd/ssdDimensions' table" << endm;
+      mReady = kStFatal;
+      return kStFatal;
+   }
+
+   m_positions = CalculateWafersPosition();
+
+   if (!m_positions) {
       return kStFatal;
    }
 
@@ -52,6 +59,7 @@ Int_t StSstDbMaker::InitRun(Int_t runNumber)
 
    if (!configTable) {
       LOG_ERROR << "InitRun: No relevant entry found in 'Geometry/ssd/ssdConfiguration' table" << endm;
+      mReady = kStFatal;
       return kStFatal;
    }
 
