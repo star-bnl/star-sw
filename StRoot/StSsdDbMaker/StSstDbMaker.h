@@ -12,41 +12,42 @@ class ssdConfiguration_st;
 #include "StSsdUtil/StSsdBarrel.hh"
 #include "THashList.h"
 
-class StSstDbMaker : public StMaker {
- private:
-  StSsdBarrel           *mySsd;
-  St_ssdDimensions      *m_dimensions;//!
-  St_ssdWafersPosition  *m_positions;//!
-  ssdConfiguration_st   *m_config;//!
-  slsCtrl_st            *m_ctrl;//!
-  Int_t                   mode;//!
-  EReturnCodes           mReady; ///< Status code returned by Make(). It is !kStOk if failed to access DB tables
-  static THashList *fRotList;
+class StSstDbMaker : public StMaker
+{
+private:
+   StSsdBarrel           *mySsd;
+   St_ssdDimensions      *m_dimensions;//!
+   St_ssdWafersPosition  *m_positions;//!
+   ssdConfiguration_st   *m_config;//!
+   slsCtrl_st            *m_ctrl;//!
+   Int_t                   mode;//!
+   EReturnCodes           mReady; ///< Status code returned by Make(). It is !kStOk if failed to access DB tables
+   static THashList *fRotList;
 
- public: 
-  StSstDbMaker(const char *name="SstDb");
-  virtual       ~StSstDbMaker();
-  virtual Int_t  Init();
-  virtual Int_t  InitRun(Int_t runNumber);
-  virtual Int_t  Make();
-  virtual Int_t  Finish();
-  virtual void   Clear(const char *opt);
-  virtual THashList *GetRotations() {return fRotList;}
-  virtual St_ssdWafersPosition *CalculateWafersPosition();
-  virtual StSsdBarrel  *GetSsd() {return mySsd;}
-  virtual slsCtrl_st   *GetSlsCtrl() {return m_ctrl;}
-  virtual Int_t        GetMode(){return mode;}
-  virtual St_ssdWafersPosition *GetssdWafersPos(){return m_positions;}
-  virtual St_ssdDimensions     *GetssdDimensions(){return m_dimensions;}
+public:
+   StSstDbMaker(const char *name = "SstDb");
+   virtual       ~StSstDbMaker();
+   virtual Int_t  Init();
+   virtual Int_t  InitRun(Int_t runNumber);
+   virtual Int_t  Make();
+   virtual Int_t  Finish();
+   virtual void   Clear(const char *opt);
+   virtual THashList *GetRotations() {return fRotList;}
+   virtual St_ssdWafersPosition *CalculateWafersPosition();
+   virtual StSsdBarrel  *GetSsd() {return mySsd;}
+   virtual slsCtrl_st   *GetSlsCtrl() {return m_ctrl;}
+   virtual Int_t        GetMode() {return mode;}
+   virtual St_ssdWafersPosition *GetssdWafersPos() {return m_positions;}
+   virtual St_ssdDimensions     *GetssdDimensions() {return m_dimensions;}
 
-  static const TGeoHMatrix* getHMatrixSensorOnGlobal(int ladder, int sensor);
+   static const TGeoHMatrix *getHMatrixSensorOnGlobal(int ladder, int sensor);
 
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSstDbMaker.h,v 1.4 2014/12/05 16:43:13 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-  ClassDef(StSstDbMaker,0)   //StAF chain virtual base class for Makers
+   virtual const char *GetCVS() const
+   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.5 2014/12/05 21:59:25 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   ClassDef(StSstDbMaker, 0)  //StAF chain virtual base class for Makers
 };
 // Global pointers:
-R__EXTERN StSstDbMaker* gStSstDbMaker;
+R__EXTERN StSstDbMaker *gStSstDbMaker;
 #endif
 
 
