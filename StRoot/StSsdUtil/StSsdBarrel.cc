@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.19 2014/12/05 16:42:54 smirnovd Exp $
+// $Id: StSsdBarrel.cc,v 1.20 2014/12/05 16:43:01 smirnovd Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.20  2014/12/05 16:43:01  smirnovd
+// Deleted pointless print statement
+//
 // Revision 1.19  2014/12/05 16:42:54  smirnovd
 // Removed commented code
 //
@@ -160,7 +163,7 @@ StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *con
   memset (first, 0, last-first);
   fSsdBarrel = this;
   setSsdParameters(dimensions);
-  LOG_INFO << "Set the Lorentz shift for holes and electrons" << endm;
+  // Set the Lorentz shift for holes and electrons
   setLorentzShift(dimensions);
   if (config) {
     mNLadder         = config[0].nMaxLadders;
@@ -208,7 +211,6 @@ void StSsdBarrel::setLorentzShift(ssdDimensions_st *geom_par){
   Float_t tan_theta_e          = scale*TMath::ATan(TMath::Tan( 8*2*TMath::Pi()/360)*(B[2]/40.));
   mShift_hole          = geom_par[0].waferHalfThickness*tan_theta_h;
   mShift_elec          = geom_par[0].waferHalfThickness*tan_theta_e;
-  LOG_INFO <<Form("mShift_hole=%f mShift_elec=%f",mShift_hole,mShift_elec)<<endm;
 }
 //________________________________________________________________________________
 

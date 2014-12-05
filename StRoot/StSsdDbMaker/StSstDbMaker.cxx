@@ -65,19 +65,16 @@ Int_t StSstDbMaker::InitRun(Int_t runNumber) {
 //_____________________________________________________________________________
 Int_t StSstDbMaker::Make()
 {
-  LOG_DEBUG << "Make" << endm; 
   return kStOK;
 }
 //_____________________________________________________________________________
 void StSstDbMaker::Clear(const char*)
 {
-  LOG_DEBUG << "Clear" << endm;
   StMaker::Clear();
 }
 //_____________________________________________________________________________
 Int_t StSstDbMaker::Finish()
 {
-  LOG_DEBUG << "Finish" << endm;
   return kStOK;
 }
 //_____________________________________________________________________________
