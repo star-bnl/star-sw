@@ -57,11 +57,12 @@
 #include "TH2.h"
 #include "TNtuple.h"
 #include "TFile.h"
-
+#include "TMath.h"
 // g2t tables and collections
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include "tables/St_g2t_vpd_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h" 
 #include "StMcTrack.hh"
 
 #include "StBTofUtil/StBTofDaqMap.h"
@@ -70,7 +71,7 @@
 #include "StBTofUtil/StBTofGeometry.h"
 #include "StEventTypes.h"
 #include "StEvent/StBTofCollection.h"
-
+#include "StDetectorDbMaker/St_tofStatusC.h"
 
 static RanluxEngine engine;
 static RandGauss ranGauss(engine);
@@ -257,13 +258,30 @@ Int_t StBTofSimMaker::VpdResponse(g2t_vpd_hit_st* vpd_hit)
 		LOG_WARN << " No VPD hit!" << endm;
 		return kStWarn;
 	}
+	St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track"); //  if (!g2t_track)    return kStWarn;
+	if (!g2t_track) {
+	  LOG_WARN << " No G2T track table!" << endm;
+	  return kStWarn;
+	};
+	g2t_track_st *tof_track = g2t_track->GetTable();
+	Int_t TrackId         = vpd_hit->track_p;
+	Int_t id3 = 0, ipart = 8, charge = 1;
+	if (tof_track) {
+	  id3        = tof_track[TrackId-1].start_vertex_p;
+	}
+	St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
+	g2t_vertex_st     *gver = 0;
+	if (g2t_ver) gver = g2t_ver->GetTable();
+	Double_t tofV = 0;
+	if (gver) tofV = gver[id3-1].ge_tof;
+	//	if (TMath::Abs(tofV) > 45e-9) return kStOK; // 45 ns trigger matching window 
 
 	Int_t vId = vpd_hit->volume_id;
 	Int_t itray = vId/1000 + 120;    //! 121: west, 122: east
 	Int_t itube = vId%100;           //! 1-19
 
-	Double_t tof = (vpd_hit->tof + ranGauss.shoot()*mSimDb->timeres_vpd())*1000./nanosecond; //! 140 ps per channel
-	Double_t t0 = vpd_hit->tof*1000./nanosecond;
+	Double_t tof = (tofV + vpd_hit->tof + ranGauss.shoot()*mSimDb->timeres_vpd())*1000./nanosecond; //! 140 ps per channel
+	Double_t t0 =  (tofV + vpd_hit->tof)*1000./nanosecond;
 	Double_t de = vpd_hit->de;
 	Double_t pathL = -9999.; //! NA for vpd
 	Double_t q = 0.;
@@ -305,33 +323,36 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 		LOG_WARN << " Not hit the sensitive MRPC volume!" << endm;
 		return kStWarn;
 	}
-	if(mBookHisto) {
-		mDeGeant->Fill(tofHitsFromGeant->de / keV);
-		mTofGeant->Fill(tofHitsFromGeant->tof / nanosecond);
-	}
-
-
-	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(mGeantData->Find("g2t_track"));
+	if (St_tofStatusC::instance()->status(itray,imodule,icell) != 1) return kStOK;
+	St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track"); //  if (!g2t_track)    return kStWarn;
 	if (!g2t_track) {
-		LOG_WARN << " No G2T track table!" << endm;
-		return kStWarn;
+	  LOG_WARN << " No G2T track table!" << endm;
+	  return kStWarn;
 	};
 	g2t_track_st *tof_track = g2t_track->GetTable();
-	Int_t no_tracks= g2t_track->GetNRows();
-
-	Double_t beta;
-	Int_t trackId = -1;
-	for(Int_t j=0;j<no_tracks;j++){
-		if(tofHitsFromGeant->track_p==tof_track[j].id){
-			trackId = j;//
-			beta = tof_track[j].ptot/tof_track[j].e;
-			break;
-		}
+	Int_t TrackId         = tofHitsFromGeant->track_p;
+	Int_t id3 = 0, ipart = 8, charge = 1;
+	if (tof_track) {
+	  id3        = tof_track[TrackId-1].start_vertex_p;
 	}
+	St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
+	g2t_vertex_st     *gver = 0;
+	if (g2t_ver) gver = g2t_ver->GetTable();
+	Double_t tofV = 0;
+	if (gver) tofV = gver[id3-1].ge_tof;
+	//	if (TMath::Abs(tofV) > 45e-9) return kStOK; // 45 ns trigger matching window 
+	if(mBookHisto) {
+		mDeGeant->Fill(tofHitsFromGeant->de / keV);
+		mTofGeant->Fill((tofV + tofHitsFromGeant->tof) / nanosecond);
+	}
+
+
+
+	Double_t beta = tof_track[TrackId].ptot/tof_track[TrackId].e;
 
 	Double_t qtot=-1;
 	Double_t tof=-1;
-	Double_t t0 = tofHitsFromGeant->tof;
+	Double_t t0 = tofV + tofHitsFromGeant->tof;
 	Float_t wt=1.0;
 
 	Double_t clusterDensity = mSimDb->nclus(beta); 
@@ -371,8 +392,8 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 	}
 	qtot = ytmp*1.e+12*e_SI;  //pC
 
-	t0 = tofHitsFromGeant->tof*1000/nanosecond;  //ps
-	tof=tofHitsFromGeant->tof*1000/nanosecond;  //ps
+	t0 = (tofV + tofHitsFromGeant->tof)*1000/nanosecond;  //ps
+	tof= (tofV + tofHitsFromGeant->tof)*1000/nanosecond;  //ps
 
 
 	for(Int_t j=0;j<nTimeBins;j++) {
@@ -401,7 +422,7 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 	trackhit.tray    = itray;
 	trackhit.module  = imodule;
 	trackhit.cell    = icell;
-	trackhit.trkId   = trackId;
+	trackhit.trkId   = TrackId;
 	trackhit.dE      = tofHitsFromGeant->de * wt;
 	trackhit.dQ      = qtot * wt; 
 	for(Int_t j=0;j<nTimeBins;j++) {
@@ -802,9 +823,9 @@ Int_t StBTofSimMaker::CellXtalk(Int_t icell, Float_t ylocal, Float_t& wt, Int_t&
 	wt = 1.;
 	icellx = -1;
 	Float_t dyCut = mSimDb->dy_xtalk();//dyCut is by default set to 1
-	if(fabs(dy)<dyCut) return kStOk;   //! no Xtalk when hit is in the cell center
+	if(TMath::Abs(dy)<dyCut) return kStOk;   //! no Xtalk when hit is in the cell center
 
-	wt = 1. - (fabs(dy) - dyCut)/(mBTofPadWidth - 2.0*dyCut);
+	wt = 1. - (TMath::Abs(dy) - dyCut)/(mBTofPadWidth - 2.0*dyCut);
 
 	if(dy>0) icellx = icell + 1;
 	else     icellx = icell - 1;
@@ -824,10 +845,27 @@ Int_t StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant)
 		LOG_WARN << " No deposit energy in this tof hit! " << endm;
 		return kStWarn;
 	}
+	St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track"); //  if (!g2t_track)    return kStWarn;
+	if (!g2t_track) {
+	  LOG_WARN << " No G2T track table!" << endm;
+	  return kStWarn;
+	};
 
+	g2t_track_st *tof_track = g2t_track->GetTable();
+	Int_t partnerTrkId         = tofHitsFromGeant->track_p;
+	Int_t id3 = 0, ipart = 8, charge = 1;
+	if (tof_track) {
+	  id3        = tof_track[partnerTrkId-1].start_vertex_p;
+	}
+	St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
+	g2t_vertex_st     *gver = 0;
+	if (g2t_ver) gver = g2t_ver->GetTable();
+	Double_t tofV = 0;
+	if (gver) tofV = gver[id3-1].ge_tof;
+	//	if (TMath::Abs(tofV) > 45e-9) return kStOK; // 45 ns trigger matching window 
 	if(mBookHisto) {
 		mDeGeant->Fill(tofHitsFromGeant->de / keV);
-		mTofGeant->Fill(tofHitsFromGeant->tof / nanosecond);
+		mTofGeant->Fill((tofV + tofHitsFromGeant->tof) / nanosecond);
 	}
 
 	IntVec cellId   = CalcCellId(tofHitsFromGeant->volume_id, tofHitsFromGeant->x[1]);
@@ -840,33 +878,18 @@ Int_t StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant)
 		LOG_WARN << " Not hit the sensitive MRPC volume !!! " << endm;
 		return kStWarn;
 	}
-
+	if (St_tofStatusC::instance()->status(itray,imodule,icell) != 1) return kStOK;
 	StThreeVectorF local(tofHitsFromGeant->x[0], tofHitsFromGeant->x[1], tofHitsFromGeant->x[2]);
 
-	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(mGeantData->Find("g2t_track"));
-	if (!g2t_track) {
-		LOG_WARN << " No g2t track table !!! " << endm;
-		return kStWarn;
-	}
-	g2t_track_st *tof_track = g2t_track->GetTable();
-	Int_t no_tracks= g2t_track->GetNRows();
-
-	StMcTrack *partnerTrk = 0;
-	Int_t partnerTrkId;
-	for(Int_t j=0;j<no_tracks;j++){
-		if(tofHitsFromGeant->track_p==tof_track[j].id){
-			partnerTrk = new StMcTrack(&(tof_track[j]));
-			partnerTrkId=partnerTrk->key();
-		}
-	}
+	StMcTrack *partnerTrk =  new StMcTrack(&(tof_track[partnerTrkId]));
 
 	/// X-talk
 	Int_t icellx = -1;
 	Float_t wt = 1.0;
 	if(mCellXtalk)   CellXtalk(icell, local.y(), wt, icellx);
 
-	Double_t tof= tofHitsFromGeant->tof*1000./nanosecond + ranGauss.shoot()*mSimDb->timeres_tof()*1000./nanosecond;    //! 85ps per channel
-	Double_t t0 = tofHitsFromGeant->tof*1000./nanosecond;
+	Double_t tof= (tofV + tofHitsFromGeant->tof)*1000./nanosecond + ranGauss.shoot()*mSimDb->timeres_tof()*1000./nanosecond;    //! 85ps per channel
+	Double_t t0 = (tofV + tofHitsFromGeant->tof)*1000./nanosecond;
 	Double_t de = tofHitsFromGeant->de * wt;
 	Double_t pathL = tofHitsFromGeant->s_track;
 	Double_t q = 0.;
@@ -882,8 +905,8 @@ Int_t StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant)
 	///
 	/// X talk signal
 	///
-	Double_t tofx = tofHitsFromGeant->tof + ranGauss.shoot()*mSimDb->timeres_tof();    //! 85ps per channel
-	Double_t dex = tofHitsFromGeant->de * (1. - wt);
+	  Double_t tofx = (tofV + tofHitsFromGeant->tof) + ranGauss.shoot()*mSimDb->timeres_tof();    //! 85ps per channel
+	  Double_t dex = tofHitsFromGeant->de * (1. - wt);
 	Double_t qx = 0.*(1.-wt);
 
 	StMcBTofHit *mcBTofHitx = new StMcBTofHit(itray,imodule,icellx,dex,pathL,t0,tofx,qx);
