@@ -348,7 +348,7 @@ Int_t StBbcSimulationMaker::Make()
        if (track)  id3        = track[Id-1].start_vertex_p;
        Double_t tof = 0;
        if (gver) tof = gver[id3-1].ge_tof;
-       if (TMath::Abs(tof) > 50e-9) continue; // 50 ns cut
+       //       if (TMath::Abs(tof) > 50e-9) continue; // 50 ns cut
        float De = bbc_hit[iBBChit].de;
        float TOF = tof + bbc_hit[iBBChit].tof;
        short Vid =  bbc_hit[iBBChit].volume_id;
