@@ -85,12 +85,7 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition(){
   SafeDelete(fRotList);
   fRotList = new THashList(320,0);
   fRotList->SetOwner(kFALSE);
-#if 0
-  St_ssdWafersPosition *ssdWafersPosition = (St_ssdWafersPosition *) GetDataBase("Geometry/ssd/ssdWafersPosition");
-  if (! ssdWafersPosition)  {cout << "ssdWafersPosition has not been found"    << endl; return 0;}
-  ssdWafersPosition_st *WafersPosition = ssdWafersPosition->GetTable(); 
-  Int_t NoWafers  = ssdWafersPosition->GetNRows();
-#endif
+
   TGeoHMatrix LS,SG,LA,WG;
   assert(gStTpcDb);
   const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
