@@ -52,6 +52,7 @@ Int_t StSstDbMaker::InitRun(Int_t runNumber)
    m_positions = CalculateWafersPosition();
 
    if (!m_positions) {
+      mReady = kStFatal;
       return kStFatal;
    }
 
@@ -71,6 +72,9 @@ Int_t StSstDbMaker::InitRun(Int_t runNumber)
    if (Debug()) mySsd->SetDebug(Debug());
 
    mySsd->initLadders(m_positions);
+
+   // Set the return code for Make() to kStOk since we managed to get to the end of this routine
+   mReady = kStOk;
 
    return kStOK;
 }
@@ -97,7 +101,6 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
 
    if (!SsdOscOnGlobal) {
       LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/ssd/SsdOscOnGlobal' table" << endm;
-      mReady = kStFatal;
       return 0;
    }
 
@@ -105,7 +108,6 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
 
    if (!SsdLaddersOnOsc) {
       LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/ssd/SsdLaddersOnOsc' table" << endm;
-      mReady = kStFatal;
       return 0;
    }
 
@@ -113,7 +115,6 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
 
    if (!SsdSensorsOnLadders) {
       LOG_ERROR << "CalculateWafersPosition: No relevant entry found in 'Geometry/ssd/SsdSensorsOnLadders' table" << endm;
-      mReady = kStFatal;
       return 0;
    }
 
@@ -252,9 +253,6 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
          comb->Print();
       }
    }
-
-   // Set the return code for Make() to kStOk since we managed to get to the end of this routine
-   mReady = kStOk;
 
    return ssdwafer;
 }
