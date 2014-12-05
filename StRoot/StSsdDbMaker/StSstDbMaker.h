@@ -27,11 +27,8 @@ private:
 public:
    StSstDbMaker(const char *name = "SstDb");
    virtual       ~StSstDbMaker();
-   virtual Int_t  Init();
    virtual Int_t  InitRun(Int_t runNumber);
    virtual Int_t  Make();
-   virtual Int_t  Finish();
-   virtual void   Clear(const char *opt);
    virtual THashList *GetRotations() {return fRotList;}
    virtual St_ssdWafersPosition *CalculateWafersPosition();
    virtual StSsdBarrel  *GetSsd() {return mySsd;}
@@ -43,7 +40,7 @@ public:
    static const TGeoHMatrix *getHMatrixSensorOnGlobal(int ladder, int sensor);
 
    virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.5 2014/12/05 21:59:25 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[] = "Tag $Name:  $ $Id: StSstDbMaker.h,v 1.6 2014/12/05 21:59:30 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StSstDbMaker, 0)  //StAF chain virtual base class for Makers
 };
 // Global pointers:
