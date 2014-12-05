@@ -74,7 +74,9 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
   else                                os <<       "*/";
   if ((v.nCTBMatch()+v.nBTOFMatch()) < 10) os << Form("%i/",(v.nCTBMatch()+v.nBTOFMatch()));
   else                                os <<       "*/";
-  if ((v.nBEMCMatch()+v.nEEMCMatch()) < 10) os << Form("%i/",(v.nBEMCMatch()+v.nEEMCMatch()));
+  if ((v.nBEMCMatch()) < 10) os << Form("%i/",(v.nBEMCMatch()));
+  else                                os <<       "*/";
+  if ((v.nEEMCMatch()) < 10) os << Form("%i/",(v.nEEMCMatch()));
   else                                os <<       "*/";
   if (v.nTpcWestOnly() < 10) os << Form("%i/",v.nTpcWestOnly());
   else                                os <<       "*/";
