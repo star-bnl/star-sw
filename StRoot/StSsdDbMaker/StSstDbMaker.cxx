@@ -20,7 +20,9 @@ THashList *StSstDbMaker::fRotList = 0;
 ClassImp(StSstDbMaker)
 //_____________________________________________________________________________
 StSstDbMaker::StSstDbMaker(const char *name) : 
-  StMaker(name), mySsd(0),m_dimensions(0),m_positions(0),m_config(0),m_ctrl(0), mode(0){
+  StMaker(name), mySsd(0),m_dimensions(0),m_positions(0),m_config(0),m_ctrl(0), mode(0),
+   mReady(kStErr)
+{
   gStSstDbMaker = this;
 }
 //_____________________________________________________________________________
@@ -65,7 +67,7 @@ Int_t StSstDbMaker::InitRun(Int_t runNumber) {
 //_____________________________________________________________________________
 Int_t StSstDbMaker::Make()
 {
-  return kStOK;
+  return mReady;
 }
 //_____________________________________________________________________________
 void StSstDbMaker::Clear(const char*)
@@ -88,12 +90,34 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition(){
   const TGeoHMatrix &Tpc2Global = gStTpcDb->Tpc2GlobalMatrix();
   
   // SSD 
-  St_Survey *SsdOscOnGlobal      = (St_Survey *) GetDataBase("Geometry/ssd/SsdOscOnGlobal");  // OSC in IDS
-  if (! SsdOscOnGlobal)      {cout << "OscOnGlobal has not been found"  << endl; return 0;}
-  St_Survey *SsdLaddersOnOsc     = (St_Survey *) GetDataBase("Geometry/ssd/SsdLaddersOnOsc");// ladders in the SSD sector coordinate systems
-  if (! SsdLaddersOnOsc)     {cout << "SsdLaddersOnOsc has not been found" << endl; return 0;}
+  St_Survey *SsdOscOnGlobal = (St_Survey *) GetDataBase("Geometry/ssd/SsdOscOnGlobal");  // OSC in IDS
+
+  if (!SsdOscOnGlobal)
+  {
+     LOG_ERROR << "No relevant entry found in 'Geometry/ssd/SsdOscOnGlobal' table."
+        " StIstDb object will not be created" << endm;
+     mReady = kStFatal;
+     return 0;
+  }
+
+  St_Survey *SsdLaddersOnOsc = (St_Survey *) GetDataBase("Geometry/ssd/SsdLaddersOnOsc");// ladders in the SSD sector coordinate systems
+
+  if (!SsdLaddersOnOsc) {
+     LOG_ERROR << "No relevant entry found in 'Geometry/ssd/SsdLaddersOnOsc' table."
+        " StIstDb object will not be created" << endm;
+     mReady = kStFatal;
+     return 0;
+  }
+
   St_Survey *SsdSensorsOnLadders = (St_Survey *) GetDataBase("Geometry/ssd/SsdSensorsOnLadders");  // wafers in the SSD ladder coordinate systems
-  if (! SsdSensorsOnLadders) {cout << "SsdSensorsOnLadders has not been found"  << endl; return 0;}
+
+  if (!SsdSensorsOnLadders)
+  {
+     LOG_ERROR << "No relevant entry found in 'Geometry/ssd/SsdSensorsOnLadders' table."
+        " StIstDb object will not be created" << endm;
+     mReady = kStFatal;
+     return 0;
+  }
   
   Survey_st *OscOnGlobal      = SsdOscOnGlobal->GetTable();      
   Survey_st *LaddersOnOsc     = SsdLaddersOnOsc->GetTable();     
@@ -206,6 +230,10 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition(){
       ssdwafer->AddAt(&row);
       if(Debug()){comb->Print();}
     }
+
+  // Set the return code for Make() to kStOk since we managed to get to the end of this routine
+  mReady = kStOk;
+
   return ssdwafer;
 }
 
