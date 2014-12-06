@@ -17,16 +17,30 @@ StiPlacement::StiPlacement(){
     zCenter=0;
   setNormalRep(0., 0., 0.);
 }
+//______________________________________________________________________________
+StiPlacement::StiPlacement(float  normRefAngle,float  normRadius,float normYOffset,float centralZ) 
+{
+  setNormalRep(normRefAngle,normRadius,normYOffset);
+  zCenter = centralZ;
+  setLayerRadius(centerRadius);
+  layerAngle = centerRefAngle;
+  mRegion = kMidRapidity;
 
+}
 //______________________________________________________________________________
 void StiPlacement::setNormalRep(float refAngle_, float radius_, float yOffset_)
 {
 
+  if (radius_ < 0) {
+    radius_   *= -1;
+    refAngle_ += M_PI;
+    yOffset_  *=-1.;
+  }
   while(refAngle_ <  -M_PI){ refAngle_ += 2.*M_PI; }
   while(refAngle_ >=  M_PI){ refAngle_ -= 2.*M_PI; }
   normalRefAngle = refAngle_;
 
-  if(radius_ >= 0.){ normalRadius = radius_; }
+  normalRadius = radius_; 
   normalYoffset = yOffset_;
 
   // the checking above makes these values within bounds, also
@@ -39,14 +53,22 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_, float yOffset_)
 }// setNormalRep()
 
 //______________________________________________________________________________
-void StiPlacement::setLayerAngle(float layerAngle) 
+void StiPlacement::setLayerAngle(float layerAng) 
 {
-  _layerAngle = layerAngle;
-  if (_layerAngle< -M_PI)  _layerAngle+=2*M_PI;	
-  if (_layerAngle>  M_PI)  _layerAngle-=2*M_PI;	
+  layerAngle = layerAng;
+  while (layerAngle< -M_PI) {layerAngle+=2*M_PI;}	
+  while (layerAngle>  M_PI) {layerAngle-=2*M_PI;}	
 }
-	
+//______________________________________________________________________________	
 ostream& operator<<(ostream& os, const StiPlacement& m) {
   os << Form(" Z:%7.2f Y:%7.2f R:%7.2f",m.getZcenter(),m.getNormalYoffset(),m.getCenterRadius());
   return os;
+}
+//______________________________________________________________________________
+void StiPlacement::setLayerRadius(float radius_)
+{
+static const double kMinRad=0.1,kMaxRad=200;
+static const double kLogStep=(log(kMaxRad)-log(kMinRad))/1000;
+   int nStp = int(log(radius_+kMinRad)/kLogStep);
+   layerRadius = exp(nStp*kLogStep)-kMinRad; 
 }
