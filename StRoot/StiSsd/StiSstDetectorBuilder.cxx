@@ -27,6 +27,7 @@
 StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
    : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom), mSstDb(0)
 {
+   setGroupId(kSsdId);
 }
 
 
@@ -53,8 +54,6 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 
       LOG_INFO << "StiSstDetectorBuilder::buildDetectors: Will build SST geometry from DB tables" << endm;
    }
-
-   setNRows(1);
 
    SetCurrentDetectorBuilder(this);
 
@@ -163,14 +162,10 @@ void StiSstDetectorBuilder::useVMCGeometry()
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
       stiDetector->setName(geoPath.str().c_str());
-      stiDetector->setIsOn(true);
 
       if (_active) { stiDetector->setIsActive(new StiSsdIsActiveFunctor);}
       else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
-      stiDetector->setIsContinuousMedium(false); // true for gases
-      stiDetector->setIsDiscreteScatterer(true); // true for anything other than gas
-      stiDetector->setGroupId(kSsdId);
       stiDetector->setShape(stiShape);
       stiDetector->setPlacement(pPlacement);
       stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
@@ -209,138 +204,96 @@ void StiSstDetectorBuilder::useVMCGeometry()
  */
 void StiSstDetectorBuilder::buildInactiveVolumes()
 {
-   // Build average inactive volumes
-   const VolumeMap_t volumes[] = {
-      {"SFMO", "Mother of the SST detector", "HALL_1/CAVE_1/TpcRefSys_1/IDSM_1", "", ""}
-   };
+   // StiCylindricalShape(const string &name, float halfDepth_, float thickness_, float outerRadius_, float openingAngle_)
+   StiCylindricalShape* sfmoCntrInnShape = new StiCylindricalShape("SFMO_CNTR_INN", fabs(34.25+34.25)/2., 23.5-23.2, 23.5, 2*M_PI);
+   StiCylindricalShape* sfmoCntrMidShape = new StiCylindricalShape("SFMO_CNTR_MID", fabs(34.25+34.25)/2., 25.8-23.5, 25.8, 2*M_PI);
+   StiCylindricalShape* sfmoCntrOutShape = new StiCylindricalShape("SFMO_CNTR_OUT", fabs(34.25+34.25)/2., 27.0-25.8, 27.0, 2*M_PI);
 
-   // Build the volume map and loop over all found volumes
-   Int_t nVolumes = sizeof(volumes) / sizeof(VolumeMap_t);
-   gGeoManager->RestoreMasterVolume();
-   gGeoManager->CdTop();
+   StiCylindricalShape* sfmoLeftInnShape = new StiCylindricalShape("SFMO_LEFT_INN", fabs(51.50-34.25)/2., 23.5-22.2, 23.5, 2*M_PI);
+   StiCylindricalShape* sfmoLeftMidShape = new StiCylindricalShape("SFMO_LEFT_MID", fabs(49.50-34.25)/2., 25.0-23.5, 25.0, 2*M_PI);
+   StiCylindricalShape* sfmoLeftOutShape = new StiCylindricalShape("SFMO_LEFT_OUT", fabs(49.50-34.25)/2., 26.5-25.0, 26.5, 2*M_PI);
 
-   for (Int_t i = 0; i < nVolumes; i++) {
+   StiCylindricalShape* sfmoRghtInnShape = new StiCylindricalShape("SFMO_RGHT_INN", fabs(51.50-34.25)/2., 23.5-22.2, 23.5, 2*M_PI);
+   StiCylindricalShape* sfmoRghtMidShape = new StiCylindricalShape("SFMO_RGHT_MID", fabs(49.50-34.25)/2., 25.0-23.5, 25.0, 2*M_PI);
+   StiCylindricalShape* sfmoRghtOutShape = new StiCylindricalShape("SFMO_RGHT_OUT", fabs(49.50-34.25)/2., 26.5-25.0, 26.5, 2*M_PI);
 
-      if ( !gGeoManager->cd(volumes[i].path) ) {
-         Warning("buildInactiveVolumes()", "Cannot find path to %s node. Skipping to next node...", volumes[i].name);
-         continue;
-      }
+   // StiPlacement(float normRefAngle, float normRadius, float normYOffset, float centralZ, StiRegion region)
+   StiPlacement* sfmoCntrInnPlacement = new StiPlacement(0, (23.5+23.2)/2., 0, (-34.25+34.25)/2.);
+   StiPlacement* sfmoCntrMidPlacement = new StiPlacement(0, (25.8+23.5)/2., 0, (-34.25+34.25)/2.);
+   StiPlacement* sfmoCntrOutPlacement = new StiPlacement(0, (27.0+25.8)/2., 0, (-34.25+34.25)/2.);
 
-      TGeoNode *geoNode = gGeoManager->GetCurrentNode();
+   StiPlacement* sfmoLeftInnPlacement = new StiPlacement(0, (23.5+22.2)/2., 0, (-51.50-34.25)/2.);
+   StiPlacement* sfmoLeftMidPlacement = new StiPlacement(0, (25.0+23.5)/2., 0, (-49.50-34.25)/2.);
+   StiPlacement* sfmoLeftOutPlacement = new StiPlacement(0, (26.5+25.0)/2., 0, (-49.50-34.25)/2.);
 
-      if (!geoNode) continue;
+   StiPlacement* sfmoRghtInnPlacement = new StiPlacement(0, (23.5+22.2)/2., 0, (+51.50+34.25)/2.);
+   StiPlacement* sfmoRghtMidPlacement = new StiPlacement(0, (25.0+23.5)/2., 0, (+49.50+34.25)/2.);
+   StiPlacement* sfmoRghtOutPlacement = new StiPlacement(0, (26.5+25.0)/2., 0, (+49.50+34.25)/2.);
 
-      LOG_DEBUG << "Current node : " << i << "/" << nVolumes << " path is : " << volumes[i].name << endm;
-      LOG_DEBUG << "Number of daughters : " << geoNode->GetNdaughters() << " weight : " << geoNode->GetVolume()->Weight() << endm;
+   // StiMaterial(const string &name, double z, double a, double density, double X0)
+   StiMaterial* sfmoCntrInnMaterial = new StiMaterial("SFMO_CNTR_INN", 7.38471, 14.7875, 0.7536000, 28128.1);
+   StiMaterial* sfmoCntrMidMaterial = new StiMaterial("SFMO_CNTR_MID", 7.29364, 14.5971, 0.0147153, 30146.9);
+   StiMaterial* sfmoCntrOutMaterial = new StiMaterial("SFMO_CNTR_OUT", 7.27831, 14.5655, 0.0372666, 29681.4);
 
-      StiVMCToolKit::LoopOverNodes(geoNode, volumes[i].path, volumes[i].name, MakeAverageVolume);
+   StiMaterial* sfmoLeftInnMaterial = new StiMaterial("SFMO_LEFT_INN", 7.90551, 15.8598, 0.5131150, 21711.5);
+   StiMaterial* sfmoLeftMidMaterial = new StiMaterial("SFMO_LEFT_MID", 7.67447, 15.3544, 0.3013760, 23510.2);
+   StiMaterial* sfmoLeftOutMaterial = new StiMaterial("SFMO_LEFT_OUT", 7.52669, 15.0602, 0.2235500, 25904.3);
 
-      // Access last added volume
-      int row = getNRows() - 1;
-      int sector = 0;
+   StiMaterial* sfmoRghtInnMaterial = new StiMaterial("SFMO_RGHT_INN", 7.92641, 15.9019, 0.5298270, 21402.6);
+   StiMaterial* sfmoRghtMidMaterial = new StiMaterial("SFMO_RGHT_MID", 7.66531, 15.3361, 0.2953080, 23582.3);
+   StiMaterial* sfmoRghtOutMaterial = new StiMaterial("SFMO_RGHT_OUT", 7.53069, 15.0682, 0.2273420, 25831.5);
 
-      // Make Sti detector active, i.e. use it in tracking. XXX:ds: Not sure it has any effect but should not hurt
-      StiDetector *stiDetector = getDetector(row, sector);
-      stiDetector->setIsOn(true);
+   // Define a prefix for detector name for consistency with automatic TGeo to Sti conversion
+   std::string pfx("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/");
 
-      // Manually modify dimensions of the mother volume
-      if (std::string(volumes[i].name) == std::string("SFMO"))
-         segmentSFMOVolume(stiDetector);
-   }
+   StiDetector* stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_CNTR_INN", new StiNeverActiveFunctor, sfmoCntrInnShape, sfmoCntrInnPlacement, getGasMat(), sfmoCntrInnMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_CNTR_MID", new StiNeverActiveFunctor, sfmoCntrMidShape, sfmoCntrMidPlacement, getGasMat(), sfmoCntrMidMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_CNTR_OUT", new StiNeverActiveFunctor, sfmoCntrOutShape, sfmoCntrOutPlacement, getGasMat(), sfmoCntrOutMaterial);
+   add(getNRows(), 0, stiDetector);
+
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_LEFT_INN", new StiNeverActiveFunctor, sfmoLeftInnShape, sfmoLeftInnPlacement, getGasMat(), sfmoLeftInnMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_LEFT_MID", new StiNeverActiveFunctor, sfmoLeftMidShape, sfmoLeftMidPlacement, getGasMat(), sfmoLeftMidMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_LEFT_OUT", new StiNeverActiveFunctor, sfmoLeftOutShape, sfmoLeftOutPlacement, getGasMat(), sfmoLeftOutMaterial);
+   add(getNRows(), 0, stiDetector);
+
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_RGHT_INN", new StiNeverActiveFunctor, sfmoRghtInnShape, sfmoRghtInnPlacement, getGasMat(), sfmoRghtInnMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_RGHT_MID", new StiNeverActiveFunctor, sfmoRghtMidShape, sfmoRghtMidPlacement, getGasMat(), sfmoRghtMidMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"SFMO_RGHT_OUT", new StiNeverActiveFunctor, sfmoRghtOutShape, sfmoRghtOutPlacement, getGasMat(), sfmoRghtOutMaterial);
+   add(getNRows(), 0, stiDetector);
 }
 
 
-/**
- * Manually modify the SST mother volume by splitting it into three tubes.
- *
- * The original SFMO volume has the following dimensions:
- *
- * Inner radius: 22.0 cm
- * Outer radius: 27.0 cm
- * Z edges at -50.5 +50.5 cm
- *
- * In Sti we split it into three tubes
- *
- * Inner radius: 23.25 cm
- * Outer radius: 27.0 cm
- * Z edges at -50.5, -34.0, +34.0, and +50.5 cm
- *
- * Note: The thickness is scaled by 0.75 leaving the outter radius the same.
- * This is done to avoid an overlap of the cylinders with the sensitive layers.
- *
- * The following material properties are calculated for the case when the inner
- * radius is 22 cm:
- *
- * Cylinder 0: Z=7.63150  A=15.2791  density=0.291833  X0=24675.4  weight=3706.24
- * Cylinder 1: Z=7.32555  A=14.6629  density=0.064873  X0=29477.9  weight=3395.38
- * Cylinder 2: Z=7.63471  A=15.2856  density=0.293828  X0=24633.0  weight=3731.59
- *
- * Note: The density is recalculated for the case when the inner radius is
- * increased.
- *
- * \author Dmitri Smirnov, BNL
- */
-void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
+void StiSstDetectorBuilder::setDetectorProperties(StiDetector* detector, std::string name, StiIsActiveFunctor* activeFunctor, StiShape* shape, StiPlacement* placement, StiMaterial* gas, StiMaterial* material)
 {
-   StiCylindricalShape* stiSFMOShape = (StiCylindricalShape*) stiSFMO->getShape();
+   if (!detector) return;
 
-   // Reduce the thickness of the tube to avoid overlapping with the sensitive layers
-   stiSFMOShape->setThickness(0.75*stiSFMOShape->getThickness());
-
-   // Copy original shape (before its depth is modified) to a new one for the end SFMO tubes
-   StiCylindricalShape* stiSFMOEndShape = new StiCylindricalShape(*stiSFMOShape);
-   stiSFMOEndShape->setName(stiSFMOEndShape->getName() + "_end");
-   stiSFMOEndShape->setHalfDepth(8.25); // 8.25 cm = (50.5-34)/2 cm
-
-   add(stiSFMOEndShape);
-
-   stiSFMOShape->setHalfDepth(34); // 34 cm
-
-   // Redefine the material of the central tube
-   StiMaterial* stiSFMOMaterial = stiSFMO->getMaterial();
-   // The parameters provided by Jason W.: name, Z, A, density, X0
-   stiSFMOMaterial->set(stiSFMOMaterial->getName(), 7.33, 14.66, 0.0843, 29480);
-
-   // Define the material for the end tubes by creating a shalow copy from the original SFMO material
-   StiMaterial* stiSFMOEndMaterial = new StiMaterial(*stiSFMOMaterial);
-   stiSFMOEndMaterial->set(stiSFMOMaterial->getName() + "_end", 7.63, 15.29, 0.380, 24650);
-
-   add(stiSFMOEndMaterial);
-
-   // Create a shalow copy for end tube 1
-   StiDetector* stiSFMOEnd = new StiDetector(*stiSFMO);
-
-   StiPlacement* stiSFMOEndPlacement = new StiPlacement(*stiSFMOEnd->getPlacement());
-   stiSFMOEndPlacement->setZcenter(stiSFMOShape->getHalfDepth() + stiSFMOEndShape->getHalfDepth());
-
-   stiSFMOEnd->setName(stiSFMO->getName() + "_end1");
-   stiSFMOEnd->setShape(stiSFMOEndShape);
-   stiSFMOEnd->setPlacement(stiSFMOEndPlacement);
-   stiSFMOEnd->setMaterial(stiSFMOEndMaterial);
-
-   add(getNRows(), 0, stiSFMOEnd);
-
-   // Create a shalow copy for end tube 2
-   StiDetector* stiSFMOEnd2 = new StiDetector(*stiSFMOEnd);
-
-   stiSFMOEndPlacement = new StiPlacement(*stiSFMOEnd2->getPlacement());
-   stiSFMOEndPlacement->setZcenter(-stiSFMOShape->getHalfDepth() - stiSFMOEndShape->getHalfDepth());
-
-   stiSFMOEnd2->setName(stiSFMO->getName() + "_end2");
-   stiSFMOEnd2->setShape(stiSFMOEndShape);
-   stiSFMOEnd2->setPlacement(stiSFMOEndPlacement);
-   stiSFMOEnd2->setMaterial(stiSFMOEndMaterial);
-
-   add(getNRows(), 0, stiSFMOEnd2);
-}
-
-
-ssdWafersPosition_st *StiSstDetectorBuilder::ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers)
-{
-   Int_t N = wafers->GetNRows();
-   ssdWafersPosition_st *wafer = wafers->GetTable();
-
-   for (Int_t i = 0; i < N; i++, wafer++) if (Id ==  wafer->id) return wafer;
-
-   return 0;
+   detector->setName(name.c_str());
+   detector->setIsActive(activeFunctor);
+   detector->setShape(shape);
+   detector->setPlacement(placement);
+   detector->setGas(gas);
+   detector->setMaterial(material);
 }

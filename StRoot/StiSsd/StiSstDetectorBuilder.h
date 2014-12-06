@@ -1,6 +1,8 @@
 #ifndef StiSstDetectorBuilder_H
 #define StiSstDetectorBuilder_H
 
+#include <string>
+
 #include "Sti/StiDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StSsdDbMaker/StSstDbMaker.h"
@@ -8,6 +10,11 @@
 class ssdWafersPosition_st;
 class St_ssdWafersPosition;
 class StiDetector;
+class StiIsActiveFunctor;
+class StiShape;
+class StiPlacement;
+class StiMaterial;
+
 
 class StiSstDetectorBuilder : public StiDetectorBuilder
 {
@@ -21,13 +28,13 @@ public:
 
 protected:
 
+   virtual void buildInactiveVolumes();
+
    bool          mBuildIdealGeom;
    StSstDbMaker *mSstDb;
-   ssdWafersPosition_st *ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers);
 
 private:
 
-   void buildInactiveVolumes();
-   void segmentSFMOVolume(StiDetector* stiSFMO);
+   void setDetectorProperties(StiDetector* detector, std::string name, StiIsActiveFunctor* activeFunctor, StiShape* shape, StiPlacement* placement, StiMaterial* gas, StiMaterial* material);
 };
 #endif
