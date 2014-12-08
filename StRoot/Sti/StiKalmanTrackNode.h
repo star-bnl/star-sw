@@ -26,6 +26,9 @@ typedef enum {
   kEnded  = -1,
   kHit    =  0,                                
 } StiIntersection;
+
+enum {kEdgeZplus=9}; //???????????????????????????????????????????
+
   
 class StiNodeStat {
 public:	
@@ -206,7 +209,9 @@ const StiELoss *getELoss()const		{return mELoss;}
   /// -3  : invalid eloss data for this node.
   double  evaluateDedx();
   
-  int  inside() const;
+  int  inside(			int mode=1) const;
+  int  inside(double x,double y,int mode=1) const;
+  int  inside(const double *x,	int mode=1) const; 
   int  locate();
   int  propagate(double x,int option,int dir);
   void propagateMtx();
