@@ -17,33 +17,47 @@ StiPlacement::StiPlacement(){
     zCenter=0;
   setNormalRep(0., 0., 0.);
 }
+//______________________________________________________________________________
+StiPlacement::StiPlacement(float  normRefAngle,float  normRadius,float normYOffset,float centralZ) 
+{
+  setNormalRep(normRefAngle,normRadius,normYOffset);
+  zCenter = centralZ;
+  setLayerRadius(centerRadius);
+  layerAngle = centerRefAngle;
+  mRegion = kMidRapidity;
 
+}
 //______________________________________________________________________________
 void StiPlacement::setNormalRep(float refAngle_, float radius_, float yOffset_)
 {
 
-  while(refAngle_ <=  -M_PI){ refAngle_ += 2.*M_PI; }
-  while(refAngle_ >    M_PI){ refAngle_ -= 2.*M_PI; }
+  if (radius_ < 0) {
+    radius_   *= -1;
+    refAngle_ += M_PI;
+    yOffset_  *=-1.;
+  }
+  while(refAngle_ <  -M_PI){ refAngle_ += 2.*M_PI; }
+  while(refAngle_ >=  M_PI){ refAngle_ -= 2.*M_PI; }
   normalRefAngle = refAngle_;
 
-  if(radius_ >= 0.){ normalRadius = radius_; }
+  normalRadius = radius_; 
   normalYoffset = yOffset_;
 
   // the checking above makes these values within bounds, also
   centerRadius = ::sqrt(normalRadius*normalRadius + normalYoffset*normalYoffset);
   centerOrientation = atan2(normalYoffset,normalRadius);
   centerRefAngle = normalRefAngle + centerOrientation;
-  while(centerRefAngle <=  -M_PI){ centerRefAngle += 2.*M_PI; }
-  while(centerRefAngle >    M_PI){ centerRefAngle -= 2.*M_PI; }
+  while(centerRefAngle <  -M_PI){ centerRefAngle += 2.*M_PI; }
+  while(centerRefAngle >=  M_PI){ centerRefAngle -= 2.*M_PI; }
 
 }// setNormalRep()
 
 //______________________________________________________________________________
-void StiPlacement::setLayerAngle(float layerAngle) 
+void StiPlacement::setLayerAngle(float layerAng) 
 {
-  _layerAngle = layerAngle;
-  if (_layerAngle< -M_PI)  _layerAngle+=2*M_PI;	
-  if (_layerAngle>  M_PI)  _layerAngle-=2*M_PI;	
+  layerAngle = layerAng;
+  while (layerAngle< -M_PI) {layerAngle+=2*M_PI;}	
+  while (layerAngle>  M_PI) {layerAngle-=2*M_PI;}	
 }
 	
 	
@@ -59,7 +73,7 @@ ostream& operator<<(ostream& os, const StiPlacement& p)
       << "centerOrientation: "  << p.centerOrientation << " rad" << endl
       << "zCenter: " << p.zCenter << " cm, "
       << "layerRadius: " << p.layerRadius << " cm, "
-      << "_layerAngle: " << p._layerAngle << " rad" << endl;
+      << "layerAngle: " << p.layerAngle << " rad" << endl;
 
    return os;
 }
