@@ -86,6 +86,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
                                  : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 9.36) );
 
    // Build active sti volumes for SST sensors
+   int stiRow = getNRows(); // Put all sensitive volumes in the same (and next available) Sti row
    int iSensor = floor(kSstNumSensorsPerLadder/2);
 
    for (int iLadder = 1; iLadder <= kSstNumLadders; ++iLadder)
@@ -174,7 +175,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
       stiDetector->setKey(1, 0);
       stiDetector->setKey(2, iLadder-1);
-      add(0, iLadder, stiDetector);
+      add(stiRow, iLadder-1, stiDetector);
 
       // Whole bunch of debugging information
       Float_t rad2deg = 180.0 / 3.1415927;
