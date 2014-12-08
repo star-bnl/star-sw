@@ -92,6 +92,8 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
                                      ,      StiNodePars &rotPars
 			             ,      StiNodePars &proPars)
 {
+static int nCall = 0; nCall++;
+StiDebug::Break(nCall);
   int ierr = 0;
   alpha = mTargetNode->_alpha - mParentNode->_alpha;
   ca=1;sa=0;
@@ -107,7 +109,7 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     ca = cos(alpha);
     sa = sin(alpha);
 
-    rotPars.x() = xt1*ca + yt1*sa;
+    rotPars.x() =  xt1*ca + yt1*sa;
     rotPars.y() = -xt1*sa + yt1*ca;
     rotPars._cosCA =  cosCA0*ca+sinCA0*sa;
     rotPars._sinCA = -cosCA0*sa+sinCA0*ca;
@@ -143,18 +145,24 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   }
   if (mDetector && mDetector->getShape()->getShapeCode()>1) { // non planar shape
     double rN = mDetector->getPlacement()->getNormalRadius();
+    double tH = mDetector->getShape()->getThickness();
+    double save[] = {x2,y2,cosCA2,sinCA2,dl};
     for (int it=0;it<100;it++) {
        double dif = rN*rN-x2*x2-y2*y2;
-       if (fabs(dif)<rN*1e-3) break;
-       if (it>=99) return 2;
-       double t = - 0.5*dif/(x2*cosCA2+y2*sinCA2);
-       if (fabs(t)>1.0) t/=fabs(t);
+       if (fabs(dif)<rN*tH*1e-2) break;
+       assert(it<99);
+       double t =  0.5*dif/(x2*cosCA2+y2*sinCA2);
+       if (fabs(t)<tH*1e-2) break;
+       if (fabs(t) > 0.1*rN) t = (t>0)? 0.1*rN:-0.1*rN;
        double ang = t*rotPars.curv();
        if (fabs(ang)>0.1) { t*=0.1/fabs(ang); ang*= 0.1/fabs(ang);}
        x2 += cosCA2*t; y2+=sinCA2*t; dl+=t;
        double c = cosCA2;
        cosCA2 = c*cos(ang)-sinCA2*sin(ang);
        sinCA2 = c*sin(ang)+sinCA2*cos(ang);
+       if (it<10) continue;
+       x2=save[0];y2=save[1];cosCA2=save[2];sinCA2=save[3];dl=save[4];
+       break;
   } }
   proPars.x() = x2;
   proPars.y() = y2;
@@ -291,7 +299,10 @@ StiDebug::Break(nCall);
     ierr = propagatePars(mBestParentPars,mBestParentRotPars,mBestPars);
     if(ierr) return 1;
     ierr = propagateMtx();	if(ierr) return 2;
+
+    mTargetNode->mFP   = mBestPars;//Hack to allow propagateMCS() to check mTargetNode->inside()
     ierr = propagateMCS();	if(ierr) return 3;
+
     ierr = propagateFitd();	if(ierr) return 4;
     ierr = propagateError();	if(ierr) return 5;
 
@@ -680,10 +691,11 @@ static const int keepElossBug = StiDebug::iFlag("keepElossBug");
 assert(pt<1e3);
   double relRadThickness;
   // Half path length in previous node
-  double pL1,pL2,pL3,d1=0,d2=0,d3=0,dxEloss,dx;
-  pL1=0.5*pathIn(mParentNode->getDetector(),&mBestParentPars);
+  double pL1=0,pL2=0,pL3=0,d1=0,d2=0,d3=0,dxEloss,dx;
+  if (mParentNode->inside()) pL1=0.5*pathIn(mParentNode->getDetector(),&mBestParentPars);
   // Half path length in this node
-  pL3=0.5*pathIn(mDetector,&mBestPars);
+  
+  if (mTargetNode->inside())	pL3=0.5*pathIn(mDetector,&mBestPars);
   // Gap path length
   pL2= fabs(dl);
   double x0p = 1e11,x0Gas=1e11,x0=1e11;
@@ -1168,9 +1180,13 @@ int StiTrackNodeHelper::nudge()
 double StiTrackNodeHelper::pathIn(const StiDetector *det,StiNodePars *pars)
 {
   if (!det) return 0.; 
-  double thickness = det->getShape()->getThickness();
+  StiShape *shape = det->getShape();
+  double thickness = shape->getThickness();
   double t = pars->tanl();
   double c = fabs(pars->_cosCA);
+  if (shape->getShapeCode()>1 && fabs(pars->x()>1e-3)) {	//Cylinder
+    c = fabs(cos(pars->phi()-atan2(pars->y(),pars->x())));
+  }
   return (thickness*::sqrt(1.+t*t)) / c;
 }
 //______________________________________________________________________________
