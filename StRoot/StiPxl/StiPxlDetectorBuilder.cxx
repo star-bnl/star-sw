@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.90 2014/12/04 17:00:59 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.91 2014/12/08 18:10:07 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -108,7 +108,8 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                                  : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 9.36) );
 
    // Build active sti volumes for pixel sensors
-   int iSensor = 5;
+   // Use the "middle" sensor on the ladder to extract alignment corrections from DB
+   int iSensor = floor(kNumberOfPxlSensorsPerLadder/2);
 
    for (int iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
    {
