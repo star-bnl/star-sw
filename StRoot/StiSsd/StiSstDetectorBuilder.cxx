@@ -198,9 +198,27 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
 
 /**
- * Creates a crude approximation of the SST detector. The geometry is modeled with a single tube
- * using the dimensions and other physical properties of the SST mother volume defined in the ROOT
- * TGeo geometry.
+ * Creates a crude model of the SST detector. The geometry is modeled with tubes
+ * segmented in z and r. The dimensions and other physical properties of the
+ * tube volumes are determined manually by looking at distribution of the
+ * material in the ROOT TGeo geometry.
+ *
+ * We use the following dimensions and material properties:
+ *
+ * SFMO_CENTER_IN:   22.2 < r < 23.5 cm  -34.25 < z <  34.25 cm  Z = 7.38471  A = 14.7875  Dens = 0.1777280  X0 = 28128.1
+ * SFMO_CENTER_MID:  23.5 < r < 25.8 cm  -34.25 < z <  34.25 cm  Z = 7.29364  A = 14.5971  Dens = 0.0147153  X0 = 30146.9
+ * SFMO_CENTER_OUT:  25.8 < r < 27.0 cm  -34.25 < z <  34.25 cm  Z = 7.27831  A = 14.5655  Dens = 0.0372666  X0 = 29681.4
+ *
+ * SFMO_LEFT_IN:     22.2 < r < 23.5 cm  -51.50 < z < -34.25 cm  Z = 7.90551  A = 15.8598  Dens = 0.5131150  X0 = 21711.5
+ * SFMO_LEFT_MID:    23.5 < r < 25.0 cm  -49.50 < z < -34.25 cm  Z = 7.67447  A = 15.3544  Dens = 0.3013760  X0 = 23510.2
+ * SFMO_LEFT_OUT:    25.0 < r < 26.5 cm  -49.50 < z < -34.25 cm  Z = 7.52669  A = 15.0602  Dens = 0.2235500  X0 = 25904.3
+ *
+ * SFMO_RIGHT_IN:    22.2 < r < 23.5 cm   34.25 < z <  51.50 cm  Z = 7.92641  A = 15.9019  Dens = 0.5298270  X0 = 21402.6
+ * SFMO_RIGHT_MID:   23.5 < r < 25.0 cm   34.25 < z <  49.50 cm  Z = 7.66531  A = 15.3361  Dens = 0.2953080  X0 = 23582.3
+ * SFMO_RIGHT_OUT:   25.0 < r < 26.5 cm   34.25 < z <  49.50 cm  Z = 7.53069  A = 15.0682  Dens = 0.2273420  X0 = 25831.5
+ *
+ * The inner radius of the central tube is increased by 0.85 cm to avoid overlap
+ * with sensitive layers, and the density of that volume is scaled accordingly.
  *
  * \author Dmitri Smirnov
  */
