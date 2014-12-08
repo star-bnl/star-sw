@@ -13,6 +13,10 @@
 #include "StiVMCToolKit.h"
 #include "TMath.h"
 using namespace std;
+#define kOLDAVER 1
+
+
+
 class StiDetector;
 class StiMaterial;
 class StiShape;
@@ -90,10 +94,14 @@ public:
   static void setDebug(int m = 0) 			{_debug = m;}
   static int  debug() {return _debug;}
   static StiDetectorBuilder *GetCurrentDetectorBuilder(){return fCurrentDetectorBuilder;}
-//   static  void MakeAverageVolume(TGeoPhysicalNode *nodeP) 
-//               {if (fCurrentDetectorBuilder) fCurrentDetectorBuilder->AverageVolume(nodeP);}
+#if kOLDAVER
+   static  void MakeAverageVolume(TGeoPhysicalNode *nodeP) 
+               {if (fCurrentDetectorBuilder) fCurrentDetectorBuilder->AverageVolume(nodeP);}
+#endif
+#ifndef kOLDAVER
   static  int MakeAverageVolume(const char *path) 
               { return fCurrentDetectorBuilder->AverageVolume(path);}
+#endif
 
   static int AveMate (TGeoVolume *vol,StiAuxMat &mat);
   static int AveMateR(TGeoVolume *vol,StiAuxMat &mat);
