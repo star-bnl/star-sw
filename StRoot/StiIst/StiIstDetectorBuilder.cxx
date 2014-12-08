@@ -84,7 +84,8 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
    unsigned int ROW = 1;
 
-   int iSensor = 3;
+   // Use the "middle" sensor on the ladder to extract alignment corrections from DB
+   int iSensor = floor(kIstNumSensorsPerLadder/2);
 
    for (int iLadder = 1; iLadder < kIstNumLadders; ++iLadder)
    {

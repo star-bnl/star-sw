@@ -87,6 +87,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
    // Build active sti volumes for SST sensors
    int stiRow = getNRows(); // Put all sensitive volumes in the same (and next available) Sti row
+   // Use the "middle" sensor on the ladder to extract alignment corrections from DB
    int iSensor = floor(kSstNumSensorsPerLadder/2);
 
    for (int iLadder = 1; iLadder <= kSstNumLadders; ++iLadder)
