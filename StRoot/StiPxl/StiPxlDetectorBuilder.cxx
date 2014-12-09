@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.92 2014/12/09 20:12:02 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.93 2014/12/09 20:12:21 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -318,12 +318,5 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
                 << "Number of daughters: " << geoNode->GetNdaughters() << ", weight: " << geoNode->GetVolume()->Weight(0.01, "a") << endm;
 
       StiVMCToolKit::LoopOverNodes(geoNode, pxlVolumes[i].path, pxlVolumes[i].name, MakeAverageVolume);
-
-      // Access last added volume/Sti detector
-      int row = getNRows() - 1;
-      int sector = 0;
-
-      // Make Sti detector active, i.e. use it in tracking
-      StiDetector *stiDetector = getDetector(row, sector);
    }
 }
