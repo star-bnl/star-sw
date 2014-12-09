@@ -333,14 +333,3 @@ void StiSstDetectorBuilder::segmentSFMOVolume(StiDetector* stiSFMO)
 
    add(getNRows(), 0, stiSFMOEnd2);
 }
-
-
-ssdWafersPosition_st *StiSstDetectorBuilder::ssdWafersPosition(Int_t Id, St_ssdWafersPosition *wafers)
-{
-   Int_t N = wafers->GetNRows();
-   ssdWafersPosition_st *wafer = wafers->GetTable();
-
-   for (Int_t i = 0; i < N; i++, wafer++) if (Id ==  wafer->id) return wafer;
-
-   return 0;
-}
