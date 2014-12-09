@@ -92,19 +92,22 @@ void StiIstDetectorBuilder::useVMCGeometry()
       unsigned int matIst = 1000 + (iLadder) * kIstNumSensorsPerLadder + iSensor;
       LOG_DEBUG << "iLadder/iSensor/matIst : " << iLadder << " " << iSensor << " " << matIst << endm;
 
-      char name[50];
-      sprintf(name, "Ist/Ladder_%d/Sensor_%d", iLadder, iSensor);
+      std::ostringstream geoPath;
+      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
 
-      TString Path("HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1");
-      Path += Form("/IBAM_%d/IBLM_%d/IBSS_1", iLadder, iSensor);
-      gGeoManager->cd(Path); // retrieve info of IBSS volume
+      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
+
+      if (!isAvail) {
+         Warning("useVMCGeometry()", "Cannot find path to IBSS (IST sensitive) node. Skipping to next node...");
+         continue;
+      }
 
       TGeoHMatrix *combI = 0;
 
-      if (!mBuildIdealGeom)
-         combI = (TGeoHMatrix *) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+      if (mBuildIdealGeom)
+         combI = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
       else
-         combI = gGeoManager->MakePhysicalNode(Path.Data())->GetMatrix();
+         combI = (TGeoHMatrix *) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
 
       if (combI) {
          combI->Print();
@@ -122,7 +125,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
                 << " " << endm;
 
       //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
-      StiShape *sh  = new StiPlanarShape(name,
+      StiShape *sh  = new StiPlanarShape(geoPath.str().c_str(),
                                          kIstNumSensorsPerLadder * (box->GetDZ() + 0.10), // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
                                          2 * box->GetDY(),              // thickness
                                          box->GetDX());                 // halfWidth
@@ -161,7 +164,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
          return;
       }
 
-      p->setName(name);
+      p->setName(geoPath.str().c_str());
       if (_active) {  p->setIsActive(new StiIstIsActiveFunctor);}
       else         {  p->setIsActive(new StiNeverActiveFunctor);}
       p->setShape(sh);
