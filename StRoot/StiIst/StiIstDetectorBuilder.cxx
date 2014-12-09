@@ -165,8 +165,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
       }
 
       p->setName(geoPath.str().c_str());
-      if (_active) {  p->setIsActive(new StiIstIsActiveFunctor);}
-      else         {  p->setIsActive(new StiNeverActiveFunctor);}
       p->setShape(sh);
       p->setPlacement(pPlacement);
       p->setGas(GetCurrentDetectorBuilder()->getGasMat());
@@ -175,6 +173,8 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       p->setMaterial(silicon);
       p->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
+      if (_active) {  p->setIsActive(new StiIstIsActiveFunctor);}
+      else         {  p->setIsActive(new StiNeverActiveFunctor);}
 
       // Adding detector, note that no keys are set in IST!
       add(ROW, iLadder, p);
