@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.10 2014/12/09 21:47:45 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.11 2014/12/09 21:52:12 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -55,7 +55,9 @@
  */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
    StiDetectorBuilder("Pixel", active), mBuildIdealGeom(buildIdealGeom), mPxlDb(0)
-{ }
+{
+   setGroupId(kPxlId);
+}
 
 
 /** Build the pixel detector components. */
@@ -205,7 +207,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             if (_active) { stiDetector->setIsActive(new StiPxlIsActiveFunctor);}
             else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
-            stiDetector->setGroupId(kPxlId);
             stiDetector->setShape(stiShape);
             stiDetector->setPlacement(pPlacement);
             stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
