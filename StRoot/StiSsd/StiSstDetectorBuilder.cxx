@@ -164,15 +164,14 @@ void StiSstDetectorBuilder::useVMCGeometry()
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
       stiDetector->setName(geoPath.str().c_str());
-
-      if (_active) { stiDetector->setIsActive(new StiSsdIsActiveFunctor);}
-      else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
-
       stiDetector->setShape(stiShape);
       stiDetector->setPlacement(pPlacement);
       stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
       stiDetector->setMaterial(silicon);
       stiDetector->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());
+
+      if (_active) { stiDetector->setIsActive(new StiSsdIsActiveFunctor);}
+      else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
       stiDetector->setKey(1, 0);
       stiDetector->setKey(2, iLadder-1);

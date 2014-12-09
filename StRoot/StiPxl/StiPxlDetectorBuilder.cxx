@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.13 2014/12/09 21:52:29 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.14 2014/12/09 21:52:45 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -201,15 +201,14 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             }
 
             stiDetector->setName(halfLadderName.c_str());
-
-            if (_active) { stiDetector->setIsActive(new StiPxlIsActiveFunctor);}
-            else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
-
             stiDetector->setShape(stiShape);
             stiDetector->setPlacement(pPlacement);
             stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
             stiDetector->setMaterial(silicon);
             stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
+
+            if (_active) { stiDetector->setIsActive(new StiPxlIsActiveFunctor);}
+            else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
             int stiRow    = 0;
             int stiSensor = 0;
