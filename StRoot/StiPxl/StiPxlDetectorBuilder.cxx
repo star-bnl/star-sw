@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.11 2014/12/09 21:52:12 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.12 2014/12/09 21:52:19 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -64,9 +64,6 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
 void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 {
    LOG_INFO << "StiPxlDetectorBuilder::buildDetectors() -I- Started" << endm;
-
-   // 2 real rows, but we have detector elements and support elements.
-   setNRows(2);
 
    SetCurrentDetectorBuilder(this);
 
