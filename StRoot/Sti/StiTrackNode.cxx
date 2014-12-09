@@ -26,8 +26,8 @@ static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[3]*MIN1ERR[3]
                               ,MIN1ERR[4]*MIN1ERR[4]
                               ,MIN1ERR[5]*MIN1ERR[5]};
-static const double recvCORRMAX  = 0.90;
-static const double chekCORRMAX  = 0.99;
+static const double recvCORRMAX  = 0.99;
+static const double chekCORRMAX  = 0.999;
 static double MAXPARS[]={250,250,250,1.5,100,100};
 
 //______________________________________________________________________________
@@ -148,15 +148,11 @@ StiDebug::Break(nCall);
 
 
 int sRho = (Rho<0) ? -1:1;
-double aRho = fabs(Rho), rr=r*r,d=0;
-
-TVector3 D(Dp); D[2]=0.; D.SetMag(1.);	//Direction
-TVector3 N(-D[1],D[0],0.);		//Ort to direction
-TVector3 X(Xp); X[2]=0.;
-TVector3 C,Cd,Cn;
-int inside = X.Perp()<r;
-
+double aRho = fabs(Rho),aR = 1./(aRho+1e-11), rr=r*r,d=0;
+TVector3 D(Dp[0],Dp[1],0.),X(Xp[0],Xp[1],0.);
+TVector3 C,Cd,Cn,N;
 double XX,XN,L;
+N[0] = -D[1]; N[1] = D[0];
 XX = X*X; XN = X*N;
 
 double LLmRR = XX*aRho+2*XN*sRho;
@@ -175,48 +171,36 @@ for (int ix = 0;ix<2; ix++) {
   Out[ix] = Cd*d + Cn*p; p = -p;
 }
 
-//		Calculate distance
 for (int ix = 0;ix<2; ix++) {
-  double len = (Out[ix]-X).Mag();
+  double len = (X-Out[ix]).Mag();
   if (len > 0.1*r) len = 2*r*asin(0.5*len*aRho);
+  
+
+  double tst = (X-Out[ix])*D;
+  if (dir) tst = -tst;
+  if (tst<0) len = M_PI*2*aR-len;
   out[ix][2] = len; 
   out[ix][0] = Out[ix][0];
   out[ix][1] = Out[ix][1];
 }
-//  Moving ==(2*dir-1)*(cosCA*x+sinCA*y)  - =movingIn, + =movingOut
-//  Inside ==start point inside of cylinder
-//
-//Outside & movingOut := Biggest  length 
-//Outside & movingIn  := Smallest length
-//Inside  & movingOut := Smallest length
-//Inside  & movingIn  := Biggest  length
-  int isShort = (out[0][2]<out[1][2]) ? 0:1;
-  int movingIn = (2*dir-1)*(Dp[0]*Xp[0]+Dp[1]*Xp[1])<0;
-  int kase = inside + 2*movingIn;
-  int which = -1;
-  switch (kase) {
-    case 0: which = 1-isShort; break;	//Outside & movingOut ==> long
-    case 1: which = isShort;   break;	//Inside  & movingOut ==> short  					
-    case 2: which = isShort;   break;	//Outside & movingIn  ==> short
-    case 3: which = 1-isShort; break;	//Inside & movingIn   ==> long
-    default: assert(0);
-  }
-
-  if (which) { //swap solutions
-    for (int j=0;j<3;j++) {
-      double swp = out[0][j];
-      out[0][j] = out[1][j];
-      out[1][j] = swp;
+  if (out[0][2]>out[1][2]) { 	//wrong order
+    for (int j=0;j<3;j++)  { 
+      double t=out[0][j]; 
+      out[0][j] = out[1][j]; 
+      out[1][j] = t; 
   } }
 
 
-  for (int jk=0;jk<2;jk++) {
-    assert(fabs(Out[jk].Perp()-r)<1e-3*r);
-    TVector3 dif = (Out[jk]-X)*Rho;
-    double qwe = dif.Perp2()-2*dif.Dot(N);
-    assert( fabs(qwe) <1.e-4);
-  }
 
+  for (int i=0;i<2;i++) {
+//  printf("x=%g y=%g len=%g\n",out[i][0],out[i][1],out[i][2]);
+  double dif = (Out[i]*aRho-C).Mag()-1.;
+//  printf("SolAcc=%g\n",dif);
+  assert(fabs(dif)<1e3);
+  dif = (Out[i]).Mag()/r-1;
+//  printf("SolAcc=%g\n",dif);
+  assert(fabs(dif)<1e3);
+  }
   return 2;
 }
 
@@ -287,7 +271,7 @@ StiNodeErrs &StiNodeErrs::merge(double wt,StiNodeErrs &other)
 {
    double wt0 = 1.-wt;
    for (int i=0;i<kNErrs;i++) {A[i] = wt0*A[i] + wt*other.A[i];}
-//assert(sign()>0); ///??? 
+assert(sign()>0); ///??? 
 
    return *this;
 }
@@ -347,12 +331,13 @@ void StiNodeErrs::recov()
 static int nCall = 0; nCall++;
 StiDebug::Break(nCall);
 
-//  double s = sign(); ///??? 
-//  if (s<0) printf("##################### StiNodeErrs::recov() sign=%g\n",s);
+  double s = sign(); ///??? 
+  if (s<0) printf("##################### StiNodeErrs::recov() sign=%g\n",s);
   int i0=1,li0=1,isMod=0;
   if (_cXX>0) {i0=0;li0=0;}
 
    double dia[kNPars],fak[kNPars]={1,1,1,1,1,1},corrMax=1;;
+   int isTouched[kNPars]={0};
    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
      double &aii = A[li+i];
      if (aii < MIN2ERR[i]) aii = MIN2ERR[i];
@@ -363,17 +348,20 @@ StiDebug::Break(nCall);
        if (isMod) aij*=fak[i]*fak[j];
        if (aij*aij <=    dia[i]*dia[j]*chekCORRMAX) continue;
        double qwe = aij*aij/(dia[i]*dia[j]);
-       if (corrMax<qwe) corrMax=qwe;
+       if (corrMax>=qwe) continue;
+       corrMax=qwe; isTouched[i]=1; isTouched[j]=1;
    } } 
    if (corrMax<=1) return;
    corrMax = sqrt(corrMax/recvCORRMAX);
    
    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+       if (!isTouched[i]) continue;
      for (int j=i0;j<i;j++) {
+       if (!isTouched[j]) continue;
        A[li+j]/=corrMax;
    } } 
 
-//assert(sign()>0); ///??? 
+assert(sign()>0); ///??? 
 
 }
 //______________________________________________________________________________
@@ -389,7 +377,7 @@ void StiNodeErrs::print() const
 //______________________________________________________________________________
 int StiNodeErrs::check(const char *pri) const
 {
-//assert(sign()>0); ///??? 
+assert(sign()>0); ///??? 
   int i=-2008,j=2009,kase=0;
   double aii=-20091005,ajj=-20101005,aij=-20111005;
   int i0=0; if (!_cXX) i0 = 1;
@@ -423,7 +411,7 @@ RETN:
           break;
     case 3: LOG_DEBUG << Form("StiNodeErrs::check(%s) FAILED: Non Positive matrix",pri)<<endm;  
   }    
-//assert(sign()>0); ///??? 
+assert(sign()>0); ///??? 
   return kase;
 }  
 //____________________________________________________________
@@ -533,7 +521,6 @@ StiNodePars &StiNodePars::operator=(const StiNodePars &fr)
 {
   assert(fabs(fr._sinCA)<=1);
   assert(fabs(fr._cosCA)<=1);
-  assert(fabs(fr.hz())>0);
   memcpy (this,&fr,sizeof(fr));
   return *this;
 }
