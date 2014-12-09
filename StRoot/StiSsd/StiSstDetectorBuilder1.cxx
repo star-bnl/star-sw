@@ -241,7 +241,6 @@ void StiSstDetectorBuilder1::buildInactiveVolumes()
 
       // Make Sti detector active, i.e. use it in tracking. XXX:ds: Not sure it has any effect but should not hurt
       StiDetector *stiDetector = getDetector(row, sector);
-      stiDetector->setIsOn(true);
 
       // Manually modify dimensions of the mother volume
       if (std::string(volumes[i].name) == std::string("SFMO"))

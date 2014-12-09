@@ -163,13 +163,10 @@ void StiSstDetectorBuilder::useVMCGeometry()
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
       stiDetector->setName(geoPath.str().c_str());
-      stiDetector->setIsOn(true);
 
       if (_active) { stiDetector->setIsActive(new StiSsdIsActiveFunctor);}
       else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
-      stiDetector->setIsContinuousMedium(false); // true for gases
-      stiDetector->setIsDiscreteScatterer(true); // true for anything other than gas
       stiDetector->setGroupId(kSsdId);
       stiDetector->setShape(stiShape);
       stiDetector->setPlacement(pPlacement);
