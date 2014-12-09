@@ -169,8 +169,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
       p->setPlacement(pPlacement);
       p->setGas(GetCurrentDetectorBuilder()->getGasMat());
 
-      if (!p->getGas()) LOG_INFO << "gas not there!" << endm;
-
       p->setMaterial(silicon);
       p->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
       if (_active) {  p->setIsActive(new StiIstIsActiveFunctor);}
