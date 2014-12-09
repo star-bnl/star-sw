@@ -102,37 +102,37 @@ void StiIstDetectorBuilder::useVMCGeometry()
          continue;
       }
 
-      TGeoHMatrix *combI = 0;
+      TGeoVolume*  sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
+      TGeoHMatrix* sensorMatrix = 0;
 
       if (mBuildIdealGeom)
-         combI = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
+         sensorMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
       else
-         combI = (TGeoHMatrix *) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+         sensorMatrix = (TGeoHMatrix *) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
 
-      if (combI) {
-         combI->Print();
+      if (sensorMatrix) {
+         sensorMatrix->Print();
       } else {
          Error("useVMCGeometry()", "Could not find TGeoHMatrix for sensor %d in database", matIst);
          continue;
       }
 
-      TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-      // Extract volume geometry for this node
-      TGeoBBox *box = (TGeoBBox *) nodeT->GetVolume()->GetShape();
-      LOG_DEBUG << " DZ/DY/DX : " << box->GetDZ()
-                << " " << box->GetDY()
-                << " " << box->GetDX()
-                << " " << endm;
+      TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
+
+      LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
+                << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
+                << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
+                << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
       //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
-      StiShape *sh  = new StiPlanarShape(geoPath.str().c_str(),
-                                         kIstNumSensorsPerLadder * (box->GetDZ() + 0.10), // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
-                                         2 * box->GetDY(),              // thickness
-                                         box->GetDX());                 // halfWidth
-      add(sh);
+      StiShape *stiShape  = new StiPlanarShape(geoPath.str().c_str(),
+                                         kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10), // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
+                                         2 * sensorBBox->GetDY(),              // thickness
+                                         sensorBBox->GetDX());                 // halfWidth
+      add(stiShape);
 
-      Double_t     *xyz    = combI->GetTranslation();
-      Double_t     *rot    = combI->GetRotationMatrix();
+      Double_t     *xyz    = sensorMatrix->GetTranslation();
+      Double_t     *rot    = sensorMatrix->GetRotationMatrix();
       StThreeVectorD centerVector(xyz[0], xyz[1], xyz[2]);
       StThreeVectorD normalVector(rot[1], rot[4], rot[7]);
 
@@ -157,29 +157,29 @@ void StiIstDetectorBuilder::useVMCGeometry()
       assert(pPlacement);
 
       //Build final detector object
-      StiDetector *p = getDetectorFactory()->getInstance();
+      StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
-      if ( !p ) {
+      if ( !stiDetector ) {
          LOG_INFO << "StiIstDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
          return;
       }
 
-      p->setName(geoPath.str().c_str());
-      p->setShape(sh);
-      p->setPlacement(pPlacement);
-      p->setGas(GetCurrentDetectorBuilder()->getGasMat());
+      stiDetector->setName(geoPath.str().c_str());
+      stiDetector->setShape(stiShape);
+      stiDetector->setPlacement(pPlacement);
+      stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
+      stiDetector->setMaterial(silicon);
+      stiDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
 
-      p->setMaterial(silicon);
-      p->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
-      if (_active) {  p->setIsActive(new StiIstIsActiveFunctor);}
-      else         {  p->setIsActive(new StiNeverActiveFunctor);}
+      if (_active) {  stiDetector->setIsActive(new StiIstIsActiveFunctor);}
+      else         {  stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
       // Adding detector, note that no keys are set in IST!
-      add(ROW, iLadder, p);
+      add(ROW, iLadder, stiDetector);
 
       // Whole bunch of debugging information
       Float_t rad2deg = 180.0 / 3.1415927;
-      LOG_DEBUG << "===>NEW:IST:pDetector:Name               = " << p->getName()                               << endm
+      LOG_DEBUG << "===>NEW:IST:pDetector:Name               = " << stiDetector->getName()                               << endm
                 << "===>NEW:IST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
                 << "===>NEW:IST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
                 << "===>NEW:IST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
@@ -192,7 +192,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
                 << "===>NEW:IST:pDetector:Ladder             = " << iLadder                                    << endm
                 << "===>NEW:IST:pDetector:Sensor             = " << iSensor                                    << endm
                 << "===>NEW:IST:pDetector:row/ladder (ITTF)  = " << ROW << " / " << iLadder                    << endm
-                << "===>NEW:IST:pDetector:Active?            = " << p->isActive()                              << endm;
+                << "===>NEW:IST:pDetector:Active?            = " << stiDetector->isActive()                              << endm;
    }
 }
 
