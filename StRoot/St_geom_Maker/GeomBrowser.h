@@ -70,7 +70,8 @@ class GeomBrowser : public QMainWindow {
    virtual ~GeomBrowser();
 
  public slots:
-	void fileOpenMacro( const QString &fileName );
+   void fileOpenMacro( const QString &fileName );
+   void fileOpenAgmlMacro( const QString &fileName );
    void fileOpenRoot ( const QString &fileName );
    void fileOpenZebra( const QString &fileName );
    void fileOpenInventor( const QString &fileName );
