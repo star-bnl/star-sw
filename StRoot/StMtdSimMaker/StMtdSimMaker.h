@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.h,v 1.8 2014/08/06 11:43:27 jeromel Exp $
+ * $Id: StMtdSimMaker.h,v 1.9 2014/12/10 17:29:19 marr Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StMtdSimMaker.h,v $
+ * Revision 1.9  2014/12/10 17:29:19  marr
+ * 1. Use localz and time-of-flight information from GEANT to determine the
+ * leading times on east and west sides for MC MTD hits. With this change, the
+ * localz of the MC hits can be calcualted exactly the same as the regular
+ * hits.
+ * 2. Cell Id runs from 0 to 11 as in real data
+ * 3. Clean up lines that are commented out.
+ *
  * Revision 1.8  2014/08/06 11:43:27  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -70,14 +78,7 @@ class StMtdSimMaker : public StMaker
    kTDCBINWIDTH = 50
  };
 
-//const static float kVHRBIN2PS = 24.4;  	//! Very High resolution mode, ps/bin
-//const static float kHRBIN2PS = 97.7;     	//! High resolution mode, ps/bin
   const static float kMtdPadWidth = 3.8 + 0.6; 	//! Pad Width: 38mm padwidth + 6mm innerspacing
-  //const static Int_t geant2backlegID[30] = {1,2,3,4,5,6,7,10,22,25,26,27,28,29,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-
-//  Bool_t mCellXtalk;     //! switch for cell xtalk
-//  Bool_t mSlow;
   Bool_t mBookHisto;
   Bool_t mWriteStEvent;  //! switch to enable Maker to write out simulated hits to StEvent
 
@@ -146,18 +147,12 @@ class StMtdSimMaker : public StMaker
     Int_t          FinishRun(Int_t);
     virtual Int_t  Make();
     virtual Int_t  Finish();
-            Int_t  FastCellResponse();
-              int  CalcCellId(Int_t volume_id, Float_t ylocal,
-                              int &ibackleg,int &imodule,int &icell);
-			       
-//fg    StMtdCollection*  GetMtdCollection()  const { return mMtdCollection; }
-//fg
-//fg    void   setHistFileName(string s);
-//fg    void   setBookHist(Bool_t val) { mBookHisto = val; }
-//fg    void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
+    Int_t          FastCellResponse();
+    Int_t          CalcCellId(Int_t volume_id, Float_t ylocal,
+			      Int_t &ibackleg,Int_t &imodule,Int_t &icell);
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.8 2014/08/06 11:43:27 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.9 2014/12/10 17:29:19 marr Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
     ClassDef(StMtdSimMaker,1)
 };
