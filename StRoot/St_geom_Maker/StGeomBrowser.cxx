@@ -40,9 +40,17 @@ void StGeomBrowser::SetFile(const char *fileName)
    } else if ( fFileName.EndsWith(".wrl") ) {         
       if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenInventor(fFileName.Data()); 
    }  else if ( fFileName.Length() <= 8) {
-      // STAR geometry version
-      fBrowser->SelectGeometry(fFileName.Data());
-   } else  {
+
+      int iyear=0;
+      const char *myY = strstr(fFileName.Data(),"y");
+      if (myY) { // "y" found 
+        iyear = atoi(myY+1);
+      }
+      if (iyear <2012) { // STAR geometry version
+        fBrowser->SelectGeometry(fFileName.Data());
+      } else  {	//AGML case
+        fBrowser->fileOpenAgmlMacro(fFileName.Data()); 
+      }
         // The last STAR geometry
         //fBrowser->fileOpenZebra(fFileName.Data());
    }
