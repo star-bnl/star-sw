@@ -178,7 +178,7 @@ for (int ix = 0;ix<2; ix++) {
 
   double tst = (X-Out[ix])*D;
   if (dir) tst = -tst;
-  if (tst<0) len = M_PI*2*aR-len;
+//VP  if (tst<0) len = M_PI*2*aR-len;
   out[ix][2] = len; 
   out[ix][0] = Out[ix][0];
   out[ix][1] = Out[ix][1];
@@ -271,7 +271,7 @@ StiNodeErrs &StiNodeErrs::merge(double wt,StiNodeErrs &other)
 {
    double wt0 = 1.-wt;
    for (int i=0;i<kNErrs;i++) {A[i] = wt0*A[i] + wt*other.A[i];}
-assert(sign()>0); ///??? 
+assert(sign()>0); ///
 
    return *this;
 }
@@ -355,13 +355,15 @@ StiDebug::Break(nCall);
    corrMax = sqrt(corrMax/recvCORRMAX);
    
    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
-       if (!isTouched[i]) continue;
      for (int j=i0;j<i;j++) {
-       if (!isTouched[j]) continue;
        A[li+j]/=corrMax;
    } } 
+   while (sign()<=0) {
+    for (int i=i0,li=li0;i<kNPars ;li+=++i) {
+      for (int j=i0;j<i;j++) {
+        A[li+j]*=0.99;
+   } } }
 
-assert(sign()>0); ///??? 
 
 }
 //______________________________________________________________________________
