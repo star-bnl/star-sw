@@ -673,7 +673,7 @@ static int activeNonActiveLoop = StiDebug::iFlag("activeNonActiveLoop");
       foundInDetLoop = 1;		//activeNonActive
       assert(testNode.isValid());
       testNode.setDetector(tDet);
-assert(testNode.inside());
+///assert(testNode.inside());
       int active = tDet->isActive(testNode.getY(),testNode.getZ());
 
       if (debug() > 2) cout << " vol active:" << active<<endl;
