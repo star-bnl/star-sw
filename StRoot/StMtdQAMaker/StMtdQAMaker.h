@@ -168,7 +168,7 @@ class StMtdQAMaker : public StMaker {
     Double_t mtdHitLeTimeEast[kMaxHits];
     Double_t mtdHitTotWest[kMaxHits];
     Double_t mtdHitTotEast[kMaxHits];
-    Double_t mtdHitTrigTimeWest[kMaxHits];
+    Double_t mtdHitTrigTime[kMaxHits];
     Double_t mtdHitPhi[kMaxHits];
     Double_t mtdHitZ[kMaxHits];
     //== matched tracks
@@ -292,7 +292,7 @@ class StMtdQAMaker : public StMaker {
   TH2F             *mhMtdHitLeTimeDiff;                        // Difference between leading time of MTD hits on east and west
   TH2F             *mhMtdHitTotWest;                           // Time-Over-Threshold distribution of MTD hits on west
   TH2F             *mhMtdHitTotEast;                           // Time-Over-Threshold distribution of MTD hits on east
-  TH2F             *mhMtdHitTrigTimeWest;                      // Difference between the leading time of MTD hits on west and trigger time from THUB
+  TH2F             *mhMtdHitTrigTime;                          // Difference between the leading time of MTD hits, i.e. (west+east)/2, and trigger time from THUB
 
   TH1F             *mhMtdNMatchHits;                           // Number of MTD hits with matched tracks per event
   TH2F             *mhMtdMatchHitMap;                          // Hit map of MTD hits with matched tracks
