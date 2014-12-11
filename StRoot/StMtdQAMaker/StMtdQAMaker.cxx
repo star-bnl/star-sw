@@ -401,9 +401,9 @@ Int_t StMtdQAMaker::processStEvent()
       mMtdData.mtdHitPhi[i]        = getMtdHitGlobalPhi(hit);
       mMtdData.mtdHitZ[i]          = getMtdHitGlobalZ(hit);
       Int_t tHub = getMtdHitTHUB(backleg);
-      Double_t tDiff = mMtdData.mtdHitLeTimeWest[i] - mMtdData.mtdTriggerTime[tHub-1];
+      Double_t tDiff = (mMtdData.mtdHitLeTimeWest[i]+mMtdData.mtdHitLeTimeEast[i])/2 - mMtdData.mtdTriggerTime[tHub-1];
       while(tDiff<0) tDiff += 51200;
-      mMtdData.mtdHitTrigTimeWest[i] = tDiff;
+      mMtdData.mtdHitTrigTime[i] = tDiff;
       mMtdData.isGoodMtdHit[i] = kTRUE;
       if(mTrigTimeCut && !isMtdHitInTrigWin(hit))
 	mMtdData.isGoodMtdHit[i] = kFALSE;
@@ -712,9 +712,9 @@ Int_t StMtdQAMaker::processMuDst()
       mMtdData.mtdHitTotWest[i]    = hit->tot().first;
       mMtdData.mtdHitTotEast[i]    = hit->tot().second;
       Int_t tHub = getMtdHitTHUB(backleg);
-      Double_t tDiff = mMtdData.mtdHitLeTimeWest[i] - mMtdData.mtdTriggerTime[tHub-1];
+      Double_t tDiff = (mMtdData.mtdHitLeTimeWest[i]+mMtdData.mtdHitLeTimeEast[i])/2 - mMtdData.mtdTriggerTime[tHub-1];
       while(tDiff<0) tDiff += 51200;
-      mMtdData.mtdHitTrigTimeWest[i] = tDiff;
+      mMtdData.mtdHitTrigTime[i] = tDiff;
       mMtdData.isGoodMtdHit[i] = kTRUE;
       if(mTrigTimeCut && !isMtdHitInTrigWin(hit))
 	mMtdData.isGoodMtdHit[i] = kFALSE;
@@ -1036,7 +1036,7 @@ void StMtdQAMaker::fillHistos()
       Int_t lChan = (module-1)*12+mMtdData.mtdHitChan[i];
       Int_t gChan = (backleg-1)*60 + lChan;
       if(backleg<1 || backleg>30) continue;
-      mhMtdHitTrigTimeWest->Fill(gChan,mMtdData.mtdHitTrigTimeWest[i]);
+      mhMtdHitTrigTime->Fill(gChan,mMtdData.mtdHitTrigTime[i]);
       if(!mMtdData.isGoodMtdHit[i]) continue;
       mhMtdHitMap->Fill(backleg,lChan);
       mhMtdHitLeTimeWest->Fill(gChan,mMtdData.mtdHitLeTimeWest[i]);
@@ -1312,8 +1312,8 @@ void StMtdQAMaker::bookHistos()
   mhMtdHitTotEast = new TH2F("hMtdHitTotEast","MTD: east TOT per channel;channel;tot (ns)",1801,-0.5,1800.5,50,0,50);
   AddHist(mhMtdHitTotEast);
 
-  mhMtdHitTrigTimeWest = new TH2F("hMtdHitTrigTimeWest","MTD: trigger time of hit (west);channel;tdc-t_{trigger} (ns)",1801,-0.5,1800.5,450,2400,3300);
-  AddHist(mhMtdHitTrigTimeWest);
+  mhMtdHitTrigTime = new TH2F("hMtdHitTrigTime","MTD: trigger time of hit (west+east)/2;channel;tdc-t_{trigger} (ns)",1801,-0.5,1800.5,450,2400,3300);
+  AddHist(mhMtdHitTrigTime);
 
   // ===== matched hits
   mhMtdNMatchHits = new TH1F("mhMtdNMatchHits","Number of matched MTD hits per event;N",100,0,100);
@@ -1464,7 +1464,7 @@ void StMtdQAMaker::bookTree()
   mQATree->Branch("mtdHitLeTimeEast",  &mMtdData.mtdHitLeTimeEast,  "mtdHitLeTimeEast[nMtdHits]/D");
   mQATree->Branch("mtdHitTotWest",     &mMtdData.mtdHitTotWest,     "mtdHitTotWest[nMtdHits]/D");
   mQATree->Branch("mtdHitTotEast",     &mMtdData.mtdHitTotEast,     "mtdHitTotEast[nMtdHits]/D");
-  mQATree->Branch("mtdHitTrigTimeWest",&mMtdData.mtdHitTrigTimeWest,"mtdHitTrigTimeWest[nMtdHits]/D");
+  mQATree->Branch("mtdHitTrigTime",    &mMtdData.mtdHitTrigTime,    "mtdHitTrigTime[nMtdHits]/D");
   mQATree->Branch("mtdHitPhi",         &mMtdData.mtdHitPhi,         "mtdHitPhi[nMtdHits]/D");
   mQATree->Branch("mtdHitZ",           &mMtdData.mtdHitZ,           "mtdHitZ[nMtdHits]/D");
   // matching
@@ -1757,8 +1757,11 @@ Double_t StMtdQAMaker::rotatePhi(Double_t phi) const
 }
 
 //
-//// $Id: StMtdQAMaker.cxx,v 1.5 2014/11/12 18:11:01 marr Exp $
+//// $Id: StMtdQAMaker.cxx,v 1.6 2014/12/11 21:14:13 marr Exp $
 //// $Log: StMtdQAMaker.cxx,v $
+//// Revision 1.6  2014/12/11 21:14:13  marr
+//// Use (leadTimeW+leadTimeE)/2 instead of leadTimeW for MTD hit time
+////
 //// Revision 1.5  2014/11/12 18:11:01  marr
 //// Minor bug fix
 ////
