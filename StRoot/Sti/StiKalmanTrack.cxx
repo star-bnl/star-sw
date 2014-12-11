@@ -1,11 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.131.2.1 2014/11/13 19:23:28 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.131.2.1 2014/11/13 19:23:28 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.2 2014/12/11 03:13:26 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.2 2014/12/11 03:13:26 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.131.2.2  2014/12/11 03:13:26  perev
+ * Assert removed. Probably it is cure of simptomps but not illness
+ * We will see(VP)
+ *
  * Revision 2.131.2.1  2014/11/13 19:23:28  perev
  * Remove getNearBeam() and use dcaNode instead
  *
@@ -1425,6 +1429,8 @@ void StiKalmanTrack::removeLastNode()
 //_____________________________________________________________________________
 int StiKalmanTrack::refit() 
 {
+static const double kMaxXi2Hit = StiKalmanTrackFitterParameters::instance()->getMaxChi2();
+static const double kMaxXi2Vtx = StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx();
   int errType = kNoErrors;
   
   static int nCall=0; nCall++;
@@ -1446,7 +1452,7 @@ int StiKalmanTrack::refit()
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
       errType = kNoErrors;
-      sTNH.set(StiKalmanTrackFitterParameters::instance()->getMaxChi2()*10,StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx()*100,errConfidence,iter);
+      sTNH.set(kMaxXi2Hit*10, kMaxXi2Vtx*100,errConfidence,iter);
       pPrev = inn->fitPars();
       ePrev = inn->fitErrs(); 
       
@@ -1473,7 +1479,7 @@ int StiKalmanTrack::refit()
     if (fail>0) 						break;
       //		
     StiKalmanTrackNode *worstNode= sTNH.getWorst();
-    if (worstNode && worstNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2())     
+    if (worstNode && worstNode->getChi2()>kMaxXi2Hit)     
     {//worstNode->getHit()->setTimesUsed(0);
       worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
     if (rejectByHitSet()) { releaseHits()            ; continue;}
@@ -1498,11 +1504,11 @@ int StiKalmanTrack::refit()
     if (!vertexNode->isValid()) 				break;
     fail = 99;			//prim node Chi2 too big
     errType = kNodeNotValid;
-    if ( vertexNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx())	break;
+    if ( vertexNode->getChi2()>kMaxXi2Vtx)	break;
     fail = 98;			//too many dropped nodes
     errType = kTooManyDroppedNodes;    
     if (nNBeg*kPctLoss/100 < nNBeg-nNEnd
-        &&  nNEnd+kHitLoss < nNBeg)					break;
+        &&  nNEnd+kHitLoss < nNBeg)				break;
     fail = 0;
     errType = kNoErrors;
     break;    
@@ -1518,7 +1524,7 @@ int StiKalmanTrack::refit()
       node->setHit(0);
       if (!node->isValid()) 				continue;
       if (node->getChi2()>10000.)			continue;
-      assert(node->getChi2()<=StiKalmanTrackFitterParameters::instance()->getMaxChi2());
+      if (node->getChi2()>kMaxXi2Hit)			continue;
       hit->setTimesUsed(1);
       node->setHit(hit);
     }
