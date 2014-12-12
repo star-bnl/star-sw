@@ -1,11 +1,9 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.94 2014/12/12 20:22:42 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.95 2014/12/12 20:22:56 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
 #include <string>
 
-#include "TDataSetIter.h"
-#include "THashList.h"
 #include "TGeoVolume.h"
 #include "TGeoMatrix.h"
 #include "TVector3.h"

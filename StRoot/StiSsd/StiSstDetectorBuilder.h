@@ -7,8 +7,6 @@
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StSsdDbMaker/StSstDbMaker.h"
 
-class ssdWafersPosition_st;
-class St_ssdWafersPosition;
 class StiDetector;
 class StiIsActiveFunctor;
 class StiShape;
