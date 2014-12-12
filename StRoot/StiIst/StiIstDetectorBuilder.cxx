@@ -110,9 +110,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
       else
          sensorMatrix = (TGeoHMatrix *) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
 
-      if (sensorMatrix) {
-         sensorMatrix->Print();
-      } else {
+      if (!sensorMatrix) {
          Error("useVMCGeometry()", "Could not find TGeoHMatrix for sensor %d in database", matIst);
          continue;
       }
