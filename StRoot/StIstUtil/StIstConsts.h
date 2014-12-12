@@ -8,8 +8,8 @@
 #ifndef StIstConsts_h
 #define StIstConsts_h
 
-/*
- * Hard-coded constants
+/**
+ * Hard-coded constants for the IST detector.
  */
 //electronics constants
 const int kIstNumRdos = 6;       	// Rdos, numbering from 1, 2, 3, ..., 6
