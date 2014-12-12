@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148.2.3 2014/12/08 04:39:27 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148.2.4 2014/12/12 17:58:19 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148.2.4  2014/12/12 17:58:19  perev
+ * Decrease strongeness of assert. 1e-4 ==> 1e-3
+ *
  * Revision 2.148.2.3  2014/12/08 04:39:27  perev
  * in propagate(xk
  * best solution saved into mygP and myFP, and only at the end the best is
@@ -1027,7 +1030,7 @@ StiDebug::Break(nCall);
   int ians = propagate(vertex->x(),1,-1);
   if (ians && ians!=kEnded)    return false; // track does not reach vertex "plane"
 ////  if (ians) return false; ////????
-  assert(fabs(mFP._sinCA)<1e-4);
+  assert(fabs(mFP._sinCA)<1e-3);
   propagateError();
   setHit(vertex);
   setDetector(0);
