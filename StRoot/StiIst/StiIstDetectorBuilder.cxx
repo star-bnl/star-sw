@@ -152,7 +152,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
       pPlacement->setLayerAngle(phi);
       pPlacement->setRegion(StiPlacement::kMidRapidity);
       pPlacement->setNormalRep(phiD, r * TMath::Cos(phi - phiD), r * TMath::Sin(phi - phiD));
-      assert(pPlacement);
 
       //Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
