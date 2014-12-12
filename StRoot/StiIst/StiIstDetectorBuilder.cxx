@@ -16,9 +16,6 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiIst/StiIstIsActiveFunctor.h"
 #include "StiIst/StiIstDetectorBuilder.h"
-#include "TDataSetIter.h"
-#include "THashList.h"
-#include "TString.h"
 #include "tables/St_HitError_Table.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StEnumerations.h"
@@ -89,9 +86,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
    for (int iLadder = 1; iLadder < kIstNumLadders; ++iLadder)
    {
-      unsigned int matIst = 1000 + (iLadder) * kIstNumSensorsPerLadder + iSensor;
-      LOG_DEBUG << "iLadder/iSensor/matIst : " << iLadder << " " << iSensor << " " << matIst << endm;
-
       std::ostringstream geoPath;
       geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
 
