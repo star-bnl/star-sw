@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StIstDbMaker.cxx,v 1.17 2014/08/06 18:44:21 ypwang Exp $
+* $Id: StIstDbMaker.cxx,v 1.17.2.1 2014/12/12 22:16:03 smirnovd Exp $
 *
 * Author: Yaping Wang, June 2013
 ****************************************************************************
@@ -9,6 +9,12 @@
 ****************************************************************************
 *
 * $Log: StIstDbMaker.cxx,v $
+* Revision 1.17.2.1  2014/12/12 22:16:03  smirnovd
+* STAR Logger messages need endm, not endl
+*
+* Revision 1.18  2014/11/18 19:43:24  genevb
+* STAR Logger messages need endm, not endl
+*
 * Revision 1.17  2014/08/06 18:44:21  ypwang
 * replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
 *
@@ -89,7 +95,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    St_Survey *st_idsOnTpc = (St_Survey *) GetDataBase("Geometry/ist/idsOnTpc");
 
    if (!st_idsOnTpc) {
-      LOG_ERROR << "idsOnTpc has not been found"  << endl;
+      LOG_ERROR << "idsOnTpc has not been found"  << endm;
       return kStErr;
    }
 
@@ -97,7 +103,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    St_Survey *st_pstOnIds = (St_Survey *) GetDataBase("Geometry/ist/pstOnIds");
 
    if (!st_pstOnIds) {
-      LOG_ERROR << "pstOnIds has not been found"  << endl;
+      LOG_ERROR << "pstOnIds has not been found"  << endm;
       return kStErr;
    }
 
@@ -105,7 +111,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    St_Survey *st_istOnPst = (St_Survey *) GetDataBase("Geometry/ist/istOnPst");
 
    if (!st_istOnPst) {
-      LOG_ERROR << "istOnPst has not been found"  << endl;
+      LOG_ERROR << "istOnPst has not been found"  << endm;
       return kStErr;
    }
 
@@ -113,7 +119,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    St_Survey *st_istLadderOnIst = (St_Survey *) GetDataBase("Geometry/ist/istLadderOnIst");
 
    if (!st_istLadderOnIst) {
-      LOG_ERROR << "istLadderOnIst has not been found"  << endl;
+      LOG_ERROR << "istLadderOnIst has not been found"  << endm;
       return kStErr;
    }
 
@@ -121,7 +127,7 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    St_Survey *st_istSensorOnLadder = (St_Survey *) GetDataBase("Geometry/ist/istSensorOnLadder");
 
    if (!st_istSensorOnLadder) {
-      LOG_ERROR << "istSensorOnLadder has not been found"  << endl;
+      LOG_ERROR << "istSensorOnLadder has not been found"  << endm;
       return kStErr;
    }
 
