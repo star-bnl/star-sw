@@ -1,4 +1,4 @@
-/* $Id: StIstDb.cxx,v 1.11 2014/11/18 23:11:57 smirnovd Exp $ */
+/* $Id: StIstDb.cxx,v 1.12 2014/12/12 21:41:09 smirnovd Exp $ */
 
 #include <assert.h>
 #include "StIstDb.h"
@@ -127,11 +127,15 @@ Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
 
 /**
  * Returns TGeoHMatrix with complete set of transformations from the sensor
- * local coordinate system to the global one.
+ * local coordinate system to the global one. The ladder and sensor id-s are
+ * expected to follow the human friendly numbering scheme, i.e. >= 1.
  */
 const TGeoHMatrix* StIstDb::getHMatrixSensorOnGlobal(int ladder, int sensor)
 {
-   int id = 1000 + ladder*kIstNumSensorsPerLadder + sensor;
+   if (ladder < 1 || ladder > kIstNumLadders || sensor < 1 || sensor > kIstNumSensorsPerLadder)
+      return 0;
+
+   int id = 1000 + (ladder-1)*kIstNumSensorsPerLadder + (sensor-1);
    return mgRotList ? (const TGeoHMatrix*) mgRotList->FindObject(Form("R%04i", id)) : 0;
 }
 
@@ -163,6 +167,9 @@ void StIstDb::Print(Option_t *opt) const
 /***************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.12  2014/12/12 21:41:09  smirnovd
+* StIstDb: Modified getter for sensors transormation matrix to accept ladder and sensor id-s using human friendly numbering starting with 1. The input values outside of possible ranges will return a null pointer
+*
 * Revision 1.11  2014/11/18 23:11:57  smirnovd
 * StIstDb: Added method to access transformation matrix for a given IST ladder/sensor pair
 *
