@@ -1,60 +1,4 @@
-/***************************************************************************
-*
-* $Id: StIstDb.cxx,v 1.8 2014/08/06 18:44:21 ypwang Exp $
-*
-* Author: Yaping Wang, June 2013
-****************************************************************************
-* Description:
-* See header file.
-****************************************************************************
-*
-* $Log: StIstDb.cxx,v $
-* Revision 1.8  2014/08/06 18:44:21  ypwang
-* replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
-*
-* Revision 1.7  2014/08/05 17:48:58  ypwang
-* update Print() function to PrintGeoHMatrices()
-*
-* Revision 1.6  2014/08/05 15:00:45  ypwang
-* minor updates on the ladder/sensor ID check output log, using LOG_WARN instead of cout
-*
-* Revision 1.5  2014/08/01 22:25:48  ypwang
-* Add several simple getters and data members for sub-level geometry matrices obtain; Add Print() function which print out all IST geometry matrices
-*
-* Revision 1.4  2014/07/31 22:40:59  smirnovd
-* StIstDb: Reduced the scope of the using namespace
-*
-* Revision 1.3  2014/07/31 22:40:52  smirnovd
-* StIstDb: Removed unused header includes
-*
-* Revision 1.2  2014/07/31 18:29:51  ypwang
-* replace the LOG_INFO with LOG_DEBUG to slim the log file
-*
-* Revision 1.1  2014/07/29 19:50:25  ypwang
-* IST DB dataset in order to separate from IST Db maker
-*
-*
-*
-****************************************************************************
-* StIstDb.cxx,v 1.0
-* Revision 1.0 2014/7/28 16:15:30 Yaping
-* Initial version
-****************************************************************************/
-/*
-  relation within STAR frame
-  IstOnGlobal = Tpc2Magnet * Ids2Tpc *    Ist2Ids     * Ladder2Ist * Sensor2Ladder * PS
-  with
-  Ids2Tpc = IstIdsOnTpc
-  Ist2Ids = IstIstOnPst * IstPstOnIds
-
-  Naming of roatation matrices in this maker :
-  positionGlobal  = tpc2Global * ids2Tpc * pst2Ids * ist2Pst * ladder2Ist * sensor2Ladder * positionOnSensor
-
-  numbering
-  Id  = 1000 + (ladder-1)*6 + sensor
-  1<= ladder <= 24
-  1<= sensor <= 6
-*/
+/* $Id: StIstDb.cxx,v 1.8.2.1 2014/12/12 22:33:28 smirnovd Exp $ */
 
 #include <assert.h>
 #include "StIstDb.h"
@@ -72,7 +16,12 @@
 THashList *StIstDb::mgRotList = 0;
 
 ClassImp(StIstDb)
-//_____________________________________________________________________________
+
+
+/**
+ * \author Yaping Wang
+ * \date June 2013
+ */
 StIstDb::StIstDb() : StObject()
 {
    mGeoHMatrixTpcOnGlobal = NULL;
@@ -175,7 +124,23 @@ Int_t StIstDb::setGeoHMatrices(Survey_st **tables)
    return kStOk;
 }
 
-void StIstDb::printGeoHMatrices() const
+
+/**
+ * Returns TGeoHMatrix with complete set of transformations from the sensor
+ * local coordinate system to the global one. The ladder and sensor id-s are
+ * expected to follow the human friendly numbering scheme, i.e. >= 1.
+ */
+const TGeoHMatrix* StIstDb::getHMatrixSensorOnGlobal(int ladder, int sensor)
+{
+   if (ladder < 1 || ladder > kIstNumLadders || sensor < 1 || sensor > kIstNumSensorsPerLadder)
+      return 0;
+
+   int id = 1000 + (ladder-1)*kIstNumSensorsPerLadder + (sensor-1);
+   return mgRotList ? (const TGeoHMatrix*) mgRotList->FindObject(Form("R%04i", id)) : 0;
+}
+
+
+void StIstDb::Print(Option_t *opt) const
 {
    mGeoHMatrixTpcOnGlobal->Print();
    mGeoHMatrixIdsOnTpc.Print();
@@ -197,3 +162,74 @@ void StIstDb::printGeoHMatrices() const
       sensorOnGlobal->Print();
    }
 }
+
+
+/***************************************************************************
+*
+* $Log: StIstDb.cxx,v $
+* Revision 1.8.2.1  2014/12/12 22:33:28  smirnovd
+* Squashed commit of the following:
+*
+*     StIstDb: Modified getter for sensors transormation matrix to accept ladder and sensor id-s using human friendly numbering starting with 1. The input values outside of possible ranges will return a null pointer
+*
+*     Use flags to indicate DbMaker readiness
+*
+*     Return fatal if database tables are not found
+*
+*     StIstDb: Added method to access transformation matrix for a given IST ladder/sensor pair
+*
+*     Set class version to 0 in order to avoid IO dictionary generation by ROOT's CINT. STAR makers are not persistent
+*
+*     [Style] Changes in comments and user feedback only
+*
+*     [Minor] Coding style clean-up. Removed unconstructive comments
+*
+*     Do not destruct StIstDb object as the ownership is passed to the framework
+*
+*     Renamed printGeoHMatrices to customary Print as that what users of ROOT framework normaly expect
+*
+*     Moved CVS log to the end of file and updated doxygen-style comments
+*
+* Revision 1.12  2014/12/12 21:41:09  smirnovd
+* StIstDb: Modified getter for sensors transormation matrix to accept ladder and sensor id-s using human friendly numbering starting with 1. The input values outside of possible ranges will return a null pointer
+*
+* Revision 1.11  2014/11/18 23:11:57  smirnovd
+* StIstDb: Added method to access transformation matrix for a given IST ladder/sensor pair
+*
+* Revision 1.10  2014/11/18 23:10:20  smirnovd
+* Renamed printGeoHMatrices to customary Print as that what users of ROOT framework normaly expect
+*
+* Revision 1.9  2014/11/18 23:08:37  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
+* Revision 1.8  2014/08/06 18:44:21  ypwang
+* replace assert statement for gStTpcDb with normal variable check and LOG_WARN printout; non-ROOT methods formatted with STAR coding style
+*
+* Revision 1.7  2014/08/05 17:48:58  ypwang
+* update Print() function to PrintGeoHMatrices()
+*
+* Revision 1.6  2014/08/05 15:00:45  ypwang
+* minor updates on the ladder/sensor ID check output log, using LOG_WARN instead of cout
+*
+* Revision 1.5  2014/08/01 22:25:48  ypwang
+* Add several simple getters and data members for sub-level geometry matrices obtain; Add Print() function which print out all IST geometry matrices
+*
+* Revision 1.4  2014/07/31 22:40:59  smirnovd
+* StIstDb: Reduced the scope of the using namespace
+*
+* Revision 1.3  2014/07/31 22:40:52  smirnovd
+* StIstDb: Removed unused header includes
+*
+* Revision 1.2  2014/07/31 18:29:51  ypwang
+* replace the LOG_INFO with LOG_DEBUG to slim the log file
+*
+* Revision 1.1  2014/07/29 19:50:25  ypwang
+* IST DB dataset in order to separate from IST Db maker
+*
+*
+*
+****************************************************************************
+* StIstDb.cxx,v 1.0
+* Revision 1.0 2014/7/28 16:15:30 Yaping
+* Initial version
+****************************************************************************/

@@ -1,14 +1,85 @@
+/* $Id: StIstDbMaker.h,v 1.16.2.1 2014/12/12 22:33:29 smirnovd Exp $ */
+
+#ifndef StIstDbMaker_hh
+#define StIstDbMaker_hh
+
+#include "StMaker.h"
+
+class StIstDb;
+
+
+/**
+ * IST calibration/geometry DBs access maker.
+ *
+ * \author Yaping Wang
+ * \date June 2013
+ */
+class StIstDbMaker : public StMaker
+{
+public:
+   StIstDbMaker(const char *name = "istDb");
+   Int_t  InitRun(Int_t runNumber);
+   Int_t  Make();
+
+   virtual const char *GetCVS() const
+   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.16.2.1 2014/12/12 22:33:29 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+
+private:
+   /// See StIstDb for details on created data structure. The ownership is passed to the STAR
+   /// framework via ToWhiteBoard()
+   StIstDb *mIstDb;
+   Int_t mReady;
+
+   ClassDef(StIstDbMaker, 0)
+};
+
+#endif
+
+
 /***************************************************************************
 *
-* $Id: StIstDbMaker.h,v 1.16 2014/08/06 11:43:22 jeromel Exp $
-*
-* Author: Yaping Wang, June 2013
-****************************************************************************
-* Description:
-* IST calibration/geometry DBs access maker.
-****************************************************************************
-*
 * $Log: StIstDbMaker.h,v $
+* Revision 1.16.2.1  2014/12/12 22:33:29  smirnovd
+* Squashed commit of the following:
+*
+*     StIstDb: Modified getter for sensors transormation matrix to accept ladder and sensor id-s using human friendly numbering starting with 1. The input values outside of possible ranges will return a null pointer
+*
+*     Use flags to indicate DbMaker readiness
+*
+*     Return fatal if database tables are not found
+*
+*     StIstDb: Added method to access transformation matrix for a given IST ladder/sensor pair
+*
+*     Set class version to 0 in order to avoid IO dictionary generation by ROOT's CINT. STAR makers are not persistent
+*
+*     [Style] Changes in comments and user feedback only
+*
+*     [Minor] Coding style clean-up. Removed unconstructive comments
+*
+*     Do not destruct StIstDb object as the ownership is passed to the framework
+*
+*     Renamed printGeoHMatrices to customary Print as that what users of ROOT framework normaly expect
+*
+*     Moved CVS log to the end of file and updated doxygen-style comments
+*
+* Revision 1.22  2014/11/19 18:29:47  genevb
+* Use flags to indicate DbMaker readiness
+*
+* Revision 1.21  2014/11/19 04:17:34  genevb
+* Return fatal if database tables are not found
+*
+* Revision 1.20  2014/11/18 23:11:50  smirnovd
+* Set class version to 0 in order to avoid IO dictionary generation by ROOT's CINT. STAR makers are not persistent
+*
+* Revision 1.19  2014/11/18 23:11:35  smirnovd
+* [Minor] Coding style clean-up. Removed unconstructive comments
+*
+* Revision 1.18  2014/11/18 23:10:27  smirnovd
+* Do not destruct StIstDb object as the ownership is passed to the framework
+*
+* Revision 1.17  2014/11/18 23:08:37  smirnovd
+* Moved CVS log to the end of file and updated doxygen-style comments
+*
 * Revision 1.16  2014/08/06 11:43:22  jeromel
 * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 *
@@ -51,30 +122,3 @@
 * Revision 1.0 2013/11/04 16:15:30 Yaping
 * Initial version
 ****************************************************************************/
-
-#ifndef StIstDbMaker_hh
-#define StIstDbMaker_hh
-
-#include "StMaker.h"
-
-class StIstDb;
-
-class StIstDbMaker : public StMaker
-{
-
-public:
-   StIstDbMaker(const char *name = "istDb");
-   virtual ~StIstDbMaker();
-   Int_t  InitRun(Int_t runNumber);
-   
-
-   virtual const char *GetCVS() const
-   {static const char cvs[] = "Tag $Name:  $ $Id: StIstDbMaker.h,v 1.16 2014/08/06 11:43:22 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
-
-private:
-   StIstDb *mIstDb;
-
-   ClassDef(StIstDbMaker, 1)
-};
-
-#endif
