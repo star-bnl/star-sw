@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.93 2014/12/09 20:12:21 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.94 2014/12/12 20:22:42 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -194,11 +194,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
             // Build final detector object
             StiDetector *stiDetector = getDetectorFactory()->getInstance();
-
-            if ( !stiDetector ) {
-               Warning("useVMCGeometry()", "Failed to create a valid Sti detector. Skipping to next pixel sensor volume");
-               continue;
-            }
 
             stiDetector->setName(halfLadderName.c_str());
             stiDetector->setShape(stiShape);
