@@ -92,20 +92,21 @@ void StiIstDetectorBuilder::useVMCGeometry()
       bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
       if (!isAvail) {
-         Warning("useVMCGeometry()", "Cannot find path to IBSS (IST sensitive) node. Skipping to next node...");
+         Warning("useVMCGeometry()", "Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder...");
          continue;
       }
 
-      TGeoVolume*  sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
-      TGeoHMatrix* sensorMatrix = 0;
+      TGeoVolume* sensorVol = gGeoManager->GetCurrentNode()->GetVolume();
+      TGeoMatrix* sensorMatrix = 0;
 
-      if (mBuildIdealGeom)
+      if (mBuildIdealGeom) {
          sensorMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
-      else
-         sensorMatrix = (TGeoHMatrix *) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+      } else {
+         sensorMatrix = (TGeoMatrix*) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+      }
 
       if (!sensorMatrix) {
-         Error("useVMCGeometry()", "Could not find TGeoHMatrix for sensor %d in database", matIst);
+         Warning("useVMCGeometry()", "Could not get IST sensor position matrix. Skipping to next ladder...");
          continue;
       }
 
@@ -117,10 +118,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
                 << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
       //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
-      StiShape *stiShape  = new StiPlanarShape(geoPath.str().c_str(),
-                                         kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10), // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
-                                         2 * sensorBBox->GetDY(),              // thickness
-                                         sensorBBox->GetDX());                 // halfWidth
+      double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
+      StiShape *stiShape  = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2 * sensorBBox->GetDY(), sensorBBox->GetDX());
+
       add(stiShape);
 
       Double_t     *xyz    = sensorMatrix->GetTranslation();
@@ -136,18 +136,18 @@ void StiIstDetectorBuilder::useVMCGeometry()
       normalVector /= normalVector.magnitude();
 
       // Volume positioning
-      StiPlacement *pPlacement = new StiPlacement;
+      StiPlacement *pPlacement = new StiPlacement();
       Double_t phi  = centerVector.phi();
       Double_t phiD = normalVector.phi();
       Double_t r    = centerVector.perp();
+
       pPlacement->setZcenter(0);
       pPlacement->setLayerRadius(r);
-
       pPlacement->setLayerAngle(phi);
       pPlacement->setRegion(StiPlacement::kMidRapidity);
       pPlacement->setNormalRep(phiD, r * TMath::Cos(phi - phiD), r * TMath::Sin(phi - phiD));
 
-      //Build final detector object
+      // Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
       stiDetector->setName(geoPath.str().c_str());
@@ -165,7 +165,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       // Whole bunch of debugging information
       Float_t rad2deg = 180.0 / 3.1415927;
-      LOG_DEBUG << "===>NEW:IST:pDetector:Name               = " << stiDetector->getName()                               << endm
+      LOG_DEBUG << "===>NEW:IST:stiDetector:Name             = " << stiDetector->getName()                     << endm
                 << "===>NEW:IST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
                 << "===>NEW:IST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
                 << "===>NEW:IST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
@@ -175,9 +175,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
                 << "===>NEW:IST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
                 << "===>NEW:IST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
                 << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                << "===>NEW:IST:pDetector:Ladder             = " << iLadder                                    << endm
-                << "===>NEW:IST:pDetector:Sensor             = " << iSensor                                    << endm
-                << "===>NEW:IST:pDetector:Active?            = " << stiDetector->isActive()                              << endm;
+                << "===>NEW:IST:stiDetector:Ladder           = " << iLadder                                    << endm
+                << "===>NEW:IST:stiDetector:sensor           = " << iSensor                                    << endm
+                << "===>NEW:IST:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
    }
 }
 
