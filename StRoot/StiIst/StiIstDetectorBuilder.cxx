@@ -157,11 +157,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
       //Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
-      if ( !stiDetector ) {
-         LOG_INFO << "StiIstDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." << endm;
-         return;
-      }
-
       stiDetector->setName(geoPath.str().c_str());
       stiDetector->setShape(stiShape);
       stiDetector->setPlacement(pPlacement);
