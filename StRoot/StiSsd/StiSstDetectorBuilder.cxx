@@ -2,6 +2,8 @@
 #include <sstream>
 #include <string>
 
+#include "TGeoVolume.h"
+#include "TGeoMatrix.h"
 #include "TVector3.h"
 
 #include "StMessMgr.h"

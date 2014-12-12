@@ -1,11 +1,9 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.15 2014/12/09 21:52:58 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.78.2.16 2014/12/12 21:24:17 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
 #include <string>
 
-#include "TDataSetIter.h"
-#include "THashList.h"
 #include "TGeoVolume.h"
 #include "TGeoMatrix.h"
 #include "TVector3.h"
@@ -121,7 +119,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
          if (!isAvail) {
-            Warning("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next node...");
+            Warning("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next ladder...");
             continue;
          }
 
@@ -135,7 +133,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          }
 
          if (!sensorMatrix) {
-            Warning("useVMCGeometry()", "Could not get pixel sensor position matrix. Skipping to next pixel sensor volume");
+            Warning("useVMCGeometry()", "Could not get PXL sensor position matrix. Skipping to next ladder...");
             continue;
          }
 
@@ -195,11 +193,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             // Build final detector object
             StiDetector *stiDetector = getDetectorFactory()->getInstance();
 
-            if ( !stiDetector ) {
-               Warning("useVMCGeometry()", "Failed to create a valid Sti detector. Skipping to next pixel sensor volume");
-               continue;
-            }
-
             stiDetector->setName(halfLadderName.c_str());
             stiDetector->setShape(stiShape);
             stiDetector->setPlacement(pPlacement);
@@ -249,7 +242,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                       << "===>NEW:PIXEL:stiDetector:sector           = " << iSector                                    << endm
                       << "===>NEW:PIXEL:stiDetector:Ladder           = " << iLadder                                    << endm
                       << "===>NEW:PIXEL:stiDetector:sensor           = " << iSensor                                    << endm
-                      << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor       << endm
                       << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
          }
       }
