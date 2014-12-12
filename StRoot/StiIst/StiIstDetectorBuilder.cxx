@@ -88,7 +88,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
    // Use the "middle" sensor on the ladder to extract alignment corrections from DB
    int iSensor = floor(kIstNumSensorsPerLadder/2);
 
-   for (int iLadder = 1; iLadder < kIstNumLadders; ++iLadder)
+   for (int iLadder = 1; iLadder <= kIstNumLadders; ++iLadder)
    {
       std::ostringstream geoPath;
       geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
