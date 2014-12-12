@@ -82,8 +82,8 @@ void StiIstDetectorBuilder::useVMCGeometry()
    StiMaterial* silicon = geoMat ? add(new StiMaterial(geoMat->GetName(), geoMat->GetZ(), geoMat->GetA(), geoMat->GetDensity(), geoMat->GetRadLen()))
                                  : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 9.36) );
 
-   unsigned int ROW = 1;
-
+   // Build active sti volumes for SST sensors
+   int stiRow = getNRows(); // Put all sensitive volumes in the same (and next available) Sti row
    // Use the "middle" sensor on the ladder to extract alignment corrections from DB
    int iSensor = floor(kIstNumSensorsPerLadder/2);
 
@@ -173,7 +173,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
       else         {  stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
       // Adding detector, note that no keys are set in IST!
-      add(ROW, iLadder, stiDetector);
+      add(stiRow, iLadder-1, stiDetector);
 
       // Whole bunch of debugging information
       Float_t rad2deg = 180.0 / 3.1415927;
@@ -189,7 +189,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
                 << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
                 << "===>NEW:IST:pDetector:Ladder             = " << iLadder                                    << endm
                 << "===>NEW:IST:pDetector:Sensor             = " << iSensor                                    << endm
-                << "===>NEW:IST:pDetector:row/ladder (ITTF)  = " << ROW << " / " << iLadder                    << endm
                 << "===>NEW:IST:pDetector:Active?            = " << stiDetector->isActive()                              << endm;
    }
 }
