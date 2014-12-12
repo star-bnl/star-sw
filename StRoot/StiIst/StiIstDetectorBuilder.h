@@ -24,10 +24,6 @@ protected:
 private:
 
    void buildInactiveVolumes();
-   void buildPlanerVolume(StiDetector& detector, std::string detName, float halfDepth, float thickness, float halfWidth,
-         float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat);
-   void buildTubeVolume(StiDetector& detector, std::string detName, float halfDepth, float thickness,
-         float outerRadius, float openingAngle, float zCenter, StiMaterial *mat);
 };
 
 #endif
