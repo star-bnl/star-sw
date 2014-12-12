@@ -2,6 +2,10 @@
 #include <sstream>
 #include <string>
 
+#include "TGeoVolume.h"
+#include "TGeoMatrix.h"
+#include "TVector3.h"
+
 #include "StMessMgr.h"
 #include "StThreeVectorD.hh"
 
@@ -110,6 +114,9 @@ void StiIstDetectorBuilder::useVMCGeometry()
          continue;
       }
 
+      // Build global rotation for the sensor
+      TGeoRotation sensorRot(*sensorMatrix);
+
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
       LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
@@ -117,35 +124,39 @@ void StiIstDetectorBuilder::useVMCGeometry()
                 << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
                 << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
+      // Convert center of the sensor geobox to coordinates in the global coordinate system
+      double sensorXyzLocal[3]  = {};
+      double sensorXyzGlobal[3] = {};
+
+      sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
+
+      TVector3 sensorVec(sensorXyzGlobal);
+
       //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
       double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
       StiShape *stiShape  = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2 * sensorBBox->GetDY(), sensorBBox->GetDX());
 
       add(stiShape);
 
-      Double_t     *xyz    = sensorMatrix->GetTranslation();
-      Double_t     *rot    = sensorMatrix->GetRotationMatrix();
-      StThreeVectorD centerVector(xyz[0], xyz[1], xyz[2]);
-      StThreeVectorD normalVector(rot[1], rot[4], rot[7]);
+      Double_t phi  = sensorVec.Phi();
+      Double_t phiD = sensorRot.GetPhiRotation() / 180 * M_PI;
+      Double_t r    = sensorVec.Perp(); // Ignore the z component if any
+      double normVecMag = fabs(r * sin(phi - phiD));
+      TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
 
-      Double_t prod = centerVector * normalVector;
-
-      if (prod < 0) normalVector *= -1;
-
-      // Normalize normal vector, just in case....
-      normalVector /= normalVector.magnitude();
+      if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
+      else                            normVec *=  normVecMag;
 
       // Volume positioning
       StiPlacement *pPlacement = new StiPlacement();
-      Double_t phi  = centerVector.phi();
-      Double_t phiD = normalVector.phi();
-      Double_t r    = centerVector.perp();
 
       pPlacement->setZcenter(0);
       pPlacement->setLayerRadius(r);
       pPlacement->setLayerAngle(phi);
       pPlacement->setRegion(StiPlacement::kMidRapidity);
-      pPlacement->setNormalRep(phiD, r * TMath::Cos(phi - phiD), r * TMath::Sin(phi - phiD));
+
+      double centerOrient = sensorVec.Phi() - normVec.Phi();
+      pPlacement->setNormalRep(normVec.Phi(), normVecMag, r * sin(centerOrient));
 
       // Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
