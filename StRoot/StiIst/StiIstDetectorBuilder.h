@@ -18,12 +18,10 @@ public:
 
 protected:
 
+   virtual void buildInactiveVolumes();
+
    bool          mBuildIdealGeom;
    StIstDb      *mIstDb;
-
-private:
-
-   void buildInactiveVolumes();
 };
 
 #endif
