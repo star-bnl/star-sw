@@ -200,6 +200,103 @@ void StiIstDetectorBuilder::useVMCGeometry()
  */
 void StiIstDetectorBuilder::buildInactiveVolumes()
 {
+   // Prepare shapes for each ladder
+   StiShape *digiBoardShape = new StiPlanarShape("IBAM_DIGI_BOARD",  5.830, 2*0.0823, 1.9355);
+   StiShape *connectorShape = new StiPlanarShape("IBAM_CONNECTOR",   1.125, 2*0.3050, 3.0500);
+   StiShape *cfBackingShape = new StiPlanarShape("IBAM_CF_BACKING", 27.800, 2*0.3050, 3.0500); // Carbon fiber backing
+
+   // StiMaterial(const string &name, double z, double a, double density, double X0)
+   StiMaterial* digiBoardMaterial     = new StiMaterial("IBAM_DIGI_BOARD",      9.01, 18.01,      1.70,   18.2086);
+   StiMaterial* alumConnectorMaterial = new StiMaterial("IBAM_ALUM_CONNECTOR", 13.00, 26.98, 1.05*2.70,    8.8751);
+   StiMaterial* gtenConnectorMaterial = new StiMaterial("IBAM_GTEN_CONNECTOR",  9.01, 18.02, 1.10*1.70,   18.2086);
+   StiMaterial* cfBackingMaterial     = new StiMaterial("IBAM_CF_BACKING",      6.34, 12.71,      0.19, 1096.0000);
+
+   // Volumes offsets
+   TVector3 digiBoardOffset    (2.11591, -2.087862, -25.4911);
+   TVector3 alumConnectorOffset(0.47779, -0.352065, -29.3221);
+   TVector3 gtenConnectorOffset(0.47779, -0.352065,  28.8080);
+   TVector3 cfBackingOffset    (0.47779, -0.352065,  -0.5141);
+
+   // We use position of sensitive IST volumes to place new inactive volumes
+   int stiRow = getNRows(); // Put volumes in the same (and next available) Sti row
+   // Use the "middle" sensor on the ladder to extract alignment corrections from DB
+   int iSensor = floor(kIstNumSensorsPerLadder/2);
+
+   for (int iLadder = 1; iLadder <= kIstNumLadders; ++iLadder)
+   {
+      std::ostringstream geoPath, ssPfx;
+      geoPath << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/IBLM_" << iSensor << "/IBSS_1";
+      ssPfx   << "/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/IBAM_" << iLadder << "/";
+
+      // Save first part of geoPath to reuse in new detector names
+      std::string pfx(ssPfx.str());
+
+      bool isAvail = gGeoManager->cd(geoPath.str().c_str());
+
+      if (!isAvail) {
+         Warning("useVMCGeometry()", "Cannot find path to IBSS (IST sensitive) node. Skipping to next ladder...");
+         continue;
+      }
+
+      TGeoMatrix* transMatrix = 0;
+
+      if (mBuildIdealGeom) {
+         transMatrix = gGeoManager->MakePhysicalNode(geoPath.str().c_str())->GetMatrix();
+      } else {
+         transMatrix = (TGeoMatrix*) mIstDb->getHMatrixSensorOnGlobal(iLadder, iSensor);
+      }
+
+      if (!transMatrix) {
+         Warning("useVMCGeometry()", "Could not get IST sensor position matrix. Skipping to next ladder...");
+         continue;
+      }
+
+      StiPlacement *cfBackingPlacement = createPlacement(*transMatrix, cfBackingOffset);
+      StiPlacement *alumConnectorPlacement = createPlacement(*transMatrix, alumConnectorOffset);
+      StiPlacement *gtenConnectorPlacement = createPlacement(*transMatrix, gtenConnectorOffset);
+      StiPlacement *digiBoardPlacement = createPlacement(*transMatrix, digiBoardOffset);
+
+      StiDetector *stiDetector = getDetectorFactory()->getInstance();
+      setDetectorProperties(stiDetector, pfx+"IBAM_CF_BACKING", new StiNeverActiveFunctor, cfBackingShape, cfBackingPlacement, getGasMat(), cfBackingMaterial);
+      add(stiRow, iLadder-1, stiDetector);
+
+      stiDetector = getDetectorFactory()->getInstance();
+      setDetectorProperties(stiDetector, pfx+"IBAM_ALUM_CONNECTOR", new StiNeverActiveFunctor, connectorShape, alumConnectorPlacement, getGasMat(), alumConnectorMaterial);
+      add(stiRow+1, iLadder-1, stiDetector);
+
+      stiDetector = getDetectorFactory()->getInstance();
+      setDetectorProperties(stiDetector, pfx+"IBAM_GTEN_CONNECTOR", new StiNeverActiveFunctor, connectorShape, gtenConnectorPlacement, getGasMat(), gtenConnectorMaterial);
+      add(stiRow+2, iLadder-1, stiDetector);
+
+      stiDetector = getDetectorFactory()->getInstance();
+      setDetectorProperties(stiDetector, pfx+"IBAM_DIGI_BOARD", new StiNeverActiveFunctor, digiBoardShape, digiBoardPlacement, getGasMat(), digiBoardMaterial);
+      add(stiRow+3, iLadder-1, stiDetector);
+   }
+
+   std::string pfx("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/IBMO_1/");
+
+   // Implement plastic brackets as a thin cylinder on east and west sides
+   StiCylindricalShape* ibamBracketShape = new StiCylindricalShape("IBAM_BRACKET", 0.635, 0.2, 12, 2*M_PI);
+   StiPlacement* ibamBracketEastPlacement = new StiPlacement(0, 11.9, 0,  29.34);
+   StiPlacement* ibamBracketWestPlacement = new StiPlacement(0, 11.9, 0, -29.6);
+   StiMaterial* ibamBracketMaterial = new StiMaterial("IBAM_BRACKET", 6.089, 12.149, 0.2601, 160);
+
+   StiDetector* stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"IBAM_BRACKET_EAST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketEastPlacement, getGasMat(), ibamBracketMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"IBAM_BRACKET_WEST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketWestPlacement, getGasMat(), ibamBracketMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   // Implement cooling line and cablings in transition area
+   StiCylindricalShape* icctShape = new StiCylindricalShape("ICCT", 4.35720/2., 22.384-19.115, 22.384, 2*M_PI);
+   StiPlacement* icctPlacement = new StiPlacement(0, (22.384+19.115)/2., 0, -57.4);
+   StiMaterial* icctMaterial = new StiMaterial("ICCT", 26.8, 56.9, 0.673, 17.9);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   setDetectorProperties(stiDetector, pfx+"ICCT", new StiNeverActiveFunctor, icctShape, icctPlacement, getGasMat(), icctMaterial);
+   add(getNRows(), 0, stiDetector);
 }
 
 
