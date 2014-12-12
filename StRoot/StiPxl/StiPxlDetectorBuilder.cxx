@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.95 2014/12/12 20:22:56 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.96 2014/12/12 20:23:02 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -119,7 +119,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
          if (!isAvail) {
-            Warning("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next node...");
+            Warning("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next ladder...");
             continue;
          }
 
@@ -133,7 +133,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          }
 
          if (!sensorMatrix) {
-            Warning("useVMCGeometry()", "Could not get pixel sensor position matrix. Skipping to next pixel sensor volume");
+            Warning("useVMCGeometry()", "Could not get PXL sensor position matrix. Skipping to next ladder...");
             continue;
          }
 
@@ -242,7 +242,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                       << "===>NEW:PIXEL:stiDetector:sector           = " << iSector                                    << endm
                       << "===>NEW:PIXEL:stiDetector:Ladder           = " << iLadder                                    << endm
                       << "===>NEW:PIXEL:stiDetector:sensor           = " << iSensor                                    << endm
-                      << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor       << endm
                       << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
          }
       }
