@@ -139,6 +139,7 @@ StiDebug::Break(nCall);
   sind = dl0*rho;
   double cosd = cosCA2*rotPars._cosCA+sinCA2*rotPars._sinCA;
   if (fabs(dsin) < 0.02 && cosd>0) { //tiny angle
+    sind/=cosd;
     dl = dl0*(1.+sind*sind/6);
   } else {
     dl = atan2(sind,cosd)/rho;

@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148.2.4 2014/12/12 17:58:19 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148.2.5 2014/12/13 03:13:52 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148.2.5  2014/12/13 03:13:52  perev
+ * BugFix. sind ==> sind/cosd
+ *
  * Revision 2.148.2.4  2014/12/12 17:58:19  perev
  * Decrease strongeness of assert. 1e-4 ==> 1e-3
  *
@@ -1123,6 +1126,7 @@ StiDebug::Break(nCall);
     double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
 
     if (fabs(sind) < 0.02 && cosd>0) { //tiny angle
+      sind /= cosd;
       mgP.dl = mgP.dl0*(1.+sind*sind/6);
     } else {
       mgP.dl = atan2(sind,cosd)/rho;
