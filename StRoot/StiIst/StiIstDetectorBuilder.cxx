@@ -279,7 +279,7 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    StiCylindricalShape* ibamBracketShape = new StiCylindricalShape("IBAM_BRACKET", 0.635, 0.2, 12, 2*M_PI);
    StiPlacement* ibamBracketEastPlacement = new StiPlacement(0, 11.9, 0,  29.34);
    StiPlacement* ibamBracketWestPlacement = new StiPlacement(0, 11.9, 0, -29.6);
-   StiMaterial* ibamBracketMaterial = new StiMaterial("IBAM_BRACKET", 6.089, 12.149, 0.2601, 160);
+   StiMaterial* ibamBracketMaterial = new StiMaterial("IBAM_BRACKET", 6.089, 12.149, 24*0.2601, 160);
 
    StiDetector* stiDetector = getDetectorFactory()->getInstance();
    setDetectorProperties(stiDetector, pfx+"IBAM_BRACKET_EAST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketEastPlacement, getGasMat(), ibamBracketMaterial);
