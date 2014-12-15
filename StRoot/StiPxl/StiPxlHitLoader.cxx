@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.9 2014/11/17 20:37:32 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.10 2014/12/15 21:07:28 qiuh Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.10  2014/12/15 21:07:28  qiuh
+ * use local x rahter than row number to distribute hits into different half ladders
+ *
  * Revision 1.9  2014/11/17 20:37:32  smirnovd
  * Split PXL sensitive layers in two halves. The change should help to avoid track backward steps in Sti due to ill ordered volumes in r and phi - inspired by Hao Qiu
  *
@@ -174,14 +177,14 @@ void StiPxlHitLoader::loadHits(StEvent *source,
                if (pxlHit->ladder() == 1) {
                   stiRow = 0;
 
-                  if (pxlHit->meanRow() < kNumberOfPxlRowsOnSensor / 2)
+                  if (pxlHit->localPosition(0) > 0)
                      stiRow += 1;
 
                   stiSensor = (pxlHit->sector() - 1);
                } else {
                   stiRow = 2;
 
-                  if (pxlHit->meanRow() >= kNumberOfPxlRowsOnSensor / 2)
+                  if (pxlHit->localPosition(0) < 0)
                      stiRow += 1;
 
                   stiSensor = (pxlHit->sector() - 1) * (kNumberOfPxlLaddersPerSector - 1) + (pxlHit->ladder() - 1);
