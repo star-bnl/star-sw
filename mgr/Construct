@@ -278,7 +278,7 @@ if ($STAR_HOST_SYS =~ /darwin/ or (env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} ==
 #  push @item, "minicern";
 #}
 if ($STAR_HOST_SYS =~ /darwin/) {
-#  push @items, "GeoTestMaker"; # if no QT |StStarLogger
+  push @items, "GeoTestMaker"; # if no QT |StStarLogger
   push @items, "Pythia6"; # problem with pythia6_common_address.c
   push @items, "StarLight"; # problem with capital and low case letter in file names
   push @items, "UrQMD3_3_1"; # -"-
