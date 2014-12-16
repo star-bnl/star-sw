@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.219 2014/10/16 22:39:59 perev Exp $
+// $Id: StiMaker.cxx,v 1.219.2.1 2014/12/16 18:29:38 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -30,6 +30,7 @@ More detailed: 				<br>
      SetAttr("useSvt",  1) && SetAttr("activeSvt"  ,0) 	// default
      SetAttr("useSsd"  ,0) && SetAttr("activeSsd"  ,0)	// default Off
 
+     SetAttr("usePixel",0) && SetAttr("activePixel",0)	// default Off
      SetAttr("useIst"  ,0) && SetAttr("activeIst"  ,0)	// default Off
 
      SetAttr("useHpd"  ,0) && SetAttr("activeHpd"  ,0)	// default Off
@@ -162,10 +163,11 @@ StiMaker::StiMaker(const Char_t *name) :
   SetAttr("useTpc"		,kTRUE);
   SetAttr("activeTpc"		,kTRUE);
 
-//SetAttr("useSvt"		,kTRUE);
+  SetAttr("useSvt"		,kTRUE);
 //SetAttr("activeSvt"		,kTRUE);
-//SetAttr("useSsd"		,kTRUE);
+  SetAttr("useSsd"		,kTRUE);
 
+  //SetAttr("usePixel"		,kTRUE);
   //SetAttr("useSst"		,kTRUE);
   //SetAttr("useIst"		,kTRUE);
 
@@ -299,7 +301,7 @@ Int_t StiMaker::InitDetectors()
   if (IAttr("usePixel"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel")));
+      _toolkit->add(group = new StiPxlDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
       group->setGroupId(kPxlId);
     }
  if (IAttr("useIst"))
@@ -311,7 +313,7 @@ Int_t StiMaker::InitDetectors()
 //  if (IAttr("useBTof"))
 //     {
 //       cout<<"StiMaker::Init() -I- Adding detector group:BTof"<<endl;
-//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof")));
+//       _toolkit->add(group = new StiBTofDetectorGroup(IAttr("activeBTof"),SAttr("BTofInputFile")));
 //       group->setGroupId(kBTofId);
 //     }
   return kStOk;
@@ -387,6 +389,7 @@ Int_t StiMaker::Make()
     _seedFinder->reset();
     iAnz = MakeGlobalTracks(event);
     if (iAnz) {MyClear(); return iAnz;}
+
     if (_vertexFinder) {
       iAnz = MakePrimaryTracks(event);
       if (iAnz) {MyClear(); return iAnz;}
@@ -413,6 +416,7 @@ Int_t StiMaker::Make()
 Int_t StiMaker::MakeGlobalTracks(StEvent   * event) {
   if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
   _tracker->findTracks();    // get the rest
+  FinishTracks(0);
   if (mTimg[kGloTimg]) mTimg[kGloTimg]->Stop();
   if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
   if (_eventFiller)
@@ -446,6 +450,7 @@ Int_t StiMaker::MakePrimaryTracks(StEvent   * event) {
 
     _tracker->extendTracksToVertices(*vertexes);
     mTotPrimTks[0]+=_tracker->getNPrims();
+    FinishTracks(1);
     if (mTimg[kPriTimg]) mTimg[kPriTimg]->Stop();
 
     //cout << "StiMaker::Make() -I- Primary Filling"<<endl;
@@ -548,13 +553,71 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   }
   return fVolume;
 }
-// $Id: StiMaker.cxx,v 1.219 2014/10/16 22:39:59 perev Exp $
+//_____________________________________________________________________________
+void StiMaker::FinishTracks (int gloPri) 
+{
+// Added new method FonishTracks(int gloPri) 0=global 1=primary tracks
+// In this method:
+// 1. loop over nodes
+// 2. Move node to the center volume along x or r  local
+
+static const char * tkNames[2] = {"globalTracks","primaryTracks"};
+static const char * noNames[2] = {"globalNodes" ,"primaryNodes" };
+static const char * inNames[2] = {"globalInside","primaryInside"};
+static const char * hiNames[2] = {"globaHits"   ,"primaryHits"  };
+static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
+
+
+ StiTrackContainer* tkV  = StiToolkit::instance()->getTrackContainer();
+ if (!tkV) return;
+
+ int nTk=0,nNodes=0,nInside=0,nHits=0;
+ 
+   for (int itk=0; itk<(int)tkV->size(); itk++)
+   {
+     StiKalmanTrack *track = (StiKalmanTrack*)(*tkV)[itk];
+     if (gloPri && !track->isPrimary()) continue;
+     nTk++;
+     StiKTNIterator tNode = track->begin();
+     StiKTNIterator eNode = track->end();
+     nNodes=0;nInside=0;nHits=0;
+     for (;tNode!=eNode;++tNode) 
+     {
+	StiKalmanTrackNode *node = &(*tNode);
+	if(!node->isValid()) 	continue;
+	if (node->isDca()  ) 	continue;	
+	StiHit *hit = node->getHit();
+	if (hit && !hit->detector()) continue;	//primary vertex
+	nNodes++;
+	if ( hit && node->getChi2()<100) nHits++;
+	node->nudge();
+	if (node->inside()) {
+	  nInside++;
+          StiDebug::Count(elNames[gloPri],node->getELoss()[0].mELoss);
+        }
+     }
+     StiDebug::Count(noNames[gloPri],nNodes );
+     StiDebug::Count(inNames[gloPri],nInside);
+     StiDebug::Count(hiNames[gloPri],nHits  );
+  }
+  StiDebug::Count(tkNames[gloPri],nTk );
+}
+
+
+// $Id: StiMaker.cxx,v 1.219.2.1 2014/12/16 18:29:38 perev Exp $
 // $Log: StiMaker.cxx,v $
-// Revision 1.219  2014/10/16 22:39:59  perev
-// Only Tpc is default now
+// Revision 1.219.2.1  2014/12/16 18:29:38  perev
+// Move main branch to StiHFT_1b
 //
-// Revision 1.218  2014/10/08 01:29:28  perev
-// Remove redundant inputFile
+// Revision 1.221  2014/12/16 01:14:40  perev
+// Added new method fonishTracks(int gloPri) 0=global 1=primary tracks
+// In this method:
+// 1. loop over nodes
+// 2. Move node to the center volume along x or r  local
+// 3. If StiDebug::mgGlobal >1 create a set of technical histogramms
+//
+// Revision 1.220  2014/10/30 15:03:55  jeromel
+// Reverted to Oct 2nd
 //
 // Revision 1.217  2014/09/10 15:52:12  perev
 // Fix typo, StiSsdDetectorGroup ==> StiSsdDetectorGroup
