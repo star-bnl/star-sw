@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.221 2014/12/16 01:14:40 perev Exp $
+// $Id: StiMaker.cxx,v 1.222 2014/12/16 17:21:14 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -591,7 +591,7 @@ static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
 	nNodes++;
 	if ( hit && node->getChi2()<100) nHits++;
 	node->nudge();
-	if (node->inside()) {
+	if (1 /*node->inside()*/) {
 	  nInside++;
           StiDebug::Count(elNames[gloPri],node->getELoss()[0].mELoss);
         }
@@ -604,8 +604,11 @@ static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
 }
 
 
-// $Id: StiMaker.cxx,v 1.221 2014/12/16 01:14:40 perev Exp $
+// $Id: StiMaker.cxx,v 1.222 2014/12/16 17:21:14 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.222  2014/12/16 17:21:14  perev
+// temporary supress inside()
+//
 // Revision 1.221  2014/12/16 01:14:40  perev
 // Added new method fonishTracks(int gloPri) 0=global 1=primary tracks
 // In this method:
