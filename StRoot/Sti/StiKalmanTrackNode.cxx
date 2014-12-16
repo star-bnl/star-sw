@@ -1,10 +1,18 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148.2.5 2014/12/13 03:13:52 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148.2.6 2014/12/16 01:07:01 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148.2.6  2014/12/16 01:07:01  perev
+ * -  assert(fabs(mFP._sinCA)<1e-3);
+ * +  assert(fabs(mFP._sinCA)<1e-2);
+ * According pure math, _sinCA here must be zero. Accounting rounding
+ * errors it must be around 1e-10. But even 1e-3 is too small.
+ * It is related to changes in mag field for curvature about 10cm
+ * So I put 1e-2 (Victor)
+ *
  * Revision 2.148.2.5  2014/12/13 03:13:52  perev
  * BugFix. sind ==> sind/cosd
  *
@@ -1033,7 +1041,7 @@ StiDebug::Break(nCall);
   int ians = propagate(vertex->x(),1,-1);
   if (ians && ians!=kEnded)    return false; // track does not reach vertex "plane"
 ////  if (ians) return false; ////????
-  assert(fabs(mFP._sinCA)<1e-3);
+  assert(fabs(mFP._sinCA)<1e-2);
   propagateError();
   setHit(vertex);
   setDetector(0);
