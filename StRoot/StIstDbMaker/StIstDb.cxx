@@ -1,4 +1,4 @@
-/* $Id: StIstDb.cxx,v 1.12 2014/12/12 21:41:09 smirnovd Exp $ */
+/* $Id: StIstDb.cxx,v 1.13 2014/12/17 19:37:47 smirnovd Exp $ */
 
 #include <assert.h>
 #include "StIstDb.h"
@@ -135,7 +135,7 @@ const TGeoHMatrix* StIstDb::getHMatrixSensorOnGlobal(int ladder, int sensor)
    if (ladder < 1 || ladder > kIstNumLadders || sensor < 1 || sensor > kIstNumSensorsPerLadder)
       return 0;
 
-   int id = 1000 + (ladder-1)*kIstNumSensorsPerLadder + (sensor-1);
+   int id = 1000 + (ladder-1)*kIstNumSensorsPerLadder + sensor;
    return mgRotList ? (const TGeoHMatrix*) mgRotList->FindObject(Form("R%04i", id)) : 0;
 }
 
@@ -167,6 +167,12 @@ void StIstDb::Print(Option_t *opt) const
 /***************************************************************************
 *
 * $Log: StIstDb.cxx,v $
+* Revision 1.13  2014/12/17 19:37:47  smirnovd
+* StiIstDb: Corrected mapping of ladder/sensor to global aggregate sensor id.
+*
+* The global sensor index (id) used in the istSensorOnLadder DB table spans the
+* range from 1001 to 1144. This bug was reported by Michael Lomnitz
+*
 * Revision 1.12  2014/12/12 21:41:09  smirnovd
 * StIstDb: Modified getter for sensors transormation matrix to accept ladder and sensor id-s using human friendly numbering starting with 1. The input values outside of possible ranges will return a null pointer
 *
