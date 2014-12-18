@@ -152,3 +152,21 @@ return shape->getVolume();
 {
 return shape->getVolume()*material->getDensity();
 }
+
+
+/**
+ * A setter for most of the detector properties. We do not pass arguments in
+ * a constructor because StiDetector-s are normally created by an StiFactory.
+ *
+ * \author Dmitri Smirnov, BNL
+ */
+void StiDetector::setProperties(std::string name, StiIsActiveFunctor* activeFunctor,
+   StiShape* shape, StiPlacement* placement, StiMaterial* gas, StiMaterial* material)
+{
+   setName(name.c_str());
+   setIsActive(activeFunctor);
+   setShape(shape);
+   setPlacement(placement);
+   setGas(gas);
+   setMaterial(material);
+}

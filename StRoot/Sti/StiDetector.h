@@ -66,6 +66,8 @@ public:
 
     void setShape(StiShape *val)		{ shape = val; }
     void setPlacement(StiPlacement *val);
+    void setProperties(std::string name, StiIsActiveFunctor* activeFunctor, StiShape* shape, StiPlacement* placement,
+            StiMaterial* gas, StiMaterial* material);
 
     //action
     virtual void build(){}  //for now, build from SCL parsable ascii file
