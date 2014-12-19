@@ -119,11 +119,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-      LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
-                << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
-                << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
-                << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
-
       // Convert center of the sensor geobox to coordinates in the global coordinate system
       double sensorXyzLocal[3]  = {};
       double sensorXyzGlobal[3] = {};
@@ -168,22 +163,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       // Adding detector, note that no keys are set in IST!
       add(stiRow, iLadder-1, stiDetector);
-
-      // Whole bunch of debugging information
-      Float_t rad2deg = 180.0 / 3.1415927;
-      LOG_DEBUG << "===>NEW:IST:stiDetector:Name             = " << stiDetector->getName()                     << endm
-                << "===>NEW:IST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
-                << "===>NEW:IST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
-                << "===>NEW:IST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
-                << "===>NEW:IST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
-                << "===>NEW:IST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
-                << "===>NEW:IST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
-                << "===>NEW:IST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
-                << "===>NEW:IST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
-                << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                << "===>NEW:IST:stiDetector:Ladder           = " << iLadder                                    << endm
-                << "===>NEW:IST:stiDetector:sensor           = " << iSensor                                    << endm
-                << "===>NEW:IST:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
    }
 }
 
