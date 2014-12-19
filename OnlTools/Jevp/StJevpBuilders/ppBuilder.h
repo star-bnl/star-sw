@@ -5,6 +5,7 @@
 #include "DAQ_READER/daqReader.h"
 #include <TH1F.h>
 #include <TH2F.h>
+#include <TProfile.h>
 
 #include <math.h>
 
@@ -23,16 +24,43 @@ public:
   static void main(int argc, char *argv[]);
 
  private:
-
+  int mEntriesSVX[6][32];
   //*** Histogram Declarations...
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
+
+  union {
+    TH2 *array[];
+    struct {
+      TH2* PMT;
+      TH2* SVX;
+      TH2* VTIM; 
+      TH2* SVX_NCH; 
+
+   };
+  } contVIP;
+
   union {
     TH1 *array[];
     struct {
-      TH1 * h_P2P[32];
+      TH1* h1_P2P[16];
     };
-  } contents;
+  } contPMT_ADC;
+
+  union {
+    TH2 *array[];
+    struct {
+      TH2* h2_P2P[8];
+    };
+  } contPMT_TAC;
+
+  union {
+    TProfile *array[];
+    struct {
+      TProfile* hp_P2P[32];
+    };
+  } contentsSVX;
+
 
   //*** End Histogram Declarations...
 
