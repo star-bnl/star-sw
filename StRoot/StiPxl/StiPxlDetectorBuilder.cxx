@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.99 2014/12/19 18:08:52 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.100 2014/12/19 18:09:01 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -230,8 +230,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                stiSensor = (iSector - 1) * (kNumberOfPxlLaddersPerSector - 1) + (iLadder - 1);
             }
 
-            stiDetector->setKey(1, stiRow);
-            stiDetector->setKey(2, stiSensor);
             add(stiRow, stiSensor, stiDetector);
          }
       }

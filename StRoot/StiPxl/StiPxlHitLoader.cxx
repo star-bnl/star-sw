@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.10 2014/12/15 21:07:28 qiuh Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.11 2014/12/19 18:09:01 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.11  2014/12/19 18:09:01  smirnovd
+ * Do not set StiDetector members _key1 and _key2 as they are not really used anywhere
+ *
  * Revision 1.10  2014/12/15 21:07:28  qiuh
  * use local x rahter than row number to distribute hits into different half ladders
  *
@@ -214,7 +217,6 @@ void StiPxlHitLoader::loadHits(StEvent *source,
                LOG_DEBUG << " detector info " << *detector << endm;
                LOG_DEBUG << " radius = " << radius << " angle = " << angle << " zCenter = " << zcenter << endm;
                LOG_DEBUG << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm;
-               LOG_DEBUG << " key 1 : " << detector->getKey(1) << " key 2 : " << detector->getKey(2) << endm;
 
                StiHit *stiHit = _hitFactory->getInstance();
 
