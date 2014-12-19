@@ -123,11 +123,6 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-      LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
-                << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
-                << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
-                << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
-
       // Convert center of the sensor geobox to coordinates in the global coordinate system
       double sensorXyzLocal[3]  = {};
       double sensorXyzGlobal[3] = {};
@@ -173,22 +168,6 @@ void StiSstDetectorBuilder::useVMCGeometry()
       stiDetector->setKey(1, 0);
       stiDetector->setKey(2, iLadder-1);
       add(stiRow, iLadder-1, stiDetector);
-
-      // Whole bunch of debugging information
-      Float_t rad2deg = 180.0 / 3.1415927;
-      LOG_DEBUG << "===>NEW:SST:stiDetector:Name             = " << stiDetector->getName()                     << endm
-                << "===>NEW:SST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
-                << "===>NEW:SST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
-                << "===>NEW:SST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
-                << "===>NEW:SST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
-                << "===>NEW:SST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
-                << "===>NEW:SST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
-                << "===>NEW:SST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
-                << "===>NEW:SST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
-                << "===>NEW:SST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                << "===>NEW:SST:stiDetector:Ladder           = " << iLadder                                    << endm
-                << "===>NEW:SST:stiDetector:sensor           = " << iSensor                                    << endm
-                << "===>NEW:SST:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
    }
 }
 

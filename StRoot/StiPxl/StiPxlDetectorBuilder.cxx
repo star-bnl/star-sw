@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.98 2014/12/19 18:08:41 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.99 2014/12/19 18:08:52 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -142,11 +142,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
          TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-         LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
-                   << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
-                   << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
-                   << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
-
          // Split the ladder in two halves
          for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++) {
             // Convert center of the half sensor geobox to coordinates in the global coordinate system
@@ -238,23 +233,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             stiDetector->setKey(1, stiRow);
             stiDetector->setKey(2, stiSensor);
             add(stiRow, stiSensor, stiDetector);
-
-            // Whole bunch of debugging information
-            Float_t rad2deg = 180.0 / 3.1415927;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Name             = " << stiDetector->getName()                     << endm
-                      << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
-                      << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
-                      << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
-                      << "===>NEW:PIXEL:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
-                      << "===>NEW:PIXEL:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
-                      << "===>NEW:PIXEL:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
-                      << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
-                      << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
-                      << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                      << "===>NEW:PIXEL:stiDetector:sector           = " << iSector                                    << endm
-                      << "===>NEW:PIXEL:stiDetector:Ladder           = " << iLadder                                    << endm
-                      << "===>NEW:PIXEL:stiDetector:sensor           = " << iSensor                                    << endm
-                      << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
          }
       }
    }
