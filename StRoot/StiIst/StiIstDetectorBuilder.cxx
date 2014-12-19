@@ -160,16 +160,11 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       // Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
+      StiIsActiveFunctor* isActive = _active ? new StiIstIsActiveFunctor :
+         static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
-      stiDetector->setName(geoPath.str().c_str());
-      stiDetector->setShape(stiShape);
-      stiDetector->setPlacement(pPlacement);
-      stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
-      stiDetector->setMaterial(silicon);
+      stiDetector->setProperties(geoPath.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
       stiDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
-
-      if (_active) {  stiDetector->setIsActive(new StiIstIsActiveFunctor);}
-      else         {  stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
       // Adding detector, note that no keys are set in IST!
       add(stiRow, iLadder-1, stiDetector);
@@ -257,19 +252,19 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       StiPlacement *digiBoardPlacement = createPlacement(*transMatrix, digiBoardOffset);
 
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
-      setDetectorProperties(stiDetector, pfx+"IBAM_CF_BACKING", new StiNeverActiveFunctor, cfBackingShape, cfBackingPlacement, getGasMat(), cfBackingMaterial);
+      stiDetector->setProperties(pfx+"IBAM_CF_BACKING", new StiNeverActiveFunctor, cfBackingShape, cfBackingPlacement, getGasMat(), cfBackingMaterial);
       add(stiRow, iLadder-1, stiDetector);
 
       stiDetector = getDetectorFactory()->getInstance();
-      setDetectorProperties(stiDetector, pfx+"IBAM_ALUM_CONNECTOR", new StiNeverActiveFunctor, connectorShape, alumConnectorPlacement, getGasMat(), alumConnectorMaterial);
+      stiDetector->setProperties(pfx+"IBAM_ALUM_CONNECTOR", new StiNeverActiveFunctor, connectorShape, alumConnectorPlacement, getGasMat(), alumConnectorMaterial);
       add(stiRow+1, iLadder-1, stiDetector);
 
       stiDetector = getDetectorFactory()->getInstance();
-      setDetectorProperties(stiDetector, pfx+"IBAM_GTEN_CONNECTOR", new StiNeverActiveFunctor, connectorShape, gtenConnectorPlacement, getGasMat(), gtenConnectorMaterial);
+      stiDetector->setProperties(pfx+"IBAM_GTEN_CONNECTOR", new StiNeverActiveFunctor, connectorShape, gtenConnectorPlacement, getGasMat(), gtenConnectorMaterial);
       add(stiRow+2, iLadder-1, stiDetector);
 
       stiDetector = getDetectorFactory()->getInstance();
-      setDetectorProperties(stiDetector, pfx+"IBAM_DIGI_BOARD", new StiNeverActiveFunctor, digiBoardShape, digiBoardPlacement, getGasMat(), digiBoardMaterial);
+      stiDetector->setProperties(pfx+"IBAM_DIGI_BOARD", new StiNeverActiveFunctor, digiBoardShape, digiBoardPlacement, getGasMat(), digiBoardMaterial);
       add(stiRow+3, iLadder-1, stiDetector);
    }
 
@@ -282,11 +277,11 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    StiMaterial* ibamBracketMaterial = new StiMaterial("IBAM_BRACKET", 6.089, 12.149, 24*0.2601, 160);
 
    StiDetector* stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"IBAM_BRACKET_EAST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketEastPlacement, getGasMat(), ibamBracketMaterial);
+   stiDetector->setProperties(pfx+"IBAM_BRACKET_EAST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketEastPlacement, getGasMat(), ibamBracketMaterial);
    add(getNRows(), 0, stiDetector);
 
    stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"IBAM_BRACKET_WEST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketWestPlacement, getGasMat(), ibamBracketMaterial);
+   stiDetector->setProperties(pfx+"IBAM_BRACKET_WEST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketWestPlacement, getGasMat(), ibamBracketMaterial);
    add(getNRows(), 0, stiDetector);
 
    // Implement cooling line and cablings in transition area
@@ -295,21 +290,8 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    StiMaterial* icctMaterial = new StiMaterial("ICCT", 26.8, 56.9, 0.673, 17.9);
 
    stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"ICCT", new StiNeverActiveFunctor, icctShape, icctPlacement, getGasMat(), icctMaterial);
+   stiDetector->setProperties(pfx+"ICCT", new StiNeverActiveFunctor, icctShape, icctPlacement, getGasMat(), icctMaterial);
    add(getNRows(), 0, stiDetector);
-}
-
-
-void StiIstDetectorBuilder::setDetectorProperties(StiDetector* detector, std::string name, StiIsActiveFunctor* activeFunctor, StiShape* shape, StiPlacement* placement, StiMaterial* gas, StiMaterial* material)
-{
-   if (!detector) return;
-
-   detector->setName(name.c_str());
-   detector->setIsActive(activeFunctor);
-   detector->setShape(shape);
-   detector->setPlacement(placement);
-   detector->setGas(gas);
-   detector->setMaterial(material);
 }
 
 
