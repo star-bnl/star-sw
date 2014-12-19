@@ -165,8 +165,6 @@ void StiSstDetectorBuilder::useVMCGeometry()
       stiDetector->setProperties(geoPath.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
       stiDetector->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());
 
-      stiDetector->setKey(1, 0);
-      stiDetector->setKey(2, iLadder-1);
       add(stiRow, iLadder-1, stiDetector);
    }
 }
