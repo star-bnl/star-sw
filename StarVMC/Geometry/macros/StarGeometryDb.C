@@ -51,7 +51,9 @@ void StarGeometryDb()
   y2011();   geom.Last(); setTitle("Year 2011 Production Geometry");  //geom.select="y2011pro"; geom.fill();
   y2012();   geom.Last(); setTitle("Year 2012 Production Geometry");  //geom.select="y2012pro"; geom.fill();
   y2013();   geom.Last(); setTitle("Year 2013 Production Geometry");  //geom.select="y2013pro"; geom.fill();
-  y2014();   geom.Last(); setTitle("Year 2014 First Cut Geometry");   //geom.select="y2014pro"; geom.fill();
+  y2014();   geom.Last(); setTitle("Year 2014 Production Geometry");   //geom.select="y2014pro"; geom.fill();
+  y2015();   geom.Last(); setTitle("Year 2015 First Cut Geometry");   //geom.select="y2014pro"; geom.fill();
+  y2016();   geom.Last(); setTitle("Yeat 2016 Asymptotic Geometry");
 
   // Setup upgrade geometries
   upgrade();
@@ -1474,6 +1476,7 @@ void y2014()
     geom.tpcRefSys = true; // set reference system for TPC
     // ================================================
     geom.caveFlag = "CAVE05";  geom.caveStat = 1;
+    geom.magpFlag = "MAGPv1"; geom.magpStat = 1; // set this explicitly
     // ================================================
     geom.sconFlag = "SCONof";  geom.sconStat = 0;
     geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
@@ -1515,6 +1518,102 @@ void y2014()
   }
 
 }
+
+
+
+
+
+void y2015()
+{
+  geom.select = "y2015"; /* y2015 first cut */ {
+    //
+    geom.tpcRefSys = true; // set reference system for TPC
+    //
+    // ================================================
+    geom.caveFlag = "CAVE06";  geom.caveStat = 1;
+    geom.magpFlag = "MAGPv1"; geom.magpStat = 1;
+    // ================================================
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
+    geom.fpdmFlag = "FPDMof";  geom.fpdmStat = 0;
+    geom.fgtdFlag = "FGTDof";  geom.fgtdStat = 0;
+    geom.hcalFlag = "HCALof";  geom.hcalStat = 0;    
+    // ================================================
+    geom.magpFlag = "MAGPv1";  geom.magpStat = 1;
+    geom.tpceFlag = "TPCE31";  geom.tpceStat = 1;
+    geom.btofFlag = "BTOFv8";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.vpddFlag = "VPDD08";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD14";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPEv3";  geom.pipeStat = 1;
+    geom.sisdFlag = "SISD85";  geom.sisdStat = 1;
+    // ================================================
+    geom.pixlFlag = "PIXL06";  geom.pixlStat = 1;
+    geom.istdFlag = "ISTD02";  geom.istdStat = 1;
+    // ================================================
+    geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.psupFlag = "PSUP01";  geom.psupStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.idsmFlag = "IDSM14";  geom.idsmStat = 1;
+    // ================================================
+    geom.fpdmFlag = "FPDM04";  geom.fpdmStat = 1;  
+    // ================================================
+    geom.fill();
+  }     
+}
+void y2016()
+{ 
+  geom.select = "dev2016"; /* y2016 development */ 
+  {
+    // ================================================
+    geom.caveFlag = "CAVE06";  geom.caveStat = 1;
+    geom.magpFlag = "MAGPv1"; geom.magpStat = 1;
+    // ================================================
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
+    geom.fpdmFlag = "FPDMof";  geom.fpdmStat = 0;
+    geom.fgtdFlag = "FGTDvf";  geom.fgtdStat = 1; // Forward FGT
+    geom.hcalFlag = "HCALv1";  geom.hcalStat = 1; // HCAL
+    // ================================================
+    geom.magpFlag = "MAGPv1";  geom.magpStat = 1;
+    geom.tpceFlag = "TPCE31";  geom.tpceStat = 1;
+    geom.btofFlag = "BTOFv8";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.vpddFlag = "VPDD08";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD14";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPEv3";  geom.pipeStat = 1;
+    geom.sisdFlag = "SISD85";  geom.sisdStat = 1;
+    // ================================================
+    geom.pixlFlag = "PIXL06";  geom.pixlStat = 1;
+    geom.istdFlag = "ISTD02";  geom.istdStat = 1;
+    // ================================================
+    geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.psupFlag = "PSUP01";  geom.psupStat = 1;
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
+    geom.idsmFlag = "IDSM14";  geom.idsmStat = 1;
+    // ================================================   
+    geom.fill();
+  }
+
+  // switch off experimental 
+  geom.hcalFlag = "HCALof";  geom.hcalStat = 0;    
+
+}
+
+
+
 
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -1576,6 +1675,8 @@ void dev15()
     geom.fill();
   };
 
+  // switch off experimental 
+  geom.hcalFlag = "HCALof";  geom.hcalStat = 0;    
 
 }
 
