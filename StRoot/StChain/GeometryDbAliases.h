@@ -116,6 +116,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 
   {"y2014",       20131215,     0, "y2014",    "y2014 first cut geometry,AgML,xgeometry"},
   {"y2014a",      20131215,     1, "y2014a",   "y2014a 2014 preview geometry,AgML,xgeometry"},
+
+  {"y2015",       20141215,     0, "y2015",    "y2015 first cut geometry, AgML,xgeometry"},
  
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
