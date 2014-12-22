@@ -1824,7 +1824,7 @@
           <Create block="IBWD" />
           <Placement x="0" y="0" z="0" block="IBWB" />
           <Placement x="0" y="-wbsp_IbeamD(1)/2.0+wbsp_IbeamD(4)/2.0" z="0.0" block="IBWC" />
-          <Placement x="0" y="+wbsp_IbeamD(1)/2.0-wbsp_IbeamD(4)/2.0" z="0.0" block="IBWc" />
+          <Placement x="0" y="+wbsp_IbeamD(1)/2.0-wbsp_IbeamD(4)/2.0" z="0.0" block="IBWC" />
 	</Block>
 
 	<Block name="IBWB" comment="is the center piece for new west IBeam for beampipe support"  >
