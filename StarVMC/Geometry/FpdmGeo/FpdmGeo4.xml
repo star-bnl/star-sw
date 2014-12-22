@@ -474,7 +474,12 @@
 
     <If expr="m.ne.7"  >
       <Create block="FBOX"  />
-      <Placement in="CAVE" y="yy" x="xx" z="zz" konly="'MANY'" block="FBOX"  >
+
+      <Placement block="FBOX" in="CAVE" group="WestRefSys" if="zz&gt;0" 		 y="yy" x="xx" z="zz" konly="MANY"  >
+	<Rotation alphay="FPOS_AY"  />
+      </Placement>
+
+      <Placement block="FBOX" in="CAVE" group="EastRefSys" if="zz&lt;0" 		 y="yy" x="xx" z="zz" konly="MANY"  >
 	<Rotation alphay="FPOS_AY"  />
       </Placement>
 
@@ -485,26 +490,29 @@
 
 
   <Create    block="FPRS"  />
-  <Placement block="FPRS" in="CAVE" konly="'MANY'"
+  <Placement block="FPRS" in="CAVE" konly="MANY" group="WestRefSys" 
 	     x="0.0" 
 	     y="0.0" 
 	     z="PRSW_Zoff(1)+PRSW_Dbox(3)/2.0" 
 	     />
 
   <Create    block="WPPL"  />
-  <Placement block="WPPL" in="CAVE" x="+WPFM_PoleP(1)" y="WPFM_PoleP(2)" z="WPFM_PoleP(3)" />
-  <Placement block="WPPL" in="CAVE" x="-WPFM_PoleP(1)" y="WPFM_PoleP(2)" z="WPFM_PoleP(3)" />
+  <Placement block="WPPL" in="CAVE" group="WestRefSys" x="+WPFM_PoleP(1)" y="WPFM_PoleP(2)" z="WPFM_PoleP(3)" />
+  <Placement block="WPPL" in="CAVE" group="WestRefSys" x="-WPFM_PoleP(1)" y="WPFM_PoleP(2)" z="WPFM_PoleP(3)" />
 
   <Create    block="WPIS"  />
-  <Placement block="WPIS" in="CAVE" x="WPFM_Ist1P(1)" y="WPFM_Ist1P(2)" z="WPFM_Ist1P(3)" />
-  <Placement block="WPIS" in="CAVE" x="WPFM_Ist2P(1)" y="WPFM_Ist2P(2)" z="WPFM_Ist2P(3)" />
+  <Placement block="WPIS" in="CAVE" group="WestRefSys" x="WPFM_Ist1P(1)" y="WPFM_Ist1P(2)" z="WPFM_Ist1P(3)" />
+  <Placement block="WPIS" in="CAVE" group="WestRefSys" x="WPFM_Ist2P(1)" y="WPFM_Ist2P(2)" z="WPFM_Ist2P(3)" />
 
   <Create    block="WPUF"  />
-  <Placement block="WPUF" in="CAVE" x="+WPFM_UstFP(1)" y="WPFM_UstFP(2)" z="WPFM_UstFP(3)" />
+  <Placement block="WPUF" in="CAVE" group="WestRefSys" x="+WPFM_UstFP(1)" y="WPFM_UstFP(2)" z="WPFM_UstFP(3)" />
   <Create    block="WPUN"  />
-  <Placement block="WPUN" in="CAVE" x="+WPFM_UstNP(1)" y="WPFM_UstNP(2)" z="WPFM_UstNP(3)" />
+  <Placement block="WPUN" in="CAVE" group="WestRefSys" x="+WPFM_UstNP(1)" y="WPFM_UstNP(2)" z="WPFM_UstNP(3)" />
   <Create    block="WPUS"  />
-  <Placement block="WPUS" in="CAVE" x="+WPFM_UstSP(1)" y="WPFM_UstSP(2)" z="WPFM_UstSP(3)" />
+  <Placement block="WPUS" in="CAVE" group="WestRefSys" x="+WPFM_UstSP(1)" y="WPFM_UstSP(2)" z="WPFM_UstSP(3)" />
+
+
+
 
   <Block name="FBOX" comment="is one Pb-Glass fpd detector"  >
     <Material name="Air"  />

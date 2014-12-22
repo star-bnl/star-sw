@@ -111,7 +111,7 @@
   TanTheta = (exp(+mend_etacut)-exp(-mend_etacut))/2 
 
   <Create    block="MAGP"  />
-  <Placement block="MAGP" in="Cave" konly="MANY" />
+  <Placement block="MAGP" in="CAVE" group="MagRefSys" konly="MANY" />
         
 
   <Volume name="MAGP" comment="is the magnet mother"  >
@@ -264,13 +264,16 @@
         
   <Volume name="MTCL" comment="is TRIM COIL Volume (filled with aluminum)"  >
     <Material name="Aluminium"  />
-    <Attribute for="MTCL" seen="1" colo="3"  />
+    <Attribute for="MTCL" seen="0" colo="3"  />
     <Shape type="TUBE" rmax="mend_tcoilRmx" rmin="mend_tcoilRmn" dz="mend_tcoilDZ/2"  />
   </Volume>
         
 </Module>
 <!--
   $Log: MagpGeo.xml,v $
+  Revision 1.6  2014/12/22 17:15:57  jwebb
+  Place into appropriate group.
+
   Revision 1.5  2013/04/30 18:06:17  jwebb
   MAGP now flagged as many due to overlap with MTD.
 

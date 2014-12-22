@@ -841,11 +841,12 @@
 
         <Create block="VPDD"  />
         zpos = zposW 
-        <Placement z="+zpos" konly="'MANY'" block="VPDD" in="Cave"  >
-        </Placement>
-        
+
+	<!-- IS MANY REALLY NEEDED? -->
+        <Placement block="VPDD" in="CAVE" group="WestRefSys" konly="MANY" z="+zpos" />
+
         zpos = zposE 
-        <Placement z="-zpos" konly="'MANY'" block="VPDD" in="Cave"  >
+        <Placement block="VPDD" in="CAVE" group="EastRefSys" konly="MANY" z="-zpos" >
             <Rotation thetaz="180"  />
         </Placement>
         
@@ -865,229 +866,176 @@
         
 
         <If expr="kIBeamStyle&gt;0"  >
+
             <Create block="IBEM"  />
-            <Placement y="vpdg_IBposYc+UDshift" z="+(vpdg_IBPosZc)" block="IBEM" in="Cave"  >
-            </Placement>
-            
-            <Placement y="vpdg_IBposYc+UDshift" z="-(vpdg_IBPosZc+EWshift)" block="IBEM" in="Cave"  >
+            <Placement block="IBEM" in="CAVE" group="WestRefSys"   y="vpdg_IBposYc+UDshift" z="+(vpdg_IBPosZc)" />
+            <Placement block="IBEM" in="CAVE" group="EastRefSys"   y="vpdg_IBposYc+UDshift" z="-(vpdg_IBPosZc+EWshift)"  >
                 <Rotation thetaz="180"  />
             </Placement>
             
             <If expr="kIBeamStyle&gt;1"  >
-                <Create block="IBSA"  />
-                <Placement y="vpds_IBSAYc" x="vpds_IBSAXc" z="vpds_IBSAZc" block="IBSA" in="Cave"  >
-                </Placement>
+
+            <Create    block="IBSA"  />
+            <Placement block="IBSA" in="CAVE" group="WestRefSys" y="vpds_IBSAYc" x="+vpds_IBSAXc" z="vpds_IBSAZc" />
+            <Placement block="IBSA" in="CAVE" group="WestRefSys" y="vpds_IBSAYc" x="-vpds_IBSAXc" z="vpds_IBSAZc"  >          <Rotation ort="-X-YZ"  /></Placement>                
+            <Placement block="IBSA" in="CAVE" group="EastRefSys" y="vpds_IBSAYc" x="vpds_IBSAXc" z="-(vpds_IBSAZc+EWshift)"  ><Rotation ort="-X-YZ"  /></Placement>            
+            <Placement block="IBSA" in="CAVE" group="EastRefSys" y="vpds_IBSAYc" x="-vpds_IBSAXc" z="-(vpds_IBSAZc+EWshift)" ><Rotation ort="-X-Y-Z" /></Placement>
                 
-                <Placement y="vpds_IBSAYc" x="-vpds_IBSAXc" z="vpds_IBSAZc" block="IBSA" in="Cave"  >
-                    <Rotation ort="-X-YZ"  />
-                </Placement>
+            <Create block="IBSB"  />
+            <Placement block="IBSB" in="CAVE" group="WestRefSys" y="vpds_IBSBYc+UDshift" x="+vpds_IBSBXc" z="+vpds_IBSBZc"  >          <Rotation alphax="-45"  /></Placement>                
+            <Placement block="IBSB" in="CAVE" group="WestRefSys" y="vpds_IBSBYc+UDshift" x="-vpds_IBSBXc" z="+vpds_IBSBZc"  >          <Rotation alphay="90"   /><Rotation alphax="-45" /></Placement>            
+            <Placement block="IBSB" in="CAVE" group="EastRefSys" y="vpds_IBSBYc+UDshift" x="+vpds_IBSBXc" z="-(vpds_IBSBZc+EWshift)"  ><Rotation alphay="-90"  /><Rotation alphax="45"  /></Placement>            
+            <Placement block="IBSB" in="CAVE" group="EastRefSys" y="vpds_IBSBYc+UDshift" x="-vpds_IBSBXc" z="-(vpds_IBSBZc+EWshift)"  ><Rotation alphay="180"  /><Rotation alphax="45"  /></Placement>
+            
+
+            <Create    block="IBSC"  />
+            <Placement block="IBSC" in="CAVE" group="WestRefSys" y="vpds_IBSCYc+UDshift" z="+vpds_IBSCZc" />
+            <Placement block="IBSC" in="CAVE" group="EastRefSys" y="vpds_IBSCYc+UDshift" z="-(vpds_IBSCZc+EWshift)" >
+              <Rotation thetaz="180"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSAYc" x="vpds_IBSAXc" z="-(vpds_IBSAZc+EWshift)" block="IBSA" in="Cave"  >
-                    <Rotation ort="-X-YZ"  />
-                </Placement>
+            <Create    block="IBSD"  />
+            <Placement block="IBSD" in="CAVE" group="WestRefSys" y="vpds_IBSDYc1+UDshift" x="0" z="+vpds_IBSDZc1" />
+            <Placement block="IBSD" in="CAVE" group="WestRefSys" y="vpds_IBSDYc1+UDshift" x="0" z="+vpds_IBSDZc2" />
                 
-                <Placement y="vpds_IBSAYc" x="-vpds_IBSAXc" z="-(vpds_IBSAZc+EWshift)" block="IBSA" in="Cave"  >
-                    <Rotation ort="-X-Y-Z"  />
-                </Placement>
+            <Placement block="IBSD" in="CAVE" group="EastRefSys" y="vpds_IBSDYc1+UDshift" x="0" z="-(vpds_IBSDZc1+EWshift)" ><Rotation thetaz="180"  /></Placement>                
+            <Placement block="IBSD" in="CAVE" group="EastRefSys" y="vpds_IBSDYc1+UDshift" x="0" z="-(vpds_IBSDZc2+EWshift)" ><Rotation thetaz="180"  /></Placement>
                 
-                <Create block="IBSB"  />
-                <Placement y="vpds_IBSBYc+UDshift" x="vpds_IBSBXc" z="vpds_IBSBZc" block="IBSB" in="Cave"  >
-                    <Rotation alphax="-45"  />
-                </Placement>
+            <Placement block="IBSD" in="CAVE" group="WestRefSys" y="vpds_IBSDYc2" x="0" z="vpds_IBSDZc1" />
+            <Placement block="IBSD" in="CAVE" group="WestRefSys" y="vpds_IBSDYc2" x="0" z="vpds_IBSDZc2" />
+
+            <Placement block="IBSD" in="CAVE" group="EastRefSys" y="vpds_IBSDYc2" x="0" z="-(vpds_IBSDZc1+EWshift)" ><Rotation thetaz="180"  /></Placement>                
+            <Placement block="IBSD" in="CAVE" group="EastRefSys" y="vpds_IBSDYc2" x="0" z="-(vpds_IBSDZc2+EWshift)" ><Rotation thetaz="180"  /></Placement>
+
+
                 
-                <Placement y="vpds_IBSBYc+UDshift" x="-vpds_IBSBXc" z="vpds_IBSBZc" block="IBSB" in="Cave"  >
-                    <Rotation alphay="90"  />
-                    <Rotation alphax="-45"  />
-                </Placement>
+            tempos = (vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.)) 
+
+            <Create    block="IBSE"  />
+            <Placement block="IBSE" in="CAVE" group="WestRefSys"   y="vpds_IBSEYc" x="+vpds_IBSEXc" z="vpds_IBSEZc1" />
+            <Placement block="IBSE" in="CAVE" group="WestRefSys"   y="vpds_IBSEYc" x="-vpds_IBSEXc" z="vpds_IBSEZc1" />
+            <Placement block="IBSE" in="CAVE" group="WestRefSys"   y="vpds_IBSEYc" x="+vpds_IBSEXc" z="vpds_IBSEZc2" />
+            <Placement block="IBSE" in="CAVE" group="WestRefSys"   y="vpds_IBSEYc" x="-vpds_IBSEXc" z="vpds_IBSEZc2" />
+            <Placement block="IBSE" in="CAVE" group="EastRefSys"   y="vpds_IBSEYc" x="+vpds_IBSEXc" z="-(vpds_IBSEZc1+EWshift)" />
+            <Placement block="IBSE" in="CAVE" group="EastRefSys"   y="vpds_IBSEYc" x="-vpds_IBSEXc" z="-(vpds_IBSEZc1+EWshift)" />
+            <Placement block="IBSE" in="CAVE" group="EastRefSys"   y="vpds_IBSEYc" x="+vpds_IBSEXc" z="-(vpds_IBSEZc2+EWshift)" />
+            <Placement block="IBSE" in="CAVE" group="EastRefSys"   y="vpds_IBSEYc" x="-vpds_IBSEXc" z="-(vpds_IBSEZc2+EWshift)" />
+
                 
-                <Placement y="vpds_IBSBYc+UDshift" x="vpds_IBSBXc" z="-(vpds_IBSBZc+EWshift)" block="IBSB" in="Cave"  >
-                    <Rotation alphay="-90"  />
-                    <Rotation alphax="45"  />
-                </Placement>
+            <Create    block="IBSF"  />
+            <Placement block="IBSF"  in="CAVE" group="WestRefSys" y="vpdg_IBposYc+UDshift" z="vpds_IBSFZc" ><Rotation alphay="90"  /></Placement>                
+            <Placement block="IBSF"  in="CAVE" group="EastRefSys" y="vpdg_IBposYc+UDshift" z="-(vpds_IBSFZc+EWshift)" ><Rotation alphay="90"  /></Placement>
+
                 
-                <Placement y="vpds_IBSBYc+UDshift" x="-vpds_IBSBXc" z="-(vpds_IBSBZc+EWshift)" block="IBSB" in="Cave"  >
-                    <Rotation alphay="180"  />
-                    <Rotation alphax="45"  />
-                </Placement>
+            <Create    block="IBST"  />
+            <Placement block="IBST"   in="IBEM" y="0" z="+(vpds_IBSFZc)-(vpdg_IBPosZc)" >
+              <Rotation alphay="90"  />
+            </Placement>                
+            <Placement block="IBST" in="IBEM" y="0" z="-(vpds_IBSFZc+EWshift)+(vpdg_IBPosZc)"  >
+              <Rotation alphay="90"  />
+            </Placement>
                 
-                <Create block="IBSC"  />
-                <Placement y="vpds_IBSCYc+UDshift" z="vpds_IBSCZc" block="IBSC" in="Cave"  >
-                </Placement>
+
+
+            <Create    block="IBSG"  />
+            <Placement block="IBSG" in="CAVE"  group="WestRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="vpds_IBSGZc1-vpds_IBSGZc3"  >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSCYc+UDshift" z="-(vpds_IBSCZc+EWshift)" block="IBSC" in="Cave"  >
-                    <Rotation thetaz="180"  />
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="WestRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="vpds_IBSGZc1-vpds_IBSGZc3"   >
+              <Rotation alphax="90"  />
+            </Placement>
+            
+            <Placement block="IBSG" in="CAVE"  group="WestRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="vpds_IBSGZc1+vpds_IBSGZc3"   >
+              <Rotation alphax="90"  />
+            </Placement>
+            
+            <Placement block="IBSG" in="CAVE"  group="WestRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="vpds_IBSGZc1+vpds_IBSGZc3"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Create block="IBSD"  />
-                <Placement y="vpds_IBSDYc1+UDshift" x="0" z="vpds_IBSDZc1" block="IBSD" in="Cave"  >
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="WestRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="vpds_IBSGZc2-vpds_IBSGZc3"  >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSDYc1+UDshift" x="0" z="vpds_IBSDZc2" block="IBSD" in="Cave"  >
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="WestRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="vpds_IBSGZc2-vpds_IBSGZc3"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSDYc1+UDshift" x="0" z="-(vpds_IBSDZc1+EWshift)" block="IBSD" in="Cave"  >
-                    <Rotation thetaz="180"  />
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="WestRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="vpds_IBSGZc2+vpds_IBSGZc3"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSDYc1+UDshift" x="0" z="-(vpds_IBSDZc2+EWshift)" block="IBSD" in="Cave"  >
-                    <Rotation thetaz="180"  />
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="WestRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="vpds_IBSGZc2+vpds_IBSGZc3"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSDYc2" x="0" z="vpds_IBSDZc1" block="IBSD" in="Cave"  >
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="EastRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="-(vpds_IBSGZc1-vpds_IBSGZc3+EWshift)"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSDYc2" x="0" z="vpds_IBSDZc2" block="IBSD" in="Cave"  >
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="EastRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="-(vpds_IBSGZc1-vpds_IBSGZc3+EWshift)"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSDYc2" x="0" z="-(vpds_IBSDZc1+EWshift)" block="IBSD" in="Cave"  >
-                    <Rotation thetaz="180"  />
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="EastRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="-(vpds_IBSGZc1+vpds_IBSGZc3+EWshift)"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSDYc2" x="0" z="-(vpds_IBSDZc2+EWshift)" block="IBSD" in="Cave"  >
-                    <Rotation thetaz="180"  />
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="EastRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="-(vpds_IBSGZc1+vpds_IBSGZc3+EWshift)"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                tempos = (vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.)) 
-                <Create block="IBSE"  />
-                <Placement y="vpds_IBSEYc" x="+vpds_IBSEXc" z="vpds_IBSEZc1" block="IBSE" in="Cave"  >
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="EastRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="-(vpds_IBSGZc2-vpds_IBSGZc3+EWshift)"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSEYc" x="-vpds_IBSEXc" z="vpds_IBSEZc1" block="IBSE" in="Cave"  >
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="EastRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="-(vpds_IBSGZc2-vpds_IBSGZc3+EWshift)"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSEYc" x="+vpds_IBSEXc" z="vpds_IBSEZc2" block="IBSE" in="Cave"  >
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="EastRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="-(vpds_IBSGZc2+vpds_IBSGZc3+EWshift)"   >
+              <Rotation alphax="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSEYc" x="-vpds_IBSEXc" z="vpds_IBSEZc2" block="IBSE" in="Cave"  >
-                </Placement>
+            <Placement block="IBSG" in="CAVE"  group="EastRefSys" y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="-(vpds_IBSGZc2+vpds_IBSGZc3+EWshift)"   >
+              <Rotation alphax="90"  />
+            </Placement>
+
+
                 
-                <Placement y="vpds_IBSEYc" x="+vpds_IBSEXc" z="-(vpds_IBSEZc1+EWshift)" block="IBSE" in="Cave"  >
-                </Placement>
+            <Create    block="IBSH"  />
+            <Placement block="IBSH" in="CAVE" group="WestRefSys" x="+vpds_IBSHXc1" z="+vpds_IBSHZc1"   >
+              <Rotation alphay="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSEYc" x="-vpds_IBSEXc" z="-(vpds_IBSEZc1+EWshift)" block="IBSE" in="Cave"  >
-                </Placement>
+            <Placement block="IBSH" in="CAVE" group="WestRefSys" x="-vpds_IBSHXc1" z="+vpds_IBSHZc1"  >
+              <Rotation alphay="90"  />
+            </Placement>
+            
+            <Placement block="IBSH" in="CAVE" group="EastRefSys" x="+vpds_IBSHXc1" z="-(vpds_IBSHZc1+EWshift)" >
+              <Rotation alphay="90"  />
+            </Placement>
+            
+            <Placement block="IBSH" in="CAVE" group="EastRefSys" x="-vpds_IBSHXc1" z="-(vpds_IBSHZc1+EWshift)" >
+              <Rotation alphay="90"  />
+            </Placement>
+            
+            <Placement block="IBSH" in="CAVE" group="WestRefSys" x="+vpds_IBSHXc2" z="+vpds_IBSHZc2" >
+              <Rotation alphay="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSEYc" x="+vpds_IBSEXc" z="-(vpds_IBSEZc2+EWshift)" block="IBSE" in="Cave"  >
-                </Placement>
+            <Placement block="IBSH" in="CAVE" group="WestRefSys" x="-vpds_IBSHXc2" z="+vpds_IBSHZc2" >
+              <Rotation alphay="90"  />
+            </Placement>
                 
-                <Placement y="vpds_IBSEYc" x="-vpds_IBSEXc" z="-(vpds_IBSEZc2+EWshift)" block="IBSE" in="Cave"  >
-                </Placement>
+            <Placement block="IBSH" in="CAVE" group="EastRefSys" x="+vpds_IBSHXc2" z="-(vpds_IBSHZc2+EWshift)" >
+              <Rotation alphay="90"  />
+            </Placement>
                 
-                <Create block="IBSF"  />
-                <Placement y="vpdg_IBposYc+UDshift" z="vpds_IBSFZc" block="IBSF" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Placement y="vpdg_IBposYc+UDshift" z="-(vpds_IBSFZc+EWshift)" block="IBSF" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Create block="IBST"  />
-                <Placement y="0" z="+(vpds_IBSFZc)-(vpdg_IBPosZc)" block="IBST" in="IBEM"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Placement y="0" z="-(vpds_IBSFZc+EWshift)+(vpdg_IBPosZc)" block="IBST" in="IBEM"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Create block="IBSG"  />
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="vpds_IBSGZc1-vpds_IBSGZc3" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="vpds_IBSGZc1-vpds_IBSGZc3" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="vpds_IBSGZc1+vpds_IBSGZc3" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="vpds_IBSGZc1+vpds_IBSGZc3" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="vpds_IBSGZc2-vpds_IBSGZc3" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="vpds_IBSGZc2-vpds_IBSGZc3" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="vpds_IBSGZc2+vpds_IBSGZc3" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="vpds_IBSGZc2+vpds_IBSGZc3" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="-(vpds_IBSGZc1-vpds_IBSGZc3+EWshift)" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="-(vpds_IBSGZc1-vpds_IBSGZc3+EWshift)" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="-(vpds_IBSGZc1+vpds_IBSGZc3+EWshift)" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="-(vpds_IBSGZc1+vpds_IBSGZc3+EWshift)" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="-(vpds_IBSGZc2-vpds_IBSGZc3+EWshift)" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="-(vpds_IBSGZc2-vpds_IBSGZc3+EWshift)" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="+vpds_IBSGXc" z="-(vpds_IBSGZc2+vpds_IBSGZc3+EWshift)" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Placement y="UDshift+BoltShift+vpds_IBSGYc" x="-vpds_IBSGXc" z="-(vpds_IBSGZc2+vpds_IBSGZc3+EWshift)" block="IBSG" in="Cave"  >
-                    <Rotation alphax="90"  />
-                </Placement>
-                
-                <Create block="IBSH"  />
-                <Placement x="+vpds_IBSHXc1" z="+vpds_IBSHZc1" block="IBSH" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Placement x="-vpds_IBSHXc1" z="+vpds_IBSHZc1" block="IBSH" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Placement x="+vpds_IBSHXc1" z="-(vpds_IBSHZc1+EWshift)" block="IBSH" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Placement x="-vpds_IBSHXc1" z="-(vpds_IBSHZc1+EWshift)" block="IBSH" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Placement x="+vpds_IBSHXc2" z="+vpds_IBSHZc2" block="IBSH" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Placement x="-vpds_IBSHXc2" z="+vpds_IBSHZc2" block="IBSH" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Placement x="+vpds_IBSHXc2" z="-(vpds_IBSHZc2+EWshift)" block="IBSH" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
-                
-                <Placement x="-vpds_IBSHXc2" z="-(vpds_IBSHZc2+EWshift)" block="IBSH" in="Cave"  >
-                    <Rotation alphay="90"  />
-                </Placement>
+            <Placement block="IBSH" in="CAVE" group="EastRefSys" x="-vpds_IBSHXc2" z="-(vpds_IBSHZc2+EWshift)" >
+              <Rotation alphay="90"  />
+            </Placement>
                 
             </If>
             

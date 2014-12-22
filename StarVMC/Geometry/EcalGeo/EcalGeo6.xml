@@ -541,7 +541,7 @@
             <Create block="ECAL"  />
 
             <If expr="emcg_OnOff==1|emcg_OnOff==3"  >
-                <Placement z="+center" block="ECAL" in="CAVE"  >
+                <Placement z="+center" block="ECAL" in="CAVE" group="MagRefSys" >
                 </Placement>
                 
             </If>
@@ -556,7 +556,7 @@
 
 
             <If expr="emcg_OnOff==2|emcg_OnOff==3"  >
-                <Placement z="-center" block="ECAL" in="CAVE"  >
+                <Placement z="-center" block="ECAL" in="CAVE" group="MagRefSys"  >
                     <Rotation thetaz="180"  />
                 </Placement>
                 
