@@ -217,9 +217,9 @@
   
 
 
-<Print level="0" fmt="' PIPE : PIPE_version = ',F5.3 " >
-      PIPG_version
-    </Print>
+	  <Print level="1" fmt="' PIPE : PIPE_version = ',F5.3 " >
+	    PIPG_version
+	  </Print>
 
     <Mixture name="StainlessSteel" dens="8.03"  >
                 <Component name="Cr" a="51.9960" z="24" w="0.19"  />
@@ -247,21 +247,30 @@
   <!--                                                                        Create the Pipe -->
  
   <Create    block="PIPE" />
-  <Placement block="PIPE" in="IDSM" x="PIPG_xoffset" y="PIPG_yoffset" z="PIPG_zoffset" />
+  <Placement block="PIPE" in="IDSM" group="EastRefSys" 
+	     x="PIPG_xoffset" 
+	     y="PIPG_yoffset" 
+	     z="PIPG_zoffset" />
   
   
-  <Create    block="PIPI" />
-  <Placement block="PIPI" in="IDSM" x="PIPG_xoffset" y="PIPG_yoffset" z="PIPG_zoffset" konly="'MANY'" />
+  <Create    block="PIPI" />  <!-- WHY IS MANY NEEDED HERE? -->
+  <Placement block="PIPI" in="IDSM" konly="MANY"
+	     x="PIPG_xoffset" 
+	     y="PIPG_yoffset" 
+	     z="PIPG_zoffset" />
   
   <Create    block="PIPW" />
-  <Placement block="PIPW" in="IDSM" x="PIPG_xoffset" y="PIPG_yoffset" z="PIPG_zoffset" />
+  <Placement block="PIPW" in="IDSM" group="WestRefSys"
+	     x="PIPG_xoffset" 
+	     y="PIPG_yoffset" 
+	     z="PIPG_zoffset" />
   
  
   <Create    block="PIPA" />
-  <Placement block="PIPA" in="CAVE" x="0" y="0" z="0" konly="'MANY'" />
+  <Placement block="PIPA" in="CAVE" group="EastRefSys" x="0" y="0" z="0" konly="MANY" />
   
   <Create    block="PIWA" />
-  <Placement block="PIWA" in="CAVE" x="0" y="0" z="0" konly="'MANY'" />
+  <Placement block="PIWA" in="CAVE" group="WestRefSys" x="0" y="0" z="0" konly="MANY" />
   
 
 

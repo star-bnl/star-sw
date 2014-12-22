@@ -75,14 +75,15 @@
         Z4 = z3 + pipu_p2leng               ! End of DX magnet    (241.21) 
         Z5 = z4 + pipu_cleng                ! Center of DX Cone   (262.42) 
         Z6 = z5 + pipu_cleng                ! End of DX Cone      (283.63) 
-        <Create block="UPST"  />
-        <Placement z="pipu_Zposit" konly="'MANY'" block="UPST" in="CAVE"  >
-        </Placement>
-        
-        <Placement z="-pipu_Zposit" konly="'MANY'" block="UPST" in="CAVE"  >
+
+        <Create    block="UPST"  />
+        <Placement block="UPST" in="CAVE" group="WestRefSys" z="+pipu_Zposit" konly="MANY"   />        
+        <Placement block="UPST" in="CAVE" group="EastRefSys" z="-pipu_Zposit"  konly="MANY" >
             <Rotation thetaz="180"  />
         </Placement>
         
+
+
         <Block name="UPST" comment="is the upstream mother volume in the STAR cave"  >
             <Material name="Air"  />
             <Medium name="Standard"  />

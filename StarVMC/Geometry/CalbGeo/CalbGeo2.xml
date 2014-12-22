@@ -414,9 +414,9 @@
         Rmax3 = Rmax/cos(3.14159*DphiMod/360)  
         <Use struct="CALR"  />
         cutAng = atan2(cut_radius-Calg_Rmin,Hleng2-cut_length2) 
+
         <Create block="CALB"  />
-        <Placement block="CALB" in="CAVE"  >
-        </Placement>
+        <Placement block="CALB" in="CAVE"  group="MagRefSys" />
         
         <Print level="1" fmt="' CALB geo. version =',F7.1"  >
             calg_Version

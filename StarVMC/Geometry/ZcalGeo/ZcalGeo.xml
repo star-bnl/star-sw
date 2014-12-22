@@ -61,14 +61,15 @@
         z2 = z1+calp_phleng+calp_pltdz ! Center of lrg pipe end plate (17.17) 
         z3 = z2+calp_pltdz+0.24+calp_pjleng    ! Center of beam pipes  
         z4 = z2+calp_pltdz+40.0+calp_qcdz ! Center of Qcal 
-        <Create block="ZCAL"  />
-        <Placement z="1767.66" block="ZCAL" in="CAVE"  >
-        </Placement>
-        
-        <Placement z="-1767.66" block="ZCAL" in="CAVE"  >
+
+        <Create     block="ZCAL"  />
+        <Placement  block="ZCAL" in="CAVE" group="WestRefSys" z="1767.66" />
+        <Placement  block="ZCAL" in="CAVE" group="EastRefSys" z="-1767.66" >
             <Rotation thetaz="180"  />
         </Placement>
         
+<!-- ///////////////////////////////////////////////////////////////////////////////////////// -->
+
         <Block name="ZCAL" comment="is the region between the DX and the D0 magnets"  >
             <Material name="Air"  />
             <Medium name="standard"  />
