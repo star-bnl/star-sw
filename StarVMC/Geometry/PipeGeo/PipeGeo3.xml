@@ -247,7 +247,7 @@
   <!--                                                                        Create the Pipe -->
  
   <Create    block="PIPE" />
-  <Placement block="PIPE" in="IDSM" group="EastRefSys" 
+  <Placement block="PIPE" in="IDSM" 
 	     x="PIPG_xoffset" 
 	     y="PIPG_yoffset" 
 	     z="PIPG_zoffset" />
@@ -260,7 +260,7 @@
 	     z="PIPG_zoffset" />
   
   <Create    block="PIPW" />
-  <Placement block="PIPW" in="IDSM" group="WestRefSys"
+  <Placement block="PIPW" in="IDSM" 
 	     x="PIPG_xoffset" 
 	     y="PIPG_yoffset" 
 	     z="PIPG_zoffset" />
