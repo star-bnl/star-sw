@@ -1172,7 +1172,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 	}
     }
   
-  if ( group && AgPlacement::kOnly==myonly )   
+  if ( group && AgPlacement::kMany==myonly )   
     {
       AgBlock::module()->Warning(AgModule::module()->GetName(), Form("Volume %s in %s, effect of MANY is ignored.",block_name.Data(),target->GetName()));
     }
