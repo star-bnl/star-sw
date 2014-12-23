@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.22 2014/06/18 16:30:55 ramdebbe Exp $
+// $Id: StPeCEvent.cxx,v 1.23 2014/12/23 20:44:57 ramdebbe Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.23  2014/12/23 20:44:57  ramdebbe
+// Modified intantiation of StPeCPair when using MuDst input to get TOF extrapolation in the pPairs branch
+//
 // Revision 1.22  2014/06/18 16:30:55  ramdebbe
 // added more variables to event summary
 //
@@ -111,40 +114,40 @@ ClassImp(StPeCEvent)
   // StPeCMaxTracks ..... looks more like Fortran......
   pPairs    = new TClonesArray ("StPeCPair", StPeCnMaxTracks);
   sPairs    = new TClonesArray ("StPeCPair", StPeCnMaxTracks);
-
+  tofHits   = new TClonesArray ("StMuBTofHit",5*StPeCnMaxTracks);
   if((useTOFlocal = useTOF)){
-    tofHits   = new TClonesArray ("StMuBTofHit",5*StPeCnMaxTracks);
+
     tofTracks = new TClonesArray ("StMuTrack",5*StPeCnMaxTracks);
 
-    LOG_INFO << "StPeCEvent constructor: useTOF ---------- " <<useTOF << endm;
+//     LOG_INFO << "StPeCEvent constructor: useTOF ---------- " <<useTOF << endm;
   }
   if((useBemcLocal = useBemc)) {
     treecalo  = new TClonesArray ("StEmcCluster",5*StPeCnMaxTracks);
-    LOG_INFO << "StPeCEvent constructor: useBemc ---------- " <<useBemc << endm;
+//     LOG_INFO << "StPeCEvent constructor: useBemc ---------- " <<useBemc << endm;
 
   }
   if((useVertexLocal = useVertex)){
     vertices  = new TClonesArray ("StMuPrimaryVertex",5*StPeCnMaxTracks);
-    LOG_INFO << "StPeCEvent constructor: useVertex ---------- " <<useVertex << endm;
+//     LOG_INFO << "StPeCEvent constructor: useVertex ---------- " <<useVertex << endm;
 
   }
   if((useTracksLocal = useTracks)){
  
-    LOG_INFO << "StPeCEvent constructor: useTracks ---------- " <<useTracks << endm;
+//     LOG_INFO << "StPeCEvent constructor: useTracks ---------- " <<useTracks << endm;
         tracks    = new TClonesArray ("StPeCTrack",StPeCnMaxTracks);
 //     tracks    = new TClonesArray ("StMuTrack", StPeCnMaxTracks);
   }
   if((readStMuDstLocal = readStMuDst)){
  
-    LOG_INFO << "StPeCEvent constructor: readStMuDst ---------- " <<readStMuDst << endm;
+//     LOG_INFO << "StPeCEvent constructor: readStMuDst ---------- " <<readStMuDst << endm;
 
   }  if((readStEventLocal = readStEvent)){
  
-    LOG_INFO << "StPeCEvent constructor: readStEvent ---------- " <<readStEvent << endm;
+//     LOG_INFO << "StPeCEvent constructor: readStEvent ---------- " <<readStEvent << endm;
 
   }  if((readBothInputsLocal = readBothInputs)){
  
-    LOG_INFO << "StPeCEvent constructor: both inputs ---------- " <<readBothInputs << endm;
+//     LOG_INFO << "StPeCEvent constructor: both inputs ---------- " <<readBothInputs << endm;
 
   }
   nPPairs  = 0 ;
@@ -178,7 +181,7 @@ ClassImp(StPeCEvent)
   lastDSM1Sum = 0;
 
 
-  LOG_INFO << "StPeCEvent constructor: leaving constructor ---------- " << endm;
+//   LOG_INFO << "StPeCEvent constructor: leaving constructor ---------- " << endm;
 
 }
 
@@ -222,9 +225,9 @@ void  StPeCEvent::clear ( ) {
    sPairs->Clear();
 
    if(useTracksLocal)tracks->Clear();
-
+   tofHits->Clear();
    if(useTOFlocal) {
-     tofHits->Clear();
+
      tofTracks->Clear();
    }
    if(useBemcLocal)treecalo->Clear();
@@ -480,12 +483,13 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
    eventN = event->eventInfo().id();
    
    runN = event->eventInfo().runId(); 
-//    LOG_INFO << "StPeCEvent fill(muDst ): useBemc ---------- " <<useBemcLocal << endm;
-//    LOG_INFO << "StPeCEvent fill(muDst ): useTOF ---------- " <<useTOFlocal << endm;
-//    LOG_INFO << "StPeCEvent fill(muDst ): useVertex ---------- " <<useVertexLocal << endm;
-//    LOG_INFO << "StPeCEvent fill(muDst ): useTracks ---------- " <<useTracksLocal << endm;
-//    LOG_INFO << "StMuEvent Run ID: " << runN << endm;
-//    LOG_INFO << "StMuEvent ID: " << eventN << endm;
+   LOG_INFO << "StPeCEvent fill(muDst ): useBemc ---------- " <<useBemcLocal << endm;
+   LOG_INFO << "StPeCEvent fill(muDst ): useTOF ---------- " <<useTOFlocal << endm;
+   LOG_INFO << "StPeCEvent fill(muDst ): useVertex ---------- " <<useVertexLocal << endm;
+   LOG_INFO << "StPeCEvent fill(muDst ): useTracks ---------- " <<useTracksLocal << endm;
+   LOG_INFO << "StPeCEvent fill(muDst StEvent): TOF geometry pointer ---------- " << mTOFgeoEv<<endm;
+   LOG_INFO << "StMuEvent Run ID: " << runN << endm;
+   LOG_INFO << "StMuEvent ID: " << eventN << endm;
    
    bField = event->eventSummary().magneticField();
   acceptEvent = kFALSE;
@@ -502,8 +506,9 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
       StMuBTofHit *aHit = (StMuBTofHit *)mudst->btofHit(i);
 		if(aHit)
 		  {
+		    new((*tofHits)[i]) StMuBTofHit((const StMuBTofHit &) *aHit);
 		    if(useTOFlocal) {
-		      new((*tofHits)[i]) StMuBTofHit((const StMuBTofHit &) *aHit);
+
 		      // global track that matched the hit
 		      int trayId = aHit->tray();
 		      if(trayId<=120&&trayId>=0) {//TOF
@@ -589,7 +594,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
      LOG_INFO << "StPeCEvent::  vertex index: "<<verti<<endm;
      StMuDst::setVertexIndex(verti);                                //assert vertex; this selects tracks connected to this vertex
      size_t Ntracks = muDst->primaryTracks()->GetEntries();
-     LOG_INFO << "StPeCEvent::fill(ev mudst) #track in vertex : "  <<Ntracks<< endm;
+//      LOG_INFO << "StPeCEvent::fill(ev mudst) #track in vertex : "  <<Ntracks<< endm;
      nPrimaryTPC = 0;
      nPrimaryFTPC = 0;
      for (size_t trackiter = 0;trackiter<Ntracks;trackiter++){
@@ -617,7 +622,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 
    if (( nPrimaryTPC > 0 ||  nPrimaryFTPC>0 ) &&   // at least one track in either FTPC or TPC
        ( nPrimaryTPC < StPeCnMaxTracks && nPrimaryFTPC< StPeCnMaxTracks )&& (nPrimaryFTPC+nPrimaryTPC>=2)) {
-     LOG_INFO << " analyze vertex !" << endm;
+//      LOG_INFO << " analyze vertex !" << endm;
      acceptEvent = kTRUE;
      //     nPPairs = 0 ;
      StPeCPair* lPair ; 
@@ -634,14 +639,14 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
 	 if (! (trk2->flag()>0)) continue;
 	 //LOG_INFO << " wrote the pair !" << endm;
 
-	 lPair = new((*pPairs)[nPPairs++]) StPeCPair(trk1,trk2,1,event) ;
+	 lPair = new((*pPairs)[nPPairs++]) StPeCPair(trk1,trk2,1,event, mTOFgeoEv) ;
  
 
        }  //lopp mutracks 2
      } //loop mutracks 1
 //      LOG_INFO << " number of pairs " << nPPairs<<"  in vertex index "<<verti<<endm;
    } else {   //accept ev
-     LOG_INFO << " reject  vertex !" << endm;
+//      LOG_INFO << " reject  vertex !" << endm;
      // return 1; 
    }    
 
@@ -725,7 +730,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
 
 	    StSPtrVecEmcCluster& clusters = coll->clusters();
 	    Int_t n = clusters.size();
-	    LOG_INFO<<"StPeCEvent::fill  number of clusters in BEMC "<<n<<endm;
+// 	    LOG_INFO<<"StPeCEvent::fill  number of clusters in BEMC "<<n<<endm;
 	    for(Int_t j = 0;j<n;j++)
 	      {
 		StEmcCluster *c =clusters[j];
@@ -746,7 +751,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
     //here we transfer TOF information in StMuEvent to UPC ntuple  RD
     //
 
-     LOG_INFO <<"StPeCEvent::fill number of btof hits "<<mudst->numberOfBTofHit()<<endm;
+//      LOG_INFO <<"StPeCEvent::fill number of btof hits "<<mudst->numberOfBTofHit()<<endm;
      nTOFhitsSum = mudst->numberOfBTofHit();
  
     int nMax = mudst->numberOfBTofHit();
@@ -755,8 +760,9 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
       StMuBTofHit *aHit = (StMuBTofHit *)mudst->btofHit(i);
 		if(aHit)
 		  {
+		    new((*tofHits)[i]) StMuBTofHit((const StMuBTofHit &) *aHit);
 		    if(useTOFlocal) {
-		      new((*tofHits)[i]) StMuBTofHit((const StMuBTofHit &) *aHit);
+
 		      // global track that matched the hit
 		      int trayId = aHit->tray();
 		      if(trayId<=120&&trayId>=0) {//TOF
@@ -793,8 +799,8 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
    
    runN = event->eventInfo().runId(); 
    LOG_INFO <<"StEvent StMuEvent Run ID: " << runN <<  " StMuEvent ID: " << eventN << endm;
-   LOG_INFO << "StMuEvent ID: " << eventN << endm;
-   LOG_INFO << "Found: " << globalTrackCounter <<" tracks with TOF hit match" << endm;
+//    LOG_INFO << "StMuEvent ID: " << eventN << endm;
+//    LOG_INFO << "Found: " << globalTrackCounter <<" tracks with TOF hit match" << endm;
    
    bField = event->eventSummary().magneticField();
    
@@ -830,7 +836,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
    nTot     = nGlobalTracks;
 
    size_t Nvert = muDst->numberOfPrimaryVertices();
-   LOG_INFO << "StPeCEvent::fill(event mudst) #vertices: "  <<Nvert<< endm; 
+//    LOG_INFO << "StPeCEvent::fill(event mudst) #vertices: "  <<Nvert<< endm; 
     //
     // select tracks that match TOF hits and reconstruct vertex  RD
     //
@@ -857,7 +863,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
      //LOG_INFO << "StPeCEvent::  vertex ranking: "<<rank<<endm;
      StMuDst::setVertexIndex(verti);                                //assert vertex; this selects tracks connected to this vertex
      size_t Ntracks = muDst->primaryTracks()->GetEntries();
-     LOG_INFO << "StPeCEvent::fill(ev mudst) #track in vertex : "  <<Ntracks<< endm;
+//      LOG_INFO << "StPeCEvent::fill(ev mudst) #track in vertex : "  <<Ntracks<< endm;
      nPrimaryTPC = 0;
      nPrimaryFTPC = 0;
      for (size_t trackiter = 0;trackiter<Ntracks;trackiter++){
@@ -875,7 +881,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
        // nTracks should be the same as nPrim afterwards
        if(useTracksLocal){
 //           new((*tracks)[nTracks++])StPeCTrack(0, tp);  //old scheme
-// 	 new((*tracks)[nTracks++]) StPeCTrack((const StPeCTrack &) *tp);
+	 new((*tracks)[nTracks++]) StPeCTrack((const StPeCTrack &) *tp);
 // 	 new((*tracks)[nTracks++]) StMuTrack((const StMuTrack &) *tp);
 
        }
@@ -887,7 +893,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
    // RD 19 APR 2013 comment this and modify to work with UPCpp to make pairs with tracks that have TOF hit match  **START**
    if (( nPrimaryTPC > 0 ||  nPrimaryFTPC>0 ) &&   // at least one track in either FTPC or TPC
        ( nPrimaryTPC < StPeCnMaxTracks && nPrimaryFTPC< StPeCnMaxTracks )&& (nPrimaryFTPC+nPrimaryTPC>=2)) {
-     LOG_INFO << " analyze vertex !" << endm;
+//      LOG_INFO << " analyze vertex !" << endm;
      acceptEvent = kTRUE;
      //     nPPairs = 0 ;
      StPeCPair* lPair ; 
@@ -911,7 +917,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
        }  //lopp mutracks 2
      } //loop mutracks 1
    } else {   //accept ev
-     LOG_INFO << " reject  vertex !" << endm;
+//      LOG_INFO << " reject  vertex !" << endm;
      // return 1; 
    }                                                    //    **END**
 //    if ((globalTrackCounter > 1) && (globalTrackCounter < StPeCnMaxTracks)){  // at least 2 TOFtracks and no more than 6    ***UPCpp START****
