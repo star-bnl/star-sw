@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.11 2013/12/27 16:52:31 ramdebbe Exp $
+// $Id: StPeCPair.h,v 1.12 2014/12/23 20:43:18 ramdebbe Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.12  2014/12/23 20:43:18  ramdebbe
+// copied the fill functionality of method with both inputs to the one with MuDst input. This gives TOF extrapolation in the pPairs branch
+//
 // Revision 1.11  2013/12/27 16:52:31  ramdebbe
 // added a input argument StBTofGeometry to fill method (StMuDst + StEvent) and x y z coordinates of intercept to TOF cylinder
 //
@@ -85,7 +88,7 @@ public:
   void                            calculatePair4Momentum( ) ;
 #ifndef __CINT__
                                   StPeCPair ( StMuTrack *trk1, StMuTrack *trk2, 
-				              Bool_t primaryFlag, StMuEvent* event );
+				              Bool_t primaryFlag, StMuEvent* event,  StBTofGeometry * pairTOFgeo );
 
                                   StPeCPair ( StTrack *trk1, StTrack *trk2, 
 				              Bool_t primaryFlag, StEvent* event );
