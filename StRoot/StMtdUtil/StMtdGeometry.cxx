@@ -1,8 +1,12 @@
 /********************************************************************
- * $Id: StMtdGeometry.cxx,v 1.9 2014/09/24 18:14:47 marr Exp $
+ * $Id: StMtdGeometry.cxx,v 1.10 2014/12/23 16:32:33 marr Exp $
  ********************************************************************
  *
  * $Log: StMtdGeometry.cxx,v $
+ * Revision 1.10  2014/12/23 16:32:33  marr
+ * In 2015 geometry file, MTD modules are placed under directory MagRefSys_1.
+ * Modification is maded to reflect this change.
+ *
  * Revision 1.9  2014/09/24 18:14:47  marr
  * Flip localY for cells in modules 4 and 5
  *
@@ -496,7 +500,8 @@ void StMtdGeometry::Init(StMaker *maker){
 	if(elementName){
 		if(IsDebugOn()) LOG_INFO <<" found detector:"<<elementName<<endm;
 		TGeoIterator next(mMtdGeom);
-		next.SetTopName("/HALL_1/CAVE_1/MUTD_1");
+		if(mGeomTag.Contains("2015")) next.SetTopName("/HALL_1/CAVE_1/MagRefSys_1/MUTD_1");
+		else next.SetTopName("/HALL_1/CAVE_1/MUTD_1");
 		TGeoNode   *node = 0;
 		TGeoVolume *blVol = 0;
 		TGeoVolume *modVol = 0;
