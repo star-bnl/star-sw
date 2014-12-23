@@ -607,7 +607,7 @@
             <var name="zposEast" value="571.45" comment=" Z position East        (more or less arbitrary) "  />
             <var name="zposWest" value="571.45" comment=" Z position West        (more or less arbitrary) "  />
             <var name="rmin" value="6.6675" comment=" mothervolume rmin      (2 5/8in) "  />
-            <var name="rmax" value="16.51" comment=" mothervolume rmax      (6 1/2in) "  />
+            <var name="rmax" value="16.51+0.3" comment=" mothervolume rmax      (6 1/2in) "  />
             <var name="length" value="32." comment=" mothervolume length "  />
             <var name="detrad" value="2.54" comment=" det assy cylnder radius (2in diameter) "  />
             <var name="detlen" value="20.32" comment=" det assy cylinder radius (8in) "  />
@@ -642,7 +642,7 @@
             <var name="zposEast" value="571.45" comment=" Z position East        (more or less arbitrary) "  />
             <var name="zposWest" value="571.45" comment=" Z position West        (more or less arbitrary) "  />
             <var name="rmin" value="6.6675" comment=" mothervolume rmin      (2 5/8in) "  />
-            <var name="rmax" value="16.51" comment=" mothervolume rmax      (6 1/2in) "  />
+            <var name="rmax" value="16.51+0.3" comment=" mothervolume rmax      (6 1/2in) "  />
             <var name="length" value="32." comment=" mothervolume length "  />
             <var name="detrad" value="2.54" comment=" det assy cylnder radius (2in diameter) "  />
             <var name="detlen" value="20.32" comment=" det assy cylinder radius (8in) "  />
@@ -1009,11 +1009,16 @@
             <Medium name="Standard"  />
             <Attribute for="VPDD" seen="1" serial="zpos" colo="7"  />
             <If expr="kDetStyle&lt;2"  >
-                <Shape type="TUBE" rmax="vpdg_rmax" rmin="vpdg_rmin" dz="vpdg_BPlength/2"  />
-                <Else  >
-                    <Shape type="TUBE" rmax="vpdh_rmax" rmin="vpdh_rmin" dz="vpdh_length/2"  />
-                </Else>
-                
+            <Shape type="TUBS" rmax="vpdg_rmax" rmin="vpdg_rmin" dz="vpdg_BPlength/2"  
+		   phi1="-65.0"
+		   phi2="245.0"
+                   />
+            <Else  >
+            <Shape type="TUBS" rmax="vpdh_rmax" rmin="vpdh_rmin" dz="vpdh_length/2"  
+		   phi1="-65.0"
+		   phi2="245.0"
+		   />
+            </Else>                
             </If>
             
 
@@ -1157,8 +1162,8 @@
             </If>
             
             <Create block="VRNG"  />
-            <Placement konly="'MANY'" block="VRNG"  >
-            </Placement>
+            <Placement konly="'MANY'" block="VRNG"  />
+
             
 
         </Block>
@@ -1370,7 +1375,11 @@
         
         <Block name="VRNG" comment="is a single pVPD Ring or the entire upVPD"  >
             <If expr="kDetStyle&lt;2"  >
-                <Shape type="TUBE" rmax="vpdg_Rmin+2*vpdg_DETrad+vpdg_CLheight" rmin="vpdg_Rmin" dz="vpdg_CLlength/2"  />
+                <Shape type="TUBS" rmax="vpdg_Rmin+2*vpdg_DETrad+vpdg_CLheight" rmin="vpdg_Rmin" dz="vpdg_CLlength/2"  
+		   phi1="-65.0"
+		   phi2="245.0"
+ 
+		       />
                 <Do var="isec" from="1" to="vpdg_NumPMT"  >
                     detangle=-30+isec*(360/vpdg_NumPMT) 
                     <Create block="VSEC"  />
@@ -1381,7 +1390,11 @@
                 </Do>
                 
                 <Elif expr="kDetStyle==2"  >
-                    <Shape type="TUBE" rmax="vpdh_rmax" rmin="vpdh_rmin" dz="vpdh_length/2"  />
+                    <Shape type="TUBS" rmax="vpdh_rmax" rmin="vpdh_rmin" dz="vpdh_length/2"  
+		   phi1="-65.0"
+		   phi2="245.0"
+  
+			   />
                     <Create block="VDET"  />
                     detzint = -(VPDH_detlen/2.0)+VPDH_detfront+(VPDH_leadthick+vpdh_scintthick) 
                     locang=0. 
