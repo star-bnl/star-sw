@@ -816,11 +816,11 @@ Bool_t sanityCheck( TGeoVolume *volume )
 Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 {
 
+  assert(block);
   //
   // Get the block's name
   //
   TString block_name = block->GetName();
-  assert(block);
 
   //
   //////////////////////////////////////////////////////////////////////////////
@@ -1160,6 +1160,26 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 
   // Add the volume to the mother volume or the group
   TGeoVolume *target = (group)?group:mother;
+
+  // Check validity of volume group... must be placed within mother
+  if ( group ) 
+    {
+      TString name = group->GetName(); name+="_1";
+      TGeoNode *node = mother->FindNode( name );
+      if ( !node )
+	{	  
+	  AgBlock::module()->Warning(AgModule::module()->GetName(), Form("Placing %s in group %s.  WARNING: group is in wrong mother volume.",block_name.Data(),group->GetName() ));
+	}
+    }
+  
+  if ( group && AgPlacement::kOnly==myonly )   
+    {
+      AgBlock::module()->Warning(AgModule::module()->GetName(), Form("Volume %s in %s, effect of MANY is ignored.",block_name.Data(),target->GetName()));
+    }
+
+
+
+    
 
 
   if ( myonly == AgPlacement::kOnly )
