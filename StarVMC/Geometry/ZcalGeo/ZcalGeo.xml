@@ -38,7 +38,7 @@
 
         <Fill name="CALP" comment="Quartz Calorimeter Data"  >
             <var name="version" value="1" comment=" Geometry version number "  />
-            <var name="DROutR" value="40.0" comment=" Outer radius of mother volume tube "  />
+            <var name="DROutR" value="30.0" comment=" Outer radius of mother volume tube "  />
             <var name="DRdz" value="250.0" comment=" Half length of mother volume "  />
             <var name="PHLeng" value="133.35" comment=" Half Length of large diameter Pipe. "  />
             <var name="PHInnR" value="20.0" comment=" Inner radius of Pipe H "  />
