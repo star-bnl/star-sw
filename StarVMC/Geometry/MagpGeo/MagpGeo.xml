@@ -63,7 +63,7 @@
         
   <Fill name="MAGG" comment="Magnet basic dimensions"  >
     <var name="version" value="1" comment=" version number "  />
-    <var name="Rmax" value="364.29" comment=" outer radius of the magnet system "  />
+    <var name="Rmax" value="364.20" comment=" outer radius of the magnet system "  />
     <var name="Length" value="715.00" comment=" magnet system full length "  />
     <var name="test" value="0" comment=" geometry type: 0-standard, 1-test "  />
   </Fill>
@@ -271,6 +271,9 @@
 </Module>
 <!--
   $Log: MagpGeo.xml,v $
+  Revision 1.7  2014/12/23 18:17:59  jwebb
+  Reduced outer radius of magnet mother volume to eliminate sub-mm overlap with mtd.
+
   Revision 1.6  2014/12/22 17:15:57  jwebb
   Place into appropriate group.
 
