@@ -868,7 +868,7 @@
 
         
         zpos = zposE 
-        <Placement block="VPDD" in="CAVE" group="WestRefSys" z="-zpos"  >
+        <Placement block="VPDD" in="CAVE" group="EastRefSys" z="-zpos"  >
             <Rotation thetaz="180"  />
         </Placement>
         
@@ -934,16 +934,17 @@
               
               tempos = (vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.)) 
               <Create block="IBSE"  />
+
 	      <If expr="kIBeamStyle&lt;4"> <!-- west side got new support for kIBeamStyle=4 -->
-                <Placement y="vpds_IBSEYc" x="+vpds_IBSEXc" z="vpds_IBSEZc1" block="IBSE" in="Cave" ></Placement>                
-                <Placement y="vpds_IBSEYc" x="-vpds_IBSEXc" z="vpds_IBSEZc1" block="IBSE" in="Cave" ></Placement>                
-                <Placement y="vpds_IBSEYc" x="+vpds_IBSEXc" z="vpds_IBSEZc2" block="IBSE" in="Cave" ></Placement>               
-                <Placement y="vpds_IBSEYc" x="-vpds_IBSEXc" z="vpds_IBSEZc2" block="IBSE" in="Cave" ></Placement>
+                <Placement block="IBSE" in="Cave" konly="MANY" y="vpds_IBSEYc" x="+vpds_IBSEXc" z="vpds_IBSEZc1" ></Placement>                
+                <Placement block="IBSE" in="Cave" konly="MANY" y="vpds_IBSEYc" x="-vpds_IBSEXc" z="vpds_IBSEZc1" ></Placement>                
+                <Placement block="IBSE" in="Cave" konly="MANY" y="vpds_IBSEYc" x="+vpds_IBSEXc" z="vpds_IBSEZc2" ></Placement>               
+                <Placement block="IBSE" in="Cave" konly="MANY" y="vpds_IBSEYc" x="-vpds_IBSEXc" z="vpds_IBSEZc2" ></Placement>
               </If>
-              <Placement y="vpds_IBSEYc" x="+vpds_IBSEXc" z="-(vpds_IBSEZc1+EWshift)" block="IBSE" in="Cave"  ></Placement>
-              <Placement y="vpds_IBSEYc" x="-vpds_IBSEXc" z="-(vpds_IBSEZc1+EWshift)" block="IBSE" in="Cave"  ></Placement>
-              <Placement y="vpds_IBSEYc" x="+vpds_IBSEXc" z="-(vpds_IBSEZc2+EWshift)" block="IBSE" in="Cave"  ></Placement>
-              <Placement y="vpds_IBSEYc" x="-vpds_IBSEXc" z="-(vpds_IBSEZc2+EWshift)" block="IBSE" in="Cave"  ></Placement>
+              <Placement block="IBSE" in="Cave" konly="MANY" y="vpds_IBSEYc" x="+vpds_IBSEXc" z="-(vpds_IBSEZc1+EWshift)"  ></Placement>
+              <Placement block="IBSE" in="Cave" konly="MANY" y="vpds_IBSEYc" x="-vpds_IBSEXc" z="-(vpds_IBSEZc1+EWshift)"  ></Placement>
+              <Placement block="IBSE" in="Cave" konly="MANY" y="vpds_IBSEYc" x="+vpds_IBSEXc" z="-(vpds_IBSEZc2+EWshift)"  ></Placement>
+              <Placement block="IBSE" in="Cave" konly="MANY" y="vpds_IBSEYc" x="-vpds_IBSEXc" z="-(vpds_IBSEZc2+EWshift)"  ></Placement>
               
               <Create block="IBSF"  />
 	      <If expr="kIBeamStyle&lt;4"> <!-- west side got new support for kIBeamStyle=4 -->
