@@ -602,6 +602,15 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       shape = mShape.Make();
       shape->SetTitle(Form("A %s created in block %s of module %s",shape->GetName(),block->GetName(),module->GetName()));
 
+
+      if ( mDebugOptions[block_name].Contains("shape") )
+    {
+      std::cout << "== Debug Shape: block="<<block_name.Data() << " ==================================" << std::endl;
+      shape->Print();
+    }
+
+
+
       // Create the volume applying the nicknaming convention
       TString nn = StarAgmlStacker::nickname( block->GetName() );	  
       if ( block->GetAssembly() ) 
@@ -816,11 +825,11 @@ Bool_t sanityCheck( TGeoVolume *volume )
 Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 {
 
+  assert(block);
   //
   // Get the block's name
   //
   TString block_name = block->GetName();
-  assert(block);
 
   //
   //////////////////////////////////////////////////////////////////////////////
@@ -1160,6 +1169,26 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 
   // Add the volume to the mother volume or the group
   TGeoVolume *target = (group)?group:mother;
+
+  // Check validity of volume group... must be placed within mother
+  if ( group ) 
+    {
+      TString name = group->GetName(); name+="_1";
+      TGeoNode *node = mother->FindNode( name );
+      if ( !node )
+	{	  
+	  AgBlock::module()->Warning(AgModule::module()->GetName(), Form("Placing %s in group %s.  WARNING: group is in wrong mother volume.",block_name.Data(),group->GetName() ));
+	}
+    }
+  
+  if ( group && AgPlacement::kMany==myonly )   
+    {
+      AgBlock::module()->Warning(AgModule::module()->GetName(), Form("Volume %s in %s, effect of MANY is ignored.",block_name.Data(),target->GetName()));
+    }
+
+
+
+    
 
 
   if ( myonly == AgPlacement::kOnly )
