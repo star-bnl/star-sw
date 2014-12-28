@@ -1887,6 +1887,15 @@ void KFParticleFinder::CombinePartPart(vector<KFParticle>& particles1,
           if( (fabs(mass - massMotherPDG)/massMotherPDGSigma) > 3.f ) continue;
           mother_temp.SetNonlinearMassConstraint(massMotherPDG);
           
+          if(MotherPDG == 428)
+          {
+            mother_temp.CleanDaughtersId();
+            for(int iD=0; iD < tmpPart2[iv]->NDaughters(); iD++)
+              mother_temp.AddDaughterId( tmpPart2[iv]->DaughterIds()[iD] );
+            for(int iD=0; iD < particles1[iP1].NDaughters(); iD++)
+              mother_temp.AddDaughterId( particles1[iP1].DaughterIds()[iD] );            
+          }
+          
           if(vMotherSec && (!(isPrimaryPart[iv])) )
             vMotherSec->push_back(mother_temp);
           if(vMotherPrim)
