@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.17 2013/12/27 16:52:20 ramdebbe Exp $
+// $Id: StPeCPair.cxx,v 1.18 2014/12/23 20:43:10 ramdebbe Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.18  2014/12/23 20:43:10  ramdebbe
+// copied the fill functionality of method with both inputs to the one with MuDst input. This gives TOF extrapolation in the pPairs branch
+//
 // Revision 1.17  2013/12/27 16:52:20  ramdebbe
 // added a input argument StBTofGeometry to fill method (StMuDst + StEvent) and x y z coordinates of intercept to TOF cylinder
 //
@@ -123,12 +126,14 @@ StPeCPair::StPeCPair ( StTrack* trk1, StTrack* trk2,
 }
 
 StPeCPair::StPeCPair ( StMuTrack* trk1, StMuTrack* trk2, 
-                       Bool_t primaryFlag, StMuEvent* event ) {
+                       Bool_t primaryFlag, StMuEvent* event,  StBTofGeometry * pairTOFgeo ) {
   this->Clear();
   //
   // Get Magnetic field from event summary
   //
-  Double_t bFld;  
+  Double_t bFld; 
+
+  pairTOFgeoLocal = pairTOFgeo; 
 
   bFld=event->eventSummary().magneticField()/10.;  
 
@@ -152,7 +157,7 @@ StPeCPair::StPeCPair ( StMuTrack* trk1, StMuTrack* trk2,
   //
   // Get Magnetic field from event summary
   //
-  pairTOFgeoLocal = pairTOFgeo;
+
 
   bFld=event->eventSummary().magneticField()/10.;  
 
@@ -399,20 +404,74 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
    
    StThreeVectorF p1 ; 
    StThreeVectorF p2 ;
-   StPhysicalHelixD h1 ;
-   StPhysicalHelixD h2 ;
+   StPhysicalHelixD h1, hOuter1 ;
+   StPhysicalHelixD h2, hOuter2 ;
+
    short charge1, charge2 ;
- 
+   Int_t mod,eta,sub; 
    StThreeVectorD position,momentum;
 //
+
+   tr1_bemcModule   = -999;
+   tr1_bemcEtabin   = -999;
+   tr1_bemcEtaValue = -999;
+   tr1_bemcPhiValue = -999;
+   tr1_bemcSub      = -999;  
+   tr1_bemcEnergy   = -999;
+   tr2_bemcModule   = -999;
+   tr2_bemcEtabin   = -999;
+   tr2_bemcEtaValue = -999;
+   tr2_bemcPhiValue = -999;
+   tr2_bemcSub      = -999;  
+   tr2_bemcEnergy   = -999;
+
+   tr1_bsmdeModule   = -999;
+   tr1_bsmdeEtabin   = -999;
+   tr1_bsmdeEtaValue = -999;
+   tr1_bsmdePhiValue = -999;
+   tr1_bsmdeSub      = -999;  
+   tr1_bsmdeEnergy   = -999;
+   tr2_bsmdeModule   = -999;
+   tr2_bsmdeEtabin   = -999;
+   tr2_bsmdeEtaValue = -999;
+   tr2_bsmdePhiValue = -999;
+   tr2_bsmdeSub      = -999;  
+   tr2_bsmdeEnergy   = -999;
+
+   tr1_timeOfFlight = -999;
+   tr1_pathLength   = -999;
+   tr1_Beta        = -999;
+   tr2_timeOfFlight = -999;
+   tr2_pathLength   = -999;
+   tr2_Beta        = -999;
+
+   tr1_extrapolatedTOF_mX = -999;
+   tr1_extrapolatedTOF_mY = -999;
+   tr1_extrapolatedTOF_mZ = -999;
+
+   tr2_extrapolatedTOF_mX = -999;
+   tr2_extrapolatedTOF_mY = -999;
+   tr2_extrapolatedTOF_mZ = -999;
+
+
    p1      = muTrack1->momentum();
    p2      = muTrack2->momentum();
    charge1 = muTrack1->charge();
    charge2 = muTrack2->charge();
    h1      = muTrack1->helix() ;
    h2      = muTrack2->helix() ;
+   hOuter1      = muTrack1->outerHelix() ;
+   hOuter2      = muTrack2->outerHelix() ;
    
    StThreeVectorF vtx = event->primaryVertexPosition() ;
+
+
+   StMuBTofPidTraits mBTofPidTraits_1 = muTrack1->btofPidTraits();
+   StMuBTofPidTraits mBTofPidTraits_2 = muTrack2->btofPidTraits();
+
+   //skip calorimeter cluster information, if necessary, it should be filled with the method using StEvent and MuDst
+
+   
 
      fill ( primaryFlag, &(event->eventSummary()), 
 	  p1, h1, charge1, p2, h2, charge2, vtx ) ; 
@@ -421,6 +480,45 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
      tr1.set(1,muTrack1, event); // 1=primary
      tr2.set(1,muTrack2, event);
 #endif
+   tr1_timeOfFlight = mBTofPidTraits_1.timeOfFlight();
+   tr1_pathLength   = mBTofPidTraits_1.pathLength();
+   tr1_Beta         = mBTofPidTraits_1.beta();
+   tr2_timeOfFlight = mBTofPidTraits_2.timeOfFlight();
+   tr2_pathLength   = mBTofPidTraits_2.pathLength();
+   tr2_Beta         = mBTofPidTraits_2.beta();
+   //
+   //extrapolate tracks to TOF
+   //
+   vector<Int_t> idVec;
+   vector<Double_t> pathVec;
+   PointVec  crossVec; 
+
+
+
+
+
+   if(pairTOFgeoLocal->HelixCrossCellIds(hOuter1,idVec,pathVec,crossVec)) 
+     {
+
+       Int_t cellId    = -999;
+       Int_t  moduleId = -999; 
+       Int_t  trayId   = -999;
+       pairTOFgeoLocal->DecodeCellId(idVec[0],cellId,moduleId,trayId);
+       tr1_extrapolatedTOF_mX     = crossVec[0].x();
+       tr1_extrapolatedTOF_mY     = crossVec[0].y();
+       tr1_extrapolatedTOF_mZ = crossVec[0].z();
+     }  
+   if(pairTOFgeoLocal->HelixCrossCellIds(hOuter2,idVec,pathVec,crossVec)) 
+     {
+       Int_t cellId    = -999;
+       Int_t  moduleId = -999; 
+       Int_t  trayId   = -999;
+       pairTOFgeoLocal->DecodeCellId(idVec[0],cellId,moduleId,trayId);
+       tr2_extrapolatedTOF_mX     = crossVec[0].x();
+       tr2_extrapolatedTOF_mY     = crossVec[0].y();
+       tr2_extrapolatedTOF_mZ = crossVec[0].z();
+     }  
+
    return 0 ;
    
 }
@@ -431,7 +529,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
 Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) {
 
    pCharge           = muTrack1->charge()+muTrack2->charge();
-   //  cout<<" in PAIR fill event muEvent"<<endl;
+
    StThreeVectorF p1 ; 
    StThreeVectorF p2 ;
    StPhysicalHelixD h1, hOuter1 ;
@@ -494,7 +592,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) 
    hOuter1      = muTrack1->outerHelix() ;
    hOuter2      = muTrack2->outerHelix() ;
 
-   cout<<" into stpecpair fill"<<endl;
+
 
    StMuBTofPidTraits mBTofPidTraits_1 = muTrack1->btofPidTraits();
    StMuBTofPidTraits mBTofPidTraits_2 = muTrack2->btofPidTraits();
@@ -649,7 +747,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) 
 
    if(pairTOFgeoLocal->HelixCrossCellIds(hOuter1,idVec,pathVec,crossVec)) 
      {
-   cout<<" value of mBTofGeom Helix   "<<endl;
+
        Int_t cellId    = -999;
        Int_t  moduleId = -999; 
        Int_t  trayId   = -999;
@@ -668,7 +766,7 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) 
        tr2_extrapolatedTOF_mY     = crossVec[0].y();
        tr2_extrapolatedTOF_mZ = crossVec[0].z();
      }  
-   cout<<" done with fill "<<endl;
+
    return 0 ;
    
 }
