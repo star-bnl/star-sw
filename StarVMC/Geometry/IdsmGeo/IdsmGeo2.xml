@@ -325,24 +325,23 @@
     <Material name="Air"  />
 
 
-<If expr="IDSC_version .eq. 1" >
-    <Shape type="TUBE" rmin="inR"    rmax="outR"   dz="lengthZ/2."  />
-<Else>
-    <Shape type="PCON" 
-           nz="6" phi1="0" dphi="360"
-           zi = "{eastZ,
-                 eastB, eastB,
-                 westB, westB,
-                 westZ}"
-           rmn ="{0,0,0,0,0,0}"
+<If expr="IDSC_version.eq.1"><Shape type="TUBE" rmin="inR"    rmax="outR"   dz="lengthZ/2."   /></If>
+<If expr="IDSC_version&gt;1"><Shape type="PCON"                                            
+           nz="10" phi1="0" dphi="360"
+           zi = "{eastZ, -398, -398, eastB, eastB, westB, westB, 398, 398, westZ}"
+           rmn ="{0,0,0,0,0,0,0,0,0,0}"
            rmx ="{1.5*inch+0.8125*inch,
-                 1.5*inch+0.8125*inch, outR,
-                 Outr, 1.5*inch+0.8125*inch,
-                 1.5*inch+0.8125*inch}" 
-     />
+	          1.5*inch+0.8125*inch,
+		  5.36, 
+		  5.36, 
+		  outR, 
+		  outR, 
+		  5.36, 
+		  5.36,
+		  1.5*inch+0.8125*inch, 
+		  1.5*inch+0.8125*inch}"   /></If>
 
-  </Else>
-</If>
+
 
     <!--  place the middle cone  volumes -->  
     <Create    block="OSCA" />

@@ -224,12 +224,10 @@
 	    <Placement block="HTWR" x="-(((towr_nTowerX/2)*towr_dx*2)-towr_dx)+(i*towr_dx*2)" y="-(((towr_nTowerY/2)*towr_dy*2)-towr_dy)+(j*towr_dy*2)" z="0.0" />
 	  </If>
 
-
 	  <If expr="(flag3.eq.1) ">
 	    <Create block="HACL" />
 	    <Placement block="HACL" x="-(((towr_nTowerX/2)*towr_dx*2)-towr_dx)+(i*towr_dx*2)" y="-(((towr_nTowerY/2)*towr_dy*2)-towr_dy)+(j*towr_dy*2)" z="0.0" />
 	  </If>
-
 
 	</For>
 
@@ -369,7 +367,7 @@
       <Material name="Polystyren"  />
       <Material name="SensPoly"  isvol="1" />
       <Medium name="standard"  />
-      <Attribute seen="1" colo="3" />
+      <Attribute seen="0" colo="3" />
       <Shape type="TUBE" rmin="fibr_rmin" rmax="fibr_rmax" dz="fibr_dz" />
 
       <!--
@@ -387,7 +385,7 @@
       <Material name="Polystyren"  />
       <Material name="SensPoly"  isvol="1" />
       <Medium name="standard"  />
-      <Attribute seen="1" colo="3" />
+      <Attribute seen="0" colo="3" />
       <Shape type="TUBE" rmin="fibr_rmin" rmax="fibr_rmax" dz="fibr_dz" />
 
       <!-- Attach hits to volume HCES.  Hits are cumulative -->

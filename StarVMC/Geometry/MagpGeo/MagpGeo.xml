@@ -8,7 +8,7 @@
   <Created date="19 March 1996 "  />
 
   <Content  >
-    MAGP,COIL,MTCL,MPTV,MPCV,MRET,MRGV,MSEC,MBAR,MCSE, PANC,PAWT,PTNC,PTWT,PMTB
+    MAGP,COIL,MTCL,MPTV,MPCV,MRET,MRGV,MSEC,MBAR,MCSE, PANC,PAWT,PTNC,PTWT
   </Content>
         
 
@@ -67,8 +67,8 @@
         
   <Fill name="MAGG" comment="Magnet basic dimensions"  >
     <var name="version" value="1" comment=" version number "  />
-    <var name="Rmax" value="144.313 * 2.54" comment=" outer radius of the magnet system, John Scheblein, 01/24/14 "  />
-    <var name="Length" value="285.440 * 2.54" comment=" magnet system full length, John Scheblein, 01/24/14 "  />
+    <var name="Rmax" value="364.20" comment=" outer radius of the magnet system "  />
+    <var name="Length" value="715.00" comment=" magnet system full length "  />
     <var name="test" value="0" comment=" geometry type: 0-standard, 1-test "  />
   </Fill>
   
@@ -125,17 +125,8 @@
   Zcut     = mend_tcoilRmn*TanTheta-mend_PoleZ 
 
   <Create    block="MAGP"  />
-  <Placement block="MAGP" in="Cave" konly="MANY" />
-
-  <Create    block="PMTB" comment="is the EEMC PMT boxes" />
-  <Placement block="PMTB" in="Cave" z="magg_Length/2+mend_dZPMT/2" />
-
-  <Volume name="PMTB"    comment="is the EEMC PMT boxes" >
-     <Mixture name="PMTBIron" dens = "7.87*3./mend_dZPMT" comment="Effective length 3 inch">
-        <Component name="Iron"      a="55.85"   z="26" w="1.0"  />
-     </Mixture>
-     <Shape type="TUBE" rmax="mend_PoleRmx-mend_dRPMT" rmin="Rcorner+mend_dRPMT" dz="mend_dZPMT/2"  />
-  </Volume>
+  <Placement block="MAGP" in="CAVE" group="MagRefSys" konly="ONLY" />
+        
 
   <Volume name="MAGP" comment="is the magnet mother"  >
 
@@ -273,7 +264,7 @@
     <Placement block="MTCL" z="-mend_tcoilDZ/2+mend_PoleCavD/2" />   
   </Volume>
         
-  <Volume name="MTCL" comment="is TRIM COIL Volume"  >
+  <Volume name="MTCL" comment="is TRIM COIL Volume (filled with aluminum)"  >
     <Material name="epoxy"  />
     <Attribute for="MTCL" seen="1" colo="7"  />
     <Shape type="TUBE" rmax="mend_tcoilRmx" rmin="mend_tcoilRmn" dz="mend_tcoilDZ/2"  />
@@ -313,6 +304,15 @@
 </Module>
 <!--
   $Log: MagpGeo.xml,v $
+  Revision 1.8  2014/12/23 20:25:23  jwebb
+  MAGP can be placed with ONLY now, as it doesn't overlap with neighbors.
+
+  Revision 1.7  2014/12/23 18:17:59  jwebb
+  Reduced outer radius of magnet mother volume to eliminate sub-mm overlap with mtd.
+
+  Revision 1.6  2014/12/22 17:15:57  jwebb
+  Place into appropriate group.
+
   Revision 1.5  2013/04/30 18:06:17  jwebb
   MAGP now flagged as many due to overlap with MTD.
 

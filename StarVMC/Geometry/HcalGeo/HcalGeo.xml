@@ -25,7 +25,10 @@
       HCSY,     <!-- "" -->
       HFIB,     <!-- fibers for Short cell  -->  
       HFIC,      <!-- fibers for Long cell, bcoz of the limitation of STAR AgML -->  
-      HSLD
+      HSLD,     <!-- bottom table -->
+      HSWR,    <!-- pre shower module -->
+      HSTP,    <!-- each stripes in one pre-shower, 20 stripes in one pre shower -->
+      HSFE      <!-- metal plate in between two pre-shower -->
     </Content>
 
     <varlist type="int">
@@ -99,13 +102,37 @@
     </Structure>
 
 
+    <Structure name="pres" comment="Pre_Shower ">
+      <var name="version" type="float"/>
+      <var name="xP1"       type="float"/>  
+      <var name="yP1"       type="float"/>
+      <var name="zP1"       type="float"/>
+      <var name="rP1"       type="float"/>
+      <var name="xP2"       type="float"/>
+      <var name="yP2"       type="float"/>
+      <var name="zP2"       type="float"/>
+      <var name="rP2"       type="float"/>
+      <var name="xFe"       type="float"/>
+      <var name="yFe"       type="float"/>
+      <var name="zFe"       type="float"/>
+      <var name="rFe"       type="float"/>
+      <var name="strpXd"    type="float"/>
+      <var name="strpYd"    type="float"/>
+      <var name="strpZd"    type="float"/>
+      <var name="FeXd"      type="float"/>
+      <var name="FeYd"      type="float"/>
+      <var name="FeZd"      type="float"/>
+      <var name="strips"     type="float"/>
+    </Structure>
+
+
 
 
     <Fill name="mcdt" comment=" Mother Calorimeter">
       <var name="version" value="1.0"       comment="face center of calorimeter"/>
-      <var name="x"       value="-50.0"     comment="x cdt from center of TPC"/>
-      <var name="y"       value="0.0"       comment="y cdt from center of TPC"/>
-      <var name="z"       value="778.5"     comment="z cdt from center of TPC"/>  <!-- 778.5 = (dis. from TPC + half of length of calorimeter) = 720 + (117/2)  -->
+      <var name="x"       value="-69.8"     comment="x cdt from center of TPC"/>
+      <var name="y"       value="4.9"       comment="y cdt from center of TPC"/>
+      <var name="z"       value="777.4"     comment="z cdt from center of TPC"/>  <!-- 778.5 = (dis. from TPC + half of length of calorimeter) = 748.9 + (117/2) + Les's correction(-30)  -->
       <var name="dx"      value="60/2."     comment="HCMO width"/>
       <var name="dy"      value="(60+5)/2." comment="HCMO height + shild hight"/>
       <var name="dz"      value="117/2."    comment="HCMO length"/>
@@ -158,11 +185,38 @@
       <var name="dzd"      value="127.0/2" coment="Dimentions of base ,Down"/>
    </Fill>
 
+    <Fill name="pres" comment="Pre_Shower ">
+      <var name="version"   value="1.0"    coment="pre-shower dimention" />
+      <var name="xP1"       value="0.0"    coment="cdt of outer pre shower"/>
+      <var name="yP1"       value="0.0"    coment=""     />
+      <var name="zP1"       value="-70.2"  coment=""     />
+      <var name="rP1"       value="45.0"   coment=""     />
+      <var name="xP2"       value="0.0"    coment="i cdt of inner(close to hcal) pre shower"     />
+      <var name="yP2"       value="0.0"    coment=""     />
+      <var name="zP2"       value="-66.2"   coment=""     />
+      <var name="rP2"       value="-45.0"  coment=""     />
+      <var name="xFe"       value="0.0"    coment=" cdt of metal plate between pre shower"     />
+      <var name="yFe"       value="0.0"    coment=""     />
+      <var name="zFe"       value="-68.2"   coment=""     />
+      <var name="rFe"       value="45.0"   coment=""     />
+      <var name="strpXd"    value="1.25"   coment=" dim. of each strp"     />
+      <var name="strpYd"    value="45.0"   coment=""     />
+      <var name="strpZd"    value="0.50"   coment=""     />
+      <var name="FeXd"      value="24.1"   coment=" dim. of metal plate"     />
+      <var name="FeYd"      value="24.1"   coment=""     />
+      <var name="FeZd"      value="0.31"   coment=""     />
+      <var name="strips"     value="20"     coment="i number of strips in each pre shower"     />
+    </Fill>
+
+
+
+
     <Use struct="mcdt" select="version" value="1.0" />
     <Use struct="towr" select="version" value="1.0" />
     <Use struct="cell" select="version" value="1.0" />
     <Use struct="fibr" select="version" value="1.0" />
     <Use struct="shld" select="version" value="1.0" />
+    <Use struct="pres" select="version" value="1.0" />
 
     <Create    block="HCMO"/>
     <Placement block="HCMO" in="CAVE" x="mcdt_x" y="mcdt_y" z="mcdt_z"/> 
@@ -185,6 +239,21 @@
 
     <Create    block="HSLD"/>
     <Placement block="HSLD" x="shld_xd" y="shld_yd" z="shld_zd"/> 
+
+    <Create    block="HSWR"/><!-- pre shower closer to hcal -->
+    <Placement block="HSWR" x="pres_xP2" y="pres_yP2" z="pres_zP2"> 
+      <Rotation alphaz="pres_rP2"  />
+    </Placement>
+
+    <Create    block="HSFE"/> <!-- metal plate in between two pre-shower -->
+    <Placement block="HSFE" x="pres_xFe" y="pres_yFe" z="pres_zFe"> 
+      <Rotation alphaz="pres_rFe"  />
+    </Placement>
+
+    <Create    block="HSWR"/> <!-- outer pre shower -->
+    <Placement block="HSWR" x="pres_xP1" y="pres_yP1" z="pres_zP1"> 
+      <Rotation alphaz="pres_rP1"  />
+    </Placement>
 
     </Volume>
 
@@ -336,6 +405,38 @@
       <Shape type="Box" dx="shld_dxd" dy="shld_dyd" dz="shld_dzd" />
     </Volume>
 
+    <Volume name="HSWR" comment="Mother of pre shower">
+      <Material  name="Air"      /> 
+      <Medium    name="Standard" />
+      <Attribute seen="0" colo="2" />
+      <Shape type="Box" dx="25.0" dy="50.0" dz="8.0" />
+      <For var="i" from="0" to="pres_strips-1">
+	  <Create block="HSTP" />
+	  <Placement block="HSTP" x="-23.75+(i*2*pres_strpXd)" y="0.0" z="0.0" />
+      </For>
+
+    </Volume>
+    <Volume name="HSTP" comment="single strips in pre shower">
+      <Material name="Polystyren"  />
+      <Material name="SensPoly"  isvol="1" />
+      <Medium name="standard"  />
+      <Attribute seen="1" colo="7" />
+      <Shape type="Box" dx="pres_strpXd" dy="pres_strpYd" dz="pres_strpZd" />
+      
+      <Instrument block="HSTP" comment="Hit declaration ">	
+	<Hit meas="birk" opts="C" nbits="0" min="0" max="100.0"  />
+      </Instrument>
+      
+    </Volume>
+
+    <Volume name="HSFE" comment="Fe in between two pre shower">
+      <Material name="Iron"  />
+      <Medium name="standard"  />
+      <Attribute seen="1" colo="2" />
+      <Shape type="Box" dx="pres_FeXd" dy="pres_FeYd" dz="pres_FeZd" />
+    </Volume>
+
+
 
   </Module>
 
@@ -356,7 +457,7 @@
 
   ! activate following for fiber only
   !if(nlevel.eq.8) then        ! nlevel == 8 is fiber
-  zhcal=720+117-VECT(3)        ! Also... hardcoded positions... 
+  zhcal=718.9+117-VECT(3)        ! Also... hardcoded positions... 
   att=exp(-zhcal/220)
   !Write (*,*) name, nlevel,' z=',zhcal,' deStep = ', deStep, adestep, att
   hit = deStep * att

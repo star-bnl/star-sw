@@ -1295,6 +1295,7 @@ Bool_t Geometry::CaveInit()
   caveGeom.select="CAVE04"; caveGeom.config=4; caveGeom.module="CaveGeo"; caveGeom.fill();
   //replace [exe CAVE05;] with [ "How about we just get the dimensions right and be done with it"; CaveConfig=5;]
   caveGeom.select="CAVE05"; caveGeom.config=5; caveGeom.module="CaveGeo2";  caveGeom.fill();
+  caveGeom.select="CAVE06"; caveGeom.config=6; caveGeom.module="CaveGeo3";  caveGeom.fill();
   return true;
 }
 // ----------------------------------------------------------------------
@@ -2185,6 +2186,12 @@ Bool_t Geometry::VpddInit()
     vpddGeom.config=7;
     vpddGeom.fill();
   }
+
+  vpddGeom.select="VPDD08"; 
+  vpddGeom.module="VpddGeo3";
+  vpddGeom.config=7;
+  vpddGeom.fill();
+
   return true;
 }
 // ----------------------------------------------------------------------------
