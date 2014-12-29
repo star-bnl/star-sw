@@ -66,6 +66,7 @@
  *
  **************************************************************************/
 #include <algorithm>
+#include <assert.h>
 #include "Riostream.h"
 #include "TClass.h"
 #include "TFile.h"
@@ -73,6 +74,7 @@
 #include "StTrack.h"
 #include "StG2TrackVertexMap.h"
 #include "TString.h"
+#include "TMath.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
@@ -109,50 +111,70 @@ StVertex::operator!=(const StVertex& v) const
 StMatrixF
 StVertex::covariantMatrix() const
 {
-  const StTrackMassFit *mKFVertex = parentMF();
+//   const StTrackMassFit *mKFVertex = parent();
   StMatrixF m(3,3);
-  if (! mKFVertex) {
+//   if (! mKFVertex) {
     m(1,1) = mCovariantMatrix[0];
     m(1,2) = m(2,1) = mCovariantMatrix[1];
     m(2,2) = mCovariantMatrix[2];
     m(1,3) = m(3,1) = mCovariantMatrix[3];
     m(2,3) = m(3,2) = mCovariantMatrix[4];
     m(3,3) = mCovariantMatrix[5];
-  } else {
-     KFParticle *kf = (KFParticle *) mKFVertex->kfParticle();
-     m(1,1) = kf->Covariance(0);
-     m(1,2) = m(2,1) = kf->Covariance(1);
-     m(2,2) = kf->Covariance(2);
-     m(1,3) = m(3,1) = kf->Covariance(3);
-     m(2,3) = m(3,2) = kf->Covariance(4);
-     m(3,3) = kf->Covariance(5);
-  }
+//   } else {
+//      KFParticle *kf = (KFParticle *) mKFVertex->kfParticle();
+//      m(1,1) = kf->GetCovariance(0,0);
+//      m(1,2) = m(2,1) = kf->GetCovariance(0,1);
+//      m(2,2) = kf->GetCovariance(1,1);
+//      m(1,3) = m(3,1) = kf->GetCovariance(0,2);
+//      m(2,3) = m(3,2) = kf->GetCovariance(1,2);
+//      m(3,3) = kf->GetCovariance(2,2);
+//   }
   return m;
 }
 
 StThreeVectorF
 StVertex::positionError() const
 {
-  const StTrackMassFit *mKFVertex = parentMF();
+  const StTrackMassFit *mKFVertex = parent();
+  Float_t sigma[3];
   if (! mKFVertex) {
-    return StThreeVectorF(::sqrt(mCovariantMatrix[0]), ::sqrt(mCovariantMatrix[2]), ::sqrt(mCovariantMatrix[5]));
+    Int_t ind[3] = {0, 2, 5};
+    for (Int_t i = 0; i < 3; i++) {
+      sigma[i] = mCovariantMatrix[ind[i]];
+      if (sigma[i] >= 0.0) sigma[i] = TMath::Sqrt(sigma[i]);
+      else                 sigma[i] = -13.;
+    }
   } else {
     KFParticle *kf = (KFParticle *) mKFVertex->kfParticle();
-    return StThreeVectorF(::sqrt(kf->Covariance(0)), ::sqrt(kf->Covariance(2)), ::sqrt(kf->Covariance(5)));
+    for (Int_t i = 0; i < 3; i++) {
+      sigma[i] = kf->GetCovariance(i,i);
+      if (sigma[i] >= 0.0) sigma[i] = TMath::Sqrt(sigma[i]);
+      else                 sigma[i] = -13.;
+    }
   }
+  return StThreeVectorF(sigma);
 }
 
-void StVertex::setParent(StTrack* val) { 
+void StVertex::setParent(StTrackMassFit* val) { 
   mParent = val; 
-  StTrackMassFit *mKFVertex = parentMF();
+  StTrackMassFit *mKFVertex = parent();
   if (mKFVertex) {
-    mPosition.set(mKFVertex->kfParticle()->X(),mKFVertex->kfParticle()->Y(),mKFVertex->kfParticle()->Z());
-    mCovariantMatrix[0] = mKFVertex->kfParticle()->Covariance(0);
-    mCovariantMatrix[1] = mKFVertex->kfParticle()->Covariance(1);
-    mCovariantMatrix[2] = mKFVertex->kfParticle()->Covariance(2);
-    mCovariantMatrix[3] = mKFVertex->kfParticle()->Covariance(3);
-    mCovariantMatrix[4] = mKFVertex->kfParticle()->Covariance(4);
-    mCovariantMatrix[5] = mKFVertex->kfParticle()->Covariance(5);
+    KFParticle *kf = (KFParticle *) mKFVertex->kfParticle();
+    mPosition.set(kf->X(),kf->Y(),kf->Z());
+//     assert (  TMath::Abs(mCovariantMatrix[0]) < 1e-7 ||
+// 	     (TMath::Abs(mCovariantMatrix[0] - kf->GetCovariance(0,0)) < 1e-7 &&
+// 	      TMath::Abs(mCovariantMatrix[1] - kf->GetCovariance(0,1)) < 1e-7 &&
+// 	      TMath::Abs(mCovariantMatrix[2] - kf->GetCovariance(1,1)) < 1e-7 &&
+// 	      TMath::Abs(mCovariantMatrix[3] - kf->GetCovariance(0,2)) < 1e-7 &&
+// 	      TMath::Abs(mCovariantMatrix[4] - kf->GetCovariance(1,2)) < 1e-7 &&
+// 	      TMath::Abs(mCovariantMatrix[5] - kf->GetCovariance(2,2)) < 1e-7 )
+// 	    );
+    mCovariantMatrix[0] = kf->GetCovariance(0,0);
+    mCovariantMatrix[1] = kf->GetCovariance(0,1);
+    mCovariantMatrix[2] = kf->GetCovariance(1,1);
+    mCovariantMatrix[3] = kf->GetCovariance(0,2);
+    mCovariantMatrix[4] = kf->GetCovariance(1,2);
+    mCovariantMatrix[5] = kf->GetCovariance(2,2);
   }
 }
 void StVertex::setCovariantMatrix(float val[6]) { copy(val, val+6, mCovariantMatrix); }
@@ -259,7 +281,7 @@ void StVertex::removeMassFit(StTrackMassFit* p) {
 }
 //________________________________________________________________________________
 std::ostream&  operator<<(std::ostream& os,  const StVertex& v) {
-    const StTrackMassFit *mF = dynamic_cast<const StTrackMassFit *>(v.parent());
+    const StTrackMassFit *mF = v.parent();
     if (mF && mF->kfParticle()) {
         os << *mF->kfParticle();
     } 
