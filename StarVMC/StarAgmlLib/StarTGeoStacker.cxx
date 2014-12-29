@@ -602,15 +602,6 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       shape = mShape.Make();
       shape->SetTitle(Form("A %s created in block %s of module %s",shape->GetName(),block->GetName(),module->GetName()));
 
-
-      if ( mDebugOptions[block_name].Contains("shape") )
-    {
-      std::cout << "== Debug Shape: block="<<block_name.Data() << " ==================================" << std::endl;
-      shape->Print();
-    }
-
-
-
       // Create the volume applying the nicknaming convention
       TString nn = StarAgmlStacker::nickname( block->GetName() );	  
       if ( block->GetAssembly() ) 
@@ -629,6 +620,15 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 
       mVolumeTable[nn]=volume;    // Add the nicknamed volume to the volume table
       block -> addNickname( nn ); // Add the nickname to the block
+
+
+      if ( mDebugOptions[block_name].Contains("shape") )
+	{
+	  std::cout << "== Debug Shape: block="<<block_name.Data() << " ==================================" << std::endl;
+	  volume->InspectShape();
+	}
+
+
     }
 
 
