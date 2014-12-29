@@ -96,10 +96,10 @@ public:
     Float_t                probChiSquared() const { return mProbChiSquared; }
     StMatrixF              covariantMatrix() const;  // overwrite inherited
     StThreeVectorF         positionError() const;    // overwrite inherited
-    StTrack*               parent()        { return mParent; }
-    const StTrack*         parent() const  { return mParent; }
-    StTrackMassFit*        parentMF()        { return dynamic_cast<StTrackMassFit*>(parent()); }
-    const StTrackMassFit*  parentMF() const  { return dynamic_cast<const StTrackMassFit*>(parent()); }
+    StTrackMassFit*        parent()        { return mParent; }
+    const StTrackMassFit*  parent() const  { return mParent; }
+    StTrackMassFit*        parentMF()        { return parent(); }
+    const StTrackMassFit*  parentMF() const  { return parent(); }
     virtual UInt_t         numberOfDaughters()    const {NotImplemented("numberOfDaughters"); return 0;}
     virtual UInt_t         numberOfGoodTracks()   const {NotImplemented("numberOfGoodTracks"); return 0;}
     virtual StTrack*       daughter(UInt_t)       {NotImplemented("daughter"); return 0;}
@@ -115,7 +115,7 @@ public:
     virtual void setCovariantMatrix(Float_t[6]);
     virtual void setChiSquared(Float_t val) { mChiSquared = val; }
     virtual void setProbChiSquared(Float_t val) { mProbChiSquared = val; }
-    virtual void setParent(StTrack*);
+    virtual void setParent(StTrackMassFit*);
     virtual void addDaughter(StTrack*) {NotImplemented("addDaughter");}
     virtual void addMassFit(StTrackMassFit*);
     virtual void removeMassFit(StTrackMassFit*);
@@ -155,14 +155,9 @@ protected:
     UShort_t      mIdTruth; // MC vertex id if any 
     UShort_t      mQuality; // quality of this information (percentage of tracks coming the above MC Vertex)
     Int_t         mIdParent;// Id of MC parent track
+    StTrackMassFit*mParent;// 
     Char_t        mEnd[1]; //!
     static        UInt_t fgNoFitPointCutForGoodTrack;
-    //  StTrack*  mParent;           	//$LINK
-#ifdef __CINT__
-    StObjLink     mParent;            
-#else
-    StLink<StTrack> mParent;            
-#endif //__CINT__
 protected:
     StSPtrVecTrackMassFit    mMassFits;
     
