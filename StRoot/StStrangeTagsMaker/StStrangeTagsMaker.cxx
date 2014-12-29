@@ -76,7 +76,6 @@
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
 #include "StEventTypes.h"
-#include "StTrack.h"
 #include "TMath.h"
 #include "PhysicalConstants.h"
 #include "phys_constants.h"
@@ -299,9 +298,18 @@ void StStrangeTagsMaker::fillTag()
   // Kinks
   StSPtrVecKinkVertex& kinkVertices = mEvent->kinkVertices();
   for(StSPtrVecKinkVertexIterator i=kinkVertices.begin();i != kinkVertices.end();i++){
+#ifndef StTrackMassFit_hh
     StTrack* parentTrack=(*i)->parent();
     Int_t charge = parentTrack->geometry()->charge();
     Float_t ptKink = parentTrack->geometry()->momentum().perp();
+#else /* StTrackMassFit_hh */
+    StTrackMassFit* parentTrack=(*i)->parent();
+    if (! parentTrack) continue;
+    KFParticle *particle = parentTrack->kfParticle();
+    if (! particle) continue;
+    Int_t charge = particle->GetQ();
+    Float_t ptKink = TMath::Sqrt(particle->Px()*particle->Px() + particle->Py()*particle->Py());
+#endif /* ! StTrackMassFit_hh */
     if(charge > 0){
       nKinkPos++;
       if(ptKink > maxPtKinkPos) maxPtKinkPos = ptKink;
