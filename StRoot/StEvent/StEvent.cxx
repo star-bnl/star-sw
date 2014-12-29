@@ -228,7 +228,6 @@
 #include "StFgtCollection.h"
 #include "StPxlHitCollection.h"
 #include "StIstHitCollection.h"
-#include "StIstHitCollection.h"
 #include "StGmtCollection.h"
 #include "StTrackNode.h"
 #include "StTrack.h"
@@ -788,6 +787,23 @@ StEvent::fgtCollection() const
     return fgtCollection;
 }
 
+StIstHitCollection*
+StEvent::istHitCollection()
+{
+    StIstHitCollection *istHitCollection = 0;
+    _lookup(istHitCollection, mContent);
+    return istHitCollection;
+}
+
+const StIstHitCollection*
+StEvent::istHitCollection() const
+{
+    StIstHitCollection *istHitCollection = 0;
+    _lookup(istHitCollection, mContent);
+    return istHitCollection;
+}
+
+
 StPxlHitCollection*
 StEvent::pxlHitCollection()
 {
@@ -1253,25 +1269,15 @@ StEvent::setFgtCollection(StFgtCollection* val)
 }
 
 void
-StEvent::setPxlHitCollection(StPxlHitCollection* val)
+StEvent::setIstHitCollection(StIstHitCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-StIstHitCollection*
-StEvent::istHitCollection()
+void 
+StEvent::setPxlHitCollection(StPxlHitCollection* val)
 {
-    StIstHitCollection *istHitCollection = 0;
-    _lookup(istHitCollection, mContent);
-    return istHitCollection;
-}
-
-const StIstHitCollection*
-StEvent::istHitCollection() const
-{
-    StIstHitCollection *istHitCollection = 0;
-    _lookup(istHitCollection, mContent);
-    return istHitCollection;
+    _lookupAndSet(val, mContent);
 }
 
 void 
