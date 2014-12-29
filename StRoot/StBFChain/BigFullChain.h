@@ -1024,13 +1024,19 @@ Bfc_st BFC[] = { // standard chains
    ,                                                              "Base chain for 2014a ITTF (tpc)",kFALSE},
 
   {"P2014","" ,"",
-   "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,analysis"
+   "B2014,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,trgd,ZDCvtx,analysis" //,l3onl,fpd
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
   // Target Chain options for BES -> P2014a,DbV20140410,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D
   {"P2014a","" ,"",
-   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis,"
+   "B2014a,ITTF,UseXgeom,BAna,hitfilt,VFMinuit,emcDY2,fpd,trgd,ZDCvtx,StiHftC,analysis,"
    ,                      "","","Production chain for 2014 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
+  {"P2014aPxLData","" ,"",
+   "P2014a,pxlRaw, pxlCluster, pxlHit, istRaw, istCluster, istHit"
+   ,                      "","","Production chain for 2014 data with pixel, ist",kFALSE},
+  {"P2014aPxLSim","" ,"",
+   "P2014a,pxlfastsim, istfastsim"
+   ,                      "","","Production chain for 2014 simulation wtih pixesl, ist",kFALSE},
 
 
 
@@ -1530,7 +1536,8 @@ Bfc_st BFC[] = { // standard chains
   {"fgtPoint"   ,"","", "event",      "StFgtPointMaker",    "StFgtPointMaker", "Creates FGT points",kFALSE},
 
   // Some global Sti stuff including vertexing
-  {"genvtx","","","ctf_T,EEmcUtil","StGenericVertexMaker"
+  {"TMVARank"   ,"","","" ,"","StTMVARank","Load STAR interface to TMVA for primary vertex ranking",kFALSE},
+  {"genvtx","","","TMVARank,ctf_T,EEmcUtil","StGenericVertexMaker"
    ,"ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti"
    ,                                "Generic Vertex Finder library (default is MinuitVertexFinder)",kFALSE},
   {"VFMinuit"  ,""  ,""  ,"genvtx"                   ,"","","... Generic VF will use Minuit method",kFALSE},
@@ -1573,10 +1580,10 @@ Bfc_st BFC[] = { // standard chains
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
    ,                                         "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
-  {"StiCA"    ,"Sti","","[-Sti,-StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
+  {"StiCA"    ,"Sti","","-Sti,-StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                                "StEventUtilities,libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
   {"HLTCA"    ,""  ,"Sti","",                  "StHLTCAMaker","StHLTCAMaker",  "HLT reconstruction",kFALSE},
-  {"KFVertex" ,""  ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
+  {"KFVertex" ,""  ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2,TMVARank"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
   {"Stv"     ,"Stv","","-TpcIT,-SvtIT,-SsdIT,gen_T,sim_T","StvMaker"
    ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker"
