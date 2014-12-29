@@ -15,7 +15,11 @@ class StEvent;
 class StiIstDetectorGroup : public StiDetectorGroup<StEvent>
 {
 public:
-   StiIstDetectorGroup(bool active, bool buildIdealGeom=false);
+
+   /// Options to identify different IST detector builders
+   enum IstDetectorBuilderImpl {kDefault, kFirstPro};
+
+   StiIstDetectorGroup(bool active, IstDetectorBuilderImpl istImpl=kDefault, bool buildIdealGeom=false);
    ~StiIstDetectorGroup();
 };
 

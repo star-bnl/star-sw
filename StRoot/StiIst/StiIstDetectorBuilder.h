@@ -1,11 +1,17 @@
 #ifndef StiIstDetectorBuilder_h
 #define StiIstDetectorBuilder_h
 
+#include "TGeoMatrix.h"
+#include "TVector3.h"
+
 #include "Sti/StiDetectorBuilder.h"
 
 class StIstDb;
-class StiMaterial;
+class StiDetector;
+class StiIsActiveFunctor;
+class StiShape;
 class StiPlacement;
+class StiMaterial;
 
 
 class StiIstDetectorBuilder : public StiDetectorBuilder
@@ -18,16 +24,14 @@ public:
 
 protected:
 
+   virtual void buildInactiveVolumes();
+
    bool          mBuildIdealGeom;
    StIstDb      *mIstDb;
 
 private:
 
-   void buildInactiveVolumes();
-   void buildPlanerVolume(StiDetector& detector, std::string detName, float halfDepth, float thickness, float halfWidth,
-         float yShift, float rShift, float zShift, StiPlacement *placement, StiMaterial *mat);
-   void buildTubeVolume(StiDetector& detector, std::string detName, float halfDepth, float thickness,
-         float outerRadius, float openingAngle, float zCenter, StiMaterial *mat);
+   static StiPlacement* createPlacement(const TGeoMatrix& transMatrix, const TVector3& localCenterOffset=TVector3(), const TVector3& normal=TVector3(0, 1, 0));
 };
 
 #endif

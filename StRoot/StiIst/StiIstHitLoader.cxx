@@ -91,7 +91,7 @@ void StiIstHitLoader::loadHits(StEvent *source,
                LOG_DEBUG << "Xg/Yg/Zg : " << hit->position().x() << "/" << hit->position().y() << "/" << hit->position().z() << endm;
                LOG_DEBUG << "Xl/Yl/Zl : " << hit->localPosition(0) << "/" << hit->localPosition(1) << "/" << hit->localPosition(2) << endm;
 
-               detector = _detector->getDetector(layer, ladder);
+               detector = _detector->getDetector(layer-1, ladder-1);
 
                if (!detector)
                   throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
