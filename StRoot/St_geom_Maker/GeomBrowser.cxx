@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.24 2012/01/31 01:11:03 perev Exp $
+// ** $Id: GeomBrowser.cxx,v 1.25 2014/12/10 02:09:06 perev Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #define  NO_GEANT_MAKER
@@ -413,6 +413,36 @@ void GeomBrowser::fileOpenMacro( const QString &fileName )
     else if (!gROOT->LoadMacro(str.c_str()))  {
       TDataSet *topSet = (TDataSet *)gROOT->ProcessLineFast("CreateTable()");
     } 
+    if ( gGeoManager) {
+      fOpenFileName = fileName;
+      QString name = gGeoManager->GetName();
+      fTreeWidget->AddModel2ListView(gGeoManager,name);
+    }
+
+
+    if (!gGeoManager) {
+       QMessageBox::warning(this,"Open ROOT macro geometry file","Can not open the macro file");
+    }
+    CleanGeoManager();
+    QApplication::restoreOverrideCursor();
+}
+//_____________________________________________________________________________
+void GeomBrowser::fileOpenAgmlMacro( const QString &fileName )
+{
+  // Read ROOT macro with the ROOT TGeo geometry model
+    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+    std::string str = fileName.toStdString();
+    if ( gGeoManager) {		//Ready
+    }
+    else {
+      TString agml("$STAR");
+      agml+="/StarVMC/Geometry/macros/loadStarGeometry.C";
+      agml+="(\""; agml+=str.c_str(); agml+="\")";
+      printf("@@@=%s @@@\n",agml.Data());
+      gSystem->ExpandPathName(agml);
+      int err = gROOT->Macro(agml.Data()); 
+      if (err) gGeoManager = 0;
+    }
     if ( gGeoManager) {
       fOpenFileName = fileName;
       QString name = gGeoManager->GetName();
