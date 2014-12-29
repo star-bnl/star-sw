@@ -46,7 +46,7 @@ public:
 
    // Get CVS
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.14 2014/10/13 22:33:05 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstRawHitMaker.h,v 1.14 2014/10/13 22:33:05 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
