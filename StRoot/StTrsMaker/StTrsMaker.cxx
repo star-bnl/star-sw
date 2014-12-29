@@ -1,7 +1,12 @@
-// $Id: StTrsMaker.cxx,v 1.89 2013/03/26 15:56:00 genevb Exp $
+// $Id: StTrsMaker.cxx,v 1.90 2014/12/16 04:09:08 perev Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.90  2014/12/16 04:09:08  perev
+// In Make() SetSeed() for StTrsRand called. Input seed tkane from g2t_event::ge_rndm[2]
+// It is made for reproducion event after skip previous ones.
+// Simulation of event is independent now.
+//
 // Revision 1.89  2013/03/26 15:56:00  genevb
 // Replace agufld(x,b) with direct call to StarMagField::Instance()->BField(x,b)
 //
@@ -395,6 +400,7 @@ using std::max;
 #include "StSequence.hh"
 
 // g2t tables
+#include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h" 
@@ -405,7 +411,7 @@ using std::max;
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.89 2013/03/26 15:56:00 genevb Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.90 2014/12/16 04:09:08 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -655,6 +661,11 @@ Int_t StTrsMaker::Make(){
     //
     TDataSetIter geant(GetDataSet("geant"));
     
+    St_g2t_event *g2tevent = (St_g2t_event *)(geant("g2t_event"));
+    if ( !g2tevent  )  return kStWarn;
+    g2t_event_st *event = g2tevent->GetTable();
+    StTrsRandom::inst().SetSeed(event->ge_rndm[0]^event->ge_rndm[1]);
+
     
     St_g2t_tpc_hit *g2t_tpc_hit =
 	static_cast<St_g2t_tpc_hit *>(geant("g2t_tpc_hit"));
