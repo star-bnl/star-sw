@@ -70,6 +70,8 @@ switch ($pkg)
 #      if ($?QTDIR) setenv QTDIR $OPTSTAR/qt4
 #      setenv PATH $QTDIR/bin:$PATH
 #      setenv LD_LIBRARY_PATH $QTDIR/lib:$LD_LIBRARY_PATH
+      setup $xSTARCMPL
+      starver $STAR_LEVEL
      breaksw
 
     case "32bits":
@@ -99,6 +101,8 @@ switch ($pkg)
 #      if ($?QTDIR) setenv QTDIR $OPTSTAR/qt4
 #      setenv PATH $QTDIR/bin:$PATH
 #      setenv LD_LIBRARY_PATH $QTDIR/lib:$LD_LIBRARY_PATH
+      setup $xSTARCMPL
+      starver $STAR_LEVEL
       breaksw
 
 
@@ -358,19 +362,19 @@ switch ($pkg)
 #      setenv IVROOT $OPTSTAR
       setenv STARCMPL "gcc"; starver $STAR_LEVEL
       breaksw
-    case "gcc44*":
-      if ( -x $GROUP_DIR/dropit ) then
-	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
-	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4`
-      endif
-      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc44/bin:$PATH
-      if (! $USE_64BITS) then
-	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc44/lib:$LD_LIBRARY_PATH
-      else
-	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc44/lib64:$LD_LIBRARY_PATH
-      endif
-      setenv STARCMPL "gcc"; starver $STAR_LEVEL
-      breaksw
+#    case "gcc44*":
+#      if ( -x $GROUP_DIR/dropit ) then
+#	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
+#	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4`
+#      endif
+#      setenv PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc44/bin:$PATH
+#      if (! $USE_64BITS) then
+#	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc44/lib:$LD_LIBRARY_PATH
+#      else
+#	setenv LD_LIBRARY_PATH /afs/rhic.bnl.gov/rcassoft/x8664_sl5/gcc44/lib64:$LD_LIBRARY_PATH
+#      endif
+#      setenv STARCMPL "gcc"; starver $STAR_LEVEL
+#      breaksw
     case "gcc471":
       if ( -x $GROUP_DIR/dropit ) then
 	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4`
@@ -390,6 +394,7 @@ switch ($pkg)
       setenv STARCMPL "gcc"; starver $STAR_LEVEL
       breaksw
     case "gcc482":
+	    unsetenv QTDIR
       if ( -x $GROUP_DIR/dropit ) then
 	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 opt`
 	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4 opt`
@@ -419,6 +424,7 @@ switch ($pkg)
 #      setenv LD_LIBRARY_PATH ${QTDIR}/lib:${LD_LIBRARY_PATH}
       breaksw
     case "gcc492":
+	    unsetenv QTDIR
       if ( -x $GROUP_DIR/dropit ) then
 	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 opt`
 	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH alt $STAR_HOST_SYS gcc4 opt`
@@ -448,13 +454,14 @@ switch ($pkg)
 #      setenv LD_LIBRARY_PATH ${QTDIR}/lib:${LD_LIBRARY_PATH}
       breaksw
     # Alternative or restore of gcc version
+    case "gcc447":
     case "gcc":
       unsetenv QTDIR
-      unsetenv OPTSTAR
+      setenv OPTSTAR $optstar
       unsetenv XOPTSTAR
       if ( -x $GROUP_DIR/dropit ) then
-	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 intel`
-	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $OPTSTAR/alt $STAR_HOST_SYS gcc4 intel`
+	setenv PATH            `$GROUP_DIR/dropit alt $STAR_HOST_SYS gcc4 intel rcassoft`
+	setenv LD_LIBRARY_PATH `$GROUP_DIR/dropit -p $LD_LIBRARY_PATH $OPTSTAR/alt $STAR_HOST_SYS gcc4 intelrcassoft `
       endif
 
 #      if ( $version != 0 ) then

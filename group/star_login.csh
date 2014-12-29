@@ -9,6 +9,10 @@
 # Based on some Hepix script content written by A. Taddei
 #
 # do not do it again, do not even continue
+
+
+
+# Now starts normally
 if ( $?self ) then
     set GRPL_pself=${self}
 endif
@@ -128,7 +132,7 @@ if( ! $?X11BIN || ! $?PATH) then
 	set ROOTPATH="$X11BIN"
     else
 	set SYSPATH="/usr/bin /bin"
-	set ROOTPATH=""	
+	set ROOTPATH=""
     endif
     # Here is a bunch of paths to check for (in reverse order)
     set DIRS="/usr/dt/bin /usr/ccs/bin /usr/ucb /usr/sbin /bin /usr/bin /usr/local/bin/X11 /usr/kerberos/bin /usr/local/bin"
