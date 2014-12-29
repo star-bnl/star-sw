@@ -23,7 +23,7 @@ public:
    Int_t Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.14 2014/10/13 22:33:04 smirnovd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIstHitMaker.h,v 1.14 2014/10/13 22:33:04 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 protected:
 
