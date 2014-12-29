@@ -276,9 +276,9 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
   // plot = 1 => All hits;
   // plot = 2 => prompt hits only |z| > 190
   struct BPoint_t {
-    Float_t                     sector,row,x,y,z,q,adc,pad,timebucket,xL,yL,zL;
+    Float_t                     sector,row,x,y,z,q,adc,pad,timebucket,IdTruth,xL,yL,zL;
   };
-  static const Char_t *vname = "sector:row:x:y:z:q:adc:pad:timebucket"
+  static const Char_t *vname = "sector:row:x:y:z:q:adc:pad:timebucket:IdTruth"
 #ifdef __TPC_LOCAL_COORDINATES__
     ":xL:yL:zL"
 #endif /* __TPC_LOCAL_COORDINATES__ */
@@ -362,6 +362,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		    BPoint.adc = tpcHit->adc();
 		    BPoint.pad = tpcHit->pad();
 		    BPoint.timebucket = tpcHit->timeBucket();
+		    BPoint.IdTruth =  tpcHit->idTruth();
 		    Nt->Fill(&BPoint.sector);
 		  }
 		}
