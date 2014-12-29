@@ -74,8 +74,6 @@ StMuDstMaker* maker = 0;
 #include "StTMVARank/TMVAClassificationApplication.h"
 const Char_t *TMVAMethod = "BDT";
 TString TMVAMethodE(Form("%s method",TMVAMethod)); 
-Bool_t iPPV = kFALSE;
-Bool_t iPileUp = kFALSE;
 Int_t iYear = -1;
 TH2F *ppvRankC = 0;
 using namespace std;
@@ -86,16 +84,30 @@ Int_t Debug() {return _debug;}
 //________________________________________________________________________________
 void Setup() {
   TString CDir(gSystem->pwd());
-  if (CDir.Contains("pileup")) {iPileUp = kTRUE; cout << "iPileUp is set" << endl;}
+  if (CDir.Contains("pileup")) {
+    TMVAdata::instance()->SetPileUp();
+    cout << "PileUp is set" << endl; 
+  }
   if (CDir.Contains("PPV")) {
     TMVAdata::instance()->SetPPV();
-    iPPV = kTRUE; cout << "iPPV is set" << endl;
+    cout << "PPV is set" << endl;
     ppvRankC = new TH2F("ppvRankC","PPV Rank  conversion new versus old",2000,-2e6,2e6,2000,-1,1);
   }
   if (CDir.Contains("2011")) iYear = 2011; 
   if (CDir.Contains("2012")) iYear = 2012; 
   cout << "iYear set to " << iYear << endl;
   TMVAdata::instance()->Init();
+  /* default : "postx:prompt:beam:cross:tof:notof:BEMC:noBEMC:nWE:chi2"
+     KFV : postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2
+  */
+  if (! TMVAdata::instance()->PileUp()) {
+    if (! TMVAdata::instance()->PPV()) TMVAdata::instance()->SetListOfActiveVariables("prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2");
+    else                               TMVAdata::instance()->SetListOfActiveVariables("prompt:cross:tof:notof:BEMC:noBEMC:nWE");
+  } else {
+    //    if (! TMVAdata::instance()->PPV()) TMVAdata::instance()->SetListOfActiveVariables("postx:prompt:beam:cross:tof:notof:BEMC:noBEMC:nWE:chi2");
+    if (! TMVAdata::instance()->PPV()) TMVAdata::instance()->SetListOfActiveVariables("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE:chi2");
+    else                               TMVAdata::instance()->SetListOfActiveVariables("postx:prompt:cross:tof:notof:BEMC:noBEMC:nWE");
+  }
 }
 //________________________________________________________________________________
 void Classification(const Char_t *method = TMVAMethod, 
@@ -114,18 +126,11 @@ void Classification(const Char_t *method = TMVAMethod,
     TString aName(s->fColumnName);
     if (! TMVAdata::instance()->AcceptVar(aName)) {
       factory->AddSpectator(aName, 'F');
-    } else {
-      // check RMS
-      background->Draw(Form("%s >> temp",aName.Data()));
-      TH1 *temp = (TH1 *) gDirectory->Get("temp");
-      if (temp && temp->GetRMS() > 1e-3 * temp->GetMean()) {
-	cout << "Add variable: " << aName << endl;
-	factory->AddVariable(aName, 'F');
-      } else {
-	TMVAdata::instance()->fAcceptMap[aName] = kFALSE;
-	factory->AddSpectator(aName, 'F');
-      }
+      continue;
     }
+    cout << "Add variable: " << aName << endl;
+    TMVAdata::instance()->SetAcceptVar(aName);
+    factory->AddVariable(aName, 'F');
   }
    // global event weights per tree (see below for setting event-wise weights)
   Double_t signalWeight     = 1.0;
@@ -138,7 +143,7 @@ void Classification(const Char_t *method = TMVAMethod,
 }
 //________________________________________________________________________________
 TMVA::Reader *ClassificationApplication(const Char_t *method = "") {
-  
+  Setup();
   std::map<std::string,int> Use;
   TMVA::Reader *reader = TMVAClassificationApplication(method, Use);
   TTableDescriptor *ds = TMVAdata::instance()->GetTableDesc();
@@ -148,10 +153,10 @@ TMVA::Reader *ClassificationApplication(const Char_t *method = "") {
     TString aName(s->fColumnName);
     if (! TMVAdata::instance()->AcceptVar(aName)) {
       reader->AddSpectator(aName,  dataArray+i);
-    } else {
-      reader->AddVariable(aName, dataArray+i);
-    }
-    i++;
+      continue;
+    } 
+    cout << "Add variable: " << aName << endl;
+    reader->AddVariable(aName, dataArray+i);
   }
   BookTMVAMethod(reader,Use);
   return reader;
@@ -204,7 +209,7 @@ void FillData(TMVAdata &Data, const StMuPrimaryVertex *Vtx, Float_t zVpd = -9999
   aData.zVpd   =  zVpd;
   aData.vR     =  Vtx->position().perp();
   Double_t Rank = Vtx->ranking();
-  if (iPPV) {
+  if (TMVAdata::instance()->PPV()) {
     aData.Rank = PPVRank(Rank);
   } else {// Recalculate rank for KFV
     aData.Rank = - aData.chi2;
@@ -311,8 +316,8 @@ Bool_t AcceptVX(const StMuPrimaryVertex *Vtx = 0) {
   //	Vtx->nBEMCMatch()    + Vtx->nEEMCMatch() <= 0) return kFALSE;
   if (  Vtx->nCTBMatch()     + Vtx->nBTOFMatch() +
   	Vtx->nBEMCMatch()    + Vtx->nEEMCMatch() <= 1) return kFALSE; // 22
-  if (! iPPV && !  Vtx->isBeamConstrained()) return kFALSE; //20
 #endif
+  if (! TMVAdata::instance()->PPV() && !  Vtx->isBeamConstrained()) return kFALSE; //20
   //21  if (  Vtx->position().perp() > 3.0) return kFALSE;
   return kTRUE;
 }
@@ -335,7 +340,8 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
   // 32 take out EEmc
   // 33 an automatic choise of variables based on their RMS
   // 34 use table
-  // 35 use table
+  // 36 use table
+  // 37 use only "B" for KFV
   // Initialize histograms -----------------------
   /* 
      1. Data sample : pp200 W->e nu with  pile-up corresponding to 1 MHz min. bias events, 50 K event y2011, 10 K event y2012.
@@ -354,18 +360,6 @@ void MuMcPrV(Bool_t iTMVA = kFALSE, Float_t RankMin = 0, Long64_t Nevent = 99999
   TString OutFile(outFile);
   TMVA::Reader *reader = 0;
   if (iTMVA)    reader = ClassificationApplication(TMVAMethod);
-#if 0
-  // Classifier Cut Efficiency
-  if (iYear == 2012) {
-    if (! iPPV) {  // KVF
-      if (! iPileUp ) RankMin = -0.189; // W +0.091;
-      else            RankMin = -0.172; // W -0.082;
-    } else {       // PPV
-      if (! iPileUp ) RankMin = -0.288; // W -0.019;
-      else            RankMin = -0.278;
-    }
-  }
-#endif
   if (iYear < 0) {
     Setup();
   }

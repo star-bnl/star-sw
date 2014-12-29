@@ -8,6 +8,7 @@
 #include "Riostream.h"
 #include "PVgadgets.h"
 #include "TTableDescriptor.h"
+#include "TPRegexp.h"
 class TMVAdata {
  public:
 /*   TMVAdata(const Char_t *names = "postx:prompt:beam:cross:tof:notof:BEMC:noBEMC:EEMC:noEEMC:nWE:iMc:EMC:noEMC:chi2" */
@@ -23,6 +24,20 @@ class TMVAdata {
   TTableDescriptor *GetTableDesc() {return fTable->GetRowDescriptors();}
   Bool_t AcceptVar(TString string) {return fAcceptMap[string];}
   void   SetPPV() {fiPPV = kTRUE;}
+  void   SetPileUp() {fiPileUp = kTRUE;}
+  void   SetAcceptVar(TString string) { fAcceptMap[string] = kTRUE; }
+  void   SetListOfActiveVariables(const Char_t *list) {
+    cout << "SetListOfActiveVariables(" << list << ")" << endl;
+    TPMERegexp reg(":");
+    TString ListOfActiveVariables(list);
+    Int_t N = reg.Split(ListOfActiveVariables);
+    for (Int_t i = 0; i < N; i++) {
+      SetAcceptVar(reg[i]);
+    }
+    Print();
+  }
+  Bool_t PPV() {return fiPPV;}  
+  Bool_t PileUp() {return fiPileUp;}
   void   Init();
   Bool_t AcceptVar(const Char_t *var) {return AcceptVar(TString(var));}
   const Char_t *Names() {return fNames.Data();}
@@ -36,10 +51,11 @@ class TMVAdata {
   }
  private:
   St_PVgadgets *fTable;
-  Bool_t fiPPV;
+  Bool_t fiPPV, fiPileUp;
   static TMVAdata* fgInstance;
   TMVAdata() : fNames("") {
     fiPPV = kFALSE;
+    fiPileUp = kFALSE;
     fTable = new St_PVgadgets("PVgadgets",1); 
     TTableDescriptor *ds = GetTableDesc();
     tableDescriptor_st *s = ds->GetTable();
@@ -48,6 +64,7 @@ class TMVAdata {
       fNames += s->fColumnName;
     }
   }
+  TMVAdata(const TMVAdata&) {}
   TString fNames;
   std::map<TString,Bool_t> fAcceptMap;
 };
@@ -57,46 +74,7 @@ void TMVAdata::Init() {
   tableDescriptor_st *s = ds->GetTable();
   for (Int_t i = 0; i < ds->GetNRows(); i++, s++) {
     TString aName(s->fColumnName);
-    if (fiPPV && aName == "beam" ||
-	fiPPV && aName == "chi2" ||
-#if 0
-	aName == "beam" || // 20
-	aName == "tof" ||
-	aName == "notof" ||
-	aName == "noBEMC" ||
-#endif
-	aName == "EEMC" || aName == "noEEMC" ||
-	aName == "EMC"  || aName == "noEMC"  ||
-#if 1
-	//  aName == "postx" && ! iPileUp || // for non pileup
-	//    iYear == 2011 && (aName == "EEMC" || aName == "noEEMC") ||
-	//    iYear == 2011 && (aName == "EMC" || aName == "noEMC") ||
-	aName == "chi2" ||
-#endif
-	aName == "iMc" ||
-	aName == "xV" ||
-	aName == "yV" ||
-	aName == "zV" ||
-	aName == "iMc" ||
-	aName == "xMc" ||
-	aName == "yMc" ||
-	aName == "zMc" ||
-	aName == "zVpd" ||
-	aName == "vR" ||
-	aName == "Rank" ||
-	aName == "noTracks" ||
-	aName == "NoMcTracksWithHits" ||
-	aName == "good" ||
-	aName == "l" ||
-	aName == "lBest" ||
-	aName == "lMcBest" ||
-	aName == "timebucket") {
-      fAcceptMap[aName] = kFALSE;
-    }   else {
-      fAcceptMap[aName] = kTRUE;
-    }
-    if ( fAcceptMap[aName] ) 
-      std::cout << "TMVAdata::AcceptVar\t" << aName.Data() << " = " << fAcceptMap[aName] << std::endl;
+    fAcceptMap[aName] = kFALSE;
   }
 }
 #endif /* __TMVAdata_h__ */
