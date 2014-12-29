@@ -98,7 +98,7 @@ Int_t StKinkMaker::InitRun(int runumber) {
  }
 //=============================================================================
 Int_t StKinkMaker::Make(){//called for each event
-
+#ifndef StTrackMassFit_hh
 
   //******* variables
   unsigned short nNodes,i,j;
@@ -437,6 +437,7 @@ Int_t StKinkMaker::Make(){//called for each event
   // make the vertex found zombie ???!!!
 
   if(kinkVertices.size()>1) Crop();
+#endif /* ! StTrackMassFit_hh */
   return kStOK; 
 }
 	
@@ -529,7 +530,7 @@ void StKinkMaker::FillEvent(StTrackGeometry *myDaughterGeometry1,StTrackGeometry
   //set momentum
   kinkVertex->setParentMomentum(mParentMoment);
   kinkVertex->setDaughterMomentum(mDaughterMoment);
-  kinkVertex->setParent(mParentTrackCandidate);
+  //yf  kinkVertex->setParent(mParentTrackCandidate);
 
   //set dcay angle	  
   kinkVertex->setDecayAngle(mDecayAngle);

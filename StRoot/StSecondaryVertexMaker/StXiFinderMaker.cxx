@@ -135,7 +135,7 @@ Int_t StXiFinderMaker::InitRun(int runumber) {
 //=============================================================================
 //_____________________________________________________________________________
 Int_t StXiFinderMaker::Make() {
-
+#ifndef StTrackMassFit_hh
   Int_t iRes;
 
   // Prepare event and track variables
@@ -182,7 +182,7 @@ Int_t StXiFinderMaker::Make() {
      }
 
   gMessMgr->Info()<<"StXiFinderMaker : now I have "<<xiVertices.size()<<" Xis."<<endm;
-
+#endif /* ! StTrackMassFit_hh */
   return kStOk;
 }
 //_____________________________________________________________________________

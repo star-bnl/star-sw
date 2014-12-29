@@ -391,7 +391,7 @@ Int_t StV0FinderMaker::Prepare() {
 
 //_____________________________________________________________________________
 Int_t StV0FinderMaker::Make() {
-
+#ifndef StTrackMassFit_hh
   // Variables:
   StThreeVectorD xi,xj,pi,pj,xpp,pp,impact;      // 3D vectors of the V0
   StThreeVectorD xi1,xj1,pi1,pj1,tmp3V;          // temporary 3D vectors
@@ -745,7 +745,7 @@ Int_t StV0FinderMaker::Make() {
   gMessMgr->Info()<<"using magnetic field : "<<Bfield/tesla<<" T."<<endm;
 
   // Any cleanup involved for using KeepV0()
-  
+#endif /* ! StTrackMassFit_hh */ 
   return kStOk;
 }
 
