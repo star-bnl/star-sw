@@ -60,11 +60,7 @@
  ***********************************************************************/
 #include "StKinkMuDst.hh"
 #include "StKinkVertex.h"
-#include "StTrack.h"
-#include "StTrackGeometry.h"
-#include "StTrackNode.h"
-#include "StTrackFitTraits.h"
-#include "StDedxPidTraits.h"
+#include "StEventTypes.h"
 #include "StMessMgr.h"
 
 #include <stdlib.h>
@@ -86,11 +82,11 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
   mHitDistanceParentDaughter = kinkVertex->hitDistanceParentDaughter();
   mHitDistanceParentVertex = kinkVertex->hitDistanceParentVertex();
   mDecayAngle = kinkVertex->decayAngle();
-  StTrack* parent = (StTrack *)kinkVertex->parent();
-  if (!parent) gMessMgr->Error("StKinkMuDst: parent missing!");
   StTrack* daughter = kinkVertex->daughter();
   if (!daughter) gMessMgr->Error("StKinkMuDst: daughter missing!");
-
+#ifndef StTrackMassFit_hh
+  StTrack* parent = (StTrack *)kinkVertex->parent();
+  if (!parent) gMessMgr->Error("StKinkMuDst: parent missing!");
   StTrack* parentPrimaryTrack = parent->node()->track(primary);
   if (parentPrimaryTrack && (parentPrimaryTrack->geometry())) {
     mParentPrimMomentumX = parentPrimaryTrack->geometry()->momentum().x();
@@ -101,6 +97,18 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
     mParentPrimMomentumY = 999.;
     mParentPrimMomentumZ = 999.;
   }
+#else /* StTrackMassFit_hh */
+  StTrackMassFit* parent = kinkVertex->parent();
+  if (!parent) {gMessMgr->Error("StKinkMuDst: parent missing!");
+  } else {
+    KFParticle *particle = parent->kfParticle();
+    if (particle) {
+      mParentPrimMomentumX = particle->GetPx();
+      mParentPrimMomentumY = particle->GetPy();
+      mParentPrimMomentumZ = particle->GetPz();
+    }
+  }
+#endif /* ! StTrackMassFit_hh */
   mParentPrimMomentum = ::sqrt( mParentPrimMomentumX*mParentPrimMomentumX +
                           mParentPrimMomentumY*mParentPrimMomentumY +
                           mParentPrimMomentumZ*mParentPrimMomentumZ );
