@@ -119,8 +119,8 @@ Bool_t StKFVertex::Fit() {
   //Check Covariance Matrix
   //  Double_t prob = TMath::Prob(GetChi2(),GetNDF());
   TRSymMatrix CL(3,CovarianceMatrix());
-  Bool_t fail = kFALSE;
-  if (CL[0] <= 0 || CL[2] <= 0 || CL[5] <= 0) fail = kTRUE;
+  TRSymMatrix CLI(CL,TRArray::kInvertedA);
+  Bool_t fail = ! CLI.IsValid();
   TIter nextI(&fKFTracks,kIterBackward);
   Track = 0;
   i = N-1;
