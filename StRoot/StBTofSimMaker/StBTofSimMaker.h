@@ -48,7 +48,7 @@ struct g2t_ctf_hit_st;
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include "tables/St_g2t_vpd_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
-#include "tables/St_g2t_tpc_hit_Table.h"
+#include "tables/St_g2t_vertex_Table.h" 
 
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcBTofHitCollection.hh"
@@ -207,7 +207,7 @@ class StBTofSimMaker : public StMaker{
 		void   setHistFileName(string s);
 		void   setBookHist(Bool_t val) { mBookHisto = val; }
 		void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
-
+                static Bool_t TimeAtVertex(Int_t TrackId,  St_g2t_track *track, St_g2t_vertex *vertex, Double_t &tofV);
 		virtual const char *GetCVS() const
 		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.5 2014/08/06 11:42:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
