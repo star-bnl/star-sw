@@ -6,7 +6,7 @@
 ClassImp(StMuMcVertex);
 //________________________________________________________________________________
 ostream&              operator<<(ostream& os,  const StMuMcVertex& v) {
-  os << Form("Mc:%4i NoTk:%4i T:%4i PP:%4i",v.Id(),v.NoDaughters(),TMath::Nint(1e7*v.Time()),v.IdParTrk());
+  os << Form("Mc:%5i NoTk:%4i T:%4i PP:%4i",v.Id(),v.NoDaughters(),TMath::Nint(1e7*v.Time()),v.IdParTrk());
   os << Form(" xyz:%8.3f %8.3f %8.3f",v.XyzV().x(),v.XyzV().y(),v.XyzV().z());
   return os;
 }
