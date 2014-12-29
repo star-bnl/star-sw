@@ -1,11 +1,9 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.90 2014/12/04 17:00:59 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.100 2014/12/19 18:09:01 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
 #include <string>
 
-#include "TDataSetIter.h"
-#include "THashList.h"
 #include "TGeoVolume.h"
 #include "TGeoMatrix.h"
 #include "TVector3.h"
@@ -108,7 +106,8 @@ void StiPxlDetectorBuilder::useVMCGeometry()
                                  : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 9.36) );
 
    // Build active sti volumes for pixel sensors
-   int iSensor = 5;
+   // Use the "middle" sensor on the ladder to extract alignment corrections from DB
+   int iSensor = floor(kNumberOfPxlSensorsPerLadder/2);
 
    for (int iSector = 1; iSector <= kNumberOfPxlSectors; ++iSector)
    {
@@ -120,7 +119,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
          if (!isAvail) {
-            Warning("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next node...");
+            Warning("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next ladder...");
             continue;
          }
 
@@ -134,7 +133,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          }
 
          if (!sensorMatrix) {
-            Warning("useVMCGeometry()", "Could not get pixel sensor position matrix. Skipping to next pixel sensor volume");
+            Warning("useVMCGeometry()", "Could not get PXL sensor position matrix. Skipping to next ladder...");
             continue;
          }
 
@@ -142,11 +141,6 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          TGeoRotation sensorRot(*sensorMatrix);
 
          TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
-
-         LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
-                   << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
-                   << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
-                   << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
          // Split the ladder in two halves
          for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++) {
@@ -193,64 +187,50 @@ void StiPxlDetectorBuilder::useVMCGeometry()
 
             // Build final detector object
             StiDetector *stiDetector = getDetectorFactory()->getInstance();
+            StiIsActiveFunctor* isActive = _active ?  new StiPxlIsActiveFunctor :
+               static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
-            if ( !stiDetector ) {
-               Warning("useVMCGeometry()", "Failed to create a valid Sti detector. Skipping to next pixel sensor volume");
-               continue;
-            }
-
-            stiDetector->setName(halfLadderName.c_str());
-
-            if (_active) { stiDetector->setIsActive(new StiPxlIsActiveFunctor);}
-            else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
-
-            stiDetector->setShape(stiShape);
-            stiDetector->setPlacement(pPlacement);
-            stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
-            stiDetector->setMaterial(silicon);
+            stiDetector->setProperties(halfLadderName, isActive, stiShape, pPlacement, getGasMat(), silicon);
             stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 
             int stiRow    = 0;
             int stiSensor = 0;
 
-            // Add created sti pixel detector to the system
+            // Add created sensitive PXL layer to Sti
+            //
             // The numbering is:
-            // ladder = 0-1- ...9 for inner layer
-            // stiRow = 0 for inner layer inner half ladder, 1 for outer half ladder
-            // ladder = 0-1-2 for sector 0 of outer layer, then 3-4-5 for the second sector until 29 for the last sectro
-            // stiRow = 2 for outer layer inner half ladder, 3 for outer half ladder
-            // ladder=1 is the inner ladder
+            //
+            // sector ladder sensorhalf -> stiRow stiSensor
+            //
+            // 1      1      1 (o)      -> 0      0
+            // 1      1      2 (i)      -> 1      0
+            // 1      2      1 (o)      -> 2      1
+            // 1      2      2 (i)      -> 3      1
+            // 1      3      1 (o)      -> 2      2
+            // 1      3      2 (i)      -> 3      2
+            // 1      4      1 (o)      -> 2      3
+            // 1      4      2 (i)      -> 3      3
+            //
+            // 2      1      1 (o)      -> 0      1
+            // 2      1      2 (i)      -> 1      1
+            // 2      2      1 (o)      -> 2      4
+            // 2      2      2 (i)      -> 3      4
+            // 2      3      1 (o)      -> 2      5
+            // 2      3      2 (i)      -> 3      5
+            // 2      4      1 (o)      -> 2      6
+            // 2      4      2 (i)      -> 3      6
+            //
+            // ...
+            //
             if (iLadder == 1) {
-               stiRow = 0 ;
-               stiRow += 1 - (iLadderHalf - 1);
+               stiRow = iLadderHalf == 2 ? 0 : 1;
                stiSensor = (iSector - 1);
-            } else {
-               stiRow = 2;
-               stiRow += 1 - (iLadderHalf - 1);
+            } else { // iLadder = 2, 3, 4
+               stiRow = iLadderHalf == 2 ? 2 : 3;
                stiSensor = (iSector - 1) * (kNumberOfPxlLaddersPerSector - 1) + (iLadder - 1);
             }
 
-            stiDetector->setKey(1, stiRow);
-            stiDetector->setKey(2, stiSensor);
             add(stiRow, stiSensor, stiDetector);
-
-            // Whole bunch of debugging information
-            Float_t rad2deg = 180.0 / 3.1415927;
-            LOG_DEBUG << "===>NEW:PIXEL:stiDetector:Name             = " << stiDetector->getName()                     << endm
-                      << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
-                      << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
-                      << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
-                      << "===>NEW:PIXEL:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
-                      << "===>NEW:PIXEL:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
-                      << "===>NEW:PIXEL:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
-                      << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
-                      << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
-                      << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                      << "===>NEW:PIXEL:stiDetector:sector           = " << iSector                                    << endm
-                      << "===>NEW:PIXEL:stiDetector:Ladder           = " << iLadder                                    << endm
-                      << "===>NEW:PIXEL:stiDetector:sensor           = " << iSensor                                    << endm
-                      << "===>NEW:PIXEL:stiDetector:stiRow/stiSensor (ITTF)  = " << stiRow << " / " << stiSensor       << endm
-                      << "===>NEW:PIXEL:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
          }
       }
    }
@@ -318,12 +298,5 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
                 << "Number of daughters: " << geoNode->GetNdaughters() << ", weight: " << geoNode->GetVolume()->Weight(0.01, "a") << endm;
 
       StiVMCToolKit::LoopOverNodes(geoNode, pxlVolumes[i].path, pxlVolumes[i].name, MakeAverageVolume);
-
-      // Access last added volume/Sti detector
-      int row = getNRows() - 1;
-      int sector = 0;
-
-      // Make Sti detector active, i.e. use it in tracking
-      StiDetector *stiDetector = getDetector(row, sector);
    }
 }

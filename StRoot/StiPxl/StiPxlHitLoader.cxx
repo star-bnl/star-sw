@@ -1,7 +1,13 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.9 2014/11/17 20:37:32 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.11 2014/12/19 18:09:01 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.11  2014/12/19 18:09:01  smirnovd
+ * Do not set StiDetector members _key1 and _key2 as they are not really used anywhere
+ *
+ * Revision 1.10  2014/12/15 21:07:28  qiuh
+ * use local x rahter than row number to distribute hits into different half ladders
+ *
  * Revision 1.9  2014/11/17 20:37:32  smirnovd
  * Split PXL sensitive layers in two halves. The change should help to avoid track backward steps in Sti due to ill ordered volumes in r and phi - inspired by Hao Qiu
  *
@@ -174,14 +180,14 @@ void StiPxlHitLoader::loadHits(StEvent *source,
                if (pxlHit->ladder() == 1) {
                   stiRow = 0;
 
-                  if (pxlHit->meanRow() < kNumberOfPxlRowsOnSensor / 2)
+                  if (pxlHit->localPosition(0) > 0)
                      stiRow += 1;
 
                   stiSensor = (pxlHit->sector() - 1);
                } else {
                   stiRow = 2;
 
-                  if (pxlHit->meanRow() >= kNumberOfPxlRowsOnSensor / 2)
+                  if (pxlHit->localPosition(0) < 0)
                      stiRow += 1;
 
                   stiSensor = (pxlHit->sector() - 1) * (kNumberOfPxlLaddersPerSector - 1) + (pxlHit->ladder() - 1);
@@ -211,7 +217,6 @@ void StiPxlHitLoader::loadHits(StEvent *source,
                LOG_DEBUG << " detector info " << *detector << endm;
                LOG_DEBUG << " radius = " << radius << " angle = " << angle << " zCenter = " << zcenter << endm;
                LOG_DEBUG << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm;
-               LOG_DEBUG << " key 1 : " << detector->getKey(1) << " key 2 : " << detector->getKey(2) << endm;
 
                StiHit *stiHit = _hitFactory->getInstance();
 
