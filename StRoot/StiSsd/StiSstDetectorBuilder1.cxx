@@ -18,8 +18,8 @@ StiSstDetectorBuilder1::~StiSstDetectorBuilder1()
 
 
 /**
- * Creates a crude approximation of the SST detector. The geometry is modeled with a single tube
- * using the dimensions and other physical properties of the SST mother volume defined in the ROOT
+ * Creates a crude approximation of the SST detector. The geometry is modeled with three tubes with
+ * modified dimensions and other physical properties of the SST mother volume defined in the ROOT
  * TGeo geometry.
  *
  * \author Dmitri Smirnov

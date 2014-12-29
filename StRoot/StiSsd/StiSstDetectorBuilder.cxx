@@ -2,6 +2,8 @@
 #include <sstream>
 #include <string>
 
+#include "TGeoVolume.h"
+#include "TGeoMatrix.h"
 #include "TVector3.h"
 
 #include "StMessMgr.h"
@@ -86,6 +88,8 @@ void StiSstDetectorBuilder::useVMCGeometry()
                                  : add(new StiMaterial("SILICON", 14, 28.0855, 2.33, 9.36) );
 
    // Build active sti volumes for SST sensors
+   int stiRow = getNRows(); // Put all sensitive volumes in the same (and next available) Sti row
+   // Use the "middle" sensor on the ladder to extract alignment corrections from DB
    int iSensor = floor(kSstNumSensorsPerLadder/2);
 
    for (int iLadder = 1; iLadder <= kSstNumLadders; ++iLadder)
@@ -118,11 +122,6 @@ void StiSstDetectorBuilder::useVMCGeometry()
       TGeoRotation sensorRot(*sensorMatrix);
 
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
-
-      LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
-                << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
-                << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
-                << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
 
       // Convert center of the sensor geobox to coordinates in the global coordinate system
       double sensorXyzLocal[3]  = {};
@@ -160,45 +159,39 @@ void StiSstDetectorBuilder::useVMCGeometry()
 
       // Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
+      StiIsActiveFunctor* isActive = _active ? new StiSsdIsActiveFunctor :
+         static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
-      stiDetector->setName(geoPath.str().c_str());
-
-      if (_active) { stiDetector->setIsActive(new StiSsdIsActiveFunctor);}
-      else         { stiDetector->setIsActive(new StiNeverActiveFunctor);}
-
-      stiDetector->setShape(stiShape);
-      stiDetector->setPlacement(pPlacement);
-      stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
-      stiDetector->setMaterial(silicon);
+      stiDetector->setProperties(geoPath.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
       stiDetector->setHitErrorCalculator(StiSsdHitErrorCalculator::instance());
 
-      stiDetector->setKey(1, 0);
-      stiDetector->setKey(2, iLadder-1);
-      add(0, iLadder, stiDetector);
-
-      // Whole bunch of debugging information
-      Float_t rad2deg = 180.0 / 3.1415927;
-      LOG_DEBUG << "===>NEW:SST:stiDetector:Name             = " << stiDetector->getName()                     << endm
-                << "===>NEW:SST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
-                << "===>NEW:SST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
-                << "===>NEW:SST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
-                << "===>NEW:SST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
-                << "===>NEW:SST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
-                << "===>NEW:SST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
-                << "===>NEW:SST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
-                << "===>NEW:SST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
-                << "===>NEW:SST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                << "===>NEW:SST:stiDetector:Ladder           = " << iLadder                                    << endm
-                << "===>NEW:SST:stiDetector:sensor           = " << iSensor                                    << endm
-                << "===>NEW:SST:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
+      add(stiRow, iLadder-1, stiDetector);
    }
 }
 
 
 /**
- * Creates a crude approximation of the SST detector. The geometry is modeled with a single tube
- * using the dimensions and other physical properties of the SST mother volume defined in the ROOT
- * TGeo geometry.
+ * Creates a crude model of the SST detector. The geometry is modeled with tubes
+ * segmented in z and r. The dimensions and other physical properties of the
+ * tube volumes are determined manually by looking at distribution of the
+ * material in the ROOT TGeo geometry.
+ *
+ * We use the following dimensions and material properties:
+ *
+ * SFMO_CENTER_IN:   22.2 < r < 23.5 cm  -34.25 < z <  34.25 cm  Z = 7.38471  A = 14.7875  Dens = 0.1777280  X0 = 28128.1
+ * SFMO_CENTER_MID:  23.5 < r < 25.8 cm  -34.25 < z <  34.25 cm  Z = 7.29364  A = 14.5971  Dens = 0.0147153  X0 = 30146.9
+ * SFMO_CENTER_OUT:  25.8 < r < 27.0 cm  -34.25 < z <  34.25 cm  Z = 7.27831  A = 14.5655  Dens = 0.0372666  X0 = 29681.4
+ *
+ * SFMO_LEFT_IN:     22.2 < r < 23.5 cm  -51.50 < z < -34.25 cm  Z = 7.90551  A = 15.8598  Dens = 0.5131150  X0 = 21711.5
+ * SFMO_LEFT_MID:    23.5 < r < 25.0 cm  -49.50 < z < -34.25 cm  Z = 7.67447  A = 15.3544  Dens = 0.3013760  X0 = 23510.2
+ * SFMO_LEFT_OUT:    25.0 < r < 26.5 cm  -49.50 < z < -34.25 cm  Z = 7.52669  A = 15.0602  Dens = 0.2235500  X0 = 25904.3
+ *
+ * SFMO_RIGHT_IN:    22.2 < r < 23.5 cm   34.25 < z <  51.50 cm  Z = 7.92641  A = 15.9019  Dens = 0.5298270  X0 = 21402.6
+ * SFMO_RIGHT_MID:   23.5 < r < 25.0 cm   34.25 < z <  49.50 cm  Z = 7.66531  A = 15.3361  Dens = 0.2953080  X0 = 23582.3
+ * SFMO_RIGHT_OUT:   25.0 < r < 26.5 cm   34.25 < z <  49.50 cm  Z = 7.53069  A = 15.0682  Dens = 0.2273420  X0 = 25831.5
+ *
+ * The inner radius of the central tube is increased by 0.85 cm to avoid overlap
+ * with sensitive layers, and the density of that volume is scaled accordingly.
  *
  * \author Dmitri Smirnov
  */
@@ -247,53 +240,40 @@ void StiSstDetectorBuilder::buildInactiveVolumes()
    std::string pfx("/HALL_1/CAVE_1/TpcRefSys_1/IDSM_1/");
 
    StiDetector* stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"SFMO_CNTR_INN", new StiNeverActiveFunctor, sfmoCntrInnShape, sfmoCntrInnPlacement, getGasMat(), sfmoCntrInnMaterial);
+   stiDetector->setProperties(pfx+"SFMO_CNTR_INN", new StiNeverActiveFunctor, sfmoCntrInnShape, sfmoCntrInnPlacement, getGasMat(), sfmoCntrInnMaterial);
    add(getNRows(), 0, stiDetector);
 
    stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"SFMO_CNTR_MID", new StiNeverActiveFunctor, sfmoCntrMidShape, sfmoCntrMidPlacement, getGasMat(), sfmoCntrMidMaterial);
+   stiDetector->setProperties(pfx+"SFMO_CNTR_MID", new StiNeverActiveFunctor, sfmoCntrMidShape, sfmoCntrMidPlacement, getGasMat(), sfmoCntrMidMaterial);
    add(getNRows(), 0, stiDetector);
 
    stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"SFMO_CNTR_OUT", new StiNeverActiveFunctor, sfmoCntrOutShape, sfmoCntrOutPlacement, getGasMat(), sfmoCntrOutMaterial);
-   add(getNRows(), 0, stiDetector);
-
-
-   stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"SFMO_LEFT_INN", new StiNeverActiveFunctor, sfmoLeftInnShape, sfmoLeftInnPlacement, getGasMat(), sfmoLeftInnMaterial);
-   add(getNRows(), 0, stiDetector);
-
-   stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"SFMO_LEFT_MID", new StiNeverActiveFunctor, sfmoLeftMidShape, sfmoLeftMidPlacement, getGasMat(), sfmoLeftMidMaterial);
-   add(getNRows(), 0, stiDetector);
-
-   stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"SFMO_LEFT_OUT", new StiNeverActiveFunctor, sfmoLeftOutShape, sfmoLeftOutPlacement, getGasMat(), sfmoLeftOutMaterial);
+   stiDetector->setProperties(pfx+"SFMO_CNTR_OUT", new StiNeverActiveFunctor, sfmoCntrOutShape, sfmoCntrOutPlacement, getGasMat(), sfmoCntrOutMaterial);
    add(getNRows(), 0, stiDetector);
 
 
    stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"SFMO_RGHT_INN", new StiNeverActiveFunctor, sfmoRghtInnShape, sfmoRghtInnPlacement, getGasMat(), sfmoRghtInnMaterial);
+   stiDetector->setProperties(pfx+"SFMO_LEFT_INN", new StiNeverActiveFunctor, sfmoLeftInnShape, sfmoLeftInnPlacement, getGasMat(), sfmoLeftInnMaterial);
    add(getNRows(), 0, stiDetector);
 
    stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"SFMO_RGHT_MID", new StiNeverActiveFunctor, sfmoRghtMidShape, sfmoRghtMidPlacement, getGasMat(), sfmoRghtMidMaterial);
+   stiDetector->setProperties(pfx+"SFMO_LEFT_MID", new StiNeverActiveFunctor, sfmoLeftMidShape, sfmoLeftMidPlacement, getGasMat(), sfmoLeftMidMaterial);
    add(getNRows(), 0, stiDetector);
 
    stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"SFMO_RGHT_OUT", new StiNeverActiveFunctor, sfmoRghtOutShape, sfmoRghtOutPlacement, getGasMat(), sfmoRghtOutMaterial);
+   stiDetector->setProperties(pfx+"SFMO_LEFT_OUT", new StiNeverActiveFunctor, sfmoLeftOutShape, sfmoLeftOutPlacement, getGasMat(), sfmoLeftOutMaterial);
    add(getNRows(), 0, stiDetector);
-}
 
 
-void StiSstDetectorBuilder::setDetectorProperties(StiDetector* detector, std::string name, StiIsActiveFunctor* activeFunctor, StiShape* shape, StiPlacement* placement, StiMaterial* gas, StiMaterial* material)
-{
-   if (!detector) return;
+   stiDetector = getDetectorFactory()->getInstance();
+   stiDetector->setProperties(pfx+"SFMO_RGHT_INN", new StiNeverActiveFunctor, sfmoRghtInnShape, sfmoRghtInnPlacement, getGasMat(), sfmoRghtInnMaterial);
+   add(getNRows(), 0, stiDetector);
 
-   detector->setName(name.c_str());
-   detector->setIsActive(activeFunctor);
-   detector->setShape(shape);
-   detector->setPlacement(placement);
-   detector->setGas(gas);
-   detector->setMaterial(material);
+   stiDetector = getDetectorFactory()->getInstance();
+   stiDetector->setProperties(pfx+"SFMO_RGHT_MID", new StiNeverActiveFunctor, sfmoRghtMidShape, sfmoRghtMidPlacement, getGasMat(), sfmoRghtMidMaterial);
+   add(getNRows(), 0, stiDetector);
+
+   stiDetector = getDetectorFactory()->getInstance();
+   stiDetector->setProperties(pfx+"SFMO_RGHT_OUT", new StiNeverActiveFunctor, sfmoRghtOutShape, sfmoRghtOutPlacement, getGasMat(), sfmoRghtOutMaterial);
+   add(getNRows(), 0, stiDetector);
 }
