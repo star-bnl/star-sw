@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.cxx,v 1.9 2014/08/25 16:59:03 marr Exp $
+ * $Id: StMtdSimMaker.cxx,v 1.10 2014/12/10 17:29:19 marr Exp $
  *
  * Author: Frank Geurts
  *
@@ -44,7 +44,7 @@ static RanluxEngine engine;
 static RandGauss ranGauss(engine);
 
 Int_t geant2backlegIDMap[30]; 
-
+float StMtdSimMaker::kMtdPadWidth = 3.8 + 0.6; 
 ClassImp(StMtdSimMaker)
 
 //_____________________________________________________________________________
@@ -231,14 +231,14 @@ int StMtdSimMaker::CalcCellId(Int_t volume_id, Float_t ylocal, int &ibackleg,int
     if ( ibackleg >= 12 && ibackleg <= 20 ) imodule = imodule + 1;
 
     /// Construct cell ID from local Y coordinate
-    icell = Int_t((ylocal + kMtdPadWidth * kNCell/2) / kMtdPadWidth) + 1;
+    icell = Int_t((ylocal + kMtdPadWidth * kNCell/2) / kMtdPadWidth);
     // Get the correct cell ID
     if ( imodule > 3 ) icell = 11 - icell;
 
     /// Verify ranges
     if(ibackleg<0 || ibackleg>kNBackleg) return -3;
     if(imodule <0 || imodule >kNModule ) return -2;  
-    if(icell  <=0 || icell   >kNCell   ) return -1;
+    if(icell  <0  || icell   >= kNCell ) return -1;
 
     return icell + 100*(imodule+100*ibackleg);
 }
@@ -276,13 +276,18 @@ Int_t StMtdSimMaker::FastCellResponse()
 
     //fg temporarily fix MTD resolution at 99ps
     Double_t tof= ghit.tof/nanosecond + ranGauss.shoot()*(99.e-12)/nanosecond;
-    //Double_t t0 = ghit.tof/nanosecond;
     Double_t de = ghit.de * wt;
-    //Double_t pathL = ghit.s_track;
-    //Double_t q = 0.;
-    
-    int channel1 = mModuleChannel[imodule - 1][icell - 1];   /// uses the module and the cell id to find the first channel on RDO
-    int channel2 = channel1 + 12;                            /// uses the module and the cell id to find the second channel on RDO
+   
+    // Calculate MTD leading and tailing edge time
+    // Assume the velocity = 56 ps/cm, module length = 87 cm
+    double vel = 56.e-3; // ns/cm
+    double leadingW = ghit.tof/nanosecond - ghit.x[2]*vel;
+    double leadingE = ghit.tof/nanosecond + ghit.x[2]*vel;
+    double trailingW = leadingW + 15;
+    double trailingE = leadingE + 15;
+
+    int channel1 = mModuleChannel[imodule - 1][icell];   /// uses the module and the cell id to find the first channel on RDO
+    int channel2 = channel1 + 12;                        /// uses the module and the cell id to find the second channel on RDO
 
     LOG_INFO << "First hit for this cell, assigning channel 1: " << channel1 << " channel 2: " << channel2 << endm;
 
@@ -295,15 +300,15 @@ Int_t StMtdSimMaker::FastCellResponse()
     mTofGeant->Fill(ghit.tof);	
     
     //mCellSeen->Fill(cellId);
-	mDeSeen->Fill(de);
+    mDeSeen->Fill(de);
     mTofSeen->Fill(tof);
     //////////////
 
     sthit->setBackleg(ibackleg);
-    sthit->setModule( imodule );
-    sthit->setCell(   icell   );
-    sthit->setLeadingEdgeTime(pair<double,double>(tof, tof));
-    sthit->setTrailingEdgeTime(pair<double,double>(tof, tof));
+    sthit->setModule(imodule);
+    sthit->setCell(icell);
+    sthit->setLeadingEdgeTime(pair<double,double>(leadingW, leadingE));
+    sthit->setTrailingEdgeTime(pair<double,double>(trailingW, trailingE));
     sthit->setAssociatedTrack(NULL);		//done in StMtdMatchMaker
     sthit->setIdTruth(ghit.track_p, 100);
 
