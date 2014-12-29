@@ -10,3 +10,8 @@ StiPlanarShape::StiPlanarShape(const string &name,
 void StiPlanarShape::setHalfWidth(float val){
   if(val >= 0.){ _halfWidth = val; }
 }// setHalfWidth()
+
+
+double  StiPlanarShape::getVolume() const
+{ return getHalfWidth()*getHalfDepth()*getThickness()*4;}
+

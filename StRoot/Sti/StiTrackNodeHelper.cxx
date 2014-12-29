@@ -881,8 +881,14 @@ double StiTrackNodeHelper::evalChi2()
   if (fabs(mPredPars._sinCA)>0.99        )	return 1e41;
   if (fabs(mPredPars.eta())       >kMaxEta) 	return 1e41;
   if (fabs(mPredPars.curv())      >kMaxCur)      return 1e41;
+  
   if (!mDetector) 	{ //Primay vertex
+    // Check positiveness of mHrr
+    TRSymMatrix A(3,&mHrr.hXX);
+    TRSymMatrix AI(A,TRArray::kInvertedA);
+    if (! AI.IsValid()) return 1e41;
     mHitPars[0] = mPredPars.x();
+    
 //    chi2 = joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A);
     chi2 = joinVtx(mHitPars,mHrr,mPredPars,mPredErrs);
   } else 		{ //Normal hit
