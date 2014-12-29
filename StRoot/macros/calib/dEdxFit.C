@@ -613,6 +613,7 @@ TF1 *FitRL5(TH1 *hist, Bool_t outer = kFALSE)
 
   return l5xg_mult;
 }
+//________________________________________________________________________________
 TF1 *FitRL5(const Char_t *hName = "f1_1", Bool_t outer = kFALSE) {
   TH1 *hist = (TH1 *) gDirectory->Get(hName);
   if (! hist) return 0;
@@ -2201,7 +2202,7 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
       return;
     }
   }
-  Double_t params[9];
+  Double_t params[20];
   TH1 *proj = 0;
   TF1 *g = 0;
   Int_t ix1 = ix, jy1 = jy;
