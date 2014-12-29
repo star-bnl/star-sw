@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.279 2014/08/18 18:50:38 jwebb Exp $
+* $Id: geometry.g,v 1.280 2014/12/22 22:21:22 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.280  2014/12/22 22:21:22  jwebb
+* dev2016 geometry implemented in starsim
+*
 * Revision 1.279  2014/08/18 18:50:38  jwebb
 * Updated y2014 tag w/ MTD y2014 configuration, not available for fast offline production.  Change required so that MTD match maker can run on all y2014 tags.  MTD does not participate in tracking and is outside of the acceptance of the tracker, so this modification does not affect the reproducability of the fast offline period.
 *
@@ -2369,6 +2372,62 @@ REPLACE [exe y2014c;] with ["Y2014 production plus hcal prototype";
     exe hcalv0;      "Prototype hcal";
 ]
 
+REPLACE [exe y2015;] with ["Y2015 first cut geometry";
+    exe FGTDof;      "switch off FGT";
+    exe TPCE31;      "agstar version of yf model with reduced Rmax";
+    exe BTOFv8;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "no FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector off";
+    exe MUTD14;      "Muon telescope detector";
+    exe CAVE05;      "Cave and tunnel";
+    exe IDSM14;      "Inner detector support";
+    exe SISD85;      "SSD version 7"
+    exe PIPEv3;      "The small diameter beam pipe";
+    exe ISTD02;      "IST version 2";
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL06;      "Full config of the pixl detector";
+    exe DTUB01;      "DTUB";
+    exe PSUP01;      "1st version of pixl supports";
+    exe FPDM04;      "FMS plus preshower";
+]
+
+REPLACE [exe dev2016;] with ["Y2016 development tag";
+
+    exe TPCE31;      "agstar version of yf model with reduced Rmax";
+    exe BTOFv8;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDMof;      "FMS off";
+
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "no FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector off";
+    exe MUTD14;      "Muon telescope detector";
+    exe CAVE05;      "Cave and tunnel";
+    exe IDSM14;      "Inner detector support";
+    exe SISD85;      "SSD version 7"
+    exe PIPEv3;      "The small diameter beam pipe";
+    exe ISTD02;      "IST version 2";
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL06;      "Full config of the pixl detector";
+    exe DTUB01;      "DTUB";
+    exe PSUP01;      "1st version of pixl supports";
+    exe FGTDv55;     "12 disk FGT";
+
+];    
+
 REPLACE [exe dev15a;] with ["Y2014 first cut geometry";
     exe y2014a;      "Baseline is y2014a";
     exe FPDM04;      "FMS plus preshower";
@@ -3356,6 +3415,12 @@ If LL>0
 
   Case y2014c   { y2014c : y2014a plus hcal prototype;          
                   Geom = 'y2014c    '; exe y2014c; }
+
+  Case y2015    { y2015  : y2015 baseline, is y2014a plus FMS preshower;
+                  Geom = 'y2015     '; exe y2015;  }
+
+  Case dev2016  { dev2016 : y2016 baseline, is y2014a plus FMS preshower;
+                  Geom = 'dev2016   '; exe dev2016; }
 
   Case dev15a   { dev15a : y2014 a plus FMS preshower;          
                   Geom = 'dev15a    '; exe dev15a; }
