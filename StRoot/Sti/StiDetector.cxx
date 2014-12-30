@@ -81,11 +81,11 @@ static int nCall=0; nCall++;
   float halfY  = shape->getHalfWidth(); 
   float angle  = shape->getOpeningAngle(); 
   float nRadius = placement->getNormalRadius();
-  if (iShape == kCylindrical)  nRadius = shape->getOuterRadius()-deltaX/2;
+  if (iShape >= kCylindrical)  nRadius = shape->getOuterRadius()-deltaX/2;
 
   if (nRadius < deltaX/2) {		// non splitable
-    Warning("splitIt","%s Non splitable Rnormal < thickness/2 %g %g\n"
-           ,getName().c_str(),nRadius,deltaX/2);
+    printf("StiDetector::splitIt %s Non splitable Rnormal < thickness/2 %g %g\n"
+          ,getName().c_str(),nRadius,deltaX/2);
     return 1;
   }
   int ny = deltaX/(halfY*2*dXdY)+0.5;
@@ -117,7 +117,7 @@ assert(myRadius>1e-2 && myRadius < 1e3);
      if (iShape==kPlanar) 	{//Planar shape
        myShape = new StiPlanarShape(ts.Data(),halfZ,dX,halfY);
 
-     } else if (iShape==kCylindrical) {//Cylinder shape
+     } else if (iShape>=kCylindrical) {//Cylinder shape
        myShape = new StiCylindricalShape(ts.Data(),halfZ,dX,myRadius+dX/2,angle);
 
      } else { assert(0 && "Wrong shape type");}
@@ -187,9 +187,25 @@ do {
    double z = xl[2]-placement->getZcenter();  
    if (fabs(z)>shape->getHalfDepth()*fakt)		break;
    return 1;
-} while(0);
+ } while(0);
   return 0;
+}
 
+/**
+ * A setter for most of the detector properties. We do not pass arguments in
+ * a constructor because StiDetector-s are normally created by an StiFactory.
+ *
+ * \author Dmitri Smirnov, BNL
+ */
+void StiDetector::setProperties(std::string name, StiIsActiveFunctor* activeFunctor,
+   StiShape* shape, StiPlacement* placement, StiMaterial* gas, StiMaterial* material)
+{
+   setName(name.c_str());
+   setIsActive(activeFunctor);
+   setShape(shape);
+   setPlacement(placement);
+   setGas(gas);
+   setMaterial(material);
 }
 //______________________________________________________________________________
 int StiDetector::inside(const double xl[3],int mode) const 
