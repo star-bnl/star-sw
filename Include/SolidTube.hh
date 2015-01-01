@@ -11,39 +11,39 @@ class SolidTube : public Solid {
 
  public:
   // Constructors
-  SolidTube(const double cx, const double cy, const double cz,
-            const double rmin, const double rmax, const double lz);
-  SolidTube(const double cx, const double cy, const double cz,
-            const double rmin, const double rmax, const double lz,
-            const double dx, const double dy, const double dz);
+  SolidTube(const double& cx, const double& cy, const double& cz,
+            const double& rmin, const double& rmax, const double& lz);
+  SolidTube(const double& cx, const double& cy, const double& cz,
+            const double& rmin, const double& rmax, const double& lz,
+            const double& dx, const double& dy, const double& dz);
   // Destructor
   ~SolidTube() {}
 
-  bool IsInside(const double x, const double y, const double z);
-  bool GetBoundingBox(double& xmin, double& ymin, double& zmin, double& xmax,
-                      double& ymax, double& zmax);
-  bool IsTube() { return true; }
+  virtual bool IsInside(const double& x, const double& y, const double& z) const;
+  virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin, 
+                              double& xmax, double& ymax, double& zmax) const;
+  virtual bool IsTube() const { return true; }
 
-  bool GetCenter(double& x, double& y, double& z);
-  bool GetDimensions(double& l1, double& l2, double& l3);
-  bool GetOrientation(double& ctheta, double& stheta, double& cphi,
-                      double& sphi);
+  virtual bool GetCenter(double& x, double& y, double& z) const;
+  virtual bool GetDimensions(double& l1, double& l2, double& l3) const;
+  virtual bool GetOrientation(double& ctheta, double& stheta, double& cphi,
+                              double& sphi) const;
 
-  void SetInnerRadius(const double rmin);
-  void SetOuterRadius(const double rmax);
-  void SetHalfLengthZ(const double lz);
+  void SetInnerRadius(const double& rmin);
+  void SetOuterRadius(const double& rmax);
+  void SetHalfLengthZ(const double& lz);
 
  private:
   // Center of the tube
-  double cX, cY, cZ;
+  double m_cX, m_cY, m_cZ;
   // Inner and outer radius
-  double rMin, rMax;
+  double m_rMin, m_rMax;
   // Length
-  double lZ;
+  double m_lZ;
   // Direction
-  double dX, dY, dZ;
-  double cPhi, sPhi;
-  double cTheta, sTheta;
+  double m_dX, m_dY, m_dZ;
+  double m_cPhi, m_sPhi;
+  double m_cTheta, m_sTheta;
 };
 }
 

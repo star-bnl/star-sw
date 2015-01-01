@@ -295,6 +295,10 @@ $(OBJDIR)/SolidTube.o: \
 	$(SRCDIR)/SolidTube.cc $(INCDIR)/SolidTube.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/SolidSphere.o: \
+	$(SRCDIR)/SolidSphere.cc $(INCDIR)/SolidSphere.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/RandomEngineGSL.o: \
 	$(SRCDIR)/RandomEngineGSL.cc $(INCDIR)/RandomEngineGSL.hh

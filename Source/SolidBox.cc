@@ -7,22 +7,14 @@
 
 namespace Garfield {
 
-SolidBox::SolidBox(const double cx, const double cy, const double cz,
-                   const double lx, const double ly, const double lz)
+SolidBox::SolidBox(const double& cx, const double& cy, const double& cz,
+                   const double& lx, const double& ly, const double& lz)
     : Solid(),
-      cX(cx),
-      cY(cy),
-      cZ(cz),
-      lX(lx),
-      lY(ly),
-      lZ(lz),
-      dX(0.),
-      dY(0.),
-      dZ(1.),
-      cPhi(1.),
-      sPhi(0.),
-      cTheta(1.),
-      sTheta(0.) {
+      m_cX(cx), m_cY(cy), m_cZ(cz),
+      m_lX(lx), m_lY(ly), m_lZ(lz),
+      m_dX(0.), m_dY(0.), m_dZ(1.),
+      m_cPhi(1.), m_sPhi(0.),
+      m_cTheta(1.), m_sTheta(0.) {
 
   std::cout << "SolidBox:\n";
   std::cout << "    " << cx - lx << " < x [cm] < " << cx + lx << "\n";
@@ -30,64 +22,56 @@ SolidBox::SolidBox(const double cx, const double cy, const double cz,
   std::cout << "    " << cz - lz << " < z [cm] < " << cz + lz << "\n";
 }
 
-SolidBox::SolidBox(const double cx, const double cy, const double cz,
-                   const double lx, const double ly, const double lz,
-                   const double dx, const double dy, const double dz)
+SolidBox::SolidBox(const double& cx, const double& cy, const double& cz,
+                   const double& lx, const double& ly, const double& lz,
+                   const double& dx, const double& dy, const double& dz)
     : Solid(),
-      cX(cx),
-      cY(cy),
-      cZ(cz),
-      lX(lx),
-      lY(ly),
-      lZ(lz),
-      dX(0.),
-      dY(0.),
-      dZ(1.),
-      cPhi(1.),
-      sPhi(0.),
-      cTheta(1.),
-      sTheta(0.) {
+      m_cX(cx), m_cY(cy), m_cZ(cz),
+      m_lX(lx), m_lY(ly), m_lZ(lz),
+      m_dX(0.), m_dY(0.), m_dZ(1.),
+      m_cPhi(1.), m_sPhi(0.),
+      m_cTheta(1.), m_sTheta(0.) {
 
   const double d = sqrt(dx * dx + dy * dy + dz * dz);
   if (d < Small) {
     std::cerr << "SolidBox: Direction vector has zero norm.\n";
   } else {
-    dX = dx / d;
-    dY = dy / d;
-    dZ = dz / d;
+    m_dX = dx / d;
+    m_dY = dy / d;
+    m_dZ = dz / d;
     double phi, theta;
-    const double dt = sqrt(dX * dX + dY * dY);
+    const double dt = sqrt(m_dX * m_dX + m_dY * m_dY);
     if (dt < Small) {
       phi = 0.;
-      if (dZ > 0.) {
+      if (m_dZ > 0.) {
         theta = 0.;
       } else {
         theta = Pi;
       }
     } else {
-      phi = atan2(dY, dX);
-      theta = atan2(dt, dZ);
+      phi = atan2(m_dY, m_dX);
+      theta = atan2(dt, m_dZ);
     }
-    cTheta = cos(theta);
-    sTheta = sin(theta);
-    cPhi = cos(phi);
-    sPhi = sin(phi);
+    m_cTheta = cos(theta);
+    m_sTheta = sin(theta);
+    m_cPhi = cos(phi);
+    m_sPhi = sin(phi);
   }
 }
 
-bool SolidBox::IsInside(const double x, const double y, const double z) {
+bool SolidBox::IsInside(const double& x, const double& y, const double& z) const {
 
   // Transform the point to local coordinates
-  const double dx = x - cX;
-  const double dy = y - cY;
-  const double dz = z - cZ;
-  const double u = cPhi * cTheta * dx + sPhi * cTheta * dy - sTheta * dz;
-  const double v = -sPhi * dx + cPhi * dy;
-  const double w = cPhi * sTheta * dx + sPhi * sTheta * dy + cTheta * dz;
+  const double dx = x - m_cX;
+  const double dy = y - m_cY;
+  const double dz = z - m_cZ;
+  const double u =  m_cPhi * m_cTheta * dx + m_sPhi * m_cTheta * dy - m_sTheta * dz;
+  const double v = -m_sPhi * dx + m_cPhi * dy;
+  const double w =  m_cPhi * m_sTheta * dx + m_sPhi * m_sTheta * dy + m_cTheta * dz;
 
   // See whether the point is inside
-  if (fabs(u) > lX || fabs(v) > lY || fabs(w) > lZ) {
-    if (debug) {
+  if (fabs(u) > m_lX || fabs(v) > m_lY || fabs(w) > m_lZ) {
+    if (m_debug) {
       std::cout << "SolidBox::IsInside:\n";
       std::cout << "    (" << x << ", " << y << ", " << z << ") "
                 << " is outside.\n";
@@ -95,7 +79,7 @@ bool SolidBox::IsInside(const double x, const double y, const double z) {
     return false;
   }
 
-  if (debug) {
+  if (m_debug) {
     std::cout << "SolidBox::IsInside:\n";
     std::cout << "    (" << x << ", " << y << ", " << z << ") "
               << " is inside.\n";
@@ -105,78 +89,78 @@ bool SolidBox::IsInside(const double x, const double y, const double z) {
 }
 
 bool SolidBox::GetBoundingBox(double& xmin, double& ymin, double& zmin,
-                              double& xmax, double& ymax, double& zmax) {
+                              double& xmax, double& ymax, double& zmax) const {
 
-  if (cTheta == 1. && cPhi == 1.) {
-    xmin = cX - lX;
-    xmax = cX + lX;
-    ymin = cY - lY;
-    ymax = cY + lY;
-    zmin = cZ - lZ;
-    zmax = cZ + lZ;
+  if (m_cTheta == 1. && m_cPhi == 1.) {
+    xmin = m_cX - m_lX;
+    xmax = m_cX + m_lX;
+    ymin = m_cY - m_lY;
+    ymax = m_cY + m_lY;
+    zmin = m_cZ - m_lZ;
+    zmax = m_cZ + m_lZ;
     return true;
   }
 
-  const double dd = sqrt(lX * lX + lY * lY + lZ * lZ);
-  xmin = cX - dd;
-  xmax = cX + dd;
-  ymin = cY - dd;
-  ymax = cY + dd;
-  zmin = cZ - dd;
-  zmax = cZ + dd;
+  const double dd = sqrt(m_lX * m_lX + m_lY * m_lY + m_lZ * m_lZ);
+  xmin = m_cX - dd;
+  xmax = m_cX + dd;
+  ymin = m_cY - dd;
+  ymax = m_cY + dd;
+  zmin = m_cZ - dd;
+  zmax = m_cZ + dd;
   return true;
 }
 
-bool SolidBox::GetCenter(double& x, double& y, double& z) {
+bool SolidBox::GetCenter(double& x, double& y, double& z) const {
 
-  x = cX;
-  y = cY;
-  z = cZ;
+  x = m_cX;
+  y = m_cY;
+  z = m_cZ;
   return true;
 }
 
-bool SolidBox::GetDimensions(double& l1, double& l2, double& l3) {
+bool SolidBox::GetDimensions(double& l1, double& l2, double& l3) const {
 
-  l1 = lX;
-  l2 = lY;
-  l3 = lZ;
+  l1 = m_lX;
+  l2 = m_lY;
+  l3 = m_lZ;
   return true;
 }
 
 bool SolidBox::GetOrientation(double& ctheta, double& stheta, double& cphi,
-                              double& sphi) {
+                              double& sphi) const {
 
-  ctheta = cTheta;
-  stheta = sTheta;
-  cphi = cPhi;
-  sphi = sPhi;
+  ctheta = m_cTheta;
+  stheta = m_sTheta;
+  cphi = m_cPhi;
+  sphi = m_sPhi;
   return true;
 }
 
-void SolidBox::SetHalfLengthX(const double lx) {
+void SolidBox::SetHalfLengthX(const double& lx) {
 
   if (lx > 0.) {
-    lX = lx;
+    m_lX = lx;
   } else {
     std::cerr << "SolidBox::SetHalfLengthX:\n";
     std::cerr << "    Half-length must be > 0.\n";
   }
 }
 
-void SolidBox::SetHalfLengthY(const double ly) {
+void SolidBox::SetHalfLengthY(const double& ly) {
 
   if (ly > 0.) {
-    lY = ly;
+    m_lY = ly;
   } else {
     std::cerr << "SolidBox::SetHalfLengthY:\n";
     std::cerr << "    Half-length must be > 0.\n";
   }
 }
 
-void SolidBox::SetHalfLengthZ(const double lz) {
+void SolidBox::SetHalfLengthZ(const double& lz) {
 
   if (lz > 0.) {
-    lZ = lz;
+    m_lZ = lz;
   } else {
     std::cerr << "SolidBox::SetHalfLengthZ:\n";
     std::cerr << "    Half-length must be > 0.\n";

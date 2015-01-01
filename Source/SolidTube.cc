@@ -7,80 +7,66 @@
 
 namespace Garfield {
 
-SolidTube::SolidTube(const double cx, const double cy, const double cz,
-                     const double rmin, const double rmax, const double lz)
+SolidTube::SolidTube(const double& cx, const double& cy, const double& cz,
+                     const double& rmin, const double& rmax, const double& lz)
     : Solid(),
-      cX(cx),
-      cY(cy),
-      cZ(cz),
-      rMin(rmin),
-      rMax(rmax),
-      lZ(lz),
-      dX(0.),
-      dY(0.),
-      dZ(1.),
-      cPhi(1.),
-      sPhi(0.),
-      cTheta(1.),
-      sTheta(0.) {}
+      m_cX(cx), m_cY(cy), m_cZ(cz),
+      m_rMin(rmin), m_rMax(rmax),
+      m_lZ(lz),
+      m_dX(0.), m_dY(0.), m_dZ(1.),
+      m_cPhi(1.), m_sPhi(0.),
+      m_cTheta(1.), m_sTheta(0.) {}
 
-SolidTube::SolidTube(const double cx, const double cy, const double cz,
-                     const double rmin, const double rmax, const double lz,
-                     const double dx, const double dy, const double dz)
+SolidTube::SolidTube(const double& cx, const double& cy, const double& cz,
+                     const double& rmin, const double& rmax, const double& lz,
+                     const double& dx, const double& dy, const double& dz)
     : Solid(),
-      cX(cx),
-      cY(cy),
-      cZ(cz),
-      rMin(rmin),
-      rMax(rmax),
-      lZ(lz),
-      dX(0.),
-      dY(0.),
-      dZ(1.),
-      cPhi(1.),
-      sPhi(0.),
-      cTheta(1.),
-      sTheta(0.) {
+      m_cX(cx), m_cY(cy), m_cZ(cz),
+      m_rMin(rmin), m_rMax(rmax),
+      m_lZ(lz),
+      m_dX(0.), m_dY(0.), m_dZ(1.),
+      m_cPhi(1.), m_sPhi(0.),
+      m_cTheta(1.), m_sTheta(0.) {
 
   const double d = sqrt(dx * dx + dy * dy + dz * dz);
   if (d < Small) {
     std::cerr << "SolidTube: Direction vector has zero norm.\n";
   } else {
-    dX = dx / d;
-    dY = dy / d;
-    dZ = dz / d;
+    m_dX = dx / d;
+    m_dY = dy / d;
+    m_dZ = dz / d;
     double phi, theta;
-    const double dt = sqrt(dX * dX + dY * dY);
+    const double dt = sqrt(m_dX * m_dX + m_dY * m_dY);
     if (dt < Small) {
       phi = 0.;
-      if (dZ > 0.) {
+      if (m_dZ > 0.) {
         theta = 0.;
       } else {
         theta = Pi;
       }
     } else {
-      phi = atan2(dY, dX);
-      theta = atan2(dt, dZ);
+      phi = atan2(m_dY, m_dX);
+      theta = atan2(dt, m_dZ);
     }
-    cTheta = cos(theta);
-    sTheta = sin(theta);
-    cPhi = cos(phi);
-    sPhi = sin(phi);
+    m_cTheta = cos(theta);
+    m_sTheta = sin(theta);
+    m_cPhi = cos(phi);
+    m_sPhi = sin(phi);
   }
 }
 
-bool SolidTube::IsInside(const double x, const double y, const double z) {
+bool SolidTube::IsInside(const double& x, const double& y, const double& z) const {
 
   // Transform the point to local coordinates
-  const double dx = x - cX;
-  const double dy = y - cY;
-  const double dz = z - cZ;
-  const double u = cPhi * cTheta * dx + sPhi * cTheta * dy - sTheta * dz;
-  const double v = -sPhi * dx + cPhi * dy;
-  const double w = cPhi * sTheta * dx + sPhi * sTheta * dy + cTheta * dz;
+  const double dx = x - m_cX;
+  const double dy = y - m_cY;
+  const double dz = z - m_cZ;
+  const double u = m_cPhi * m_cTheta * dx + m_sPhi * m_cTheta * dy - m_sTheta * dz;
+  const double v = -m_sPhi * dx + m_cPhi * dy;
+  const double w = m_cPhi * m_sTheta * dx + m_sPhi * m_sTheta * dy + m_cTheta * dz;
 
-  if (fabs(w) > lZ) {
-    if (debug) {
+  if (fabs(w) > m_lZ) {
+    if (m_debug) {
       std::cout << "SolidTube::IsInside:\n";
       std::cout << "    (" << x << ", " << y << ", " << z << ")"
                 << " is outside.\n";
@@ -89,8 +75,8 @@ bool SolidTube::IsInside(const double x, const double y, const double z) {
   }
 
   const double r = sqrt(u * u + v * v);
-  if (r >= rMin && r <= rMax) {
-    if (debug) {
+  if (r >= m_rMin && r <= m_rMax) {
+    if (m_debug) {
       std::cout << "SolidTube::IsInside:\n";
       std::cout << "    (" << x << ", " << y << ", " << z << ")"
                 << " is inside.\n";
@@ -98,7 +84,7 @@ bool SolidTube::IsInside(const double x, const double y, const double z) {
     return true;
   }
 
-  if (debug) {
+  if (m_debug) {
     std::cout << "SolidTube::IsInside:\n";
     std::cout << "    (" << x << ", " << y << ", " << z << ") "
               << " is outside.\n";
@@ -107,91 +93,91 @@ bool SolidTube::IsInside(const double x, const double y, const double z) {
 }
 
 bool SolidTube::GetBoundingBox(double& xmin, double& ymin, double& zmin,
-                               double& xmax, double& ymax, double& zmax) {
+                               double& xmax, double& ymax, double& zmax) const {
 
-  if (cTheta == 1. && cPhi == 1.) {
-    xmin = cX - rMax;
-    xmax = cX + rMax;
-    ymin = cY - rMax;
-    ymax = cY + rMax;
-    zmin = cZ - lZ;
-    zmax = cZ + lZ;
+  if (m_cTheta == 1. && m_cPhi == 1.) {
+    xmin = m_cX - m_rMax;
+    xmax = m_cX + m_rMax;
+    ymin = m_cY - m_rMax;
+    ymax = m_cY + m_rMax;
+    zmin = m_cZ - m_lZ;
+    zmax = m_cZ + m_lZ;
     return true;
   }
 
-  const double dd = sqrt(rMax * rMax + lZ * lZ);
-  xmin = cX - dd;
-  xmax = cX + dd;
-  ymin = cY - dd;
-  ymax = cY + dd;
-  zmin = cZ - dd;
-  zmax = cZ + dd;
+  const double dd = sqrt(m_rMax * m_rMax + m_lZ * m_lZ);
+  xmin = m_cX - dd;
+  xmax = m_cX + dd;
+  ymin = m_cY - dd;
+  ymax = m_cY + dd;
+  zmin = m_cZ - dd;
+  zmax = m_cZ + dd;
   return true;
 }
 
-bool SolidTube::GetCenter(double& x, double& y, double& z) {
+bool SolidTube::GetCenter(double& x, double& y, double& z) const {
 
-  x = cX;
-  y = cY;
-  z = cZ;
+  x = m_cX;
+  y = m_cY;
+  z = m_cZ;
   return true;
 }
 
-bool SolidTube::GetDimensions(double& l1, double& l2, double& l3) {
+bool SolidTube::GetDimensions(double& l1, double& l2, double& l3) const {
 
-  l1 = rMin;
-  l2 = rMax;
-  l3 = lZ;
+  l1 = m_rMin;
+  l2 = m_rMax;
+  l3 = m_lZ;
   return true;
 }
 
 bool SolidTube::GetOrientation(double& ctheta, double& stheta, double& cphi,
-                               double& sphi) {
+                               double& sphi) const {
 
-  ctheta = cTheta;
-  stheta = sTheta;
-  cphi = cPhi;
-  sphi = sPhi;
+  ctheta = m_cTheta;
+  stheta = m_sTheta;
+  cphi = m_cPhi;
+  sphi = m_sPhi;
   return true;
 }
 
-void SolidTube::SetInnerRadius(const double rmin) {
+void SolidTube::SetInnerRadius(const double& rmin) {
 
   if (rmin <= 0.) {
     std::cerr << "SolidTube::SetInnerRadius:\n";
     std::cerr << "    Radius must be > 0.\n";
     return;
   }
-  if (rmin >= rMax) {
+  if (rmin >= m_rMax) {
     std::cerr << "SolidTube::SetInnerRadius:\n";
     std::cerr << "    Inner radius must be smaller than outer radius.\n";
     return;
   }
-  rMin = rmin;
+  m_rMin = rmin;
 }
 
-void SolidTube::SetOuterRadius(const double rmax) {
+void SolidTube::SetOuterRadius(const double& rmax) {
 
   if (rmax <= 0.) {
     std::cerr << "SolidTube::SetOuterRadius:\n";
     std::cerr << "    Radius must be > 0.\n";
     return;
   }
-  if (rmax <= rMin) {
+  if (rmax <= m_rMin) {
     std::cerr << "SolidTube::SetOuterRadius:\n";
     std::cerr << "    Outer radius must be greater than inner radius.\n";
     return;
   }
-  rMax = rmax;
+  m_rMax = rmax;
 }
 
-void SolidTube::SetHalfLengthZ(const double lz) {
+void SolidTube::SetHalfLengthZ(const double& lz) {
 
   if (lz <= 0.) {
     std::cerr << "SolidTube::SetHalfLengthZ:\n";
     std::cerr << "    Half-length must be > 0.\n";
     return;
   }
-  lZ = lz;
+  m_lZ = lz;
 }
 }

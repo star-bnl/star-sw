@@ -9,28 +9,30 @@ class Solid {
 
  public:
   // Constructor
-  Solid() : debug(false) {}
+  Solid() : m_debug(false) {}
   // Destructor
   virtual ~Solid() {}
 
-  virtual bool IsInside(const double x, const double y, const double z) = 0;
+  virtual bool IsInside(const double& x, const double& y, 
+                        const double& z) const = 0;
   virtual bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
-                              double& xmax, double& ymax, double& zmax) = 0;
+                              double& xmax, double& ymax, double& zmax) const = 0;
   // Solid type
-  virtual bool IsBox() { return false; }
-  virtual bool IsTube() { return false; }
+  virtual bool IsBox() const { return false; }
+  virtual bool IsTube() const { return false; }
+  virtual bool IsSphere() const { return false; }
 
-  virtual bool GetCenter(double& x, double& y, double& z) = 0;
-  virtual bool GetDimensions(double& l1, double& l2, double& l3) = 0;
+  virtual bool GetCenter(double& x, double& y, double& z) const = 0;
+  virtual bool GetDimensions(double& l1, double& l2, double& l3) const = 0;
   virtual bool GetOrientation(double& ctheta, double& stheta, double& cphi,
-                              double& shpi) = 0;
+                              double& shpi) const = 0;
 
   // Switch on/off debugging messages
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  protected:
-  bool debug;
+  bool m_debug;
 };
 }
 
