@@ -10,7 +10,7 @@ ifeq ($(HOSTNAME),l4evp)
 	RTSCACHE := /RTScache/bin/LINUX/x86_64
 	HISTOMOTHER := l4HistoMother
 else
-	RTSCACHE := /RTScache/bin/LINUX/i686
+	RTSCACHE := /RTScache/bin/LINUX/x86_64
 	HISTOMOTHER := jevpHistoMother
 endif
 
@@ -27,8 +27,8 @@ vpath %.c $(CVSDIR)/StRoot/RTS/src/LOG
 WritePDFToDB:	WritePDFToDB.o rtsLogUnix.o
 
 install:
-	/RTS/bin/install.sh WritePDFToDB $(RTSCACHE)
-	/RTS/bin/install.sh $(HISTOMOTHER) ~
+	../../../online/RTS/src/SH_UTIL/install.sh WritePDFToDB $(RTSCACHE)
+	../../../online/RTS/src/SH_UTIL/install.sh $(HISTOMOTHER) ~
 
 clean:
 	rm *.o

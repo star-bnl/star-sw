@@ -229,6 +229,8 @@ void JevpServer::readSocket()
 
     if(strcmp(msg->getSource(), "readerThread") == 0) {   // From the daqReader!
       CP;
+      //LOG("JEFF", "Handle message from reader");
+
       handleNewEvent(msg);
       
       EvpMessage m;
@@ -242,6 +244,7 @@ void JevpServer::readSocket()
     }
     else {                                // from a client!
       CP;
+      //LOG("JEFF", "Handle message from client");
       handleEvpMessage(s, msg);
       CP;
     }
