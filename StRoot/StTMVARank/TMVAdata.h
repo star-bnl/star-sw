@@ -26,29 +26,13 @@ class TMVAdata {
   void   SetPPV() {fiPPV = kTRUE;}
   void   SetPileUp() {fiPileUp = kTRUE;}
   void   SetAcceptVar(TString string) { fAcceptMap[string] = kTRUE; }
-  void   SetListOfActiveVariables(const Char_t *list) {
-    cout << "SetListOfActiveVariables(" << list << ")" << endl;
-    TPMERegexp reg(":");
-    TString ListOfActiveVariables(list);
-    Int_t N = reg.Split(ListOfActiveVariables);
-    for (Int_t i = 0; i < N; i++) {
-      SetAcceptVar(reg[i]);
-    }
-    Print();
-  }
+  void   SetListOfActiveVariables(const Char_t *list);
   Bool_t PPV() {return fiPPV;}  
   Bool_t PileUp() {return fiPileUp;}
   void   Init();
   Bool_t AcceptVar(const Char_t *var) {return AcceptVar(TString(var));}
   const Char_t *Names() {return fNames.Data();}
-  void Print() {
-    TTableDescriptor *ds = GetTableDesc();
-    tableDescriptor_st *s = ds->GetTable();
-    for (Int_t i = 0; i < ds->GetNRows(); i++, s++) {
-      TString aName(s->fColumnName);
-      std::cout << "TMVAdata::AcceptVar\t" << aName.Data() << " = " << fAcceptMap[aName] << std::endl;
-    }    
-  }
+  void Print(); 
  private:
   St_PVgadgets *fTable;
   Bool_t fiPPV, fiPileUp;
@@ -67,14 +51,6 @@ class TMVAdata {
   TMVAdata(const TMVAdata&) {}
   TString fNames;
   std::map<TString,Bool_t> fAcceptMap;
+  ClassDef(TMVAdata,1)
 };
-//________________________________________________________________________________
-void TMVAdata::Init() {
-  TTableDescriptor *ds = GetTableDesc();
-  tableDescriptor_st *s = ds->GetTable();
-  for (Int_t i = 0; i < ds->GetNRows(); i++, s++) {
-    TString aName(s->fColumnName);
-    fAcceptMap[aName] = kFALSE;
-  }
-}
 #endif /* __TMVAdata_h__ */
