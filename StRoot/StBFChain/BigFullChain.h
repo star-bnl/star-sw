@@ -1536,7 +1536,7 @@ Bfc_st BFC[] = { // standard chains
   {"fgtPoint"   ,"","", "event",      "StFgtPointMaker",    "StFgtPointMaker", "Creates FGT points",kFALSE},
 
   // Some global Sti stuff including vertexing
-  {"TMVARank"   ,"","","" ,"","StTMVARank","Load STAR interface to TMVA for primary vertex ranking",kFALSE},
+  {"TMVARank"   ,"","",""     ,"","libTMVA,StTMVARank","Load STAR interface to TMVA for PV ranking",kFALSE},
   {"genvtx","","","TMVARank,ctf_T,EEmcUtil","StGenericVertexMaker"
    ,"ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti"
    ,                                "Generic Vertex Finder library (default is MinuitVertexFinder)",kFALSE},
