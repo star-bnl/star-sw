@@ -3,13 +3,8 @@
 
 #include "Sti/StiHitLoader.h"
 
-#include "StEvent.h"
-class StMcEvent;
-class StMcTrack;
-class StiMcTrack;
+class StEvent;
 class StiDetectorBuilder;
-class StTpcHit;
-class StMcIstHit;
 
 
 /*!
