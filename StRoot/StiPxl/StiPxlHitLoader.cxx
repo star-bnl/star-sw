@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.11 2014/12/19 18:09:01 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.12 2015/01/05 15:40:04 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.12  2015/01/05 15:40:04  smirnovd
+ * StiXxxHitLoader: Changes in whitespace only
+ *
  * Revision 1.11  2014/12/19 18:09:01  smirnovd
  * Do not set StiDetector members _key1 and _key2 as they are not really used anywhere
  *
@@ -110,16 +113,13 @@ StiPxlHitLoader::StiPxlHitLoader()
 {}
 
 
-StiPxlHitLoader::StiPxlHitLoader(StiHitContainer *hitContainer,
-                                 Factory<StiHit> *hitFactory,
-                                 StiDetectorBuilder *detector)
-   : StiHitLoader<StEvent, StiDetectorBuilder>("PixelHitLoader", hitContainer, hitFactory, detector)
+StiPxlHitLoader::StiPxlHitLoader(StiHitContainer *hitContainer, Factory<StiHit> *hitFactory,
+   StiDetectorBuilder *detector) :
+   StiHitLoader<StEvent, StiDetectorBuilder>("PixelHitLoader", hitContainer, hitFactory, detector)
 {}
 
 
-void StiPxlHitLoader::loadHits(StEvent *source,
-                                 Filter<StiTrack> *trackFilter,
-                                 Filter<StiHit> *hitFilter)
+void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter)
 {
    LOG_INFO << " -I- Started" << endl;
 
@@ -246,4 +246,3 @@ void StiPxlHitLoader::loadHits(StEvent *source,
 
    LOG_INFO << "StiPxlHitLoader:loadHits -I- Loaded " << nHit << " pixel hits." << endm;
 }
-

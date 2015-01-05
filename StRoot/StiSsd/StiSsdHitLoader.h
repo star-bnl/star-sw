@@ -1,6 +1,9 @@
-// $Id: StiSsdHitLoader.h,v 1.7 2005/10/26 21:59:12 fisyak Exp $
+// $Id: StiSsdHitLoader.h,v 1.8 2015/01/05 15:40:04 smirnovd Exp $
 // 
 // $Log: StiSsdHitLoader.h,v $
+// Revision 1.8  2015/01/05 15:40:04  smirnovd
+// StiXxxHitLoader: Changes in whitespace only
+//
 // Revision 1.7  2005/10/26 21:59:12  fisyak
 // get rid off dependencies from StMcEvent
 //
@@ -14,6 +17,7 @@
 #define StiSsdHitLoader_H
 
 #include "Sti/StiHitLoader.h"
+
 class StEvent;
 class StiDetectorBuilder;
 
@@ -34,13 +38,9 @@ class StiSsdHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
 public:
 
     StiSsdHitLoader();
-    StiSsdHitLoader(StiHitContainer      * hitContainer,
-		    Factory<StiHit>      * hitFactory,
-		    StiDetectorBuilder   * detector);
+    StiSsdHitLoader(StiHitContainer* hitContainer, Factory<StiHit>* hitFactory, StiDetectorBuilder* detector);
     virtual ~StiSsdHitLoader();
-    virtual void loadHits(StEvent* source,
-			  Filter<StiTrack> * trackFilter, 
-			  Filter<StiHit> * hitFilter);
+    virtual void loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter);
 };
 
 #endif

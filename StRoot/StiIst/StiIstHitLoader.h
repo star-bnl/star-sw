@@ -27,14 +27,11 @@ written by Mike Miller.
 class StiIstHitLoader : public StiHitLoader<StEvent, StiDetectorBuilder>
 {
 public:
+
    StiIstHitLoader();
-   StiIstHitLoader(StiHitContainer *hitContainer,
-                   Factory<StiHit> *hitFactory,
-                   StiDetectorBuilder *detector);
+   StiIstHitLoader(StiHitContainer *hitContainer, Factory<StiHit> *hitFactory, StiDetectorBuilder *detector);
    virtual ~StiIstHitLoader();
-   virtual void loadHits(StEvent *source,
-                         Filter<StiTrack> *trackFilter,
-                         Filter<StiHit> *hitFilter);
+   virtual void loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter);
 };
 
 #endif
