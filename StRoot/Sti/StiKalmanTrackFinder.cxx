@@ -170,8 +170,10 @@ void StiKalmanTrackFinder::findTracks()
 #endif /* DO_TPCCATRACKER */  
   findAllTracks(); // find track left
 #ifdef DO_TPCCATRACKER 
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   caTrackerInt.SetStiTracks(_trackContainer);
   caTrackerInt.RunPerformance();
+#endif /* DO_TPCCATRACKER_EFF_PERFORMANCE */
 #endif /* DO_TPCCATRACKER */
 }
 #ifdef DO_TPCCATRACKER

@@ -144,20 +144,25 @@ void StiTPCCATrackerInterface::Run()
   name += iEvent;
   name += "_";
   fTracker->SaveHitsInFile(string(name));
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fPerformance->SaveDataInFiles(string(name));
-
+#endif
 // check
   if(1){
   if (fTracker)    delete fTracker;
   fTracker    = new AliHLTTPCCAGBTracker;
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fPerformance->SetTracker(fTracker);
+#endif
   TString name = "./data/";
   fTracker->ReadSettingsFromFile(string(name));
   name += "event";
   name += iEvent;
   name += "_";
   fTracker->ReadHitsFromFile(string(name));
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   fPerformance->ReadDataFromFiles(string(name));
+#endif
   fTracker->SetSettings(fCaParam);
   fTracker->SetHits(fCaHits);
 

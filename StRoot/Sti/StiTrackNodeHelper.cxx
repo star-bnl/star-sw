@@ -615,9 +615,17 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   enum {nP1=3,nE1=6,nP2=6,nE2=21};
 
   StiNodeErrs Ai=A;	//Inverted A
+  double chi2 = 3e33;
   
   Ai._cXX=1;
+#if 0
   TCL::trsinv(Ai.A,Ai.A,nP2);
+#else
+  TRSymMatrix AA(nP2,Ai.A);
+  TRSymMatrix AI(AA,TRArray::kInvertedA);
+  if (! AI.IsValid()) return chi2;
+  TCL::ucopy(AI.GetArray(),Ai.A, nP2*(nP2+1)/2);
+#endif
   Ai._cXX=0;
 
 
@@ -633,7 +641,6 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
   if (M) {TCL::ucopy(m,M->P,nP2); M->ready();}	//fill resulting params
 
   TCL::vsub(X.P,m,dif,nP2);			//dif = X - M
-  double chi2;
   TCL::trasat(dif,Ai.A,&chi2,1,nP2);		//calc chi2
   if (!C) return chi2;
 		// Error matrix calculation
