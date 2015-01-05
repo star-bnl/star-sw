@@ -50,6 +50,6 @@ public:
 protected:
     KFParticle *mKFParticle;
     
-    ClassDef(StTrackMassFit,1)
+    ClassDef(StTrackMassFit,2)
 };
 #endif

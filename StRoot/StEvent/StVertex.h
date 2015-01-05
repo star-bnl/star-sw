@@ -161,6 +161,6 @@ protected:
 protected:
     StSPtrVecTrackMassFit    mMassFits;
     
-    ClassDef(StVertex,5)
+    ClassDef(StVertex,6)
 };
 #endif
