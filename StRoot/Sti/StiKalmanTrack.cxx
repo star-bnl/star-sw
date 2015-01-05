@@ -1,11 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.131.2.2 2014/12/11 03:13:26 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.131.2.2 2014/12/11 03:13:26 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.3 2015/01/05 22:56:50 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.3 2015/01/05 22:56:50 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.131.2.3  2015/01/05 22:56:50  perev
+ * Assert forr accuracy decreased from 1e-6 to 1e-4
+ * If inner node not found, return with error, Very rare case
+ * Assert added when found Xi2 > maxXi2 after refit
+ *
  * Revision 2.131.2.2  2014/12/11 03:13:26  perev
  * Assert removed. Probably it is cure of simptomps but not illness
  * We will see(VP)
@@ -1197,7 +1202,7 @@ static int nCall=0; nCall++;
         tNode->setChi2(0); 
 	tNode->setHit(0);
 	tNode->setDetector(0);
-        assert(fabs(tNode->x())<1e-6);
+        assert(fabs(tNode->x())<1e-4);
 //        assert(fabs(tNode->y())<  50);
 
         return tNode;
@@ -1441,6 +1446,8 @@ static const double kMaxXi2Vtx = StiKalmanTrackFitterParameters::instance()->get
   if (nNBeg<=3) 	return 1;
   if (!mgMaxRefiter) 	return 0;
   StiKalmanTrackNode *inn= getInnerMostNode(3);
+  if (!inn) return 1;
+
   int fail=0,status=0;
 
   StiNodePars pPrev;
@@ -1461,7 +1468,9 @@ static const double kMaxXi2Vtx = StiKalmanTrackFitterParameters::instance()->get
       nNEnd = sTNH.getUsed();
       if ((nNEnd <=3))	{fail= 2; errType = kNotEnoughUsed; break;}
       if (!inn->isValid() || inn->getChi2()>1000) {
-        inn = getInnerMostNode(3); fail=-1; errType = kInNodeNotValid; continue;}	
+        inn = getInnerMostNode(3); 
+	if (!inn) return 2;
+	fail=-1; errType = kInNodeNotValid; continue;}	
       qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
       static int oldRefit = StiDebug::iFlag("StiOldRefit");
       if (oldRefit) {
@@ -1524,7 +1533,8 @@ static const double kMaxXi2Vtx = StiKalmanTrackFitterParameters::instance()->get
       node->setHit(0);
       if (!node->isValid()) 				continue;
       if (node->getChi2()>10000.)			continue;
-      if (node->getChi2()>kMaxXi2Hit)			continue;
+//      if (node->getChi2()>kMaxXi2Hit)			continue;
+      assert(node->getChi2()<=kMaxXi2Hit);
       hit->setTimesUsed(1);
       node->setHit(hit);
     }
