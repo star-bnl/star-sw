@@ -29,7 +29,7 @@ StiIstHitLoader::StiIstHitLoader(StiHitContainer *hitContainer,
                                  Factory<StiHit> *hitFactory,
                                  StiDetectorBuilder *detector)
    : StiHitLoader<StEvent, StiDetectorBuilder>("IstHitLoader", hitContainer, hitFactory, detector)
-{evNum = 0;}
+{}
 
 StiIstHitLoader::~StiIstHitLoader()
 {}
@@ -38,8 +38,6 @@ void StiIstHitLoader::loadHits(StEvent *source,
                                Filter<StiTrack> *trackFilter,
                                Filter<StiHit> *hitFilter)
 {
-   n = 0;
-   //cout << "  n = " << n << endl;
    LOG_INFO << "StiIstHitLoader::loadHits(StEvent*) -I- Started" << endm;
 
    if (!_detector)
