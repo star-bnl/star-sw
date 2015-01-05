@@ -11,7 +11,7 @@ class StTMVARanking : public TObject {
   static StTMVARanking  *instance() {return fgInstance;}
   static TMVA::Reader   *Reader()   {return fgReader;}
   static TString        &Method()   {return *&fMethod;}
-  static Double_t        Evaluate() {return fgReader->EvaluateMVA(fMethodE);}
+  static Double_t        Evaluate() {return fgReader->EvaluateMVA(fMethod);}
   static void            TMVAClassification( TString myMethodList, TTree *signal, TTree *background);
  private:
   static StTMVARanking* fgInstance;
