@@ -20,6 +20,7 @@ originally written by Mike Miller.
 class StiPxlHitLoader : public StiHitLoader<StEvent, StiDetectorBuilder>
 {
 public:
+
    StiPxlHitLoader();
    StiPxlHitLoader(StiHitContainer *hitContainer, Factory<StiHit> *hitFactory, StiDetectorBuilder *detector);
    virtual void loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter);

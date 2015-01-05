@@ -25,18 +25,15 @@ StiIstHitLoader::StiIstHitLoader() :
    StiHitLoader<StEvent, StiDetectorBuilder>("IstHitLoader")
 {}
 
-StiIstHitLoader::StiIstHitLoader(StiHitContainer *hitContainer,
-                                 Factory<StiHit> *hitFactory,
-                                 StiDetectorBuilder *detector)
-   : StiHitLoader<StEvent, StiDetectorBuilder>("IstHitLoader", hitContainer, hitFactory, detector)
+StiIstHitLoader::StiIstHitLoader(StiHitContainer *hitContainer, Factory<StiHit> *hitFactory,
+   StiDetectorBuilder *detector) :
+   StiHitLoader<StEvent, StiDetectorBuilder>("IstHitLoader", hitContainer, hitFactory, detector)
 {}
 
 StiIstHitLoader::~StiIstHitLoader()
 {}
 
-void StiIstHitLoader::loadHits(StEvent *source,
-                               Filter<StiTrack> *trackFilter,
-                               Filter<StiHit> *hitFilter)
+void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter)
 {
    LOG_INFO << "StiIstHitLoader::loadHits(StEvent*) -I- Started" << endm;
 
