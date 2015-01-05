@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.42 2009/03/18 19:55:39 fisyak Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.43 2015/01/05 21:04:32 fisyak Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.43  2015/01/05 21:04:32  fisyak
+ * Add access to TMVA ranking
+ *
  * Revision 2.42  2009/03/18 19:55:39  fisyak
  * remove StiDetectorFinder class
  *

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.106 2014/07/03 00:37:51 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.107 2015/01/05 21:04:32 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.107  2015/01/05 21:04:32  fisyak
+ * Add access to TMVA ranking
+ *
  * Revision 2.106  2014/07/03 00:37:51  perev
  * c++11 fix
  *

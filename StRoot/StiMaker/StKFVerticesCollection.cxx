@@ -1,4 +1,4 @@
-// $Id: StKFVerticesCollection.cxx,v 1.3 2014/01/14 14:49:18 fisyak Exp $
+// $Id: StKFVerticesCollection.cxx,v 2.5 2015/01/05 21:04:31 fisyak Exp $
 #include "StKFVerticesCollection.h"
 #include "TArrayI.h"
 #include "TArrayD.h"
@@ -422,6 +422,9 @@ Int_t StKFVerticesCollection::NoVertices() const {
 }
 //________________________________________________________________________________
 // $Log: StKFVerticesCollection.cxx,v $
+// Revision 2.5  2015/01/05 21:04:31  fisyak
+// Add access to TMVA ranking
+//
 // Revision 1.3  2014/01/14 14:49:18  fisyak
 // Freeze
 //

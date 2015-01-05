@@ -1,4 +1,4 @@
-// $Id: StKFTrack.cxx,v 2.2 2012/06/11 15:33:41 fisyak Exp $
+// $Id: StKFTrack.cxx,v 2.3 2015/01/05 21:04:31 fisyak Exp $
 #include "StKFTrack.h"
 ClassImp(StKFTrack);
 //________________________________________________________________________________
@@ -80,6 +80,9 @@ std::ostream&  operator<<(std::ostream& os,  const StKFTrack& p) {
   return os;
 }
 // $Log: StKFTrack.cxx,v $
+// Revision 2.3  2015/01/05 21:04:31  fisyak
+// Add access to TMVA ranking
+//
 // Revision 2.2  2012/06/11 15:33:41  fisyak
 // std namespace
 //

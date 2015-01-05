@@ -1,6 +1,6 @@
 #ifndef __StKFVertex_h__
 #define __StKFVertex_h__
-// $Id: StKFVertex.h,v 2.3 2013/04/08 19:21:41 fisyak Exp $
+// $Id: StKFVertex.h,v 2.5 2015/01/05 21:04:31 fisyak Exp $
 #include "Riostream.h"
 #include "TObject.h"
 #include "StKFTrack.h"
@@ -67,6 +67,9 @@ private:
   ClassDef(StKFVertex,0)
 };
 // $Log: StKFVertex.h,v $
+// Revision 2.5  2015/01/05 21:04:31  fisyak
+// Add access to TMVA ranking
+//
 // Revision 2.3  2013/04/08 19:21:41  fisyak
 // Adjust for new KFParticle
 //

@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.cxx,v 1.3 2014/01/14 14:49:17 fisyak Exp $
+// $Id: StKFVertexMaker.cxx,v 2.7 2015/01/05 21:04:31 fisyak Exp $
 #include "RVersion.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -38,6 +38,11 @@ using std::map;
 #include "TParticlePDG.h"
 #include "TArrayF.h"
 #include "TArrayI.h"
+#include "TMVA/Reader.h"
+#include "StTMVARank/TMVAdata.h"
+#include "StTMVARank/TMVArank.h"
+#include "StTMVARank/StTMVARanking.h"
+using namespace TMVA;
 ClassImp(StKFVertexMaker);
 #ifdef StTrackMassFit_hh
 #define __MakeV0__
@@ -194,6 +199,52 @@ Double_t StKFVertexMaker::AnnelingFcn(Double_t TInv) {
 }
 //________________________________________________________________________________
 void StKFVertexMaker::CalculateRank(StPrimaryVertex *primV) {    
+  static St_TMVArank *tmvaRank = 0;
+  if (! tmvaRank) {
+    tmvaRank = (St_TMVArank *) GetDataBase("rank/TMVArank4KFV");
+    assert(tmvaRank);
+    TMVArank_st *tmva = tmvaRank->GetTable();
+    if (TString(tmva->XmlFile) != "") {
+      new StTMVARanking(tmva->ActiveVars,tmva->XmlFile,tmva->Method);
+    }
+  }
+  if (StTMVARanking::Reader()) TMVARank(primV);
+  else               SimpleMindedRank(primV);
+}
+//________________________________________________________________________________
+void StKFVertexMaker::TMVARank(StPrimaryVertex *primV) {    
+  PVgadgets_st &aData = *TMVAdata::instance()->GetArray();
+  memset(&aData.postx, 0, sizeof(PVgadgets_st));
+  Int_t noTracks = primV->numberOfDaughters();
+  if (! noTracks) return; 
+  aData.noTracks = noTracks;
+  aData.postx  =  primV->numPostXTracks(); // noTracks;
+  aData.prompt =  primV->numTracksWithPromptHit(); // noTracks;
+  aData.beam   =  primV->isBeamConstrained() ? 1 : 0;
+  aData.cross  =  primV->numTracksCrossingCentralMembrane(); // noTracks;
+  aData.tof    = (primV->numMatchesWithCTB()     + primV->numMatchesWithBTOF()); // noTracks;
+  aData.notof  = (primV->numNotMatchesWithCTB()  + primV->numNotMatchesWithBTOF()); // noTracks;
+  aData.BEMC   =  primV->numMatchesWithBEMC(); // noTracks;
+  aData.noBEMC =  primV->numNotMatchesWithBEMC(); // noTracks;
+  aData.EEMC   =  primV->numNotMatchesWithEEMC(); // noTracks;
+  aData.noEEMC =  primV->numNotMatchesWithEEMC(); // noTracks;
+  aData.iMc    =  primV->idTruth();
+  aData.EMC    =  aData.BEMC + aData.EEMC;
+  aData.noEMC  =  aData.noBEMC + aData.noEEMC;
+  aData.chi2   =  primV->chiSquared();
+  aData.nWE    =  0;
+  if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
+    aData.nWE = TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());// noTracks;
+  aData.xV     =  primV->position().x();
+  aData.yV     =  primV->position().y();
+  aData.zV     =  primV->position().z();
+  aData.vR     =  primV->position().perp();
+  Float_t rank = StTMVARanking::instance()->Evaluate();
+  primV->setRanking(rank); 
+  if (Debug()) primV->Print(Form("Rank:#V[%3i]",primV->key()));
+}
+//________________________________________________________________________________
+void StKFVertexMaker::SimpleMindedRank(StPrimaryVertex *primV) {    
   // Calculation of veretx ranks to select 'best' (i.e. triggered)  vertex
   // Simpilfied version (w/o weighting)
   Float_t rank = primV->probChiSquared();
@@ -1006,6 +1057,9 @@ void StKFVertexMaker::UpdateParticleAtVertex(StiKalmanTrack *kTrack,KFParticle *
 }
 //________________________________________________________________________________
 // $Log: StKFVertexMaker.cxx,v $
+// Revision 2.7  2015/01/05 21:04:31  fisyak
+// Add access to TMVA ranking
+//
 // Revision 1.3  2014/01/14 14:49:17  fisyak
 // Freeze
 //

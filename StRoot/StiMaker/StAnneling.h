@@ -1,6 +1,6 @@
 #ifndef __StAnneling_h__
 #define __StAnneling_h__
-// $Id: StAnneling.h,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StAnneling.h,v 2.2 2015/01/05 21:04:31 fisyak Exp $
 #include "TMath.h"
 #include "TObject.h"
 //________________________________________________________________________________
@@ -29,6 +29,9 @@ private:
   ClassDef(StAnneling,1)
 };
 // $Log: StAnneling.h,v $
+// Revision 2.2  2015/01/05 21:04:31  fisyak
+// Add access to TMVA ranking
+//
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //

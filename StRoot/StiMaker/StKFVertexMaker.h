@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.h,v 2.4 2014/08/06 11:43:59 jeromel Exp $
+// $Id: StKFVertexMaker.h,v 2.5 2015/01/05 21:04:31 fisyak Exp $
 
 #ifndef STAR_StKFVertexMaker
 #define STAR_StKFVertexMaker
@@ -46,6 +46,8 @@ class StKFVertexMaker : public StMaker {
   static Double_t	 	 AnnelingFcn(Double_t TInv=1);					  		   
   TCanvas        	 	*Canvas() {return fc1;}					  		   
   void           	 	 CalculateRank(StPrimaryVertex *primV);			  		   
+  void                           SimpleMindedRank(StPrimaryVertex *primV);	
+  void                           TMVARank(StPrimaryVertex *primV);
   void           	 	 Clear(Option_t *option="");					  		   
   virtual Int_t  	 	 Init();							  		   
   void           	 	 Fit();							  		   
@@ -84,7 +86,7 @@ class StKFVertexMaker : public StMaker {
   Int_t                          fNGoodGlobals;
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.4 2014/08/06 11:43:59 jeromel Exp $ built " __DATE__ " " __TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StKFVertexMaker.h,v 2.5 2015/01/05 21:04:31 fisyak Exp $ built " __DATE__ " " __TIME__ ; 
     return cvs;
   }
 
@@ -92,6 +94,9 @@ class StKFVertexMaker : public StMaker {
 };
 #endif
 // $Log: StKFVertexMaker.h,v $
+// Revision 2.5  2015/01/05 21:04:31  fisyak
+// Add access to TMVA ranking
+//
 // Revision 2.4  2014/08/06 11:43:59  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //

@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.222 2014/12/16 17:21:14 perev Exp $
+// $Id: StiMaker.cxx,v 1.223 2015/01/05 21:04:32 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -627,8 +627,11 @@ static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
 }
 
 
-// $Id: StiMaker.cxx,v 1.222 2014/12/16 17:21:14 perev Exp $
+// $Id: StiMaker.cxx,v 1.223 2015/01/05 21:04:32 fisyak Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.223  2015/01/05 21:04:32  fisyak
+// Add access to TMVA ranking
+//
 // Revision 1.222  2014/12/16 17:21:14  perev
 // temporary supress inside()
 //

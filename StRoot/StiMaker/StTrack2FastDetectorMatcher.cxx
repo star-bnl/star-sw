@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 1.2 2014/06/10 22:59:33 fisyak Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.6 2015/01/05 21:04:31 fisyak Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -304,6 +304,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.6  2015/01/05 21:04:31  fisyak
+ * Add access to TMVA ranking
+ *
  * Revision 1.2  2014/06/10 22:59:33  fisyak
  * Freeze
  *

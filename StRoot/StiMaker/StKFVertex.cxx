@@ -1,4 +1,4 @@
-// $Id: StKFVertex.cxx,v 1.2 2014/01/14 14:49:17 fisyak Exp $
+// $Id: StKFVertex.cxx,v 2.5 2015/01/05 21:04:31 fisyak Exp $
 #include "StKFVertex.h"
 #include "StKFTrack.h"
 #include "TArrayC.h"
@@ -395,6 +395,9 @@ Int_t StKFVertex::NoTracks() const {
 }
 #undef PrPP
 // $Log: StKFVertex.cxx,v $
+// Revision 2.5  2015/01/05 21:04:31  fisyak
+// Add access to TMVA ranking
+//
 // Revision 1.2  2014/01/14 14:49:17  fisyak
 // Freeze
 //
