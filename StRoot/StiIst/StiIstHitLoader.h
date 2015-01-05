@@ -35,13 +35,6 @@ public:
    virtual void loadHits(StEvent *source,
                          Filter<StiTrack> *trackFilter,
                          Filter<StiHit> *hitFilter);
-
-protected:
-   // temporary hit ptr used to determine whether mc hits from a given event are
-   // already loaded.
-   UInt_t n;
-   StMcIstHit *saveHit;
-   long evNum;
 };
 
 #endif
