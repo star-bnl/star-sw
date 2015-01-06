@@ -53,6 +53,10 @@ class JevpServer {
   int nodb;               // send to db?
   int die;                // die when the run is over? or wait for the next run...
   char *daqfilename;      // NULL if running real data
+  
+  int cdaqfilename;
+  int ndaqfilenames;
+  char *daqfilenames[10];
 
   RunStatus runStatus;    // are we in a run or not?
   TList builders;         

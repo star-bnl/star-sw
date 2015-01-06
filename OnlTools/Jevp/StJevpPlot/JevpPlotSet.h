@@ -25,6 +25,10 @@ class JevpServer;
 
 #define DEFAULT_CLIENTDATADIR "/a/jevp/client"
 
+
+#define PCPC dbgCallSourceLine=__LINE__
+#define PCP dbgSourceLine=__LINE__
+
 class RtsTimer_root;
 
 class JevpPlotSet : public TObject {
@@ -33,9 +37,16 @@ class JevpPlotSet : public TObject {
   BuilderStatus builderStatus;
   JevpPlotSet(JevpServer *server = NULL);
 
+  int dbgSourceLine;
+  int dbgCallSourceLine;
+
   char *getPlotSetName();
-
-
+  char *getDebugInfo() {
+    static char str[256];
+    sprintf(str, "%d:call %d", dbgSourceLine, dbgCallSourceLine);
+    return str;
+  }
+  
   // Plot management
   //
   // Generally, one adds plots only at initialization

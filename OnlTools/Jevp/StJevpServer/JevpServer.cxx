@@ -50,6 +50,7 @@
 #include "Jevp/StJevpBuilders/pxlBuilder.h"
 #include "Jevp/StJevpBuilders/istBuilder.h"
 #include "Jevp/StJevpBuilders/ssdBuilder.h"
+#include "Jevp/StJevpBuilders/ppBuilder.h"
 
 #include <RTS/include/SUNRT/clockClass.h>
 
@@ -277,10 +278,6 @@ void JevpServer::readSocket()
 }  
 
 
-
-
-
-
 void JevpServer::parseArgs(int argc, char *argv[])
 {
   throttleAlgos = 1;
@@ -291,8 +288,14 @@ void JevpServer::parseArgs(int argc, char *argv[])
   log_port = 8004;
   log_level = (char *)WARN;
 
+  rtsLogOutput(log_output);
+  rtsLogAddDest(log_dest, log_port);
+  rtsLogLevel(log_level);
+
   clientdatadir =  "/a/jevp/client";
-  
+  ndaqfilenames = 0;
+  cdaqfilename = 0;
+
   for(int i=1;i<argc;i++) {
     if(strcmp(argv[i], "-dd")==0) {
       i++;
@@ -324,6 +327,21 @@ void JevpServer::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-file")==0) {
       i++;
       daqfilename = argv[i];
+    }
+    else if (strcmp(argv[i], "-files") == 0) {
+      i++;
+
+      LOG("JEFF", "files...");
+
+      while(i<argc && strcmp(argv[i], "-endfiles") != 0) {
+
+	LOG("JEFF", "testing ndaq=%d i=%d arg=%s",i, ndaqfilenames, argv[i]);
+	daqfilenames[ndaqfilenames] = argv[i];
+	ndaqfilenames++;
+	i++;
+      }
+
+      LOG("JEFF", "ndaqfilenames = %d", ndaqfilenames);
     }
     else if (strcmp(argv[i], "-die")==0) {
       die = 1;
@@ -423,6 +441,8 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 
   // Create daq reader...
   LOG(DBG, "Reader filename is %s",daqfilename ? daqfilename : "none");
+  if(ndaqfilenames) daqfilename = daqfilenames[cdaqfilename];
+
   rdr = new daqReader(daqfilename);
 
   if(diska) rdr->setEvpDisk(diska);
@@ -455,6 +475,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
     builders.Add(new pxlBuilder(this));
     builders.Add(new istBuilder(this));
     builders.Add(new ssdBuilder(this));
+    builders.Add(new ppBuilder(this));
   }
   else {
     builders.Add(new trgBuilder(this));
@@ -488,7 +509,29 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     if(runStatus.running()) {
       CP;
       performStopRun();
+
+      if(ndaqfilenames) {
+	cdaqfilename++;
+
+	if(cdaqfilename < ndaqfilenames) {
+	  daqfilename = daqfilenames[cdaqfilename];
+	  delete rdr;
+	  LOG("JEFF", "Next file is :%s",daqfilename);
+
+	  rdr = new daqReader(daqfilename);
+	}
+      }
+
+      if(die && (cdaqfilename >= ndaqfilenames)) {
+	LOG("JEFF", "die is set, so now exit");
 	CP;
+	
+	ignoreSignals();
+	gApplication->Terminate();
+	//exit(0);
+      }
+      
+      CP;
     }
 	CP;
   }
@@ -531,7 +574,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
       LOG(DBG, "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
       
       if(sigsetjmp(env, 1)) {
-	LOG(CAUTION, "Sigsegv in builder: %s.  Disabling builder.",curr->getPlotSetName());
+	LOG(CAUTION, "Sigsegv in builder: %s.  Disable.  (%s)",curr->getPlotSetName(), curr->getDebugInfo());
 	curr->setDisabled();
 	CP_LEAVE_BUILDER;
       }
@@ -890,15 +933,6 @@ void JevpServer::performStopRun()
   args[3] = NULL;
 
   execScript("OnlTools/Jevp/archiveHistoDefs.pl", args);
- 
-  if(die) {
-    LOG("JEFF", "die is set, so now exit");
-    CP;
-
-    ignoreSignals();
-    gApplication->Terminate();
-    //exit(0);
-  }
 
   runStatus.setStatus("stopped");
 }
