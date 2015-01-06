@@ -121,7 +121,7 @@ MoleculeDef C3H8("C3H8", "C3H8", "C", 3, "H", 8,
 MoleculeDef C4H10("C4H10", "C4H10", "C", 4, "H", 10,
                   ActivePtr<VanDerVaals> (&C4H10_VanDerVaals, do_clone));
 // MoleculeDef C4H10( "C4H10",  "C4H10",  "C", 4, "H", 10);
-MoleculeDef C2F4H2("C2F4H2", "C2F4H2", "C", 2, "F", 4, "H", 2);
+MoleculeDef C2H2F4("C2H2F4", "C2H2F4", "C", 2, "F", 4, "H", 2);
 MoleculeDef Water_molec("Water", "Water", "H", 2, "O", 1,
                         ActivePtr<VanDerVaals> (&Water_VanDerVaals, do_clone));
 MoleculeDef Methylal_molec("Methylal", "Methylal", "O", 2, "C", 3, "H", 8,

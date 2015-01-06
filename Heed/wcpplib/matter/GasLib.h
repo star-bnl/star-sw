@@ -140,7 +140,7 @@ extern VanDerVaals C4H10_VanDerVaals;
 extern MoleculeDef C4H10;
 
 // The following is defined without VanDerVaals corrections
-extern MoleculeDef C2F4H2;
+extern MoleculeDef C2H2F4;
 
 extern VanDerVaals Water_VanDerVaals;
 extern MoleculeDef Water_molec;
