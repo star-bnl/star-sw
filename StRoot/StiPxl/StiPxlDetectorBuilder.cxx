@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.100 2014/12/19 18:09:01 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.101 2015/01/06 15:47:50 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -298,5 +298,58 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
                 << "Number of daughters: " << geoNode->GetNdaughters() << ", weight: " << geoNode->GetVolume()->Weight(0.01, "a") << endm;
 
       StiVMCToolKit::LoopOverNodes(geoNode, pxlVolumes[i].path, pxlVolumes[i].name, MakeAverageVolume);
+   }
+}
+
+
+/**
+ * Convert natural sensor id (sector/ladder/sensorHalf) to Sti indices stiRow
+ * and stiSensor. If the input values are not within valid ranges unphisical
+ * (i.e. negative) Sti indices returned.
+ *
+ * The numbering is:
+ *
+ * <pre>
+ * sector ladder sensorHalf -> stiRow stiSensor
+ *
+ * 1      1      1          -> 0      0
+ * 1      1      2          -> 1      0
+ * 1      2      1          -> 2      0
+ * 1      2      2          -> 3      0
+ * 1      3      1          -> 2      1
+ * 1      3      2          -> 3      1
+ * 1      4      1          -> 2      2
+ * 1      4      2          -> 3      2
+ *
+ * 2      1      1          -> 0      1
+ * 2      1      2          -> 1      1
+ * 2      2      1          -> 2      3
+ * 2      2      2          -> 3      3
+ * 2      3      1          -> 2      4
+ * 2      3      2          -> 3      4
+ * 2      4      1          -> 2      5
+ * 2      4      2          -> 3      5
+ *
+ * ...
+ *
+ * </pre>
+ */
+void StiPxlDetectorBuilder::convertSensor2StiId(int sector, int ladder, int sensorHalf, int& stiRow, int& stiSensor)
+{
+   // Check validity of input values
+   if (sector < 1 || sector > kNumberOfPxlSectors ||
+       ladder < 1 || ladder > kNumberOfPxlLaddersPerSector ||
+       sensorHalf < 1 || sensorHalf > 2)
+   {
+      stiRow = stiSensor = -1;
+      return;
+   }
+
+   if (ladder == 1) {
+      stiRow = sensorHalf == 1 ? 0 : 1;
+      stiSensor = (sector - 1);
+   } else { // ladder = 2, 3, 4
+      stiRow = sensorHalf == 1 ? 2 : 3;
+      stiSensor = (sector - 1) * (kNumberOfPxlLaddersPerSector - 1) + (ladder - 2);
    }
 }
