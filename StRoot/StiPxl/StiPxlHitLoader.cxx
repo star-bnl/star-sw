@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.13 2015/01/06 15:47:35 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.14 2015/01/06 15:47:44 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.14  2015/01/06 15:47:44  smirnovd
+ * Removed excessive print statements
+ *
  * Revision 1.13  2015/01/06 15:47:35  smirnovd
  * Simplified debug output by reusing existing streamers of StHit class and its daughters
  *
@@ -142,8 +145,6 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
    }
 
    //Added by Michael Lomnitz (KSU):  Loops over Sector/Ladder/Sensor to obtain the whole hit collection
-   int nHit = 0;
-
    UInt_t numberOfSectors = pxlHitCollection->numberOfSectors();
 
    for (UInt_t i = 0; i < numberOfSectors; i++)
@@ -204,19 +205,6 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                if (!detector)
                   throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
 
-               LOG_DEBUG << "add hit to detector:\t" << detector->getName() << endm;
-
-               double angle     = detector->getPlacement()->getNormalRefAngle();
-               double radius    = detector->getPlacement()->getNormalRadius();
-               double zcenter   = detector->getPlacement()->getZcenter();
-               double halfDepth = detector->getShape()->getHalfDepth();
-               double halfWidth = detector->getShape()->getHalfWidth();
-               double thick     = detector->getShape()->getThickness();
-
-               LOG_DEBUG << " detector info " << *detector << endm;
-               LOG_DEBUG << " radius = " << radius << " angle = " << angle << " zCenter = " << zcenter << endm;
-               LOG_DEBUG << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm;
-
                StiHit *stiHit = _hitFactory->getInstance();
 
                if (!stiHit) throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- stiHit==0");
@@ -228,20 +216,8 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                                  pxlHit->position().z(), pxlHit->charge());
 
                _hitContainer->add(stiHit);
-               LOG_DEBUG << " nHit = " << nHit
-                  << " Sector = " << (int) pxlHit->sector()
-                  << " Ladder = " << (int) pxlHit->ladder()
-                  << " x = " << (float) pxlHit->position().x()
-                  << " y = " << (float) pxlHit->position().y()
-                  << " z = " << (float) pxlHit->position().z() << endm;
-               LOG_DEBUG << " " << endm;
-
-               //done loop over hits
-               nHit++;
             }
          }
       }
    }
-
-   LOG_INFO << "StiPxlHitLoader:loadHits -I- Loaded " << nHit << " pixel hits." << endm;
 }

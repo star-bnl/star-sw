@@ -91,17 +91,6 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                if (!detector)
                   throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
 
-               LOG_DEBUG << "StiIstHitLoader: add hit to detector:\t" << detector->getName() << endl;
-               double angle     = detector->getPlacement()->getNormalRefAngle();
-               double radius    = detector->getPlacement()->getNormalRadius();
-               double zcenter   = detector->getPlacement()->getZcenter();
-               double halfDepth = detector->getShape()->getHalfDepth();
-               double halfWidth = detector->getShape()->getHalfWidth();
-               double thick     = detector->getShape()->getThickness();
-               LOG_DEBUG << " detector info " << *detector << endm;
-               LOG_DEBUG << " radius = " << radius << " angle = " << angle << " zCenter = " << zcenter << endm;
-               LOG_DEBUG << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm;
-
                StiHit *stiHit = _hitFactory->getInstance();
 
                if (!stiHit) throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- stiHit==0");
