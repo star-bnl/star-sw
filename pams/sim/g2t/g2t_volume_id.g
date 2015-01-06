@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.75 2014/08/04 14:11:30 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.76 2015/01/06 21:47:34 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.76  2015/01/06 21:47:34  jwebb
+* Updated g2t volume ID for FMS preshower
+*
 * Revision 1.75  2014/08/04 14:11:30  jwebb
 * Updates to HCAL geometry and volume IDs (affects y2014b,dev15b).
 *
@@ -188,7 +191,7 @@
       Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/,imtd/0/
       Integer          istVersion/0/,istLayer/0/
 *     FPD
-      Integer          n1,n2,ew,nstb,ch,sl
+      Integer          n1,n2,ew,nstb,ch,sl,quad,layr,slat
 *
 *    this is an internal agfhit/digi information - need a better access.
       integer          idigi
@@ -881,21 +884,25 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            endif
           endif
           volume_id=ew*10000+nstb*1000+ch       
-         else ! FMS-Preshower
+       else                     ! FPS (FMS-Preshower)
           ew=2          
-          layer=n1
-          if(layer.eq.4) layer=3
-          nch=41
-          if(layer.eq.1) nch=40
-          if(n2.le.nch) then
-            nstb=2
-            ch=n2
-          else
-            nstb=1
-            ch=n2-nch
-          endif     
-          volume_id=100000+ew*10000+nstb*1000+layer*100+ch  
-!//          write(*,*) 'FMSPS ',n1,n2,nstb,ch,volume_id
+          layr=n1
+          if(layr.eq.4) layr=3          
+          if(n2.le.21) then
+             quad=1
+             slat=n2
+          else if(n2.le.21+19) then
+             quad=2
+             slat=n2-21
+          else if(n2.le.21+19+21) then
+             quad=3
+             slat=n2-21-19
+          else 
+             quad=4
+             slat=n2-21-19-21
+          endif
+          volume_id=100000+ew*10000+quad*1000+layr*100+slat  
+          write(*,*) 'FMSPS ',n1,n2,quad,layr,slat,volume_id
          endif
         }
 *24*                                 Dmitry Arkhipkin
