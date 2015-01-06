@@ -60,6 +60,12 @@ private:
   int propagatePars(const StiNodePars &parPars
                    ,      StiNodePars &rotPars
 		   ,      StiNodePars &proPars);       
+  int propagateParsA(const StiNodePars &parPars
+                   ,      StiNodePars &rotPars
+		   ,      StiNodePars &proPars);       
+  int propagateParsB(const StiNodePars &parPars
+                   ,      StiNodePars &rotPars
+		   ,      StiNodePars &proPars);       
   int propagateFitd();
   int propagateMtx();       
   int propagateError();
@@ -134,21 +140,21 @@ double     mHitPars[3];
 StiHitErrs mHrr;
 StiNode2Pars mUnTouch;
 // locals
-  double alpha,ca,sa;
-  double x1;
-  double x2;
-  double dx;
+  double mAlpha,mCa,mSa;
+  double mX1;
+  double mX2;
+  double mDx;
   double rho;
   double dsin;
   double sinCA2; 
   double cosCA2;
   double sumSin;
   double sumCos;
-  double dy;
-  double y2;
-  double dl0;
-  double sind;
-  double dl;
+  double mDy;
+  double mY2;
+  double mDl0;
+  double mDl;
+  double mSind;
   
   double mDetm;
   double mChi2;
