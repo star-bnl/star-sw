@@ -25,7 +25,7 @@ double getDelta()  const 		{return sqrt(_cXX+_cYY+_cZZ);}
 double getDelta2() const 		{return     (_cXX+_cYY+_cZZ);}
 StiNodeErrs &operator*=(double f) 	{for (int i=0;i<kNErrs;i++){A[i]*=f;}; return *this;}
 StiNodeErrs &merge(double wt,StiNodeErrs &other);
-
+void rotate(double alpha,const StiNodePars &pars );
 void get00(      double *a) const;
 void set00(const double *a)      ;
 void get10(      double *a) const;
@@ -141,7 +141,7 @@ virtual double z()    const	=0;
   void  setDetector(const StiDetector *detector);
   double getChi2 ()  const		{return _chi2;} 		
   double getDeterm() const		{return _det ;} 		
-  void  setChi2(double chi2)		{_chi2  =chi2;}
+  void  setChi2(double chi2)		{assert(chi2>=0); _chi2  =chi2;}
   int   getState() const 		{return _state;}
   void  setInvalid()  			{ _state=0;}
   void  setReady()  			{ _state=kTNReady;}
@@ -149,11 +149,12 @@ virtual double z()    const	=0;
   int isFitted() const 			{return (_hit && _chi2<1e3);}
   double getRefPosition() const;
   double getLayerAngle()  const;
-protected:   
+
 static void mult6(double Rot[kNPars][kNPars],const double Pro[kNPars][kNPars]); 
 static void errPropag6(double G[21],const double F[6][6],int nF);
 static  int cylCross(const double Xp[2],const double Dp[2], const double Rho, const double r
                     ,         int dir,        double out[2][3]);
+protected:   
 
 static double  sinX(double x);  // (sin(x)-x)/x**3
 
@@ -171,7 +172,7 @@ static int mgFlag;
 inline void StiTrackNode::reset()
 { 
    StiTreeNode::reset();
-  _state = kTNReset;
+  _state = kTNReady;
   _detector = 0;
   _hit=0;
   _chi2 = 1e60;
