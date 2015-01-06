@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.103 2015/01/06 15:48:04 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.104 2015/01/06 20:57:50 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -149,17 +149,14 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             double sensorXyzGlobal[3] = {};
 
             // Shift the halves by a quater width
-            if ((iLadderHalf == 1 && iLadder != 1) || (iLadderHalf == 2 && iLadder == 1))
-               sensorXyzLocal[0] = -sensorBBox->GetDX()/2;
-            else
-               sensorXyzLocal[0] =  sensorBBox->GetDX()/2;
+            sensorXyzLocal[0] = iLadderHalf == 1 ? -sensorBBox->GetDX()/2 : sensorBBox->GetDX()/2;
 
             sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
 
             TVector3 sensorVec(sensorXyzGlobal);
 
             // Create new Sti shape based on the sensor geometry
-            std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_OUT" : "_INN") );
+            std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
             double sensorLength = kNumberOfPxlSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
             StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
