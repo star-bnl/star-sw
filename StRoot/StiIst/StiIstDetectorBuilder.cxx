@@ -168,6 +168,21 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
 
 /**
+ * Returns the active StiDetector corresponding to a sensitive layer in IST. An
+ * active volume can have hits associated with it. The ladder id is expected to
+ * follow the human friendly numbering scheme, i.e.
+ *
+ * 1 <= ladder <= kIstNumLadders
+ *
+ * In this builder the active IST layers are added in stiRow = 0.
+ */
+const StiDetector* StiIstDetectorBuilder::getActiveDetector(int ladder) const
+{
+   return (ladder < 1 || ladder > kIstNumLadders) ? 0 : getDetector(0, ladder-1);
+}
+
+
+/**
  * Creates a crude approximation of the IST detector. The geometry is modeled
  * with a single tube using the dimensions and other physical properties of the
  * IST mother volume defined in the ROOT TGeo geometry.
