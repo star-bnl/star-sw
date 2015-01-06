@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.101 2015/01/06 15:47:50 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.102 2015/01/06 15:47:58 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -193,43 +193,12 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             stiDetector->setProperties(halfLadderName, isActive, stiShape, pPlacement, getGasMat(), silicon);
             stiDetector->setHitErrorCalculator(StiPxlHitErrorCalculator::instance());
 
-            int stiRow    = 0;
-            int stiSensor = 0;
+            // Convert geo sensor id to Sti indices. We do not check the validity
+            // of returned values because the input is valid a priori in this case
+            int stiRow, stiSensor;
+            convertSensor2StiId(iSector, iLadder, iLadderHalf, stiRow, stiSensor);
 
             // Add created sensitive PXL layer to Sti
-            //
-            // The numbering is:
-            //
-            // sector ladder sensorhalf -> stiRow stiSensor
-            //
-            // 1      1      1 (o)      -> 0      0
-            // 1      1      2 (i)      -> 1      0
-            // 1      2      1 (o)      -> 2      1
-            // 1      2      2 (i)      -> 3      1
-            // 1      3      1 (o)      -> 2      2
-            // 1      3      2 (i)      -> 3      2
-            // 1      4      1 (o)      -> 2      3
-            // 1      4      2 (i)      -> 3      3
-            //
-            // 2      1      1 (o)      -> 0      1
-            // 2      1      2 (i)      -> 1      1
-            // 2      2      1 (o)      -> 2      4
-            // 2      2      2 (i)      -> 3      4
-            // 2      3      1 (o)      -> 2      5
-            // 2      3      2 (i)      -> 3      5
-            // 2      4      1 (o)      -> 2      6
-            // 2      4      2 (i)      -> 3      6
-            //
-            // ...
-            //
-            if (iLadder == 1) {
-               stiRow = iLadderHalf == 2 ? 0 : 1;
-               stiSensor = (iSector - 1);
-            } else { // iLadder = 2, 3, 4
-               stiRow = iLadderHalf == 2 ? 2 : 3;
-               stiSensor = (iSector - 1) * (kNumberOfPxlLaddersPerSector - 1) + (iLadder - 1);
-            }
-
             add(stiRow, stiSensor, stiDetector);
          }
       }
