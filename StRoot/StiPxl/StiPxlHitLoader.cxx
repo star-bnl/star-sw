@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.12 2015/01/05 15:40:04 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.13 2015/01/06 15:47:35 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.13  2015/01/06 15:47:35  smirnovd
+ * Simplified debug output by reusing existing streamers of StHit class and its daughters
+ *
  * Revision 1.12  2015/01/05 15:40:04  smirnovd
  * StiXxxHitLoader: Changes in whitespace only
  *
@@ -193,12 +196,8 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                   stiSensor = (pxlHit->sector() - 1) * (kNumberOfPxlLaddersPerSector - 1) + (pxlHit->ladder() - 1);
                }
 
-               LOG_DEBUG << " hit sector : " << (int) pxlHit->sector()
-                         << " ladder : " << (int) pxlHit->ladder()
-                         << " sensor : " << (int) pxlHit->sensor() << endm;
-               LOG_DEBUG << "stiRow: " << stiRow << ", stiSensor: " << stiSensor << endm;
-               LOG_DEBUG << "X/Y/Z    : " << pxlHit->position().x() << "/" << pxlHit->position().y() << "/" << pxlHit->position().z() << endm;
-               LOG_DEBUG << "Xl/Yl/Zl : " << pxlHit->localPosition(0) << "/" << pxlHit->localPosition(1) << "/" << pxlHit->localPosition(2) << endm;
+               LOG_DEBUG << *pxlHit << "\n"
+                         << *static_cast<StMeasuredPoint*>(pxlHit) << endm;
 
                StiDetector *detector = _detector->getDetector(stiRow, stiSensor);
 
