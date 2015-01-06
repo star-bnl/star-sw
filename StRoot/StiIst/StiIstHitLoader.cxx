@@ -82,9 +82,9 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                int layer  = 1; //active area
                int ladder = hit->getLadder();
                int sensor = hit->getSensor();
-               LOG_DEBUG << "StiIstHitLoader: hit found on ladder: " << ladder << "; sensor: " << sensor << endm;
-               LOG_DEBUG << "Xg/Yg/Zg : " << hit->position().x() << "/" << hit->position().y() << "/" << hit->position().z() << endm;
-               LOG_DEBUG << "Xl/Yl/Zl : " << hit->localPosition(0) << "/" << hit->localPosition(1) << "/" << hit->localPosition(2) << endm;
+
+               LOG_DEBUG << *hit << "\n"
+                         << *static_cast<StMeasuredPoint*>(hit) << endm;
 
                detector = _detector->getDetector(layer, ladder);
 
