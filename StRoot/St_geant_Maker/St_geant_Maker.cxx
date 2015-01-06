@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.149 2014/07/29 17:51:29 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.150 2015/01/06 15:59:20 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.150  2015/01/06 15:59:20  jwebb
+// Add FMS preshower to data readout
+//
 // Revision 1.149  2014/07/29 17:51:29  jwebb
 // Read in HCAL hits.
 //
@@ -1411,10 +1414,11 @@ Int_t St_geant_Maker::Make() {
       //           ==============================
     }
 
-  nhit1 = nhit2 = 0;
+  nhit1 = nhit2 = nhit3 = 0;
   geant3->Gfnhit("FPDH","FLGR",nhit1);
   geant3->Gfnhit("FPDH","FLXF",nhit2);
-  nhits = nhit1+nhit2;
+  geant3->Gfnhit("FPDH","FPSC",nhit3);
+  nhits = nhit1+nhit2+nhit3;
   if (nhits>0) {
     St_g2t_emc_hit* g2t_fpd_hit = new St_g2t_emc_hit("g2t_fpd_hit",nhits);
     m_DataSet->Add(g2t_fpd_hit);
