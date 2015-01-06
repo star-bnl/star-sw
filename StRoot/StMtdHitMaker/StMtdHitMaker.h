@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.11 2014/09/19 17:49:33 marr Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.12 2015/01/06 20:37:37 marr Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -72,15 +72,44 @@ struct MTDOneSideHit{
    Class to read in MTD data from DAQ and store into StMtdCollection   
 */
 class StMtdHitMaker:public StRTSBaseMaker {
- private: 
-  StEvent *mStEvent;
-  mtd_t   *fMtd;
-  
-  Int_t mUseMuDst;
-  
-  bool mTriggerWndSelection;
+ private:
+  StEvent                 *mStEvent;
+  mtd_t                   *fMtd;
+  Int_t                   mUseMuDst;
+  Bool_t                  mCosmicFlag;
+  TString                 mCosmicTrigTimeWinFile;
+  Bool_t                  mTriggerWndSelection;
+  Int_t                   mSwapBacklegInRun13;                         // 0 - do not swap; 1 - for first part of Run13
+                                                                       // 2 - for second part of Run13
+  Int_t                   mYear;                                       //! RHIC run year
+  Int_t                   mNValidTrays;                                //! number of valid MTD trays
 
+  StMtdCollection*        mMtdCollection;                              //! pointer to StMtdCollection
+  StBTofINLCorr*          mINLCorr;                                    //! pointer to INL correction class
+
+  static const Int_t nTHUB     = 2;
+  static const Int_t mNFIBER   = 1;
+  UInt_t           	  mTriggerTimeStamp[nTHUB];                    //! Trigger Time in 4 fibers
+  Int_t                   mTray2TdigMap[gMtdNBacklegs][gMtdNModules];  //! map TDIG-Id to MTD tray
+  Int_t                   mTrayId[gMtdNBacklegs][gMtdNModules];        //! map MTD trayIDs
+  Int_t                   mTdigId[gMtdNModulesAll];                    //! map TDIG Ids on MTD TrayIds
+  Int_t 		  mtdStrip[gMtdNChannels];		       //! strip channel to glabal tdc chan
+  Double_t                mTriggerTimeWindow[gMtdNModulesAll][2];      //! trigger time window cut
+
+  vector<MtdRawHit> MtdLeadingHits;
+  vector<MtdRawHit> MtdTrailingHits;
+  mtdSingleHitVector mSingleHitVec[gMtdNModulesAll];
+
+  TH3D *hxhyhz;
+
+
+ protected:
+  StMtdCollection *GetMtdCollection();
   Int_t UnpackMtdRawData();
+  StRtsTable *GetNextRaw();
+  StRtsTable *GetNextRaw(Int_t sec);
+  Int_t tdcChan2globalStrip11(Int_t, Int_t, Int_t, Int_t);
+  Int_t tdcChan2globalStrip(Int_t, Int_t, Int_t, Int_t);
   Int_t getTdigBoardId(Int_t backlegid, Int_t tray, Int_t chn);
   Int_t getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn);
   Int_t getTdigLocalChan(Int_t backlegid, Int_t itdigid);
@@ -93,33 +122,6 @@ class StMtdHitMaker:public StRTSBaseMaker {
   IntVec  GetValidChannel(int backleg, int tray, int &fiber);
   UIntVec GetLeadingTdc(int backleg, int tray, int channel);
   UIntVec GetTrailingTdc(int backleg, int tray, int channel);
-  ///----------------------------------------------------
-  vector<MtdRawHit> MtdLeadingHits;
-  vector<MtdRawHit> MtdTrailingHits;
-  
-  static const Int_t nTHUB     = 2;
-  static const Int_t mNFIBER   = 1;
-  Int_t                   mYear;                                       //! RHIC run year
-  Int_t                   mNValidTrays;                                //! number of valid MTD trays
-  UInt_t           	  mTriggerTimeStamp[nTHUB];                    //! Trigger Time in 4 fibers
-  StMtdCollection*        mMtdCollection;                              //! pointer to StMtdCollection
-  Int_t                   mTray2TdigMap[gMtdNBacklegs][gMtdNModules];  //! map TDIG-Id to MTD tray
-  Int_t                   mTrayId[gMtdNBacklegs][gMtdNModules];        //! map MTD trayIDs
-  Int_t                   mTdigId[gMtdNModulesAll];                    //! map TDIG Ids on MTD TrayIds
-  StBTofINLCorr*          mINLCorr;                                    //! pointer to INL correction class
-  Int_t 		  mtdStrip[gMtdNChannels];		       //! strip channel to glabal tdc chan
-  Double_t                mTriggerTimeWindow[gMtdNModulesAll][2];      //! trigger time window cut
-
-  mtdSingleHitVector mSingleHitVec[gMtdNModulesAll];
-  Bool_t mSwapBacklegInRun13;             // Flag to swap backlegs 25 and 26 in run 13 when running in afterburner mode on muDst
-
- protected:
-  StRtsTable *GetNextRaw();
-  StRtsTable *GetNextRaw(Int_t sec);
-      
-  StMtdCollection *GetMtdCollection();
-  Int_t tdcChan2globalStrip11(Int_t, Int_t, Int_t, Int_t);
-  Int_t tdcChan2globalStrip(Int_t, Int_t, Int_t, Int_t);
 
  public:
 
@@ -128,7 +130,9 @@ class StMtdHitMaker:public StRTSBaseMaker {
   ~StMtdHitMaker() ;
   void setUseMuDst(Int_t val);
   void setTriggerWndSelection(Bool_t val);
-  void setSwapBacklegInRun13(Bool_t swap);
+  void setSwapBacklegInRun13(Int_t swap);
+  void setCosmicEvent(Bool_t val);
+  void setCosmicTrigTimeWinFile(const char *file);
 
   void   Clear(Option_t* option="");
   Int_t  Init();
@@ -142,19 +146,21 @@ class StMtdHitMaker:public StRTSBaseMaker {
   /// obtain the whole list of trainling edge hits
   vector<MtdRawHit> getTrailingHits();
   
-  TH3D *hxhyhz;
   /// cvs
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
   }
   
-  ClassDef(StMtdHitMaker, 2)    ///StMtdHitMaker - class to fille the StEvent from DAQ reader
+  ClassDef(StMtdHitMaker, 3)    ///StMtdHitMaker - class to fille the StEvent from DAQ reader
 };
 
-inline vector<MtdRawHit> StMtdHitMaker::getLeadingHits()  { return MtdLeadingHits; }
-inline vector<MtdRawHit> StMtdHitMaker::getTrailingHits() { return MtdTrailingHits;}
-inline void StMtdHitMaker::setUseMuDst(Int_t val) { mUseMuDst = val; return;}
-inline void StMtdHitMaker::setTriggerWndSelection(Bool_t val) { mTriggerWndSelection = val; return;}
-inline void StMtdHitMaker::setSwapBacklegInRun13(Bool_t swap) { mSwapBacklegInRun13 = swap; }
+inline vector<MtdRawHit> StMtdHitMaker::getLeadingHits()      { return MtdLeadingHits; }
+inline vector<MtdRawHit> StMtdHitMaker::getTrailingHits()     { return MtdTrailingHits;}
+inline void StMtdHitMaker::setUseMuDst(Int_t val)             { mUseMuDst = val;}
+inline void StMtdHitMaker::setTriggerWndSelection(Bool_t val) { mTriggerWndSelection = val;}
+inline void StMtdHitMaker::setSwapBacklegInRun13(Int_t swap)  { mSwapBacklegInRun13 = swap; }
+inline void StMtdHitMaker::setCosmicEvent(Bool_t val)         { mCosmicFlag = val; }
+inline void StMtdHitMaker::setCosmicTrigTimeWinFile(const char *file)
+{ mCosmicTrigTimeWinFile = file; }
 
 #endif
