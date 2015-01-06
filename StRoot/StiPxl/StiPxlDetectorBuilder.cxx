@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.102 2015/01/06 15:47:58 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.103 2015/01/06 15:48:04 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -203,6 +203,28 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          }
       }
    }
+}
+
+
+/**
+ * Returns the active StiDetector corresponding to a sensitive layer in PXL. The
+ * StiDetector is normally created by this StiDetectorBuilder and identified by
+ * its sector, ladder, and sesortHalf id-s. An active volume can have hits
+ * associated with it. The ladder id is expected to follow the human friendly
+ * numbering scheme, i.e.
+ *
+ * <pre>
+ * 1 <= sector <= kNumberOfPxlSectors
+ * 1 <= ladder <= kNumberOfPxlLaddersPerSector
+ * 1 <= sensorHalf <= 2
+ * </pre>
+ */
+const StiDetector* StiPxlDetectorBuilder::getActiveDetector(int sector, int ladder, int sensorHalf) const
+{
+   int stiRow, stiSensor;
+   convertSensor2StiId(sector, ladder, sensorHalf, stiRow, stiSensor);
+
+   return stiRow < 0 ? 0 : getDetector(stiRow, stiSensor);
 }
 
 
