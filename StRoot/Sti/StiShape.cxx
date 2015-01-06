@@ -9,7 +9,7 @@ ostream& operator<<(ostream& os, const StiShape& m)
      << " HalfDepth (dZ): " << m.getHalfDepth()
      << " HalfWidth (dY): " << m.getHalfWidth();
 
-  if (m.getShapeCode() == kCylindrical) {
+  if (m.getShapeCode() >= kCylindrical) {
     StiCylindricalShape *cyl = (StiCylindricalShape *) &m;
     os << " OuterRadius: "<< cyl->getOuterRadius()
        << " OpeningAngle: "<< cyl->getOpeningAngle();
