@@ -29,8 +29,8 @@ MediumGaAs::MediumGaAs()
       hasOpticalData(false),
       opticalDataFile("OpticalData_GaAs.txt") {
 
-  className = "MediumGaAs";
-  name = "GaAs";
+  m_className = "MediumGaAs";
+  m_name = "GaAs";
 
   SetTemperature(300.);
   SetDielectricConstant(12.9);
@@ -40,13 +40,13 @@ MediumGaAs::MediumGaAs()
 
   EnableDrift();
   EnablePrimaryIonisation();
-  microscopic = false;
+  m_microscopic = false;
 
-  wValue = 4.35;
-  fanoFactor = 0.1;
+  m_w = 4.35;
+  m_fano = 0.1;
 }
 
-void MediumGaAs::GetComponent(const int i, std::string& label, double& f) {
+void MediumGaAs::GetComponent(const unsigned int& i, std::string& label, double& f) {
 
   if (i == 0) {
     label = "Ga";
@@ -60,27 +60,27 @@ void MediumGaAs::GetComponent(const int i, std::string& label, double& f) {
 void MediumGaAs::SetTrapCrossSection(const double ecs, const double hcs) {
 
   if (ecs < 0.) {
-    std::cerr << className << "::SetTrapCrossSection:\n";
+    std::cerr << m_className << "::SetTrapCrossSection:\n";
     std::cerr << "    Capture cross-section [cm2] must positive.\n";
   } else {
     eTrapCs = ecs;
   }
 
   if (hcs < 0.) {
-    std::cerr << className << "::SetTrapCrossSection:\n";
+    std::cerr << m_className << "::SetTrapCrossSection:\n";
     std::cerr << "    Capture cross-section [cm2] must be positive.n";
   } else {
     hTrapCs = hcs;
   }
 
   trappingModel = 0;
-  isChanged = true;
+  m_isChanged = true;
 }
 
 void MediumGaAs::SetTrapDensity(const double n) {
 
   if (n < 0.) {
-    std::cerr << className << "::SetTrapDensity:\n";
+    std::cerr << m_className << "::SetTrapDensity:\n";
     std::cerr << "    Trap density [cm-3] must be greater than zero.\n";
   } else {
     eTrapDensity = n;
@@ -88,27 +88,27 @@ void MediumGaAs::SetTrapDensity(const double n) {
   }
 
   trappingModel = 0;
-  isChanged = true;
+  m_isChanged = true;
 }
 
 void MediumGaAs::SetTrappingTime(const double etau, const double htau) {
 
   if (etau <= 0.) {
-    std::cerr << className << "::SetTrappingTime:\n";
+    std::cerr << m_className << "::SetTrappingTime:\n";
     std::cerr << "    Trapping time [ns-1] must be positive.\n";
   } else {
     eTrapTime = etau;
   }
 
   if (htau <= 0.) {
-    std::cerr << className << "::SetTrappingTime:\n";
+    std::cerr << m_className << "::SetTrappingTime:\n";
     std::cerr << "    Trapping time [ns-1] must be positive.\n";
   } else {
     hTrapTime = htau;
   }
 
   trappingModel = 1;
-  isChanged = true;
+  m_isChanged = true;
 }
 
 bool MediumGaAs::ElectronVelocity(const double ex, const double ey,
@@ -177,7 +177,7 @@ bool MediumGaAs::ElectronAttachment(const double ex, const double ey,
       if (eta > 0.) eta = 1. / eta;
       break;
     default:
-      std::cerr << className << "::ElectronAttachment:\n";
+      std::cerr << m_className << "::ElectronAttachment:\n";
       std::cerr << "    Unknown model activated. Program bug!\n";
       return false;
       break;
@@ -247,7 +247,7 @@ bool MediumGaAs::HoleAttachment(const double ex, const double ey,
       if (eta > 0.) eta = 1. / eta;
       break;
     default:
-      std::cerr << className << "::HoleAttachment:\n";
+      std::cerr << m_className << "::HoleAttachment:\n";
       std::cerr << "    Unknown model activated. Program bug!\n";
       return false;
       break;
@@ -258,7 +258,7 @@ bool MediumGaAs::HoleAttachment(const double ex, const double ey,
 void MediumGaAs::SetLowFieldMobility(const double mue, const double muh) {
 
   if (mue <= 0. || muh <= 0.) {
-    std::cerr << className << "::SetLowFieldMobility:\n";
+    std::cerr << m_className << "::SetLowFieldMobility:\n";
     std::cerr << "    Mobility must be greater than zero.\n";
     return;
   }
@@ -266,20 +266,21 @@ void MediumGaAs::SetLowFieldMobility(const double mue, const double muh) {
   eMobility = mue;
   hMobility = muh;
   hasUserMobility = true;
-  isChanged = true;
+  m_isChanged = true;
 }
 
-bool MediumGaAs::GetOpticalDataRange(double& emin, double& emax, const int i) {
+bool MediumGaAs::GetOpticalDataRange(double& emin, double& emax, 
+                                     const unsigned int& i) {
 
   if (i != 0) {
-    std::cerr << className << "::GetOpticalDataRange:\n";
+    std::cerr << m_className << "::GetOpticalDataRange:\n";
     std::cerr << "    Medium has only one component.\n";
   }
 
   // Make sure the optical data table has been loaded.
   if (!hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
-      std::cerr << className << "::GetOpticalDataRange:\n";
+      std::cerr << m_className << "::GetOpticalDataRange:\n";
       std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
@@ -288,18 +289,18 @@ bool MediumGaAs::GetOpticalDataRange(double& emin, double& emax, const int i) {
 
   emin = opticalDataTable[0].energy;
   emax = opticalDataTable.back().energy;
-  if (debug) {
-    std::cout << className << "::GetOpticalDataRange:\n";
+  if (m_debug) {
+    std::cout << m_className << "::GetOpticalDataRange:\n";
     std::cout << "    " << emin << " < E [eV] < " << emax << "\n";
   }
   return true;
 }
 
-bool MediumGaAs::GetDielectricFunction(const double e, double& eps1,
-                                       double& eps2, const int i) {
+bool MediumGaAs::GetDielectricFunction(const double& e, double& eps1,
+                                       double& eps2, const unsigned int& i) {
 
   if (i != 0) {
-    std::cerr << className << "::GetDielectricFunction:\n";
+    std::cerr << m_className << "::GetDielectricFunction:\n";
     std::cerr << "    Medium has only one component.\n";
     return false;
   }
@@ -307,7 +308,7 @@ bool MediumGaAs::GetDielectricFunction(const double e, double& eps1,
   // Make sure the optical data table has been loaded.
   if (!hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
-      std::cerr << className << "::GetDielectricFunction:\n";
+      std::cerr << m_className << "::GetDielectricFunction:\n";
       std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
@@ -318,7 +319,7 @@ bool MediumGaAs::GetDielectricFunction(const double e, double& eps1,
   const double emin = opticalDataTable[0].energy;
   const double emax = opticalDataTable.back().energy;
   if (e < emin || e > emax) {
-    std::cerr << className << "::GetDielectricFunction:\n";
+    std::cerr << m_className << "::GetDielectricFunction:\n";
     std::cerr << "    Requested energy (" << e << " eV) "
               << " is outside the range of the optical data table.\n";
     std::cerr << "    " << emin << " < E [eV] < " << emax << "\n";
@@ -371,7 +372,7 @@ bool MediumGaAs::LoadOpticalData(const std::string filename) {
   // Get the path to the data directory.
   char* pPath = getenv("GARFIELD_HOME");
   if (pPath == 0) {
-    std::cerr << className << "::LoadOpticalData:\n";
+    std::cerr << m_className << "::LoadOpticalData:\n";
     std::cerr << "    Environment variable GARFIELD_HOME is not set.\n";
     return false;
   }
@@ -383,7 +384,7 @@ bool MediumGaAs::LoadOpticalData(const std::string filename) {
   infile.open(filepath.c_str(), std::ios::in);
   // Make sure the file could actually be opened.
   if (!infile) {
-    std::cerr << className << "::LoadOpticalData:\n";
+    std::cerr << m_className << "::LoadOpticalData:\n";
     std::cerr << "    Error opening file " << filename << ".\n";
     return false;
   }
@@ -415,7 +416,7 @@ bool MediumGaAs::LoadOpticalData(const std::string filename) {
     if (dataStream.eof()) break;
     // Check if the data has been read correctly.
     if (infile.fail()) {
-      std::cerr << className << "::LoadOpticalData:\n";
+      std::cerr << m_className << "::LoadOpticalData:\n";
       std::cerr << "    Error reading file " << filename << " (line " << i
                 << ").\n";
       return false;
@@ -427,7 +428,7 @@ bool MediumGaAs::LoadOpticalData(const std::string filename) {
     // The table has to be in ascending order
     //  with respect to the photon energy.
     if (energy <= lastEnergy) {
-      std::cerr << className << "::LoadOpticalData:\n";
+      std::cerr << m_className << "::LoadOpticalData:\n";
       std::cerr << "    Table is not in monotonically "
                 << "increasing order (line " << i << ").\n";
       std::cerr << "    " << lastEnergy << "  " << energy << "  " << eps1
@@ -436,7 +437,7 @@ bool MediumGaAs::LoadOpticalData(const std::string filename) {
     }
     // The imaginary part of the dielectric function has to be positive.
     if (eps2 < 0.) {
-      std::cerr << className << "::LoadOpticalData:\n";
+      std::cerr << m_className << "::LoadOpticalData:\n";
       std::cerr << "    Negative value of the loss function "
                 << "(line " << i << ").\n";
       return false;
@@ -453,14 +454,14 @@ bool MediumGaAs::LoadOpticalData(const std::string filename) {
 
   const int nEntries = opticalDataTable.size();
   if (nEntries <= 0) {
-    std::cerr << className << "::LoadOpticalData:\n";
+    std::cerr << m_className << "::LoadOpticalData:\n";
     std::cerr << "    Import of data from file " << filepath << "failed.\n";
     std::cerr << "    No valid data found.\n";
     return false;
   }
 
-  if (debug) {
-    std::cout << className << "::LoadOpticalData:\n";
+  if (m_debug) {
+    std::cout << m_className << "::LoadOpticalData:\n";
     std::cout << "    Read " << nEntries << " values from file " << filepath
               << "\n";
   }

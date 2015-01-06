@@ -16,7 +16,8 @@ class MediumCdTe : public Medium {
 
   bool IsSemiconductor() const { return true; }
 
-  void GetComponent(const int i, std::string& label, double& f);
+  void GetComponent(const unsigned int& i, 
+                    std::string& label, double& f);
 
   // Trapping cross-section
   void SetTrapCrossSection(const double ecs, const double hcs);
@@ -47,9 +48,10 @@ class MediumCdTe : public Medium {
   void SetLowFieldMobility(const double mue, const double muh);
   void SetSaturationVelocity(const double vsate, const double vsath);
 
-  bool GetOpticalDataRange(double& emin, double& emax, const int i = 0);
-  bool GetDielectricFunction(const double e, double& eps1, double& eps2,
-                             const int i = 0);
+  bool GetOpticalDataRange(double& emin, double& emax, 
+                           const unsigned int& i = 0);
+  bool GetDielectricFunction(const double& e, double& eps1, double& eps2,
+                             const unsigned int& i = 0);
 
  private:
   // double bandGap;

@@ -17,53 +17,54 @@ class Medium {
   virtual ~Medium() {}
 
   // Return the id number of the class instance
-  int GetId() const { return id; }
+  int GetId() const { return m_id; }
   // Medium name/identifier
-  std::string GetName() const { return name; }
+  std::string GetName() const { return m_name; }
   virtual bool IsGas() const { return false; }
   virtual bool IsSemiconductor() const { return false; }
 
   // Temperature [K]
-  void SetTemperature(const double t);
-  double GetTemperature() const { return temperature; }
+  void SetTemperature(const double& t);
+  double GetTemperature() const { return m_temperature; }
   // Pressure [Torr]
-  void SetPressure(const double p);
-  double GetPressure() const { return pressure; }
+  void SetPressure(const double& p);
+  double GetPressure() const { return m_pressure; }
   // Relative static dielectric constant
-  void SetDielectricConstant(const double eps);
-  double GetDielectricConstant() const { return epsilon; }
+  void SetDielectricConstant(const double& eps);
+  double GetDielectricConstant() const { return m_epsilon; }
 
   // Get number of components
-  int GetNumberOfComponents() const { return nComponents; }
-  virtual void GetComponent(const int i, std::string& label, double& f);
+  unsigned int GetNumberOfComponents() const { return m_nComponents; }
+  virtual void GetComponent(const unsigned int& i, 
+                            std::string& label, double& f);
   // Effective atomic number and weight
-  virtual void SetAtomicNumber(const double z);
-  virtual double GetAtomicNumber() const { return atomicNumber; }
-  virtual void SetAtomicWeight(const double a);
-  virtual double GetAtomicWeight() const { return atomicWeight; }
+  virtual void SetAtomicNumber(const double& z);
+  virtual double GetAtomicNumber() const { return m_z; }
+  virtual void SetAtomicWeight(const double& a);
+  virtual double GetAtomicWeight() const { return m_a; }
   // Number density [cm-3] and mass density [g/cm3]
-  virtual void SetNumberDensity(const double n);
-  virtual double GetNumberDensity() const { return density; }
-  virtual void SetMassDensity(const double rho);
+  virtual void SetNumberDensity(const double& n);
+  virtual double GetNumberDensity() const { return m_density; }
+  virtual void SetMassDensity(const double& rho);
   virtual double GetMassDensity() const;
 
   // Transport properties
-  virtual void EnableDrift() { driftable = true; }
-  void DisableDrift() { driftable = false; }
-  virtual void EnablePrimaryIonisation() { ionisable = true; }
-  void DisablePrimaryIonisation() { ionisable = false; }
+  virtual void EnableDrift() { m_driftable = true; }
+  void DisableDrift() { m_driftable = false; }
+  virtual void EnablePrimaryIonisation() { m_ionisable = true; }
+  void DisablePrimaryIonisation() { m_ionisable = false; }
 
-  bool IsDriftable() const { return driftable; }
-  bool IsMicroscopic() const { return microscopic; }
-  bool IsIonisable() const { return ionisable; }
+  bool IsDriftable() const { return m_driftable; }
+  bool IsMicroscopic() const { return m_microscopic; }
+  bool IsIonisable() const { return m_ionisable; }
 
   // W value and Fano factor
-  void SetW(const double w) {
-    wValue = w;
+  void SetW(const double& w) {
+    m_w = w;
   };
-  double GetW() { return wValue; }
-  void SetFanoFactor(const double f) { fanoFactor = f; }
-  double GetFanoFactor() { return fanoFactor; }
+  double GetW() { return m_w; }
+  void SetFanoFactor(const double& f) { m_fano = f; }
+  double GetFanoFactor() { return m_fano; }
 
   // Transport parameters for electrons
   // Drift velocity [cm / ns]
@@ -78,7 +79,7 @@ class Medium {
                                  double& dt);
   // Diffusion tensor: diagonal elements are the diffusion
   // coefficients [cm] along e, btrans, e x b,
-  // off-diagonal elements are covariances are the covariances
+  // off-diagonal elements are the covariances
   virtual bool ElectronDiffusion(const double ex, const double ey,
                                  const double ez, const double bx,
                                  const double by, const double bz,
@@ -232,68 +233,71 @@ class Medium {
   void SetInterpolationMethodIonDissociation(const int intrp);
 
   // Scaling of fields and transport parameters.
-  virtual double ScaleElectricField(const double e) { return e; }
-  virtual double UnScaleElectricField(const double e) { return e; }
-  virtual double ScaleVelocity(const double v) { return v; }
-  virtual double ScaleDiffusion(const double d) { return d; }
-  virtual double ScaleDiffusionTensor(const double d) { return d; }
-  virtual double ScaleTownsend(const double alpha) { return alpha; }
-  virtual double ScaleAttachment(const double eta) { return eta; }
-  virtual double ScaleDissociation(const double diss) { return diss; }
+  virtual double ScaleElectricField(const double& e) const { return e; }
+  virtual double UnScaleElectricField(const double& e) const { return e; }
+  virtual double ScaleVelocity(const double& v) const { return v; }
+  virtual double ScaleDiffusion(const double& d) const { return d; }
+  virtual double ScaleDiffusionTensor(const double& d) const { return d; }
+  virtual double ScaleTownsend(const double& alpha) const { return alpha; }
+  virtual double ScaleAttachment(const double& eta) const { return eta; }
+  virtual double ScaleDissociation(const double &diss) const { return diss; }
 
   // Optical properties
   // Energy range [eV] of available optical data
-  virtual bool GetOpticalDataRange(double& emin, double& emax, const int i = 0);
+  virtual bool GetOpticalDataRange(double& emin, double& emax, 
+                                   const unsigned int& i = 0);
   // Complex dielectric function
-  virtual bool GetDielectricFunction(const double e, double& eps1, double& eps2,
-                                     const int i = 0);
+  virtual bool GetDielectricFunction(const double& e, double& eps1, double& eps2,
+                                     const unsigned int& i = 0);
   // Photoabsorption cross-section [cm2]
-  virtual bool GetPhotoAbsorptionCrossSection(const double e, double& sigma,
-                                              const int i = 0);
-  virtual double GetPhotonCollisionRate(const double e);
+  virtual bool GetPhotoAbsorptionCrossSection(const double& e, double& sigma,
+                                              const unsigned int& i = 0);
+  virtual double GetPhotonCollisionRate(const double& e);
   virtual bool GetPhotonCollision(const double e, int& type, int& level,
                                   double& e1, double& ctheta, int& nsec,
                                   double& esec);
 
   // Switch on/off debugging  messages
-  void EnableDebugging() { debug = true; }
-  void DisableDebugging() { debug = false; }
+  void EnableDebugging() { m_debug = true; }
+  void DisableDebugging() { m_debug = false; }
 
  protected:
-  std::string className;
+  std::string m_className;
 
-  static int idCounter;
+  static int m_idCounter;
 
   // Id number
-  int id;
+  int m_id;
   // Name
-  std::string name;
+  std::string m_name;
   // Temperature [K]
-  double temperature;
+  double m_temperature;
   // Pressure [Torr]
-  double pressure;
+  double m_pressure;
   // Static dielectric constant
-  double epsilon;
+  double m_epsilon;
   // Number of components
-  int nComponents;
+  unsigned int m_nComponents;
   // (Effective) atomic number Z
-  double atomicNumber;
+  double m_z;
   // Atomic weight A
-  double atomicWeight;
+  double m_a;
   // Number density [cm-3]
-  double density;
+  double m_density;
 
   // Transport flags
-  bool driftable, microscopic, ionisable;
+  bool m_driftable;
+  bool m_microscopic;
+  bool m_ionisable;
 
   // W value and Fano factor
-  double wValue, fanoFactor;
+  double m_w, m_fano;
 
   // Update flag
-  bool isChanged;
+  bool m_isChanged;
 
   // Switch on/off debugging messages
-  bool debug;
+  bool m_debug;
 
   // Field grids
   int nEfields;

@@ -18,8 +18,8 @@ MediumGas::MediumGas()
       usePenning(false),
       rPenningGlobal(0.),
       lambdaPenningGlobal(0.),
-      pressureTable(pressure),
-      temperatureTable(temperature),
+      pressureTable(m_pressure),
+      temperatureTable(m_temperature),
       hasExcRates(false),
       hasIonRates(false),
       nExcListElements(0),
@@ -31,10 +31,10 @@ MediumGas::MediumGas()
       intpExcRates(2),
       intpIonRates(2) {
 
-  className = "MediumGas";
+  m_className = "MediumGas";
 
   // Default gas mixture: pure argon
-  for (int i = nMaxGases; i--;) {
+  for (unsigned int i = 0; i < m_nMaxGases; ++i) {
     fraction[i] = 0.;
     gas[i] = "";
     atWeight[i] = 0.;
@@ -42,16 +42,16 @@ MediumGas::MediumGas()
   }
   gas[0] = "Ar";
   fraction[0] = 1.;
-  name = gas[0];
+  m_name = gas[0];
   GetGasInfo(gas[0], atWeight[0], atNum[0]);
 
-  isChanged = true;
+  m_isChanged = true;
 
   EnableDrift();
   EnablePrimaryIonisation();
 
   // Initialise Penning parameters
-  for (int i = nMaxGases; i--;) {
+  for (unsigned int i = 0; i < m_nMaxGases; ++i) {
     rPenningGas[i] = 0.;
     lambdaPenningGas[i] = 0.;
   }
@@ -69,67 +69,65 @@ bool MediumGas::SetComposition(const std::string gas1, const double f1,
                                const std::string gas6, const double f6) {
 
   // Make a backup copy of the gas composition.
-  std::string gasOld[nMaxGases];
-  for (int i = nMaxGases; i--;) {
+  std::string gasOld[m_nMaxGases];
+  for (unsigned int i = 0; i< m_nMaxGases; ++i) {
     gasOld[i] = gas[i];
   }
-  int nComponentsOld = nComponents;
-
-  int i = 0;
+  const unsigned int nComponentsOld = m_nComponents;
+  m_nComponents = 0;
 
   // Find the gas name corresponding to the input string.
   std::string gasname = "";
   if (f1 > 0. && GetGasName(gas1, gasname)) {
-    gas[i] = gasname;
-    fraction[i] = f1;
-    ++i;
+    gas[m_nComponents] = gasname;
+    fraction[m_nComponents] = f1;
+    ++m_nComponents;
   }
   if (f2 > 0. && GetGasName(gas2, gasname)) {
-    gas[i] = gasname;
-    fraction[i] = f2;
-    ++i;
+    gas[m_nComponents] = gasname;
+    fraction[m_nComponents] = f2;
+    ++m_nComponents;
   }
   if (f3 > 0. && GetGasName(gas3, gasname)) {
-    gas[i] = gasname;
-    fraction[i] = f3;
-    ++i;
+    gas[m_nComponents] = gasname;
+    fraction[m_nComponents] = f3;
+    ++m_nComponents;
   }
   if (f4 > 0. && GetGasName(gas4, gasname)) {
-    gas[i] = gasname;
-    fraction[i] = f4;
-    ++i;
+    gas[m_nComponents] = gasname;
+    fraction[m_nComponents] = f4;
+    ++m_nComponents;
   }
   if (f5 > 0. && GetGasName(gas5, gasname)) {
-    gas[i] = gasname;
-    fraction[i] = f5;
-    ++i;
+    gas[m_nComponents] = gasname;
+    fraction[m_nComponents] = f5;
+    ++m_nComponents;
   }
   if (f6 > 0. && GetGasName(gas6, gasname)) {
-    gas[i] = gasname;
-    fraction[i] = f6;
-    ++i;
+    gas[m_nComponents] = gasname;
+    fraction[m_nComponents] = f6;
+    ++m_nComponents;
   }
 
   // Check if at least one valid ingredient was specified.
-  if (i <= 0) {
-    std::cerr << className << "::SetComposition:\n";
+  if (m_nComponents == 0) {
+    std::cerr << m_className << "::SetComposition:\n";
     std::cerr << "    Error setting the composition.\n";
     std::cerr << "    No valid ingredients were specified.\n";
     return false;
   }
 
-  nComponents = i;
   // Establish the name.
-  name = "";
+  m_name = "";
   double sum = 0.;
-  for (i = 0; i < nComponents; ++i) {
-    if (i > 0) name += "/";
-    name += gas[i];
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
+    if (i > 0) m_name += "/";
+    m_name += gas[i];
     sum += fraction[i];
   }
   // Normalise the fractions to one.
-  for (i = 0; i < nMaxGases; ++i) {
-    if (i < nComponents) {
+  for (unsigned int i = 0; i < m_nMaxGases; ++i) {
+    if (i < m_nComponents) {
       fraction[i] /= sum;
     } else {
       fraction[i] = 0.;
@@ -137,18 +135,18 @@ bool MediumGas::SetComposition(const std::string gas1, const double f1,
   }
 
   // Set the atomic weight and number
-  for (i = 0; i < nComponents; ++i) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     atWeight[i] = 0.;
     atNum[i] = 0.;
     GetGasInfo(gas[i], atWeight[i], atNum[i]);
   }
 
   // Print the composition.
-  std::cout << className << "::SetComposition:\n";
-  std::cout << "    " << name;
-  if (nComponents > 1) {
+  std::cout << m_className << "::SetComposition:\n";
+  std::cout << "    " << m_name;
+  if (m_nComponents > 1) {
     std::cout << " (" << fraction[0] * 100;
-    for (i = 1; i < nComponents; ++i) {
+    for (unsigned int i = 1; i < m_nComponents; ++i) {
       std::cout << "/" << fraction[i] * 100;
     }
     std::cout << ")";
@@ -156,24 +154,24 @@ bool MediumGas::SetComposition(const std::string gas1, const double f1,
   std::cout << "\n";
 
   // Force a recalculation of the collision rates.
-  isChanged = true;
+  m_isChanged = true;
 
   // Copy the previous Penning transfer parameters.
-  double rPenningGasOld[nMaxGases];
-  double lambdaPenningGasOld[nMaxGases];
-  for (int i = nMaxGases; i--;) {
+  double rPenningGasOld[m_nMaxGases];
+  double lambdaPenningGasOld[m_nMaxGases];
+  for (unsigned int i = 0; i < m_nMaxGases; ++i) {
     rPenningGasOld[i] = rPenningGas[i];
     lambdaPenningGasOld[i] = lambdaPenningGas[i];
     rPenningGas[i] = 0.;
     lambdaPenningGas[i] = 0.;
   }
-  for (int i = nComponents; i--;) {
-    for (int j = nComponentsOld; j--;) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
+    for (unsigned int j = 0; j < nComponentsOld; ++j) {
       if (gas[i] == gasOld[j]) {
         if (rPenningGasOld[j] > 0.) {
           rPenningGas[i] = rPenningGasOld[j];
           lambdaPenningGas[i] = lambdaPenningGasOld[i];
-          std::cout << className << "::SetComposition:\n";
+          std::cout << m_className << "::SetComposition:\n";
           std::cout << "    Adopting Penning transfer parameters for " << gas[i]
                     << " from previous mixture.\n";
           std::cout << "      r      = " << rPenningGas[i] << "\n";
@@ -204,10 +202,11 @@ void MediumGas::GetComposition(std::string& gas1, double& f1, std::string& gas2,
   f6 = fraction[5];
 }
 
-void MediumGas::GetComponent(const int i, std::string& label, double& f) {
+void MediumGas::GetComponent(const unsigned int& i, 
+                             std::string& label, double& f) {
 
-  if (i < 0 || i >= nComponents) {
-    std::cerr << className << "::GetComponent:\n";
+  if (i >= m_nComponents) {
+    std::cerr << m_className << "::GetComponent:\n";
     std::cerr << "    Index out of range.\n";
     label = "";
     f = 0.;
@@ -218,32 +217,32 @@ void MediumGas::GetComponent(const int i, std::string& label, double& f) {
   f = fraction[i];
 }
 
-void MediumGas::SetAtomicNumber(const double z) {
+void MediumGas::SetAtomicNumber(const double& z) {
 
-  std::cerr << className << "::SetAtomicNumber:\n";
+  std::cerr << m_className << "::SetAtomicNumber:\n";
   std::cerr << "    Effective Z cannot be changed"
             << " directly to " << z << ".\n";
   std::cerr << "    Use SetComposition to define the gas mixture.\n";
 }
 
-void MediumGas::SetAtomicWeight(const double a) {
+void MediumGas::SetAtomicWeight(const double& a) {
 
-  std::cerr << className << "::SetAtomicWeight:\n";
+  std::cerr << m_className << "::SetAtomicWeight:\n";
   std::cerr << "    Effective A cannot be changed"
             << " directly to " << a << ".\n";
   std::cerr << "    Use SetComposition to define the gas mixture.\n";
 }
 
-void MediumGas::SetNumberDensity(const double n) {
+void MediumGas::SetNumberDensity(const double& n) {
 
-  std::cerr << className << "::SetNumberDensity:\n";
+  std::cerr << m_className << "::SetNumberDensity:\n";
   std::cerr << "    Density cannot directly be changed to " << n << ".\n";
   std::cerr << "    Use SetTemperature and SetPressure.\n";
 }
 
-void MediumGas::SetMassDensity(const double rho) {
+void MediumGas::SetMassDensity(const double& rho) {
 
-  std::cerr << className << "::SetMassDensity:\n";
+  std::cerr << m_className << "::SetMassDensity:\n";
   std::cerr << "    Density cannot directly be changed to " << rho << ".\n";
   std::cerr << "    Use SetTemperature, SetPressure"
             << " and SetComposition.\n";
@@ -253,7 +252,7 @@ double MediumGas::GetAtomicWeight() const {
 
   // Effective A, weighted by the fractions of the components.
   double a = 0.;
-  for (int i = 0; i < nComponents; ++i) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     a += atWeight[i] * fraction[i];
   }
   return a;
@@ -262,8 +261,8 @@ double MediumGas::GetAtomicWeight() const {
 double MediumGas::GetNumberDensity() const {
 
   // Ideal gas law.
-  return LoschmidtNumber * (pressure / AtmosphericPressure) *
-         (ZeroCelsius / temperature);
+  return LoschmidtNumber * (m_pressure / AtmosphericPressure) *
+         (ZeroCelsius / m_temperature);
 }
 
 double MediumGas::GetMassDensity() const {
@@ -275,20 +274,20 @@ double MediumGas::GetAtomicNumber() const {
 
   // Effective Z, weighted by the fractions of the components.
   double z = 0.;
-  for (int i = 0; i < nComponents; ++i) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     z += atNum[i] * fraction[i];
   }
   return z;
 }
 
-bool MediumGas::LoadGasFile(const std::string filename) {
+bool MediumGas::LoadGasFile(const std::string& filename) {
 
   std::ifstream gasfile;
   // Open the file.
   gasfile.open(filename.c_str());
   // Make sure the file could be opened.
   if (!gasfile.is_open()) {
-    std::cerr << className << "::LoadGasFile:\n";
+    std::cerr << m_className << "::LoadGasFile:\n";
     std::cerr << "   Gas file could not be opened.\n";
     return false;
   }
@@ -320,33 +319,33 @@ bool MediumGas::LoadGasFile(const std::string filename) {
     if (strncmp(line, " The gas tables follow:", 8) == 0 ||
         strncmp(line, "The gas tables follow:", 7) == 0) {
       atTables = true;
-      if (debug) {
+      if (m_debug) {
         std::cout << "    Entering tables.\n";
         getchar();
       }
     }
-    if (debug) {
+    if (m_debug) {
       std::cout << "    Line: " << line << "\n";
       getchar();
     }
     if (!atTables) {
       token = strtok(line, " :,%");
       while (token != NULL) {
-        if (debug) std::cout << "    Token: " << token << "\n";
+        if (m_debug) std::cout << "    Token: " << token << "\n";
         if (strcmp(token, "Version") == 0) {
           token = strtok(NULL, " :,%");
           versionNumber = atoi(token);
           // Check the version number.
           if (versionNumber != 10 && versionNumber != 11 &&
               versionNumber != 12) {
-            std::cerr << className << "::LoadGasFile:\n";
+            std::cerr << m_className << "::LoadGasFile:\n";
             std::cerr << "    The file has version number " << versionNumber
                       << ".\n";
             std::cerr << "    Files written in this format cannot be read.\n";
             gasfile.close();
             return false;
           } else {
-            std::cout << className << "::LoadGasFile:\n";
+            std::cout << m_className << "::LoadGasFile:\n";
             std::cout << "    Version: " << versionNumber << "\n";
           }
         } else if (strcmp(token, "GASOK") == 0) {
@@ -360,8 +359,8 @@ bool MediumGas::LoadGasFile(const std::string filename) {
           std::string identifier = "";
           token = strtok(NULL, "\n");
           if (token != NULL) identifier += token;
-          if (debug) {
-            std::cout << className << "::LoadGasFile:\n";
+          if (m_debug) {
+            std::cout << m_className << "::LoadGasFile:\n";
             std::cout << "    Identifier:\n";
             std::cout << "      " << token << "\n";
           }
@@ -376,7 +375,7 @@ bool MediumGas::LoadGasFile(const std::string filename) {
           eFieldRes = atoi(token);
           // Check the number of E points.
           if (eFieldRes <= 0) {
-            std::cerr << className << "::LoadGasFile:\n";
+            std::cerr << m_className << "::LoadGasFile:\n";
             std::cerr << "    Number of E fields out of range.\n";
             gasfile.close();
             return false;
@@ -385,7 +384,7 @@ bool MediumGas::LoadGasFile(const std::string filename) {
           angRes = atoi(token);
           // Check the number of angles.
           if (map2d && angRes <= 0) {
-            std::cerr << className << "::LoadGasFile:\n";
+            std::cerr << m_className << "::LoadGasFile:\n";
             std::cerr << "    Number of E-B angles out of range.\n";
             gasfile.close();
             return false;
@@ -395,7 +394,7 @@ bool MediumGas::LoadGasFile(const std::string filename) {
           bFieldRes = atoi(token);
           // Check the number of B points.
           if (map2d && bFieldRes <= 0) {
-            std::cerr << className << "::LoadGasFile:\n";
+            std::cerr << m_className << "::LoadGasFile:\n";
             std::cerr << "    Number of B fields out of range.\n";
             gasfile.close();
             return false;
@@ -411,7 +410,7 @@ bool MediumGas::LoadGasFile(const std::string filename) {
           // Fill in the excitation/ionisation structs
           // Excitation
           token = strtok(NULL, " :,%\t");
-          if (debug) {
+          if (m_debug) {
             std::cout << "    " << token << "\n";
           }
           int nexc = atoi(token);
@@ -426,7 +425,7 @@ bool MediumGas::LoadGasFile(const std::string filename) {
           if (nIonListElements > 0) {
             ionisationList.resize(nIonListElements);
           }
-          if (debug) {
+          if (m_debug) {
             std::cout << "    Finished initializing excitation/ionisation"
                       << "  structs.\n";
           }
@@ -519,8 +518,8 @@ bool MediumGas::LoadGasFile(const std::string filename) {
   // (15) excitation rates
   // (16) ionisation rates
 
-  if (debug) {
-    std::cout << className << "::LoadGasFile:\n";
+  if (m_debug) {
+    std::cout << m_className << "::LoadGasFile:\n";
     std::cout << "    GASOK bits: " << gasBits << "\n";
   }
 
@@ -623,12 +622,12 @@ bool MediumGas::LoadGasFile(const std::string filename) {
   std::vector<double> percentages;
   percentages.clear();
   bool gasMixOk = true;
-  int gasCount = 0;
+  unsigned int gasCount = 0;
   for (int i = 0; i < nMagboltzGases; ++i) {
     if (mixture[i] > 0.) {
       std::string gasname = "";
       if (!GetGasName(i + 1, versionNumber, gasname)) {
-        std::cerr << className << "::LoadGasFile:\n";
+        std::cerr << m_className << "::LoadGasFile:\n";
         std::cerr << "    Unknown gas (gas number ";
         std::cerr << i + 1 << ")\n";
         gasMixOk = false;
@@ -639,54 +638,54 @@ bool MediumGas::LoadGasFile(const std::string filename) {
       ++gasCount;
     }
   }
-  if (gasCount > nMaxGases) {
-    std::cerr << className << "::LoadGasFile:\n";
+  if (gasCount > m_nMaxGases) {
+    std::cerr << m_className << "::LoadGasFile:\n";
     std::cerr << "    Gas mixture has " << gasCount << " components.\n";
-    std::cerr << "    Number of gases is limited to " << nMaxGases << ".\n";
+    std::cerr << "    Number of gases is limited to " << m_nMaxGases << ".\n";
     gasMixOk = false;
-  } else if (gasCount <= 0) {
-    std::cerr << className << "::LoadGasFile:\n";
+  } else if (gasCount == 0) {
+    std::cerr << m_className << "::LoadGasFile:\n";
     std::cerr << "    Gas mixture is not defined (zero components).\n";
     gasMixOk = false;
   }
   double sum = 0.;
-  for (int i = 0; i < gasCount; ++i) sum += percentages[i];
+  for (unsigned int i = 0; i < gasCount; ++i) sum += percentages[i];
   if (gasMixOk && sum != 100.) {
-    std::cerr << className << "::LoadGasFile:\n";
+    std::cerr << m_className << "::LoadGasFile:\n";
     std::cerr << "    Percentages are not normalized to 100.\n";
-    for (int i = 0; i < gasCount; ++i) percentages[i] *= 100. / sum;
+    for (unsigned int i = 0; i < gasCount; ++i) percentages[i] *= 100. / sum;
   }
 
   // Force re-initialisation of collision rates etc.
-  isChanged = true;
+  m_isChanged = true;
 
   if (gasMixOk) {
-    name = "";
-    nComponents = gasCount;
-    for (int i = 0; i < nComponents; ++i) {
-      if (i > 0) name += "/";
-      name += gasnames[i];
+    m_name = "";
+    m_nComponents = gasCount;
+    for (unsigned int i = 0; i < m_nComponents; ++i) {
+      if (i > 0) m_name += "/";
+      m_name += gasnames[i];
       gas[i] = gasnames[i];
       fraction[i] = percentages[i] / 100.;
       GetGasInfo(gas[i], atWeight[i], atNum[i]);
     }
-    std::cout << className << "::LoadGasFile:\n";
-    std::cout << "    Gas composition set to " << name;
-    if (nComponents > 1) {
+    std::cout << m_className << "::LoadGasFile:\n";
+    std::cout << "    Gas composition set to " << m_name;
+    if (m_nComponents > 1) {
       std::cout << " (" << fraction[0] * 100;
-      for (int i = 1; i < nComponents; ++i) {
+      for (unsigned int i = 1; i < m_nComponents; ++i) {
         std::cout << "/" << fraction[i] * 100;
       }
       std::cout << ")";
     }
     std::cout << "\n";
   } else {
-    std::cerr << className << "::LoadGasFile:\n";
+    std::cerr << m_className << "::LoadGasFile:\n";
     std::cerr << "    Gas composition could not be established.\n";
   }
 
-  if (debug) {
-    std::cout << className << "::LoadGasFile:\n";
+  if (m_debug) {
+    std::cout << m_className << "::LoadGasFile:\n";
     std::cout << "    Reading gas tables.\n";
   }
 
@@ -707,8 +706,8 @@ bool MediumGas::LoadGasFile(const std::string filename) {
   double waste = 0.;
 
   if (map2d) {
-    if (debug) {
-      std::cout << className << "::LoadGasFile:\n";
+    if (m_debug) {
+      std::cout << m_className << "::LoadGasFile:\n";
       std::cout << "    Gas table is 3D.\n";
     }
     for (int i = 0; i < eFieldRes; i++) {
@@ -765,12 +764,12 @@ bool MediumGas::LoadGasFile(const std::string filename) {
       }
     }
   } else {
-    if (debug) {
-      std::cout << className << "::LoadGasFile:\n";
+    if (m_debug) {
+      std::cout << m_className << "::LoadGasFile:\n";
       std::cout << "    Gas table is 1D.\n";
     }
     for (int i = 0; i < eFieldRes; i++) {
-      if (debug) std::cout << "    Done table: " << i << "\n";
+      if (m_debug) std::cout << "    Done table: " << i << "\n";
       // Drift velocity along E, Bt, ExB
       gasfile >> ve >> waste >> vb >> waste >> vexb >> waste;
       ve *= 1.e-3;
@@ -818,7 +817,7 @@ bool MediumGas::LoadGasFile(const std::string filename) {
       }
     }
   }
-  if (debug) std::cout << "    Done with gas tables.\n";
+  if (m_debug) std::cout << "    Done with gas tables.\n";
 
   // Extrapolation methods
   int hExtrap[13], lExtrap[13];
@@ -896,12 +895,12 @@ bool MediumGas::LoadGasFile(const std::string filename) {
         token = strtok(NULL, " :,%=\t");
         double pTorr = 760.;
         if (token != NULL) pTorr = atof(token);
-        if (pTorr > 0.) pressure = pTorr;
+        if (pTorr > 0.) m_pressure = pTorr;
       } else if (strcmp(token, "TGAS") == 0) {
         token = strtok(NULL, " :,%=\t");
         double tKelvin = 293.15;
         if (token != NULL) tKelvin = atof(token);
-        if (tKelvin > 0.) temperature = tKelvin;
+        if (tKelvin > 0.) m_temperature = tKelvin;
         done = true;
         break;
       } else {
@@ -915,8 +914,8 @@ bool MediumGas::LoadGasFile(const std::string filename) {
   gasfile.close();
 
   // Set the reference pressure and temperature.
-  pressureTable = pressure;
-  temperatureTable = temperature;
+  pressureTable = m_pressure;
+  temperatureTable = m_temperature;
 
   // Multiply the E/p values by the pressure.
   for (int i = eFieldRes; i--;) {
@@ -1011,24 +1010,24 @@ bool MediumGas::LoadGasFile(const std::string filename) {
     tabIonDiffTrans.clear();
   }
 
-  if (debug) {
-    std::cout << className << "::LoadGasFile:\n";
+  if (m_debug) {
+    std::cout << m_className << "::LoadGasFile:\n";
     std::cout << "    Gas file sucessfully read.\n";
   }
 
   return true;
 }
 
-bool MediumGas::WriteGasFile(const std::string filename) {
+bool MediumGas::WriteGasFile(const std::string& filename) {
 
   const int nMagboltzGases = 60;
   std::vector<double> mixture(nMagboltzGases);
   for (int i = nMagboltzGases; i--;) mixture[i] = 0.;
   // Set the gas mixture.
-  for (int i = 0; i < nComponents; ++i) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     int ng = 0;
     if (!GetGasNumberGasFile(gas[i], ng)) {
-      std::cerr << className << "::WriteGasFile:\n";
+      std::cerr << m_className << "::WriteGasFile:\n";
       std::cerr << "    Error retrieving gas number for gas " << gas[i]
                 << ".\n";
     } else {
@@ -1040,15 +1039,15 @@ bool MediumGas::WriteGasFile(const std::string filename) {
   const int bFieldRes = nBfields;
   const int angRes = nAngles;
 
-  if (debug) {
-    std::cout << className << "::WriteGasFile:\n";
+  if (m_debug) {
+    std::cout << m_className << "::WriteGasFile:\n";
     std::cout << "    Writing gas tables to file: " << filename << "\n";
   }
 
   std::ofstream outFile;
   outFile.open(filename.c_str(), std::ios::out);
   if (!outFile.is_open()) {
-    std::cerr << className << "::WriteGasFile:\n";
+    std::cerr << m_className << "::WriteGasFile:\n";
     std::cerr << "    File could not be opened.\n";
     outFile.close();
     return false;
@@ -1097,7 +1096,7 @@ bool MediumGas::WriteGasFile(const std::string filename) {
   outFile << " GASOK bits: " << gasBits << "\n";
   std::stringstream idStream;
   idStream.str("");
-  idStream << name << ", p = " << pressureTable / AtmosphericPressure
+  idStream << m_name << ", p = " << pressureTable / AtmosphericPressure
            << " atm, T = " << temperatureTable << " K";
   std::string idString = idStream.str();
   outFile << " Identifier: " << std::setw(80) << std::left << idString << "\n";
@@ -1118,7 +1117,7 @@ bool MediumGas::WriteGasFile(const std::string filename) {
   outFile << std::scientific << std::setw(15) << std::setprecision(8);
   for (int i = 0; i < eFieldRes; i++) {
     // List 5 values, then new line.
-    outFile << std::setw(15) << eFields[i] / pressure;
+    outFile << std::setw(15) << eFields[i] / m_pressure;
     if ((i + 1) % 5 == 0) outFile << "\n";
   }
   if (eFieldRes % 5 != 0) outFile << "\n";
@@ -1438,18 +1437,18 @@ bool MediumGas::WriteGasFile(const std::string filename) {
 void MediumGas::PrintGas() {
 
   // Print a summary.
-  std::cout << className << "::PrintGas:\n";
-  std::cout << "    Gas composition: " << name;
-  if (nComponents > 1) {
+  std::cout << m_className << "::PrintGas:\n";
+  std::cout << "    Gas composition: " << m_name;
+  if (m_nComponents > 1) {
     std::cout << " (" << fraction[0] * 100;
-    for (int i = 1; i < nComponents; ++i) {
+    for (unsigned int i = 1; i < m_nComponents; ++i) {
       std::cout << "/" << fraction[i] * 100;
     }
     std::cout << ")";
   }
   std::cout << "\n";
-  std::cout << "    Pressure:    " << pressure << " Torr\n";
-  std::cout << "    Temperature: " << temperature << " K\n";
+  std::cout << "    Pressure:    " << m_pressure << " Torr\n";
+  std::cout << "    Temperature: " << m_temperature << " K\n";
   std::cout << "    Gas file:\n";
   std::cout << "      Pressure:    " << pressureTable << " Torr\n";
   std::cout << "      Temperature: " << temperatureTable << " K\n";
@@ -1721,7 +1720,7 @@ bool MediumGas::LoadIonMobility(const std::string filename) {
   infile.open(filename.c_str(), std::ios::in);
   // Make sure the file could actually be opened.
   if (!infile) {
-    std::cerr << className << "::LoadIonMobility:\n";
+    std::cerr << m_className << "::LoadIonMobility:\n";
     std::cerr << "    Error opening file\n";
     std::cerr << "    " << filename << ".\n";
     return false;
@@ -1754,7 +1753,7 @@ bool MediumGas::LoadIonMobility(const std::string filename) {
       field = atof(token);
       token = strtok(NULL, " ,\t");
       if (!token) {
-        std::cerr << className << "::LoadIonMobility:\n";
+        std::cerr << m_className << "::LoadIonMobility:\n";
         std::cerr << "    Found E/N but no mobility before the end-of-line\n";
         std::cerr << "    " << filename << " (line " << i << ").\n";
         continue;
@@ -1763,7 +1762,7 @@ bool MediumGas::LoadIonMobility(const std::string filename) {
     }
     token = strtok(NULL, " ,\t");
     if (token && strcmp(token, "//") != 0) {
-      std::cerr << className << "::LoadIonMobility:\n";
+      std::cerr << m_className << "::LoadIonMobility:\n";
       std::cerr << "    Unexpected non-comment characters after the mobility; "
                    "line skipped.\n";
       std::cerr << "    " << filename << " (line " << i << ").\n";
@@ -1772,7 +1771,7 @@ bool MediumGas::LoadIonMobility(const std::string filename) {
     // printf("E/N = %g Td: mu = %g cm2/(V.s)\n", field, mu);
     // Check if the data has been read correctly.
     if (infile.fail() && !infile.eof()) {
-      std::cerr << className << "::LoadIonMobility:\n";
+      std::cerr << m_className << "::LoadIonMobility:\n";
       std::cerr << "    Error reading file\n";
       std::cerr << "    " << filename << " (line " << i << ").\n";
       return false;
@@ -1780,13 +1779,13 @@ bool MediumGas::LoadIonMobility(const std::string filename) {
     // Make sure the values make sense.
     // Negative field values are not allowed.
     if (field < 0.) {
-      std::cerr << className << "::LoadIonMobility:\n";
+      std::cerr << m_className << "::LoadIonMobility:\n";
       std::cerr << "    Negative electric field (line " << i << ").\n";
       return false;
     }
     // The table has to be in ascending order.
     if (field <= lastField) {
-      std::cerr << className << "::LoadIonMobility:\n";
+      std::cerr << m_className << "::LoadIonMobility:\n";
       std::cerr << "    Table is not in ascending order (line " << i << ").\n";
       return false;
     }
@@ -1798,7 +1797,7 @@ bool MediumGas::LoadIonMobility(const std::string filename) {
 
   const int ne = efields.size();
   if (ne <= 0) {
-    std::cerr << className << "::LoadIonMobilities:\n";
+    std::cerr << m_className << "::LoadIonMobilities:\n";
     std::cerr << "    No valid data found.\n";
     return false;
   }
@@ -1807,14 +1806,14 @@ bool MediumGas::LoadIonMobility(const std::string filename) {
   const double scaleField = 1.e-17 * GetNumberDensity();
   // The reduced mobilities in the file are supposed to be in cm2/(V s).
   const double scaleMobility =
-      1.e-9 * (AtmosphericPressure / pressure) * (temperature / ZeroCelsius);
+      1.e-9 * (AtmosphericPressure / m_pressure) * (m_temperature / ZeroCelsius);
   for (int j = ne; j--;) {
     // Scale the fields and mobilities.
     efields[j] *= scaleField;
     mobilities[j] *= scaleMobility;
   }
 
-  std::cout << className << "::LoadIonMobility:\n";
+  std::cout << m_className << "::LoadIonMobility:\n";
   std::cout << "    Read " << ne << " values from file " << filename << "\n";
 
   return SetIonMobility(efields, mobilities);
@@ -1827,13 +1826,13 @@ void MediumGas::SetExtrapolationMethodExcitationRates(
   if (GetExtrapolationIndex(extrLow, iExtr)) {
     extrLowExcRates = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodExcitationRates:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodExcitationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighExcRates = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodExcitationRates:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodExcitationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 }
@@ -1845,13 +1844,13 @@ void MediumGas::SetExtrapolationMethodIonisationRates(
   if (GetExtrapolationIndex(extrLow, iExtr)) {
     extrLowIonRates = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodIonisationRates:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodIonisationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighIonRates = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodIonisationRates:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodIonisationRates:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 }
@@ -2591,7 +2590,7 @@ bool MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
 
-  std::cerr << className << "::GetGasName:\n";
+  std::cerr << m_className << "::GetGasName:\n";
   std::cerr << "    Gas " << input << " is not defined.\n";
   return false;
 }
@@ -2880,16 +2879,16 @@ bool MediumGas::GetGasNumberGasFile(const std::string input,
     return true;
   }
 
-  std::cerr << className << "::GetGasNumberGasFile:\n";
+  std::cerr << m_className << "::GetGasNumberGasFile:\n";
   std::cerr << "    Gas " << input << " is not defined.\n";
   return false;
 }
 
-bool MediumGas::GetPhotoabsorptionCrossSection(const double e, double& sigma,
-                                               const int i) {
+bool MediumGas::GetPhotoabsorptionCrossSection(const double& e, double& sigma,
+                                               const unsigned int& i) {
 
-  if (i < 0 || i >= nMaxGases) {
-    std::cerr << className << "::GetPhotoabsorptionCrossSection:\n";
+  if (i >= m_nMaxGases) {
+    std::cerr << m_className << "::GetPhotoabsorptionCrossSection:\n";
     std::cerr << "    Index (" << i << ") out of range.\n";
     return false;
   }

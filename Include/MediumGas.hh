@@ -30,19 +30,19 @@ class MediumGas : public Medium {
                       double& f2, std::string& gas3, double& f3,
                       std::string& gas4, double& f4, std::string& gas5,
                       double& f5, std::string& gas6, double& f6);
-  void GetComponent(const int i, std::string& label, double& f);
+  void GetComponent(const unsigned int& i, std::string& label, double& f);
 
-  void SetAtomicNumber(const double z);
+  void SetAtomicNumber(const double& z);
   double GetAtomicNumber() const;
-  void SetAtomicWeight(const double a);
+  void SetAtomicWeight(const double& a);
   double GetAtomicWeight() const;
-  void SetNumberDensity(const double n);
+  void SetNumberDensity(const double& n);
   double GetNumberDensity() const;
-  void SetMassDensity(const double rho);
+  void SetMassDensity(const double& rho);
   double GetMassDensity() const;
 
-  bool LoadGasFile(const std::string filename);
-  bool WriteGasFile(const std::string filename);
+  bool LoadGasFile(const std::string& filename);
+  bool WriteGasFile(const std::string& filename);
 
   void PrintGas();
 
@@ -56,46 +56,46 @@ class MediumGas : public Medium {
   void SetInterpolationMethodIonisationRates(const int intrp);
 
   // Scaling laws.
-  double ScaleElectricField(const double e) {
-    return e * pressureTable / pressure;
+  double ScaleElectricField(const double& e) const {
+    return e * pressureTable / m_pressure;
   }
-  double UnScaleElectricField(const double e) {
-    return e * pressure / pressureTable;
+  double UnScaleElectricField(const double& e) const {
+    return e * m_pressure / pressureTable;
   }
-  double ScaleDiffusion(const double d) {
-    return d * sqrt(pressureTable / pressure);
+  double ScaleDiffusion(const double& d) const {
+    return d * sqrt(pressureTable / m_pressure);
   }
-  double ScaleDiffusionTensor(const double d) {
-    return d * pressureTable / pressure;
+  double ScaleDiffusionTensor(const double& d) const {
+    return d * pressureTable / m_pressure;
   }
-  double ScaleTownsend(const double alpha) {
-    return alpha * pressure / pressureTable;
+  double ScaleTownsend(const double& alpha) const {
+    return alpha * m_pressure / pressureTable;
   }
-  double ScaleAttachment(const double eta) {
-    return eta * pressure / pressureTable;
+  double ScaleAttachment(const double& eta) const {
+    return eta * m_pressure / pressureTable;
   }
 
-  bool GetPhotoabsorptionCrossSection(const double e, double& sigma,
-                                      const int i);
+  bool GetPhotoabsorptionCrossSection(const double& e, double& sigma,
+                                      const unsigned int& i);
 
  protected:
-  static const int nMaxGases = 6;
+  static const unsigned int m_nMaxGases = 6;
 
   // Gas mixture
-  std::string gas[nMaxGases];
-  double fraction[nMaxGases];
-  double atWeight[nMaxGases];
-  double atNum[nMaxGases];
+  std::string gas[m_nMaxGases];
+  double fraction[m_nMaxGases];
+  double atWeight[m_nMaxGases];
+  double atNum[m_nMaxGases];
 
   // Penning transfer
   // Flag enabling/disabling Penning transfer
   bool usePenning;
   // Penning transfer probability
   double rPenningGlobal;
-  double rPenningGas[nMaxGases];
+  double rPenningGas[m_nMaxGases];
   // Mean distance of Penning ionisation
   double lambdaPenningGlobal;
-  double lambdaPenningGas[nMaxGases];
+  double lambdaPenningGas[m_nMaxGases];
 
   // Pressure and temperature at which the transport parameter
   // table was calculated

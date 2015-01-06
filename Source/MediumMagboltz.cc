@@ -49,7 +49,7 @@ MediumMagboltz::MediumMagboltz()
   fit4sEtaC2H6 = 0.5;
   fitLineCut = 1000;
 
-  className = "MediumMagboltz";
+  m_className = "MediumMagboltz";
 
   // Set physical constants in Magboltz common blocks.
   Magboltz::cnsts_.echarg = ElementaryCharge * 1.e-15;
@@ -59,7 +59,7 @@ MediumMagboltz::MediumMagboltz()
   Magboltz::inpt_.ary = RydbergEnergy;
 
   // Set parameters in Magboltz common blocks.
-  Magboltz::inpt_.nGas = nComponents;
+  Magboltz::inpt_.nGas = m_nComponents;
   Magboltz::inpt_.nStep = nEnergySteps;
   // Select the scattering model.
   Magboltz::inpt_.nAniso = 2;
@@ -68,9 +68,9 @@ MediumMagboltz::MediumMagboltz()
   // Energy step size [eV]
   Magboltz::inpt_.estep = eStep;
   // Temperature and pressure
-  Magboltz::inpt_.akt = BoltzmannConstant * temperature;
-  Magboltz::inpt_.tempc = temperature - ZeroCelsius;
-  Magboltz::inpt_.torr = pressure;
+  Magboltz::inpt_.akt = BoltzmannConstant * m_temperature;
+  Magboltz::inpt_.tempc = m_temperature - ZeroCelsius;
+  Magboltz::inpt_.torr = m_pressure;
   // Disable Penning transfer.
   Magboltz::inpt_.ipen = 0;
 
@@ -80,11 +80,11 @@ MediumMagboltz::MediumMagboltz()
     lambdaPenning[i] = 0.;
   }
 
-  isChanged = true;
+  m_isChanged = true;
 
   EnableDrift();
   EnablePrimaryIonisation();
-  microscopic = true;
+  m_microscopic = true;
 
   // Initialize the collision counters.
   nCollisionsDetailed.clear();
@@ -94,13 +94,13 @@ MediumMagboltz::MediumMagboltz()
   ionProducts.clear();
   dxcProducts.clear();
 
-  for (int i = 0; i < nMaxGases; ++i) scaleExc[i] = 1.;
+  for (unsigned int i = 0; i < m_nMaxGases; ++i) scaleExc[i] = 1.;
 }
 
 bool MediumMagboltz::SetMaxElectronEnergy(const double e) {
 
   if (e <= Small) {
-    std::cerr << className << "::SetMaxElectronEnergy:\n";
+    std::cerr << m_className << "::SetMaxElectronEnergy:\n";
     std::cerr << "    Provided upper electron energy limit (" << e
               << " eV) is too small.\n";
     return false;
@@ -119,7 +119,7 @@ bool MediumMagboltz::SetMaxElectronEnergy(const double e) {
   Magboltz::inpt_.estep = eStep;
 
   // Force recalculation of the scattering rates table.
-  isChanged = true;
+  m_isChanged = true;
 
   return true;
 }
@@ -127,7 +127,7 @@ bool MediumMagboltz::SetMaxElectronEnergy(const double e) {
 bool MediumMagboltz::SetMaxPhotonEnergy(const double e) {
 
   if (e <= Small) {
-    std::cerr << className << "::SetMaxPhotonEnergy:\n";
+    std::cerr << m_className << "::SetMaxPhotonEnergy:\n";
     std::cerr << "    Provided upper photon energy limit (" << e
               << " eV) is too small.\n";
     return false;
@@ -138,7 +138,7 @@ bool MediumMagboltz::SetMaxPhotonEnergy(const double e) {
   eStepGamma = eFinalGamma / nEnergyStepsGamma;
 
   // Force recalculation of the scattering rates table.
-  isChanged = true;
+  m_isChanged = true;
 
   return true;
 }
@@ -153,13 +153,13 @@ void MediumMagboltz::SetSplittingFunctionGreenSawada() {
 
   useOpalBeaty = false;
   useGreenSawada = true;
-  if (isChanged) return;
+  if (m_isChanged) return;
 
   bool allset = true;
-  for (int i = 0; i < nComponents; ++i) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     if (!hasGreenSawada[i]) {
       if (allset) {
-        std::cout << className << "::SetSplittingFunctionGreenSawada:\n";
+        std::cout << m_className << "::SetSplittingFunctionGreenSawada:\n";
         allset = false;
       }
       std::cout << "    Fit parameters for " << gas[i] << " not available.\n";
@@ -177,7 +177,7 @@ void MediumMagboltz::SetSplittingFunctionFlat() {
 void MediumMagboltz::EnableDeexcitation() {
 
   if (usePenning) {
-    std::cout << className << "::EnableDeexcitation:\n";
+    std::cout << m_className << "::EnableDeexcitation:\n";
     std::cout << "    Penning transfer will be switched off.\n";
   }
   // if (useRadTrap) {
@@ -187,7 +187,7 @@ void MediumMagboltz::EnableDeexcitation() {
   // }
   usePenning = false;
   useDeexcitation = true;
-  isChanged = true;
+  m_isChanged = true;
   nDeexcitationProducts = 0;
 }
 
@@ -195,11 +195,11 @@ void MediumMagboltz::EnableRadiationTrapping() {
 
   useRadTrap = true;
   if (!useDeexcitation) {
-    std::cout << className << "::EnableRadiationTrapping:\n";
+    std::cout << m_className << "::EnableRadiationTrapping:\n";
     std::cout << "    Radiation trapping is enabled"
               << " but de-excitation is not.\n";
   } else {
-    isChanged = true;
+    m_isChanged = true;
   }
 }
 
@@ -207,7 +207,7 @@ void MediumMagboltz::EnablePenningTransfer(const double r,
                                            const double lambda) {
 
   if (r < 0. || r > 1.) {
-    std::cerr << className << "::EnablePenningTransfer:\n";
+    std::cerr << m_className << "::EnablePenningTransfer:\n";
     std::cerr << "    Penning transfer probability must be "
               << " in the range [0, 1].\n";
     return;
@@ -220,7 +220,7 @@ void MediumMagboltz::EnablePenningTransfer(const double r,
     lambdaPenningGlobal = lambda;
   }
 
-  std::cout << className << "::EnablePenningTransfer:\n";
+  std::cout << m_className << "::EnablePenningTransfer:\n";
   std::cout << "    Global Penning transfer parameters set to: \n";
   std::cout << "    r      = " << rPenningGlobal << "\n";
   std::cout << "    lambda = " << lambdaPenningGlobal << " cm\n";
@@ -231,7 +231,7 @@ void MediumMagboltz::EnablePenningTransfer(const double r,
   }
 
   if (useDeexcitation) {
-    std::cout << className << "::EnablePenningTransfer:\n";
+    std::cout << m_className << "::EnablePenningTransfer:\n";
     std::cout << "    Deexcitation handling will be switched off.\n";
   }
   usePenning = true;
@@ -241,7 +241,7 @@ void MediumMagboltz::EnablePenningTransfer(const double r, const double lambda,
                                            std::string gasname) {
 
   if (r < 0. || r > 1.) {
-    std::cerr << className << "::EnablePenningTransfer:\n";
+    std::cerr << m_className << "::EnablePenningTransfer:\n";
     std::cerr << "    Penning transfer probability must be "
               << " in the range [0, 1].\n";
     return;
@@ -249,7 +249,7 @@ void MediumMagboltz::EnablePenningTransfer(const double r, const double lambda,
 
   // Get the "standard" name of this gas.
   if (!GetGasName(gasname, gasname)) {
-    std::cerr << className << "::EnablePenningTransfer:\n";
+    std::cerr << m_className << "::EnablePenningTransfer:\n";
     std::cerr << "    Unknown gas name.\n";
     return;
   }
@@ -257,7 +257,7 @@ void MediumMagboltz::EnablePenningTransfer(const double r, const double lambda,
   // Look for this gas in the present gas mixture.
   bool found = false;
   int iGas = -1;
-  for (int i = nComponents; i--;) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     if (gas[i] == gasname) {
       rPenningGas[i] = r;
       if (lambda < Small) {
@@ -272,20 +272,20 @@ void MediumMagboltz::EnablePenningTransfer(const double r, const double lambda,
   }
 
   if (!found) {
-    std::cerr << className << "::EnablePenningTransfer:\n";
+    std::cerr << m_className << "::EnablePenningTransfer:\n";
     std::cerr << "    Specified gas (" << gasname
               << ") is not part of the present gas mixture.\n";
     return;
   }
 
   // Make sure that the collision rate table is updated.
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::EnablePenningTransfer:\n";
+      std::cerr << m_className << "::EnablePenningTransfer:\n";
       std::cerr << "    Error calculating the collision rates table.\n";
       return;
     }
-    isChanged = false;
+    m_isChanged = false;
   }
 
   int nLevelsFound = 0;
@@ -300,13 +300,13 @@ void MediumMagboltz::EnablePenningTransfer(const double r, const double lambda,
   }
 
   if (nLevelsFound > 0) {
-    std::cout << className << "::EnablePenningTransfer:\n";
+    std::cout << m_className << "::EnablePenningTransfer:\n";
     std::cout << "    Penning transfer parameters for " << nLevelsFound
               << " excitation levels set to:\n";
     std::cout << "      r      = " << rPenningGas[iGas] << "\n";
     std::cout << "      lambda = " << lambdaPenningGas[iGas] << " cm\n";
   } else {
-    std::cerr << className << "::EnablePenningTransfer:\n";
+    std::cerr << m_className << "::EnablePenningTransfer:\n";
     std::cerr << "    Specified gas (" << gasname
               << ") has no excitation levels in the present energy range.\n";
   }
@@ -323,7 +323,7 @@ void MediumMagboltz::DisablePenningTransfer() {
   rPenningGlobal = 0.;
   lambdaPenningGlobal = 0.;
 
-  for (int i = nMaxGases; i--;) {
+  for (unsigned int i = 0; i < m_nMaxGases; ++i) {
     rPenningGas[i] = 0.;
     lambdaPenningGas[i] = 0.;
   }
@@ -335,7 +335,7 @@ void MediumMagboltz::DisablePenningTransfer(std::string gasname) {
 
   // Get the "standard" name of this gas.
   if (!GetGasName(gasname, gasname)) {
-    std::cerr << className << "::DisablePenningTransfer:\n";
+    std::cerr << m_className << "::DisablePenningTransfer:\n";
     std::cerr << "    Gas " << gasname << " is not defined.\n";
     return;
   }
@@ -343,7 +343,7 @@ void MediumMagboltz::DisablePenningTransfer(std::string gasname) {
   // Look for this gas in the present gas mixture.
   bool found = false;
   int iGas = -1;
-  for (int i = nComponents; i--;) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     if (gas[i] == gasname) {
       rPenningGas[i] = 0.;
       lambdaPenningGas[i] = 0.;
@@ -354,7 +354,7 @@ void MediumMagboltz::DisablePenningTransfer(std::string gasname) {
   }
 
   if (!found) {
-    std::cerr << className << "::DisablePenningTransfer:\n";
+    std::cerr << m_className << "::DisablePenningTransfer:\n";
     std::cerr << "    Specified gas (" << gasname
               << ") is not part of the present gas mixture.\n";
     return;
@@ -375,7 +375,7 @@ void MediumMagboltz::DisablePenningTransfer(std::string gasname) {
 
   if (nLevelsFound <= 0) {
     // There are no more excitation levels with r > 0.
-    std::cout << className << "::DisablePenningTransfer:\n";
+    std::cout << m_className << "::DisablePenningTransfer:\n";
     std::cout << "    Penning transfer globally switched off.\n";
     usePenning = false;
   }
@@ -385,21 +385,21 @@ void MediumMagboltz::SetExcitationScalingFactor(const double r,
                                                 std::string gasname) {
 
   if (r <= 0.) {
-    std::cerr << className << "::SetScalingFactor:\n";
+    std::cerr << m_className << "::SetScalingFactor:\n";
     std::cerr << "    Incorrect value for scaling factor: " << r << "\n";
     return;
   }
 
   // Get the "standard" name of this gas.
   if (!GetGasName(gasname, gasname)) {
-    std::cerr << className << "::SetExcitationScalingFactor:\n";
+    std::cerr << m_className << "::SetExcitationScalingFactor:\n";
     std::cerr << "    Unknown gas name.\n";
     return;
   }
 
   // Look for this gas in the present gas mixture.
   bool found = false;
-  for (int i = nComponents; i--;) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     if (gas[i] == gasname) {
       scaleExc[i] = r;
       found = true;
@@ -408,31 +408,31 @@ void MediumMagboltz::SetExcitationScalingFactor(const double r,
   }
 
   if (!found) {
-    std::cerr << className << "::SetExcitationScalingFactor:\n";
+    std::cerr << m_className << "::SetExcitationScalingFactor:\n";
     std::cerr << "    Specified gas (" << gasname
               << ") is not part of the present gas mixture.\n";
     return;
   }
 
   // Make sure that the collision rate table is updated.
-  isChanged = true;
+  m_isChanged = true;
 }
 
 bool MediumMagboltz::Initialise(const bool verbose) {
 
-  if (!isChanged) {
-    if (debug) {
-      std::cerr << className << "::Initialise:\n";
+  if (!m_isChanged) {
+    if (m_debug) {
+      std::cerr << m_className << "::Initialise:\n";
       std::cerr << "    Nothing changed.\n";
     }
     return true;
   }
   if (!Mixer(verbose)) {
-    std::cerr << className << "::Initialise:\n";
+    std::cerr << m_className << "::Initialise:\n";
     std::cerr << "    Error calculating the collision rates table.\n";
     return false;
   }
-  isChanged = false;
+  m_isChanged = false;
   return true;
 }
 
@@ -440,11 +440,11 @@ void MediumMagboltz::PrintGas() {
 
   MediumGas::PrintGas();
 
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Initialise()) return;
   }
 
-  std::cout << className << "::PrintGas:\n";
+  std::cout << m_className << "::PrintGas:\n";
   for (int i = 0; i < nTerms; ++i) {
     // Collision type
     int type = csType[i] % nCsTypes;
@@ -530,17 +530,17 @@ void MediumMagboltz::PrintGas() {
 double MediumMagboltz::GetElectronNullCollisionRate(const int band) {
 
   // If necessary, update the collision rates table.
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::GetElectronNullCollisionRate:\n";
+      std::cerr << m_className << "::GetElectronNullCollisionRate:\n";
       std::cerr << "     Error calculating the collision rates table.\n";
       return 0.;
     }
-    isChanged = false;
+    m_isChanged = false;
   }
 
-  if (debug && band > 0) {
-    std::cerr << className << "::GetElectronNullCollisionRate:\n";
+  if (m_debug && band > 0) {
+    std::cerr << m_className << "::GetElectronNullCollisionRate:\n";
     std::cerr << "    Warning: unexpected band index.\n";
   }
 
@@ -552,12 +552,12 @@ double MediumMagboltz::GetElectronCollisionRate(const double e,
 
   // Check if the electron energy is within the currently set range.
   if (e <= 0.) {
-    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << m_className << "::GetElectronCollisionRate:\n";
     std::cerr << "    Electron energy must be greater than zero.\n";
     return cfTot[0];
   }
   if (e > eFinal && useAutoAdjust) {
-    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << m_className << "::GetElectronCollisionRate:\n";
     std::cerr << "    Collision rate at " << e
               << " eV is not included in the current table.\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e << " eV.\n";
@@ -565,17 +565,17 @@ double MediumMagboltz::GetElectronCollisionRate(const double e,
   }
 
   // If necessary, update the collision rates table.
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::GetElectronCollisionRate:\n";
+      std::cerr << m_className << "::GetElectronCollisionRate:\n";
       std::cerr << "    Error calculating the collision rates table.\n";
       return 0.;
     }
-    isChanged = false;
+    m_isChanged = false;
   }
 
-  if (debug && band > 0) {
-    std::cerr << className << "::GetElectronCollisionRate:\n";
+  if (m_debug && band > 0) {
+    std::cerr << m_className << "::GetElectronCollisionRate:\n";
     std::cerr << "    Warning: unexpected band index.\n";
   }
 
@@ -605,18 +605,18 @@ double MediumMagboltz::GetElectronCollisionRate(const double e, const int level,
 
   // Check if the electron energy is within the currently set range.
   if (e <= 0.) {
-    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << m_className << "::GetElectronCollisionRate:\n";
     std::cerr << "    Electron energy must be greater than zero.\n";
     return 0.;
   }
 
   // Check if the level exists.
   if (level < 0) {
-    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << m_className << "::GetElectronCollisionRate:\n";
     std::cerr << "    Level must be greater than zero.\n";
     return 0.;
   } else if (level >= nTerms) {
-    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << m_className << "::GetElectronCollisionRate:\n";
     std::cerr << "    Level " << level << " does not exist.\n";
     std::cerr << "    The present gas mixture has " << nTerms
               << " cross-section terms.\n";
@@ -655,29 +655,29 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
 
   // Check if the electron energy is within the currently set range.
   if (e > eFinal && useAutoAdjust) {
-    std::cerr << className << "::GetElectronCollision:\n";
+    std::cerr << m_className << "::GetElectronCollision:\n";
     std::cerr << "    Provided electron energy  (" << e
               << " eV) exceeds current energy range  (" << eFinal << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e << " eV.\n";
     SetMaxElectronEnergy(1.05 * e);
   } else if (e <= 0.) {
-    std::cerr << className << "::GetElectronCollision:\n";
+    std::cerr << m_className << "::GetElectronCollision:\n";
     std::cerr << "    Electron energy must be greater than zero.\n";
     return false;
   }
 
   // If necessary, update the collision rates table.
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::GetElectronCollision:\n";
+      std::cerr << m_className << "::GetElectronCollision:\n";
       std::cerr << "    Error calculating the collision rates table.\n";
       return false;
     }
-    isChanged = false;
+    m_isChanged = false;
   }
 
-  if (debug && band > 0) {
-    std::cerr << className << "::GetElectronCollision:\n";
+  if (m_debug && band > 0) {
+    std::cerr << m_className << "::GetElectronCollision:\n";
     std::cerr << "    Warning: unexpected band index.\n";
   }
 
@@ -851,7 +851,7 @@ bool MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
         ctheta0 = (ctheta0 + angPar) / (1. + angPar * ctheta0);
         break;
       default:
-        std::cerr << className << "::GetElectronCollision:\n";
+        std::cerr << m_className << "::GetElectronCollision:\n";
         std::cerr << "    Unknown scattering model. \n";
         std::cerr << "    Using isotropic distribution.\n";
         break;
@@ -916,7 +916,7 @@ bool MediumMagboltz::GetIonisationProduct(const int i, int& type,
                                           double& energy) {
 
   if (i < 0 || i >= nIonisationProducts) {
-    std::cerr << className << "::GetIonisationProduct:\n";
+    std::cerr << m_className << "::GetIonisationProduct:\n";
     std::cerr << "    Index out of range.\n";
     return false;
   }
@@ -926,28 +926,28 @@ bool MediumMagboltz::GetIonisationProduct(const int i, int& type,
   return true;
 }
 
-double MediumMagboltz::GetPhotonCollisionRate(const double e) {
+double MediumMagboltz::GetPhotonCollisionRate(const double& e) {
 
   if (e <= 0.) {
-    std::cerr << className << "::GetPhotonCollisionRate:\n";
+    std::cerr << m_className << "::GetPhotonCollisionRate:\n";
     std::cerr << "    Photon energy must be greater than zero.\n";
     return cfTotGamma[0];
   }
   if (e > eFinalGamma && useAutoAdjust) {
-    std::cerr << className << "::GetPhotonCollisionRate:\n";
+    std::cerr << m_className << "::GetPhotonCollisionRate:\n";
     std::cerr << "    Collision rate at " << e
               << " eV is not included in the current table.\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e << " eV.\n";
     SetMaxPhotonEnergy(1.05 * e);
   }
 
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::GetPhotonCollisionRate:\n";
+      std::cerr << m_className << "::GetPhotonCollisionRate:\n";
       std::cerr << "     Error calculating the collision rates table.\n";
       return 0.;
     }
-    isChanged = false;
+    m_isChanged = false;
   }
 
   int iE = int(e / eStepGamma);
@@ -976,25 +976,25 @@ bool MediumMagboltz::GetPhotonCollision(const double e, int& type, int& level,
                                         double& esec) {
 
   if (e > eFinalGamma && useAutoAdjust) {
-    std::cerr << className << "::GetPhotonCollision:\n";
+    std::cerr << m_className << "::GetPhotonCollision:\n";
     std::cerr << "    Provided electron energy  (" << e
               << " eV) exceeds current energy range  (" << eFinalGamma
               << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e << " eV.\n";
     SetMaxPhotonEnergy(1.05 * e);
   } else if (e <= 0.) {
-    std::cerr << className << "::GetPhotonCollision:\n";
+    std::cerr << m_className << "::GetPhotonCollision:\n";
     std::cerr << "    Photon energy must be greater than zero.\n";
     return false;
   }
 
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::GetPhotonCollision:\n";
+      std::cerr << m_className << "::GetPhotonCollision:\n";
       std::cerr << "    Error calculating the collision rates table.\n";
       return false;
     }
-    isChanged = false;
+    m_isChanged = false;
   }
 
   // Energy interval
@@ -1032,7 +1032,7 @@ bool MediumMagboltz::GetPhotonCollision(const double e, int& type, int& level,
           return true;
         }
       }
-      std::cerr << className << "::GetPhotonCollision:\n";
+      std::cerr << m_className << "::GetPhotonCollision:\n";
       std::cerr << "    Random sampling of deexcitation line failed.\n";
       std::cerr << "    Program bug!\n";
       return false;
@@ -1112,13 +1112,13 @@ int MediumMagboltz::GetNumberOfElectronCollisions(
 
 int MediumMagboltz::GetNumberOfLevels() {
 
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::GetNumberOfLevels:\n";
+      std::cerr << m_className << "::GetNumberOfLevels:\n";
       std::cerr << "    Error calculating the collision rates table.\n";
       return 0;
     }
-    isChanged = false;
+    m_isChanged = false;
   }
 
   return nTerms;
@@ -1127,17 +1127,17 @@ int MediumMagboltz::GetNumberOfLevels() {
 bool MediumMagboltz::GetLevel(const int i, int& ngas, int& type,
                               std::string& descr, double& e) {
 
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::GetLevel:\n";
+      std::cerr << m_className << "::GetLevel:\n";
       std::cerr << "    Error calculating the collision rates table.\n";
       return false;
     }
-    isChanged = false;
+    m_isChanged = false;
   }
 
   if (i < 0 || i >= nTerms) {
-    std::cerr << className << "::GetLevel:\n";
+    std::cerr << m_className << "::GetLevel:\n";
     std::cerr << "    Requested level (" << i << ") does not exist.\n";
     return false;
   }
@@ -1150,8 +1150,8 @@ bool MediumMagboltz::GetLevel(const int i, int& ngas, int& type,
   for (int j = 50; j--;) descr[j] = description[i][j];
   // Threshold energy
   e = rgas[ngas] * energyLoss[i];
-  if (debug) {
-    std::cout << className << "::GetLevel:\n";
+  if (m_debug) {
+    std::cout << m_className << "::GetLevel:\n";
     std::cout << "    Level " << i << ": " << descr << "\n";
     std::cout << "    Type " << type << "\n",
         std::cout << "    Threshold energy: " << e << " eV\n";
@@ -1211,7 +1211,7 @@ bool MediumMagboltz::GetLevel(const int i, int& ngas, int& type,
 int MediumMagboltz::GetNumberOfElectronCollisions(const int level) const {
 
   if (level < 0 || level >= nTerms) {
-    std::cerr << className << "::GetNumberOfElectronCollisions:\n";
+    std::cerr << m_className << "::GetNumberOfElectronCollisions:\n";
     std::cerr << "    Requested cross-section term (" << level
               << ") does not exist.\n";
     return 0;
@@ -1518,7 +1518,7 @@ bool MediumMagboltz::GetGasNumberMagboltz(const std::string input,
     return true;
   }
 
-  std::cerr << className << "::GetGasNumberMagboltz:\n";
+  std::cerr << m_className << "::GetGasNumberMagboltz:\n";
   std::cerr << "    Gas " << input << " is not defined.\n";
   return false;
 }
@@ -1532,11 +1532,11 @@ bool MediumMagboltz::Mixer(const bool verbose) {
   Magboltz::cnsts_.pir2 = BohrRadius * BohrRadius * Pi;
   Magboltz::inpt_.ary = RydbergEnergy;
 
-  Magboltz::inpt_.akt = BoltzmannConstant * temperature;
-  Magboltz::inpt_.tempc = temperature - ZeroCelsius;
-  Magboltz::inpt_.torr = pressure;
+  Magboltz::inpt_.akt = BoltzmannConstant * m_temperature;
+  Magboltz::inpt_.tempc = m_temperature - ZeroCelsius;
+  Magboltz::inpt_.torr = m_pressure;
 
-  Magboltz::inpt_.nGas = nComponents;
+  Magboltz::inpt_.nGas = m_nComponents;
   Magboltz::inpt_.nStep = nEnergySteps;
   if (useAnisotropic) {
     Magboltz::inpt_.nAniso = 2;
@@ -1576,7 +1576,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
   }
 
   minIonPot = -1.;
-  for (int i = nMaxGases; i--;) {
+  for (unsigned int i = 0; i < m_nMaxGases; ++i) {
     ionPot[i] = -1.;
     gsGreenSawada[i] = 1.;
     gbGreenSawada[i] = 0.;
@@ -1608,18 +1608,18 @@ bool MediumMagboltz::Mixer(const bool verbose) {
   static char scrpt[260][50];
 
   // Check the gas composition and establish the gas numbers.
-  int gasNumber[nMaxGases];
-  for (int i = 0; i < nComponents; ++i) {
+  int gasNumber[m_nMaxGases];
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     if (!GetGasNumberMagboltz(gas[i], gasNumber[i])) {
-      std::cerr << className << "::Mixer:\n";
+      std::cerr << m_className << "::Mixer:\n";
       std::cerr << "    Gas " << gas[i] << " has no corresponding"
                 << " gas number in Magboltz.\n";
       return false;
     }
   }
 
-  if (debug || verbose) {
-    std::cout << className << "::Mixer:\n";
+  if (m_debug || verbose) {
+    std::cout << m_className << "::Mixer:\n";
     std::cout << "    Creating table of collision rates with\n";
     std::cout << "    " << nEnergySteps << " linear energy steps between 0 and "
               << std::min(eFinal, eHigh) << " eV\n";
@@ -1638,7 +1638,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
   }
 
   // Loop over the gases in the mixture.
-  for (int iGas = 0; iGas < nComponents; ++iGas) {
+  for (unsigned int iGas = 0; iGas < m_nComponents; ++iGas) {
     if (eFinal <= eHigh) {
       Magboltz::inpt_.efinal = eFinal;
     } else {
@@ -1665,7 +1665,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
     Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, eoby,
                       pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, qIon[0],
                       pEqIon[0], eIon, &nIon, scrpt);
-    if (debug || verbose) {
+    if (m_debug || verbose) {
       const double massAmu =
           (2. / e[1]) * ElectronMass / AtomicMassUnitElectronVolt;
       std::cout << "    " << name << "\n";
@@ -1685,7 +1685,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
 
     // Make sure there is still sufficient space.
     if (np0 + nIn + nIon + 1 >= nMaxLevels) {
-      std::cerr << className << "::Mixer:\n";
+      std::cerr << m_className << "::Mixer:\n";
       std::cerr << "    Max. number of levels (" << nMaxLevels
                 << ") exceeded.\n";
       return false;
@@ -1867,7 +1867,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
           // }
         }
         if (cf[iE][np] < 0.) {
-          std::cerr << className << "::Mixer:\n";
+          std::cerr << m_className << "::Mixer:\n";
           std::cerr << "    Negative inelastic cross-section at "
                     << (iE + 0.5) * eStep << " eV.\n";
           std::cerr << "    Set to zero.\n";
@@ -1880,7 +1880,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
           scatParameter[iE][np] = pEqIn[iE][j];
         }
       }
-      if ((debug || verbose) && nIn > 0 && iE == nEnergySteps - 1) {
+      if ((m_debug || verbose) && nIn > 0 && iE == nEnergySteps - 1) {
         std::cout << "      " << nIn << " inelastic terms (" << nExc
                   << " excitations, " << nSuperEl << " superelastic, "
                   << nIn - nExc - nSuperEl << " other)\n";
@@ -1959,7 +1959,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
         // Scale the excitation cross-sections (for error estimates).
         cfLog[iE][np] *= scaleExc[iGas];
         if (cfLog[iE][np] < 0.) {
-          std::cerr << className << "::Mixer:\n";
+          std::cerr << m_className << "::Mixer:\n";
           std::cerr << "    Negative inelastic cross-section at " << emax
                     << " eV.\n";
           std::cerr << "    Set to zero.\n";
@@ -1981,7 +1981,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
 
   // Find the smallest ionisation threshold.
   std::string minIonPotGas = "";
-  for (int i = nMaxGases; i--;) {
+  for (unsigned int i = 0; i < m_nMaxGases; ++i) {
     if (ionPot[i] < 0.) continue;
     if (minIonPot < 0.) {
       minIonPot = ionPot[i];
@@ -1992,8 +1992,8 @@ bool MediumMagboltz::Mixer(const bool verbose) {
     }
   }
 
-  if (debug || verbose) {
-    std::cout << className << "::Mixer:\n";
+  if (m_debug || verbose) {
+    std::cout << m_className << "::Mixer:\n";
     std::cout << "    Lowest ionisation threshold in the mixture:\n";
     std::cout << "      " << minIonPot << " eV (" << minIonPotGas << ")\n";
   }
@@ -2002,7 +2002,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
     // Calculate the total collision frequency.
     for (int k = nTerms; k--;) {
       if (cf[iE][k] < 0.) {
-        std::cerr << className << "::Mixer:\n";
+        std::cerr << m_className << "::Mixer:\n";
         std::cerr << "    Negative collision rate at " << (iE + 0.5) * eStep
                   << " eV. \n";
         std::cerr << "    Set to zero.\n";
@@ -2068,8 +2068,8 @@ bool MediumMagboltz::Mixer(const bool verbose) {
   for (int j = nCsTypes; j--;) nCollisions[j] = 0;
   for (int j = nTerms; j--;) nCollisionsDetailed[j] = 0;
 
-  if (debug || verbose) {
-    std::cout << className << "::Mixer:\n";
+  if (m_debug || verbose) {
+    std::cout << m_className << "::Mixer:\n";
     std::cout << "    Energy [eV]    Collision Rate [ns-1]\n";
     for (int i = 0; i < 8; ++i) {
       const double emax = std::min(eHigh, eFinal);
@@ -2086,7 +2086,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
     ComputeDeexcitationTable(verbose);
     const int dxcCount = deexcitations.size();
     if (dxcCount != nDeexcitations) {
-      std::cerr << className << "::Mixer:\n";
+      std::cerr << m_className << "::Mixer:\n";
       std::cerr << "    Mismatch in deexcitation count.\n";
       std::cerr << "    Program bug!\n";
       std::cerr << "    Deexcitation handling is switched off.\n";
@@ -2098,7 +2098,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
         const int typeCount = deexcitations[j].type.size();
         if (!(probCount == flvlCount && flvlCount == typeCount &&
               typeCount == deexcitations[j].nChannels)) {
-          std::cerr << className << "::Mixer:\n";
+          std::cerr << m_className << "::Mixer:\n";
           std::cerr << "    Mismatch in deexcitation channel count.\n";
           std::cerr << "    Program bug!\n";
           std::cerr << "    Deexcitation handling is switched off.\n";
@@ -2110,7 +2110,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
 
   // Fill the photon collision rates table.
   if (!ComputePhotonCollisionTable(verbose)) {
-    std::cerr << className << "::Mixer:\n";
+    std::cerr << m_className << "::Mixer:\n";
     std::cerr << "    Photon collision rates could not be calculated.\n";
     if (useDeexcitation) {
       std::cerr << "    Deexcitation handling is switched off.\n";
@@ -2136,7 +2136,7 @@ bool MediumMagboltz::Mixer(const bool verbose) {
 
 void MediumMagboltz::SetupGreenSawada() {
 
-  for (int i = nComponents; i--;) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     taGreenSawada[i] = 1000.;
     hasGreenSawada[i] = true;
     if (gas[i] == "He" || gas[i] == "He-3") {
@@ -2199,7 +2199,7 @@ void MediumMagboltz::SetupGreenSawada() {
       taGreenSawada[i] = 0.;
       hasGreenSawada[i] = false;
       if (useGreenSawada) {
-        std::cout << className << "::SetupGreenSawada:\n";
+        std::cout << m_className << "::SetupGreenSawada:\n";
         std::cout << "    Fit parameters for " << gas[i] << " not available.\n";
         std::cout << "    Opal-Beaty formula is used instead.\n";
       }
@@ -2348,7 +2348,7 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       else if (level == "HIGH   ")
         mapLevels["Ar_Higher"] = i;
       else {
-        std::cerr << className << "::ComputeDeexcitationTable:\n";
+        std::cerr << m_className << "::ComputeDeexcitationTable:\n";
         std::cerr << "    Unknown excitation level:\n";
         std::cerr << "      Ar " << level << "\n";
       }
@@ -2450,7 +2450,7 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       else if (level == "SUM D H")
         mapLevels["Ne_Sum_P_High"] = i;
       else {
-        std::cerr << className << "::ComputeDeexcitationTable:\n";
+        std::cerr << m_className << "::ComputeDeexcitationTable:\n";
         std::cerr << "    Unknown excitation level:\n";
         std::cerr << "      Ne " << level << "\n";
       }
@@ -3297,7 +3297,7 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       newDxc.p[4] = 100.;
       newDxc.final[4] = mapDxc["Ar_6D2"];
     } else {
-      std::cerr << className << "::ComputeDeexcitationTable:\n";
+      std::cerr << m_className << "::ComputeDeexcitationTable:\n";
       std::cerr << "    Missing de-excitation data for level " << level
                 << ".\n";
       std::cerr << "    Program bug!\n";
@@ -3306,8 +3306,8 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
     deexcitations.push_back(newDxc);
   }
 
-  if (debug || verbose) {
-    std::cout << className << "::ComputeDeexcitationTable:\n";
+  if (m_debug || verbose) {
+    std::cout << m_className << "::ComputeDeexcitationTable:\n";
     std::cout << "    Found " << nDeexcitations << " levels "
               << "with available radiative de-excitation data.\n";
   }
@@ -3787,7 +3787,7 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
   bool withCF4 = false;
   double cCF4 = 0.;
   int iCF4 = 0;
-  for (int i = nComponents; i--;) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     if (gas[i] == "CO2") {
       withCO2 = true;
       cCO2 = fraction[i];
@@ -3903,9 +3903,9 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
             (2 * RydbergEnergy / deexcitations[j].energy) * pacs /
             (4 * Pi2 * FineStructureConstant * BohrRadius * BohrRadius);
         const double kQ =
-            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(temperature / mR, 3. / 10.);
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(m_temperature / mR, 3. / 10.);
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CO2 (W-K formula):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -3934,10 +3934,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = fit3dQCO2 * sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CO2 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -3963,10 +3963,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = fit3dQCO2 * sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CO2 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4097,9 +4097,9 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
             (2 * RydbergEnergy / deexcitations[j].energy) * pacs /
             (4 * Pi2 * FineStructureConstant * BohrRadius * BohrRadius);
         const double kQ =
-            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(temperature / mR, 3. / 10.);
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(m_temperature / mR, 3. / 10.);
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CH4 (W-K formula):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4128,10 +4128,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = fit3dQCH4 * sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CH4 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4157,10 +4157,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = fit3dQCH4 * sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CH4 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4302,9 +4302,9 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
             (2 * RydbergEnergy / deexcitations[j].energy) * pacs /
             (4 * Pi2 * FineStructureConstant * BohrRadius * BohrRadius);
         const double kQ =
-            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(temperature / mR, 3. / 10.);
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(m_temperature / mR, 3. / 10.);
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by C2H6 (W-K formula):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4332,10 +4332,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = fit3dQC2H6 * sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by C2H6 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4361,10 +4361,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = fit3dQC2H6 * sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by C2H6 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4451,8 +4451,8 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         double kQ = kEth;
         kQ *= pow((r4p + rIso) / (r4p + rEth), 2) *
               sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Estim. rate constant for coll. deexcitation of\n"
                     << "    " << level << " by iC4H10:\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4480,8 +4480,8 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         double kQ = kEth;
         kQ *= pow((r4p + rIso) / (r4p + rEth), 2) *
               sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Estim. rate constant for coll. deexcitation of\n"
                     << "    " << level << " by iC4H10:\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4509,8 +4509,8 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         double kQ = kEth;
         kQ *= pow((r4p + rIso) / (r4p + rEth), 2) *
               sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Estim. rate constant for coll. deexcitation of\n"
                     << "    " << level << " by iC4H10:\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4538,8 +4538,8 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         double kQ = kEth;
         kQ *= pow((r4p + rIso) / (r4p + rEth), 2) *
               sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Estim. rate constant for coll. deexcitation of\n"
                     << "    " << level << " by iC4H10:\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4568,8 +4568,8 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         double kQ = kEth;
         kQ *= pow((r4p + rIso) / (r4p + rEth), 2) *
               sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Estim. rate constant for coll. deexcitation of\n"
                     << "    " << level << " by iC4H10:\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4595,9 +4595,9 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
             (2 * RydbergEnergy / deexcitations[j].energy) * pacs /
             (4 * Pi2 * FineStructureConstant * BohrRadius * BohrRadius);
         const double kQ =
-            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(temperature / mR, 3. / 10.);
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(m_temperature / mR, 3. / 10.);
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by C4H10 (W-K formula):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4625,10 +4625,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by iC4H10 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4653,10 +4653,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by iC4H10 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4797,9 +4797,9 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
             (2 * RydbergEnergy / deexcitations[j].energy) * pacs /
             (4 * Pi2 * FineStructureConstant * BohrRadius * BohrRadius);
         const double kQ =
-            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(temperature / mR, 3. / 10.);
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(m_temperature / mR, 3. / 10.);
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by C2H2 (W-K formula):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4827,10 +4827,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by C2H2 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4855,10 +4855,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by C2H2 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4948,9 +4948,9 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
             (2 * RydbergEnergy / deexcitations[j].energy) * pacs /
             (4 * Pi2 * FineStructureConstant * BohrRadius * BohrRadius);
         const double kQ =
-            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(temperature / mR, 3. / 10.);
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+            2.591e-19 * pow(uA * uQ, 2. / 5.) * pow(m_temperature / mR, 3. / 10.);
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CF4 (W-K formula):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -4975,10 +4975,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CF4 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -5000,10 +5000,10 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double mR = m1 * m2 / (m1 + m2);
         // Relative velocity
         const double vel = SpeedOfLight * sqrt(8. * BoltzmannConstant *
-                                               temperature / (Pi * mR));
+                                               m_temperature / (Pi * mR));
         const double kQ = sigma * vel;
-        if (debug) {
-          std::cout << className << "::ComputeDeexcitationTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CF4 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
@@ -5016,8 +5016,8 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
     }
   }
 
-  if ((debug || verbose) && nDeexcitations > 0) {
-    std::cout << className << "::ComputeDeexcitationTable:\n";
+  if ((m_debug || verbose) && nDeexcitations > 0) {
+    std::cout << m_className << "::ComputeDeexcitationTable:\n";
     std::cout << "      Level  Energy [eV]   "
               << "                 Lifetimes [ns]\n";
     std::cout << "                          "
@@ -5045,7 +5045,7 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
           fCollTransfer += deexcitations[i].p[j];
         }
       } else {
-        std::cerr << className << "::ComputeDeexcitationTable:\n";
+        std::cerr << m_className << "::ComputeDeexcitationTable:\n";
         std::cerr << "    Unknown type of deexcitation channel (level "
                   << deexcitations[i].label << ")\n";
         std::cerr << "    Program bug!\n";
@@ -5053,7 +5053,7 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
     }
     if (deexcitations[i].rate > 0.) {
       // Print the radiative and collisional decay rates.
-      if (debug || verbose) {
+      if (m_debug || verbose) {
         std::cout << std::setw(12) << deexcitations[i].label << "  "
                   << std::fixed << std::setprecision(3) << std::setw(7)
                   << deexcitations[i].energy << "  " << std::setw(10)
@@ -5095,30 +5095,30 @@ void MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
 void MediumMagboltz::ComputeDeexcitation(int iLevel, int& fLevel) {
 
   if (!useDeexcitation) {
-    std::cerr << className << "::ComputeDeexcitation:\n";
+    std::cerr << m_className << "::ComputeDeexcitation:\n";
     std::cerr << "    Deexcitation is disabled.\n";
     return;
   }
 
   // Make sure that the tables are updated.
-  if (isChanged) {
+  if (m_isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::ComputeDeexcitation:\n";
+      std::cerr << m_className << "::ComputeDeexcitation:\n";
       std::cerr << "    Error calculating the collision rates table.\n";
       return;
     }
-    isChanged = false;
+    m_isChanged = false;
   }
 
   if (iLevel < 0 || iLevel >= nTerms) {
-    std::cerr << className << "::ComputeDeexcitation:\n";
+    std::cerr << m_className << "::ComputeDeexcitation:\n";
     std::cerr << "    Level index is out of range.\n";
     return;
   }
 
   iLevel = iDeexcitation[iLevel];
   if (iLevel < 0 || iLevel >= nDeexcitations) {
-    std::cerr << className << "::ComputeDeexcitation:\n";
+    std::cerr << m_className << "::ComputeDeexcitation:\n";
     std::cerr << "    Level is not deexcitable.\n";
     return;
   }
@@ -5215,7 +5215,7 @@ void MediumMagboltz::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
       // Proceed with the next level in the cascade.
       iLevel = fLevel;
     } else {
-      std::cerr << className << "::ComputeDeexcitationInternal:\n";
+      std::cerr << m_className << "::ComputeDeexcitationInternal:\n";
       std::cerr << "    Unknown deexcitation channel type (" << type << ").\n";
       std::cerr << "    Program bug!\n";
       // Abort the deexcitation calculation.
@@ -5243,14 +5243,14 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
   csTypeGamma.clear();
 
   nPhotonTerms = 0;
-  for (int i = 0; i < nComponents; ++i) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     const double prefactor = dens * SpeedOfLight * fraction[i];
     // Check if optical data for this gas is available.
     std::string gasname = gas[i];
     if (gasname == "iC4H10") {
       gasname = "nC4H10";
-      if (debug || verbose) {
-        std::cout << className << "::ComputePhotonCollisionTable:\n";
+      if (m_debug || verbose) {
+        std::cout << m_className << "::ComputePhotonCollisionTable:\n";
         std::cout << "    Photoabsorption cross-section for "
                   << "iC4H10 not available.\n";
         std::cout << "    Using n-butane cross-section instead.\n";
@@ -5291,8 +5291,8 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
     }
   }
 
-  if (debug || verbose) {
-    std::cout << className << "::ComputePhotonCollisionTable:\n";
+  if (m_debug || verbose) {
+    std::cout << m_className << "::ComputePhotonCollisionTable:\n";
     std::cout << "    Energy [eV]      Mean free path [um]\n";
     for (int i = 0; i < 10; ++i) {
       const double imfp =
@@ -5323,7 +5323,7 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
     deexcitations[i].cf = prefactor * f2cs * deexcitations[i].osc;
     // Compute the line width due to Doppler broadening.
     const double mgas = ElectronMass / (rgas[deexcitations[i].gas] - 1.);
-    const double wDoppler = sqrt(BoltzmannConstant * temperature / mgas);
+    const double wDoppler = sqrt(BoltzmannConstant * m_temperature / mgas);
     deexcitations[i].sDoppler = wDoppler * deexcitations[i].energy;
     // Compute the half width at half maximum due to resonance broadening.
     //   A. W. Ali and H. R. Griem, Phys. Rev. 140, 1044
@@ -5350,13 +5350,13 @@ bool MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
   }
 
   if (nResonanceLines <= 0) {
-    std::cerr << className << "::ComputePhotonCollisionTable:\n";
+    std::cerr << m_className << "::ComputePhotonCollisionTable:\n";
     std::cerr << "    No resonance lines found.\n";
     return true;
   }
 
-  if (debug || verbose) {
-    std::cout << className << "::ComputePhotonCollisionTable:\n";
+  if (m_debug || verbose) {
+    std::cout << m_className << "::ComputePhotonCollisionTable:\n";
     std::cout << "    Discrete absorption lines:\n";
     std::cout << "      Energy [eV]        Line width (FWHM) [eV]  "
               << "    Mean free path [um]\n";
@@ -5405,12 +5405,12 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
   alphaerr = etaerr = 0.;
 
   // Set input parameters in Magboltz common blocks.
-  Magboltz::inpt_.nGas = nComponents;
+  Magboltz::inpt_.nGas = m_nComponents;
   Magboltz::inpt_.nStep = 4000;
   Magboltz::inpt_.nAniso = 2;
 
-  Magboltz::inpt_.tempc = temperature - ZeroCelsius;
-  Magboltz::inpt_.torr = pressure;
+  Magboltz::inpt_.tempc = m_temperature - ZeroCelsius;
+  Magboltz::inpt_.torr = m_pressure;
   Magboltz::inpt_.ipen = 0;
   Magboltz::setp_.nmax = ncoll;
 
@@ -5421,10 +5421,10 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
   Magboltz::bfld_.btheta = btheta * 180. / Pi;
 
   // Set the gas composition in Magboltz.
-  for (int i = 0; i < nComponents; ++i) {
+  for (unsigned int i = 0; i < m_nComponents; ++i) {
     int ng = 0;
     if (!GetGasNumberMagboltz(gas[i], ng)) {
-      std::cerr << className << "::RunMagboltz:\n";
+      std::cerr << m_className << "::RunMagboltz:\n";
       std::cerr << "    Gas " << gas[i] << " has no corresponding"
                 << " gas number in Magboltz.\n";
       return;
@@ -5437,7 +5437,7 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
   Magboltz::setup1_();
 
   // Calculate the max. energy in the table.
-  if (e * temperature / (293.15 * pressure) > 15) {
+  if (e * m_temperature / (293.15 * m_pressure) > 15) {
     // If E/p > 15 start with 8 eV.
     Magboltz::inpt_.efinal = 8.;
   } else {
@@ -5462,7 +5462,7 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
     }
   }
 
-  if (debug || verbose) Magboltz::prnter_();
+  if (m_debug || verbose) Magboltz::prnter_();
 
   // Run the Monte Carlo calculation.
   if (bmag == 0.) {
@@ -5474,12 +5474,12 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
   } else {
     Magboltz::montec_();
   }
-  if (debug || verbose) Magboltz::output_();
+  if (m_debug || verbose) Magboltz::output_();
 
   // If attachment or ionisation rate is greater than sstmin,
   // include spatial gradients in the solution.
   const double sstmin = 30.;
-  const double epscale = 760. * temperature / (pressure * 293.15);
+  const double epscale = 760. * m_temperature / (m_pressure * 293.15);
   double alpp = Magboltz::ctowns_.alpha * epscale;
   double attp = Magboltz::ctowns_.att * epscale;
   bool useSST = false;
@@ -5502,7 +5502,7 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
     double fc2 = 1.e12 * (alphapt - etapt) / Magboltz::tofout_.tofdl;
     alphatof = fc1 - sqrt(fc1 * fc1 - fc2);
   }
-  if (debug || verbose) Magboltz::output2_();
+  if (m_debug || verbose) Magboltz::output2_();
 
   // Convert to cm / ns.
   vx = Magboltz::vel_.wx * 1.e-9;
@@ -5523,8 +5523,8 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
   etaerr = Magboltz::ctwner_.atter;
 
   // Print the results.
-  if (debug) {
-    std::cout << className << "::RunMagboltz:\n";
+  if (m_debug) {
+    std::cout << m_className << "::RunMagboltz:\n";
     std::cout << "    Results: \n";
     std::cout << "      Drift velocity along E:           " << std::right
               << std::setw(10) << std::setprecision(6) << vz << " cm/ns +/- "
@@ -5565,8 +5565,8 @@ void MediumMagboltz::RunMagboltz(const double e, const double bmag,
 void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
 
   // Set the reference pressure and temperature.
-  pressureTable = pressure;
-  temperatureTable = temperature;
+  pressureTable = m_pressure;
+  temperatureTable = m_temperature;
 
   // Initialize the parameter arrays.
   InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityE, 0.);
@@ -5619,8 +5619,8 @@ void MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
   for (int i = 0; i < nEfields; ++i) {
     for (int j = 0; j < nAngles; ++j) {
       for (int k = 0; k < nBfields; ++k) {
-        if (debug) {
-          std::cout << className << "::GenerateGasTable:\n";
+        if (m_debug) {
+          std::cout << m_className << "::GenerateGasTable:\n";
           std::cout << "    E = " << eFields[i] << " V/cm, B = " << bFields[k]
                     << " T, angle: " << bAngles[j] << " rad\n";
         }

@@ -77,12 +77,11 @@ const long max_size_of_extra_increment = 1000000;  // in bytes
 
 #ifndef DONT_USE_ABSPTR
 template <class T>
-class BlkArr : public RegPassivePtr
+class BlkArr : public RegPassivePtr {
 #else
-               template <class T>
-               class BlkArr
+template <class T>
+class BlkArr {
 #endif
-               {
  public:
   BlkArr(void) : qel(0), la(), size_of_element(sizeof(T)) { ; }
   explicit BlkArr(long fqel)

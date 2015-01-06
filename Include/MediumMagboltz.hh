@@ -33,11 +33,11 @@ class MediumMagboltz : public MediumGas {
   // Switch on/off anisotropic scattering (enabled by default)
   void EnableAnisotropicScattering() {
     useAnisotropic = true;
-    isChanged = true;
+    m_isChanged = true;
   }
   void DisableAnisotropicScattering() {
     useAnisotropic = false;
-    isChanged = true;
+    m_isChanged = true;
   }
 
   // Select secondary electron energy distribution parameterization
@@ -89,7 +89,7 @@ class MediumMagboltz : public MediumGas {
   bool GetDeexcitationProduct(const int i, double& t, double& s, int& type,
                               double& energy);
 
-  double GetPhotonCollisionRate(const double e);
+  double GetPhotonCollisionRate(const double& e);
   bool GetPhotonCollision(const double e, int& type, int& level, double& e1,
                           double& ctheta, int& nsec, double& esec);
 
@@ -161,16 +161,16 @@ class MediumMagboltz : public MediumGas {
   // Number of different cross-section types in the current gas mixture
   int nTerms;
   // Recoil energy parameter
-  double rgas[nMaxGases];
+  double rgas[m_nMaxGases];
   // Opal-Beaty-Peterson splitting parameter [eV]
   double wOpalBeaty[nMaxLevels];
   // Green-Sawada splitting parameters [eV]
-  double gsGreenSawada[nMaxGases];
-  double gbGreenSawada[nMaxGases];
-  double tsGreenSawada[nMaxGases];
-  double taGreenSawada[nMaxGases];
-  double tbGreenSawada[nMaxGases];
-  bool hasGreenSawada[nMaxGases];
+  double gsGreenSawada[m_nMaxGases];
+  double gbGreenSawada[m_nMaxGases];
+  double tsGreenSawada[m_nMaxGases];
+  double taGreenSawada[m_nMaxGases];
+  double tbGreenSawada[m_nMaxGases];
+  bool hasGreenSawada[m_nMaxGases];
   // Energy loss
   double energyLoss[nMaxLevels];
   // Cross-section type
@@ -279,12 +279,12 @@ class MediumMagboltz : public MediumGas {
   std::vector<dxcProd> dxcProducts;
 
   // Ionisation potentials
-  double ionPot[nMaxGases];
+  double ionPot[m_nMaxGases];
   // Minimum ionisation potential
   double minIonPot;
 
   // Scaling factor for excitation cross-sections
-  double scaleExc[nMaxGases];
+  double scaleExc[m_nMaxGases];
   // Flag selecting secondary electron energy distribution model
   bool useOpalBeaty;
   bool useGreenSawada;

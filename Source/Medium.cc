@@ -10,26 +10,26 @@
 
 namespace Garfield {
 
-int Medium::idCounter = -1;
+int Medium::m_idCounter = -1;
 
 Medium::Medium()
-    : className("Medium"),
-      id(++idCounter),
-      name(""),
-      temperature(293.15),
-      pressure(760.),
-      epsilon(1.),
-      nComponents(1),
-      atomicNumber(1.),
-      atomicWeight(0.),
-      density(0.),
-      driftable(false),
-      microscopic(false),
-      ionisable(false),
-      wValue(0.),
-      fanoFactor(0.),
-      isChanged(true),
-      debug(false),
+    : m_className("Medium"),
+      m_id(++m_idCounter),
+      m_name(""),
+      m_temperature(293.15),
+      m_pressure(760.),
+      m_epsilon(1.),
+      m_nComponents(1),
+      m_z(1.),
+      m_a(0.),
+      m_density(0.),
+      m_driftable(false),
+      m_microscopic(false),
+      m_ionisable(false),
+      m_w(0.),
+      m_fano(0.),
+      m_isChanged(true),
+      m_debug(false),
       map2d(false) {
 
   // Initialise the transport tables.
@@ -39,11 +39,9 @@ Medium::Medium()
 
   eFields.clear();
   bFields.clear();
-  bFields.resize(1);
-  bFields[0] = 0.;
+  bFields.assign(1, 0.);
   bAngles.clear();
-  bAngles.resize(1);
-  bAngles[0] = 0.;
+  bAngles.assign(1, 0.);
 
   hasElectronVelocityE = false;
   tabElectronVelocityE.clear();
@@ -116,103 +114,104 @@ Medium::Medium()
   SetFieldGrid(100., 100000., 20, true, 0., 0., 1, 0., 0., 1);
 }
 
-void Medium::SetTemperature(const double t) {
+void Medium::SetTemperature(const double& t) {
 
   if (t <= 0.) {
-    std::cerr << className << "::SetTemperature:\n";
+    std::cerr << m_className << "::SetTemperature:\n";
     std::cerr << "    Temperature [K] must be greater than zero.\n";
     return;
   }
-  temperature = t;
-  isChanged = true;
+  m_temperature = t;
+  m_isChanged = true;
 }
 
-void Medium::SetPressure(const double p) {
+void Medium::SetPressure(const double& p) {
 
   if (p <= 0.) {
-    std::cerr << className << "::SetPressure:\n";
+    std::cerr << m_className << "::SetPressure:\n";
     std::cerr << "    Pressure [Torr] must be greater than zero.\n";
     return;
   }
-  pressure = p;
-  isChanged = true;
+  m_pressure = p;
+  m_isChanged = true;
 }
 
-void Medium::SetDielectricConstant(const double eps) {
+void Medium::SetDielectricConstant(const double& eps) {
 
   if (eps < 1.) {
-    std::cerr << className << "::SetDielectricConstant:\n";
+    std::cerr << m_className << "::SetDielectricConstant:\n";
     std::cerr << "    Dielectric constant must be >= 1.\n";
     return;
   }
-  epsilon = eps;
-  isChanged = true;
+  m_epsilon = eps;
+  m_isChanged = true;
 }
 
 double Medium::GetMassDensity() const {
 
-  return density * AtomicMassUnit * atomicWeight;
+  return m_density * AtomicMassUnit * m_a;
 }
 
-void Medium::GetComponent(const int i, std::string& label, double& f) {
+void Medium::GetComponent(const unsigned int& i, 
+                          std::string& label, double& f) {
 
-  if (i < 0 || i >= nComponents) {
-    std::cerr << className << "::GetComponent:\n";
+  if (i >= m_nComponents) {
+    std::cerr << m_className << "::GetComponent:\n";
     std::cerr << "    Index out of range.\n";
   }
 
-  label = name;
+  label = m_name;
   f = 1.;
 }
 
-void Medium::SetAtomicNumber(const double z) {
+void Medium::SetAtomicNumber(const double& z) {
 
   if (z < 1.) {
-    std::cerr << className << "::SetAtomicNumber:\n";
+    std::cerr << m_className << "::SetAtomicNumber:\n";
     std::cerr << "    Atomic number must be >= 1.\n";
     return;
   }
-  atomicNumber = z;
-  isChanged = true;
+  m_z = z;
+  m_isChanged = true;
 }
 
-void Medium::SetAtomicWeight(const double a) {
+void Medium::SetAtomicWeight(const double& a) {
 
   if (a <= 0.) {
-    std::cerr << className << "::SetAtomicWeight:\n";
+    std::cerr << m_className << "::SetAtomicWeight:\n";
     std::cerr << "    Atomic weight must be greater than zero.\n";
     return;
   }
-  atomicWeight = a;
-  isChanged = true;
+  m_a = a;
+  m_isChanged = true;
 }
 
-void Medium::SetNumberDensity(const double n) {
+void Medium::SetNumberDensity(const double& n) {
 
   if (n <= 0.) {
-    std::cerr << className << "::SetNumberDensity:\n";
+    std::cerr << m_className << "::SetNumberDensity:\n";
     std::cerr << "    Density [cm-3] must be greater than zero.\n";
     return;
   }
-  density = n;
-  isChanged = true;
+  m_density = n;
+  m_isChanged = true;
 }
 
-void Medium::SetMassDensity(const double rho) {
+void Medium::SetMassDensity(const double& rho) {
 
   if (rho <= 0.) {
-    std::cerr << className << "::SetMassDensity:\n";
+    std::cerr << m_className << "::SetMassDensity:\n";
     std::cerr << "    Density [g/cm3] must be greater than zero.\n";
     return;
   }
 
-  if (atomicWeight <= 0.) {
-    std::cerr << className << "::SetMassDensity:\n";
+  if (m_a <= 0.) {
+    std::cerr << m_className << "::SetMassDensity:\n";
     std::cerr << "    Atomic weight is not defined.\n";
     return;
   }
-  density = rho / (AtomicMassUnit * atomicWeight);
-  isChanged = true;
+  m_density = rho / (AtomicMassUnit * m_a);
+  m_isChanged = true;
 }
 
 bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
@@ -256,7 +255,7 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
       if (!Numerics::Boxin3(tabElectronVelocityE, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, ve,
                             intpVelocity)) {
-        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << m_className << "::ElectronVelocity:\n";
         std::cerr << "    Interpolation of velocity along E failed.\n";
         return false;
       }
@@ -302,9 +301,9 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
       ubt[2] = ue[2];
     }
 
-    if (debug) {
+    if (m_debug) {
       std::cout << std::setprecision(5);
-      std::cout << className << "::ElectronVelocity:\n";
+      std::cout << m_className << "::ElectronVelocity:\n";
       std::cout << "    unit vector along E:     (" << ue[0] << ", " << ue[1]
                 << ", " << ue[2] << ")\n";
       std::cout << "    unit vector along E x B: (" << uexb[0] << ", "
@@ -319,21 +318,21 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
       if (!Numerics::Boxin3(tabElectronVelocityE, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, ve,
                             intpVelocity)) {
-        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << m_className << "::ElectronVelocity:\n";
         std::cerr << "    Interpolation of velocity along E failed.\n";
         return false;
       }
       if (!Numerics::Boxin3(tabElectronVelocityExB, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, vexb,
                             intpVelocity)) {
-        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << m_className << "::ElectronVelocity:\n";
         std::cerr << "    Interpolation of velocity along ExB failed.\n";
         return false;
       }
       if (!Numerics::Boxin3(tabElectronVelocityB, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, vbt,
                             intpVelocity)) {
-        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << m_className << "::ElectronVelocity:\n";
         std::cerr << "    Interpolation of velocity along Bt failed.\n";
         return false;
       }
@@ -359,7 +358,7 @@ bool Medium::ElectronVelocity(const double ex, const double ey, const double ez,
       if (!Numerics::Boxin3(tabElectronVelocityE, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, ve,
                             intpVelocity)) {
-        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << m_className << "::ElectronVelocity:\n";
         std::cerr << "    Interpolation of velocity along E failed.\n";
         return false;
       }
@@ -439,7 +438,7 @@ bool Medium::ElectronDiffusion(const double ex, const double ey,
   // If no data available, calculate
   // the diffusion coefficients using the Einstein relation
   if (!hasElectronDiffLong || !hasElectronDiffTrans) {
-    const double d = sqrt(2. * BoltzmannConstant * temperature / e);
+    const double d = sqrt(2. * BoltzmannConstant * m_temperature / e);
     if (!hasElectronDiffLong) dl = d;
     if (!hasElectronDiffTrans) dt = d;
   }
@@ -669,7 +668,7 @@ double Medium::GetElectronEnergy(const double px, const double py,
                                  double& vz, const int band) {
 
   if (band > 0) {
-    std::cerr << className << "::GetElectronEnergy:\n";
+    std::cerr << m_className << "::GetElectronEnergy:\n";
     std::cerr << "    Unknown band index.\n";
   }
 
@@ -697,8 +696,8 @@ void Medium::GetElectronMomentum(const double e, double& px, double& py,
 
 double Medium::GetElectronNullCollisionRate(const int band) {
 
-  if (debug) {
-    std::cerr << className << "::GetElectronNullCollisionRate:\n";
+  if (m_debug) {
+    std::cerr << m_className << "::GetElectronNullCollisionRate:\n";
     std::cerr << "    Electron null collision rate for band " << band
               << " not available.\n";
     std::cerr << "    Function is not implemented.\n";
@@ -708,8 +707,8 @@ double Medium::GetElectronNullCollisionRate(const int band) {
 
 double Medium::GetElectronCollisionRate(const double e, const int band) {
 
-  if (debug) {
-    std::cerr << className << "::GetElectronCollisionRate:\n";
+  if (m_debug) {
+    std::cerr << m_className << "::GetElectronCollisionRate:\n";
     std::cerr << "    Electron collision rate at energy " << e << " eV (band "
               << band << ") not available.\n";
     std::cerr << "    Function is not implemented.\n";
@@ -731,8 +730,8 @@ bool Medium::GetElectronCollision(const double e, int& type, int& level,
   dy = sin(phi) * stheta;
   dz = ctheta;
 
-  if (debug) {
-    std::cerr << className << "::GetElectronCollision:\n";
+  if (m_debug) {
+    std::cerr << m_className << "::GetElectronCollision:\n";
     std::cerr << "    Function is not implemented.\n";
   }
   return false;
@@ -740,8 +739,8 @@ bool Medium::GetElectronCollision(const double e, int& type, int& level,
 
 bool Medium::GetIonisationProduct(const int i, int& type, double& energy) {
 
-  if (debug) {
-    std::cerr << className << "::GetIonisationProduct:\n";
+  if (m_debug) {
+    std::cerr << m_className << "::GetIonisationProduct:\n";
     std::cerr << "    Ionisation product " << i << " requested.\n";
     std::cerr << "    Not supported. Program bug!\n";
   }
@@ -753,8 +752,8 @@ bool Medium::GetIonisationProduct(const int i, int& type, double& energy) {
 bool Medium::GetDeexcitationProduct(const int i, double& t, double& s,
                                     int& type, double& energy) {
 
-  if (debug) {
-    std::cerr << className << "::GetDeexcitationProduct:\n";
+  if (m_debug) {
+    std::cerr << m_className << "::GetDeexcitationProduct:\n";
     std::cerr << "    Deexcitation product " << i << " requested.\n";
     std::cerr << "    Not supported. Program bug!\n";
   }
@@ -803,7 +802,7 @@ bool Medium::HoleVelocity(const double ex, const double ey, const double ez,
       if (!Numerics::Boxin3(tabHoleVelocityE, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, ve,
                             intpVelocity)) {
-        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << m_className << "::HoleVelocity:\n";
         std::cerr << "    Interpolation of velocity along E failed.\n";
         return false;
       }
@@ -855,21 +854,21 @@ bool Medium::HoleVelocity(const double ex, const double ey, const double ez,
       if (!Numerics::Boxin3(tabHoleVelocityE, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, ve,
                             intpVelocity)) {
-        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << m_className << "::HoleVelocity:\n";
         std::cerr << "    Interpolation of velocity along E failed.\n";
         return false;
       }
       if (!Numerics::Boxin3(tabHoleVelocityExB, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, vexb,
                             intpVelocity)) {
-        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << m_className << "::HoleVelocity:\n";
         std::cerr << "    Interpolation of velocity along ExB failed.\n";
         return false;
       }
       if (!Numerics::Boxin3(tabHoleVelocityB, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, vbt,
                             intpVelocity)) {
-        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << m_className << "::HoleVelocity:\n";
         std::cerr << "    Interpolation of velocity along Bt failed.\n";
         return false;
       }
@@ -895,7 +894,7 @@ bool Medium::HoleVelocity(const double ex, const double ey, const double ez,
       if (!Numerics::Boxin3(tabHoleVelocityE, bAngles, bFields, eFields,
                             nAngles, nBfields, nEfields, ebang, b, e0, ve,
                             intpVelocity)) {
-        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << m_className << "::HoleVelocity:\n";
         std::cerr << "    Interpolation of velocity along E failed.\n";
         return false;
       }
@@ -974,10 +973,10 @@ bool Medium::HoleDiffusion(const double ex, const double ey, const double ez,
   // If no data available, calculate
   // the diffusion coefficients using the Einstein relation
   if (!hasHoleDiffLong) {
-    dl = sqrt(2. * BoltzmannConstant * temperature / e);
+    dl = sqrt(2. * BoltzmannConstant * m_temperature / e);
   }
   if (!hasHoleDiffTrans) {
-    dt = sqrt(2. * BoltzmannConstant * temperature / e);
+    dt = sqrt(2. * BoltzmannConstant * m_temperature / e);
   }
 
   // Verify values and apply scaling.
@@ -1312,10 +1311,10 @@ bool Medium::IonDiffusion(const double ex, const double ey, const double ez,
   // If no data available, calculate
   // the diffusion coefficients using the Einstein relation
   if (!hasIonDiffLong) {
-    dl = sqrt(2. * BoltzmannConstant * temperature / e);
+    dl = sqrt(2. * BoltzmannConstant * m_temperature / e);
   }
   if (!hasIonDiffTrans) {
-    dt = sqrt(2. * BoltzmannConstant * temperature / e);
+    dt = sqrt(2. * BoltzmannConstant * m_temperature / e);
   }
 
   return true;
@@ -1387,39 +1386,40 @@ bool Medium::IonDissociation(const double ex, const double ey, const double ez,
   return true;
 }
 
-bool Medium::GetOpticalDataRange(double& emin, double& emax, const int i) {
+bool Medium::GetOpticalDataRange(double& emin, double& emax, 
+                                 const unsigned int& i) {
 
-  if (i < 0 || i >= nComponents) {
-    std::cerr << className << "::GetOpticalDataRange:\n";
+  if (i >= m_nComponents) {
+    std::cerr << m_className << "::GetOpticalDataRange:\n";
     std::cerr << "    Component " << i << " does not exist.\n";
     return false;
   }
 
-  if (debug) {
-    std::cerr << className << "::GetOpticalDataRange:\n";
+  if (m_debug) {
+    std::cerr << m_className << "::GetOpticalDataRange:\n";
     std::cerr << "    Function is not implemented.\n";
   }
   emin = emax = 0.;
   return false;
 }
 
-bool Medium::GetDielectricFunction(const double e, double& eps1, double& eps2,
-                                   const int i) {
+bool Medium::GetDielectricFunction(const double& e, double& eps1, double& eps2,
+                                   const unsigned int& i) {
 
-  if (i < 0 || i >= nComponents) {
-    std::cerr << className << "::GetDielectricFunction:\n";
+  if (i >= m_nComponents) {
+    std::cerr << m_className << "::GetDielectricFunction:\n";
     std::cerr << "    Component " << i << " does not exist.\n";
     return false;
   }
 
   if (e < 0.) {
-    std::cerr << className << "::GetDielectricFunction:\n";
+    std::cerr << m_className << "::GetDielectricFunction:\n";
     std::cerr << "    Energy must be > 0.\n";
     return false;
   }
 
-  if (debug) {
-    std::cerr << className << "::GetDielectricFunction:\n";
+  if (m_debug) {
+    std::cerr << m_className << "::GetDielectricFunction:\n";
     std::cerr << "    Function is not implemented.\n";
   }
   eps1 = 1.;
@@ -1427,35 +1427,35 @@ bool Medium::GetDielectricFunction(const double e, double& eps1, double& eps2,
   return false;
 }
 
-bool Medium::GetPhotoAbsorptionCrossSection(const double e, double& sigma,
-                                            const int i) {
+bool Medium::GetPhotoAbsorptionCrossSection(const double& e, double& sigma,
+                                            const unsigned int& i) {
 
-  if (i < 0 || i >= nComponents) {
-    std::cerr << className << "::GetPhotoAbsorptionCrossSection:\n";
+  if (i >= m_nComponents) {
+    std::cerr << m_className << "::GetPhotoAbsorptionCrossSection:\n";
     std::cerr << "    Component " << i << " does not exist.\n";
     return false;
   }
 
   if (e < 0.) {
-    std::cerr << className << "::GetPhotoAbsorptionCrossSection:\n";
+    std::cerr << m_className << "::GetPhotoAbsorptionCrossSection:\n";
     std::cerr << "    Energy must be > 0.\n";
     return false;
   }
 
-  if (debug) {
-    std::cerr << className << "::GetPhotoAbsorptionCrossSection:\n";
+  if (m_debug) {
+    std::cerr << m_className << "::GetPhotoAbsorptionCrossSection:\n";
     std::cerr << "    Function is not implemented.\n";
   }
   sigma = 0.;
   return false;
 }
 
-double Medium::GetPhotonCollisionRate(const double e) {
+double Medium::GetPhotonCollisionRate(const double& e) {
 
   double sigma = 0.;
   if (!GetPhotoAbsorptionCrossSection(e, sigma)) return 0.;
 
-  return sigma * density * SpeedOfLight;
+  return sigma * m_density * SpeedOfLight;
 }
 
 bool Medium::GetPhotonCollision(const double e, int& type, int& level,
@@ -1560,19 +1560,19 @@ void Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
 
   // Check if the requested E-field range makes sense.
   if (ne <= 0) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Number of E-fields must be > 0.\n";
     return;
   }
 
   if (emin < 0. || emax < 0.) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Electric fields must be positive.\n";
     return;
   }
 
   if (emax < emin) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Swapping min./max. E-field.\n";
     const double etemp = emin;
     emin = emax;
@@ -1583,12 +1583,12 @@ void Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
   if (logE) {
     // Logarithmic scale
     if (emin < Small) {
-      std::cerr << className << "::SetFieldGrid:\n";
+      std::cerr << m_className << "::SetFieldGrid:\n";
       std::cerr << "    Min. E-field must be non-zero for log. scale.\n";
       return;
     }
     if (ne == 1) {
-      std::cerr << className << "::SetFieldGrid:\n";
+      std::cerr << m_className << "::SetFieldGrid:\n";
       std::cerr << "    Number of E-fields must be > 1 for log. scale.\n";
       return;
     }
@@ -1600,17 +1600,17 @@ void Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
 
   // Check if the requested B-field range makes sense.
   if (nb <= 0) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Number of B-fields must be > 0.\n";
     return;
   }
   if (bmax < 0. || bmin < 0.) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Magnetic fields must be positive.\n";
     return;
   }
   if (bmax < bmin) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Swapping min./max. B-field.\n";
     const double btemp = bmin;
     bmin = bmax;
@@ -1622,17 +1622,17 @@ void Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
 
   // Check if the requested angular range makes sense.
   if (na <= 0) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Number of angles must be > 0.\n";
     return;
   }
   if (amax < 0. || amin < 0.) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Angles must be positive.\n";
     return;
   }
   if (amax < amin) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Swapping min./max. angle.\n";
     const double atemp = amin;
     amin = amax;
@@ -1679,32 +1679,32 @@ void Medium::SetFieldGrid(const std::vector<double>& efields,
   const int nAnglesNew = angles.size();
 
   if (nEfieldsNew <= 0) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Number of E-fields must be > 0.\n";
     return;
   }
   if (nBfieldsNew <= 0) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Number of B-fields must be > 0.\n";
     return;
   }
   if (nAnglesNew <= 0) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Number of angles must be > 0.\n";
     return;
   }
 
   // Make sure the values are not negative.
   if (efields[0] < 0.) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    E-fields must be >= 0.\n";
   }
   if (bfields[0] < 0.) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    B-fields must be >= 0.\n";
   }
   if (angles[0] < 0.) {
-    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << m_className << "::SetFieldGrid:\n";
     std::cerr << "    Angles must be >= 0.\n";
   }
 
@@ -1712,7 +1712,7 @@ void Medium::SetFieldGrid(const std::vector<double>& efields,
   if (nEfieldsNew > 1) {
     for (int i = 1; i < nEfieldsNew; ++i) {
       if (efields[i] <= efields[i - 1]) {
-        std::cerr << className << "::SetFieldGrid:\n";
+        std::cerr << m_className << "::SetFieldGrid:\n";
         std::cerr << "    E-fields are not in ascending order.\n";
         return;
       }
@@ -1721,7 +1721,7 @@ void Medium::SetFieldGrid(const std::vector<double>& efields,
   if (nBfieldsNew > 1) {
     for (int i = 1; i < nBfieldsNew; ++i) {
       if (bfields[i] <= bfields[i - 1]) {
-        std::cerr << className << "::SetFieldGrid:\n";
+        std::cerr << m_className << "::SetFieldGrid:\n";
         std::cerr << "    B-fields are not in ascending order.\n";
         return;
       }
@@ -1730,15 +1730,15 @@ void Medium::SetFieldGrid(const std::vector<double>& efields,
   if (nAnglesNew > 1) {
     for (int i = 1; i < nAnglesNew; ++i) {
       if (angles[i] <= angles[i - 1]) {
-        std::cerr << className << "::SetFieldGrid:\n";
+        std::cerr << m_className << "::SetFieldGrid:\n";
         std::cerr << "    Angles are not in ascending order.\n";
         return;
       }
     }
   }
 
-  if (debug) {
-    std::cout << className << "::SetFieldGrid:\n";
+  if (m_debug) {
+    std::cout << m_className << "::SetFieldGrid:\n";
     std::cout << "    E-fields:\n";
     for (int i = 0; i < nEfieldsNew; ++i) {
       std::cout << "      " << efields[i] << "\n";
@@ -1883,15 +1883,15 @@ bool Medium::GetElectronVelocityE(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetElectronVelocityE:\n";
+    std::cerr << m_className << "::GetElectronVelocityE:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     v = 0.;
     return false;
   }
   if (!hasElectronVelocityE) {
-    if (debug) {
-      std::cerr << className << "::GetElectronVelocityE:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetElectronVelocityE:\n";
       std::cerr << "    Data not available.\n";
     }
     v = 0.;
@@ -1907,15 +1907,15 @@ bool Medium::GetElectronVelocityExB(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetElectronVelocityExB:\n";
+    std::cerr << m_className << "::GetElectronVelocityExB:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     v = 0.;
     return false;
   }
   if (!hasElectronVelocityExB) {
-    if (debug) {
-      std::cerr << className << "::GetElectronVelocityExB:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetElectronVelocityExB:\n";
       std::cerr << "    Data not available.\n";
     }
     v = 0.;
@@ -1931,15 +1931,15 @@ bool Medium::GetElectronVelocityB(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetElectronVelocityB:\n";
+    std::cerr << m_className << "::GetElectronVelocityB:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     v = 0.;
     return false;
   }
   if (!hasElectronVelocityB) {
-    if (debug) {
-      std::cerr << className << "::GetElectronVelocityB:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetElectronVelocityB:\n";
       std::cerr << "    Data not available.\n";
     }
     v = 0.;
@@ -1955,15 +1955,15 @@ bool Medium::GetElectronLongitudinalDiffusion(const int ie, const int ib,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetElectronLongitudinalDiffusion:\n";
+    std::cerr << m_className << "::GetElectronLongitudinalDiffusion:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     dl = 0.;
     return false;
   }
   if (!hasElectronDiffLong) {
-    if (debug) {
-      std::cerr << className << "::GetElectronLongitudinalDiffusion:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetElectronLongitudinalDiffusion:\n";
       std::cerr << "    Data not available.\n";
     }
     dl = 0.;
@@ -1979,15 +1979,15 @@ bool Medium::GetElectronTransverseDiffusion(const int ie, const int ib,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetElectronTransverseDiffusion:\n";
+    std::cerr << m_className << "::GetElectronTransverseDiffusion:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     dt = 0.;
     return false;
   }
   if (!hasElectronDiffTrans) {
-    if (debug) {
-      std::cerr << className << "::GetElectronTransverseDiffusion:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetElectronTransverseDiffusion:\n";
       std::cerr << "    Data not available.\n";
     }
     dt = 0.;
@@ -2003,15 +2003,15 @@ bool Medium::GetElectronTownsend(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetElectronTownsend:\n";
+    std::cerr << m_className << "::GetElectronTownsend:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     alpha = 0.;
     return false;
   }
   if (!hasElectronTownsend) {
-    if (debug) {
-      std::cerr << className << "::GetElectronTownsend:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetElectronTownsend:\n";
       std::cerr << "    Data not available.\n";
     }
     alpha = 0.;
@@ -2027,15 +2027,15 @@ bool Medium::GetElectronAttachment(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetElectronAttachment:\n";
+    std::cerr << m_className << "::GetElectronAttachment:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     eta = 0.;
     return false;
   }
   if (!hasElectronAttachment) {
-    if (debug) {
-      std::cerr << className << "::GetElectronAttachment:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetElectronAttachment:\n";
       std::cerr << "    Data not available.\n";
     }
     eta = 0.;
@@ -2051,15 +2051,15 @@ bool Medium::GetHoleVelocityE(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetHoleVelocityE:\n";
+    std::cerr << m_className << "::GetHoleVelocityE:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     v = 0.;
     return false;
   }
   if (!hasHoleVelocityE) {
-    if (debug) {
-      std::cerr << className << "::GetHoleVelocityE:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetHoleVelocityE:\n";
       std::cerr << "    Data not available.\n";
     }
     v = 0.;
@@ -2075,15 +2075,15 @@ bool Medium::GetHoleVelocityExB(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetHoleVelocityExB:\n";
+    std::cerr << m_className << "::GetHoleVelocityExB:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     v = 0.;
     return false;
   }
   if (!hasHoleVelocityExB) {
-    if (debug) {
-      std::cerr << className << "::GetHoleVelocityExB:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetHoleVelocityExB:\n";
       std::cerr << "    Data not available.\n";
     }
     v = 0.;
@@ -2099,15 +2099,15 @@ bool Medium::GetHoleVelocityB(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetHoleVelocityB:\n";
+    std::cerr << m_className << "::GetHoleVelocityB:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     v = 0.;
     return false;
   }
   if (!hasHoleVelocityB) {
-    if (debug) {
-      std::cerr << className << "::GetHoleVelocityB:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetHoleVelocityB:\n";
       std::cerr << "    Data not available.\n";
     }
     v = 0.;
@@ -2123,15 +2123,15 @@ bool Medium::GetHoleLongitudinalDiffusion(const int ie, const int ib,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetHoleLongitudinalDiffusion:\n";
+    std::cerr << m_className << "::GetHoleLongitudinalDiffusion:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     dl = 0.;
     return false;
   }
   if (!hasHoleDiffLong) {
-    if (debug) {
-      std::cerr << className << "::GetHoleLongitudinalDiffusion:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetHoleLongitudinalDiffusion:\n";
       std::cerr << "    Data not available.\n";
     }
     dl = 0.;
@@ -2147,15 +2147,15 @@ bool Medium::GetHoleTransverseDiffusion(const int ie, const int ib,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetHoleTransverseDiffusion:\n";
+    std::cerr << m_className << "::GetHoleTransverseDiffusion:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     dt = 0.;
     return false;
   }
   if (!hasHoleDiffTrans) {
-    if (debug) {
-      std::cerr << className << "::GetHoleTransverseDiffusion:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetHoleTransverseDiffusion:\n";
       std::cerr << "    Data not available.\n";
     }
     dt = 0.;
@@ -2171,15 +2171,15 @@ bool Medium::GetHoleTownsend(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetHoleTownsend:\n";
+    std::cerr << m_className << "::GetHoleTownsend:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     alpha = 0.;
     return false;
   }
   if (!hasHoleTownsend) {
-    if (debug) {
-      std::cerr << className << "::GetHoleTownsend:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetHoleTownsend:\n";
       std::cerr << "    Data not available.\n";
     }
     alpha = 0.;
@@ -2195,15 +2195,15 @@ bool Medium::GetHoleAttachment(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetHoleAttachment:\n";
+    std::cerr << m_className << "::GetHoleAttachment:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     eta = 0.;
     return false;
   }
   if (!hasHoleAttachment) {
-    if (debug) {
-      std::cerr << className << "::GetHoleAttachment:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetHoleAttachment:\n";
       std::cerr << "    Data not available.\n";
     }
     eta = 0.;
@@ -2219,15 +2219,15 @@ bool Medium::GetIonMobility(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetIonMobility:\n";
+    std::cerr << m_className << "::GetIonMobility:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     mu = 0.;
     return false;
   }
   if (!hasIonMobility) {
-    if (debug) {
-      std::cerr << className << "::GetIonMobility:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetIonMobility:\n";
       std::cerr << "    Data not available.\n";
     }
     mu = 0.;
@@ -2243,15 +2243,15 @@ bool Medium::GetIonLongitudinalDiffusion(const int ie, const int ib,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetIonLongitudinalDiffusion:\n";
+    std::cerr << m_className << "::GetIonLongitudinalDiffusion:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     dl = 0.;
     return false;
   }
   if (!hasIonDiffLong) {
-    if (debug) {
-      std::cerr << className << "::GetIonLongitudinalDiffusion:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetIonLongitudinalDiffusion:\n";
       std::cerr << "    Data not available.\n";
     }
     dl = 0.;
@@ -2267,15 +2267,15 @@ bool Medium::GetIonTransverseDiffusion(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetIonTransverseDiffusion:\n";
+    std::cerr << m_className << "::GetIonTransverseDiffusion:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     dt = 0.;
     return false;
   }
   if (!hasIonDiffTrans) {
-    if (debug) {
-      std::cerr << className << "::GetIonTransverseDiffusion:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetIonTransverseDiffusion:\n";
       std::cerr << "    Data not available.\n";
     }
     dt = 0.;
@@ -2291,15 +2291,15 @@ bool Medium::GetIonDissociation(const int ie, const int ib, const int ia,
 
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::GetIonDissociation:\n";
+    std::cerr << m_className << "::GetIonDissociation:\n";
     std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     diss = 0.;
     return false;
   }
   if (!hasIonDissociation) {
-    if (debug) {
-      std::cerr << className << "::GetIonDissociation:\n";
+    if (m_debug) {
+      std::cerr << m_className << "::GetIonDissociation:\n";
       std::cerr << "    Data not available.\n";
     }
     diss = 0.;
@@ -2317,8 +2317,8 @@ void Medium::CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
                         const int extrLow, const int extrHigh,
                         const double init, const std::string label) {
 
-  if (debug) {
-    std::cout << className << "::CloneTable:\n";
+  if (m_debug) {
+    std::cout << m_className << "::CloneTable:\n";
     std::cout << "    Copying values of " << label << " to new grid.\n";
   }
 
@@ -2341,7 +2341,7 @@ void Medium::CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
           if (!Numerics::Boxin3(tab, bAngles, bFields, eFields, nAngles,
                                 nBfields, nEfields, angles[k], bfields[j],
                                 efields[i], val, intp)) {
-            std::cerr << className << "::SetFieldGrid:\n";
+            std::cerr << m_className << "::SetFieldGrid:\n";
             std::cerr << "    Interpolation of " << label << " failed.\n";
             std::cerr << "    Cannot copy value to new grid at: \n";
             std::cerr << "      E = " << efields[i] << "\n";
@@ -2398,7 +2398,7 @@ void Medium::CloneTensor(
             if (!Numerics::Boxin3(tab[l], bAngles, bFields, eFields, nAngles,
                                   nBfields, nEfields, angles[k], bfields[j],
                                   efields[i], val, intp)) {
-              std::cerr << className << "::SetFieldGrid:\n";
+              std::cerr << m_className << "::SetFieldGrid:\n";
               std::cerr << "    Interpolation of " << label << " failed.\n";
               std::cerr << "    Cannot copy value to new grid at: \n";
               std::cerr << "      Index: " << l << "\n";
@@ -2438,27 +2438,27 @@ bool Medium::SetIonMobility(const int ie, const int ib, const int ia,
   // Check the index.
   if (ie < 0 || ie >= nEfields || ib < 0 || ib >= nBfields || ia < 0 ||
       ia >= nAngles) {
-    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << m_className << "::SetIonMobility:\n";
     std::cerr << "    Index (" << ie << ", " << ib << ", " << ia
               << ") out of range.\n";
     return false;
   }
 
   if (!hasIonMobility) {
-    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << m_className << "::SetIonMobility:\n";
     std::cerr << "    Ion mobility table not initialised.\n";
     return false;
   }
 
   if (mu == 0.) {
-    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << m_className << "::SetIonMobility:\n";
     std::cerr << "    Zero value not permitted.\n";
     return false;
   }
 
   tabIonMobility[ia][ib][ie] = mu;
-  if (debug) {
-    std::cout << className << "::SetIonMobility:\n";
+  if (m_debug) {
+    std::cout << m_className << "::SetIonMobility:\n";
     std::cout << "   Ion mobility at E = " << eFields[ie]
               << " V/cm, B = " << bFields[ib] << " T, angle " << bAngles[ia]
               << " set to " << mu << " cm2/(V ns).\n";
@@ -2472,7 +2472,7 @@ bool Medium::SetIonMobility(const std::vector<double>& efields,
   const int ne = efields.size();
   const int nm = mobilities.size();
   if (ne != nm) {
-    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << m_className << "::SetIonMobility:\n";
     std::cerr << "    E-field and mobility arrays have different sizes.\n";
     return false;
   }
@@ -2507,14 +2507,14 @@ void Medium::SetExtrapolationMethodVelocity(const std::string extrLow,
   if (GetExtrapolationIndex(extrLow, iExtr)) {
     extrLowVelocity = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodVelocity:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodVelocity:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighVelocity = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodVelocity:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodVelocity:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 }
@@ -2526,14 +2526,14 @@ void Medium::SetExtrapolationMethodDiffusion(const std::string extrLow,
   if (GetExtrapolationIndex(extrLow, iExtr)) {
     extrLowDiffusion = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodDiffusion:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodDiffusion:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighDiffusion = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodDiffusion:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodDiffusion:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 }
@@ -2545,14 +2545,14 @@ void Medium::SetExtrapolationMethodTownsend(const std::string extrLow,
   if (GetExtrapolationIndex(extrLow, iExtr)) {
     extrLowTownsend = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodTownsend:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodTownsend:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighTownsend = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodTownsend:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodTownsend:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 }
@@ -2564,14 +2564,14 @@ void Medium::SetExtrapolationMethodAttachment(const std::string extrLow,
   if (GetExtrapolationIndex(extrLow, iExtr)) {
     extrLowAttachment = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodAttachment:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodAttachment:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighAttachment = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodAttachment:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodAttachment:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 }
@@ -2583,13 +2583,13 @@ void Medium::SetExtrapolationMethodIonMobility(const std::string extrLow,
   if (GetExtrapolationIndex(extrLow, iExtr)) {
     extrLowMobility = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodIonMobility:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodIonMobility:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighMobility = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodIonMobility:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodIonMobility:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 }
@@ -2601,14 +2601,14 @@ void Medium::SetExtrapolationMethodIonDissociation(const std::string extrLow,
   if (GetExtrapolationIndex(extrLow, iExtr)) {
     extrLowDissociation = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodIonDissociation:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodIonDissociation:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
     extrHighDissociation = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodIonDissociation:\n";
+    std::cerr << m_className << "::SetExtrapolationMethodIonDissociation:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 }
@@ -2696,8 +2696,8 @@ double Medium::Interpolate1D(const double e, const std::vector<double>& table,
   } else if (e < fields[0]) {
     // Extrapolation towards small fields
     if (fields[0] >= fields[1]) {
-      if (debug) {
-        std::cerr << className << "::Interpolate1D:\n";
+      if (m_debug) {
+        std::cerr << m_className << "::Interpolate1D:\n";
         std::cerr << "    First two field values coincide.\n";
         std::cerr << "    No extrapolation to lower fields.\n";
       }
@@ -2718,8 +2718,8 @@ double Medium::Interpolate1D(const double e, const std::vector<double>& table,
   } else if (e > fields[nSizeTable - 1]) {
     // Extrapolation towards large fields
     if (fields[nSizeTable - 1] <= fields[nSizeTable - 2]) {
-      if (debug) {
-        std::cerr << className << "::Interpolate1D:\n";
+      if (m_debug) {
+        std::cerr << m_className << "::Interpolate1D:\n";
         std::cerr << "    Last two field values coincide.\n";
         std::cerr << "    No extrapolation to higher fields.\n";
       }
@@ -2755,7 +2755,7 @@ void Medium::InitParamArrays(
     std::vector<std::vector<std::vector<double> > >& tab, const double val) {
 
   if (eRes <= 0 || bRes <= 0 || aRes <= 0) {
-    std::cerr << className << "::InitParamArrays:\n";
+    std::cerr << m_className << "::InitParamArrays:\n";
     std::cerr << "    Invalid grid.\n";
     return;
   }
@@ -2778,7 +2778,7 @@ void Medium::InitParamTensor(
     const double val) {
 
   if (eRes <= 0 || bRes <= 0 || aRes <= 0 || tRes <= 0) {
-    std::cerr << className << "::InitParamArrays:\n";
+    std::cerr << m_className << "::InitParamArrays:\n";
     std::cerr << "    Invalid grid.\n";
     return;
   }
