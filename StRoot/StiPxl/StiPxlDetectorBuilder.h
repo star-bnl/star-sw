@@ -22,6 +22,7 @@ protected:
 private:
 
    void buildInactiveVolumes();
+   static void convertSensor2StiId(int sector, int ladder, int sensorHalf, int& stiRow, int& stiSensor);
 };
 
 #endif
