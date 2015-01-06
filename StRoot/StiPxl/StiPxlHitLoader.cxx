@@ -1,7 +1,16 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.14 2015/01/06 15:47:44 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.15 2015/01/06 20:57:50 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.15  2015/01/06 20:57:50  smirnovd
+ * Reimplemented segmentation of PXL sensor to two halves.
+ *
+ * In the sensor's local coordinate system the first half is for x<0 and the second
+ * one is for x>0. The notion of inner and outter halves is not critical and in
+ * fact confusing because it depends on the original rotation around the z axis.
+ * For example, two rotations of phi=5 and phi=-175 give us essentially the same
+ * layer but result in swapped inner and outter halves.
+ *
  * Revision 1.14  2015/01/06 15:47:44  smirnovd
  * Removed excessive print statements
  *
@@ -110,6 +119,7 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiTrackContainer.h"
+#include "StiPxl/StiPxlDetectorBuilder.h"
 #include "StiPxlHitLoader.h"
 #include "StPxlUtil/StPxlConstants.h"
 
@@ -200,7 +210,10 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                LOG_DEBUG << *pxlHit << "\n"
                          << *static_cast<StMeasuredPoint*>(pxlHit) << endm;
 
-               StiDetector *detector = _detector->getDetector(stiRow, stiSensor);
+               // The PXL sensitive layers are split into two halves so, access the corresponding
+               // sensor half to be later associated with this pxlHit
+               int sensorHalf = pxlHit->localPosition(0) < 0 ? 1 : 2;
+               const StiDetector *detector = static_cast<StiPxlDetectorBuilder*>(_detector)->getActiveDetector(pxlHit->sector(), pxlHit->ladder(), sensorHalf);
 
                if (!detector)
                   throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
