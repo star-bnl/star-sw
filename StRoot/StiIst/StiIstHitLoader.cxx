@@ -12,6 +12,7 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiTrackContainer.h"
+#include "StiIst/StiIstDetectorBuilder.h"
 #include "StiIstHitLoader.h"
 #include "StMcEvent/StMcTrack.hh"
 #include "StMcEvent/StMcIstHit.hh"
@@ -53,7 +54,6 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
       return;
    }
 
-   StiDetector *detector = 0;
    int nIsthits = col->numberOfHits();
    LOG_DEBUG << "StiIstHitLoader: IST Hits: " << nIsthits << endm;
 
@@ -86,7 +86,7 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                LOG_DEBUG << *hit << "\n"
                          << *static_cast<StMeasuredPoint*>(hit) << endm;
 
-               detector = _detector->getDetector(layer, ladder);
+               const StiDetector *detector = static_cast<StiIstDetectorBuilder*>(_detector)->getActiveDetector(ladder);
 
                if (!detector)
                   throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
