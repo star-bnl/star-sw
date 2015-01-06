@@ -1581,7 +1581,7 @@ void y2016()
     geom.svttFlag = "SVTTof";  geom.svttStat = 0;
     geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
     geom.fpdmFlag = "FPDMof";  geom.fpdmStat = 0;
-    geom.fgtdFlag = "FGTDvf";  geom.fgtdStat = 1; // Forward FGT
+    geom.fgtdFlag = "FGTDv56";  geom.fgtdStat = 1; // Forward FGT
     geom.hcalFlag = "HCALv1";  geom.hcalStat = 1; // HCAL
     // ================================================
     geom.magpFlag = "MAGPv1";  geom.magpStat = 1;
