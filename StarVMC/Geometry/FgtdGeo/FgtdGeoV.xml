@@ -165,6 +165,23 @@
 </Fill>
 
 
+<!--         
+  ============================================================       
+  Version 4.0  has 6 full discs
+  Edited for HCAL + FGT + FPS y2016 configaration (Prashanth)                            
+ ============================================================                            
+  -->                                                                                    
+<Fill name="FGST" comment="FGT Geometry  for year 2014"  >                               
+   <var name="config"  value="4.0"  comment="versioning of the FGST geometry data" />      
+   <var name="ndisk"   value="6"    comment="number of disks" />                         
+   <var name="nQuad"   value="4"    comment="number quadrants in a disks" />             
+   <var name="zdiscA"  value="{93.500,100.000,193.500,200.000,293.500,300.00}" comment=" z-center" />
+</Fill>                                 
+
+
+
+
+
 
 
  <!--  mmmmmmmmmmmmm  good MATERIALS mmmmmmmmmmmmmmmmm    -->   
