@@ -25,7 +25,6 @@ static const double MAXSTEP[]={0,DY,DZ,DEta,DPti,DTan};
 static const double ERROR_FACTOR = 2.;
 int StiTrackNodeHelper::_debug = 0;
 int StiTrackNodeHelper::mgCutStep=0;
-static int nCallpropagatePars=0;
 //______________________________________________________________________________
 int errTest(StiNodePars &predP,StiNodeErrs &predE,
             const StiHit *hit,StiHitErrs &hitErr,
@@ -92,37 +91,6 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
 //______________________________________________________________________________
 int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
                                      ,      StiNodePars &rotPars
-			             ,      StiNodePars &proPars){
-int err,errA,errB;
-#if 0
- nCallpropagatePars++;
- StiDebug::Break(nCallpropagatePars);
- err = propagateParsA(parPars,rotPars,proPars);
- errA = err;
- StiNodePars A = proPars;
-#endif
-
-#if 1
-
- err = propagateParsB(parPars,rotPars,proPars);
- errB=err;
-#endif
-
-#if 0
-//assert(errA==errB);
-
- for (int i=-2;i<8;i++) {
-   double qwe = A.P[i]-proPars.P[i];
-   qwe /= fabs(A.P[i]+proPars.P[i])+1e-3;
-   assert(qwe<1e-2);
- };
-#endif
- return err ;
-
-}
-//______________________________________________________________________________
-int StiTrackNodeHelper::propagateParsB(const StiNodePars &parPars
-                                     ,      StiNodePars &rotPars
 			             ,      StiNodePars &proPars)
 {
 static int nCall = 0; nCall++;
@@ -150,7 +118,8 @@ StiDebug::Break(nCall);
     
     double s = hlx.Path(999.,mySur,7,0,0,1);
     if (fabs(s)>999) {
-      s = hlx.Path(0.,0.);
+
+      s = hlx.Path(mDetector->getCenterX(),0.);
       hlx.Move(s);
       if(fabs(s)>999) return 1;
     } else {
@@ -170,127 +139,39 @@ assert(fabs(pow(myX[0],2)+pow(myX[1],2)-mX2*mX2)<1e-4*mX2);
     mX2 = hlx.Pos()[0];
   }
   mDx = mX2-mX1;
-  rho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
-  mSind = rho*mDx;
-  sinCA2=rotPars._sinCA + mSind; 
-//  if (fabs(sinCA2)> 1) return 2;
-  if (fabs(sinCA2)> 0.99) sinCA2 = (sinCA2<0)? -0.99:0.99;
-  cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
-  sumSin   = rotPars._sinCA+sinCA2;
-  sumCos   = rotPars._cosCA+cosCA2;
-  mDy = mDx*(sumSin/sumCos);
+  mRho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
+  mDSin = mRho*mDx;
+  mSinCA2=rotPars._sinCA + mDSin; 
+  if (fabs(mSinCA2)> 0.99) {
+    mSinCA2 = (mSinCA2<0)? -0.99:0.99;
+    mDSin = mSinCA2-rotPars._sinCA;
+    mDx = mDSin/mRho;
+    mX2 = mX1+mDx;
+  }
+  mCosCA2 = ::sqrt((1.-mSinCA2)*(1.+mSinCA2));
+  mSumSin   = rotPars._sinCA+mSinCA2;
+  mSumCos   = rotPars._cosCA+mCosCA2;
+  mDy = mDx*(mSumSin/mSumCos);
   mY2 = rotPars.y()+mDy;
   mDl0 = rotPars._cosCA*mDx+rotPars._sinCA*mDy;
-  mSind = mDl0*rho;
-  double cosd = cosCA2*rotPars._cosCA+sinCA2*rotPars._sinCA;
+  mSind = mDl0*mRho;
+  double cosd = mCosCA2*rotPars._cosCA+mSinCA2*rotPars._sinCA;
   if (fabs(mSind) < 0.01 && cosd>0) { //tiny angle
     mDl = mDl0*(1.+ mSind*mSind*(1./6 +mSind*mSind*3./40));
   } else {
-    mDl = atan2(mSind,cosd)/rho;
+    mDl = atan2(mSind,cosd)/mRho;
   }
   proPars.x() = mX2;
   proPars.y() = mY2;
   proPars.z() = rotPars.z() + mDl*rotPars.tanl();
-  proPars.eta() = (rotPars.eta()+rho*mDl);  					
+  proPars.eta() = (rotPars.eta()+mRho*mDl);  					
   proPars.eta() = NICE(proPars.eta());  					
   proPars.ptin() = rotPars.ptin();
   proPars.hz()   = mTargetHz;
   proPars.curv() = proPars.ptin()*mTargetHz;
   proPars.tanl() = rotPars.tanl();
-  proPars._sinCA   = sinCA2;
-  proPars._cosCA   = cosCA2;
-  proPars.ready();
-  ierr = proPars.check();
-  if (ierr) return 2;
-  return 0;
-} 
-//______________________________________________________________________________
-int StiTrackNodeHelper::propagateParsA(const StiNodePars &parPars
-                                     ,      StiNodePars &rotPars
-			             ,      StiNodePars &proPars)
-{
-static int nCall = 0; nCall++;
-StiDebug::Break(nCall);
-  int ierr = 0;
-  mAlpha = mTargetNode->_alpha - mParentNode->_alpha;
-  mCa=1;mSa=0;
-  parPars.check("1propagatePars");
-  rotPars = parPars;
-  if (fabs(mAlpha) > 1.e-6) { //rotation part
-
-    double xt1=parPars.x(); 
-    double yt1=parPars.y(); 
-    double cosCA0 = parPars._cosCA;
-    double sinCA0 = parPars._sinCA;
-
-    mCa = cos(mAlpha);
-    mSa = sin(mAlpha);
-
-    rotPars.x() =  xt1*mCa + yt1*mSa;
-    rotPars.y() = -xt1*mSa + yt1*mCa;
-    rotPars._cosCA =  cosCA0*mCa+sinCA0*mSa;
-    rotPars._sinCA = -cosCA0*mSa+sinCA0*mCa;
-    double nor = 0.5*(rotPars._sinCA*rotPars._sinCA+rotPars._cosCA*rotPars._cosCA +1);
-    rotPars._cosCA /= nor;
-    rotPars._sinCA /= nor;
-    rotPars.eta()= NICE(parPars.eta()-mAlpha); 
-  }// end of rotation part
-  ierr = rotPars.check();
-  if (ierr) return 1;
-  
-//  	Propagation 
-  mX1 = rotPars.x();
-  mX2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHitPars[0];
-  mDx = mX2-mX1;
-  rho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
-  mSind = rho*mDx;
-  sinCA2=rotPars._sinCA + mSind; 
-  if (sinCA2> 0.99) sinCA2= 0.99;
-  if (sinCA2<-0.99) sinCA2=-0.99;
-  cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
-  sumSin   = rotPars._sinCA+sinCA2;
-  sumCos   = rotPars._cosCA+cosCA2;
-  mDy = mDx*(sumSin/sumCos);
-  mY2 = rotPars.y()+mDy;
-  mDl0 = rotPars._cosCA*mDx+rotPars._sinCA*mDy;
-  mSind = mDl0*rho;
-  double cosd = cosCA2*rotPars._cosCA+sinCA2*rotPars._sinCA;
-  if (fabs(mSind) < 0.02 && cosd>0) { //tiny angle
-    mDl = mDl0*(1.+mSind*mSind/6);
-  } else {
-    mDl = atan2(mSind,cosd)/rho;
-  }
-  if (mDetector && mDetector->getShape()->getShapeCode()>1) { // non planar shape
-    double rN = mDetector->getPlacement()->getNormalRadius();
-    double tH = mDetector->getShape()->getThickness();
-    double save[] = {mX2,mY2,cosCA2,sinCA2,mDl};
-    for (int it=0;it<100;it++) {
-       double dif = rN*rN-mX2*mX2-mY2*mY2;
-       if (fabs(dif)<rN*tH*1e-6) break;
-       double t =  0.5*dif/(mX2*cosCA2+mY2*sinCA2);
-       if (fabs(t)<tH*1e-2) break;
-       if (fabs(t) > 0.1*rN) t = (t>0)? 0.1*rN:-0.1*rN;
-       double ang = t*rotPars.curv();
-       if (fabs(ang)>0.1) { t*=0.1/fabs(ang); ang*= 0.1/fabs(ang);}
-       mX2 += cosCA2*t; mY2+=sinCA2*t; mDl+=t;
-       double c = cosCA2;
-       cosCA2 = c*cos(ang)-sinCA2*sin(ang);
-       sinCA2 = c*sin(ang)+sinCA2*cos(ang);
-       if (it<20) continue;
-       mX2=save[0];mY2=save[1];cosCA2=save[2];sinCA2=save[3];mDl=save[4];
-       break;
-  } }
-  proPars.x() = mX2;
-  proPars.y() = mY2;
-  proPars.z() = rotPars.z() + mDl*rotPars.tanl();
-  proPars.eta() = (rotPars.eta()+rho*mDl);  					
-  proPars.eta() = NICE(proPars.eta());  					
-  proPars.ptin() = rotPars.ptin();
-  proPars.hz()   = mTargetHz;
-  proPars.curv() = proPars.ptin()*mTargetHz;
-  proPars.tanl() = rotPars.tanl();
-  proPars._sinCA   = sinCA2;
-  proPars._cosCA   = cosCA2;
+  proPars._sinCA   = mSinCA2;
+  proPars._cosCA   = mCosCA2;
   proPars.ready();
   ierr = proPars.check();
   if (ierr) return 2;
@@ -326,25 +207,25 @@ int StiTrackNodeHelper::propagateFitd()
 int StiTrackNodeHelper::propagateMtx()
 {
 //  	fYE == dY/dEta
-  double fYE= mDx*(1.+mBestParentRotPars._cosCA*cosCA2+mBestParentRotPars._sinCA*sinCA2)/(sumCos*cosCA2);
+  double fYE= mDx*(1.+mBestParentRotPars._cosCA*mCosCA2+mBestParentRotPars._sinCA*mSinCA2)/(mSumCos*mCosCA2);
 //	fZE == dZ/dEta
-  double dLdEta = mDy/cosCA2;
+  double dLdEta = mDy/mCosCA2;
   double fZE =  mBestPars.tanl()*dLdEta;
 //  	fZT == dZ/dTanL; 
   double fZT= mDl; 
 
 
 //	fEC == dEta/dRho
-  double fEC = mDx/cosCA2;
+  double fEC = mDx/mCosCA2;
 //	fYC == dY/dRho
-  double fYC=(mDl0)/sumCos*fEC;
+  double fYC=(mDl0)/mSumCos*fEC;
 // 	fZC == dZ/dRho
-  double dang = mDl*rho;
+  double dang = mDl*mRho;
   double C2LDX = mDl*mDl*(
-               0.5*sinCA2*pow((1+pow(dang/2,2)*sinX(dang/2)),2) +
-                   cosCA2*dang*sinX(dang));
+               0.5*mSinCA2*pow((1+pow(dang/2,2)*sinX(dang/2)),2) +
+                   mCosCA2*dang*sinX(dang));
 
-  double fZC = mBestPars.tanl()*C2LDX/cosCA2;
+  double fZC = mBestPars.tanl()*C2LDX/mCosCA2;
 
   fEC*=mTargetHz; fYC*=mTargetHz;fZC*=mTargetHz;
     
@@ -352,9 +233,9 @@ int StiTrackNodeHelper::propagateMtx()
   mMtx.reset();
 //  X related derivatives
   mMtx.A[0][0] = -1;
-  mMtx.A[1][0] = -sinCA2/cosCA2; 
-  mMtx.A[2][0] = -mBestPars.tanl()/cosCA2 ;
-  mMtx.A[3][0] = -mBestPars.curv()/cosCA2 ;       ;
+  mMtx.A[1][0] = -mSinCA2/mCosCA2; 
+  mMtx.A[2][0] = -mBestPars.tanl()/mCosCA2 ;
+  mMtx.A[3][0] = -mBestPars.curv()/mCosCA2 ;       ;
 
   mMtx.A[1][3]=fYE; mMtx.A[1][4]=fYC; mMtx.A[2][3]=fZE;
   mMtx.A[2][4]=fZC; mMtx.A[2][5]=fZT; mMtx.A[3][4]=fEC;
@@ -890,28 +771,6 @@ assert(calculator);
 
 
   mMcs._ptinCorr = ::sqrt(e2)*dE/p2;
-if (fabs(mMcs._ptinCorr)>1e-4) {
-  double dens = calculator->getDens();
-  StiDebug::Count("HelpCorr.new",mMcs._ptinCorr,-0.2,0.2);
-  StiDebug::Count("HelpDens:rxy.new",mBestPars.rxy(),dens
-                                    ,0,200,-0,3);
-  StiDebug::Count("Helpdens:z.new"  ,mBestPars.z()  ,dens
-                                    ,-200,200,0,3);
-  double phig = (mBestPars.phi()+mTargetNode->getAlpha())/M_PI*180;
-  StiDebug::Count("Helpdens:phi.new",phig,dens
-                                    ,-180,180,0,3);
-//   if (dens >2 && dens <3) {
-//   if (mBestPars.z()<-50 ) {
-//   if (mBestPars.rxy()<3,5) {
-// static int nQwe=0; nQwe++; if (nQwe>1000) exit(0);  
-//     printf("#### det=%s mat=%s r=%g d=%g\n",mDetector->getName().c_str()
-//           ,mDetector->getMaterial()->getName().c_str()
-// 	  ,mBestPars.rxy(),dens);
-// }}}
-// 
-
-
-}   
 
 
   if (fabs(mMcs._ptinCorr)>0.1) mMcs._ptinCorr = (dE<0)? -0.1:0.1;
