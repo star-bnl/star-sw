@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148.2.7 2015/01/06 00:38:43 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148.2.8 2015/01/07 02:36:39 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148.2.8  2015/01/07 02:36:39  perev
+ * kFarFromBeam 10 ==> 2 (Hao)
+ *
  * Revision 2.148.2.7  2015/01/06 00:38:43  perev
  * Cylindrical shape splitted into two: Full cylinder & sector of cylinder.
  * Full cylinder could be rotated many times, sector not.
@@ -547,7 +550,7 @@ using namespace std;
 static const double kMaxEta = 1.25; // 72 degrees for laser tracks
 static const double kMaxSinEta = sin(kMaxEta);
 static const double kMaxCur = 0.2;
-static const double kFarFromBeam = 10.;
+static const double kFarFromBeam = 2.;
 static const Double_t kMaxZ = 250;
 static const Double_t kMaxR = 250;
 StiNodeStat StiKalmanTrackNode::mgP; 
@@ -1019,7 +1022,6 @@ StiDebug::Break(nCall);
   position = propagate(endVal,shapeCode,dir); 
 
   if (position) return position;
-  assert(mFP.x() > 0.);
   propagateError();
 
   // Multiple scattering
@@ -1048,16 +1050,6 @@ StiDebug::Break(nCall);
   TCircle tc(&mFP.x(),&mFP._cosCA,mFP.curv());
   double xy[2]; xy[0]=vertex->x(),xy[1]=vertex->y();
   double s = tc.Path(xy); tc.Move(s);
-  if (fabs(mFP.curv())>0.01) {
-
-    const double *pos = tc.Pos();
-    double r21 = pow(pos[0]-xy[0],2)+pow(pos[1]-xy[1],2);
-    double s2 = s - M_PI/fabs(mFP.curv());
-    TCircle tc2(tc); tc2.Move(s2);
-    pos = tc2.Pos();
-    double r22 = pow(pos[0]-xy[0],2)+pow(pos[1]-xy[1],2);
-    if (r22<r21) tc = tc2;
-  }
   double ang = atan2(tc.Dir()[1],tc.Dir()[0]);
   vertex->rotate(ang);
   rotate(ang);
@@ -1642,7 +1634,6 @@ static int nCall=0; nCall++;
   mFP.curv()  = cur;
   mFP.tanl()  = tanl;
   mFP.ready();
-  assert(!_detector || mFP.x() > 0.);
   mFP.hz() = getHz();
 
 // update error matrix
