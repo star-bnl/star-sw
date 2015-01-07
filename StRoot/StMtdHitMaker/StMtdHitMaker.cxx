@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.20 2014/09/25 14:36:25 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.21 2015/01/06 20:37:36 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -39,17 +39,19 @@ ClassImp(StMtdHitMaker);
 
 //_____________________________________________________________
 StMtdHitMaker::StMtdHitMaker(const char *name):StRTSBaseMaker("mtd",name),
-					       mStEvent(0),fMtd(0),
-					       mNValidTrays(-1),        //! number of valid MTD trays
-					       mMtdCollection(0)        //! pointer to StMtdCollection
+					       mStEvent(0),fMtd(0), mUseMuDst(0),
+					       mCosmicFlag(kFALSE), mCosmicTrigTimeWinFile(""),
+					       mTriggerWndSelection(kTRUE), mSwapBacklegInRun13(0),
+					       mYear(-1),
+					       mNValidTrays(-1),         //! number of valid MTD trays
+					       mMtdCollection(0),        //! pointer to StMtdCollection
+					       mINLCorr(0)
 {
+  LOG_DEBUG << "StMtdHitMaker::ctor"  << endm;
+ 
   Int_t mStripMap[24]={21,12,32,20,14,35,25,13,30,24,11,31,34,22,10,37,27,17,33,23,16,36,26,15};
   for(int i=0;i<24;i++) mtdStrip[i] = mStripMap[i];
-  mUseMuDst = 0;
-  mSwapBacklegInRun13 = kFALSE;
-  mTriggerWndSelection = kTRUE;
-  //  hxhyhz=new TH3D("hxhyhz","hxhyhz",10,19.5,29.5,10,-0.5,9.5,30,-0.5,29.5);
-  LOG_DEBUG << "StMtdHitMaker::ctor"  << endm;
+    //  hxhyhz = new TH3D("hxhyhz","hxhyhz",10,19.5,29.5,10,-0.5,9.5,30,-0.5,29.5);
 }
 
 
@@ -72,11 +74,11 @@ void StMtdHitMaker::Clear(Option_t* option)
 Int_t StMtdHitMaker::Init() 
 {
   Clear("");
-  /// Initialize Tray-to-Tdig map (-1 means no TDIG board)
+
   memset(mTray2TdigMap,-1,sizeof(mTray2TdigMap));
   memset(mTrayId,0,sizeof(mTrayId));
   memset(mTdigId,0,sizeof(mTdigId));
-  
+
   for(Int_t i=0;i<gMtdNModulesAll;i++)
     {
       mTriggerTimeWindow[i][0] = 0;
@@ -153,6 +155,21 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber)
       mTriggerTimeWindow[i][0] = mtdTriggerTimeTable->minTriggerTime[i];
       mTriggerTimeWindow[i][1] = mtdTriggerTimeTable->maxTriggerTime[i];
       LOG_DEBUG << "(" << i/5 << "," << i%5 << "): " << mTriggerTimeWindow[i][0] << " - " << mTriggerTimeWindow[i][1] << endm;
+    }
+
+  // pick up local trigger time window cuts for cosmic ray data
+  if(mTriggerWndSelection && mCosmicFlag && mCosmicTrigTimeWinFile.Length()>0)
+    {
+      LOG_WARN << "Local trigger time window cuts are picked up for cosmic ray data." << endm;
+      ifstream inData;
+      inData.open(mCosmicTrigTimeWinFile.Data());
+      Int_t backleg, module;
+
+      for(Int_t i=0; i<gMtdNModulesAll; i++)
+  	{
+  	  inData >> backleg >> module >>  mTriggerTimeWindow[i][0] >>  mTriggerTimeWindow[i][1];
+  	}
+      inData.close();
     }
   
   /// INL Table provided by TOF
@@ -262,11 +279,32 @@ StMtdCollection *StMtdHitMaker::GetMtdCollection()
 	  if(muMtdCollection) ahit = muMtdCollection->RawMtdHit(i);
 	  else ahit = mMuDst->mtdRawHit(i);
 	  Int_t backleg = (Int_t)ahit->backleg();
-	  if(mYear==13 && mSwapBacklegInRun13)
+
+	  if(mYear==13 && mSwapBacklegInRun13 !=0 )
 	    {
-	      if(backleg==25) backleg = 26;
-	      else if (backleg==26) backleg = 25;
+	      // 0 - do not swap; 
+	      // 1 - swapping scheme for first part of Run13, i.e. days 76-126
+	      // 2 - swapping scheme for second part of Run13, i.e. days 129-161
+	      if(mSwapBacklegInRun13==1)
+		{
+		  if(backleg==25) backleg = 26;
+		  else if (backleg==26) backleg = 25;
+		}
+	      else if (mSwapBacklegInRun13==2)
+		{
+		  if(ahit->flag()<0)
+		    {
+		      if(backleg==25) backleg = 26;
+		      else if (backleg==26) backleg = 25;
+		    }
+		}
+	      else
+		{
+		  LOG_FATAL << "Please check your setup for mSwapBacklegInRun13" << endm;
+		  return 0;
+		}
 	    }
+
 	  mMtdCollection->addRawHit(new StMtdRawHit(ahit->flag(),(UChar_t)backleg,ahit->channel(),ahit->tdc()));
 	}
     }
@@ -368,6 +406,14 @@ Int_t StMtdHitMaker::UnpackMtdRawData()
 	    {
 	      halfbacklegid =  dataword&0x01;    
 	      backlegid     = (dataword&0x0FE)>>1;
+
+	      // swap backleg 25 and 26 for run 13
+	      if(mYear == 13)
+		{
+		  if(backlegid==25) backlegid = 26;
+		  else if (backlegid==26) backlegid = 25;
+		}
+
 	      continue;
 	    }
 	  // range checks
@@ -412,13 +458,6 @@ Int_t StMtdHitMaker::UnpackMtdRawData()
 		}
 	    }
 	  if(itray<1||itray>5) LOG_FATAL<<" Wrong tray ID or mTray2TdigMap missing! backleg = "<<backlegid<<" trayid = "<<itray<<" tdigid ="<<tdigid<<endm;
-
-	  // swap backleg 25 and 26 for run 13
-	  if(mYear == 13)
-	    {
-	      if(backlegid==25) backlegid = 26;
-	      else if (backlegid==26) backlegid = 25;
-	    }
 	  
 	  /// Fill MTD raw hit structures
 	  MtdRawHit temphit={0};
@@ -869,7 +908,7 @@ void StMtdHitMaker::fillMtdHitCollection()
 	  if(mTriggerWndSelection)
 	    {
 	      // trigger time window cuts
-	      float timeDiff = mLeadingEdgeTime.first - 25.*(mTriggerTimeStamp[iFiber] & 0xfff);
+	      float timeDiff = (mLeadingEdgeTime.first+mLeadingEdgeTime.second)/2 - 25.*(mTriggerTimeStamp[iFiber] & 0xfff);
 	      while(timeDiff<0) timeDiff += 51200;
 	      int igtray = (iBackLeg-1)*gMtdNModules+iTray;
 	      if(timeDiff<mTriggerTimeWindow[igtray-1][0] || timeDiff>mTriggerTimeWindow[igtray-1][1]) continue;
@@ -998,8 +1037,17 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.20 2014/09/25 14:36:25 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.21 2015/01/06 20:37:36 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.21  2015/01/06 20:37:36  marr
+// 1. Add an option to load trigger time window cuts from local files for cosmic ray data.
+// This is motivated by the fact that the cuts are different for cosmic ray and collision data.
+// 2. The time of a MTD hit is calcualted as: (mLeadingEdgeTime.first+mLeadingEdgeTime.second)/2
+// 3. Add the scheme to swap backlegs 25 & 26 for the second part of Run13 data when running
+// MuDst in afterburner mode. Note that the scheme is different for the first part of Run13 data.
+// Different schemes can be select using function setSwapBacklegInRun13(Int_t swap).
+// 4. Clean up in header file
+//
 // Revision 1.20  2014/09/25 14:36:25  marr
 // Do not automatically print out hit information to log file when running on muDst
 //
