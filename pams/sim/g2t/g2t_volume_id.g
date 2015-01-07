@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.76 2015/01/06 21:47:34 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.77 2015/01/07 17:34:27 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.77  2015/01/07 17:34:27  jwebb
+* Remove print statements which Akio snuck by me...
+*
 * Revision 1.76  2015/01/06 21:47:34  jwebb
 * Updated g2t volume ID for FMS preshower
 *
@@ -902,7 +905,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              slat=n2-21-19-21
           endif
           volume_id=100000+ew*10000+quad*1000+layr*100+slat  
-          write(*,*) 'FMSPS ',n1,n2,quad,layr,slat,volume_id
+*$$$      write(*,*) 'FMSPS ',n1,n2,quad,layr,slat,volume_id
          endif
         }
 *24*                                 Dmitry Arkhipkin
