@@ -26,6 +26,7 @@ static void Count(const char *key,double valx,double valy);
 static void Count(const char *key,double valx, double valy
                                  ,double leftx,double ritex
 				 ,double lefty,double ritey);
+static void SaveAll(const char *type=".png");
 static void Sumary();
 static void   show(StiKalmanTrack *kt);
 static void   Init();

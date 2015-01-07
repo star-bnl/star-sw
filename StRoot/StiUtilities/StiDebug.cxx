@@ -72,7 +72,6 @@ void StiDebug::tally(const char *name,int val)
 //______________________________________________________________________________
 void StiDebug::Finish()
 {
-  Sumary();
 }
 //______________________________________________________________________________
 void StiDebug::Break(int kase)
@@ -266,6 +265,19 @@ void StiDebug::Count(const char *key,double valx,double valy)
   TH1 *&h = (TH1*&)myDebMap[key];
   if (!h) { h = new TH2F(key,key,100,0.,0.,100,0,0);}
   h->Fill(valx,valy);
+}
+//______________________________________________________________________________
+void  StiDebug::SaveAll(const char *ext)
+{
+  TIter nextCanv(gROOT->GetListOfCanvases());
+  TCanvas *obj=0;
+  while((obj=(TCanvas*)nextCanv())) {// loop over Canvas
+    if (!obj->InheritsFrom("TCanvas")) 	continue;
+    TString ts(obj->GetTitle());ts+=ext;
+    obj->SaveAs(ts);
+  }
+  while(!gSystem->ProcessEvents()){}; 
+
 }
 //______________________________________________________________________________ 
 void StiDebug::Sumary()
