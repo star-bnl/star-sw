@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148.2.8 2015/01/07 02:36:39 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148.2.9 2015/01/07 22:42:31 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148.2.9  2015/01/07 22:42:31  perev
+ * Method isPrimary added
+ *
  * Revision 2.148.2.8  2015/01/07 02:36:39  perev
  * kFarFromBeam 10 ==> 2 (Hao)
  *
@@ -1449,7 +1452,19 @@ int StiKalmanTrackNode::isEnded() const
 //______________________________________________________________________________
 int StiKalmanTrackNode::isDca() const
 {
-   return (!_detector && fabs(mFP.x())<=0);   
+   if (_detector) 	return 0;
+   if (fabs(mFP.x())>0) return 0;
+   if (!_hit)  		return 1;
+   if (fabs(_hit->x())+fabs(_hit->y())+fabs(_hit->z())<=0) return 1;
+   return 0;   
+}		
+//______________________________________________________________________________
+int StiKalmanTrackNode::isPrimary() const
+{
+   if (_detector) 	return 0;
+   if (!_hit)  		return 0;
+   if (fabs(_hit->x())+fabs(_hit->y())+fabs(_hit->z())<=0) return 0;
+   return 1;   
 }		
 		
 //______________________________________________________________________________

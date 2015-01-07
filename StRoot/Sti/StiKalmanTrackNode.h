@@ -191,6 +191,7 @@ const StiELoss *getELoss()const		{return mELoss;}
   void getGlobalMomentum(double p[3], double e[6]=0) const;
   int  isEnded() const;	
   int  isDca()   const;	
+  int  isPrimary()   const;	
   
   /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
   int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet, int dir);	//throw (Exception);
