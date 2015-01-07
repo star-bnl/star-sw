@@ -119,11 +119,6 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-      LOG_DEBUG << "Weight/Daughters/Material/A/Z : " << sensorVol->Weight() << "/"
-                << sensorVol->GetNdaughters() << "/" << sensorVol->GetMaterial()->GetName() << "/"
-                << sensorVol->GetMaterial()->GetA() << "/" << sensorVol->GetMaterial()->GetZ() << endm
-                << "DZ/DY/DX : " << sensorBBox->GetDZ() << "/" << sensorBBox->GetDY() << "/" << sensorBBox->GetDX() << endm;
-
       // Convert center of the sensor geobox to coordinates in the global coordinate system
       double sensorXyzLocal[3]  = {};
       double sensorXyzGlobal[3] = {};
@@ -160,36 +155,30 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       // Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
+      StiIsActiveFunctor* isActive = _active ? new StiIstIsActiveFunctor :
+         static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
-      stiDetector->setName(geoPath.str().c_str());
-      stiDetector->setShape(stiShape);
-      stiDetector->setPlacement(pPlacement);
-      stiDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
-      stiDetector->setMaterial(silicon);
+      stiDetector->setProperties(geoPath.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
       stiDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
-
-      if (_active) {  stiDetector->setIsActive(new StiIstIsActiveFunctor);}
-      else         {  stiDetector->setIsActive(new StiNeverActiveFunctor);}
 
       // Adding detector, note that no keys are set in IST!
       add(stiRow, iLadder-1, stiDetector);
-
-      // Whole bunch of debugging information
-      Float_t rad2deg = 180.0 / 3.1415927;
-      LOG_DEBUG << "===>NEW:IST:stiDetector:Name             = " << stiDetector->getName()                     << endm
-                << "===>NEW:IST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm
-                << "===>NEW:IST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm
-                << "===>NEW:IST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm
-                << "===>NEW:IST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm
-                << "===>NEW:IST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm
-                << "===>NEW:IST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm
-                << "===>NEW:IST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm
-                << "===>NEW:IST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm
-                << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm
-                << "===>NEW:IST:stiDetector:Ladder           = " << iLadder                                    << endm
-                << "===>NEW:IST:stiDetector:sensor           = " << iSensor                                    << endm
-                << "===>NEW:IST:stiDetector:Active?          = " << stiDetector->isActive()                    << endm;
    }
+}
+
+
+/**
+ * Returns the active StiDetector corresponding to a sensitive layer in IST. An
+ * active volume can have hits associated with it. The ladder id is expected to
+ * follow the human friendly numbering scheme, i.e.
+ *
+ * 1 <= ladder <= kIstNumLadders
+ *
+ * In this builder the active IST layers are added in stiRow = 0.
+ */
+const StiDetector* StiIstDetectorBuilder::getActiveDetector(int ladder) const
+{
+   return (ladder < 1 || ladder > kIstNumLadders) ? 0 : getDetector(0, ladder-1);
 }
 
 
@@ -257,19 +246,19 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
       StiPlacement *digiBoardPlacement = createPlacement(*transMatrix, digiBoardOffset);
 
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
-      setDetectorProperties(stiDetector, pfx+"IBAM_CF_BACKING", new StiNeverActiveFunctor, cfBackingShape, cfBackingPlacement, getGasMat(), cfBackingMaterial);
+      stiDetector->setProperties(pfx+"IBAM_CF_BACKING", new StiNeverActiveFunctor, cfBackingShape, cfBackingPlacement, getGasMat(), cfBackingMaterial);
       add(stiRow, iLadder-1, stiDetector);
 
       stiDetector = getDetectorFactory()->getInstance();
-      setDetectorProperties(stiDetector, pfx+"IBAM_ALUM_CONNECTOR", new StiNeverActiveFunctor, connectorShape, alumConnectorPlacement, getGasMat(), alumConnectorMaterial);
+      stiDetector->setProperties(pfx+"IBAM_ALUM_CONNECTOR", new StiNeverActiveFunctor, connectorShape, alumConnectorPlacement, getGasMat(), alumConnectorMaterial);
       add(stiRow+1, iLadder-1, stiDetector);
 
       stiDetector = getDetectorFactory()->getInstance();
-      setDetectorProperties(stiDetector, pfx+"IBAM_GTEN_CONNECTOR", new StiNeverActiveFunctor, connectorShape, gtenConnectorPlacement, getGasMat(), gtenConnectorMaterial);
+      stiDetector->setProperties(pfx+"IBAM_GTEN_CONNECTOR", new StiNeverActiveFunctor, connectorShape, gtenConnectorPlacement, getGasMat(), gtenConnectorMaterial);
       add(stiRow+2, iLadder-1, stiDetector);
 
       stiDetector = getDetectorFactory()->getInstance();
-      setDetectorProperties(stiDetector, pfx+"IBAM_DIGI_BOARD", new StiNeverActiveFunctor, digiBoardShape, digiBoardPlacement, getGasMat(), digiBoardMaterial);
+      stiDetector->setProperties(pfx+"IBAM_DIGI_BOARD", new StiNeverActiveFunctor, digiBoardShape, digiBoardPlacement, getGasMat(), digiBoardMaterial);
       add(stiRow+3, iLadder-1, stiDetector);
    }
 
@@ -279,14 +268,14 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    StiCylindricalShape* ibamBracketShape = new StiCylindricalShape("IBAM_BRACKET", 0.635, 0.2, 12, 2*M_PI);
    StiPlacement* ibamBracketEastPlacement = new StiPlacement(0, 11.9, 0,  29.34);
    StiPlacement* ibamBracketWestPlacement = new StiPlacement(0, 11.9, 0, -29.6);
-   StiMaterial* ibamBracketMaterial = new StiMaterial("IBAM_BRACKET", 6.089, 12.149, 0.2601, 160);
+   StiMaterial* ibamBracketMaterial = new StiMaterial("IBAM_BRACKET", 6.089, 12.149, 24*0.2601, 160);
 
    StiDetector* stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"IBAM_BRACKET_EAST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketEastPlacement, getGasMat(), ibamBracketMaterial);
+   stiDetector->setProperties(pfx+"IBAM_BRACKET_EAST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketEastPlacement, getGasMat(), ibamBracketMaterial);
    add(getNRows(), 0, stiDetector);
 
    stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"IBAM_BRACKET_WEST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketWestPlacement, getGasMat(), ibamBracketMaterial);
+   stiDetector->setProperties(pfx+"IBAM_BRACKET_WEST", new StiNeverActiveFunctor, ibamBracketShape, ibamBracketWestPlacement, getGasMat(), ibamBracketMaterial);
    add(getNRows(), 0, stiDetector);
 
    // Implement cooling line and cablings in transition area
@@ -295,21 +284,8 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    StiMaterial* icctMaterial = new StiMaterial("ICCT", 26.8, 56.9, 0.673, 17.9);
 
    stiDetector = getDetectorFactory()->getInstance();
-   setDetectorProperties(stiDetector, pfx+"ICCT", new StiNeverActiveFunctor, icctShape, icctPlacement, getGasMat(), icctMaterial);
+   stiDetector->setProperties(pfx+"ICCT", new StiNeverActiveFunctor, icctShape, icctPlacement, getGasMat(), icctMaterial);
    add(getNRows(), 0, stiDetector);
-}
-
-
-void StiIstDetectorBuilder::setDetectorProperties(StiDetector* detector, std::string name, StiIsActiveFunctor* activeFunctor, StiShape* shape, StiPlacement* placement, StiMaterial* gas, StiMaterial* material)
-{
-   if (!detector) return;
-
-   detector->setName(name.c_str());
-   detector->setIsActive(activeFunctor);
-   detector->setShape(shape);
-   detector->setPlacement(placement);
-   detector->setGas(gas);
-   detector->setMaterial(material);
 }
 
 

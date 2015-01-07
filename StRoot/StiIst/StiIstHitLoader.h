@@ -3,13 +3,8 @@
 
 #include "Sti/StiHitLoader.h"
 
-#include "StEvent.h"
-class StMcEvent;
-class StMcTrack;
-class StiMcTrack;
+class StEvent;
 class StiDetectorBuilder;
-class StTpcHit;
-class StMcIstHit;
 
 
 /*!
@@ -27,21 +22,11 @@ written by Mike Miller.
 class StiIstHitLoader : public StiHitLoader<StEvent, StiDetectorBuilder>
 {
 public:
-   StiIstHitLoader();
-   StiIstHitLoader(StiHitContainer *hitContainer,
-                   Factory<StiHit> *hitFactory,
-                   StiDetectorBuilder *detector);
-   virtual ~StiIstHitLoader();
-   virtual void loadHits(StEvent *source,
-                         Filter<StiTrack> *trackFilter,
-                         Filter<StiHit> *hitFilter);
 
-protected:
-   // temporary hit ptr used to determine whether mc hits from a given event are
-   // already loaded.
-   UInt_t n;
-   StMcIstHit *saveHit;
-   long evNum;
+   StiIstHitLoader();
+   StiIstHitLoader(StiHitContainer *hitContainer, Factory<StiHit> *hitFactory, StiDetectorBuilder *detector);
+   virtual ~StiIstHitLoader();
+   virtual void loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter);
 };
 
 #endif

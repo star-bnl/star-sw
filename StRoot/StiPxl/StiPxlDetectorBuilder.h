@@ -13,6 +13,7 @@ public:
    StiPxlDetectorBuilder(bool active, bool buildIdealGeom=true);
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
+   const StiDetector* getActiveDetector(int sector, int ladder, int sensorHalf) const;
 
 protected:
 
@@ -22,6 +23,7 @@ protected:
 private:
 
    void buildInactiveVolumes();
+   static void convertSensor2StiId(int sector, int ladder, int sensorHalf, int& stiRow, int& stiSensor);
 };
 
 #endif

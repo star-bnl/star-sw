@@ -30,9 +30,5 @@ protected:
 
    bool          mBuildIdealGeom;
    StSstDbMaker *mSstDb;
-
-private:
-
-   static void setDetectorProperties(StiDetector* detector, std::string name, StiIsActiveFunctor* activeFunctor, StiShape* shape, StiPlacement* placement, StiMaterial* gas, StiMaterial* material);
 };
 #endif
