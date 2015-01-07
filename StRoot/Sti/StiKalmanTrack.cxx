@@ -1,11 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.131.2.3 2015/01/05 22:56:50 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.131.2.3 2015/01/05 22:56:50 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.4 2015/01/07 22:41:43 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.4 2015/01/07 22:41:43 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.131.2.4  2015/01/07 22:41:43  perev
+ * Test for vertex replaced by test for detector. Both, vertex node and dca node
+ * have detector==0. So thi test is more robust
+ *
  * Revision 2.131.2.3  2015/01/05 22:56:50  perev
  * Assert forr accuracy decreased from 1e-6 to 1e-4
  * If inner node not found, return with error, Very rare case
@@ -1526,7 +1530,7 @@ static const double kMaxXi2Vtx = StiKalmanTrackFitterParameters::instance()->get
     StiKalmanTrackNode *node;
     StiKTNIterator it = begin();
     for (;(node=it());it++){
-      if (node == vertexNode)				continue;
+      if (!node->getDetector())				continue;
       StiHit *hit = node->getHit();
       if(!hit) 						continue;
       hit->setTimesUsed(0);
