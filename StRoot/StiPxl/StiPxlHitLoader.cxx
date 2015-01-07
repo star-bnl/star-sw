@@ -1,7 +1,25 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.11 2014/12/19 18:09:01 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.15 2015/01/06 20:57:50 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.15  2015/01/06 20:57:50  smirnovd
+ * Reimplemented segmentation of PXL sensor to two halves.
+ *
+ * In the sensor's local coordinate system the first half is for x<0 and the second
+ * one is for x>0. The notion of inner and outter halves is not critical and in
+ * fact confusing because it depends on the original rotation around the z axis.
+ * For example, two rotations of phi=5 and phi=-175 give us essentially the same
+ * layer but result in swapped inner and outter halves.
+ *
+ * Revision 1.14  2015/01/06 15:47:44  smirnovd
+ * Removed excessive print statements
+ *
+ * Revision 1.13  2015/01/06 15:47:35  smirnovd
+ * Simplified debug output by reusing existing streamers of StHit class and its daughters
+ *
+ * Revision 1.12  2015/01/05 15:40:04  smirnovd
+ * StiXxxHitLoader: Changes in whitespace only
+ *
  * Revision 1.11  2014/12/19 18:09:01  smirnovd
  * Do not set StiDetector members _key1 and _key2 as they are not really used anywhere
  *
@@ -101,6 +119,7 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiTrackContainer.h"
+#include "StiPxl/StiPxlDetectorBuilder.h"
 #include "StiPxlHitLoader.h"
 #include "StPxlUtil/StPxlConstants.h"
 
@@ -110,16 +129,13 @@ StiPxlHitLoader::StiPxlHitLoader()
 {}
 
 
-StiPxlHitLoader::StiPxlHitLoader(StiHitContainer *hitContainer,
-                                 Factory<StiHit> *hitFactory,
-                                 StiDetectorBuilder *detector)
-   : StiHitLoader<StEvent, StiDetectorBuilder>("PixelHitLoader", hitContainer, hitFactory, detector)
+StiPxlHitLoader::StiPxlHitLoader(StiHitContainer *hitContainer, Factory<StiHit> *hitFactory,
+   StiDetectorBuilder *detector) :
+   StiHitLoader<StEvent, StiDetectorBuilder>("PixelHitLoader", hitContainer, hitFactory, detector)
 {}
 
 
-void StiPxlHitLoader::loadHits(StEvent *source,
-                                 Filter<StiTrack> *trackFilter,
-                                 Filter<StiHit> *hitFilter)
+void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter)
 {
    LOG_INFO << " -I- Started" << endl;
 
@@ -139,8 +155,6 @@ void StiPxlHitLoader::loadHits(StEvent *source,
    }
 
    //Added by Michael Lomnitz (KSU):  Loops over Sector/Ladder/Sensor to obtain the whole hit collection
-   int nHit = 0;
-
    UInt_t numberOfSectors = pxlHitCollection->numberOfSectors();
 
    for (UInt_t i = 0; i < numberOfSectors; i++)
@@ -193,30 +207,16 @@ void StiPxlHitLoader::loadHits(StEvent *source,
                   stiSensor = (pxlHit->sector() - 1) * (kNumberOfPxlLaddersPerSector - 1) + (pxlHit->ladder() - 1);
                }
 
-               LOG_DEBUG << " hit sector : " << (int) pxlHit->sector()
-                         << " ladder : " << (int) pxlHit->ladder()
-                         << " sensor : " << (int) pxlHit->sensor() << endm;
-               LOG_DEBUG << "stiRow: " << stiRow << ", stiSensor: " << stiSensor << endm;
-               LOG_DEBUG << "X/Y/Z    : " << pxlHit->position().x() << "/" << pxlHit->position().y() << "/" << pxlHit->position().z() << endm;
-               LOG_DEBUG << "Xl/Yl/Zl : " << pxlHit->localPosition(0) << "/" << pxlHit->localPosition(1) << "/" << pxlHit->localPosition(2) << endm;
+               LOG_DEBUG << *pxlHit << "\n"
+                         << *static_cast<StMeasuredPoint*>(pxlHit) << endm;
 
-               StiDetector *detector = _detector->getDetector(stiRow, stiSensor);
+               // The PXL sensitive layers are split into two halves so, access the corresponding
+               // sensor half to be later associated with this pxlHit
+               int sensorHalf = pxlHit->localPosition(0) < 0 ? 1 : 2;
+               const StiDetector *detector = static_cast<StiPxlDetectorBuilder*>(_detector)->getActiveDetector(pxlHit->sector(), pxlHit->ladder(), sensorHalf);
 
                if (!detector)
                   throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
-
-               LOG_DEBUG << "add hit to detector:\t" << detector->getName() << endm;
-
-               double angle     = detector->getPlacement()->getNormalRefAngle();
-               double radius    = detector->getPlacement()->getNormalRadius();
-               double zcenter   = detector->getPlacement()->getZcenter();
-               double halfDepth = detector->getShape()->getHalfDepth();
-               double halfWidth = detector->getShape()->getHalfWidth();
-               double thick     = detector->getShape()->getThickness();
-
-               LOG_DEBUG << " detector info " << *detector << endm;
-               LOG_DEBUG << " radius = " << radius << " angle = " << angle << " zCenter = " << zcenter << endm;
-               LOG_DEBUG << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm;
 
                StiHit *stiHit = _hitFactory->getInstance();
 
@@ -229,21 +229,8 @@ void StiPxlHitLoader::loadHits(StEvent *source,
                                  pxlHit->position().z(), pxlHit->charge());
 
                _hitContainer->add(stiHit);
-               LOG_DEBUG << " nHit = " << nHit
-                  << " Sector = " << (int) pxlHit->sector()
-                  << " Ladder = " << (int) pxlHit->ladder()
-                  << " x = " << (float) pxlHit->position().x()
-                  << " y = " << (float) pxlHit->position().y()
-                  << " z = " << (float) pxlHit->position().z() << endm;
-               LOG_DEBUG << " " << endm;
-
-               //done loop over hits
-               nHit++;
             }
          }
       }
    }
-
-   LOG_INFO << "StiPxlHitLoader:loadHits -I- Loaded " << nHit << " pixel hits." << endm;
 }
-

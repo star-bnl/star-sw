@@ -1074,6 +1074,8 @@ Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
 
   if ( fgtdGeom.config<40 )
     AgStructure::AgDetpAdd( "Fggg_t", "fgstconfig", (Float_t) (fgtdGeom.config%30) );
+  else
+    AgStructure::AgDetpAdd( "Fggg_t", "fgstconfig", (Float_t) (fgtdGeom.config)    );
 
   if ( go )
   if ( !CreateModule( fgtdGeom.module  ) )
@@ -2261,6 +2263,7 @@ Bool_t Geometry::FgtdInit()
   // vf -- very forward FGT
   fgtdGeom.select="FGTDvf";    fgtdGeom.module="FgtdGeoV"; fgtdGeom.config=55;   fgtdGeom.fill();
   fgtdGeom.select="FGTDv55";   fgtdGeom.module="FgtdGeoV"; fgtdGeom.config=55;   fgtdGeom.fill();
+  fgtdGeom.select="FGTDv56";   fgtdGeom.module="FgtdGeoV"; fgtdGeom.config=56;   fgtdGeom.fill();
 
 
   /*

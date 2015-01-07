@@ -1,5 +1,14 @@
-* $Id: geometry.g,v 1.280 2014/12/22 22:21:22 jwebb Exp $
+* $Id: geometry.g,v 1.283 2015/01/06 19:45:16 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.283  2015/01/06 19:45:16  jwebb
+* Correct version of VPD in 2015
+*
+* Revision 1.282  2015/01/06 19:06:46  jwebb
+* Added FGT to HCAL dev2016 geometry
+*
+* Revision 1.281  2015/01/06 15:58:40  jwebb
+* Add HCAL to dev2016
+*
 * Revision 1.280  2014/12/22 22:21:22  jwebb
 * dev2016 geometry implemented in starsim
 *
@@ -1520,6 +1529,7 @@ replace [exe VPDD02;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConf
 replace [exe VPDD03;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=3;]
 replace [exe VPDD04;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=4;]
 replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=7;]
+replace [exe VPDD08;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=8;]
 
 
 replace [exe FGTDof;] with  [;FGTD=off;FgtdConfig=0; "FGT off";]
@@ -1527,6 +1537,7 @@ replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
 replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 5 half plus one full disk"]
 replace [exe FGTDv32;] with [;FGTD=on;FgtdConfig=32; "FGT v3 6 disks"]
 replace [exe FGTDv55;] with [;FGTD=on;FgtdConfig=55; "FGT very forward upgrade w/ 12 disks"]
+replace [exe FGTDv56;] with [;FGTD=on;FgtdConfig=56; "FGT very forward w/ 6 disks";]
 
 replace [exe IDSM01;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
 replace [exe IDSM02;] with [;IDSM=on;IdsmConfig=2; "Inner Detector Support"]
@@ -2382,7 +2393,7 @@ REPLACE [exe y2015;] with ["Y2015 first cut geometry";
     exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe BBCMon;      "beam beam counters";
 
-    exe VPDD07;      "Latest version of VPD";
+    exe VPDD08;      "Latest version of VPD";
     exe FTPCof;      "no FTPC";
     exe SVTTof;      "No SVT";
     exe PHMDof;      "Photon mult detector off";
@@ -2424,7 +2435,8 @@ REPLACE [exe dev2016;] with ["Y2016 development tag";
     exe PIXL06;      "Full config of the pixl detector";
     exe DTUB01;      "DTUB";
     exe PSUP01;      "1st version of pixl supports";
-    exe FGTDv55;     "12 disk FGT";
+    exe FGTDv56;     "12 disk FGT";
+    exe HCALv1;      "HCAL prototype";
 
 ];    
 
@@ -5034,6 +5046,7 @@ c    write(*,*) 'BTOF'
      call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
      if(VpddConfig <7) { CONSTRUCT vpddgeo; }
      if(VpddConfig==7) { CONSTRUCT vpddgeo2;}
+     if(VpddConfig==8) { CONSTRUCT vpddgeo3;}
    endif
 
 ********************** BARREL CALORIMETER ************************
@@ -5262,6 +5275,7 @@ IF (PSUP){ CONSTRUCT PsupGeo;}    """ Insertion structures """
         IF FgtdConfig==31 { Call AgDETP add ( 'FGGG.FgstConfig=', 1.0, 1 );         CONSTRUCT FgtdGeo3; }
         IF FgtdConfig==32 { Call AgDetp add ( 'FGGG.FgstConfig=', 2.0, 1 );         CONSTRUCT FgtdGeo3; }
         IF FgtdConfig==55 {                                               ;         CONSTRUCT FgtdGeoV; }
+        IF FgtdConfig==56 { Call AgDetp add ( 'FGGG.Fgstconfig=', 4.0, 1 );         CONSTRUCT FgtdGeoV; }
      }
 
 

@@ -406,16 +406,11 @@ Int_t StiMaker::Make()
     if (HLT) HLT->Make();
     iAnz = MakeGlobalTracks(event);
     if (iAnz) {MyClear(); return iAnz;}
-
     if (_vertexFinder) {
       iAnz = MakePrimaryTracks(event);
       if (iAnz) {MyClear(); return iAnz;}
     } else {
-      StMaker *KFV  = GetMaker("KFVertex");
-      if (KFV) {
-	iAnz = KFV->Make();
-	if (iAnz) {MyClear(); return iAnz;}
-      }
+      iAnz = StMaker::Make();
     }
     if (mPullTTree) {iAns = FillPulls();}
     cout<< "StiMaker::Make() -I- Done"<<endl;
@@ -432,7 +427,6 @@ Int_t StiMaker::Make()
     return kStErr;
   }
 }
-
 //_____________________________________________________________________________
 Int_t StiMaker::MakeGlobalTracks(StEvent   * event) {
   if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);

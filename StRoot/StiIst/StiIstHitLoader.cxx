@@ -12,6 +12,7 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiTrackContainer.h"
+#include "StiIst/StiIstDetectorBuilder.h"
 #include "StiIstHitLoader.h"
 #include "StMcEvent/StMcTrack.hh"
 #include "StMcEvent/StMcIstHit.hh"
@@ -25,21 +26,16 @@ StiIstHitLoader::StiIstHitLoader() :
    StiHitLoader<StEvent, StiDetectorBuilder>("IstHitLoader")
 {}
 
-StiIstHitLoader::StiIstHitLoader(StiHitContainer *hitContainer,
-                                 Factory<StiHit> *hitFactory,
-                                 StiDetectorBuilder *detector)
-   : StiHitLoader<StEvent, StiDetectorBuilder>("IstHitLoader", hitContainer, hitFactory, detector)
-{evNum = 0;}
+StiIstHitLoader::StiIstHitLoader(StiHitContainer *hitContainer, Factory<StiHit> *hitFactory,
+   StiDetectorBuilder *detector) :
+   StiHitLoader<StEvent, StiDetectorBuilder>("IstHitLoader", hitContainer, hitFactory, detector)
+{}
 
 StiIstHitLoader::~StiIstHitLoader()
 {}
 
-void StiIstHitLoader::loadHits(StEvent *source,
-                               Filter<StiTrack> *trackFilter,
-                               Filter<StiHit> *hitFilter)
+void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter)
 {
-   n = 0;
-   //cout << "  n = " << n << endl;
    LOG_INFO << "StiIstHitLoader::loadHits(StEvent*) -I- Started" << endm;
 
    if (!_detector)
@@ -58,7 +54,6 @@ void StiIstHitLoader::loadHits(StEvent *source,
       return;
    }
 
-   StiDetector *detector = 0;
    int nIsthits = col->numberOfHits();
    LOG_DEBUG << "StiIstHitLoader: IST Hits: " << nIsthits << endm;
 
@@ -87,25 +82,14 @@ void StiIstHitLoader::loadHits(StEvent *source,
                int layer  = 1; //active area
                int ladder = hit->getLadder();
                int sensor = hit->getSensor();
-               LOG_DEBUG << "StiIstHitLoader: hit found on ladder: " << ladder << "; sensor: " << sensor << endm;
-               LOG_DEBUG << "Xg/Yg/Zg : " << hit->position().x() << "/" << hit->position().y() << "/" << hit->position().z() << endm;
-               LOG_DEBUG << "Xl/Yl/Zl : " << hit->localPosition(0) << "/" << hit->localPosition(1) << "/" << hit->localPosition(2) << endm;
 
-               detector = _detector->getDetector(layer-1, ladder-1);
+               LOG_DEBUG << *hit << "\n"
+                         << *static_cast<StMeasuredPoint*>(hit) << endm;
+
+               const StiDetector *detector = static_cast<StiIstDetectorBuilder*>(_detector)->getActiveDetector(ladder);
 
                if (!detector)
                   throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
-
-               LOG_DEBUG << "StiIstHitLoader: add hit to detector:\t" << detector->getName() << endl;
-               double angle     = detector->getPlacement()->getNormalRefAngle();
-               double radius    = detector->getPlacement()->getNormalRadius();
-               double zcenter   = detector->getPlacement()->getZcenter();
-               double halfDepth = detector->getShape()->getHalfDepth();
-               double halfWidth = detector->getShape()->getHalfWidth();
-               double thick     = detector->getShape()->getThickness();
-               LOG_DEBUG << " detector info " << *detector << endm;
-               LOG_DEBUG << " radius = " << radius << " angle = " << angle << " zCenter = " << zcenter << endm;
-               LOG_DEBUG << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm;
 
                StiHit *stiHit = _hitFactory->getInstance();
 

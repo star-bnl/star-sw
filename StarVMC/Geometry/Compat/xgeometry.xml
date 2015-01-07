@@ -4,16 +4,22 @@
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
-call geometry;
+  call geometry
 </Export>
 </Module>
 
       
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.41 2014/12/22 22:21:22 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.43 2015/01/06 19:06:47 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.43  2015/01/06 19:06:47  jwebb
+  Added FGT to HCAL dev2016 geometry
+
+  Revision 1.42  2015/01/06 15:58:40  jwebb
+  Add HCAL to dev2016
+
   Revision 1.41  2014/12/22 22:21:22  jwebb
   dev2016 geometry implemented in starsim
 
