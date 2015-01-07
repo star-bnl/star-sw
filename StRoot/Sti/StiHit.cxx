@@ -190,9 +190,9 @@ StiDebug::Break(-46);
   double difY = fabs(my-posY)-deltaY;
   double difZ = fabs(my-posZ)-deltaZ;
 
-  double accX = posX*0.05+1e-3;
-  double accY = deltaY*0.1+1e-3;
-  double accZ = deltaZ*0.1+1e-3;
+  double accX = posX*0.05+0.1;
+  double accY = deltaY*0.1+0.1;
+  double accZ = deltaZ*0.1+0.1;
 
   if (difX<accX &&  difY<accY && difZ<accZ) return;
   static int counts = 0; counts++; if (counts>100) return;
