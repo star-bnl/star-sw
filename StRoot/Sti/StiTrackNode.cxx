@@ -29,8 +29,8 @@ static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[3]*MIN1ERR[3]
                               ,MIN1ERR[4]*MIN1ERR[4]
                               ,MIN1ERR[5]*MIN1ERR[5]};
-static const double recvCORRMAX  = 0.99;
-static const double chekCORRMAX  = 0.999;
+static const double recvCORRMAX  = 0.999;
+static const double chekCORRMAX  = 0.9999;
 static double MAXPARS[]={500,500,500,3.15,100,100};
 
 //______________________________________________________________________________
