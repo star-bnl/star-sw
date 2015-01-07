@@ -134,7 +134,6 @@ void StiHit::setGlobal(const StiDetector * detector,
 		       float gx, float gy, float gz,
 		       float energy)
 {
-StiDebug::Break(-46);
   if (detector)
     {
       StiPlacement * placement = detector->getPlacement();
@@ -188,7 +187,7 @@ StiDebug::Break(-46);
 
   double difX = fabs(mx-posX)-deltaX/2;
   double difY = fabs(my-posY)-deltaY;
-  double difZ = fabs(my-posZ)-deltaZ;
+  double difZ = fabs(mz-posZ)-deltaZ;
 
   double accX = posX*0.05+0.1;
   double accY = deltaY*0.1+0.1;
