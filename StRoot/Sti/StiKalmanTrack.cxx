@@ -624,8 +624,11 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
   px=py=pz=0;
 
   StiKalmanTrackNode * inner = getInnerMostNode();
-
-  if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
+#if 1
+  assert(inner);
+#else
+  if (inner==0) throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
+#endif
   inner->propagate(0.,0,kOutsideIn);
   double p[3];
   inner->getMomentum(p,0);
@@ -1022,8 +1025,9 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
 {
   if (firstNode==0 || lastNode==0)
  {
-  //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
-  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
+  cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
+   //  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
+  assert(0);
  }
   
   StiKalmanTrackNode *node;
@@ -1064,12 +1068,15 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 #ifdef DO_TPCCATRACKER
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostTPCHitNode(int qua)   const
 {
+#if 1
+  assert(firstNode && lastNode);
+#else
   if (firstNode==0 || lastNode==0)
  {
   //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
   throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
  }
-
+#endif
   StiKalmanTrackNode *node = 0;
   StiKalmanTrackNode* leaf = getLastNode();
   StiKTNForwardIterator it(leaf);
