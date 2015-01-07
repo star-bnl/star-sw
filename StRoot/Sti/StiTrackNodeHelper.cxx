@@ -76,7 +76,7 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   }
 
   mDetector   = mTargetNode->getDetector();
-  if (!mDetector) mVertexNode = mTargetNode;
+  if (mTargetNode->isPrimary()) mVertexNode = mTargetNode;
   mHit        = mTargetNode->getHit();
   if (mHit) {
     double time = 0;
