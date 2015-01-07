@@ -215,3 +215,19 @@ int StiDetector::inside(const double xl[3],int mode) const
   xg.RotateZ(-alfa);
   return insideL(&xg[0],mode);
 }
+//______________________________________________________________________________
+double StiDetector::getCenterX() const 
+{
+  int shapeCode = shape->getShapeCode();
+  switch(shapeCode) {
+  
+    case kPlanar: 		return placement->getNormalRadius()-shape->getThickness()/2;
+    case kCylindrical: 	return 0;
+    case kSector: {
+      double rn = placement->getNormalRadius()-shape->getThickness()/2;
+      double ang = shape->getOpeningAngle();
+      return rn*cos(ang);}
+    default: assert(0 && "WrongShape");
+  }
+  return 0;
+}
