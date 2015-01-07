@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.219.2.1 2014/12/16 18:29:38 perev Exp $
+// $Id: StiMaker.cxx,v 1.219.2.2 2015/01/07 22:47:52 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -561,15 +561,20 @@ void StiMaker::FinishTracks (int gloPri)
 // 1. loop over nodes
 // 2. Move node to the center volume along x or r  local
 
-static const char * tkNames[2] = {"globalTracks","primaryTracks"};
-static const char * noNames[2] = {"globalNodes" ,"primaryNodes" };
-static const char * inNames[2] = {"globalInside","primaryInside"};
-static const char * hiNames[2] = {"globaHits"   ,"primaryHits"  };
-static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
-
+static const char * nTraksTit  [2] = {"nTracksGlobal","nTracksPrimary"};
+static const char * nNodesTit  [2] = {"nNodesGlobal" ,"nNodesPrimary" };
+static const char * nInNodesTit[2] = {"nInsideGlobal","nInsidePrimary"};
+static const char * nHitsTit   [2] = {"nHitsGlobal"  ,"nHitsPrimary"  };
+static const char * Xi2TrakTit [2] = {"Xi2TrakGlobal","Xi2TrakPrimary"};
+static const char * Xi2NodesTit[2] = {"Xi2NodeGlobal","Xi2NodePrimary"};
+static const char * DcaNodesTit[2] = {"DcaNodeGlobal","DcaNodePrimary"};
+static const char * eLossTit   [2] = {"ELossNode.log10","ELossTrack.log10"};
 
  StiTrackContainer* tkV  = StiToolkit::instance()->getTrackContainer();
  if (!tkV) return;
+
+#define StiNOINSIDE 0
+
 
  int nTk=0,nNodes=0,nInside=0,nHits=0;
  
@@ -578,34 +583,54 @@ static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
      StiKalmanTrack *track = (StiKalmanTrack*)(*tkV)[itk];
      if (gloPri && !track->isPrimary()) continue;
      nTk++;
+     double Xi2 = track->getChi2();
+     StiDebug::Count(Xi2TrakTit[gloPri],Xi2);
+
+
      StiKTNIterator tNode = track->begin();
      StiKTNIterator eNode = track->end();
      nNodes=0;nInside=0;nHits=0;
+     double eLossTk = 0;
      for (;tNode!=eNode;++tNode) 
      {
 	StiKalmanTrackNode *node = &(*tNode);
 	if(!node->isValid()) 	continue;
-	if (node->isDca()  ) 	continue;	
-	StiHit *hit = node->getHit();
-	if (hit && !hit->detector()) continue;	//primary vertex
+	if (node->isDca()) { StiDebug::Count(DcaNodesTit[0],node->y()); continue;}
 	nNodes++;
-	if ( hit && node->getChi2()<100) nHits++;
 	node->nudge();
-	if (node->inside()) {
+#if StiNOINSIDE
+	if (!gloPri ) {
+#else
+	if (!gloPri && node->inside()) {
+#endif
 	  nInside++;
-          StiDebug::Count(elNames[gloPri],node->getELoss()[0].mELoss);
+          double el = node->getELoss()[0].mELoss;
+          if (el>0) StiDebug::Count(eLossTit[0],log(el)/log(10.));
+          eLossTk += el;
+        }
+        StiHit *hit = node->getHit();
+        if (!hit || node->getChi2()>1000) continue;
+	nHits++;
+        if (gloPri && !node->getDetector()) { //primary node
+          StiDebug::Count(Xi2NodesTit[gloPri],node->getChi2()/2);}
+        else if (!gloPri) {//regular hit node in globals
+	  StiDebug::Count(Xi2NodesTit[gloPri],node->getChi2()/2);
         }
      }
-     StiDebug::Count(noNames[gloPri],nNodes );
-     StiDebug::Count(inNames[gloPri],nInside);
-     StiDebug::Count(hiNames[gloPri],nHits  );
+     if (!gloPri) StiDebug::Count(eLossTit[1],log(eLossTk)/log(10.));
+     StiDebug::Count(nNodesTit[gloPri],nNodes );
+     StiDebug::Count(nInNodesTit[gloPri],nInside);
+     StiDebug::Count(nHitsTit[gloPri],nHits  );
   }
-  StiDebug::Count(tkNames[gloPri],nTk );
+  StiDebug::Count(nTraksTit[gloPri],nTk );
 }
 
 
-// $Id: StiMaker.cxx,v 1.219.2.1 2014/12/16 18:29:38 perev Exp $
+// $Id: StiMaker.cxx,v 1.219.2.2 2015/01/07 22:47:52 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.219.2.2  2015/01/07 22:47:52  perev
+// Some histograms added for debug
+//
 // Revision 1.219.2.1  2014/12/16 18:29:38  perev
 // Move main branch to StiHFT_1b
 //
