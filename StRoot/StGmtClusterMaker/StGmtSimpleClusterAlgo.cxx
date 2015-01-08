@@ -199,6 +199,8 @@ void StGmtSimpleClusterAlgo::calculatePedestals( StGmtStripCollection& strips, U
 	StGmtStrip* stripPtr = strips.getSortedStrip( mapIdx );    
 	for( Int_t timebin = 0; timebin < usedtb; timebin++)
 	  {
+               int adc = stripPtr->getAdc(timebin);
+               if(adc<0) continue;
 	    mSum[mapIdx] += stripPtr->getAdc(timebin);
 	    mSqrSum[mapIdx] += pow(stripPtr->getAdc(timebin),2);
 	    mCounters[mapIdx]++;
@@ -428,12 +430,14 @@ void StGmtSimpleClusterAlgo::subtractPedestals( StGmtStripCollection& strips, UI
 	  mSum[mapIdx] += stripPtr->getAdc(timebin);
 	  mSqrSum[mapIdx] += pow(stripPtr->getAdc(timebin),2);
 	  mCounters[mapIdx]++;
+#if 0
 	  if (a<50 && !module){ 
 #if 0
 	    LOG_INFO << "Module=" << module << "\tgeoid=" << stripPtr->getGeoId() << "\ttb="<< timebin<< "\tadc=" << stripPtr->getAdc(timebin) << endm;
 #endif
 	    a++;
 	  }
+#endif
 	}
     }
   for( Int_t mapIdx=0; mapIdx < loopMax; mapIdx++)
@@ -492,13 +496,15 @@ void StGmtSimpleClusterAlgo::subtractPedestals( StGmtStripCollection& strips, UI
 	{
 	  mSum[mapIdx] += stripPtr->getAdc(timebin);
 	  stripPtr->setPedSubtractedAdc( stripPtr->getAdc(timebin) - stripPtr->getPed(), timebin );
+#if 0
 	  if (a<50 && !module){ 
 #if 0
 	    LOG_INFO << "Module=" << module << "\tgeoid=" << stripPtr->getGeoId() << "\ttb="<< timebin
 					 << "\tadc=" << stripPtr->getAdc(timebin) << "\tped = " << stripPtr->getPed() << endm;
 #endif
 	    a++;
-}
+	  }
+#endif
 	}
       //     stripPtr->setCharge( (sum[mapIdx]/kGmtNumTimeBins) - stripPtr->getPed() );
       //     stripPtr->setChargeUncert( stripPtr->getPedErr() );
