@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.77 2015/01/07 17:34:27 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.78 2015/01/08 21:24:18 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.78  2015/01/08 21:24:18  jwebb
+* Support FMS preshower detector in HCAL.
+*
 * Revision 1.77  2015/01/07 17:34:27  jwebb
 * Remove print statements which Akio snuck by me...
 *
@@ -943,10 +946,34 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           hcal_tower = numbv(1)
           hcal_cell  = numbv(2)
 
+          " Calorimeter cell volume ID "
  	  if (cd=='HCEL') hcal_cell = hcal_cell +5000
  	  if (cd=='HCES') hcal_cell = hcal_cell +0
 
           volume_id  =    hcal_cell  + 10000 *  hcal_tower
+
+          " Preshower volume ID "
+          if (cd=='FPSC') then
+             n1 = numbv(1); n2 = numbv(2); ew = 2; layr = n1; 
+             if ( layr==4 ) layr = 3;
+             if ( n2 <= 21 ) then
+                quad = 1
+                slat = n2
+             else if ( n2 <= 21+19 ) then
+                quad = 2
+                slat = n2 - 21
+             else if ( n2 <= 21+19+21 ) then
+                quad = 3 
+                slat = n2 - 21 - 19
+             else
+                quad = 4;
+                slat = n2 - 21 - 19 - 21
+             endif
+
+          volume_id = 100000+ew*10000+quad*1000+layr*100+slat
+          endif
+
+
 
  
 
