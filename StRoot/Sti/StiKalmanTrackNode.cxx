@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148.2.9 2015/01/07 22:42:31 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148.2.10 2015/01/08 01:09:27 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148.2.10  2015/01/08 01:09:27  perev
+ * Cleanup
+ *
  * Revision 2.148.2.9  2015/01/07 22:42:31  perev
  * Method isPrimary added
  *
@@ -1058,7 +1061,6 @@ StiDebug::Break(nCall);
   rotate(ang);
   int ians = propagate(vertex->x(),1,-1);
   if (ians && ians!=kEnded)    return false; // track does not reach vertex "plane"
-////  if (ians) return false; ////????
   assert(fabs(mFP._sinCA)<1e-2);
   double qwe = (mFP.x()-vertex->x())*mFP._cosCA 
              + (mFP.y()-vertex->y())*mFP._sinCA;
