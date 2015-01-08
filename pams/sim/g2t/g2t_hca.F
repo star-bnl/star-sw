@@ -17,10 +17,11 @@
       i=0
       g2t_emc_hit_h.nok = 0
 
-      DO isys=1,2 """ Loop over all sensitive fibers """ 
+      DO isys=1,3 """ Loop over all sensitive fibers """ 
 
          IF (isys==1) { call G2R_GET_SYS ('HCAL','HCEL',Iprin,Idigi) }
          IF (isys==2) { call G2R_GET_SYS ('HCAL','HCES',Iprin,Idigi) }
+         IF (isys==3) { call G2R_GET_SYS ('HCAL','FPSC',Iprin,Idigi) }
          if (Iprin.lt.0) return
          Local  = Idigi.ge.2
 
@@ -36,12 +37,18 @@
             g2t_emc_hit(i).y             = xx(2)
             g2t_emc_hit(i).z             = xx(3)
 
-            do khit=1,15
-               IF (chit(khit)=myhit) { 
-               g2t_emc_hit(i).de = hits(khit); 
-               break; 
-               }
+            if isys .ne. 3 { """Attenuated hit for HCA"""
+              do khit=1,15
+                 IF (chit(khit)=myhit) { 
+                 g2t_emc_hit(i).de = hits(khit); 
+                 break; 
+                 }
             enddo
+            }
+
+            if isys .eq. 3 { """Unattenuated hit for preshower """
+            g2t_emc_hit(i).de = elos
+            }
 
 
 *        <W> i,trac,volume,hits(khit);( 'g2t_hca: ', I4, I4, I8, F8.4);

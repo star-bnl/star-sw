@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.150 2015/01/06 15:59:20 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.151 2015/01/08 21:24:18 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.151  2015/01/08 21:24:18  jwebb
+// Support FMS preshower detector in HCAL.
+//
 // Revision 1.150  2015/01/06 15:59:20  jwebb
 // Add FMS preshower to data readout
 //
@@ -1460,7 +1463,8 @@ Int_t St_geant_Maker::Make() {
   nhits = 0; nhit1=nhit2=0;
   geant3 -> Gfnhit("HCAH","HCEL", nhit1);
   geant3 -> Gfnhit("HCAH","HCES", nhit2);
-  nhits=nhit1+nhit2;
+  geant3 -> Gfnhit("HCAH","FPSC", nhit3);
+  nhits=nhit1+nhit2+nhit3;
   if ( nhits > 0 ) 
      {
         St_g2t_emc_hit *g2t_hca_hit = new St_g2t_emc_hit("g2t_hca_hit",nhits);
