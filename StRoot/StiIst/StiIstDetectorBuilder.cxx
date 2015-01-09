@@ -33,6 +33,15 @@
 using namespace StIstConsts;
 
 
+/**
+ * Builds an object to direct the construction of Sti detectors/volumes.
+ *
+ * \param active   Set to true when accounting for hits in active volumes or
+ * false otherwise
+ *
+ * \param buildIdealGeom  Set to true (default) to ignore volume position
+ * transformation stored in the survey DB tables
+ */
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
    StiDetectorBuilder("Ist", active), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
 {

@@ -26,6 +26,15 @@
 #include "StDetectorDbMaker/StiSsdHitErrorCalculator.h"
 
 
+/**
+ * Builds an object to direct the construction of Sti detectors/volumes.
+ *
+ * \param active   Set to true when accounting for hits in active volumes or
+ * false otherwise
+ *
+ * \param buildIdealGeom  Set to true (default) to ignore volume position
+ * transformation stored in the survey DB tables
+ */
 StiSstDetectorBuilder::StiSstDetectorBuilder(bool active, bool buildIdealGeom)
    : StiDetectorBuilder("Ssd", active), mBuildIdealGeom(buildIdealGeom), mSstDb(0)
 {
@@ -74,8 +83,6 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 
 /**
  * Builds the sensors of the SST detector.
- *
- * \author Dmitri Smirnov, BNL
  */
 void StiSstDetectorBuilder::useVMCGeometry()
 {

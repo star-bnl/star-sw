@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.105 2015/01/09 21:08:12 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.106 2015/01/09 21:08:48 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -30,26 +30,13 @@
 
 
 /**
- * Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
- * returns average error once you actually want to do tracking, the results
- * depend strongly on the numbers below.
+ * Builds an object to direct the construction of Sti detectors/volumes.
  *
-   numbering should be the following :
-   hardware : sector ladder   ITTF : layer  ladder
-   1      1                          1      0
-   1      2                          1      1
-   1      3                          1      2
-   1      4                          0      0
-
-   2      1                          1      3
-   2      2                          1      4
-   2      3                          1      5
-   2      4                          0      1
-   (...)
-   10     1                          1     27
-   10     2                          1     28
-   10     3                          1     29
-   10     4                          0     9
+ * \param active   Set to true when accounting for hits in active volumes or
+ * false otherwise
+ *
+ * \param buildIdealGeom  Set to true (default) to ignore volume position
+ * transformation stored in the survey DB tables
  */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
    StiDetectorBuilder("Pixel", active), mBuildIdealGeom(buildIdealGeom), mPxlDb(0)
