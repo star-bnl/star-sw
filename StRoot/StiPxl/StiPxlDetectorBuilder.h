@@ -6,6 +6,13 @@
 class StPxlDb;
 
 
+/**
+ * This detector builder is responsible for constructing sensitive and inactive
+ * Sti volumes describing the material of the PXL detector. The corresponding
+ * PXL detector geometry is described in AgML files in StarVMC/Geometry/
+ *
+ * \author Dmitri Smirnov, BNL
+ */
 class StiPxlDetectorBuilder : public StiDetectorBuilder
 {
 public:
