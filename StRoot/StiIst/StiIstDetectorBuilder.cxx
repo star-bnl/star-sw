@@ -114,18 +114,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
          continue;
       }
 
-      // Build global rotation for the sensor
-      TGeoRotation sensorRot(*sensorMatrix);
-
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
-
-      // Convert center of the sensor geobox to coordinates in the global coordinate system
-      double sensorXyzLocal[3]  = {};
-      double sensorXyzGlobal[3] = {};
-
-      sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
-
-      TVector3 sensorVec(sensorXyzGlobal);
 
       //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
       double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
@@ -133,25 +122,7 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       add(stiShape);
 
-      Double_t phi  = sensorVec.Phi();
-      Double_t phiD = sensorRot.GetPhiRotation() / 180 * M_PI;
-      Double_t r    = sensorVec.Perp(); // Ignore the z component if any
-      double normVecMag = fabs(r * sin(phi - phiD));
-      TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
-
-      if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
-      else                            normVec *=  normVecMag;
-
-      // Volume positioning
-      StiPlacement *pPlacement = new StiPlacement();
-
-      pPlacement->setZcenter(0);
-      pPlacement->setLayerRadius(r);
-      pPlacement->setLayerAngle(phi);
-      pPlacement->setRegion(StiPlacement::kMidRapidity);
-
-      double centerOrient = sensorVec.Phi() - normVec.Phi();
-      pPlacement->setNormalRep(normVec.Phi(), normVecMag, r * sin(centerOrient));
+      StiPlacement *pPlacement= new StiPlacement(*sensorMatrix);
 
       // Build final detector object
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
@@ -240,10 +211,10 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
          continue;
       }
 
-      StiPlacement *cfBackingPlacement = createPlacement(*transMatrix, cfBackingOffset);
-      StiPlacement *alumConnectorPlacement = createPlacement(*transMatrix, alumConnectorOffset);
-      StiPlacement *gtenConnectorPlacement = createPlacement(*transMatrix, gtenConnectorOffset);
-      StiPlacement *digiBoardPlacement = createPlacement(*transMatrix, digiBoardOffset);
+      StiPlacement *cfBackingPlacement = new StiPlacement(*transMatrix, cfBackingOffset);
+      StiPlacement *alumConnectorPlacement = new StiPlacement(*transMatrix, alumConnectorOffset);
+      StiPlacement *gtenConnectorPlacement = new StiPlacement(*transMatrix, gtenConnectorOffset);
+      StiPlacement *digiBoardPlacement = new StiPlacement(*transMatrix, digiBoardOffset);
 
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
       stiDetector->setProperties(pfx+"IBAM_CF_BACKING", new StiNeverActiveFunctor, cfBackingShape, cfBackingPlacement, getGasMat(), cfBackingMaterial);

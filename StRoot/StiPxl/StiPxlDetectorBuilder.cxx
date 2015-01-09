@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.104 2015/01/06 20:57:50 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.105 2015/01/09 21:08:12 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -137,50 +137,17 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             continue;
          }
 
-         // Build global rotation for the sensor
-         TGeoRotation sensorRot(*sensorMatrix);
-
          TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
          // Split the ladder in two halves
          for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++) {
-            // Convert center of the half sensor geobox to coordinates in the global coordinate system
-            double sensorXyzLocal[3]  = {};
-            double sensorXyzGlobal[3] = {};
-
-            // Shift the halves by a quater width
-            sensorXyzLocal[0] = iLadderHalf == 1 ? -sensorBBox->GetDX()/2 : sensorBBox->GetDX()/2;
-
-            sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
-
-            TVector3 sensorVec(sensorXyzGlobal);
-
             // Create new Sti shape based on the sensor geometry
             std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
             double sensorLength = kNumberOfPxlSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
             StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
-            add(stiShape);
-
-            Double_t phi  = sensorVec.Phi();
-            Double_t phiD = sensorRot.GetPhiRotation() / 180 * M_PI;
-            Double_t r    = sensorVec.Perp(); // Ignore the z component if any
-            double normVecMag = fabs(r * sin(phi - phiD));
-            TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
-
-            if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
-            else                            normVec *=  normVecMag;
-
-            // Volume positioning
-            StiPlacement *pPlacement = new StiPlacement();
-
-            pPlacement->setZcenter(0);
-            pPlacement->setLayerRadius(r);
-            pPlacement->setLayerAngle(phi);
-            pPlacement->setRegion(StiPlacement::kMidRapidity);
-
-            double centerOrient = sensorVec.Phi() - normVec.Phi();
-            pPlacement->setNormalRep(normVec.Phi(), normVecMag, r * sin(centerOrient));
+            TVector3 offset((iLadderHalf == 1 ? -sensorBBox->GetDX()/2 : sensorBBox->GetDX()/2), 0, 0);
+            StiPlacement *pPlacement= new StiPlacement(*sensorMatrix, offset);
 
             // Build final detector object
             StiDetector *stiDetector = getDetectorFactory()->getInstance();
