@@ -383,7 +383,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
       StiTrackNode *extended = track->extendToVertex(vertex);
       if (extended) {
         track->add(extended,kOutsideIn);
-static int myRefit=0;
+static int myRefit=1;
         if (myRefit && track->refit()) 			extended=0;
         if (extended && !extended->isValid()) 		extended=0;
         if (extended && extended->getChi2()>1000) 	extended=0;
@@ -598,18 +598,9 @@ static  const double ref1a  = 110.*degToRad;
     for ( ; (!direction)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer); ++sector)
     {
        StiDetector * detector = (*sector)->getData();
-       double angle  = detector->getPlacement()->getNormalRefAngle();
+       double angle  = detector->getPlacement()->getLayerAngle();
        double radius = detector->getPlacement()->getLayerRadius();
-static int myRadius = 0;
-if (myRadius) {
-static int nKount = 0; nKount++;
-
-       double layRadius = detector->getPlacement()->getLayerRadius();
-       double cntRadius = detector->getPlacement()->getCenterRadius();
-       double leaRudius = sqrt(xg*xg+yg*yg);
-       printf("###RADIUSES### %d  Node=%g N=%g L=%g C=%g Det=%p\n",nKount,leaRudius,radius,layRadius,cntRadius,detector);
-}
-      assert(radius>0 && radius<1000);
+       assert(radius>0 && radius<1000);
        if (radius < qa.rmin) {gLevelOfFind--;return;}
        double diff = radius-leadRadius;if (!direction) diff = -diff;
        if (diff<-1e-6 && debug()>3) {
@@ -643,7 +634,7 @@ static int nKount = 0; nKount++;
 static int activeNonActiveLoop = StiDebug::iFlag("activeNonActiveLoop");
     if (!activeNonActiveLoop) foundInDetLoop = 1;
 //		
-    for (int nowActive=0; nowActive>=0; nowActive--) { //Additional activeNonActive loop
+    for (int nowActive=1; nowActive>=0; nowActive--) { //Additional activeNonActive loop
 
 
     for (vector<StiDetector*>::const_iterator d=detectors.begin();d!=detectors.end();++d)
