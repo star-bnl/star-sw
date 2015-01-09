@@ -149,13 +149,20 @@ void StiIstDetectorBuilder::useVMCGeometry()
  * active volume can have hits associated with it. The ladder id is expected to
  * follow the human friendly numbering scheme, i.e.
  *
+ * <pre>
  * 1 <= ladder <= kIstNumLadders
+ * 1 <= sensorHalf <= 2
+ * </pre>
  *
- * In this builder the active IST layers are added in stiRow = 0.
+ * In this builder the active IST layers are added in stiRows 0 and 1 depending
+ * on the sensor half
  */
-const StiDetector* StiIstDetectorBuilder::getActiveDetector(int ladder) const
+const StiDetector* StiIstDetectorBuilder::getActiveDetector(int ladder, int sensorHalf) const
 {
-   return (ladder < 1 || ladder > kIstNumLadders) ? 0 : getDetector(0, ladder-1);
+   if (ladder < 1 || ladder > kIstNumLadders || sensorHalf < 1 || sensorHalf > 2)
+      return 0;
+   else
+      return getDetector(sensorHalf-1, ladder-1);
 }
 
 

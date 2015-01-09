@@ -21,7 +21,7 @@ public:
    StiIstDetectorBuilder(bool active, bool buildIdealGeom = true);
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
-   const StiDetector* getActiveDetector(int ladder) const;
+   const StiDetector* getActiveDetector(int ladder, int sensorHalf) const;
 
 protected:
 
