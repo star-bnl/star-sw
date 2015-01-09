@@ -86,7 +86,10 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                LOG_DEBUG << *hit << "\n"
                          << *static_cast<StMeasuredPoint*>(hit) << endm;
 
-               const StiDetector *detector = static_cast<StiIstDetectorBuilder*>(_detector)->getActiveDetector(ladder);
+               // The IST sensitive layers are split into two halves so, access the corresponding
+               // sensor half to be later associated with this istHit
+               int sensorHalf = hit->localPosition(0) < 0 ? 1 : 2;
+               const StiDetector *detector = static_cast<StiIstDetectorBuilder*>(_detector)->getActiveDetector(hit->getLadder(), sensorHalf);
 
                if (!detector)
                   throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
