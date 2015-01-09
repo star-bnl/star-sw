@@ -79,10 +79,6 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
 
                if (hit->detector() != kIstId) continue;
 
-               int layer  = 1; //active area
-               int ladder = hit->getLadder();
-               int sensor = hit->getSensor();
-
                LOG_DEBUG << *hit << "\n"
                          << *static_cast<StMeasuredPoint*>(hit) << endm;
 
