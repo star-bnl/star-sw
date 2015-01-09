@@ -116,24 +116,30 @@ void StiIstDetectorBuilder::useVMCGeometry()
 
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-      //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
-      double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
-      StiShape *stiShape  = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2 * sensorBBox->GetDY(), sensorBBox->GetDX());
+      // Split the ladder in two halves
+      for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++)
+      {
+         // Create new Sti shape based on the sensor geometry
+         std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
 
-      add(stiShape);
+         // IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
+         double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
+         StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
-      StiPlacement *pPlacement= new StiPlacement(*sensorMatrix);
+         TVector3 offset((iLadderHalf == 1 ? -sensorBBox->GetDX()/2 : sensorBBox->GetDX()/2), 0, 0);
+         StiPlacement *pPlacement= new StiPlacement(*sensorMatrix, offset);
 
-      // Build final detector object
-      StiDetector *stiDetector = getDetectorFactory()->getInstance();
-      StiIsActiveFunctor* isActive = _active ? new StiIstIsActiveFunctor :
-         static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
+         // Build final detector object
+         StiDetector *stiDetector = getDetectorFactory()->getInstance();
+         StiIsActiveFunctor* isActive = _active ?  new StiIstIsActiveFunctor :
+            static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
-      stiDetector->setProperties(geoPath.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
-      stiDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
+         stiDetector->setProperties(halfLadderName, isActive, stiShape, pPlacement, getGasMat(), silicon);
+         stiDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
 
-      // Adding detector, note that no keys are set in IST!
-      add(stiRow, iLadder-1, stiDetector);
+         // Add created sensitive IST layer to Sti
+         add(iLadderHalf-1, iLadder-1, stiDetector);
+      }
    }
 }
 
