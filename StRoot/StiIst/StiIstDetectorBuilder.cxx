@@ -271,29 +271,3 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    stiDetector->setProperties(pfx+"ICCT", new StiNeverActiveFunctor, icctShape, icctPlacement, getGasMat(), icctMaterial);
    add(getNRows(), 0, stiDetector);
 }
-
-
-StiPlacement* StiIstDetectorBuilder::createPlacement(const TGeoMatrix& transMatrix, const TVector3& localCenterOffset, const TVector3& normal)
-{
-   // Convert center of the geobox to coordinates in the global coordinate system
-   double sensorXyzLocal[3]  = {localCenterOffset.X(), localCenterOffset.Y(), localCenterOffset.Z()};
-   double sensorXyzGlobal[3] = {};
-
-   double normalXyzLocal[3]  = {normal.X() + localCenterOffset.X(), normal.Y() + localCenterOffset.Y(), normal.Z() + localCenterOffset.Z()};
-   double normalXyzGlobal[3] = {};
-
-   transMatrix.LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
-   transMatrix.LocalToMaster(normalXyzLocal, normalXyzGlobal);
-
-   TVector3 centralVec(sensorXyzGlobal);
-   TVector3 normalVec(normalXyzGlobal);
-
-   normalVec -= centralVec;
-
-   if (normalVec.Dot(centralVec) < 0) normalVec *= -1;
-
-   double deltaPhi = centralVec.DeltaPhi(normalVec);
-   double normalVecMag = fabs(centralVec.Perp() * cos(deltaPhi));
-
-   return new StiPlacement(normalVec.Phi(), normalVecMag, centralVec.Perp()*sin(deltaPhi), localCenterOffset.Z());
-}

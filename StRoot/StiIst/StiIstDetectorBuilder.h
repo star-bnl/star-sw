@@ -29,10 +29,6 @@ protected:
 
    bool          mBuildIdealGeom;
    StIstDb      *mIstDb;
-
-private:
-
-   static StiPlacement* createPlacement(const TGeoMatrix& transMatrix, const TVector3& localCenterOffset=TVector3(), const TVector3& normal=TVector3(0, 1, 0));
 };
 
 #endif
