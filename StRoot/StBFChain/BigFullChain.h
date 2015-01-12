@@ -1429,11 +1429,10 @@ Bfc_st BFC[] = { // standard chains
   {"pxlCluster"  ,"","","pxlRaw", "StPxlClusterMaker", "StPxlClusterMaker", "Run PXL cluster maker",kFALSE},
   {"pxlHit"      ,"","","event pxlCluster",   "StPxlHitMaker", "StPxlHitMaker", "Run PXL hit maker",kFALSE},
   //{"pxlMon"    ,"","","StEvent"              ,"StPxlMonMaker","StPxlMonMaker","Example of Pxl QA",kFALSE},
-
-  {"istRaw",     "", "", "istUtil istDb",    "StIstRawHitMaker",  "StIstRawHitMaker",  "Run IST raw hit maker", kFALSE},
-  {"istCluster", "", "", "istRaw",           "StIstClusterMaker", "StIstClusterMaker", "Run IST cluster maker", kFALSE},
-  {"istHit",     "", "", "event istCluster", "StIstHitMaker",     "StIstHitMaker",     "Run IST hit Maker",     kFALSE},
-
+  {"istFastSim"  ,"","","StMcEvent,StEvent", "StIstFastSimMaker","StIstFastSimMaker","Ist Fast Sim",kFALSE},
+  {"istRaw",     "", "", "istUtil istDb","StIstRawHitMaker","StIstRawHitMaker","IST raw hit maker", kFALSE},
+  {"istCluster", "", "", "istRaw","StIstClusterMaker", "StIstClusterMaker","Run IST cluster maker", kFALSE},
+  {"istHit",     "", "", "event istCluster", "StIstHitMaker","StIstHitMaker",  "Run IST hit Maker", kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
@@ -1577,13 +1576,13 @@ Bfc_st BFC[] = { // standard chains
    ,"ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker"	,  "... StEvent based VFPPV, noCTB",kFALSE},
   {"VFPPVEvNoBtof"     	,""  ,""	,"VFPPVEv"	,""	     ,"","...VFPPVEv with no Btof ",kFALSE},
   // Sti/Stv chains
-  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil","StiMaker"
+  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,sim_T,tbutil,TMVARank","StiMaker"
    ,                                         "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"StiCAPerf","","","","",                             "TPCCATrackerPerformance", "CA Performance",kFALSE},
-  {"StiCA"    ,"Sti","","-Sti,-StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
-   ,                                "StEventUtilities,libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
+  {"StiCA"    ,"Sti","","-Sti,-StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil,TMVARank"
+   ,                     "StiMaker","StEventUtilities,libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
   {"HLTCA"    ,""  ,"","",                     "StHLTCAMaker","StHLTCAMaker",  "HLT reconstruction",kFALSE},
-  {"KFVertex" ,""  ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2,TMVARank"
+  {"KFVertex" ,""  ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV,-Kink2,-V02,-Xi2"
    ,"StKFVertexMaker",      "MathMore,Spectrum",  "...KFParticle based multi vertex reconstruction",kFALSE},
   {"Stv"     ,"Stv","","-TpcIT,-SvtIT,-SsdIT,gen_T,sim_T","StvMaker"
    ,"libHist,libHistPainter,libVMC,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker"
@@ -1731,6 +1730,8 @@ Bfc_st BFC[] = { // standard chains
    ,                                                             "Creates tree in minimc.root file",kFALSE},
   {"SvtMatTree","","","","SvtMatchedTree"
    ,                              "StSvtPoolEventT,StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
+  {"HftMatTree","","","","HftMatchedTree"
+   ,                              "StHftPoolEventT,StHftPoolHftMatchedTree","Create HftMatchedTree",kFALSE},
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"
