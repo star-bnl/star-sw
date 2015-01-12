@@ -1,12 +1,18 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.131.2.4 2015/01/07 22:41:43 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.131.2.4 2015/01/07 22:41:43 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.5 2015/01/12 20:13:30 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.131.2.5 2015/01/12 20:13:30 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.131.2.5  2015/01/12 20:13:30  perev
+ * nudge() added before fit
+ *
  * Revision 2.131.2.4  2015/01/07 22:41:43  perev
+ *
+ * Revision 2.132  2014/10/30 15:03:54  jeromel
+ * Reverted to Oct 2nd
  * Test for vertex replaced by test for detector. Both, vertex node and dca node
  * have detector==0. So thi test is more robust
  *
@@ -38,7 +44,6 @@
  *
  * Revision 2.128  2014/10/14 02:27:12  perev
  * nudge() & inside() added
- *
  * Revision 2.127  2014/09/29 21:44:55  perev
  * Check cos>=1 replaced to cos>=.99
  *
@@ -661,6 +666,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
   StiKalmanTrackNode * inner = getInnerMostNode();
 
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
+  inner->propagate(0.,0,kOutsideIn);
   inner->propagate(0.,0,-1);
   double p[3];
   inner->getMomentum(p,0);
@@ -1206,9 +1212,6 @@ static int nCall=0; nCall++;
         tNode->setChi2(0); 
 	tNode->setHit(0);
 	tNode->setDetector(0);
-        assert(fabs(tNode->x())<1e-4);
-//        assert(fabs(tNode->y())<  50);
-
         return tNode;
       } else {			//Normal vertex 
 	tNode->setChi2(3e33);
@@ -1231,7 +1234,6 @@ static int nCall=0; nCall++;
 	  tNode->setDetector(0);
           trackExtended = (tNode->updateNode()==0);
           
-
 	  if (trackExtended) return tNode;
           trackNodeFactory->free(tNode);             
 	}
@@ -1493,9 +1495,9 @@ static const double kMaxXi2Vtx = StiKalmanTrackFitterParameters::instance()->get
       //		
     StiKalmanTrackNode *worstNode= sTNH.getWorst();
     if (worstNode && worstNode->getChi2()>kMaxXi2Hit)     
-    {//worstNode->getHit()->setTimesUsed(0);
+    {
       worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
-    if (rejectByHitSet()) { releaseHits()            ; continue;}
+    if (rejectByHitSet()) { releaseHits()           ; continue;}
     
     if (!fail) 							break;
     
@@ -1574,21 +1576,23 @@ static int nCall=0;nCall++;
 
 
   pNode = 0; iNode=0;isStarted=0;restIsWrong=0;
-  for (source=rbegin();source!=rend();source++) {
+ for (source=rbegin();source!=rend();source++) {
     iNode++;
     targetNode = &(*source);
     if (targetNode->isDca()) 		continue;
     if (restIsWrong) 		{ targetNode->setInvalid(); continue;}
 
     if (!isStarted) {
+      if (!targetNode->isValid()) 	continue;
       if (!targetNode->getHit()) 	continue;		
       if ( targetNode->getChi2()>1000) 	continue;;
     }
     isStarted++;
     sTNH.set(pNode,targetNode);
-    status = sTNH.makeFit(0);
-    if (status) 		{ restIsWrong = 2005; targetNode->setInvalid();continue;}
     targetNode->nudge();
+    status = sTNH.makeFit(0);
+    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
+    if (!targetNode->isValid()) 	continue;
     pNode = targetNode;
   }//end for of nodes
 
@@ -1599,15 +1603,16 @@ static int nCall=0;nCall++;
     if (targetNode->isDca()) 		continue;
     if (restIsWrong) { targetNode->setInvalid(); continue;}
     if (!isStarted) {
+      if (!targetNode->isValid()) 	continue;
       if (!targetNode->getHit()) 	continue;;		
       if ( targetNode->getChi2()>1000) 	continue;
     }
     isStarted++;
-
+    targetNode->nudge();
     sTNH.set(pNode,targetNode);
     status = sTNH.makeFit(1);
-    if (status) {restIsWrong = 2005; targetNode->setInvalid();continue;}
-    targetNode->nudge();
+    if (status) {restIsWrong = 2005; targetNode->setInvalid();}
+    if (!targetNode->isValid()) 	continue;
     pNode = targetNode;
   }//end for of nodes
   return 0;
