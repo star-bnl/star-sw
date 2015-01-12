@@ -38,6 +38,7 @@
 
 ClassImp(EventT);
 
+static Int_t _debug = 0;
 
 EventT::EventT() : TObject(),
    fNPTracks(0),
@@ -100,7 +101,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
 
          UInt_t nDaughters = pVertex->numberOfDaughters();
          vtx->SetNtracks(nDaughters);
-         LOG_DEBUG << "Number of daughters: " << nDaughters << endl;
+         if (_debug) {LOG_INFO << "Number of daughters: " << nDaughters << endm;}
          nGoodTpcTracks = 0;
 
          for (UInt_t i = 0; i < nDaughters; i++) {
@@ -112,7 +113,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
          if (nBestTracks < nGoodTpcTracks) {nBestTracks = nGoodTpcTracks; ibest = ipr;}
       }
 
-      LOG_DEBUG << "Number of tracks: "  << nGoodTpcTracks << endl;
+      if (_debug) {LOG_INFO << "Number of tracks: "  << nGoodTpcTracks << endm;}
 
       if (ibest >= 0) {
          pVertex = stEvent->primaryVertex(ibest);
@@ -157,7 +158,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
       time = info->time();
    }
 
-   LOG_DEBUG << "Event Infos: ev/run/time: " << ev << "/" << run << "/" << time << endl;
+   if (_debug) {LOG_INFO << "Event Infos: ev/run/time: " << ev << "/" << run << "/" << time << endm;}
    StEventSummary *summary = stEvent->summary();
    Double32_t field = 0;
 
@@ -165,7 +166,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
 
    SetHeader(ev, run, time, field);
    // Create and Fill the TrackT objects
-   //LOG_DEBUG <<" # of daughter tracks : "<< fNPTracks << endl;
+   //if (_debug) {LOG_INFO <<" # of daughter tracks : "<< fNPTracks << endm;}
 
    UInt_t nT = 0;
 
@@ -178,11 +179,11 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
    StPxlHitCollection *stPxlHitCollection = stEvent->pxlHitCollection();
 
    if(!stPxlHitCollection) {
-      LOG_WARN << "No valid PXL hit collection found in StEvent" << endl;
+      LOG_WARN << "No valid PXL hit collection found in StEvent" << endm;
    }
 
    if (stPxlHitCollection) {
-      LOG_DEBUG << "Number of PXL hits: " << stPxlHitCollection->numberOfHits() << endl;
+      if (_debug) {LOG_INFO << "Number of PXL hits: " << stPxlHitCollection->numberOfHits() << endm;}
       UInt_t numberOfSectors = stPxlHitCollection->numberOfSectors();
 
       for (UInt_t i = 0; i < numberOfSectors; i++) {
@@ -208,7 +209,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
 
                if (vec.size() <= 0) continue;
 
-               LOG_DEBUG << "curr i/j/l (starting from 0) : " << i << "/" << j << "/" << l << " ==> StiPixelHitLoader - collection size: " << vec.size() << endl;
+               if (_debug) {LOG_INFO << "curr i/j/l (starting from 0) : " << i << "/" << j << "/" << l << " ==> StiPixelHitLoader - collection size: " << vec.size() << endm;}
 
                UInt_t NoHits = vec.size();
 
@@ -218,14 +219,14 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                   if (!hit) continue;
 
                   //hit->Print("");
-                  //LOG_DEBUG <<" layer/sector/ladder/sensor/idTruth/detectorId : " << (int)hit->layer()<<"/"<<(int)hit->sector() <<"/"<< (int)hit->ladder() <<"/"<< (int)hit->sensor() <<"/"<<(int)hit->idTruth()<<"/"<<(int)hit->detector() <<endl;
+                  //if (_debug) {LOG_INFO <<" layer/sector/ladder/sensor/idTruth/detectorId : " << (int)hit->layer()<<"/"<<(int)hit->sector() <<"/"<< (int)hit->ladder() <<"/"<< (int)hit->sensor() <<"/"<<(int)hit->idTruth()<<"/"<<(int)hit->detector() <<endm;}
                   int matId = ((int)hit->sector() - 1) * 40 + (int)(hit->ladder() - 1) * 10 + (int)(hit->sensor());
-                  //LOG_DEBUG <<" -->matPix : " << matId << endl;
+                  //if (_debug) {LOG_INFO <<" -->matPix : " << matId << endm;}
                   Double_t globalPixHitPos[3] = {hit->position().x(), hit->position().y(), hit->position().z()};
                   Double_t localPixHitPos[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
 
-                  //LOG_DEBUG << "globalPixHitPos = " << globalPixHitPos[0] << " " << globalPixHitPos[1] << " " << globalPixHitPos[2] << endl;
-                  //LOG_DEBUG<< "localPixHitPos = " << localPixHitPos[0] << " " << localPixHitPos[1] << " " << localPixHitPos[2] << endl;
+                  //if (_debug) {LOG_INFO << "globalPixHitPos = " << globalPixHitPos[0] << " " << globalPixHitPos[1] << " " << globalPixHitPos[2] << endm;}
+                  //if (_debug) {LOG_INFO<< "localPixHitPos = " << localPixHitPos[0] << " " << localPixHitPos[1] << " " << localPixHitPos[2] << endm;}
 
                   HitT *h = AddHitT();
                   h->SetId(matId);
@@ -241,7 +242,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
    StIstHitCollection *stIstHitCollection = stEvent->istHitCollection();
 
    if (stIstHitCollection) {
-      LOG_DEBUG << "Number of IST hits: " << stIstHitCollection->numberOfHits() << endl;
+      if (_debug) {LOG_INFO << "Number of IST hits: " << stIstHitCollection->numberOfHits() << endm;}
       UInt_t numberOfLadders = kIstNumLadders;
 
       for (UInt_t i = 0; i < numberOfLadders; i++) {
@@ -267,8 +268,8 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                Double_t globalIstHitPos[3] = {hit->position().x(), hit->position().y(), hit->position().z()};
                Double_t localIstHitPos[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
 
-               //LOG_DEBUG << "globalIstHitPos = " << globalIstHitPos[0] << " " << globalIstHitPos[1] << " " << globalIstHitPos[2] << endl;
-               //LOG_DEBUG<< "localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endl;
+               //if (_debug) {LOG_INFO << "globalIstHitPos = " << globalIstHitPos[0] << " " << globalIstHitPos[1] << " " << globalIstHitPos[2] << endm;}
+               //if (_debug) {LOG_INFO<< "localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endm;}
 
                HitT *h = AddHitT();
                h->SetId(matId);
@@ -283,7 +284,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
    StSsdHitCollection *stSsdHitCollection = stEvent->ssdHitCollection();
 
    if (stSsdHitCollection) {
-      LOG_DEBUG << "Number of SSD hits: " << stSsdHitCollection->numberOfHits() << endl;
+      if (_debug) {LOG_INFO << "Number of SSD hits: " << stSsdHitCollection->numberOfHits() << endm;}
       UInt_t numberOfLadders = stSsdHitCollection->numberOfLadders();
 
       for (UInt_t i = 0; i < numberOfLadders; i++) {
@@ -311,8 +312,8 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                Double_t globalSsdHitPos[3] = {hit->position().x(), hit->position().y(), hit->position().z()};
                Double_t localSsdHitPos[3]  = {hit->localPosition(0), 0, hit->localPosition(1)};
 
-               //LOG_DEBUG << "globalSsdHitPos = " << globalSsdHitPos[0] << " " << globalSsdHitPos[1] << " " << globalSsdHitPos[2] << endl;
-               //LOG_DEBUG << "localSsdHitPos = " << localSsdHitPos[0] << " " << localSsdHitPos[1] << " " << localSsdHitPos[2] << endl;
+               //if (_debug) {LOG_INFO << "globalSsdHitPos = " << globalSsdHitPos[0] << " " << globalSsdHitPos[1] << " " << globalSsdHitPos[2] << endm;}
+               //if (_debug) {LOG_INFO << "localSsdHitPos = " << localSsdHitPos[0] << " " << localSsdHitPos[1] << " " << localSsdHitPos[2] << endm;}
 
                HitT *h = AddHitT();
                h->SetId(matId);
@@ -327,11 +328,11 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
    UInt_t onIST = 0;
 
    StSPtrVecTrackNode &nodes = stEvent->trackNodes();
-   LOG_DEBUG << " TrackNode size = " << nodes.size() << endl;
+   if (_debug) {LOG_INFO << " TrackNode size = " << nodes.size() << endm;}
 
    for (size_t trkIndx = 0; trkIndx < nodes.size(); trkIndx++)
    {
-      LOG_DEBUG << " current track # :" << trkIndx+1 << "/" << nodes.size() << endl;
+      if (_debug) {LOG_INFO << " current track # :" << trkIndx+1 << "/" << nodes.size() << endm;}
 
       StGlobalTrack *stGlobalTrack = dynamic_cast<StGlobalTrack *>(nodes[trkIndx]->track(global));
 
@@ -342,7 +343,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
       StDcaGeometry *dcaGeometry = stGlobalTrack->dcaGeometry();
 
       if (!dcaGeometry) {
-         LOG_WARN << "No valid StDcaGeometry object found in this global track. Skipping to next track... " << endl;
+         LOG_WARN << "No valid StDcaGeometry object found in this global track. Skipping to next track... " << endm;
          continue;
       }
 
@@ -408,7 +409,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
 
       StPtrVecHit pxlHits = dInfo->hits(kPxlId);
 
-      if (pxlHits.size() > 0) LOG_DEBUG << "Number of PXL hits on this track " << pxlHits.size() << endl;
+      if (pxlHits.size() > 0) if (_debug) {LOG_INFO << "Number of PXL hits on this track " << pxlHits.size() << endm;}
 
       UInt_t npts_pxl1 = 0;  // first layer
       UInt_t npts_pxl2 = 0;  // second layer
@@ -444,17 +445,17 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                        npts_pxl2 * 10000 +
                        npts_pxl1 * 100000;
 
-      LOG_DEBUG << " NPoints = " << npoints << endl;
+      if (_debug) {LOG_INFO << " NPoints = " << npoints << endm;}
 
-      LOG_DEBUG << " Number of Possible Points: tpc/ssd/ist/PXL = " << stGlobalTrack->numberOfPossiblePoints(kTpcId)
+      if (_debug) {LOG_INFO << " Number of Possible Points: tpc/ssd/ist/PXL = " << stGlobalTrack->numberOfPossiblePoints(kTpcId)
            << "/" << stGlobalTrack->numberOfPossiblePoints(kSsdId) << "/" << stGlobalTrack->numberOfPossiblePoints(kIstId)
-           << "/" << stGlobalTrack->numberOfPossiblePoints(kPxlId) << endl;
-      LOG_DEBUG << " Number of Points: tpc/ssd/ist/PXL = " << dInfo->numberOfPoints(kTpcId) << "/"
+           << "/" << stGlobalTrack->numberOfPossiblePoints(kPxlId) << endm;}
+      if (_debug) {LOG_INFO << " Number of Points: tpc/ssd/ist/PXL = " << dInfo->numberOfPoints(kTpcId) << "/"
            << dInfo->numberOfPoints(kSsdId) << "/" << dInfo->numberOfPoints(kIstId) << "/"
-           << dInfo->numberOfPoints(kPxlId) << endl;
-      LOG_DEBUG << " Number of Points vector size: tpc/ssd/ist/PXL = " << tpcHits.size() << "/"
-           << ssdHits.size() << "/" << istHits.size() << "/" << pxlHits.size() << endl;
-      //    LOG_DEBUG << " Hit Patter: ssd/ist/PXL = " << nssdpattern << "/" << nistpattern << "/" << npxlpattern << endl;
+           << dInfo->numberOfPoints(kPxlId) << endm;}
+      if (_debug) {LOG_INFO << " Number of Points vector size: tpc/ssd/ist/PXL = " << tpcHits.size() << "/"
+           << ssdHits.size() << "/" << istHits.size() << "/" << pxlHits.size() << endm;}
+      //    if (_debug) {LOG_INFO << " Hit Patter: ssd/ist/PXL = " << nssdpattern << "/" << nistpattern << "/" << npxlpattern << endm;}
 
       StPhysicalHelixD dcaG_helix = dcaGeometry->helix();
       StThreeVectorF dcaG_origin = dcaGeometry->origin();
@@ -543,7 +544,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                Double_t global[3] = {hit->position().x(), hit->position().y(), hit->position().z()};
                Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
 
-               LOG_DEBUG << (*hit) << endl;
+               if (_debug) {LOG_INFO << (*hit) << endm;}
 
                HitMatchT *h = AddHitMatchT();
                h->Set(global, local);
@@ -726,13 +727,13 @@ void EventT::SetHeader(Int_t i, Int_t run, Int_t date, Double32_t field)
 void EventT::Print(Option_t *opt) const
 {
    LOG_INFO << "Run/EventT\t" << fEvtHdr.GetRun() << "/" << fEvtHdr.GetEvtNum() << "\tDate " << fEvtHdr.GetDate()
-        << "\tField " << fEvtHdr.GetField() << endl;
+        << "\tField " << fEvtHdr.GetField() << endm;
    LOG_INFO << "Total no. tracks " << GetTotalNoTracks() << "\tRecorded tracks " << GetNtrack()
-        << "\tRecorded hits " << GetNhit() << endl;
+        << "\tRecorded hits " << GetNhit() << endm;
    TRVector vertex(3, GetVertex());
    TRSymMatrix cov(3, GetCovMatrix());
-   LOG_INFO << "Primary vertex " << vertex << endl;
-   LOG_INFO << "Its cov. matrix " << cov << endl;
+   LOG_INFO << "Primary vertex " << vertex << endm;
+   LOG_INFO << "Its cov. matrix " << cov << endm;
 
    for (UInt_t i = 0; i < GetNtrack(); i++) {LOG_INFO << i << "\t"; GetTrackT(i)->Print();}
 

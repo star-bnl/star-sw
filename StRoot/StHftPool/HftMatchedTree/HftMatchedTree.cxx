@@ -25,18 +25,9 @@ HftMatchedTree::HftMatchedTree(const Char_t *name) : StMaker(name),
 {
    fTree->SetAutoSave(1000000000);  // autosave when 1 Gbyte written
 }
-
-
-HftMatchedTree::~HftMatchedTree()
-{
-   if (fFile) fFile->Close();
-
-   delete fFile; fFile = nullptr;
-   delete fTree; fTree = nullptr;
-   delete fEvent; fEvent = nullptr;
-}
-
-
+//________________________________________________________________________________
+HftMatchedTree::~HftMatchedTree(){}
+//________________________________________________________________________________
 Int_t HftMatchedTree::Init()
 {
    if (Debug() >= 2)
