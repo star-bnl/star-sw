@@ -683,6 +683,9 @@ TDataSet *St_geant_Maker::fgGeom = 0;
 TGiant3  *St_geant_Maker::geant3 = 0;
 St_geant_Maker *St_geant_Maker::fgGeantMk = 0;
 static TTreeIter *MuDstIter = 0;
+TString   St_geant_Maker::fgVertex("");
+TString   St_geant_Maker::fgSpread("");
+
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
   StMaker(name), 
@@ -791,7 +794,13 @@ Int_t St_geant_Maker::Init(){
     if (Debug()) LOG_INFO << "St_geant_Maker::Init File " << fInputFile.Data() << endm;
     TString kuip("");
     if      (InputFile.Contains(".fz"))    {ifz = 1; kuip = "gfile p ";         kuip += InputFile;}
-    else if (InputFile.Contains(".nt"))    {kuip = "user/input user "; kuip += InputFile; SetAttr("user/input",kTRUE);}
+    else if (InputFile.Contains(".nt"))    {
+      kuip = "user/input user "; 
+      kuip += InputFile; 
+      SetAttr("user/input",kTRUE);
+      if (fgVertex != "") {Do(fgVertex.Data());  LOG_INFO << "St_geant_Maker::" << fgVertex.Data() << endm;}
+      if (fgSpread != "") {Do(fgSpread.Data());  LOG_INFO << "St_geant_Maker::" << fgSpread.Data() << endm;}
+    }
     else if (InputFile.Contains(".MuDst")) {
       if (! MuDstIter) MuDstIter = new TTreeIter();
       MuDstIter->AddFile(InputFile); 

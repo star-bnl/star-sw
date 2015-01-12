@@ -163,7 +163,7 @@ protected:
                                  float theta3, float phi3);
 
 
-           Int_t SetInputFile(const char* file);
+   Int_t SetInputFile(const char* file);
 
    TDataSet* GetVolume() { return fVolume; }
    const TFileSet *GetGeoDirectory() const { return fGeoDirectory;}
@@ -201,6 +201,8 @@ protected:
   static void usflux();
   static Int_t ipartx(Int_t id);
   static Float_t dose(Float_t Z);
+  static void SetgVertex(const Char_t *vx="") {fgVertex = vx;}
+  static void SetgSpread(const Char_t *sp="") {fgSpread = sp;}
   /// Returns a pointer to the GEANT3 VMC interface
   TGiant3 *Geant3(){ return geant3; }
  protected:
@@ -227,7 +229,8 @@ protected:
    static Gccuts_t  *ccuts; //!
    static Gcphys_t  *cphys; //!
    static Int_t      nlev; //!
-
+   static TString   fgVertex;
+   static TString   fgSpread;
    virtual const char *GetCVS() const
    {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.55 2014/08/06 11:43:54 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
