@@ -805,7 +805,7 @@
     <Shape type="BOX" dz="FLGG_depth/2.0" dx="FLGG_Width/2.0" dy="FLGG_Width/2.0"  />
 
     <Instrument block="FLGR">
-      <Hit meas="elos" nbits="0" min="0" max="50" />
+      <Hit meas="elos" nbits="0" min="0" max="250" />
     </Instrument>
 
     <If expr="FMCG_ChkvSim==1"  >
@@ -827,7 +827,7 @@
     <Attribute for="FLXF" seen="1" colo="4"  />
     <Shape type="BOX" dz="FLGG_depth/2.0" dx="FLGG_Width/2.0" dy="FLGG_Width/2.0"  />
     <Instrument block="FLXF">
-      <Hit meas="elos" nbits="0" min="0" max="50" />
+      <Hit meas="elos" nbits="0" min="0" max="250" />
     </Instrument>
   </Block>
 
