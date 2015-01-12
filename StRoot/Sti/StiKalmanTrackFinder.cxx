@@ -631,9 +631,6 @@ static  const double ref1a  = 110.*degToRad;
 
 //		There is additional loop. 1st loop for active only, second for non active
     int foundInDetLoop = 0;
-static int activeNonActiveLoop = StiDebug::iFlag("activeNonActiveLoop");
-    if (!activeNonActiveLoop) foundInDetLoop = 1;
-//		
     for (int nowActive=1; nowActive>=0; nowActive--) { //Additional activeNonActive loop
 
 
@@ -641,33 +638,22 @@ static int activeNonActiveLoop = StiDebug::iFlag("activeNonActiveLoop");
     {
       tDet = *d;
 
-      if ((tDet->isActive() != nowActive) && ! foundInDetLoop ) continue;
+      if ((tDet->isActive() != nowActive)) continue;
 
-      if (debug() > 2) {
-	cout << endl<< "target det:"<< *tDet;
-	cout << endl<< "lead angle:" << projAngle*radToDeg 
-	     <<" this angle:" << radToDeg*(*d)->getPlacement()->getNormalRefAngle()<<endl;
-      }
       //begin tracking here...
       testNode.reduce();testNode.reset();
       testNode.setChi2(1e55);
       position = testNode.propagate(leadNode,tDet,direction);
       if (position == kEnded) { gLevelOfFind--; return;}
-      if (debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
-      if (position<0) { 
-	// not reaching this detector layer - stop track
-	if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
-	if (debug() >= 1) StiKalmanTrackNode::PrintStep();
+      if (position) { 
 	continue; // will try the next available volume on this layer
       }
 
       foundInDetLoop = 1;		//activeNonActive
       assert(testNode.isValid());
       testNode.setDetector(tDet);
-///assert(testNode.inside());
       int active = tDet->isActive(testNode.getY(),testNode.getZ());
 
-      if (debug() > 2) cout << " vol active:" << active<<endl;
       double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
 
       StiHitContino hitCont;
