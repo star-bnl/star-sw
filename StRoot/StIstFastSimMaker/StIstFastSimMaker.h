@@ -41,7 +41,7 @@ public:
    Double_t distortHit(double x, double res, double detLength);
 
    virtual const char *GetCVS() const {
-      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.10 2014/10/13 22:35:07 smirnovd Exp $ built "__DATE__" "__TIME__ ;
+      static const char cvs[] = "Tag $Name:  $ $Id: StIstFastSimMaker.h,v 1.10 2014/10/13 22:35:07 smirnovd Exp $ built " __DATE__ " " __TIME__ ;
       return cvs;
    }
 
