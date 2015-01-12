@@ -53,7 +53,9 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   //
   // Setup a geometry control structure for testing purposes
   //  
+#if 0
   gROOT->ProcessLine(Form(".!mkdir %s",mytag));
+#endif
   if ( agml )
     {
       if ( !gGeoManager ) new TGeoManager(tag,tag+" | dyson");	
@@ -107,7 +109,9 @@ void loadDevStarGeometry( const Char_t *mytag="upgr2012" )
   // Setup a geometry control structure for testing purposes
   //  
   if ( !gGeoManager ) new TGeoManager(tag,tag+" | dyson");	
+#if 0
   gROOT->ProcessLine(Form(".!mkdir %s",mytag));
+#endif
   build -> ConstructGeometry ( tag );
   
   std::cout << "================================================================" << std::endl;
