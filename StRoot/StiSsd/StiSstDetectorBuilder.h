@@ -14,6 +14,13 @@ class StiPlacement;
 class StiMaterial;
 
 
+/**
+ * This detector builder is responsible for constructing sensitive and inactive
+ * Sti volumes describing the material of the SST detector. The corresponding
+ * SST detector geometry is described in AgML files in StarVMC/Geometry/
+ *
+ * \author Dmitri Smirnov, BNL
+ */
 class StiSstDetectorBuilder : public StiDetectorBuilder
 {
 

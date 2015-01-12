@@ -14,6 +14,13 @@ class StiPlacement;
 class StiMaterial;
 
 
+/**
+ * This detector builder is responsible for constructing sensitive and inactive
+ * Sti volumes describing the material of the IST detector. The corresponding
+ * IST detector geometry is described in AgML files in StarVMC/Geometry/
+ *
+ * \author Dmitri Smirnov, BNL
+ */
 class StiIstDetectorBuilder : public StiDetectorBuilder
 {
 public:
@@ -21,7 +28,7 @@ public:
    StiIstDetectorBuilder(bool active, bool buildIdealGeom = true);
    virtual void buildDetectors(StMaker &source);
    virtual void useVMCGeometry();
-   const StiDetector* getActiveDetector(int ladder) const;
+   const StiDetector* getActiveDetector(int ladder, int sensorHalf) const;
 
 protected:
 
@@ -29,10 +36,6 @@ protected:
 
    bool          mBuildIdealGeom;
    StIstDb      *mIstDb;
-
-private:
-
-   static StiPlacement* createPlacement(const TGeoMatrix& transMatrix, const TVector3& localCenterOffset=TVector3(), const TVector3& normal=TVector3(0, 1, 0));
 };
 
 #endif

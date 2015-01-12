@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.104 2015/01/06 20:57:50 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.106 2015/01/09 21:08:48 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -30,26 +30,13 @@
 
 
 /**
- * Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
- * returns average error once you actually want to do tracking, the results
- * depend strongly on the numbers below.
+ * Builds an object to direct the construction of Sti detectors/volumes.
  *
-   numbering should be the following :
-   hardware : sector ladder   ITTF : layer  ladder
-   1      1                          1      0
-   1      2                          1      1
-   1      3                          1      2
-   1      4                          0      0
-
-   2      1                          1      3
-   2      2                          1      4
-   2      3                          1      5
-   2      4                          0      1
-   (...)
-   10     1                          1     27
-   10     2                          1     28
-   10     3                          1     29
-   10     4                          0     9
+ * \param active   Set to true when accounting for hits in active volumes or
+ * false otherwise
+ *
+ * \param buildIdealGeom  Set to true (default) to ignore volume position
+ * transformation stored in the survey DB tables
  */
 StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
    StiDetectorBuilder("Pixel", active), mBuildIdealGeom(buildIdealGeom), mPxlDb(0)
@@ -137,50 +124,17 @@ void StiPxlDetectorBuilder::useVMCGeometry()
             continue;
          }
 
-         // Build global rotation for the sensor
-         TGeoRotation sensorRot(*sensorMatrix);
-
          TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
          // Split the ladder in two halves
          for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++) {
-            // Convert center of the half sensor geobox to coordinates in the global coordinate system
-            double sensorXyzLocal[3]  = {};
-            double sensorXyzGlobal[3] = {};
-
-            // Shift the halves by a quater width
-            sensorXyzLocal[0] = iLadderHalf == 1 ? -sensorBBox->GetDX()/2 : sensorBBox->GetDX()/2;
-
-            sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
-
-            TVector3 sensorVec(sensorXyzGlobal);
-
             // Create new Sti shape based on the sensor geometry
             std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
             double sensorLength = kNumberOfPxlSensorsPerLadder * (sensorBBox->GetDZ() + 0.02); // halfDepth + 0.02 ~= (dead edge + sensor gap)/2
             StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
-            add(stiShape);
-
-            Double_t phi  = sensorVec.Phi();
-            Double_t phiD = sensorRot.GetPhiRotation() / 180 * M_PI;
-            Double_t r    = sensorVec.Perp(); // Ignore the z component if any
-            double normVecMag = fabs(r * sin(phi - phiD));
-            TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
-
-            if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
-            else                            normVec *=  normVecMag;
-
-            // Volume positioning
-            StiPlacement *pPlacement = new StiPlacement();
-
-            pPlacement->setZcenter(0);
-            pPlacement->setLayerRadius(r);
-            pPlacement->setLayerAngle(phi);
-            pPlacement->setRegion(StiPlacement::kMidRapidity);
-
-            double centerOrient = sensorVec.Phi() - normVec.Phi();
-            pPlacement->setNormalRep(normVec.Phi(), normVecMag, r * sin(centerOrient));
+            TVector3 offset((iLadderHalf == 1 ? -sensorBBox->GetDX()/2 : sensorBBox->GetDX()/2), 0, 0);
+            StiPlacement *pPlacement= new StiPlacement(*sensorMatrix, offset);
 
             // Build final detector object
             StiDetector *stiDetector = getDetectorFactory()->getInstance();

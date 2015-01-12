@@ -33,6 +33,15 @@
 using namespace StIstConsts;
 
 
+/**
+ * Builds an object to direct the construction of Sti detectors/volumes.
+ *
+ * \param active   Set to true when accounting for hits in active volumes or
+ * false otherwise
+ *
+ * \param buildIdealGeom  Set to true (default) to ignore volume position
+ * transformation stored in the survey DB tables
+ */
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, bool buildIdealGeom) :
    StiDetectorBuilder("Ist", active), mBuildIdealGeom(buildIdealGeom), mIstDb(0)
 {
@@ -114,55 +123,32 @@ void StiIstDetectorBuilder::useVMCGeometry()
          continue;
       }
 
-      // Build global rotation for the sensor
-      TGeoRotation sensorRot(*sensorMatrix);
-
       TGeoBBox *sensorBBox = (TGeoBBox*) sensorVol->GetShape();
 
-      // Convert center of the sensor geobox to coordinates in the global coordinate system
-      double sensorXyzLocal[3]  = {};
-      double sensorXyzGlobal[3] = {};
+      // Split the ladder in two halves
+      for (int iLadderHalf = 1; iLadderHalf <= 2; iLadderHalf++)
+      {
+         // Create new Sti shape based on the sensor geometry
+         std::string halfLadderName(geoPath.str() + (iLadderHalf == 1 ? "_HALF1" : "_HALF2") );
 
-      sensorMatrix->LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
+         // IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
+         double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
+         StiShape *stiShape = new StiPlanarShape(halfLadderName.c_str(), sensorLength, 2*sensorBBox->GetDY(), sensorBBox->GetDX()/2);
 
-      TVector3 sensorVec(sensorXyzGlobal);
+         TVector3 offset((iLadderHalf == 1 ? -sensorBBox->GetDX()/2 : sensorBBox->GetDX()/2), 0, 0);
+         StiPlacement *pPlacement= new StiPlacement(*sensorMatrix, offset);
 
-      //IBSS shape : DX =1.9008cm ; DY = .015cm ; DZ = 3.765 cm
-      double sensorLength = kIstNumSensorsPerLadder * (sensorBBox->GetDZ() + 0.10); // halfDepth + deadedge 0.16/2 + sensor gap 0.04/2
-      StiShape *stiShape  = new StiPlanarShape(geoPath.str().c_str(), sensorLength, 2 * sensorBBox->GetDY(), sensorBBox->GetDX());
+         // Build final detector object
+         StiDetector *stiDetector = getDetectorFactory()->getInstance();
+         StiIsActiveFunctor* isActive = _active ?  new StiIstIsActiveFunctor :
+            static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
 
-      add(stiShape);
+         stiDetector->setProperties(halfLadderName, isActive, stiShape, pPlacement, getGasMat(), silicon);
+         stiDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
 
-      Double_t phi  = sensorVec.Phi();
-      Double_t phiD = sensorRot.GetPhiRotation() / 180 * M_PI;
-      Double_t r    = sensorVec.Perp(); // Ignore the z component if any
-      double normVecMag = fabs(r * sin(phi - phiD));
-      TVector3 normVec(cos(phiD + M_PI_2), sin(phiD + M_PI_2), 0);
-
-      if (normVec.Dot(sensorVec) < 0) normVec *= -normVecMag;
-      else                            normVec *=  normVecMag;
-
-      // Volume positioning
-      StiPlacement *pPlacement = new StiPlacement();
-
-      pPlacement->setZcenter(0);
-      pPlacement->setLayerRadius(r);
-      pPlacement->setLayerAngle(phi);
-      pPlacement->setRegion(StiPlacement::kMidRapidity);
-
-      double centerOrient = sensorVec.Phi() - normVec.Phi();
-      pPlacement->setNormalRep(normVec.Phi(), normVecMag, r * sin(centerOrient));
-
-      // Build final detector object
-      StiDetector *stiDetector = getDetectorFactory()->getInstance();
-      StiIsActiveFunctor* isActive = _active ? new StiIstIsActiveFunctor :
-         static_cast<StiIsActiveFunctor*>(new StiNeverActiveFunctor);
-
-      stiDetector->setProperties(geoPath.str(), isActive, stiShape, pPlacement, getGasMat(), silicon);
-      stiDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
-
-      // Adding detector, note that no keys are set in IST!
-      add(stiRow, iLadder-1, stiDetector);
+         // Add created sensitive IST layer to Sti
+         add(iLadderHalf-1, iLadder-1, stiDetector);
+      }
    }
 }
 
@@ -172,13 +158,20 @@ void StiIstDetectorBuilder::useVMCGeometry()
  * active volume can have hits associated with it. The ladder id is expected to
  * follow the human friendly numbering scheme, i.e.
  *
+ * <pre>
  * 1 <= ladder <= kIstNumLadders
+ * 1 <= sensorHalf <= 2
+ * </pre>
  *
- * In this builder the active IST layers are added in stiRow = 0.
+ * In this builder the active IST layers are added in stiRows 0 and 1 depending
+ * on the sensor half
  */
-const StiDetector* StiIstDetectorBuilder::getActiveDetector(int ladder) const
+const StiDetector* StiIstDetectorBuilder::getActiveDetector(int ladder, int sensorHalf) const
 {
-   return (ladder < 1 || ladder > kIstNumLadders) ? 0 : getDetector(0, ladder-1);
+   if (ladder < 1 || ladder > kIstNumLadders || sensorHalf < 1 || sensorHalf > 2)
+      return 0;
+   else
+      return getDetector(sensorHalf-1, ladder-1);
 }
 
 
@@ -240,10 +233,10 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
          continue;
       }
 
-      StiPlacement *cfBackingPlacement = createPlacement(*transMatrix, cfBackingOffset);
-      StiPlacement *alumConnectorPlacement = createPlacement(*transMatrix, alumConnectorOffset);
-      StiPlacement *gtenConnectorPlacement = createPlacement(*transMatrix, gtenConnectorOffset);
-      StiPlacement *digiBoardPlacement = createPlacement(*transMatrix, digiBoardOffset);
+      StiPlacement *cfBackingPlacement = new StiPlacement(*transMatrix, cfBackingOffset);
+      StiPlacement *alumConnectorPlacement = new StiPlacement(*transMatrix, alumConnectorOffset);
+      StiPlacement *gtenConnectorPlacement = new StiPlacement(*transMatrix, gtenConnectorOffset);
+      StiPlacement *digiBoardPlacement = new StiPlacement(*transMatrix, digiBoardOffset);
 
       StiDetector *stiDetector = getDetectorFactory()->getInstance();
       stiDetector->setProperties(pfx+"IBAM_CF_BACKING", new StiNeverActiveFunctor, cfBackingShape, cfBackingPlacement, getGasMat(), cfBackingMaterial);
@@ -286,30 +279,4 @@ void StiIstDetectorBuilder::buildInactiveVolumes()
    stiDetector = getDetectorFactory()->getInstance();
    stiDetector->setProperties(pfx+"ICCT", new StiNeverActiveFunctor, icctShape, icctPlacement, getGasMat(), icctMaterial);
    add(getNRows(), 0, stiDetector);
-}
-
-
-StiPlacement* StiIstDetectorBuilder::createPlacement(const TGeoMatrix& transMatrix, const TVector3& localCenterOffset, const TVector3& normal)
-{
-   // Convert center of the geobox to coordinates in the global coordinate system
-   double sensorXyzLocal[3]  = {localCenterOffset.X(), localCenterOffset.Y(), localCenterOffset.Z()};
-   double sensorXyzGlobal[3] = {};
-
-   double normalXyzLocal[3]  = {normal.X() + localCenterOffset.X(), normal.Y() + localCenterOffset.Y(), normal.Z() + localCenterOffset.Z()};
-   double normalXyzGlobal[3] = {};
-
-   transMatrix.LocalToMaster(sensorXyzLocal, sensorXyzGlobal);
-   transMatrix.LocalToMaster(normalXyzLocal, normalXyzGlobal);
-
-   TVector3 centralVec(sensorXyzGlobal);
-   TVector3 normalVec(normalXyzGlobal);
-
-   normalVec -= centralVec;
-
-   if (normalVec.Dot(centralVec) < 0) normalVec *= -1;
-
-   double deltaPhi = centralVec.DeltaPhi(normalVec);
-   double normalVecMag = fabs(centralVec.Perp() * cos(deltaPhi));
-
-   return new StiPlacement(normalVec.Phi(), normalVecMag, centralVec.Perp()*sin(deltaPhi), localCenterOffset.Z());
 }
