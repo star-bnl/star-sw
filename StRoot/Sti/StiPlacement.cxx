@@ -27,6 +27,51 @@ StiPlacement::StiPlacement(float  normRefAngle,float  normRadius,float normYOffs
   mRegion = kMidRapidity;
 
 }
+
+
+/**
+ * Creates a new StiPlacement for an Sti detector by transforming its center
+ * coordinates to the global coordinate system defined by transMatrix. The
+ * center of the Sti detector can be placed at arbitrary localCenter in the
+ * _local_ coordinate system.
+ *
+ * By default the normal vector is collinear with the "thickness" of the Sti
+ * detector, i.e. normal = {x, y, z} = {0, 1, 0}. But it can be arbitrary
+ * redefined to, say, {1, 0, 0} in order to swap the Sti detector's thickness
+ * and width. It is assumed that the normal vector starts from the origin.
+ */
+StiPlacement::StiPlacement(const TGeoMatrix& transMatrix, const TVector3& localCenter, const TVector3& normal)
+{
+   double centerXyzLocal[3]  = {localCenter.X(), localCenter.Y(), localCenter.Z()};
+   double centerXyzGlobal[3] = {};
+
+   double normalXyzLocal[3]  = {normal.X() + localCenter.X(), normal.Y() + localCenter.Y(), normal.Z() + localCenter.Z()};
+   double normalXyzGlobal[3] = {};
+
+   // Translate the local coordinates to the global coordinate system
+   transMatrix.LocalToMaster(centerXyzLocal, centerXyzGlobal);
+   transMatrix.LocalToMaster(normalXyzLocal, normalXyzGlobal);
+
+   TVector3 centralVec(centerXyzGlobal);
+   TVector3 normalVec(normalXyzGlobal);
+
+   // We actually need the normal vector from the center rather than from the
+   // origin
+   normalVec -= centralVec;
+
+   if (normalVec.Dot(centralVec) < 0) normalVec *= -1;
+
+   double deltaPhi = centralVec.DeltaPhi(normalVec);
+   double normalVecMag = fabs(centralVec.Perp() * cos(deltaPhi));
+
+   setNormalRep(normalVec.Phi(), normalVecMag, centralVec.Perp()*sin(deltaPhi));
+   zCenter = centralVec.Z();
+   setLayerRadius(centerRadius);
+   layerAngle = centerRefAngle;
+   mRegion = kMidRapidity;
+}
+
+
 //______________________________________________________________________________
 void StiPlacement::setNormalRep(float refAngle_, float radius_, float yOffset_)
 {

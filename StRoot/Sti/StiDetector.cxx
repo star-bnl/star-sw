@@ -47,11 +47,11 @@ void StiDetector::copy(StiDetector &detector){
 //______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
-    os << "StiDetector:" << endl
-       << d.getName()
+  //    os << "StiDetector:" << endl
+  os   << d.getName()
        <<"\tR:"<<d.getPlacement()->getNormalRadius()<<"cm\tA:"
-       <<d.getPlacement()->getNormalRefAngle()<< " radians" << endl;
-
+       <<d.getPlacement()->getNormalRefAngle()<< " radians";// << endl;
+#if 0
     if (d.material)
        os << *d.material;
 
@@ -60,7 +60,7 @@ ostream& operator<<(ostream& os, const StiDetector& d)
 
     if (d.placement)
        os << *d.placement;
-
+#endif
     return os;
 }
 //______________________________________________________________________________

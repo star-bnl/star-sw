@@ -68,7 +68,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
       setNSectors(row,nSectors);
       for (UInt_t sector=0;sector<nSectors;sector++)	    {
 	StiDetector *detector = (*iter)->getDetector(i,sector);
-	if (detector) {
+	if (detector && detector->isActive()) {
 	  if (! sector) {
 	    LOG_INFO << "StiMasterDetectorBuilder::build() -I- row:"<<row << "\t" << *detector << endm;
 	  }

@@ -36,6 +36,10 @@
 #ifndef STI_PLACEMENT_H
 #define STI_PLACEMENT_H
 #include "Stiostream.h"
+#include "TGeoMatrix.h"
+#include "TVector3.h"
+
+
 class StiPlacement{
 
 public:
@@ -49,6 +53,7 @@ public:
 /// Some of them directly, others indirectly, some by default.
 /// This setting could be changed by additional setters if needed
     StiPlacement(float  normRefAngle,float  normRadius,float normYOffset,float centralZ); 
+    StiPlacement(const TGeoMatrix& transMatrix, const TVector3& localCenter=TVector3(), const TVector3& normal=TVector3(0, 1, 0));
     // accessors
     float getNormalRefAngle()	const { return normalRefAngle;   }
     float getNormalRadius() 	const { return normalRadius;     }
