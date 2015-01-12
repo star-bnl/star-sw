@@ -36,7 +36,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   TString RootFile("");
   TString Opt(opt);
   TString RunOpt(Run);
-  RunOpt.ToLower();
+  //  RunOpt.ToLower();
   //ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   if (! RunOpt.Contains("RC.y",TString::kIgnoreCase) &&  
       ! RunOpt.Contains("MC.y",TString::kIgnoreCase)) {
@@ -65,6 +65,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   if (FileIn == "") {
     if (RunOpt.Contains("pythia",TString::kIgnoreCase)) {
       RootFile += "pythia";
+    } else if (RunOpt.Contains("hijing",TString::kIgnoreCase)) {
+      RootFile += "hijing";
     } else {
       ChainOpt += "gstar,"; RootFile += "gstar";
     }
@@ -99,6 +101,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     } else if (FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
       ChainOpt += "mtin,";
       RootFile.ReplaceAll(".MuDst.root","");
+    } else {
+      if (gSystem->AccessPathName(FileIn.Data())) FileIn ="";
     }
   }
   ChainOpt += RunOpt;
