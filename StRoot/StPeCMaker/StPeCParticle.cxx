@@ -38,6 +38,27 @@ void StPeCParticle::set ( g2t_track_st* trk) {
 
    charge = (Short_t)trk->charge ;
 }
+
+StPeCParticle::StPeCParticle ( StMuMcTrack* trk) {
+   set ( trk ) ;
+}
+void StPeCParticle::set ( StMuMcTrack* trk) {
+
+  pid     = trk->GePid() ;
+  key    = trk->Id()  ;
+  pt     = trk->pT()  ;
+  eta    = trk->Eta() ;
+  e      = trk->E() ;
+  psi    = atan2(trk->Pxyz().x(),trk->Pxyz().y());
+   if ( psi < 0 ) psi += 2. * M_PI ;
+   vertexId = trk->IdVx() ;
+   
+   nTpcHits = trk->No_tpc_hit() ;
+   nFtpHits = trk->No_ftp_hit() ;
+   nSvtHits = trk->No_svt_hit() ;
+
+   charge = (Short_t)trk->Charge() ;
+}
 #endif /*__CINT__*/
 
 
