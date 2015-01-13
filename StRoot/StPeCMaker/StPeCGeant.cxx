@@ -8,6 +8,10 @@
 #include "StPeCGeant.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 
 
 ClassImp(StPeCGeant)
@@ -97,6 +101,67 @@ Int_t StPeCGeant::fill ( TDataSet* geant ) {
    g2t_vertex_st* vtxT = vtx->GetTable() ;
 
    gZVertex = vtxT->ge_x[2] ;
+   
+   return 0 ;
+}
+
+Int_t StPeCGeant::fill ( StMuDst * mu  ) {
+//
+//  fill  McEvent class to access StMuMcTracks
+//
+    StMuEvent* muEvent = mu->event(); // get a pointer to the class holding event-wise information
+     LOG_INFO << "StPeCGeant::fill: using MuDst ++++++++++++++++++++++++++++++++++++++++++++++++++++---------- "  << endm;
+   if ( !muEvent ) {
+      printf ( "StPeCGeant::fill: MC event not found \n" ) ; 
+      return 1 ;
+   }
+
+    TClonesArray *MuMcTracks     = mu->mcArray(1); 
+
+   int nTracks = MuMcTracks->GetEntriesFast(); 
+   LOG_INFO << "StPeCGeant::fill: "<<nTracks<<"  tracks found "<<endm;
+
+   float px = 0 ;
+   float py = 0 ;
+        gPz = 0 ;
+   float e  = 0 ;
+   nPart    = 0 ;
+   TClonesArray &pParticle = *pPart ;
+
+   int vert ;
+
+for (Int_t kg = 0; kg < nTracks; kg++) {
+  StMuMcTrack *mcTrack = (StMuMcTrack *) MuMcTracks->UncheckedAt(kg);
+
+  new(pParticle[nPart++]) StPeCParticle(mcTrack) ;
+//   new((*tofTracks)[globalTrackCounter]) StMuTrack((const StMuTrack &) *TofGlobalTrack);
+      
+  //       vert = trkT[i].start_vertex_p ;
+  //       if ( vert != 1 ) continue ;
+  px  += mcTrack->Pxyz().x();
+  py  += mcTrack->Pxyz().y();
+  gPz += mcTrack->Pxyz().z();
+  e   += mcTrack->E();
+ }
+   
+   gPt  = ::sqrt(px*px+py*py);
+   gPsi = atan2(py,px);
+   if ( gPsi < 0 ) gPsi += M_PI ;
+   gMass = ::sqrt(e*e-gPt*gPt-gPz*gPz);
+
+   float theta = atan2(gPt,gPz);
+   gEta = -::log(tan(theta/2.)) ;
+   gY   = 0.5*::log((e+gPz)/(e-gPz));
+
+//    St_g2t_vertex*  vtx = 0 ;
+//    vtx = (St_g2t_vertex *)geant->Find("g2t_vertex") ;
+//    if ( !vtx ) {
+//       printf ( "StPeCGeant::fill: vertex not found \n" ) ; 
+//       return 1 ;
+//    }
+//    g2t_vertex_st* vtxT = vtx->GetTable() ;
+
+//    gZVertex = vtxT->ge_x[2] ;
    
    return 0 ;
 }
