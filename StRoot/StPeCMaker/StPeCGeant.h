@@ -20,6 +20,7 @@
 #include "StEventTypes.h"
 #endif /* __CINT__ */
 #include "StPeCParticle.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
 
 class St_g2t_track;
 
@@ -33,6 +34,7 @@ public:
   void                   clear (  ) ; 
 #ifndef __CINT__
   Int_t                  fill  ( TDataSet* geant ) ; 
+  Int_t                  fill  (StMuDst * mu ) ; 
 #endif /* __CINT__ */
 
   Float_t                gPt ;
