@@ -14,6 +14,8 @@
 #include "TMath.h"
 #include "TVector3.h"
 #include "StTpcDb/StTpcDb.h"
+#include "StSsdUtil/StSstConsts.h"
+
 StSstDbMaker *gStSstDbMaker = NULL;
 THashList *StSstDbMaker::fRotList = 0;
 
