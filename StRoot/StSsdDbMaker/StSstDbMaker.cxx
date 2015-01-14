@@ -260,10 +260,19 @@ St_ssdWafersPosition *StSstDbMaker::CalculateWafersPosition()
 
 /**
  * Returns TGeoHMatrix with complete set of transformations from the sensor
- * local coordinate system to the global one.
+ * local coordinate system to the global one. The ladder and the sensor id's are
+ * expected to follow the human friendly numbering scheme, i.e.
+ *
+ * <pre>
+ * 1 <= ladder <= kSstNumLadders
+ * 1 <= sensor <= kSstNumSensorsPerLadder
+ * </pre>
  */
 const TGeoHMatrix *StSstDbMaker::getHMatrixSensorOnGlobal(int ladder, int sensor)
 {
-   int id = 7000 + 100 * (sensor) + (ladder);
+   if (ladder < 1 || ladder > kSstNumLadders || sensor < 1 || sensor > kSstNumSensorsPerLadder)
+      return 0;
+
+   int id = 7000 + 100*sensor + ladder;
    return fRotList ? (TGeoHMatrix *) fRotList->FindObject(Form("R%04i", id)) : 0;
 }
