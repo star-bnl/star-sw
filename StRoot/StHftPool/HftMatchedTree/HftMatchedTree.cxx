@@ -17,13 +17,11 @@ ClassImp(HftMatchedTree)
 
 
 HftMatchedTree::HftMatchedTree(const Char_t *name) : StMaker(name),
-   fTree(new TTree("t", "TTree with HFT hits and tracks")),
-   fEvent(nullptr),
-   fFile(nullptr),
-   fMinNoHits(0),
-   fpCut(0)
+						     fTree(0),
+						     fEvent(nullptr),
+						     fMinNoHits(0),
+						     fpCut(0)
 {
-   fTree->SetAutoSave(1000000000);  // autosave when 1 Gbyte written
 }
 //________________________________________________________________________________
 HftMatchedTree::~HftMatchedTree(){}
@@ -39,25 +37,14 @@ Int_t HftMatchedTree::Init()
 
    // Authorize Trees up to 2 Terabytes (if the system can do it)
    TTree::SetMaxTreeSize(1000 * Long64_t(2000000000));
-
-   TString fileName( gSystem->BaseName(bfChain->GetFileIn().Data()) );
-
-   fileName.ReplaceAll("st_physics", "");
-   fileName.ReplaceAll(".event", "");
-   fileName.ReplaceAll(".daq", "");
-   fileName.ReplaceAll(".fz", "");
-
-   if (fMinNoHits > 0) fileName += Form("_%i_%f2.1_", fMinNoHits, fpCut);
-
-   fileName += ".hftree.root";
-
-   fFile = new TFile(fileName, "RECREATE", "TTree with HFT hits and tracks");
-   fFile->SetCompressionLevel(1); // Set file compression level
-
+   
+   TFile *f = GetTFile();
+   assert(f);
+   f->cd();
+   fTree = new TTree("t", "TTree with HFT hits and tracks");
+   fTree->SetAutoSave(1000000000);  // autosave when 1 Gbyte written
+   
    SetTree();
-
-   fTree->SetDirectory(fFile);
-
    return kStOK;
 }
 
@@ -90,7 +77,7 @@ Int_t HftMatchedTree::InitRun(Int_t runnumber)
 
    // Update pointers to the detector spatial transformations at new run transition
    fEvent->SetDbDatasets(stPxlDb, stIstDb);
-
+#if 0
    // Dump geometry matrix into root file
    TFile *file = new TFile("GeometryTables.root", "recreate");
 
@@ -115,21 +102,11 @@ Int_t HftMatchedTree::InitRun(Int_t runnumber)
 
    file->Close();
    delete file;
-
+#endif
    return kStOK;
 }
 
 
-Int_t HftMatchedTree::Finish()
-{
-   fFile = fTree->GetCurrentFile(); //just in case we switched to a new file
-   fFile->Write();
-
-   if (GetDebug() >= 1)
-      fTree->Print();
-
-   return kStOK;
-}
 
 
 void HftMatchedTree::SetTree()

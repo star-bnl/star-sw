@@ -242,7 +242,7 @@ Double_t g2g(Double_t *xx, Double_t *par) {
 //________________________________________________________________________________
 TF1 *InitGP() {
   struct Par_t {
-    Char_t *Name;
+    const Char_t *Name;
     Double_t p, pmin, pmax;
   };
 #if 0

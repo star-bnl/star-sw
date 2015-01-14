@@ -18,7 +18,6 @@ public:
    virtual Int_t InitRun(Int_t runnumber);
    virtual Int_t Make();
    virtual void  Clear(Option_t *opt = "");
-   virtual Int_t Finish();
 
    void SetMinNoHits(Int_t minNoHits = 0) { fMinNoHits = minNoHits; }
    void SetpCut(Double_t pCut = 0.0) { fpCut = pCut; }
@@ -34,7 +33,6 @@ private:
 
    virtual void SetTree();
 
-   TFile    *fFile;
    Int_t     fMinNoHits;
    Double_t  fpCut;
 
