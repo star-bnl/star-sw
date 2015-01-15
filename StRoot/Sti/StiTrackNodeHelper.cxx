@@ -750,24 +750,6 @@ assert(calculator);
 
   mMcs._ptinCorr = ::sqrt(e2)*dE/p2;
 if (fabs(mMcs._ptinCorr)>1e-4) {
-  double dens = calculator->getDens();
-  StiDebug::Count("HelpCorr.new",mMcs._ptinCorr,-0.2,0.2);
-  StiDebug::Count("HelpDens:rxy.new",mBestPars.rxy(),dens
-                                    ,0,200,-0,3);
-  StiDebug::Count("Helpdens:z.new"  ,mBestPars.z()  ,dens
-                                    ,-200,200,0,3);
-  double phig = (mBestPars.phi()+mTargetNode->getAlpha())/M_PI*180;
-  StiDebug::Count("Helpdens:phi.new",phig,dens
-                                    ,-180,180,0,3);
-//   if (dens >2 && dens <3) {
-//   if (mBestPars.z()<-50 ) {
-//   if (mBestPars.rxy()<3,5) {
-// static int nQwe=0; nQwe++; if (nQwe>1000) exit(0);  
-//     printf("#### det=%s mat=%s r=%g d=%g\n",mDetector->getName().c_str()
-//           ,mDetector->getMaterial()->getName().c_str()
-// 	  ,mBestPars.rxy(),dens);
-// }}}
-// 
 
 
 }   
