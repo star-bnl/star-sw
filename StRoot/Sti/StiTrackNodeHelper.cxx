@@ -1125,8 +1125,9 @@ int StiTrackNodeHelper::nudge()
     pars->y()     += pars->_sinCA *deltaL;
     pars->z()     += pars->tanl()  *deltaL;
     pars->eta()   +=               deltaE;
+    double cosCA = pars->_cosCA;
     pars->_cosCA -= pars->_sinCA *deltaE;
-    pars->_sinCA += pars->_cosCA *deltaE;
+    pars->_sinCA +=        cosCA *deltaE;
     if (fabs(pars->_cosCA)>=0.99
       ||fabs(pars->_sinCA)>=0.99) pars->ready();
     if (pars->check()) return 1;
