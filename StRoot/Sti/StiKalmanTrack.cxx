@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.133 2014/11/10 21:45:09 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.133 2014/11/10 21:45:09 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.134  2015/01/15 19:10:19  perev
+ * Added mthod test() for debug only
+ *
  * Revision 2.133  2014/11/10 21:45:09  perev
  * In approx more carefully accounted case mag field == 0
  * To deside that field == 0 method isZeroH() is used
@@ -1874,4 +1877,28 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
   }
   return sum;
 }
+//_____________________________________________________________________________
+void StiKalmanTrack::test(const char *txt) const
+{
+static const char *tit[]={".???",".pla",".cyl",".sec",".dca",".vtx"};
+
+
+  StiKTNIterator it;
+  for (it=begin();it!=end();it++)  {
+    StiKalmanTrackNode *node = &(*it);
+    if (!node->isValid()) continue;
+    if (node->getCyy()>1) continue;
+    int shapeCode=0;
+    const StiDetector *det = node->getDetector();
+    if  (det) { shapeCode = det->getShape()->getShapeCode();}
+    else      { shapeCode = (node->isDca())? 4:5           ;}
+    TString tsY(txt); tsY+=".YY";tsY+=tit[shapeCode];
+    TString tsZ(txt); tsZ+=".ZZ";tsZ+=tit[shapeCode];
+
+
+    StiDebug::Count(tsY.Data(),sqrt(node->getCyy()));
+    StiDebug::Count(tsZ.Data(),sqrt(node->getCzz()));
+  }
+}
+
 
