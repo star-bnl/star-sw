@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.222 2014/12/16 17:21:14 perev Exp $
+// $Id: StiMaker.cxx,v 1.223 2015/01/15 19:04:41 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -593,19 +593,22 @@ static const char * elNames[2] = {"globaELoss"  ,"primaryELoss" };
 	node->nudge();
 	if (1 /*node->inside()*/) {
 	  nInside++;
-          StiDebug::Count(elNames[gloPri],node->getELoss()[0].mELoss);
+//          StiDebug::Count(elNames[gloPri],node->getELoss()[0].mELoss);
         }
      }
-     StiDebug::Count(noNames[gloPri],nNodes );
-     StiDebug::Count(inNames[gloPri],nInside);
-     StiDebug::Count(hiNames[gloPri],nHits  );
+//      StiDebug::Count(noNames[gloPri],nNodes );
+//      StiDebug::Count(inNames[gloPri],nInside);
+//      StiDebug::Count(hiNames[gloPri],nHits  );
   }
-  StiDebug::Count(tkNames[gloPri],nTk );
+//  StiDebug::Count(tkNames[gloPri],nTk );
 }
 
 
-// $Id: StiMaker.cxx,v 1.222 2014/12/16 17:21:14 perev Exp $
+// $Id: StiMaker.cxx,v 1.223 2015/01/15 19:04:41 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.223  2015/01/15 19:04:41  perev
+// Debug--
+//
 // Revision 1.222  2014/12/16 17:21:14  perev
 // temporary supress inside()
 //
