@@ -6,7 +6,7 @@
 using namespace std;
 
 // allowed values for shapeCode
-enum StiShapeCode {kPlanar = 1, kCylindrical, kConical, kDisk}; 
+enum StiShapeCode {kPlanar = 1, kCylindrical, kSector, kConical, kDisk}; 
 
 /*! Class encapsulating the notion of detector/volume shape.
 \author Ben Norman, Kent State, 25 July 01
