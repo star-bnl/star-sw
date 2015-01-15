@@ -1,6 +1,0 @@
-      subroutine  GMORIN
-      logical first/.true./
-      if (first) print* ,' GMORIN is calling orininal MORINI '
-      first=.false.
-      call MORINI
-      end
