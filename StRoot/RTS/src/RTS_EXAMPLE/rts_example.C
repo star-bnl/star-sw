@@ -1666,7 +1666,7 @@ static int fps_doer(daqReader *rdr, const char *do_print)
 
 		fps_evt_hdr_t *hdr = (fps_evt_hdr_t *)dd->meta ;
 		if(do_print) {
-			printf("FPS META: %u us\n",hdr->delta) ;
+			printf("FPS META: delta %u us, xing %d\n",hdr->delta,hdr->xing) ;
 		}
 
 		while(dd->iterate()) {
