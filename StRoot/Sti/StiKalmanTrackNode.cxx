@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.152 2015/01/15 19:23:26 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.153 2015/01/15 20:05:27 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.153  2015/01/15 20:05:27  perev
+ * Simplified check of simplified locate()
+ *
  * Revision 2.152  2015/01/15 19:23:26  perev
  * Method locate() simplified. Redundunt info removed.
  * For instance, which part of detector track missed. This is not used anyway.
@@ -950,7 +953,7 @@ StiDebug::Break(nCall);
    
   position = propagate(endVal,shapeCode,dir); 
 
-  if (position>kEdgeZplus || position<0) return position;
+  if (position) return position;
   assert(mFP.x() > 0.);
   propagateError();
   if (debug() & 8) { PrintpT("E");}
@@ -1099,9 +1102,9 @@ StiDebug::StiDebug::Break(nCall);
     mFP._sinCA   = mgP.sinCA2;
     mFP._cosCA   = mgP.cosCA2;
     ians = locate();
-    if (ians<=kEdgeZplus && ians>=0) break;
+    if (!ians) break;
   }
-  if (ians>kEdgeZplus || ians<0) 		return ians;
+  if (ians) 		return ians;
   if (mFP.x()> kFarFromBeam) {
     if (fabs(mFP.eta())>kMaxEta) 		return kEnded;
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
