@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.12 2004/01/10 01:10:17 genevb Exp $
+// $Id: QAhlist_logy.h,v 2.13 2015/01/16 21:08:28 genevb Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.13  2015/01/16 21:08:28  genevb
+// Initial versions of HFT histograms
+//
 // Revision 2.12  2004/01/10 01:10:17  genevb
 // Preparations for Year 5, added some svt plots
 //
@@ -323,5 +326,7 @@
  "QaFpdSums4",
  "QaFpdSums5",
  "QaFpdSums6",
- "QaFpdSums7"
+ "QaFpdSums7",
+
+ "QaPointSizeSSD"
 

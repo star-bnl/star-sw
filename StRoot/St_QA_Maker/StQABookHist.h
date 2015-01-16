@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.34 2014/08/06 11:43:53 jeromel Exp $ 
+// $Id: StQABookHist.h,v 2.35 2015/01/16 21:08:28 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.35  2015/01/16 21:08:28  genevb
+// Initial versions of HFT histograms
+//
 // Revision 2.34  2014/08/06 11:43:53  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
@@ -130,13 +133,13 @@ class StQABookHist : public TObject {
   StQABookHist() {}
   StQABookHist(const char *type);
   virtual       ~StQABookHist() {}
-  virtual void   BookHist(Int_t histsSet);
+  virtual void   BookHist(Int_t hSet);
 
   const char*    HistType() {return QAHistType.Data();}
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.34 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.35 2015/01/16 21:08:28 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -703,6 +706,37 @@ class StQABookHist : public TObject {
   TH2F* m_pnt_sizeSSD;         //!
   TH1F* m_pnt_eSSD;            //!
 
+  // Hists for HFT
+  // correlation plots: hits in HFT subsystems
+  TH2F* m_nhit_Pxl_Its;         //!     # of hits in PIXEL vs hits in ITS
+  TH2F* m_nhit_Pxl_Ssd;         //!     # of hits in PIXEL vs hits in SSD
+  TH2F* m_nhit_Its_Ssd;         //!     # of hits in ITS vs hits in ITS
+  TH1F* m_global_hft_hit;       //! HFT hits per global track
+  TH1F* m_primary_hft_hit;      //!     HFT hits per primary track
+
+  // Hists for PIXEL
+  TH2F* m_pxl_hit_phi_z_Pxl1;           //!     # of hits vs phi vs z position, inner PIXEL layer
+  TH2F* m_pxl_hit_phi_z_Pxl2;           //!     # of hits vs phi vs z position, outer PIXEL layer
+  TH1F* m_pxl_hit_ladder;               //!     # of hits vs x ladder (integrated over ladder, per event)
+  TH2F* m_pxl_hit_sector_sensor_Pxl1;   //!     # of hits vs sector vs sensor, inner PIXEL layer
+  TH2F* m_pxl_hit_sector_sensor_Pxl2;   //!     # of hits vs sector vs sensor, outer PIXEL layer
+  TH2F* m_pxl_nhit_Pxl1_tpc_mult;       //!     # of hits in inner PIXEL layer vs TPC track multiplicity
+  TH2F* m_pxl_nhit_Pxl2_tpc_mult;       //!     # of hits in outer PIXEL layer vs TPC track multiplicity
+  TH2F* m_pxl_nhit_Pxl1_tof_mult;       //!     # of hits in inner PIXEL layer vs TOF track multiplicity
+  TH2F* m_pxl_nhit_Pxl2_tof_mult;       //!     # of hits in outer PIXEL layer vs TOF track multiplicity
+  TH2F* m_pxl_nhit_Pxl1_Pxl2;           //!     # of hits in inner vs outer PIXEL layer
+  TH1F* m_global_pxl_hit;               //!     # of PIXEL hits per global track
+  TH1F* m_primary_pxl_hit;              //!     # of PIXEL hits per primary track
+
+  // Hists for IST
+  TH2F* m_ist_hit_phi_z;        //!     # of hits vs phi vs z position
+  TH1F* m_ist_hit_ladder;       //!     # of hits vs x ladder (integrated over ladder, per event)
+  TH2F* m_ist_hit_ladder_sensor;//!     # of hits vs ladder vs sensor
+  TH2F* m_ist_nhit_tpc_mult;    //!     # of hits in IST vs TPC track multiplicity
+  TH2F* m_ist_nhit_tof_mult;    //!     # of hits in IST vs TOF track multiplicity
+  TH1F* m_global_ist_hit;       //!     # of IST hits per global track
+  TH1F* m_primary_ist_hit;      //!     # of IST hits per primary track
+
   // X. Dong
   // Hists for TOF
   TH2F* m_tof_hit_tray;        //! # of hits vs tray # (int over modules)
@@ -725,6 +759,7 @@ class StQABookHist : public TObject {
   TString QAHistType; // character string to prepend to each hist name/title
   bool silHists;
   bool ftpHists;
+  Int_t histsSet;
 
   virtual void   BookHistGlob();
   virtual void   BookHistDE();
@@ -739,6 +774,9 @@ class StQABookHist : public TObject {
   virtual void   BookHistPMD();
   virtual void   BookHistTOF();
   virtual void   BookHistMTD();
+  virtual void   BookHistPXL();
+  virtual void   BookHistHFT();
+  virtual void   BookHistIST();
 
   ClassDef(StQABookHist,0)
 };

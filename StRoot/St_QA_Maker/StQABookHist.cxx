@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.70 2014/07/22 20:39:28 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.71 2015/01/16 21:08:28 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.71  2015/01/16 21:08:28  genevb
+// Initial versions of HFT histograms
+//
 // Revision 2.70  2014/07/22 20:39:28  genevb
 // Add MTD to Offline QA
 //
@@ -761,6 +764,28 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pnt_sizeSSD = 0;
   m_pnt_eSSD = 0;
 
+  // HFT histograms
+  // correlation plots: hits in HFT subsystems
+  m_nhit_Pxl_Its = 0;
+  m_nhit_Pxl_Ssd = 0;
+  m_nhit_Its_Ssd = 0;
+  m_global_hft_hit = 0;
+  m_primary_hft_hit = 0;
+
+  // Hists for PIXEL
+  m_pxl_hit_phi_z_Pxl1 = 0;
+  m_pxl_hit_phi_z_Pxl2 = 0;
+  m_pxl_hit_ladder = 0;
+  m_pxl_hit_sector_sensor_Pxl1 = 0;
+  m_pxl_hit_sector_sensor_Pxl2 = 0;
+  m_pxl_nhit_Pxl1_tpc_mult = 0;
+  m_pxl_nhit_Pxl2_tpc_mult = 0;
+  m_pxl_nhit_Pxl1_tof_mult = 0;
+  m_pxl_nhit_Pxl2_tof_mult = 0;
+  m_pxl_nhit_Pxl1_Pxl2 = 0;
+  m_global_pxl_hit = 0;
+  m_primary_pxl_hit = 0;
+
 // for MTD
   m_MtdNHits = 0;
   m_MtdHitMap = 0;
@@ -769,7 +794,9 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
 
 }
 //_____________________________________________________________________________
-void StQABookHist::BookHist(Int_t histsSet){
+void StQABookHist::BookHist(Int_t hSet){
+
+  histsSet = hSet;
 
   QAH::preString = QAHistType;
 //book histograms --------------
@@ -795,6 +822,12 @@ void StQABookHist::BookHist(Int_t histsSet){
   if (histsSet==StQA_MC) BookHistEval();
   if (histsSet>=StQA_run8) BookHistTOF();
   if (histsSet>=StQA_run12all) BookHistMTD();
+  if (histsSet>=StQA_run14){
+    BookHistPXL();
+    BookHistIST();
+    BookHistHFT();
+  }
+
   
 }
 //_____________________________________________________________________________
@@ -1039,7 +1072,7 @@ void StQABookHist::BookHistGlob(){
   m_glb_rzl0TS->Rebin(1,"z_{dif}");
   m_glb_rzl0TS->SetStats(kFALSE);
   m_glb_phifTS   = QAH::H1F("QaGtrkPhifTS",   "globtrk: phi of first point on track, svt",64,0,360);
-  m_glb_ssd_phi  = QAH::H1F("QaGtrkPhifSSD",  "globtrk: phi of ssd point",64,0,360);
+  m_glb_ssd_phi  = QAH::H1F("QaGtrkPhifSSD",  "globtrk: phi of ssd point (per event)",64,0,360);
   m_lengthTS     = QAH::H1F("QaGtrkLengthTS", "globtrk: track length, tpc+svt", 50,0.,300.);
   m_psiTS        = QAH::H1F("QaGtrkPsiTS",    "globtrk: psi, tpc+svt (deg) ", 64, 0.,360.);
   m_tanlTS       = QAH::H1F("QaGtrkTanlTS",   "globtrk: tanl, tpc+svt",32,-4.,4.);
@@ -1265,6 +1298,20 @@ void StQABookHist::BookHistGlob(){
     m_npoint_lengthFW->SetYTitle("Npoints on trk");
 
   } // ftpHists
+
+  m_global_pxl_hit = QAH::H1F("QaGtrkPxlHit","PIXEL: Hits per global track",5,-0.5,4.5);
+  m_global_pxl_hit->SetXTitle("hits in PIXEL");
+  m_global_ist_hit = QAH::H1F("QaGtrkIstHit","IST: Hits per global track",5,-0.5,4.5);
+  m_global_ist_hit->SetXTitle("hits in IST");
+  m_global_hft_hit = QAH::H1F("QaGtrkHftHit","HFT: Hits per global track",5,-0.5,4.5);
+  m_global_hft_hit->SetXTitle("hits in HFT subsystem");
+
+  m_global_hft_hit->GetXaxis()->SetBinLabel(1,"");
+  m_global_hft_hit->GetXaxis()->SetBinLabel(2,"PIXEL (inner)");
+  m_global_hft_hit->GetXaxis()->SetBinLabel(3,"PIXEL (outer)");
+  m_global_hft_hit->GetXaxis()->SetBinLabel(4,"IST");
+  m_global_hft_hit->GetXaxis()->SetBinLabel(5,"SSD");
+
 }
 //____________________________________________________
 void StQABookHist::BookHistPrim(){
@@ -1278,7 +1325,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,200.);
   if (silHists)
-  m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",150,0.,4500.);
+    m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",150,0.,4500.);
   m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",150,0.,1500.,150,0.,1500.);
   m_primtrk_goodF->SetXTitle("East");
   m_primtrk_goodF->SetYTitle("West");
@@ -1286,45 +1333,45 @@ void StQABookHist::BookHistPrim(){
   m_primglob_fit    = QAH::H1F("QaPtrkGlobFit","primtrk: ratio primary/global nfit points",50,0,2);
   m_pdet_id         = QAH::H1F("QaPtrkDetId",  "primtrk: Detector ID good tracks - all",25,0.,25.);
   if (silHists) {
-  m_primtrk_meanptTTS = QAH::MH1F("QaPtrkMeanPtTTS","primtrk: <pT>, tpc, tpc+svt",50,0.,2.,2);
-  m_primtrk_meanptTTS->Rebin(0,"TPC+SVT");
-  m_primtrk_meanptTTS->Rebin(1,"TPC");
-  m_primtrk_meanptTTS->SetStats(kFALSE);
+    m_primtrk_meanptTTS = QAH::MH1F("QaPtrkMeanPtTTS","primtrk: <pT>, tpc, tpc+svt",50,0.,2.,2);
+    m_primtrk_meanptTTS->Rebin(0,"TPC+SVT");
+    m_primtrk_meanptTTS->Rebin(1,"TPC");
+    m_primtrk_meanptTTS->SetStats(kFALSE);
   }
   m_primtrk_meanptF = QAH::MH1F("QaPtrkMeanPtF","primtrk: <pT>, ftpc",50,0.,2.,2);
   m_primtrk_meanptF->Rebin(0,"East");
   m_primtrk_meanptF->Rebin(1,"West");
   m_primtrk_meanptF->SetStats(kFALSE);
   if (silHists) {
-  m_primtrk_meanetaTTS = QAH::MH1F("QaPtrkMeanEtaTTS","primtrk: <eta>, tpc, tpc+svt",40,-2.,2.,2);
-  m_primtrk_meanetaTTS->Rebin(0,"TPC+SVT");
-  m_primtrk_meanetaTTS->Rebin(1,"TPC");
-  m_primtrk_meanetaTTS->SetStats(kFALSE);
+    m_primtrk_meanetaTTS = QAH::MH1F("QaPtrkMeanEtaTTS","primtrk: <eta>, tpc, tpc+svt",40,-2.,2.,2);
+    m_primtrk_meanetaTTS->Rebin(0,"TPC+SVT");
+    m_primtrk_meanetaTTS->Rebin(1,"TPC");
+    m_primtrk_meanetaTTS->SetStats(kFALSE);
   }
   m_primtrk_meanetaF = QAH::MH1F("QaPtrkMeanEtaF","primtrk: |<eta>|, ftpc",40,2,5,2);
   m_primtrk_meanetaF->Rebin(0,"East");
   m_primtrk_meanetaF->Rebin(1,"West");
   m_primtrk_meanetaF->SetStats(kFALSE);
   if (silHists) {
-  m_ppsiTTS         = QAH::MH1F("QaPtrkPsiTTS","primtrk: psi (deg), tpc, svt", 36, 0.,360.,2);
-  m_ppsiTTS->Rebin(0,"TPC+SVT");
-  m_ppsiTTS->Rebin(1,"TPC");
-  m_ppsiTTS->SetStats(kFALSE);
-  m_petaTTS         = QAH::MH1F("QaPtrkEtaTTS","primtrk: eta, tpc,svt",40,-2.,2.,2);
-  m_petaTTS->Rebin(0,"TPC+SVT");
-  m_petaTTS->Rebin(1,"TPC");
-  m_petaTTS->SetStats(kFALSE);
-  m_ppTTTS          = QAH::MH1F("QaPtrkPtTTS", "primtrk: pT, tpc,svt",50,0.,5.,2);
-  m_ppTTTS->Rebin(0,"TPC+SVT");
-  m_ppTTTS->Rebin(1,"TPC");
-  m_ppTTTS->SetStats(kFALSE);
-  m_pchisq0TTS     = QAH::MH1F("QaPtrkChisq0TTS", "primtrk: chisq0, tpc,svt", 50, 0.,5.,2);
-  m_pchisq0TTS->Rebin(0,"TPC+SVT");
-  m_pchisq0TTS->Rebin(1,"TPC");
-  m_pchisq0TTS->SetStats(kFALSE);
-  m_pfpoint_lengthTTS = QAH::H2F("QaPtrkFitPntLTTS","primtrk: N fit pnts vs length, tpc,tpc+svt",25,70.,350.,25,0.,50.);
-  m_pfpoint_lengthTTS->SetXTitle("trk length");
-  m_pfpoint_lengthTTS->SetYTitle("Npoints on trk");
+    m_ppsiTTS         = QAH::MH1F("QaPtrkPsiTTS","primtrk: psi (deg), tpc, svt", 36, 0.,360.,2);
+    m_ppsiTTS->Rebin(0,"TPC+SVT");
+    m_ppsiTTS->Rebin(1,"TPC");
+    m_ppsiTTS->SetStats(kFALSE);
+    m_petaTTS         = QAH::MH1F("QaPtrkEtaTTS","primtrk: eta, tpc,svt",40,-2.,2.,2);
+    m_petaTTS->Rebin(0,"TPC+SVT");
+    m_petaTTS->Rebin(1,"TPC");
+    m_petaTTS->SetStats(kFALSE);
+    m_ppTTTS          = QAH::MH1F("QaPtrkPtTTS", "primtrk: pT, tpc,svt",50,0.,5.,2);
+    m_ppTTTS->Rebin(0,"TPC+SVT");
+    m_ppTTTS->Rebin(1,"TPC");
+    m_ppTTTS->SetStats(kFALSE);
+    m_pchisq0TTS     = QAH::MH1F("QaPtrkChisq0TTS", "primtrk: chisq0, tpc,svt", 50, 0.,5.,2);
+    m_pchisq0TTS->Rebin(0,"TPC+SVT");
+    m_pchisq0TTS->Rebin(1,"TPC");
+    m_pchisq0TTS->SetStats(kFALSE);
+    m_pfpoint_lengthTTS = QAH::H2F("QaPtrkFitPntLTTS","primtrk: N fit pnts vs length, tpc,tpc+svt",25,70.,350.,25,0.,50.);
+    m_pfpoint_lengthTTS->SetXTitle("trk length");
+    m_pfpoint_lengthTTS->SetYTitle("Npoints on trk");
   }
 
 // 1D tpc
@@ -1445,7 +1492,7 @@ void StQABookHist::BookHistPrim(){
   m_ppTTS         = QAH::H1F("QaPtrkPtTS",     "primtrk: pT, tpc+svt",50,0.,5.);
   m_pmomTS        = QAH::H1F("QaPtrkPTS",      "primtrk: momentum, tpc+svt",50,0.,5.);
   m_pchisq0TS     = QAH::H1F("QaPtrkChisq0TS", "primtrk: chisq0, tpc+svt", 50, 0.,5.);
-  m_prim_ssd_phi  = QAH::H1F("QaPtrkPhifSSD",  "primtrk: phi of ssd point",64,0,360);
+  m_prim_ssd_phi  = QAH::H1F("QaPtrkPhifSSD",  "primtrk: phi of ssd point (per event)",64,0,360);
 
 // 2D - tpc + silicon (svt + ssd)
   m_ppT_eta_recTS = QAH::H2F("QaPtrkPtVsEtaTS","primtrk: log10 pT vs eta, tpc+svt", 20,-2.,2.,40,1.,4.);
@@ -1608,7 +1655,21 @@ void StQABookHist::BookHistPrim(){
 
 // 2D - SVT drift length
   if (silHists)
-  m_svt_loc = QAH::H2F("QaPtrkSvtLoc","primtrk: SVT hit time bins",256,0,128,432,-0.5,431.5);
+    m_svt_loc = QAH::H2F("QaPtrkSvtLoc","primtrk: SVT hit time bins",256,0,128,432,-0.5,431.5);
+
+  m_primary_pxl_hit = QAH::H1F("QaPtrkPxlHit","PIXEL: Hits per primary track",5,-0.5,4.5);
+  m_primary_pxl_hit->SetXTitle("hits in PIXEL");
+  m_primary_ist_hit = QAH::H1F("QaPtrkIstHit","IST: Hits per primary track",5,-0.5,4.5);
+  m_primary_ist_hit->SetXTitle("hits in IST");
+  m_primary_hft_hit = QAH::H1F("QaPtrkHftHit","HFT: Hits per primary track",5,-0.5,4.5);
+  m_primary_hft_hit->SetXTitle("hits in HFT subsystem");
+
+  m_primary_hft_hit->GetXaxis()->SetBinLabel(1,"");
+  m_primary_hft_hit->GetXaxis()->SetBinLabel(2,"PIXEL (inner)");
+  m_primary_hft_hit->GetXaxis()->SetBinLabel(3,"PIXEL (outer)");
+  m_primary_hft_hit->GetXaxis()->SetBinLabel(4,"IST");
+  m_primary_hft_hit->GetXaxis()->SetBinLabel(5,"SSD");
+
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHistDE(){
@@ -1716,8 +1777,10 @@ void StQABookHist::BookHistPoint(){
 
   m_pnt_tpc     = QAH::H1F("QaPointTpc",  "point: # hits tpc ",100, 0.,300000.);
   if (silHists) {
-  m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",600, 0.,15000.);
-  m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",200, 0.,5000.);
+    m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",600, 0.,15000.);
+  }
+  if (silHists || histsSet>=StQA_run14) {
+    m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",200, 0.,5000.);
   }
   // east and west on same plot
   m_pnt_ftpc   = QAH::MH1F("QaPointFtpc", "point: # hits ftpc",100,0.,25000.,2);
@@ -1728,14 +1791,24 @@ void StQABookHist::BookHistPoint(){
   m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,25000.);
   m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,25000.);
   if (silHists) {
-  m_pnt_svtLaser= QAH::H2F("QaPointSvtLaser","point: laser spots, svt ",150,0,600,65,0.,130.);
-  m_pnt_svtLaser->SetXTitle("event in file");
-  m_pnt_svtLaserDiff= QAH::MH2F("QaPointSvtLaserDiff","point: diff of laser spots, svt ",150,0,600,101,9.8,50.2,2);
-  m_pnt_svtLaserDiff->SetXTitle("event in file");
-  m_pnt_svtLaserDiff->SetYTitle("time buckets");
-  m_pnt_svtLaserDiff->Rebin(0,"Laser 1");
-  m_pnt_svtLaserDiff->Rebin(1,"Laser 2");
-  m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt,ssd",125,-25,25,125,-25,25);
+    m_pnt_svtLaser= QAH::H2F("QaPointSvtLaser","point: laser spots, svt ",150,0,600,65,0.,130.);
+    m_pnt_svtLaser->SetXTitle("event in file");
+    m_pnt_svtLaserDiff= QAH::MH2F("QaPointSvtLaserDiff","point: diff of laser spots, svt ",150,0,600,101,9.8,50.2,2);
+    m_pnt_svtLaserDiff->SetXTitle("event in file");
+    m_pnt_svtLaserDiff->SetYTitle("time buckets");
+    m_pnt_svtLaserDiff->Rebin(0,"Laser 1");
+    m_pnt_svtLaserDiff->Rebin(1,"Laser 2");
+  }
+  if (silHists || histsSet>=StQA_run14) {
+    m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt,ssd",125,-25,25,125,-25,25);
+    m_pnt_xyS->SetStats(kFALSE);
+    m_pnt_xyS->SetXTitle("x [cm]");
+    m_pnt_xyS->SetYTitle("y [cm]");
+
+    // for run >= 14, change the title of the histogram with vertex detector hit distribution in x-y
+    // FIXME: move this part to BookHistPoint and pass histsSet there?
+    if (histsSet>=StQA_run14)
+      m_pnt_xyS->SetTitle("PIXEL, IST, SSD: Distribution of hits in XY");
   }
   // Now using polar coords (lego didn't work well because of inner radius and colored zero)
   // Drawing a lego plot requires r-phi,r. Drawing a plain polar plot reguirs r,r-phi
@@ -1757,20 +1830,22 @@ void StQABookHist::BookHistPoint(){
   m_pnt_padrowT->SetXTitle("padrow number");
 
   if (silHists) {
-  m_pnt_zS      = QAH::H1F("QaPointZhitsS","point: z distribution of hits, svt",100,-35,35);
-  m_pnt_phiS    = QAH::H1F("QaPointPhiS","point: #phi distribution of hits, svt",36,0,360);
-  m_pnt_barrelS = QAH::H1F("QaPointBarrelS","point: barrel distribution of hits, svt",3,0.5,3.5);
-  m_pnt_barrelS->SetXTitle("barrel number");
-
-  m_pnt_phiSSD  = QAH::H1F("QaPointPhiSSD","point: #phi of hits, ssd",36,0,360);
-  m_pnt_lwSSD   = QAH::H2F("QaPointLWSSD","point: wafer id vs ladder id, ssd",20,0.5,20.5,16,0.5,16.5);
-  m_pnt_lwSSD->SetXTitle("Ladder #");
-  m_pnt_lwSSD->SetYTitle("Wafer #");
-  m_pnt_sizeSSD = QAH::MH1F("QaPointSizeSSD","point: size of clusters, ssd",10,0.5,10.5,2);
-  m_pnt_sizeSSD->Rebin(0,"P-side");
-  m_pnt_sizeSSD->Rebin(1,"N-side");
-  m_pnt_sizeSSD->SetStats(kFALSE);
-  m_pnt_eSSD = QAH::H1F("QaPointESSD","point: log10(energy) of hits, ssd",90,-5,-2);
+    m_pnt_zS      = QAH::H1F("QaPointZhitsS","point: z distribution of hits, svt",100,-35,35);
+    m_pnt_phiS    = QAH::H1F("QaPointPhiS","point: #phi distribution of hits, svt",36,0,360);
+    m_pnt_barrelS = QAH::H1F("QaPointBarrelS","point: barrel distribution of hits, svt",3,0.5,3.5);
+    m_pnt_barrelS->SetXTitle("barrel number");
+  }
+  if (silHists || histsSet>=StQA_run14) {
+    m_pnt_phiSSD  = QAH::H1F("QaPointPhiSSD","SSD: #phi of hits (per event)",36,0,360);
+    m_pnt_lwSSD   = QAH::H2F("QaPointLWSSD","SSD: wafer id vs ladder id (per event)",20,0.5,20.5,16,0.5,16.5);
+    m_pnt_lwSSD->SetXTitle("Ladder #");
+    m_pnt_lwSSD->SetYTitle("Wafer (sensor) #");
+    m_pnt_lwSSD->SetStats(kFALSE);
+    m_pnt_sizeSSD = QAH::MH1F("QaPointSizeSSD","SSD: size of clusters",10,0.5,10.5,2);
+    m_pnt_sizeSSD->Rebin(0,"P-side");
+    m_pnt_sizeSSD->Rebin(1,"N-side");
+    m_pnt_sizeSSD->SetStats(kFALSE);
+    m_pnt_eSSD = QAH::H1F("QaPointESSD","SSD: log10(energy) of hits",90,-5,-2);
   }
 
   m_pnt_xyFE    = QAH::H2F("QaPointXYFtpcE","point: x-y distribution of hits, ftpcE",70,-35,35,70,-35,35);
@@ -2016,6 +2091,92 @@ void StQABookHist::BookHistTOF(){
   m_tof_vpd_hit =  QAH::H2F("QaTofHitvsVpdHit","TOF Hits vs Vpd Hits",50,0.,50.,100,0.,5000.);
   m_tof_vtx_z =  QAH::H2F("QaTofVpdZvsTpcZ","VPD vtxz vs TPC vtxz",100,-100.,100.,100,-100.,100.);
   m_tof_PID =  QAH::H2F("QaTofPID","TOF InvBeta vs p",100,0.,5.,100,0.,4.);
+
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistHFT(){
+
+  m_nhit_Pxl_Its = QAH::H2F("QaPxlvsIstHit","PIXEL hits vs ITS hits",500,0.,20000.,100,0.,5000.);
+  m_nhit_Pxl_Its->SetXTitle("PIXEL hits");
+  m_nhit_Pxl_Its->SetYTitle("IST hits");
+
+  m_nhit_Pxl_Ssd = QAH::H2F("QaPxlvsSsdHit","PIXEL hits vs SSD hits",500,0.,20000.,100,0.,5000.);
+  m_nhit_Pxl_Ssd->SetXTitle("PIXEL hits");
+  m_nhit_Pxl_Ssd->SetYTitle("SSD hits");
+
+  m_nhit_Its_Ssd = QAH::H2F("QaIstvsSsdHit","ITS hits vs SSD hits",100,0.,5000.,100,0.,5000.);
+  m_nhit_Its_Ssd->SetXTitle("ITS hits");
+  m_nhit_Its_Ssd->SetYTitle("SSD hits");
+
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistPXL(){
+
+  m_pxl_hit_phi_z_Pxl1= QAH::H2F("QaPxlHitPhivsZPxl1","PIXEL: hits vs phi vs z in inner layer (per event)",20,-10.,10.,100,-TMath::Pi(),TMath::Pi());
+  m_pxl_hit_phi_z_Pxl1->SetXTitle("z [cm]");
+  m_pxl_hit_phi_z_Pxl1->SetYTitle("#phi");
+  m_pxl_hit_phi_z_Pxl2= QAH::H2F("QaPxlHitPhivsZPxl2","PIXEL: hits vs phi vs z in outer layer (per event)",20,-10.,10.,100,-TMath::Pi(),TMath::Pi());
+  m_pxl_hit_phi_z_Pxl2->SetXTitle("z [cm]");
+  m_pxl_hit_phi_z_Pxl2->SetYTitle("#phi");
+
+  m_pxl_hit_ladder = QAH::H1F("QaPxlHitvsLadder","PIXEL: hits per ladder (per event)",5,0.,5.);
+  m_pxl_hit_ladder->SetXTitle("Ladder ID");
+
+  m_pxl_hit_sector_sensor_Pxl1 = QAH::H2F("QaPxlHitvsSectorvsSensorPxl1","PIXEL: hits vs sector vs sensor in inner layer (per event)",10,0.5,10.5,10,0.5,10.5);
+  m_pxl_hit_sector_sensor_Pxl1->SetXTitle("Sector ID");
+  m_pxl_hit_sector_sensor_Pxl1->SetYTitle("Sensor ID");
+  m_pxl_hit_sector_sensor_Pxl1->SetStats(kFALSE);
+
+  m_pxl_hit_sector_sensor_Pxl2 = QAH::H2F("QaPxlHitvsSectorvsSensorPxl2","PIXEL: hits vs ladder vs sensor in outer layer (per event)",40,0.5,40.5,10,0.5,10.5);
+  m_pxl_hit_sector_sensor_Pxl2->SetXTitle("Ladder ID");
+  m_pxl_hit_sector_sensor_Pxl2->SetYTitle("Sensor ID");
+  m_pxl_hit_sector_sensor_Pxl2->SetStats(kFALSE);
+
+  m_pxl_nhit_Pxl1_tpc_mult = QAH::H2F("QaPxl1HitvsTpcMult","PIXEL: Hits in inner layer vs TPC multiplicity",100,0.,12000.,500,0.,10000.);
+  m_pxl_nhit_Pxl1_tpc_mult->SetXTitle("PIXEL hits (inner layer)");
+  m_pxl_nhit_Pxl1_tpc_mult->SetYTitle("TPC multiplicity");
+
+  m_pxl_nhit_Pxl2_tpc_mult = QAH::H2F("QaPxl2HitvsTpcMult","PIXEL: Hits in outer layer vs TPC multiplicity",100,0.,8000.,500,0.,10000.);
+  m_pxl_nhit_Pxl2_tpc_mult->SetXTitle("PIXEL hits (outer layer)");
+  m_pxl_nhit_Pxl2_tpc_mult->SetYTitle("TPC multiplicity");
+
+  m_pxl_nhit_Pxl1_tof_mult = QAH::H2F("QaPxl1HitvsTofMult","PIXEL: Hits in inner layer vs TOF multiplicity",100,0.,12000.,100,0.,5000.);
+  m_pxl_nhit_Pxl1_tof_mult->SetXTitle("PIXEL hits (inner layer)");
+  m_pxl_nhit_Pxl1_tof_mult->SetYTitle("ToF hits");
+
+  m_pxl_nhit_Pxl2_tof_mult = QAH::H2F("QaPxl2HitvsTofMult","PIXEL: Hits in outer layer vs TOF multiplicity",100,0.,8000.,100,0.,5000.);
+  m_pxl_nhit_Pxl2_tof_mult->SetXTitle("PIXEL hits (outer layer)");
+  m_pxl_nhit_Pxl2_tof_mult->SetYTitle("ToF hits");
+
+  m_pxl_nhit_Pxl1_Pxl2 = QAH::H2F("QaPxlHitLayer1vsLayer2","PIXEL: Hits in inner vs outer layer (per event)",100,0.,5000.,100,0.,5000.);
+  m_pxl_nhit_Pxl1_Pxl2->SetXTitle("hits inner layer");
+  m_pxl_nhit_Pxl1_Pxl2->SetYTitle("hits outer layer");
+
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistIST(){
+
+
+  m_ist_hit_phi_z = QAH::H2F("QaIstHitPhivsZ","IST: Hits vs phi vs z (per event)",60,-30.,30.,100,-TMath::Pi(),TMath::Pi());
+  m_ist_hit_phi_z->SetXTitle("z [cm]");
+  m_ist_hit_phi_z->SetYTitle("#phi");
+
+  m_ist_hit_ladder = QAH::H1F("QaIstHitvsLadder","IST: Hits per ladder (per event)",25,0.,25.);
+  m_ist_hit_ladder->SetXTitle("Ladder ID");
+
+  m_ist_hit_ladder_sensor = QAH::H2F("QaIstHitvsLaddervsSensor","IST: Hits vs ladder vs sensor (per event)", 24,0.5,24.5, 6, 0.5, 6.5);
+  m_ist_hit_ladder_sensor->SetXTitle("Ladder ID");
+  m_ist_hit_ladder_sensor->SetYTitle("Sensor ID");
+  m_ist_hit_ladder_sensor->SetStats(kFALSE);
+
+
+  m_ist_nhit_tpc_mult = QAH::H2F("QaIstHitvsTpcMult","IST hits vs TPC multiplicity",100,0.,5000.,500,0.,10000.);
+  m_ist_nhit_tpc_mult->SetXTitle("IST hits");
+  m_ist_nhit_tpc_mult->SetYTitle("TPC multiplicity");
+
+  m_ist_nhit_tof_mult = QAH::H2F("QaIstHitvsTofMult","IST hits vs TOF multiplicity",100,0.,5000.,100,0.,5000.);
+  m_ist_nhit_tof_mult->SetXTitle("IST hits");
+  m_ist_nhit_tof_mult->SetYTitle("ToF hits");
 
 }
 //_____________________________________________________________________________

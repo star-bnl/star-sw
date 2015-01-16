@@ -100,13 +100,6 @@ StEventQAMaker::~StEventQAMaker() {
 
 
 //_____________________________________________________________________________
-Int_t StEventQAMaker::Finish() {
-  
-  return StMaker::Finish();
-}
-
-
-//_____________________________________________________________________________
 Int_t StEventQAMaker::Init() {
 
   return StQAMakerBase::Init();
@@ -322,7 +315,9 @@ Int_t StEventQAMaker::Make() {
       gMessMgr->Warning("StEventQAMaker::Make(): No trigger info");
     }
   }  // allTrigs
-  if (run_year >=14) {
+  if (run_year >=15) {
+    if (realData) histsSet = StQA_run14; // for now, everything from run14 on uses this set
+  } else if (run_year >=14) {
     if (realData) histsSet = StQA_run13; // for now, everything from run13 on uses this set
   } else if (run_year >=13) {
     if (realData) histsSet = StQA_run12; // for now, everything from run12 on uses this set
@@ -949,6 +944,20 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_npoint_lengthFW->Fill(globtrk->length(),
 				       Float_t(detInfo->numberOfPoints()));
       }
+
+      if (histsSet>=StQA_run14) {
+        // HFT Histograms
+        hists->m_global_pxl_hit->Fill(map.numberOfHits(kPxlId));      // number of PIXEL hits per global track
+        //hists->m_global_ist_hit->Fill(map.numberOfHits(kIstId));    // number of IST hits per global track
+        hists->m_global_ist_hit->Fill(detInfo->hits(kIstId).size());
+        if(map.hasHitInPxlLayer(1))hists->m_global_hft_hit->Fill(1);  // PXL layer=1
+        if(map.hasHitInPxlLayer(2))hists->m_global_hft_hit->Fill(2);  // PXL layer=2
+        //hists->m_global_hft_hit->Fill(3,map.numberOfHits(kIstId));  // it should work in priciple, but it does not on 20.02.2014 (DK)
+        hists->m_global_hft_hit->Fill(3,detInfo->hits(kIstId).size());
+        hists->m_global_hft_hit->Fill(4,map.numberOfHits(kSsdId));
+        //hists->m_global_hft_hit->Fill(4,detInfo->hits(kSsdId).size());
+      }
+
     }
   }
   hists->m_globtrk_tot->Fill(cnttrk); 
@@ -1430,6 +1439,20 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pnpoint_lengthFW->Fill(primtrk->length(),
 					  Float_t(detInfo->numberOfPoints()));
 	}
+
+        if (histsSet>=StQA_run14 ){
+          // HFT Histograms
+          hists->m_primary_pxl_hit->Fill(map.numberOfHits(kPxlId));   // number of PIXEL hits per primary track
+          //hists->m_primary_ist_hit->Fill(map.numberOfHits(kIstId)); // number of IST hits per primary track
+          hists->m_primary_ist_hit->Fill(detInfo->hits(kIstId).size());
+
+          if(map.hasHitInPxlLayer(1))hists->m_primary_hft_hit->Fill(1);        // PXL layer=1
+          if(map.hasHitInPxlLayer(2))hists->m_primary_hft_hit->Fill(2);        // PXL layer=2
+          //hists->m_primary_hft_hit->Fill(3,map.numberOfHits(kIstId));
+          hists->m_primary_hft_hit->Fill(3,detInfo->hits(kIstId).size());
+          hists->m_primary_hft_hit->Fill(4,map.numberOfHits(kSsdId));
+        }
+
       }
     }
     hists->m_primtrk_good->Fill(cnttrkg);
@@ -2460,6 +2483,181 @@ void StEventQAMaker::MakeHistFMS() {
 
 }
 //_____________________________________________________________________________
+void StEventQAMaker::MakeHistHFT() {
+
+        StPxlHitCollection* pxlHitCollection= event->pxlHitCollection();
+
+        if (!pxlHitCollection) {
+                LOG_WARN << "No StPxlHitCollection" << endm;
+        }
+
+        StIstHitCollection* istHitCollection = event->istHitCollection();
+
+        if (!istHitCollection) {
+                LOG_WARN << "No StIstHitCollection" << endm;
+        }
+
+        StSsdHitCollection *ssdHitCollection = event->ssdHitCollection();
+
+        if (!ssdHitCollection) {
+                LOG_WARN << "No StSsdHitCollection" << endm;
+        }
+
+        if(pxlHitCollection && istHitCollection){
+                hists->m_nhit_Pxl_Its->Fill(pxlHitCollection->numberOfHits(),istHitCollection->numberOfHits());
+        }
+        if(pxlHitCollection && ssdHitCollection){
+                hists->m_nhit_Pxl_Ssd->Fill(pxlHitCollection->numberOfHits(),ssdHitCollection->numberOfHits());
+        }
+        if(istHitCollection && ssdHitCollection){
+                hists->m_nhit_Its_Ssd->Fill(istHitCollection->numberOfHits(),ssdHitCollection->numberOfHits());
+        }
+
+
+}
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistPXL() {
+
+        StPxlHitCollection* pxlHitCollection= event->pxlHitCollection();
+
+        if (!pxlHitCollection) {
+                LOG_WARN << "No PXL hit collection" << endm;
+                return;
+        }
+
+        Int_t nHitsPxl1 = 0;
+        Int_t nHitsPxl2 = 0;
+
+        UInt_t numberOfSectors = pxlHitCollection->numberOfSectors();
+        for (UInt_t sectorIdx = 0; sectorIdx < numberOfSectors; sectorIdx++) {
+                StPxlSectorHitCollection* PxlSectorHitCollection = pxlHitCollection->sector(sectorIdx);
+                if (!PxlSectorHitCollection) {
+                        LOG_WARN << "MakeHistPXL: No PxlSectorHitCollection" << endm;
+                        return;
+                }
+                UInt_t numberOfLadders = PxlSectorHitCollection->numberOfLadders();
+                for (UInt_t ladderIdx = 0; ladderIdx < numberOfLadders; ladderIdx++) {
+                        StPxlLadderHitCollection* PxlLadderHitCollection = PxlSectorHitCollection->ladder(ladderIdx);
+                        if (!PxlLadderHitCollection) {
+                                LOG_WARN << "MakeHistPXL: No PXLLadder hit collection" << endm;
+                                return;
+                        }
+
+                        UInt_t numberOfHits = PxlLadderHitCollection->numberOfHits();
+                        hists->m_pxl_hit_ladder->Fill(ladderIdx,numberOfHits);
+                        UInt_t numberOfSensors = PxlLadderHitCollection->numberOfSensors();
+
+                        for (UInt_t sensorIdx = 0; sensorIdx < numberOfSensors; sensorIdx++) {
+                                StPxlSensorHitCollection* PxlSensorHitCollection = PxlLadderHitCollection->sensor(sensorIdx);
+                                StSPtrVecPxlHit& vec = PxlSensorHitCollection->hits();
+
+                                UInt_t NoHits = vec.size();
+                                Int_t sensorId = sensorIdx + 1;
+                                Int_t ladderId = sectorIdx*4 + ladderIdx + 1;
+                                Int_t sectorId = sectorIdx + 1;
+
+
+                                if(ladderIdx==0)
+                                        hists->m_pxl_hit_sector_sensor_Pxl1->Fill(sectorId,sensorId,NoHits);  //inner PIXEL layer
+                                else
+                                        hists->m_pxl_hit_sector_sensor_Pxl2->Fill(ladderId,sensorId,NoHits);  // outer PIXEL layer
+
+                                if (NoHits > 0) {
+                                        LOG_DEBUG << "MakeHistPXL: StiPixelHitLoader size: " << NoHits << endm;
+
+                                        for (UInt_t ll = 0; ll < NoHits; ll++) {
+                                                StPxlHit *hit = vec[ll];
+                                                if (hit) {
+
+                                                        const StThreeVectorF &pos = hit->position();
+
+                                                        Int_t ladder = hit->ladder();
+
+                                                        // x,y position in the HFT, re-use SSD histogram since it is the most layer
+                                                        hists->m_pnt_xyS->Fill(pos.x(),pos.y());
+
+                                                        int layer = (ladder == 1) ? 1 : 2; // inner or outer PIXEL layer
+
+                                                        if(layer==1){
+                                                                nHitsPxl1++;
+                                                                hists->m_pxl_hit_phi_z_Pxl1->Fill(pos.z(), pos.phi());
+                                                        }
+
+                                                        if(layer==2){
+                                                                nHitsPxl2++;
+                                                                hists->m_pxl_hit_phi_z_Pxl2->Fill(pos.z(), pos.phi());
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+
+    StBTofCollection *btofcol = (StBTofCollection *)(event->btofCollection());
+    if (btofcol) {
+                Int_t nTofHits = btofcol->tofHits().size();
+                hists->m_pxl_nhit_Pxl1_tof_mult->Fill(nHitsPxl1, nTofHits);
+                hists->m_pxl_nhit_Pxl2_tof_mult->Fill(nHitsPxl2, nTofHits);
+                hists->m_pxl_nhit_Pxl1_Pxl2->Fill(nHitsPxl1,nHitsPxl2);
+    }
+
+        Int_t tpcMult = event->trackNodes().size();
+        hists->m_pxl_nhit_Pxl1_tpc_mult->Fill(nHitsPxl1,tpcMult);
+        hists->m_pxl_nhit_Pxl2_tpc_mult->Fill(nHitsPxl2,tpcMult);
+
+
+}
+
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistIST() {
+
+        StIstHitCollection* istHitCollection = event->istHitCollection();
+
+        if (!istHitCollection) {
+                LOG_WARN << "Error getting pointer to StIstHitCollection" << endm;
+                return;
+        }
+
+        for (UInt_t ladderIdx = 0; /* ladderIdx < istHitCollection->numberOfLadders() && */ ladderIdx < (UInt_t) kIstNumLadders; ladderIdx++) {
+                StIstLadderHitCollection* ladderHitCollection = istHitCollection->ladder(ladderIdx);
+
+                UInt_t numberOfHits = ladderHitCollection->numberOfHits();
+                hists->m_ist_hit_ladder->Fill(ladderIdx,numberOfHits);
+
+                for (UInt_t sensorIdx = 0; /* sensorIdx < ladderHitCollection->numberOfSensors() && */ sensorIdx < (UInt_t) kIstNumSensorsPerLadder; sensorIdx++) {
+                        StIstSensorHitCollection* sensorHitCollection = ladderHitCollection->sensor(sensorIdx);
+
+                        UInt_t nHitsSensor = sensorHitCollection->hits().size();
+
+                        //Int_t SensorId = ladderIdx*kIstNumSensorsPerLadder + sensorIdx + 1;
+                        //hists->m_ist_hit_ladder_sensor->Fill(sensorIdx+1,ladderIdx+1, nHitsSensor);
+                        hists->m_ist_hit_ladder_sensor->Fill(ladderIdx+1, sensorIdx+1, nHitsSensor);
+
+                        for (UInt_t idx = 0; idx < nHitsSensor; idx++) {
+
+                                StIstHit* hit = sensorHitCollection->hits()[idx];
+                                if (hit) {
+                                        const StThreeVectorF &pos = hit->position();
+                                        hists->m_ist_hit_phi_z->Fill(pos.z(), pos.phi());
+                                        // x,y position in the HFT, re-use SSD histogram since it is the most outer layer
+                                        hists->m_pnt_xyS->Fill(pos.x(),pos.y());
+                                }
+                        } //end loop over hits
+                } //loop over sensors
+        } //loop over ladders
+
+        UInt_t nIstHits = istHitCollection->numberOfHits();
+        StBTofCollection *btofcol = (StBTofCollection *)(event->btofCollection());
+        if (btofcol){
+                Int_t nTofHits = btofcol->tofHits().size();
+                hists->m_ist_nhit_tof_mult->Fill(nIstHits, nTofHits);
+        }
+
+        Int_t tpcMult = event->trackNodes().size();
+        hists->m_ist_nhit_tpc_mult->Fill(nIstHits,tpcMult);
+}
+//_____________________________________________________________________________
 void StEventQAMaker::MakeHistMTD() {
 
   StMtdCollection *mtdCollection = event->mtdCollection();
@@ -2488,8 +2686,11 @@ void StEventQAMaker::MakeHistMTD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.115 2014/07/22 20:39:28 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.116 2015/01/16 21:08:28 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.116  2015/01/16 21:08:28  genevb
+// Initial versions of HFT histograms
+//
 // Revision 2.115  2014/07/22 20:39:28  genevb
 // Add MTD to Offline QA
 //

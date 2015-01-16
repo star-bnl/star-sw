@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.41 2014/07/22 20:39:28 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.42 2015/01/16 21:08:28 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.42  2015/01/16 21:08:28  genevb
+// Initial versions of HFT histograms
+//
 // Revision 2.41  2014/07/22 20:39:28  genevb
 // Add MTD to Offline QA
 //
@@ -261,6 +264,12 @@ Int_t StQAMakerBase::Make() {
   if (histsSet>=StQA_run13) MakeHistFMS(); 
   // histograms from MTD in StEvent
   if (histsSet>=StQA_run12all) MakeHistMTD(); 
+  // histograms from HFT (PXL and IST) in StEvent
+  if (histsSet>=StQA_run14) {
+    MakeHistHFT(); 
+    MakeHistPXL(); 
+    MakeHistIST(); 
+  }
 
   eventCount++;
   return kStOk;
@@ -522,6 +531,61 @@ void StQAMakerBase::BookHistFMS(){
     AddHist(h);
     mFMShistograms.insert(std::make_pair(qt, h));
   } // for
+
+}
+//_____________________________________________________________________________
+Int_t StQAMakerBase::Finish(){
+
+  if (histsSet>=StQA_run14) FinishHistHFT();
+
+  return StMaker::Finish();
+
+}
+//_____________________________________________________________________________
+void StQAMakerBase::FinishHistHFT(){
+
+        // Normalize histograms by number of tracks or events
+
+        Int_t Nevents = hists->m_primtrk_tot->GetEntries();
+        Int_t NglobTrk = hists->m_globtrk_fit_prob->GetEntries();
+        Int_t NprimTrk = hists->m_primglob_fit->GetEntries();
+
+        LOG_INFO << "Normalizing HFT hists using:"
+                 << "\nNevents: " << Nevents
+                 << "\nNglobTrk: " << NglobTrk
+                 << "\nNprimTrk: " << NprimTrk << endm;
+
+        Float_t invNevents = 1.0/Nevents;
+        Float_t invNglobTrk = 1.0/NglobTrk;
+        Float_t invNprimTrk = 1.0/NprimTrk;
+
+        // Hists for HFT
+        hists->m_global_hft_hit->Scale(invNglobTrk);
+        hists->m_primary_hft_hit->Scale(invNprimTrk);
+
+        // Hists for PIXEL
+        hists->m_pxl_hit_phi_z_Pxl1->Scale(invNevents);
+        hists->m_pxl_hit_phi_z_Pxl2->Scale(invNevents);
+        hists->m_pxl_hit_ladder->Scale(invNevents);
+        hists->m_pxl_hit_sector_sensor_Pxl1->Scale(invNevents);
+        hists->m_pxl_hit_sector_sensor_Pxl2->Scale(invNevents);
+        hists->m_global_pxl_hit->Scale(invNglobTrk);
+        hists->m_primary_pxl_hit->Scale(invNprimTrk);
+
+        // Hists for IST
+        hists->m_ist_hit_phi_z->Scale(invNevents);
+        hists->m_ist_hit_ladder->Scale(invNevents);
+        hists->m_ist_hit_ladder_sensor->Scale(invNevents);
+        hists->m_global_ist_hit->Scale(invNglobTrk);
+        hists->m_primary_ist_hit->Scale(invNprimTrk);
+
+        // Hists for SST
+        hists->m_pnt_lwSSD->Scale(invNevents);
+        hists->m_pnt_phiSSD->Scale(invNevents);
+        if (hists->m_glb_ssd_phi) {
+          hists->m_glb_ssd_phi->Scale(invNevents);
+          hists->m_prim_ssd_phi->Scale(invNevents);
+        }
 
 }
 //_____________________________________________________________________________
