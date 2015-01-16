@@ -1,15 +1,18 @@
-#ifndef __HftMatchedTreeB_H
-#define __HftMatchedTreeB_H
+#ifndef __HftMatchedTree_H
+#define __HftMatchedTree_H
 #include "StMaker.h"
 #include "TFile.h"
 #include "TArrayI.h"
 #include "TTree.h"
+class StPxlDb;
+class StIstDb;
 class EventT;
-class HftMatchedTreeB : public StMaker {
+class HftMatchedTree : public StMaker {
  public:
-  HftMatchedTreeB(const Char_t *name="SvtMatTree");
-  virtual ~HftMatchedTreeB() {}
+  HftMatchedTree(const Char_t *name="HftMatTree");
+  virtual ~HftMatchedTree() {}
   virtual Int_t Init();
+  Int_t InitRun(Int_t runnumber);
   virtual Int_t Make();
   virtual Int_t Finish();
   void SetTree();
@@ -17,7 +20,6 @@ class HftMatchedTreeB : public StMaker {
   void SetMinNoHits(Int_t MinNoHits=0) {fMinNoHits = MinNoHits;}
   void SetpCut(Double_t pCut=0.0) {fpCut = pCut;}
   void SetOut(Char_t *Out="Event") {fOut = Out;}
-  void MakeListOfRotations();
  private:
   TFile   *fFile;
   TTree   *fTree;
@@ -25,6 +27,9 @@ class HftMatchedTreeB : public StMaker {
   Int_t    fMinNoHits;
   Double_t fpCut;
   Char_t  *fOut;
-  ClassDef(HftMatchedTreeB,1)
+  
+  StPxlDb  *mPxlDb;
+  StIstDb  *fIstDb;
+  ClassDef(HftMatchedTree,1)
 };
 #endif

@@ -715,7 +715,9 @@ void TDrawG(Int_t sectors=8) {
   out <<  "|dX mkm         |dY mkm         |dZ mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
   cout << "____________________________________________________________________________________________________"  << endl;
   cout << "|dX mkm         |dY mkm         |dZ mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
-  for (Int_t i = 0; i < nx; i++) {
+  for (Int_t i = 2; i < nx; i++) {
+    if(i==6) continue;
+    if(i==8) continue;
     f->cd();
     out  << "______________________________________________________________________________________________ "  << f->GetName() << endl;
     cout << "______________________________________________________________________________________________ "  << f->GetName() << endl;

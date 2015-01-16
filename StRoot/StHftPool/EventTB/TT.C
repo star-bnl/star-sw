@@ -74,22 +74,18 @@ void TT() { printf("Hello Van\n"); TreeClass::Create(); printf("bye  Van\n");}
   
 //*********************************************************************
 void TreeClass::Loop(Int_t Nevents) {  
-
+  cout <<" T.Loop : start " << endl;
 struct Geometry_t {
   Int_t Barrel;
   Int_t Layer;
   Int_t NoLadders;
   Int_t NoWafers;
 };
-const Int_t NSvtLayers = 6;
+//jb 10/13
+const Int_t NLayers = 2;
 // Barrel, Layer  ladder wafer
-const Geometry_t SvtSsdConfig[] = 
-  {    {1,     1,      8,   4}, // even
-       {1,     2,      8,   4}, // odd
-       {2,     3,     12,   6}, // event
-       {2,     4,     12,   6}, // odd
-       {3,     5,     16,   7}, // even
-       {3,     6,     16,   7}, // odd
+const Geometry_t IstSsdConfig[] = 
+  {    {2,     3,     24,  12}  // Ist
        {4,     7,     20,  16}  // Ssd
   };
 //const Int_t BL[4] = {8, 12, 16, 20}; // ladders in barrel
@@ -125,13 +121,14 @@ const Geometry_t SvtSsdConfig[] =
   TString Title;
   TString uName;
   TString uTitle;
-  const Int_t NB =  3;
+  const Int_t NB =  2;
   const Int_t NL = 16;
   const Int_t NW =  7;
   const Int_t NH =  2;
   const Int_t NA =  3;
   //              B   L   W   H   A
-  TH1F *LocPlots[NB][NL][NW][NH][NA];
+  //TH1F *LocPlots[NB][NL][NW][NH][NA];
+  TH1F *LocPlots[NB][NL][NW];
   TH1F *  uPlots[NB][NL];
   TH1F *  uPlBLW[NB][NL][NW];
   TH1F *    hpT = new TH1F(   "Pt",   "pt", 200, -2., 2.);
@@ -149,9 +146,10 @@ const Geometry_t SvtSsdConfig[] =
   TH1F * vMin   = new TH1F("VMin","vmin", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
   TH1F * uMin   = new TH1F("UMin","umin", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
   TH1F * uMinC  = new TH1F("UMinC","umC", plotDuv.nx, plotDuv.xmin, plotDuv.xmax);
-   memset(LocPlots,0,NB*NL*NW*NH*sizeof(TH1F *));
+  //memset(LocPlots,0,NB*NL*NW*NH*sizeof(TH1F *));
+   memset(LocPlots,0,NB*NL*NW*sizeof(TH1F *));
    memset(  uPlots,0,NB*NL*sizeof(TH1F *));
-   for (int B = 0; B < 3; B++) {// over svt Barrels
+   for (int B = 0; B < 2; B++) {// over svt Barrels
      uName  = Form("UBarrel%i", B+1);
      uTitle = Form("du for B%i", B+1);
      duB[B][0] =  new TH1F(uName, uTitle, plotDuv.nx, plotDuv.xmin, plotDuv.xmax );
@@ -162,13 +160,14 @@ const Geometry_t SvtSsdConfig[] =
      uTitle = Form("du for B%i after Vcut", B+1);
      duB[B][1] =  new TH1F(uName, uTitle, plotDuv.nx, plotDuv.xmin, plotDuv.xmax );
    }
-   for (Int_t L = 0; L < NSvtLayers; L++) {// over Layers
-     Int_t barrel    = SvtSsdConfig[L].Barrel;
-     Int_t layer     = SvtSsdConfig[L].Layer;
-     Int_t NoLadders = SvtSsdConfig[L].NoLadders;
-     Int_t NoWafers  = SvtSsdConfig[L].NoWafers;
+   for (Int_t L = 0; L < NLayers; L++) {// over Layers
+     Int_t barrel    = IstSsdConfig[L].Barrel;
+     Int_t layer     = IstSsdConfig[L].Layer;
+     Int_t NoLadders = IstSsdConfig[L].NoLadders;
+     Int_t NoWafers  = IstSsdConfig[L].NoWafers;
      for (Int_t ladder = 1; ladder <= NoLadders; ladder++) {
-       if (barrel <= 3 && (ladder-1)%2 != layer%2) continue;
+       //jb 10/12
+       //if (barrel <= 3 && (ladder-1)%2 != layer%2) continue;
          uName  = plotUP.Name;
 	 uName += Form("L%02iB%i", ladder, barrel);
 	 uTitle = Form("uP for layer %i B %i L %i", layer, barrel, ladder);
@@ -192,10 +191,10 @@ const Geometry_t SvtSsdConfig[] =
 	 for (Int_t hybrid = 1; hybrid <= 2; hybrid++) {
 	   for (Int_t anode =1; anode <=3; anode++) {
 	     Name = plotTB.Name;
-	     Name += Form("L%02iB%iW%02iH%iA%i", ladder, barrel, wafer, hybrid, anode);
-	     Title = Form("%s for layer %i B %i L %i W %i H %i G %i",
-			  plotTB.Title, layer, barrel, ladder, wafer, hybrid, anode);
-	     LocPlots[barrel-1][ladder-1][wafer-1][hybrid-1][anode-1] = 
+	     Name += Form("L%02iB%iW%02iH%iA%i", ladder, barrel, wafer);
+	     Title = Form("%s for layer %i B %i L %i W %i",
+			  plotTB.Title, layer, barrel, ladder, wafer);
+	     LocPlots[barrel-1][ladder-1][wafer-1] = 
 	       new TH1F(Name, Title, plotTB.nx, plotTB.xmin, plotTB.xmax );
            }	   
 	 }
@@ -239,11 +238,12 @@ const Geometry_t SvtSsdConfig[] =
 	 if ( k < 0) cout <<" k <0:"<<k<<" hit="<<hit<<" Nsp="<<Nsp<< endl;
 	 if ( k < 0) continue;
 	 Int_t layer  = fHits_layer[k];
-	 if (layer <= NSvtLayers ){
+	 if (layer <= NLayers ){
 	   Int_t barrel = fHits_barrel[k];
 	   Int_t ladder = fHits_ladder[k];
 	   Int_t wafer  = fHits_wafer[k];
-	   Int_t hybrid = fHits_hybrid[k];
+	   //jb 10/13
+	   //Int_t hybrid = fHits_hybrid[k];
 
 	   Double32_t u = fHits_u[k];       
 	   Double32_t v = fHits_v[k];
@@ -251,8 +251,8 @@ const Geometry_t SvtSsdConfig[] =
 	   Double32_t vP = fHits_vP[k];
 	   Double32_t du = u - uP;
 	   Double32_t dv = v - vP;
-	   Double32_t anode = fHits_anode[k];
-	   Double32_t timeb = fHits_timeb[k];
+	   //Double32_t anode = fHits_anode[k];
+	   //Double32_t timeb = fHits_timeb[k];
 	   
            hpT->Fill(fHits_pT[k]);
            hpM->Fill(fHits_pMom[k]);
@@ -272,21 +272,21 @@ const Geometry_t SvtSsdConfig[] =
 	   if (TMath::Abs(dv) > rCut ) continue;
 	   uCut->Fill(du);
            uCuts[barrel-1][ladder-1]->Fill(du);
-	   
-	   int hid = X1.GetHid (barrel, ladder, wafer, hybrid);
-	   double dux = uP - X1.Sptr[hid]->Coord( timeb );
-	   xCuts[barrel-1][ladder-1]->Fill(dux);
+	   //jb 10/13 : for hybrid --> don't use
+	   //int hid = X1.GetHid (barrel, ladder, wafer, hybrid);
+	   //double dux = uP - X1.Sptr[hid]->Coord( timeb );
+	   //xCuts[barrel-1][ladder-1]->Fill(dux);
 	   
            duB[barrel-1][1]->Fill(du);
 	   if (TMath::Abs(du) > 2.*rCut) continue;
 	   
-	   Int_t   group = ((Int_t)anode)/80;
-	   if (group >= 3) group = 2;
-	   if (group <  0) group = 0;
-	   LocPlots[barrel-1][ladder-1][wafer-1][hybrid-1][group]->Fill( timeb );
+	   //Int_t   group = ((Int_t)anode)/80;
+	   //if (group >= 3) group = 2;
+	   //if (group <  0) group = 0;
+	   LocPlots[barrel-1][ladder-1][wafer-1]->Fill( timeb );
            LocAll->Fill( timeb );
            uAll->Fill( u );
-	   X1.Sptr[hid]->addStat( timeb, u, uP);
+	   //X1.Sptr[hid]->addStat( timeb, u, uP);
 	   
 	 } //layer if
        } //hits loop

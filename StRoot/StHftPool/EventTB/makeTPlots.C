@@ -3,11 +3,10 @@ void makeTPlots(const Char_t *tag = ""){//"dEdx") {
   gInterpreter->ProcessLine(".L Chain.C");
   TChain *theChain = Chain();
   TString macro(".L ");
-  const Char_t *T = gSystem->Which(gROOT->GetMacroPath(),"T.C");
-  macro += T; delete [] T;
+  macro += gSystem->Which(gROOT->GetMacroPath(),"T.C");
   macro += "+";
   gInterpreter->ProcessLine(macro);
-  //  gInterpreter->ProcessLine(".L T.C+");
+  //gInterpreter->ProcessLine(".L T.C+");
   TT t(theChain);
 #if 1
   TString Out = gSystem->DirName(FileN); cout << Out;
@@ -82,5 +81,6 @@ void makeTPlots(const Char_t *tag = ""){//"dEdx") {
   Out += ".root";
   cout << " ===> " << Out << endl;
   t.SetOutFileName(Out);
+  cout << " here " << endl;
   t.Loop(0);
 }

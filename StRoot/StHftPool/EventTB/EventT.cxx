@@ -1,3 +1,5 @@
+#define __USE_GLOBAL__
+#include "StMaker.h"
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
 #include "StEventInfo.h"
@@ -8,42 +10,55 @@
 #include "StGlobalTrack.h"
 #include "StTrackDetectorInfo.h"
 #include "StTrackGeometry.h"
-#include "StSvtHit.h"
+#include "StTpcDedxPidAlgorithm.h"
+#include "StPionPlus.hh"
+#include "StTpcHit.h"
+#include "StPxlHit.h"
+#include "StIstHit.h"
 #include "StSsdHit.h"
-#include "TGeoMatrix.h"
+#include "StIstHitCollection.h"
+#include "StIstLadderHitCollection.h"
+#include "StIstSensorHitCollection.h"
+#include "StSsdHitCollection.h"
+#include "StSsdLadderHitCollection.h"
+#include "StSsdWaferHitCollection.h"
+#include "StBTofCollection.h"
+#include "StBTofHeader.h"
 #include "StarRoot/THelixTrack.h"
 #include "EventT.h"
 #include "TrackT.h"
 #include "HitT.h"
+#include "HitMatchT.h"
+#include "VertexT.h"
 #include "TKey.h"
 #include "TDirectory.h"
 #include "TClass.h"
-//#include "StSvtPool/SvtMatchedTree/SvtMatchedTree.h"
 #include "TRVector.h"
 #include "TRSymMatrix.h"
-#include "StSvtBarrelHitCollection.h"
-#include "StSvtHitCollection.h"
-#include "StSvtLadderHitCollection.h"
-#include "StSsdLadderHitCollection.h"
-#include "StSsdWaferHitCollection.h"
-#include "StSsdHitCollection.h"
-#include "StDbUtilities/St_svtRDOstrippedC.h"
+#include "TGeoMatrix.h"
+#include "StPxlHitCollection.h"
 #include "StDedxPidTraits.h"
-// #include "StDbUtilities/StSvtCoordinateTransform.hh"
-// #include "StDbUtilities/StSvtLocalCoordinate.hh"
-// #include "StDbUtilities/StSvtWaferCoordinate.hh"
-#include "StDbUtilities/St_svtHybridDriftVelocityC.h"
+#include "StBTofPidTraits.h"
+#include "PhysicalConstants.h"
+#include "StPxlDbMaker/StPxlDb.h"
+#include "StIstDbMaker/StIstDb.h"
+#include "StPxlDbMaker/StPxlDbMaker.h"
+#include "StIstDbMaker/StIstDbMaker.h"
+#include "StSsdDbMaker/StSsdDbMaker.h"
+#include "StSsdDbMaker/StSstDbMaker.h"
+#include "StSsdUtil/StSsdBarrel.hh"
 ClassImp(EventTHeader);
 ClassImp(EventT);
 ClassImp(TrackT);
 ClassImp(HitT);  
+ClassImp(HitMatchT);
+ClassImp(VertexT);
 
 TClonesArray *EventT::fgTracks = 0;
 TClonesArray *EventT::fgHits = 0;
-THashList *EventT::fRotList = 0;
-
-
-static Int_t _debug = 0;
+TClonesArray *EventT::fgMatchHits = 0;
+TClonesArray *EventT::fgVertices = 0;
+static Int_t _debug =22;
 //______________________________________________________________________________
 EventT::EventT() : fIsValid(kFALSE)
 {
@@ -57,31 +72,62 @@ EventT::EventT() : fIsValid(kFALSE)
   if (!fgHits) fgHits = new TClonesArray("HitT", 1000);
   fHits = fgHits;
   fNhit = 0;
+  if (!fgMatchHits) fgMatchHits = new TClonesArray("HitMatchT", 1000);
+  fMatchHits = fgMatchHits;
+  fNmatchhit = 0;
+  if (!fgVertices) fgVertices = new TClonesArray("VertexT", 1000);
+  fVertices = fgVertices;
+  fNvertex = 0;
 }
 
 //______________________________________________________________________________
 EventT::~EventT()
 {
   Clear();
-  SafeDelete(fRotList);
 }
 
 //______________________________________________________________________________
-Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
-  static const Int_t NoFitPointCutForGoodTrackT = 15;
-  Int_t iok = 1;
-  fIsValid = kFALSE;
+Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut, StMaker *maker, StPxlDb *pxlDb, StIstDb *fIstDb) {
+
+  Clear();
+
+  Int_t iok    = 1;
   if (! pEventT) return iok;
+
+  //Save current Object count
+
+  fIsValid = kFALSE;
+
+
+  // the way to access the db makers are not so consistent, need to be fixed later
+  //StIstDbMaker *istDbMaker = (StIstDbMaker *)maker->GetMaker("istDb");
+  THashList *istRot = fIstDb->getRotations();
+  
+  std::cout <<" JB : get SSD rotation matrices : " << std::endl;
+  THashList        *ssdRot = gStSstDbMaker->GetRotations();
+  //StSsdBarrel *mySsd =gStSsdDbMaker->GetSsd();
+
   UInt_t NprimVtx = pEventT->numberOfPrimaryVertices();
   if (! NprimVtx) return iok;
   StPrimaryVertex *pVertex=0;
+  StThreeVectorF xyzP(-999,-999,-999);
+  StMatrixF vCM(3,3);
+
+  static const Int_t NoFitPointCutForGoodTrackT = 15;
   Int_t ibest = -1;
   Int_t nBestTracks = -1;
   Int_t nGoodTpcTracks;
   for (UInt_t ipr=0; ipr < NprimVtx ; ipr++) {
     pVertex = pEventT->primaryVertex(ipr);
-    if (! pVertex) continue;
+    //if (! pVertex) continue;
+    const StThreeVectorF& vtxPos = pVertex->position();
+    Double32_t vtxXYZ[] = {vtxPos.x(), vtxPos.y(), vtxPos.z()};
+    VertexT *vtx = AddVertexT();
+    vtx->SetVertex(vtxXYZ);
+    
     UInt_t nDaughters = pVertex->numberOfDaughters();
+    vtx->SetNtracks(nDaughters);
+    //      cout <<"  number of daughters : " << nDaughters << endl;
     nGoodTpcTracks = 0;
     for (UInt_t i=0; i < nDaughters; i++) {
       StTrack* pTrackT = pVertex->daughter(i);
@@ -89,26 +135,35 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
     }  
     if (nBestTracks < nGoodTpcTracks) {nBestTracks = nGoodTpcTracks; ibest = ipr;}
   }
+  cout <<" # of tracks "  << nBestTracks << endl;
   if (ibest < 0) return iok;
   pVertex = pEventT->primaryVertex(ibest);
-  StSvtHitCollection* SvtHitCollection = pEventT->svtHitCollection();
-  StSsdHitCollection* SsdHitCollection = pEventT->ssdHitCollection();
-  St_svtRDOstrippedC *svtRDOs = St_svtRDOstrippedC::instance();
-  if (! SvtHitCollection && ! SsdHitCollection) { cout << "No SVT & SSD HitT Collections" << endl; return iok;}
-  const StThreeVectorF& xyzP = pVertex->position();
+  xyzP = pVertex->position();
+  vCM = pVertex->covariantMatrix();
+  fNPTracks = pVertex->numberOfDaughters();
   fVertex[0] = xyzP.x();
   fVertex[1] = xyzP.y();
   fVertex[2] = xyzP.z();
-  StMatrixF vCM = pVertex->covariantMatrix();
   fCovariantMatrix[0] = vCM(1,1); // left triangular
   fCovariantMatrix[1] = vCM(1,2);
   fCovariantMatrix[2] = vCM(2,2);
   fCovariantMatrix[3] = vCM(1,3);
   fCovariantMatrix[4] = vCM(2,3);
   fCovariantMatrix[5] = vCM(3,3);
-  fNPTracks = pVertex->numberOfDaughters();
-  //Save current Object count
-  Clear();
+
+  StBTofCollection *btofColl = pEventT->btofCollection();
+  fVzVpd = -9999.;
+  fNVpdHits = 0;
+  if(btofColl) {
+    StBTofHeader *tofHeader = btofColl->tofHeader();
+    if(tofHeader) {
+      fVzVpd = tofHeader->vpdVz();
+      int nE = tofHeader->numberOfVpdHits(east);
+      int nW = tofHeader->numberOfVpdHits(west);
+      fNVpdHits = nE*100 + nW;
+    }
+  }
+
   
   StEventInfo*      info = pEventT->info();
   Int_t ev = 0, run = 0, time = 0;
@@ -117,53 +172,291 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
     run  = info->runId();
     time = info->time();
   }
+
+  cout <<" Event Infos : ev/run/time : " << ev<<"/"<<run<<"/"<<time << endl;
   StEventSummary* summary = pEventT->summary();
   Double32_t field = 0;
   if (summary) field = summary->magneticField();
   SetHeader(ev,run,time,field);
   SetFlag(1);
   //  Create and Fill the TrackT objects
-  for (UInt_t t = 0; t < fNPTracks; t++) {
-    StTrack *pTrackT = pVertex->daughter(t);
+//  cout <<" # of daughter tracks : "<< fNPTracks << endl;
+
+  UInt_t nT = 0;
+
+  const double SSD_Width_X = 2*3.8; // active area length is 3.75*2 --> make it a bit bigger
+  const double SSD_Width_Z = 2*2.10;// active area width is 2.0 cm --> make it a bit bigger
+  const double IST_Width_X = 3.8016;
+  const double IST_Width_Z = 7.53;
+  const double PXL_Width_X = 0.9605*2;
+  const double PXL_Width_Z = 0.9936*2;
+
+
+  // Load hits - PXL
+  StPxlHitCollection* PxlHitCollection = pEventT->pxlHitCollection();
+//  if(! PxlHitCollection){cout <<" no pxl hit collection !!!" << endl;}
+
+  if(PxlHitCollection){
+    cout << " Total Pxl Hits = " << PxlHitCollection->numberOfHits() << endl;
+    UInt_t numberOfSectors=PxlHitCollection->numberOfSectors();
+    for(UInt_t i=0;i<numberOfSectors;i++){
+      StPxlSectorHitCollection* PxlSectorHitCollection=PxlHitCollection->sector(i);
+      if(!PxlSectorHitCollection) continue;
+
+      UInt_t numberOfLadders=PxlSectorHitCollection->numberOfLadders();
+      for(UInt_t j=0;j<numberOfLadders;j++){
+        StPxlLadderHitCollection* PxlLadderHitCollection=PxlSectorHitCollection->ladder(j);
+        if(!PxlLadderHitCollection) continue;
+
+        UInt_t numberOfSensors=PxlLadderHitCollection->numberOfSensors();
+        for(UInt_t l=0;l<numberOfSensors;l++){
+          StPxlSensorHitCollection* PxlSensorHitCollection=PxlLadderHitCollection->sensor(l);
+          if(!PxlSectorHitCollection) continue;
+
+          StSPtrVecPxlHit& vec = PxlSensorHitCollection->hits();
+          if(vec.size()<=0) continue;
+
+          if(_debug==2)
+             cout<<"curr i/j/l (starting from 0) : " <<i<<"/"<<j<<"/"<<l<<" ==> StiPixelHitLoader - collection size: "<<vec.size()<<endl;
+
+          UInt_t NoHits = vec.size();
+          for (UInt_t ll = 0; ll < NoHits; ll++) {
+            StPxlHit *hit = vec[ll];
+            if(!hit) continue;
+//            hit->Print("");
+//            cout <<" layer/sector/ladder/sensor/idTruth/detectorId : " << (int)hit->layer()<<"/"<<(int)hit->sector() <<"/"<< (int)hit->ladder() <<"/"<< (int)hit->sensor() <<"/"<<(int)hit->idTruth()<<"/"<<(int)hit->detector() <<endl;
+            int matId = ((int)hit->sector()-1)*40+(int)(hit->ladder()-1)*10+(int)(hit->sensor());
+//            cout <<" -->matPix : " << matId << endl;
+            Double_t globalPixHitPos[3] = {hit->position().x(),hit->position().y(),hit->position().z()};
+            Double_t localPixHitPos[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
+
+//            cout << "globalPixHitPos = " << globalPixHitPos[0] << " " << globalPixHitPos[1] << " " << globalPixHitPos[2] << endl;
+//            cout<< "localPixHitPos = " << localPixHitPos[0] << " " << localPixHitPos[1] << " " << localPixHitPos[2] << endl;            
+
+            HitT *h = AddHitT();
+            h->SetId(matId);
+            h->Set(globalPixHitPos, localPixHitPos);
+            h->SetNRawHits((UInt_t)hit->nRawHits());
+          }  // end loop ll hits
+        } // end loop l sensor
+      } // end loop j ladder
+    } // end loop i (sector
+  } // end if 
+
+  // load hits - IST
+  StIstHitCollection *IstHitCollection = pEventT->istHitCollection();
+  if(IstHitCollection) {
+    cout << " Total Ist Hits = " << IstHitCollection->numberOfHits() << endl;
+//    UInt_t numberOfLadders=IstHitCollection->numberOfLadders();
+    for(UInt_t i=0;i<kIstNumLadders;i++) {
+      StIstLadderHitCollection *IstLadderHitCollection = IstHitCollection->ladder(i);
+      if(!IstLadderHitCollection) continue;
+//      UInt_t numberOfSensors=IstLadderHitCollection->numberOfSensors();
+      for(UInt_t j=0;j<kIstNumSensors;j++) {
+        StIstSensorHitCollection *IstSensorHitCollection = IstLadderHitCollection->sensor(j);
+        if(!IstSensorHitCollection) continue;
+        StSPtrVecIstHit& vec = IstSensorHitCollection->hits();
+        for(UInt_t l=0;l<vec.size();l++) {
+          StIstHit *hit = vec[l];
+          if(!hit) continue;
+          int ladder = hit->getLadder();
+          int sensor = hit->getSensor();
+          int matId = (ladder-1)*6 + sensor + 1000;
+          Double_t globalIstHitPos[3] = {hit->position().x(),hit->position().y(),hit->position().z()};
+          Double_t localIstHitPos[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
+
+//          cout << "globalIstHitPos = " << globalIstHitPos[0] << " " << globalIstHitPos[1] << " " << globalIstHitPos[2] << endl;
+//          cout<< "localIstHitPos = " << localIstHitPos[0] << " " << localIstHitPos[1] << " " << localIstHitPos[2] << endl;
+
+          HitT *h = AddHitT();
+          h->SetId(matId);
+          h->Set(globalIstHitPos, localIstHitPos);
+          h->SetNRawHits((UInt_t)hit->getNRawHits());
+        } // end loop l hits
+      } // end j sensor
+    } // end i ladder
+  } // end if
+
+  // load hits - SSD
+  StSsdHitCollection *SsdHitCollection = pEventT->ssdHitCollection();
+  if(SsdHitCollection) {
+    cout << " Total Ssd Hits = " << SsdHitCollection->numberOfHits() << endl;
+    UInt_t numberOfLadders=SsdHitCollection->numberOfLadders();
+    for(UInt_t i=0;i<numberOfLadders;i++) {
+      StSsdLadderHitCollection *SsdLadderHitCollection = SsdHitCollection->ladder(i);
+      if(!SsdLadderHitCollection) continue;
+      UInt_t numberOfSensors=SsdLadderHitCollection->numberOfWafers();
+      for(UInt_t j=0;j<numberOfSensors;j++) {
+        StSsdWaferHitCollection *SsdWaferHitCollection = SsdLadderHitCollection->wafer(j);
+        if(!SsdWaferHitCollection) continue;
+        StSPtrVecSsdHit& vec = SsdWaferHitCollection->hits();
+        for(UInt_t l=0;l<vec.size();l++) {
+          StSsdHit *hit = vec[l];
+          if(!hit) continue;
+          Int_t ladder = hit->ladder();
+          Int_t wafer  = hit->wafer();
+          Int_t matId  = 7000 + 100*(wafer) + ladder ;
+          Double_t globalSsdHitPos[3] = {hit->position().x(),hit->position().y(),hit->position().z()};
+          Double_t localSsdHitPos[3]  = {hit->localPosition(0),hit->localPosition(1), hit->localPosition(2)};
+	  //cout << "ladder/wafer/matId : " << ladder <<" " << " " << wafer <<" " << matId << endl;
+	  //cout << "globalSsdHitPos = " << globalSsdHitPos[0] << " " << globalSsdHitPos[1] << " " << globalSsdHitPos[2] << endl;
+	  //cout << "localSsdHitPos = " << localSsdHitPos[0] << " " << localSsdHitPos[1] << " " << localSsdHitPos[2] << endl;
+	  //cout << "adcP : " << hit->getADC(0) <<" adcN  : " << hit->getADC(1) << endl; 
+	  hit->Print();
+
+          HitT *h = AddHitT();
+          h->SetId(matId);
+          h->Set(globalSsdHitPos, localSsdHitPos);
+	  h->SetLadderWafer(ladder,wafer);
+	  h->SetADC((int)hit->getADC(0),(int)hit->getADC(1));
+        } // end loop l hits
+      } // end j wafer
+    } // end i ladder
+  } // end if
+
+
+  UInt_t onPXL2 = 0;
+  UInt_t onPXL1 = 0;
+  UInt_t onIST  = 0;
+  UInt_t onSSD  = 0;
+
+
+  StSPtrVecTrackNode& nodes = pEventT->trackNodes();
+  cout << " TrackNode size = " << nodes.size() << endl;
+
+  for (size_t t = 0; t < nodes.size(); t++) {
+    if(_debug==1)cout <<" current track # :" << t << "/"<< nodes.size() << endl;
+    StGlobalTrack *gTrackT = dynamic_cast<StGlobalTrack*>(nodes[t]->track(global));
+    if(!gTrackT) continue;
+    if(gTrackT->fitTraits().numberOfFitPoints(kTpcId)<NoFitPointCutForGoodTrackT) continue;
+
+    StDcaGeometry *dcaGeometry = gTrackT->dcaGeometry();
+    if(!dcaGeometry) { cout << " No dcaGeometry " << endl; continue; }
+
+    StPrimaryTrack *pTrackT = dynamic_cast<StPrimaryTrack*>(nodes[t]->track(primary));
+    if(pTrackT && pTrackT->vertex()!=pVertex) pTrackT = 0;
     if (! pTrackT) continue;
-    StTrackNode *node = pTrackT->node();
-    if (! node) continue;
-#ifdef __USE_GLOBAL__
-    StGlobalTrack *gTrackT = (StGlobalTrack *) node->track(global);
-    if (! gTrackT) continue;
-#endif
-    StTrackDetectorInfo*    dInfo = pTrackT->detectorInfo();
+    StPhysicalHelixD helixI = pTrackT->geometry()->helix();
+    StTrackDetectorInfo*  dInfo = gTrackT->detectorInfo();
     if (! dInfo) continue;
-    static StDetectorId ids[2] = {kSvtId, kSsdId};
-    UInt_t Nsp = dInfo->numberOfPoints(ids[0]) + dInfo->numberOfPoints(ids[1]);
-    if (MinNoHits > 0 && Nsp < MinNoHits) continue;
-    UInt_t npoints = dInfo->numberOfPoints() + 100*(dInfo->numberOfPoints(ids[0]) + 10*dInfo->numberOfPoints(ids[1]));
-    UInt_t nPpoints = 
-      pTrackT->numberOfPossiblePoints() + 
-      100*(pTrackT->numberOfPossiblePoints(ids[0]) + 10*pTrackT->numberOfPossiblePoints(ids[1]));
-    StThreeVectorD g3 = pTrackT->geometry()->momentum();
-#ifdef __USE_GLOBAL__
-    StThreeVectorD g3Gl = gTrackT->geometry()->momentum();
-#endif
-    Double_t pT = g3.perp();
-    Double_t pMom = g3.mag();
-    if (pMom < pCut) continue;
+
     TrackT *track = AddTrackT();
-    Double_t InvpT = 0;
-    Double_t TanL = 999999;
-    if (TMath::Abs(pT) > 1.e-7) {
-      InvpT = pTrackT->geometry()->charge()/pT;
-      TanL = g3.z()/pT;
+
+    int ii = 0;
+
+    StPtrVecHit tpcHits = dInfo->hits(kTpcId);
+    for(size_t ih = 0; ih < tpcHits.size(); ih++) {
+      StTpcHit* aHit = dynamic_cast<StTpcHit *>(tpcHits[ih]);
+      if(!aHit) continue;
+      Double_t xyz[] = {aHit->position().x(), aHit->position().y(), aHit->position().z()};
+      track->SetTpcHit(ii, xyz);
+      ii++;
     }
-    track->SetInvpT(InvpT);
-    track->SetPhi(TMath::ATan2(g3.y(),g3.x()));
-    track->SetTanL(TanL);
-    static const Double_t EC = 2.9979251E-4;
-    Double_t Rho = - EC*InvpT*field;
-    track->SetRho(Rho);
-    Double_t I70 = 0;
-    Double_t TrackLength70 = 0;
-    StSPtrVecTrackPidTraits &traits = pTrackT->pidTraits();
+
+    ii = 0;
+    UInt_t npattern_ssd[2] = {0, 0};
+    StPtrVecHit ssdHits = dInfo->hits(kSsdId);
+    if(ssdHits.size()>0) cout << " Number of Ssd hits on this track " << ssdHits.size() << endl;
+    for(size_t ih = 0; ih < ssdHits.size(); ih++) {
+      StSsdHit* aHit = dynamic_cast<StSsdHit *>(ssdHits[ih]);
+      if(!aHit) continue;
+      npattern_ssd[ii] = aHit->wafer() + (aHit->ladder()-1)*16;
+      Double_t xyz[] = {aHit->position().x(), aHit->position().y(), aHit->position().z()};
+      track->SetSsdHit(ii, xyz);
+      Double_t xyzL[] = {aHit->localPosition(0), aHit->localPosition(1), aHit->localPosition(2)};
+      track->SetSsdHitLocal(ii, xyzL);
+      ii++;
+    }
+    UInt_t nssdpattern = npattern_ssd[0] + npattern_ssd[1] * 1000;
+    track->SetSsdHitPattern(nssdpattern);
+
+    ii = 0;
+    UInt_t npattern_ist[2] = {0, 0};
+    StPtrVecHit istHits = dInfo->hits(kIstId);
+    if(istHits.size()>0) cout << " Number of Ist hits on this track " << istHits.size() << endl;
+    for(size_t ih = 0; ih < istHits.size(); ih++) {
+      StIstHit* aHit = dynamic_cast<StIstHit *>(istHits[ih]);
+      if(!aHit) continue;
+      npattern_ist[ii] = aHit->getSensor() + (aHit->getLadder()-1)*6; 
+      Double_t xyz[] = {aHit->position().x(), aHit->position().y(), aHit->position().z()};
+      track->SetIstHit(ii, xyz);
+      Double_t xyzL[] = {aHit->localPosition(0), aHit->localPosition(1), aHit->localPosition(2)};
+      track->SetIstHitLocal(ii, xyzL);
+      ii++;
+    }
+    UInt_t nistpattern = npattern_ist[0] + npattern_ist[1] * 1000;
+    track->SetIstHitPattern(nistpattern);
+
+    StPtrVecHit pxlHits = dInfo->hits(kPxlId);
+    if(pxlHits.size()>0) cout << " Number of Pxl hits on this track " << pxlHits.size() << endl;
+    UInt_t npts_pxl1 = 0;  // first layer
+    UInt_t npts_pxl2 = 0;  // second layer
+    UInt_t npattern_pxl[3] = {0, 0, 0};
+    for(size_t ih = 0; ih < pxlHits.size(); ih++) {
+      StPxlHit* aHit = dynamic_cast<StPxlHit *>(pxlHits[ih]);
+      if(!aHit) continue;
+//      cout << (*aHit) << endl;
+      Double_t xyz[] = {aHit->position().x(), aHit->position().y(), aHit->position().z()};
+      track->SetPxlHit(ih, xyz);
+      Double_t xyzL[] = {aHit->localPosition(0), aHit->localPosition(1), aHit->localPosition(2)};
+      track->SetPxlHitLocal(ii, xyzL);
+
+      UInt_t sensorId = aHit->sensor() + (aHit->ladder()-1)*10 + (aHit->sector()-1)*40;      
+      if(aHit->ladder()==1) {
+        npts_pxl1++;
+        npattern_pxl[0] = sensorId;
+      }
+      if(aHit->ladder()>=2 && aHit->ladder()<=4) {
+        npts_pxl2++;
+        npattern_pxl[npts_pxl2] = sensorId;
+      }      
+    }
+    UInt_t npxlpattern = npattern_pxl[0] + npattern_pxl[1]*1000 + npattern_pxl[2]*1000000;
+    track->SetPxlHitPattern(npxlpattern);
+/*
+    UInt_t npoints = dInfo->numberOfPoints(kTpcId) + 
+                     dInfo->numberOfPoints(kSsdId) * 100 +
+                     dInfo->numberOfPoints(kIstId) * 1000 +
+                     npts_pxl2 * 10000 + 
+                     npts_pxl1 * 100000;
+*/
+    UInt_t npoints = dInfo->numberOfPoints(kTpcId) +
+                     ssdHits.size() * 100 +
+                     istHits.size() * 1000 +
+                     npts_pxl2 * 10000 +
+                     npts_pxl1 * 100000;
+
+//    if(npoints>100) 
+//      cout << " NPoints = " << npoints << endl;
+
+/*
+    cout << " Number of Possible Points: tpc/ssd/ist/pxl = " << gTrackT->numberOfPossiblePoints(kTpcId)
+         << "/" << gTrackT->numberOfPossiblePoints(kSsdId) << "/" << gTrackT->numberOfPossiblePoints(kIstId)
+         << "/" << gTrackT->numberOfPossiblePoints(kPxlId) << endl;
+    cout << " Number of Points: tpc/ssd/ist/pxl = " << dInfo->numberOfPoints(kTpcId) << "/"
+         << dInfo->numberOfPoints(kSsdId) << "/" << dInfo->numberOfPoints(kIstId) << "/"
+         << dInfo->numberOfPoints(kPxlId) << endl;
+*/
+//    cout << " Number of Points vector size: tpc/ssd/ist/pxl = " << tpcHits.size() << "/"
+//         << ssdHits.size() << "/" << istHits.size() << "/" << pxlHits.size() << endl;
+//    cout << " Hit Patter: ssd/ist/pxl = " << nssdpattern << "/" << nistpattern << "/" << npxlpattern << endl;
+
+    StPhysicalHelixD dcaG_helix = dcaGeometry->helix();
+    StThreeVectorF dcaG_origin = dcaGeometry->origin();
+    StThreeVectorF dcaG_mom = dcaGeometry->momentum();
+    int dcaG_q = dcaGeometry->charge();
+
+    StPhysicalHelixD gHelix = gTrackT->geometry()->helix();
+    StThreeVectorD origin = gHelix.origin();
+    StThreeVectorD gmom = gHelix.momentum(field*kilogauss);
+    int q = gHelix.charge(field*kilogauss);
+
+//    cout << " global momentum = " << gmom << " charge = " << q << endl;
+//    cout << " global momentum direct = " << gTrackT->geometry()->momentum() << " charge = " << gTrackT->geometry()->charge () << endl;
+    
+
+/*
+    StSPtrVecTrackPidTraits &traits = gTrackT->pidTraits();
     UInt_t size = traits.size();
     StDedxPidTraits *pid;
     for (UInt_t i = 0; i < size; i++) {
@@ -171,215 +464,267 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
       if ( traits[i]->IsZombie()) continue;
       pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
       if (! pid || pid->method() != kTruncatedMeanId) continue;
-      I70 = pid->mean();
-      TrackLength70 = pid->length();
     }
-    track->SetdEdx(I70,TrackLength70);
-#ifdef __USE_GLOBAL__
-    Double_t pTGl = g3Gl.perp();
-    //    Double_t pMomGl = g3Gl.mag();
-    Double_t InvpTGl = 0;
-    Double_t TanLGl = 999999;
-    if (TMath::Abs(pTGl) > 1.e-7) {
-      InvpTGl = gTrackT->geometry()->charge()/pTGl;
-      TanLGl = g3Gl.z()/pTGl;
+*/
+    static StTpcDedxPidAlgorithm PidAlgorithm;
+    static StPionPlus *Pion = StPionPlus::instance();
+    const StParticleDefinition *pd = gTrackT->pidTraits(PidAlgorithm);
+    double nsigmaPi = -999.;
+    if(pd) {
+      nsigmaPi = PidAlgorithm.numberOfSigma(Pion);
     }
-    track->SetInvpTGl(InvpTGl);
-    track->SetPhiGl(TMath::ATan2(g3Gl.y(),g3Gl.x()));
-    track->SetTanLGl(TanLGl);
-    Double_t RhoGl = - EC*InvpT*field;
-    track->SetRhoGl(RhoGl);
-    track->SetNPpoint(nPpoints);
-#endif
+//    cout << " nsigma pion = " << nsigmaPi << endl;
 
-    track->SetN(0);
-    track->SetNpoint(npoints);
-    track->SetNPpoint(nPpoints);
+//    double dca2d = gHelix.curvatureSignedDistance(xyzP.x(), xyzP.y());
+//    double dca3d = gHelix.curvatureSignedDistance(xyzP);
+    double dca2d = dcaG_helix.curvatureSignedDistance(xyzP.x(), xyzP.y());  
+    double dca3d = dcaG_helix.curvatureSignedDistance(xyzP);
+
+    track->SetPxPyPz(gmom.x(), gmom.y(), gmom.z());
+    track->SetDcaPxPyPz(dcaG_mom.x(), dcaG_mom.y(), dcaG_mom.z());
+    if(pTrackT) {
+      StThreeVectorD pmom = pTrackT->geometry()->momentum();
+      track->SetPPxPyPz(pmom.x(), pmom.y(), pmom.z());
+    } else {
+      track->SetPPxPyPz(0.,0.,0.);
+    }
+    track->SetOxOyOz(origin.x(), origin.y(), origin.z());
+    track->SetDcaOxOyOz(dcaG_origin.x(), dcaG_origin.y(), dcaG_origin.z());
+//    track->SetNpoint(npoints, q);
+    track->SetNpoint(npoints, dcaG_q);
+    track->SetNsigmaPi(nsigmaPi);
+    track->SetDca2D(dca2d);
+    track->SetDca3D(dca3d);
+
+    StThreeVectorF firstP = dInfo->firstPoint();
 #if 0
-    const Double_t XyzDirRho[6] = {fVertex[0], fVertex[1], fVertex[2], track->GetTanL(), track->GetPhi(), track->GetRho()};
-    const Double_t XyzDirRhoGl[6] = {fVertex[0], fVertex[1], fVertex[2], track->GetTanL(), track->GetPhi(), track->GetRho()};
-#endif
-    THashList *fRotList = RotMatrices();
-    if (! fRotList) continue;
-    TIter next(fRotList);
-    TGeoHMatrix *comb = 0;
-    while ((comb = (TGeoHMatrix *) next())) {
-      TString combName(comb->GetName());
-      if (! combName.BeginsWith("R")) continue;
-      Int_t Id;
-      sscanf(comb->GetName()+1,"%04i",&Id);
-      UInt_t Ladder = Id%100;
-      UInt_t Layer  = Id/1000; if (Layer > 7) Layer = 7;
-      UInt_t Wafer  = (Id - 1000*Layer)/100;
-      UInt_t Barrel = (Layer - 1)/2 + 1;
-      if (_debug) {
-	cout << comb->GetName() << "\tLayer/Ladder/Wafer = " << Layer << "/" << Ladder << "/" << Wafer << endl;
-	comb->Print();
-      }
-      static Double_t dz[2] = {3.00, 2.10};
-      static Double_t dx[2] = {3.00, 3.65};
-      Int_t k = 0; // svt
-      if (Layer > 6) k = 1;
-#if 0
-      // check straight line
-      const Double_t *X = &XyzDirRho[0]; // Global
-      Double_t x0[3];               // Local
-      comb->MasterToLocal(X,x0);
-      Double_t CosL = 1./TMath::Sqrt(1. + XyzDirRho[3]*XyzDirRho[3]);
-      Double_t SinL = XyzDirRho[3]*CosL;
-      Double_t CosP = TMath::Cos(XyzDirRho[4]);
-      Double_t SinP = TMath::Sin(XyzDirRho[4]);
-      Double_t dir[3], d[3];
-      dir[0] = CosL*CosP;
-      dir[1] = CosL*SinP;
-      dir[2] = SinL;
-      comb->MasterToLocalVect(dir,d);
-      if (TMath::Abs(d[2]) < 1.e-7) continue;
-      Double_t s = - x0[2]/d[2]; if (_debug) cout << "straight line s " << s << endl;;
-      if (s < 0) continue;
-      TRVector uvP(3,x0);
-      TRVector tuvP(2,d[0]/d[2],d[1]/d[2]);
-      TRVector DD(3,d);
-      DD *= s;
-      uvP += DD;                  if (_debug) cout << "straight line uvP\t" << uvP << "\ttuvP \t" << tuvP << endl;
-      //                        svt   ssd
-      if (TMath::Abs(uvP[0]) > dx[k] + 1.0) continue;
-      if (TMath::Abs(uvP[1]) > dz[k] + 1.0) continue;
-      // 	if (_debug) {
-#endif
-      Double_t *rot = comb->GetRotationMatrix();
-      Double_t *tra = comb->GetTranslation();
-      const StThreeVectorD normal(rot[2],      rot[5],      rot[8]);
-      const StThreeVectorD middle(tra);
-      StPhysicalHelixD helixI = pTrackT->geometry()->helix();
-      Double_t sh = helixI.pathLength(middle, normal); if (_debug) cout << "StHelix sh " << sh << endl;
-      if (sh <= 0 || sh > 1e3) continue;
-      StThreeVectorD xyzG = helixI.at(sh); if (_debug) cout << "StHelix xyzG\t" << xyzG << endl;
-      Double_t xyzGPred[3] = {xyzG.x(),xyzG.y(),xyzG.z()};
-      Double_t uvPred[3];
-      comb->MasterToLocal(xyzGPred,uvPred);
-      TRVector xyzL(3,uvPred); if (_debug) cout << "StHelix xyzL\t" << xyzL << endl;
-      Double_t dirGPred[3] = {helixI.cx(sh),helixI.cy(sh),helixI.cz(sh)};
-      Double_t dxyzL[3];
-      comb->MasterToLocalVect(dirGPred,dxyzL);
-      Double_t tuvPred[2] = {dxyzL[0]/dxyzL[2], dxyzL[1]/dxyzL[2]};
-      if (_debug) cout << "StHelix tU/tV =  " << tuvPred[0] << "\t" << tuvPred[1] << endl; 
-#ifdef __USE_GLOBAL__
-      
-      StPhysicalHelixD helixG = gTrackT->geometry()->helix();
-      sh = helixG.pathLength(middle, normal); if (_debug) cout << "StHelix sh " << sh << endl;
-      if (sh < 0 || sh > 1e3) continue;
-      xyzG = helixG.at(sh); if (_debug) cout << "StHelix xyzG\t" << xyzG << endl;
-      Double_t xyzGPredGl[3] = {xyzG.x(),xyzG.y(),xyzG.z()};
-      Double_t uvPredGl[3];
-      comb->MasterToLocal(xyzGPredGl,uvPredGl);
-      TRVector xyzLGl(3,uvPredGl); if (_debug) cout << "StHelix xyzL\t" << xyzL << endl;
-      Double_t dirGPredGl[3] = {helixG.cx(sh),helixG.cy(sh),helixG.cz(sh)};
-      comb->MasterToLocalVect(dirGPredGl,dxyzL);
-      Double_t tuvPredGl[2] = {dxyzL[0]/dxyzL[2], dxyzL[1]/dxyzL[2]};
-      if (_debug) cout << "StHelix tU/tV =  " << tuvPredGl[0] << "\t" << tuvPredGl[1] << endl; 
-#endif      
-      
-      if (TMath::Abs(uvPred[0]) > dx[k] + 1.0) continue;
-      if (TMath::Abs(uvPred[1]) > dz[k] + 1.0) continue;
-      StPtrVecHit &hvec = pTrackT->detectorInfo()->hits();
-      UInt_t NoHits = hvec.size();
-      StHit *hit = 0;
-      for (UInt_t j = 0; j < NoHits; j++) {
-	StHit *hitc = hvec[j];
-	if (! hitc) continue;
-	if (hitc->detector() == kSvtId) {
-	  StSvtHit *htSvt = (StSvtHit *) hitc;
-	  if (htSvt->barrel() == Barrel &&
-	      htSvt->ladder() == Ladder &&
-	      htSvt->wafer()  == Wafer) {hit = hitc; break;}
-	}
-	if (hitc->detector() == kSsdId) {
-	  StSsdHit *htSsd = (StSsdHit *) hitc;
-	  if (htSsd->ladder() == Ladder &&
-	      htSsd->wafer()  == Wafer) {hit = hitc; break;}
-	}
-      }
-      HitT *ht = AddHitT();
-      UInt_t Hybrid = 1;
-      if (uvPred[0] >= 0) Hybrid = 2;
-      ht->SetId(Barrel,Layer,Ladder,Wafer,Hybrid);
-      ht->SetisTrack(t+1);
-      ht->SetUVPred (uvPred[0],uvPred[1]);
-      ht->SettUVPred(tuvPred[0],tuvPred[1]);
-      ht->SetXyzG(xyzGPred);
-      ht->SetDirG(dirGPred);
-#ifdef __USE_GLOBAL__
-      ht->SetUVPredGl (uvPredGl[0],uvPredGl[1]);
-      ht->SettUVPredGl(tuvPredGl[0],tuvPredGl[1]);
-      ht->SetXyzGl(xyzGPredGl);
-      ht->SetDirGl(dirGPredGl);
-#endif
-      if (hit) {
-	SetHitT(ht, hit, comb, track);
-	ht->SetisFitted(t+1);
-      }
-      StSPtrVecSvtHit *hitsvt = 0;
-      StSPtrVecSsdHit *hitssd = 0;
-      Int_t NoHitPerTrack = 0;
-      if (Layer < 7) { // svt
-	if (! SvtHitCollection) continue;
-	StSvtBarrelHitCollection* barrelCollection = SvtHitCollection->barrel(Barrel-1);
-	if (! barrelCollection) continue;
-	StSvtLadderHitCollection *ladderCollection = barrelCollection->ladder(Ladder-1);
-	if (! ladderCollection) continue;
-	if (svtRDOs && svtRDOs->svtRDOstrippedStatus(Barrel,Ladder,Wafer)) continue;
-	StSvtWaferHitCollection* waferCollection = ladderCollection->wafer(Wafer-1);
-	if (! waferCollection) continue;
-	hitsvt = &waferCollection->hits();
-      } else         { // ssd
-	if (! SsdHitCollection) continue;
-	StSsdLadderHitCollection* ladderCollection = SsdHitCollection->ladder(Ladder-1);
-	if (! ladderCollection) continue;
-	
-	StSsdWaferHitCollection* waferCollection = ladderCollection->wafer(Wafer-1);
-	if (! waferCollection) continue;
-	hitssd = &waferCollection->hits();
-      }
-      if (! hitsvt && ! hitssd) continue;
-      if (hitsvt) NoHits = hitsvt->size();
-      if (hitssd) NoHits = hitssd->size();
-      ht->SetNofHits(NoHits);
-      if (! NoHits) continue;
+ // do Projections first SSD
+      for (Int_t i_ladder = 0; i_ladder < 20; i_ladder++) {
+	for (Int_t i_sensor = 0; i_sensor < 16; i_sensor++) {
+	  UInt_t id = 7000 + 100*(i_sensor+1) + (i_ladder+1);
+	  TGeoHMatrix *comb = (TGeoHMatrix *)ssdRot->FindObject(Form("R%04i", id));
+	  //std::cout <<" id : "<< id << std::endl;
+	  //comb->Print();
+	  Double_t *rot = comb->GetRotationMatrix();
+	  Double_t *tra = comb->GetTranslation();
+	  /*
+	  const StThreeVectorD normal(mySsd->mLadders[i_ladder]->mWafers[i_sensor]->n(0),	    
+				      mySsd->mLadders[i_ladder]->mWafers[i_sensor]->n(1),
+				      mySsd->mLadders[i_ladder]->mWafers[i_sensor]->n(2));				      
+	  const StThreeVectorD middle(mySsd->mLadders[i_ladder]->mWafers[i_sensor]->x(0),	    
+				      mySsd->mLadders[i_ladder]->mWafers[i_sensor]->x(1),
+				      mySsd->mLadders[i_ladder]->mWafers[i_sensor]->x(2));
+	  */				      
+	  const StThreeVectorD normal(rot[2], rot[5], rot[8]);
+	  const StThreeVectorD middle(tra);
+	  const StThreeVectorD &o = helixI.origin();
+	  const StThreeVectorD  n = helixI.cat(0.);
+	  
+	  Double_t sh = helixI.pathLength(middle, normal);
+	  
+	  if (sh <= 0 || sh > 1e3) continue; // dcaG geometry, projection pathLength should be positive
+	  //if (TMath::Abs(sh) > 1e3) continue;
+	  StThreeVectorD xyzG = helixI.at(sh);
+	  Double_t xyzGPred[3] = {xyzG.x(), xyzG.y(), xyzG.z()};
+	  Double_t uvPred[3];
+	  //mySsd->mLadders[i_ladder]->mWafers[i_sensor]->MasterToLocal(xyzGPred,uvPred);
+	  comb->MasterToLocal(xyzGPred, uvPred);
+	  if (TMath::Abs(uvPred[0]) > SSD_Width_X / 2. ) continue;	 
+	  if (TMath::Abs(uvPred[2]) > SSD_Width_Z / 2. ) continue;
+	  
+	  onSSD++;
+	  
+	  Double_t dirGPred[3] = {helixI.cx(sh), helixI.cy(sh), helixI.cz(sh)};
+	  Double_t dxyzL[3];
+	  //mySsd->mLadders[i_ladder]->mWafers[i_sensor]->MasterToLocal(dirGPred,dxyzL);
+	  comb->MasterToLocalVect(dirGPred, dxyzL);
+	  Double_t tuvPred[2] = {dxyzL[0] / dxyzL[1], dxyzL[2] / dxyzL[1]};
+	  
+	  if (!pEventT->ssdHitCollection()) continue;
+	  
+	  if (!pEventT->ssdHitCollection()->ladder(i_ladder)) continue;
+	  
+	  if (!pEventT->ssdHitCollection()->ladder(i_ladder)->wafer(i_sensor)) continue;
+	  
+	  StSPtrVecSsdHit &vec = pEventT->ssdHitCollection()->ladder(i_ladder)->wafer(i_sensor)->hits();
+	  
+	  if (vec.size() <= 0) continue;
+	  
+	  for (size_t ih = 0; ih < vec.size(); ih++) {
+	    StSsdHit *hit = (StSsdHit *)vec[ih];
+	    
+	    if (!hit) continue;
+	    
+	    Double_t global[3] = {hit->position().x(), hit->position().y(), hit->position().z()};
+	    Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
 
-      for (UInt_t l = 0; l < NoHits; l++) {
-	hit = 0;
-	if (hitsvt) hit = (*hitsvt)[l];
-	if (hitssd) hit = (*hitssd)[l];
-	if (hit) {
-	  //if (hit->flag()>=4) continue;
-	  //if (hit->flag()< 0) continue;
-	  //	  cout << "hitFlag=" << hit->flag() << endl;
-	  HitT *h = AddHitT();
-	  h->SetHitFlag(UInt_t(hit->flag()));
-	  h->SetUVPred (uvPred[0],uvPred[1]);
-	  h->SettUVPred(tuvPred[0],tuvPred[1]);
-	  h->SetXyzG(xyzGPred);
-	  h->SetDirG(dirGPred);
-#ifdef __USE_GLOBAL__
-
-	  h->SetUVPredGl (uvPredGl[0],uvPredGl[1]);
-	  h->SettUVPredGl(tuvPredGl[0],tuvPredGl[1]);
-	  h->SetXyzGl(xyzGPredGl);
-	  h->SetDirGl(dirGPredGl);
-#endif
-	  SetHitT(h, hit, comb, track);
-	  NoHitPerTrack++;
-	  h->SetHitPerTrack(NoHitPerTrack);
-	  //	    SetHitT(h, hit, comb, track, &TPDeriv);
+	    //cout <<" Prediction --> xGP :" << xyzGPred[0] <<" yGP :" << xyzGPred[1] <<" zGP :" << xyzGPred[2] << endl;  
+	    //cout <<" Prediction --> uvPred[0] :" << uvPred[0] <<" uvPred[1] :" << uvPred[1] <<" uvPred[2] :" << uvPred[2] <<endl;
+	    //cout <<" id/i_ladder/i_sensor : " << id <<" " << i_ladder << " " << i_sensor << std::endl;
+	    //comb->Print();	    
+	    cout << (*hit) << endl;
+	    double rr[3];
+	    comb->MasterToLocal(global,rr);
+	    //std::cout <<" hitCol --> xg : " << global[0] <<"yl : " << global[1] <<" zl : " << global[2] << std::endl;
+	    //std::cout <<" hitCol --> xl : " << local[0] <<"yl : " << local[1] <<" zl : " << local[2] << std::endl;
+	    //std::cout <<" check  --> xl : " << rr[0] <<"yl : " << rr[1] <<" zl : " << rr[2] << std::endl;
+	    comb->MasterToLocal(xyzGPred, uvPred);
+	    HitMatchT *h = AddHitMatchT();
+	    h->Set(global, local);
+	    h->SetPred(xyzGPred, uvPred);
+	    h->SettuvPred(tuvPred[0], tuvPred[1]);
+	    h->SetDetId(id);
+	    //h->SetNRawHits((UInt_t)hit->getNRawHits());
+	    h->SetIndex2Track(nT);
+	    (hit->idTruth() == gTrackT->idTruth())?h->SetIndex2Hit(1):h->SetIndex2Hit(0);  // need to map out later
+	    h->SetTrackMom(dcaG_mom.perp(), dcaG_mom.pseudoRapidity(), dcaG_mom.phi());
+	    h->SetTrackOrigin(dcaG_origin.x(), dcaG_origin.y(), dcaG_origin.z());
+	    h->SetTrackNpoint(npoints * dcaG_q);
+	    h->SetTrackFirstPointR(firstP.perp());
+	    h->SetTrackFirstPointZ(firstP.z());
+	    h->SetLadderWafer(i_ladder,i_sensor);
+	    h->SetADC((int)hit->getADC(0),(int)hit->getADC(1));
+	  }
 	}
+      }
+#endif
+    // do Projections
+    // first IST
+      //      std::cout << " start IST projections " << std::endl;
+    for(int i_ladder = 0; i_ladder<24; i_ladder++) {
+      for(int i_sensor = 0; i_sensor<6; i_sensor++) {
+        UInt_t id = 1000 + i_ladder * 6 + i_sensor + 1;
+	//TGeoHMatrix *comb = (TGeoHMatrix *) fIstDb->FindObject(Form("R%04i", id));
+	//	TGeoHMatrix *comb = (TGeoHMatrix *) fIstDb->getHMatrixSensorOnGlobal(i_ladder,i_sensor+1);
+        TGeoHMatrix *comb = (TGeoHMatrix *)istRot->FindObject(Form("R%04i",id));
+//        if(t==0) comb->Print();
+	//cout<<"Lomnitz: Starting projection on sensor "<<id<<" "<<endl;
+	//cout<<"Rotation Matrix"<<endl;
+	//comb->Print();
+        Double_t *rot = comb->GetRotationMatrix();
+        Double_t *tra = comb->GetTranslation();
+        const StThreeVectorD normal(rot[1], rot[4], rot[7]);
+        const StThreeVectorD middle(tra);
+	//cout<<"Lomnitz: Looking for path length sensor "<<endl;
+        Double_t sh = helixI.pathLength(middle, normal);
+        if(sh<=0 || sh > 1e3) continue;  // dcaG geometry, projection pathLength should be positive
+        StThreeVectorD xyzG = helixI.at(sh);
+	//cout<<"Lomnitz: Global pred hit "<<endl;
+        Double_t xyzGPred[3] = {xyzG.x(), xyzG.y(), xyzG.z()};
+        Double_t uvPred[3];
+        comb->MasterToLocal(xyzGPred,uvPred);
+        if (TMath::Abs(uvPred[0]) > IST_Width_X/2. ) continue;
+        if (TMath::Abs(uvPred[2]) > IST_Width_Z/2. ) continue;
+        onIST++;
+        Double_t dirGPred[3] = {helixI.cx(sh),helixI.cy(sh),helixI.cz(sh)};
+        Double_t dxyzL[3];
+        comb->MasterToLocalVect(dirGPred,dxyzL);
+        Double_t tuvPred[2] = {dxyzL[0]/dxyzL[1], dxyzL[2]/dxyzL[1]};
+
+        if(!pEventT->istHitCollection()) continue;
+        if(!pEventT->istHitCollection()->ladder(i_ladder)) continue;
+        if(!pEventT->istHitCollection()->ladder(i_ladder)->sensor(i_sensor)) continue;                                
+        StSPtrVecIstHit& vec = pEventT->istHitCollection()->ladder(i_ladder)->sensor(i_sensor)->hits();
+        if(vec.size()<=0) continue;
+        for(size_t ih=0;ih<vec.size();ih++) {
+          StIstHit *hit = (StIstHit*)vec[ih];
+          if(!hit) continue;
+
+          Double_t global[3] = {hit->position().x(),hit->position().y(),hit->position().z()};
+          Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
+
+//          cout << (*hit) << endl;
+
+          HitMatchT *h = AddHitMatchT();
+          h->Set(global, local);
+          h->SetPred(xyzGPred, uvPred);
+          h->SettuvPred(tuvPred[0], tuvPred[1]);
+          h->SetDetId(id);
+          h->SetNRawHits((UInt_t)hit->getNRawHits());
+          h->SetIndex2Track(nT);
+          h->SetIndex2Hit(0);  // need to map out later
+          h->SetTrackMom(dcaG_mom.perp(), dcaG_mom.pseudoRapidity(), dcaG_mom.phi());
+          h->SetTrackOrigin(dcaG_origin.x(), dcaG_origin.y(), dcaG_origin.z());
+          h->SetTrackNpoint(npoints*dcaG_q);
+          h->SetTrackFirstPointR(firstP.perp());
+          h->SetTrackFirstPointZ(firstP.z());
+        }
       }
     }
+    // do projection to PXL
+    for(int i_sector = 0; i_sector<10; i_sector++) {
+      for(int i_ladder = 0; i_ladder<4; i_ladder++) {
+        for(int i_sensor = 0; i_sensor<10; i_sensor++) {
+          UInt_t id = i_sector * 40 + i_ladder * 10 + i_sensor + 1;
+          TGeoHMatrix *comb = (TGeoHMatrix *)pxlDb->geoHMatrixSensorOnGlobal(i_sector+1, i_ladder+1, i_sensor+1);
+//          if(t==0) comb->Print();
+
+          Double_t *rot = comb->GetRotationMatrix();
+          Double_t *tra = comb->GetTranslation();
+          const StThreeVectorD normal(rot[1], rot[4], rot[7]);
+          const StThreeVectorD middle(tra);
+          Double_t sh = helixI.pathLength(middle, normal);
+          if(sh<=0 || sh > 1e3) continue;  // dcaG geometry, projection pathLength should be positive
+          StThreeVectorD xyzG = helixI.at(sh);
+          Double_t xyzGPred[3] = {xyzG.x(), xyzG.y(), xyzG.z()};
+          Double_t uvPred[3];
+          comb->MasterToLocal(xyzGPred,uvPred);
+          if (TMath::Abs(uvPred[0]) > PXL_Width_X/2. ) continue;
+          if (TMath::Abs(uvPred[2]) > PXL_Width_Z/2. ) continue;
+          if(i_ladder==0) onPXL1++;
+          else onPXL2++;
+
+          Double_t dirGPred[3] = {helixI.cx(sh),helixI.cy(sh),helixI.cz(sh)}; 
+          Double_t dxyzL[3];
+          comb->MasterToLocalVect(dirGPred,dxyzL);                         
+          Double_t tuvPred[2] = {dxyzL[0]/dxyzL[1], dxyzL[2]/dxyzL[1]};
+
+          if(!pEventT->pxlHitCollection()) continue;
+          if(!pEventT->pxlHitCollection()->sector(i_sector)) continue;
+          if(!pEventT->pxlHitCollection()->sector(i_sector)->ladder(i_ladder)) continue;
+          if(!pEventT->pxlHitCollection()->sector(i_sector)->ladder(i_ladder)->sensor(i_sensor)) continue;
+          StSPtrVecPxlHit& vec = pEventT->pxlHitCollection()->sector(i_sector)->ladder(i_ladder)->sensor(i_sensor)->hits();
+          if(vec.size()<=0) continue;
+
+          for(size_t ih=0;ih<vec.size();ih++) {
+            StPxlHit *hit = (StPxlHit*)vec[ih];
+            if(!hit) continue;
+
+            Double_t global[3] = {hit->position().x(),hit->position().y(),hit->position().z()};
+            Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
+
+            HitMatchT *h = AddHitMatchT();
+            h->Set(global, local);
+            h->SetPred(xyzGPred, uvPred);
+            h->SettuvPred(tuvPred[0], tuvPred[1]);
+            h->SetDetId(id);
+            h->SetNRawHits((UInt_t)hit->nRawHits());
+            h->SetIndex2Track(nT);
+            h->SetIndex2Hit(0);  // need to map out later
+            h->SetTrackMom(dcaG_mom.perp(), dcaG_mom.pseudoRapidity(), dcaG_mom.phi());
+            h->SetTrackOrigin(dcaG_origin.x(), dcaG_origin.y(), dcaG_origin.z());
+            h->SetTrackNpoint(npoints*dcaG_q);
+            h->SetTrackFirstPointR(firstP.perp());
+            h->SetTrackFirstPointZ(firstP.z());
+          }
+
+        }
+      }
+    }
+
+    nT++;
   }
-  fIsValid = kTRUE;
+
+  UInt_t val[4] = {onPXL1, onPXL2, onIST, onSSD};
+  SetNPredHFT(val);
+  //SetNPredHits(onPXL1+onPXL2, onIST, onSSD);
+  //if(!onIST && !onPXL2 && !onPXL1) return iok;  // only fill events with tracks that can be projected to HFT
+  LOG_INFO << " Number of predicted hits on PXL1/PXL2/IST/SSD = " << onPXL1 << "/" << onPXL2 << "/" << onIST << "/" << onSSD << endm;
+
+
   iok = 0;
   return iok;
-}  
+}
 //______________________________________________________________________________
 TrackT *EventT::AddTrackT()
 {
@@ -408,12 +753,43 @@ HitT *EventT::AddHitT()
   //Save reference to last HitT in the collection of Hits
   return hit;
 }
+//______________________________________________________________________________
+HitMatchT *EventT::AddHitMatchT()
+{
+  // Add a new hit to the list of hits for this event.
+  // To avoid calling the very time consuming operator new for each hit,
+  // the standard but not well know C++ operator "new with placement"
+  // is called. If hits[i] is 0, a new HitT object will be created
+  // otherwise the previous HitT[i] will be overwritten.
 
+  TClonesArray &matchhits = *fMatchHits;
+  HitMatchT *hitmatch = new(matchhits[fNmatchhit++]) HitMatchT();
+  //Save reference to last HitMatchT in the collection of Hits
+
+  //cout << " Test -- create a new HitMatch here " << endl;
+  return hitmatch;
+}
+//______________________________________________________________________________
+VertexT *EventT::AddVertexT()
+{
+  // Add a new hit to the list of vertices for this event.
+  // To avoid calling the very time consuming operator new for each hit,
+  // the standard but not well know C++ operator "new with placement"
+  // is called. If vertex[i] is 0, a new VertexT object will be created
+  // otherwise the previous VertexT[i] will be overwritten.
+  
+  TClonesArray &vertices = *fVertices;
+  VertexT *vertex = new(vertices[fNvertex++]) VertexT();
+  //Save reference to last VertexT in the collection of Hits
+  return vertex;
+}
 //______________________________________________________________________________
 void EventT::Clear(Option_t * /*option*/)
 {
   fTracks->Clear("C"); //will also call TrackT::Clear
   fHits->Clear("C"); //will also call HitT::Clear
+  fVertices->Clear("C");
+  fMatchHits->Clear("C");
 }
 
 //______________________________________________________________________________
@@ -424,6 +800,8 @@ void EventT::Reset(Option_t * /*option*/)
   
   delete fgTracks; fgTracks = 0;
   delete fgHits; fgHits = 0;
+  delete fgVertices; fgVertices = 0;
+  delete fgMatchHits; fgMatchHits = 0;
 }
 
 //______________________________________________________________________________
@@ -431,6 +809,8 @@ void EventT::SetHeader(Int_t i, Int_t run, Int_t date, Double32_t field)
 {
   fNtrack = 0;
   fNhit = 0;
+  fNvertex = 0;
+  fNmatchhit = 0;
   fEvtHdr.Set(i, run, date, field);
 }
 //________________________________________________________________________________
@@ -445,197 +825,19 @@ void EventT::Print(Option_t *opt) const {
   cout << "Its cov. matrix " << cov << endl;
   for (UInt_t i = 0; i < GetNtrack(); i++) {cout << i << "\t"; GetTrackT(i)->Print();}
   for (UInt_t i = 0; i < GetNhit(); i++) {cout << i << "\t"; GetHitT(i)->Print();}
+//  for (UInt_t i = 0; i < GetNvertex(); i++) {cout << i << "\t"; GetVertexT(i)->Print();}
   
 }
 //________________________________________________________________________________
-HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
-  struct RDO_t {
-    const Char_t *name;
-    Int_t ladder, barrel;
-    Int_t rdo;
-  };
-  const Int_t NRDOS = 36;
-  const RDO_t RDOS[NRDOS] = {
-    {"L01B1", 1,1, 1},{"L02B1", 2,1, 2},{"L03B1", 3,1, 4},{"L04B1", 4,1, 5},{"L05B1", 5,1, 7},
-    {"L06B1", 6,1, 8},{"L07B1", 7,1,10},{"L08B1", 8,1,11},{"L01B2", 1,2, 3},{"L02B2", 2,2, 3},
-    {"L03B2", 3,2, 3},{"L04B2", 4,2, 6},{"L05B2", 5,2, 6},{"L06B2", 6,2, 6},{"L07B2", 7,2, 9},
-    {"L08B2", 8,2, 9},{"L09B2", 9,2, 9},{"L10B2",10,2,12},{"L11B2",11,2,12},{"L12B2",12,2,12},
-    {"L01B3", 1,3, 1},{"L02B3", 2,3, 1},{"L03B3", 3,3, 2},{"L04B3", 4,3, 2},{"L05B3", 5,3, 4}, 
-    {"L06B3", 6,3, 4},{"L07B3", 7,3, 5},{"L08B3", 8,3, 5},{"L09B3", 9,3, 7},{"L10B3",10,3, 7}, 
-    {"L11B3",11,3, 8},{"L12B3",12,3, 8},{"L13B3",13,3,10},{"L14B3",14,3,10},{"L15B3",15,3,11},
-    {"L16B3",16,3,11} 
-  };
-  UInt_t B = 0, L = 0, l = 0, W = 0, H = 0;
-  Int_t rdo = 0;
-  h->SetRDO(rdo);
-  if (hit->detector() == kSvtId) {
-    StSvtHit *ht = (StSvtHit *) hit;
-    B = ht->barrel();
-    L = ht->layer();
-    l = ht->ladder();
-    W = ht->wafer();
-    H = ht->hybrid();
-    h->SetId(B,L,l,W,H);
-    h->SetuvD(ht->localPosition(0), ht->localPosition(1));			
-    h->SetAnode(ht->anode());
-    h->SetTimeB(ht->timebucket());
-    for (Int_t r = 0; r < NRDOS; r++) {
-      if (h->Ladder() == RDOS[r].ladder && h->Barrel() == RDOS[r].barrel) {
-	rdo = RDOS[r].rdo;
-	break;
-      }
-    }
-    if (rdo) h->SetRDO(rdo);
-    St_svtHybridDriftVelocityC *d = St_svtHybridDriftVelocityC::instance();
-    if (d && d->p(B,l,W,H)) {
-      h->SetLM(d->CalcU(B,l,W,H,ht->timebucket(),ht->anode()),
-	       d->CalcV(H,ht->anode()));
-      h->SetuHat(d->uHat(B,l,W,H,ht->timebucket()));
-    }
-  }
-  h->SetUsedInFit(hit->usedInFit());
-  if (hit->detector() == kSsdId) {
-    StSsdHit *ht = (StSsdHit *) hit;
-    B = 4;
-    L = 7;
-    l = ht->ladder();
-    W = ht->wafer();
-    h->SetId(B,L,l,W,H);
-    h->SetLM(-ht->localPosition(0), ht->localPosition(1));			
-    h->SetuHat(-ht->localPosition(0));
-    h->SetAnode(0);
-    h->SetTimeB(0);
-  }
-  StThreeVectorF position = hit->position();
-  Double_t xyzG[3] = {position.x(),position.y(),position.z()};
-  h->SetGC(xyzG[0],xyzG[1],xyzG[2]);
-  Double_t xyzL[3] = {0,0,0};
-  comb->MasterToLocal(xyzG,xyzL);
-  //	  if (TMath::Abs(xyzL[2]) > 0.1) continue;
-  Double_t uvw[3] = {h->GetU(),h->GetV(),0};
-  comb->LocalToMaster(uvw,xyzG);
-  h->Set(xyzG,uvw);
-  Double_t *rot = comb->GetRotationMatrix();
-  h->SetWG(rot[2],rot[5],rot[8]);
-  //  Int_t IdH = GetIndexOfHitT(h);
-  Int_t IdH = fNhit - 1;
-  track->SetHitTId(IdH);
-  Double_t invpT = track->GetInvpT();
-  if (TMath::Abs(invpT) < 1e-7) invpT = 1e-7;
-  h->SetpT(1./invpT);
-  h->SetMom(track->GetMomentum());
-  h->SetWG(rot[2],rot[5],rot[8]);
-  TGeoHMatrix *rotL = (TGeoHMatrix *) RotMatrices()->FindObject(Form("WL%s",comb->GetName()+1));
-  Double_t xyzLadder[3] = {0,0,0};
-  if (rotL) {
-    
-    rotL->LocalToMaster(uvw,xyzLadder);
-    h->SetL(xyzLadder[0],xyzLadder[1],xyzLadder[2]); 
-    Double_t uvwP[3] = {h->GetPredU(),h->GetPredV(),0};
-    rotL->LocalToMaster(uvwP,xyzLadder);
-    h->SetXyzL(xyzLadder);
-#ifdef __USE_GLOBAL__
-
-    Double_t uvwPGl[3] = {h->GetPredGlU(),h->GetPredGlV(),0};
-    rotL->LocalToMaster(uvwPGl,xyzLadder);
-    h->SetXyzGlL(xyzLadder);
-#endif
-  } else {
-    
-    cout << Form("WL%s",comb->GetName()+1) << " has not been found" << endl;
-    h->SetL(xyzLadder[0],xyzLadder[1],xyzLadder[2]);
-    h->SetXyzL(xyzLadder);
-#ifdef __USE_GLOBAL__
-    h->SetXyzGlL(xyzLadder);
-#endif
-  }
-  return h;
-}
-//________________________________________________________________________________
 void TrackT::Print(Option_t *opt) const {
-  cout << "TrackT: InvpT " << fInvpT << "\tTanL " << fTanL 
-       << "\tPhi " << fPhi << "\tRho " << fRho 
-       << "\tNpoint " << fNpoint << "\tNsp " << fNsp << endl;
-  for (UInt_t i = 0; i < fNsp; i++) cout << "\t" << fIdHitT[i];
   cout << endl;
 }
 //________________________________________________________________________________
-void HitT::SetId(Int_t B, Int_t L, Int_t l, Int_t W, Int_t H) {
-  struct Geom_t {
-    Int_t Barrel;
-    Int_t Layer;
-    Int_t NoLadders;
-    Int_t NoWafers;
-  };
-  const Int_t NoLayers = 7;
-  //Barrel, Layer Nladder Nwafer
-  static const Geom_t SvtSsdConfig[NoLayers] = 
-  {    {1,     1,      8,   4}, // even
-       {1,     2,      8,   4}, // odd
-       {2,     3,     12,   6}, // event
-       {2,     4,     12,   6}, // odd
-       {3,     5,     16,   7}, // even
-       {3,     6,     16,   7}, // odd
-       {4,     7,     20,  16}  // Ssd
-  };
-  static const Int_t ssdSector[20] = {// 100*sector + ladder
-      101, 102,
-      203, 204, 205, 206, 207, 208, 209,
-      310, 311, 312, 
-      413, 414, 415, 416, 417, 418, 419,
-      120
-      };
-  barrel = B; layer = L; ladder = l; wafer = W; hybrid = H;
-  if (barrel == 0) Id = 7000       + 100*wafer + ladder;
-  else             Id = 1000*layer + 100*wafer + ladder;
-  sector = -1;
-  if (layer < 7) {
-    sector = 0;
-    if (ladder > SvtSsdConfig[layer-1].NoLadders/2) sector = 1;
-  } else         {sector = ssdSector[ladder-1]/100 + 1; barrel = 4;}
-}
-#if 0
-//________________________________________________________________________________
-void HitT::SetId(StHit *shit) {
-  if (shit) {
-    if (shit->detector() == kSvtId) {
-      StSvtHit *hit = (StSvtHit *) shit;
-      B = hit->barrel();
-      L = hit->layer();
-      l = hit->ladder();
-      W = hit->wafer();
-      H = hit->hybrid();
-    }
-    if (shit->detector() == kSsdId) {
-      StSsdHit *hit = (StSsdHit *) shit;
-      B = 4;
-      L = 7;
-      l = hit->ladder();
-      W = hit->wafer();
-    }
-  }
-  SetId(B,L,l,W,H);
-}
-#endif
-//________________________________________________________________________________
 void HitT::Print(Option_t *opt) const {
-  cout << "HitT: Id " << Id << "\tpT = " << pT << "\tmomentum " << pMom << endl;
-  TRVector glob(3,&xG); cout << "Global :" << glob << endl;
-  cout << "Local      u/v/w " << u << "/ " << v << "/ " << w << endl;
-  cout << "Prediction uP/vP " << uP << "/ " << vP << "\ttuP/tvP " << tuP << "/ " << tvP << endl;
 }
 //________________________________________________________________________________
-void EventT::RestoreListOfRotations() {
-  if (fRotList) return;
-  if (! gDirectory) return;
-  fRotList = new THashList(100,0);
-  fRotList->SetOwner();
-  TIter nextkey(gDirectory->GetListOfKeys() );
-  TKey *key;
-  while ((key = (TKey*) nextkey())) {
-    TObject *obj = key->ReadObj();
-    if ( obj->IsA()->InheritsFrom( "TGeoHMatrix" ) ) {
-     fRotList->Add(obj);
-    }
-  }
+void VertexT::Print(Option_t *opt) const {
+}
+//________________________________________________________________________________
+void HitMatchT::Print(Option_t *opt) const {
 }
