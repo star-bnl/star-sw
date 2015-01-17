@@ -1260,6 +1260,7 @@ sub wanted {
       /^\w.*\.g$/     ||
       /^\w.*\.age$/   || #for STAR      /^\w.*\.f$/       ||
       /^\w.*\.cdf$/   ||
+      /^\w.*\.f90$/   ||
       /^\w.*\.F$/) {# print " $File::Find::name\n";
     push @main::search_files,  $File::Find::name;
   }

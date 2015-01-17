@@ -306,6 +306,7 @@ if (! -r $libv) {
   push @items, "KFParticle";
   push @items, "TPCCATracker";
 }
+push @items, "MillepedeII";
 #$items .= "StBTofPool|StTriggerUtilities|StFgtPool|StPeCMaker";
 #$items .= "StBTofPool|StFgtPool|StPeCMaker";
 # closing exclusion list
