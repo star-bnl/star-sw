@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.42 2015/01/16 21:08:28 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.43 2015/01/17 23:16:12 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.43  2015/01/17 23:16:12  genevb
+// protection from missing data/histograms
+//
 // Revision 2.42  2015/01/16 21:08:28  genevb
 // Initial versions of HFT histograms
 //
@@ -546,6 +549,8 @@ void StQAMakerBase::FinishHistHFT(){
 
         // Normalize histograms by number of tracks or events
 
+        if (!hists || !hists->m_primtrk_tot || !hists->m_globtrk_fit_prob || !hists->m_primglob_fit) return;
+
         Int_t Nevents = hists->m_primtrk_tot->GetEntries();
         Int_t NglobTrk = hists->m_globtrk_fit_prob->GetEntries();
         Int_t NprimTrk = hists->m_primglob_fit->GetEntries();
@@ -555,9 +560,9 @@ void StQAMakerBase::FinishHistHFT(){
                  << "\nNglobTrk: " << NglobTrk
                  << "\nNprimTrk: " << NprimTrk << endm;
 
-        Float_t invNevents = 1.0/Nevents;
-        Float_t invNglobTrk = 1.0/NglobTrk;
-        Float_t invNprimTrk = 1.0/NprimTrk;
+        Float_t invNevents = 1.0/TMath::Max(1,Nevents);
+        Float_t invNglobTrk = 1.0/TMath::Max(1,NglobTrk);
+        Float_t invNprimTrk = 1.0/TMath::Max(1,NprimTrk);
 
         // Hists for HFT
         hists->m_global_hft_hit->Scale(invNglobTrk);
