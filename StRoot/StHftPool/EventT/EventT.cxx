@@ -25,6 +25,7 @@
 #include "StEvent/StSsdHitCollection.h"
 #include "StEvent/StSsdLadderHitCollection.h"
 #include "StEvent/StSsdWaferHitCollection.h"
+#include "SystemOfUnits.h"
 #include "StPxlDbMaker/StPxlDb.h"
 #include "StIstDbMaker/StIstDb.h"
 #include "StBTofCollection.h"
@@ -350,6 +351,10 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
       StPrimaryTrack *pTrackT = dynamic_cast<StPrimaryTrack *>(nodes[trkIndx]->track(primary));
 
       if (pTrackT && pTrackT->vertex() != pVertex) pTrackT = 0;
+      if (! pTrackT) continue;
+      StThreeVectorF pmom = pTrackT->geometry()->momentum();
+      if (pmom.perp() < 1.0) continue;
+      StPhysicalHelixD helixI = pTrackT->geometry()->helix();
 
       StTrackDetectorInfo *dInfo = stGlobalTrack->detectorInfo();
 
@@ -509,11 +514,11 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
             Double_t *tra = comb->GetTranslation();
             const StThreeVectorD normal(rot[1], rot[4], rot[7]);
             const StThreeVectorD middle(tra);
-            Double_t sh = dcaG_helix.pathLength(middle, normal);
+            Double_t sh = helixI.pathLength(middle, normal);
 
             if (sh <= 0 || sh > 1e3) continue; // dcaG geometry, projection pathLength should be positive
 
-            StThreeVectorD xyzG = dcaG_helix.at(sh);
+            StThreeVectorD xyzG = helixI.at(sh);
             Double_t xyzGPred[3] = {xyzG.x(), xyzG.y(), xyzG.z()};
             Double_t uvPred[3];
             comb->MasterToLocal(xyzGPred, uvPred);
@@ -523,7 +528,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
 
             onIST++;
 
-            Double_t dirGPred[3] = {dcaG_helix.cx(sh), dcaG_helix.cy(sh), dcaG_helix.cz(sh)};
+            Double_t dirGPred[3] = {helixI.cx(sh), helixI.cy(sh), helixI.cz(sh)};
             Double_t dxyzL[3];
             comb->MasterToLocalVect(dirGPred, dxyzL);
             Double_t tuvPred[2] = {dxyzL[0] / dxyzL[1], dxyzL[2] / dxyzL[1]};
@@ -536,6 +541,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
 
             if (vec.size() <= 0) continue;
 
+	    HitMatchT *hbest = 0;
             for (size_t ih = 0; ih < vec.size(); ih++) {
                StIstHit *hit = (StIstHit *)vec[ih];
 
@@ -545,9 +551,10 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
 
                if (_debug) {LOG_INFO << (*hit) << endm;}
-
-               HitMatchT *h = AddHitMatchT();
+	       HitMatchT *h = new HitMatchT();
                h->Set(global, local);
+	       h->SetPredDir(dirGPred);
+	       h->SetWG(normal.x(),normal.y(),normal.z());
                h->SetPred(xyzGPred, uvPred);
                h->SettuvPred(tuvPred[0], tuvPred[1]);
                h->SetDetId(id);
@@ -559,6 +566,15 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                h->SetTrackNpoint(npoints * dcaG_q);
                h->SetTrackFirstPointR(firstP.perp());
                h->SetTrackFirstPointZ(firstP.z());
+	       if (! hbest) {
+		 hbest = AddHitMatchT();
+		 *hbest = *h;
+	       } else {
+		 if (hbest->Diff() > h->Diff()) {
+		   *hbest = *h;
+		 }
+	       }
+	       delete h;
             }
          }
       }
@@ -576,11 +592,11 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                Double_t *tra = comb->GetTranslation();
                const StThreeVectorD normal(rot[1], rot[4], rot[7]);
                const StThreeVectorD middle(tra);
-               Double_t sh = dcaG_helix.pathLength(middle, normal);
+               Double_t sh = helixI.pathLength(middle, normal);
 
                if (sh <= 0 || sh > 1e3) continue; // dcaG geometry, projection pathLength should be positive
 
-               StThreeVectorD xyzG = dcaG_helix.at(sh);
+               StThreeVectorD xyzG = helixI.at(sh);
                Double_t xyzGPred[3] = {xyzG.x(), xyzG.y(), xyzG.z()};
                Double_t uvPred[3];
                comb->MasterToLocal(xyzGPred, uvPred);
@@ -591,7 +607,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                if (i_ladder == 0) onPXL1++;
                else onPXL2++;
 
-               Double_t dirGPred[3] = {dcaG_helix.cx(sh), dcaG_helix.cy(sh), dcaG_helix.cz(sh)};
+               Double_t dirGPred[3] = {helixI.cx(sh), helixI.cy(sh), helixI.cz(sh)};
                Double_t dxyzL[3];
                comb->MasterToLocalVect(dirGPred, dxyzL);
                Double_t tuvPred[2] = {dxyzL[0] / dxyzL[1], dxyzL[2] / dxyzL[1]};
@@ -604,17 +620,20 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                StSPtrVecPxlHit &vec = stEvent->pxlHitCollection()->sector(i_sector)->ladder(i_ladder)->sensor(i_sensor)->hits();
 
                if (vec.size() <= 0) continue;
-
+	       HitMatchT *hbest = 0;
                for (size_t ih = 0; ih < vec.size(); ih++) {
                   StPxlHit *hit = (StPxlHit *)vec[ih];
 
                   if (!hit) continue;
+		  if (_debug) {LOG_INFO << (*hit) << endm;}
 
                   Double_t global[3] = {hit->position().x(), hit->position().y(), hit->position().z()};
                   Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
 
-                  HitMatchT *h = AddHitMatchT();
+                  HitMatchT *h = new HitMatchT();
                   h->Set(global, local);
+		  h->SetPredDir(dirGPred);
+		  h->SetWG(normal.x(),normal.y(),normal.z());
                   h->SetPred(xyzGPred, uvPred);
                   h->SettuvPred(tuvPred[0], tuvPred[1]);
                   h->SetDetId(id);
@@ -626,6 +645,15 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut)
                   h->SetTrackNpoint(npoints * dcaG_q);
                   h->SetTrackFirstPointR(firstP.perp());
                   h->SetTrackFirstPointZ(firstP.z());
+		  if (! hbest) {
+		    hbest = AddHitMatchT();
+		    *hbest = *h;
+		  } else {
+		    if (hbest->Diff() > h->Diff()) {
+		      *hbest = *h;
+		    }
+		  }
+		  delete h;
                }
             }
          }

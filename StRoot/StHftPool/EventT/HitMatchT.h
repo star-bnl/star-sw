@@ -1,24 +1,26 @@
 #ifndef HitMatchT_h
 #define HitMatchT_h
 
-#include <string.h>
+#include "Riostream.h"
 #include "TObject.h"
 
 class HitMatchT : public TObject
 {
-private:
+public:
    Char_t start;
    UInt_t index2Track;
    UInt_t index2Hit;
    UInt_t detId;  // hit detector Id
    UInt_t nRawHits;
    Double32_t xGP, yGP, zGP;
+   Double32_t dxGP, dyGP, dzGP; // global direction
    Double32_t xLP, yLP, zLP;  // aka (u,w,v)
    Double32_t tuP, tvP;
    Double32_t xG, yG, zG;    // hit Global from StEvent
    Double32_t xL, yL, zL;    // hit in Ladder CS
    Double32_t pT, eta, phi;  // track mom at origin (dcaGeometry)
    Double32_t ox, oy, oz;    // origin (dcaGeometry)
+   Double32_t wGu, wGv, wGw; // Global direction for detector plane
    Int_t      npoint;        // npoint
    Double32_t firstPointR;   // first measured point R
    Double32_t firstPointZ;   // first measured point Z
@@ -46,6 +48,7 @@ public:
    void SetNRawHits(UInt_t n) {nRawHits = n;}
    void Set(Double32_t *xyzG, Double32_t *xyzL) {Set(xyzG[0], xyzG[1], xyzG[2], xyzL[0], xyzL[1], xyzL[2]);}
    void SetPred(Double32_t *xyzG, Double32_t *xyzL) {SetPred(xyzG[0], xyzG[1], xyzG[2], xyzL[0], xyzL[1], xyzL[2]);}
+   void SetPredDir(Double32_t *dirGPred) {dxGP = dirGPred[0]; dyGP = dirGPred[1]; dzGP = dirGPred[2];}
    void SettuvPred(Double32_t tu, Double32_t tv) {tuP = tu; tvP = tv;}
 
    void SetIndex2Track(UInt_t index) {index2Track = index;}
@@ -56,8 +59,33 @@ public:
    void SetTrackNpoint(Int_t n) {npoint = n;}
    void SetTrackFirstPointR(Double32_t r) {firstPointR = r;}
    void SetTrackFirstPointZ(Double32_t z) {firstPointZ = z;}
-
-   ClassDef(HitMatchT, 1)
+   void SetWG(Double32_t wu, Double32_t wv, Double32_t ww) { wGu = wu; wGv = wv; wGw = ww;}
+   Double_t Diff() const  {return TMath::Sqrt((xL - xLP)*(xL - xLP) + (yL - yLP)*(yL - yLP));}
+   //    Ist = 1000 + i_ladder * 6 + i_sensor + 1; Pxl =  i_sector * 40 + i_ladder * 10 + i_sensor + 1
+   Int_t Sector() const  {
+     if (detId > 1000) return -1;
+     return (detId - 1)/40;
+   }
+   Int_t Ladder() const  {
+     if (detId > 1000) return (detId - 1001)/6;
+     return (detId - 40*Sector() - 1)/10;} 
+   Int_t Sensor() const  {
+     if (detId > 1000) return (detId - 1001)%6;
+     return (detId - 40*Sector() -10*Ladder() - 1);}
+   Int_t Layer() const  {
+     if (detId > 1000) return 3;
+     if (Ladder() % 4 == 0) return 1; 
+     return 2;
+   }
+   virtual void      Print(Option_t *opt = "") const {
+     cout << "HitMatchT\t" << detId 
+	  << " Layer = "   << Layer() 
+	  << " Sector = "  << Sector() 
+	  << " Ladder = "  << Ladder() 
+	  << " Sensor = "  << Sensor() 
+	  << " Diff = "    << Diff() << endl;
+   }
+   ClassDef(HitMatchT, 2)
 };
 
 #endif
