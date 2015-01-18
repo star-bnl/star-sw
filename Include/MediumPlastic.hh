@@ -13,7 +13,7 @@ class MediumPlastic : public Medium {
   // Constructor
   MediumPlastic() : Medium() {
     m_className = "MediumPlastic";
-    name = "Plastic";
+    m_name = "Plastic";
   }
   // Destructor
   ~MediumPlastic() {}
