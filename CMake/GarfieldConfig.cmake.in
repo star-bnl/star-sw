@@ -11,4 +11,4 @@ SET(GARFIELD_LIBRARIES Garfield)
 SET( GARFIELD_SOURCE_DIR "@PROJECT_SOURCE_DIR@")
 SET( GARFIELD_BINARY_DIR "@PROJECT_BINARY_DIR@")
  
-include("@PROJECT_SOURCE_DIR@/Library/cmake/GarfieldLibraryDepends.cmake")
+include("@CMAKE_INSTALL_PREFIX@/cmake/GarfieldLibraryDepends.cmake")
