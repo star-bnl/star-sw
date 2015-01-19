@@ -119,19 +119,20 @@ configure_file(CMake/GarfieldConfig.cmake.in
 configure_file(CMake/GarfieldConfigVersion.cmake.in
   "${PROJECT_BINARY_DIR}/GarfieldConfigVersion.cmake" @ONLY)
 
-# set the install path
-SET( INSTALL_CMAKE_DIR ${PROJECT_SOURCE_DIR}/Library/ CACHE PATH
-  "Installation directory for CMake files" )
+MESSAGE(STATUS "Install path: ${CMAKE_INSTALL_PREFIX}")
+MESSAGE(STATUS "If you want to change this path call cmake -DCMAKE_INSTALL_PREFIX=my_install_path ...")
+SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX})
+
 
 # decide were the library will end up and to write info in  GarfieldLibraryDepends.cmake
-INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ${INSTALL_CMAKE_DIR} EXPORT GarfieldLibraryDepends)
+INSTALL(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ EXPORT GarfieldLibraryDepends)
 
 # decide were to install GarfieldLibraryDepends.camke
-INSTALL(EXPORT GarfieldLibraryDepends DESTINATION ${INSTALL_CMAKE_DIR}/cmake  COMPONENT cmakefiles)
+INSTALL(EXPORT GarfieldLibraryDepends DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake  COMPONENT cmakefiles)
 
 # now install cofigured config files 
 INSTALL( FILES ${PROJECT_BINARY_DIR}/GarfieldConfig.cmake
         ${PROJECT_BINARY_DIR}/GarfieldConfigVersion.cmake
-        DESTINATION ${INSTALL_CMAKE_DIR}/cmake
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/cmake
         COMPONENT cmakefiles )
   
