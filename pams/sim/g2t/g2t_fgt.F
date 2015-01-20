@@ -5,14 +5,16 @@
 #include "genhit.h"
       INTEGER   G2T_FGT,G2R_GET_HIT,Iprin/0/,Idigi,i,isys,iName
       logical   Local/.false./
-      character*4 fgtd(2) /'FGZC','FGZD'/
+
+*     Names of the sensitive volumes
+      character*4 fgtd(3) /'FGZC','FGZD','FZCB'/
 *
       G2T_FGT=STAFCV_OK
       if (g2t_fgt_hit_h.maxlen.le.0) return
 *
       i=0
       g2t_fgt_hit_h.nok = 0
-      do 100 iName=1,2
+      do 100 iName=1,3
       
 	call G2R_GET_SYS ('FGTD',fgtd(iName),Iprin,Idigi)
 	 if (Iprin.lt.0) go to 100
