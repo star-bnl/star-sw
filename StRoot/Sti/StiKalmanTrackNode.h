@@ -211,8 +211,9 @@ const StiELoss *getELoss()const		{return mELoss;}
   double  evaluateDedx();
   
   int  inside(			int mode=1) const;
-  int  inside(double x,double y,int mode=1) const;
-  int  inside(const double *x,	int mode=1) const; 
+  int  insideL(double x,double y,int mode=1) const;
+  int  insideL(const double *x,	int mode=1) const; 
+  int  insideG(const double *x,	int mode=1) const; 
   int  locate();
   int  propagate(double x,int option,int dir);
   void propagateMtx();
