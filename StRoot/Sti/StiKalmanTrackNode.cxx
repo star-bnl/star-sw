@@ -1,10 +1,19 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148.2.10 2015/01/08 01:09:27 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148.2.11 2015/01/21 17:51:57 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148.2.11  2015/01/21 17:51:57  perev
+ * 1. Same rotation for kCylindric & kSector. Angles StiKalmanTrackNode:alpha
+ *    and StiPlacement::alpha are not the same now
+ * 2. When cylinder crossing point is tested by inside() z is correct one.
+ * 3. locate() is actually replaced by inside()
+ * 4. In inside() accounted that node angle and detector angle are different now
+ *    for kSector shape
+ * 5. Method insifeG(...) is added
+ *
  * Revision 2.148.2.10  2015/01/08 01:09:27  perev
  * Cleanup
  *
@@ -1010,13 +1019,20 @@ StiDebug::Break(nCall);
       if (!position) 			return -11;
       int sol = 0;
       for (sol=0;sol<2;sol++) {
-        if (!inside(xy[sol][0],xy[sol][1],2|4)) continue;
-        dAlpha = atan2(xy[sol][1],xy[sol][0]);
-        if (shapeCode==kCylindrical) 	{
-          position = rotate(dAlpha);	}
-	else 				{
-          endVal = xy[sol][0];
-        }
+        double s = xy[sol][2];
+        double myX[3]={xy[sol][0],xy[sol][1],mFP.P[2]+mFP.tanl()*s};
+        if (!insideL(myX,2|4)) continue;
+        dAlpha = mFP.phi()+mFP.curv()*s;
+        TVector3 v3(xy[sol][0],xy[sol][1],0);
+        TVector3 par1(mFP.P); par1[2]=0;
+        double delta1 = (v3-par1).Mag();
+
+        position = rotate(dAlpha);	
+        TVector3 par2(mFP.P); par2[2]=0;
+        v3.RotateZ(-dAlpha);
+        double delta2 = (v3-par2).Mag();
+assert(fabs(delta2-delta1)<1e-6);
+        endVal = v3[0];
         break;
       }
       if (sol>1) 			return -12;
@@ -1026,8 +1042,9 @@ StiDebug::Break(nCall);
   }
    
   position = propagate(endVal,shapeCode,dir); 
-
   if (position) return position;
+  assert(shapeCode<=kPlanar || fabs(mFP._sinCA)<1e-4);
+  assert(shapeCode<=kPlanar || fabs(mFP.phi() )<1e-4);
   propagateError();
 
   // Multiple scattering
@@ -1131,12 +1148,10 @@ StiDebug::Break(nCall);
 //	Orientation is bad. Fit is non reliable
   if (fabs(mgP.sinCA2)>kMaxSinEta) 	return kFailed; 
   int nTry = 2;
-  if (option==kCylindrical) { 	//cyl case
+  if (option>=kCylindrical) { 	//cyl case
     nTry = 1;
-    mgP.cosCA2 = mgP.y1*rho + mgP.cosCA1;
-    if (fabs(mgP.cosCA2) > 1) { 
-      mgP.cosCA2 =(mgP.cosCA2>0)? 1:-1; 
-      mgP.sinCA2=0;}
+    mgP.cosCA2=1.;
+    mgP.sinCA2=0;
     }
   else          { 	//planar case
     mgP.cosCA2   = ::sqrt((1.-mgP.sinCA2)*(1.+mgP.sinCA2));
@@ -1805,37 +1820,8 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
 //______________________________________________________________________________
 int StiKalmanTrackNode::locate()
 {
-  double yOff, zOff,ang;
-  //fast way out for projections going out of fiducial volume
-  const StiDetector *tDet = getDetector();
-  if (!tDet) return 0;
-  const StiPlacement *place = tDet->getPlacement();
-  const StiShape     *sh    = tDet->getShape();
-
-  if (fabs(mFP.z())>kMaxZ || mFP.rxy()> kMaxR) return -1;
-  
-  
-  //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
-  Int_t shapeCode  = sh->getShapeCode();
-  switch (shapeCode) {
-  case kDisk:
-  case kCylindrical: // cylinder
-    break;
-  case kSector: 	// cylinder sector
-    ang = atan2(mFP.y(),mFP.x());
-    yOff    = nice(ang +_alpha - place->getLayerAngle());
-    if (fabs(yOff)>sh->getOpeningAngle()/2) return -1;
-    break;
-  case kPlanar: 
-    yOff = mFP.y() - place->getNormalYoffset();
-    if (fabs(yOff)> sh->getHalfWidth()) return -1;
-    break;
-  default: assert(0 && "Wrong Shape code");
-  }
-  zOff = mFP.z() - place->getZcenter();
-  if (fabs(zOff)>sh->getHalfDepth()) return -1;
-  return 0;
- }
+  return !inside(7);
+}
 //______________________________________________________________________________
 void StiKalmanTrackNode::initialize(StiHit *h)
 {
@@ -2251,21 +2237,29 @@ int StiKalmanTrackNode::inside(int mode) const
 {
 const StiDetector *det = getDetector();
 if (!det) return 1;
-int ans = inside(mFP.P,mode);
+int shapeCode = det->getShape()->getShapeCode();
+TVector3 myPos(mFP.P);
+if (shapeCode == kSector) {
+  const StiPlacement *pla = det->getPlacement();
+  double refAlpha = pla->getNormalRefAngle();
+  double dAlpha = _alpha -refAlpha;
+  if (fabs(dAlpha)>1e-6) myPos.RotateZ(dAlpha);
+}
+int ans = insideL(&(myPos[0]),mode);
 return ans;
 }
 //________________________________________________________________________________
-int StiKalmanTrackNode::inside(double x,double y,int mode) const 
+int StiKalmanTrackNode::insideL(double x,double y,int mode) const 
 {
 const StiDetector *det = getDetector();
   if (!det) return 1;
   const StiPlacement *place = det->getPlacement();
   double z = place->getZcenter();
   double xyz[3] = {x,y,z};
-return inside(xyz,mode);
+return insideL(xyz,mode);
 }
 //________________________________________________________________________________
-int StiKalmanTrackNode::inside(const double *x,int mode) const 
+int StiKalmanTrackNode::insideL(const double *x,int mode) const 
 {
 const StiDetector *det = getDetector();
   if (!det) return 1;
@@ -2281,4 +2275,17 @@ const StiDetector *det = getDetector();
     X = xyz;
   }
   return det->insideL(X,mode);
+}
+//________________________________________________________________________________
+int StiKalmanTrackNode::insideG(const double *x,int mode) const 
+{
+const StiDetector *det = getDetector();
+  if (!det) return 1;
+  const StiPlacement *place = det->getPlacement();
+  double dAng = place->getNormalRefAngle();
+  double xyz[3];
+    xyz[0] = x[0]*cos(dAng)+x[1]*sin(dAng);
+    xyz[1] =-x[0]*sin(dAng)+x[1]*cos(dAng);
+    xyz[2] = x[2];
+  return det->insideL(xyz,mode);
 }
