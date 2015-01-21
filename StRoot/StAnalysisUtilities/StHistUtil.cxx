@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.94 2014/04/10 17:58:40 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.95 2015/01/21 17:30:33 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.95  2015/01/21 17:30:33  genevb
+// Provide histogram normalization
+//
 // Revision 2.94  2014/04/10 17:58:40  genevb
 // Fix for dE/dx slope plot
 //
@@ -887,6 +890,14 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 	  gPad->SetGridx(0);
 	  
           // set logX,Y,Z scale on/off
+
+// Normalized histograms: rely on negative bin content 0 as a flag (seems OK for now, but not guaranteed)
+          Float_t BinCont0 = hobj->GetBinContent(0);
+          if (BinCont0 < 0) {
+            LOG_INFO << "       -- Will normalize by 1/" << -BinCont0 << ": " << oname << endm;
+            hobj->Scale(-1.0/BinCont0);
+          }
+
 
 // Set logY scale on if: there is a loglist, if the hist name is on the list, if it has entries
 //    and if the max entries in all bins is > 0
