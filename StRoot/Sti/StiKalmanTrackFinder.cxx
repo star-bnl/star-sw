@@ -322,7 +322,6 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
       status = 0;
       if(status) return abs(status)*100 + kRefitInFail;
     }	
-
   }
     // decide if an outward pass is needed.
   const StiKalmanTrackNode * outerMostNode = track->getOuterMostNode(2);
@@ -338,10 +337,13 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
   }
   trackExtended |=trackExtendedOut;
   if (trackExtended) {
+track->test("BefAprx");
     status = track->approx(1);
+track->test("AftAprx");
       //    if (status) return -1;
     status = track->refit();
     if (status) return abs(status)*100 + kRefitOutFail;
+track->test("AftRefi");
 
   }
     //cout << " find track done" << endl;
@@ -419,10 +421,14 @@ StiDebug::tally("PrimA.GloTraks",nTracks);
     int bestVertex=0;
     const StiKalmanTrackNode *dcaNode = track->getLastNode();
     if (!dcaNode->isDca()) 		continue;
-    StiDebug::tally("PrimB:HaveDca2Node"); 
+{
+if (fabs(dcaNode->y())<10) {
+  StiDebug::Count("DCA00",fabs(dcaNode->y())); 		/////???????
+  StiDebug::Count("DCAYY",sqrt(dcaNode->getCyy())); 	/////???????
+  StiDebug::Count("DCAZZ",sqrt(dcaNode->getCzz())); 	/////???????
+}}
 
     if (fabs(dcaNode->y())>RMAX2d) 	continue;
-    StiDebug::tally("PrimC:GoodDca2Node");	
     int good3D =0;
     for (int iVertex=0;iVertex<nVertex;iVertex++) {
       StiHit *vertex = vertices[iVertex];
@@ -451,7 +457,6 @@ StiDebug::tally("PrimA.GloTraks",nTracks);
     if(!bestNode) 			continue;
     track->add(bestNode,kOutsideIn);
     track->setPrimary(bestVertex);
-StiDebug::tally("PrimE:Fitted");
     int         ifail = 0;
 static int REFIT=2005;
     bestNode->setUntouched();
@@ -466,7 +471,6 @@ if (REFIT) {
       track->setPrimary(0); 
       continue;}
     goodCount++;
-StiDebug::tally("PrimG:Refited");
     if (track->getCharge()>0) plus++; else minus++;
 
   }//End track loop 
@@ -558,7 +562,7 @@ static  const double ref1a  = 110.*degToRad;
   leadRadius = leadDet->getPlacement()->getLayerRadius();
   assert(leadRadius>0 && leadRadius<1000);
   if (leadRadius < qa.rmin) {gLevelOfFind--;return;}
-  leadAngle  = leadDet->getPlacement()->getNormalRefAngle();
+  leadAngle  = leadDet->getPlacement()->getLayerAngle();
 
 
 ////  if ((!direction) && !nRefit && leadRadius <100 && track->getNNodes(3)>10) {
@@ -620,7 +624,7 @@ static  const double ref1a  = 110.*degToRad;
        diff = projAngle-angle;
        if (diff >  M_PI) diff -= 2*M_PI;
        if (diff < -M_PI) diff += 2*M_PI;
-       if (fabs(diff) > OpenAngle)	continue;
+       if (fabs(diff) > OpenAngle/2)	continue;
        detectors.push_back(detector);
     }
 
@@ -644,7 +648,7 @@ static  const double ref1a  = 110.*degToRad;
       testNode.reduce();testNode.reset();
       testNode.setChi2(1e55);
       position = testNode.propagate(leadNode,tDet,direction);
-      if (position == kEnded) { gLevelOfFind--; return;}
+//      if (position == kEnded) { gLevelOfFind--; return;}  do not stop yet, next volu will be better
       if (position) { 
 	continue; // will try the next available volume on this layer
       }
