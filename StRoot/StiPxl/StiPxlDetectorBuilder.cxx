@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.107 2015/01/21 23:06:36 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.108 2015/01/21 23:10:59 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -102,7 +102,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
          if (!isAvail) {
-            LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot find path to PLAC (pixel sensitive) node. Skipping to next ladder...");
+            LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot find path to PLAC (pixel sensitive) node. Skipping to next ladder..." << endm;
             continue;
          }
 
