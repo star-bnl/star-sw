@@ -29,8 +29,8 @@ static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[3]*MIN1ERR[3]
                               ,MIN1ERR[4]*MIN1ERR[4]
                               ,MIN1ERR[5]*MIN1ERR[5]};
-static const double recvCORRMAX  = 0.999;
-static const double chekCORRMAX  = 0.9999;
+static const double recvCORRMAX  = 0.99999;
+static const double chekCORRMAX  = 0.99999;
 static double MAXPARS[]={500,500,500,3.15,100,100};
 
 //______________________________________________________________________________
@@ -163,9 +163,9 @@ for (int ix = 0;ix<2; ix++) {
 }
 
 for (int ix = 0;ix<2; ix++) {
-  double len = (X-Out[ix]).Mag();
-  if (len > 0.1*r) len = 2*r*asin(0.5*len*aRho);
-  
+  double len = (Out[ix]-X).Mag();
+  if (len*aRho > 0.1) len = 2*asin(0.5*len*aRho)/aRho;
+  if ((Out[ix]-X).Dot(D)<0) len = -len;
 
   double tst = (X-Out[ix])*D;
   if (dir) tst = -tst;
@@ -174,7 +174,7 @@ for (int ix = 0;ix<2; ix++) {
   out[ix][0] = Out[ix][0];
   out[ix][1] = Out[ix][1];
 }
-  if (out[0][2]>out[1][2]) { 	//wrong order
+  if (fabs(out[0][2])>fabs(out[1][2])) { 	//wrong order
     for (int j=0;j<3;j++)  { 
       double t=out[0][j]; 
       out[0][j] = out[1][j]; 
