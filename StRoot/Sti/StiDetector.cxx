@@ -208,7 +208,7 @@ void StiDetector::setProperties(std::string name, StiIsActiveFunctor* activeFunc
    setMaterial(material);
 }
 //______________________________________________________________________________
-int StiDetector::inside(const double xl[3],int mode) const 
+int StiDetector::insideG(const double xl[3],int mode) const 
 {
   TVector3 xg(xl);
   double alfa = getPlacement()->getNormalRefAngle();
