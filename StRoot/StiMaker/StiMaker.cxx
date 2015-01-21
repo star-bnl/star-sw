@@ -1,4 +1,4 @@
-// $Id: StiMaker.cxx,v 1.219.2.2 2015/01/07 22:47:52 perev Exp $
+// $Id: StiMaker.cxx,v 1.219.2.3 2015/01/21 19:39:05 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
@@ -584,9 +584,7 @@ static const char * eLossTit   [2] = {"ELossNode.log10","ELossTrack.log10"};
      if (gloPri && !track->isPrimary()) continue;
      nTk++;
      double Xi2 = track->getChi2();
-     StiDebug::Count(Xi2TrakTit[gloPri],Xi2);
-
-
+//   StiDebug::Count(Xi2TrakTit[gloPri],Xi2);
      StiKTNIterator tNode = track->begin();
      StiKTNIterator eNode = track->end();
      nNodes=0;nInside=0;nHits=0;
@@ -595,7 +593,7 @@ static const char * eLossTit   [2] = {"ELossNode.log10","ELossTrack.log10"};
      {
 	StiKalmanTrackNode *node = &(*tNode);
 	if(!node->isValid()) 	continue;
-	if (node->isDca()) { StiDebug::Count(DcaNodesTit[0],node->y()); continue;}
+	if (node->isDca()) {/* StiDebug::Count(DcaNodesTit[0],node->y())*/; continue;}
 	nNodes++;
 	node->nudge();
 #if StiNOINSIDE
@@ -605,29 +603,33 @@ static const char * eLossTit   [2] = {"ELossNode.log10","ELossTrack.log10"};
 #endif
 	  nInside++;
           double el = node->getELoss()[0].mELoss;
-          if (el>0) StiDebug::Count(eLossTit[0],log(el)/log(10.));
+//          if (el>0) StiDebug::Count(eLossTit[0],log(el)/log(10.));
           eLossTk += el;
         }
         StiHit *hit = node->getHit();
         if (!hit || node->getChi2()>1000) continue;
 	nHits++;
         if (gloPri && !node->getDetector()) { //primary node
-          StiDebug::Count(Xi2NodesTit[gloPri],node->getChi2()/2);}
+//          StiDebug::Count(Xi2NodesTit[gloPri],node->getChi2()/2);
+        }
         else if (!gloPri) {//regular hit node in globals
-	  StiDebug::Count(Xi2NodesTit[gloPri],node->getChi2()/2);
+//	  StiDebug::Count(Xi2NodesTit[gloPri],node->getChi2()/2);
         }
      }
-     if (!gloPri) StiDebug::Count(eLossTit[1],log(eLossTk)/log(10.));
-     StiDebug::Count(nNodesTit[gloPri],nNodes );
-     StiDebug::Count(nInNodesTit[gloPri],nInside);
-     StiDebug::Count(nHitsTit[gloPri],nHits  );
+//     if (!gloPri) StiDebug::Count(eLossTit[1],log(eLossTk)/log(10.));
+//      StiDebug::Count(nNodesTit[gloPri],nNodes );
+//      StiDebug::Count(nInNodesTit[gloPri],nInside);
+//      StiDebug::Count(nHitsTit[gloPri],nHits  );
   }
-  StiDebug::Count(nTraksTit[gloPri],nTk );
+//  StiDebug::Count(nTraksTit[gloPri],nTk );
 }
 
 
-// $Id: StiMaker.cxx,v 1.219.2.2 2015/01/07 22:47:52 perev Exp $
+// $Id: StiMaker.cxx,v 1.219.2.3 2015/01/21 19:39:05 perev Exp $
 // $Log: StiMaker.cxx,v $
+// Revision 1.219.2.3  2015/01/21 19:39:05  perev
+// Debug--
+//
 // Revision 1.219.2.2  2015/01/07 22:47:52  perev
 // Some histograms added for debug
 //
