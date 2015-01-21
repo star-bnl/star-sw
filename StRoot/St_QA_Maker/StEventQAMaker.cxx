@@ -315,6 +315,8 @@ Int_t StEventQAMaker::Make() {
       gMessMgr->Warning("StEventQAMaker::Make(): No trigger info");
     }
   }  // allTrigs
+
+  // some identified StQAHistSetType values
   if (run_year >=15) {
     if (realData) histsSet = StQA_run14; // for now, everything from run14 on uses this set
   } else if (run_year >=14) {
@@ -352,9 +354,11 @@ Int_t StEventQAMaker::Make() {
         else evClasses[0] = 3;
         break;
       }
+      // other identified StQAHistSetType values
       case (StQA_run8) :
       case (StQA_run12):
       case (StQA_run13):
+      case (StQA_run14):
       case (StQA_AuAu) :
       case (StQA_dAu)  : break;
       default: nEvClasses=1; evClasses[0] = 1;
@@ -966,6 +970,22 @@ void StEventQAMaker::MakeHistGlob() {
   if (silHists)
   hists->m_globtrk_goodTTS->Fill(cnttrkgTTS);
   hists->m_globtrk_goodF->Fill(cnttrkgFE,cnttrkgFW);
+
+  // Normalizations
+  if (histsSet>=StQA_run14) {
+    Int_t NglobTrk = - hists->m_globtrk_fit_prob->GetEntries();
+    hists->m_global_hft_hit->SetBinContent(0,NglobTrk);
+    hists->m_global_pxl_hit->SetBinContent(0,NglobTrk);
+    hists->m_global_ist_hit->SetBinContent(0,NglobTrk);
+    hists->m_global_hft_hit->SetEntries(hists->m_global_hft_hit->GetEntries()-1);
+    hists->m_global_pxl_hit->SetEntries(hists->m_global_pxl_hit->GetEntries()-1);
+    hists->m_global_ist_hit->SetEntries(hists->m_global_ist_hit->GetEntries()-1);
+  }
+  if (hists->m_glb_ssd_phi) {
+    Int_t Nevents = - hists->m_primtrk_tot->GetEntries();
+    hists->m_glb_ssd_phi->SetBinContent(0,Nevents);
+    hists->m_glb_ssd_phi->SetEntries(hists->m_glb_ssd_phi->GetEntries()-1);
+  }
 }
 
 //_____________________________________________________________________________
@@ -1482,6 +1502,22 @@ void StEventQAMaker::MakeHistPrim() {
   
   // MakeHistPrim() must be called after MakeHistGlob for the following to work
   hists->m_primglob_good->Fill((Float_t)n_prim_good/((Float_t)n_glob_good+1.e-10));
+
+  // Normalizations
+  if (histsSet>=StQA_run14) {
+    Int_t NprimTrk = - hists->m_primglob_fit->GetEntries();
+    hists->m_primary_hft_hit->SetBinContent(0,NprimTrk);
+    hists->m_primary_pxl_hit->SetBinContent(0,NprimTrk);
+    hists->m_primary_ist_hit->SetBinContent(0,NprimTrk);
+    hists->m_primary_hft_hit->SetEntries(hists->m_primary_hft_hit->GetEntries()-1);
+    hists->m_primary_pxl_hit->SetEntries(hists->m_primary_pxl_hit->GetEntries()-1);
+    hists->m_primary_ist_hit->SetEntries(hists->m_primary_ist_hit->GetEntries()-1);
+  }
+  if (hists->m_prim_ssd_phi) {
+    Int_t Nevents = - hists->m_primtrk_tot->GetEntries();
+    hists->m_prim_ssd_phi->SetBinContent(0,Nevents);
+    hists->m_prim_ssd_phi->SetEntries(hists->m_prim_ssd_phi->GetEntries()-1);
+  }
 }
 
 
@@ -1876,6 +1912,12 @@ void StEventQAMaker::MakeHistPoint() {
         }
       }
     }
+    // Normalizations
+    Int_t Nevents = - hists->m_primtrk_tot->GetEntries();
+    hists->m_pnt_phiSSD->SetBinContent(0,Nevents);
+    hists->m_pnt_lwSSD->SetBinContent(0,Nevents);
+    hists->m_pnt_phiSSD->SetEntries(hists->m_pnt_phiSSD->GetEntries()-1);
+    hists->m_pnt_lwSSD->SetEntries(hists->m_pnt_lwSSD->GetEntries()-1);
   }
   if (ftpcHits) {
     // StFtpcHitCollection doesn't differentiate between W and E FTPCs
@@ -2607,6 +2649,20 @@ void StEventQAMaker::MakeHistPXL() {
         hists->m_pxl_nhit_Pxl2_tpc_mult->Fill(nHitsPxl2,tpcMult);
 
 
+  // Normalizations
+  Int_t Nevents = - hists->m_primtrk_tot->GetEntries();
+  hists->m_pxl_hit_phi_z_Pxl1->SetBinContent(0,Nevents);
+  hists->m_pxl_hit_phi_z_Pxl2->SetBinContent(0,Nevents);
+  hists->m_pxl_hit_ladder->SetBinContent(0,Nevents);
+  hists->m_pxl_hit_sector_sensor_Pxl1->SetBinContent(0,Nevents);
+  hists->m_pxl_hit_sector_sensor_Pxl2->SetBinContent(0,Nevents);
+  hists->m_pxl_nhit_Pxl1_Pxl2->SetBinContent(0,Nevents);
+  hists->m_pxl_hit_phi_z_Pxl1->SetEntries(hists->m_pxl_hit_phi_z_Pxl1->GetEntries()-1);
+  hists->m_pxl_hit_phi_z_Pxl2->SetEntries(hists->m_pxl_hit_phi_z_Pxl2->GetEntries()-1);
+  hists->m_pxl_hit_ladder->SetEntries(hists->m_pxl_hit_ladder->GetEntries()-1);
+  hists->m_pxl_hit_sector_sensor_Pxl1->SetEntries(hists->m_pxl_hit_sector_sensor_Pxl1->GetEntries()-1);
+  hists->m_pxl_hit_sector_sensor_Pxl2->SetEntries(hists->m_pxl_hit_sector_sensor_Pxl2->GetEntries()-1);
+  hists->m_pxl_nhit_Pxl1_Pxl2->SetEntries(hists->m_pxl_nhit_Pxl1_Pxl2->GetEntries()-1);
 }
 
 //_____________________________________________________________________________
@@ -2656,6 +2712,15 @@ void StEventQAMaker::MakeHistIST() {
 
         Int_t tpcMult = event->trackNodes().size();
         hists->m_ist_nhit_tpc_mult->Fill(nIstHits,tpcMult);
+
+  // Normalizations
+  Int_t Nevents = - hists->m_primtrk_tot->GetEntries();
+  hists->m_ist_hit_phi_z->SetBinContent(0,Nevents);
+  hists->m_ist_hit_ladder->SetBinContent(0,Nevents);
+  hists->m_ist_hit_ladder_sensor->SetBinContent(0,Nevents);
+  hists->m_ist_hit_phi_z->SetEntries(hists->m_ist_hit_phi_z->GetEntries()-1);
+  hists->m_ist_hit_ladder->SetEntries(hists->m_ist_hit_ladder->GetEntries()-1);
+  hists->m_ist_hit_ladder_sensor->SetEntries(hists->m_ist_hit_ladder_sensor->GetEntries()-1);
 }
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistMTD() {
@@ -2686,8 +2751,11 @@ void StEventQAMaker::MakeHistMTD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.116 2015/01/16 21:08:28 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.117 2015/01/21 17:49:40 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.117  2015/01/21 17:49:40  genevb
+// Fix missing run14 cases, remove unused firstEventClass, re-work normalizations with StHistUtil
+//
 // Revision 2.116  2015/01/16 21:08:28  genevb
 // Initial versions of HFT histograms
 //

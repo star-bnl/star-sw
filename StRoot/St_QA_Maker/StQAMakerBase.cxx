@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.43 2015/01/17 23:16:12 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.44 2015/01/21 17:49:40 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.44  2015/01/21 17:49:40  genevb
+// Fix missing run14 cases, remove unused firstEventClass, re-work normalizations with StHistUtil
+//
 // Revision 2.43  2015/01/17 23:16:12  genevb
 // protection from missing data/histograms
 //
@@ -199,12 +202,10 @@ StQAMakerBase::~StQAMakerBase() {
 Int_t StQAMakerBase::Init() {
 // Histogram booking must wait until first event Make() to determine event type
   eventCount = 0;
-  firstEventClass = kTRUE;
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 void StQAMakerBase::Clear(Option_t* opt) {
-  firstEventClass = kTRUE;
   StMaker::Clear(opt);
 }
 //_____________________________________________________________________________
@@ -223,20 +224,16 @@ Int_t StQAMakerBase::Make() {
     default : {
       if (!eventClass) { hists=0; return kStOk; }
       hists = (StQABookHist*) histsList.At((--eventClass));
+ 
     }
   }
 
   if (!hists) NewQABookHist();
+
     
 
   if (!fillHists) return kStOk;
   // Call methods to fill histograms
-
-
-  // Those not divided by event class:
-  if (firstEventClass) {
-    firstEventClass = kFALSE;
-  }
 
   // Those divided by event class:
   // histograms from table globtrk
@@ -323,6 +320,8 @@ void StQAMakerBase::BookHist() {
 
   // Real data with event classes for different triggers
 
+    // any new StQAHistSetType values
+    case (StQA_run14) :
     case (StQA_run13) :
     case (StQA_run12) :
     case (StQA_run8) :
@@ -534,63 +533,6 @@ void StQAMakerBase::BookHistFMS(){
     AddHist(h);
     mFMShistograms.insert(std::make_pair(qt, h));
   } // for
-
-}
-//_____________________________________________________________________________
-Int_t StQAMakerBase::Finish(){
-
-  if (histsSet>=StQA_run14) FinishHistHFT();
-
-  return StMaker::Finish();
-
-}
-//_____________________________________________________________________________
-void StQAMakerBase::FinishHistHFT(){
-
-        // Normalize histograms by number of tracks or events
-
-        if (!hists || !hists->m_primtrk_tot || !hists->m_globtrk_fit_prob || !hists->m_primglob_fit) return;
-
-        Int_t Nevents = hists->m_primtrk_tot->GetEntries();
-        Int_t NglobTrk = hists->m_globtrk_fit_prob->GetEntries();
-        Int_t NprimTrk = hists->m_primglob_fit->GetEntries();
-
-        LOG_INFO << "Normalizing HFT hists using:"
-                 << "\nNevents: " << Nevents
-                 << "\nNglobTrk: " << NglobTrk
-                 << "\nNprimTrk: " << NprimTrk << endm;
-
-        Float_t invNevents = 1.0/TMath::Max(1,Nevents);
-        Float_t invNglobTrk = 1.0/TMath::Max(1,NglobTrk);
-        Float_t invNprimTrk = 1.0/TMath::Max(1,NprimTrk);
-
-        // Hists for HFT
-        hists->m_global_hft_hit->Scale(invNglobTrk);
-        hists->m_primary_hft_hit->Scale(invNprimTrk);
-
-        // Hists for PIXEL
-        hists->m_pxl_hit_phi_z_Pxl1->Scale(invNevents);
-        hists->m_pxl_hit_phi_z_Pxl2->Scale(invNevents);
-        hists->m_pxl_hit_ladder->Scale(invNevents);
-        hists->m_pxl_hit_sector_sensor_Pxl1->Scale(invNevents);
-        hists->m_pxl_hit_sector_sensor_Pxl2->Scale(invNevents);
-        hists->m_global_pxl_hit->Scale(invNglobTrk);
-        hists->m_primary_pxl_hit->Scale(invNprimTrk);
-
-        // Hists for IST
-        hists->m_ist_hit_phi_z->Scale(invNevents);
-        hists->m_ist_hit_ladder->Scale(invNevents);
-        hists->m_ist_hit_ladder_sensor->Scale(invNevents);
-        hists->m_global_ist_hit->Scale(invNglobTrk);
-        hists->m_primary_ist_hit->Scale(invNprimTrk);
-
-        // Hists for SST
-        hists->m_pnt_lwSSD->Scale(invNevents);
-        hists->m_pnt_phiSSD->Scale(invNevents);
-        if (hists->m_glb_ssd_phi) {
-          hists->m_glb_ssd_phi->Scale(invNevents);
-          hists->m_prim_ssd_phi->Scale(invNevents);
-        }
 
 }
 //_____________________________________________________________________________

@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.24 2015/01/16 21:08:28 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.25 2015/01/21 17:49:40 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.25  2015/01/21 17:49:40  genevb
+// Fix missing run14 cases, remove unused firstEventClass, re-work normalizations with StHistUtil
+//
 // Revision 2.24  2015/01/16 21:08:28  genevb
 // Initial versions of HFT histograms
 //
@@ -94,6 +97,7 @@ enum StQAHistSetType {
   StQA_run12 = 7,
   StQA_run13 = 8,
   StQA_run14 = 9
+  // when adding more, search for StQAHistSetType for other changes
 };
 
 #include "StMaker.h"
@@ -126,12 +130,11 @@ class StQAMakerBase : public StMaker {
   virtual       ~StQAMakerBase();
   virtual Int_t  Init();
   virtual Int_t  Make();
-  virtual Int_t  Finish();
   virtual void   Clear(Option_t *);
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.24 2015/01/16 21:08:28 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.25 2015/01/21 17:49:40 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -180,7 +183,6 @@ class StQAMakerBase : public StMaker {
   TString prefix[32];
   Int_t eventClass;
   Int_t eventCount;
-  Bool_t firstEventClass;
   Bool_t fillHists;
   Bool_t ITTF;
   Int_t EST;
@@ -214,8 +216,6 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistHFT() {}
   virtual void MakeHistPXL() {}
   virtual void MakeHistIST() {}
-
-  virtual void FinishHistHFT();
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
 };
