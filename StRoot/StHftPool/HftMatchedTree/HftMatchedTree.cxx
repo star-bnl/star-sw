@@ -20,7 +20,7 @@ HftMatchedTree::HftMatchedTree(const Char_t *name) : StMaker(name),
 						     fTree(0),
 						     fEvent(nullptr),
 						     fMinNoHits(0),
-						     fpCut(0)
+						     fpCut(0.5)
 {
 }
 //________________________________________________________________________________
@@ -51,12 +51,9 @@ Int_t HftMatchedTree::Init()
 
 Int_t HftMatchedTree::InitRun(Int_t runnumber)
 {
-   TObjectSet *pxlDbDataSet = (TObjectSet *)GetDataSet("pxl_db");
-   StPxlDb* stPxlDb = nullptr;
+   StPxlDb* stPxlDb = StPxlDb::instance();
 
-   if (pxlDbDataSet) {
-      stPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
-      assert(stPxlDb);
+   if (stPxlDb) {
    }
    else {
       LOG_ERROR << "InitRun : Dataset \"pxl_db\" not found" << endm;
@@ -64,19 +61,14 @@ Int_t HftMatchedTree::InitRun(Int_t runnumber)
    }
 
    TObjectSet *istDbDataSet = (TObjectSet*) GetDataSet("ist_db");
-   StIstDb* stIstDb = nullptr;
+   StIstDb* stIstDb = StIstDb::instance();
 
    if (istDbDataSet) {
-      stIstDb = (StIstDb*) istDbDataSet->GetObject();
-      assert(stIstDb);
    }
    else {
       LOG_ERROR << "InitRun : Dataset \"ist_db\" not found" << endm;
       return kStErr;
    }
-
-   // Update pointers to the detector spatial transformations at new run transition
-   fEvent->SetDbDatasets(stPxlDb, stIstDb);
 #if 0
    // Dump geometry matrix into root file
    TFile *file = new TFile("GeometryTables.root", "recreate");

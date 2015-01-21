@@ -9,6 +9,7 @@
 #include "TRMatrix.h"
 #include "TRSymMatrix.h"
 #include "HftT.h"
+#include "TKey.h"
 #include "Riostream.h"
 ClassImp(HftT);
 static Int_t _debug = 0;
@@ -19,11 +20,14 @@ struct Geometry_t {
   Int_t NoSensors;
 };
 const Int_t NoLayers = 3;
+//               kIstNumSensorsPerLadder = 6
 const Geometry_t HftConfig[4] = 
-  //    Layer  Sector NoLadders NoSensors
-  {    {   1,     10,       10,   0}, //   10}, // Pxl 1   i_sector * 40 + i_ladder * 10 + i_sensor + 1     
-       {   2,     10,       30,   0}, //   10}, // Pxl 2
-       {   3,     -1,       24,   0}, //   12}, // Ist    1000 + i_ladder * 6 + i_sensor + 1
+  // Pxl: geoHMatrixSensorOnGlobal(Int_t sector, Int_t ladder, Int_t sensor)
+  // Ist : int sensorId = 1000 + ((int)newHit->getLadder() - 1) * kIstNumSensorsPerLadder + (int)newHit->getSensor();
+  //    Layer  Sector NoLadders NoSensors                  i_sector [1-10], i_ladder[1-n], i_sensor[1-n]
+  {    {   1,     10,        1,   0}, //   10}, // Pxl 1  id =  i_sector * 40 + (i_ladder - 1) * 10 + i_sensor + 1     
+       {   2,     10,        3,   0}, //   10}, // Pxl 2
+       {   3,     -1,       24,   0}, //    6}, // Ist    id = 1000 + (i_ladder-1) * 6 + i_sensor + 1
        {   4,     -1,       20,   0}  //   16}  // Sst
   };
 //________________________________________________________________________________
@@ -141,29 +145,29 @@ void HftT::Loop(Int_t Nevents) {
   //by  b_branchname->GetEntry(ientry); //read only this branch
   /*   Local
        --------  
-       (1  0          0)
+                         (1  0          0)
        RotateX(alpha) =  (0  1     -alpha)
-       (0  alpha      1)  
+                         (0  alpha      1)  
        
-       (1       0  beta)
+                         (1       0  beta)
        RotateY(beta) =   (0       1     0)
-       (-beta   0     1)
+                         (-beta   0     1)
        
-       (1     -gamma     0)
+                         (1     -gamma     0)
        RotateZ(gamma) =  (gamma      1     0)
-       (0          0     1)
+                         (0          0     1)
        
-       (1     -gamma   beta)
+                         (1     -gamma   beta)
        Rx*Ry*Rz     =    (gamma      1 -alpha)
-       (-beta  alpha      1)
+                         (-beta  alpha      1)
        
        
        T is transformation from "real" local (l) coordinate system to "known" as local (l') (local -> Master) 
-       (u')             (     1  gamma  -beta)(u)   (du)
+          (u')             (     1  gamma  -beta)(u)   (du)
        l'=(v')          =  (-gamma      1  alpha)(v) + (dv)
-       (w')             (  beta -alpha      1)(w)   (dw)
+          (w')             (  beta -alpha      1)(w)   (dw)
        
-       du  dv   dw      alpha          beta    gamma
+                    du  dv   dw      alpha          beta    gamma
        (u - uP) = (-1,  0, tuP,    tuP*vP,      -tuP*uP,      vP) =
        (v - vP)   ( 0, -1, tvP,    tvP*vP,      -tvP*uP,     -uP)
        
@@ -173,8 +177,8 @@ void HftT::Loop(Int_t Nevents) {
        (u - uP) =  -du    +tuP*(dw +vP*alpha -uP*beta) +vP*gamma;
        (v - vP) =     -dv +tvP*(dw +vP*alpha -uP*beta) -uP*gamma;
        Assume uniform distribution over tuP, tvP, vP, uP then:
-       <u - uP>                   => -du;
-       <v - vP>                   => -dv
+          <u - uP>                   => -du;
+          <v - vP>                   => -dv
        1. <u - uP>       versus  tuP => dw
        2  <v - vP>       versus  tvP => dw
        3. <u - uP>       versus   vP => gamma
@@ -186,22 +190,22 @@ void HftT::Loop(Int_t Nevents) {
        ________________________________________________________________________________
        Global
        ------  
-       (dx)   (     1 -gamma  beta )(xG)    (xP)
+                        (dx)   (     1 -gamma  beta )(xG)    (xP)
        r' = dr + R*r = 	(dy) + ( gamma      1 -alpha)(yG) => (yP) 
-       (dz)   ( -beta  alpha     1 )(zG)    (zP)
+                        (dz)   ( -beta  alpha     1 )(zG)    (zP)
        
        dX = xP - xG = dx            -gamma*yG + beta*zG
        dY = yP - yG = dy + gamma*xG           -alpha*zG
        dZ = zP - zG = dz   -beta*xG +alpha*yG
        
-       (     1  gamma -beta )(xP-dx)    (xG)
+                      (     1  gamma -beta )(xP-dx)    (xG)
        R^-1*(r-dr) =  (-gamma      1  alpha)(yP-dy) => (yG) 
-       (  beta -alpha     1 )(zP-dz)    (zG)
+                      (  beta -alpha     1 )(zP-dz)    (zG)
        
        
        dX = xG - xP = -dx            +gamma*yP  -beta*zP
        dY = yG - yP = -dy  -gamma*xP           +alpha*zP
-       dZ = zG - zP = -dz   +beta*xP -alpha*yP
+       dZ = zG - zP = -dz  +beta *xP -alpha*yP
        
        ________________________________________________________________________________
        <dX> => -dx
@@ -243,40 +247,40 @@ void HftT::Loop(Int_t Nevents) {
        r0 = DR*t + dt); w0 = DR*R*wL = DR*wG
        w0T *( p + h*j - DR*t - dt) = 0;
        
-       (     1  gamma -beta )
+                       (     1  gamma -beta )
        DRT =           (-gamma      1  alpha); 
-       (  beta -alpha     1 )
+                       (  beta -alpha     1 )
        
-       (     0  gamma -beta )
+                       (     0  gamma -beta )
        DT = DRT - I =  (-gamma      0  alpha); 
-       (  beta -alpha     0 )
+                       (  beta -alpha     0 )
        
-       (     0  gamma -beta ) (x)    (          gamma*y - beta *z)
+              (     0  gamma -beta ) (x)    (          gamma*y - beta *z)
        DT*p = (-gamma      0  alpha)*(y) =  (-gamma*x          + alpha*z)
-       (  beta -alpha     0 ) (z)    ( beta *x -alpha*y          )
+              (  beta -alpha     0 ) (z)    ( beta *x -alpha*y          )
        
        
        
-       ( dx - gamma*y + beta *z)
+                                                         ( dx - gamma*y + beta *z)
        s                               = dt - DT * p =   ( dy + gamma*x - alpha*z)
-       ( dz - beta *x + alpha*y) 
+                                                         ( dz - beta *x + alpha*y) 
        q =             (dx,dy,dZ,alpha,beta,gamma)
-       ( 1  0  0     0    z    -y)
+                       ( 1  0  0     0    z    -y)
        ds / d q = B =  ( 0  1  0    -z    0     x)
-       ( 0  0  1     y   -x     0)
+                       ( 0  0  1     y   -x     0)
        
        
-       (-1  0  0)    (jx)                 ((-1 + jx*vx)       jx*vy        jx*vz ) 
+                       (-1  0  0)    (jx)                 ((-1 + jx*vx)       jx*vy        jx*vz ) 
        A = -I + j*vT = ( 0 -1  0)  + (jy) * (vx vy vz) =  (      jy*vx  (-1 + jy*vy)       jy*vz )
-       ( 0  0 -1)    (jz)                 (      jz*vx        jz*vy  (-1 + jz*vz))
+                       ( 0  0 -1)    (jz)                 (      jz*vx        jz*vy  (-1 + jz*vz))
        
-       (-1+jx*vx    jx*vy    jx*vz)    ( 1  0  0     0    z    -y)  
+                (-1+jx*vx    jx*vy    jx*vz)    ( 1  0  0     0    z    -y)  
        A * B =  (   jy*vx -1+jy*vy    jy*vz) *  ( 0  1  0    -z    0     x) =
-       (   jz*vx    jz*vy -1+jz*vz)    ( 0  0  1     y   -x     0)
+                (   jz*vx    jz*vy -1+jz*vz)    ( 0  0  1     y   -x     0)
        
-       (-1+jx*vx    jx*vy    jx*vz    jx*(-vy*z+vz*y) -z+jx*(vx*z-vz*x)  y+jx*(-vx*y+vy*x))
+         (-1+jx*vx    jx*vy    jx*vz    jx*(-vy*z+vz*y) -z+jx*(vx*z-vz*x)  y+jx*(-vx*y+vy*x))
        = (   jy*vx -1+jy*vy    jy*vz  z+jy*(-vy*z+vz*y)    jy*(vx*z-vz*x) -x+jy*(-vx*y+vy*x))
-       (   jz*vx    jz*vy -1+jz*vz -y+jz*(-vy*z+vz*y)  x+jz*(vx*z-vy*x)    jz*(-vx*y+vy*x))
+         (   jz*vx    jz*vy -1+jz*vz -y+jz*(-vy*z+vz*y)  x+jz*(vx*z-vy*x)    jz*(-vx*y+vy*x))
        
   */
   if (fChain == 0) return;  
@@ -343,6 +347,7 @@ void HftT::Loop(Int_t Nevents) {
   Double_t rCut = 1.0;
   TFile *fOut = new TFile(fOutFileName,"recreate");
   TString Name, Title;
+#if 0
   TH1D *LSF = new TH1D("LSF","Matrix and right part for Least Squred Fit",6*28,0,6*28);
   //  TH1D *LSF = new TH1D("LSF","Matrix and right part for Least Squred Fit",15*28,0,15*28);
   TH1D *LSFB[4];
@@ -350,6 +355,8 @@ void HftT::Loop(Int_t Nevents) {
     LSFB[layern-1] = new TH1D(Form("LSFB%i",layern),
 			      Form("Matrix and right part for Least Squred Fit for layer %i",layern),
 			      HftConfig[layern-1].NoLadders*28,0,HftConfig[layern-1].NoLadders*28);
+#endif
+#if 0
   //                     T  Ly ld   W+1
   TH2F *LocPlots[eLocPlots][4][30][17];
   memset(LocPlots,0,eLocPlots*4*30*17*sizeof(TH2F *));
@@ -382,7 +389,7 @@ void HftT::Loop(Int_t Nevents) {
 	  if ((sensor == 0 ) && (t == 2 || t == 4 || t == 5 || t == 9)) {
 	    switch (layer) {
 	    case 1: 
-	    case 2: xmax = 1; break;
+	    case 2: xmax = 21; break;
 	    case 3: xmax = 21; break;
 	    case 0:
 	    case 4: xmax = 35; break;
@@ -399,47 +406,32 @@ void HftT::Loop(Int_t Nevents) {
     }
   }  // NoLayers
   //              T  S
+#endif
   TH2F *GloPlots[27][15];
   memset(GloPlots,0,27*15*sizeof(TH2F *));
-  for (Int_t s = 0; s < 15; s++) {
+  for (Int_t s = 0; s < 14; s++) { // no SSt
     for (Int_t i = 0; i < 27; i++) {
       Int_t t = i+10;
-      Name = Form("%s%i",plotName[t].Name,s);
-      if (s <= 9 ) 
-	Title = Form("%s for PXL Sector  %i",plotName[t].Title,s+1);
-      if(s==10 || s==11)      Title = Form("%s for PXL Half %i",plotName[t].Title,s-9);
-      if(s==12)      Title = Form("%s for All-PXL",plotName[t].Title);
-      if(s==13)      Title = Form("%s for All-Ist",plotName[t].Title);
-      if(s==14)      Title = Form("%s for All-Ssd",plotName[t].Title);
+      Name = Form("%s%02i",plotName[t].Name,s);
+      if (s <=  9) 	      Title = Form("%s for PXL Sector  %i",plotName[t].Title,s+1);
+      if (s == 10 || s == 11) Title = Form("%s for PXL Half %i",plotName[t].Title,s-9);
+      if (s == 12)            Title = Form("%s for All-PXL",plotName[t].Title);
+      if (s == 13)            Title = Form("%s for All-Ist",plotName[t].Title);
+      if (s == 14)            Title = Form("%s for All-Ssd",plotName[t].Title);
       Int_t m = 0;
-      if (s==14) m = 1;
+      if (s == 14) m = 1;
+#if 0
       Double_t xmax = plotName[t].xmax[m];
       Int_t n = (Int_t) (4.*xmax);
       if (n < 100) n = 100;
       if( (i == 14) || (i==20) ) n = 400;
-      Double_t ymax = rCut/2;
+      Double_t ymax = 1.0;
+#else
+      Int_t    n = 100;
+      Double_t xmax = 0;
+      Double_t ymax = 0;
+#endif
       GloPlots[i][s] = new TH2F(Name,Title, n,-xmax,xmax,500,-ymax,ymax);
-    }
-  }
-  //                T  L   Ld
-  TH2F *GloBLPlots[27][4][30];
-  memset(GloBLPlots,0,27*4*30*sizeof(TH2F *));
-  for (Int_t layer = 0; layer < 4; layer++) {
-    for (Int_t ladder = 0; ladder < HftConfig[layer].NoLadders; ladder++) {
-      for (Int_t i = 0; i < 27; i++) {
-	Int_t t = i+10;
-	Name = Form("%sL%iLd%02i",plotName[t].Name,layer+1,ladder+1);
-	Title = Form("%s for layer %i ladder %02i",plotName[t].Title,layer+1,ladder+1);
-	Int_t m = 0;
-	if (layer >3) m = 1;
-	Double_t xmax = plotName[t].xmax[m];
-	Int_t n = (Int_t) (4.*xmax);
-	if (n < 100) n = 100;
-	if( (i == 14) || (i==20) ) n = 400;
-	//	   Double_t ymax = 2.50;
-	Double_t ymax = rCut/2;
-	GloBLPlots[i][layer][ladder] = new TH2F(Name,Title, n,-xmax,xmax,500,-ymax,ymax);
-      }
     }
   }
   Long64_t nentries = fChain->GetEntriesFast();
@@ -466,6 +458,7 @@ void HftT::Loop(Int_t Nevents) {
       if (_debug) {
 	cout << "hitK\t"; hitK->Print("");
       }
+#if __BEST__
       Double_t difK = hitK->Diff();
       Int_t k1 = k + 1;
       for (; k1 < NHits; k1++) {
@@ -481,236 +474,188 @@ void HftT::Loop(Int_t Nevents) {
 	}
       }
       if (! hitK) continue;
-	Int_t layer  = hitK->Layer();
-	Int_t sector = hitK->Sector();
-	Int_t ladder = hitK->Ladder();
-	if (ladder == 0) continue;
-#if 0	
-	if(layer ==1)    ladder = sector ;
-	if(layer ==2)    ladder = (sector-1)*3 + ladder-1 ;
 #endif
-	Int_t sensor  = hitK->Sensor();
-	
-	Double32_t xGP = hitK->xGP;
-	Double32_t zGP = hitK->zGP;
-	Double32_t yGP = hitK->yGP;
-	Double32_t uP = hitK->xLP;       
-	Double32_t vP = hitK->zLP;
-	Double32_t tuP = hitK->tuP;       
-	Double32_t tvP = hitK->tvP;
-	Double32_t xLP = hitK->xLP;
-	Double32_t zLP = hitK->zLP;
-	Double32_t dxP = hitK->dxGP;
-	Double32_t dyP = hitK->dyGP;
-	Double32_t dzP = hitK->dzGP;
-	Double32_t xG = hitK->xG;       
-	Double32_t yG = hitK->yG;       
-	Double32_t zG = hitK->zG;       
-	Double32_t dX = xG - xGP;
-	Double32_t dY = yG - yGP;
-	Double32_t dZ = zG - zGP;
-	Double32_t u = hitK->xL;       
-	Double32_t v = hitK->zL;
-	Double32_t zL = hitK->zL;
-	//	 if (layer <= 3) {zLP -= 23.5250; zL -= 23.5250;}
-	Double32_t xL = hitK->xL;
-	Double32_t DxL = xL - xLP;
-	Double32_t DzL = zL - zLP;
-	Double32_t du = u - uP;
-	Double32_t dv = v - vP;
-	if (TMath::Abs(hitK->pT) < 0.2) continue;
-	//       if (TMath::Abs(du) > 0.5 || TMath::Abs(dv) > 0.5) continue;
-	if (TMath::Abs(du) > rCut || TMath::Abs(dv) > rCut) continue;
-	Int_t m = 0;
-	if (layer > 2) m = 1;
-	if (TMath::Abs(xGP) > plotName[10].xmax[m] ||
-	    TMath::Abs(yGP) > plotName[11].xmax[m] ||
-	    TMath::Abs(zGP) > plotName[12].xmax[m]) continue;
-	if (TMath::Abs(uP) > Du[m] || TMath::Abs(vP) > Sv[m]/2) continue;
-	Double_t uA = TMath::Abs(u);
-	Double_t vA = TMath::Abs(v);
-	// 	 if (layer < 7) {
-	// 	   if (uMax > 0 && uA > uMax) continue;
-	// 	   if (uMin > 0 && uA < uMin) continue;
-	// 	   if (vMax > 0 && vA > vMax) continue;
-	// 	   if (vMin > 0 && vA < vMin) continue;
-	// 	 }
-	Double_t x = xGP;
-	Double_t y = yGP;
-	Double_t z = zGP;
-	Double_t jL2 = TMath::Sqrt(1. + tuP*tuP + tvP*tvP);
-	Double_t wG[3] = {hitK->wGu,hitK->wGv, hitK->wGw};
-	Double_t vx =  hitK->wGu*jL2;
-	Double_t vy =  hitK->wGv*jL2;
-	Double_t vz =  hitK->wGw*jL2;
-	Double_t vars[27][2] = {
-	  {dX ,  x}, // 0
-	  {dX ,  y},
-	  {dX , -z},
-	  {dY , -x},
-	  {dY ,  y},
-	  {dY ,  z},
-	  {dZ ,  x},
-	  {dZ , -y},
-	  {dZ ,  z}, // 8 
-	  {dX, (-1+dxP*vx) }, //  9 
-	  {dX, (   dxP*vy) }, // 10
-	  {dX, (   dxP*vz) },
-	  {dX, (   dxP*(-vy*z+vz*y))},
-	  {dX, (-z+dxP*( vx*z-vz*x))},
-	  //	   {dX, ( y+dxP*(-vx*y+vy*x))},
-	  {dX, ( dxP*(-vx*y+vy*x))},
-	  {dY, (   dyP*vx) }, // 15
-	  {dY, (-1+dyP*vy) },
-	  {dY, (   dyP*vz) },
-	  {dY, ( z+dyP*(-vy*z+vz*y))},
-	  {dY, (   dyP*( vx*z-vz*x))},
-	  //	   {dY, (-x+dyP*(-vx*y+vy*x))},
-	  {dY, (dyP*(-vx*y+vy*x))},
-	  {dZ, (   dzP*vx) }, // 21
-	  {dZ, (   dzP*vy) },
-	  {dZ, (-1+dzP*vz) },
-	  {dZ, (-y+dzP*(-vy*z+vz*y))},
-	  {dZ, ( x+dzP*( vx*z-vz*x))},
-	  {dZ, (   dzP*(-vx*y+vy*x))}
-	};
-	if(layer == 3) sector=14;
-	if(layer == 4) sector=15;
-	for (Int_t l = 0; l < 9; l++) {
-	  // layer 1 out until resolved
-	  //if (layer !=1 )
-	  //	   if (layer !=4 )
-	  //{ 
-	  GloPlots[l][sector-1]->Fill(vars[l][1],vars[l][0]);
-	  if(layer == 1 || layer ==2)   GloPlots[l][12]->Fill(vars[l][1],vars[l][0]);
-	  if((layer == 1 || layer ==2) && sector <= 5)    GloPlots[l][10]->Fill(vars[l][1],vars[l][0]);
-	  if((layer == 1 || layer ==2) && sector >= 6)    GloPlots[l][11]->Fill(vars[l][1],vars[l][0]);
-	  //     }
-	  GloBLPlots[l][layer-1][ladder-1]->Fill(vars[l][1],vars[l][0]);
-	}
-	Double_t vxyz[3] = {vx, vy, vz};
-	TRMatrix vR(3,1,vxyz);
-	Double_t dxyzP[3] = {dxP, dyP, dzP};
-	TRMatrix dR(3,1,dxyzP);
-	static TRMatrix UR(TRArray::kUnit,3);
-	TRMatrix AR(dR,TRArray::kAxBT,vR);// cout << "AR\t" << AR;
-	AR -= UR;// cout << "AR\t" << AR;
-	TRMatrix BR(3,6,
-		    1. , 0., 0., 0.,  z,-y,
-		    0.,  1., 0., -z, 0., x,
-		    0.,  0., 1.,  y, -x, 0.);//  cout << "BR\t" << BR;
-	TRMatrix ABR(AR,TRArray::kAxB,BR);//    cout << "ABR\t" << ABR;
-	Double_t dxyz[3] = {dX, dY, dZ};
-	TRVector mX;
-	TRMatrix A(0,6);
-	for (UInt_t l = 0; l < 3; l++) {
-	  if ((l == 0 && TMath::Abs(wG[0]) >= 0.999) ||
-	      (l == 1 && TMath::Abs(wG[1]) >= 0.999)) continue;
-	  mX.AddRow(&dxyz[l]);
-	  A.AddRow(ABR.GetRow(l));
-	  for (UInt_t jk = 0; jk < 6; jk++) {
-	    UInt_t lk = jk + 6*l + 9;
-	    //	   cout << "lk = "<< lk << "  sector=" << sector <<endl;
-	    // layer 1 out until resolved
-	    if (layer !=1 )
-	      //	     if (layer !=4 )
-	      {
-		GloPlots[lk][sector-1]->Fill(ABR(l,jk),dxyz[l]);
-		if(layer == 1 || layer ==2)  GloPlots[lk][12]->Fill(ABR(l,jk),dxyz[l]);
-		if((layer == 1 || layer ==2) && sector <= 5)  GloPlots[lk][10]->Fill(ABR(l,jk),dxyz[l]);
-		if((layer == 1 || layer ==2) && sector >= 6)  GloPlots[lk][11]->Fill(ABR(l,jk),dxyz[l]);
-	      }
-	    else
-	      {
-		GloPlots[lk][sector-1]->Fill(-ABR(l,jk),dxyz[l]);
-		if(layer == 1 || layer ==2)  GloPlots[lk][12]->Fill(-ABR(l,jk),dxyz[l]);
-		if((layer == 1 || layer ==2) && sector <= 5)  GloPlots[lk][10]->Fill(-ABR(l,jk),dxyz[l]);
-		if((layer == 1 || layer ==2) && sector >= 6)  GloPlots[lk][11]->Fill(-ABR(l,jk),dxyz[l]);
-		
-	      }
-	    if (layer !=1 )
-	      {
-		GloBLPlots[lk][layer-1][ladder-1]->Fill(ABR(l,jk),dxyz[l]);
-	      }
-	    else
-	      {
-		GloBLPlots[lk][layer-1][ladder-1]->Fill(-ABR(l,jk),dxyz[l]);
-	      }
-	  }
-	}
-	//	 cout << "I am out of the lk loop on GloBLPlots"<<endl;
-	TRVector AmX(A,TRArray::kATxB,mX);// cout << "AmX\t" << AmX << endl; 
-	TRSymMatrix SX(A,TRArray::kATxA);// cout << "SX\t" << SX << endl;
-	Double_t *array = LSF->GetArray();
-	Double_t *amX = AmX.GetArray();
-	Double_t *sX  = SX.GetArray();
-	Int_t im = 1 + 28*sector;
-	Int_t is = im + 6;
-#if 1
-	TCL::vadd(amX,array+im,array+im,6);
-	TCL::vadd(sX,array+is,array+is,21);
-	TRVector duv(2,du,dv);
-	TRMatrix P(2,6,
-		   -1.,  0., tuP,    tuP*vP,      -tuP*uP,      vP,
-		   0., -1., tvP,    tvP*vP,      -tvP*uP,     -uP);
-	TRVector pm(P,TRArray::kATxB,duv);
-	TRSymMatrix PX(P,TRArray::kATxA);
-	array = LSFB[layer-1]->GetArray();
-	amX = pm.GetArray();
-	sX  = PX.GetArray();
-	im = 1 + 28*(ladder-1);
-	is = im + 6;
-	TCL::vadd(amX,array+im,array+im,6);
-	TCL::vadd(sX,array+is,array+is,21);
-	//	 cout << "I am out of the LSFB --- jentry="<<jentry<<"   k="<<k<<endl;
-#endif
-	Double32_t duOvertuP = du/tuP;
-	Double32_t dvOvertvP = dv/tvP;
-	//#if 0
-	//	 if (sensor == 0) {
-	LocPlots[0][layer-1][ladder-1][sensor]->Fill(tuP,du);
-	LocPlots[1][layer-1][ladder-1][sensor]->Fill(tvP,dv);
-	LocPlots[2][layer-1][ladder-1][sensor]->Fill( vP,du);
-	LocPlots[3][layer-1][ladder-1][sensor]->Fill(-uP,dv);
-	LocPlots[4][layer-1][ladder-1][sensor]->Fill( vP,duOvertuP);
-	LocPlots[5][layer-1][ladder-1][sensor]->Fill( vP,dvOvertvP);
-	LocPlots[6][layer-1][ladder-1][sensor]->Fill(-uP,duOvertuP);
-	LocPlots[7][layer-1][ladder-1][sensor]->Fill(-uP,dvOvertvP);
-	LocPlots[8][layer-1][ladder-1][sensor]->Fill(-uP,du);
-	LocPlots[9][layer-1][ladder-1][sensor]->Fill( vP,dv);
-	//	 } else {
-	//#if 0
-	sensor = 0;
-	LocPlots[0][layer-1][ladder-1][sensor]->Fill(tuP,du);
-	LocPlots[1][layer-1][ladder-1][sensor]->Fill(tvP,dv);
-	LocPlots[2][layer-1][ladder-1][sensor]->Fill( v ,du);
-	LocPlots[3][layer-1][ladder-1][sensor]->Fill( u ,dv);
-	LocPlots[4][layer-1][ladder-1][sensor]->Fill( v ,duOvertuP);
-	LocPlots[5][layer-1][ladder-1][sensor]->Fill( v ,dvOvertvP);
-	LocPlots[6][layer-1][ladder-1][sensor]->Fill( u ,duOvertuP);
-	LocPlots[7][layer-1][ladder-1][sensor]->Fill( u ,dvOvertvP);
-	//#endif
-	//	 }
-	//#endif
-	//       vP = vP + Sv[m]*(sensor - NoSensors/2 - 0.5);
-#if 1	 
-	sensor = 0;
-	Double32_t DxLOvertuP = DxL/tuP;
-	Double32_t DzLOvertvP = DzL/tvP;
-	LocPlots[0][layer-1][ladder-1][sensor]->Fill(tuP,DxL);  // => dw
-	LocPlots[1][layer-1][ladder-1][sensor]->Fill(tvP,DzL);  // => dw
-	LocPlots[2][layer-1][ladder-1][sensor]->Fill( zLP,DxL); // => gamma
-	LocPlots[3][layer-1][ladder-1][sensor]->Fill(-xLP,DzL); // => gamma (-)
-	LocPlots[4][layer-1][ladder-1][sensor]->Fill( zLP,DxLOvertuP); //=> alpha
-	LocPlots[5][layer-1][ladder-1][sensor]->Fill( zLP,DzLOvertvP); //=> alpha
-	LocPlots[6][layer-1][ladder-1][sensor]->Fill(-xLP,DxLOvertuP); //=> beta (-)
-	LocPlots[7][layer-1][ladder-1][sensor]->Fill(-xLP,DzLOvertvP); //=> beta (-)
-	LocPlots[8][layer-1][ladder-1][sensor]->Fill(-xLP,DxL);        // 
-	LocPlots[9][layer-1][ladder-1][sensor]->Fill( zLP,DzL);        //
-#endif
+      Int_t layer  = hitK->Layer();
+      Int_t sector = hitK->Sector()+1;
+      Int_t ladder = hitK->Ladder();
+      Int_t half   = hitK->Half();
+      if (ladder == 0) continue;
+      Int_t sensor  = hitK->Sensor();
+      Double32_t xGP = hitK->xGP;
+      Double32_t zGP = hitK->zGP;
+      Double32_t yGP = hitK->yGP;
+      Double32_t uP = hitK->xLP;       
+      Double32_t vP = hitK->zLP;
+      Double32_t tuP = hitK->tuP;       
+      Double32_t tvP = hitK->tvP;
+      Double32_t xLP = hitK->xLP;
+      Double32_t zLP = hitK->zLP;
+      Double32_t dxP = hitK->dxGP;
+      Double32_t dyP = hitK->dyGP;
+      Double32_t dzP = hitK->dzGP;
+      Double32_t xG = hitK->xG;       
+      Double32_t yG = hitK->yG;       
+      Double32_t zG = hitK->zG;       
+      Double32_t dX = xG - xGP;
+      Double32_t dY = yG - yGP;
+      Double32_t dZ = zG - zGP;
+      Double32_t u = hitK->xL;       
+      Double32_t v = hitK->zL;
+      Double32_t zL = hitK->zL;
+      Double32_t xL = hitK->xL;
+      Double32_t DxL = xL - xLP;
+      Double32_t DzL = zL - zLP;
+      Double32_t du = u - uP;
+      Double32_t dv = v - vP;
+      Double_t uA = TMath::Abs(u);
+      Double_t vA = TMath::Abs(v);
+      Double_t x = xGP;
+      Double_t y = yGP;
+      Double_t z = zGP;
+      Double_t jL2 = TMath::Sqrt(1. + tuP*tuP + tvP*tvP);
+      Double_t wG[3] = {hitK->wGu,hitK->wGv, hitK->wGw};
+      Double_t vx =  hitK->wGu*jL2;
+      Double_t vy =  hitK->wGv*jL2;
+      Double_t vz =  hitK->wGw*jL2;
+      Double_t vars[27][2] = {
+	{dX ,  x}, // 0
+	{dX ,  y},
+	{dX , -z},
+	{dY , -x},
+	{dY ,  y},
+	{dY ,  z},
+	{dZ ,  x},
+	{dZ , -y},
+	{dZ ,  z}, // 8 
+	{dX, (-1+dxP*vx) }, //  9 
+	{dX, (   dxP*vy) }, // 10
+	{dX, (   dxP*vz) },
+	{dX, (   dxP*(-vy*z+vz*y))},
+	{dX, (-z+dxP*( vx*z-vz*x))},
+	//	   {dX, ( y+dxP*(-vx*y+vy*x))},
+	{dX, ( dxP*(-vx*y+vy*x))},
+	{dY, (   dyP*vx) }, // 15
+	{dY, (-1+dyP*vy) },
+	{dY, (   dyP*vz) },
+	{dY, ( z+dyP*(-vy*z+vz*y))},
+	{dY, (   dyP*( vx*z-vz*x))},
+	//	   {dY, (-x+dyP*(-vx*y+vy*x))},
+	{dY, (dyP*(-vx*y+vy*x))},
+	{dZ, (   dzP*vx) }, // 21
+	{dZ, (   dzP*vy) },
+	{dZ, (-1+dzP*vz) },
+	{dZ, (-y+dzP*(-vy*z+vz*y))},
+	{dZ, ( x+dzP*( vx*z-vz*x))},
+	{dZ, (   dzP*(-vx*y+vy*x))}
+      };
+      for (Int_t l = 0; l < 27; l++) {
+	if      (layer <= 2) {
+	  GloPlots[l][sector-1]->Fill(vars[l][1],vars[l][0]); // Pxl Sector
+	  assert(half == 1 || half == 2);
+	  GloPlots[l][9+half]->Fill(vars[l][1],vars[l][0]); // Pxl Half
+	  GloPlots[l][12]->Fill(vars[l][1],vars[l][0]); // Pxl as whole
+	} else if (layer == 3) {GloPlots[l][13]->Fill(vars[l][1],vars[l][0]); // Ist
+	} else if (layer == 4) {GloPlots[l][13]->Fill(vars[l][1],vars[l][0]);  // Sst
+	}	  
       }
-      //       cout << "I am out of the hit loop --- jentry="<<jentry<<"   trk="<<trk<<endl;
-    if (jentry%1000 == 0) cout << "I am out of the track loop --- jentry="<<jentry<<endl;
+#if 0
+      Double_t vxyz[3] = {vx, vy, vz};
+      TRMatrix vR(3,1,vxyz);
+      Double_t dxyzP[3] = {dxP, dyP, dzP};
+      TRMatrix dR(3,1,dxyzP);
+      static TRMatrix UR(TRArray::kUnit,3);
+      TRMatrix AR(dR,TRArray::kAxBT,vR);// cout << "AR\t" << AR;
+      AR -= UR;// cout << "AR\t" << AR;
+      TRMatrix BR(3,6,
+		  1. , 0., 0., 0.,  z,-y,
+		  0.,  1., 0., -z, 0., x,
+		  0.,  0., 1.,  y, -x, 0.);//  cout << "BR\t" << BR;
+      TRMatrix ABR(AR,TRArray::kAxB,BR);//    cout << "ABR\t" << ABR;
+      Double_t dxyz[3] = {dX, dY, dZ};
+      TRVector mX;
+      TRMatrix A(0,6);
+      for (UInt_t l = 0; l < 3; l++) {
+	if ((l == 0 && TMath::Abs(wG[0]) >= 0.999) ||
+	    (l == 1 && TMath::Abs(wG[1]) >= 0.999)) continue;
+	mX.AddRow(&dxyz[l]);
+	A.AddRow(ABR.GetRow(l));
+	for (UInt_t jk = 0; jk < 6; jk++) {
+	  UInt_t lk = jk + 6*l + 9;
+	  //	   cout << "lk = "<< lk << "  sector=" << sector <<endl;
+	  // layer 1 out until resolved
+	  if (layer !=1 )
+	    //	     if (layer !=4 )
+	    {
+	      GloPlots[lk][sector-1]->Fill(ABR(l,jk),dxyz[l]);
+	      if(layer == 1 || layer ==2)  GloPlots[lk][12]->Fill(ABR(l,jk),dxyz[l]);
+	      if((layer == 1 || layer ==2) && sector <= 5)  GloPlots[lk][10]->Fill(ABR(l,jk),dxyz[l]);
+	      if((layer == 1 || layer ==2) && sector >= 6)  GloPlots[lk][11]->Fill(ABR(l,jk),dxyz[l]);
+	    }
+	  else
+	    {
+	      GloPlots[lk][sector-1]->Fill(-ABR(l,jk),dxyz[l]);
+	      if(layer == 1 || layer ==2)  GloPlots[lk][12]->Fill(-ABR(l,jk),dxyz[l]);
+	      if((layer == 1 || layer ==2) && sector <= 5)  GloPlots[lk][10]->Fill(-ABR(l,jk),dxyz[l]);
+	      if((layer == 1 || layer ==2) && sector >= 6)  GloPlots[lk][11]->Fill(-ABR(l,jk),dxyz[l]);
+	      
+	    }
+	  if (layer !=1 )
+	    {
+	      GloBLPlots[lk][layer-1][ladder-1]->Fill(ABR(l,jk),dxyz[l]);
+	    }
+	  else
+	    {
+	      GloBLPlots[lk][layer-1][ladder-1]->Fill(-ABR(l,jk),dxyz[l]);
+	    }
+      //	 cout << "I am out of the lk loop on GloBLPlots"<<endl;
+      TRVector AmX(A,TRArray::kATxB,mX);// cout << "AmX\t" << AmX << endl; 
+      TRSymMatrix SX(A,TRArray::kATxA);// cout << "SX\t" << SX << endl;
+      Double_t *array = LSF->GetArray();
+      Double_t *amX = AmX.GetArray();
+      Double_t *sX  = SX.GetArray();
+      Int_t im = 1 + 28*sector;
+      Int_t is = im + 6;
+      TCL::vadd(amX,array+im,array+im,6);
+      TCL::vadd(sX,array+is,array+is,21);
+      TRVector duv(2,du,dv);
+      TRMatrix P(2,6,
+		 -1.,  0., tuP,    tuP*vP,      -tuP*uP,      vP,
+		 0., -1., tvP,    tvP*vP,      -tvP*uP,     -uP);
+      TRVector pm(P,TRArray::kATxB,duv);
+      TRSymMatrix PX(P,TRArray::kATxA);
+      array = LSFB[layer-1]->GetArray();
+      amX = pm.GetArray();
+      sX  = PX.GetArray();
+      im = 1 + 28*(ladder-1);
+      is = im + 6;
+      TCL::vadd(amX,array+im,array+im,6);
+      TCL::vadd(sX,array+is,array+is,21);
+      //	 cout << "I am out of the LSFB --- jentry="<<jentry<<"   k="<<k<<endl;
+      Double32_t duOvertuP = du/tuP;
+      Double32_t dvOvertvP = dv/tvP;
+      sensor = 0;
+      LocPlots[0][layer-1][ladder][sensor]->Fill(tuP,du);
+      LocPlots[1][layer-1][ladder][sensor]->Fill(tvP,dv);
+      LocPlots[2][layer-1][ladder][sensor]->Fill( v ,du);
+      LocPlots[3][layer-1][ladder][sensor]->Fill( u ,dv);
+      LocPlots[4][layer-1][ladder][sensor]->Fill( v ,duOvertuP);
+      LocPlots[5][layer-1][ladder][sensor]->Fill( v ,dvOvertvP);
+      LocPlots[6][layer-1][ladder][sensor]->Fill( u ,duOvertuP);
+      LocPlots[7][layer-1][ladder][sensor]->Fill( u ,dvOvertvP);
+#endif
+    }
+    //       cout << "I am out of the hit loop --- jentry="<<jentry<<"   trk="<<trk<<endl;
+    if (jentry%1000 == 0) cout << "jentry="<<jentry<<endl;
+  }
+  TIter nextkey( gDirectory->GetListOfKeys() );
+  TKey *key = 0;
+  while ((key = (TKey*) nextkey())) {
+    TObject *obj = key->ReadObj();
+    if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
+      TH1 *h1 = (TH1*)obj;
+      cout << "Found histogram " << h1->GetName() << " with " << h1->GetEntries() << " entries" << endl;
+      if (h1->GetEntries() == 0) delete  h1;
+    }
   }
   fOut->Write();
 }

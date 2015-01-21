@@ -61,21 +61,28 @@ public:
    void SetTrackFirstPointZ(Double32_t z) {firstPointZ = z;}
    void SetWG(Double32_t wu, Double32_t wv, Double32_t ww) { wGu = wu; wGv = wv; wGw = ww;}
    Double_t Diff() const  {return TMath::Sqrt((xL - xLP)*(xL - xLP) + (yL - yLP)*(yL - yLP));}
-   //    Ist = 1000 + i_ladder * 6 + i_sensor + 1; Pxl =  i_sector * 40 + i_ladder * 10 + i_sensor + 1
+   // i_ladder[1-N], i_sector[1-10], i_sensor[1-N]
+   //    Pxl =  (i_sector-1) * 40 + (i_ladder-1) * 10 + i_sensor
+   //    Ist =               1000 + (i_ladder-1) *  6 + i_sensor; 
+   //    Sst =               2000 + (i_ladder-1) * 16 + i_sensor;
    Int_t Sector() const  {
-     if (detId > 1000) return -1;
-     return (detId - 1)/40;
+     if (detId > 1000) return 0;
+     return (detId - 1)/40 + 1;
    }
    Int_t Ladder() const  {
-     if (detId > 1000) return (detId - 1001)/6;
-     return (detId - 40*Sector() - 1)/10;} 
+     if (detId > 1000) return (detId - 1001)/6 + 1;
+     return (detId - 40*(Sector() - 1)  - 1)/10 + 1;} 
    Int_t Sensor() const  {
-     if (detId > 1000) return (detId - 1001)%6;
-     return (detId - 40*Sector() -10*Ladder() - 1);}
+     if (detId > 1000) return (detId - 1001)%6 + 1;
+     return (detId - 40*(Sector() - 1) - 10*Ladder());}
    Int_t Layer() const  {
      if (detId > 1000) return 3;
-     if (Ladder() % 4 == 0) return 1; 
+     if ((Ladder()-1) % 4 == 0) return 1; 
      return 2;
+   }
+   Int_t Half() const  {
+     if (detId > 1000) return -1;
+     return (Sector()-1)/5 + 1;
    }
    virtual void      Print(Option_t *opt = "") const {
      cout << "HitMatchT\t" << detId 

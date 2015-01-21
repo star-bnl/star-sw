@@ -79,8 +79,8 @@ static const Char_t *plotName[] = {
   // "dZ4dz",
   "dZ4daL","dZ4dbL","dZ4dgL"};
 static const Char_t *plotNameG[] = {
-  "duuH", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
-  "dvuP", "duvH", "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 10
+  //  "duuH", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
+  //  "dvuP", "duvH", "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 10
    //  "duuP", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
    //  "dvuP",/* "duvH",*/ "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 9
   "dXvsZ","dYvsZ","dZvsZ",
@@ -902,7 +902,7 @@ void FitGL(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, 
   }
 }
 //________________________________________________________________________________
-void TDrawG(Int_t layers=4) {
+void TDrawG(Int_t layers=2) {
   Int_t s, s1, s2;
   s = s1 = s2 = layers;
   Int_t nx = 5;
@@ -926,16 +926,16 @@ void TDrawG(Int_t layers=4) {
   TCollection *files = gROOT->GetListOfFiles();
   TIter next(files);
   TFile *f = (TFile *) next();
-//  TFile *f = (TFile *) gDirectory;
+  //  TFile *f = (TFile *) gDirectory;
   if (! f) return;
   out <<  "____________________________________________________________________________________________________"  << endl;
   out <<  "|dX mkm         |dY mkm         |dZ mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
   cout << "____________________________________________________________________________________________________"  << endl;
   cout << "|dX mkm         |dY mkm         |dZ mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
   //  for (Int_t i = 0; i < nx; i++) {
-for (Int_t i = 4; i < nx; i++) {
-  if(i==6) continue;
-  if(i==8) continue;
+  for (Int_t i = 4; i < nx; i++) {
+    if(i==6) continue;
+    if(i==8) continue;
     cout << "doing  i= "<< i << endl;
     f->cd();
     out  << "______________________________________________________________________________________________ "  << f->GetName() << endl;
@@ -954,40 +954,41 @@ for (Int_t i = 4; i < nx; i++) {
     if (i == 7) {s1 = 2; s2 = 5;}
     if (i == 8) {s1 = 0; s2 = 5;}
     if(i>0) {
-    //    if (LSF) {
-      Double_t *array = LSF->GetArray();
-      TRVector AmX(6);
-      TRSymMatrix S(6);
-      for (s = s1; s <= s2; s++) {
-	Int_t im = 1 + 28*s;
-	Int_t is = im + 6;
-	AmX += TRVector(6,array+im);
-	S   += TRSymMatrix(6,array+is);// cout << "S " << S << endl;
-      }
-      TRSymMatrix SInv(S,TRArray::kInverted);// cout << "SInv " << SInv << endl;
-      TRVector  X(SInv,TRArray::kSxA,AmX); //cout << "X " << X << endl;
-      TString line("");
-      for (Int_t l = 0; l < 6; l++) {
-	Double_t scale = 1e4;
-	if (l > 2) scale = 1e3;
-	LSFit[l] = scale*X(l);
-	dLSFit[l] = scale*TMath::Sqrt(SInv(l,l));
-	line += Form("|%7.2f+-%5.2f ",LSFit[l],dLSFit[l]); 
-	if (SInv(l,l) > 0) {
-	  FitR[l]  += X(l)/SInv(l,l);
-	  dFitR[l] +=  1./SInv(l,l);
+      if (LSF) {
+	Double_t *array = LSF->GetArray();
+	TRVector AmX(6);
+	TRSymMatrix S(6);
+	for (s = s1; s <= s2; s++) {
+	  Int_t im = 1 + 28*s;
+	  Int_t is = im + 6;
+	  AmX += TRVector(6,array+im);
+	  S   += TRSymMatrix(6,array+is);// cout << "S " << S << endl;
 	}
-      }
-      line += "|"; line += LSF->GetName(); line += "/"; 
-      if (i <  6) line += LSF->GetTitle();
-      else {
-	if (i == 6) line += "Sum Over Svt Shells";
-	if (i == 7) line += "Sum Over Ssd Sectors";
-	if (i == 8) line += "Sum Over Svt+Ssd";
-      }
-      cout << line << endl;
-      out << line << endl;
-    } // LSF
+	TRSymMatrix SInv(S,TRArray::kInverted);// cout << "SInv " << SInv << endl;
+	TRVector  X(SInv,TRArray::kSxA,AmX); //cout << "X " << X << endl;
+	TString line("");
+	for (Int_t l = 0; l < 6; l++) {
+	  Double_t scale = 1e4;
+	  if (l > 2) scale = 1e3;
+	  LSFit[l] = scale*X(l);
+	  dLSFit[l] = scale*TMath::Sqrt(SInv(l,l));
+	  line += Form("|%7.2f+-%5.2f ",LSFit[l],dLSFit[l]); 
+	  if (SInv(l,l) > 0) {
+	    FitR[l]  += X(l)/SInv(l,l);
+	    dFitR[l] +=  1./SInv(l,l);
+	  }
+	}
+	line += "|"; line += LSF->GetName(); line += "/"; 
+	if (i <  6) line += LSF->GetTitle();
+	else {
+	  if (i == 6) line += "Sum Over Svt Shells";
+	  if (i == 7) line += "Sum Over Ssd Sectors";
+	  if (i == 8) line += "Sum Over Svt+Ssd";
+	}
+	cout << line << endl;
+	out << line << endl;
+      } // LSF
+    }
     for (Int_t j = firstH; j <= lastH; j++) {
       cout << "Plotname j,i,nx,s,s1" << plotNameG[j]<< endl;
       cout << "j=" <<  j<< "   i=" <<i << "    nx=" <<nx<< "     s=" <<s<< "    s1=" <<s1 << "    s2="<<s2<<endl;

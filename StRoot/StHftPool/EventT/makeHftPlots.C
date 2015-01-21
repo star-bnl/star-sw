@@ -1,8 +1,10 @@
 /*
-  root.exe lHft.C makeTPlots.C
+  root.exe makeHftPlots.C
  */
-void makeTPlots(const Char_t *tag = ""){//"dEdx") {
-  gSystem->Load("StHftPoolEventT");
+void makeHftPlots(const Char_t *tag = ""){//"dEdx") {
+  gROOT->LoadMacro("bfc.C");
+  TString Chain("tpcDb,istDb,pxlDb,StEvent,detDb,HftMatTree,nodefault");
+  bfc(-1,Chain,0,0,0);
   TDirIter Dir("./*tree.root");
   tchain = new TChain("t");
   Int_t NFiles = 0;
