@@ -711,7 +711,7 @@ static int nCall=0; nCall++;
      if (!gVolu->Contains(lX)) continue;
      Nin++; if (Nin>kNin) break;
      gGeoManager->LocalToMaster(lX, gX);
-     if (sVolu->inside(gX,1|2|4)) continue;
+     if (sVolu->insideG(gX,1|2|4)) continue;
      assert(0);
    }
      
