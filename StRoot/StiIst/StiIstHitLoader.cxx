@@ -36,8 +36,6 @@ StiIstHitLoader::~StiIstHitLoader()
 
 void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter)
 {
-   LOG_INFO << "StiIstHitLoader::loadHits(StEvent*) -I- Started" << endm;
-
    if (!_detector)
       throw runtime_error("StiIstHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
 
@@ -48,9 +46,9 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
    StIstHitCollection *col = source->istHitCollection();
 
    if (!col) {
-      LOG_INFO << "StiIstHitLoader::loadHits\tERROR:\tcol==0" << endm;
-      LOG_INFO << "You must not have istFastSim in your chain" << endm;
-      LOG_INFO << "will return with no action taken" << endm;
+      LOG_WARN << "StiIstHitLoader::loadHits() - StIstHitCollection not found. "
+                  "Check for istFastSim option in input chain. "
+                  "IST hits will not be used in tracking" << endm;
       return;
    }
 
@@ -61,12 +59,18 @@ void StiIstHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
       for (int ladderIdx = 0; ladderIdx < kIstNumLadders; ++ladderIdx ) {
          StIstLadderHitCollection *ladderHitCollection = col->ladder(ladderIdx);
 
-         if (! ladderHitCollection) {cout << "No IST ladder hit collection" << endl; return;}
+      if (! ladderHitCollection) {
+         LOG_WARN << "No IST ladder hit collection" << endl;
+         return;
+      }
 
          for (int sensorIdx = 0; sensorIdx < kIstNumSensorsPerLadder; sensorIdx++)   {
             StIstSensorHitCollection *sensorHitCollection = ladderHitCollection->sensor(sensorIdx);
 
-            if (! sensorHitCollection) {cout << "No IST sensor hit collection" << endl; return;}
+         if (! sensorHitCollection) {
+            cout << "No IST sensor hit collection" << endl;
+            return;
+         }
 
             StSPtrVecIstHit &vec = sensorHitCollection->hits();
             LOG_DEBUG << "StiIstHitLoader - collection size: " << vec.size() << " on Ladder " << ladderIdx + 1 << " Sensor " << sensorIdx + 1 << endm;

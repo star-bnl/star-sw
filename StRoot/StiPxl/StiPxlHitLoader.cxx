@@ -1,7 +1,10 @@
  /*
- * $Id: StiPxlHitLoader.cxx,v 1.15 2015/01/06 20:57:50 smirnovd Exp $
+ * $Id: StiPxlHitLoader.cxx,v 1.16 2015/01/21 23:10:59 smirnovd Exp $
  *
  * $Log: StiPxlHitLoader.cxx,v $
+ * Revision 1.16  2015/01/21 23:10:59  smirnovd
+ * Made all info/warn/error messages consistent across StiDetectorBuilder's
+ *
  * Revision 1.15  2015/01/06 20:57:50  smirnovd
  * Reimplemented segmentation of PXL sensor to two halves.
  *
@@ -137,8 +140,6 @@ StiPxlHitLoader::StiPxlHitLoader(StiHitContainer *hitContainer, Factory<StiHit> 
 
 void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, Filter<StiHit> *hitFilter)
 {
-   LOG_INFO << " -I- Started" << endl;
-
    if (!_detector)
       throw runtime_error("StiPxlHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
 
@@ -148,9 +149,9 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
    StPxlHitCollection *pxlHitCollection = source->pxlHitCollection();
 
    if (!pxlHitCollection) {
-      LOG_WARN << "StiPxlHitLoader::loadHits\tWARN:\t pxlHitCollection not found. "
-               << "You may not have StPxlSimMaker or StPxlHitMaker in your chain. "
-               << "No pixel hits can be loaded." << endm;
+      LOG_WARN << "StiPxlHitLoader::loadHits() - StPxlHitCollection not found. "
+                  "Check for StPxlSimMaker or StPxlHitMaker options in input chain. "
+                  "PXL hits will not be used in tracking" << endm;
       return;
    }
 
@@ -176,7 +177,7 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
             StPxlSensorHitCollection *PxlSensorHitCollection = pxlLadderHitCollection->sensor(l);
             StSPtrVecPxlHit &pxlHits = PxlSensorHitCollection->hits();
 
-            LOG_DEBUG << "StiPxlHitLoader - collection size: " << pxlHits.size() << endm;
+            LOG_DEBUG << "StiPxlHitLoader::loadHits() - Collection size: " << pxlHits.size() << endm;
 
             for (unsigned int iPxlHit = 0; iPxlHit < pxlHits.size(); iPxlHit++)
             {
@@ -207,7 +208,8 @@ void StiPxlHitLoader::loadHits(StEvent *source, Filter<StiTrack> *trackFilter, F
                   stiSensor = (pxlHit->sector() - 1) * (kNumberOfPxlLaddersPerSector - 1) + (pxlHit->ladder() - 1);
                }
 
-               LOG_DEBUG << *pxlHit << "\n"
+               LOG_DEBUG << "StiPxlHitLoader::loadHits() - \n"
+                         << *pxlHit << "\n"
                          << *static_cast<StMeasuredPoint*>(pxlHit) << endm;
 
                // The PXL sensitive layers are split into two halves so, access the corresponding
