@@ -114,7 +114,8 @@ StiDebug::Break(nCall);
   if (shapeCode>kPlanar) { // non planar shape
     double mySur[7]={-mX2*mX2, 0,0,0, 1,1,0};
     double myDir[3]={rotPars._cosCA,rotPars._sinCA,rotPars.tanl()};
-    THelixTrack hlx(&rotPars.x(),myDir,rotPars.curv());
+    mRho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
+    THelixTrack hlx(&rotPars.x(),myDir,mRho);
     
     double s = hlx.Path(999.,mySur,7,0,0,1);
     if (fabs(s)>999) {
@@ -128,20 +129,20 @@ StiDebug::Break(nCall);
 assert(fabs(pow(myX[0],2)+pow(myX[1],2)-mX2*mX2)<1e-4*mX2);
     }
     
-    if (shapeCode==kCylindrical) {//
-      double dAlpha = atan2(hlx.Dir()[1],hlx.Dir()[0]);
-      rotPars.rotate(dAlpha);
-      mTargetNode->rotate(dAlpha);
-      mAlpha += dAlpha;
-      hlx.Rot(-dAlpha);
-      assert(fabs(hlx.Dir()[1])<=1e-5);
-    }
+    double dAlpha = atan2(hlx.Dir()[1],hlx.Dir()[0]);
+    rotPars.rotate(dAlpha);
+    mTargetNode->rotate(dAlpha);
+    mAlpha += dAlpha;
+    hlx.Rot(-dAlpha);
+    assert(fabs(hlx.Dir()[1])<=1e-5);
+    mX1 = rotPars.x();	//node was rotated, mX1 changed
     mX2 = hlx.Pos()[0];
   }
   mDx = mX2-mX1;
   mRho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
   mDSin = mRho*mDx;
   mSinCA2=rotPars._sinCA + mDSin; 
+  assert(shapeCode<=kPlanar || fabs(mSinCA2)<1e-5);
   if (fabs(mSinCA2)> 0.99) {
     mSinCA2 = (mSinCA2<0)? -0.99:0.99;
     mDSin = mSinCA2-rotPars._sinCA;
