@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.21 2015/01/06 20:37:36 marr Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.22 2015/01/22 22:10:58 marr Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -41,7 +41,8 @@ ClassImp(StMtdHitMaker);
 StMtdHitMaker::StMtdHitMaker(const char *name):StRTSBaseMaker("mtd",name),
 					       mStEvent(0),fMtd(0), mUseMuDst(0),
 					       mCosmicFlag(kFALSE), mCosmicTrigTimeWinFile(""),
-					       mTriggerWndSelection(kTRUE), mSwapBacklegInRun13(0),
+					       mTriggerWndSelection(kTRUE), mSwapBacklegInRun13(0), 
+					       mReverseStripInRun14(kFALSE),
 					       mYear(-1),
 					       mNValidTrays(-1),         //! number of valid MTD trays
 					       mMtdCollection(0),        //! pointer to StMtdCollection
@@ -279,6 +280,7 @@ StMtdCollection *StMtdHitMaker::GetMtdCollection()
 	  if(muMtdCollection) ahit = muMtdCollection->RawMtdHit(i);
 	  else ahit = mMuDst->mtdRawHit(i);
 	  Int_t backleg = (Int_t)ahit->backleg();
+	  Int_t channel = (Int_t)ahit->channel();
 
 	  if(mYear==13 && mSwapBacklegInRun13 !=0 )
 	    {
@@ -304,8 +306,25 @@ StMtdCollection *StMtdHitMaker::GetMtdCollection()
 		  return 0;
 		}
 	    }
-
-	  mMtdCollection->addRawHit(new StMtdRawHit(ahit->flag(),(UChar_t)backleg,ahit->channel(),ahit->tdc()));
+	  
+	  if(mYear>=14 && mReverseStripInRun14)
+	    {
+	      // The ribbon cable is reversed for backleg 7, module 5 since Run14
+	      if(backleg==7)
+		{
+		  Int_t module = (channel-1)/24 + 1;
+		  if(module==5)
+		    {
+		      Int_t cell = (channel-1)%24;
+		      if(cell>=0 && cell<=5) cell = 5 - cell;
+		      else if (cell>=6 && cell<=11) cell = 17 - cell;
+		      else if (cell>=12 && cell<=17) cell = 29 - cell;
+		      else if (cell>=18 && cell<=23) cell = 41 - cell;
+		      channel = cell + 1 + (module-1)*24;
+		    }
+		}
+	    }
+	  mMtdCollection->addRawHit(new StMtdRawHit(ahit->flag(),(UChar_t)backleg,(UChar_t)channel,ahit->tdc()));
 	}
     }
   return mMtdCollection;
@@ -470,6 +489,24 @@ Int_t StMtdHitMaker::UnpackMtdRawData()
 	    temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip11(tdigid,tdcid,tdcchan,backlegid)); 
 	  else
 	    temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip(itray, tdigid,tdcid,tdcchan)); 
+
+	  if(mYear>=14 && backlegid==7)
+	    {
+	      Int_t channel = (Int_t) temphit.globaltdcchan;
+	      Int_t module = (channel-1)/24 + 1;
+	      if(module==5)
+		{
+		  Int_t cell = (channel-1)%24;
+		  if(cell>=0 && cell<=5) cell = 5 - cell;
+		  else if (cell>=6 && cell<=11) cell = 17 - cell;
+		  else if (cell>=12 && cell<=17) cell = 29 - cell;
+		  else if (cell>=18 && cell<=23) cell = 41 - cell;
+		  channel = cell + 1 + (module-1)*24;
+		  temphit.globaltdcchan = (UChar_t) channel;
+		}
+	      
+	    }
+
 	  temphit.dataword      = dataword;
 	  
 	  if(edgeid == 4) 
@@ -1037,8 +1074,12 @@ Int_t StMtdHitMaker::getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn)
 }
 
 //
-// $Id: StMtdHitMaker.cxx,v 1.21 2015/01/06 20:37:36 marr Exp $
+// $Id: StMtdHitMaker.cxx,v 1.22 2015/01/22 22:10:58 marr Exp $
 // $Log: StMtdHitMaker.cxx,v $
+// Revision 1.22  2015/01/22 22:10:58  marr
+// Fix the reserved ribbon cable in backleg 7 module 5 since 2014 run. This is
+// not fixed on the hardware level in 2015 run.
+//
 // Revision 1.21  2015/01/06 20:37:36  marr
 // 1. Add an option to load trigger time window cuts from local files for cosmic ray data.
 // This is motivated by the fact that the cuts are different for cosmic ray and collision data.
