@@ -47,7 +47,6 @@ public:
 
   void findTracks(){}; 
   bool find(StiTrack *track, int direction,double rmin=0){return false;};
-  void extendTracksToVertex(StiHit* vertex){};
 
   friend ostream& operator<<(ostream& os, const StiLocalTrackSeedFinder & f);
 

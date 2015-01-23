@@ -56,9 +56,7 @@ public:
   void extendTracks(double rMin);
   /// Extend track
   int extendTrack(StiKalmanTrack *track,double rMin);
-  /// Extent all tracks to the given vertex
-          void extendTracksToVertex(StiHit* vertex);
-          void extendTracksToVertices(const std::vector<StiHit*> &vertices);
+  void extendTracksToVertices(const std::vector<StiHit*> &vertices);
   /// get number of tracks
   int getNTracks() const ;
   int getNPrims()  const { return _nPrimTracks;}
