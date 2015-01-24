@@ -287,62 +287,65 @@ void HftT::Loop(Int_t Nevents) {
   struct PlotName_t {
     Char_t *Name;
     Char_t *Title;
-    Double_t xmax[2]; // pxl ist  ssd 
+    Double_t xmax[3]; // pxl ist  ssd 
   };
   static Double_t Du[2] = {3.000, 3.65};
   static Double_t Sv[2] = {6.305, 4.35};
   enum {eLocPlots = 8, eGlobPlots = 37};
   const  PlotName_t plotNameD[eLocPlots] = {// plots for drift
-    {"dutuP","<u - uP>       versus  tuP =>  dw ", { 0.5, 0.5}},                    //  0
-    {"dvtvP","<v - vP>       versus  tvP =>  dw ", { 2.5, 2.5}},                    //  1
-    {"duvP", "<u - uP>       versus    v =>  gamma (our beta)", { 1, -1}},          //  2 z
-    {"dvuP", "<v - vP>       versus    u => -gamma (our -beta)", { 1, -1}},         //  3
-    {"duOvertuPvP","<(u - uP)/tuP> versus  v => alpha ", { 1, -1}},                 //  4 z
-    {"dvOvertvPvP","<(v - vP)/tvP> versus  v => alpha ", { 1, -1}},                 //  5 z
-    {"duOvertuPuP","<(u - uP)/tuP> versus  u => -beta (our gamma)", { 1, -1}},      //  6
-    {"dvOvertvPuP","<(v - vP)/tvP> versus  u => -beta (our gamma)", { 1, -1}},      //  7
+    {"dutuP","<u - uP>       versus  tuP =>  dw ", { 0.5, 0.5, 1}},                    //  0
+    {"dvtvP","<v - vP>       versus  tvP =>  dw ", { 2.5, 2.5, 1}},                    //  1
+    {"duvP", "<u - uP>       versus    v =>  gamma (our beta)", { 1, -1, 1}},          //  2 z
+    {"dvuP", "<v - vP>       versus    u => -gamma (our -beta)", { 1, -1, 1}},         //  3
+    {"duOvertuPvP","<(u - uP)/tuP> versus  v => alpha ", { 1, -1, 1}},                 //  4 z
+    {"dvOvertvPvP","<(v - vP)/tvP> versus  v => alpha ", { 1, -1, 1}},                 //  5 z
+    {"duOvertuPuP","<(u - uP)/tuP> versus  u => -beta (our gamma)", { 1, -1, 1}},      //  6
+    {"dvOvertvPuP","<(v - vP)/tvP> versus  u => -beta (our gamma)", { 1, -1, 1}},      //  7
   };
   const  PlotName_t plotName[eGlobPlots] = {
-    {"dutuP","<u - uP>       versus  tuP =>  dw", { 0.5, 0.5}},                    //  0
-    {"dvtvP","<v - vP>       versus  tvP =>  dw", { 2.5, 2.5}},                    //  1
-    {"duvP", "<u - uP>       versus   vP =>  gamma", { -2, -2}},                   //  2 z
-    {"dvuP", "<v - vP>       versus  -uP =>  gamma", { -1, -1}},                   //  3
-    {"duOvertuPvP","<(u - uP)/tuP> versus   vP => alpha", { -2, -2}},             //  4 z
-    {"dvOvertvPvP","<(v - vP)/tvP> versus   vP => alpha", { -2, -2}},             //  5 z
-    {"duOvertuPuP","<(u - uP)/tuP> versus  -uP => beta", { -1, -1}},              //  6
-    {"dvOvertvPuP","<(v - vP)/tvP> versus  -uP => beta", { -1, -1}},              //  7
-    {"duuP", "<u - uP>       versus  -uP", { -1, -1}},                             //  8 
-    {"dvvP", "<v - vP>       versus   vP", { -2, -2}},                             //  9 z
-    {"dXvsX","dX versus  x"          , { 10, 24}},                                // 10
-    {"dXvsY","dX versus  y  => gamma", { 10, 24}},                                // 11
-    {"dXvsZ","dX versus -z  => beta",  { 11.,36}},                                // 12
-    {"dYvsX","dY versus -x  => gamma", { 10, 24}},                                // 13
-    {"dYvsY","dY versus  y"          , { 10, 24}},                                // 14
-    {"dYvsZ","dY versus  z  => alpha", { 11.,36}},                                // 15
-    {"dZvsX","dZ versus  x  => beta",  { 10, 24}},                                // 16
-    {"dZvsY","dZ versus -y  => alpha", { 10, 24}},                                // 17
-    {"dZvsZ","dZ versus  z",           { 11.,36}},                                // 18
+    {"dutuP","<u - uP>       versus  tuP =>  dw", { 0.5, 0.5, 1}},                    //  0
+    {"dvtvP","<v - vP>       versus  tvP =>  dw", { 2.5, 2.5, 1}},                    //  1
+    {"duvP", "<u - uP>       versus   vP =>  gamma", { -2, -2, 1}},                   //  2 z
+    {"dvuP", "<v - vP>       versus  -uP =>  gamma", { -1, -1, 1}},                   //  3
+    {"duOvertuPvP","<(u - uP)/tuP> versus   vP => alpha", { -2, -2, 1}},             //  4 z
+    {"dvOvertvPvP","<(v - vP)/tvP> versus   vP => alpha", { -2, -2, 1}},             //  5 z
+    {"duOvertuPuP","<(u - uP)/tuP> versus  -uP => beta", { -1, -1, 1}},              //  6
+    {"dvOvertvPuP","<(v - vP)/tvP> versus  -uP => beta", { -1, -1, 1}},              //  7
+    {"duuP", "<u - uP>       versus  -uP", { -1, -1, 1}},                             //  8 
+    {"dvvP", "<v - vP>       versus   vP", { -2, -2, 1}},                             //  9 z
+
+    {"dXvsX","dX versus  x"          , { 10, 15, 24}},                                // 10
+    {"dXvsY","dX versus  y  => gamma", { 10, 15, 24}},                                // 11
+    {"dXvsZ","dX versus -z  => beta",  { 11, 24, 24}},                                // 12
+    {"dYvsX","dY versus -x  => gamma", { 10, 15, 24}},                                // 13
+    {"dYvsY","dY versus  y"          , { 10, 15, 24}},                                // 14
+    {"dYvsZ","dY versus  z  => alpha", { 11 ,24, 24}},                                // 15
+    {"dZvsX","dZ versus  x  => beta",  { 10, 15, 24}},                                // 16
+    {"dZvsY","dZ versus -y  => alpha", { 10, 15, 24}},                                // 17
+    {"dZvsZ","dZ versus  z",           { 11, 24, 24}},                                // 18
     
-    {"dX4dx","dX vs -1+jx*vx          => dx",  {2.2,2.2}},                    // 19
-    {"dX4dy","dX vs    jx*vy          => dy",    { 1, 1}},                    // 20
-    {"dX4dz","dX vs    jx*vz          => dz",  {.01,.01}},                    // 21
-    {"dX4da","dX vs    jx*(-vy*z+vz*y)=> alpha", {10,20}},                    // 22
-    {"dX4db","dX vs  -z+jx*(vx*z-vz*x)=> beta ", {20,40}},                    // 23
-    {"dX4dg","dX vs  [y]+jx*(-vx*y+vy*x)=> gamma", {10,25}},                    // 24
+    {"dX4dx","dX vs -1+jx*vx          => dx",    {  3, 3, 24}},                    // 19
+    {"dX4dy","dX vs    jx*vy          => dy",    {1.2, 1, 24}},                    // 20
+    {"dX4dz","dX vs    jx*vz          => dz",    {.01,.8, 24}},                    // 21
+    {"dX4da","dX vs    jx*(-vy*z+vz*y)=> alpha", { 6,15, 24}},                    // 22
+    {"dX4db","dX vs  -z+jx*(vx*z-vz*x)=> beta ", {10,50, 24}},                    // 23
+    {"dX4dg","dX vs  [y]+jx*(-vx*y+vy*x)=> gamma", { 4, 6, 24}},                    // 24
     
-    {"dY4dx","dY vs    jy*vx          => dx",    { 1, 1}},                    // 25
-    {"dY4dy","dY vs -1+jy*vy          => dy",  {2.2,2.2}},                    // 26
-    {"dY4dz","dY vs    jy*vz          => dz",  {.01,.01}},                    // 27
-    {"dY4da","dY vs  z+jy*(-vy*z+vz*y)=> alpha", {20,35}},                    // 28
-    {"dY4db","dY vs     jy*(vx*z-vz*x)=> beta ", {10,20}},                    // 29
-    {"dY4dg","dY vs [-x]+jy*(-vx*y+vy*x)=> gamma", {10,25}},                    // 30
+    {"dY4dx","dY vs    jy*vx          => dx",    { 1.2, 0.8, 24}},                    // 25
+    {"dY4dy","dY vs -1+jy*vy          => dy",  {2.2,2.2, 24}},                    // 26
+    {"dY4dz","dY vs    jy*vz          => dz",  {.01,1.0, 24}},                    // 27
+    {"dY4da","dY vs  z+jy*(-vy*z+vz*y)=> alpha", {10,50, 24}},                    // 28
+    {"dY4db","dY vs     jy*(vx*z-vz*x)=> beta ", { 6,15, 24}},                    // 29
+    {"dY4dg","dY vs [-x]+jy*(-vx*y+vy*x)=> gamma", {4,5, 24}},                    // 30
     
-    {"dZ4dx","dZ vs    jz*vx          => dx",  {2.2,2.2}},                    // 31
-    {"dZ4dy","dZ vs    jz*vy          => dy",  {2.2,2.2}},                    // 32
-    {"dZ4dz","dZ vs -1+jz*vz          => dz",  {2.2,2.2}},                    // 33
-    {"dZ4da","dZ vs -y+jz*(-vy*z+vz*y)=> alpha", {20,80}},                    // 34
-    {"dZ4db","dZ vs  x+jz*( vx*z-vy*x)=> beta ", {20,80}},                    // 35
-    {"dZ4dg","dZ vs    jz*(-vx*y+vy*x)=> gamma", {5,10}},                    // 36
+    {"dZ4dx","dZ vs    jz*vx          => dx",  { 3, 2.2, 24}},                    // 31
+    {"dZ4dy","dZ vs    jz*vy          => dy",  {1.2,0.8, 24}},                    // 32
+    {"dZ4dz","dZ vs -1+jz*vz          => dz",  {0.1,0.8, 24}},                    // 33
+    {"dZ4da","dZ vs -y+jz*(-vy*z+vz*y)=> alpha", { 6,15, 24}},                    // 34
+    {"dZ4db","dZ vs  x+jz*( vx*z-vy*x)=> beta ", {10,50, 24}},                    // 35
+    {"dZ4dg","dZ vs    jz*(-vx*y+vy*x)=> gamma", {4,  6, 24}},                     // 36
+
+
   };
   Double_t rCut = 1.0;
   TFile *fOut = new TFile(fOutFileName,"recreate");
@@ -407,31 +410,35 @@ void HftT::Loop(Int_t Nevents) {
   }  // NoLayers
   //              T  S
 #endif
-  TH2F *GloPlots[27][15];
+  TH2F *GloPlots[27][16];
   memset(GloPlots,0,27*15*sizeof(TH2F *));
-  for (Int_t s = 0; s < 14; s++) { // no SSt
+  for (Int_t s = 1; s <= 16; s++) { 
     for (Int_t i = 0; i < 27; i++) {
       Int_t t = i+10;
       Name = Form("%s%02i",plotName[t].Name,s);
-      if (s <=  9) 	      Title = Form("%s for PXL Sector  %i",plotName[t].Title,s+1);
-      if (s == 10 || s == 11) Title = Form("%s for PXL Half %i",plotName[t].Title,s-9);
-      if (s == 12)            Title = Form("%s for All-PXL",plotName[t].Title);
-      if (s == 13)            Title = Form("%s for All-Ist",plotName[t].Title);
-      if (s == 14)            Title = Form("%s for All-Ssd",plotName[t].Title);
+      if (s <= 10) 	      Title = Form("%s for PXL Sector  %i",plotName[t].Title,s);
+      if (s == 11)            Title = Form("%s for Pxl 1 half",plotName[t].Title);
+      if (s == 12)            Title = Form("%s for Pxl 2 half",plotName[t].Title);
+      if (s == 13)            Title = Form("%s for All Pxl",plotName[t].Title);
+      if (s == 14)            Title = Form("%s for All Ist",plotName[t].Title);
+      if (s == 15)            Title = Form("%s for All Ssd",plotName[t].Title);
+      if (s == 16)            Title = Form("%s for All HFT",plotName[t].Title);
+#if 1
       Int_t m = 0;
       if (s == 14) m = 1;
-#if 0
+      if (s == 15) m = 2;
+      if (s == 16) m = 1;
       Double_t xmax = plotName[t].xmax[m];
       Int_t n = (Int_t) (4.*xmax);
       if (n < 100) n = 100;
-      if( (i == 14) || (i==20) ) n = 400;
-      Double_t ymax = 1.0;
+      if (n > 400) n = 400;
+      Double_t ymax = 0.4;
 #else
       Int_t    n = 100;
       Double_t xmax = 0;
       Double_t ymax = 0;
 #endif
-      GloPlots[i][s] = new TH2F(Name,Title, n,-xmax,xmax,500,-ymax,ymax);
+      GloPlots[i][s-1] = new TH2F(Name,Title, n,-xmax,xmax,500,-ymax,ymax);
     }
   }
   Long64_t nentries = fChain->GetEntriesFast();
@@ -476,7 +483,7 @@ void HftT::Loop(Int_t Nevents) {
       if (! hitK) continue;
 #endif
       Int_t layer  = hitK->Layer();
-      Int_t sector = hitK->Sector()+1;
+      Int_t sector = hitK->Sector();
       Int_t ladder = hitK->Ladder();
       Int_t half   = hitK->Half();
       if (ladder == 0) continue;
@@ -548,15 +555,23 @@ void HftT::Loop(Int_t Nevents) {
 	{dZ, ( x+dzP*( vx*z-vz*x))},
 	{dZ, (   dzP*(-vx*y+vy*x))}
       };
-      for (Int_t l = 0; l < 27; l++) {
-	if      (layer <= 2) {
-	  GloPlots[l][sector-1]->Fill(vars[l][1],vars[l][0]); // Pxl Sector
-	  assert(half == 1 || half == 2);
-	  GloPlots[l][9+half]->Fill(vars[l][1],vars[l][0]); // Pxl Half
-	  GloPlots[l][12]->Fill(vars[l][1],vars[l][0]); // Pxl as whole
-	} else if (layer == 3) {GloPlots[l][13]->Fill(vars[l][1],vars[l][0]); // Ist
-	} else if (layer == 4) {GloPlots[l][13]->Fill(vars[l][1],vars[l][0]);  // Sst
-	}	  
+      Int_t ss[4] = {0, 0, 0, 16};
+      if (layer <= 2) {
+	ss[0] = sector;               // Pxl sector
+	if (sector <= 5) ss[1] = 11;  // Pxl 1-st half
+	else             ss[1] = 12;  // Pxl 2-nd half
+	ss[2] = 13;                   // Pxl as whole
+      } else if (layer == 3) {
+	ss[0] = 14;                   // Ist
+      } else if (layer == 4) {
+	ss[0] = 15;                   // Sst
+      }
+      for (Int_t k = 0; k < 4; k++) {
+	Int_t s = ss[k];
+	if (! s) continue;
+	for (Int_t l = 0; l < 27; l++) {
+	  GloPlots[l][s-1]->Fill(vars[l][1],vars[l][0]); // Pxl Sector
+	}
       }
 #if 0
       Double_t vxyz[3] = {vx, vy, vz};

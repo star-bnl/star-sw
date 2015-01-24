@@ -426,8 +426,9 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
 	for (size_t ih = 0; ih < vec.size(); ih++) {
 	  StIstHit *hit = (StIstHit *)vec[ih];
 	  if (!hit) continue;
-	  Double_t global[3] = {hit->position().x(), hit->position().y(), hit->position().z()};
+	  Double_t global[3];// = {hit->position().x(), hit->position().y(), hit->position().z()};
 	  Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
+	  comb->LocalToMaster(local,global);
 	  if (_debug) {LOG_INFO << (*hit) << endm;}
 #ifdef __BEST__
 	  HitMatchT *h = new HitMatchT();
@@ -499,8 +500,9 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
 	    StPxlHit *hit = (StPxlHit *)vec[ih];
 	    if (!hit) continue;
 	    if (_debug) {LOG_INFO << (*hit) << endm;}
-	    Double_t global[3] = {hit->position().x(), hit->position().y(), hit->position().z()};
+	    Double_t global[3];// = {hit->position().x(), hit->position().y(), hit->position().z()};
 	    Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
+	    comb->LocalToMaster(local,global);
 #ifdef __BEST__
 	    HitMatchT *h = new HitMatchT();
 #else

@@ -1,11 +1,13 @@
 /*
   root.exe makeHftPlots.C
  */
-void makeHftPlots(const Char_t *tag = ""){//"dEdx") {
+void makeHftPlots(const Char_t *treefiles = ""){//"dEdx") {
   gROOT->LoadMacro("bfc.C");
   TString Chain("tpcDb,istDb,pxlDb,StEvent,detDb,HftMatTree,nodefault");
   bfc(-1,Chain,0,0,0);
-  TDirIter Dir("./*tree.root");
+  TString TreeFiles(treefiles);
+  if (TreeFiles == "") {TreeFiles = "./*.tree.root";}
+  TDirIter Dir(TreeFiles.Data());
   tchain = new TChain("t");
   Int_t NFiles = 0;
   ULong64_t nEvents = 0;
@@ -28,11 +30,13 @@ void makeHftPlots(const Char_t *tag = ""){//"dEdx") {
   }
   cout << "chained " << NFiles  << " files\t" 
        << "\twith total\t" << nEvTot << " events" << endl;
- 
   HftT t(tchain);
-  TString Out("Out");
-  Out += "Plots"; Out += tag; 
-  Out += ".root";
+  TString Out(gSystem->BaseName(TreeFiles));
+  if (Out == "*.tree.root") {
+    Out = "Out.plot.root";
+  } else {
+    Out.ReplaceAll(".tree.root",".plot.root");
+  }
   cout << " ===> " << Out << endl;
   t.SetOutFileName(Out);
   t.Loop(0);

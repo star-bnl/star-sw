@@ -1,6 +1,3 @@
-/* 
-   offline/hft/calibrations/alignment/plots/Draw/HFTDraw.C
- */ 
 //#define TSPECTRA
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Riostream.h"
@@ -27,7 +24,7 @@
 //#include "DeDxTree.C"
 #include "TMinuit.h"
 #include "TSpectrum.h"
-//#include "StBichsel/Bichsel.h"
+#include "StBichsel/Bichsel.h"
 #include "TROOT.h"
 #include "TString.h"
 #include "TObjString.h"
@@ -67,25 +64,9 @@ static const Char_t *plotName[] = {
   "dvuP", "duvH", "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 10
    //  "duuP", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
    //  "dvuP",/* "duvH",*/ "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 9
-  "dXvsZL","dYvsZL","dZvsZL",
-  //  "dXvsX","dXvsY","dYvsX",
-  //  "dYvsY","dZvsX","dZvsY",
-  // 11
-  "dX4dxL","dX4dyL",//  "dX4dz",
-  "dX4daL","dX4dbL","dX4dgL","dY4dxL","dY4dyL",
-  // "dY4dz",
-  "dY4daL",
-  "dY4dbL","dY4dgL",//"dZ4dx","dZ4dy",
-  // "dZ4dz",
-  "dZ4daL","dZ4dbL","dZ4dgL"};
-static const Char_t *plotNameG[] = {
-  //  "duuH", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
-  //  "dvuP", "duvH", "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 10
-   //  "duuP", "duvP", "dutuP", "duOvertuPuP", "duOvertuPvP",  
-   //  "dvuP",/* "duvH",*/ "dvtvP", "dvOvertvPuP", "dvOvertvPvP", // 9
   "dXvsZ","dYvsZ","dZvsZ",
-  //  "dXvsX","dXvsY","dYvsX",
-  //  "dYvsY","dZvsX","dZvsY",
+  "dXvsX","dXvsY","dYvsX",
+  "dYvsY","dZvsX","dZvsY",
   // 11
   "dX4dx","dX4dy",//  "dX4dz",
   "dX4da","dX4db","dX4dg","dY4dx","dY4dy",
@@ -263,7 +244,7 @@ TF1 *InitGP() {
   const Par_t par[7] = {
     {"logN1",    5.,    0.,   25.},
     {"mu1",      0.,   -1.,    1.},
-    {"sigma1",0.01, 0.001,   0.10},
+    {"sigma1",0.01, 0.001,    1.0},
     {"logN2",    1.,    0.,   25.},
     {"mu2",      0.,   -1.,    1.},
     {"sigma2", 0.10,  0.01,    1.},
@@ -276,6 +257,14 @@ TF1 *InitGP() {
   }
 #endif
   return gp;
+}
+//________________________________________________________________________________
+void UpdateGP(TF1 *gp, TF1 *gaus) {
+  if (! gp || ! gaus) return;
+  gp->SetParameter(0,TMath::Log(gaus->GetParameter(0)));
+  gp->SetParameter(1,gaus->GetParameter(1));
+  gp->SetParameter(2,TMath::Abs(gaus->GetParameter(2)));
+  gp->SetParameter(3,0.);
 }
 //________________________________________________________________________________
 Double_t fbackgr(Double_t *x, Double_t *par) {
@@ -335,7 +324,7 @@ TF1 *Peaks(TH1 *h=0) {
   //  fback->SetRange(xmin,xmax);
   //  fback->SetNpx(1000);
   fback->SetParameter(0,constant); fback->SetParLimits(0,constant-10,constant+30);
-  fback->SetParameter(1,mean); fback->SetParLimits(1,-1,1);
+  fback->SetParameter(1,mean); fback->SetParLimits(1,-10,10);
   fback->SetParameter(2,rms/2.);
   fback->SetParLimits(2,20e-4,rms);
   fback->FixParameter(3,0);
@@ -464,10 +453,10 @@ void SlicesYFit(TH2* h=0, Int_t binmin=0, Int_t binmax=0, Int_t cut=10, Option_t
       }
 #if 0 
       hpy->Draw();
-      //     c1->Update();
-      //   cout << "type something" << endl;
-      //   Int_t i;
-      //    cin >> i;
+      c1->Update();
+      cout << "type something" << endl;
+      Int_t i;
+      cin >> i;
 #endif
       delete hpy;
     }
@@ -512,32 +501,16 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
   TString line("");
   TString comment("");
   TH2F *h = 0;
-  name = plotName[j]; 
-  if (i == 6) {name += "AllSvt";}
-  if (i == 7) {name += "AllSsd";}
-  if (i == 8) {name += "AllSvtSsd";}
   if (c2) c2->cd();
-  if (i < 6)  h = (TH2F *) f->Get(Form("%s%i%s",plotName[j],i,"Ld"));
-  else {
-    TH2F *h2 = (TH2F *) f->Get(Form("%s%i",plotName[j],s1));
-    if (! h2)  { cout << "Histogram " << Form("%s%i",plotName[s1]) << " is not found" << endl; return;}
-    h = new TH2F(*h2);
-    cout << "Histogram " << Form("%s%i",plotName[s1]) << " is  found f,i,j,nx,s,s1"<<f <<i<<j<<nx<<s<<s1 << endl;
-    h->SetName(name);
-    TString Title(h->GetTitle());
-    Int_t index = Title.Index("Sector");
-    if (index < 0) index = Title.Index("Clam");
-    if (index > 0) {
-      TString t(Title,index);
-      t += "All";
-      h->SetTitle(t);
-    }
-    for (s = s1+1; s <= s2; s++) {
-      h2 = (TH2F *) f->Get(Form("%s%i",plotName[j],s));
-      h->Add(h2);
-    }
+  h = (TH2F *) f->Get(Form("%s%02i",plotName[j],s));
+  if (! h) return;
+  for (Int_t k = s1+1; k <= s2; s++) {
+    TH2F *h2 = (TH2F *) f->Get(Form("%s%0i",plotName[j],k));
+    if (! h2) return;
+    h->Add(h2);
   }
-  if (! h) {cout << "Histogram for i/j = " << i << "/" << j << endl; return;}
+  if (! h) {cout << "Histogram for s/j = " << s << "/" << j << endl; return;}
+  if (h->GetEntries() < 100) {cout << "Histogram:" << h->GetName() << " for s/j = " << s << "/" << j << " is empty" <<  endl; return;}
   h->SetXTitle(f->GetName());
   TProfile *prof = h->ProfileX();
   prof->SetMarkerStyle(24);
@@ -548,7 +521,8 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
   Double_t dMu = 0;
   TString HistName(h->GetName());
   TF1 *gaus = sp->GetFunction("gaus");
-  gp->SetParameters(TMath::Log(gaus->GetParameter(0)),gaus->GetParameter(1),TMath::Abs(gaus->GetParameter(2)),0.);
+  if (! gaus) {cout << "Histogram:" << sp->GetName() << " Guas fit fails" << endl; return;}
+  UpdateGP(gp,gaus);
   sp->Fit(gp,"q");
   Mu = sp->GetFunction("gp")->GetParameter(1);
   if (j >= firstHG && j < firstHP) dMu = sp->GetFunction("gp")->GetParError(1);
@@ -675,7 +649,7 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
     Int_t ij = i + nx*(j-firstH) + 1;
     c1->cd(ij)->SetLogz(1);
     h->SetMinimum(1);
-#if 1
+#if 0
     if (h) h->DrawCopy("colz");
     if (prof) prof->DrawCopy("same");
 #else
@@ -683,204 +657,7 @@ void FitG(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, T
     if (prof) prof->Draw("same");
 #endif
     if (fit) {
-#if 1
-      fit->DrawCopy("same"); 
-#else
-      fit->Draw("same"); 
-#endif
-      TF1 *pol1 = fit->GetFunction("PolN"); 
-      if (pol1) {pol1->SetLineColor(2); pol1->Draw("same");}
-      // 	 TPaveStats *st = (TPaveStats*) fit->FindObject("stats");
-      // 	 if (st) {
-      // 	   st->SetX1NDC(0.1);
-      // 	   st->SetX2NDC(0.5);
-      // 	   st->Draw();
-      // 	 }
-    }
-    if (leg->GetEntry()) leg->Draw();
-    //        cout << f->GetName() << "\t" << h->GetName() << "/" << h->GetTitle() 
-    // 	    << "\tMu = " << Mu << " +/- " << dMu 
-    // 	    << "\tSlope = " << slope << " +/- " << dslope << endl;
-    //       static const Char_t *blank10 = Form("|             ");
-  }
-}
-//_______________________________________________________________________________________________________
-void FitGL(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, TF1 *gp, ofstream &out,
-	  Double_t FitR[6], Double_t dFitR[6], Double_t LSFit[6], Double_t dLSFit[6],TString &name) {
-  TString line("");
-  TString comment("");
-  TH2F *h = 0;
-    name = plotNameG[j]; 
-    //if (i == 13) {name += "All IST";}
-    //if (i == 14) {name += "All SSD";}
-    //if (i == 10) {name += "All PXL Half 1";}
-    //if (i == 11) {name += "All PXL Half 2";}
-    //if (i == 12) {name += "All PXL";}
-    //if (i < 10) {name += Form("PXL Sector %1 ",i+1);}
-  if (c2) c2->cd();
-  h = (TH2F *) f->Get(Form("%s%i",plotNameG[j],i));
-  if (! h)  { cout << "Histogram " << Form("%s%i",plotNameG[j],i) << " is not found" << endl; return;}
-    h->SetName(name);
-    TString Title(h->GetTitle());
-    Int_t index = Title.Index("Sector");
-    if (index < 0) index = Title.Index("Clam");
-    if (index > 0) {
-      TString t(Title,index);
-      t += "All";
-      h->SetTitle(t);
-    }
-  h->SetXTitle(f->GetName());
-  TProfile *prof = h->ProfileX();
-  prof->SetMarkerStyle(24);
-  prof->SetMarkerColor(6);
-  TH1 *sp = h->ProjectionY("_py",-1,-1,"e");
-  sp->Fit("gaus","q");
-  cout << "Done fitting ProjY with gaussian sp"<<endl;
-  Double_t Mu = 0;
-  Double_t dMu = 0;
-  TString HistName(h->GetName());
-  TF1 *gaus = sp->GetFunction("gaus");
-  gp->SetParameters(TMath::Log(gaus->GetParameter(0)),gaus->GetParameter(1),TMath::Abs(gaus->GetParameter(2)),0.);
-  cout << "Done getfunction"<<endl;
-  sp->Fit(gp,"q");
-  Mu = sp->GetFunction("gp")->GetParameter(1);
-  if (j >= firstHG && j < firstHP) dMu = sp->GetFunction("gp")->GetParError(1);
-  cout << "Done get errors"<<endl;
-  Double_t *params = gp->GetParameters();
-  params[0] -= TMath::Log(100.);
-  gp->SetParameters(params);
-  //  SlicesYFit(h,0,0,10,"qnig3"); //g3
-  SlicesYFit(h,0,0,10,"qni"); //g3
-  TH1 *fit = (TH1 *) gDirectory->Get(Form("%s_1",h->GetName()));
-  //       TH1 *sig = (TH1 *) gDirectory->Get(Form("%s_2",h->GetName()));
-  //       TH1 *gra = (TH1 *) gDirectory->Get(Form("%s_3",h->GetName()));
-  Double_t slope = 0;
-  Double_t dslope = 0;
-  TLegend *leg = new TLegend(0.2,0.2,0.8,0.3,"");
-  leg->SetTextSize(0.033);
-  if (fit) {
-    cout << "fit.is.TRUE    i= "<<i<<endl;
-    fit->SetTitle(h->GetTitle());
-    fit->SetMarkerStyle(20);
-    fit->SetMarkerColor(1);
-    fit->SetMaximum(0.2);
-    fit->SetMinimum(-.2);
-    fit->SetStats(1);
-    //    Double_t zmax = 99;
-    Double_t zmax = 25;
-    FitPolN(fit,-zmax,zmax);
-    //	fit->Fit("PolN","eqr","",-zmax,zmax);
-    TF1 *pol1 = fit->GetFunction("PolN");
-    Double_t prob = 0;
-    if (pol1) {
-      prob = pol1->GetProb();
-      // 	if (prob <= 1e-3) {
-      // 	  fit = prof;
-      // 	  FitPolN(fit,-zmax,zmax);
-      // 	  pol1 = fit->GetFunction("PolN");
-      // 	  prob = pol1->GetProb();
-      // 	}
-      //      if (prob > 1.e-7) {
-	slope = pol1->GetParameter(1);
-	dslope = pol1->GetParError(1);
-	//      }
-    }
-    static const Char_t *dXYZ[3] = {"dX", "dY", "dZ"};
-    static const Char_t *abc[6]  = {"=> dx", "=> dy", "=> dz", "=> alpha","=> beta","=> gamma"};
-    TString Name(h->GetName());
-    TString Title(h->GetTitle());
-    line = "";
-    if (j >= firstHG && j < firstHP) {
-      if (dMu > 0) {
-	cout << "dMu >0    i= "<<i<<endl;
-	for (Int_t m = 0; m < 3; m++) {
-	  if (Name.BeginsWith(dXYZ[m])) {
-	    Double_t mu = -1e4*Mu;
-	    Double_t dmu = 1e4*dMu;
-	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
-	    Double_t dev = mu - LSFit[m];
-	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
-	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
-	      Double_t dMu2 = dMu*dMu;
-	      FitR[m]  += -Mu/dMu2;
-	      dFitR[m] +=  1./dMu2;
-	      line += "A";
-	    } else line +="R";
-	    if (m == 2) comment = Form("| slope = %7.2f+-%5.2f",1e3*slope, 1e3*dslope);
-	  }
-	  else                          line += Form("|               ");
-	  //	 cout << line << endl;
-	}
-	for (Int_t m = 3; m < 6; m++) {
-	  if (dslope > 0 && Title.Contains(abc[m]))   {
-	    Double_t mu = 1e3*slope;
-	    Double_t dmu = 1e3*dslope;
-	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
-	    Double_t dev = mu - LSFit[m];
-	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
-	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
-	      Double_t dslope2 = dslope*dslope;
-	      FitR[m]  += slope/dslope2;
-	      dFitR[m] +=  1./dslope2;
-	      line += "A";
-	    } else line +="R";
-	  }
-	  else                          line += Form("|               ");
-	  //	 cout << line << endl;
-	}
-      }
-      if (pol1) 
-	leg->AddEntry(pol1,Form("Mu = %7.2f +- %5.2f (mkm) Slope = %7.2f +- %5.2f (mrad)", 
-				1e4*Mu, 1e4*dMu, 1e3*slope, 1e3*dslope));
-    } else {
-      if (j >= firstHP) {
-	for (Int_t m = 0; m < 6; m++) {
-	  if (dslope > 0 && Title.Contains(abc[m]))   {
-	    Double_t scale = 1e4;
-	    if (m >= 3) scale = 1.e3;
-	    Double_t mu = scale*slope;
-	    Double_t dmu = scale*dslope;
-	    line += Form("|%7.2f+-%5.2f",mu,dmu); 
-	    Double_t dev = mu - LSFit[m];
-	    Double_t sdev = TMath::Sqrt(dmu*dmu+dLSFit[m]*dLSFit[m]);
-	    if (dLSFit[m] == 0 || sdev > 0 && TMath::Abs(dev/sdev) < nSigMax) {
-	      Double_t dslope2 = dslope*dslope;
-	      FitR[m]  += slope/dslope2;
-	      dFitR[m] +=  1./dslope2;
-	      line += "A";
-	    } else line +="R";
-	    if (pol1) {
-	      TString legT(abc[m]);
-	      legT.ReplaceAll("=> d","#Delta ");
-	      legT.ReplaceAll("=> ","#");
-	      legT += Form(" = %8.2f +- %8.2f",mu,dmu);
-	      if (scale < 5.e3) legT += "(mrad)";
-	      else              legT += "(mkm)";
-	      legT += Form(" prob = %4.3f",prob);
-	      leg->AddEntry(pol1,legT);
-	    }
-	  }
-	  else  line += Form("|               ");
-	}
-      }
-    }
-    line += "|"; line += fit->GetName(); line += "/"; line += h->GetTitle();// line += "\t"; line += f->GetName();
-    line += comment;
-    cout << line << endl;
-    out << line << endl;
-
-    Int_t ij = i + nx*(j-firstH) + 1;
-    c1->cd(ij)->SetLogz(1);
-    h->SetMinimum(1);
-#if 1
-    if (h) h->DrawCopy("colz");
-    if (prof) prof->DrawCopy("same");
-#else
-    if (h) h->Draw("colz");
-    if (prof) prof->Draw("same");
-#endif
-    if (fit) {
-#if 1
+#if 0
       fit->DrawCopy("same"); 
 #else
       fit->Draw("same"); 
@@ -902,132 +679,15 @@ void FitGL(TFile *f, Int_t i, Int_t j, Int_t nx, Int_t s, Int_t &s1, Int_t &s2, 
   }
 }
 //________________________________________________________________________________
-void TDrawG(Int_t layers=2) {
-  Int_t s, s1, s2;
-  s = s1 = s2 = layers;
-  Int_t nx = 5;
-  //if (s > 5) nx = s; // 8 => sum for SVT and SSD
+void TDrawG(Int_t sector2=16, Int_t sector1=1) {
+  if (sector2 < sector1) sector2 = 14;
+  Int_t nx = sector2 - sector1 + 1;
   Int_t ny = lastH - firstH + 1;
   Int_t scaleX = 60; //600/nx;
   Int_t scaleY = 40; //800/ny;
   //  Int_t scale  = TMath::Min(scaleX,scaleY);
   c2 = new TCanvas();
-  c1 = new TCanvas("Global","SVT ClamShell and SSD sectors",10,10,10+scaleX*nx,10+scaleY*ny);
-  cout << "nx/ny = " << nx << "/" << ny << endl;
-  c1->Divide(nx,ny);
-  ofstream out;
-  TString Out("Results.");
-  Out += gSystem->BaseName(gDirectory->GetName());
-  Out.ReplaceAll(".root","");
-  Out.ReplaceAll(" ","");
-  if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
-  else                              out.open(Out, ios::app);
-  TF1 *gp = InitGP();
-  TCollection *files = gROOT->GetListOfFiles();
-  TIter next(files);
-  TFile *f = (TFile *) next();
-  //  TFile *f = (TFile *) gDirectory;
-  if (! f) return;
-  out <<  "____________________________________________________________________________________________________"  << endl;
-  out <<  "|dX mkm         |dY mkm         |dZ mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
-  cout << "____________________________________________________________________________________________________"  << endl;
-  cout << "|dX mkm         |dY mkm         |dZ mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
-  //  for (Int_t i = 0; i < nx; i++) {
-  for (Int_t i = 4; i < nx; i++) {
-    if(i==6) continue;
-    if(i==8) continue;
-    cout << "doing  i= "<< i << endl;
-    f->cd();
-    out  << "______________________________________________________________________________________________ "  << f->GetName() << endl;
-    cout << "______________________________________________________________________________________________ "  << f->GetName() << endl;
-    Double_t FitR[6], dFitR[6], LSFit[6], dLSFit[6];
-    memset (FitR, 0, 6*sizeof(Double_t));
-    memset (dFitR, 0, 6*sizeof(Double_t));
-    memset (LSFit, 0, 6*sizeof(Double_t));
-    memset (dLSFit, 0, 6*sizeof(Double_t));
-    TString line("");
-    TString lTitle("");
-    TH1D *LSF = (TH1D *) f->Get("LSF");
-    TString name; 
-    s = s1 = s2 = i;
-    if (i == 6) {s1 = 0; s2 = 1;}
-    if (i == 7) {s1 = 2; s2 = 5;}
-    if (i == 8) {s1 = 0; s2 = 5;}
-    if(i>0) {
-      if (LSF) {
-	Double_t *array = LSF->GetArray();
-	TRVector AmX(6);
-	TRSymMatrix S(6);
-	for (s = s1; s <= s2; s++) {
-	  Int_t im = 1 + 28*s;
-	  Int_t is = im + 6;
-	  AmX += TRVector(6,array+im);
-	  S   += TRSymMatrix(6,array+is);// cout << "S " << S << endl;
-	}
-	TRSymMatrix SInv(S,TRArray::kInverted);// cout << "SInv " << SInv << endl;
-	TRVector  X(SInv,TRArray::kSxA,AmX); //cout << "X " << X << endl;
-	TString line("");
-	for (Int_t l = 0; l < 6; l++) {
-	  Double_t scale = 1e4;
-	  if (l > 2) scale = 1e3;
-	  LSFit[l] = scale*X(l);
-	  dLSFit[l] = scale*TMath::Sqrt(SInv(l,l));
-	  line += Form("|%7.2f+-%5.2f ",LSFit[l],dLSFit[l]); 
-	  if (SInv(l,l) > 0) {
-	    FitR[l]  += X(l)/SInv(l,l);
-	    dFitR[l] +=  1./SInv(l,l);
-	  }
-	}
-	line += "|"; line += LSF->GetName(); line += "/"; 
-	if (i <  6) line += LSF->GetTitle();
-	else {
-	  if (i == 6) line += "Sum Over Svt Shells";
-	  if (i == 7) line += "Sum Over Ssd Sectors";
-	  if (i == 8) line += "Sum Over Svt+Ssd";
-	}
-	cout << line << endl;
-	out << line << endl;
-      } // LSF
-    }
-    for (Int_t j = firstH; j <= lastH; j++) {
-      cout << "Plotname j,i,nx,s,s1" << plotNameG[j]<< endl;
-      cout << "j=" <<  j<< "   i=" <<i << "    nx=" <<nx<< "     s=" <<s<< "    s1=" <<s1 << "    s2="<<s2<<endl;
-      FitG(f,i,j,nx,s,s1,s2,gp, out, FitR, dFitR, LSFit, dLSFit, name); 
-    }
-    for (Int_t m = 0; m < 6; m++) {
-      if (dFitR[m] > 0) {
-	Double_t scale = 1e4;
-	if (m > 2) scale = 1e3;
-	FitR[m] = scale*FitR[m]/dFitR[m]; 
-	dFitR[m] = scale/TMath::Sqrt(dFitR[m]);
-	line += Form("|%7.2f+-%5.2f ", FitR[m],dFitR[m]); 
-      } else {
-	line += Form("|               ");
-      }
-    }
-    line += "| Average for "; 
-    if      (i == 8) line += "All Svt + Ssd";
-    else if (i == 7) line += "All Ssd";
-    else if (i == 6) line += "All Svt";
-    else if (i  < 2) line += Form("SVT ClamShell %i",i);
-    else if (i  < 6) line += Form("SSD Sector %i",i-1);
-    cout << line << endl;
-    out << line << endl;
-  }
-  out.close();
-}
-//________________________________________________________________________________
-void TDrawGL(Int_t layers=15) {
-  Int_t s, s1, s2;
-  s = s1 = s2 = layers;
-  Int_t nx = 15;
-  //if (s > 5) nx = s; // 8 => sum for SVT and SSD
-  Int_t ny = lastH - firstH + 2;
-  Int_t scaleX = 60; //600/nx;
-  Int_t scaleY = 50; //800/ny;
-  //  Int_t scale  = TMath::Min(scaleX,scaleY);
-  c2 = new TCanvas();
-  c1 = new TCanvas("Global","PXL Sectors and IST, SSD",10,10,10+scaleX*nx,10+scaleY*ny);
+  c1 = new TCanvas("Global","HFT, PXL + IST + SST",10,10,10+scaleX*nx,10+scaleY*ny);
   cout << "nx/ny = " << nx << "/" << ny << endl;
   c1->Divide(nx,ny);
   ofstream out;
@@ -1047,8 +707,8 @@ void TDrawGL(Int_t layers=15) {
   out <<  "|dX mkm         |dY mkm         |dZ mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
   cout << "____________________________________________________________________________________________________"  << endl;
   cout << "|dX mkm         |dY mkm         |dZ mkm         |alpha mrad     |beta mrad      |gamma mrad     |Comment" << endl;
-  //  for (Int_t i = 0; i < nx; i++) {
-  for (Int_t i = 0; i < 15; i++) {
+  for (Int_t i = 0; i < nx; i++) {
+    Int_t sector = sector1 + i;
     f->cd();
     out  << "______________________________________________________________________________________________ "  << f->GetName() << endl;
     cout << "______________________________________________________________________________________________ "  << f->GetName() << endl;
@@ -1061,9 +721,15 @@ void TDrawGL(Int_t layers=15) {
     TString lTitle("");
     TH1D *LSF = (TH1D *) f->Get("LSF");
     TString name; 
-    s = s1 = s2 = i;
-    if (i == 13) {s1 = 0; s2 = 20;}
-    if (i == 14) {s1 = 0; s2 = 24;}
+    Int_t s, s1, s2;
+    s = s1 = s2 = sector;                // Pxl sector(1-10), Ist(11), Sst(12)
+#if 0
+    if (sector == 13) {s1 = 1; s2 =  5;} // Pxl 1-st half
+    if (sector == 14) {s1 = 6; s2 = 10;} // Pxl 2-nd half
+    if (sector == 15) {s1 = 1; s2 = 10;} // Pxl whole
+    if (sector == 16) {s1 = 1; s2 = 11;} // Pxl + Ist
+    if (sector == 17) {s1 = 1; s2 = 12;} // Pxl + Ist + Sst
+#endif
     if (LSF) {
       Double_t *array = LSF->GetArray();
       TRVector AmX(6);
@@ -1089,29 +755,19 @@ void TDrawGL(Int_t layers=15) {
 	}
       }
       line += "|"; line += LSF->GetName(); line += "/"; 
-      if (i <  10) line += LSF->GetTitle();
+      if (i <  6) line += LSF->GetTitle();
       else {
-	if (i == 10) line += "Sum Over PXL Shell 1";
-	if (i == 11) line += "Sum Over PXL Shell 2";
-	if (i == 12) line += "Sum Over All PXL ";
-	if (i == 13) line += "Sum Over IST ";
-	if (i == 14) line += "Sum Over SSD ";
-       }
+	if (i == 6) line += "Sum Over Svt Shells";
+	if (i == 7) line += "Sum Over Ssd Sectors";
+	if (i == 8) line += "Sum Over Svt+Ssd";
+      }
       cout << line << endl;
       out << line << endl;
     } // LSF
-    for (Int_t j = firstH; j <= lastH; j++) {
-      cout << "Plotname " << plotName[j]<< endl;
-      cout << "j=" <<  j<< "   i=" <<i << "    nx=" <<nx<< "     s=" <<s<< "    s1=" <<s1 << "    s2="<<s2<<endl;
-      FitGL(f,i,j,nx,s,s1,s2,gp, out, FitR, dFitR, LSFit, dLSFit, name); 
+
+    for (Int_t j = firstH; j <= lastH; j++) {//cout << "Plot:" << plotName[j] << endl;
+      FitG(f,i,j,nx,s,s1,s2,gp, out, FitR, dFitR, LSFit, dLSFit, name); 
     }
-        c1->Update();
-	if( i == 14 ) 
-	  {
-	    cout << "type a number to continue " << endl;
-	    Int_t iif;
-	    cin >> iif;
-	  }
     for (Int_t m = 0; m < 6; m++) {
       if (dFitR[m] > 0) {
 	Double_t scale = 1e4;
@@ -1123,13 +779,15 @@ void TDrawGL(Int_t layers=15) {
 	line += Form("|               ");
       }
     }
-    line += "| Average for "; 
-    if      (i == 12) line += "All  PXL";
-    else if (i == 10) line += "PXL - Shell 1";
-    else if (i == 11) line += "PXL - Shell 2";
-    else if (i == 13) line += "All Ist";
-    else if (i == 14) line += "All Ssd";
-    else if (i  < 10) line += Form("PXL Sector %i",i+1);
+    line += "| Average"; 
+#if 0
+    line += " for ";
+    if      (i == 8) line += "All Svt + Ssd";
+    else if (i == 7) line += "All Ssd";
+    else if (i == 6) line += "All Svt";
+    else if (i  < 2) line += Form("SVT ClamShell %i",i);
+    else if (i  < 6) line += Form("SSD Sector %i",i-1);
+#endif
     cout << line << endl;
     out << line << endl;
   }
@@ -1225,7 +883,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
       out << line << endl;
     }
     for (Int_t j = firstH; j <= lastH; j++) {
-      Int_t Id = ladder + 100*(wafer + 20*layer);
+      Int_t Id = ladder + 100*(wafer + 10*layer);
       h = (TH2 *) gDirectory->Get(Form("%s%04i",plotName[j],Id));
       if (! h) continue;
       h->SetMinimum(1);
@@ -1241,7 +899,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
       Double_t Mu = 0;
       Double_t dMu = 0;
       TF1 *gaus = sp->GetFunction("gaus");
-      gp->SetParameters(TMath::Log(gaus->GetParameter(0)),gaus->GetParameter(1),TMath::Abs(gaus->GetParameter(2)),0.);
+      UpdateGP(gp,gaus);
       sp->Fit(gp,"q");
       Mu = sp->GetFunction("gp")->GetParameter(1);
       dMu = sp->GetFunction("gp")->GetParError(1);
@@ -1394,7 +1052,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
 	outC << lineC << endl;
       } 
     endhLoop:
-#if 1
+#if 0
       if (h) h->DrawCopy("colz");
       if (prof) prof->DrawCopy("same");
 #else
@@ -1402,7 +1060,7 @@ void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0)
       if (prof) prof->Draw("same");
 #endif
       if (fit) {
-#if 1
+#if 0
 	fit->DrawCopy("same"); 
 #else
 	fit->Draw("same"); 
@@ -1531,7 +1189,7 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
       Int_t ij = i + nx*j + 1;
       c1->cd(ij)->SetLogz(1);
       wafer = w1 + j;
-      Int_t Id = ladder + 100*(wafer + 20*layer);
+      Int_t Id = ladder + 100*(wafer + 10*layer);
       h = (TH2 *) gDirectory->Get(Form("%s%04i",tag,Id));
       if (!h) continue;
       h->SetMinimum(1);
@@ -1638,7 +1296,7 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
 	}
       }
     ENDL:
-#if 1
+#if 0
       h->DrawCopy("colz");
       if (prof) prof->DrawCopy("same");
       if (fit) {
@@ -1660,8 +1318,7 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
 }
 //________________________________________________________________________________
 void HFTDraw(Int_t k = 0) {
-  //if (k == 0) {TDrawG(); return;}
-  if (k == 0) {TDrawGL(); return;}
+  if (k == 0) {TDrawG(); return;}
   if (k == -3) {
     for (Int_t i = 3; i >= 1; i--) TDrawL(-1,i);
     return;
