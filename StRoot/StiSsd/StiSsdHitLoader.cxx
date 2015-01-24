@@ -1,6 +1,9 @@
-// $Id: StiSsdHitLoader.cxx,v 1.13 2009/03/18 19:55:39 fisyak Exp $
+// $Id: StiSsdHitLoader.cxx,v 1.14 2015/01/24 04:43:41 smirnovd Exp $
 // 
 // $Log: StiSsdHitLoader.cxx,v $
+// Revision 1.14  2015/01/24 04:43:41  smirnovd
+// StiSsdHitLoader: Just to be safe got rid of local variable 'ladder' shadowing the loop's counter having the same name
+//
 // Revision 1.13  2009/03/18 19:55:39  fisyak
 // remove StiDetectorFinder class
 //
@@ -84,9 +87,8 @@ void StiSsdHitLoader::loadHits(StEvent* source,
 
 	      if (!hit) throw runtime_error("StiSsdHitLoader::loadHits() - WARNING - hit==0");
 
-	      int ssdLadder = hit->ladder();
-	      int ladder = ssdLadder -1 ;
-	      detector = _detector->getDetector(layer,ladder);	      
+	      detector = _detector->getDetector(layer, hit->ladder() - 1);
+
 	      if (hit && detector) 
 		{
 		  compt++;
