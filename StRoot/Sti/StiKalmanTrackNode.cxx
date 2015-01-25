@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.148.2.11 2015/01/21 17:51:57 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.148.2.12 2015/01/25 05:04:23 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.148.2.12  2015/01/25 05:04:23  perev
+ * _wallx introdused, look comment in .h
+ *
  * Revision 2.148.2.11  2015/01/21 17:51:57  perev
  * 1. Same rotation for kCylindric & kSector. Angles StiKalmanTrackNode:alpha
  *    and StiPlacement::alpha are not the same now
@@ -996,14 +999,14 @@ StiDebug::Break(nCall);
   StiPlacement * place = tDet->getPlacement();
 //double nLayerRadius  = place->getLayerRadius ();
   double nNormalRadius = place->getNormalRadius();
-
   StiShape * sh = tDet->getShape();
   int shapeCode = sh->getShapeCode();
-  double endVal= nNormalRadius,dAlpha=0;
+  double endVal=0,dAlpha=0;
   switch (shapeCode) {
 
   case kPlanar: 
     { //flat volume
+      endVal=nNormalRadius;
       dAlpha = place->getNormalRefAngle();
       dAlpha = nice(dAlpha - _alpha);
       // bail out if the rotation fails...
@@ -1015,7 +1018,7 @@ StiDebug::Break(nCall);
   case kCylindrical:;
     {
       double xy[2][3];
-      position = cylCross(mFP.P,&(mFP._cosCA), mFP.curv(),endVal,dir,xy);
+      position = cylCross(mFP.P,&(mFP._cosCA), mFP.curv(),nNormalRadius,dir,xy);
       if (!position) 			return -11;
       int sol = 0;
       for (sol=0;sol<2;sol++) {
@@ -1024,14 +1027,8 @@ StiDebug::Break(nCall);
         if (!insideL(myX,2|4)) continue;
         dAlpha = mFP.phi()+mFP.curv()*s;
         TVector3 v3(xy[sol][0],xy[sol][1],0);
-        TVector3 par1(mFP.P); par1[2]=0;
-        double delta1 = (v3-par1).Mag();
-
         position = rotate(dAlpha);	
-        TVector3 par2(mFP.P); par2[2]=0;
         v3.RotateZ(-dAlpha);
-        double delta2 = (v3-par2).Mag();
-assert(fabs(delta2-delta1)<1e-6);
         endVal = v3[0];
         break;
       }
@@ -1040,6 +1037,7 @@ assert(fabs(delta2-delta1)<1e-6);
    					break;
   default: assert(0);
   }
+  _wallx = endVal;	//This wall defined and NEVER changed
    
   position = propagate(endVal,shapeCode,dir); 
   if (position) return position;
@@ -1078,7 +1076,7 @@ StiDebug::Break(nCall);
   rotate(ang);
   int ians = propagate(vertex->x(),1,-1);
   if (ians && ians!=kEnded)    return false; // track does not reach vertex "plane"
-  assert(fabs(mFP._sinCA)<1e-2);
+  assert(fabs(mFP._sinCA)<1e-3);
   double qwe = (mFP.x()-vertex->x())*mFP._cosCA 
              + (mFP.y()-vertex->y())*mFP._sinCA;
   assert(fabs(qwe)<1e-4);
@@ -1220,27 +1218,20 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   enum { kTooFar = 33};
 
   StiHit *hit = hitp;
-  double deltaX = 0,rN=0,sCA2,cCA2,deltaY,deltaL;
-  int kase = 0,kaze = 0,shapeCode=0;		// 0=shift accounting deltaX, 1=use THelixTrack
+  double deltaX = 0,sCA2,cCA2,deltaY,deltaL;
+  int kase = 0,kaze = 0;		// 0=shift accounting deltaX, 1=use THelixTrack
 
   do {
    if ( hit) 			{kase = 1; break;}
    if ( !_detector && _hit)	{kase = 1; hit = _hit; break;}
    if ( !_detector) return 0;
-   shapeCode =_detector->getShape()->getShapeCode();
-   rN = _detector->getPlacement()->getNormalRadius();
-   if ( shapeCode ==1) 		{kase = 2; break;}
-   kase = 3;
+                                {kase = 2; break;}
   } while(0);
 
   switch(kase) {
     case 1: { deltaX = hit->x()-mFP.x(); break;}
-    case 2: { deltaX = rN-mFP.x()      ; break;}
-    case 3: {
-      double t = 0.5*(rN*rN-mFP.rxy2())/(mFP.x()*mFP._cosCA+mFP.y()*mFP._sinCA);
-      deltaX = mFP._cosCA*t;
-      if (fabs(t) > 0.1*rN || fabs(t*mFP.curv()) > 0.01) kaze = 1; break;}
-    default: { assert(0 && "Wrong Node");}
+    case 2: { deltaX = _wallx-mFP.x()  ; break;}
+    default:{ assert(0 && "Wrong Node");}
   }//end switch
   
   if (fabs(deltaX)>kTooFar)	kaze = 1;
@@ -1269,16 +1260,8 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   case 1: {// hard way, use THelixTrack
  
     THelixTrack hlx(mFP.P,&mFP._cosCA,mFP.curv()); 
-    double surf[7]={0};
-    int nSurf=0;
-    switch(shapeCode) {
-      case 0:;case kPlanar:
-        surf[0]=mFP.x()+deltaX;surf[1]=-1;nSurf=4;break;
-      case kCylindrical: 
-      case kSector: 
-        surf[0]=rN*rN; surf[4]=-1; surf[5]=-1; nSurf=7;break;
-      default: assert(0 && "Wrong shape code"); 
-    }//end switch
+    double surf[7]={mFP.x()+deltaX,-1,0,0};
+    int nSurf=4;
 
     double x[3];
     deltaL = hlx.Path(999.,surf,nSurf,x,0,1);
@@ -1687,9 +1670,6 @@ static int nCall=0; nCall++;
     return -14;
   }
   if (mFE.check()) return -14;
-
-  if (debug() & 8) PrintpT("U");
-
   return 0; 
 }
 
@@ -1830,6 +1810,7 @@ static const double initAng = atan2(0.6,0.8);
   setHit(h);
   _detector = h->detector();
   _alpha   = _detector->getPlacement()->getNormalRefAngle(); 
+  _wallx   = _detector->getPlacement()->getNormalRadius();
   mFP._sinCA = 0.6;
   mFP._cosCA = 0.8;
   mFP.phi() = initAng;
