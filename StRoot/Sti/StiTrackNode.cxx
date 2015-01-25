@@ -31,6 +31,7 @@ static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[5]*MIN1ERR[5]};
 static const double recvCORRMAX  = 0.99999;
 static const double chekCORRMAX  = 0.99999;
+static const double baddCORRMAX  = 1.1;
 static double MAXPARS[]={500,500,500,3.15,100,100};
 
 //______________________________________________________________________________
@@ -376,7 +377,7 @@ assert(sign()>0); ///???
   int i0=0; if (!_cXX) i0 = 1;
   for (i=i0;i<kNPars;i++) {
     aii = A[idx66[i][i]];
-    if (aii<MIN2ERR[i]) {kase = 1; break;}
+    if (aii<0) {kase = 1; break;}
   }
   if (kase) goto RETN;
   for (i=i0;i<kNPars;i++) {
@@ -385,7 +386,7 @@ assert(sign()>0); ///???
       ajj = A[idx66[j][j]];
       if (ajj<=0) continue;
       aij = A[idx66[i][j]];
-      if ((aij*aij)> chekCORRMAX*aii*ajj) {kase = 2; break;}
+      if ((aij*aij)> aii*ajj) {kase = 2; break;}
     }
     if (kase) break;
   }  
