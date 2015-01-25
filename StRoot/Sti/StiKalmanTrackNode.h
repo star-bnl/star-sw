@@ -152,6 +152,7 @@ public:
   double getSin  () const 		{return mFP._sinCA;}
   double getCos  () const 		{return mFP._cosCA;}
   double getAlpha() const 		{return _alpha;  }
+  double getWallx() const 		{return _wallx;  }
   const double *hitErrs() const         {return mHrr.A;  }
   double getEyy()   const 		{return mHrr.hYY;}
   double getEzz()   const 		{return mHrr.hZZ;}
@@ -299,6 +300,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
 
   char _beg[1];  
   double _alpha;
+  double _wallx;
 ///  Z mag field in units PGev = Hz*Rcm
   mutable double mHz;
   StiNodePars mFP; 
