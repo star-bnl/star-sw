@@ -109,6 +109,7 @@ StiKalmanTrackNode *mParentNode;
 StiKalmanTrackNode *mTargetNode;		
 const StiDetector  *mDetector;
 const StiHit       *mHit;
+double mWallx;
 StiNodePars mBestParentPars; 	//Best parent params 
 StiNodePars mBestParentRotPars;	//Best rotated parent params into target node frame
 StiNodePars mBestPars; 		//Propagated  best parent params into target node frame

@@ -65,6 +65,7 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   mTargetNode = sNode;
   mTargetHz = mTargetNode->getHz();
   mParentHz = mTargetHz;
+  mWallx = mTargetNode->getWallx();
   if (mParentNode) {
     mParentHz = mParentNode->getHz();
     assert(fabs(mParentHz-mParentNode->mFP.hz()) < EC*0.1); // allow the difference in 100 Gauss. TODO check why 10 is not enough
@@ -108,47 +109,12 @@ StiDebug::Break(nCall);
   
 //  	Propagation 
   mX1 = rotPars.x();
-  mX2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHitPars[0];
-  
-  int shapeCode = (mDetector)? mDetector->getShape()->getShapeCode():0;
-  if (shapeCode>kPlanar) { // non planar shape
-    double mySur[7]={-mX2*mX2, 0,0,0, 1,1,0};
-    double myDir[3]={rotPars._cosCA,rotPars._sinCA,rotPars.tanl()};
-    mRho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
-    THelixTrack hlx(&rotPars.x(),myDir,mRho);
-    
-    double s = hlx.Path(999.,mySur,7,0,0,1);
-    if (fabs(s)>999) {
-
-      s = hlx.Path(mDetector->getCenterX(),0.);
-      hlx.Move(s);
-      if(fabs(s)>999) return 1;
-    } else {
-      hlx.Move(s);
-      const double* myX = hlx.Pos();
-assert(fabs(pow(myX[0],2)+pow(myX[1],2)-mX2*mX2)<1e-4*mX2);
-    }
-    
-    double dAlpha = atan2(hlx.Dir()[1],hlx.Dir()[0]);
-    rotPars.rotate(dAlpha);
-    mTargetNode->rotate(dAlpha);
-    mAlpha += dAlpha;
-    hlx.Rot(-dAlpha);
-    assert(fabs(hlx.Dir()[1])<=1e-5);
-    mX1 = rotPars.x();	//node was rotated, mX1 changed
-    mX2 = hlx.Pos()[0];
-  }
+  mX2 = mWallx;
   mDx = mX2-mX1;
   mRho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
   mDSin = mRho*mDx;
   mSinCA2=rotPars._sinCA + mDSin; 
-  assert(shapeCode<=kPlanar || fabs(mSinCA2)<1e-5);
-  if (fabs(mSinCA2)> 0.99) {
-    mSinCA2 = (mSinCA2<0)? -0.99:0.99;
-    mDSin = mSinCA2-rotPars._sinCA;
-    mDx = mDSin/mRho;
-    mX2 = mX1+mDx;
-  }
+  if (fabs(mSinCA2)> 0.99) return 1;
   mCosCA2 = ::sqrt((1.-mSinCA2)*(1.+mSinCA2));
   mSumSin   = rotPars._sinCA+mSinCA2;
   mSumCos   = rotPars._cosCA+mCosCA2;
@@ -256,7 +222,7 @@ static int nCall = 0; nCall++; StiDebug::Break(nCall);
   mPredErrs._cEE+=mMcs._cEE;		//add err to <eta*eta> eta crossing angle//add err to <eta*eta> eta crossing angle
   mPredErrs._cPP+=mMcs._cPP;    	//add err to <curv*curv>		 //add err to <curv*curv>
   mPredErrs._cTP+=mMcs._cTP;    	//add err to <tanL*curv>		 //add err to <tanL*curv>
-  mPredErrs._cTT+=mMcs._cTT;    	//add err to <tanL*tanL>		 //add err to <tanL*tanL>
+  mPredErrs._cTT+=mMcs._cTT;    	//add err to <tanL*tanL>		 //add err to <tanL*tanL
   int ierr = mPredErrs.check();
   if (ierr) return 1;
   return 0;
@@ -293,6 +259,7 @@ StiDebug::Break(nCall);
     mFitdParentPars = mFitdPars;
     mFitdParentErrs = mFitdErrs;
     mFitdParentPars.check("2makeFit");
+    mFitdParentErrs.recov();
     mFitdParentErrs.check("3makeFit");
 
     ierr = propagatePars(mBestParentPars,mBestParentRotPars,mBestPars);
@@ -316,6 +283,7 @@ StiDebug::Break(nCall);
   if (!mParentNode) {
     if (!smooth) mgCutStep = 0;
     mPredErrs = mTargetNode->mFE;
+    mPredErrs.recov();
     ierr = mPredErrs.check(); 	if (ierr) return 11;
     mPredPars = mTargetNode->mFP;
     ierr = mPredPars.check();	if (ierr) return 12;
@@ -1054,6 +1022,7 @@ static int nCall=0; nCall++;
       StiKalmanTrackNode::ResetComment(Form("%30s ",mDetector->getName().c_str()));
     }
   }
+  mFitdErrs.recov();
   if (mFitdErrs.check()) return -12;
 //  mFitdErrs.recov();
   
@@ -1128,21 +1097,22 @@ int StiTrackNodeHelper::cutStep(StiNodePars *pars,StiNodePars *base)
 //______________________________________________________________________________
 int StiTrackNodeHelper::nudge()
 {
-  if(!mHit) return 0;
+  double endVal = (mHit)? mHitPars[0]:mWallx;
   StiNodePars *pars = &mBestPars;
   for (int i=0;i<2;i++,pars =&mPredPars) {
-    double deltaX = mHitPars[0]-pars->x();
+    double deltaX = endVal-pars->x();
     if (fabs(deltaX) <1e-6) continue;
     double deltaL = deltaX/pars->_cosCA;
     double deltaE = pars->curv()*deltaL;
-    pars->x()      = mHitPars[0];
+    pars->x()      = endVal;
     pars->y()     += pars->_sinCA *deltaL;
-    pars->z()     += pars->tanl()  *deltaL;
+    pars->z()     += pars->tanl() *deltaL;
     pars->eta()   +=               deltaE;
     if (fabs(deltaE)>0.001) {pars->ready();}
-    else                   {
-    pars->_cosCA -= pars->_sinCA *deltaE;
-    pars->_sinCA += pars->_cosCA *deltaE;
+    else                    {
+      double cosCA = pars->_cosCA;
+      pars->_cosCA -= pars->_sinCA *deltaE;
+      pars->_sinCA +=        cosCA *deltaE;
     if (fabs(pars->_cosCA)>=0.99
       ||fabs(pars->_sinCA)>=0.99) pars->ready();
     }
