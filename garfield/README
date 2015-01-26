@@ -1,0 +1,17 @@
+To install
+cvs co -dgarfield offline/users/fisyak/garfield++/garfield
+
+make installdirs
+make 
+
+Take from ~fisyak/macros/ lGarfield.C  and tpc.C 
+
+
+Set
+
+setenv GARFIELD_HOME `pwd`
+setenv HEED_DATABASE ${GARFIELD_HOME}/Heed/heed++/database
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${GARFIELD_HOME}/.${STAR_HOST_SYS}/Library
+
+
+root.exe lGarfield.C tpc.C+
