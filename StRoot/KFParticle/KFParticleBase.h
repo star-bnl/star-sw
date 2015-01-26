@@ -22,7 +22,9 @@
 #ifdef __ROOT__ //for the STAR experiment
 #define HomogeneousField
 #endif
-
+#ifndef HomogeneousField
+#define NonhomogeneousField
+#endif
 #ifdef HLTCA_STANDALONE
 #include "RootTypesDef.h"
 #else

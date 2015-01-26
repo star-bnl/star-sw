@@ -1,4 +1,4 @@
-/* $Id: StiPxlDetectorBuilder.cxx,v 1.106 2015/01/09 21:08:48 smirnovd Exp $ */
+/* $Id: StiPxlDetectorBuilder.cxx,v 1.108 2015/01/21 23:10:59 smirnovd Exp $ */
 
 #include <assert.h>
 #include <sstream>
@@ -48,8 +48,6 @@ StiPxlDetectorBuilder::StiPxlDetectorBuilder(bool active, bool buildIdealGeom) :
 /** Build the pixel detector components. */
 void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 {
-   LOG_INFO << "StiPxlDetectorBuilder::buildDetectors() -I- Started" << endm;
-
    SetCurrentDetectorBuilder(this);
 
    // Access the (survey) geometry if requested by the user
@@ -57,7 +55,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
       TObjectSet *pxlDbDataSet = (TObjectSet*) source.GetDataSet("pxl_db");
 
       if (!pxlDbDataSet) {
-         LOG_ERROR << "StiPxlDetectorBuilder::buildDetectors: PXL geometry was requested from "
+         LOG_ERROR << "StiPxlDetectorBuilder::buildDetectors() - PXL geometry was requested from "
             "DB but no StPxlDb object found. Check for pxlDb option in BFC chain" << endm;
          exit(EXIT_FAILURE);
       }
@@ -65,7 +63,7 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
       mPxlDb = (StPxlDb*) pxlDbDataSet->GetObject();
       assert(mPxlDb);
 
-      LOG_INFO << "StiPxlDetectorBuilder::buildDetectors: Will build PXL geometry from DB tables" << endm;
+      LOG_INFO << "StiPxlDetectorBuilder::buildDetectors() - Will build PXL geometry from DB tables" << endm;
    }
 
    // Gas material must be defined. Here we use air properties
@@ -84,8 +82,6 @@ void StiPxlDetectorBuilder::buildDetectors(StMaker &source)
 /** Builds the sensors of the pixel detector. */
 void StiPxlDetectorBuilder::useVMCGeometry()
 {
-   LOG_INFO << "StiPxlDetectorBuilder::useVMCGeometry() -I- Use VMC geometry" << endm;
-
    // Define silicon material used in manual construction of sensitive layers in this builder
    const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
 
@@ -106,7 +102,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
          if (!isAvail) {
-            Warning("useVMCGeometry()", "Cannot find path to PLAC (pixel sensitive) node. Skipping to next ladder...");
+            LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot find path to PLAC (pixel sensitive) node. Skipping to next ladder..." << endm;
             continue;
          }
 
@@ -120,7 +116,7 @@ void StiPxlDetectorBuilder::useVMCGeometry()
          }
 
          if (!sensorMatrix) {
-            Warning("useVMCGeometry()", "Could not get PXL sensor position matrix. Skipping to next ladder...");
+            LOG_WARN << "StiPxlDetectorBuilder::useVMCGeometry() - Cannot get PXL sensor position matrix. Skipping to next ladder..." << endm;
             continue;
          }
 
@@ -222,22 +218,18 @@ void StiPxlDetectorBuilder::buildInactiveVolumes()
    };
 
    int nPxlVolumes = sizeof(pxlVolumes) / sizeof(VolumeMap_t);
-   LOG_DEBUG << " # of volume(s) : " << nPxlVolumes << endm;
 
    for (int i = 0; i < nPxlVolumes; i++) {
 
       if (! gGeoManager->cd(pxlVolumes[i].path) ) {
-         Warning("buildInactiveVolumes()", "Cannot find path to %s node. Skipping to next node...", pxlVolumes[i].name);
+         LOG_WARN << "StiPxlDetectorBuilder::buildInactiveVolumes() - Cannot find path to '"
+                  << pxlVolumes[i].name << "' node. Skipping to next node..." << endm;
          continue;
       }
 
       TGeoNode *geoNode = gGeoManager->GetCurrentNode();
 
       if (!geoNode) continue;
-
-      LOG_DEBUG << "\n\n" << endm
-                << "Current node: " << i << " of " << nPxlVolumes << ", path: " << pxlVolumes[i].path << endm
-                << "Number of daughters: " << geoNode->GetNdaughters() << ", weight: " << geoNode->GetVolume()->Weight(0.01, "a") << endm;
 
       StiVMCToolKit::LoopOverNodes(geoNode, pxlVolumes[i].path, pxlVolumes[i].name, MakeAverageVolume);
    }

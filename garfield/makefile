@@ -10,7 +10,7 @@ SOURCES = $(wildcard $(SRCDIR)/*.cc)
 
 OBJECTS = $(subst $(SRCDIR),$(OBJDIR),$(SOURCES:.cc=.o))
 OBJECTS += $(OBJDIR)/magboltz.o 
-#OBJECTS += $(OBJDIR)/GarfieldDict.o
+OBJECTS += $(OBJDIR)/GarfieldDict.o
 
 TARGETS = $(OBJECTS)
 TARGETS += heed

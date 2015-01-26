@@ -14,7 +14,7 @@
 #include "tables/St_istChipConfig_Table.h"
 
 THashList *StIstDb::mgRotList = 0;
-
+StIstDb* StIstDb::fgInstance = 0;
 ClassImp(StIstDb)
 
 
@@ -30,6 +30,7 @@ StIstDb::StIstDb() : StObject()
    mIstMapping  = NULL;
    mIstControl  = NULL;
    mIstChipStatus = NULL;
+   fgInstance = this;
 }
 //_____________________________________________________________________________
 Int_t StIstDb::setGeoHMatrices(Survey_st **tables)

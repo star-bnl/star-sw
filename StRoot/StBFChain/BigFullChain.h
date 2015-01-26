@@ -18,8 +18,9 @@ y2009:     ctb      bbc	    tof btow fms ftpc         etow pp2pp bsmd esmd tpx	 
 y2010:              bbc	    tof btow fms ftpc pmd     etow       bsmd esmd tpx	       vpd | AuAu200,62,39,7.7,11.5
 y2011:              bbc	    tof btow fms ftpc pmd     etow       bsmd esmd tpx mtd     vpd | AuAu19.6,27,200;pp500
 y2012:              bbc	    tof btow fms              etow       bsmd esmd tpx mtd fgt vpd | pp500,200,UU193
-y2013               bbc     tof btow fms              etow       nsmd esmd tpx mtd fgt vpd gmt  | - fpd, pp500
-y2014               bbc     tof btow                  etow       nsmd esmd tpx mtd     vpd gmt  | no fgt and fms
+y2013               bbc     tof btow fms              etow       bsmd esmd tpx mtd fgt vpd gmt  | - fpd, pp500
+y2014               bbc     tof btow                  etow       bsmd esmd tpx mtd     vpd gmt  | no fgt and fms
+y2015               bbc     tof btow fms              etow       bsmd esmd tpx mtd     vpd gmt fps | no fgt 
 ______________________________________________________________________________________________________________
  */
 #endif
@@ -191,7 +192,7 @@ Bfc_st BFC[] = { // standard chains
   {"MC.y2013"        ,"","","TpcRS,TpxClu,y2013_1x,useXgeom,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big"
    ,                                                                                       "","","",kFALSE},
-  {"MC.y2014"        ,"","","TpcRS,TpxClu,y2014,useXgeom,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
+  {"MC.y2014"        ,"","","TpcRS,TpxClu,y2014a,useXgeom,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
    "TpcHitMover,bbcSim,btofsim,btofMatch,tags,emcY2,EEfs,evout,IdTruth,geantout,big"
    ,                                                                                       "","","",kFALSE},
   {"MC.devT"        ,"","","TpcRS,TpxClu,devT,MakeEvent,NoSsdIt,NoSvtIt,Idst,BAna,VFMinuit,tpcDB,"
@@ -1037,6 +1038,9 @@ Bfc_st BFC[] = { // standard chains
   {"P2014aPxLSim","" ,"",
    "P2014a,pxlfastsim, istfastsim"
    ,                      "","","Production chain for 2014 simulation wtih pixesl, ist",kFALSE},
+  // Year 15 chains
+  {"B2015"  ,"","","ry2015,in,tpcX,AgML,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                               "Base chain for 2015 ITTF (tpc)",kFALSE},
 
 
 
@@ -1732,6 +1736,8 @@ Bfc_st BFC[] = { // standard chains
    ,                              "StSvtPoolEventT,StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
   {"HftMatTree","","","","HftMatchedTree"
    ,                              "StHftPoolEventT,StHftPoolHftMatchedTree","Create HftMatchedTree",kFALSE},
+  {"HftMatTreeB","","","","HftMatchedTree"
+   ,                            "StHftPoolEventTB,StHftPoolHftMatchedTreeB","Create HftMatchedTree",kFALSE},
   {"LAna"        ,"","","in,detDb,StEvent,tpcDb","StLaserAnalysisMaker"
    ,                                                   "StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"EandBDir","","","in,StEvent,TpcHitMover,nodefault"

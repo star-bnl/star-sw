@@ -67,6 +67,7 @@ StSsdHit::StSsdHit()
 {
     mLocalPosition[0] = 0;
     mLocalPosition[1] = 0;
+    mLocalPosition[2] = 0;
 }
 
 
@@ -77,6 +78,7 @@ StSsdHit::StSsdHit(const StThreeVectorF& p,
 {
     mLocalPosition[0] = 0;
     mLocalPosition[1] = 0;
+    mLocalPosition[2] = 0;
 }
 
 
@@ -123,26 +125,44 @@ StSsdHit::clusterSizePSide() const
 float
 StSsdHit::localPosition(unsigned int i) const
 {
-    if (i<2)
+    if (i<3)
         return mLocalPosition[i];
     else
         return 0;
 }
 
 void
-StSsdHit::setLocalPosition(float u, float v)
+StSsdHit::setLocalPosition(float u, float v, float w)
 {
     mLocalPosition[0] = u;
     mLocalPosition[1] = v;
+    mLocalPosition[2] = w;
 }
+
+void
+StSsdHit::setADC(int adcp, int adcn)
+{
+    mADC[0] = adcp;
+    mADC[1] = adcn;
+}
+
+int
+StSsdHit::getADC(unsigned int i) const
+{
+    if (i<2)
+        return mADC[i];
+    else
+        return 0;
+}
+
 
 int
 StSsdHit::volumeID() const {return 10000 * sector() + 7000 + 100 * wafer() + ladder();}
 
-std::ostream&  operator<<(std::ostream& os, const StSsdHit& v)
+ostream&  operator<<(ostream& os, const StSsdHit& v)
 {
     return os << Form("Ssd l:%2i w:%2i",v.ladder(), v.wafer())
 	    << *((StHit *)&v)
-	    << Form(" Luv: %8.3f %8.3f",v.localPosition(0),v.localPosition(1));
+	      << Form(" Luv: %8.3f %8.3f %8.3f",v.localPosition(0),v.localPosition(1),v.localPosition(2));
 }
-void StSsdHit::Print(const Option_t *option) const { std::cout << *this << std::endl;}
+void StSsdHit::Print(const Option_t *option) const { cout << *this << endl;}

@@ -1,11 +1,43 @@
 /*
- * $Id: StiKalmanTrackNode.cxx,v 1.5 2014/08/25 21:05:18 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.153 2015/01/15 20:05:27 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
- * Revision 1.5  2014/08/25 21:05:18  fisyak
- * Freeze before changing KFVertex fit scenario, merge with latest Eloss changes
+ * Revision 2.153  2015/01/15 20:05:27  perev
+ * Simplified check of simplified locate()
+ *
+ * Revision 2.152  2015/01/15 19:23:26  perev
+ * Method locate() simplified. Redundunt info removed.
+ * For instance, which part of detector track missed. This is not used anyway.
+ * Some debug added/removed
+ *
+ * Revision 2.151  2014/11/10 21:48:03  perev
+ * Zero field accounting using isZeroH(0 methot
+ *
+ * Revision 2.150  2014/11/03 20:53:08  perev
+ * For the zero field defined minimum non zero field eqaal 1GeV radius 1km
+ * Such notation was before, but because zero field is not used too often
+ * it was disappeared. Now fixed again
+ *
+ * Revision 2.149  2014/10/30 15:03:54  jeromel
+ * Reverted to Oct 2nd
+ *
+ * Revision 2.142  2014/09/30 15:44:51  perev
+ * Added StELoss class to keep ELoss info
+ *
+ * Revision 2.141  2014/09/18 18:45:00  perev
+ * Debug++
+ * Using new cylCross method
+ * More checks for out of region
+ *
+ * Revision 2.140  2014/09/05 21:55:29  perev
+ * bug #2903  fixed. x0,x0p,x0Gas initialised now tp 1e11 instead of -1
+ * Many asserts adde temporary. Some of them time consuming
+ *
+ * Revision 2.139  2014/08/27 01:33:59  perev
+ * ::print bug fixed (printed local coordinates instead of global ones)
+ *         added print of rxy and direction of track, outside +ve, inside -ve
  *
  * Revision 2.138  2014/08/22 16:25:20  perev
  * Fix old bug double counting of density
@@ -919,7 +951,8 @@ Break(nCall);
 
   position = propagate(endVal,shapeCode,dir); 
 
-  if (position>kEdgeZplus || position<0) return position;
+  if (position) return position;
+  assert(mFP.x() > 0.);
   propagateError();
   if (debug() & 8) { PrintpT("E");}
 
@@ -1065,9 +1098,9 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
     mFP._sinCA   = mgP.sinCA2;
     mFP._cosCA   = mgP.cosCA2;
     ians = locate();
-    if (ians<=kEdgeZplus && ians>=0) break;
+    if (!ians) break;
   }
-  if (ians>kEdgeZplus || ians<0) 		return ians;
+  if (ians) 		return ians;
   if (mFP.x()> kFarFromBeam) {
     if (TMath::Abs(mFP.eta())>kMaxEta) 		return kEnded;
     if (mFP.x()*mgP.cosCA2+mFP.y()*mgP.sinCA2<=0)	return kEnded; 
@@ -1488,9 +1521,8 @@ assert(calculator);
 	commentdEdx  = Form("%6.3g cm(%5.2f) %6.3g keV %6.3f GeV",mgP.dx,100*relRadThickness,1e6*dE,TMath::Sqrt(e2)-m); 
       }
       double correction =1. + ::sqrt(e2)*dE/p2;
-if (TMath::Abs(correction-1)>1e-3) StiDebug::Count("NodeCorr",correction-1);
-      if (correction>1.1) correction = 1.1;
-      else if (correction<0.9) correction = 0.9;
+      if      (correction>1.1) 	correction = 1.1;
+      else if (correction<0.9) 	correction = 0.9;
       mFP.curv() = mFP.curv()*correction;
       mFP.ptin() = mFP.ptin()*correction;
     }
@@ -1864,6 +1896,43 @@ StThreeVector<double> StiKalmanTrackNode::getHelixCenter() const
   double sinAlpha = sin(_alpha);
   return (StThreeVector<double>(cosAlpha*xt0-sinAlpha*yt0,sinAlpha*xt0+cosAlpha*yt0,zt0));
 }
+#if 1
+//______________________________________________________________________________
+int StiKalmanTrackNode::locate()
+{
+  double yOff, zOff,ang;
+  //fast way out for projections going out of fiducial volume
+  const StiDetector *tDet = getDetector();
+  if (!tDet) return 0;
+  const StiPlacement *place = tDet->getPlacement();
+  const StiShape     *sh    = tDet->getShape();
+
+  if (fabs(mFP.z())>kMaxZ || mFP.rxy()> kMaxR) return -1;
+  
+  
+  //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
+  Int_t shapeCode  = sh->getShapeCode();
+  switch (shapeCode) {
+  case kDisk:
+  case kCylindrical: // cylinder
+    break;
+  case kSector: 	// cylinder sector
+    ang = atan2(mFP.y(),mFP.x());
+    yOff    = nice(ang +_alpha - place->getLayerAngle());
+    if (fabs(yOff)>sh->getOpeningAngle()/2) return -1;
+    break;
+  case kPlanar: 
+    yOff = mFP.y() - place->getNormalYoffset();
+    if (fabs(yOff)> sh->getHalfWidth()) return -1;
+    break;
+  default: assert(0 && "Wrong Shape code");
+  }
+  zOff = mFP.z() - place->getZcenter();
+  if (fabs(zOff)>sh->getHalfDepth()) return -1;
+  return 0;
+ }
+#endif //1
+#if 0
 //______________________________________________________________________________
 int StiKalmanTrackNode::locate()
 {
@@ -1941,6 +2010,8 @@ int StiKalmanTrackNode::locate()
   }
   return position;
  }
+#endif //0
+
 //______________________________________________________________________________
 void StiKalmanTrackNode::initialize(StiHit *h)
 {

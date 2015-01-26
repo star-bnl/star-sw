@@ -1,13 +1,23 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 1.3 2014/08/01 16:38:07 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 1.3 2014/08/01 16:38:07 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.134 2015/01/15 19:10:19 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 1.3  2014/08/01 16:38:07  fisyak
- * Freeze version with signle precision KFParticle
+ * Revision 2.134  2015/01/15 19:10:19  perev
+ * Added mthod test() for debug only
+ *
+ * Revision 2.133  2014/11/10 21:45:09  perev
+ * In approx more carefully accounted case mag field == 0
+ * To deside that field == 0 method isZeroH() is used
+ *
+ * Revision 2.132  2014/10/30 15:03:54  jeromel
+ * Reverted to Oct 2nd
+ *
+ * Revision 2.127  2014/09/29 21:44:55  perev
+ * Check cos>=1 replaced to cos>=.99
  *
  * Revision 2.126  2014/07/09 00:15:45  perev
  * Fix wrong Xi2 for 5hits track
@@ -1881,4 +1891,28 @@ int StiKalmanTrack::releaseHits(double rMin,double rMax)
   }
   return sum;
 }
+//_____________________________________________________________________________
+void StiKalmanTrack::test(const char *txt) const
+{
+static const char *tit[]={".???",".pla",".cyl",".sec",".dca",".vtx"};
+
+
+  StiKTNIterator it;
+  for (it=begin();it!=end();it++)  {
+    StiKalmanTrackNode *node = &(*it);
+    if (!node->isValid()) continue;
+    if (node->getCyy()>1) continue;
+    int shapeCode=0;
+    const StiDetector *det = node->getDetector();
+    if  (det) { shapeCode = det->getShape()->getShapeCode();}
+    else      { shapeCode = (node->isDca())? 4:5           ;}
+    TString tsY(txt); tsY+=".YY";tsY+=tit[shapeCode];
+    TString tsZ(txt); tsZ+=".ZZ";tsZ+=tit[shapeCode];
+
+
+    StiDebug::Count(tsY.Data(),sqrt(node->getCyy()));
+    StiDebug::Count(tsZ.Data(),sqrt(node->getCzz()));
+  }
+}
+
 

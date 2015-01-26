@@ -341,65 +341,18 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
   }
   trackExtended |=trackExtendedOut;
   if (trackExtended) {
+track->test("BefAprx");
     status = track->approx(1);
+track->test("AftAprx");
       //    if (status) return -1;
     status = track->refit();
     if (status) return abs(status)*100 + kRefitOutFail;
+track->test("AftRefi");
 
   }
     //cout << " find track done" << endl;
   if ( trackExtended ) return kExtended;
   return kNotExtended;
-}
-//______________________________________________________________________________
-/*
- Extend all known tracks to primary vertex
- <p>
- Attempt an extension of all known tracks to the given primary vertex. If the extension is successfull,
- the vertex is added to the track as a node. Node that in this implementation, it is assumed the
- track has been pruned and thus consists of a single node sequence (as opposed to a tree).
- <p>
- <ol>
- <li>Loop on all tracks currently stored in track container.</li>
- <li>It is assumed that the track does not already have a main vertex associated with it.</li>
- <li>Attempt extension to the given vertex by a call to "extendToMainVertex".
- <li>If extension is successfull, the given vertex is added as node to the track.
- </ol>
- <p>
- <h3>Note</h3>
- Any exception thrown by "getInnerMostNode()" or "extendTrackToVertex()" are
- caught here and reported with "cout".
- */
-//______________________________________________________________________________
-void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
-{
-  //cout << "SKTF::extendTracksToVertex() - vertex position " << vertex->x_g() << ", " << vertex->y_g() << ", " << vertex->z_g() << endl;
-
-  int rawCount = 0;
-  int goodCount= 0;
-  int plus=0;
-  int minus=0;
-  int ntr = _trackContainer->size();
-  for (int itr=0;itr<ntr;itr++) {
-      StiKalmanTrack* track = (StiKalmanTrack*)(*_trackContainer)[itr];
-      rawCount++;
-      StiTrackNode *extended = track->extendToVertex(vertex);
-      if (extended) {
-        track->add(extended,kOutsideIn);
-static int myRefit=0;
-        if (myRefit && track->refit()) 			extended=0;
-        if (extended && !extended->isValid()) 		extended=0;
-        if (extended && extended->getChi2()>1000) 	extended=0;
-      }
-      track->reduce();
-      // simple diagnostics
-      if (extended) goodCount++;
-      if (track->getCharge()>0) plus++;else minus++;
-   }
-  cout << "SKTF::extendTracksToVertex(StiHit* vertex) -I- rawCount:"<<rawCount<<endl
-       << "                                          extendedCount:"<<goodCount<<endl
-       << "                                                   plus:"<<plus<<endl
-       << "                                                  minus:"<<minus<<endl;
 }
 //______________________________________________________________________________
 void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &vertices)
@@ -415,12 +368,20 @@ void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &ve
 
   for (int iTrack=0;iTrack<nTracks;iTrack++)		{
     StiKalmanTrack * track = (StiKalmanTrack*)(*_trackContainer)[iTrack];  
-StiDebug::tally("Tracks");
 
     StiKalmanTrackNode *bestNode=0;  
     int bestVertex=0;
     StThreeVectorD nearBeam;
     track->getNearBeam(&nearBeam);
+{
+    const StiKalmanTrackNode *dcaNode = track->getLastNode();
+    if (!dcaNode->isDca()) 		continue;
+if (fabs(dcaNode->y())<10) {
+  StiDebug::Count("DCA00",fabs(dcaNode->y())); 		/////???????
+  StiDebug::Count("DCAYY",sqrt(dcaNode->getCyy())); 	/////???????
+  StiDebug::Count("DCAZZ",sqrt(dcaNode->getCzz())); 	/////???????
+}}
+
     if (nearBeam.perp2()>RMAX2d*RMAX2d) 		continue;
     for (int iVertex=0;iVertex<nVertex;iVertex++) {
       StiHit *vertex = vertices[iVertex];
@@ -544,10 +505,10 @@ static  const double ref1a  = 110.*degToRad;
 
   assert(leadNode->isValid());
   const StiDetector *leadDet = leadNode->getDetector();
-  leadRadius = leadDet->getPlacement()->getNormalRadius();
+  leadRadius = leadDet->getPlacement()->getLayerRadius();
   assert(leadRadius>0 && leadRadius<1000);
   if (leadRadius < qa.rmin) {gLevelOfFind--;return;}
-  leadAngle  = leadDet->getPlacement()->getNormalRefAngle();
+  leadAngle  = leadDet->getPlacement()->getLayerAngle();
 
 
 ////  if ((!direction) && !nRefit && leadRadius <100 && track->getNNodes(3)>10) {
@@ -587,8 +548,8 @@ static  const double ref1a  = 110.*degToRad;
     for ( ; (!direction)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer); ++sector)
     {
        StiDetector * detector = (*sector)->getData();
-       double angle  = detector->getPlacement()->getNormalRefAngle();
-       double radius = detector->getPlacement()->getNormalRadius();
+       double angle  = detector->getPlacement()->getLayerAngle();
+       double radius = detector->getPlacement()->getLayerRadius();
        assert(radius>0 && radius<1000);
        if (radius < qa.rmin) {gLevelOfFind--;return;}
        double diff = radius-leadRadius;if (!direction) diff = -diff;
@@ -617,9 +578,15 @@ static  const double ref1a  = 110.*degToRad;
     if (debug() > 2 && nDets==0) cout << "no detector of interest on this layer"<<endl;
     if (!nDets) continue;
     if (nDets>1) sort(detectors.begin(),detectors.end(),CloserAngle(projAngle) );
+
+//		There is additional loop. 1st loop for active only, second for non active
+    int foundInDetLoop = 0;
+    for (int nowActive=1; nowActive>=0; nowActive--) { //Additional activeNonActive loop
+
     for (vector<StiDetector*>::const_iterator d=detectors.begin();d!=detectors.end();++d)
     {
       tDet = *d;
+      if ((tDet->isActive() != nowActive)) continue;
       if (debug() > 2) {
 	cout << endl<< "target det:"<< *tDet;
 	cout << endl<< "lead angle:" << projAngle*radToDeg 
@@ -629,20 +596,13 @@ static  const double ref1a  = 110.*degToRad;
       testNode.reduce();testNode.reset();
       testNode.setChi2(1e55);
       position = testNode.propagate(leadNode,tDet,direction);
-      if (position == kEnded) { gLevelOfFind--; return;}
-      if (debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
-      if (position<0 || position>kEdgeZplus) { 
-	// not reaching this detector layer - stop track
-	if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
-	if (debug() >= 1) StiKalmanTrackNode::PrintStep();
+      if (position) { 
 	continue; // will try the next available volume on this layer
       }
-      if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
       assert(testNode.isValid());
       testNode.setDetector(tDet);
       int active = tDet->isActive(testNode.getY(),testNode.getZ());
 
-      if (debug() > 2) cout << " vol active:" << active<<endl;
       double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
 
       StiHitContino hitCont;
@@ -723,6 +683,8 @@ static  const double ref1a  = 110.*degToRad;
       }
       qa = qaBest; gLevelOfFind--; return;
     }//End Detectors
+    if (foundInDetLoop) break;		//activeNonActive
+    } //End of activeNonActive loop;
   }while(0);
   if(!direction){++rlayer;}else{++layer;}}
 //end layers

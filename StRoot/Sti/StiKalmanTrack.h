@@ -292,6 +292,7 @@ class StiKalmanTrack : public StiTrack
   static int  debug() {return _debug;}
   StiKalmanTrack &operator=(const StiKalmanTrack &tk);
   int rejectByHitSet()  const;
+ void test(const char *txt="")  const;
   
   typedef enum{ // type of return value for the refit() procedure
     kNoErrors = 0,

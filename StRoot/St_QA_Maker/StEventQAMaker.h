@@ -53,7 +53,6 @@ class StEventQAMaker : public StQAMakerBase {
   virtual       ~StEventQAMaker();
   virtual Int_t  Init();
   virtual Int_t  InitRun(int runnumber);
-  virtual Int_t  Finish();
   virtual Int_t  Make();
   
   virtual void   MakeHistGlob();
@@ -70,6 +69,9 @@ class StEventQAMaker : public StQAMakerBase {
   virtual void   MakeHistTOF();
   virtual void   MakeHistFMS();
   virtual void   MakeHistMTD();
+  virtual void   MakeHistHFT();
+  virtual void   MakeHistPXL();
+  virtual void   MakeHistIST();
   
   virtual void   AllTriggers() { allTrigs = kTRUE; }
 
@@ -77,15 +79,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.19 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.20 2015/01/16 21:08:28 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.19 2014/08/06 11:43:53 jeromel Exp $
+// $Id: StEventQAMaker.h,v 2.20 2015/01/16 21:08:28 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.20  2015/01/16 21:08:28  genevb
+// Initial versions of HFT histograms
+//
 // Revision 2.19  2014/08/06 11:43:53  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //

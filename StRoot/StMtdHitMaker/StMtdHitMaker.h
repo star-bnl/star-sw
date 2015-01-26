@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.12 2015/01/06 20:37:37 marr Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.13 2015/01/22 22:10:58 marr Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -81,6 +81,7 @@ class StMtdHitMaker:public StRTSBaseMaker {
   Bool_t                  mTriggerWndSelection;
   Int_t                   mSwapBacklegInRun13;                         // 0 - do not swap; 1 - for first part of Run13
                                                                        // 2 - for second part of Run13
+  Bool_t                  mReverseStripInRun14;                        // Reverse strips in backleg 7, module 5 in Run14
   Int_t                   mYear;                                       //! RHIC run year
   Int_t                   mNValidTrays;                                //! number of valid MTD trays
 
@@ -131,6 +132,7 @@ class StMtdHitMaker:public StRTSBaseMaker {
   void setUseMuDst(Int_t val);
   void setTriggerWndSelection(Bool_t val);
   void setSwapBacklegInRun13(Int_t swap);
+  void setReverseStripInRun14(Bool_t re);
   void setCosmicEvent(Bool_t val);
   void setCosmicTrigTimeWinFile(const char *file);
 
@@ -151,7 +153,7 @@ class StMtdHitMaker:public StRTSBaseMaker {
     static const char cvs[]="Tag $Name:  $Id: built " __DATE__ " " __TIME__ ; return cvs;
   }
   
-  ClassDef(StMtdHitMaker, 3)    ///StMtdHitMaker - class to fille the StEvent from DAQ reader
+  ClassDef(StMtdHitMaker, 4)    ///StMtdHitMaker - class to fille the StEvent from DAQ reader
 };
 
 inline vector<MtdRawHit> StMtdHitMaker::getLeadingHits()      { return MtdLeadingHits; }
@@ -159,6 +161,7 @@ inline vector<MtdRawHit> StMtdHitMaker::getTrailingHits()     { return MtdTraili
 inline void StMtdHitMaker::setUseMuDst(Int_t val)             { mUseMuDst = val;}
 inline void StMtdHitMaker::setTriggerWndSelection(Bool_t val) { mTriggerWndSelection = val;}
 inline void StMtdHitMaker::setSwapBacklegInRun13(Int_t swap)  { mSwapBacklegInRun13 = swap; }
+inline void StMtdHitMaker::setReverseStripInRun14(Bool_t re)  { mReverseStripInRun14 = re; }
 inline void StMtdHitMaker::setCosmicEvent(Bool_t val)         { mCosmicFlag = val; }
 inline void StMtdHitMaker::setCosmicTrigTimeWinFile(const char *file)
 { mCosmicTrigTimeWinFile = file; }

@@ -1,12 +1,19 @@
 /* 
    root.exe -q -b lMuDstMZ.C MuMcKFP.C+; 
 */
+#if !defined(__CINT__)
+// code that should be seen ONLY by the compiler
+#else
+#if !defined(__CINT__) || defined(__MAKECINT__)
+// code that should be seen by the compiler AND rootcint
+#else
+// code that should always be seen
+#endif
+#endif
 //#define  __TMVA__
 #if !defined(__CINT__) || defined(__MAKECINT__)
-
-//#define KFPARTICLE
-#define STIPV
-
+#define KFPARTICLE
+//#define STIPV
 #include <assert.h>
 #include <map>
 #include <utility>
@@ -44,12 +51,14 @@
 #include "StMuDSTMaker/COMMON/StMuMcVertex.h"
 #include "KFParticle/KFVertex.h"
 #include "KFParticle/KFParticle.h"
-
+#ifndef __CINT__
 #include "KFParticle/KFParticleTopoReconstructor.h"
-#if 1
+#define __PERFORMANCE__
+#ifdef __PERFORMANCE__
 #include "TPCCATrackerPerformance/AliHLTTPCCAPerformance.h"
 #include "TPCCATrackerPerformance/AliHLTTPCCAMCTrack.h"
 #endif
+#endif /* __CINT__ */
 #include "TDatabasePDG.h"
 
 #include "KFParticle/KFPVertex.h"
@@ -85,6 +94,7 @@ StMuDstMaker* maker = 0;
 void MuMcKFP(Long64_t Nevent = 999999,
 	     const char* file="./*.MuDst.root",
 	     const  char* outFile="MuMcPrV23") { 
+#ifndef __CINT__
   TString OutFile(outFile);
   StMuDebug::setLevel(0);  
   maker = new StMuDstMaker(0,0,"",file,"st:MuDst.root",1e9);   // set up maker in read mode
@@ -120,7 +130,7 @@ void MuMcKFP(Long64_t Nevent = 999999,
   int nTracksGhost = 0;
   int nStiVertex = 0;
   int nKFVertex = 0;
-#if 1
+#ifdef __PERFORMANCE__
   AliHLTTPCCAPerformance *perf = 0;
   perf = &AliHLTTPCCAPerformance::Instance();
   TFile* perfHistoFile = new TFile("HLTTPCCATrackerPerformance.root","RECREATE");
@@ -346,11 +356,12 @@ void MuMcKFP(Long64_t Nevent = 999999,
     const Double_t field = muEvent->magneticField();
 //     std::cout << "Field!!!!!!!     " << field << std::endl;
     KFParticleTopoReconstructor* topoReconstructor = new KFParticleTopoReconstructor(); // TODO don't recreate with each event
+#ifdef __PERFORMANCE__
     if ( perf ) {
       perf->SetTopoReconstructor(topoReconstructor);
       perf->SetMCTracks(mcTracks);
     }
-
+#endif
     TStopwatch timer;
     timer.Start();
   
@@ -387,7 +398,7 @@ void MuMcKFP(Long64_t Nevent = 999999,
     timer.Stop();
 //   topoReconstructor->SetTime(timer.RealTime());
     nKFVertex += topoReconstructor->NPrimaryVertices();
-#if 1
+#ifdef __PERFORMANCE__
     if ( perf ) {
       perf->InitSubPerformances();
       perf->SetRecoData(mcIndexes);
@@ -397,7 +408,7 @@ void MuMcKFP(Long64_t Nevent = 999999,
     if(topoReconstructor) delete topoReconstructor;
   }
 
-#if 1
+#ifdef __PERFORMANCE__
 // #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
 //   if ( AliHLTTPCCAPerformance::Instance().GetSubPerformance("Global Performance")->fMCTracks->Size() > 0 )
 //   for(unsigned int iTr=0; iTr<tmpTracks.size(); iTr++)
@@ -418,4 +429,5 @@ void MuMcKFP(Long64_t Nevent = 999999,
   std::cout << "nKFVertex " << nKFVertex << " nStiVertex "  << nStiVertex << std::endl;
   // Count no. track at a vertex with TPC reconstructable traks.
   //  fOut->Write();
+#endif /* __CINT__ */
 }

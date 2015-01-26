@@ -20,8 +20,6 @@ public:
   virtual bool find(StiTrack *track, int direction, double rmin=0) = 0;
   /// Find the next track 
   virtual StiTrack * findTrack(double rMin=0)=0;
-  /// Extent all tracks to the given vertex
-  virtual void extendTracksToVertex(StiHit* vertex)=0;
   virtual void extendTracksToVertices(const std::vector<StiHit*> &vertices){};
   /// Reset the tracker
   virtual void reset()=0;

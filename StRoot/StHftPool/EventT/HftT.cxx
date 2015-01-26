@@ -347,7 +347,7 @@ void HftT::Loop(Int_t Nevents) {
 
 
   };
-  Double_t rCut = 1.0;
+  Double_t rCut = 0.5;
   TFile *fOut = new TFile(fOutFileName,"recreate");
   TString Name, Title;
 #if 0
@@ -410,9 +410,9 @@ void HftT::Loop(Int_t Nevents) {
   }  // NoLayers
   //              T  S
 #endif
-  TH2F *GloPlots[27][16];
-  memset(GloPlots,0,27*15*sizeof(TH2F *));
-  for (Int_t s = 1; s <= 16; s++) { 
+  TH2F *GloPlots[27][65];
+  memset(GloPlots,0,27*65*sizeof(TH2F *));
+  for (Int_t s = 1; s <= 65; s++) { 
     for (Int_t i = 0; i < 27; i++) {
       Int_t t = i+10;
       Name = Form("%s%02i",plotName[t].Name,s);
@@ -423,6 +423,8 @@ void HftT::Loop(Int_t Nevents) {
       if (s == 14)            Title = Form("%s for All Ist",plotName[t].Title);
       if (s == 15)            Title = Form("%s for All Ssd",plotName[t].Title);
       if (s == 16)            Title = Form("%s for All HFT",plotName[t].Title);
+      if (s > 16 && s <= 40)  Title = Form("%s for All Pxl with TPC sector %i",plotName[t].Title,s-16);
+      if (s > 40 && s <= 64)  Title = Form("%s for All Ist with TPC sector %i",plotName[t].Title,s-40);
 #if 1
       Int_t m = 0;
       if (s == 14) m = 1;
@@ -432,7 +434,7 @@ void HftT::Loop(Int_t Nevents) {
       Int_t n = (Int_t) (4.*xmax);
       if (n < 100) n = 100;
       if (n > 400) n = 400;
-      Double_t ymax = 0.4;
+      Double_t ymax = 0.2;
 #else
       Int_t    n = 100;
       Double_t xmax = 0;
@@ -465,6 +467,7 @@ void HftT::Loop(Int_t Nevents) {
       if (_debug) {
 	cout << "hitK\t"; hitK->Print("");
       }
+      if (hitK->NM < 101) continue;
 #if __BEST__
       Double_t difK = hitK->Diff();
       Int_t k1 = k + 1;
@@ -486,23 +489,24 @@ void HftT::Loop(Int_t Nevents) {
       Int_t sector = hitK->Sector();
       Int_t ladder = hitK->Ladder();
       Int_t half   = hitK->Half();
+      Int_t tpcSector = hitK->SectorTpc;
       if (ladder == 0) continue;
       Int_t sensor  = hitK->Sensor();
-      Double32_t xGP = hitK->xGP;
-      Double32_t zGP = hitK->zGP;
-      Double32_t yGP = hitK->yGP;
+      Double32_t xGP = hitK->xTPCP;
+      Double32_t zGP = hitK->zTPCP;
+      Double32_t yGP = hitK->yTPCP;
       Double32_t uP = hitK->xLP;       
       Double32_t vP = hitK->zLP;
       Double32_t tuP = hitK->tuP;       
       Double32_t tvP = hitK->tvP;
       Double32_t xLP = hitK->xLP;
       Double32_t zLP = hitK->zLP;
-      Double32_t dxP = hitK->dxGP;
-      Double32_t dyP = hitK->dyGP;
-      Double32_t dzP = hitK->dzGP;
-      Double32_t xG = hitK->xG;       
-      Double32_t yG = hitK->yG;       
-      Double32_t zG = hitK->zG;       
+      Double32_t dxP = hitK->dxTPCP;
+      Double32_t dyP = hitK->dyTPCP;
+      Double32_t dzP = hitK->dzTPCP;
+      Double32_t xG = hitK->xTPC;       
+      Double32_t yG = hitK->yTPC;       
+      Double32_t zG = hitK->zTPC;       
       Double32_t dX = xG - xGP;
       Double32_t dY = yG - yGP;
       Double32_t dZ = zG - zGP;
@@ -555,7 +559,7 @@ void HftT::Loop(Int_t Nevents) {
 	{dZ, ( x+dzP*( vx*z-vz*x))},
 	{dZ, (   dzP*(-vx*y+vy*x))}
       };
-      Int_t ss[4] = {0, 0, 0, 16};
+      Int_t ss[5] = {0, 0, 0, 16, tpcSector+16};
       if (layer <= 2) {
 	ss[0] = sector;               // Pxl sector
 	if (sector <= 5) ss[1] = 11;  // Pxl 1-st half
@@ -565,8 +569,9 @@ void HftT::Loop(Int_t Nevents) {
 	ss[0] = 14;                   // Ist
       } else if (layer == 4) {
 	ss[0] = 15;                   // Sst
+	ss[4] =  tpcSector+40;
       }
-      for (Int_t k = 0; k < 4; k++) {
+      for (Int_t k = 0; k < 5; k++) {
 	Int_t s = ss[k];
 	if (! s) continue;
 	for (Int_t l = 0; l < 27; l++) {

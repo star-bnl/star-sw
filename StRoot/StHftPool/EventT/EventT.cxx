@@ -1,3 +1,4 @@
+#include <vector>
 #include "St_base/Stypes.h"
 #include "St_base/StMessMgr.h"
 #include "StEvent/StEvent.h"
@@ -26,6 +27,7 @@
 #include "StEvent/StSsdLadderHitCollection.h"
 #include "StEvent/StSsdWaferHitCollection.h"
 #include "SystemOfUnits.h"
+#include "StTpcDb/StTpcDb.h"
 #include "StPxlDbMaker/StPxlDb.h"
 #include "StIstDbMaker/StIstDb.h"
 #include "StBTofCollection.h"
@@ -35,6 +37,24 @@
 #include "TRSymMatrix.h"
 ClassImp(EventT);
 static Int_t _debug = 0;
+//________________________________________________________________________________
+Int_t TpcSector(Float_t x, Float_t y, Float_t z) {
+  Double_t phi = TMath::RadToDeg()*TMath::ATan2(y,x);
+  Int_t iphi = TMath::Nint(phi/30.);
+  Int_t Sector;
+  if (z > 0) {
+    Sector = 3 - iphi;
+    if (Sector <=  0) Sector += 12;
+  } else {
+    Sector = 21 + iphi;
+    if (Sector > 24) Sector -= 12;
+  }
+  return Sector;
+}
+//________________________________________________________________________________
+Int_t TpcSector(StThreeVectorF firstP) {
+  return TpcSector(firstP.x(), firstP.y(), firstP.z());
+}
 //________________________________________________________________________________
 
 EventT::EventT() : TObject(),
@@ -73,6 +93,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
   Int_t ibest = -1;
   Int_t nBestTracks = -1;
   Int_t nGoodTpcTracks;
+  const TGeoHMatrix &Tpc2GlobalMatrix = StTpcDb::instance()->Tpc2GlobalMatrix();
   for (UInt_t ipr = 0; ipr < NprimVtx ; ipr++) {
     pVertex = stEvent->primaryVertex(ipr);
     if (! pVertex) continue;
@@ -392,8 +413,11 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
     track->SetDca3D(dca3d);
  #endif   
     StThreeVectorF firstP = dInfo->firstPoint();
+    Int_t tpcSector  = TpcSector(firstP);
+    Int_t NM = 0; // 100*no. of best Ist + no. of best Pxl
     // do Projections
     // first IST
+    vector<HitMatchT *> bestHits;
     for (int i_ladder = 0; i_ladder < 24; i_ladder++) {
       for (int i_sensor = 0; i_sensor < 6; i_sensor++) {
 	UInt_t id = 1000 + i_ladder * 6 + i_sensor + 1;
@@ -412,6 +436,10 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
 	if (TMath::Abs(uvPred[2]) > IST_Width_Z / 2. ) continue;
 	onIST++;
 	Double_t dirGPred[3] = {helixI.cx(sh), helixI.cy(sh), helixI.cz(sh)};
+	Double_t xyzTPCP[3];
+	Tpc2GlobalMatrix.MasterToLocal(xyzG.xyz(), xyzTPCP);
+	Double_t dirTPCP[3];
+	Tpc2GlobalMatrix.MasterToLocalVect(dirGPred, dirTPCP);
 	Double_t dxyzL[3];
 	comb->MasterToLocalVect(dirGPred, dxyzL);
 	Double_t tuvPred[2] = {dxyzL[0] / dxyzL[1], dxyzL[2] / dxyzL[1]};
@@ -420,24 +448,24 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
 	if (!stEvent->istHitCollection()->ladder(i_ladder)->sensor(i_sensor)) continue;
 	StSPtrVecIstHit &vec = stEvent->istHitCollection()->ladder(i_ladder)->sensor(i_sensor)->hits();
 	if (vec.size() <= 0) continue;
-#ifdef __BEST__
 	HitMatchT *hbest = 0;
-#endif
 	for (size_t ih = 0; ih < vec.size(); ih++) {
 	  StIstHit *hit = (StIstHit *)vec[ih];
 	  if (!hit) continue;
 	  Double_t global[3];// = {hit->position().x(), hit->position().y(), hit->position().z()};
 	  Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
 	  comb->LocalToMaster(local,global);
+	  Double_t tpc[3];
+	  Tpc2GlobalMatrix.MasterToLocal(global,tpc);
 	  if (_debug) {LOG_INFO << (*hit) << endm;}
-#ifdef __BEST__
-	  HitMatchT *h = new HitMatchT();
-#else
 	  HitMatchT *h = AddHitMatchT();
-#endif
 	  h->Set(global, local);
+	  h->SetTPC(tpc);
 	  h->SetPredDir(dirGPred);
+	  h->SetPredDirTPC(dirTPCP);
 	  h->SetWG(normal.x(),normal.y(),normal.z());
+	  h->SetPred(xyzGPred, uvPred);
+	  h->SetPredTPC(xyzTPCP);
 	  h->SetPred(xyzGPred, uvPred);
 	  h->SettuvPred(tuvPred[0], tuvPred[1]);
 	  h->SetDetId(id);
@@ -449,20 +477,22 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
 	  h->SetTrackNpoint(npoints * dcaG_q);
 	  h->SetTrackFirstPointR(firstP.perp());
 	  h->SetTrackFirstPointZ(firstP.z());
-#ifdef __BEST__
+	  h->SectorTpc = tpcSector;
+	  if (_debug) h->Print("");
 	  if (! hbest) {
-	    hbest = AddHitMatchT();
-	    *hbest = *h;
+	    hbest = h;
 	  } else {
 	    if (hbest->Diff() > h->Diff()) {
-	      *hbest = *h;
+	      hbest = h;
 	    }
 	  }
-	  delete h;
-#endif
+	}
+	if (hbest && hbest->Diff() < 1.0) {
+	  bestHits.push_back(hbest);
 	}
       }
     }
+    NM = 100*bestHits.size();
     // do projection to PXL
     for (int i_sector = 0; i_sector < 10; i_sector++) {
       for (int i_ladder = 0; i_ladder < 4; i_ladder++) {
@@ -484,6 +514,10 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
 	  if (i_ladder == 0) onPXL1++;
 	  else onPXL2++;
 	  Double_t dirGPred[3] = {helixI.cx(sh), helixI.cy(sh), helixI.cz(sh)};
+	  Double_t xyzTPCP[3];
+	  Tpc2GlobalMatrix.MasterToLocal(xyzG.xyz(), xyzTPCP);
+	  Double_t dirTPCP[3];
+	  Tpc2GlobalMatrix.MasterToLocalVect(dirGPred, dirTPCP);
 	  Double_t dxyzL[3];
 	  comb->MasterToLocalVect(dirGPred, dxyzL);
 	  Double_t tuvPred[2] = {dxyzL[0] / dxyzL[1], dxyzL[2] / dxyzL[1]};
@@ -493,9 +527,7 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
 	  if (!stEvent->pxlHitCollection()->sector(i_sector)->ladder(i_ladder)->sensor(i_sensor)) continue;
 	  StSPtrVecPxlHit &vec = stEvent->pxlHitCollection()->sector(i_sector)->ladder(i_ladder)->sensor(i_sensor)->hits();
 	  if (vec.size() <= 0) continue;
-#ifdef __BEST__
 	  HitMatchT *hbest = 0;
-#endif
 	  for (size_t ih = 0; ih < vec.size(); ih++) {
 	    StPxlHit *hit = (StPxlHit *)vec[ih];
 	    if (!hit) continue;
@@ -503,15 +535,16 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
 	    Double_t global[3];// = {hit->position().x(), hit->position().y(), hit->position().z()};
 	    Double_t local[3]  = {hit->localPosition(0), hit->localPosition(1), hit->localPosition(2)};
 	    comb->LocalToMaster(local,global);
-#ifdef __BEST__
-	    HitMatchT *h = new HitMatchT();
-#else
+	    Double_t tpc[3];
+	    Tpc2GlobalMatrix.MasterToLocal(global,tpc);
 	    HitMatchT *h = AddHitMatchT();
-#endif
 	    h->Set(global, local);
+	    h->SetTPC(tpc);
 	    h->SetPredDir(dirGPred);
+	    h->SetPredDirTPC(dirTPCP);
 	    h->SetWG(normal.x(),normal.y(),normal.z());
 	    h->SetPred(xyzGPred, uvPred);
+	    h->SetPredTPC(xyzTPCP);
 	    h->SettuvPred(tuvPred[0], tuvPred[1]);
 	    h->SetDetId(id);
 	    h->SetNRawHits((UInt_t)hit->nRawHits());
@@ -522,22 +555,27 @@ Int_t EventT::Build(StEvent *stEvent, UInt_t minNoHits, Double_t pCut) {
 	    h->SetTrackNpoint(npoints * dcaG_q);
 	    h->SetTrackFirstPointR(firstP.perp());
 	    h->SetTrackFirstPointZ(firstP.z());
-#ifdef __BEST__
+	    h->SectorTpc = tpcSector;
+	    if (_debug) h->Print("");
 	    if (! hbest) {
-	      hbest = AddHitMatchT();
-	      *hbest = *h;
+	      hbest = h;
 	    } else {
 	      if (hbest->Diff() > h->Diff()) {
-		*hbest = *h;
+		hbest = h;
 	      }
 	    }
-	    delete h;
-#endif
+	  }
+	  if (hbest && hbest->Diff() < 1.0) {
+	    bestHits.push_back(hbest);
 	  }
 	}
       }
     }
+    NM += bestHits.size();
     nT++;
+    for (UInt_t p = 0; p < bestHits.size(); p++) {
+      bestHits[p]->SetNM(NM);
+    }
   }
   UInt_t val[4] = {onPXL1, onPXL2, onIST, 0};
   SetNPredHFT(val);

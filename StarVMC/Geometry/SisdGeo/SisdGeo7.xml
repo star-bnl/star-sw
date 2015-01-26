@@ -201,7 +201,7 @@
         </Structure>
         
         <Structure name="SFPA"  >
-            <var name="Version" type="int" />
+            <var name="Version"  />
             <var name="rmin" />
             <var name="rmax" />
             <var name="Len" />
@@ -490,7 +490,7 @@
             <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
         </Fill>
 
-           <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+        <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
             <var name="version" value="7" comment=" geometry version " />
             <var name="ladderMap" value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
             <!--<var name="ladderAngle" value="{81.0,99.0,117.0,135.0,153.0,171.0,189.0,207.0,225.0,243.0,261.0,279.0,297.0,315,333,351,9.0,27.0,45.0,63.0}" comment=" individual angles " />-->
@@ -498,7 +498,15 @@
             <var name="ladderAngle" value="{81.0, 63.0, 45.0, 27.0, 9.0, 351.0, 333.0, 315.0, 297.0, 279.0, 261.0, 243.0, 225.0, 207.0, 189.0, 171.0, 153.0, 135.0, 117.0, 99.0}" comment=" individual angles " />
             <var name="ladderTilt" value="{-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0}" comment=" individual tilts " />
             <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
-            </Fill>
+        </Fill>
+
+        <Fill name="SFPA" comment="Silicon Strip detector parameters"  >
+            <var name="version"      value="7.1" comment=" geometry version " />
+            <var name="ladderMap"    value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment=" presence of ladders " />
+	    <var name="ladderAngle"  value="{81.0, 63.0, 45.0, 27.0, 9.0, 351.0, 333.0, 315.0, 297.0, 279.0, 261.0, 243.0, 225.0, 207.0, 189.0, 171.0, 153.0, 135.0, 117.0, 99.0}" comment=" individual angles, revised numbering 1/12/15" />
+            <var name="ladderTilt"   value="{-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0,-7.0}" comment=" individual tilts " />
+            <var name="ladderRadius" value="{22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3,22.3}" comment=" individual radii " />
+        </Fill>
 
         <Use struct="SSDP" />
         ConfigA = mod(SSDP_Config   ,10) 
@@ -506,7 +514,7 @@
 
 <!--        <Use struct="SFPA" select="version" value="ConfigA " />-->
 <!--     jb : update : use the latest version of SFPA -->
-        <Use struct="SFPA" select="version" value="7" />
+        <Use struct="SFPA" select="version" value="7.1" />
         <Use struct="SFJP" select="version" value="2 " />
 
         <Mixture name="G10" dens="1.7"  >
@@ -1452,10 +1460,10 @@
             <Attribute for="SFSL" seen="2" colo="1" />
             <Shape type="BOX" dz="SFJP_SFSL_Dz" dx="SFJP_SFSL_Dx" dy="SFJP_SFSL_Dy" />
 
-            <Create block="SFSD" />
-            <Placement block="SFSD">
-            <Rotation alphaz="180" />
-            </Placement>            
+            <Create    block="SFSD" />
+            <Placement block="SFSD"   if="SFPA_version&lt;=7.0" />
+            <Placement block="SFSD"   if="SFPA_version&gt; 7.0"  ><Rotation alphaz="180" /></Placement>
+
 
         </Block>
         

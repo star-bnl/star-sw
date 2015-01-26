@@ -3,7 +3,7 @@
 
 #include "Riostream.h"
 #include "TObject.h"
-
+#include "TString.h"
 class HitMatchT : public TObject
 {
 public:
@@ -12,11 +12,14 @@ public:
    UInt_t index2Hit;
    UInt_t detId;  // hit detector Id
    UInt_t nRawHits;
-   Double32_t xGP, yGP, zGP;
+   Double32_t xGP, yGP, zGP;   // Prediction in Global CS
    Double32_t dxGP, dyGP, dzGP; // global direction
+   Double32_t xTPCP, yTPCP, zTPCP;   // Prediction in TPC CS
+   Double32_t dxTPCP, dyTPCP, dzTPCP; // direction in TPC CS
    Double32_t xLP, yLP, zLP;  // aka (u,w,v)
    Double32_t tuP, tvP;
    Double32_t xG, yG, zG;    // hit Global from StEvent
+   Double32_t xTPC, yTPC, zTPC;    // hit in TPC CS
    Double32_t xL, yL, zL;    // hit in Ladder CS
    Double32_t pT, eta, phi;  // track mom at origin (dcaGeometry)
    Double32_t ox, oy, oz;    // origin (dcaGeometry)
@@ -24,6 +27,8 @@ public:
    Int_t      npoint;        // npoint
    Double32_t firstPointR;   // first measured point R
    Double32_t firstPointZ;   // first measured point Z
+   Int_t      NM;            // no. of best matchs for the given track
+   Int_t      SectorTpc;     //
    Char_t end;
 
 public:
@@ -44,11 +49,15 @@ public:
       xGP = X; yGP = Y; zGP = Z;
       xLP = XL; yLP = YL; zLP = ZL;
    }
+   void SetNM(Int_t m=0) {NM = m;}
    void SetDetId(UInt_t id) {detId = id;}
    void SetNRawHits(UInt_t n) {nRawHits = n;}
    void Set(Double32_t *xyzG, Double32_t *xyzL) {Set(xyzG[0], xyzG[1], xyzG[2], xyzL[0], xyzL[1], xyzL[2]);}
+   void SetTPC(Double32_t *xyzTPC) {xTPC = xyzTPC[0]; yTPC = xyzTPC[1]; zTPC = xyzTPC[2];}
    void SetPred(Double32_t *xyzG, Double32_t *xyzL) {SetPred(xyzG[0], xyzG[1], xyzG[2], xyzL[0], xyzL[1], xyzL[2]);}
    void SetPredDir(Double32_t *dirGPred) {dxGP = dirGPred[0]; dyGP = dirGPred[1]; dzGP = dirGPred[2];}
+   void SetPredTPC(Double32_t *xyzTPCP) {xTPCP = xyzTPCP[0]; yTPCP = xyzTPCP[1]; zTPCP = xyzTPCP[2];}
+   void SetPredDirTPC(Double32_t *dirTPCPred) {dxTPCP = dirTPCPred[0]; dyTPCP = dirTPCPred[1]; dzTPCP = dirTPCPred[2];}
    void SettuvPred(Double32_t tu, Double32_t tv) {tuP = tu; tvP = tv;}
 
    void SetIndex2Track(UInt_t index) {index2Track = index;}
@@ -90,9 +99,13 @@ public:
 	  << " Sector = "  << Sector() 
 	  << " Ladder = "  << Ladder() 
 	  << " Sensor = "  << Sensor() 
+	  << Form(" G: %8.3f %8.3f %8.3f",xG,yG,zG)  
+	  << Form(" GP: %8.3f %8.3f %8.3f",xGP,yGP,zGP)  
+	  << Form(" TPC: %8.3f %8.3f %8.3f",xTPC,yTPC,zTPC)  
+	  << Form(" TPCP: %8.3f %8.3f %8.3f",xTPCP,yTPCP,zTPCP)  
 	  << " Diff = "    << Diff() << endl;
    }
-   ClassDef(HitMatchT, 2)
+   ClassDef(HitMatchT, 4)
 };
 
 #endif

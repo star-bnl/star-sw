@@ -35,11 +35,16 @@ public:
 
 
 
-  StarParticleData StarParticleData::sInstance;
+  StarParticleData *StarParticleData::sInstance = 0;
 // ---------------------------------------------------------------------------------------------
 StarParticleData::~StarParticleData()
 {
-
+  sInstance = 0;
+}
+// ---------------------------------------------------------------------------------------------
+StarParticleData &StarParticleData::instance(){ 
+  if (! sInstance) sInstance = new StarParticleData();
+  return *sInstance; 
 }
 // ---------------------------------------------------------------------------------------------
 StarParticleData::StarParticleData( const Char_t *name, TDataSet *parent ) :

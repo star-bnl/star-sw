@@ -99,7 +99,9 @@
   gSystem->Load("libEG.so");
   if (gSystem->DynamicPathName("StarRoot",kTRUE)) {
     gSystem->Load("StarRoot");
-    gSystem->Load("KFParticle");
+    if (gSystem->DynamicPathName("KFParticle",kTRUE)) {
+      gSystem->Load("KFParticle");
+    }
     StCloseFileOnTerminate::Instantiate();
   }
   if (strstr(gSystem->GetLibraries(),"libTable")) {

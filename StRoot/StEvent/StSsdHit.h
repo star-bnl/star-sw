@@ -82,17 +82,20 @@ public:
     float        localPosition(unsigned int) const;
     static unsigned int sector(unsigned int);
     unsigned int sector() const;
-    void         setLocalPosition(float, float);
+    void         setLocalPosition(float u, float v, float w = 0);
+    void         setADC(int, int);
+    int          getADC(unsigned int) const;
     virtual int  volumeID() const;
     void         Print(const Option_t *option="") const;
 
 protected:
     static StMemoryPool mPool;  //!
-    Float_t mLocalPosition[2];
+    Float_t mLocalPosition[3];
+    Int_t   mADC[2];
     
 private:
     enum {mWaferPerLadder=16};
-    ClassDef(StSsdHit,2)
+    ClassDef(StSsdHit,3)
 };
 
 inline unsigned int
@@ -107,6 +110,6 @@ StSsdHit::sector(unsigned int ladder) {
 inline unsigned int
 StSsdHit::sector() const {return sector(ladder()); }
 
-std::ostream&              operator<<(std::ostream& os, StSsdHit const & v);
+ostream&              operator<<(ostream& os, StSsdHit const & v);
 
 #endif

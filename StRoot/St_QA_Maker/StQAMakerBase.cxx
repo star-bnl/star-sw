@@ -1,5 +1,14 @@
-// $Id: StQAMakerBase.cxx,v 2.41 2014/07/22 20:39:28 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.44 2015/01/21 17:49:40 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.44  2015/01/21 17:49:40  genevb
+// Fix missing run14 cases, remove unused firstEventClass, re-work normalizations with StHistUtil
+//
+// Revision 2.43  2015/01/17 23:16:12  genevb
+// protection from missing data/histograms
+//
+// Revision 2.42  2015/01/16 21:08:28  genevb
+// Initial versions of HFT histograms
+//
 // Revision 2.41  2014/07/22 20:39:28  genevb
 // Add MTD to Offline QA
 //
@@ -193,12 +202,10 @@ StQAMakerBase::~StQAMakerBase() {
 Int_t StQAMakerBase::Init() {
 // Histogram booking must wait until first event Make() to determine event type
   eventCount = 0;
-  firstEventClass = kTRUE;
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 void StQAMakerBase::Clear(Option_t* opt) {
-  firstEventClass = kTRUE;
   StMaker::Clear(opt);
 }
 //_____________________________________________________________________________
@@ -217,20 +224,16 @@ Int_t StQAMakerBase::Make() {
     default : {
       if (!eventClass) { hists=0; return kStOk; }
       hists = (StQABookHist*) histsList.At((--eventClass));
+ 
     }
   }
 
   if (!hists) NewQABookHist();
+
     
 
   if (!fillHists) return kStOk;
   // Call methods to fill histograms
-
-
-  // Those not divided by event class:
-  if (firstEventClass) {
-    firstEventClass = kFALSE;
-  }
 
   // Those divided by event class:
   // histograms from table globtrk
@@ -261,6 +264,12 @@ Int_t StQAMakerBase::Make() {
   if (histsSet>=StQA_run13) MakeHistFMS(); 
   // histograms from MTD in StEvent
   if (histsSet>=StQA_run12all) MakeHistMTD(); 
+  // histograms from HFT (PXL and IST) in StEvent
+  if (histsSet>=StQA_run14) {
+    MakeHistHFT(); 
+    MakeHistPXL(); 
+    MakeHistIST(); 
+  }
 
   eventCount++;
   return kStOk;
@@ -311,6 +320,8 @@ void StQAMakerBase::BookHist() {
 
   // Real data with event classes for different triggers
 
+    // any new StQAHistSetType values
+    case (StQA_run14) :
     case (StQA_run13) :
     case (StQA_run12) :
     case (StQA_run8) :

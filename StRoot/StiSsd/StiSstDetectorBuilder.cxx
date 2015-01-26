@@ -49,13 +49,12 @@ StiSstDetectorBuilder::~StiSstDetectorBuilder()
 /** Build the SST detector components. */
 void StiSstDetectorBuilder::buildDetectors(StMaker &source)
 {
-   LOG_INFO << "StiSstDetectorBuilder::buildDetectors() - I - Started " << endm;
    //StSsdBarrel *mySsd = StSsdBarrel::Instance();
 
    if (!mBuildIdealGeom) {
 
       if (!gStSstDbMaker) {
-         LOG_ERROR << "StiSstDetectorBuilder::buildDetectors: SST geometry was requested from "
+         LOG_ERROR << "StiSstDetectorBuilder::buildDetectors() - SST geometry was requested from "
             "DB but no StSstDb object found. Check for sstDb option in BFC chain" << endm;
          exit(EXIT_FAILURE);
       }
@@ -63,7 +62,7 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
       mSstDb = (StSstDbMaker*) gStSstDbMaker;
       assert(mSstDb);
 
-      LOG_INFO << "StiSstDetectorBuilder::buildDetectors: Will build SST geometry from DB tables" << endm;
+      LOG_INFO << "StiSstDetectorBuilder::buildDetectors() - Will build SST geometry from DB tables" << endm;
    }
 
    SetCurrentDetectorBuilder(this);
@@ -86,8 +85,6 @@ void StiSstDetectorBuilder::buildDetectors(StMaker &source)
  */
 void StiSstDetectorBuilder::useVMCGeometry()
 {
-   LOG_INFO << "StiSstDetectorBuilder::useVMCGeometry() -I- Use VMC geometry" << endm;
-
    // Define silicon material used in manual construction of sensitive layers in this builder
    const TGeoMaterial* geoMat = gGeoManager->GetMaterial("SILICON");
 
@@ -107,7 +104,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
       bool isAvail = gGeoManager->cd(geoPath.str().c_str());
 
       if (!isAvail) {
-         Warning("useVMCGeometry()", "Cannot find path to SFSD (SST sensitive) node. Skipping to next ladder...");
+         LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot find path to SFSD (SST sensitive) node. Skipping to next ladder..." << endm;
          continue;
       }
 
@@ -121,7 +118,7 @@ void StiSstDetectorBuilder::useVMCGeometry()
       }
 
       if (!sensorMatrix) {
-         Warning("useVMCGeometry()", "Could not get SST sensor position matrix. Skipping to next ladder...");
+         LOG_WARN << "StiSstDetectorBuilder::useVMCGeometry() - Cannot get SST sensor position matrix. Skipping to next ladder..." << endm;
          continue;
       }
 

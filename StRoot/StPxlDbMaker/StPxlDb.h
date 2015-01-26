@@ -89,6 +89,8 @@ class StPxlDb : public StObject
 {
 public:
    StPxlDb();
+   virtual ~StPxlDb() {fgInstance = 0;}
+   static StPxlDb* 	instance() {return fgInstance;}
 
    //! geoHMatrices describing rotation + shift tranlations between different coordinate systems
    const TGeoHMatrix *geoHMatrixTpcOnGlobal() const
@@ -153,6 +155,7 @@ private:
    map<unsigned int,short> mMapHotPixels; //! 
    pxlControl_st *mPxlControl; ///< control parameters for raw data decoding and so on
    StThinPlateSpline *mThinPlateSpline[kNumberOfPxlSectors][kNumberOfPxlLaddersPerSector][kNumberOfPxlSensorsPerLadder]; ///< thin plate spline function to describe the sensor surface
+   static StPxlDb       *fgInstance;
 
    ClassDef(StPxlDb, 0)
 };

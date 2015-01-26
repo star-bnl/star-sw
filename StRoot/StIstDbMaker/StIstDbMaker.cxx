@@ -4,13 +4,12 @@
 #include "StIstDbMaker/StIstDb.h"
 #include "St_base/StMessMgr.h"
 #include "St_db_Maker/St_db_Maker.h"
-
-#include "tables/St_Survey_Table.h"
-#include "tables/St_istPedNoise_Table.h"
-#include "tables/St_istGain_Table.h"
-#include "tables/St_istMapping_Table.h"
-#include "tables/St_istControl_Table.h"
-#include "tables/St_istChipConfig_Table.h"
+#include "StDetectorDbMaker/StIstSurveyC.h"
+#include "StDetectorDbMaker/St_istPedNoiseC.h"
+#include "StDetectorDbMaker/St_istGainC.h"
+#include "StDetectorDbMaker/St_istMappingC.h"
+#include "StDetectorDbMaker/St_istControlC.h"
+#include "StDetectorDbMaker/St_istChipConfigC.h"
 
 ClassImp(StIstDbMaker)
 
@@ -33,107 +32,32 @@ Int_t StIstDbMaker::InitRun(Int_t runNumber)
    LOG_DEBUG << "StIstDbMaker::InitRun() - Access data from database" << endm;
 
    // Get IDS positionment relative to TPC
-   St_Survey *st_idsOnTpc = (St_Survey *) GetDataBase("Geometry/ist/idsOnTpc");
-
-   if (!st_idsOnTpc) {
-      LOG_ERROR << "No relevant entry found in 'Geometry/ist/idsOnTpc' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   const St_Survey *st_idsOnTpc = (const St_Survey *) StidsOnTpc::instance()->Table();
    // Get PST positionment relative to IDS
-   St_Survey *st_pstOnIds = (St_Survey *) GetDataBase("Geometry/ist/pstOnIds");
-
-   if (!st_pstOnIds) {
-      LOG_ERROR << "No relevant entry found in 'Geometry/ist/pstOnIds' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   const St_Survey *st_pstOnIds = (const St_Survey *) StIstpstOnIds::instance()->Table();
    // Get IST positionment relative to PST
-   St_Survey *st_istOnPst = (St_Survey *) GetDataBase("Geometry/ist/istOnPst");
-
-   if (!st_istOnPst) {
-      LOG_ERROR << "No relevant entry found in 'Geometry/ist/istOnPst' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   const St_Survey *st_istOnPst = (const St_Survey *) StistOnPst::instance()->Table();
    // Get ladder positionments relative to IST
-   St_Survey *st_istLadderOnIst = (St_Survey *) GetDataBase("Geometry/ist/istLadderOnIst");
-
-   if (!st_istLadderOnIst) {
-      LOG_ERROR << "No relevant entry found in 'Geometry/ist/istLadderOnIst' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   const St_Survey *st_istLadderOnIst = (const St_Survey *) StLadderOnIst::instance()->Table();
    // Get sensor positionments relative to ladder
-   St_Survey *st_istSensorOnLadder = (St_Survey *) GetDataBase("Geometry/ist/istSensorOnLadder");
-
-   if (!st_istSensorOnLadder) {
-      LOG_ERROR << "No relevant entry found in 'Geometry/ist/istSensorOnLadder' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   const St_Survey *st_istSensorOnLadder = (const St_Survey *) StistSensorOnLadder::instance()->Table();
    Survey_st *tables[5] = {st_idsOnTpc->GetTable(), st_pstOnIds->GetTable(), st_istOnPst->GetTable(),
                            st_istLadderOnIst->GetTable(), st_istSensorOnLadder->GetTable()
                           };
-   mIstDb->setGeoHMatrices(tables);
-
+   mIstDb->setGeoHMatrices(tables);  
    // Now access IST pedestal and noise tables
-   St_istPedNoise *mPedNoise = (St_istPedNoise *) GetDataBase("Calibrations/ist/istPedNoise");
-
-   if (!mPedNoise) {
-      LOG_ERROR << "No relevant entry found in 'Calibrations/ist/istPedNoise' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   const St_istPedNoise *mPedNoise = (St_istPedNoise *) St_istPedNoiseC::instance()->Table();
    mIstDb->setPedNoise(mPedNoise->GetTable());
-
    // Access IST gain table
-   St_istGain *mGain = (St_istGain *) GetDataBase("Calibrations/ist/istGain");
-
-   if (!mGain) {
-      LOG_ERROR << "No relevant entry found in 'Calibrations/ist/istGain' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   St_istGain *mGain = (St_istGain *) St_istGainC::instance()->Table();
    mIstDb->setGain(mGain->GetTable());
-
-   St_istMapping *mMapping = (St_istMapping *) GetDataBase("Calibrations/ist/istMapping");
-
-   if (!mMapping) {
-      LOG_ERROR << "No relevant entry found in 'Calibrations/ist/istMapping' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   St_istMapping *mMapping = (St_istMapping *) St_istMappingC::instance()->Table();
    mIstDb->setMapping(mMapping->GetTable());
-
    // Access IST control table
-   St_istControl *mControl = (St_istControl *) GetDataBase("Calibrations/ist/istControl");
-
-   if (!mControl) {
-      LOG_ERROR << "No relevant entry found in 'Calibrations/ist/istControl' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   St_istControl *mControl = (St_istControl *) St_istControlC::instance()->Table();
    mIstDb->setControl(mControl->GetTable());
-
    // Access IST chip status table
-   St_istChipConfig *mChipConfig = (St_istChipConfig *) GetDataBase("Calibrations/ist/istChipConfig");
-
-   if (!mChipConfig) {
-      LOG_ERROR << "No relevant entry found in 'Calibrations/ist/istChipConfig' table."
-         " StIstDb object will not be created" << endm;
-      return kStErr;
-   }
-
+   St_istChipConfig *mChipConfig = (St_istChipConfig *) St_istChipConfigC::instance()->Table();
    mIstDb->setChipStatus(mChipConfig->GetTable());
 
    if ( GetDebug() >= 2)

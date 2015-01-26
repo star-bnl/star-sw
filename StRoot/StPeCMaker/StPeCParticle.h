@@ -14,6 +14,7 @@
 #define StPeCParticle_h
 #include "Rtypes.h"
 #include "TObject.h"
+#include "StMuDSTMaker/COMMON/StMuMcTrack.h"
 class g2t_track_st ;
 
 class StPeCParticle : public TObject {
@@ -26,6 +27,8 @@ public:
 #ifndef __CINT__
                                   StPeCParticle ( g2t_track_st *trk);
   void                            set        ( g2t_track_st* trk);
+                                  StPeCParticle ( StMuMcTrack * trk);
+  void                            set           ( StMuMcTrack * trk);
 #endif /*__CINT__*/
   Int_t                           key ;
   Short_t                         pid ;

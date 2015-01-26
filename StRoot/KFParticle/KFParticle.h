@@ -883,7 +883,7 @@ inline float KFParticle::GetDStoPoint( const float xyz[] ) const
 #ifdef HomogeneousField
   return KFParticleBase::GetDStoPointBz( GetFieldAlice(), xyz );
 #endif
-#ifdef NonhomogeneousField
+#ifndef NonhomogeneousField
   return KFParticleBase::GetDStoPointCBM( xyz );
 #endif
 }

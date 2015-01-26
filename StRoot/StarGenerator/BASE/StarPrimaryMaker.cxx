@@ -58,12 +58,12 @@ StarPrimaryMaker::StarPrimaryMaker()  :
 
   mStack = new StarParticleStack();
   AgStarReader::Instance().SetStack(mStack);
-
+#if 0
   // Register the particle database with this maker
   StarParticleData &pdb = StarParticleData::instance();
   //  Shunt( &pdb );
   AddData( &pdb, ".data" );
-
+#endif
   SetAttr("FilterKeepHeader", int(1) );
 
 }
@@ -109,19 +109,20 @@ Int_t StarPrimaryMaker::Init()
   // Intialize the TTree with one event branch for each sub generator
   // and one branch for the primary event
   //
-  if ( mFileName == "" ) {
-    mFileName =   ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
-    mFileName.ReplaceAll(".root",".gener.root");
-  }
-
-  mFile = TFile::Open( mFileName, "recreate" );
-  if ( !mFile ) result = (result<kStWarn)? kStWarn : result;
-
-  mTree = new TTree( "genevents", "TTree containing event generator information" );
-
   mPrimaryEvent = new StarGenEvent("primaryEvent","Primary Event... particle-wise information from all event generators");
-  mTree->Branch("primaryEvent","StarGenEvent",&mPrimaryEvent,64000,99);
+  if (mFileName != "none" ) {
+    if ( mFileName == "" ) {
+      mFileName =   ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
+      mFileName.ReplaceAll(".root",".gener.root");
+    }
+    
+    mFile = TFile::Open( mFileName, "recreate" );
+    if ( !mFile ) result = (result<kStWarn)? kStWarn : result;
+    
+    mTree = new TTree( "genevents", "TTree containing event generator information" );
 
+    mTree->Branch("primaryEvent","StarGenEvent",&mPrimaryEvent,64000,99);
+  }
   if (mFilter) mFilter->SetEvent(mPrimaryEvent);
 
   TIter Next( GetMakeList() );
@@ -150,7 +151,7 @@ Int_t StarPrimaryMaker::Init()
       // By default, connect generator to output tree.  It the IO mode
       // of the generator has been set, skip this step.
       //
-      if ( generator->IOmode()==0 ) 
+      if ( generator->IOmode()==0 && mTree) 
 	{
 	  generator -> SetOutputTree( mTree );
 	}
@@ -173,7 +174,7 @@ Int_t StarPrimaryMaker::Finish()
     mFilter->Finish();
     
     mAccepted->Print("all");
-    mTree->SetEventList( mAccepted );
+    if (mTree) mTree->SetEventList( mAccepted );
   }
 
   if (mFile) 
@@ -204,7 +205,7 @@ Int_t StarPrimaryMaker::Finish()
 	  if ( mFilter ) stats.nFilterSeen   = mFilter->numberOfEvents();
 	  if ( mFilter ) stats.nFilterAccept = mFilter->acceptedEvents();
 	  stats.Dump();
-	  stats.Write(); // write to fiel
+	  stats.Write(); // write to file
 	}
 
       mFile -> Write();
@@ -264,13 +265,14 @@ Int_t StarPrimaryMaker::Make()
 	//
 	// Fill the TTree
 	//
-	mTree->Fill();
-
-	//
-	// Add the event to the accepted event list
-	//
-	if ( mAccepted ) mAccepted->Enter( mTree->GetEntries() );
-
+	if (mTree) {
+	  mTree->Fill();
+	  
+	  //
+	  // Add the event to the accepted event list
+	  //
+	  if ( mAccepted ) mAccepted->Enter( mTree->GetEntries() );
+	}
 
 	return kStOK;
 	
@@ -281,7 +283,9 @@ Int_t StarPrimaryMaker::Make()
     /// Clear the particle information if the KeepAll flag has not been set.
     ///
     if ( IAttr( "FilterKeepAll" ) == 0 ) mPrimaryEvent->Clear("part");
-    if ( IAttr( "FilterKeepAll" ) || IAttr( "FilterKeepHeader" ) )    mTree->Fill();
+    if (mTree) {
+      if ( IAttr( "FilterKeepAll" ) || IAttr( "FilterKeepHeader" ) )    mTree->Fill();
+    }
     Clear();
 
     //

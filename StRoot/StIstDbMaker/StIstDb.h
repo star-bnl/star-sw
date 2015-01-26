@@ -43,6 +43,8 @@ class StIstDb : public StObject
 
 public:
    StIstDb();
+   virtual ~StIstDb() {fgInstance = 0;}
+   static StIstDb* 	instance() {return fgInstance;}
    THashList *getRotations() const      	{return mgRotList; }
    const TGeoHMatrix *getGeoHMatrixTpcOnGlobal() const	{return mGeoHMatrixTpcOnGlobal; }
    const TGeoHMatrix *getGeoHMatrixIdsOnTpc() const     	{return &mGeoHMatrixIdsOnTpc; }
@@ -84,6 +86,7 @@ private:
    istMapping_st 	*mIstMapping;
    istControl_st 	*mIstControl;
    istChipConfig_st 	*mIstChipStatus;
+   static StIstDb       *fgInstance;
 
    ClassDef(StIstDb, 1)
 };

@@ -691,12 +691,17 @@ void TDrawG(Int_t sector2=16, Int_t sector1=1) {
   cout << "nx/ny = " << nx << "/" << ny << endl;
   c1->Divide(nx,ny);
   ofstream out;
+  ofstream outC;
   TString Out("Results.");
   Out += gSystem->BaseName(gDirectory->GetName());
   Out.ReplaceAll(".root","");
   Out.ReplaceAll(" ","");
   if (gSystem->AccessPathName(Out)) out.open(Out, ios::out); //"Results.list",ios::out | ios::app);
   else                              out.open(Out, ios::app);
+  Out.ReplaceAll(" ","");
+  Out += ".h";
+  if (gSystem->AccessPathName(Out)) outC.open(Out, ios::out); //"Results.list",ios::out | ios::app);
+  else                              outC.open(Out, ios::app);
   TF1 *gp = InitGP();
   TCollection *files = gROOT->GetListOfFiles();
   TIter next(files);
@@ -717,7 +722,6 @@ void TDrawG(Int_t sector2=16, Int_t sector1=1) {
     memset (dFitR, 0, 6*sizeof(Double_t));
     memset (LSFit, 0, 6*sizeof(Double_t));
     memset (dLSFit, 0, 6*sizeof(Double_t));
-    TString line("");
     TString lTitle("");
     TH1D *LSF = (TH1D *) f->Get("LSF");
     TString name; 
@@ -743,6 +747,7 @@ void TDrawG(Int_t sector2=16, Int_t sector1=1) {
       TRSymMatrix SInv(S,TRArray::kInverted);// cout << "SInv " << SInv << endl;
       TRVector  X(SInv,TRArray::kSxA,AmX); //cout << "X " << X << endl;
       TString line("");
+      TString lineC("");
       for (Int_t l = 0; l < 6; l++) {
 	Double_t scale = 1e4;
 	if (l > 2) scale = 1e3;
@@ -775,8 +780,10 @@ void TDrawG(Int_t sector2=16, Int_t sector1=1) {
 	FitR[m] = scale*FitR[m]/dFitR[m]; 
 	dFitR[m] = scale/TMath::Sqrt(dFitR[m]);
 	line += Form("|%7.2f+-%5.2f ", FitR[m],dFitR[m]); 
+	lineC += Form(",%7.2f,%5.2f", FitR[m],dFitR[m]); 
       } else {
 	line += Form("|               ");
+	lineC += ",      0,-9.99";
       }
     }
     line += "| Average"; 
@@ -790,8 +797,10 @@ void TDrawG(Int_t sector2=16, Int_t sector1=1) {
 #endif
     cout << line << endl;
     out << line << endl;
+    outC << lineC << endl;
   }
   out.close();
+  outC.close();
 }
 //________________________________________________________________________________
 void TDrawL(Int_t iHist=-1, Int_t barrel = 4, Int_t ladder = 0, Int_t wafer = 0) {
@@ -1285,7 +1294,7 @@ void TDrawD(const Char_t *tag="duuH", Int_t barrel = 1, Int_t ladder = 0, Int_t 
 	    }
 	    leg->AddEntry(f[k],lTitle);
 	    static const Int_t type = 2, idx = 0, nrows = 0;
-	    //	    lineC = Form("\t{%1i,%1i,%1i,%1i,%1i,%2i,%2i,%2i,%2i,\n{",type,idx,nrows,barrel, layer, ladder, wafer, k+1, NPar);
+	    // lineC = Form("\t{%1i,%1i,%1i,%1i,%1i,%2i,%2i,%2i,%2i,\n{",type,idx,nrows,barrel, layer, ladder, wafer, k+1, NPar);
 	    lineC = Form("\t{%1i,%1i,%1i,%1i,%1i,%2i,%2i,%2i,%2i,",type,idx,nrows,barrel, layer, ladder, wafer, k+1, NPar);
 	    //	    for (Int_t l = 1; l < NPol1; l++) {lineC += Form("%8.5f",params[l]);  if (l != NPol1 - 1) lineC += ",";} lineC += "},\n{";
 	    for (Int_t l = 1; l < NPol1; l++) {lineC += Form("%8.5f",params[l]);  if (l != NPol1 - 1) lineC += ",";} lineC += "";

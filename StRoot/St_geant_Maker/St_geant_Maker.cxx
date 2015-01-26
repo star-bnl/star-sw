@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.151 2015/01/08 21:24:18 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.152 2015/01/13 19:02:47 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.152  2015/01/13 19:02:47  jwebb
+// Read out sensitive layer from FgtdGeoV.xml
+//
 // Revision 1.151  2015/01/08 21:24:18  jwebb
 // Support FMS preshower detector in HCAL.
 //
@@ -1249,7 +1252,8 @@ Int_t St_geant_Maker::Make() {
   nhits = myNhits;
   geant3->Gfnhit("FGTH","FGZD", myNhits);
   nhits+= myNhits;
-  
+  geant3->Gfnhit("FGTH","FZCB", myNhits); // from FgtmGeoV.xml
+  nhits+= myNhits;
   if (nhits>0) { 
     St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
     m_DataSet->Add(g2t_fgt_hit);

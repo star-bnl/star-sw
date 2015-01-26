@@ -1,5 +1,11 @@
-// $Id: StQAMakerBase.h,v 2.23 2014/08/06 11:43:53 jeromel Exp $ 
+// $Id: StQAMakerBase.h,v 2.25 2015/01/21 17:49:40 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.25  2015/01/21 17:49:40  genevb
+// Fix missing run14 cases, remove unused firstEventClass, re-work normalizations with StHistUtil
+//
+// Revision 2.24  2015/01/16 21:08:28  genevb
+// Initial versions of HFT histograms
+//
 // Revision 2.23  2014/08/06 11:43:53  jeromel
 // Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
 //
@@ -91,6 +97,7 @@ enum StQAHistSetType {
   StQA_run12 = 7,
   StQA_run13 = 8,
   StQA_run14 = 9
+  // when adding more, search for StQAHistSetType for other changes
 };
 
 #include "StMaker.h"
@@ -127,7 +134,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.23 2014/08/06 11:43:53 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.25 2015/01/21 17:49:40 genevb Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -176,7 +183,6 @@ class StQAMakerBase : public StMaker {
   TString prefix[32];
   Int_t eventClass;
   Int_t eventCount;
-  Bool_t firstEventClass;
   Bool_t fillHists;
   Bool_t ITTF;
   Int_t EST;
@@ -207,6 +213,9 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistTOF() {}
   virtual void MakeHistFMS() {}
   virtual void MakeHistMTD() {}
+  virtual void MakeHistHFT() {}
+  virtual void MakeHistPXL() {}
+  virtual void MakeHistIST() {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
 };

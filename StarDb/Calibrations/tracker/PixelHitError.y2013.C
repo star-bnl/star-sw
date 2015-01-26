@@ -8,8 +8,10 @@ TDataSet *CreateTable() {
 HitError_st row;
 St_HitError *tableSet = new St_HitError("PixelHitError",1);
 //
- Double_t sigma_x = 0.00086; //  8.6 mkm
- Double_t sigma_z = 0.00086; // 8.6 mkm
+// Double_t sigma_x = 0.00086; //  8.6 mkm
+// Double_t sigma_z = 0.00086; // 8.6 mkm
+ Double_t sigma_x = 0.0012; //  12 mkm
+ Double_t sigma_z = 0.0012; // 12 mkm
 memset(&row,0,tableSet->GetRowSize());
 //                                        hit errors are squared !
     row.coeff[0]	 =   sigma_x*sigma_x;     // u intrinsic;

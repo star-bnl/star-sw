@@ -8,7 +8,8 @@ TDataSet *CreateTable() {
   gSystem->Load( "libMathMore"   );  
   gSystem->Load( "libHijing1_383");
   StarPrimaryMaker *primary = new StarPrimaryMaker();
-  primary -> SetFileName( "hijing.starsim.root");
+  //  primary -> SetFileName( "hijing.starsim.root");
+  primary -> SetFileName( "");
   chain -> AddBefore( "geant", primary );
   //
   // Setup an event generator
@@ -40,6 +41,14 @@ TDataSet *CreateTable() {
   // Initialize primary event generator and all sub makers
   //
   primary -> Init();
+  Double_t XVERTEX =  0.31;
+  Double_t YVERTEX = -0.35;
+  Double_t ZVERTEX = -1.40;
+  geantMk->Do(Form("GVERTEX %f %f %f",XVERTEX,YVERTEX,ZVERTEX));
+  Double_t XSIGMA  =  0.1; 
+  Double_t YSIGMA  =  0.1;
+  Double_t ZSIGMA  = 36.680;
+  geantMk->Do(Form("GSPREAD %f %f %f",XSIGMA,YSIGMA,ZSIGMA));
   geantMk->Do("gkine -4 0");
   TDataSet *tableSet = new TDataSet("Hijing");
   return (TDataSet *)tableSet;

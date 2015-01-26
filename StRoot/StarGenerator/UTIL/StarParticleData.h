@@ -23,7 +23,6 @@ class StarParticleData : public TObjectSet
 {
  public:
 
-  StarParticleData( const Char_t *name="PDG_Database",       TDataSet *parent = 0 );
   ~StarParticleData();
 
   /// Get a particle by name
@@ -68,19 +67,20 @@ class StarParticleData : public TObjectSet
   */
 
   /// Returns a reference to the single instance of this class
-  static StarParticleData &instance(){ return sInstance; }
+    static StarParticleData &instance();
 
-  TParticlePDG *operator()( const Char_t *name ){ return sInstance.GetParticle(name); }
-  TParticlePDG *operator()( const Int_t  id    ){ return sInstance.GetParticle(id)  ; }
+  TParticlePDG *operator()( const Char_t *name ){ return instance().GetParticle(name); }
+  TParticlePDG *operator()( const Int_t  id    ){ return instance().GetParticle(id)  ; }
 
   /// Returns a reference to the list of particles.
   const TObjArray &GetParticles() const { return mParticleList; }
 
  private:
+  StarParticleData( const Char_t *name="PDG_Database",       TDataSet *parent = 0 );
  protected:
 
   // Singleton instance of this class
-  static StarParticleData sInstance; 
+  static StarParticleData *sInstance; 
 
   TObjArray                           mParticleList;      // my particles
   std::map< TString, TParticlePDG* >  mParticleNameMap;   // particle aliases

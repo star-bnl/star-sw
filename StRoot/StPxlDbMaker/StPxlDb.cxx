@@ -56,6 +56,7 @@
 #include "tables/St_pxlControl_Table.h"
 
 
+StPxlDb* StPxlDb::fgInstance = 0;
 ClassImp(StPxlDb)
 
 //_____________________________________________________________________________
@@ -66,6 +67,7 @@ StPxlDb::StPxlDb() : StObject()
    mRowColumnStatusTable = 0;
    mPxlControl = 0;
    memset(mThinPlateSpline, 0, sizeof(mThinPlateSpline));
+   fgInstance = this;
 }
 //_____________________________________________________________________________
 void StPxlDb::setGeoHMatrices(Survey_st **tables)

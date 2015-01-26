@@ -58,18 +58,18 @@
   -->
 <varlist  type="float"  comment=" inner radii inner cooling tube" >  coolTubeInR/10.25/  </varlist>
 <varlist  type="float"  comment=" inner radii inner cooling tube" >  coolTubeInRT/7.0/  </varlist>
-<varlist  type="float"  comment=" Z length  inner cooling tube" >  coolTubeDZ/150/  </varlist>
-<varlist  type="float"  comment=" inner radii for physical disk" >  diskInR/10.35/  </varlist>
-<varlist  type="float"  comment=" inner radii for physical disk" >  diskInRT/7.0/  </varlist>
-<varlist  type="float"  comment=" outer radii for physical disk" >  diskOutR/39.4/ </varlist>
-<varlist  type="float"  comment=" outer radii for flat" >        flatOutR/37.0/   </varlist>
-<varlist  type="float"  comment=" angle of perp.to flat (deg)">  flatPerpAng/31.0/    </varlist>
-<varlist  type="float"  comment=" angle of quadrant (deg)" >     quadTiltAng/-15.0/ </varlist>
-<varlist  type="float"  comment=" spacer grid big arc" >            gridArcBigR/29.15/   </varlist>
-<varlist  type="float"  comment=" spacer grid small arc" >          gridArcSmallR/20.63/ </varlist>
-<varlist  type="float"  comment=" spacer grid longer ray angle " >  gridRayLongPhi/60./  </varlist>
-<varlist  type="float"  comment=" spacer grid shorter ray angle " > gridRayShortPhi/30./ </varlist>
-<varlist  type="float"  comment=" spacer grid width in XY tmp" >    gridWidth/0.2/       </varlist>
+<varlist  type="float"  comment=" Z length  inner cooling tube" >    coolTubeDZ/150/  </varlist>
+<varlist  type="float"  comment=" inner radii for physical disk" >   diskInR/10.35/  </varlist>
+<varlist  type="float"  comment=" inner radii for physical disk" >   diskInRT/7.0/  </varlist>
+<varlist  type="float"  comment=" outer radii for physical disk" >   diskOutR/39.4/ </varlist>
+<varlist  type="float"  comment=" outer radii for flat" >            flatOutR/37.0/   </varlist>
+<varlist  type="float"  comment=" angle of perp.to flat (deg)">      flatPerpAng/31.0/    </varlist>
+<varlist  type="float"  comment=" angle of quadrant (deg)" >         quadTiltAng/-15.0/ </varlist>
+<varlist  type="float"  comment=" spacer grid big arc" >             gridArcBigR/29.15/   </varlist>
+<varlist  type="float"  comment=" spacer grid small arc" >           gridArcSmallR/20.63/ </varlist>
+<varlist  type="float"  comment=" spacer grid longer ray angle " >   gridRayLongPhi/60./  </varlist>
+<varlist  type="float"  comment=" spacer grid shorter ray angle " >  gridRayShortPhi/30./ </varlist>
+<varlist  type="float"  comment=" spacer grid width in XY tmp" >     gridWidth/0.2/       </varlist>
 
 <varlist  type="float"  comment=" width of the quadrant frame" >   frameWidth/1.15/   </varlist>
 <varlist  type="float"  comment=" X,Y offset of frame edges" >     frameXYoff/0.05/  </varlist>
@@ -109,10 +109,11 @@
 </Structure>
 
 <Structure name="FGST"  >
-   <var name="config"    type="float" />
-   <var name="ndisk"      type="int" />
+   <var name="config"      />
+   <var name="ndisk"       />
    <var name="nQuad"      type="int"/>
-   <var name="zDiscA(12)"   type="float"   />   
+   <var name="zDiscA(12)"  />   
+   <var name="ctubedz"     />
 </Structure>
 
 <!--                                                                 
@@ -135,6 +136,7 @@
    <var name="ndisk"   value="6"    comment="number of disks" />
    <var name="nQuad"   value="4"    comment="number quadrants in a disks" />
    <var name="zdiscA"  value="{67.3990,77.8765,87.0840,97.4821,108.9121,118.9927}" comment=" z-center of disk senstive volume from center in STAR , as measured in 2011-10  "  />
+   <var name="ctubedz" value="150.0" comment="Cooling tube DZ" />
 </Fill>
 
 
@@ -149,6 +151,7 @@
    <var name="ndisk"   value="6"    comment="number of disks" />
    <var name="nQuad"   value="4"    comment="number quadrants in a disks" />
    <var name="zdiscA"    value="{70.,80.,90.,100.,110.,120.}" comment=" z-center of disk senstive volume from center in STAR , ideal location "  />
+   <var name="ctubedz" value="150.0" comment="Cooling tube DZ" />
 </Fill>
 
 
@@ -162,6 +165,7 @@
    <var name="ndisk"   value="12"    comment="number of disks" />
    <var name="nQuad"   value="4"    comment="number quadrants in a disks" />
    <var name="zdiscA"  value="{67.3990,77.8765,87.0840,97.4821,108.9121,118.9927,130.0000,140.0000,150.0000,170.0000,190.0000,200.0000}" comment=" z-center of disk senstive volume from center in STAR , as measured in 2011-10  "  />
+   <var name="ctubedz" value="150.0" comment="Cooling tube DZ" />
 </Fill>
 
 
@@ -176,6 +180,7 @@
    <var name="ndisk"   value="6"    comment="number of disks" />                         
    <var name="nQuad"   value="4"    comment="number quadrants in a disks" />             
    <var name="zdiscA"  value="{93.500,100.000,193.500,200.000,293.500,300.00}" comment=" z-center" />
+   <var name="ctubedz" value="270.0" comment="Cooling tube DZ" />
 </Fill>                                 
 
 
@@ -318,7 +323,10 @@
 <!--  Quad disk depth: sum of 5 mix-volumes -->
 diskLenZ=volNomexDZ+volSensDZ+volGemDZ+volReadDZ+volElecDZ
 
+<!-- Setup length of FGT model -->
+coolTubeDZ = FGST_ctubedz
 fgtLenZ = coolTubeDZ
+
 <!-- center begin of FGT on the active volume of the 1st disk  -->
 centerZ = FGST_zdiscA(1) +fgtLenZ/2.0 -( volNomexDZ+volSensDZ/2.)
 
