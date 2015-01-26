@@ -778,6 +778,25 @@ MakeChairAltInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSecto
 MakeChairAltInstance2(Survey,StTpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPositionB,gEnv->GetValue("NewTpcAlignment",0));
 MakeChairInstance2(Survey,StTpcHalfPosition,Geometry/tpc/TpcHalfPosition);
 MakeChairInstance2(Survey,StTpcPosition,Geometry/tpc/TpcPosition);
+//____________________________Geometry/ist____________________________________________________
+#include "StIstSurveyC.h"
+MakeChairInstance2(Survey,StidsOnTpc,Geometry/ist/idsOnTpc);                      
+MakeChairInstance2(Survey,StIstpstOnIds,Geometry/ist/pstOnIds);
+MakeChairInstance2(Survey,StistOnPst,Geometry/ist/istOnPst);
+MakeChairInstance2(Survey,StLadderOnIst,Geometry/ist/istLadderOnIst);
+MakeChairInstance2(Survey,StistSensorOnLadder,Geometry/ist/istSensorOnLadder);
+//____________________________Geometry/pxl____________________________________________________
+#include "StPxlSurveyC.h"
+MakeChairInstance2(Survey,StPxlpstOnIds,Geometry/pxl/pstOnIds);
+MakeChairInstance2(Survey,StpxlOnPst,Geometry/pxl/pxlOnPst);
+MakeChairInstance2(Survey,StpxlHalfOnPxl,Geometry/pxl/pxlHalfOnPxl);
+MakeChairInstance2(Survey,StpxlSectorOnHalf,Geometry/pxl/pxlSectorOnHalf);
+MakeChairInstance2(Survey,StpxlLadderOnSector,Geometry/pxl/pxlLadderOnSector);
+MakeChairInstance2(Survey,StpxlSensorOnLadder,Geometry/pxl/pxlSensorOnLadder);
+#include "St_pxlControlC.h"
+MakeChairInstance(pxlControl,Geometry/pxl/pxlControl);
+#include "St_pxlSensorTpsC.h"
+MakeChairInstance(pxlSensorTps,Geometry/pxl/pxlSensorTps);
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   static TGeoHMatrix rot;
@@ -837,6 +856,12 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "TpcOuterSectorPosition") return (St_SurveyC   *) StTpcOuterSectorPosition::instance();
   if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
   if (Name == "TpcHalfPosition")        return (St_SurveyC   *) StTpcHalfPosition::instance();
+  if (Name == "idsOnTpc")               return (St_SurveyC   *) StidsOnTpc::instance();	    
+  if (Name == "istpstOnIds")        	return (St_SurveyC   *) StIstpstOnIds::instance();  	
+  if (Name == "istOnPst")        	return (St_SurveyC   *) StistOnPst::instance();  	
+  if (Name == "LadderOnIst")       	return (St_SurveyC   *) StLadderOnIst::instance(); 	
+  if (Name == "LadderOnShell")        	return (St_SurveyC   *) StSvtLadderOnShell::instance();  	
+  if (Name == "istSensorOnLadder")      return (St_SurveyC   *) StistSensorOnLadder::instance();  	
   return 0;
 }
 //__________________Calibrations/rhic______________________________________________________________
@@ -924,3 +949,23 @@ MakeChairInstance(bprsMap,Calibrations/prs/map/bprsMap);
 MakeChairInstance(bsmdeMap,Calibrations/smde/map/bsmdeMap);
 #include "St_bsmdpMapC.h"
 MakeChairInstance(bsmdpMap,Calibrations/smdp/map/bsmdpMap);
+//____________________________Calibrations/ist____________________________________________________
+#include "St_istPedNoiseC.h"
+MakeChairInstance(istPedNoise,Calibrations/ist/istPedNoise);
+#include "St_istChipConfigC.h"
+MakeChairInstance(istChipConfig,Calibrations/ist/istChipConfig);
+#include "St_istControlC.h"
+MakeChairInstance(istControl,Calibrations/ist/istControl);
+#include "St_istGainC.h"
+MakeChairInstance(istGain,Calibrations/ist/istGain);
+#include "St_istMappingC.h"
+MakeChairInstance(istMapping,Calibrations/ist/istMapping);
+//____________________________Calibrations/pxl____________________________________________________
+#include "St_pxlHotPixelsC.h"
+MakeChairInstance(pxlHotPixels,Calibrations/pxl/pxlHotPixels);
+#include "St_pxlRowColumnStatusC.h"
+MakeChairInstance(pxlRowColumnStatus,Calibrations/pxl/pxlRowColumnStatus);
+#include "St_pxlBadRowColumnsC.h"
+MakeChairInstance(pxlBadRowColumns,Calibrations/pxl/pxlBadRowColumns);
+#include "St_pxlSensorStatusC.h"
+MakeChairInstance(pxlSensorStatus,Calibrations/pxl/pxlSensorStatus);
