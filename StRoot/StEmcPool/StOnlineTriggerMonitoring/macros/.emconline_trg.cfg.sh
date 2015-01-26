@@ -1,8 +1,8 @@
 # main directory
-export EMCONLINE_TRG_DIR=/ldaphome/onlmon/bemctrgdb2013
+export EMCONLINE_TRG_DIR=/ldaphome/onlmon/bemctrgdb2015
 
 # web output directory
-export EMCONLINE_TRG_WEBDIR=/onlineweb/www/test2012/stevens4/bemctrgdb2013
+export EMCONLINE_TRG_WEBDIR=/onlineweb/www/bemcTrgDb2015
 
 # ROOT script
 export EMCONLINE_TRG_SCRIPT=${EMCONLINE_TRG_DIR}/saveTriggerLoad.C
@@ -108,7 +108,7 @@ function update_desktop_icon_trg () {
 # Most recent real configuration in the control room
 
 # Directory that contains pedestal files
-if [[ "${EMCONLINE_SLOWCTRL_PED_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_PED_DIR='sysuser@sc5.starp.bnl.gov:/home/sysuser/GUI/emc/unix' ; fi
+if [[ "${EMCONLINE_SLOWCTRL_PED_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_PED_DIR='operator@daqman.starp.bnl.gov:/RTS/conf/btow' ; fi
 
 # Directory that contains crate configuration files
 if [[ "${EMCONLINE_SLOWCTRL_CFG_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_CFG_DIR='sysuser@sc5.starp.bnl.gov:/home/sysuser/GUI/emc/unix' ; fi
@@ -189,38 +189,38 @@ config_crate0x1e.dat \
 " ; fi
 
 # Crate pedestal files
-if [[ "${CRATE_PEDESTAL_FILES_MASK}" == "" ]] ; then export CRATE_PEDESTAL_FILES_MASK="pedestal_crate0x??.dat" ; fi
+if [[ "${CRATE_PEDESTAL_FILES_MASK}" == "" ]] ; then export CRATE_PEDESTAL_FILES_MASK="daq_pedestal_crate0x??.dat" ; fi
 if [[ "${CRATE_PEDESTAL_FILES}" == "" ]] ; then export CRATE_PEDESTAL_FILES="\
-pedestal_crate0x01.dat \
-pedestal_crate0x02.dat \
-pedestal_crate0x03.dat \
-pedestal_crate0x04.dat \
-pedestal_crate0x05.dat \
-pedestal_crate0x06.dat \
-pedestal_crate0x07.dat \
-pedestal_crate0x08.dat \
-pedestal_crate0x09.dat \
-pedestal_crate0x0a.dat \
-pedestal_crate0x0b.dat \
-pedestal_crate0x0c.dat \
-pedestal_crate0x0d.dat \
-pedestal_crate0x0e.dat \
-pedestal_crate0x0f.dat \
-pedestal_crate0x10.dat \
-pedestal_crate0x11.dat \
-pedestal_crate0x12.dat \
-pedestal_crate0x13.dat \
-pedestal_crate0x14.dat \
-pedestal_crate0x15.dat \
-pedestal_crate0x16.dat \
-pedestal_crate0x17.dat \
-pedestal_crate0x18.dat \
-pedestal_crate0x19.dat \
-pedestal_crate0x1a.dat \
-pedestal_crate0x1b.dat \
-pedestal_crate0x1c.dat \
-pedestal_crate0x1d.dat \
-pedestal_crate0x1e.dat \
+daq_pedestal_crate0x01.dat \
+daq_pedestal_crate0x02.dat \
+daq_pedestal_crate0x03.dat \
+daq_pedestal_crate0x04.dat \
+daq_pedestal_crate0x05.dat \
+daq_pedestal_crate0x06.dat \
+daq_pedestal_crate0x07.dat \
+daq_pedestal_crate0x08.dat \
+daq_pedestal_crate0x09.dat \
+daq_pedestal_crate0x0a.dat \
+daq_pedestal_crate0x0b.dat \
+daq_pedestal_crate0x0c.dat \
+daq_pedestal_crate0x0d.dat \
+daq_pedestal_crate0x0e.dat \
+daq_pedestal_crate0x0f.dat \
+daq_pedestal_crate0x10.dat \
+daq_pedestal_crate0x11.dat \
+daq_pedestal_crate0x12.dat \
+daq_pedestal_crate0x13.dat \
+daq_pedestal_crate0x14.dat \
+daq_pedestal_crate0x15.dat \
+daq_pedestal_crate0x16.dat \
+daq_pedestal_crate0x17.dat \
+daq_pedestal_crate0x18.dat \
+daq_pedestal_crate0x19.dat \
+daq_pedestal_crate0x1a.dat \
+daq_pedestal_crate0x1b.dat \
+daq_pedestal_crate0x1c.dat \
+daq_pedestal_crate0x1d.dat \
+daq_pedestal_crate0x1e.dat \
 " ; fi
 
 # Main configuration file

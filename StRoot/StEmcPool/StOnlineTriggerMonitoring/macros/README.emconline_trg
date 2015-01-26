@@ -10,7 +10,7 @@ B. Write access to the database
 Here we assume that the monitoring job has write access to the database, in Calibrations/emc.
 Please consult EMC or DB experts on how to set it up.
 
-Create a new directory. Cronjobs are restricted to onl11-onl13 (as of 3/28/2014), so do all of this work on one of those machines
+Create a new directory. This code no longer uses a "crontab"-type job, so it can be ran on any of the onlXX machines. I generally run on onl02.
 mkdir /ldaphome/onlmon/bemctrgdbYYYY (YYYY = year)
 cd /ldaphome/onlmon/bemctrgdbYYYY
 
@@ -28,18 +28,21 @@ These are EMC-related, likely to change from time to time, better to have local 
 cvs co StRoot/StDaqLib
 cvs co StRoot/StEmcPool/StOnlineTriggerMonitoring #trg monitoring itself, checkout this
 
+NOTE: I never have checked anything other than the StOnlineTriggerMonitoring package out of CVS, and it always works correctly. Do as you please. (JKA)
+
 2. Run the configuration script in /ldaphome/onlmon/bemctrgdbYYYY
    sets the soft links for all code, etc.
 ./StRoot/StOnlineTriggerMonitoring/macros/configure.emconline_trg
 
 The following files are created:
     .emconline_trg.cfg.sh - configuration file
-    crontab.emconline_trg - setup for the cron job
+    bemcTrgDbMonitor.py   - Infinite loop script which runs the monitoring task
     saveTriggerLoad.C     - ROOT script to run the trigger monitoring
     job.emconline_trg     - script to be run as a cron job
     status.emconline_trg  - set or report the current status
     update.emconline_trg  - shell script to run monitoring
     bce_table.txt, bcw_table.txt - DSM internal patches numeration
+    scp                   - Script which does the "scp"-ing between machines
 
 The "Trigger monitoring" icon also appears on the GNOME desktop showing the current status of the job.
 
@@ -60,6 +63,7 @@ function getPassw () {
     if [[ "${1}" == "sysuser@sc5.starp.bnl.gov" ]] ; then echo '$properPass' ; fi
     if [[ "${1}" == "evpops@evp.starp.bnl.gov" ]] ; then echo '$properPass' ; fi
     if [[ "${1}" == "staruser@startrg.starp.bnl.gov" ]] ; then echo '$properPass' ; fi  
+    if [[ "${1}" == "operator@daqman.starp.bnl.gov" ]] ; then echo '$properPass' ; fi  
 }
 
 Where $properPass is the password associated with the node you wish to log into. If you don't know these, you will have to find someone that does (They're always in the control room...). The point of this file is for the "scp" script  to work correctly. The ".scprc" holds the login and password information to get and send information to other computer systems
@@ -71,8 +75,14 @@ File RUNMODE.emconline_trg will contain the current monitoring status, RUN or ST
 *NOTE* If you wish to stop monitoring, it's as simple as:
 ./status.emconline_trg STOP
 
-6. Install the cron job
-crontab crontab.emconline_trg
+6. Fire up the infinite monitoring loop with nohup command:
+nohup bemcTrgDbMonitor.py >& monitoringReport.txt &
+
+This script should be stopped once you stop monitoring. To stop perform the following:
+ps -daf | grep "bemcTrgDb" 
+kill XXXX
+
+where XXXX is the process ID of the bemcTrgDbMonitor.py process.
 
 ----------------------------------------------------------------------
 USAGE
@@ -113,7 +123,9 @@ Notes:
 
 6.) Saved tables may be uploaded to the DB after the run. Use the macro uploadToDB.C to do this, the directions are in the code and pretty simple to follow. One would have to set the DB_ACCESS_MODE to write for this code to run, and should be cautious when running it. Don't upload before you're ready, you can comment out the write command (or place a return statement) to stop accidential uploads - be prepared before you act!
 
+7.) In 2015, the libraries were in such a way that only "stardev" had the root4star variable defined in it. So, one MUST be in this library when starting up the Python monitoring script. Otherwise, the code will not run correctly. This may not be the case in 2016 and beyond.
+
 Oleksandr Grebenyuk
 April, 2007
 
-Updated 3/28/2014 - Kevin Adkins
+Updated 1/23/2015 - Kevin Adkins
