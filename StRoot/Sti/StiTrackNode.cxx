@@ -383,7 +383,7 @@ assert(sign()>0); ///???
   int i0=0; if (!_cXX) i0 = 1;
   for (i=i0;i<kNPars;i++) {
     aii = A[idx66[i][i]];
-    if (aii<MIN2ERR[i]) {kase = 1; break;}
+    if (aii<0) {kase = 1; break;}	//Diagonal must be positive
   }
   if (kase) goto RETN;
   for (i=i0;i<kNPars;i++) {
