@@ -16,7 +16,7 @@ class ComponentFieldMap : public ComponentBase {
 
   // Ranges
   // Calculates x, y, z, V and angular ranges
-  void SetRange();
+  virtual void SetRange();
   // Shows x, y, z, V and angular ranges
   void PrintRange();
   // Returns the current sensor size
