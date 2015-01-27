@@ -1,11 +1,14 @@
 /*
- * $Id: StPxlFastSim.h,v 1.4 2014/08/06 11:43:35 jeromel Exp $
+ * $Id: StPxlFastSim.h,v 1.5 2015/01/27 01:31:09 smirnovd Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.5  2015/01/27 01:31:09  smirnovd
+ * Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
+ *
  * Revision 1.4  2014/08/06 11:43:35  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
@@ -74,11 +77,11 @@ class StPxlFastSim: public StPxlISim
   */
 
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.4 2014/08/06 11:43:35 jeromel Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPxlFastSim.h,v 1.5 2015/01/27 01:31:09 smirnovd Exp $ built " __DATE__ " " __TIME__ ; return cvs;}
 
  private:
   //Routine to smear hit by resolution with gaussian, mean zero and width res.
-  Double_t distortHit(Double_t x, Double_t res, Double_t constraint);
+  double distortHit(const double x, const double res, const double constraint) const;
 
   void localToMatser(Double_t* local,Double_t* master,Int_t sector,Int_t ladder,Int_t sensor);
 
@@ -94,13 +97,16 @@ class StPxlFastSim: public StPxlISim
 };
 #endif
 /*
- * $Id: StPxlFastSim.h,v 1.4 2014/08/06 11:43:35 jeromel Exp $
+ * $Id: StPxlFastSim.h,v 1.5 2015/01/27 01:31:09 smirnovd Exp $
  *
  * Author: M. Mustafa
  *
  * 
  **********************************************************
  * $Log: StPxlFastSim.h,v $
+ * Revision 1.5  2015/01/27 01:31:09  smirnovd
+ * Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
+ *
  * Revision 1.4  2014/08/06 11:43:35  jeromel
  * Suffix on literals need to be space (later gcc compiler makes it an error) - first wave of fixes
  *
