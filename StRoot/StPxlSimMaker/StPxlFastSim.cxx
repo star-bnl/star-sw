@@ -5,6 +5,9 @@
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.7  2015/01/27 01:31:09  smirnovd
+ * Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
+ *
  * Revision 1.6  2014/07/03 19:46:37  mstftsm
  * Revereted the changes made for the pileup adder. That does not belong to the master branch.
  *
@@ -193,20 +196,31 @@ Int_t StPxlFastSim::addPxlHits(const StMcPxlHitCollection& mcPxlHitCol,
    return kStOK;
 }
 
-//____________________________________________________________
-Double_t StPxlFastSim::distortHit(Double_t x, Double_t res, Double_t constraint)
+
+/**
+ * Calculates and returns new value for the local coordinate x by smearing it
+ * acccording to a normal distribution N(mean, sigma) = N(x, res). The returned
+ * value is constrained to be within the characteristic dimension detLength
+ * provided by the user.
+ */
+double StPxlFastSim::distortHit(const double x, const double res, const double detLength) const
 {
-   Double_t test;
-
-   test = x + mRandom->gauss(0, res);
-
-   while (fabs(test) > constraint)
-   {
-      test = x + mRandom->gauss(0, res);
+   // Do not smear x when it is outside the physical limits. Issue a warning instead
+   if (fabs(x) > detLength) {
+      LOG_WARN << "distortHit() - Generated hit is outside detector sensor plane" << endm;
+      return x;
    }
 
-   return test;
+   double smeared_x;
+
+   do {
+      smeared_x = mRandom->gauss(x, res);
+   } while ( fabs(smeared_x) > detLength);
+
+   return smeared_x;
 }
+
+
 //____________________________________________________________
 void StPxlFastSim::localToMatser(Double_t* local,Double_t* master,Int_t sector,Int_t ladder,Int_t sensor)
 {
@@ -235,6 +249,9 @@ void StPxlFastSim::localToMatser(Double_t* local,Double_t* master,Int_t sector,I
  *
  **********************************************************
  * $Log: StPxlFastSim.cxx,v $
+ * Revision 1.7  2015/01/27 01:31:09  smirnovd
+ * Minor refactoring of StPxlFastSim::distortHit() to include a new warning for unphysical hit position
+ *
  * Revision 1.6  2014/07/03 19:46:37  mstftsm
  * Revereted the changes made for the pileup adder. That does not belong to the master branch.
  *
